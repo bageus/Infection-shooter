@@ -72,7 +72,7 @@ None.
 - Discovery Group 0 completed.
 - Working agreement accepted.
 - Core game identity and player promise recorded from Discovery Group 1.
-- Remaining Group 1 details require clarification.
+- Camera, controls, campaign length, checkpoints, mutation acquisition, antidote behavior, and the three-stage loss-of-control cycle are recorded.
 
 ## Decisions made during this task
 
@@ -85,6 +85,10 @@ None.
 - Each floor is a level with combat, infection sources, destructible interiors, interactions, bosses, and multiple exit strategies.
 - Infection grants mutation abilities but can cause loss of control; antidote reverses both infection and mutations.
 - The game is single-player, uses 3D levels, and takes visual direction from a more colorful Alien Shooter 2.
+- The camera rotates and follows the player; controls are WASD and mouse with no gamepad support.
+- The campaign contains 20 floors, three tutorial levels, and checkpoints at floors 15, 10, and 5.
+- Killed infected leave temporary mutagen clouds that feed a branching mutation meter.
+- Loss of control escalates from 5 seconds to 7 seconds to defeat, with resettable 30-second risk windows.
 
 ## Validation evidence
 
@@ -92,12 +96,12 @@ None.
 
 ## Blockers
 
-- Camera behavior, control scheme, run/checkpoint structure, mutation selection, and exact loss-of-control behavior require owner answers.
+- Target platform, difficulty numbering, checkpoint timing, mutation branch taxonomy, and antidote edge cases require owner answers.
 
 ## Next exact action
 
-Ask focused follow-up questions to complete Discovery Group 1.
+Ask focused questions about platform, difficulty numbering, checkpoints, mutation branches, and antidote safety margins.
 
 ## Session handoff
 
-Group 0 is complete and the core Group 1 concept is recorded in `GAME_SPEC.md`. No validation was run. Continue with focused Group 1 questions.
+Core loop and major mutation rules are recorded in `GAME_SPEC.md`. No validation was run. Continue with high-impact discovery questions.
