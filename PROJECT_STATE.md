@@ -15,7 +15,7 @@ This is the compact current truth about project progress. Update it after every 
 
 ## Current outcome
 
-The project is in discovery. Group 0 is complete. Core loop, Godot 4.7.2, monetization intent, five distinct weapon models with three active slots, automatic pickups, session weapon collection, the first fast infected enemy, mutation systems, checkpoints, and the approved prototype are recorded.
+The project is in discovery. Group 0 is complete. Core loop, weapon models, automatic pickups, fast infected AI, player health/healing values, mutagen-on-death, explosive self-damage/destruction, mutation systems, checkpoints, and the approved prototype are recorded.
 
 ## Current phase
 
@@ -48,7 +48,7 @@ None. Discovery questions are the current work.
 
 - `GAME_SPEC.md` contains unanswered discovery fields.
 - The 48-hour prototype scope is approved; delivery risk remains high for one developer.
-- Enemy perception/combat numbers, weapon numerical parameters, technical budgets, level rewards, and shop balance are not yet defined.
+- Enemy navigation/health/speed values, weapon numerical parameters, technical budgets, floor structure/rewards, and shop balance are not yet defined.
 
 ## Current risks
 
@@ -58,8 +58,8 @@ None. Discovery questions are the current work.
 
 ## Next action
 
-Define the first enemy's perception and combat rules, player health, explosive self-damage, and level completion rewards.
+Define floor structure, completion routes and rewards, enemy counts, and authored-versus-procedural content.
 
 ## Handoff notes
 
-Weapon behavior, automatic pickups, first enemy concept, and ad timeout behavior are recorded; real ads/payments remain deferred. No implementation is in progress.
+Fast infected perception/damage, player HP/healing, mutagen-on-death, and grenade self-damage/destruction are recorded. No implementation is in progress.
