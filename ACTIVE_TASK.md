@@ -93,7 +93,11 @@ None.
 - Mutation branches cover passive utility, vitality/healing, and ammunition damage; control grows via one ampoule per level.
 - Save buttons are placed on stairwell landings before floors 15, 10, and 5.
 - Target audience is male teens and adults at 16+; English is primary and Russian secondary.
-- The game is free with ads and paid packs; one developer has a stated 48-hour deadline.
+- The game is free with ads, paid packs, and paid ad removal; one developer has 48 hours for a full-mechanics vertical prototype.
+- Ads and real payments are deferred until the core mechanics are complete.
+- Stairwell shops offer weapons, antidote, upgrades, and health ampoules.
+- Before the first checkpoint, death returns the player to the roof.
+- Emergency antidote resets the risk window after either the first or second loss-of-control episode.
 
 ## Validation evidence
 
@@ -101,12 +105,12 @@ None.
 
 ## Blockers
 
-- The meaning of the 48-hour deadline, ad format, pack contents, technical budgets, pre-checkpoint death behavior, and first-window antidote behavior require owner answers.
+- Ad gating, pack pricing/currency, exact Godot version, technical budgets, and shop balance require owner answers.
 
 ## Next exact action
 
-Ask the owner to approve the 48-hour vertical slice and define monetization boundaries.
+Complete the remaining economy and core-flow questions, then prepare the 48-hour prototype task sequence.
 
 ## Session handoff
 
-Audience, localization, monetization intent, and the solo 48-hour constraint are recorded in `GAME_SPEC.md`. No validation was run. Resolve the scope blocker next.
+The 48-hour vertical prototype, stairwell shop, deferred monetization, roof respawn, and emergency-antidote rules are recorded in `GAME_SPEC.md`. No validation was run. Continue discovery.
