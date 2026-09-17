@@ -137,6 +137,9 @@ None.
 - R reloads manually and an empty magazine auto-reloads; switching cancels reload.
 - Shotgun reload is shell-by-shell and interruptible without losing loaded shells.
 - Excess ammo remains on the floor; weapon switching takes 0.25 seconds.
+- Prototype content uses five authored room modules and assembles 3–5 per floor.
+- Prototype visuals are simple 3D geometry with temporary 2D character sprites.
+- Target is 60 FPS, minimum 30 FPS at 1280×720; floors last 5–10 minutes.
 
 ## Validation evidence
 
@@ -144,12 +147,12 @@ None.
 
 ## Blockers
 
-- Camera numeric tuning, procedural module budget, presentation assets, technical budgets, and shop balance require owner answers.
+- Minimum hardware, save format/recovery, camera numeric tuning, remaining technical budgets, and shop balance require owner answers.
 
 ## Next exact action
 
-Define prototype room-module count, generation constraints, art approach, and performance target.
+Define save slots, button reuse, versioned local format, recovery, and cloud-save deferral.
 
 ## Session handoff
 
-R/manual and empty-mag auto reload, swap cancellation, shell reload interruption, ammo overflow, and 0.25-second switching are recorded in `GAME_SPEC.md`. No validation was run. Continue with prototype content boundaries.
+Five room modules, 3–5 per floor, placeholder 2D-in-3D art, 1280×720, 60/30 FPS, and 5–10 minute floor duration are recorded in `GAME_SPEC.md`. No validation was run. Continue with save design.
