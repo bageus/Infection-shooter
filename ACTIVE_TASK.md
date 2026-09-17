@@ -111,6 +111,9 @@ None.
 - The player has 100 HP; a health ampoule restores 30 HP.
 - Every killed infected creates a mutagen cloud.
 - Grenade explosions damage the player and destroy eligible internal walls and partitions.
+- Floors are procedurally assembled from authored modular maps/rooms.
+- Early floors contain 5–10 infected; counts grow over the campaign.
+- MVP floor completion uses clearing infected and destroying the infection source; window exits are deferred.
 
 ## Validation evidence
 
@@ -118,12 +121,12 @@ None.
 
 ## Blockers
 
-- Enemy navigation/health/speed values, weapon numerical parameters, technical budgets, floor structure/rewards, and shop balance require owner answers.
+- Floor completion AND/OR logic, generation seed/save behavior, infection-source rules, enemy maximum/budgets, technical budgets, and shop balance require owner answers.
 
 ## Next exact action
 
-Define floor structure, completion routes/rewards, content generation, and enemy budgets.
+Define completion logic, procedural seed persistence, infection-source behavior, and enemy growth budget.
 
 ## Session handoff
 
-Fast infected targeting/damage, player health/healing, mutagen-on-death, and grenade self-damage/destruction are recorded in `GAME_SPEC.md`. No validation was run. Continue discovery.
+Hybrid procedural generation from authored modules, 5–10 early enemies, clear/source completion, and removal of the window exit from MVP are recorded in `GAME_SPEC.md`. No validation was run. Continue discovery.
