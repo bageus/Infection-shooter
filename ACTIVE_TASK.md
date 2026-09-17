@@ -149,6 +149,9 @@ None.
 - Industrial electronic music intensifies with combat and mutation; prototype has no voiced dialogue.
 - Dismemberment with flying limbs is desired; 16+ compatibility must be verified before release.
 - External assets require a confirmed commercial license; otherwise use self-created replacements.
+- Dismemberment occurs only on death; powerful final hits and grenades can separate limbs.
+- Up to 20 physical fragments fly, then stopped limbs become surface decals; blood also paints the location.
+- Gore toggle removes limbs, blood, and gore decals, replacing death with a brief flash/disappear effect.
 
 ## Validation evidence
 
@@ -156,12 +159,12 @@ None.
 
 ## Blockers
 
-- Dismemberment triggers/lifetime/gore toggle, minimum hardware, camera numeric tuning, remaining technical budgets, and shop balance require owner answers.
+- Gore decal cap/lifetime, minimum hardware, camera numeric tuning, remaining technical budgets, and shop balance require owner answers.
 
 ## Next exact action
 
-Define dismemberment triggers, fragment lifetime, gore-toggle behavior, and performance cap.
+Define blood/limb decal cap, persistence/reset behavior, and affected surfaces.
 
 ## Session handoff
 
-Cold office/toxic mutation palette, adaptive industrial music, no voiced dialogue, dismemberment intent, and verified-license asset policy are recorded in `GAME_SPEC.md`. No validation was run. Continue with gore behavior.
+Death-only dismemberment, 20 physical-fragment cap, limb-to-decal conversion, blood-painted surfaces, and gore toggle are recorded in `GAME_SPEC.md`. No validation was run. Continue with decal limits.
