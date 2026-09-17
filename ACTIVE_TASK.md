@@ -107,7 +107,10 @@ None.
 - Advertising waits up to 10 seconds when unavailable, then progression continues without it.
 - Pistol is accurate; Uzi and rifle spread; shotgun uses a triangular pellet spread; grenade launcher explodes on impact.
 - Pickups are automatic, and found weapons remain in the current campaign collection.
-- The first prototype enemy is a fast infected human that chases and attacks in melee.
+- The first prototype enemy is faster than the player, permanently tracks the hero after line-of-sight detection, and deals 15 damage without causing infection.
+- The player has 100 HP; a health ampoule restores 30 HP.
+- Every killed infected creates a mutagen cloud.
+- Grenade explosions damage the player and destroy eligible internal walls and partitions.
 
 ## Validation evidence
 
@@ -115,12 +118,12 @@ None.
 
 ## Blockers
 
-- Enemy perception/combat numbers, player health, explosive self-damage, weapon numerical parameters, technical budgets, level rewards, and shop balance require owner answers.
+- Enemy navigation/health/speed values, weapon numerical parameters, technical budgets, floor structure/rewards, and shop balance require owner answers.
 
 ## Next exact action
 
-Define the fast infected enemy, player damage model, explosive behavior, and level-completion rewards.
+Define floor structure, completion routes/rewards, content generation, and enemy budgets.
 
 ## Session handoff
 
-Weapon firing models, automatic pickups, session inventory persistence, fast infected enemy, and ad timeout continuation are recorded in `GAME_SPEC.md`. No validation was run. Continue discovery.
+Fast infected targeting/damage, player health/healing, mutagen-on-death, and grenade self-damage/destruction are recorded in `GAME_SPEC.md`. No validation was run. Continue discovery.
