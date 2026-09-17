@@ -15,7 +15,7 @@ This is the compact current truth about project progress. Update it after every 
 
 ## Current outcome
 
-The project is in discovery. Group 0 is complete. Core loop/mechanics, prototype content/performance, saves/UI, death-only gore, 20 physical fragments, 100 blood/limb/scorch decals with layering/reset, gore toggle, and asset policy are recorded.
+The project is in discovery. Group 0 is complete. Core loop/mechanics, prototype content/performance, saves/UI, final E/F bindings, camera numbers, results/defeat/new-game flow, gore system, and asset policy are recorded.
 
 ## Current phase
 
@@ -48,7 +48,7 @@ None. Discovery questions are the current work.
 
 - `GAME_SPEC.md` contains unanswered discovery fields.
 - The 48-hour prototype scope is approved; delivery risk remains high for one developer.
-- Minimum hardware, camera numeric tuning, prototype completion screen, remaining technical budgets, and shop balance are not yet defined.
+- Deferred post-prototype items remain: minimum hardware certification, full shop balance/SDKs, final technical budgets, and platform rating compliance.
 
 ## Current risks
 
@@ -58,8 +58,8 @@ None. Discovery questions are the current work.
 
 ## Next action
 
-Define final prototype input bindings, camera numeric defaults, and completion/death screen flow.
+Present the final discovery synthesis and request explicit owner approval to make the specification READY.
 
 ## Handoff notes
 
-Gore decal limits, layering, affected surfaces, reset, collision, and toggle behavior are recorded. No implementation is in progress.
+Prototype game-design discovery is materially complete. No implementation is in progress; explicit owner approval is required before READY/planning.
