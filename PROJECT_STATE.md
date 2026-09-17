@@ -15,7 +15,7 @@ This is the compact current truth about project progress. Update it after every 
 
 ## Current outcome
 
-The project is in discovery. Group 0 is complete. Core loop, encounter rules, 0–100 mutation meter, 25/15 ability hysteresis, 30–95 control threshold, +10 clouds, -10 antidote, 10-second instability, combat, and the approved prototype are recorded.
+The project is in discovery. Group 0 is complete. Core loop, encounter rules, mutation numbers, three first-node choices, pause selection, priority auto-reactivation, combat, and the approved prototype are recorded.
 
 ## Current phase
 
@@ -48,7 +48,7 @@ None. Discovery questions are the current work.
 
 - `GAME_SPEC.md` contains unanswered discovery fields.
 - The 48-hour prototype scope is approved; delivery risk remains high for one developer.
-- Prototype ability effects, enemy navigation/health/speed values, weapon numbers, technical budgets, and shop balance are not yet defined.
+- Antidote-overdose/respec rules, enemy navigation/health/speed values, weapon numbers, technical budgets, and shop balance are not yet defined.
 
 ## Current risks
 
@@ -58,8 +58,8 @@ None. Discovery questions are the current work.
 
 ## Next action
 
-Define the prototype mutation choices and their numeric effects.
+Define antidote overdose, debuff, priority persistence, and respec behavior.
 
 ## Handoff notes
 
-Mutation thresholds, control growth, antidote amount, and instability timing are recorded. No implementation is in progress.
+First-node ability effects, re-selection, pause, and priority auto-reactivation are recorded. No implementation is in progress.
