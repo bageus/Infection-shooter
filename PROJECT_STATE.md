@@ -15,7 +15,7 @@ This is the compact current truth about project progress. Update it after every 
 
 ## Current outcome
 
-The project is in discovery. Group 0 is complete. Core loop/mechanics, prototype content/performance, saves/UI, presentation, death-only dismemberment, 20-fragment cap, blood/limb decals, gore toggle, and verified-license asset policy are recorded.
+The project is in discovery. Group 0 is complete. Core loop/mechanics, prototype content/performance, saves/UI, death-only gore, 20 physical fragments, 100 blood/limb/scorch decals with layering/reset, gore toggle, and asset policy are recorded.
 
 ## Current phase
 
@@ -48,7 +48,7 @@ None. Discovery questions are the current work.
 
 - `GAME_SPEC.md` contains unanswered discovery fields.
 - The 48-hour prototype scope is approved; delivery risk remains high for one developer.
-- Gore decal cap/lifetime, minimum hardware, camera numeric tuning, remaining technical budgets, and shop balance are not yet defined.
+- Minimum hardware, camera numeric tuning, prototype completion screen, remaining technical budgets, and shop balance are not yet defined.
 
 ## Current risks
 
@@ -58,8 +58,8 @@ None. Discovery questions are the current work.
 
 ## Next action
 
-Define blood/limb decal cap, persistence/reset behavior, and affected surfaces.
+Define final prototype input bindings, camera numeric defaults, and completion/death screen flow.
 
 ## Handoff notes
 
-Death-only dismemberment, physical-to-decal conversion, blood painting, fragment cap, and gore toggle are recorded. No implementation is in progress.
+Gore decal limits, layering, affected surfaces, reset, collision, and toggle behavior are recorded. No implementation is in progress.
