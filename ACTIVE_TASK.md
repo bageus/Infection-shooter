@@ -72,7 +72,7 @@ None.
 - Discovery Group 0 completed.
 - Working agreement accepted.
 - Core game identity and player promise recorded from Discovery Group 1.
-- Camera, controls, campaign length, checkpoints, mutation acquisition, antidote behavior, and the three-stage loss-of-control cycle are recorded.
+- Camera, controls, browser-first platform, campaign length, checkpoint landings, mutation branches, control ampoules, antidote behavior, and the three-stage loss-of-control cycle are recorded.
 
 ## Decisions made during this task
 
@@ -89,6 +89,9 @@ None.
 - The campaign contains 20 floors, three tutorial levels, and checkpoints at floors 15, 10, and 5.
 - Killed infected leave temporary mutagen clouds that feed a branching mutation meter.
 - Loss of control escalates from 5 seconds to 7 seconds to defeat, with resettable 30-second risk windows.
+- Browser release targets itch.io and Yandex Games, with a standalone launcher as an approved fallback requiring a later decision.
+- Mutation branches cover passive utility, vitality/healing, and ammunition damage; control grows via one ampoule per level.
+- Save buttons are placed on stairwell landings before floors 15, 10, and 5.
 
 ## Validation evidence
 
@@ -96,12 +99,12 @@ None.
 
 ## Blockers
 
-- Target platform, difficulty numbering, checkpoint timing, mutation branch taxonomy, and antidote edge cases require owner answers.
+- Audience, monetization, team/time constraints, technical budgets, pre-checkpoint death behavior, and first-window antidote behavior require owner answers.
 
 ## Next exact action
 
-Ask focused questions about platform, difficulty numbering, checkpoints, mutation branches, and antidote safety margins.
+Ask Discovery Group 2 questions about audience, monetization, production constraints, and success criteria.
 
 ## Session handoff
 
-Core loop and major mutation rules are recorded in `GAME_SPEC.md`. No validation was run. Continue with high-impact discovery questions.
+Browser targets, checkpoints, mutation branches, and control ampoules are recorded in `GAME_SPEC.md`. No validation was run. Continue with Discovery Group 2.
