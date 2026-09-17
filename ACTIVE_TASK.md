@@ -122,6 +122,8 @@ None.
 - The first ability unlocks at 25 and disables only below 15.
 - Critical control starts at 30; each control ampoule adds 5 up to 95.
 - A normal antidote removes 10; staying above the critical line fills a 10-second instability timer.
+- At 25, the player chooses reload -15%, movement +10%, or all-weapon damage +10%; selection pauses the game.
+- Dropping below 15 removes the active choice. At the next 25, the player chooses again unless a priority ability is marked for automatic activation.
 
 ## Validation evidence
 
@@ -129,12 +131,12 @@ None.
 
 ## Blockers
 
-- Prototype ability effects, enemy navigation/health/speed values, weapon numbers, technical budgets, and shop balance require owner answers.
+- Antidote-overdose/respec rules, enemy navigation/health/speed values, weapon numbers, technical budgets, and shop balance require owner answers.
 
 ## Next exact action
 
-Define the first mutation choices and their numeric effects.
+Define antidote overdose, debuff, priority persistence, and respec behavior.
 
 ## Session handoff
 
-The 0–100 meter, +10 clouds, 25/15 ability buffer, 30–95 critical threshold, -10 antidote, and 10-second instability timer are recorded in `GAME_SPEC.md`. No validation was run. Continue discovery.
+The three first-node abilities, pause selection, rollback re-selection, and priority auto-reactivation are recorded in `GAME_SPEC.md`. No validation was run. Continue discovery.
