@@ -98,6 +98,10 @@ None.
 - Stairwell shops offer weapons, antidote, upgrades, and health ampoules.
 - Before the first checkpoint, death returns the player to the roof.
 - Emergency antidote resets the risk window after either the first or second loss-of-control episode.
+- The project uses Godot 4.7.2.
+- Ads are intended to be mandatory but must not block progress when unavailable; ad removal is paid.
+- The stairwell shop uses real money for weapons, antidote, upgrades, and health ampoules.
+- The player has three weapon slots; weapons reload and consume ammo found on levels or dropped by monsters.
 
 ## Validation evidence
 
@@ -105,12 +109,12 @@ None.
 
 ## Blockers
 
-- Ad gating, pack pricing/currency, exact Godot version, technical budgets, and shop balance require owner answers.
+- Mandatory-ad failure behavior, free baseline resources, prototype weapon archetypes, ammo types, technical budgets, and shop balance require owner answers.
 
 ## Next exact action
 
-Complete the remaining economy and core-flow questions, then prepare the 48-hour prototype task sequence.
+Define ad failure behavior, free baseline resources, and the prototype weapon set, then continue the remaining discovery groups.
 
 ## Session handoff
 
-The 48-hour vertical prototype, stairwell shop, deferred monetization, roof respawn, and emergency-antidote rules are recorded in `GAME_SPEC.md`. No validation was run. Continue discovery.
+Godot 4.7.2, mandatory-ad intent, real-money shop, three weapon slots, reloading, and ammo drops are recorded in `GAME_SPEC.md`. No validation was run. Continue discovery.
