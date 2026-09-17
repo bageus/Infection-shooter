@@ -140,6 +140,8 @@ None.
 - Prototype content uses five authored room modules and assembles 3–5 per floor.
 - Prototype visuals are simple 3D geometry with temporary 2D character sprites.
 - Target is 60 FPS, minimum 30 FPS at 1280×720; floors last 5–10 minutes.
+- Campaign uses one versioned save_v1 slot with a backup; buttons overwrite it and can be reused.
+- Death or mid-floor exit returns to the last button, or the roof before the first checkpoint. Cloud saves are deferred.
 
 ## Validation evidence
 
@@ -147,12 +149,12 @@ None.
 
 ## Blockers
 
-- Minimum hardware, save format/recovery, camera numeric tuning, remaining technical budgets, and shop balance require owner answers.
+- Minimum hardware, camera numeric tuning, UI/accessibility settings, remaining technical budgets, and shop balance require owner answers.
 
 ## Next exact action
 
-Define save slots, button reuse, versioned local format, recovery, and cloud-save deferral.
+Define prototype menus, pause/settings, control remapping scope, text scaling, and flash reduction.
 
 ## Session handoff
 
-Five room modules, 3–5 per floor, placeholder 2D-in-3D art, 1280×720, 60/30 FPS, and 5–10 minute floor duration are recorded in `GAME_SPEC.md`. No validation was run. Continue with save design.
+One save slot, reusable checkpoint buttons, save_v1, backup recovery, mid-floor rollback, and deferred cloud saves are recorded in `GAME_SPEC.md`. No validation was run. Continue with UI/accessibility.
