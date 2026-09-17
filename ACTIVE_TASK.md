@@ -132,6 +132,8 @@ None.
 - Weapon profiles are fixed for the prototype: pistol 20/12/60, Uzi 8/30/180, rifle 15/30/120, shotgun 10×8/6/30, grenade launcher 100/1/6 with the approved rates and reloads.
 - Light partitions have 40 HP and accept all damage; reinforced walls have 200 HP and accept Uzi/rifle/grenade/infected damage.
 - External walls and columns are indestructible. Debris falls, expires, and resets with the floor after death.
+- Camera follows the player, rotates smoothly with Q/E, has no zoom, and fades occluding walls.
+- WASD is screen-relative; mouse aiming projects the cursor onto the floor.
 
 ## Validation evidence
 
@@ -139,12 +141,12 @@ None.
 
 ## Blockers
 
-- Camera controls/aim mapping, reload interruption, technical budgets, and shop balance require owner answers.
+- Reload/swap interruption, camera numeric tuning, technical budgets, and shop balance require owner answers.
 
 ## Next exact action
 
-Define camera rotation/zoom, movement reference, aim projection, and input bindings.
+Define reload interruption, weapon switching, automatic reload, and pickup overflow.
 
 ## Session handoff
 
-Light/reinforced/indestructible classes, falling debris, cleanup, and geometry reset after death are recorded in `GAME_SPEC.md`. No validation was run. Continue with camera and controls.
+Q/E camera rotation, camera-relative movement, cursor-floor aiming, no zoom, and occluder transparency are recorded in `GAME_SPEC.md`. No validation was run. Continue with weapon-handling edge cases.
