@@ -125,6 +125,10 @@ None.
 - At 25, the player chooses reload -15%, movement +10%, or all-weapon damage +10%; selection pauses the game.
 - Dropping below 15 removes the active choice. At the next 25, the player chooses again unless a priority ability is marked for automatic activation.
 - Antidote has no overdose, toxicity meter, or separate debuff.
+- Player speed is 6 m/s; fast infected speed is 7 m/s with 50 HP.
+- Infected attack at 1.2 m once per second for 15 damage and route around obstacles.
+- The first infected attacks a destructible object only if one hit would destroy it, so it does not attack partitions.
+- Grenade radius is 3 m with up to 100 center damage and falloff, including player self-damage.
 
 ## Validation evidence
 
@@ -132,12 +136,12 @@ None.
 
 ## Blockers
 
-- Enemy navigation/health/speed values, weapon numbers, technical budgets, and shop balance require owner answers.
+- Weapon numbers, blocked-enemy fallback, technical budgets, and shop balance require owner answers.
 
 ## Next exact action
 
-Define enemy navigation and numeric combat values for the prototype.
+Define weapon magazines, damage, fire rates, reload times, reserves, and blocked-enemy fallback.
 
 ## Session handoff
 
-Antidote overdose/toxicity is explicitly excluded from `GAME_SPEC.md`. No validation was run. Continue with prototype combat numbers.
+Player/enemy speed, infected HP/attack, 3D navigation, obstacle rules, and grenade radius/falloff are recorded in `GAME_SPEC.md`. No validation was run. Continue with weapon numbers.
