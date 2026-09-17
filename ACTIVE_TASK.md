@@ -101,7 +101,10 @@ None.
 - The project uses Godot 4.7.2.
 - Ads are intended to be mandatory but must not block progress when unavailable; ad removal is paid.
 - The stairwell shop uses real money for weapons, antidote, upgrades, and health ampoules.
-- The player has three weapon slots; weapons reload and consume ammo found on levels or dropped by monsters.
+- The player equips three of five weapon types, switches them with 1–3 in combat, and changes the loadout only on stairwell landings.
+- Each weapon has separate ammo; ammo, health, and antidote drop from monsters or appear on levels.
+- Weapons drop from bosses, appear on levels, or are sold in the shop.
+- Advertising waits up to 10 seconds when unavailable; behavior after timeout still requires confirmation.
 
 ## Validation evidence
 
@@ -109,12 +112,12 @@ None.
 
 ## Blockers
 
-- Mandatory-ad failure behavior, free baseline resources, prototype weapon archetypes, ammo types, technical budgets, and shop balance require owner answers.
+- Post-timeout ad behavior, weapon numerical parameters, combat resolution, enemy model, technical budgets, and shop balance require owner answers.
 
 ## Next exact action
 
-Define ad failure behavior, free baseline resources, and the prototype weapon set, then continue the remaining discovery groups.
+Confirm post-timeout ad behavior and define combat, enemy, drop, and level-reward rules.
 
 ## Session handoff
 
-Godot 4.7.2, mandatory-ad intent, real-money shop, three weapon slots, reloading, and ammo drops are recorded in `GAME_SPEC.md`. No validation was run. Continue discovery.
+Five weapon types, three active slots, in-combat switching, landing-only loadout replacement, separate ammo, free drops, and 10-second ad waiting are recorded in `GAME_SPEC.md`. No validation was run. Continue discovery.
