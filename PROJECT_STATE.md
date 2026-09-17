@@ -15,7 +15,7 @@ This is the compact current truth about project progress. Update it after every 
 
 ## Current outcome
 
-The project is in discovery. Group 0 working preferences are confirmed. Complete and approve `GAME_SPEC.md` before gameplay implementation.
+The project is in discovery. Group 0 is complete and the core game identity from Group 1 is recorded. Clarify the remaining player-promise decisions before gameplay implementation.
 
 ## Current phase
 
@@ -47,17 +47,18 @@ None. Discovery questions are the current work.
 ## Known blockers
 
 - `GAME_SPEC.md` contains unanswered discovery fields.
-- The game identity and player promise are not yet defined.
+- Camera behavior, run structure, mutation selection, and loss-of-control behavior are not yet defined.
 
 ## Current risks
 
-- Concept and scope are not yet defined.
-- Technical choices may change after discovery.
+- The concept is defined at a high level, but MVP scope is not yet fixed.
+- Hybrid 2D characters in 3D levels require an early rendering/readability prototype.
+- Destructible environments may create significant production and performance cost.
 
 ## Next action
 
-Ask Discovery Group 1 questions about game identity and player promise.
+Clarify the remaining Group 1 decisions: camera, controls, run duration, mutation choice, and loss of control.
 
 ## Handoff notes
 
-Working agreement accepted. No implementation is in progress. Preserve Discovery mode until the readiness gates pass.
+Working agreement accepted and the core Infection Shooter concept is recorded. No implementation is in progress. Continue Group 1 clarification.
