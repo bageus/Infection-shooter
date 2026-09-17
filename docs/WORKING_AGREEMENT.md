@@ -1,9 +1,9 @@
 ---
 agreement_version: 1
-status: DRAFT
+status: ACCEPTED
 communication_language: Russian
-autonomy_level: SUPERVISED
-updated: {{YYYY-MM-DD}}
+autonomy_level: AUTONOMOUS_WITHIN_APPROVED_SCOPE
+updated: 2026-09-17
 ---
 
 # Working Agreement
@@ -29,17 +29,22 @@ The role never grants permission to ignore scope, architecture, validation, or u
 - When offering choices: provide 2–3 options, trade-offs, and a recommendation.
 - Unknown facts: mark as assumptions; never present them as confirmed.
 - Progress updates during long work: enabled.
+- Code identifiers, code comments, and commit messages: English.
+- Game and project documentation: Russian.
 
 ## Autonomy
 
-Current level: **SUPERVISED**.
+Current level: **AUTONOMOUS_WITHIN_APPROVED_SCOPE**.
+
+After a plan is approved, AI may independently complete the approved task within its defined scope.
 
 AI may without separate approval:
 
 - inspect repository files;
 - update documentation with confirmed answers;
 - make changes strictly inside an approved active task;
-- run non-destructive validation and tests.
+- run non-destructive validation and tests;
+- commit approved-scope work directly to `main` until the playable MVP is reached.
 
 AI must request approval before:
 
@@ -71,8 +76,9 @@ AI must request approval before:
 - Preserve user changes.
 - Use descriptive, task-scoped commits.
 - Do not rewrite shared history.
-- Default delivery policy: {{direct_main_or_pull_request}}
-- Default commit language: {{commit_language}}
+- Before playable MVP: commit approved-scope work directly to `main`.
+- After playable MVP: use feature branches and pull requests.
+- Default commit language: English.
 
 ## Validation
 
@@ -97,6 +103,6 @@ Report:
 
 ## Owner confirmation
 
-- Owner/name: {{owner_name}}
-- Agreement accepted: {{yes_or_no}}
-- Date: {{YYYY-MM-DD}}
+- Owner/name: bageus
+- Agreement accepted: yes
+- Date: 2026-09-17
