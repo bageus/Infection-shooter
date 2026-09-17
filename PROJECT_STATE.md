@@ -15,7 +15,7 @@ This is the compact current truth about project progress. Update it after every 
 
 ## Current outcome
 
-The project is in discovery. Group 0 is complete and the core game identity from Group 1 is recorded. Clarify the remaining player-promise decisions before gameplay implementation.
+The project is in discovery. Group 0 is complete. Core loop, controls, campaign structure, mutation progression, antidote behavior, and loss-of-control escalation are recorded.
 
 ## Current phase
 
@@ -47,18 +47,19 @@ None. Discovery questions are the current work.
 ## Known blockers
 
 - `GAME_SPEC.md` contains unanswered discovery fields.
-- Camera behavior, run structure, mutation selection, and loss-of-control behavior are not yet defined.
+- Target platform and exact Godot version are not yet defined.
+- Difficulty numbering, checkpoint timing, mutation branch taxonomy, and antidote edge cases require confirmation.
 
 ## Current risks
 
-- The concept is defined at a high level, but MVP scope is not yet fixed.
+- The concept and main risk/reward loop are defined, but MVP scope is not yet fixed.
 - Hybrid 2D characters in 3D levels require an early rendering/readability prototype.
 - Destructible environments may create significant production and performance cost.
 
 ## Next action
 
-Clarify the remaining Group 1 decisions: camera, controls, run duration, mutation choice, and loss of control.
+Resolve the remaining high-impact product and mutation-system questions.
 
 ## Handoff notes
 
-Working agreement accepted and the core Infection Shooter concept is recorded. No implementation is in progress. Continue Group 1 clarification.
+The main Infection Shooter loop and 20-floor campaign are recorded. No implementation is in progress. Continue focused discovery on platform, difficulty, checkpoints, and mutation rules.
