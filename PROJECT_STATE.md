@@ -15,7 +15,7 @@ This is the compact current truth about project progress. Update it after every 
 
 ## Current outcome
 
-The project is in discovery. Group 0 is complete. Core loop, browser-first platform, audience, bilingual release, advertising/IAP intent, campaign structure, mutation systems, and checkpoints are recorded.
+The project is in discovery. Group 0 is complete. Core loop, browser-first product, monetization intent, stairwell shop, mutation systems, checkpoints, and the approved 48-hour vertical-prototype scope are recorded.
 
 ## Current phase
 
@@ -47,19 +47,19 @@ None. Discovery questions are the current work.
 ## Known blockers
 
 - `GAME_SPEC.md` contains unanswered discovery fields.
-- The 48-hour deadline is ambiguous between a vertical prototype and the full MVP.
-- Ad formats, pack contents, exact Godot version, technical budgets, and save behavior before the first checkpoint are not yet defined.
+- The 48-hour prototype scope is approved; delivery risk remains high for one developer.
+- Ad gating, pricing/currency, exact Godot version, technical budgets, and shop balance are not yet defined.
 
 ## Current risks
 
-- The concept and main risk/reward loop are defined, but the 48-hour scope versus full MVP is not yet approved.
+- The concept, main risk/reward loop, and 48-hour vertical-prototype scope are approved; full MVP content scope remains open.
 - Browser delivery with hybrid 2D characters in 3D levels requires an early performance and readability prototype.
 - Destructible environments may create significant production and performance cost.
 
 ## Next action
 
-Approve a realistic 48-hour vertical-prototype scope and define monetization boundaries.
+Finish the remaining economy and core-flow decisions, then define Phase 1 tasks for the approved 48-hour prototype.
 
 ## Handoff notes
 
-Audience, localization, monetization intent, and solo 48-hour constraint are recorded. No implementation is in progress. Resolve the scope blocker before detailed planning.
+The 48-hour vertical-prototype scope is approved. Monetization is deferred until the core mechanics are complete. No implementation is in progress; continue discovery before readiness validation.
