@@ -15,7 +15,7 @@ This is the compact current truth about project progress. Update it after every 
 
 ## Current outcome
 
-The project is in discovery. Group 0 is complete. Core loop, encounter/mutation/combat/destruction, camera-relative movement, Q/E rotation, cursor-floor aiming, occluder transparency, and the approved prototype are recorded.
+The project is in discovery. Group 0 is complete. Core loop, encounter/mutation/combat/destruction, camera/input, manual/auto reload, reload interruption, shell loading, ammo overflow, and the approved prototype are recorded.
 
 ## Current phase
 
@@ -48,7 +48,7 @@ None. Discovery questions are the current work.
 
 - `GAME_SPEC.md` contains unanswered discovery fields.
 - The 48-hour prototype scope is approved; delivery risk remains high for one developer.
-- Reload/swap interruption, camera numeric tuning, technical budgets, and shop balance are not yet defined.
+- Camera numeric tuning, procedural module budget, presentation assets, technical budgets, and shop balance are not yet defined.
 
 ## Current risks
 
@@ -58,8 +58,8 @@ None. Discovery questions are the current work.
 
 ## Next action
 
-Define reload interruption, weapon switching, automatic reload, and pickup overflow.
+Define prototype room-module count, floor-generation constraints, art approach, and performance target.
 
 ## Handoff notes
 
-Camera/input behavior and occlusion transparency are recorded. No implementation is in progress; define weapon handling edge cases next.
+Weapon handling edge cases are recorded. No implementation is in progress; define prototype content and performance boundaries next.
