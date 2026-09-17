@@ -116,6 +116,8 @@ None.
 - The first floor has no source and completes when all infected die; later floors include one or more stationary sources that spawn enemies.
 - A floor seed is generated on first entry and reused after death.
 - Provisional active-enemy limits are 10 for the prototype and 100 for the hardest full-game floors.
+- The prototype uses a representative post-tutorial floor with one 500-HP source that spawns every 8 seconds.
+- Any weapon damages the source; after it dies, the player must kill all remaining infected.
 
 ## Validation evidence
 
@@ -123,12 +125,12 @@ None.
 
 ## Blockers
 
-- Post-source floor-completion logic, source health/spawn cadence/caps, enemy navigation, technical budgets, and shop balance require owner answers.
+- Mutation numeric thresholds/repeat-loss trigger, enemy navigation, weapon numbers, technical budgets, and shop balance require owner answers.
 
 ## Next exact action
 
-Define the representative prototype floor, infection-source damage/spawn rules, and remaining-enemy behavior.
+Define mutation-meter thresholds, antidote amount, control-ampule effect, and repeat-loss trigger.
 
 ## Session handoff
 
-Persistent procedural seeds, first-floor clear objective, spawning infection sources, and provisional 10/100 enemy limits are recorded in `GAME_SPEC.md`. No validation was run. Continue discovery.
+The representative later-floor prototype, 500-HP source, 8-second spawns, 10-enemy cap, any-weapon damage, and post-source cleanup are recorded in `GAME_SPEC.md`. No validation was run. Continue discovery.
