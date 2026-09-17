@@ -104,7 +104,10 @@ None.
 - The player equips three of five weapon types, switches them with 1–3 in combat, and changes the loadout only on stairwell landings.
 - Each weapon has separate ammo; ammo, health, and antidote drop from monsters or appear on levels.
 - Weapons drop from bosses, appear on levels, or are sold in the shop.
-- Advertising waits up to 10 seconds when unavailable; behavior after timeout still requires confirmation.
+- Advertising waits up to 10 seconds when unavailable, then progression continues without it.
+- Pistol is accurate; Uzi and rifle spread; shotgun uses a triangular pellet spread; grenade launcher explodes on impact.
+- Pickups are automatic, and found weapons remain in the current campaign collection.
+- The first prototype enemy is a fast infected human that chases and attacks in melee.
 
 ## Validation evidence
 
@@ -112,12 +115,12 @@ None.
 
 ## Blockers
 
-- Post-timeout ad behavior, weapon numerical parameters, combat resolution, enemy model, technical budgets, and shop balance require owner answers.
+- Enemy perception/combat numbers, player health, explosive self-damage, weapon numerical parameters, technical budgets, level rewards, and shop balance require owner answers.
 
 ## Next exact action
 
-Confirm post-timeout ad behavior and define combat, enemy, drop, and level-reward rules.
+Define the fast infected enemy, player damage model, explosive behavior, and level-completion rewards.
 
 ## Session handoff
 
-Five weapon types, three active slots, in-combat switching, landing-only loadout replacement, separate ammo, free drops, and 10-second ad waiting are recorded in `GAME_SPEC.md`. No validation was run. Continue discovery.
+Weapon firing models, automatic pickups, session inventory persistence, fast infected enemy, and ad timeout continuation are recorded in `GAME_SPEC.md`. No validation was run. Continue discovery.
