@@ -1,8 +1,8 @@
-# Mandatory AI instructions
+# Mandatory AI instructions for Godot
 
-These rules apply to every AI agent and every file in this repository.
+These rules apply to every AI agent and every file in this Godot 4.x repository. GDScript is the default implementation language.
 
-Normative keywords **MUST**, **MUST NOT**, **SHOULD**, and **MAY** are intentional. The canonical human-readable architecture is `docs/ARCHITECTURE.md`; the executable dependency policy is `architecture/policy.json`.
+Normative keywords **MUST**, **MUST NOT**, **SHOULD**, and **MAY** are intentional. The canonical architecture is `docs/ARCHITECTURE.md`; executable boundaries are in `architecture/policy.json`.
 
 ## Required reading order
 
@@ -14,88 +14,118 @@ Before changing code or project structure, the agent MUST read:
 4. all `module.json` files for modules touched by the task;
 5. relevant ADRs under `docs/adr/`.
 
-If any required file is missing, contradictory, or unclear, the agent MUST stop and ask for clarification instead of inventing a rule.
+If these sources conflict or the requested work requires an exception, the agent MUST stop, describe the conflict, and request a decision. It MUST NOT silently invent a rule.
 
-## Mandatory workflow
+## Required workflow
 
-Before editing, the agent MUST:
+Before editing, the agent MUST identify:
 
-1. restate the requested outcome;
-2. identify affected modules and state owners;
-3. list files expected to change;
-4. identify architectural risks;
-5. keep the change within the requested scope.
+- requested outcome;
+- affected modules and state owners;
+- scenes, scripts, resources, save DTOs, and public contracts involved;
+- expected files;
+- architectural and migration risks.
 
-While editing, the agent MUST:
+During implementation, the agent MUST make the smallest coherent change, preserve unrelated files, and update manifests before adding cross-module dependencies.
 
-- make the smallest coherent change;
-- preserve public APIs unless the task explicitly requires changing them;
-- access another module only through its declared public API;
-- declare every module dependency in that module's `module.json`;
-- keep domain logic independent from UI, engine objects, persistence, networking, analytics, and platform SDKs;
-- keep configuration data separate from runtime state;
-- leave unrelated files unchanged.
-
-Before finishing, the agent MUST run:
+Before completion it MUST run:
 
 ```bash
 python tools/validate_architecture.py
 ```
 
-It MUST also run project tests and builds when they exist. A task is not complete while validation fails.
+When Godot is available it MUST also run:
 
-## Non-negotiable architecture rules
+```bash
+godot --headless --path . --editor --quit
+```
 
-1. The project is a modular monolith.
-2. Each mutable state has exactly one owning module.
-3. Other modules request changes through commands or public interfaces; they MUST NOT mutate foreign state.
-4. Module internals are private. Only items listed in `public_api` are cross-module contracts.
-5. Dependency cycles are forbidden.
-6. Hidden dependency lookup, global mutable state, and service locator patterns are forbidden.
-7. Global event buses are forbidden. Cross-module events MUST be typed, documented public contracts.
-8. Events describe facts that already happened. Required actions use commands or direct public interfaces.
-9. Gameplay/domain code MUST NOT depend on presentation or concrete infrastructure.
-10. Third-party SDKs MUST be wrapped by infrastructure adapters.
-11. Save formats, network protocols, and public contracts MUST be versioned when introduced.
-12. A new abstraction MUST solve a current demonstrated need; speculative frameworks are forbidden.
-13. ECS MAY be used only for measured high-volume simulation. UI, orchestration, and unique scripted objects SHOULD remain conventional objects.
-14. Refactoring and feature work SHOULD be separate changes.
-15. Generated code MUST NOT be trusted without validation and tests.
+It MUST run relevant tests. It MUST NOT claim a check passed unless it actually ran successfully.
+
+## Core architecture rules
+
+1. The game is a modular monolith.
+2. Every mutable state has exactly one owning module.
+3. Other modules request state changes through commands or public interfaces.
+4. Module internals are private; cross-module references target only `public/`.
+5. Every dependency is declared in `module.json`.
+6. Dependency cycles are forbidden.
+7. Gameplay/domain code MUST NOT depend on UI, scenes, concrete storage, transport, analytics, or platform SDKs.
+8. Third-party SDKs and Godot platform APIs with external side effects MUST be wrapped by infrastructure adapters.
+9. Global mutable state, service locators, and untyped global event buses are forbidden.
+10. Events report facts that already happened. Required work uses commands or direct typed interfaces.
+11. New abstractions MUST solve a current demonstrated need.
+12. Save formats, network protocols, and public contracts MUST be versioned when introduced.
+
+## Godot-specific rules
+
+### Scenes and nodes
+
+- Scenes are composition and presentation boundaries, not domain databases.
+- A scene root MAY wire child nodes belonging to the same module.
+- A node MUST NOT search the SceneTree for a service or another module.
+- Absolute `/root/` paths and `get_tree().root` are forbidden outside approved bootstrap/infrastructure code.
+- Cross-module node references MUST be injected by the composition root or expressed through a declared public contract.
+- `get_node()`, `$Node`, and `%UniqueNode` SHOULD remain local to the owning scene.
+- Gameplay rules MUST be callable without instantiating a scene.
+
+### Autoload
+
+- Autoload is allowed only for bootstrap composition or infrastructure bridges explicitly approved by policy.
+- Autoload MUST NOT own combat, inventory, quests, progression, world, or other gameplay state.
+- A module MUST NOT use Autoload as a service locator.
+- Adding an Autoload requires an ADR unless it is the single documented application composition root.
+
+### Signals
+
+- Signals MUST be typed where Godot permits.
+- Signals are local by default.
+- Cross-module signals must be listed in the producer's `public_api`.
+- A global signal bus is forbidden.
+- Signal connections MUST have an explicit lifecycle and be disconnected when the subscriber outlives its context.
+
+### Resources
+
+- `Resource` files are authored definitions/configuration by default, not mutable runtime state.
+- Runtime state MUST be copied into module-owned runtime objects before mutation.
+- Shared loaded resources MUST be treated as immutable.
+- Durable identity uses stable IDs, never NodePath, instance ID, RID, or scene object reference.
+
+### GDScript
+
+- New GDScript SHOULD use static typing for parameters, returns, fields, arrays, and dictionaries when practical.
+- `class_name` is part of the global namespace and MUST be unique.
+- Cross-module scripts/scenes/resources are loaded only with explicit `res://` paths that the validator can inspect.
+- Dynamic paths that hide module dependencies are forbidden.
+- Engine callbacks should delegate quickly to application/domain methods.
+- Heavy work MUST NOT be added to every node's `_process` or `_physics_process` without a measured need.
+
+### Files and naming
+
+- Files and directories use `snake_case`.
+- Nodes use `PascalCase`.
+- Signals use past-tense `snake_case` facts.
+- Input actions use `snake_case`.
+- Public cross-module files live under `public/`.
 
 ## Architecture changes
 
-The agent MUST NOT silently bypass a rule.
-
-A change to layer directions, state ownership, public contracts, persistence format, network authority, or a shared abstraction requires:
+Changing layer direction, state ownership, public APIs, Autoloads, save/network formats, or shared abstractions requires:
 
 1. an ADR copied from `docs/adr/0000-template.md`;
-2. explicit rationale and rejected alternatives;
+2. rejected alternatives;
 3. migration and rollback plans;
-4. corresponding updates to documentation and policy;
-5. explicit approval from the user or maintainer.
+4. documentation and policy updates;
+5. explicit user or maintainer approval.
 
-Without approval, the agent MUST propose the change but not implement the architectural exception.
-
-## Module creation
-
-A new module MUST have a `module.json` based on `templates/module.json`. Its ID MUST be stable and unique. The manifest MUST name:
-
-- layer;
-- purpose;
-- state owner;
-- public API;
-- dependencies.
-
-A module MUST NOT be split merely to reduce file size. Split only when ownership, lifecycle, scaling, or dependency boundaries are genuinely different.
+Without approval the agent may propose, but MUST NOT implement, the exception.
 
 ## Completion report
 
-The final response MUST include:
+The final response MUST list:
 
-- changed modules and files;
-- public API or data-format changes;
-- tests and validators run;
-- unresolved risks or assumptions;
-- any architecture deviation, clearly marked.
-
-The agent MUST never claim a check passed unless it actually ran successfully.
+- modules and files changed;
+- public API, scene, resource, save, or network format changes;
+- validation and tests actually run;
+- assumptions and unresolved risks;
+- any architecture exception, clearly marked.

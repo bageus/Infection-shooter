@@ -1,0 +1,10 @@
+# Godot generated files
+.godot/
+.import/
+.mono/
+
+# Local/editor files
+*.tmp
+*.translation
+.DS_Store
+Thumbs.db

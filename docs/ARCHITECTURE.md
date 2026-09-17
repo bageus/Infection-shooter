@@ -1,182 +1,182 @@
-# Game architecture
+# Godot game architecture
 
-## Goal
+## Target
 
-Keep a large game understandable and changeable as its team and content grow. The default is a **modular monolith**: one deployable game project with explicit module boundaries.
-
-The architecture optimizes for local reasoning:
-
-- one owner for each mutable state;
-- small public module APIs;
-- explicit dependency direction;
-- engine and vendor isolation;
-- data-driven content;
-- automated boundary validation.
+This template targets **Godot 4.x with GDScript**. It uses a modular monolith so a large game remains understandable without introducing unnecessary frameworks.
 
 ## Layers
 
-| Layer | Responsibility | May depend on |
+| Layer | Godot responsibility | Allowed dependencies |
 |---|---|---|
-| `core` | Stable primitives, IDs, time abstractions, result types, contracts with no gameplay meaning | nothing |
-| `features` | Gameplay rules and state: combat, inventory, quests, abilities, world simulation | `core`, public APIs of other `features` |
-| `presentation` | UI, camera, animation, audio and VFX presentation | `core`, public `features` APIs |
-| `infrastructure` | Save storage, network transport, asset loading, analytics and platform adapters | `core`, public `features` APIs |
-| `bootstrap` | Composition root, startup, module wiring and top-level game states | all layers |
+| `core` | Engine-light primitives, IDs, time abstractions, result types | none |
+| `features` | Gameplay rules and owned state: combat, inventory, quests, abilities, world | `core`, public APIs of `features` |
+| `presentation` | UI scenes, camera, animation, audio and VFX | `core`, public `features` |
+| `infrastructure` | Save files, transport, asset/platform adapters, analytics | `core`, public `features` |
+| `bootstrap` | Main scene, game states, dependency composition and module wiring | all layers |
 
-Dependencies point inward toward gameplay and stable contracts. Gameplay never imports concrete UI, storage, transport, analytics, or platform SDKs.
-
-## Repository layout
+## Project layout
 
 ```text
-src/
-  core/<module>/module.json
-  features/<module>/module.json
-  presentation/<module>/module.json
-  infrastructure/<module>/module.json
-  bootstrap/<module>/module.json
-
-architecture/policy.json
+project.godot
+game/
+  core/<module>/
+  features/<module>/
+  presentation/<module>/
+  infrastructure/<module>/
+  bootstrap/<module>/
+content/                  authored .tres resources and data
+assets/                   imported art, audio and fonts
+addons/                   isolated third-party Godot plugins
 docs/adr/
-templates/module.json
+architecture/policy.json
 tools/validate_architecture.py
 ```
 
-Engine-specific folders MAY wrap this layout, but every architectural module still needs one discoverable `module.json`.
+Every module directory contains `module.json`.
 
-## Module contract
-
-A module owns one coherent capability. Its manifest declares its identity, layer, state ownership, public API, and dependencies.
-
-Recommended internal structure:
+Recommended module anatomy:
 
 ```text
-<module>/
-  Public/          cross-module interfaces, commands, queries and events
-  Domain/          state and invariant rules
-  Application/     use cases and orchestration
-  Data/            immutable definitions and configuration
-  Presentation/    optional module-owned views
-  Infrastructure/  optional adapters
-  Tests/
+inventory/
+  public/                 cross-module interfaces, commands, DTOs and signals
+  domain/                 state and invariant rules
+  application/            use cases and orchestration
+  data/                   definitions and configuration
+  presentation/           optional module-owned scenes/views
+  infrastructure/         optional adapters
+  tests/
   module.json
 ```
 
-Do not create empty directories merely to match the diagram.
+Create only directories the module actually needs.
 
-### Public API
+## Dependency enforcement
 
-Only contracts named in `public_api` may be consumed from another module. A public API should expose intent, not internal collections or mutable fields.
+Godot paths are architectural imports. References found in `.gd`, `.tscn`, and `.tres` are mapped to their owning module.
 
-Bad:
+A cross-module reference is legal only when:
 
-```text
-questSystem.inventory.items.append(item)
-```
+1. the target module appears in the source module's `dependencies`;
+2. the target layer is allowed by policy;
+3. the referenced file is inside the target module's `public/`.
 
-Good:
+References to `assets/`, `content/`, and approved `addons/` are data/plugin references rather than module dependencies. Wrappers around addon APIs belong in infrastructure.
 
-```text
-inventory.try_add(item_id, amount)
-```
+Dynamic construction of cross-module paths is forbidden because it bypasses static validation.
 
-### State ownership
+## State and domain logic
 
-Every mutable state has exactly one owner. The owner validates commands and performs mutations. Other modules may query through read-only contracts or request a change.
+Each mutable state has one authoritative owner. Nodes and scenes may display or cache derived state but do not become authoritative merely because they contain a script.
 
-Examples:
+Domain logic should be plain `RefCounted` objects or similarly engine-light classes when possible. It must be testable without loading a scene.
 
-| State | Owner |
-|---|---|
-| health and alive/dead state | character or combat, chosen once |
-| item stacks and equipment | inventory |
-| quest progress | quests |
-| persistent file representation | persistence adapter |
-| authoritative multiplayer outcome | server simulation |
+Separate:
 
-Duplicated read models and presentation caches are allowed when they are derived, disposable, and never treated as authoritative.
+- authored `Resource` definition;
+- mutable runtime state;
+- domain rules;
+- Node-based presentation;
+- versioned persistence DTO;
+- versioned network DTO.
 
-## Communication
+Loaded resources are shared by Godot. Treat definition resources as immutable; copy values into runtime state before mutation.
 
-Use the simplest explicit mechanism:
+## Scene rules
 
-- **command**: requests a state-changing action and may fail;
-- **query**: reads without changing state;
-- **event**: announces a fact that already occurred.
+A scene is a local composition boundary. Its root owns the lifecycle of children it creates.
 
-Use direct calls for required synchronous work. Use typed events for optional reactions. Avoid global buses because they hide dependencies and execution order.
+Allowed:
 
-## Data boundaries
+- local `$Child` or `%UniqueNode` access;
+- exported references wired in the editor;
+- instantiating another module's explicitly public scene through a declared dependency;
+- bootstrap composing top-level modules.
 
-Keep these concepts separate:
+Forbidden:
 
-- definition: immutable authored data, such as an item type;
-- runtime state: a specific item stack or character instance;
-- domain rule: how state may change;
-- presentation: how state is shown;
-- persistence DTO: versioned saved representation;
-- network DTO: versioned transferred representation.
+- searching the SceneTree for services;
+- absolute `/root/` lookups from gameplay;
+- embedding domain rules only in button handlers or animation callbacks;
+- using node groups as a hidden global dependency container;
+- reaching into another module's internal child nodes.
 
-Never serialize engine object references as durable identity. Use stable IDs and explicit migrations.
+Keep reusable scene APIs on their root script. External code must not depend on internal node layout.
 
-## Runtime and update loop
+## Autoload policy
 
-Prefer a controlled phase order:
+Autoload is not a general dependency injection mechanism. It is limited to:
+
+- the application composition root;
+- narrow infrastructure bridges whose engine lifecycle truly requires it.
+
+Autoload never owns gameplay state. Adding one requires review and normally an ADR. The validator reads `project.godot` and rejects Autoloads from disallowed layers.
+
+## Signals, commands, and queries
+
+Use:
+
+- command for a requested state change that may fail;
+- query for a read with no state change;
+- signal/event for a fact that already happened.
+
+Prefer direct typed calls when an operation is required synchronously. Signals are best for local optional reactions. Cross-module signals are public contracts and must have explicit connection/disconnection lifecycles.
+
+A global signal bus is forbidden because it hides dependencies, ordering, and ownership.
+
+## Runtime loop
+
+Do not give every node an update callback.
+
+Preferred phases:
 
 1. input collection;
 2. command validation;
-3. fixed-step simulation;
+3. fixed-step simulation in `_physics_process`;
 4. state publication;
-5. presentation;
+5. frame presentation in `_process`;
 6. deferred cleanup.
 
-Not every object should own a per-frame update. Batch or schedule high-volume work. Performance changes require profiler evidence and a stated budget.
+Use timers, events, batching, visibility callbacks, and central scheduling to avoid thousands of idle callbacks. Performance changes require profiler evidence and a target budget.
+
+## Persistence
+
+Feature modules expose versioned snapshots. Infrastructure writes them atomically and handles backup, integrity, and cloud/platform APIs.
+
+Persistent data must not contain:
+
+- Node references;
+- NodePath as durable identity;
+- instance IDs;
+- RID values;
+- resource memory identity.
+
+Use stable string/integer IDs and explicit migrations with old-save fixtures.
 
 ## Multiplayer
 
 For authoritative multiplayer:
 
 ```text
-Input -> Command -> Server validation -> Simulation -> Replication -> Client presentation
+input -> command -> server validation -> simulation -> replication -> presentation
 ```
 
-The client may predict for responsiveness but cannot authoritatively decide combat, inventory, economy, or progression outcomes.
+Godot RPC annotations describe transport, not game authority. Server-side feature modules validate combat, inventory, economy, and progression. Network DTOs and RPC contracts are versioned.
 
-Transport code carries versioned commands and snapshots; it does not own game rules.
+## Testing
 
-## Persistence
-
-Modules expose serializable snapshots through contracts. Infrastructure performs atomic storage, backup, integrity checks, and cloud integration.
-
-Every durable format requires:
-
-- version number;
-- stable IDs;
-- migration path;
-- interrupted-write recovery;
-- tests using older fixtures.
-
-## ECS policy
-
-Use ECS selectively for measured high-volume, homogeneous simulation such as crowds, projectiles, or vegetation. Do not force UI, narrative orchestration, unique scripted actors, or platform integrations into ECS.
-
-## Complexity limits
-
-- No abstraction solely for hypothetical reuse.
-- No generic framework before at least two concrete use cases reveal the stable common contract.
-- No cross-module access to internals.
-- No global mutable state.
-- No service locator.
-- No new third-party dependency without a documented need and isolation boundary.
-- No architecture exception without an ADR.
+- Domain tests instantiate engine-light classes without scenes.
+- Integration tests load one module boundary.
+- Scene tests verify wiring and lifecycle.
+- Persistence tests load old fixtures.
+- Performance tests measure representative object counts.
+- Headless project import catches missing resources and broken scene paths.
 
 ## Definition of done
 
-A change is complete only when:
+A change is complete when manifests are accurate, ownership remains unique, public paths are respected, tests pass, the project imports headlessly, and:
 
-- ownership and dependencies remain explicit;
-- manifests are updated;
-- public/data format changes are documented;
-- tests cover success, boundary, and failure cases;
-- architecture validation passes;
-- build and relevant performance checks pass;
-- rollback or migration exists where needed.
+```bash
+python tools/validate_architecture.py
+```
+
+passes without exceptions.

@@ -1,0 +1,11 @@
+{
+  "id": "bootstrap.app",
+  "layer": "bootstrap",
+  "purpose": "Own the application lifecycle and compose top-level game modules.",
+  "state_owner": [
+    "Application lifecycle",
+    "Current top-level application state"
+  ],
+  "public_api": [],
+  "dependencies": []
+}

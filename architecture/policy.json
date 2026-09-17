@@ -1,8 +1,19 @@
 {
-  "version": 1,
+  "version": 2,
+  "engine": {
+    "name": "Godot",
+    "major_version": 4,
+    "language": "GDScript",
+    "project_file": "project.godot"
+  },
   "manifest_name": "module.json",
-  "source_roots": ["src"],
+  "source_roots": ["game"],
+  "public_directories": ["public"],
+  "unowned_res_prefixes": ["assets/", "content/", "addons/"],
+  "autoload_allowed_layers": ["bootstrap", "infrastructure"],
+  "root_access_allowed_layers": ["bootstrap", "infrastructure"],
   "required_files": [
+    "project.godot",
     "AGENTS.md",
     "docs/ARCHITECTURE.md",
     "architecture/policy.json",
@@ -40,12 +51,14 @@
     "public_api",
     "dependencies"
   ],
+  "godot_reference_extensions": [".gd", ".tscn", ".tres"],
   "forbidden_patterns": [
     "global mutable state",
     "service locator",
-    "untyped global event bus",
+    "global signal bus",
     "cross-module internal access",
     "cyclic dependency",
-    "gameplay dependency on concrete infrastructure"
+    "gameplay dependency on concrete infrastructure",
+    "dynamic cross-module res path"
   ]
 }
