@@ -1,5 +1,5 @@
 {
-  "version": 3,
+  "version": 4,
   "engine": {
     "name": "Godot",
     "major_version": 4,
@@ -35,7 +35,15 @@
     "templates/module.json",
     "tools/validate_architecture.py",
     "templates/GAME_SPEC_TEMPLATE.md",
-    "tools/validate_game_spec.py"
+    "tools/validate_game_spec.py",
+    "AI_START_HERE.md",
+    "PROJECT_STATE.md",
+    "ACTIVE_TASK.md",
+    "BACKLOG.md",
+    "docs/WORKING_AGREEMENT.md",
+    "docs/DISCOVERY_QUESTIONS.md",
+    "docs/GLOSSARY.md",
+    "tools/validate_workflow_state.py"
   ],
   "layers": {
     "core": {

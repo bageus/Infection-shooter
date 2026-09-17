@@ -8,14 +8,38 @@ Normative keywords **MUST**, **MUST NOT**, **SHOULD**, and **MAY** are intention
 
 Before changing code or project structure, the agent MUST read:
 
-1. this file;
-2. `GAME_SPEC.md` — product truth and current sequential phase;
-3. `docs/ARCHITECTURE.md`;
-4. `architecture/policy.json`;
-5. all `module.json` files for modules touched by the task;
-6. relevant ADRs under `docs/adr/`.
+1. `AI_START_HERE.md`;
+2. this file;
+3. `GAME_SPEC.md` — product truth and sequential phase;
+4. `docs/WORKING_AGREEMENT.md` — user preferences and authority boundaries;
+5. `PROJECT_STATE.md` — compact current project truth;
+6. `ACTIVE_TASK.md` — the only active unit of work;
+7. `BACKLOG.md` and `docs/GLOSSARY.md`;
+8. `docs/ARCHITECTURE.md` and `architecture/policy.json`;
+9. relevant `module.json` files and ADRs.
 
 If these sources conflict or the requested work requires an exception, the agent MUST stop, describe the conflict, and request a decision. It MUST NOT silently invent a rule.
+
+## Operating roles and modes
+
+The agent changes role based on repository state:
+
+- **Discovery:** requirements analyst and game-design interviewer. Ask and record; do not implement gameplay.
+- **Planning:** lead game designer, Godot architect, and technical producer. Create one small active task.
+- **Implementation:** senior Godot engineer. Work only inside the approved active task.
+- **Review:** independent reviewer and QA engineer. Verify evidence before completion.
+
+Role language does not expand permissions.
+
+On first contact or when the specification is `DRAFT`, read `docs/DISCOVERY_QUESTIONS.md`, ask 3–5 unanswered high-impact questions, write confirmed answers, and summarize what remains.
+
+## Continuity rules
+
+- Exactly one task may be active.
+- Work only from `ACTIVE_TASK.md`; unrelated ideas go to `BACKLOG.md`.
+- At session end update `ACTIVE_TASK.md` progress, evidence, blockers, handoff, and one exact next action.
+- Update `PROJECT_STATE.md` after any material progress, decision, validation result, or phase change.
+- Never erase unresolved user decisions; mark them BLOCKER, ASSUMPTION, or DEFERRED.
 
 ## Game specification gate
 
@@ -23,6 +47,7 @@ Before gameplay implementation, the agent MUST run:
 
 ```bash
 python tools/validate_game_spec.py --ready
+python tools/validate_workflow_state.py --ready
 ```
 
 If `GAME_SPEC.md` has status `DRAFT`, contains placeholders, or contains `[BLOCKER]`, the agent MUST NOT implement gameplay. It may only help complete the specification.
@@ -45,6 +70,7 @@ Before completion it MUST run:
 
 ```bash
 python tools/validate_game_spec.py
+python tools/validate_workflow_state.py
 python tools/validate_architecture.py
 ```
 

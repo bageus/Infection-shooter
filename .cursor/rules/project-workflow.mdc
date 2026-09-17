@@ -1,0 +1,15 @@
+---
+description: Always load the canonical project workflow before work
+alwaysApply: true
+---
+
+Read and follow, in order:
+
+1. `AI_START_HERE.md`
+2. `AGENTS.md`
+3. `GAME_SPEC.md`
+4. `docs/WORKING_AGREEMENT.md`
+5. `PROJECT_STATE.md`
+6. `ACTIVE_TASK.md`
+
+Do not implement gameplay while `GAME_SPEC.md` is `DRAFT`.

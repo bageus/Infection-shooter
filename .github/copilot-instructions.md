@@ -4,10 +4,13 @@ This is a Godot 4.x GDScript modular-monolith project.
 
 Before changing files, read:
 
-1. `/AGENTS.md`
-2. `/docs/ARCHITECTURE.md`
-3. `/architecture/policy.json`
-4. relevant `module.json` manifests and ADRs
+1. `/AI_START_HERE.md`
+2. `/AGENTS.md`
+3. `/GAME_SPEC.md`
+4. `/docs/WORKING_AGREEMENT.md`
+5. `/PROJECT_STATE.md`
+6. `/ACTIVE_TASK.md`
+7. architecture, manifests, and ADRs
 
 Never bypass module boundaries. Cross-module `res://` references must be declared and must target the dependency's `public/` directory.
 
@@ -18,6 +21,8 @@ Scenes compose Nodes; domain rules remain independently testable. External code 
 Before completion run:
 
 ```bash
+python tools/validate_game_spec.py
+python tools/validate_workflow_state.py
 python tools/validate_architecture.py
 godot --headless --path . --editor --quit
 ```

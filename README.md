@@ -16,16 +16,20 @@ bootstrap -> presentation -> features -> core
 ## Начало работы
 
 1. Откройте проект в Godot 4.x.
-2. Заполните [GAME_SPEC.md](GAME_SPEC.md) — описание игры и последовательный план.
-3. AI-агент обязан прочитать [AGENTS.md](AGENTS.md), затем `GAME_SPEC.md`.
-4. Архитектура Godot описана в [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md).
-5. Новый модуль создаётся внутри `game/<layer>/<module>/` из [templates/module.json](templates/module.json).
-6. Межмодульные контракты помещаются только в каталог `public/`.
-7. Перед завершением работы выполните:
+2. Попросите AI прочитать [AI_START_HERE.md](AI_START_HERE.md) и репозиторий.
+3. AI определит режим работы и начнёт интервью из [DISCOVERY_QUESTIONS.md](docs/DISCOVERY_QUESTIONS.md).
+4. Заполните [GAME_SPEC.md](GAME_SPEC.md) — описание игры и последовательный план.
+5. AI-агент обязан прочитать [AGENTS.md](AGENTS.md), затем `GAME_SPEC.md`.
+6. Архитектура Godot описана в [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md).
+7. Новый модуль создаётся внутри `game/<layer>/<module>/` из [templates/module.json](templates/module.json).
+8. Межмодульные контракты помещаются только в каталог `public/`.
+9. Перед завершением работы выполните:
 
 ```bash
 python tools/validate_game_spec.py
+python tools/validate_workflow_state.py
 python tools/validate_game_spec.py --ready
+python tools/validate_workflow_state.py --ready
 python tools/validate_architecture.py
 godot --headless --path . --editor --quit
 ```
@@ -54,3 +58,13 @@ godot --headless --path . --editor --quit
 3. Какова текущая фаза и какая задача должна выполняться следующей?
 
 Пока файл имеет статус `DRAFT`, AI помогает заполнять спецификацию. После заполнения установите `status: READY`; команда `python tools/validate_game_spec.py --ready` должна пройти без ошибок.
+
+## Непрерывность работы AI
+
+- `PROJECT_STATE.md` хранит текущую фазу, сборку, риски и следующий результат.
+- `ACTIVE_TASK.md` хранит единственную активную задачу и точное место продолжения.
+- `BACKLOG.md` хранит последующие задачи и идеи.
+- `docs/WORKING_AGREEMENT.md` фиксирует полномочия и предпочтения владельца.
+- `docs/GLOSSARY.md` предотвращает расхождение терминов.
+
+В конце каждой сессии AI обязан оставить одно точное следующее действие.
