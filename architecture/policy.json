@@ -1,5 +1,5 @@
 {
-  "version": 4,
+  "version": 5,
   "engine": {
     "name": "Godot",
     "major_version": 4,
@@ -43,7 +43,8 @@
     "docs/WORKING_AGREEMENT.md",
     "docs/DISCOVERY_QUESTIONS.md",
     "docs/GLOSSARY.md",
-    "tools/validate_workflow_state.py"
+    "tools/validate_workflow_state.py",
+    "tools/validate_project.py"
   ],
   "layers": {
     "core": {

@@ -66,13 +66,13 @@ Before editing, the agent MUST identify:
 
 During implementation, the agent MUST make the smallest coherent change, preserve unrelated files, and update manifests before adding cross-module dependencies.
 
-Before completion it MUST run:
+Before completion it MUST run the status-aware gate:
 
 ```bash
-python tools/validate_game_spec.py
-python tools/validate_workflow_state.py
-python tools/validate_architecture.py
+python tools/validate_project.py
 ```
+
+This command automatically enables strict specification and workflow checks when the game status is `READY` or `LOCKED`.
 
 When Godot is available it MUST also run:
 

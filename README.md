@@ -26,15 +26,11 @@ bootstrap -> presentation -> features -> core
 9. Перед завершением работы выполните:
 
 ```bash
-python tools/validate_game_spec.py
-python tools/validate_workflow_state.py
-python tools/validate_game_spec.py --ready
-python tools/validate_workflow_state.py --ready
-python tools/validate_architecture.py
+python tools/validate_project.py
 godot --headless --path . --editor --quit
 ```
 
-Последняя команда требует установленный Godot и проверяет импорт проекта.
+Команда `validate_project.py` автоматически включает строгие проверки после статуса `READY`. Последняя команда требует установленный Godot и проверяет импорт проекта.
 
 ## Автоматически проверяется
 
