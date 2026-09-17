@@ -16,13 +16,16 @@ bootstrap -> presentation -> features -> core
 ## Начало работы
 
 1. Откройте проект в Godot 4.x.
-2. AI-агент обязан сначала прочитать [AGENTS.md](AGENTS.md).
-3. Архитектура Godot описана в [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md).
-4. Новый модуль создаётся внутри `game/<layer>/<module>/` из [templates/module.json](templates/module.json).
-5. Межмодульные контракты помещаются только в каталог `public/`.
-6. Перед завершением работы выполните:
+2. Заполните [GAME_SPEC.md](GAME_SPEC.md) — описание игры и последовательный план.
+3. AI-агент обязан прочитать [AGENTS.md](AGENTS.md), затем `GAME_SPEC.md`.
+4. Архитектура Godot описана в [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md).
+5. Новый модуль создаётся внутри `game/<layer>/<module>/` из [templates/module.json](templates/module.json).
+6. Межмодульные контракты помещаются только в каталог `public/`.
+7. Перед завершением работы выполните:
 
 ```bash
+python tools/validate_game_spec.py
+python tools/validate_game_spec.py --ready
 python tools/validate_architecture.py
 godot --headless --path . --editor --quit
 ```
@@ -41,3 +44,13 @@ godot --headless --path . --editor --quit
 - наличие обязательных архитектурных файлов.
 
 Текстовые инструкции сами по себе не гарантируют соблюдение архитектуры. Поэтому правила продублированы в [architecture/policy.json](architecture/policy.json), проверяются скриптом и запускаются в GitHub Actions.
+
+## Спецификация игры
+
+`GAME_SPEC.md` отвечает на три вопроса:
+
+1. Что это за игра и какой опыт она создаёт?
+2. Как работают её механики, данные, состояния и ограничения?
+3. Какова текущая фаза и какая задача должна выполняться следующей?
+
+Пока файл имеет статус `DRAFT`, AI помогает заполнять спецификацию. После заполнения установите `status: READY`; команда `python tools/validate_game_spec.py --ready` должна пройти без ошибок.

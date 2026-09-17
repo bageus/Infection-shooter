@@ -21,5 +21,8 @@ jobs:
         with:
           python-version: "3.12"
 
+      - name: Validate game specification structure
+        run: python tools/validate_game_spec.py
+
       - name: Validate module boundaries
         run: python tools/validate_architecture.py

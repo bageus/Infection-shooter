@@ -9,12 +9,25 @@ Normative keywords **MUST**, **MUST NOT**, **SHOULD**, and **MAY** are intention
 Before changing code or project structure, the agent MUST read:
 
 1. this file;
-2. `docs/ARCHITECTURE.md`;
-3. `architecture/policy.json`;
-4. all `module.json` files for modules touched by the task;
-5. relevant ADRs under `docs/adr/`.
+2. `GAME_SPEC.md` — product truth and current sequential phase;
+3. `docs/ARCHITECTURE.md`;
+4. `architecture/policy.json`;
+5. all `module.json` files for modules touched by the task;
+6. relevant ADRs under `docs/adr/`.
 
 If these sources conflict or the requested work requires an exception, the agent MUST stop, describe the conflict, and request a decision. It MUST NOT silently invent a rule.
+
+## Game specification gate
+
+Before gameplay implementation, the agent MUST run:
+
+```bash
+python tools/validate_game_spec.py --ready
+```
+
+If `GAME_SPEC.md` has status `DRAFT`, contains placeholders, or contains `[BLOCKER]`, the agent MUST NOT implement gameplay. It may only help complete the specification.
+
+When ready, the agent MUST work only on `current_phase` and the first unfinished task in section 25 whose dependencies are satisfied. It MUST NOT begin the next phase until the current phase exit criteria are met.
 
 ## Required workflow
 
@@ -31,6 +44,7 @@ During implementation, the agent MUST make the smallest coherent change, preserv
 Before completion it MUST run:
 
 ```bash
+python tools/validate_game_spec.py
 python tools/validate_architecture.py
 ```
 

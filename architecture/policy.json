@@ -1,5 +1,5 @@
 {
-  "version": 2,
+  "version": 3,
   "engine": {
     "name": "Godot",
     "major_version": 4,
@@ -7,31 +7,57 @@
     "project_file": "project.godot"
   },
   "manifest_name": "module.json",
-  "source_roots": ["game"],
-  "public_directories": ["public"],
-  "unowned_res_prefixes": ["assets/", "content/", "addons/"],
-  "autoload_allowed_layers": ["bootstrap", "infrastructure"],
-  "root_access_allowed_layers": ["bootstrap", "infrastructure"],
+  "source_roots": [
+    "game"
+  ],
+  "public_directories": [
+    "public"
+  ],
+  "unowned_res_prefixes": [
+    "assets/",
+    "content/",
+    "addons/"
+  ],
+  "autoload_allowed_layers": [
+    "bootstrap",
+    "infrastructure"
+  ],
+  "root_access_allowed_layers": [
+    "bootstrap",
+    "infrastructure"
+  ],
   "required_files": [
     "project.godot",
+    "GAME_SPEC.md",
     "AGENTS.md",
     "docs/ARCHITECTURE.md",
     "architecture/policy.json",
     "templates/module.json",
-    "tools/validate_architecture.py"
+    "tools/validate_architecture.py",
+    "templates/GAME_SPEC_TEMPLATE.md",
+    "tools/validate_game_spec.py"
   ],
   "layers": {
     "core": {
       "allowed_dependency_layers": []
     },
     "features": {
-      "allowed_dependency_layers": ["core", "features"]
+      "allowed_dependency_layers": [
+        "core",
+        "features"
+      ]
     },
     "presentation": {
-      "allowed_dependency_layers": ["core", "features"]
+      "allowed_dependency_layers": [
+        "core",
+        "features"
+      ]
     },
     "infrastructure": {
-      "allowed_dependency_layers": ["core", "features"]
+      "allowed_dependency_layers": [
+        "core",
+        "features"
+      ]
     },
     "bootstrap": {
       "allowed_dependency_layers": [
@@ -51,7 +77,11 @@
     "public_api",
     "dependencies"
   ],
-  "godot_reference_extensions": [".gd", ".tscn", ".tres"],
+  "godot_reference_extensions": [
+    ".gd",
+    ".tscn",
+    ".tres"
+  ],
   "forbidden_patterns": [
     "global mutable state",
     "service locator",
