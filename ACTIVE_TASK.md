@@ -127,8 +127,9 @@ None.
 - Antidote has no overdose, toxicity meter, or separate debuff.
 - Player speed is 6 m/s; fast infected speed is 7 m/s with 50 HP.
 - Infected attack at 1.2 m once per second for 15 damage and route around obstacles.
-- The first infected attacks a destructible object only if one hit would destroy it, so it does not attack partitions.
+- If no route exists, the first infected attacks the blocking destructible obstacle until it breaks; it never attacks external walls or columns.
 - Grenade radius is 3 m with up to 100 center damage and falloff, including player self-damage.
+- Weapon profiles are fixed for the prototype: pistol 20/12/60, Uzi 8/30/180, rifle 15/30/120, shotgun 10×8/6/30, grenade launcher 100/1/6 with the approved rates and reloads.
 
 ## Validation evidence
 
@@ -136,12 +137,12 @@ None.
 
 ## Blockers
 
-- Weapon numbers, blocked-enemy fallback, technical budgets, and shop balance require owner answers.
+- Destructible-material health/resistance, reload interruption, technical budgets, and shop balance require owner answers.
 
 ## Next exact action
 
-Define weapon magazines, damage, fire rates, reload times, reserves, and blocked-enemy fallback.
+Define destructible material classes, health, weapon permissions, and enemy obstacle damage.
 
 ## Session handoff
 
-Player/enemy speed, infected HP/attack, 3D navigation, obstacle rules, and grenade radius/falloff are recorded in `GAME_SPEC.md`. No validation was run. Continue with weapon numbers.
+All five initial weapon numeric profiles, shell-by-shell shotgun reload, and enemy obstacle destruction when blocked are recorded in `GAME_SPEC.md`. No validation was run. Continue with destructible materials.
