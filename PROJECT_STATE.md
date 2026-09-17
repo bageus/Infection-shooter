@@ -15,7 +15,7 @@ This is the compact current truth about project progress. Update it after every 
 
 ## Current outcome
 
-The project is in discovery. Group 0 is complete. Core loop/mechanics, prototype content/performance, save behavior, main/pause menus, audio/language/fullscreen settings, text scale, flash reduction, and deferred remapping are recorded.
+The project is in discovery. Group 0 is complete. Core loop/mechanics, prototype content/performance, saves/UI, cold office/toxic mutation palette, adaptive industrial music, dismemberment intent, and verified-license-only asset policy are recorded.
 
 ## Current phase
 
@@ -48,7 +48,7 @@ None. Discovery questions are the current work.
 
 - `GAME_SPEC.md` contains unanswered discovery fields.
 - The 48-hour prototype scope is approved; delivery risk remains high for one developer.
-- Minimum hardware, camera numeric tuning, visual/audio direction, asset licensing, remaining technical budgets, and shop balance are not yet defined.
+- Dismemberment triggers/lifetime/gore toggle, minimum hardware, camera numeric tuning, remaining technical budgets, and shop balance are not yet defined.
 
 ## Current risks
 
@@ -58,8 +58,8 @@ None. Discovery questions are the current work.
 
 ## Next action
 
-Define prototype visual palette, music/audio direction, dialogue/subtitles, gore level, and asset licensing policy.
+Define dismemberment triggers, fragment lifetime, gore-toggle behavior, and performance cap.
 
 ## Handoff notes
 
-Prototype menu/settings/accessibility scope is recorded. No implementation is in progress; define visual/audio and licensing boundaries next.
+Visual/audio direction, dismemberment intent, and verified asset licensing are recorded. No implementation is in progress; define gore behavior next.
