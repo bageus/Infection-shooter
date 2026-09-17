@@ -145,6 +145,10 @@ None.
 - Main menu supports New/Continue/Settings/Language; Esc fully pauses.
 - Settings include master/music/SFX, EN/RU, fullscreen, text 100/125/150%, and reduced flashes.
 - Key remapping is deferred until after the 48-hour prototype.
+- Visuals use cold gray-blue offices, green-purple mutagen, and red danger cues.
+- Industrial electronic music intensifies with combat and mutation; prototype has no voiced dialogue.
+- Dismemberment with flying limbs is desired; 16+ compatibility must be verified before release.
+- External assets require a confirmed commercial license; otherwise use self-created replacements.
 
 ## Validation evidence
 
@@ -152,12 +156,12 @@ None.
 
 ## Blockers
 
-- Minimum hardware, camera numeric tuning, visual/audio direction, asset licensing, remaining technical budgets, and shop balance require owner answers.
+- Dismemberment triggers/lifetime/gore toggle, minimum hardware, camera numeric tuning, remaining technical budgets, and shop balance require owner answers.
 
 ## Next exact action
 
-Define prototype visual palette, music/audio direction, dialogue/subtitles, gore level, and asset licensing policy.
+Define dismemberment triggers, fragment lifetime, gore-toggle behavior, and performance cap.
 
 ## Session handoff
 
-Main/pause menus, audio/language/fullscreen settings, fixed controls, text scales, and flash reduction are recorded in `GAME_SPEC.md`. No validation was run. Continue with visual/audio direction.
+Cold office/toxic mutation palette, adaptive industrial music, no voiced dialogue, dismemberment intent, and verified-license asset policy are recorded in `GAME_SPEC.md`. No validation was run. Continue with gore behavior.
