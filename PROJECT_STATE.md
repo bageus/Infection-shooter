@@ -15,7 +15,7 @@ This is the compact current truth about project progress. Update it after every 
 
 ## Current outcome
 
-The project is in discovery. Group 0 is complete. Core loop, browser-first platform, campaign structure, mutation branches, control ampoules, checkpoints, antidote behavior, and loss-of-control escalation are recorded.
+The project is in discovery. Group 0 is complete. Core loop, browser-first platform, audience, bilingual release, advertising/IAP intent, campaign structure, mutation systems, and checkpoints are recorded.
 
 ## Current phase
 
@@ -47,19 +47,19 @@ None. Discovery questions are the current work.
 ## Known blockers
 
 - `GAME_SPEC.md` contains unanswered discovery fields.
-- Exact Godot version, audience, monetization, schedule, and technical budgets are not yet defined.
-- Save behavior before the first checkpoint and first-window antidote behavior require confirmation.
+- The 48-hour deadline is ambiguous between a vertical prototype and the full MVP.
+- Ad formats, pack contents, exact Godot version, technical budgets, and save behavior before the first checkpoint are not yet defined.
 
 ## Current risks
 
-- The concept and main risk/reward loop are defined, but MVP scope is not yet fixed.
+- The concept and main risk/reward loop are defined, but the 48-hour scope versus full MVP is not yet approved.
 - Browser delivery with hybrid 2D characters in 3D levels requires an early performance and readability prototype.
 - Destructible environments may create significant production and performance cost.
 
 ## Next action
 
-Define audience, monetization, production constraints, and browser performance targets.
+Approve a realistic 48-hour vertical-prototype scope and define monetization boundaries.
 
 ## Handoff notes
 
-Browser-first delivery, control ampoules, checkpoint landings, and mutation rules are recorded. No implementation is in progress. Continue Discovery Group 2 product constraints.
+Audience, localization, monetization intent, and solo 48-hour constraint are recorded. No implementation is in progress. Resolve the scope blocker before detailed planning.
