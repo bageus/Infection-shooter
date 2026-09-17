@@ -72,7 +72,7 @@ None.
 - Discovery Group 0 completed.
 - Working agreement accepted.
 - Core game identity and player promise recorded from Discovery Group 1.
-- Camera, controls, browser-first platform, campaign length, checkpoint landings, mutation branches, control ampoules, antidote behavior, and the three-stage loss-of-control cycle are recorded.
+- Camera, controls, browser-first platform, audience, localization, monetization intent, campaign length, checkpoint landings, mutation branches, control ampoules, antidote behavior, and the three-stage loss-of-control cycle are recorded.
 
 ## Decisions made during this task
 
@@ -92,6 +92,8 @@ None.
 - Browser release targets itch.io and Yandex Games, with a standalone launcher as an approved fallback requiring a later decision.
 - Mutation branches cover passive utility, vitality/healing, and ammunition damage; control grows via one ampoule per level.
 - Save buttons are placed on stairwell landings before floors 15, 10, and 5.
+- Target audience is male teens and adults at 16+; English is primary and Russian secondary.
+- The game is free with ads and paid packs; one developer has a stated 48-hour deadline.
 
 ## Validation evidence
 
@@ -99,12 +101,12 @@ None.
 
 ## Blockers
 
-- Audience, monetization, team/time constraints, technical budgets, pre-checkpoint death behavior, and first-window antidote behavior require owner answers.
+- The meaning of the 48-hour deadline, ad format, pack contents, technical budgets, pre-checkpoint death behavior, and first-window antidote behavior require owner answers.
 
 ## Next exact action
 
-Ask Discovery Group 2 questions about audience, monetization, production constraints, and success criteria.
+Ask the owner to approve the 48-hour vertical slice and define monetization boundaries.
 
 ## Session handoff
 
-Browser targets, checkpoints, mutation branches, and control ampoules are recorded in `GAME_SPEC.md`. No validation was run. Continue with Discovery Group 2.
+Audience, localization, monetization intent, and the solo 48-hour constraint are recorded in `GAME_SPEC.md`. No validation was run. Resolve the scope blocker next.
