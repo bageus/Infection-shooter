@@ -118,6 +118,10 @@ None.
 - Provisional active-enemy limits are 10 for the prototype and 100 for the hardest full-game floors.
 - The prototype uses a representative post-tutorial floor with one 500-HP source that spawns every 8 seconds.
 - Any weapon damages the source; after it dies, the player must kill all remaining infected.
+- Mutation uses a 0–100 scale; a full cloud gives +10 over 2 seconds.
+- The first ability unlocks at 25 and disables only below 15.
+- Critical control starts at 30; each control ampoule adds 5 up to 95.
+- A normal antidote removes 10; staying above the critical line fills a 10-second instability timer.
 
 ## Validation evidence
 
@@ -125,12 +129,12 @@ None.
 
 ## Blockers
 
-- Mutation numeric thresholds/repeat-loss trigger, enemy navigation, weapon numbers, technical budgets, and shop balance require owner answers.
+- Prototype ability effects, enemy navigation/health/speed values, weapon numbers, technical budgets, and shop balance require owner answers.
 
 ## Next exact action
 
-Define mutation-meter thresholds, antidote amount, control-ampule effect, and repeat-loss trigger.
+Define the first mutation choices and their numeric effects.
 
 ## Session handoff
 
-The representative later-floor prototype, 500-HP source, 8-second spawns, 10-enemy cap, any-weapon damage, and post-source cleanup are recorded in `GAME_SPEC.md`. No validation was run. Continue discovery.
+The 0–100 meter, +10 clouds, 25/15 ability buffer, 30–95 critical threshold, -10 antidote, and 10-second instability timer are recorded in `GAME_SPEC.md`. No validation was run. Continue discovery.
