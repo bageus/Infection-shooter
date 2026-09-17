@@ -15,7 +15,7 @@ This is the compact current truth about project progress. Update it after every 
 
 ## Current outcome
 
-The project is in discovery. Group 0 is complete. Core loop, controls, campaign structure, mutation progression, antidote behavior, and loss-of-control escalation are recorded.
+The project is in discovery. Group 0 is complete. Core loop, browser-first platform, campaign structure, mutation branches, control ampoules, checkpoints, antidote behavior, and loss-of-control escalation are recorded.
 
 ## Current phase
 
@@ -47,19 +47,19 @@ None. Discovery questions are the current work.
 ## Known blockers
 
 - `GAME_SPEC.md` contains unanswered discovery fields.
-- Target platform and exact Godot version are not yet defined.
-- Difficulty numbering, checkpoint timing, mutation branch taxonomy, and antidote edge cases require confirmation.
+- Exact Godot version, audience, monetization, schedule, and technical budgets are not yet defined.
+- Save behavior before the first checkpoint and first-window antidote behavior require confirmation.
 
 ## Current risks
 
 - The concept and main risk/reward loop are defined, but MVP scope is not yet fixed.
-- Hybrid 2D characters in 3D levels require an early rendering/readability prototype.
+- Browser delivery with hybrid 2D characters in 3D levels requires an early performance and readability prototype.
 - Destructible environments may create significant production and performance cost.
 
 ## Next action
 
-Resolve the remaining high-impact product and mutation-system questions.
+Define audience, monetization, production constraints, and browser performance targets.
 
 ## Handoff notes
 
-The main Infection Shooter loop and 20-floor campaign are recorded. No implementation is in progress. Continue focused discovery on platform, difficulty, checkpoints, and mutation rules.
+Browser-first delivery, control ampoules, checkpoint landings, and mutation rules are recorded. No implementation is in progress. Continue Discovery Group 2 product constraints.
