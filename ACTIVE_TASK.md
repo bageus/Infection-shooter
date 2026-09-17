@@ -71,7 +71,8 @@ None.
 - Workflow prepared.
 - Discovery Group 0 completed.
 - Working agreement accepted.
-- Discovery Group 1 is next.
+- Core game identity and player promise recorded from Discovery Group 1.
+- Remaining Group 1 details require clarification.
 
 ## Decisions made during this task
 
@@ -80,6 +81,10 @@ None.
 - Architecture, dependency, scope, format, destructive, publishing, release, and merge changes require confirmation.
 - Completion reports should be concise.
 - Conversation and documentation use Russian; code identifiers, code comments, and commits use English.
+- The player is a special-forces operative descending through an infected skyscraper.
+- Each floor is a level with combat, infection sources, destructible interiors, interactions, bosses, and multiple exit strategies.
+- Infection grants mutation abilities but can cause loss of control; antidote reverses both infection and mutations.
+- The game is single-player, uses 3D levels, and takes visual direction from a more colorful Alien Shooter 2.
 
 ## Validation evidence
 
@@ -87,12 +92,12 @@ None.
 
 ## Blockers
 
-- Game identity and player promise require owner answers.
+- Camera behavior, control scheme, run/checkpoint structure, mutation selection, and exact loss-of-control behavior require owner answers.
 
 ## Next exact action
 
-Ask the unanswered questions from Group 1 in `docs/DISCOVERY_QUESTIONS.md`.
+Ask focused follow-up questions to complete Discovery Group 1.
 
 ## Session handoff
 
-Group 0 is complete. Files updated: `docs/WORKING_AGREEMENT.md`, `PROJECT_STATE.md`, and `ACTIVE_TASK.md`. No validation was run. Continue with Discovery Group 1.
+Group 0 is complete and the core Group 1 concept is recorded in `GAME_SPEC.md`. No validation was run. Continue with focused Group 1 questions.
