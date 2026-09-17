@@ -124,6 +124,7 @@ None.
 - A normal antidote removes 10; staying above the critical line fills a 10-second instability timer.
 - At 25, the player chooses reload -15%, movement +10%, or all-weapon damage +10%; selection pauses the game.
 - Dropping below 15 removes the active choice. At the next 25, the player chooses again unless a priority ability is marked for automatic activation.
+- Antidote has no overdose, toxicity meter, or separate debuff.
 
 ## Validation evidence
 
@@ -131,12 +132,12 @@ None.
 
 ## Blockers
 
-- Antidote-overdose/respec rules, enemy navigation/health/speed values, weapon numbers, technical budgets, and shop balance require owner answers.
+- Enemy navigation/health/speed values, weapon numbers, technical budgets, and shop balance require owner answers.
 
 ## Next exact action
 
-Define antidote overdose, debuff, priority persistence, and respec behavior.
+Define enemy navigation and numeric combat values for the prototype.
 
 ## Session handoff
 
-The three first-node abilities, pause selection, rollback re-selection, and priority auto-reactivation are recorded in `GAME_SPEC.md`. No validation was run. Continue discovery.
+Antidote overdose/toxicity is explicitly excluded from `GAME_SPEC.md`. No validation was run. Continue with prototype combat numbers.
