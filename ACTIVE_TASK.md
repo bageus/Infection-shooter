@@ -152,6 +152,8 @@ None.
 - Dismemberment occurs only on death; powerful final hits and grenades can separate limbs.
 - Up to 20 physical fragments fly, then stopped limbs become surface decals; blood also paints the location.
 - Gore toggle removes limbs, blood, and gore decals, replacing death with a brief flash/disappear effect.
+- Blood/limb/scorch decals share a 100-item cap, affect floor/interior/destructible surfaces, have no collision, and reset with the floor.
+- Grenade explosions paint a black scorch decal over existing blood.
 
 ## Validation evidence
 
@@ -159,12 +161,12 @@ None.
 
 ## Blockers
 
-- Gore decal cap/lifetime, minimum hardware, camera numeric tuning, remaining technical budgets, and shop balance require owner answers.
+- Minimum hardware, camera numeric tuning, prototype completion screen, remaining technical budgets, and shop balance require owner answers.
 
 ## Next exact action
 
-Define blood/limb decal cap, persistence/reset behavior, and affected surfaces.
+Define final prototype input bindings, camera numeric defaults, and completion/death screen flow.
 
 ## Session handoff
 
-Death-only dismemberment, 20 physical-fragment cap, limb-to-decal conversion, blood-painted surfaces, and gore toggle are recorded in `GAME_SPEC.md`. No validation was run. Continue with decal limits.
+Twenty physical fragments, 100 persistent blood/limb/scorch decals, scorch-over-blood layering, reset rules, and gore-toggle cleanup are recorded in `GAME_SPEC.md`. No validation was run. Continue with final input/flow defaults.
