@@ -48,7 +48,7 @@ None. Discovery questions are the current work.
 
 - `GAME_SPEC.md` contains unanswered discovery fields.
 - The 48-hour prototype scope is approved; delivery risk remains high for one developer.
-- Antidote-overdose/respec rules, enemy navigation/health/speed values, weapon numbers, technical budgets, and shop balance are not yet defined.
+- Enemy navigation/health/speed values, weapon numbers, technical budgets, and shop balance are not yet defined.
 
 ## Current risks
 
@@ -58,8 +58,8 @@ None. Discovery questions are the current work.
 
 ## Next action
 
-Define antidote overdose, debuff, priority persistence, and respec behavior.
+Define enemy navigation and numeric combat values for the prototype.
 
 ## Handoff notes
 
-First-node ability effects, re-selection, pause, and priority auto-reactivation are recorded. No implementation is in progress.
+Antidote overdose and toxicity are explicitly excluded. No implementation is in progress; define prototype combat numbers next.
