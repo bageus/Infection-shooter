@@ -50,6 +50,6 @@ Web performance, gore compliance, platform SDKs, monetization, and full-campaign
 
 Run strict repository gates, inspect the architecture contract, then implement only T001.
 
-## Handoff
+## Handoff notes
 
 Owner approval was received on 2026-09-17. Work directly in main until playable MVP. Ask before architecture, dependency, scope, format, destructive, or publishing changes.
