@@ -142,6 +142,9 @@ None.
 - Target is 60 FPS, minimum 30 FPS at 1280×720; floors last 5–10 minutes.
 - Campaign uses one versioned save_v1 slot with a backup; buttons overwrite it and can be reused.
 - Death or mid-floor exit returns to the last button, or the roof before the first checkpoint. Cloud saves are deferred.
+- Main menu supports New/Continue/Settings/Language; Esc fully pauses.
+- Settings include master/music/SFX, EN/RU, fullscreen, text 100/125/150%, and reduced flashes.
+- Key remapping is deferred until after the 48-hour prototype.
 
 ## Validation evidence
 
@@ -149,12 +152,12 @@ None.
 
 ## Blockers
 
-- Minimum hardware, camera numeric tuning, UI/accessibility settings, remaining technical budgets, and shop balance require owner answers.
+- Minimum hardware, camera numeric tuning, visual/audio direction, asset licensing, remaining technical budgets, and shop balance require owner answers.
 
 ## Next exact action
 
-Define prototype menus, pause/settings, control remapping scope, text scaling, and flash reduction.
+Define prototype visual palette, music/audio direction, dialogue/subtitles, gore level, and asset licensing policy.
 
 ## Session handoff
 
-One save slot, reusable checkpoint buttons, save_v1, backup recovery, mid-floor rollback, and deferred cloud saves are recorded in `GAME_SPEC.md`. No validation was run. Continue with UI/accessibility.
+Main/pause menus, audio/language/fullscreen settings, fixed controls, text scales, and flash reduction are recorded in `GAME_SPEC.md`. No validation was run. Continue with visual/audio direction.
