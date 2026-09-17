@@ -15,7 +15,7 @@ This is the compact current truth about project progress. Update it after every 
 
 ## Current outcome
 
-The project is in discovery. Group 0 is complete. Core loop, weapon models, automatic pickups, fast infected AI, player health/healing values, mutagen-on-death, explosive self-damage/destruction, mutation systems, checkpoints, and the approved prototype are recorded.
+The project is in discovery. Group 0 is complete. Core loop, hybrid procedural floors from authored modules, initial 5–10 enemy counts, clear/source completion, weapon/combat rules, mutation systems, checkpoints, and the approved prototype are recorded.
 
 ## Current phase
 
@@ -48,7 +48,7 @@ None. Discovery questions are the current work.
 
 - `GAME_SPEC.md` contains unanswered discovery fields.
 - The 48-hour prototype scope is approved; delivery risk remains high for one developer.
-- Enemy navigation/health/speed values, weapon numerical parameters, technical budgets, floor structure/rewards, and shop balance are not yet defined.
+- Floor completion AND/OR logic, generation seed/save behavior, infection-source behavior, enemy maximum/budgets, technical budgets, and shop balance are not yet defined.
 
 ## Current risks
 
@@ -58,8 +58,8 @@ None. Discovery questions are the current work.
 
 ## Next action
 
-Define floor structure, completion routes and rewards, enemy counts, and authored-versus-procedural content.
+Define exact floor completion logic, procedural seed persistence, infection-source behavior, and enemy growth budget.
 
 ## Handoff notes
 
-Fast infected perception/damage, player HP/healing, mutagen-on-death, and grenade self-damage/destruction are recorded. No implementation is in progress.
+Hybrid procedural floor generation, 5–10 early enemies, clear/source completion, and deferred window exits are recorded. No implementation is in progress.
