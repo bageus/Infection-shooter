@@ -15,7 +15,7 @@ This is the compact current truth about project progress. Update it after every 
 
 ## Current outcome
 
-The project is in discovery. Group 0 is complete. Core loop, Godot 4.7.2, mandatory-ad/real-money intent, stairwell shop, three-slot weapon/ammo system, mutation systems, checkpoints, and the approved 48-hour prototype are recorded.
+The project is in discovery. Group 0 is complete. Core loop, Godot 4.7.2, monetization intent, stairwell shop, five weapon types with three active slots and separate ammo, free item sources, mutation systems, checkpoints, and the approved 48-hour prototype are recorded.
 
 ## Current phase
 
@@ -48,7 +48,7 @@ None. Discovery questions are the current work.
 
 - `GAME_SPEC.md` contains unanswered discovery fields.
 - The 48-hour prototype scope is approved; delivery risk remains high for one developer.
-- Mandatory-ad failure behavior, free baseline economy, weapon archetypes, technical budgets, and shop balance are not yet defined.
+- Post-timeout ad behavior, weapon numerical parameters, technical budgets, and shop balance are not yet defined.
 
 ## Current risks
 
@@ -58,8 +58,8 @@ None. Discovery questions are the current work.
 
 ## Next action
 
-Define the free baseline, ad failure behavior, and prototype weapon set, then finish the remaining discovery groups.
+Confirm post-timeout ad behavior and define combat rules, enemy model, drops, and level completion rewards.
 
 ## Handoff notes
 
-The 48-hour prototype is approved for Godot 4.7.2. Weapons and monetization intent are recorded; real ads/payments remain deferred. No implementation is in progress.
+The five-weapon/three-slot system and free resource sources are recorded; real ads/payments remain deferred. No implementation is in progress.
