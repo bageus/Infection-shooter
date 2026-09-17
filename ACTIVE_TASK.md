@@ -130,6 +130,8 @@ None.
 - If no route exists, the first infected attacks the blocking destructible obstacle until it breaks; it never attacks external walls or columns.
 - Grenade radius is 3 m with up to 100 center damage and falloff, including player self-damage.
 - Weapon profiles are fixed for the prototype: pistol 20/12/60, Uzi 8/30/180, rifle 15/30/120, shotgun 10×8/6/30, grenade launcher 100/1/6 with the approved rates and reloads.
+- Light partitions have 40 HP and accept all damage; reinforced walls have 200 HP and accept Uzi/rifle/grenade/infected damage.
+- External walls and columns are indestructible. Debris falls, expires, and resets with the floor after death.
 
 ## Validation evidence
 
@@ -137,12 +139,12 @@ None.
 
 ## Blockers
 
-- Destructible-material health/resistance, reload interruption, technical budgets, and shop balance require owner answers.
+- Camera controls/aim mapping, reload interruption, technical budgets, and shop balance require owner answers.
 
 ## Next exact action
 
-Define destructible material classes, health, weapon permissions, and enemy obstacle damage.
+Define camera rotation/zoom, movement reference, aim projection, and input bindings.
 
 ## Session handoff
 
-All five initial weapon numeric profiles, shell-by-shell shotgun reload, and enemy obstacle destruction when blocked are recorded in `GAME_SPEC.md`. No validation was run. Continue with destructible materials.
+Light/reinforced/indestructible classes, falling debris, cleanup, and geometry reset after death are recorded in `GAME_SPEC.md`. No validation was run. Continue with camera and controls.
