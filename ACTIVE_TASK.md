@@ -134,6 +134,9 @@ None.
 - External walls and columns are indestructible. Debris falls, expires, and resets with the floor after death.
 - Camera follows the player, rotates smoothly with Q/E, has no zoom, and fades occluding walls.
 - WASD is screen-relative; mouse aiming projects the cursor onto the floor.
+- R reloads manually and an empty magazine auto-reloads; switching cancels reload.
+- Shotgun reload is shell-by-shell and interruptible without losing loaded shells.
+- Excess ammo remains on the floor; weapon switching takes 0.25 seconds.
 
 ## Validation evidence
 
@@ -141,12 +144,12 @@ None.
 
 ## Blockers
 
-- Reload/swap interruption, camera numeric tuning, technical budgets, and shop balance require owner answers.
+- Camera numeric tuning, procedural module budget, presentation assets, technical budgets, and shop balance require owner answers.
 
 ## Next exact action
 
-Define reload interruption, weapon switching, automatic reload, and pickup overflow.
+Define prototype room-module count, generation constraints, art approach, and performance target.
 
 ## Session handoff
 
-Q/E camera rotation, camera-relative movement, cursor-floor aiming, no zoom, and occluder transparency are recorded in `GAME_SPEC.md`. No validation was run. Continue with weapon-handling edge cases.
+R/manual and empty-mag auto reload, swap cancellation, shell reload interruption, ammo overflow, and 0.25-second switching are recorded in `GAME_SPEC.md`. No validation was run. Continue with prototype content boundaries.
