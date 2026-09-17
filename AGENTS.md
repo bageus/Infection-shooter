@@ -140,6 +140,20 @@ It MUST run relevant tests. It MUST NOT claim a check passed unless it actually 
 - Engine callbacks should delegate quickly to application/domain methods.
 - Heavy work MUST NOT be added to every node's `_process` or `_physics_process` without a measured need.
 
+### File and function decomposition
+
+- A file MUST have one primary responsibility describable in one sentence.
+- Do not create “Manager”, “Controller”, or “Utils” god objects that accumulate unrelated behavior.
+- Separate public contracts, domain state/rules, application use cases, Node presentation, infrastructure adapters, and tests.
+- Do not split code merely to satisfy a number if the result hides ownership or creates pass-through files.
+- At more than 300 physical lines in a production GDScript file, the agent MUST review and report whether responsibilities can be separated.
+- A production GDScript file MUST NOT exceed 600 lines.
+- Test files warn after 500 lines and MUST NOT exceed 900 lines.
+- A function warns after 50 lines and MUST NOT exceed 100 lines.
+- Before extending a file already above a warning threshold, the agent MUST present a decomposition decision.
+- A hard-limit exception requires an explicit entry in `architecture/policy.json`, a finite replacement limit, and an approved ADR. Inline comments cannot disable the check.
+- Godot-generated `.tscn`, `.tres`, imported assets, and third-party addons are not judged by handwritten-code limits.
+
 ### Files and naming
 
 - Files and directories use `snake_case`.

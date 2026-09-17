@@ -162,6 +162,46 @@ input -> command -> server validation -> simulation -> replication -> presentati
 
 Godot RPC annotations describe transport, not game authority. Server-side feature modules validate combat, inventory, economy, and progression. Network DTOs and RPC contracts are versioned.
 
+## Source decomposition and size guardrails
+
+Line count is a warning signal, not the definition of architecture. Split code by ownership and reason to change:
+
+- `public/`: small cross-module contracts, commands, queries, DTOs and events;
+- `domain/`: authoritative state and invariant rules;
+- `application/`: one use case or orchestration flow;
+- `presentation/`: Nodes, scenes and player feedback;
+- `infrastructure/`: persistence, network, platform and SDK adapters;
+- `tests/`: behavior and regression evidence.
+
+Do not create empty pass-through files, one-line wrappers, or vague shared helpers merely to reduce line counts.
+
+Default GDScript guardrails:
+
+| Scope | Review threshold | Hard limit |
+|---|---:|---:|
+| Production file | 300 lines | 600 lines |
+| Test file | 500 lines | 900 lines |
+| Function | 50 lines | 100 lines |
+
+Physical lines are counted deliberately so comments and whitespace cannot hide an oversized unit. Scene and Resource serialization are editor-managed data and are not subject to handwritten-code limits.
+
+Files above a review threshold require a responsibility review. Files above a hard limit fail validation. A justified exception must be exact-path, finite, recorded in policy, and backed by an approved ADR.
+
+Good reasons to split:
+
+- different state owners;
+- domain rules mixed with Node/UI behavior;
+- persistence or network details mixed with gameplay;
+- functions that change for unrelated reasons;
+- independent lifecycles or testing boundaries.
+
+Bad reasons to split:
+
+- reaching an arbitrary line number;
+- creating generic `utils.gd`;
+- moving code into helpers that still mutate foreign state;
+- hiding a dependency behind signals or a service locator.
+
 ## Testing
 
 - Domain tests instantiate engine-light classes without scenes.

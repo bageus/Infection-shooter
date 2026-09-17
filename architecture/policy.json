@@ -1,5 +1,5 @@
 {
-  "version": 5,
+  "version": 6,
   "engine": {
     "name": "Godot",
     "major_version": 4,
@@ -44,7 +44,8 @@
     "docs/DISCOVERY_QUESTIONS.md",
     "docs/GLOSSARY.md",
     "tools/validate_workflow_state.py",
-    "tools/validate_project.py"
+    "tools/validate_project.py",
+    "tools/validate_source_size.py"
   ],
   "layers": {
     "core": {
@@ -99,5 +100,21 @@
     "cyclic dependency",
     "gameplay dependency on concrete infrastructure",
     "dynamic cross-module res path"
-  ]
+  ],
+  "source_size_policy": {
+    "extensions": [
+      ".gd"
+    ],
+    "warning_lines": 300,
+    "error_lines": 600,
+    "test_warning_lines": 500,
+    "test_error_lines": 900,
+    "function_warning_lines": 50,
+    "function_error_lines": 100,
+    "excluded_path_prefixes": [
+      "addons/",
+      "generated/"
+    ],
+    "exceptions": []
+  }
 }
