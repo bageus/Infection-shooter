@@ -154,6 +154,9 @@ None.
 - Gore toggle removes limbs, blood, and gore decals, replacing death with a brief flash/disappear effect.
 - Blood/limb/scorch decals share a 100-item cap, affect floor/interior/destructible surfaces, have no collision, and reset with the floor.
 - Grenade explosions paint a black scorch decal over existing blood.
+- E interacts; F uses antidote. Camera uses 55° pitch, 14 m distance, and 90°/s Q/E rotation.
+- Floor results show time, kills, and mutation before the landing; defeat shows the reason and reload action.
+- Starting a new game with an existing save requires confirmation.
 
 ## Validation evidence
 
@@ -161,12 +164,12 @@ None.
 
 ## Blockers
 
-- Minimum hardware, camera numeric tuning, prototype completion screen, remaining technical budgets, and shop balance require owner answers.
+- No unresolved blocker prevents the 48-hour gameplay prototype; post-prototype platform, monetization, and certification details remain deferred.
 
 ## Next exact action
 
-Define final prototype input bindings, camera numeric defaults, and completion/death screen flow.
+Show the final concept/MVP synthesis and ask for explicit approval to transition `GAME_SPEC.md` from DRAFT to READY.
 
 ## Session handoff
 
-Twenty physical fragments, 100 persistent blood/limb/scorch decals, scorch-over-blood layering, reset rules, and gore-toggle cleanup are recorded in `GAME_SPEC.md`. No validation was run. Continue with final input/flow defaults.
+E/F bindings, 55°/14 m/90°/s camera, results screen, defeat reason, and new-game confirmation are recorded in `GAME_SPEC.md`. No validation was run. Request explicit READY approval next.
