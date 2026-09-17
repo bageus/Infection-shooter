@@ -15,7 +15,7 @@ This is the compact current truth about project progress. Update it after every 
 
 ## Current outcome
 
-The project is in discovery. Group 0 is complete. Core loop, encounter/mutation/combat/destruction, camera/input, manual/auto reload, reload interruption, shell loading, ammo overflow, and the approved prototype are recorded.
+The project is in discovery. Group 0 is complete. Core loop and mechanics, five-room procedural kit, 3–5 modules per floor, placeholder 2D-in-3D art, 1280×720, 60/30 FPS targets, and 5–10 minute floors are recorded.
 
 ## Current phase
 
@@ -48,7 +48,7 @@ None. Discovery questions are the current work.
 
 - `GAME_SPEC.md` contains unanswered discovery fields.
 - The 48-hour prototype scope is approved; delivery risk remains high for one developer.
-- Camera numeric tuning, procedural module budget, presentation assets, technical budgets, and shop balance are not yet defined.
+- Minimum hardware, save format/recovery, camera numeric tuning, remaining technical budgets, and shop balance are not yet defined.
 
 ## Current risks
 
@@ -58,8 +58,8 @@ None. Discovery questions are the current work.
 
 ## Next action
 
-Define prototype room-module count, floor-generation constraints, art approach, and performance target.
+Define save slots, button reuse, versioned local format, atomic recovery, and cloud-save deferral.
 
 ## Handoff notes
 
-Weapon handling edge cases are recorded. No implementation is in progress; define prototype content and performance boundaries next.
+Prototype content and primary performance boundaries are recorded. No implementation is in progress; define save behavior next.
