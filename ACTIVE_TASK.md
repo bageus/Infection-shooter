@@ -113,7 +113,9 @@ None.
 - Grenade explosions damage the player and destroy eligible internal walls and partitions.
 - Floors are procedurally assembled from authored modular maps/rooms.
 - Early floors contain 5–10 infected; counts grow over the campaign.
-- MVP floor completion uses clearing infected and destroying the infection source; window exits are deferred.
+- The first floor has no source and completes when all infected die; later floors include one or more stationary sources that spawn enemies.
+- A floor seed is generated on first entry and reused after death.
+- Provisional active-enemy limits are 10 for the prototype and 100 for the hardest full-game floors.
 
 ## Validation evidence
 
@@ -121,12 +123,12 @@ None.
 
 ## Blockers
 
-- Floor completion AND/OR logic, generation seed/save behavior, infection-source rules, enemy maximum/budgets, technical budgets, and shop balance require owner answers.
+- Post-source floor-completion logic, source health/spawn cadence/caps, enemy navigation, technical budgets, and shop balance require owner answers.
 
 ## Next exact action
 
-Define completion logic, procedural seed persistence, infection-source behavior, and enemy growth budget.
+Define the representative prototype floor, infection-source damage/spawn rules, and remaining-enemy behavior.
 
 ## Session handoff
 
-Hybrid procedural generation from authored modules, 5–10 early enemies, clear/source completion, and removal of the window exit from MVP are recorded in `GAME_SPEC.md`. No validation was run. Continue discovery.
+Persistent procedural seeds, first-floor clear objective, spawning infection sources, and provisional 10/100 enemy limits are recorded in `GAME_SPEC.md`. No validation was run. Continue discovery.
