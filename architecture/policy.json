@@ -1,0 +1,51 @@
+{
+  "version": 1,
+  "manifest_name": "module.json",
+  "source_roots": ["src"],
+  "required_files": [
+    "AGENTS.md",
+    "docs/ARCHITECTURE.md",
+    "architecture/policy.json",
+    "templates/module.json",
+    "tools/validate_architecture.py"
+  ],
+  "layers": {
+    "core": {
+      "allowed_dependency_layers": []
+    },
+    "features": {
+      "allowed_dependency_layers": ["core", "features"]
+    },
+    "presentation": {
+      "allowed_dependency_layers": ["core", "features"]
+    },
+    "infrastructure": {
+      "allowed_dependency_layers": ["core", "features"]
+    },
+    "bootstrap": {
+      "allowed_dependency_layers": [
+        "core",
+        "features",
+        "presentation",
+        "infrastructure",
+        "bootstrap"
+      ]
+    }
+  },
+  "module_required_fields": [
+    "id",
+    "layer",
+    "purpose",
+    "state_owner",
+    "public_api",
+    "dependencies"
+  ],
+  "forbidden_patterns": [
+    "global mutable state",
+    "service locator",
+    "untyped global event bus",
+    "cross-module internal access",
+    "cyclic dependency",
+    "gameplay dependency on concrete infrastructure"
+  ]
+}

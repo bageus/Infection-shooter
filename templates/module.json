@@ -1,0 +1,12 @@
+{
+  "id": "layer.module-name",
+  "layer": "features",
+  "purpose": "One sentence describing the capability owned by this module.",
+  "state_owner": [
+    "List authoritative mutable state owned only by this module."
+  ],
+  "public_api": [
+    "List cross-module commands, queries, interfaces, DTOs, and events."
+  ],
+  "dependencies": []
+}
