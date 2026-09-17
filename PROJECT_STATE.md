@@ -15,7 +15,7 @@ This is the compact current truth about project progress. Update it after every 
 
 ## Current outcome
 
-The project is in discovery. Group 0 is complete. Core loop, encounter/mutation rules, player/enemy movement and health values, melee timing, navigation, conditional obstacle attacks, grenade falloff, and the approved prototype are recorded.
+The project is in discovery. Group 0 is complete. Core loop, encounter/mutation rules, full initial weapon numbers, shell reload, player/enemy combat values, navigation with obstacle destruction, grenade falloff, and the approved prototype are recorded.
 
 ## Current phase
 
@@ -48,7 +48,7 @@ None. Discovery questions are the current work.
 
 - `GAME_SPEC.md` contains unanswered discovery fields.
 - The 48-hour prototype scope is approved; delivery risk remains high for one developer.
-- Weapon numbers, blocked-enemy fallback, technical budgets, and shop balance are not yet defined.
+- Destructible-material health/resistance, reload interruption, technical budgets, and shop balance are not yet defined.
 
 ## Current risks
 
@@ -58,8 +58,8 @@ None. Discovery questions are the current work.
 
 ## Next action
 
-Define weapon magazines, damage, fire rates, reload times, reserves, and blocked-enemy fallback.
+Define destructible material classes, health, allowed weapon damage, and enemy damage to obstacles.
 
 ## Handoff notes
 
-Initial enemy/player/grenade combat values are recorded. No implementation is in progress; define weapon numbers next.
+Initial weapon numbers and obstacle-attack fallback are recorded. No implementation is in progress; define destructible material rules next.
