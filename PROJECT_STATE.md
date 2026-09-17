@@ -15,7 +15,7 @@ This is the compact current truth about project progress. Update it after every 
 
 ## Current outcome
 
-The project is in discovery. Group 0 is complete. Core loop, encounter rules, mutation numbers, three first-node choices, pause selection, priority auto-reactivation, combat, and the approved prototype are recorded.
+The project is in discovery. Group 0 is complete. Core loop, encounter/mutation rules, player/enemy movement and health values, melee timing, navigation, conditional obstacle attacks, grenade falloff, and the approved prototype are recorded.
 
 ## Current phase
 
@@ -48,7 +48,7 @@ None. Discovery questions are the current work.
 
 - `GAME_SPEC.md` contains unanswered discovery fields.
 - The 48-hour prototype scope is approved; delivery risk remains high for one developer.
-- Enemy navigation/health/speed values, weapon numbers, technical budgets, and shop balance are not yet defined.
+- Weapon numbers, blocked-enemy fallback, technical budgets, and shop balance are not yet defined.
 
 ## Current risks
 
@@ -58,8 +58,8 @@ None. Discovery questions are the current work.
 
 ## Next action
 
-Define enemy navigation and numeric combat values for the prototype.
+Define weapon magazines, damage, fire rates, reload times, reserves, and blocked-enemy fallback.
 
 ## Handoff notes
 
-Antidote overdose and toxicity are explicitly excluded. No implementation is in progress; define prototype combat numbers next.
+Initial enemy/player/grenade combat values are recorded. No implementation is in progress; define weapon numbers next.
