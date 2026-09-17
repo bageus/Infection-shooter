@@ -15,7 +15,7 @@ This is the compact current truth about project progress. Update it after every 
 
 ## Current outcome
 
-The project is in discovery. Group 0 is complete. Core loop, persistent procedural seeds, representative prototype floor, 500-HP stationary source spawning every 8 seconds, clear-after-source rule, 10/100 enemy limits, combat, mutation systems, and the approved prototype are recorded.
+The project is in discovery. Group 0 is complete. Core loop, encounter rules, 0–100 mutation meter, 25/15 ability hysteresis, 30–95 control threshold, +10 clouds, -10 antidote, 10-second instability, combat, and the approved prototype are recorded.
 
 ## Current phase
 
@@ -48,7 +48,7 @@ None. Discovery questions are the current work.
 
 - `GAME_SPEC.md` contains unanswered discovery fields.
 - The 48-hour prototype scope is approved; delivery risk remains high for one developer.
-- Mutation numeric thresholds and repeat-loss trigger, enemy navigation, weapon numbers, technical budgets, and shop balance are not yet defined.
+- Prototype ability effects, enemy navigation/health/speed values, weapon numbers, technical budgets, and shop balance are not yet defined.
 
 ## Current risks
 
@@ -58,8 +58,8 @@ None. Discovery questions are the current work.
 
 ## Next action
 
-Define mutation-meter numbers, ability thresholds, antidote amount, control-ampule effect, and repeat-loss trigger.
+Define the prototype mutation choices and their numeric effects.
 
 ## Handoff notes
 
-The representative prototype floor and exact initial infection-source rules are recorded. No implementation is in progress.
+Mutation thresholds, control growth, antidote amount, and instability timing are recorded. No implementation is in progress.
