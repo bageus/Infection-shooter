@@ -60,7 +60,7 @@ func take_damage(amount:float)->void:
 	armor-=absorbed
 	remaining-=absorbed
 	health=maxf(0.0,health-remaining)
-	if remaining > 0.0: _spawn_floor_blood()
+	if amount > 0.0: _spawn_floor_blood(amount)
 func heal(amount:float)->float:
 	var previous:=health
 	health=minf(max_health,health+maxf(amount,0.0))
@@ -100,12 +100,23 @@ func _update_aim()->void:
 	var d:=r*delta.x+f*-delta.y
 	if d.length_squared()>0.0001:aim_pivot.look_at(aim_pivot.global_position+d.normalized(),Vector3.UP)
 
-func _spawn_floor_blood()->void:
-	var mark:=MeshInstance3D.new()
-	var mesh:=CylinderMesh.new()
-	mesh.top_radius=randf_range(0.18,0.32);mesh.bottom_radius=mesh.top_radius;mesh.height=0.012
-	var material:=StandardMaterial3D.new()
-	material.albedo_color=Color(0.34,0.0,0.015,0.88);material.roughness=1.0
-	mesh.material=material;mark.mesh=mesh
-	get_tree().current_scene.add_child(mark)
-	mark.global_position=Vector3(global_position.x,0.02,global_position.z)+Vector3(randf_range(-0.22,0.22),0,randf_range(-0.22,0.22))
+func _spawn_floor_blood(amount:float)->void:
+	var count:=clampi(ceili(amount/8.0),2,6)
+	for i in count:
+		var mark:=MeshInstance3D.new()
+		var mesh:=ImmediateMesh.new()
+		var material:=StandardMaterial3D.new()
+		material.albedo_color=Color(0.34,0.0,0.015,0.92);material.roughness=1.0;material.cull_mode=BaseMaterial3D.CULL_DISABLED
+		mesh.surface_begin(Mesh.PRIMITIVE_TRIANGLES,material)
+		var points:=randi_range(7,11)
+		var width:=randf_range(0.08,0.24)
+		var height:=width*randf_range(0.45,1.7)
+		for p in points:
+			var a0:=TAU*float(p)/points;var a1:=TAU*float(p+1)/points
+			var r0:=randf_range(0.45,1.2);var r1:=randf_range(0.45,1.2)
+			mesh.surface_add_vertex(Vector3.ZERO)
+			mesh.surface_add_vertex(Vector3(cos(a0)*width*r0,sin(a0)*height*r0,0))
+			mesh.surface_add_vertex(Vector3(cos(a1)*width*r1,sin(a1)*height*r1,0))
+		mesh.surface_end();mark.mesh=mesh;get_tree().current_scene.add_child(mark)
+		mark.global_position=Vector3(global_position.x,0.025,global_position.z)+Vector3(randf_range(-0.5,0.5),0,randf_range(-0.5,0.5))
+		mark.rotation_degrees=Vector3(-90,randf_range(0,360),0)
