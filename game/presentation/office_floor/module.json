@@ -1,7 +1,7 @@
 {
   "id": "presentation.office_floor",
   "layer": "presentation",
-  "purpose": "Expose individually authored office object scenes and the legacy office-floor composition.",
+  "purpose": "Expose individually authored office object scenes, destructible environment reactions, and the legacy office-floor composition.",
   "state_owner": [],
   "public_api": [
     "public/office_floor.tscn"
