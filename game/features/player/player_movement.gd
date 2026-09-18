@@ -119,10 +119,10 @@ func _apply_enemy_collision_push() -> void:
 
 	for index in get_slide_collision_count():
 		var collision := get_slide_collision(index)
-		var collider := collision.get_collider()
+		var collider := collision.get_collider() as Node3D
 		if collider == null or not collider.has_method("apply_player_push"):
 			continue
-		var push_direction := collider.global_position - global_position
+		var push_direction: Vector3 = collider.global_position - global_position
 		push_direction.y = 0.0
 		if push_direction.length_squared() <= 0.0001:
 			continue
