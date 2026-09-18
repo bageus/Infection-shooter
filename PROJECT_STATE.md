@@ -5,7 +5,7 @@ current_phase: 1
 current_milestone: P1_LOGIC
 active_task_id: T001
 last_completed_task_id: DISC-001
-build_status: PENDING_VALIDATION
+build_status: REPOSITORY_GATE_PASSED
 updated: 2026-09-18
 ---
 
@@ -35,7 +35,7 @@ DISC-001 — discovery synthesis and owner approval.
 
 | Check | Status | Evidence |
 |---|---|---|
-| Repository gates | PENDING | Existing GitHub Actions validation runs after the implementation commit |
+| Repository gates | PASSED | GitHub Actions run 35360785260 passed on commit `fab04e62fa559d9e64dfb0d4e4afeda9b2194dbb` |
 | Godot domain tests | NOT_RUN | Godot 4.7.2 is not installed in the current execution environment |
 
 ## Known blockers
@@ -48,7 +48,7 @@ Web performance, gore compliance, platform SDKs, monetization, and full-campaign
 
 ## Next action
 
-Verify repository gates and run the T001 Godot headless test runner in an environment with Godot 4.7.2.
+Run the T001 Godot headless test runner in an environment with Godot 4.7.2.
 
 ## Handoff notes
 
