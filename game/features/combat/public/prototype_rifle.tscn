@@ -1,0 +1,22 @@
+[gd_scene load_steps=3 format=3]
+
+[ext_resource type="Script" path="res://game/features/combat/prototype_rifle.gd" id="1_weapon_script"]
+
+[sub_resource type="StandardMaterial3D" id="WeaponMaterial"]
+albedo_color = Color(0.08, 0.1, 0.13, 1)
+metallic = 0.35
+roughness = 0.4
+
+[sub_resource type="CapsuleMesh" id="WeaponMesh"]
+material = SubResource("WeaponMaterial")
+radius = 0.12
+height = 1.4
+
+[node name="PrototypeRifle" type="Node3D"]
+script = ExtResource("1_weapon_script")
+
+[node name="Body" type="MeshInstance3D" parent="."]
+position = Vector3(0, 0, -0.55)
+rotation_degrees = Vector3(90, 0, 0)
+scale = Vector3(0.65, 1.0, 0.55)
+mesh = SubResource("WeaponMesh")

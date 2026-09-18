@@ -1,0 +1,8 @@
+{
+  "id": "features.infection_source",
+  "layer": "features",
+  "purpose": "Expose the prototype infection source as a reusable authored scene.",
+  "state_owner": [],
+  "public_api": ["public/infection_source.tscn"],
+  "dependencies": []
+}

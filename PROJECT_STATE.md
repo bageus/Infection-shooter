@@ -5,7 +5,7 @@ current_phase: 1
 current_milestone: P1_LOGIC
 active_task_id: T002
 last_completed_task_id: DISC-001
-build_status: T002_SCENE_PENDING_VALIDATION
+build_status: T002_COMBAT_PENDING_VALIDATION
 updated: 2026-09-18
 ---
 
@@ -37,7 +37,8 @@ DISC-001 — discovery synthesis and owner approval. T001 implementation is pres
 |---|---|---|
 | T001 repository gates | PASSED | GitHub Actions run 35360785260 passed the T001 implementation |
 | T001 Godot domain tests | NOT_RUN | Godot 4.7.2 is not installed in the current execution environment |
-| T002 scene/player gates | PENDING | Run automatically after the scene/player commit |
+| T002 scene/player gates | PASSED | GitHub Actions run 35362345864 passed commit `886f1f1a748a49eab14946ae5f5539aebc2596b2` |
+| T002 enemy/weapon/source gates | PENDING | Run automatically after the combat-scene commit |
 
 ## Known blockers
 
@@ -49,8 +50,8 @@ Imported GLB scale/orientation and scene appearance cannot be visually checked w
 
 ## Next action
 
-Validate the T002 scene/player increment, then continue T002 with weapon, infected enemy, and infection-source scenes.
+Validate the T002 enemy/weapon/source increment, then continue with infection integration and playable review.
 
 ## Handoff notes
 
-Environment geometry is authored in scenes only. Runtime code is limited to player movement; no environment prop or wall is spawned from code.
+Environment geometry is authored in scenes only. Environment and gameplay actors are authored as scenes; runtime code handles movement, aiming, firing, pursuit, and attacks but does not spawn environment props.

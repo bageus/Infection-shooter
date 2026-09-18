@@ -1,12 +1,8 @@
 {
   "id": "presentation.office_floor",
   "layer": "presentation",
-  "purpose": "Present a hand-authored office combat floor assembled from reusable model scenes.",
+  "purpose": "Present a hand-authored office combat floor assembled from reusable model and gameplay scenes.",
   "state_owner": [],
-  "public_api": [
-    "public/office_floor.tscn"
-  ],
-  "dependencies": [
-    "features.player"
-  ]
+  "public_api": ["public/office_floor.tscn"],
+  "dependencies": ["features.player", "features.infected", "features.infection_source"]
 }

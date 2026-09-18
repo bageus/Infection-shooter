@@ -1,0 +1,27 @@
+[gd_scene load_steps=4 format=3]
+
+[ext_resource type="Script" path="res://game/features/infected/infected_capsule.gd" id="1_enemy_script"]
+
+[sub_resource type="StandardMaterial3D" id="EnemyMaterial"]
+albedo_color = Color(0.72, 0.06, 0.11, 1)
+roughness = 0.7
+
+[sub_resource type="CapsuleMesh" id="EnemyMesh"]
+material = SubResource("EnemyMaterial")
+radius = 0.48
+height = 1.85
+
+[sub_resource type="CapsuleShape3D" id="EnemyShape"]
+radius = 0.48
+height = 1.85
+
+[node name="InfectedCapsule" type="CharacterBody3D"]
+script = ExtResource("1_enemy_script")
+collision_layer = 2
+collision_mask = 1
+
+[node name="Body" type="MeshInstance3D" parent="."]
+mesh = SubResource("EnemyMesh")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="."]
+shape = SubResource("EnemyShape")

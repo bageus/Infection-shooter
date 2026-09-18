@@ -1,4 +1,4 @@
-[gd_scene load_steps=33 format=3]
+[gd_scene load_steps=36 format=3]
 
 [ext_resource type="PackedScene" path="res://game/features/player/public/player.tscn" id="1_player"]
 [ext_resource type="PackedScene" path="res://models/objects/01_wall_straight.glb" id="2_wall"]
@@ -27,6 +27,9 @@
 [ext_resource type="PackedScene" path="res://models/objects/06_wall_broken.glb" id="25_broken_wall"]
 [ext_resource type="PackedScene" path="res://models/objects/13_table_long.glb" id="26_table_long"]
 [ext_resource type="PackedScene" path="res://models/objects/09_standing_desk.glb" id="27_standing_desk"]
+[ext_resource type="Script" path="res://game/presentation/office_floor/office_floor.gd" id="28_floor_script"]
+[ext_resource type="PackedScene" path="res://game/features/infected/public/infected_capsule.tscn" id="29_enemy"]
+[ext_resource type="PackedScene" path="res://game/features/infection_source/public/infection_source.tscn" id="30_source"]
 
 [sub_resource type="StandardMaterial3D" id="FloorMaterial"]
 albedo_color = Color(0.42, 0.45, 0.5, 1)
@@ -56,6 +59,7 @@ ambient_light_energy = 0.8
 tonemap_mode = 2
 
 [node name="OfficeFloor" type="Node3D"]
+script = ExtResource("28_floor_script")
 
 [node name="WorldEnvironment" type="WorldEnvironment" parent="."]
 environment = SubResource("OfficeEnvironment")
@@ -261,7 +265,7 @@ position = Vector3(5.5, 0, 0)
 [node name="PlantSouth" parent="Interior" instance=ExtResource("11_plant_medium")]
 position = Vector3(2.5, 0, 9.5)
 
-[node name="AlienGrowth" parent="Interior" instance=ExtResource("21_growth")]
+[node name="InfectionSource" parent="Interior" instance=ExtResource("30_source")]
 position = Vector3(11.5, 0, -8.5)
 rotation_degrees = Vector3(0, -35, 0)
 
@@ -272,3 +276,21 @@ position = Vector3(5, 0, 6)
 
 [node name="Player" parent="." instance=ExtResource("1_player")]
 position = Vector3(0, 1, 5)
+
+
+[node name="Enemies" type="Node3D" parent="."]
+
+[node name="Infected01" parent="Enemies" instance=ExtResource("29_enemy")]
+position = Vector3(-6, 1, -4)
+
+[node name="Infected02" parent="Enemies" instance=ExtResource("29_enemy")]
+position = Vector3(0, 1, -6)
+
+[node name="Infected03" parent="Enemies" instance=ExtResource("29_enemy")]
+position = Vector3(6, 1, -4)
+
+[node name="Infected04" parent="Enemies" instance=ExtResource("29_enemy")]
+position = Vector3(9, 1, -1)
+
+[node name="Infected05" parent="Enemies" instance=ExtResource("29_enemy")]
+position = Vector3(4, 1, 3)
