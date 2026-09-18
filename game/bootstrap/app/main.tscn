@@ -1,6 +1,9 @@
-[gd_scene load_steps=2 format=3]
+[gd_scene load_steps=3 format=3]
 
 [ext_resource type="Script" path="res://game/bootstrap/app/main.gd" id="1_main"]
+[ext_resource type="PackedScene" path="res://game/presentation/office_floor/public/office_floor.tscn" id="2_floor"]
 
 [node name="Main" type="Node"]
 script = ExtResource("1_main")
+
+[node name="OfficeFloor" parent="." instance=ExtResource("2_floor")]

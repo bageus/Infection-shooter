@@ -7,5 +7,7 @@
     "Current top-level application state"
   ],
   "public_api": [],
-  "dependencies": []
+  "dependencies": [
+    "presentation.office_floor"
+  ]
 }

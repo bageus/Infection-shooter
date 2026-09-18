@@ -1,0 +1,16 @@
+{
+  "id": "features.infection",
+  "layer": "features",
+  "purpose": "Own mutation, mutation-ability hysteresis, critical threshold, and control-loss escalation rules.",
+  "state_owner": [
+    "Mutation amount",
+    "Active and priority mutation ability",
+    "Critical mutation threshold",
+    "Instability timer",
+    "Control-loss and risk-window timers",
+    "Control-loss escalation stage",
+    "Terminal control-loss defeat state"
+  ],
+  "public_api": [],
+  "dependencies": []
+}
