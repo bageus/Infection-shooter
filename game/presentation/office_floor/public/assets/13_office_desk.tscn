@@ -8,7 +8,7 @@ size = Vector3(2.2, 0.95, 1.05)
 [node name="13_office_desk" type="Node3D"]
 
 [node name="Visual" parent="." instance=ExtResource("1_model")]
-rotation_degrees = Vector3(-90, 0, 0)
+rotation_degrees = Vector3(0, 0, 0)
 
 [node name="Body" type="StaticBody3D" parent="."]
 
