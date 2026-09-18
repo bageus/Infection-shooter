@@ -77,6 +77,8 @@
 [ext_resource type="PackedScene" path="res://game/features/pickups/public/med_case_green_pickup.tscn" id="pickup_medgreen"]
 [ext_resource type="PackedScene" path="res://game/features/pickups/public/medkit_closed_pickup.tscn" id="pickup_medkit"]
 
+[ext_resource type="PackedScene" path="res://game/presentation/prototype_hud/public/radar.tscn" id="radar_ui"]
+
 [sub_resource type="Environment" id="Environment"]
 background_mode = 1
 background_color = Color(0.055, 0.075, 0.12, 1)
@@ -683,3 +685,5 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1, 11)
 [node name="GlassFull_17" parent="Partitions/Glass" instance=ExtResource("m50")]
 position = Vector3(-1.406, 0, 6)
 rotation_degrees = Vector3(0, 0, 0)
+
+[node name="Radar" parent="." instance=ExtResource("radar_ui")]
