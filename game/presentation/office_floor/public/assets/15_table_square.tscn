@@ -3,12 +3,12 @@
 [ext_resource type="PackedScene" path="res://models/objects/15_table_square.glb" id="1_model"]
 
 [sub_resource type="BoxShape3D" id="Collision"]
-size = Vector3(1.5, 0.75, 1.2)
+size = Vector3(1.5, 0.75, 1.0)
 
 [node name="15_table_square" type="Node3D"]
 
 [node name="Visual" parent="." instance=ExtResource("1_model")]
-rotation_degrees = Vector3(-90, 0, 0)
+rotation_degrees = Vector3(0, 0, 0)
 
 [node name="Body" type="StaticBody3D" parent="."]
 

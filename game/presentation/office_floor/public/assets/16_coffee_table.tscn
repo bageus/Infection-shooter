@@ -3,7 +3,7 @@
 [ext_resource type="PackedScene" path="res://models/objects/16_coffee_table.glb" id="1_model"]
 
 [sub_resource type="BoxShape3D" id="Collision"]
-size = Vector3(1.5, 0.75, 1.2)
+size = Vector3(1.5, 0.75, 1.0)
 
 [node name="16_coffee_table" type="Node3D"]
 

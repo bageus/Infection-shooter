@@ -3,7 +3,7 @@
 [ext_resource type="PackedScene" path="res://models/objects/31_cubicle_corner_partition.glb" id="1_model"]
 
 [sub_resource type="BoxShape3D" id="Collision"]
-size = Vector3(1.35, 1.45, 0.14)
+size = Vector3(1.55, 1.75, 1.55)
 
 [node name="31_cubicle_corner_partition" type="Node3D"]
 
@@ -13,5 +13,5 @@ rotation_degrees = Vector3(-90, 0, 0)
 [node name="Body" type="StaticBody3D" parent="."]
 
 [node name="CollisionShape3D" type="CollisionShape3D" parent="Body"]
-position = Vector3(0, 0.725, 0)
+position = Vector3(0, 0.875, 0)
 shape = SubResource("Collision")
