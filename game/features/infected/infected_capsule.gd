@@ -17,7 +17,7 @@ var health: float
 var _target: Node3D
 var _attack_cooldown: float = 0.0
 var _dead: bool = false
-var _push_velocity := Vector3.ZERO
+var _push_velocity: Vector3 = Vector3.ZERO
 
 
 func _ready() -> void:
@@ -51,20 +51,20 @@ func _physics_process(delta: float) -> void:
 		return
 
 	_attack_cooldown = maxf(0.0, _attack_cooldown - delta)
-	var desired := Vector3.ZERO
+	var desired: Vector3 = Vector3.ZERO
 
 	if _target != null and is_instance_valid(_target):
-		var offset := _target.global_position - global_position
+		var offset: Vector3 = _target.global_position - global_position
 		offset.y = 0.0
-		var distance := offset.length()
+		var distance: float = offset.length()
+
 		if distance > attack_range:
-			var direction := offset.normalized()
+			var direction: Vector3 = offset.normalized()
 			desired = direction * move_speed
 			if direction.length_squared() > 0.0001:
 				look_at(global_position + direction, Vector3.UP)
 		else:
 			desired = Vector3.ZERO
-		else:
 			_try_attack()
 
 	velocity.x = desired.x + _push_velocity.x
