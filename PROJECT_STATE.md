@@ -6,14 +6,14 @@ current_milestone: P1_LOGIC
 active_task_id: T002
 last_completed_task_id: DISC-001
 build_status: T002_HUD_PENDING_VALIDATION
-updated: 2026-09-18
+updated: 2026-09-19
 ---
 
 # Project state
 
 ## Current outcome
 
-T002 is active by explicit owner instruction. The hand-authored office floor, capsule player/enemies, prototype weapon, infection source, enemy-death mutagen loop, T001 integration, and observable prototype HUD are now implemented in scene-authored form.
+T002 is active by explicit owner instruction. The hand-authored office floor, capsule player/enemies, prototype weapon, infection source, enemy-death mutagen loop, T001 integration, and observable prototype HUD are now implemented in scene-authored form. The combat slice also has destructible/penetrable props, infected obstacle breaking, and directional blood splatter on nearby surfaces.
 
 ## Current phase
 
@@ -52,7 +52,7 @@ Imported GLB scale/orientation and scene appearance cannot be visually checked w
 
 ## Next action
 
-Validate the T002 prototype HUD increment, then perform a Godot playable review when runtime access is available.
+Validate the combat-feedback increment and perform a Godot visual review of blood splatter orientation and breakable partition glass.
 
 ## Handoff notes
 
