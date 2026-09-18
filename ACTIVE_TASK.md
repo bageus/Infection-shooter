@@ -1,10 +1,10 @@
 ---
 task_version: 1
 task_id: T001
-status: READY
+status: IN_PROGRESS
 phase: 1
 owner: AI
-updated: 2026-09-17
+updated: 2026-09-18
 ---
 
 # Active task
@@ -65,24 +65,24 @@ Feature-local manifest, domain scripts, and tests; documentation only when valid
 
 ## Progress
 
-READY; implementation not started.
+Domain implementation, feature manifest, and deterministic headless test runner are implemented on 2026-09-18. The implementation remains engine-light and contains no scene, rendering, input, or infrastructure dependency.
 
 ## Decisions
 
-Explicit domain state transitions; no scene-driven timers; no scope extension.
+Explicit domain state transitions; no scene-driven timers; no scope extension. The module does not expose a cross-module public contract yet; T001 is self-contained and its domain implementation remains internal until a consuming module requires an approved contract.
 
 ## Validation evidence
 
-Not run.
+Static repository validation is delegated to the existing GitHub Actions gate after the implementation commit. Godot headless execution is pending because Godot is not installed in the current execution environment.
 
 ## Blockers
 
-None.
+No product blocker. Completion evidence still requires the repository gate and an available Godot headless test run.
 
 ## Next exact action
 
-Run readiness gates, then inspect architecture before creating feature files.
+Verify the post-commit repository gate, then run `godot --headless --path . --script game/features/infection/tests/run_tests.gd` in an environment with Godot 4.7.2.
 
 ## Session handoff
 
-This is the only active task. Work in main under the accepted agreement and stop for protected decisions.
+T001 implementation exists in `game/features/infection`. Do not start T002 until T001 validation evidence is complete.

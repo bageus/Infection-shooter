@@ -1,19 +1,19 @@
 ---
 state_version: 1
-status: PLANNING
+status: IMPLEMENTATION
 current_phase: 1
 current_milestone: P1_LOGIC
 active_task_id: T001
 last_completed_task_id: DISC-001
-build_status: NOT_RUN
-updated: 2026-09-17
+build_status: PENDING_VALIDATION
+updated: 2026-09-18
 ---
 
 # Project state
 
 ## Current outcome
 
-The specification is READY. Phase 1 and T001 are prepared; gameplay code has not started.
+The specification is READY. T001 domain implementation and deterministic tests are now present; validation evidence is still being collected.
 
 ## Current phase
 
@@ -25,7 +25,7 @@ P1_LOGIC — prove mutation, ability hysteresis, antidote, critical threshold, a
 
 ## Active task
 
-T001 — Infection and control-loss domain. Status: READY.
+T001 — Infection and control-loss domain. Status: IN_PROGRESS.
 
 ## Last completed task
 
@@ -35,21 +35,21 @@ DISC-001 — discovery synthesis and owner approval.
 
 | Check | Status | Evidence |
 |---|---|---|
-| Readiness and workflow | NOT_RUN | Run after this transition |
-| Godot tests | NOT_RUN | No gameplay implementation yet |
+| Repository gates | PENDING | Existing GitHub Actions validation runs after the implementation commit |
+| Godot domain tests | NOT_RUN | Godot 4.7.2 is not installed in the current execution environment |
 
 ## Known blockers
 
-None for T001.
+No product blocker. T001 cannot be marked complete until validation evidence is recorded.
 
 ## Current risks
 
-Web performance, gore compliance, platform SDKs, monetization, and full-campaign content are deferred outside T001.
+Web performance, gore compliance, platform SDKs, monetization, and full-campaign content remain deferred outside T001.
 
 ## Next action
 
-Run strict repository gates, inspect the architecture contract, then implement only T001.
+Verify repository gates and run the T001 Godot headless test runner in an environment with Godot 4.7.2.
 
 ## Handoff notes
 
-Owner approval was received on 2026-09-17. Work directly in main until playable MVP. Ask before architecture, dependency, scope, format, destructive, or publishing changes.
+T001 changes are limited to `game/features/infection` plus continuity-state updates. No cross-module public API, scene contract, save format, dependency, or architecture exception was introduced.
