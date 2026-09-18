@@ -1,0 +1,12 @@
+{
+  "id": "features.player",
+  "layer": "features",
+  "purpose": "Own the playable character movement state and expose the player scene.",
+  "state_owner": [
+    "Player movement velocity"
+  ],
+  "public_api": [
+    "public/player.tscn"
+  ],
+  "dependencies": []
+}

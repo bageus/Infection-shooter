@@ -1,0 +1,12 @@
+{
+  "id": "presentation.office_floor",
+  "layer": "presentation",
+  "purpose": "Present a hand-authored office combat floor assembled from reusable model scenes.",
+  "state_owner": [],
+  "public_api": [
+    "public/office_floor.tscn"
+  ],
+  "dependencies": [
+    "features.player"
+  ]
+}

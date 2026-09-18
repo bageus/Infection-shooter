@@ -2,7 +2,7 @@
 backlog_version: 1
 status: ACTIVE
 current_milestone: P1_LOGIC
-updated: 2026-09-17
+updated: 2026-09-18
 ---
 
 # Backlog
@@ -11,18 +11,19 @@ updated: 2026-09-17
 
 | ID | Phase | Outcome | Status |
 |---|---:|---|---|
-| T001 | 1 | Deterministic infection and control-loss domain with tests | ACTIVE / READY |
+| T002 | 1 | Minimal player, camera, weapons, infected enemy, and source | ACTIVE / IN_PROGRESS |
 
 ## Planned
 
 | ID | Phase | Outcome | Depends on |
 |---|---:|---|---|
-| T002 | 1 | Minimal player, camera, weapons, infected enemy, and source | T001 |
 | T003 | 1 | Procedural floor, destruction, save, bilingual HUD, and Web build | T002 |
 
 ## Icebox
 
 Platform monetization and SDKs; full campaign content; cloud saves; window exits; gamepad; multiplayer; launcher; final rating and certification.
+
+T001 implementation is retained with repository gates passed. Its Godot headless test execution is still pending; the owner explicitly instructed work to continue with T002 before that runtime check.
 
 ## Completed
 
