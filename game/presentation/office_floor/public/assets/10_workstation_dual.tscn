@@ -1,6 +1,8 @@
-[gd_scene load_steps=3 format=3]
+[gd_scene load_steps=4 format=3]
 
 [ext_resource type="PackedScene" path="res://models/objects/10_workstation_dual.glb" id="1_model"]
+
+[ext_resource type="Script" path="res://game/presentation/office_floor/destructible_prop.gd" id="2_script"]
 
 [sub_resource type="BoxShape3D" id="Collision"]
 size = Vector3(2.0, 1.05, 1.7)
@@ -11,6 +13,12 @@ size = Vector3(2.0, 1.05, 1.7)
 rotation_degrees = Vector3(0, 0, 0)
 
 [node name="Body" type="StaticBody3D" parent="."]
+script = ExtResource("2_script")
+max_health = 80.0
+penetrable = false
+impact_marks = true
+spark_on_hit = true
+break_effect = "debris"
 
 [node name="CollisionShape3D" type="CollisionShape3D" parent="Body"]
 position = Vector3(0, 0.525, 0)
