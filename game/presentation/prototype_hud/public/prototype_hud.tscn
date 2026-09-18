@@ -107,7 +107,7 @@ layer = 5
 script = ExtResource("1")
 player_path = NodePath("../Gameplay/Player")
 
-[node name="HealthPanel" type="PanelContainer" parent="."]
+[node name="HealthPanel" type="Panel" parent="."]
 anchors_preset = 2
 anchor_top = 1.0
 anchor_bottom = 1.0
@@ -196,7 +196,7 @@ theme_override_font_sizes/font_size = 21
 horizontal_alignment = 2
 vertical_alignment = 1
 
-[node name="AntidotePanel" type="PanelContainer" parent="."]
+[node name="AntidotePanel" type="Panel" parent="."]
 anchors_preset = 2
 anchor_top = 1.0
 anchor_bottom = 1.0
@@ -237,7 +237,7 @@ theme_override_colors/font_color = Color(0.9, 0.98, 1, 1)
 theme_override_font_sizes/font_size = 19
 horizontal_alignment = 1
 
-[node name="WeaponPanel" type="PanelContainer" parent="."]
+[node name="WeaponPanel" type="Panel" parent="."]
 anchors_preset = 3
 anchor_left = 1.0
 anchor_top = 1.0
