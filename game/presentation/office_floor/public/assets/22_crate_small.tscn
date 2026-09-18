@@ -3,7 +3,7 @@
 [ext_resource type="PackedScene" path="res://models/objects/22_crate_small.glb" id="1_model"]
 
 [sub_resource type="BoxShape3D" id="Collision"]
-size = Vector3(1.0, 0.9, 1.0)
+size = Vector3(1.0, 0.8, 1.0)
 
 [node name="22_crate_small" type="Node3D"]
 
@@ -13,5 +13,5 @@ rotation_degrees = Vector3(0, 0, 0)
 [node name="Body" type="StaticBody3D" parent="."]
 
 [node name="CollisionShape3D" type="CollisionShape3D" parent="Body"]
-position = Vector3(0, 0.45, 0)
+position = Vector3(0, 0.4, 0)
 shape = SubResource("Collision")

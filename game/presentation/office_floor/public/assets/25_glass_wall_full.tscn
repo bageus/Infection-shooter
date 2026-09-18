@@ -3,7 +3,7 @@
 [ext_resource type="PackedScene" path="res://models/objects/25_glass_wall_full.glb" id="1_model"]
 
 [sub_resource type="BoxShape3D" id="Collision"]
-size = Vector3(1.85, 2.8, 0.16)
+size = Vector3(1.37, 1.98, 0.08)
 
 [node name="25_glass_wall_full" type="Node3D"]
 
@@ -13,5 +13,5 @@ rotation_degrees = Vector3(-90, 0, 0)
 [node name="Body" type="StaticBody3D" parent="."]
 
 [node name="CollisionShape3D" type="CollisionShape3D" parent="Body"]
-position = Vector3(0, 1.4, 0)
+position = Vector3(0, 0.99, 0)
 shape = SubResource("Collision")
