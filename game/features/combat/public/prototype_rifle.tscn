@@ -10,18 +10,18 @@ roughness = 0.4
 
 [sub_resource type="CapsuleMesh" id="WeaponMesh"]
 material = SubResource("WeaponMaterial")
-radius = 0.12
-height = 1.4
+radius = 0.11
+height = 0.82
 
 [node name="PrototypeRifle" type="Node3D"]
 script = ExtResource("1_weapon_script")
 bullet_scene = ExtResource("2_bullet")
 
 [node name="Body" type="MeshInstance3D" parent="."]
-position = Vector3(0, 0, -0.55)
+position = Vector3(0, 0, -0.28)
 rotation_degrees = Vector3(90, 0, 0)
-scale = Vector3(0.65, 1.0, 0.55)
+scale = Vector3(0.7, 1.0, 0.58)
 mesh = SubResource("WeaponMesh")
 
 [node name="Muzzle" type="Marker3D" parent="."]
-position = Vector3(0, 0, -1.3)
+position = Vector3(0, 0, -0.68)

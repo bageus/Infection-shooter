@@ -6,6 +6,8 @@ extends CharacterBody3D
 @export var attack_damage: float = 15.0
 @export var attack_interval: float = 1.0
 @export var gravity_acceleration: float = 24.0
+@export var push_decay: float = 10.0
+@export var max_push_speed: float = 6.0
 
 @onready var body_mesh: MeshInstance3D = $Body
 @onready var collision_shape: CollisionShape3D = $CollisionShape3D
@@ -15,6 +17,7 @@ var health: float
 var _target: Node3D
 var _attack_cooldown: float = 0.0
 var _dead: bool = false
+var _push_velocity := Vector3.ZERO
 
 
 func _ready() -> void:
@@ -26,10 +29,17 @@ func set_target(target: Node3D) -> void:
 	_target = target
 
 
+func apply_player_push(direction: Vector3, strength: float) -> void:
+	if _dead or strength <= 0.0:
+		return
+	_push_velocity += direction.normalized() * strength
+	if _push_velocity.length() > max_push_speed:
+		_push_velocity = _push_velocity.normalized() * max_push_speed
+
+
 func take_damage(amount: float) -> void:
 	if amount <= 0.0 or _dead:
 		return
-
 	health = maxf(0.0, health - amount)
 	if health <= 0.0:
 		_die()
@@ -41,27 +51,25 @@ func _physics_process(delta: float) -> void:
 		return
 
 	_attack_cooldown = maxf(0.0, _attack_cooldown - delta)
-	if _target == null or not is_instance_valid(_target):
-		velocity.x = 0.0
-		velocity.z = 0.0
-		_apply_gravity(delta)
-		move_and_slide()
-		return
+	var desired := Vector3.ZERO
 
-	var offset := _target.global_position - global_position
-	offset.y = 0.0
-	var distance := offset.length()
+	if _target != null and is_instance_valid(_target):
+		var offset := _target.global_position - global_position
+		offset.y = 0.0
+		var distance := offset.length()
+		if distance > attack_range:
+			var direction := offset.normalized()
+			desired = direction * move_speed
+			if direction.length_squared() > 0.0001:
+				look_at(global_position + direction, Vector3.UP)
+		else:
+			desired = Vector3.ZERO
+		else:
+			_try_attack()
 
-	if distance > attack_range:
-		var direction := offset.normalized()
-		velocity.x = direction.x * move_speed
-		velocity.z = direction.z * move_speed
-		if direction.length_squared() > 0.0001:
-			look_at(global_position + direction, Vector3.UP)
-	else:
-		velocity.x = 0.0
-		velocity.z = 0.0
-		_try_attack()
+	velocity.x = desired.x + _push_velocity.x
+	velocity.z = desired.z + _push_velocity.z
+	_push_velocity = _push_velocity.move_toward(Vector3.ZERO, push_decay * delta)
 
 	_apply_gravity(delta)
 	move_and_slide()

@@ -21,6 +21,7 @@ height = 1.8
 script = ExtResource("1_player_script")
 collision_layer = 1
 collision_mask = 3
+safe_margin = 0.04
 
 [node name="AimPivot" type="Node3D" parent="."]
 
@@ -28,7 +29,7 @@ collision_mask = 3
 mesh = SubResource("CapsuleMesh_player")
 
 [node name="PrototypeRifle" parent="AimPivot" instance=ExtResource("2_weapon")]
-position = Vector3(0.38, 0.2, -0.55)
+position = Vector3(0.31, 0.18, -0.3)
 
 [node name="CollisionShape3D" type="CollisionShape3D" parent="."]
 shape = SubResource("CapsuleShape_player")

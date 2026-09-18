@@ -3,15 +3,16 @@
 [ext_resource type="PackedScene" path="res://models/objects/13_office_desk.glb" id="1_model"]
 
 [sub_resource type="BoxShape3D" id="Collision"]
-size = Vector3(2.0, 0.9, 1.25)
+size = Vector3(2.0, 0.9, 1.4)
 
 [node name="13_office_desk" type="Node3D"]
 
 [node name="Visual" parent="." instance=ExtResource("1_model")]
 rotation_degrees = Vector3(0, 0, 0)
+scale = Vector3(1,1,1)
 
 [node name="Body" type="StaticBody3D" parent="."]
 
 [node name="CollisionShape3D" type="CollisionShape3D" parent="Body"]
-position = Vector3(0, 0.45, 0)
+position = Vector3(0,0.45,0)
 shape = SubResource("Collision")
