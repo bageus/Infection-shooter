@@ -1,3 +1,4 @@
+<<<<<<< Updated upstream
 [gd_scene load_steps=86 format=3]
 
 [ext_resource type="PackedScene" path="res://game/presentation/office_floor/public/assets/01_locker_tall.tscn" id="m1"]
@@ -833,3 +834,18 @@ position = Vector3(-5, 1, 4)
 [node name="PrototypeHUD" parent="." instance=ExtResource("m74")]
 
 [node name="Crosshair" parent="." instance=ExtResource("m75")]
+=======
+[gd_scene format=3 uid="uid://bdqpqaixmh8ea"]
+
+[ext_resource type="Script" uid="uid://cjm3a57h7v5im" path="res://game/bootstrap/app/main.gd" id="1_main"]
+[ext_resource type="PackedScene" path="res://game/presentation/office_floor/public/office_floor.tscn" id="2_floor"]
+[ext_resource type="PackedScene" path="res://game/presentation/prototype_hud/public/prototype_hud.tscn" id="3_hud"]
+
+[node name="Main" type="Node" unique_id=398723793]
+script = ExtResource("1_main")
+
+[node name="OfficeFloor" parent="." unique_id=32495208 instance=ExtResource("2_floor")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 12.217242, 0.0440073, -9.725761)
+
+[node name="PrototypeHUD" parent="." unique_id=1421796545 instance=ExtResource("3_hud")]
+>>>>>>> Stashed changes
