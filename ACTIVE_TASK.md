@@ -66,7 +66,7 @@ Player module manifest, player scene and movement script, office-floor presentat
 
 ## Progress
 
-Owner override accepted: T002 started before the pending Godot headless execution of T001. The scene/player increment passed repository validation. Red capsule enemies, elongated capsule weapon, aiming/fire, and the infection source are implemented. The current increment completes the basic loop by activating a pre-authored mutagen-cloud child scene on enemy death and routing cloud absorption into the T001 infection domain hosted by the player.
+Owner override accepted: T002 started before the pending Godot headless execution of T001. The scene/player increment passed repository validation. Red capsule enemies, elongated capsule weapon, aiming/fire, infection source, enemy-death mutagen cloud, and T001 infection integration are implemented. A prototype HUD is now added as a separate presentation scene so HP and mutation behavior are directly observable during play.
 
 ## Decisions
 
@@ -74,7 +74,7 @@ The visual reference is used for layout direction, not copied literally. Importe
 
 ## Validation evidence
 
-GitHub Actions runs 35362345864 and 35369496353 passed the scene/player and enemy/weapon/source repository gates. The current integration connects T001 infection state to the player and adds a scene-authored mutagen cloud activated by enemy death. Godot runtime/import testing is unavailable in the current environment.
+GitHub Actions runs 35362345864, 35369496353, and 35371501101 passed the scene/player, combat, and infection-integration repository gates. The current increment adds a scene-authored prototype HUD for HP, mutation, critical threshold, control state, and controls. Godot runtime/import testing is unavailable in the current environment.
 
 ## Blockers
 
@@ -82,7 +82,7 @@ No product blocker. Runtime visual scale and imported-model transforms require G
 
 ## Next exact action
 
-Verify repository gates for the infection integration increment, then perform a Godot playable review when runtime access is available.
+Verify repository gates for the prototype HUD increment, then perform a Godot playable review when runtime access is available.
 
 ## Session handoff
 

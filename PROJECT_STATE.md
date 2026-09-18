@@ -5,7 +5,7 @@ current_phase: 1
 current_milestone: P1_LOGIC
 active_task_id: T002
 last_completed_task_id: DISC-001
-build_status: T002_INFECTION_PENDING_VALIDATION
+build_status: T002_HUD_PENDING_VALIDATION
 updated: 2026-09-18
 ---
 
@@ -13,7 +13,7 @@ updated: 2026-09-18
 
 ## Current outcome
 
-T002 is active by explicit owner instruction. The hand-authored office floor, capsule player/enemies, prototype weapon, infection source, and enemy-death mutagen loop are now implemented in scene-authored form.
+T002 is active by explicit owner instruction. The hand-authored office floor, capsule player/enemies, prototype weapon, infection source, enemy-death mutagen loop, T001 integration, and observable prototype HUD are now implemented in scene-authored form.
 
 ## Current phase
 
@@ -39,7 +39,8 @@ DISC-001 — discovery synthesis and owner approval. T001 implementation is pres
 | T001 Godot domain tests | NOT_RUN | Godot 4.7.2 is not installed in the current execution environment |
 | T002 scene/player gates | PASSED | GitHub Actions run 35362345864 passed commit `886f1f1a748a49eab14946ae5f5539aebc2596b2` |
 | T002 enemy/weapon/source gates | PASSED | GitHub Actions run 35369496353 passed commit `d953a2688a1769b05556ac905d0d4c98eeb99214` |
-| T002 infection integration gates | PENDING | Run automatically after the infection-integration commit |
+| T002 infection integration gates | PASSED | GitHub Actions run 35371501101 passed commit `d98b27567c99a4659be018e002f2f501278e15b0` |
+| T002 prototype HUD gates | PENDING | Run automatically after the HUD commit |
 
 ## Known blockers
 
@@ -51,7 +52,7 @@ Imported GLB scale/orientation and scene appearance cannot be visually checked w
 
 ## Next action
 
-Validate the T002 infection integration, then perform a Godot playable review when runtime access is available.
+Validate the T002 prototype HUD increment, then perform a Godot playable review when runtime access is available.
 
 ## Handoff notes
 

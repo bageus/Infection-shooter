@@ -1,0 +1,74 @@
+[gd_scene load_steps=5 format=3]
+
+[ext_resource type="Script" path="res://game/presentation/prototype_hud/prototype_hud.gd" id="1_hud"]
+
+[sub_resource type="StyleBoxFlat" id="PanelStyle"]
+bg_color = Color(0.025, 0.035, 0.055, 0.88)
+border_width_left = 2
+border_width_top = 2
+border_width_right = 2
+border_width_bottom = 2
+border_color = Color(0.25, 0.33, 0.45, 0.9)
+corner_radius_top_left = 8
+corner_radius_top_right = 8
+corner_radius_bottom_right = 8
+corner_radius_bottom_left = 8
+
+[sub_resource type="StyleBoxFlat" id="HealthFill"]
+bg_color = Color(0.75, 0.12, 0.12, 1)
+corner_radius_top_left = 3
+corner_radius_top_right = 3
+corner_radius_bottom_right = 3
+corner_radius_bottom_left = 3
+
+[sub_resource type="StyleBoxFlat" id="MutationFill"]
+bg_color = Color(0.18, 0.85, 0.3, 1)
+corner_radius_top_left = 3
+corner_radius_top_right = 3
+corner_radius_bottom_right = 3
+corner_radius_bottom_left = 3
+
+[node name="PrototypeHUD" type="CanvasLayer"]
+script = ExtResource("1_hud")
+player_path = NodePath("../Player")
+
+[node name="Margin" type="MarginContainer" parent="."]
+offset_left = 18.0
+offset_top = 18.0
+offset_right = 318.0
+offset_bottom = 220.0
+
+[node name="Panel" type="PanelContainer" parent="Margin"]
+theme_override_styles/panel = SubResource("PanelStyle")
+
+[node name="VBox" type="VBoxContainer" parent="Margin/Panel"]
+theme_override_constants/separation = 6
+
+[node name="Title" type="Label" parent="Margin/Panel/VBox"]
+text = "INFECTION // PROTOTYPE"
+
+[node name="HealthLabel" type="Label" parent="Margin/Panel/VBox"]
+text = "HP  100 / 100"
+
+[node name="HealthBar" type="ProgressBar" parent="Margin/Panel/VBox"]
+custom_minimum_size = Vector2(270, 18)
+value = 100.0
+show_percentage = false
+theme_override_styles/fill = SubResource("HealthFill")
+
+[node name="MutationLabel" type="Label" parent="Margin/Panel/VBox"]
+text = "MUTATION  0 / 100"
+
+[node name="MutationBar" type="ProgressBar" parent="Margin/Panel/VBox"]
+custom_minimum_size = Vector2(270, 18)
+show_percentage = false
+theme_override_styles/fill = SubResource("MutationFill")
+
+[node name="CriticalLabel" type="Label" parent="Margin/Panel/VBox"]
+text = "CRITICAL  30"
+
+[node name="ControlLabel" type="Label" parent="Margin/Panel/VBox"]
+text = "CONTROL: STABLE"
+
+[node name="Hint" type="Label" parent="Margin/Panel/VBox"]
+text = "WASD MOVE  |  MOUSE AIM  |  LMB FIRE"
