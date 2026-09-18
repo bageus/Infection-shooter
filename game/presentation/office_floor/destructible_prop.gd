@@ -45,6 +45,14 @@ func take_projectile_hit(
 	return not penetrable
 
 
+func take_melee_hit(damage: float, hit_position: Vector3, _direction: Vector3) -> void:
+	if _broken:
+		return
+	_health -= maxf(damage, 0.0)
+	if break_on_first_hit or _health <= 0.0:
+		_break_prop(hit_position)
+
+
 func _break_prop(hit_position: Vector3) -> void:
 	if _broken:
 		return
@@ -54,6 +62,8 @@ func _break_prop(hit_position: Vector3) -> void:
 	var visual := owner_root.get_node_or_null("Visual") as Node3D
 	if visual != null:
 		visual.visible = false
+	if break_effect == "glass":
+		_spawn_replacement_frame(owner_root)
 
 	for child in get_children():
 		if child is CollisionShape3D:
@@ -65,6 +75,32 @@ func _break_prop(hit_position: Vector3) -> void:
 		_spawn_fragments(hit_position, Color(0.25, 0.65, 1.0, 0.9), 10)
 	else:
 		_spawn_fragments(hit_position, Color(0.28, 0.2, 0.13, 1.0), 6)
+
+
+func _spawn_replacement_frame(owner_root: Node3D) -> void:
+	var collision_shape := get_node_or_null("CollisionShape3D") as CollisionShape3D
+	if collision_shape == null or not collision_shape.shape is BoxShape3D:
+		return
+	var size: Vector3 = (collision_shape.shape as BoxShape3D).size
+	var material := StandardMaterial3D.new()
+	material.albedo_color = Color(0.06, 0.09, 0.12, 1.0)
+	material.metallic = 0.55
+	material.roughness = 0.38
+	var bar := 0.065
+	_add_frame_bar(owner_root, Vector3(size.x, bar, maxf(size.z, 0.07)), Vector3(0, bar * 0.5, 0), material)
+	_add_frame_bar(owner_root, Vector3(size.x, bar, maxf(size.z, 0.07)), Vector3(0, size.y - bar * 0.5, 0), material)
+	_add_frame_bar(owner_root, Vector3(bar, size.y, maxf(size.z, 0.07)), Vector3(-size.x * 0.5 + bar * 0.5, size.y * 0.5, 0), material)
+	_add_frame_bar(owner_root, Vector3(bar, size.y, maxf(size.z, 0.07)), Vector3(size.x * 0.5 - bar * 0.5, size.y * 0.5, 0), material)
+
+
+func _add_frame_bar(owner_root: Node3D, size: Vector3, position: Vector3, material: Material) -> void:
+	var piece := MeshInstance3D.new()
+	var mesh := BoxMesh.new()
+	mesh.size = size
+	mesh.material = material
+	piece.mesh = mesh
+	piece.position = position
+	owner_root.add_child(piece)
 
 
 func _spawn_impact_mark(position: Vector3, normal: Vector3) -> void:
