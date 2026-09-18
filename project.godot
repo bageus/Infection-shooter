@@ -70,6 +70,31 @@ fire={
 ]
 }
 
+reload={
+"deadzone":0.5,
+"events":[Object(InputEventKey,"physical_keycode":82,"unicode":114)]
+}
+
+antidote={
+"deadzone":0.5,
+"events":[Object(InputEventKey,"physical_keycode":70,"unicode":102)]
+}
+
+weapon_1={
+"deadzone":0.5,
+"events":[Object(InputEventKey,"physical_keycode":49,"unicode":49)]
+}
+
+weapon_2={
+"deadzone":0.5,
+"events":[Object(InputEventKey,"physical_keycode":50,"unicode":50)]
+}
+
+weapon_3={
+"deadzone":0.5,
+"events":[Object(InputEventKey,"physical_keycode":51,"unicode":51)]
+}
+
 [rendering]
 
 renderer/rendering_method="gl_compatibility"

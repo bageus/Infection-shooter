@@ -1,48 +1,38 @@
-[gd_scene load_steps=6 format=3]
-
-[ext_resource type="Script" path="res://game/features/player/player_movement.gd" id="1_player_script"]
-[ext_resource type="PackedScene" path="res://game/features/combat/public/prototype_rifle.tscn" id="2_weapon"]
-[ext_resource type="Script" path="res://game/features/infection/public/infection_runtime.gd" id="3_infection_runtime"]
-
-[sub_resource type="StandardMaterial3D" id="PlayerMaterial"]
-albedo_color = Color(0.06, 0.2, 0.62, 1)
-roughness = 0.65
-
-[sub_resource type="CapsuleMesh" id="CapsuleMesh_player"]
-material = SubResource("PlayerMaterial")
-radius = 0.45
-height = 1.8
-
-[sub_resource type="CapsuleShape3D" id="CapsuleShape_player"]
-radius = 0.45
-height = 1.8
-
+[gd_scene load_steps=8 format=3]
+[ext_resource type="Script" path="res://game/features/player/player_movement.gd" id="1"]
+[ext_resource type="PackedScene" path="res://game/features/combat/public/pistol.tscn" id="2"]
+[ext_resource type="PackedScene" path="res://game/features/combat/public/uzi.tscn" id="3"]
+[ext_resource type="PackedScene" path="res://game/features/combat/public/shotgun.tscn" id="4"]
+[ext_resource type="Script" path="res://game/features/infection/public/infection_runtime.gd" id="5"]
+[sub_resource type="StandardMaterial3D" id="Mat"]
+albedo_color=Color(0.06,0.2,0.62,1)
+[sub_resource type="CapsuleMesh" id="Mesh"]
+material=SubResource("Mat")
+radius=0.45
+height=1.8
+[sub_resource type="CapsuleShape3D" id="Shape"]
+radius=0.45
+height=1.8
 [node name="Player" type="CharacterBody3D"]
-script = ExtResource("1_player_script")
-collision_layer = 1
-collision_mask = 3
-safe_margin = 0.04
-
+script=ExtResource("1")
+collision_layer=1
+collision_mask=3
 [node name="AimPivot" type="Node3D" parent="."]
-
 [node name="Body" type="MeshInstance3D" parent="AimPivot"]
-mesh = SubResource("CapsuleMesh_player")
-
-[node name="PrototypeRifle" parent="AimPivot" instance=ExtResource("2_weapon")]
-position = Vector3(0.31, 0.18, -0.3)
-
+mesh=SubResource("Mesh")
+[node name="Pistol" parent="AimPivot" instance=ExtResource("2")]
+position=Vector3(0.3,0.18,-0.2)
+[node name="Uzi" parent="AimPivot" instance=ExtResource("3")]
+position=Vector3(0.3,0.18,-0.23)
+[node name="Shotgun" parent="AimPivot" instance=ExtResource("4")]
+position=Vector3(0.32,0.18,-0.27)
 [node name="CollisionShape3D" type="CollisionShape3D" parent="."]
-shape = SubResource("CapsuleShape_player")
-
+shape=SubResource("Shape")
 [node name="InfectionRuntime" type="Node" parent="."]
-script = ExtResource("3_infection_runtime")
-
+script=ExtResource("5")
 [node name="CameraRig" type="Node3D" parent="."]
-
 [node name="Camera3D" type="Camera3D" parent="CameraRig"]
-position = Vector3(10, 12, 10)
-rotation_degrees = Vector3(-42, 45, 0)
-current = true
-fov = 50.0
-near = 0.1
-far = 100.0
+position=Vector3(10,12,10)
+rotation_degrees=Vector3(-42,45,0)
+current=true
+fov=50.0
