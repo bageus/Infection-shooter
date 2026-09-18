@@ -129,114 +129,6 @@ transform = Transform3D(-1, 0, -8.742278e-08, 0, 1, 0, 8.742278e-08, 0, -1, -18.
 [node name="SouthWall_2" parent="Structure/PerimeterWalls" unique_id=406820719 instance=ExtResource("m2")]
 transform = Transform3D(-1, 0, -8.742278e-08, 0, 1, 0, 8.742278e-08, 0, -1, -16.5, 0, 14.8)
 
-<<<<<<< HEAD
-[node name="SouthWall_3" parent="Structure/PerimeterWalls" unique_id=1198107092 instance=ExtResource("m2")]
-transform = Transform3D(-1, 0, -8.742278e-08, 0, 1, 0, 8.742278e-08, 0, -1, -14.3, 0, 14.8)
-
-[node name="SouthWall_4" parent="Structure/PerimeterWalls" unique_id=1277845650 instance=ExtResource("m2")]
-transform = Transform3D(-1, 0, -8.742278e-08, 0, 1, 0, 8.742278e-08, 0, -1, -12.1, 0, 14.8)
-
-[node name="SouthWall_5" parent="Structure/PerimeterWalls" unique_id=991569437 instance=ExtResource("m2")]
-transform = Transform3D(-1, 0, -8.742278e-08, 0, 1, 0, 8.742278e-08, 0, -1, -9.9, 0, 14.8)
-
-[node name="SouthWall_6" parent="Structure/PerimeterWalls" unique_id=474255133 instance=ExtResource("m2")]
-transform = Transform3D(-1, 0, -8.742278e-08, 0, 1, 0, 8.742278e-08, 0, -1, -7.7, 0, 14.8)
-
-[node name="SouthWall_7" parent="Structure/PerimeterWalls" unique_id=1446277844 instance=ExtResource("m2")]
-transform = Transform3D(-1, 0, -8.742278e-08, 0, 1, 0, 8.742278e-08, 0, -1, -5.5, 0, 14.8)
-
-[node name="SouthWall_8" parent="Structure/PerimeterWalls" unique_id=945993556 instance=ExtResource("m2")]
-transform = Transform3D(-1, 0, -8.742278e-08, 0, 1, 0, 8.742278e-08, 0, -1, -3.3, 0, 14.8)
-
-[node name="SouthWall_9" parent="Structure/PerimeterWalls" unique_id=597316221 instance=ExtResource("m2")]
-transform = Transform3D(-1, 0, -8.742278e-08, 0, 1, 0, 8.742278e-08, 0, -1, -1.1, 0, 14.8)
-
-[node name="SouthWall_10" parent="Structure/PerimeterWalls" unique_id=1747682951 instance=ExtResource("m2")]
-transform = Transform3D(-1, 0, -8.742278e-08, 0, 1, 0, 8.742278e-08, 0, -1, 1.1, 0, 14.8)
-
-[node name="SouthWall_11" parent="Structure/PerimeterWalls" unique_id=896560514 instance=ExtResource("m2")]
-transform = Transform3D(-1, 0, -8.742278e-08, 0, 1, 0, 8.742278e-08, 0, -1, 3.3, 0, 14.8)
-
-[node name="SouthWall_12" parent="Structure/PerimeterWalls" unique_id=911928958 instance=ExtResource("m2")]
-transform = Transform3D(-1, 0, -8.742278e-08, 0, 1, 0, 8.742278e-08, 0, -1, 5.5, 0, 14.8)
-
-[node name="SouthWall_13" parent="Structure/PerimeterWalls" unique_id=1576190187 instance=ExtResource("m2")]
-transform = Transform3D(-1, 0, -8.742278e-08, 0, 1, 0, 8.742278e-08, 0, -1, 7.7, 0, 14.8)
-
-[node name="SouthWall_14" parent="Structure/PerimeterWalls" unique_id=3954554 instance=ExtResource("m2")]
-transform = Transform3D(-1, 0, -8.742278e-08, 0, 1, 0, 8.742278e-08, 0, -1, 9.9, 0, 14.8)
-
-[node name="SouthWall_15" parent="Structure/PerimeterWalls" unique_id=909863320 instance=ExtResource("m2")]
-transform = Transform3D(-1, 0, -8.742278e-08, 0, 1, 0, 8.742278e-08, 0, -1, 12.1, 0, 14.8)
-
-[node name="SouthWall_16" parent="Structure/PerimeterWalls" unique_id=262842085 instance=ExtResource("m2")]
-transform = Transform3D(-1, 0, -8.742278e-08, 0, 1, 0, 8.742278e-08, 0, -1, 14.3, 0, 14.8)
-
-[node name="SouthWall_17" parent="Structure/PerimeterWalls" unique_id=1934276486 instance=ExtResource("m2")]
-transform = Transform3D(-1, 0, -8.742278e-08, 0, 1, 0, 8.742278e-08, 0, -1, 16.5, 0, 14.8)
-
-[node name="SouthWall_18" parent="Structure/PerimeterWalls" unique_id=464786885 instance=ExtResource("m2")]
-transform = Transform3D(-1, 0, -8.742278e-08, 0, 1, 0, 8.742278e-08, 0, -1, 18.7, 0, 14.8)
-
-[node name="WestEdge_2" parent="Structure/PerimeterWalls" unique_id=1020644686 instance=ExtResource("m2")]
-transform = Transform3D(-4.371139e-08, 0, -1, 0, 1, 0, 1, 0, -4.371139e-08, -19.8, 0, -11.6)
-
-[node name="EastEdge_2" parent="Structure/PerimeterWalls" unique_id=1374584445 instance=ExtResource("m2")]
-transform = Transform3D(-4.371139e-08, 0, 1, 0, 1, 0, -1, 0, -4.371139e-08, 19.8, 0, -11.6)
-
-[node name="WestEdge_5" parent="Structure/PerimeterWalls" unique_id=1408455593 instance=ExtResource("m2")]
-transform = Transform3D(-4.371139e-08, 0, -1, 0, 1, 0, 1, 0, -4.371139e-08, -19.8, 0, -5.3)
-
-[node name="EastEdge_5" parent="Structure/PerimeterWalls" unique_id=1463247693 instance=ExtResource("m2")]
-transform = Transform3D(-4.371139e-08, 0, 1, 0, 1, 0, -1, 0, -4.371139e-08, 19.8, 0, -5.3)
-
-[node name="WestEdge_8" parent="Structure/PerimeterWalls" unique_id=249592092 instance=ExtResource("m2")]
-transform = Transform3D(-4.371139e-08, 0, -1, 0, 1, 0, 1, 0, -4.371139e-08, -19.8, 0, 1)
-
-[node name="EastEdge_8" parent="Structure/PerimeterWalls" unique_id=330299128 instance=ExtResource("m2")]
-transform = Transform3D(-4.371139e-08, 0, 1, 0, 1, 0, -1, 0, -4.371139e-08, 19.8, 0, 1)
-
-[node name="WestEdge_11" parent="Structure/PerimeterWalls" unique_id=84665745 instance=ExtResource("m2")]
-transform = Transform3D(-4.371139e-08, 0, -1, 0, 1, 0, 1, 0, -4.371139e-08, -19.8, 0, 7.3)
-
-[node name="EastEdge_11" parent="Structure/PerimeterWalls" unique_id=40164016 instance=ExtResource("m2")]
-transform = Transform3D(-4.371139e-08, 0, 1, 0, 1, 0, -1, 0, -4.371139e-08, 19.8, 0, 7.3)
-
-[node name="WestEdge_14" parent="Structure/PerimeterWalls" unique_id=705167579 instance=ExtResource("m2")]
-transform = Transform3D(-4.371139e-08, 0, -1, 0, 1, 0, 1, 0, -4.371139e-08, -19.8, 0, 13.6)
-
-[node name="EastEdge_14" parent="Structure/PerimeterWalls" unique_id=1594733095 instance=ExtResource("m2")]
-transform = Transform3D(-4.371139e-08, 0, 1, 0, 1, 0, -1, 0, -4.371139e-08, 19.8, 0, 13.6)
-
-[node name="InnerCorner" parent="Structure/PerimeterWalls" unique_id=1774590149 instance=ExtResource("m4")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -18.7, 0, -13.7)
-
-[node name="OuterCorner" parent="Structure/PerimeterWalls" unique_id=172427525 instance=ExtResource("m6")]
-transform = Transform3D(-4.371139e-08, 0, 1, 0, 1, 0, -1, 0, -4.371139e-08, 18.7, 0, -13.7)
-
-[node name="HalfPanel" parent="Structure/PerimeterWalls" unique_id=631198236 instance=ExtResource("m10")]
-transform = Transform3D(-1, 0, -8.742278e-08, 0, 1, 0, 8.742278e-08, 0, -1, -10, 0, 14.2)
-
-[node name="BrokenWall" parent="Structure/PerimeterWalls" unique_id=1374851773 instance=ExtResource("m12")]
-transform = Transform3D(-1, 0, -8.742278e-08, 0, 1, 0, 8.742278e-08, 0, -1, 10, 0, 14.2)
-
-[node name="WallCorner" parent="Structure/PerimeterWalls" unique_id=935057984 instance=ExtResource("m64")]
-transform = Transform3D(-1, 0, -8.742278e-08, 0, 1, 0, 8.742278e-08, 0, -1, 18.7, 0, 13.7)
-
-[node name="ReinforcedWall" parent="Structure/PerimeterWalls" unique_id=2126574361 instance=ExtResource("m67")]
-transform = Transform3D(-1, 0, -8.742278e-08, 0, 1, 0, 8.742278e-08, 0, -1, -14, 0, 14.3)
-
-[node name="PerimeterWindows" type="Node3D" parent="Structure" unique_id=473680453]
-
-[node name="NorthWindow_1" parent="Structure/PerimeterWindows" unique_id=1434885046 instance=ExtResource("m14")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -18.7, 0, -14.8)
-
-[node name="NorthWindow_2" parent="Structure/PerimeterWindows" unique_id=976205489 instance=ExtResource("m14")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -16.5, 0, -14.8)
-
-[node name="NorthWindow_3" parent="Structure/PerimeterWindows" unique_id=887902316 instance=ExtResource("m14")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -14.3, 0, -14.8)
-=======
 [node name="NorthWindow_1" parent="Structure/PerimeterWindows" instance=ExtResource("m14")]
 position = Vector3(-18.19, 0, -14.8)
 
@@ -362,8 +254,6 @@ rotation_degrees = Vector3(0, 180, 0)
 [node name="SouthWall_18" parent="Structure/PerimeterWalls" instance=ExtResource("m2")]
 position = Vector3(18.19, 0, 14.8)
 rotation_degrees = Vector3(0, 180, 0)
->>>>>>> a96bf7533324cd9633c171138b5f57f53f01b975
-
 [node name="NorthWindow_4" parent="Structure/PerimeterWindows" unique_id=1638253035 instance=ExtResource("m14")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -12.1, 0, -14.8)
 
@@ -544,53 +434,6 @@ transform = Transform3D(-1, 0, -8.742278e-08, 0, 1, 0, 8.742278e-08, 0, -1, 2, 1
 [node name="EmergencyDoor" parent="Structure/ElevatorLobby" unique_id=151220822 instance=ExtResource("m68")]
 transform = Transform3D(-1, 0, -8.742278e-08, 0, 1, 0, 8.742278e-08, 0, -1, 6, 0, 13.8)
 
-<<<<<<< HEAD
-[node name="WallDoor" parent="Structure/ElevatorLobby" unique_id=762841232 instance=ExtResource("m8")]
-transform = Transform3D(-1, 0, -8.742278e-08, 0, 1, 0, 8.742278e-08, 0, -1, -7, 0, 13.8)
-
-[node name="Partitions" type="Node3D" parent="." unique_id=788989849]
-
-[node name="Glass" type="Node3D" parent="Partitions" unique_id=1152834599]
-
-[node name="GlassFull_1" parent="Partitions/Glass" unique_id=1991432403 instance=ExtResource("m50")]
-transform = Transform3D(-4.371139e-08, 0, 1, 0, 1, 0, -1, 0, -4.371139e-08, -10, 0, -9)
-
-[node name="GlassFull_2" parent="Partitions/Glass" unique_id=1385661206 instance=ExtResource("m50")]
-transform = Transform3D(-4.371139e-08, 0, 1, 0, 1, 0, -1, 0, -4.371139e-08, -10, 0, -7)
-
-[node name="GlassFull_3" parent="Partitions/Glass" unique_id=1304192081 instance=ExtResource("m50")]
-transform = Transform3D(-4.371139e-08, 0, 1, 0, 1, 0, -1, 0, -4.371139e-08, -10, 0, -5)
-
-[node name="GlassFull_4" parent="Partitions/Glass" unique_id=1147858964 instance=ExtResource("m50")]
-transform = Transform3D(-4.371139e-08, 0, 1, 0, 1, 0, -1, 0, -4.371139e-08, -10, 0, -3)
-
-[node name="GlassFull_5" parent="Partitions/Glass" unique_id=1697864008 instance=ExtResource("m50")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -4, 0, -8)
-
-[node name="GlassFull_6" parent="Partitions/Glass" unique_id=612824645 instance=ExtResource("m50")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -2, 0, -8)
-
-[node name="GlassFull_7" parent="Partitions/Glass" unique_id=137162689 instance=ExtResource("m50")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, -8)
-
-[node name="GlassFull_8" parent="Partitions/Glass" unique_id=251530903 instance=ExtResource("m50")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 2, 0, -8)
-
-[node name="GlassFull_9" parent="Partitions/Glass" unique_id=1202289881 instance=ExtResource("m50")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 4, 0, -8)
-
-[node name="GlassFull_10" parent="Partitions/Glass" unique_id=677823847 instance=ExtResource("m50")]
-transform = Transform3D(-4.371139e-08, 0, 1, 0, 1, 0, -1, 0, -4.371139e-08, 10, 0, -9)
-
-[node name="GlassFull_11" parent="Partitions/Glass" unique_id=717867560 instance=ExtResource("m50")]
-transform = Transform3D(-4.371139e-08, 0, 1, 0, 1, 0, -1, 0, -4.371139e-08, 10, 0, -7)
-
-[node name="GlassFull_12" parent="Partitions/Glass" unique_id=1769066773 instance=ExtResource("m50")]
-transform = Transform3D(-4.371139e-08, 0, 1, 0, 1, 0, -1, 0, -4.371139e-08, 10, 0, -5)
-
-[node name="GlassFull_13" parent="Partitions/Glass" unique_id=147374959 instance=ExtResource("m50")]
-transform = Transform3D(-4.371139e-08, 0, 1, 0, 1, 0, -1, 0, -4.371139e-08, 10, 0, -3)
-=======
 [node name="GlassFull_1" parent="Partitions/Glass" instance=ExtResource("m50")]
 position = Vector3(-10, 0, -8)
 rotation_degrees = Vector3(0, 90, 0)
@@ -654,21 +497,9 @@ rotation_degrees = Vector3(0, 0, 0)
 [node name="GlassFull_16" parent="Partitions/Glass" instance=ExtResource("m50")]
 position = Vector3(-1.4, 0, 6)
 rotation_degrees = Vector3(0, 0, 0)
->>>>>>> a96bf7533324cd9633c171138b5f57f53f01b975
-
 [node name="GlassFull_14" parent="Partitions/Glass" unique_id=37202256 instance=ExtResource("m50")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -6, 0, 6)
 
-<<<<<<< HEAD
-[node name="GlassFull_15" parent="Partitions/Glass" unique_id=389513875 instance=ExtResource("m50")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -4, 0, 6)
-
-[node name="GlassFull_16" parent="Partitions/Glass" unique_id=548791124 instance=ExtResource("m50")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -2, 0, 6)
-
-[node name="GlassFull_17" parent="Partitions/Glass" unique_id=1092618342 instance=ExtResource("m50")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 6)
-=======
 [node name="GlassFull_18" parent="Partitions/Glass" instance=ExtResource("m50")]
 position = Vector3(1.4, 0, 6)
 rotation_degrees = Vector3(0, 0, 0)
@@ -680,8 +511,6 @@ rotation_degrees = Vector3(0, 0, 0)
 [node name="GlassFull_20" parent="Partitions/Glass" instance=ExtResource("m50")]
 position = Vector3(4.2, 0, 6)
 rotation_degrees = Vector3(0, 0, 0)
->>>>>>> a96bf7533324cd9633c171138b5f57f53f01b975
-
 [node name="GlassFull_18" parent="Partitions/Glass" unique_id=1960347756 instance=ExtResource("m50")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 2, 0, 6)
 
@@ -709,36 +538,6 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 14, 0, 2)
 [node name="GlassHalf_6" parent="Partitions/Glass" unique_id=1274487653 instance=ExtResource("m46")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 14, 0, 7)
 
-<<<<<<< HEAD
-[node name="GlassCornerA" parent="Partitions/Glass" unique_id=313472260 instance=ExtResource("m47")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -10, 0, -8)
-
-[node name="GlassCornerB" parent="Partitions/Glass" unique_id=435340048 instance=ExtResource("m54")]
-transform = Transform3D(-4.371139e-08, 0, 1, 0, 1, 0, -1, 0, -4.371139e-08, 10, 0, -8)
-
-[node name="SlidingGlassDoor" parent="Partitions/Glass" unique_id=1158959845 instance=ExtResource("m52")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 6)
-
-[node name="Cubicles" type="Node3D" parent="Partitions" unique_id=779396330]
-
-[node name="Cubicle_1" parent="Partitions/Cubicles" unique_id=600669742 instance=ExtResource("m55")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -6, 0, -3)
-
-[node name="Cubicle_2" parent="Partitions/Cubicles" unique_id=2134128922 instance=ExtResource("m57")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -3, 0, -3)
-
-[node name="Cubicle_3" parent="Partitions/Cubicles" unique_id=1234095632 instance=ExtResource("m59")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, -3)
-
-[node name="Cubicle_4" parent="Partitions/Cubicles" unique_id=1199182524 instance=ExtResource("m61")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 3, 0, -3)
-
-[node name="Cubicle_5" parent="Partitions/Cubicles" unique_id=1936955048 instance=ExtResource("m55")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 6, 0, -3)
-
-[node name="Cubicle_6" parent="Partitions/Cubicles" unique_id=1438485597 instance=ExtResource("m57")]
-transform = Transform3D(-4.371139e-08, 0, 1, 0, 1, 0, -1, 0, -4.371139e-08, -6, 0, 2)
-=======
 [node name="Cubicle_1" parent="Partitions/Cubicles" instance=ExtResource("m55")]
 position = Vector3(-6.88, 0, -3)
 rotation_degrees = Vector3(0, 0, 0)
@@ -778,8 +577,6 @@ rotation_degrees = Vector3(0, 90, 0)
 [node name="Cubicle_10" parent="Partitions/Cubicles" instance=ExtResource("m57")]
 position = Vector3(0, 0, 2)
 rotation_degrees = Vector3(0, 90, 0)
->>>>>>> a96bf7533324cd9633c171138b5f57f53f01b975
-
 [node name="Cubicle_7" parent="Partitions/Cubicles" unique_id=523982915 instance=ExtResource("m59")]
 transform = Transform3D(-4.371139e-08, 0, 1, 0, 1, 0, -1, 0, -4.371139e-08, -3, 0, 2)
 
