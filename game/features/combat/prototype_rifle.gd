@@ -42,7 +42,6 @@ func wants_continuous_fire() -> bool: return fire_mode == "auto"
 func try_fire() -> bool:
 	if _cooldown_remaining > 0.0 or _reloading or bullet_scene == null: return false
 	if _magazine_ammo <= 0:
-		start_reload()
 		return false
 	var shooter := get_parent().get_parent() as CollisionObject3D
 	for pellet in pellets_per_shot:

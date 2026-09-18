@@ -390,43 +390,39 @@ position = Vector3(-10, 0, -8)
 rotation_degrees = Vector3(0, 90, 0)
 
 [node name="GlassFull_2" parent="Partitions/Glass" instance=ExtResource("m50")]
-position = Vector3(-10, 0, -6.594)
+position = Vector3(-10, 0, -6.59)
 rotation_degrees = Vector3(0, 90, 0)
 
 [node name="GlassFull_3" parent="Partitions/Glass" instance=ExtResource("m50")]
-position = Vector3(-10, 0, -5.188)
+position = Vector3(-10, 0, -5.18)
 rotation_degrees = Vector3(0, 90, 0)
 
 [node name="GlassFull_4" parent="Partitions/Glass" instance=ExtResource("m50")]
-position = Vector3(-10, 0, -3.782)
+position = Vector3(-10, 0, -3.77)
 rotation_degrees = Vector3(0, 90, 0)
 
 [node name="GlassFull_5" parent="Partitions/Glass" instance=ExtResource("m50")]
-position = Vector3(-4.693, 0, -8)
+position = Vector3(-4.7, 0, -8)
 rotation_degrees = Vector3(0, 0, 0)
 
 [node name="GlassFull_6" parent="Partitions/Glass" instance=ExtResource("m50")]
-position = Vector3(-3.287, 0, -8)
+position = Vector3(-3.29, 0, -8)
 rotation_degrees = Vector3(0, 0, 0)
 
 [node name="GlassFull_7" parent="Partitions/Glass" instance=ExtResource("m50")]
-position = Vector3(-1.881, 0, -8)
+position = Vector3(-1.88, 0, -8)
 rotation_degrees = Vector3(0, 0, 0)
 
 [node name="GlassFull_8" parent="Partitions/Glass" instance=ExtResource("m50")]
-position = Vector3(-1.178, 0, -8)
+position = Vector3(1.18, 0, -8)
 rotation_degrees = Vector3(0, 0, 0)
 
 [node name="GlassFull_9" parent="Partitions/Glass" instance=ExtResource("m50")]
-position = Vector3(1.178, 0, -8)
+position = Vector3(2.59, 0, -8)
 rotation_degrees = Vector3(0, 0, 0)
 
 [node name="GlassFull_10" parent="Partitions/Glass" instance=ExtResource("m50")]
-position = Vector3(2.584, 0, -8)
-rotation_degrees = Vector3(0, 0, 0)
-
-[node name="GlassFull_11" parent="Partitions/Glass" instance=ExtResource("m50")]
-position = Vector3(3.99, 0, -8)
+position = Vector3(4, 0, -8)
 rotation_degrees = Vector3(0, 0, 0)
 
 [node name="GlassFull_12" parent="Partitions/Glass" instance=ExtResource("m50")]
@@ -434,19 +430,19 @@ position = Vector3(10, 0, -8)
 rotation_degrees = Vector3(0, 90, 0)
 
 [node name="GlassFull_13" parent="Partitions/Glass" instance=ExtResource("m50")]
-position = Vector3(10, 0, -6.594)
+position = Vector3(10, 0, -6.59)
 rotation_degrees = Vector3(0, 90, 0)
 
 [node name="GlassFull_15" parent="Partitions/Glass" instance=ExtResource("m50")]
-position = Vector3(10, 0, -3.782)
+position = Vector3(10, 0, -3.77)
 rotation_degrees = Vector3(0, 90, 0)
 
 [node name="GlassFull_16" parent="Partitions/Glass" instance=ExtResource("m50")]
-position = Vector3(-2.812, 0, 6)
+position = Vector3(-2.82, 0, 6)
 rotation_degrees = Vector3(0, 0, 0)
 
 [node name="GlassFull_14" parent="Partitions/Glass" instance=ExtResource("m50")]
-position = Vector3(10, 0, -5.188)
+position = Vector3(10, 0, -5.18)
 rotation_degrees = Vector3(0, 90, 0)
 
 [node name="GlassFull_18" parent="Partitions/Glass" instance=ExtResource("m50")]
@@ -454,30 +450,12 @@ position = Vector3(0, 0, 6)
 rotation_degrees = Vector3(0, 0, 0)
 
 [node name="GlassFull_19" parent="Partitions/Glass" instance=ExtResource("m50")]
-position = Vector3(1.406, 0, 6)
+position = Vector3(1.41, 0, 6)
 rotation_degrees = Vector3(0, 0, 0)
 
 [node name="GlassFull_20" parent="Partitions/Glass" instance=ExtResource("m50")]
-position = Vector3(2.812, 0, 6)
+position = Vector3(2.82, 0, 6)
 rotation_degrees = Vector3(0, 0, 0)
-
-[node name="GlassHalf_1" parent="Partitions/Glass" unique_id=845374270 instance=ExtResource("m46")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -14, 0, -3)
-
-[node name="GlassHalf_2" parent="Partitions/Glass" unique_id=489489524 instance=ExtResource("m46")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -14, 0, 2)
-
-[node name="GlassHalf_3" parent="Partitions/Glass" unique_id=1206944386 instance=ExtResource("m46")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -14, 0, 7)
-
-[node name="GlassHalf_4" parent="Partitions/Glass" unique_id=32398017 instance=ExtResource("m46")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 14, 0, -3)
-
-[node name="GlassHalf_5" parent="Partitions/Glass" unique_id=1581163037 instance=ExtResource("m46")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 14, 0, 2)
-
-[node name="GlassHalf_6" parent="Partitions/Glass" unique_id=1274487653 instance=ExtResource("m46")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 14, 0, 7)
 
 [node name="Cubicle_1" parent="Partitions/Cubicles" instance=ExtResource("m55")]
 position = Vector3(-6.88, 0, -3)
@@ -683,7 +661,7 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1, 11)
 [node name="Crosshair" parent="." unique_id=999217401 instance=ExtResource("m75")]
 
 [node name="GlassFull_17" parent="Partitions/Glass" instance=ExtResource("m50")]
-position = Vector3(-1.406, 0, 6)
+position = Vector3(-1.41, 0, 6)
 rotation_degrees = Vector3(0, 0, 0)
 
 [node name="Radar" parent="." instance=ExtResource("radar_ui")]

@@ -1,172 +1,229 @@
-[gd_scene load_steps=5 format=3]
+[gd_scene load_steps=6 format=3]
 [ext_resource type="Script" path="res://game/presentation/prototype_hud/prototype_hud.gd" id="1"]
 [sub_resource type="StyleBoxFlat" id="Frame"]
-bg_color=Color(0.01,0.045,0.075,0.92)
-border_width_left=2
-border_width_top=2
-border_width_right=2
-border_width_bottom=2
-border_color=Color(0.04,0.75,1,0.95)
-corner_radius_top_left=9
-corner_radius_top_right=9
-corner_radius_bottom_left=9
-corner_radius_bottom_right=9
+bg_color = Color(0.008, 0.035, 0.065, 0.94)
+border_width_left = 2
+border_width_top = 2
+border_width_right = 2
+border_width_bottom = 2
+border_color = Color(0.02, 0.75, 1, 1)
+corner_radius_top_left = 9
+corner_radius_top_right = 9
+corner_radius_bottom_left = 9
+corner_radius_bottom_right = 9
 [sub_resource type="StyleBoxFlat" id="Red"]
-bg_color=Color(0.95,0.07,0.18,1)
+bg_color = Color(0.95, 0.06, 0.18, 1)
 [sub_resource type="StyleBoxFlat" id="Green"]
-bg_color=Color(0.2,0.9,0.14,1)
+bg_color = Color(0.2, 0.9, 0.12, 1)
 [sub_resource type="StyleBoxFlat" id="Dark"]
-bg_color=Color(0.02,0.07,0.11,1)
+bg_color = Color(0.025, 0.075, 0.11, 1)
+[sub_resource type="StyleBoxFlat" id="Slot"]
+bg_color = Color(0.015, 0.06, 0.1, 0.98)
+border_width_left = 1
+border_width_top = 1
+border_width_right = 1
+border_width_bottom = 1
+border_color = Color(0.12, 0.38, 0.55, 1)
+
 [node name="PrototypeHUD" type="CanvasLayer"]
-script=ExtResource("1")
-player_path=NodePath("../Gameplay/Player")
-[node name="Left" type="MarginContainer" parent="."]
-anchors_preset=2
-anchor_top=1.0
-anchor_bottom=1.0
-offset_left=20.0
-offset_top=-165.0
-offset_right=535.0
-offset_bottom=-20.0
-[node name="Frame" type="PanelContainer" parent="Left"]
-theme_override_styles/panel=SubResource("Frame")
-[node name="V" type="VBoxContainer" parent="Left/Frame"]
-[node name="Health" type="HBoxContainer" parent="Left/Frame/V"]
-[node name="Icon" type="Label" parent="Left/Frame/V/Health"]
-custom_minimum_size=Vector2(45,0)
-text="+"
-theme_override_font_sizes/font_size=25
-[node name="Bar" type="ProgressBar" parent="Left/Frame/V/Health"]
-custom_minimum_size=Vector2(330,25)
-show_percentage=false
-theme_override_styles/background=SubResource("Dark")
-theme_override_styles/fill=SubResource("Red")
-[node name="Value" type="Label" parent="Left/Frame/V/Health"]
-text="100 / 100"
-[node name="Armor" type="HBoxContainer" parent="Left/Frame/V"]
-[node name="A1" type="ColorRect" parent="Left/Frame/V/Armor"]
-custom_minimum_size=Vector2(42,5)
-color=Color(0.1,0.85,1,1)
-[node name="A2" type="ColorRect" parent="Left/Frame/V/Armor"]
-custom_minimum_size=Vector2(42,5)
-color=Color(0.1,0.85,1,1)
-[node name="A3" type="ColorRect" parent="Left/Frame/V/Armor"]
-custom_minimum_size=Vector2(42,5)
-color=Color(0.1,0.85,1,1)
-[node name="A4" type="ColorRect" parent="Left/Frame/V/Armor"]
-custom_minimum_size=Vector2(42,5)
-color=Color(0.1,0.85,1,1)
-[node name="A5" type="ColorRect" parent="Left/Frame/V/Armor"]
-custom_minimum_size=Vector2(42,5)
-color=Color(0.1,0.85,1,1)
-[node name="A6" type="ColorRect" parent="Left/Frame/V/Armor"]
-custom_minimum_size=Vector2(42,5)
-color=Color(0.1,0.85,1,1)
-[node name="A7" type="ColorRect" parent="Left/Frame/V/Armor"]
-custom_minimum_size=Vector2(42,5)
-color=Color(0.1,0.85,1,1)
-[node name="A8" type="ColorRect" parent="Left/Frame/V/Armor"]
-custom_minimum_size=Vector2(42,5)
-color=Color(0.1,0.85,1,1)
-[node name="A9" type="ColorRect" parent="Left/Frame/V/Armor"]
-custom_minimum_size=Vector2(42,5)
-color=Color(0.1,0.85,1,1)
-[node name="A10" type="ColorRect" parent="Left/Frame/V/Armor"]
-custom_minimum_size=Vector2(42,5)
-color=Color(0.1,0.85,1,1)
-[node name="Mutation" type="HBoxContainer" parent="Left/Frame/V"]
-[node name="Icon" type="Label" parent="Left/Frame/V/Mutation"]
-custom_minimum_size=Vector2(45,0)
-text="BIO"
-[node name="Wrap" type="Control" parent="Left/Frame/V/Mutation"]
-custom_minimum_size=Vector2(330,25)
-[node name="Bar" type="ProgressBar" parent="Left/Frame/V/Mutation/Wrap"]
-layout_mode=1
-anchors_preset=15
-anchor_right=1.0
-anchor_bottom=1.0
-show_percentage=false
-theme_override_styles/background=SubResource("Dark")
-theme_override_styles/fill=SubResource("Green")
-[node name="Marker" type="ColorRect" parent="Left/Frame/V/Mutation/Wrap"]
-offset_right=3.0
-offset_bottom=25.0
-color=Color(1,0.4,0.05,1)
-[node name="Value" type="Label" parent="Left/Frame/V/Mutation"]
-text="0 / 100"
-[node name="Antidote" type="PanelContainer" parent="Left"]
-offset_left=470.0
-offset_top=70.0
-offset_right=515.0
-offset_bottom=140.0
-theme_override_styles/panel=SubResource("Frame")
-[node name="Key" type="Label" parent="Left/Antidote"]
-text="F"
-horizontal_alignment=1
-[node name="Count" type="Label" parent="Left/Antidote"]
-offset_top=32.0
-offset_bottom=64.0
-text="2"
-horizontal_alignment=1
-[node name="Right" type="MarginContainer" parent="."]
-anchors_preset=3
-anchor_left=1.0
-anchor_top=1.0
-anchor_right=1.0
-anchor_bottom=1.0
-offset_left=-405.0
-offset_top=-175.0
-offset_right=-20.0
-offset_bottom=-20.0
-[node name="Frame" type="PanelContainer" parent="Right"]
-theme_override_styles/panel=SubResource("Frame")
-[node name="Name" type="Label" parent="Right/Frame"]
-offset_left=20.0
-offset_top=14.0
-offset_right=210.0
-offset_bottom=48.0
-text="PISTOL"
-theme_override_font_sizes/font_size=24
-[node name="Ammo" type="HBoxContainer" parent="Right/Frame"]
-offset_left=225.0
-offset_top=10.0
-offset_right=370.0
-offset_bottom=55.0
-[node name="Mag" type="Label" parent="Right/Frame/Ammo"]
-text="15"
-theme_override_font_sizes/font_size=34
-[node name="Reserve" type="Label" parent="Right/Frame/Ammo"]
-text="/ 75"
-theme_override_font_sizes/font_size=19
-[node name="Reload" type="Label" parent="Right/Frame"]
-offset_left=225.0
-offset_top=55.0
-offset_right=370.0
-offset_bottom=78.0
-text=""
-[node name="Slots" type="HBoxContainer" parent="Right/Frame"]
-offset_left=15.0
-offset_top=90.0
-offset_right=370.0
-offset_bottom=145.0
-[node name="S1" type="PanelContainer" parent="Right/Frame/Slots"]
-custom_minimum_size=Vector2(112,50)
-theme_override_styles/panel=SubResource("Frame")
-[node name="Label" type="Label" parent="Right/Frame/Slots/S1"]
-text="1  PISTOL"
-horizontal_alignment=1
-vertical_alignment=1
-[node name="S2" type="PanelContainer" parent="Right/Frame/Slots"]
-custom_minimum_size=Vector2(112,50)
-theme_override_styles/panel=SubResource("Frame")
-[node name="Label" type="Label" parent="Right/Frame/Slots/S2"]
-text="2  UZI"
-horizontal_alignment=1
-vertical_alignment=1
-[node name="S3" type="PanelContainer" parent="Right/Frame/Slots"]
-custom_minimum_size=Vector2(112,50)
-theme_override_styles/panel=SubResource("Frame")
-[node name="Label" type="Label" parent="Right/Frame/Slots/S3"]
-text="3  SHOTGUN"
-horizontal_alignment=1
-vertical_alignment=1
+script = ExtResource("1")
+player_path = NodePath("../Gameplay/Player")
+
+[node name="HealthPanel" type="PanelContainer" parent="."]
+anchors_preset = 2
+anchor_top = 1.0
+anchor_bottom = 1.0
+offset_left = 18.0
+offset_top = -150.0
+offset_right = 520.0
+offset_bottom = -18.0
+theme_override_styles/panel = SubResource("Frame")
+
+[node name="HealthIcon" type="Label" parent="HealthPanel"]
+offset_left = 18.0
+offset_top = 18.0
+offset_right = 62.0
+offset_bottom = 50.0
+text = "+"
+theme_override_font_sizes/font_size = 28
+horizontal_alignment = 1
+
+[node name="HealthBar" type="ProgressBar" parent="HealthPanel"]
+offset_left = 78.0
+offset_top = 20.0
+offset_right = 338.0
+offset_bottom = 43.0
+show_percentage = false
+theme_override_styles/background = SubResource("Dark")
+theme_override_styles/fill = SubResource("Red")
+
+[node name="HealthValue" type="Label" parent="HealthPanel"]
+offset_left = 360.0
+offset_top = 18.0
+offset_right = 475.0
+offset_bottom = 45.0
+text = "100 / 100"
+
+[node name="ArmorSegments" type="HBoxContainer" parent="HealthPanel"]
+offset_left = 78.0
+offset_top = 47.0
+offset_right = 338.0
+offset_bottom = 53.0
+theme_override_constants/separation = 2
+[node name="A1" type="ColorRect" parent="HealthPanel/ArmorSegments"]
+custom_minimum_size = Vector2(24, 6)
+color = Color(0.1, 0.85, 1, 1)
+[node name="A2" type="ColorRect" parent="HealthPanel/ArmorSegments"]
+custom_minimum_size = Vector2(24, 6)
+color = Color(0.1, 0.85, 1, 1)
+[node name="A3" type="ColorRect" parent="HealthPanel/ArmorSegments"]
+custom_minimum_size = Vector2(24, 6)
+color = Color(0.1, 0.85, 1, 1)
+[node name="A4" type="ColorRect" parent="HealthPanel/ArmorSegments"]
+custom_minimum_size = Vector2(24, 6)
+color = Color(0.1, 0.85, 1, 1)
+[node name="A5" type="ColorRect" parent="HealthPanel/ArmorSegments"]
+custom_minimum_size = Vector2(24, 6)
+color = Color(0.1, 0.85, 1, 1)
+[node name="A6" type="ColorRect" parent="HealthPanel/ArmorSegments"]
+custom_minimum_size = Vector2(24, 6)
+color = Color(0.1, 0.85, 1, 1)
+[node name="A7" type="ColorRect" parent="HealthPanel/ArmorSegments"]
+custom_minimum_size = Vector2(24, 6)
+color = Color(0.1, 0.85, 1, 1)
+[node name="A8" type="ColorRect" parent="HealthPanel/ArmorSegments"]
+custom_minimum_size = Vector2(24, 6)
+color = Color(0.1, 0.85, 1, 1)
+[node name="A9" type="ColorRect" parent="HealthPanel/ArmorSegments"]
+custom_minimum_size = Vector2(24, 6)
+color = Color(0.1, 0.85, 1, 1)
+[node name="A10" type="ColorRect" parent="HealthPanel/ArmorSegments"]
+custom_minimum_size = Vector2(24, 6)
+color = Color(0.1, 0.85, 1, 1)
+
+[node name="MutationIcon" type="Label" parent="HealthPanel"]
+offset_left = 18.0
+offset_top = 69.0
+offset_right = 62.0
+offset_bottom = 98.0
+text = "BIO"
+
+[node name="MutationBar" type="ProgressBar" parent="HealthPanel"]
+offset_left = 78.0
+offset_top = 70.0
+offset_right = 338.0
+offset_bottom = 93.0
+show_percentage = false
+theme_override_styles/background = SubResource("Dark")
+theme_override_styles/fill = SubResource("Green")
+
+[node name="CriticalMarker" type="ColorRect" parent="HealthPanel"]
+offset_left = 156.0
+offset_top = 68.0
+offset_right = 159.0
+offset_bottom = 95.0
+color = Color(1, 0.42, 0.05, 1)
+
+[node name="MutationValue" type="Label" parent="HealthPanel"]
+offset_left = 360.0
+offset_top = 68.0
+offset_right = 475.0
+offset_bottom = 96.0
+text = "0 / 100"
+
+[node name="AntidoteKey" type="Label" parent="HealthPanel"]
+offset_left = 430.0
+offset_top = 103.0
+offset_right = 460.0
+offset_bottom = 128.0
+text = "F"
+
+[node name="AntidoteCount" type="Label" parent="HealthPanel"]
+offset_left = 462.0
+offset_top = 103.0
+offset_right = 490.0
+offset_bottom = 128.0
+text = "2"
+
+[node name="WeaponPanel" type="PanelContainer" parent="."]
+anchors_preset = 3
+anchor_left = 1.0
+anchor_top = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = -390.0
+offset_top = -168.0
+offset_right = -18.0
+offset_bottom = -18.0
+theme_override_styles/panel = SubResource("Frame")
+
+[node name="WeaponGlyph" type="Label" parent="WeaponPanel"]
+offset_left = 18.0
+offset_top = 14.0
+offset_right = 155.0
+offset_bottom = 54.0
+text = "▰━━━━"
+theme_override_font_sizes/font_size = 25
+
+[node name="WeaponName" type="Label" parent="WeaponPanel"]
+offset_left = 145.0
+offset_top = 25.0
+offset_right = 230.0
+offset_bottom = 52.0
+text = "PISTOL"
+
+[node name="Magazine" type="Label" parent="WeaponPanel"]
+offset_left = 245.0
+offset_top = 8.0
+offset_right = 310.0
+offset_bottom = 54.0
+text = "15"
+theme_override_font_sizes/font_size = 36
+
+[node name="Reserve" type="Label" parent="WeaponPanel"]
+offset_left = 307.0
+offset_top = 24.0
+offset_right = 365.0
+offset_bottom = 52.0
+text = "/ 75"
+theme_override_font_sizes/font_size = 18
+
+[node name="Reload" type="Label" parent="WeaponPanel"]
+offset_left = 245.0
+offset_top = 55.0
+offset_right = 365.0
+offset_bottom = 76.0
+text = ""
+
+[node name="Slot1" type="PanelContainer" parent="WeaponPanel"]
+offset_left = 14.0
+offset_top = 88.0
+offset_right = 122.0
+offset_bottom = 137.0
+theme_override_styles/panel = SubResource("Slot")
+[node name="Label" type="Label" parent="WeaponPanel/Slot1"]
+text = "1  PISTOL"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="Slot2" type="PanelContainer" parent="WeaponPanel"]
+offset_left = 132.0
+offset_top = 88.0
+offset_right = 240.0
+offset_bottom = 137.0
+theme_override_styles/panel = SubResource("Slot")
+[node name="Label" type="Label" parent="WeaponPanel/Slot2"]
+text = "2  UZI"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="Slot3" type="PanelContainer" parent="WeaponPanel"]
+offset_left = 250.0
+offset_top = 88.0
+offset_right = 358.0
+offset_bottom = 137.0
+theme_override_styles/panel = SubResource("Slot")
+[node name="Label" type="Label" parent="WeaponPanel/Slot3"]
+text = "3  SHOTGUN"
+horizontal_alignment = 1
+vertical_alignment = 1

@@ -36,8 +36,8 @@ func _physics_process(delta: float) -> void:
 	_update_move(delta)
 	var w:=get_current_weapon()
 	if w!=null and _roll_remaining<=0.0:
-		var firing: bool = Input.is_action_pressed("fire") if w.call("wants_continuous_fire") else Input.is_action_just_pressed("fire")
-		if firing: w.call("try_fire")
+		if Input.is_action_just_pressed("fire"):
+			w.call("try_fire")
 func _handle_actions() -> void:
 	if Input.is_action_just_pressed("weapon_1"): _select_weapon(0)
 	elif Input.is_action_just_pressed("weapon_2"): _select_weapon(1)
