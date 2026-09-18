@@ -30,7 +30,7 @@ corner_radius_bottom_left = 3
 
 [node name="PrototypeHUD" type="CanvasLayer"]
 script = ExtResource("1_hud")
-player_path = NodePath("../OfficeFloor/Player")
+player_path = NodePath("../OfficeFloor/Gameplay/Player")
 
 [node name="Margin" type="MarginContainer" parent="."]
 offset_left = 18.0

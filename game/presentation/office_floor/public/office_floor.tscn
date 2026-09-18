@@ -1,297 +1,570 @@
-[gd_scene load_steps=36 format=3]
+[gd_scene load_steps=31 format=3]
 
 [ext_resource type="PackedScene" path="res://game/features/player/public/player.tscn" id="1_player"]
-[ext_resource type="PackedScene" path="res://models/objects/01_wall_straight.glb" id="2_wall"]
-[ext_resource type="PackedScene" path="res://models/objects/07_window_double.glb" id="3_window"]
-[ext_resource type="PackedScene" path="res://models/objects/32_wall_corner.glb" id="4_corner"]
-[ext_resource type="PackedScene" path="res://models/objects/08_workstation_quad.glb" id="5_workstation"]
-[ext_resource type="PackedScene" path="res://models/objects/13_office_desk.glb" id="6_desk"]
-[ext_resource type="PackedScene" path="res://models/objects/14_office_chair.glb" id="7_chair"]
-[ext_resource type="PackedScene" path="res://models/objects/15_sofa.glb" id="8_sofa"]
-[ext_resource type="PackedScene" path="res://models/objects/16_coffee_table.glb" id="9_coffee"]
-[ext_resource type="PackedScene" path="res://models/objects/30_plant_large.glb" id="10_plant_large"]
-[ext_resource type="PackedScene" path="res://models/objects/31_plant_medium.glb" id="11_plant_medium"]
-[ext_resource type="PackedScene" path="res://models/objects/01_locker_tall.glb" id="12_locker"]
-[ext_resource type="PackedScene" path="res://models/objects/17_file_cabinet_tall.glb" id="13_file_cabinet"]
-[ext_resource type="PackedScene" path="res://models/objects/21_crate_large.glb" id="14_crate_large"]
-[ext_resource type="PackedScene" path="res://models/objects/22_crate_small.glb" id="15_crate_small"]
-[ext_resource type="PackedScene" path="res://models/objects/23_cardboard_boxes.glb" id="16_boxes"]
-[ext_resource type="PackedScene" path="res://models/objects/19_water_cooler.glb" id="17_water"]
-[ext_resource type="PackedScene" path="res://models/objects/20_fire_extinguisher.glb" id="18_extinguisher"]
-[ext_resource type="PackedScene" path="res://models/objects/25_glass_wall_full.glb" id="19_glass_wall"]
-[ext_resource type="PackedScene" path="res://models/objects/23_glass_partition_half.glb" id="20_glass_half"]
-[ext_resource type="PackedScene" path="res://models/objects/33_alien_growth.glb" id="21_growth"]
-[ext_resource type="PackedScene" path="res://models/objects/24_medkit_closed.glb" id="22_medkit"]
-[ext_resource type="PackedScene" path="res://models/objects/25_ammo_case_red_open.glb" id="23_ammo"]
-[ext_resource type="PackedScene" path="res://models/objects/11_rubble.glb" id="24_rubble"]
-[ext_resource type="PackedScene" path="res://models/objects/06_wall_broken.glb" id="25_broken_wall"]
-[ext_resource type="PackedScene" path="res://models/objects/13_table_long.glb" id="26_table_long"]
-[ext_resource type="PackedScene" path="res://models/objects/09_standing_desk.glb" id="27_standing_desk"]
-[ext_resource type="Script" path="res://game/presentation/office_floor/office_floor.gd" id="28_floor_script"]
-[ext_resource type="PackedScene" path="res://game/features/infected/public/infected_capsule.tscn" id="29_enemy"]
-[ext_resource type="PackedScene" path="res://game/features/infection_source/public/infection_source.tscn" id="30_source"]
+[ext_resource type="PackedScene" path="res://game/presentation/office_floor/assets/wall_straight.tscn" id="2_wall"]
+[ext_resource type="PackedScene" path="res://game/presentation/office_floor/assets/window_double.tscn" id="3_window"]
+[ext_resource type="PackedScene" path="res://game/presentation/office_floor/assets/glass_wall.tscn" id="4_glass"]
+[ext_resource type="PackedScene" path="res://game/presentation/office_floor/assets/glass_half.tscn" id="5_half"]
+[ext_resource type="PackedScene" path="res://game/presentation/office_floor/assets/cubicle_partition.tscn" id="6_part"]
+[ext_resource type="PackedScene" path="res://game/presentation/office_floor/assets/desk.tscn" id="7_desk"]
+[ext_resource type="PackedScene" path="res://game/presentation/office_floor/assets/standing_desk.tscn" id="8_standing"]
+[ext_resource type="PackedScene" path="res://game/presentation/office_floor/assets/long_table.tscn" id="9_long"]
+[ext_resource type="PackedScene" path="res://game/presentation/office_floor/assets/coffee_table.tscn" id="10_coffee"]
+[ext_resource type="PackedScene" path="res://game/presentation/office_floor/assets/sofa.tscn" id="11_sofa"]
+[ext_resource type="PackedScene" path="res://game/presentation/office_floor/assets/workstation_quad.tscn" id="12_workstation"]
+[ext_resource type="PackedScene" path="res://game/presentation/office_floor/assets/locker.tscn" id="13_locker"]
+[ext_resource type="PackedScene" path="res://game/presentation/office_floor/assets/file_cabinet.tscn" id="14_file"]
+[ext_resource type="PackedScene" path="res://game/presentation/office_floor/assets/crate_large.tscn" id="15_crate"]
+[ext_resource type="PackedScene" path="res://game/presentation/office_floor/assets/plant_large.tscn" id="16_plant_l"]
+[ext_resource type="PackedScene" path="res://game/presentation/office_floor/assets/plant_medium.tscn" id="17_plant_m"]
+[ext_resource type="PackedScene" path="res://game/presentation/office_floor/assets/water_cooler.tscn" id="18_water"]
+[ext_resource type="PackedScene" path="res://game/presentation/office_floor/assets/fire_extinguisher.tscn" id="19_ext"]
+[ext_resource type="PackedScene" path="res://game/presentation/office_floor/assets/medkit.tscn" id="20_medkit"]
+[ext_resource type="PackedScene" path="res://game/presentation/office_floor/assets/ammo_case.tscn" id="21_ammo"]
+[ext_resource type="PackedScene" path="res://game/presentation/office_floor/assets/rubble.tscn" id="22_rubble"]
+[ext_resource type="PackedScene" path="res://game/presentation/office_floor/assets/broken_wall.tscn" id="23_broken"]
+[ext_resource type="PackedScene" path="res://game/features/infected/public/infected_capsule.tscn" id="24_enemy"]
+[ext_resource type="PackedScene" path="res://game/features/infection_source/public/infection_source.tscn" id="25_source"]
+[ext_resource type="Script" path="res://game/presentation/office_floor/office_floor.gd" id="26_script"]
 
 [sub_resource type="StandardMaterial3D" id="FloorMaterial"]
-albedo_color = Color(0.42, 0.45, 0.5, 1)
-roughness = 0.9
+albedo_color = Color(0.32, 0.36, 0.42, 1)
+roughness = 0.92
 
 [sub_resource type="PlaneMesh" id="FloorMesh"]
 material = SubResource("FloorMaterial")
-size = Vector2(32, 24)
-subdivide_width = 15
-subdivide_depth = 11
+size = Vector2(36, 28)
+subdivide_width = 17
+subdivide_depth = 13
 
 [sub_resource type="BoxShape3D" id="FloorCollision"]
-size = Vector3(32, 0.2, 24)
+size = Vector3(36, 0.2, 28)
 
 [sub_resource type="BoxShape3D" id="NorthSouthCollision"]
-size = Vector3(32.5, 4, 0.5)
+size = Vector3(36.5, 4, 0.5)
 
 [sub_resource type="BoxShape3D" id="EastWestCollision"]
-size = Vector3(0.5, 4, 24.5)
+size = Vector3(0.5, 4, 28.5)
 
 [sub_resource type="Environment" id="OfficeEnvironment"]
 background_mode = 1
-background_color = Color(0.11, 0.15, 0.23, 1)
+background_color = Color(0.07, 0.1, 0.16, 1)
 ambient_light_source = 3
-ambient_light_color = Color(0.72, 0.8, 1, 1)
-ambient_light_energy = 0.8
+ambient_light_color = Color(0.68, 0.78, 1, 1)
+ambient_light_energy = 0.68
 tonemap_mode = 2
 
 [node name="OfficeFloor" type="Node3D"]
-script = ExtResource("28_floor_script")
+script = ExtResource("26_script")
 
 [node name="WorldEnvironment" type="WorldEnvironment" parent="."]
 environment = SubResource("OfficeEnvironment")
 
 [node name="KeyLight" type="DirectionalLight3D" parent="."]
-rotation_degrees = Vector3(-55, -35, 0)
-light_energy = 1.1
+rotation_degrees = Vector3(-58, -35, 0)
+light_energy = 1.0
 shadow_enabled = true
 
 [node name="Floor" type="MeshInstance3D" parent="."]
 mesh = SubResource("FloorMesh")
 
 [node name="FloorBody" type="StaticBody3D" parent="."]
-
 [node name="CollisionShape3D" type="CollisionShape3D" parent="FloorBody"]
 position = Vector3(0, -0.1, 0)
 shape = SubResource("FloorCollision")
 
 [node name="PerimeterCollision" type="Node3D" parent="."]
-
 [node name="NorthBody" type="StaticBody3D" parent="PerimeterCollision"]
-position = Vector3(0, 2, -12.15)
-
+position = Vector3(0, 2, -14.15)
 [node name="CollisionShape3D" type="CollisionShape3D" parent="PerimeterCollision/NorthBody"]
 shape = SubResource("NorthSouthCollision")
-
 [node name="SouthBody" type="StaticBody3D" parent="PerimeterCollision"]
-position = Vector3(0, 2, 12.15)
-
+position = Vector3(0, 2, 14.15)
 [node name="CollisionShape3D" type="CollisionShape3D" parent="PerimeterCollision/SouthBody"]
 shape = SubResource("NorthSouthCollision")
-
 [node name="WestBody" type="StaticBody3D" parent="PerimeterCollision"]
-position = Vector3(-16.15, 2, 0)
-
+position = Vector3(-18.15, 2, 0)
 [node name="CollisionShape3D" type="CollisionShape3D" parent="PerimeterCollision/WestBody"]
 shape = SubResource("EastWestCollision")
-
 [node name="EastBody" type="StaticBody3D" parent="PerimeterCollision"]
-position = Vector3(16.15, 2, 0)
-
+position = Vector3(18.15, 2, 0)
 [node name="CollisionShape3D" type="CollisionShape3D" parent="PerimeterCollision/EastBody"]
 shape = SubResource("EastWestCollision")
 
-[node name="PerimeterModels" type="Node3D" parent="."]
+[node name="Architecture" type="Node3D" parent="."]
+[node name="Walls" type="Node3D" parent="Architecture"]
+[node name="Windows" type="Node3D" parent="Architecture"]
+[node name="Partitions" type="Node3D" parent="Architecture"]
+[node name="Furniture" type="Node3D" parent="."]
+[node name="Desks" type="Node3D" parent="Furniture"]
+[node name="Seating" type="Node3D" parent="Furniture"]
+[node name="Storage" type="Node3D" parent="Furniture"]
+[node name="OfficeProps" type="Node3D" parent="."]
+[node name="Gameplay" type="Node3D" parent="."]
+[node name="Enemies" type="Node3D" parent="Gameplay"]
 
-[node name="NorthWindow01" parent="PerimeterModels" instance=ExtResource("3_window")]
-position = Vector3(-14, 0, -12)
-[node name="NorthWindow02" parent="PerimeterModels" instance=ExtResource("3_window")]
-position = Vector3(-10, 0, -12)
-[node name="NorthWindow03" parent="PerimeterModels" instance=ExtResource("3_window")]
-position = Vector3(-6, 0, -12)
-[node name="NorthWindow04" parent="PerimeterModels" instance=ExtResource("3_window")]
-position = Vector3(-2, 0, -12)
-[node name="NorthWindow05" parent="PerimeterModels" instance=ExtResource("3_window")]
-position = Vector3(2, 0, -12)
-[node name="NorthWindow06" parent="PerimeterModels" instance=ExtResource("3_window")]
-position = Vector3(6, 0, -12)
-[node name="NorthWindow07" parent="PerimeterModels" instance=ExtResource("3_window")]
-position = Vector3(10, 0, -12)
-[node name="NorthWindow08" parent="PerimeterModels" instance=ExtResource("3_window")]
-position = Vector3(14, 0, -12)
+[node name="NorthWindow1" parent="Architecture/Windows" instance=ExtResource("3_window")]
+position = Vector3(-16, 0, -14)
 
-[node name="SouthWall01" parent="PerimeterModels" instance=ExtResource("2_wall")]
-position = Vector3(-14, 0, 12)
-rotation_degrees = Vector3(0, 180, 0)
-[node name="SouthWall02" parent="PerimeterModels" instance=ExtResource("2_wall")]
-position = Vector3(-10, 0, 12)
-rotation_degrees = Vector3(0, 180, 0)
-[node name="SouthWall03" parent="PerimeterModels" instance=ExtResource("2_wall")]
-position = Vector3(-6, 0, 12)
-rotation_degrees = Vector3(0, 180, 0)
-[node name="SouthWall04" parent="PerimeterModels" instance=ExtResource("2_wall")]
-position = Vector3(-2, 0, 12)
-rotation_degrees = Vector3(0, 180, 0)
-[node name="SouthWall05" parent="PerimeterModels" instance=ExtResource("2_wall")]
-position = Vector3(2, 0, 12)
-rotation_degrees = Vector3(0, 180, 0)
-[node name="SouthWall06" parent="PerimeterModels" instance=ExtResource("2_wall")]
-position = Vector3(6, 0, 12)
-rotation_degrees = Vector3(0, 180, 0)
-[node name="SouthWall07" parent="PerimeterModels" instance=ExtResource("2_wall")]
-position = Vector3(10, 0, 12)
-rotation_degrees = Vector3(0, 180, 0)
-[node name="SouthWall08" parent="PerimeterModels" instance=ExtResource("2_wall")]
-position = Vector3(14, 0, 12)
+[node name="NorthWindow2" parent="Architecture/Windows" instance=ExtResource("3_window")]
+position = Vector3(-12, 0, -14)
+
+[node name="NorthWindow3" parent="Architecture/Windows" instance=ExtResource("3_window")]
+position = Vector3(-8, 0, -14)
+
+[node name="NorthWindow4" parent="Architecture/Windows" instance=ExtResource("3_window")]
+position = Vector3(-4, 0, -14)
+
+[node name="NorthWindow5" parent="Architecture/Windows" instance=ExtResource("3_window")]
+position = Vector3(0, 0, -14)
+
+[node name="NorthWindow6" parent="Architecture/Windows" instance=ExtResource("3_window")]
+position = Vector3(4, 0, -14)
+
+[node name="NorthWindow7" parent="Architecture/Windows" instance=ExtResource("3_window")]
+position = Vector3(8, 0, -14)
+
+[node name="NorthWindow8" parent="Architecture/Windows" instance=ExtResource("3_window")]
+position = Vector3(12, 0, -14)
+
+[node name="NorthWindow9" parent="Architecture/Windows" instance=ExtResource("3_window")]
+position = Vector3(16, 0, -14)
+
+[node name="SouthWall1" parent="Architecture/Walls" instance=ExtResource("2_wall")]
+position = Vector3(-16, 0, 14)
 rotation_degrees = Vector3(0, 180, 0)
 
-[node name="WestWall01" parent="PerimeterModels" instance=ExtResource("2_wall")]
-position = Vector3(-16, 0, -10)
-rotation_degrees = Vector3(0, -90, 0)
-[node name="WestWall02" parent="PerimeterModels" instance=ExtResource("2_wall")]
-position = Vector3(-16, 0, -6)
-rotation_degrees = Vector3(0, -90, 0)
-[node name="WestWall03" parent="PerimeterModels" instance=ExtResource("2_wall")]
-position = Vector3(-16, 0, -2)
-rotation_degrees = Vector3(0, -90, 0)
-[node name="WestWall04" parent="PerimeterModels" instance=ExtResource("2_wall")]
-position = Vector3(-16, 0, 2)
-rotation_degrees = Vector3(0, -90, 0)
-[node name="WestWall05" parent="PerimeterModels" instance=ExtResource("2_wall")]
-position = Vector3(-16, 0, 6)
-rotation_degrees = Vector3(0, -90, 0)
-[node name="WestWall06" parent="PerimeterModels" instance=ExtResource("2_wall")]
-position = Vector3(-16, 0, 10)
+[node name="SouthWall2" parent="Architecture/Walls" instance=ExtResource("2_wall")]
+position = Vector3(-12, 0, 14)
+rotation_degrees = Vector3(0, 180, 0)
+
+[node name="SouthWall3" parent="Architecture/Walls" instance=ExtResource("2_wall")]
+position = Vector3(-8, 0, 14)
+rotation_degrees = Vector3(0, 180, 0)
+
+[node name="SouthWall4" parent="Architecture/Walls" instance=ExtResource("2_wall")]
+position = Vector3(-4, 0, 14)
+rotation_degrees = Vector3(0, 180, 0)
+
+[node name="SouthWall5" parent="Architecture/Walls" instance=ExtResource("2_wall")]
+position = Vector3(0, 0, 14)
+rotation_degrees = Vector3(0, 180, 0)
+
+[node name="SouthWall6" parent="Architecture/Walls" instance=ExtResource("2_wall")]
+position = Vector3(4, 0, 14)
+rotation_degrees = Vector3(0, 180, 0)
+
+[node name="SouthWall7" parent="Architecture/Walls" instance=ExtResource("2_wall")]
+position = Vector3(8, 0, 14)
+rotation_degrees = Vector3(0, 180, 0)
+
+[node name="SouthWall8" parent="Architecture/Walls" instance=ExtResource("2_wall")]
+position = Vector3(12, 0, 14)
+rotation_degrees = Vector3(0, 180, 0)
+
+[node name="SouthWall9" parent="Architecture/Walls" instance=ExtResource("2_wall")]
+position = Vector3(16, 0, 14)
+rotation_degrees = Vector3(0, 180, 0)
+
+[node name="WestWall1" parent="Architecture/Walls" instance=ExtResource("2_wall")]
+position = Vector3(-18, 0, -12)
 rotation_degrees = Vector3(0, -90, 0)
 
-[node name="EastWall01" parent="PerimeterModels" instance=ExtResource("2_wall")]
-position = Vector3(16, 0, -10)
-rotation_degrees = Vector3(0, 90, 0)
-[node name="EastWall02" parent="PerimeterModels" instance=ExtResource("2_wall")]
-position = Vector3(16, 0, -6)
-rotation_degrees = Vector3(0, 90, 0)
-[node name="EastWall03" parent="PerimeterModels" instance=ExtResource("2_wall")]
-position = Vector3(16, 0, -2)
-rotation_degrees = Vector3(0, 90, 0)
-[node name="EastWall04" parent="PerimeterModels" instance=ExtResource("2_wall")]
-position = Vector3(16, 0, 2)
-rotation_degrees = Vector3(0, 90, 0)
-[node name="EastWall05" parent="PerimeterModels" instance=ExtResource("2_wall")]
-position = Vector3(16, 0, 6)
-rotation_degrees = Vector3(0, 90, 0)
-[node name="EastWall06" parent="PerimeterModels" instance=ExtResource("2_wall")]
-position = Vector3(16, 0, 10)
+[node name="WestWall2" parent="Architecture/Walls" instance=ExtResource("2_wall")]
+position = Vector3(-18, 0, -8)
+rotation_degrees = Vector3(0, -90, 0)
+
+[node name="WestWall3" parent="Architecture/Walls" instance=ExtResource("2_wall")]
+position = Vector3(-18, 0, -4)
+rotation_degrees = Vector3(0, -90, 0)
+
+[node name="WestWall4" parent="Architecture/Walls" instance=ExtResource("2_wall")]
+position = Vector3(-18, 0, 0)
+rotation_degrees = Vector3(0, -90, 0)
+
+[node name="WestWall5" parent="Architecture/Walls" instance=ExtResource("2_wall")]
+position = Vector3(-18, 0, 4)
+rotation_degrees = Vector3(0, -90, 0)
+
+[node name="WestWall6" parent="Architecture/Walls" instance=ExtResource("2_wall")]
+position = Vector3(-18, 0, 8)
+rotation_degrees = Vector3(0, -90, 0)
+
+[node name="WestWall7" parent="Architecture/Walls" instance=ExtResource("2_wall")]
+position = Vector3(-18, 0, 12)
+rotation_degrees = Vector3(0, -90, 0)
+
+[node name="EastWall1" parent="Architecture/Walls" instance=ExtResource("2_wall")]
+position = Vector3(18, 0, -12)
 rotation_degrees = Vector3(0, 90, 0)
 
-[node name="NorthWestCorner" parent="PerimeterModels" instance=ExtResource("4_corner")]
+[node name="EastWall2" parent="Architecture/Walls" instance=ExtResource("2_wall")]
+position = Vector3(18, 0, -8)
+rotation_degrees = Vector3(0, 90, 0)
+
+[node name="EastWall3" parent="Architecture/Walls" instance=ExtResource("2_wall")]
+position = Vector3(18, 0, -4)
+rotation_degrees = Vector3(0, 90, 0)
+
+[node name="EastWall4" parent="Architecture/Walls" instance=ExtResource("2_wall")]
+position = Vector3(18, 0, 0)
+rotation_degrees = Vector3(0, 90, 0)
+
+[node name="EastWall5" parent="Architecture/Walls" instance=ExtResource("2_wall")]
+position = Vector3(18, 0, 4)
+rotation_degrees = Vector3(0, 90, 0)
+
+[node name="EastWall6" parent="Architecture/Walls" instance=ExtResource("2_wall")]
+position = Vector3(18, 0, 8)
+rotation_degrees = Vector3(0, 90, 0)
+
+[node name="EastWall7" parent="Architecture/Walls" instance=ExtResource("2_wall")]
+position = Vector3(18, 0, 12)
+rotation_degrees = Vector3(0, 90, 0)
+
+[node name="GlassWall1" parent="Architecture/Partitions" instance=ExtResource("4_glass")]
+position = Vector3(-10, 0, -8)
+rotation_degrees = Vector3(0, 90, 0)
+
+[node name="GlassWall2" parent="Architecture/Partitions" instance=ExtResource("4_glass")]
+position = Vector3(-10, 0, -4)
+rotation_degrees = Vector3(0, 90, 0)
+
+[node name="GlassWall3" parent="Architecture/Partitions" instance=ExtResource("4_glass")]
+position = Vector3(-10, 0, 0)
+rotation_degrees = Vector3(0, 90, 0)
+
+[node name="GlassWall4" parent="Architecture/Partitions" instance=ExtResource("4_glass")]
+position = Vector3(-10, 0, 4)
+rotation_degrees = Vector3(0, 90, 0)
+
+[node name="GlassWall5" parent="Architecture/Partitions" instance=ExtResource("4_glass")]
+position = Vector3(-4, 0, -8)
+rotation_degrees = Vector3(0, 0, 0)
+
+[node name="GlassWall6" parent="Architecture/Partitions" instance=ExtResource("4_glass")]
+position = Vector3(0, 0, -8)
+rotation_degrees = Vector3(0, 0, 0)
+
+[node name="GlassWall7" parent="Architecture/Partitions" instance=ExtResource("4_glass")]
+position = Vector3(4, 0, -8)
+rotation_degrees = Vector3(0, 0, 0)
+
+[node name="GlassWall8" parent="Architecture/Partitions" instance=ExtResource("4_glass")]
+position = Vector3(8, 0, -8)
+rotation_degrees = Vector3(0, 90, 0)
+
+[node name="GlassWall9" parent="Architecture/Partitions" instance=ExtResource("4_glass")]
+position = Vector3(8, 0, -4)
+rotation_degrees = Vector3(0, 90, 0)
+
+[node name="GlassWall10" parent="Architecture/Partitions" instance=ExtResource("4_glass")]
+position = Vector3(8, 0, 0)
+rotation_degrees = Vector3(0, 90, 0)
+
+[node name="GlassWall11" parent="Architecture/Partitions" instance=ExtResource("4_glass")]
+position = Vector3(-6, 0, 6)
+rotation_degrees = Vector3(0, 0, 0)
+
+[node name="GlassWall12" parent="Architecture/Partitions" instance=ExtResource("4_glass")]
+position = Vector3(-2, 0, 6)
+rotation_degrees = Vector3(0, 0, 0)
+
+[node name="GlassWall13" parent="Architecture/Partitions" instance=ExtResource("4_glass")]
+position = Vector3(2, 0, 6)
+rotation_degrees = Vector3(0, 0, 0)
+
+[node name="GlassWall14" parent="Architecture/Partitions" instance=ExtResource("4_glass")]
+position = Vector3(6, 0, 6)
+rotation_degrees = Vector3(0, 0, 0)
+
+[node name="HalfPartition1" parent="Architecture/Partitions" instance=ExtResource("5_half")]
+position = Vector3(-14, 0, -4)
+rotation_degrees = Vector3(0, 0, 0)
+
+[node name="HalfPartition2" parent="Architecture/Partitions" instance=ExtResource("5_half")]
+position = Vector3(-14, 0, 1)
+rotation_degrees = Vector3(0, 0, 0)
+
+[node name="HalfPartition3" parent="Architecture/Partitions" instance=ExtResource("5_half")]
+position = Vector3(-14, 0, 6)
+rotation_degrees = Vector3(0, 0, 0)
+
+[node name="HalfPartition4" parent="Architecture/Partitions" instance=ExtResource("5_half")]
+position = Vector3(12, 0, -4)
+rotation_degrees = Vector3(0, 0, 0)
+
+[node name="HalfPartition5" parent="Architecture/Partitions" instance=ExtResource("5_half")]
+position = Vector3(12, 0, 1)
+rotation_degrees = Vector3(0, 0, 0)
+
+[node name="HalfPartition6" parent="Architecture/Partitions" instance=ExtResource("5_half")]
+position = Vector3(12, 0, 6)
+rotation_degrees = Vector3(0, 0, 0)
+
+[node name="HalfPartition7" parent="Architecture/Partitions" instance=ExtResource("5_half")]
+position = Vector3(-4, 0, -2)
+rotation_degrees = Vector3(0, 90, 0)
+
+[node name="HalfPartition8" parent="Architecture/Partitions" instance=ExtResource("5_half")]
+position = Vector3(0, 0, -2)
+rotation_degrees = Vector3(0, 90, 0)
+
+[node name="HalfPartition9" parent="Architecture/Partitions" instance=ExtResource("5_half")]
+position = Vector3(4, 0, -2)
+rotation_degrees = Vector3(0, 90, 0)
+
+[node name="CubiclePartition1" parent="Architecture/Partitions" instance=ExtResource("6_part")]
+position = Vector3(-7, 0, -5)
+rotation_degrees = Vector3(0, 0, 0)
+
+[node name="CubiclePartition2" parent="Architecture/Partitions" instance=ExtResource("6_part")]
+position = Vector3(-4, 0, -5)
+rotation_degrees = Vector3(0, 0, 0)
+
+[node name="CubiclePartition3" parent="Architecture/Partitions" instance=ExtResource("6_part")]
+position = Vector3(-1, 0, -5)
+rotation_degrees = Vector3(0, 0, 0)
+
+[node name="CubiclePartition4" parent="Architecture/Partitions" instance=ExtResource("6_part")]
+position = Vector3(2, 0, -5)
+rotation_degrees = Vector3(0, 0, 0)
+
+[node name="CubiclePartition5" parent="Architecture/Partitions" instance=ExtResource("6_part")]
+position = Vector3(5, 0, -5)
+rotation_degrees = Vector3(0, 0, 0)
+
+[node name="CubiclePartition6" parent="Architecture/Partitions" instance=ExtResource("6_part")]
+position = Vector3(-7, 0, 2)
+rotation_degrees = Vector3(0, 90, 0)
+
+[node name="CubiclePartition7" parent="Architecture/Partitions" instance=ExtResource("6_part")]
+position = Vector3(-7, 0, 5)
+rotation_degrees = Vector3(0, 90, 0)
+
+[node name="CubiclePartition8" parent="Architecture/Partitions" instance=ExtResource("6_part")]
+position = Vector3(7, 0, 2)
+rotation_degrees = Vector3(0, 90, 0)
+
+[node name="CubiclePartition9" parent="Architecture/Partitions" instance=ExtResource("6_part")]
+position = Vector3(7, 0, 5)
+rotation_degrees = Vector3(0, 90, 0)
+
+[node name="BrokenWall" parent="Architecture/Partitions" instance=ExtResource("23_broken")]
+position = Vector3(-10, 0, 8)
+rotation_degrees = Vector3(0, 90, 0)
+
+[node name="Rubble" parent="OfficeProps" instance=ExtResource("22_rubble")]
+position = Vector3(-8.8, 0, 8.1)
+
+[node name="Desk1" parent="Furniture/Desks" instance=ExtResource("7_desk")]
+position = Vector3(-14, 0, -9)
+rotation_degrees = Vector3(0, 0, 0)
+
+[node name="Desk2" parent="Furniture/Desks" instance=ExtResource("7_desk")]
+position = Vector3(-9, 0, -10)
+rotation_degrees = Vector3(0, 0, 0)
+
+[node name="Desk3" parent="Furniture/Desks" instance=ExtResource("7_desk")]
+position = Vector3(-4, 0, -10)
+rotation_degrees = Vector3(0, 0, 0)
+
+[node name="Desk4" parent="Furniture/Desks" instance=ExtResource("7_desk")]
+position = Vector3(4, 0, -10)
+rotation_degrees = Vector3(0, 180, 0)
+
+[node name="Desk5" parent="Furniture/Desks" instance=ExtResource("7_desk")]
+position = Vector3(9, 0, -10)
+rotation_degrees = Vector3(0, 180, 0)
+
+[node name="Desk6" parent="Furniture/Desks" instance=ExtResource("7_desk")]
+position = Vector3(14, 0, -9)
+rotation_degrees = Vector3(0, 180, 0)
+
+[node name="Desk7" parent="Furniture/Desks" instance=ExtResource("7_desk")]
+position = Vector3(-14, 0, 8)
+rotation_degrees = Vector3(0, 0, 0)
+
+[node name="Desk8" parent="Furniture/Desks" instance=ExtResource("7_desk")]
+position = Vector3(-9, 0, 9)
+rotation_degrees = Vector3(0, 0, 0)
+
+[node name="Desk9" parent="Furniture/Desks" instance=ExtResource("7_desk")]
+position = Vector3(-4, 0, 9)
+rotation_degrees = Vector3(0, 0, 0)
+
+[node name="Desk10" parent="Furniture/Desks" instance=ExtResource("7_desk")]
+position = Vector3(4, 0, 9)
+rotation_degrees = Vector3(0, 180, 0)
+
+[node name="Desk11" parent="Furniture/Desks" instance=ExtResource("7_desk")]
+position = Vector3(9, 0, 9)
+rotation_degrees = Vector3(0, 180, 0)
+
+[node name="Desk12" parent="Furniture/Desks" instance=ExtResource("7_desk")]
+position = Vector3(14, 0, 8)
+rotation_degrees = Vector3(0, 180, 0)
+
+[node name="Workstation1" parent="Furniture/Desks" instance=ExtResource("12_workstation")]
+position = Vector3(-4, 0, -4)
+rotation_degrees = Vector3(0, 0, 0)
+
+[node name="Workstation2" parent="Furniture/Desks" instance=ExtResource("12_workstation")]
+position = Vector3(4, 0, -4)
+rotation_degrees = Vector3(0, 0, 0)
+
+[node name="Workstation3" parent="Furniture/Desks" instance=ExtResource("12_workstation")]
+position = Vector3(-4, 0, 3)
+rotation_degrees = Vector3(0, 0, 0)
+
+[node name="Workstation4" parent="Furniture/Desks" instance=ExtResource("12_workstation")]
+position = Vector3(4, 0, 3)
+rotation_degrees = Vector3(0, 0, 0)
+
+[node name="StandingDeskWest" parent="Furniture/Desks" instance=ExtResource("8_standing")]
+position = Vector3(-14, 0, 3)
+rotation_degrees = Vector3(0, 90, 0)
+
+[node name="StandingDeskEast" parent="Furniture/Desks" instance=ExtResource("8_standing")]
+position = Vector3(14, 0, 3)
+rotation_degrees = Vector3(0, -90, 0)
+
+[node name="ConferenceTable" parent="Furniture/Desks" instance=ExtResource("9_long")]
+position = Vector3(0, 0, 10)
+rotation_degrees = Vector3(0, 0, 0)
+
+[node name="SofaNW" parent="Furniture/Seating" instance=ExtResource("11_sofa")]
+position = Vector3(-14, 0, -11)
+rotation_degrees = Vector3(0, 90, 0)
+
+[node name="SofaSW" parent="Furniture/Seating" instance=ExtResource("11_sofa")]
+position = Vector3(-14, 0, 11)
+rotation_degrees = Vector3(0, 90, 0)
+
+[node name="SofaNE" parent="Furniture/Seating" instance=ExtResource("11_sofa")]
+position = Vector3(14, 0, -11)
+rotation_degrees = Vector3(0, -90, 0)
+
+[node name="SofaSE" parent="Furniture/Seating" instance=ExtResource("11_sofa")]
+position = Vector3(14, 0, 11)
+rotation_degrees = Vector3(0, -90, 0)
+
+[node name="CoffeeNW" parent="Furniture/Seating" instance=ExtResource("10_coffee")]
+position = Vector3(-11.7, 0, -11)
+
+[node name="CoffeeSE" parent="Furniture/Seating" instance=ExtResource("10_coffee")]
+position = Vector3(11.7, 0, 11)
+
+[node name="LockerEast1" parent="Furniture/Storage" instance=ExtResource("13_locker")]
+position = Vector3(16, 0, 5)
+rotation_degrees = Vector3(0, 90, 0)
+
+[node name="LockerEast2" parent="Furniture/Storage" instance=ExtResource("13_locker")]
+position = Vector3(16, 0, 7)
+rotation_degrees = Vector3(0, 90, 0)
+
+[node name="FileWest1" parent="Furniture/Storage" instance=ExtResource("14_file")]
+position = Vector3(-16, 0, 5)
+rotation_degrees = Vector3(0, -90, 0)
+
+[node name="FileWest2" parent="Furniture/Storage" instance=ExtResource("14_file")]
+position = Vector3(-16, 0, 7)
+rotation_degrees = Vector3(0, -90, 0)
+
+[node name="Crate1" parent="Furniture/Storage" instance=ExtResource("15_crate")]
+position = Vector3(10, 0, 1)
+
+[node name="Crate2" parent="Furniture/Storage" instance=ExtResource("15_crate")]
+position = Vector3(12, 0, 1)
+
+[node name="Crate3" parent="Furniture/Storage" instance=ExtResource("15_crate")]
+position = Vector3(11, 0, 3)
+
+[node name="Crate4" parent="Furniture/Storage" instance=ExtResource("15_crate")]
+position = Vector3(-11, 0, 1)
+
+[node name="Crate5" parent="Furniture/Storage" instance=ExtResource("15_crate")]
+position = Vector3(-13, 0, 1)
+
+[node name="PlantLarge1" parent="OfficeProps" instance=ExtResource("16_plant_l")]
 position = Vector3(-16, 0, -12)
-[node name="NorthEastCorner" parent="PerimeterModels" instance=ExtResource("4_corner")]
+
+[node name="PlantLarge2" parent="OfficeProps" instance=ExtResource("16_plant_l")]
+position = Vector3(-8, 0, -12)
+
+[node name="PlantLarge3" parent="OfficeProps" instance=ExtResource("16_plant_l")]
+position = Vector3(0, 0, -12)
+
+[node name="PlantLarge4" parent="OfficeProps" instance=ExtResource("16_plant_l")]
+position = Vector3(8, 0, -12)
+
+[node name="PlantLarge5" parent="OfficeProps" instance=ExtResource("16_plant_l")]
 position = Vector3(16, 0, -12)
-rotation_degrees = Vector3(0, 90, 0)
-[node name="SouthEastCorner" parent="PerimeterModels" instance=ExtResource("4_corner")]
-position = Vector3(16, 0, 12)
-rotation_degrees = Vector3(0, 180, 0)
-[node name="SouthWestCorner" parent="PerimeterModels" instance=ExtResource("4_corner")]
+
+[node name="PlantLarge6" parent="OfficeProps" instance=ExtResource("16_plant_l")]
 position = Vector3(-16, 0, 12)
-rotation_degrees = Vector3(0, -90, 0)
 
-[node name="Interior" type="Node3D" parent="."]
+[node name="PlantLarge7" parent="OfficeProps" instance=ExtResource("16_plant_l")]
+position = Vector3(-8, 0, 12)
 
-[node name="WestOfficeGlass01" parent="Interior" instance=ExtResource("19_glass_wall")]
-position = Vector3(-8, 0, -5)
-rotation_degrees = Vector3(0, 90, 0)
-[node name="WestOfficeGlass02" parent="Interior" instance=ExtResource("19_glass_wall")]
-position = Vector3(-8, 0, -1)
-rotation_degrees = Vector3(0, 90, 0)
-[node name="WestOfficeHalfGlass" parent="Interior" instance=ExtResource("20_glass_half")]
-position = Vector3(-5, 0, -7)
+[node name="PlantLarge8" parent="OfficeProps" instance=ExtResource("16_plant_l")]
+position = Vector3(8, 0, 12)
 
-[node name="BrokenWall" parent="Interior" instance=ExtResource("25_broken_wall")]
-position = Vector3(-7, 0, 4)
-rotation_degrees = Vector3(0, 90, 0)
-[node name="Rubble" parent="Interior" instance=ExtResource("24_rubble")]
-position = Vector3(-5.8, 0, 4.3)
+[node name="PlantLarge9" parent="OfficeProps" instance=ExtResource("16_plant_l")]
+position = Vector3(16, 0, 12)
 
-[node name="WorkstationCluster" parent="Interior" instance=ExtResource("5_workstation")]
-position = Vector3(-10.5, 0, -3)
-rotation_degrees = Vector3(0, 90, 0)
-[node name="DeskWest" parent="Interior" instance=ExtResource("6_desk")]
-position = Vector3(-11, 0, 5.5)
-[node name="ChairWest" parent="Interior" instance=ExtResource("7_chair")]
-position = Vector3(-10.7, 0, 4.2)
-rotation_degrees = Vector3(0, 180, 0)
+[node name="PlantMedium1" parent="OfficeProps" instance=ExtResource("17_plant_m")]
+position = Vector3(-12, 0, -6)
 
-[node name="SofaNorthWest" parent="Interior" instance=ExtResource("8_sofa")]
-position = Vector3(-12, 0, -8.5)
-rotation_degrees = Vector3(0, 90, 0)
-[node name="CoffeeTableNorthWest" parent="Interior" instance=ExtResource("9_coffee")]
-position = Vector3(-9.8, 0, -8.2)
+[node name="PlantMedium2" parent="OfficeProps" instance=ExtResource("17_plant_m")]
+position = Vector3(12, 0, -6)
 
-[node name="StandingDeskSouth" parent="Interior" instance=ExtResource("27_standing_desk")]
-position = Vector3(-3, 0, 8.2)
-[node name="LongTableSouthEast" parent="Interior" instance=ExtResource("26_table_long")]
-position = Vector3(7.5, 0, 8)
+[node name="PlantMedium3" parent="OfficeProps" instance=ExtResource("17_plant_m")]
+position = Vector3(-12, 0, 6)
+
+[node name="PlantMedium4" parent="OfficeProps" instance=ExtResource("17_plant_m")]
+position = Vector3(12, 0, 6)
+
+[node name="PlantMedium5" parent="OfficeProps" instance=ExtResource("17_plant_m")]
+position = Vector3(0, 0, 5)
+
+[node name="WaterCoolerWest" parent="OfficeProps" instance=ExtResource("18_water")]
+position = Vector3(-16, 0, -2)
+
+[node name="WaterCoolerEast" parent="OfficeProps" instance=ExtResource("18_water")]
+position = Vector3(16, 0, -2)
+
+[node name="FireExtinguisher" parent="OfficeProps" instance=ExtResource("19_ext")]
+position = Vector3(17.5, 0, 9)
 rotation_degrees = Vector3(0, 90, 0)
 
-[node name="LockerEast" parent="Interior" instance=ExtResource("12_locker")]
-position = Vector3(13, 0, 4.5)
-[node name="FileCabinetEast" parent="Interior" instance=ExtResource("13_file_cabinet")]
-position = Vector3(13, 0, 6.5)
+[node name="Medkit" parent="OfficeProps" instance=ExtResource("20_medkit")]
+position = Vector3(-2, 0, 1)
 
-[node name="CrateLarge01" parent="Interior" instance=ExtResource("14_crate_large")]
-position = Vector3(7, 0, 2.5)
-[node name="CrateLarge02" parent="Interior" instance=ExtResource("14_crate_large")]
-position = Vector3(9, 0, 2.5)
-[node name="CrateSmall01" parent="Interior" instance=ExtResource("15_crate_small")]
-position = Vector3(8.5, 0, 4)
-[node name="CardboardBoxes" parent="Interior" instance=ExtResource("16_boxes")]
-position = Vector3(-2, 0, -8.5)
+[node name="AmmoCase" parent="OfficeProps" instance=ExtResource("21_ammo")]
+position = Vector3(2, 0, 1)
 
-[node name="WaterCooler" parent="Interior" instance=ExtResource("17_water")]
-position = Vector3(11.5, 0, 0.5)
-[node name="FireExtinguisher" parent="Interior" instance=ExtResource("18_extinguisher")]
-position = Vector3(14.8, 0, 7.5)
-rotation_degrees = Vector3(0, -90, 0)
-
-[node name="PlantNorthWest" parent="Interior" instance=ExtResource("10_plant_large")]
-position = Vector3(-13, 0, -10)
-[node name="PlantNorth" parent="Interior" instance=ExtResource("11_plant_medium")]
-position = Vector3(-1, 0, -9.5)
-[node name="PlantCenterEast" parent="Interior" instance=ExtResource("10_plant_large")]
-position = Vector3(5.5, 0, 0)
-[node name="PlantSouth" parent="Interior" instance=ExtResource("11_plant_medium")]
-position = Vector3(2.5, 0, 9.5)
-
-[node name="InfectionSource" parent="Interior" instance=ExtResource("30_source")]
-position = Vector3(11.5, 0, -8.5)
+[node name="InfectionSource" parent="Gameplay" instance=ExtResource("25_source")]
+position = Vector3(14, 0, -9)
 rotation_degrees = Vector3(0, -35, 0)
 
-[node name="Medkit" parent="Interior" instance=ExtResource("22_medkit")]
-position = Vector3(-4.5, 0, 1.5)
-[node name="AmmoCase" parent="Interior" instance=ExtResource("23_ammo")]
-position = Vector3(5, 0, 6)
+[node name="Player" parent="Gameplay" instance=ExtResource("1_player")]
+position = Vector3(0, 1, 11)
 
-[node name="Player" parent="." instance=ExtResource("1_player")]
-position = Vector3(0, 1, 5)
+[node name="Infected1" parent="Gameplay/Enemies" instance=ExtResource("24_enemy")]
+position = Vector3(-6, 1, -1)
 
+[node name="Infected2" parent="Gameplay/Enemies" instance=ExtResource("24_enemy")]
+position = Vector3(-2, 1, -6)
 
-[node name="Enemies" type="Node3D" parent="."]
+[node name="Infected3" parent="Gameplay/Enemies" instance=ExtResource("24_enemy")]
+position = Vector3(3, 1, -5)
 
-[node name="Infected01" parent="Enemies" instance=ExtResource("29_enemy")]
-position = Vector3(-6, 1, -4)
+[node name="Infected4" parent="Gameplay/Enemies" instance=ExtResource("24_enemy")]
+position = Vector3(7, 1, -1)
 
-[node name="Infected02" parent="Enemies" instance=ExtResource("29_enemy")]
-position = Vector3(0, 1, -6)
+[node name="Infected5" parent="Gameplay/Enemies" instance=ExtResource("24_enemy")]
+position = Vector3(2, 1, 4)
 
-[node name="Infected03" parent="Enemies" instance=ExtResource("29_enemy")]
-position = Vector3(6, 1, -4)
-
-[node name="Infected04" parent="Enemies" instance=ExtResource("29_enemy")]
-position = Vector3(9, 1, -1)
-
-[node name="Infected05" parent="Enemies" instance=ExtResource("29_enemy")]
-position = Vector3(4, 1, 3)
-
+[node name="Infected6" parent="Gameplay/Enemies" instance=ExtResource("24_enemy")]
+position = Vector3(-5, 1, 5)

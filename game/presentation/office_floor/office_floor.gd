@@ -1,12 +1,13 @@
 extends Node3D
 
-@onready var player: Node3D = $Player
+@onready var player: Node3D = $Gameplay/Player
 @onready var enemies: Array[Node] = [
-	$Enemies/Infected01,
-	$Enemies/Infected02,
-	$Enemies/Infected03,
-	$Enemies/Infected04,
-	$Enemies/Infected05,
+	$Gameplay/Enemies/Infected1,
+	$Gameplay/Enemies/Infected2,
+	$Gameplay/Enemies/Infected3,
+	$Gameplay/Enemies/Infected4,
+	$Gameplay/Enemies/Infected5,
+	$Gameplay/Enemies/Infected6,
 ]
 
 
