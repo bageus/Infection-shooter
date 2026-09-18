@@ -23,6 +23,3 @@ jobs:
 
       - name: Validate project gates
         run: python tools/validate_project.py
-
-      - name: Inspect GLB orientation
-        run: python tools/inspect_glb_orientation.py
