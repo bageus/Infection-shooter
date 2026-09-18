@@ -1,0 +1,29 @@
+[gd_scene load_steps=4 format=3]
+[ext_resource type="Script" path="res://game/features/combat/prototype_rifle.gd" id="1"]
+[ext_resource type="PackedScene" path="res://game/features/combat/public/prototype_bullet.tscn" id="2"]
+[sub_resource type="StandardMaterial3D" id="Mat"]
+albedo_color = Color(0.2,0.12,0.06,1)
+[sub_resource type="CapsuleMesh" id="Mesh"]
+material = SubResource("Mat")
+radius = 0.1
+height = 0.78
+[node name="Shotgun" type="Node3D"]
+script = ExtResource("1")
+bullet_scene = ExtResource("2")
+weapon_name="SHOTGUN"
+shots_per_second=1.1
+magazine_size=6
+starting_reserve_ammo=36
+reload_time=0.48
+spread_degrees=8.5
+pellets_per_shot=8
+bullet_damage=12.0
+bullet_speed=34.0
+bullet_range=15.0
+shotgun_shell_reload=true
+[node name="Body" type="MeshInstance3D" parent="."]
+position = Vector3(0, 0, -0.32)
+rotation_degrees = Vector3(90, 0, 0)
+mesh = SubResource("Mesh")
+[node name="Muzzle" type="Marker3D" parent="."]
+position = Vector3(0, 0, -0.64)

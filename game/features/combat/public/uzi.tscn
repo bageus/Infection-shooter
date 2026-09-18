@@ -1,0 +1,28 @@
+[gd_scene load_steps=4 format=3]
+[ext_resource type="Script" path="res://game/features/combat/prototype_rifle.gd" id="1"]
+[ext_resource type="PackedScene" path="res://game/features/combat/public/prototype_bullet.tscn" id="2"]
+[sub_resource type="StandardMaterial3D" id="Mat"]
+albedo_color = Color(0.07,0.11,0.15,1)
+[sub_resource type="CapsuleMesh" id="Mesh"]
+material = SubResource("Mat")
+radius = 0.1
+height = 0.6
+[node name="Uzi" type="Node3D"]
+script = ExtResource("1")
+bullet_scene = ExtResource("2")
+weapon_name="UZI"
+fire_mode="auto"
+shots_per_second=12.0
+magazine_size=36
+starting_reserve_ammo=144
+reload_time=0.8
+spread_degrees=5.0
+bullet_damage=11.0
+bullet_speed=38.0
+bullet_range=20.0
+[node name="Body" type="MeshInstance3D" parent="."]
+position = Vector3(0, 0, -0.26)
+rotation_degrees = Vector3(90, 0, 0)
+mesh = SubResource("Mesh")
+[node name="Muzzle" type="Marker3D" parent="."]
+position = Vector3(0, 0, -0.52)

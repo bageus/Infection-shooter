@@ -1,0 +1,17 @@
+[gd_scene load_steps=2 format=3]
+[ext_resource type="Script" path="res://game/presentation/prototype_hud/radar.gd" id="1"]
+[node name="RadarLayer" type="CanvasLayer"]
+layer=10
+[node name="Radar" type="Control" parent="."]
+anchors_preset=1
+anchor_left=1.0
+anchor_right=1.0
+offset_left=-265.0
+offset_top=20.0
+offset_right=-20.0
+offset_bottom=265.0
+grow_horizontal=0
+script=ExtResource("1")
+player_path=NodePath("../../Gameplay/Player")
+enemies_path=NodePath("../../Gameplay/Enemies")
+source_path=NodePath("../../Gameplay/InfectionSource")
