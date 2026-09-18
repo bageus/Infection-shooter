@@ -12,6 +12,7 @@
     "presentation.prototype_hud",
     "features.player",
     "features.infected",
-    "features.infection_source"
+    "features.infection_source",
+    "features.pickups"
   ]
 }

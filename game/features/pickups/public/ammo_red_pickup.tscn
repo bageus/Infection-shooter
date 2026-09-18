@@ -1,0 +1,21 @@
+[gd_scene load_steps=3 format=3]
+
+[ext_resource type="PackedScene" path="res://models/objects/25_ammo_case_red_open.glb" id="1_model"]
+[ext_resource type="Script" path="res://game/features/pickups/ammo_pickup.gd" id="2_script"]
+
+[sub_resource type="SphereShape3D" id="PickupShape"]
+radius = 1.15
+
+[node name="AmmoRedPickup" type="Area3D"]
+script = ExtResource("2_script")
+ammo_amount = 36
+collision_layer = 0
+collision_mask = 1
+monitoring = true
+
+[node name="Visual" parent="." instance=ExtResource("1_model")]
+rotation_degrees = Vector3(-90, 0, 0)
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="."]
+position = Vector3(0, 0.6, 0)
+shape = SubResource("PickupShape")

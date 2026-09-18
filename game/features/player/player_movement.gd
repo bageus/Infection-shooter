@@ -40,6 +40,20 @@ func take_damage(amount: float) -> void:
 	health = maxf(0.0, health - amount)
 
 
+func heal(amount: float) -> float:
+	if amount <= 0.0:
+		return 0.0
+	var previous := health
+	health = minf(max_health, health + amount)
+	return health - previous
+
+
+func add_ammo_to_current_weapon(amount: int) -> int:
+	if amount <= 0 or weapon == null or not weapon.has_method("add_reserve_ammo"):
+		return 0
+	return weapon.call("add_reserve_ammo", amount)
+
+
 func absorb_mutagen(delta_seconds: float) -> float:
 	return infection_runtime.call("absorb_mutagen", delta_seconds)
 

@@ -1,0 +1,13 @@
+{
+  "id": "features.pickups",
+  "layer": "features",
+  "purpose": "Own scene-authored health and ammunition pickup interaction.",
+  "state_owner": [],
+  "public_api": [
+    "public/medkit_closed_pickup.tscn",
+    "public/med_case_green_pickup.tscn",
+    "public/ammo_red_pickup.tscn",
+    "public/ammo_orange_pickup.tscn"
+  ],
+  "dependencies": []
+}

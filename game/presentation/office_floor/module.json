@@ -1,10 +1,14 @@
 {
   "id": "presentation.office_floor",
   "layer": "presentation",
-  "purpose": "Expose individually authored office object scenes for bootstrap composition.",
+  "purpose": "Expose individually authored office object scenes and the legacy office-floor composition.",
   "state_owner": [],
   "public_api": [
     "public/office_floor.tscn"
   ],
-  "dependencies": []
+  "dependencies": [
+    "features.player",
+    "features.infected",
+    "features.infection_source"
+  ]
 }

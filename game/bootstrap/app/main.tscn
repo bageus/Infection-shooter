@@ -1,4 +1,4 @@
-[gd_scene load_steps=82 format=3]
+[gd_scene load_steps=86 format=3]
 
 [ext_resource type="PackedScene" path="res://game/presentation/office_floor/public/assets/01_locker_tall.tscn" id="m1"]
 [ext_resource type="PackedScene" path="res://game/presentation/office_floor/public/assets/01_wall_straight.tscn" id="m2"]
@@ -76,6 +76,10 @@
 [ext_resource type="PackedScene" path="res://game/presentation/prototype_hud/public/prototype_hud.tscn" id="m74"]
 [ext_resource type="PackedScene" path="res://game/presentation/prototype_hud/public/crosshair.tscn" id="m75"]
 [ext_resource type="Script" path="res://game/bootstrap/app/main.gd" id="m76"]
+[ext_resource type="PackedScene" path="res://game/features/pickups/public/medkit_closed_pickup.tscn" id="pickup_medkit"]
+[ext_resource type="PackedScene" path="res://game/features/pickups/public/med_case_green_pickup.tscn" id="pickup_medgreen"]
+[ext_resource type="PackedScene" path="res://game/features/pickups/public/ammo_red_pickup.tscn" id="pickup_ammored"]
+[ext_resource type="PackedScene" path="res://game/features/pickups/public/ammo_orange_pickup.tscn" id="pickup_ammoorange"]
 
 [sub_resource type="StandardMaterial3D" id="FloorMaterial"]
 albedo_color = Color(0.31, 0.34, 0.4, 1)
@@ -771,25 +775,17 @@ rotation_degrees = Vector3(0, 90, 0)
 position = Vector3(15.4, 0, 5)
 rotation_degrees = Vector3(0, 0, 0)
 
-[node name="P_24_medkit_closed" parent="Props" instance=ExtResource("m48")]
-position = Vector3(17.1, 0, 5)
-rotation_degrees = Vector3(0, 90, 0)
+[node name="P_24_medkit_closed" parent="Props" instance=ExtResource("pickup_medkit")]
 
-[node name="P_25_ammo_case_red_open" parent="Props" instance=ExtResource("m49")]
-position = Vector3(12, 0, 6.8)
-rotation_degrees = Vector3(0, 0, 0)
+[node name="P_25_ammo_case_red_open" parent="Props" instance=ExtResource("pickup_ammored")]
 
 [node name="P_26_case_blue_open" parent="Props" instance=ExtResource("m51")]
 position = Vector3(13.7, 0, 6.8)
 rotation_degrees = Vector3(0, 90, 0)
 
-[node name="P_27_ammo_case_orange_open" parent="Props" instance=ExtResource("m53")]
-position = Vector3(15.4, 0, 6.8)
-rotation_degrees = Vector3(0, 0, 0)
+[node name="P_27_ammo_case_orange_open" parent="Props" instance=ExtResource("pickup_ammoorange")]
 
-[node name="P_28_med_case_green_open" parent="Props" instance=ExtResource("m56")]
-position = Vector3(17.1, 0, 6.8)
-rotation_degrees = Vector3(0, 90, 0)
+[node name="P_28_med_case_green_open" parent="Props" instance=ExtResource("pickup_medgreen")]
 
 [node name="P_30_plant_large" parent="Props" instance=ExtResource("m60")]
 position = Vector3(12, 0, 8.6)

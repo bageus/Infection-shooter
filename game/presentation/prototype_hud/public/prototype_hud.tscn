@@ -1,47 +1,52 @@
-[gd_scene load_steps=7 format=3]
+[gd_scene load_steps=8 format=3]
 
 [ext_resource type="Script" path="res://game/presentation/prototype_hud/prototype_hud.gd" id="1_hud"]
 
-[sub_resource type="StyleBoxFlat" id="PanelStyle"]
-bg_color = Color(0.025, 0.055, 0.09, 0.88)
+[sub_resource type="StyleBoxFlat" id="FrameStyle"]
+bg_color = Color(0.015, 0.045, 0.075, 0.9)
 border_width_left = 2
 border_width_top = 2
 border_width_right = 2
 border_width_bottom = 2
-border_color = Color(0.1, 0.78, 1, 0.92)
-corner_radius_top_left = 8
-corner_radius_top_right = 8
-corner_radius_bottom_right = 8
-corner_radius_bottom_left = 8
+border_color = Color(0.05, 0.72, 1, 0.95)
+corner_radius_top_left = 10
+corner_radius_top_right = 10
+corner_radius_bottom_right = 10
+corner_radius_bottom_left = 10
 
 [sub_resource type="StyleBoxFlat" id="BarBg"]
-bg_color = Color(0.03, 0.08, 0.12, 0.95)
-corner_radius_top_left = 4
-corner_radius_top_right = 4
-corner_radius_bottom_right = 4
-corner_radius_bottom_left = 4
-
-[sub_resource type="StyleBoxFlat" id="HealthFill"]
-bg_color = Color(0.95, 0.12, 0.22, 1)
-corner_radius_top_left = 4
-corner_radius_top_right = 4
-corner_radius_bottom_right = 4
-corner_radius_bottom_left = 4
-
-[sub_resource type="StyleBoxFlat" id="MutationFill"]
-bg_color = Color(0.25, 0.95, 0.18, 1)
-corner_radius_top_left = 4
-corner_radius_top_right = 4
-corner_radius_bottom_right = 4
-corner_radius_bottom_left = 4
-
-[sub_resource type="StyleBoxFlat" id="SlotStyle"]
-bg_color = Color(0.02, 0.08, 0.13, 0.95)
+bg_color = Color(0.025, 0.075, 0.105, 1)
 border_width_left = 1
 border_width_top = 1
 border_width_right = 1
 border_width_bottom = 1
-border_color = Color(0.08, 0.65, 0.9, 0.9)
+border_color = Color(0.18, 0.42, 0.58, 1)
+
+[sub_resource type="StyleBoxFlat" id="HealthFill"]
+bg_color = Color(0.95, 0.08, 0.2, 1)
+
+[sub_resource type="StyleBoxFlat" id="MutationFill"]
+bg_color = Color(0.22, 0.9, 0.17, 1)
+
+[sub_resource type="StyleBoxFlat" id="SlotStyle"]
+bg_color = Color(0.02, 0.07, 0.11, 0.96)
+border_width_left = 1
+border_width_top = 1
+border_width_right = 1
+border_width_bottom = 1
+border_color = Color(0.16, 0.38, 0.52, 1)
+corner_radius_top_left = 5
+corner_radius_top_right = 5
+corner_radius_bottom_right = 5
+corner_radius_bottom_left = 5
+
+[sub_resource type="StyleBoxFlat" id="ActiveSlotStyle"]
+bg_color = Color(0.015, 0.15, 0.2, 1)
+border_width_left = 2
+border_width_top = 2
+border_width_right = 2
+border_width_bottom = 2
+border_color = Color(0.0, 0.95, 1, 1)
 corner_radius_top_left = 5
 corner_radius_top_right = 5
 corner_radius_bottom_right = 5
@@ -55,46 +60,49 @@ player_path = NodePath("../Gameplay/Player")
 anchors_preset = 2
 anchor_top = 1.0
 anchor_bottom = 1.0
-offset_left = 18.0
-offset_top = -158.0
+offset_left = 20.0
+offset_top = -150.0
 offset_right = 520.0
-offset_bottom = -18.0
+offset_bottom = -20.0
 grow_vertical = 0
 
-[node name="Panel" type="PanelContainer" parent="BottomLeft"]
-theme_override_styles/panel = SubResource("PanelStyle")
+[node name="Frame" type="PanelContainer" parent="BottomLeft"]
+theme_override_styles/panel = SubResource("FrameStyle")
 
-[node name="VBox" type="VBoxContainer" parent="BottomLeft/Panel"]
+[node name="Rows" type="VBoxContainer" parent="BottomLeft/Frame"]
 theme_override_constants/separation = 8
 
-[node name="HealthRow" type="HBoxContainer" parent="BottomLeft/Panel/VBox"]
+[node name="Health" type="HBoxContainer" parent="BottomLeft/Frame/Rows"]
 
-[node name="Icon" type="Label" parent="BottomLeft/Panel/VBox/HealthRow"]
-custom_minimum_size = Vector2(42, 0)
-text = "✚"
+[node name="Icon" type="Label" parent="BottomLeft/Frame/Rows/Health"]
+custom_minimum_size = Vector2(45, 0)
+text = "+"
+horizontal_alignment = 1
 
-[node name="HealthBar" type="ProgressBar" parent="BottomLeft/Panel/VBox/HealthRow"]
-custom_minimum_size = Vector2(300, 24)
+[node name="HealthBar" type="ProgressBar" parent="BottomLeft/Frame/Rows/Health"]
+custom_minimum_size = Vector2(320, 24)
 size_flags_horizontal = 3
 show_percentage = false
 theme_override_styles/background = SubResource("BarBg")
 theme_override_styles/fill = SubResource("HealthFill")
 
-[node name="HealthValue" type="Label" parent="BottomLeft/Panel/VBox/HealthRow"]
-custom_minimum_size = Vector2(90, 0)
+[node name="HealthValue" type="Label" parent="BottomLeft/Frame/Rows/Health"]
+custom_minimum_size = Vector2(95, 0)
 text = "100 / 100"
+horizontal_alignment = 1
 
-[node name="MutationRow" type="HBoxContainer" parent="BottomLeft/Panel/VBox"]
+[node name="Mutation" type="HBoxContainer" parent="BottomLeft/Frame/Rows"]
 
-[node name="Icon" type="Label" parent="BottomLeft/Panel/VBox/MutationRow"]
-custom_minimum_size = Vector2(42, 0)
-text = "☣"
+[node name="Icon" type="Label" parent="BottomLeft/Frame/Rows/Mutation"]
+custom_minimum_size = Vector2(45, 0)
+text = "BIO"
+horizontal_alignment = 1
 
-[node name="MutationWrap" type="Control" parent="BottomLeft/Panel/VBox/MutationRow"]
-custom_minimum_size = Vector2(300, 24)
+[node name="MutationWrap" type="Control" parent="BottomLeft/Frame/Rows/Mutation"]
+custom_minimum_size = Vector2(320, 24)
 size_flags_horizontal = 3
 
-[node name="MutationBar" type="ProgressBar" parent="BottomLeft/Panel/VBox/MutationRow/MutationWrap"]
+[node name="MutationBar" type="ProgressBar" parent="BottomLeft/Frame/Rows/Mutation/MutationWrap"]
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
@@ -105,19 +113,21 @@ show_percentage = false
 theme_override_styles/background = SubResource("BarBg")
 theme_override_styles/fill = SubResource("MutationFill")
 
-[node name="CriticalMarker" type="ColorRect" parent="BottomLeft/Panel/VBox/MutationRow/MutationWrap"]
-offset_left = 88.0
-offset_right = 91.0
+[node name="CriticalMarker" type="ColorRect" parent="BottomLeft/Frame/Rows/Mutation/MutationWrap"]
+offset_left = 95.0
+offset_right = 98.0
 offset_bottom = 24.0
-color = Color(1, 0.45, 0.1, 1)
+color = Color(1, 0.4, 0.08, 1)
 mouse_filter = 2
 
-[node name="MutationValue" type="Label" parent="BottomLeft/Panel/VBox/MutationRow"]
-custom_minimum_size = Vector2(90, 0)
+[node name="MutationValue" type="Label" parent="BottomLeft/Frame/Rows/Mutation"]
+custom_minimum_size = Vector2(95, 0)
 text = "0 / 100"
+horizontal_alignment = 1
 
-[node name="ControlLabel" type="Label" parent="BottomLeft/Panel/VBox"]
+[node name="ControlLabel" type="Label" parent="BottomLeft/Frame/Rows"]
 text = ""
+horizontal_alignment = 1
 
 [node name="BottomRight" type="MarginContainer" parent="."]
 anchors_preset = 3
@@ -125,44 +135,103 @@ anchor_left = 1.0
 anchor_top = 1.0
 anchor_right = 1.0
 anchor_bottom = 1.0
-offset_left = -350.0
-offset_top = -150.0
-offset_right = -18.0
-offset_bottom = -18.0
+offset_left = -405.0
+offset_top = -180.0
+offset_right = -20.0
+offset_bottom = -20.0
 grow_horizontal = 0
 grow_vertical = 0
 
-[node name="Panel" type="PanelContainer" parent="BottomRight"]
-theme_override_styles/panel = SubResource("PanelStyle")
+[node name="Frame" type="PanelContainer" parent="BottomRight"]
+theme_override_styles/panel = SubResource("FrameStyle")
 
-[node name="VBox" type="VBoxContainer" parent="BottomRight/Panel"]
-alignment = 1
+[node name="WeaponRow" type="HBoxContainer" parent="BottomRight/Frame"]
+offset_left = 14.0
+offset_top = 10.0
+offset_right = 365.0
+offset_bottom = 66.0
 
-[node name="WeaponLabel" type="Label" parent="BottomRight/Panel/VBox"]
+[node name="WeaponIcon" type="Control" parent="BottomRight/Frame/WeaponRow"]
+custom_minimum_size = Vector2(175, 52)
+
+[node name="Stock" type="ColorRect" parent="BottomRight/Frame/WeaponRow/WeaponIcon"]
+offset_left = 4.0
+offset_top = 19.0
+offset_right = 42.0
+offset_bottom = 31.0
+color = Color(0.83, 0.94, 1, 1)
+
+[node name="Body" type="ColorRect" parent="BottomRight/Frame/WeaponRow/WeaponIcon"]
+offset_left = 38.0
+offset_top = 14.0
+offset_right = 112.0
+offset_bottom = 34.0
+color = Color(0.83, 0.94, 1, 1)
+
+[node name="Barrel" type="ColorRect" parent="BottomRight/Frame/WeaponRow/WeaponIcon"]
+offset_left = 108.0
+offset_top = 19.0
+offset_right = 166.0
+offset_bottom = 25.0
+color = Color(0.83, 0.94, 1, 1)
+
+[node name="Grip" type="ColorRect" parent="BottomRight/Frame/WeaponRow/WeaponIcon"]
+offset_left = 72.0
+offset_top = 33.0
+offset_right = 87.0
+offset_bottom = 49.0
+color = Color(0.83, 0.94, 1, 1)
+
+[node name="WeaponName" type="Label" parent="BottomRight/Frame/WeaponRow"]
+custom_minimum_size = Vector2(150, 52)
 text = "RIFLE"
+vertical_alignment = 1
 horizontal_alignment = 1
 
-[node name="AmmoLabel" type="Label" parent="BottomRight/Panel/VBox"]
-text = "24 / 96"
-horizontal_alignment = 1
+[node name="AmmoRow" type="HBoxContainer" parent="BottomRight/Frame"]
+offset_left = 180.0
+offset_top = 61.0
+offset_right = 365.0
+offset_bottom = 105.0
+alignment = 2
 
-[node name="Slots" type="HBoxContainer" parent="BottomRight/Panel/VBox"]
+[node name="Magazine" type="Label" parent="BottomRight/Frame/AmmoRow"]
+theme_override_font_sizes/font_size = 34
+text = "24"
+
+[node name="Reserve" type="Label" parent="BottomRight/Frame/AmmoRow"]
+theme_override_font_sizes/font_size = 20
+text = "/ 96"
+vertical_alignment = 2
+
+[node name="Slots" type="HBoxContainer" parent="BottomRight/Frame"]
+offset_left = 14.0
+offset_top = 112.0
+offset_right = 365.0
+offset_bottom = 154.0
+theme_override_constants/separation = 8
 alignment = 1
 
-[node name="Slot1" type="PanelContainer" parent="BottomRight/Panel/VBox/Slots"]
-custom_minimum_size = Vector2(84, 42)
+[node name="Slot1" type="PanelContainer" parent="BottomRight/Frame/Slots"]
+custom_minimum_size = Vector2(105, 38)
 theme_override_styles/panel = SubResource("SlotStyle")
-[node name="Label" type="Label" parent="BottomRight/Panel/VBox/Slots/Slot1"]
+[node name="Label" type="Label" parent="BottomRight/Frame/Slots/Slot1"]
 text = "1"
+horizontal_alignment = 1
+vertical_alignment = 1
 
-[node name="Slot2" type="PanelContainer" parent="BottomRight/Panel/VBox/Slots"]
-custom_minimum_size = Vector2(84, 42)
-theme_override_styles/panel = SubResource("SlotStyle")
-[node name="Label" type="Label" parent="BottomRight/Panel/VBox/Slots/Slot2"]
+[node name="Slot2" type="PanelContainer" parent="BottomRight/Frame/Slots"]
+custom_minimum_size = Vector2(105, 38)
+theme_override_styles/panel = SubResource("ActiveSlotStyle")
+[node name="Label" type="Label" parent="BottomRight/Frame/Slots/Slot2"]
 text = "2  RIFLE"
+horizontal_alignment = 1
+vertical_alignment = 1
 
-[node name="Slot3" type="PanelContainer" parent="BottomRight/Panel/VBox/Slots"]
-custom_minimum_size = Vector2(84, 42)
+[node name="Slot3" type="PanelContainer" parent="BottomRight/Frame/Slots"]
+custom_minimum_size = Vector2(105, 38)
 theme_override_styles/panel = SubResource("SlotStyle")
-[node name="Label" type="Label" parent="BottomRight/Panel/VBox/Slots/Slot3"]
+[node name="Label" type="Label" parent="BottomRight/Frame/Slots/Slot3"]
 text = "3"
+horizontal_alignment = 1
+vertical_alignment = 1

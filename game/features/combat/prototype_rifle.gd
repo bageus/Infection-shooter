@@ -3,6 +3,7 @@ extends Node3D
 @export var shots_per_second: float = 5.0
 @export var magazine_size: int = 24
 @export var starting_reserve_ammo: int = 96
+@export var max_reserve_ammo: int = 240
 @export var bullet_scene: PackedScene
 
 @onready var muzzle: Marker3D = $Muzzle
@@ -45,6 +46,14 @@ func get_magazine_ammo() -> int:
 
 func get_reserve_ammo() -> int:
 	return _reserve_ammo
+
+
+func add_reserve_ammo(amount: int) -> int:
+	if amount <= 0:
+		return 0
+	var previous := _reserve_ammo
+	_reserve_ammo = mini(max_reserve_ammo, _reserve_ammo + amount)
+	return _reserve_ammo - previous
 
 
 func _reload() -> void:
