@@ -5,9 +5,7 @@
 [sub_resource type="BoxShape3D" id="Collision"]
 size = Vector3(3.5, 2.8, 0.35)
 
-[node name="Object" type="Node3D"]
-
-[node name="Model" parent="." instance=ExtResource("1_model")]
+[node name="BrokenWall" instance=ExtResource("1_model")]
 rotation_degrees = Vector3(-90, 0, 0)
 
 [node name="Body" type="StaticBody3D" parent="."]

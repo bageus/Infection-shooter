@@ -4,7 +4,8 @@
   "purpose": "Present prototype health, mutation, critical threshold, and control-loss feedback.",
   "state_owner": [],
   "public_api": [
-    "public/prototype_hud.tscn"
+    "public/prototype_hud.tscn",
+    "public/crosshair.tscn"
   ],
   "dependencies": [
     "features.player"

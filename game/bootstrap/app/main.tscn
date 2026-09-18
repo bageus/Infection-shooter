@@ -1,8 +1,9 @@
-[gd_scene load_steps=4 format=3]
+[gd_scene load_steps=5 format=3]
 
 [ext_resource type="Script" path="res://game/bootstrap/app/main.gd" id="1_main"]
 [ext_resource type="PackedScene" path="res://game/presentation/office_floor/public/office_floor.tscn" id="2_floor"]
 [ext_resource type="PackedScene" path="res://game/presentation/prototype_hud/public/prototype_hud.tscn" id="3_hud"]
+[ext_resource type="PackedScene" path="res://game/presentation/prototype_hud/public/crosshair.tscn" id="4_crosshair"]
 
 [node name="Main" type="Node"]
 script = ExtResource("1_main")
@@ -10,3 +11,5 @@ script = ExtResource("1_main")
 [node name="OfficeFloor" parent="." instance=ExtResource("2_floor")]
 
 [node name="PrototypeHUD" parent="." instance=ExtResource("3_hud")]
+
+[node name="Crosshair" parent="." instance=ExtResource("4_crosshair")]

@@ -104,124 +104,220 @@ shape = SubResource("EastWestCollision")
 [node name="Enemies" type="Node3D" parent="Gameplay"]
 
 [node name="NorthWindow1" parent="Architecture/Windows" instance=ExtResource("3_window")]
-position = Vector3(-16, 0, -14)
+position = Vector3(-16.875, 0, -14)
 
 [node name="NorthWindow2" parent="Architecture/Windows" instance=ExtResource("3_window")]
-position = Vector3(-12, 0, -14)
+position = Vector3(-14.625, 0, -14)
 
 [node name="NorthWindow3" parent="Architecture/Windows" instance=ExtResource("3_window")]
-position = Vector3(-8, 0, -14)
+position = Vector3(-12.375, 0, -14)
 
 [node name="NorthWindow4" parent="Architecture/Windows" instance=ExtResource("3_window")]
-position = Vector3(-4, 0, -14)
+position = Vector3(-10.125, 0, -14)
 
 [node name="NorthWindow5" parent="Architecture/Windows" instance=ExtResource("3_window")]
-position = Vector3(0, 0, -14)
+position = Vector3(-7.875, 0, -14)
 
 [node name="NorthWindow6" parent="Architecture/Windows" instance=ExtResource("3_window")]
-position = Vector3(4, 0, -14)
+position = Vector3(-5.625, 0, -14)
 
 [node name="NorthWindow7" parent="Architecture/Windows" instance=ExtResource("3_window")]
-position = Vector3(8, 0, -14)
+position = Vector3(-3.375, 0, -14)
 
 [node name="NorthWindow8" parent="Architecture/Windows" instance=ExtResource("3_window")]
-position = Vector3(12, 0, -14)
+position = Vector3(-1.125, 0, -14)
 
 [node name="NorthWindow9" parent="Architecture/Windows" instance=ExtResource("3_window")]
-position = Vector3(16, 0, -14)
+position = Vector3(1.125, 0, -14)
+
+[node name="NorthWindow10" parent="Architecture/Windows" instance=ExtResource("3_window")]
+position = Vector3(3.375, 0, -14)
+
+[node name="NorthWindow11" parent="Architecture/Windows" instance=ExtResource("3_window")]
+position = Vector3(5.625, 0, -14)
+
+[node name="NorthWindow12" parent="Architecture/Windows" instance=ExtResource("3_window")]
+position = Vector3(7.875, 0, -14)
+
+[node name="NorthWindow13" parent="Architecture/Windows" instance=ExtResource("3_window")]
+position = Vector3(10.125, 0, -14)
+
+[node name="NorthWindow14" parent="Architecture/Windows" instance=ExtResource("3_window")]
+position = Vector3(12.375, 0, -14)
+
+[node name="NorthWindow15" parent="Architecture/Windows" instance=ExtResource("3_window")]
+position = Vector3(14.625, 0, -14)
+
+[node name="NorthWindow16" parent="Architecture/Windows" instance=ExtResource("3_window")]
+position = Vector3(16.875, 0, -14)
 
 [node name="SouthWall1" parent="Architecture/Walls" instance=ExtResource("2_wall")]
-position = Vector3(-16, 0, 14)
+position = Vector3(-16.875, 0, 14)
 rotation_degrees = Vector3(0, 180, 0)
 
 [node name="SouthWall2" parent="Architecture/Walls" instance=ExtResource("2_wall")]
-position = Vector3(-12, 0, 14)
+position = Vector3(-14.625, 0, 14)
 rotation_degrees = Vector3(0, 180, 0)
 
 [node name="SouthWall3" parent="Architecture/Walls" instance=ExtResource("2_wall")]
-position = Vector3(-8, 0, 14)
+position = Vector3(-12.375, 0, 14)
 rotation_degrees = Vector3(0, 180, 0)
 
 [node name="SouthWall4" parent="Architecture/Walls" instance=ExtResource("2_wall")]
-position = Vector3(-4, 0, 14)
+position = Vector3(-10.125, 0, 14)
 rotation_degrees = Vector3(0, 180, 0)
 
 [node name="SouthWall5" parent="Architecture/Walls" instance=ExtResource("2_wall")]
-position = Vector3(0, 0, 14)
+position = Vector3(-7.875, 0, 14)
 rotation_degrees = Vector3(0, 180, 0)
 
 [node name="SouthWall6" parent="Architecture/Walls" instance=ExtResource("2_wall")]
-position = Vector3(4, 0, 14)
+position = Vector3(-5.625, 0, 14)
 rotation_degrees = Vector3(0, 180, 0)
 
 [node name="SouthWall7" parent="Architecture/Walls" instance=ExtResource("2_wall")]
-position = Vector3(8, 0, 14)
+position = Vector3(-3.375, 0, 14)
 rotation_degrees = Vector3(0, 180, 0)
 
 [node name="SouthWall8" parent="Architecture/Walls" instance=ExtResource("2_wall")]
-position = Vector3(12, 0, 14)
+position = Vector3(-1.125, 0, 14)
 rotation_degrees = Vector3(0, 180, 0)
 
 [node name="SouthWall9" parent="Architecture/Walls" instance=ExtResource("2_wall")]
-position = Vector3(16, 0, 14)
+position = Vector3(1.125, 0, 14)
 rotation_degrees = Vector3(0, 180, 0)
 
-[node name="WestWall1" parent="Architecture/Walls" instance=ExtResource("2_wall")]
-position = Vector3(-18, 0, -12)
+[node name="SouthWall10" parent="Architecture/Walls" instance=ExtResource("2_wall")]
+position = Vector3(3.375, 0, 14)
+rotation_degrees = Vector3(0, 180, 0)
+
+[node name="SouthWall11" parent="Architecture/Walls" instance=ExtResource("2_wall")]
+position = Vector3(5.625, 0, 14)
+rotation_degrees = Vector3(0, 180, 0)
+
+[node name="SouthWall12" parent="Architecture/Walls" instance=ExtResource("2_wall")]
+position = Vector3(7.875, 0, 14)
+rotation_degrees = Vector3(0, 180, 0)
+
+[node name="SouthWall13" parent="Architecture/Walls" instance=ExtResource("2_wall")]
+position = Vector3(10.125, 0, 14)
+rotation_degrees = Vector3(0, 180, 0)
+
+[node name="SouthWall14" parent="Architecture/Walls" instance=ExtResource("2_wall")]
+position = Vector3(12.375, 0, 14)
+rotation_degrees = Vector3(0, 180, 0)
+
+[node name="SouthWall15" parent="Architecture/Walls" instance=ExtResource("2_wall")]
+position = Vector3(14.625, 0, 14)
+rotation_degrees = Vector3(0, 180, 0)
+
+[node name="SouthWall16" parent="Architecture/Walls" instance=ExtResource("2_wall")]
+position = Vector3(16.875, 0, 14)
+rotation_degrees = Vector3(0, 180, 0)
+
+[node name="WestEdge1" parent="Architecture/Windows" instance=ExtResource("3_window")]
+position = Vector3(-18, 0, -12.8)
 rotation_degrees = Vector3(0, -90, 0)
 
-[node name="WestWall2" parent="Architecture/Walls" instance=ExtResource("2_wall")]
-position = Vector3(-18, 0, -8)
+[node name="EastEdge1" parent="Architecture/Windows" instance=ExtResource("3_window")]
+position = Vector3(18, 0, -12.8)
+rotation_degrees = Vector3(0, 90, 0)
+
+[node name="WestEdge2" parent="Architecture/Walls" instance=ExtResource("2_wall")]
+position = Vector3(-18, 0, -10.65)
 rotation_degrees = Vector3(0, -90, 0)
 
-[node name="WestWall3" parent="Architecture/Walls" instance=ExtResource("2_wall")]
-position = Vector3(-18, 0, -4)
+[node name="EastEdge2" parent="Architecture/Walls" instance=ExtResource("2_wall")]
+position = Vector3(18, 0, -10.65)
+rotation_degrees = Vector3(0, 90, 0)
+
+[node name="WestEdge3" parent="Architecture/Windows" instance=ExtResource("3_window")]
+position = Vector3(-18, 0, -8.5)
 rotation_degrees = Vector3(0, -90, 0)
 
-[node name="WestWall4" parent="Architecture/Walls" instance=ExtResource("2_wall")]
-position = Vector3(-18, 0, 0)
+[node name="EastEdge3" parent="Architecture/Windows" instance=ExtResource("3_window")]
+position = Vector3(18, 0, -8.5)
+rotation_degrees = Vector3(0, 90, 0)
+
+[node name="WestEdge4" parent="Architecture/Windows" instance=ExtResource("3_window")]
+position = Vector3(-18, 0, -6.35)
 rotation_degrees = Vector3(0, -90, 0)
 
-[node name="WestWall5" parent="Architecture/Walls" instance=ExtResource("2_wall")]
-position = Vector3(-18, 0, 4)
+[node name="EastEdge4" parent="Architecture/Windows" instance=ExtResource("3_window")]
+position = Vector3(18, 0, -6.35)
+rotation_degrees = Vector3(0, 90, 0)
+
+[node name="WestEdge5" parent="Architecture/Windows" instance=ExtResource("3_window")]
+position = Vector3(-18, 0, -4.2)
 rotation_degrees = Vector3(0, -90, 0)
 
-[node name="WestWall6" parent="Architecture/Walls" instance=ExtResource("2_wall")]
-position = Vector3(-18, 0, 8)
+[node name="EastEdge5" parent="Architecture/Windows" instance=ExtResource("3_window")]
+position = Vector3(18, 0, -4.2)
+rotation_degrees = Vector3(0, 90, 0)
+
+[node name="WestEdge6" parent="Architecture/Walls" instance=ExtResource("2_wall")]
+position = Vector3(-18, 0, -2.05)
 rotation_degrees = Vector3(0, -90, 0)
 
-[node name="WestWall7" parent="Architecture/Walls" instance=ExtResource("2_wall")]
-position = Vector3(-18, 0, 12)
+[node name="EastEdge6" parent="Architecture/Walls" instance=ExtResource("2_wall")]
+position = Vector3(18, 0, -2.05)
+rotation_degrees = Vector3(0, 90, 0)
+
+[node name="WestEdge7" parent="Architecture/Windows" instance=ExtResource("3_window")]
+position = Vector3(-18, 0, 0.1)
 rotation_degrees = Vector3(0, -90, 0)
 
-[node name="EastWall1" parent="Architecture/Walls" instance=ExtResource("2_wall")]
-position = Vector3(18, 0, -12)
+[node name="EastEdge7" parent="Architecture/Windows" instance=ExtResource("3_window")]
+position = Vector3(18, 0, 0.1)
 rotation_degrees = Vector3(0, 90, 0)
 
-[node name="EastWall2" parent="Architecture/Walls" instance=ExtResource("2_wall")]
-position = Vector3(18, 0, -8)
+[node name="WestEdge8" parent="Architecture/Windows" instance=ExtResource("3_window")]
+position = Vector3(-18, 0, 2.25)
+rotation_degrees = Vector3(0, -90, 0)
+
+[node name="EastEdge8" parent="Architecture/Windows" instance=ExtResource("3_window")]
+position = Vector3(18, 0, 2.25)
 rotation_degrees = Vector3(0, 90, 0)
 
-[node name="EastWall3" parent="Architecture/Walls" instance=ExtResource("2_wall")]
-position = Vector3(18, 0, -4)
+[node name="WestEdge9" parent="Architecture/Windows" instance=ExtResource("3_window")]
+position = Vector3(-18, 0, 4.4)
+rotation_degrees = Vector3(0, -90, 0)
+
+[node name="EastEdge9" parent="Architecture/Windows" instance=ExtResource("3_window")]
+position = Vector3(18, 0, 4.4)
 rotation_degrees = Vector3(0, 90, 0)
 
-[node name="EastWall4" parent="Architecture/Walls" instance=ExtResource("2_wall")]
-position = Vector3(18, 0, 0)
+[node name="WestEdge10" parent="Architecture/Walls" instance=ExtResource("2_wall")]
+position = Vector3(-18, 0, 6.55)
+rotation_degrees = Vector3(0, -90, 0)
+
+[node name="EastEdge10" parent="Architecture/Walls" instance=ExtResource("2_wall")]
+position = Vector3(18, 0, 6.55)
 rotation_degrees = Vector3(0, 90, 0)
 
-[node name="EastWall5" parent="Architecture/Walls" instance=ExtResource("2_wall")]
-position = Vector3(18, 0, 4)
+[node name="WestEdge11" parent="Architecture/Windows" instance=ExtResource("3_window")]
+position = Vector3(-18, 0, 8.7)
+rotation_degrees = Vector3(0, -90, 0)
+
+[node name="EastEdge11" parent="Architecture/Windows" instance=ExtResource("3_window")]
+position = Vector3(18, 0, 8.7)
 rotation_degrees = Vector3(0, 90, 0)
 
-[node name="EastWall6" parent="Architecture/Walls" instance=ExtResource("2_wall")]
-position = Vector3(18, 0, 8)
+[node name="WestEdge12" parent="Architecture/Windows" instance=ExtResource("3_window")]
+position = Vector3(-18, 0, 10.85)
+rotation_degrees = Vector3(0, -90, 0)
+
+[node name="EastEdge12" parent="Architecture/Windows" instance=ExtResource("3_window")]
+position = Vector3(18, 0, 10.85)
 rotation_degrees = Vector3(0, 90, 0)
 
-[node name="EastWall7" parent="Architecture/Walls" instance=ExtResource("2_wall")]
-position = Vector3(18, 0, 12)
-rotation_degrees = Vector3(0, 90, 0)
+[node name="WestEdge13" parent="Architecture/Windows" instance=ExtResource("3_window")]
+position = Vector3(-18, 0, 13)
+rotation_degrees = Vector3(0, -90, 0)
 
+[node name="EastEdge13" parent="Architecture/Windows" instance=ExtResource("3_window")]
+position = Vector3(18, 0, 13)
+rotation_degrees = Vector3(0, 90, 0)
 [node name="GlassWall1" parent="Architecture/Partitions" instance=ExtResource("4_glass")]
 position = Vector3(-10, 0, -8)
 rotation_degrees = Vector3(0, 90, 0)

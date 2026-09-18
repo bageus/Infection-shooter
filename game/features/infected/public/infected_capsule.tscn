@@ -9,7 +9,7 @@ roughness = 0.7
 
 [sub_resource type="CapsuleMesh" id="EnemyMesh"]
 material = SubResource("EnemyMaterial")
-radius = 0.48
+radius = 0.52
 height = 1.85
 
 [sub_resource type="CapsuleShape3D" id="EnemyShape"]
@@ -19,7 +19,8 @@ height = 1.85
 [node name="InfectedCapsule" type="CharacterBody3D"]
 script = ExtResource("1_enemy_script")
 collision_layer = 2
-collision_mask = 1
+collision_mask = 3
+safe_margin = 0.04
 
 [node name="Body" type="MeshInstance3D" parent="."]
 mesh = SubResource("EnemyMesh")

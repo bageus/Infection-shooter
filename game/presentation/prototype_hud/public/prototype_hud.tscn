@@ -71,4 +71,4 @@ text = "CRITICAL  30"
 text = "CONTROL: STABLE"
 
 [node name="Hint" type="Label" parent="Margin/Panel/VBox"]
-text = "WASD MOVE  |  MOUSE AIM  |  LMB FIRE"
+text = "WASD MOVE | SHIFT SPRINT | SPACE ROLL | Q/E CAMERA | LMB FIRE"

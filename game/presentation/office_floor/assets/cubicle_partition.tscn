@@ -3,11 +3,9 @@
 [ext_resource type="PackedScene" path="res://models/objects/29_cubicle_straight_partition.glb" id="1_model"]
 
 [sub_resource type="BoxShape3D" id="Collision"]
-size = Vector3(3.0, 1.5, 0.18)
+size = Vector3(2.8, 1.5, 0.18)
 
-[node name="Object" type="Node3D"]
-
-[node name="Model" parent="." instance=ExtResource("1_model")]
+[node name="CubiclePartition" instance=ExtResource("1_model")]
 rotation_degrees = Vector3(-90, 0, 0)
 
 [node name="Body" type="StaticBody3D" parent="."]

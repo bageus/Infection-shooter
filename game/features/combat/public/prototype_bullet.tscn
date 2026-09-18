@@ -1,0 +1,21 @@
+[gd_scene load_steps=3 format=3]
+
+[ext_resource type="Script" path="res://game/features/combat/prototype_bullet.gd" id="1_script"]
+
+[sub_resource type="StandardMaterial3D" id="BulletMaterial"]
+albedo_color = Color(1, 0.75, 0.18, 1)
+emission_enabled = true
+emission = Color(1, 0.45, 0.05, 1)
+emission_energy_multiplier = 2.5
+
+[sub_resource type="CapsuleMesh" id="BulletMesh"]
+material = SubResource("BulletMaterial")
+radius = 0.045
+height = 0.34
+
+[node name="PrototypeBullet" type="Node3D"]
+script = ExtResource("1_script")
+
+[node name="Visual" type="MeshInstance3D" parent="."]
+rotation_degrees = Vector3(90, 0, 0)
+mesh = SubResource("BulletMesh")

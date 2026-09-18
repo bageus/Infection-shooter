@@ -3,6 +3,7 @@
   "layer": "features",
   "purpose": "Own prototype firearm cadence and hit resolution.",
   "state_owner": ["Prototype weapon fire cooldown"],
-  "public_api": ["public/prototype_rifle.tscn"],
+  "public_api": ["public/prototype_rifle.tscn",
+    "public/prototype_bullet.tscn"],
   "dependencies": []
 }
