@@ -129,6 +129,7 @@ transform = Transform3D(-1, 0, -8.742278e-08, 0, 1, 0, 8.742278e-08, 0, -1, -18.
 [node name="SouthWall_2" parent="Structure/PerimeterWalls" unique_id=406820719 instance=ExtResource("m2")]
 transform = Transform3D(-1, 0, -8.742278e-08, 0, 1, 0, 8.742278e-08, 0, -1, -16.5, 0, 14.8)
 
+<<<<<<< HEAD
 [node name="SouthWall_3" parent="Structure/PerimeterWalls" unique_id=1198107092 instance=ExtResource("m2")]
 transform = Transform3D(-1, 0, -8.742278e-08, 0, 1, 0, 8.742278e-08, 0, -1, -14.3, 0, 14.8)
 
@@ -235,6 +236,133 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -16.5, 0, -14.8)
 
 [node name="NorthWindow_3" parent="Structure/PerimeterWindows" unique_id=887902316 instance=ExtResource("m14")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -14.3, 0, -14.8)
+=======
+[node name="NorthWindow_1" parent="Structure/PerimeterWindows" instance=ExtResource("m14")]
+position = Vector3(-18.19, 0, -14.8)
+
+[node name="NorthWindow_2" parent="Structure/PerimeterWindows" instance=ExtResource("m14")]
+position = Vector3(-16.05, 0, -14.8)
+
+[node name="NorthWindow_3" parent="Structure/PerimeterWindows" instance=ExtResource("m14")]
+position = Vector3(-13.91, 0, -14.8)
+
+[node name="NorthWindow_4" parent="Structure/PerimeterWindows" instance=ExtResource("m14")]
+position = Vector3(-11.77, 0, -14.8)
+
+[node name="NorthWindow_5" parent="Structure/PerimeterWindows" instance=ExtResource("m14")]
+position = Vector3(-9.63, 0, -14.8)
+
+[node name="NorthWindow_6" parent="Structure/PerimeterWindows" instance=ExtResource("m14")]
+position = Vector3(-7.49, 0, -14.8)
+
+[node name="NorthWindow_7" parent="Structure/PerimeterWindows" instance=ExtResource("m14")]
+position = Vector3(-5.35, 0, -14.8)
+
+[node name="NorthWindow_8" parent="Structure/PerimeterWindows" instance=ExtResource("m14")]
+position = Vector3(-3.21, 0, -14.8)
+
+[node name="NorthWindow_9" parent="Structure/PerimeterWindows" instance=ExtResource("m14")]
+position = Vector3(-1.07, 0, -14.8)
+
+[node name="NorthWindow_10" parent="Structure/PerimeterWindows" instance=ExtResource("m14")]
+position = Vector3(1.07, 0, -14.8)
+
+[node name="NorthWindow_11" parent="Structure/PerimeterWindows" instance=ExtResource("m14")]
+position = Vector3(3.21, 0, -14.8)
+
+[node name="NorthWindow_12" parent="Structure/PerimeterWindows" instance=ExtResource("m14")]
+position = Vector3(5.35, 0, -14.8)
+
+[node name="NorthWindow_13" parent="Structure/PerimeterWindows" instance=ExtResource("m14")]
+position = Vector3(7.49, 0, -14.8)
+
+[node name="NorthWindow_14" parent="Structure/PerimeterWindows" instance=ExtResource("m14")]
+position = Vector3(9.63, 0, -14.8)
+
+[node name="NorthWindow_15" parent="Structure/PerimeterWindows" instance=ExtResource("m14")]
+position = Vector3(11.77, 0, -14.8)
+
+[node name="NorthWindow_16" parent="Structure/PerimeterWindows" instance=ExtResource("m14")]
+position = Vector3(13.91, 0, -14.8)
+
+[node name="NorthWindow_17" parent="Structure/PerimeterWindows" instance=ExtResource("m14")]
+position = Vector3(16.05, 0, -14.8)
+
+[node name="NorthWindow_18" parent="Structure/PerimeterWindows" instance=ExtResource("m14")]
+position = Vector3(18.19, 0, -14.8)
+
+[node name="SouthWall_1" parent="Structure/PerimeterWalls" instance=ExtResource("m2")]
+position = Vector3(-18.19, 0, 14.8)
+rotation_degrees = Vector3(0, 180, 0)
+
+[node name="SouthWall_2" parent="Structure/PerimeterWalls" instance=ExtResource("m2")]
+position = Vector3(-16.05, 0, 14.8)
+rotation_degrees = Vector3(0, 180, 0)
+
+[node name="SouthWall_3" parent="Structure/PerimeterWalls" instance=ExtResource("m2")]
+position = Vector3(-13.91, 0, 14.8)
+rotation_degrees = Vector3(0, 180, 0)
+
+[node name="SouthWall_4" parent="Structure/PerimeterWalls" instance=ExtResource("m2")]
+position = Vector3(-11.77, 0, 14.8)
+rotation_degrees = Vector3(0, 180, 0)
+
+[node name="SouthWall_5" parent="Structure/PerimeterWalls" instance=ExtResource("m2")]
+position = Vector3(-9.63, 0, 14.8)
+rotation_degrees = Vector3(0, 180, 0)
+
+[node name="SouthWall_6" parent="Structure/PerimeterWalls" instance=ExtResource("m2")]
+position = Vector3(-7.49, 0, 14.8)
+rotation_degrees = Vector3(0, 180, 0)
+
+[node name="SouthWall_7" parent="Structure/PerimeterWalls" instance=ExtResource("m2")]
+position = Vector3(-5.35, 0, 14.8)
+rotation_degrees = Vector3(0, 180, 0)
+
+[node name="SouthWall_8" parent="Structure/PerimeterWalls" instance=ExtResource("m2")]
+position = Vector3(-3.21, 0, 14.8)
+rotation_degrees = Vector3(0, 180, 0)
+
+[node name="SouthWall_9" parent="Structure/PerimeterWalls" instance=ExtResource("m2")]
+position = Vector3(-1.07, 0, 14.8)
+rotation_degrees = Vector3(0, 180, 0)
+
+[node name="SouthWall_10" parent="Structure/PerimeterWalls" instance=ExtResource("m2")]
+position = Vector3(1.07, 0, 14.8)
+rotation_degrees = Vector3(0, 180, 0)
+
+[node name="SouthWall_11" parent="Structure/PerimeterWalls" instance=ExtResource("m2")]
+position = Vector3(3.21, 0, 14.8)
+rotation_degrees = Vector3(0, 180, 0)
+
+[node name="SouthWall_12" parent="Structure/PerimeterWalls" instance=ExtResource("m2")]
+position = Vector3(5.35, 0, 14.8)
+rotation_degrees = Vector3(0, 180, 0)
+
+[node name="SouthWall_13" parent="Structure/PerimeterWalls" instance=ExtResource("m2")]
+position = Vector3(7.49, 0, 14.8)
+rotation_degrees = Vector3(0, 180, 0)
+
+[node name="SouthWall_14" parent="Structure/PerimeterWalls" instance=ExtResource("m2")]
+position = Vector3(9.63, 0, 14.8)
+rotation_degrees = Vector3(0, 180, 0)
+
+[node name="SouthWall_15" parent="Structure/PerimeterWalls" instance=ExtResource("m2")]
+position = Vector3(11.77, 0, 14.8)
+rotation_degrees = Vector3(0, 180, 0)
+
+[node name="SouthWall_16" parent="Structure/PerimeterWalls" instance=ExtResource("m2")]
+position = Vector3(13.91, 0, 14.8)
+rotation_degrees = Vector3(0, 180, 0)
+
+[node name="SouthWall_17" parent="Structure/PerimeterWalls" instance=ExtResource("m2")]
+position = Vector3(16.05, 0, 14.8)
+rotation_degrees = Vector3(0, 180, 0)
+
+[node name="SouthWall_18" parent="Structure/PerimeterWalls" instance=ExtResource("m2")]
+position = Vector3(18.19, 0, 14.8)
+rotation_degrees = Vector3(0, 180, 0)
+>>>>>>> a96bf7533324cd9633c171138b5f57f53f01b975
 
 [node name="NorthWindow_4" parent="Structure/PerimeterWindows" unique_id=1638253035 instance=ExtResource("m14")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -12.1, 0, -14.8)
@@ -416,6 +544,7 @@ transform = Transform3D(-1, 0, -8.742278e-08, 0, 1, 0, 8.742278e-08, 0, -1, 2, 1
 [node name="EmergencyDoor" parent="Structure/ElevatorLobby" unique_id=151220822 instance=ExtResource("m68")]
 transform = Transform3D(-1, 0, -8.742278e-08, 0, 1, 0, 8.742278e-08, 0, -1, 6, 0, 13.8)
 
+<<<<<<< HEAD
 [node name="WallDoor" parent="Structure/ElevatorLobby" unique_id=762841232 instance=ExtResource("m8")]
 transform = Transform3D(-1, 0, -8.742278e-08, 0, 1, 0, 8.742278e-08, 0, -1, -7, 0, 13.8)
 
@@ -461,10 +590,76 @@ transform = Transform3D(-4.371139e-08, 0, 1, 0, 1, 0, -1, 0, -4.371139e-08, 10, 
 
 [node name="GlassFull_13" parent="Partitions/Glass" unique_id=147374959 instance=ExtResource("m50")]
 transform = Transform3D(-4.371139e-08, 0, 1, 0, 1, 0, -1, 0, -4.371139e-08, 10, 0, -3)
+=======
+[node name="GlassFull_1" parent="Partitions/Glass" instance=ExtResource("m50")]
+position = Vector3(-10, 0, -8)
+rotation_degrees = Vector3(0, 90, 0)
+
+[node name="GlassFull_2" parent="Partitions/Glass" instance=ExtResource("m50")]
+position = Vector3(-10, 0, -6.6)
+rotation_degrees = Vector3(0, 90, 0)
+
+[node name="GlassFull_3" parent="Partitions/Glass" instance=ExtResource("m50")]
+position = Vector3(-10, 0, -5.2)
+rotation_degrees = Vector3(0, 90, 0)
+
+[node name="GlassFull_4" parent="Partitions/Glass" instance=ExtResource("m50")]
+position = Vector3(-10, 0, -3.8)
+rotation_degrees = Vector3(0, 90, 0)
+
+[node name="GlassFull_5" parent="Partitions/Glass" instance=ExtResource("m50")]
+position = Vector3(-4.2, 0, -8)
+rotation_degrees = Vector3(0, 0, 0)
+
+[node name="GlassFull_6" parent="Partitions/Glass" instance=ExtResource("m50")]
+position = Vector3(-2.8, 0, -8)
+rotation_degrees = Vector3(0, 0, 0)
+
+[node name="GlassFull_7" parent="Partitions/Glass" instance=ExtResource("m50")]
+position = Vector3(-1.4, 0, -8)
+rotation_degrees = Vector3(0, 0, 0)
+
+[node name="GlassFull_8" parent="Partitions/Glass" instance=ExtResource("m50")]
+position = Vector3(0, 0, -8)
+rotation_degrees = Vector3(0, 0, 0)
+
+[node name="GlassFull_9" parent="Partitions/Glass" instance=ExtResource("m50")]
+position = Vector3(1.4, 0, -8)
+rotation_degrees = Vector3(0, 0, 0)
+
+[node name="GlassFull_10" parent="Partitions/Glass" instance=ExtResource("m50")]
+position = Vector3(10, 0, -8)
+rotation_degrees = Vector3(0, 90, 0)
+
+[node name="GlassFull_11" parent="Partitions/Glass" instance=ExtResource("m50")]
+position = Vector3(10, 0, -6.6)
+rotation_degrees = Vector3(0, 90, 0)
+
+[node name="GlassFull_12" parent="Partitions/Glass" instance=ExtResource("m50")]
+position = Vector3(10, 0, -5.2)
+rotation_degrees = Vector3(0, 90, 0)
+
+[node name="GlassFull_13" parent="Partitions/Glass" instance=ExtResource("m50")]
+position = Vector3(10, 0, -3.8)
+rotation_degrees = Vector3(0, 90, 0)
+
+[node name="GlassFull_14" parent="Partitions/Glass" instance=ExtResource("m50")]
+position = Vector3(-4.2, 0, 6)
+rotation_degrees = Vector3(0, 0, 0)
+
+[node name="GlassFull_15" parent="Partitions/Glass" instance=ExtResource("m50")]
+position = Vector3(-2.8, 0, 6)
+rotation_degrees = Vector3(0, 0, 0)
+
+[node name="GlassFull_16" parent="Partitions/Glass" instance=ExtResource("m50")]
+position = Vector3(-1.4, 0, 6)
+rotation_degrees = Vector3(0, 0, 0)
+>>>>>>> a96bf7533324cd9633c171138b5f57f53f01b975
 
 [node name="GlassFull_14" parent="Partitions/Glass" unique_id=37202256 instance=ExtResource("m50")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -6, 0, 6)
 
+<<<<<<< HEAD
 [node name="GlassFull_15" parent="Partitions/Glass" unique_id=389513875 instance=ExtResource("m50")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -4, 0, 6)
 
@@ -473,6 +668,19 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -2, 0, 6)
 
 [node name="GlassFull_17" parent="Partitions/Glass" unique_id=1092618342 instance=ExtResource("m50")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 6)
+=======
+[node name="GlassFull_18" parent="Partitions/Glass" instance=ExtResource("m50")]
+position = Vector3(1.4, 0, 6)
+rotation_degrees = Vector3(0, 0, 0)
+
+[node name="GlassFull_19" parent="Partitions/Glass" instance=ExtResource("m50")]
+position = Vector3(2.8, 0, 6)
+rotation_degrees = Vector3(0, 0, 0)
+
+[node name="GlassFull_20" parent="Partitions/Glass" instance=ExtResource("m50")]
+position = Vector3(4.2, 0, 6)
+rotation_degrees = Vector3(0, 0, 0)
+>>>>>>> a96bf7533324cd9633c171138b5f57f53f01b975
 
 [node name="GlassFull_18" parent="Partitions/Glass" unique_id=1960347756 instance=ExtResource("m50")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 2, 0, 6)
@@ -501,6 +709,7 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 14, 0, 2)
 [node name="GlassHalf_6" parent="Partitions/Glass" unique_id=1274487653 instance=ExtResource("m46")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 14, 0, 7)
 
+<<<<<<< HEAD
 [node name="GlassCornerA" parent="Partitions/Glass" unique_id=313472260 instance=ExtResource("m47")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -10, 0, -8)
 
@@ -529,6 +738,47 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 6, 0, -3)
 
 [node name="Cubicle_6" parent="Partitions/Cubicles" unique_id=1438485597 instance=ExtResource("m57")]
 transform = Transform3D(-4.371139e-08, 0, 1, 0, 1, 0, -1, 0, -4.371139e-08, -6, 0, 2)
+=======
+[node name="Cubicle_1" parent="Partitions/Cubicles" instance=ExtResource("m55")]
+position = Vector3(-6.88, 0, -3)
+rotation_degrees = Vector3(0, 0, 0)
+
+[node name="Cubicle_2" parent="Partitions/Cubicles" instance=ExtResource("m57")]
+position = Vector3(-5.16, 0, -3)
+rotation_degrees = Vector3(0, 0, 0)
+
+[node name="Cubicle_3" parent="Partitions/Cubicles" instance=ExtResource("m59")]
+position = Vector3(-3.44, 0, -3)
+rotation_degrees = Vector3(0, 0, 0)
+
+[node name="Cubicle_4" parent="Partitions/Cubicles" instance=ExtResource("m61")]
+position = Vector3(-1.72, 0, -3)
+rotation_degrees = Vector3(0, 0, 0)
+
+[node name="Cubicle_5" parent="Partitions/Cubicles" instance=ExtResource("m55")]
+position = Vector3(0, 0, -3)
+rotation_degrees = Vector3(0, 0, 0)
+
+[node name="Cubicle_6" parent="Partitions/Cubicles" instance=ExtResource("m57")]
+position = Vector3(-6.88, 0, 2)
+rotation_degrees = Vector3(0, 90, 0)
+
+[node name="Cubicle_7" parent="Partitions/Cubicles" instance=ExtResource("m59")]
+position = Vector3(-5.16, 0, 2)
+rotation_degrees = Vector3(0, 90, 0)
+
+[node name="Cubicle_8" parent="Partitions/Cubicles" instance=ExtResource("m61")]
+position = Vector3(-3.44, 0, 2)
+rotation_degrees = Vector3(0, 90, 0)
+
+[node name="Cubicle_9" parent="Partitions/Cubicles" instance=ExtResource("m55")]
+position = Vector3(-1.72, 0, 2)
+rotation_degrees = Vector3(0, 90, 0)
+
+[node name="Cubicle_10" parent="Partitions/Cubicles" instance=ExtResource("m57")]
+position = Vector3(0, 0, 2)
+rotation_degrees = Vector3(0, 90, 0)
+>>>>>>> a96bf7533324cd9633c171138b5f57f53f01b975
 
 [node name="Cubicle_7" parent="Partitions/Cubicles" unique_id=523982915 instance=ExtResource("m59")]
 transform = Transform3D(-4.371139e-08, 0, 1, 0, 1, 0, -1, 0, -4.371139e-08, -3, 0, 2)
