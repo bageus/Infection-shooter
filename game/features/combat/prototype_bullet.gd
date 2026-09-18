@@ -83,7 +83,7 @@ func _handle_hit(collider: Object, position: Vector3, normal: Vector3) -> bool:
 
 	if collider.has_method("take_damage"):
 		if collider.has_method("take_projectile_damage"):
-			collider.call("take_projectile_damage", hit_damage, position, _direction)
+			collider.call("take_projectile_damage", hit_damage, position, _direction, _weapon_name)
 		else:
 			collider.call("take_damage", hit_damage)
 		return true
