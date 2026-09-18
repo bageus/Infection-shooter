@@ -13,7 +13,7 @@ extends CanvasLayer
 @onready var magazine: Label = $WeaponPanel/Magazine
 @onready var reserve: Label = $WeaponPanel/Reserve
 @onready var reload_label: Label = $WeaponPanel/Reload
-@onready var slots: Array[PanelContainer] = [$WeaponPanel/Slot1, $WeaponPanel/Slot2, $WeaponPanel/Slot3]
+@onready var slot_frames: Array[PanelContainer] = [$WeaponPanel/Slot1, $WeaponPanel/Slot2, $WeaponPanel/Slot3]
 
 var player: Node
 var infection: Node
@@ -34,12 +34,12 @@ func _process(_delta: float) -> void:
 	var critical: float = infection.call("get_critical_threshold")
 	mutation_bar.value = mutation
 	mutation_value.text = "%d / 100" % roundi(mutation)
-	critical_marker.position.x = 78.0 + 260.0 * clampf(critical / 100.0, 0.0, 1.0)
+	critical_marker.position.x = 80.0 + 260.0 * clampf(critical / 100.0, 0.0, 1.0)
 
 	var filled := ceili(player.armor / maxf(player.max_armor, 1.0) * armor_segments.get_child_count())
 	for i in armor_segments.get_child_count():
 		var segment := armor_segments.get_child(i) as ColorRect
-		segment.color = Color(0.1, 0.85, 1.0, 1.0) if i < filled else Color(0.03, 0.12, 0.18, 0.8)
+		segment.color = Color(0.08, 0.82, 1.0, 1.0) if i < filled else Color(0.025, 0.12, 0.18, 0.9)
 
 	antidote_count.text = str(player.antidotes)
 	var weapon: Node = player.get_current_weapon()
@@ -48,5 +48,5 @@ func _process(_delta: float) -> void:
 	reserve.text = "/ %d" % weapon.call("get_reserve_ammo")
 	reload_label.text = "RELOADING" if weapon.call("is_reloading") else ""
 
-	for i in slots.size():
-		slots[i].modulate = Color(0.05, 1.0, 1.0, 1.0) if i == player.get_current_weapon_index() else Color(0.55, 0.7, 0.82, 0.8)
+	for i in slot_frames.size():
+		slot_frames[i].modulate = Color(0.05, 1.0, 1.0, 1.0) if i == player.get_current_weapon_index() else Color(0.5, 0.66, 0.78, 0.9)
