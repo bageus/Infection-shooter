@@ -18,7 +18,10 @@ func _run() -> void:
 	_test_escalation_to_defeat()
 	_test_risk_window_expiry_resets_escalation()
 	_test_antidote_resets_risk_without_reducing_mutation()
+	_test_antidote_resets_second_risk_window()
+	_test_antidote_is_blocked_during_control_loss()
 	_test_instability_only_builds_at_critical_threshold()
+	_test_instability_resets_below_critical_threshold()
 	_test_mutagen_pauses_during_control_loss()
 
 	if failures == 0:
@@ -150,6 +153,42 @@ func _test_antidote_resets_risk_without_reducing_mutation() -> void:
 	_expect(domain.next_control_loss_stage == 1, "Risk-window antidote resets escalation to stage one.")
 	domain.tick(10.0)
 	_expect(domain.active_control_loss_stage == 1, "Continued high mutation restarts from stage one.")
+
+
+func _test_antidote_resets_second_risk_window() -> void:
+	var domain = _reach_first_control_loss()
+	domain.tick(5.0)
+	domain.tick(10.0)
+	_expect(domain.active_control_loss_stage == 2, "Test setup reaches stage-two control loss.")
+	domain.tick(7.0)
+	var mutation_before := domain.mutation
+	_expect_float(domain.risk_window_remaining, 30.0, "Stage two opens the second risk window.")
+	_expect(domain.use_antidote(), "Antidote is usable during the second risk window.")
+	_expect_float(domain.mutation, mutation_before, "Second-window antidote does not reduce mutation.")
+	_expect_float(domain.risk_window_remaining, 0.0, "Second-window antidote ends the risk window.")
+	_expect(domain.next_control_loss_stage == 1, "Second-window antidote resets escalation to stage one.")
+	domain.tick(10.0)
+	_expect(domain.active_control_loss_stage == 1, "After a second-window reset, the next loss is stage one.")
+
+
+func _test_antidote_is_blocked_during_control_loss() -> void:
+	var domain = _reach_first_control_loss()
+	var mutation_before := domain.mutation
+	_expect(not domain.use_antidote(), "Antidote cannot be used during active control loss.")
+	_expect_float(domain.mutation, mutation_before, "Blocked antidote does not change mutation.")
+	_expect(domain.active_control_loss_stage == 1, "Blocked antidote does not alter control-loss stage.")
+
+
+func _test_instability_resets_below_critical_threshold() -> void:
+	var domain = InfectionDomain.new()
+	domain.absorb_mutagen(6.0)
+	domain.tick(6.0)
+	_expect_float(domain.instability_elapsed, 6.0, "Instability accumulates while mutation is critical.")
+	domain.use_antidote()
+	_expect_float(domain.mutation, 20.0, "Ordinary antidote can move mutation below critical.")
+	_expect_float(domain.instability_elapsed, 0.0, "Dropping below critical resets instability progress.")
+	domain.tick(20.0)
+	_expect(not domain.is_control_lost(), "No control loss occurs while mutation remains below critical.")
 
 
 func _test_instability_only_builds_at_critical_threshold() -> void:
