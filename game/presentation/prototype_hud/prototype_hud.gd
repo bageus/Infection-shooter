@@ -13,6 +13,7 @@ extends CanvasLayer
 @onready var magazine: Label = $WeaponPanel/Magazine
 @onready var reserve: Label = $WeaponPanel/Reserve
 @onready var reload_label: Label = $WeaponPanel/Reload
+@onready var gun_parts: Array[ColorRect] = [$WeaponPanel/GunStock, $WeaponPanel/GunBody, $WeaponPanel/GunBarrel, $WeaponPanel/GunGrip]
 @onready var slot_frames: Array[PanelContainer] = [$WeaponPanel/Slot1, $WeaponPanel/Slot2, $WeaponPanel/Slot3]
 
 var player: Node
@@ -44,9 +45,34 @@ func _process(_delta: float) -> void:
 	antidote_count.text = str(player.antidotes)
 	var weapon: Node = player.get_current_weapon()
 	weapon_name.text = weapon.call("get_weapon_name")
-	magazine.text = str(weapon.call("get_magazine_ammo"))
-	reserve.text = "/ %d" % weapon.call("get_reserve_ammo")
-	reload_label.text = "RELOADING" if weapon.call("is_reloading") else ""
+	var magazine_ammo: int = weapon.call("get_magazine_ammo")
+	var reserve_ammo: int = weapon.call("get_reserve_ammo")
+	var reloading: bool = weapon.call("is_reloading")
+	var empty: bool = magazine_ammo == 0
 
+	magazine.text = str(magazine_ammo)
+	reserve.text = "/ %d" % reserve_ammo
+
+	if reloading:
+		reload_label.text = "RELOADING"
+	elif empty and reserve_ammo > 0:
+		reload_label.text = "RELOAD [R]"
+	elif empty:
+		reload_label.text = "NO AMMO"
+	else:
+		reload_label.text = ""
+
+	var warning_color := Color(1.0, 0.12, 0.08, 1.0)
+	var normal_weapon_color := Color(0.82, 0.93, 1.0, 1.0)
+	weapon_name.modulate = warning_color if empty else Color.WHITE
+	magazine.modulate = warning_color if empty else Color.WHITE
+	reload_label.modulate = warning_color if empty and not reloading else Color(0.1, 0.9, 1.0, 1.0)
+	for part in gun_parts:
+		part.color = warning_color if empty else normal_weapon_color
+
+	var active_index: int = player.get_current_weapon_index()
 	for i in slot_frames.size():
-		slot_frames[i].modulate = Color(0.05, 1.0, 1.0, 1.0) if i == player.get_current_weapon_index() else Color(0.5, 0.66, 0.78, 0.9)
+		if i == active_index:
+			slot_frames[i].modulate = warning_color if empty else Color(0.05, 1.0, 1.0, 1.0)
+		else:
+			slot_frames[i].modulate = Color(0.5, 0.66, 0.78, 0.9)

@@ -300,11 +300,12 @@ text = "/ 75"
 theme_override_font_sizes/font_size = 17
 
 [node name="Reload" type="Label" parent="WeaponPanel"]
-offset_left = 235.0
-offset_top = 59.0
+offset_left = 205.0
+offset_top = 57.0
 offset_right = 360.0
-offset_bottom = 78.0
+offset_bottom = 81.0
 text = ""
+theme_override_font_sizes/font_size = 15
 horizontal_alignment = 2
 
 [node name="Slot1" type="PanelContainer" parent="WeaponPanel"]
