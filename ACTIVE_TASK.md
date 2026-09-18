@@ -74,7 +74,7 @@ The visual reference is used for layout direction, not copied literally. Importe
 
 ## Validation evidence
 
-GitHub Actions runs 35362345864, 35369496353, and 35371501101 passed the scene/player, combat, and infection-integration repository gates. The current increment adds a scene-authored prototype HUD for HP, mutation, critical threshold, control state, and controls. Godot runtime/import testing is unavailable in the current environment.
+GitHub Actions runs 35362345864, 35369496353, and 35371501101 passed the scene/player, combat, and infection-integration repository gates. HUD validation initially failed because one presentation module depended on another. The fix moves HUD composition to bootstrap, preserving presentation-layer boundaries. Godot runtime/import testing is unavailable in the current environment.
 
 ## Blockers
 

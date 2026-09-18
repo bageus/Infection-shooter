@@ -8,6 +8,7 @@
   ],
   "public_api": [],
   "dependencies": [
-    "presentation.office_floor"
+    "presentation.office_floor",
+    "presentation.prototype_hud"
   ]
 }

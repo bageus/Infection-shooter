@@ -40,7 +40,7 @@ DISC-001 — discovery synthesis and owner approval. T001 implementation is pres
 | T002 scene/player gates | PASSED | GitHub Actions run 35362345864 passed commit `886f1f1a748a49eab14946ae5f5539aebc2596b2` |
 | T002 enemy/weapon/source gates | PASSED | GitHub Actions run 35369496353 passed commit `d953a2688a1769b05556ac905d0d4c98eeb99214` |
 | T002 infection integration gates | PASSED | GitHub Actions run 35371501101 passed commit `d98b27567c99a4659be018e002f2f501278e15b0` |
-| T002 prototype HUD gates | PENDING | Run automatically after the HUD commit |
+| T002 prototype HUD gates | FIXING | Run 35376058977 failed only on presentation-to-presentation dependency; bootstrap composition fix committed next |
 
 ## Known blockers
 

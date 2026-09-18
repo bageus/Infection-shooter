@@ -9,7 +9,6 @@
   "dependencies": [
     "features.player",
     "features.infected",
-    "features.infection_source",
-    "presentation.prototype_hud"
+    "features.infection_source"
   ]
 }
