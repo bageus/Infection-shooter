@@ -1,74 +1,168 @@
-[gd_scene load_steps=5 format=3]
+[gd_scene load_steps=7 format=3]
 
 [ext_resource type="Script" path="res://game/presentation/prototype_hud/prototype_hud.gd" id="1_hud"]
 
 [sub_resource type="StyleBoxFlat" id="PanelStyle"]
-bg_color = Color(0.025, 0.035, 0.055, 0.88)
+bg_color = Color(0.025, 0.055, 0.09, 0.88)
 border_width_left = 2
 border_width_top = 2
 border_width_right = 2
 border_width_bottom = 2
-border_color = Color(0.25, 0.33, 0.45, 0.9)
+border_color = Color(0.1, 0.78, 1, 0.92)
 corner_radius_top_left = 8
 corner_radius_top_right = 8
 corner_radius_bottom_right = 8
 corner_radius_bottom_left = 8
 
+[sub_resource type="StyleBoxFlat" id="BarBg"]
+bg_color = Color(0.03, 0.08, 0.12, 0.95)
+corner_radius_top_left = 4
+corner_radius_top_right = 4
+corner_radius_bottom_right = 4
+corner_radius_bottom_left = 4
+
 [sub_resource type="StyleBoxFlat" id="HealthFill"]
-bg_color = Color(0.75, 0.12, 0.12, 1)
-corner_radius_top_left = 3
-corner_radius_top_right = 3
-corner_radius_bottom_right = 3
-corner_radius_bottom_left = 3
+bg_color = Color(0.95, 0.12, 0.22, 1)
+corner_radius_top_left = 4
+corner_radius_top_right = 4
+corner_radius_bottom_right = 4
+corner_radius_bottom_left = 4
 
 [sub_resource type="StyleBoxFlat" id="MutationFill"]
-bg_color = Color(0.18, 0.85, 0.3, 1)
-corner_radius_top_left = 3
-corner_radius_top_right = 3
-corner_radius_bottom_right = 3
-corner_radius_bottom_left = 3
+bg_color = Color(0.25, 0.95, 0.18, 1)
+corner_radius_top_left = 4
+corner_radius_top_right = 4
+corner_radius_bottom_right = 4
+corner_radius_bottom_left = 4
+
+[sub_resource type="StyleBoxFlat" id="SlotStyle"]
+bg_color = Color(0.02, 0.08, 0.13, 0.95)
+border_width_left = 1
+border_width_top = 1
+border_width_right = 1
+border_width_bottom = 1
+border_color = Color(0.08, 0.65, 0.9, 0.9)
+corner_radius_top_left = 5
+corner_radius_top_right = 5
+corner_radius_bottom_right = 5
+corner_radius_bottom_left = 5
 
 [node name="PrototypeHUD" type="CanvasLayer"]
 script = ExtResource("1_hud")
-player_path = NodePath("../OfficeFloor/Gameplay/Player")
+player_path = NodePath("../Gameplay/Player")
 
-[node name="Margin" type="MarginContainer" parent="."]
+[node name="BottomLeft" type="MarginContainer" parent="."]
+anchors_preset = 2
+anchor_top = 1.0
+anchor_bottom = 1.0
 offset_left = 18.0
-offset_top = 18.0
-offset_right = 318.0
-offset_bottom = 220.0
+offset_top = -158.0
+offset_right = 520.0
+offset_bottom = -18.0
+grow_vertical = 0
 
-[node name="Panel" type="PanelContainer" parent="Margin"]
+[node name="Panel" type="PanelContainer" parent="BottomLeft"]
 theme_override_styles/panel = SubResource("PanelStyle")
 
-[node name="VBox" type="VBoxContainer" parent="Margin/Panel"]
-theme_override_constants/separation = 6
+[node name="VBox" type="VBoxContainer" parent="BottomLeft/Panel"]
+theme_override_constants/separation = 8
 
-[node name="Title" type="Label" parent="Margin/Panel/VBox"]
-text = "INFECTION // PROTOTYPE"
+[node name="HealthRow" type="HBoxContainer" parent="BottomLeft/Panel/VBox"]
 
-[node name="HealthLabel" type="Label" parent="Margin/Panel/VBox"]
-text = "HP  100 / 100"
+[node name="Icon" type="Label" parent="BottomLeft/Panel/VBox/HealthRow"]
+custom_minimum_size = Vector2(42, 0)
+text = "✚"
 
-[node name="HealthBar" type="ProgressBar" parent="Margin/Panel/VBox"]
-custom_minimum_size = Vector2(270, 18)
-value = 100.0
+[node name="HealthBar" type="ProgressBar" parent="BottomLeft/Panel/VBox/HealthRow"]
+custom_minimum_size = Vector2(300, 24)
+size_flags_horizontal = 3
 show_percentage = false
+theme_override_styles/background = SubResource("BarBg")
 theme_override_styles/fill = SubResource("HealthFill")
 
-[node name="MutationLabel" type="Label" parent="Margin/Panel/VBox"]
-text = "MUTATION  0 / 100"
+[node name="HealthValue" type="Label" parent="BottomLeft/Panel/VBox/HealthRow"]
+custom_minimum_size = Vector2(90, 0)
+text = "100 / 100"
 
-[node name="MutationBar" type="ProgressBar" parent="Margin/Panel/VBox"]
-custom_minimum_size = Vector2(270, 18)
+[node name="MutationRow" type="HBoxContainer" parent="BottomLeft/Panel/VBox"]
+
+[node name="Icon" type="Label" parent="BottomLeft/Panel/VBox/MutationRow"]
+custom_minimum_size = Vector2(42, 0)
+text = "☣"
+
+[node name="MutationWrap" type="Control" parent="BottomLeft/Panel/VBox/MutationRow"]
+custom_minimum_size = Vector2(300, 24)
+size_flags_horizontal = 3
+
+[node name="MutationBar" type="ProgressBar" parent="BottomLeft/Panel/VBox/MutationRow/MutationWrap"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
 show_percentage = false
+theme_override_styles/background = SubResource("BarBg")
 theme_override_styles/fill = SubResource("MutationFill")
 
-[node name="CriticalLabel" type="Label" parent="Margin/Panel/VBox"]
-text = "CRITICAL  30"
+[node name="CriticalMarker" type="ColorRect" parent="BottomLeft/Panel/VBox/MutationRow/MutationWrap"]
+offset_left = 88.0
+offset_right = 91.0
+offset_bottom = 24.0
+color = Color(1, 0.45, 0.1, 1)
+mouse_filter = 2
 
-[node name="ControlLabel" type="Label" parent="Margin/Panel/VBox"]
-text = "CONTROL: STABLE"
+[node name="MutationValue" type="Label" parent="BottomLeft/Panel/VBox/MutationRow"]
+custom_minimum_size = Vector2(90, 0)
+text = "0 / 100"
 
-[node name="Hint" type="Label" parent="Margin/Panel/VBox"]
-text = "WASD MOVE | SHIFT SPRINT | SPACE ROLL | Q/E CAMERA | LMB FIRE"
+[node name="ControlLabel" type="Label" parent="BottomLeft/Panel/VBox"]
+text = ""
+
+[node name="BottomRight" type="MarginContainer" parent="."]
+anchors_preset = 3
+anchor_left = 1.0
+anchor_top = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = -350.0
+offset_top = -150.0
+offset_right = -18.0
+offset_bottom = -18.0
+grow_horizontal = 0
+grow_vertical = 0
+
+[node name="Panel" type="PanelContainer" parent="BottomRight"]
+theme_override_styles/panel = SubResource("PanelStyle")
+
+[node name="VBox" type="VBoxContainer" parent="BottomRight/Panel"]
+alignment = 1
+
+[node name="WeaponLabel" type="Label" parent="BottomRight/Panel/VBox"]
+text = "RIFLE"
+horizontal_alignment = 1
+
+[node name="AmmoLabel" type="Label" parent="BottomRight/Panel/VBox"]
+text = "24 / 96"
+horizontal_alignment = 1
+
+[node name="Slots" type="HBoxContainer" parent="BottomRight/Panel/VBox"]
+alignment = 1
+
+[node name="Slot1" type="PanelContainer" parent="BottomRight/Panel/VBox/Slots"]
+custom_minimum_size = Vector2(84, 42)
+theme_override_styles/panel = SubResource("SlotStyle")
+[node name="Label" type="Label" parent="BottomRight/Panel/VBox/Slots/Slot1"]
+text = "1"
+
+[node name="Slot2" type="PanelContainer" parent="BottomRight/Panel/VBox/Slots"]
+custom_minimum_size = Vector2(84, 42)
+theme_override_styles/panel = SubResource("SlotStyle")
+[node name="Label" type="Label" parent="BottomRight/Panel/VBox/Slots/Slot2"]
+text = "2  RIFLE"
+
+[node name="Slot3" type="PanelContainer" parent="BottomRight/Panel/VBox/Slots"]
+custom_minimum_size = Vector2(84, 42)
+theme_override_styles/panel = SubResource("SlotStyle")
+[node name="Label" type="Label" parent="BottomRight/Panel/VBox/Slots/Slot3"]
+text = "3"

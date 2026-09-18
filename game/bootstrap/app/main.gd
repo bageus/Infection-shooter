@@ -1,8 +1,10 @@
-extends Node
+extends Node3D
 
-## Composition root for the game application.
-## Instantiate and inject top-level modules here; do not put gameplay rules here.
+@onready var player: Node3D = $Gameplay/Player
+@onready var enemies: Node3D = $Gameplay/Enemies
 
 
 func _ready() -> void:
-	pass
+	for enemy in enemies.get_children():
+		if enemy.has_method("set_target"):
+			enemy.call("set_target", player)

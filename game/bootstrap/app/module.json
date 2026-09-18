@@ -1,7 +1,7 @@
 {
   "id": "bootstrap.app",
   "layer": "bootstrap",
-  "purpose": "Own the application lifecycle and compose top-level game modules.",
+  "purpose": "Own the application lifecycle and compose top-level game modules and authored scenes.",
   "state_owner": [
     "Application lifecycle",
     "Current top-level application state"
@@ -9,6 +9,9 @@
   "public_api": [],
   "dependencies": [
     "presentation.office_floor",
-    "presentation.prototype_hud"
+    "presentation.prototype_hud",
+    "features.player",
+    "features.infected",
+    "features.infection_source"
   ]
 }
