@@ -7,13 +7,19 @@ extends CharacterBody3D
 @export var attack_interval: float = 1.0
 @export var gravity_acceleration: float = 24.0
 
+@onready var body_mesh: MeshInstance3D = $Body
+@onready var collision_shape: CollisionShape3D = $CollisionShape3D
+@onready var death_cloud: Area3D = $DeathCloud
+
 var health: float
 var _target: Node3D
 var _attack_cooldown: float = 0.0
+var _dead: bool = false
 
 
 func _ready() -> void:
 	health = max_health
+	death_cloud.depleted.connect(_on_death_cloud_depleted)
 
 
 func set_target(target: Node3D) -> void:
@@ -21,14 +27,19 @@ func set_target(target: Node3D) -> void:
 
 
 func take_damage(amount: float) -> void:
-	if amount <= 0.0 or health <= 0.0:
+	if amount <= 0.0 or _dead:
 		return
+
 	health = maxf(0.0, health - amount)
 	if health <= 0.0:
-		queue_free()
+		_die()
 
 
 func _physics_process(delta: float) -> void:
+	if _dead:
+		velocity = Vector3.ZERO
+		return
+
 	_attack_cooldown = maxf(0.0, _attack_cooldown - delta)
 	if _target == null or not is_instance_valid(_target):
 		velocity.x = 0.0
@@ -69,3 +80,16 @@ func _try_attack() -> void:
 	if _target != null and _target.has_method("take_damage"):
 		_target.call("take_damage", attack_damage)
 	_attack_cooldown = attack_interval
+
+
+func _die() -> void:
+	_dead = true
+	collision_layer = 0
+	collision_mask = 0
+	collision_shape.disabled = true
+	body_mesh.visible = false
+	death_cloud.call("activate")
+
+
+func _on_death_cloud_depleted() -> void:
+	queue_free()

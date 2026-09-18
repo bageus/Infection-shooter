@@ -1,8 +1,16 @@
 {
   "id": "features.infected",
   "layer": "features",
-  "purpose": "Own prototype infected health, pursuit, and melee attack state.",
-  "state_owner": ["Prototype infected health", "Prototype infected attack cooldown"],
-  "public_api": ["public/infected_capsule.tscn"],
-  "dependencies": []
+  "purpose": "Own prototype infected health, pursuit, melee attack, and death-to-mutagen transition.",
+  "state_owner": [
+    "Prototype infected health",
+    "Prototype infected attack cooldown",
+    "Prototype infected death state"
+  ],
+  "public_api": [
+    "public/infected_capsule.tscn"
+  ],
+  "dependencies": [
+    "features.infection_source"
+  ]
 }

@@ -11,6 +11,8 @@
     "Control-loss escalation stage",
     "Terminal control-loss defeat state"
   ],
-  "public_api": [],
+  "public_api": [
+    "public/infection_runtime.gd"
+  ],
   "dependencies": []
 }

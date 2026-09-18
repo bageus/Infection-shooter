@@ -66,7 +66,7 @@ Player module manifest, player scene and movement script, office-floor presentat
 
 ## Progress
 
-Owner override accepted: T002 started before the pending Godot headless execution of T001. The scene/player increment passed repository validation. The current increment adds red capsule enemies, an elongated capsule prototype rifle, mouse aiming/fire, and a dedicated infection-source scene. All gameplay objects are authored as `.tscn` scenes.
+Owner override accepted: T002 started before the pending Godot headless execution of T001. The scene/player increment passed repository validation. Red capsule enemies, elongated capsule weapon, aiming/fire, and the infection source are implemented. The current increment completes the basic loop by activating a pre-authored mutagen-cloud child scene on enemy death and routing cloud absorption into the T001 infection domain hosted by the player.
 
 ## Decisions
 
@@ -74,7 +74,7 @@ The visual reference is used for layout direction, not copied literally. Importe
 
 ## Validation evidence
 
-GitHub Actions run 35362345864 passed the scene/player repository gate. Validation for the enemy/weapon/source increment is pending. Godot runtime/import testing is unavailable in the current environment.
+GitHub Actions runs 35362345864 and 35369496353 passed the scene/player and enemy/weapon/source repository gates. The current integration connects T001 infection state to the player and adds a scene-authored mutagen cloud activated by enemy death. Godot runtime/import testing is unavailable in the current environment.
 
 ## Blockers
 
@@ -82,7 +82,7 @@ No product blocker. Runtime visual scale and imported-model transforms require G
 
 ## Next exact action
 
-Verify repository gates for the enemy/weapon/source increment, then continue T002 with infection integration and playable review.
+Verify repository gates for the infection integration increment, then perform a Godot playable review when runtime access is available.
 
 ## Session handoff
 

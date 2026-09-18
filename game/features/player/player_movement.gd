@@ -7,6 +7,7 @@ extends CharacterBody3D
 @onready var camera: Camera3D = $CameraRig/Camera3D
 @onready var aim_pivot: Node3D = $AimPivot
 @onready var weapon: Node3D = $AimPivot/PrototypeRifle
+@onready var infection_runtime: Node = $InfectionRuntime
 
 var health: float
 
@@ -28,6 +29,14 @@ func take_damage(amount: float) -> void:
 	health = maxf(0.0, health - amount)
 
 
+func absorb_mutagen(delta_seconds: float) -> float:
+	return infection_runtime.call("absorb_mutagen", delta_seconds)
+
+
+func get_mutation() -> float:
+	return infection_runtime.call("get_mutation")
+
+
 func _update_movement(delta: float) -> void:
 	var input_vector := Input.get_vector("move_left", "move_right", "move_up", "move_down")
 	var forward := -camera.global_transform.basis.z
@@ -39,6 +48,7 @@ func _update_movement(delta: float) -> void:
 	var direction := right * input_vector.x + forward * -input_vector.y
 	if direction.length_squared() > 1.0:
 		direction = direction.normalized()
+
 	velocity.x = direction.x * move_speed
 	velocity.z = direction.z * move_speed
 	if is_on_floor():
@@ -56,6 +66,7 @@ func _update_aim() -> void:
 	var distance = aim_plane.intersects_ray(ray_origin, ray_direction)
 	if distance == null:
 		return
+
 	var target: Vector3 = ray_origin + ray_direction * distance
 	var flat_target := Vector3(target.x, aim_pivot.global_position.y, target.z)
 	if aim_pivot.global_position.distance_squared_to(flat_target) <= 0.0001:

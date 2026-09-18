@@ -1,8 +1,14 @@
 {
   "id": "features.infection_source",
   "layer": "features",
-  "purpose": "Expose the prototype infection source as a reusable authored scene.",
-  "state_owner": [],
-  "public_api": ["public/infection_source.tscn"],
+  "purpose": "Expose authored infection-source and mutagen-cloud scenes used by the prototype slice.",
+  "state_owner": [
+    "Per-cloud absorption budget",
+    "Per-cloud lifetime"
+  ],
+  "public_api": [
+    "public/infection_source.tscn",
+    "public/mutagen_cloud.tscn"
+  ],
   "dependencies": []
 }

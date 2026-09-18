@@ -1,8 +1,16 @@
 {
   "id": "features.player",
   "layer": "features",
-  "purpose": "Own playable character movement, health, aiming, and expose the player scene.",
-  "state_owner": ["Player movement velocity", "Player prototype health"],
-  "public_api": ["public/player.tscn"],
-  "dependencies": ["features.combat"]
+  "purpose": "Own playable character movement, health, aiming, and host the infection runtime.",
+  "state_owner": [
+    "Player movement velocity",
+    "Player prototype health"
+  ],
+  "public_api": [
+    "public/player.tscn"
+  ],
+  "dependencies": [
+    "features.combat",
+    "features.infection"
+  ]
 }

@@ -1,7 +1,8 @@
-[gd_scene load_steps=5 format=3]
+[gd_scene load_steps=6 format=3]
 
 [ext_resource type="Script" path="res://game/features/player/player_movement.gd" id="1_player_script"]
 [ext_resource type="PackedScene" path="res://game/features/combat/public/prototype_rifle.tscn" id="2_weapon"]
+[ext_resource type="Script" path="res://game/features/infection/public/infection_runtime.gd" id="3_infection_runtime"]
 
 [sub_resource type="StandardMaterial3D" id="PlayerMaterial"]
 albedo_color = Color(0.06, 0.2, 0.62, 1)
@@ -19,7 +20,7 @@ height = 1.8
 [node name="Player" type="CharacterBody3D"]
 script = ExtResource("1_player_script")
 collision_layer = 1
-collision_mask = 1
+collision_mask = 3
 
 [node name="AimPivot" type="Node3D" parent="."]
 
@@ -31,6 +32,9 @@ position = Vector3(0.38, 0.2, -0.55)
 
 [node name="CollisionShape3D" type="CollisionShape3D" parent="."]
 shape = SubResource("CapsuleShape_player")
+
+[node name="InfectionRuntime" type="Node" parent="."]
+script = ExtResource("3_infection_runtime")
 
 [node name="CameraRig" type="Node3D" parent="."]
 
