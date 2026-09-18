@@ -13,6 +13,7 @@ extends Node3D
 @export var bullet_range: float = 34.0
 @export var shotgun_shell_reload: bool = false
 @export var bullet_scene: PackedScene
+@export var environment_damage_multiplier: float = 1.0
 @onready var muzzle: Marker3D = $Muzzle
 var _cooldown_remaining: float = 0.0
 var _reload_remaining: float = 0.0
@@ -48,7 +49,7 @@ func try_fire() -> bool:
 		var bullet := bullet_scene.instantiate()
 		get_tree().current_scene.add_child(bullet)
 		bullet.global_transform = muzzle.global_transform
-		bullet.call("setup_projectile", _spread_direction(-muzzle.global_transform.basis.z), shooter, bullet_damage, bullet_speed, bullet_range)
+		bullet.call("setup_projectile", _spread_direction(-muzzle.global_transform.basis.z), shooter, bullet_damage * environment_damage_multiplier, bullet_speed, bullet_range, weapon_name)
 	_magazine_ammo -= 1
 	_cooldown_remaining = 1.0 / maxf(shots_per_second, 0.01)
 	return true
