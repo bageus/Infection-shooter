@@ -4,7 +4,7 @@ task_id: T002
 status: IN_PROGRESS
 phase: 1
 owner: AI
-updated: 2026-09-18
+updated: 2026-09-19
 ---
 
 # Active task
@@ -66,7 +66,7 @@ Player module manifest, player scene and movement script, office-floor presentat
 
 ## Progress
 
-Owner override accepted: T002 started before the pending Godot headless execution of T001. The scene/player increment passed repository validation. Red capsule enemies, elongated capsule weapon, aiming/fire, infection source, enemy-death mutagen cloud, and T001 infection integration are implemented. A prototype HUD is now added as a separate presentation scene so HP and mutation behavior are directly observable during play.
+Owner override accepted: T002 started before the pending Godot headless execution of T001. The scene/player increment passed repository validation. Red capsule enemies, elongated capsule weapon, aiming/fire, infection source, enemy-death mutagen cloud, and T001 infection integration are implemented. A prototype HUD is now added as a separate presentation scene so HP and mutation behavior are directly observable during play. Combat feedback now includes surface-bound blood splatter, destructible/penetrable office props, breakable partition glass, and infected obstacle breaking.
 
 ## Decisions
 
@@ -82,7 +82,7 @@ No product blocker. Runtime visual scale and imported-model transforms require G
 
 ## Next exact action
 
-Verify repository gates for the prototype HUD increment, then perform a Godot playable review when runtime access is available.
+Run repository gates for the combat-feedback increment, then visually verify blood decal orientation, glass-frame approximation, and infected obstacle breaking in Godot.
 
 ## Session handoff
 
