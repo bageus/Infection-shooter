@@ -60,6 +60,7 @@ func take_damage(amount:float)->void:
 	armor-=absorbed
 	remaining-=absorbed
 	health=maxf(0.0,health-remaining)
+	if remaining > 0.0: _spawn_floor_blood()
 func heal(amount:float)->float:
 	var previous:=health
 	health=minf(max_health,health+maxf(amount,0.0))
@@ -98,3 +99,13 @@ func _update_aim()->void:
 	var f:Vector3=-camera.global_transform.basis.z;f.y=0;f=f.normalized()
 	var d:=r*delta.x+f*-delta.y
 	if d.length_squared()>0.0001:aim_pivot.look_at(aim_pivot.global_position+d.normalized(),Vector3.UP)
+
+func _spawn_floor_blood()->void:
+	var mark:=MeshInstance3D.new()
+	var mesh:=CylinderMesh.new()
+	mesh.top_radius=randf_range(0.18,0.32);mesh.bottom_radius=mesh.top_radius;mesh.height=0.012
+	var material:=StandardMaterial3D.new()
+	material.albedo_color=Color(0.34,0.0,0.015,0.88);material.roughness=1.0
+	mesh.material=material;mark.mesh=mesh
+	get_tree().current_scene.add_child(mark)
+	mark.global_position=Vector3(global_position.x,0.02,global_position.z)+Vector3(randf_range(-0.22,0.22),0,randf_range(-0.22,0.22))
