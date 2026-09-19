@@ -10,80 +10,29 @@ updated: 2026-09-19
 # Active task
 
 ## Goal
-
-Build the first playable combat-slice foundation: a hand-authored office floor, movable player, camera, then minimal weapons, infected enemy, and infection source.
-
-## Why this task now
-
-The owner explicitly requested moving to T002 on 2026-09-18 and supplied a visual reference for the office scene.
+Build the first playable combat-slice foundation with an authored office floor, player, combat, infected enemies, infection source, and observable fail states.
 
 ## In scope
-
-- hand-authored office floor assembled from scenes under `models/objects`;
-- closed perimeter using wall/window model scenes plus scene-authored collision;
-- separate capsule player scene with WASD movement;
-- isometric follow camera authored in the player scene;
-- next increments: minimal weapon, infected enemy, infection source, and T001 integration required by T002.
-
-## Out of scope
-
-Procedural generation, save/checkpoints, final HUD, monetization, platform SDKs, campaign content, and runtime generation of environment objects from code.
+- hand-authored office floor from the newly grouped 01-16 object library;
+- closed non-destructible perimeter with window/wall corner modules;
+- expanded 80 x 60 m floor plan with elevator lobby, short connector corridor, small hall, broad left/right circulation, open combat areas and a small enclosed office;
+- player defeat on zero health or falling below the floor;
+- temporary defeat menu with restart and exit.
 
 ## Dependencies
-
-READY game specification, accepted working agreement, architecture contract, existing T001 implementation, and repository validators. T001 Godot headless execution remains deferred by explicit owner instruction to proceed.
+READY game specification, accepted working agreement, architecture contract, and existing T001/T002 implementation.
 
 ## Affected modules
-
-`features.player`, `presentation.office_floor`, and `bootstrap.app`. Existing `features.infection` is not modified in this first T002 increment.
-
-## State ownership
-
-The player module owns movement velocity. The office-floor presentation module owns no mutable gameplay state; it only authors scene composition.
-
-## Expected files
-
-Player module manifest, player scene and movement script, office-floor presentation manifest and public scene, bootstrap composition update, Input Map update, and continuity documentation.
-
-## Acceptance criteria
-
-- project starts into the office-floor scene;
-- all environment props are instantiated as scenes, not spawned from code;
-- walls/windows visibly surround the level and scene-authored collision prevents leaving the floor;
-- the player is a capsule scene and moves with WASD;
-- camera follows the player from an isometric angle;
-- repository validators pass after each coherent increment;
-- T002 remains open until minimal weapon, infected enemy, and source are also implemented and tested.
-
-## Plan
-
-1. Author the office floor and capsule player as scenes.
-2. Wire bootstrap and WASD Input Map.
-3. Validate architecture and scene references.
-4. Add minimal weapon and aiming.
-5. Add infected enemy and infection source.
-6. Connect T001 infection behavior and perform playable review.
+presentation.office_floor and bootstrap.app. Player health remains owned by features.player.
 
 ## Progress
+The office-floor composition was rebuilt for the newly oriented grouped object library. Old public asset-wrapper usage was removed from the active scene, including the former -90 degree model compensation. The floor footprint is doubled from 40 x 30 to 80 x 60. The perimeter uses window corners at all four corners, mostly window modules along the facade, a solid elevator/emergency-exit block on the south facade, scene-authored perimeter collision, and a regular interior column grid. Interior architecture now provides an elevator lobby, short connector, small hall, wide circulation, open areas and a small enclosed office using explicit inner/outer corner modules. Bootstrap now detects zero health and falling below the floor and shows a temporary restart/exit defeat menu.
 
-Owner override accepted: T002 started before the pending Godot headless execution of T001. The scene/player increment passed repository validation. Red capsule enemies, elongated capsule weapon, aiming/fire, infection source, enemy-death mutagen cloud, and T001 infection integration are implemented. A prototype HUD is now added as a separate presentation scene so HP and mutation behavior are directly observable during play. Combat feedback now includes surface-bound blood splatter, destructible/penetrable office props, breakable partition glass, and infected obstacle breaking.
+## Validation
+Repository static validation still needs to run in CI. Godot runtime/import validation remains unavailable in this environment and is especially important because the new source assets are .blend files.
 
-## Decisions
-
-The visual reference is used for layout direction, not copied literally. Imported GLB files are treated as PackedScene content. Perimeter gameplay collision is authored directly in the level scene so imported models do not need runtime collision generation.
-
-## Validation evidence
-
-GitHub Actions runs 35362345864, 35369496353, and 35371501101 passed the scene/player, combat, and infection-integration repository gates. HUD validation initially failed because one presentation module depended on another. The fix moves HUD composition to bootstrap, preserving presentation-layer boundaries. Godot runtime/import testing is unavailable in the current environment.
-
-## Blockers
-
-No product blocker. Runtime visual scale and imported-model transforms require Godot review because the current environment cannot open the project.
+## Risks
+Godot must be able to import the new .blend sources in the developer environment. Exact authored mesh extents still require visual snapping review in Godot; collision is deliberately scene-authored and continuous even if a visual module has small origin offsets.
 
 ## Next exact action
-
-Run repository gates for the combat-feedback increment, then visually verify blood decal orientation, glass-frame approximation, and infected obstacle breaking in Godot.
-
-## Session handoff
-
-T002 is the only active task by explicit owner instruction. T001 implementation remains present, with its Godot headless execution still unverified.
+Run repository gates, then open the rebuilt floor in Godot and visually verify model import orientation, corner seams, elevator facade alignment, player spawn and defeat menu.

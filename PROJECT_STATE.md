@@ -5,55 +5,29 @@ current_phase: 1
 current_milestone: P1_LOGIC
 active_task_id: T002
 last_completed_task_id: DISC-001
-build_status: T002_HUD_PENDING_VALIDATION
+build_status: T002_EXPANDED_FLOOR_PENDING_VALIDATION
 updated: 2026-09-19
 ---
 
 # Project state
 
 ## Current outcome
-
-T002 is active by explicit owner instruction. The hand-authored office floor, capsule player/enemies, prototype weapon, infection source, enemy-death mutagen loop, T001 integration, and observable prototype HUD are now implemented in scene-authored form. The combat slice also has destructible/penetrable props, infected obstacle breaking, and directional blood splatter on nearby surfaces.
+T002 remains active. The combat slice now uses the newly grouped/oriented object library for a rebuilt 80 x 60 authored office floor. The new composition has a continuous perimeter, window-heavy facade, elevator/emergency-exit block, columns, planned internal circulation and temporary defeat handling for zero health or falling out of the playable floor.
 
 ## Current phase
-
 Phase 1 — Logic prototype, extended into the owner-requested T002 playable slice.
 
 ## Current milestone
-
-P1_LOGIC — preserve the infection-domain implementation while beginning the minimal combat slice.
+P1_LOGIC.
 
 ## Active task
-
-T002 — Minimal combat slice with player, camera, weapons, infected enemy, and source. Status: IN_PROGRESS.
-
-## Last completed task
-
-DISC-001 — discovery synthesis and owner approval. T001 implementation is present but its Godot headless execution remains pending.
+T002 — Minimal combat slice. Status: IN_PROGRESS.
 
 ## Build and validation
-
-| Check | Status | Evidence |
-|---|---|---|
-| T001 repository gates | PASSED | GitHub Actions run 35360785260 passed the T001 implementation |
-| T001 Godot domain tests | NOT_RUN | Godot 4.7.2 is not installed in the current execution environment |
-| T002 scene/player gates | PASSED | GitHub Actions run 35362345864 passed commit `886f1f1a748a49eab14946ae5f5539aebc2596b2` |
-| T002 enemy/weapon/source gates | PASSED | GitHub Actions run 35369496353 passed commit `d953a2688a1769b05556ac905d0d4c98eeb99214` |
-| T002 infection integration gates | PASSED | GitHub Actions run 35371501101 passed commit `d98b27567c99a4659be018e002f2f501278e15b0` |
-| T002 prototype HUD gates | FIXING | Run 35376058977 failed only on presentation-to-presentation dependency; bootstrap composition fix committed next |
-
-## Known blockers
-
-No product blocker. T001 runtime validation debt is explicitly carried forward by owner instruction.
+Repository validation for this increment is pending. Godot 4.7.2 runtime/import testing is unavailable in the current execution environment.
 
 ## Current risks
-
-Imported GLB scale/orientation and scene appearance cannot be visually checked without Godot. Web performance, gore compliance, SDKs, monetization, and full-campaign content remain outside this increment.
+The new source object library is stored as .blend files; local Godot import therefore depends on Blender being available during import. Exact mesh pivots/extents require visual review. Scene-authored collision provides the authoritative closed gameplay boundary.
 
 ## Next action
-
-Validate the combat-feedback increment and perform a Godot visual review of blood splatter orientation and breakable partition glass.
-
-## Handoff notes
-
-Environment geometry is authored in scenes only. Environment and gameplay actors are authored as scenes; runtime code handles movement, aiming, firing, pursuit, and attacks but does not spawn environment props.
+Run repository gates and visually verify the expanded floor, corner joins, elevator block and fail-state menu in Godot.

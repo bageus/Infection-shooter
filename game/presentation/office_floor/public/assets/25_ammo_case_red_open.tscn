@@ -1,8 +1,0 @@
-[gd_scene load_steps=2 format=3]
-
-[ext_resource type="PackedScene" path="res://models/objects/25_ammo_case_red_open.glb" id="1_model"]
-
-[node name="25_ammo_case_red_open" type="Node3D"]
-
-[node name="Visual" parent="." instance=ExtResource("1_model")]
-rotation_degrees = Vector3(0, 0, 0)
