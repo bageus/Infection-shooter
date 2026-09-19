@@ -31,3 +31,9 @@ The new source object library is stored as .blend files; local Godot import ther
 
 ## Next action
 Run repository gates and visually verify the expanded floor, corner joins, elevator block and fail-state menu in Godot.
+
+## Known blockers
+No product blocker. Godot visual/import verification remains required.
+
+## Handoff notes
+Perimeter and interior wall collision is scene-authored. The latest correction tightens structural module spacing and fixes exterior corner orientation based on user runtime screenshots.

@@ -36,3 +36,18 @@ Godot must be able to import the new .blend sources in the developer environment
 
 ## Next exact action
 Run repository gates, then open the rebuilt floor in Godot and visually verify model import orientation, corner seams, elevator facade alignment, player spawn and defeat menu.
+
+## Out of scope
+Procedural generation, save/checkpoints, final HUD, monetization, platform SDKs and campaign-wide content remain outside this T002 increment.
+
+## Acceptance criteria
+- Structural modules visually touch edge-to-edge with no visible gaps and no overlap beyond a tiny seam tolerance.\n- Exterior corners face inward correctly.\n- Perimeter and authored interior walls block the player.\n- The expanded floor and defeat menu remain functional.
+
+## Validation evidence
+User runtime screenshots exposed perimeter spacing, corner orientation and missing interior collision defects in the previous increment. This increment corrects those defects; repository CI must validate the static project gates.
+
+## Blockers
+No product blocker. Exact imported .blend bounds still require visual confirmation in Godot.
+
+## Session handoff
+T002 remains the only active task. After CI, visually verify seams and collision in Godot before adding furniture/content.
