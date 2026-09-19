@@ -39,10 +39,10 @@ subdivide_depth = 29
 size = Vector3(80,0.2,60)
 
 [sub_resource type="BoxShape3D" id="north_south_collision"]
-size = Vector3(37.08,3.0,0.35)
+size = Vector3(80,3.0,0.35)
 
 [sub_resource type="BoxShape3D" id="east_west_collision"]
-size = Vector3(0.35,3.0,26.78)
+size = Vector3(0.35,3.0,60)
 
 [sub_resource type="BoxShape3D" id="internal_h"]
 size = Vector3(18,3.2,0.3)
@@ -75,246 +75,539 @@ shape = SubResource("floor_shape")
 [node name="Structure" type="Node3D" parent="."]
 [node name="Perimeter" type="Node3D" parent="Structure"]
 
-[node name="WindowCorner_1" parent="Structure/Perimeter" instance=ExtResource("window_corner")]
-position = Vector3(-18.54,0,-13.39)\nrotation_degrees = Vector3(0,180,0)
+[node name="WindowCorner_NW" parent="Structure/Perimeter" instance=ExtResource("window_corner")]
+position = Vector3(-39,0,-29)
+rotation_degrees = Vector3(0,180,0)
 
-[node name="WindowCorner_2" parent="Structure/Perimeter" instance=ExtResource("window_corner")]
-position = Vector3(18.54,0,-13.39)\nrotation_degrees = Vector3(0,90,0)
+[node name="WindowCorner_NE" parent="Structure/Perimeter" instance=ExtResource("window_corner")]
+position = Vector3(39,0,-29)
+rotation_degrees = Vector3(0,90,0)
 
-[node name="WindowCorner_3" parent="Structure/Perimeter" instance=ExtResource("window_corner")]
-position = Vector3(18.54,0,13.39)\nrotation_degrees = Vector3(0,0,0)
+[node name="WindowCorner_SE" parent="Structure/Perimeter" instance=ExtResource("window_corner")]
+position = Vector3(39,0,29)
+rotation_degrees = Vector3(0,0,0)
 
-[node name="WindowCorner_4" parent="Structure/Perimeter" instance=ExtResource("window_corner")]
-position = Vector3(-18.54,0,13.39)\nrotation_degrees = Vector3(0,270,0)
+[node name="WindowCorner_SW" parent="Structure/Perimeter" instance=ExtResource("window_corner")]
+position = Vector3(-39,0,29)
+rotation_degrees = Vector3(0,270,0)
 
 [node name="NorthWindow_1" parent="Structure/Perimeter" instance=ExtResource("window")]
-position = Vector3(-16.48,0,-29)
-
-[node name="SouthWindow_1" parent="Structure/Perimeter" instance=ExtResource("window")]
-position = Vector3(-16.48,0,29)
-rotation_degrees = Vector3(0,180,0)
+position = Vector3(-38,0,-29)
 
 [node name="NorthWindow_2" parent="Structure/Perimeter" instance=ExtResource("window")]
-position = Vector3(-14.42,0,-29)
-
-[node name="SouthWindow_2" parent="Structure/Perimeter" instance=ExtResource("window")]
-position = Vector3(-14.42,0,29)
-rotation_degrees = Vector3(0,180,0)
+position = Vector3(-36,0,-29)
 
 [node name="NorthWindow_3" parent="Structure/Perimeter" instance=ExtResource("window")]
-position = Vector3(-12.36,0,-29)
-
-[node name="SouthWindow_3" parent="Structure/Perimeter" instance=ExtResource("window")]
-position = Vector3(-12.36,0,29)
-rotation_degrees = Vector3(0,180,0)
+position = Vector3(-34,0,-29)
 
 [node name="NorthWindow_4" parent="Structure/Perimeter" instance=ExtResource("window")]
-position = Vector3(-10.30,0,-29)
-
-[node name="SouthWindow_4" parent="Structure/Perimeter" instance=ExtResource("window")]
-position = Vector3(-10.30,0,29)
-rotation_degrees = Vector3(0,180,0)
+position = Vector3(-32,0,-29)
 
 [node name="NorthWindow_5" parent="Structure/Perimeter" instance=ExtResource("window")]
-position = Vector3(-8.24,0,-29)
-
-[node name="SouthWindow_5" parent="Structure/Perimeter" instance=ExtResource("window")]
-position = Vector3(-8.24,0,29)
-rotation_degrees = Vector3(0,180,0)
+position = Vector3(-30,0,-29)
 
 [node name="NorthWindow_6" parent="Structure/Perimeter" instance=ExtResource("window")]
-position = Vector3(-6.18,0,-29)
-
-[node name="SouthWindow_6" parent="Structure/Perimeter" instance=ExtResource("window")]
-position = Vector3(-6.18,0,29)
-rotation_degrees = Vector3(0,180,0)
+position = Vector3(-28,0,-29)
 
 [node name="NorthWindow_7" parent="Structure/Perimeter" instance=ExtResource("window")]
-position = Vector3(-4.12,0,-29)
-
-[node name="SouthWindow_7" parent="Structure/Perimeter" instance=ExtResource("window")]
-position = Vector3(-4.12,0,29)
-rotation_degrees = Vector3(0,180,0)
+position = Vector3(-26,0,-29)
 
 [node name="NorthWindow_8" parent="Structure/Perimeter" instance=ExtResource("window")]
-position = Vector3(-2.06,0,-29)
-
-[node name="SouthWindow_8" parent="Structure/Perimeter" instance=ExtResource("window")]
-position = Vector3(-2.06,0,29)
-rotation_degrees = Vector3(0,180,0)
+position = Vector3(-24,0,-29)
 
 [node name="NorthWindow_9" parent="Structure/Perimeter" instance=ExtResource("window")]
-position = Vector3(0.00,0,-29)
-
-[node name="SouthWindow_9" parent="Structure/Perimeter" instance=ExtResource("window")]
-position = Vector3(0.00,0,29)
-rotation_degrees = Vector3(0,180,0)
+position = Vector3(-22,0,-29)
 
 [node name="NorthWindow_10" parent="Structure/Perimeter" instance=ExtResource("window")]
-position = Vector3(2.06,0,-29)
-
-[node name="SouthWindow_10" parent="Structure/Perimeter" instance=ExtResource("window")]
-position = Vector3(2.06,0,29)
-rotation_degrees = Vector3(0,180,0)
+position = Vector3(-20,0,-29)
 
 [node name="NorthWindow_11" parent="Structure/Perimeter" instance=ExtResource("window")]
-position = Vector3(4.12,0,-29)
-
-[node name="SouthWindow_11" parent="Structure/Perimeter" instance=ExtResource("window")]
-position = Vector3(4.12,0,29)
-rotation_degrees = Vector3(0,180,0)
+position = Vector3(-18,0,-29)
 
 [node name="NorthWindow_12" parent="Structure/Perimeter" instance=ExtResource("window")]
-position = Vector3(6.18,0,-29)
+position = Vector3(-16,0,-29)
 
 [node name="NorthWindow_13" parent="Structure/Perimeter" instance=ExtResource("window")]
-position = Vector3(8.24,0,-29)
+position = Vector3(-14,0,-29)
 
 [node name="NorthWindow_14" parent="Structure/Perimeter" instance=ExtResource("window")]
-position = Vector3(10.30,0,-29)
+position = Vector3(-12,0,-29)
 
 [node name="NorthWindow_15" parent="Structure/Perimeter" instance=ExtResource("window")]
-position = Vector3(12.36,0,-29)
+position = Vector3(-10,0,-29)
 
 [node name="NorthWindow_16" parent="Structure/Perimeter" instance=ExtResource("window")]
-position = Vector3(14.42,0,-29)
-
-[node name="SouthWindow_16" parent="Structure/Perimeter" instance=ExtResource("window")]
-position = Vector3(14.42,0,29)
-rotation_degrees = Vector3(0,180,0)
+position = Vector3(-8,0,-29)
 
 [node name="NorthWindow_17" parent="Structure/Perimeter" instance=ExtResource("window")]
-position = Vector3(16.48,0,-29)
+position = Vector3(-6,0,-29)
+
+[node name="NorthWindow_18" parent="Structure/Perimeter" instance=ExtResource("window")]
+position = Vector3(-4,0,-29)
+
+[node name="NorthWindow_19" parent="Structure/Perimeter" instance=ExtResource("window")]
+position = Vector3(-2,0,-29)
+
+[node name="NorthWindow_20" parent="Structure/Perimeter" instance=ExtResource("window")]
+position = Vector3(0,0,-29)
+
+[node name="NorthWindow_21" parent="Structure/Perimeter" instance=ExtResource("window")]
+position = Vector3(2,0,-29)
+
+[node name="NorthWindow_22" parent="Structure/Perimeter" instance=ExtResource("window")]
+position = Vector3(4,0,-29)
+
+[node name="NorthWindow_23" parent="Structure/Perimeter" instance=ExtResource("window")]
+position = Vector3(6,0,-29)
+
+[node name="NorthWindow_24" parent="Structure/Perimeter" instance=ExtResource("window")]
+position = Vector3(8,0,-29)
+
+[node name="NorthWindow_25" parent="Structure/Perimeter" instance=ExtResource("window")]
+position = Vector3(10,0,-29)
+
+[node name="NorthWindow_26" parent="Structure/Perimeter" instance=ExtResource("window")]
+position = Vector3(12,0,-29)
+
+[node name="NorthWindow_27" parent="Structure/Perimeter" instance=ExtResource("window")]
+position = Vector3(14,0,-29)
+
+[node name="NorthWindow_28" parent="Structure/Perimeter" instance=ExtResource("window")]
+position = Vector3(16,0,-29)
+
+[node name="NorthWindow_29" parent="Structure/Perimeter" instance=ExtResource("window")]
+position = Vector3(18,0,-29)
+
+[node name="NorthWindow_30" parent="Structure/Perimeter" instance=ExtResource("window")]
+position = Vector3(20,0,-29)
+
+[node name="NorthWindow_31" parent="Structure/Perimeter" instance=ExtResource("window")]
+position = Vector3(22,0,-29)
+
+[node name="NorthWindow_32" parent="Structure/Perimeter" instance=ExtResource("window")]
+position = Vector3(24,0,-29)
+
+[node name="NorthWindow_33" parent="Structure/Perimeter" instance=ExtResource("window")]
+position = Vector3(26,0,-29)
+
+[node name="NorthWindow_34" parent="Structure/Perimeter" instance=ExtResource("window")]
+position = Vector3(28,0,-29)
+
+[node name="NorthWindow_35" parent="Structure/Perimeter" instance=ExtResource("window")]
+position = Vector3(30,0,-29)
+
+[node name="NorthWindow_36" parent="Structure/Perimeter" instance=ExtResource("window")]
+position = Vector3(32,0,-29)
+
+[node name="NorthWindow_37" parent="Structure/Perimeter" instance=ExtResource("window")]
+position = Vector3(34,0,-29)
+
+[node name="NorthWindow_38" parent="Structure/Perimeter" instance=ExtResource("window")]
+position = Vector3(36,0,-29)
+
+[node name="NorthWindow_39" parent="Structure/Perimeter" instance=ExtResource("window")]
+position = Vector3(38,0,-29)
+
+[node name="SouthWindow_1" parent="Structure/Perimeter" instance=ExtResource("window")]
+position = Vector3(-38,0,29)
+rotation_degrees = Vector3(0,180,0)
+
+[node name="SouthWindow_2" parent="Structure/Perimeter" instance=ExtResource("window")]
+position = Vector3(-36,0,29)
+rotation_degrees = Vector3(0,180,0)
+
+[node name="SouthWindow_3" parent="Structure/Perimeter" instance=ExtResource("window")]
+position = Vector3(-34,0,29)
+rotation_degrees = Vector3(0,180,0)
+
+[node name="SouthWindow_4" parent="Structure/Perimeter" instance=ExtResource("window")]
+position = Vector3(-32,0,29)
+rotation_degrees = Vector3(0,180,0)
+
+[node name="SouthWindow_5" parent="Structure/Perimeter" instance=ExtResource("window")]
+position = Vector3(-30,0,29)
+rotation_degrees = Vector3(0,180,0)
+
+[node name="SouthWindow_6" parent="Structure/Perimeter" instance=ExtResource("window")]
+position = Vector3(-28,0,29)
+rotation_degrees = Vector3(0,180,0)
+
+[node name="SouthWindow_7" parent="Structure/Perimeter" instance=ExtResource("window")]
+position = Vector3(-26,0,29)
+rotation_degrees = Vector3(0,180,0)
+
+[node name="SouthWindow_8" parent="Structure/Perimeter" instance=ExtResource("window")]
+position = Vector3(-24,0,29)
+rotation_degrees = Vector3(0,180,0)
+
+[node name="SouthWindow_9" parent="Structure/Perimeter" instance=ExtResource("window")]
+position = Vector3(-22,0,29)
+rotation_degrees = Vector3(0,180,0)
+
+[node name="SouthWindow_10" parent="Structure/Perimeter" instance=ExtResource("window")]
+position = Vector3(-20,0,29)
+rotation_degrees = Vector3(0,180,0)
+
+[node name="SouthWindow_11" parent="Structure/Perimeter" instance=ExtResource("window")]
+position = Vector3(-18,0,29)
+rotation_degrees = Vector3(0,180,0)
+
+[node name="SouthWindow_12" parent="Structure/Perimeter" instance=ExtResource("window")]
+position = Vector3(-16,0,29)
+rotation_degrees = Vector3(0,180,0)
+
+[node name="SouthWindow_13" parent="Structure/Perimeter" instance=ExtResource("window")]
+position = Vector3(-14,0,29)
+rotation_degrees = Vector3(0,180,0)
+
+[node name="SouthWindow_14" parent="Structure/Perimeter" instance=ExtResource("window")]
+position = Vector3(-12,0,29)
+rotation_degrees = Vector3(0,180,0)
+
+[node name="SouthWindow_15" parent="Structure/Perimeter" instance=ExtResource("window")]
+position = Vector3(-10,0,29)
+rotation_degrees = Vector3(0,180,0)
+
+[node name="SouthWindow_16" parent="Structure/Perimeter" instance=ExtResource("window")]
+position = Vector3(-8,0,29)
+rotation_degrees = Vector3(0,180,0)
 
 [node name="SouthWindow_17" parent="Structure/Perimeter" instance=ExtResource("window")]
-position = Vector3(16.48,0,29)
+position = Vector3(-6,0,29)
+rotation_degrees = Vector3(0,180,0)
+
+[node name="SouthWindow_18" parent="Structure/Perimeter" instance=ExtResource("window")]
+position = Vector3(-4,0,29)
+rotation_degrees = Vector3(0,180,0)
+
+[node name="SouthWindow_19" parent="Structure/Perimeter" instance=ExtResource("window")]
+position = Vector3(-2,0,29)
+rotation_degrees = Vector3(0,180,0)
+
+[node name="SouthWindow_20" parent="Structure/Perimeter" instance=ExtResource("window")]
+position = Vector3(0,0,29)
+rotation_degrees = Vector3(0,180,0)
+
+[node name="SouthWindow_21" parent="Structure/Perimeter" instance=ExtResource("window")]
+position = Vector3(2,0,29)
+rotation_degrees = Vector3(0,180,0)
+
+[node name="SouthWindow_22" parent="Structure/Perimeter" instance=ExtResource("window")]
+position = Vector3(4,0,29)
+rotation_degrees = Vector3(0,180,0)
+
+[node name="SouthWindow_23" parent="Structure/Perimeter" instance=ExtResource("window")]
+position = Vector3(6,0,29)
+rotation_degrees = Vector3(0,180,0)
+
+[node name="SouthWindow_24" parent="Structure/Perimeter" instance=ExtResource("window")]
+position = Vector3(8,0,29)
+rotation_degrees = Vector3(0,180,0)
+
+[node name="SouthWindow_25" parent="Structure/Perimeter" instance=ExtResource("window")]
+position = Vector3(10,0,29)
+rotation_degrees = Vector3(0,180,0)
+
+[node name="SouthWindow_26" parent="Structure/Perimeter" instance=ExtResource("window")]
+position = Vector3(12,0,29)
+rotation_degrees = Vector3(0,180,0)
+
+[node name="SouthWindow_27" parent="Structure/Perimeter" instance=ExtResource("window")]
+position = Vector3(14,0,29)
+rotation_degrees = Vector3(0,180,0)
+
+[node name="SouthSolid_16" parent="Structure/Perimeter" instance=ExtResource("wall")]
+position = Vector3(16,0,29)
+rotation_degrees = Vector3(0,180,0)
+
+[node name="SouthSolid_18" parent="Structure/Perimeter" instance=ExtResource("wall")]
+position = Vector3(18,0,29)
+rotation_degrees = Vector3(0,180,0)
+
+[node name="ElevatorDoor_20" parent="Structure/Perimeter" instance=ExtResource("wall_door")]
+position = Vector3(20,0,29)
+rotation_degrees = Vector3(0,180,0)
+
+[node name="ElevatorDoor_22" parent="Structure/Perimeter" instance=ExtResource("wall_door")]
+position = Vector3(22,0,29)
+rotation_degrees = Vector3(0,180,0)
+
+[node name="SouthSolid_24" parent="Structure/Perimeter" instance=ExtResource("wall")]
+position = Vector3(24,0,29)
+rotation_degrees = Vector3(0,180,0)
+
+[node name="SouthSolid_26" parent="Structure/Perimeter" instance=ExtResource("wall")]
+position = Vector3(26,0,29)
+rotation_degrees = Vector3(0,180,0)
+
+[node name="EmergencyDoor" parent="Structure/Perimeter" instance=ExtResource("emergency")]
+position = Vector3(28,0,29)
+rotation_degrees = Vector3(0,180,0)
+
+[node name="SouthSolid_30" parent="Structure/Perimeter" instance=ExtResource("wall")]
+position = Vector3(30,0,29)
+rotation_degrees = Vector3(0,180,0)
+
+[node name="SouthSolid_32" parent="Structure/Perimeter" instance=ExtResource("wall")]
+position = Vector3(32,0,29)
+rotation_degrees = Vector3(0,180,0)
+
+[node name="SouthSolid_34" parent="Structure/Perimeter" instance=ExtResource("wall")]
+position = Vector3(34,0,29)
+rotation_degrees = Vector3(0,180,0)
+
+[node name="SouthSolid_36" parent="Structure/Perimeter" instance=ExtResource("wall")]
+position = Vector3(36,0,29)
+rotation_degrees = Vector3(0,180,0)
+
+[node name="SouthWindow_28" parent="Structure/Perimeter" instance=ExtResource("window")]
+position = Vector3(38,0,29)
 rotation_degrees = Vector3(0,180,0)
 
 [node name="WestWindow_1" parent="Structure/Perimeter" instance=ExtResource("window")]
-position = Vector3(-39,0,-11.33)
+position = Vector3(-39,0,-28)
 rotation_degrees = Vector3(0,90,0)
 
 [node name="EastWindow_1" parent="Structure/Perimeter" instance=ExtResource("window")]
-position = Vector3(39,0,-11.33)
+position = Vector3(39,0,-28)
 rotation_degrees = Vector3(0,-90,0)
 
 [node name="WestWindow_2" parent="Structure/Perimeter" instance=ExtResource("window")]
-position = Vector3(-39,0,-9.27)
+position = Vector3(-39,0,-26)
 rotation_degrees = Vector3(0,90,0)
 
 [node name="EastWindow_2" parent="Structure/Perimeter" instance=ExtResource("window")]
-position = Vector3(39,0,-9.27)
+position = Vector3(39,0,-26)
 rotation_degrees = Vector3(0,-90,0)
 
 [node name="WestWindow_3" parent="Structure/Perimeter" instance=ExtResource("window")]
-position = Vector3(-39,0,-7.21)
+position = Vector3(-39,0,-24)
 rotation_degrees = Vector3(0,90,0)
 
 [node name="EastWindow_3" parent="Structure/Perimeter" instance=ExtResource("window")]
-position = Vector3(39,0,-7.21)
+position = Vector3(39,0,-24)
 rotation_degrees = Vector3(0,-90,0)
 
 [node name="WestWindow_4" parent="Structure/Perimeter" instance=ExtResource("window")]
-position = Vector3(-39,0,-5.15)
+position = Vector3(-39,0,-22)
 rotation_degrees = Vector3(0,90,0)
 
 [node name="EastWindow_4" parent="Structure/Perimeter" instance=ExtResource("window")]
-position = Vector3(39,0,-5.15)
+position = Vector3(39,0,-22)
 rotation_degrees = Vector3(0,-90,0)
 
 [node name="WestWindow_5" parent="Structure/Perimeter" instance=ExtResource("window")]
-position = Vector3(-39,0,-3.09)
+position = Vector3(-39,0,-20)
 rotation_degrees = Vector3(0,90,0)
 
 [node name="EastWindow_5" parent="Structure/Perimeter" instance=ExtResource("window")]
-position = Vector3(39,0,-3.09)
+position = Vector3(39,0,-20)
 rotation_degrees = Vector3(0,-90,0)
 
 [node name="WestWindow_6" parent="Structure/Perimeter" instance=ExtResource("window")]
-position = Vector3(-39,0,-1.03)
+position = Vector3(-39,0,-18)
 rotation_degrees = Vector3(0,90,0)
 
 [node name="EastWindow_6" parent="Structure/Perimeter" instance=ExtResource("window")]
-position = Vector3(39,0,-1.03)
+position = Vector3(39,0,-18)
 rotation_degrees = Vector3(0,-90,0)
 
 [node name="WestWindow_7" parent="Structure/Perimeter" instance=ExtResource("window")]
-position = Vector3(-39,0,1.03)
+position = Vector3(-39,0,-16)
 rotation_degrees = Vector3(0,90,0)
 
 [node name="EastWindow_7" parent="Structure/Perimeter" instance=ExtResource("window")]
-position = Vector3(39,0,1.03)
+position = Vector3(39,0,-16)
 rotation_degrees = Vector3(0,-90,0)
 
 [node name="WestWindow_8" parent="Structure/Perimeter" instance=ExtResource("window")]
-position = Vector3(-39,0,3.09)
+position = Vector3(-39,0,-14)
 rotation_degrees = Vector3(0,90,0)
 
 [node name="EastWindow_8" parent="Structure/Perimeter" instance=ExtResource("window")]
-position = Vector3(39,0,3.09)
+position = Vector3(39,0,-14)
 rotation_degrees = Vector3(0,-90,0)
 
 [node name="WestWindow_9" parent="Structure/Perimeter" instance=ExtResource("window")]
-position = Vector3(-39,0,5.15)
+position = Vector3(-39,0,-12)
 rotation_degrees = Vector3(0,90,0)
 
 [node name="EastWindow_9" parent="Structure/Perimeter" instance=ExtResource("window")]
-position = Vector3(39,0,5.15)
+position = Vector3(39,0,-12)
 rotation_degrees = Vector3(0,-90,0)
 
 [node name="WestWindow_10" parent="Structure/Perimeter" instance=ExtResource("window")]
-position = Vector3(-39,0,7.21)
+position = Vector3(-39,0,-10)
 rotation_degrees = Vector3(0,90,0)
 
 [node name="EastWindow_10" parent="Structure/Perimeter" instance=ExtResource("window")]
-position = Vector3(39,0,7.21)
+position = Vector3(39,0,-10)
 rotation_degrees = Vector3(0,-90,0)
 
 [node name="WestWindow_11" parent="Structure/Perimeter" instance=ExtResource("window")]
-position = Vector3(-39,0,9.27)
+position = Vector3(-39,0,-8)
 rotation_degrees = Vector3(0,90,0)
 
 [node name="EastWindow_11" parent="Structure/Perimeter" instance=ExtResource("window")]
-position = Vector3(39,0,9.27)
+position = Vector3(39,0,-8)
 rotation_degrees = Vector3(0,-90,0)
 
 [node name="WestWindow_12" parent="Structure/Perimeter" instance=ExtResource("window")]
-position = Vector3(-39,0,11.33)
+position = Vector3(-39,0,-6)
 rotation_degrees = Vector3(0,90,0)
 
 [node name="EastWindow_12" parent="Structure/Perimeter" instance=ExtResource("window")]
-position = Vector3(39,0,11.33)
+position = Vector3(39,0,-6)
 rotation_degrees = Vector3(0,-90,0)
 
-[node name="ElevatorLobbyFacade" type="Node3D" parent="Structure/Perimeter"]
-[node name="ElevatorA" parent="Structure/Perimeter/ElevatorLobbyFacade" instance=ExtResource("wall_door")]
-position = Vector3(22,0,29)
-rotation_degrees = Vector3(0,180,0)
-[node name="ElevatorB" parent="Structure/Perimeter/ElevatorLobbyFacade" instance=ExtResource("wall_door")]
-position = Vector3(25,0,29)
-rotation_degrees = Vector3(0,180,0)
-[node name="EmergencyDoor" parent="Structure/Perimeter/ElevatorLobbyFacade" instance=ExtResource("emergency")]
-position = Vector3(31,0,29)
-rotation_degrees = Vector3(0,180,0)
-[node name="SouthSolid_1" parent="Structure/Perimeter/ElevatorLobbyFacade" instance=ExtResource("wall")]
-position = Vector3(18,0,29)
-rotation_degrees = Vector3(0,180,0)
-[node name="SouthSolid_2" parent="Structure/Perimeter/ElevatorLobbyFacade" instance=ExtResource("wall")]
-position = Vector3(35,0,29)
-rotation_degrees = Vector3(0,180,0)
+[node name="WestWindow_13" parent="Structure/Perimeter" instance=ExtResource("window")]
+position = Vector3(-39,0,-4)
+rotation_degrees = Vector3(0,90,0)
+
+[node name="EastWindow_13" parent="Structure/Perimeter" instance=ExtResource("window")]
+position = Vector3(39,0,-4)
+rotation_degrees = Vector3(0,-90,0)
+
+[node name="WestWindow_14" parent="Structure/Perimeter" instance=ExtResource("window")]
+position = Vector3(-39,0,-2)
+rotation_degrees = Vector3(0,90,0)
+
+[node name="EastWindow_14" parent="Structure/Perimeter" instance=ExtResource("window")]
+position = Vector3(39,0,-2)
+rotation_degrees = Vector3(0,-90,0)
+
+[node name="WestWindow_15" parent="Structure/Perimeter" instance=ExtResource("window")]
+position = Vector3(-39,0,0)
+rotation_degrees = Vector3(0,90,0)
+
+[node name="EastWindow_15" parent="Structure/Perimeter" instance=ExtResource("window")]
+position = Vector3(39,0,0)
+rotation_degrees = Vector3(0,-90,0)
+
+[node name="WestWindow_16" parent="Structure/Perimeter" instance=ExtResource("window")]
+position = Vector3(-39,0,2)
+rotation_degrees = Vector3(0,90,0)
+
+[node name="EastWindow_16" parent="Structure/Perimeter" instance=ExtResource("window")]
+position = Vector3(39,0,2)
+rotation_degrees = Vector3(0,-90,0)
+
+[node name="WestWindow_17" parent="Structure/Perimeter" instance=ExtResource("window")]
+position = Vector3(-39,0,4)
+rotation_degrees = Vector3(0,90,0)
+
+[node name="EastWindow_17" parent="Structure/Perimeter" instance=ExtResource("window")]
+position = Vector3(39,0,4)
+rotation_degrees = Vector3(0,-90,0)
+
+[node name="WestWindow_18" parent="Structure/Perimeter" instance=ExtResource("window")]
+position = Vector3(-39,0,6)
+rotation_degrees = Vector3(0,90,0)
+
+[node name="EastWindow_18" parent="Structure/Perimeter" instance=ExtResource("window")]
+position = Vector3(39,0,6)
+rotation_degrees = Vector3(0,-90,0)
+
+[node name="WestWindow_19" parent="Structure/Perimeter" instance=ExtResource("window")]
+position = Vector3(-39,0,8)
+rotation_degrees = Vector3(0,90,0)
+
+[node name="EastWindow_19" parent="Structure/Perimeter" instance=ExtResource("window")]
+position = Vector3(39,0,8)
+rotation_degrees = Vector3(0,-90,0)
+
+[node name="WestWindow_20" parent="Structure/Perimeter" instance=ExtResource("window")]
+position = Vector3(-39,0,10)
+rotation_degrees = Vector3(0,90,0)
+
+[node name="EastWindow_20" parent="Structure/Perimeter" instance=ExtResource("window")]
+position = Vector3(39,0,10)
+rotation_degrees = Vector3(0,-90,0)
+
+[node name="WestWindow_21" parent="Structure/Perimeter" instance=ExtResource("window")]
+position = Vector3(-39,0,12)
+rotation_degrees = Vector3(0,90,0)
+
+[node name="EastWindow_21" parent="Structure/Perimeter" instance=ExtResource("window")]
+position = Vector3(39,0,12)
+rotation_degrees = Vector3(0,-90,0)
+
+[node name="WestWindow_22" parent="Structure/Perimeter" instance=ExtResource("window")]
+position = Vector3(-39,0,14)
+rotation_degrees = Vector3(0,90,0)
+
+[node name="EastWindow_22" parent="Structure/Perimeter" instance=ExtResource("window")]
+position = Vector3(39,0,14)
+rotation_degrees = Vector3(0,-90,0)
+
+[node name="WestWindow_23" parent="Structure/Perimeter" instance=ExtResource("window")]
+position = Vector3(-39,0,16)
+rotation_degrees = Vector3(0,90,0)
+
+[node name="EastWindow_23" parent="Structure/Perimeter" instance=ExtResource("window")]
+position = Vector3(39,0,16)
+rotation_degrees = Vector3(0,-90,0)
+
+[node name="WestWindow_24" parent="Structure/Perimeter" instance=ExtResource("window")]
+position = Vector3(-39,0,18)
+rotation_degrees = Vector3(0,90,0)
+
+[node name="EastWindow_24" parent="Structure/Perimeter" instance=ExtResource("window")]
+position = Vector3(39,0,18)
+rotation_degrees = Vector3(0,-90,0)
+
+[node name="WestWindow_25" parent="Structure/Perimeter" instance=ExtResource("window")]
+position = Vector3(-39,0,20)
+rotation_degrees = Vector3(0,90,0)
+
+[node name="EastWindow_25" parent="Structure/Perimeter" instance=ExtResource("window")]
+position = Vector3(39,0,20)
+rotation_degrees = Vector3(0,-90,0)
+
+[node name="WestWindow_26" parent="Structure/Perimeter" instance=ExtResource("window")]
+position = Vector3(-39,0,22)
+rotation_degrees = Vector3(0,90,0)
+
+[node name="EastWindow_26" parent="Structure/Perimeter" instance=ExtResource("window")]
+position = Vector3(39,0,22)
+rotation_degrees = Vector3(0,-90,0)
+
+[node name="WestWindow_27" parent="Structure/Perimeter" instance=ExtResource("window")]
+position = Vector3(-39,0,24)
+rotation_degrees = Vector3(0,90,0)
+
+[node name="EastWindow_27" parent="Structure/Perimeter" instance=ExtResource("window")]
+position = Vector3(39,0,24)
+rotation_degrees = Vector3(0,-90,0)
+
+[node name="WestWindow_28" parent="Structure/Perimeter" instance=ExtResource("window")]
+position = Vector3(-39,0,26)
+rotation_degrees = Vector3(0,90,0)
+
+[node name="EastWindow_28" parent="Structure/Perimeter" instance=ExtResource("window")]
+position = Vector3(39,0,26)
+rotation_degrees = Vector3(0,-90,0)
+
+[node name="WestWindow_29" parent="Structure/Perimeter" instance=ExtResource("window")]
+position = Vector3(-39,0,28)
+rotation_degrees = Vector3(0,90,0)
+
+[node name="EastWindow_29" parent="Structure/Perimeter" instance=ExtResource("window")]
+position = Vector3(39,0,28)
+rotation_degrees = Vector3(0,-90,0)
 
 [node name="PerimeterCollision" type="StaticBody3D" parent="Structure"]
 [node name="North" type="CollisionShape3D" parent="Structure/PerimeterCollision"]
-position = Vector3(0,1.5,-13.39)
+position = Vector3(0,1.5,-29.1)
 shape = SubResource("north_south_collision")
 [node name="South" type="CollisionShape3D" parent="Structure/PerimeterCollision"]
-position = Vector3(0,1.5,13.39)
+position = Vector3(0,1.5,29.1)
 shape = SubResource("north_south_collision")
 [node name="West" type="CollisionShape3D" parent="Structure/PerimeterCollision"]
-position = Vector3(-18.54,1.5,0)
+position = Vector3(-39.1,1.5,0)
 shape = SubResource("east_west_collision")
 [node name="East" type="CollisionShape3D" parent="Structure/PerimeterCollision"]
-position = Vector3(18.54,1.5,0)
+position = Vector3(39.1,1.5,0)
 shape = SubResource("east_west_collision")
 
 [node name="Columns" type="Node3D" parent="Structure"]
