@@ -47,24 +47,24 @@ func _physics_process(delta: float) -> void:
 			_travelled += step
 			return
 
-		var position: Vector3 = hit.get("position")
+		var hit_position: Vector3 = hit.get("position")
 		var normal: Vector3 = hit.get("normal")
 		var collider: Object = hit.get("collider")
-		var stops_bullet := _handle_hit(collider, position, normal)
+		var stops_bullet := _handle_hit(collider, hit_position, normal)
 		if stops_bullet:
-			global_position = position
+			global_position = hit_position
 			queue_free()
 			return
 
 		if collider is CollisionObject3D:
 			excluded.append((collider as CollisionObject3D).get_rid())
-		remaining_start = position + _direction * 0.04
+		remaining_start = hit_position + _direction * 0.04
 
 	global_position = finish
 	_travelled += step
 
 
-func _handle_hit(collider: Object, position: Vector3, normal: Vector3) -> bool:
+func _handle_hit(collider: Object, hit_position: Vector3, normal: Vector3) -> bool:
 	if collider == null:
 		return true
 
@@ -75,7 +75,7 @@ func _handle_hit(collider: Object, position: Vector3, normal: Vector3) -> bool:
 		return bool(collider.call(
 			"take_projectile_hit",
 			hit_damage,
-			position,
+			hit_position,
 			normal,
 			_direction,
 			_weapon_name
@@ -93,7 +93,7 @@ func _handle_hit(collider: Object, position: Vector3, normal: Vector3) -> bool:
 		return bool(parent.call(
 			"take_projectile_hit",
 			hit_damage,
-			position,
+			hit_position,
 			normal,
 			_direction,
 			_weapon_name
