@@ -22,7 +22,7 @@ background_mode = 1
 background_color = Color(0.055,0.075,0.12,1)
 ambient_light_source = 3
 ambient_light_color = Color(0.72,0.8,1,1)
-ambient_light_energy = 0.62
+ambient_light_energy = 0.32
 tonemap_mode = 2
 
 [sub_resource type="StandardMaterial3D" id="floor_mat"]
@@ -61,7 +61,7 @@ environment = SubResource("env")
 
 [node name="Sun" type="DirectionalLight3D" parent="."]
 rotation_degrees = Vector3(-55,-35,0)
-light_energy = 1.05
+light_energy = 0.62
 shadow_enabled = true
 
 [node name="Floor" type="MeshInstance3D" parent="."]
