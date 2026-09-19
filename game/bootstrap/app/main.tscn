@@ -21,8 +21,8 @@
 background_mode = 1
 background_color = Color(0.055,0.075,0.12,1)
 ambient_light_source = 3
-ambient_light_color = Color(0.72,0.8,1,1)
-ambient_light_energy = 0.32
+ambient_light_color = Color(0.62,0.68,0.78,1)
+ambient_light_energy = 0.22
 tonemap_mode = 2
 
 [sub_resource type="StandardMaterial3D" id="floor_mat"]
@@ -44,11 +44,6 @@ size = Vector3(80,3.0,0.35)
 [sub_resource type="BoxShape3D" id="east_west_collision"]
 size = Vector3(0.35,3.0,60)
 
-[sub_resource type="BoxShape3D" id="internal_h"]
-size = Vector3(18,3.2,0.3)
-
-[sub_resource type="BoxShape3D" id="internal_v"]
-size = Vector3(0.3,3.2,14)
 
 [sub_resource type="BoxShape3D" id="module_collision"]
 size = Vector3(2.06,3.0,0.28)
@@ -59,10 +54,6 @@ script = ExtResource("script")
 [node name="WorldEnvironment" type="WorldEnvironment" parent="."]
 environment = SubResource("env")
 
-[node name="Sun" type="DirectionalLight3D" parent="."]
-rotation_degrees = Vector3(-55,-35,0)
-light_energy = 0.62
-shadow_enabled = true
 
 [node name="Floor" type="MeshInstance3D" parent="."]
 mesh = SubResource("floor_mesh")
@@ -726,15 +717,6 @@ position = Vector3(0,0,0)
 position = Vector3(2.06,0,0)
 rotation_degrees = Vector3(0,90,0)
 
-[node name="InteriorCollision" type="StaticBody3D" parent="Structure"]
-[node name="LobbyLeftCollision" type="CollisionShape3D" parent="Structure/InteriorCollision"]
-position = Vector3(18,1.6,22)
-rotation_degrees = Vector3(0,90,0)
-shape = SubResource("internal_h")
-[node name="LobbyRightCollision" type="CollisionShape3D" parent="Structure/InteriorCollision"]
-position = Vector3(34,1.6,22)
-rotation_degrees = Vector3(0,90,0)
-shape = SubResource("internal_h")
 
 [node name="WallCollision" type="StaticBody3D" parent="Structure"]
 
