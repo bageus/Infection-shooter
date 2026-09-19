@@ -122,7 +122,7 @@ func _try_attack() -> void:
 	_attack_cooldown = attack_interval
 
 
-func _spawn_air_blood(position: Vector3, direction: Vector3, weapon_name: String) -> void:
+func _spawn_air_blood(hit_position: Vector3, direction: Vector3, weapon_name: String) -> void:
 	var count := 11 if weapon_name == "SHOTGUN" else 6
 	var spread := 0.72 if weapon_name == "SHOTGUN" else 0.34
 	for i in count:
@@ -133,24 +133,24 @@ func _spawn_air_blood(position: Vector3, direction: Vector3, weapon_name: String
 		mesh.material = _blood_material()
 		drop.mesh = mesh
 		get_tree().current_scene.add_child(drop)
-		drop.global_position = position
-		var target := position + direction * randf_range(0.25, 0.9)
+		drop.global_position = hit_position
+		var target := hit_position + direction * randf_range(0.25, 0.9)
 		target += Vector3(randf_range(-spread, spread), randf_range(-0.2, 0.28), randf_range(-spread, spread))
 		var tween := drop.create_tween()
 		tween.tween_property(drop, "global_position", target, randf_range(0.1, 0.24))
 		tween.tween_callback(drop.queue_free)
 
 
-func _spawn_surface_splatter(position: Vector3, direction: Vector3, weapon_name: String) -> void:
+func _spawn_surface_splatter(hit_position: Vector3, direction: Vector3, weapon_name: String) -> void:
 	var rays := 16 if weapon_name == "SHOTGUN" else 6
 	var reach := 4.0 if weapon_name == "SHOTGUN" else 2.4
 	var spread := 0.9 if weapon_name == "SHOTGUN" else 0.35
 	for i in rays:
 		var ray_direction := direction.normalized()
 		ray_direction += Vector3(randf_range(-spread, spread), randf_range(-0.55, 0.2), randf_range(-spread, spread))
-		_cast_blood_ray(position, ray_direction.normalized(), reach, weapon_name == "SHOTGUN")
+		_cast_blood_ray(hit_position, ray_direction.normalized(), reach, weapon_name == "SHOTGUN")
 	for i in (5 if weapon_name == "SHOTGUN" else 2):
-		var floor_start := position + Vector3(randf_range(-0.8, 0.8), 0.35, randf_range(-0.8, 0.8))
+		var floor_start := hit_position + Vector3(randf_range(-0.8, 0.8), 0.35, randf_range(-0.8, 0.8))
 		_cast_blood_ray(floor_start, Vector3.DOWN, 3.0, weapon_name == "SHOTGUN")
 
 
@@ -166,7 +166,7 @@ func _cast_blood_ray(origin: Vector3, direction: Vector3, reach: float, heavy: b
 	_spawn_splatter_mark(hit.get("position"), normal, heavy)
 
 
-func _spawn_splatter_mark(position: Vector3, normal: Vector3, heavy: bool) -> void:
+func _spawn_splatter_mark(hit_position: Vector3, normal: Vector3, heavy: bool) -> void:
 	var mark := MeshInstance3D.new()
 	var mesh := ImmediateMesh.new()
 	var material := _blood_material()
@@ -185,13 +185,13 @@ func _spawn_splatter_mark(position: Vector3, normal: Vector3, heavy: bool) -> vo
 	mesh.surface_end()
 	mark.mesh = mesh
 	get_tree().current_scene.add_child(mark)
-	mark.global_position = position + normal * 0.014
+	mark.global_position = hit_position + normal * 0.014
 	mark.global_basis = _basis_for_normal(normal)
 	if heavy:
-		_spawn_satellite_drops(position, normal, mark.global_basis)
+		_spawn_satellite_drops(hit_position, normal, mark.global_basis)
 
 
-func _spawn_satellite_drops(position: Vector3, normal: Vector3, basis: Basis) -> void:
+func _spawn_satellite_drops(hit_position: Vector3, normal: Vector3, surface_basis: Basis) -> void:
 	for i in randi_range(3, 7):
 		var dot := MeshInstance3D.new()
 		var mesh := QuadMesh.new()
@@ -201,8 +201,8 @@ func _spawn_satellite_drops(position: Vector3, normal: Vector3, basis: Basis) ->
 		dot.mesh = mesh
 		get_tree().current_scene.add_child(dot)
 		var local_offset := Vector3(randf_range(-0.55, 0.55), randf_range(-0.45, 0.45), 0)
-		dot.global_position = position + basis * local_offset + normal * 0.016
-		dot.global_basis = basis
+		dot.global_position = hit_position + surface_basis * local_offset + normal * 0.016
+		dot.global_basis = surface_basis
 
 
 func _basis_for_normal(normal: Vector3) -> Basis:
