@@ -1,635 +1,523 @@
-[gd_scene format=3 uid="uid://cfm3smjohpd2f"]
+[gd_scene format=3]
 
-[ext_resource type="PackedScene" path="res://game/presentation/office_floor/public/assets/01_locker_tall.tscn" id="m1"]
-[ext_resource type="PackedScene" path="res://game/presentation/office_floor/public/assets/01_wall_straight.tscn" id="m2"]
-[ext_resource type="PackedScene" path="res://game/presentation/office_floor/public/assets/02_cardboard_boxes_stack.tscn" id="m3"]
-[ext_resource type="PackedScene" path="res://game/presentation/office_floor/public/assets/03_drawer_cabinet_mobile.tscn" id="m5"]
-[ext_resource type="PackedScene" path="res://game/presentation/office_floor/public/assets/04_cardboard_box_open.tscn" id="m7"]
-[ext_resource type="PackedScene" path="res://game/presentation/office_floor/public/assets/05_plastic_storage_bin.tscn" id="m9"]
-[ext_resource type="PackedScene" path="res://game/presentation/office_floor/public/assets/06_cardboard_box_closed.tscn" id="m11"]
-[ext_resource type="PackedScene" path="res://game/presentation/office_floor/public/assets/07_cardboard_archive_box.tscn" id="m13"]
-[ext_resource type="PackedScene" path="res://game/presentation/office_floor/public/assets/07_window_double.tscn" id="m14"]
-[ext_resource type="PackedScene" path="res://game/presentation/office_floor/public/assets/08_window_corner.tscn" id="m15"]
-[ext_resource type="PackedScene" path="res://game/presentation/office_floor/public/assets/08_workstation_quad.tscn" id="m16"]
-[ext_resource type="PackedScene" path="res://game/presentation/office_floor/public/assets/09_standing_desk.tscn" id="m17"]
-[ext_resource type="PackedScene" path="res://game/presentation/office_floor/public/assets/09_window_city.tscn" id="m18"]
-[ext_resource type="PackedScene" path="res://game/presentation/office_floor/public/assets/10_column.tscn" id="m19"]
-[ext_resource type="PackedScene" path="res://game/presentation/office_floor/public/assets/10_workstation_dual.tscn" id="m20"]
-[ext_resource type="PackedScene" path="res://game/presentation/office_floor/public/assets/11_rubble.tscn" id="m21"]
-[ext_resource type="PackedScene" path="res://game/presentation/office_floor/public/assets/11_workstation_partitioned.tscn" id="m22"]
-[ext_resource type="PackedScene" path="res://game/presentation/office_floor/public/assets/12_office_desk_lamp.tscn" id="m23"]
-[ext_resource type="PackedScene" path="res://game/presentation/office_floor/public/assets/12_table.tscn" id="m24"]
-[ext_resource type="PackedScene" path="res://game/presentation/office_floor/public/assets/13_office_desk.tscn" id="m25"]
-[ext_resource type="PackedScene" path="res://game/presentation/office_floor/public/assets/13_table_long.tscn" id="m26"]
-[ext_resource type="PackedScene" path="res://game/presentation/office_floor/public/assets/14_office_chair.tscn" id="m27"]
-[ext_resource type="PackedScene" path="res://game/presentation/office_floor/public/assets/14_table_l_shaped.tscn" id="m28"]
-[ext_resource type="PackedScene" path="res://game/presentation/office_floor/public/assets/15_sofa.tscn" id="m29"]
-[ext_resource type="PackedScene" path="res://game/presentation/office_floor/public/assets/15_table_square.tscn" id="m30"]
-[ext_resource type="PackedScene" path="res://game/presentation/office_floor/public/assets/16_coffee_table.tscn" id="m31"]
-[ext_resource type="PackedScene" path="res://game/presentation/office_floor/public/assets/16_elevator_closed.tscn" id="m32"]
-[ext_resource type="PackedScene" path="res://game/presentation/office_floor/public/assets/17_elevator_open.tscn" id="m33"]
-[ext_resource type="PackedScene" path="res://game/presentation/office_floor/public/assets/17_file_cabinet_tall.tscn" id="m34"]
-[ext_resource type="PackedScene" path="res://game/presentation/office_floor/public/assets/18_drawer_cabinet.tscn" id="m35"]
-[ext_resource type="PackedScene" path="res://game/presentation/office_floor/public/assets/18_executive_chair.tscn" id="m36"]
-[ext_resource type="PackedScene" path="res://game/presentation/office_floor/public/assets/19_office_chair.tscn" id="m37"]
-[ext_resource type="PackedScene" path="res://game/presentation/office_floor/public/assets/19_water_cooler.tscn" id="m38"]
-[ext_resource type="PackedScene" path="res://game/presentation/office_floor/public/assets/20_fire_extinguisher.tscn" id="m39"]
-[ext_resource type="PackedScene" path="res://game/presentation/office_floor/public/assets/20_simple_chair.tscn" id="m40"]
-[ext_resource type="PackedScene" path="res://game/presentation/office_floor/public/assets/21_crate_large.tscn" id="m41"]
-[ext_resource type="PackedScene" path="res://game/presentation/office_floor/public/assets/21_elevator_call_panel.tscn" id="m42"]
-[ext_resource type="PackedScene" path="res://game/presentation/office_floor/public/assets/22_chair_overturned.tscn" id="m43"]
-[ext_resource type="PackedScene" path="res://game/presentation/office_floor/public/assets/22_crate_small.tscn" id="m44"]
-[ext_resource type="PackedScene" path="res://game/presentation/office_floor/public/assets/23_cardboard_boxes.tscn" id="m45"]
-[ext_resource type="PackedScene" path="res://game/presentation/office_floor/public/assets/23_glass_partition_half.tscn" id="m46"]
-[ext_resource type="PackedScene" path="res://game/presentation/office_floor/public/assets/25_glass_wall_full.tscn" id="m50"]
-[ext_resource type="PackedScene" path="res://game/presentation/office_floor/public/assets/26_case_blue_open.tscn" id="m51"]
-[ext_resource type="PackedScene" path="res://game/presentation/office_floor/public/assets/28_cubicle_cross_partition.tscn" id="m55"]
-[ext_resource type="PackedScene" path="res://game/presentation/office_floor/public/assets/29_cubicle_straight_partition.tscn" id="m57"]
-[ext_resource type="PackedScene" path="res://game/presentation/office_floor/public/assets/29_floor_pad.tscn" id="m58"]
-[ext_resource type="PackedScene" path="res://game/presentation/office_floor/public/assets/30_cubicle_damaged_partition.tscn" id="m59"]
-[ext_resource type="PackedScene" path="res://game/presentation/office_floor/public/assets/30_plant_large.tscn" id="m60"]
-[ext_resource type="PackedScene" path="res://game/presentation/office_floor/public/assets/31_cubicle_corner_partition.tscn" id="m61"]
-[ext_resource type="PackedScene" path="res://game/presentation/office_floor/public/assets/31_plant_medium.tscn" id="m62"]
-[ext_resource type="PackedScene" path="res://game/presentation/office_floor/public/assets/32_plant_small.tscn" id="m63"]
-[ext_resource type="PackedScene" path="res://game/presentation/office_floor/public/assets/33_alien_growth.tscn" id="m65"]
-[ext_resource type="PackedScene" path="res://game/presentation/office_floor/public/assets/33_wall_pillar_wide.tscn" id="m66"]
-[ext_resource type="PackedScene" path="res://game/presentation/office_floor/public/assets/35_wall_emergency_door.tscn" id="m68"]
-[ext_resource type="PackedScene" path="res://game/presentation/office_floor/public/assets/36_wall_pillar_narrow.tscn" id="m69"]
-[ext_resource type="PackedScene" path="res://game/presentation/office_floor/public/assets/37_window_panel.tscn" id="m70"]
-[ext_resource type="PackedScene" path="res://game/features/player/public/player.tscn" id="m71"]
-[ext_resource type="PackedScene" path="res://game/features/infected/public/infected_capsule.tscn" id="m72"]
-[ext_resource type="PackedScene" path="res://game/features/infection_source/public/infection_source.tscn" id="m73"]
-[ext_resource type="PackedScene" path="res://game/presentation/prototype_hud/public/prototype_hud.tscn" id="m74"]
-[ext_resource type="PackedScene" path="res://game/presentation/prototype_hud/public/crosshair.tscn" id="m75"]
-[ext_resource type="Script" uid="uid://cjm3a57h7v5im" path="res://game/bootstrap/app/main.gd" id="m76"]
-[ext_resource type="PackedScene" path="res://game/features/pickups/public/ammo_orange_pickup.tscn" id="pickup_ammoorange"]
-[ext_resource type="PackedScene" path="res://game/features/pickups/public/ammo_red_pickup.tscn" id="pickup_ammored"]
-[ext_resource type="PackedScene" path="res://game/features/pickups/public/med_case_green_pickup.tscn" id="pickup_medgreen"]
-[ext_resource type="PackedScene" path="res://game/features/pickups/public/medkit_closed_pickup.tscn" id="pickup_medkit"]
-[ext_resource type="PackedScene" path="res://game/presentation/prototype_hud/public/radar.tscn" id="radar_ui"]
+[ext_resource type="Script" path="res://game/bootstrap/app/main.gd" id="script"]
+[ext_resource type="PackedScene" path="res://models/objects/01_wall_straight.blend" id="wall"]
+[ext_resource type="PackedScene" path="res://models/objects/01_wall_inner_corner.blend" id="inner"]
+[ext_resource type="PackedScene" path="res://models/objects/01_wall_outer_corner.blend" id="outer"]
+[ext_resource type="PackedScene" path="res://models/objects/01_window_double.blend" id="window"]
+[ext_resource type="PackedScene" path="res://models/objects/01_window_corner.blend" id="window_corner"]
+[ext_resource type="PackedScene" path="res://models/objects/01_column.blend" id="column"]
+[ext_resource type="PackedScene" path="res://models/objects/01_wall_door.blend" id="wall_door"]
+[ext_resource type="PackedScene" path="res://models/objects/01_wall_emergency_door.blend" id="emergency"]
+[ext_resource type="PackedScene" path="res://models/objects/01_wall_half_panel.blend" id="half"]
+[ext_resource type="PackedScene" path="res://game/features/player/public/player.tscn" id="player"]
+[ext_resource type="PackedScene" path="res://game/features/infected/public/infected_capsule.tscn" id="infected"]
+[ext_resource type="PackedScene" path="res://game/features/infection_source/public/infection_source.tscn" id="source"]
+[ext_resource type="PackedScene" path="res://game/presentation/prototype_hud/public/prototype_hud.tscn" id="hud"]
+[ext_resource type="PackedScene" path="res://game/presentation/prototype_hud/public/crosshair.tscn" id="crosshair"]
+[ext_resource type="PackedScene" path="res://game/presentation/prototype_hud/public/radar.tscn" id="radar"]
 
-[sub_resource type="Environment" id="Environment"]
+[sub_resource type="Environment" id="env"]
 background_mode = 1
-background_color = Color(0.055, 0.075, 0.12, 1)
+background_color = Color(0.055,0.075,0.12,1)
 ambient_light_source = 3
-ambient_light_color = Color(0.72, 0.8, 1, 1)
+ambient_light_color = Color(0.72,0.8,1,1)
 ambient_light_energy = 0.62
 tonemap_mode = 2
 
-[sub_resource type="StandardMaterial3D" id="FloorMaterial"]
-albedo_color = Color(0.31, 0.34, 0.4, 1)
+[sub_resource type="StandardMaterial3D" id="floor_mat"]
+albedo_color = Color(0.31,0.34,0.4,1)
 roughness = 0.92
 
-[sub_resource type="PlaneMesh" id="FloorMesh"]
-material = SubResource("FloorMaterial")
-size = Vector2(40, 30)
-subdivide_width = 19
-subdivide_depth = 14
+[sub_resource type="PlaneMesh" id="floor_mesh"]
+material = SubResource("floor_mat")
+size = Vector2(80,60)
+subdivide_width = 39
+subdivide_depth = 29
 
-[sub_resource type="BoxShape3D" id="FloorShape"]
-size = Vector3(40, 0.2, 30)
+[sub_resource type="BoxShape3D" id="floor_shape"]
+size = Vector3(80,0.2,60)
 
-[node name="Main" type="Node3D" unique_id=1645086248]
-script = ExtResource("m76")
+[sub_resource type="BoxShape3D" id="north_south_collision"]
+size = Vector3(80,3.2,0.35)
 
-[node name="WorldEnvironment" type="WorldEnvironment" parent="." unique_id=61289503]
-environment = SubResource("Environment")
+[sub_resource type="BoxShape3D" id="east_west_collision"]
+size = Vector3(0.35,3.2,60)
 
-[node name="Sun" type="DirectionalLight3D" parent="." unique_id=605080159]
-transform = Transform3D(0.81915206, 0.46984634, -0.32898995, 0, 0.57357645, 0.81915206, 0.57357645, -0.6710101, 0.46984634, 0, 0, 0)
+[sub_resource type="BoxShape3D" id="internal_h"]
+size = Vector3(18,3.2,0.3)
+
+[sub_resource type="BoxShape3D" id="internal_v"]
+size = Vector3(0.3,3.2,14)
+
+[node name="Main" type="Node3D"]
+script = ExtResource("script")
+
+[node name="WorldEnvironment" type="WorldEnvironment" parent="."]
+environment = SubResource("env")
+
+[node name="Sun" type="DirectionalLight3D" parent="."]
+rotation_degrees = Vector3(-55,-35,0)
 light_energy = 1.05
 shadow_enabled = true
 
-[node name="Floor" type="MeshInstance3D" parent="." unique_id=213993589]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 1.355835, 0.15324259, -2.694045)
-mesh = SubResource("FloorMesh")
+[node name="Floor" type="MeshInstance3D" parent="."]
+mesh = SubResource("floor_mesh")
 
-[node name="FloorBody" type="StaticBody3D" parent="." unique_id=1422461267]
+[node name="FloorBody" type="StaticBody3D" parent="."]
+[node name="CollisionShape3D" type="CollisionShape3D" parent="FloorBody"]
+position = Vector3(0,-0.1,0)
+shape = SubResource("floor_shape")
 
-[node name="CollisionShape3D" type="CollisionShape3D" parent="FloorBody" unique_id=1973101294]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.1, 0)
-shape = SubResource("FloorShape")
+[node name="Structure" type="Node3D" parent="."]
+[node name="Perimeter" type="Node3D" parent="Structure"]
 
-[node name="Structure" type="Node3D" parent="." unique_id=684839431]
+[node name="WindowCorner_1" parent="Structure/Perimeter" instance=ExtResource("window_corner")]
+position = Vector3(-39,0,-29)
+rotation_degrees = Vector3(0,0,0)
 
-[node name="PerimeterWalls" type="Node3D" parent="Structure" unique_id=319012188]
+[node name="WindowCorner_2" parent="Structure/Perimeter" instance=ExtResource("window_corner")]
+position = Vector3(39,0,-29)
+rotation_degrees = Vector3(0,90,0)
 
-[node name="SouthWall_1" parent="Structure/PerimeterWalls" unique_id=797157114 instance=ExtResource("m2")]
-transform = Transform3D(-1, 0, -8.742278e-08, 0, 1, 0, 8.742278e-08, 0, -1, -18.19, 0, 14.8)
+[node name="WindowCorner_3" parent="Structure/Perimeter" instance=ExtResource("window_corner")]
+position = Vector3(39,0,29)
+rotation_degrees = Vector3(0,180,0)
 
-[node name="SouthWall_2" parent="Structure/PerimeterWalls" unique_id=1649799141 instance=ExtResource("m2")]
-transform = Transform3D(-1, 0, -8.742278e-08, 0, 1, 0, 8.742278e-08, 0, -1, -16.05, 0, 14.8)
+[node name="WindowCorner_4" parent="Structure/Perimeter" instance=ExtResource("window_corner")]
+position = Vector3(-39,0,29)
+rotation_degrees = Vector3(0,270,0)
 
-[node name="SouthWall_3" parent="Structure/PerimeterWalls" unique_id=1043766033 instance=ExtResource("m2")]
-transform = Transform3D(-1, 0, -8.742278e-08, 0, 1, 0, 8.742278e-08, 0, -1, -13.91, 0, 14.8)
+[node name="NorthWindow_1" parent="Structure/Perimeter" instance=ExtResource("window")]
+position = Vector3(-34.00,0,-29)
 
-[node name="SouthWall_4" parent="Structure/PerimeterWalls" unique_id=1989793642 instance=ExtResource("m2")]
-transform = Transform3D(-1, 0, -8.742278e-08, 0, 1, 0, 8.742278e-08, 0, -1, -11.77, 0, 14.8)
+[node name="SouthWindow_1" parent="Structure/Perimeter" instance=ExtResource("window")]
+position = Vector3(-34.00,0,29)
+rotation_degrees = Vector3(0,180,0)
 
-[node name="SouthWall_5" parent="Structure/PerimeterWalls" unique_id=1352296596 instance=ExtResource("m2")]
-transform = Transform3D(-1, 0, -8.742278e-08, 0, 1, 0, 8.742278e-08, 0, -1, -9.63, 0, 14.8)
+[node name="NorthWindow_2" parent="Structure/Perimeter" instance=ExtResource("window")]
+position = Vector3(-29.75,0,-29)
 
-[node name="SouthWall_6" parent="Structure/PerimeterWalls" unique_id=1213913276 instance=ExtResource("m2")]
-transform = Transform3D(-1, 0, -8.742278e-08, 0, 1, 0, 8.742278e-08, 0, -1, -7.49, 0, 14.8)
+[node name="SouthWindow_2" parent="Structure/Perimeter" instance=ExtResource("window")]
+position = Vector3(-29.75,0,29)
+rotation_degrees = Vector3(0,180,0)
 
-[node name="SouthWall_7" parent="Structure/PerimeterWalls" unique_id=1168117191 instance=ExtResource("m2")]
-transform = Transform3D(-1, 0, -8.742278e-08, 0, 1, 0, 8.742278e-08, 0, -1, -5.35, 0, 14.8)
+[node name="NorthWindow_3" parent="Structure/Perimeter" instance=ExtResource("window")]
+position = Vector3(-25.50,0,-29)
 
-[node name="SouthWall_8" parent="Structure/PerimeterWalls" unique_id=828849064 instance=ExtResource("m2")]
-transform = Transform3D(-1, 0, -8.742278e-08, 0, 1, 0, 8.742278e-08, 0, -1, -3.21, 0, 14.8)
+[node name="SouthWindow_3" parent="Structure/Perimeter" instance=ExtResource("window")]
+position = Vector3(-25.50,0,29)
+rotation_degrees = Vector3(0,180,0)
 
-[node name="SouthWall_9" parent="Structure/PerimeterWalls" unique_id=1771128393 instance=ExtResource("m2")]
-transform = Transform3D(-1, 0, -8.742278e-08, 0, 1, 0, 8.742278e-08, 0, -1, -1.07, 0, 14.8)
+[node name="NorthWindow_4" parent="Structure/Perimeter" instance=ExtResource("window")]
+position = Vector3(-21.25,0,-29)
 
-[node name="SouthWall_10" parent="Structure/PerimeterWalls" unique_id=1710086821 instance=ExtResource("m2")]
-transform = Transform3D(-1, 0, -8.742278e-08, 0, 1, 0, 8.742278e-08, 0, -1, 1.07, 0, 14.8)
+[node name="SouthWindow_4" parent="Structure/Perimeter" instance=ExtResource("window")]
+position = Vector3(-21.25,0,29)
+rotation_degrees = Vector3(0,180,0)
 
-[node name="SouthWall_11" parent="Structure/PerimeterWalls" unique_id=1603419074 instance=ExtResource("m2")]
-transform = Transform3D(-1, 0, -8.742278e-08, 0, 1, 0, 8.742278e-08, 0, -1, 3.21, 0, 14.8)
+[node name="NorthWindow_5" parent="Structure/Perimeter" instance=ExtResource("window")]
+position = Vector3(-17.00,0,-29)
 
-[node name="SouthWall_12" parent="Structure/PerimeterWalls" unique_id=827768812 instance=ExtResource("m2")]
-transform = Transform3D(-1, 0, -8.742278e-08, 0, 1, 0, 8.742278e-08, 0, -1, 5.35, 0, 14.8)
+[node name="SouthWindow_5" parent="Structure/Perimeter" instance=ExtResource("window")]
+position = Vector3(-17.00,0,29)
+rotation_degrees = Vector3(0,180,0)
 
-[node name="SouthWall_13" parent="Structure/PerimeterWalls" unique_id=1028829968 instance=ExtResource("m2")]
-transform = Transform3D(-1, 0, -8.742278e-08, 0, 1, 0, 8.742278e-08, 0, -1, 7.49, 0, 14.8)
+[node name="NorthWindow_6" parent="Structure/Perimeter" instance=ExtResource("window")]
+position = Vector3(-12.75,0,-29)
 
-[node name="SouthWall_14" parent="Structure/PerimeterWalls" unique_id=97712706 instance=ExtResource("m2")]
-transform = Transform3D(-1, 0, -8.742278e-08, 0, 1, 0, 8.742278e-08, 0, -1, 9.63, 0, 14.8)
+[node name="SouthWindow_6" parent="Structure/Perimeter" instance=ExtResource("window")]
+position = Vector3(-12.75,0,29)
+rotation_degrees = Vector3(0,180,0)
 
-[node name="SouthWall_15" parent="Structure/PerimeterWalls" unique_id=2420538 instance=ExtResource("m2")]
-transform = Transform3D(-1, 0, -8.742278e-08, 0, 1, 0, 8.742278e-08, 0, -1, 11.77, 0, 14.8)
+[node name="NorthWindow_7" parent="Structure/Perimeter" instance=ExtResource("window")]
+position = Vector3(-8.50,0,-29)
 
-[node name="SouthWall_16" parent="Structure/PerimeterWalls" unique_id=1192144446 instance=ExtResource("m2")]
-transform = Transform3D(-1, 0, -8.742278e-08, 0, 1, 0, 8.742278e-08, 0, -1, 13.91, 0, 14.8)
+[node name="SouthWindow_7" parent="Structure/Perimeter" instance=ExtResource("window")]
+position = Vector3(-8.50,0,29)
+rotation_degrees = Vector3(0,180,0)
 
-[node name="SouthWall_17" parent="Structure/PerimeterWalls" unique_id=1895349374 instance=ExtResource("m2")]
-transform = Transform3D(-1, 0, -8.742278e-08, 0, 1, 0, 8.742278e-08, 0, -1, 16.05, 0, 14.8)
+[node name="NorthWindow_8" parent="Structure/Perimeter" instance=ExtResource("window")]
+position = Vector3(-4.25,0,-29)
 
-[node name="SouthWall_18" parent="Structure/PerimeterWalls" unique_id=324199276 instance=ExtResource("m2")]
-transform = Transform3D(-1, 0, -8.742278e-08, 0, 1, 0, 8.742278e-08, 0, -1, 18.19, 0, 14.8)
+[node name="SouthWindow_8" parent="Structure/Perimeter" instance=ExtResource("window")]
+position = Vector3(-4.25,0,29)
+rotation_degrees = Vector3(0,180,0)
 
-[node name="Columns" type="Node3D" parent="Structure" unique_id=138672427]
+[node name="NorthWindow_9" parent="Structure/Perimeter" instance=ExtResource("window")]
+position = Vector3(0.00,0,-29)
 
-[node name="Column_1" parent="Structure/Columns" unique_id=1371522318 instance=ExtResource("m19")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -12, 0, -8)
+[node name="SouthWindow_9" parent="Structure/Perimeter" instance=ExtResource("window")]
+position = Vector3(0.00,0,29)
+rotation_degrees = Vector3(0,180,0)
 
-[node name="Column_2" parent="Structure/Columns" unique_id=2032789297 instance=ExtResource("m19")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -12, 0, 0)
+[node name="NorthWindow_10" parent="Structure/Perimeter" instance=ExtResource("window")]
+position = Vector3(4.25,0,-29)
 
-[node name="Column_3" parent="Structure/Columns" unique_id=1557853374 instance=ExtResource("m19")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -12, 0, 8)
+[node name="SouthWindow_10" parent="Structure/Perimeter" instance=ExtResource("window")]
+position = Vector3(4.25,0,29)
+rotation_degrees = Vector3(0,180,0)
 
-[node name="Column_4" parent="Structure/Columns" unique_id=726010009 instance=ExtResource("m19")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -6, 0, -8)
+[node name="NorthWindow_11" parent="Structure/Perimeter" instance=ExtResource("window")]
+position = Vector3(8.50,0,-29)
 
-[node name="Column_5" parent="Structure/Columns" unique_id=2142822135 instance=ExtResource("m19")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -6, 0, 0)
+[node name="SouthWindow_11" parent="Structure/Perimeter" instance=ExtResource("window")]
+position = Vector3(8.50,0,29)
+rotation_degrees = Vector3(0,180,0)
 
-[node name="Column_6" parent="Structure/Columns" unique_id=499782667 instance=ExtResource("m19")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -6, 0, 8)
+[node name="NorthWindow_12" parent="Structure/Perimeter" instance=ExtResource("window")]
+position = Vector3(12.75,0,-29)
 
-[node name="Column_7" parent="Structure/Columns" unique_id=381050600 instance=ExtResource("m19")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, -8)
+[node name="NorthWindow_13" parent="Structure/Perimeter" instance=ExtResource("window")]
+position = Vector3(17.00,0,-29)
 
-[node name="Column_8" parent="Structure/Columns" unique_id=410839987 instance=ExtResource("m19")]
+[node name="NorthWindow_14" parent="Structure/Perimeter" instance=ExtResource("window")]
+position = Vector3(21.25,0,-29)
 
-[node name="Column_9" parent="Structure/Columns" unique_id=2001570962 instance=ExtResource("m19")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 8)
+[node name="NorthWindow_15" parent="Structure/Perimeter" instance=ExtResource("window")]
+position = Vector3(25.50,0,-29)
 
-[node name="Column_10" parent="Structure/Columns" unique_id=1110086888 instance=ExtResource("m19")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 6, 0, -8)
+[node name="NorthWindow_16" parent="Structure/Perimeter" instance=ExtResource("window")]
+position = Vector3(29.75,0,-29)
 
-[node name="Column_11" parent="Structure/Columns" unique_id=31134537 instance=ExtResource("m19")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 6, 0, 0)
+[node name="SouthWindow_16" parent="Structure/Perimeter" instance=ExtResource("window")]
+position = Vector3(29.75,0,29)
+rotation_degrees = Vector3(0,180,0)
 
-[node name="Column_12" parent="Structure/Columns" unique_id=81913831 instance=ExtResource("m19")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 6, 0.1339786, 8)
+[node name="NorthWindow_17" parent="Structure/Perimeter" instance=ExtResource("window")]
+position = Vector3(34.00,0,-29)
 
-[node name="Column_13" parent="Structure/Columns" unique_id=1253961715 instance=ExtResource("m19")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 12, 0, -8)
+[node name="SouthWindow_17" parent="Structure/Perimeter" instance=ExtResource("window")]
+position = Vector3(34.00,0,29)
+rotation_degrees = Vector3(0,180,0)
 
-[node name="Column_14" parent="Structure/Columns" unique_id=1458450481 instance=ExtResource("m19")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 12, 0, 0)
-
-[node name="Column_15" parent="Structure/Columns" unique_id=1624205456 instance=ExtResource("m19")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 12, 0, 8)
-
-[node name="WidePillar_NW" parent="Structure/Columns" unique_id=812420925 instance=ExtResource("m66")]
-transform = Transform3D(-4.371139e-08, 0, 1, 0, 1.1391165, 0, -1, 0, -4.371139e-08, -18.172, 0.116081595, -8.46214)
-
-[node name="WidePillar_NE" parent="Structure/Columns" unique_id=683928812 instance=ExtResource("m66")]
-transform = Transform3D(-4.371139e-08, 0, -1, 0, 1, 0, 1, 0, -4.371139e-08, 18, 0, -10)
-
-[node name="NarrowPillar_SW" parent="Structure/Columns" unique_id=1217097934 instance=ExtResource("m69")]
-transform = Transform3D(-4.371139e-08, 0, 1, 0, 1, 0, -1, 0, -4.371139e-08, -18, 0, 10)
-
-[node name="NarrowPillar_SE" parent="Structure/Columns" unique_id=106425341 instance=ExtResource("m69")]
-transform = Transform3D(-4.371139e-08, 0, -1, 0, 1, 0, 1, 0, -4.371139e-08, 18.105959, 0.16987038, 10.1352825)
-
-[node name="ElevatorLobby" type="Node3D" parent="Structure" unique_id=542151967]
-
-[node name="ElevatorClosed" parent="Structure/ElevatorLobby" unique_id=1835320736 instance=ExtResource("m32")]
-transform = Transform3D(-1, 0, -8.742278e-08, 0, 1, 0, 8.742278e-08, 0, -1, -3, 0, 13.8)
-
-[node name="ElevatorOpen" parent="Structure/ElevatorLobby" unique_id=921840741 instance=ExtResource("m33")]
-transform = Transform3D(-1, 0, -8.742278e-08, 0, 1, 0, 8.742278e-08, 0, -1, 0, 0, 13.8)
-
-[node name="ElevatorCallPanel" parent="Structure/ElevatorLobby" unique_id=436632308 instance=ExtResource("m42")]
-transform = Transform3D(-1, 0, -8.742278e-08, 0, 1, 0, 8.742278e-08, 0, -1, 2, 1, 13.6)
-
-[node name="EmergencyDoor" parent="Structure/ElevatorLobby" unique_id=151220822 instance=ExtResource("m68")]
-transform = Transform3D(-1, 0, -8.742278e-08, 0, 1, 0, 8.742278e-08, 0, -1, 6, 0.46734166, 13.8)
-
-[node name="Structure_PerimeterWindows#NorthWindow_1" parent="." unique_id=2063376844 instance=ExtResource("m14")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -18.19, 0, -14.8)
-
-[node name="Structure_PerimeterWindows#NorthWindow_2" parent="." unique_id=2143175662 instance=ExtResource("m14")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -16.05, 0, -14.8)
-
-[node name="Structure_PerimeterWindows#NorthWindow_3" parent="." unique_id=2137582112 instance=ExtResource("m14")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -13.91, 0, -14.8)
-
-[node name="Structure_PerimeterWindows#NorthWindow_4" parent="." unique_id=1638253035 instance=ExtResource("m14")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -12.1, 0, -14.8)
-
-[node name="Structure_PerimeterWindows#NorthWindow_5" parent="." unique_id=107218006 instance=ExtResource("m14")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -9.9, 0, -14.8)
-
-[node name="Structure_PerimeterWindows#NorthWindow_6" parent="." unique_id=287109876 instance=ExtResource("m14")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -7.7, 0, -14.8)
-
-[node name="Structure_PerimeterWindows#NorthWindow_7" parent="." unique_id=1234660226 instance=ExtResource("m14")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -5.5, 0, -14.8)
-
-[node name="Structure_PerimeterWindows#NorthWindow_8" parent="." unique_id=1131315737 instance=ExtResource("m14")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -3.3, 0, -14.8)
-
-[node name="Structure_PerimeterWindows#NorthWindow_9" parent="." unique_id=999662339 instance=ExtResource("m14")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -1.1, 0, -14.8)
-
-[node name="Structure_PerimeterWindows#NorthWindow_10" parent="." unique_id=2000419142 instance=ExtResource("m14")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 1.1, 0, -14.8)
-
-[node name="Structure_PerimeterWindows#NorthWindow_11" parent="." unique_id=820437632 instance=ExtResource("m14")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 3.3, 0, -14.8)
-
-[node name="Structure_PerimeterWindows#NorthWindow_12" parent="." unique_id=2107476801 instance=ExtResource("m14")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 5.5, 0, -14.8)
-
-[node name="Structure_PerimeterWindows#NorthWindow_13" parent="." unique_id=444297826 instance=ExtResource("m14")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 7.7, 0, -14.8)
-
-[node name="Structure_PerimeterWindows#NorthWindow_14" parent="." unique_id=469177007 instance=ExtResource("m14")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 9.9, 0, -14.8)
-
-[node name="Structure_PerimeterWindows#NorthWindow_15" parent="." unique_id=695199607 instance=ExtResource("m14")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 12.1, 0, -14.8)
-
-[node name="Structure_PerimeterWindows#NorthWindow_16" parent="." unique_id=1334857693 instance=ExtResource("m14")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 14.3, 0, -14.8)
-
-[node name="Structure_PerimeterWindows#NorthWindow_17" parent="." unique_id=139138716 instance=ExtResource("m14")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 16.5, 0, -14.8)
-
-[node name="Structure_PerimeterWindows#NorthWindow_18" parent="." unique_id=1303372137 instance=ExtResource("m14")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 18.7, 0, -14.8)
-
-[node name="Structure_PerimeterWindows#WestEdge_1" parent="." unique_id=236103868 instance=ExtResource("m14")]
-transform = Transform3D(-4.371139e-08, 0, -1, 0, 1, 0, 1, 0, -4.371139e-08, -19.8, 0, -13.7)
-
-[node name="Structure_PerimeterWindows#EastEdge_1" parent="." unique_id=1305844143 instance=ExtResource("m14")]
-transform = Transform3D(-4.371139e-08, 0, 1, 0, 1, 0, -1, 0, -4.371139e-08, 19.8, 0, -13.7)
-
-[node name="Structure_PerimeterWindows#WestEdge_3" parent="." unique_id=508794189 instance=ExtResource("m14")]
-transform = Transform3D(-4.371139e-08, 0, -1, 0, 1, 0, 1, 0, -4.371139e-08, -19.8, 0, -9.5)
-
-[node name="Structure_PerimeterWindows#EastEdge_3" parent="." unique_id=70783715 instance=ExtResource("m14")]
-transform = Transform3D(-4.371139e-08, 0, 1, 0, 1, 0, -1, 0, -4.371139e-08, 19.8, 0, -5.228941)
-
-[node name="Structure_PerimeterWindows#WestEdge_4" parent="." unique_id=1529949034 instance=ExtResource("m14")]
-transform = Transform3D(-4.371139e-08, 0, -1, 0, 1, 0, 1, 0, -4.371139e-08, -19.8, 0, -7.4)
-
-[node name="Structure_PerimeterWindows#EastEdge_4" parent="." unique_id=154445401 instance=ExtResource("m14")]
-transform = Transform3D(-4.371139e-08, 0, 1, 0, 1, 0, -1, 0, -4.371139e-08, 19.8, 0, -3.165711)
-
-[node name="Structure_PerimeterWindows#WestEdge_6" parent="." unique_id=1718194960 instance=ExtResource("m14")]
-transform = Transform3D(-4.371139e-08, 0, -1, 0, 1, 0, 1, 0, -4.371139e-08, -19.8, 0, -3.2)
-
-[node name="Structure_PerimeterWindows#EastEdge_6" parent="." unique_id=1810168688 instance=ExtResource("m14")]
-transform = Transform3D(-4.371139e-08, 0, 1, 0, 1, 0, -1, 0, -4.371139e-08, 19.8, 0, -1.1991818)
-
-[node name="Structure_PerimeterWindows#WestEdge_7" parent="." unique_id=374995141 instance=ExtResource("m14")]
-transform = Transform3D(-4.371139e-08, 0, -1, 0, 1, 0, 1, 0, -4.371139e-08, -19.8, 0, -1.1)
-
-[node name="Structure_PerimeterWindows#EastEdge_7" parent="." unique_id=1876347197 instance=ExtResource("m14")]
-transform = Transform3D(-4.371139e-08, 0, 1, 0, 1, 0, -1, 0, -4.371139e-08, 19.8, 0, 0.93585956)
-
-[node name="Structure_PerimeterWindows#WestEdge_9" parent="." unique_id=1331847459 instance=ExtResource("m14")]
-transform = Transform3D(-4.371139e-08, 0, -1, 0, 1, 0, 1, 0, -4.371139e-08, -19.8, 0, 3.1)
-
-[node name="Structure_PerimeterWindows#EastEdge_9" parent="." unique_id=876520106 instance=ExtResource("m14")]
-transform = Transform3D(-4.371139e-08, 0, 1, 0, 1, 0, -1, 0, -4.371139e-08, 19.8, 0, 3.1)
-
-[node name="Structure_PerimeterWindows#WestEdge_10" parent="." unique_id=440458070 instance=ExtResource("m14")]
-transform = Transform3D(-4.371139e-08, 0, -1, 0, 1, 0, 1, 0, -4.371139e-08, -19.8, 0, 5.2)
-
-[node name="Structure_PerimeterWindows#EastEdge_10" parent="." unique_id=1191545860 instance=ExtResource("m14")]
-transform = Transform3D(-4.371139e-08, 0, 1, 0, 1, 0, -1, 0, -4.371139e-08, 19.8, 0, 5.2)
-
-[node name="Structure_PerimeterWindows#WestEdge_12" parent="." unique_id=1753204684 instance=ExtResource("m14")]
-transform = Transform3D(-4.371139e-08, 0, -1, 0, 1, 0, 1, 0, -4.371139e-08, -19.8, 0, 9.4)
-
-[node name="Structure_PerimeterWindows#EastEdge_12" parent="." unique_id=2078452201 instance=ExtResource("m14")]
-transform = Transform3D(-4.371139e-08, 0, 1, 0, 1, 0, -1, 0, -4.371139e-08, 19.8, 0, 9.4)
-
-[node name="Structure_PerimeterWindows#WestEdge_13" parent="." unique_id=790490245 instance=ExtResource("m14")]
-transform = Transform3D(-4.371139e-08, 0, -1, 0, 1, 0, 1, 0, -4.371139e-08, -19.8, 0, 11.5)
-
-[node name="Structure_PerimeterWindows#EastEdge_13" parent="." unique_id=1497607523 instance=ExtResource("m14")]
-transform = Transform3D(-4.371139e-08, 0, 1, 0, 1, 0, -1, 0, -4.371139e-08, 19.8, 0, 11.5)
-
-[node name="Structure_PerimeterWindows#WindowCorner" parent="." unique_id=1837781356 instance=ExtResource("m15")]
-transform = Transform3D(-4.371139e-08, 0, -1, 0, 1, 0, 1, 0, -4.371139e-08, -18.7, 0, 13.7)
-
-[node name="Structure_PerimeterWindows#CityWindow" parent="." unique_id=1444997109 instance=ExtResource("m18")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 8, 0, -14.5)
-
-[node name="Structure_PerimeterWindows#WindowPanel" parent="." unique_id=1219021357 instance=ExtResource("m70")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 12, 0, -14.5)
-
-[node name="Partitions_Glass#GlassFull_1" parent="." unique_id=396615408 instance=ExtResource("m50")]
-transform = Transform3D(-4.371139e-08, 0, 1, 0, 1, 0, -1, 0, -4.371139e-08, -10, 0, -8)
-
-[node name="Partitions_Glass#GlassFull_2" parent="." unique_id=975486119 instance=ExtResource("m50")]
-transform = Transform3D(-4.371139e-08, 0, 1, 0, 1, 0, -1, 0, -4.371139e-08, -10, 0, -6.594)
-
-[node name="Partitions_Glass#GlassFull_3" parent="." unique_id=1769036488 instance=ExtResource("m50")]
-transform = Transform3D(-4.371139e-08, 0, 1, 0, 1, 0, -1, 0, -4.371139e-08, -10, 0, -5.188)
-
-[node name="Partitions_Glass#GlassFull_4" parent="." unique_id=1132326975 instance=ExtResource("m50")]
-transform = Transform3D(-4.371139e-08, 0, 1, 0, 1, 0, -1, 0, -4.371139e-08, -10, 0, -3.782)
-
-[node name="Partitions_Glass#GlassFull_5" parent="." unique_id=1646309599 instance=ExtResource("m50")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -4.693, 0, -8)
-
-[node name="Partitions_Glass#GlassFull_6" parent="." unique_id=297976506 instance=ExtResource("m50")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -3.287, 0, -8)
-
-[node name="Partitions_Glass#GlassFull_7" parent="." unique_id=1339396759 instance=ExtResource("m50")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -1.881, 0, -8)
-
-[node name="Partitions_Glass#GlassFull_8" parent="." unique_id=1155710967 instance=ExtResource("m50")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -1.178, 0, -8)
-
-[node name="Partitions_Glass#GlassFull_9" parent="." unique_id=16899559 instance=ExtResource("m50")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 1.178, 0, -8)
-
-[node name="Partitions_Glass#GlassFull_10" parent="." unique_id=82962137 instance=ExtResource("m50")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 2.584, 0, -8)
-
-[node name="Partitions_Glass#GlassFull_11" parent="." unique_id=1925341086 instance=ExtResource("m50")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 3.99, 0, -8)
-
-[node name="Partitions_Glass#GlassFull_12" parent="." unique_id=1109350474 instance=ExtResource("m50")]
-transform = Transform3D(-4.371139e-08, 0, 1, 0, 1, 0, -1, 0, -4.371139e-08, 10, 0, -8)
-
-[node name="Partitions_Glass#GlassFull_13" parent="." unique_id=1663126126 instance=ExtResource("m50")]
-transform = Transform3D(-4.371139e-08, 0, 1, 0, 1, 0, -1, 0, -4.371139e-08, 10, 0, -6.594)
-
-[node name="Partitions_Glass#GlassFull_15" parent="." unique_id=92872990 instance=ExtResource("m50")]
-transform = Transform3D(-4.371139e-08, 0, 1, 0, 1, 0, -1, 0, -4.371139e-08, 10, 0, -3.782)
-
-[node name="Partitions_Glass#GlassFull_16" parent="." unique_id=1069048319 instance=ExtResource("m50")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -2.812, 0, 6)
-
-[node name="Partitions_Glass#GlassFull_14" parent="." unique_id=1995859477 instance=ExtResource("m50")]
-transform = Transform3D(-4.371139e-08, 0, 1, 0, 1, 0, -1, 0, -4.371139e-08, 10, 0, -5.188)
-
-[node name="Partitions_Glass#GlassFull_18" parent="." unique_id=839293738 instance=ExtResource("m50")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 6)
-
-[node name="Partitions_Glass#GlassFull_19" parent="." unique_id=1788152115 instance=ExtResource("m50")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 1.406, 0, 6)
-
-[node name="Partitions_Glass#GlassFull_20" parent="." unique_id=387254379 instance=ExtResource("m50")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 2.812, 0, 6)
-
-[node name="Partitions_Glass#GlassHalf_1" parent="." unique_id=845374270 instance=ExtResource("m46")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -14, 0, -3)
-
-[node name="Partitions_Glass#GlassHalf_2" parent="." unique_id=489489524 instance=ExtResource("m46")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -14, 0, 2)
-
-[node name="Partitions_Glass#GlassHalf_3" parent="." unique_id=1206944386 instance=ExtResource("m46")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -14, 0, 7)
-
-[node name="Partitions_Glass#GlassHalf_4" parent="." unique_id=32398017 instance=ExtResource("m46")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 14, 0, -3)
-
-[node name="Partitions_Glass#GlassHalf_5" parent="." unique_id=1581163037 instance=ExtResource("m46")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 14, 0, 2)
-
-[node name="Partitions_Glass#GlassHalf_6" parent="." unique_id=1274487653 instance=ExtResource("m46")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 16.165297, 0, 7)
-
-[node name="Partitions_Cubicles#Cubicle_1" parent="." unique_id=88850112 instance=ExtResource("m55")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -6.88, 0, -3)
-
-[node name="Partitions_Cubicles#Cubicle_2" parent="." unique_id=867519526 instance=ExtResource("m57")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -5.16, 0, -3)
-
-[node name="Partitions_Cubicles#Cubicle_3" parent="." unique_id=2138728888 instance=ExtResource("m59")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -3.44, 0, -3)
-
-[node name="Partitions_Cubicles#Cubicle_4" parent="." unique_id=572561576 instance=ExtResource("m61")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -1.72, 0, -3)
-
-[node name="Partitions_Cubicles#Cubicle_5" parent="." unique_id=867672794 instance=ExtResource("m55")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, -3)
-
-[node name="Partitions_Cubicles#Cubicle_6" parent="." unique_id=1918508679 instance=ExtResource("m57")]
-transform = Transform3D(-4.371139e-08, 0, 1, 0, 1, 0, -1, 0, -4.371139e-08, -6.88, 0, 2)
-
-[node name="Partitions_Cubicles#Cubicle_7" parent="." unique_id=523982915 instance=ExtResource("m59")]
-transform = Transform3D(-4.371139e-08, 0, 1, 0, 1, 0, -1, 0, -4.371139e-08, -3, 0, 2)
-
-[node name="Partitions_Cubicles#Cubicle_8" parent="." unique_id=1490294049 instance=ExtResource("m61")]
-transform = Transform3D(-4.371139e-08, 0, 1, 0, 1, 0, -1, 0, -4.371139e-08, 0, 0, 2)
-
-[node name="Partitions_Cubicles#Cubicle_9" parent="." unique_id=1701759729 instance=ExtResource("m55")]
-transform = Transform3D(-4.371139e-08, 0, 1, 0, 1, 0, -1, 0, -4.371139e-08, 3, 0, 2)
-
-[node name="Partitions_Cubicles#Cubicle_10" parent="." unique_id=265260304 instance=ExtResource("m57")]
-transform = Transform3D(0.18131797, -0.19427058, 0.964045, 0.03590888, 0.980948, 0.19092305, -0.9827687, 0, 0.18483953, 10.33484, 0.5666089, 2)
-
-[node name="Furniture" type="Node3D" parent="." unique_id=1435327468]
-
-[node name="Workstations" type="Node3D" parent="Furniture" unique_id=954483884]
-
-[node name="F_08_workstation_quad" parent="Furniture/Workstations" unique_id=909806981 instance=ExtResource("m16")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -6.6, 0, -11)
-
-[node name="F_09_standing_desk" parent="Furniture/Workstations" unique_id=2047055561 instance=ExtResource("m17")]
-transform = Transform3D(-1, 0, -8.742278e-08, 0, 1, 0, 8.742278e-08, 0, -1, -2.4, 0, -11)
-
-[node name="F_10_workstation_dual" parent="Furniture/Workstations" unique_id=1961314633 instance=ExtResource("m20")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 1.8, 0, -11)
-
-[node name="F_11_workstation_partitioned" parent="Furniture/Workstations" unique_id=129165959 instance=ExtResource("m22")]
-transform = Transform3D(-1, 0, -8.742278e-08, 0, 1, 0, 8.742278e-08, 0, -1, 6, 0, -11)
-
-[node name="F_12_office_desk_lamp" parent="Furniture/Workstations" unique_id=305196007 instance=ExtResource("m23")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 10.2, 0, -11)
-
-[node name="F_13_office_desk" parent="Furniture/Workstations" unique_id=1010600907 instance=ExtResource("m25")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -15, 0, -6)
-
-[node name="Tables" type="Node3D" parent="Furniture" unique_id=1487608674]
-
-[node name="F_12_table" parent="Furniture/Tables" unique_id=1895765960 instance=ExtResource("m24")]
-transform = Transform3D(-1, 0, -8.742278e-08, 0, 1, 0, 8.742278e-08, 0, -1, 14.4, 0, -11)
-
-[node name="F_13_table_long" parent="Furniture/Tables" unique_id=1039730860 instance=ExtResource("m26")]
-transform = Transform3D(-1, 0, -8.742278e-08, 0, 1, 0, 8.742278e-08, 0, -1, -10.8, 0, -6)
-
-[node name="F_14_table_l_shaped" parent="Furniture/Tables" unique_id=608703672 instance=ExtResource("m28")]
-transform = Transform3D(-1, 0, -8.742278e-08, 0, 1, 0, 8.742278e-08, 0, -1, -2.4, 0, -6)
-
-[node name="F_15_table_square" parent="Furniture/Tables" unique_id=1459485001 instance=ExtResource("m30")]
-transform = Transform3D(-1, 0, -8.742278e-08, 0, 1, 0, 8.742278e-08, 0, -1, 6, 0, -6)
-
-[node name="F_16_coffee_table" parent="Furniture/Tables" unique_id=2102908657 instance=ExtResource("m31")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 10.2, 0, -6)
-
-[node name="Seating" type="Node3D" parent="Furniture" unique_id=267190369]
-
-[node name="F_14_office_chair" parent="Furniture/Seating" unique_id=340882639 instance=ExtResource("m27")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -6.6, 0, -6)
-
-[node name="F_15_sofa" parent="Furniture/Seating" unique_id=395682083 instance=ExtResource("m29")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 1.8, 0, -6)
-
-[node name="F_18_executive_chair" parent="Furniture/Seating" unique_id=2141530809 instance=ExtResource("m36")]
-transform = Transform3D(-1, 0, -8.742278e-08, 0, 1, 0, 8.742278e-08, 0, -1, -10.8, 0, -1)
-
-[node name="F_19_office_chair" parent="Furniture/Seating" unique_id=545698845 instance=ExtResource("m37")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -6.6, 0, -1)
-
-[node name="F_20_simple_chair" parent="Furniture/Seating" unique_id=552927826 instance=ExtResource("m40")]
-transform = Transform3D(-1, 0, -8.742278e-08, 0, 1, 0, 8.742278e-08, 0, -1, -2.4, 0, -1)
-
-[node name="F_22_chair_overturned" parent="Furniture/Seating" unique_id=105837072 instance=ExtResource("m43")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 1.8, 0, -1)
-
-[node name="Storage" type="Node3D" parent="Furniture" unique_id=122748854]
-
-[node name="F_01_locker_tall" parent="Furniture/Storage" unique_id=1198350411 instance=ExtResource("m1")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -15, 0, -11)
-
-[node name="F_03_drawer_cabinet_mobile" parent="Furniture/Storage" unique_id=554815347 instance=ExtResource("m5")]
-transform = Transform3D(-1, 0, -8.742278e-08, 0, 1, 0, 8.742278e-08, 0, -1, -10.8, 0, -11)
-
-[node name="F_17_file_cabinet_tall" parent="Furniture/Storage" unique_id=628481479 instance=ExtResource("m34")]
-transform = Transform3D(-1, 0, -8.742278e-08, 0, 1, 0, 8.742278e-08, 0, -1, 14.4, 0, -6)
-
-[node name="F_18_drawer_cabinet" parent="Furniture/Storage" unique_id=258505486 instance=ExtResource("m35")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -15, 0, -1)
-
-[node name="S_02_cardboard_boxes_stack" parent="Furniture/Storage" unique_id=1538777996 instance=ExtResource("m3")]
-transform = Transform3D(-4.371139e-08, 0, 1, 0, 1, 0, -1, 0, -4.371139e-08, -17, 0, 5)
-
-[node name="S_04_cardboard_box_open" parent="Furniture/Storage" unique_id=1749819083 instance=ExtResource("m7")]
-transform = Transform3D(-4.371139e-08, 0, 1, 0, 1, 0, -1, 0, -4.371139e-08, -15, 0, 5)
-
-[node name="S_05_plastic_storage_bin" parent="Furniture/Storage" unique_id=1646884812 instance=ExtResource("m9")]
-transform = Transform3D(-4.371139e-08, 0, 1, 0, 1, 0, -1, 0, -4.371139e-08, -13, 0, 5)
-
-[node name="S_06_cardboard_box_closed" parent="Furniture/Storage" unique_id=1295606904 instance=ExtResource("m11")]
-transform = Transform3D(-4.371139e-08, 0, 1, 0, 1, 0, -1, 0, -4.371139e-08, -17, 0, 7)
-
-[node name="S_07_cardboard_archive_box" parent="Furniture/Storage" unique_id=1456097309 instance=ExtResource("m13")]
-transform = Transform3D(-4.371139e-08, 0, 1, 0, 1, 0, -1, 0, -4.371139e-08, -15, 0, 7)
-
-[node name="S_21_crate_large" parent="Furniture/Storage" unique_id=2144052658 instance=ExtResource("m41")]
-transform = Transform3D(-4.371139e-08, 0, 1, 0, 1, 0, -1, 0, -4.371139e-08, -13, 0, 7)
-
-[node name="S_22_crate_small" parent="Furniture/Storage" unique_id=789598336 instance=ExtResource("m44")]
-transform = Transform3D(-4.371139e-08, 0, 1, 0, 1, 0, -1, 0, -4.371139e-08, -17, 0, 9)
-
-[node name="S_23_cardboard_boxes" parent="Furniture/Storage" unique_id=540686097 instance=ExtResource("m45")]
-transform = Transform3D(-4.371139e-08, 0, 1, 0, 1, 0, -1, 0, -4.371139e-08, -15, 0, 9)
-
-[node name="Props" type="Node3D" parent="." unique_id=1831540347]
-
-[node name="P_11_rubble" parent="Props" unique_id=1769980754 instance=ExtResource("m21")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 12, 0.36760318, 5)
-
-[node name="P_19_water_cooler" parent="Props" unique_id=442685495 instance=ExtResource("m38")]
-transform = Transform3D(0.98441947, 0, -0.17583595, 0, 1, 0, 0.17583595, 0, 0.98441947, 13.7, 0, 5)
-
-[node name="P_20_fire_extinguisher" parent="Props" unique_id=727908307 instance=ExtResource("m39")]
-transform = Transform3D(0.7846601, 0, 0, 0, 0.7478847, 0, 0, 0, 0.7846601, 15.4, 1.1646074, 5)
-
-[node name="P_24_medkit_closed" parent="Props" unique_id=18699977 instance=ExtResource("pickup_medkit")]
-heal_amount = 35.0
-
-[node name="P_25_ammo_case_red_open" parent="Props" unique_id=77115972 instance=ExtResource("pickup_ammored")]
-
-[node name="P_26_case_blue_open" parent="Props" unique_id=44439101 instance=ExtResource("m51")]
-transform = Transform3D(1.7051405e-09, -0.99923885, -0.03900907, -4.3678117e-08, -0.03900907, 0.99923885, -1, 0, -4.371139e-08, 13.7, 0.18847394, 6.8)
-
-[node name="P_27_ammo_case_orange_open" parent="Props" unique_id=1580731371 instance=ExtResource("pickup_ammoorange")]
-
-[node name="P_28_med_case_green_open" parent="Props" unique_id=868408030 instance=ExtResource("pickup_medgreen")]
-
-[node name="P_30_plant_large" parent="Props" unique_id=163395170 instance=ExtResource("m60")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 12, 0, 8.6)
-
-[node name="P_31_plant_medium" parent="Props" unique_id=1578566570 instance=ExtResource("m62")]
-transform = Transform3D(-4.371139e-08, 0, 1, 0, 1, 0, -1, 0, -4.371139e-08, 13.7, 0, 8.6)
-
-[node name="P_32_plant_small" parent="Props" unique_id=1957236854 instance=ExtResource("m63")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 15.4, 0, 8.6)
-
-[node name="P_33_alien_growth" parent="Props" unique_id=1210288191 instance=ExtResource("m65")]
-transform = Transform3D(-4.371139e-08, 0, 1, 0, 1, 0, -1, 0, -4.371139e-08, 17.1, 0, 8.6)
-
-[node name="FloorPad" parent="Props" unique_id=1789767530 instance=ExtResource("m58")]
-transform = Transform3D(-0.53291416, 0, 0.73856574, 0, 1.5388932, 0, -0.3908963, 0, -1.0068966, 6.6864004, 0.7074196, 11.587613)
-
-[node name="Gameplay" type="Node3D" parent="." unique_id=1358941227]
-
-[node name="Enemies" type="Node3D" parent="Gameplay" unique_id=1140390992]
-
-[node name="Infected_1" parent="Gameplay/Enemies" unique_id=1758116311 instance=ExtResource("m72")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -7, 1, -1)
-
-[node name="Infected_2" parent="Gameplay/Enemies" unique_id=1856976389 instance=ExtResource("m72")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -3, 1, -5)
-
-[node name="Infected_3" parent="Gameplay/Enemies" unique_id=1334235263 instance=ExtResource("m72")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 3, 1, -5)
-
-[node name="Infected_4" parent="Gameplay/Enemies" unique_id=1092343416 instance=ExtResource("m72")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 7, 1, -1)
-
-[node name="Infected_5" parent="Gameplay/Enemies" unique_id=1560372215 instance=ExtResource("m72")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 4, 1, 4)
-
-[node name="Infected_6" parent="Gameplay/Enemies" unique_id=1852365119 instance=ExtResource("m72")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -5, 1, 4)
-
-[node name="InfectionSource" parent="Gameplay" unique_id=1224859548 instance=ExtResource("m73")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 15, 0, -9)
-
-[node name="Player" parent="Gameplay" unique_id=1656869965 instance=ExtResource("m71")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1, 11)
-
-[node name="PrototypeHUD" parent="." unique_id=1130520018 instance=ExtResource("m74")]
-
-[node name="Crosshair" parent="." unique_id=999217401 instance=ExtResource("m75")]
-
-[node name="Partitions_Glass#GlassFull_17" parent="." unique_id=1117852253 instance=ExtResource("m50")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -1.406, 0, 6)
-
-[node name="Radar" parent="." unique_id=2123112419 instance=ExtResource("radar_ui")]
+[node name="WestWindow_1" parent="Structure/Perimeter" instance=ExtResource("window")]
+position = Vector3(-39,0,-24.00)
+rotation_degrees = Vector3(0,90,0)
+
+[node name="EastWindow_1" parent="Structure/Perimeter" instance=ExtResource("window")]
+position = Vector3(39,0,-24.00)
+rotation_degrees = Vector3(0,-90,0)
+
+[node name="WestWindow_2" parent="Structure/Perimeter" instance=ExtResource("window")]
+position = Vector3(-39,0,-19.65)
+rotation_degrees = Vector3(0,90,0)
+
+[node name="EastWindow_2" parent="Structure/Perimeter" instance=ExtResource("window")]
+position = Vector3(39,0,-19.65)
+rotation_degrees = Vector3(0,-90,0)
+
+[node name="WestWindow_3" parent="Structure/Perimeter" instance=ExtResource("window")]
+position = Vector3(-39,0,-15.30)
+rotation_degrees = Vector3(0,90,0)
+
+[node name="EastWindow_3" parent="Structure/Perimeter" instance=ExtResource("window")]
+position = Vector3(39,0,-15.30)
+rotation_degrees = Vector3(0,-90,0)
+
+[node name="WestWindow_4" parent="Structure/Perimeter" instance=ExtResource("window")]
+position = Vector3(-39,0,-10.95)
+rotation_degrees = Vector3(0,90,0)
+
+[node name="EastWindow_4" parent="Structure/Perimeter" instance=ExtResource("window")]
+position = Vector3(39,0,-10.95)
+rotation_degrees = Vector3(0,-90,0)
+
+[node name="WestWindow_5" parent="Structure/Perimeter" instance=ExtResource("window")]
+position = Vector3(-39,0,-6.60)
+rotation_degrees = Vector3(0,90,0)
+
+[node name="EastWindow_5" parent="Structure/Perimeter" instance=ExtResource("window")]
+position = Vector3(39,0,-6.60)
+rotation_degrees = Vector3(0,-90,0)
+
+[node name="WestWindow_6" parent="Structure/Perimeter" instance=ExtResource("window")]
+position = Vector3(-39,0,-2.25)
+rotation_degrees = Vector3(0,90,0)
+
+[node name="EastWindow_6" parent="Structure/Perimeter" instance=ExtResource("window")]
+position = Vector3(39,0,-2.25)
+rotation_degrees = Vector3(0,-90,0)
+
+[node name="WestWindow_7" parent="Structure/Perimeter" instance=ExtResource("window")]
+position = Vector3(-39,0,2.10)
+rotation_degrees = Vector3(0,90,0)
+
+[node name="EastWindow_7" parent="Structure/Perimeter" instance=ExtResource("window")]
+position = Vector3(39,0,2.10)
+rotation_degrees = Vector3(0,-90,0)
+
+[node name="WestWindow_8" parent="Structure/Perimeter" instance=ExtResource("window")]
+position = Vector3(-39,0,6.45)
+rotation_degrees = Vector3(0,90,0)
+
+[node name="EastWindow_8" parent="Structure/Perimeter" instance=ExtResource("window")]
+position = Vector3(39,0,6.45)
+rotation_degrees = Vector3(0,-90,0)
+
+[node name="WestWindow_9" parent="Structure/Perimeter" instance=ExtResource("window")]
+position = Vector3(-39,0,10.80)
+rotation_degrees = Vector3(0,90,0)
+
+[node name="EastWindow_9" parent="Structure/Perimeter" instance=ExtResource("window")]
+position = Vector3(39,0,10.80)
+rotation_degrees = Vector3(0,-90,0)
+
+[node name="WestWindow_10" parent="Structure/Perimeter" instance=ExtResource("window")]
+position = Vector3(-39,0,15.15)
+rotation_degrees = Vector3(0,90,0)
+
+[node name="EastWindow_10" parent="Structure/Perimeter" instance=ExtResource("window")]
+position = Vector3(39,0,15.15)
+rotation_degrees = Vector3(0,-90,0)
+
+[node name="WestWindow_11" parent="Structure/Perimeter" instance=ExtResource("window")]
+position = Vector3(-39,0,19.50)
+rotation_degrees = Vector3(0,90,0)
+
+[node name="EastWindow_11" parent="Structure/Perimeter" instance=ExtResource("window")]
+position = Vector3(39,0,19.50)
+rotation_degrees = Vector3(0,-90,0)
+
+[node name="WestWindow_12" parent="Structure/Perimeter" instance=ExtResource("window")]
+position = Vector3(-39,0,23.85)
+rotation_degrees = Vector3(0,90,0)
+
+[node name="EastWindow_12" parent="Structure/Perimeter" instance=ExtResource("window")]
+position = Vector3(39,0,23.85)
+rotation_degrees = Vector3(0,-90,0)
+
+[node name="ElevatorLobbyFacade" type="Node3D" parent="Structure/Perimeter"]
+[node name="ElevatorA" parent="Structure/Perimeter/ElevatorLobbyFacade" instance=ExtResource("wall_door")]
+position = Vector3(22,0,29)
+rotation_degrees = Vector3(0,180,0)
+[node name="ElevatorB" parent="Structure/Perimeter/ElevatorLobbyFacade" instance=ExtResource("wall_door")]
+position = Vector3(25,0,29)
+rotation_degrees = Vector3(0,180,0)
+[node name="EmergencyDoor" parent="Structure/Perimeter/ElevatorLobbyFacade" instance=ExtResource("emergency")]
+position = Vector3(31,0,29)
+rotation_degrees = Vector3(0,180,0)
+[node name="SouthSolid_1" parent="Structure/Perimeter/ElevatorLobbyFacade" instance=ExtResource("wall")]
+position = Vector3(18,0,29)
+rotation_degrees = Vector3(0,180,0)
+[node name="SouthSolid_2" parent="Structure/Perimeter/ElevatorLobbyFacade" instance=ExtResource("wall")]
+position = Vector3(35,0,29)
+rotation_degrees = Vector3(0,180,0)
+
+[node name="PerimeterCollision" type="StaticBody3D" parent="Structure"]
+[node name="North" type="CollisionShape3D" parent="Structure/PerimeterCollision"]
+position = Vector3(0,1.6,-29.1)
+shape = SubResource("north_south_collision")
+[node name="South" type="CollisionShape3D" parent="Structure/PerimeterCollision"]
+position = Vector3(0,1.6,29.1)
+shape = SubResource("north_south_collision")
+[node name="West" type="CollisionShape3D" parent="Structure/PerimeterCollision"]
+position = Vector3(-39.1,1.6,0)
+shape = SubResource("east_west_collision")
+[node name="East" type="CollisionShape3D" parent="Structure/PerimeterCollision"]
+position = Vector3(39.1,1.6,0)
+shape = SubResource("east_west_collision")
+
+[node name="Columns" type="Node3D" parent="Structure"]
+
+[node name="Column_1" parent="Structure/Columns" instance=ExtResource("column")]
+position = Vector3(-26,0,-18)
+
+[node name="Column_2" parent="Structure/Columns" instance=ExtResource("column")]
+position = Vector3(-26,0,0)
+
+[node name="Column_3" parent="Structure/Columns" instance=ExtResource("column")]
+position = Vector3(-26,0,18)
+
+[node name="Column_4" parent="Structure/Columns" instance=ExtResource("column")]
+position = Vector3(-13,0,-18)
+
+[node name="Column_5" parent="Structure/Columns" instance=ExtResource("column")]
+position = Vector3(-13,0,0)
+
+[node name="Column_6" parent="Structure/Columns" instance=ExtResource("column")]
+position = Vector3(-13,0,18)
+
+[node name="Column_7" parent="Structure/Columns" instance=ExtResource("column")]
+position = Vector3(0,0,-18)
+
+[node name="Column_8" parent="Structure/Columns" instance=ExtResource("column")]
+position = Vector3(0,0,0)
+
+[node name="Column_9" parent="Structure/Columns" instance=ExtResource("column")]
+position = Vector3(0,0,18)
+
+[node name="Column_10" parent="Structure/Columns" instance=ExtResource("column")]
+position = Vector3(13,0,-18)
+
+[node name="Column_11" parent="Structure/Columns" instance=ExtResource("column")]
+position = Vector3(13,0,0)
+
+[node name="Column_12" parent="Structure/Columns" instance=ExtResource("column")]
+position = Vector3(13,0,18)
+
+[node name="Column_13" parent="Structure/Columns" instance=ExtResource("column")]
+position = Vector3(26,0,-18)
+
+[node name="Column_14" parent="Structure/Columns" instance=ExtResource("column")]
+position = Vector3(26,0,0)
+
+[node name="Column_15" parent="Structure/Columns" instance=ExtResource("column")]
+position = Vector3(26,0,18)
+
+[node name="Interior" type="Node3D" parent="Structure"]
+
+; Elevator lobby: solid rear facade, short exit corridor and small reception hall.
+[node name="LobbyWallL" parent="Structure/Interior" instance=ExtResource("wall")]
+position = Vector3(18,0,22)
+rotation_degrees = Vector3(0,90,0)
+[node name="LobbyInnerL" parent="Structure/Interior" instance=ExtResource("inner")]
+position = Vector3(18,0,18)
+rotation_degrees = Vector3(0,90,0)
+[node name="LobbyWallR" parent="Structure/Interior" instance=ExtResource("wall")]
+position = Vector3(34,0,22)
+rotation_degrees = Vector3(0,90,0)
+[node name="LobbyInnerR" parent="Structure/Interior" instance=ExtResource("inner")]
+position = Vector3(34,0,18)
+rotation_degrees = Vector3(0,180,0)
+
+; Corridor exits into a small hall, then splits left/right into wide circulation.
+[node name="HallHalf_1" parent="Structure/Interior" instance=ExtResource("half")]
+position = Vector3(16,0,14)
+[node name="HallHalf_2" parent="Structure/Interior" instance=ExtResource("half")]
+position = Vector3(12,0,14)
+[node name="HallOuter_1" parent="Structure/Interior" instance=ExtResource("outer")]
+position = Vector3(8,0,14)
+[node name="HallHalf_3" parent="Structure/Interior" instance=ExtResource("half")]
+position = Vector3(36,0,14)
+[node name="HallOuter_2" parent="Structure/Interior" instance=ExtResource("outer")]
+position = Vector3(38,0,14)
+rotation_degrees = Vector3(0,90,0)
+
+; Left enclosed office.
+[node name="OfficeNWCorner" parent="Structure/Interior" instance=ExtResource("inner")]
+position = Vector3(-32,0,-18)
+[node name="OfficeNWall1" parent="Structure/Interior" instance=ExtResource("half")]
+position = Vector3(-28,0,-18)
+[node name="OfficeNWall2" parent="Structure/Interior" instance=ExtResource("half")]
+position = Vector3(-24,0,-18)
+[node name="OfficeNECorner" parent="Structure/Interior" instance=ExtResource("outer")]
+position = Vector3(-20,0,-18)
+rotation_degrees = Vector3(0,90,0)
+[node name="OfficeEWall1" parent="Structure/Interior" instance=ExtResource("wall")]
+position = Vector3(-20,0,-14)
+rotation_degrees = Vector3(0,90,0)
+[node name="OfficeEWall2" parent="Structure/Interior" instance=ExtResource("wall_door")]
+position = Vector3(-20,0,-10)
+rotation_degrees = Vector3(0,90,0)
+[node name="OfficeSECorner" parent="Structure/Interior" instance=ExtResource("inner")]
+position = Vector3(-20,0,-6)
+rotation_degrees = Vector3(0,180,0)
+[node name="OfficeSWCorner" parent="Structure/Interior" instance=ExtResource("outer")]
+position = Vector3(-32,0,-6)
+rotation_degrees = Vector3(0,-90,0)
+[node name="OfficeWWall1" parent="Structure/Interior" instance=ExtResource("half")]
+position = Vector3(-32,0,-10)
+rotation_degrees = Vector3(0,90,0)
+[node name="OfficeWWall2" parent="Structure/Interior" instance=ExtResource("half")]
+position = Vector3(-32,0,-14)
+rotation_degrees = Vector3(0,90,0)
+
+; Central room edge leaves broad open combat spaces north and west.
+[node name="CenterCornerA" parent="Structure/Interior" instance=ExtResource("outer")]
+position = Vector3(-5,0,5)
+[node name="CenterHalf1" parent="Structure/Interior" instance=ExtResource("half")]
+position = Vector3(-1,0,5)
+[node name="CenterHalf2" parent="Structure/Interior" instance=ExtResource("half")]
+position = Vector3(3,0,5)
+[node name="CenterCornerB" parent="Structure/Interior" instance=ExtResource("inner")]
+position = Vector3(7,0,5)
+rotation_degrees = Vector3(0,90,0)
+
+[node name="InteriorCollision" type="StaticBody3D" parent="Structure"]
+[node name="LobbyLeftCollision" type="CollisionShape3D" parent="Structure/InteriorCollision"]
+position = Vector3(18,1.6,22)
+rotation_degrees = Vector3(0,90,0)
+shape = SubResource("internal_h")
+[node name="LobbyRightCollision" type="CollisionShape3D" parent="Structure/InteriorCollision"]
+position = Vector3(34,1.6,22)
+rotation_degrees = Vector3(0,90,0)
+shape = SubResource("internal_h")
+
+[node name="Gameplay" type="Node3D" parent="."]
+[node name="Enemies" type="Node3D" parent="Gameplay"]
+[node name="Infected_1" parent="Gameplay/Enemies" instance=ExtResource("infected")]
+position = Vector3(-12,1,-2)
+[node name="Infected_2" parent="Gameplay/Enemies" instance=ExtResource("infected")]
+position = Vector3(4,1,-10)
+[node name="Infected_3" parent="Gameplay/Enemies" instance=ExtResource("infected")]
+position = Vector3(-25,1,10)
+[node name="Infected_4" parent="Gameplay/Enemies" instance=ExtResource("infected")]
+position = Vector3(22,1,-12)
+[node name="InfectionSource" parent="Gameplay" instance=ExtResource("source")]
+position = Vector3(-30,0,-22)
+[node name="Player" parent="Gameplay" instance=ExtResource("player")]
+position = Vector3(31,1,25)
+
+[node name="PrototypeHUD" parent="." instance=ExtResource("hud")]
+[node name="Crosshair" parent="." instance=ExtResource("crosshair")]
+[node name="Radar" parent="." instance=ExtResource("radar")]
+
+[node name="GameOver" type="Control" parent="."]
+visible = false
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 1
+
+[node name="Dim" type="ColorRect" parent="GameOver"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+color = Color(0,0,0,0.72)
+
+[node name="Panel" type="PanelContainer" parent="GameOver"]
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -220.0
+offset_top = -125.0
+offset_right = 220.0
+offset_bottom = 125.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="VBox" type="VBoxContainer" parent="GameOver/Panel"]
+layout_mode = 2
+theme_override_constants/separation = 18
+
+[node name="Title" type="Label" parent="GameOver/Panel/VBox"]
+layout_mode = 2
+text = "MISSION FAILED"
+horizontal_alignment = 1
+theme_override_font_sizes/font_size = 32
+
+[node name="Reason" type="Label" parent="GameOver/Panel/VBox"]
+layout_mode = 2
+text = "MISSION FAILED"
+horizontal_alignment = 1
+
+[node name="Restart" type="Button" parent="GameOver/Panel/VBox"]
+layout_mode = 2
+text = "RESTART MISSION"
+
+[node name="Exit" type="Button" parent="GameOver/Panel/VBox"]
+layout_mode = 2
+text = "EXIT"
+
+[connection signal="pressed" from="GameOver/Panel/VBox/Restart" to="." method="_on_restart_pressed"]
+[connection signal="pressed" from="GameOver/Panel/VBox/Exit" to="." method="_on_exit_pressed"]
