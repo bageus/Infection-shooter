@@ -48,6 +48,12 @@ size = Vector3(0.35,3.0,60)
 [sub_resource type="BoxShape3D" id="module_collision"]
 size = Vector3(2.06,3.0,0.28)
 
+[sub_resource type="BoxShape3D" id="column_collision"]
+size = Vector3(0.9,3.0,0.9)
+
+[sub_resource type="BoxShape3D" id="corner_arm_collision"]
+size = Vector3(2.0,3.0,0.32)
+
 [node name="Main" type="Node3D"]
 script = ExtResource("script")
 
@@ -83,9 +89,6 @@ position = Vector3(-39,0,29)
 rotation_degrees = Vector3(0,270,0)
 
 [node name="NorthWindow_1" parent="Structure/Perimeter" instance=ExtResource("window")]
-position = Vector3(-38,0,-29)
-
-[node name="NorthWindow_2" parent="Structure/Perimeter" instance=ExtResource("window")]
 position = Vector3(-36,0,-29)
 
 [node name="NorthWindow_3" parent="Structure/Perimeter" instance=ExtResource("window")]
@@ -193,19 +196,8 @@ position = Vector3(32,0,-29)
 [node name="NorthWindow_37" parent="Structure/Perimeter" instance=ExtResource("window")]
 position = Vector3(34,0,-29)
 
-[node name="NorthWindow_38" parent="Structure/Perimeter" instance=ExtResource("window")]
-position = Vector3(36,0,-29)
-
 [node name="NorthWindow_39" parent="Structure/Perimeter" instance=ExtResource("window")]
-position = Vector3(38,0,-29)
-
-[node name="SouthWindow_1" parent="Structure/Perimeter" instance=ExtResource("window")]
-position = Vector3(-38,0,29)
-rotation_degrees = Vector3(0,180,0)
-
-[node name="SouthWindow_2" parent="Structure/Perimeter" instance=ExtResource("window")]
-position = Vector3(-36,0,29)
-rotation_degrees = Vector3(0,180,0)
+position = Vector3(36,0,-29)
 
 [node name="SouthWindow_3" parent="Structure/Perimeter" instance=ExtResource("window")]
 position = Vector3(-34,0,29)
@@ -354,22 +346,6 @@ rotation_degrees = Vector3(0,180,0)
 [node name="SouthWindow_28" parent="Structure/Perimeter" instance=ExtResource("window")]
 position = Vector3(38,0,29)
 rotation_degrees = Vector3(0,180,0)
-
-[node name="WestWindow_1" parent="Structure/Perimeter" instance=ExtResource("window")]
-position = Vector3(-39,0,-28)
-rotation_degrees = Vector3(0,90,0)
-
-[node name="EastWindow_1" parent="Structure/Perimeter" instance=ExtResource("window")]
-position = Vector3(39,0,-28)
-rotation_degrees = Vector3(0,-90,0)
-
-[node name="WestWindow_2" parent="Structure/Perimeter" instance=ExtResource("window")]
-position = Vector3(-39,0,-26)
-rotation_degrees = Vector3(0,90,0)
-
-[node name="EastWindow_2" parent="Structure/Perimeter" instance=ExtResource("window")]
-position = Vector3(39,0,-26)
-rotation_degrees = Vector3(0,-90,0)
 
 [node name="WestWindow_3" parent="Structure/Perimeter" instance=ExtResource("window")]
 position = Vector3(-39,0,-24)
@@ -571,22 +547,6 @@ rotation_degrees = Vector3(0,90,0)
 position = Vector3(39,0,24)
 rotation_degrees = Vector3(0,-90,0)
 
-[node name="WestWindow_28" parent="Structure/Perimeter" instance=ExtResource("window")]
-position = Vector3(-39,0,26)
-rotation_degrees = Vector3(0,90,0)
-
-[node name="EastWindow_28" parent="Structure/Perimeter" instance=ExtResource("window")]
-position = Vector3(39,0,26)
-rotation_degrees = Vector3(0,-90,0)
-
-[node name="WestWindow_29" parent="Structure/Perimeter" instance=ExtResource("window")]
-position = Vector3(-39,0,28)
-rotation_degrees = Vector3(0,90,0)
-
-[node name="EastWindow_29" parent="Structure/Perimeter" instance=ExtResource("window")]
-position = Vector3(39,0,28)
-rotation_degrees = Vector3(0,-90,0)
-
 [node name="PerimeterCollision" type="StaticBody3D" parent="Structure"]
 [node name="North" type="CollisionShape3D" parent="Structure/PerimeterCollision"]
 position = Vector3(0,1.5,-29.1)
@@ -624,29 +584,14 @@ position = Vector3(-13,0,18)
 [node name="Column_7" parent="Structure/Columns" instance=ExtResource("column")]
 position = Vector3(0,0,-18)
 
-[node name="Column_8" parent="Structure/Columns" instance=ExtResource("column")]
-position = Vector3(0,0,0)
-
 [node name="Column_9" parent="Structure/Columns" instance=ExtResource("column")]
 position = Vector3(0,0,18)
 
 [node name="Column_10" parent="Structure/Columns" instance=ExtResource("column")]
 position = Vector3(13,0,-18)
 
-[node name="Column_11" parent="Structure/Columns" instance=ExtResource("column")]
-position = Vector3(13,0,0)
-
-[node name="Column_12" parent="Structure/Columns" instance=ExtResource("column")]
-position = Vector3(13,0,18)
-
 [node name="Column_13" parent="Structure/Columns" instance=ExtResource("column")]
 position = Vector3(26,0,-18)
-
-[node name="Column_14" parent="Structure/Columns" instance=ExtResource("column")]
-position = Vector3(26,0,0)
-
-[node name="Column_15" parent="Structure/Columns" instance=ExtResource("column")]
-position = Vector3(26,0,18)
 
 [node name="Interior" type="Node3D" parent="Structure"]
 
@@ -824,6 +769,88 @@ shape = SubResource("module_collision")
 position = Vector3(2.06,1.5,0)
 rotation_degrees = Vector3(0,90,0)
 shape = SubResource("module_collision")
+
+[node name="ArchitecturalCollision" type="StaticBody3D" parent="Structure"]
+
+[node name="Column_1" type="CollisionShape3D" parent="Structure/ArchitecturalCollision"]
+position = Vector3(-26,1.5,-18)
+shape = SubResource("column_collision")
+
+[node name="Column_2" type="CollisionShape3D" parent="Structure/ArchitecturalCollision"]
+position = Vector3(-26,1.5,0)
+shape = SubResource("column_collision")
+
+[node name="Column_3" type="CollisionShape3D" parent="Structure/ArchitecturalCollision"]
+position = Vector3(-26,1.5,18)
+shape = SubResource("column_collision")
+
+[node name="Column_4" type="CollisionShape3D" parent="Structure/ArchitecturalCollision"]
+position = Vector3(-13,1.5,-18)
+shape = SubResource("column_collision")
+
+[node name="Column_5" type="CollisionShape3D" parent="Structure/ArchitecturalCollision"]
+position = Vector3(-13,1.5,0)
+shape = SubResource("column_collision")
+
+[node name="Column_6" type="CollisionShape3D" parent="Structure/ArchitecturalCollision"]
+position = Vector3(-13,1.5,18)
+shape = SubResource("column_collision")
+
+[node name="Column_7" type="CollisionShape3D" parent="Structure/ArchitecturalCollision"]
+position = Vector3(0,1.5,-18)
+shape = SubResource("column_collision")
+
+[node name="Column_9" type="CollisionShape3D" parent="Structure/ArchitecturalCollision"]
+position = Vector3(0,1.5,18)
+shape = SubResource("column_collision")
+
+[node name="Column_10" type="CollisionShape3D" parent="Structure/ArchitecturalCollision"]
+position = Vector3(13,1.5,-18)
+shape = SubResource("column_collision")
+
+[node name="Column_13" type="CollisionShape3D" parent="Structure/ArchitecturalCollision"]
+position = Vector3(26,1.5,-18)
+shape = SubResource("column_collision")
+
+[node name="Corner_NW_A" type="CollisionShape3D" parent="Structure/ArchitecturalCollision"]
+position = Vector3(-39,1.5,-29)
+rotation_degrees = Vector3(0,0,0)
+shape = SubResource("corner_arm_collision")
+
+[node name="Corner_NW_B" type="CollisionShape3D" parent="Structure/ArchitecturalCollision"]
+position = Vector3(-39,1.5,-29)
+rotation_degrees = Vector3(0,90,0)
+shape = SubResource("corner_arm_collision")
+
+[node name="Corner_NE_A" type="CollisionShape3D" parent="Structure/ArchitecturalCollision"]
+position = Vector3(39,1.5,-29)
+rotation_degrees = Vector3(0,90,0)
+shape = SubResource("corner_arm_collision")
+
+[node name="Corner_NE_B" type="CollisionShape3D" parent="Structure/ArchitecturalCollision"]
+position = Vector3(39,1.5,-29)
+rotation_degrees = Vector3(0,180,0)
+shape = SubResource("corner_arm_collision")
+
+[node name="Corner_SE_A" type="CollisionShape3D" parent="Structure/ArchitecturalCollision"]
+position = Vector3(39,1.5,29)
+rotation_degrees = Vector3(0,180,0)
+shape = SubResource("corner_arm_collision")
+
+[node name="Corner_SE_B" type="CollisionShape3D" parent="Structure/ArchitecturalCollision"]
+position = Vector3(39,1.5,29)
+rotation_degrees = Vector3(0,270,0)
+shape = SubResource("corner_arm_collision")
+
+[node name="Corner_SW_A" type="CollisionShape3D" parent="Structure/ArchitecturalCollision"]
+position = Vector3(-39,1.5,29)
+rotation_degrees = Vector3(0,270,0)
+shape = SubResource("corner_arm_collision")
+
+[node name="Corner_SW_B" type="CollisionShape3D" parent="Structure/ArchitecturalCollision"]
+position = Vector3(-39,1.5,29)
+rotation_degrees = Vector3(0,360,0)
+shape = SubResource("corner_arm_collision")
 
 [node name="Gameplay" type="Node3D" parent="."]
 [node name="Enemies" type="Node3D" parent="Gameplay"]
