@@ -698,7 +698,7 @@ layout_mode = 1
 anchors_preset = 10
 anchor_right = 0.0
 anchor_bottom = 1.0
-offset_right = 310.0
+offset_right = 360.0
 grow_vertical = 2
 mouse_filter = 0
 
@@ -713,9 +713,10 @@ text = "LEVEL PLANNER"
 horizontal_alignment = 1
 
 [node name="Palette" type="ItemList" parent="PlanningUI/Panel/VBox"]
-custom_minimum_size = Vector2(280, 430)
+custom_minimum_size = Vector2(330, 0)
 layout_mode = 2
 size_flags_vertical = 3
+max_columns = 1
 theme_override_colors/font_color = Color(0.92, 0.96, 1, 1)
 theme_override_colors/font_hovered_color = Color(1, 1, 1, 1)
 theme_override_colors/font_selected_color = Color(1, 1, 1, 1)
@@ -741,6 +742,25 @@ text = "CLEAR PLACED"
 [node name="Close" type="Button" parent="PlanningUI/Panel/VBox"]
 layout_mode = 2
 text = "EXIT PLANNING"
+
+[node name="HelpPanel" type="PanelContainer" parent="PlanningUI"]
+layout_mode = 1
+anchors_preset = 1
+anchor_left = 1.0
+anchor_right = 1.0
+offset_left = -285.0
+offset_top = 24.0
+offset_right = -24.0
+offset_bottom = 390.0
+grow_horizontal = 0
+mouse_filter = 2
+
+[node name="Help" type="Label" parent="PlanningUI/HelpPanel"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.88, 0.95, 1, 1)
+theme_override_font_sizes/font_size = 16
+text = "PLANNING CONTROLS"
+vertical_alignment = 0
 
 [node name="Gameplay" type="Node3D" parent="." unique_id=1463085699]
 
