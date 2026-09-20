@@ -490,6 +490,61 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 13, 0, -18)
 [node name="Column_13" parent="Structure/Columns" unique_id=1843346836 instance=ExtResource("column")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 26, 0, -18)
 
+[node name="Core" type="Node3D" parent="Structure"]
+
+[node name="CoreNorth_1" parent="Structure/Core" instance=ExtResource("wall")]
+position = Vector3(-3.09, 0, -5.15)
+[node name="CoreNorth_2" parent="Structure/Core" instance=ExtResource("wall")]
+position = Vector3(-1.03, 0, -5.15)
+[node name="CoreNorthDoor" parent="Structure/Core" instance=ExtResource("wall_door")]
+position = Vector3(1.03, 0, -5.15)
+[node name="CoreNorth_3" parent="Structure/Core" instance=ExtResource("wall")]
+position = Vector3(3.09, 0, -5.15)
+
+[node name="CoreSouth_1" parent="Structure/Core" instance=ExtResource("wall")]
+position = Vector3(-3.09, 0, 5.15)
+[node name="CoreSouth_2" parent="Structure/Core" instance=ExtResource("wall")]
+position = Vector3(-1.03, 0, 5.15)
+[node name="CoreSouthEmergency" parent="Structure/Core" instance=ExtResource("emergency")]
+position = Vector3(1.03, 0, 5.15)
+[node name="CoreSouth_3" parent="Structure/Core" instance=ExtResource("wall")]
+position = Vector3(3.09, 0, 5.15)
+
+[node name="CoreWest_1" parent="Structure/Core" instance=ExtResource("wall")]
+position = Vector3(-5.15, 0, -3.09)
+rotation_degrees = Vector3(0, 90, 0)
+[node name="CoreWest_2" parent="Structure/Core" instance=ExtResource("wall")]
+position = Vector3(-5.15, 0, -1.03)
+rotation_degrees = Vector3(0, 90, 0)
+[node name="CoreWest_3" parent="Structure/Core" instance=ExtResource("wall")]
+position = Vector3(-5.15, 0, 1.03)
+rotation_degrees = Vector3(0, 90, 0)
+[node name="CoreWest_4" parent="Structure/Core" instance=ExtResource("wall")]
+position = Vector3(-5.15, 0, 3.09)
+rotation_degrees = Vector3(0, 90, 0)
+
+[node name="CoreEast_1" parent="Structure/Core" instance=ExtResource("wall")]
+position = Vector3(5.15, 0, -3.09)
+rotation_degrees = Vector3(0, 90, 0)
+[node name="CoreEast_2" parent="Structure/Core" instance=ExtResource("wall")]
+position = Vector3(5.15, 0, -1.03)
+rotation_degrees = Vector3(0, 90, 0)
+[node name="CoreEast_3" parent="Structure/Core" instance=ExtResource("wall")]
+position = Vector3(5.15, 0, 1.03)
+rotation_degrees = Vector3(0, 90, 0)
+[node name="CoreEast_4" parent="Structure/Core" instance=ExtResource("wall")]
+position = Vector3(5.15, 0, 3.09)
+rotation_degrees = Vector3(0, 90, 0)
+
+[node name="CoreColumn_NW" parent="Structure/Columns" instance=ExtResource("column")]
+position = Vector3(-6.5, 0, -6.5)
+[node name="CoreColumn_NE" parent="Structure/Columns" instance=ExtResource("column")]
+position = Vector3(6.5, 0, -6.5)
+[node name="CoreColumn_SW" parent="Structure/Columns" instance=ExtResource("column")]
+position = Vector3(-6.5, 0, 6.5)
+[node name="CoreColumn_SE" parent="Structure/Columns" instance=ExtResource("column")]
+position = Vector3(6.5, 0, 6.5)
+
 [node name="Interior" type="Node3D" parent="Structure" unique_id=530802739]
 
 [node name="LobbyWallL" parent="Structure/Interior" unique_id=692838826 instance=ExtResource("wall")]
