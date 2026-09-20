@@ -2,6 +2,9 @@ extends Node
 
 const SAVE_PATH := "user://planned_layout.json"
 const GRID_SIZE := 1.0
+const CAMERA_SPEED := 18.0
+const CAMERA_ZOOM_STEP := 2.5
+const SCALE_STEP := 0.1
 
 var host: Node3D
 var camera: Camera3D
@@ -12,8 +15,11 @@ var status: Label
 var active := false
 var selected_path := ""
 var preview: Node3D
+var selected: Node3D
 var rotation_y := 0.0
 var placed: Array[Node3D] = []
+var camera_anchor := Vector3.ZERO
+var camera_height := 24.0
 
 var catalog := [
 	{"name":"Window Double","path":"res://game/presentation/office_floor/public/structural/window_double.tscn"},
@@ -51,42 +57,118 @@ func enter() -> void:
 	get_tree().paused = true
 	ui.show()
 	Input.mouse_mode = Input.MOUSE_MODE_VISIBLE
-	status.text = "LMB place | RMB delete | R rotate | grid 1m"
+	camera_anchor = camera.global_position
+	camera_height = clampf(camera.global_position.y, 8.0, 50.0)
+	status.text = "WASD pan | wheel zoom | LMB select/place | drag move | Del delete | Q/E rotate | +/- scale"
 
 
 func exit() -> void:
 	active = false
 	_clear_preview()
+	_select(null)
 	ui.hide()
 	get_tree().paused = false
+
+
+func _process(delta: float) -> void:
+	if not active:
+		return
+	var move := Vector3.ZERO
+	if Input.is_key_pressed(KEY_W): move.z -= 1.0
+	if Input.is_key_pressed(KEY_S): move.z += 1.0
+	if Input.is_key_pressed(KEY_A): move.x -= 1.0
+	if Input.is_key_pressed(KEY_D): move.x += 1.0
+	if move.length_squared() > 0.0:
+		move = move.normalized() * CAMERA_SPEED * delta
+		camera.global_position += move
+		camera_anchor += move
 
 
 func _unhandled_input(event: InputEvent) -> void:
 	if not active:
 		return
 	if event is InputEventKey and event.pressed and not event.echo:
-		if event.keycode == KEY_ESCAPE:
-			exit()
-			get_viewport().set_input_as_handled()
-			return
-		if event.keycode == KEY_R:
-			rotation_y = fmod(rotation_y + 90.0, 360.0)
-			if preview != null:
-				preview.rotation_degrees.y = rotation_y
-	if event is InputEventMouseMotion:
-		_update_preview(event.position)
-	if event is InputEventMouseButton and event.pressed:
-		if event.button_index == MOUSE_BUTTON_LEFT:
-			_place_selected(event.position)
-		elif event.button_index == MOUSE_BUTTON_RIGHT:
+		match event.keycode:
+			KEY_ESCAPE:
+				exit()
+			KEY_DELETE:
+				_delete_selected()
+			KEY_Q:
+				_rotate_selected(-15.0)
+			KEY_E:
+				_rotate_selected(15.0)
+			KEY_R:
+				_rotate_selected(90.0)
+			KEY_EQUAL, KEY_KP_ADD:
+				_scale_selected(Vector3.ONE * SCALE_STEP)
+			KEY_MINUS, KEY_KP_SUBTRACT:
+				_scale_selected(Vector3.ONE * -SCALE_STEP)
+			KEY_X:
+				_scale_selected(Vector3(SCALE_STEP, 0.0, 0.0))
+			KEY_Z:
+				_scale_selected(Vector3(-SCALE_STEP, 0.0, 0.0))
+			KEY_C:
+				_scale_selected(Vector3(0.0, 0.0, SCALE_STEP))
+			KEY_V:
+				_scale_selected(Vector3(0.0, 0.0, -SCALE_STEP))
+		get_viewport().set_input_as_handled()
+	if event is InputEventMouseButton:
+		if event.button_index == MOUSE_BUTTON_WHEEL_UP and event.pressed:
+			_zoom_camera(-CAMERA_ZOOM_STEP)
+		elif event.button_index == MOUSE_BUTTON_WHEEL_DOWN and event.pressed:
+			_zoom_camera(CAMERA_ZOOM_STEP)
+		elif event.button_index == MOUSE_BUTTON_LEFT and event.pressed:
+			_click_world(event.position)
+		elif event.button_index == MOUSE_BUTTON_RIGHT and event.pressed:
 			_delete_at(event.position)
+	if event is InputEventMouseMotion:
+		if Input.is_mouse_button_pressed(MOUSE_BUTTON_LEFT) and selected != null:
+			var world := _screen_to_floor(event.position)
+			if world.is_finite():
+				selected.global_position = _snap(world)
+				_update_status()
+		elif preview != null:
+			_update_preview(event.position)
 
 
 func _on_palette_selected(index: int) -> void:
 	var entry: Dictionary = catalog[index]
 	selected_path = str(entry.get("path", ""))
 	rotation_y = 0.0
+	_select(null)
 	_rebuild_preview()
+
+
+func _click_world(screen_pos: Vector2) -> void:
+	var hit_node := _planned_object_at(screen_pos)
+	if hit_node != null:
+		_select(hit_node)
+		_clear_preview()
+		return
+	if not selected_path.is_empty():
+		_place_selected(screen_pos)
+	else:
+		_select(null)
+
+
+func _select(node: Node3D) -> void:
+	if selected != null and is_instance_valid(selected):
+		selected.scale = selected.scale
+	selected = node
+	_update_status()
+
+
+func _planned_object_at(screen_pos: Vector2) -> Node3D:
+	var origin := camera.project_ray_origin(screen_pos)
+	var end := origin + camera.project_ray_normal(screen_pos) * 300.0
+	var query := PhysicsRayQueryParameters3D.create(origin, end)
+	var hit := camera.get_world_3d().direct_space_state.intersect_ray(query)
+	if hit.is_empty():
+		return null
+	var node := hit.get("collider") as Node
+	while node != null and node.get_parent() != root:
+		node = node.get_parent()
+	return node as Node3D if node != null and node.get_parent() == root else null
 
 
 func _rebuild_preview() -> void:
@@ -110,7 +192,7 @@ func _clear_preview() -> void:
 func _update_preview(screen_pos: Vector2) -> void:
 	if preview == null:
 		return
-	var world: Vector3 = _screen_to_floor(screen_pos)
+	var world := _screen_to_floor(screen_pos)
 	if not world.is_finite():
 		return
 	preview.global_position = _snap(world)
@@ -118,9 +200,7 @@ func _update_preview(screen_pos: Vector2) -> void:
 
 
 func _place_selected(screen_pos: Vector2) -> void:
-	if selected_path.is_empty():
-		return
-	var world: Vector3 = _screen_to_floor(screen_pos)
+	var world := _screen_to_floor(screen_pos)
 	if not world.is_finite():
 		return
 	var scene := load(selected_path) as PackedScene
@@ -132,23 +212,54 @@ func _place_selected(screen_pos: Vector2) -> void:
 	node.rotation_degrees.y = rotation_y
 	node.set_meta("planning_scene_path", selected_path)
 	placed.append(node)
-	status.text = "%d placed | unsaved" % placed.size()
+	_select(node)
+	_clear_preview()
 
 
 func _delete_at(screen_pos: Vector2) -> void:
-	var origin := camera.project_ray_origin(screen_pos)
-	var end := origin + camera.project_ray_normal(screen_pos) * 200.0
-	var query := PhysicsRayQueryParameters3D.create(origin, end)
-	var hit := camera.get_world_3d().direct_space_state.intersect_ray(query)
-	if hit.is_empty():
+	var node := _planned_object_at(screen_pos)
+	if node != null:
+		_delete_node(node)
+
+
+func _delete_selected() -> void:
+	if selected != null:
+		_delete_node(selected)
+
+
+func _delete_node(node: Node3D) -> void:
+	placed.erase(node)
+	if selected == node:
+		selected = null
+	node.queue_free()
+	_update_status()
+
+
+func _rotate_selected(amount: float) -> void:
+	if selected != null:
+		selected.rotation_degrees.y = fmod(selected.rotation_degrees.y + amount + 360.0, 360.0)
+	elif preview != null:
+		rotation_y = fmod(rotation_y + amount + 360.0, 360.0)
+		preview.rotation_degrees.y = rotation_y
+	_update_status()
+
+
+func _scale_selected(delta_scale: Vector3) -> void:
+	if selected == null:
 		return
-	var node := hit.get("collider") as Node
-	while node != null and node.get_parent() != root:
-		node = node.get_parent()
-	if node != null and node.get_parent() == root:
-		placed.erase(node)
-		node.queue_free()
-		status.text = "%d placed | unsaved" % placed.size()
+	var next := selected.scale + delta_scale
+	next.x = maxf(next.x, 0.1)
+	next.y = maxf(next.y, 0.1)
+	next.z = maxf(next.z, 0.1)
+	selected.scale = next
+	_update_status()
+
+
+func _zoom_camera(amount: float) -> void:
+	camera_height = clampf(camera_height + amount, 6.0, 55.0)
+	var p := camera.global_position
+	p.y = camera_height
+	camera.global_position = p
 
 
 func _screen_to_floor(screen_pos: Vector2) -> Vector3:
@@ -156,18 +267,24 @@ func _screen_to_floor(screen_pos: Vector2) -> Vector3:
 	var direction := camera.project_ray_normal(screen_pos)
 	if absf(direction.y) < 0.0001:
 		return Vector3(INF, INF, INF)
-	var distance: float = -origin.y / direction.y
+	var distance := -origin.y / direction.y
 	if distance < 0.0:
 		return Vector3(INF, INF, INF)
 	return origin + direction * distance
 
 
 func _snap(value: Vector3) -> Vector3:
-	return Vector3(
-		roundf(value.x / GRID_SIZE) * GRID_SIZE,
-		0.0,
-		roundf(value.z / GRID_SIZE) * GRID_SIZE
-	)
+	return Vector3(roundf(value.x / GRID_SIZE) * GRID_SIZE, 0.0, roundf(value.z / GRID_SIZE) * GRID_SIZE)
+
+
+func _update_status() -> void:
+	if selected == null:
+		status.text = "%d objects | select palette or object" % placed.size()
+		return
+	status.text = "SELECTED | pos %.1f %.1f | rot %.0f | scale %.2f %.2f %.2f" % [
+		selected.position.x, selected.position.z, selected.rotation_degrees.y,
+		selected.scale.x, selected.scale.y, selected.scale.z
+	]
 
 
 func save_layout() -> void:
@@ -177,16 +294,16 @@ func save_layout() -> void:
 			continue
 		objects.append({
 			"scene": str(node.get_meta("planning_scene_path", "")),
-			"x": node.position.x,
-			"z": node.position.z,
-			"rotation_y": node.rotation_degrees.y
+			"x": node.position.x, "y": node.position.y, "z": node.position.z,
+			"rotation_y": node.rotation_degrees.y,
+			"scale_x": node.scale.x, "scale_y": node.scale.y, "scale_z": node.scale.z
 		})
 	var file := FileAccess.open(SAVE_PATH, FileAccess.WRITE)
 	if file == null:
 		status.text = "SAVE FAILED"
 		return
-	file.store_string(JSON.stringify({"version":1,"objects":objects}, "\t"))
-	status.text = "SAVED: %s" % SAVE_PATH
+	file.store_string(JSON.stringify({"version":2,"objects":objects}, "\t"))
+	status.text = "SAVED | %d objects" % objects.size()
 
 
 func load_layout() -> void:
@@ -196,7 +313,7 @@ func load_layout() -> void:
 	if file == null:
 		return
 	var data: Variant = JSON.parse_string(file.get_as_text())
-	if not data is Dictionary or not data.has("objects"):
+	if not data is Dictionary:
 		return
 	clear_layout(false)
 	var records: Array = data.get("objects", [])
@@ -209,8 +326,9 @@ func load_layout() -> void:
 			continue
 		var node := scene.instantiate() as Node3D
 		root.add_child(node)
-		node.position = Vector3(float(record.get("x",0.0)),0.0,float(record.get("z",0.0)))
+		node.position = Vector3(float(record.get("x",0.0)),float(record.get("y",0.0)),float(record.get("z",0.0)))
 		node.rotation_degrees.y = float(record.get("rotation_y",0.0))
+		node.scale = Vector3(float(record.get("scale_x",1.0)),float(record.get("scale_y",1.0)),float(record.get("scale_z",1.0)))
 		node.set_meta("planning_scene_path", str(record.get("scene","")))
 		placed.append(node)
 
@@ -220,8 +338,9 @@ func clear_layout(update_status: bool = true) -> void:
 		if is_instance_valid(node):
 			node.queue_free()
 	placed.clear()
+	selected = null
 	if update_status:
-		status.text = "Layout cleared"
+		_update_status()
 
 
 func _set_preview_collision(node: Node, disabled: bool) -> void:
