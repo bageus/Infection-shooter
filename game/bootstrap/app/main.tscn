@@ -615,6 +615,120 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -2.06, 0, 0)
 [node name="CenterCornerB" parent="Structure/Interior" unique_id=1844917703 instance=ExtResource("inner")]
 transform = Transform3D(-4.371139e-08, 0, 1, 0, 1, 0, -1, 0, -4.371139e-08, 2.06, 0, 0)
 
+[node name="PlanningObjects" type="Node3D" parent="."]
+
+[node name="PauseMenu" type="Control" parent="."]
+visible = false
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 0
+process_mode = 3
+
+[node name="Dim" type="ColorRect" parent="PauseMenu"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 1
+color = Color(0, 0, 0, 0.72)
+
+[node name="Panel" type="PanelContainer" parent="PauseMenu"]
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -220.0
+offset_top = -175.0
+offset_right = 220.0
+offset_bottom = 175.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="VBox" type="VBoxContainer" parent="PauseMenu/Panel"]
+layout_mode = 2
+theme_override_constants/separation = 16
+
+[node name="Title" type="Label" parent="PauseMenu/Panel/VBox"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 30
+text = "PAUSED"
+horizontal_alignment = 1
+
+[node name="Resume" type="Button" parent="PauseMenu/Panel/VBox"]
+layout_mode = 2
+text = "CONTINUE"
+
+[node name="Planning" type="Button" parent="PauseMenu/Panel/VBox"]
+layout_mode = 2
+text = "PLANNING MODE"
+
+[node name="Restart" type="Button" parent="PauseMenu/Panel/VBox"]
+layout_mode = 2
+text = "RESTART LEVEL"
+
+[node name="Exit" type="Button" parent="PauseMenu/Panel/VBox"]
+layout_mode = 2
+text = "EXIT GAME"
+
+[node name="PlanningUI" type="Control" parent="."]
+visible = false
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+process_mode = 3
+
+[node name="Panel" type="PanelContainer" parent="PlanningUI"]
+layout_mode = 1
+anchors_preset = 10
+anchor_right = 0.0
+anchor_bottom = 1.0
+offset_right = 310.0
+grow_vertical = 2
+mouse_filter = 0
+
+[node name="VBox" type="VBoxContainer" parent="PlanningUI/Panel"]
+layout_mode = 2
+theme_override_constants/separation = 8
+
+[node name="Title" type="Label" parent="PlanningUI/Panel/VBox"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 22
+text = "LEVEL PLANNER"
+horizontal_alignment = 1
+
+[node name="Palette" type="ItemList" parent="PlanningUI/Panel/VBox"]
+custom_minimum_size = Vector2(280, 430)
+layout_mode = 2
+size_flags_vertical = 3
+
+[node name="Status" type="Label" parent="PlanningUI/Panel/VBox"]
+layout_mode = 2
+text = "Select an object"
+
+[node name="Save" type="Button" parent="PlanningUI/Panel/VBox"]
+layout_mode = 2
+text = "SAVE LAYOUT"
+
+[node name="Clear" type="Button" parent="PlanningUI/Panel/VBox"]
+layout_mode = 2
+text = "CLEAR PLACED"
+
+[node name="Close" type="Button" parent="PlanningUI/Panel/VBox"]
+layout_mode = 2
+text = "EXIT PLANNING"
+
 [node name="Gameplay" type="Node3D" parent="." unique_id=1463085699]
 
 [node name="Enemies" type="Node3D" parent="Gameplay" unique_id=1034168936]
@@ -703,3 +817,8 @@ text = "EXIT"
 
 [connection signal="pressed" from="GameOver/Panel/VBox/Restart" to="." method="_on_restart_pressed"]
 [connection signal="pressed" from="GameOver/Panel/VBox/Exit" to="." method="_on_exit_pressed"]
+
+[connection signal="pressed" from="PauseMenu/Panel/VBox/Resume" to="." method="_on_resume_pressed"]
+[connection signal="pressed" from="PauseMenu/Panel/VBox/Planning" to="." method="_on_planning_pressed"]
+[connection signal="pressed" from="PauseMenu/Panel/VBox/Restart" to="." method="_on_restart_pressed"]
+[connection signal="pressed" from="PauseMenu/Panel/VBox/Exit" to="." method="_on_exit_pressed"]
