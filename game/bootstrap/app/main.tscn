@@ -148,6 +148,21 @@ grow_vertical = 2
 mouse_filter = 2
 process_mode = 3
 
+[node name="Tabs" type="HBoxContainer" parent="PlanningUI"]
+layout_mode = 0
+offset_left = 8.0
+offset_top = 38.0
+offset_right = 352.0
+offset_bottom = 76.0
+
+[node name="Structure" type="Button" parent="PlanningUI/Tabs"]
+layout_mode = 2
+text = "STRUCTURE"
+
+[node name="Actors" type="Button" parent="PlanningUI/Tabs"]
+layout_mode = 2
+text = "ACTORS"
+
 [node name="Panel" type="PanelContainer" parent="PlanningUI"]
 layout_mode = 1
 anchors_preset = 10
