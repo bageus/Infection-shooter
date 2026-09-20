@@ -6,6 +6,7 @@ const SNAP_DISTANCE := 0.8
 const CAMERA_SPEED := 18.0
 const CAMERA_ZOOM_STEP := 2.5
 const SCALE_STEP := 0.1
+const CAMERA_ROTATE_SPEED := 0.008
 
 var host: Node3D
 var camera: Camera3D
@@ -25,6 +26,11 @@ var last_mouse_world := Vector3.ZERO
 var placed: Array[Node3D] = []
 var camera_anchor := Vector3.ZERO
 var camera_height := 24.0
+var saved_camera_transform := Transform3D.IDENTITY
+var saved_camera_rig_transform := Transform3D.IDENTITY
+var camera_rig: Node3D
+var camera_yaw := 0.0
+var camera_pitch := -0.75
 
 var catalog := [
 	{"name":"Window Double","path":"res://game/presentation/office_floor/public/structural/window_double.tscn"},
@@ -52,6 +58,7 @@ func setup(owner: Node3D, planning_root: Node3D, planning_ui: Control) -> void:
 	root = planning_root
 	structure_root = host.get_node("Structure")
 	ui = planning_ui
+	camera_rig = host.get_node("Gameplay/Player/CameraRig") as Node3D
 	camera = host.get_node("Gameplay/Player/CameraRig/Camera3D")
 	palette = ui.get_node("Panel/VBox/Palette")
 	status = ui.get_node("Panel/VBox/Status")
@@ -75,6 +82,10 @@ func setup(owner: Node3D, planning_root: Node3D, planning_ui: Control) -> void:
 
 func enter() -> void:
 	active = true
+	saved_camera_transform = camera.transform
+	saved_camera_rig_transform = camera_rig.transform
+	camera_yaw = camera_rig.rotation.y
+	camera_pitch = camera.rotation.x
 	_reset_selection()
 	for node in hud_nodes:
 		node.hide()
@@ -83,12 +94,14 @@ func enter() -> void:
 	Input.mouse_mode = Input.MOUSE_MODE_VISIBLE
 	camera_anchor = camera.global_position
 	camera_height = clampf(camera.global_position.y, 8.0, 50.0)
-	help.text = "PLANNING CONTROLS\n\nWASD  Move view\nWheel  Zoom\nLMB  Select / Place\nLMB drag  Move selected\nRMB  Cancel current tool\nDelete  Delete selected\nQ / E  Rotate -/+15°\nR  Rotate +90°\n+ / -  Uniform scale\nX / Z  X size +/-\nC / V  Z size +/-\nESC  Exit planner"
+	help.text = "PLANNING CONTROLS\n\nWASD  Move view\nMMB drag  Rotate view\nWheel  Zoom\nLMB  Select / Place\nLMB drag  Move selected\nRMB  Cancel current tool\nDelete  Delete selected\nQ / E  Rotate -/+15°\nR  Rotate +90°\n+ / -  Uniform scale\nX / Z  X size +/-\nC / V  Z size +/-\nESC  Exit planner"
 	status.text = "Choose an object | matching edges snap automatically"
 
 
 func exit() -> void:
 	active = false
+	camera_rig.transform = saved_camera_rig_transform
+	camera.transform = saved_camera_transform
 	for node in hud_nodes:
 		node.show()
 	_clear_preview()
@@ -149,7 +162,9 @@ func _unhandled_input(event: InputEvent) -> void:
 		elif event.button_index == MOUSE_BUTTON_RIGHT and event.pressed:
 			_reset_selection()
 	if event is InputEventMouseMotion:
-		if Input.is_mouse_button_pressed(MOUSE_BUTTON_LEFT) and selected != null:
+		if Input.is_mouse_button_pressed(MOUSE_BUTTON_MIDDLE):
+			_rotate_camera(event.relative)
+		elif Input.is_mouse_button_pressed(MOUSE_BUTTON_LEFT) and selected != null:
 			var world := _screen_to_floor(event.position)
 			if world.is_finite():
 				selected.global_position = _snap_position_for(selected, world)
@@ -337,6 +352,13 @@ func _scale_selected(delta_scale: Vector3) -> void:
 	next.z = maxf(next.z, 0.1)
 	selected.scale = next
 	_update_status()
+
+
+func _rotate_camera(relative: Vector2) -> void:
+	camera_yaw -= relative.x * CAMERA_ROTATE_SPEED
+	camera_pitch = clampf(camera_pitch - relative.y * CAMERA_ROTATE_SPEED, deg_to_rad(-80.0), deg_to_rad(-25.0))
+	camera_rig.rotation.y = camera_yaw
+	camera.rotation.x = camera_pitch
 
 
 func _zoom_camera(amount: float) -> void:
