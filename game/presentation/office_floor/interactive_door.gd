@@ -14,6 +14,8 @@ enum DoorMode { SWING_BIDIRECTIONAL, SWING_ONE_WAY, SLIDING_ELEVATOR }
 
 var _player: Node3D
 var _door_parts: Array[Node3D] = []
+var _left_slide_parts: Array[Node3D] = []
+var _right_slide_parts: Array[Node3D] = []
 var _closed_transforms: Array[Transform3D] = []
 var _open_amount := 0.0
 var _close_timer := 0.0
@@ -77,17 +79,51 @@ func _collect_door_parts() -> void:
 	var visual := get_node_or_null("Visual")
 	if visual == null:
 		return
-	var candidates: Array[Node3D] = []
-	_collect_named_meshes(visual, candidates)
-	if candidates.is_empty():
-		_collect_all_meshes(visual, candidates)
-	if mode == DoorMode.SLIDING_ELEVATOR and candidates.size() > 2:
-		candidates = candidates.slice(0, 2)
-	elif mode != DoorMode.SLIDING_ELEVATOR and candidates.size() > 1:
-		candidates = [candidates[0]]
-	for part in candidates:
-		_door_parts.append(part)
-		_closed_transforms.append(part.transform)
+	if mode == DoorMode.SLIDING_ELEVATOR:
+		_collect_elevator_parts(visual)
+	else:
+		var pivot := _find_named_node(visual, ["doorpivot"])
+		if pivot != null:
+			_door_parts.append(pivot)
+			_closed_transforms.append(pivot.transform)
+		else:
+			var candidates: Array[Node3D] = []
+			_collect_named_meshes(visual, candidates)
+			if not candidates.is_empty():
+				_door_parts.append(candidates[0])
+				_closed_transforms.append(candidates[0].transform)
+
+
+func _collect_elevator_parts(node: Node) -> void:
+	for child in node.get_children():
+		if child is Node3D:
+			var n := child as Node3D
+			var lower := n.name.to_lower()
+			if "innerdoor_left" in lower or "innetdoor_left" in lower or "door_left" in lower:
+				_left_slide_parts.append(n)
+			elif "innerdoor_right" in lower or "innetdoor_right" in lower or "door_right" in lower:
+				_right_slide_parts.append(n)
+		_collect_elevator_parts(child)
+	for part in _left_slide_parts:
+		if not _door_parts.has(part):
+			_door_parts.append(part)
+			_closed_transforms.append(part.transform)
+	for part in _right_slide_parts:
+		if not _door_parts.has(part):
+			_door_parts.append(part)
+			_closed_transforms.append(part.transform)
+
+
+func _find_named_node(node: Node, names: Array[String]) -> Node3D:
+	var lower := node.name.to_lower()
+	for wanted in names:
+		if lower == wanted or wanted in lower:
+			return node as Node3D if node is Node3D else null
+	for child in node.get_children():
+		var found := _find_named_node(child, names)
+		if found != null:
+			return found
+	return null
 
 
 func _collect_named_meshes(node: Node, out: Array[Node3D]) -> void:
@@ -97,13 +133,6 @@ func _collect_named_meshes(node: Node, out: Array[Node3D]) -> void:
 			out.append(node as Node3D)
 	for child in node.get_children():
 		_collect_named_meshes(child, out)
-
-
-func _collect_all_meshes(node: Node, out: Array[Node3D]) -> void:
-	if node is MeshInstance3D:
-		out.append(node as Node3D)
-	for child in node.get_children():
-		_collect_all_meshes(child, out)
 
 
 func _disable_static_collision_for_door_parts() -> void:
@@ -125,7 +154,7 @@ func _apply_door_pose(local_player: Vector3) -> void:
 			continue
 		var closed := _closed_transforms[i]
 		if mode == DoorMode.SLIDING_ELEVATOR:
-			var direction := -1.0 if i == 0 else 1.0
+			var direction := -1.0 if _left_slide_parts.has(part) else 1.0
 			var t := closed
 			t.origin.x += direction * slide_distance * _open_amount
 			part.transform = t
