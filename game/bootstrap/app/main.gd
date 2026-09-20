@@ -16,7 +16,7 @@ var planning_mode: Node
 
 
 func _ready() -> void:
-	process_mode = Node.PROCESS_MODE_WHEN_PAUSED
+	process_mode = Node.PROCESS_MODE_ALWAYS
 	game_over.process_mode = Node.PROCESS_MODE_WHEN_PAUSED
 	pause_menu.process_mode = Node.PROCESS_MODE_WHEN_PAUSED
 	planning_ui.process_mode = Node.PROCESS_MODE_WHEN_PAUSED
