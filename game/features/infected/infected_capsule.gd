@@ -1,5 +1,7 @@
 extends CharacterBody3D
 
+const BLOOD_SPLATTER_TEXTURE: Texture2D = preload("res://assets/vfx/blood_splatter.svg")
+
 @export var max_health: float = 50.0
 @export var move_speed: float = 4.5
 @export var attack_range: float = 1.2
@@ -123,7 +125,7 @@ func _try_attack() -> void:
 
 
 func _spawn_air_blood(hit_position: Vector3, direction: Vector3, weapon_name: String) -> void:
-	var count := 11 if weapon_name == "SHOTGUN" else 6
+	var count := 22 if weapon_name == "SHOTGUN" else 12
 	var spread := 0.72 if weapon_name == "SHOTGUN" else 0.34
 	for i in count:
 		var drop := MeshInstance3D.new()
@@ -142,14 +144,14 @@ func _spawn_air_blood(hit_position: Vector3, direction: Vector3, weapon_name: St
 
 
 func _spawn_surface_splatter(hit_position: Vector3, direction: Vector3, weapon_name: String) -> void:
-	var rays := 28 if weapon_name == "SHOTGUN" else 11
+	var rays := 42 if weapon_name == "SHOTGUN" else 18
 	var reach := 4.5 if weapon_name == "SHOTGUN" else 3.0
 	var spread := 0.9 if weapon_name == "SHOTGUN" else 0.35
 	for i in rays:
 		var ray_direction := direction.normalized()
 		ray_direction += Vector3(randf_range(-spread, spread), randf_range(-0.55, 0.2), randf_range(-spread, spread))
 		_cast_blood_ray(hit_position, ray_direction.normalized(), reach, weapon_name == "SHOTGUN")
-	for i in (10 if weapon_name == "SHOTGUN" else 5):
+	for i in (16 if weapon_name == "SHOTGUN" else 8):
 		var floor_start := hit_position + Vector3(randf_range(-0.8, 0.8), 0.35, randf_range(-0.8, 0.8))
 		_cast_blood_ray(floor_start, Vector3.DOWN, 3.0, weapon_name == "SHOTGUN")
 
@@ -173,7 +175,8 @@ func _spawn_splatter_mark(position: Vector3, normal: Vector3, heavy: bool) -> vo
 		0.08,
 		randf_range(0.5, 1.15) if heavy else randf_range(0.22, 0.55)
 	)
-	decal.modulate = Color(0.34, 0.0, 0.012, 0.94)
+	decal.texture_albedo = BLOOD_SPLATTER_TEXTURE
+	decal.modulate = Color(0.34, 0.0, 0.012, 0.96)
 	decal.upper_fade = 0.03
 	decal.lower_fade = 0.03
 	decal.normal_fade = 0.15
@@ -191,7 +194,8 @@ func _spawn_satellite_decals(position: Vector3, normal: Vector3, heavy: bool) ->
 		var decal := Decal.new()
 		var radius := randf_range(0.05, 0.16) if heavy else randf_range(0.035, 0.1)
 		decal.size = Vector3(radius, 0.06, radius * randf_range(0.6, 2.0))
-		decal.modulate = Color(0.31, 0.0, 0.01, randf_range(0.78, 0.96))
+		decal.texture_albedo = BLOOD_SPLATTER_TEXTURE
+		decal.modulate = Color(0.31, 0.0, 0.01, randf_range(0.82, 0.98))
 		decal.upper_fade = 0.02
 		decal.lower_fade = 0.02
 		decal.normal_fade = 0.15
