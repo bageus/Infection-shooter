@@ -8,3 +8,8 @@
 *.translation
 .DS_Store
 Thumbs.db
+
+# Blender aggregate/source workspace (local only)
+models/objects/01_all.blend
+models/objects/01_all.blend1
+models/objects/01_all.blend.import
