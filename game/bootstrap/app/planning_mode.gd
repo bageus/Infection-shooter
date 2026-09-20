@@ -9,6 +9,7 @@ const SCALE_STEP := 0.1
 var host: Node3D
 var camera: Camera3D
 var root: Node3D
+var structure_root: Node3D
 var ui: Control
 var palette: ItemList
 var status: Label
@@ -39,6 +40,7 @@ var catalog := [
 func setup(owner: Node3D, planning_root: Node3D, planning_ui: Control) -> void:
 	host = owner
 	root = planning_root
+	structure_root = host.get_node("Structure")
 	ui = planning_ui
 	camera = host.get_node("Gameplay/Player/CameraRig/Camera3D")
 	palette = ui.get_node("Panel/VBox/Palette")
@@ -57,6 +59,7 @@ func setup(owner: Node3D, planning_root: Node3D, planning_ui: Control) -> void:
 	ui.get_node("Panel/VBox/Clear").pressed.connect(clear_layout)
 	ui.get_node("Panel/VBox/Close").pressed.connect(exit)
 	ui.hide()
+	_register_existing_scene_objects()
 	load_layout()
 
 
@@ -181,6 +184,51 @@ func _select(node: Node3D) -> void:
 	_update_status()
 
 
+func _register_existing_scene_objects() -> void:
+	_register_editable_children(structure_root)
+
+
+func _register_editable_children(parent: Node) -> void:
+	for child in parent.get_children():
+		if child is Node3D:
+			var node := child as Node3D
+			if _is_editable_scene_object(node):
+				if not placed.has(node):
+					placed.append(node)
+				node.set_meta("planning_existing", true)
+			else:
+				_register_editable_children(node)
+
+
+func _is_editable_scene_object(node: Node3D) -> bool:
+	if node == root or node == structure_root:
+		return false
+	return _find_collision_descendant(node) != null and node.get_parent() != host
+
+
+func _find_collision_descendant(node: Node) -> CollisionObject3D:
+	if node is CollisionObject3D:
+		return node as CollisionObject3D
+	for child in node.get_children():
+		var found := _find_collision_descendant(child)
+		if found != null:
+			return found
+	return null
+
+
+func _editable_root_from_collider(collider: Node) -> Node3D:
+	var node: Node = collider
+	while node != null:
+		if node.get_parent() == root:
+			return node as Node3D
+		if node is Node3D and placed.has(node):
+			return node as Node3D
+		if node.get_parent() == structure_root:
+			return node as Node3D
+		node = node.get_parent()
+	return null
+
+
 func _planned_object_at(screen_pos: Vector2) -> Node3D:
 	var origin := camera.project_ray_origin(screen_pos)
 	var end := origin + camera.project_ray_normal(screen_pos) * 300.0
@@ -188,10 +236,10 @@ func _planned_object_at(screen_pos: Vector2) -> Node3D:
 	var hit := camera.get_world_3d().direct_space_state.intersect_ray(query)
 	if hit.is_empty():
 		return null
-	var node := hit.get("collider") as Node
-	while node != null and node.get_parent() != root:
-		node = node.get_parent()
-	return node as Node3D if node != null and node.get_parent() == root else null
+	var collider := hit.get("collider") as Node
+	if collider == null:
+		return null
+	return _editable_root_from_collider(collider)
 
 
 func _rebuild_preview() -> void:
@@ -317,6 +365,9 @@ func save_layout() -> void:
 	for node in placed:
 		if not is_instance_valid(node):
 			continue
+		var scene_path := str(node.get_meta("planning_scene_path", ""))
+		if scene_path.is_empty():
+			continue
 		objects.append({
 			"scene": str(node.get_meta("planning_scene_path", "")),
 			"x": node.position.x, "y": node.position.y, "z": node.position.z,
@@ -359,10 +410,15 @@ func load_layout() -> void:
 
 
 func clear_layout(update_status: bool = true) -> void:
+	var retained: Array[Node3D] = []
 	for node in placed:
-		if is_instance_valid(node):
+		if not is_instance_valid(node):
+			continue
+		if bool(node.get_meta("planning_existing", false)):
+			retained.append(node)
+		else:
 			node.queue_free()
-	placed.clear()
+	placed = retained
 	selected = null
 	if update_status:
 		_update_status()
