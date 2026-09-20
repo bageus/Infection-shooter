@@ -32,6 +32,7 @@ var saved_camera_rig_transform := Transform3D.IDENTITY
 var camera_rig: Node3D
 var camera_yaw := 0.0
 var camera_pitch := -0.75
+var selection_box: MeshInstance3D
 
 var catalog := [
 	{"name":"Window Double","path":"res://game/presentation/office_floor/public/structural/window_double.tscn"},
@@ -204,10 +205,35 @@ func _click_world(screen_pos: Vector2) -> void:
 
 
 func _select(node: Node3D) -> void:
-	if selected != null and is_instance_valid(selected):
-		selected.scale = selected.scale
+	_clear_selection_highlight()
 	selected = node
+	if selected != null:
+		_show_selection_highlight(selected)
 	_update_status()
+
+
+func _show_selection_highlight(node: Node3D) -> void:
+	var aabb := _combined_aabb(node)
+	if aabb.size.length_squared() <= 0.0001:
+		return
+	selection_box = MeshInstance3D.new()
+	var box := BoxMesh.new()
+	box.size = aabb.size + Vector3(0.08, 0.08, 0.08)
+	var material := StandardMaterial3D.new()
+	material.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
+	material.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
+	material.albedo_color = Color(0.1, 0.85, 1.0, 0.16)
+	material.no_depth_test = true
+	box.material = material
+	selection_box.mesh = box
+	node.add_child(selection_box)
+	selection_box.position = aabb.get_center()
+
+
+func _clear_selection_highlight() -> void:
+	if selection_box != null and is_instance_valid(selection_box):
+		selection_box.queue_free()
+	selection_box = null
 
 
 func _register_existing_scene_objects() -> void:
@@ -256,6 +282,9 @@ func _editable_root_from_collider(collider: Node) -> Node3D:
 
 
 func _planned_object_at(screen_pos: Vector2) -> Node3D:
+	var direct := _visual_object_at(screen_pos)
+	if direct != null:
+		return direct
 	var origin := camera.project_ray_origin(screen_pos)
 	var end := origin + camera.project_ray_normal(screen_pos) * 300.0
 	var query := PhysicsRayQueryParameters3D.create(origin, end)
@@ -266,6 +295,28 @@ func _planned_object_at(screen_pos: Vector2) -> Node3D:
 	if collider == null:
 		return null
 	return _editable_root_from_collider(collider)
+
+
+func _visual_object_at(screen_pos: Vector2) -> Node3D:
+	var ray_origin := camera.project_ray_origin(screen_pos)
+	var ray_direction := camera.project_ray_normal(screen_pos)
+	var best: Node3D
+	var best_distance := INF
+	for node in placed:
+		if not is_instance_valid(node):
+			continue
+		var aabb := _combined_aabb(node)
+		if aabb.size.length_squared() <= 0.0001:
+			continue
+		var world_aabb := node.global_transform * aabb
+		var hit := world_aabb.intersects_ray(ray_origin, ray_direction)
+		if hit == null:
+			continue
+		var distance := ray_origin.distance_to(hit)
+		if distance < best_distance:
+			best_distance = distance
+			best = node
+	return best
 
 
 func _rebuild_preview() -> void:
@@ -328,6 +379,7 @@ func _delete_selected() -> void:
 
 
 func _delete_node(node: Node3D) -> void:
+	_clear_selection_highlight()
 	placed.erase(node)
 	if selected == node:
 		selected = null
