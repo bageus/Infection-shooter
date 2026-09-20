@@ -201,7 +201,7 @@ func _spawn_satellite_decals(hit_position: Vector3, normal: Vector3, heavy: bool
 		decal.normal_fade = 0.15
 		get_tree().current_scene.add_child(decal)
 		var splatter_offset := basis * Vector3(randf_range(-0.75, 0.75), randf_range(-0.65, 0.65), 0)
-		decal.global_position = hit_position + offset
+		decal.global_position = hit_position + splatter_offset
 		decal.global_basis = _decal_basis(normal)
 		_register_surface_decal(decal.global_position, normal, decal)
 
