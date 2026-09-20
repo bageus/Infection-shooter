@@ -1,17 +1,11 @@
-[gd_scene load_steps=4 format=3]
+[gd_scene load_steps=3 format=3]
 
 [ext_resource type="PackedScene" path="res://models/objects/01_wall_outer_corner.blend" id="1_model"]
-[sub_resource type="BoxShape3D" id="Horizontal"]
-size = Vector3(2.06, 3.0, 0.28)
-[sub_resource type="BoxShape3D" id="Vertical"]
-size = Vector3(0.28, 3.0, 2.06)
+[ext_resource type="Script" path="res://game/presentation/office_floor/mesh_collision_builder.gd" id="2_collision"]
 
 [node name="WallOuterCorner" type="Node3D"]
+script = ExtResource("2_collision")
+
 [node name="Visual" parent="." instance=ExtResource("1_model")]
+
 [node name="Body" type="StaticBody3D" parent="."]
-[node name="Horizontal" type="CollisionShape3D" parent="Body"]
-position = Vector3(0, 1.5, 0)
-shape = SubResource("Horizontal")
-[node name="Vertical" type="CollisionShape3D" parent="Body"]
-position = Vector3(0, 1.5, 0)
-shape = SubResource("Vertical")
