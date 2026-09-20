@@ -6,6 +6,8 @@ extends CharacterBody3D
 @export var roll_speed: float = 13.0
 @export var roll_duration: float = 0.24
 @export var roll_cooldown: float = 0.65
+@export var roll_push_strength: float = 8.5
+@export var roll_push_radius: float = 1.25
 @export var camera_rotation_speed: float = 95.0
 @export var gravity_acceleration: float = 24.0
 @export var max_health: float = 100.0
@@ -86,7 +88,8 @@ func _update_move(delta:float)->void:
 		velocity.x=move_toward(velocity.x,target.x,accel*delta);velocity.z=move_toward(velocity.z,target.z,accel*delta)
 	velocity.y=0.0 if is_on_floor() else velocity.y-gravity_acceleration*delta
 	move_and_slide()
-func _move_direction()->Vector3:
+	if _roll_remaining>0.0: _push_roll_contacts()
+func _push_roll_contacts()->Vector3:
 	var input:=Input.get_vector("move_left","move_right","move_up","move_down")
 	var f:Vector3=-camera.global_transform.basis.z;f.y=0;f=f.normalized()
 	var r:Vector3=camera.global_transform.basis.x;r.y=0;r=r.normalized()
