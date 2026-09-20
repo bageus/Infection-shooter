@@ -716,6 +716,15 @@ horizontal_alignment = 1
 custom_minimum_size = Vector2(280, 430)
 layout_mode = 2
 size_flags_vertical = 3
+theme_override_colors/font_color = Color(0.92, 0.96, 1, 1)
+theme_override_colors/font_hovered_color = Color(1, 1, 1, 1)
+theme_override_colors/font_selected_color = Color(1, 1, 1, 1)
+theme_override_colors/font_hovered_selected_color = Color(1, 1, 1, 1)
+theme_override_colors/guide_color = Color(0.18, 0.22, 0.28, 1)
+theme_override_font_sizes/font_size = 18
+same_column_width = true
+fixed_column_width = 270
+icon_mode = 0
 
 [node name="Status" type="Label" parent="PlanningUI/Panel/VBox"]
 layout_mode = 2
