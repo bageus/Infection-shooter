@@ -17,23 +17,23 @@ var planning_mode: Node
 
 
 func _ready() -> void:
-	process_mode = Node.PROCESS_MODE_ALWAYS
-	game_over.process_mode = Node.PROCESS_MODE_WHEN_PAUSED
-	pause_menu.process_mode = Node.PROCESS_MODE_WHEN_PAUSED
-	planning_ui.process_mode = Node.PROCESS_MODE_WHEN_PAUSED
+	process_mode = Node.PROCESS_MODE_PAUSABLE
+	game_over.process_mode = Node.PROCESS_MODE_ALWAYS
+	pause_menu.process_mode = Node.PROCESS_MODE_ALWAYS
+	planning_ui.process_mode = Node.PROCESS_MODE_ALWAYS
 	game_over.hide()
 	pause_menu.hide()
 	planning_ui.hide()
 	planning_mode = PlanningMode.new()
 	add_child(planning_mode)
-	planning_mode.process_mode = Node.PROCESS_MODE_WHEN_PAUSED
+	planning_mode.process_mode = Node.PROCESS_MODE_ALWAYS
 	planning_mode.setup(self, planning_root, planning_ui)
 	for enemy in enemies.get_children():
 		if enemy.has_method("set_target"):
 			enemy.call("set_target", player)
 
 
-func _input(event: InputEvent) -> void:
+func _unhandled_key_input(event: InputEvent) -> void:
 	if event is InputEventKey and event.pressed and not event.echo and event.keycode == KEY_ESCAPE:
 		if planning_mode.active:
 			planning_mode.exit()
@@ -60,7 +60,6 @@ func _process(_delta: float) -> void:
 
 func _open_pause_menu() -> void:
 	_pause_open = true
-	gameplay.process_mode = Node.PROCESS_MODE_DISABLED
 	pause_menu.show()
 	pause_menu.move_to_front()
 	get_tree().paused = true
@@ -69,7 +68,6 @@ func _open_pause_menu() -> void:
 
 func _resume_game() -> void:
 	_pause_open = false
-	gameplay.process_mode = Node.PROCESS_MODE_INHERIT
 	pause_menu.hide()
 	get_tree().paused = false
 
@@ -80,14 +78,12 @@ func _on_resume_pressed() -> void:
 
 func _on_planning_pressed() -> void:
 	_pause_open = false
-	gameplay.process_mode = Node.PROCESS_MODE_DISABLED
 	pause_menu.hide()
 	planning_mode.enter()
 
 
 func _end_run(reason: String) -> void:
 	_ended = true
-	gameplay.process_mode = Node.PROCESS_MODE_DISABLED
 	$GameOver/Panel/VBox/Reason.text = reason
 	game_over.show()
 	game_over.move_to_front()
@@ -96,7 +92,6 @@ func _end_run(reason: String) -> void:
 
 
 func _on_restart_pressed() -> void:
-	gameplay.process_mode = Node.PROCESS_MODE_INHERIT
 	get_tree().paused = false
 	get_tree().reload_current_scene()
 
