@@ -110,8 +110,8 @@ func _clear_preview() -> void:
 func _update_preview(screen_pos: Vector2) -> void:
 	if preview == null:
 		return
-	var world: Variant = _screen_to_floor(screen_pos)
-	if world == null:
+	var world: Vector3 = _screen_to_floor(screen_pos)
+	if not world.is_finite():
 		return
 	preview.global_position = _snap(world)
 	preview.rotation_degrees.y = rotation_y
@@ -120,8 +120,8 @@ func _update_preview(screen_pos: Vector2) -> void:
 func _place_selected(screen_pos: Vector2) -> void:
 	if selected_path.is_empty():
 		return
-	var world := _screen_to_floor(screen_pos)
-	if world == null:
+	var world: Vector3 = _screen_to_floor(screen_pos)
+	if not world.is_finite():
 		return
 	var scene := load(selected_path) as PackedScene
 	if scene == null:
@@ -151,14 +151,14 @@ func _delete_at(screen_pos: Vector2) -> void:
 		status.text = "%d placed | unsaved" % placed.size()
 
 
-func _screen_to_floor(screen_pos: Vector2) -> Variant:
+func _screen_to_floor(screen_pos: Vector2) -> Vector3:
 	var origin := camera.project_ray_origin(screen_pos)
 	var direction := camera.project_ray_normal(screen_pos)
 	if absf(direction.y) < 0.0001:
-		return null
-	var distance := -origin.y / direction.y
+		return Vector3(INF, INF, INF)
+	var distance: float = -origin.y / direction.y
 	if distance < 0.0:
-		return null
+		return Vector3(INF, INF, INF)
 	return origin + direction * distance
 
 
