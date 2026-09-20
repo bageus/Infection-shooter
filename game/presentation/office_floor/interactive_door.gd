@@ -10,7 +10,7 @@ enum DoorMode { SWING_BIDIRECTIONAL, SWING_ONE_WAY, SLIDING_ELEVATOR }
 @export var one_way_allowed_side: float = 1.0
 @export var slide_distance: float = 0.72
 @export var elevator_sync_radius: float = 4.0
-@export var player_path: NodePath = NodePath("/root/Main/Gameplay/Player")
+@export var player_path: NodePath
 
 var _player: Node3D
 var _door_parts: Array[Node3D] = []
@@ -24,7 +24,13 @@ var _requested_open := false
 
 func _ready() -> void:
 	process_mode = Node.PROCESS_MODE_PAUSABLE
-	_player = get_node_or_null(player_path) as Node3D
+	_player = get_node_or_null(player_path) as Node3D if not player_path.is_empty() else null
+	if _player == null:
+		_player = get_tree().get_first_node_in_group("player") as Node3D
+	if _player == null:
+		var scene := get_tree().current_scene
+		if scene != null:
+			_player = scene.get_node_or_null("Gameplay/Player") as Node3D
 	if mode == DoorMode.SLIDING_ELEVATOR:
 		add_to_group("elevator_door_components")
 	_collect_door_parts()
@@ -76,7 +82,7 @@ func _request_nearby_elevator_open() -> void:
 
 
 func _collect_door_parts() -> void:
-	var visual := get_node_or_null("Visual")
+	var visual := get_parent().get_node_or_null("Visual")
 	if visual == null:
 		return
 	if mode == DoorMode.SLIDING_ELEVATOR:
@@ -136,7 +142,7 @@ func _collect_named_meshes(node: Node, out: Array[Node3D]) -> void:
 
 
 func _disable_static_collision_for_door_parts() -> void:
-	var body := get_node_or_null("Body") as StaticBody3D
+	var body := get_parent().get_node_or_null("Body") as StaticBody3D
 	if body == null:
 		return
 	# Structural collision is generated from the full imported mesh. Door motion
