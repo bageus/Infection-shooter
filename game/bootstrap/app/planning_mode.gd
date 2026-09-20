@@ -34,8 +34,10 @@ var camera_yaw := 0.0
 var camera_pitch := -0.75
 var selection_box: MeshInstance3D
 var selection_source_aabb := AABB()
+var planning_grid: MeshInstance3D
+var active_catalog: Array = []
 
-var catalog := [
+var structure_catalog := [
 	{"name":"Window Double","path":"res://game/presentation/office_floor/public/structural/window_double.tscn"},
 	{"name":"Window Corner","path":"res://game/presentation/office_floor/public/structural/window_corner.tscn"},
 	{"name":"Wall Straight","path":"res://game/presentation/office_floor/public/structural/wall_straight.tscn"},
@@ -55,6 +57,11 @@ var catalog := [
 	{"name":"Broken Door 3","path":"res://game/presentation/office_floor/public/structural/only_door_3.tscn"}
 ]
 
+var actor_catalog := [
+	{"name":"Player Spawn","path":"res://game/features/player/public/player.tscn","kind":"player"},
+	{"name":"Infected","path":"res://game/features/infected/public/infected_capsule.tscn","kind":"enemy"}
+]
+
 
 func setup(app_owner: Node3D, planning_root: Node3D, planning_ui: Control) -> void:
 	host = app_owner
@@ -71,10 +78,11 @@ func setup(app_owner: Node3D, planning_root: Node3D, planning_ui: Control) -> vo
 		host.get_node("Crosshair"),
 		host.get_node("Radar")
 	]
-	palette.clear()
-	for entry: Dictionary in catalog:
-		palette.add_item(str(entry.get("name", "")))
+	active_catalog = structure_catalog
+	_rebuild_palette()
 	palette.item_selected.connect(_on_palette_selected)
+	ui.get_node("Tabs/Structure").pressed.connect(_show_structure_catalog)
+	ui.get_node("Tabs/Actors").pressed.connect(_show_actor_catalog)
 	ui.get_node("Panel/VBox/Save").pressed.connect(save_layout)
 	ui.get_node("Panel/VBox/Clear").pressed.connect(clear_layout)
 	ui.get_node("Panel/VBox/Close").pressed.connect(exit)
@@ -90,6 +98,7 @@ func enter() -> void:
 	camera_yaw = camera_rig.rotation.y
 	camera_pitch = camera.rotation.x
 	_reset_selection()
+	_show_planning_grid()
 	for node in hud_nodes:
 		node.hide()
 	get_tree().paused = true
@@ -108,6 +117,7 @@ func exit() -> void:
 	for node in hud_nodes:
 		node.show()
 	_clear_preview()
+	_hide_planning_grid()
 	_select(null)
 	ui.hide()
 	get_tree().paused = false
@@ -185,8 +195,57 @@ func _reset_selection() -> void:
 	status.text = "Selection cleared | choose palette item or click placed object"
 
 
+func _rebuild_palette() -> void:
+	palette.clear()
+	for entry: Dictionary in active_catalog:
+		palette.add_item(str(entry.get("name", "")))
+
+
+func _show_structure_catalog() -> void:
+	_reset_selection()
+	active_catalog = structure_catalog
+	_rebuild_palette()
+	status.text = "STRUCTURE | choose building object"
+
+
+func _show_actor_catalog() -> void:
+	_reset_selection()
+	active_catalog = actor_catalog
+	_rebuild_palette()
+	status.text = "ACTORS | place/remove Player and Infected"
+
+
+func _show_planning_grid() -> void:
+	if planning_grid != null and is_instance_valid(planning_grid):
+		return
+	planning_grid = MeshInstance3D.new()
+	var mesh := ImmediateMesh.new()
+	var material := StandardMaterial3D.new()
+	material.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
+	material.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
+	material.albedo_color = Color(0.1, 0.75, 1.0, 0.38)
+	mesh.surface_begin(Mesh.PRIMITIVE_LINES, material)
+	var extent := 40
+	var step := 1.0
+	for i in range(-extent, extent + 1):
+		var p := float(i) * step
+		mesh.surface_add_vertex(Vector3(p, 0.012, -float(extent)))
+		mesh.surface_add_vertex(Vector3(p, 0.012, float(extent)))
+		mesh.surface_add_vertex(Vector3(-float(extent), 0.012, p))
+		mesh.surface_add_vertex(Vector3(float(extent), 0.012, p))
+	mesh.surface_end()
+	planning_grid.mesh = mesh
+	host.add_child(planning_grid)
+
+
+func _hide_planning_grid() -> void:
+	if planning_grid != null and is_instance_valid(planning_grid):
+		planning_grid.queue_free()
+	planning_grid = null
+
+
 func _on_palette_selected(index: int) -> void:
-	var entry: Dictionary = catalog[index]
+	var entry: Dictionary = active_catalog[index]
 	selected_path = str(entry.get("path", ""))
 	rotation_y = 0.0
 	_select(null)
