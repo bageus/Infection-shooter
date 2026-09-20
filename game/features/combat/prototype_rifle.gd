@@ -49,7 +49,11 @@ func try_fire() -> bool:
 		var bullet := bullet_scene.instantiate()
 		get_tree().current_scene.add_child(bullet)
 		bullet.global_transform = muzzle.global_transform
-		bullet.call("setup_projectile", _spread_direction(-muzzle.global_transform.basis.z), shooter, bullet_damage * environment_damage_multiplier, bullet_speed, bullet_range, weapon_name)
+		var shot_direction := _spread_direction(-muzzle.global_transform.basis.z)
+		var collision_origin := muzzle.global_position
+		if shooter != null:
+			collision_origin = shooter.global_position + Vector3.UP * 0.55
+		bullet.call("setup_projectile", shot_direction, shooter, bullet_damage * environment_damage_multiplier, bullet_speed, bullet_range, weapon_name, collision_origin)
 	_magazine_ammo -= 1
 	_cooldown_remaining = 1.0 / maxf(shots_per_second, 0.01)
 	return true

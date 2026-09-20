@@ -142,14 +142,14 @@ func _spawn_air_blood(hit_position: Vector3, direction: Vector3, weapon_name: St
 
 
 func _spawn_surface_splatter(hit_position: Vector3, direction: Vector3, weapon_name: String) -> void:
-	var rays := 16 if weapon_name == "SHOTGUN" else 6
-	var reach := 4.0 if weapon_name == "SHOTGUN" else 2.4
+	var rays := 28 if weapon_name == "SHOTGUN" else 11
+	var reach := 4.5 if weapon_name == "SHOTGUN" else 3.0
 	var spread := 0.9 if weapon_name == "SHOTGUN" else 0.35
 	for i in rays:
 		var ray_direction := direction.normalized()
 		ray_direction += Vector3(randf_range(-spread, spread), randf_range(-0.55, 0.2), randf_range(-spread, spread))
 		_cast_blood_ray(hit_position, ray_direction.normalized(), reach, weapon_name == "SHOTGUN")
-	for i in (5 if weapon_name == "SHOTGUN" else 2):
+	for i in (10 if weapon_name == "SHOTGUN" else 5):
 		var floor_start := hit_position + Vector3(randf_range(-0.8, 0.8), 0.35, randf_range(-0.8, 0.8))
 		_cast_blood_ray(floor_start, Vector3.DOWN, 3.0, weapon_name == "SHOTGUN")
 
@@ -166,43 +166,56 @@ func _cast_blood_ray(origin: Vector3, direction: Vector3, reach: float, heavy: b
 	_spawn_splatter_mark(hit.get("position"), normal, heavy)
 
 
-func _spawn_splatter_mark(hit_position: Vector3, normal: Vector3, heavy: bool) -> void:
-	var mark := MeshInstance3D.new()
-	var mesh := ImmediateMesh.new()
-	var material := _blood_material()
-	mesh.surface_begin(Mesh.PRIMITIVE_TRIANGLES, material)
-	var points := 14 if heavy else 9
-	var width := randf_range(0.18, 0.42) if heavy else randf_range(0.1, 0.24)
-	var height := width * randf_range(0.45, 1.45)
-	for i in points:
-		var a0 := TAU * float(i) / points
-		var a1 := TAU * float(i + 1) / points
-		var r0 := randf_range(0.45, 1.15)
-		var r1 := randf_range(0.45, 1.15)
-		mesh.surface_add_vertex(Vector3.ZERO)
-		mesh.surface_add_vertex(Vector3(cos(a0) * width * r0, sin(a0) * height * r0, 0))
-		mesh.surface_add_vertex(Vector3(cos(a1) * width * r1, sin(a1) * height * r1, 0))
-	mesh.surface_end()
-	mark.mesh = mesh
-	get_tree().current_scene.add_child(mark)
-	mark.global_position = hit_position + normal * 0.014
-	mark.global_basis = _basis_for_normal(normal)
-	if heavy:
-		_spawn_satellite_drops(hit_position, normal, mark.global_basis)
+func _spawn_splatter_mark(position: Vector3, normal: Vector3, heavy: bool) -> void:
+	var decal := Decal.new()
+	decal.size = Vector3(
+		randf_range(0.65, 1.25) if heavy else randf_range(0.28, 0.62),
+		0.08,
+		randf_range(0.5, 1.15) if heavy else randf_range(0.22, 0.55)
+	)
+	decal.modulate = Color(0.34, 0.0, 0.012, 0.94)
+	decal.upper_fade = 0.03
+	decal.lower_fade = 0.03
+	decal.normal_fade = 0.15
+	get_tree().current_scene.add_child(decal)
+	decal.global_position = position
+	decal.global_basis = _decal_basis(normal)
+	_register_surface_decal(position, normal, decal)
+	_spawn_satellite_decals(position, normal, heavy)
 
 
-func _spawn_satellite_drops(hit_position: Vector3, normal: Vector3, surface_basis: Basis) -> void:
-	for i in randi_range(3, 7):
-		var dot := MeshInstance3D.new()
-		var mesh := QuadMesh.new()
-		var radius := randf_range(0.025, 0.075)
-		mesh.size = Vector2(radius, radius * randf_range(0.7, 1.8))
-		mesh.material = _blood_material()
-		dot.mesh = mesh
-		get_tree().current_scene.add_child(dot)
-		var local_offset := Vector3(randf_range(-0.55, 0.55), randf_range(-0.45, 0.45), 0)
-		dot.global_position = hit_position + surface_basis * local_offset + normal * 0.016
-		dot.global_basis = surface_basis
+func _spawn_satellite_decals(position: Vector3, normal: Vector3, heavy: bool) -> void:
+	var count := randi_range(7, 14) if heavy else randi_range(3, 7)
+	var basis := _basis_for_normal(normal)
+	for i in count:
+		var decal := Decal.new()
+		var radius := randf_range(0.05, 0.16) if heavy else randf_range(0.035, 0.1)
+		decal.size = Vector3(radius, 0.06, radius * randf_range(0.6, 2.0))
+		decal.modulate = Color(0.31, 0.0, 0.01, randf_range(0.78, 0.96))
+		decal.upper_fade = 0.02
+		decal.lower_fade = 0.02
+		decal.normal_fade = 0.15
+		get_tree().current_scene.add_child(decal)
+		var offset := basis * Vector3(randf_range(-0.75, 0.75), randf_range(-0.65, 0.65), 0)
+		decal.global_position = position + offset
+		decal.global_basis = _decal_basis(normal)
+		_register_surface_decal(decal.global_position, normal, decal)
+
+
+func _register_surface_decal(position: Vector3, normal: Vector3, decal: Decal) -> void:
+	var query := PhysicsRayQueryParameters3D.create(position + normal * 0.08, position - normal * 0.12, 1)
+	query.exclude = [get_rid()]
+	var hit := get_world_3d().direct_space_state.intersect_ray(query)
+	if hit.is_empty():
+		return
+	var collider: Object = hit.get("collider")
+	if collider != null and collider.has_method("add_blood_decal"):
+		collider.call("add_blood_decal", decal)
+
+
+func _decal_basis(normal: Vector3) -> Basis:
+	var surface_basis := _basis_for_normal(normal)
+	return Basis(surface_basis.x, surface_basis.z, -surface_basis.y)
 
 
 func _basis_for_normal(normal: Vector3) -> Basis:

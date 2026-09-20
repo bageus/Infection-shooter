@@ -7,6 +7,8 @@ var _damage: float = 20.0
 var _range: float = 30.0
 var _travelled: float = 0.0
 var _weapon_name: String = "PISTOL"
+var _collision_origin := Vector3.ZERO
+var _first_step := true
 
 
 func setup_projectile(
@@ -15,7 +17,8 @@ func setup_projectile(
 	damage: float,
 	speed: float,
 	max_range: float,
-	weapon_name: String = "PISTOL"
+	weapon_name: String = "PISTOL",
+	collision_origin: Vector3 = Vector3.ZERO
 ) -> void:
 	_direction = direction.normalized()
 	_shooter = shooter
@@ -23,6 +26,7 @@ func setup_projectile(
 	_speed = speed
 	_range = max_range
 	_weapon_name = weapon_name
+	_collision_origin = collision_origin if collision_origin != Vector3.ZERO else global_position
 
 
 func _physics_process(delta: float) -> void:
@@ -36,7 +40,8 @@ func _physics_process(delta: float) -> void:
 	if _shooter != null:
 		excluded.append(_shooter.get_rid())
 
-	var remaining_start := global_position
+	var remaining_start := _collision_origin if _first_step else global_position
+	_first_step = false
 	var remaining_finish := finish
 	for pass_index in 5:
 		var query := PhysicsRayQueryParameters3D.create(remaining_start, remaining_finish, 3)

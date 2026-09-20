@@ -16,7 +16,7 @@ height = 1.85
 radius = 0.48
 height = 1.85
 
-[node name="InfectedCapsule" type="CharacterBody3D"]
+[node name="InfectedCapsule" type="CharacterBody3D" groups=["infected"]]
 script = ExtResource("1_enemy_script")
 collision_layer = 2
 collision_mask = 3

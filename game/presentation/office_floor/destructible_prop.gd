@@ -10,6 +10,7 @@ extends StaticBody3D
 
 var _health: float
 var _broken: bool = false
+var _blood_decals: Array[Node] = []
 
 
 func _ready() -> void:
@@ -57,6 +58,7 @@ func _break_prop(hit_position: Vector3) -> void:
 	if _broken:
 		return
 	_broken = true
+	_clear_blood_decals()
 
 	var owner_root := get_parent()
 	var visual := owner_root.get_node_or_null("Visual") as Node3D
@@ -75,6 +77,19 @@ func _break_prop(hit_position: Vector3) -> void:
 		_spawn_fragments(hit_position, Color(0.25, 0.65, 1.0, 0.9), 10)
 	else:
 		_spawn_fragments(hit_position, Color(0.28, 0.2, 0.13, 1.0), 6)
+
+
+func add_blood_decal(decal: Node) -> void:
+	if decal == null:
+		return
+	_blood_decals.append(decal)
+
+
+func _clear_blood_decals() -> void:
+	for decal in _blood_decals:
+		if is_instance_valid(decal):
+			decal.queue_free()
+	_blood_decals.clear()
 
 
 func _spawn_replacement_frame(owner_root: Node3D) -> void:
