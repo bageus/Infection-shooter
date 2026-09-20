@@ -309,10 +309,11 @@ func _visual_object_at(screen_pos: Vector2) -> Node3D:
 		if aabb.size.length_squared() <= 0.0001:
 			continue
 		var world_aabb := node.global_transform * aabb
-		var hit := world_aabb.intersects_ray(ray_origin, ray_direction)
+		var hit: Variant = world_aabb.intersects_ray(ray_origin, ray_direction)
 		if hit == null:
 			continue
-		var distance := ray_origin.distance_to(hit)
+		var hit_position: Vector3 = hit as Vector3
+		var distance: float = ray_origin.distance_to(hit_position)
 		if distance < best_distance:
 			best_distance = distance
 			best = node
