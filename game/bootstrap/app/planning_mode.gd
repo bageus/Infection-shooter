@@ -81,8 +81,8 @@ func setup(app_owner: Node3D, planning_root: Node3D, planning_ui: Control) -> vo
 	active_catalog = structure_catalog
 	_rebuild_palette()
 	palette.item_selected.connect(_on_palette_selected)
-	ui.get_node("Tabs/Structure").pressed.connect(_show_structure_catalog)
-	ui.get_node("Tabs/Actors").pressed.connect(_show_actor_catalog)
+	ui.get_node("Panel/VBox/Tabs/Structure").pressed.connect(_show_structure_catalog)
+	ui.get_node("Panel/VBox/Tabs/Actors").pressed.connect(_show_actor_catalog)
 	ui.get_node("Panel/VBox/Save").pressed.connect(save_layout)
 	ui.get_node("Panel/VBox/Clear").pressed.connect(clear_layout)
 	ui.get_node("Panel/VBox/Close").pressed.connect(exit)
