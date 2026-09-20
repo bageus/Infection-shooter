@@ -1,10 +1,19 @@
 {
   "id": "presentation.office_floor",
   "layer": "presentation",
-  "purpose": "Expose the authored office-floor composition and destructible environment reactions using the grouped office object library.",
+  "purpose": "Expose authored structural office modules with their own collision and the current office-floor composition.",
   "state_owner": [],
   "public_api": [
-    "public/office_floor.tscn"
+    "public/office_floor.tscn",
+    "public/structural/column.tscn",
+    "public/structural/wall_straight.tscn",
+    "public/structural/wall_half_panel.tscn",
+    "public/structural/wall_inner_corner.tscn",
+    "public/structural/wall_outer_corner.tscn",
+    "public/structural/wall_door.tscn",
+    "public/structural/wall_emergency_door.tscn",
+    "public/structural/window_double.tscn",
+    "public/structural/window_corner.tscn"
   ],
   "dependencies": [
     "features.player",
