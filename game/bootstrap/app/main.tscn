@@ -619,6 +619,7 @@ transform = Transform3D(-4.371139e-08, 0, 1, 0, 1, 0, -1, 0, -4.371139e-08, 2.06
 
 [node name="PauseMenu" type="Control" parent="."]
 visible = false
+z_index = 100
 layout_mode = 3
 anchors_preset = 15
 anchor_right = 1.0
@@ -635,7 +636,7 @@ anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
-mouse_filter = 1
+mouse_filter = 0
 color = Color(0, 0, 0, 0.72)
 
 [node name="Panel" type="PanelContainer" parent="PauseMenu"]
@@ -680,6 +681,7 @@ text = "EXIT GAME"
 
 [node name="PlanningUI" type="Control" parent="."]
 visible = false
+z_index = 110
 layout_mode = 3
 anchors_preset = 15
 anchor_right = 1.0
@@ -759,6 +761,7 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 31, 1, 25)
 
 [node name="GameOver" type="Control" parent="." unique_id=915151426]
 visible = false
+z_index = 120
 layout_mode = 3
 anchors_preset = 15
 anchor_right = 1.0
@@ -770,7 +773,7 @@ process_mode = 3
 
 [node name="Dim" type="ColorRect" parent="GameOver" unique_id=1236850566]
 layout_mode = 1
-mouse_filter = 1
+mouse_filter = 0
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
