@@ -25,9 +25,15 @@ ambient_light_color = Color(0.62, 0.68, 0.78, 1)
 ambient_light_energy = 0.22
 tonemap_mode = 2
 
-[sub_resource type="StandardMaterial3D" id="floor_mat"]
-albedo_color = Color(0.31, 0.34, 0.4, 1)
-roughness = 0.92
+[sub_resource type="Shader" id="floor_shader"]
+code = "shader_type spatial;\nrender_mode diffuse_burley;\nuniform vec4 tile_color : source_color = vec4(0.34, 0.37, 0.43, 1.0);\nuniform vec4 grout_color : source_color = vec4(0.12, 0.14, 0.17, 1.0);\nuniform float tile_size = 2.0;\nuniform float grout_width = 0.045;\nvoid fragment() {\n    vec2 grid = abs(fract(VERTEX.xz / tile_size + 0.5) - 0.5);\n    float edge = max(grid.x, grid.y);\n    float grout = smoothstep(0.5 - grout_width, 0.5 - grout_width * 0.35, edge);\n    float variation = 0.96 + 0.04 * sin(floor(VERTEX.x / tile_size) * 7.31 + floor(VERTEX.z / tile_size) * 13.17);\n    ALBEDO = mix(tile_color.rgb * variation, grout_color.rgb, grout);\n    ROUGHNESS = mix(0.78, 0.96, grout);\n}\n"
+
+[sub_resource type="ShaderMaterial" id="floor_mat"]
+shader = SubResource("floor_shader")
+shader_parameter/tile_color = Color(0.34, 0.37, 0.43, 1)
+shader_parameter/grout_color = Color(0.12, 0.14, 0.17, 1)
+shader_parameter/tile_size = 2.0
+shader_parameter/grout_width = 0.045
 
 [sub_resource type="PlaneMesh" id="floor_mesh"]
 material = SubResource("floor_mat")
