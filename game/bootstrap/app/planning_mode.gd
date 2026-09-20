@@ -36,8 +36,8 @@ func setup(owner: Node3D, planning_root: Node3D, planning_ui: Control) -> void:
 	palette = ui.get_node("Panel/VBox/Palette")
 	status = ui.get_node("Panel/VBox/Status")
 	palette.clear()
-	for entry in catalog:
-		palette.add_item(entry.name)
+	for entry: Dictionary in catalog:
+		palette.add_item(str(entry.get("name", "")))
 	palette.item_selected.connect(_on_palette_selected)
 	ui.get_node("Panel/VBox/Save").pressed.connect(save_layout)
 	ui.get_node("Panel/VBox/Clear").pressed.connect(clear_layout)
@@ -83,7 +83,8 @@ func _unhandled_input(event: InputEvent) -> void:
 
 
 func _on_palette_selected(index: int) -> void:
-	selected_path = catalog[index].path
+	var entry: Dictionary = catalog[index]
+	selected_path = str(entry.get("path", ""))
 	rotation_y = 0.0
 	_rebuild_preview()
 
@@ -109,7 +110,7 @@ func _clear_preview() -> void:
 func _update_preview(screen_pos: Vector2) -> void:
 	if preview == null:
 		return
-	var world := _screen_to_floor(screen_pos)
+	var world: Variant = _screen_to_floor(screen_pos)
 	if world == null:
 		return
 	preview.global_position = _snap(world)
@@ -198,7 +199,11 @@ func load_layout() -> void:
 	if not data is Dictionary or not data.has("objects"):
 		return
 	clear_layout(false)
-	for record in data.objects:
+	var records: Array = data.get("objects", [])
+	for record_value: Variant in records:
+		if not record_value is Dictionary:
+			continue
+		var record: Dictionary = record_value
 		var scene := load(str(record.get("scene", ""))) as PackedScene
 		if scene == null:
 			continue
