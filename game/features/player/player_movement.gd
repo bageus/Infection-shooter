@@ -89,11 +89,29 @@ func _update_move(delta:float)->void:
 	velocity.y=0.0 if is_on_floor() else velocity.y-gravity_acceleration*delta
 	move_and_slide()
 	if _roll_remaining>0.0: _push_roll_contacts()
-func _push_roll_contacts()->Vector3:
+func _push_roll_contacts()->void:
+	for i in get_slide_collision_count():
+		var collision:=get_slide_collision(i)
+		var collider:=collision.get_collider()
+		if collider!=null and collider.has_method("apply_player_push"):
+			var direction:Vector3=collider.global_position-global_position
+			direction.y=0.0
+			if direction.length_squared()<0.001: direction=_roll_direction
+			collider.call("apply_player_push",direction.normalized(),roll_push_strength)
+	for node in get_tree().get_nodes_in_group("infected"):
+		if not node is Node3D: continue
+		var enemy:=node as Node3D
+		var offset:Vector3=enemy.global_position-global_position
+		offset.y=0.0
+		if offset.length()<=roll_push_radius and enemy.has_method("apply_player_push"):
+			var direction:Vector3=offset.normalized() if offset.length_squared()>0.001 else _roll_direction
+			enemy.call("apply_player_push",direction,roll_push_strength)
+
+func _move_direction()->Vector3:
 	var input:=Input.get_vector("move_left","move_right","move_up","move_down")
 	var f:Vector3=-camera.global_transform.basis.z;f.y=0;f=f.normalized()
 	var r:Vector3=camera.global_transform.basis.x;r.y=0;r=r.normalized()
-	var d:=r*input.x+f*-input.y
+	var d:Vector3=r*input.x+f*-input.y
 	return d.normalized() if d.length_squared()>1.0 else d
 func _update_aim()->void:
 	var delta:=get_viewport().get_mouse_position()-get_viewport().get_visible_rect().size*0.5
