@@ -12,6 +12,8 @@ var root: Node3D
 var ui: Control
 var palette: ItemList
 var status: Label
+var help: Label
+var hud_nodes: Array[Node] = []
 var active := false
 var selected_path := ""
 var preview: Node3D
@@ -41,6 +43,12 @@ func setup(owner: Node3D, planning_root: Node3D, planning_ui: Control) -> void:
 	camera = host.get_node("Gameplay/Player/CameraRig/Camera3D")
 	palette = ui.get_node("Panel/VBox/Palette")
 	status = ui.get_node("Panel/VBox/Status")
+	help = ui.get_node("HelpPanel/Help")
+	hud_nodes = [
+		host.get_node("PrototypeHUD"),
+		host.get_node("Crosshair"),
+		host.get_node("Radar")
+	]
 	palette.clear()
 	for entry: Dictionary in catalog:
 		palette.add_item(str(entry.get("name", "")))
@@ -54,16 +62,22 @@ func setup(owner: Node3D, planning_root: Node3D, planning_ui: Control) -> void:
 
 func enter() -> void:
 	active = true
+	_reset_selection()
+	for node in hud_nodes:
+		node.hide()
 	get_tree().paused = true
 	ui.show()
 	Input.mouse_mode = Input.MOUSE_MODE_VISIBLE
 	camera_anchor = camera.global_position
 	camera_height = clampf(camera.global_position.y, 8.0, 50.0)
-	status.text = "WASD pan | wheel zoom | LMB select/place | drag move | Del delete | Q/E rotate | +/- scale"
+	help.text = "PLANNING CONTROLS\n\nWASD  Move view\nWheel  Zoom\nLMB  Select / Place\nLMB drag  Move selected\nRMB  Cancel selection\nDelete  Delete selected\nQ / E  Rotate -/+15°\nR  Rotate +90°\n+ / -  Uniform scale\nX / Z  X size +/-\nC / V  Z size +/-\nESC  Exit planner"
+	status.text = "Choose an object from palette or click a placed object"
 
 
 func exit() -> void:
 	active = false
+	for node in hud_nodes:
+		node.show()
 	_clear_preview()
 	_select(null)
 	ui.hide()
@@ -120,7 +134,7 @@ func _unhandled_input(event: InputEvent) -> void:
 		elif event.button_index == MOUSE_BUTTON_LEFT and event.pressed:
 			_click_world(event.position)
 		elif event.button_index == MOUSE_BUTTON_RIGHT and event.pressed:
-			_delete_at(event.position)
+			_reset_selection()
 	if event is InputEventMouseMotion:
 		if Input.is_mouse_button_pressed(MOUSE_BUTTON_LEFT) and selected != null:
 			var world := _screen_to_floor(event.position)
@@ -129,6 +143,15 @@ func _unhandled_input(event: InputEvent) -> void:
 				_update_status()
 		elif preview != null:
 			_update_preview(event.position)
+
+
+func _reset_selection() -> void:
+	selected_path = ""
+	rotation_y = 0.0
+	_clear_preview()
+	_select(null)
+	palette.deselect_all()
+	status.text = "Selection cleared | choose palette item or click placed object"
 
 
 func _on_palette_selected(index: int) -> void:
@@ -213,6 +236,8 @@ func _place_selected(screen_pos: Vector2) -> void:
 	node.set_meta("planning_scene_path", selected_path)
 	placed.append(node)
 	_select(node)
+	selected_path = ""
+	palette.deselect_all()
 	_clear_preview()
 
 
