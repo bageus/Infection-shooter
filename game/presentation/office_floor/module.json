@@ -8,12 +8,16 @@
     "public/structural/column.tscn",
     "public/structural/wall_straight.tscn",
     "public/structural/wall_half_panel.tscn",
-    "public/structural/wall_inner_corner.tscn",
     "public/structural/wall_outer_corner.tscn",
     "public/structural/wall_door.tscn",
     "public/structural/wall_emergency_door.tscn",
     "public/structural/window_double.tscn",
-    "public/structural/window_corner.tscn"
+    "public/structural/window_corner.tscn",
+    "public/structural/floor_pad.tscn",
+    "public/structural/elevator_cabin_passenger.tscn",
+    "public/structural/elevator_cabin_freight.tscn",
+    "public/structural/elevator_door.tscn",
+    "public/structural/wall_door_3.tscn"
   ],
   "dependencies": [
     "features.player",
