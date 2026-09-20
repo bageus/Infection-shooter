@@ -15,6 +15,7 @@
 [ext_resource type="PackedScene" path="res://game/presentation/office_floor/public/structural/wall_door.tscn" id="wall_door"]
 [ext_resource type="PackedScene" path="res://game/presentation/office_floor/public/structural/window_double.tscn" id="window"]
 [ext_resource type="PackedScene" path="res://game/presentation/office_floor/public/structural/window_corner.tscn" id="window_corner"]
+[ext_resource type="PackedScene" path="res://game/levels/authored/base_office_layout.tscn" id="authored_layout"]
 
 [sub_resource type="Environment" id="env"]
 background_mode = 1
@@ -66,6 +67,8 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.1, 0)
 shape = SubResource("floor_shape")
 
 [node name="Structure" type="Node3D" parent="."]
+
+[node name="AuthoredLayout" parent="Structure" instance=ExtResource("authored_layout")]
 
 [node name="PlanningObjects" type="Node3D" parent="."]
 
