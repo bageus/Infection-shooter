@@ -31,11 +31,15 @@ var catalog := [
 	{"name":"Window Corner","path":"res://game/presentation/office_floor/public/structural/window_corner.tscn"},
 	{"name":"Wall Straight","path":"res://game/presentation/office_floor/public/structural/wall_straight.tscn"},
 	{"name":"Wall Half","path":"res://game/presentation/office_floor/public/structural/wall_half_panel.tscn"},
-	{"name":"Inner Corner","path":"res://game/presentation/office_floor/public/structural/wall_inner_corner.tscn"},
 	{"name":"Outer Corner","path":"res://game/presentation/office_floor/public/structural/wall_outer_corner.tscn"},
 	{"name":"Door Wall","path":"res://game/presentation/office_floor/public/structural/wall_door.tscn"},
 	{"name":"Emergency Door","path":"res://game/presentation/office_floor/public/structural/wall_emergency_door.tscn"},
-	{"name":"Column","path":"res://game/presentation/office_floor/public/structural/column.tscn"}
+	{"name":"Column","path":"res://game/presentation/office_floor/public/structural/column.tscn"},
+	{"name":"Floor Pad","path":"res://game/presentation/office_floor/public/structural/floor_pad.tscn"},
+	{"name":"Elevator Passenger","path":"res://game/presentation/office_floor/public/structural/elevator_cabin_passenger.tscn"},
+	{"name":"Elevator Freight","path":"res://game/presentation/office_floor/public/structural/elevator_cabin_freight.tscn"},
+	{"name":"Elevator Door","path":"res://game/presentation/office_floor/public/structural/elevator_door.tscn"},
+	{"name":"Door Wall 3","path":"res://game/presentation/office_floor/public/structural/wall_door_3.tscn"}
 ]
 
 
