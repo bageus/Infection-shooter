@@ -111,7 +111,7 @@ func enter() -> void:
 	camera_anchor = camera.global_position
 	camera_height = clampf(camera.global_position.y, 8.0, 50.0)
 	help.text = "PLANNING CONTROLS\n\nWASD  Move view\nALT + LMB drag  Rotate view\nWheel  Zoom\nLMB  Select / Place\nLMB drag  Move selected\nRMB  Cancel current tool\nDelete  Delete selected\nQ / E  Rotate -/+15°\nR  Rotate +90°\n+ / -  Uniform scale\nX / Z  X size +/-\nC / V  Z size +/-\nESC  Exit planner"
-	status.text = "Choose an object | matching edges snap automatically"
+	status.text = "Choose an object"
 
 
 func exit() -> void:
@@ -203,7 +203,7 @@ func _reset_selection() -> void:
 	_clear_preview()
 	_select(null)
 	palette.deselect_all()
-	status.text = "Selection cleared | choose palette item or click placed object"
+	status.text = "Selection cleared"
 
 
 func _rebuild_palette() -> void:
@@ -605,9 +605,9 @@ func save_layout() -> void:
 		file.store_string(JSON.stringify({"version":3,"objects":objects}, "\t"))
 	var scene_error := _save_authored_scene()
 	if scene_error == OK:
-		status.text = "SAVED SCENE | %s | %d objects" % [AUTHORED_SCENE_PATH, objects.size()]
+		status.text = "SAVED | %d objects" % objects.size()
 	else:
-		status.text = "JSON SAVED | scene save error %d" % scene_error
+		status.text = "SAVE ERROR %d" % scene_error
 
 
 func _save_authored_scene() -> Error:
