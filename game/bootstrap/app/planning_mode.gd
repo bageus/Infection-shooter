@@ -33,6 +33,7 @@ var camera_rig: Node3D
 var camera_yaw := 0.0
 var camera_pitch := -0.75
 var selection_box: MeshInstance3D
+var selection_source_aabb := AABB()
 
 var catalog := [
 	{"name":"Window Double","path":"res://game/presentation/office_floor/public/structural/window_double.tscn"},
@@ -213,7 +214,8 @@ func _select(node: Node3D) -> void:
 
 
 func _show_selection_highlight(node: Node3D) -> void:
-	var aabb := _combined_aabb(node)
+	var aabb := _combined_aabb(node, true)
+	selection_source_aabb = aabb
 	if aabb.size.length_squared() <= 0.0001:
 		return
 	selection_box = MeshInstance3D.new()
@@ -226,6 +228,7 @@ func _show_selection_highlight(node: Node3D) -> void:
 	material.no_depth_test = true
 	box.material = material
 	selection_box.mesh = box
+	selection_box.set_meta("planning_selection_highlight", true)
 	node.add_child(selection_box)
 	selection_box.position = aabb.get_center()
 
@@ -234,6 +237,7 @@ func _clear_selection_highlight() -> void:
 	if selection_box != null and is_instance_valid(selection_box):
 		selection_box.queue_free()
 	selection_box = null
+	selection_source_aabb = AABB()
 
 
 func _register_existing_scene_objects() -> void:
@@ -464,10 +468,14 @@ func _snap_position_for(node: Node3D, value: Vector3) -> Vector3:
 	return best
 
 
-func _combined_aabb(node: Node3D) -> AABB:
+func _combined_aabb(node: Node3D, ignore_selection: bool = false) -> AABB:
 	var result := AABB()
 	var found := false
 	for child in node.find_children("*", "MeshInstance3D", true, false):
+		if ignore_selection and child == selection_box:
+			continue
+		if child.has_meta("planning_selection_highlight"):
+			continue
 		var mesh_instance := child as MeshInstance3D
 		if mesh_instance == null or mesh_instance.mesh == null:
 			continue
