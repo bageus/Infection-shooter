@@ -1,0 +1,11 @@
+[gd_scene load_steps=3 format=3]
+
+[ext_resource type="PackedScene" path="res://models/objects/01_elevator_door.glb" id="1_model"]
+[ext_resource type="Script" path="res://game/presentation/office_floor/mesh_collision_builder.gd" id="2_collision"]
+
+[node name="ElevatorDoor" type="Node3D"]
+script = ExtResource("2_collision")
+
+[node name="Visual" parent="." instance=ExtResource("1_model")]
+
+[node name="Body" type="StaticBody3D" parent="."]
