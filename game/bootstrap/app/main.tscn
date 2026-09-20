@@ -196,18 +196,24 @@ fixed_column_width = 270
 icon_mode = 0
 
 [node name="Status" type="Label" parent="PlanningUI/Panel/VBox"]
+custom_minimum_size = Vector2(330, 44)
 layout_mode = 2
 text = "Select an object"
+clip_text = true
+text_overrun_behavior = 3
 
 [node name="Save" type="Button" parent="PlanningUI/Panel/VBox"]
+custom_minimum_size = Vector2(0, 42)
 layout_mode = 2
 text = "SAVE LAYOUT"
 
 [node name="Clear" type="Button" parent="PlanningUI/Panel/VBox"]
+custom_minimum_size = Vector2(0, 42)
 layout_mode = 2
 text = "CLEAR PLACED"
 
 [node name="Close" type="Button" parent="PlanningUI/Panel/VBox"]
+custom_minimum_size = Vector2(0, 42)
 layout_mode = 2
 text = "EXIT PLANNING"
 
