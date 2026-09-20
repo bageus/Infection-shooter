@@ -9,6 +9,7 @@ const PlanningMode = preload("res://game/bootstrap/app/planning_mode.gd")
 @onready var pause_menu: Control = $PauseMenu
 @onready var planning_ui: Control = $PlanningUI
 @onready var planning_root: Node3D = $PlanningObjects
+@onready var gameplay: Node3D = $Gameplay
 
 var _ended := false
 var _pause_open := false
@@ -59,6 +60,7 @@ func _process(_delta: float) -> void:
 
 func _open_pause_menu() -> void:
 	_pause_open = true
+	gameplay.process_mode = Node.PROCESS_MODE_DISABLED
 	pause_menu.show()
 	pause_menu.move_to_front()
 	get_tree().paused = true
@@ -67,6 +69,7 @@ func _open_pause_menu() -> void:
 
 func _resume_game() -> void:
 	_pause_open = false
+	gameplay.process_mode = Node.PROCESS_MODE_INHERIT
 	pause_menu.hide()
 	get_tree().paused = false
 
@@ -77,12 +80,14 @@ func _on_resume_pressed() -> void:
 
 func _on_planning_pressed() -> void:
 	_pause_open = false
+	gameplay.process_mode = Node.PROCESS_MODE_DISABLED
 	pause_menu.hide()
 	planning_mode.enter()
 
 
 func _end_run(reason: String) -> void:
 	_ended = true
+	gameplay.process_mode = Node.PROCESS_MODE_DISABLED
 	$GameOver/Panel/VBox/Reason.text = reason
 	game_over.show()
 	game_over.move_to_front()
@@ -91,6 +96,7 @@ func _end_run(reason: String) -> void:
 
 
 func _on_restart_pressed() -> void:
+	gameplay.process_mode = Node.PROCESS_MODE_INHERIT
 	get_tree().paused = false
 	get_tree().reload_current_scene()
 
