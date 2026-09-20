@@ -13,3 +13,6 @@ Thumbs.db
 models/objects/01_all.blend
 models/objects/01_all.blend1
 models/objects/01_all.blend.import
+
+# Local layout authored by the in-game planning tool
+game/levels/authored/base_office_layout.tscn
