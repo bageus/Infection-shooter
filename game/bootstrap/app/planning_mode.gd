@@ -32,6 +32,8 @@ var saved_camera_rig_transform := Transform3D.IDENTITY
 var camera_rig: Node3D
 var camera_yaw := 0.0
 var camera_pitch := -0.75
+var planning_yaw := 0.0
+var planning_pitch := -0.75
 var selection_box: MeshInstance3D
 var selection_source_aabb := AABB()
 var planning_grid: MeshInstance3D
@@ -95,8 +97,10 @@ func enter() -> void:
 	active = true
 	saved_camera_transform = camera.transform
 	saved_camera_rig_transform = camera_rig.transform
-	camera_yaw = camera_rig.rotation.y
-	camera_pitch = camera.rotation.x
+	planning_yaw = camera.global_rotation.y
+	planning_pitch = camera.global_rotation.x
+	camera_yaw = planning_yaw
+	camera_pitch = planning_pitch
 	_reset_selection()
 	_show_planning_grid()
 	for node in hud_nodes:
@@ -126,13 +130,20 @@ func exit() -> void:
 func _process(delta: float) -> void:
 	if not active:
 		return
-	var move := Vector3.ZERO
-	if Input.is_key_pressed(KEY_W): move.z -= 1.0
-	if Input.is_key_pressed(KEY_S): move.z += 1.0
-	if Input.is_key_pressed(KEY_A): move.x -= 1.0
-	if Input.is_key_pressed(KEY_D): move.x += 1.0
-	if move.length_squared() > 0.0:
-		move = move.normalized() * CAMERA_SPEED * delta
+	var input := Vector2.ZERO
+	if Input.is_key_pressed(KEY_W): input.y += 1.0
+	if Input.is_key_pressed(KEY_S): input.y -= 1.0
+	if Input.is_key_pressed(KEY_A): input.x -= 1.0
+	if Input.is_key_pressed(KEY_D): input.x += 1.0
+	if input.length_squared() > 0.0:
+		input = input.normalized()
+		var forward := -camera.global_transform.basis.z
+		forward.y = 0.0
+		forward = forward.normalized()
+		var right := camera.global_transform.basis.x
+		right.y = 0.0
+		right = right.normalized()
+		var move := (right * input.x + forward * input.y) * CAMERA_SPEED * delta
 		camera.global_position += move
 		camera_anchor += move
 
@@ -472,10 +483,11 @@ func _scale_selected(delta_scale: Vector3) -> void:
 
 
 func _rotate_camera(relative: Vector2) -> void:
-	camera_yaw -= relative.x * CAMERA_ROTATE_SPEED
-	camera_pitch = clampf(camera_pitch - relative.y * CAMERA_ROTATE_SPEED, deg_to_rad(-80.0), deg_to_rad(-25.0))
-	camera_rig.rotation.y = camera_yaw
-	camera.rotation.x = camera_pitch
+	planning_yaw -= relative.x * CAMERA_ROTATE_SPEED
+	planning_pitch = clampf(planning_pitch - relative.y * CAMERA_ROTATE_SPEED, deg_to_rad(-80.0), deg_to_rad(-20.0))
+	var current_position := camera.global_position
+	camera.global_rotation = Vector3(planning_pitch, planning_yaw, 0.0)
+	camera.global_position = current_position
 
 
 func _zoom_camera(amount: float) -> void:
