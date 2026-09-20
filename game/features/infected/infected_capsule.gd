@@ -168,7 +168,7 @@ func _cast_blood_ray(origin: Vector3, direction: Vector3, reach: float, heavy: b
 	_spawn_splatter_mark(hit.get("position"), normal, heavy)
 
 
-func _spawn_splatter_mark(position: Vector3, normal: Vector3, heavy: bool) -> void:
+func _spawn_splatter_mark(hit_position: Vector3, normal: Vector3, heavy: bool) -> void:
 	var decal := Decal.new()
 	decal.size = Vector3(
 		randf_range(0.65, 1.25) if heavy else randf_range(0.28, 0.62),
@@ -181,13 +181,13 @@ func _spawn_splatter_mark(position: Vector3, normal: Vector3, heavy: bool) -> vo
 	decal.lower_fade = 0.03
 	decal.normal_fade = 0.15
 	get_tree().current_scene.add_child(decal)
-	decal.global_position = position
+	decal.global_position = hit_position
 	decal.global_basis = _decal_basis(normal)
-	_register_surface_decal(position, normal, decal)
-	_spawn_satellite_decals(position, normal, heavy)
+	_register_surface_decal(hit_position, normal, decal)
+	_spawn_satellite_decals(hit_position, normal, heavy)
 
 
-func _spawn_satellite_decals(position: Vector3, normal: Vector3, heavy: bool) -> void:
+func _spawn_satellite_decals(hit_position: Vector3, normal: Vector3, heavy: bool) -> void:
 	var count := randi_range(7, 14) if heavy else randi_range(3, 7)
 	var basis := _basis_for_normal(normal)
 	for i in count:
@@ -200,14 +200,14 @@ func _spawn_satellite_decals(position: Vector3, normal: Vector3, heavy: bool) ->
 		decal.lower_fade = 0.02
 		decal.normal_fade = 0.15
 		get_tree().current_scene.add_child(decal)
-		var offset := basis * Vector3(randf_range(-0.75, 0.75), randf_range(-0.65, 0.65), 0)
-		decal.global_position = position + offset
+		var splatter_offset := basis * Vector3(randf_range(-0.75, 0.75), randf_range(-0.65, 0.65), 0)
+		decal.global_position = hit_position + offset
 		decal.global_basis = _decal_basis(normal)
 		_register_surface_decal(decal.global_position, normal, decal)
 
 
-func _register_surface_decal(position: Vector3, normal: Vector3, decal: Decal) -> void:
-	var query := PhysicsRayQueryParameters3D.create(position + normal * 0.08, position - normal * 0.12, 1)
+func _register_surface_decal(hit_position: Vector3, normal: Vector3, decal: Decal) -> void:
+	var query := PhysicsRayQueryParameters3D.create(hit_position + normal * 0.08, hit_position - normal * 0.12, 1)
 	query.exclude = [get_rid()]
 	var hit := get_world_3d().direct_space_state.intersect_ray(query)
 	if hit.is_empty():
@@ -223,11 +223,11 @@ func _decal_basis(normal: Vector3) -> Basis:
 
 
 func _basis_for_normal(normal: Vector3) -> Basis:
-	var z := normal.normalized()
-	var helper := Vector3.UP if absf(z.dot(Vector3.UP)) < 0.92 else Vector3.FORWARD
-	var x := helper.cross(z).normalized()
-	var y := z.cross(x).normalized()
-	return Basis(x, y, z)
+	var basis_z := normal.normalized()
+	var helper := Vector3.UP if absf(basis_z.dot(Vector3.UP)) < 0.92 else Vector3.FORWARD
+	var x := helper.cross(basis_z).normalized()
+	var y := basis_z.cross(x).normalized()
+	return Basis(x, y, basis_z)
 
 
 func _blood_material() -> StandardMaterial3D:
