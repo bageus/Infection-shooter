@@ -20,6 +20,7 @@ var _closed_transforms: Array[Transform3D] = []
 var _open_amount := 0.0
 var _close_timer := 0.0
 var _requested_open := false
+var _swing_side := 0.0
 
 
 func _ready() -> void:
@@ -34,7 +35,6 @@ func _ready() -> void:
 	if mode == DoorMode.SLIDING_ELEVATOR:
 		add_to_group("elevator_door_components")
 	_collect_door_parts()
-	_disable_static_collision_for_door_parts()
 
 
 func _physics_process(delta: float) -> void:
@@ -49,10 +49,14 @@ func _physics_process(delta: float) -> void:
 		match mode:
 			DoorMode.SWING_BIDIRECTIONAL:
 				wants_open = true
+				if _open_amount <= 0.02 and _swing_side == 0.0:
+					_swing_side = _player_side(local_player)
 			DoorMode.SWING_ONE_WAY:
 				var side := signf(local_player.z)
 				if side == signf(one_way_allowed_side):
 					wants_open = true
+					if _open_amount <= 0.02:
+						_swing_side = signf(one_way_allowed_side)
 			DoorMode.SLIDING_ELEVATOR:
 				wants_open = true
 				_request_nearby_elevator_open()
@@ -64,6 +68,8 @@ func _physics_process(delta: float) -> void:
 		_close_timer = maxf(0.0, _close_timer - delta)
 		if _close_timer <= 0.0:
 			_open_amount = move_toward(_open_amount, 0.0, open_speed * delta)
+			if _open_amount <= 0.001:
+				_swing_side = 0.0
 
 	_apply_door_pose(local_player)
 
@@ -88,7 +94,13 @@ func _collect_door_parts() -> void:
 	if mode == DoorMode.SLIDING_ELEVATOR:
 		_collect_elevator_parts(visual)
 	else:
-		var pivot := _find_named_node(visual, ["doorpivot"])
+		var pivot: Node3D
+		if mode == DoorMode.SWING_ONE_WAY:
+			pivot = _find_exact_named_node(visual, "doorpivot.001")
+			if pivot == null:
+				pivot = _find_exact_named_node(visual, "doorpivot")
+		else:
+			pivot = _find_exact_named_node(visual, "doorpivot")
 		if pivot != null:
 			_door_parts.append(pivot)
 			_closed_transforms.append(pivot.transform)
@@ -120,6 +132,21 @@ func _collect_elevator_parts(node: Node) -> void:
 			_closed_transforms.append(part.transform)
 
 
+func _find_exact_named_node(node: Node, wanted: String) -> Node3D:
+	if node.name.to_lower() == wanted.to_lower():
+		return node as Node3D if node is Node3D else null
+	for child in node.get_children():
+		var found := _find_exact_named_node(child, wanted)
+		if found != null:
+			return found
+	return null
+
+
+func _player_side(local_player: Vector3) -> float:
+	var side := signf(local_player.z)
+	return 1.0 if absf(side) < 0.1 else side
+
+
 func _find_named_node(node: Node, names: Array[String]) -> Node3D:
 	var lower := node.name.to_lower()
 	for wanted in names:
@@ -141,18 +168,6 @@ func _collect_named_meshes(node: Node, out: Array[Node3D]) -> void:
 		_collect_named_meshes(child, out)
 
 
-func _disable_static_collision_for_door_parts() -> void:
-	var body := get_parent().get_node_or_null("Body") as StaticBody3D
-	if body == null:
-		return
-	# Structural collision is generated from the full imported mesh. Door motion
-	# must not keep an invisible closed blocker, so disable that aggregate body.
-	# Non-door frame collision remains supplied by the visual structural pieces
-	# in dedicated scenes where applicable.
-	body.collision_layer = 0
-	body.collision_mask = 0
-
-
 func _apply_door_pose(local_player: Vector3) -> void:
 	for i in _door_parts.size():
 		var part := _door_parts[i]
@@ -165,11 +180,9 @@ func _apply_door_pose(local_player: Vector3) -> void:
 			t.origin.x += direction * slide_distance * _open_amount
 			part.transform = t
 		else:
-			var side := signf(local_player.z)
-			if absf(side) < 0.1:
-				side = 1.0
-			if mode == DoorMode.SWING_ONE_WAY:
-				side = signf(one_way_allowed_side)
+			var side := _swing_side
+			if side == 0.0:
+				side = signf(one_way_allowed_side) if mode == DoorMode.SWING_ONE_WAY else _player_side(local_player)
 			var angle := deg_to_rad(open_angle_degrees * side * _open_amount)
 			var t := closed
 			t.basis = closed.basis.rotated(Vector3.UP, angle)
