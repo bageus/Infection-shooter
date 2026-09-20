@@ -39,7 +39,11 @@ var catalog := [
 	{"name":"Elevator Passenger","path":"res://game/presentation/office_floor/public/structural/elevator_cabin_passenger.tscn"},
 	{"name":"Elevator Freight","path":"res://game/presentation/office_floor/public/structural/elevator_cabin_freight.tscn"},
 	{"name":"Elevator Door","path":"res://game/presentation/office_floor/public/structural/elevator_door.tscn"},
-	{"name":"Door Wall 3","path":"res://game/presentation/office_floor/public/structural/wall_door_3.tscn"}
+	{"name":"Door Wall 3","path":"res://game/presentation/office_floor/public/structural/wall_door_3.tscn"},
+	{"name":"Door Wall 2 Empty","path":"res://game/presentation/office_floor/public/structural/wall_door_2_without.tscn"},
+	{"name":"Door Wall 3 Empty","path":"res://game/presentation/office_floor/public/structural/wall_door_3_without.tscn"},
+	{"name":"Broken Door 2","path":"res://game/presentation/office_floor/public/structural/only_door_2.tscn"},
+	{"name":"Broken Door 3","path":"res://game/presentation/office_floor/public/structural/only_door_3.tscn"}
 ]
 
 
