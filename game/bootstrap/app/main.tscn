@@ -147,11 +147,13 @@ mouse_filter = 2
 process_mode = 3
 
 [node name="Tabs" type="HBoxContainer" parent="PlanningUI"]
+z_index = 20
 layout_mode = 0
 offset_left = 8.0
-offset_top = 38.0
+offset_top = 48.0
 offset_right = 352.0
-offset_bottom = 76.0
+mouse_filter = 0
+offset_bottom = 90.0
 
 [node name="Structure" type="Button" parent="PlanningUI/Tabs"]
 layout_mode = 2
@@ -162,6 +164,7 @@ layout_mode = 2
 text = "ACTORS"
 
 [node name="Panel" type="PanelContainer" parent="PlanningUI"]
+z_index = 10
 layout_mode = 1
 anchors_preset = 10
 anchor_right = 0.0
