@@ -10,8 +10,8 @@ var _ended: bool = false
 
 
 func _ready() -> void:
-	process_mode = Node.PROCESS_MODE_ALWAYS
-	game_over.process_mode = Node.PROCESS_MODE_ALWAYS
+	process_mode = Node.PROCESS_MODE_PAUSABLE
+	game_over.process_mode = Node.PROCESS_MODE_WHEN_PAUSED
 	game_over.hide()
 	for enemy in enemies.get_children():
 		if enemy.has_method("set_target"):
