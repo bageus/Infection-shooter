@@ -6,7 +6,6 @@
 [ext_resource type="PackedScene" path="res://game/presentation/office_floor/public/structural/wall_half_panel.tscn" id="half"]
 [ext_resource type="PackedScene" path="res://game/presentation/prototype_hud/public/prototype_hud.tscn" id="hud"]
 [ext_resource type="PackedScene" path="res://game/features/infected/public/infected_capsule.tscn" id="infected"]
-[ext_resource type="PackedScene" path="res://game/presentation/office_floor/public/structural/wall_inner_corner.tscn" id="inner"]
 [ext_resource type="PackedScene" path="res://game/presentation/office_floor/public/structural/wall_outer_corner.tscn" id="outer"]
 [ext_resource type="PackedScene" path="res://game/features/player/public/player.tscn" id="player"]
 [ext_resource type="PackedScene" path="res://game/presentation/prototype_hud/public/radar.tscn" id="radar"]
@@ -557,13 +556,13 @@ position = Vector3(6.5, 0, 6.5)
 [node name="LobbyWallL" parent="Structure/Interior" unique_id=692838826 instance=ExtResource("wall")]
 transform = Transform3D(-4.371139e-08, 0, 1, 0, 1, 0, -1, 0, -4.371139e-08, 8.24, 0, 9.27)
 
-[node name="LobbyInnerL" parent="Structure/Interior" unique_id=1927249751 instance=ExtResource("inner")]
+[node name="LobbyInnerL" parent="Structure/Interior" unique_id=1927249751 instance=ExtResource("outer")]
 transform = Transform3D(-4.371139e-08, 0, 1, 0, 1, 0, -1, 0, -4.371139e-08, 8.24, 0, 5.15)
 
 [node name="LobbyWallR" parent="Structure/Interior" unique_id=1659516860 instance=ExtResource("wall")]
 transform = Transform3D(-4.371139e-08, 0, 1, 0, 1, 0, -1, 0, -4.371139e-08, 16.48, 0, 9.27)
 
-[node name="LobbyInnerR" parent="Structure/Interior" unique_id=866951330 instance=ExtResource("inner")]
+[node name="LobbyInnerR" parent="Structure/Interior" unique_id=866951330 instance=ExtResource("outer")]
 transform = Transform3D(-1, 0, -8.742278e-08, 0, 1, 0, 8.742278e-08, 0, -1, 16.48, 0, 5.15)
 
 [node name="HallHalf_1" parent="Structure/Interior" unique_id=1595838475 instance=ExtResource("half")]
@@ -581,7 +580,7 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 17.51, 0, 3.09)
 [node name="HallOuter_2" parent="Structure/Interior" unique_id=606904183 instance=ExtResource("outer")]
 transform = Transform3D(-4.371139e-08, 0, 1, 0, 1, 0, -1, 0, -4.371139e-08, 19.57, 0, 3.09)
 
-[node name="OfficeNWCorner" parent="Structure/Interior" unique_id=248878949 instance=ExtResource("inner")]
+[node name="OfficeNWCorner" parent="Structure/Interior" unique_id=248878949 instance=ExtResource("outer")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -14.42, 0, -9.27)
 
 [node name="OfficeNWall1" parent="Structure/Interior" unique_id=1848365102 instance=ExtResource("half")]
@@ -599,7 +598,7 @@ transform = Transform3D(-4.371139e-08, 0, 1, 0, 1, 0, -1, 0, -4.371139e-08, -8.2
 [node name="OfficeEWall2" parent="Structure/Interior" unique_id=145395933 instance=ExtResource("wall_door")]
 transform = Transform3D(-4.371139e-08, 0, 1, 0, 1, 0, -1, 0, -4.371139e-08, -8.24, 0, -5.15)
 
-[node name="OfficeSECorner" parent="Structure/Interior" unique_id=1982165211 instance=ExtResource("inner")]
+[node name="OfficeSECorner" parent="Structure/Interior" unique_id=1982165211 instance=ExtResource("outer")]
 transform = Transform3D(-1, 0, -8.742278e-08, 0, 1, 0, 8.742278e-08, 0, -1, -8.24, 0, -3.09)
 
 [node name="OfficeSWCorner" parent="Structure/Interior" unique_id=667501865 instance=ExtResource("outer")]
@@ -619,7 +618,7 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -2.06, 0, 0)
 
 [node name="CenterHalf2" parent="Structure/Interior" unique_id=374713057 instance=ExtResource("half")]
 
-[node name="CenterCornerB" parent="Structure/Interior" unique_id=1844917703 instance=ExtResource("inner")]
+[node name="CenterCornerB" parent="Structure/Interior" unique_id=1844917703 instance=ExtResource("outer")]
 transform = Transform3D(-4.371139e-08, 0, 1, 0, 1, 0, -1, 0, -4.371139e-08, 2.06, 0, 0)
 
 [node name="PlanningObjects" type="Node3D" parent="."]
