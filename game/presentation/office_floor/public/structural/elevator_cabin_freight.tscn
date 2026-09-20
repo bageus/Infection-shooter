@@ -1,10 +1,10 @@
 [gd_scene load_steps=4 format=3]
 
-[ext_resource type="PackedScene" path="res://models/objects/01_wall_emergency_door.glb" id="1_model"]
+[ext_resource type="PackedScene" path="res://models/objects/01_elevator_cabin_freight.glb" id="1_model"]
 [ext_resource type="Script" path="res://game/presentation/office_floor/mesh_collision_builder.gd" id="2_collision"]
 [ext_resource type="Script" path="res://game/presentation/office_floor/interactive_door.gd" id="3_door"]
 
-[node name="WallEmergencyDoor" type="Node3D"]
+[node name="ElevatorCabinFreight" type="Node3D"]
 script = ExtResource("2_collision")
 
 [node name="Visual" parent="." instance=ExtResource("1_model")]
@@ -13,5 +13,4 @@ script = ExtResource("2_collision")
 
 [node name="DoorController" type="Node3D" parent="."]
 script = ExtResource("3_door")
-mode = 1
-one_way_allowed_side = 1.0
+mode = 2
