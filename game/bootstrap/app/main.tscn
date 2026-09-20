@@ -146,23 +146,6 @@ grow_vertical = 2
 mouse_filter = 2
 process_mode = 3
 
-[node name="Tabs" type="HBoxContainer" parent="PlanningUI"]
-z_index = 20
-layout_mode = 0
-offset_left = 8.0
-offset_top = 48.0
-offset_right = 352.0
-mouse_filter = 0
-offset_bottom = 90.0
-
-[node name="Structure" type="Button" parent="PlanningUI/Tabs"]
-layout_mode = 2
-text = "STRUCTURE"
-
-[node name="Actors" type="Button" parent="PlanningUI/Tabs"]
-layout_mode = 2
-text = "ACTORS"
-
 [node name="Panel" type="PanelContainer" parent="PlanningUI"]
 z_index = 10
 layout_mode = 1
@@ -182,6 +165,20 @@ layout_mode = 2
 theme_override_font_sizes/font_size = 22
 text = "LEVEL PLANNER"
 horizontal_alignment = 1
+
+[node name="Tabs" type="HBoxContainer" parent="PlanningUI/Panel/VBox"]
+layout_mode = 2
+mouse_filter = 1
+
+[node name="Structure" type="Button" parent="PlanningUI/Panel/VBox/Tabs"]
+layout_mode = 2
+size_flags_horizontal = 3
+text = "STRUCTURE"
+
+[node name="Actors" type="Button" parent="PlanningUI/Panel/VBox/Tabs"]
+layout_mode = 2
+size_flags_horizontal = 3
+text = "ACTORS"
 
 [node name="Palette" type="ItemList" parent="PlanningUI/Panel/VBox"]
 custom_minimum_size = Vector2(330, 0)
