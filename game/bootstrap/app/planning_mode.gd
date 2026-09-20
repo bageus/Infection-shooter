@@ -1,6 +1,7 @@
 extends Node
 
 const SAVE_PATH := "user://planned_layout.json"
+const AUTHORED_SCENE_PATH := "res://game/levels/authored/base_office_layout.tscn"
 const GRID_SIZE := 0.25
 const SNAP_DISTANCE := 0.8
 const CAMERA_SPEED := 18.0
@@ -53,8 +54,8 @@ var catalog := [
 ]
 
 
-func setup(owner: Node3D, planning_root: Node3D, planning_ui: Control) -> void:
-	host = owner
+func setup(app_owner: Node3D, planning_root: Node3D, planning_ui: Control) -> void:
+	host = app_owner
 	root = planning_root
 	structure_root = host.get_node("Structure")
 	ui = planning_ui
@@ -450,17 +451,54 @@ func save_layout() -> void:
 		if scene_path.is_empty():
 			continue
 		objects.append({
-			"scene": str(node.get_meta("planning_scene_path", "")),
+			"scene": scene_path,
 			"x": node.position.x, "y": node.position.y, "z": node.position.z,
 			"rotation_y": node.rotation_degrees.y,
 			"scale_x": node.scale.x, "scale_y": node.scale.y, "scale_z": node.scale.z
 		})
 	var file := FileAccess.open(SAVE_PATH, FileAccess.WRITE)
-	if file == null:
-		status.text = "SAVE FAILED"
-		return
-	file.store_string(JSON.stringify({"version":2,"objects":objects}, "\t"))
-	status.text = "SAVED | %d objects" % objects.size()
+	if file != null:
+		file.store_string(JSON.stringify({"version":3,"objects":objects}, "\t"))
+	var scene_error := _save_authored_scene()
+	if scene_error == OK:
+		status.text = "SAVED SCENE | %s | %d objects" % [AUTHORED_SCENE_PATH, objects.size()]
+	else:
+		status.text = "JSON SAVED | scene save error %d" % scene_error
+
+
+func _save_authored_scene() -> Error:
+	var scene_root := Node3D.new()
+	scene_root.name = "BaseOfficeLayout"
+	for node in placed:
+		if not is_instance_valid(node):
+			continue
+		var scene_path := str(node.get_meta("planning_scene_path", ""))
+		if scene_path.is_empty():
+			continue
+		var packed := load(scene_path) as PackedScene
+		if packed == null:
+			continue
+		var copy := packed.instantiate() as Node3D
+		if copy == null:
+			continue
+		scene_root.add_child(copy)
+		copy.owner = scene_root
+		copy.transform = node.transform
+		_assign_owner_recursive(copy, scene_root)
+	var packed_layout := PackedScene.new()
+	var pack_error := packed_layout.pack(scene_root)
+	if pack_error != OK:
+		scene_root.free()
+		return pack_error
+	var save_error := ResourceSaver.save(packed_layout, AUTHORED_SCENE_PATH)
+	scene_root.free()
+	return save_error
+
+
+func _assign_owner_recursive(node: Node, scene_owner: Node) -> void:
+	for child in node.get_children():
+		child.owner = scene_owner
+		_assign_owner_recursive(child, scene_owner)
 
 
 func load_layout() -> void:
@@ -478,7 +516,10 @@ func load_layout() -> void:
 		if not record_value is Dictionary:
 			continue
 		var record: Dictionary = record_value
-		var scene := load(str(record.get("scene", ""))) as PackedScene
+		var scene_path := _migrate_scene_path(str(record.get("scene", "")))
+		if scene_path.is_empty() or not ResourceLoader.exists(scene_path):
+			continue
+		var scene := load(scene_path) as PackedScene
 		if scene == null:
 			continue
 		var node := scene.instantiate() as Node3D
@@ -486,8 +527,20 @@ func load_layout() -> void:
 		node.position = Vector3(float(record.get("x",0.0)),float(record.get("y",0.0)),float(record.get("z",0.0)))
 		node.rotation_degrees.y = float(record.get("rotation_y",0.0))
 		node.scale = Vector3(float(record.get("scale_x",1.0)),float(record.get("scale_y",1.0)),float(record.get("scale_z",1.0)))
-		node.set_meta("planning_scene_path", str(record.get("scene","")))
+		node.set_meta("planning_scene_path", scene_path)
 		placed.append(node)
+
+
+func _migrate_scene_path(old_path: String) -> String:
+	var replacements := {
+		"res://models/objects/01_wall_door.glb": "res://game/presentation/office_floor/public/structural/wall_door.tscn",
+		"res://models/objects/01_wall_door_2.glb": "res://game/presentation/office_floor/public/structural/wall_door.tscn",
+		"res://models/objects/01_wall_inner_corner.blend": "",
+		"res://game/presentation/office_floor/public/structural/wall_inner_corner.tscn": ""
+	}
+	if replacements.has(old_path):
+		return str(replacements[old_path])
+	return old_path
 
 
 func clear_layout(update_status: bool = true) -> void:
