@@ -1,6 +1,6 @@
 [gd_scene load_steps=3 format=3]
 
-[ext_resource type="PackedScene" path="res://models/objects/01_wall_emergency_door.blend" id="1_model"]
+[ext_resource type="PackedScene" path="res://models/objects/01_wall_emergency_door.glb" id="1_model"]
 [ext_resource type="Script" path="res://game/presentation/office_floor/mesh_collision_builder.gd" id="2_collision"]
 
 [node name="WallEmergencyDoor" type="Node3D"]
