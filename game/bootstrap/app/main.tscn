@@ -148,12 +148,11 @@ process_mode = 3
 
 [node name="Panel" type="PanelContainer" parent="PlanningUI"]
 z_index = 10
-layout_mode = 1
-anchors_preset = 10
-anchor_right = 0.0
-anchor_bottom = 1.0
-offset_right = 360.0
-grow_vertical = 2
+layout_mode = 0
+offset_left = 8.0
+offset_top = 8.0
+offset_right = 368.0
+offset_bottom = 712.0
 mouse_filter = 0
 
 [node name="VBox" type="VBoxContainer" parent="PlanningUI/Panel"]
@@ -181,7 +180,7 @@ size_flags_horizontal = 3
 text = "ACTORS"
 
 [node name="Palette" type="ItemList" parent="PlanningUI/Panel/VBox"]
-custom_minimum_size = Vector2(330, 0)
+custom_minimum_size = Vector2(330, 500)
 layout_mode = 2
 size_flags_vertical = 3
 max_columns = 1
