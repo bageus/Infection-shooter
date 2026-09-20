@@ -1,7 +1,8 @@
 extends Node
 
 const SAVE_PATH := "user://planned_layout.json"
-const GRID_SIZE := 1.0
+const GRID_SIZE := 0.25
+const SNAP_DISTANCE := 0.8
 const CAMERA_SPEED := 18.0
 const CAMERA_ZOOM_STEP := 2.5
 const SCALE_STEP := 0.1
@@ -20,6 +21,7 @@ var selected_path := ""
 var preview: Node3D
 var selected: Node3D
 var rotation_y := 0.0
+var last_mouse_world := Vector3.ZERO
 var placed: Array[Node3D] = []
 var camera_anchor := Vector3.ZERO
 var camera_height := 24.0
@@ -73,8 +75,8 @@ func enter() -> void:
 	Input.mouse_mode = Input.MOUSE_MODE_VISIBLE
 	camera_anchor = camera.global_position
 	camera_height = clampf(camera.global_position.y, 8.0, 50.0)
-	help.text = "PLANNING CONTROLS\n\nWASD  Move view\nWheel  Zoom\nLMB  Select / Place\nLMB drag  Move selected\nRMB  Cancel selection\nDelete  Delete selected\nQ / E  Rotate -/+15°\nR  Rotate +90°\n+ / -  Uniform scale\nX / Z  X size +/-\nC / V  Z size +/-\nESC  Exit planner"
-	status.text = "Choose an object from palette or click a placed object"
+	help.text = "PLANNING CONTROLS\n\nWASD  Move view\nWheel  Zoom\nLMB  Select / Place\nLMB drag  Move selected\nRMB  Cancel current tool\nDelete  Delete selected\nQ / E  Rotate -/+15°\nR  Rotate +90°\n+ / -  Uniform scale\nX / Z  X size +/-\nC / V  Z size +/-\nESC  Exit planner"
+	status.text = "Choose an object | matching edges snap automatically"
 
 
 func exit() -> void:
@@ -142,7 +144,7 @@ func _unhandled_input(event: InputEvent) -> void:
 		if Input.is_mouse_button_pressed(MOUSE_BUTTON_LEFT) and selected != null:
 			var world := _screen_to_floor(event.position)
 			if world.is_finite():
-				selected.global_position = _snap(world)
+				selected.global_position = _snap_position_for(selected, world)
 				_update_status()
 		elif preview != null:
 			_update_preview(event.position)
@@ -266,7 +268,7 @@ func _update_preview(screen_pos: Vector2) -> void:
 	var world := _screen_to_floor(screen_pos)
 	if not world.is_finite():
 		return
-	preview.global_position = _snap(world)
+	preview.global_position = _snap_position_for(preview, world)
 	preview.rotation_degrees.y = rotation_y
 
 
@@ -279,14 +281,15 @@ func _place_selected(screen_pos: Vector2) -> void:
 		return
 	var node := scene.instantiate() as Node3D
 	root.add_child(node)
-	node.global_position = _snap(world)
+	node.global_position = _snap_position_for(node, world)
 	node.rotation_degrees.y = rotation_y
 	node.set_meta("planning_scene_path", selected_path)
 	placed.append(node)
-	_select(node)
-	selected_path = ""
-	palette.deselect_all()
-	_clear_preview()
+	_select(null)
+	_rebuild_preview()
+	preview.global_position = _snap_position_for(preview, world)
+	preview.rotation_degrees.y = rotation_y
+	status.text = "Placed | same object remains active | RMB cancel"
 
 
 func _delete_at(screen_pos: Vector2) -> void:
@@ -344,6 +347,54 @@ func _screen_to_floor(screen_pos: Vector2) -> Vector3:
 	if distance < 0.0:
 		return Vector3(INF, INF, INF)
 	return origin + direction * distance
+
+
+func _snap_position_for(node: Node3D, value: Vector3) -> Vector3:
+	var base := _snap(value)
+	var source_aabb := _combined_aabb(node)
+	if source_aabb.size.length_squared() <= 0.0001:
+		return base
+	var best := base
+	var best_distance := SNAP_DISTANCE
+	var source_center := base + Vector3(source_aabb.position.x + source_aabb.size.x * 0.5, 0.0, source_aabb.position.z + source_aabb.size.z * 0.5)
+	var source_half := Vector2(source_aabb.size.x * absf(node.scale.x) * 0.5, source_aabb.size.z * absf(node.scale.z) * 0.5)
+	for other in placed:
+		if other == node or not is_instance_valid(other):
+			continue
+		var other_aabb := _combined_aabb(other)
+		if other_aabb.size.length_squared() <= 0.0001:
+			continue
+		var other_center := other.global_position + Vector3(other_aabb.position.x + other_aabb.size.x * 0.5, 0.0, other_aabb.position.z + other_aabb.size.z * 0.5)
+		var other_half := Vector2(other_aabb.size.x * absf(other.scale.x) * 0.5, other_aabb.size.z * absf(other.scale.z) * 0.5)
+		var candidates := [
+			Vector3(other_center.x + other_half.x + source_half.x, 0.0, other_center.z),
+			Vector3(other_center.x - other_half.x - source_half.x, 0.0, other_center.z),
+			Vector3(other_center.x, 0.0, other_center.z + other_half.y + source_half.y),
+			Vector3(other_center.x, 0.0, other_center.z - other_half.y - source_half.y)
+		]
+		for candidate: Vector3 in candidates:
+			var distance := Vector2(candidate.x - source_center.x, candidate.z - source_center.z).length()
+			if distance < best_distance:
+				best_distance = distance
+				best = base + Vector3(candidate.x - source_center.x, 0.0, candidate.z - source_center.z)
+	return best
+
+
+func _combined_aabb(node: Node3D) -> AABB:
+	var result := AABB()
+	var found := false
+	for child in node.find_children("*", "MeshInstance3D", true, false):
+		var mesh_instance := child as MeshInstance3D
+		if mesh_instance == null or mesh_instance.mesh == null:
+			continue
+		var local_transform := node.global_transform.affine_inverse() * mesh_instance.global_transform
+		var aabb := local_transform * mesh_instance.get_aabb()
+		if not found:
+			result = aabb
+			found = true
+		else:
+			result = result.merge(aabb)
+	return result
 
 
 func _snap(value: Vector3) -> Vector3:
