@@ -16,7 +16,7 @@ var planning_mode: Node
 
 
 func _ready() -> void:
-	process_mode = Node.PROCESS_MODE_ALWAYS
+	process_mode = Node.PROCESS_MODE_WHEN_PAUSED
 	game_over.process_mode = Node.PROCESS_MODE_WHEN_PAUSED
 	pause_menu.process_mode = Node.PROCESS_MODE_WHEN_PAUSED
 	planning_ui.process_mode = Node.PROCESS_MODE_WHEN_PAUSED
@@ -32,7 +32,7 @@ func _ready() -> void:
 			enemy.call("set_target", player)
 
 
-func _unhandled_input(event: InputEvent) -> void:
+func _input(event: InputEvent) -> void:
 	if event is InputEventKey and event.pressed and not event.echo and event.keycode == KEY_ESCAPE:
 		if planning_mode.active:
 			planning_mode.exit()
@@ -59,8 +59,9 @@ func _process(_delta: float) -> void:
 
 func _open_pause_menu() -> void:
 	_pause_open = true
-	get_tree().paused = true
 	pause_menu.show()
+	pause_menu.move_to_front()
+	get_tree().paused = true
 	Input.mouse_mode = Input.MOUSE_MODE_VISIBLE
 
 
@@ -84,6 +85,7 @@ func _end_run(reason: String) -> void:
 	_ended = true
 	$GameOver/Panel/VBox/Reason.text = reason
 	game_over.show()
+	game_over.move_to_front()
 	Input.mouse_mode = Input.MOUSE_MODE_VISIBLE
 	get_tree().paused = true
 
