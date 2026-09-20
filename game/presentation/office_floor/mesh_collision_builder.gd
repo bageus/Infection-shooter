@@ -4,6 +4,7 @@ extends Node3D
 @export var visual_path: NodePath = NodePath("Visual")
 @export var body_path: NodePath = NodePath("Body")
 @export var rebuild_in_editor: bool = true
+@export var exclude_name_tokens: PackedStringArray = PackedStringArray()
 
 var _built := false
 
@@ -27,6 +28,8 @@ func _rebuild_collision() -> void:
 
 
 func _add_mesh_collisions(node: Node, body: StaticBody3D) -> void:
+	if _is_excluded(node):
+		return
 	if node is MeshInstance3D:
 		var mesh_instance := node as MeshInstance3D
 		if mesh_instance.mesh != null:
@@ -38,3 +41,11 @@ func _add_mesh_collisions(node: Node, body: StaticBody3D) -> void:
 				collision.global_transform = mesh_instance.global_transform
 	for child in node.get_children():
 		_add_mesh_collisions(child, body)
+
+
+func _is_excluded(node: Node) -> bool:
+	var lower := node.name.to_lower()
+	for token in exclude_name_tokens:
+		if str(token).to_lower() in lower:
+			return true
+	return false
