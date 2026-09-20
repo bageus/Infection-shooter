@@ -501,30 +501,42 @@ func _snap_position_for(node: Node3D, value: Vector3) -> Vector3:
 	var source_aabb := _combined_aabb(node)
 	if source_aabb.size.length_squared() <= 0.0001:
 		return base
+	var source_sockets := _connection_sockets(node, base, source_aabb)
 	var best := base
 	var best_distance := SNAP_DISTANCE
-	var source_center := base + Vector3(source_aabb.position.x + source_aabb.size.x * 0.5, 0.0, source_aabb.position.z + source_aabb.size.z * 0.5)
-	var source_half := Vector2(source_aabb.size.x * absf(node.scale.x) * 0.5, source_aabb.size.z * absf(node.scale.z) * 0.5)
 	for other in placed:
 		if other == node or not is_instance_valid(other):
 			continue
 		var other_aabb := _combined_aabb(other)
 		if other_aabb.size.length_squared() <= 0.0001:
 			continue
-		var other_center := other.global_position + Vector3(other_aabb.position.x + other_aabb.size.x * 0.5, 0.0, other_aabb.position.z + other_aabb.size.z * 0.5)
-		var other_half := Vector2(other_aabb.size.x * absf(other.scale.x) * 0.5, other_aabb.size.z * absf(other.scale.z) * 0.5)
-		var candidates := [
-			Vector3(other_center.x + other_half.x + source_half.x, 0.0, other_center.z),
-			Vector3(other_center.x - other_half.x - source_half.x, 0.0, other_center.z),
-			Vector3(other_center.x, 0.0, other_center.z + other_half.y + source_half.y),
-			Vector3(other_center.x, 0.0, other_center.z - other_half.y - source_half.y)
-		]
-		for candidate: Vector3 in candidates:
-			var distance := Vector2(candidate.x - source_center.x, candidate.z - source_center.z).length()
-			if distance < best_distance:
-				best_distance = distance
-				best = base + Vector3(candidate.x - source_center.x, 0.0, candidate.z - source_center.z)
+		var other_sockets := _connection_sockets(other, other.global_position, other_aabb)
+		for source_socket: Vector3 in source_sockets:
+			for target_socket: Vector3 in other_sockets:
+				var distance := Vector2(source_socket.x - target_socket.x, source_socket.z - target_socket.z).length()
+				if distance < best_distance:
+					best_distance = distance
+					best = base + (target_socket - source_socket)
+					best.y = 0.0
 	return best
+
+
+func _connection_sockets(node: Node3D, world_origin: Vector3, aabb: AABB) -> Array[Vector3]:
+	var center_local := Vector3(aabb.position.x + aabb.size.x * 0.5, 0.0, aabb.position.z + aabb.size.z * 0.5)
+	var half_x := aabb.size.x * 0.5
+	var half_z := aabb.size.z * 0.5
+	var local_points: Array[Vector3] = [
+		center_local + Vector3(-half_x, 0.0, 0.0),
+		center_local + Vector3(half_x, 0.0, 0.0),
+		center_local + Vector3(0.0, 0.0, -half_z),
+		center_local + Vector3(0.0, 0.0, half_z)
+	]
+	var basis := Basis(Vector3.UP, node.rotation.y)
+	var sockets: Array[Vector3] = []
+	for point: Vector3 in local_points:
+		var relative := point - Vector3(aabb.position.x + aabb.size.x * 0.5, 0.0, aabb.position.z + aabb.size.z * 0.5)
+		sockets.append(world_origin + basis * relative)
+	return sockets
 
 
 func _combined_aabb(node: Node3D, ignore_selection: bool = false) -> AABB:
