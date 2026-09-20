@@ -1,877 +1,730 @@
-[gd_scene format=3]
+[gd_scene format=3 uid="uid://cfm3smjohpd2f"]
 
-[ext_resource type="Script" path="res://game/bootstrap/app/main.gd" id="script"]
-[ext_resource type="PackedScene" path="res://models/objects/01_wall_straight.blend" id="wall"]
-[ext_resource type="PackedScene" path="res://models/objects/01_wall_inner_corner.blend" id="inner"]
-[ext_resource type="PackedScene" path="res://models/objects/01_wall_outer_corner.blend" id="outer"]
-[ext_resource type="PackedScene" path="res://models/objects/01_window_double.blend" id="window"]
-[ext_resource type="PackedScene" path="res://models/objects/01_window_corner.blend" id="window_corner"]
-[ext_resource type="PackedScene" path="res://models/objects/01_column.blend" id="column"]
-[ext_resource type="PackedScene" path="res://models/objects/01_wall_door.blend" id="wall_door"]
-[ext_resource type="PackedScene" path="res://models/objects/01_wall_emergency_door.blend" id="emergency"]
-[ext_resource type="PackedScene" path="res://models/objects/01_wall_half_panel.blend" id="half"]
-[ext_resource type="PackedScene" path="res://game/features/player/public/player.tscn" id="player"]
-[ext_resource type="PackedScene" path="res://game/features/infected/public/infected_capsule.tscn" id="infected"]
-[ext_resource type="PackedScene" path="res://game/features/infection_source/public/infection_source.tscn" id="source"]
-[ext_resource type="PackedScene" path="res://game/presentation/prototype_hud/public/prototype_hud.tscn" id="hud"]
+[ext_resource type="PackedScene" uid="uid://c5a43ocx4utxe" path="res://models/objects/01_column.blend" id="column"]
 [ext_resource type="PackedScene" path="res://game/presentation/prototype_hud/public/crosshair.tscn" id="crosshair"]
+[ext_resource type="PackedScene" uid="uid://j8m0r3f2idfx" path="res://models/objects/01_wall_emergency_door.blend" id="emergency"]
+[ext_resource type="PackedScene" uid="uid://d2x7roj63nw1i" path="res://models/objects/01_wall_half_panel.blend" id="half"]
+[ext_resource type="PackedScene" path="res://game/presentation/prototype_hud/public/prototype_hud.tscn" id="hud"]
+[ext_resource type="PackedScene" path="res://game/features/infected/public/infected_capsule.tscn" id="infected"]
+[ext_resource type="PackedScene" uid="uid://b7ia34uudy4jk" path="res://models/objects/01_wall_inner_corner.blend" id="inner"]
+[ext_resource type="PackedScene" uid="uid://5xwtdilxjio7" path="res://models/objects/01_wall_outer_corner.blend" id="outer"]
+[ext_resource type="PackedScene" path="res://game/features/player/public/player.tscn" id="player"]
 [ext_resource type="PackedScene" path="res://game/presentation/prototype_hud/public/radar.tscn" id="radar"]
+[ext_resource type="Script" uid="uid://cjm3a57h7v5im" path="res://game/bootstrap/app/main.gd" id="script"]
+[ext_resource type="PackedScene" path="res://game/features/infection_source/public/infection_source.tscn" id="source"]
+[ext_resource type="PackedScene" uid="uid://1cy5tql04rgs" path="res://models/objects/01_wall_straight.blend" id="wall"]
+[ext_resource type="PackedScene" uid="uid://crlbstncpfbhu" path="res://models/objects/01_wall_door.blend" id="wall_door"]
+[ext_resource type="PackedScene" uid="uid://dytd2ou4sykbx" path="res://models/objects/01_window_double.blend" id="window"]
+[ext_resource type="PackedScene" uid="uid://cgtwpirtlxaiu" path="res://models/objects/01_window_corner.blend" id="window_corner"]
 
 [sub_resource type="Environment" id="env"]
 background_mode = 1
-background_color = Color(0.055,0.075,0.12,1)
+background_color = Color(0.055, 0.075, 0.12, 1)
 ambient_light_source = 3
-ambient_light_color = Color(0.62,0.68,0.78,1)
+ambient_light_color = Color(0.62, 0.68, 0.78, 1)
 ambient_light_energy = 0.22
 tonemap_mode = 2
 
 [sub_resource type="StandardMaterial3D" id="floor_mat"]
-albedo_color = Color(0.31,0.34,0.4,1)
+albedo_color = Color(0.31, 0.34, 0.4, 1)
 roughness = 0.92
 
 [sub_resource type="PlaneMesh" id="floor_mesh"]
 material = SubResource("floor_mat")
-size = Vector2(80,60)
+size = Vector2(80, 60)
 subdivide_width = 39
 subdivide_depth = 29
 
 [sub_resource type="BoxShape3D" id="floor_shape"]
-size = Vector3(80,0.2,60)
-
-[sub_resource type="BoxShape3D" id="north_south_collision"]
-size = Vector3(80,3.0,0.35)
-
-[sub_resource type="BoxShape3D" id="east_west_collision"]
-size = Vector3(0.35,3.0,60)
-
+size = Vector3(80, 0.2, 60)
 
 [sub_resource type="BoxShape3D" id="module_collision"]
-size = Vector3(2.06,3.0,0.28)
+size = Vector3(2.06, 3, 0.28)
 
 [sub_resource type="BoxShape3D" id="column_collision"]
-size = Vector3(0.9,3.0,0.9)
+size = Vector3(0.9, 3, 0.9)
 
-[sub_resource type="BoxShape3D" id="corner_arm_collision"]
-size = Vector3(2.0,3.0,0.32)
-
-[node name="Main" type="Node3D"]
+[node name="Main" type="Node3D" unique_id=479644666]
 script = ExtResource("script")
 
-[node name="WorldEnvironment" type="WorldEnvironment" parent="."]
+[node name="WorldEnvironment" type="WorldEnvironment" parent="." unique_id=968256143]
 environment = SubResource("env")
 
-
-[node name="Floor" type="MeshInstance3D" parent="."]
+[node name="Floor" type="MeshInstance3D" parent="." unique_id=557799538]
 mesh = SubResource("floor_mesh")
 
-[node name="FloorBody" type="StaticBody3D" parent="."]
-[node name="CollisionShape3D" type="CollisionShape3D" parent="FloorBody"]
-position = Vector3(0,-0.1,0)
+[node name="FloorBody" type="StaticBody3D" parent="." unique_id=1764252328]
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="FloorBody" unique_id=872202857]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.1, 0)
 shape = SubResource("floor_shape")
 
-[node name="Structure" type="Node3D" parent="."]
-[node name="Perimeter" type="Node3D" parent="Structure"]
+[node name="Structure" type="Node3D" parent="." unique_id=820363237]
 
-[node name="WindowCorner_NW" parent="Structure/Perimeter" instance=ExtResource("window_corner")]
-position = Vector3(-39,0,-29)
-rotation_degrees = Vector3(0,180,0)
+[node name="Perimeter" type="Node3D" parent="Structure" unique_id=29272844]
 
-[node name="WindowCorner_NE" parent="Structure/Perimeter" instance=ExtResource("window_corner")]
-position = Vector3(39,0,-29)
-rotation_degrees = Vector3(0,90,0)
+[node name="WindowCorner_NW" parent="Structure/Perimeter" unique_id=750631304 instance=ExtResource("window_corner")]
+transform = Transform3D(-1.4092846, 0, -1.321386e-07, 0, 1.0626628, 0, 1.2320356e-07, 0, -1.5114894, -39, 0, -29)
 
-[node name="WindowCorner_SE" parent="Structure/Perimeter" instance=ExtResource("window_corner")]
-position = Vector3(39,0,29)
-rotation_degrees = Vector3(0,0,0)
+[node name="WindowCorner_NE" parent="Structure/Perimeter" unique_id=2020509795 instance=ExtResource("window_corner")]
+transform = Transform3D(-9.354157e-08, 0, 1, 0, 1.0842651, 0, -2.1399817, 0, -4.371139e-08, 39, 0, -29)
 
-[node name="WindowCorner_SW" parent="Structure/Perimeter" instance=ExtResource("window_corner")]
-position = Vector3(-39,0,29)
-rotation_degrees = Vector3(0,270,0)
+[node name="WindowCorner_SE" parent="Structure/Perimeter" unique_id=1340042452 instance=ExtResource("window_corner")]
+transform = Transform3D(1.5636691, 0, 0, 0, 1.0561281, 0, 0, 0, 1, 39.098293, 0.03545618, 28.973904)
 
-[node name="NorthWindow_1" parent="Structure/Perimeter" instance=ExtResource("window")]
-position = Vector3(-36,0,-29)
+[node name="WindowCorner_SW" parent="Structure/Perimeter" unique_id=252560984 instance=ExtResource("window_corner")]
+transform = Transform3D(2.8594018e-08, 0, -1.8157312, 0, 1.1170355, 0, 2.3978453, 0, 2.1652378e-08, -39, 0, 29)
 
-[node name="NorthWindow_3" parent="Structure/Perimeter" instance=ExtResource("window")]
-position = Vector3(-34,0,-29)
+[node name="NorthWindow_1" parent="Structure/Perimeter" unique_id=577392396 instance=ExtResource("window")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -36, 0, -29)
 
-[node name="NorthWindow_4" parent="Structure/Perimeter" instance=ExtResource("window")]
-position = Vector3(-32,0,-29)
+[node name="NorthWindow_3" parent="Structure/Perimeter" unique_id=378258207 instance=ExtResource("window")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -34, 0, -29)
 
-[node name="NorthWindow_5" parent="Structure/Perimeter" instance=ExtResource("window")]
-position = Vector3(-30,0,-29)
+[node name="NorthWindow_4" parent="Structure/Perimeter" unique_id=1506091043 instance=ExtResource("window")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -32, 0, -29)
 
-[node name="NorthWindow_6" parent="Structure/Perimeter" instance=ExtResource("window")]
-position = Vector3(-28,0,-29)
+[node name="NorthWindow_5" parent="Structure/Perimeter" unique_id=1427909502 instance=ExtResource("window")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -30, 0, -29)
 
-[node name="NorthWindow_7" parent="Structure/Perimeter" instance=ExtResource("window")]
-position = Vector3(-26,0,-29)
+[node name="NorthWindow_6" parent="Structure/Perimeter" unique_id=1087265015 instance=ExtResource("window")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -28, 0, -29)
 
-[node name="NorthWindow_8" parent="Structure/Perimeter" instance=ExtResource("window")]
-position = Vector3(-24,0,-29)
+[node name="NorthWindow_7" parent="Structure/Perimeter" unique_id=483469831 instance=ExtResource("window")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -26, 0, -29)
 
-[node name="NorthWindow_9" parent="Structure/Perimeter" instance=ExtResource("window")]
-position = Vector3(-22,0,-29)
+[node name="NorthWindow_8" parent="Structure/Perimeter" unique_id=581659607 instance=ExtResource("window")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -24, 0, -29)
 
-[node name="NorthWindow_10" parent="Structure/Perimeter" instance=ExtResource("window")]
-position = Vector3(-20,0,-29)
+[node name="NorthWindow_9" parent="Structure/Perimeter" unique_id=1797376467 instance=ExtResource("window")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -22, 0, -29)
 
-[node name="NorthWindow_11" parent="Structure/Perimeter" instance=ExtResource("window")]
-position = Vector3(-18,0,-29)
+[node name="NorthWindow_10" parent="Structure/Perimeter" unique_id=1535387311 instance=ExtResource("window")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -20, 0, -29)
 
-[node name="NorthWindow_12" parent="Structure/Perimeter" instance=ExtResource("window")]
-position = Vector3(-16,0,-29)
+[node name="NorthWindow_11" parent="Structure/Perimeter" unique_id=1460704255 instance=ExtResource("window")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -18, 0, -29)
 
-[node name="NorthWindow_13" parent="Structure/Perimeter" instance=ExtResource("window")]
-position = Vector3(-14,0,-29)
+[node name="NorthWindow_12" parent="Structure/Perimeter" unique_id=483128066 instance=ExtResource("window")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -16, 0, -29)
 
-[node name="NorthWindow_14" parent="Structure/Perimeter" instance=ExtResource("window")]
-position = Vector3(-12,0,-29)
+[node name="NorthWindow_13" parent="Structure/Perimeter" unique_id=1632090374 instance=ExtResource("window")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -14, 0, -29)
 
-[node name="NorthWindow_15" parent="Structure/Perimeter" instance=ExtResource("window")]
-position = Vector3(-10,0,-29)
+[node name="NorthWindow_14" parent="Structure/Perimeter" unique_id=2105691099 instance=ExtResource("window")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -12, 0, -29)
 
-[node name="NorthWindow_16" parent="Structure/Perimeter" instance=ExtResource("window")]
-position = Vector3(-8,0,-29)
+[node name="NorthWindow_15" parent="Structure/Perimeter" unique_id=1551966486 instance=ExtResource("window")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -10, 0, -29)
 
-[node name="NorthWindow_17" parent="Structure/Perimeter" instance=ExtResource("window")]
-position = Vector3(-6,0,-29)
+[node name="NorthWindow_16" parent="Structure/Perimeter" unique_id=509941640 instance=ExtResource("window")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -8, 0, -29)
 
-[node name="NorthWindow_18" parent="Structure/Perimeter" instance=ExtResource("window")]
-position = Vector3(-4,0,-29)
+[node name="NorthWindow_17" parent="Structure/Perimeter" unique_id=400518327 instance=ExtResource("window")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -6, 0, -29)
 
-[node name="NorthWindow_19" parent="Structure/Perimeter" instance=ExtResource("window")]
-position = Vector3(-2,0,-29)
+[node name="NorthWindow_18" parent="Structure/Perimeter" unique_id=543441629 instance=ExtResource("window")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -4, 0, -29)
 
-[node name="NorthWindow_20" parent="Structure/Perimeter" instance=ExtResource("window")]
-position = Vector3(0,0,-29)
+[node name="NorthWindow_19" parent="Structure/Perimeter" unique_id=1036061134 instance=ExtResource("window")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -2, 0, -29)
 
-[node name="NorthWindow_21" parent="Structure/Perimeter" instance=ExtResource("window")]
-position = Vector3(2,0,-29)
+[node name="NorthWindow_20" parent="Structure/Perimeter" unique_id=859917393 instance=ExtResource("window")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, -29)
 
-[node name="NorthWindow_22" parent="Structure/Perimeter" instance=ExtResource("window")]
-position = Vector3(4,0,-29)
+[node name="NorthWindow_21" parent="Structure/Perimeter" unique_id=7892873 instance=ExtResource("window")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 2, 0, -29)
 
-[node name="NorthWindow_23" parent="Structure/Perimeter" instance=ExtResource("window")]
-position = Vector3(6,0,-29)
+[node name="NorthWindow_22" parent="Structure/Perimeter" unique_id=1750756722 instance=ExtResource("window")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 4, 0, -29)
 
-[node name="NorthWindow_24" parent="Structure/Perimeter" instance=ExtResource("window")]
-position = Vector3(8,0,-29)
+[node name="NorthWindow_23" parent="Structure/Perimeter" unique_id=151435164 instance=ExtResource("window")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 6, 0, -29)
 
-[node name="NorthWindow_25" parent="Structure/Perimeter" instance=ExtResource("window")]
-position = Vector3(10,0,-29)
+[node name="NorthWindow_24" parent="Structure/Perimeter" unique_id=1727878238 instance=ExtResource("window")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 8, 0, -29)
 
-[node name="NorthWindow_26" parent="Structure/Perimeter" instance=ExtResource("window")]
-position = Vector3(12,0,-29)
+[node name="NorthWindow_25" parent="Structure/Perimeter" unique_id=1141177576 instance=ExtResource("window")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 10, 0, -29)
 
-[node name="NorthWindow_27" parent="Structure/Perimeter" instance=ExtResource("window")]
-position = Vector3(14,0,-29)
+[node name="NorthWindow_26" parent="Structure/Perimeter" unique_id=532300928 instance=ExtResource("window")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 12, 0, -29)
 
-[node name="NorthWindow_28" parent="Structure/Perimeter" instance=ExtResource("window")]
-position = Vector3(16,0,-29)
+[node name="NorthWindow_27" parent="Structure/Perimeter" unique_id=213207603 instance=ExtResource("window")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 14, 0, -29)
 
-[node name="NorthWindow_29" parent="Structure/Perimeter" instance=ExtResource("window")]
-position = Vector3(18,0,-29)
+[node name="NorthWindow_28" parent="Structure/Perimeter" unique_id=699590161 instance=ExtResource("window")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 16, 0, -29)
 
-[node name="NorthWindow_30" parent="Structure/Perimeter" instance=ExtResource("window")]
-position = Vector3(20,0,-29)
+[node name="NorthWindow_29" parent="Structure/Perimeter" unique_id=1186592295 instance=ExtResource("window")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 18, 0, -29)
 
-[node name="NorthWindow_31" parent="Structure/Perimeter" instance=ExtResource("window")]
-position = Vector3(22,0,-29)
+[node name="NorthWindow_30" parent="Structure/Perimeter" unique_id=130528471 instance=ExtResource("window")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 20, 0, -29)
 
-[node name="NorthWindow_32" parent="Structure/Perimeter" instance=ExtResource("window")]
-position = Vector3(24,0,-29)
+[node name="NorthWindow_31" parent="Structure/Perimeter" unique_id=1806737837 instance=ExtResource("window")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 22, 0, -29)
 
-[node name="NorthWindow_33" parent="Structure/Perimeter" instance=ExtResource("window")]
-position = Vector3(26,0,-29)
+[node name="NorthWindow_32" parent="Structure/Perimeter" unique_id=559338409 instance=ExtResource("window")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 24, 0, -29)
 
-[node name="NorthWindow_34" parent="Structure/Perimeter" instance=ExtResource("window")]
-position = Vector3(28,0,-29)
+[node name="NorthWindow_33" parent="Structure/Perimeter" unique_id=963920529 instance=ExtResource("window")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 26, 0, -29)
 
-[node name="NorthWindow_35" parent="Structure/Perimeter" instance=ExtResource("window")]
-position = Vector3(30,0,-29)
+[node name="NorthWindow_34" parent="Structure/Perimeter" unique_id=1917736980 instance=ExtResource("window")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 28, 0, -29)
 
-[node name="NorthWindow_36" parent="Structure/Perimeter" instance=ExtResource("window")]
-position = Vector3(32,0,-29)
+[node name="NorthWindow_35" parent="Structure/Perimeter" unique_id=1856190152 instance=ExtResource("window")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 30, 0, -29)
 
-[node name="NorthWindow_37" parent="Structure/Perimeter" instance=ExtResource("window")]
-position = Vector3(34,0,-29)
+[node name="NorthWindow_36" parent="Structure/Perimeter" unique_id=998336238 instance=ExtResource("window")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 32, 0, -29)
 
-[node name="NorthWindow_39" parent="Structure/Perimeter" instance=ExtResource("window")]
-position = Vector3(36,0,-29)
+[node name="NorthWindow_37" parent="Structure/Perimeter" unique_id=812247655 instance=ExtResource("window")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 34, 0, -29)
 
-[node name="SouthWindow_3" parent="Structure/Perimeter" instance=ExtResource("window")]
-position = Vector3(-34,0,29)
-rotation_degrees = Vector3(0,180,0)
+[node name="NorthWindow_39" parent="Structure/Perimeter" unique_id=226125090 instance=ExtResource("window")]
+transform = Transform3D(1.2287569, 0, 0, 0, 1, 0, 0, 0, 1, 36.370186, 0, -29)
 
-[node name="SouthWindow_4" parent="Structure/Perimeter" instance=ExtResource("window")]
-position = Vector3(-32,0,29)
-rotation_degrees = Vector3(0,180,0)
+[node name="SouthWindow_3" parent="Structure/Perimeter" unique_id=1629966307 instance=ExtResource("window")]
+transform = Transform3D(-1.7147186, 0, -8.7422784e-08, 0, 1.0152872, 0, 1.4990546e-07, 0, -1.0000001, -34.780525, 0, 29)
 
-[node name="SouthWindow_5" parent="Structure/Perimeter" instance=ExtResource("window")]
-position = Vector3(-30,0,29)
-rotation_degrees = Vector3(0,180,0)
+[node name="SouthWindow_4" parent="Structure/Perimeter" unique_id=828003793 instance=ExtResource("window")]
+transform = Transform3D(-1, 0, -8.742278e-08, 0, 1, 0, 8.742278e-08, 0, -1, -32, 0, 29)
 
-[node name="SouthWindow_6" parent="Structure/Perimeter" instance=ExtResource("window")]
-position = Vector3(-28,0,29)
-rotation_degrees = Vector3(0,180,0)
+[node name="SouthWindow_5" parent="Structure/Perimeter" unique_id=1114023101 instance=ExtResource("window")]
+transform = Transform3D(-1, 0, -8.742278e-08, 0, 1, 0, 8.742278e-08, 0, -1, -30, 0, 29)
 
-[node name="SouthWindow_7" parent="Structure/Perimeter" instance=ExtResource("window")]
-position = Vector3(-26,0,29)
-rotation_degrees = Vector3(0,180,0)
+[node name="SouthWindow_6" parent="Structure/Perimeter" unique_id=216555520 instance=ExtResource("window")]
+transform = Transform3D(-1, 0, -8.742278e-08, 0, 1, 0, 8.742278e-08, 0, -1, -28, 0, 29)
 
-[node name="SouthWindow_8" parent="Structure/Perimeter" instance=ExtResource("window")]
-position = Vector3(-24,0,29)
-rotation_degrees = Vector3(0,180,0)
+[node name="SouthWindow_7" parent="Structure/Perimeter" unique_id=1059188207 instance=ExtResource("window")]
+transform = Transform3D(-1, 0, -8.742278e-08, 0, 1, 0, 8.742278e-08, 0, -1, -26, 0, 29)
 
-[node name="SouthWindow_9" parent="Structure/Perimeter" instance=ExtResource("window")]
-position = Vector3(-22,0,29)
-rotation_degrees = Vector3(0,180,0)
+[node name="SouthWindow_8" parent="Structure/Perimeter" unique_id=472518384 instance=ExtResource("window")]
+transform = Transform3D(-1, 0, -8.742278e-08, 0, 1, 0, 8.742278e-08, 0, -1, -24, 0, 29)
 
-[node name="SouthWindow_10" parent="Structure/Perimeter" instance=ExtResource("window")]
-position = Vector3(-20,0,29)
-rotation_degrees = Vector3(0,180,0)
+[node name="SouthWindow_9" parent="Structure/Perimeter" unique_id=1612796324 instance=ExtResource("window")]
+transform = Transform3D(-1, 0, -8.742278e-08, 0, 1, 0, 8.742278e-08, 0, -1, -22, 0, 29)
 
-[node name="SouthWindow_11" parent="Structure/Perimeter" instance=ExtResource("window")]
-position = Vector3(-18,0,29)
-rotation_degrees = Vector3(0,180,0)
+[node name="SouthWindow_10" parent="Structure/Perimeter" unique_id=1306033122 instance=ExtResource("window")]
+transform = Transform3D(-1, 0, -8.742278e-08, 0, 1, 0, 8.742278e-08, 0, -1, -20, 0, 29)
 
-[node name="SouthWindow_12" parent="Structure/Perimeter" instance=ExtResource("window")]
-position = Vector3(-16,0,29)
-rotation_degrees = Vector3(0,180,0)
+[node name="SouthWindow_11" parent="Structure/Perimeter" unique_id=1388896736 instance=ExtResource("window")]
+transform = Transform3D(-1, 0, -8.742278e-08, 0, 1, 0, 8.742278e-08, 0, -1, -18, 0, 29)
 
-[node name="SouthWindow_13" parent="Structure/Perimeter" instance=ExtResource("window")]
-position = Vector3(-14,0,29)
-rotation_degrees = Vector3(0,180,0)
+[node name="SouthWindow_12" parent="Structure/Perimeter" unique_id=1550035527 instance=ExtResource("window")]
+transform = Transform3D(-1, 0, -8.742278e-08, 0, 1, 0, 8.742278e-08, 0, -1, -16, 0, 29)
 
-[node name="SouthWindow_14" parent="Structure/Perimeter" instance=ExtResource("window")]
-position = Vector3(-12,0,29)
-rotation_degrees = Vector3(0,180,0)
+[node name="SouthWindow_13" parent="Structure/Perimeter" unique_id=2069209597 instance=ExtResource("window")]
+transform = Transform3D(-1, 0, -8.742278e-08, 0, 1, 0, 8.742278e-08, 0, -1, -14, 0, 29)
 
-[node name="SouthWindow_15" parent="Structure/Perimeter" instance=ExtResource("window")]
-position = Vector3(-10,0,29)
-rotation_degrees = Vector3(0,180,0)
+[node name="SouthWindow_14" parent="Structure/Perimeter" unique_id=968135306 instance=ExtResource("window")]
+transform = Transform3D(-1, 0, -8.742278e-08, 0, 1, 0, 8.742278e-08, 0, -1, -12, 0, 29)
 
-[node name="SouthWindow_16" parent="Structure/Perimeter" instance=ExtResource("window")]
-position = Vector3(-8,0,29)
-rotation_degrees = Vector3(0,180,0)
+[node name="SouthWindow_15" parent="Structure/Perimeter" unique_id=969528667 instance=ExtResource("window")]
+transform = Transform3D(-1, 0, -8.742278e-08, 0, 1, 0, 8.742278e-08, 0, -1, -10, 0, 29)
 
-[node name="SouthWindow_17" parent="Structure/Perimeter" instance=ExtResource("window")]
-position = Vector3(-6,0,29)
-rotation_degrees = Vector3(0,180,0)
+[node name="SouthWindow_16" parent="Structure/Perimeter" unique_id=842809449 instance=ExtResource("window")]
+transform = Transform3D(-1, 0, -8.742278e-08, 0, 1, 0, 8.742278e-08, 0, -1, -8, 0, 29)
 
-[node name="SouthWindow_18" parent="Structure/Perimeter" instance=ExtResource("window")]
-position = Vector3(-4,0,29)
-rotation_degrees = Vector3(0,180,0)
+[node name="SouthWindow_17" parent="Structure/Perimeter" unique_id=1526882865 instance=ExtResource("window")]
+transform = Transform3D(-1, 0, -8.742278e-08, 0, 1, 0, 8.742278e-08, 0, -1, -6, 0, 29)
 
-[node name="SouthWindow_19" parent="Structure/Perimeter" instance=ExtResource("window")]
-position = Vector3(-2,0,29)
-rotation_degrees = Vector3(0,180,0)
+[node name="SouthWindow_18" parent="Structure/Perimeter" unique_id=1366855729 instance=ExtResource("window")]
+transform = Transform3D(-1, 0, -8.742278e-08, 0, 1, 0, 8.742278e-08, 0, -1, -4, 0, 29)
 
-[node name="SouthWindow_20" parent="Structure/Perimeter" instance=ExtResource("window")]
-position = Vector3(0,0,29)
-rotation_degrees = Vector3(0,180,0)
+[node name="SouthWindow_19" parent="Structure/Perimeter" unique_id=1200039352 instance=ExtResource("window")]
+transform = Transform3D(-1, 0, -8.742278e-08, 0, 1, 0, 8.742278e-08, 0, -1, -2, 0, 29)
 
-[node name="SouthWindow_21" parent="Structure/Perimeter" instance=ExtResource("window")]
-position = Vector3(2,0,29)
-rotation_degrees = Vector3(0,180,0)
+[node name="SouthWindow_20" parent="Structure/Perimeter" unique_id=1691978135 instance=ExtResource("window")]
+transform = Transform3D(-1, 0, -8.742278e-08, 0, 1, 0, 8.742278e-08, 0, -1, 0, 0, 29)
 
-[node name="SouthWindow_22" parent="Structure/Perimeter" instance=ExtResource("window")]
-position = Vector3(4,0,29)
-rotation_degrees = Vector3(0,180,0)
+[node name="SouthWindow_21" parent="Structure/Perimeter" unique_id=1325876789 instance=ExtResource("window")]
+transform = Transform3D(-1, 0, -8.742278e-08, 0, 1, 0, 8.742278e-08, 0, -1, 2, 0, 29)
 
-[node name="SouthWindow_23" parent="Structure/Perimeter" instance=ExtResource("window")]
-position = Vector3(6,0,29)
-rotation_degrees = Vector3(0,180,0)
+[node name="SouthWindow_22" parent="Structure/Perimeter" unique_id=677446032 instance=ExtResource("window")]
+transform = Transform3D(-1, 0, -8.742278e-08, 0, 1, 0, 8.742278e-08, 0, -1, 4, 0, 29)
 
-[node name="SouthWindow_24" parent="Structure/Perimeter" instance=ExtResource("window")]
-position = Vector3(8,0,29)
-rotation_degrees = Vector3(0,180,0)
+[node name="SouthWindow_23" parent="Structure/Perimeter" unique_id=1072968196 instance=ExtResource("window")]
+transform = Transform3D(-1, 0, -8.742278e-08, 0, 1, 0, 8.742278e-08, 0, -1, 6, 0, 29)
 
-[node name="SouthWindow_25" parent="Structure/Perimeter" instance=ExtResource("window")]
-position = Vector3(10,0,29)
-rotation_degrees = Vector3(0,180,0)
+[node name="SouthWindow_24" parent="Structure/Perimeter" unique_id=665512047 instance=ExtResource("window")]
+transform = Transform3D(-1, 0, -8.742278e-08, 0, 1, 0, 8.742278e-08, 0, -1, 8, 0, 29)
 
-[node name="SouthWindow_26" parent="Structure/Perimeter" instance=ExtResource("window")]
-position = Vector3(12,0,29)
-rotation_degrees = Vector3(0,180,0)
+[node name="SouthWindow_25" parent="Structure/Perimeter" unique_id=144834257 instance=ExtResource("window")]
+transform = Transform3D(-1, 0, -8.742278e-08, 0, 1, 0, 8.742278e-08, 0, -1, 10, 0, 29)
 
-[node name="SouthWindow_27" parent="Structure/Perimeter" instance=ExtResource("window")]
-position = Vector3(14,0,29)
-rotation_degrees = Vector3(0,180,0)
+[node name="SouthWindow_26" parent="Structure/Perimeter" unique_id=369606975 instance=ExtResource("window")]
+transform = Transform3D(-1, 0, -8.742278e-08, 0, 1, 0, 8.742278e-08, 0, -1, 12, 0, 29)
 
-[node name="SouthSolid_16" parent="Structure/Perimeter" instance=ExtResource("wall")]
-position = Vector3(16,0,29)
-rotation_degrees = Vector3(0,180,0)
+[node name="SouthWindow_27" parent="Structure/Perimeter" unique_id=993994226 instance=ExtResource("window")]
+transform = Transform3D(-1, 0, -8.742278e-08, 0, 1, 0, 8.742278e-08, 0, -1, 14, 0, 29)
 
-[node name="SouthSolid_18" parent="Structure/Perimeter" instance=ExtResource("wall")]
-position = Vector3(18,0,29)
-rotation_degrees = Vector3(0,180,0)
+[node name="SouthSolid_16" parent="Structure/Perimeter" unique_id=1169153143 instance=ExtResource("wall")]
+transform = Transform3D(-1, 0, -8.742278e-08, 0, 1, 0, 8.742278e-08, 0, -1, 16, 0, 29)
 
-[node name="ElevatorDoor_20" parent="Structure/Perimeter" instance=ExtResource("wall_door")]
-position = Vector3(20,0,29)
-rotation_degrees = Vector3(0,180,0)
+[node name="SouthSolid_18" parent="Structure/Perimeter" unique_id=1288440214 instance=ExtResource("wall")]
+transform = Transform3D(-1, 0, -8.742278e-08, 0, 1, 0, 8.742278e-08, 0, -1, 18, 0, 29)
 
-[node name="ElevatorDoor_22" parent="Structure/Perimeter" instance=ExtResource("wall_door")]
-position = Vector3(22,0,29)
-rotation_degrees = Vector3(0,180,0)
+[node name="ElevatorDoor_20" parent="Structure/Perimeter" unique_id=1037495461 instance=ExtResource("wall_door")]
+transform = Transform3D(-1, 0, -8.742278e-08, 0, 1, 0, 8.742278e-08, 0, -1, 20, 0, 29)
 
-[node name="SouthSolid_24" parent="Structure/Perimeter" instance=ExtResource("wall")]
-position = Vector3(24,0,29)
-rotation_degrees = Vector3(0,180,0)
+[node name="ElevatorDoor_22" parent="Structure/Perimeter" unique_id=735652523 instance=ExtResource("wall_door")]
+transform = Transform3D(-1, 0, -8.742278e-08, 0, 1, 0, 8.742278e-08, 0, -1, 22, 0, 29)
 
-[node name="SouthSolid_26" parent="Structure/Perimeter" instance=ExtResource("wall")]
-position = Vector3(26,0,29)
-rotation_degrees = Vector3(0,180,0)
+[node name="SouthSolid_24" parent="Structure/Perimeter" unique_id=219839379 instance=ExtResource("wall")]
+transform = Transform3D(-1, 0, -8.742278e-08, 0, 1, 0, 8.742278e-08, 0, -1, 24, 0, 29)
 
-[node name="EmergencyDoor" parent="Structure/Perimeter" instance=ExtResource("emergency")]
-position = Vector3(28,0,29)
-rotation_degrees = Vector3(0,180,0)
+[node name="SouthSolid_26" parent="Structure/Perimeter" unique_id=1383815707 instance=ExtResource("wall")]
+transform = Transform3D(-1, 0, -8.742278e-08, 0, 1, 0, 8.742278e-08, 0, -1, 26, 0, 29)
 
-[node name="SouthSolid_30" parent="Structure/Perimeter" instance=ExtResource("wall")]
-position = Vector3(30,0,29)
-rotation_degrees = Vector3(0,180,0)
+[node name="EmergencyDoor" parent="Structure/Perimeter" unique_id=1978550286 instance=ExtResource("emergency")]
+transform = Transform3D(-1, 0, -8.742278e-08, 0, 1, 0, 8.742278e-08, 0, -1, 28, 0, 29)
 
-[node name="SouthSolid_32" parent="Structure/Perimeter" instance=ExtResource("wall")]
-position = Vector3(32,0,29)
-rotation_degrees = Vector3(0,180,0)
+[node name="SouthSolid_30" parent="Structure/Perimeter" unique_id=1153623716 instance=ExtResource("wall")]
+transform = Transform3D(-1, 0, -8.742278e-08, 0, 1, 0, 8.742278e-08, 0, -1, 30, 0, 29)
 
-[node name="SouthSolid_34" parent="Structure/Perimeter" instance=ExtResource("wall")]
-position = Vector3(34,0,29)
-rotation_degrees = Vector3(0,180,0)
+[node name="SouthSolid_32" parent="Structure/Perimeter" unique_id=422680057 instance=ExtResource("wall")]
+transform = Transform3D(-1, 0, -8.742278e-08, 0, 1, 0, 8.742278e-08, 0, -1, 32, 0, 29)
 
-[node name="SouthSolid_36" parent="Structure/Perimeter" instance=ExtResource("wall")]
-position = Vector3(36,0,29)
-rotation_degrees = Vector3(0,180,0)
+[node name="SouthSolid_34" parent="Structure/Perimeter" unique_id=417891687 instance=ExtResource("wall")]
+transform = Transform3D(-1, 0, -8.742278e-08, 0, 1, 0, 8.742278e-08, 0, -1, 34, 0, 29)
 
-[node name="SouthWindow_28" parent="Structure/Perimeter" instance=ExtResource("window")]
-position = Vector3(38,0,29)
-rotation_degrees = Vector3(0,180,0)
+[node name="SouthSolid_36" parent="Structure/Perimeter" unique_id=1441542411 instance=ExtResource("wall")]
+transform = Transform3D(-1, 0, -8.742278e-08, 0, 1, 0, 8.742278e-08, 0, -1, 36, 0, 29)
 
-[node name="WestWindow_3" parent="Structure/Perimeter" instance=ExtResource("window")]
-position = Vector3(-39,0,-24)
-rotation_degrees = Vector3(0,90,0)
+[node name="SouthWindow_28" parent="Structure/Perimeter" unique_id=1391764105 instance=ExtResource("window")]
+transform = Transform3D(0.034631208, 0, -1.0042901, 0, 1, 0, 1.1579413, 0, 0.030035874, 39.046955, 2.3841858e-07, 26.429174)
 
-[node name="EastWindow_3" parent="Structure/Perimeter" instance=ExtResource("window")]
-position = Vector3(39,0,-24)
-rotation_degrees = Vector3(0,-90,0)
+[node name="WestWindow_3" parent="Structure/Perimeter" unique_id=395690436 instance=ExtResource("window")]
+transform = Transform3D(-8.2066464e-08, 0, 1, 0, 1, 0, -1.8774619, 0, -4.371139e-08, -39, 0, -25.071814)
 
-[node name="WestWindow_4" parent="Structure/Perimeter" instance=ExtResource("window")]
-position = Vector3(-39,0,-22)
-rotation_degrees = Vector3(0,90,0)
+[node name="EastWindow_3" parent="Structure/Perimeter" unique_id=612493226 instance=ExtResource("window")]
+transform = Transform3D(-6.858393e-08, 0, -1, 0, 1, 0, 1.5690174, 0, -4.371139e-08, 39, 0, -24.659206)
 
-[node name="EastWindow_4" parent="Structure/Perimeter" instance=ExtResource("window")]
-position = Vector3(39,0,-22)
-rotation_degrees = Vector3(0,-90,0)
+[node name="EastWindow_3" parent="Structure/Perimeter/EastWindow_3" unique_id=32681993 instance=ExtResource("window")]
+transform = Transform3D(-4.371139e-08, 0, -1, 0, 1, 0, 1, 0, -4.371139e-08, 39, 0, -24)
 
-[node name="WestWindow_5" parent="Structure/Perimeter" instance=ExtResource("window")]
-position = Vector3(-39,0,-20)
-rotation_degrees = Vector3(0,90,0)
+[node name="EastWindow_4" parent="Structure/Perimeter/EastWindow_3" unique_id=1553241854 instance=ExtResource("window")]
+transform = Transform3D(-4.371139e-08, 0, -1, 0, 1, 0, 1, 0, -4.371139e-08, 39, 0, -24.642794)
 
-[node name="EastWindow_5" parent="Structure/Perimeter" instance=ExtResource("window")]
-position = Vector3(39,0,-20)
-rotation_degrees = Vector3(0,-90,0)
+[node name="EastWindow_3" parent="Structure/Perimeter/EastWindow_3/EastWindow_4" unique_id=325306520 instance=ExtResource("window")]
+transform = Transform3D(-4.371139e-08, 0, -1, 0, 1, 0, 1, 0, -4.371139e-08, 39, 0, -24)
 
-[node name="WestWindow_6" parent="Structure/Perimeter" instance=ExtResource("window")]
-position = Vector3(-39,0,-18)
-rotation_degrees = Vector3(0,90,0)
+[node name="WestWindow_4" parent="Structure/Perimeter" unique_id=253431318 instance=ExtResource("window")]
+transform = Transform3D(-4.371139e-08, 0, 1, 0, 1, 0, -1, 0, -4.371139e-08, -39, 0, -22)
 
-[node name="EastWindow_6" parent="Structure/Perimeter" instance=ExtResource("window")]
-position = Vector3(39,0,-18)
-rotation_degrees = Vector3(0,-90,0)
+[node name="EastWindow_4" parent="Structure/Perimeter" unique_id=604673566 instance=ExtResource("window")]
+transform = Transform3D(-4.371139e-08, 0, -1, 0, 1, 0, 1, 0, -4.371139e-08, 39, 0, -22)
 
-[node name="WestWindow_7" parent="Structure/Perimeter" instance=ExtResource("window")]
-position = Vector3(-39,0,-16)
-rotation_degrees = Vector3(0,90,0)
+[node name="WestWindow_5" parent="Structure/Perimeter" unique_id=1780763959 instance=ExtResource("window")]
+transform = Transform3D(-4.371139e-08, 0, 1, 0, 1, 0, -1, 0, -4.371139e-08, -39, 0, -20)
 
-[node name="EastWindow_7" parent="Structure/Perimeter" instance=ExtResource("window")]
-position = Vector3(39,0,-16)
-rotation_degrees = Vector3(0,-90,0)
+[node name="EastWindow_5" parent="Structure/Perimeter" unique_id=186051770 instance=ExtResource("window")]
+transform = Transform3D(-4.371139e-08, 0, -1, 0, 1, 0, 1, 0, -4.371139e-08, 39, 0, -20)
 
-[node name="WestWindow_8" parent="Structure/Perimeter" instance=ExtResource("window")]
-position = Vector3(-39,0,-14)
-rotation_degrees = Vector3(0,90,0)
+[node name="WestWindow_6" parent="Structure/Perimeter" unique_id=1799156431 instance=ExtResource("window")]
+transform = Transform3D(-4.371139e-08, 0, 1, 0, 1, 0, -1, 0, -4.371139e-08, -39, 0, -18)
 
-[node name="EastWindow_8" parent="Structure/Perimeter" instance=ExtResource("window")]
-position = Vector3(39,0,-14)
-rotation_degrees = Vector3(0,-90,0)
+[node name="EastWindow_6" parent="Structure/Perimeter" unique_id=2088407252 instance=ExtResource("window")]
+transform = Transform3D(-4.371139e-08, 0, -1, 0, 1, 0, 1, 0, -4.371139e-08, 39, 0, -18)
 
-[node name="WestWindow_9" parent="Structure/Perimeter" instance=ExtResource("window")]
-position = Vector3(-39,0,-12)
-rotation_degrees = Vector3(0,90,0)
+[node name="WestWindow_7" parent="Structure/Perimeter" unique_id=456006937 instance=ExtResource("window")]
+transform = Transform3D(-4.371139e-08, 0, 1, 0, 1, 0, -1, 0, -4.371139e-08, -39, 0, -16)
 
-[node name="EastWindow_9" parent="Structure/Perimeter" instance=ExtResource("window")]
-position = Vector3(39,0,-12)
-rotation_degrees = Vector3(0,-90,0)
+[node name="EastWindow_7" parent="Structure/Perimeter" unique_id=890365116 instance=ExtResource("window")]
+transform = Transform3D(-4.371139e-08, 0, -1, 0, 1, 0, 1, 0, -4.371139e-08, 39, 0, -16)
 
-[node name="WestWindow_10" parent="Structure/Perimeter" instance=ExtResource("window")]
-position = Vector3(-39,0,-10)
-rotation_degrees = Vector3(0,90,0)
+[node name="WestWindow_8" parent="Structure/Perimeter" unique_id=1089160577 instance=ExtResource("window")]
+transform = Transform3D(-4.371139e-08, 0, 1, 0, 1, 0, -1, 0, -4.371139e-08, -39, 0, -14)
 
-[node name="EastWindow_10" parent="Structure/Perimeter" instance=ExtResource("window")]
-position = Vector3(39,0,-10)
-rotation_degrees = Vector3(0,-90,0)
+[node name="EastWindow_8" parent="Structure/Perimeter" unique_id=2019234852 instance=ExtResource("window")]
+transform = Transform3D(-4.371139e-08, 0, -1, 0, 1, 0, 1, 0, -4.371139e-08, 39, 0, -14)
 
-[node name="WestWindow_11" parent="Structure/Perimeter" instance=ExtResource("window")]
-position = Vector3(-39,0,-8)
-rotation_degrees = Vector3(0,90,0)
+[node name="WestWindow_9" parent="Structure/Perimeter" unique_id=1093891111 instance=ExtResource("window")]
+transform = Transform3D(-4.371139e-08, 0, 1, 0, 1, 0, -1, 0, -4.371139e-08, -39, 0, -12)
 
-[node name="EastWindow_11" parent="Structure/Perimeter" instance=ExtResource("window")]
-position = Vector3(39,0,-8)
-rotation_degrees = Vector3(0,-90,0)
+[node name="EastWindow_9" parent="Structure/Perimeter" unique_id=310400501 instance=ExtResource("window")]
+transform = Transform3D(-4.371139e-08, 0, -1, 0, 1, 0, 1, 0, -4.371139e-08, 39, 0, -12)
 
-[node name="WestWindow_12" parent="Structure/Perimeter" instance=ExtResource("window")]
-position = Vector3(-39,0,-6)
-rotation_degrees = Vector3(0,90,0)
+[node name="WestWindow_10" parent="Structure/Perimeter" unique_id=943171140 instance=ExtResource("window")]
+transform = Transform3D(-4.371139e-08, 0, 1, 0, 1, 0, -1, 0, -4.371139e-08, -39, 0, -10)
 
-[node name="EastWindow_12" parent="Structure/Perimeter" instance=ExtResource("window")]
-position = Vector3(39,0,-6)
-rotation_degrees = Vector3(0,-90,0)
+[node name="EastWindow_10" parent="Structure/Perimeter" unique_id=179259610 instance=ExtResource("window")]
+transform = Transform3D(-4.371139e-08, 0, -1, 0, 1, 0, 1, 0, -4.371139e-08, 39, 0, -10)
 
-[node name="WestWindow_13" parent="Structure/Perimeter" instance=ExtResource("window")]
-position = Vector3(-39,0,-4)
-rotation_degrees = Vector3(0,90,0)
+[node name="WestWindow_11" parent="Structure/Perimeter" unique_id=438781980 instance=ExtResource("window")]
+transform = Transform3D(-4.371139e-08, 0, 1, 0, 1, 0, -1, 0, -4.371139e-08, -39, 0, -8)
 
-[node name="EastWindow_13" parent="Structure/Perimeter" instance=ExtResource("window")]
-position = Vector3(39,0,-4)
-rotation_degrees = Vector3(0,-90,0)
+[node name="EastWindow_11" parent="Structure/Perimeter" unique_id=1693265198 instance=ExtResource("window")]
+transform = Transform3D(-4.371139e-08, 0, -1, 0, 1, 0, 1, 0, -4.371139e-08, 39, 0, -8)
 
-[node name="WestWindow_14" parent="Structure/Perimeter" instance=ExtResource("window")]
-position = Vector3(-39,0,-2)
-rotation_degrees = Vector3(0,90,0)
+[node name="WestWindow_12" parent="Structure/Perimeter" unique_id=1446683978 instance=ExtResource("window")]
+transform = Transform3D(-4.371139e-08, 0, 1, 0, 1, 0, -1, 0, -4.371139e-08, -39, 0, -6)
 
-[node name="EastWindow_14" parent="Structure/Perimeter" instance=ExtResource("window")]
-position = Vector3(39,0,-2)
-rotation_degrees = Vector3(0,-90,0)
+[node name="EastWindow_12" parent="Structure/Perimeter" unique_id=2107830238 instance=ExtResource("window")]
+transform = Transform3D(-4.371139e-08, 0, -1, 0, 1, 0, 1, 0, -4.371139e-08, 39, 0, -6)
 
-[node name="WestWindow_15" parent="Structure/Perimeter" instance=ExtResource("window")]
-position = Vector3(-39,0,0)
-rotation_degrees = Vector3(0,90,0)
+[node name="WestWindow_13" parent="Structure/Perimeter" unique_id=1414470071 instance=ExtResource("window")]
+transform = Transform3D(-4.371139e-08, 0, 1, 0, 1, 0, -1, 0, -4.371139e-08, -39, 0, -4)
 
-[node name="EastWindow_15" parent="Structure/Perimeter" instance=ExtResource("window")]
-position = Vector3(39,0,0)
-rotation_degrees = Vector3(0,-90,0)
+[node name="EastWindow_13" parent="Structure/Perimeter" unique_id=1119210217 instance=ExtResource("window")]
+transform = Transform3D(-4.371139e-08, 0, -1, 0, 1, 0, 1, 0, -4.371139e-08, 39, 0, -4)
 
-[node name="WestWindow_16" parent="Structure/Perimeter" instance=ExtResource("window")]
-position = Vector3(-39,0,2)
-rotation_degrees = Vector3(0,90,0)
+[node name="WestWindow_14" parent="Structure/Perimeter" unique_id=1309486186 instance=ExtResource("window")]
+transform = Transform3D(-4.371139e-08, 0, 1, 0, 1, 0, -1, 0, -4.371139e-08, -39, 0, -2)
 
-[node name="EastWindow_16" parent="Structure/Perimeter" instance=ExtResource("window")]
-position = Vector3(39,0,2)
-rotation_degrees = Vector3(0,-90,0)
-
-[node name="WestWindow_17" parent="Structure/Perimeter" instance=ExtResource("window")]
-position = Vector3(-39,0,4)
-rotation_degrees = Vector3(0,90,0)
-
-[node name="EastWindow_17" parent="Structure/Perimeter" instance=ExtResource("window")]
-position = Vector3(39,0,4)
-rotation_degrees = Vector3(0,-90,0)
+[node name="EastWindow_14" parent="Structure/Perimeter" unique_id=1504114030 instance=ExtResource("window")]
+transform = Transform3D(-4.371139e-08, 0, -1, 0, 1, 0, 1, 0, -4.371139e-08, 39, 0, -2)
 
-[node name="WestWindow_18" parent="Structure/Perimeter" instance=ExtResource("window")]
-position = Vector3(-39,0,6)
-rotation_degrees = Vector3(0,90,0)
+[node name="WestWindow_15" parent="Structure/Perimeter" unique_id=139424619 instance=ExtResource("window")]
+transform = Transform3D(-4.371139e-08, 0, 1, 0, 1, 0, -1, 0, -4.371139e-08, -39, 0, 0)
 
-[node name="EastWindow_18" parent="Structure/Perimeter" instance=ExtResource("window")]
-position = Vector3(39,0,6)
-rotation_degrees = Vector3(0,-90,0)
+[node name="EastWindow_15" parent="Structure/Perimeter" unique_id=1834935280 instance=ExtResource("window")]
+transform = Transform3D(-4.371139e-08, 0, -1, 0, 1, 0, 1, 0, -4.371139e-08, 39, 0, 0)
 
-[node name="WestWindow_19" parent="Structure/Perimeter" instance=ExtResource("window")]
-position = Vector3(-39,0,8)
-rotation_degrees = Vector3(0,90,0)
+[node name="WestWindow_16" parent="Structure/Perimeter" unique_id=1370123149 instance=ExtResource("window")]
+transform = Transform3D(-4.371139e-08, 0, 1, 0, 1, 0, -1, 0, -4.371139e-08, -39, 0, 2)
 
-[node name="EastWindow_19" parent="Structure/Perimeter" instance=ExtResource("window")]
-position = Vector3(39,0,8)
-rotation_degrees = Vector3(0,-90,0)
+[node name="EastWindow_16" parent="Structure/Perimeter" unique_id=580288994 instance=ExtResource("window")]
+transform = Transform3D(-4.371139e-08, 0, -1, 0, 1, 0, 1, 0, -4.371139e-08, 39, 0, 2)
 
-[node name="WestWindow_20" parent="Structure/Perimeter" instance=ExtResource("window")]
-position = Vector3(-39,0,10)
-rotation_degrees = Vector3(0,90,0)
+[node name="WestWindow_17" parent="Structure/Perimeter" unique_id=1266155708 instance=ExtResource("window")]
+transform = Transform3D(-4.371139e-08, 0, 1, 0, 1, 0, -1, 0, -4.371139e-08, -39, 0, 4)
 
-[node name="EastWindow_20" parent="Structure/Perimeter" instance=ExtResource("window")]
-position = Vector3(39,0,10)
-rotation_degrees = Vector3(0,-90,0)
+[node name="EastWindow_17" parent="Structure/Perimeter" unique_id=1662956500 instance=ExtResource("window")]
+transform = Transform3D(-4.371139e-08, 0, -1, 0, 1, 0, 1, 0, -4.371139e-08, 39, 0, 4)
 
-[node name="WestWindow_21" parent="Structure/Perimeter" instance=ExtResource("window")]
-position = Vector3(-39,0,12)
-rotation_degrees = Vector3(0,90,0)
+[node name="WestWindow_18" parent="Structure/Perimeter" unique_id=1146476164 instance=ExtResource("window")]
+transform = Transform3D(-4.371139e-08, 0, 1, 0, 1, 0, -1, 0, -4.371139e-08, -39, 0, 6)
 
-[node name="EastWindow_21" parent="Structure/Perimeter" instance=ExtResource("window")]
-position = Vector3(39,0,12)
-rotation_degrees = Vector3(0,-90,0)
+[node name="EastWindow_18" parent="Structure/Perimeter" unique_id=1258631394 instance=ExtResource("window")]
+transform = Transform3D(-4.371139e-08, 0, -1, 0, 1, 0, 1, 0, -4.371139e-08, 39, 0, 6)
 
-[node name="WestWindow_22" parent="Structure/Perimeter" instance=ExtResource("window")]
-position = Vector3(-39,0,14)
-rotation_degrees = Vector3(0,90,0)
+[node name="WestWindow_19" parent="Structure/Perimeter" unique_id=558422798 instance=ExtResource("window")]
+transform = Transform3D(-4.371139e-08, 0, 1, 0, 1, 0, -1, 0, -4.371139e-08, -39, 0, 8)
 
-[node name="EastWindow_22" parent="Structure/Perimeter" instance=ExtResource("window")]
-position = Vector3(39,0,14)
-rotation_degrees = Vector3(0,-90,0)
+[node name="EastWindow_19" parent="Structure/Perimeter" unique_id=700322979 instance=ExtResource("window")]
+transform = Transform3D(-4.371139e-08, 0, -1, 0, 1, 0, 1, 0, -4.371139e-08, 39, 0, 8)
 
-[node name="WestWindow_23" parent="Structure/Perimeter" instance=ExtResource("window")]
-position = Vector3(-39,0,16)
-rotation_degrees = Vector3(0,90,0)
+[node name="WestWindow_20" parent="Structure/Perimeter" unique_id=1305049792 instance=ExtResource("window")]
+transform = Transform3D(-4.371139e-08, 0, 1, 0, 1, 0, -1, 0, -4.371139e-08, -39, 0, 10)
 
-[node name="EastWindow_23" parent="Structure/Perimeter" instance=ExtResource("window")]
-position = Vector3(39,0,16)
-rotation_degrees = Vector3(0,-90,0)
-
-[node name="WestWindow_24" parent="Structure/Perimeter" instance=ExtResource("window")]
-position = Vector3(-39,0,18)
-rotation_degrees = Vector3(0,90,0)
-
-[node name="EastWindow_24" parent="Structure/Perimeter" instance=ExtResource("window")]
-position = Vector3(39,0,18)
-rotation_degrees = Vector3(0,-90,0)
-
-[node name="WestWindow_25" parent="Structure/Perimeter" instance=ExtResource("window")]
-position = Vector3(-39,0,20)
-rotation_degrees = Vector3(0,90,0)
-
-[node name="EastWindow_25" parent="Structure/Perimeter" instance=ExtResource("window")]
-position = Vector3(39,0,20)
-rotation_degrees = Vector3(0,-90,0)
-
-[node name="WestWindow_26" parent="Structure/Perimeter" instance=ExtResource("window")]
-position = Vector3(-39,0,22)
-rotation_degrees = Vector3(0,90,0)
-
-[node name="EastWindow_26" parent="Structure/Perimeter" instance=ExtResource("window")]
-position = Vector3(39,0,22)
-rotation_degrees = Vector3(0,-90,0)
-
-[node name="WestWindow_27" parent="Structure/Perimeter" instance=ExtResource("window")]
-position = Vector3(-39,0,24)
-rotation_degrees = Vector3(0,90,0)
-
-[node name="EastWindow_27" parent="Structure/Perimeter" instance=ExtResource("window")]
-position = Vector3(39,0,24)
-rotation_degrees = Vector3(0,-90,0)
-
-[node name="PerimeterCollision" type="StaticBody3D" parent="Structure"]
-[node name="North" type="CollisionShape3D" parent="Structure/PerimeterCollision"]
-position = Vector3(0,1.5,-29.1)
-shape = SubResource("north_south_collision")
-[node name="South" type="CollisionShape3D" parent="Structure/PerimeterCollision"]
-position = Vector3(0,1.5,29.1)
-shape = SubResource("north_south_collision")
-[node name="West" type="CollisionShape3D" parent="Structure/PerimeterCollision"]
-position = Vector3(-39.1,1.5,0)
-shape = SubResource("east_west_collision")
-[node name="East" type="CollisionShape3D" parent="Structure/PerimeterCollision"]
-position = Vector3(39.1,1.5,0)
-shape = SubResource("east_west_collision")
-
-[node name="Columns" type="Node3D" parent="Structure"]
-
-[node name="Column_1" parent="Structure/Columns" instance=ExtResource("column")]
-position = Vector3(-26,0,-18)
-
-[node name="Column_2" parent="Structure/Columns" instance=ExtResource("column")]
-position = Vector3(-26,0,0)
-
-[node name="Column_3" parent="Structure/Columns" instance=ExtResource("column")]
-position = Vector3(-26,0,18)
-
-[node name="Column_4" parent="Structure/Columns" instance=ExtResource("column")]
-position = Vector3(-13,0,-18)
-
-[node name="Column_5" parent="Structure/Columns" instance=ExtResource("column")]
-position = Vector3(-13,0,0)
-
-[node name="Column_6" parent="Structure/Columns" instance=ExtResource("column")]
-position = Vector3(-13,0,18)
-
-[node name="Column_7" parent="Structure/Columns" instance=ExtResource("column")]
-position = Vector3(0,0,-18)
-
-[node name="Column_9" parent="Structure/Columns" instance=ExtResource("column")]
-position = Vector3(0,0,18)
-
-[node name="Column_10" parent="Structure/Columns" instance=ExtResource("column")]
-position = Vector3(13,0,-18)
-
-[node name="Column_13" parent="Structure/Columns" instance=ExtResource("column")]
-position = Vector3(26,0,-18)
-
-[node name="Interior" type="Node3D" parent="Structure"]
-
-; Elevator lobby: solid rear facade, short exit corridor and small reception hall.
-[node name="LobbyWallL" parent="Structure/Interior" instance=ExtResource("wall")]
-position = Vector3(8.24,0,9.27)
-rotation_degrees = Vector3(0,90,0)
-[node name="LobbyInnerL" parent="Structure/Interior" instance=ExtResource("inner")]
-position = Vector3(8.24,0,5.15)
-rotation_degrees = Vector3(0,90,0)
-[node name="LobbyWallR" parent="Structure/Interior" instance=ExtResource("wall")]
-position = Vector3(16.48,0,9.27)
-rotation_degrees = Vector3(0,90,0)
-[node name="LobbyInnerR" parent="Structure/Interior" instance=ExtResource("inner")]
-position = Vector3(16.48,0,5.15)
-rotation_degrees = Vector3(0,180,0)
-
-; Corridor exits into a small hall, then splits left/right into wide circulation.
-[node name="HallHalf_1" parent="Structure/Interior" instance=ExtResource("half")]
-position = Vector3(7.21,0,3.09)
-[node name="HallHalf_2" parent="Structure/Interior" instance=ExtResource("half")]
-position = Vector3(5.15,0,3.09)
-[node name="HallOuter_1" parent="Structure/Interior" instance=ExtResource("outer")]
-position = Vector3(3.09,0,3.09)
-[node name="HallHalf_3" parent="Structure/Interior" instance=ExtResource("half")]
-position = Vector3(17.51,0,3.09)
-[node name="HallOuter_2" parent="Structure/Interior" instance=ExtResource("outer")]
-position = Vector3(19.57,0,3.09)
-rotation_degrees = Vector3(0,90,0)
-
-; Left enclosed office.
-[node name="OfficeNWCorner" parent="Structure/Interior" instance=ExtResource("inner")]
-position = Vector3(-14.42,0,-9.27)
-[node name="OfficeNWall1" parent="Structure/Interior" instance=ExtResource("half")]
-position = Vector3(-12.36,0,-9.27)
-[node name="OfficeNWall2" parent="Structure/Interior" instance=ExtResource("half")]
-position = Vector3(-10.30,0,-9.27)
-[node name="OfficeNECorner" parent="Structure/Interior" instance=ExtResource("outer")]
-position = Vector3(-8.24,0,-9.27)
-rotation_degrees = Vector3(0,90,0)
-[node name="OfficeEWall1" parent="Structure/Interior" instance=ExtResource("wall")]
-position = Vector3(-8.24,0,-7.21)
-rotation_degrees = Vector3(0,90,0)
-[node name="OfficeEWall2" parent="Structure/Interior" instance=ExtResource("wall_door")]
-position = Vector3(-8.24,0,-5.15)
-rotation_degrees = Vector3(0,90,0)
-[node name="OfficeSECorner" parent="Structure/Interior" instance=ExtResource("inner")]
-position = Vector3(-8.24,0,-3.09)
-rotation_degrees = Vector3(0,180,0)
-[node name="OfficeSWCorner" parent="Structure/Interior" instance=ExtResource("outer")]
-position = Vector3(-14.42,0,-3.09)
-rotation_degrees = Vector3(0,-90,0)
-[node name="OfficeWWall1" parent="Structure/Interior" instance=ExtResource("half")]
-position = Vector3(-14.42,0,-5.15)
-rotation_degrees = Vector3(0,90,0)
-[node name="OfficeWWall2" parent="Structure/Interior" instance=ExtResource("half")]
-position = Vector3(-14.42,0,-7.21)
-rotation_degrees = Vector3(0,90,0)
-
-; Central room edge leaves broad open combat spaces north and west.
-[node name="CenterCornerA" parent="Structure/Interior" instance=ExtResource("outer")]
-position = Vector3(-4.12,0,0)
-[node name="CenterHalf1" parent="Structure/Interior" instance=ExtResource("half")]
-position = Vector3(-2.06,0,0)
-[node name="CenterHalf2" parent="Structure/Interior" instance=ExtResource("half")]
-position = Vector3(0,0,0)
-[node name="CenterCornerB" parent="Structure/Interior" instance=ExtResource("inner")]
-position = Vector3(2.06,0,0)
-rotation_degrees = Vector3(0,90,0)
-
-
-[node name="WallCollision" type="StaticBody3D" parent="Structure"]
-
-[node name="Segment_1" type="CollisionShape3D" parent="Structure/WallCollision"]
-position = Vector3(8.24,1.5,9.27)
-rotation_degrees = Vector3(0,90,0)
+[node name="EastWindow_20" parent="Structure/Perimeter" unique_id=422542089 instance=ExtResource("window")]
+transform = Transform3D(-4.371139e-08, 0, -1, 0, 1, 0, 1, 0, -4.371139e-08, 39, 0, 10)
+
+[node name="WestWindow_21" parent="Structure/Perimeter" unique_id=1354632034 instance=ExtResource("window")]
+transform = Transform3D(-4.371139e-08, 0, 1, 0, 1, 0, -1, 0, -4.371139e-08, -39, 0, 12)
+
+[node name="EastWindow_21" parent="Structure/Perimeter" unique_id=1885614074 instance=ExtResource("window")]
+transform = Transform3D(-4.371139e-08, 0, -1, 0, 1, 0, 1, 0, -4.371139e-08, 39, 0, 12)
+
+[node name="WestWindow_22" parent="Structure/Perimeter" unique_id=196845529 instance=ExtResource("window")]
+transform = Transform3D(-4.371139e-08, 0, 1, 0, 1, 0, -1, 0, -4.371139e-08, -39, 0, 14)
+
+[node name="EastWindow_22" parent="Structure/Perimeter" unique_id=994684507 instance=ExtResource("window")]
+transform = Transform3D(-4.371139e-08, 0, -1, 0, 1, 0, 1, 0, -4.371139e-08, 39, 0, 14)
+
+[node name="WestWindow_23" parent="Structure/Perimeter" unique_id=291065052 instance=ExtResource("window")]
+transform = Transform3D(-4.371139e-08, 0, 1, 0, 1, 0, -1, 0, -4.371139e-08, -39, 0, 16)
+
+[node name="EastWindow_23" parent="Structure/Perimeter" unique_id=1123172971 instance=ExtResource("window")]
+transform = Transform3D(-4.371139e-08, 0, -1, 0, 1, 0, 1, 0, -4.371139e-08, 39, 0, 16)
+
+[node name="WestWindow_24" parent="Structure/Perimeter" unique_id=73626371 instance=ExtResource("window")]
+transform = Transform3D(-4.371139e-08, 0, 1, 0, 1, 0, -1, 0, -4.371139e-08, -39, 0, 18)
+
+[node name="EastWindow_24" parent="Structure/Perimeter" unique_id=1668534309 instance=ExtResource("window")]
+transform = Transform3D(-4.371139e-08, 0, -1, 0, 1, 0, 1, 0, -4.371139e-08, 39, 0, 18)
+
+[node name="WestWindow_25" parent="Structure/Perimeter" unique_id=1107012575 instance=ExtResource("window")]
+transform = Transform3D(-4.371139e-08, 0, 1, 0, 1, 0, -1, 0, -4.371139e-08, -39, 0, 20)
+
+[node name="EastWindow_25" parent="Structure/Perimeter" unique_id=1902464142 instance=ExtResource("window")]
+transform = Transform3D(-4.371139e-08, 0, -1, 0, 1, 0, 1, 0, -4.371139e-08, 39, 0, 20)
+
+[node name="WestWindow_26" parent="Structure/Perimeter" unique_id=782893119 instance=ExtResource("window")]
+transform = Transform3D(-4.371139e-08, 0, 1, 0, 1, 0, -1, 0, -4.371139e-08, -39, 0, 22)
+
+[node name="EastWindow_26" parent="Structure/Perimeter" unique_id=802586307 instance=ExtResource("window")]
+transform = Transform3D(-4.371139e-08, 0, -1, 0, 1, 0, 1, 0, -4.371139e-08, 39, 0, 22)
+
+[node name="WestWindow_27" parent="Structure/Perimeter" unique_id=1550533797 instance=ExtResource("window")]
+transform = Transform3D(-5.838201e-08, 0, 1, 0, 1, 0, -1.3356247, 0, -4.371139e-08, -39, 0, 24.43271)
+
+[node name="EastWindow_27" parent="Structure/Perimeter" unique_id=125140194 instance=ExtResource("window")]
+transform = Transform3D(-4.371139e-08, 0, -1, 0, 1, 0, 1, 0, -4.371139e-08, 39, 0, 24.135021)
+
+[node name="PerimeterCollision" type="StaticBody3D" parent="Structure" unique_id=580762569]
+
+[node name="Columns" type="Node3D" parent="Structure" unique_id=384100776]
+
+[node name="Column_1" parent="Structure/Columns" unique_id=1543718114 instance=ExtResource("column")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -26, 0, -18)
+
+[node name="Column_2" parent="Structure/Columns" unique_id=1131035219 instance=ExtResource("column")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -26, 0, 0)
+
+[node name="Column_3" parent="Structure/Columns" unique_id=1410105953 instance=ExtResource("column")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -26, 0, 18)
+
+[node name="Column_4" parent="Structure/Columns" unique_id=444724414 instance=ExtResource("column")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -13, 0, -18)
+
+[node name="Column_5" parent="Structure/Columns" unique_id=1968110493 instance=ExtResource("column")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -13, 0, 0)
+
+[node name="Column_6" parent="Structure/Columns" unique_id=1512508554 instance=ExtResource("column")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -13, 0, 18)
+
+[node name="Column_7" parent="Structure/Columns" unique_id=314132403 instance=ExtResource("column")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, -18)
+
+[node name="Column_9" parent="Structure/Columns" unique_id=1676097566 instance=ExtResource("column")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 18)
+
+[node name="Column_10" parent="Structure/Columns" unique_id=1920816631 instance=ExtResource("column")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 13, 0, -18)
+
+[node name="Column_13" parent="Structure/Columns" unique_id=1843346836 instance=ExtResource("column")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 26, 0, -18)
+
+[node name="Interior" type="Node3D" parent="Structure" unique_id=530802739]
+
+[node name="LobbyWallL" parent="Structure/Interior" unique_id=692838826 instance=ExtResource("wall")]
+transform = Transform3D(-4.371139e-08, 0, 1, 0, 1, 0, -1, 0, -4.371139e-08, 8.24, 0, 9.27)
+
+[node name="LobbyInnerL" parent="Structure/Interior" unique_id=1927249751 instance=ExtResource("inner")]
+transform = Transform3D(-4.371139e-08, 0, 1, 0, 1, 0, -1, 0, -4.371139e-08, 8.24, 0, 5.15)
+
+[node name="LobbyWallR" parent="Structure/Interior" unique_id=1659516860 instance=ExtResource("wall")]
+transform = Transform3D(-4.371139e-08, 0, 1, 0, 1, 0, -1, 0, -4.371139e-08, 16.48, 0, 9.27)
+
+[node name="LobbyInnerR" parent="Structure/Interior" unique_id=866951330 instance=ExtResource("inner")]
+transform = Transform3D(-1, 0, -8.742278e-08, 0, 1, 0, 8.742278e-08, 0, -1, 16.48, 0, 5.15)
+
+[node name="HallHalf_1" parent="Structure/Interior" unique_id=1595838475 instance=ExtResource("half")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 7.21, 0, 3.09)
+
+[node name="HallHalf_2" parent="Structure/Interior" unique_id=1688117585 instance=ExtResource("half")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 5.15, 0, 3.09)
+
+[node name="HallOuter_1" parent="Structure/Interior" unique_id=155953831 instance=ExtResource("outer")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 3.09, 0, 3.09)
+
+[node name="HallHalf_3" parent="Structure/Interior" unique_id=1959649879 instance=ExtResource("half")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 17.51, 0, 3.09)
+
+[node name="HallOuter_2" parent="Structure/Interior" unique_id=606904183 instance=ExtResource("outer")]
+transform = Transform3D(-4.371139e-08, 0, 1, 0, 1, 0, -1, 0, -4.371139e-08, 19.57, 0, 3.09)
+
+[node name="OfficeNWCorner" parent="Structure/Interior" unique_id=248878949 instance=ExtResource("inner")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -14.42, 0, -9.27)
+
+[node name="OfficeNWall1" parent="Structure/Interior" unique_id=1848365102 instance=ExtResource("half")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -12.36, 0, -9.27)
+
+[node name="OfficeNWall2" parent="Structure/Interior" unique_id=1747177539 instance=ExtResource("half")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -10.3, 0, -9.27)
+
+[node name="OfficeNECorner" parent="Structure/Interior" unique_id=1329777646 instance=ExtResource("outer")]
+transform = Transform3D(-4.371139e-08, 0, 1, 0, 1, 0, -1, 0, -4.371139e-08, -8.24, 0, -9.27)
+
+[node name="OfficeEWall1" parent="Structure/Interior" unique_id=412525553 instance=ExtResource("wall")]
+transform = Transform3D(-4.371139e-08, 0, 1, 0, 1, 0, -1, 0, -4.371139e-08, -8.24, 0, -7.21)
+
+[node name="OfficeEWall2" parent="Structure/Interior" unique_id=145395933 instance=ExtResource("wall_door")]
+transform = Transform3D(-4.371139e-08, 0, 1, 0, 1, 0, -1, 0, -4.371139e-08, -8.24, 0, -5.15)
+
+[node name="OfficeSECorner" parent="Structure/Interior" unique_id=1982165211 instance=ExtResource("inner")]
+transform = Transform3D(-1, 0, -8.742278e-08, 0, 1, 0, 8.742278e-08, 0, -1, -8.24, 0, -3.09)
+
+[node name="OfficeSWCorner" parent="Structure/Interior" unique_id=667501865 instance=ExtResource("outer")]
+transform = Transform3D(-4.371139e-08, 0, -1, 0, 1, 0, 1, 0, -4.371139e-08, -14.42, 0, -3.09)
+
+[node name="OfficeWWall1" parent="Structure/Interior" unique_id=1290156617 instance=ExtResource("half")]
+transform = Transform3D(-4.371139e-08, 0, 1, 0, 1, 0, -1, 0, -4.371139e-08, -14.42, 0, -5.15)
+
+[node name="OfficeWWall2" parent="Structure/Interior" unique_id=241055618 instance=ExtResource("half")]
+transform = Transform3D(-4.371139e-08, 0, 1, 0, 1, 0, -1, 0, -4.371139e-08, -14.42, 0, -7.21)
+
+[node name="CenterCornerA" parent="Structure/Interior" unique_id=212607168 instance=ExtResource("outer")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -4.12, 0, 0)
+
+[node name="CenterHalf1" parent="Structure/Interior" unique_id=1613562764 instance=ExtResource("half")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -2.06, 0, 0)
+
+[node name="CenterHalf2" parent="Structure/Interior" unique_id=374713057 instance=ExtResource("half")]
+
+[node name="CenterCornerB" parent="Structure/Interior" unique_id=1844917703 instance=ExtResource("inner")]
+transform = Transform3D(-4.371139e-08, 0, 1, 0, 1, 0, -1, 0, -4.371139e-08, 2.06, 0, 0)
+
+[node name="WallCollision" type="StaticBody3D" parent="Structure" unique_id=815323206]
+
+[node name="Segment_1" type="CollisionShape3D" parent="Structure/WallCollision" unique_id=1655258612]
+transform = Transform3D(-4.371139e-08, 0, 1, 0, 1, 0, -1, 0, -4.371139e-08, 8.24, 1.5, 9.27)
 shape = SubResource("module_collision")
 
-[node name="Segment_2" type="CollisionShape3D" parent="Structure/WallCollision"]
-position = Vector3(8.24,1.5,5.15)
-rotation_degrees = Vector3(0,90,0)
+[node name="Segment_2" type="CollisionShape3D" parent="Structure/WallCollision" unique_id=792483526]
+transform = Transform3D(-4.371139e-08, 0, 1, 0, 1, 0, -1, 0, -4.371139e-08, 8.24, 1.5, 5.15)
 shape = SubResource("module_collision")
 
-[node name="Segment_3" type="CollisionShape3D" parent="Structure/WallCollision"]
-position = Vector3(16.48,1.5,9.27)
-rotation_degrees = Vector3(0,90,0)
+[node name="Segment_3" type="CollisionShape3D" parent="Structure/WallCollision" unique_id=944230126]
+transform = Transform3D(-4.371139e-08, 0, 1, 0, 1, 0, -1, 0, -4.371139e-08, 16.48, 1.5, 9.27)
 shape = SubResource("module_collision")
 
-[node name="Segment_4" type="CollisionShape3D" parent="Structure/WallCollision"]
-position = Vector3(16.48,1.5,5.15)
-rotation_degrees = Vector3(0,180,0)
+[node name="Segment_4" type="CollisionShape3D" parent="Structure/WallCollision" unique_id=45802267]
+transform = Transform3D(-1, 0, -8.742278e-08, 0, 1, 0, 8.742278e-08, 0, -1, 16.48, 1.5, 5.15)
 shape = SubResource("module_collision")
 
-[node name="Segment_5" type="CollisionShape3D" parent="Structure/WallCollision"]
-position = Vector3(7.21,1.5,3.09)
+[node name="Segment_5" type="CollisionShape3D" parent="Structure/WallCollision" unique_id=619840240]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 7.21, 1.5, 3.09)
 shape = SubResource("module_collision")
 
-[node name="Segment_6" type="CollisionShape3D" parent="Structure/WallCollision"]
-position = Vector3(5.15,1.5,3.09)
+[node name="Segment_6" type="CollisionShape3D" parent="Structure/WallCollision" unique_id=980903019]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 5.15, 1.5, 3.09)
 shape = SubResource("module_collision")
 
-[node name="Segment_7" type="CollisionShape3D" parent="Structure/WallCollision"]
-position = Vector3(3.09,1.5,3.09)
+[node name="Segment_7" type="CollisionShape3D" parent="Structure/WallCollision" unique_id=145664581]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 3.09, 1.5, 3.09)
 shape = SubResource("module_collision")
 
-[node name="Segment_8" type="CollisionShape3D" parent="Structure/WallCollision"]
-position = Vector3(17.51,1.5,3.09)
+[node name="Segment_8" type="CollisionShape3D" parent="Structure/WallCollision" unique_id=1070582697]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 17.51, 1.5, 3.09)
 shape = SubResource("module_collision")
 
-[node name="Segment_9" type="CollisionShape3D" parent="Structure/WallCollision"]
-position = Vector3(19.57,1.5,3.09)
-rotation_degrees = Vector3(0,90,0)
+[node name="Segment_9" type="CollisionShape3D" parent="Structure/WallCollision" unique_id=588217133]
+transform = Transform3D(-4.371139e-08, 0, 1, 0, 1, 0, -1, 0, -4.371139e-08, 19.57, 1.5, 3.09)
 shape = SubResource("module_collision")
 
-[node name="Segment_10" type="CollisionShape3D" parent="Structure/WallCollision"]
-position = Vector3(-14.42,1.5,-9.27)
+[node name="Segment_10" type="CollisionShape3D" parent="Structure/WallCollision" unique_id=1421344438]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -14.42, 1.5, -9.27)
 shape = SubResource("module_collision")
 
-[node name="Segment_11" type="CollisionShape3D" parent="Structure/WallCollision"]
-position = Vector3(-12.36,1.5,-9.27)
+[node name="Segment_11" type="CollisionShape3D" parent="Structure/WallCollision" unique_id=473947664]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -12.36, 1.5, -9.27)
 shape = SubResource("module_collision")
 
-[node name="Segment_12" type="CollisionShape3D" parent="Structure/WallCollision"]
-position = Vector3(-10.30,1.5,-9.27)
+[node name="Segment_12" type="CollisionShape3D" parent="Structure/WallCollision" unique_id=158846207]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -10.3, 1.5, -9.27)
 shape = SubResource("module_collision")
 
-[node name="Segment_13" type="CollisionShape3D" parent="Structure/WallCollision"]
-position = Vector3(-8.24,1.5,-9.27)
-rotation_degrees = Vector3(0,90,0)
+[node name="Segment_13" type="CollisionShape3D" parent="Structure/WallCollision" unique_id=1015175360]
+transform = Transform3D(-4.371139e-08, 0, 1, 0, 1, 0, -1, 0, -4.371139e-08, -8.24, 1.5, -9.27)
 shape = SubResource("module_collision")
 
-[node name="Segment_14" type="CollisionShape3D" parent="Structure/WallCollision"]
-position = Vector3(-8.24,1.5,-7.21)
-rotation_degrees = Vector3(0,90,0)
+[node name="Segment_14" type="CollisionShape3D" parent="Structure/WallCollision" unique_id=1372304786]
+transform = Transform3D(-4.371139e-08, 0, 1, 0, 1, 0, -1, 0, -4.371139e-08, -8.24, 1.5, -7.21)
 shape = SubResource("module_collision")
 
-[node name="Segment_15" type="CollisionShape3D" parent="Structure/WallCollision"]
-position = Vector3(-8.24,1.5,-5.15)
-rotation_degrees = Vector3(0,90,0)
+[node name="Segment_15" type="CollisionShape3D" parent="Structure/WallCollision" unique_id=376421987]
+transform = Transform3D(-4.371139e-08, 0, 1, 0, 1, 0, -1, 0, -4.371139e-08, -8.24, 1.5, -5.15)
 shape = SubResource("module_collision")
 
-[node name="Segment_16" type="CollisionShape3D" parent="Structure/WallCollision"]
-position = Vector3(-8.24,1.5,-3.09)
-rotation_degrees = Vector3(0,180,0)
+[node name="Segment_16" type="CollisionShape3D" parent="Structure/WallCollision" unique_id=2045731210]
+transform = Transform3D(-1, 0, -8.742278e-08, 0, 1, 0, 8.742278e-08, 0, -1, -8.24, 1.5, -3.09)
 shape = SubResource("module_collision")
 
-[node name="Segment_17" type="CollisionShape3D" parent="Structure/WallCollision"]
-position = Vector3(-14.42,1.5,-3.09)
-rotation_degrees = Vector3(0,-90,0)
+[node name="Segment_17" type="CollisionShape3D" parent="Structure/WallCollision" unique_id=862212530]
+transform = Transform3D(-4.371139e-08, 0, -1, 0, 1, 0, 1, 0, -4.371139e-08, -14.42, 1.5, -3.09)
 shape = SubResource("module_collision")
 
-[node name="Segment_18" type="CollisionShape3D" parent="Structure/WallCollision"]
-position = Vector3(-14.42,1.5,-5.15)
-rotation_degrees = Vector3(0,90,0)
+[node name="Segment_18" type="CollisionShape3D" parent="Structure/WallCollision" unique_id=1330542651]
+transform = Transform3D(-4.371139e-08, 0, 1, 0, 1, 0, -1, 0, -4.371139e-08, -14.42, 1.5, -5.15)
 shape = SubResource("module_collision")
 
-[node name="Segment_19" type="CollisionShape3D" parent="Structure/WallCollision"]
-position = Vector3(-14.42,1.5,-7.21)
-rotation_degrees = Vector3(0,90,0)
+[node name="Segment_19" type="CollisionShape3D" parent="Structure/WallCollision" unique_id=1614254473]
+transform = Transform3D(-4.371139e-08, 0, 1, 0, 1, 0, -1, 0, -4.371139e-08, -14.42, 1.5, -7.21)
 shape = SubResource("module_collision")
 
-[node name="Segment_20" type="CollisionShape3D" parent="Structure/WallCollision"]
-position = Vector3(-4.12,1.5,0)
+[node name="Segment_20" type="CollisionShape3D" parent="Structure/WallCollision" unique_id=75934080]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -4.12, 1.5, 0)
 shape = SubResource("module_collision")
 
-[node name="Segment_21" type="CollisionShape3D" parent="Structure/WallCollision"]
-position = Vector3(-2.06,1.5,0)
+[node name="Segment_21" type="CollisionShape3D" parent="Structure/WallCollision" unique_id=238104259]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -2.06, 1.5, 0)
 shape = SubResource("module_collision")
 
-[node name="Segment_22" type="CollisionShape3D" parent="Structure/WallCollision"]
-position = Vector3(0,1.5,0)
+[node name="Segment_22" type="CollisionShape3D" parent="Structure/WallCollision" unique_id=1340592374]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.5, 0)
 shape = SubResource("module_collision")
 
-[node name="Segment_23" type="CollisionShape3D" parent="Structure/WallCollision"]
-position = Vector3(2.06,1.5,0)
-rotation_degrees = Vector3(0,90,0)
+[node name="Segment_23" type="CollisionShape3D" parent="Structure/WallCollision" unique_id=1983085590]
+transform = Transform3D(-4.371139e-08, 0, 1, 0, 1, 0, -1, 0, -4.371139e-08, 2.06, 1.5, 0)
 shape = SubResource("module_collision")
 
-[node name="ArchitecturalCollision" type="StaticBody3D" parent="Structure"]
+[node name="ArchitecturalCollision" type="StaticBody3D" parent="Structure" unique_id=432534371]
 
-[node name="Column_1" type="CollisionShape3D" parent="Structure/ArchitecturalCollision"]
-position = Vector3(-26,1.5,-18)
+[node name="Column_1" type="CollisionShape3D" parent="Structure/ArchitecturalCollision" unique_id=823261633]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -26, 1.5, -18)
 shape = SubResource("column_collision")
 
-[node name="Column_2" type="CollisionShape3D" parent="Structure/ArchitecturalCollision"]
-position = Vector3(-26,1.5,0)
+[node name="Column_2" type="CollisionShape3D" parent="Structure/ArchitecturalCollision" unique_id=1273836513]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -26, 1.5, 0)
 shape = SubResource("column_collision")
 
-[node name="Column_3" type="CollisionShape3D" parent="Structure/ArchitecturalCollision"]
-position = Vector3(-26,1.5,18)
+[node name="Column_3" type="CollisionShape3D" parent="Structure/ArchitecturalCollision" unique_id=1060677279]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -26, 1.5, 18)
 shape = SubResource("column_collision")
 
-[node name="Column_4" type="CollisionShape3D" parent="Structure/ArchitecturalCollision"]
-position = Vector3(-13,1.5,-18)
+[node name="Column_4" type="CollisionShape3D" parent="Structure/ArchitecturalCollision" unique_id=758102129]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -13, 1.5, -18)
 shape = SubResource("column_collision")
 
-[node name="Column_5" type="CollisionShape3D" parent="Structure/ArchitecturalCollision"]
-position = Vector3(-13,1.5,0)
+[node name="Column_5" type="CollisionShape3D" parent="Structure/ArchitecturalCollision" unique_id=534647884]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -13, 1.5, 0)
 shape = SubResource("column_collision")
 
-[node name="Column_6" type="CollisionShape3D" parent="Structure/ArchitecturalCollision"]
-position = Vector3(-13,1.5,18)
+[node name="Column_6" type="CollisionShape3D" parent="Structure/ArchitecturalCollision" unique_id=93189443]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -13, 1.5, 18)
 shape = SubResource("column_collision")
 
-[node name="Column_7" type="CollisionShape3D" parent="Structure/ArchitecturalCollision"]
-position = Vector3(0,1.5,-18)
+[node name="Column_7" type="CollisionShape3D" parent="Structure/ArchitecturalCollision" unique_id=1566840986]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.5, -18)
 shape = SubResource("column_collision")
 
-[node name="Column_9" type="CollisionShape3D" parent="Structure/ArchitecturalCollision"]
-position = Vector3(0,1.5,18)
+[node name="Column_9" type="CollisionShape3D" parent="Structure/ArchitecturalCollision" unique_id=1858815754]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.5, 18)
 shape = SubResource("column_collision")
 
-[node name="Column_10" type="CollisionShape3D" parent="Structure/ArchitecturalCollision"]
-position = Vector3(13,1.5,-18)
+[node name="Column_10" type="CollisionShape3D" parent="Structure/ArchitecturalCollision" unique_id=135571437]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 13, 1.5, -18)
 shape = SubResource("column_collision")
 
-[node name="Column_13" type="CollisionShape3D" parent="Structure/ArchitecturalCollision"]
-position = Vector3(26,1.5,-18)
+[node name="Column_13" type="CollisionShape3D" parent="Structure/ArchitecturalCollision" unique_id=571876157]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 26, 1.5, -18)
 shape = SubResource("column_collision")
 
-[node name="Corner_NW_A" type="CollisionShape3D" parent="Structure/ArchitecturalCollision"]
-position = Vector3(-39,1.5,-29)
-rotation_degrees = Vector3(0,0,0)
-shape = SubResource("corner_arm_collision")
+[node name="Gameplay" type="Node3D" parent="." unique_id=1463085699]
 
-[node name="Corner_NW_B" type="CollisionShape3D" parent="Structure/ArchitecturalCollision"]
-position = Vector3(-39,1.5,-29)
-rotation_degrees = Vector3(0,90,0)
-shape = SubResource("corner_arm_collision")
+[node name="Enemies" type="Node3D" parent="Gameplay" unique_id=1034168936]
 
-[node name="Corner_NE_A" type="CollisionShape3D" parent="Structure/ArchitecturalCollision"]
-position = Vector3(39,1.5,-29)
-rotation_degrees = Vector3(0,90,0)
-shape = SubResource("corner_arm_collision")
+[node name="Infected_1" parent="Gameplay/Enemies" unique_id=665421036 instance=ExtResource("infected")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -12, 1, -2)
 
-[node name="Corner_NE_B" type="CollisionShape3D" parent="Structure/ArchitecturalCollision"]
-position = Vector3(39,1.5,-29)
-rotation_degrees = Vector3(0,180,0)
-shape = SubResource("corner_arm_collision")
+[node name="Infected_2" parent="Gameplay/Enemies" unique_id=370282427 instance=ExtResource("infected")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 4, 1, -10)
 
-[node name="Corner_SE_A" type="CollisionShape3D" parent="Structure/ArchitecturalCollision"]
-position = Vector3(39,1.5,29)
-rotation_degrees = Vector3(0,180,0)
-shape = SubResource("corner_arm_collision")
+[node name="Infected_3" parent="Gameplay/Enemies" unique_id=320736124 instance=ExtResource("infected")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -25, 1, 10)
 
-[node name="Corner_SE_B" type="CollisionShape3D" parent="Structure/ArchitecturalCollision"]
-position = Vector3(39,1.5,29)
-rotation_degrees = Vector3(0,270,0)
-shape = SubResource("corner_arm_collision")
+[node name="Infected_4" parent="Gameplay/Enemies" unique_id=735874232 instance=ExtResource("infected")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 22, 1, -12)
 
-[node name="Corner_SW_A" type="CollisionShape3D" parent="Structure/ArchitecturalCollision"]
-position = Vector3(-39,1.5,29)
-rotation_degrees = Vector3(0,270,0)
-shape = SubResource("corner_arm_collision")
+[node name="InfectionSource" parent="Gameplay" unique_id=1141576136 instance=ExtResource("source")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -30, 0, -22)
 
-[node name="Corner_SW_B" type="CollisionShape3D" parent="Structure/ArchitecturalCollision"]
-position = Vector3(-39,1.5,29)
-rotation_degrees = Vector3(0,360,0)
-shape = SubResource("corner_arm_collision")
+[node name="Player" parent="Gameplay" unique_id=123607063 instance=ExtResource("player")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 31, 1, 25)
 
-[node name="Gameplay" type="Node3D" parent="."]
-[node name="Enemies" type="Node3D" parent="Gameplay"]
-[node name="Infected_1" parent="Gameplay/Enemies" instance=ExtResource("infected")]
-position = Vector3(-12,1,-2)
-[node name="Infected_2" parent="Gameplay/Enemies" instance=ExtResource("infected")]
-position = Vector3(4,1,-10)
-[node name="Infected_3" parent="Gameplay/Enemies" instance=ExtResource("infected")]
-position = Vector3(-25,1,10)
-[node name="Infected_4" parent="Gameplay/Enemies" instance=ExtResource("infected")]
-position = Vector3(22,1,-12)
-[node name="InfectionSource" parent="Gameplay" instance=ExtResource("source")]
-position = Vector3(-30,0,-22)
-[node name="Player" parent="Gameplay" instance=ExtResource("player")]
-position = Vector3(31,1,25)
+[node name="PrototypeHUD" parent="." unique_id=320878560 instance=ExtResource("hud")]
 
-[node name="PrototypeHUD" parent="." instance=ExtResource("hud")]
-[node name="Crosshair" parent="." instance=ExtResource("crosshair")]
-[node name="Radar" parent="." instance=ExtResource("radar")]
+[node name="Crosshair" parent="." unique_id=685347533 instance=ExtResource("crosshair")]
 
-[node name="GameOver" type="Control" parent="."]
+[node name="Radar" parent="." unique_id=86935713 instance=ExtResource("radar")]
+
+[node name="GameOver" type="Control" parent="." unique_id=915151426]
 visible = false
 layout_mode = 3
 anchors_preset = 15
@@ -881,16 +734,16 @@ grow_horizontal = 2
 grow_vertical = 2
 mouse_filter = 1
 
-[node name="Dim" type="ColorRect" parent="GameOver"]
+[node name="Dim" type="ColorRect" parent="GameOver" unique_id=1236850566]
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
-color = Color(0,0,0,0.72)
+color = Color(0, 0, 0, 0.72)
 
-[node name="Panel" type="PanelContainer" parent="GameOver"]
+[node name="Panel" type="PanelContainer" parent="GameOver" unique_id=80846730]
 layout_mode = 1
 anchors_preset = 8
 anchor_left = 0.5
@@ -904,26 +757,26 @@ offset_bottom = 125.0
 grow_horizontal = 2
 grow_vertical = 2
 
-[node name="VBox" type="VBoxContainer" parent="GameOver/Panel"]
+[node name="VBox" type="VBoxContainer" parent="GameOver/Panel" unique_id=1123625005]
 layout_mode = 2
 theme_override_constants/separation = 18
 
-[node name="Title" type="Label" parent="GameOver/Panel/VBox"]
+[node name="Title" type="Label" parent="GameOver/Panel/VBox" unique_id=363933443]
 layout_mode = 2
-text = "MISSION FAILED"
-horizontal_alignment = 1
 theme_override_font_sizes/font_size = 32
+text = "MISSION FAILED"
+horizontal_alignment = 1
 
-[node name="Reason" type="Label" parent="GameOver/Panel/VBox"]
+[node name="Reason" type="Label" parent="GameOver/Panel/VBox" unique_id=260740357]
 layout_mode = 2
 text = "MISSION FAILED"
 horizontal_alignment = 1
 
-[node name="Restart" type="Button" parent="GameOver/Panel/VBox"]
+[node name="Restart" type="Button" parent="GameOver/Panel/VBox" unique_id=784562578]
 layout_mode = 2
 text = "RESTART MISSION"
 
-[node name="Exit" type="Button" parent="GameOver/Panel/VBox"]
+[node name="Exit" type="Button" parent="GameOver/Panel/VBox" unique_id=753602770]
 layout_mode = 2
 text = "EXIT"
 
