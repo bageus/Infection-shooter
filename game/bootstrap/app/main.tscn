@@ -1,21 +1,21 @@
-[gd_scene format=3 uid="uid://cfm3smjohpd2f"]
+[gd_scene format=3]
 
-[ext_resource type="PackedScene" uid="uid://c5a43ocx4utxe" path="res://models/objects/01_column.blend" id="column"]
+[ext_resource type="PackedScene" path="res://game/presentation/office_floor/public/structural/column.tscn" id="column"]
 [ext_resource type="PackedScene" path="res://game/presentation/prototype_hud/public/crosshair.tscn" id="crosshair"]
-[ext_resource type="PackedScene" uid="uid://j8m0r3f2idfx" path="res://models/objects/01_wall_emergency_door.blend" id="emergency"]
-[ext_resource type="PackedScene" uid="uid://d2x7roj63nw1i" path="res://models/objects/01_wall_half_panel.blend" id="half"]
+[ext_resource type="PackedScene" path="res://game/presentation/office_floor/public/structural/wall_emergency_door.tscn" id="emergency"]
+[ext_resource type="PackedScene" path="res://game/presentation/office_floor/public/structural/wall_half_panel.tscn" id="half"]
 [ext_resource type="PackedScene" path="res://game/presentation/prototype_hud/public/prototype_hud.tscn" id="hud"]
 [ext_resource type="PackedScene" path="res://game/features/infected/public/infected_capsule.tscn" id="infected"]
-[ext_resource type="PackedScene" uid="uid://b7ia34uudy4jk" path="res://models/objects/01_wall_inner_corner.blend" id="inner"]
-[ext_resource type="PackedScene" uid="uid://5xwtdilxjio7" path="res://models/objects/01_wall_outer_corner.blend" id="outer"]
+[ext_resource type="PackedScene" path="res://game/presentation/office_floor/public/structural/wall_inner_corner.tscn" id="inner"]
+[ext_resource type="PackedScene" path="res://game/presentation/office_floor/public/structural/wall_outer_corner.tscn" id="outer"]
 [ext_resource type="PackedScene" path="res://game/features/player/public/player.tscn" id="player"]
 [ext_resource type="PackedScene" path="res://game/presentation/prototype_hud/public/radar.tscn" id="radar"]
-[ext_resource type="Script" uid="uid://cjm3a57h7v5im" path="res://game/bootstrap/app/main.gd" id="script"]
+[ext_resource type="Script" path="res://game/bootstrap/app/main.gd" id="script"]
 [ext_resource type="PackedScene" path="res://game/features/infection_source/public/infection_source.tscn" id="source"]
-[ext_resource type="PackedScene" uid="uid://1cy5tql04rgs" path="res://models/objects/01_wall_straight.blend" id="wall"]
-[ext_resource type="PackedScene" uid="uid://crlbstncpfbhu" path="res://models/objects/01_wall_door.blend" id="wall_door"]
-[ext_resource type="PackedScene" uid="uid://dytd2ou4sykbx" path="res://models/objects/01_window_double.blend" id="window"]
-[ext_resource type="PackedScene" uid="uid://cgtwpirtlxaiu" path="res://models/objects/01_window_corner.blend" id="window_corner"]
+[ext_resource type="PackedScene" path="res://game/presentation/office_floor/public/structural/wall_straight.tscn" id="wall"]
+[ext_resource type="PackedScene" path="res://game/presentation/office_floor/public/structural/wall_door.tscn" id="wall_door"]
+[ext_resource type="PackedScene" path="res://game/presentation/office_floor/public/structural/window_double.tscn" id="window"]
+[ext_resource type="PackedScene" path="res://game/presentation/office_floor/public/structural/window_corner.tscn" id="window_corner"]
 
 [sub_resource type="Environment" id="env"]
 background_mode = 1
@@ -560,142 +560,6 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -2.06, 0, 0)
 [node name="CenterCornerB" parent="Structure/Interior" unique_id=1844917703 instance=ExtResource("inner")]
 transform = Transform3D(-4.371139e-08, 0, 1, 0, 1, 0, -1, 0, -4.371139e-08, 2.06, 0, 0)
 
-[node name="WallCollision" type="StaticBody3D" parent="Structure" unique_id=815323206]
-
-[node name="Segment_1" type="CollisionShape3D" parent="Structure/WallCollision" unique_id=1655258612]
-transform = Transform3D(-4.371139e-08, 0, 1, 0, 1, 0, -1, 0, -4.371139e-08, 8.24, 1.5, 9.27)
-shape = SubResource("module_collision")
-
-[node name="Segment_2" type="CollisionShape3D" parent="Structure/WallCollision" unique_id=792483526]
-transform = Transform3D(-4.371139e-08, 0, 1, 0, 1, 0, -1, 0, -4.371139e-08, 8.24, 1.5, 5.15)
-shape = SubResource("module_collision")
-
-[node name="Segment_3" type="CollisionShape3D" parent="Structure/WallCollision" unique_id=944230126]
-transform = Transform3D(-4.371139e-08, 0, 1, 0, 1, 0, -1, 0, -4.371139e-08, 16.48, 1.5, 9.27)
-shape = SubResource("module_collision")
-
-[node name="Segment_4" type="CollisionShape3D" parent="Structure/WallCollision" unique_id=45802267]
-transform = Transform3D(-1, 0, -8.742278e-08, 0, 1, 0, 8.742278e-08, 0, -1, 16.48, 1.5, 5.15)
-shape = SubResource("module_collision")
-
-[node name="Segment_5" type="CollisionShape3D" parent="Structure/WallCollision" unique_id=619840240]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 7.21, 1.5, 3.09)
-shape = SubResource("module_collision")
-
-[node name="Segment_6" type="CollisionShape3D" parent="Structure/WallCollision" unique_id=980903019]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 5.15, 1.5, 3.09)
-shape = SubResource("module_collision")
-
-[node name="Segment_7" type="CollisionShape3D" parent="Structure/WallCollision" unique_id=145664581]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 3.09, 1.5, 3.09)
-shape = SubResource("module_collision")
-
-[node name="Segment_8" type="CollisionShape3D" parent="Structure/WallCollision" unique_id=1070582697]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 17.51, 1.5, 3.09)
-shape = SubResource("module_collision")
-
-[node name="Segment_9" type="CollisionShape3D" parent="Structure/WallCollision" unique_id=588217133]
-transform = Transform3D(-4.371139e-08, 0, 1, 0, 1, 0, -1, 0, -4.371139e-08, 19.57, 1.5, 3.09)
-shape = SubResource("module_collision")
-
-[node name="Segment_10" type="CollisionShape3D" parent="Structure/WallCollision" unique_id=1421344438]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -14.42, 1.5, -9.27)
-shape = SubResource("module_collision")
-
-[node name="Segment_11" type="CollisionShape3D" parent="Structure/WallCollision" unique_id=473947664]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -12.36, 1.5, -9.27)
-shape = SubResource("module_collision")
-
-[node name="Segment_12" type="CollisionShape3D" parent="Structure/WallCollision" unique_id=158846207]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -10.3, 1.5, -9.27)
-shape = SubResource("module_collision")
-
-[node name="Segment_13" type="CollisionShape3D" parent="Structure/WallCollision" unique_id=1015175360]
-transform = Transform3D(-4.371139e-08, 0, 1, 0, 1, 0, -1, 0, -4.371139e-08, -8.24, 1.5, -9.27)
-shape = SubResource("module_collision")
-
-[node name="Segment_14" type="CollisionShape3D" parent="Structure/WallCollision" unique_id=1372304786]
-transform = Transform3D(-4.371139e-08, 0, 1, 0, 1, 0, -1, 0, -4.371139e-08, -8.24, 1.5, -7.21)
-shape = SubResource("module_collision")
-
-[node name="Segment_15" type="CollisionShape3D" parent="Structure/WallCollision" unique_id=376421987]
-transform = Transform3D(-4.371139e-08, 0, 1, 0, 1, 0, -1, 0, -4.371139e-08, -8.24, 1.5, -5.15)
-shape = SubResource("module_collision")
-
-[node name="Segment_16" type="CollisionShape3D" parent="Structure/WallCollision" unique_id=2045731210]
-transform = Transform3D(-1, 0, -8.742278e-08, 0, 1, 0, 8.742278e-08, 0, -1, -8.24, 1.5, -3.09)
-shape = SubResource("module_collision")
-
-[node name="Segment_17" type="CollisionShape3D" parent="Structure/WallCollision" unique_id=862212530]
-transform = Transform3D(-4.371139e-08, 0, -1, 0, 1, 0, 1, 0, -4.371139e-08, -14.42, 1.5, -3.09)
-shape = SubResource("module_collision")
-
-[node name="Segment_18" type="CollisionShape3D" parent="Structure/WallCollision" unique_id=1330542651]
-transform = Transform3D(-4.371139e-08, 0, 1, 0, 1, 0, -1, 0, -4.371139e-08, -14.42, 1.5, -5.15)
-shape = SubResource("module_collision")
-
-[node name="Segment_19" type="CollisionShape3D" parent="Structure/WallCollision" unique_id=1614254473]
-transform = Transform3D(-4.371139e-08, 0, 1, 0, 1, 0, -1, 0, -4.371139e-08, -14.42, 1.5, -7.21)
-shape = SubResource("module_collision")
-
-[node name="Segment_20" type="CollisionShape3D" parent="Structure/WallCollision" unique_id=75934080]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -4.12, 1.5, 0)
-shape = SubResource("module_collision")
-
-[node name="Segment_21" type="CollisionShape3D" parent="Structure/WallCollision" unique_id=238104259]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -2.06, 1.5, 0)
-shape = SubResource("module_collision")
-
-[node name="Segment_22" type="CollisionShape3D" parent="Structure/WallCollision" unique_id=1340592374]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.5, 0)
-shape = SubResource("module_collision")
-
-[node name="Segment_23" type="CollisionShape3D" parent="Structure/WallCollision" unique_id=1983085590]
-transform = Transform3D(-4.371139e-08, 0, 1, 0, 1, 0, -1, 0, -4.371139e-08, 2.06, 1.5, 0)
-shape = SubResource("module_collision")
-
-[node name="ArchitecturalCollision" type="StaticBody3D" parent="Structure" unique_id=432534371]
-
-[node name="Column_1" type="CollisionShape3D" parent="Structure/ArchitecturalCollision" unique_id=823261633]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -26, 1.5, -18)
-shape = SubResource("column_collision")
-
-[node name="Column_2" type="CollisionShape3D" parent="Structure/ArchitecturalCollision" unique_id=1273836513]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -26, 1.5, 0)
-shape = SubResource("column_collision")
-
-[node name="Column_3" type="CollisionShape3D" parent="Structure/ArchitecturalCollision" unique_id=1060677279]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -26, 1.5, 18)
-shape = SubResource("column_collision")
-
-[node name="Column_4" type="CollisionShape3D" parent="Structure/ArchitecturalCollision" unique_id=758102129]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -13, 1.5, -18)
-shape = SubResource("column_collision")
-
-[node name="Column_5" type="CollisionShape3D" parent="Structure/ArchitecturalCollision" unique_id=534647884]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -13, 1.5, 0)
-shape = SubResource("column_collision")
-
-[node name="Column_6" type="CollisionShape3D" parent="Structure/ArchitecturalCollision" unique_id=93189443]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -13, 1.5, 18)
-shape = SubResource("column_collision")
-
-[node name="Column_7" type="CollisionShape3D" parent="Structure/ArchitecturalCollision" unique_id=1566840986]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.5, -18)
-shape = SubResource("column_collision")
-
-[node name="Column_9" type="CollisionShape3D" parent="Structure/ArchitecturalCollision" unique_id=1858815754]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.5, 18)
-shape = SubResource("column_collision")
-
-[node name="Column_10" type="CollisionShape3D" parent="Structure/ArchitecturalCollision" unique_id=135571437]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 13, 1.5, -18)
-shape = SubResource("column_collision")
-
-[node name="Column_13" type="CollisionShape3D" parent="Structure/ArchitecturalCollision" unique_id=571876157]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 26, 1.5, -18)
-shape = SubResource("column_collision")
-
 [node name="Gameplay" type="Node3D" parent="." unique_id=1463085699]
 
 [node name="Enemies" type="Node3D" parent="Gameplay" unique_id=1034168936]
@@ -732,10 +596,12 @@ anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
-mouse_filter = 1
+mouse_filter = 0
+process_mode = 3
 
 [node name="Dim" type="ColorRect" parent="GameOver" unique_id=1236850566]
 layout_mode = 1
+mouse_filter = 1
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
