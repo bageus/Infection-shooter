@@ -2,17 +2,20 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://cacavlj237aio"
-path.s3tc="res://.godot/imported/Image_1.png-ea2707919a0eaaefcf482eafbf07803f.s3tc.ctex"
+uid="uid://cqgba7wf1gu65"
+path.s3tc="res://.godot/imported/01_wall_emergency_door_Image_1.png-8d284640d967b27b0d16f8425e469537.s3tc.ctex"
 metadata={
 "imported_formats": ["s3tc_bptc"],
 "vram_texture": true
 }
+generator_parameters={
+"md5": "850cbedff3bdd560b3e94d1ce9bea416"
+}
 
 [deps]
 
-source_file="res://models/objects/textures/Image_1.png"
-dest_files=["res://.godot/imported/Image_1.png-ea2707919a0eaaefcf482eafbf07803f.s3tc.ctex"]
+source_file="res://models/objects/01_wall_emergency_door_Image_1.png"
+dest_files=["res://.godot/imported/01_wall_emergency_door_Image_1.png-8d284640d967b27b0d16f8425e469537.s3tc.ctex"]
 
 [params]
 
