@@ -740,8 +740,14 @@ func _apply_wall_mount(node: Node3D) -> void:
 
 func _snap_position_for(node: Node3D, value: Vector3) -> Vector3:
 	var base := _snap(value)
-	base.y = _support_height_at(node, base)
 	var source_aabb := _combined_aabb(node)
+	if bool(node.get_meta("planning_wall_mount", false)) and node.has_meta("planning_wall_normal"):
+		base.y = value.y
+	else:
+		var support_y := _support_height_at(node, base)
+		if value.y > 0.01:
+			support_y = maxf(support_y, value.y - source_aabb.position.y)
+		base.y = support_y - source_aabb.position.y
 	if source_aabb.size.length_squared() <= 0.0001:
 		return base
 	var source_sockets := _connection_sockets(node, base, source_aabb)
