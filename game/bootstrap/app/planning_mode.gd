@@ -13,6 +13,9 @@ var host: Node3D
 var camera: Camera3D
 var root: Node3D
 var structure_root: Node3D
+var gameplay_root: Node3D
+var enemies_root: Node3D
+var main_player: Node3D
 var ui: Control
 var palette: ItemList
 var status: Label
@@ -60,7 +63,7 @@ var structure_catalog := [
 ]
 
 var actor_catalog := [
-	{"name":"Player Spawn","path":"res://game/features/player/public/player.tscn","kind":"player"},
+	{"name":"Player Spawn","path":"","kind":"player"},
 	{"name":"Infected","path":"res://game/features/infected/public/infected_capsule.tscn","kind":"enemy"}
 ]
 
@@ -69,6 +72,9 @@ func setup(app_owner: Node3D, planning_root: Node3D, planning_ui: Control) -> vo
 	host = app_owner
 	root = planning_root
 	structure_root = host.get_node("Structure")
+	gameplay_root = host.get_node("Gameplay")
+	enemies_root = host.get_node("Gameplay/Enemies")
+	main_player = host.get_node("Gameplay/Player")
 	ui = planning_ui
 	camera_rig = host.get_node("Gameplay/Player/CameraRig") as Node3D
 	camera = host.get_node("Gameplay/Player/CameraRig/Camera3D")
@@ -90,6 +96,7 @@ func setup(app_owner: Node3D, planning_root: Node3D, planning_ui: Control) -> vo
 	ui.get_node("Panel/VBox/Close").pressed.connect(exit)
 	ui.hide()
 	_register_existing_scene_objects()
+	_register_actor_objects()
 	load_layout()
 
 
@@ -258,6 +265,8 @@ func _hide_planning_grid() -> void:
 func _on_palette_selected(index: int) -> void:
 	var entry: Dictionary = active_catalog[index]
 	selected_path = str(entry.get("path", ""))
+	if str(entry.get("kind", "")) == "player":
+		selected_path = ""
 	rotation_y = 0.0
 	_select(null)
 	_rebuild_preview()
@@ -324,6 +333,20 @@ func _register_editable_children(parent: Node) -> void:
 				node.set_meta("planning_existing", true)
 			else:
 				_register_editable_children(node)
+
+
+func _register_actor_objects() -> void:
+	if main_player != null and not placed.has(main_player):
+		placed.append(main_player)
+		main_player.set_meta("planning_actor_kind", "player")
+		main_player.set_meta("planning_existing", true)
+	for child in enemies_root.get_children():
+		if child is Node3D:
+			var enemy := child as Node3D
+			if not placed.has(enemy):
+				placed.append(enemy)
+			enemy.set_meta("planning_actor_kind", "enemy")
+			enemy.set_meta("planning_existing", true)
 
 
 func _is_editable_scene_object(node: Node3D) -> bool:
@@ -396,6 +419,10 @@ func _visual_object_at(screen_pos: Vector2) -> Node3D:
 
 func _rebuild_preview() -> void:
 	_clear_preview()
+	if _selected_kind() == "player":
+		preview = _make_player_spawn_preview()
+		host.add_child(preview)
+		return
 	if selected_path.is_empty():
 		return
 	var scene := load(selected_path) as PackedScene
@@ -404,6 +431,32 @@ func _rebuild_preview() -> void:
 	preview = scene.instantiate() as Node3D
 	host.add_child(preview)
 	_set_preview_collision(preview, true)
+
+
+func _selected_kind() -> String:
+	for entry: Dictionary in active_catalog:
+		if str(entry.get("path", "")) == selected_path and not selected_path.is_empty():
+			return str(entry.get("kind", ""))
+	if selected_path.is_empty() and active_catalog == actor_catalog:
+		var selected_items := palette.get_selected_items()
+		if not selected_items.is_empty():
+			return str(actor_catalog[selected_items[0]].get("kind", ""))
+	return ""
+
+
+func _make_player_spawn_preview() -> Node3D:
+	var marker := MeshInstance3D.new()
+	var mesh := CylinderMesh.new()
+	mesh.top_radius = 0.45
+	mesh.bottom_radius = 0.45
+	mesh.height = 1.8
+	var material := StandardMaterial3D.new()
+	material.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
+	material.albedo_color = Color(0.15, 0.55, 1.0, 0.45)
+	mesh.material = material
+	marker.mesh = mesh
+	marker.set_meta("planning_spawn_preview", true)
+	return marker
 
 
 func _clear_preview() -> void:
@@ -426,19 +479,35 @@ func _place_selected(screen_pos: Vector2) -> void:
 	var world := _screen_to_floor(screen_pos)
 	if not world.is_finite():
 		return
+	var kind := _selected_kind()
+	if kind == "player":
+		main_player.global_position = _snap(world) + Vector3(0.0, 1.0, 0.0)
+		main_player.rotation_degrees.y = rotation_y
+		status.text = "Player spawn moved"
+		_rebuild_preview()
+		return
+	if selected_path.is_empty():
+		return
 	var scene := load(selected_path) as PackedScene
 	if scene == null:
 		return
 	var node := scene.instantiate() as Node3D
-	root.add_child(node)
+	var target_parent := enemies_root if kind == "enemy" else root
+	target_parent.add_child(node)
 	node.global_position = _snap_position_for(node, world)
+	if kind == "enemy":
+		node.global_position.y = 1.0
+		node.set_meta("planning_actor_kind", "enemy")
+		if node.has_method("set_target"):
+			node.call("set_target", main_player)
 	node.rotation_degrees.y = rotation_y
 	node.set_meta("planning_scene_path", selected_path)
 	placed.append(node)
 	_select(null)
 	_rebuild_preview()
-	preview.global_position = _snap_position_for(preview, world)
-	preview.rotation_degrees.y = rotation_y
+	if preview != null:
+		preview.global_position = _snap_position_for(preview, world)
+		preview.rotation_degrees.y = rotation_y
 	status.text = "Placed | same object remains active | RMB cancel"
 
 
@@ -454,6 +523,9 @@ func _delete_selected() -> void:
 
 
 func _delete_node(node: Node3D) -> void:
+	if node == main_player or str(node.get_meta("planning_actor_kind", "")) == "player":
+		status.text = "Player spawn cannot be deleted; move it instead"
+		return
 	_clear_selection_highlight()
 	placed.erase(node)
 	if selected == node:
