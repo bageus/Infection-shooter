@@ -3,13 +3,13 @@
 importer="scene"
 importer_version=1
 type="PackedScene"
-uid="uid://bw6cmgb488k74"
-path="res://.godot/imported/02_cardboard_boxes_7.blend-241f21a1814982df5d14eba84657b13f.scn"
+uid="uid://cdo3iqukl2ct0"
+path="res://.godot/imported/13_glass_corner_panel_a.blend-016c20ffb9ff8f98055d782f31f2549c.scn"
 
 [deps]
 
-source_file="res://models/objects/02_cardboard_boxes_7.blend"
-dest_files=["res://.godot/imported/02_cardboard_boxes_7.blend-241f21a1814982df5d14eba84657b13f.scn"]
+source_file="res://models/objects/13_glass_corner_panel_a.blend"
+dest_files=["res://.godot/imported/13_glass_corner_panel_a.blend-016c20ffb9ff8f98055d782f31f2549c.scn"]
 
 [params]
 
