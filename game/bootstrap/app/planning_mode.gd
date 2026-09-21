@@ -23,6 +23,7 @@ var help: Label
 var hud_nodes: Array[Node] = []
 var active := false
 var selected_path := ""
+var selected_kind := ""
 var preview: Node3D
 var selected: Node3D
 var rotation_y := 0.0
@@ -123,6 +124,7 @@ func enter() -> void:
 
 func exit() -> void:
 	active = false
+	_activate_all_enemies()
 	camera_rig.transform = saved_camera_rig_transform
 	camera.transform = saved_camera_transform
 	for node in hud_nodes:
@@ -206,6 +208,7 @@ func _unhandled_input(event: InputEvent) -> void:
 
 func _reset_selection() -> void:
 	selected_path = ""
+	selected_kind = ""
 	rotation_y = 0.0
 	_clear_preview()
 	_select(null)
@@ -265,8 +268,7 @@ func _hide_planning_grid() -> void:
 func _on_palette_selected(index: int) -> void:
 	var entry: Dictionary = active_catalog[index]
 	selected_path = str(entry.get("path", ""))
-	if str(entry.get("kind", "")) == "player":
-		selected_path = ""
+	selected_kind = str(entry.get("kind", ""))
 	rotation_y = 0.0
 	_select(null)
 	_rebuild_preview()
@@ -278,7 +280,7 @@ func _click_world(screen_pos: Vector2) -> void:
 		_select(hit_node)
 		_clear_preview()
 		return
-	if not selected_path.is_empty():
+	if not selected_path.is_empty() or selected_kind == "player":
 		_place_selected(screen_pos)
 	else:
 		_select(null)
@@ -333,6 +335,12 @@ func _register_editable_children(parent: Node) -> void:
 				node.set_meta("planning_existing", true)
 			else:
 				_register_editable_children(node)
+
+
+func _activate_all_enemies() -> void:
+	for child in enemies_root.get_children():
+		if child.has_method("set_target"):
+			child.call("set_target", main_player)
 
 
 func _register_actor_objects() -> void:
@@ -434,14 +442,7 @@ func _rebuild_preview() -> void:
 
 
 func _selected_kind() -> String:
-	for entry: Dictionary in active_catalog:
-		if str(entry.get("path", "")) == selected_path and not selected_path.is_empty():
-			return str(entry.get("kind", ""))
-	if selected_path.is_empty() and active_catalog == actor_catalog:
-		var selected_items := palette.get_selected_items()
-		if not selected_items.is_empty():
-			return str(actor_catalog[selected_items[0]].get("kind", ""))
-	return ""
+	return selected_kind
 
 
 func _make_player_spawn_preview() -> Node3D:
@@ -739,11 +740,18 @@ func load_layout() -> void:
 		if scene == null:
 			continue
 		var node := scene.instantiate() as Node3D
-		root.add_child(node)
+		var load_kind := "enemy" if scene_path == "res://game/features/infected/public/infected_capsule.tscn" else ""
+		var target_parent := enemies_root if load_kind == "enemy" else root
+		target_parent.add_child(node)
 		node.position = Vector3(float(record.get("x",0.0)),float(record.get("y",0.0)),float(record.get("z",0.0)))
 		node.rotation_degrees.y = float(record.get("rotation_y",0.0))
 		node.scale = Vector3(float(record.get("scale_x",1.0)),float(record.get("scale_y",1.0)),float(record.get("scale_z",1.0)))
 		node.set_meta("planning_scene_path", scene_path)
+		if load_kind == "enemy":
+			node.set_meta("planning_actor_kind", "enemy")
+			node.global_position.y = 1.0
+			if node.has_method("set_target"):
+				node.call("set_target", main_player)
 		placed.append(node)
 
 
