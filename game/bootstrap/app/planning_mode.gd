@@ -7,6 +7,7 @@ const SNAP_DISTANCE := 0.8
 const CAMERA_SPEED := 18.0
 const CAMERA_ZOOM_STEP := 2.5
 const SCALE_STEP := 0.1
+const HEIGHT_STEP := 0.25
 const CAMERA_ROTATE_SPEED := 0.008
 
 var host: Node3D
@@ -162,7 +163,7 @@ func enter() -> void:
 	Input.mouse_mode = Input.MOUSE_MODE_VISIBLE
 	camera_anchor = camera.global_position
 	camera_height = clampf(camera.global_position.y, 8.0, 50.0)
-	help.text = "PLANNING CONTROLS\n\nWASD  Move view\nALT + LMB drag  Rotate view\nWheel  Zoom\nLMB  Select / Place\nLMB drag  Move selected\nRMB  Cancel current tool\nDelete  Delete selected\nQ / E  Rotate -/+15°\nR  Rotate +90°\n+ / -  Uniform scale\nX / Z  X size +/-\nC / V  Z size +/-\nESC  Exit planner"
+	help.text = "PLANNING CONTROLS\n\nWASD  Move view\nALT + LMB drag  Rotate view\nWheel  Zoom\nLMB  Select / Place\nLMB drag  Move selected\nRMB  Cancel current tool\nDelete  Delete selected\nQ / E  Rotate -/+15°\nR  Rotate +90°\n+ / -  Uniform scale\nX / Z  X size +/-\nC / V  Z size +/-\nPgUp / PgDn  Move object up/down\nESC  Exit planner"
 	status.text = "Choose an object"
 
 
@@ -228,6 +229,10 @@ func _unhandled_input(event: InputEvent) -> void:
 				_scale_selected(Vector3(0.0, 0.0, SCALE_STEP))
 			KEY_V:
 				_scale_selected(Vector3(0.0, 0.0, -SCALE_STEP))
+			KEY_PAGEUP:
+				_move_selected_height(HEIGHT_STEP)
+			KEY_PAGEDOWN:
+				_move_selected_height(-HEIGHT_STEP)
 		get_viewport().set_input_as_handled()
 	if event is InputEventMouseButton:
 		if event.button_index == MOUSE_BUTTON_WHEEL_UP and event.pressed:
@@ -606,6 +611,14 @@ func _scale_selected(delta_scale: Vector3) -> void:
 	next.z = maxf(next.z, 0.1)
 	selected.scale = next
 	_update_status()
+
+
+func _move_selected_height(amount: float) -> void:
+	if selected != null:
+		selected.position.y += amount
+		_update_status()
+	elif preview != null:
+		preview.position.y += amount
 
 
 func _rotate_camera(relative: Vector2) -> void:
