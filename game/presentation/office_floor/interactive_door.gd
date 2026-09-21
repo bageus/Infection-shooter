@@ -1,6 +1,6 @@
 extends Node3D
 
-enum DoorMode { SWING_BIDIRECTIONAL, SWING_ONE_WAY, SLIDING_ELEVATOR }
+enum DoorMode { SWING_BIDIRECTIONAL, SWING_ONE_WAY, SLIDING_ELEVATOR, SLIDING_SINGLE }
 
 @export var mode: DoorMode = DoorMode.SWING_BIDIRECTIONAL
 @export var trigger_distance: float = 1.45
@@ -21,6 +21,7 @@ var _open_amount := 0.0
 var _close_timer := 0.0
 var _requested_open := false
 var _swing_side := 0.0
+var _door_recess_nodes: Array[Node3D] = []
 
 
 func _ready() -> void:
@@ -57,9 +58,10 @@ func _physics_process(delta: float) -> void:
 					wants_open = true
 					if _open_amount <= 0.02:
 						_swing_side = signf(one_way_allowed_side)
-			DoorMode.SLIDING_ELEVATOR:
+			DoorMode.SLIDING_ELEVATOR, DoorMode.SLIDING_SINGLE:
 				wants_open = true
-				_request_nearby_elevator_open()
+				if mode == DoorMode.SLIDING_ELEVATOR:
+					_request_nearby_elevator_open()
 
 	if wants_open:
 		_close_timer = close_delay
@@ -72,6 +74,9 @@ func _physics_process(delta: float) -> void:
 				_swing_side = 0.0
 
 	_apply_door_pose(local_player)
+	for recess in _door_recess_nodes:
+		if is_instance_valid(recess):
+			recess.visible = _open_amount < 0.08
 
 
 func request_open() -> void:
@@ -93,6 +98,14 @@ func _collect_door_parts() -> void:
 		return
 	if mode == DoorMode.SLIDING_ELEVATOR:
 		_collect_elevator_parts(visual)
+		_collect_named_nodes(visual, "doorrecess", _door_recess_nodes)
+	elif mode == DoorMode.SLIDING_SINGLE:
+		var pivot := _find_exact_named_node(visual, "doorpivot")
+		if pivot == null:
+			pivot = _find_named_node(visual, ["door", "glass"])
+		if pivot != null:
+			_door_parts.append(pivot)
+			_closed_transforms.append(pivot.transform)
 	else:
 		var pivot: Node3D
 		if mode == DoorMode.SWING_ONE_WAY:
@@ -130,6 +143,13 @@ func _collect_elevator_parts(node: Node) -> void:
 		if not _door_parts.has(part):
 			_door_parts.append(part)
 			_closed_transforms.append(part.transform)
+
+
+func _collect_named_nodes(node: Node, token: String, out: Array[Node3D]) -> void:
+	if node is Node3D and token in node.name.to_lower():
+		out.append(node as Node3D)
+	for child in node.get_children():
+		_collect_named_nodes(child, token, out)
 
 
 func _find_exact_named_node(node: Node, wanted: String) -> Node3D:
@@ -178,6 +198,14 @@ func _apply_door_pose(local_player: Vector3) -> void:
 			var direction := -1.0 if _left_slide_parts.has(part) else 1.0
 			var t := closed
 			t.origin.x += direction * slide_distance * _open_amount
+			part.transform = t
+		elif mode == DoorMode.SLIDING_SINGLE:
+			var side := _swing_side
+			if side == 0.0:
+				side = _player_side(local_player)
+				_swing_side = side
+			var t := closed
+			t.origin.x += side * slide_distance * _open_amount
 			part.transform = t
 		else:
 			var side := _swing_side
