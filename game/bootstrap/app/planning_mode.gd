@@ -142,6 +142,18 @@ var group_catalogs := {
 		{"name":"Fire Extinguisher","path":"res://game/presentation/office_floor/public/props/14_fire_extinguisher.tscn"},
 		{"name":"Water Cooler","path":"res://game/presentation/office_floor/public/props/14_water_cooler.tscn"}
 	],
+	"16": [
+		{"name":"Kitchen Lower Complete","path":"res://game/presentation/office_floor/public/props/16_kitchen_lower_complete.tscn"},
+		{"name":"Kitchen Upper 4","path":"res://game/presentation/office_floor/public/props/16_kitchen_upper_4.tscn"},
+		{"name":"Refrigerator","path":"res://game/presentation/office_floor/public/props/16_refrigerator.tscn"},
+		{"name":"Round Dining Table","path":"res://game/presentation/office_floor/public/props/16_round_dining_table.tscn"},
+		{"name":"Sink Pedestal","path":"res://game/presentation/office_floor/public/props/16_sink_pedestal.tscn"},
+		{"name":"Snack Vending Machine","path":"res://game/presentation/office_floor/public/props/16_snack_vending_machine.tscn"},
+		{"name":"Toilet Floor","path":"res://game/presentation/office_floor/public/props/16_toilet_floor.tscn"},
+		{"name":"Wall Hand Dryer","path":"res://game/presentation/office_floor/public/props/16_wall_hand_dryer.tscn"},
+		{"name":"Wall Mirror","path":"res://game/presentation/office_floor/public/props/16_wall_mirror.tscn"},
+		{"name":"Wall Urinal","path":"res://game/presentation/office_floor/public/props/16_wall_urinal.tscn"}
+	],
 	"13": [
 		{"name":"Glass Wall Full","path":"res://game/presentation/office_floor/public/structural/glass_wall_full.tscn"},
 		{"name":"Glass Partition Half","path":"res://game/presentation/office_floor/public/structural/glass_partition_half.tscn"},
@@ -179,7 +191,7 @@ func setup(app_owner: Node3D, planning_root: Node3D, planning_ui: Control) -> vo
 	palette.item_selected.connect(_on_palette_selected)
 	ui.get_node("Panel/VBox/Tabs/Structure").pressed.connect(_show_structure_catalog)
 	ui.get_node("Panel/VBox/Tabs/Actors").pressed.connect(_show_actor_catalog)
-	for group_name in ["01","02","03","04","05","06","07","08","09","10","11","13","14"]:
+	for group_name in ["01","02","03","04","05","06","07","08","09","10","11","13","14","16"]:
 		var button := ui.get_node("Panel/VBox/GroupTabs/G" + group_name) as Button
 		button.pressed.connect(_show_structure_group.bind(group_name))
 	ui.get_node("Panel/VBox/Save").pressed.connect(save_layout)
@@ -572,15 +584,17 @@ func _clear_preview() -> void:
 func _update_preview(screen_pos: Vector2) -> void:
 	if preview == null:
 		return
-	var world := _screen_to_floor(screen_pos)
+	var world := _screen_to_surface(screen_pos, preview)
 	if not world.is_finite():
 		return
 	preview.global_position = _snap_position_for(preview, world)
+	_apply_wall_mount(preview)
 	preview.rotation_degrees.y = rotation_y
 
 
 func _place_selected(screen_pos: Vector2) -> void:
-	var world := _screen_to_floor(screen_pos)
+	var placement_probe := preview
+	var world := _screen_to_surface(screen_pos, placement_probe)
 	if not world.is_finite():
 		return
 	var kind := _selected_kind()
@@ -599,6 +613,9 @@ func _place_selected(screen_pos: Vector2) -> void:
 	var target_parent := enemies_root if kind == "enemy" else root
 	target_parent.add_child(node)
 	node.global_position = _snap_position_for(node, world)
+	if preview != null and preview.has_meta("planning_wall_normal"):
+		node.set_meta("planning_wall_normal", preview.get_meta("planning_wall_normal"))
+	_apply_wall_mount(node)
 	if kind == "enemy":
 		node.global_position.y = 1.0
 		node.set_meta("planning_actor_kind", "enemy")
@@ -681,6 +698,25 @@ func _zoom_camera(amount: float) -> void:
 	camera.global_position = p
 
 
+func _screen_to_surface(screen_pos: Vector2, placing: Node3D) -> Vector3:
+	var origin := camera.project_ray_origin(screen_pos)
+	var end := origin + camera.project_ray_normal(screen_pos) * 300.0
+	var query := PhysicsRayQueryParameters3D.create(origin, end)
+	if placing != null and placing.has_meta("planning_preview"):
+		query.exclude = []
+	var hit := camera.get_world_3d().direct_space_state.intersect_ray(query)
+	if not hit.is_empty():
+		var point: Vector3 = hit.get("position")
+		var normal: Vector3 = hit.get("normal")
+		if bool(placing.get_meta("planning_wall_mount", false)) and absf(normal.y) < 0.35:
+			point += normal * 0.025
+			placing.set_meta("planning_wall_normal", normal)
+			return point
+		if normal.y > 0.55:
+			return point
+	return _screen_to_floor(screen_pos)
+
+
 func _screen_to_floor(screen_pos: Vector2) -> Vector3:
 	var origin := camera.project_ray_origin(screen_pos)
 	var direction := camera.project_ray_normal(screen_pos)
@@ -692,10 +728,26 @@ func _screen_to_floor(screen_pos: Vector2) -> Vector3:
 	return origin + direction * distance
 
 
+func _apply_wall_mount(node: Node3D) -> void:
+	if not bool(node.get_meta("planning_wall_mount", false)):
+		return
+	if not node.has_meta("planning_wall_normal"):
+		return
+	var normal: Vector3 = node.get_meta("planning_wall_normal")
+	var facing := atan2(normal.x, normal.z)
+	node.rotation.y = facing
+
+
 func _snap_position_for(node: Node3D, value: Vector3) -> Vector3:
 	var base := _snap(value)
-	base.y = _support_height_at(node, base)
 	var source_aabb := _combined_aabb(node)
+	if bool(node.get_meta("planning_wall_mount", false)) and node.has_meta("planning_wall_normal"):
+		base.y = value.y
+	else:
+		var support_y := _support_height_at(node, base)
+		if value.y > 0.01:
+			support_y = maxf(support_y, value.y - source_aabb.position.y)
+		base.y = support_y - source_aabb.position.y
 	if source_aabb.size.length_squared() <= 0.0001:
 		return base
 	var source_sockets := _connection_sockets(node, base, source_aabb)
