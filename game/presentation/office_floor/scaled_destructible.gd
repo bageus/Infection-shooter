@@ -9,15 +9,15 @@ func _ready() -> void:
 	call_deferred("_initialize_health")
 
 func _initialize_health() -> void:
-	var root := get_parent()
+	var root: Node3D = get_parent() as Node3D
 	var bounds := AABB()
 	var found := false
 	for child in root.find_children("*", "MeshInstance3D", true, false):
 		var mesh_instance := child as MeshInstance3D
 		if mesh_instance == null or mesh_instance.mesh == null:
 			continue
-		var local_transform := root.global_transform.affine_inverse() * mesh_instance.global_transform
-		var aabb := local_transform * mesh_instance.get_aabb()
+		var local_transform: Transform3D = root.global_transform.affine_inverse() * mesh_instance.global_transform
+		var aabb: AABB = local_transform * mesh_instance.get_aabb()
 		bounds = aabb if not found else bounds.merge(aabb)
 		found = true
 	var volume := maxf(bounds.size.x * bounds.size.y * bounds.size.z, 0.25)
