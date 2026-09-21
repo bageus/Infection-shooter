@@ -230,6 +230,10 @@ text = "09"
 layout_mode = 2
 text = "14"
 
+[node name="G16" type="Button" parent="PlanningUI/Panel/VBox/GroupTabs"]
+layout_mode = 2
+text = "16"
+
 [node name="G13" type="Button" parent="PlanningUI/Panel/VBox/GroupTabs"]
 layout_mode = 2
 text = "13"
