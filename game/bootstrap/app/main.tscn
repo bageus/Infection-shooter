@@ -179,6 +179,37 @@ layout_mode = 2
 size_flags_horizontal = 3
 text = "ACTORS"
 
+[node name="GroupTabs" type="HBoxContainer" parent="PlanningUI/Panel/VBox"]
+layout_mode = 2
+
+[node name="G01" type="Button" parent="PlanningUI/Panel/VBox/GroupTabs"]
+layout_mode = 2
+text = "01"
+
+[node name="G06" type="Button" parent="PlanningUI/Panel/VBox/GroupTabs"]
+layout_mode = 2
+text = "06"
+
+[node name="G07" type="Button" parent="PlanningUI/Panel/VBox/GroupTabs"]
+layout_mode = 2
+text = "07"
+
+[node name="G08" type="Button" parent="PlanningUI/Panel/VBox/GroupTabs"]
+layout_mode = 2
+text = "08"
+
+[node name="G10" type="Button" parent="PlanningUI/Panel/VBox/GroupTabs"]
+layout_mode = 2
+text = "10"
+
+[node name="G11" type="Button" parent="PlanningUI/Panel/VBox/GroupTabs"]
+layout_mode = 2
+text = "11"
+
+[node name="G13" type="Button" parent="PlanningUI/Panel/VBox/GroupTabs"]
+layout_mode = 2
+text = "13"
+
 [node name="Palette" type="ItemList" parent="PlanningUI/Panel/VBox"]
 custom_minimum_size = Vector2(330, 500)
 layout_mode = 2
