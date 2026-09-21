@@ -2,17 +2,20 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://cj0x8uvh0i0gt"
-path.s3tc="res://.godot/imported/Image_0.007.png-aec7508f635732938d3deb35496283e5.s3tc.ctex"
+uid="uid://d2ja27wyot7r8"
+path.s3tc="res://.godot/imported/03_locker_tall_Image_0.png-4aeb8348d847c713c419e5edf0b4027f.s3tc.ctex"
 metadata={
 "imported_formats": ["s3tc_bptc"],
 "vram_texture": true
 }
+generator_parameters={
+"md5": "8009944e4c4204e16587b71d5cf2c07f"
+}
 
 [deps]
 
-source_file="res://models/objects/textures/Image_0.007.png"
-dest_files=["res://.godot/imported/Image_0.007.png-aec7508f635732938d3deb35496283e5.s3tc.ctex"]
+source_file="res://models/objects/03_locker_tall_Image_0.png"
+dest_files=["res://.godot/imported/03_locker_tall_Image_0.png-4aeb8348d847c713c419e5edf0b4027f.s3tc.ctex"]
 
 [params]
 

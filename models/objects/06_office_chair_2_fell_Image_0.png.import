@@ -2,17 +2,20 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://cj0x8uvh0i0gt"
-path.s3tc="res://.godot/imported/Image_0.007.png-aec7508f635732938d3deb35496283e5.s3tc.ctex"
+uid="uid://bdplm40qctl6o"
+path.s3tc="res://.godot/imported/06_office_chair_2_fell_Image_0.png-28b6d54753703141e1b2e7d97276718b.s3tc.ctex"
 metadata={
 "imported_formats": ["s3tc_bptc"],
 "vram_texture": true
 }
+generator_parameters={
+"md5": "6e9678f1e0e418e1089a6fe5651a8ee1"
+}
 
 [deps]
 
-source_file="res://models/objects/textures/Image_0.007.png"
-dest_files=["res://.godot/imported/Image_0.007.png-aec7508f635732938d3deb35496283e5.s3tc.ctex"]
+source_file="res://models/objects/06_office_chair_2_fell_Image_0.png"
+dest_files=["res://.godot/imported/06_office_chair_2_fell_Image_0.png-28b6d54753703141e1b2e7d97276718b.s3tc.ctex"]
 
 [params]
 
