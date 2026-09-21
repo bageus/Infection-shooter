@@ -24,6 +24,8 @@ var _swing_side := 0.0
 var _door_recess_nodes: Array[Node3D] = []
 var _single_slide_parts: Array[Node3D] = []
 var _single_closed_locals: Array[Transform3D] = []
+var _glass_hinge: Node3D
+var _glass_hinge_closed := Transform3D.IDENTITY
 var _elevator_lights: Array[Node3D] = []
 
 
@@ -77,18 +79,14 @@ func _physics_process(delta: float) -> void:
 				_swing_side = 0.0
 
 	_apply_door_pose(local_player)
-	if mode == DoorMode.GLASS_SWING:
-		var slide_side := _swing_side
-		if slide_side == 0.0:
-			slide_side = _player_side(local_player)
-			_swing_side = slide_side
-		for i in _single_slide_parts.size():
-			var slide_part := _single_slide_parts[i]
-			if not is_instance_valid(slide_part):
-				continue
-			var slide_transform := _single_closed_locals[i]
-			slide_transform.basis = _single_closed_locals[i].basis.rotated(Vector3.UP, deg_to_rad(open_angle_degrees * slide_side * _open_amount))
-			slide_part.transform = slide_transform
+	if mode == DoorMode.GLASS_SWING and _glass_hinge != null:
+		var swing_side := _swing_side
+		if swing_side == 0.0:
+			swing_side = _player_side(local_player)
+			_swing_side = swing_side
+		var hinge_transform := _glass_hinge_closed
+		hinge_transform.basis = _glass_hinge_closed.basis.rotated(Vector3.UP, deg_to_rad(open_angle_degrees * swing_side * _open_amount))
+		_glass_hinge.transform = hinge_transform
 	for recess in _door_recess_nodes:
 		if is_instance_valid(recess):
 			recess.visible = _open_amount <= 0.001
@@ -119,7 +117,7 @@ func _collect_door_parts() -> void:
 		_collect_named_nodes(visual, "doorrecess", _door_recess_nodes)
 		_collect_elevator_lights(visual)
 	elif mode == DoorMode.GLASS_SWING:
-		_collect_single_sliding_parts(visual)
+		_build_glass_hinge(visual)
 	else:
 		var pivot: Node3D
 		if mode == DoorMode.SWING_ONE_WAY:
@@ -187,13 +185,35 @@ func _set_light_state(node: Node3D, enabled: bool) -> void:
 			_set_light_state(child as Node3D, enabled)
 
 
-func _collect_single_sliding_parts(visual: Node) -> void:
-	var names := ["doorglass", "doorhandle", "doortoppanel"]
-	for wanted in names:
+func _build_glass_hinge(visual: Node3D) -> void:
+	var glass := _find_exact_named_node(visual, "doorglass")
+	if glass == null:
+		return
+	_glass_hinge = Node3D.new()
+	_glass_hinge.name = "RuntimeDoorPivot"
+	visual.add_child(_glass_hinge)
+	var bounds := _combined_parts_aabb(visual, ["doorglass", "doorhandle", "doortoppanel"])
+	var hinge_local := Vector3(bounds.position.x, bounds.position.y, bounds.get_center().z)
+	_glass_hinge.position = hinge_local
+	_glass_hinge_closed = _glass_hinge.transform
+	for wanted in ["doorglass", "doorhandle", "doortoppanel"]:
 		var part := _find_exact_named_node(visual, wanted)
 		if part != null:
-			_single_slide_parts.append(part)
-			_single_closed_locals.append(part.transform)
+			part.reparent(_glass_hinge, true)
+
+
+func _combined_parts_aabb(root: Node3D, names: Array[String]) -> AABB:
+	var result := AABB()
+	var found := false
+	for wanted in names:
+		var part := _find_exact_named_node(root, wanted)
+		if part is MeshInstance3D:
+			var mesh_part := part as MeshInstance3D
+			var local_transform: Transform3D = root.global_transform.affine_inverse() * mesh_part.global_transform
+			var part_aabb: AABB = local_transform * mesh_part.get_aabb()
+			result = part_aabb if not found else result.merge(part_aabb)
+			found = true
+	return result
 
 
 func _collect_named_nodes(node: Node, token: String, out: Array[Node3D]) -> void:
