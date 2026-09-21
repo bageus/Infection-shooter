@@ -23,7 +23,7 @@ var _requested_open := false
 var _swing_side := 0.0
 var _door_recess_nodes: Array[Node3D] = []
 var _single_slide_parts: Array[Node3D] = []
-var _single_closed_globals: Array[Transform3D] = []
+var _single_closed_locals: Array[Transform3D] = []
 var _elevator_lights: Array[Node3D] = []
 
 
@@ -86,9 +86,9 @@ func _physics_process(delta: float) -> void:
 			var slide_part := _single_slide_parts[i]
 			if not is_instance_valid(slide_part):
 				continue
-			var slide_transform := _single_closed_globals[i]
+			var slide_transform := _single_closed_locals[i]
 			slide_transform.origin.x += slide_side * slide_distance * _open_amount
-			slide_part.global_transform = slide_transform
+			slide_part.transform = slide_transform
 	for recess in _door_recess_nodes:
 		if is_instance_valid(recess):
 			recess.visible = _open_amount <= 0.001
@@ -193,7 +193,7 @@ func _collect_single_sliding_parts(visual: Node) -> void:
 		var part := _find_exact_named_node(visual, wanted)
 		if part != null:
 			_single_slide_parts.append(part)
-			_single_closed_globals.append(part.global_transform)
+			_single_closed_locals.append(part.transform)
 
 
 func _collect_named_nodes(node: Node, token: String, out: Array[Node3D]) -> void:
