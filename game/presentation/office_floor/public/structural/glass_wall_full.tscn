@@ -7,10 +7,10 @@
 
 [node name="GlassWallFull" type="Node3D"]
 script = ExtResource("2_collision")
+exclude_name_tokens = PackedStringArray("glass", "blinds")
 
 [node name="GlassCollisionBuilder" type="Node3D" parent="."]
 script = ExtResource("5_glass_collision")
-exclude_name_tokens = PackedStringArray("glass", "blinds")
 
 [node name="Visual" parent="." instance=ExtResource("1_model")]
 
