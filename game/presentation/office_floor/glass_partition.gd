@@ -53,7 +53,7 @@ func _break_glass(hit_position: Vector3) -> void:
 	var owner_root := get_parent()
 	var static_body := owner_root.get_node_or_null("Body") as StaticBody3D
 	if static_body != null:
-		_disable_glass_named_collision(static_body)
+		_disable_collision_recursive(static_body)
 	_spawn_fragments(hit_position)
 
 
