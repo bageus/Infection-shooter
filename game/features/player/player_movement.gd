@@ -13,6 +13,7 @@ extends CharacterBody3D
 @export var max_health: float = 100.0
 @export var max_armor: float = 100.0
 @export var starting_antidotes: int = 2
+@export var max_antidotes: int = 3
 @onready var camera_rig: Node3D = $CameraRig
 @onready var camera: Camera3D = $CameraRig/Camera3D
 @onready var aim_pivot: Node3D = $AimPivot
@@ -73,6 +74,15 @@ func use_antidote()->bool:
 	if used:antidotes-=1
 	return used
 func add_ammo_to_current_weapon(amount:int)->int:return get_current_weapon().call("add_reserve_ammo",amount)
+func add_ammo_for_weapon(weapon_name:String,amount:int)->int:
+	for weapon in weapons:
+		if weapon.call("get_weapon_name")==weapon_name:
+			return int(weapon.call("add_reserve_ammo",amount))
+	return 0
+func add_antidote(amount:int=1)->bool:
+	if antidotes>=max_antidotes:return false
+	antidotes=mini(max_antidotes,antidotes+maxi(amount,0))
+	return true
 func absorb_mutagen(delta_seconds:float)->float:return infection_runtime.call("absorb_mutagen",delta_seconds)
 func get_mutation()->float:return infection_runtime.call("get_mutation")
 func _update_camera(delta:float)->void:camera_rig.rotate_y(deg_to_rad(Input.get_axis("camera_left","camera_right")*camera_rotation_speed*delta))
