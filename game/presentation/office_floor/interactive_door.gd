@@ -1,6 +1,6 @@
 extends Node3D
 
-enum DoorMode { SWING_BIDIRECTIONAL, SWING_ONE_WAY, SLIDING_ELEVATOR, SLIDING_SINGLE }
+enum DoorMode { SWING_BIDIRECTIONAL, SWING_ONE_WAY, SLIDING_ELEVATOR, GLASS_SWING }
 
 @export var mode: DoorMode = DoorMode.SWING_BIDIRECTIONAL
 @export var trigger_distance: float = 1.45
@@ -61,7 +61,7 @@ func _physics_process(delta: float) -> void:
 					wants_open = true
 					if _open_amount <= 0.02:
 						_swing_side = signf(one_way_allowed_side)
-			DoorMode.SLIDING_ELEVATOR, DoorMode.SLIDING_SINGLE:
+			DoorMode.SLIDING_ELEVATOR, DoorMode.GLASS_SWING:
 				wants_open = true
 				if mode == DoorMode.SLIDING_ELEVATOR:
 					_request_nearby_elevator_open()
@@ -77,7 +77,7 @@ func _physics_process(delta: float) -> void:
 				_swing_side = 0.0
 
 	_apply_door_pose(local_player)
-	if mode == DoorMode.SLIDING_SINGLE:
+	if mode == DoorMode.GLASS_SWING:
 		var slide_side := _swing_side
 		if slide_side == 0.0:
 			slide_side = _player_side(local_player)
@@ -87,7 +87,7 @@ func _physics_process(delta: float) -> void:
 			if not is_instance_valid(slide_part):
 				continue
 			var slide_transform := _single_closed_locals[i]
-			slide_transform.origin.x += slide_side * slide_distance * _open_amount
+			slide_transform.basis = _single_closed_locals[i].basis.rotated(Vector3.UP, deg_to_rad(open_angle_degrees * slide_side * _open_amount))
 			slide_part.transform = slide_transform
 	for recess in _door_recess_nodes:
 		if is_instance_valid(recess):
@@ -118,7 +118,7 @@ func _collect_door_parts() -> void:
 		_collect_elevator_parts(visual)
 		_collect_named_nodes(visual, "doorrecess", _door_recess_nodes)
 		_collect_elevator_lights(visual)
-	elif mode == DoorMode.SLIDING_SINGLE:
+	elif mode == DoorMode.GLASS_SWING:
 		_collect_single_sliding_parts(visual)
 	else:
 		var pivot: Node3D
@@ -250,7 +250,7 @@ func _apply_door_pose(local_player: Vector3) -> void:
 			var t := closed
 			t.origin.x += direction * slide_distance * _open_amount
 			part.transform = t
-		elif mode == DoorMode.SLIDING_SINGLE:
+		elif mode == DoorMode.GLASS_SWING:
 			pass
 		else:
 			var side := _swing_side
