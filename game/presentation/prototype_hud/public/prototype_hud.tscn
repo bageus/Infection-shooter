@@ -1,6 +1,7 @@
-[gd_scene load_steps=12 format=3]
+[gd_scene load_steps=13 format=3]
 
 [ext_resource type="Script" path="res://game/presentation/prototype_hud/prototype_hud.gd" id="1"]
+[ext_resource type="Texture2D" path="res://assets/icon_interface.png" id="2_icons"]
 
 [sub_resource type="StyleBoxFlat" id="HudFrame"]
 bg_color = Color(0.005, 0.035, 0.065, 0.95)
@@ -207,16 +208,14 @@ offset_bottom = -18.0
 grow_vertical = 0
 theme_override_styles/panel = SubResource("AntidoteFrame")
 
-[node name="Symbol" type="Label" parent="AntidotePanel"]
+[node name="Symbol" type="TextureRect" parent="AntidotePanel"]
 offset_left = 8.0
 offset_top = 8.0
 offset_right = 56.0
 offset_bottom = 52.0
-text = "💉"
-theme_override_colors/font_color = Color(0.1, 0.9, 1, 1)
-theme_override_font_sizes/font_size = 25
-horizontal_alignment = 1
-vertical_alignment = 1
+texture = ExtResource("2_icons")
+expand_mode = 1
+stretch_mode = 5
 
 [node name="KeyHint" type="Label" parent="AntidotePanel"]
 offset_left = 8.0
@@ -251,33 +250,14 @@ grow_horizontal = 0
 grow_vertical = 0
 theme_override_styles/panel = SubResource("HudFrame")
 
-[node name="GunStock" type="ColorRect" parent="WeaponPanel"]
-offset_left = 22.0
-offset_top = 28.0
-offset_right = 54.0
-offset_bottom = 38.0
-color = Color(0.82, 0.93, 1, 1)
-
-[node name="GunBody" type="ColorRect" parent="WeaponPanel"]
-offset_left = 48.0
-offset_top = 20.0
-offset_right = 112.0
-offset_bottom = 42.0
-color = Color(0.82, 0.93, 1, 1)
-
-[node name="GunBarrel" type="ColorRect" parent="WeaponPanel"]
-offset_left = 108.0
-offset_top = 26.0
-offset_right = 158.0
-offset_bottom = 32.0
-color = Color(0.82, 0.93, 1, 1)
-
-[node name="GunGrip" type="ColorRect" parent="WeaponPanel"]
-offset_left = 78.0
-offset_top = 40.0
-offset_right = 91.0
-offset_bottom = 56.0
-color = Color(0.82, 0.93, 1, 1)
+[node name="WeaponIcon" type="TextureRect" parent="WeaponPanel"]
+offset_left = 18.0
+offset_top = 12.0
+offset_right = 210.0
+offset_bottom = 72.0
+texture = ExtResource("2_icons")
+expand_mode = 1
+stretch_mode = 5
 
 [node name="WeaponName" type="Label" parent="WeaponPanel"]
 offset_left = 118.0
@@ -326,11 +306,15 @@ offset_bottom = 143.0
 theme_override_styles/panel = SubResource("ActiveSlotFrame")
 
 [node name="Label" type="Label" parent="WeaponPanel/Slot1"]
-text = "1   ▰"
+text = "1"
 theme_override_colors/font_color = Color(0.88, 0.95, 1, 1)
-theme_override_font_sizes/font_size = 18
-horizontal_alignment = 1
-vertical_alignment = 1
+theme_override_font_sizes/font_size = 14
+
+[node name="Icon" type="TextureRect" parent="WeaponPanel/Slot1"]
+layout_mode = 2
+texture = ExtResource("2_icons")
+expand_mode = 1
+stretch_mode = 5
 
 [node name="Slot2" type="PanelContainer" parent="WeaponPanel"]
 offset_left = 133.0
@@ -340,11 +324,15 @@ offset_bottom = 143.0
 theme_override_styles/panel = SubResource("SlotFrame")
 
 [node name="Label" type="Label" parent="WeaponPanel/Slot2"]
-text = "2   ▰▰"
+text = "2"
 theme_override_colors/font_color = Color(0.88, 0.95, 1, 1)
-theme_override_font_sizes/font_size = 18
-horizontal_alignment = 1
-vertical_alignment = 1
+theme_override_font_sizes/font_size = 14
+
+[node name="Icon" type="TextureRect" parent="WeaponPanel/Slot2"]
+layout_mode = 2
+texture = ExtResource("2_icons")
+expand_mode = 1
+stretch_mode = 5
 
 [node name="Slot3" type="PanelContainer" parent="WeaponPanel"]
 offset_left = 250.0
@@ -354,8 +342,12 @@ offset_bottom = 143.0
 theme_override_styles/panel = SubResource("SlotFrame")
 
 [node name="Label" type="Label" parent="WeaponPanel/Slot3"]
-text = "3   ▰▰▰"
+text = "3"
 theme_override_colors/font_color = Color(0.88, 0.95, 1, 1)
-theme_override_font_sizes/font_size = 18
-horizontal_alignment = 1
-vertical_alignment = 1
+theme_override_font_sizes/font_size = 14
+
+[node name="Icon" type="TextureRect" parent="WeaponPanel/Slot3"]
+layout_mode = 2
+texture = ExtResource("2_icons")
+expand_mode = 1
+stretch_mode = 5
