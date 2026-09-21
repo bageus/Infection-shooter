@@ -587,6 +587,7 @@ func _screen_to_floor(screen_pos: Vector2) -> Vector3:
 
 func _snap_position_for(node: Node3D, value: Vector3) -> Vector3:
 	var base := _snap(value)
+	base.y = _support_height_at(node, base)
 	var source_aabb := _combined_aabb(node)
 	if source_aabb.size.length_squared() <= 0.0001:
 		return base
@@ -606,8 +607,29 @@ func _snap_position_for(node: Node3D, value: Vector3) -> Vector3:
 				if distance < best_distance:
 					best_distance = distance
 					best = base + (target_socket - source_socket)
-					best.y = 0.0
+					best.y = base.y
 	return best
+
+
+func _support_height_at(node: Node3D, base: Vector3) -> float:
+	var best_height := 0.0
+	var node_aabb := _combined_aabb(node)
+	var node_half := Vector2(node_aabb.size.x * 0.5, node_aabb.size.z * 0.5)
+	for other in placed:
+		if other == node or not is_instance_valid(other):
+			continue
+		var scene_path := str(other.get_meta("planning_scene_path", ""))
+		if not scene_path.ends_with("/floor_pad.tscn"):
+			continue
+		var pad_aabb := _combined_aabb(other)
+		if pad_aabb.size.length_squared() <= 0.0001:
+			continue
+		var pad_world := other.global_transform * pad_aabb
+		var center := pad_world.get_center()
+		var half := Vector2(pad_world.size.x * 0.5, pad_world.size.z * 0.5)
+		if absf(base.x - center.x) <= half.x + node_half.x * 0.25 and absf(base.z - center.z) <= half.y + node_half.y * 0.25:
+			best_height = maxf(best_height, pad_world.position.y + pad_world.size.y)
+	return best_height
 
 
 func _connection_sockets(node: Node3D, world_origin: Vector3, aabb: AABB) -> Array[Vector3]:
