@@ -1,6 +1,7 @@
 extends CharacterBody3D
 
 const BLOOD_SPLATTER_TEXTURE: Texture2D = preload("res://assets/vfx/blood_splatter.svg")
+const DROP_TABLE_SCRIPT := preload("res://game/features/pickups/drop_table.gd")
 
 @export var max_health: float = 50.0
 @export var move_speed: float = 4.5
@@ -240,6 +241,10 @@ func _blood_material() -> StandardMaterial3D:
 
 func _die() -> void:
 	_dead = true
+	var drop_table := DROP_TABLE_SCRIPT.new()
+	get_tree().current_scene.add_child(drop_table)
+	drop_table.call("drop_for_enemy", get_tree().current_scene, global_position)
+	drop_table.queue_free()
 	collision_layer = 0
 	collision_mask = 0
 	collision_shape.disabled = true
