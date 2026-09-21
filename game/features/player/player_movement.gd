@@ -98,7 +98,16 @@ func _update_move(delta:float)->void:
 		velocity.x=move_toward(velocity.x,target.x,accel*delta);velocity.z=move_toward(velocity.z,target.z,accel*delta)
 	velocity.y=0.0 if is_on_floor() else velocity.y-gravity_acceleration*delta
 	move_and_slide()
+	_push_chair_contacts()
 	if _roll_remaining>0.0: _push_roll_contacts()
+func _push_chair_contacts()->void:
+	for i in get_slide_collision_count():
+		var collision:=get_slide_collision(i)
+		var collider:=collision.get_collider()
+		if collider!=null and collider.has_method("push_from_character"):
+			var movement:=Vector3(velocity.x,0.0,velocity.z)
+			collider.call("push_from_character",global_position,movement)
+
 func _push_roll_contacts()->void:
 	for i in get_slide_collision_count():
 		var collision:=get_slide_collision(i)
