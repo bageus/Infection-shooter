@@ -24,10 +24,13 @@ var _attack_cooldown: float = 0.0
 var _obstacle_cooldown: float = 0.0
 var _dead: bool = false
 var _push_velocity: Vector3 = Vector3.ZERO
+var _ai_tick_offset: int = 0
+var _cached_desired: Vector3 = Vector3.ZERO
 
 
 func _ready() -> void:
 	health = max_health
+	_ai_tick_offset = get_instance_id() % 4
 	death_cloud.depleted.connect(_on_death_cloud_depleted)
 
 
@@ -69,14 +72,21 @@ func _physics_process(delta: float) -> void:
 
 	_attack_cooldown = maxf(0.0, _attack_cooldown - delta)
 	_obstacle_cooldown = maxf(0.0, _obstacle_cooldown - delta)
-	var desired := _desired_velocity()
+	var distance_to_target := INF
+	if _target != null and is_instance_valid(_target):
+		distance_to_target = global_position.distance_to(_target.global_position)
+	var frame_slot := Engine.get_physics_frames() % 4
+	if distance_to_target < 10.0 or frame_slot == _ai_tick_offset:
+		_cached_desired = _desired_velocity()
+	var desired := _cached_desired
 	velocity.x = desired.x + _push_velocity.x
 	velocity.z = desired.z + _push_velocity.z
 	_push_velocity = _push_velocity.move_toward(Vector3.ZERO, push_decay * delta)
 	_apply_gravity(delta)
 	move_and_slide()
 	_push_chair_contacts()
-	_try_break_blocking_props()
+	if distance_to_target < 14.0 or frame_slot == _ai_tick_offset:
+		_try_break_blocking_props()
 
 
 func _desired_velocity() -> Vector3:
@@ -136,7 +146,7 @@ func _try_attack() -> void:
 
 
 func _spawn_air_blood(hit_position: Vector3, direction: Vector3, weapon_name: String) -> void:
-	var count := 22 if weapon_name == "SHOTGUN" else 12
+	var count := 10 if weapon_name == "SHOTGUN" else 5
 	var spread := 0.72 if weapon_name == "SHOTGUN" else 0.34
 	for i in count:
 		var drop := MeshInstance3D.new()
@@ -155,14 +165,14 @@ func _spawn_air_blood(hit_position: Vector3, direction: Vector3, weapon_name: St
 
 
 func _spawn_surface_splatter(hit_position: Vector3, direction: Vector3, weapon_name: String) -> void:
-	var rays := 42 if weapon_name == "SHOTGUN" else 18
+	var rays := 18 if weapon_name == "SHOTGUN" else 8
 	var reach := 4.5 if weapon_name == "SHOTGUN" else 3.0
 	var spread := 0.9 if weapon_name == "SHOTGUN" else 0.35
 	for i in rays:
 		var ray_direction := direction.normalized()
 		ray_direction += Vector3(randf_range(-spread, spread), randf_range(-0.55, 0.2), randf_range(-spread, spread))
 		_cast_blood_ray(hit_position, ray_direction.normalized(), reach, weapon_name == "SHOTGUN")
-	for i in (16 if weapon_name == "SHOTGUN" else 8):
+	for i in (8 if weapon_name == "SHOTGUN" else 4):
 		var floor_start := hit_position + Vector3(randf_range(-0.8, 0.8), 0.35, randf_range(-0.8, 0.8))
 		_cast_blood_ray(floor_start, Vector3.DOWN, 3.0, weapon_name == "SHOTGUN")
 
@@ -199,7 +209,7 @@ func _spawn_splatter_mark(hit_position: Vector3, normal: Vector3, heavy: bool) -
 
 
 func _spawn_satellite_decals(hit_position: Vector3, normal: Vector3, heavy: bool) -> void:
-	var count := randi_range(7, 14) if heavy else randi_range(3, 7)
+	var count := randi_range(3, 7) if heavy else randi_range(1, 4)
 	var basis := _basis_for_normal(normal)
 	for i in count:
 		var decal := Decal.new()
