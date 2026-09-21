@@ -17,7 +17,7 @@ func _rebuild_collision() -> void:
 	if _built:
 		return
 	var visual := get_node_or_null(visual_path) as Node3D
-	var body := get_node_or_null(body_path) as StaticBody3D
+	var body := get_node_or_null(body_path) as CollisionObject3D
 	if visual == null or body == null:
 		return
 	for child in body.get_children():
@@ -27,7 +27,7 @@ func _rebuild_collision() -> void:
 	_built = true
 
 
-func _add_mesh_collisions(node: Node, body: StaticBody3D) -> void:
+func _add_mesh_collisions(node: Node, body: CollisionObject3D) -> void:
 	if _is_excluded(node):
 		return
 	if node is MeshInstance3D:
