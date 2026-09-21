@@ -1,6 +1,6 @@
 extends Node3D
 
-enum DoorMode { SWING_BIDIRECTIONAL, SWING_ONE_WAY, SLIDING_ELEVATOR }
+enum DoorMode { SWING_BIDIRECTIONAL, SWING_ONE_WAY, SLIDING_ELEVATOR, SLIDING_SINGLE }
 
 @export var mode: DoorMode = DoorMode.SWING_BIDIRECTIONAL
 @export var trigger_distance: float = 1.45
@@ -21,6 +21,9 @@ var _open_amount := 0.0
 var _close_timer := 0.0
 var _requested_open := false
 var _swing_side := 0.0
+var _door_recess_nodes: Array[Node3D] = []
+var _single_slide_parts: Array[Node3D] = []
+var _single_closed_globals: Array[Transform3D] = []
 
 
 func _ready() -> void:
@@ -57,9 +60,10 @@ func _physics_process(delta: float) -> void:
 					wants_open = true
 					if _open_amount <= 0.02:
 						_swing_side = signf(one_way_allowed_side)
-			DoorMode.SLIDING_ELEVATOR:
+			DoorMode.SLIDING_ELEVATOR, DoorMode.SLIDING_SINGLE:
 				wants_open = true
-				_request_nearby_elevator_open()
+				if mode == DoorMode.SLIDING_ELEVATOR:
+					_request_nearby_elevator_open()
 
 	if wants_open:
 		_close_timer = close_delay
@@ -72,6 +76,21 @@ func _physics_process(delta: float) -> void:
 				_swing_side = 0.0
 
 	_apply_door_pose(local_player)
+	if mode == DoorMode.SLIDING_SINGLE:
+		var slide_side := _swing_side
+		if slide_side == 0.0:
+			slide_side = _player_side(local_player)
+			_swing_side = slide_side
+		for i in _single_slide_parts.size():
+			var slide_part := _single_slide_parts[i]
+			if not is_instance_valid(slide_part):
+				continue
+			var slide_transform := _single_closed_globals[i]
+			slide_transform.origin.x += slide_side * slide_distance * _open_amount
+			slide_part.global_transform = slide_transform
+	for recess in _door_recess_nodes:
+		if is_instance_valid(recess):
+			recess.visible = _open_amount < 0.08
 
 
 func request_open() -> void:
@@ -93,6 +112,9 @@ func _collect_door_parts() -> void:
 		return
 	if mode == DoorMode.SLIDING_ELEVATOR:
 		_collect_elevator_parts(visual)
+		_collect_named_nodes(visual, "doorrecess", _door_recess_nodes)
+	elif mode == DoorMode.SLIDING_SINGLE:
+		_collect_single_sliding_parts(visual)
 	else:
 		var pivot: Node3D
 		if mode == DoorMode.SWING_ONE_WAY:
@@ -130,6 +152,22 @@ func _collect_elevator_parts(node: Node) -> void:
 		if not _door_parts.has(part):
 			_door_parts.append(part)
 			_closed_transforms.append(part.transform)
+
+
+func _collect_single_sliding_parts(visual: Node) -> void:
+	var names := ["doorglass", "doorhandle", "doortoppanel"]
+	for wanted in names:
+		var part := _find_exact_named_node(visual, wanted)
+		if part != null:
+			_single_slide_parts.append(part)
+			_single_closed_globals.append(part.global_transform)
+
+
+func _collect_named_nodes(node: Node, token: String, out: Array[Node3D]) -> void:
+	if node is Node3D and token in node.name.to_lower():
+		out.append(node as Node3D)
+	for child in node.get_children():
+		_collect_named_nodes(child, token, out)
 
 
 func _find_exact_named_node(node: Node, wanted: String) -> Node3D:
@@ -179,6 +217,8 @@ func _apply_door_pose(local_player: Vector3) -> void:
 			var t := closed
 			t.origin.x += direction * slide_distance * _open_amount
 			part.transform = t
+		elif mode == DoorMode.SLIDING_SINGLE:
+			pass
 		else:
 			var side := _swing_side
 			if side == 0.0:
