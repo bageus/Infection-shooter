@@ -12,7 +12,9 @@ extends CanvasLayer
 @onready var magazine: Label = $WeaponPanel/Magazine
 @onready var reserve: Label = $WeaponPanel/Reserve
 @onready var reload_label: Label = $WeaponPanel/Reload
-@onready var gun_parts: Array[ColorRect] = [$WeaponPanel/GunStock, $WeaponPanel/GunBody, $WeaponPanel/GunBarrel, $WeaponPanel/GunGrip]
+@onready var weapon_icon: TextureRect = $WeaponPanel/WeaponIcon
+@onready var antidote_icon: TextureRect = $AntidotePanel/Symbol
+@onready var slot_icons: Array[TextureRect] = [$WeaponPanel/Slot1/Icon, $WeaponPanel/Slot2/Icon, $WeaponPanel/Slot3/Icon]
 @onready var slot_frames: Array[PanelContainer] = [$WeaponPanel/Slot1, $WeaponPanel/Slot2, $WeaponPanel/Slot3]
 
 var player: Node
@@ -24,11 +26,41 @@ func _ready() -> void:
 	infection = player.get_node("InfectionRuntime")
 	hp_bar.max_value = player.max_health
 	mutation_bar.max_value = 100.0
+	_configure_icon_regions()
 
 
 func _process(_delta: float) -> void:
 	_update_vitals()
 	_update_weapon()
+
+
+func _configure_icon_regions() -> void:
+	var texture := weapon_icon.texture
+	if texture == null:
+		return
+	var size := texture.get_size()
+	# Atlas order in icon_interface.png: rifle, pistol, uzi, shotgun, syringe.
+	var cell_width := size.x / 5.0
+	var regions: Array[Rect2] = []
+	for i in 5:
+		regions.append(Rect2(cell_width * i, 0.0, cell_width, size.y))
+	_set_region(slot_icons[0], texture, regions[1])
+	_set_region(slot_icons[1], texture, regions[2])
+	_set_region(slot_icons[2], texture, regions[3])
+	_set_region(antidote_icon, texture, regions[4])
+
+
+func _set_region(target: TextureRect, source: Texture2D, region: Rect2) -> void:
+	var atlas := AtlasTexture.new()
+	atlas.atlas = source
+	atlas.region = region
+	target.texture = atlas
+
+
+func _set_active_weapon_icon(index: int) -> void:
+	if index < 0 or index >= slot_icons.size():
+		return
+	weapon_icon.texture = slot_icons[index].texture
 
 
 func _update_vitals() -> void:
@@ -45,6 +77,7 @@ func _update_vitals() -> void:
 
 func _update_weapon() -> void:
 	var weapon: Node = player.get_current_weapon()
+	_set_active_weapon_icon(player.get_current_weapon_index())
 	weapon_name.text = weapon.call("get_weapon_name").to_upper()
 	var magazine_ammo: int = weapon.call("get_magazine_ammo")
 	var reserve_ammo: int = weapon.call("get_reserve_ammo")
@@ -75,8 +108,7 @@ func _update_weapon_warning(empty: bool) -> void:
 	weapon_name.modulate = warning_color if empty else Color.WHITE
 	magazine.modulate = warning_color if empty else Color.WHITE
 	reload_label.modulate = warning_color if empty else Color(0.1, 0.9, 1.0, 1.0)
-	for part in gun_parts:
-		part.color = warning_color if empty else normal_color
+	weapon_icon.modulate = warning_color if empty else normal_color
 
 
 func _update_weapon_slots(empty: bool) -> void:
