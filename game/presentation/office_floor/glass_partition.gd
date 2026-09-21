@@ -49,10 +49,25 @@ func _break_glass(hit_position: Vector3) -> void:
 			glass.visible = false
 	for token in hide_with_glass:
 		_hide_named(get_parent().get_node_or_null("Visual"), str(token).to_lower())
-	for child in get_children():
-		if child is CollisionShape3D:
-			(child as CollisionShape3D).set_deferred("disabled", true)
+	_disable_collision_recursive(self)
+	var owner_root := get_parent()
+	var static_body := owner_root.get_node_or_null("Body") as StaticBody3D
+	if static_body != null:
+		_disable_glass_named_collision(static_body)
 	_spawn_fragments(hit_position)
+
+
+func _disable_collision_recursive(node: Node) -> void:
+	if node is CollisionShape3D:
+		(node as CollisionShape3D).set_deferred("disabled", true)
+	for child in node.get_children():
+		_disable_collision_recursive(child)
+
+
+func _disable_glass_named_collision(body: StaticBody3D) -> void:
+	for child in body.get_children():
+		if child is CollisionShape3D and ("glass" in child.name.to_lower() or "door" in child.name.to_lower()):
+			(child as CollisionShape3D).set_deferred("disabled", true)
 
 
 func _hide_named(node: Node, token: String) -> void:
