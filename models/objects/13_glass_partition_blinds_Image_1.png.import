@@ -2,17 +2,20 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://f4ff2pxd1mce"
-path.s3tc="res://.godot/imported/Image_0.044.png-4ed3348cf66501f3e3f9852fe3ae37f0.s3tc.ctex"
+uid="uid://6ar840k3dvd8"
+path.s3tc="res://.godot/imported/13_glass_partition_blinds_Image_1.png-4e907998b0e90a1bebd84d9495eb02a3.s3tc.ctex"
 metadata={
 "imported_formats": ["s3tc_bptc"],
 "vram_texture": true
 }
+generator_parameters={
+"md5": "d59250c489a07bcdac47bd031bb30860"
+}
 
 [deps]
 
-source_file="res://models/objects/textures/Image_0.044.png"
-dest_files=["res://.godot/imported/Image_0.044.png-4ed3348cf66501f3e3f9852fe3ae37f0.s3tc.ctex"]
+source_file="res://models/objects/13_glass_partition_blinds_Image_1.png"
+dest_files=["res://.godot/imported/13_glass_partition_blinds_Image_1.png-4e907998b0e90a1bebd84d9495eb02a3.s3tc.ctex"]
 
 [params]
 

@@ -2,17 +2,20 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://f4ff2pxd1mce"
-path.s3tc="res://.godot/imported/Image_0.044.png-4ed3348cf66501f3e3f9852fe3ae37f0.s3tc.ctex"
+uid="uid://dxefxkwoso2la"
+path.s3tc="res://.godot/imported/13_glass_wall_full_Image_0.png-17091e1f0ba5233ce6b32998a9b6502f.s3tc.ctex"
 metadata={
 "imported_formats": ["s3tc_bptc"],
 "vram_texture": true
 }
+generator_parameters={
+"md5": "16eb6c065ba86fbed2a71dfd3056573b"
+}
 
 [deps]
 
-source_file="res://models/objects/textures/Image_0.044.png"
-dest_files=["res://.godot/imported/Image_0.044.png-4ed3348cf66501f3e3f9852fe3ae37f0.s3tc.ctex"]
+source_file="res://models/objects/13_glass_wall_full_Image_0.png"
+dest_files=["res://.godot/imported/13_glass_wall_full_Image_0.png-17091e1f0ba5233ce6b32998a9b6502f.s3tc.ctex"]
 
 [params]
 
