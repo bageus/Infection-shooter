@@ -43,29 +43,66 @@ var selection_source_aabb := AABB()
 var planning_grid: MeshInstance3D
 var active_catalog: Array = []
 
-var structure_catalog := [
-	{"name":"Window Double","path":"res://game/presentation/office_floor/public/structural/window_double.tscn"},
-	{"name":"Window Corner","path":"res://game/presentation/office_floor/public/structural/window_corner.tscn"},
-	{"name":"Wall Straight","path":"res://game/presentation/office_floor/public/structural/wall_straight.tscn"},
-	{"name":"Wall Half","path":"res://game/presentation/office_floor/public/structural/wall_half_panel.tscn"},
-	{"name":"Outer Corner","path":"res://game/presentation/office_floor/public/structural/wall_outer_corner.tscn"},
-	{"name":"Door Wall 2","path":"res://game/presentation/office_floor/public/structural/wall_door.tscn"},
-	{"name":"Emergency Door","path":"res://game/presentation/office_floor/public/structural/wall_emergency_door.tscn"},
-	{"name":"Column","path":"res://game/presentation/office_floor/public/structural/column.tscn"},
-	{"name":"Floor Pad","path":"res://game/presentation/office_floor/public/structural/floor_pad.tscn"},
-	{"name":"Elevator Passenger","path":"res://game/presentation/office_floor/public/structural/elevator_cabin_passenger.tscn"},
-	{"name":"Elevator Freight","path":"res://game/presentation/office_floor/public/structural/elevator_cabin_freight.tscn"},
-	{"name":"Elevator Door","path":"res://game/presentation/office_floor/public/structural/elevator_door.tscn"},
-	{"name":"Door Wall 3","path":"res://game/presentation/office_floor/public/structural/wall_door_3.tscn"},
-	{"name":"Door Wall 2 Empty","path":"res://game/presentation/office_floor/public/structural/wall_door_2_without.tscn"},
-	{"name":"Door Wall 3 Empty","path":"res://game/presentation/office_floor/public/structural/wall_door_3_without.tscn"},
-	{"name":"Broken Door 2","path":"res://game/presentation/office_floor/public/structural/only_door_2.tscn"},
-	{"name":"Broken Door 3","path":"res://game/presentation/office_floor/public/structural/only_door_3.tscn"},
-	{"name":"Glass Wall Full","path":"res://game/presentation/office_floor/public/structural/glass_wall_full.tscn"},
-	{"name":"Glass Partition Half","path":"res://game/presentation/office_floor/public/structural/glass_partition_half.tscn"},
-	{"name":"Glass Partition Blinds","path":"res://game/presentation/office_floor/public/structural/glass_partition_blinds.tscn"},
-	{"name":"Sliding Glass Door","path":"res://game/presentation/office_floor/public/structural/sliding_glass_door.tscn"}
-]
+var group_catalogs := {
+	"01": [
+		{"name":"Window Double","path":"res://game/presentation/office_floor/public/structural/window_double.tscn"},
+		{"name":"Window Corner","path":"res://game/presentation/office_floor/public/structural/window_corner.tscn"},
+		{"name":"Wall Straight","path":"res://game/presentation/office_floor/public/structural/wall_straight.tscn"},
+		{"name":"Wall Half","path":"res://game/presentation/office_floor/public/structural/wall_half_panel.tscn"},
+		{"name":"Outer Corner","path":"res://game/presentation/office_floor/public/structural/wall_outer_corner.tscn"},
+		{"name":"Door Wall 2","path":"res://game/presentation/office_floor/public/structural/wall_door.tscn"},
+		{"name":"Emergency Door","path":"res://game/presentation/office_floor/public/structural/wall_emergency_door.tscn"},
+		{"name":"Column","path":"res://game/presentation/office_floor/public/structural/column.tscn"},
+		{"name":"Floor Pad","path":"res://game/presentation/office_floor/public/structural/floor_pad.tscn"},
+		{"name":"Elevator Passenger","path":"res://game/presentation/office_floor/public/structural/elevator_cabin_passenger.tscn"},
+		{"name":"Elevator Freight","path":"res://game/presentation/office_floor/public/structural/elevator_cabin_freight.tscn"},
+		{"name":"Elevator Door","path":"res://game/presentation/office_floor/public/structural/elevator_door.tscn"},
+		{"name":"Door Wall 3","path":"res://game/presentation/office_floor/public/structural/wall_door_3.tscn"},
+		{"name":"Door Wall 2 Empty","path":"res://game/presentation/office_floor/public/structural/wall_door_2_without.tscn"},
+		{"name":"Door Wall 3 Empty","path":"res://game/presentation/office_floor/public/structural/wall_door_3_without.tscn"},
+		{"name":"Broken Door 2","path":"res://game/presentation/office_floor/public/structural/only_door_2.tscn"},
+		{"name":"Broken Door 3","path":"res://game/presentation/office_floor/public/structural/only_door_3.tscn"}
+	],
+	"06": [
+		{"name":"Executive Chair","path":"res://game/presentation/office_floor/public/props/06_executive_chair.tscn"},
+		{"name":"Office Chair","path":"res://game/presentation/office_floor/public/props/06_office_chair.tscn"},
+		{"name":"Office Chair 2","path":"res://game/presentation/office_floor/public/props/06_office_chair_2.tscn"},
+		{"name":"Simple Chair","path":"res://game/presentation/office_floor/public/props/06_simple_chair.tscn"}
+	],
+	"07": [
+		{"name":"Table","path":"res://game/presentation/office_floor/public/props/07_table.tscn"},
+		{"name":"Table L Shaped","path":"res://game/presentation/office_floor/public/props/07_table_L_shaped.tscn"},
+		{"name":"Table Long","path":"res://game/presentation/office_floor/public/props/07_table_long.tscn"},
+		{"name":"Table Longest","path":"res://game/presentation/office_floor/public/props/07_table_longest.tscn"}
+	],
+	"08": [
+		{"name":"Office Desk","path":"res://game/presentation/office_floor/public/props/08_office_desk.tscn"},
+		{"name":"Office Desk 2","path":"res://game/presentation/office_floor/public/props/08_office_desk_2.tscn"},
+		{"name":"Desk Lamp","path":"res://game/presentation/office_floor/public/props/08_office_desk_lamp.tscn"},
+		{"name":"Table Square","path":"res://game/presentation/office_floor/public/props/08_table_square.tscn"},
+		{"name":"Workstation Dual","path":"res://game/presentation/office_floor/public/props/08_workstation_dual.tscn"},
+		{"name":"Workstation Partitioned","path":"res://game/presentation/office_floor/public/props/08_workstation_partitioned.tscn"},
+		{"name":"Workstation Partitioned Dual","path":"res://game/presentation/office_floor/public/props/08_workstation_partitioned_dual.tscn"},
+		{"name":"Workstation Quad","path":"res://game/presentation/office_floor/public/props/08_workstation_quad.tscn"},
+		{"name":"Workstation Quad Without","path":"res://game/presentation/office_floor/public/props/08_workstation_quad_without.tscn"}
+	],
+	"10": [
+		{"name":"Coffee Table","path":"res://game/presentation/office_floor/public/props/10_coffee_table.tscn"},
+		{"name":"Coffee Table + Sofa","path":"res://game/presentation/office_floor/public/props/10_coffee_table_and_sofa.tscn"},
+		{"name":"Sofa","path":"res://game/presentation/office_floor/public/props/10_sofa.tscn"}
+	],
+	"11": [
+		{"name":"Plant Large","path":"res://game/presentation/office_floor/public/props/11_plant_large.tscn"},
+		{"name":"Plant Medium","path":"res://game/presentation/office_floor/public/props/11_plant_medium.tscn"},
+		{"name":"Plant Small","path":"res://game/presentation/office_floor/public/props/11_plant_small.tscn"}
+	],
+	"13": [
+		{"name":"Glass Wall Full","path":"res://game/presentation/office_floor/public/structural/glass_wall_full.tscn"},
+		{"name":"Glass Partition Half","path":"res://game/presentation/office_floor/public/structural/glass_partition_half.tscn"},
+		{"name":"Glass Partition Blinds","path":"res://game/presentation/office_floor/public/structural/glass_partition_blinds.tscn"},
+		{"name":"Sliding Glass Door","path":"res://game/presentation/office_floor/public/structural/sliding_glass_door.tscn"}
+	]
+}
 
 var actor_catalog := [
 	{"name":"Player Spawn","path":"","kind":"player"},
@@ -91,11 +128,14 @@ func setup(app_owner: Node3D, planning_root: Node3D, planning_ui: Control) -> vo
 		host.get_node("Crosshair"),
 		host.get_node("Radar")
 	]
-	active_catalog = structure_catalog
+	active_catalog = group_catalogs["01"]
 	_rebuild_palette()
 	palette.item_selected.connect(_on_palette_selected)
 	ui.get_node("Panel/VBox/Tabs/Structure").pressed.connect(_show_structure_catalog)
 	ui.get_node("Panel/VBox/Tabs/Actors").pressed.connect(_show_actor_catalog)
+	for group_name in ["01","06","07","08","10","11","13"]:
+		var button := ui.get_node("Panel/VBox/GroupTabs/G" + group_name) as Button
+		button.pressed.connect(_show_structure_group.bind(group_name))
 	ui.get_node("Panel/VBox/Save").pressed.connect(save_layout)
 	ui.get_node("Panel/VBox/Clear").pressed.connect(clear_layout)
 	ui.get_node("Panel/VBox/Close").pressed.connect(exit)
@@ -228,13 +268,22 @@ func _rebuild_palette() -> void:
 
 func _show_structure_catalog() -> void:
 	_reset_selection()
-	active_catalog = structure_catalog
+	active_catalog = group_catalogs["01"]
+	ui.get_node("Panel/VBox/GroupTabs").show()
 	_rebuild_palette()
 	status.text = "STRUCTURE | choose building object"
 
 
+func _show_structure_group(group_name: String) -> void:
+	_reset_selection()
+	active_catalog = group_catalogs.get(group_name, group_catalogs["01"])
+	_rebuild_palette()
+	status.text = "STRUCTURE " + group_name
+
+
 func _show_actor_catalog() -> void:
 	_reset_selection()
+	ui.get_node("Panel/VBox/GroupTabs").hide()
 	active_catalog = actor_catalog
 	_rebuild_palette()
 	status.text = "ACTORS | place/remove Player and Infected"
