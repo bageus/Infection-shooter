@@ -64,11 +64,49 @@ var group_catalogs := {
 		{"name":"Broken Door 2","path":"res://game/presentation/office_floor/public/structural/only_door_2.tscn"},
 		{"name":"Broken Door 3","path":"res://game/presentation/office_floor/public/structural/only_door_3.tscn"}
 	],
+	"02": [
+		{"name":"Archive Box","path":"res://game/presentation/office_floor/public/props/02_cardboard_archive_box.tscn"},
+		{"name":"Box Closed","path":"res://game/presentation/office_floor/public/props/02_cardboard_box_closed.tscn"},
+		{"name":"Box Open","path":"res://game/presentation/office_floor/public/props/02_cardboard_box_open.tscn"},
+		{"name":"Boxes","path":"res://game/presentation/office_floor/public/props/02_cardboard_boxes.tscn"},
+		{"name":"Boxes 1","path":"res://game/presentation/office_floor/public/props/02_cardboard_boxes_1.tscn"},
+		{"name":"Boxes 2","path":"res://game/presentation/office_floor/public/props/02_cardboard_boxes_2.tscn"},
+		{"name":"Boxes 3","path":"res://game/presentation/office_floor/public/props/02_cardboard_boxes_3.tscn"},
+		{"name":"Boxes 4","path":"res://game/presentation/office_floor/public/props/02_cardboard_boxes_4.tscn"},
+		{"name":"Boxes 5","path":"res://game/presentation/office_floor/public/props/02_cardboard_boxes_5.tscn"},
+		{"name":"Boxes 6","path":"res://game/presentation/office_floor/public/props/02_cardboard_boxes_6.tscn"},
+		{"name":"Boxes 8","path":"res://game/presentation/office_floor/public/props/02_cardboard_boxes_8.tscn"},
+		{"name":"Boxes 11","path":"res://game/presentation/office_floor/public/props/02_cardboard_boxes_11.tscn"},
+		{"name":"Box Stack","path":"res://game/presentation/office_floor/public/props/02_cardboard_boxes_stack.tscn"},
+		{"name":"Box Stack 2","path":"res://game/presentation/office_floor/public/props/02_cardboard_boxes_stack_2.tscn"},
+		{"name":"Box Stack 3","path":"res://game/presentation/office_floor/public/props/02_cardboard_boxes_stack_3.tscn"},
+		{"name":"Box Stack 4","path":"res://game/presentation/office_floor/public/props/02_cardboard_boxes_stack_4.tscn"},
+		{"name":"Box Stack 5","path":"res://game/presentation/office_floor/public/props/02_cardboard_boxes_stack_5.tscn"},
+		{"name":"Box Stack 6","path":"res://game/presentation/office_floor/public/props/02_cardboard_boxes_stack_6.tscn"}
+	],
+	"03": [
+		{"name":"Drawer Cabinet","path":"res://game/presentation/office_floor/public/props/03_drawer_cabinet.tscn"},
+		{"name":"Drawer Cabinet Mobile","path":"res://game/presentation/office_floor/public/props/03_drawer_cabinet_mobile.tscn"},
+		{"name":"File Cabinet Tall","path":"res://game/presentation/office_floor/public/props/03_file_cabinet_tall.tscn"},
+		{"name":"Locker Tall","path":"res://game/presentation/office_floor/public/props/03_locker_tall.tscn"}
+	],
+	"04": [
+		{"name":"Crate Large","path":"res://game/presentation/office_floor/public/props/04_crate_large.tscn"},
+		{"name":"Crate Small","path":"res://game/presentation/office_floor/public/props/04_crate_small.tscn"},
+		{"name":"Plastic Storage Bin","path":"res://game/presentation/office_floor/public/props/04_plastic_storage_bin.tscn"}
+	],
+	"05": [
+		{"name":"Desktop","path":"res://game/presentation/office_floor/public/props/05_desktop.tscn"}
+	],
 	"06": [
 		{"name":"Executive Chair","path":"res://game/presentation/office_floor/public/props/06_executive_chair.tscn"},
 		{"name":"Office Chair","path":"res://game/presentation/office_floor/public/props/06_office_chair.tscn"},
 		{"name":"Office Chair 2","path":"res://game/presentation/office_floor/public/props/06_office_chair_2.tscn"},
-		{"name":"Simple Chair","path":"res://game/presentation/office_floor/public/props/06_simple_chair.tscn"}
+		{"name":"Simple Chair","path":"res://game/presentation/office_floor/public/props/06_simple_chair.tscn"},
+		{"name":"Executive Chair Fallen","path":"res://game/presentation/office_floor/public/props/06_executive_chair_fell.tscn"},
+		{"name":"Office Chair Fallen","path":"res://game/presentation/office_floor/public/props/06_office_chair_fell.tscn"},
+		{"name":"Office Chair 2 Fallen","path":"res://game/presentation/office_floor/public/props/06_office_chair_2_fell.tscn"},
+		{"name":"Simple Chair Fallen","path":"res://game/presentation/office_floor/public/props/06_simple_chair_fell.tscn"}
 	],
 	"07": [
 		{"name":"Table","path":"res://game/presentation/office_floor/public/props/07_table.tscn"},
@@ -87,6 +125,9 @@ var group_catalogs := {
 		{"name":"Workstation Quad","path":"res://game/presentation/office_floor/public/props/08_workstation_quad.tscn"},
 		{"name":"Workstation Quad Without","path":"res://game/presentation/office_floor/public/props/08_workstation_quad_without.tscn"}
 	],
+	"09": [
+		{"name":"Standing Desk","path":"res://game/presentation/office_floor/public/props/09_standing_desk.tscn"}
+	],
 	"10": [
 		{"name":"Coffee Table","path":"res://game/presentation/office_floor/public/props/10_coffee_table.tscn"},
 		{"name":"Coffee Table + Sofa","path":"res://game/presentation/office_floor/public/props/10_coffee_table_and_sofa.tscn"},
@@ -96,6 +137,10 @@ var group_catalogs := {
 		{"name":"Plant Large","path":"res://game/presentation/office_floor/public/props/11_plant_large.tscn"},
 		{"name":"Plant Medium","path":"res://game/presentation/office_floor/public/props/11_plant_medium.tscn"},
 		{"name":"Plant Small","path":"res://game/presentation/office_floor/public/props/11_plant_small.tscn"}
+	],
+	"14": [
+		{"name":"Fire Extinguisher","path":"res://game/presentation/office_floor/public/props/14_fire_extinguisher.tscn"},
+		{"name":"Water Cooler","path":"res://game/presentation/office_floor/public/props/14_water_cooler.tscn"}
 	],
 	"13": [
 		{"name":"Glass Wall Full","path":"res://game/presentation/office_floor/public/structural/glass_wall_full.tscn"},
@@ -134,7 +179,7 @@ func setup(app_owner: Node3D, planning_root: Node3D, planning_ui: Control) -> vo
 	palette.item_selected.connect(_on_palette_selected)
 	ui.get_node("Panel/VBox/Tabs/Structure").pressed.connect(_show_structure_catalog)
 	ui.get_node("Panel/VBox/Tabs/Actors").pressed.connect(_show_actor_catalog)
-	for group_name in ["01","06","07","08","10","11","13"]:
+	for group_name in ["01","02","03","04","05","06","07","08","09","10","11","13","14"]:
 		var button := ui.get_node("Panel/VBox/GroupTabs/G" + group_name) as Button
 		button.pressed.connect(_show_structure_group.bind(group_name))
 	ui.get_node("Panel/VBox/Save").pressed.connect(save_layout)

@@ -9,8 +9,8 @@ func _ready() -> void:
 
 
 func _build_glass_collision() -> void:
-	var body := get_node_or_null(glass_body_path) as StaticBody3D
-	var visual := get_node_or_null(visual_path) as Node3D
+	var body := get_parent().get_node_or_null(glass_body_path) as StaticBody3D
+	var visual := get_parent().get_node_or_null(visual_path) as Node3D
 	if body == null or visual == null:
 		return
 	_add_glass_meshes(visual, body)
