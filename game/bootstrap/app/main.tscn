@@ -206,6 +206,30 @@ text = "10"
 layout_mode = 2
 text = "11"
 
+[node name="G02" type="Button" parent="PlanningUI/Panel/VBox/GroupTabs"]
+layout_mode = 2
+text = "02"
+
+[node name="G03" type="Button" parent="PlanningUI/Panel/VBox/GroupTabs"]
+layout_mode = 2
+text = "03"
+
+[node name="G04" type="Button" parent="PlanningUI/Panel/VBox/GroupTabs"]
+layout_mode = 2
+text = "04"
+
+[node name="G05" type="Button" parent="PlanningUI/Panel/VBox/GroupTabs"]
+layout_mode = 2
+text = "05"
+
+[node name="G09" type="Button" parent="PlanningUI/Panel/VBox/GroupTabs"]
+layout_mode = 2
+text = "09"
+
+[node name="G14" type="Button" parent="PlanningUI/Panel/VBox/GroupTabs"]
+layout_mode = 2
+text = "14"
+
 [node name="G13" type="Button" parent="PlanningUI/Panel/VBox/GroupTabs"]
 layout_mode = 2
 text = "13"
