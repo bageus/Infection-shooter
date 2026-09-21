@@ -729,11 +729,24 @@ func load_layout() -> void:
 		return
 	clear_layout(false)
 	var records: Array = data.get("objects", [])
+	var player_records: Array = []
+	for record_value: Variant in records:
+		if record_value is Dictionary:
+			var candidate: Dictionary = record_value
+			var candidate_path := str(candidate.get("scene", ""))
+			if candidate_path == "res://game/features/player/public/player.tscn":
+				player_records.append(candidate)
+	if not player_records.is_empty():
+		var latest: Dictionary = player_records[player_records.size() - 1]
+		main_player.position = Vector3(float(latest.get("x",0.0)),float(latest.get("y",1.0)),float(latest.get("z",0.0)))
+		main_player.rotation_degrees.y = float(latest.get("rotation_y",0.0))
 	for record_value: Variant in records:
 		if not record_value is Dictionary:
 			continue
 		var record: Dictionary = record_value
 		var scene_path := _migrate_scene_path(str(record.get("scene", "")))
+		if scene_path == "res://game/features/player/public/player.tscn":
+			continue
 		if scene_path.is_empty() or not ResourceLoader.exists(scene_path):
 			continue
 		var scene := load(scene_path) as PackedScene
