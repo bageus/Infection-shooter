@@ -102,7 +102,11 @@ var group_catalogs := {
 		{"name":"Executive Chair","path":"res://game/presentation/office_floor/public/props/06_executive_chair.tscn"},
 		{"name":"Office Chair","path":"res://game/presentation/office_floor/public/props/06_office_chair.tscn"},
 		{"name":"Office Chair 2","path":"res://game/presentation/office_floor/public/props/06_office_chair_2.tscn"},
-		{"name":"Simple Chair","path":"res://game/presentation/office_floor/public/props/06_simple_chair.tscn"}
+		{"name":"Simple Chair","path":"res://game/presentation/office_floor/public/props/06_simple_chair.tscn"},
+		{"name":"Executive Chair Fallen","path":"res://game/presentation/office_floor/public/props/06_executive_chair_fell.tscn"},
+		{"name":"Office Chair Fallen","path":"res://game/presentation/office_floor/public/props/06_office_chair_fell.tscn"},
+		{"name":"Office Chair 2 Fallen","path":"res://game/presentation/office_floor/public/props/06_office_chair_2_fell.tscn"},
+		{"name":"Simple Chair Fallen","path":"res://game/presentation/office_floor/public/props/06_simple_chair_fell.tscn"}
 	],
 	"07": [
 		{"name":"Table","path":"res://game/presentation/office_floor/public/props/07_table.tscn"},
