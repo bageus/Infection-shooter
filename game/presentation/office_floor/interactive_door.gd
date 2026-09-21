@@ -24,6 +24,7 @@ var _swing_side := 0.0
 var _door_recess_nodes: Array[Node3D] = []
 var _single_slide_parts: Array[Node3D] = []
 var _single_closed_globals: Array[Transform3D] = []
+var _elevator_lights: Array[Node3D] = []
 
 
 func _ready() -> void:
@@ -90,7 +91,10 @@ func _physics_process(delta: float) -> void:
 			slide_part.global_transform = slide_transform
 	for recess in _door_recess_nodes:
 		if is_instance_valid(recess):
-			recess.visible = _open_amount < 0.08
+			recess.visible = _open_amount <= 0.001
+	for light_node in _elevator_lights:
+		if is_instance_valid(light_node):
+			_set_light_state(light_node, _open_amount >= 0.98)
 
 
 func request_open() -> void:
@@ -113,6 +117,7 @@ func _collect_door_parts() -> void:
 	if mode == DoorMode.SLIDING_ELEVATOR:
 		_collect_elevator_parts(visual)
 		_collect_named_nodes(visual, "doorrecess", _door_recess_nodes)
+		_collect_elevator_lights(visual)
 	elif mode == DoorMode.SLIDING_SINGLE:
 		_collect_single_sliding_parts(visual)
 	else:
@@ -152,6 +157,34 @@ func _collect_elevator_parts(node: Node) -> void:
 		if not _door_parts.has(part):
 			_door_parts.append(part)
 			_closed_transforms.append(part.transform)
+
+
+func _collect_elevator_lights(node: Node) -> void:
+	if node is Node3D:
+		var lower := node.name.to_lower()
+		if "light" in lower or "lamp" in lower or "indicator" in lower:
+			_elevator_lights.append(node as Node3D)
+	for child in node.get_children():
+		_collect_elevator_lights(child)
+
+
+func _set_light_state(node: Node3D, enabled: bool) -> void:
+	if node is Light3D:
+		(node as Light3D).visible = enabled
+	if node is MeshInstance3D:
+		var mesh_instance := node as MeshInstance3D
+		for surface in mesh_instance.get_surface_override_material_count():
+			var material := mesh_instance.get_active_material(surface)
+			if material is StandardMaterial3D:
+				var duplicate := material.duplicate() as StandardMaterial3D
+				duplicate.emission_enabled = enabled
+				if enabled:
+					duplicate.emission = Color(1.0, 0.78, 0.28)
+					duplicate.emission_energy_multiplier = 4.0
+				mesh_instance.set_surface_override_material(surface, duplicate)
+	for child in node.get_children():
+		if child is Node3D:
+			_set_light_state(child as Node3D, enabled)
 
 
 func _collect_single_sliding_parts(visual: Node) -> void:
