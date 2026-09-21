@@ -75,6 +75,7 @@ func _physics_process(delta: float) -> void:
 	_push_velocity = _push_velocity.move_toward(Vector3.ZERO, push_decay * delta)
 	_apply_gravity(delta)
 	move_and_slide()
+	_push_chair_contacts()
 	_try_break_blocking_props()
 
 
@@ -91,6 +92,15 @@ func _desired_velocity() -> Vector3:
 	if direction.length_squared() > 0.0001:
 		look_at(global_position + direction, Vector3.UP)
 	return direction * move_speed
+
+
+func _push_chair_contacts() -> void:
+	for i in get_slide_collision_count():
+		var collision := get_slide_collision(i)
+		var collider := collision.get_collider()
+		if collider != null and collider.has_method("push_from_character"):
+			var movement := Vector3(velocity.x, 0.0, velocity.z)
+			collider.call("push_from_character", global_position, movement)
 
 
 func _try_break_blocking_props() -> void:
