@@ -60,7 +60,11 @@ var structure_catalog := [
 	{"name":"Door Wall 2 Empty","path":"res://game/presentation/office_floor/public/structural/wall_door_2_without.tscn"},
 	{"name":"Door Wall 3 Empty","path":"res://game/presentation/office_floor/public/structural/wall_door_3_without.tscn"},
 	{"name":"Broken Door 2","path":"res://game/presentation/office_floor/public/structural/only_door_2.tscn"},
-	{"name":"Broken Door 3","path":"res://game/presentation/office_floor/public/structural/only_door_3.tscn"}
+	{"name":"Broken Door 3","path":"res://game/presentation/office_floor/public/structural/only_door_3.tscn"},
+	{"name":"Glass Wall Full","path":"res://game/presentation/office_floor/public/structural/glass_wall_full.tscn"},
+	{"name":"Glass Partition Half","path":"res://game/presentation/office_floor/public/structural/glass_partition_half.tscn"},
+	{"name":"Glass Partition Blinds","path":"res://game/presentation/office_floor/public/structural/glass_partition_blinds.tscn"},
+	{"name":"Sliding Glass Door","path":"res://game/presentation/office_floor/public/structural/sliding_glass_door.tscn"}
 ]
 
 var actor_catalog := [
