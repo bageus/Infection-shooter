@@ -22,6 +22,7 @@ extends CanvasLayer
 var player: Node
 var infection: Node
 var _perf_timer := 0.0
+var _last_weapon_index := -1
 
 
 func _ready() -> void:
@@ -123,7 +124,23 @@ func _update_weapon_slots(empty: bool) -> void:
 	var active_index: int = player.get_current_weapon_index()
 	var warning_color := Color(1.0, 0.12, 0.08, 1.0)
 	for i in slot_frames.size():
+		var frame := slot_frames[i]
+		var style := frame.get_theme_stylebox("panel").duplicate() as StyleBoxFlat
 		if i == active_index:
-			slot_frames[i].modulate = warning_color if empty else Color(0.05, 1.0, 1.0, 1.0)
+			style.border_width_left = 2
+			style.border_width_top = 2
+			style.border_width_right = 2
+			style.border_width_bottom = 2
+			style.border_color = warning_color if empty else Color(0.0, 0.95, 1.0, 1.0)
+			style.bg_color = Color(0.0, 0.12, 0.17, 1.0)
+			frame.modulate = Color.WHITE
 		else:
-			slot_frames[i].modulate = Color(0.5, 0.66, 0.78, 0.9)
+			style.border_width_left = 1
+			style.border_width_top = 1
+			style.border_width_right = 1
+			style.border_width_bottom = 1
+			style.border_color = Color(0.12, 0.3, 0.42, 1.0)
+			style.bg_color = Color(0.015, 0.055, 0.09, 0.98)
+			frame.modulate = Color.WHITE
+		frame.add_theme_stylebox_override("panel", style)
+	_last_weapon_index = active_index
