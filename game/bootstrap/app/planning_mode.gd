@@ -216,6 +216,9 @@ func setup(app_owner: Node3D, planning_root: Node3D, planning_ui: Control) -> vo
 
 func enter() -> void:
 	active = true
+	var planning_lighting := host.get_node_or_null("PlanningLighting")
+	if planning_lighting != null:
+		planning_lighting.call("set_planning_mode", true)
 	saved_camera_transform = camera.transform
 	saved_camera_rig_transform = camera_rig.transform
 	planning_yaw = camera.global_rotation.y
@@ -242,6 +245,9 @@ func enter() -> void:
 
 func exit() -> void:
 	active = false
+	var planning_lighting := host.get_node_or_null("PlanningLighting")
+	if planning_lighting != null:
+		planning_lighting.call("set_planning_mode", false)
 	var chunk_streamer := host.get_node_or_null("ChunkStreamer")
 	if chunk_streamer != null:
 		chunk_streamer.call("rebuild")
