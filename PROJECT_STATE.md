@@ -6,7 +6,7 @@ current_milestone: P1_LOGIC
 active_task_id: T002
 last_completed_task_id: DISC-001
 build_status: T002_EXPANDED_FLOOR_PENDING_VALIDATION
-updated: 2026-09-19
+updated: 2026-09-23
 ---
 
 # Project state
@@ -27,10 +27,12 @@ T002 — Minimal combat slice. Status: IN_PROGRESS.
 Repository validation for this increment is pending. Godot 4.7.2 runtime/import testing is unavailable in the current execution environment.
 
 ## Current risks
+Structural asset audit found inconsistent connection spans in legacy glass/cubicle modules. The canonical standard is now documented at `docs/ASSET_STANDARD.md`; destructive source-mesh edits remain blocked on Godot AABB/visual verification.
+
 The new source object library is stored as .blend files; local Godot import therefore depends on Blender being available during import. Exact mesh pivots/extents require visual review. Scene-authored collision provides the authoritative closed gameplay boundary.
 
 ## Next action
-Run repository gates and visually verify the expanded floor, corner joins, elevator block and fail-state menu in Godot.
+Run repository gates and measure canonical structural mesh bounds in Godot. Verify pivots and seams, then correct confirmed 13_* glass spans to 4.0 m and retained cubicle spans to 3.0 m.
 
 ## Known blockers
 No product blocker. Godot visual/import verification remains required.
