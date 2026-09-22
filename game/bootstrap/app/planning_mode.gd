@@ -8,6 +8,8 @@ const CAMERA_SPEED := 18.0
 const CAMERA_ZOOM_STEP := 2.5
 const SCALE_STEP := 0.1
 const HEIGHT_STEP := 0.25
+const LIGHT_DEFAULT_HEIGHT := HEIGHT_STEP * 10.0
+const DARKNESS_DEFAULT_HEIGHT := HEIGHT_STEP * 11.0
 const CAMERA_ROTATE_SPEED := 0.008
 
 var host: Node3D
@@ -581,6 +583,7 @@ func _rebuild_preview() -> void:
 	preview = scene.instantiate() as Node3D
 	host.add_child(preview)
 	_set_preview_collision(preview, true)
+	_apply_special_default_height(preview, _selected_kind())
 
 
 func _selected_kind() -> String:
@@ -615,6 +618,7 @@ func _update_preview(screen_pos: Vector2) -> void:
 	if not world.is_finite():
 		return
 	preview.global_position = _snap_position_for(preview, world)
+	_apply_special_default_height(preview, _selected_kind())
 	_apply_wall_mount(preview)
 	preview.rotation_degrees.y = rotation_y
 
@@ -648,6 +652,7 @@ func _place_selected(screen_pos: Vector2) -> void:
 	var target_parent := enemies_root if kind == "enemy" else root
 	target_parent.add_child(node)
 	node.global_position = _snap_position_for(node, world)
+	_apply_special_default_height(node, kind)
 	if preview != null and preview.has_meta("planning_wall_normal"):
 		node.set_meta("planning_wall_normal", preview.get_meta("planning_wall_normal"))
 	_apply_wall_mount(node)
@@ -772,6 +777,13 @@ func _screen_to_floor(screen_pos: Vector2) -> Vector3:
 	if distance < 0.0:
 		return Vector3(INF, INF, INF)
 	return origin + direction * distance
+
+
+func _apply_special_default_height(node: Node3D, kind: String) -> void:
+	if kind == "light":
+		node.global_position.y = LIGHT_DEFAULT_HEIGHT
+	elif kind == "darkness" or kind == "exploration_darkness":
+		node.global_position.y = DARKNESS_DEFAULT_HEIGHT
 
 
 func _apply_wall_mount(node: Node3D) -> void:
