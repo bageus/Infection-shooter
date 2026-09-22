@@ -164,7 +164,9 @@ var group_catalogs := {
 }
 
 var lighting_catalog := [
-	{"name":"Omni Light","path":"res://game/presentation/office_floor/public/props/planner_light.tscn","kind":"light"}
+	{"name":"Omni Light","path":"res://game/presentation/office_floor/public/props/planner_light.tscn","kind":"light"},
+	{"name":"Permanent Darkness","path":"res://game/presentation/office_floor/public/props/darkness_zone.tscn","kind":"darkness"},
+	{"name":"Exploration Darkness","path":"res://game/presentation/office_floor/public/props/darkness_zone.tscn","kind":"exploration_darkness"}
 ]
 
 var actor_catalog := [
@@ -365,7 +367,7 @@ func _show_lighting_catalog() -> void:
 	ui.get_node("Panel/VBox/GroupTabs").hide()
 	active_catalog = lighting_catalog
 	_rebuild_palette()
-	status.text = "LIGHTING | place light | [ / ] brightness"
+	status.text = "LIGHTING | lights and darkness zones"
 
 
 func _show_actor_catalog() -> void:
@@ -637,6 +639,12 @@ func _place_selected(screen_pos: Vector2) -> void:
 	if scene == null:
 		return
 	var node := scene.instantiate() as Node3D
+	if kind == "exploration_darkness":
+		node.set("permanent", false)
+		node.set_meta("planning_permanent", false)
+	elif kind == "darkness":
+		node.set("permanent", true)
+		node.set_meta("planning_permanent", true)
 	var target_parent := enemies_root if kind == "enemy" else root
 	target_parent.add_child(node)
 	node.global_position = _snap_position_for(node, world)
@@ -876,6 +884,9 @@ func _update_status() -> void:
 	if selected == null:
 		status.text = "%d objects | select palette or object" % placed.size()
 		return
+	if selected.is_in_group("darkness_zone"):
+		status.text = "DARKNESS | scale X/Z changes covered area | Delete removes"
+		return
 	status.text = "SELECTED | pos %.1f %.1f | rot %.0f | scale %.2f %.2f %.2f" % [
 		selected.position.x, selected.position.z, selected.rotation_degrees.y,
 		selected.scale.x, selected.scale.y, selected.scale.z
@@ -902,7 +913,9 @@ func save_layout() -> void:
 			"x": node.position.x, "y": node.position.y, "z": node.position.z,
 			"rotation_y": node.rotation_degrees.y,
 			"scale_x": node.scale.x, "scale_y": node.scale.y, "scale_z": node.scale.z,
-			"light_energy": node.get_meta("planning_light_energy", 0.0)
+			"light_energy": node.get_meta("planning_light_energy", 0.0),
+			"darkness": node.get("darkness") if node.get("darkness") != null else 0.0,
+			"permanent_darkness": node.get("permanent") if node.get("permanent") != null else false
 		})
 	var file := FileAccess.open(SAVE_PATH, FileAccess.WRITE)
 	if file != null:
@@ -998,6 +1011,11 @@ func load_layout() -> void:
 			if saved_light != null:
 				saved_light.light_energy = saved_light_energy
 				node.set_meta("planning_light_energy", saved_light_energy)
+		if node.get("darkness") != null:
+			node.set("darkness", float(record.get("darkness", 0.88)))
+			node.set("permanent", bool(record.get("permanent_darkness", true)))
+			if node.has_method("configure_zone"):
+				node.call("configure_zone", Vector2(node.scale.x * 4.0, node.scale.z * 4.0), node.get("darkness"), node.get("permanent"))
 		if load_kind == "enemy":
 			node.set_meta("planning_actor_kind", "enemy")
 			node.global_position.y = 1.0
