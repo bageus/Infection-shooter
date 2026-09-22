@@ -20,7 +20,7 @@ script=ExtResource("1")
 collision_layer=1
 collision_mask=3
 [node name="AimPivot" type="Node3D" parent="."]
-[node name="Body" parent="AimPivot" instance=ExtResource("character_model")]
+[node name="Body" parent="." instance=ExtResource("character_model")]
 rotation_degrees=Vector3(0,180,0)
 [node name="Pistol" parent="AimPivot" instance=ExtResource("2")]
 position=Vector3(0.3,0.18,-0.2)
