@@ -67,6 +67,10 @@ func _update_chunks(force: bool) -> void:
 			var object: Node3D = object_variant
 			if object == null:
 				continue
+			if object.is_in_group("planner_lights"):
+				object.visible = true
+				object.process_mode = Node.PROCESS_MODE_INHERIT
+				continue
 			object.visible = render_active
 			object.process_mode = Node.PROCESS_MODE_INHERIT if render_active else Node.PROCESS_MODE_DISABLED
 			_set_collision_enabled(object, collision_active)
