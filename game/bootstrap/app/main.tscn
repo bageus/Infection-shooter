@@ -15,7 +15,7 @@
 [ext_resource type="PackedScene" path="res://game/presentation/office_floor/public/structural/wall_door.tscn" id="wall_door"]
 [ext_resource type="PackedScene" path="res://game/presentation/office_floor/public/structural/window_double.tscn" id="window"]
 [ext_resource type="PackedScene" path="res://game/presentation/office_floor/public/structural/window_corner.tscn" id="window_corner"]
-[ext_resource type="Texture2D" path="res://assets/floor_tiles.svg" id="floor_tiles"]
+[ext_resource type="Script" path="res://game/presentation/office_floor/base_floor_renderer.gd" id="base_floor_renderer"]
 
 [sub_resource type="Environment" id="env"]
 background_mode = 1
@@ -25,18 +25,6 @@ ambient_light_color = Color(0, 0, 0, 1)
 ambient_light_energy = 0.0
 reflected_light_source = 0
 tonemap_mode = 2
-
-[sub_resource type="StandardMaterial3D" id="floor_mat"]
-albedo_color = Color(0.34, 0.37, 0.43, 1)
-roughness = 0.62
-metallic = 0.0
-albedo_texture = ExtResource("floor_tiles")
-uv1_scale = Vector3(40, 30, 1)
-texture_filter = 1
-
-[sub_resource type="BoxMesh" id="floor_mesh"]
-material = SubResource("floor_mat")
-size = Vector3(80, 0.08, 60)
 
 [sub_resource type="BoxShape3D" id="floor_shape"]
 size = Vector3(80, 0.2, 60)
@@ -53,10 +41,8 @@ script = ExtResource("script")
 [node name="WorldEnvironment" type="WorldEnvironment" parent="." unique_id=968256143]
 environment = SubResource("env")
 
-[node name="Floor" type="MeshInstance3D" parent="." unique_id=557799538]
-position = Vector3(0, -0.04, 0)
-mesh = SubResource("floor_mesh")
-cast_shadow = 1
+[node name="Floor" type="Node3D" parent="." unique_id=557799538]
+script = ExtResource("base_floor_renderer")
 
 [node name="FloorBody" type="StaticBody3D" parent="." unique_id=1764252328]
 
