@@ -106,3 +106,22 @@ Legacy 29_cubicle_straight_partition.glb используется через ass
 ## Требующаяся визуальная проверка
 
 GitHub-исходники позволяют определить scene composition и legacy collision sizes, но не дают надежно подтвердить фактический AABB каждого импортированного GLB/Blend без импорта в Godot. Поэтому перед физическим редактированием source meshes нужно измерить реальные bounds в Godot и сверить их с целевыми connection spans выше.
+
+
+## Автоматическая проверка в Godot
+
+Для измерения реальных импортированных mesh bounds используйте:
+
+```bash
+python tools/audit_structural_assets.py
+```
+
+Для сохранения CSV:
+
+```bash
+python tools/audit_structural_assets.py --output structural_asset_audit.csv
+```
+
+Аудит загружает все `.tscn` из `public/structural`, объединяет AABB всех MeshInstance3D в координатах placement root и выводит: размеры X/Y/Z, min/max, расстояние origin до низа геометрии, ошибку кратности X/Z сетке 0.25 м, целевой connection span для 13_* glass и отклонение от него.
+
+Для bottom-center structural asset значение `min_y` / `origin_to_floor` должно быть близко к 0. Для элементов с целевым span статус `CHECK` означает, что фактическая геометрия отличается от целевого размера более чем на 1 см.
