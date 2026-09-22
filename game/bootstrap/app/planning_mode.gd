@@ -182,7 +182,8 @@ var lighting_catalog := [
 
 var actor_catalog := [
 	{"name":"Player Spawn","path":"","kind":"player"},
-	{"name":"Infected","path":"res://game/features/infected/public/infected_capsule.tscn","kind":"enemy"}
+	{"name":"Zombie L1","path":"res://game/features/infected/public/infected_capsule.tscn","kind":"enemy"},
+	{"name":"Mutant L2","path":"res://game/features/infected/public/mutant_level2.tscn","kind":"enemy"}
 ]
 
 
@@ -1152,7 +1153,10 @@ func load_layout() -> void:
 		if scene == null:
 			continue
 		var node := scene.instantiate() as Node3D
-		var load_kind := "enemy" if scene_path == "res://game/features/infected/public/infected_capsule.tscn" else ""
+		var load_kind := "enemy" if scene_path in [
+			"res://game/features/infected/public/infected_capsule.tscn",
+			"res://game/features/infected/public/mutant_level2.tscn"
+		] else ""
 		var target_parent := enemies_root if load_kind == "enemy" else root
 		target_parent.add_child(node)
 		node.position = Vector3(float(record.get("x",0.0)),float(record.get("y",0.0)),float(record.get("z",0.0)))

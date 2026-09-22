@@ -1,32 +1,26 @@
-[gd_scene load_steps=7 format=3]
+[gd_scene load_steps=5 format=3]
 
 [ext_resource type="Script" path="res://game/presentation/character_animation_driver.gd" id="anim_driver"]
 [ext_resource type="Script" path="res://game/features/infected/infected_capsule.gd" id="1_enemy_script"]
-[ext_resource type="PackedScene" path="res://models/objects/characters/zombie_animated.glb" id="character_model"]
 [ext_resource type="PackedScene" path="res://game/features/infection_source/public/mutagen_cloud.tscn" id="2_cloud"]
-
-[sub_resource type="StandardMaterial3D" id="EnemyMaterial"]
-albedo_color = Color(0.72, 0.06, 0.11, 1)
-roughness = 0.7
-
-[sub_resource type="CapsuleMesh" id="EnemyMesh"]
-material = SubResource("EnemyMaterial")
-radius = 0.52
-height = 1.85
+[ext_resource type="PackedScene" path="res://models/objects/characters/mutant_animated.glb" id="3_model"]
 
 [sub_resource type="CapsuleShape3D" id="EnemyShape"]
-radius = 0.48
-height = 1.85
+radius = 0.58
+height = 2.05
 
-[node name="InfectedCapsule" type="CharacterBody3D" groups=["infected"]]
+[node name="MutantLevel2" type="CharacterBody3D" groups=["infected"]]
 script = ExtResource("1_enemy_script")
+max_health = 110.0
+move_speed = 5.1
+attack_damage = 25.0
+attack_range = 1.35
 collision_layer = 2
 collision_mask = 3
 safe_margin = 0.02
 floor_stop_on_slope = false
-wall_min_slide_angle = 0.9
 
-[node name="Body" parent="." instance=ExtResource("character_model")]
+[node name="Body" parent="." instance=ExtResource("3_model")]
 rotation_degrees = Vector3(0, 180, 0)
 
 [node name="CollisionShape3D" type="CollisionShape3D" parent="."]

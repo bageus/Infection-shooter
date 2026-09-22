@@ -1,5 +1,7 @@
-[gd_scene load_steps=8 format=3]
+[gd_scene load_steps=10 format=3]
+[ext_resource type="Script" path="res://game/presentation/character_animation_driver.gd" id="anim_driver"]
 [ext_resource type="Script" path="res://game/features/player/player_movement.gd" id="1"]
+[ext_resource type="PackedScene" path="res://models/objects/characters/soldier_animated.glb" id="character_model"]
 [ext_resource type="PackedScene" path="res://game/features/combat/public/pistol.tscn" id="2"]
 [ext_resource type="PackedScene" path="res://game/features/combat/public/uzi.tscn" id="3"]
 [ext_resource type="PackedScene" path="res://game/features/combat/public/shotgun.tscn" id="4"]
@@ -18,8 +20,8 @@ script=ExtResource("1")
 collision_layer=1
 collision_mask=3
 [node name="AimPivot" type="Node3D" parent="."]
-[node name="Body" type="MeshInstance3D" parent="AimPivot"]
-mesh=SubResource("Mesh")
+[node name="Body" parent="AimPivot" instance=ExtResource("character_model")]
+rotation_degrees=Vector3(0,180,0)
 [node name="Pistol" parent="AimPivot" instance=ExtResource("2")]
 position=Vector3(0.3,0.18,-0.2)
 [node name="Uzi" parent="AimPivot" instance=ExtResource("3")]
@@ -36,3 +38,6 @@ position=Vector3(10,12,10)
 rotation_degrees=Vector3(-42,45,0)
 current=true
 fov=50.0
+
+[node name="AnimationDriver" type="Node" parent="."]
+script = ExtResource("anim_driver")
