@@ -19,9 +19,10 @@
 [sub_resource type="Environment" id="env"]
 background_mode = 1
 background_color = Color(0.055, 0.075, 0.12, 1)
-ambient_light_source = 3
-ambient_light_color = Color(0.62, 0.68, 0.78, 1)
+ambient_light_source = 0
+ambient_light_color = Color(0, 0, 0, 1)
 ambient_light_energy = 0.0
+reflected_light_source = 0
 tonemap_mode = 2
 
 [sub_resource type="Shader" id="floor_shader"]
