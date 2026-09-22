@@ -276,6 +276,24 @@ max_value = 16.0
 value = 3.0
 show_percentage = false
 
+[node name="LightAngleInfo" type="Label" parent="PlanningUI/Panel/VBox"]
+visible = false
+custom_minimum_size = Vector2(330, 24)
+layout_mode = 2
+text = "CONE 48°"
+theme_override_colors/font_color = Color(1, 0.78, 0.32, 1)
+theme_override_font_sizes/font_size = 14
+horizontal_alignment = 1
+
+[node name="LightAngle" type="ProgressBar" parent="PlanningUI/Panel/VBox"]
+visible = false
+custom_minimum_size = Vector2(330, 14)
+layout_mode = 2
+min_value = 5.0
+max_value = 89.0
+value = 48.0
+show_percentage = false
+
 [node name="Status" type="Label" parent="PlanningUI/Panel/VBox"]
 custom_minimum_size = Vector2(330, 44)
 layout_mode = 2
