@@ -708,7 +708,7 @@ func _screen_to_surface(screen_pos: Vector2, placing: Node3D) -> Vector3:
 	if not hit.is_empty():
 		var point: Vector3 = hit.get("position")
 		var normal: Vector3 = hit.get("normal")
-		if bool(placing.get_meta("planning_wall_mount", false)) and absf(normal.y) < 0.35:
+		if placing != null and bool(placing.get_meta("planning_wall_mount", false)) and absf(normal.y) < 0.35:
 			point += normal * 0.025
 			placing.set_meta("planning_wall_normal", normal)
 			return point
