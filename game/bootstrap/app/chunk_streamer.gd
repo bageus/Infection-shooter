@@ -69,7 +69,9 @@ func _update_chunks(force: bool) -> void:
 				continue
 			if object.is_in_group("planner_lights"):
 				object.visible = true
-				object.process_mode = Node.PROCESS_MODE_INHERIT
+				object.process_mode = Node.PROCESS_MODE_ALWAYS
+				if object.has_method("set_runtime_light_active"):
+					object.call("set_runtime_light_active", render_active)
 				continue
 			object.visible = render_active
 			object.process_mode = Node.PROCESS_MODE_INHERIT if render_active else Node.PROCESS_MODE_DISABLED
