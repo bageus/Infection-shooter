@@ -25,16 +25,10 @@ ambient_light_energy = 0.0
 reflected_light_source = 0
 tonemap_mode = 2
 
-[sub_resource type="Shader" id="floor_shader"]
-code = "shader_type spatial;\nrender_mode diffuse_burley;\nuniform vec4 tile_color : source_color = vec4(0.38, 0.41, 0.47, 1.0);\nuniform vec4 grout_color : source_color = vec4(0.075, 0.085, 0.10, 1.0);\nuniform float tile_size = 2.0;\nuniform float grout_width = 0.035;\nuniform float grout_depth = 0.018;\nvarying vec3 world_pos;\nvoid vertex() {\n    world_pos = (MODEL_MATRIX * vec4(VERTEX, 1.0)).xyz;\n    vec2 cell = abs(fract(world_pos.xz / tile_size + 0.5) - 0.5);\n    float edge = max(cell.x, cell.y);\n    float seam = smoothstep(0.5 - grout_width, 0.5 - grout_width * 0.2, edge);\n    VERTEX.y -= seam * grout_depth;\n}\nvoid fragment() {\n    vec2 grid = abs(fract(world_pos.xz / tile_size + 0.5) - 0.5);\n    float edge = max(grid.x, grid.y);\n    float grout = smoothstep(0.5 - grout_width, 0.5 - grout_width * 0.2, edge);\n    vec2 tile_id = floor(world_pos.xz / tile_size);\n    float variation = 0.94 + 0.06 * fract(sin(dot(tile_id, vec2(12.9898,78.233))) * 43758.5453);\n    ALBEDO = mix(tile_color.rgb * variation, grout_color.rgb, grout);\n    ROUGHNESS = mix(0.68, 1.0, grout);\n    NORMAL_MAP_DEPTH = 0.35;\n}\n"
-
-[sub_resource type="ShaderMaterial" id="floor_mat"]
-shader = SubResource("floor_shader")
-shader_parameter/tile_color = Color(0.34, 0.37, 0.43, 1)
-shader_parameter/grout_color = Color(0.075, 0.085, 0.1, 1)
-shader_parameter/tile_size = 2.0
-shader_parameter/grout_width = 0.035
-shader_parameter/grout_depth = 0.018
+[sub_resource type="StandardMaterial3D" id="floor_mat"]
+albedo_color = Color(0.34, 0.37, 0.43, 1)
+roughness = 0.62
+metallic = 0.0
 
 [sub_resource type="PlaneMesh" id="floor_mesh"]
 material = SubResource("floor_mat")
