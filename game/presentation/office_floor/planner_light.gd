@@ -15,10 +15,10 @@ func _ready() -> void:
 	if light != null:
 		light.visible = true
 
-func set_runtime_light_active(enabled: bool) -> void:
+func set_runtime_light_active(_enabled: bool) -> void:
 	visible = true
 	if light != null:
-		light.visible = enabled
+		light.visible = true
 		light.light_energy = float(get_meta("planning_light_energy", light.light_energy))
 		if has_meta("planning_light_angle"):
 			light.spot_angle = float(get_meta("planning_light_angle"))
