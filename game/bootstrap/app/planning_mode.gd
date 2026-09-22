@@ -295,10 +295,17 @@ func _process(delta: float) -> void:
 		camera_anchor += move
 
 
-func _unhandled_input(event: InputEvent) -> void:
+func _input(event: InputEvent) -> void:
 	if not active:
 		return
 	if event is InputEventKey and event.pressed and not event.echo:
+		if event.keycode in [KEY_UP, KEY_DOWN, KEY_LEFT, KEY_RIGHT]:
+			_nudge_selected(Vector2(
+				-1.0 if event.keycode == KEY_LEFT else (1.0 if event.keycode == KEY_RIGHT else 0.0),
+				-1.0 if event.keycode == KEY_UP else (1.0 if event.keycode == KEY_DOWN else 0.0)
+			))
+			get_viewport().set_input_as_handled()
+			return
 		match event.keycode:
 			KEY_ESCAPE:
 				exit()
@@ -334,14 +341,6 @@ func _unhandled_input(event: InputEvent) -> void:
 				_adjust_selected_light_angle(-4.0)
 			KEY_PERIOD:
 				_adjust_selected_light_angle(4.0)
-			KEY_UP:
-				_nudge_selected(Vector2(0.0, -1.0))
-			KEY_DOWN:
-				_nudge_selected(Vector2(0.0, 1.0))
-			KEY_LEFT:
-				_nudge_selected(Vector2(-1.0, 0.0))
-			KEY_RIGHT:
-				_nudge_selected(Vector2(1.0, 0.0))
 		get_viewport().set_input_as_handled()
 	if event is InputEventMouseButton:
 		if event.button_index == MOUSE_BUTTON_WHEEL_UP and event.pressed:
