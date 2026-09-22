@@ -15,10 +15,13 @@ extends CanvasLayer
 @onready var weapon_icon: TextureRect = $WeaponPanel/WeaponIcon
 @onready var antidote_icon: TextureRect = $AntidotePanel/Symbol
 @onready var slot_icons: Array[TextureRect] = [$WeaponPanel/Slot1/Icon, $WeaponPanel/Slot2/Icon, $WeaponPanel/Slot3/Icon]
+@onready var fps_label: Label = $FPS
+@onready var enemy_count_label: Label = $EnemyCount
 @onready var slot_frames: Array[PanelContainer] = [$WeaponPanel/Slot1, $WeaponPanel/Slot2, $WeaponPanel/Slot3]
 
 var player: Node
 var infection: Node
+var _perf_timer := 0.0
 
 
 func _ready() -> void:
@@ -29,9 +32,14 @@ func _ready() -> void:
 	_configure_icon_regions()
 
 
-func _process(_delta: float) -> void:
+func _process(delta: float) -> void:
 	_update_vitals()
 	_update_weapon()
+	_perf_timer += delta
+	if _perf_timer >= 0.25:
+		_perf_timer = 0.0
+		fps_label.text = "FPS %d" % Engine.get_frames_per_second()
+		enemy_count_label.text = "ENEMIES %d" % get_tree().get_nodes_in_group("infected").size()
 
 
 func _configure_icon_regions() -> void:
