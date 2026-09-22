@@ -224,6 +224,7 @@ func enter() -> void:
 	camera_pitch = planning_pitch
 	_reset_selection()
 	_show_planning_grid()
+	_set_light_markers_visible(true)
 	for node in hud_nodes:
 		if node != null:
 			node.hide()
@@ -249,6 +250,7 @@ func exit() -> void:
 		if node != null:
 			node.show()
 	_clear_preview()
+	_set_light_markers_visible(false)
 	_hide_planning_grid()
 	_select(null)
 	ui.hide()
@@ -378,6 +380,12 @@ func _show_actor_catalog() -> void:
 	active_catalog = actor_catalog
 	_rebuild_palette()
 	status.text = "ACTORS | place/remove Player and Infected"
+
+
+func _set_light_markers_visible(value: bool) -> void:
+	for light_node in get_tree().get_nodes_in_group("planner_lights"):
+		if light_node.has_method("set_planning_visual"):
+			light_node.call("set_planning_visual", value)
 
 
 func _show_planning_grid() -> void:
