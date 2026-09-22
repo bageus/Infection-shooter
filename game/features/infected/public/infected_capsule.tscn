@@ -1,5 +1,6 @@
-[gd_scene load_steps=6 format=3]
+[gd_scene load_steps=7 format=3]
 
+[ext_resource type="Script" path="res://game/presentation/character_animation_driver.gd" id="anim_driver"]
 [ext_resource type="Script" path="res://game/features/infected/infected_capsule.gd" id="1_enemy_script"]
 [ext_resource type="PackedScene" path="res://models/objects/characters/zombie_animated.glb" id="character_model"]
 [ext_resource type="PackedScene" path="res://game/features/infection_source/public/mutagen_cloud.tscn" id="2_cloud"]
@@ -32,3 +33,6 @@ rotation_degrees = Vector3(0, 180, 0)
 shape = SubResource("EnemyShape")
 
 [node name="DeathCloud" parent="." instance=ExtResource("2_cloud")]
+
+[node name="AnimationDriver" type="Node" parent="."]
+script = ExtResource("anim_driver")
