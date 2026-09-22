@@ -45,9 +45,13 @@ func _add_mesh_collisions(node: Node, body: CollisionObject3D) -> void:
 				var collision := CollisionShape3D.new()
 				collision.shape = shape
 				body.add_child(collision)
-				collision.global_transform = mesh_instance.global_transform
 				if use_simple_collision:
-					collision.position += mesh_instance.global_basis * mesh_instance.get_aabb().get_center()
+					var aabb := mesh_instance.get_aabb()
+					var mesh_to_body: Transform3D = body.global_transform.affine_inverse() * mesh_instance.global_transform
+					collision.transform = mesh_to_body
+					collision.position += mesh_to_body.basis * aabb.get_center()
+				else:
+					collision.global_transform = mesh_instance.global_transform
 	for child in node.get_children():
 		_add_mesh_collisions(child, body)
 
