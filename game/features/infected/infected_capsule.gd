@@ -237,7 +237,7 @@ func _spawn_splatter_mark(hit_position: Vector3, normal: Vector3, heavy: bool) -
 
 func _spawn_satellite_decals(hit_position: Vector3, normal: Vector3, heavy: bool) -> void:
 	var count := randi_range(3, 7) if heavy else randi_range(1, 4)
-	var basis := _basis_for_normal(normal)
+	var splatter_basis := _basis_for_normal(normal)
 	for i in count:
 		var decal := Decal.new()
 		var radius := randf_range(0.05, 0.16) if heavy else randf_range(0.035, 0.1)
@@ -248,7 +248,7 @@ func _spawn_satellite_decals(hit_position: Vector3, normal: Vector3, heavy: bool
 		decal.lower_fade = 0.02
 		decal.normal_fade = 0.15
 		get_tree().current_scene.add_child(decal)
-		var splatter_offset := basis * Vector3(randf_range(-0.75, 0.75), randf_range(-0.65, 0.65), 0)
+		var splatter_offset := splatter_basis * Vector3(randf_range(-0.75, 0.75), randf_range(-0.65, 0.65), 0)
 		decal.global_position = hit_position + splatter_offset
 		decal.global_basis = _decal_basis(normal)
 		_register_surface_decal(decal.global_position, normal, decal)
