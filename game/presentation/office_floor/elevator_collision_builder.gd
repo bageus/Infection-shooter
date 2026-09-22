@@ -25,10 +25,10 @@ func _build() -> void:
 	_add_box(body, Vector3(side_width, cabin_size.y, wall_thickness), Vector3(-doorway_width * 0.5 - side_width * 0.5, cabin_size.y * 0.5, -half_z))
 	_add_box(body, Vector3(side_width, cabin_size.y, wall_thickness), Vector3(doorway_width * 0.5 + side_width * 0.5, cabin_size.y * 0.5, -half_z))
 
-func _add_box(body: StaticBody3D, size: Vector3, position: Vector3) -> void:
+func _add_box(body: StaticBody3D, size: Vector3, local_position: Vector3) -> void:
 	var shape := BoxShape3D.new()
 	shape.size = size
 	var collision := CollisionShape3D.new()
 	collision.shape = shape
-	collision.position = position
+	collision.position = local_position
 	body.add_child(collision)
