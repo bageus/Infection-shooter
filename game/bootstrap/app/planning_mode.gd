@@ -185,7 +185,8 @@ func setup(app_owner: Node3D, planning_root: Node3D, planning_ui: Control) -> vo
 	hud_nodes = [
 		host.get_node("PrototypeHUD"),
 		host.get_node("Crosshair"),
-		host.get_node("Radar")
+		host.get_node("Radar"),
+		host.get_node("FogOfWar")
 	]
 	active_catalog = group_catalogs["01"]
 	_rebuild_palette()
@@ -227,6 +228,10 @@ func enter() -> void:
 
 func exit() -> void:
 	active = false
+	var visibility_manager := host.get_node_or_null("VisibilityManager")
+	if visibility_manager != null:
+		visibility_manager.call("rebuild")
+		visibility_manager.call("set_runtime_enabled", true)
 	_activate_all_enemies()
 	camera_rig.transform = saved_camera_rig_transform
 	camera.transform = saved_camera_transform
