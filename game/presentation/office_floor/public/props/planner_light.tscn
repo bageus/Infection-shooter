@@ -25,6 +25,7 @@ material_override = SubResource("marker_material")
 
 [node name="Light" type="SpotLight3D" parent="."]
 rotation_degrees = Vector3(-90, 0, 0)
+position = Vector3(0, -0.02, 0)
 spot_range = 12.0
 spot_angle = 48.0
 spot_angle_attenuation = 0.7
