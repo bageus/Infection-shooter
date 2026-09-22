@@ -70,5 +70,5 @@ func _rebuild() -> void:
 	material.no_depth_test = true
 	mesh.material = material
 	overlay.mesh = mesh
-	overlay.position.y = 5.0
-	overlay.rotation_degrees.x = -90.0
+	overlay.position = Vector3.ZERO
+	overlay.rotation_degrees = Vector3.ZERO
