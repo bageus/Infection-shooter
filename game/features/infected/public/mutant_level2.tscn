@@ -1,0 +1,28 @@
+[gd_scene load_steps=4 format=3]
+
+[ext_resource type="Script" path="res://game/features/infected/infected_capsule.gd" id="1_enemy_script"]
+[ext_resource type="PackedScene" path="res://game/features/infection_source/public/mutagen_cloud.tscn" id="2_cloud"]
+[ext_resource type="PackedScene" path="res://models/objects/characters/mutant_animated.glb" id="3_model"]
+
+[sub_resource type="CapsuleShape3D" id="EnemyShape"]
+radius = 0.58
+height = 2.05
+
+[node name="MutantLevel2" type="CharacterBody3D" groups=["infected"]]
+script = ExtResource("1_enemy_script")
+max_health = 110.0
+move_speed = 5.1
+attack_damage = 25.0
+attack_range = 1.35
+collision_layer = 2
+collision_mask = 3
+safe_margin = 0.02
+floor_stop_on_slope = false
+
+[node name="Body" parent="." instance=ExtResource("3_model")]
+rotation_degrees = Vector3(0, 180, 0)
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="."]
+shape = SubResource("EnemyShape")
+
+[node name="DeathCloud" parent="." instance=ExtResource("2_cloud")]
