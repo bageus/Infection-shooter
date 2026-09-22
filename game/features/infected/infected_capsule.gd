@@ -13,6 +13,8 @@ const DROP_TABLE_SCRIPT := preload("res://game/features/pickups/drop_table.gd")
 @export var max_push_speed: float = 6.0
 @export var obstacle_damage: float = 34.0
 @export var obstacle_attack_interval: float = 0.45
+@export var full_simulation_distance: float = 14.0
+@export var sleep_distance: float = 32.0
 
 @onready var body_mesh: MeshInstance3D = $Body
 @onready var collision_shape: CollisionShape3D = $CollisionShape3D
@@ -26,11 +28,14 @@ var _dead: bool = false
 var _push_velocity: Vector3 = Vector3.ZERO
 var _ai_tick_offset: int = 0
 var _cached_desired: Vector3 = Vector3.ZERO
+var _lod_frame_offset: int = 0
+var _sleeping_far := false
 
 
 func _ready() -> void:
 	health = max_health
 	_ai_tick_offset = get_instance_id() % 4
+	_lod_frame_offset = get_instance_id() % 12
 	death_cloud.depleted.connect(_on_death_cloud_depleted)
 
 
@@ -69,24 +74,59 @@ func _physics_process(delta: float) -> void:
 	if _dead:
 		velocity = Vector3.ZERO
 		return
+	if _target == null or not is_instance_valid(_target):
+		return
+
+	var target_offset := _target.global_position - global_position
+	target_offset.y = 0.0
+	var distance_sq := target_offset.length_squared()
+	var physics_frame := Engine.get_physics_frames()
+
+	if distance_sq > sleep_distance * sleep_distance:
+		_sleeping_far = true
+		if physics_frame % 12 != _lod_frame_offset:
+			return
+	else:
+		_sleeping_far = false
 
 	_attack_cooldown = maxf(0.0, _attack_cooldown - delta)
 	_obstacle_cooldown = maxf(0.0, _obstacle_cooldown - delta)
-	var distance_to_target := INF
-	if _target != null and is_instance_valid(_target):
-		distance_to_target = global_position.distance_to(_target.global_position)
-	var frame_slot := Engine.get_physics_frames() % 4
-	if distance_to_target < 10.0 or frame_slot == _ai_tick_offset:
-		_cached_desired = _desired_velocity()
+
+	var near := distance_sq < full_simulation_distance * full_simulation_distance
+	var ai_divisor := 1 if near else 4
+	if physics_frame % ai_divisor == _ai_tick_offset % ai_divisor:
+		_cached_desired = _desired_velocity_from_offset(target_offset)
+
 	var desired := _cached_desired
 	velocity.x = desired.x + _push_velocity.x
 	velocity.z = desired.z + _push_velocity.z
 	_push_velocity = _push_velocity.move_toward(Vector3.ZERO, push_decay * delta)
+
+	if _sleeping_far:
+		# Far enemies use cheap kinematic stepping and skip CharacterBody collision solving.
+		var step_delta := delta * 12.0
+		global_position.x += velocity.x * step_delta
+		global_position.z += velocity.z * step_delta
+		return
+
 	_apply_gravity(delta)
 	move_and_slide()
 	_push_chair_contacts()
-	if distance_to_target < 14.0 or frame_slot == _ai_tick_offset:
+	if near or physics_frame % 4 == _ai_tick_offset:
 		_try_break_blocking_props()
+
+
+func _desired_velocity_from_offset(offset: Vector3) -> Vector3:
+	var distance := offset.length()
+	if distance <= attack_range:
+		_try_attack()
+		return Vector3.ZERO
+	if distance <= 0.0001:
+		return Vector3.ZERO
+	var direction := offset / distance
+	if direction.length_squared() > 0.0001:
+		look_at(global_position + direction, Vector3.UP)
+	return direction * move_speed
 
 
 func _desired_velocity() -> Vector3:
