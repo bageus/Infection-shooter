@@ -2,6 +2,7 @@ extends Node3D
 
 const FALL_DEATH_Y: float = -4.0
 const PlanningMode = preload("res://game/bootstrap/app/planning_mode.gd")
+const VisibilityManager = preload("res://game/bootstrap/app/visibility_manager.gd")
 
 @onready var player: Node3D = $Gameplay/Player
 @onready var enemies: Node3D = $Gameplay/Enemies
@@ -14,6 +15,7 @@ const PlanningMode = preload("res://game/bootstrap/app/planning_mode.gd")
 var _ended := false
 var _pause_open := false
 var planning_mode: Node
+var visibility_manager: Node
 
 
 func _ready() -> void:
@@ -28,6 +30,9 @@ func _ready() -> void:
 	add_child(planning_mode)
 	planning_mode.process_mode = Node.PROCESS_MODE_ALWAYS
 	planning_mode.setup(self, planning_root, planning_ui)
+	visibility_manager = VisibilityManager.new()
+	add_child(visibility_manager)
+	visibility_manager.setup(player, [planning_root, $Structure])
 	for enemy in enemies.get_children():
 		if enemy.has_method("set_target"):
 			enemy.call("set_target", player)
@@ -73,10 +78,12 @@ func _resume_game() -> void:
 
 
 func _on_resume_pressed() -> void:
+	visibility_manager.set_runtime_enabled(true)
 	_resume_game()
 
 
 func _on_planning_pressed() -> void:
+	visibility_manager.set_runtime_enabled(false)
 	_pause_open = false
 	pause_menu.hide()
 	planning_mode.enter()
