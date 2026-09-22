@@ -7,6 +7,11 @@ func _ready() -> void:
 	add_to_group("planner_lights")
 	set_planning_visual(false)
 
+func set_runtime_light_active(enabled: bool) -> void:
+	if light != null:
+		light.visible = enabled
+
+
 func set_planning_visual(enabled: bool) -> void:
 	visible = true
 	if marker != null:
