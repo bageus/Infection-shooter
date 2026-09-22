@@ -9,10 +9,7 @@ script = ExtResource("2_collision")
 
 [node name="Visual" parent="." instance=ExtResource("1_model")]
 
-[node name="Body" type="RigidBody3D" parent="."]
-mass = 4.0
-linear_damp = 3.5
-angular_damp = 4.0
+[node name="Body" type="AnimatableBody3D" parent="."]
 collision_layer = 1
 collision_mask = 3
 script = ExtResource("3_destructible")
