@@ -229,10 +229,10 @@ func enter() -> void:
 
 func exit() -> void:
 	active = false
-	var visibility_manager := host.get_node_or_null("VisibilityManager")
-	if visibility_manager != null:
-		visibility_manager.call("rebuild")
-		visibility_manager.call("set_runtime_enabled", true)
+	var chunk_streamer := host.get_node_or_null("ChunkStreamer")
+	if chunk_streamer != null:
+		chunk_streamer.call("rebuild")
+		chunk_streamer.call("set_runtime_enabled", true)
 	_activate_all_enemies()
 	camera_rig.transform = saved_camera_rig_transform
 	camera.transform = saved_camera_transform
