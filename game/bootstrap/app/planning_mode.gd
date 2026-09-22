@@ -24,6 +24,8 @@ var ui: Control
 var palette: ItemList
 var status: Label
 var help: Label
+var light_info: Label
+var light_level: ProgressBar
 var hud_nodes: Array[Node] = []
 var active := false
 var selected_path := ""
@@ -190,6 +192,8 @@ func setup(app_owner: Node3D, planning_root: Node3D, planning_ui: Control) -> vo
 	palette = ui.get_node("Panel/VBox/Palette")
 	status = ui.get_node("Panel/VBox/Status")
 	help = ui.get_node("HelpPanel/Help")
+	light_info = ui.get_node("Panel/VBox/LightInfo")
+	light_level = ui.get_node("Panel/VBox/LightLevel")
 	hud_nodes = [
 		host.get_node("PrototypeHUD"),
 		host.get_node("Crosshair"),
@@ -452,7 +456,23 @@ func _select(node: Node3D) -> void:
 	selected = node
 	if selected != null:
 		_show_selection_highlight(selected)
+	_update_light_ui()
 	_update_status()
+
+
+func _update_light_ui() -> void:
+	var target := selected
+	if target == null and preview != null and _selected_kind() == "light":
+		target = preview
+	var light: Light3D
+	if target != null:
+		light = target.find_child("Light", true, false) as Light3D
+	var show_light := light != null
+	light_info.visible = show_light
+	light_level.visible = show_light
+	if show_light:
+		light_info.text = "LIGHT %.2f / 16.00" % light.light_energy
+		light_level.value = light.light_energy
 
 
 func _show_selection_highlight(node: Node3D) -> void:
@@ -599,6 +619,8 @@ func _rebuild_preview() -> void:
 		return
 	preview = scene.instantiate() as Node3D
 	host.add_child(preview)
+	if _selected_kind() == "light" and preview.has_method("set_planning_visual"):
+		preview.call_deferred("set_planning_visual", true)
 	_set_preview_collision(preview, true)
 	_apply_special_default_height(preview, _selected_kind())
 
@@ -623,6 +645,8 @@ func _make_player_spawn_preview() -> Node3D:
 
 
 func _clear_preview() -> void:
+	light_info.hide()
+	light_level.hide()
 	if preview != null and is_instance_valid(preview):
 		preview.queue_free()
 	preview = null
@@ -638,6 +662,7 @@ func _update_preview(screen_pos: Vector2) -> void:
 	_apply_special_default_height(preview, _selected_kind())
 	_apply_wall_mount(preview)
 	preview.rotation_degrees.y = rotation_y
+	_update_light_ui()
 
 
 func _place_selected(screen_pos: Vector2) -> void:
@@ -681,6 +706,8 @@ func _place_selected(screen_pos: Vector2) -> void:
 	node.rotation_degrees.y = rotation_y
 	node.set_meta("planning_scene_path", selected_path)
 	placed.append(node)
+	if kind == "light" and node.has_method("set_planning_visual"):
+		node.call("set_planning_visual", true)
 	_select(null)
 	_rebuild_preview()
 	if preview != null:
@@ -740,6 +767,7 @@ func _adjust_selected_light(amount: float) -> void:
 		return
 	light.light_energy = clampf(light.light_energy + amount, 0.0, 16.0)
 	selected.set_meta("planning_light_energy", light.light_energy)
+	_update_light_ui()
 	status.text = "LIGHT | brightness %.2f | [ / ] adjust" % light.light_energy
 
 
