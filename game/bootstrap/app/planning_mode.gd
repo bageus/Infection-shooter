@@ -1053,9 +1053,13 @@ func save_layout() -> void:
 		var scene_path := str(node.get_meta("planning_scene_path", ""))
 		if scene_path.is_empty():
 			continue
+		var save_position := node.position
+		if str(node.get_meta("planning_actor_kind", "")) == "enemy" and node.has_meta("planning_spawn_transform"):
+			var enemy_spawn: Transform3D = node.get_meta("planning_spawn_transform")
+			save_position = enemy_spawn.origin
 		objects.append({
 			"scene": scene_path,
-			"x": node.position.x, "y": node.position.y, "z": node.position.z,
+			"x": save_position.x, "y": save_position.y, "z": save_position.z,
 			"rotation_y": node.rotation_degrees.y,
 			"scale_x": node.scale.x, "scale_y": node.scale.y, "scale_z": node.scale.z,
 			"light_energy": node.get_meta("planning_light_energy", 0.0),
