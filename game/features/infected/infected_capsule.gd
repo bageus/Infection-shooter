@@ -129,19 +129,6 @@ func _desired_velocity_from_offset(offset: Vector3) -> Vector3:
 	return direction * move_speed
 
 
-func _desired_velocity() -> Vector3:
-	if _target == null or not is_instance_valid(_target):
-		return Vector3.ZERO
-	var offset: Vector3 = _target.global_position - global_position
-	offset.y = 0.0
-	var distance := offset.length()
-	if distance <= attack_range:
-		_try_attack()
-		return Vector3.ZERO
-	var direction := offset.normalized()
-	if direction.length_squared() > 0.0001:
-		look_at(global_position + direction, Vector3.UP)
-	return direction * move_speed
 
 
 func _push_chair_contacts() -> void:
