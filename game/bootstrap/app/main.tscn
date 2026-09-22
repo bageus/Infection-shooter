@@ -259,6 +259,23 @@ same_column_width = true
 fixed_column_width = 270
 icon_mode = 0
 
+[node name="LightInfo" type="Label" parent="PlanningUI/Panel/VBox"]
+visible = false
+custom_minimum_size = Vector2(330, 30)
+layout_mode = 2
+text = "LIGHT 3.00 / 16.00"
+theme_override_colors/font_color = Color(1, 0.86, 0.38, 1)
+theme_override_font_sizes/font_size = 16
+horizontal_alignment = 1
+
+[node name="LightLevel" type="ProgressBar" parent="PlanningUI/Panel/VBox"]
+visible = false
+custom_minimum_size = Vector2(330, 18)
+layout_mode = 2
+max_value = 16.0
+value = 3.0
+show_percentage = false
+
 [node name="Status" type="Label" parent="PlanningUI/Panel/VBox"]
 custom_minimum_size = Vector2(330, 44)
 layout_mode = 2
