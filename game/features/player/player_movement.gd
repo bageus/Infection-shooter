@@ -27,6 +27,7 @@ var current_weapon_index: int = 0
 var _roll_direction := Vector3.ZERO
 var _roll_remaining: float = 0.0
 var _roll_cooldown_remaining: float = 0.0
+var _aim_point := Vector3.ZERO
 func _ready() -> void:
 	health=max_health
 	armor=max_armor
@@ -40,7 +41,7 @@ func _physics_process(delta: float) -> void:
 	_update_move(delta)
 	var w:=get_current_weapon()
 	if w != null and _roll_remaining <= 0.0 and Input.is_action_pressed("fire"):
-		w.call("try_fire")
+		w.call("try_fire_at", _aim_point)
 func _handle_actions() -> void:
 	if Input.is_action_just_pressed("weapon_1"): _select_weapon(0)
 	elif Input.is_action_just_pressed("weapon_2"): _select_weapon(1)
@@ -134,13 +135,26 @@ func _move_direction()->Vector3:
 	var d:Vector3=r*input.x+f*-input.y
 	return d.normalized() if d.length_squared()>1.0 else d
 func _update_aim()->void:
-	var delta:=get_viewport().get_mouse_position()-get_viewport().get_visible_rect().size*0.5
-	if delta.length_squared()<=4:return
-	var r:Vector3=camera.global_transform.basis.x;r.y=0;r=r.normalized()
-	var f:Vector3=-camera.global_transform.basis.z;f.y=0;f=f.normalized()
-	var d:=r*delta.x+f*-delta.y
-	if d.length_squared()>0.0001:
-		var target_direction:=d.normalized()
+	var mouse:=get_viewport().get_mouse_position()
+	var origin:=camera.project_ray_origin(mouse)
+	var ray_end:=origin+camera.project_ray_normal(mouse)*200.0
+	var query:=PhysicsRayQueryParameters3D.create(origin,ray_end,3)
+	query.exclude=[get_rid()]
+	var hit:=get_world_3d().direct_space_state.intersect_ray(query)
+	if not hit.is_empty():
+		_aim_point=hit.get("position")
+	else:
+		# Fallback to the gameplay floor so the cursor always has a world target.
+		var direction:=camera.project_ray_normal(mouse)
+		if absf(direction.y)>0.0001:
+			var t:float=(0.0-origin.y)/direction.y
+			_aim_point=origin+direction*maxf(t,0.0)
+		else:
+			_aim_point=ray_end
+	var flat_direction:=_aim_point-global_position
+	flat_direction.y=0.0
+	if flat_direction.length_squared()>0.0001:
+		var target_direction:=flat_direction.normalized()
 		aim_pivot.look_at(aim_pivot.global_position+target_direction,Vector3.UP)
 		body_visual.look_at(body_visual.global_position+target_direction,Vector3.UP)
 
