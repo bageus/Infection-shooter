@@ -1,0 +1,12 @@
+[gd_scene load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://game/presentation/office_floor/darkness_zone.gd" id="1"]
+
+[node name="DarknessZone" type="Node3D"]
+script = ExtResource("1")
+metadata/planning_kind = "darkness"
+metadata/planning_darkness = 0.88
+metadata/planning_permanent = true
+
+[node name="Overlay" type="MeshInstance3D" parent="."]
+cast_shadow = 0
