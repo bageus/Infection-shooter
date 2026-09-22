@@ -62,8 +62,10 @@ func _update_chunks(force: bool) -> void:
 		var collision_active := dx <= collision_chunk_radius and dy <= collision_chunk_radius
 		var bucket: Array = _chunks[key]
 		for object_variant in bucket:
-			var object := object_variant as Node3D
-			if object == null or not is_instance_valid(object):
+			if not is_instance_valid(object_variant):
+				continue
+			var object: Node3D = object_variant
+			if object == null:
 				continue
 			object.visible = render_active
 			object.process_mode = Node.PROCESS_MODE_INHERIT if render_active else Node.PROCESS_MODE_DISABLED
@@ -81,8 +83,10 @@ func set_runtime_enabled(value: bool) -> void:
 		for key_variant in _chunks.keys():
 			var bucket: Array = _chunks[key_variant]
 			for object_variant in bucket:
-				var object := object_variant as Node3D
-				if object != null and is_instance_valid(object):
+				if not is_instance_valid(object_variant):
+					continue
+				var object: Node3D = object_variant
+				if object != null:
 					object.visible = true
 					object.process_mode = Node.PROCESS_MODE_INHERIT
 					_set_collision_enabled(object, true)
