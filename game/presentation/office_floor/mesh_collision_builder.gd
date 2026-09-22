@@ -5,6 +5,7 @@ extends Node3D
 @export var body_path: NodePath = NodePath("Body")
 @export var rebuild_in_editor: bool = true
 @export var exclude_name_tokens: PackedStringArray = PackedStringArray()
+@export var use_simple_collision: bool = true
 
 var _built := false
 
@@ -33,12 +34,20 @@ func _add_mesh_collisions(node: Node, body: CollisionObject3D) -> void:
 	if node is MeshInstance3D:
 		var mesh_instance := node as MeshInstance3D
 		if mesh_instance.mesh != null:
-			var shape := mesh_instance.mesh.create_trimesh_shape()
+			var shape: Shape3D
+			if use_simple_collision:
+				var box := BoxShape3D.new()
+				box.size = mesh_instance.get_aabb().size
+				shape = box
+			else:
+				shape = mesh_instance.mesh.create_trimesh_shape()
 			if shape != null:
 				var collision := CollisionShape3D.new()
 				collision.shape = shape
 				body.add_child(collision)
 				collision.global_transform = mesh_instance.global_transform
+				if use_simple_collision:
+					collision.position += mesh_instance.global_basis * mesh_instance.get_aabb().get_center()
 	for child in node.get_children():
 		_add_mesh_collisions(child, body)
 

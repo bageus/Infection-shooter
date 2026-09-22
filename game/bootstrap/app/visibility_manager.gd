@@ -6,13 +6,13 @@ extends Node
 @export var max_updates_per_tick := 160
 
 var player: Node3D
-var roots: Array[Node] = []
+var roots: Array = []
 var _objects: Array[Node3D] = []
 var _cursor := 0
 var _elapsed := 0.0
 var enabled := true
 
-func setup(target: Node3D, managed_roots: Array[Node]) -> void:
+func setup(target: Node3D, managed_roots: Array) -> void:
 	player = target
 	roots = managed_roots
 	rebuild()
