@@ -29,6 +29,7 @@ var _elevator_lights: Array[Node3D] = []
 
 func _ready() -> void:
 	process_mode = Node.PROCESS_MODE_PAUSABLE
+	add_to_group("interactive_doors")
 	_player = get_node_or_null(player_path) as Node3D if not player_path.is_empty() else null
 	if _player == null:
 		_player = get_tree().get_first_node_in_group("player") as Node3D
@@ -91,6 +92,10 @@ func _physics_process(delta: float) -> void:
 	for light_node in _elevator_lights:
 		if is_instance_valid(light_node):
 			_set_light_state(light_node, _open_amount >= 0.98)
+
+
+func is_open_for_exploration() -> bool:
+	return _open_amount >= 0.12
 
 
 func request_open() -> void:
