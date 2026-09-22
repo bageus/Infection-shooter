@@ -163,6 +163,10 @@ var group_catalogs := {
 	]
 }
 
+var lighting_catalog := [
+	{"name":"Omni Light","path":"res://game/presentation/office_floor/public/props/planner_light.tscn","kind":"light"}
+]
+
 var actor_catalog := [
 	{"name":"Player Spawn","path":"","kind":"player"},
 	{"name":"Infected","path":"res://game/features/infected/public/infected_capsule.tscn","kind":"enemy"}
@@ -193,6 +197,7 @@ func setup(app_owner: Node3D, planning_root: Node3D, planning_ui: Control) -> vo
 	palette.item_selected.connect(_on_palette_selected)
 	ui.get_node("Panel/VBox/Tabs/Structure").pressed.connect(_show_structure_catalog)
 	ui.get_node("Panel/VBox/Tabs/Actors").pressed.connect(_show_actor_catalog)
+	ui.get_node("Panel/VBox/Tabs/Lighting").pressed.connect(_show_lighting_catalog)
 	for group_name in ["01","02","03","04","05","06","07","08","09","10","11","13","14","16"]:
 		var button := ui.get_node("Panel/VBox/GroupTabs/G" + group_name) as Button
 		button.pressed.connect(_show_structure_group.bind(group_name))
@@ -223,7 +228,7 @@ func enter() -> void:
 	Input.mouse_mode = Input.MOUSE_MODE_VISIBLE
 	camera_anchor = camera.global_position
 	camera_height = clampf(camera.global_position.y, 8.0, 50.0)
-	help.text = "PLANNING CONTROLS\n\nWASD  Move view\nALT + LMB drag  Rotate view\nWheel  Zoom\nLMB  Select / Place\nLMB drag  Move selected\nRMB  Cancel current tool\nDelete  Delete selected\nQ / E  Rotate -/+15°\nR  Rotate +90°\n+ / -  Uniform scale\nX / Z  X size +/-\nC / V  Z size +/-\nPgUp / PgDn  Move object up/down\nESC  Exit planner"
+	help.text = "PLANNING CONTROLS\n\nWASD  Move view\nALT + LMB drag  Rotate view\nWheel  Zoom\nLMB  Select / Place\nLMB drag  Move selected\nRMB  Cancel current tool\nDelete  Delete selected\nQ / E  Rotate -/+15°\nR  Rotate +90°\n+ / -  Uniform scale\nX / Z  X size +/-\nC / V  Z size +/-\nPgUp / PgDn  Move object up/down\n[ / ]  Light brightness\nESC  Exit planner"
 	status.text = "Choose an object"
 
 
@@ -298,6 +303,10 @@ func _unhandled_input(event: InputEvent) -> void:
 				_move_selected_height(HEIGHT_STEP)
 			KEY_PAGEDOWN:
 				_move_selected_height(-HEIGHT_STEP)
+			KEY_BRACKETLEFT:
+				_adjust_selected_light(-0.25)
+			KEY_BRACKETRIGHT:
+				_adjust_selected_light(0.25)
 		get_viewport().set_input_as_handled()
 	if event is InputEventMouseButton:
 		if event.button_index == MOUSE_BUTTON_WHEEL_UP and event.pressed:
@@ -349,6 +358,14 @@ func _show_structure_group(group_name: String) -> void:
 	active_catalog = group_catalogs.get(group_name, group_catalogs["01"])
 	_rebuild_palette()
 	status.text = "STRUCTURE " + group_name
+
+
+func _show_lighting_catalog() -> void:
+	_reset_selection()
+	ui.get_node("Panel/VBox/GroupTabs").hide()
+	active_catalog = lighting_catalog
+	_rebuild_palette()
+	status.text = "LIGHTING | place light | [ / ] brightness"
 
 
 func _show_actor_catalog() -> void:
@@ -685,6 +702,17 @@ func _scale_selected(delta_scale: Vector3) -> void:
 	_update_status()
 
 
+func _adjust_selected_light(amount: float) -> void:
+	if selected == null:
+		return
+	var light := selected.find_child("Light", true, false) as Light3D
+	if light == null:
+		return
+	light.light_energy = clampf(light.light_energy + amount, 0.0, 16.0)
+	selected.set_meta("planning_light_energy", light.light_energy)
+	status.text = "LIGHT | brightness %.2f | [ / ] adjust" % light.light_energy
+
+
 func _move_selected_height(amount: float) -> void:
 	if selected != null:
 		selected.position.y += amount
@@ -873,7 +901,8 @@ func save_layout() -> void:
 			"scene": scene_path,
 			"x": node.position.x, "y": node.position.y, "z": node.position.z,
 			"rotation_y": node.rotation_degrees.y,
-			"scale_x": node.scale.x, "scale_y": node.scale.y, "scale_z": node.scale.z
+			"scale_x": node.scale.x, "scale_y": node.scale.y, "scale_z": node.scale.z,
+			"light_energy": node.get_meta("planning_light_energy", 0.0)
 		})
 	var file := FileAccess.open(SAVE_PATH, FileAccess.WRITE)
 	if file != null:
@@ -963,6 +992,12 @@ func load_layout() -> void:
 		node.rotation_degrees.y = float(record.get("rotation_y",0.0))
 		node.scale = Vector3(float(record.get("scale_x",1.0)),float(record.get("scale_y",1.0)),float(record.get("scale_z",1.0)))
 		node.set_meta("planning_scene_path", scene_path)
+		var saved_light_energy := float(record.get("light_energy", 0.0))
+		if saved_light_energy > 0.0:
+			var saved_light := node.find_child("Light", true, false) as Light3D
+			if saved_light != null:
+				saved_light.light_energy = saved_light_energy
+				node.set_meta("planning_light_energy", saved_light_energy)
 		if load_kind == "enemy":
 			node.set_meta("planning_actor_kind", "enemy")
 			node.global_position.y = 1.0
