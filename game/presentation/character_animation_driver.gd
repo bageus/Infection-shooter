@@ -7,6 +7,7 @@ extends Node
 var character: CharacterBody3D
 var animation_player: AnimationPlayer
 var _current := ""
+var _animations: Dictionary = {}
 
 func _ready() -> void:
 	character = get_parent() as CharacterBody3D
@@ -19,30 +20,42 @@ func _ready() -> void:
 		return
 	animation_player = _find_animation_player(model)
 	if animation_player != null:
-		_play_best(["idle", "Idle", "idle_weapon", "rifle_idle"])
+		_index_animations()
+		_play_semantic(["idle", "stand"])
 
 func _process(_delta: float) -> void:
 	if character == null or animation_player == null:
 		return
 	var horizontal_speed := Vector2(character.velocity.x, character.velocity.z).length()
 	if horizontal_speed > run_speed_threshold:
-		_play_best(["run", "Run", "running", "sprint"])
+		_play_semantic(["run", "sprint"])
 	elif horizontal_speed > 0.15:
-		_play_best(["walk", "Walk", "walking"])
+		_play_semantic(["walk", "walking", "locomotion"])
 	else:
-		_play_best(["idle", "Idle", "idle_weapon", "rifle_idle"])
+		_play_semantic(["idle", "stand"])
 
-func _play_best(candidates: Array[String]) -> void:
-	for candidate in candidates:
-		if animation_player.has_animation(candidate):
-			if _current != candidate:
-				_current = candidate
-				animation_player.play(candidate, 0.12)
-			return
+func _index_animations() -> void:
+	_animations.clear()
+	for animation_name in animation_player.get_animation_list():
+		var normalized := str(animation_name).to_lower().replace(" ", "_").replace("-", "_")
+		_animations[normalized] = str(animation_name)
+
+
+func _play_semantic(tokens: Array[String]) -> void:
+	for token in tokens:
+		var wanted := token.to_lower()
+		for normalized in _animations.keys():
+			if wanted in str(normalized):
+				var actual := str(_animations[normalized])
+				if _current != actual:
+					_current = actual
+					animation_player.play(actual, 0.12)
+				return
 	var list := animation_player.get_animation_list()
 	if not list.is_empty() and _current.is_empty():
 		_current = list[0]
 		animation_player.play(_current)
+
 
 func _find_animation_player(node: Node) -> AnimationPlayer:
 	if node == null:
