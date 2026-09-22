@@ -5,11 +5,16 @@ extends Node3D
 
 func _ready() -> void:
 	add_to_group("planner_lights")
+	process_mode = Node.PROCESS_MODE_ALWAYS
 	set_planning_visual(false)
 
 func set_runtime_light_active(enabled: bool) -> void:
+	visible = true
 	if light != null:
 		light.visible = enabled
+		light.light_energy = float(get_meta("planning_light_energy", light.light_energy))
+		if has_meta("planning_light_angle"):
+			light.spot_angle = float(get_meta("planning_light_angle"))
 
 
 func set_planning_visual(enabled: bool) -> void:
