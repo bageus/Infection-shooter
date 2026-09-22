@@ -12,6 +12,8 @@ const PlanningLighting = preload("res://game/bootstrap/app/planning_lighting.gd"
 @onready var planning_ui: Control = $PlanningUI
 @onready var planning_root: Node3D = $PlanningObjects
 @onready var gameplay: Node3D = $Gameplay
+@onready var mutation_choice: Control = $MutationChoice
+@onready var infection_runtime: Node = $Gameplay/Player/InfectionRuntime
 
 var _ended := false
 var _pause_open := false
@@ -28,6 +30,13 @@ func _ready() -> void:
 	game_over.hide()
 	pause_menu.hide()
 	planning_ui.hide()
+	mutation_choice.hide()
+	mutation_choice.process_mode = Node.PROCESS_MODE_ALWAYS
+	infection_runtime.ability_choice_requested.connect(_on_mutation_choice_requested)
+	infection_runtime.ability_changed.connect(_on_mutation_ability_changed)
+	$MutationChoice/Panel/VBox/Choices/FastHands.pressed.connect(_choose_fast_hands)
+	$MutationChoice/Panel/VBox/Choices/LegMutation.pressed.connect(_choose_leg_mutation)
+	$MutationChoice/Panel/VBox/Choices/EnhancedAmmo.pressed.connect(_choose_enhanced_ammo)
 	planning_mode = PlanningMode.new()
 	add_child(planning_mode)
 	planning_mode.process_mode = Node.PROCESS_MODE_ALWAYS
@@ -94,6 +103,40 @@ func _on_planning_pressed() -> void:
 	_pause_open = false
 	pause_menu.hide()
 	planning_mode.enter()
+
+
+func _on_mutation_choice_requested() -> void:
+	if mutation_choice.visible:
+		return
+	mutation_choice.show()
+	mutation_choice.move_to_front()
+	get_tree().paused = true
+	Input.mouse_mode = Input.MOUSE_MODE_VISIBLE
+
+
+func _on_mutation_ability_changed(choice: int) -> void:
+	if choice == 0:
+		mutation_choice.hide()
+		if not _pause_open and not planning_mode.active and not _ended:
+			get_tree().paused = false
+
+
+func _select_mutation(choice: int) -> void:
+	if infection_runtime.call("select_ability", choice):
+		mutation_choice.hide()
+		get_tree().paused = false
+
+
+func _choose_fast_hands() -> void:
+	_select_mutation(1)
+
+
+func _choose_leg_mutation() -> void:
+	_select_mutation(2)
+
+
+func _choose_enhanced_ammo() -> void:
+	_select_mutation(3)
 
 
 func _end_run(reason: String) -> void:
