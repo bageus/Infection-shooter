@@ -15,7 +15,6 @@
 [ext_resource type="PackedScene" path="res://game/presentation/office_floor/public/structural/wall_door.tscn" id="wall_door"]
 [ext_resource type="PackedScene" path="res://game/presentation/office_floor/public/structural/window_double.tscn" id="window"]
 [ext_resource type="PackedScene" path="res://game/presentation/office_floor/public/structural/window_corner.tscn" id="window_corner"]
-[ext_resource type="Texture2D" path="res://assets/floor_tiles.svg" id="floor_tiles"]
 
 [sub_resource type="Environment" id="env"]
 background_mode = 1
@@ -30,8 +29,6 @@ tonemap_mode = 2
 albedo_color = Color(0.34, 0.37, 0.43, 1)
 roughness = 0.62
 metallic = 0.0
-albedo_texture = ExtResource("floor_tiles")
-uv1_scale = Vector3(40, 30, 1)
 
 [sub_resource type="PlaneMesh" id="floor_mesh"]
 material = SubResource("floor_mat")
@@ -56,6 +53,7 @@ environment = SubResource("env")
 
 [node name="Floor" type="MeshInstance3D" parent="." unique_id=557799538]
 mesh = SubResource("floor_mesh")
+cast_shadow = 1
 
 [node name="FloorBody" type="StaticBody3D" parent="." unique_id=1764252328]
 
