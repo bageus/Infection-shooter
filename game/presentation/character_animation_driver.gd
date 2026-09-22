@@ -9,8 +9,14 @@ var animation_player: AnimationPlayer
 var _current := ""
 
 func _ready() -> void:
-	character = get_node(character_path) as CharacterBody3D
-	var model := get_node(model_path)
+	character = get_parent() as CharacterBody3D
+	if character == null:
+		character = get_node_or_null(character_path) as CharacterBody3D
+	var model: Node = character.get_node_or_null("Body") if character != null else null
+	if model == null:
+		model = get_node_or_null(model_path)
+	if model == null:
+		return
 	animation_player = _find_animation_player(model)
 	if animation_player != null:
 		_play_best(["idle", "Idle", "idle_weapon", "rifle_idle"])
@@ -39,6 +45,8 @@ func _play_best(candidates: Array[String]) -> void:
 		animation_player.play(_current)
 
 func _find_animation_player(node: Node) -> AnimationPlayer:
+	if node == null:
+		return null
 	if node is AnimationPlayer:
 		return node as AnimationPlayer
 	for child in node.get_children():
