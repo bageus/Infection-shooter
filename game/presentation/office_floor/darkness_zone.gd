@@ -67,7 +67,9 @@ func _rebuild() -> void:
 	material.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
 	material.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
 	material.albedo_color = Color(0.0, 0.0, 0.0, darkness)
-	material.no_depth_test = true
+	material.no_depth_test = false
+	material.cull_mode = BaseMaterial3D.CULL_DISABLED
+	material.render_priority = 10
 	mesh.material = material
 	overlay.mesh = mesh
 	overlay.position = Vector3.ZERO
