@@ -17,6 +17,7 @@ extends CharacterBody3D
 @onready var camera_rig: Node3D = $CameraRig
 @onready var camera: Camera3D = $CameraRig/Camera3D
 @onready var aim_pivot: Node3D = $AimPivot
+@onready var body_visual: Node3D = $Body
 @onready var weapons: Array[Node3D] = [$AimPivot/Pistol,$AimPivot/Uzi,$AimPivot/Shotgun]
 @onready var infection_runtime: Node = $InfectionRuntime
 var health: float
@@ -138,7 +139,10 @@ func _update_aim()->void:
 	var r:Vector3=camera.global_transform.basis.x;r.y=0;r=r.normalized()
 	var f:Vector3=-camera.global_transform.basis.z;f.y=0;f=f.normalized()
 	var d:=r*delta.x+f*-delta.y
-	if d.length_squared()>0.0001:aim_pivot.look_at(aim_pivot.global_position+d.normalized(),Vector3.UP)
+	if d.length_squared()>0.0001:
+		var target_direction:=d.normalized()
+		aim_pivot.look_at(aim_pivot.global_position+target_direction,Vector3.UP)
+		body_visual.look_at(body_visual.global_position+target_direction,Vector3.UP)
 
 func _spawn_floor_blood(amount:float)->void:
 	var count:=clampi(ceili(amount/8.0),2,6)
