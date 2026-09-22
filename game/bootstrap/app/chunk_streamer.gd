@@ -68,10 +68,12 @@ func _update_chunks(force: bool) -> void:
 			if object == null:
 				continue
 			if object.is_in_group("planner_lights"):
+				# Placed lights are independent of geometry streaming. Godot already
+				# clips their influence by range, so chunk boundaries must not switch them.
 				object.visible = true
 				object.process_mode = Node.PROCESS_MODE_ALWAYS
 				if object.has_method("set_runtime_light_active"):
-					object.call("set_runtime_light_active", render_active)
+					object.call("set_runtime_light_active", true)
 				continue
 			object.visible = render_active
 			object.process_mode = Node.PROCESS_MODE_INHERIT if render_active else Node.PROCESS_MODE_DISABLED
