@@ -30,11 +30,9 @@ albedo_color = Color(0.34, 0.37, 0.43, 1)
 roughness = 0.62
 metallic = 0.0
 
-[sub_resource type="PlaneMesh" id="floor_mesh"]
+[sub_resource type="BoxMesh" id="floor_mesh"]
 material = SubResource("floor_mat")
-size = Vector2(80, 60)
-subdivide_width = 39
-subdivide_depth = 29
+size = Vector3(80, 0.08, 60)
 
 [sub_resource type="BoxShape3D" id="floor_shape"]
 size = Vector3(80, 0.2, 60)
@@ -52,6 +50,7 @@ script = ExtResource("script")
 environment = SubResource("env")
 
 [node name="Floor" type="MeshInstance3D" parent="." unique_id=557799538]
+position = Vector3(0, -0.04, 0)
 mesh = SubResource("floor_mesh")
 cast_shadow = 1
 
