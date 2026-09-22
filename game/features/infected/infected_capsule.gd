@@ -13,6 +13,7 @@ const DROP_TABLE_SCRIPT := preload("res://game/features/pickups/drop_table.gd")
 @export var max_push_speed: float = 6.0
 @export var obstacle_damage: float = 34.0
 @export var obstacle_attack_interval: float = 0.45
+@export var obstacle_probe_distance: float = 1.15
 @export var full_simulation_distance: float = 14.0
 @export var sleep_distance: float = 32.0
 
@@ -114,6 +115,7 @@ func _physics_process(delta: float) -> void:
 	_push_chair_contacts()
 	if near or physics_frame % 4 == _ai_tick_offset:
 		_try_break_blocking_props()
+		_probe_and_break_forward_obstacle()
 
 
 func _desired_velocity_from_offset(offset: Vector3) -> Vector3:
@@ -155,6 +157,22 @@ func _try_break_blocking_props() -> void:
 			)
 			_obstacle_cooldown = obstacle_attack_interval
 			return
+
+
+func _probe_and_break_forward_obstacle() -> void:
+	if _obstacle_cooldown > 0.0 or _cached_desired.length_squared() <= 0.01:
+		return
+	var direction := _cached_desired.normalized()
+	var origin := global_position + Vector3.UP * 0.65
+	var query := PhysicsRayQueryParameters3D.create(origin, origin + direction * obstacle_probe_distance, 1)
+	query.exclude = [get_rid()]
+	var hit := get_world_3d().direct_space_state.intersect_ray(query)
+	if hit.is_empty():
+		return
+	var collider: Object = hit.get("collider")
+	if collider != null and collider.has_method("take_melee_hit"):
+		collider.call("take_melee_hit", obstacle_damage, hit.get("position"), direction)
+		_obstacle_cooldown = obstacle_attack_interval
 
 
 func _apply_gravity(delta: float) -> void:
