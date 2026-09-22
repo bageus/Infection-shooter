@@ -17,7 +17,16 @@
     "public/structural/elevator_cabin_passenger.tscn",
     "public/structural/elevator_cabin_freight.tscn",
     "public/structural/elevator_door.tscn",
-    "public/structural/wall_door_3.tscn"
+    "public/structural/wall_door_3.tscn",
+    "public/structural/wall_inner_corner.tscn",
+    "public/structural/wall_door_2_without.tscn",
+    "public/structural/wall_door_3_without.tscn",
+    "public/structural/only_door_2.tscn",
+    "public/structural/only_door_3.tscn",
+    "public/structural/glass_wall_full.tscn",
+    "public/structural/glass_partition_half.tscn",
+    "public/structural/glass_partition_blinds.tscn",
+    "public/structural/sliding_glass_door.tscn"
   ],
   "dependencies": [
     "features.player",
