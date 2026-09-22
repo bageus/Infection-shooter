@@ -5,10 +5,14 @@ const InfectionDomain = preload("res://game/features/infection/domain/infection_
 signal mutation_changed(current: float, critical_threshold: float)
 signal control_loss_changed(active: bool)
 signal defeated
+signal ability_choice_requested
+signal ability_changed(choice: int)
 
 var _domain = InfectionDomain.new()
 var _was_control_lost: bool = false
 var _was_defeated: bool = false
+var _was_choice_pending: bool = false
+var _last_active_ability: int = 0
 
 
 func _physics_process(delta: float) -> void:
@@ -42,6 +46,21 @@ func get_mutation() -> float:
 	return _domain.mutation
 
 
+func is_ability_choice_pending() -> bool:
+	return _domain.ability_choice_pending
+
+
+func get_active_ability() -> int:
+	return _domain.active_ability
+
+
+func select_ability(choice: int) -> bool:
+	var selected := _domain.select_ability(choice)
+	if selected:
+		_emit_ability_state()
+	return selected
+
+
 func get_critical_threshold() -> float:
 	return _domain.critical_threshold
 
@@ -63,6 +82,17 @@ func _emit_state_changes(previous_mutation: float) -> void:
 		_was_control_lost = control_lost
 		control_loss_changed.emit(control_lost)
 
+	_emit_ability_state()
+
 	if _domain.defeated and not _was_defeated:
 		_was_defeated = true
 		defeated.emit()
+
+
+func _emit_ability_state() -> void:
+	if _domain.ability_choice_pending and not _was_choice_pending:
+		ability_choice_requested.emit()
+	_was_choice_pending = _domain.ability_choice_pending
+	if _domain.active_ability != _last_active_ability:
+		_last_active_ability = _domain.active_ability
+		ability_changed.emit(_last_active_ability)
