@@ -243,7 +243,7 @@ func enter() -> void:
 	Input.mouse_mode = Input.MOUSE_MODE_VISIBLE
 	camera_anchor = camera.global_position
 	camera_height = clampf(camera.global_position.y, 8.0, 50.0)
-	help.text = "PLANNING CONTROLS\n\nWASD  Move view\nALT + LMB drag  Rotate view\nWheel  Zoom\nLMB  Select / Place\nLMB drag  Move selected\nRMB  Cancel current tool\nDelete  Delete selected\nQ / E  Rotate -/+15°\nR  Rotate +90°\n+ / -  Uniform scale\nX / Z  X size +/-\nC / V  Z size +/-\nPgUp / PgDn  Move object up/down\n[ / ]  Light brightness\nESC  Exit planner"
+	help.text = "PLANNING CONTROLS\n\nWASD  Move view\nALT + LMB drag  Rotate view\nWheel  Zoom\nLMB  Select / Place\nLMB drag  Move selected\nRMB  Cancel current tool\nDelete  Delete selected\nQ / E  Rotate -/+15°\nR  Rotate +90°\n+ / -  Uniform scale\nX / Z  X size +/-\nC / V  Z size +/-\nArrow keys  Move selected on plane\nPgUp / PgDn  Move object up/down\n[ / ]  Light brightness\nESC  Exit planner"
 	status.text = "Choose an object"
 
 
@@ -326,6 +326,14 @@ func _unhandled_input(event: InputEvent) -> void:
 				_adjust_selected_light(-0.25)
 			KEY_BRACKETRIGHT:
 				_adjust_selected_light(0.25)
+			KEY_UP:
+				_nudge_selected(Vector2(0.0, -1.0))
+			KEY_DOWN:
+				_nudge_selected(Vector2(0.0, 1.0))
+			KEY_LEFT:
+				_nudge_selected(Vector2(-1.0, 0.0))
+			KEY_RIGHT:
+				_nudge_selected(Vector2(1.0, 0.0))
 		get_viewport().set_input_as_handled()
 	if event is InputEventMouseButton:
 		if event.button_index == MOUSE_BUTTON_WHEEL_UP and event.pressed:
@@ -756,6 +764,22 @@ func _scale_selected(delta_scale: Vector3) -> void:
 	next.y = maxf(next.y, 0.1)
 	next.z = maxf(next.z, 0.1)
 	selected.scale = next
+	_update_status()
+
+
+func _nudge_selected(input: Vector2) -> void:
+	if selected == null:
+		return
+	var forward := -camera.global_transform.basis.z
+	forward.y = 0.0
+	forward = forward.normalized()
+	var right := camera.global_transform.basis.x
+	right.y = 0.0
+	right = right.normalized()
+	var motion := (right * input.x + forward * -input.y) * GRID_SIZE
+	selected.global_position += motion
+	selected.global_position.x = roundf(selected.global_position.x / GRID_SIZE) * GRID_SIZE
+	selected.global_position.z = roundf(selected.global_position.z / GRID_SIZE) * GRID_SIZE
 	_update_status()
 
 
