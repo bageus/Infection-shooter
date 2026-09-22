@@ -244,6 +244,56 @@ text = "16"
 layout_mode = 2
 text = "13"
 
+[node name="LightDefaults" type="VBoxContainer" parent="PlanningUI/Panel/VBox"]
+visible = false
+layout_mode = 2
+
+[node name="Title" type="Label" parent="PlanningUI/Panel/VBox/LightDefaults"]
+layout_mode = 2
+text = "NEW LIGHT DEFAULTS"
+horizontal_alignment = 1
+
+[node name="HeightRow" type="HBoxContainer" parent="PlanningUI/Panel/VBox/LightDefaults"]
+layout_mode = 2
+[node name="Label" type="Label" parent="PlanningUI/Panel/VBox/LightDefaults/HeightRow"]
+layout_mode = 2
+text = "Height"
+[node name="Value" type="SpinBox" parent="PlanningUI/Panel/VBox/LightDefaults/HeightRow"]
+layout_mode = 2
+size_flags_horizontal = 3
+min_value = 0.25
+max_value = 10.0
+step = 0.25
+value = 2.5
+suffix = " m"
+
+[node name="EnergyRow" type="HBoxContainer" parent="PlanningUI/Panel/VBox/LightDefaults"]
+layout_mode = 2
+[node name="Label" type="Label" parent="PlanningUI/Panel/VBox/LightDefaults/EnergyRow"]
+layout_mode = 2
+text = "Brightness"
+[node name="Value" type="SpinBox" parent="PlanningUI/Panel/VBox/LightDefaults/EnergyRow"]
+layout_mode = 2
+size_flags_horizontal = 3
+min_value = 0.0
+max_value = 16.0
+step = 0.25
+value = 3.0
+
+[node name="AngleRow" type="HBoxContainer" parent="PlanningUI/Panel/VBox/LightDefaults"]
+layout_mode = 2
+[node name="Label" type="Label" parent="PlanningUI/Panel/VBox/LightDefaults/AngleRow"]
+layout_mode = 2
+text = "Cone"
+[node name="Value" type="SpinBox" parent="PlanningUI/Panel/VBox/LightDefaults/AngleRow"]
+layout_mode = 2
+size_flags_horizontal = 3
+min_value = 5.0
+max_value = 89.0
+step = 1.0
+value = 48.0
+suffix = "°"
+
 [node name="Palette" type="ItemList" parent="PlanningUI/Panel/VBox"]
 custom_minimum_size = Vector2(330, 500)
 layout_mode = 2
