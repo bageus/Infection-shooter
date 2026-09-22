@@ -26,6 +26,8 @@ var status: Label
 var help: Label
 var light_info: Label
 var light_level: ProgressBar
+var light_angle_info: Label
+var light_angle: ProgressBar
 var hud_nodes: Array[Node] = []
 var active := false
 var selected_path := ""
@@ -194,6 +196,8 @@ func setup(app_owner: Node3D, planning_root: Node3D, planning_ui: Control) -> vo
 	help = ui.get_node("HelpPanel/Help")
 	light_info = ui.get_node("Panel/VBox/LightInfo")
 	light_level = ui.get_node("Panel/VBox/LightLevel")
+	light_angle_info = ui.get_node("Panel/VBox/LightAngleInfo")
+	light_angle = ui.get_node("Panel/VBox/LightAngle")
 	hud_nodes = [
 		host.get_node("PrototypeHUD"),
 		host.get_node("Crosshair"),
@@ -243,7 +247,7 @@ func enter() -> void:
 	Input.mouse_mode = Input.MOUSE_MODE_VISIBLE
 	camera_anchor = camera.global_position
 	camera_height = clampf(camera.global_position.y, 8.0, 50.0)
-	help.text = "PLANNING CONTROLS\n\nWASD  Move view\nALT + LMB drag  Rotate view\nWheel  Zoom\nLMB  Select / Place\nLMB drag  Move selected\nRMB  Cancel current tool\nDelete  Delete selected\nQ / E  Rotate -/+15°\nR  Rotate +90°\n+ / -  Uniform scale\nX / Z  X size +/-\nC / V  Z size +/-\nArrow keys  Move selected on plane\nPgUp / PgDn  Move object up/down\n[ / ]  Light brightness\nESC  Exit planner"
+	help.text = "PLANNING CONTROLS\n\nWASD  Move view\nALT + LMB drag  Rotate view\nWheel  Zoom\nLMB  Select / Place\nLMB drag  Move selected\nRMB  Cancel current tool\nDelete  Delete selected\nQ / E  Rotate -/+15°\nR  Rotate +90°\n+ / -  Uniform scale\nX / Z  X size +/-\nC / V  Z size +/-\nArrow keys  Move selected on plane\nPgUp / PgDn  Move object up/down\n[ / ]  Light brightness\n, / .  Light cone angle\nESC  Exit planner"
 	status.text = "Choose an object"
 
 
@@ -326,6 +330,10 @@ func _unhandled_input(event: InputEvent) -> void:
 				_adjust_selected_light(-0.25)
 			KEY_BRACKETRIGHT:
 				_adjust_selected_light(0.25)
+			KEY_COMMA:
+				_adjust_selected_light_angle(-4.0)
+			KEY_PERIOD:
+				_adjust_selected_light_angle(4.0)
 			KEY_UP:
 				_nudge_selected(Vector2(0.0, -1.0))
 			KEY_DOWN:
@@ -478,9 +486,15 @@ func _update_light_ui() -> void:
 	var show_light := light != null
 	light_info.visible = show_light
 	light_level.visible = show_light
+	light_angle_info.visible = show_light and light is SpotLight3D
+	light_angle.visible = show_light and light is SpotLight3D
 	if show_light:
 		light_info.text = "LIGHT %.2f / 16.00" % light.light_energy
 		light_level.value = light.light_energy
+		if light is SpotLight3D:
+			var spot := light as SpotLight3D
+			light_angle_info.text = "CONE %.0f°" % spot.spot_angle
+			light_angle.value = spot.spot_angle
 
 
 func _show_selection_highlight(node: Node3D) -> void:
@@ -655,6 +669,8 @@ func _make_player_spawn_preview() -> Node3D:
 func _clear_preview() -> void:
 	light_info.hide()
 	light_level.hide()
+	light_angle_info.hide()
+	light_angle.hide()
 	if preview != null and is_instance_valid(preview):
 		preview.queue_free()
 	preview = null
@@ -781,6 +797,18 @@ func _nudge_selected(input: Vector2) -> void:
 	selected.global_position.x = roundf(selected.global_position.x / GRID_SIZE) * GRID_SIZE
 	selected.global_position.z = roundf(selected.global_position.z / GRID_SIZE) * GRID_SIZE
 	_update_status()
+
+
+func _adjust_selected_light_angle(amount: float) -> void:
+	if selected == null:
+		return
+	var light := selected.find_child("Light", true, false) as SpotLight3D
+	if light == null:
+		return
+	light.spot_angle = clampf(light.spot_angle + amount, 5.0, 89.0)
+	selected.set_meta("planning_light_angle", light.spot_angle)
+	_update_light_ui()
+	status.text = "LIGHT | cone %.0f° | , / . adjust" % light.spot_angle
 
 
 func _adjust_selected_light(amount: float) -> void:
@@ -995,6 +1023,7 @@ func save_layout() -> void:
 			"rotation_y": node.rotation_degrees.y,
 			"scale_x": node.scale.x, "scale_y": node.scale.y, "scale_z": node.scale.z,
 			"light_energy": node.get_meta("planning_light_energy", 0.0),
+			"light_angle": node.get_meta("planning_light_angle", 48.0),
 			"darkness": node.get("darkness") if node.get("darkness") != null else 0.0,
 			"permanent_darkness": node.get("permanent") if node.get("permanent") != null else false
 		})
@@ -1092,6 +1121,11 @@ func load_layout() -> void:
 			if saved_light != null:
 				saved_light.light_energy = saved_light_energy
 				node.set_meta("planning_light_energy", saved_light_energy)
+		var saved_light_angle := float(record.get("light_angle", 48.0))
+		var saved_spot := node.find_child("Light", true, false) as SpotLight3D
+		if saved_spot != null:
+			saved_spot.spot_angle = saved_light_angle
+			node.set_meta("planning_light_angle", saved_light_angle)
 		if node.get("darkness") != null:
 			node.set("darkness", float(record.get("darkness", 0.88)))
 			node.set("permanent", bool(record.get("permanent_darkness", true)))
