@@ -17,7 +17,7 @@ script = ExtResource("5_glass_collision")
 
 [node name="Body" type="StaticBody3D" parent="."]
 
-[node name="GlassBody" type="StaticBody3D" parent="."]
+[node name="GlassBody" type="StaticBody3D" parent="." groups=["infected_breakable_glass"]]
 script = ExtResource("3_glass")
 
 
