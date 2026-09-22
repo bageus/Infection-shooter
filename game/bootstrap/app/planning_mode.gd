@@ -365,7 +365,10 @@ func _input(event: InputEvent) -> void:
 		elif Input.is_mouse_button_pressed(MOUSE_BUTTON_LEFT) and selected != null:
 			var world := _screen_to_floor(event.position)
 			if world.is_finite():
+				var locked_y := selected.global_position.y
 				selected.global_position = _snap_position_for(selected, world)
+				if _is_ceiling_tool(selected):
+					selected.global_position.y = locked_y
 				_update_status()
 		elif preview != null:
 			_update_preview(event.position)
@@ -885,6 +888,13 @@ func _screen_to_floor(screen_pos: Vector2) -> Vector3:
 	if distance < 0.0:
 		return Vector3(INF, INF, INF)
 	return origin + direction * distance
+
+
+func _is_ceiling_tool(node: Node3D) -> bool:
+	if node.is_in_group("planner_lights") or node.is_in_group("darkness_zone"):
+		return true
+	var kind := str(node.get_meta("planning_kind", ""))
+	return kind == "light" or kind == "darkness" or kind == "exploration_darkness"
 
 
 func _apply_special_default_height(node: Node3D, kind: String) -> void:
