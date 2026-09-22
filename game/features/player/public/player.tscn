@@ -1,4 +1,5 @@
-[gd_scene load_steps=9 format=3]
+[gd_scene load_steps=10 format=3]
+[ext_resource type="Script" path="res://game/presentation/character_animation_driver.gd" id="anim_driver"]
 [ext_resource type="Script" path="res://game/features/player/player_movement.gd" id="1"]
 [ext_resource type="PackedScene" path="res://models/objects/characters/soldier_animated.glb" id="character_model"]
 [ext_resource type="PackedScene" path="res://game/features/combat/public/pistol.tscn" id="2"]
@@ -37,3 +38,6 @@ position=Vector3(10,12,10)
 rotation_degrees=Vector3(-42,45,0)
 current=true
 fov=50.0
+
+[node name="AnimationDriver" type="Node" parent="."]
+script = ExtResource("anim_driver")
