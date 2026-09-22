@@ -16,13 +16,15 @@ emission_energy_multiplier = 2.0
 [node name="PlannerLight" type="Node3D"]
 script = ExtResource("1_script")
 metadata/planning_kind = "light"
-metadata/planning_light_energy = 2.0
+metadata/planning_light_energy = 3.0
 
 [node name="Marker" type="MeshInstance3D" parent="."]
 mesh = SubResource("marker_mesh")
 material_override = SubResource("marker_material")
 
 [node name="Light" type="OmniLight3D" parent="."]
-omni_range = 9.0
-light_energy = 2.0
+omni_range = 12.0
+omni_attenuation = 0.65
+light_energy = 3.0
+light_color = Color(1, 0.92, 0.78, 1)
 shadow_enabled = false
