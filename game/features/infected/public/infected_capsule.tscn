@@ -1,6 +1,7 @@
-[gd_scene load_steps=5 format=3]
+[gd_scene load_steps=6 format=3]
 
 [ext_resource type="Script" path="res://game/features/infected/infected_capsule.gd" id="1_enemy_script"]
+[ext_resource type="PackedScene" path="res://models/objects/characters/zombie_animated.glb" id="character_model"]
 [ext_resource type="PackedScene" path="res://game/features/infection_source/public/mutagen_cloud.tscn" id="2_cloud"]
 
 [sub_resource type="StandardMaterial3D" id="EnemyMaterial"]
@@ -24,8 +25,8 @@ safe_margin = 0.02
 floor_stop_on_slope = false
 wall_min_slide_angle = 0.9
 
-[node name="Body" type="MeshInstance3D" parent="."]
-mesh = SubResource("EnemyMesh")
+[node name="Body" parent="." instance=ExtResource("character_model")]
+rotation_degrees = Vector3(0, 180, 0)
 
 [node name="CollisionShape3D" type="CollisionShape3D" parent="."]
 shape = SubResource("EnemyShape")
