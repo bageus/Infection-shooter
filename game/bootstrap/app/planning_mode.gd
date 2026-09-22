@@ -224,6 +224,9 @@ func enter() -> void:
 	camera_pitch = planning_pitch
 	_reset_selection()
 	_show_planning_grid()
+	var chunk_streamer := host.get_node_or_null("ChunkStreamer")
+	if chunk_streamer != null:
+		chunk_streamer.call("set_runtime_enabled", false)
 	_set_light_markers_visible(true)
 	for node in hud_nodes:
 		if node != null:
