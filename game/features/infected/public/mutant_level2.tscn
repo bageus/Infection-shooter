@@ -22,6 +22,7 @@ floor_stop_on_slope = false
 
 [node name="Body" parent="." instance=ExtResource("3_model")]
 rotation_degrees = Vector3(0, 180, 0)
+position = Vector3(0, -1.025, 0)
 
 [node name="CollisionShape3D" type="CollisionShape3D" parent="."]
 shape = SubResource("EnemyShape")
