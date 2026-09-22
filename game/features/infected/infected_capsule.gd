@@ -16,7 +16,7 @@ const DROP_TABLE_SCRIPT := preload("res://game/features/pickups/drop_table.gd")
 @export var full_simulation_distance: float = 14.0
 @export var sleep_distance: float = 32.0
 
-@onready var body_mesh: MeshInstance3D = $Body
+@onready var body_visual: Node3D = $Body
 @onready var collision_shape: CollisionShape3D = $CollisionShape3D
 @onready var death_cloud: Area3D = $DeathCloud
 
@@ -297,7 +297,7 @@ func _die() -> void:
 	collision_layer = 0
 	collision_mask = 0
 	collision_shape.disabled = true
-	body_mesh.visible = false
+	body_visual.visible = false
 	death_cloud.call("activate")
 
 
