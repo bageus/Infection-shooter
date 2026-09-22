@@ -28,6 +28,10 @@ var light_info: Label
 var light_level: ProgressBar
 var light_angle_info: Label
 var light_angle: ProgressBar
+var light_defaults: VBoxContainer
+var default_light_height: SpinBox
+var default_light_energy: SpinBox
+var default_light_angle: SpinBox
 var hud_nodes: Array[Node] = []
 var active := false
 var selected_path := ""
@@ -198,6 +202,10 @@ func setup(app_owner: Node3D, planning_root: Node3D, planning_ui: Control) -> vo
 	light_level = ui.get_node("Panel/VBox/LightLevel")
 	light_angle_info = ui.get_node("Panel/VBox/LightAngleInfo")
 	light_angle = ui.get_node("Panel/VBox/LightAngle")
+	light_defaults = ui.get_node("Panel/VBox/LightDefaults")
+	default_light_height = ui.get_node("Panel/VBox/LightDefaults/HeightRow/Value")
+	default_light_energy = ui.get_node("Panel/VBox/LightDefaults/EnergyRow/Value")
+	default_light_angle = ui.get_node("Panel/VBox/LightDefaults/AngleRow/Value")
 	hud_nodes = [
 		host.get_node("PrototypeHUD"),
 		host.get_node("Crosshair"),
@@ -380,6 +388,7 @@ func _rebuild_palette() -> void:
 
 
 func _show_structure_catalog() -> void:
+	light_defaults.hide()
 	_reset_selection()
 	active_catalog = group_catalogs["01"]
 	ui.get_node("Panel/VBox/GroupTabs").show()
@@ -388,6 +397,7 @@ func _show_structure_catalog() -> void:
 
 
 func _show_structure_group(group_name: String) -> void:
+	light_defaults.hide()
 	_reset_selection()
 	active_catalog = group_catalogs.get(group_name, group_catalogs["01"])
 	_rebuild_palette()
@@ -396,6 +406,7 @@ func _show_structure_group(group_name: String) -> void:
 
 func _show_lighting_catalog() -> void:
 	_reset_selection()
+	light_defaults.show()
 	ui.get_node("Panel/VBox/GroupTabs").hide()
 	active_catalog = lighting_catalog
 	_rebuild_palette()
@@ -403,6 +414,7 @@ func _show_lighting_catalog() -> void:
 
 
 func _show_actor_catalog() -> void:
+	light_defaults.hide()
 	_reset_selection()
 	ui.get_node("Panel/VBox/GroupTabs").hide()
 	active_catalog = actor_catalog
@@ -877,9 +889,22 @@ func _screen_to_floor(screen_pos: Vector2) -> Vector3:
 
 func _apply_special_default_height(node: Node3D, kind: String) -> void:
 	if kind == "light":
-		node.global_position.y = LIGHT_DEFAULT_HEIGHT
+		node.global_position.y = float(default_light_height.value) if default_light_height != null else LIGHT_DEFAULT_HEIGHT
+		_apply_new_light_defaults(node)
 	elif kind == "darkness" or kind == "exploration_darkness":
 		node.global_position.y = DARKNESS_DEFAULT_HEIGHT
+
+
+func _apply_new_light_defaults(node: Node3D) -> void:
+	var spot := node.find_child("Light", true, false) as SpotLight3D
+	if spot == null:
+		return
+	var energy := float(default_light_energy.value) if default_light_energy != null else 3.0
+	var angle := float(default_light_angle.value) if default_light_angle != null else 48.0
+	spot.light_energy = energy
+	spot.spot_angle = angle
+	node.set_meta("planning_light_energy", energy)
+	node.set_meta("planning_light_angle", angle)
 
 
 func _apply_wall_mount(node: Node3D) -> void:
