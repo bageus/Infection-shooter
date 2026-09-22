@@ -1,7 +1,7 @@
 extends Node
 
 @export var character_path: NodePath = NodePath("..")
-@export var model_path: NodePath = NodePath("../Body")
+@export var model_path: NodePath = NodePath("Body")
 @export var run_speed_threshold := 6.8
 
 var character: CharacterBody3D
@@ -12,9 +12,9 @@ func _ready() -> void:
 	character = get_parent() as CharacterBody3D
 	if character == null:
 		character = get_node_or_null(character_path) as CharacterBody3D
-	var model: Node = character.get_node_or_null("Body") if character != null else null
-	if model == null:
-		model = get_node_or_null(model_path)
+	var model: Node = null
+	if character != null:
+		model = character.get_node_or_null(model_path)
 	if model == null:
 		return
 	animation_player = _find_animation_player(model)
