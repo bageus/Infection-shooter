@@ -28,6 +28,12 @@ func rebuild() -> void:
 	_update_chunks(true)
 
 func _register_object(object: Node3D) -> void:
+	if object.is_in_group("planner_lights"):
+		object.visible = true
+		object.process_mode = Node.PROCESS_MODE_ALWAYS
+		if object.has_method("set_runtime_light_active"):
+			object.call("set_runtime_light_active", true)
+		return
 	if object == player or object.is_in_group("infected"):
 		return
 	var key := _chunk_for(object.global_position)
