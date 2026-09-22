@@ -17,14 +17,18 @@ emission_energy_multiplier = 2.0
 script = ExtResource("1_script")
 metadata/planning_kind = "light"
 metadata/planning_light_energy = 3.0
+metadata/planning_light_angle = 48.0
 
 [node name="Marker" type="MeshInstance3D" parent="."]
 mesh = SubResource("marker_mesh")
 material_override = SubResource("marker_material")
 
-[node name="Light" type="OmniLight3D" parent="."]
-omni_range = 12.0
-omni_attenuation = 0.65
+[node name="Light" type="SpotLight3D" parent="."]
+rotation_degrees = Vector3(-90, 0, 0)
+spot_range = 12.0
+spot_angle = 48.0
+spot_angle_attenuation = 0.7
+spot_attenuation = 0.65
 light_energy = 3.0
 light_color = Color(1, 0.92, 0.78, 1)
 shadow_enabled = false
