@@ -186,7 +186,7 @@ func setup(app_owner: Node3D, planning_root: Node3D, planning_ui: Control) -> vo
 		host.get_node("PrototypeHUD"),
 		host.get_node("Crosshair"),
 		host.get_node("Radar"),
-		host.get_node("FogOfWar")
+		host.get_node_or_null("FogOfWar")
 	]
 	active_catalog = group_catalogs["01"]
 	_rebuild_palette()
@@ -216,7 +216,8 @@ func enter() -> void:
 	_reset_selection()
 	_show_planning_grid()
 	for node in hud_nodes:
-		node.hide()
+		if node != null:
+			node.hide()
 	get_tree().paused = true
 	ui.show()
 	Input.mouse_mode = Input.MOUSE_MODE_VISIBLE
@@ -236,7 +237,8 @@ func exit() -> void:
 	camera_rig.transform = saved_camera_rig_transform
 	camera.transform = saved_camera_transform
 	for node in hud_nodes:
-		node.show()
+		if node != null:
+			node.show()
 	_clear_preview()
 	_hide_planning_grid()
 	_select(null)
