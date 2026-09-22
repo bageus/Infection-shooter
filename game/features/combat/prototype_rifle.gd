@@ -41,6 +41,10 @@ func _process(delta: float) -> void:
 		_reloading = false
 func wants_continuous_fire() -> bool: return fire_mode == "auto"
 func try_fire() -> bool:
+	return try_fire_at(muzzle.global_position - muzzle.global_transform.basis.z * bullet_range)
+
+
+func try_fire_at(target_point: Vector3) -> bool:
 	if _cooldown_remaining > 0.0 or _reloading or bullet_scene == null: return false
 	if _magazine_ammo <= 0:
 		return false
@@ -49,7 +53,10 @@ func try_fire() -> bool:
 		var bullet := bullet_scene.instantiate()
 		get_tree().current_scene.add_child(bullet)
 		bullet.global_transform = muzzle.global_transform
-		var shot_direction := _spread_direction(-muzzle.global_transform.basis.z)
+		var base_direction := target_point - muzzle.global_position
+		if base_direction.length_squared() < 0.0001:
+			base_direction = -muzzle.global_transform.basis.z
+		var shot_direction := _spread_direction(base_direction.normalized())
 		var collision_origin := muzzle.global_position
 		if shooter != null:
 			collision_origin = shooter.global_position + Vector3.UP * 0.55
