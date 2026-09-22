@@ -17,6 +17,7 @@ var structure_root: Node3D
 var gameplay_root: Node3D
 var enemies_root: Node3D
 var main_player: Node3D
+var player_spawn_defined := false
 var ui: Control
 var palette: ItemList
 var status: Label
@@ -601,7 +602,9 @@ func _place_selected(screen_pos: Vector2) -> void:
 	if kind == "player":
 		main_player.global_position = _snap(world) + Vector3(0.0, 1.0, 0.0)
 		main_player.rotation_degrees.y = rotation_y
-		status.text = "Player spawn moved"
+		player_spawn_defined = true
+		main_player.set_meta("planning_scene_path", "res://game/features/player/public/player.tscn")
+		status.text = "Player spawn set"
 		_rebuild_preview()
 		return
 	if selected_path.is_empty():
@@ -846,6 +849,13 @@ func _update_status() -> void:
 
 func save_layout() -> void:
 	var objects: Array = []
+	if player_spawn_defined:
+		objects.append({
+			"scene":"res://game/features/player/public/player.tscn",
+			"x":main_player.position.x, "y":main_player.position.y, "z":main_player.position.z,
+			"rotation_y":main_player.rotation_degrees.y,
+			"scale_x":1.0, "scale_y":1.0, "scale_z":1.0
+		})
 	for node in placed:
 		if not is_instance_valid(node):
 			continue
@@ -922,6 +932,7 @@ func load_layout() -> void:
 			if candidate_path == "res://game/features/player/public/player.tscn":
 				player_records.append(candidate)
 	if not player_records.is_empty():
+		player_spawn_defined = true
 		var latest: Dictionary = player_records[player_records.size() - 1]
 		main_player.position = Vector3(float(latest.get("x",0.0)),float(latest.get("y",1.0)),float(latest.get("z",0.0)))
 		main_player.rotation_degrees.y = float(latest.get("rotation_y",0.0))
