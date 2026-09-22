@@ -22,8 +22,6 @@ var _close_timer := 0.0
 var _requested_open := false
 var _swing_side := 0.0
 var _door_recess_nodes: Array[Node3D] = []
-var _single_slide_parts: Array[Node3D] = []
-var _single_closed_locals: Array[Transform3D] = []
 var _glass_hinge: Node3D
 var _glass_hinge_closed := Transform3D.IDENTITY
 var _elevator_lights: Array[Node3D] = []
@@ -174,12 +172,12 @@ func _set_light_state(node: Node3D, enabled: bool) -> void:
 		for surface in mesh_instance.get_surface_override_material_count():
 			var material := mesh_instance.get_active_material(surface)
 			if material is StandardMaterial3D:
-				var duplicate := material.duplicate() as StandardMaterial3D
-				duplicate.emission_enabled = enabled
+				var material_copy := material.duplicate() as StandardMaterial3D
+				material_copy.emission_enabled = enabled
 				if enabled:
-					duplicate.emission = Color(1.0, 0.78, 0.28)
-					duplicate.emission_energy_multiplier = 4.0
-				mesh_instance.set_surface_override_material(surface, duplicate)
+					material_copy.emission = Color(1.0, 0.78, 0.28)
+					material_copy.emission_energy_multiplier = 4.0
+				mesh_instance.set_surface_override_material(surface, material_copy)
 	for child in node.get_children():
 		if child is Node3D:
 			_set_light_state(child as Node3D, enabled)
