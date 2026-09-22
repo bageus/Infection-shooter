@@ -11,7 +11,6 @@ extends Node3D
 var _revealed := false
 var _player: Node3D
 var _linked_doors: Array[Node3D] = []
-var _initial_overlay_visible := true
 
 func _ready() -> void:
 	add_to_group("darkness_zone")
