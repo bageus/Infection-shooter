@@ -179,6 +179,11 @@ layout_mode = 2
 size_flags_horizontal = 3
 text = "ACTORS"
 
+[node name="Lighting" type="Button" parent="PlanningUI/Panel/VBox/Tabs"]
+layout_mode = 2
+size_flags_horizontal = 3
+text = "LIGHTING"
+
 [node name="GroupTabs" type="HBoxContainer" parent="PlanningUI/Panel/VBox"]
 layout_mode = 2
 
