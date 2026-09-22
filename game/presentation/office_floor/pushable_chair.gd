@@ -10,6 +10,8 @@ func _ready() -> void:
 	continuous_cd = true
 	contact_monitor = true
 	max_contacts_reported = 6
+	add_to_group("pushable_chair")
+	lock_rotation = true
 
 func push_from_character(character_position: Vector3, movement: Vector3) -> void:
 	var direction := global_position - character_position
@@ -20,6 +22,7 @@ func push_from_character(character_position: Vector3, movement: Vector3) -> void
 		direction = direction.normalized()
 	else:
 		direction = Vector3.FORWARD
+	sleeping = false
 	apply_central_impulse(direction * push_impulse)
 
 func _integrate_forces(state: PhysicsDirectBodyState3D) -> void:
