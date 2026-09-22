@@ -5,11 +5,9 @@
 [ext_resource type="PackedScene" path="res://game/presentation/office_floor/public/structural/wall_emergency_door.tscn" id="emergency"]
 [ext_resource type="PackedScene" path="res://game/presentation/office_floor/public/structural/wall_half_panel.tscn" id="half"]
 [ext_resource type="PackedScene" path="res://game/presentation/prototype_hud/public/prototype_hud.tscn" id="hud"]
-[ext_resource type="PackedScene" path="res://game/features/infected/public/infected_capsule.tscn" id="infected"]
 [ext_resource type="PackedScene" path="res://game/presentation/office_floor/public/structural/wall_outer_corner.tscn" id="outer"]
 [ext_resource type="PackedScene" path="res://game/features/player/public/player.tscn" id="player"]
 [ext_resource type="PackedScene" path="res://game/presentation/prototype_hud/public/radar.tscn" id="radar"]
-[ext_resource type="Script" path="res://game/presentation/prototype_hud/fps_counter.gd" id="fps_counter"]
 [ext_resource type="Script" path="res://game/bootstrap/app/main.gd" id="script"]
 [ext_resource type="PackedScene" path="res://game/features/infection_source/public/infection_source.tscn" id="source"]
 [ext_resource type="PackedScene" path="res://game/presentation/office_floor/public/structural/wall_straight.tscn" id="wall"]
@@ -298,18 +296,6 @@ vertical_alignment = 0
 [node name="Gameplay" type="Node3D" parent="." unique_id=1463085699]
 
 [node name="Enemies" type="Node3D" parent="Gameplay" unique_id=1034168936]
-
-[node name="Infected_1" parent="Gameplay/Enemies" unique_id=665421036 instance=ExtResource("infected")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -12, 1, -2)
-
-[node name="Infected_2" parent="Gameplay/Enemies" unique_id=370282427 instance=ExtResource("infected")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 4, 1, -10)
-
-[node name="Infected_3" parent="Gameplay/Enemies" unique_id=320736124 instance=ExtResource("infected")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -25, 1, 10)
-
-[node name="Infected_4" parent="Gameplay/Enemies" unique_id=735874232 instance=ExtResource("infected")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 22, 1, -12)
 
 [node name="InfectionSource" parent="Gameplay" unique_id=1141576136 instance=ExtResource("source")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -30, 0, -22)
