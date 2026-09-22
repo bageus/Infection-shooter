@@ -3,10 +3,17 @@ extends Node3D
 @onready var marker: MeshInstance3D = $Marker
 @onready var light: SpotLight3D = $Light
 
-func _ready() -> void:
+func _enter_tree() -> void:
 	add_to_group("planner_lights")
+
+
+func _ready() -> void:
 	process_mode = Node.PROCESS_MODE_ALWAYS
-	set_planning_visual(false)
+	visible = true
+	if marker != null:
+		marker.visible = false
+	if light != null:
+		light.visible = true
 
 func set_runtime_light_active(enabled: bool) -> void:
 	visible = true
