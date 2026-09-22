@@ -28,6 +28,7 @@ wall_min_slide_angle = 0.9
 
 [node name="Body" parent="." instance=ExtResource("character_model")]
 rotation_degrees = Vector3(0, 180, 0)
+position = Vector3(0, -0.925, 0)
 
 [node name="CollisionShape3D" type="CollisionShape3D" parent="."]
 shape = SubResource("EnemyShape")
