@@ -11,11 +11,14 @@ extends Node3D
 var _revealed := false
 var _player: Node3D
 var _linked_doors: Array[Node3D] = []
+var _initial_overlay_visible := true
 
 func _ready() -> void:
 	add_to_group("darkness_zone")
 	_player = get_tree().get_first_node_in_group("player") as Node3D
+	_revealed = false
 	_rebuild()
+	overlay.visible = true
 	call_deferred("_find_linked_doors")
 
 func _process(_delta: float) -> void:
