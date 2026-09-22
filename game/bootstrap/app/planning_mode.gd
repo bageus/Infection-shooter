@@ -20,6 +20,7 @@ var gameplay_root: Node3D
 var enemies_root: Node3D
 var main_player: Node3D
 var player_spawn_defined := false
+var player_spawn_transform := Transform3D.IDENTITY
 var ui: Control
 var palette: ItemList
 var status: Label
@@ -713,6 +714,7 @@ func _place_selected(screen_pos: Vector2) -> void:
 		main_player.global_position = _snap(world) + Vector3(0.0, 1.0, 0.0)
 		main_player.rotation_degrees.y = rotation_y
 		player_spawn_defined = true
+		player_spawn_transform = main_player.transform
 		main_player.set_meta("planning_scene_path", "res://game/features/player/public/player.tscn")
 		status.text = "Player spawn set"
 		_rebuild_preview()
@@ -1041,8 +1043,8 @@ func save_layout() -> void:
 	if player_spawn_defined:
 		objects.append({
 			"scene":"res://game/features/player/public/player.tscn",
-			"x":main_player.position.x, "y":main_player.position.y, "z":main_player.position.z,
-			"rotation_y":main_player.rotation_degrees.y,
+			"x":player_spawn_transform.origin.x, "y":player_spawn_transform.origin.y, "z":player_spawn_transform.origin.z,
+			"rotation_y":player_spawn_transform.basis.get_euler().y * 180.0 / PI,
 			"scale_x":1.0, "scale_y":1.0, "scale_z":1.0
 		})
 	for node in placed:
@@ -1059,7 +1061,10 @@ func save_layout() -> void:
 			"light_energy": node.get_meta("planning_light_energy", 0.0),
 			"light_angle": node.get_meta("planning_light_angle", 48.0),
 			"darkness": node.get("darkness") if node.get("darkness") != null else 0.0,
-			"permanent_darkness": node.get("permanent") if node.get("permanent") != null else false
+			"permanent_darkness": node.get("permanent") if node.get("permanent") != null else false,
+			"spawn_x": (node.get_meta("planning_spawn_transform") as Transform3D).origin.x if node.has_meta("planning_spawn_transform") else node.position.x,
+			"spawn_y": (node.get_meta("planning_spawn_transform") as Transform3D).origin.y if node.has_meta("planning_spawn_transform") else node.position.y,
+			"spawn_z": (node.get_meta("planning_spawn_transform") as Transform3D).origin.z if node.has_meta("planning_spawn_transform") else node.position.z
 		})
 	var file := FileAccess.open(SAVE_PATH, FileAccess.WRITE)
 	if file != null:
@@ -1129,6 +1134,7 @@ func load_layout() -> void:
 		var latest: Dictionary = player_records[player_records.size() - 1]
 		main_player.position = Vector3(float(latest.get("x",0.0)),float(latest.get("y",1.0)),float(latest.get("z",0.0)))
 		main_player.rotation_degrees.y = float(latest.get("rotation_y",0.0))
+		player_spawn_transform = main_player.transform
 	for record_value: Variant in records:
 		if not record_value is Dictionary:
 			continue
@@ -1167,7 +1173,8 @@ func load_layout() -> void:
 				node.call("configure_zone", Vector2(node.scale.x * 4.0, node.scale.z * 4.0), node.get("darkness"), node.get("permanent"))
 		if load_kind == "enemy":
 			node.set_meta("planning_actor_kind", "enemy")
-			node.global_position.y = 1.0
+			node.set_meta("planning_spawn_transform", node.transform)
+			node.global_position.y = float(record.get("y", 1.0))
 			if node.has_method("set_target"):
 				node.call("set_target", main_player)
 		placed.append(node)
