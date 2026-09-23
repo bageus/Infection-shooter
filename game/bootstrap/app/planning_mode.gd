@@ -1,6 +1,7 @@
 extends Node
 
 const SAVE_PATH := "user://planned_layout.json"
+const MAPS_DIR := "user://maps"
 const AUTHORED_SCENE_PATH := "res://game/levels/authored/base_office_layout.tscn"
 const GRID_SIZE := 0.25
 const SNAP_DISTANCE := 0.8
@@ -55,6 +56,8 @@ var selection_box: MeshInstance3D
 var selection_source_aabb := AABB()
 var planning_grid: MeshInstance3D
 var active_catalog: Array = []
+var map_name_edit: LineEdit
+var map_select: OptionButton
 
 var group_catalogs := {
 	"01": [
@@ -208,6 +211,8 @@ func setup(app_owner: Node3D, planning_root: Node3D, planning_ui: Control) -> vo
 	default_light_height = ui.get_node("Panel/VBox/LightDefaults/HeightRow/Value")
 	default_light_energy = ui.get_node("Panel/VBox/LightDefaults/EnergyRow/Value")
 	default_light_angle = ui.get_node("Panel/VBox/LightDefaults/AngleRow/Value")
+	map_name_edit = ui.get_node("Panel/VBox/MapManager/Name")
+	map_select = ui.get_node("Panel/VBox/MapManager/Maps")
 	hud_nodes = [
 		host.get_node("PrototypeHUD"),
 		host.get_node("Crosshair"),
@@ -223,12 +228,16 @@ func setup(app_owner: Node3D, planning_root: Node3D, planning_ui: Control) -> vo
 	for group_name in ["01","02","03","04","05","06","07","08","09","10","11","13","14","16"]:
 		var button := ui.get_node("Panel/VBox/GroupTabs/G" + group_name) as Button
 		button.pressed.connect(_show_structure_group.bind(group_name))
+	ui.get_node("Panel/VBox/MapManager/Buttons/SaveMap").pressed.connect(save_named_map)
+	ui.get_node("Panel/VBox/MapManager/Buttons/LoadMap").pressed.connect(load_selected_map)
 	ui.get_node("Panel/VBox/Save").pressed.connect(save_layout)
 	ui.get_node("Panel/VBox/Clear").pressed.connect(clear_layout)
 	ui.get_node("Panel/VBox/Close").pressed.connect(exit)
 	ui.hide()
 	_register_existing_scene_objects()
 	_register_actor_objects()
+	_ensure_maps_dir()
+	_refresh_map_list()
 	load_layout()
 
 
@@ -1039,7 +1048,31 @@ func _update_status() -> void:
 	]
 
 
-func save_layout() -> void:
+func _ensure_maps_dir() -> void:
+	if not DirAccess.dir_exists_absolute(MAPS_DIR):
+		DirAccess.make_dir_recursive_absolute(MAPS_DIR)
+
+
+func _safe_map_name(raw_name: String) -> String:
+	var value := raw_name.strip_edges()
+	if value.is_empty():
+		value = "map"
+	var safe := ""
+	for ch in value:
+		if ch.is_valid_identifier() or ch.is_valid_int():
+			safe += ch
+		elif ch in [" ", "-", "_"]:
+			safe += "_"
+	while "__" in safe:
+		safe = safe.replace("__", "_")
+	return safe.strip_edges().to_lower()
+
+
+func _map_path(map_name: String) -> String:
+	return MAPS_DIR + "/" + _safe_map_name(map_name) + ".json"
+
+
+func _collect_layout_data() -> Dictionary:
 	var objects: Array = []
 	if player_spawn_defined:
 		objects.append({
@@ -1071,60 +1104,77 @@ func save_layout() -> void:
 			"spawn_y": (node.get_meta("planning_spawn_transform") as Transform3D).origin.y if node.has_meta("planning_spawn_transform") else node.position.y,
 			"spawn_z": (node.get_meta("planning_spawn_transform") as Transform3D).origin.z if node.has_meta("planning_spawn_transform") else node.position.z
 		})
-	var file := FileAccess.open(SAVE_PATH, FileAccess.WRITE)
-	if file != null:
-		file.store_string(JSON.stringify({"version":3,"objects":objects}, "\t"))
-	var scene_error := _save_authored_scene()
-	if scene_error == OK:
-		status.text = "SAVED | %d objects" % objects.size()
-	else:
-		status.text = "SAVE ERROR %d" % scene_error
+	return {"version": 4, "objects": objects}
 
 
-func _save_authored_scene() -> Error:
-	var scene_root := Node3D.new()
-	scene_root.name = "BaseOfficeLayout"
-	for node in placed:
-		if not is_instance_valid(node):
-			continue
-		var scene_path := str(node.get_meta("planning_scene_path", ""))
-		if scene_path.is_empty():
-			continue
-		var packed := load(scene_path) as PackedScene
-		if packed == null:
-			continue
-		var copy := packed.instantiate() as Node3D
-		if copy == null:
-			continue
-		scene_root.add_child(copy)
-		copy.owner = scene_root
-		copy.transform = node.transform
-		_assign_owner_recursive(copy, scene_root)
-	var packed_layout := PackedScene.new()
-	var pack_error := packed_layout.pack(scene_root)
-	if pack_error != OK:
-		scene_root.free()
-		return pack_error
-	var save_error := ResourceSaver.save(packed_layout, AUTHORED_SCENE_PATH)
-	scene_root.free()
-	return save_error
-
-
-func _assign_owner_recursive(node: Node, scene_owner: Node) -> void:
-	for child in node.get_children():
-		child.owner = scene_owner
-		_assign_owner_recursive(child, scene_owner)
-
-
-func load_layout() -> void:
-	if not FileAccess.file_exists(SAVE_PATH):
+func save_named_map() -> void:
+	_ensure_maps_dir()
+	var name := _safe_map_name(map_name_edit.text)
+	var path := _map_path(name)
+	var file := FileAccess.open(path, FileAccess.WRITE)
+	if file == null:
+		status.text = "MAP SAVE ERROR"
 		return
-	var file := FileAccess.open(SAVE_PATH, FileAccess.READ)
+	file.store_string(JSON.stringify(_collect_layout_data(), "	"))
+	map_name_edit.text = name
+	_refresh_map_list(name)
+	status.text = "MAP SAVED | " + name
+
+
+func load_selected_map() -> void:
+	if map_select.item_count <= 0:
+		status.text = "NO SAVED MAPS"
+		return
+	var selected_name := map_select.get_item_text(map_select.selected)
+	load_named_map(selected_name)
+
+
+func load_named_map(map_name: String) -> void:
+	var path := _map_path(map_name)
+	if not FileAccess.file_exists(path):
+		status.text = "MAP NOT FOUND"
+		return
+	_load_layout_from_path(path)
+	map_name_edit.text = map_name
+	status.text = "MAP LOADED | " + map_name
+
+
+func _refresh_map_list(select_name: String = "") -> void:
+	if map_select == null:
+		return
+	map_select.clear()
+	_ensure_maps_dir()
+	var dir := DirAccess.open(MAPS_DIR)
+	if dir == null:
+		return
+	dir.list_dir_begin()
+	var file_name := dir.get_next()
+	var index := 0
+	var selected_index := -1
+	while not file_name.is_empty():
+		if not dir.current_is_dir() and file_name.to_lower().ends_with(".json"):
+			var name := file_name.get_basename()
+			map_select.add_item(name)
+			if name == select_name:
+				selected_index = index
+			index += 1
+		file_name = dir.get_next()
+	dir.list_dir_end()
+	if selected_index >= 0:
+		map_select.select(selected_index)
+
+
+func _load_layout_from_path(path: String) -> void:
+	var file := FileAccess.open(path, FileAccess.READ)
 	if file == null:
 		return
 	var data: Variant = JSON.parse_string(file.get_as_text())
 	if not data is Dictionary:
 		return
+	_apply_layout_data(data as Dictionary)
+
+
+func _apply_layout_data(data: Dictionary) -> void:
 	clear_layout(false)
 	var records: Array = data.get("objects", [])
 	var player_records: Array = []
@@ -1186,6 +1236,61 @@ func load_layout() -> void:
 			if node.has_method("set_target"):
 				node.call("set_target", main_player)
 		placed.append(node)
+	_update_status()
+
+
+func save_layout() -> void:
+	var data := _collect_layout_data()
+	var objects: Array = data.get("objects", [])
+	var file := FileAccess.open(SAVE_PATH, FileAccess.WRITE)
+	if file != null:
+		file.store_string(JSON.stringify(data, "\t"))
+	var scene_error := _save_authored_scene()
+	if scene_error == OK:
+		status.text = "SAVED | %d objects" % objects.size()
+	else:
+		status.text = "SAVE ERROR %d" % scene_error
+
+
+func _save_authored_scene() -> Error:
+	var scene_root := Node3D.new()
+	scene_root.name = "BaseOfficeLayout"
+	for node in placed:
+		if not is_instance_valid(node):
+			continue
+		var scene_path := str(node.get_meta("planning_scene_path", ""))
+		if scene_path.is_empty():
+			continue
+		var packed := load(scene_path) as PackedScene
+		if packed == null:
+			continue
+		var copy := packed.instantiate() as Node3D
+		if copy == null:
+			continue
+		scene_root.add_child(copy)
+		copy.owner = scene_root
+		copy.transform = node.transform
+		_assign_owner_recursive(copy, scene_root)
+	var packed_layout := PackedScene.new()
+	var pack_error := packed_layout.pack(scene_root)
+	if pack_error != OK:
+		scene_root.free()
+		return pack_error
+	var save_error := ResourceSaver.save(packed_layout, AUTHORED_SCENE_PATH)
+	scene_root.free()
+	return save_error
+
+
+func _assign_owner_recursive(node: Node, scene_owner: Node) -> void:
+	for child in node.get_children():
+		child.owner = scene_owner
+		_assign_owner_recursive(child, scene_owner)
+
+
+func load_layout() -> void:
+	if not FileAccess.file_exists(SAVE_PATH):
+		return
+	_load_layout_from_path(SAVE_PATH)
 
 
 func _migrate_scene_path(old_path: String) -> String:
