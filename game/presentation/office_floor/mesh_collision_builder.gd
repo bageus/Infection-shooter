@@ -25,6 +25,12 @@ func _rebuild_collision() -> void:
 		if child is CollisionShape3D:
 			child.queue_free()
 	_add_mesh_collisions(visual, body)
+	if body is RigidBody3D:
+		# Visual GLB is a sibling of Body. Reparent it so the visible prop follows
+		# the rigid body's translation/rotation after collision shapes are built.
+		var visual_global := visual.global_transform
+		visual.reparent(body, true)
+		visual.global_transform = visual_global
 	_built = true
 
 
