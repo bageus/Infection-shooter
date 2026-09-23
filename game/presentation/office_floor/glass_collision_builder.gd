@@ -13,6 +13,9 @@ func _build_glass_collision() -> void:
 	var visual := get_parent().get_node_or_null(visual_path) as Node3D
 	if body == null or visual == null:
 		return
+	for child in body.get_children():
+		if child is CollisionShape3D:
+			child.queue_free()
 	_add_glass_meshes(visual, body)
 
 
