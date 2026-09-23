@@ -137,12 +137,13 @@ layout_mode = 0
 offset_left = 8.0
 offset_top = 8.0
 offset_right = 368.0
-offset_bottom = 712.0
+anchor_bottom = 1.0
+offset_bottom = -8.0
 mouse_filter = 0
 
 [node name="VBox" type="VBoxContainer" parent="PlanningUI/Panel"]
 layout_mode = 2
-theme_override_constants/separation = 8
+theme_override_constants/separation = 5
 
 [node name="Title" type="Label" parent="PlanningUI/Panel/VBox"]
 layout_mode = 2
@@ -283,9 +284,10 @@ value = 48.0
 suffix = "°"
 
 [node name="Palette" type="ItemList" parent="PlanningUI/Panel/VBox"]
-custom_minimum_size = Vector2(330, 500)
+custom_minimum_size = Vector2(330, 120)
 layout_mode = 2
 size_flags_vertical = 3
+size_flags_stretch_ratio = 1.0
 max_columns = 1
 theme_override_colors/font_color = Color(0.92, 0.96, 1, 1)
 theme_override_colors/font_hovered_color = Color(1, 1, 1, 1)
@@ -333,7 +335,7 @@ value = 48.0
 show_percentage = false
 
 [node name="Status" type="Label" parent="PlanningUI/Panel/VBox"]
-custom_minimum_size = Vector2(330, 44)
+custom_minimum_size = Vector2(330, 30)
 layout_mode = 2
 text = "Select an object"
 clip_text = true
@@ -372,17 +374,17 @@ size_flags_horizontal = 3
 text = "LOAD MAP"
 
 [node name="Save" type="Button" parent="PlanningUI/Panel/VBox"]
-custom_minimum_size = Vector2(0, 42)
+custom_minimum_size = Vector2(0, 32)
 layout_mode = 2
 text = "SAVE LAYOUT"
 
 [node name="Clear" type="Button" parent="PlanningUI/Panel/VBox"]
-custom_minimum_size = Vector2(0, 42)
+custom_minimum_size = Vector2(0, 32)
 layout_mode = 2
 text = "CLEAR PLACED"
 
 [node name="Close" type="Button" parent="PlanningUI/Panel/VBox"]
-custom_minimum_size = Vector2(0, 42)
+custom_minimum_size = Vector2(0, 32)
 layout_mode = 2
 text = "EXIT PLANNING"
 
