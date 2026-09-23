@@ -62,5 +62,5 @@ func _print_tree(model_path: String, node: Node, relative_path: String, parent_n
 		_print_tree(model_path, child, current_path, node.name)
 
 func _csv(value: Variant) -> String:
-	var text := str(value).replace(""", """")
-	return ""%s"" % text
+	var text := str(value).replace("\\\"", "\\\"\\\"")
+\treturn "\\\"%s\\\"" % text
