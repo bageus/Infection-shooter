@@ -2,7 +2,7 @@
 
 [ext_resource type="PackedScene" path="res://models/objects/07_table_longest.glb" id="1_model"]
 [ext_resource type="Script" path="res://game/presentation/office_floor/mesh_collision_builder.gd" id="2_collision"]
-[ext_resource type="Script" path="res://game/presentation/office_floor/physical_prop.gd" id="3_destructible"]
+[ext_resource type="Script" path="res://game/presentation/office_floor/physical_table.gd" id="3_destructible"]
 
 [node name="07_table_longest" type="Node3D"]
 script = ExtResource("2_collision")
