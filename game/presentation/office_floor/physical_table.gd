@@ -7,6 +7,7 @@ extends "res://game/presentation/office_floor/physical_prop.gd"
 @export var max_broken_legs := 4
 
 var _broken_legs: Dictionary = {}
+var _support_loss := 0.0
 
 func _ready() -> void:
 	super._ready()
@@ -53,6 +54,12 @@ func _break_leg(leg_id: String, local_hit: Vector3, direction: Vector3) -> void:
 	apply_impulse(away.normalized() * broken_leg_tilt_impulse, local_hit)
 	_hide_nearest_leg_visual(local_hit)
 	set_meta("broken_legs", _broken_legs.size())
+	_support_loss = minf(1.0, float(_broken_legs.size()) / maxf(float(max_broken_legs), 1.0))
+	angular_damp = lerpf(4.0, 1.2, _support_loss)
+	linear_damp = lerpf(3.0, 2.0, _support_loss)
+	if _broken_legs.size() >= 2:
+		var torque_axis := Vector3(-local_hit.z, 0.0, local_hit.x).normalized()
+		apply_torque_impulse(torque_axis * broken_leg_tilt_impulse * 0.65)
 
 func _hide_nearest_leg_visual(local_hit: Vector3) -> void:
 	var root := get_parent().get_node_or_null("Visual")
