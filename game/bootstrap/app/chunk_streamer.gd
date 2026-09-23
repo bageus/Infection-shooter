@@ -36,12 +36,25 @@ func _register_object(object: Node3D) -> void:
 		return
 	if object == player or object.is_in_group("infected"):
 		return
+	if _contains_physical_prop(object):
+		# Dynamic rigid bodies must never have their collision/process disabled by
+		# geometry streaming. Their own sleeping handles performance.
+		return
 	var key := _chunk_for(object.global_position)
 	if not _chunks.has(key):
 		_chunks[key] = []
 	var bucket: Array = _chunks[key]
 	bucket.append(object)
 	_chunks[key] = bucket
+
+func _contains_physical_prop(node: Node) -> bool:
+	if node.is_in_group("physical_props") or node is RigidBody3D:
+		return true
+	for child in node.get_children():
+		if _contains_physical_prop(child):
+			return true
+	return false
+
 
 func _chunk_for(position: Vector3) -> Vector2i:
 	return Vector2i(floori(position.x / chunk_size), floori(position.z / chunk_size))
