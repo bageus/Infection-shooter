@@ -1,7 +1,7 @@
 [gd_scene load_steps=4 format=3]
 
 [ext_resource type="PackedScene" path="res://models/objects/10_coffee_table.glb" id="1_model"]
-[ext_resource type="Script" path="res://game/presentation/office_floor/physical_prop.gd" id="physics_prop"]
+[ext_resource type="Script" path="res://game/presentation/office_floor/physical_table.gd" id="physics_prop"]
 [ext_resource type="Script" path="res://game/presentation/office_floor/mesh_collision_builder.gd" id="2_collision"]
 [ext_resource type="Script" path="res://game/presentation/office_floor/scaled_destructible.gd" id="3_destructible"]
 
