@@ -335,6 +335,38 @@ text = "Select an object"
 clip_text = true
 text_overrun_behavior = 3
 
+[node name="MapManager" type="VBoxContainer" parent="PlanningUI/Panel/VBox"]
+layout_mode = 2
+theme_override_constants/separation = 6
+
+[node name="Title" type="Label" parent="PlanningUI/Panel/VBox/MapManager"]
+layout_mode = 2
+text = "MAPS"
+horizontal_alignment = 1
+
+[node name="Name" type="LineEdit" parent="PlanningUI/Panel/VBox/MapManager"]
+layout_mode = 2
+placeholder_text = "Map name"
+text = "default"
+
+[node name="Maps" type="OptionButton" parent="PlanningUI/Panel/VBox/MapManager"]
+layout_mode = 2
+tooltip_text = "Saved maps"
+
+[node name="Buttons" type="HBoxContainer" parent="PlanningUI/Panel/VBox/MapManager"]
+layout_mode = 2
+theme_override_constants/separation = 6
+
+[node name="SaveMap" type="Button" parent="PlanningUI/Panel/VBox/MapManager/Buttons"]
+layout_mode = 2
+size_flags_horizontal = 3
+text = "SAVE MAP"
+
+[node name="LoadMap" type="Button" parent="PlanningUI/Panel/VBox/MapManager/Buttons"]
+layout_mode = 2
+size_flags_horizontal = 3
+text = "LOAD MAP"
+
 [node name="Save" type="Button" parent="PlanningUI/Panel/VBox"]
 custom_minimum_size = Vector2(0, 42)
 layout_mode = 2
