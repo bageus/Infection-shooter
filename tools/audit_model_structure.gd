@@ -43,7 +43,7 @@ func _scan_directory(directory: String, result: PackedStringArray) -> void:
 	dir.list_dir_end()
 
 func _print_tree(model_path: String, node: Node, relative_path: String, parent_name: String) -> void:
-	var current_path := node.name if relative_path.is_empty() else "%s/%s" % [relative_path, node.name]
+	var current_path: String = str(node.name) if relative_path.is_empty() else "%s/%s" % [relative_path, str(node.name)]
 	var mesh_name := ""
 	if node is MeshInstance3D:
 		var mi := node as MeshInstance3D
