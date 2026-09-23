@@ -326,6 +326,8 @@ func exit() -> void:
 func _process(delta: float) -> void:
 	if not active:
 		return
+	if map_name_edit != null and map_name_edit.has_focus():
+		return
 	var input := Vector2.ZERO
 	if Input.is_key_pressed(KEY_W): input.y += 1.0
 	if Input.is_key_pressed(KEY_S): input.y -= 1.0
@@ -346,6 +348,12 @@ func _process(delta: float) -> void:
 
 func _input(event: InputEvent) -> void:
 	if not active:
+		return
+	# Text fields must receive keyboard/mouse events before planner hotkeys.
+	if map_name_edit != null and map_name_edit.has_focus():
+		if event is InputEventKey and event.pressed and event.keycode == KEY_ESCAPE:
+			map_name_edit.release_focus()
+			get_viewport().set_input_as_handled()
 		return
 	if event is InputEventKey and event.pressed and not event.echo:
 		if event.keycode in [KEY_UP, KEY_DOWN, KEY_LEFT, KEY_RIGHT]:
