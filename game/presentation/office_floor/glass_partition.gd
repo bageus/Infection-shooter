@@ -50,10 +50,9 @@ func _break_glass(hit_position: Vector3) -> void:
 	for token in hide_with_glass:
 		_hide_named(get_parent().get_node_or_null("Visual"), str(token).to_lower())
 	_disable_collision_recursive(self)
-	var owner_root := get_parent()
-	var static_body := owner_root.get_node_or_null("Body") as StaticBody3D
-	if static_body != null:
-		_disable_collision_recursive(static_body)
+	# Only GlassBody is disabled. The structural frame collision stays intact.
+	# Frames/blinds were excluded from glass collision at build time, so the
+	# opening becomes traversable without deleting the surrounding wall frame.
 	_spawn_fragments(hit_position)
 
 
