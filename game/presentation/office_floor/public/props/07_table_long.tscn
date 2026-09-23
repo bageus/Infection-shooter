@@ -2,12 +2,17 @@
 
 [ext_resource type="PackedScene" path="res://models/objects/07_table_long.glb" id="1_model"]
 [ext_resource type="Script" path="res://game/presentation/office_floor/mesh_collision_builder.gd" id="2_collision"]
-[ext_resource type="Script" path="res://game/presentation/office_floor/scaled_destructible.gd" id="3_destructible"]
+[ext_resource type="Script" path="res://game/presentation/office_floor/physical_prop.gd" id="3_destructible"]
 
 [node name="07_table_long" type="Node3D"]
 script = ExtResource("2_collision")
 
 [node name="Visual" parent="." instance=ExtResource("1_model")]
 
-[node name="Body" type="StaticBody3D" parent="."]
+[node name="Body" type="RigidBody3D" parent="."]
+mass = 18.0
+linear_damp = 3.0
+angular_damp = 4.0
+bullet_impulse = 0.8
+character_push_impulse = 1.7
 script = ExtResource("3_destructible")
