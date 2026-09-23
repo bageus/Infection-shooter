@@ -125,3 +125,20 @@ python tools/audit_structural_assets.py --output structural_asset_audit.csv
 Аудит загружает все `.tscn` из `public/structural`, объединяет AABB всех MeshInstance3D в координатах placement root и выводит: размеры X/Y/Z, min/max, расстояние origin до низа геометрии, ошибку кратности X/Z сетке 0.25 м, целевой connection span для 13_* glass и отклонение от него.
 
 Для bottom-center structural asset значение `min_y` / `origin_to_floor` должно быть близко к 0. Для элементов с целевым span статус `CHECK` означает, что фактическая геометрия отличается от целевого размера более чем на 1 см.
+
+
+## Аудит внутренней структуры всех моделей
+
+Для выгрузки дерева узлов и MeshInstance3D всех GLB/GLTF из `models/objects`:
+
+```bash
+python tools/audit_model_structure.py --output model_structure_audit.csv
+```
+
+Если Python launcher в Windows не работает, тот же аудит можно запустить напрямую через Godot:
+
+```powershell
+& "ПУТЬ_К_GODOT_EXE" --headless --path . --script res://tools/audit_model_structure.gd > model_structure_audit_raw.txt
+```
+
+CSV содержит: путь модели, полный node path, тип узла, имя mesh, родительский узел и количество дочерних узлов. По этому отчету определяется, какие ассеты уже разделены на пригодные destruction groups, какие требуют объединения логических частей, а какие остаются монолитными.
