@@ -168,6 +168,10 @@ text = "ACTORS"
 layout_mode = 2
 size_flags_horizontal = 3
 text = "LIGHTING"
+[node name="OfficeSet" type="Button" parent="PlanningUI/Panel/VBox/Tabs"]
+layout_mode = 2
+text = "OFFICE SET"
+
 
 [node name="GroupTabs" type="HBoxContainer" parent="PlanningUI/Panel/VBox"]
 layout_mode = 2

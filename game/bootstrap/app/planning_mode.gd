@@ -183,6 +183,30 @@ var lighting_catalog := [
 	{"name":"Exploration Darkness","path":"res://game/presentation/office_floor/public/props/darkness_zone.tscn","kind":"exploration_darkness"}
 ]
 
+var office_set_catalog: Array = []
+
+
+func _build_office_set_catalog() -> void:
+	office_set_catalog.clear()
+	var dir_path := "res://models/objects/Office_Set/FBX/Separated"
+	var dir := DirAccess.open(dir_path)
+	if dir == null:
+		return
+	dir.list_dir_begin()
+	var file_name := dir.get_next()
+	while not file_name.is_empty():
+		if not dir.current_is_dir() and file_name.to_lower().ends_with(".fbx"):
+			var base := file_name.get_basename()
+			office_set_catalog.append({
+				"name": base.replace("_", " "),
+				"path": dir_path + "/" + file_name,
+				"kind": "office_set"
+			})
+		file_name = dir.get_next()
+	dir.list_dir_end()
+	office_set_catalog.sort_custom(func(a, b): return str(a["name"]).naturalnocasecmp_to(str(b["name"])) < 0)
+
+
 var actor_catalog := [
 	{"name":"Player Spawn","path":"","kind":"player"},
 	{"name":"Zombie L1","path":"res://game/features/infected/public/infected_capsule.tscn","kind":"enemy"},
@@ -219,13 +243,19 @@ func setup(app_owner: Node3D, planning_root: Node3D, planning_ui: Control) -> vo
 		host.get_node("Radar"),
 		host.get_node_or_null("FogOfWar")
 	]
+	_build_office_set_catalog()
 	active_catalog = group_catalogs["01"]
 	_rebuild_palette()
 	palette.item_selected.connect(_on_palette_selected)
 	ui.get_node("Panel/VBox/Tabs/Structure").pressed.connect(_show_structure_catalog)
 	ui.get_node("Panel/VBox/Tabs/Actors").pressed.connect(_show_actor_catalog)
 	ui.get_node("Panel/VBox/Tabs/Lighting").pressed.connect(_show_lighting_catalog)
-	for group_name in ["01","02","03","04","05","06","07","08","09","10","11","13","14","16"]:
+	var office_button := ui.get_node_or_null("Panel/VBox/Tabs/OfficeSet") as Button
+	if office_button != null:
+		office_button.pressed.connect(_show_office_set_catalog)
+	for group_name in ["01","02","03","04","05","06","07","08","09","10","11","13","14","16","17"]:
+		if group_name == "17":
+			continue
 		var button := ui.get_node("Panel/VBox/GroupTabs/G" + group_name) as Button
 		button.pressed.connect(_show_structure_group.bind(group_name))
 	ui.get_node("Panel/VBox/MapManager/Buttons/SaveMap").pressed.connect(save_named_map)
@@ -425,6 +455,14 @@ func _show_lighting_catalog() -> void:
 	active_catalog = lighting_catalog
 	_rebuild_palette()
 	status.text = "LIGHTING | lights and darkness zones"
+
+
+func _show_office_set_catalog() -> void:
+	light_defaults.hide()
+	_reset_selection()
+	active_catalog = office_set_catalog
+	_rebuild_palette()
+	status.text = "OFFICE SET | %d models" % office_set_catalog.size()
 
 
 func _show_actor_catalog() -> void:
@@ -661,7 +699,17 @@ func _rebuild_preview() -> void:
 		return
 	if selected_path.is_empty():
 		return
-	var scene := load(selected_path) as PackedScene
+	var scene: PackedScene
+	if selected_kind == "office_set":
+		var wrapper := load("res://game/presentation/office_floor/office_set_prop.gd") as Script
+		var office_node := Node3D.new()
+		office_node.set_script(wrapper)
+		office_node.set("model_path", selected_path)
+		var temp := PackedScene.new()
+		temp.pack(office_node)
+		scene = temp
+	else:
+		scene = load(selected_path) as PackedScene
 	if scene == null:
 		return
 	preview = scene.instantiate() as Node3D
