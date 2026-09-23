@@ -24,14 +24,43 @@ func _rebuild_collision() -> void:
 	for child in body.get_children():
 		if child is CollisionShape3D:
 			child.queue_free()
-	_add_mesh_collisions(visual, body)
 	if body is RigidBody3D:
-		# Visual GLB is a sibling of Body. Reparent it so the visible prop follows
-		# the rigid body's translation/rotation after collision shapes are built.
+		# Make visual a child first, then build collision in the body's local space.
+		# This keeps mesh, shapes and rigid transform perfectly aligned.
 		var visual_global := visual.global_transform
 		visual.reparent(body, true)
 		visual.global_transform = visual_global
+	_add_mesh_collisions(visual, body)
+	if body.get_child_count() == 1 and body is RigidBody3D:
+		_add_fallback_collision(visual, body)
 	_built = true
+
+
+func _add_fallback_collision(visual: Node3D, body: CollisionObject3D) -> void:
+	var merged := AABB()
+	var found := false
+	var meshes: Array[MeshInstance3D] = []
+	_collect_meshes(visual, meshes)
+	for mesh in meshes:
+		var local_transform := body.global_transform.affine_inverse() * mesh.global_transform
+		var aabb := local_transform * mesh.get_aabb()
+		merged = aabb if not found else merged.merge(aabb)
+		found = true
+	if not found:
+		return
+	var box := BoxShape3D.new()
+	box.size = merged.size
+	var collision := CollisionShape3D.new()
+	collision.shape = box
+	collision.position = merged.get_center()
+	body.add_child(collision)
+
+
+func _collect_meshes(node: Node, result: Array[MeshInstance3D]) -> void:
+	if node is MeshInstance3D and not _is_excluded(node):
+		result.append(node as MeshInstance3D)
+	for child in node.get_children():
+		_collect_meshes(child, result)
 
 
 func _add_mesh_collisions(node: Node, body: CollisionObject3D) -> void:
