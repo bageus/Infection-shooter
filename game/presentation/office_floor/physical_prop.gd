@@ -3,7 +3,7 @@ extends RigidBody3D
 @export var max_health := 70.0
 @export var bullet_impulse := 1.8
 @export var character_push_impulse := 2.8
-@export var breakable := false
+@export var breakable := true
 @export var max_linear_speed := 7.0
 @export var max_angular_speed := 8.0
 
@@ -15,6 +15,9 @@ func _ready() -> void:
 	contact_monitor = true
 	max_contacts_reported = 8
 	continuous_cd = true
+	collision_layer = 1
+	collision_mask = 3
+	can_sleep = true
 
 func push_from_character(character_position: Vector3, movement: Vector3) -> void:
 	if movement.length_squared() < 0.01:
@@ -34,7 +37,7 @@ func take_projectile_hit(damage: float, hit_position: Vector3, _hit_normal: Vect
 	apply_impulse(direction.normalized() * impulse, hit_position - global_position)
 	_health -= maxf(damage, 0.0) * multiplier
 	if breakable and _health <= 0.0:
-		queue_free()
+		_break_physical_prop(hit_position, direction)
 	return true
 
 func take_melee_hit(damage: float, hit_position: Vector3, direction: Vector3) -> void:
@@ -42,10 +45,33 @@ func take_melee_hit(damage: float, hit_position: Vector3, direction: Vector3) ->
 	apply_impulse(direction.normalized() * character_push_impulse, hit_position - global_position)
 	_health -= maxf(damage, 0.0)
 	if breakable and _health <= 0.0:
-		queue_free()
+		_break_physical_prop(hit_position, direction)
 
 func _integrate_forces(state: PhysicsDirectBodyState3D) -> void:
 	if state.linear_velocity.length() > max_linear_speed:
 		state.linear_velocity = state.linear_velocity.normalized() * max_linear_speed
 	if state.angular_velocity.length() > max_angular_speed:
 		state.angular_velocity = state.angular_velocity.normalized() * max_angular_speed
+
+
+func _break_physical_prop(hit_position: Vector3, direction: Vector3) -> void:
+	if is_queued_for_deletion():
+		return
+	var root := get_parent()
+	var visual := get_node_or_null("Visual")
+	if visual == null and root != null:
+		visual = root.get_node_or_null("Visual")
+	if visual != null:
+		for child in visual.get_children():
+			if child is MeshInstance3D:
+				var fragment := RigidBody3D.new()
+				fragment.mass = 0.6
+				fragment.collision_layer = 0
+				fragment.collision_mask = 1
+				get_tree().current_scene.add_child(fragment)
+				fragment.global_position = (child as MeshInstance3D).global_position
+				var copy := (child as MeshInstance3D).duplicate()
+				fragment.add_child(copy)
+				copy.transform = Transform3D.IDENTITY
+				fragment.apply_central_impulse(direction.normalized() * randf_range(0.4, 1.4) + Vector3.UP * randf_range(0.2, 0.8))
+	queue_free()
