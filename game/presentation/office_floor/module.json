@@ -5,6 +5,7 @@
   "state_owner": [],
   "public_api": [
     "public/office_floor.tscn",
+    "public/props/07_table.tscn",
     "public/structural/column.tscn",
     "public/structural/wall_straight.tscn",
     "public/structural/wall_half_panel.tscn",

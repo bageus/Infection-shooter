@@ -1,5 +1,10 @@
 extends Node3D
 
+const IMPACT_TEXTURES := [
+	preload("res://models/objects/textures/Minimal dark bullet impact decal.png"),
+	preload("res://models/objects/textures/Minimal transparent bullet impact decal.png")
+]
+
 var _direction := Vector3.ZERO
 var _shooter: CollisionObject3D
 var _speed: float = 32.0
@@ -72,6 +77,7 @@ func _physics_process(delta: float) -> void:
 func _handle_hit(collider: Object, hit_position: Vector3, normal: Vector3) -> bool:
 	if collider == null:
 		return true
+	_spawn_impact_decal(collider, hit_position, normal)
 
 	var falloff := clampf(1.0 - _travelled / maxf(_range, 0.01), 0.35, 1.0)
 	var hit_damage := _damage * falloff
@@ -105,3 +111,29 @@ func _handle_hit(collider: Object, hit_position: Vector3, normal: Vector3) -> bo
 		))
 
 	return true
+
+
+func _spawn_impact_decal(collider: Object, hit_position: Vector3, normal: Vector3) -> void:
+	var mark := Decal.new()
+	mark.texture_albedo = IMPACT_TEXTURES[randi() % IMPACT_TEXTURES.size()]
+	mark.size = Vector3(0.18, 0.12, 0.18)
+	mark.modulate = Color(0.65, 0.65, 0.65) if mark.texture_albedo == IMPACT_TEXTURES[1] else Color.WHITE
+	var parent: Node3D = collider as Node3D
+	if parent == null:
+		parent = get_tree().current_scene as Node3D
+	if parent == null:
+		return
+	var previous_marks: Array[Node] = []
+	for child in parent.get_children():
+		if child is Decal and child.get_meta("bullet_mark", false):
+			previous_marks.append(child)
+	if previous_marks.size() >= 12:
+		previous_marks[0].queue_free()
+	mark.set_meta("bullet_mark", true)
+	parent.add_child(mark)
+	mark.global_position = hit_position + normal * 0.015
+	mark.global_basis = Basis(Quaternion(Vector3.UP, normal))
+	get_tree().create_timer(24.0).timeout.connect(func() -> void:
+		if is_instance_valid(mark):
+			mark.queue_free()
+	)
