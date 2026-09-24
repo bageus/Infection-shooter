@@ -30,15 +30,15 @@ var _rest_transforms: Dictionary = {}
 var _broken_legs: Array[String] = []
 
 
-func take_projectile_hit(_damage: float, position: Vector3, _normal: Vector3, direction: Vector3, _weapon: String) -> bool:
+func take_projectile_hit(_damage: float, hit_point: Vector3, _normal: Vector3, direction: Vector3, _weapon: String) -> bool:
 	_switch_to_modular()
-	hit_piece(_part_at(position), position, direction)
+	hit_piece(_part_at(hit_point), hit_point, direction)
 	return true
 
 
-func take_melee_hit(_damage: float, position: Vector3, direction: Vector3) -> void:
+func take_melee_hit(_damage: float, hit_point: Vector3, direction: Vector3) -> void:
 	_switch_to_modular()
-	hit_piece(_part_at(position), position, direction)
+	hit_piece(_part_at(hit_point), hit_point, direction)
 
 
 func _ready() -> void:
@@ -57,17 +57,17 @@ func _ready() -> void:
 	_secondary.hide()
 	for group in [_modular, _fragments, _secondary]:
 		_collect_parts(group)
-	for name in _parts:
-		_rest_transforms[name] = _mesh_transform(_parts[name])
-	for name in ["Top"] + LEG_IDS:
-		var modular_mesh: MeshInstance3D = _parts.get(name)
+	for part_id in _parts:
+		_rest_transforms[part_id] = _mesh_transform(_parts[part_id])
+	for part_id in ["Top"] + LEG_IDS:
+		var modular_mesh: MeshInstance3D = _parts.get(part_id)
 		if modular_mesh != null:
 			modular_mesh.scale = Vector3.ONE
 	_build_assembly()
 
 
-func _part_at(position: Vector3) -> String:
-	var local_hit := to_local(position)
+func _part_at(hit_point: Vector3) -> String:
+	var local_hit := to_local(hit_point)
 	if local_hit.y > 0.65:
 		return "Top"
 	var x := "R" if local_hit.x < 0.0 else "L"
@@ -75,15 +75,15 @@ func _part_at(position: Vector3) -> String:
 	return "Leg_" + z + x
 
 
-func hit_piece(name: String, hit_position: Vector3, direction: Vector3) -> void:
-	if not _active.has(name):
+func hit_piece(part_id: String, hit_position: Vector3, direction: Vector3) -> void:
+	if not _active.has(part_id):
 		return
 	if not _started:
 		_switch_to_modular()
 		return
-	var body: RigidBody3D = _active[name]
-	_active.erase(name)
-	call_deferred("_transition_piece", name, body, hit_position, direction)
+	var body: RigidBody3D = _active[part_id]
+	_active.erase(part_id)
+	call_deferred("_transition_piece", part_id, body, hit_position, direction)
 
 
 func _switch_to_modular() -> void:
@@ -98,26 +98,26 @@ func _switch_to_modular() -> void:
 	_assembly.collision_layer = 1
 
 
-func _transition_piece(name: String, body: RigidBody3D, hit_position: Vector3, direction: Vector3) -> void:
-	var original: MeshInstance3D = _parts[name]
+func _transition_piece(part_id: String, body: RigidBody3D, hit_position: Vector3, direction: Vector3) -> void:
+	var original: MeshInstance3D = _parts[part_id]
 	var original_transform := _current_mesh_transform(original, body)
 	if body == _assembly:
-		(_part_shapes[name] as CollisionShape3D).set_deferred("disabled", true)
+		(_part_shapes[part_id] as CollisionShape3D).set_deferred("disabled", true)
 	else:
 		body.queue_free()
 	original.hide()
-	if name == "Top":
+	if part_id == "Top":
 		for index in range(1, 9):
-			_spawn_piece("Top_%02d" % index, name, original_transform, hit_position, direction, false)
+			_spawn_piece("Top_%02d" % index, part_id, original_transform, hit_position, direction, false)
 		_drop_remaining_legs(hit_position, direction)
-	elif name.begins_with("Leg_"):
-		_spawn_piece(name + "_lower", name, original_transform, hit_position, direction, true)
-		_spawn_piece(name + "_upper", name, original_transform, hit_position, direction, true)
+	elif part_id.begins_with("Leg_"):
+		_spawn_piece(part_id + "_lower", part_id, original_transform, hit_position, direction, true)
+		_spawn_piece(part_id + "_upper", part_id, original_transform, hit_position, direction, true)
 		if body == _assembly:
-			_on_leg_lost(name, hit_position)
-	elif name.begins_with("Top_"):
-		_spawn_piece(name + "_A", name, original_transform, hit_position, direction, true)
-		_spawn_piece(name + "_B", name, original_transform, hit_position, direction, true)
+			_on_leg_lost(part_id, hit_position)
+	elif part_id.begins_with("Top_"):
+		_spawn_piece(part_id + "_A", part_id, original_transform, hit_position, direction, true)
+		_spawn_piece(part_id + "_B", part_id, original_transform, hit_position, direction, true)
 
 
 func _build_assembly() -> void:
@@ -131,33 +131,33 @@ func _build_assembly() -> void:
 	_assembly.collision_mask = 1
 	add_child(_assembly)
 	_modular.reparent(_assembly, true)
-	for name in ["Top"] + LEG_IDS:
-		var mesh: MeshInstance3D = _parts.get(name)
+	for part_id in ["Top"] + LEG_IDS:
+		var mesh: MeshInstance3D = _parts.get(part_id)
 		if mesh == null:
-			push_error("07_table.glb is missing modular part " + name)
+			push_error("07_table.glb is missing modular part " + part_id)
 			continue
 		var bounds := mesh.get_aabb()
 		var shape := CollisionShape3D.new()
-		shape.name = name
+		shape.name = part_id
 		var box := BoxShape3D.new()
 		box.size = bounds.size
 		shape.shape = box
 		_assembly.add_child(shape)
 		shape.transform = _assembly.global_transform.affine_inverse() * _mesh_transform(mesh)
 		shape.position += shape.basis * bounds.get_center()
-		_part_shapes[name] = shape
-		_active[name] = _assembly
+		_part_shapes[part_id] = shape
+		_active[part_id] = _assembly
 
 
-func _on_leg_lost(name: String, hit_position: Vector3) -> void:
-	_broken_legs.append(name)
+func _on_leg_lost(part_id: String, _hit_position: Vector3) -> void:
+	_broken_legs.append(part_id)
 	var tilt := Vector3.ZERO
 	for missing in _broken_legs:
 		var corner: Vector3 = (_part_shapes[missing] as CollisionShape3D).position
 		tilt += _assembly.global_basis * Vector3(corner.x, 0.0, corner.z)
 	# Opposite corners cancel; in that case favor the last leg that was removed.
 	if tilt.length_squared() < 0.01:
-		var corner: Vector3 = (_part_shapes[name] as CollisionShape3D).position
+		var corner: Vector3 = (_part_shapes[part_id] as CollisionShape3D).position
 		tilt = _assembly.global_basis * Vector3(corner.x, 0.0, corner.z)
 	tilt = tilt.normalized()
 	var strength := one_leg_tilt_impulse if _broken_legs.size() == 1 else two_leg_tilt_impulse
@@ -169,14 +169,14 @@ func _on_leg_lost(name: String, hit_position: Vector3) -> void:
 	_wake_tabletop_items(tilt, strength)
 
 
-func _drop_remaining_legs(hit_position: Vector3, direction: Vector3) -> void:
+func _drop_remaining_legs(_hit_position: Vector3, direction: Vector3) -> void:
 	_wake_tabletop_items(direction, two_leg_tilt_impulse)
-	for name in LEG_IDS:
-		if not _active.has(name):
+	for part_id in LEG_IDS:
+		if not _active.has(part_id):
 			continue
-		var mesh: MeshInstance3D = _parts[name]
+		var mesh: MeshInstance3D = _parts[part_id]
 		var current := _mesh_transform(mesh)
-		var body := _make_body(mesh, name, false)
+		var body := _make_body(mesh, part_id, false)
 		get_parent().add_child(body)
 		var center := mesh.get_aabb().get_center()
 		body.global_transform = current * Transform3D(Basis.IDENTITY, center)
@@ -185,8 +185,15 @@ func _drop_remaining_legs(hit_position: Vector3, direction: Vector3) -> void:
 		copy.transform = Transform3D(Basis.IDENTITY, -center)
 		copy.show()
 		mesh.hide()
-		_active[name] = body
-		body.apply_impulse((direction.normalized() + Vector3.DOWN * 0.4).normalized() * fragment_impulse)
+		_active[part_id] = body
+		var outward := body.global_position - _assembly.global_position
+		outward.y = 0.0
+		if outward.length_squared() < 0.01:
+			outward = direction
+		outward.y = 0.0
+		outward = outward.normalized()
+		body.apply_impulse((outward + Vector3.UP * 0.15).normalized() * fragment_impulse, Vector3.UP * 0.25)
+		body.apply_torque_impulse(Vector3.UP.cross(outward) * fragment_impulse * 0.4)
 		_schedule_settle(body, fragment_lifetime * 2.0)
 	_modular.reparent(get_node("Visual"), true)
 	_modular.hide()
@@ -221,13 +228,13 @@ func _current_mesh_transform(mesh: MeshInstance3D, body: RigidBody3D) -> Transfo
 	return body.global_transform * Transform3D(Basis.IDENTITY, -mesh.get_aabb().get_center())
 
 
-func _spawn_piece(name: String, source_name: String, source_current: Transform3D, hit_position: Vector3, direction: Vector3, final_stage: bool) -> void:
-	var mesh: MeshInstance3D = _parts.get(name)
+func _spawn_piece(part_id: String, source_name: String, source_current: Transform3D, hit_position: Vector3, direction: Vector3, final_stage: bool) -> void:
+	var mesh: MeshInstance3D = _parts.get(part_id)
 	if mesh == null:
-		push_error("07_table.glb is missing fragment " + name)
+		push_error("07_table.glb is missing fragment " + part_id)
 		return
-	var target: Transform3D = source_current * (_rest_transforms[source_name] as Transform3D).affine_inverse() * (_rest_transforms[name] as Transform3D)
-	var body := _make_body(mesh, name, final_stage)
+	var target: Transform3D = source_current * (_rest_transforms[source_name] as Transform3D).affine_inverse() * (_rest_transforms[part_id] as Transform3D)
+	var body := _make_body(mesh, part_id, final_stage)
 	get_parent().add_child(body)
 	var center := mesh.get_aabb().get_center()
 	body.global_transform = target * Transform3D(Basis.IDENTITY, center)
@@ -235,7 +242,7 @@ func _spawn_piece(name: String, source_name: String, source_current: Transform3D
 	body.add_child(copy)
 	copy.transform = Transform3D(Basis.IDENTITY, -center)
 	copy.show()
-	_active[name] = body
+	_active[part_id] = body
 	_add_fracture_marks(body, mesh, hit_position)
 	var offset := body.global_position - hit_position
 	var away := (direction.normalized() + offset.normalized() * 0.5 + Vector3.UP * 0.5).normalized()
@@ -331,15 +338,15 @@ func _locate_effects() -> Node3D:
 	return local_pool
 
 
-func _make_body(mesh: MeshInstance3D, name: String, final_stage: bool) -> RigidBody3D:
+func _make_body(mesh: MeshInstance3D, part_id: String, final_stage: bool) -> RigidBody3D:
 	var body := RigidBody3D.new()
 	body.set_script(PIECE_SCRIPT)
-	body.name = name
+	body.name = part_id
 	body.set("table", self)
-	body.set("piece_id", name)
+	body.set("piece_id", part_id)
 	body.set("last_stage", final_stage)
-	body.mass = 1.0 if name.begins_with("Top") else 0.4
-	body.freeze = name == "Top" or name in LEG_IDS
+	body.mass = 1.0 if part_id.begins_with("Top") else 0.4
+	body.freeze = false
 	body.collision_layer = 1
 	body.collision_mask = 3
 	var shape := CollisionShape3D.new()
@@ -359,11 +366,11 @@ func _collect_parts(node: Node) -> void:
 		_collect_parts(child)
 
 
-func _find(node: Node, name: String) -> Node3D:
-	if node.name == name:
+func _find(node: Node, part_id: String) -> Node3D:
+	if node.name == part_id:
 		return node as Node3D
 	for child in node.get_children():
-		var result := _find(child, name)
+		var result := _find(child, part_id)
 		if result != null:
 			return result
 	return null

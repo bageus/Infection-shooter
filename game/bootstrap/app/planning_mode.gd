@@ -354,7 +354,7 @@ func _input(event: InputEvent) -> void:
 	if not active:
 		return
 	if event is InputEventMouse and (ui.get_node("Panel") as Control).get_global_rect().has_point(event.position):
-		get_viewport().set_input_as_handled()
+		# _input precedes GUI dispatch: let the palette receive this event.
 		return
 	# Text fields must receive keyboard/mouse events before planner hotkeys.
 	if map_name_edit != null and map_name_edit.has_focus():
