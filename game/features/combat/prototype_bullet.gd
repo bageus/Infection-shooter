@@ -62,7 +62,7 @@ func _physics_process(delta: float) -> void:
 		var hit_position: Vector3 = hit.get("position")
 		var normal: Vector3 = hit.get("normal")
 		var collider: Object = hit.get("collider")
-		var stops_bullet := _handle_hit(collider, hit_position, normal)
+		var stops_bullet := _handle_hit(collider, hit_position, normal, int(hit.get("shape", -1)))
 		if stops_bullet:
 			global_position = hit_position
 			queue_free()
@@ -76,13 +76,18 @@ func _physics_process(delta: float) -> void:
 	_travelled += step
 
 
-func _handle_hit(collider: Object, hit_position: Vector3, normal: Vector3) -> bool:
+func _handle_hit(collider: Object, hit_position: Vector3, normal: Vector3, shape_index: int = -1) -> bool:
 	if collider == null:
 		return true
 	_spawn_impact_decal(collider, hit_position, normal)
 
 	var falloff := clampf(1.0 - _travelled / maxf(_range, 0.01), 0.35, 1.0)
 	var hit_damage := _damage * falloff
+	if collider.has_method("take_projectile_hit_at_shape"):
+		return bool(collider.call(
+			"take_projectile_hit_at_shape",
+			hit_damage, hit_position, normal, _direction, _weapon_name, shape_index
+		))
 
 	if collider.has_method("take_projectile_hit"):
 		return bool(collider.call(
@@ -116,6 +121,8 @@ func _handle_hit(collider: Object, hit_position: Vector3, normal: Vector3) -> bo
 
 
 func _spawn_impact_decal(collider: Object, hit_position: Vector3, normal: Vector3) -> void:
+	if normal.is_zero_approx():
+		normal = -_direction if not _direction.is_zero_approx() else Vector3.UP
 	var mark := MeshInstance3D.new()
 	var quad := QuadMesh.new()
 	var texture_index := 1 if randi() % 4 == 0 else 0

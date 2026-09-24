@@ -32,6 +32,8 @@ Procedural generation, save/checkpoints, final HUD, monetization, platform SDKs 
 - Structural modules visually touch edge-to-edge with no visible gaps and no overlap beyond a tiny seam tolerance.\n- Exterior corners face inward correctly.\n- Perimeter and authored interior walls block the player.\n- The expanded floor and defeat menu remain functional.
 
 ## Progress
+По уточнению владельца `07_table` переведён на физическое тело из столешницы и оставшихся ножек: первое попадание сразу разрушает выбранную часть; потеря одной ножки наклоняет стол к отсутствующей опоре, потеря двух ускоряет опрокидывание. При разрушении центра остальные ножки отделяются и падают. Физические предметы на столешнице получают толчок по направлению наклона. Оставшиеся после таймера 1–3 обломка не сталкиваются с игроком и другими телами.
+
 По обратной связи владельца восстановлены ненулевой масштаб мешей из GLB и твёрдая коллизия исходного стола. Попадание переключает модель на пять адресных частей, далее создаёт физические фрагменты; после задержки остаётся 1–3 обломка на стол, не более 40 на сцену, затем исчезают и они. Следы пуль и дерева отображаются плоскими мешами в Compatibility, имеют общий предел 40 по принципу FIFO.
 
 Structural asset audit completed. `docs/ASSET_STANDARD.md` now defines the 0.25 m placement grid, canonical root pivots, the existing 2.25 m facade module, and identifies the 13_* glass kit plus the legacy 2.8 m cubicle partition as requiring dimensional correction/visual verification. All canonical public structural scenes are now declared in the module manifest. Source GLB/Blend geometry has not been destructively rescaled before Godot AABB verification.
@@ -44,6 +46,8 @@ The office-floor composition was rebuilt for the newly oriented grouped object l
 ## Risks
 Полный проект импортирует .blend только с установленным Blender. Изолированная сцена использует проверенный GLB; визуальное совпадение всех частей и коллизий в игровом Godot 4.7.2 ещё требует просмотра.
 ## Validation evidence
+Изолированный Godot 4.5.2 подтвердил лучом коллизию целого и модульного стола, адресное попадание по форме ножки, распад центра и ножек, опрокидывание после второй ножки, падение физического предмета со стола, вторичное дробление столешницы, предел 40 декалей и бесконтактные остаточные обломки. Полный headless импорт с разреженной копией репозитория вывел ошибки отсутствующих ресурсов и некорректных прежних `.import`; визуальная проверка в полной сцене Godot 4.7.2 остаётся необходимой. `validate_project.py` по-прежнему не проходит старые нарушения архитектуры и лимит `planning_mode.gd` (1383 строки); новый `staged_table.gd` превышает рекомендованный порог 300 строк, но не жёсткий лимит.
+
 Проверка готовности спецификации и рабочего состояния пройдена. Архитектурная проверка и ограничение размера исходников всё ещё выявляют старые нарушения вне этого изменения. Изолированный Godot 4.5.2 подтвердил лучом коллизию intact и Top, переходы Leg/Top/Top_01, пределы 40 следов и 40 остаточных обломков и сохранение 1–3 фрагментов. Полная игровая сцена в Godot 4.7.2 требует проверки на стороне владельца.
 
 User runtime screenshots exposed perimeter spacing, corner orientation and missing interior collision defects in the previous increment. This increment corrects those defects; repository CI must validate the static project gates.
@@ -52,6 +56,8 @@ User runtime screenshots exposed perimeter spacing, corner orientation and missi
 No product blocker. Exact imported .blend bounds still require visual confirmation in Godot.
 
 ## Next exact action
+Проверить в полной сцене Godot 4.7.2 направленное падение стола при отстреле каждой пары ножек и поведение размещённых на нём физических предметов.
+
 Проверить в полной сцене Godot 4.7.2 визуальную ориентацию отметин на стенах и предметах, все четыре ножки, восемь частей столешницы и исчезновение остаточных обломков.
 
 Run repository gates, then measure imported structural mesh AABBs in Godot against `docs/ASSET_STANDARD.md`; correct the 13_* glass connection span to 4.0 m and any retained legacy cubicle partition to 3.0 m only after confirming source mesh bounds.
