@@ -330,7 +330,7 @@ func exit() -> void:
 func _process(delta: float) -> void:
 	if not active:
 		return
-	if map_name_edit != null and map_name_edit.has_focus():
+	if _text_field_has_focus():
 		return
 	var input := Vector2.ZERO
 	if Input.is_key_pressed(KEY_W): input.y += 1.0
@@ -356,10 +356,10 @@ func _input(event: InputEvent) -> void:
 	if event is InputEventMouse and (ui.get_node("Panel") as Control).get_global_rect().has_point(event.position):
 		# _input precedes GUI dispatch: let the palette receive this event.
 		return
-	# Text fields must receive keyboard/mouse events before planner hotkeys.
-	if map_name_edit != null and map_name_edit.has_focus():
+	# Allow both map names and SpinBox editors to receive keys before planner shortcuts.
+	if _text_field_has_focus() and event is InputEventKey:
 		if event is InputEventKey and event.pressed and event.keycode == KEY_ESCAPE:
-			map_name_edit.release_focus()
+			(get_viewport().gui_get_focus_owner() as Control).release_focus()
 			get_viewport().set_input_as_handled()
 		return
 	if event is InputEventKey and event.pressed and not event.echo:
@@ -428,6 +428,16 @@ func _input(event: InputEvent) -> void:
 				_update_status()
 		elif preview != null:
 			_update_preview(event.position)
+
+
+func _text_field_has_focus() -> bool:
+	var focused := get_viewport().gui_get_focus_owner()
+	if focused == map_name_edit and focused != null:
+		return true
+	for field in [default_light_height, default_light_energy, default_light_angle, default_flicker_step, selected_flicker_step]:
+		if field != null and focused == (field as SpinBox).get_line_edit():
+			return true
+	return false
 
 
 func _reset_selection() -> void:

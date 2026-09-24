@@ -25,6 +25,7 @@ var _door_recess_nodes: Array[Node3D] = []
 var _glass_hinge: Node3D
 var _glass_hinge_closed := Transform3D.IDENTITY
 var _elevator_lights: Array[Node3D] = []
+var _fallback_leaf_collisions: Array[CollisionShape3D] = []
 
 
 func _ready() -> void:
@@ -78,6 +79,10 @@ func _physics_process(delta: float) -> void:
 				_swing_side = 0.0
 
 	_apply_door_pose(local_player)
+	for collision in _fallback_leaf_collisions:
+		var should_disable := _open_amount >= 0.6
+		if collision.disabled != should_disable:
+			collision.set_deferred("disabled", should_disable)
 	if mode == DoorMode.GLASS_SWING and _glass_hinge != null:
 		var swing_side := _swing_side
 		if swing_side == 0.0:
@@ -132,12 +137,41 @@ func _collect_door_parts() -> void:
 		if pivot != null:
 			_door_parts.append(pivot)
 			_closed_transforms.append(pivot.transform)
+			_add_swing_leaf_collision(pivot)
 		else:
 			var candidates: Array[Node3D] = []
 			_collect_named_meshes(visual, candidates)
 			if not candidates.is_empty():
 				_door_parts.append(candidates[0])
 				_closed_transforms.append(candidates[0].transform)
+				_add_swing_leaf_collision(candidates[0])
+
+
+func _add_swing_leaf_collision(part: Node3D) -> void:
+	var leaves: Array[MeshInstance3D] = []
+	_collect_leaf_meshes(part, leaves)
+	for leaf in leaves:
+		var body := StaticBody3D.new()
+		body.name = "MovingDoorBody"
+		part.add_child(body)
+		var collision := CollisionShape3D.new()
+		var box := BoxShape3D.new()
+		var bounds := leaf.get_aabb()
+		box.size = bounds.size
+		collision.shape = box
+		body.add_child(collision)
+		var mesh_to_body := body.global_transform.affine_inverse() * leaf.global_transform
+		collision.transform = mesh_to_body
+		collision.position += mesh_to_body.basis * bounds.get_center()
+		if "doorhandle" in leaf.name.to_lower():
+			_fallback_leaf_collisions.append(collision)
+
+
+func _collect_leaf_meshes(node: Node, leaves: Array[MeshInstance3D]) -> void:
+	if node is MeshInstance3D and ("doorleaf" in node.name.to_lower() or "door_leaf" in node.name.to_lower() or "doorhandle" in node.name.to_lower()):
+		leaves.append(node as MeshInstance3D)
+	for child in node.get_children():
+		_collect_leaf_meshes(child, leaves)
 
 
 func _collect_elevator_parts(node: Node) -> void:
