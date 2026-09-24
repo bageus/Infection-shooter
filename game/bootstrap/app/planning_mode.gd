@@ -34,6 +34,11 @@ var light_defaults: VBoxContainer
 var default_light_height: SpinBox
 var default_light_energy: SpinBox
 var default_light_angle: SpinBox
+var default_flicker_mode: OptionButton
+var default_flicker_step: SpinBox
+var selected_flicker_mode: OptionButton
+var selected_flicker_step: SpinBox
+var editing_flicker := false
 var hud_nodes: Array[Node] = []
 var active := false
 var selected_path := ""
@@ -62,10 +67,8 @@ var map_select: OptionButton
 var group_catalogs := {
 	"01": [
 		{"name":"Window Double","path":"res://game/presentation/office_floor/public/structural/window_double.tscn"},
-		{"name":"Window Corner","path":"res://game/presentation/office_floor/public/structural/window_corner.tscn"},
 		{"name":"Wall Straight","path":"res://game/presentation/office_floor/public/structural/wall_straight.tscn"},
 		{"name":"Wall Half","path":"res://game/presentation/office_floor/public/structural/wall_half_panel.tscn"},
-		{"name":"Outer Corner","path":"res://game/presentation/office_floor/public/structural/wall_outer_corner.tscn"},
 		{"name":"Door Wall 2","path":"res://game/presentation/office_floor/public/structural/wall_door.tscn"},
 		{"name":"Emergency Door","path":"res://game/presentation/office_floor/public/structural/wall_emergency_door.tscn"},
 		{"name":"Column","path":"res://game/presentation/office_floor/public/structural/column.tscn"},
@@ -73,11 +76,8 @@ var group_catalogs := {
 		{"name":"Elevator Passenger","path":"res://game/presentation/office_floor/public/structural/elevator_cabin_passenger.tscn"},
 		{"name":"Elevator Freight","path":"res://game/presentation/office_floor/public/structural/elevator_cabin_freight.tscn"},
 		{"name":"Elevator Door","path":"res://game/presentation/office_floor/public/structural/elevator_door.tscn"},
-		{"name":"Door Wall 3","path":"res://game/presentation/office_floor/public/structural/wall_door_3.tscn"},
 		{"name":"Door Wall 2 Empty","path":"res://game/presentation/office_floor/public/structural/wall_door_2_without.tscn"},
-		{"name":"Door Wall 3 Empty","path":"res://game/presentation/office_floor/public/structural/wall_door_3_without.tscn"},
-		{"name":"Broken Door 2","path":"res://game/presentation/office_floor/public/structural/only_door_2.tscn"},
-		{"name":"Broken Door 3","path":"res://game/presentation/office_floor/public/structural/only_door_3.tscn"}
+		{"name":"Broken Door 2","path":"res://game/presentation/office_floor/public/structural/only_door_2.tscn"}
 	],
 	"02": [
 		{"name":"Archive Box","path":"res://game/presentation/office_floor/public/props/02_cardboard_archive_box.tscn"},
@@ -125,12 +125,9 @@ var group_catalogs := {
 	],
 	"07": [
 		{"name":"Table","path":"res://game/presentation/office_floor/public/props/07_table.tscn"},
-		{"name":"Table L Shaped","path":"res://game/presentation/office_floor/public/props/07_table_L_shaped.tscn"},
-		{"name":"Table Long","path":"res://game/presentation/office_floor/public/props/07_table_long.tscn"},
 		{"name":"Table Longest","path":"res://game/presentation/office_floor/public/props/07_table_longest.tscn"}
 	],
 	"08": [
-		{"name":"Office Desk","path":"res://game/presentation/office_floor/public/props/08_office_desk.tscn"},
 		{"name":"Office Desk 2","path":"res://game/presentation/office_floor/public/props/08_office_desk_2.tscn"},
 		{"name":"Desk Lamp","path":"res://game/presentation/office_floor/public/props/08_office_desk_lamp.tscn"},
 		{"name":"Table Square","path":"res://game/presentation/office_floor/public/props/08_table_square.tscn"},
@@ -235,6 +232,13 @@ func setup(app_owner: Node3D, planning_root: Node3D, planning_ui: Control) -> vo
 	default_light_height = ui.get_node("Panel/VBox/LightDefaults/HeightRow/Value")
 	default_light_energy = ui.get_node("Panel/VBox/LightDefaults/EnergyRow/Value")
 	default_light_angle = ui.get_node("Panel/VBox/LightDefaults/AngleRow/Value")
+	default_flicker_mode = ui.get_node("Panel/VBox/LightDefaults/FlickerRow/Mode")
+	default_flicker_step = ui.get_node("Panel/VBox/LightDefaults/FlickerStepRow/Value")
+	selected_flicker_mode = ui.get_node("Panel/VBox/SelectedFlicker/Mode")
+	selected_flicker_step = ui.get_node("Panel/VBox/SelectedFlickerStep/Value")
+	default_flicker_mode.item_selected.connect(_on_default_flicker_mode_changed)
+	selected_flicker_mode.item_selected.connect(_on_selected_flicker_changed)
+	selected_flicker_step.value_changed.connect(_on_selected_flicker_step_changed)
 	map_name_edit = ui.get_node("Panel/VBox/MapManager/Name")
 	map_select = ui.get_node("Panel/VBox/MapManager/Maps")
 	hud_nodes = [
@@ -348,6 +352,9 @@ func _process(delta: float) -> void:
 
 func _input(event: InputEvent) -> void:
 	if not active:
+		return
+	if event is InputEventMouse and (ui.get_node("Panel") as Control).get_global_rect().has_point(event.position):
+		get_viewport().set_input_as_handled()
 		return
 	# Text fields must receive keyboard/mouse events before planner hotkeys.
 	if map_name_edit != null and map_name_edit.has_focus():
@@ -559,6 +566,8 @@ func _update_light_ui() -> void:
 	light_level.visible = show_light
 	light_angle_info.visible = show_light and light is SpotLight3D
 	light_angle.visible = show_light and light is SpotLight3D
+	ui.get_node("Panel/VBox/SelectedFlicker").visible = show_light and selected != null
+	ui.get_node("Panel/VBox/SelectedFlickerStep").visible = show_light and selected != null
 	if show_light:
 		light_info.text = "LIGHT %.2f / 16.00" % light.light_energy
 		light_level.value = light.light_energy
@@ -566,6 +575,39 @@ func _update_light_ui() -> void:
 			var spot := light as SpotLight3D
 			light_angle_info.text = "CONE %.0f°" % spot.spot_angle
 			light_angle.value = spot.spot_angle
+		if selected != null:
+			editing_flicker = true
+			selected_flicker_mode.select(int(target.get_meta("planning_flicker_mode", 0)))
+			selected_flicker_step.value = float(target.get_meta("planning_flicker_step", 0.2))
+			editing_flicker = false
+
+
+func _on_selected_flicker_changed(_index: int) -> void:
+	if not editing_flicker:
+		selected_flicker_step.value = _recommended_flicker_step(selected_flicker_mode.get_selected_id())
+	_apply_selected_flicker()
+
+
+func _on_default_flicker_mode_changed(_index: int) -> void:
+	default_flicker_step.value = _recommended_flicker_step(default_flicker_mode.get_selected_id())
+
+
+func _recommended_flicker_step(mode: int) -> float:
+	match mode:
+		1: return 0.12
+		2: return 0.75
+		3: return 1.5
+	return 0.2
+
+
+func _on_selected_flicker_step_changed(_value: float) -> void:
+	_apply_selected_flicker()
+
+
+func _apply_selected_flicker() -> void:
+	if editing_flicker or selected == null or not selected.has_method("configure_flicker"):
+		return
+	selected.call("configure_flicker", selected_flicker_mode.get_selected_id(), selected_flicker_step.value)
 
 
 func _show_selection_highlight(node: Node3D) -> void:
@@ -752,6 +794,8 @@ func _clear_preview() -> void:
 	light_level.hide()
 	light_angle_info.hide()
 	light_angle.hide()
+	ui.get_node("Panel/VBox/SelectedFlicker").hide()
+	ui.get_node("Panel/VBox/SelectedFlickerStep").hide()
 	if preview != null and is_instance_valid(preview):
 		preview.queue_free()
 	preview = null
@@ -983,6 +1027,8 @@ func _apply_new_light_defaults(node: Node3D) -> void:
 	spot.spot_angle = angle
 	node.set_meta("planning_light_energy", energy)
 	node.set_meta("planning_light_angle", angle)
+	if node.has_method("configure_flicker"):
+		node.call("configure_flicker", default_flicker_mode.get_selected_id(), default_flicker_step.value)
 
 
 func _apply_wall_mount(node: Node3D) -> void:
@@ -1154,6 +1200,8 @@ func _collect_layout_data() -> Dictionary:
 			"scale_x": node.scale.x, "scale_y": node.scale.y, "scale_z": node.scale.z,
 			"light_energy": node.get_meta("planning_light_energy", 0.0),
 			"light_angle": node.get_meta("planning_light_angle", 48.0),
+			"flicker_mode": node.get_meta("planning_flicker_mode", 0),
+			"flicker_step": node.get_meta("planning_flicker_step", 0.2),
 			"darkness": node.get("darkness") if node.get("darkness") != null else 0.0,
 			"permanent_darkness": node.get("permanent") if node.get("permanent") != null else false,
 			"spawn_x": (node.get_meta("planning_spawn_transform") as Transform3D).origin.x if node.has_meta("planning_spawn_transform") else node.position.x,
@@ -1165,16 +1213,16 @@ func _collect_layout_data() -> Dictionary:
 
 func save_named_map() -> void:
 	_ensure_maps_dir()
-	var name := _safe_map_name(map_name_edit.text)
-	var path := _map_path(name)
+	var safe_name := _safe_map_name(map_name_edit.text)
+	var path := _map_path(safe_name)
 	var file := FileAccess.open(path, FileAccess.WRITE)
 	if file == null:
 		status.text = "MAP SAVE ERROR"
 		return
 	file.store_string(JSON.stringify(_collect_layout_data(), "	"))
-	map_name_edit.text = name
-	_refresh_map_list(name)
-	status.text = "MAP SAVED | " + name
+	map_name_edit.text = safe_name
+	_refresh_map_list(safe_name)
+	status.text = "MAP SAVED | " + safe_name
 
 
 func load_selected_map() -> void:
@@ -1209,9 +1257,9 @@ func _refresh_map_list(select_name: String = "") -> void:
 	var selected_index := -1
 	while not file_name.is_empty():
 		if not dir.current_is_dir() and file_name.to_lower().ends_with(".json"):
-			var name := file_name.get_basename()
-			map_select.add_item(name)
-			if name == select_name:
+			var map_label := file_name.get_basename()
+			map_select.add_item(map_label)
+			if map_label == select_name:
 				selected_index = index
 			index += 1
 		file_name = dir.get_next()
@@ -1280,6 +1328,8 @@ func _apply_layout_data(data: Dictionary) -> void:
 		if saved_spot != null:
 			saved_spot.spot_angle = saved_light_angle
 			node.set_meta("planning_light_angle", saved_light_angle)
+		if node.has_method("configure_flicker"):
+			node.call("configure_flicker", int(record.get("flicker_mode", 0)), float(record.get("flicker_step", 0.2)))
 		if node.get("darkness") != null:
 			node.set("darkness", float(record.get("darkness", 0.88)))
 			node.set("permanent", bool(record.get("permanent_darkness", true)))
@@ -1326,6 +1376,11 @@ func _save_authored_scene() -> Error:
 		scene_root.add_child(copy)
 		copy.owner = scene_root
 		copy.transform = node.transform
+		if copy.has_method("configure_flicker"):
+			copy.set_meta("planning_light_energy", node.get_meta("planning_light_energy", 3.0))
+			copy.set_meta("planning_light_angle", node.get_meta("planning_light_angle", 48.0))
+			copy.set_meta("planning_flicker_mode", node.get_meta("planning_flicker_mode", 0))
+			copy.set_meta("planning_flicker_step", node.get_meta("planning_flicker_step", 0.2))
 		_assign_owner_recursive(copy, scene_root)
 	var packed_layout := PackedScene.new()
 	var pack_error := packed_layout.pack(scene_root)

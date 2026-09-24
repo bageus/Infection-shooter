@@ -5,7 +5,6 @@
 [ext_resource type="PackedScene" path="res://game/presentation/office_floor/public/structural/wall_emergency_door.tscn" id="emergency"]
 [ext_resource type="PackedScene" path="res://game/presentation/office_floor/public/structural/wall_half_panel.tscn" id="half"]
 [ext_resource type="PackedScene" path="res://game/presentation/prototype_hud/public/prototype_hud.tscn" id="hud"]
-[ext_resource type="PackedScene" path="res://game/presentation/office_floor/public/structural/wall_outer_corner.tscn" id="outer"]
 [ext_resource type="PackedScene" path="res://game/features/player/public/player.tscn" id="player"]
 [ext_resource type="PackedScene" path="res://game/presentation/prototype_hud/public/radar.tscn" id="radar"]
 [ext_resource type="Script" path="res://game/bootstrap/app/main.gd" id="script"]
@@ -15,7 +14,6 @@
 [ext_resource type="PackedScene" path="res://game/presentation/office_floor/public/structural/wall_straight.tscn" id="wall"]
 [ext_resource type="PackedScene" path="res://game/presentation/office_floor/public/structural/wall_door.tscn" id="wall_door"]
 [ext_resource type="PackedScene" path="res://game/presentation/office_floor/public/structural/window_double.tscn" id="window"]
-[ext_resource type="PackedScene" path="res://game/presentation/office_floor/public/structural/window_corner.tscn" id="window_corner"]
 [ext_resource type="Script" path="res://game/presentation/office_floor/base_floor_renderer.gd" id="base_floor_renderer"]
 
 [sub_resource type="Environment" id="env"]
@@ -287,6 +285,37 @@ step = 1.0
 value = 48.0
 suffix = "°"
 
+[node name="FlickerRow" type="HBoxContainer" parent="PlanningUI/Panel/VBox/LightDefaults"]
+layout_mode = 2
+[node name="Label" type="Label" parent="PlanningUI/Panel/VBox/LightDefaults/FlickerRow"]
+layout_mode = 2
+text = "Flicker"
+[node name="Mode" type="OptionButton" parent="PlanningUI/Panel/VBox/LightDefaults/FlickerRow"]
+layout_mode = 2
+size_flags_horizontal = 3
+item_count = 4
+popup/item_0/text = "Steady"
+popup/item_1/text = "Fast"
+popup/item_1/id = 1
+popup/item_2/text = "Slow"
+popup/item_2/id = 2
+popup/item_3/text = "Occasional outage"
+popup/item_3/id = 3
+
+[node name="FlickerStepRow" type="HBoxContainer" parent="PlanningUI/Panel/VBox/LightDefaults"]
+layout_mode = 2
+[node name="Label" type="Label" parent="PlanningUI/Panel/VBox/LightDefaults/FlickerStepRow"]
+layout_mode = 2
+text = "Step"
+[node name="Value" type="SpinBox" parent="PlanningUI/Panel/VBox/LightDefaults/FlickerStepRow"]
+layout_mode = 2
+size_flags_horizontal = 3
+min_value = 0.05
+max_value = 3.0
+step = 0.05
+value = 0.2
+suffix = " s"
+
 [node name="Palette" type="ItemList" parent="PlanningUI/Panel/VBox"]
 custom_minimum_size = Vector2(330, 120)
 layout_mode = 2
@@ -337,6 +366,39 @@ min_value = 5.0
 max_value = 89.0
 value = 48.0
 show_percentage = false
+
+[node name="SelectedFlicker" type="HBoxContainer" parent="PlanningUI/Panel/VBox"]
+visible = false
+layout_mode = 2
+[node name="Label" type="Label" parent="PlanningUI/Panel/VBox/SelectedFlicker"]
+layout_mode = 2
+text = "Flicker"
+[node name="Mode" type="OptionButton" parent="PlanningUI/Panel/VBox/SelectedFlicker"]
+layout_mode = 2
+size_flags_horizontal = 3
+item_count = 4
+popup/item_0/text = "Steady"
+popup/item_1/text = "Fast"
+popup/item_1/id = 1
+popup/item_2/text = "Slow"
+popup/item_2/id = 2
+popup/item_3/text = "Occasional outage"
+popup/item_3/id = 3
+
+[node name="SelectedFlickerStep" type="HBoxContainer" parent="PlanningUI/Panel/VBox"]
+visible = false
+layout_mode = 2
+[node name="Label" type="Label" parent="PlanningUI/Panel/VBox/SelectedFlickerStep"]
+layout_mode = 2
+text = "Step"
+[node name="Value" type="SpinBox" parent="PlanningUI/Panel/VBox/SelectedFlickerStep"]
+layout_mode = 2
+size_flags_horizontal = 3
+min_value = 0.05
+max_value = 3.0
+step = 0.05
+value = 0.2
+suffix = " s"
 
 [node name="Status" type="Label" parent="PlanningUI/Panel/VBox"]
 custom_minimum_size = Vector2(330, 30)
