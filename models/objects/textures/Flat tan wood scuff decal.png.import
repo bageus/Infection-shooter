@@ -2,7 +2,15 @@
 
 importer="texture"
 type="CompressedTexture2D"
+<<<<<<< Updated upstream
 uid="uid://b28h880pifx40"
+=======
+<<<<<<< HEAD
+uid="uid://dx00gfp62ignv"
+=======
+uid="uid://b28h880pifx40"
+>>>>>>> c9f9c42ed6c995fcf0d60bd860085af553e4a5a3
+>>>>>>> Stashed changes
 path="res://.godot/imported/Flat tan wood scuff decal.png-217b22dc5f9cb53aea6ca02581300bd9.ctex"
 metadata={
 "vram_texture": false

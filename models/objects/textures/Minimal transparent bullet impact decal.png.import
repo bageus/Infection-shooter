@@ -2,7 +2,15 @@
 
 importer="texture"
 type="CompressedTexture2D"
+<<<<<<< Updated upstream
 uid="uid://dc3vbbnmvbbty"
+=======
+<<<<<<< HEAD
+uid="uid://fcfys5jlejp4"
+=======
+uid="uid://dc3vbbnmvbbty"
+>>>>>>> c9f9c42ed6c995fcf0d60bd860085af553e4a5a3
+>>>>>>> Stashed changes
 path="res://.godot/imported/Minimal transparent bullet impact decal.png-e30ee95f385946f3f6668b615183aa60.ctex"
 metadata={
 "vram_texture": false

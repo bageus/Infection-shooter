@@ -2,7 +2,15 @@
 
 importer="texture"
 type="CompressedTexture2D"
+<<<<<<< Updated upstream
 uid="uid://t8lhyt7kpwn7"
+=======
+<<<<<<< HEAD
+uid="uid://bt5wx0eii6ciq"
+=======
+uid="uid://t8lhyt7kpwn7"
+>>>>>>> c9f9c42ed6c995fcf0d60bd860085af553e4a5a3
+>>>>>>> Stashed changes
 path="res://.godot/imported/Splintered Wood Fracture Decal.png-6430411928ce6a75ca4104d2a57be7ce.ctex"
 metadata={
 "vram_texture": false
