@@ -20,15 +20,12 @@ func _ready() -> void:
 func take_projectile_hit(
 	damage: float,
 	hit_position: Vector3,
-	hit_normal: Vector3,
+	_hit_normal: Vector3,
 	_direction: Vector3,
 	weapon_name: String
 ) -> bool:
 	if _broken:
 		return false
-
-	if impact_marks:
-		_spawn_impact_mark(hit_position, hit_normal)
 
 	if spark_on_hit and to_local(hit_position).y >= spark_height:
 		_spawn_sparks(hit_position)
@@ -116,21 +113,6 @@ func _add_frame_bar(owner_root: Node3D, size: Vector3, position: Vector3, materi
 	piece.mesh = mesh
 	piece.position = position
 	owner_root.add_child(piece)
-
-
-func _spawn_impact_mark(position: Vector3, normal: Vector3) -> void:
-	var mark := MeshInstance3D.new()
-	var mesh := SphereMesh.new()
-	mesh.radius = 0.055
-	mesh.height = 0.028
-	var material := StandardMaterial3D.new()
-	material.albedo_color = Color(0.035, 0.035, 0.035, 1.0)
-	material.roughness = 1.0
-	mesh.material = material
-	mark.mesh = mesh
-	get_tree().current_scene.add_child(mark)
-	mark.global_position = position + normal * 0.012
-	_expire_node(mark, 24.0)
 
 
 func _spawn_sparks(position: Vector3) -> void:

@@ -9,6 +9,7 @@
 [ext_resource type="PackedScene" path="res://game/features/player/public/player.tscn" id="player"]
 [ext_resource type="PackedScene" path="res://game/presentation/prototype_hud/public/radar.tscn" id="radar"]
 [ext_resource type="Script" path="res://game/bootstrap/app/main.gd" id="script"]
+[ext_resource type="Script" path="res://game/features/combat/public/impact_effects.gd" id="impact_effects"]
 [ext_resource type="Script" path="res://game/presentation/prototype_hud/fog_overlay.gd" id="fog"]
 [ext_resource type="PackedScene" path="res://game/features/infection_source/public/infection_source.tscn" id="source"]
 [ext_resource type="PackedScene" path="res://game/presentation/office_floor/public/structural/wall_straight.tscn" id="wall"]
@@ -37,6 +38,9 @@ size = Vector3(0.9, 3, 0.9)
 
 [node name="Main" type="Node3D" unique_id=479644666]
 script = ExtResource("script")
+
+[node name="ImpactEffects" type="Node3D" parent="."]
+script = ExtResource("impact_effects")
 
 [node name="WorldEnvironment" type="WorldEnvironment" parent="." unique_id=968256143]
 environment = SubResource("env")

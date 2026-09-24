@@ -13,6 +13,7 @@
     "features.player",
     "features.infected",
     "features.infection_source",
-    "features.pickups"
+    "features.pickups",
+    "features.combat"
   ]
 }

@@ -1,8 +1,10 @@
 extends Node3D
 
+const EFFECTS_SCRIPT = preload("res://game/features/combat/public/impact_effects.gd")
+
 const IMPACT_TEXTURES := [
-	preload("res://models/objects/textures/Minimal dark bullet impact decal.png"),
-	preload("res://models/objects/textures/Minimal transparent bullet impact decal.png")
+	"res://models/objects/textures/Minimal dark bullet impact decal.png",
+	"res://models/objects/textures/Minimal transparent bullet impact decal.png"
 ]
 
 var _direction := Vector3.ZERO
@@ -114,26 +116,38 @@ func _handle_hit(collider: Object, hit_position: Vector3, normal: Vector3) -> bo
 
 
 func _spawn_impact_decal(collider: Object, hit_position: Vector3, normal: Vector3) -> void:
-	var mark := Decal.new()
-	mark.texture_albedo = IMPACT_TEXTURES[randi() % IMPACT_TEXTURES.size()]
-	mark.size = Vector3(0.18, 0.12, 0.18)
-	mark.modulate = Color(0.65, 0.65, 0.65) if mark.texture_albedo == IMPACT_TEXTURES[1] else Color.WHITE
+	var mark := MeshInstance3D.new()
+	var quad := QuadMesh.new()
+	var texture_index := 1 if randi() % 4 == 0 else 0
+	quad.size = Vector2.ONE * (0.5 if texture_index == 1 else 0.3)
+	var material := StandardMaterial3D.new()
+	var pool := get_parent().get_node_or_null("ImpactEffects")
+	if pool == null:
+		pool = Node3D.new()
+		pool.name = "ImpactEffects"
+		pool.set_script(EFFECTS_SCRIPT)
+		get_parent().add_child(pool)
+	material.albedo_texture = pool.call("texture_for", IMPACT_TEXTURES[texture_index]) as Texture2D
+	material.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
+	material.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
+	material.cull_mode = BaseMaterial3D.CULL_DISABLED
+	material.render_priority = 1
+	quad.material = material
+	mark.mesh = quad
 	var parent: Node3D = collider as Node3D
 	if parent == null:
 		parent = get_tree().current_scene as Node3D
 	if parent == null:
 		return
-	var previous_marks: Array[Node] = []
-	for child in parent.get_children():
-		if child is Decal and child.get_meta("bullet_mark", false):
-			previous_marks.append(child)
-	if previous_marks.size() >= 12:
-		previous_marks[0].queue_free()
-	mark.set_meta("bullet_mark", true)
 	parent.add_child(mark)
-	mark.global_position = hit_position + normal * 0.015
-	mark.global_basis = Basis(Quaternion(Vector3.UP, normal))
+	mark.global_position = hit_position + normal * 0.018
+	var up := Vector3.FORWARD if absf(normal.y) > 0.9 else Vector3.UP
+	mark.global_basis = Basis.looking_at(-normal, up)
+	if pool != null:
+		pool.call("register_mark", mark)
+	var mark_ref: WeakRef = weakref(mark)
 	get_tree().create_timer(24.0).timeout.connect(func() -> void:
-		if is_instance_valid(mark):
-			mark.queue_free()
+		var live_mark: MeshInstance3D = mark_ref.get_ref() as MeshInstance3D
+		if live_mark != null:
+			live_mark.queue_free()
 	)
