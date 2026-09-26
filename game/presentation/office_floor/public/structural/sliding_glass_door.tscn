@@ -1,6 +1,6 @@
 [gd_scene load_steps=6 format=3]
 
-[ext_resource type="PackedScene" path="res://models/objects/13_sliding_glass_door.glb" id="1_model"]
+[ext_resource type="PackedScene" path="res://models/objects/enviroments/01/01_glass_door_breakable.glb" id="1_model"]
 [ext_resource type="Script" path="res://game/presentation/office_floor/mesh_collision_builder.gd" id="2_collision"]
 [ext_resource type="Script" path="res://game/presentation/office_floor/glass_partition.gd" id="3_glass"]
 [ext_resource type="Script" path="res://game/presentation/office_floor/glass_collision_builder.gd" id="5_glass_collision"]

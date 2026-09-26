@@ -1,6 +1,6 @@
 [gd_scene load_steps=3 format=3]
 
-[ext_resource type="PackedScene" path="res://models/objects/01_wall_straight.glb" id="1_model"]
+[ext_resource type="PackedScene" path="res://models/objects/enviroments/01/01_wall_straight.glb" id="1_model"]
 
 [sub_resource type="BoxShape3D" id="Collision"]
 size = Vector3(2.25, 3.2, 0.35)

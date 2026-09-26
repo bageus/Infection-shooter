@@ -1,6 +1,6 @@
 [gd_scene load_steps=3 format=3]
 
-[ext_resource type="PackedScene" path="res://models/objects/27_ammo_case_orange_open.glb" id="1_model"]
+[ext_resource type="PackedScene" path="res://models/objects/enviroments/12/12_ammo_shotgun.glb" id="1_model"]
 [ext_resource type="Script" path="res://game/features/pickups/ammo_pickup.gd" id="2_script"]
 
 [sub_resource type="SphereShape3D" id="PickupShape"]
