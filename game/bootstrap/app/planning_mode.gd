@@ -12,6 +12,8 @@ const HEIGHT_STEP := 0.25
 const LIGHT_DEFAULT_HEIGHT := HEIGHT_STEP * 10.0
 const DARKNESS_DEFAULT_HEIGHT := HEIGHT_STEP * 11.0
 const CAMERA_ROTATE_SPEED := 0.008
+const PLAN_HALF_WIDTH := 40.0
+const PLAN_HALF_DEPTH := 30.0
 
 var host: Node3D
 var camera: Camera3D
@@ -64,145 +66,71 @@ var active_catalog: Array = []
 var map_name_edit: LineEdit
 var map_select: OptionButton
 
-var group_catalogs := {
-	"01": [
-		{"name":"Window Double","path":"res://game/presentation/office_floor/public/structural/window_double.tscn"},
-		{"name":"Wall Straight","path":"res://game/presentation/office_floor/public/structural/wall_straight.tscn"},
-		{"name":"Wall Half","path":"res://game/presentation/office_floor/public/structural/wall_half_panel.tscn"},
-		{"name":"Door Wall 2","path":"res://game/presentation/office_floor/public/structural/wall_door.tscn"},
-		{"name":"Emergency Door","path":"res://game/presentation/office_floor/public/structural/wall_emergency_door.tscn"},
-		{"name":"Column","path":"res://game/presentation/office_floor/public/structural/column.tscn"},
-		{"name":"Floor Pad","path":"res://game/presentation/office_floor/public/structural/floor_pad.tscn"},
-		{"name":"Elevator Passenger","path":"res://game/presentation/office_floor/public/structural/elevator_cabin_passenger.tscn"},
-		{"name":"Elevator Freight","path":"res://game/presentation/office_floor/public/structural/elevator_cabin_freight.tscn"},
-		{"name":"Elevator Door","path":"res://game/presentation/office_floor/public/structural/elevator_door.tscn"},
-		{"name":"Door Wall 2 Empty","path":"res://game/presentation/office_floor/public/structural/wall_door_2_without.tscn"},
-		{"name":"Broken Door 2","path":"res://game/presentation/office_floor/public/structural/only_door_2.tscn"}
-	],
-	"02": [
-		{"name":"Archive Box","path":"res://game/presentation/office_floor/public/props/02_cardboard_archive_box.tscn"},
-		{"name":"Box Closed","path":"res://game/presentation/office_floor/public/props/02_cardboard_box_closed.tscn"},
-		{"name":"Box Open","path":"res://game/presentation/office_floor/public/props/02_cardboard_box_open.tscn"},
-		{"name":"Boxes","path":"res://game/presentation/office_floor/public/props/02_cardboard_boxes.tscn"},
-		{"name":"Boxes 1","path":"res://game/presentation/office_floor/public/props/02_cardboard_boxes_1.tscn"},
-		{"name":"Boxes 2","path":"res://game/presentation/office_floor/public/props/02_cardboard_boxes_2.tscn"},
-		{"name":"Boxes 3","path":"res://game/presentation/office_floor/public/props/02_cardboard_boxes_3.tscn"},
-		{"name":"Boxes 4","path":"res://game/presentation/office_floor/public/props/02_cardboard_boxes_4.tscn"},
-		{"name":"Boxes 5","path":"res://game/presentation/office_floor/public/props/02_cardboard_boxes_5.tscn"},
-		{"name":"Boxes 6","path":"res://game/presentation/office_floor/public/props/02_cardboard_boxes_6.tscn"},
-		{"name":"Boxes 8","path":"res://game/presentation/office_floor/public/props/02_cardboard_boxes_8.tscn"},
-		{"name":"Boxes 11","path":"res://game/presentation/office_floor/public/props/02_cardboard_boxes_11.tscn"},
-		{"name":"Box Stack","path":"res://game/presentation/office_floor/public/props/02_cardboard_boxes_stack.tscn"},
-		{"name":"Box Stack 2","path":"res://game/presentation/office_floor/public/props/02_cardboard_boxes_stack_2.tscn"},
-		{"name":"Box Stack 3","path":"res://game/presentation/office_floor/public/props/02_cardboard_boxes_stack_3.tscn"},
-		{"name":"Box Stack 4","path":"res://game/presentation/office_floor/public/props/02_cardboard_boxes_stack_4.tscn"},
-		{"name":"Box Stack 5","path":"res://game/presentation/office_floor/public/props/02_cardboard_boxes_stack_5.tscn"},
-		{"name":"Box Stack 6","path":"res://game/presentation/office_floor/public/props/02_cardboard_boxes_stack_6.tscn"}
-	],
-	"03": [
-		{"name":"Drawer Cabinet","path":"res://game/presentation/office_floor/public/props/03_drawer_cabinet.tscn"},
-		{"name":"Drawer Cabinet Mobile","path":"res://game/presentation/office_floor/public/props/03_drawer_cabinet_mobile.tscn"},
-		{"name":"File Cabinet Tall","path":"res://game/presentation/office_floor/public/props/03_file_cabinet_tall.tscn"},
-		{"name":"Locker Tall","path":"res://game/presentation/office_floor/public/props/03_locker_tall.tscn"}
-	],
-	"04": [
-		{"name":"Crate Large","path":"res://game/presentation/office_floor/public/props/04_crate_large.tscn"},
-		{"name":"Crate Small","path":"res://game/presentation/office_floor/public/props/04_crate_small.tscn"},
-		{"name":"Plastic Storage Bin","path":"res://game/presentation/office_floor/public/props/04_plastic_storage_bin.tscn"}
-	],
-	"05": [
-		{"name":"Desktop","path":"res://game/presentation/office_floor/public/props/05_desktop.tscn"}
-	],
-	"06": [
-		{"name":"Executive Chair","path":"res://game/presentation/office_floor/public/props/06_executive_chair.tscn"},
-		{"name":"Office Chair","path":"res://game/presentation/office_floor/public/props/06_office_chair.tscn"},
-		{"name":"Office Chair 2","path":"res://game/presentation/office_floor/public/props/06_office_chair_2.tscn"},
-		{"name":"Simple Chair","path":"res://game/presentation/office_floor/public/props/06_simple_chair.tscn"},
-		{"name":"Executive Chair Fallen","path":"res://game/presentation/office_floor/public/props/06_executive_chair_fell.tscn"},
-		{"name":"Office Chair Fallen","path":"res://game/presentation/office_floor/public/props/06_office_chair_fell.tscn"},
-		{"name":"Office Chair 2 Fallen","path":"res://game/presentation/office_floor/public/props/06_office_chair_2_fell.tscn"},
-		{"name":"Simple Chair Fallen","path":"res://game/presentation/office_floor/public/props/06_simple_chair_fell.tscn"}
-	],
-	"07": [
-		{"name":"Table","path":"res://game/presentation/office_floor/public/props/07_table.tscn"},
-		{"name":"Table Longest","path":"res://game/presentation/office_floor/public/props/07_table_longest.tscn"}
-	],
-	"08": [
-		{"name":"Office Desk 2","path":"res://game/presentation/office_floor/public/props/08_office_desk_2.tscn"},
-		{"name":"Desk Lamp","path":"res://game/presentation/office_floor/public/props/08_office_desk_lamp.tscn"},
-		{"name":"Table Square","path":"res://game/presentation/office_floor/public/props/08_table_square.tscn"},
-		{"name":"Workstation Dual","path":"res://game/presentation/office_floor/public/props/08_workstation_dual.tscn"},
-		{"name":"Workstation Partitioned","path":"res://game/presentation/office_floor/public/props/08_workstation_partitioned.tscn"},
-		{"name":"Workstation Partitioned Dual","path":"res://game/presentation/office_floor/public/props/08_workstation_partitioned_dual.tscn"},
-		{"name":"Workstation Quad","path":"res://game/presentation/office_floor/public/props/08_workstation_quad.tscn"},
-		{"name":"Workstation Quad Without","path":"res://game/presentation/office_floor/public/props/08_workstation_quad_without.tscn"}
-	],
-	"09": [
-		{"name":"Standing Desk","path":"res://game/presentation/office_floor/public/props/09_standing_desk.tscn"}
-	],
-	"10": [
-		{"name":"Coffee Table","path":"res://game/presentation/office_floor/public/props/10_coffee_table.tscn"},
-		{"name":"Coffee Table + Sofa","path":"res://game/presentation/office_floor/public/props/10_coffee_table_and_sofa.tscn"},
-		{"name":"Sofa","path":"res://game/presentation/office_floor/public/props/10_sofa.tscn"}
-	],
-	"11": [
-		{"name":"Plant Large","path":"res://game/presentation/office_floor/public/props/11_plant_large.tscn"},
-		{"name":"Plant Medium","path":"res://game/presentation/office_floor/public/props/11_plant_medium.tscn"},
-		{"name":"Plant Small","path":"res://game/presentation/office_floor/public/props/11_plant_small.tscn"}
-	],
-	"14": [
-		{"name":"Fire Extinguisher","path":"res://game/presentation/office_floor/public/props/14_fire_extinguisher.tscn"},
-		{"name":"Water Cooler","path":"res://game/presentation/office_floor/public/props/14_water_cooler.tscn"}
-	],
-	"16": [
-		{"name":"Kitchen Lower Complete","path":"res://game/presentation/office_floor/public/props/16_kitchen_lower_complete.tscn"},
-		{"name":"Kitchen Upper 4","path":"res://game/presentation/office_floor/public/props/16_kitchen_upper_4.tscn"},
-		{"name":"Refrigerator","path":"res://game/presentation/office_floor/public/props/16_refrigerator.tscn"},
-		{"name":"Round Dining Table","path":"res://game/presentation/office_floor/public/props/16_round_dining_table.tscn"},
-		{"name":"Sink Pedestal","path":"res://game/presentation/office_floor/public/props/16_sink_pedestal.tscn"},
-		{"name":"Snack Vending Machine","path":"res://game/presentation/office_floor/public/props/16_snack_vending_machine.tscn"},
-		{"name":"Toilet Floor","path":"res://game/presentation/office_floor/public/props/16_toilet_floor.tscn"},
-		{"name":"Wall Hand Dryer","path":"res://game/presentation/office_floor/public/props/16_wall_hand_dryer.tscn"},
-		{"name":"Wall Mirror","path":"res://game/presentation/office_floor/public/props/16_wall_mirror.tscn"},
-		{"name":"Wall Urinal","path":"res://game/presentation/office_floor/public/props/16_wall_urinal.tscn"}
-	],
-	"13": [
-		{"name":"Glass Wall Full","path":"res://game/presentation/office_floor/public/structural/glass_wall_full.tscn"},
-		{"name":"Glass Partition Half","path":"res://game/presentation/office_floor/public/structural/glass_partition_half.tscn"},
-		{"name":"Glass Partition Blinds","path":"res://game/presentation/office_floor/public/structural/glass_partition_blinds.tscn"},
-		{"name":"Sliding Glass Door","path":"res://game/presentation/office_floor/public/structural/sliding_glass_door.tscn"}
-	]
-}
+const ENVIRONMENT_ROOT := "res://models/objects/enviroments"
+const ENVIRONMENT_SCENE := preload("res://game/presentation/office_floor/public/props/environment_prop.tscn")
+
+var group_catalogs: Dictionary = {}
+
+
+func _build_environment_catalogs() -> void:
+	group_catalogs.clear()
+	for group_index in range(1, 14):
+		var group := "%02d" % group_index
+		var directory := ENVIRONMENT_ROOT + "/" + group
+		var entries: Array = []
+		group_catalogs[group] = entries
+		var handle := DirAccess.open(directory)
+		if handle == null:
+			continue
+		handle.list_dir_begin()
+		var file_name := handle.get_next()
+		while not file_name.is_empty():
+			if not handle.current_is_dir() and file_name.to_lower().ends_with(".glb"):
+				var model_path := directory + "/" + file_name
+				var special_scene := _environment_scene_for(file_name)
+				entries.append({
+					"name": file_name.get_basename().replace("_", " "),
+					"path": special_scene if not special_scene.is_empty() else model_path,
+					"kind": "" if not special_scene.is_empty() else "environment"
+				})
+			file_name = handle.get_next()
+		handle.list_dir_end()
+		entries.sort_custom(func(a, b): return str(a["name"]).naturalnocasecmp_to(str(b["name"])) < 0)
+		group_catalogs[group] = entries
+
+
+func _environment_scene_for(file_name: String) -> String:
+	var structural := {
+		"01_column.glb": "column", "01_elevator_cabin_freight.glb": "elevator_cabin_freight",
+		"01_elevator_cabin_passenger.glb": "elevator_cabin_passenger", "01_elevator_door.glb": "elevator_door",
+		"01_floor_pad.glb": "floor_pad", "01_wall_door.glb": "wall_door",
+		"01_wall_door_without.glb": "wall_door_2_without", "01_wall_emergency_door.glb": "wall_emergency_door",
+		"01_wall_half_panel.glb": "wall_half_panel", "01_wall_straight.glb": "wall_straight",
+		"01_window_double.glb": "window_double", "01_only_door.glb": "only_door_2",
+		"01_glass_door_breakable.glb": "sliding_glass_door",
+		"01_glass_partition_blinds_breakable.glb": "glass_partition_blinds",
+		"01_glass_partition_half_breakable.glb": "glass_partition_half",
+		"01_glass_wall_full_breakable.glb": "glass_wall_full"
+	}
+	if structural.has(file_name):
+		return "res://game/presentation/office_floor/public/structural/" + str(structural[file_name]) + ".tscn"
+	if file_name == "07_table.glb":
+		return "res://game/presentation/office_floor/public/props/07_table.tscn"
+	var pickups := {
+		"12_ammo_pistols.glb": "ammo_pistol_pickup", "12_ammo_shotgun.glb": "ammo_shotgun_pickup",
+		"12_ammo_uzi.glb": "ammo_uzi_pickup", "12_antidote.glb": "antidote_pickup",
+		"12_medkit.glb": "medkit_pickup"
+	}
+	if pickups.has(file_name):
+		return "res://game/features/pickups/public/" + str(pickups[file_name]) + ".tscn"
+	return ""
+
 
 var lighting_catalog := [
 	{"name":"Omni Light","path":"res://game/presentation/office_floor/public/props/planner_light.tscn","kind":"light"},
 	{"name":"Permanent Darkness","path":"res://game/presentation/office_floor/public/props/darkness_zone.tscn","kind":"darkness"},
 	{"name":"Exploration Darkness","path":"res://game/presentation/office_floor/public/props/darkness_zone.tscn","kind":"exploration_darkness"}
 ]
-
-var office_set_catalog: Array = []
-
-
-func _build_office_set_catalog() -> void:
-	office_set_catalog.clear()
-	var dir_path := "res://models/objects/Office_Set/FBX/Separated"
-	var dir := DirAccess.open(dir_path)
-	if dir == null:
-		return
-	dir.list_dir_begin()
-	var file_name := dir.get_next()
-	while not file_name.is_empty():
-		if not dir.current_is_dir() and file_name.to_lower().ends_with(".fbx"):
-			var base := file_name.get_basename()
-			office_set_catalog.append({
-				"name": base.replace("_", " "),
-				"path": dir_path + "/" + file_name,
-				"kind": "office_set"
-			})
-		file_name = dir.get_next()
-	dir.list_dir_end()
-	office_set_catalog.sort_custom(func(a, b): return str(a["name"]).naturalnocasecmp_to(str(b["name"])) < 0)
-
 
 var actor_catalog := [
 	{"name":"Player Spawn","path":"","kind":"player"},
@@ -247,19 +175,14 @@ func setup(app_owner: Node3D, planning_root: Node3D, planning_ui: Control) -> vo
 		host.get_node("Radar"),
 		host.get_node_or_null("FogOfWar")
 	]
-	_build_office_set_catalog()
+	_build_environment_catalogs()
 	active_catalog = group_catalogs["01"]
 	_rebuild_palette()
 	palette.item_selected.connect(_on_palette_selected)
 	ui.get_node("Panel/VBox/Tabs/Structure").pressed.connect(_show_structure_catalog)
 	ui.get_node("Panel/VBox/Tabs/Actors").pressed.connect(_show_actor_catalog)
 	ui.get_node("Panel/VBox/Tabs/Lighting").pressed.connect(_show_lighting_catalog)
-	var office_button := ui.get_node_or_null("Panel/VBox/Tabs/OfficeSet") as Button
-	if office_button != null:
-		office_button.pressed.connect(_show_office_set_catalog)
-	for group_name in ["01","02","03","04","05","06","07","08","09","10","11","13","14","16","17"]:
-		if group_name == "17":
-			continue
+	for group_name in ["01","02","03","04","05","06","07","08","09","10","11","12","13"]:
 		var button := ui.get_node("Panel/VBox/GroupTabs/G" + group_name) as Button
 		button.pressed.connect(_show_structure_group.bind(group_name))
 	ui.get_node("Panel/VBox/MapManager/Buttons/SaveMap").pressed.connect(save_named_map)
@@ -468,7 +391,7 @@ func _show_structure_catalog() -> void:
 func _show_structure_group(group_name: String) -> void:
 	light_defaults.hide()
 	_reset_selection()
-	active_catalog = group_catalogs.get(group_name, group_catalogs["01"])
+	active_catalog = group_catalogs.get(group_name, [])
 	_rebuild_palette()
 	status.text = "STRUCTURE " + group_name
 
@@ -480,14 +403,6 @@ func _show_lighting_catalog() -> void:
 	active_catalog = lighting_catalog
 	_rebuild_palette()
 	status.text = "LIGHTING | lights and darkness zones"
-
-
-func _show_office_set_catalog() -> void:
-	light_defaults.hide()
-	_reset_selection()
-	active_catalog = office_set_catalog
-	_rebuild_palette()
-	status.text = "OFFICE SET | %d models" % office_set_catalog.size()
 
 
 func _show_actor_catalog() -> void:
@@ -515,17 +430,45 @@ func _show_planning_grid() -> void:
 	material.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
 	material.albedo_color = Color(0.1, 0.75, 1.0, 0.38)
 	mesh.surface_begin(Mesh.PRIMITIVE_LINES, material)
-	var extent := 40
-	var step := 1.0
-	for i in range(-extent, extent + 1):
-		var p := float(i) * step
-		mesh.surface_add_vertex(Vector3(p, 0.012, -float(extent)))
-		mesh.surface_add_vertex(Vector3(p, 0.012, float(extent)))
-		mesh.surface_add_vertex(Vector3(-float(extent), 0.012, p))
-		mesh.surface_add_vertex(Vector3(float(extent), 0.012, p))
+	for x in range(-int(PLAN_HALF_WIDTH), int(PLAN_HALF_WIDTH) + 1):
+		mesh.surface_add_vertex(Vector3(x, 0.012, -PLAN_HALF_DEPTH))
+		mesh.surface_add_vertex(Vector3(x, 0.012, PLAN_HALF_DEPTH))
+	for z in range(-int(PLAN_HALF_DEPTH), int(PLAN_HALF_DEPTH) + 1):
+		mesh.surface_add_vertex(Vector3(-PLAN_HALF_WIDTH, 0.012, z))
+		mesh.surface_add_vertex(Vector3(PLAN_HALF_WIDTH, 0.012, z))
+	mesh.surface_end()
+	var red := StandardMaterial3D.new()
+	red.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
+	red.cull_mode = BaseMaterial3D.CULL_DISABLED
+	red.albedo_color = Color(1.0, 0.06, 0.06)
+	mesh.surface_begin(Mesh.PRIMITIVE_TRIANGLES, red)
+	_add_grid_rectangle(mesh, Vector3(-PLAN_HALF_WIDTH, 0.035, -0.045), Vector3(PLAN_HALF_WIDTH, 0.035, 0.045))
+	_add_grid_rectangle(mesh, Vector3(-0.045, 0.035, -PLAN_HALF_DEPTH), Vector3(0.045, 0.035, PLAN_HALF_DEPTH))
+	_add_grid_marker(mesh, Vector2.ZERO, 0.7)
+	for x in [-PLAN_HALF_WIDTH * 0.5, PLAN_HALF_WIDTH * 0.5]:
+		for z in [-PLAN_HALF_DEPTH * 0.5, PLAN_HALF_DEPTH * 0.5]:
+			_add_grid_marker(mesh, Vector2(x, z), 0.5)
 	mesh.surface_end()
 	planning_grid.mesh = mesh
 	host.add_child(planning_grid)
+
+
+func _add_grid_rectangle(mesh: ImmediateMesh, minimum: Vector3, maximum: Vector3) -> void:
+	var a := Vector3(minimum.x, minimum.y, minimum.z)
+	var b := Vector3(maximum.x, minimum.y, minimum.z)
+	var c := Vector3(maximum.x, minimum.y, maximum.z)
+	var d := Vector3(minimum.x, minimum.y, maximum.z)
+	for vertex in [a, b, c, a, c, d]:
+		mesh.surface_add_vertex(vertex)
+
+
+func _add_grid_marker(mesh: ImmediateMesh, center: Vector2, radius: float) -> void:
+	for sector in 16:
+		var first := TAU * float(sector) / 16.0
+		var second := TAU * float(sector + 1) / 16.0
+		mesh.surface_add_vertex(Vector3(center.x, 0.045, center.y))
+		mesh.surface_add_vertex(Vector3(center.x + cos(first) * radius, 0.045, center.y + sin(first) * radius))
+		mesh.surface_add_vertex(Vector3(center.x + cos(second) * radius, 0.045, center.y + sin(second) * radius))
 
 
 func _hide_planning_grid() -> void:
@@ -751,6 +694,17 @@ func _visual_object_at(screen_pos: Vector2) -> Node3D:
 	return best
 
 
+func _instantiate_asset(asset_path: String) -> Node3D:
+	if asset_path.begins_with(ENVIRONMENT_ROOT + "/") and asset_path.ends_with(".glb"):
+		var environment := ENVIRONMENT_SCENE.instantiate() as Node3D
+		environment.set("model_path", asset_path)
+		return environment
+	var packed := load(asset_path) as PackedScene
+	if packed == null:
+		return null
+	return packed.instantiate() as Node3D
+
+
 func _rebuild_preview() -> void:
 	_clear_preview()
 	if _selected_kind() == "player":
@@ -759,20 +713,9 @@ func _rebuild_preview() -> void:
 		return
 	if selected_path.is_empty():
 		return
-	var scene: PackedScene
-	if selected_kind == "office_set":
-		var wrapper := load("res://game/presentation/office_floor/office_set_prop.gd") as Script
-		var office_node := Node3D.new()
-		office_node.set_script(wrapper)
-		office_node.set("model_path", selected_path)
-		var temp := PackedScene.new()
-		temp.pack(office_node)
-		scene = temp
-	else:
-		scene = load(selected_path) as PackedScene
-	if scene == null:
+	preview = _instantiate_asset(selected_path)
+	if preview == null:
 		return
-	preview = scene.instantiate() as Node3D
 	host.add_child(preview)
 	if _selected_kind() == "light" and preview.has_method("set_planning_visual"):
 		preview.call_deferred("set_planning_visual", true)
@@ -841,10 +784,9 @@ func _place_selected(screen_pos: Vector2) -> void:
 		return
 	if selected_path.is_empty():
 		return
-	var scene := load(selected_path) as PackedScene
-	if scene == null:
+	var node := _instantiate_asset(selected_path)
+	if node == null:
 		return
-	var node := scene.instantiate() as Node3D
 	if kind == "exploration_darkness":
 		node.set("permanent", false)
 		node.set_meta("planning_permanent", false)
@@ -1313,10 +1255,9 @@ func _apply_layout_data(data: Dictionary) -> void:
 			continue
 		if scene_path.is_empty() or not ResourceLoader.exists(scene_path):
 			continue
-		var scene := load(scene_path) as PackedScene
-		if scene == null:
+		var node := _instantiate_asset(scene_path)
+		if node == null:
 			continue
-		var node := scene.instantiate() as Node3D
 		var load_kind := "enemy" if scene_path in [
 			"res://game/features/infected/public/infected_capsule.tscn",
 			"res://game/features/infected/public/mutant_level2.tscn"
@@ -1377,10 +1318,7 @@ func _save_authored_scene() -> Error:
 		var scene_path := str(node.get_meta("planning_scene_path", ""))
 		if scene_path.is_empty():
 			continue
-		var packed := load(scene_path) as PackedScene
-		if packed == null:
-			continue
-		var copy := packed.instantiate() as Node3D
+		var copy := _instantiate_asset(scene_path)
 		if copy == null:
 			continue
 		scene_root.add_child(copy)
@@ -1391,7 +1329,8 @@ func _save_authored_scene() -> Error:
 			copy.set_meta("planning_light_angle", node.get_meta("planning_light_angle", 48.0))
 			copy.set_meta("planning_flicker_mode", node.get_meta("planning_flicker_mode", 0))
 			copy.set_meta("planning_flicker_step", node.get_meta("planning_flicker_step", 0.2))
-		_assign_owner_recursive(copy, scene_root)
+		if not scene_path.begins_with(ENVIRONMENT_ROOT + "/"):
+			_assign_owner_recursive(copy, scene_root)
 	var packed_layout := PackedScene.new()
 	var pack_error := packed_layout.pack(scene_root)
 	if pack_error != OK:
@@ -1423,6 +1362,20 @@ func _migrate_scene_path(old_path: String) -> String:
 	}
 	if replacements.has(old_path):
 		return str(replacements[old_path])
+	if old_path.begins_with("res://models/objects/Office_Set/"):
+		return ""
+	var legacy_prop := "res://game/presentation/office_floor/public/props/"
+	if old_path.begins_with(legacy_prop) and old_path.ends_with(".tscn"):
+		if old_path.get_file() in ["planner_light.tscn", "darkness_zone.tscn", "environment_prop.tscn"]:
+			return old_path
+		if old_path.get_file() == "07_table.tscn":
+			return old_path
+		var legacy_name := old_path.get_file().get_basename().substr(3).to_lower()
+		for group in group_catalogs.values():
+			for entry: Dictionary in group:
+				if str(entry["name"]).substr(3).replace(" ", "_").to_lower() == legacy_name:
+					return str(entry["path"])
+		return ""
 	return old_path
 
 

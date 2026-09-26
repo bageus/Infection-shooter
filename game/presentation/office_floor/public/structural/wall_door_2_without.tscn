@@ -1,6 +1,6 @@
 [gd_scene load_steps=3 format=3]
 
-[ext_resource type="PackedScene" path="res://models/objects/01_wall_door_2_without.glb" id="1_model"]
+[ext_resource type="PackedScene" path="res://models/objects/enviroments/01/01_wall_door_without.glb" id="1_model"]
 [ext_resource type="Script" path="res://game/presentation/office_floor/mesh_collision_builder.gd" id="2_collision"]
 
 [node name="WallDoor2Without" type="Node3D"]

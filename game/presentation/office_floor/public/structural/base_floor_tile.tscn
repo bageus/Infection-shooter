@@ -1,7 +1,8 @@
 [gd_scene load_steps=2 format=3]
 
-[ext_resource type="PackedScene" path="res://models/objects/01_floor_pad.glb" id="1_model"]
+[ext_resource type="PackedScene" path="res://models/objects/enviroments/01/01_floor_2x2.glb" id="1_model"]
 
 [node name="BaseFloorTile" type="Node3D"]
 
 [node name="Visual" parent="." instance=ExtResource("1_model")]
+position = Vector3(-1, 0, 1)

@@ -171,13 +171,11 @@ text = "ACTORS"
 layout_mode = 2
 size_flags_horizontal = 3
 text = "LIGHTING"
-[node name="OfficeSet" type="Button" parent="PlanningUI/Panel/VBox/Tabs"]
-layout_mode = 2
-text = "OFFICE SET"
 
 
-[node name="GroupTabs" type="HBoxContainer" parent="PlanningUI/Panel/VBox"]
+[node name="GroupTabs" type="GridContainer" parent="PlanningUI/Panel/VBox"]
 layout_mode = 2
+columns = 7
 
 [node name="G01" type="Button" parent="PlanningUI/Panel/VBox/GroupTabs"]
 layout_mode = 2
@@ -223,13 +221,9 @@ text = "05"
 layout_mode = 2
 text = "09"
 
-[node name="G14" type="Button" parent="PlanningUI/Panel/VBox/GroupTabs"]
+[node name="G12" type="Button" parent="PlanningUI/Panel/VBox/GroupTabs"]
 layout_mode = 2
-text = "14"
-
-[node name="G16" type="Button" parent="PlanningUI/Panel/VBox/GroupTabs"]
-layout_mode = 2
-text = "16"
+text = "12"
 
 [node name="G13" type="Button" parent="PlanningUI/Panel/VBox/GroupTabs"]
 layout_mode = 2

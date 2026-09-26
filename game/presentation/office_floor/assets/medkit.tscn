@@ -1,6 +1,6 @@
 [gd_scene load_steps=2 format=3]
 
-[ext_resource type="PackedScene" path="res://models/objects/24_medkit_closed.glb" id="1_model"]
+[ext_resource type="PackedScene" path="res://models/objects/enviroments/12/12_medkit.glb" id="1_model"]
 
 [node name="Medkit" instance=ExtResource("1_model")]
 rotation_degrees = Vector3(-90, 0, 0)
