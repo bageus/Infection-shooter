@@ -1,0 +1,44 @@
+[remap]
+
+importer="texture"
+type="CompressedTexture2D"
+uid="uid://7wd1l5llbosq"
+path.s3tc="res://.godot/imported/09_fire_extinguisher_Image_11.png-67efef38e4a57a1037a8eb89002dfab1.s3tc.ctex"
+metadata={
+"imported_formats": ["s3tc_bptc"],
+"vram_texture": true
+}
+generator_parameters={
+"md5": "1a162d0c18a41f792d8b8ce1c7cd47f9"
+}
+
+[deps]
+
+source_file="res://models/objects/enviroments/09/09_fire_extinguisher_Image_11.png"
+dest_files=["res://.godot/imported/09_fire_extinguisher_Image_11.png-67efef38e4a57a1037a8eb89002dfab1.s3tc.ctex"]
+
+[params]
+
+compress/mode=2
+compress/high_quality=false
+compress/lossy_quality=0.7
+compress/uastc_level=0
+compress/rdo_quality_loss=0.0
+compress/hdr_compression=1
+compress/normal_map=1
+compress/channel_pack=0
+mipmaps/generate=true
+mipmaps/limit=-1
+roughness/mode=1
+roughness/src_normal="res://models/objects/enviroments/09/09_fire_extinguisher_Image_11.png"
+process/channel_remap/red=0
+process/channel_remap/green=1
+process/channel_remap/blue=2
+process/channel_remap/alpha=3
+process/fix_alpha_border=true
+process/premult_alpha=false
+process/normal_map_invert_y=false
+process/hdr_as_srgb=false
+process/hdr_clamp_exposure=false
+process/size_limit=0
+detect_3d/compress_to=0
