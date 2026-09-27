@@ -1,3 +1,6 @@
+Warning: truncated output (original token count: 13336)
+Total output lines: 1458
+
 extends Node
 
 const SAVE_PATH := "user://planned_layout.json"
@@ -68,6 +71,9 @@ var map_select: OptionButton
 
 const ENVIRONMENT_ROOT := "res://models/objects/enviroments"
 const ENVIRONMENT_SCENE := preload("res://game/presentation/office_floor/public/props/environment_prop.tscn")
+const WORKSTATIONS := preload("res://game/bootstrap/app/workstation_templates.gd")
+
+var workstation_transforms: Dictionary = {}
 
 var group_catalogs: Dictionary = {}
 
@@ -206,6 +212,7 @@ func setup(app_owner: Node3D, planning_root: Node3D, planning_ui: Control) -> vo
 
 func enter() -> void:
 	active = true
+	workstation_transforms.clear()
 	var planning_lighting := host.get_node_or_null("PlanningLighting")
 	if planning_lighting != null:
 		planning_lighting.call("set_planning_mode", true)
@@ -259,6 +266,7 @@ func exit() -> void:
 func _process(delta: float) -> void:
 	if not active:
 		return
+	_sync_workstations()
 	if _text_field_has_focus():
 		return
 	var input := Vector2.ZERO
@@ -522,380 +530,7 @@ func _update_light_ui() -> void:
 		light = target.find_child("Light", true, false) as Light3D
 	var show_light := light != null
 	light_info.visible = show_light
-	light_level.visible = show_light
-	light_angle_info.visible = show_light and light is SpotLight3D
-	light_angle.visible = show_light and light is SpotLight3D
-	ui.get_node("Panel/VBox/SelectedFlicker").visible = show_light and selected != null
-	ui.get_node("Panel/VBox/SelectedFlickerStep").visible = show_light and selected != null
-	if show_light:
-		light_info.text = "LIGHT %.2f / 16.00" % light.light_energy
-		light_level.value = light.light_energy
-		if light is SpotLight3D:
-			var spot := light as SpotLight3D
-			light_angle_info.text = "CONE %.0f°" % spot.spot_angle
-			light_angle.value = spot.spot_angle
-		if selected != null:
-			editing_flicker = true
-			selected_flicker_mode.select(int(target.get_meta("planning_flicker_mode", 0)))
-			selected_flicker_step.value = float(target.get_meta("planning_flicker_step", 0.2))
-			editing_flicker = false
-
-
-func _on_selected_flicker_changed(_index: int) -> void:
-	if not editing_flicker:
-		selected_flicker_step.value = _recommended_flicker_step(selected_flicker_mode.get_selected_id())
-	_apply_selected_flicker()
-
-
-func _on_default_flicker_mode_changed(_index: int) -> void:
-	default_flicker_step.value = _recommended_flicker_step(default_flicker_mode.get_selected_id())
-
-
-func _recommended_flicker_step(mode: int) -> float:
-	match mode:
-		1: return 0.12
-		2: return 0.75
-		3: return 1.5
-	return 0.2
-
-
-func _on_selected_flicker_step_changed(_value: float) -> void:
-	_apply_selected_flicker()
-
-
-func _apply_selected_flicker() -> void:
-	if editing_flicker or selected == null or not selected.has_method("configure_flicker"):
-		return
-	selected.call("configure_flicker", selected_flicker_mode.get_selected_id(), selected_flicker_step.value)
-
-
-func _show_selection_highlight(node: Node3D) -> void:
-	var aabb := _combined_aabb(node, true)
-	selection_source_aabb = aabb
-	if aabb.size.length_squared() <= 0.0001:
-		return
-	selection_box = MeshInstance3D.new()
-	var box := BoxMesh.new()
-	box.size = aabb.size + Vector3(0.08, 0.08, 0.08)
-	var material := StandardMaterial3D.new()
-	material.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
-	material.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
-	material.albedo_color = Color(0.1, 0.85, 1.0, 0.16)
-	material.no_depth_test = true
-	box.material = material
-	selection_box.mesh = box
-	selection_box.set_meta("planning_selection_highlight", true)
-	node.add_child(selection_box)
-	selection_box.position = aabb.get_center()
-
-
-func _clear_selection_highlight() -> void:
-	if selection_box != null and is_instance_valid(selection_box):
-		selection_box.queue_free()
-	selection_box = null
-	selection_source_aabb = AABB()
-
-
-func _register_existing_scene_objects() -> void:
-	_register_editable_children(structure_root)
-
-
-func _register_editable_children(parent: Node) -> void:
-	for child in parent.get_children():
-		if child is Node3D:
-			var node := child as Node3D
-			if _is_editable_scene_object(node):
-				if not placed.has(node):
-					placed.append(node)
-				node.set_meta("planning_existing", true)
-			else:
-				_register_editable_children(node)
-
-
-func _activate_all_enemies() -> void:
-	for child in enemies_root.get_children():
-		if child.has_method("set_target"):
-			child.call("set_target", main_player)
-
-
-func _register_actor_objects() -> void:
-	if main_player != null and not placed.has(main_player):
-		placed.append(main_player)
-		main_player.set_meta("planning_actor_kind", "player")
-		main_player.set_meta("planning_existing", true)
-	for child in enemies_root.get_children():
-		if child is Node3D:
-			var enemy := child as Node3D
-			if not placed.has(enemy):
-				placed.append(enemy)
-			enemy.set_meta("planning_actor_kind", "enemy")
-			enemy.set_meta("planning_existing", true)
-
-
-func _is_editable_scene_object(node: Node3D) -> bool:
-	if node == root or node == structure_root:
-		return false
-	return _find_collision_descendant(node) != null and node.get_parent() != host
-
-
-func _find_collision_descendant(node: Node) -> CollisionObject3D:
-	if node is CollisionObject3D:
-		return node as CollisionObject3D
-	for child in node.get_children():
-		var found := _find_collision_descendant(child)
-		if found != null:
-			return found
-	return null
-
-
-func _editable_root_from_collider(collider: Node) -> Node3D:
-	var node: Node = collider
-	while node != null:
-		if node.get_parent() == root:
-			return node as Node3D
-		if node is Node3D and placed.has(node):
-			return node as Node3D
-		if node.get_parent() == structure_root:
-			return node as Node3D
-		node = node.get_parent()
-	return null
-
-
-func _planned_object_at(screen_pos: Vector2) -> Node3D:
-	var direct := _visual_object_at(screen_pos)
-	if direct != null:
-		return direct
-	var origin := camera.project_ray_origin(screen_pos)
-	var end := origin + camera.project_ray_normal(screen_pos) * 300.0
-	var query := PhysicsRayQueryParameters3D.create(origin, end)
-	var hit := camera.get_world_3d().direct_space_state.intersect_ray(query)
-	if hit.is_empty():
-		return null
-	var collider := hit.get("collider") as Node
-	if collider == null:
-		return null
-	return _editable_root_from_collider(collider)
-
-
-func _visual_object_at(screen_pos: Vector2) -> Node3D:
-	var ray_origin := camera.project_ray_origin(screen_pos)
-	var ray_direction := camera.project_ray_normal(screen_pos)
-	var best: Node3D
-	var best_distance := INF
-	for node in placed:
-		if not is_instance_valid(node):
-			continue
-		var aabb := _combined_aabb(node)
-		if aabb.size.length_squared() <= 0.0001:
-			continue
-		var world_aabb := node.global_transform * aabb
-		var hit: Variant = world_aabb.intersects_ray(ray_origin, ray_direction)
-		if hit == null:
-			continue
-		var hit_position: Vector3 = hit as Vector3
-		var distance: float = ray_origin.distance_to(hit_position)
-		if distance < best_distance:
-			best_distance = distance
-			best = node
-	return best
-
-
-func _instantiate_asset(asset_path: String) -> Node3D:
-	if asset_path.begins_with(ENVIRONMENT_ROOT + "/") and asset_path.ends_with(".glb"):
-		var environment := ENVIRONMENT_SCENE.instantiate() as Node3D
-		environment.set("model_path", asset_path)
-		return environment
-	var packed := load(asset_path) as PackedScene
-	if packed == null:
-		return null
-	return packed.instantiate() as Node3D
-
-
-func _rebuild_preview() -> void:
-	_clear_preview()
-	if _selected_kind() == "player":
-		preview = _make_player_spawn_preview()
-		host.add_child(preview)
-		return
-	if selected_path.is_empty():
-		return
-	preview = _instantiate_asset(selected_path)
-	if preview == null:
-		return
-	host.add_child(preview)
-	if _selected_kind() == "light" and preview.has_method("set_planning_visual"):
-		preview.call_deferred("set_planning_visual", true)
-	_set_preview_collision(preview, true)
-	_apply_special_default_height(preview, _selected_kind())
-
-
-func _selected_kind() -> String:
-	return selected_kind
-
-
-func _make_player_spawn_preview() -> Node3D:
-	var marker := MeshInstance3D.new()
-	var mesh := CylinderMesh.new()
-	mesh.top_radius = 0.45
-	mesh.bottom_radius = 0.45
-	mesh.height = 1.8
-	var material := StandardMaterial3D.new()
-	material.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
-	material.albedo_color = Color(0.15, 0.55, 1.0, 0.45)
-	mesh.material = material
-	marker.mesh = mesh
-	marker.set_meta("planning_spawn_preview", true)
-	return marker
-
-
-func _clear_preview() -> void:
-	light_info.hide()
-	light_level.hide()
-	light_angle_info.hide()
-	light_angle.hide()
-	ui.get_node("Panel/VBox/SelectedFlicker").hide()
-	ui.get_node("Panel/VBox/SelectedFlickerStep").hide()
-	if preview != null and is_instance_valid(preview):
-		preview.queue_free()
-	preview = null
-
-
-func _update_preview(screen_pos: Vector2) -> void:
-	if preview == null:
-		return
-	var world := _screen_to_surface(screen_pos, preview)
-	if not world.is_finite():
-		return
-	preview.global_position = _snap_position_for(preview, world)
-	_apply_special_default_height(preview, _selected_kind())
-	_apply_wall_mount(preview)
-	preview.rotation_degrees.y = rotation_y
-	_update_light_ui()
-
-
-func _place_selected(screen_pos: Vector2) -> void:
-	var placement_probe := preview
-	var world := _screen_to_surface(screen_pos, placement_probe)
-	if not world.is_finite():
-		return
-	var kind := _selected_kind()
-	if kind == "player":
-		main_player.global_position = _snap(world) + Vector3(0.0, 1.0, 0.0)
-		main_player.rotation_degrees.y = rotation_y
-		player_spawn_defined = true
-		player_spawn_transform = main_player.transform
-		main_player.set_meta("planning_scene_path", "res://game/features/player/public/player.tscn")
-		status.text = "Player spawn set"
-		_rebuild_preview()
-		return
-	if selected_path.is_empty():
-		return
-	var node := _instantiate_asset(selected_path)
-	if node == null:
-		return
-	if kind == "exploration_darkness":
-		node.set("permanent", false)
-		node.set_meta("planning_permanent", false)
-	elif kind == "darkness":
-		node.set("permanent", true)
-		node.set_meta("planning_permanent", true)
-	var target_parent := enemies_root if kind == "enemy" else root
-	target_parent.add_child(node)
-	node.global_position = _snap_position_for(node, world)
-	_apply_special_default_height(node, kind)
-	if preview != null and preview.has_meta("planning_wall_normal"):
-		node.set_meta("planning_wall_normal", preview.get_meta("planning_wall_normal"))
-	_apply_wall_mount(node)
-	if kind == "enemy":
-		node.global_position.y = 1.0
-		node.set_meta("planning_actor_kind", "enemy")
-		if node.has_method("set_target"):
-			node.call("set_target", main_player)
-	node.rotation_degrees.y = rotation_y
-	node.set_meta("planning_scene_path", selected_path)
-	placed.append(node)
-	if kind == "light" and node.has_method("set_planning_visual"):
-		node.call("set_planning_visual", true)
-	_select(null)
-	_rebuild_preview()
-	if preview != null:
-		preview.global_position = _snap_position_for(preview, world)
-		preview.rotation_degrees.y = rotation_y
-	status.text = "Placed | same object remains active | RMB cancel"
-
-
-func _delete_at(screen_pos: Vector2) -> void:
-	var node := _planned_object_at(screen_pos)
-	if node != null:
-		_delete_node(node)
-
-
-func _delete_selected() -> void:
-	if selected != null:
-		_delete_node(selected)
-
-
-func _delete_node(node: Node3D) -> void:
-	if node == main_player or str(node.get_meta("planning_actor_kind", "")) == "player":
-		status.text = "Player spawn cannot be deleted; move it instead"
-		return
-	_clear_selection_highlight()
-	placed.erase(node)
-	if selected == node:
-		selected = null
-	node.queue_free()
-	_update_status()
-
-
-func _rotate_selected(amount: float) -> void:
-	if selected != null:
-		selected.rotation_degrees.y = fmod(selected.rotation_degrees.y + amount + 360.0, 360.0)
-	elif preview != null:
-		rotation_y = fmod(rotation_y + amount + 360.0, 360.0)
-		preview.rotation_degrees.y = rotation_y
-	_update_status()
-
-
-func _scale_selected(delta_scale: Vector3) -> void:
-	if selected == null:
-		return
-	var next := selected.scale + delta_scale
-	next.x = maxf(next.x, 0.1)
-	next.y = maxf(next.y, 0.1)
-	next.z = maxf(next.z, 0.1)
-	selected.scale = next
-	_update_status()
-
-
-func _nudge_selected(input: Vector2) -> void:
-	if selected == null:
-		return
-	var forward := -camera.global_transform.basis.z
-	forward.y = 0.0
-	forward = forward.normalized()
-	var right := camera.global_transform.basis.x
-	right.y = 0.0
-	right = right.normalized()
-	var motion := (right * input.x + forward * -input.y) * GRID_SIZE
-	selected.global_position += motion
-	selected.global_position.x = roundf(selected.global_position.x / GRID_SIZE) * GRID_SIZE
-	selected.global_position.z = roundf(selected.global_position.z / GRID_SIZE) * GRID_SIZE
-	_update_status()
-
-
-func _adjust_selected_light_angle(amount: float) -> void:
-	if selected == null:
-		return
-	var light := selected.find_child("Light", true, false) as SpotLight3D
-	if light == null:
-		return
-	light.spot_angle = clampf(light.spot_angle + amount, 5.0, 89.0)
-	selected.set_meta("planning_light_angle", light.spot_angle)
-	_update_light_ui()
-	status.text = "LIGHT | cone %.0f° | , / . adjust" % light.spot_angle
-
-
-func _adjust_selected_light(amount: float) -> void:
+	light_level.visible = sho…3336 tokens truncated…ted_light(amount: float) -> void:
 	if selected == null:
 		return
 	var light := selected.find_child("Light", true, false) as Light3D
@@ -1153,6 +788,8 @@ func _collect_layout_data() -> Dictionary:
 			save_position = enemy_spawn.origin
 		objects.append({
 			"scene": scene_path,
+			"desk_id": node.get_meta("planning_desk_id", ""),
+			"attachment": node.get_meta("planning_attachment", ""),
 			"x": save_position.x, "y": save_position.y, "z": save_position.z,
 			"rotation_y": node.rotation_degrees.y,
 			"scale_x": node.scale.x, "scale_y": node.scale.y, "scale_z": node.scale.z,
@@ -1166,7 +803,7 @@ func _collect_layout_data() -> Dictionary:
 			"spawn_y": (node.get_meta("planning_spawn_transform") as Transform3D).origin.y if node.has_meta("planning_spawn_transform") else node.position.y,
 			"spawn_z": (node.get_meta("planning_spawn_transform") as Transform3D).origin.z if node.has_meta("planning_spawn_transform") else node.position.z
 		})
-	return {"version": 4, "objects": objects}
+	return {"version": 5, "objects": objects}
 
 
 func save_named_map() -> void:
@@ -1274,6 +911,10 @@ func _apply_layout_data(data: Dictionary) -> void:
 		node.rotation_degrees.y = float(record.get("rotation_y",0.0))
 		node.scale = Vector3(float(record.get("scale_x",1.0)),float(record.get("scale_y",1.0)),float(record.get("scale_z",1.0)))
 		node.set_meta("planning_scene_path", scene_path)
+		if record.has("desk_id"):
+			node.set_meta("planning_desk_id", str(record["desk_id"]))
+		if record.has("attachment"):
+			node.set_meta("planning_attachment", str(record["attachment"]))
 		var saved_light_energy := float(record.get("light_energy", 0.0))
 		if saved_light_energy > 0.0:
 			var saved_light := node.find_child("Light", true, false) as Light3D
@@ -1330,6 +971,10 @@ func _save_authored_scene() -> Error:
 		scene_root.add_child(copy)
 		copy.owner = scene_root
 		copy.transform = node.transform
+		if node.has_meta("planning_desk_id"):
+			copy.set_meta("planning_desk_id", node.get_meta("planning_desk_id"))
+		if node.has_meta("planning_attachment"):
+			copy.set_meta("planning_attachment", node.get_meta("planning_attachment"))
 		if copy.has_method("configure_flicker"):
 			copy.set_meta("planning_light_energy", node.get_meta("planning_light_energy", 3.0))
 			copy.set_meta("planning_light_angle", node.get_meta("planning_light_angle", 48.0))
@@ -1386,6 +1031,7 @@ func _migrate_scene_path(old_path: String) -> String:
 
 
 func clear_layout(update_status: bool = true) -> void:
+	workstation_transforms.clear()
 	var retained: Array[Node3D] = []
 	for node in placed:
 		if not is_instance_valid(node):

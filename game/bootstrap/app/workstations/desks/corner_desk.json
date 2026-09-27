@@ -1,0 +1,50 @@
+{
+  "height": 0.95,
+  "stations": [
+    {
+      "x": 0,
+      "z": 0.22,
+      "angle": 0
+    }
+  ],
+  "optional": [
+    {
+      "model": "lamp",
+      "x": -0.7,
+      "z": 0.28
+    },
+    {
+      "model": "paper",
+      "x": -0.55,
+      "z": 0.31
+    },
+    {
+      "model": "small",
+      "x": 0.68,
+      "z": 0.29
+    },
+    {
+      "model": "05_printer_destructible",
+      "x": 0.82,
+      "z": 1.58
+    }
+  ],
+  "chair": {
+    "model": "chair",
+    "x": 0,
+    "z": -0.82,
+    "jitter": 0.08
+  },
+  "bin": {
+    "model": "bin",
+    "x": 0.88,
+    "z": -0.9,
+    "jitter": 0.05
+  },
+  "cabinet": {
+    "model": "03_file_cabinet_smaller",
+    "x": 0.82,
+    "z": 1.36,
+    "jitter": 0.02
+  }
+}

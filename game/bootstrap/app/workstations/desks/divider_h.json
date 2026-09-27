@@ -1,0 +1,34 @@
+{
+  "height": 0.9,
+  "stations": [
+    {
+      "x": 0,
+      "z": -0.77,
+      "angle": 0
+    },
+    {
+      "x": 0,
+      "z": 0.77,
+      "angle": 180
+    }
+  ],
+  "optional": [
+    {
+      "model": "small",
+      "x": 0.6,
+      "z": 0.26
+    }
+  ],
+  "chair": {
+    "model": "chair",
+    "x": 0,
+    "z": -0.75,
+    "jitter": 0.06
+  },
+  "bin": {
+    "model": "bin",
+    "x": 0.84,
+    "z": -0.7,
+    "jitter": 0.04
+  }
+}

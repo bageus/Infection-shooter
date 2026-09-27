@@ -1,0 +1,25 @@
+{
+  "items": [
+    {
+      "model": "monitor",
+      "x": -0.38,
+      "z": 0.22
+    },
+    {
+      "model": "monitor",
+      "x": 0.38,
+      "z": 0.22
+    },
+    {
+      "model": "tower",
+      "x": -0.63,
+      "z": 0.18,
+      "floor": true
+    },
+    {
+      "model": "05_keyboard",
+      "x": 0,
+      "z": -0.21
+    }
+  ]
+}

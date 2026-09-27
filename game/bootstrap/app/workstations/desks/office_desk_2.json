@@ -1,0 +1,39 @@
+{
+  "height": 0.89,
+  "stations": [
+    {
+      "x": 0,
+      "z": 0,
+      "angle": 0
+    }
+  ],
+  "optional": [
+    {
+      "model": "lamp",
+      "x": -0.7,
+      "z": 0.28
+    },
+    {
+      "model": "paper",
+      "x": -0.55,
+      "z": 0.31
+    },
+    {
+      "model": "small",
+      "x": 0.68,
+      "z": 0.29
+    }
+  ],
+  "chair": {
+    "model": "chair",
+    "x": 0,
+    "z": -0.99,
+    "jitter": 0.12
+  },
+  "bin": {
+    "model": "bin",
+    "x": 0.84,
+    "z": -0.86,
+    "jitter": 0.06
+  }
+}
