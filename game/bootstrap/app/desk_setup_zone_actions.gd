@@ -6,6 +6,22 @@ const GEOMETRY := preload("res://game/bootstrap/app/desk_setup_zone_geometry.gd"
 const MODEL_ROOT := "res://models/objects/enviroments/"
 
 
+static func clear_selection(mode: Variant) -> void:
+	mode.dragged = null
+	mode.dragging_zone = false
+	mode.placing_zone = false
+	mode.chair_positioning = false
+	mode.zone_index = -1
+	mode.model_list.deselect_all()
+	mode.model_list.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	mode.zone_form.hide()
+	if mode.model_list.has_meta("placing"):
+		mode.model_list.remove_meta("placing")
+	mode.planner._select(null)
+	mode._refresh_zones()
+	mode.status.text = "Selection cleared. Select a zone to continue."
+
+
 static func refresh_models(mode: Variant) -> void:
 	var category := str(mode.zones[mode.zone_index].get("category", "Другие")) if mode.zone_index >= 0 else "Другие"
 	if mode.shown_category == category:
@@ -47,18 +63,42 @@ static func toggle_surface(mode: Variant) -> void:
 	if mode.zone_index < 0:
 		return
 	var zone: Dictionary = mode.zones[mode.zone_index]
-	if not RULES.items_in_zone(mode.desk, zone, mode._attachments()).is_empty():
-		mode.status.text = "Remove zone items before moving the zone between table and floor."
-		return
 	var proposed := zone.duplicate()
 	proposed["floor"] = not bool(zone["floor"])
 	proposed["height"] = 0.0 if bool(proposed["floor"]) else mode.markers.surface_height
-	if not RULES._inside_surface(Vector2(float(zone["x"]), float(zone["z"])), proposed, mode.stations):
+	var original := Vector2(float(zone["x"]), float(zone["z"]))
+	var destination := original
+	if not RULES._inside_surface(destination, proposed, mode.stations):
+		var angle := deg_to_rad(float(proposed.get("angle", 0.0)))
+		var half_width := absf(cos(angle)) * float(proposed["width"]) * 0.5 + absf(sin(angle)) * float(proposed["depth"]) * 0.5
+		var half_depth := absf(sin(angle)) * float(proposed["width"]) * 0.5 + absf(cos(angle)) * float(proposed["depth"]) * 0.5
+		if bool(proposed["floor"]) and half_width <= 2.75 and half_depth <= 2.75:
+			destination = Vector2(clampf(original.x, -2.75 + half_width, 2.75 - half_width), clampf(original.y, -2.75 + half_depth, 2.75 - half_depth))
+		else:
+			var found := false
+			for station_value in mode.stations:
+				var station: Dictionary = station_value
+				if half_width > 0.95 or half_depth > 0.6:
+					continue
+				var center := Vector2(float(station.get("x", 0.0)), float(station.get("z", 0.0)))
+				var candidate := Vector2(clampf(original.x, center.x - 0.95 + half_width, center.x + 0.95 - half_width), clampf(original.y, center.y - 0.6 + half_depth, center.y + 0.6 - half_depth))
+				if not found or candidate.distance_squared_to(original) < destination.distance_squared_to(original):
+					destination = candidate
+					found = true
+	if not RULES._inside_surface(destination, proposed, mode.stations):
 		mode.status.text = "Zone does not fit on this surface."
 		return
+	var contents := RULES.items_in_zone(mode.desk, zone, mode._attachments())
+	var displacement: Vector3 = mode.desk.to_global(Vector3(destination.x, 0.0, destination.y)) - mode.desk.to_global(Vector3(original.x, 0.0, original.y))
+	var surface_y: float = mode.desk.to_global(Vector3.UP * float(proposed["height"])).y
+	for item in contents:
+		item.global_position += displacement
+		item.global_position.y += surface_y - WORKSTATIONS._bounds(item).position.y
+	zone["x"] = destination.x
+	zone["z"] = destination.y
 	zone["floor"] = proposed["floor"]
 	zone["height"] = proposed["height"]
-	mode._refresh_zones()
+	mode.status.text = "Zone and items moved to floor." if bool(zone["floor"]) else "Zone and items moved to table."
 
 
 static func place_model(mode: Variant, model: String, local: Vector3) -> void:
@@ -70,13 +110,7 @@ static func place_model(mode: Variant, model: String, local: Vector3) -> void:
 	if not FileAccess.file_exists(path):
 		return
 	var existing: Array[Node3D] = []
-	for object in mode.planner.placed:
-		if is_instance_valid(object) and object != mode.desk and object.get_meta("planning_attachment", "") != mode._desk_id():
-			existing.append(object)
 	var occupied: Array[Rect2] = []
-	for object in mode._attachments():
-		var bounds: AABB = WORKSTATIONS._bounds(object)
-		occupied.append(Rect2(Vector2(bounds.position.x, bounds.position.z), Vector2(bounds.size.x, bounds.size.z)).grow(0.015))
 	var created: Array[Node3D] = []
 	var random := RandomNumberGenerator.new()
 	random.randomize()
@@ -92,7 +126,7 @@ static func place_model(mode: Variant, model: String, local: Vector3) -> void:
 		mode.planner.placed.append(object)
 		accepted += 1
 	mode._refresh_zone_items()
-	mode.status.text = "Placed " + model if accepted > 0 else "Object does not fit inside the zone or overlaps another item."
+	mode.status.text = "Placed " + model if accepted > 0 else "Place the object's centre inside its zone."
 
 
 static func refresh_items(mode: Variant) -> void:

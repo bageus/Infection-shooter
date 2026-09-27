@@ -21,7 +21,6 @@ var stations: Array = []
 var zone_index := -1
 var front := 0
 var placing_zone := false
-var next_zone_floor := false
 var chair_positioning := false
 var chair_model: OptionButton
 var panel: PanelContainer
@@ -75,8 +74,6 @@ func configure(owner_planner: Node, planning_ui: Control) -> void:
 	box.add_child(zone_form)
 	zone_form.connect("zone_changed", _on_zone_changed)
 	_button(box, "Add zone (click table or floor)", _start_zone)
-	_button(box, "Next zone: table / floor", _toggle_zone_surface)
-	_button(box, "Selected zone: table / floor", _toggle_selected_surface)
 	var chair_row := HBoxContainer.new()
 	box.add_child(chair_row)
 	chair_model = OptionButton.new()
@@ -157,7 +154,7 @@ func _build_help(planning_ui: Control) -> void:
 	var contents := VBoxContainer.new()
 	help_panel.add_child(contents)
 	var instructions := Label.new()
-	instructions.text = "LMB drag zone  Move zone and contents\nArrows  Move selected zone (0.1 m)\nDirection  Aim zone arrow and models\nShift + LMB drag  Move one item\nDelete  Remove selected item\nRMB drag / Alt + LMB  Orbit table\nWheel  Zoom in or out"
+	instructions.text = "LMB drag zone  Move zone and contents\nArrows  Move selected zone (0.1 m)\nDirection  Aim zone arrow and models\nShift + LMB drag  Move one item\nDelete  Remove selected item\nRMB  Clear selection; drag to orbit\nСтол / Пол in zone row  Change surface\nWheel  Zoom in or out"
 	contents.add_child(instructions)
 	_button(contents, "ROTATE LEFT", _orbit_left)
 	_button(contents, "ROTATE RIGHT", _orbit_right)
@@ -263,6 +260,8 @@ func handle_input(event: InputEvent) -> bool:
 			_move_zone(zone_index, Vector2(float(zones[zone_index]["x"]), float(zones[zone_index]["z"])) + direction)
 			return true
 	if event is InputEventMouse:
+		if event is InputEventMouseButton and event.pressed and event.button_index == MOUSE_BUTTON_RIGHT:
+			ZONE_ACTIONS.clear_selection(self)
 		if scroll.get_global_rect().has_point(event.position) or (help_panel.visible and help_panel.get_global_rect().has_point(event.position)):
 			return false # GUI receives the event; world input stays disabled.
 		if event is InputEventMouseButton:
@@ -305,7 +304,7 @@ func _click_world(screen: Vector2, pick_item: bool) -> void:
 				_refresh_zones()
 			status.text = "Drag the item inside the zone; Delete removes it."
 			return
-	var zone := _zone_at(screen)
+	var zone := zone_index if zone_index >= 0 and _point_in_zone(zone_index, screen) else _zone_at(screen)
 	if zone >= 0:
 		var was_placing := model_list.has_meta("placing")
 		var picked := ""
@@ -324,11 +323,16 @@ func _click_world(screen: Vector2, pick_item: bool) -> void:
 			dragging_zone = true
 
 func _add_zone_at(screen: Vector2) -> void:
-	var point := _project(screen, 0.0 if next_zone_floor else 0.89)
+	var tabletop_height: float = float(markers.get("surface_height"))
+	var table_point := _project(screen, tabletop_height)
+	var table_local := desk.to_local(table_point)
+	var preview := {"x": table_local.x, "z": table_local.z, "width": 0.65, "depth": 0.45, "angle": 0.0, "floor": false}
+	var on_table := table_local.is_finite() and ZONE_RULES._inside_surface(Vector2(table_local.x, table_local.z), preview, stations)
+	var point := table_point if on_table else _project(screen, 0.0)
 	if not point.is_finite():
 		return
 	var local: Vector3 = desk.to_local(point)
-	var zone := {"name": "Zone %d" % (zones.size() + 1), "required": false, "category": "Другие", "angle": 0.0, "x": snappedf(local.x, 0.05), "z": snappedf(local.z, 0.05), "width": 0.65, "depth": 0.45, "height": 0.0 if next_zone_floor else 0.89, "floor": next_zone_floor}
+	var zone := {"name": "Zone %d" % (zones.size() + 1), "required": false, "category": "Другие", "angle": 0.0, "x": snappedf(local.x, 0.05), "z": snappedf(local.z, 0.05), "width": 0.65, "depth": 0.45, "height": tabletop_height if on_table else 0.0, "floor": not on_table}
 	var center := ZONE_RULES.snap_to_neighbors(Vector2(zone["x"], zone["z"]), zone, zones, -1)
 	zone["x"] = center.x
 	zone["z"] = center.y
@@ -355,12 +359,12 @@ func _rotate_zone(amount: float) -> void:
 
 func _drag_item(screen: Vector2) -> void:
 	var local := _local_at(screen, zones[zone_index])
-	if not local.is_finite() or _zone_at(screen) != zone_index:
+	if not local.is_finite() or not _point_in_zone(zone_index, screen):
 		return
 	var previous := dragged.global_position
 	dragged.global_position = desk.to_global(Vector3(local.x, desk.to_local(previous).y, local.z))
 	var type_matches := ZONE_RULES.category_for(str(dragged.get_meta("planning_scene_path", "")).get_file().get_basename()) == str(zones[zone_index]["category"])
-	if not type_matches or not ZONE_RULES.fits_zone(desk, zones[zone_index], dragged) or ZONE_RULES.overlaps_item(dragged, _attachments()):
+	if not type_matches or not ZONE_RULES.fits_zone(desk, zones[zone_index], dragged):
 		dragged.global_position = previous
 	else:
 		var previous_slot := int(dragged.get_meta("planning_zone", -1))
@@ -395,12 +399,17 @@ func _local_at(screen: Vector2, zone: Dictionary) -> Vector3:
 
 func _zone_at(screen: Vector2) -> int:
 	for i in range(zones.size() - 1, -1, -1):
-		var zone: Dictionary = zones[i]
-		var local := _local_at(screen, zone)
-		var offset := Vector3(local.x - float(zone["x"]), 0, local.z - float(zone["z"])).rotated(Vector3.UP, -deg_to_rad(float(zone.get("angle", 0.0))))
-		if local.is_finite() and absf(offset.x) <= float(zone["width"]) * 0.5 and absf(offset.z) <= float(zone["depth"]) * 0.5:
+		if _point_in_zone(i, screen):
 			return i
 	return -1
+
+func _point_in_zone(index: int, screen: Vector2) -> bool:
+	var zone: Dictionary = zones[index]
+	var local := _local_at(screen, zone)
+	if not local.is_finite():
+		return false
+	var offset := Vector3(local.x - float(zone["x"]), 0, local.z - float(zone["z"])).rotated(Vector3.UP, -deg_to_rad(float(zone.get("angle", 0.0))))
+	return absf(offset.x) <= float(zone["width"]) * 0.5 and absf(offset.z) <= float(zone["depth"]) * 0.5
 
 
 func _desk_path() -> String:
@@ -425,16 +434,13 @@ func _attachments() -> Array[Node3D]:
 
 func _start_zone() -> void:
 	placing_zone = true
-	status.text = "Click to set the %s zone centre." % ("floor" if next_zone_floor else "table")
+	status.text = "Click the table or floor to set the zone centre."
 
 
-func _toggle_zone_surface() -> void:
-	next_zone_floor = not next_zone_floor
-	status.text = "New zones will be on the floor." if next_zone_floor else "New zones will be on the tabletop."
-
-
-func _toggle_selected_surface() -> void:
+func _toggle_surface_at(index: int) -> void:
+	zone_index = index
 	ZONE_ACTIONS.toggle_surface(self)
+	_refresh_zones()
 
 
 func _start_item() -> void:
@@ -476,6 +482,8 @@ func _switch_front() -> void:
 
 func _select_zone(index: int) -> void:
 	zone_index = index
+	zone_form.show()
+	model_list.mouse_filter = Control.MOUSE_FILTER_STOP
 	for i in zone_list.get_child_count():
 		var button := zone_list.get_child(i).get_child(0) as Button
 		button.modulate = Color(1.0, 0.83, 0.48) if i == index else Color.WHITE
@@ -504,7 +512,7 @@ func _on_zone_changed(zone_name: String, required: bool, angle: float, category:
 		var proposed := zone.duplicate()
 		proposed["angle"] = angle
 		if not ZONE_RULES._inside_surface(Vector2(float(zone["x"]), float(zone["z"])), proposed, stations) or not ZONE_RULES.rotate_items(desk, zone, _attachments(), delta):
-			status.text = "Zone cannot rotate here without leaving the surface or overlapping items."
+			status.text = "Zone or an item's centre would leave the surface."
 			zone_form.call("display", zone)
 			return
 	zone["name"] = category if category != previous_category else (zone_name if not zone_name.is_empty() else "Zone %d" % (zone_index + 1))
@@ -536,6 +544,7 @@ func _refresh_zones() -> void:
 		select.clip_text = true
 		select.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 		select.modulate = Color(1.0, 0.83, 0.48) if i == zone_index else Color.WHITE
+		_button(row, "Пол" if bool(zones[i].get("floor", false)) else "Стол", _toggle_surface_at.bind(i))
 		_button(row, "×", _remove_zone_at.bind(i))
 	if zone_index >= 0:
 		_select_zone(zone_index)
@@ -560,7 +569,7 @@ func _zone_label(zone: Dictionary, index: int) -> String:
 	var category := str(zone.get("category", "Другие"))
 	if title != category:
 		title += " · " + category
-	return "%s | %s | %s | %d°" % [title, "обяз." if bool(zone.get("required", true)) else "необяз.", "пол" if bool(zone.get("floor", false)) else "стол", roundi(float(zone.get("angle", 0.0)))]
+	return "%s | %s | %d°" % [title, "обяз." if bool(zone.get("required", true)) else "необяз.", roundi(float(zone.get("angle", 0.0)))]
 
 
 func _refresh_markers() -> void:

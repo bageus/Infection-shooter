@@ -75,25 +75,12 @@ static func rotate_items(desk: Node3D, zone: Dictionary, attached: Array[Node3D]
 		if not fits_zone(desk, proposed, item):
 			outside = true
 			break
-	if outside or _overlaps(moved, attached):
+	if outside:
 		for item in moved:
 			item.global_position = desk.to_global((desk.to_local(item.global_position) - pivot).rotated(Vector3.UP, -deg_to_rad(delta_degrees)) + pivot)
 			item.rotation.y -= deg_to_rad(delta_degrees)
 		return false
 	return true
-
-
-static func overlaps_item(item: Node3D, attached: Array[Node3D]) -> bool:
-	var bounds: AABB = WORKSTATIONS._bounds(item)
-	var area := Rect2(Vector2(bounds.position.x, bounds.position.z), Vector2(bounds.size.x, bounds.size.z)).grow(0.025)
-	for other in attached:
-		if item == other:
-			continue
-		var other_bounds: AABB = WORKSTATIONS._bounds(other)
-		if other_bounds.position.y < bounds.end.y and other_bounds.end.y > bounds.position.y:
-			if area.intersects(Rect2(Vector2(other_bounds.position.x, other_bounds.position.z), Vector2(other_bounds.size.x, other_bounds.size.z))):
-				return true
-	return false
 
 
 static func random_items(zone: Dictionary) -> Array[Dictionary]:
@@ -131,7 +118,7 @@ static func move_zone(desk: Node3D, zones: Array[Dictionary], index: int, target
 		if not fits_zone(desk, proposed, item):
 			outside = true
 			break
-	if outside or _overlaps(contents, attached):
+	if outside:
 		for item in contents:
 			item.global_position = desk.to_global(desk.to_local(item.global_position) - Vector3(movement.x, 0, movement.y))
 		return false
@@ -174,18 +161,4 @@ static func _inside_surface(point: Vector2, zone: Dictionary, stations: Array) -
 		var station: Dictionary = station_value
 		if absf(point.x - float(station.get("x", 0.0))) + half_width <= 0.95 and absf(point.y - float(station.get("z", 0.0))) + half_depth <= 0.6:
 			return true
-	return false
-
-
-static func _overlaps(moved: Array[Node3D], attached: Array[Node3D]) -> bool:
-	for item in moved:
-		var bounds: AABB = WORKSTATIONS._bounds(item)
-		var area := Rect2(Vector2(bounds.position.x, bounds.position.z), Vector2(bounds.size.x, bounds.size.z)).grow(0.015)
-		for other in attached:
-			if item == other:
-				continue
-			var other_bounds: AABB = WORKSTATIONS._bounds(other)
-			if other_bounds.position.y < bounds.end.y and other_bounds.end.y > bounds.position.y:
-				if area.intersects(Rect2(Vector2(other_bounds.position.x, other_bounds.position.z), Vector2(other_bounds.size.x, other_bounds.size.z))):
-					return true
 	return false

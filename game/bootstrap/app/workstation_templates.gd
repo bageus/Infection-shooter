@@ -64,7 +64,7 @@ static func from_saved_template(desk: Node3D, path: String, parent: Node3D, make
 			var shift := Vector3(randf_range(-0.04, 0.04), 0.0, randf_range(-0.04, 0.04))
 			node.global_position = original_position + desk.global_basis * shift
 			node.rotation.y = original_angle + deg_to_rad(randf_range(-5.0, 5.0))
-			if ZONE_GEOMETRY.fits_zone(desk, zone, node) and not _overlaps_created(node, created):
+			if ZONE_GEOMETRY.fits_zone(desk, zone, node):
 				break
 			node.global_position = original_position
 			node.rotation.y = original_angle
@@ -72,18 +72,6 @@ static func from_saved_template(desk: Node3D, path: String, parent: Node3D, make
 		node.set_meta("planning_zone", slot)
 		created.append(node)
 	return created
-
-
-static func _overlaps_created(item: Node3D, others: Array[Node3D]) -> bool:
-	var bounds := _bounds(item)
-	var footprint := Rect2(Vector2(bounds.position.x, bounds.position.z), Vector2(bounds.size.x, bounds.size.z))
-	for other in others:
-		var other_bounds := _bounds(other)
-		if other_bounds.position.y < bounds.end.y and other_bounds.end.y > bounds.position.y:
-			var other_footprint := Rect2(Vector2(other_bounds.position.x, other_bounds.position.z), Vector2(other_bounds.size.x, other_bounds.size.z))
-			if footprint.intersects(other_footprint):
-				return true
-	return false
 
 
 static func available_models() -> Array[String]:
