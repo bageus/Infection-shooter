@@ -11,6 +11,7 @@ enum DoorMode { SWING_BIDIRECTIONAL, SWING_ONE_WAY, SLIDING_ELEVATOR, GLASS_SWIN
 @export var slide_distance: float = 0.72
 @export var elevator_sync_radius: float = 4.0
 @export var player_path: NodePath
+@export var requires_emergency_key := false
 
 var _player: Node3D
 var _door_parts: Array[Node3D] = []
@@ -26,6 +27,7 @@ var _glass_hinge: Node3D
 var _glass_hinge_closed := Transform3D.IDENTITY
 var _elevator_lights: Array[Node3D] = []
 var _fallback_leaf_collisions: Array[CollisionShape3D] = []
+var _key_hint: Label3D
 
 
 func _ready() -> void:
@@ -40,6 +42,14 @@ func _ready() -> void:
 			_player = scene.get_node_or_null("Gameplay/Player") as Node3D
 	if mode == DoorMode.SLIDING_ELEVATOR:
 		add_to_group("elevator_door_components")
+	if requires_emergency_key:
+		_key_hint = Label3D.new()
+		_key_hint.text = "Нужен аварийный ключ"
+		_key_hint.font_size = 38
+		_key_hint.pixel_size = 0.006
+		_key_hint.billboard = BaseMaterial3D.BILLBOARD_ENABLED
+		_key_hint.position = Vector3(0, 2.5, 0)
+		add_child(_key_hint)
 	_collect_door_parts()
 
 
@@ -48,7 +58,7 @@ func _physics_process(delta: float) -> void:
 		_player = get_tree().get_first_node_in_group("player") as Node3D
 		if _player == null:
 			return
-	var wants_open := _requested_open
+	var wants_open := _requested_open and not requires_emergency_key
 	_requested_open = false
 	var local_player := to_local(_player.global_position)
 	if mode == DoorMode.GLASS_SWING:
@@ -56,24 +66,31 @@ func _physics_process(delta: float) -> void:
 		if visual != null:
 			local_player = to_local(_player.global_position - (visual.global_position - global_position))
 	var horizontal_distance := Vector2(local_player.x, local_player.z).length()
+	if _key_hint != null:
+		_key_hint.visible = horizontal_distance < 3.0 and not bool(_player.call("has_emergency_key"))
 
 	if horizontal_distance <= trigger_distance:
-		match mode:
-			DoorMode.SWING_BIDIRECTIONAL:
-				wants_open = true
-				if _open_amount <= 0.02 and _swing_side == 0.0:
-					_swing_side = _player_side(local_player)
-			DoorMode.SWING_ONE_WAY:
-				var side := signf(local_player.z)
-				if side == signf(one_way_allowed_side):
+		if requires_emergency_key and not (_player.has_method("has_emergency_key") and bool(_player.call("has_emergency_key"))):
+			pass
+		else:
+			match mode:
+				DoorMode.SWING_BIDIRECTIONAL:
 					wants_open = true
-					if _open_amount <= 0.02:
-						_swing_side = signf(one_way_allowed_side)
-			DoorMode.SLIDING_ELEVATOR, DoorMode.GLASS_SWING:
-				wants_open = true
-				if mode == DoorMode.SLIDING_ELEVATOR:
-					_request_nearby_elevator_open()
+					if _open_amount <= 0.02 and _swing_side == 0.0:
+						_swing_side = _player_side(local_player)
+				DoorMode.SWING_ONE_WAY:
+					var side := signf(local_player.z)
+					if side == signf(one_way_allowed_side):
+						wants_open = true
+						if _open_amount <= 0.02:
+							_swing_side = signf(one_way_allowed_side)
+				DoorMode.SLIDING_ELEVATOR, DoorMode.GLASS_SWING:
+					wants_open = true
+					if mode == DoorMode.SLIDING_ELEVATOR:
+						_request_nearby_elevator_open()
 
+	if requires_emergency_key and _open_amount > 0.04 and _someone_in_doorway():
+		wants_open = true
 	if wants_open:
 		_close_timer = close_delay
 		_open_amount = move_toward(_open_amount, 1.0, open_speed * delta)
@@ -118,7 +135,20 @@ func is_open_for_exploration() -> bool:
 
 
 func request_open() -> void:
-	_requested_open = true
+	if not requires_emergency_key:
+		_requested_open = true
+
+
+func _someone_in_doorway() -> bool:
+	for group in ["player", "infected"]:
+		for actor in get_tree().get_nodes_in_group(group):
+			if actor is Node3D:
+				if float(actor.get("health")) <= 0.0:
+					continue
+				var local := to_local((actor as Node3D).global_position)
+				if absf(local.x) < 1.15 and absf(local.z) < 1.15 and absf(local.y) < 2.2:
+					return true
+	return false
 
 
 func _request_nearby_elevator_open() -> void:

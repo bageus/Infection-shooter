@@ -6,6 +6,7 @@ const ChunkStreamer = preload("res://game/bootstrap/app/chunk_streamer.gd")
 const PlanningLighting = preload("res://game/bootstrap/app/planning_lighting.gd")
 const TEST_CLOUD := preload("res://game/features/infection_source/public/mutagen_cloud.tscn")
 const MUTATION_UI := preload("res://game/bootstrap/app/mutation_tree_ui.gd")
+const MISSION_LAYOUT := preload("res://game/bootstrap/app/mission_layout.gd")
 
 @onready var player: Node3D = $Gameplay/Player
 @onready var enemies: Node3D = $Gameplay/Enemies
@@ -23,6 +24,7 @@ var planning_mode: Node
 var chunk_streamer: Node
 var planning_lighting: Node
 var mutation_tree_ui: CanvasLayer
+var mission_layout: Node3D
 
 
 func _ready() -> void:
@@ -55,6 +57,10 @@ func _ready() -> void:
 	planning_lighting.name = "PlanningLighting"
 	add_child(planning_lighting)
 	planning_lighting.setup($WorldEnvironment)
+	mission_layout = MISSION_LAYOUT.new()
+	mission_layout.name = "MissionLayout"
+	gameplay.add_child(mission_layout)
+	mission_layout.call("setup", self)
 	var mutagen_test_cloud := TEST_CLOUD.instantiate()
 	mutagen_test_cloud.name = "PermanentTestMutagen"
 	mutagen_test_cloud.set("permanent", true)
@@ -82,6 +88,9 @@ func _unhandled_key_input(event: InputEvent) -> void:
 
 func _process(_delta: float) -> void:
 	if _ended or _pause_open or planning_mode.active:
+		return
+	if mission_layout.call("goal_reached", player.global_position):
+		_end_run("MISSION COMPLETE")
 		return
 	if player.global_position.y < FALL_DEATH_Y:
 		_end_run("YOU FELL OUTSIDE THE FLOOR")
@@ -150,11 +159,16 @@ func _choose_enhanced_ammo() -> void:
 
 func _end_run(reason: String) -> void:
 	_ended = true
+	$GameOver/Panel/VBox/Title.text = "MISSION COMPLETE" if reason == "MISSION COMPLETE" else "MISSION FAILED"
 	$GameOver/Panel/VBox/Reason.text = reason
 	game_over.show()
 	game_over.move_to_front()
 	Input.mouse_mode = Input.MOUSE_MODE_VISIBLE
 	get_tree().paused = true
+
+
+func drop_weapon_pickup(index: int, world_position: Vector3) -> void:
+	mission_layout.call("spawn_weapon", index, world_position)
 
 
 func _on_restart_pressed() -> void:

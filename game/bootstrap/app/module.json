@@ -4,7 +4,8 @@
   "purpose": "Own the application lifecycle and compose top-level game modules and authored scenes.",
   "state_owner": [
     "Application lifecycle",
-    "Current top-level application state"
+    "Current top-level application state",
+    "Mission staircase, pickup placement, and exit condition"
   ],
   "public_api": [],
   "dependencies": [

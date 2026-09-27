@@ -1,0 +1,23 @@
+[gd_scene load_steps=3 format=3]
+
+[ext_resource type="Script" path="res://game/features/combat/grenade_launcher.gd" id="weapon"]
+[ext_resource type="Script" path="res://game/features/combat/public/launcher_visual.gd" id="art"]
+
+[node name="GrenadeLauncher" type="Node3D"]
+script = ExtResource("weapon")
+weapon_name = "GRENADE LAUNCHER"
+shots_per_second = 1.2
+magazine_size = 6
+starting_reserve_ammo = 18
+max_reserve_ammo = 48
+reload_time = 2.4
+casing_radius = 0.028
+
+[node name="Body" type="Node3D" parent="."]
+script = ExtResource("art")
+
+[node name="Muzzle" type="Marker3D" parent="."]
+position = Vector3(0, 0.04, -0.71)
+
+[node name="EjectionPort" type="Marker3D" parent="."]
+position = Vector3(0.15, 0.08, -0.12)

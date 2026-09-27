@@ -68,6 +68,7 @@ func _set_region(target: TextureRect, source: Texture2D, region: Rect2) -> void:
 
 func _set_active_weapon_icon(index: int) -> void:
 	if index < 0 or index >= slot_icons.size():
+		weapon_icon.texture = null
 		return
 	weapon_icon.texture = slot_icons[index].texture
 
@@ -81,7 +82,7 @@ func _update_vitals() -> void:
 	mutation_bar.value = mutation
 	mutation_value.text = "%d / 100" % roundi(mutation)
 	critical_marker.position.x = 78.0 + 264.0 * clampf(critical / 100.0, 0.0, 1.0)
-	antidote_count.text = str(player.antidotes)
+	antidote_count.text = str(player.antidotes) + ("  KEY" if player.has_emergency_key() else "")
 
 
 func _update_weapon() -> void:

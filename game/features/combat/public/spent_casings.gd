@@ -2,7 +2,7 @@ extends Node
 
 const MAX_CASINGS := 40
 const LIFETIME_MSEC := 60000
-const CASING_SCALE := 1.5
+const CASING_SCALE := 3.0
 
 var _casings: Array[RigidBody3D] = []
 var _born_at: Array[int] = []

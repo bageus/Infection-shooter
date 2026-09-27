@@ -6,7 +6,8 @@
     "Player movement velocity",
     "Player prototype health",
     "Mutation skill combat effects and temporary buffs",
-    "Explosion disorientation and camera/audio recovery"
+    "Explosion disorientation and camera/audio recovery",
+    "Owned weapon slots and emergency key possession"
   ],
   "public_api": [
     "public/player.tscn"

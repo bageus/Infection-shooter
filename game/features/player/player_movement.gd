@@ -22,7 +22,7 @@ const MUTATION_EFFECTS := preload("res://game/features/player/mutation_skill_eff
 @onready var camera: Camera3D = $CameraRig/Camera3D
 @onready var aim_pivot: Node3D = $AimPivot
 @onready var body_visual: Node3D = $Body
-@onready var weapons: Array[Node3D] = [$AimPivot/Pistol,$AimPivot/Uzi,$AimPivot/Shotgun]
+@onready var weapons: Array[Node3D] = [$AimPivot/Pistol,$AimPivot/Uzi,$AimPivot/Shotgun,$AimPivot/GrenadeLauncher]
 @onready var infection_runtime: Node = $InfectionRuntime
 var health: float
 var armor: float
@@ -40,6 +40,8 @@ var _stun_ringing: AudioStreamPlayer
 var _original_master_volume := 0.0
 var mutation_effects: Node
 var _mutation_menu_open := false
+var _owned_weapons := [true, true, true, false]
+var _emergency_key := false
 func _ready() -> void:
 	_camera_distance=camera.position.length()
 	health=max_health
@@ -83,19 +85,51 @@ func _handle_actions() -> void:
 	if Input.is_action_just_pressed("weapon_1"): _select_weapon(0)
 	elif Input.is_action_just_pressed("weapon_2"): _select_weapon(1)
 	elif Input.is_action_just_pressed("weapon_3"): _select_weapon(2)
+	elif Input.is_action_just_pressed("weapon_4"): _select_weapon(3)
+	if Input.is_action_just_pressed("pickup_weapon"):
+		var nearest: Node3D
+		var best := 2.4
+		for item in get_tree().get_nodes_in_group("weapon_pickups"):
+			if item is Node3D:
+				var distance := global_position.distance_to((item as Node3D).global_position)
+				if distance < best:
+					nearest = item as Node3D
+					best = distance
+		if nearest != null:
+			nearest.call("claim", self)
 	if Input.is_action_just_pressed("reload"):
 		var w:=get_current_weapon()
 		if w!=null: w.call("start_reload")
 	if Input.is_action_just_pressed("antidote"): use_antidote()
 	if Input.is_action_just_pressed("melee"): mutation_effects.call("melee")
 func _select_weapon(index:int)->void:
-	if index<0 or index>=weapons.size(): return
+	if index<0 or index>=weapons.size() or not _owned_weapons[index]: return
 	var old:=get_current_weapon()
 	if old!=null: old.call("cancel_reload")
 	current_weapon_index=index
 	for i in weapons.size(): weapons[i].visible=i==index
 func get_current_weapon()->Node3D:
 	return weapons[current_weapon_index]
+
+func pickup_weapon(index: int) -> bool:
+	if index < 0 or index >= weapons.size() or _owned_weapons[index]:
+		return false
+	var previous := current_weapon_index
+	if not get_tree().current_scene.has_method("drop_weapon_pickup"):
+		return false
+	var offset := camera.global_basis.x
+	offset.y = 0.0
+	get_tree().current_scene.call("drop_weapon_pickup", previous, global_position + offset.normalized() * 1.3)
+	_owned_weapons[previous] = false
+	_owned_weapons[index] = true
+	_select_weapon(index)
+	return true
+
+func acquire_emergency_key() -> void:
+	_emergency_key = true
+
+func has_emergency_key() -> bool:
+	return _emergency_key
 func get_current_weapon_index()->int: return current_weapon_index
 func take_damage(amount: float, damage_type: String = "physical") -> void:
 	var remaining: float = mutation_effects.call("on_player_hit", maxf(amount, 0.0), damage_type)

@@ -7,7 +7,7 @@
 [node name="WallEmergencyDoor" type="Node3D"]
 script = ExtResource("2_collision")
 use_simple_collision = false
-exclude_name_tokens = PackedStringArray("doorpivot", "doorhandle")
+exclude_name_tokens = PackedStringArray("doorpivot", "doorhandle", "doorleaf", "door_leaf")
 
 [node name="Visual" parent="." instance=ExtResource("1_model")]
 
@@ -15,5 +15,6 @@ exclude_name_tokens = PackedStringArray("doorpivot", "doorhandle")
 
 [node name="DoorController" type="Node3D" parent="."]
 script = ExtResource("3_door")
-mode = 1
+mode = 0
+requires_emergency_key = true
 one_way_allowed_side = 1.0

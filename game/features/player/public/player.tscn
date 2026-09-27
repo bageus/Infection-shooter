@@ -1,4 +1,4 @@
-[gd_scene load_steps=11 format=3]
+[gd_scene load_steps=12 format=3]
 [ext_resource type="Script" path="res://game/features/character_animation/public/character_animation_driver.gd" id="anim_driver"]
 [ext_resource type="Script" path="res://game/features/player/player_movement.gd" id="1"]
 [ext_resource type="PackedScene" path="res://models/objects/characters/soldier_animated.glb" id="character_model"]
@@ -7,6 +7,7 @@
 [ext_resource type="PackedScene" path="res://game/features/combat/public/shotgun.tscn" id="4"]
 [ext_resource type="Script" path="res://game/features/infection/public/infection_runtime.gd" id="5"]
 [ext_resource type="Script" path="res://game/features/combat/public/spent_casings.gd" id="casings"]
+[ext_resource type="PackedScene" path="res://game/features/combat/public/grenade_launcher.tscn" id="launcher"]
 [sub_resource type="StandardMaterial3D" id="Mat"]
 albedo_color=Color(0.06,0.2,0.62,1)
 [sub_resource type="CapsuleMesh" id="Mesh"]
@@ -32,6 +33,8 @@ position=Vector3(0.3,0.18,-0.2)
 position=Vector3(0.3,0.18,-0.23)
 [node name="Shotgun" parent="AimPivot" instance=ExtResource("4")]
 position=Vector3(0.32,0.18,-0.27)
+[node name="GrenadeLauncher" parent="AimPivot" instance=ExtResource("launcher")]
+position=Vector3(0.32,0.18,-0.28)
 [node name="CollisionShape3D" type="CollisionShape3D" parent="."]
 shape=SubResource("Shape")
 [node name="InfectionRuntime" type="Node" parent="."]
