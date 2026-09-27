@@ -5,6 +5,7 @@ const DAMAGE = preload("res://game/presentation/office_floor/environment_damage.
 @export var max_health := 28.0
 @export var hide_with_glass: PackedStringArray = PackedStringArray()
 @export var blinds_pass_through := false
+@export var preserve_open_frame := false
 
 var _health := 0.0
 var _broken := false
@@ -63,6 +64,10 @@ func take_projectile_hit(damage: float, hit_position: Vector3, _hit_normal: Vect
 	return false
 
 
+func get_projectile_material(_shape_index: int = -1) -> String:
+	return "glass"
+
+
 func take_melee_hit(damage: float, hit_position: Vector3, _direction: Vector3) -> void:
 	if _broken:
 		return
@@ -92,11 +97,48 @@ func _break_glass(hit_position: Vector3) -> void:
 			_drop_lower_panel(hit_position)
 		else:
 			_hide_named(get_parent().get_node_or_null("Visual"), str(token).to_lower())
+	if preserve_open_frame:
+		_replace_frame_collision()
 	_disable_collision_recursive(self)
-	# Only GlassBody is disabled. The structural frame collision stays intact.
-	# Frames/blinds were excluded from glass collision at build time, so the
-	# opening becomes traversable without deleting the surrounding wall frame.
+	# Only GlassBody is disabled; the surrounding frame keeps its own collision.
 	_spawn_fragments(hit_position)
+
+
+func _replace_frame_collision() -> void:
+	var frame_body := get_parent().get_node_or_null("Body") as StaticBody3D
+	var visual := get_parent().get_node_or_null("Visual") as Node3D
+	var frame := _find_visible_frame(visual)
+	if frame_body == null or frame == null or _glass_nodes.is_empty():
+		return
+	var to_body := frame_body.global_transform.affine_inverse()
+	var outer: AABB = (to_body * frame.global_transform) * frame.get_aabb()
+	var inner: AABB = (to_body * _glass_nodes[0].global_transform) * (_glass_nodes[0] as MeshInstance3D).get_aabb()
+	# Only the perimeter of the imported frame should obstruct a character.
+	# Some frame models have an additional pane collision across the opening.
+	if inner.size.x <= 0.0 or inner.size.y <= 0.0:
+		return
+	for child in frame_body.get_children():
+		if child is CollisionShape3D:
+			(child as CollisionShape3D).set_deferred("disabled", true)
+	var depth := maxf(outer.size.z, 0.07)
+	var left := maxf(inner.position.x - outer.position.x, 0.06)
+	var right := maxf(outer.end.x - inner.end.x, 0.06)
+	var bottom := maxf(inner.position.y - outer.position.y, 0.06)
+	var top := maxf(outer.end.y - inner.end.y, 0.06)
+	_add_frame_bar(frame_body, Vector3(left, outer.size.y, depth), Vector3(outer.position.x + left * 0.5, outer.get_center().y, outer.get_center().z))
+	_add_frame_bar(frame_body, Vector3(right, outer.size.y, depth), Vector3(outer.end.x - right * 0.5, outer.get_center().y, outer.get_center().z))
+	_add_frame_bar(frame_body, Vector3(maxf(inner.size.x, 0.1), bottom, depth), Vector3(inner.get_center().x, outer.position.y + bottom * 0.5, outer.get_center().z))
+	_add_frame_bar(frame_body, Vector3(maxf(inner.size.x, 0.1), top, depth), Vector3(inner.get_center().x, outer.end.y - top * 0.5, outer.get_center().z))
+
+
+func _add_frame_bar(body: StaticBody3D, size: Vector3, center: Vector3) -> void:
+	var collision := CollisionShape3D.new()
+	collision.name = "FrameBar"
+	var box := BoxShape3D.new()
+	box.size = size
+	collision.shape = box
+	body.add_child(collision)
+	collision.position = center
 
 
 func _drop_lower_panel(hit_position: Vector3) -> void:

@@ -1,6 +1,8 @@
 extends StaticBody3D
 
-@export var max_health: float = 60.0
+const BALANCE = preload("res://game/features/combat/public/projectile_balance.gd")
+
+@export var max_health: float = 110.0
 @export var penetrable: bool = false
 @export var break_on_first_hit: bool = false
 @export var impact_marks: bool = true
@@ -36,11 +38,16 @@ func take_projectile_hit(
 	elif weapon_name == "UZI":
 		weapon_multiplier = 0.9
 
-	_health -= maxf(damage, 0.0) * weapon_multiplier
-	if break_on_first_hit or _health <= 0.0:
+	var category := "small" if break_effect == "glass" or break_effect == "water" else "large"
+	_health -= BALANCE.object_damage(maxf(damage, 0.0), weapon_name, category) * weapon_multiplier
+	if (break_on_first_hit and category == "small") or _health <= 0.0:
 		_break_prop(hit_position)
 
 	return not penetrable
+
+
+func get_projectile_material(_shape_index: int = -1) -> String:
+	return "glass" if break_effect == "glass" else "wood"
 
 
 func take_melee_hit(damage: float, hit_position: Vector3, _direction: Vector3) -> void:

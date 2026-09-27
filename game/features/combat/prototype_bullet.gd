@@ -1,6 +1,7 @@
 extends Node3D
 
 const EFFECTS_SCRIPT = preload("res://game/features/combat/public/impact_effects.gd")
+const BALANCE = preload("res://game/features/combat/public/projectile_balance.gd")
 
 const IMPACT_TEXTURES := [
 	"res://models/objects/textures/Minimal dark bullet impact decal.png",
@@ -16,6 +17,8 @@ var _travelled: float = 0.0
 var _weapon_name: String = "PISTOL"
 var _collision_origin := Vector3.ZERO
 var _first_step := true
+var _initial_energy := 24.0
+var _remaining_energy := 24.0
 
 
 func setup_projectile(
@@ -33,6 +36,8 @@ func setup_projectile(
 	_speed = speed
 	_range = max_range
 	_weapon_name = weapon_name
+	_initial_energy = BALANCE.projectile_energy(weapon_name)
+	_remaining_energy = _initial_energy
 	_collision_origin = collision_origin if collision_origin != Vector3.ZERO else global_position
 
 
@@ -62,7 +67,12 @@ func _physics_process(delta: float) -> void:
 		var hit_position: Vector3 = hit.get("position")
 		var normal: Vector3 = hit.get("normal")
 		var collider: Object = hit.get("collider")
-		var stops_bullet := _handle_hit(collider, hit_position, normal, int(hit.get("shape", -1)))
+		var shape_index := int(hit.get("shape", -1))
+		var stops_bullet := _handle_hit(collider, hit_position, normal, shape_index)
+		var material := _hit_material(collider, shape_index)
+		_remaining_energy -= BALANCE.material_cost(material)
+		if _remaining_energy < 8.0:
+			stops_bullet = true
 		if stops_bullet:
 			global_position = hit_position
 			queue_free()
@@ -81,8 +91,8 @@ func _handle_hit(collider: Object, hit_position: Vector3, normal: Vector3, shape
 		return true
 	_spawn_impact_decal(collider, hit_position, normal)
 
-	var falloff := clampf(1.0 - _travelled / maxf(_range, 0.01), 0.35, 1.0)
-	var hit_damage := _damage * falloff
+	var distance := _collision_origin.distance_to(hit_position)
+	var hit_damage := _damage * BALANCE.distance_multiplier(_weapon_name, distance, _range) * (_remaining_energy / _initial_energy)
 	if collider.has_method("take_projectile_hit_at_shape"):
 		return bool(collider.call(
 			"take_projectile_hit_at_shape",
@@ -101,7 +111,7 @@ func _handle_hit(collider: Object, hit_position: Vector3, normal: Vector3, shape
 
 	if collider.has_method("take_damage"):
 		if collider.has_method("take_projectile_damage"):
-			collider.call("take_projectile_damage", hit_damage, position, _direction, _weapon_name)
+			collider.call("take_projectile_damage", hit_damage, hit_position, _direction, _weapon_name)
 		else:
 			collider.call("take_damage", hit_damage)
 		return true
@@ -118,6 +128,12 @@ func _handle_hit(collider: Object, hit_position: Vector3, normal: Vector3, shape
 		))
 
 	return true
+
+
+func _hit_material(collider: Object, shape_index: int) -> String:
+	if collider != null and collider.has_method("get_projectile_material"):
+		return str(collider.call("get_projectile_material", shape_index))
+	return "solid"
 
 
 func _spawn_impact_decal(collider: Object, hit_position: Vector3, normal: Vector3) -> void:

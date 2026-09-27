@@ -3,6 +3,7 @@ extends Node3D
 const PIECE_SCRIPT = preload("res://game/presentation/office_floor/table_piece.gd")
 const ASSEMBLY_SCRIPT = preload("res://game/presentation/office_floor/table_assembly.gd")
 const EFFECTS_SCRIPT = preload("res://game/features/combat/public/impact_effects.gd")
+const BALANCE = preload("res://game/features/combat/public/projectile_balance.gd")
 const LEG_IDS := ["Leg_BL", "Leg_BR", "Leg_FL", "Leg_FR"]
 const WOOD_MARKS := [
 	"res://models/objects/textures/Splintered Wood Fracture Decal.png",
@@ -28,17 +29,26 @@ var _assembly: RigidBody3D
 var _part_shapes: Dictionary = {}
 var _rest_transforms: Dictionary = {}
 var _broken_legs: Array[String] = []
+var _intact_health := 155.0
+var _part_health: Dictionary = {}
 
 
-func take_projectile_hit(_damage: float, hit_point: Vector3, _normal: Vector3, direction: Vector3, _weapon: String) -> bool:
-	_switch_to_modular()
-	hit_piece(_part_at(hit_point), hit_point, direction)
+func take_projectile_hit(damage: float, hit_point: Vector3, _normal: Vector3, direction: Vector3, weapon: String) -> bool:
+	if not _started:
+		_intact_health -= BALANCE.object_damage(damage, weapon, "large")
+		if _intact_health <= 0.0:
+			_switch_to_modular()
+	else:
+		hit_piece(_part_at(hit_point), hit_point, direction, damage, weapon)
 	return true
 
 
-func take_melee_hit(_damage: float, hit_point: Vector3, direction: Vector3) -> void:
-	_switch_to_modular()
-	hit_piece(_part_at(hit_point), hit_point, direction)
+func take_melee_hit(damage: float, hit_point: Vector3, direction: Vector3) -> void:
+	take_projectile_hit(damage, hit_point, Vector3.ZERO, direction, "MELEE")
+
+
+func get_projectile_material(_shape_index: int = -1) -> String:
+	return "wood"
 
 
 func _ready() -> void:
@@ -75,12 +85,17 @@ func _part_at(hit_point: Vector3) -> String:
 	return "Leg_" + z + x
 
 
-func hit_piece(part_id: String, hit_position: Vector3, direction: Vector3) -> void:
+func hit_piece(part_id: String, hit_position: Vector3, direction: Vector3, damage: float = 0.0, weapon: String = "") -> void:
 	if not _active.has(part_id):
 		return
 	if not _started:
-		_switch_to_modular()
 		return
+	var health := float(_part_health.get(part_id, 115.0 if part_id == "Top" else 75.0))
+	health -= BALANCE.object_damage(damage, weapon, "large")
+	if health > 0.0:
+		_part_health[part_id] = health
+		return
+	_part_health.erase(part_id)
 	var body: RigidBody3D = _active[part_id]
 	_active.erase(part_id)
 	call_deferred("_transition_piece", part_id, body, hit_position, direction)

@@ -1,11 +1,14 @@
 extends RigidBody3D
 
+const BALANCE = preload("res://game/features/combat/public/projectile_balance.gd")
+
 var source: WeakRef
 var piece_name := ""
 var stage_index := -1
 var kickable := false
 var _kick_cooldown := 0.0
 var _age := 0.0
+var _piece_health := 55.0
 
 
 func _ready() -> void:
@@ -37,7 +40,12 @@ func _physics_process(delta: float) -> void:
 	apply_central_impulse((away + Vector3.UP * 0.25) * minf(mass * 1.7, 0.9))
 
 
-func take_projectile_hit(_damage: float, hit_position: Vector3, _normal: Vector3, direction: Vector3, _weapon: String) -> bool:
+func take_projectile_hit(damage: float, hit_position: Vector3, _normal: Vector3, direction: Vector3, weapon: String) -> bool:
+	_piece_health -= BALANCE.object_damage(damage, weapon, "large")
+	if _piece_health > 0.0:
+		apply_central_impulse(direction.normalized() * 0.35)
+		return true
+	_piece_health = 55.0
 	var piece_owner: Node = null
 	if source != null:
 		piece_owner = source.get_ref() as Node
@@ -45,7 +53,11 @@ func take_projectile_hit(_damage: float, hit_position: Vector3, _normal: Vector3
 		piece_owner.call("hit_environment_fragment", self, hit_position, direction)
 	else:
 		apply_central_impulse(direction.normalized() * 0.5)
-	return false
+	return true
+
+
+func get_projectile_material(_shape_index: int = -1) -> String:
+	return "wood"
 
 
 func take_melee_hit(damage: float, hit_position: Vector3, direction: Vector3) -> void:

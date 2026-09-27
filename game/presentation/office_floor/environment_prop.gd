@@ -1,6 +1,7 @@
 extends RigidBody3D
 
 const DAMAGE = preload("res://game/presentation/office_floor/environment_damage.gd")
+const BALANCE = preload("res://game/features/combat/public/projectile_balance.gd")
 
 @export_file("*.glb") var model_path := ""
 
@@ -13,6 +14,8 @@ var _shapes: Array[CollisionShape3D] = []
 var _shape_meshes: Array[MeshInstance3D] = []
 var _glass_broken := false
 var _broken := false
+var _health := 0.0
+var _transition_pending := false
 
 
 func _ready() -> void:
@@ -29,6 +32,7 @@ func _ready() -> void:
 	add_child(visual)
 	_visual = visual
 	_discover_stages()
+	_health = _stage_health()
 	# Architectural pieces and carpets stay anchored; all other groups are movable.
 	freeze = model_path.begins_with("res://models/objects/enviroments/01/")
 	if freeze and "01_floor_" in model_path:
@@ -84,9 +88,40 @@ func take_projectile_hit_at_shape(damage: float, hit_position: Vector3, normal: 
 	return take_projectile_hit(damage, hit_position, normal, direction, weapon)
 
 
-func take_projectile_hit(_damage: float, hit_position: Vector3, _normal: Vector3, direction: Vector3, _weapon: String) -> bool:
-	if not _broken and (_variant_index + 1 < _variants.size() or not _stages.is_empty()):
-		call_deferred("_apply_damage", hit_position, direction)
+func get_projectile_material(shape_index: int = -1) -> String:
+	if shape_index >= 0:
+		var shape_owner := shape_owner_get_owner(shape_find_owner(shape_index)) as CollisionShape3D
+		var mesh_index := _shapes.find(shape_owner)
+		if mesh_index >= 0 and _is_glass_mesh(_shape_meshes[mesh_index]):
+			return "glass"
+	var group := model_path.get_file().substr(0, 2)
+	if group == "01": return "concrete"
+	if group == "05": return "tech"
+	if group == "09" or group == "11": return "light"
+	if group == "03" or group == "06": return "metal"
+	return "wood"
+
+
+func _damage_category() -> String:
+	var group := model_path.get_file().substr(0, 2)
+	if group == "05": return "tech"
+	if group == "09" or group == "11" or group == "12": return "small"
+	return "large"
+
+
+func _stage_health() -> float:
+	match _damage_category():
+		"tech": return 65.0
+		"small": return 42.0
+	return 155.0
+
+
+func take_projectile_hit(damage: float, hit_position: Vector3, _normal: Vector3, direction: Vector3, weapon: String) -> bool:
+	if not _broken and not _transition_pending and (_variant_index + 1 < _variants.size() or not _stages.is_empty()):
+		_health -= BALANCE.object_damage(damage, weapon, _damage_category())
+		if _health <= 0.0:
+			_transition_pending = true
+			call_deferred("_apply_damage", hit_position, direction)
 	elif not freeze:
 		sleeping = false
 		apply_impulse(direction.normalized() * maxf(0.4, mass * 0.3), hit_position - global_position)
@@ -109,6 +144,8 @@ func _apply_damage(hit_position: Vector3, direction: Vector3) -> void:
 		var variant := _variants[_variant_index]
 		DAMAGE.reveal_meshes(variant)
 		variant.show()
+		_health = _stage_health() * 0.8
+		_transition_pending = false
 		_rebuild_shapes()
 	elif not _stages.is_empty():
 		_broken = true

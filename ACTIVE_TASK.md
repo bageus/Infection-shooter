@@ -32,6 +32,13 @@ Procedural generation, save/checkpoints, final HUD, monetization, platform SDKs 
 - Structural modules visually touch edge-to-edge with no visible gaps and no overlap beyond a tiny seam tolerance.\n- Exterior corners face inward correctly.\n- Perimeter and authored interior walls block the player.\n- The expanded floor and defeat menu remain functional.
 
 ## Progress
+По запросу владельца стеклянные перегородки после попадания получают коллизию
+только у планок рамы; жалюзи остаются видимыми и подвижными. У пуль ограничен
+остаток энергии по материалу и урон зависит от дистанции для предметов и
+врагов. Прочность крупных объектов, вторичных фрагментов и тестового стола
+повышена; пистолет разрушает преимущественно стекло, мелкие предметы и технику.
+Решение о публичных правилах урона описано в ADR-0002.
+
 По прямому запросу владельца устранены семь нарушений архитектурных границ:
 скрипты пола и тумана опубликованы в своих модулях, общий драйвер анимации
 получил отдельный модуль, добыча заражённых оформлена публичной зависимостью,

@@ -1,13 +1,27 @@
 extends RigidBody3D
 
-@export var max_health := 70.0
+const BALANCE = preload("res://game/features/combat/public/projectile_balance.gd")
+
+@export var max_health := 110.0
 @export var bullet_impulse := 1.8
 @export var character_push_impulse := 2.8
 @export var breakable := true
 @export var max_linear_speed := 7.0
 @export var max_angular_speed := 8.0
 
-var _health := 70.0
+var _health := 110.0
+
+
+func _damage_category() -> String:
+	var label := (name + " " + get_parent().name).to_lower()
+	for token in ["computer", "desktop", "phone", "monitor", "printer", "lamp", "keyboard"]:
+		if token in label:
+			return "tech"
+	return "large"
+
+
+func get_projectile_material(_shape_index: int = -1) -> String:
+	return "tech" if _damage_category() == "tech" else "wood"
 
 func _ready() -> void:
 	_health = max_health
@@ -31,11 +45,11 @@ func push_from_character(character_position: Vector3, movement: Vector3) -> void
 	apply_central_impulse(direction * character_push_impulse)
 
 func take_projectile_hit(damage: float, hit_position: Vector3, _hit_normal: Vector3, direction: Vector3, weapon_name: String) -> bool:
-	var multiplier := 1.8 if weapon_name == "SHOTGUN" else (0.7 if weapon_name == "UZI" else 1.0)
+	var multiplier := 1.1 if weapon_name == "SHOTGUN" else (0.7 if weapon_name == "UZI" else 1.0)
 	var impulse := bullet_impulse * multiplier
 	sleeping = false
 	apply_impulse(direction.normalized() * impulse, hit_position - global_position)
-	_health -= maxf(damage, 0.0) * multiplier
+	_health -= BALANCE.object_damage(maxf(damage, 0.0), weapon_name, _damage_category()) * multiplier
 	if breakable and _health <= 0.0:
 		_break_physical_prop(hit_position, direction)
 	return true

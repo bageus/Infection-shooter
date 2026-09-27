@@ -20,3 +20,4 @@ script = ExtResource("5_glass_collision")
 [node name="GlassBody" type="StaticBody3D" parent="." groups=["infected_breakable_glass"]]
 script = ExtResource("3_glass")
 blinds_pass_through = true
+preserve_open_frame = true
