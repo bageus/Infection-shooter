@@ -160,6 +160,8 @@ func apply_blast_stun(duration: float, intensity: float) -> void:
 		tone.mix_rate = 22050
 		tone.format = AudioStreamWAV.FORMAT_16_BITS
 		tone.loop_mode = AudioStreamWAV.LOOP_FORWARD
+		tone.loop_begin = 0
+		tone.loop_end = 11025
 		var samples := PackedByteArray()
 		samples.resize(22050)
 		for i in 11025:
@@ -168,6 +170,12 @@ func apply_blast_stun(duration: float, intensity: float) -> void:
 		_stun_ringing.stream = tone
 	_stun_ringing.volume_db = -19.0 + 6.0 * _stun_intensity
 	_stun_ringing.play()
+
+func _exit_tree() -> void:
+	if _stun_remaining > 0.0:
+		AudioServer.set_bus_volume_db(0, _original_master_volume)
+
+
 func _update_move(delta:float)->void:
 	var d:=_move_direction()
 	if _roll_remaining>0.0:
