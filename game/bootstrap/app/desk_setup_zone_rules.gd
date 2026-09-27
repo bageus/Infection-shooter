@@ -153,12 +153,12 @@ static func snap_to_neighbors(point: Vector2, zone: Dictionary, zones: Array[Dic
 		var vertical := (float(zone["depth"]) + float(other["depth"])) * 0.5
 		if absf(point.y - float(other["z"])) < vertical:
 			for sign_value in [-1.0, 1.0]:
-				var edge := float(other["x"]) + sign_value * horizontal
+				var edge: float = float(other["x"]) + sign_value * horizontal
 				if absf(point.x - edge) < 0.08:
 					point.x = edge
 		if absf(point.x - float(other["x"])) < horizontal:
 			for sign_value in [-1.0, 1.0]:
-				var edge := float(other["z"]) + sign_value * vertical
+				var edge: float = float(other["z"]) + sign_value * vertical
 				if absf(point.y - edge) < 0.08:
 					point.y = edge
 	return point

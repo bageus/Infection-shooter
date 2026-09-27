@@ -1,8 +1,12 @@
 extends RefCounted
 
-# Test the visible mesh corners in the desk's local coordinates, not just the
-# object's pivot: a rotated object can otherwise cross a zone boundary.
+# Zones contain the placement point. Visible geometry may extend past the
+# boundary: the same zone can accommodate small position and angle variations.
 static func fits_zone(desk: Node3D, zone: Dictionary, item: Node3D) -> bool:
+	var point := desk.to_local(item.global_position)
+	var offset := Vector3(point.x - float(zone["x"]), 0, point.z - float(zone["z"])).rotated(Vector3.UP, -deg_to_rad(float(zone.get("angle", 0.0))))
+	if absf(offset.x) > float(zone["width"]) * 0.5 + 0.002 or absf(offset.z) > float(zone["depth"]) * 0.5 + 0.002:
+		return false
 	var mesh_found := false
 	var lowest := INF
 	var pending: Array[Node] = [item]
@@ -18,10 +22,6 @@ static func fits_zone(desk: Node3D, zone: Dictionary, item: Node3D) -> bool:
 						for y in [box.position.y, box.end.y]:
 							var world := mesh.to_global(Vector3(x, y, z))
 							lowest = minf(lowest, world.y)
-							var point := desk.to_local(world)
-							var offset := Vector3(point.x - float(zone["x"]), 0, point.z - float(zone["z"])).rotated(Vector3.UP, -deg_to_rad(float(zone.get("angle", 0.0))))
-							if absf(offset.x) > float(zone["width"]) * 0.5 + 0.002 or absf(offset.z) > float(zone["depth"]) * 0.5 + 0.002:
-								return false
 		for child in current.get_children():
 			pending.append(child)
 	return mesh_found and bool(zone.get("floor", false)) == (lowest < desk.to_global(Vector3.UP * 0.35).y)
