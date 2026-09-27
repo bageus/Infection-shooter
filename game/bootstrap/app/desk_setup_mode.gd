@@ -358,9 +358,11 @@ func _randomize() -> void:
 	random.randomize()
 	var choices := ["05_computer_mouse", "05_desk_phone", "05_laptop_destructible", "05_monitor_destructible", "05_keyboard", "09_notepad", "09_mug", "09_stapler", "11_plant_small"]
 	var count := random.randi_range(1, 3)
-	for i in count:
+	for _i in count:
 		var model: String = choices[random.randi_range(0, choices.size() - 1)]
-		var local := Vector3(float(zone["x"]) + random.randf_range(-float(zone["width"]) * 0.33, float(zone["height"]), float(zone["z"]) + random.randf_range(-float(zone["depth"]) * 0.33)))
+		var x_offset := random.randf_range(-float(zone["width"]) * 0.33, float(zone["width"]) * 0.33)
+		var z_offset := random.randf_range(-float(zone["depth"]) * 0.33, float(zone["depth"]) * 0.33)
+		var local := Vector3(float(zone["x"]) + x_offset, float(zone["height"]), float(zone["z"]) + z_offset)
 		_place_model(model, local)
 	status.text = "Random preview for zone %d" % (zone_index + 1)
 
