@@ -3,7 +3,7 @@ extends "res://game/presentation/office_floor/physical_prop.gd"
 @export var leg_health := 28.0
 @export var leg_hit_height := 0.48
 @export var leg_edge_ratio := 0.30
-@export var broken_leg_tilt_impulse := 4.5
+@export var broken_leg_tilt_impulse := 1.2
 @export var max_broken_legs := 4
 
 var _broken_legs: Dictionary = {}
@@ -51,7 +51,7 @@ func _break_leg(leg_id: String, local_hit: Vector3, direction: Vector3) -> void:
 	if away.length_squared() < 0.001:
 		away = direction
 	away.y = -0.35
-	apply_impulse(away.normalized() * broken_leg_tilt_impulse, local_hit)
+	apply_impulse(away.normalized() * broken_leg_tilt_impulse, global_basis * local_hit.limit_length(0.35))
 	_hide_nearest_leg_visual(local_hit)
 	set_meta("broken_legs", _broken_legs.size())
 	_support_loss = minf(1.0, float(_broken_legs.size()) / maxf(float(max_broken_legs), 1.0))

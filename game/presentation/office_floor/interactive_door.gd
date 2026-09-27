@@ -45,10 +45,16 @@ func _ready() -> void:
 
 func _physics_process(delta: float) -> void:
 	if _player == null or not is_instance_valid(_player):
-		return
+		_player = get_tree().get_first_node_in_group("player") as Node3D
+		if _player == null:
+			return
 	var wants_open := _requested_open
 	_requested_open = false
 	var local_player := to_local(_player.global_position)
+	if mode == DoorMode.GLASS_SWING:
+		var visual := get_parent().get_node_or_null("Visual") as Node3D
+		if visual != null:
+			local_player = to_local(_player.global_position - (visual.global_position - global_position))
 	var horizontal_distance := Vector2(local_player.x, local_player.z).length()
 
 	if horizontal_distance <= trigger_distance:
@@ -83,6 +89,13 @@ func _physics_process(delta: float) -> void:
 		var should_disable := _open_amount >= 0.6
 		if collision.disabled != should_disable:
 			collision.set_deferred("disabled", should_disable)
+	if mode == DoorMode.GLASS_SWING:
+		var glass_body := get_parent().get_node_or_null("GlassBody") as StaticBody3D
+		if glass_body != null:
+			var broken := bool(glass_body.get("_broken"))
+			for child in glass_body.get_children():
+				if child is CollisionShape3D and (child as CollisionShape3D).disabled != (broken or _open_amount >= 0.15):
+					(child as CollisionShape3D).set_deferred("disabled", broken or _open_amount >= 0.15)
 	if mode == DoorMode.GLASS_SWING and _glass_hinge != null:
 		var swing_side := _swing_side
 		if swing_side == 0.0:

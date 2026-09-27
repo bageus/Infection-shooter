@@ -867,7 +867,7 @@ func _place_selected(screen_pos: Vector2) -> void:
 	if not WORKSTATIONS.desk_name(selected_path).is_empty():
 		var desk_id := str(Time.get_ticks_usec())
 		node.set_meta("planning_desk_id", desk_id)
-		var objects: Array[Node3D] = WORKSTATIONS.generate(node, selected_path, root, placed, Callable(self, "_instantiate_asset"))
+		var objects: Array[Node3D] = WORKSTATIONS.from_saved_template(node, selected_path, root, Callable(self, "_instantiate_asset"))
 		for object in objects:
 			object.set_meta("planning_attachment", desk_id)
 			placed.append(object)

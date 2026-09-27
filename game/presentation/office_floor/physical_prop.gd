@@ -46,9 +46,14 @@ func push_from_character(character_position: Vector3, movement: Vector3) -> void
 
 func take_projectile_hit(damage: float, hit_position: Vector3, _hit_normal: Vector3, direction: Vector3, weapon_name: String) -> bool:
 	var multiplier := 1.1 if weapon_name == "SHOTGUN" else (0.7 if weapon_name == "UZI" else 1.0)
-	var impulse := bullet_impulse * multiplier
+	# Shotgun pellets each deliver a separate hit; share a modest kick across
+	# the spread instead of applying a full pistol-sized impulse eight times.
+	var impulse := minf(bullet_impulse * 0.22, mass * 0.12) if weapon_name == "SHOTGUN" else bullet_impulse * multiplier
 	sleeping = false
-	apply_impulse(direction.normalized() * impulse, hit_position - global_position)
+	if mass >= 5.0:
+		apply_central_impulse((direction.normalized() + Vector3.UP * 0.1).normalized() * minf(impulse, mass * 0.12))
+	else:
+		apply_impulse((direction.normalized() + Vector3.UP * (0.3 if weapon_name == "SHOTGUN" else 0.0)).normalized() * impulse, hit_position - global_position)
 	_health -= BALANCE.object_damage(maxf(damage, 0.0), weapon_name, _damage_category()) * multiplier
 	if breakable and _health <= 0.0:
 		_break_physical_prop(hit_position, direction)

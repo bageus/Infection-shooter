@@ -3,6 +3,7 @@ extends RefCounted
 # Authored in game/bootstrap/app/workstations. Coordinates are metres in the desk's
 # local space: the seated person looks towards positive Z.
 const ROOT := "res://game/bootstrap/app/workstations/"
+const TEMPLATE_FILES := preload("res://game/bootstrap/app/desk_setup_template_files.gd")
 const MODEL_ROOT := "res://models/objects/enviroments/"
 const DESKS := {
 	"08_office_desk_2": "office_desk_2",
@@ -27,6 +28,31 @@ const VARIANTS := {
 static func desk_name(path: String) -> String:
 	var stem := path.get_file().get_basename()
 	return str(DESKS.get(stem, ""))
+
+
+static func from_saved_template(desk: Node3D, path: String, parent: Node3D, make_asset: Callable) -> Array[Node3D]:
+	var created: Array[Node3D] = []
+	var templates: Array[Dictionary] = TEMPLATE_FILES.list_for(desk_name(path))
+	if templates.is_empty():
+		return created
+	var template: Dictionary = templates[randi_range(0, templates.size() - 1)]
+	var data: Dictionary = TEMPLATE_FILES.load(str(template["path"]), desk_name(path))
+	for value in data.get("items", []):
+		if not value is Dictionary:
+			continue
+		var entry: Dictionary = value
+		var asset_path := str(entry.get("path", ""))
+		if not asset_path.begins_with(MODEL_ROOT) or not FileAccess.file_exists(asset_path):
+			continue
+		var node := make_asset.call(asset_path) as Node3D
+		if node == null:
+			continue
+		parent.add_child(node)
+		node.global_position = desk.to_global(Vector3(float(entry.get("x", 0.0)), float(entry.get("y", 0.0)), float(entry.get("z", 0.0))))
+		node.rotation.y = desk.rotation.y + float(entry.get("yaw", 0.0))
+		node.set_meta("planning_scene_path", asset_path)
+		created.append(node)
+	return created
 
 
 static func available_models() -> Array[String]:

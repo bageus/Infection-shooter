@@ -9,6 +9,7 @@
 [node name="SlidingGlassDoor" type="Node3D"]
 script = ExtResource("2_collision")
 exclude_name_tokens = PackedStringArray("glass", "blinds", "doorhandle", "doortoppanel")
+use_simple_collision = false
 
 [node name="GlassCollisionBuilder" type="Node3D" parent="."]
 script = ExtResource("5_glass_collision")
@@ -20,6 +21,7 @@ position = Vector3(-2, 0, 0)
 
 [node name="GlassBody" type="StaticBody3D" parent="." groups=["infected_breakable_glass"]]
 script = ExtResource("3_glass")
+preserve_open_frame = true
 
 
 [node name="DoorController" type="Node3D" parent="."]

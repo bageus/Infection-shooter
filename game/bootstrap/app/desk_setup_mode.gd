@@ -4,8 +4,9 @@ extends Node
 const WORKSTATIONS := preload("res://game/bootstrap/app/workstation_templates.gd")
 const VISUALS := preload("res://game/bootstrap/app/desk_setup_visuals.gd")
 const ZONE_RULES := preload("res://game/bootstrap/app/desk_setup_zone_rules.gd")
-const TEMPLATE_FILES := preload("res://game/bootstrap/app/desk_setup_template_files.gd")
+const TEMPLATE_ACTIONS := preload("res://game/bootstrap/app/desk_setup_template_actions.gd")
 const ZONE_FORM := preload("res://game/bootstrap/app/desk_setup_zone_form.gd")
+const ZONE_ACTIONS := preload("res://game/bootstrap/app/desk_setup_zone_actions.gd")
 const MODEL_ROOT := "res://models/objects/enviroments/"
 
 var planner: Node
@@ -21,10 +22,13 @@ var zone_index := -1
 var front := 0
 var placing_zone := false
 var next_zone_floor := false
+var chair_positioning := false
+var chair_model: OptionButton
 var panel: PanelContainer
 var scroll: ScrollContainer
 var help_panel: PanelContainer
-var zone_list: ItemList
+var zone_list: VBoxContainer
+var zone_items: VBoxContainer
 var zone_form: Control
 var model_list: ItemList
 var template_list: OptionButton
@@ -35,7 +39,6 @@ var status: Label
 var front_button: Button
 var markers: Node3D
 var models: Array[String] = []
-
 
 func configure(owner_planner: Node, planning_ui: Control) -> void:
 	planner = owner_planner
@@ -60,17 +63,27 @@ func configure(owner_planner: Node, planning_ui: Control) -> void:
 	header.add_child(title)
 	_button(header, "?", _toggle_help)
 	front_button = _button(box, "Front: seated side", _switch_front)
-	zone_list = ItemList.new()
-	zone_list.custom_minimum_size.y = 105
-	zone_list.item_selected.connect(_select_zone)
-	box.add_child(zone_list)
+	var zone_scroll := ScrollContainer.new()
+	zone_scroll.custom_minimum_size.y = 105
+	zone_scroll.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
+	box.add_child(zone_scroll)
+	zone_list = VBoxContainer.new()
+	zone_list.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	zone_scroll.add_child(zone_list)
 	zone_form = ZONE_FORM.new()
 	box.add_child(zone_form)
 	zone_form.connect("zone_changed", _on_zone_changed)
 	_button(box, "Add zone (click table or floor)", _start_zone)
 	_button(box, "Next zone: table / floor", _toggle_zone_surface)
 	_button(box, "Selected zone: table / floor", _toggle_selected_surface)
-	_button(box, "Remove selected zone", _remove_zone)
+	var chair_row := HBoxContainer.new()
+	box.add_child(chair_row)
+	chair_model = OptionButton.new()
+	for model in ["06_office_chair", "06_office_chair_2", "06_office_chair_2_fell"]:
+		chair_model.add_item(model)
+	chair_model.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	chair_row.add_child(chair_model)
+	_button(chair_row, "Chair position", _choose_chair_position)
 	var sizes := HBoxContainer.new()
 	box.add_child(sizes)
 	width_field = _dimension(sizes, "Width", 0.65)
@@ -83,6 +96,16 @@ func configure(owner_planner: Node, planning_ui: Control) -> void:
 	_button(box, "Place selected item (click zone)", _start_item)
 	_button(box, "Random items in selected zone", _randomize)
 	_button(box, "Remove zone items", _clear_zone)
+	var item_caption := Label.new()
+	item_caption.text = "Items in selected zone (remove one with ×)"
+	box.add_child(item_caption)
+	var item_scroll := ScrollContainer.new()
+	item_scroll.custom_minimum_size.y = 85
+	item_scroll.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
+	box.add_child(item_scroll)
+	zone_items = VBoxContainer.new()
+	zone_items.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	item_scroll.add_child(zone_items)
 	template_name = LineEdit.new()
 	template_name.placeholder_text = "Template name"
 	box.add_child(template_name)
@@ -104,14 +127,12 @@ func configure(owner_planner: Node, planning_ui: Control) -> void:
 	markers.hide()
 	_collect_models()
 
-
 func _button(parent: Node, caption: String, action: Callable) -> Button:
 	var button := Button.new()
 	button.text = caption
 	button.pressed.connect(action)
 	parent.add_child(button)
 	return button
-
 
 func _dimension(parent: HBoxContainer, caption: String, initial: float) -> SpinBox:
 	var label := Label.new()
@@ -125,7 +146,6 @@ func _dimension(parent: HBoxContainer, caption: String, initial: float) -> SpinB
 	field.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	parent.add_child(field)
 	return field
-
 
 func _build_help(planning_ui: Control) -> void:
 	help_panel = PanelContainer.new()
@@ -144,7 +164,6 @@ func _build_help(planning_ui: Control) -> void:
 	_button(contents, "CLOSE HELP", _toggle_help)
 	help_panel.hide()
 
-
 func _resize_menu() -> void:
 	if scroll == null:
 		return
@@ -157,16 +176,13 @@ func _resize_menu() -> void:
 	panel.custom_minimum_size.x = menu_width - 12.0
 	help_panel.position = Vector2(maxf(8.0, viewport_size.x - menu_width - 304.0), 8.0)
 
-
 func _toggle_help() -> void:
 	help_panel.visible = not help_panel.visible
-
 
 func _collect_models() -> void:
 	models = WORKSTATIONS.available_models()
 	for model in models:
 		model_list.add_item(model)
-
 
 func open(target: Node3D) -> void:
 	if active:
@@ -175,6 +191,7 @@ func open(target: Node3D) -> void:
 	dragged = null
 	active = true
 	placing_zone = false
+	chair_positioning = false
 	dragging_zone = false
 	saved_camera = planner.camera.global_transform
 	var profile: Dictionary = WORKSTATIONS._read("desks/" + WORKSTATIONS.desk_name(_desk_path()) + ".json")
@@ -183,9 +200,9 @@ func open(target: Node3D) -> void:
 	for station_index in stations.size():
 		var station_value: Variant = stations[station_index]
 		var station: Dictionary = station_value
-		zones.append({"name": "Work surface %d" % (station_index + 1), "required": true, "angle": float(station.get("angle", 0.0)), "x": float(station.get("x", 0.0)), "z": float(station.get("z", 0.0)), "width": 1.5, "depth": 0.85, "height": float(profile.get("height", 0.89)), "floor": false})
+		zones.append({"name": "Work surface %d" % (station_index + 1), "required": false, "category": "Any", "angle": float(station.get("angle", 0.0)), "x": float(station.get("x", 0.0)), "z": float(station.get("z", 0.0)), "width": 1.5, "depth": 0.85, "height": float(profile.get("height", 0.89)), "floor": false})
 	if zones.is_empty():
-		zones.append({"name": "Work surface 1", "required": true, "angle": 0.0, "x": 0.0, "z": 0.0, "width": 1.5, "depth": 0.85, "height": 0.89, "floor": false})
+		zones.append({"name": "Work surface 1", "required": false, "category": "Any", "angle": 0.0, "x": 0.0, "z": 0.0, "width": 1.5, "depth": 0.85, "height": 0.89, "floor": false})
 	front = 0
 	zone_index = 0
 	scroll.show()
@@ -201,12 +218,12 @@ func open(target: Node3D) -> void:
 	_reset_view()
 	status.text = "Click a zone to select it; the desk stays fixed."
 
-
 func close() -> void:
 	if not active:
 		return
 	active = false
 	placing_zone = false
+	chair_positioning = false
 	dragging_zone = false
 	dragged = null
 	planner.camera.global_transform = saved_camera
@@ -219,7 +236,6 @@ func close() -> void:
 	desk = null
 	planner._select(null)
 
-
 func handle_input(event: InputEvent) -> bool:
 	if not active:
 		return false
@@ -230,10 +246,14 @@ func handle_input(event: InputEvent) -> bool:
 			close()
 		return true
 	if event is InputEventKey and event.pressed and not event.echo and not _editing_text():
+		if zone_index >= 0 and event.keycode in [KEY_Q, KEY_E]:
+			_rotate_zone(-15.0 if event.keycode == KEY_Q else 15.0)
+			return true
 		if event.keycode == KEY_DELETE and dragged != null:
 			planner.placed.erase(dragged)
 			dragged.queue_free()
 			dragged = null
+			_refresh_zone_items()
 			return true
 		if zone_index >= 0 and event.keycode in [KEY_LEFT, KEY_RIGHT, KEY_UP, KEY_DOWN]:
 			var direction := Vector2.ZERO
@@ -265,13 +285,14 @@ func handle_input(event: InputEvent) -> bool:
 		return true
 	return false # Let focused LineEdit and SpinBox controls receive keyboard input.
 
-
 func _editing_text() -> bool:
 	return template_name.has_focus() or width_field.get_line_edit().has_focus() or depth_field.get_line_edit().has_focus() or bool(zone_form.call("editing_text"))
 
-
 func _click_world(screen: Vector2, pick_item: bool) -> void:
 	dragged = null
+	if chair_positioning:
+		_place_chair_at(screen)
+		return
 	if placing_zone:
 		_add_zone_at(screen)
 		return
@@ -301,22 +322,28 @@ func _click_world(screen: Vector2, pick_item: bool) -> void:
 			zone_drag_offset = Vector2(float(zones[zone]["x"]) - local.x, float(zones[zone]["z"]) - local.z)
 			dragging_zone = true
 
-
 func _add_zone_at(screen: Vector2) -> void:
 	var point := _project(screen, 0.0 if next_zone_floor else 0.89)
 	if not point.is_finite():
 		return
 	var local: Vector3 = desk.to_local(point)
-	zones.append({"name": "Zone %d" % (zones.size() + 1), "required": false, "angle": 0.0, "x": local.x, "z": local.z, "width": 0.65, "depth": 0.45, "height": 0.0 if next_zone_floor else 0.89, "floor": next_zone_floor})
+	zones.append({"name": "Zone %d" % (zones.size() + 1), "required": false, "category": "Any", "angle": 0.0, "x": local.x, "z": local.z, "width": 0.65, "depth": 0.45, "height": 0.0 if next_zone_floor else 0.89, "floor": next_zone_floor})
 	zone_index = zones.size() - 1
 	placing_zone = false
 	_refresh_zones()
-
 
 func _move_zone(index: int, target: Vector2) -> void:
 	if ZONE_RULES.move_zone(desk, zones, index, target, stations, _attachments()):
 		_refresh_zones()
 
+func _choose_chair_position() -> void:
+	ZONE_ACTIONS.choose_chair(self)
+
+func _place_chair_at(screen: Vector2) -> void:
+	ZONE_ACTIONS.place_chair(self, screen)
+
+func _rotate_zone(amount: float) -> void:
+	zone_form.call("turn_by", amount)
 
 func _drag_item(screen: Vector2) -> void:
 	var local := _local_at(screen, zones[zone_index])
@@ -327,26 +354,20 @@ func _drag_item(screen: Vector2) -> void:
 	if ZONE_RULES.overlaps_item(dragged, _attachments()):
 		dragged.global_position = previous
 
-
 func _orbit(relative: Vector2) -> void:
 	markers.call("rotate_view", planner.camera, relative)
-
 
 func _zoom_orbit(amount: float) -> void:
 	markers.call("zoom_view", planner.camera, amount)
 
-
 func _orbit_left() -> void:
 	_orbit(Vector2(PI * 0.5 / 0.008, 0))
-
 
 func _orbit_right() -> void:
 	_orbit(Vector2(-PI * 0.5 / 0.008, 0))
 
-
 func _reset_view() -> void:
 	markers.call("reset_view", planner.camera)
-
 
 func _project(screen: Vector2, height: float) -> Vector3:
 	var origin: Vector3 = planner.camera.project_ray_origin(screen)
@@ -355,16 +376,15 @@ func _project(screen: Vector2, height: float) -> Vector3:
 	var point: Variant = plane.intersects_ray(origin, ray)
 	return point if point is Vector3 else Vector3(INF, INF, INF)
 
-
 func _local_at(screen: Vector2, zone: Dictionary) -> Vector3:
 	return desk.to_local(_project(screen, float(zone["height"])))
-
 
 func _zone_at(screen: Vector2) -> int:
 	for i in range(zones.size() - 1, -1, -1):
 		var zone: Dictionary = zones[i]
 		var local := _local_at(screen, zone)
-		if local.is_finite() and absf(local.x - float(zone["x"])) <= float(zone["width"]) * 0.5 and absf(local.z - float(zone["z"])) <= float(zone["depth"]) * 0.5:
+		var offset := Vector3(local.x - float(zone["x"]), 0, local.z - float(zone["z"])).rotated(Vector3.UP, -deg_to_rad(float(zone.get("angle", 0.0))))
+		if local.is_finite() and absf(offset.x) <= float(zone["width"]) * 0.5 and absf(offset.z) <= float(zone["depth"]) * 0.5:
 			return i
 	return -1
 
@@ -379,6 +399,9 @@ func _desk_id() -> String:
 
 func _place_model(model: String, local: Vector3) -> void:
 	var zone := zones[zone_index]
+	if str(zone.get("category", "Any")) != "Any" and ZONE_RULES.category_for(model) != str(zone["category"]):
+		status.text = "Choose an item of type: " + str(zone["category"])
+		return
 	var group := model.substr(0, 2)
 	var path := MODEL_ROOT + group + "/" + model + ".glb"
 	if not FileAccess.file_exists(path):
@@ -400,6 +423,7 @@ func _place_model(model: String, local: Vector3) -> void:
 		object.set_meta("planning_attachment", _desk_id())
 		object.set_meta("planning_zone", zone_index)
 		planner.placed.append(object)
+	_refresh_zone_items()
 	status.text = "Placed " + model if not created.is_empty() else "No room here; move the zone or choose a smaller item."
 
 
@@ -436,12 +460,13 @@ func _start_item() -> void:
 		status.text = "Click inside a highlighted zone to place the selected object."
 
 
-func _remove_zone() -> void:
-	if zone_index < 0:
+func _remove_zone_at(index: int) -> void:
+	if index < 0 or index >= zones.size():
 		return
+	zone_index = index
 	_clear_zone()
-	zones.remove_at(zone_index)
-	zone_index = mini(zone_index, zones.size() - 1)
+	zones.remove_at(index)
+	zone_index = mini(index, zones.size() - 1)
 	_refresh_zones()
 
 
@@ -450,25 +475,11 @@ func _clear_zone() -> void:
 		for object in ZONE_RULES.items_in_zone(desk, zones[zone_index], _attachments()):
 			planner.placed.erase(object)
 			object.queue_free()
+	_refresh_zone_items()
 
 
 func _randomize() -> void:
-	if zone_index < 0:
-		return
-	_clear_zone()
-	var zone: Dictionary = zones[zone_index]
-	for item in ZONE_RULES.random_items(zone):
-		_place_model(str(item["model"]), Vector3(float(item["x"]), float(zone["height"]), float(item["z"])))
-	if bool(zone.get("required", true)):
-		for _attempt in 8:
-			if not ZONE_RULES.items_in_zone(desk, zone, _attachments()).is_empty():
-				break
-			var choice: Dictionary = ZONE_RULES.random_items(zone)[0]
-			_place_model(str(choice["model"]), Vector3(float(choice["x"]), float(zone["height"]), float(choice["z"])))
-		if ZONE_RULES.items_in_zone(desk, zone, _attachments()).is_empty():
-			status.text = "No room for an item in required zone: " + str(zone["name"])
-			return
-	status.text = "Random preview: " + str(zone["name"])
+	ZONE_ACTIONS.randomize(self)
 
 
 func _switch_front() -> void:
@@ -479,24 +490,44 @@ func _switch_front() -> void:
 
 func _select_zone(index: int) -> void:
 	zone_index = index
+	for i in zone_list.get_child_count():
+		var button := zone_list.get_child(i).get_child(0) as Button
+		button.modulate = Color(1.0, 0.83, 0.48) if i == index else Color.WHITE
 	var zone: Dictionary = zones[index]
 	zone_form.call("display", zone)
 	width_field.set_value_no_signal(float(zone["width"]))
 	depth_field.set_value_no_signal(float(zone["depth"]))
+	_refresh_zone_items()
 	_refresh_markers()
 
 
-func _on_zone_changed(zone_name: String, required: bool, angle: float) -> void:
+func _on_zone_changed(zone_name: String, required: bool, angle: float, category: String) -> void:
 	if zone_index < 0:
 		return
 	var zone: Dictionary = zones[zone_index]
 	var delta := angle - float(zone.get("angle", 0.0))
 	if not is_zero_approx(delta):
-		ZONE_RULES.rotate_items(desk, zone, _attachments(), delta)
-	zone["name"] = zone_name if not zone_name.is_empty() else "Zone %d" % (zone_index + 1)
+		var proposed := zone.duplicate()
+		proposed["angle"] = angle
+		if not ZONE_RULES._inside_surface(Vector2(float(zone["x"]), float(zone["z"])), proposed, stations) or not ZONE_RULES.rotate_items(desk, zone, _attachments(), delta):
+			status.text = "Zone cannot rotate here without leaving the surface or overlapping items."
+			zone_form.call("display", zone)
+			return
+	var previous_category := str(zone.get("category", "Any"))
+	if category != "Any" and category != previous_category:
+		for object in ZONE_RULES.items_in_zone(desk, zone, _attachments()):
+			if ZONE_RULES.category_for(str(object.get_meta("planning_scene_path", "")).get_file().get_basename()) != category:
+				status.text = "Remove incompatible items before changing the zone type."
+				zone_form.call("display", zone)
+				return
+	zone["name"] = category if category != "Any" and category != previous_category else (zone_name if not zone_name.is_empty() else "Zone %d" % (zone_index + 1))
 	zone["required"] = required
 	zone["angle"] = angle
-	zone_list.set_item_text(zone_index, _zone_label(zone, zone_index))
+	zone["category"] = category
+	if category != previous_category:
+		zone_form.call("display", zone)
+	(zone_list.get_child(zone_index).get_child(0) as Button).text = _zone_label(zone, zone_index)
+	_refresh_zone_items()
 	_refresh_markers()
 
 
@@ -508,18 +539,49 @@ func _resize_zone(_value: float) -> void:
 
 
 func _refresh_zones() -> void:
-	zone_list.clear()
+	for child in zone_list.get_children():
+		zone_list.remove_child(child)
+		child.queue_free()
 	for i in zones.size():
-		zone_list.add_item(_zone_label(zones[i], i))
+		var row := HBoxContainer.new()
+		zone_list.add_child(row)
+		var select := _button(row, _zone_label(zones[i], i), _select_zone.bind(i))
+		select.clip_text = true
+		select.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		select.modulate = Color(1.0, 0.83, 0.48) if i == zone_index else Color.WHITE
+		_button(row, "×", _remove_zone_at.bind(i))
 	if zone_index >= 0:
-		zone_list.select(zone_index)
 		_select_zone(zone_index)
 	else:
+		_refresh_zone_items()
 		_refresh_markers()
 
 
+func _refresh_zone_items() -> void:
+	for child in zone_items.get_children():
+		zone_items.remove_child(child)
+		child.queue_free()
+	if zone_index < 0 or desk == null:
+		return
+	for object in ZONE_RULES.items_in_zone(desk, zones[zone_index], _attachments()):
+		var row := HBoxContainer.new()
+		zone_items.add_child(row)
+		var label := Label.new()
+		label.text = str(object.get_meta("planning_scene_path", object.name)).get_file().get_basename()
+		label.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		row.add_child(label)
+		_button(row, "×", _remove_zone_item.bind(object))
+
+
+func _remove_zone_item(object: Node3D) -> void:
+	if is_instance_valid(object):
+		planner.placed.erase(object)
+		object.queue_free()
+	_refresh_zone_items()
+
+
 func _zone_label(zone: Dictionary, index: int) -> String:
-	return "%s | %s | %d°" % [str(zone.get("name", "Zone %d" % (index + 1))), "Required" if bool(zone.get("required", true)) else "Optional", roundi(float(zone.get("angle", 0.0)))]
+	return "%s | %s | %s | %d°" % [str(zone.get("name", "Zone %d" % (index + 1))), "Required" if bool(zone.get("required", true)) else "Optional", str(zone.get("category", "Any")), roundi(float(zone.get("angle", 0.0)))]
 
 
 func _refresh_markers() -> void:
@@ -527,64 +589,12 @@ func _refresh_markers() -> void:
 
 
 func _save() -> void:
-	if TEMPLATE_FILES.safe_name(template_name.text).is_empty():
-		status.text = "Enter a template name first."
-		return
-	for zone in zones:
-		if bool(zone.get("required", true)) and ZONE_RULES.items_in_zone(desk, zone, _attachments()).is_empty():
-			status.text = "Required zone is empty: " + str(zone["name"])
-			return
-	var items: Array[Dictionary] = []
-	for object in _attachments():
-		var local := desk.to_local(object.global_position)
-		items.append({"path": str(object.get_meta("planning_scene_path", "")), "x": local.x, "y": local.y, "z": local.z, "yaw": object.rotation.y - desk.rotation.y})
-	if not TEMPLATE_FILES.save(WORKSTATIONS.desk_name(_desk_path()), template_name.text, {"version": 1, "desk": WORKSTATIONS.desk_name(_desk_path()), "front": front, "zones": zones, "items": items}):
-		status.text = "Could not save the template."
-		return
-	_refresh_templates()
-	status.text = "Saved: " + template_name.text
+	TEMPLATE_ACTIONS.save(self)
 
 
 func _refresh_templates() -> void:
-	template_list.clear()
-	for item in TEMPLATE_FILES.list_for(WORKSTATIONS.desk_name(_desk_path())):
-		template_list.add_item(str(item["name"]))
-		template_list.set_item_metadata(template_list.item_count - 1, item["path"])
+	TEMPLATE_ACTIONS.refresh(self)
 
 
 func _load() -> void:
-	if template_list.selected < 0:
-		return
-	var path: String = template_list.get_item_metadata(template_list.selected)
-	var data := TEMPLATE_FILES.load(path, WORKSTATIONS.desk_name(_desk_path())) as Dictionary
-	if data.is_empty():
-		status.text = "Template does not match this desk."
-		return
-	for object in _attachments():
-		planner.placed.erase(object)
-		object.queue_free()
-	zones.clear()
-	for value in data.get("zones", []):
-		if value is Dictionary:
-			zones.append(ZONE_RULES.normalize(value, zones.size()))
-	front = int(data.get("front", 0))
-	front_button.text = "Front: opposite side" if front else "Front: seated side"
-	zone_index = 0 if not zones.is_empty() else -1
-	_refresh_zones()
-	for entry_value in data.get("items", []):
-		if not entry_value is Dictionary:
-			continue
-		var entry: Dictionary = entry_value
-		var asset_path := str(entry.get("path", ""))
-		if not asset_path.begins_with(MODEL_ROOT) or not FileAccess.file_exists(asset_path):
-			continue
-		var object := planner._instantiate_asset(asset_path) as Node3D
-		if object == null:
-			continue
-		planner.root.add_child(object)
-		object.global_position = desk.to_global(Vector3(float(entry.get("x", 0)), float(entry.get("y", 0)), float(entry.get("z", 0))))
-		object.rotation.y = desk.rotation.y + float(entry.get("yaw", 0))
-		object.set_meta("planning_scene_path", asset_path)
-		object.set_meta("planning_attachment", _desk_id())
-		planner.placed.append(object)
-	status.text = "Template applied to this desk. Save the map to keep it."
+	TEMPLATE_ACTIONS.load_selected(self)

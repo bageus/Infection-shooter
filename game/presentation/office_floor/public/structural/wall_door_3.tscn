@@ -6,7 +6,8 @@
 
 [node name="WallDoor3" type="Node3D"]
 script = ExtResource("2_collision")
-exclude_name_tokens = PackedStringArray("doorpivot")
+use_simple_collision = false
+exclude_name_tokens = PackedStringArray("doorleaf", "doorhandle")
 
 [node name="Visual" parent="." instance=ExtResource("1_model")]
 

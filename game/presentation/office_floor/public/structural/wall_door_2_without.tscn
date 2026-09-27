@@ -5,6 +5,7 @@
 
 [node name="WallDoor2Without" type="Node3D"]
 script = ExtResource("2_collision")
+use_simple_collision = false
 
 [node name="Visual" parent="." instance=ExtResource("1_model")]
 

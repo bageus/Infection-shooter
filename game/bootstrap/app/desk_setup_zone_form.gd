@@ -1,9 +1,12 @@
 extends VBoxContainer
 
-signal zone_changed(zone_name: String, required: bool, angle: float)
+signal zone_changed(zone_name: String, required: bool, angle: float, category: String)
+
+const ZONE_RULES := preload("res://game/bootstrap/app/desk_setup_zone_rules.gd")
 
 var name_edit: LineEdit
 var type_select: OptionButton
+var category_select: OptionButton
 var angle_spin: SpinBox
 var _syncing := false
 
@@ -24,6 +27,17 @@ func _ready() -> void:
 	type_select.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	type_select.item_selected.connect(_changed)
 	type_row.add_child(type_select)
+	var category_row := HBoxContainer.new()
+	add_child(category_row)
+	var category_label := Label.new()
+	category_label.text = "Object"
+	category_row.add_child(category_label)
+	category_select = OptionButton.new()
+	for category in ZONE_RULES.CATEGORIES:
+		category_select.add_item(category)
+	category_select.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	category_select.item_selected.connect(_changed)
+	category_row.add_child(category_select)
 	var angle_row := HBoxContainer.new()
 	add_child(angle_row)
 	var angle_label := Label.new()
@@ -51,6 +65,8 @@ func display(zone: Dictionary) -> void:
 	_syncing = true
 	name_edit.text = str(zone.get("name", ""))
 	type_select.select(0 if bool(zone.get("required", true)) else 1)
+	var category_index := ZONE_RULES.CATEGORIES.find(str(zone.get("category", "Any")))
+	category_select.select(maxi(category_index, 0))
 	angle_spin.set_value_no_signal(float(zone.get("angle", 0.0)))
 	_syncing = false
 
@@ -63,6 +79,10 @@ func _turn(amount: float) -> void:
 	angle_spin.value = wrapf(angle_spin.value + amount, -180.0, 180.0)
 
 
+func turn_by(amount: float) -> void:
+	_turn(amount)
+
+
 func _changed(_value: Variant) -> void:
 	if not _syncing:
-		zone_changed.emit(name_edit.text.strip_edges(), type_select.get_selected_id() == 0, angle_spin.value)
+		zone_changed.emit(name_edit.text.strip_edges(), type_select.get_selected_id() == 0, angle_spin.value, category_select.get_item_text(category_select.selected))

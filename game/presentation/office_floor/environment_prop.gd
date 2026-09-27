@@ -45,6 +45,9 @@ func _ready() -> void:
 		return # Carpet lies on the level floor and must not create a raised obstacle.
 	var volume := _add_shapes(visual)
 	mass = clampf(volume * 18.0, 0.12, 55.0)
+	if "table" in model_path.get_file() or "desk" in model_path.get_file():
+		linear_damp = 3.0
+		angular_damp = 4.0
 	continuous_cd = true
 
 
@@ -123,6 +126,16 @@ func _stage_health() -> float:
 
 
 func take_projectile_hit(damage: float, hit_position: Vector3, _normal: Vector3, direction: Vector3, weapon: String) -> bool:
+	if model_path.get_file() == "02_water_cooler_bottle.glb":
+		if not freeze:
+			sleeping = false
+			apply_central_impulse((direction.normalized() + Vector3.UP * 0.25).normalized() * (mass * 0.055 if weapon == "SHOTGUN" else mass * 0.2))
+		return false
+	if not freeze and weapon == "SHOTGUN":
+		sleeping = false
+		var is_table := "table" in model_path.get_file() or "desk" in model_path.get_file()
+		var push := direction.normalized() if is_table else (direction.normalized() + Vector3.UP * 0.18).normalized()
+		apply_central_impulse(push * clampf(mass * (0.004 if is_table else 0.015), 0.025, 0.15 if is_table else 0.32))
 	if not _broken and not _transition_pending and (_variant_index + 1 < _variants.size() or not _stages.is_empty()):
 		_health -= BALANCE.object_damage(damage, weapon, _damage_category())
 		if _health <= 0.0:

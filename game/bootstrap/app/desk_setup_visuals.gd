@@ -71,7 +71,10 @@ func redraw(zones: Array[Dictionary], selected: int, front: int) -> void:
 		box.size = Vector3(float(zone["width"]), 0.006, float(zone["depth"]))
 		var color := Color(1.0, 0.38, 0.18, 0.42) if i == selected else Color(0.12, 0.8, 1.0, 0.25)
 		box.material = _material(color, true)
-		_add_mesh(box, Vector3(float(zone["x"]), float(zone["height"]) + 0.035, float(zone["z"])))
+		var region := MeshInstance3D.new()
+		region.mesh = box
+		add_child(region)
+		region.global_transform = desk.global_transform * Transform3D(Basis(Vector3.UP, deg_to_rad(float(zone.get("angle", 0.0)))), Vector3(float(zone["x"]), float(zone["height"]) + 0.035, float(zone["z"])))
 		_add_zone_arrow(zone, Color(1.0, 0.9, 0.3) if i == selected else Color(0.93, 0.96, 1.0))
 	var direction := BoxMesh.new()
 	direction.size = Vector3(0.3, 0.015, 0.08)

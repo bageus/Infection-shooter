@@ -13,7 +13,7 @@ const WOOD_MARKS := [
 @export var fragment_impulse := 1.8
 @export var fragment_lifetime := 24.0
 @export var one_leg_tilt_impulse := 1.2
-@export var two_leg_tilt_impulse := 6.0
+@export var two_leg_tilt_impulse := 3.2
 
 var _intact: Node3D
 var _modular: Node3D
@@ -180,7 +180,6 @@ func _on_leg_lost(part_id: String, _hit_position: Vector3) -> void:
 	_assembly.freeze = false
 	_assembly.sleeping = false
 	_assembly.apply_torque_impulse(Vector3.UP.cross(tilt) * strength)
-	_assembly.apply_impulse(Vector3.DOWN * strength * 0.25, tilt * 0.5)
 	_wake_tabletop_items(tilt, strength)
 
 

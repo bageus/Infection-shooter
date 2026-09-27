@@ -98,7 +98,7 @@ func _break_glass(hit_position: Vector3) -> void:
 		else:
 			_hide_named(get_parent().get_node_or_null("Visual"), str(token).to_lower())
 	if preserve_open_frame:
-		_replace_frame_collision()
+		call_deferred("_replace_frame_collision")
 	_disable_collision_recursive(self)
 	# Only GlassBody is disabled; the surrounding frame keeps its own collision.
 	_spawn_fragments(hit_position)
@@ -115,20 +115,24 @@ func _replace_frame_collision() -> void:
 	var inner: AABB = (to_body * _glass_nodes[0].global_transform) * (_glass_nodes[0] as MeshInstance3D).get_aabb()
 	# Only the perimeter of the imported frame should obstruct a character.
 	# Some frame models have an additional pane collision across the opening.
-	if inner.size.x <= 0.0 or inner.size.y <= 0.0:
-		return
 	for child in frame_body.get_children():
 		if child is CollisionShape3D:
 			(child as CollisionShape3D).set_deferred("disabled", true)
 	var depth := maxf(outer.size.z, 0.07)
-	var left := maxf(inner.position.x - outer.position.x, 0.06)
-	var right := maxf(outer.end.x - inner.end.x, 0.06)
-	var top := maxf(outer.end.y - inner.end.y, 0.06)
+	# Leave enough clear width and height for the player's capsule after the pane
+	# breaks. Imported frame meshes can include an invisible full-size infill.
+	var opening_width := minf(maxf(inner.size.x, 1.15), maxf(outer.size.x - 0.12, 0.12))
+	var opening_left := clampf(inner.get_center().x - opening_width * 0.5, outer.position.x + 0.06, outer.end.x - opening_width - 0.06)
+	var opening_right := opening_left + opening_width
+	var left := maxf(opening_left - outer.position.x, 0.06)
+	var right := maxf(outer.end.x - opening_right, 0.06)
+	var opening_top := minf(maxf(inner.end.y, outer.position.y + 2.05), outer.end.y - 0.06)
+	var top := maxf(outer.end.y - opening_top, 0.06)
 	_add_frame_bar(frame_body, Vector3(left, outer.size.y, depth), Vector3(outer.position.x + left * 0.5, outer.get_center().y, outer.get_center().z))
 	_add_frame_bar(frame_body, Vector3(right, outer.size.y, depth), Vector3(outer.end.x - right * 0.5, outer.get_center().y, outer.get_center().z))
 	# The visible sill is below a normal step, but CharacterBody3D has no step-up;
 	# a collision here would close the passage at foot height again.
-	_add_frame_bar(frame_body, Vector3(maxf(inner.size.x, 0.1), top, depth), Vector3(inner.get_center().x, outer.end.y - top * 0.5, outer.get_center().z))
+	_add_frame_bar(frame_body, Vector3(opening_width, top, depth), Vector3(opening_left + opening_width * 0.5, outer.end.y - top * 0.5, outer.get_center().z))
 
 
 func _add_frame_bar(body: StaticBody3D, size: Vector3, center: Vector3) -> void:
