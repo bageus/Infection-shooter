@@ -8,9 +8,12 @@
     "Prototype infected death state"
   ],
   "public_api": [
-    "public/infected_capsule.tscn"
+    "public/infected_capsule.tscn",
+    "public/mutant_level2.tscn"
   ],
   "dependencies": [
-    "features.infection_source"
+    "features.infection_source",
+    "features.character_animation",
+    "features.pickups"
   ]
 }

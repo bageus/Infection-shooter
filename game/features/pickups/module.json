@@ -7,7 +7,8 @@
     "public/medkit_closed_pickup.tscn",
     "public/med_case_green_pickup.tscn",
     "public/ammo_red_pickup.tscn",
-    "public/ammo_orange_pickup.tscn"
+    "public/ammo_orange_pickup.tscn",
+    "public/drop_table.gd"
   ],
   "dependencies": []
 }

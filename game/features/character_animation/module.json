@@ -1,0 +1,12 @@
+{
+  "id": "features.character_animation",
+  "layer": "features",
+  "purpose": "Provide the shared character animation driver used by player and infected scenes.",
+  "state_owner": [
+    "Per-character animation playback selection"
+  ],
+  "public_api": [
+    "public/character_animation_driver.gd"
+  ],
+  "dependencies": []
+}

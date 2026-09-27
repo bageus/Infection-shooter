@@ -1,7 +1,7 @@
 extends CharacterBody3D
 
 const BLOOD_SPLATTER_TEXTURE: Texture2D = preload("res://assets/vfx/blood_splatter.svg")
-const DROP_TABLE_SCRIPT := preload("res://game/features/pickups/drop_table.gd")
+const DROP_TABLE_SCRIPT := preload("res://game/features/pickups/public/drop_table.gd")
 
 @export var max_health: float = 50.0
 @export var move_speed: float = 4.5

@@ -11,6 +11,7 @@
   ],
   "dependencies": [
     "features.combat",
-    "features.infection"
+    "features.infection",
+    "features.character_animation"
   ]
 }
