@@ -175,10 +175,21 @@ func _shatter_glass(hit_position: Vector3, direction: Vector3) -> void:
 	if not found:
 		return
 	var shards: Node3D = DAMAGE.find_named(_visual, "Glass_Shards")
-	if shards != null and absf((shards.get_parent() as Node3D).global_basis.determinant()) > 0.000000000001:
+	if shards != null:
+		# Vending machines keep their shard group below a hidden damage variant.
+		# Reveal its parents only while copying shard geometry.
+		var hidden_parents: Array[Node3D] = []
+		var ancestor := shards.get_parent() as Node3D
+		while ancestor != null and ancestor != _visual:
+			if ancestor.scale.length_squared() < 0.000001:
+				hidden_parents.append(ancestor)
+				ancestor.scale = Vector3.ONE
+			ancestor = ancestor.get_parent() as Node3D
 		var meshes: Array[MeshInstance3D] = DAMAGE.reveal_meshes(shards)
 		for index in mini(meshes.size(), 12):
 			DAMAGE.spawn_piece(self, meshes[index], self, _stages.size(), index, direction, hit_position)
+		for hidden in hidden_parents:
+			hidden.scale = Vector3.ZERO
 	else:
 		_spawn_fallback_glass(glass_bounds, hit_position, direction)
 
