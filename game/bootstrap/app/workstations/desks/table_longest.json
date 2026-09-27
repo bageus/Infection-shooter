@@ -1,0 +1,29 @@
+{
+  "height": 0.72,
+  "stations": [
+    {
+      "x": -1.087,
+      "z": 0,
+      "angle": 0,
+      "grid_height": 0.72,
+      "grid_width": 2.17,
+      "grid_depth": 0.77,
+      "usable_width": 2.17,
+      "usable_depth": 0.77,
+      "zone_width": 0.65,
+      "zone_depth": 0.35
+    },
+    {
+      "x": 1.087,
+      "z": 0,
+      "angle": 0,
+      "grid_height": 0.72,
+      "grid_width": 2.17,
+      "grid_depth": 0.77,
+      "usable_width": 2.17,
+      "usable_depth": 0.77,
+      "zone_width": 0.65,
+      "zone_depth": 0.35
+    }
+  ]
+}

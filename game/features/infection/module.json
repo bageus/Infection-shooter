@@ -4,6 +4,7 @@
   "purpose": "Own mutation, mutation-ability hysteresis, critical threshold, and control-loss escalation rules.",
   "state_owner": [
     "Mutation amount",
+    "Mutation skill tree, locked upgrades, and active skill cooldowns",
     "Active and priority mutation ability",
     "Critical mutation threshold",
     "Instability timer",

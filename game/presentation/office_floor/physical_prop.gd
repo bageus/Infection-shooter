@@ -1,6 +1,8 @@
 extends RigidBody3D
 
 const BALANCE = preload("res://game/features/combat/public/projectile_balance.gd")
+const SPARKS = preload("res://game/presentation/office_floor/electric_sparks.gd")
+const BLAST = preload("res://game/presentation/office_floor/blast_effect.gd")
 
 @export var max_health := 110.0
 @export var bullet_impulse := 1.8
@@ -10,6 +12,7 @@ const BALANCE = preload("res://game/features/combat/public/projectile_balance.gd
 @export var max_angular_speed := 8.0
 
 var _health := 110.0
+var _extinguisher_triggered := false
 
 
 func _damage_category() -> String:
@@ -45,6 +48,20 @@ func push_from_character(character_position: Vector3, movement: Vector3) -> void
 	apply_central_impulse(direction * character_push_impulse)
 
 func take_projectile_hit(damage: float, hit_position: Vector3, _hit_normal: Vector3, direction: Vector3, weapon_name: String) -> bool:
+	if "extinguisher" in (name + get_parent().name).to_lower():
+		if not _extinguisher_triggered:
+			_extinguisher_triggered = true
+			BLAST.smoke(self, hit_position)
+			apply_torque_impulse(Vector3(1, 4, 1))
+			apply_central_impulse((direction.normalized() + Vector3.UP) * 1.5)
+			get_tree().create_timer(0.55).timeout.connect(func() -> void:
+				if is_instance_valid(self):
+					BLAST.detonate(self, hit_position)
+					queue_free()
+			)
+		return true
+	if _damage_category() == "tech":
+		SPARKS.spawn(self, hit_position)
 	var multiplier := 1.1 if weapon_name == "SHOTGUN" else (0.7 if weapon_name == "UZI" else 1.0)
 	# Shotgun pellets each deliver a separate hit; share a modest kick across
 	# the spread instead of applying a full pistol-sized impulse eight times.
@@ -76,6 +93,8 @@ func _integrate_forces(state: PhysicsDirectBodyState3D) -> void:
 func _break_physical_prop(hit_position: Vector3, direction: Vector3) -> void:
 	if is_queued_for_deletion():
 		return
+	if _damage_category() == "tech":
+		SPARKS.spawn(self, hit_position, true)
 	var root := get_parent()
 	var visual := get_node_or_null("Visual")
 	if visual == null and root != null:

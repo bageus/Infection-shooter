@@ -3,6 +3,8 @@ extends RigidBody3D
 const DAMAGE = preload("res://game/presentation/office_floor/environment_damage.gd")
 const BALANCE = preload("res://game/features/combat/public/projectile_balance.gd")
 const BOOK_CONTACT = preload("res://game/presentation/office_floor/book_contact.gd")
+const SPARKS = preload("res://game/presentation/office_floor/electric_sparks.gd")
+const BLAST = preload("res://game/presentation/office_floor/blast_effect.gd")
 
 @export_file("*.glb") var model_path := ""
 
@@ -18,6 +20,7 @@ var _broken := false
 var _health := 0.0
 var _transition_pending := false
 var _book_kick_cooldown := 0.0
+var _extinguisher_triggered := false
 
 
 func _physics_process(delta: float) -> void:
@@ -137,6 +140,11 @@ func _stage_health() -> float:
 
 
 func take_projectile_hit(damage: float, hit_position: Vector3, _normal: Vector3, direction: Vector3, weapon: String) -> bool:
+	if "fire_extinguisher" in model_path.get_file():
+		_trigger_extinguisher(hit_position, direction)
+		return false
+	if _damage_category() == "tech":
+		SPARKS.spawn(self, hit_position)
 	if model_path.get_file() == "02_water_cooler_bottle.glb":
 		if not freeze:
 			sleeping = false
@@ -158,6 +166,24 @@ func take_projectile_hit(damage: float, hit_position: Vector3, _normal: Vector3,
 	return false
 
 
+func _trigger_extinguisher(hit_position: Vector3, direction: Vector3) -> void:
+	if _extinguisher_triggered:
+		return
+	_extinguisher_triggered = true
+	BLAST.smoke(self, hit_position)
+	sleeping = false
+	apply_central_impulse((direction.normalized() + Vector3.UP * 0.7) * 2.0)
+	apply_torque_impulse(Vector3(randf_range(-2, 2), 4.0, randf_range(-2, 2)))
+	var smoke_position := hit_position
+	get_tree().create_timer(0.55).timeout.connect(func() -> void:
+		if is_instance_valid(self):
+			BLAST.detonate(self, smoke_position)
+			_visual.hide()
+			collision_layer = 0
+			get_tree().create_timer(4.0).timeout.connect(queue_free)
+	)
+
+
 func take_melee_hit(damage: float, hit_position: Vector3, direction: Vector3) -> void:
 	take_projectile_hit(damage, hit_position, Vector3.ZERO, direction, "MELEE")
 
@@ -165,6 +191,8 @@ func take_melee_hit(damage: float, hit_position: Vector3, direction: Vector3) ->
 func _apply_damage(hit_position: Vector3, direction: Vector3) -> void:
 	if _broken:
 		return
+	if _damage_category() == "tech":
+		SPARKS.spawn(self, hit_position, true)
 	if _variant_index + 1 < _variants.size():
 		if _intact != null:
 			_intact.hide()

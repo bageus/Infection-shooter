@@ -1,6 +1,7 @@
 extends SceneTree
 
 const InfectionDomain = preload("res://game/features/infection/domain/infection_domain.gd")
+const MutationTree = preload("res://game/features/infection/domain/mutation_tree.gd")
 
 var failures: int = 0
 
@@ -23,12 +24,27 @@ func _run() -> void:
 	_test_instability_only_builds_at_critical_threshold()
 	_test_instability_resets_below_critical_threshold()
 	_test_mutagen_pauses_during_control_loss()
+	_test_skill_tree_lock_and_reactivation()
 
 	if failures == 0:
 		print("T001 infection domain tests passed.")
 	else:
 		push_error("T001 infection domain tests failed: %d failure(s)." % failures)
 	quit(failures)
+
+
+func _test_skill_tree_lock_and_reactivation() -> void:
+	var tree := MutationTree.new()
+	_expect(tree.upgrade("muscle_memory", 70.0), "The first skill can be learned with sufficient mutation.")
+	_expect(tree.upgrade("claws", 70.0), "A second passive branch can be learned.")
+	_expect(tree.upgrade("killer_instinct", 70.0), "A hybrid requires its two parent skills.")
+	_expect(not tree.upgrade("devourer", 70.0), "A hybrid without both parents stays unavailable.")
+	_expect(tree.toggle_lock("muscle_memory"), "Learned skill lock toggles.")
+	_expect(tree.reconcile(10.0), "Unlocked skills disappear when mutation falls below the threshold.")
+	_expect(tree.learned.has("muscle_memory"), "Locked skill remains learned below threshold.")
+	_expect(not tree.is_active("muscle_memory", 10.0), "Locked skill becomes inactive until its threshold returns.")
+	_expect(tree.is_active("muscle_memory", 70.0), "Locked skill reactivates without another point.")
+	_expect(not tree.learned.has("claws"), "Unlocked skill must be learned again.")
 
 
 func _test_cloud_rate_and_bounds() -> void:

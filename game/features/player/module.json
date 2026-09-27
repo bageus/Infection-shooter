@@ -4,7 +4,9 @@
   "purpose": "Own playable character movement, health, aiming, and host the infection runtime.",
   "state_owner": [
     "Player movement velocity",
-    "Player prototype health"
+    "Player prototype health",
+    "Mutation skill combat effects and temporary buffs",
+    "Explosion disorientation and camera/audio recovery"
   ],
   "public_api": [
     "public/player.tscn"

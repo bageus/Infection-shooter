@@ -84,6 +84,10 @@ func add_reserve_ammo(amount: int) -> int:
 	var previous := _reserve_ammo
 	_reserve_ammo = mini(max_reserve_ammo, _reserve_ammo + maxi(amount, 0))
 	return _reserve_ammo - previous
+func add_magazine_ammo(amount: int) -> int:
+	var before := _magazine_ammo
+	_magazine_ammo = mini(magazine_size, _magazine_ammo + maxi(0, amount))
+	return _magazine_ammo - before
 func _spread_direction(base: Vector3) -> Vector3:
 	var yaw := deg_to_rad(randf_range(-spread_degrees, spread_degrees))
 	var pitch := deg_to_rad(randf_range(-spread_degrees, spread_degrees))

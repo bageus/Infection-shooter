@@ -30,6 +30,9 @@ var _ai_tick_offset: int = 0
 var _cached_desired: Vector3 = Vector3.ZERO
 var _lod_frame_offset: int = 0
 var _sleeping_far := false
+var _blast_stun_remaining := 0.0
+var mutation_poison_remaining := 0.0
+var _mutation_poison_damage := 0.0
 
 
 func _ready() -> void:
@@ -59,6 +62,9 @@ func take_projectile_damage(
 ) -> void:
 	_spawn_air_blood(hit_position, direction, weapon_name)
 	_spawn_surface_splatter(hit_position, direction, weapon_name)
+	if is_instance_valid(_target) and _target.has_method("get_infection_skill"):
+		if bool(_target.call("get_infection_skill", "blood_scent")) and health < max_health * 0.7:
+			amount *= 1.22
 	take_damage(amount)
 
 
@@ -70,7 +76,22 @@ func take_damage(amount: float) -> void:
 		_die()
 
 
+func apply_blast_stun(duration: float, intensity: float) -> void:
+	_blast_stun_remaining = maxf(_blast_stun_remaining, duration * maxf(intensity, 0.25))
+
+
+func apply_mutation_poison(duration: float, damage_per_second: float, parasite: bool = false) -> void:
+	mutation_poison_remaining = maxf(mutation_poison_remaining, duration)
+	_mutation_poison_damage = maxf(_mutation_poison_damage, damage_per_second)
+	if parasite:
+		set_meta("mutation_parasite", true)
+
+
 func _physics_process(delta: float) -> void:
+	_blast_stun_remaining = maxf(0.0, _blast_stun_remaining - delta)
+	if mutation_poison_remaining > 0.0:
+		mutation_poison_remaining = maxf(0.0, mutation_poison_remaining - delta)
+		take_damage(_mutation_poison_damage * delta)
 	if _dead:
 		velocity = Vector3.ZERO
 		return
@@ -97,7 +118,7 @@ func _physics_process(delta: float) -> void:
 	if physics_frame % ai_divisor == _ai_tick_offset % ai_divisor:
 		_cached_desired = _desired_velocity_from_offset(target_offset)
 
-	var desired := _cached_desired
+	var desired := Vector3.ZERO if _blast_stun_remaining > 0.0 else _cached_desired
 	velocity.x = desired.x + _push_velocity.x
 	velocity.z = desired.z + _push_velocity.z
 	_push_velocity = _push_velocity.move_toward(Vector3.ZERO, push_decay * delta)
@@ -167,7 +188,7 @@ func _apply_gravity(delta: float) -> void:
 
 
 func _try_attack() -> void:
-	if _attack_cooldown > 0.0:
+	if _attack_cooldown > 0.0 or _blast_stun_remaining > 0.0:
 		return
 	if _target != null and _target.has_method("take_damage"):
 		_target.call("take_damage", attack_damage)
@@ -290,6 +311,8 @@ func _blood_material() -> StandardMaterial3D:
 
 func _die() -> void:
 	_dead = true
+	if is_instance_valid(_target) and _target.has_method("mutation_enemy_killed"):
+		_target.call("mutation_enemy_killed", self)
 	var drop_table := DROP_TABLE_SCRIPT.new()
 	get_tree().current_scene.add_child(drop_table)
 	drop_table.call("drop_for_enemy", get_tree().current_scene, global_position)

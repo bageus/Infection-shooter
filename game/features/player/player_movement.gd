@@ -1,4 +1,5 @@
 extends CharacterBody3D
+const MUTATION_EFFECTS := preload("res://game/features/player/mutation_skill_effects.gd")
 @export var move_speed: float = 6.0
 @export var sprint_speed: float = 9.0
 @export var ground_acceleration: float = 18.0
@@ -32,22 +33,41 @@ var _roll_remaining: float = 0.0
 var _roll_cooldown_remaining: float = 0.0
 var _aim_point := Vector3.ZERO
 var _camera_distance := 0.0
+var _stun_remaining := 0.0
+var _stun_intensity := 0.0
+var _stun_rotation := 0
+var _stun_ringing: AudioStreamPlayer
+var _original_master_volume := 0.0
+var mutation_effects: Node
+var _mutation_menu_open := false
 func _ready() -> void:
 	_camera_distance=camera.position.length()
 	health=max_health
 	armor=max_armor
 	antidotes=starting_antidotes
 	_select_weapon(0)
+	mutation_effects = MUTATION_EFFECTS.new()
+	add_child(mutation_effects)
+	mutation_effects.call("configure", self, infection_runtime, weapons)
 func _physics_process(delta: float) -> void:
+	if _stun_remaining > 0.0:
+		_stun_remaining = maxf(0.0, _stun_remaining - delta)
+		if _stun_remaining == 0.0:
+			camera_rig.position = Vector3.ZERO
+			AudioServer.set_bus_volume_db(0, _original_master_volume)
+			if is_instance_valid(_stun_ringing): _stun_ringing.stop()
 	if absf(camera.position.length()-_camera_distance)>0.001:
 		camera.position=camera.position.normalized()*lerpf(camera.position.length(),_camera_distance,1.0-exp(-8.0*delta))
 	_roll_cooldown_remaining=maxf(0.0,_roll_cooldown_remaining-delta)
-	_handle_actions()
+	if not _mutation_menu_open:
+		_handle_actions()
 	_update_camera(delta)
 	_update_aim()
 	_update_move(delta)
 	var w:=get_current_weapon()
-	if w != null and _roll_remaining <= 0.0 and Input.is_action_pressed("fire"):
+	if w != null and not _mutation_menu_open and _roll_remaining <= 0.0 and Input.is_action_pressed("fire"):
+		if int(w.call("get_magazine_ammo")) == 0:
+			mutation_effects.call("refill_organic_magazine")
 		w.call("try_fire_at", _aim_point)
 func _unhandled_input(event: InputEvent) -> void:
 	if get_tree().paused:
@@ -67,6 +87,7 @@ func _handle_actions() -> void:
 		var w:=get_current_weapon()
 		if w!=null: w.call("start_reload")
 	if Input.is_action_just_pressed("antidote"): use_antidote()
+	if Input.is_action_just_pressed("melee"): mutation_effects.call("melee")
 func _select_weapon(index:int)->void:
 	if index<0 or index>=weapons.size(): return
 	var old:=get_current_weapon()
@@ -76,15 +97,19 @@ func _select_weapon(index:int)->void:
 func get_current_weapon()->Node3D:
 	return weapons[current_weapon_index]
 func get_current_weapon_index()->int: return current_weapon_index
-func take_damage(amount:float)->void:
-	var remaining:=maxf(amount,0.0)
+func take_damage(amount: float, damage_type: String = "physical") -> void:
+	var remaining: float = mutation_effects.call("on_player_hit", maxf(amount, 0.0), damage_type)
 	var absorbed:=minf(armor,remaining)
 	armor-=absorbed
 	remaining-=absorbed
 	health=maxf(0.0,health-remaining)
+	if health <= 0.0 and mutation_effects.call("survive_lethal"):
+		health = 1.0
 	if amount > 0.0: _spawn_floor_blood(amount)
 func heal(amount:float)->float:
 	var previous:=health
+	if mutation_effects.call("enabled", "assimilation"):
+		amount *= 1.25
 	health=minf(max_health,health+maxf(amount,0.0))
 	return health-previous
 func use_antidote()->bool:
@@ -103,16 +128,55 @@ func add_antidote(amount:int=1)->bool:
 	antidotes=mini(max_antidotes,antidotes+maxi(amount,0))
 	return true
 func absorb_mutagen(delta_seconds:float)->float:return infection_runtime.call("absorb_mutagen",delta_seconds)
+func mutation_dash() -> void:
+	_roll_direction = -aim_pivot.global_basis.z
+	_roll_direction.y = 0.0
+	_roll_direction = _roll_direction.normalized()
+	_roll_remaining = 0.4
+func mutation_enemy_killed(enemy: Node3D) -> void:
+	mutation_effects.call("on_enemy_killed", enemy)
 func get_mutation()->float:return infection_runtime.call("get_mutation")
-func _update_camera(delta:float)->void:camera_rig.rotate_y(deg_to_rad(Input.get_axis("camera_left","camera_right")*camera_rotation_speed*delta))
+func get_infection_skill(skill_id: String) -> bool:
+	return bool(infection_runtime.call("has_skill", skill_id))
+func _update_camera(delta: float) -> void:
+	var turn := Input.get_axis("camera_left", "camera_right")
+	if _stun_remaining > 0.0 and _stun_intensity > 0.35:
+		turn = -turn
+		camera_rig.position = Vector3(randf_range(-0.06, 0.06), randf_range(-0.04, 0.04), 0) * _stun_intensity
+	camera_rig.rotate_y(deg_to_rad(turn * camera_rotation_speed * delta))
+
+func apply_blast_stun(duration: float, intensity: float) -> void:
+	if _stun_remaining <= 0.0:
+		_original_master_volume = AudioServer.get_bus_volume_db(0)
+	_stun_remaining = maxf(_stun_remaining, duration)
+	_stun_intensity = clampf(intensity, 0.0, 1.0)
+	_stun_rotation = randi_range(1, 3)
+	AudioServer.set_bus_volume_db(0, _original_master_volume - 12.0 * _stun_intensity)
+	if _stun_ringing == null:
+		_stun_ringing = AudioStreamPlayer.new()
+		_stun_ringing.name = "BlastRinging"
+		add_child(_stun_ringing)
+		var tone := AudioStreamWAV.new()
+		tone.mix_rate = 22050
+		tone.format = AudioStreamWAV.FORMAT_16_BITS
+		tone.loop_mode = AudioStreamWAV.LOOP_FORWARD
+		var samples := PackedByteArray()
+		samples.resize(22050)
+		for i in 11025:
+			samples.encode_s16(i * 2, roundi(sin(float(i) * TAU * 730.0 / 22050.0) * 750.0))
+		tone.data = samples
+		_stun_ringing.stream = tone
+	_stun_ringing.volume_db = -19.0 + 6.0 * _stun_intensity
+	_stun_ringing.play()
 func _update_move(delta:float)->void:
 	var d:=_move_direction()
 	if _roll_remaining>0.0:
 		_roll_remaining=maxf(0.0,_roll_remaining-delta);velocity.x=_roll_direction.x*roll_speed;velocity.z=_roll_direction.z*roll_speed
 	elif Input.is_action_just_pressed("roll") and d.length_squared()>0.0001 and _roll_cooldown_remaining<=0.0:
 		_roll_direction=d.normalized();_roll_remaining=roll_duration;_roll_cooldown_remaining=roll_cooldown
+		mutation_effects.call("on_roll")
 	else:
-		var target:=d*(sprint_speed if Input.is_action_pressed("sprint") else move_speed)
+		var target:=d*(sprint_speed if Input.is_action_pressed("sprint") else move_speed) * float(mutation_effects.call("movement_multiplier"))
 		var accel:=ground_acceleration if d.length_squared()>0.0001 else ground_deceleration
 		velocity.x=move_toward(velocity.x,target.x,accel*delta);velocity.z=move_toward(velocity.z,target.z,accel*delta)
 	velocity.y=0.0 if is_on_floor() else velocity.y-gravity_acceleration*delta
@@ -146,13 +210,19 @@ func _push_roll_contacts()->void:
 			enemy.call("apply_player_push",direction,roll_push_strength)
 
 func _move_direction()->Vector3:
+	if _mutation_menu_open:
+		return Vector3.ZERO
 	var input:=Input.get_vector("move_left","move_right","move_up","move_down")
+	if _stun_remaining > 0.0 and _stun_intensity > 0.25:
+		input = input.rotated(float(_stun_rotation) * PI * 0.5)
 	var f:Vector3=-camera.global_transform.basis.z;f.y=0;f=f.normalized()
 	var r:Vector3=camera.global_transform.basis.x;r.y=0;r=r.normalized()
 	var d:Vector3=r*input.x+f*-input.y
 	return d.normalized() if d.length_squared()>1.0 else d
 func _update_aim()->void:
 	var mouse:=get_viewport().get_mouse_position()
+	if _stun_remaining > 0.0 and _stun_intensity > 0.35:
+		mouse.x = get_viewport().get_visible_rect().size.x - mouse.x
 	var origin:=camera.project_ray_origin(mouse)
 	var ray_end:=origin+camera.project_ray_normal(mouse)*200.0
 	var query:=PhysicsRayQueryParameters3D.create(origin,ray_end,7)

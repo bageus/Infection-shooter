@@ -1,0 +1,41 @@
+{
+  "height": 0.76,
+  "stations": [
+    {
+      "x": 0,
+      "z": 0,
+      "angle": 0,
+      "grid_height": 0.39,
+      "grid_width": 0.4,
+      "grid_depth": 0.35,
+      "usable_width": 0.4,
+      "usable_depth": 0.35,
+      "zone_width": 0.27,
+      "zone_depth": 0.24
+    },
+    {
+      "x": 0,
+      "z": 0,
+      "angle": 0,
+      "grid_height": 0.76,
+      "grid_width": 0.4,
+      "grid_depth": 0.35,
+      "usable_width": 0.4,
+      "usable_depth": 0.35,
+      "zone_width": 0.27,
+      "zone_depth": 0.24
+    },
+    {
+      "x": 0,
+      "z": 0,
+      "angle": 0,
+      "grid_height": 1.13,
+      "grid_width": 0.4,
+      "grid_depth": 0.35,
+      "usable_width": 0.4,
+      "usable_depth": 0.35,
+      "zone_width": 0.27,
+      "zone_depth": 0.24
+    }
+  ]
+}

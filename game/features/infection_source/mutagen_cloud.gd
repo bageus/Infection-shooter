@@ -4,6 +4,7 @@ signal depleted
 
 @export var absorption_seconds: float = 2.0
 @export var lifetime_seconds: float = 8.0
+@export var permanent: bool = false
 
 var _active: bool = false
 var _absorption_remaining: float = 0.0
@@ -25,6 +26,11 @@ func activate() -> void:
 
 func _physics_process(delta: float) -> void:
 	if not _active:
+		return
+	if permanent:
+		var visitor := _find_absorbing_body()
+		if visitor != null:
+			visitor.call("absorb_mutagen", delta)
 		return
 
 	_lifetime_remaining -= delta

@@ -1,0 +1,65 @@
+{
+  "height": 1.1,
+  "stations": [
+    {
+      "x": 0,
+      "z": 0,
+      "angle": 0,
+      "grid_height": 0.36,
+      "grid_width": 0.94,
+      "grid_depth": 0.26,
+      "usable_width": 0.94,
+      "usable_depth": 0.26,
+      "zone_width": 0.64,
+      "zone_depth": 0.18
+    },
+    {
+      "x": 0,
+      "z": 0,
+      "angle": 0,
+      "grid_height": 0.73,
+      "grid_width": 0.94,
+      "grid_depth": 0.26,
+      "usable_width": 0.94,
+      "usable_depth": 0.26,
+      "zone_width": 0.64,
+      "zone_depth": 0.18
+    },
+    {
+      "x": 0,
+      "z": 0,
+      "angle": 0,
+      "grid_height": 1.1,
+      "grid_width": 0.94,
+      "grid_depth": 0.26,
+      "usable_width": 0.94,
+      "usable_depth": 0.26,
+      "zone_width": 0.64,
+      "zone_depth": 0.18
+    },
+    {
+      "x": 0,
+      "z": 0,
+      "angle": 0,
+      "grid_height": 1.46,
+      "grid_width": 0.94,
+      "grid_depth": 0.26,
+      "usable_width": 0.94,
+      "usable_depth": 0.26,
+      "zone_width": 0.64,
+      "zone_depth": 0.18
+    },
+    {
+      "x": 0,
+      "z": 0,
+      "angle": 0,
+      "grid_height": 1.8,
+      "grid_width": 0.94,
+      "grid_depth": 0.26,
+      "usable_width": 0.94,
+      "usable_depth": 0.26,
+      "zone_width": 0.64,
+      "zone_depth": 0.18
+    }
+  ]
+}

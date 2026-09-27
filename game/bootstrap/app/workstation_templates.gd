@@ -11,7 +11,19 @@ const DESKS := {
 	"08_divider_full_H_desk": "divider_h",
 	"08_divider_full_U_desk": "divider_u",
 	"08_office_desk_4_coner": "corner_desk",
-	"07_reception_counter_two_heights": "reception"
+	"07_reception_counter_two_heights": "reception",
+	"07_table_circular": "table_circular",
+	"07_coffee_table": "coffee_table",
+	"07_round_dining_table": "round_dining_table",
+	"07_table": "table",
+	"07_table_square_tall": "table_square_tall",
+	"07_coffee_table2": "coffee_table2",
+	"07_table_longest": "table_longest",
+	"07_table_square": "table_square",
+	"03_bookshelf": "bookshelf",
+	"03_file_cabinet_small_shelf_fancy": "cabinet_small_shelf",
+	"03_file_cabinet_large_shelf_fancy": "cabinet_large_shelf",
+	"03_file_cabinet_small_with_shelfs": "cabinet_with_shelves"
 }
 const SETUPS := ["laptop", "laptop_monitor", "desktop", "dual_laptop", "dual_desktop"]
 const VARIANTS := {
@@ -29,6 +41,11 @@ const VARIANTS := {
 static func desk_name(path: String) -> String:
 	var stem := path.get_file().get_basename()
 	return str(DESKS.get(stem, ""))
+
+
+static func profile(path: String) -> Dictionary:
+	var key := desk_name(path)
+	return _read("desks/" + key + ".json") if not key.is_empty() else {}
 
 
 static func from_saved_template(desk: Node3D, path: String, parent: Node3D, make_asset: Callable) -> Array[Node3D]:

@@ -53,7 +53,7 @@ static func items_in_zone(desk: Node3D, zone: Dictionary, attached: Array[Node3D
 		var delta := Vector3(local.x - float(zone["x"]), 0, local.z - float(zone["z"])).rotated(Vector3.UP, -deg_to_rad(float(zone.get("angle", 0.0))))
 		if absf(delta.x) <= float(zone["width"]) * 0.5 and absf(delta.z) <= float(zone["depth"]) * 0.5:
 			var bounds: AABB = WORKSTATIONS._bounds(item)
-			if bool(zone["floor"]) == (bounds.position.y < desk.to_global(Vector3.UP * 0.35).y):
+		if absf(bounds.position.y - desk.to_global(Vector3.UP * float(zone.get("height", 0.0))).y) < 0.3:
 				results.append(item)
 	return results
 
@@ -159,6 +159,8 @@ static func _inside_surface(point: Vector2, zone: Dictionary, stations: Array) -
 		return absf(point.x) + half_width <= 2.75 and absf(point.y) + half_depth <= 2.75
 	for station_value in stations:
 		var station: Dictionary = station_value
+		if absf(float(zone.get("height", 0.89)) - float(station.get("grid_height", zone.get("height", 0.89)))) > 0.04:
+			continue
 		if absf(point.x - float(station.get("x", 0.0))) + half_width <= float(station.get("usable_width", 1.9)) * 0.5 and absf(point.y - float(station.get("z", 0.0))) + half_depth <= float(station.get("usable_depth", 1.2)) * 0.5:
 			return true
 	return false

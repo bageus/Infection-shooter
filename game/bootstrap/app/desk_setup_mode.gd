@@ -190,13 +190,13 @@ func open(target: Node3D) -> void:
 	chair_positioning = false
 	dragging_zone = false
 	saved_camera = planner.camera.global_transform
-	var profile: Dictionary = WORKSTATIONS._read("desks/" + WORKSTATIONS.desk_name(_desk_path()) + ".json")
+	var profile: Dictionary = WORKSTATIONS.profile(_desk_path())
 	stations = profile.get("stations", [])
 	zones.clear()
 	for station_index in stations.size():
 		var station_value: Variant = stations[station_index]
 		var station: Dictionary = station_value
-		zones.append({"name": "Work surface %d" % (station_index + 1), "required": false, "category": "Другие", "angle": float(station.get("angle", 0.0)), "x": float(station.get("x", 0.0)), "z": float(station.get("z", 0.0)), "width": float(station.get("zone_width", 1.5)), "depth": float(station.get("zone_depth", 0.85)), "height": float(profile.get("height", 0.89)), "floor": false})
+		zones.append({"name": "Surface %d" % (station_index + 1), "required": false, "category": "Другие", "angle": float(station.get("angle", 0.0)), "x": float(station.get("x", 0.0)), "z": float(station.get("z", 0.0)), "width": float(station.get("zone_width", 0.65)), "depth": float(station.get("zone_depth", 0.35)), "height": float(station.get("grid_height", profile.get("height", 0.89))), "floor": false})
 	if zones.is_empty():
 		zones.append({"name": "Work surface 1", "required": false, "category": "Другие", "angle": 0.0, "x": 0.0, "z": 0.0, "width": 1.5, "depth": 0.85, "height": 0.89, "floor": false})
 	front = 0
@@ -324,6 +324,8 @@ func _click_world(screen: Vector2, pick_item: bool) -> void:
 
 func _add_zone_at(screen: Vector2) -> void:
 	var tabletop_height: float = float(markers.get("surface_height"))
+	if zone_index >= 0 and not bool(zones[zone_index].get("floor", false)):
+		tabletop_height = float(zones[zone_index].get("height", tabletop_height))
 	var table_point := _project(screen, tabletop_height)
 	var table_local := desk.to_local(table_point)
 	var preview := {"x": table_local.x, "z": table_local.z, "width": 0.65, "depth": 0.45, "angle": 0.0, "floor": false}

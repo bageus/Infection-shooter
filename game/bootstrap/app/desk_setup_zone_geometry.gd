@@ -24,7 +24,8 @@ static func fits_zone(desk: Node3D, zone: Dictionary, item: Node3D) -> bool:
 							lowest = minf(lowest, world.y)
 		for child in current.get_children():
 			pending.append(child)
-	return mesh_found and bool(zone.get("floor", false)) == (lowest < desk.to_global(Vector3.UP * 0.35).y)
+	var surface_y := desk.to_global(Vector3.UP * float(zone.get("height", 0.0))).y
+	return mesh_found and absf(lowest - surface_y) < 0.28
 
 
 static func matching_zone(desk: Node3D, zones: Array, item: Node3D, hint: int = -1) -> int:

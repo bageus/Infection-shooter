@@ -1,14 +1,19 @@
 extends Node
 
 const InfectionDomain = preload("res://game/features/infection/domain/infection_domain.gd")
+const MUTATION_TREE := preload("res://game/features/infection/domain/mutation_tree.gd")
+const CATALOG := preload("res://game/features/infection/domain/mutation_catalog.gd")
 
 signal mutation_changed(current: float, critical_threshold: float)
 signal control_loss_changed(active: bool)
 signal defeated
 signal ability_choice_requested
 signal ability_changed(choice: int)
+signal tree_changed
+signal skill_cast(skill_id: String)
 
 var _domain = InfectionDomain.new()
+var tree = MUTATION_TREE.new()
 var _was_control_lost: bool = false
 var _was_defeated: bool = false
 var _was_choice_pending: bool = false
@@ -18,6 +23,7 @@ var _last_active_ability: int = 0
 func _physics_process(delta: float) -> void:
 	var previous_mutation: float = _domain.mutation
 	_domain.tick(delta)
+	tree.tick(delta)
 	_emit_state_changes(previous_mutation)
 
 
@@ -44,6 +50,55 @@ func add_control_ampule() -> float:
 
 func get_mutation() -> float:
 	return _domain.mutation
+
+
+func skill_catalog() -> Array:
+	return CATALOG.all()
+
+
+func mutation_points() -> int:
+	return tree.points(_domain.mutation)
+
+
+func has_skill(skill_id: String) -> bool:
+	return tree.is_active(skill_id, _domain.mutation)
+
+
+func skill_learned(skill_id: String) -> bool:
+	return tree.learned.has(skill_id)
+
+
+func skill_locked(skill_id: String) -> bool:
+	return tree.locked.has(skill_id)
+
+
+func reduce_skill_cooldowns(seconds: float) -> void:
+	for skill_id in tree.cooldowns.keys():
+		tree.cooldowns[skill_id] = maxf(0.0, float(tree.cooldowns[skill_id]) - seconds)
+
+
+func upgrade_skill(skill_id: String) -> bool:
+	if not tree.upgrade(skill_id, _domain.mutation):
+		return false
+	tree_changed.emit()
+	return true
+
+
+func toggle_skill_lock(skill_id: String) -> bool:
+	if not tree.toggle_lock(skill_id):
+		return false
+	tree_changed.emit()
+	return true
+
+
+func cast_skill(skill_id: String) -> bool:
+	if not tree.cast(skill_id, _domain.mutation):
+		return false
+	skill_cast.emit(skill_id)
+	if has_skill("neurostim"):
+		tree.cooldowns[skill_id] = float(tree.cooldowns[skill_id]) * 0.8
+	tree_changed.emit()
+	return true
 
 
 func is_ability_choice_pending() -> bool:
@@ -75,7 +130,11 @@ func is_defeated() -> bool:
 
 func _emit_state_changes(previous_mutation: float) -> void:
 	if not is_equal_approx(previous_mutation, _domain.mutation):
+		if tree.reconcile(_domain.mutation):
+			tree_changed.emit()
 		mutation_changed.emit(_domain.mutation, _domain.critical_threshold)
+		if floori((previous_mutation - 15.0) / 10.0) != floori((_domain.mutation - 15.0) / 10.0):
+			tree_changed.emit()
 
 	var control_lost := _domain.is_control_lost()
 	if control_lost != _was_control_lost:

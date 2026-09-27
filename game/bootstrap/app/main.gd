@@ -4,6 +4,8 @@ const FALL_DEATH_Y: float = -4.0
 const PlanningMode = preload("res://game/bootstrap/app/planning_mode.gd")
 const ChunkStreamer = preload("res://game/bootstrap/app/chunk_streamer.gd")
 const PlanningLighting = preload("res://game/bootstrap/app/planning_lighting.gd")
+const TEST_CLOUD := preload("res://game/features/infection_source/public/mutagen_cloud.tscn")
+const MUTATION_UI := preload("res://game/bootstrap/app/mutation_tree_ui.gd")
 
 @onready var player: Node3D = $Gameplay/Player
 @onready var enemies: Node3D = $Gameplay/Enemies
@@ -20,6 +22,7 @@ var _pause_open := false
 var planning_mode: Node
 var chunk_streamer: Node
 var planning_lighting: Node
+var mutation_tree_ui: CanvasLayer
 
 
 func _ready() -> void:
@@ -34,6 +37,9 @@ func _ready() -> void:
 	mutation_choice.process_mode = Node.PROCESS_MODE_ALWAYS
 	infection_runtime.ability_choice_requested.connect(_on_mutation_choice_requested)
 	infection_runtime.ability_changed.connect(_on_mutation_ability_changed)
+	mutation_tree_ui = MUTATION_UI.new()
+	add_child(mutation_tree_ui)
+	mutation_tree_ui.call("configure", infection_runtime)
 	$MutationChoice/Panel/VBox/Choices/FastHands.pressed.connect(_choose_fast_hands)
 	$MutationChoice/Panel/VBox/Choices/LegMutation.pressed.connect(_choose_leg_mutation)
 	$MutationChoice/Panel/VBox/Choices/EnhancedAmmo.pressed.connect(_choose_enhanced_ammo)
@@ -49,6 +55,12 @@ func _ready() -> void:
 	planning_lighting.name = "PlanningLighting"
 	add_child(planning_lighting)
 	planning_lighting.setup($WorldEnvironment)
+	var mutagen_test_cloud := TEST_CLOUD.instantiate()
+	mutagen_test_cloud.name = "PermanentTestMutagen"
+	mutagen_test_cloud.set("permanent", true)
+	gameplay.add_child(mutagen_test_cloud)
+	mutagen_test_cloud.global_position = Vector3.ZERO
+	mutagen_test_cloud.call("activate")
 	for enemy in enemies.get_children():
 		if enemy.has_method("set_target"):
 			enemy.call("set_target", player)
@@ -106,12 +118,9 @@ func _on_planning_pressed() -> void:
 
 
 func _on_mutation_choice_requested() -> void:
-	if mutation_choice.visible:
-		return
-	mutation_choice.show()
-	mutation_choice.move_to_front()
-	get_tree().paused = true
-	Input.mouse_mode = Input.MOUSE_MODE_VISIBLE
+	# Keep the older single-choice runtime compatible with saved games.
+	infection_runtime.call("select_ability", 1)
+	mutation_tree_ui.call("open_tree")
 
 
 func _on_mutation_ability_changed(choice: int) -> void:
