@@ -32,6 +32,12 @@ func _ready() -> void:
 	add_child(visual)
 	_visual = visual
 	_discover_stages()
+	# This GLB exports the complete table alongside a visible Primary debris group.
+	# Keep the authored intact root as the only initial mesh and collision source.
+	if model_path.get_file() == "07_table_square.glb":
+		var primary := DAMAGE.find_named(_visual, "Primary")
+		if primary != null:
+			primary.hide()
 	_health = _stage_health()
 	# Architectural pieces and carpets stay anchored; all other groups are movable.
 	freeze = model_path.begins_with("res://models/objects/enviroments/01/")

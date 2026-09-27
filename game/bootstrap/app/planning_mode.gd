@@ -69,8 +69,11 @@ var map_select: OptionButton
 const ENVIRONMENT_ROOT := "res://models/objects/enviroments"
 const ENVIRONMENT_SCENE := preload("res://game/presentation/office_floor/public/props/environment_prop.tscn")
 const WORKSTATIONS := preload("res://game/bootstrap/app/workstation_templates.gd")
+const DESK_SETUP_MODE := preload("res://game/bootstrap/app/desk_setup_mode.gd")
 
 var workstation_transforms: Dictionary = {}
+var desk_setup: Node
+var desk_setup_button: Button
 
 var group_catalogs: Dictionary = {}
 
@@ -188,6 +191,15 @@ func setup(app_owner: Node3D, planning_root: Node3D, planning_ui: Control) -> vo
 	active_catalog = group_catalogs["01"]
 	_rebuild_palette()
 	palette.item_selected.connect(_on_palette_selected)
+	desk_setup_button = Button.new()
+	desk_setup_button.text = "Plan desk setup"
+	desk_setup_button.visible = false
+	ui.get_node("Panel/VBox").add_child(desk_setup_button)
+	ui.get_node("Panel/VBox").move_child(desk_setup_button, palette.get_index() + 1)
+	desk_setup_button.pressed.connect(_open_desk_setup)
+	desk_setup = DESK_SETUP_MODE.new()
+	add_child(desk_setup)
+	desk_setup.configure(self, ui)
 	ui.get_node("Panel/VBox/Tabs/Structure").pressed.connect(_show_structure_catalog)
 	ui.get_node("Panel/VBox/Tabs/Actors").pressed.connect(_show_actor_catalog)
 	ui.get_node("Panel/VBox/Tabs/Lighting").pressed.connect(_show_lighting_catalog)
@@ -238,6 +250,8 @@ func enter() -> void:
 
 
 func exit() -> void:
+	if desk_setup.active:
+		desk_setup.close()
 	active = false
 	var planning_lighting := host.get_node_or_null("PlanningLighting")
 	if planning_lighting != null:
@@ -264,6 +278,8 @@ func _process(delta: float) -> void:
 	if not active:
 		return
 	_sync_workstations()
+	if desk_setup.active:
+		return
 	if _text_field_has_focus():
 		return
 	var input := Vector2.ZERO
@@ -286,6 +302,10 @@ func _process(delta: float) -> void:
 
 func _input(event: InputEvent) -> void:
 	if not active:
+		return
+	if desk_setup.active:
+		if desk_setup.handle_input(event):
+			get_viewport().set_input_as_handled()
 		return
 	if event is InputEventMouse and (ui.get_node("Panel") as Control).get_global_rect().has_point(event.position):
 		# _input precedes GUI dispatch: let the palette receive this event.
@@ -512,10 +532,16 @@ func _click_world(screen_pos: Vector2) -> void:
 func _select(node: Node3D) -> void:
 	_clear_selection_highlight()
 	selected = node
+	desk_setup_button.visible = selected != null and not WORKSTATIONS.desk_name(str(selected.get_meta("planning_scene_path", ""))).is_empty()
 	if selected != null:
 		_show_selection_highlight(selected)
 	_update_light_ui()
 	_update_status()
+
+
+func _open_desk_setup() -> void:
+	if selected != null and desk_setup_button.visible:
+		desk_setup.open(selected)
 
 
 func _update_light_ui() -> void:
