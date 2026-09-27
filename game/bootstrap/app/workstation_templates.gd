@@ -37,7 +37,7 @@ static func available_models() -> Array[String]:
 			continue
 		for file in directory.get_files():
 			if file.ends_with(".glb") and (group != "03" or file == "03_file_cabinet_smaller.glb"):
-			result.append(file.get_basename())
+				result.append(file.get_basename())
 	result.sort()
 	return result
 
