@@ -32,6 +32,8 @@ Procedural generation, save/checkpoints, final HUD, monetization, platform SDKs 
 - Structural modules visually touch edge-to-edge with no visible gaps and no overlap beyond a tiny seam tolerance.\n- Exterior corners face inward correctly.\n- Perimeter and authored interior walls block the player.\n- The expanded floor and defeat menu remain functional.
 
 ## Progress
+27.09.2026: по прямому запросу владельца исправлен начальный вид `07_table_square`: видимая в исходном GLB группа `Primary` скрывается до разрушения, коллизия строится только по целой модели. Добавлен отдельный режим планирования установленного рабочего стола с приближением камеры, неизменяемым столом, зонами стола/пола, выбором передней стороны, ручными предметами, случайным просмотром зоны и сохранением/применением шаблонов JSON версии 1 в `user://desk_setups`. Формат существующих карт не меняется. ADR-0003 описывает новый формат. Полная визуальная и интерактивная проверка в Godot остаётся необходимой: локальный исполняемый файл завершается с кодом 139 до запуска проекта.
+
 По запросу владельца стеклянные перегородки после попадания получают коллизию
 только у планок рамы; жалюзи остаются видимыми и подвижными. У пуль ограничен
 остаток энергии по материалу и урон зависит от дистанции для предметов и
@@ -89,6 +91,8 @@ User runtime screenshots exposed perimeter spacing, corner orientation and missi
 No product blocker. Exact imported .blend bounds still require visual confirmation in Godot.
 
 ## Next exact action
+Проверить в полной сцене Godot интерфейс нового редактора на офисном столе: создание зон на столе и на полу, применение сохранённого шаблона ко второму столу, клики по панели и исходное состояние `07_table_square`.
+
 В полном проекте Godot 4.7.2 проверить визуальные размеры и коллизии новых моделей, загрузку всех вкладок палитры, сохранение карты и красные ориентиры в режиме планирования.
 
 В полной сцене Godot 4.7.2 проверить ввод чисел во всех полях планировщика и пройти игровым персонажем через открытую обычную и аварийную двери.
