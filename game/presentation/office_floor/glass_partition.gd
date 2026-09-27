@@ -123,11 +123,11 @@ func _replace_frame_collision() -> void:
 	var depth := maxf(outer.size.z, 0.07)
 	var left := maxf(inner.position.x - outer.position.x, 0.06)
 	var right := maxf(outer.end.x - inner.end.x, 0.06)
-	var bottom := maxf(inner.position.y - outer.position.y, 0.06)
 	var top := maxf(outer.end.y - inner.end.y, 0.06)
 	_add_frame_bar(frame_body, Vector3(left, outer.size.y, depth), Vector3(outer.position.x + left * 0.5, outer.get_center().y, outer.get_center().z))
 	_add_frame_bar(frame_body, Vector3(right, outer.size.y, depth), Vector3(outer.end.x - right * 0.5, outer.get_center().y, outer.get_center().z))
-	_add_frame_bar(frame_body, Vector3(maxf(inner.size.x, 0.1), bottom, depth), Vector3(inner.get_center().x, outer.position.y + bottom * 0.5, outer.get_center().z))
+	# The visible sill is below a normal step, but CharacterBody3D has no step-up;
+	# a collision here would close the passage at foot height again.
 	_add_frame_bar(frame_body, Vector3(maxf(inner.size.x, 0.1), top, depth), Vector3(inner.get_center().x, outer.end.y - top * 0.5, outer.get_center().z))
 
 
