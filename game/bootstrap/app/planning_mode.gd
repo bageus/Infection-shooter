@@ -89,7 +89,7 @@ func _build_environment_catalogs() -> void:
 				var model_path := directory + "/" + file_name
 				var special_scene := _environment_scene_for(file_name)
 				entries.append({
-					"name": file_name.get_basename().replace("_", " "),
+					"name": _environment_display_name(file_name),
 					"path": special_scene if not special_scene.is_empty() else model_path,
 					"kind": "" if not special_scene.is_empty() else "environment"
 				})
@@ -97,6 +97,12 @@ func _build_environment_catalogs() -> void:
 		handle.list_dir_end()
 		entries.sort_custom(func(a, b): return str(a["name"]).naturalnocasecmp_to(str(b["name"])) < 0)
 		group_catalogs[group] = entries
+
+
+func _environment_display_name(file_name: String) -> String:
+	if file_name.begins_with("01_floor_") and file_name != "01_floor_pad.glb":
+		return "Carpet " + file_name.trim_prefix("01_floor_").get_basename().replace("_", " ")
+	return file_name.get_basename().replace("_", " ")
 
 
 func _environment_scene_for(file_name: String) -> String:

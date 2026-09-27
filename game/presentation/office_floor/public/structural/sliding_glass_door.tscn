@@ -14,6 +14,7 @@ exclude_name_tokens = PackedStringArray("glass", "blinds", "doorhandle", "doorto
 script = ExtResource("5_glass_collision")
 
 [node name="Visual" parent="." instance=ExtResource("1_model")]
+position = Vector3(-2, 0, 0)
 
 [node name="Body" type="StaticBody3D" parent="."]
 

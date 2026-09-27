@@ -47,6 +47,7 @@ environment = SubResource("env")
 script = ExtResource("base_floor_renderer")
 
 [node name="FloorBody" type="StaticBody3D" parent="." unique_id=1764252328]
+collision_layer = 3
 
 [node name="CollisionShape3D" type="CollisionShape3D" parent="FloorBody" unique_id=872202857]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.1, 0)

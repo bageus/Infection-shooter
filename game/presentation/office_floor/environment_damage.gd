@@ -1,0 +1,58 @@
+extends RefCounted
+
+const FRAGMENT_SCRIPT = preload("res://game/presentation/office_floor/environment_fragment.gd")
+
+
+static func find_named(node: Node, wanted: String) -> Node3D:
+	if node is Node3D and (node.name.to_lower() == wanted.to_lower() or node.name.to_lower().begins_with(wanted.to_lower() + ".")):
+		return node as Node3D
+	for child in node.get_children():
+		var found := find_named(child, wanted)
+		if found != null:
+			return found
+	return null
+
+
+static func reveal_meshes(group: Node3D) -> Array[MeshInstance3D]:
+	var meshes: Array[MeshInstance3D] = []
+	_collect(group, meshes)
+	return meshes
+
+
+static func _collect(node: Node, meshes: Array[MeshInstance3D]) -> void:
+	if node is Node3D:
+		var part := node as Node3D
+		if part.scale.length_squared() < 0.000001:
+			part.scale = Vector3.ONE
+	if node is MeshInstance3D and (node as MeshInstance3D).mesh != null:
+		meshes.append(node as MeshInstance3D)
+	for child in node.get_children():
+		_collect(child, meshes)
+
+
+static func spawn_piece(host: Node3D, mesh: MeshInstance3D, owner: Node3D, stage: int, index: int, direction: Vector3, hit_point: Vector3) -> RigidBody3D:
+	var bounds: AABB = mesh.global_transform * mesh.get_aabb()
+	if bounds.size.length_squared() < 0.000001:
+		return null
+	var fragment := RigidBody3D.new()
+	fragment.set_script(FRAGMENT_SCRIPT)
+	fragment.name = "Fragment_" + mesh.name
+	fragment.set("source", weakref(owner) if owner != null else null)
+	fragment.set("piece_name", mesh.name)
+	fragment.set("stage_index", stage)
+	fragment.set("kickable", index % 3 == 0)
+	fragment.mass = clampf(bounds.size.length() * 0.3, 0.1, 3.0)
+	var shape := CollisionShape3D.new()
+	var box := BoxShape3D.new()
+	box.size = Vector3(maxf(bounds.size.x, 0.02), maxf(bounds.size.y, 0.02), maxf(bounds.size.z, 0.02))
+	shape.shape = box
+	fragment.add_child(shape)
+	var copy := MeshInstance3D.new()
+	copy.mesh = mesh.mesh
+	copy.material_override = mesh.material_override
+	fragment.add_child(copy)
+	host.get_tree().current_scene.add_child(fragment)
+	fragment.global_position = bounds.get_center()
+	copy.global_transform = mesh.global_transform
+	fragment.apply_impulse(direction.normalized() * randf_range(0.15, 0.7) + Vector3.UP * 0.3, hit_point - fragment.global_position)
+	return fragment

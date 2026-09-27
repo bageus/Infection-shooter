@@ -1,10 +1,5 @@
 extends Node3D
 
-@export var cabin_size := Vector3(3.4, 2.8, 3.2)
-@export var doorway_width := 1.8
-@export var wall_thickness := 0.16
-@export var floor_thickness := 0.12
-
 func _ready() -> void:
 	call_deferred("_build")
 
@@ -15,20 +10,41 @@ func _build() -> void:
 	for child in body.get_children():
 		if child is CollisionShape3D:
 			child.queue_free()
-	var half_x := cabin_size.x * 0.5
-	var half_z := cabin_size.z * 0.5
-	var side_width := maxf(0.1, (cabin_size.x - doorway_width) * 0.5)
-	_add_box(body, Vector3(cabin_size.x, floor_thickness, cabin_size.z), Vector3(0, -floor_thickness * 0.5, 0))
-	_add_box(body, Vector3(cabin_size.x, cabin_size.y, wall_thickness), Vector3(0, cabin_size.y * 0.5, half_z))
-	_add_box(body, Vector3(wall_thickness, cabin_size.y, cabin_size.z), Vector3(-half_x, cabin_size.y * 0.5, 0))
-	_add_box(body, Vector3(wall_thickness, cabin_size.y, cabin_size.z), Vector3(half_x, cabin_size.y * 0.5, 0))
-	_add_box(body, Vector3(side_width, cabin_size.y, wall_thickness), Vector3(-doorway_width * 0.5 - side_width * 0.5, cabin_size.y * 0.5, -half_z))
-	_add_box(body, Vector3(side_width, cabin_size.y, wall_thickness), Vector3(doorway_width * 0.5 + side_width * 0.5, cabin_size.y * 0.5, -half_z))
+	# The freight and passenger GLBs have different widths and offsets. Use their
+	# actual shell meshes so the opening stays aligned with the visible doorway.
+	if name == "ElevatorDoor":
+		# The GLB combines both jambs and lintel in one mesh. A single AABB
+		# across that mesh would seal the doorway even after the leaves slide.
+		_add_box(body, Vector3(0.93, 3.0, 0.25), Vector3(-1.53, 1.5, 0))
+		_add_box(body, Vector3(0.93, 3.0, 0.25), Vector3(1.53, 1.5, 0))
+		_add_box(body, Vector3(2.13, 0.7, 0.25), Vector3(0, 2.65, 0))
+	else:
+		_add_shell(get_node_or_null("Visual"), body)
+
 
 func _add_box(body: StaticBody3D, size: Vector3, local_position: Vector3) -> void:
-	var shape := BoxShape3D.new()
-	shape.size = size
 	var collision := CollisionShape3D.new()
-	collision.shape = shape
+	var box := BoxShape3D.new()
+	box.size = size
+	collision.shape = box
 	collision.position = local_position
 	body.add_child(collision)
+
+func _add_shell(node: Node, body: StaticBody3D) -> void:
+	if node == null:
+		return
+	if node is MeshInstance3D:
+		var mesh := node as MeshInstance3D
+		var part := mesh.name.to_lower()
+		if (part.begins_with("cabin_") or part.begins_with("front_")) and mesh.mesh != null:
+			var bounds := mesh.get_aabb()
+			var box := BoxShape3D.new()
+			box.size = Vector3(maxf(bounds.size.x, 0.02), maxf(bounds.size.y, 0.02), maxf(bounds.size.z, 0.02))
+			var collision := CollisionShape3D.new()
+			collision.shape = box
+			body.add_child(collision)
+			var local := body.global_transform.affine_inverse() * mesh.global_transform
+			collision.transform = local
+			collision.position += local.basis * bounds.get_center()
+	for child in node.get_children():
+		_add_shell(child, body)

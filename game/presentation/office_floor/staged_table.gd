@@ -271,10 +271,11 @@ func _settle_piece(body: RigidBody3D) -> void:
 	if _retained.size() >= _retention_target:
 		body.queue_free()
 		return
-	# The few pieces left on the floor are visual only and never obstruct movement.
-	body.freeze = true
+	# Retained pieces touch only the floor collision layer, never the player.
+	body.freeze = false
 	body.collision_layer = 0
-	body.collision_mask = 0
+	body.collision_mask = 2
+	body.set_meta("kickable", _retained.size() % 2 == 0)
 	_retained.append(body)
 	if _effects != null:
 		_effects.call("register_retained", body)
