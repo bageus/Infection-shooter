@@ -72,10 +72,24 @@ func redraw(zones: Array[Dictionary], selected: int, front: int) -> void:
 		var color := Color(1.0, 0.38, 0.18, 0.42) if i == selected else Color(0.12, 0.8, 1.0, 0.25)
 		box.material = _material(color, true)
 		_add_mesh(box, Vector3(float(zone["x"]), float(zone["height"]) + 0.035, float(zone["z"])))
+		_add_zone_arrow(zone, Color(1.0, 0.9, 0.3) if i == selected else Color(0.93, 0.96, 1.0))
 	var direction := BoxMesh.new()
 	direction.size = Vector3(0.3, 0.015, 0.08)
 	direction.material = _material(Color(1.0, 0.08, 0.04), true)
 	_add_mesh(direction, Vector3(0, surface_height + 0.06, 0.87 if front else -0.87))
+
+
+func _add_zone_arrow(zone: Dictionary, color: Color) -> void:
+	var arrow := ImmediateMesh.new()
+	arrow.surface_begin(Mesh.PRIMITIVE_LINES, _material(color, true))
+	for point in [Vector3(0, 0, -0.17), Vector3(0, 0, 0.17), Vector3(0, 0, 0.17), Vector3(-0.08, 0, 0.06), Vector3(0, 0, 0.17), Vector3(0.08, 0, 0.06)]:
+		arrow.surface_add_vertex(point)
+	arrow.surface_end()
+	var indicator := MeshInstance3D.new()
+	indicator.mesh = arrow
+	add_child(indicator)
+	var angle := deg_to_rad(float(zone.get("angle", 0.0)))
+	indicator.global_transform = desk.global_transform * Transform3D(Basis(Vector3.UP, angle), Vector3(float(zone["x"]), float(zone["height"]) + 0.06, float(zone["z"])))
 
 
 func _material(color: Color, overlay: bool = false) -> StandardMaterial3D:

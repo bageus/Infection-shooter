@@ -5,6 +5,7 @@ const WORKSTATIONS := preload("res://game/bootstrap/app/workstation_templates.gd
 const VISUALS := preload("res://game/bootstrap/app/desk_setup_visuals.gd")
 const ZONE_RULES := preload("res://game/bootstrap/app/desk_setup_zone_rules.gd")
 const TEMPLATE_FILES := preload("res://game/bootstrap/app/desk_setup_template_files.gd")
+const ZONE_FORM := preload("res://game/bootstrap/app/desk_setup_zone_form.gd")
 const MODEL_ROOT := "res://models/objects/enviroments/"
 
 var planner: Node
@@ -24,6 +25,7 @@ var panel: PanelContainer
 var scroll: ScrollContainer
 var help_panel: PanelContainer
 var zone_list: ItemList
+var zone_form: Control
 var model_list: ItemList
 var template_list: OptionButton
 var template_name: LineEdit
@@ -62,6 +64,9 @@ func configure(owner_planner: Node, planning_ui: Control) -> void:
 	zone_list.custom_minimum_size.y = 105
 	zone_list.item_selected.connect(_select_zone)
 	box.add_child(zone_list)
+	zone_form = ZONE_FORM.new()
+	box.add_child(zone_form)
+	zone_form.connect("zone_changed", _on_zone_changed)
 	_button(box, "Add zone (click table or floor)", _start_zone)
 	_button(box, "Next zone: table / floor", _toggle_zone_surface)
 	_button(box, "Selected zone: table / floor", _toggle_selected_surface)
@@ -131,7 +136,7 @@ func _build_help(planning_ui: Control) -> void:
 	var contents := VBoxContainer.new()
 	help_panel.add_child(contents)
 	var instructions := Label.new()
-	instructions.text = "LMB drag zone  Move zone and contents\nArrows  Move selected zone (0.1 m)\nShift + LMB drag  Move one item\nDelete  Remove selected item\nRMB drag / Alt + LMB  Orbit table\nWheel  Zoom in or out"
+	instructions.text = "LMB drag zone  Move zone and contents\nArrows  Move selected zone (0.1 m)\nDirection  Aim zone arrow and models\nShift + LMB drag  Move one item\nDelete  Remove selected item\nRMB drag / Alt + LMB  Orbit table\nWheel  Zoom in or out"
 	contents.add_child(instructions)
 	_button(contents, "ROTATE LEFT", _orbit_left)
 	_button(contents, "ROTATE RIGHT", _orbit_right)
@@ -158,16 +163,7 @@ func _toggle_help() -> void:
 
 
 func _collect_models() -> void:
-	for group in ["03", "05", "06", "09", "11"]:
-		var directory := DirAccess.open(MODEL_ROOT + group)
-		if directory == null:
-			continue
-		for file in directory.get_files():
-			if file.ends_with(".glb"):
-				var name_part := file.get_basename()
-				if group != "03" or name_part == "03_file_cabinet_smaller":
-					models.append(name_part)
-	models.sort()
+	models = WORKSTATIONS.available_models()
 	for model in models:
 		model_list.add_item(model)
 
@@ -184,11 +180,12 @@ func open(target: Node3D) -> void:
 	var profile: Dictionary = WORKSTATIONS._read("desks/" + WORKSTATIONS.desk_name(_desk_path()) + ".json")
 	stations = profile.get("stations", [])
 	zones.clear()
-	for station_value in profile.get("stations", []):
+	for station_index in stations.size():
+		var station_value: Variant = stations[station_index]
 		var station: Dictionary = station_value
-		zones.append({"x": float(station.get("x", 0.0)), "z": float(station.get("z", 0.0)), "width": 1.5, "depth": 0.85, "height": float(profile.get("height", 0.89)), "floor": false})
+		zones.append({"name": "Work surface %d" % (station_index + 1), "required": true, "angle": float(station.get("angle", 0.0)), "x": float(station.get("x", 0.0)), "z": float(station.get("z", 0.0)), "width": 1.5, "depth": 0.85, "height": float(profile.get("height", 0.89)), "floor": false})
 	if zones.is_empty():
-		zones.append({"x": 0.0, "z": 0.0, "width": 1.5, "depth": 0.85, "height": 0.89, "floor": false})
+		zones.append({"name": "Work surface 1", "required": true, "angle": 0.0, "x": 0.0, "z": 0.0, "width": 1.5, "depth": 0.85, "height": 0.89, "floor": false})
 	front = 0
 	zone_index = 0
 	scroll.show()
@@ -270,7 +267,7 @@ func handle_input(event: InputEvent) -> bool:
 
 
 func _editing_text() -> bool:
-	return template_name.has_focus() or width_field.get_line_edit().has_focus() or depth_field.get_line_edit().has_focus()
+	return template_name.has_focus() or width_field.get_line_edit().has_focus() or depth_field.get_line_edit().has_focus() or bool(zone_form.call("editing_text"))
 
 
 func _click_world(screen: Vector2, pick_item: bool) -> void:
@@ -310,7 +307,7 @@ func _add_zone_at(screen: Vector2) -> void:
 	if not point.is_finite():
 		return
 	var local: Vector3 = desk.to_local(point)
-	zones.append({"x": local.x, "z": local.z, "width": 0.65, "depth": 0.45, "height": 0.0 if next_zone_floor else 0.89, "floor": next_zone_floor})
+	zones.append({"name": "Zone %d" % (zones.size() + 1), "required": false, "angle": 0.0, "x": local.x, "z": local.z, "width": 0.65, "depth": 0.45, "height": 0.0 if next_zone_floor else 0.89, "floor": next_zone_floor})
 	zone_index = zones.size() - 1
 	placing_zone = false
 	_refresh_zones()
@@ -327,7 +324,7 @@ func _drag_item(screen: Vector2) -> void:
 		return
 	var previous := dragged.global_position
 	dragged.global_position = desk.to_global(Vector3(local.x, desk.to_local(previous).y, local.z))
-	if _overlaps_attached(dragged):
+	if ZONE_RULES.overlaps_item(dragged, _attachments()):
 		dragged.global_position = previous
 
 
@@ -397,8 +394,8 @@ func _place_model(model: String, local: Vector3) -> void:
 	var created: Array[Node3D] = []
 	var random := RandomNumberGenerator.new()
 	random.randomize()
-	var entry := {"model": model, "x": local.x, "z": local.z, "jitter": 0.0, "floor": bool(zone["floor"])}
-	WORKSTATIONS._add_item(entry, {"x": 0.0, "z": 0.0, "angle": 0.0}, float(zone["height"]), desk, planner.root, existing, created, occupied, random, Callable(planner, "_instantiate_asset"))
+	var entry := {"model": model, "x": 0.0, "z": 0.0, "jitter": 0.0, "rotation_jitter": 0.0, "floor": bool(zone["floor"])}
+	WORKSTATIONS._add_item(entry, {"x": local.x, "z": local.z, "angle": float(zone.get("angle", 0.0))}, float(zone["height"]), desk, planner.root, existing, created, occupied, random, Callable(planner, "_instantiate_asset"))
 	for object in created:
 		object.set_meta("planning_attachment", _desk_id())
 		object.set_meta("planning_zone", zone_index)
@@ -412,19 +409,6 @@ func _attachments() -> Array[Node3D]:
 		if is_instance_valid(object) and str(object.get_meta("planning_attachment", "")) == _desk_id():
 			attached.append(object)
 	return attached
-
-
-func _overlaps_attached(object: Node3D) -> bool:
-	var bounds: AABB = WORKSTATIONS._bounds(object)
-	var rectangle := Rect2(Vector2(bounds.position.x, bounds.position.z), Vector2(bounds.size.x, bounds.size.z)).grow(0.025)
-	for other in _attachments():
-		if other == object:
-			continue
-		var other_bounds: AABB = WORKSTATIONS._bounds(other)
-		if other_bounds.position.y < bounds.end.y and other_bounds.end.y > bounds.position.y:
-			if rectangle.intersects(Rect2(Vector2(other_bounds.position.x, other_bounds.position.z), Vector2(other_bounds.size.x, other_bounds.size.z))):
-				return true
-	return false
 
 
 func _start_zone() -> void:
@@ -462,12 +446,8 @@ func _remove_zone() -> void:
 
 
 func _clear_zone() -> void:
-	for object in _attachments():
-		var local := desk.to_local(object.global_position)
-		var zone: Dictionary = zones[zone_index] if zone_index >= 0 else {}
-		if zone.is_empty():
-			continue
-		if absf(local.x - float(zone["x"])) < float(zone["width"]) * 0.5 and absf(local.z - float(zone["z"])) < float(zone["depth"]) * 0.5:
+	if zone_index >= 0:
+		for object in ZONE_RULES.items_in_zone(desk, zones[zone_index], _attachments()):
 			planner.placed.erase(object)
 			object.queue_free()
 
@@ -477,17 +457,18 @@ func _randomize() -> void:
 		return
 	_clear_zone()
 	var zone: Dictionary = zones[zone_index]
-	var random := RandomNumberGenerator.new()
-	random.randomize()
-	var choices := ["05_computer_mouse", "05_desk_phone", "05_laptop_destructible", "05_monitor_destructible", "05_keyboard", "09_notepad", "09_mug", "09_stapler", "11_plant_small"]
-	var count := random.randi_range(1, 3)
-	for _i in count:
-		var model: String = choices[random.randi_range(0, choices.size() - 1)]
-		var x_offset := random.randf_range(-float(zone["width"]) * 0.33, float(zone["width"]) * 0.33)
-		var z_offset := random.randf_range(-float(zone["depth"]) * 0.33, float(zone["depth"]) * 0.33)
-		var local := Vector3(float(zone["x"]) + x_offset, float(zone["height"]), float(zone["z"]) + z_offset)
-		_place_model(model, local)
-	status.text = "Random preview for zone %d" % (zone_index + 1)
+	for item in ZONE_RULES.random_items(zone):
+		_place_model(str(item["model"]), Vector3(float(item["x"]), float(zone["height"]), float(item["z"])))
+	if bool(zone.get("required", true)):
+		for _attempt in 8:
+			if not ZONE_RULES.items_in_zone(desk, zone, _attachments()).is_empty():
+				break
+			var choice: Dictionary = ZONE_RULES.random_items(zone)[0]
+			_place_model(str(choice["model"]), Vector3(float(choice["x"]), float(zone["height"]), float(choice["z"])))
+		if ZONE_RULES.items_in_zone(desk, zone, _attachments()).is_empty():
+			status.text = "No room for an item in required zone: " + str(zone["name"])
+			return
+	status.text = "Random preview: " + str(zone["name"])
 
 
 func _switch_front() -> void:
@@ -499,8 +480,23 @@ func _switch_front() -> void:
 func _select_zone(index: int) -> void:
 	zone_index = index
 	var zone: Dictionary = zones[index]
+	zone_form.call("display", zone)
 	width_field.set_value_no_signal(float(zone["width"]))
 	depth_field.set_value_no_signal(float(zone["depth"]))
+	_refresh_markers()
+
+
+func _on_zone_changed(zone_name: String, required: bool, angle: float) -> void:
+	if zone_index < 0:
+		return
+	var zone: Dictionary = zones[zone_index]
+	var delta := angle - float(zone.get("angle", 0.0))
+	if not is_zero_approx(delta):
+		ZONE_RULES.rotate_items(desk, zone, _attachments(), delta)
+	zone["name"] = zone_name if not zone_name.is_empty() else "Zone %d" % (zone_index + 1)
+	zone["required"] = required
+	zone["angle"] = angle
+	zone_list.set_item_text(zone_index, _zone_label(zone, zone_index))
 	_refresh_markers()
 
 
@@ -514,12 +510,16 @@ func _resize_zone(_value: float) -> void:
 func _refresh_zones() -> void:
 	zone_list.clear()
 	for i in zones.size():
-		zone_list.add_item("Zone %d  (%.2f, %.2f)" % [i + 1, zones[i]["x"], zones[i]["z"]])
+		zone_list.add_item(_zone_label(zones[i], i))
 	if zone_index >= 0:
 		zone_list.select(zone_index)
 		_select_zone(zone_index)
 	else:
 		_refresh_markers()
+
+
+func _zone_label(zone: Dictionary, index: int) -> String:
+	return "%s | %s | %d°" % [str(zone.get("name", "Zone %d" % (index + 1))), "Required" if bool(zone.get("required", true)) else "Optional", roundi(float(zone.get("angle", 0.0)))]
 
 
 func _refresh_markers() -> void:
@@ -530,6 +530,10 @@ func _save() -> void:
 	if TEMPLATE_FILES.safe_name(template_name.text).is_empty():
 		status.text = "Enter a template name first."
 		return
+	for zone in zones:
+		if bool(zone.get("required", true)) and ZONE_RULES.items_in_zone(desk, zone, _attachments()).is_empty():
+			status.text = "Required zone is empty: " + str(zone["name"])
+			return
 	var items: Array[Dictionary] = []
 	for object in _attachments():
 		var local := desk.to_local(object.global_position)
@@ -562,7 +566,7 @@ func _load() -> void:
 	zones.clear()
 	for value in data.get("zones", []):
 		if value is Dictionary:
-			zones.append(value)
+			zones.append(ZONE_RULES.normalize(value, zones.size()))
 	front = int(data.get("front", 0))
 	front_button.text = "Front: opposite side" if front else "Front: seated side"
 	zone_index = 0 if not zones.is_empty() else -1

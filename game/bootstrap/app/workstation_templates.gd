@@ -29,6 +29,19 @@ static func desk_name(path: String) -> String:
 	return str(DESKS.get(stem, ""))
 
 
+static func available_models() -> Array[String]:
+	var result: Array[String] = []
+	for group in ["03", "05", "06", "09", "11"]:
+		var directory := DirAccess.open(MODEL_ROOT + group)
+		if directory == null:
+			continue
+		for file in directory.get_files():
+			if file.ends_with(".glb") and (group != "03" or file == "03_file_cabinet_smaller.glb"):
+			result.append(file.get_basename())
+	result.sort()
+	return result
+
+
 static func generate(desk: Node3D, path: String, parent: Node3D, existing: Array[Node3D], make_asset: Callable) -> Array[Node3D]:
 	var created: Array[Node3D] = []
 	var profile := _read("desks/" + desk_name(path) + ".json")
@@ -112,7 +125,8 @@ static func _add_item(entry: Dictionary, station: Dictionary, height: float, des
 	local = local.rotated(Vector3.UP, angle) + Vector3(float(station.get("x", 0.0)), 0.0, float(station.get("z", 0.0)))
 	var jitter := float(entry.get("jitter", 0.025))
 	local += Vector3(random.randf_range(-jitter, jitter), 0.0, random.randf_range(-jitter, jitter))
-	node.rotation.y = desk.rotation.y + angle + deg_to_rad(random.randf_range(-6.0, 6.0))
+	var rotation_jitter := float(entry.get("rotation_jitter", 6.0))
+	node.rotation.y = desk.rotation.y + angle + deg_to_rad(random.randf_range(-rotation_jitter, rotation_jitter))
 	var surface_height := 0.0 if bool(entry.get("floor", false)) else height
 	node.global_position = desk.to_global(local + Vector3.UP * surface_height)
 	var bounds := _bounds(node)
