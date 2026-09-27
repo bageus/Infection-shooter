@@ -1,0 +1,66 @@
+extends Node
+
+const MAX_CASINGS := 40
+const LIFETIME_MSEC := 60000
+
+var _casings: Array[RigidBody3D] = []
+var _born_at: Array[int] = []
+var _cleanup_accumulator := 0.0
+
+
+func spawn_casing(model: PackedScene, eject_transform: Transform3D, radius: float, shooter: CollisionObject3D) -> void:
+	if model == null or get_tree().current_scene == null:
+		return
+	var body := RigidBody3D.new()
+	body.name = "SpentCasing"
+	body.collision_layer = 0
+	body.collision_mask = 1
+	body.mass = 0.012
+	body.continuous_cd = true
+	body.linear_damp = 0.4
+	body.angular_damp = 1.1
+	var material := PhysicsMaterial.new()
+	material.bounce = 0.48
+	material.friction = 0.65
+	body.physics_material_override = material
+	var collider := CollisionShape3D.new()
+	var shape := SphereShape3D.new()
+	shape.radius = radius
+	shape.margin = 0.001
+	collider.shape = shape
+	body.add_child(collider)
+	body.add_child(model.instantiate())
+	get_tree().current_scene.add_child(body)
+	body.global_transform = eject_transform
+	if shooter != null:
+		body.add_collision_exception_with(shooter)
+	var basis := eject_transform.basis.orthonormalized()
+	body.linear_velocity = basis.x * randf_range(1.5, 2.3) + Vector3.UP * randf_range(1.4, 2.2) + basis.z * randf_range(-0.5, 0.2)
+	body.angular_velocity = Vector3(randf_range(-10.0, 10.0), randf_range(-10.0, 10.0), randf_range(-10.0, 10.0))
+	_casings.append(body)
+	_born_at.append(Time.get_ticks_msec())
+	_cleanup()
+
+
+func _process(delta: float) -> void:
+	_cleanup_accumulator += delta
+	if _cleanup_accumulator >= 0.5:
+		_cleanup_accumulator = 0.0
+		_cleanup()
+
+
+func _cleanup() -> void:
+	var now := Time.get_ticks_msec()
+	for index in range(_casings.size() - 1, -1, -1):
+		if not is_instance_valid(_casings[index]) or _casings[index].is_queued_for_deletion():
+			_casings.remove_at(index)
+			_born_at.remove_at(index)
+		elif now - _born_at[index] >= LIFETIME_MSEC:
+			_casings[index].queue_free()
+			_casings.remove_at(index)
+			_born_at.remove_at(index)
+	while _casings.size() > MAX_CASINGS:
+		var oldest: RigidBody3D = _casings.pop_front()
+		_born_at.pop_front()
+		if is_instance_valid(oldest):
+			oldest.queue_free()

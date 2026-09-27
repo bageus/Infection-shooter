@@ -1,7 +1,8 @@
-[gd_scene load_steps=5 format=3]
+[gd_scene load_steps=6 format=3]
 [ext_resource type="Script" path="res://game/features/combat/prototype_rifle.gd" id="1"]
 [ext_resource type="PackedScene" path="res://game/features/combat/public/prototype_bullet.tscn" id="2"]
 [ext_resource type="PackedScene" path="res://models/objects/weapons/pistol_lowpoly.glb" id="weapon_model"]
+[ext_resource type="PackedScene" path="res://models/objects/enviroments/12/12_pistol_casing.glb" id="casing_model"]
 [sub_resource type="StandardMaterial3D" id="Mat"]
 albedo_color = Color(0.18,0.2,0.23,1)
 [sub_resource type="CapsuleMesh" id="Mesh"]
@@ -11,6 +12,7 @@ height = 0.45
 [node name="Pistol" type="Node3D"]
 script = ExtResource("1")
 bullet_scene = ExtResource("2")
+casing_scene = ExtResource("casing_model")
 weapon_name="PISTOL"
 shots_per_second=3.5
 magazine_size=15
@@ -24,3 +26,5 @@ bullet_range=36.0
 rotation_degrees = Vector3(0, 180, 0)
 [node name="Muzzle" type="Marker3D" parent="."]
 position = Vector3(0, 0, -0.4)
+[node name="EjectionPort" type="Marker3D" parent="."]
+position = Vector3(0.1, 0.08, -0.16)

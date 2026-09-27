@@ -1,4 +1,4 @@
-[gd_scene load_steps=10 format=3]
+[gd_scene load_steps=11 format=3]
 [ext_resource type="Script" path="res://game/features/character_animation/public/character_animation_driver.gd" id="anim_driver"]
 [ext_resource type="Script" path="res://game/features/player/player_movement.gd" id="1"]
 [ext_resource type="PackedScene" path="res://models/objects/characters/soldier_animated.glb" id="character_model"]
@@ -6,6 +6,7 @@
 [ext_resource type="PackedScene" path="res://game/features/combat/public/uzi.tscn" id="3"]
 [ext_resource type="PackedScene" path="res://game/features/combat/public/shotgun.tscn" id="4"]
 [ext_resource type="Script" path="res://game/features/infection/public/infection_runtime.gd" id="5"]
+[ext_resource type="Script" path="res://game/features/combat/public/spent_casings.gd" id="casings"]
 [sub_resource type="StandardMaterial3D" id="Mat"]
 albedo_color=Color(0.06,0.2,0.62,1)
 [sub_resource type="CapsuleMesh" id="Mesh"]
@@ -20,6 +21,8 @@ script=ExtResource("1")
 collision_layer=1
 collision_mask=3
 [node name="AimPivot" type="Node3D" parent="."]
+[node name="SpentCasings" type="Node" parent="AimPivot"]
+script = ExtResource("casings")
 [node name="Body" parent="." instance=ExtResource("character_model")]
 rotation_degrees=Vector3(0,180,0)
 position = Vector3(0, -0.9, 0)

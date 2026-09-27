@@ -13,8 +13,11 @@ extends Node3D
 @export var bullet_range: float = 34.0
 @export var shotgun_shell_reload: bool = false
 @export var bullet_scene: PackedScene
+@export var casing_scene: PackedScene
+@export var casing_radius: float = 0.012
 @export var environment_damage_multiplier: float = 1.0
 @onready var muzzle: Marker3D = $Muzzle
+@onready var ejection_port: Marker3D = get_node_or_null("EjectionPort") as Marker3D
 var _cooldown_remaining: float = 0.0
 var _reload_remaining: float = 0.0
 var _magazine_ammo: int
@@ -63,6 +66,10 @@ func try_fire_at(target_point: Vector3) -> bool:
 		bullet.call("setup_projectile", shot_direction, shooter, bullet_damage * environment_damage_multiplier, bullet_speed, bullet_range, weapon_name, collision_origin)
 	_magazine_ammo -= 1
 	_cooldown_remaining = 1.0 / maxf(shots_per_second, 0.01)
+	if casing_scene != null and ejection_port != null:
+		var casing_pool := get_parent().get_node_or_null("SpentCasings")
+		if casing_pool != null:
+			casing_pool.call("spawn_casing", casing_scene, ejection_port.global_transform, casing_radius, shooter)
 	return true
 func start_reload() -> void:
 	if _reloading or _reserve_ammo <= 0 or _magazine_ammo >= magazine_size: return
