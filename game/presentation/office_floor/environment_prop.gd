@@ -2,6 +2,7 @@ extends RigidBody3D
 
 const DAMAGE = preload("res://game/presentation/office_floor/environment_damage.gd")
 const BALANCE = preload("res://game/features/combat/public/projectile_balance.gd")
+const BOOK_CONTACT = preload("res://game/presentation/office_floor/book_contact.gd")
 
 @export_file("*.glb") var model_path := ""
 
@@ -16,11 +17,21 @@ var _glass_broken := false
 var _broken := false
 var _health := 0.0
 var _transition_pending := false
+var _book_kick_cooldown := 0.0
 
+
+func _physics_process(delta: float) -> void:
+	_book_kick_cooldown = BOOK_CONTACT.kick_if_close(self, _book_kick_cooldown, delta)
 
 func _ready() -> void:
 	if model_path.is_empty():
 		return
+	var is_book := model_path.get_file().begins_with("09_book")
+	set_physics_process(is_book)
+	if is_book:
+		# Player/enemy masks use layers 1-2. Bullets and aiming include layer 3.
+		collision_layer = 4
+		collision_mask = 3
 	var packed := load(model_path) as PackedScene
 	if packed == null:
 		push_error("Environment model unavailable: " + model_path)

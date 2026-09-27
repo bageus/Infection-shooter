@@ -442,6 +442,9 @@ func _toggle_surface_at(index: int) -> void:
 	ZONE_ACTIONS.toggle_surface(self)
 	_refresh_zones()
 
+func _duplicate_zone_at(index: int) -> void:
+	ZONE_ACTIONS.duplicate_zone(self, index)
+
 
 func _start_item() -> void:
 	if zone_index >= 0 and not model_list.get_selected_items().is_empty():
@@ -544,6 +547,7 @@ func _refresh_zones() -> void:
 		select.clip_text = true
 		select.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 		select.modulate = Color(1.0, 0.83, 0.48) if i == zone_index else Color.WHITE
+		_button(row, "Копия", _duplicate_zone_at.bind(i))
 		_button(row, "Пол" if bool(zones[i].get("floor", false)) else "Стол", _toggle_surface_at.bind(i))
 		_button(row, "×", _remove_zone_at.bind(i))
 	if zone_index >= 0:

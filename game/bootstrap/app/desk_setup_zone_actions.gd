@@ -22,6 +22,49 @@ static func clear_selection(mode: Variant) -> void:
 	mode.status.text = "Selection cleared. Select a zone to continue."
 
 
+static func duplicate_zone(mode: Variant, index: int) -> void:
+	if index < 0 or index >= mode.zones.size():
+		return
+	var source: Dictionary = mode.zones[index]
+	var copy := source.duplicate(true)
+	copy["name"] = str(source.get("name", "Zone")) + " (копия)"
+	var original := Vector2(float(source["x"]), float(source["z"]))
+	var destination := original
+	var offsets := [Vector2(float(source["width"]), 0.0), Vector2(-float(source["width"]), 0.0), Vector2(0.0, float(source["depth"])), Vector2(0.0, -float(source["depth"]))]
+	for offset in offsets:
+		if RULES._inside_surface(original + offset, copy, mode.stations):
+			destination = original + offset
+			break
+	copy["x"] = destination.x
+	copy["z"] = destination.y
+	var items := RULES.items_in_zone(mode.desk, source, mode._attachments())
+	var new_index: int = mode.zones.size()
+	mode.zones.append(copy)
+	var displacement: Vector3 = mode.desk.to_global(Vector3(destination.x, 0.0, destination.y)) - mode.desk.to_global(Vector3(original.x, 0.0, original.y))
+	var skipped := 0
+	for original_item in items:
+		var path := str(original_item.get_meta("planning_scene_path", ""))
+		if not path.begins_with(MODEL_ROOT) or not FileAccess.file_exists(path):
+			skipped += 1
+			continue
+		var item: Node3D = mode.planner._instantiate_asset(path) as Node3D
+		if item == null:
+			skipped += 1
+			continue
+		mode.planner.root.add_child(item)
+		item.global_transform = original_item.global_transform
+		item.global_position += displacement
+		item.set_meta("planning_scene_path", path)
+		item.set_meta("planning_attachment", mode._desk_id())
+		item.set_meta("planning_zone", new_index)
+		mode.planner.placed.append(item)
+	mode.zone_index = new_index
+	mode._refresh_zones()
+	mode.status.text = "Zone and items copied. Drag the copy to a new position." if destination == original else "Zone and items copied."
+	if skipped > 0:
+		mode.status.text += " Missing models: %d." % skipped
+
+
 static func refresh_models(mode: Variant) -> void:
 	var category := str(mode.zones[mode.zone_index].get("category", "Другие")) if mode.zone_index >= 0 else "Другие"
 	if mode.shown_category == category:
@@ -102,31 +145,39 @@ static func toggle_surface(mode: Variant) -> void:
 
 
 static func place_model(mode: Variant, model: String, local: Vector3) -> void:
+	if mode.zone_index < 0 or mode.zone_index >= mode.zones.size():
+		return
 	var zone: Dictionary = mode.zones[mode.zone_index]
 	if RULES.category_for(model) != str(zone["category"]):
 		mode.status.text = "Choose an item of type: " + str(zone["category"])
 		return
 	var path := MODEL_ROOT + model.substr(0, 2) + "/" + model + ".glb"
 	if not FileAccess.file_exists(path):
+		mode.status.text = "Model file is missing: " + model
 		return
-	var existing: Array[Node3D] = []
-	var occupied: Array[Rect2] = []
-	var created: Array[Node3D] = []
-	var random := RandomNumberGenerator.new()
-	random.randomize()
-	var entry := {"model": model, "x": 0.0, "z": 0.0, "jitter": 0.0, "rotation_jitter": 0.0, "floor": bool(zone["floor"])}
-	WORKSTATIONS._add_item(entry, {"x": local.x, "z": local.z, "angle": float(zone.get("angle", 0.0))}, float(zone["height"]), mode.desk, mode.planner.root, existing, created, occupied, random, Callable(mode.planner, "_instantiate_asset"))
-	var accepted := 0
-	for object in created:
-		if not RULES.fits_zone(mode.desk, zone, object):
-			object.queue_free()
-			continue
-		object.set_meta("planning_attachment", mode._desk_id())
-		object.set_meta("planning_zone", mode.zone_index)
-		mode.planner.placed.append(object)
-		accepted += 1
+	var object: Node3D = mode.planner._instantiate_asset(path) as Node3D
+	if object == null:
+		mode.status.text = "Cannot load model: " + model
+		return
+	mode.planner.root.add_child(object)
+	object.rotation.y = mode.desk.rotation.y + deg_to_rad(float(zone.get("angle", 0.0)))
+	object.global_position = mode.desk.to_global(Vector3(local.x, float(zone["height"]), local.z))
+	var bounds := WORKSTATIONS._bounds(object)
+	if bounds.size.length_squared() < 0.000001:
+		object.queue_free()
+		mode.status.text = "Model has no visible geometry: " + model
+		return
+	object.global_position.y += mode.desk.to_global(Vector3.UP * float(zone["height"])).y - bounds.position.y
+	if not RULES.fits_zone(mode.desk, zone, object):
+		object.queue_free()
+		mode.status.text = "Place the object's centre inside its zone: " + model
+		return
+	object.set_meta("planning_scene_path", path)
+	object.set_meta("planning_attachment", mode._desk_id())
+	object.set_meta("planning_zone", mode.zone_index)
+	mode.planner.placed.append(object)
 	mode._refresh_zone_items()
-	mode.status.text = "Placed " + model if accepted > 0 else "Place the object's centre inside its zone."
+	mode.status.text = "Placed " + model
 
 
 static func refresh_items(mode: Variant) -> void:

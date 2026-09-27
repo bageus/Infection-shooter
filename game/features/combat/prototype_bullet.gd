@@ -56,7 +56,7 @@ func _physics_process(delta: float) -> void:
 	_first_step = false
 	var remaining_finish := finish
 	for pass_index in 5:
-		var query := PhysicsRayQueryParameters3D.create(remaining_start, remaining_finish, 3)
+		var query := PhysicsRayQueryParameters3D.create(remaining_start, remaining_finish, 7)
 		query.exclude = excluded
 		var hit := get_world_3d().direct_space_state.intersect_ray(query)
 		if hit.is_empty():

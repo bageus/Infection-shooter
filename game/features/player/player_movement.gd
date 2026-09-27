@@ -138,7 +138,7 @@ func _update_aim()->void:
 	var mouse:=get_viewport().get_mouse_position()
 	var origin:=camera.project_ray_origin(mouse)
 	var ray_end:=origin+camera.project_ray_normal(mouse)*200.0
-	var query:=PhysicsRayQueryParameters3D.create(origin,ray_end,3)
+	var query:=PhysicsRayQueryParameters3D.create(origin,ray_end,7)
 	query.exclude=[get_rid()]
 	var hit:=get_world_3d().direct_space_state.intersect_ray(query)
 	if not hit.is_empty():
