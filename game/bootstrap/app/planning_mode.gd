@@ -28,6 +28,7 @@ var ui: Control
 var palette: ItemList
 var status: Label
 var help: Label
+var help_button: Button
 var light_info: Label
 var light_level: ProgressBar
 var light_angle_info: Label
@@ -163,7 +164,16 @@ func setup(app_owner: Node3D, planning_root: Node3D, planning_ui: Control) -> vo
 	camera = host.get_node("Gameplay/Player/CameraRig/Camera3D")
 	palette = ui.get_node("Panel/VBox/Palette")
 	status = ui.get_node("Panel/VBox/Status")
-	help = ui.get_node("HelpPanel/Help")
+	help = ui.get_node("HelpPanel/VBox/Help")
+	help_button = Button.new()
+	help_button.text = "?"
+	help_button.tooltip_text = "Planning controls"
+	help_button.custom_minimum_size = Vector2(36, 36)
+	ui.add_child(help_button)
+	help_button.set_anchors_preset(Control.PRESET_TOP_RIGHT)
+	help_button.position = Vector2(-52, 8)
+	help_button.pressed.connect(_toggle_help)
+	ui.get_node("HelpPanel/VBox/Close").pressed.connect(_toggle_help)
 	light_info = ui.get_node("Panel/VBox/LightInfo")
 	light_level = ui.get_node("Panel/VBox/LightLevel")
 	light_angle_info = ui.get_node("Panel/VBox/LightAngleInfo")
@@ -221,6 +231,8 @@ func setup(app_owner: Node3D, planning_root: Node3D, planning_ui: Control) -> vo
 
 func enter() -> void:
 	active = true
+	help.get_parent().get_parent().hide()
+	help_button.show()
 	workstation_transforms.clear()
 	var planning_lighting := host.get_node_or_null("PlanningLighting")
 	if planning_lighting != null:
@@ -253,6 +265,8 @@ func exit() -> void:
 	if desk_setup.active:
 		desk_setup.close()
 	active = false
+	help.get_parent().get_parent().hide()
+	help_button.hide()
 	var planning_lighting := host.get_node_or_null("PlanningLighting")
 	if planning_lighting != null:
 		planning_lighting.call("set_planning_mode", false)
@@ -542,6 +556,11 @@ func _select(node: Node3D) -> void:
 func _open_desk_setup() -> void:
 	if selected != null and desk_setup_button.visible:
 		desk_setup.open(selected)
+
+
+func _toggle_help() -> void:
+	var overlay := help.get_parent().get_parent() as Control
+	overlay.visible = not overlay.visible
 
 
 func _update_light_ui() -> void:

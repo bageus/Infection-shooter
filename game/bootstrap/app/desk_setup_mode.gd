@@ -2,20 +2,27 @@ extends Node
 
 # Local desk coordinates are the single source of truth for zones and templates.
 const WORKSTATIONS := preload("res://game/bootstrap/app/workstation_templates.gd")
-const TEMPLATE_DIR := "user://desk_setups"
+const VISUALS := preload("res://game/bootstrap/app/desk_setup_visuals.gd")
+const ZONE_RULES := preload("res://game/bootstrap/app/desk_setup_zone_rules.gd")
+const TEMPLATE_FILES := preload("res://game/bootstrap/app/desk_setup_template_files.gd")
 const MODEL_ROOT := "res://models/objects/enviroments/"
 
 var planner: Node
 var desk: Node3D
 var dragged: Node3D
+var dragging_zone := false
+var zone_drag_offset := Vector2.ZERO
 var active := false
 var saved_camera := Transform3D.IDENTITY
 var zones: Array[Dictionary] = []
+var stations: Array = []
 var zone_index := -1
 var front := 0
 var placing_zone := false
 var next_zone_floor := false
 var panel: PanelContainer
+var scroll: ScrollContainer
+var help_panel: PanelContainer
 var zone_list: ItemList
 var model_list: ItemList
 var template_list: OptionButton
@@ -30,18 +37,26 @@ var models: Array[String] = []
 
 func configure(owner_planner: Node, planning_ui: Control) -> void:
 	planner = owner_planner
+	scroll = ScrollContainer.new()
+	scroll.name = "DeskSetupScroll"
+	scroll.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
+	scroll.mouse_filter = Control.MOUSE_FILTER_STOP
+	planning_ui.add_child(scroll)
+	scroll.set_anchors_preset(Control.PRESET_TOP_RIGHT)
 	panel = PanelContainer.new()
 	panel.name = "DeskSetupPanel"
-	panel.set_anchors_preset(Control.PRESET_TOP_RIGHT)
-	panel.position = Vector2(-354, 8)
-	panel.custom_minimum_size = Vector2(344, 0)
+	panel.custom_minimum_size = Vector2(330, 0)
 	panel.mouse_filter = Control.MOUSE_FILTER_STOP
-	planning_ui.add_child(panel)
+	scroll.add_child(panel)
 	var box := VBoxContainer.new()
 	panel.add_child(box)
+	var header := HBoxContainer.new()
+	box.add_child(header)
 	var title := Label.new()
 	title.text = "DESK SETUP | zones and objects"
-	box.add_child(title)
+	title.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	header.add_child(title)
+	_button(header, "?", _toggle_help)
 	front_button = _button(box, "Front: seated side", _switch_front)
 	zone_list = ItemList.new()
 	zone_list.custom_minimum_size.y = 105
@@ -74,8 +89,11 @@ func configure(owner_planner: Node, planning_ui: Control) -> void:
 	status = Label.new()
 	status.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	box.add_child(status)
-	panel.hide()
-	markers = Node3D.new()
+	scroll.hide()
+	_build_help(planning_ui)
+	get_viewport().size_changed.connect(_resize_menu)
+	_resize_menu()
+	markers = VISUALS.new()
 	markers.name = "DeskSetupMarkers"
 	planner.root.add_child(markers)
 	markers.hide()
@@ -104,6 +122,41 @@ func _dimension(parent: HBoxContainer, caption: String, initial: float) -> SpinB
 	return field
 
 
+func _build_help(planning_ui: Control) -> void:
+	help_panel = PanelContainer.new()
+	help_panel.name = "DeskSetupHelp"
+	help_panel.custom_minimum_size.x = 280
+	help_panel.mouse_filter = Control.MOUSE_FILTER_STOP
+	planning_ui.add_child(help_panel)
+	var contents := VBoxContainer.new()
+	help_panel.add_child(contents)
+	var instructions := Label.new()
+	instructions.text = "LMB drag zone  Move zone and contents\nArrows  Move selected zone (0.1 m)\nShift + LMB drag  Move one item\nDelete  Remove selected item\nRMB drag / Alt + LMB  Orbit table\nWheel  Zoom in or out"
+	contents.add_child(instructions)
+	_button(contents, "ROTATE LEFT", _orbit_left)
+	_button(contents, "ROTATE RIGHT", _orbit_right)
+	_button(contents, "RESET VIEW", _reset_view)
+	_button(contents, "CLOSE HELP", _toggle_help)
+	help_panel.hide()
+
+
+func _resize_menu() -> void:
+	if scroll == null:
+		return
+	var viewport_size := get_viewport().get_visible_rect().size
+	var menu_width := minf(360.0, viewport_size.x - 16.0)
+	scroll.offset_left = -menu_width - 8.0
+	scroll.offset_right = -8.0
+	scroll.offset_top = 8.0
+	scroll.offset_bottom = viewport_size.y - 8.0
+	panel.custom_minimum_size.x = menu_width - 12.0
+	help_panel.position = Vector2(maxf(8.0, viewport_size.x - menu_width - 304.0), 8.0)
+
+
+func _toggle_help() -> void:
+	help_panel.visible = not help_panel.visible
+
+
 func _collect_models() -> void:
 	for group in ["03", "05", "06", "09", "11"]:
 		var directory := DirAccess.open(MODEL_ROOT + group)
@@ -126,8 +179,10 @@ func open(target: Node3D) -> void:
 	dragged = null
 	active = true
 	placing_zone = false
+	dragging_zone = false
 	saved_camera = planner.camera.global_transform
 	var profile: Dictionary = WORKSTATIONS._read("desks/" + WORKSTATIONS.desk_name(_desk_path()) + ".json")
+	stations = profile.get("stations", [])
 	zones.clear()
 	for station_value in profile.get("stations", []):
 		var station: Dictionary = station_value
@@ -136,15 +191,17 @@ func open(target: Node3D) -> void:
 		zones.append({"x": 0.0, "z": 0.0, "width": 1.5, "depth": 0.85, "height": 0.89, "floor": false})
 	front = 0
 	zone_index = 0
-	panel.show()
-	panel.get_parent().get_node("Panel").hide()
+	scroll.show()
+	planner.ui.get_node("Panel").hide()
+	planner.help.get_parent().get_parent().hide()
+	planner.help_button.hide()
+	markers.call("configure", desk, profile)
 	markers.show()
 	_refresh_zones()
 	_refresh_templates()
 	planner._clear_preview()
 	planner._clear_selection_highlight()
-	planner.camera.global_position = desk.to_global(Vector3(0, 3.5, -4.2))
-	planner.camera.look_at(desk.to_global(Vector3(0, 0.7, 0)), Vector3.UP)
+	_reset_view()
 	status.text = "Click a zone to select it; the desk stays fixed."
 
 
@@ -153,13 +210,16 @@ func close() -> void:
 		return
 	active = false
 	placing_zone = false
+	dragging_zone = false
 	dragged = null
-	desk = null
 	planner.camera.global_transform = saved_camera
-	panel.hide()
-	panel.get_parent().get_node("Panel").show()
+	scroll.hide()
+	help_panel.hide()
+	planner.ui.get_node("Panel").show()
+	planner.help_button.show()
 	markers.hide()
-	_clear_markers()
+	markers.call("clear")
+	desk = null
 	planner._select(null)
 
 
@@ -167,35 +227,58 @@ func handle_input(event: InputEvent) -> bool:
 	if not active:
 		return false
 	if event is InputEventKey and event.pressed and event.keycode == KEY_ESCAPE:
-		if template_name.has_focus() or width_field.get_line_edit().has_focus() or depth_field.get_line_edit().has_focus():
+		if _editing_text():
 			get_viewport().gui_get_focus_owner().release_focus()
 		else:
 			close()
 		return true
-	if event is InputEventKey and event.pressed and event.keycode == KEY_DELETE and dragged != null:
-		planner.placed.erase(dragged)
-		dragged.queue_free()
-		dragged = null
-		return true
+	if event is InputEventKey and event.pressed and not event.echo and not _editing_text():
+		if event.keycode == KEY_DELETE and dragged != null:
+			planner.placed.erase(dragged)
+			dragged.queue_free()
+			dragged = null
+			return true
+		if zone_index >= 0 and event.keycode in [KEY_LEFT, KEY_RIGHT, KEY_UP, KEY_DOWN]:
+			var direction := Vector2.ZERO
+			if event.keycode == KEY_LEFT: direction.x = -0.1
+			if event.keycode == KEY_RIGHT: direction.x = 0.1
+			if event.keycode == KEY_UP: direction.y = -0.1
+			if event.keycode == KEY_DOWN: direction.y = 0.1
+			_move_zone(zone_index, Vector2(float(zones[zone_index]["x"]), float(zones[zone_index]["z"])) + direction)
+			return true
 	if event is InputEventMouse:
-		if panel.get_global_rect().has_point(event.position):
-			return false # GUI receives the event; planner world input remains disabled.
-		if event is InputEventMouseButton and event.pressed and event.button_index == MOUSE_BUTTON_LEFT:
-			_click_world(event.position)
-		if event is InputEventMouseMotion and dragged != null and Input.is_mouse_button_pressed(MOUSE_BUTTON_LEFT) and zone_index >= 0:
-			var local := _local_at(event.position, zones[zone_index])
-			if local.is_finite() and _zone_at(event.position) == zone_index:
-				var previous := dragged.global_position
-				dragged.global_position = desk.to_global(Vector3(local.x, desk.to_local(previous).y, local.z))
-				if _overlaps_attached(dragged):
-					dragged.global_position = previous
+		if scroll.get_global_rect().has_point(event.position) or (help_panel.visible and help_panel.get_global_rect().has_point(event.position)):
+			return false # GUI receives the event; world input stays disabled.
+		if event is InputEventMouseButton:
+			if event.pressed and event.button_index == MOUSE_BUTTON_WHEEL_UP: _zoom_orbit(-0.4)
+			if event.pressed and event.button_index == MOUSE_BUTTON_WHEEL_DOWN: _zoom_orbit(0.4)
+			if event.pressed and event.button_index == MOUSE_BUTTON_LEFT and not event.alt_pressed:
+				_click_world(event.position, event.shift_pressed)
+			if not event.pressed and event.button_index == MOUSE_BUTTON_LEFT:
+				dragging_zone = false
+		if event is InputEventMouseMotion:
+			if Input.is_mouse_button_pressed(MOUSE_BUTTON_RIGHT) or (event.alt_pressed and Input.is_mouse_button_pressed(MOUSE_BUTTON_LEFT)):
+				_orbit(event.relative)
+			elif dragging_zone and Input.is_mouse_button_pressed(MOUSE_BUTTON_LEFT) and zone_index >= 0:
+				var local := _local_at(event.position, zones[zone_index])
+				if local.is_finite():
+					_move_zone(zone_index, Vector2(local.x, local.z) + zone_drag_offset)
+			elif dragged != null and Input.is_mouse_button_pressed(MOUSE_BUTTON_LEFT) and zone_index >= 0:
+				_drag_item(event.position)
 		return true
 	return false # Let focused LineEdit and SpinBox controls receive keyboard input.
 
 
-func _click_world(screen: Vector2) -> void:
+func _editing_text() -> bool:
+	return template_name.has_focus() or width_field.get_line_edit().has_focus() or depth_field.get_line_edit().has_focus()
+
+
+func _click_world(screen: Vector2, pick_item: bool) -> void:
 	dragged = null
-	if not placing_zone and not model_list.has_meta("placing"):
+	if placing_zone:
+		_add_zone_at(screen)
+		return
+	if pick_item and not model_list.has_meta("placing"):
 		var hit := planner._planned_object_at(screen) as Node3D
 		if hit != null and str(hit.get_meta("planning_attachment", "")) == _desk_id():
 			dragged = hit
@@ -208,16 +291,6 @@ func _click_world(screen: Vector2) -> void:
 			status.text = "Drag the item inside the zone; Delete removes it."
 			return
 	var zone := _zone_at(screen)
-	if placing_zone:
-		var point := _project(screen, 0.0 if next_zone_floor else 0.89)
-		if not point.is_finite():
-			return
-		var local: Vector3 = desk.to_local(point)
-		zones.append({"x": local.x, "z": local.z, "width": 0.65, "depth": 0.45, "height": 0.0 if next_zone_floor else 0.89, "floor": next_zone_floor})
-		zone_index = zones.size() - 1
-		placing_zone = false
-		_refresh_zones()
-		return
 	if zone >= 0:
 		zone_index = zone
 		_refresh_zones()
@@ -226,6 +299,56 @@ func _click_world(screen: Vector2) -> void:
 			var selected_items := model_list.get_selected_items()
 			if not selected_items.is_empty():
 				_place_model(models[selected_items[0]], _local_at(screen, zones[zone]))
+		else:
+			var local := _local_at(screen, zones[zone])
+			zone_drag_offset = Vector2(float(zones[zone]["x"]) - local.x, float(zones[zone]["z"]) - local.z)
+			dragging_zone = true
+
+
+func _add_zone_at(screen: Vector2) -> void:
+	var point := _project(screen, 0.0 if next_zone_floor else 0.89)
+	if not point.is_finite():
+		return
+	var local: Vector3 = desk.to_local(point)
+	zones.append({"x": local.x, "z": local.z, "width": 0.65, "depth": 0.45, "height": 0.0 if next_zone_floor else 0.89, "floor": next_zone_floor})
+	zone_index = zones.size() - 1
+	placing_zone = false
+	_refresh_zones()
+
+
+func _move_zone(index: int, target: Vector2) -> void:
+	if ZONE_RULES.move_zone(desk, zones, index, target, stations, _attachments()):
+		_refresh_zones()
+
+
+func _drag_item(screen: Vector2) -> void:
+	var local := _local_at(screen, zones[zone_index])
+	if not local.is_finite() or _zone_at(screen) != zone_index:
+		return
+	var previous := dragged.global_position
+	dragged.global_position = desk.to_global(Vector3(local.x, desk.to_local(previous).y, local.z))
+	if _overlaps_attached(dragged):
+		dragged.global_position = previous
+
+
+func _orbit(relative: Vector2) -> void:
+	markers.call("rotate_view", planner.camera, relative)
+
+
+func _zoom_orbit(amount: float) -> void:
+	markers.call("zoom_view", planner.camera, amount)
+
+
+func _orbit_left() -> void:
+	_orbit(Vector2(PI * 0.5 / 0.008, 0))
+
+
+func _orbit_right() -> void:
+	_orbit(Vector2(-PI * 0.5 / 0.008, 0))
+
+
+func _reset_view() -> void:
+	markers.call("reset_view", planner.camera)
 
 
 func _project(screen: Vector2, height: float) -> Vector3:
@@ -399,94 +522,38 @@ func _refresh_zones() -> void:
 		_refresh_markers()
 
 
-func _clear_markers() -> void:
-	for child in markers.get_children():
-		child.queue_free()
-
-
 func _refresh_markers() -> void:
-	_clear_markers()
-	if desk == null:
-		return
-	for i in zones.size():
-		var zone: Dictionary = zones[i]
-		var shape := BoxMesh.new()
-		shape.size = Vector3(float(zone["width"]), 0.008, float(zone["depth"]))
-		var material := StandardMaterial3D.new()
-		material.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
-		material.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
-		material.no_depth_test = true
-		material.albedo_color = Color(1.0, 0.38, 0.18, 0.4) if i == zone_index else Color(0.12, 0.8, 1.0, 0.23)
-		shape.material = material
-		var marker := MeshInstance3D.new()
-		marker.mesh = shape
-		markers.add_child(marker)
-		marker.global_transform = desk.global_transform * Transform3D(Basis.IDENTITY, Vector3(float(zone["x"]), float(zone["height"]) + 0.015, float(zone["z"])))
-	var arrow := BoxMesh.new()
-	arrow.size = Vector3(0.34, 0.02, 0.09)
-	var highlight := StandardMaterial3D.new()
-	highlight.albedo_color = Color(1.0, 0.05, 0.04)
-	highlight.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
-	arrow.material = highlight
-	var front_marker := MeshInstance3D.new()
-	front_marker.mesh = arrow
-	markers.add_child(front_marker)
-	front_marker.global_transform = desk.global_transform * Transform3D(Basis.IDENTITY, Vector3(0, 0.94, 0.85 if front else -0.85))
-
-
-func _template_path() -> String:
-	return TEMPLATE_DIR + "/" + WORKSTATIONS.desk_name(_desk_path()) + "_" + _safe_name(template_name.text) + ".json"
-
-
-func _safe_name(value: String) -> String:
-	var result := ""
-	for letter in value.to_lower():
-		if letter.is_valid_identifier() or letter.is_valid_int():
-			result += letter
-		elif letter in [" ", "-"]:
-			result += "_"
-	return result.trim_prefix("_").trim_suffix("_")
+	markers.call("redraw", zones, zone_index, front)
 
 
 func _save() -> void:
-	if _safe_name(template_name.text).is_empty():
+	if TEMPLATE_FILES.safe_name(template_name.text).is_empty():
 		status.text = "Enter a template name first."
 		return
-	DirAccess.make_dir_recursive_absolute(TEMPLATE_DIR)
 	var items: Array[Dictionary] = []
 	for object in _attachments():
 		var local := desk.to_local(object.global_position)
 		items.append({"path": str(object.get_meta("planning_scene_path", "")), "x": local.x, "y": local.y, "z": local.z, "yaw": object.rotation.y - desk.rotation.y})
-	var file := FileAccess.open(_template_path(), FileAccess.WRITE)
-	if file == null:
+	if not TEMPLATE_FILES.save(WORKSTATIONS.desk_name(_desk_path()), template_name.text, {"version": 1, "desk": WORKSTATIONS.desk_name(_desk_path()), "front": front, "zones": zones, "items": items}):
 		status.text = "Could not save the template."
 		return
-	file.store_string(JSON.stringify({"version": 1, "desk": WORKSTATIONS.desk_name(_desk_path()), "front": front, "zones": zones, "items": items}, "  "))
 	_refresh_templates()
 	status.text = "Saved: " + template_name.text
 
 
 func _refresh_templates() -> void:
 	template_list.clear()
-	var folder := DirAccess.open(TEMPLATE_DIR)
-	if folder == null:
-		return
-	var prefix := WORKSTATIONS.desk_name(_desk_path()) + "_"
-	for file in folder.get_files():
-		if file.begins_with(prefix) and file.ends_with(".json"):
-			template_list.add_item(file.trim_prefix(prefix).trim_suffix(".json"))
-			template_list.set_item_metadata(template_list.item_count - 1, TEMPLATE_DIR + "/" + file)
+	for item in TEMPLATE_FILES.list_for(WORKSTATIONS.desk_name(_desk_path())):
+		template_list.add_item(str(item["name"]))
+		template_list.set_item_metadata(template_list.item_count - 1, item["path"])
 
 
 func _load() -> void:
 	if template_list.selected < 0:
 		return
 	var path: String = template_list.get_item_metadata(template_list.selected)
-	var file := FileAccess.open(path, FileAccess.READ)
-	if file == null:
-		return
-	var data: Variant = JSON.parse_string(file.get_as_text())
-	if not data is Dictionary or data.get("version") != 1 or data.get("desk") != WORKSTATIONS.desk_name(_desk_path()):
+	var data := TEMPLATE_FILES.load(path, WORKSTATIONS.desk_name(_desk_path())) as Dictionary
+	if data.is_empty():
 		status.text = "Template does not match this desk."
 		return
 	for object in _attachments():
