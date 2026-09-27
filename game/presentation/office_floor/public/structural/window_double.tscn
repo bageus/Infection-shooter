@@ -1,11 +1,20 @@
-[gd_scene load_steps=3 format=3]
+[gd_scene load_steps=5 format=3]
 
 [ext_resource type="PackedScene" path="res://models/objects/enviroments/01/01_window_double.glb" id="1_model"]
 [ext_resource type="Script" path="res://game/presentation/office_floor/mesh_collision_builder.gd" id="2_collision"]
+[ext_resource type="Script" path="res://game/presentation/office_floor/glass_partition.gd" id="3_glass"]
+[ext_resource type="Script" path="res://game/presentation/office_floor/glass_collision_builder.gd" id="4_glass_collision"]
 
 [node name="WindowDouble" type="Node3D"]
 script = ExtResource("2_collision")
+exclude_name_tokens = PackedStringArray("glass")
+
+[node name="GlassCollisionBuilder" type="Node3D" parent="."]
+script = ExtResource("4_glass_collision")
 
 [node name="Visual" parent="." instance=ExtResource("1_model")]
 
 [node name="Body" type="StaticBody3D" parent="."]
+
+[node name="GlassBody" type="StaticBody3D" parent="." groups=["infected_breakable_glass"]]
+script = ExtResource("3_glass")

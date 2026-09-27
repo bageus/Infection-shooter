@@ -57,18 +57,16 @@ func _add_fallback_collision(visual: Node3D, body: CollisionObject3D) -> void:
 
 
 func _collect_meshes(node: Node, result: Array[MeshInstance3D]) -> void:
-	if node is MeshInstance3D and not _is_excluded(node):
+	if node is MeshInstance3D and not _is_excluded(node) and absf((node as MeshInstance3D).global_basis.determinant()) > 0.000000000001:
 		result.append(node as MeshInstance3D)
 	for child in node.get_children():
 		_collect_meshes(child, result)
 
 
 func _add_mesh_collisions(node: Node, body: CollisionObject3D) -> void:
-	if _is_excluded(node):
-		return
 	if node is MeshInstance3D:
 		var mesh_instance := node as MeshInstance3D
-		if mesh_instance.mesh != null:
+		if mesh_instance.mesh != null and not _is_excluded(node) and mesh_instance.is_visible_in_tree() and absf(mesh_instance.global_basis.determinant()) > 0.000000000001:
 			var shape: Shape3D
 			if use_simple_collision:
 				var box := BoxShape3D.new()

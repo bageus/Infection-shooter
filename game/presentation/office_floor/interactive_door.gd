@@ -188,10 +188,30 @@ func _collect_elevator_parts(node: Node) -> void:
 		if not _door_parts.has(part):
 			_door_parts.append(part)
 			_closed_transforms.append(part.transform)
+			_add_elevator_leaf_collision(part)
 	for part in _right_slide_parts:
 		if not _door_parts.has(part):
 			_door_parts.append(part)
 			_closed_transforms.append(part.transform)
+			_add_elevator_leaf_collision(part)
+
+
+func _add_elevator_leaf_collision(part: Node3D) -> void:
+	if not part is MeshInstance3D:
+		return
+	var mesh := part as MeshInstance3D
+	if mesh.mesh == null:
+		return
+	var body := StaticBody3D.new()
+	body.name = "MovingLeafBody"
+	part.add_child(body)
+	var collision := CollisionShape3D.new()
+	var box := BoxShape3D.new()
+	var bounds := mesh.get_aabb()
+	box.size = Vector3(maxf(bounds.size.x, 0.02), maxf(bounds.size.y, 0.02), maxf(bounds.size.z, 0.02))
+	collision.shape = box
+	collision.position = bounds.get_center()
+	body.add_child(collision)
 
 
 func _collect_elevator_lights(node: Node) -> void:
