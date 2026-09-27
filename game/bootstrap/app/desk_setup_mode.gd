@@ -39,6 +39,7 @@ var status: Label
 var front_button: Button
 var markers: Node3D
 var models: Array[String] = []
+var shown_category := ""
 
 func configure(owner_planner: Node, planning_ui: Control) -> void:
 	planner = owner_planner
@@ -180,9 +181,7 @@ func _toggle_help() -> void:
 	help_panel.visible = not help_panel.visible
 
 func _collect_models() -> void:
-	models = WORKSTATIONS.available_models()
-	for model in models:
-		model_list.add_item(model)
+	ZONE_ACTIONS.refresh_models(self)
 
 func open(target: Node3D) -> void:
 	if active:
@@ -200,9 +199,9 @@ func open(target: Node3D) -> void:
 	for station_index in stations.size():
 		var station_value: Variant = stations[station_index]
 		var station: Dictionary = station_value
-		zones.append({"name": "Work surface %d" % (station_index + 1), "required": false, "category": "Any", "angle": float(station.get("angle", 0.0)), "x": float(station.get("x", 0.0)), "z": float(station.get("z", 0.0)), "width": 1.5, "depth": 0.85, "height": float(profile.get("height", 0.89)), "floor": false})
+		zones.append({"name": "Work surface %d" % (station_index + 1), "required": false, "category": "Другие", "angle": float(station.get("angle", 0.0)), "x": float(station.get("x", 0.0)), "z": float(station.get("z", 0.0)), "width": 1.5, "depth": 0.85, "height": float(profile.get("height", 0.89)), "floor": false})
 	if zones.is_empty():
-		zones.append({"name": "Work surface 1", "required": false, "category": "Any", "angle": 0.0, "x": 0.0, "z": 0.0, "width": 1.5, "depth": 0.85, "height": 0.89, "floor": false})
+		zones.append({"name": "Work surface 1", "required": false, "category": "Другие", "angle": 0.0, "x": 0.0, "z": 0.0, "width": 1.5, "depth": 0.85, "height": 0.89, "floor": false})
 	front = 0
 	zone_index = 0
 	scroll.show()
@@ -300,23 +299,25 @@ func _click_world(screen: Vector2, pick_item: bool) -> void:
 		var hit := planner._planned_object_at(screen) as Node3D
 		if hit != null and str(hit.get_meta("planning_attachment", "")) == _desk_id():
 			dragged = hit
-			var pivot := desk.to_local(hit.global_position)
-			for i in zones.size():
-				if absf(pivot.x - float(zones[i]["x"])) <= float(zones[i]["width"]) * 0.5 and absf(pivot.z - float(zones[i]["z"])) <= float(zones[i]["depth"]) * 0.5:
-					zone_index = i
-					_refresh_zones()
-					break
+			var slot := int(hit.get_meta("planning_zone", -1))
+			if slot >= 0 and slot < zones.size():
+				zone_index = slot
+				_refresh_zones()
 			status.text = "Drag the item inside the zone; Delete removes it."
 			return
 	var zone := _zone_at(screen)
 	if zone >= 0:
+		var was_placing := model_list.has_meta("placing")
+		var picked := ""
+		if was_placing and not model_list.get_selected_items().is_empty():
+			picked = models[model_list.get_selected_items()[0]]
 		zone_index = zone
 		_refresh_zones()
-		if model_list.has_meta("placing"):
-			model_list.remove_meta("placing")
-			var selected_items := model_list.get_selected_items()
-			if not selected_items.is_empty():
-				_place_model(models[selected_items[0]], _local_at(screen, zones[zone]))
+		if was_placing:
+			if model_list.has_meta("placing"):
+				model_list.remove_meta("placing")
+			if not picked.is_empty():
+				_place_model(picked, _local_at(screen, zones[zone]))
 		else:
 			var local := _local_at(screen, zones[zone])
 			zone_drag_offset = Vector2(float(zones[zone]["x"]) - local.x, float(zones[zone]["z"]) - local.z)
@@ -327,7 +328,14 @@ func _add_zone_at(screen: Vector2) -> void:
 	if not point.is_finite():
 		return
 	var local: Vector3 = desk.to_local(point)
-	zones.append({"name": "Zone %d" % (zones.size() + 1), "required": false, "category": "Any", "angle": 0.0, "x": local.x, "z": local.z, "width": 0.65, "depth": 0.45, "height": 0.0 if next_zone_floor else 0.89, "floor": next_zone_floor})
+	var zone := {"name": "Zone %d" % (zones.size() + 1), "required": false, "category": "Другие", "angle": 0.0, "x": snappedf(local.x, 0.05), "z": snappedf(local.z, 0.05), "width": 0.65, "depth": 0.45, "height": 0.0 if next_zone_floor else 0.89, "floor": next_zone_floor}
+	var center := ZONE_RULES.snap_to_neighbors(Vector2(zone["x"], zone["z"]), zone, zones, -1)
+	zone["x"] = center.x
+	zone["z"] = center.y
+	if not ZONE_RULES._inside_surface(Vector2(zone["x"], zone["z"]), zone, stations):
+		status.text = "Zone must fit on the selected surface."
+		return
+	zones.append(zone)
 	zone_index = zones.size() - 1
 	placing_zone = false
 	_refresh_zones()
@@ -351,8 +359,14 @@ func _drag_item(screen: Vector2) -> void:
 		return
 	var previous := dragged.global_position
 	dragged.global_position = desk.to_global(Vector3(local.x, desk.to_local(previous).y, local.z))
-	if ZONE_RULES.overlaps_item(dragged, _attachments()):
+	var type_matches := ZONE_RULES.category_for(str(dragged.get_meta("planning_scene_path", "")).get_file().get_basename()) == str(zones[zone_index]["category"])
+	if not type_matches or not ZONE_RULES.fits_zone(desk, zones[zone_index], dragged) or ZONE_RULES.overlaps_item(dragged, _attachments()):
 		dragged.global_position = previous
+	else:
+		var previous_slot := int(dragged.get_meta("planning_zone", -1))
+		dragged.set_meta("planning_zone", zone_index)
+		if previous_slot != zone_index:
+			_refresh_zone_items()
 
 func _orbit(relative: Vector2) -> void:
 	markers.call("rotate_view", planner.camera, relative)
@@ -398,33 +412,7 @@ func _desk_id() -> String:
 
 
 func _place_model(model: String, local: Vector3) -> void:
-	var zone := zones[zone_index]
-	if str(zone.get("category", "Any")) != "Any" and ZONE_RULES.category_for(model) != str(zone["category"]):
-		status.text = "Choose an item of type: " + str(zone["category"])
-		return
-	var group := model.substr(0, 2)
-	var path := MODEL_ROOT + group + "/" + model + ".glb"
-	if not FileAccess.file_exists(path):
-		return
-	var existing: Array[Node3D] = []
-	for object in planner.placed:
-		if is_instance_valid(object) and object != desk and object.get_meta("planning_attachment", "") != _desk_id():
-			existing.append(object)
-	var occupied: Array[Rect2] = []
-	for object in _attachments():
-		var bounds: AABB = WORKSTATIONS._bounds(object)
-		occupied.append(Rect2(Vector2(bounds.position.x, bounds.position.z), Vector2(bounds.size.x, bounds.size.z)).grow(0.025))
-	var created: Array[Node3D] = []
-	var random := RandomNumberGenerator.new()
-	random.randomize()
-	var entry := {"model": model, "x": 0.0, "z": 0.0, "jitter": 0.0, "rotation_jitter": 0.0, "floor": bool(zone["floor"])}
-	WORKSTATIONS._add_item(entry, {"x": local.x, "z": local.z, "angle": float(zone.get("angle", 0.0))}, float(zone["height"]), desk, planner.root, existing, created, occupied, random, Callable(planner, "_instantiate_asset"))
-	for object in created:
-		object.set_meta("planning_attachment", _desk_id())
-		object.set_meta("planning_zone", zone_index)
-		planner.placed.append(object)
-	_refresh_zone_items()
-	status.text = "Placed " + model if not created.is_empty() else "No room here; move the zone or choose a smaller item."
+	ZONE_ACTIONS.place_model(self, model, local)
 
 
 func _attachments() -> Array[Node3D]:
@@ -446,12 +434,7 @@ func _toggle_zone_surface() -> void:
 
 
 func _toggle_selected_surface() -> void:
-	if zone_index < 0:
-		return
-	var floor_zone := not bool(zones[zone_index]["floor"])
-	zones[zone_index]["floor"] = floor_zone
-	zones[zone_index]["height"] = 0.0 if floor_zone else 0.89
-	_refresh_markers()
+	ZONE_ACTIONS.toggle_surface(self)
 
 
 func _start_item() -> void:
@@ -467,6 +450,9 @@ func _remove_zone_at(index: int) -> void:
 	_clear_zone()
 	zones.remove_at(index)
 	zone_index = mini(index, zones.size() - 1)
+	for object in _attachments():
+		if int(object.get_meta("planning_zone", -1)) > index:
+			object.set_meta("planning_zone", int(object.get_meta("planning_zone")) - 1)
 	_refresh_zones()
 
 
@@ -495,6 +481,7 @@ func _select_zone(index: int) -> void:
 		button.modulate = Color(1.0, 0.83, 0.48) if i == index else Color.WHITE
 	var zone: Dictionary = zones[index]
 	zone_form.call("display", zone)
+	_collect_models()
 	width_field.set_value_no_signal(float(zone["width"]))
 	depth_field.set_value_no_signal(float(zone["depth"]))
 	_refresh_zone_items()
@@ -505,6 +492,13 @@ func _on_zone_changed(zone_name: String, required: bool, angle: float, category:
 	if zone_index < 0:
 		return
 	var zone: Dictionary = zones[zone_index]
+	var previous_category := str(zone.get("category", "Другие"))
+	if category != previous_category:
+		for object in ZONE_RULES.items_in_zone(desk, zone, _attachments()):
+			if ZONE_RULES.category_for(str(object.get_meta("planning_scene_path", "")).get_file().get_basename()) != category:
+				status.text = "Remove incompatible items before changing the zone type."
+				zone_form.call("display", zone)
+				return
 	var delta := angle - float(zone.get("angle", 0.0))
 	if not is_zero_approx(delta):
 		var proposed := zone.duplicate()
@@ -513,18 +507,13 @@ func _on_zone_changed(zone_name: String, required: bool, angle: float, category:
 			status.text = "Zone cannot rotate here without leaving the surface or overlapping items."
 			zone_form.call("display", zone)
 			return
-	var previous_category := str(zone.get("category", "Any"))
-	if category != "Any" and category != previous_category:
-		for object in ZONE_RULES.items_in_zone(desk, zone, _attachments()):
-			if ZONE_RULES.category_for(str(object.get_meta("planning_scene_path", "")).get_file().get_basename()) != category:
-				status.text = "Remove incompatible items before changing the zone type."
-				zone_form.call("display", zone)
-				return
-	zone["name"] = category if category != "Any" and category != previous_category else (zone_name if not zone_name.is_empty() else "Zone %d" % (zone_index + 1))
+	zone["name"] = category if category != previous_category else (zone_name if not zone_name.is_empty() else "Zone %d" % (zone_index + 1))
 	zone["required"] = required
 	zone["angle"] = angle
 	zone["category"] = category
 	if category != previous_category:
+		shown_category = ""
+		_collect_models()
 		zone_form.call("display", zone)
 	(zone_list.get_child(zone_index).get_child(0) as Button).text = _zone_label(zone, zone_index)
 	_refresh_zone_items()
@@ -532,10 +521,7 @@ func _on_zone_changed(zone_name: String, required: bool, angle: float, category:
 
 
 func _resize_zone(_value: float) -> void:
-	if zone_index >= 0:
-		zones[zone_index]["width"] = width_field.value
-		zones[zone_index]["depth"] = depth_field.value
-		_refresh_markers()
+	ZONE_ACTIONS.resize_zone(self)
 
 
 func _refresh_zones() -> void:
@@ -543,6 +529,7 @@ func _refresh_zones() -> void:
 		zone_list.remove_child(child)
 		child.queue_free()
 	for i in zones.size():
+		zones[i]["slot"] = i
 		var row := HBoxContainer.new()
 		zone_list.add_child(row)
 		var select := _button(row, _zone_label(zones[i], i), _select_zone.bind(i))
@@ -558,19 +545,7 @@ func _refresh_zones() -> void:
 
 
 func _refresh_zone_items() -> void:
-	for child in zone_items.get_children():
-		zone_items.remove_child(child)
-		child.queue_free()
-	if zone_index < 0 or desk == null:
-		return
-	for object in ZONE_RULES.items_in_zone(desk, zones[zone_index], _attachments()):
-		var row := HBoxContainer.new()
-		zone_items.add_child(row)
-		var label := Label.new()
-		label.text = str(object.get_meta("planning_scene_path", object.name)).get_file().get_basename()
-		label.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-		row.add_child(label)
-		_button(row, "×", _remove_zone_item.bind(object))
+	ZONE_ACTIONS.refresh_items(self)
 
 
 func _remove_zone_item(object: Node3D) -> void:
@@ -581,7 +556,11 @@ func _remove_zone_item(object: Node3D) -> void:
 
 
 func _zone_label(zone: Dictionary, index: int) -> String:
-	return "%s | %s | %s | %d°" % [str(zone.get("name", "Zone %d" % (index + 1))), "Required" if bool(zone.get("required", true)) else "Optional", str(zone.get("category", "Any")), roundi(float(zone.get("angle", 0.0)))]
+	var title := str(zone.get("name", "Zone %d" % (index + 1)))
+	var category := str(zone.get("category", "Другие"))
+	if title != category:
+		title += " · " + category
+	return "%s | %s | %s | %d°" % [title, "обяз." if bool(zone.get("required", true)) else "необяз.", "пол" if bool(zone.get("floor", false)) else "стол", roundi(float(zone.get("angle", 0.0)))]
 
 
 func _refresh_markers() -> void:

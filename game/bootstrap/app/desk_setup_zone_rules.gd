@@ -2,39 +2,53 @@ extends RefCounted
 
 # Move a local placement region and its contents as one transaction.
 const WORKSTATIONS := preload("res://game/bootstrap/app/workstation_templates.gd")
-const CATEGORIES := ["Any", "Chair", "Monitor", "Keyboard", "Laptop", "Computer", "Mouse", "Phone", "Lamp", "Printer", "Drinkware", "Paper", "Book", "Plant", "Storage", "Other"]
+const GEOMETRY := preload("res://game/bootstrap/app/desk_setup_zone_geometry.gd")
+const CATEGORIES := ["Монитор", "Клавиатура", "Мышь", "Ноутбук", "Стакан", "Кружка", "Карандаш", "Ручка", "Бумага", "Книги", "Mini PC", "Tower PC", "Другие", "Кресло"]
 
 
 static func category_for(model: String) -> String:
 	var label := model.to_lower()
-	if "chair" in label: return "Chair"
-	if "monitor" in label: return "Monitor"
-	if "keyboard" in label: return "Keyboard"
-	if "laptop" in label: return "Laptop"
-	if "minipc" in label or "computer_tower" in label or "05_pc_" in label: return "Computer"
-	if "mouse" in label: return "Mouse"
-	if "phone" in label: return "Phone"
-	if "lamp" in label: return "Lamp"
-	if "printer" in label: return "Printer"
-	if "mug" in label or "glass" in label: return "Drinkware"
-	if "book" in label: return "Book"
-	if "plant" in label: return "Plant"
-	if "paper" in label or "file" in label or "notepad" in label or "binder" in label: return "Paper"
-	if "cabinet" in label or "bin" in label: return "Storage"
-	return "Other"
+	if "chair" in label: return "Кресло"
+	if "monitor" in label: return "Монитор"
+	if "keyboard" in label: return "Клавиатура"
+	if "laptop" in label: return "Ноутбук"
+	if "mouse" in label: return "Мышь"
+	if "minipc" in label: return "Mini PC"
+	if "computer_tower" in label or label.begins_with("05_pc_"): return "Tower PC"
+	if "mug" in label: return "Кружка"
+	if label.begins_with("09_glass"): return "Стакан"
+	if "pencil" in label: return "Карандаш"
+	if label.begins_with("09_pen_"): return "Ручка"
+	if "book" in label: return "Книги"
+	if "paper" in label or "file" in label or "notepad" in label or "binder" in label: return "Бумага"
+	return "Другие"
+
+
+static func models_for(category: String) -> Array[String]:
+	var choices: Array[String] = []
+	for model in WORKSTATIONS.available_models():
+		if category_for(model) == category:
+			choices.append(model)
+	return choices
 
 
 static func normalize(zone: Dictionary, index: int) -> Dictionary:
 	zone["name"] = str(zone.get("name", "Zone %d" % (index + 1)))
 	zone["required"] = bool(zone.get("required", true))
 	zone["angle"] = float(zone.get("angle", 0.0))
-	zone["category"] = str(zone.get("category", "Any")) if str(zone.get("category", "Any")) in CATEGORIES else "Any"
+	var old_category := str(zone.get("category", "Другие"))
+	var aliases := {"Any": "Другие", "Other": "Другие", "Chair": "Кресло", "Monitor": "Монитор", "Keyboard": "Клавиатура", "Laptop": "Ноутбук", "Computer": "Tower PC", "Mouse": "Мышь", "Drinkware": "Стакан", "Paper": "Бумага", "Book": "Книги"}
+	zone["category"] = aliases.get(old_category, old_category) if aliases.get(old_category, old_category) in CATEGORIES else "Другие"
 	return zone
 
 
 static func items_in_zone(desk: Node3D, zone: Dictionary, attached: Array[Node3D]) -> Array[Node3D]:
 	var results: Array[Node3D] = []
 	for item in attached:
+		if item.has_meta("planning_zone") and int(zone.get("slot", -1)) >= 0:
+			if int(item.get_meta("planning_zone")) == int(zone["slot"]):
+				results.append(item)
+			continue
 		var local := desk.to_local(item.global_position)
 		var delta := Vector3(local.x - float(zone["x"]), 0, local.z - float(zone["z"])).rotated(Vector3.UP, -deg_to_rad(float(zone.get("angle", 0.0))))
 		if absf(delta.x) <= float(zone["width"]) * 0.5 and absf(delta.z) <= float(zone["depth"]) * 0.5:
@@ -44,13 +58,24 @@ static func items_in_zone(desk: Node3D, zone: Dictionary, attached: Array[Node3D
 	return results
 
 
+static func fits_zone(desk: Node3D, zone: Dictionary, item: Node3D) -> bool:
+	return GEOMETRY.fits_zone(desk, zone, item)
+
+
 static func rotate_items(desk: Node3D, zone: Dictionary, attached: Array[Node3D], delta_degrees: float) -> bool:
 	var moved := items_in_zone(desk, zone, attached)
 	var pivot := Vector3(float(zone["x"]), 0, float(zone["z"]))
+	var proposed := zone.duplicate()
+	proposed["angle"] = float(zone.get("angle", 0.0)) + delta_degrees
 	for item in moved:
 		item.global_position = desk.to_global((desk.to_local(item.global_position) - pivot).rotated(Vector3.UP, deg_to_rad(delta_degrees)) + pivot)
 		item.rotation.y += deg_to_rad(delta_degrees)
-	if _overlaps(moved, attached):
+	var outside := false
+	for item in moved:
+		if not fits_zone(desk, proposed, item):
+			outside = true
+			break
+	if outside or _overlaps(moved, attached):
 		for item in moved:
 			item.global_position = desk.to_global((desk.to_local(item.global_position) - pivot).rotated(Vector3.UP, -deg_to_rad(delta_degrees)) + pivot)
 			item.rotation.y -= deg_to_rad(delta_degrees)
@@ -74,12 +99,7 @@ static func overlaps_item(item: Node3D, attached: Array[Node3D]) -> bool:
 static func random_items(zone: Dictionary) -> Array[Dictionary]:
 	var random := RandomNumberGenerator.new()
 	random.randomize()
-	var choices: Array[String] = []
-	var category := str(zone.get("category", "Any"))
-	var general_choices := ["05_computer_mouse", "05_desk_phone", "05_laptop_destructible", "05_monitor_destructible", "05_keyboard", "09_notepad", "09_mug", "09_stapler", "11_plant_small"]
-	for model in WORKSTATIONS.available_models():
-		if (category == "Any" and model in general_choices) or (category != "Any" and category_for(model) == category):
-			choices.append(model)
+	var choices := models_for(str(zone.get("category", "Другие")))
 	var result: Array[Dictionary] = []
 	if choices.is_empty():
 		return result
@@ -93,7 +113,7 @@ static func move_zone(desk: Node3D, zones: Array[Dictionary], index: int, target
 	if index < 0 or index >= zones.size():
 		return false
 	var zone: Dictionary = zones[index]
-	var next := Vector2(snappedf(target.x, 0.05), snappedf(target.y, 0.05))
+	var next := snap_to_neighbors(Vector2(snappedf(target.x, 0.05), snappedf(target.y, 0.05)), zone, zones, index)
 	if not _inside_surface(next, zone, stations):
 		return false
 	var current := Vector2(float(zone["x"]), float(zone["z"]))
@@ -101,15 +121,47 @@ static func move_zone(desk: Node3D, zones: Array[Dictionary], index: int, target
 	if movement.length_squared() < 0.0001:
 		return false
 	var contents := items_in_zone(desk, zone, attached)
+	var proposed := zone.duplicate()
+	proposed["x"] = next.x
+	proposed["z"] = next.y
 	for item in contents:
 		item.global_position = desk.to_global(desk.to_local(item.global_position) + Vector3(movement.x, 0, movement.y))
-	if _overlaps(contents, attached):
+	var outside := false
+	for item in contents:
+		if not fits_zone(desk, proposed, item):
+			outside = true
+			break
+	if outside or _overlaps(contents, attached):
 		for item in contents:
 			item.global_position = desk.to_global(desk.to_local(item.global_position) - Vector3(movement.x, 0, movement.y))
 		return false
 	zone["x"] = next.x
 	zone["z"] = next.y
 	return true
+
+
+static func snap_to_neighbors(point: Vector2, zone: Dictionary, zones: Array[Dictionary], index: int) -> Vector2:
+	if absf(float(zone.get("angle", 0.0))) > 0.01:
+		return point
+	for i in zones.size():
+		if i == index:
+			continue
+		var other: Dictionary = zones[i]
+		if bool(other["floor"]) != bool(zone["floor"]) or absf(float(other.get("angle", 0.0))) > 0.01:
+			continue
+		var horizontal := (float(zone["width"]) + float(other["width"])) * 0.5
+		var vertical := (float(zone["depth"]) + float(other["depth"])) * 0.5
+		if absf(point.y - float(other["z"])) < vertical:
+			for sign_value in [-1.0, 1.0]:
+				var edge := float(other["x"]) + sign_value * horizontal
+				if absf(point.x - edge) < 0.08:
+					point.x = edge
+		if absf(point.x - float(other["x"])) < horizontal:
+			for sign_value in [-1.0, 1.0]:
+				var edge := float(other["z"]) + sign_value * vertical
+				if absf(point.y - edge) < 0.08:
+					point.y = edge
+	return point
 
 
 static func _inside_surface(point: Vector2, zone: Dictionary, stations: Array) -> bool:

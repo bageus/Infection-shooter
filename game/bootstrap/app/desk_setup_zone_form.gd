@@ -65,7 +65,7 @@ func display(zone: Dictionary) -> void:
 	_syncing = true
 	name_edit.text = str(zone.get("name", ""))
 	type_select.select(0 if bool(zone.get("required", true)) else 1)
-	var category_index := ZONE_RULES.CATEGORIES.find(str(zone.get("category", "Any")))
+	var category_index := ZONE_RULES.CATEGORIES.find(str(zone.get("category", "Другие")))
 	category_select.select(maxi(category_index, 0))
 	angle_spin.set_value_no_signal(float(zone.get("angle", 0.0)))
 	_syncing = false

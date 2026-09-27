@@ -4,6 +4,7 @@ extends RefCounted
 # local space: the seated person looks towards positive Z.
 const ROOT := "res://game/bootstrap/app/workstations/"
 const TEMPLATE_FILES := preload("res://game/bootstrap/app/desk_setup_template_files.gd")
+const ZONE_GEOMETRY := preload("res://game/bootstrap/app/desk_setup_zone_geometry.gd")
 const MODEL_ROOT := "res://models/objects/enviroments/"
 const DESKS := {
 	"08_office_desk_2": "office_desk_2",
@@ -37,6 +38,7 @@ static func from_saved_template(desk: Node3D, path: String, parent: Node3D, make
 		return created
 	var template: Dictionary = templates[randi_range(0, templates.size() - 1)]
 	var data: Dictionary = TEMPLATE_FILES.load(str(template["path"]), desk_name(path))
+	var zones: Array = data.get("zones", [])
 	for value in data.get("items", []):
 		if not value is Dictionary:
 			continue
@@ -50,7 +52,12 @@ static func from_saved_template(desk: Node3D, path: String, parent: Node3D, make
 		parent.add_child(node)
 		node.global_position = desk.to_global(Vector3(float(entry.get("x", 0.0)), float(entry.get("y", 0.0)), float(entry.get("z", 0.0))))
 		node.rotation.y = desk.rotation.y + float(entry.get("yaw", 0.0))
+		var slot := ZONE_GEOMETRY.matching_zone(desk, zones, node, int(entry.get("zone", -1)))
+		if slot < 0:
+			node.queue_free()
+			continue
 		node.set_meta("planning_scene_path", asset_path)
+		node.set_meta("planning_zone", slot)
 		created.append(node)
 	return created
 

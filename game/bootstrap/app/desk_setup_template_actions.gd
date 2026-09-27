@@ -3,6 +3,7 @@ extends RefCounted
 const TEMPLATE_FILES := preload("res://game/bootstrap/app/desk_setup_template_files.gd")
 const WORKSTATIONS := preload("res://game/bootstrap/app/workstation_templates.gd")
 const ZONE_RULES := preload("res://game/bootstrap/app/desk_setup_zone_rules.gd")
+const GEOMETRY := preload("res://game/bootstrap/app/desk_setup_zone_geometry.gd")
 const MODEL_ROOT := "res://models/objects/enviroments/"
 
 
@@ -16,8 +17,15 @@ static func save(mode: Variant) -> void:
 			return
 	var items: Array[Dictionary] = []
 	for object in mode._attachments():
+		var slot := GEOMETRY.matching_zone(mode.desk, mode.zones, object, int(object.get_meta("planning_zone", -1)))
+		if slot < 0:
+			mode.status.text = "Move or remove the object outside a zone: " + object.name
+			return
+		if ZONE_RULES.category_for(str(object.get_meta("planning_scene_path", "")).get_file().get_basename()) != str(mode.zones[slot]["category"]):
+			mode.status.text = "Object has the wrong type for its zone: " + object.name
+			return
 		var local: Vector3 = mode.desk.to_local(object.global_position)
-		items.append({"path": str(object.get_meta("planning_scene_path", "")), "x": local.x, "y": local.y, "z": local.z, "yaw": object.rotation.y - mode.desk.rotation.y})
+		items.append({"path": str(object.get_meta("planning_scene_path", "")), "zone": slot, "x": local.x, "y": local.y, "z": local.z, "yaw": object.rotation.y - mode.desk.rotation.y})
 	var desk_type := WORKSTATIONS.desk_name(mode._desk_path())
 	if not TEMPLATE_FILES.save(desk_type, mode.template_name.text, {"version": 1, "desk": desk_type, "front": mode.front, "zones": mode.zones, "items": items}):
 		mode.status.text = "Could not save the template."
@@ -52,6 +60,7 @@ static func load_selected(mode: Variant) -> void:
 	mode.front_button.text = "Front: opposite side" if mode.front else "Front: seated side"
 	mode.zone_index = 0 if not mode.zones.is_empty() else -1
 	mode._refresh_zones()
+	var skipped := 0
 	for entry_value in data.get("items", []):
 		if not entry_value is Dictionary:
 			continue
@@ -65,8 +74,14 @@ static func load_selected(mode: Variant) -> void:
 		mode.planner.root.add_child(object)
 		object.global_position = mode.desk.to_global(Vector3(float(entry.get("x", 0)), float(entry.get("y", 0)), float(entry.get("z", 0))))
 		object.rotation.y = mode.desk.rotation.y + float(entry.get("yaw", 0))
+		var slot := GEOMETRY.matching_zone(mode.desk, mode.zones, object, int(entry.get("zone", -1)))
+		if slot < 0:
+			object.queue_free()
+			skipped += 1
+			continue
 		object.set_meta("planning_scene_path", asset_path)
 		object.set_meta("planning_attachment", mode._desk_id())
+		object.set_meta("planning_zone", slot)
 		mode.planner.placed.append(object)
-	mode.status.text = "Template applied to this desk. Save the map to keep it."
+	mode.status.text = "Template applied; %d items outside zones skipped." % skipped if skipped > 0 else "Template applied to this desk. Save the map to keep it."
 	mode._refresh_zone_items()

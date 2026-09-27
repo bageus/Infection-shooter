@@ -59,17 +59,17 @@ func redraw(zones: Array[Dictionary], selected: int, front: int) -> void:
 		child.queue_free()
 	if desk == null:
 		return
-	_add_grid(-FLOOR_RADIUS, FLOOR_RADIUS, -FLOOR_RADIUS, FLOOR_RADIUS, 0.025, FLOOR_STEP, Color(0.15, 0.66, 0.82, 0.32))
+	_add_grid(-FLOOR_RADIUS, FLOOR_RADIUS, -FLOOR_RADIUS, FLOOR_RADIUS, 0.025, FLOOR_STEP, Color(0.15, 0.66, 0.82, 0.16))
 	for station_value in stations:
 		var station: Dictionary = station_value
 		var x := float(station.get("x", 0.0))
 		var z := float(station.get("z", 0.0))
-		_add_grid(x - 0.9, x + 0.9, z - 0.55, z + 0.55, surface_height + 0.019, SURFACE_STEP, Color(0.85, 0.95, 1.0, 0.48))
+		_add_grid(x - 0.9, x + 0.9, z - 0.55, z + 0.55, surface_height + 0.019, SURFACE_STEP, Color(0.85, 0.95, 1.0, 0.22))
 	for i in zones.size():
 		var zone: Dictionary = zones[i]
 		var box := BoxMesh.new()
 		box.size = Vector3(float(zone["width"]), 0.006, float(zone["depth"]))
-		var color := Color(1.0, 0.38, 0.18, 0.42) if i == selected else Color(0.12, 0.8, 1.0, 0.25)
+		var color := Color(1.0, 0.52, 0.25, 0.12) if i == selected else Color(0.12, 0.8, 1.0, 0.055)
 		box.material = _material(color, true)
 		var region := MeshInstance3D.new()
 		region.mesh = box

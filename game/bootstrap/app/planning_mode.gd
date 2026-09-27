@@ -1240,6 +1240,7 @@ func _collect_layout_data() -> Dictionary:
 			"scene": scene_path,
 			"desk_id": node.get_meta("planning_desk_id", ""),
 			"attachment": node.get_meta("planning_attachment", ""),
+			"zone": node.get_meta("planning_zone", -1),
 			"x": save_position.x, "y": save_position.y, "z": save_position.z,
 			"rotation_y": node.rotation_degrees.y,
 			"scale_x": node.scale.x, "scale_y": node.scale.y, "scale_z": node.scale.z,
@@ -1365,6 +1366,8 @@ func _apply_layout_data(data: Dictionary) -> void:
 			node.set_meta("planning_desk_id", str(record["desk_id"]))
 		if record.has("attachment"):
 			node.set_meta("planning_attachment", str(record["attachment"]))
+		if int(record.get("zone", -1)) >= 0:
+			node.set_meta("planning_zone", int(record["zone"]))
 		var saved_light_energy := float(record.get("light_energy", 0.0))
 		if saved_light_energy > 0.0:
 			var saved_light := node.find_child("Light", true, false) as Light3D
@@ -1425,6 +1428,8 @@ func _save_authored_scene() -> Error:
 			copy.set_meta("planning_desk_id", node.get_meta("planning_desk_id"))
 		if node.has_meta("planning_attachment"):
 			copy.set_meta("planning_attachment", node.get_meta("planning_attachment"))
+		if node.has_meta("planning_zone"):
+			copy.set_meta("planning_zone", node.get_meta("planning_zone"))
 		if copy.has_method("configure_flicker"):
 			copy.set_meta("planning_light_energy", node.get_meta("planning_light_energy", 3.0))
 			copy.set_meta("planning_light_angle", node.get_meta("planning_light_angle", 48.0))
