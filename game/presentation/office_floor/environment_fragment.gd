@@ -38,9 +38,11 @@ func _physics_process(delta: float) -> void:
 
 
 func take_projectile_hit(_damage: float, hit_position: Vector3, _normal: Vector3, direction: Vector3, _weapon: String) -> bool:
-	var owner := source.get_ref() if source != null else null
-	if owner != null and owner.has_method("hit_environment_fragment"):
-		owner.call("hit_environment_fragment", self, hit_position, direction)
+	var piece_owner: Node = null
+	if source != null:
+		piece_owner = source.get_ref() as Node
+	if piece_owner != null and piece_owner.has_method("hit_environment_fragment"):
+		piece_owner.call("hit_environment_fragment", self, hit_position, direction)
 	else:
 		apply_central_impulse(direction.normalized() * 0.5)
 	return false
