@@ -3,13 +3,13 @@
 importer="scene"
 importer_version=1
 type="PackedScene"
-uid="uid://c1l6vvktb74yn"
-path="res://.godot/imported/09_casehand_1.glb-597cdd0e9bf6da6ce2f7b09ecfbb6e95.scn"
+uid="uid://dq8lbngdmqp00"
+path="res://.godot/imported/09_mug_alt_1.glb-4443b7747badce45b2accfc46b410c24.scn"
 
 [deps]
 
-source_file="res://models/objects/enviroments/09/09_casehand_1.glb"
-dest_files=["res://.godot/imported/09_casehand_1.glb-597cdd0e9bf6da6ce2f7b09ecfbb6e95.scn"]
+source_file="res://models/objects/enviroments/09/09_mug_alt_1.glb"
+dest_files=["res://.godot/imported/09_mug_alt_1.glb-4443b7747badce45b2accfc46b410c24.scn"]
 
 [params]
 

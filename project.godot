@@ -97,5 +97,4 @@ weapon_3={
 
 [rendering]
 
-renderer/rendering_method="forward_plus"
 renderer/rendering_method.mobile="gl_compatibility"
