@@ -11,7 +11,9 @@ static func distance_multiplier(weapon: String, distance: float, max_range: floa
 		full_damage_distance = 3.0
 		minimum = 0.2
 	var fraction := clampf((distance - full_damage_distance) / maxf(max_range - full_damage_distance, 0.01), 0.0, 1.0)
-	return lerpf(1.0, minimum, fraction)
+	# Damage begins to decay just beyond the effective range and reaches its
+	# weapon-specific minimum at the projectile's maximum travel distance.
+	return lerpf(1.0, minimum, pow(fraction, 0.72))
 
 
 static func projectile_energy(weapon: String) -> float:

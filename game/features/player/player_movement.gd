@@ -67,7 +67,7 @@ func _physics_process(delta: float) -> void:
 	_update_aim()
 	_update_move(delta)
 	var w:=get_current_weapon()
-	if w != null and not _mutation_menu_open and _roll_remaining <= 0.0 and Input.is_action_pressed("fire"):
+	if w != null and not _mutation_menu_open and _roll_remaining <= 0.0 and (Input.is_action_pressed("fire") if bool(w.call("wants_continuous_fire")) else Input.is_action_just_pressed("fire")):
 		if int(w.call("get_magazine_ammo")) == 0:
 			mutation_effects.call("refill_organic_magazine")
 		w.call("try_fire_at", _aim_point)

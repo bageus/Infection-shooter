@@ -52,8 +52,8 @@ static func items_in_zone(desk: Node3D, zone: Dictionary, attached: Array[Node3D
 		var local := desk.to_local(item.global_position)
 		var delta := Vector3(local.x - float(zone["x"]), 0, local.z - float(zone["z"])).rotated(Vector3.UP, -deg_to_rad(float(zone.get("angle", 0.0))))
 		if absf(delta.x) <= float(zone["width"]) * 0.5 and absf(delta.z) <= float(zone["depth"]) * 0.5:
-			var bounds: AABB = WORKSTATIONS._bounds(item)
-		if absf(bounds.position.y - desk.to_global(Vector3.UP * float(zone.get("height", 0.0))).y) < 0.3:
+			# Check the item's placement point and its supporting surface.
+			if GEOMETRY.fits_zone(desk, zone, item):
 				results.append(item)
 	return results
 

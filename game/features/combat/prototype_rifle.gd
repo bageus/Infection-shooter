@@ -23,6 +23,8 @@ var _reload_remaining: float = 0.0
 var _magazine_ammo: int
 var _reserve_ammo: int
 var _reloading: bool = false
+var _burst_shots: int = 0
+var _last_shot_time: float = -100.0
 func _ready() -> void:
 	_magazine_ammo = magazine_size
 	_reserve_ammo = starting_reserve_ammo
@@ -52,19 +54,34 @@ func try_fire_at(target_point: Vector3) -> bool:
 	if _magazine_ammo <= 0:
 		return false
 	var shooter := get_parent().get_parent() as CollisionObject3D
+	var now := Time.get_ticks_msec() * 0.001
+	if now - _last_shot_time > maxf(0.34, 2.5 / maxf(shots_per_second, 0.01)):
+		_burst_shots = 0
+	var effective_spread := spread_degrees
+	if wants_continuous_fire():
+		# A short burst stays tight; sustained fire gradually loses accuracy.
+		effective_spread *= lerpf(0.42, 1.65, clampf(float(_burst_shots) / 11.0, 0.0, 1.0))
+	var forward := -global_transform.basis.z.normalized()
+	forward.y = 0.0
+	forward = forward.normalized()
+	var muzzle_position := muzzle.global_position
+	var aim_offset := target_point - muzzle_position
+	var horizontal := Vector3(aim_offset.x, 0.0, aim_offset.z)
+	if horizontal.length_squared() < 0.04 or horizontal.dot(forward) < 0.0:
+		horizontal = forward * 8.0
+	# Ray hits high surfaces near the camera must not send bullets into the sky.
+	var rise := clampf(aim_offset.y, -horizontal.length() * 0.22, horizontal.length() * 0.22)
+	var base_direction := (horizontal + Vector3.UP * rise).normalized()
 	for pellet in pellets_per_shot:
 		var bullet := bullet_scene.instantiate()
 		get_tree().current_scene.add_child(bullet)
 		bullet.global_transform = muzzle.global_transform
-		var base_direction := target_point - muzzle.global_position
-		if base_direction.length_squared() < 0.0001:
-			base_direction = -muzzle.global_transform.basis.z
-		var shot_direction := _spread_direction(base_direction.normalized())
-		var collision_origin := muzzle.global_position
-		if shooter != null:
-			collision_origin = shooter.global_position + Vector3.UP * 0.55
+		var shot_direction := _spread_direction(base_direction, effective_spread)
+		var collision_origin := muzzle_position
 		bullet.call("setup_projectile", shot_direction, shooter, bullet_damage * environment_damage_multiplier, bullet_speed, bullet_range, weapon_name, collision_origin)
 	_magazine_ammo -= 1
+	_last_shot_time = now
+	_burst_shots += 1
 	_cooldown_remaining = 1.0 / maxf(shots_per_second, 0.01)
 	if casing_scene != null and ejection_port != null:
 		var casing_pool := get_parent().get_node_or_null("SpentCasings")
@@ -88,7 +105,9 @@ func add_magazine_ammo(amount: int) -> int:
 	var before := _magazine_ammo
 	_magazine_ammo = mini(magazine_size, _magazine_ammo + maxi(0, amount))
 	return _magazine_ammo - before
-func _spread_direction(base: Vector3) -> Vector3:
-	var yaw := deg_to_rad(randf_range(-spread_degrees, spread_degrees))
-	var pitch := deg_to_rad(randf_range(-spread_degrees, spread_degrees))
-	return base.rotated(Vector3.UP, yaw).rotated(global_transform.basis.x.normalized(), pitch).normalized()
+func _spread_direction(base: Vector3, cone_degrees: float) -> Vector3:
+	var yaw := deg_to_rad(randf_range(-cone_degrees, cone_degrees))
+	var pitch := deg_to_rad(randf_range(-cone_degrees, cone_degrees))
+	var turned := base.rotated(Vector3.UP, yaw)
+	var right := turned.cross(Vector3.UP).normalized()
+	return turned.rotated(right, pitch).normalized()
