@@ -360,7 +360,7 @@ func _randomize() -> void:
 	var count := random.randi_range(1, 3)
 	for i in count:
 		var model: String = choices[random.randi_range(0, choices.size() - 1)]
-		var local := Vector3(float(zone["x"]) + random.randf_range(-float(zone["width"]) * 0.33, float(zone["height"]), float(zone["z"]) + random.randf_range(-float(zone["depth"]) * 0.33))
+		var local := Vector3(float(zone["x"]) + random.randf_range(-float(zone["width"]) * 0.33, float(zone["height"]), float(zone["z"]) + random.randf_range(-float(zone["depth"]) * 0.33)))
 		_place_model(model, local)
 	status.text = "Random preview for zone %d" % (zone_index + 1)
 
