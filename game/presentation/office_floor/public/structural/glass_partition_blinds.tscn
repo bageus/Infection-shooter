@@ -8,6 +8,7 @@
 [node name="GlassPartitionBlinds" type="Node3D"]
 script = ExtResource("2_collision")
 exclude_name_tokens = PackedStringArray("glass", "blinds")
+use_simple_collision = false
 
 [node name="GlassCollisionBuilder" type="Node3D" parent="."]
 script = ExtResource("5_glass_collision")

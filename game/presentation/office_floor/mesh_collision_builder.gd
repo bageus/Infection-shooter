@@ -6,6 +6,7 @@ extends Node3D
 @export var rebuild_in_editor: bool = true
 @export var exclude_name_tokens: PackedStringArray = PackedStringArray()
 @export var use_simple_collision: bool = true
+@export var breakaway_frame_surface: int = -1
 
 var _built := false
 
@@ -67,6 +68,9 @@ func _add_mesh_collisions(node: Node, body: CollisionObject3D) -> void:
 	if node is MeshInstance3D:
 		var mesh_instance := node as MeshInstance3D
 		if mesh_instance.mesh != null and not _is_excluded(node) and mesh_instance.is_visible_in_tree() and absf(mesh_instance.global_basis.determinant()) > 0.000000000001:
+			if not use_simple_collision and breakaway_frame_surface >= 0 and "frame" in mesh_instance.name.to_lower():
+				_add_frame_surfaces(mesh_instance, body)
+				return
 			var shape: Shape3D
 			if use_simple_collision:
 				var box := BoxShape3D.new()
@@ -87,6 +91,20 @@ func _add_mesh_collisions(node: Node, body: CollisionObject3D) -> void:
 					collision.global_transform = mesh_instance.global_transform
 	for child in node.get_children():
 		_add_mesh_collisions(child, body)
+
+
+func _add_frame_surfaces(mesh_instance: MeshInstance3D, body: CollisionObject3D) -> void:
+	for surface in mesh_instance.mesh.get_surface_count():
+		var surface_mesh := ArrayMesh.new()
+		surface_mesh.add_surface_from_arrays(Mesh.PRIMITIVE_TRIANGLES, mesh_instance.mesh.surface_get_arrays(surface))
+		var shape := surface_mesh.create_trimesh_shape()
+		if shape == null:
+			continue
+		var collision := CollisionShape3D.new()
+		collision.name = "BreakawayPanel" if surface == breakaway_frame_surface else "FrameCollision"
+		collision.shape = shape
+		body.add_child(collision)
+		collision.global_transform = mesh_instance.global_transform
 
 
 func _is_excluded(node: Node) -> bool:

@@ -2,7 +2,8 @@
 
 [sub_resource type="StandardMaterial3D" id="TileMaterial"]
 albedo_color = Color(0.56, 0.59, 0.61, 1)
-roughness = 0.9
+metallic = 0.08
+roughness = 0.64
 
 [sub_resource type="BoxMesh" id="TileMesh"]
 material = SubResource("TileMaterial")
