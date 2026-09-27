@@ -3,13 +3,13 @@
 importer="scene"
 importer_version=1
 type="PackedScene"
-uid="uid://c1yicyqyt2vud"
-path="res://.godot/imported/09_book_st.fbx-34b24a761c71626f58621368925355bf.scn"
+uid="uid://bgpd8yqe5kuaq"
+path="res://.godot/imported/01_stairs_2.glb-6aef4f63ec04cffedc538451f8201e79.scn"
 
 [deps]
 
-source_file="res://models/objects/enviroments/09/09_book_st.fbx"
-dest_files=["res://.godot/imported/09_book_st.fbx-34b24a761c71626f58621368925355bf.scn"]
+source_file="res://models/objects/enviroments/01/01_stairs_2.glb"
+dest_files=["res://.godot/imported/01_stairs_2.glb-6aef4f63ec04cffedc538451f8201e79.scn"]
 
 [params]
 
@@ -32,7 +32,7 @@ meshes/force_disable_compression=false
 skins/use_named_skins=true
 animation/import=true
 animation/fps=30
-animation/trimming=true
+animation/trimming=false
 animation/remove_immutable_tracks=true
 animation/import_rest_as_RESET=false
 import_script/path=""
@@ -40,7 +40,6 @@ materials/extract=0
 materials/extract_format=0
 materials/extract_path=""
 _subresources={}
-fbx/importer=0
-fbx/allow_geometry_helper_nodes=false
-fbx/embedded_image_handling=1
-fbx/naming_version=2
+gltf/naming_version=2
+gltf/embedded_image_handling=1
+gltf/texture_map_mode=1
