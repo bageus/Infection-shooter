@@ -121,10 +121,12 @@ static func toggle_surface(mode: Variant) -> void:
 			var found := false
 			for station_value in mode.stations:
 				var station: Dictionary = station_value
-				if half_width > 0.95 or half_depth > 0.6:
+				var available_width := float(station.get("usable_width", 1.9)) * 0.5
+				var available_depth := float(station.get("usable_depth", 1.2)) * 0.5
+				if half_width > available_width or half_depth > available_depth:
 					continue
 				var center := Vector2(float(station.get("x", 0.0)), float(station.get("z", 0.0)))
-				var candidate := Vector2(clampf(original.x, center.x - 0.95 + half_width, center.x + 0.95 - half_width), clampf(original.y, center.y - 0.6 + half_depth, center.y + 0.6 - half_depth))
+				var candidate := Vector2(clampf(original.x, center.x - available_width + half_width, center.x + available_width - half_width), clampf(original.y, center.y - available_depth + half_depth, center.y + available_depth - half_depth))
 				if not found or candidate.distance_squared_to(original) < destination.distance_squared_to(original):
 					destination = candidate
 					found = true

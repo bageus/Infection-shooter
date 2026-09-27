@@ -2,6 +2,7 @@ extends Node
 
 const MAX_CASINGS := 40
 const LIFETIME_MSEC := 60000
+const CASING_SCALE := 1.5
 
 var _casings: Array[RigidBody3D] = []
 var _born_at: Array[int] = []
@@ -25,11 +26,16 @@ func spawn_casing(model: PackedScene, eject_transform: Transform3D, radius: floa
 	body.physics_material_override = material
 	var collider := CollisionShape3D.new()
 	var shape := SphereShape3D.new()
-	shape.radius = radius
+	shape.radius = radius * CASING_SCALE
 	shape.margin = 0.001
 	collider.shape = shape
 	body.add_child(collider)
-	body.add_child(model.instantiate())
+	var visual := model.instantiate() as Node3D
+	if visual == null:
+		body.queue_free()
+		return
+	visual.scale *= CASING_SCALE
+	body.add_child(visual)
 	get_tree().current_scene.add_child(body)
 	body.global_transform = eject_transform
 	if shooter != null:

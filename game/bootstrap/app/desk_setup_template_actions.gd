@@ -27,8 +27,11 @@ static func save(mode: Variant) -> void:
 		var local: Vector3 = mode.desk.to_local(object.global_position)
 		items.append({"path": str(object.get_meta("planning_scene_path", "")), "zone": slot, "x": local.x, "y": local.y, "z": local.z, "yaw": object.rotation.y - mode.desk.rotation.y})
 	var desk_type := WORKSTATIONS.desk_name(mode._desk_path())
+	if desk_type.is_empty():
+		mode.status.text = "This desk model has no template profile: " + mode._desk_path().get_file()
+		return
 	if not TEMPLATE_FILES.save(desk_type, mode.template_name.text, {"version": 1, "desk": desk_type, "front": mode.front, "zones": mode.zones, "items": items}):
-		mode.status.text = "Could not save the template."
+		mode.status.text = "Could not write the desk template to user://desk_setups."
 		return
 	refresh(mode)
 	mode.status.text = "Saved: " + mode.template_name.text

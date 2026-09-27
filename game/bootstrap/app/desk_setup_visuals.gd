@@ -62,9 +62,11 @@ func redraw(zones: Array[Dictionary], selected: int, front: int) -> void:
 	_add_grid(-FLOOR_RADIUS, FLOOR_RADIUS, -FLOOR_RADIUS, FLOOR_RADIUS, 0.025, FLOOR_STEP, Color(0.15, 0.66, 0.82, 0.16))
 	for station_value in stations:
 		var station: Dictionary = station_value
-		var x := float(station.get("x", 0.0))
-		var z := float(station.get("z", 0.0))
-		_add_grid(x - 0.9, x + 0.9, z - 0.55, z + 0.55, surface_height + 0.019, SURFACE_STEP, Color(0.85, 0.95, 1.0, 0.22))
+		var x := float(station.get("grid_x", station.get("x", 0.0)))
+		var z := float(station.get("grid_z", station.get("z", 0.0)))
+		var half_width := float(station.get("grid_width", 1.8)) * 0.5
+		var half_depth := float(station.get("grid_depth", 1.1)) * 0.5
+		_add_grid(x - half_width, x + half_width, z - half_depth, z + half_depth, float(station.get("grid_height", surface_height)) + 0.025, SURFACE_STEP, Color(0.85, 0.95, 1.0, 0.22))
 	for i in zones.size():
 		var zone: Dictionary = zones[i]
 		var box := BoxMesh.new()

@@ -18,13 +18,14 @@ static func save(desk_type: String, name_part: String, payload: Dictionary) -> b
 	var safe := safe_name(name_part)
 	if safe.is_empty():
 		return false
-	if DirAccess.make_dir_recursive_absolute(ROOT) != OK:
+	if desk_type.is_empty() or DirAccess.make_dir_recursive_absolute(ProjectSettings.globalize_path(ROOT)) != OK:
 		return false
 	var file := FileAccess.open(ROOT + "/" + desk_type + "_" + safe + ".json", FileAccess.WRITE)
 	if file == null:
 		return false
 	file.store_string(JSON.stringify(payload, "  "))
-	return true
+	file.flush()
+	return file.get_error() == OK
 
 
 static func list_for(desk_type: String) -> Array[Dictionary]:

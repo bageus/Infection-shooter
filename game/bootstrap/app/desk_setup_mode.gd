@@ -107,14 +107,14 @@ func configure(owner_planner: Node, planning_ui: Control) -> void:
 	template_name = LineEdit.new()
 	template_name.placeholder_text = "Template name"
 	box.add_child(template_name)
+	status = Label.new()
+	status.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	box.add_child(status)
 	_button(box, "Save template", _save)
 	template_list = OptionButton.new()
 	box.add_child(template_list)
 	_button(box, "Apply selected template", _load)
 	_button(box, "Back to level planner", close)
-	status = Label.new()
-	status.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-	box.add_child(status)
 	scroll.hide()
 	_build_help(planning_ui)
 	get_viewport().size_changed.connect(_resize_menu)
@@ -196,7 +196,7 @@ func open(target: Node3D) -> void:
 	for station_index in stations.size():
 		var station_value: Variant = stations[station_index]
 		var station: Dictionary = station_value
-		zones.append({"name": "Work surface %d" % (station_index + 1), "required": false, "category": "Другие", "angle": float(station.get("angle", 0.0)), "x": float(station.get("x", 0.0)), "z": float(station.get("z", 0.0)), "width": 1.5, "depth": 0.85, "height": float(profile.get("height", 0.89)), "floor": false})
+		zones.append({"name": "Work surface %d" % (station_index + 1), "required": false, "category": "Другие", "angle": float(station.get("angle", 0.0)), "x": float(station.get("x", 0.0)), "z": float(station.get("z", 0.0)), "width": float(station.get("zone_width", 1.5)), "depth": float(station.get("zone_depth", 0.85)), "height": float(profile.get("height", 0.89)), "floor": false})
 	if zones.is_empty():
 		zones.append({"name": "Work surface 1", "required": false, "category": "Другие", "angle": 0.0, "x": 0.0, "z": 0.0, "width": 1.5, "depth": 0.85, "height": 0.89, "floor": false})
 	front = 0

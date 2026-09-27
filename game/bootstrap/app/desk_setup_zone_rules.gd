@@ -159,6 +159,6 @@ static func _inside_surface(point: Vector2, zone: Dictionary, stations: Array) -
 		return absf(point.x) + half_width <= 2.75 and absf(point.y) + half_depth <= 2.75
 	for station_value in stations:
 		var station: Dictionary = station_value
-		if absf(point.x - float(station.get("x", 0.0))) + half_width <= 0.95 and absf(point.y - float(station.get("z", 0.0))) + half_depth <= 0.6:
+		if absf(point.x - float(station.get("x", 0.0))) + half_width <= float(station.get("usable_width", 1.9)) * 0.5 and absf(point.y - float(station.get("z", 0.0))) + half_depth <= float(station.get("usable_depth", 1.2)) * 0.5:
 			return true
 	return false

@@ -5,7 +5,7 @@ enum DoorMode { SWING_BIDIRECTIONAL, SWING_ONE_WAY, SLIDING_ELEVATOR, GLASS_SWIN
 @export var mode: DoorMode = DoorMode.SWING_BIDIRECTIONAL
 @export var trigger_distance: float = 1.45
 @export var open_angle_degrees: float = 92.0
-@export var open_speed: float = 5.5
+@export var open_speed: float = 1.65
 @export var close_delay: float = 0.7
 @export var one_way_allowed_side: float = 1.0
 @export var slide_distance: float = 0.72
@@ -102,7 +102,8 @@ func _physics_process(delta: float) -> void:
 			swing_side = _player_side(local_player)
 			_swing_side = swing_side
 		var hinge_transform := _glass_hinge_closed
-		hinge_transform.basis = _glass_hinge_closed.basis.rotated(Vector3.UP, deg_to_rad(open_angle_degrees * swing_side * _open_amount))
+		var eased := _open_amount * _open_amount * (3.0 - 2.0 * _open_amount)
+		hinge_transform.basis = _glass_hinge_closed.basis.rotated(Vector3.UP, deg_to_rad(open_angle_degrees * swing_side * eased))
 		_glass_hinge.transform = hinge_transform
 	for recess in _door_recess_nodes:
 		if is_instance_valid(recess):
@@ -330,6 +331,7 @@ func _collect_named_meshes(node: Node, out: Array[Node3D]) -> void:
 
 
 func _apply_door_pose(local_player: Vector3) -> void:
+	var eased := _open_amount * _open_amount * (3.0 - 2.0 * _open_amount)
 	for i in _door_parts.size():
 		var part := _door_parts[i]
 		if not is_instance_valid(part):
@@ -338,7 +340,7 @@ func _apply_door_pose(local_player: Vector3) -> void:
 		if mode == DoorMode.SLIDING_ELEVATOR:
 			var direction := -1.0 if _left_slide_parts.has(part) else 1.0
 			var t := closed
-			t.origin.x += direction * slide_distance * _open_amount
+			t.origin.x += direction * slide_distance * eased
 			part.transform = t
 		elif mode == DoorMode.GLASS_SWING:
 			pass
@@ -346,7 +348,7 @@ func _apply_door_pose(local_player: Vector3) -> void:
 			var side := _swing_side
 			if side == 0.0:
 				side = signf(one_way_allowed_side) if mode == DoorMode.SWING_ONE_WAY else _player_side(local_player)
-			var angle := deg_to_rad(open_angle_degrees * side * _open_amount)
+			var angle := deg_to_rad(open_angle_degrees * side * eased)
 			var t := closed
 			t.basis = closed.basis.rotated(Vector3.UP, angle)
 			part.transform = t
