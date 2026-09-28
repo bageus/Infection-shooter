@@ -74,6 +74,10 @@ func _ready() -> void:
 
 func _unhandled_key_input(event: InputEvent) -> void:
 	if event is InputEventKey and event.pressed and not event.echo and event.keycode == KEY_ESCAPE:
+		if mutation_tree_ui != null and bool(mutation_tree_ui.call("is_tree_open")):
+			mutation_tree_ui.call("close_tree")
+			get_viewport().set_input_as_handled()
+			return
 		if planning_mode.active:
 			planning_mode.exit()
 			return
