@@ -100,7 +100,14 @@ func _update_chunks(force: bool) -> void:
 
 func _set_collision_enabled(node: Node, value: bool) -> void:
 	if node is CollisionShape3D:
-		(node as CollisionShape3D).set_deferred("disabled", not value)
+		var shape := node as CollisionShape3D
+		if value:
+			if shape.has_meta("chunk_streamed_disabled"):
+				shape.remove_meta("chunk_streamed_disabled")
+				shape.set_deferred("disabled", false)
+		elif not shape.disabled:
+			shape.set_meta("chunk_streamed_disabled", true)
+			shape.set_deferred("disabled", true)
 	for child in node.get_children():
 		_set_collision_enabled(child, value)
 

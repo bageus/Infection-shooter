@@ -61,12 +61,34 @@ func _collect_blinds(node: Node) -> void:
 
 func take_projectile_hit(_damage: float, hit_position: Vector3, hit_normal: Vector3, _direction: Vector3, _weapon_name: String) -> bool:
 	if unbreakable:
-		CRACKS.spawn(self, hit_position, hit_normal)
+		var mark_size := _glass_mark_size(hit_position)
+		if mark_size >= 0.08:
+			CRACKS.spawn(self, hit_position, hit_normal, mark_size)
 		return false
 	if _broken:
 		return false
 	_break_glass(hit_position)
 	return false
+
+
+func _glass_mark_size(point: Vector3) -> float:
+	var visual := get_parent().get_node_or_null("Visual") as Node3D
+	var exterior := get_parent().scene_file_path.get_file() == "window_double.tscn" or (visual != null and visual.scene_file_path.get_file() == "01_window_double.glb")
+	for node in _glass_nodes:
+		if not is_instance_valid(node) or not node.is_visible_in_tree():
+			continue
+		var pane := node as MeshInstance3D
+		var local := pane.to_local(point)
+		var bounds := pane.get_aabb()
+		var edge_x := minf(local.x - bounds.position.x, bounds.end.x - local.x)
+		var edge_z := minf(local.z - bounds.position.z, bounds.end.z - local.z)
+		if exterior:
+			# The central mullion belongs to the frame, even though the pane mesh spans it.
+			edge_x = minf(edge_x, absf(local.x) - 0.13)
+		var clearance := minf(edge_x * pane.global_basis.x.length(), edge_z * pane.global_basis.z.length())
+		if clearance > 0.0:
+			return minf(clearance * 0.85, 0.65)
+	return 0.0
 
 
 func get_projectile_material(_shape_index: int = -1) -> String:
@@ -86,7 +108,7 @@ func take_melee_hit(damage: float, hit_position: Vector3, _direction: Vector3) -
 func _collect_glass(node: Node) -> void:
 	if node == null:
 		return
-	if node is MeshInstance3D and "glass" in node.name.to_lower() and absf((node as MeshInstance3D).global_basis.determinant()) > 0.000000000001:
+	if node is MeshInstance3D and "glass" in node.name.to_lower() and (node as MeshInstance3D).is_visible_in_tree() and absf((node as MeshInstance3D).global_basis.determinant()) > 0.000000000001:
 		_glass_nodes.append(node as Node3D)
 	for child in node.get_children():
 		_collect_glass(child)
@@ -115,11 +137,10 @@ func _replace_frame_collision() -> void:
 	var frame_body := get_parent().get_node_or_null("Body") as StaticBody3D
 	var visual := get_parent().get_node_or_null("Visual") as Node3D
 	var frame := _find_visible_frame(visual)
-	if frame_body == null or frame == null or _glass_nodes.is_empty():
+	if frame_body == null or frame == null:
 		return
 	var to_body := frame_body.global_transform.affine_inverse()
 	var outer: AABB = (to_body * frame.global_transform) * frame.get_aabb()
-	var inner: AABB = (to_body * _glass_nodes[0].global_transform) * (_glass_nodes[0] as MeshInstance3D).get_aabb()
 	# Only the perimeter of the imported frame should obstruct a character.
 	# Some frame models have an additional pane collision across the opening.
 	for child in frame_body.get_children():
@@ -128,18 +149,14 @@ func _replace_frame_collision() -> void:
 	var depth := maxf(outer.size.z, 0.07)
 	# Leave enough clear width and height for the player's capsule after the pane
 	# breaks. Imported frame meshes can include an invisible full-size infill.
-	var opening_width := minf(maxf(inner.size.x, 1.15), maxf(outer.size.x - 0.12, 0.12))
-	var opening_left := clampf(inner.get_center().x - opening_width * 0.5, outer.position.x + 0.06, outer.end.x - opening_width - 0.06)
-	var opening_right := opening_left + opening_width
-	var left := maxf(opening_left - outer.position.x, 0.06)
-	var right := maxf(outer.end.x - opening_right, 0.06)
-	var opening_top := minf(maxf(inner.end.y, outer.position.y + 2.05), outer.end.y - 0.06)
-	var top := maxf(outer.end.y - opening_top, 0.06)
-	_add_frame_bar(frame_body, Vector3(left, outer.size.y, depth), Vector3(outer.position.x + left * 0.5, outer.get_center().y, outer.get_center().z))
-	_add_frame_bar(frame_body, Vector3(right, outer.size.y, depth), Vector3(outer.end.x - right * 0.5, outer.get_center().y, outer.get_center().z))
+	var side := clampf(outer.size.x * 0.09, 0.08, 0.16)
+	var opening_width := maxf(outer.size.x - side * 2.0, 0.1)
+	var top := clampf(outer.size.y - 1.95, 0.08, 0.16)
+	_add_frame_bar(frame_body, Vector3(side, outer.size.y, depth), Vector3(outer.position.x + side * 0.5, outer.get_center().y, outer.get_center().z))
+	_add_frame_bar(frame_body, Vector3(side, outer.size.y, depth), Vector3(outer.end.x - side * 0.5, outer.get_center().y, outer.get_center().z))
 	# The visible sill is below a normal step, but CharacterBody3D has no step-up;
 	# a collision here would close the passage at foot height again.
-	_add_frame_bar(frame_body, Vector3(opening_width, top, depth), Vector3(opening_left + opening_width * 0.5, outer.end.y - top * 0.5, outer.get_center().z))
+	_add_frame_bar(frame_body, Vector3(opening_width, top, depth), Vector3(outer.get_center().x, outer.end.y - top * 0.5, outer.get_center().z))
 
 
 func _add_frame_bar(body: StaticBody3D, size: Vector3, center: Vector3) -> void:
@@ -181,7 +198,7 @@ func _drop_lower_panel(hit_position: Vector3) -> void:
 func _find_visible_frame(node: Node) -> MeshInstance3D:
 	if node == null:
 		return null
-	if node is MeshInstance3D and "frame" in node.name.to_lower() and absf((node as MeshInstance3D).global_basis.determinant()) > 0.000000000001:
+	if node is MeshInstance3D and "frame" in node.name.to_lower() and (node as MeshInstance3D).is_visible_in_tree() and absf((node as MeshInstance3D).global_basis.determinant()) > 0.000000000001:
 		return node as MeshInstance3D
 	for child in node.get_children():
 		var found := _find_visible_frame(child)

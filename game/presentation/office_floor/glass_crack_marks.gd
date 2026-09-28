@@ -19,7 +19,7 @@ const IMPACT_CENTERS = [
 ]
 
 
-static func spawn(pane: StaticBody3D, point: Vector3, normal: Vector3) -> void:
+static func spawn(pane: StaticBody3D, point: Vector3, normal: Vector3, max_size: float = 0.65) -> void:
 	var mark := MeshInstance3D.new()
 	var material := StandardMaterial3D.new()
 	material.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
@@ -31,7 +31,7 @@ static func spawn(pane: StaticBody3D, point: Vector3, normal: Vector3) -> void:
 	material.albedo_texture = CRACK_TEXTURES[variant] as Texture2D
 	if material.albedo_texture != null:
 		var quad := QuadMesh.new()
-		var size := randf_range(0.38, 0.65)
+		var size := minf(randf_range(0.38, 0.65), max_size)
 		quad.size = Vector2.ONE * size
 		var center: Vector2 = IMPACT_CENTERS[variant]
 		quad.center_offset = Vector3((0.5 - center.x) * size, (center.y - 0.5) * size, 0.0)
