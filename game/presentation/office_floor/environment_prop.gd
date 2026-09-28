@@ -46,6 +46,12 @@ func _ready() -> void:
 	add_child(visual)
 	_visual = visual
 	_discover_stages()
+	if model_path.get_file() == "06_conference_chair.glb":
+		# Only the baked chair may affect its initial height or collision.
+		for stage in _stages:
+			stage.hide()
+		for variant in _variants:
+			variant.hide()
 	_add_missing_bookcase_shelves()
 	# This GLB exports the complete table alongside a visible Primary debris group.
 	# Keep the authored intact root as the only initial mesh and collision source.
@@ -59,6 +65,13 @@ func _ready() -> void:
 	if freeze and "01_floor_" in model_path:
 		return # Carpet lies on the level floor and must not create a raised obstacle.
 	var volume := _add_shapes(visual)
+	if model_path.get_file() == "06_conference_chair.glb" and global_position.y < 0.25:
+		var lowest := INF
+		for mesh in _shape_meshes:
+			var bounds: AABB = mesh.global_transform * mesh.get_aabb()
+			lowest = minf(lowest, bounds.position.y)
+		if lowest < 0.0:
+			global_position.y -= lowest
 	mass = clampf(volume * 18.0, 0.12, 55.0)
 	if "table" in model_path.get_file() or "desk" in model_path.get_file():
 		linear_damp = 3.0

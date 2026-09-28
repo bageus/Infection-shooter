@@ -12,6 +12,7 @@ frame_surface_boxes = true
 
 [node name="GlassCollisionBuilder" type="Node3D" parent="."]
 script = ExtResource("4_glass_collision")
+solid_window_collision = true
 
 [node name="Visual" parent="." instance=ExtResource("1_model")]
 
