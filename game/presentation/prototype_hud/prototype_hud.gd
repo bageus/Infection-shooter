@@ -23,6 +23,8 @@ var player: Node
 var infection: Node
 var _perf_timer := 0.0
 var _last_weapon_index := -1
+var _weapon_icons: Array[Texture2D] = []
+var _slot_weapon_indices := [-1, -1, -1]
 
 
 func _ready() -> void:
@@ -53,10 +55,23 @@ func _configure_icon_regions() -> void:
 	var regions: Array[Rect2] = []
 	for i in 5:
 		regions.append(Rect2(cell_width * i, 0.0, cell_width, size.y))
-	_set_region(slot_icons[0], texture, regions[1])
-	_set_region(slot_icons[1], texture, regions[2])
-	_set_region(slot_icons[2], texture, regions[3])
+	for region in [regions[1], regions[2], regions[3]]:
+		var atlas := AtlasTexture.new()
+		atlas.atlas = texture
+		atlas.region = region
+		_weapon_icons.append(atlas)
+	_refresh_slot_icons()
 	_set_region(antidote_icon, texture, regions[4])
+
+
+func _refresh_slot_icons() -> void:
+	for i in slot_icons.size():
+		var weapon_index: int = player.get_weapon_in_slot(i)
+		if _slot_weapon_indices[i] == weapon_index:
+			continue
+		_slot_weapon_indices[i] = weapon_index
+		slot_icons[i].texture = _weapon_icons[weapon_index] if weapon_index >= 0 and weapon_index < _weapon_icons.size() else null
+		(slot_frames[i].get_node("Label") as Label).text = "%d GL" % (i + 1) if weapon_index == 3 else str(i + 1)
 
 
 func _set_region(target: TextureRect, source: Texture2D, region: Rect2) -> void:
@@ -87,6 +102,7 @@ func _update_vitals() -> void:
 
 func _update_weapon() -> void:
 	var weapon: Node = player.get_current_weapon()
+	_refresh_slot_icons()
 	_set_active_weapon_icon(player.get_current_weapon_index())
 	weapon_name.text = weapon.call("get_weapon_name").to_upper()
 	var magazine_ammo: int = weapon.call("get_magazine_ammo")

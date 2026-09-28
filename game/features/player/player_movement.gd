@@ -40,7 +40,7 @@ var _stun_ringing: AudioStreamPlayer
 var _original_master_volume := 0.0
 var mutation_effects: Node
 var _mutation_menu_open := false
-var _owned_weapons := [true, true, true, false]
+var _slot_weapons: Array[int] = [0, 1, 2]
 var _emergency_key := false
 func _ready() -> void:
 	floor_snap_length = 0.45
@@ -86,7 +86,7 @@ func _handle_actions() -> void:
 	if Input.is_action_just_pressed("weapon_1"): _select_weapon(0)
 	elif Input.is_action_just_pressed("weapon_2"): _select_weapon(1)
 	elif Input.is_action_just_pressed("weapon_3"): _select_weapon(2)
-	elif Input.is_action_just_pressed("weapon_4"): _select_weapon(3)
+	elif Input.is_action_just_pressed("weapon_4") and _slot_weapons.has(3): _select_weapon(_slot_weapons.find(3))
 	if Input.is_action_just_pressed("pickup_weapon"):
 		var nearest: Node3D
 		var best := 2.4
@@ -104,26 +104,29 @@ func _handle_actions() -> void:
 	if Input.is_action_just_pressed("antidote"): use_antidote()
 	if Input.is_action_just_pressed("melee"): mutation_effects.call("melee")
 func _select_weapon(index:int)->void:
-	if index<0 or index>=weapons.size() or not _owned_weapons[index]: return
+	if index<0 or index>=_slot_weapons.size(): return
 	var old:=get_current_weapon()
 	if old!=null: old.call("cancel_reload")
 	current_weapon_index=index
-	for i in weapons.size(): weapons[i].visible=i==index
+	for i in weapons.size(): weapons[i].visible=i==_slot_weapons[index]
 func get_current_weapon()->Node3D:
-	return weapons[current_weapon_index]
+	return weapons[_slot_weapons[current_weapon_index]]
+
+func get_weapon_in_slot(index: int) -> int:
+	return _slot_weapons[index] if index >= 0 and index < _slot_weapons.size() else -1
 
 func pickup_weapon(index: int) -> bool:
-	if index < 0 or index >= weapons.size() or _owned_weapons[index]:
+	if index < 0 or index >= weapons.size() or _slot_weapons.has(index):
 		return false
-	var previous := current_weapon_index
+	var previous := _slot_weapons[current_weapon_index]
 	if not get_tree().current_scene.has_method("drop_weapon_pickup"):
 		return false
 	var offset := camera.global_basis.x
 	offset.y = 0.0
 	get_tree().current_scene.call("drop_weapon_pickup", previous, global_position + offset.normalized() * 1.3)
-	_owned_weapons[previous] = false
-	_owned_weapons[index] = true
-	_select_weapon(index)
+	get_current_weapon().call("cancel_reload")
+	_slot_weapons[current_weapon_index] = index
+	_select_weapon(current_weapon_index)
 	return true
 
 func acquire_emergency_key() -> void:

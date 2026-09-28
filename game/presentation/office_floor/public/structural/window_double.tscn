@@ -8,6 +8,7 @@
 [node name="WindowDouble" type="Node3D"]
 script = ExtResource("2_collision")
 exclude_name_tokens = PackedStringArray("glass")
+frame_surface_boxes = true
 
 [node name="GlassCollisionBuilder" type="Node3D" parent="."]
 script = ExtResource("4_glass_collision")
