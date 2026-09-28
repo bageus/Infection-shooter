@@ -2,7 +2,7 @@ extends Node
 
 const SAVE_PATH := "user://planned_layout.json"
 const MAPS_DIR := "user://maps"
-const AUTHORED_SCENE_PATH := "res://game/bootstrap/app/base_office_layout.tscn"
+const AUTHORED_SCENE_PATH := "res://game/presentation/office_floor/public/base_office_layout.tscn"
 const GRID_SIZE := 0.25
 const SNAP_DISTANCE := 0.8
 const CAMERA_SPEED := 18.0

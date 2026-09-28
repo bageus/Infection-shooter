@@ -1,8 +1,22 @@
 extends RefCounted
 
-# Damage marks follow their pane and share the existing 40-mark impact budget.
-static var _textures: Array[String] = []
-static var _scanned := false
+# Explicit references make these assets available in exported builds as well as the editor.
+# Each impact center is measured in texture UVs so the hole lands on the bullet hit.
+const CRACK_TEXTURES = [
+	preload("res://models/objects/textures/Asymmetric bullet-impact glass crack overlay.png"),
+	preload("res://models/objects/textures/Bullet Impact Glass Crack Decal.png"),
+	preload("res://models/objects/textures/Diagonal bullet-impact glass cracks.png"),
+	preload("res://models/objects/textures/Fine bullet-damaged glass crack overlay.png"),
+	preload("res://models/objects/textures/Shattered glass impact crack decal.png"),
+	preload("res://models/objects/textures/Spiderweb Bullet Impact Crack Decal.png"),
+	preload("res://models/objects/textures/Starburst bullet impact glass crack.png"),
+	preload("res://models/objects/textures/Twin Impact Cracked Glass Decal.png"),
+]
+const IMPACT_CENTERS = [
+	Vector2(0.24, 0.56), Vector2(0.5, 0.5), Vector2(0.54, 0.51),
+	Vector2(0.51, 0.53), Vector2(0.5, 0.5), Vector2(0.51, 0.49),
+	Vector2(0.52, 0.53), Vector2(0.47, 0.48),
+]
 
 
 static func spawn(pane: StaticBody3D, point: Vector3, normal: Vector3) -> void:
@@ -13,16 +27,14 @@ static func spawn(pane: StaticBody3D, point: Vector3, normal: Vector3) -> void:
 	material.cull_mode = BaseMaterial3D.CULL_DISABLED
 	material.render_priority = 2
 	var pool := pane.get_tree().current_scene.get_node_or_null("ImpactEffects")
-	var assets := _available_textures()
-	if not assets.is_empty():
-		var path: String = assets.pick_random()
-		if pool != null:
-			material.albedo_texture = pool.call("texture_for", path) as Texture2D
-		if material.albedo_texture == null:
-			material.albedo_texture = load(path) as Texture2D
+	var variant := randi_range(0, CRACK_TEXTURES.size() - 1)
+	material.albedo_texture = CRACK_TEXTURES[variant] as Texture2D
 	if material.albedo_texture != null:
 		var quad := QuadMesh.new()
-		quad.size = Vector2.ONE * randf_range(0.38, 0.65)
+		var size := randf_range(0.38, 0.65)
+		quad.size = Vector2.ONE * size
+		var center: Vector2 = IMPACT_CENTERS[variant]
+		quad.center_offset = Vector3((0.5 - center.x) * size, (center.y - 0.5) * size, 0.0)
 		quad.material = material
 		mark.mesh = quad
 	else:
@@ -34,21 +46,6 @@ static func spawn(pane: StaticBody3D, point: Vector3, normal: Vector3) -> void:
 	mark.global_basis = Basis.looking_at(-outward, up) * Basis(Vector3.FORWARD, randf() * TAU)
 	if pool != null:
 		pool.call("register_mark", mark)
-
-
-static func _available_textures() -> Array[String]:
-	if _scanned:
-		return _textures
-	_scanned = true
-	for folder in ["res://models/objects/textures/", "res://models/objects/enviroments/01/"]:
-		var directory := DirAccess.open(folder)
-		if directory == null:
-			continue
-		for file in directory.get_files():
-			var name := file.to_lower()
-			if ("crack" in name or "glass_fracture" in name) and "wood" not in name and (name.ends_with(".png") or name.ends_with(".webp")):
-				_textures.append(folder + file)
-	return _textures
 
 
 static func _fallback_fracture(material: Material) -> Mesh:

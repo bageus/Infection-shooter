@@ -4,6 +4,7 @@
   "purpose": "Expose authored structural office modules with their own collision and the current office-floor composition.",
   "state_owner": [],
   "public_api": [
+    "public/base_office_layout.tscn",
     "public/office_floor.tscn",
     "public/base_floor_renderer.gd",
     "public/props/07_table.tscn",
