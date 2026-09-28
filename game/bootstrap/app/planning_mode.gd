@@ -71,6 +71,7 @@ var map_select: OptionButton
 
 const ENVIRONMENT_ROOT := "res://models/objects/enviroments"
 const ENVIRONMENT_SCENE := preload("res://game/presentation/office_floor/public/props/environment_prop.tscn")
+const BATHROOM_FIXTURE_SCENE := preload("res://game/presentation/office_floor/public/props/bathroom_fixture.tscn")
 const STAIRCASE_SCENE := preload("res://game/presentation/office_floor/public/structural/staircase.tscn")
 const WORKSTATIONS := preload("res://game/bootstrap/app/workstation_templates.gd")
 const DESK_SETUP_MODE := preload("res://game/bootstrap/app/desk_setup_mode.gd")
@@ -101,7 +102,7 @@ func _build_environment_catalogs() -> void:
 		handle.list_dir_begin()
 		var file_name := handle.get_next()
 		while not file_name.is_empty():
-			if not handle.current_is_dir() and file_name.to_lower().ends_with(".glb"):
+			if not handle.current_is_dir() and file_name.to_lower().ends_with(".glb") and file_name not in ["16_toilet_floor.glb", "16_wall_urinal.glb", "16_wall_hand_dryer.glb", "16_sink_pedestal.glb"]:
 				var model_path := directory + "/" + file_name
 				var special_scene := _environment_scene_for(file_name)
 				entries.append({
@@ -815,6 +816,10 @@ func _visual_object_at(screen_pos: Vector2) -> Node3D:
 
 func _instantiate_asset(asset_path: String) -> Node3D:
 	if asset_path.begins_with(ENVIRONMENT_ROOT + "/") and asset_path.ends_with(".glb"):
+		if asset_path.get_file() in ["02_toilet_new.glb", "02_wall_urinal_improved.glb", "05_wall_hand_dryer_improved.glb", "02_sink_pedestal_improved.glb", "16_toilet_floor.glb", "16_wall_urinal.glb", "16_wall_hand_dryer.glb", "16_sink_pedestal.glb"]:
+			var fixture := BATHROOM_FIXTURE_SCENE.instantiate() as Node3D
+			fixture.set("model_path", asset_path)
+			return fixture
 		if asset_path.get_file() in ["01_stairs.glb", "01_stairs_2.glb"]:
 			var staircase := STAIRCASE_SCENE.instantiate() as Node3D
 			staircase.set("model_path", asset_path)
@@ -885,8 +890,8 @@ func _update_preview(screen_pos: Vector2) -> void:
 		return
 	preview.global_position = _snap_position_for(preview, world)
 	_apply_special_default_height(preview, _selected_kind())
-	_apply_wall_mount(preview)
 	preview.rotation_degrees.y = rotation_y
+	_apply_wall_mount(preview)
 	_update_light_ui()
 
 
@@ -923,13 +928,13 @@ func _place_selected(screen_pos: Vector2) -> void:
 	_apply_special_default_height(node, kind)
 	if preview != null and preview.has_meta("planning_wall_normal"):
 		node.set_meta("planning_wall_normal", preview.get_meta("planning_wall_normal"))
-	_apply_wall_mount(node)
 	if kind == "enemy":
 		node.global_position.y = 1.0
 		node.set_meta("planning_actor_kind", "enemy")
 		if node.has_method("set_target"):
 			node.call("set_target", main_player)
 	node.rotation_degrees.y = rotation_y
+	_apply_wall_mount(node)
 	if selected_path.get_file() == "06_conference_chair.glb":
 		_ground_conference_chair(node)
 	node.set_meta("planning_scene_path", selected_path)
