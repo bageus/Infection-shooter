@@ -9,6 +9,7 @@
     "public/base_floor_renderer.gd",
     "public/props/07_table.tscn",
     "public/props/environment_prop.tscn",
+    "public/props/bathroom_fixture.tscn",
     "public/structural/column.tscn",
     "public/structural/wall_straight.tscn",
     "public/structural/wall_half_panel.tscn",
