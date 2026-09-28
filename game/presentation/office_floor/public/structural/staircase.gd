@@ -20,12 +20,19 @@ func _ready() -> void:
 	body.collision_layer = 3
 	add_child(body)
 	_add_mesh_collisions(visual, body)
+	# The source GLB contains two 1.5 m flights joined by a turn landing. Thin
+	# imported treads alone leave gaps a CharacterBody can fall through.
+	_add_walkable_box(body, Vector3(-1.06, 0.67, 1.41), Vector3(1.85, 0.18, 3.2), -atan(1.5 / 2.82))
+	_add_walkable_box(body, Vector3(1.06, 2.17, 1.41), Vector3(1.85, 0.18, 3.2), atan(1.5 / 2.82))
+	_add_walkable_box(body, Vector3(0, -0.11, -0.71), Vector3(3.9, 0.20, 1.4), 0.0)
+	_add_walkable_box(body, Vector3(0, 1.40, 3.52), Vector3(3.9, 0.20, 1.4), 0.0)
+	_add_walkable_box(body, Vector3(0, 2.90, -0.71), Vector3(3.9, 0.20, 1.4), 0.0)
 
 
 func _add_mesh_collisions(node: Node, body: StaticBody3D) -> void:
 	if node is MeshInstance3D:
 		var mesh := node as MeshInstance3D
-		if mesh.mesh != null and mesh.is_visible_in_tree():
+		if mesh.mesh != null and mesh.visible:
 			var shape := mesh.mesh.create_trimesh_shape()
 			if shape != null:
 				var collision := CollisionShape3D.new()
@@ -34,3 +41,13 @@ func _add_mesh_collisions(node: Node, body: StaticBody3D) -> void:
 				collision.global_transform = mesh.global_transform
 	for child in node.get_children():
 		_add_mesh_collisions(child, body)
+
+
+func _add_walkable_box(body: StaticBody3D, center: Vector3, dimensions: Vector3, tilt: float) -> void:
+	var collision := CollisionShape3D.new()
+	var box := BoxShape3D.new()
+	box.size = dimensions
+	collision.shape = box
+	collision.position = center
+	collision.rotation.x = tilt
+	body.add_child(collision)

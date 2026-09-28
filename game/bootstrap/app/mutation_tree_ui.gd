@@ -136,20 +136,22 @@ func _refresh() -> void:
 				furthest = maxi(furthest, rank)
 		var label := Label.new()
 		label.text = branch.to_upper() + ("  ·  ACTIVE" if group_is_active else "  ·  PASSIVE")
-		label.position = Vector2(20, center.y - 13)
+		label.position = Vector2(center.x - 85, 404 if group_is_active else 464)
 		canvas.add_child(label)
 		progress.append(furthest)
-	canvas.call("set_progress", progress)
 	var hybrid_label := Label.new()
-	hybrid_label.text = "HYBRID SKILLS  ·  TWO BRANCHES REQUIRED"
-	hybrid_label.position = Vector2(20, 790)
+	hybrid_label.text = "HYBRID SKILLS  ·  LINK TWO BRANCHES"
+	hybrid_label.position = Vector2(20, 806)
 	canvas.add_child(hybrid_label)
 	var hybrid_index := 0
+	var hybrids: Array[bool] = []
 	for row in skills:
 		if int(row[3]) != 3:
 			continue
-		_add_skill(canvas, row, Vector2(1060 - hybrid_index * 150, 805))
+		_add_skill(canvas, row, canvas.call("hybrid_position", hybrid_index))
+		hybrids.append(bool(runtime.call("skill_learned", str(row[0]))))
 		hybrid_index += 1
+	canvas.call("set_progress", progress, hybrids)
 	var open := Button.new()
 	open.text = "Mutations [M]"
 	open.pressed.connect(open_tree)
