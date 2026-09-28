@@ -47,7 +47,7 @@ static func casing_model() -> PackedScene:
 
 
 static func make_visual(grenade_launcher: bool = true) -> Node3D:
-	var model := launcher_model() if grenade_launcher else null
+	var model: PackedScene = launcher_model() if grenade_launcher else null
 	if model != null:
 		return model.instantiate() as Node3D
 	var root := Node3D.new()

@@ -75,7 +75,7 @@ func _unhandled_key_input(event: InputEvent) -> void:
 			get_viewport().set_input_as_handled()
 		elif event.keycode >= KEY_4 and event.keycode <= KEY_7:
 			var skills: Array[String] = _equipped()
-			var index := event.keycode - KEY_4
+			var index: int = int(event.keycode) - int(KEY_4)
 			if index < skills.size():
 				runtime.call("cast_skill", skills[index])
 				get_viewport().set_input_as_handled()
