@@ -41,11 +41,11 @@ static func smoke(host: Node3D, location: Vector3) -> void:
 	var puff := SphereMesh.new()
 	puff.radius = 0.19
 	puff.height = 0.38
-	var smoke := StandardMaterial3D.new()
-	smoke.albedo_color = Color(0.74, 0.77, 0.72, 0.32)
-	smoke.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
-	smoke.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
-	puff.material = smoke
+	var smoke_material := StandardMaterial3D.new()
+	smoke_material.albedo_color = Color(0.74, 0.77, 0.72, 0.32)
+	smoke_material.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
+	smoke_material.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
+	puff.material = smoke_material
 	cloud.draw_pass_1 = puff
 	world.add_child(cloud)
 	cloud.global_position = location

@@ -106,14 +106,14 @@ static func available_models() -> Array[String]:
 
 static func generate(desk: Node3D, path: String, parent: Node3D, existing: Array[Node3D], make_asset: Callable) -> Array[Node3D]:
 	var created: Array[Node3D] = []
-	var profile := _read("desks/" + desk_name(path) + ".json")
-	if profile.is_empty():
+	var desk_profile := _read("desks/" + desk_name(path) + ".json")
+	if desk_profile.is_empty():
 		return created
 	var seed_value := hash([path, desk.position.x, desk.position.z, desk.rotation.y])
 	var random := RandomNumberGenerator.new()
 	random.seed = absi(seed_value)
 	var occupied: Array[Rect2] = []
-	var stations: Array = profile.get("stations", [])
+	var stations: Array = desk_profile.get("stations", [])
 	for station_index in stations.size():
 		var station: Dictionary = stations[station_index]
 		var setup := _read("setups/" + SETUPS[random.randi_range(0, SETUPS.size() - 1)] + ".json")
@@ -125,9 +125,9 @@ static func generate(desk: Node3D, path: String, parent: Node3D, existing: Array
 		items.append_array(setup.get("items", []))
 		for entry_value in items:
 			var entry: Dictionary = entry_value
-			_add_item(entry, station, float(profile.get("height", 0.89)), desk, parent, existing, created, occupied, random, make_asset)
+			_add_item(entry, station, float(desk_profile.get("height", 0.89)), desk, parent, existing, created, occupied, random, make_asset)
 		# Uncrowded desks: at most two extra pieces per working surface.
-		var options: Array = profile.get("optional", [])
+		var options: Array = desk_profile.get("optional", [])
 		if not options.is_empty():
 			var shuffled := options.duplicate()
 			for i in range(shuffled.size() - 1, 0, -1):
@@ -137,14 +137,14 @@ static func generate(desk: Node3D, path: String, parent: Node3D, existing: Array
 				shuffled[j] = option_value
 			for option_index in mini(random.randi_range(0, 2), shuffled.size()):
 				var option: Dictionary = shuffled[option_index]
-				_add_item(option, station, float(profile.get("height", 0.89)), desk, parent, existing, created, occupied, random, make_asset)
-		var chair: Dictionary = profile.get("chair", {})
+				_add_item(option, station, float(desk_profile.get("height", 0.89)), desk, parent, existing, created, occupied, random, make_asset)
+		var chair: Dictionary = desk_profile.get("chair", {})
 		_add_item(chair, station, 0.0, desk, parent, existing, created, occupied, random, make_asset)
 		if random.randf() < 0.85:
-			var bin_slot: Dictionary = profile.get("bin", {})
+			var bin_slot: Dictionary = desk_profile.get("bin", {})
 			_add_item(bin_slot, station, 0.0, desk, parent, existing, created, occupied, random, make_asset)
-	if profile.has("cabinet"):
-		var cabinet: Dictionary = profile["cabinet"]
+	if desk_profile.has("cabinet"):
+		var cabinet: Dictionary = desk_profile["cabinet"]
 		if random.randf() < 0.5:
 			cabinet = cabinet.duplicate()
 			cabinet["x"] = -float(cabinet.get("x", 0.0))

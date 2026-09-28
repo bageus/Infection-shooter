@@ -57,7 +57,7 @@ func _collect_blinds(node: Node) -> void:
 		_collect_blinds(child)
 
 
-func take_projectile_hit(damage: float, hit_position: Vector3, _hit_normal: Vector3, _direction: Vector3, _weapon_name: String) -> bool:
+func take_projectile_hit(_damage: float, hit_position: Vector3, _hit_normal: Vector3, _direction: Vector3, _weapon_name: String) -> bool:
 	if _broken:
 		return false
 	_break_glass(hit_position)

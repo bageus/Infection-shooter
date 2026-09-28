@@ -10,8 +10,8 @@ var _lifetime := 4.0
 var _exploded := false
 
 
-func setup(target: Vector3, owner: CollisionObject3D) -> void:
-	shooter = owner
+func setup(target: Vector3, firing_body: CollisionObject3D) -> void:
+	shooter = firing_body
 	var offset := target - global_position
 	var horizontal := Vector3(offset.x, 0, offset.z)
 	var duration := maxf(0.25, horizontal.length() / SPEED)

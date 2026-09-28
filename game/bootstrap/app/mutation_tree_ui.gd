@@ -2,6 +2,7 @@ extends CanvasLayer
 
 var runtime: Node
 var panel: PanelContainer
+var points_label: Label
 var content: VBoxContainer
 var hotbar: HBoxContainer
 var _last_skill_tier := -1
@@ -26,10 +27,9 @@ func configure(infection: Node) -> void:
 	panel.add_child(layout)
 	var title := HBoxContainer.new()
 	layout.add_child(title)
-	var label := Label.new()
-	label.name = "Points"
-	label.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	title.add_child(label)
+	points_label = Label.new()
+	points_label.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	title.add_child(points_label)
 	var close := Button.new()
 	close.text = "Закрыть  [M]"
 	close.pressed.connect(func() -> void: _set_open(false))
@@ -61,7 +61,7 @@ func configure(infection: Node) -> void:
 
 func _on_mutation_changed(amount: float, _limit: float) -> void:
 	if panel.visible:
-		(panel.get_node("VBoxContainer/HBoxContainer/Points") as Label).text = "МУТАЦИИ  %d%%    Очки: %d" % [roundi(amount), runtime.call("mutation_points")]
+		points_label.text = "МУТАЦИИ  %d%%    Очки: %d" % [roundi(amount), runtime.call("mutation_points")]
 	var tier := floori((amount - 25.0) / 15.0)
 	if tier != _last_skill_tier:
 		_last_skill_tier = tier
@@ -101,7 +101,7 @@ func _refresh() -> void:
 	for child in hotbar.get_children():
 		hotbar.remove_child(child)
 		child.queue_free()
-	(panel.get_node("VBoxContainer/HBoxContainer/Points") as Label).text = "МУТАЦИИ  %d%%    Очки: %d" % [roundi(runtime.call("get_mutation")), runtime.call("mutation_points")]
+	points_label.text = "МУТАЦИИ  %d%%    Очки: %d" % [roundi(runtime.call("get_mutation")), runtime.call("mutation_points")]
 	var skills: Array = runtime.call("skill_catalog")
 	for category in ["active", "passive"]:
 		var heading := Label.new()
