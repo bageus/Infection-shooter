@@ -191,7 +191,8 @@ func open(target: Node3D) -> void:
 	dragging_zone = false
 	saved_camera = planner.camera.global_transform
 	var profile: Dictionary = WORKSTATIONS.profile(_desk_path())
-	stations = profile.get("stations", [])
+	markers.call("configure", desk, profile)
+	stations = markers.get("stations")
 	zones.clear()
 	for station_index in stations.size():
 		var station_value: Variant = stations[station_index]
@@ -203,9 +204,9 @@ func open(target: Node3D) -> void:
 	zone_index = 0
 	scroll.show()
 	planner.ui.get_node("Panel").hide()
+	planner.planning_toolbar.hide()
 	planner.help.get_parent().get_parent().hide()
 	planner.help_button.hide()
-	markers.call("configure", desk, profile)
 	markers.show()
 	_refresh_zones()
 	_refresh_templates()
@@ -226,6 +227,7 @@ func close() -> void:
 	scroll.hide()
 	help_panel.hide()
 	planner.ui.get_node("Panel").show()
+	planner.planning_toolbar.show()
 	planner.help_button.show()
 	markers.hide()
 	markers.call("clear")

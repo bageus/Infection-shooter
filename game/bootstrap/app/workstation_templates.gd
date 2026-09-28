@@ -21,6 +21,11 @@ const DESKS := {
 	"07_table_longest": "table_longest",
 	"07_table_square": "table_square",
 	"03_bookshelf": "bookshelf",
+	"03_book_case": "book_case",
+	"03_book_case_small": "book_case_small",
+	"03_book_case_with_back": "book_case_with_back",
+	"03_book_case_with_back_small": "book_case_with_back_small",
+	"03_file_cabinet_largest": "file_cabinet_largest",
 	"03_file_cabinet_small_shelf_fancy": "cabinet_small_shelf",
 	"03_file_cabinet_large_shelf_fancy": "cabinet_large_shelf",
 	"03_file_cabinet_small_with_shelfs": "cabinet_with_shelves"

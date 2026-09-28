@@ -23,11 +23,13 @@ func _add_glass_meshes(node: Node, body: StaticBody3D) -> void:
 	if node is MeshInstance3D and "glass" in node.name.to_lower():
 		var mesh_instance := node as MeshInstance3D
 		if mesh_instance.mesh != null and mesh_instance.is_visible_in_tree() and absf(mesh_instance.global_basis.determinant()) > 0.000000000001:
-			var shape := mesh_instance.mesh.create_trimesh_shape()
-			if shape != null:
-				var collision := CollisionShape3D.new()
-				collision.shape = shape
-				body.add_child(collision)
-				collision.global_transform = mesh_instance.global_transform
+			var bounds := mesh_instance.get_aabb()
+			var box := BoxShape3D.new()
+			box.size = Vector3(maxf(bounds.size.x, 0.055), maxf(bounds.size.y, 0.055), maxf(bounds.size.z, 0.055))
+			var collision := CollisionShape3D.new()
+			collision.shape = box
+			body.add_child(collision)
+			collision.global_transform = mesh_instance.global_transform
+			collision.position += collision.basis * bounds.get_center()
 	for child in node.get_children():
 		_add_glass_meshes(child, body)

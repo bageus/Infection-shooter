@@ -1,11 +1,13 @@
 extends StaticBody3D
 
 const DAMAGE = preload("res://game/presentation/office_floor/environment_damage.gd")
+const CRACKS = preload("res://game/presentation/office_floor/glass_crack_marks.gd")
 
 @export var max_health := 28.0
 @export var hide_with_glass: PackedStringArray = PackedStringArray()
 @export var blinds_pass_through := false
 @export var preserve_open_frame := false
+@export var unbreakable := false
 
 var _health := 0.0
 var _broken := false
@@ -57,7 +59,10 @@ func _collect_blinds(node: Node) -> void:
 		_collect_blinds(child)
 
 
-func take_projectile_hit(_damage: float, hit_position: Vector3, _hit_normal: Vector3, _direction: Vector3, _weapon_name: String) -> bool:
+func take_projectile_hit(_damage: float, hit_position: Vector3, hit_normal: Vector3, _direction: Vector3, _weapon_name: String) -> bool:
+	if unbreakable:
+		CRACKS.spawn(self, hit_position, hit_normal)
+		return false
 	if _broken:
 		return false
 	_break_glass(hit_position)
@@ -69,6 +74,8 @@ func get_projectile_material(_shape_index: int = -1) -> String:
 
 
 func take_melee_hit(damage: float, hit_position: Vector3, _direction: Vector3) -> void:
+	if unbreakable:
+		return
 	if _broken:
 		return
 	_health -= maxf(damage, 0.0)

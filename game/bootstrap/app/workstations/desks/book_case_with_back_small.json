@@ -1,0 +1,53 @@
+{
+  "height": 2.0,
+  "stations": [
+    {
+      "x": 0,
+      "z": 0,
+      "angle": 0,
+      "grid_height": 0.5,
+      "grid_width": 0.9,
+      "grid_depth": 0.43,
+      "usable_width": 0.9,
+      "usable_depth": 0.43,
+      "zone_width": 0.6,
+      "zone_depth": 0.34
+    },
+    {
+      "x": 0,
+      "z": 0,
+      "angle": 0,
+      "grid_height": 1.0,
+      "grid_width": 0.9,
+      "grid_depth": 0.43,
+      "usable_width": 0.9,
+      "usable_depth": 0.43,
+      "zone_width": 0.6,
+      "zone_depth": 0.34
+    },
+    {
+      "x": 0,
+      "z": 0,
+      "angle": 0,
+      "grid_height": 1.5,
+      "grid_width": 0.9,
+      "grid_depth": 0.43,
+      "usable_width": 0.9,
+      "usable_depth": 0.43,
+      "zone_width": 0.6,
+      "zone_depth": 0.34
+    },
+    {
+      "x": 0,
+      "z": 0,
+      "angle": 0,
+      "grid_height": 2.0,
+      "grid_width": 0.9,
+      "grid_depth": 0.43,
+      "usable_width": 0.9,
+      "usable_depth": 0.43,
+      "zone_width": 0.6,
+      "zone_depth": 0.34
+    }
+  ]
+}

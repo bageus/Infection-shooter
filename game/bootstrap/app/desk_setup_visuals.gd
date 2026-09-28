@@ -15,7 +15,18 @@ var orbit_distance := 5.6
 
 func configure(target: Node3D, profile: Dictionary) -> void:
 	desk = target
-	stations = profile.get("stations", [])
+	stations = []
+	var footprint := _visible_footprint()
+	var is_table := "table" in str(desk.get_meta("planning_scene_path", "")).get_file() and "desk" not in str(desk.get_meta("planning_scene_path", "")).get_file()
+	for value in profile.get("stations", []):
+		var station: Dictionary = (value as Dictionary).duplicate()
+		if is_table and footprint.has_area():
+			var old_center := Vector2(float(station.get("x", 0.0)), float(station.get("z", 0.0)))
+			station["x"] = footprint.get_center().x + old_center.x
+			station["z"] = footprint.get_center().y + old_center.y
+			station["grid_x"] = station["x"]
+			station["grid_z"] = station["z"]
+		stations.append(station)
 	surface_height = float(profile.get("height", 0.89))
 	redraw([], -1, 0)
 
@@ -59,7 +70,12 @@ func redraw(zones: Array[Dictionary], selected: int, front: int) -> void:
 		child.queue_free()
 	if desk == null:
 		return
-	_add_grid(-FLOOR_RADIUS, FLOOR_RADIUS, -FLOOR_RADIUS, FLOOR_RADIUS, 0.025, FLOOR_STEP, Color(0.15, 0.66, 0.82, 0.16))
+	var footprint := _visible_footprint()
+	var left := minf(-FLOOR_RADIUS, footprint.position.x - 0.85)
+	var right := maxf(FLOOR_RADIUS, footprint.end.x + 0.85)
+	var back := minf(-FLOOR_RADIUS, footprint.position.y - 0.85)
+	var forward := maxf(FLOOR_RADIUS, footprint.end.y + 0.85)
+	_add_grid(left, right, back, forward, 0.025, FLOOR_STEP, Color(0.15, 0.66, 0.82, 0.16))
 	for station_value in stations:
 		var station: Dictionary = station_value
 		var x := float(station.get("grid_x", station.get("x", 0.0)))
@@ -131,3 +147,19 @@ func _add_grid(left: float, right: float, back: float, front: float, height: flo
 	instance.mesh = lines
 	add_child(instance)
 	instance.global_transform = desk.global_transform
+
+
+func _visible_footprint() -> Rect2:
+	var area := Rect2()
+	var found := false
+	if desk == null:
+		return area
+	for descendant in desk.find_children("*", "MeshInstance3D", true, false):
+		var mesh := descendant as MeshInstance3D
+		if mesh.mesh == null or not mesh.is_visible_in_tree() or absf(mesh.global_basis.determinant()) < 0.000001:
+			continue
+		var local := (desk.global_transform.affine_inverse() * mesh.global_transform) * mesh.get_aabb()
+		var region := Rect2(Vector2(local.position.x, local.position.z), Vector2(local.size.x, local.size.z))
+		area = area.merge(region) if found else region
+		found = true
+	return area

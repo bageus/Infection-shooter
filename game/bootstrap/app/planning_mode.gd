@@ -74,10 +74,16 @@ const ENVIRONMENT_SCENE := preload("res://game/presentation/office_floor/public/
 const STAIRCASE_SCENE := preload("res://game/presentation/office_floor/public/structural/staircase.tscn")
 const WORKSTATIONS := preload("res://game/bootstrap/app/workstation_templates.gd")
 const DESK_SETUP_MODE := preload("res://game/bootstrap/app/desk_setup_mode.gd")
+const EDIT_HISTORY := preload("res://game/bootstrap/app/planning_edit_history.gd")
 
 var workstation_transforms: Dictionary = {}
 var desk_setup: Node
 var desk_setup_button: Button
+var edit_history: RefCounted
+var planning_toolbar: PanelContainer
+var undo_button: Button
+var duplicate_button: Button
+var _drag_recorded := false
 
 var group_catalogs: Dictionary = {}
 
@@ -213,6 +219,7 @@ func setup(app_owner: Node3D, planning_root: Node3D, planning_ui: Control) -> vo
 	desk_setup = DESK_SETUP_MODE.new()
 	add_child(desk_setup)
 	desk_setup.configure(self, ui)
+	_build_planning_toolbar()
 	ui.get_node("Panel/VBox/Tabs/Structure").pressed.connect(_show_structure_catalog)
 	ui.get_node("Panel/VBox/Tabs/Actors").pressed.connect(_show_actor_catalog)
 	ui.get_node("Panel/VBox/Tabs/Lighting").pressed.connect(_show_lighting_catalog)
@@ -232,8 +239,40 @@ func setup(app_owner: Node3D, planning_root: Node3D, planning_ui: Control) -> vo
 	load_layout()
 
 
+func _build_planning_toolbar() -> void:
+	edit_history = EDIT_HISTORY.new()
+	edit_history.set("planner", self)
+	planning_toolbar = PanelContainer.new()
+	planning_toolbar.set_anchors_preset(Control.PRESET_CENTER_TOP)
+	planning_toolbar.offset_left = -165
+	planning_toolbar.offset_right = 165
+	planning_toolbar.offset_top = 8
+	planning_toolbar.offset_bottom = 48
+	planning_toolbar.mouse_filter = Control.MOUSE_FILTER_STOP
+	var toolbar_style := StyleBoxFlat.new()
+	toolbar_style.bg_color = Color(0.005, 0.035, 0.065, 0.95)
+	toolbar_style.border_color = Color(0.02, 0.72, 0.98)
+	toolbar_style.set_border_width_all(2)
+	toolbar_style.set_corner_radius_all(8)
+	planning_toolbar.add_theme_stylebox_override("panel", toolbar_style)
+	ui.add_child(planning_toolbar)
+	var toolbar_buttons := HBoxContainer.new()
+	planning_toolbar.add_child(toolbar_buttons)
+	undo_button = Button.new()
+	undo_button.text = "Undo last action"
+	undo_button.pressed.connect(func() -> void: edit_history.call("undo"))
+	toolbar_buttons.add_child(undo_button)
+	duplicate_button = Button.new()
+	duplicate_button.text = "Duplicate selected"
+	duplicate_button.pressed.connect(func() -> void: edit_history.call("duplicate_selected"))
+	toolbar_buttons.add_child(duplicate_button)
+	_update_history_buttons()
+
+
 func enter() -> void:
 	active = true
+	edit_history.set("stack", [])
+	_update_history_buttons()
 	help.get_parent().get_parent().hide()
 	help_button.show()
 	workstation_transforms.clear()
@@ -324,6 +363,8 @@ func _input(event: InputEvent) -> void:
 		if desk_setup.handle_input(event):
 			get_viewport().set_input_as_handled()
 		return
+	if event is InputEventMouse and planning_toolbar.get_global_rect().has_point(event.position):
+		return
 	if event is InputEventMouse and (ui.get_node("Panel") as Control).get_global_rect().has_point(event.position):
 		# _input precedes GUI dispatch: let the palette receive this event.
 		return
@@ -378,6 +419,8 @@ func _input(event: InputEvent) -> void:
 				_adjust_selected_light_angle(4.0)
 		get_viewport().set_input_as_handled()
 	if event is InputEventMouseButton:
+		if event.button_index == MOUSE_BUTTON_LEFT and not event.pressed:
+			_drag_recorded = false
 		if event.button_index == MOUSE_BUTTON_WHEEL_UP and event.pressed:
 			_zoom_camera(-CAMERA_ZOOM_STEP)
 		elif event.button_index == MOUSE_BUTTON_WHEEL_DOWN and event.pressed:
@@ -392,6 +435,9 @@ func _input(event: InputEvent) -> void:
 		elif Input.is_mouse_button_pressed(MOUSE_BUTTON_LEFT) and selected != null:
 			var world := _screen_to_floor(event.position)
 			if world.is_finite():
+				if not _drag_recorded:
+					edit_history.call("record_transform", selected)
+					_drag_recorded = true
 				var locked_y := selected.global_position.y
 				selected.global_position = _snap_position_for(selected, world)
 				if _is_ceiling_tool(selected):
@@ -554,6 +600,14 @@ func _select(node: Node3D) -> void:
 		_show_selection_highlight(selected)
 	_update_light_ui()
 	_update_status()
+	_update_history_buttons()
+
+
+func _update_history_buttons() -> void:
+	if undo_button != null:
+		undo_button.disabled = (edit_history.get("stack") as Array).is_empty()
+	if duplicate_button != null:
+		duplicate_button.disabled = selected == null or selected == main_player
 
 
 func _open_desk_setup() -> void:
@@ -837,6 +891,7 @@ func _place_selected(screen_pos: Vector2) -> void:
 		return
 	var kind := _selected_kind()
 	if kind == "player":
+		edit_history.call("record_player_spawn")
 		main_player.global_position = _snap(world) + Vector3(0.0, 1.0, 0.0)
 		main_player.rotation_degrees.y = rotation_y
 		player_spawn_defined = true
@@ -871,6 +926,7 @@ func _place_selected(screen_pos: Vector2) -> void:
 	node.rotation_degrees.y = rotation_y
 	node.set_meta("planning_scene_path", selected_path)
 	placed.append(node)
+	edit_history.call("record_added", node)
 	if not WORKSTATIONS.desk_name(selected_path).is_empty():
 		var desk_id := str(Time.get_ticks_usec())
 		node.set_meta("planning_desk_id", desk_id)
@@ -897,6 +953,7 @@ func _delete_at(screen_pos: Vector2) -> void:
 
 func _delete_selected() -> void:
 	if selected != null:
+		edit_history.call("record_deleted", selected)
 		_delete_node(selected)
 
 
@@ -917,6 +974,7 @@ func _delete_node(node: Node3D) -> void:
 		selected = null
 	node.queue_free()
 	_update_status()
+	_update_history_buttons()
 
 
 func _sync_workstations() -> void:
@@ -941,6 +999,7 @@ func _sync_workstations() -> void:
 
 func _rotate_selected(amount: float) -> void:
 	if selected != null:
+		edit_history.call("record_transform", selected)
 		selected.rotation_degrees.y = fmod(selected.rotation_degrees.y + amount + 360.0, 360.0)
 	elif preview != null:
 		rotation_y = fmod(rotation_y + amount + 360.0, 360.0)
@@ -951,6 +1010,7 @@ func _rotate_selected(amount: float) -> void:
 func _scale_selected(delta_scale: Vector3) -> void:
 	if selected == null:
 		return
+	edit_history.call("record_transform", selected)
 	var next := selected.scale + delta_scale
 	next.x = maxf(next.x, 0.1)
 	next.y = maxf(next.y, 0.1)
@@ -962,6 +1022,7 @@ func _scale_selected(delta_scale: Vector3) -> void:
 func _nudge_selected(input: Vector2) -> void:
 	if selected == null:
 		return
+	edit_history.call("record_transform", selected)
 	var forward := -camera.global_transform.basis.z
 	forward.y = 0.0
 	forward = forward.normalized()
@@ -981,6 +1042,7 @@ func _adjust_selected_light_angle(amount: float) -> void:
 	var light := selected.find_child("Light", true, false) as SpotLight3D
 	if light == null:
 		return
+	edit_history.call("record_transform", selected)
 	light.spot_angle = clampf(light.spot_angle + amount, 5.0, 89.0)
 	selected.set_meta("planning_light_angle", light.spot_angle)
 	_update_light_ui()
@@ -993,6 +1055,7 @@ func _adjust_selected_light(amount: float) -> void:
 	var light := selected.find_child("Light", true, false) as Light3D
 	if light == null:
 		return
+	edit_history.call("record_transform", selected)
 	light.light_energy = clampf(light.light_energy + amount, 0.0, 16.0)
 	selected.set_meta("planning_light_energy", light.light_energy)
 	_update_light_ui()
@@ -1001,6 +1064,7 @@ func _adjust_selected_light(amount: float) -> void:
 
 func _move_selected_height(amount: float) -> void:
 	if selected != null:
+		edit_history.call("record_transform", selected)
 		selected.position.y += amount
 		_update_status()
 	elif preview != null:

@@ -46,6 +46,7 @@ func _ready() -> void:
 	add_child(visual)
 	_visual = visual
 	_discover_stages()
+	_add_missing_bookcase_shelves()
 	# This GLB exports the complete table alongside a visible Primary debris group.
 	# Keep the authored intact root as the only initial mesh and collision source.
 	if model_path.get_file() == "07_table_square.glb":
@@ -54,7 +55,7 @@ func _ready() -> void:
 			primary.hide()
 	_health = _stage_health()
 	# Architectural pieces and carpets stay anchored; all other groups are movable.
-	freeze = model_path.begins_with("res://models/objects/enviroments/01/")
+	freeze = model_path.begins_with("res://models/objects/enviroments/01/") or "server_rack" in model_path.get_file()
 	if freeze and "01_floor_" in model_path:
 		return # Carpet lies on the level floor and must not create a raised obstacle.
 	var volume := _add_shapes(visual)
@@ -98,6 +99,26 @@ func _discover_stages() -> void:
 		var stage: Node3D = DAMAGE.find_named(_visual, name_part)
 		if stage != null:
 			_stages.append(stage)
+
+
+func _add_missing_bookcase_shelves() -> void:
+	if model_path.get_file() not in ["03_book_case.glb", "03_book_case_with_back.glb"] or _intact == null:
+		return
+	var baked := _intact.find_child("Intact*", true, false) as MeshInstance3D
+	var material: Material = baked.get_active_material(0) if baked != null else null
+	if material == null:
+		var wood := StandardMaterial3D.new()
+		wood.albedo_color = Color(0.45, 0.27, 0.16)
+		material = wood
+	for shelf_height in [0.50, 0.95, 1.40, 1.85, 2.30]:
+		var shelf := MeshInstance3D.new()
+		shelf.name = "VisibleShelf"
+		var mesh := BoxMesh.new()
+		mesh.size = Vector3(1.94, 0.035, 0.46)
+		mesh.material = material
+		shelf.mesh = mesh
+		_intact.add_child(shelf)
+		shelf.position.y = shelf_height
 
 
 func take_projectile_hit_at_shape(damage: float, hit_position: Vector3, normal: Vector3, direction: Vector3, weapon: String, shape_index: int) -> bool:
@@ -207,6 +228,13 @@ func _apply_damage(hit_position: Vector3, direction: Vector3) -> void:
 		_rebuild_shapes()
 	elif not _stages.is_empty():
 		_broken = true
+		if "server_rack" in model_path.get_file():
+			if _intact != null:
+				_intact.hide()
+			DAMAGE.reveal_meshes(_stages[0])
+			_stages[0].show()
+			_rebuild_shapes()
+			return
 		_visual.hide()
 		for shape in _shapes:
 			shape.set_deferred("disabled", true)

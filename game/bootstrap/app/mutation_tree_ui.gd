@@ -50,10 +50,19 @@ func configure(infection: Node) -> void:
 	panel.hide()
 	var bar_panel := PanelContainer.new()
 	bar_panel.set_anchors_preset(Control.PRESET_BOTTOM_LEFT)
-	bar_panel.position = Vector2(12, -76)
+	bar_panel.offset_left = 18
+	bar_panel.offset_right = 492
+	bar_panel.offset_top = -216
+	bar_panel.offset_bottom = -164
+	var frame := StyleBoxFlat.new()
+	frame.bg_color = Color(0.005, 0.035, 0.065, 0.95)
+	frame.border_color = Color(0.02, 0.72, 0.98)
+	frame.set_border_width_all(2)
+	frame.set_corner_radius_all(12)
+	bar_panel.add_theme_stylebox_override("panel", frame)
 	root.add_child(bar_panel)
 	var bar_scroll := ScrollContainer.new()
-	bar_scroll.custom_minimum_size = Vector2(640, 58)
+	bar_scroll.custom_minimum_size = Vector2(466, 46)
 	bar_scroll.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_AUTO
 	bar_panel.add_child(bar_scroll)
 	hotbar = HBoxContainer.new()
