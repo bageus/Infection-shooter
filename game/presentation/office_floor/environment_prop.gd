@@ -71,8 +71,8 @@ func _ready() -> void:
 		for mesh in _shape_meshes:
 			var bounds: AABB = mesh.global_transform * mesh.get_aabb()
 			lowest = minf(lowest, bounds.position.y)
-		if lowest < 0.0:
-			global_position.y -= lowest
+		if lowest < 0.025:
+			global_position.y += 0.025 - lowest
 	mass = clampf(volume * 18.0, 0.12, 55.0)
 	if "table" in model_path.get_file() or "desk" in model_path.get_file():
 		linear_damp = 3.0

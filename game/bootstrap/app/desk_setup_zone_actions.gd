@@ -106,6 +106,28 @@ static func toggle_surface(mode: Variant) -> void:
 	if mode.zone_index < 0:
 		return
 	var zone: Dictionary = mode.zones[mode.zone_index]
+	if mode.shelf_mode:
+		var current := -1
+		for index in mode.stations.size():
+			if absf(float(zone.get("height", 0.0)) - float(mode.stations[index].get("grid_height", 0.0))) < 0.04:
+				current = index
+				break
+		var next := (current + 1) % mode.stations.size()
+		var target_height := float(mode.stations[next].get("grid_height", 0.0))
+		var proposed := zone.duplicate()
+		proposed["height"] = target_height
+		proposed["floor"] = false
+		if not RULES._inside_surface(Vector2(float(zone["x"]), float(zone["z"])), proposed, mode.stations):
+			mode.status.text = "Zone does not fit on this shelf."
+			return
+		var surface_y: float = mode.desk.to_global(Vector3.UP * target_height).y
+		for item in RULES.items_in_zone(mode.desk, zone, mode._attachments()):
+			var local: Vector3 = mode.desk.to_local(item.global_position)
+			item.global_position.y += _support_y(mode, item, local, target_height, surface_y) - WORKSTATIONS._bounds(item).position.y
+		zone["height"] = target_height
+		zone["floor"] = false
+		mode.status.text = "Moved to shelf %d." % (next + 1)
+		return
 	var proposed := zone.duplicate()
 	proposed["floor"] = not bool(zone["floor"])
 	proposed["height"] = 0.0 if bool(proposed["floor"]) else mode.markers.surface_height
@@ -138,7 +160,8 @@ static func toggle_surface(mode: Variant) -> void:
 	var surface_y: float = mode.desk.to_global(Vector3.UP * float(proposed["height"])).y
 	for item in contents:
 		item.global_position += displacement
-		item.global_position.y += surface_y - WORKSTATIONS._bounds(item).position.y
+		var item_local: Vector3 = mode.desk.to_local(item.global_position)
+		item.global_position.y += _support_y(mode, item, item_local, float(proposed["height"]), surface_y) - WORKSTATIONS._bounds(item).position.y
 	zone["x"] = destination.x
 	zone["z"] = destination.y
 	zone["floor"] = proposed["floor"]
@@ -169,7 +192,8 @@ static func place_model(mode: Variant, model: String, local: Vector3) -> void:
 		object.queue_free()
 		mode.status.text = "Model has no visible geometry: " + model
 		return
-	object.global_position.y += mode.desk.to_global(Vector3.UP * float(zone["height"])).y - bounds.position.y
+	var expected_y: float = mode.desk.to_global(Vector3.UP * float(zone["height"])).y
+	object.global_position.y += _support_y(mode, object, local, float(zone["height"]), expected_y) - bounds.position.y
 	if not RULES.fits_zone(mode.desk, zone, object):
 		object.queue_free()
 		mode.status.text = "Place the object's centre inside its zone: " + model
@@ -180,6 +204,25 @@ static func place_model(mode: Variant, model: String, local: Vector3) -> void:
 	mode.planner.placed.append(object)
 	mode._refresh_zone_items()
 	mode.status.text = "Placed " + model
+
+
+static func _support_y(mode: Variant, item: Node3D, local: Vector3, height: float, expected_y: float) -> float:
+	if height < 0.02:
+		return expected_y
+	# Match the visible object's bottom to the actual tabletop. Profiles are guides,
+	# and imported meshes may differ from their nominal authored heights.
+	var start: Vector3 = mode.desk.to_global(Vector3(local.x, height + 0.38, local.z))
+	var end: Vector3 = mode.desk.to_global(Vector3(local.x, height - 0.28, local.z))
+	var query := PhysicsRayQueryParameters3D.create(start, end)
+	query.collide_with_areas = false
+	if item is CollisionObject3D:
+		query.exclude = [(item as CollisionObject3D).get_rid()]
+	var hit: Dictionary = mode.desk.get_world_3d().direct_space_state.intersect_ray(query)
+	if hit.get("collider") == mode.desk:
+		var actual_y: float = (hit["position"] as Vector3).y
+		if absf(actual_y - expected_y) < 0.28:
+			return maxf(actual_y + 0.005, expected_y)
+	return expected_y
 
 
 static func refresh_items(mode: Variant) -> void:

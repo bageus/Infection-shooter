@@ -94,6 +94,8 @@ T002 — Minimal combat slice. Status: IN_PROGRESS.
 Изолированный тест лучами и переходами стадий прошёл; импорт полного проекта требует всех ресурсов и Blender.
 
 ## Current risks
+
+2026-09-28: Planning item placement uses a physics ray against the selected desk/shelf to correct small differences between model geometry and profile heights. Bookcase profiles gain a bottom-frame level. Visual inspection in a working Godot editor remains necessary for the imported assets; local Godot binary exits 139 before startup.
 Structural asset audit found inconsistent connection spans in legacy glass/cubicle modules. The canonical standard is now documented at `docs/ASSET_STANDARD.md`; destructive source-mesh edits remain blocked on Godot AABB/visual verification.
 
 The new source object library is stored as .blend files; local Godot import therefore depends on Blender being available during import. Exact mesh pivots/extents require visual review. Scene-authored collision provides the authoritative closed gameplay boundary.

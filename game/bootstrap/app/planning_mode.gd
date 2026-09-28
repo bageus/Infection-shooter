@@ -294,6 +294,9 @@ func enter() -> void:
 	for node in hud_nodes:
 		if node != null:
 			node.hide()
+	var mutation_hud := host.get("mutation_tree_ui") as CanvasLayer
+	if mutation_hud != null:
+		mutation_hud.hide()
 	get_tree().paused = true
 	ui.show()
 	Input.mouse_mode = Input.MOUSE_MODE_VISIBLE
@@ -322,6 +325,9 @@ func exit() -> void:
 	for node in hud_nodes:
 		if node != null:
 			node.show()
+	var mutation_hud := host.get("mutation_tree_ui") as CanvasLayer
+	if mutation_hud != null:
+		mutation_hud.show()
 	_clear_preview()
 	_set_light_markers_visible(false)
 	_hide_planning_grid()
@@ -924,6 +930,8 @@ func _place_selected(screen_pos: Vector2) -> void:
 		if node.has_method("set_target"):
 			node.call("set_target", main_player)
 	node.rotation_degrees.y = rotation_y
+	if selected_path.get_file() == "06_conference_chair.glb":
+		_ground_conference_chair(node)
 	node.set_meta("planning_scene_path", selected_path)
 	placed.append(node)
 	edit_history.call("record_added", node)
@@ -1247,6 +1255,12 @@ func _combined_aabb(node: Node3D, ignore_selection: bool = false) -> AABB:
 	return result
 
 
+func _ground_conference_chair(node: Node3D) -> void:
+	var bounds := _combined_aabb(node)
+	if bounds.size.length_squared() > 0.0001 and node.global_position.y < 0.25:
+		node.global_position.y = maxf(node.global_position.y, 0.025 - bounds.position.y)
+
+
 func _snap(value: Vector3) -> Vector3:
 	return Vector3(roundf(value.x / GRID_SIZE) * GRID_SIZE, 0.0, roundf(value.z / GRID_SIZE) * GRID_SIZE)
 
@@ -1432,6 +1446,8 @@ func _apply_layout_data(data: Dictionary) -> void:
 		node.position = Vector3(float(record.get("x",0.0)),float(record.get("y",0.0)),float(record.get("z",0.0)))
 		node.rotation_degrees.y = float(record.get("rotation_y",0.0))
 		node.scale = Vector3(float(record.get("scale_x",1.0)),float(record.get("scale_y",1.0)),float(record.get("scale_z",1.0)))
+		if scene_path.get_file() == "06_conference_chair.glb":
+			_ground_conference_chair(node)
 		node.set_meta("planning_scene_path", scene_path)
 		if record.has("desk_id"):
 			node.set_meta("planning_desk_id", str(record["desk_id"]))

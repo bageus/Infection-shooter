@@ -27,6 +27,12 @@ func configure(target: Node3D, profile: Dictionary) -> void:
 			station["grid_x"] = station["x"]
 			station["grid_z"] = station["z"]
 		stations.append(station)
+	# Older shelf profiles start at the next shelf, although the bottom frame supports objects.
+	var model := str(desk.get_meta("planning_scene_path", "")).get_file().get_basename()
+	if model.begins_with("03_") and stations.size() > 1 and float(stations[0].get("grid_height", 0.0)) > 0.12:
+		var bottom: Dictionary = stations[0].duplicate()
+		bottom["grid_height"] = 0.035
+		stations.push_front(bottom)
 	surface_height = float(profile.get("height", 0.89))
 	redraw([], -1, 0)
 

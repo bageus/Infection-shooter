@@ -3,7 +3,7 @@ extends RefCounted
 # Move a local placement region and its contents as one transaction.
 const WORKSTATIONS := preload("res://game/bootstrap/app/workstation_templates.gd")
 const GEOMETRY := preload("res://game/bootstrap/app/desk_setup_zone_geometry.gd")
-const CATEGORIES := ["Monitor", "Keyboard", "Mouse", "Laptop", "Glass", "Mug", "Pencil", "Pen", "Paper", "Books", "Mini PC", "Tower PC", "Other", "Chair"]
+const CATEGORIES := ["Monitor", "Keyboard", "Mouse", "Laptop", "Drinkware", "Food", "Stationery", "Paper", "Books", "Mini PC", "Tower PC", "Bags", "Bins", "Plants", "Printers", "Desk lamps", "Desk phones", "Other", "Chair"]
 
 
 static func category_for(model: String) -> String:
@@ -15,10 +15,15 @@ static func category_for(model: String) -> String:
 	if "mouse" in label: return "Mouse"
 	if "minipc" in label: return "Mini PC"
 	if "computer_tower" in label or label.begins_with("05_pc_"): return "Tower PC"
-	if "mug" in label: return "Mug"
-	if label.begins_with("09_glass"): return "Glass"
-	if "pencil" in label: return "Pencil"
-	if label.begins_with("09_pen_"): return "Pen"
+	if "mug" in label or label.begins_with("09_glass") or "fruit_plate" in label: return "Drinkware"
+	if label.begins_with("09_fruit_") or "snack" in label or "cookies" in label: return "Food"
+	if "pencil" in label or label.begins_with("09_pen_") or "marker" in label or "stapler" in label or "tablet" in label: return "Stationery"
+	if "casehand" in label or "09_case_" in label: return "Bags"
+	if "trash_bin" in label: return "Bins"
+	if label.begins_with("11_plant") or "deco_plant" in label or label.begins_with("11_bamboo"): return "Plants"
+	if "printer" in label or "mfu" in label: return "Printers"
+	if "desklamp" in label or label == "05_lamp": return "Desk lamps"
+	if "desk_phone" in label or label.begins_with("09_phone_"): return "Desk phones"
 	if "book" in label: return "Books"
 	if "paper" in label or "file" in label or "notepad" in label or "binder" in label: return "Paper"
 	return "Other"
@@ -37,7 +42,7 @@ static func normalize(zone: Dictionary, index: int) -> Dictionary:
 	zone["required"] = bool(zone.get("required", true))
 	zone["angle"] = float(zone.get("angle", 0.0))
 	var old_category := str(zone.get("category", "Other"))
-	var aliases := {"Any": "Other", "Computer": "Tower PC", "Drinkware": "Glass", "Book": "Books", "Монитор": "Monitor", "Клавиатура": "Keyboard", "Мышь": "Mouse", "Ноутбук": "Laptop", "Стакан": "Glass", "Кружка": "Mug", "Карандаш": "Pencil", "Ручка": "Pen", "Бумага": "Paper", "Книги": "Books", "Другие": "Other", "Кресло": "Chair"}
+	var aliases := {"Any": "Other", "Computer": "Tower PC", "Glass": "Drinkware", "Mug": "Drinkware", "Pencil": "Stationery", "Pen": "Stationery", "Book": "Books", "Монитор": "Monitor", "Клавиатура": "Keyboard", "Мышь": "Mouse", "Ноутбук": "Laptop", "Стакан": "Drinkware", "Кружка": "Drinkware", "Карандаш": "Stationery", "Ручка": "Stationery", "Бумага": "Paper", "Книги": "Books", "Другие": "Other", "Кресло": "Chair"}
 	zone["category"] = aliases.get(old_category, old_category) if aliases.get(old_category, old_category) in CATEGORIES else "Other"
 	if zone["name"] == old_category:
 		zone["name"] = zone["category"]

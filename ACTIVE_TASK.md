@@ -141,4 +141,6 @@ No product blocker. Exact imported .blend bounds still require visual confirmati
 Run repository gates, then measure imported structural mesh AABBs in Godot against `docs/ASSET_STANDARD.md`; correct the 13_* glass connection span to 4.0 m and any retained legacy cubicle partition to 3.0 m only after confirming source mesh bounds.
 
 ## Session handoff
+
+2026-09-28: Desk setup zones now cycle through authored shelves including the bottom frame, item categories group drinkware/food/stationery/bags/bins/plants/printers/lamps/phones, and wall fixtures are excluded from the item list. Placement probes the actual supporting surface. Planning hides the mutation canvas, and conference chairs are grounded during scene and saved-layout loading. Godot headless executable exits 139 in this environment; parser and architecture checks are the available local verification.
 T002 remains the only active task. After CI, visually verify seams and collision in Godot before adding furniture/content.

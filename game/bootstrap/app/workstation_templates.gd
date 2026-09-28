@@ -103,10 +103,18 @@ static func available_models() -> Array[String]:
 		if directory == null:
 			continue
 		for file in directory.get_files():
-			if file.ends_with(".glb") and (group != "03" or file == "03_file_cabinet_smaller.glb"):
+			if file.ends_with(".glb") and (group != "03" or file == "03_file_cabinet_smaller.glb") and not _wall_or_large_fixture(file.get_basename()):
 				result.append(file.get_basename())
 	result.sort()
 	return result
+
+
+static func _wall_or_large_fixture(model: String) -> bool:
+	var label := model.to_lower()
+	for term in ["aircondition", "wall_tv", "painting", "wall_clock", "white_board", "board_stand", "fire_extinguisher"]:
+		if term in label:
+			return true
+	return false
 
 
 static func generate(desk: Node3D, path: String, parent: Node3D, existing: Array[Node3D], make_asset: Callable) -> Array[Node3D]:

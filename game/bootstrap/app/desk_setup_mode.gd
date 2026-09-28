@@ -7,6 +7,7 @@ const ZONE_RULES := preload("res://game/bootstrap/app/desk_setup_zone_rules.gd")
 const TEMPLATE_ACTIONS := preload("res://game/bootstrap/app/desk_setup_template_actions.gd")
 const ZONE_FORM := preload("res://game/bootstrap/app/desk_setup_zone_form.gd")
 const ZONE_ACTIONS := preload("res://game/bootstrap/app/desk_setup_zone_actions.gd")
+const ZONE_CREATION := preload("res://game/bootstrap/app/desk_setup_zone_creation.gd")
 const MODEL_ROOT := "res://models/objects/enviroments/"
 
 var planner: Node
@@ -22,6 +23,7 @@ var zone_index := -1
 var front := 0
 var placing_zone := false
 var chair_positioning := false
+var shelf_mode := false
 var chair_model: OptionButton
 var panel: PanelContainer
 var scroll: ScrollContainer
@@ -193,6 +195,7 @@ func open(target: Node3D) -> void:
 	var profile: Dictionary = WORKSTATIONS.profile(_desk_path())
 	markers.call("configure", desk, profile)
 	stations = markers.get("stations")
+	shelf_mode = _desk_path().get_file().begins_with("03_") and stations.size() > 1
 	zones.clear()
 	for station_index in stations.size():
 		var station_value: Variant = stations[station_index]
@@ -325,28 +328,7 @@ func _click_world(screen: Vector2, pick_item: bool) -> void:
 			dragging_zone = true
 
 func _add_zone_at(screen: Vector2) -> void:
-	var tabletop_height: float = float(markers.get("surface_height"))
-	if zone_index >= 0 and not bool(zones[zone_index].get("floor", false)):
-		tabletop_height = float(zones[zone_index].get("height", tabletop_height))
-	var table_point := _project(screen, tabletop_height)
-	var table_local := desk.to_local(table_point)
-	var preview := {"x": table_local.x, "z": table_local.z, "width": 0.65, "depth": 0.45, "angle": 0.0, "floor": false}
-	var on_table := table_local.is_finite() and ZONE_RULES._inside_surface(Vector2(table_local.x, table_local.z), preview, stations)
-	var point := table_point if on_table else _project(screen, 0.0)
-	if not point.is_finite():
-		return
-	var local: Vector3 = desk.to_local(point)
-	var zone := {"name": "Zone %d" % (zones.size() + 1), "required": false, "category": "Other", "angle": 0.0, "x": snappedf(local.x, 0.05), "z": snappedf(local.z, 0.05), "width": 0.65, "depth": 0.45, "height": tabletop_height if on_table else 0.0, "floor": not on_table}
-	var center := ZONE_RULES.snap_to_neighbors(Vector2(zone["x"], zone["z"]), zone, zones, -1)
-	zone["x"] = center.x
-	zone["z"] = center.y
-	if not ZONE_RULES._inside_surface(Vector2(zone["x"], zone["z"]), zone, stations):
-		status.text = "Zone must fit on the selected surface."
-		return
-	zones.append(zone)
-	zone_index = zones.size() - 1
-	placing_zone = false
-	_refresh_zones()
+	ZONE_CREATION.add_at(self, screen)
 
 func _move_zone(index: int, target: Vector2) -> void:
 	if ZONE_RULES.move_zone(desk, zones, index, target, stations, _attachments()):
@@ -438,7 +420,7 @@ func _attachments() -> Array[Node3D]:
 
 func _start_zone() -> void:
 	placing_zone = true
-	status.text = "Click the table or floor to set the zone centre."
+	status.text = "Click the selected shelf to set the zone centre." if shelf_mode else "Click the table or floor to set the zone centre."
 
 
 func _toggle_surface_at(index: int) -> void:
@@ -552,7 +534,7 @@ func _refresh_zones() -> void:
 		select.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 		select.modulate = Color(1.0, 0.83, 0.48) if i == zone_index else Color.WHITE
 		_button(row, "Duplicate", _duplicate_zone_at.bind(i))
-		_button(row, "Floor" if bool(zones[i].get("floor", false)) else "Table", _toggle_surface_at.bind(i))
+		_button(row, ZONE_CREATION.surface_label(self, zones[i]), _toggle_surface_at.bind(i))
 		_button(row, "×", _remove_zone_at.bind(i))
 	if zone_index >= 0:
 		_select_zone(zone_index)
