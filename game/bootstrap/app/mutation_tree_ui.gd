@@ -88,6 +88,8 @@ func _input(event: InputEvent) -> void:
 
 
 func _unhandled_key_input(event: InputEvent) -> void:
+	if not visible:
+		return
 	if event is InputEventKey and event.pressed and not event.echo:
 		if event.keycode == KEY_M:
 			_set_open(not panel.visible)
