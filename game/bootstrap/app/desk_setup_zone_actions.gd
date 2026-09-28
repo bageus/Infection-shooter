@@ -158,7 +158,7 @@ static func toggle_surface(mode: Variant) -> void:
 			if absf(float(zone.get("height", 0.0)) - float(mode.stations[index].get("grid_height", 0.0))) < 0.04:
 				current = index
 				break
-		var next := (current + 1) % mode.stations.size()
+		var next: int = (current + 1) % int(mode.stations.size())
 		var target_height := float(mode.stations[next].get("grid_height", 0.0))
 		var proposed := zone.duplicate()
 		proposed["height"] = target_height
