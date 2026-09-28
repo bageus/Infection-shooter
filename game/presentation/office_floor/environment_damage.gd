@@ -30,7 +30,7 @@ static func _collect(node: Node, meshes: Array[MeshInstance3D]) -> void:
 		_collect(child, meshes)
 
 
-static func spawn_piece(host: Node3D, mesh: MeshInstance3D, owner: Node3D, stage: int, index: int, direction: Vector3, hit_point: Vector3) -> RigidBody3D:
+static func spawn_piece(host: Node3D, mesh: MeshInstance3D, owner: Node3D, stage: int, index: int, direction: Vector3, hit_point: Vector3, blast: bool = false) -> RigidBody3D:
 	var bounds: AABB = mesh.global_transform * mesh.get_aabb()
 	if bounds.size.length_squared() < 0.000001:
 		return null
@@ -54,5 +54,8 @@ static func spawn_piece(host: Node3D, mesh: MeshInstance3D, owner: Node3D, stage
 	host.get_tree().current_scene.add_child(fragment)
 	fragment.global_position = bounds.get_center()
 	copy.global_transform = mesh.global_transform
-	fragment.apply_impulse(direction.normalized() * randf_range(0.15, 0.7) + Vector3.UP * 0.3, hit_point - fragment.global_position)
+	var away := fragment.global_position - hit_point
+	away.y = maxf(away.y, 0.1)
+	var impulse := (away.normalized() * 0.75 + direction.normalized() * 0.25 + Vector3.UP * 0.35).normalized() * fragment.mass * randf_range(1.5, 3.0) if blast else direction.normalized() * randf_range(0.15, 0.7) + Vector3.UP * 0.3
+	fragment.apply_impulse(impulse, (hit_point - fragment.global_position).limit_length(0.3))
 	return fragment

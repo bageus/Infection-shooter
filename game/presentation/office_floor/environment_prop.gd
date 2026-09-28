@@ -19,6 +19,7 @@ var _glass_broken := false
 var _broken := false
 var _health := 0.0
 var _transition_pending := false
+var _pending_full_break := false
 var _book_kick_cooldown := 0.0
 var _extinguisher_triggered := false
 
@@ -141,7 +142,8 @@ func take_projectile_hit_at_shape(damage: float, hit_position: Vector3, normal: 
 		var mesh_index := _shapes.find(collision)
 		if mesh_index >= 0 and _is_glass_mesh(_shape_meshes[mesh_index]):
 			call_deferred("_shatter_glass", hit_position, direction)
-			return false
+			if weapon != "GRENADE":
+				return false
 	return take_projectile_hit(damage, hit_position, normal, direction, weapon)
 
 
@@ -192,6 +194,7 @@ func take_projectile_hit(damage: float, hit_position: Vector3, _normal: Vector3,
 	if not _broken and not _transition_pending and (_variant_index + 1 < _variants.size() or not _stages.is_empty()):
 		_health -= BALANCE.object_damage(damage, weapon, _damage_category())
 		if _health <= 0.0:
+			_pending_full_break = weapon == "GRENADE" and not _stages.is_empty()
 			_transition_pending = true
 			call_deferred("_apply_damage", hit_position, direction)
 	elif not freeze:
@@ -227,7 +230,7 @@ func _apply_damage(hit_position: Vector3, direction: Vector3) -> void:
 		return
 	if _damage_category() == "tech":
 		SPARKS.spawn(self, hit_position, true)
-	if _variant_index + 1 < _variants.size():
+	if _variant_index + 1 < _variants.size() and not _pending_full_break:
 		if _intact != null:
 			_intact.hide()
 		if _variant_index >= 0:
@@ -253,7 +256,7 @@ func _apply_damage(hit_position: Vector3, direction: Vector3) -> void:
 			shape.set_deferred("disabled", true)
 		collision_layer = 0
 		freeze = true
-		_spawn_stage(0, "", hit_position, direction)
+		_spawn_stage(0, "", hit_position, direction, _pending_full_break)
 
 
 func _rebuild_shapes() -> void:
@@ -265,7 +268,7 @@ func _rebuild_shapes() -> void:
 	_add_shapes(_visual)
 
 
-func _spawn_stage(stage_index: int, prefix: String, hit_position: Vector3, direction: Vector3) -> bool:
+func _spawn_stage(stage_index: int, prefix: String, hit_position: Vector3, direction: Vector3, blast: bool = false) -> bool:
 	if stage_index >= _stages.size():
 		return false
 	var meshes: Array[MeshInstance3D] = DAMAGE.reveal_meshes(_stages[stage_index])
@@ -275,7 +278,7 @@ func _spawn_stage(stage_index: int, prefix: String, hit_position: Vector3, direc
 			continue
 		if spawned >= 32:
 			break
-		var body: RigidBody3D = DAMAGE.spawn_piece(self, mesh, self, stage_index, spawned, direction, hit_position)
+		var body: RigidBody3D = DAMAGE.spawn_piece(self, mesh, self, stage_index, spawned, direction, hit_position, blast)
 		if body != null:
 			spawned += 1
 	return spawned > 0

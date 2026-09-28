@@ -38,6 +38,8 @@ func take_projectile_hit(damage: float, hit_point: Vector3, _normal: Vector3, di
 		_intact_health -= BALANCE.object_damage(damage, weapon, "large")
 		if _intact_health <= 0.0:
 			_switch_to_modular()
+			if weapon == "GRENADE":
+				hit_piece("Top", hit_point, direction, damage, weapon)
 	else:
 		hit_piece(_part_at(hit_point), hit_point, direction, damage, weapon)
 	return true

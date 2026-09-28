@@ -25,15 +25,15 @@ static func explode(projectile: Node3D, location: Vector3, normal: Vector3, cont
 		var body := collider as Node3D
 		if body == null:
 			continue
-		var distance := body.global_position.distance_to(location)
+		var distance := _distance_to_shape(collider, int(hit.get("shape", -1)), location, body.global_position)
 		var factor := pow(1.0 - clampf(distance / RADIUS, 0.0, 1.0), 1.15)
 		var direction := (body.global_position - location).normalized()
 		if direction.length_squared() < 0.01:
 			direction = Vector3.UP
 		if collider.has_method("take_projectile_hit_at_shape"):
-			collider.call("take_projectile_hit_at_shape", 380.0 * factor, body.global_position, -direction, direction, "GRENADE", int(hit.get("shape", -1)))
+			collider.call("take_projectile_hit_at_shape", 380.0 * factor, location, -direction, direction, "GRENADE", int(hit.get("shape", -1)))
 		elif collider.has_method("take_projectile_hit"):
-			collider.call("take_projectile_hit", 380.0 * factor, body.global_position, -direction, direction, "GRENADE")
+			collider.call("take_projectile_hit", 380.0 * factor, location, -direction, direction, "GRENADE")
 		elif collider.has_method("take_damage"):
 			collider.call("take_damage", 155.0 * factor)
 		if collider is RigidBody3D and not (collider as RigidBody3D).freeze:
@@ -48,6 +48,18 @@ static func explode(projectile: Node3D, location: Vector3, normal: Vector3, cont
 		var surface := projectile.get_world_3d().direct_space_state.intersect_ray(trace)
 		if not surface.is_empty() and not surface["collider"].has_method("take_projectile_hit"):
 			_scorch(scene, surface["position"], surface["normal"])
+
+
+static func _distance_to_shape(collider: Object, shape_index: int, location: Vector3, fallback: Vector3) -> float:
+	if collider is CollisionObject3D and shape_index >= 0:
+		var physics_body := collider as CollisionObject3D
+		var owner := physics_body.shape_owner_get_owner(physics_body.shape_find_owner(shape_index)) as CollisionShape3D
+		if owner != null and owner.shape is BoxShape3D:
+			var half := (owner.shape as BoxShape3D).size * 0.5
+			var local := owner.to_local(location)
+			var nearest := Vector3(clampf(local.x, -half.x, half.x), clampf(local.y, -half.y, half.y), clampf(local.z, -half.z, half.z))
+			return owner.to_global(nearest).distance_to(location)
+	return fallback.distance_to(location)
 
 
 static func _flash(scene: Node3D, location: Vector3) -> void:
