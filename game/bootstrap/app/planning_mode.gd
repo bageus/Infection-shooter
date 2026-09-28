@@ -69,6 +69,7 @@ var map_select: OptionButton
 
 const ENVIRONMENT_ROOT := "res://models/objects/enviroments"
 const ENVIRONMENT_SCENE := preload("res://game/presentation/office_floor/public/props/environment_prop.tscn")
+const STAIRCASE_SCENE := preload("res://game/presentation/office_floor/public/structural/staircase.tscn")
 const WORKSTATIONS := preload("res://game/bootstrap/app/workstation_templates.gd")
 const DESK_SETUP_MODE := preload("res://game/bootstrap/app/desk_setup_mode.gd")
 
@@ -752,6 +753,10 @@ func _visual_object_at(screen_pos: Vector2) -> Node3D:
 
 func _instantiate_asset(asset_path: String) -> Node3D:
 	if asset_path.begins_with(ENVIRONMENT_ROOT + "/") and asset_path.ends_with(".glb"):
+		if asset_path.get_file() in ["01_stairs.glb", "01_stairs_2.glb"]:
+			var staircase := STAIRCASE_SCENE.instantiate() as Node3D
+			staircase.set("model_path", asset_path)
+			return staircase
 		var environment := ENVIRONMENT_SCENE.instantiate() as Node3D
 		environment.set("model_path", asset_path)
 		return environment

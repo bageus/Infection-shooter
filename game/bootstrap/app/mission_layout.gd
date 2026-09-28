@@ -3,15 +3,17 @@ extends Node3D
 const KEY := preload("res://game/bootstrap/app/mission_key.gd")
 const WEAPON := preload("res://game/bootstrap/app/weapon_pickup.gd")
 const DOOR := preload("res://game/presentation/office_floor/public/structural/wall_emergency_door.tscn")
-const OPENING := Rect2(Vector2(-22, 10), Vector2(4, 14))
-const LOWER_END_Y := -3.4
+const FLOOR_BOUNDS := Rect2(-40, -30, 80, 60)
+const TILE_STEP := 2.0
+
+var _stage: Node3D
+var _openings: Array[Rect2] = []
+var _scan_remaining := 0.0
 
 
 func setup(stage: Node3D) -> void:
-	stage.get_node("Floor").call("set_stair_opening", OPENING)
-	_cut_floor_collision(stage.get_node("FloorBody") as StaticBody3D)
-	_build_staircase()
-	_build_stairwell_walls()
+	_stage = stage
+	_refresh_stairs()
 	var door := DOOR.instantiate() as Node3D
 	door.name = "LockedEmergencyDoor"
 	stage.get_node("Structure").add_child(door)
@@ -21,6 +23,13 @@ func setup(stage: Node3D) -> void:
 	add_child(key)
 	key.global_position = Vector3(20, 0.25, 15)
 	spawn_weapon(3, Vector3(-20, 0.25, -15))
+
+
+func _process(delta: float) -> void:
+	_scan_remaining -= delta
+	if _scan_remaining <= 0.0:
+		_scan_remaining = 0.35
+		_refresh_stairs()
 
 
 func spawn_weapon(index: int, world_position: Vector3) -> void:
@@ -33,83 +42,98 @@ func spawn_weapon(index: int, world_position: Vector3) -> void:
 
 
 func goal_reached(location: Vector3) -> bool:
-	return location.x > OPENING.position.x and location.x < OPENING.end.x and location.z > 19 and location.z < OPENING.end.y and location.y < -1.3
+	if location.y >= -1.3:
+		return false
+	for opening in _openings:
+		if opening.grow(-0.25).has_point(Vector2(location.x, location.z)):
+			return true
+	return false
 
 
-func _cut_floor_collision(body: StaticBody3D) -> void:
-	body.get_node("CollisionShape3D").set_deferred("disabled", true)
-	# Four boxes leave exactly the same 4 x 14 m hole as the missing floor tiles.
-	for region in [Rect2(-40, -30, 18, 60), Rect2(-18, -30, 58, 60), Rect2(-22, -30, 4, 40), Rect2(-22, 24, 4, 6)]:
-		var shape := CollisionShape3D.new()
+func _refresh_stairs() -> void:
+	if _stage == null:
+		return
+	var next_openings: Array[Rect2] = []
+	for node in _stage.get_node("PlanningObjects").get_children():
+		if not node is Node3D:
+			continue
+		var stair := node as Node3D
+		var asset_path := str(stair.get_meta("planning_scene_path", ""))
+		if asset_path.is_empty():
+			asset_path = str(stair.get("model_path"))
+		if asset_path.get_file() not in ["01_stairs.glb", "01_stairs_2.glb"]:
+			continue
+		var bounds := _visual_bounds(stair)
+		# An upstairs flight needs the unbroken ground floor beneath it.
+		if bounds.size.length_squared() < 0.01 or bounds.position.y > -0.4 or bounds.end.y < -0.05:
+			continue
+		var area := _tile_aligned(Rect2(Vector2(bounds.position.x, bounds.position.z), Vector2(bounds.size.x, bounds.size.z)).grow(0.1))
+		if area.has_area():
+			next_openings.append(area)
+	if next_openings == _openings:
+		return
+	_openings = next_openings
+	_stage.get_node("Floor").call("set_stair_openings", _openings)
+	_update_floor_collision(_stage.get_node("FloorBody") as StaticBody3D)
+
+
+func _visual_bounds(stair: Node3D) -> AABB:
+	var bounds := AABB()
+	var found := false
+	for child in stair.find_children("*", "MeshInstance3D", true, false):
+		var mesh := child as MeshInstance3D
+		if mesh.mesh == null or mesh.has_meta("planning_selection_highlight"):
+			continue
+		var box := mesh.global_transform * mesh.get_aabb()
+		bounds = bounds.merge(box) if found else box
+		found = true
+	return bounds
+
+
+func _tile_aligned(area: Rect2) -> Rect2:
+	var start := Vector2(
+		floorf((area.position.x - FLOOR_BOUNDS.position.x) / TILE_STEP) * TILE_STEP + FLOOR_BOUNDS.position.x,
+		floorf((area.position.y - FLOOR_BOUNDS.position.y) / TILE_STEP) * TILE_STEP + FLOOR_BOUNDS.position.y
+	)
+	var finish := Vector2(
+		ceilf((area.end.x - FLOOR_BOUNDS.position.x) / TILE_STEP) * TILE_STEP + FLOOR_BOUNDS.position.x,
+		ceilf((area.end.y - FLOOR_BOUNDS.position.y) / TILE_STEP) * TILE_STEP + FLOOR_BOUNDS.position.y
+	)
+	return Rect2(start, finish - start).intersection(FLOOR_BOUNDS)
+
+
+func _update_floor_collision(body: StaticBody3D) -> void:
+	var original := body.get_node("CollisionShape3D") as CollisionShape3D
+	for child in body.get_children():
+		if child.name.begins_with("StairFloorRegion"):
+			body.remove_child(child)
+			child.queue_free()
+	original.set_deferred("disabled", not _openings.is_empty())
+	if _openings.is_empty():
+		return
+	var regions: Array[Rect2] = [FLOOR_BOUNDS]
+	for opening in _openings:
+		var remaining: Array[Rect2] = []
+		for region in regions:
+			var overlap := region.intersection(opening)
+			if not overlap.has_area():
+				remaining.append(region)
+				continue
+			for part in [
+				Rect2(region.position, Vector2(region.size.x, overlap.position.y - region.position.y)),
+				Rect2(Vector2(region.position.x, overlap.end.y), Vector2(region.size.x, region.end.y - overlap.end.y)),
+				Rect2(Vector2(region.position.x, overlap.position.y), Vector2(overlap.position.x - region.position.x, overlap.size.y)),
+				Rect2(Vector2(overlap.end.x, overlap.position.y), Vector2(region.end.x - overlap.end.x, overlap.size.y))
+			]:
+				if part.has_area():
+					remaining.append(part)
+		regions = remaining
+	for index in regions.size():
+		var region := regions[index]
+		var collision := CollisionShape3D.new()
+		collision.name = "StairFloorRegion%d" % index
 		var box := BoxShape3D.new()
 		box.size = Vector3(region.size.x, 0.2, region.size.y)
-		shape.shape = box
-		shape.position = Vector3(region.get_center().x, -0.1, region.get_center().y)
-		body.add_child(shape)
-
-
-func _build_staircase() -> void:
-	var body := StaticBody3D.new()
-	body.name = "WalkableStairRamp"
-	body.collision_layer = 3
-	add_child(body)
-	var collision := CollisionShape3D.new()
-	var ramp := BoxShape3D.new()
-	ramp.size = Vector3(3.7, 0.2, sqrt(14.0 * 14.0 + LOWER_END_Y * LOWER_END_Y))
-	collision.shape = ramp
-	collision.position = Vector3(-20, LOWER_END_Y * 0.5 - 0.1, 17)
-	collision.rotation.x = atan(-LOWER_END_Y / 14.0)
-	body.add_child(collision)
-	var treads := StandardMaterial3D.new()
-	treads.albedo_color = Color(0.33, 0.37, 0.4)
-	var edges := StandardMaterial3D.new()
-	edges.albedo_color = Color(0.73, 0.58, 0.29)
-	for step in 14:
-		var z := 10.5 + step
-		var elevation := LOWER_END_Y * (float(step) + 0.5) / 14.0
-		_box(Vector3(-20, elevation - 0.11, z), Vector3(3.65, 0.15, 0.97), treads)
-		_box(Vector3(-20, elevation - 0.03, z + 0.43), Vector3(3.65, 0.025, 0.08), edges)
-	for side in [-1.0, 1.0]:
-		for step in 14:
-			var z := 10.5 + step
-			var elevation := LOWER_END_Y * (float(step) + 0.5) / 14.0
-			_box(Vector3(-20 + side * 1.83, elevation + 0.18, z), Vector3(0.05, 0.36, 0.97), edges)
-
-
-func _build_stairwell_walls() -> void:
-	var material := StandardMaterial3D.new()
-	material.albedo_color = Color(0.35, 0.38, 0.42)
-	# Side and end walls join the locked door, so the stairwell has one entrance.
-	for x in [-22.0, -18.0]:
-		_wall(Vector3(x, -0.95, 16.2), Vector3(0.16, 5.0, 15.8), material)
-	_wall(Vector3(-20, -0.95, 24.1), Vector3(4.0, 5.0, 0.16), material)
-	for x in [-21.58, -18.42]:
-		_wall(Vector3(x, 1.5, 8.6), Vector3(0.84, 3.0, 0.25), material)
-
-
-func _wall(at: Vector3, dimensions: Vector3, material: Material) -> void:
-	var body := StaticBody3D.new()
-	body.collision_layer = 3
-	add_child(body)
-	var shape := CollisionShape3D.new()
-	var box := BoxShape3D.new()
-	box.size = dimensions
-	shape.shape = box
-	body.add_child(shape)
-	body.position = at
-	var panel := BoxMesh.new()
-	panel.size = dimensions
-	panel.material = material
-	var visual := MeshInstance3D.new()
-	visual.mesh = panel
-	body.add_child(visual)
-
-
-func _box(at: Vector3, dimensions: Vector3, material: Material) -> void:
-	var mesh := BoxMesh.new()
-	mesh.size = dimensions
-	mesh.material = material
-	var visual := MeshInstance3D.new()
-	visual.mesh = mesh
-	visual.position = at
-	add_child(visual)
+		collision.shape = box
+		collision.position = Vector3(region.get_center().x, -0.1, region.get_center().y)
+		body.add_child(collision)

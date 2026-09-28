@@ -5,7 +5,7 @@ const TILE_SCENE := preload("res://game/presentation/office_floor/public/structu
 @export var floor_size := Vector2(80.0, 60.0)
 @export var tile_step := 2.0
 @export var tile_y := 0.001
-var opening := Rect2()
+var openings: Array[Rect2] = []
 
 func _ready() -> void:
 	_build_tiles()
@@ -20,13 +20,20 @@ func _build_tiles() -> void:
 	for z in rows:
 		for x in columns:
 			var tile_position := Vector2(start_x + x * tile_step, start_z + z * tile_step)
-			if opening.has_area() and opening.has_point(tile_position):
+			var covered := false
+			for opening in openings:
+				if opening.has_point(tile_position):
+					covered = true
+					break
+			if covered:
 				continue
 			var tile := TILE_SCENE.instantiate() as Node3D
 			add_child(tile)
 			tile.position = Vector3(tile_position.x, tile_y, tile_position.y)
 
 
-func set_stair_opening(area: Rect2) -> void:
-	opening = area
+func set_stair_openings(areas: Array[Rect2]) -> void:
+	if openings == areas:
+		return
+	openings = areas.duplicate()
 	_build_tiles()
