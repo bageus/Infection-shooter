@@ -43,6 +43,7 @@ var _mutation_menu_open := false
 var _owned_weapons := [true, true, true, false]
 var _emergency_key := false
 func _ready() -> void:
+	floor_snap_length = 0.45
 	_camera_distance=camera.position.length()
 	health=max_health
 	armor=max_armor

@@ -139,7 +139,7 @@ func _on_mutation_choice_requested() -> void:
 func _on_mutation_ability_changed(choice: int) -> void:
 	if choice == 0:
 		mutation_choice.hide()
-		if not _pause_open and not planning_mode.active and not _ended:
+		if not _pause_open and not planning_mode.active and not _ended and not bool(mutation_tree_ui.call("is_tree_open")):
 			get_tree().paused = false
 
 

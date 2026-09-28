@@ -3,25 +3,25 @@ extends RefCounted
 # Move a local placement region and its contents as one transaction.
 const WORKSTATIONS := preload("res://game/bootstrap/app/workstation_templates.gd")
 const GEOMETRY := preload("res://game/bootstrap/app/desk_setup_zone_geometry.gd")
-const CATEGORIES := ["Монитор", "Клавиатура", "Мышь", "Ноутбук", "Стакан", "Кружка", "Карандаш", "Ручка", "Бумага", "Книги", "Mini PC", "Tower PC", "Другие", "Кресло"]
+const CATEGORIES := ["Monitor", "Keyboard", "Mouse", "Laptop", "Glass", "Mug", "Pencil", "Pen", "Paper", "Books", "Mini PC", "Tower PC", "Other", "Chair"]
 
 
 static func category_for(model: String) -> String:
 	var label := model.to_lower()
-	if "chair" in label: return "Кресло"
-	if "monitor" in label: return "Монитор"
-	if "keyboard" in label: return "Клавиатура"
-	if "laptop" in label: return "Ноутбук"
-	if "mouse" in label: return "Мышь"
+	if "chair" in label: return "Chair"
+	if "monitor" in label: return "Monitor"
+	if "keyboard" in label: return "Keyboard"
+	if "laptop" in label: return "Laptop"
+	if "mouse" in label: return "Mouse"
 	if "minipc" in label: return "Mini PC"
 	if "computer_tower" in label or label.begins_with("05_pc_"): return "Tower PC"
-	if "mug" in label: return "Кружка"
-	if label.begins_with("09_glass"): return "Стакан"
-	if "pencil" in label: return "Карандаш"
-	if label.begins_with("09_pen_"): return "Ручка"
-	if "book" in label: return "Книги"
-	if "paper" in label or "file" in label or "notepad" in label or "binder" in label: return "Бумага"
-	return "Другие"
+	if "mug" in label: return "Mug"
+	if label.begins_with("09_glass"): return "Glass"
+	if "pencil" in label: return "Pencil"
+	if label.begins_with("09_pen_"): return "Pen"
+	if "book" in label: return "Books"
+	if "paper" in label or "file" in label or "notepad" in label or "binder" in label: return "Paper"
+	return "Other"
 
 
 static func models_for(category: String) -> Array[String]:
@@ -36,9 +36,11 @@ static func normalize(zone: Dictionary, index: int) -> Dictionary:
 	zone["name"] = str(zone.get("name", "Zone %d" % (index + 1)))
 	zone["required"] = bool(zone.get("required", true))
 	zone["angle"] = float(zone.get("angle", 0.0))
-	var old_category := str(zone.get("category", "Другие"))
-	var aliases := {"Any": "Другие", "Other": "Другие", "Chair": "Кресло", "Monitor": "Монитор", "Keyboard": "Клавиатура", "Laptop": "Ноутбук", "Computer": "Tower PC", "Mouse": "Мышь", "Drinkware": "Стакан", "Paper": "Бумага", "Book": "Книги"}
-	zone["category"] = aliases.get(old_category, old_category) if aliases.get(old_category, old_category) in CATEGORIES else "Другие"
+	var old_category := str(zone.get("category", "Other"))
+	var aliases := {"Any": "Other", "Computer": "Tower PC", "Drinkware": "Glass", "Book": "Books", "Монитор": "Monitor", "Клавиатура": "Keyboard", "Мышь": "Mouse", "Ноутбук": "Laptop", "Стакан": "Glass", "Кружка": "Mug", "Карандаш": "Pencil", "Ручка": "Pen", "Бумага": "Paper", "Книги": "Books", "Другие": "Other", "Кресло": "Chair"}
+	zone["category"] = aliases.get(old_category, old_category) if aliases.get(old_category, old_category) in CATEGORIES else "Other"
+	if zone["name"] == old_category:
+		zone["name"] = zone["category"]
 	return zone
 
 
@@ -86,7 +88,7 @@ static func rotate_items(desk: Node3D, zone: Dictionary, attached: Array[Node3D]
 static func random_items(zone: Dictionary) -> Array[Dictionary]:
 	var random := RandomNumberGenerator.new()
 	random.randomize()
-	var choices := models_for(str(zone.get("category", "Другие")))
+	var choices := models_for(str(zone.get("category", "Other")))
 	var result: Array[Dictionary] = []
 	if choices.is_empty():
 		return result

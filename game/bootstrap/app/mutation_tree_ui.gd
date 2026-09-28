@@ -5,24 +5,26 @@ const TREE_CANVAS := preload("res://game/bootstrap/app/mutation_tree_canvas.gd")
 var runtime: Node
 var panel: PanelContainer
 var points_label: Label
-var content: VBoxContainer
+var content: Control
 var hotbar: HBoxContainer
 var _last_skill_tier := -1
+var _previous_pause := false
 
 
 func configure(infection: Node) -> void:
 	runtime = infection
 	layer = 120
+	process_mode = Node.PROCESS_MODE_ALWAYS
 	var root := Control.new()
 	root.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 	root.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	add_child(root)
 	panel = PanelContainer.new()
-	panel.set_anchors_preset(Control.PRESET_CENTER)
-	panel.offset_left = -520
-	panel.offset_right = 520
-	panel.offset_top = -320
-	panel.offset_bottom = 320
+	panel.set_anchors_preset(Control.PRESET_FULL_RECT)
+	panel.offset_left = 12
+	panel.offset_right = -12
+	panel.offset_top = 12
+	panel.offset_bottom = -12
 	panel.mouse_filter = Control.MOUSE_FILTER_STOP
 	root.add_child(panel)
 	var layout := VBoxContainer.new()
@@ -36,12 +38,12 @@ func configure(infection: Node) -> void:
 	close.text = "Close [Esc / M]"
 	close.pressed.connect(close_tree)
 	title.add_child(close)
-	var scroll := ScrollContainer.new()
-	scroll.size_flags_vertical = Control.SIZE_EXPAND_FILL
-	scroll.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_AUTO
-	layout.add_child(scroll)
-	content = VBoxContainer.new()
-	scroll.add_child(content)
+	content = Control.new()
+	content.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	content.size_flags_vertical = Control.SIZE_EXPAND_FILL
+	content.clip_contents = true
+	layout.add_child(content)
+	content.resized.connect(_fit_tree)
 	var hint := Label.new()
 	hint.text = "Click a circle to unlock a skill. Hover for details. Lock a learned skill to keep it when mutation drops."
 	layout.add_child(hint)
@@ -102,10 +104,29 @@ func is_tree_open() -> bool:
 
 
 func _set_open(value: bool) -> void:
+	if panel.visible == value:
+		return
+	if value:
+		_previous_pause = get_tree().paused
+		get_tree().paused = true
+	else:
+		get_tree().paused = _previous_pause
 	panel.visible = value
 	if runtime != null and runtime.get_parent() != null:
 		runtime.get_parent().set("_mutation_menu_open", value)
 	_refresh()
+	if value:
+		_fit_tree.call_deferred()
+
+
+func _fit_tree() -> void:
+	if content == null or content.get_child_count() == 0:
+		return
+	var canvas := content.get_child(0) as Control
+	var design_size := Vector2(1280, 900)
+	var factor := minf(content.size.x / design_size.x, content.size.y / design_size.y)
+	canvas.scale = Vector2.ONE * factor
+	canvas.position = (content.size - design_size * factor) * 0.5
 
 
 func _refresh() -> void:
@@ -121,6 +142,7 @@ func _refresh() -> void:
 	var skills: Array = runtime.call("skill_catalog")
 	var canvas := TREE_CANVAS.new() as Control
 	content.add_child(canvas)
+	_fit_tree.call_deferred()
 	var progress: Array[int] = []
 	for branch_index in TREE_CANVAS.BRANCHES.size():
 		var branch: String = TREE_CANVAS.BRANCHES[branch_index]

@@ -4,7 +4,7 @@ const KEY := preload("res://game/bootstrap/app/mission_key.gd")
 const WEAPON := preload("res://game/bootstrap/app/weapon_pickup.gd")
 const DOOR := preload("res://game/presentation/office_floor/public/structural/wall_emergency_door.tscn")
 const FLOOR_BOUNDS := Rect2(-40, -30, 80, 60)
-const TILE_STEP := 2.0
+const CUT_STEP := 0.5
 
 var _stage: Node3D
 var _openings: Array[Rect2] = []
@@ -45,7 +45,7 @@ func goal_reached(location: Vector3) -> bool:
 	if location.y >= -1.3:
 		return false
 	for opening in _openings:
-		if opening.grow(-0.25).has_point(Vector2(location.x, location.z)):
+		if opening.has_point(Vector2(location.x, location.z)):
 			return true
 	return false
 
@@ -67,9 +67,7 @@ func _refresh_stairs() -> void:
 		# An upstairs flight needs the unbroken ground floor beneath it.
 		if bounds.size.length_squared() < 0.01 or bounds.position.y > -0.4 or bounds.end.y < -0.05:
 			continue
-		var area := _tile_aligned(Rect2(Vector2(bounds.position.x, bounds.position.z), Vector2(bounds.size.x, bounds.size.z)).grow(0.1))
-		if area.has_area():
-			next_openings.append(area)
+		next_openings.append_array(_stair_openings(stair, bounds))
 	if next_openings == _openings:
 		return
 	_openings = next_openings
@@ -90,16 +88,42 @@ func _visual_bounds(stair: Node3D) -> AABB:
 	return bounds
 
 
-func _tile_aligned(area: Rect2) -> Rect2:
-	var start := Vector2(
-		floorf((area.position.x - FLOOR_BOUNDS.position.x) / TILE_STEP) * TILE_STEP + FLOOR_BOUNDS.position.x,
-		floorf((area.position.y - FLOOR_BOUNDS.position.y) / TILE_STEP) * TILE_STEP + FLOOR_BOUNDS.position.y
-	)
-	var finish := Vector2(
-		ceilf((area.end.x - FLOOR_BOUNDS.position.x) / TILE_STEP) * TILE_STEP + FLOOR_BOUNDS.position.x,
-		ceilf((area.end.y - FLOOR_BOUNDS.position.y) / TILE_STEP) * TILE_STEP + FLOOR_BOUNDS.position.y
-	)
-	return Rect2(start, finish - start).intersection(FLOOR_BOUNDS)
+func _stair_openings(stair: Node3D, bounds: AABB) -> Array[Rect2]:
+	var result: Array[Rect2] = []
+	var first_x := maxi(0, floori((bounds.position.x - FLOOR_BOUNDS.position.x) / CUT_STEP))
+	var last_x := mini(floori(FLOOR_BOUNDS.size.x / CUT_STEP), ceili((bounds.end.x - FLOOR_BOUNDS.position.x) / CUT_STEP))
+	var first_z := maxi(0, floori((bounds.position.z - FLOOR_BOUNDS.position.y) / CUT_STEP))
+	var last_z := mini(floori(FLOOR_BOUNDS.size.y / CUT_STEP), ceili((bounds.end.z - FLOOR_BOUNDS.position.y) / CUT_STEP))
+	for z in range(first_z, last_z):
+		var start := -1
+		for x in range(first_x, last_x + 1):
+			var below := false
+			if x < last_x:
+				var world_x := FLOOR_BOUNDS.position.x + (x + 0.5) * CUT_STEP
+				var world_z := FLOOR_BOUNDS.position.y + (z + 0.5) * CUT_STEP
+				var local := stair.to_local(Vector3(world_x, stair.global_position.y, world_z))
+				var surface := _stair_surface_height(local)
+				below = surface >= 0.0 and stair.to_global(Vector3(local.x, surface, local.z)).y < -0.06
+			if below and start < 0:
+				start = x
+			elif not below and start >= 0:
+				result.append(Rect2(FLOOR_BOUNDS.position + Vector2(start, z) * CUT_STEP, Vector2(x - start, 1) * CUT_STEP))
+				start = -1
+	return result
+
+
+func _stair_surface_height(local: Vector3) -> float:
+	if absf(local.x) > 1.98 or local.z < -1.42 or local.z > 4.22:
+		return -1.0
+	if local.z < 0.0:
+		return 3.0
+	if local.z > 2.82:
+		return 1.5
+	if local.x < -0.12:
+		return 1.5 * local.z / 2.82
+	if local.x > 0.12:
+		return 3.0 - 1.5 * local.z / 2.82
+	return -1.0
 
 
 func _update_floor_collision(body: StaticBody3D) -> void:

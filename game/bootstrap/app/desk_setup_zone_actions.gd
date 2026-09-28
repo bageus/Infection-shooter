@@ -27,7 +27,7 @@ static func duplicate_zone(mode: Variant, index: int) -> void:
 		return
 	var source: Dictionary = mode.zones[index]
 	var copy := source.duplicate(true)
-	copy["name"] = str(source.get("name", "Zone")) + " (копия)"
+	copy["name"] = str(source.get("name", "Zone")) + " (copy)"
 	var original := Vector2(float(source["x"]), float(source["z"]))
 	var destination := original
 	var offsets := [Vector2(float(source["width"]), 0.0), Vector2(-float(source["width"]), 0.0), Vector2(0.0, float(source["depth"])), Vector2(0.0, -float(source["depth"]))]
@@ -66,7 +66,7 @@ static func duplicate_zone(mode: Variant, index: int) -> void:
 
 
 static func refresh_models(mode: Variant) -> void:
-	var category := str(mode.zones[mode.zone_index].get("category", "Другие")) if mode.zone_index >= 0 else "Другие"
+	var category := str(mode.zones[mode.zone_index].get("category", "Other")) if mode.zone_index >= 0 else "Other"
 	if mode.shown_category == category:
 		return
 	mode.shown_category = category
@@ -203,7 +203,7 @@ static func refresh_items(mode: Variant) -> void:
 			var row := HBoxContainer.new()
 			mode.zone_items.add_child(row)
 			var label := Label.new()
-			label.text = "ВНЕ ЗОНЫ: " + str(object.get_meta("planning_scene_path", object.name)).get_file().get_basename()
+			label.text = "OUTSIDE ZONE: " + str(object.get_meta("planning_scene_path", object.name)).get_file().get_basename()
 			label.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 			row.add_child(label)
 			mode._button(row, "×", Callable(mode, "_remove_zone_item").bind(object))
@@ -226,11 +226,11 @@ static func place_chair(mode: Variant, screen: Vector2) -> void:
 		return
 	var index := -1
 	for i in mode.zones.size():
-		if str(mode.zones[i].get("category", "")) == "Кресло" and bool(mode.zones[i]["floor"]):
+		if str(mode.zones[i].get("category", "")) == "Chair" and bool(mode.zones[i]["floor"]):
 			index = i
 			break
 	if index < 0:
-		mode.zones.append({"name": "Кресло", "required": true, "category": "Кресло", "angle": 0.0, "x": target.x, "z": target.y, "width": 1.45, "depth": 1.45, "height": 0.0, "floor": true})
+		mode.zones.append({"name": "Chair", "required": true, "category": "Chair", "angle": 0.0, "x": target.x, "z": target.y, "width": 1.45, "depth": 1.45, "height": 0.0, "floor": true})
 		index = mode.zones.size() - 1
 	elif not RULES.move_zone(mode.desk, mode.zones, index, target, mode.stations, mode._attachments()):
 		mode.status.text = "No room for the chair at this position."

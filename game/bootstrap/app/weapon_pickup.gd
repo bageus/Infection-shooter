@@ -1,7 +1,7 @@
 extends Node3D
 
 const ART := preload("res://game/features/combat/public/launcher_visual.gd")
-const LABELS := ["пистолет", "автомат", "дробовик", "барабанный гранатомёт"]
+const LABELS := ["pistol", "assault rifle", "shotgun", "revolver grenade launcher"]
 
 @export_range(0, 3) var weapon_index := 3
 var _base_position := Vector3.ZERO
@@ -17,7 +17,7 @@ func _ready() -> void:
 	art.scale = Vector3.ONE * 0.9
 	art.position.y = 0.08 if weapon_index == 3 and ART.launcher_model() != null else 0.25
 	_hint = Label3D.new()
-	_hint.text = "[G] Подобрать: " + LABELS[weapon_index] + "\nАктивное оружие выпадет рядом"
+	_hint.text = "[G] Pick up: " + LABELS[weapon_index] + "\nCurrent weapon drops nearby"
 	_hint.font_size = 44
 	_hint.pixel_size = 0.006
 	_hint.billboard = BaseMaterial3D.BILLBOARD_ENABLED

@@ -154,7 +154,7 @@ func _build_help(planning_ui: Control) -> void:
 	var contents := VBoxContainer.new()
 	help_panel.add_child(contents)
 	var instructions := Label.new()
-	instructions.text = "LMB drag zone  Move zone and contents\nArrows  Move selected zone (0.1 m)\nDirection  Aim zone arrow and models\nShift + LMB drag  Move one item\nDelete  Remove selected item\nRMB  Clear selection; drag to orbit\nСтол / Пол in zone row  Change surface\nWheel  Zoom in or out"
+	instructions.text = "LMB drag zone  Move zone and contents\nArrows  Move selected zone (0.1 m)\nDirection  Aim zone arrow and models\nShift + LMB drag  Move one item\nDelete  Remove selected item\nRMB  Clear selection; drag to orbit\nTable / Floor in zone row  Change surface\nWheel  Zoom in or out"
 	contents.add_child(instructions)
 	_button(contents, "ROTATE LEFT", _orbit_left)
 	_button(contents, "ROTATE RIGHT", _orbit_right)
@@ -196,9 +196,9 @@ func open(target: Node3D) -> void:
 	for station_index in stations.size():
 		var station_value: Variant = stations[station_index]
 		var station: Dictionary = station_value
-		zones.append({"name": "Surface %d" % (station_index + 1), "required": false, "category": "Другие", "angle": float(station.get("angle", 0.0)), "x": float(station.get("x", 0.0)), "z": float(station.get("z", 0.0)), "width": float(station.get("zone_width", 0.65)), "depth": float(station.get("zone_depth", 0.35)), "height": float(station.get("grid_height", profile.get("height", 0.89))), "floor": false})
+		zones.append({"name": "Surface %d" % (station_index + 1), "required": false, "category": "Other", "angle": float(station.get("angle", 0.0)), "x": float(station.get("x", 0.0)), "z": float(station.get("z", 0.0)), "width": float(station.get("zone_width", 0.65)), "depth": float(station.get("zone_depth", 0.35)), "height": float(station.get("grid_height", profile.get("height", 0.89))), "floor": false})
 	if zones.is_empty():
-		zones.append({"name": "Work surface 1", "required": false, "category": "Другие", "angle": 0.0, "x": 0.0, "z": 0.0, "width": 1.5, "depth": 0.85, "height": 0.89, "floor": false})
+		zones.append({"name": "Work surface 1", "required": false, "category": "Other", "angle": 0.0, "x": 0.0, "z": 0.0, "width": 1.5, "depth": 0.85, "height": 0.89, "floor": false})
 	front = 0
 	zone_index = 0
 	scroll.show()
@@ -334,7 +334,7 @@ func _add_zone_at(screen: Vector2) -> void:
 	if not point.is_finite():
 		return
 	var local: Vector3 = desk.to_local(point)
-	var zone := {"name": "Zone %d" % (zones.size() + 1), "required": false, "category": "Другие", "angle": 0.0, "x": snappedf(local.x, 0.05), "z": snappedf(local.z, 0.05), "width": 0.65, "depth": 0.45, "height": tabletop_height if on_table else 0.0, "floor": not on_table}
+	var zone := {"name": "Zone %d" % (zones.size() + 1), "required": false, "category": "Other", "angle": 0.0, "x": snappedf(local.x, 0.05), "z": snappedf(local.z, 0.05), "width": 0.65, "depth": 0.45, "height": tabletop_height if on_table else 0.0, "floor": not on_table}
 	var center := ZONE_RULES.snap_to_neighbors(Vector2(zone["x"], zone["z"]), zone, zones, -1)
 	zone["x"] = center.x
 	zone["z"] = center.y
@@ -505,7 +505,7 @@ func _on_zone_changed(zone_name: String, required: bool, angle: float, category:
 	if zone_index < 0:
 		return
 	var zone: Dictionary = zones[zone_index]
-	var previous_category := str(zone.get("category", "Другие"))
+	var previous_category := str(zone.get("category", "Other"))
 	if category != previous_category:
 		for object in ZONE_RULES.items_in_zone(desk, zone, _attachments()):
 			if ZONE_RULES.category_for(str(object.get_meta("planning_scene_path", "")).get_file().get_basename()) != category:
@@ -549,8 +549,8 @@ func _refresh_zones() -> void:
 		select.clip_text = true
 		select.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 		select.modulate = Color(1.0, 0.83, 0.48) if i == zone_index else Color.WHITE
-		_button(row, "Копия", _duplicate_zone_at.bind(i))
-		_button(row, "Пол" if bool(zones[i].get("floor", false)) else "Стол", _toggle_surface_at.bind(i))
+		_button(row, "Duplicate", _duplicate_zone_at.bind(i))
+		_button(row, "Floor" if bool(zones[i].get("floor", false)) else "Table", _toggle_surface_at.bind(i))
 		_button(row, "×", _remove_zone_at.bind(i))
 	if zone_index >= 0:
 		_select_zone(zone_index)
@@ -572,10 +572,10 @@ func _remove_zone_item(object: Node3D) -> void:
 
 func _zone_label(zone: Dictionary, index: int) -> String:
 	var title := str(zone.get("name", "Zone %d" % (index + 1)))
-	var category := str(zone.get("category", "Другие"))
+	var category := str(zone.get("category", "Other"))
 	if title != category:
 		title += " · " + category
-	return "%s | %s | %d°" % [title, "обяз." if bool(zone.get("required", true)) else "необяз.", roundi(float(zone.get("angle", 0.0)))]
+	return "%s | %s | %d°" % [title, "required" if bool(zone.get("required", true)) else "optional", roundi(float(zone.get("angle", 0.0)))]
 
 
 func _refresh_markers() -> void:

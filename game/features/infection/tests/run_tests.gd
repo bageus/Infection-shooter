@@ -18,7 +18,7 @@ func _run() -> void:
 	_test_first_control_loss()
 	_test_escalation_to_defeat()
 	_test_risk_window_expiry_resets_escalation()
-	_test_antidote_resets_risk_without_reducing_mutation()
+	_test_antidote_resets_risk_and_reduces_mutation()
 	_test_antidote_resets_second_risk_window()
 	_test_antidote_is_blocked_during_control_loss()
 	_test_instability_only_builds_at_critical_threshold()
@@ -159,16 +159,19 @@ func _test_risk_window_expiry_resets_escalation() -> void:
 	_expect(domain.active_control_loss_stage == 1, "The next loss after reset lasts as stage one.")
 
 
-func _test_antidote_resets_risk_without_reducing_mutation() -> void:
+func _test_antidote_resets_risk_and_reduces_mutation() -> void:
 	var domain = _reach_first_control_loss()
 	domain.tick(5.0)
 	var mutation_before := domain.mutation
 	_expect(domain.use_antidote(), "Antidote is usable during the risk window.")
-	_expect_float(domain.mutation, mutation_before, "Risk-window antidote does not reduce mutation.")
+	_expect_float(domain.mutation, maxf(0.0, mutation_before - 10.0), "Risk-window antidote reduces mutation.")
 	_expect_float(domain.risk_window_remaining, 0.0, "Risk-window antidote ends the window immediately.")
 	_expect(domain.next_control_loss_stage == 1, "Risk-window antidote resets escalation to stage one.")
 	domain.tick(10.0)
-	_expect(domain.active_control_loss_stage == 1, "Continued high mutation restarts from stage one.")
+	_expect(not domain.is_control_lost(), "Reducing mutation below critical prevents renewed control loss.")
+	domain.absorb_mutagen(2.0)
+	domain.tick(10.0)
+	_expect(domain.active_control_loss_stage == 1, "Reaching critical mutation again restarts from stage one.")
 
 
 func _test_antidote_resets_second_risk_window() -> void:
@@ -180,9 +183,10 @@ func _test_antidote_resets_second_risk_window() -> void:
 	var mutation_before := domain.mutation
 	_expect_float(domain.risk_window_remaining, 30.0, "Stage two opens the second risk window.")
 	_expect(domain.use_antidote(), "Antidote is usable during the second risk window.")
-	_expect_float(domain.mutation, mutation_before, "Second-window antidote does not reduce mutation.")
+	_expect_float(domain.mutation, maxf(0.0, mutation_before - 10.0), "Second-window antidote reduces mutation.")
 	_expect_float(domain.risk_window_remaining, 0.0, "Second-window antidote ends the risk window.")
 	_expect(domain.next_control_loss_stage == 1, "Second-window antidote resets escalation to stage one.")
+	domain.absorb_mutagen(2.0)
 	domain.tick(10.0)
 	_expect(domain.active_control_loss_stage == 1, "After a second-window reset, the next loss is stage one.")
 

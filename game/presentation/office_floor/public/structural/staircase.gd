@@ -32,7 +32,7 @@ func _ready() -> void:
 func _add_mesh_collisions(node: Node, body: StaticBody3D) -> void:
 	if node is MeshInstance3D:
 		var mesh := node as MeshInstance3D
-		if mesh.mesh != null and mesh.visible:
+		if mesh.mesh != null and mesh.visible and not ("step" in mesh.name.to_lower() or "riser" in mesh.name.to_lower() or "tread" in mesh.name.to_lower()):
 			var shape := mesh.mesh.create_trimesh_shape()
 			if shape != null:
 				var collision := CollisionShape3D.new()
