@@ -15,6 +15,7 @@ static func category_for(model: String) -> String:
 	if "mouse" in label: return "Mouse"
 	if "minipc" in label: return "Mini PC"
 	if "computer_tower" in label or label.begins_with("05_pc_"): return "Tower PC"
+	if "water_bottle" in label: return "Food"
 	if "mug" in label or label.begins_with("09_glass") or "fruit_plate" in label: return "Drinkware"
 	if label.begins_with("09_fruit_") or "snack" in label or "cookies" in label: return "Food"
 	if "pencil" in label or label.begins_with("09_pen_") or "marker" in label or "stapler" in label or "tablet" in label: return "Stationery"

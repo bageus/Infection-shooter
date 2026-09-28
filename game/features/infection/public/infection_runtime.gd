@@ -10,6 +10,7 @@ signal defeated
 signal ability_choice_requested
 signal ability_changed(choice: int)
 signal tree_changed
+signal skill_available
 signal skill_cast(skill_id: String)
 
 var _domain = InfectionDomain.new()
@@ -18,6 +19,7 @@ var _was_control_lost: bool = false
 var _was_defeated: bool = false
 var _was_choice_pending: bool = false
 var _last_active_ability: int = 0
+var _available_skills: Dictionary = {}
 
 
 func _physics_process(delta: float) -> void:
@@ -72,6 +74,18 @@ func skill_locked(skill_id: String) -> bool:
 	return tree.locked.has(skill_id)
 
 
+func can_upgrade_skill(skill_id: String) -> bool:
+	return tree.can_upgrade(skill_id, _domain.mutation)
+
+
+func _upgrade_candidates() -> Dictionary:
+	var candidates := {}
+	for row in CATALOG.all():
+		if tree.can_upgrade(str(row[0]), _domain.mutation):
+			candidates[str(row[0])] = true
+	return candidates
+
+
 func reduce_skill_cooldowns(seconds: float) -> void:
 	for skill_id in tree.cooldowns.keys():
 		tree.cooldowns[skill_id] = maxf(0.0, float(tree.cooldowns[skill_id]) - seconds)
@@ -80,6 +94,7 @@ func reduce_skill_cooldowns(seconds: float) -> void:
 func upgrade_skill(skill_id: String) -> bool:
 	if not tree.upgrade(skill_id, _domain.mutation):
 		return false
+	_available_skills = _upgrade_candidates()
 	tree_changed.emit()
 	return true
 
@@ -135,6 +150,13 @@ func _emit_state_changes(previous_mutation: float) -> void:
 		mutation_changed.emit(_domain.mutation, _domain.critical_threshold)
 		if floori((previous_mutation - 15.0) / 10.0) != floori((_domain.mutation - 15.0) / 10.0):
 			tree_changed.emit()
+		var candidates := _upgrade_candidates()
+		if _domain.mutation > previous_mutation:
+			for skill_id in candidates:
+				if not _available_skills.has(skill_id):
+					skill_available.emit()
+					break
+		_available_skills = candidates
 
 	var control_lost := _domain.is_control_lost()
 	if control_lost != _was_control_lost:

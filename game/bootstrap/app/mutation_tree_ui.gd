@@ -69,7 +69,13 @@ func configure(infection: Node) -> void:
 	bar_scroll.add_child(hotbar)
 	runtime.connect("tree_changed", _refresh)
 	runtime.connect("mutation_changed", _on_mutation_changed)
+	runtime.connect("skill_available", _on_new_skill_available)
 	_refresh()
+
+
+func _on_new_skill_available() -> void:
+	if visible and not get_tree().paused:
+		open_tree()
 
 
 func _on_mutation_changed(amount: float, _limit: float) -> void:
@@ -82,6 +88,11 @@ func _on_mutation_changed(amount: float, _limit: float) -> void:
 
 
 func _input(event: InputEvent) -> void:
+	if is_tree_open() and event is InputEventKey and event.pressed and not event.echo and (event.keycode == KEY_F or event.physical_keycode == KEY_F):
+		var player := runtime.get_parent()
+		if player != null and player.has_method("use_antidote") and bool(player.call("use_antidote")):
+			get_viewport().set_input_as_handled()
+		return
 	if is_tree_open() and event is InputEventKey and event.pressed and not event.echo and event.keycode == KEY_ESCAPE:
 		close_tree()
 		get_viewport().set_input_as_handled()
@@ -123,6 +134,7 @@ func _set_open(value: bool) -> void:
 	else:
 		get_tree().paused = _previous_pause
 	panel.visible = value
+	hotbar.get_parent().get_parent().visible = not value
 	if runtime != null and runtime.get_parent() != null:
 		runtime.get_parent().set("_mutation_menu_open", value)
 	_refresh()
@@ -165,16 +177,16 @@ func _refresh() -> void:
 				continue
 			var rank := int(row[3])
 			_add_skill(canvas, row, canvas.call("skill_position", branch_index, rank))
-			if bool(runtime.call("skill_learned", str(row[0]))):
+			if bool(runtime.call("skill_learned", str(row[0]))) or bool(runtime.call("can_upgrade_skill", str(row[0]))):
 				furthest = maxi(furthest, rank)
 		var label := Label.new()
 		label.text = branch.to_upper() + ("  ·  ACTIVE" if group_is_active else "  ·  PASSIVE")
-		label.position = Vector2(center.x - 85, 404 if group_is_active else 464)
+		label.position = Vector2(255, center.y - 31)
 		canvas.add_child(label)
 		progress.append(furthest)
 	var hybrid_label := Label.new()
 	hybrid_label.text = "HYBRID SKILLS  ·  LINK TWO BRANCHES"
-	hybrid_label.position = Vector2(20, 806)
+	hybrid_label.position = Vector2(1020, 424)
 	canvas.add_child(hybrid_label)
 	var hybrid_index := 0
 	var hybrids: Array[bool] = []
@@ -182,7 +194,7 @@ func _refresh() -> void:
 		if int(row[3]) != 3:
 			continue
 		_add_skill(canvas, row, canvas.call("hybrid_position", hybrid_index))
-		hybrids.append(bool(runtime.call("skill_learned", str(row[0]))))
+		hybrids.append(bool(runtime.call("skill_learned", str(row[0]))) or bool(runtime.call("can_upgrade_skill", str(row[0]))))
 		hybrid_index += 1
 	canvas.call("set_progress", progress, hybrids)
 	var open := Button.new()
@@ -210,6 +222,7 @@ func _add_skill(canvas: Control, row: Array, center: Vector2) -> void:
 	var level: float = 25.0 + float(row[3]) * 15.0
 	var learned: bool = runtime.call("skill_learned", skill_id)
 	var enabled: bool = runtime.call("has_skill", skill_id)
+	var available: bool = runtime.call("can_upgrade_skill", skill_id)
 	var button := Button.new()
 	button.text = str(row[4])
 	button.position = center - Vector2(22, 22)
@@ -218,8 +231,11 @@ func _add_skill(canvas: Control, row: Array, center: Vector2) -> void:
 	button.tooltip_text = "%s\n%s\nRequires %d%% mutation%s" % [row[1], row[5], roundi(level), " · Learned" if learned else ""]
 	button.focus_mode = Control.FOCUS_NONE
 	var style := StyleBoxFlat.new()
-	style.bg_color = Color(0.14, 0.57, 0.43) if enabled else (Color(0.29, 0.43, 0.48) if learned else Color(0.15, 0.20, 0.26))
-	style.border_color = Color(0.59, 0.98, 0.79) if enabled else Color(0.42, 0.53, 0.58)
+	style.bg_color = Color(0.14, 0.57, 0.43) if enabled else (Color(0.19, 0.38, 0.36) if available else (Color(0.29, 0.43, 0.48) if learned else Color(0.15, 0.20, 0.26)))
+	style.border_color = Color(0.59, 0.98, 0.79) if enabled or available else Color(0.42, 0.53, 0.58)
+	if available:
+		style.shadow_color = Color(0.31, 0.92, 0.7, 0.36)
+		style.shadow_size = 8
 	style.set_border_width_all(2)
 	style.set_corner_radius_all(22)
 	button.add_theme_stylebox_override("normal", style)

@@ -26,7 +26,7 @@ func is_active(skill_id: String, mutation: float) -> bool:
 	return learned.has(skill_id) and not row.is_empty() and mutation >= CATALOG.threshold(row)
 
 
-func upgrade(skill_id: String, mutation: float) -> bool:
+func can_upgrade(skill_id: String, mutation: float) -> bool:
 	var row := CATALOG.find(skill_id)
 	if row.is_empty() or points(mutation) <= 0 or mutation < CATALOG.threshold(row) or learned.has(skill_id):
 		return false
@@ -42,6 +42,12 @@ func upgrade(skill_id: String, mutation: float) -> bool:
 		for parent in CATALOG.HYBRID_PARENTS.get(skill_id, []):
 			if not learned.has(parent):
 				return false
+	return true
+
+
+func upgrade(skill_id: String, mutation: float) -> bool:
+	if not can_upgrade(skill_id, mutation):
+		return false
 	learned[skill_id] = true
 	return true
 

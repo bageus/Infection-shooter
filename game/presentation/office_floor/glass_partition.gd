@@ -129,6 +129,10 @@ func _break_glass(hit_position: Vector3) -> void:
 	if preserve_open_frame:
 		call_deferred("_replace_frame_collision")
 	_disable_collision_recursive(self)
+	# Streaming can reactivate deferred shapes; remove the broken pane body
+	# from character and projectile collision immediately.
+	collision_layer = 0
+	collision_mask = 0
 	# Only GlassBody is disabled; the surrounding frame keeps its own collision.
 	_spawn_fragments(hit_position)
 
@@ -145,7 +149,7 @@ func _replace_frame_collision() -> void:
 	# Some frame models have an additional pane collision across the opening.
 	for child in frame_body.get_children():
 		if child is CollisionShape3D:
-			(child as CollisionShape3D).set_deferred("disabled", true)
+			child.queue_free()
 	var depth := maxf(outer.size.z, 0.07)
 	# Leave enough clear width and height for the player's capsule after the pane
 	# breaks. Imported frame meshes can include an invisible full-size infill.

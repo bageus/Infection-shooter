@@ -14,9 +14,11 @@ func setup(target: Vector3, firing_body: CollisionObject3D) -> void:
 	shooter = firing_body
 	var offset := target - global_position
 	var horizontal := Vector3(offset.x, 0, offset.z)
-	var duration := maxf(0.25, horizontal.length() / SPEED)
-	var rise := clampf((offset.y + 0.5 * GRAVITY * duration * duration) / duration, 3.0, 12.0)
-	_velocity = horizontal.normalized() * SPEED + Vector3.UP * rise
+	# Short targets need a slower horizontal launch, otherwise the projectile
+	# overshoots before gravity can bring it back to the cursor's surface.
+	var duration := clampf(horizontal.length() / SPEED, 0.42, 1.6)
+	var rise := (offset.y + 0.5 * GRAVITY * duration * duration) / duration
+	_velocity = horizontal / duration + Vector3.UP * rise
 	var mesh := SphereMesh.new()
 	mesh.radius = 0.09
 	mesh.height = 0.18

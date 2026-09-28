@@ -142,5 +142,7 @@ Run repository gates, then measure imported structural mesh AABBs in Godot again
 
 ## Session handoff
 
+2026-09-28: Follow-up fixes target grenade cursor range at near distances, the bright green `03_server_rack3` damaged stage, passable panes after glass destruction while retaining frame bars, antidote F while the mutation tree pauses gameplay, and an in-window left-to-right mutation tree with diagonal branches, available-node glow and automatic opening for genuinely new unlocks. Desk/shelf Food options now include both water-cooler bottle models. Parser and architecture gates are the local verification path; visually verify in Godot after sync.
+
 2026-09-28: Desk setup zones now cycle through authored shelves including the bottom frame, item categories group drinkware/food/stationery/bags/bins/plants/printers/lamps/phones, and wall fixtures are excluded from the item list. Placement probes the actual supporting surface. Planning hides the mutation canvas, and conference chairs are grounded during scene and saved-layout loading. Godot headless executable exits 139 in this environment; parser and architecture checks are the available local verification.
 T002 remains the only active task. After CI, visually verify seams and collision in Godot before adding furniture/content.
