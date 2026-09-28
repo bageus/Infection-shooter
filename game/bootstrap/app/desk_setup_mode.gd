@@ -7,7 +7,6 @@ const ZONE_RULES := preload("res://game/bootstrap/app/desk_setup_zone_rules.gd")
 const TEMPLATE_ACTIONS := preload("res://game/bootstrap/app/desk_setup_template_actions.gd")
 const ZONE_FORM := preload("res://game/bootstrap/app/desk_setup_zone_form.gd")
 const ZONE_ACTIONS := preload("res://game/bootstrap/app/desk_setup_zone_actions.gd")
-const ZONE_CREATION := preload("res://game/bootstrap/app/desk_setup_zone_creation.gd")
 const MODEL_ROOT := "res://models/objects/enviroments/"
 
 var planner: Node
@@ -328,7 +327,7 @@ func _click_world(screen: Vector2, pick_item: bool) -> void:
 			dragging_zone = true
 
 func _add_zone_at(screen: Vector2) -> void:
-	ZONE_CREATION.add_at(self, screen)
+	ZONE_ACTIONS.add_at(self, screen)
 
 func _move_zone(index: int, target: Vector2) -> void:
 	if ZONE_RULES.move_zone(desk, zones, index, target, stations, _attachments()):
@@ -534,7 +533,7 @@ func _refresh_zones() -> void:
 		select.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 		select.modulate = Color(1.0, 0.83, 0.48) if i == zone_index else Color.WHITE
 		_button(row, "Duplicate", _duplicate_zone_at.bind(i))
-		_button(row, ZONE_CREATION.surface_label(self, zones[i]), _toggle_surface_at.bind(i))
+		_button(row, ZONE_ACTIONS.surface_label(self, zones[i]), _toggle_surface_at.bind(i))
 		_button(row, "×", _remove_zone_at.bind(i))
 	if zone_index >= 0:
 		_select_zone(zone_index)
