@@ -142,6 +142,8 @@ Run repository gates, then measure imported structural mesh AABBs in Godot again
 
 ## Session handoff
 
+2026-09-29: Eight new paper GLBs (four crumpled A4 sheets and four horizontal/vertical tissue/toilet rolls) are selectable in Paper setup zones. Existing named paper props share a dedicated damage scene that emits shader-edged flying scraps on impact and does not block walking. Validate in Godot by placing one of each on the floor and in a desk zone, shooting them, and checking saved-map reload. The existing planning script size limit still blocks the aggregate validator.
+
 2026-09-29: Four new group-02/05 bathroom fixtures use a dedicated presentation scene and the existing environment fragment physics. Wall/floor fixtures stay anchored until hit; the hand dryer sparks and three plumbing fixtures emit shader-rendered water for ten seconds. Old group-13 variants remain loadable from saved maps but are hidden from the palette. Parser and architecture checks passed; full project validation still fails on the pre-existing 600-line limit in `planning_mode.gd`. Exact next action: open each fixture in Godot, break it, and verify mounting, debris, spray timing and saved-map reload.
 
 2026-09-28: Follow-up fixes target grenade cursor range at near distances, the bright green `03_server_rack3` damaged stage, passable panes after glass destruction while retaining frame bars, antidote F while the mutation tree pauses gameplay, and an in-window left-to-right mutation tree with diagonal branches, available-node glow and automatic opening for genuinely new unlocks. Desk/shelf Food options now include both water-cooler bottle models. Parser and architecture gates are the local verification path; visually verify in Godot after sync.

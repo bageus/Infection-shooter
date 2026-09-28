@@ -72,6 +72,7 @@ var map_select: OptionButton
 const ENVIRONMENT_ROOT := "res://models/objects/enviroments"
 const ENVIRONMENT_SCENE := preload("res://game/presentation/office_floor/public/props/environment_prop.tscn")
 const BATHROOM_FIXTURE_SCENE := preload("res://game/presentation/office_floor/public/props/bathroom_fixture.tscn")
+const PAPER_PROP_SCENE := preload("res://game/presentation/office_floor/public/props/paper_prop.tscn")
 const STAIRCASE_SCENE := preload("res://game/presentation/office_floor/public/structural/staircase.tscn")
 const WORKSTATIONS := preload("res://game/bootstrap/app/workstation_templates.gd")
 const DESK_SETUP_MODE := preload("res://game/bootstrap/app/desk_setup_mode.gd")
@@ -816,6 +817,10 @@ func _visual_object_at(screen_pos: Vector2) -> Node3D:
 
 func _instantiate_asset(asset_path: String) -> Node3D:
 	if asset_path.begins_with(ENVIRONMENT_ROOT + "/") and asset_path.ends_with(".glb"):
+		if asset_path.get_file().begins_with("09_") and WORKSTATIONS.VARIANTS["paper"].has(asset_path.get_file().get_basename()):
+			var paper := PAPER_PROP_SCENE.instantiate() as Node3D
+			paper.set("model_path", asset_path)
+			return paper
 		if asset_path.get_file() in ["02_toilet_new.glb", "02_wall_urinal_improved.glb", "05_wall_hand_dryer_improved.glb", "02_sink_pedestal_improved.glb", "16_toilet_floor.glb", "16_wall_urinal.glb", "16_wall_hand_dryer.glb", "16_sink_pedestal.glb"]:
 			var fixture := BATHROOM_FIXTURE_SCENE.instantiate() as Node3D
 			fixture.set("model_path", asset_path)
