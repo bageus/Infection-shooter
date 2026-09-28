@@ -7,6 +7,8 @@ const GRID_SIZE := 0.25
 const SNAP_DISTANCE := 0.8
 const CAMERA_SPEED := 18.0
 const CAMERA_ZOOM_STEP := 2.5
+const CAMERA_MIN_HEIGHT := -15.0
+const CAMERA_MAX_HEIGHT := 55.0
 const SCALE_STEP := 0.1
 const HEIGHT_STEP := 0.25
 const LIGHT_DEFAULT_HEIGHT := HEIGHT_STEP * 10.0
@@ -257,8 +259,8 @@ func enter() -> void:
 	ui.show()
 	Input.mouse_mode = Input.MOUSE_MODE_VISIBLE
 	camera_anchor = camera.global_position
-	camera_height = clampf(camera.global_position.y, 8.0, 50.0)
-	help.text = "PLANNING CONTROLS\n\nWASD  Move view\nALT + LMB drag  Rotate view\nWheel  Zoom\nLMB  Select / Place\nLMB drag  Move selected\nRMB  Cancel current tool\nDelete  Delete selected\nQ / E  Rotate -/+15°\nR  Rotate +90°\n+ / -  Uniform scale\nX / Z  X size +/-\nC / V  Z size +/-\nArrow keys  Move selected on plane\nPgUp / PgDn  Move object up/down\n[ / ]  Light brightness\n, / .  Light cone angle\nESC  Exit planner"
+	camera_height = clampf(camera.global_position.y, CAMERA_MIN_HEIGHT, CAMERA_MAX_HEIGHT)
+	help.text = "PLANNING CONTROLS\n\nWASD  Move view\nALT + LMB drag  Rotate view (look up or down)\nWheel  Raise / lower camera, including below floor\nLMB  Select / Place\nLMB drag  Move selected\nRMB  Cancel current tool\nDelete  Delete selected\nQ / E  Rotate -/+15°\nR  Rotate +90°\n+ / -  Uniform scale\nX / Z  X size +/-\nC / V  Z size +/-\nArrow keys  Move selected on plane\nPgUp / PgDn  Move object up/down\n[ / ]  Light brightness\n, / .  Light cone angle\nESC  Exit planner"
 	status.text = "Choose an object"
 
 
@@ -1007,14 +1009,14 @@ func _move_selected_height(amount: float) -> void:
 
 func _rotate_camera(relative: Vector2) -> void:
 	planning_yaw -= relative.x * CAMERA_ROTATE_SPEED
-	planning_pitch = clampf(planning_pitch - relative.y * CAMERA_ROTATE_SPEED, deg_to_rad(-80.0), deg_to_rad(-20.0))
+	planning_pitch = clampf(planning_pitch - relative.y * CAMERA_ROTATE_SPEED, deg_to_rad(-80.0), deg_to_rad(80.0))
 	var current_position := camera.global_position
 	camera.global_rotation = Vector3(planning_pitch, planning_yaw, 0.0)
 	camera.global_position = current_position
 
 
 func _zoom_camera(amount: float) -> void:
-	camera_height = clampf(camera_height + amount, 6.0, 55.0)
+	camera_height = clampf(camera_height + amount, CAMERA_MIN_HEIGHT, CAMERA_MAX_HEIGHT)
 	var p := camera.global_position
 	p.y = camera_height
 	camera.global_position = p
