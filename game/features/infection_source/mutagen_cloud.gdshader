@@ -7,8 +7,8 @@ instance uniform float phase = 0.0;
 
 uniform sampler2D cloud_texture : source_color, filter_linear_mipmap;
 uniform float opacity : hint_range(0.0, 1.0) = 0.78;
-uniform float swirl_strength : hint_range(0.0, 0.08) = 0.022;
-uniform float swirl_speed : hint_range(0.0, 3.0) = 1.0;
+uniform float swirl_strength : hint_range(0.0, 0.15) = 0.085;
+uniform float swirl_speed : hint_range(0.0, 3.0) = 1.25;
 uniform vec4 tint : source_color = vec4(1.0);
 
 float hash21(vec2 p) {
@@ -41,14 +41,20 @@ void fragment() {
     float activity = pow(1.0 - life, 1.25);
     float t = (TIME + phase) * swirl_speed;
 
-    float n1 = value_noise(UV * 5.0 + vec2(t * 0.19, -t * 0.12));
-    float n2 = value_noise(UV * 8.0 + vec2(-t * 0.14, t * 0.17));
-    vec2 displacement = (vec2(n1, n2) - vec2(0.5)) * swirl_strength * activity;
-    vec4 gas = texture(cloud_texture, clamp(UV + displacement, vec2(0.0), vec2(1.0)));
+    float n1 = value_noise(UV * 5.0 + vec2(t * 0.31, -t * 0.23));
+    float n2 = value_noise(UV * 8.0 + vec2(-t * 0.27, t * 0.34));
+    vec2 waves = vec2(sin(t * 0.85 + UV.y * 7.0), cos(t * 0.72 + UV.x * 6.0));
+    vec2 displacement = ((vec2(n1, n2) - vec2(0.5)) + waves * 0.55) * swirl_strength;
+    float angle = sin(t * 0.43) * 0.10;
+    mat2 rotation = mat2(vec2(cos(angle), sin(angle)), vec2(-sin(angle), cos(angle)));
+    vec2 flowing_uv = rotation * (UV - vec2(0.5)) + vec2(0.5) + displacement;
+    vec4 gas = texture(cloud_texture, clamp(flowing_uv, vec2(0.0), vec2(1.0)));
+    vec4 eddies = texture(cloud_texture, clamp(UV - displacement * 0.70, vec2(0.0), vec2(1.0)));
+    gas = mix(gas, eddies, 0.27);
 
     float pulse = 1.0 + 0.10 * activity * sin(t * 3.3 + n1 * 6.0);
     float brightness = mix(0.40, 1.30, activity) * pulse;
-    float fade = 1.0 - smoothstep(0.15, 1.0, life);
+    float fade = smoothstep(0.0, 0.08, life) * (1.0 - smoothstep(0.15, 1.0, life));
     float breathing = 0.87 + 0.13 * n2;
 
     ALBEDO = gas.rgb * tint.rgb * brightness;

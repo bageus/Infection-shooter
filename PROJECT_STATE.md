@@ -105,6 +105,8 @@ T002 — Minimal combat slice. Status: IN_PROGRESS.
 
 ## Current risks
 
+2026-09-29: Постоянное облако использует цикл `lifetime_seconds` только для визуального `progress`; поглощение остаётся непрерывным. Шейдер сильнее перемещает и поворачивает текстуру, вводит мягкое появление перед затуханием. Требуется проверка визуального движения в Godot 4.7.2.
+
 2026-09-29: Новый PNG облака мутагена подключён к spatial-адаптации присланного 2D шейдера. Затухание зависит от времени жизни и поглощения; постоянный тестовый источник не исчезает. Сцена требует визуального осмотра в Godot 4.7.2, поскольку локального исполняемого Godot нет.
 
 2026-09-28: The glass break handler now removes the pane body from collision immediately and replaces the old frame collision with perimeter bars. Imported geometry still needs a runtime passage check in Godot. The grenade's ballistic travel time now scales horizontal launch speed for close cursor targets.
