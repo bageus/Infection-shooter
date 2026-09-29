@@ -226,6 +226,7 @@ func _trigger_extinguisher(hit_position: Vector3, direction: Vector3) -> void:
 		return
 	_extinguisher_triggered = true
 	BLAST.smoke(self, hit_position)
+	freeze = false
 	sleeping = false
 	apply_central_impulse((direction.normalized() + Vector3.UP * 0.7) * 2.0)
 	apply_torque_impulse(Vector3(randf_range(-2, 2), 4.0, randf_range(-2, 2)))
