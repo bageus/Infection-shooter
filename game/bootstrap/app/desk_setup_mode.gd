@@ -7,6 +7,7 @@ const ZONE_RULES := preload("res://game/bootstrap/app/desk_setup_zone_rules.gd")
 const TEMPLATE_ACTIONS := preload("res://game/bootstrap/app/desk_setup_template_actions.gd")
 const ZONE_FORM := preload("res://game/bootstrap/app/desk_setup_zone_form.gd")
 const ZONE_ACTIONS := preload("res://game/bootstrap/app/desk_setup_zone_actions.gd")
+const NOTICE := preload("res://game/bootstrap/app/desk_setup_notice.gd")
 const MODEL_ROOT := "res://models/objects/enviroments/"
 
 var planner: Node
@@ -36,6 +37,7 @@ var template_name: LineEdit
 var width_field: SpinBox
 var depth_field: SpinBox
 var status: Label
+var notice_panel: PanelContainer
 var front_button: Button
 var markers: Node3D
 var models: Array[String] = []
@@ -111,6 +113,8 @@ func configure(owner_planner: Node, planning_ui: Control) -> void:
 	status = Label.new()
 	status.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	box.add_child(status)
+	notice_panel = NOTICE.new()
+	planning_ui.add_child(notice_panel)
 	_button(box, "Save template", _save)
 	template_list = OptionButton.new()
 	box.add_child(template_list)
@@ -178,6 +182,10 @@ func _resize_menu() -> void:
 func _toggle_help() -> void:
 	help_panel.visible = not help_panel.visible
 
+func _notify_failure(reason: String) -> void:
+	status.text = reason
+	notice_panel.call("show_reason", reason)
+
 func _collect_models() -> void:
 	ZONE_ACTIONS.refresh_models(self)
 
@@ -187,6 +195,7 @@ func open(target: Node3D) -> void:
 	desk = target
 	dragged = null
 	active = true
+	notice_panel.call("dismiss")
 	placing_zone = false
 	chair_positioning = false
 	dragging_zone = false
@@ -227,6 +236,7 @@ func close() -> void:
 	dragged = null
 	planner.camera.global_transform = saved_camera
 	scroll.hide()
+	notice_panel.call("dismiss")
 	help_panel.hide()
 	planner.ui.get_node("Panel").show()
 	planner.planning_toolbar.show()
@@ -321,10 +331,14 @@ func _click_world(screen: Vector2, pick_item: bool) -> void:
 				model_list.remove_meta("placing")
 			if not picked.is_empty():
 				_place_model(picked, _local_at(screen, zones[zone]))
+			else:
+				_notify_failure("Select an item from the zone's model list first.")
 		else:
 			var local := _local_at(screen, zones[zone])
 			zone_drag_offset = Vector2(float(zones[zone]["x"]) - local.x, float(zones[zone]["z"]) - local.z)
 			dragging_zone = true
+	elif model_list.has_meta("placing"):
+		_notify_failure("Click inside a highlighted zone to place the item. The zone must be on this table or shelf.")
 
 func _add_zone_at(screen: Vector2) -> void:
 	ZONE_ACTIONS.add_at(self, screen)
@@ -432,9 +446,14 @@ func _duplicate_zone_at(index: int) -> void:
 
 
 func _start_item() -> void:
-	if zone_index >= 0 and not model_list.get_selected_items().is_empty():
-		model_list.set_meta("placing", true)
-		status.text = "Click inside a highlighted zone to place the selected object."
+	if zone_index < 0:
+		_notify_failure("Select a zone before adding an item.")
+		return
+	if model_list.get_selected_items().is_empty():
+		_notify_failure("Select a model of type %s before placing it." % str(zones[zone_index]["category"]))
+		return
+	model_list.set_meta("placing", true)
+	status.text = "Click inside a highlighted zone to place the selected object."
 
 
 func _remove_zone_at(index: int) -> void:

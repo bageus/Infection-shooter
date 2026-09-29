@@ -239,7 +239,7 @@ static func _bounds(node: Node3D) -> AABB:
 		var current: Node = stack.pop_back()
 		if current is MeshInstance3D:
 			var mesh := current as MeshInstance3D
-			if mesh.mesh != null and mesh.is_visible_in_tree() and absf(mesh.global_basis.determinant()) > 0.000001:
+			if mesh.mesh != null and mesh.is_visible_in_tree() and absf(mesh.global_basis.determinant()) > 0.000000000001:
 				var box := mesh.global_transform * mesh.get_aabb()
 				result = result.merge(box) if found else box
 				found = true

@@ -9,29 +9,29 @@ const MODEL_ROOT := "res://models/objects/enviroments/"
 
 static func save(mode: Variant) -> void:
 	if TEMPLATE_FILES.safe_name(mode.template_name.text).is_empty():
-		mode.status.text = "Enter a template name first."
+		mode._notify_failure("Enter a template name first.")
 		return
 	for zone in mode.zones:
 		if bool(zone.get("required", true)) and ZONE_RULES.items_in_zone(mode.desk, zone, mode._attachments()).is_empty():
-			mode.status.text = "Required zone is empty: " + str(zone["name"])
+			mode._notify_failure("Required zone is empty: " + str(zone["name"]))
 			return
 	var items: Array[Dictionary] = []
 	for object in mode._attachments():
 		var slot := GEOMETRY.matching_zone(mode.desk, mode.zones, object, int(object.get_meta("planning_zone", -1)))
 		if slot < 0:
-			mode.status.text = "Move or remove the object outside a zone: " + object.name
+			mode._notify_failure("Move or remove the object outside a zone: " + object.name)
 			return
 		if ZONE_RULES.category_for(str(object.get_meta("planning_scene_path", "")).get_file().get_basename()) != str(mode.zones[slot]["category"]):
-			mode.status.text = "Object has the wrong type for its zone: " + object.name
+			mode._notify_failure("Object has the wrong type for its zone: " + object.name)
 			return
 		var local: Vector3 = mode.desk.to_local(object.global_position)
 		items.append({"path": str(object.get_meta("planning_scene_path", "")), "zone": slot, "x": local.x, "y": local.y, "z": local.z, "yaw": object.rotation.y - mode.desk.rotation.y})
 	var desk_type := WORKSTATIONS.desk_name(mode._desk_path())
 	if desk_type.is_empty():
-		mode.status.text = "This desk model has no template profile: " + mode._desk_path().get_file()
+		mode._notify_failure("This desk model has no template profile: " + mode._desk_path().get_file())
 		return
 	if not TEMPLATE_FILES.save(desk_type, mode.template_name.text, {"version": 1, "desk": desk_type, "front": mode.front, "zones": mode.zones, "items": items}):
-		mode.status.text = "Could not write the desk template to user://desk_setups."
+		mode._notify_failure("Could not write the desk template to user://desk_setups.")
 		return
 	refresh(mode)
 	mode.status.text = "Saved: " + mode.template_name.text
@@ -46,11 +46,12 @@ static func refresh(mode: Variant) -> void:
 
 static func load_selected(mode: Variant) -> void:
 	if mode.template_list.selected < 0:
+		mode._notify_failure("Select a saved template before applying it.")
 		return
 	var path: String = mode.template_list.get_item_metadata(mode.template_list.selected)
 	var data: Dictionary = TEMPLATE_FILES.load(path, WORKSTATIONS.desk_name(mode._desk_path()))
 	if data.is_empty():
-		mode.status.text = "Template does not match this desk."
+		mode._notify_failure("Template does not match this desk.")
 		return
 	for object in mode._attachments():
 		mode.planner.placed.erase(object)
@@ -86,5 +87,8 @@ static func load_selected(mode: Variant) -> void:
 		object.set_meta("planning_attachment", mode._desk_id())
 		object.set_meta("planning_zone", slot)
 		mode.planner.placed.append(object)
-	mode.status.text = "Template applied; %d items outside zones skipped." % skipped if skipped > 0 else "Template applied to this desk. Save the map to keep it."
+	if skipped > 0:
+		mode._notify_failure("Template applied, but %d items could not fit their saved zones." % skipped)
+	else:
+		mode.status.text = "Template applied to this desk. Save the map to keep it."
 	mode._refresh_zone_items()

@@ -68,7 +68,7 @@ func _collect_meshes(node: Node, result: Array[MeshInstance3D]) -> void:
 func _add_mesh_collisions(node: Node, body: CollisionObject3D) -> void:
 	if node is MeshInstance3D:
 		var mesh_instance := node as MeshInstance3D
-		if mesh_instance.mesh != null and not _is_excluded(node) and mesh_instance.is_visible_in_tree() and absf(mesh_instance.global_basis.determinant()) > 0.000000000001:
+		if mesh_instance.mesh != null and not _is_excluded(node) and _visible_in_model(mesh_instance) and absf(mesh_instance.global_basis.determinant()) > 0.000000000001:
 			if frame_surface_boxes and "frame" in mesh_instance.name.to_lower():
 				_add_frame_boxes(mesh_instance, body)
 				return
@@ -95,6 +95,16 @@ func _add_mesh_collisions(node: Node, body: CollisionObject3D) -> void:
 					collision.global_transform = mesh_instance.global_transform
 	for child in node.get_children():
 		_add_mesh_collisions(child, body)
+
+
+func _visible_in_model(mesh: Node3D) -> bool:
+	# A hidden streamed root is not an authored hidden stage of the model.
+	var current: Node = mesh
+	while current != null and current != self:
+		if current is Node3D and not (current as Node3D).visible:
+			return false
+		current = current.get_parent()
+	return true
 
 
 func _add_frame_boxes(mesh_instance: MeshInstance3D, body: CollisionObject3D) -> void:
