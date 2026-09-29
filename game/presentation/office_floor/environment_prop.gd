@@ -7,6 +7,7 @@ const SPARKS = preload("res://game/presentation/office_floor/electric_sparks.gd"
 const BLAST = preload("res://game/presentation/office_floor/blast_effect.gd")
 const WALL_MOUNT = preload("res://game/presentation/office_floor/wall_mount_models.gd")
 const BOOK_STACK = preload("res://game/presentation/office_floor/book_stack_breakup.gd")
+const EXTINGUISHER_FX = preload("res://game/presentation/office_floor/extinguisher_hit_fx.tscn")
 
 @export_file("*.glb") var model_path := ""
 
@@ -24,6 +25,7 @@ var _transition_pending := false
 var _pending_full_break := false
 var _book_kick_cooldown := 0.0
 var _extinguisher_triggered := false
+var _extinguisher_fx: Node3D
 
 
 func _physics_process(delta: float) -> void:
@@ -79,6 +81,14 @@ func _ready() -> void:
 		if lowest < 0.025:
 			global_position.y += 0.025 - lowest
 	mass = clampf(volume * 18.0, 0.12, 55.0)
+	if "fire_extinguisher" in model_path.get_file():
+		mass = 1.8
+		linear_damp = 3.5
+		angular_damp = 2.5
+		_extinguisher_fx = EXTINGUISHER_FX.instantiate() as Node3D
+		add_child(_extinguisher_fx)
+		_extinguisher_fx.call("configure", self, _shape_meshes)
+		_extinguisher_fx.connect("ruptured", _on_extinguisher_ruptured)
 	if "table" in model_path.get_file() or "desk" in model_path.get_file():
 		linear_damp = 3.0
 		angular_damp = 4.0
@@ -225,19 +235,15 @@ func _trigger_extinguisher(hit_position: Vector3, direction: Vector3) -> void:
 	if _extinguisher_triggered:
 		return
 	_extinguisher_triggered = true
-	BLAST.smoke(self, hit_position)
-	freeze = false
-	sleeping = false
-	apply_central_impulse((direction.normalized() + Vector3.UP * 0.7) * 2.0)
-	apply_torque_impulse(Vector3(randf_range(-2, 2), 4.0, randf_range(-2, 2)))
-	var smoke_position := hit_position
-	get_tree().create_timer(0.55).timeout.connect(func() -> void:
-		if is_instance_valid(self):
-			BLAST.detonate(self, smoke_position)
-			_visual.hide()
-			collision_layer = 0
-			get_tree().create_timer(4.0).timeout.connect(queue_free)
-	)
+	if _extinguisher_fx != null:
+		_extinguisher_fx.call("start", hit_position, direction)
+
+
+func _on_extinguisher_ruptured(location: Vector3) -> void:
+	BLAST.detonate(self, location, 5.0, false)
+	_visual.hide()
+	collision_layer = 0
+	queue_free()
 
 
 func take_melee_hit(damage: float, hit_position: Vector3, direction: Vector3) -> void:

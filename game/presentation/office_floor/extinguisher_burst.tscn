@@ -1,0 +1,29 @@
+[gd_scene load_steps=3 format=3]
+
+[ext_resource type="Script" path="res://game/presentation/office_floor/extinguisher_burst.gd" id="1_burst"]
+[ext_resource type="AudioStream" path="res://game/presentation/office_floor/assets/extinguisher_pop.wav" id="2_pop"]
+
+[node name="ExtinguisherBurst" type="Node3D"]
+script = ExtResource("1_burst")
+
+[node name="Flash" type="OmniLight3D" parent="."]
+light_color = Color(0.89, 0.94, 1, 1)
+light_energy = 0.0
+omni_range = 4.0
+shadow_enabled = false
+
+[node name="PressureRing" type="MeshInstance3D" parent="."]
+
+[node name="PowderBurst" type="GPUParticles3D" parent="."]
+emitting = false
+local_coords = false
+one_shot = true
+
+[node name="PowderCloud" type="GPUParticles3D" parent="."]
+emitting = false
+local_coords = false
+one_shot = true
+
+[node name="Pop" type="AudioStreamPlayer3D" parent="."]
+stream = ExtResource("2_pop")
+unit_size = 4.0

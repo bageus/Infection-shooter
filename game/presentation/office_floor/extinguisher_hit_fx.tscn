@@ -1,0 +1,23 @@
+[gd_scene load_steps=3 format=3]
+
+[ext_resource type="Script" path="res://game/presentation/office_floor/extinguisher_hit_fx.gd" id="1_fx"]
+[ext_resource type="AudioStream" path="res://game/presentation/office_floor/assets/extinguisher_hiss.wav" id="2_hiss"]
+
+[node name="ExtinguisherHitFx" type="Node3D"]
+script = ExtResource("1_fx")
+
+[node name="Nozzle" type="Marker3D" parent="."]
+rotation = Vector3(0, 3.1415927, 0)
+
+[node name="Jet" type="GPUParticles3D" parent="Nozzle"]
+emitting = false
+local_coords = false
+
+[node name="Mist" type="GPUParticles3D" parent="Nozzle"]
+emitting = false
+local_coords = false
+
+[node name="Hiss" type="AudioStreamPlayer3D" parent="Nozzle"]
+stream = ExtResource("2_hiss")
+volume_db = -7.0
+unit_size = 3.0
