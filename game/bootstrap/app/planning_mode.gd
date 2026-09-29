@@ -892,7 +892,9 @@ func _update_preview(screen_pos: Vector2) -> void:
 		return
 	var world := _screen_to_surface(screen_pos, preview)
 	if not world.is_finite():
+		preview.hide()
 		return
+	preview.show()
 	preview.global_position = _snap_position_for(preview, world)
 	_apply_special_default_height(preview, _selected_kind())
 	preview.rotation_degrees.y = rotation_y
@@ -904,6 +906,8 @@ func _place_selected(screen_pos: Vector2) -> void:
 	var placement_probe := preview
 	var world := _screen_to_surface(screen_pos, placement_probe)
 	if not world.is_finite():
+		if placement_probe != null and bool(placement_probe.get_meta("planning_wall_mount", false)):
+			status.text = "Aim at a wall to place this wall-mounted object."
 		return
 	var kind := _selected_kind()
 	if kind == "player":
@@ -929,10 +933,14 @@ func _place_selected(screen_pos: Vector2) -> void:
 		node.set_meta("planning_permanent", true)
 	var target_parent := enemies_root if kind == "enemy" else root
 	target_parent.add_child(node)
-	node.global_position = _snap_position_for(node, world)
-	_apply_special_default_height(node, kind)
 	if preview != null and preview.has_meta("planning_wall_normal"):
 		node.set_meta("planning_wall_normal", preview.get_meta("planning_wall_normal"))
+	if bool(node.get_meta("planning_wall_mount", false)) and not node.has_meta("planning_wall_normal"):
+		status.text = "Aim at a wall to place this wall-mounted object."
+		node.queue_free()
+		return
+	node.global_position = _snap_position_for(node, world)
+	_apply_special_default_height(node, kind)
 	if kind == "enemy":
 		node.global_position.y = 1.0
 		node.set_meta("planning_actor_kind", "enemy")
@@ -1118,8 +1126,16 @@ func _screen_to_surface(screen_pos: Vector2, placing: Node3D) -> Vector3:
 			point += normal * 0.025
 			placing.set_meta("planning_wall_normal", normal)
 			return point
+		if placing != null and bool(placing.get_meta("planning_wall_mount", false)):
+			if placing.has_meta("planning_wall_normal"):
+				placing.remove_meta("planning_wall_normal")
+			return Vector3(INF, INF, INF)
 		if normal.y > 0.55:
 			return point
+	if placing != null and bool(placing.get_meta("planning_wall_mount", false)):
+		if placing.has_meta("planning_wall_normal"):
+			placing.remove_meta("planning_wall_normal")
+		return Vector3(INF, INF, INF)
 	return _screen_to_floor(screen_pos)
 
 
@@ -1177,7 +1193,7 @@ func _snap_position_for(node: Node3D, value: Vector3) -> Vector3:
 	var base := _snap(value)
 	var source_aabb := _combined_aabb(node)
 	if bool(node.get_meta("planning_wall_mount", false)) and node.has_meta("planning_wall_normal"):
-		base.y = value.y
+		return value
 	else:
 		var support_y := _support_height_at(node, base)
 		if value.y > 0.01:
@@ -1599,6 +1615,9 @@ func clear_layout(update_status: bool = true) -> void:
 
 
 func _set_preview_collision(node: Node, disabled: bool) -> void:
+	if disabled and node is CollisionObject3D:
+		(node as CollisionObject3D).collision_layer = 0
+		(node as CollisionObject3D).collision_mask = 0
 	if node is CollisionShape3D:
 		(node as CollisionShape3D).disabled = disabled
 	for child in node.get_children():

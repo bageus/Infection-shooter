@@ -5,6 +5,7 @@ const BALANCE = preload("res://game/features/combat/public/projectile_balance.gd
 const BOOK_CONTACT = preload("res://game/presentation/office_floor/book_contact.gd")
 const SPARKS = preload("res://game/presentation/office_floor/electric_sparks.gd")
 const BLAST = preload("res://game/presentation/office_floor/blast_effect.gd")
+const WALL_MOUNT = preload("res://game/presentation/office_floor/wall_mount_models.gd")
 
 @export_file("*.glb") var model_path := ""
 
@@ -30,6 +31,9 @@ func _physics_process(delta: float) -> void:
 func _ready() -> void:
 	if model_path.is_empty():
 		return
+	var wall_mounted: bool = WALL_MOUNT.contains(model_path)
+	if wall_mounted:
+		set_meta("planning_wall_mount", true)
 	var is_book := model_path.get_file().begins_with("09_book")
 	set_physics_process(is_book)
 	if is_book:
@@ -62,7 +66,7 @@ func _ready() -> void:
 			primary.hide()
 	_health = _stage_health()
 	# Architectural pieces and carpets stay anchored; all other groups are movable.
-	freeze = model_path.begins_with("res://models/objects/enviroments/01/") or "server_rack" in model_path.get_file()
+	freeze = wall_mounted or model_path.begins_with("res://models/objects/enviroments/01/") or "server_rack" in model_path.get_file()
 	if freeze and "01_floor_" in model_path:
 		return # Carpet lies on the level floor and must not create a raised obstacle.
 	var volume := _add_shapes(visual)
@@ -197,6 +201,13 @@ func take_projectile_hit(damage: float, hit_position: Vector3, _normal: Vector3,
 			_pending_full_break = weapon == "GRENADE" and not _stages.is_empty()
 			_transition_pending = true
 			call_deferred("_apply_damage", hit_position, direction)
+	elif bool(get_meta("planning_wall_mount", false)) and freeze and not _broken:
+		_health -= BALANCE.object_damage(damage, weapon, _damage_category())
+		if _health <= 0.0:
+			_broken = true
+			freeze = false
+			sleeping = false
+			apply_central_impulse((direction.normalized() + Vector3.UP * 0.2).normalized() * maxf(0.5, mass * 0.12))
 	elif not freeze:
 		sleeping = false
 		apply_impulse(direction.normalized() * maxf(0.4, mass * 0.3), hit_position - global_position)
@@ -222,6 +233,8 @@ func _trigger_extinguisher(hit_position: Vector3, direction: Vector3) -> void:
 
 
 func take_melee_hit(damage: float, hit_position: Vector3, direction: Vector3) -> void:
+	if bool(get_meta("planning_wall_mount", false)) and freeze:
+		return
 	take_projectile_hit(damage, hit_position, Vector3.ZERO, direction, "MELEE")
 
 
