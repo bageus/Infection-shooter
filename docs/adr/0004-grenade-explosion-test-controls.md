@@ -1,9 +1,13 @@
 # ADR-0004: Переключение вариантов взрыва из HUD
 
-- Status: accepted
+- Status: superseded
 - Date: 2026-09-29
 - Owners: bageus
 - Related modules: features.combat, bootstrap.app, presentation.prototype_hud
+
+29.09.2026: владелец выбрал вариант 1 единственным взрывом и разрешил удалить
+остальные варианты. Кнопка сравнения, её команды и bootstrap-связка удалены;
+документ сохранён как история решения.
 
 ## Context
 

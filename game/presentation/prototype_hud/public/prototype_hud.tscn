@@ -293,29 +293,6 @@ texture = ExtResource("2_icons")
 expand_mode = 1
 stretch_mode = 5
 
-[node name="ExplosionVariant" type="Button" parent="."]
-visible = false
-anchors_preset = 3
-anchor_left = 1.0
-anchor_top = 1.0
-anchor_right = 1.0
-anchor_bottom = 1.0
-offset_left = -388.0
-offset_top = -218.0
-offset_right = -22.0
-offset_bottom = -182.0
-grow_horizontal = 0
-grow_vertical = 0
-mouse_filter = 0
-focus_mode = 0
-theme_override_colors/font_color = Color(0.2, 0.95, 1, 1)
-theme_override_font_sizes/font_size = 16
-theme_override_styles/normal = SubResource("HudFrame")
-theme_override_styles/hover = SubResource("ActiveSlotFrame")
-theme_override_styles/pressed = SubResource("SlotFrame")
-text = "Explosion: 2  |  Switch"
-tooltip_text = "Switch grenade explosion 1 / 2 for the next shot"
-
 [node name="WeaponName" type="Label" parent="WeaponPanel"]
 offset_left = 118.0
 offset_top = 50.0

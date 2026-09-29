@@ -7,7 +7,6 @@ const PlanningLighting = preload("res://game/bootstrap/app/planning_lighting.gd"
 const TEST_CLOUD := preload("res://game/features/infection_source/public/mutagen_cloud.tscn")
 const MUTATION_UI := preload("res://game/bootstrap/app/mutation_tree_ui.gd")
 const MISSION_LAYOUT := preload("res://game/bootstrap/app/mission_layout.gd")
-const EXPLOSION_CONTROLS := preload("res://game/bootstrap/app/grenade_explosion_controls.gd")
 
 @onready var player: Node3D = $Gameplay/Player
 @onready var enemies: Node3D = $Gameplay/Enemies
@@ -26,7 +25,6 @@ var chunk_streamer: Node
 var planning_lighting: Node
 var mutation_tree_ui: CanvasLayer
 var mission_layout: Node3D
-var explosion_controls: RefCounted
 
 
 func _ready() -> void:
@@ -51,8 +49,6 @@ func _ready() -> void:
 	add_child(planning_mode)
 	planning_mode.process_mode = Node.PROCESS_MODE_ALWAYS
 	planning_mode.setup(self, planning_root, planning_ui)
-	explosion_controls = EXPLOSION_CONTROLS.new()
-	explosion_controls.call("configure", $PrototypeHUD/ExplosionVariant, player)
 	chunk_streamer = ChunkStreamer.new()
 	chunk_streamer.name = "ChunkStreamer"
 	add_child(chunk_streamer)
@@ -76,12 +72,6 @@ func _ready() -> void:
 			enemy.call("set_target", player)
 
 
-func _input(event: InputEvent) -> void:
-	if not _ended and not _pause_open and not planning_mode.active and explosion_controls != null:
-		if bool(explosion_controls.call("handle_input", event)):
-			get_viewport().set_input_as_handled()
-
-
 func _unhandled_key_input(event: InputEvent) -> void:
 	if event is InputEventKey and event.pressed and not event.echo and event.keycode == KEY_ESCAPE:
 		if mutation_tree_ui != null and bool(mutation_tree_ui.call("is_tree_open")):
@@ -101,7 +91,6 @@ func _unhandled_key_input(event: InputEvent) -> void:
 
 
 func _process(_delta: float) -> void:
-	explosion_controls.call("update", not _ended and not _pause_open and not planning_mode.active)
 	if _ended or _pause_open or planning_mode.active:
 		return
 	if mission_layout.call("goal_reached", player.global_position):
