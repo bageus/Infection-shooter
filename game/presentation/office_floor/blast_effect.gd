@@ -2,9 +2,10 @@ extends RefCounted
 const SPARKS := preload("res://game/presentation/office_floor/electric_sparks.gd")
 
 # Shared point-blank blast response for extinguisher and future explosions.
-static func detonate(host: Node3D, location: Vector3, radius: float = 5.0) -> void:
-	smoke(host, location)
-	SPARKS.spawn(host, location, true)
+static func detonate(host: Node3D, location: Vector3, radius: float = 5.0, show_visuals: bool = true) -> void:
+	if show_visuals:
+		smoke(host, location)
+		SPARKS.spawn(host, location, true)
 	for group in ["player", "infected"]:
 		for victim in host.get_tree().get_nodes_in_group(group):
 			if not victim is Node3D:
