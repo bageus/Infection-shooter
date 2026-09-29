@@ -1,5 +1,7 @@
 extends Area3D
 
+const WALL_FIELD := preload("res://game/features/infection_source/cloud_wall_field.gd")
+
 signal depleted
 
 @export var absorption_seconds: float = 2.0
@@ -25,6 +27,12 @@ func activate() -> void:
 	_cycle_elapsed = 0.0
 	_visual.set_instance_shader_parameter("phase", randf_range(0.0, 100.0))
 	_visual.set_instance_shader_parameter("progress", 0.0)
+	var shared_material := _visual.mesh.surface_get_material(0) as ShaderMaterial
+	if shared_material != null:
+		var cloud_material := shared_material.duplicate() as ShaderMaterial
+		cloud_material.set_shader_parameter("wall_mask", WALL_FIELD.texture_for(self))
+		cloud_material.set_shader_parameter("wall_mask_enabled", true)
+		_visual.material_override = cloud_material
 	monitoring = true
 	visible = true
 
@@ -63,7 +71,7 @@ func _physics_process(delta: float) -> void:
 
 func _find_absorbing_body() -> Node:
 	for body in get_overlapping_bodies():
-		if body != null and body.has_method("absorb_mutagen"):
+		if body != null and body.has_method("absorb_mutagen") and WALL_FIELD.clear_to(self, body):
 			return body
 	return null
 

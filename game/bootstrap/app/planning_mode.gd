@@ -5,6 +5,7 @@ const MAPS_DIR := "user://maps"
 const AUTHORED_SCENE_PATH := "res://game/presentation/office_floor/public/base_office_layout.tscn"
 const GRID_SIZE := 0.25
 const SNAP_DISTANCE := 0.8
+const FLOOR_WALL_SNAP := preload("res://game/bootstrap/app/floor_wall_snap.gd")
 const CAMERA_SPEED := 18.0
 const CAMERA_ZOOM_STEP := 2.5
 const CAMERA_MIN_HEIGHT := -15.0
@@ -1218,6 +1219,8 @@ func _snap_position_for(node: Node3D, value: Vector3) -> Vector3:
 					best_distance = distance
 					best = base + (target_socket - source_socket)
 					best.y = base.y
+	if node is RigidBody3D or bool(node.get_meta("planning_surface_placeable", false)):
+		return FLOOR_WALL_SNAP.position_for(node, source_aabb, best)
 	return best
 
 

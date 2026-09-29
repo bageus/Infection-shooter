@@ -6,6 +6,7 @@ const BOOK_CONTACT = preload("res://game/presentation/office_floor/book_contact.
 const SPARKS = preload("res://game/presentation/office_floor/electric_sparks.gd")
 const BLAST = preload("res://game/presentation/office_floor/blast_effect.gd")
 const WALL_MOUNT = preload("res://game/presentation/office_floor/wall_mount_models.gd")
+const BOOK_STACK = preload("res://game/presentation/office_floor/book_stack_breakup.gd")
 
 @export_file("*.glb") var model_path := ""
 
@@ -195,7 +196,13 @@ func take_projectile_hit(damage: float, hit_position: Vector3, _normal: Vector3,
 		var is_table := "table" in model_path.get_file() or "desk" in model_path.get_file()
 		var push := direction.normalized() if is_table else (direction.normalized() + Vector3.UP * 0.18).normalized()
 		apply_central_impulse(push * clampf(mass * (0.004 if is_table else 0.015), 0.025, 0.15 if is_table else 0.32))
-	if not _broken and not _transition_pending and (_variant_index + 1 < _variants.size() or not _stages.is_empty()):
+	if BOOK_STACK.contains(model_path) and not _broken:
+		_health -= BALANCE.object_damage(damage, weapon, "small")
+		if _health <= 0.0:
+			_broken = true
+			BOOK_STACK.scatter(self, _visual, hit_position, direction)
+			queue_free()
+	elif not _broken and not _transition_pending and (_variant_index + 1 < _variants.size() or not _stages.is_empty()):
 		_health -= BALANCE.object_damage(damage, weapon, _damage_category())
 		if _health <= 0.0:
 			_pending_full_break = weapon == "GRENADE" and not _stages.is_empty()
