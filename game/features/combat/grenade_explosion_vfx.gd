@@ -7,7 +7,7 @@ const SPARKS := preload("res://models/objects/textures/grenade_explosion_layers/
 const SMOKE := preload("res://models/objects/textures/grenade_explosion_layers/05_smoke.png")
 const PARTICLE_SHADER := preload("res://game/features/combat/grenade_explosion_particle.gdshader")
 
-@export_range(0.5, 6.0, 0.1) var effect_radius := 2.6
+@export_range(0.5, 12.0, 0.1) var effect_radius := 7.8
 @export_range(0.5, 4.0, 0.1) var effect_duration := 2.0
 @export_range(1, 50, 1) var ember_count := 8
 @export_range(1, 50, 1) var spark_count := 12
@@ -43,26 +43,28 @@ func start(surface_normal: Vector3) -> void:
 	_started = true
 	var outward := surface_normal.normalized() if surface_normal.length_squared() > 0.01 else Vector3.UP
 	var speed := effect_duration / 2.0
+	var size_scale := effect_radius / 2.6
 	for layer in [_flash, _fire, _shockwave, _sparks, _smoke]:
 		layer.position = outward * 0.08
 	_flash.position = outward * 0.12
 	_fire.position = outward * 0.11
 	_smoke.position = outward * 0.16 + Vector3.UP * 0.16
-	_animate_layer(_flash, 0.0, 0.1, 0.35, 0.8, 0.42, speed)
-	_animate_layer(_fire, 0.03, 0.4, 0.65, effect_radius * 0.75, 0.7, speed)
-	_animate_layer(_shockwave, 0.05, 0.55, 0.55, effect_radius * 1.8, 0.52, speed)
-	_animate_layer(_sparks, 0.04, 0.65, 0.7, effect_radius * 0.9, 0.22, speed)
-	_animate_layer(_smoke, 0.18, 2.0, smoke_size, effect_radius * 1.25, 0.38, speed)
-	_configure_emitter(_embers, FIRE, ember_count, 0.36 * speed, 0.16, effect_radius * 1.1,
+	_animate_layer(_flash, 0.0, 0.1, 0.35 * size_scale, 0.8 * size_scale, 0.42, speed)
+	_animate_layer(_fire, 0.03, 0.4, 0.65 * size_scale, effect_radius * 0.75, 0.7, speed)
+	_animate_layer(_shockwave, 0.05, 0.55, 0.55 * size_scale, effect_radius * 1.8, 0.52, speed)
+	_animate_layer(_sparks, 0.04, 0.65, 0.7 * size_scale, effect_radius * 0.9, 0.22, speed)
+	_animate_layer(_smoke, 0.18, 2.0, smoke_size * size_scale, effect_radius * 1.25, 0.38, speed)
+	_configure_emitter(_embers, FIRE, ember_count, 0.36 * speed, 0.16 * size_scale, effect_radius * 1.1,
 		outward, 80.0, Vector3(0, -2.2, 0), Color(1, 0.57, 0.2), 0.52, 0.0)
-	_configure_emitter(_spark_debris, SPARKS, spark_count, 0.58 * speed, 0.12, effect_radius * 2.4,
+	_configure_emitter(_spark_debris, SPARKS, spark_count, 0.58 * speed, 0.12 * size_scale, effect_radius * 2.4,
 		outward, 86.0, Vector3(0, -4.0, 0), Color(1, 0.78, 0.36), 0.55, 0.0)
-	_configure_emitter(_wisps, SMOKE, smoke_count, 1.8 * speed, smoke_size * 0.75, effect_radius * 0.5,
+	_configure_emitter(_wisps, SMOKE, smoke_count, 1.8 * speed, smoke_size * 0.75 * size_scale, effect_radius * 0.5,
 		Vector3.UP, 75.0, Vector3(0, 0.36, 0), Color(0.7, 0.7, 0.68), 0.24, 0.025)
 	_emit_after(_embers, 0.05 * speed)
 	_emit_after(_spark_debris, 0.04 * speed)
 	_emit_after(_wisps, 0.18 * speed)
 	_light.light_energy = flash_brightness
+	_light.omni_range = effect_radius * 1.5
 	var light_fade := create_tween()
 	light_fade.tween_property(_light, "light_energy", 0.0, 0.12 * speed)
 	_sound.play()
@@ -113,7 +115,7 @@ func _configure_emitter(emitter: GPUParticles3D, texture: Texture2D, amount: int
 	emitter.local_coords = false
 	emitter.explosiveness = 1.0
 	emitter.transform_align = GPUParticles3D.TRANSFORM_ALIGN_Z_BILLBOARD
-	emitter.visibility_aabb = AABB(Vector3.ONE * -8.0, Vector3.ONE * 16.0)
+	emitter.visibility_aabb = AABB(Vector3.ONE * -effect_radius * 3.0, Vector3.ONE * effect_radius * 6.0)
 	var motion := ParticleProcessMaterial.new()
 	motion.emission_shape = ParticleProcessMaterial.EMISSION_SHAPE_POINT
 	motion.direction = direction

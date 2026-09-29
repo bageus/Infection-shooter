@@ -3,8 +3,8 @@ extends Node3D
 const FRAMES := 6
 
 @export_range(0.06, 0.4, 0.01) var duration := 0.19
-@export_range(0.2, 1.4, 0.05) var width := 0.85
-@export_range(0.1, 1.0, 0.05) var height := 0.52
+@export_range(0.1, 1.4, 0.01) var width := 0.425
+@export_range(0.1, 1.0, 0.01) var height := 0.26
 @export_range(0.0, 1.0, 0.01) var tip_position := 0.20
 
 @onready var _visual: MeshInstance3D = $Visual

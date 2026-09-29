@@ -6,6 +6,7 @@ const AUTHORED_SCENE_PATH := "res://game/presentation/office_floor/public/base_o
 const GRID_SIZE := 0.25
 const SNAP_DISTANCE := 0.8
 const FLOOR_WALL_SNAP := preload("res://game/bootstrap/app/floor_wall_snap.gd")
+const EXTINGUISHER_WALL := preload("res://game/bootstrap/app/extinguisher_wall_placement.gd")
 const CAMERA_SPEED := 18.0
 const CAMERA_ZOOM_STEP := 2.5
 const CAMERA_MIN_HEIGHT := -15.0
@@ -967,8 +968,7 @@ func _place_selected(screen_pos: Vector2) -> void:
 	_select(null)
 	_rebuild_preview()
 	if preview != null:
-		preview.global_position = _snap_position_for(preview, world)
-		preview.rotation_degrees.y = rotation_y
+		_update_preview(screen_pos)
 	status.text = "Placed | same object remains active | RMB cancel"
 
 
@@ -1128,6 +1128,10 @@ func _screen_to_surface(screen_pos: Vector2, placing: Node3D) -> Vector3:
 			placing.set_meta("planning_wall_normal", normal)
 			return point
 		if placing != null and bool(placing.get_meta("planning_wall_mount", false)):
+			if selected_path.get_file() == "09_fire_extinguisher.glb" and normal.y > 0.55:
+				var mounted := EXTINGUISHER_WALL.from_floor(placing, point)
+				if mounted.is_finite():
+					return mounted
 			if placing.has_meta("planning_wall_normal"):
 				placing.remove_meta("planning_wall_normal")
 			return Vector3(INF, INF, INF)
