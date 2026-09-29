@@ -11,6 +11,8 @@ signal ruptured(location: Vector3)
 @export_range(0.0, 5.0, 0.05) var bullet_impulse := 0.85
 @export_range(0.0, 8.0, 0.1) var recoil_force := 2.4
 @export_range(0.0, 12.0, 0.1) var spin_speed := 5.5
+@export_range(0.5, 12.0, 0.1) var topple_speed := 4.5
+@export_range(1.0, 60.0, 0.5) var spin_acceleration := 24.0
 @export_range(1, 300, 1) var jet_count := 80
 @export_range(1, 300, 1) var mist_count := 45
 @export_range(0.1, 4.0, 0.1) var jet_lifetime := 0.34
@@ -28,6 +30,8 @@ var _body: RigidBody3D
 var _active := false
 var _elapsed := 0.0
 var _anchor := Vector3.ZERO
+var _long_axis := Vector3.UP
+var _fall_direction := Vector3.FORWARD
 
 
 func _ready() -> void:
@@ -47,6 +51,12 @@ func configure(body: RigidBody3D, meshes: Array[MeshInstance3D]) -> void:
 		bounds = bounds.merge(local) if found else local
 		found = true
 	if found:
+		# Derive the cylinder axis from the imported model, including its root transform.
+		_long_axis = Vector3.UP
+		if bounds.size.x > bounds.size.y and bounds.size.x > bounds.size.z:
+			_long_axis = Vector3.RIGHT
+		elif bounds.size.z > bounds.size.y:
+			_long_axis = Vector3.BACK
 		_nozzle.position = bounds.get_center() + Vector3(0.0, bounds.size.y * 0.42, bounds.size.z * 0.38)
 
 
@@ -59,8 +69,20 @@ func start(hit_point: Vector3, bullet_direction: Vector3) -> void:
 	_body.freeze = false
 	_body.sleeping = false
 	var direction := bullet_direction.normalized() if bullet_direction.length_squared() > 0.0001 else _body.global_basis.z
+	_fall_direction = _body.get_meta("planning_wall_normal", direction)
+	_fall_direction.y = 0.0
+	if _fall_direction.length_squared() < 0.0001:
+		_fall_direction = _body.global_basis.z
+		_fall_direction.y = 0.0
+	if _fall_direction.length_squared() < 0.0001:
+		_fall_direction = Vector3.FORWARD
+	_fall_direction = _fall_direction.normalized()
+	var axis := (_body.global_basis * _long_axis).normalized()
+	if axis.y < 0.0:
+		_long_axis = -_long_axis
+		axis = -axis
 	_body.apply_impulse(direction * bullet_impulse, (hit_point - _body.global_position).limit_length(0.35))
-	_body.apply_torque_impulse(Vector3.UP * spin_speed * 0.26)
+	_body.angular_velocity = axis.cross(_fall_direction) * topple_speed + axis * spin_speed * 0.35
 	_jet.emitting = true
 	_mist.emitting = true
 	_hiss.play()
@@ -72,22 +94,30 @@ func _physics_process(delta: float) -> void:
 	if _elapsed >= rupture_delay:
 		_rupture()
 		return
+	var pressure := 1.0 - clampf(_elapsed / maxf(spray_seconds, 0.01), 0.0, 1.0) * 0.48
+	_drive_motion(pressure, delta)
 	if _elapsed >= spray_seconds:
 		_jet.emitting = false
 		_mist.emitting = false
 		_hiss.stop()
 		return
-	var pressure := 1.0 - clampf(_elapsed / maxf(spray_seconds, 0.01), 0.0, 1.0) * 0.48
 	_jet.amount_ratio = pressure
 	_mist.amount_ratio = pressure
 	var recoil := _nozzle.global_basis.z.normalized() * recoil_force * pressure
 	_body.apply_force(recoil, _nozzle.global_position - _body.global_position)
-	_body.apply_torque(Vector3.UP * spin_speed * pressure * 0.3)
+
+
+func _drive_motion(pressure: float, delta: float) -> void:
+	var axis := (_body.global_basis * _long_axis).normalized()
+	# Physics topples the cylinder, then rolls it about its own horizontal axis.
+	var tipping := axis.cross(_fall_direction) * topple_speed
+	var target_spin := axis * spin_speed * pressure + tipping
+	_body.angular_velocity = _body.angular_velocity.move_toward(target_spin, spin_acceleration * delta)
 	var displacement := _body.global_position - _anchor
+	displacement.y = 0.0 # Never pull a falling cylinder back up to its wall mount.
 	if displacement.length() > 0.45:
 		_body.apply_central_force(-displacement.normalized() * 8.0 * (displacement.length() - 0.45))
 	_body.linear_velocity = _body.linear_velocity.limit_length(2.2)
-	_body.angular_velocity = _body.angular_velocity.limit_length(spin_speed)
 
 
 func _rupture() -> void:
