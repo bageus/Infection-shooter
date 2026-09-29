@@ -25,6 +25,7 @@ func _run() -> void:
 	_test_instability_resets_below_critical_threshold()
 	_test_mutagen_pauses_during_control_loss()
 	_test_skill_tree_lock_and_reactivation()
+	_test_skill_branch_order_and_locked_prerequisites()
 
 	if failures == 0:
 		print("T001 infection domain tests passed.")
@@ -45,6 +46,22 @@ func _test_skill_tree_lock_and_reactivation() -> void:
 	_expect(not tree.is_active("muscle_memory", 10.0), "Locked skill becomes inactive until its threshold returns.")
 	_expect(tree.is_active("muscle_memory", 70.0), "Locked skill reactivates without another point.")
 	_expect(not tree.learned.has("claws"), "Unlocked skill must be learned again.")
+
+
+func _test_skill_branch_order_and_locked_prerequisites() -> void:
+	var tree := MutationTree.new()
+	_expect(tree.upgrade("hypertrophy", 100.0), "Passive Biomass begins at its first circle.")
+	_expect(not tree.upgrade("parasite", 100.0), "Passive Biomass cannot unlock the active branch's second circle.")
+	_expect(tree.upgrade("regeneration", 100.0), "Passive Biomass may advance from its first circle.")
+	_expect(tree.upgrade("blood_burst", 100.0), "Active Biomass begins independently.")
+	_expect(tree.upgrade("parasite", 100.0), "Active Biomass advances after its own first circle.")
+	_expect(tree.upgrade("living_harvest", 100.0), "The third circle follows the second.")
+	_expect(tree.toggle_lock("living_harvest"), "The last circle can be locked.")
+	tree.reconcile(10.0)
+	_expect(tree.learned.has("blood_burst") and tree.learned.has("parasite"), "A locked descendant keeps its earlier circles learned.")
+	_expect(tree.toggle_lock("living_harvest"), "The last circle can be unlocked.")
+	tree.reconcile(10.0)
+	_expect(not tree.learned.has("living_harvest") and not tree.learned.has("parasite"), "Unlocked chain is removed below threshold.")
 
 
 func _test_cloud_rate_and_bounds() -> void:

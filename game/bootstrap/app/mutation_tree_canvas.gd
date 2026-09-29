@@ -4,7 +4,7 @@ const BRANCHES := [
 	"Biomass", "Neural Storm", "Toxic Mutation", "Predator Form",
 	"Arsenal", "Predator", "Biomass", "Adaptation", "Neural System", "Metabolism"
 ]
-const TRUNK_Y := 450.0
+const TRUNK_Y := 440.0
 const TRUNK_START := 80.0
 const BRANCH_START := 190.0
 const BRANCH_JOIN := 360.0
@@ -20,7 +20,8 @@ func _ready() -> void:
 
 
 func skill_position(branch_index: int, rank: int) -> Vector2:
-	return Vector2(475.0 + float(rank) * 225.0, 76.0 + float(branch_index) * 80.0)
+	var branch_y := 88.0 + float(branch_index) * 90.0 if branch_index < 4 else 475.0 + float(branch_index - 4) * 72.0
+	return Vector2(475.0 + float(rank) * 225.0, branch_y)
 
 
 func hybrid_position(index: int) -> Vector2:
@@ -36,6 +37,7 @@ func set_progress(new_progress: Array[int], new_hybrids: Array[bool]) -> void:
 func _draw() -> void:
 	var dim := Color(0.28, 0.35, 0.42, 0.9)
 	var lit := Color(0.29, 0.88, 0.67, 0.95)
+	draw_line(Vector2(240, 439), Vector2(1020, 439), Color(0.31, 0.43, 0.46, 0.45), 2.0, true)
 	draw_line(Vector2(TRUNK_START, TRUNK_Y), Vector2(BRANCH_START, TRUNK_Y), dim, 10.0, true)
 	var lit_trunk := false
 	for index in BRANCHES.size():

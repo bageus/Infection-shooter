@@ -142,6 +142,8 @@ Run repository gates, then measure imported structural mesh AABBs in Godot again
 
 ## Session handoff
 
+2026-09-29: The mutation tree separates active upper and passive lower branches, requires previous upgrades within the same category, preserves prerequisites for locked descendants, and repairs old skipped steps. Straight wall instances add visual-only covers where their ends meet; the static corner InfectionSource was removed while the center test mutagen remains. Next action: in Godot, unlock/lock/reduce mutation across both Biomass paths, inspect moved wall seams, and check the corner is clear. Domain tests were extended; headless Godot is unavailable locally.
+
 2026-09-29: Eight new paper GLBs (four crumpled A4 sheets and four horizontal/vertical tissue/toilet rolls) are selectable in Paper setup zones. Existing named paper props share a dedicated damage scene that emits shader-edged flying scraps on impact and does not block walking. Validate in Godot by placing one of each on the floor and in a desk zone, shooting them, and checking saved-map reload. The existing planning script size limit still blocks the aggregate validator.
 
 2026-09-29: Four new group-02/05 bathroom fixtures use a dedicated presentation scene and the existing environment fragment physics. Wall/floor fixtures stay anchored until hit; the hand dryer sparks and three plumbing fixtures emit shader-rendered water for ten seconds. Old group-13 variants remain loadable from saved maps but are hidden from the palette. Parser and architecture checks passed; full project validation still fails on the pre-existing 600-line limit in `planning_mode.gd`. Exact next action: open each fixture in Godot, break it, and verify mounting, debris, spray timing and saved-map reload.

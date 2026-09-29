@@ -102,6 +102,7 @@ func upgrade_skill(skill_id: String) -> bool:
 func toggle_skill_lock(skill_id: String) -> bool:
 	if not tree.toggle_lock(skill_id):
 		return false
+	tree.reconcile(_domain.mutation)
 	tree_changed.emit()
 	return true
 
