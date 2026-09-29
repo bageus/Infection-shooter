@@ -2,6 +2,7 @@ extends RefCounted
 
 const RADIUS := 5.5
 const MARK_LIFETIME := 25.0
+const EXPLOSION_VFX := preload("res://game/features/combat/grenade_explosion_vfx.tscn")
 static var scorch_texture: Texture2D
 
 
@@ -9,7 +10,10 @@ static func explode(projectile: Node3D, location: Vector3, normal: Vector3, cont
 	var scene := projectile.get_tree().current_scene as Node3D
 	if scene == null:
 		return
-	_flash(scene, location)
+	var effect := EXPLOSION_VFX.instantiate() as Node3D
+	scene.add_child(effect)
+	effect.global_position = location
+	effect.call("start", normal)
 	var query := PhysicsShapeQueryParameters3D.new()
 	var sphere := SphereShape3D.new()
 	sphere.radius = RADIUS
@@ -60,50 +64,6 @@ static func _distance_to_shape(collider: Object, shape_index: int, location: Vec
 			var nearest := Vector3(clampf(local.x, -half.x, half.x), clampf(local.y, -half.y, half.y), clampf(local.z, -half.z, half.z))
 			return owner.to_global(nearest).distance_to(location)
 	return fallback.distance_to(location)
-
-
-static func _flash(scene: Node3D, location: Vector3) -> void:
-	var burst := MeshInstance3D.new()
-	var mesh := SphereMesh.new()
-	mesh.radius = 0.5
-	mesh.height = 1.0
-	var glow := StandardMaterial3D.new()
-	glow.albedo_color = Color(1.0, 0.45, 0.08, 0.5)
-	glow.emission_enabled = true
-	glow.emission = Color(1.0, 0.33, 0.03)
-	glow.emission_energy_multiplier = 4.0
-	glow.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
-	glow.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
-	mesh.material = glow
-	burst.mesh = mesh
-	scene.add_child(burst)
-	burst.global_position = location
-	var tween := burst.create_tween()
-	tween.tween_property(burst, "scale", Vector3.ONE * RADIUS * 1.5, 0.28)
-	tween.tween_callback(burst.queue_free)
-	var smoke := GPUParticles3D.new()
-	smoke.amount = 64
-	smoke.lifetime = 1.1
-	smoke.one_shot = true
-	smoke.explosiveness = 1.0
-	var process := ParticleProcessMaterial.new()
-	process.spread = 180.0
-	process.initial_velocity_min = 3.0
-	process.initial_velocity_max = 7.0
-	process.gravity = Vector3(0, -3, 0)
-	smoke.process_material = process
-	var puff := SphereMesh.new()
-	puff.radius = 0.12
-	puff.height = 0.24
-	var soot := StandardMaterial3D.new()
-	soot.albedo_color = Color(0.14, 0.13, 0.12, 0.65)
-	soot.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
-	puff.material = soot
-	smoke.draw_pass_1 = puff
-	scene.add_child(smoke)
-	smoke.global_position = location
-	smoke.emitting = true
-	scene.get_tree().create_timer(2.0).timeout.connect(smoke.queue_free)
 
 
 static func _scorch(scene: Node3D, hit_position: Vector3, normal: Vector3) -> void:
