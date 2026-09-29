@@ -591,15 +591,13 @@ func _on_palette_selected(index: int) -> void:
 
 
 func _click_world(screen_pos: Vector2) -> void:
-	var hit_node := _planned_object_at(screen_pos)
-	if hit_node != null:
-		_select(hit_node)
-		_clear_preview()
-		return
 	if not selected_path.is_empty() or selected_kind == "player":
 		_place_selected(screen_pos)
-	else:
-		_select(null)
+		return
+	var hit_node := _planned_object_at(screen_pos)
+	_select(hit_node)
+	if hit_node != null:
+		_clear_preview()
 
 
 func _select(node: Node3D) -> void:
