@@ -53,17 +53,17 @@ func reconcile(mutation: float) -> bool:
 
 
 func points(mutation: float) -> int:
-	return maxi(0, int(floor((mutation - 15.0) / 10.0)) - learned.size())
+	return maxi(0, CATALOG.point_budget(mutation) - learned.size())
 
 
-func is_active(skill_id: String, mutation: float) -> bool:
+func is_active(skill_id: String, mutation: float, stability: float = 30.0) -> bool:
 	var row := CATALOG.find(skill_id)
-	return learned.has(skill_id) and not row.is_empty() and mutation >= CATALOG.threshold(row)
+	return learned.has(skill_id) and not row.is_empty() and mutation >= CATALOG.threshold(row) and stability >= CATALOG.required_stability(row)
 
 
-func can_upgrade(skill_id: String, mutation: float) -> bool:
+func can_upgrade(skill_id: String, mutation: float, stability: float = 30.0) -> bool:
 	var row := CATALOG.find(skill_id)
-	if row.is_empty() or points(mutation) <= 0 or mutation < CATALOG.threshold(row) or learned.has(skill_id):
+	if row.is_empty() or points(mutation) <= 0 or mutation < CATALOG.threshold(row) or learned.has(skill_id) or stability < CATALOG.required_stability(row):
 		return false
 	var rank := int(row[3])
 	if rank > 0 and rank < 3 and not _has_previous(row, _branch_rows(row)):
@@ -86,8 +86,8 @@ func _has_previous(row: Array, rows: Array) -> bool:
 	return false
 
 
-func upgrade(skill_id: String, mutation: float) -> bool:
-	if not can_upgrade(skill_id, mutation):
+func upgrade(skill_id: String, mutation: float, stability: float = 30.0) -> bool:
+	if not can_upgrade(skill_id, mutation, stability):
 		return false
 	learned[skill_id] = true
 	return true
@@ -108,8 +108,8 @@ func tick(delta: float) -> void:
 		cooldowns[skill_id] = maxf(0.0, float(cooldowns[skill_id]) - delta)
 
 
-func cast(skill_id: String, mutation: float) -> bool:
-	if not is_active(skill_id, mutation) or float(cooldowns.get(skill_id, 0.0)) > 0.0:
+func cast(skill_id: String, mutation: float, stability: float = 30.0) -> bool:
+	if not is_active(skill_id, mutation, stability) or float(cooldowns.get(skill_id, 0.0)) > 0.0:
 		return false
 	var row := CATALOG.find(skill_id)
 	if row not in CATALOG.ACTIVE:

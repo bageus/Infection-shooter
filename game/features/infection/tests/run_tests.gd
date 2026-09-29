@@ -1,6 +1,8 @@
 extends SceneTree
 
 const InfectionDomain = preload("res://game/features/infection/domain/infection_domain.gd")
+const Catalog = preload("res://game/features/infection/domain/mutation_catalog.gd")
+const Runtime = preload("res://game/features/infection/public/infection_runtime.gd")
 const MutationTree = preload("res://game/features/infection/domain/mutation_tree.gd")
 
 var failures: int = 0
@@ -24,6 +26,9 @@ func _run() -> void:
 	_test_instability_only_builds_at_critical_threshold()
 	_test_instability_resets_below_critical_threshold()
 	_test_mutagen_pauses_during_control_loss()
+	_test_progression_budget_and_stages()
+	_test_hybrid_stage_gates()
+	_test_ampule_notification_and_antidote()
 	_test_skill_tree_lock_and_reactivation()
 	_test_skill_branch_order_and_locked_prerequisites()
 
@@ -36,32 +41,111 @@ func _run() -> void:
 
 func _test_skill_tree_lock_and_reactivation() -> void:
 	var tree := MutationTree.new()
-	_expect(tree.upgrade("muscle_memory", 70.0), "The first skill can be learned with sufficient mutation.")
-	_expect(tree.upgrade("claws", 70.0), "A second passive branch can be learned.")
-	_expect(tree.upgrade("killer_instinct", 70.0), "A hybrid requires its two parent skills.")
-	_expect(not tree.upgrade("devourer", 70.0), "A hybrid without both parents stays unavailable.")
+	_expect(tree.upgrade("muscle_memory", 70.0, 95.0), "The first skill can be learned with sufficient mutation.")
+	_expect(tree.upgrade("claws", 70.0, 95.0), "A second passive branch can be learned.")
+	_expect(tree.upgrade("killer_instinct", 70.0, 95.0), "A hybrid requires its two parent skills.")
+	_expect(not tree.upgrade("devourer", 70.0, 95.0), "A hybrid without both parents stays unavailable.")
 	_expect(tree.toggle_lock("muscle_memory"), "Learned skill lock toggles.")
 	_expect(tree.reconcile(10.0), "Unlocked skills disappear when mutation falls below the threshold.")
 	_expect(tree.learned.has("muscle_memory"), "Locked skill remains learned below threshold.")
-	_expect(not tree.is_active("muscle_memory", 10.0), "Locked skill becomes inactive until its threshold returns.")
-	_expect(tree.is_active("muscle_memory", 70.0), "Locked skill reactivates without another point.")
+	_expect(not tree.is_active("muscle_memory", 10.0, 95.0), "Locked skill becomes inactive until its threshold returns.")
+	_expect(tree.is_active("muscle_memory", 70.0, 95.0), "Locked skill reactivates without another point.")
 	_expect(not tree.learned.has("claws"), "Unlocked skill must be learned again.")
 
 
 func _test_skill_branch_order_and_locked_prerequisites() -> void:
 	var tree := MutationTree.new()
-	_expect(tree.upgrade("hypertrophy", 100.0), "Passive Biomass begins at its first circle.")
-	_expect(not tree.upgrade("parasite", 100.0), "Passive Biomass cannot unlock the active branch's second circle.")
-	_expect(tree.upgrade("regeneration", 100.0), "Passive Biomass may advance from its first circle.")
-	_expect(tree.upgrade("blood_burst", 100.0), "Active Biomass begins independently.")
-	_expect(tree.upgrade("parasite", 100.0), "Active Biomass advances after its own first circle.")
-	_expect(tree.upgrade("living_harvest", 100.0), "The third circle follows the second.")
+	_expect(tree.upgrade("hypertrophy", 100.0, 95.0), "Passive Biomass begins at its first circle.")
+	_expect(not tree.upgrade("parasite", 100.0, 95.0), "Passive Biomass cannot unlock the active branch's second circle.")
+	_expect(tree.upgrade("regeneration", 100.0, 95.0), "Passive Biomass may advance from its first circle.")
+	_expect(tree.upgrade("blood_burst", 100.0, 95.0), "Active Biomass begins independently.")
+	_expect(tree.upgrade("parasite", 100.0, 95.0), "Active Biomass advances after its own first circle.")
+	_expect(tree.upgrade("living_harvest", 100.0, 95.0), "The third circle follows the second.")
 	_expect(tree.toggle_lock("living_harvest"), "The last circle can be locked.")
 	tree.reconcile(10.0)
 	_expect(tree.learned.has("blood_burst") and tree.learned.has("parasite"), "A locked descendant keeps its earlier circles learned.")
 	_expect(tree.toggle_lock("living_harvest"), "The last circle can be unlocked.")
 	tree.reconcile(10.0)
 	_expect(not tree.learned.has("living_harvest") and not tree.learned.has("parasite"), "Unlocked chain is removed below threshold.")
+
+
+
+func _test_progression_budget_and_stages() -> void:
+	var tree := MutationTree.new()
+	for pair in [[0.0, 0], [24.99, 0], [25.0, 1], [29.99, 1], [30.0, 2], [40.0, 4], [55.0, 7], [70.0, 10], [85.0, 13], [100.0, 16]]:
+		_expect(tree.points(pair[0]) == pair[1], "Point budget matches the +5 progression boundary.")
+	var expected_roots := [
+		["muscle_memory", "acid_spit"], ["claws", "blood_burst"],
+		["hypertrophy", "predator_dash"], ["bone_armor", "discharge"], ["synapses", "recycling"]
+	]
+	for stage_index in range(5):
+		var stability := 30.0 + stage_index * 15.0
+		var roots := 0
+		for row in Catalog.all():
+			if int(row[3]) == 0 and tree.can_upgrade(str(row[0]), 100.0, stability):
+				roots += 1
+		_expect(roots == (stage_index + 1) * 2, "Exactly two branches open at each stability stage.")
+		for skill_id in expected_roots[stage_index]:
+			var row := Catalog.find(skill_id)
+			_expect_float(Catalog.threshold(row), 25.0 + stage_index * 15.0, "Each stage shifts the first mutation threshold by 15.")
+			_expect(tree.can_upgrade(skill_id, Catalog.threshold(row), stability), "A root is available at both exact thresholds.")
+			_expect(not tree.can_upgrade(skill_id, Catalog.threshold(row) - 0.01, stability), "Mutation immediately below the root threshold cannot unlock it.")
+			_expect(not tree.can_upgrade(skill_id, 100.0, stability - 0.01), "Mutation cannot bypass the stability gate.")
+	_expect(tree.upgrade("muscle_memory", 25.0), "First point can buy the initial passive skill.")
+	_expect(not tree.upgrade("acid_spit", 25.0), "One point cannot buy two skills.")
+	_expect(tree.upgrade("stabilizers", 30.0), "Second circle unlocks after +5 mutation.")
+	_expect(tree.upgrade("combat_reflex", 35.0), "Third circle follows another +5 mutation.")
+	var full := MutationTree.new()
+	for row in Catalog.all().slice(0, 16):
+		_expect(full.upgrade(str(row[0]), 100.0, 95.0), "The capped budget permits sixteen ordered upgrades.")
+	_expect(full.points(100.0) == 0, "Sixteen upgrades exhaust the budget.")
+	_expect(not full.upgrade("blood_scent", 100.0, 95.0), "A seventeenth upgrade is refused.")
+
+
+func _test_hybrid_stage_gates() -> void:
+	var tree := MutationTree.new()
+	_expect(tree.upgrade("muscle_memory", 100.0, 90.0), "First hybrid parent learned.")
+	_expect(tree.upgrade("claws", 100.0, 90.0), "Second hybrid parent learned.")
+	_expect(not tree.can_upgrade("killer_instinct", 69.99, 90.0), "An early hybrid still requires 70 mutation.")
+	_expect(tree.can_upgrade("killer_instinct", 70.0, 45.0), "Existing hybrid parents remain valid.")
+	_expect(tree.upgrade("recycling", 100.0, 90.0), "Late hybrid parent learned.")
+	_expect(not tree.can_upgrade("organic_ammo", 94.99, 90.0), "A late hybrid requires 95 mutation.")
+	_expect(not tree.can_upgrade("organic_ammo", 100.0, 89.99), "A late hybrid cannot bypass the final stability gate.")
+	_expect(tree.can_upgrade("organic_ammo", 95.0, 90.0), "A late hybrid opens with its unchanged parents.")
+
+
+func _test_ampule_notification_and_antidote() -> void:
+	var runtime := Runtime.new()
+	var notifications := [0]
+	runtime.skill_available.connect(func() -> void: notifications[0] += 1)
+	runtime.absorb_mutagen(8.0)
+	_expect(not runtime.can_upgrade_skill("claws"), "Runtime guards unopened branches even at sufficient mutation.")
+	runtime.add_control_ampule()
+	runtime.add_control_ampule()
+	var before: int = notifications[0]
+	runtime.add_control_ampule()
+	_expect(runtime.can_upgrade_skill("claws"), "The third ampule opens the second stage without mutation gain.")
+	_expect(notifications[0] == before + 1, "Opening a stage announces a new available skill once.")
+	_expect(runtime.upgrade_skill("claws"), "Runtime accepts an open branch.")
+	runtime.toggle_skill_lock("claws")
+	runtime.use_antidote()
+	_expect(runtime.skill_learned("claws") and not runtime.has_skill("claws"), "A locked skill stays learned but inactive after antidote.")
+	_expect(runtime.skill_requirements("claws")["branch_open"], "Antidote does not close the branch.")
+	runtime.absorb_mutagen(2.0)
+	_expect(runtime.has_skill("claws"), "Locked skill reactivates at its new mutation threshold.")
+	_expect(not runtime.can_upgrade_skill("claws"), "Reactivation never offers a locked skill for purchase again.")
+	runtime.free()
+	var locked_runtime := Runtime.new()
+	var locked_notifications := [0]
+	locked_runtime.skill_available.connect(func() -> void: locked_notifications[0] += 1)
+	locked_runtime.absorb_mutagen(5.0)
+	locked_runtime.upgrade_skill("muscle_memory")
+	locked_runtime.toggle_skill_lock("muscle_memory")
+	var locked_before: int = locked_notifications[0]
+	locked_runtime.use_antidote()
+	locked_runtime.absorb_mutagen(2.0)
+	_expect(locked_notifications[0] == locked_before, "Returning to a locked skill with no new candidate does not reopen the menu.")
+	locked_runtime.free()
 
 
 func _test_cloud_rate_and_bounds() -> void:

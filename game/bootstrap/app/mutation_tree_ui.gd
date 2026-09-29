@@ -80,8 +80,8 @@ func _on_new_skill_available() -> void:
 
 func _on_mutation_changed(amount: float, _limit: float) -> void:
 	if panel.visible:
-		points_label.text = "MUTATION %d%%    Points: %d" % [roundi(amount), runtime.call("mutation_points")]
-	var tier := floori((amount - 25.0) / 15.0)
+		points_label.text = "MUTATION %d%%    Points: %d    Stability: %d%%" % [roundi(amount), runtime.call("mutation_points"), roundi(runtime.call("get_critical_threshold"))]
+	var tier := floori((amount - 25.0) / 5.0)
 	if tier != _last_skill_tier:
 		_last_skill_tier = tier
 		_refresh()
@@ -161,7 +161,7 @@ func _refresh() -> void:
 	for child in hotbar.get_children():
 		hotbar.remove_child(child)
 		child.queue_free()
-	points_label.text = "MUTATION %d%%    Points: %d" % [roundi(runtime.call("get_mutation")), runtime.call("mutation_points")]
+	points_label.text = "MUTATION %d%%    Points: %d    Stability: %d%%" % [roundi(runtime.call("get_mutation")), runtime.call("mutation_points"), roundi(runtime.call("get_critical_threshold"))]
 	var skills: Array = runtime.call("skill_catalog")
 	var canvas := TREE_CANVAS.new() as Control
 	content.add_child(canvas)
@@ -172,16 +172,23 @@ func _refresh() -> void:
 		var group_is_active := branch_index < 4
 		var furthest := -1
 		var center: Vector2 = canvas.call("skill_position", branch_index, 0)
+		var requirements: Dictionary = {}
 		for row in skills:
 			if int(row[3]) == 3 or str(row[2]) != branch or (skills.find(row) < 12) != group_is_active:
 				continue
+			requirements = runtime.call("skill_requirements", str(row[0]))
 			var rank := int(row[3])
 			_add_skill(canvas, row, canvas.call("skill_position", branch_index, rank))
 			if bool(runtime.call("skill_learned", str(row[0]))) or bool(runtime.call("can_upgrade_skill", str(row[0]))):
 				furthest = maxi(furthest, rank)
 		var label := Label.new()
 		label.text = branch.to_upper() + ("  ·  ACTIVE" if group_is_active else "  ·  PASSIVE")
-		label.position = Vector2(255, center.y - 31)
+		label.position = Vector2(255, center.y - 39)
+		var gate := Label.new()
+		gate.text = "Stage %d · %d%% stability%s" % [requirements["stage"], roundi(requirements["stability"]), " · LOCKED" if not requirements["branch_open"] else ""]
+		gate.add_theme_font_size_override("font_size", 13)
+		gate.position = Vector2(255, center.y - 19)
+		canvas.add_child(gate)
 		canvas.add_child(label)
 		progress.append(furthest)
 	var hybrid_label := Label.new()
@@ -219,7 +226,8 @@ func _refresh() -> void:
 
 func _add_skill(canvas: Control, row: Array, center: Vector2) -> void:
 	var skill_id := str(row[0])
-	var level: float = 25.0 + float(row[3]) * 15.0
+	var requirements: Dictionary = runtime.call("skill_requirements", skill_id)
+	var level: float = requirements["mutation"]
 	var learned: bool = runtime.call("skill_learned", skill_id)
 	var enabled: bool = runtime.call("has_skill", skill_id)
 	var available: bool = runtime.call("can_upgrade_skill", skill_id)
@@ -228,7 +236,8 @@ func _add_skill(canvas: Control, row: Array, center: Vector2) -> void:
 	button.position = center - Vector2(22, 22)
 	button.custom_minimum_size = Vector2(44, 44)
 	button.size = Vector2(44, 44)
-	button.tooltip_text = "%s\n%s\nRequires %d%% mutation%s" % [row[1], row[5], roundi(level), " · Learned" if learned else ""]
+	button.tooltip_text = "%s\n%s\nRequires %d%% mutation · %d%% stability\n%s%s" % [row[1], row[5], roundi(level), roundi(requirements["stability"]), "Branch open" if requirements["branch_open"] else "Collect control ampules to open this branch", " · Learned" if learned else ""]
+	button.disabled = not available
 	button.focus_mode = Control.FOCUS_NONE
 	var style := StyleBoxFlat.new()
 	style.bg_color = Color(0.14, 0.57, 0.43) if enabled else (Color(0.19, 0.38, 0.36) if available else (Color(0.29, 0.43, 0.48) if learned else Color(0.15, 0.20, 0.26)))
@@ -238,6 +247,7 @@ func _add_skill(canvas: Control, row: Array, center: Vector2) -> void:
 		style.shadow_size = 8
 	style.set_border_width_all(2)
 	style.set_corner_radius_all(22)
+	button.add_theme_stylebox_override("disabled", style)
 	button.add_theme_stylebox_override("normal", style)
 	button.add_theme_stylebox_override("hover", style)
 	button.add_theme_stylebox_override("pressed", style)

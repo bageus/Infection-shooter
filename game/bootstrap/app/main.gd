@@ -133,7 +133,7 @@ func _on_planning_pressed() -> void:
 func _on_mutation_choice_requested() -> void:
 	# Keep the older single-choice runtime compatible with saved games.
 	infection_runtime.call("select_ability", 1)
-	mutation_tree_ui.call("open_tree")
+	# Only skill_available opens the tree; legacy reactivation must not prompt.
 
 
 func _on_mutation_ability_changed(choice: int) -> void:

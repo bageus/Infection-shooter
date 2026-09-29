@@ -53,6 +53,19 @@ const HYBRID_PARENTS := {
 }
 
 
+# Stage lookup never changes the authored order or hybrid parent IDs.
+const PASSIVE_STAGES := {
+	"Arsenal": 0, "Predator": 1, "Biomass": 2,
+	"Adaptation": 3, "Neural System": 4, "Metabolism": 4
+}
+const ACTIVE_STAGES := {
+	"Toxic Mutation": 0, "Biomass": 1, "Predator Form": 2, "Neural Storm": 3
+}
+const FIRST_POINT := 25.0
+const POINT_STEP := 5.0
+const STABILITY_STAGES := [30.0, 45.0, 60.0, 75.0, 90.0]
+
+
 static func all() -> Array:
 	return ACTIVE + PASSIVE
 
@@ -64,5 +77,26 @@ static func find(skill_id: String) -> Array:
 	return []
 
 
+static func point_budget(mutation: float) -> int:
+	return maxi(0, floori((clampf(mutation, 0.0, 100.0) - FIRST_POINT) / POINT_STEP) + 1)
+
+
+static func stage(row: Array) -> int:
+	if int(row[3]) == 3:
+		var latest := 0
+		for parent_id in HYBRID_PARENTS[str(row[0])]:
+			latest = maxi(latest, stage(find(str(parent_id))))
+		return latest
+	var stages: Dictionary = ACTIVE_STAGES if row in ACTIVE else PASSIVE_STAGES
+	return int(stages[str(row[2])])
+
+
+static func required_stability(row: Array) -> float:
+	return float(STABILITY_STAGES[stage(row)])
+
+
 static func threshold(row: Array) -> float:
-	return 25.0 + float(row[3]) * 15.0
+	if int(row[3]) == 3:
+		# Keep hybrids late, including those linking early branches.
+		return maxf(70.0, FIRST_POINT + float(stage(row)) * 15.0 + 10.0)
+	return FIRST_POINT + float(stage(row)) * 15.0 + float(row[3]) * POINT_STEP
