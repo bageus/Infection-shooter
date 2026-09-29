@@ -2,6 +2,8 @@ extends RefCounted
 
 const RADIUS := 5.5
 const MARK_LIFETIME := 25.0
+const SCORCH_SIZE_MIN := 2.55
+const SCORCH_SIZE_MAX := 4.05
 const EXPLOSION_V1 := preload("res://game/features/combat/grenade_explosion_v1.tscn")
 const EXPLOSION_V2 := preload("res://game/features/combat/grenade_explosion_v2.tscn")
 static var scorch_texture: Texture2D
@@ -80,7 +82,7 @@ static func _scorch(scene: Node3D, hit_position: Vector3, normal: Vector3) -> vo
 		scorch_texture = ImageTexture.create_from_image(image)
 	var mark := MeshInstance3D.new()
 	var quad := QuadMesh.new()
-	quad.size = Vector2.ONE * randf_range(0.85, 1.35)
+	quad.size = Vector2.ONE * randf_range(SCORCH_SIZE_MIN, SCORCH_SIZE_MAX)
 	var material := StandardMaterial3D.new()
 	material.albedo_texture = scorch_texture
 	material.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
