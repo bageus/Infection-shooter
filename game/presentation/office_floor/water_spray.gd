@@ -3,7 +3,7 @@ extends RefCounted
 const DURATION := 10.0
 
 
-static func spawn(host: Node3D, outlet: Vector3) -> void:
+static func spawn(host: Node3D, outlet: Vector3, reverse_direction: bool = false) -> void:
 	var scene := host.get_tree().current_scene
 	if scene == null:
 		return
@@ -16,7 +16,7 @@ static func spawn(host: Node3D, outlet: Vector3) -> void:
 	var motion := ParticleProcessMaterial.new()
 	motion.emission_shape = ParticleProcessMaterial.EMISSION_SHAPE_SPHERE
 	motion.emission_sphere_radius = 0.035
-	motion.direction = Vector3(0, 0.65, 1).normalized()
+	motion.direction = Vector3(0, 0.65, -1 if reverse_direction else 1).normalized()
 	motion.spread = 38.0
 	motion.initial_velocity_min = 1.8
 	motion.initial_velocity_max = 3.5

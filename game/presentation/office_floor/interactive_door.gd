@@ -44,7 +44,7 @@ func _ready() -> void:
 		add_to_group("elevator_door_components")
 	if requires_emergency_key:
 		_key_hint = Label3D.new()
-		_key_hint.text = "Emergency key required"
+		_key_hint.text = "Emergency key required on this side"
 		_key_hint.font_size = 38
 		_key_hint.pixel_size = 0.006
 		_key_hint.billboard = BaseMaterial3D.BILLBOARD_ENABLED
@@ -66,11 +66,13 @@ func _physics_process(delta: float) -> void:
 		if visual != null:
 			local_player = to_local(_player.global_position - (visual.global_position - global_position))
 	var horizontal_distance := Vector2(local_player.x, local_player.z).length()
+	var emergency_exit_side := signf(local_player.z) == signf(one_way_allowed_side)
+	var has_emergency_key := _player.has_method("has_emergency_key") and bool(_player.call("has_emergency_key"))
 	if _key_hint != null:
-		_key_hint.visible = horizontal_distance < 3.0 and not bool(_player.call("has_emergency_key"))
+		_key_hint.visible = horizontal_distance < 3.0 and not emergency_exit_side and not has_emergency_key
 
 	if horizontal_distance <= trigger_distance:
-		if requires_emergency_key and not (_player.has_method("has_emergency_key") and bool(_player.call("has_emergency_key"))):
+		if requires_emergency_key and not emergency_exit_side and not has_emergency_key:
 			pass
 		else:
 			match mode:

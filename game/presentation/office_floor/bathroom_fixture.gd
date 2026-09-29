@@ -57,6 +57,6 @@ func _break_fixture(hit_position: Vector3, direction: Vector3, outlet: Vector3, 
 		if is_instance_valid(part):
 			DAMAGE.spawn_piece(self, part, null, 0, index, direction, hit_position)
 	if not dryer:
-		WATER.spawn(self, outlet)
+		WATER.spawn(self, outlet, "urinal" in model_path.get_file())
 	# Keep the anchor until the water shuts off, independently of debris lifetime.
 	get_tree().create_timer(11.0).timeout.connect(queue_free)

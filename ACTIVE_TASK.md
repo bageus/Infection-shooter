@@ -142,6 +142,8 @@ Run repository gates, then measure imported structural mesh AABBs in Godot again
 
 ## Session handoff
 
+2026-09-29: Emergency door permits keyless entry from its long-bar side (+Z in the authored door model) and requires the player's key from the ordinary-handle side. Visual wall seam covers and their script were removed. Urinal water spray reverses its horizontal direction. Next action: in Godot, approach both sides with and without the key, verify enemies cannot trigger the door but can use an open doorway, and shoot a wall urinal to inspect spray direction.
+
 2026-09-29: Godot screenshot showed radar.gd:16 requiring the now-removed corner InfectionSource. Removed the radar's stale source path/blip and two duplicate local names in shelf switching. Parser and architecture checks pass. Next action: open the game in Godot and confirm radar initializes, enemy blips remain, and the two shelf warnings disappear.
 
 2026-09-29: The mutation tree separates active upper and passive lower branches, requires previous upgrades within the same category, preserves prerequisites for locked descendants, and repairs old skipped steps. Straight wall instances add visual-only covers where their ends meet; the static corner InfectionSource was removed while the center test mutagen remains. Next action: in Godot, unlock/lock/reduce mutation across both Biomass paths, inspect moved wall seams, and check the corner is clear. Domain tests were extended; headless Godot is unavailable locally.
