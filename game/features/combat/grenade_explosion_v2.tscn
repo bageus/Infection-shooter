@@ -1,0 +1,16 @@
+[gd_scene load_steps=3 format=3]
+
+[ext_resource type="PackedScene" path="res://game/features/combat/grenade_explosion_v1.tscn" id="1_base"]
+[ext_resource type="Script" path="res://game/features/combat/grenade_explosion_v2.gd" id="2_v2"]
+
+[node name="GrenadeExplosion2" instance=ExtResource("1_base")]
+script = ExtResource("2_v2")
+effect_duration = 2.8
+smoke_count = 14
+spark_count = 20
+
+[node name="Dust" type="GPUParticles3D" parent="."]
+emitting = false
+local_coords = false
+one_shot = true
+

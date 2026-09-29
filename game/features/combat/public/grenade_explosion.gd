@@ -2,7 +2,8 @@ extends RefCounted
 
 const RADIUS := 5.5
 const MARK_LIFETIME := 25.0
-const EXPLOSION_VFX := preload("res://game/features/combat/grenade_explosion_vfx.tscn")
+const EXPLOSION_V1 := preload("res://game/features/combat/grenade_explosion_v1.tscn")
+const EXPLOSION_V2 := preload("res://game/features/combat/grenade_explosion_v2.tscn")
 static var scorch_texture: Texture2D
 
 
@@ -10,7 +11,8 @@ static func explode(projectile: Node3D, location: Vector3, normal: Vector3, cont
 	var scene := projectile.get_tree().current_scene as Node3D
 	if scene == null:
 		return
-	var effect := EXPLOSION_VFX.instantiate() as Node3D
+	var variant := int(projectile.get_meta("grenade_explosion_variant", 2))
+	var effect := (EXPLOSION_V1 if variant == 1 else EXPLOSION_V2).instantiate() as Node3D
 	scene.add_child(effect)
 	effect.global_position = location
 	effect.call("start", normal)
