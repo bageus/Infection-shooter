@@ -2,18 +2,15 @@ extends Control
 
 @export var player_path: NodePath
 @export var enemies_path: NodePath
-@export var source_path: NodePath
 @export var world_radius: float = 18.0
 
 var player: Node3D
 var enemies: Node
-var source: Node3D
 
 
 func _ready() -> void:
 	player = get_node(player_path)
 	enemies = get_node(enemies_path)
-	source = get_node(source_path)
 	queue_redraw()
 
 
@@ -39,8 +36,6 @@ func _draw() -> void:
 	for enemy in enemies.get_children():
 		if enemy is Node3D:
 			_draw_blip(center, radius, enemy.global_position, Color(1.0, 0.1, 0.08, 1.0), 4.0)
-	if source != null:
-		_draw_blip(center, radius, source.global_position, Color(0.28, 1.0, 0.08, 1.0), 6.0)
 
 
 func _draw_blip(center: Vector2, radius: float, world_position: Vector3, color: Color, blip_radius: float) -> void:

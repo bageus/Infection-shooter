@@ -18,4 +18,3 @@ mouse_filter = 2
 script = ExtResource("1")
 player_path = NodePath("../../Gameplay/Player")
 enemies_path = NodePath("../../Gameplay/Enemies")
-source_path = NodePath("../../Gameplay/InfectionSource")

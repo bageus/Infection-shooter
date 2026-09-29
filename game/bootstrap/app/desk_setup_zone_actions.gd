@@ -160,16 +160,16 @@ static func toggle_surface(mode: Variant) -> void:
 				break
 		var next: int = (current + 1) % int(mode.stations.size())
 		var target_height := float(mode.stations[next].get("grid_height", 0.0))
-		var proposed := zone.duplicate()
-		proposed["height"] = target_height
-		proposed["floor"] = false
-		if not RULES._inside_surface(Vector2(float(zone["x"]), float(zone["z"])), proposed, mode.stations):
+		var shelf_proposal := zone.duplicate()
+		shelf_proposal["height"] = target_height
+		shelf_proposal["floor"] = false
+		if not RULES._inside_surface(Vector2(float(zone["x"]), float(zone["z"])), shelf_proposal, mode.stations):
 			mode.status.text = "Zone does not fit on this shelf."
 			return
-		var surface_y: float = mode.desk.to_global(Vector3.UP * target_height).y
+		var shelf_surface_y: float = mode.desk.to_global(Vector3.UP * target_height).y
 		for item in RULES.items_in_zone(mode.desk, zone, mode._attachments()):
 			var local: Vector3 = mode.desk.to_local(item.global_position)
-			item.global_position.y += _support_y(mode, item, local, target_height, surface_y) - WORKSTATIONS._bounds(item).position.y
+			item.global_position.y += _support_y(mode, item, local, target_height, shelf_surface_y) - WORKSTATIONS._bounds(item).position.y
 		zone["height"] = target_height
 		zone["floor"] = false
 		mode.status.text = "Moved to shelf %d." % (next + 1)
