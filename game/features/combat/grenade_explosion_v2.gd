@@ -8,6 +8,7 @@ const FRAME_COUNT := 16
 @export_range(0.1, 0.2, 0.01) var fire_seconds := 0.18
 @export_range(0, 16, 1) var atlas_columns := 0 # 0 detects a grid of square frames.
 @export_range(1, 50, 1) var dust_count := 22
+@export_range(0.1, 5.0, 0.1) var visual_scale := 3.0
 
 @onready var _dust: GPUParticles3D = $Dust
 
@@ -15,6 +16,7 @@ var _atlas_material: ShaderMaterial
 
 
 func _ready() -> void:
+	effect_radius *= visual_scale
 	super._ready()
 	var atlas := load(FIRE_ATLAS_PATH) as Texture2D
 	if atlas == null:
@@ -58,6 +60,7 @@ func start(surface_normal: Vector3) -> void:
 	var debris_motion := _debris.process_material as ParticleProcessMaterial
 	debris_motion.damping_min = 0.8
 	debris_motion.damping_max = 1.6
+	_scale_particle_motion()
 	_emit_after(_spark_debris, 0.025)
 	_emit_after(_debris, 0.03)
 	_emit_after(_dust, 0.075)
@@ -96,6 +99,15 @@ func _animate_fire(size_scale: float) -> void:
 	animation.tween_method(_advance_atlas, 0.0, float(FRAME_COUNT), fire_seconds)
 	animation.parallel().tween_property(_fire, "scale", Vector3.ONE * effect_radius * 0.46, fire_seconds).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_OUT)
 	animation.tween_callback(_fire.hide)
+
+
+func _scale_particle_motion() -> void:
+	# Sizes and launch speeds already scale through effect_radius; keep paths proportional.
+	for emitter in [_spark_debris, _wisps, _dust, _debris]:
+		var motion := emitter.process_material as ParticleProcessMaterial
+		motion.gravity *= visual_scale
+		motion.damping_min *= visual_scale
+		motion.damping_max *= visual_scale
 
 
 func _advance_atlas(frame: float) -> void:
