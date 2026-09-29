@@ -52,7 +52,7 @@ func _ready() -> void:
 	planning_mode.process_mode = Node.PROCESS_MODE_ALWAYS
 	planning_mode.setup(self, planning_root, planning_ui)
 	explosion_controls = EXPLOSION_CONTROLS.new()
-	explosion_controls.call("configure", $PrototypeHUD/WeaponPanel/ExplosionVariant, player)
+	explosion_controls.call("configure", $PrototypeHUD/ExplosionVariant, player)
 	chunk_streamer = ChunkStreamer.new()
 	chunk_streamer.name = "ChunkStreamer"
 	add_child(chunk_streamer)
@@ -74,6 +74,12 @@ func _ready() -> void:
 	for enemy in enemies.get_children():
 		if enemy.has_method("set_target"):
 			enemy.call("set_target", player)
+
+
+func _input(event: InputEvent) -> void:
+	if not _ended and not _pause_open and not planning_mode.active and explosion_controls != null:
+		if bool(explosion_controls.call("handle_input", event)):
+			get_viewport().set_input_as_handled()
 
 
 func _unhandled_key_input(event: InputEvent) -> void:
