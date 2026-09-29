@@ -193,9 +193,8 @@ func _configure_debris(outward: Vector3, size_scale: float, time_scale: float) -
 
 
 func _emit_after(emitter: GPUParticles3D, delay: float) -> void:
-	var tween := create_tween()
+	# Binding the tween to the emitter cancels it when that emitter leaves the tree.
+	var tween := emitter.create_tween()
 	tween.tween_interval(delay)
-	tween.tween_callback(func() -> void:
-		emitter.restart()
-		emitter.emitting = true
-	)
+	tween.tween_callback(emitter.restart)
+	tween.tween_callback(emitter.set.bind("emitting", true))
