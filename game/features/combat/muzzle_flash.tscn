@@ -1,0 +1,20 @@
+[gd_scene load_steps=6 format=3]
+
+[ext_resource type="Script" path="res://game/features/combat/muzzle_flash.gd" id="1_script"]
+[ext_resource type="Shader" path="res://game/features/combat/muzzle_flash.gdshader" id="2_shader"]
+[ext_resource type="Texture2D" path="res://models/objects/textures/gun_fog.png" id="3_atlas"]
+
+[sub_resource type="ShaderMaterial" id="FlashMaterial"]
+shader = ExtResource("2_shader")
+shader_parameter/atlas = ExtResource("3_atlas")
+
+[sub_resource type="QuadMesh" id="FlashQuad"]
+material = SubResource("FlashMaterial")
+size = Vector2(1, 1)
+
+[node name="MuzzleFlash" type="Node3D"]
+script = ExtResource("1_script")
+
+[node name="Visual" type="MeshInstance3D" parent="."]
+mesh = SubResource("FlashQuad")
+cast_shadow = 0

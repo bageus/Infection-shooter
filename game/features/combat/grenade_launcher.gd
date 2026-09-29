@@ -12,6 +12,7 @@ func try_fire_at(target_point: Vector3) -> bool:
 	projectile.global_position = muzzle.global_position
 	projectile.setup(target_point, get_parent().get_parent() as CollisionObject3D)
 	_magazine_ammo -= 1
+	_show_muzzle_flash()
 	_cooldown_remaining = 1.0 / shots_per_second
 	return true
 

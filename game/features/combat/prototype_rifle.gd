@@ -1,4 +1,5 @@
 extends Node3D
+const MUZZLE_FLASH := preload("res://game/features/combat/muzzle_flash.tscn")
 @export var weapon_name: String = "PISTOL"
 @export var fire_mode: String = "semi"
 @export var shots_per_second: float = 4.0
@@ -80,6 +81,7 @@ func try_fire_at(target_point: Vector3) -> bool:
 		var collision_origin := muzzle_position
 		bullet.call("setup_projectile", shot_direction, shooter, bullet_damage * environment_damage_multiplier, bullet_speed, bullet_range, weapon_name, collision_origin)
 	_magazine_ammo -= 1
+	_show_muzzle_flash()
 	_last_shot_time = now
 	_burst_shots += 1
 	_cooldown_remaining = 1.0 / maxf(shots_per_second, 0.01)
@@ -88,6 +90,12 @@ func try_fire_at(target_point: Vector3) -> bool:
 		if casing_pool != null:
 			casing_pool.call("spawn_casing", casing_scene, ejection_port.global_transform, casing_radius, shooter)
 	return true
+
+
+func _show_muzzle_flash() -> void:
+	muzzle.add_child(MUZZLE_FLASH.instantiate())
+
+
 func start_reload() -> void:
 	if _reloading or _reserve_ammo <= 0 or _magazine_ammo >= magazine_size: return
 	_reloading = true
