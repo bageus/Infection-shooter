@@ -45,7 +45,7 @@ func _add_window_barrier(visual: Node3D, body: StaticBody3D) -> void:
 func _add_glass_meshes(node: Node, body: StaticBody3D) -> void:
 	if node is MeshInstance3D and "glass" in node.name.to_lower():
 		var mesh_instance := node as MeshInstance3D
-		if mesh_instance.mesh != null and mesh_instance.is_visible_in_tree() and absf(mesh_instance.global_basis.determinant()) > 0.000000000001:
+		if mesh_instance.mesh != null and _visible_in_model(mesh_instance) and absf(mesh_instance.global_basis.determinant()) > 0.000000000001:
 			var bounds := mesh_instance.get_aabb()
 			var box := BoxShape3D.new()
 			box.size = Vector3(maxf(bounds.size.x, 0.055), maxf(bounds.size.y, 0.055), maxf(bounds.size.z, 0.055))
@@ -56,3 +56,14 @@ func _add_glass_meshes(node: Node, body: StaticBody3D) -> void:
 			collision.position += collision.basis * bounds.get_center()
 	for child in node.get_children():
 		_add_glass_meshes(child, body)
+
+
+func _visible_in_model(mesh: Node3D) -> bool:
+	# Chunk streaming may hide the scene root before this deferred build runs.
+	# Only visibility authored within the imported model determines its panes.
+	var current: Node = mesh
+	while current != null and current != get_parent():
+		if current is Node3D and not (current as Node3D).visible:
+			return false
+		current = current.get_parent()
+	return true

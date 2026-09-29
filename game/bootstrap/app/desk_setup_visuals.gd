@@ -162,7 +162,7 @@ func _visible_footprint() -> Rect2:
 		return area
 	for descendant in desk.find_children("*", "MeshInstance3D", true, false):
 		var mesh := descendant as MeshInstance3D
-		if mesh.mesh == null or not mesh.is_visible_in_tree() or absf(mesh.global_basis.determinant()) < 0.000001:
+		if mesh.mesh == null or not mesh.is_visible_in_tree() or absf(mesh.global_basis.determinant()) < 0.000000000001:
 			continue
 		var local := (desk.global_transform.affine_inverse() * mesh.global_transform) * mesh.get_aabb()
 		var region := Rect2(Vector2(local.position.x, local.position.z), Vector2(local.size.x, local.size.z))

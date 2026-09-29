@@ -217,18 +217,19 @@ static func toggle_surface(mode: Variant) -> void:
 
 static func place_model(mode: Variant, model: String, local: Vector3) -> void:
 	if mode.zone_index < 0 or mode.zone_index >= mode.zones.size():
+		mode._notify_failure("Select a zone before adding an item.")
 		return
 	var zone: Dictionary = mode.zones[mode.zone_index]
 	if RULES.category_for(model) != str(zone["category"]):
-		mode.status.text = "Choose an item of type: " + str(zone["category"])
+		mode._notify_failure("%s is in %s; this zone accepts %s." % [model, RULES.category_for(model), str(zone["category"])])
 		return
 	var path := MODEL_ROOT + model.substr(0, 2) + "/" + model + ".glb"
 	if not FileAccess.file_exists(path):
-		mode.status.text = "Model file is missing: " + model
+		mode._notify_failure("Model file is missing: " + model)
 		return
 	var object: Node3D = mode.planner._instantiate_asset(path) as Node3D
 	if object == null:
-		mode.status.text = "Cannot load model: " + model
+		mode._notify_failure("Cannot load model: " + model)
 		return
 	mode.planner.root.add_child(object)
 	object.rotation.y = mode.desk.rotation.y + deg_to_rad(float(zone.get("angle", 0.0)))
@@ -236,13 +237,14 @@ static func place_model(mode: Variant, model: String, local: Vector3) -> void:
 	var bounds := WORKSTATIONS._bounds(object)
 	if bounds.size.length_squared() < 0.000001:
 		object.queue_free()
-		mode.status.text = "Model has no visible geometry: " + model
+		mode._notify_failure("Model has no visible geometry: " + model)
 		return
 	var expected_y: float = mode.desk.to_global(Vector3.UP * float(zone["height"])).y
 	object.global_position.y += _support_y(mode, object, local, float(zone["height"]), expected_y) - bounds.position.y
-	if not RULES.fits_zone(mode.desk, zone, object):
+	var issue: String = GEOMETRY.fit_issue(mode.desk, zone, object)
+	if not issue.is_empty():
 		object.queue_free()
-		mode.status.text = "Place the object's centre inside its zone: " + model
+		mode._notify_failure("Cannot place %s: %s" % [model, issue])
 		return
 	object.set_meta("planning_scene_path", path)
 	object.set_meta("planning_attachment", mode._desk_id())

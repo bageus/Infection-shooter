@@ -6,6 +6,8 @@ instance uniform float progress : hint_range(0.0, 1.0) = 0.0;
 instance uniform float phase = 0.0;
 
 uniform sampler2D cloud_texture : source_color, filter_linear_mipmap;
+uniform sampler2D wall_mask : filter_nearest, repeat_disable;
+uniform bool wall_mask_enabled = false;
 uniform float opacity : hint_range(0.0, 1.0) = 0.78;
 uniform float swirl_strength : hint_range(0.0, 0.15) = 0.085;
 uniform float swirl_speed : hint_range(0.0, 3.0) = 1.25;
@@ -62,4 +64,12 @@ void fragment() {
     ALBEDO = gas.rgb * tint.rgb * brightness + vec3(0.25, 0.65, 0.12) * burst_flash;
     EMISSION = ALBEDO * 0.35;
     ALPHA = gas.a * tint.a * opacity * fade * breathing;
+    if (wall_mask_enabled) {
+        vec3 world_position = (INV_VIEW_MATRIX * vec4(VERTEX, 1.0)).xyz;
+        vec2 horizontal = world_position.xz - MODEL_MATRIX[3].xz;
+        float azimuth = atan(horizontal.y, horizontal.x);
+        float sample_index = floor((azimuth + PI) / TAU * 48.0);
+        float limit = texture(wall_mask, vec2((sample_index + 0.5) / 48.0, 0.5)).r * 2.25;
+        ALPHA *= 1.0 - smoothstep(limit - 0.08, limit, length(horizontal));
+    }
 }
