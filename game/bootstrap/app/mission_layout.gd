@@ -2,7 +2,6 @@ extends Node3D
 
 const KEY := preload("res://game/bootstrap/app/mission_key.gd")
 const WEAPON := preload("res://game/bootstrap/app/weapon_pickup.gd")
-const DOOR := preload("res://game/presentation/office_floor/public/structural/wall_emergency_door.tscn")
 const FLOOR_BOUNDS := Rect2(-40, -30, 80, 60)
 const CUT_STEP := 0.5
 
@@ -14,10 +13,6 @@ var _scan_remaining := 0.0
 func setup(stage: Node3D) -> void:
 	_stage = stage
 	_refresh_stairs()
-	var door := DOOR.instantiate() as Node3D
-	door.name = "LockedEmergencyDoor"
-	stage.get_node("Structure").add_child(door)
-	door.global_position = Vector3(-20, 0, 8.6)
 	var key := KEY.new()
 	key.name = "EmergencyKey"
 	add_child(key)

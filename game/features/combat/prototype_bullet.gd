@@ -1,6 +1,7 @@
 extends Node3D
 
 const EFFECTS_SCRIPT = preload("res://game/features/combat/public/impact_effects.gd")
+const PROJECTILE_VISUAL := preload("res://game/features/combat/projectile_visual.gd")
 const BALANCE = preload("res://game/features/combat/public/projectile_balance.gd")
 
 const IMPACT_TEXTURES := [
@@ -38,6 +39,9 @@ func setup_projectile(
 	_weapon_name = weapon_name
 	_initial_energy = BALANCE.projectile_energy(weapon_name)
 	_remaining_energy = _initial_energy
+	var visual := PROJECTILE_VISUAL.new() as Node3D
+	add_child(visual)
+	visual.call("configure", weapon_name, _direction)
 	_collision_origin = collision_origin if collision_origin != Vector3.ZERO else global_position
 
 

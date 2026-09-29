@@ -27,6 +27,10 @@ func configure(infection: Node) -> void:
 	panel.offset_bottom = -12
 	panel.mouse_filter = Control.MOUSE_FILTER_STOP
 	root.add_child(panel)
+	var background := StyleBoxFlat.new()
+	background.bg_color = Color(0.015, 0.028, 0.045, 0.97)
+	background.set_content_margin_all(10)
+	panel.add_theme_stylebox_override("panel", background)
 	var layout := VBoxContainer.new()
 	panel.add_child(layout)
 	var title := HBoxContainer.new()
@@ -81,6 +85,8 @@ func _on_new_skill_available() -> void:
 func _on_mutation_changed(amount: float, _limit: float) -> void:
 	if panel.visible:
 		points_label.text = "MUTATION %d%%    Points: %d    Stability: %d%%" % [roundi(amount), runtime.call("mutation_points"), roundi(runtime.call("get_critical_threshold"))]
+		if content.get_child_count() > 0:
+			content.get_child(0).call("set_mutation", amount)
 	var tier := floori((amount - 25.0) / 5.0)
 	if tier != _last_skill_tier:
 		_last_skill_tier = tier
@@ -166,12 +172,18 @@ func _refresh() -> void:
 	var canvas := TREE_CANVAS.new() as Control
 	content.add_child(canvas)
 	_fit_tree.call_deferred()
+	var thresholds: Array[float] = []
+	for branch_index in TREE_CANVAS.BRANCHES.size():
+		for row in skills:
+			if int(row[3]) == 0 and str(row[2]) == TREE_CANVAS.BRANCHES[branch_index] and (skills.find(row) < 12) == (branch_index < 4):
+				var requirement: Dictionary = runtime.call("skill_requirements", str(row[0]))
+				thresholds.append(float(requirement["mutation"]))
+	canvas.call("configure_progression", thresholds, float(runtime.call("get_mutation")))
 	var progress: Array[int] = []
 	for branch_index in TREE_CANVAS.BRANCHES.size():
 		var branch: String = TREE_CANVAS.BRANCHES[branch_index]
 		var group_is_active := branch_index < 4
 		var furthest := -1
-		var center: Vector2 = canvas.call("skill_position", branch_index, 0)
 		var requirements: Dictionary = {}
 		for row in skills:
 			if int(row[3]) == 3 or str(row[2]) != branch or (skills.find(row) < 12) != group_is_active:
@@ -179,21 +191,22 @@ func _refresh() -> void:
 			requirements = runtime.call("skill_requirements", str(row[0]))
 			var rank := int(row[3])
 			_add_skill(canvas, row, canvas.call("skill_position", branch_index, rank))
-			if bool(runtime.call("skill_learned", str(row[0]))) or bool(runtime.call("can_upgrade_skill", str(row[0]))):
+			if bool(runtime.call("has_skill", str(row[0]))) or bool(runtime.call("can_upgrade_skill", str(row[0]))):
 				furthest = maxi(furthest, rank)
 		var label := Label.new()
 		label.text = branch.to_upper() + ("  ·  ACTIVE" if group_is_active else "  ·  PASSIVE")
-		label.position = Vector2(255, center.y - 39)
+		label.position = canvas.call("label_position", branch_index)
+		label.add_theme_font_size_override("font_size", 14)
 		var gate := Label.new()
-		gate.text = "Stage %d · %d%% stability%s" % [requirements["stage"], roundi(requirements["stability"]), " · LOCKED" if not requirements["branch_open"] else ""]
-		gate.add_theme_font_size_override("font_size", 13)
-		gate.position = Vector2(255, center.y - 19)
+		gate.text = "S%d · Stability %d%%%s" % [requirements["stage"], roundi(requirements["stability"]), " · Locked" if not requirements["branch_open"] else ""]
+		gate.add_theme_font_size_override("font_size", 11)
+		gate.position = label.position + Vector2(0, 20)
 		canvas.add_child(gate)
 		canvas.add_child(label)
 		progress.append(furthest)
 	var hybrid_label := Label.new()
 	hybrid_label.text = "HYBRID SKILLS  ·  LINK TWO BRANCHES"
-	hybrid_label.position = Vector2(1020, 424)
+	hybrid_label.position = Vector2(30, 790)
 	canvas.add_child(hybrid_label)
 	var hybrid_index := 0
 	var hybrids: Array[bool] = []
@@ -201,7 +214,7 @@ func _refresh() -> void:
 		if int(row[3]) != 3:
 			continue
 		_add_skill(canvas, row, canvas.call("hybrid_position", hybrid_index))
-		hybrids.append(bool(runtime.call("skill_learned", str(row[0]))) or bool(runtime.call("can_upgrade_skill", str(row[0]))))
+		hybrids.append(bool(runtime.call("has_skill", str(row[0]))) or bool(runtime.call("can_upgrade_skill", str(row[0]))))
 		hybrid_index += 1
 	canvas.call("set_progress", progress, hybrids)
 	var open := Button.new()

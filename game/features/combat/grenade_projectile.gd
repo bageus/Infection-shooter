@@ -1,6 +1,7 @@
 extends Node3D
 
 const EXPLOSION := preload("res://game/features/combat/public/grenade_explosion.gd")
+const PROJECTILE_VISUAL := preload("res://game/features/combat/projectile_visual.gd")
 const GRAVITY := 17.0
 const SPEED := 22.0
 
@@ -8,6 +9,7 @@ var shooter: CollisionObject3D
 var _velocity := Vector3.ZERO
 var _lifetime := 4.0
 var _exploded := false
+var _visual: Node3D
 
 
 func setup(target: Vector3, firing_body: CollisionObject3D) -> void:
@@ -19,16 +21,9 @@ func setup(target: Vector3, firing_body: CollisionObject3D) -> void:
 	var duration := clampf(horizontal.length() / SPEED, 0.42, 1.6)
 	var rise := (offset.y + 0.5 * GRAVITY * duration * duration) / duration
 	_velocity = horizontal / duration + Vector3.UP * rise
-	var mesh := SphereMesh.new()
-	mesh.radius = 0.09
-	mesh.height = 0.18
-	var material := StandardMaterial3D.new()
-	material.albedo_color = Color(0.14, 0.17, 0.12)
-	material.metallic = 0.65
-	mesh.material = material
-	var ball := MeshInstance3D.new()
-	ball.mesh = mesh
-	add_child(ball)
+	_visual = PROJECTILE_VISUAL.new() as Node3D
+	add_child(_visual)
+	_visual.call("configure", "GRENADE LAUNCHER", _velocity)
 
 
 func _physics_process(delta: float) -> void:
@@ -47,6 +42,7 @@ func _physics_process(delta: float) -> void:
 		return
 	global_position = next
 	_velocity += Vector3.DOWN * GRAVITY * delta
+	_visual.call("set_direction", _velocity)
 	if _lifetime <= 0.0:
 		_exploded = true
 		call_deferred("_explode_at", global_position, Vector3.UP, null)
