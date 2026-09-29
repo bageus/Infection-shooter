@@ -105,6 +105,8 @@ T002 — Minimal combat slice. Status: IN_PROGRESS.
 
 ## Current risks
 
+2026-09-29: Новый PNG облака мутагена подключён к spatial-адаптации присланного 2D шейдера. Затухание зависит от времени жизни и поглощения; постоянный тестовый источник не исчезает. Сцена требует визуального осмотра в Godot 4.7.2, поскольку локального исполняемого Godot нет.
+
 2026-09-28: The glass break handler now removes the pane body from collision immediately and replaces the old frame collision with perimeter bars. Imported geometry still needs a runtime passage check in Godot. The grenade's ballistic travel time now scales horizontal launch speed for close cursor targets.
 
 2026-09-28: Planning item placement uses a physics ray against the selected desk/shelf to correct small differences between model geometry and profile heights. Bookcase profiles gain a bottom-frame level. Visual inspection in a working Godot editor remains necessary for the imported assets; local Godot binary exits 139 before startup.

@@ -1,20 +1,16 @@
-[gd_scene load_steps=4 format=3]
+[gd_scene load_steps=7 format=3]
 
 [ext_resource type="Script" path="res://game/features/infection_source/mutagen_cloud.gd" id="1_cloud_script"]
+[ext_resource type="Shader" path="res://game/features/infection_source/mutagen_cloud.gdshader" id="2_cloud_shader"]
+[ext_resource type="Texture2D" path="res://models/objects/textures/mutagen_cloud.png" id="3_cloud_texture"]
 
-[sub_resource type="StandardMaterial3D" id="CloudMaterial"]
-transparency = 1
-albedo_color = Color(0.18, 0.95, 0.24, 0.32)
-emission_enabled = true
-emission = Color(0.1, 0.8, 0.18, 1)
-emission_energy_multiplier = 1.35
+[sub_resource type="ShaderMaterial" id="CloudMaterial"]
+shader = ExtResource("2_cloud_shader")
+shader_parameter/cloud_texture = ExtResource("3_cloud_texture")
 
-[sub_resource type="CylinderMesh" id="CloudMesh"]
+[sub_resource type="QuadMesh" id="CloudMesh"]
 material = SubResource("CloudMaterial")
-top_radius = 1.8
-bottom_radius = 2.4
-height = 0.35
-radial_segments = 32
+size = Vector2(4.3, 3.93)
 
 [sub_resource type="CylinderShape3D" id="CloudShape"]
 radius = 2.25
@@ -26,7 +22,7 @@ collision_layer = 0
 collision_mask = 1
 
 [node name="Visual" type="MeshInstance3D" parent="."]
-position = Vector3(0, 0.18, 0)
+position = Vector3(0, 1.65, 0)
 mesh = SubResource("CloudMesh")
 
 [node name="CollisionShape3D" type="CollisionShape3D" parent="."]

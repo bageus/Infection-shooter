@@ -9,6 +9,7 @@ signal depleted
 var _active: bool = false
 var _absorption_remaining: float = 0.0
 var _lifetime_remaining: float = 0.0
+@onready var _visual: MeshInstance3D = $Visual
 
 
 func _ready() -> void:
@@ -20,6 +21,8 @@ func activate() -> void:
 	_active = true
 	_absorption_remaining = absorption_seconds
 	_lifetime_remaining = lifetime_seconds
+	_visual.set_instance_shader_parameter("phase", randf_range(0.0, 100.0))
+	_visual.set_instance_shader_parameter("progress", 0.0)
 	monitoring = true
 	visible = true
 
@@ -34,6 +37,7 @@ func _physics_process(delta: float) -> void:
 		return
 
 	_lifetime_remaining -= delta
+	_visual.set_instance_shader_parameter("progress", 1.0 - clampf(_lifetime_remaining / maxf(lifetime_seconds, 0.001), 0.0, 1.0))
 	if _lifetime_remaining <= 0.0:
 		_finish()
 		return
@@ -49,6 +53,10 @@ func _physics_process(delta: float) -> void:
 	var step := minf(delta, _absorption_remaining)
 	absorbing_body.call("absorb_mutagen", step)
 	_absorption_remaining -= step
+	_visual.set_instance_shader_parameter("progress", maxf(
+		1.0 - clampf(_lifetime_remaining / maxf(lifetime_seconds, 0.001), 0.0, 1.0),
+		1.0 - clampf(_absorption_remaining / maxf(absorption_seconds, 0.001), 0.0, 1.0)
+	))
 
 	if _absorption_remaining <= 0.0:
 		_finish()
