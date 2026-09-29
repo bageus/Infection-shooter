@@ -3,7 +3,7 @@ extends Area3D
 signal depleted
 
 @export var absorption_seconds: float = 2.0
-@export var lifetime_seconds: float = 8.0
+@export var lifetime_seconds: float = 14.0
 @export var permanent: bool = false
 
 var _active: bool = false
@@ -47,7 +47,7 @@ func _physics_process(delta: float) -> void:
 		return
 
 	if _absorption_remaining <= 0.0:
-		_finish()
+		# The mutagen is spent, but the visual cloud finishes dissipating naturally.
 		return
 
 	var absorbing_body: Node = _find_absorbing_body()
@@ -57,13 +57,8 @@ func _physics_process(delta: float) -> void:
 	var step := minf(delta, _absorption_remaining)
 	absorbing_body.call("absorb_mutagen", step)
 	_absorption_remaining -= step
-	_visual.set_instance_shader_parameter("progress", maxf(
-		1.0 - clampf(_lifetime_remaining / maxf(lifetime_seconds, 0.001), 0.0, 1.0),
-		1.0 - clampf(_absorption_remaining / maxf(absorption_seconds, 0.001), 0.0, 1.0)
-	))
-
 	if _absorption_remaining <= 0.0:
-		_finish()
+		monitoring = false
 
 
 func _find_absorbing_body() -> Node:

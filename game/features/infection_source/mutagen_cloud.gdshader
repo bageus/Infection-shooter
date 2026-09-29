@@ -30,7 +30,8 @@ void vertex() {
     float life = clamp(progress, 0.0, 1.0);
     vec2 size = vec2(length(MODEL_MATRIX[0].xyz), length(MODEL_MATRIX[1].xyz));
     // Keep the plane facing the rendering camera without updating every cloud on the CPU.
-    VERTEX = vec3(VERTEX.xy * size * (1.0 + life * 0.22), 0.0);
+    float burst = 1.0 - pow(1.0 - clamp(life / 0.09, 0.0, 1.0), 3.0);
+    VERTEX = vec3(VERTEX.xy * size * mix(0.025, 1.0, burst) * (1.0 + life * 0.22), 0.0);
     VERTEX.y += life * 0.28;
     VERTEX += (VIEW_MATRIX * MODEL_MATRIX[3]).xyz;
     NORMAL = vec3(0.0, 0.0, 1.0);
@@ -54,10 +55,11 @@ void fragment() {
 
     float pulse = 1.0 + 0.10 * activity * sin(t * 3.3 + n1 * 6.0);
     float brightness = mix(0.40, 1.30, activity) * pulse;
-    float fade = smoothstep(0.0, 0.08, life) * (1.0 - smoothstep(0.15, 1.0, life));
+    float fade = smoothstep(0.0, 0.018, life) * (1.0 - smoothstep(0.42, 1.0, life));
     float breathing = 0.87 + 0.13 * n2;
 
-    ALBEDO = gas.rgb * tint.rgb * brightness;
+    float burst_flash = 0.45 * (1.0 - smoothstep(0.0, 0.07, life));
+    ALBEDO = gas.rgb * tint.rgb * brightness + vec3(0.25, 0.65, 0.12) * burst_flash;
     EMISSION = ALBEDO * 0.35;
     ALPHA = gas.a * tint.a * opacity * fade * breathing;
 }
