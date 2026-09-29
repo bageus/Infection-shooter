@@ -142,6 +142,8 @@ Run repository gates, then measure imported structural mesh AABBs in Godot again
 
 ## Session handoff
 
+2026-09-29: Усилено видимое движение PNG облака (две текстурные струи, волны и медленный поворот). Постоянное тестовое облако повторяет восьмисекундное визуальное появление и затухание, продолжая заражать игрока на всём протяжении цикла. Проверить в Godot 4.7.2 движение текстуры и мягкость перехода между циклами.
+
 2026-09-29: Авторский PNG и 2D шейдер облака адаптированы для существующего 3D `Area3D` через прозрачную плоскость, ориентированную к камере в вершинном шейдере. Логика поглощения и бесконечного облака сохранена; `progress` теперь затухает с временем жизни или поглощением. Проверить в Godot 4.7.2 отображение обоих типов облака с разных углов и исчезновение временного облака.
 
 2026-09-29: Emergency door permits keyless entry from its long-bar side (+Z in the authored door model) and requires the player's key from the ordinary-handle side. Visual wall seam covers and their script were removed. Urinal water spray reverses its horizontal direction. Next action: in Godot, approach both sides with and without the key, verify enemies cannot trigger the door but can use an open doorway, and shoot a wall urinal to inspect spray direction.
