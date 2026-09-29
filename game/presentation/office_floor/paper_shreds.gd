@@ -45,7 +45,4 @@ void fragment() {
 	scene.add_child(shreds)
 	shreds.global_position = hit_position
 	shreds.emitting = true
-	scene.get_tree().create_timer(shreds.lifetime + 0.35).timeout.connect(func() -> void:
-		if is_instance_valid(shreds):
-			shreds.queue_free()
-	)
+	scene.get_tree().create_timer(shreds.lifetime + 0.35).timeout.connect(shreds.queue_free)

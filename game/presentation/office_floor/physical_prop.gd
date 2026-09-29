@@ -54,11 +54,7 @@ func take_projectile_hit(damage: float, hit_position: Vector3, _hit_normal: Vect
 			BLAST.smoke(self, hit_position)
 			apply_torque_impulse(Vector3(1, 4, 1))
 			apply_central_impulse((direction.normalized() + Vector3.UP) * 1.5)
-			get_tree().create_timer(0.55).timeout.connect(func() -> void:
-				if is_instance_valid(self):
-					BLAST.detonate(self, hit_position)
-					queue_free()
-			)
+			get_tree().create_timer(0.55).timeout.connect(_rupture_extinguisher.bind(hit_position))
 		return true
 	if _damage_category() == "tech":
 		SPARKS.spawn(self, hit_position)
@@ -75,6 +71,13 @@ func take_projectile_hit(damage: float, hit_position: Vector3, _hit_normal: Vect
 	if breakable and _health <= 0.0:
 		_break_physical_prop(hit_position, direction)
 	return true
+
+func _rupture_extinguisher(hit_position: Vector3) -> void:
+	if is_queued_for_deletion():
+		return
+	BLAST.detonate(self, hit_position)
+	queue_free()
+
 
 func take_melee_hit(damage: float, hit_position: Vector3, direction: Vector3) -> void:
 	sleeping = false

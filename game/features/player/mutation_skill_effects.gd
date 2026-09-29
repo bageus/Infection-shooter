@@ -22,8 +22,19 @@ func configure(host: CharacterBody3D, infection: Node, guns: Array[Node3D]) -> v
 		baselines.append({"reload_time": gun.get("reload_time"), "spread_degrees": gun.get("spread_degrees"), "shots_per_second": gun.get("shots_per_second"), "bullet_damage": gun.get("bullet_damage")})
 	runtime.connect("skill_cast", _cast)
 	runtime.connect("tree_changed", _refresh_stats)
-	runtime.connect("mutation_changed", func(_amount: float, _threshold: float) -> void: _refresh_stats())
+	runtime.connect("mutation_changed", _on_mutation_changed)
 	_refresh_stats()
+
+
+func _on_mutation_changed(_amount: float, _threshold: float) -> void:
+	_refresh_stats()
+
+
+func _release_spores(location: Vector3) -> void:
+	if not is_instance_valid(player) or player.is_queued_for_deletion():
+		return
+	for enemy in _enemies_near(location, 3.0):
+		enemy.call("apply_mutation_poison", 5.0, 5.0)
 
 
 func _refresh_stats() -> void:
@@ -202,10 +213,7 @@ func _cast(skill_id: String) -> void:
 		"spore_cocoon":
 			var location: Vector3 = player.get("_aim_point")
 			_indicator(location, Color(0.71, 0.77, 0.12, 0.45), 3.0, 2.6)
-			get_tree().create_timer(2.0).timeout.connect(func() -> void:
-				if is_instance_valid(player):
-					for enemy in _enemies_near(location, 3.0): enemy.call("apply_mutation_poison", 5.0, 5.0)
-			)
+			get_tree().create_timer(2.0).timeout.connect(_release_spores.bind(location))
 		"epidemic":
 			for enemy in _enemies_near(player.global_position, 15.0):
 				if float(enemy.get("mutation_poison_remaining")) > 0.0:

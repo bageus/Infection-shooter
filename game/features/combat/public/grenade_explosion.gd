@@ -95,6 +95,5 @@ static func _scorch(scene: Node3D, hit_position: Vector3, normal: Vector3) -> vo
 	var pool := scene.get_node_or_null("ImpactEffects")
 	if pool != null and pool.has_method("register_mark"):
 		pool.call("register_mark", mark)
-	scene.get_tree().create_timer(MARK_LIFETIME).timeout.connect(func() -> void:
-		if is_instance_valid(mark): mark.queue_free()
-	)
+	# A direct callable disconnects automatically if the impact budget removes the mark first.
+	scene.get_tree().create_timer(MARK_LIFETIME).timeout.connect(mark.queue_free)
