@@ -30,7 +30,7 @@ func _run() -> void:
 			_expect(icons[index].get_width() == int(bounds.size.x) and icons[index].get_height() == int(bounds.size.y), "Visible artwork bounds preserve native aspect.")
 			var crop := image.get_region(Rect2i(bounds))
 			var icon := icons[index].get_image()
-			_expect(icon.get_pixel(20, 20).is_equal_approx(crop.get_pixel(20, 20)), "Each semantic icon uses its authored atlas region.")
+			_check_crop_pixels(icon, crop)
 		_expect(ICONS.ARTWORK_BOUNDS[5].end.y < ICONS.ARTWORK_BOUNDS[0].position.y, "Launcher comes from the upper row, not the syringe cell.")
 	_expect(ATLAS.get_image().get_data() == original, "Shared source texture is unchanged.")
 	var stage := TestMission.new()
@@ -94,3 +94,15 @@ func _test_key_buttons(hud: Node, player: Node) -> void:
 	isolated.fill_rect(Rect2i(18, 4, 4, 4), Color.WHITE)
 	ICONS._keep_largest_component(isolated)
 	_expect(isolated.get_pixel(4, 4).a == 1.0 and isolated.get_pixel(19, 5).a == 0.0, "An overlapping neighbour is removed while the main artwork remains.")
+
+
+func _check_crop_pixels(icon: Image, crop: Image) -> void:
+	var visible := 0
+	var faithful := true
+	for y in icon.get_height():
+		for x in icon.get_width():
+			var pixel := icon.get_pixel(x, y)
+			if pixel.a > 0.12:
+				visible += 1
+				faithful = faithful and pixel.is_equal_approx(crop.get_pixel(x, y))
+	_expect(visible > 1000 and faithful, "Visible artwork retains the atlas pixels; only neighbouring artwork is discarded.")

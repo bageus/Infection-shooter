@@ -18,6 +18,11 @@ jobs:
           sudo ln -s /tmp/godot/Godot* /usr/local/bin/godot
       - name: Import
         run: timeout 240 godot --headless --path . --editor --quit
+      - name: Readiness and architecture
+        run: |
+          python tools/validate_game_spec.py --ready
+          python tools/validate_workflow_state.py --ready
+          python tools/validate_architecture.py
       - name: Runtime regressions
         shell: bash
         run: |
