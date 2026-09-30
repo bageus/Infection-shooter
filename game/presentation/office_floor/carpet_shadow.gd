@@ -48,4 +48,4 @@ func _update_casters() -> void:
 		transform.basis.z.y *= HEIGHT_RATIO
 		transform.origin.y = FLOOR_SURFACE_Y + (transform.origin.y - FLOOR_SURFACE_Y) * HEIGHT_RATIO
 		_casters[index].global_transform = transform
-		_casters[index].visible = _sources[index].is_visible_in_tree()
+		_casters[index].visible = _sources[index].visible
