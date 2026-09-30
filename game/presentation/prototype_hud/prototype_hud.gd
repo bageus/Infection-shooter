@@ -193,6 +193,8 @@ func _configure_key_buttons() -> void:
 	_key_outline.border_color = Color(0.0, 0.95, 1.0, 1.0)
 	_key_outline.set_border_width_all(1)
 	_key_outline.set_corner_radius_all(4)
+	_key_outline.corner_detail = 1
+	_key_outline.anti_aliasing = false
 	_key_outline.set_content_margin_all(0)
 	_key_filled = _key_outline.duplicate() as StyleBoxFlat
 	_key_filled.bg_color = _key_outline.border_color
