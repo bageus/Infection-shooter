@@ -309,6 +309,8 @@ func _combined_aabb(node: Node3D, ignore_selection: bool = false) -> AABB:
 		if child.has_meta("planning_selection_highlight"):
 			continue
 		var mesh_instance = child as MeshInstance3D
+		if mesh_instance != null and mesh_instance.cast_shadow == GeometryInstance3D.SHADOW_CASTING_SETTING_SHADOWS_ONLY:
+			continue # Shadow proxies are not visible placement geometry.
 		if mesh_instance == null or mesh_instance.mesh == null or not mesh_instance.is_visible_in_tree() or absf(mesh_instance.global_basis.determinant()) < 0.000000000001:
 			continue
 		var local_transform = node.global_transform.affine_inverse() * mesh_instance.global_transform
