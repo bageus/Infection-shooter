@@ -23,8 +23,8 @@ func _run() -> void:
 	_test_antidote_resets_risk_and_reduces_mutation()
 	_test_antidote_resets_second_risk_window()
 	_test_antidote_is_blocked_during_control_loss()
-	_test_instability_only_builds_at_critical_threshold()
-	_test_instability_resets_below_critical_threshold()
+	_test_exact_threshold_and_immediate_crossing()
+	_test_below_threshold_has_no_delayed_loss()
 	_test_mutagen_pauses_during_control_loss()
 	_test_progression_budget_and_stages()
 	_test_path_feedback_without_spare_points()
@@ -46,12 +46,12 @@ func _test_skill_tree_lock_and_reactivation() -> void:
 	var tree := MutationTree.new()
 	_expect(tree.upgrade("muscle_memory", 70.0, 95.0), "The first skill can be learned with sufficient mutation.")
 	_expect(tree.upgrade("claws", 70.0, 95.0), "A second passive branch can be learned.")
-	_expect(tree.upgrade("killer_instinct", 70.0, 95.0), "A hybrid requires its two parent skills.")
-	_expect(not tree.upgrade("devourer", 70.0, 95.0), "A hybrid without both parents stays unavailable.")
+	_expect(not tree.is_active("killer_instinct", 70.0, 95.0), "Two first circles do not complete a hybrid.")
+	_expect(not tree.upgrade("killer_instinct", 70.0, 95.0), "A hybrid is not a separate point purchase.")
 	_expect(tree.toggle_lock("muscle_memory"), "Learned skill lock toggles.")
-	_expect(tree.reconcile(10.0), "Unlocked skills disappear when mutation falls below the threshold.")
+	_expect(tree.reconcile(10.0), "Unlocked skills disappear below their threshold.")
 	_expect(tree.learned.has("muscle_memory"), "Locked skill remains learned below threshold.")
-	_expect(not tree.is_active("muscle_memory", 10.0, 95.0), "Locked skill becomes inactive until its threshold returns.")
+	_expect(not tree.is_active("muscle_memory", 10.0, 95.0), "Locked skill is inactive below threshold.")
 	_expect(tree.is_active("muscle_memory", 70.0, 95.0), "Locked skill reactivates without another point.")
 	_expect(not tree.learned.has("claws"), "Unlocked skill must be learned again.")
 
@@ -107,15 +107,29 @@ func _test_progression_budget_and_stages() -> void:
 
 func _test_hybrid_stage_gates() -> void:
 	var tree := MutationTree.new()
-	_expect(tree.upgrade("muscle_memory", 100.0, 90.0), "First hybrid parent learned.")
-	_expect(tree.upgrade("claws", 100.0, 90.0), "Second hybrid parent learned.")
-	_expect(not tree.can_upgrade("killer_instinct", 69.99, 90.0), "An early hybrid still requires 70 mutation.")
-	_expect(tree.can_upgrade("killer_instinct", 70.0, 45.0), "Existing hybrid parents remain valid.")
-	_expect(tree.upgrade("recycling", 100.0, 90.0), "Late hybrid parent learned.")
-	_expect(tree.upgrade("synapses", 100.0, 90.0), "Adjacent late parent learned.")
-	_expect(not tree.can_upgrade("hyperactive", 94.99, 90.0), "A late hybrid requires 95 mutation.")
-	_expect(not tree.can_upgrade("hyperactive", 100.0, 89.99), "A late hybrid cannot bypass the final stability gate.")
-	_expect(tree.can_upgrade("hyperactive", 95.0, 90.0), "A late hybrid opens with its unchanged parents.")
+	for skill_id in ["muscle_memory", "stabilizers", "combat_reflex", "claws", "blood_scent"]:
+		_expect(tree.upgrade(skill_id, 50.0, 45.0), "Each regular parent circle uses its existing point.")
+	_expect(not tree.is_active("killer_instinct", 50.0, 45.0), "One incomplete branch cannot activate a hybrid.")
+	_expect(tree.upgrade("adrenaline", 50.0, 45.0), "Completing both branches uses the sixth point.")
+	_expect(tree.points(50.0) == 0, "The fixture has no spare point for a separate hybrid purchase.")
+	_expect(tree.is_active("killer_instinct", 50.0, 45.0), "The hybrid activates automatically with two full branches.")
+	_expect(not tree.can_upgrade("killer_instinct", 50.0, 45.0), "An automatic bonus cannot consume another point.")
+	_expect(not tree.is_active("killer_instinct", 49.99, 45.0), "The bonus disables below its later branch's last-circle mutation.")
+	_expect(not tree.is_active("killer_instinct", 50.0, 44.99), "The bonus respects the later branch's stability gate.")
+	_expect(tree.toggle_lock("adrenaline"), "The later branch can remain learned below mutation.")
+	tree.reconcile(49.0)
+	_expect(not tree.is_active("killer_instinct", 49.0, 45.0), "Retained learned parents cannot bypass the mutation gate.")
+	_expect(tree.is_active("killer_instinct", 50.0, 45.0), "A retained full pair restores its derived bonus.")
+	for row in Catalog.PASSIVE:
+		if int(row[3]) < 3:
+			tree.learned[str(row[0])] = true
+	for hybrid_id in Catalog.HYBRID_PARENTS:
+		var row := Catalog.find(str(hybrid_id))
+		_expect(tree.is_active(str(hybrid_id), Catalog.threshold(row), Catalog.required_stability(row)), "Every adjacent full pair activates its hybrid at its exact gates.")
+	tree.learned["killer_instinct"] = true
+	tree.locked["killer_instinct"] = true
+	tree.reconcile(100.0)
+	_expect(not tree.learned.has("killer_instinct") and not tree.locked.has("killer_instinct"), "Legacy purchased/locked hybrid state is removed without another charge.")
 
 
 func _test_ampule_notification_and_antidote() -> void:
@@ -130,6 +144,8 @@ func _test_ampule_notification_and_antidote() -> void:
 	runtime.add_control_ampule()
 	_expect(runtime.can_upgrade_skill("claws"), "The third ampule opens the second stage without mutation gain.")
 	_expect(notifications[0] == before + 1, "Opening a stage announces a new available skill once.")
+	runtime.call("_physics_process", 5.0)
+	_expect(not runtime.is_control_lost(), "Raised stability lets the first loss finish safely.")
 	_expect(runtime.upgrade_skill("claws"), "Runtime accepts an open branch.")
 	runtime.toggle_skill_lock("claws")
 	runtime.use_antidote()
@@ -231,69 +247,63 @@ func _test_ordinary_antidote() -> void:
 
 func _test_first_control_loss() -> void:
 	var domain = _reach_first_control_loss()
-	_expect(domain.is_control_lost(), "Ten seconds at critical mutation starts control loss.")
-	_expect(domain.active_control_loss_stage == 1, "The first control loss is stage one.")
-	_expect_float(domain.control_loss_remaining, 5.0, "Stage one control loss lasts five seconds.")
+	_expect(domain.is_control_lost(), "Crossing the critical threshold starts loss inside absorb_mutagen.")
+	_expect(domain.active_control_loss_stage == 1, "The first loss is stage one.")
+	_expect_float(domain.control_loss_remaining, 5.0, "Stage one still lasts five seconds.")
+	domain.add_control_ampule()
 	domain.tick(5.0)
-	_expect(not domain.is_control_lost(), "Control returns after five seconds.")
-	_expect_float(domain.risk_window_remaining, 30.0, "Stage one opens a 30-second risk window.")
+	_expect(not domain.is_control_lost(), "Raised stability permits recovery after the five-second loss.")
+	_expect_float(domain.risk_window_remaining, 30.0, "Safe recovery opens the existing risk window.")
 
 
 func _test_escalation_to_defeat() -> void:
 	var domain = _reach_first_control_loss()
 	domain.tick(5.0)
-	domain.tick(10.0)
-	_expect(domain.active_control_loss_stage == 2, "A new loss inside the first risk window is stage two.")
-	_expect_float(domain.control_loss_remaining, 7.0, "Stage two control loss lasts seven seconds.")
+	_expect(domain.active_control_loss_stage == 2, "Remaining above the threshold starts stage two at the recovery boundary.")
+	_expect_float(domain.control_loss_remaining, 7.0, "Stage two starts with its full seven-second duration.")
 	domain.tick(7.0)
-	_expect_float(domain.risk_window_remaining, 30.0, "Stage two opens a new 30-second risk window.")
-	domain.tick(10.0)
-	_expect(domain.defeated, "A third trigger inside the second risk window causes defeat.")
+	_expect(domain.defeated, "Remaining above the threshold defeats immediately at the second recovery boundary.")
+	_expect(domain.active_control_loss_stage == 3, "The third loss has no playable duration.")
+	var combined = _reach_first_control_loss()
+	combined.tick(12.0)
+	_expect(combined.defeated, "A large simulation step processes both losses and immediate defeat.")
 
 
 func _test_risk_window_expiry_resets_escalation() -> void:
 	var domain = _reach_first_control_loss()
-	domain.tick(5.0)
 	domain.add_control_ampule()
-	_expect_float(domain.critical_threshold, 35.0, "A control ampule raises the threshold by five.")
+	domain.tick(5.0)
 	domain.tick(30.0)
-	_expect_float(domain.risk_window_remaining, 0.0, "A survived risk window expires.")
-	_expect(domain.next_control_loss_stage == 1, "Risk-window expiry resets escalation to stage one.")
+	_expect_float(domain.risk_window_remaining, 0.0, "A safe risk window expires.")
+	_expect(domain.next_control_loss_stage == 1, "Risk-window expiry resets escalation.")
 	domain.absorb_mutagen(1.0)
-	domain.tick(10.0)
-	_expect(domain.active_control_loss_stage == 1, "The next loss after reset lasts as stage one.")
+	_expect(domain.active_control_loss_stage == 1, "The next threshold crossing is immediately a first-stage loss.")
 
 
 func _test_antidote_resets_risk_and_reduces_mutation() -> void:
 	var domain = _reach_first_control_loss()
+	domain.add_control_ampule()
 	domain.tick(5.0)
-	var mutation_before: float = domain.mutation
-	_expect(domain.use_antidote(), "Antidote is usable during the risk window.")
-	_expect_float(domain.mutation, maxf(0.0, mutation_before - 10.0), "Risk-window antidote reduces mutation.")
-	_expect_float(domain.risk_window_remaining, 0.0, "Risk-window antidote ends the window immediately.")
-	_expect(domain.next_control_loss_stage == 1, "Risk-window antidote resets escalation to stage one.")
-	domain.tick(10.0)
-	_expect(not domain.is_control_lost(), "Reducing mutation below critical prevents renewed control loss.")
-	domain.absorb_mutagen(2.0)
-	domain.tick(10.0)
-	_expect(domain.active_control_loss_stage == 1, "Reaching critical mutation again restarts from stage one.")
+	var before: float = domain.mutation
+	_expect(domain.use_antidote(), "Antidote remains usable after safe recovery.")
+	_expect_float(domain.mutation, before - 10.0, "Antidote preserves its existing ten-point reduction.")
+	_expect_float(domain.risk_window_remaining, 0.0, "Antidote ends the risk window.")
+	_expect(domain.next_control_loss_stage == 1, "Antidote resets escalation.")
+	domain.absorb_mutagen(3.0)
+	_expect(domain.active_control_loss_stage == 1, "A new threshold crossing starts stage one immediately.")
 
 
 func _test_antidote_resets_second_risk_window() -> void:
 	var domain = _reach_first_control_loss()
 	domain.tick(5.0)
-	domain.tick(10.0)
-	_expect(domain.active_control_loss_stage == 2, "Test setup reaches stage-two control loss.")
+	_expect(domain.active_control_loss_stage == 2, "The second loss follows immediately.")
+	domain.add_control_ampule()
 	domain.tick(7.0)
-	var mutation_before: float = domain.mutation
-	_expect_float(domain.risk_window_remaining, 30.0, "Stage two opens the second risk window.")
-	_expect(domain.use_antidote(), "Antidote is usable during the second risk window.")
-	_expect_float(domain.mutation, maxf(0.0, mutation_before - 10.0), "Second-window antidote reduces mutation.")
-	_expect_float(domain.risk_window_remaining, 0.0, "Second-window antidote ends the risk window.")
-	_expect(domain.next_control_loss_stage == 1, "Second-window antidote resets escalation to stage one.")
-	domain.absorb_mutagen(2.0)
-	domain.tick(10.0)
-	_expect(domain.active_control_loss_stage == 1, "After a second-window reset, the next loss is stage one.")
+	_expect(not domain.is_control_lost(), "DNA during stage two can make recovery safe.")
+	_expect(domain.use_antidote(), "Antidote is usable after stage-two recovery.")
+	_expect(domain.next_control_loss_stage == 1, "Second-window antidote resets escalation.")
+	domain.absorb_mutagen(3.0)
+	_expect(domain.active_control_loss_stage == 1, "The next crossing follows the reset stage immediately.")
 
 
 func _test_antidote_is_blocked_during_control_loss() -> void:
@@ -304,28 +314,24 @@ func _test_antidote_is_blocked_during_control_loss() -> void:
 	_expect(domain.active_control_loss_stage == 1, "Blocked antidote does not alter control-loss stage.")
 
 
-func _test_instability_resets_below_critical_threshold() -> void:
+func _test_below_threshold_has_no_delayed_loss() -> void:
 	var domain = InfectionDomain.new()
 	domain.absorb_mutagen(6.0)
-	domain.tick(6.0)
-	_expect_float(domain.instability_elapsed, 6.0, "Instability accumulates while mutation is critical.")
+	_expect(not domain.is_control_lost(), "Exactly at the threshold has not crossed it.")
 	domain.use_antidote()
-	_expect_float(domain.mutation, 20.0, "Ordinary antidote can move mutation below critical.")
-	_expect_float(domain.instability_elapsed, 0.0, "Dropping below critical resets instability progress.")
-	domain.tick(20.0)
-	_expect(not domain.is_control_lost(), "No control loss occurs while mutation remains below critical.")
-
-
-func _test_instability_only_builds_at_critical_threshold() -> void:
-	var domain = InfectionDomain.new()
-	domain.absorb_mutagen(5.0)
 	domain.tick(100.0)
-	_expect_float(domain.instability_elapsed, 0.0, "Instability does not build below the critical threshold.")
-	domain.absorb_mutagen(1.0)
-	domain.tick(9.9)
-	_expect(not domain.is_control_lost(), "Instability has not triggered before ten seconds.")
-	domain.tick(0.1)
-	_expect(domain.is_control_lost(), "Instability triggers at ten seconds at or above threshold.")
+	_expect(not domain.is_control_lost(), "Below-threshold mutation never builds a delayed loss.")
+
+
+func _test_exact_threshold_and_immediate_crossing() -> void:
+	var domain = InfectionDomain.new()
+	domain.absorb_mutagen(6.0)
+	_expect_float(domain.mutation, 30.0, "The fixture is exactly at the threshold.")
+	domain.tick(100.0)
+	_expect(not domain.is_control_lost(), "Equality is safe: loss needs a crossing above the boundary.")
+	domain.absorb_mutagen(0.001)
+	_expect(domain.is_control_lost(), "The smallest positive crossing triggers without a timer tick.")
+	_expect_float(domain.control_loss_remaining, 5.0, "The instantaneous trigger has not consumed any loss duration.")
 
 
 func _test_mutagen_pauses_during_control_loss() -> void:
@@ -337,8 +343,7 @@ func _test_mutagen_pauses_during_control_loss() -> void:
 
 func _reach_first_control_loss():
 	var domain = InfectionDomain.new()
-	domain.absorb_mutagen(6.0)
-	domain.tick(10.0)
+	domain.absorb_mutagen(6.2)
 	return domain
 
 
@@ -379,9 +384,19 @@ func _test_runtime_cast_control_guard() -> void:
 	runtime.absorb_mutagen(6.0)
 	runtime.upgrade_skill("acid_spit")
 	_expect(runtime.has_skill("acid_spit"), "Fixture has an active learned ability.")
-	runtime.call("_physics_process", 10.0)
-	_expect(runtime.is_control_lost(), "Existing ten-second instability timer reaches the runtime.")
+	runtime.absorb_mutagen(0.2)
+	_expect(runtime.is_control_lost(), "The runtime observes the immediate crossing.")
 	_expect(not runtime.cast_skill("acid_spit"), "Hotbar cannot bypass control loss.")
+	runtime.add_control_ampule()
 	runtime.call("_physics_process", 5.0)
-	_expect(runtime.cast_skill("acid_spit"), "Casting returns after the normal control-loss duration.")
+	_expect(runtime.cast_skill("acid_spit"), "Casting returns after safe recovery.")
+	var terminal := Runtime.new()
+	var defeats := [0]
+	terminal.defeated.connect(func() -> void: defeats[0] += 1)
+	terminal.absorb_mutagen(6.2)
+	terminal.call("_physics_process", 5.0)
+	terminal.call("_physics_process", 7.0)
+	_expect(terminal.is_defeated() and defeats[0] == 1, "Third loss publishes terminal defeat once in the same simulation step.")
+	terminal.free()
 	runtime.free()
+

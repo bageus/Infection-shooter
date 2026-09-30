@@ -118,6 +118,16 @@ func _select_weapon(index:int)->void:
 	if old!=null: old.call("cancel_reload")
 	current_weapon_index=index
 	for i in weapons.size(): weapons[i].visible=i==_slot_weapons[index]
+
+# Public v1 command used by the HUD's slot buttons.
+func select_weapon_slot(index: int) -> bool:
+	if get_tree().paused or _mutation_menu_open or infection_runtime.call("is_control_lost") or infection_runtime.call("is_defeated"):
+		return false
+	if index < 0 or index >= _slot_weapons.size():
+		return false
+	_select_weapon(index)
+	return true
+
 func get_current_weapon()->Node3D:
 	return weapons[_slot_weapons[current_weapon_index]]
 

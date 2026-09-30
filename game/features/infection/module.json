@@ -7,7 +7,6 @@
     "Mutation skill tree, locked upgrades, and active skill cooldowns",
     "Active and priority mutation ability",
     "Critical mutation threshold",
-    "Instability timer",
     "Control-loss and risk-window timers",
     "Control-loss escalation stage",
     "Terminal control-loss defeat state"

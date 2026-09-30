@@ -17,8 +17,7 @@ func _run() -> void:
 	player.set("gravity_acceleration", 0.0)
 	player.call("_select_weapon", 1)
 	var runtime := player.get_node("InfectionRuntime")
-	runtime.call("absorb_mutagen", 6.0)
-	runtime.call("_physics_process", 10.0)
+	runtime.call("absorb_mutagen", 6.2)
 	_expect(bool(runtime.call("is_control_lost")), "Player runtime has entered normal stage-one loss.")
 	var before := player.global_position
 	var weapon := player.call("get_current_weapon") as Node3D
@@ -31,6 +30,8 @@ func _run() -> void:
 	_expect(int(weapon.call("get_magazine_ammo")) < ammo, "Mutation fires without the fire action being held.")
 	var control: RefCounted = player.get("_mutation_control")
 	_expect((player.call("_move_direction") as Vector3).distance_to(control.get("direction")) < 0.001, "Movement follows mutation direction rather than held player input.")
+	_expect(not bool(player.call("select_weapon_slot", 2)), "HUD slot commands are blocked during loss.")
+	runtime.call("add_control_ampule")
 	runtime.call("_physics_process", 5.0)
 	_expect(not bool(runtime.call("is_control_lost")), "Control returns after its existing duration.")
 	for frame in range(4):

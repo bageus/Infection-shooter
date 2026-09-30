@@ -43,15 +43,15 @@ const ACTIVE := [
 ]
 
 const HYBRID_PARENTS := {
-	"killer_instinct": ["muscle_memory", "claws"],
-	"devourer": ["claws", "hypertrophy"],
-	"reactive_evolution": ["hypertrophy", "bone_armor"],
-	"retaliation": ["bone_armor", "synapses"],
-	"hyperactive": ["synapses", "recycling"]
+	"killer_instinct": ["combat_reflex", "adrenaline"],
+	"devourer": ["adrenaline", "second_heart"],
+	"reactive_evolution": ["second_heart", "pain_block"],
+	"retaliation": ["pain_block", "reflex_arc"],
+	"hyperactive": ["reflex_arc", "battle_metabolism"]
 }
 
 
-# Stage lookup never changes the authored order or hybrid parent IDs.
+# Hybrids are derived bonuses from the last circles of adjacent full branches.
 const PASSIVE_STAGES := {
 	"Arsenal": 0, "Predator": 1, "Biomass": 2,
 	"Adaptation": 3, "Neural System": 4, "Metabolism": 4
@@ -95,6 +95,5 @@ static func required_stability(row: Array) -> float:
 
 static func threshold(row: Array) -> float:
 	if int(row[3]) == 3:
-		# Keep hybrids late, including those linking early branches.
-		return maxf(70.0, FIRST_POINT + float(stage(row)) * 15.0 + 10.0)
+		return FIRST_POINT + float(stage(row)) * 15.0 + 10.0
 	return FIRST_POINT + float(stage(row)) * 15.0 + float(row[3]) * POINT_STEP

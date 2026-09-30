@@ -80,6 +80,8 @@ func has_skill(skill_id: String) -> bool:
 
 
 func skill_learned(skill_id: String) -> bool:
+	if CATALOG.HYBRID_PARENTS.has(skill_id):
+		return tree.has_hybrid_parents(skill_id)
 	return tree.learned.has(skill_id)
 
 

@@ -11,11 +11,20 @@
 - Each late passive has its own root. Locks sit to the right of circles.
   Five hybrid circles link adjacent passive branches, not the first/last.
   Retired Organic Ammo is removed from both learned and locked old state.
-- Critical mutation retains its existing **10 seconds of instability** before
-  control loss. Manual movement, aim, roll, reload, switching and casting are then
-  blocked; the hero moves and fires autonomously, retaining gravity/collisions. Stage-one recovery takes five seconds,
-  stage two seven; the existing third-stage defeat is connected to main.
-  Opening the mutation menu still pauses all simulation/timers by design.
+- Mutation strictly above the critical boundary starts control loss immediately.
+  First loss lasts five seconds; recovery immediately starts the seven-second
+  second loss if still critical, then the third crossing ends the mission.
+  DNA raising the threshold can allow recovery; equality is safe.
+- Hybrids activate automatically after all three circles in each of the two
+  adjacent passive parent branches are learned and mutation/stability gates pass.
+  They cost no extra point and cannot be individually locked.
+- Central trunk darkens from the first closed stability gate onward.
+- HUD key buttons sit inside the left of each cell; selection fills their frame
+  and reverses the number color. Antidote quantity is upper right in its cell.
+  Weapon names/GL letters behind icons are hidden. The new atlas is tightly
+  cropped; neighboring disconnected artwork is removed from each extracted copy.
+- Renamed elevator door instances build their static Wall collider from actual
+  mesh triangles, preserving the opening and blocking both visible side walls.
 - DNA at `(-17.5, 0.5, -15)` near the launcher grants +5 stability through
   `add_control_ampule`, up to the existing 95 cap. It respawns after two seconds
   of unpaused game time. Only the injected player can collect it. A single
@@ -39,6 +48,7 @@ godot --headless --path . --script game/bootstrap/app/tests/run_mutation_feedbac
 godot --headless --path . --script game/features/player/tests/run_control_loss_tests.gd
 godot --headless --path . --script game/presentation/prototype_hud/tests/run_weapon_icon_tests.gd
 godot --headless --path . --script game/presentation/office_floor/tests/run_blood_effects_tests.gd
+godot --headless --path . --script game/presentation/office_floor/tests/run_elevator_collision_tests.gd
 python tools/validate_project.py
 ```
 
@@ -50,7 +60,7 @@ models, and the real six-image atlas/HUD launcher swap without stretching.
 The blood suite fixes splatters-per-hit to one for its pre-existing budget and
 throttle assertions; production defaults to three.
 
-## Verification status and exact limits
+## Previous verification status and exact limits
 
 Повторная проверка полного checkout 30.09.2026: Godot 4.5.2 успешно выполнил
 все пять runtime suites выше. Основная сцена отработала 180 кадров без игровых
@@ -76,9 +86,10 @@ launcher → pistol в основном HUD и слоте. ДНК провере
 2. Inspect a small and large window: ten distinct roots/circles fit, passive
    order stays intact, five hybrids lie between adjacent parents, `+` does not
    cover outgoing lines, and no divisions remain on the trunk.
-3. Close the menu, stay critical for ten seconds, hold movement/fire/roll.
-   Confirm loss notice, autonomous motion/fire, five-second recovery and repeat
-   escalation. Antidote rules remain unchanged; third loss ends the mission.
+3. Cross the threshold: loss starts in the same update. Keep mutation critical:
+   after five seconds second loss starts immediately; seven seconds later the
+   mission ends. Collect DNA during loss to verify safe recovery when its raised
+   threshold catches mutation. Full hybrid parent paths activate their hybrid.
 4. Collect DNA repeatedly and stand within its area during respawn. Confirm one
    grant per two seconds, stability cap 95, and no duplicate nodes. Pause while
    hidden; the timer must resume with gameplay.
@@ -92,3 +103,7 @@ API references checked for image extraction and Timer lifecycle:
 https://docs.godotengine.org/en/stable/classes/class_image.html
 https://docs.godotengine.org/en/stable/classes/class_timer.html
 These documentation checks do not establish a 4.7.2 runtime pass.
+
+Current follow-up verification is pending; prior runtime results above describe the preceding commit, not this follow-up. Check renamed neighboring elevators from both sides, their wall seams and open doorway after syncing.
+
+2026-09-30 follow-up verification complete: GitHub Actions run https://github.com/bageus/Infection-shooter/actions/runs/36771078309 checked source against the owner's latest atlas (1ece24b05682c59a1e00c8732d0e3e8141f8731a). Godot 4.5.2 passed six suites: infection, mutation feedback/DNA/models, player control loss, atlas/HUD, blood, and renamed/rotated/scaled elevator collision. Main scene ran 180 frames without SCRIPT ERROR/ERROR. Readiness, workflow and architecture gates passed. Aggregate validate_project.py still fails only the pre-existing planning_mode.gd hard size limit (1629 > 600); its CI step uses continue-on-error and does not constitute a full validator pass. Editor import exited 0 with the existing missing FBX palette1.png/couches.png errors. No new architecture exception or game dependency. Exact next action: sync main and visually verify in installed Godot 4.7.2 framed keys, trunk shading, automatic hybrids, immediate loss chain, and neighboring elevator walls/open doorway. T002 remains IN_PROGRESS.
