@@ -273,7 +273,7 @@ func _input(event: InputEvent) -> void:
 				if not _drag_recorded:
 					edit_history.call("record_transform", objects.selected)
 					_drag_recorded = true
-				var locked_y := objects.selected.global_position.y
+				var locked_y: float = objects.selected.global_position.y
 				objects.selected.global_position = geometry._snap_position_for(objects.selected, world)
 				if geometry._is_ceiling_tool(objects.selected):
 					objects.selected.global_position.y = locked_y
