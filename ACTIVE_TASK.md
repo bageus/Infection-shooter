@@ -13,6 +13,7 @@ updated: 2026-09-30
 Build the first playable combat-slice foundation with an authored office floor, player, combat, infected enemies, infection source, and observable fail states.
 
 ## In scope
+- owner-requested discrete central mutation-tree connectors, with gradual progression confined to branches;
 - owner-requested threefold reduction of carpet cast-shadow extent;
 - owner-approved contact-lighting pass: SSAO in the game Environment and provisional MSAA 2x, with existing light/shadow power preserved;
 
@@ -38,6 +39,8 @@ Procedural generation, save/checkpoints, final HUD, monetization, platform SDKs 
 - Structural modules visually touch edge-to-edge with no visible gaps and no overlap beyond a tiny seam tolerance.\n- Exterior corners face inward correctly.\n- Perimeter and authored interior walls block the player.\n- The expanded floor and defeat menu remain functional.
 
 ## Progress
+
+01.10.2026: по уточнению владельца центральный соединитель дерева появляется целыми участками только до последнего открытого по стабильности корня. Линия к закрытой следующей ветке скрыта, зелёный соединитель больше не интерполируется от mutation и не зависит от купленных/доступных узлов. Постепенная подсветка самих веток сохранена. Локальное представление bootstrap.app; без изменений домена, контрактов, состояния, сохранений и зависимостей. Существующие layout-проверки обновлены для нового правила, включая высокий mutation при закрытой ветке, снижение mutation и открытие следующей группы. Ожидается CI; далее визуально проверить переход стабильности 30→45→60 и рост/снижение mutation.
 
 30.09.2026: по скриншоту владельца вынос падающей тени ковров сокращён втрое: локальный carpet_shadow сжимает только высоту shadow-only геометрии относительно поверхности базового пола 0.0135 м. Видимый GLB, UV, XZ размер, положение, другие предметы/свет и карты сохранены. Работает для всех 01_floor_* ковров environment_prop, включая восстановление/перемещение; floor_pad идёт отдельной структурной сценой. Исходные меши не отбрасывают дублирующую тень; планировщик исключает невидимый caster из размеров размещения. environment_prop выше мягкого порога: расчёт/жизненный цикл тени вынесен в самостоятельный локальный компонент, без API/зависимостей. SSAO из параллельного main сохранён; изменение касается падающей тени, не глобальной интенсивности SSAO. Godot 4.7.2: validate_project, 255 scene resources, workstation/glass/scene-access, все 12 runtime-наборов и main smoke 180 кадров прошли в https://github.com/bageus/Infection-shooter/actions/runs/36783136279. Editor import завершился 0 с прежними отсутствующими palette1.png/couches.png; runtime без SCRIPT ERROR/ERROR. Точный визуальный коэффициент в итоговом изображении ещё не подтверждён: проверить вынос тени ковров на базовом полу, перенос/поворот и скрытие/показ потокового участка.
 

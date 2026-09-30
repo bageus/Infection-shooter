@@ -1,7 +1,7 @@
 name: Mission runtime regressions
 on:
   push:
-    branches: [main]
+    branches: [verify/discrete-trunk-20261001]
   pull_request:
 permissions:
   contents: read

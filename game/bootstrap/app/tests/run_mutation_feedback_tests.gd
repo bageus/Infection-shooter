@@ -23,10 +23,16 @@ func _run() -> void:
 	var values: Array[float] = [40, 70, 25, 55, 25, 40, 55, 70, 85, 85]
 	var opened: Array[bool] = [true, true, true, true, true, true, true, true, true, true]
 	canvas.configure_progression(values, 95.0, opened)
-	_expect(canvas.trunk_available_x() == 1160.0, "Fully open stability leaves the entire trunk gray/available.")
+	_expect(canvas.trunk_available_x() == canvas.branch_origin(9).x, "The trunk ends at the last open root, with no available tail.")
 	var initial: Array[bool] = [false, false, true, false, true, false, false, false, false, false]
 	canvas.configure_progression(values, 95.0, initial)
-	_expect(canvas.trunk_available_x() == canvas.branch_origin(5).x, "Trunk darkness starts at the first closed stability junction, even with high mutation.")
+	_expect(canvas.trunk_available_x() == canvas.branch_origin(4).x, "High mutation cannot expose a connector toward a closed branch.")
+	canvas.set_mutation(0.0)
+	_expect(canvas.trunk_available_x() == canvas.branch_origin(4).x, "Mutation changes cannot partially fill or retract the central connector.")
+	initial[0] = true
+	initial[5] = true
+	canvas.configure_progression(values, 0.0, initial)
+	_expect(canvas.trunk_available_x() == canvas.branch_origin(5).x, "Opening the next branches exposes their entire connector at once.")
 	canvas.configure_progression(values, 95.0, opened)
 	_expect(canvas.branch_origin(8) != canvas.branch_origin(9), "Late passive roots are distinct.")
 	_expect(CANVAS.HYBRID_PARENTS.size() == 5, "Only adjacent passive branches have hybrids.")
