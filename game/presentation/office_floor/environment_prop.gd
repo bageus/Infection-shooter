@@ -1,5 +1,6 @@
 extends RigidBody3D
 
+const CARPET_SHADOW := preload("res://game/presentation/office_floor/carpet_shadow.gd")
 const DAMAGE = preload("res://game/presentation/office_floor/environment_damage.gd")
 const BALANCE = preload("res://game/features/combat/public/projectile_balance.gd")
 const BOOK_CONTACT = preload("res://game/presentation/office_floor/book_contact.gd")
@@ -82,6 +83,10 @@ func _ready() -> void:
 	# Architectural pieces and carpets stay anchored; all other groups are movable.
 	freeze = wall_mounted or model_path.begins_with("res://models/objects/enviroments/01/") or "server_rack" in model_path.get_file()
 	if freeze and "01_floor_" in model_path:
+		var shadow := CARPET_SHADOW.new()
+		shadow.name = "CarpetShadow"
+		add_child(shadow)
+		shadow.configure(visual)
 		return # Carpet lies on the level floor and must not create a raised obstacle.
 	var volume := _add_shapes(visual)
 	if model_path.get_file() == "06_conference_chair.glb" and global_position.y < 0.25:
