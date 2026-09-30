@@ -7,8 +7,9 @@ const PLAYER := preload("res://game/features/player/public/player.tscn")
 class TestMission:
 	extends Node3D
 	var dropped := -1
-	func drop_weapon_pickup(index: int, _position: Vector3) -> void:
+	func drop_weapon_pickup(index: int, _position: Vector3) -> bool:
 		dropped = index
+		return true
 const ATLAS := preload("res://assets/icon_interface.png")
 var failures := 0
 
@@ -39,6 +40,7 @@ func _run() -> void:
 	var player := PLAYER.instantiate() as Node3D
 	player.name = "Player"
 	stage.add_child(player)
+	player.call("configure_weapon_drop", Callable(stage, "drop_weapon_pickup"))
 	var hud := HUD.instantiate()
 	hud.set("player_path", NodePath("../Player"))
 	stage.add_child(hud)

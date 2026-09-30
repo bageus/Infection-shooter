@@ -26,6 +26,10 @@ var _reserve_ammo: int
 var _reloading: bool = false
 var _burst_shots: int = 0
 var _last_shot_time: float = -100.0
+var effects_root: Node3D
+var impact_pool: Node
+
+
 func _ready() -> void:
 	_magazine_ammo = magazine_size
 	_reserve_ammo = starting_reserve_ammo
@@ -50,8 +54,15 @@ func try_fire() -> bool:
 	return try_fire_at(muzzle.global_position - muzzle.global_transform.basis.z * bullet_range)
 
 
+
+# Public scene wiring v1; owned by the mission composition.
+func configure_world(container: Node3D, impacts: Node) -> void:
+	effects_root = container
+	impact_pool = impacts
+
+
 func try_fire_at(target_point: Vector3) -> bool:
-	if _cooldown_remaining > 0.0 or _reloading or bullet_scene == null: return false
+	if _cooldown_remaining > 0.0 or _reloading or bullet_scene == null or not is_instance_valid(effects_root): return false
 	if _magazine_ammo <= 0:
 		return false
 	var shooter := get_parent().get_parent() as CollisionObject3D
@@ -75,7 +86,8 @@ func try_fire_at(target_point: Vector3) -> bool:
 	var base_direction := (horizontal + Vector3.UP * rise).normalized()
 	for pellet in pellets_per_shot:
 		var bullet := bullet_scene.instantiate()
-		get_tree().current_scene.add_child(bullet)
+		bullet.call("configure_world", effects_root, impact_pool)
+		effects_root.add_child(bullet)
 		bullet.global_transform = muzzle.global_transform
 		var shot_direction := _spread_direction(base_direction, effective_spread)
 		var collision_origin := muzzle_position

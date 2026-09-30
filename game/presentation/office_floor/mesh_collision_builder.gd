@@ -147,3 +147,16 @@ func _is_excluded(node: Node) -> bool:
 		if str(token).to_lower() in lower:
 			return true
 	return false
+
+
+# Public structural scene wiring v1, forwarded inside the owning scene only.
+func configure_world(container: Node3D, impacts: Node) -> void:
+	for child in get_children():
+		if child.has_method("configure_world"):
+			child.call("configure_world", container, impacts)
+
+
+func configure_player(actor: Node3D) -> void:
+	for child in get_children():
+		if child.has_method("configure_player"):
+			child.call("configure_player", actor)

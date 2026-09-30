@@ -1,6 +1,5 @@
 extends Node3D
 
-const EFFECTS_SCRIPT = preload("res://game/features/combat/public/impact_effects.gd")
 const PROJECTILE_VISUAL := preload("res://game/features/combat/projectile_visual.gd")
 const BALANCE = preload("res://game/features/combat/public/projectile_balance.gd")
 
@@ -20,6 +19,15 @@ var _collision_origin := Vector3.ZERO
 var _first_step := true
 var _initial_energy := 24.0
 var _remaining_energy := 24.0
+
+var effects_root: Node3D
+var impact_pool: Node
+
+
+# Public scene wiring v1; owned by the mission composition.
+func configure_world(container: Node3D, impacts: Node) -> void:
+	effects_root = container
+	impact_pool = impacts
 
 
 func setup_projectile(
@@ -143,17 +151,14 @@ func _hit_material(collider: Object, shape_index: int) -> String:
 func _spawn_impact_decal(collider: Object, hit_position: Vector3, normal: Vector3) -> void:
 	if normal.is_zero_approx():
 		normal = -_direction if not _direction.is_zero_approx() else Vector3.UP
+	if not is_instance_valid(effects_root) or not is_instance_valid(impact_pool):
+		return
 	var mark := MeshInstance3D.new()
 	var quad := QuadMesh.new()
 	var texture_index := 1 if randi() % 4 == 0 else 0
 	quad.size = Vector2.ONE * (0.5 if texture_index == 1 else 0.3)
 	var material := StandardMaterial3D.new()
-	var pool := get_parent().get_node_or_null("ImpactEffects")
-	if pool == null:
-		pool = Node3D.new()
-		pool.name = "ImpactEffects"
-		pool.set_script(EFFECTS_SCRIPT)
-		get_parent().add_child(pool)
+	var pool := impact_pool
 	material.albedo_texture = pool.call("texture_for", IMPACT_TEXTURES[texture_index]) as Texture2D
 	material.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
 	material.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
@@ -163,7 +168,7 @@ func _spawn_impact_decal(collider: Object, hit_position: Vector3, normal: Vector
 	mark.mesh = quad
 	var parent: Node3D = collider as Node3D
 	if parent == null:
-		parent = get_tree().current_scene as Node3D
+		parent = effects_root
 	if parent == null:
 		return
 	parent.add_child(mark)

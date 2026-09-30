@@ -4,10 +4,11 @@ const PROJECTILE := preload("res://game/features/combat/grenade_projectile.gd")
 const ART := preload("res://game/features/combat/public/launcher_visual.gd")
 
 func try_fire_at(target_point: Vector3) -> bool:
-	if _cooldown_remaining > 0.0 or _reloading or _magazine_ammo <= 0:
+	if _cooldown_remaining > 0.0 or _reloading or _magazine_ammo <= 0 or not is_instance_valid(effects_root):
 		return false
 	var projectile := PROJECTILE.new()
-	get_tree().current_scene.add_child(projectile)
+	projectile.configure_world(effects_root, impact_pool)
+	effects_root.add_child(projectile)
 	projectile.global_position = muzzle.global_position
 	projectile.setup(target_point, get_parent().get_parent() as CollisionObject3D)
 	_magazine_ammo -= 1

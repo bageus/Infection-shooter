@@ -14,6 +14,15 @@ var _health: float
 var _broken: bool = false
 var _blood_decals: Array[Node] = []
 
+var effects_root: Node3D
+var impact_pool: Node
+
+
+# Public scene wiring v1; owned by the mission composition.
+func configure_world(container: Node3D, impacts: Node) -> void:
+	effects_root = container
+	impact_pool = impacts
+
 
 func _ready() -> void:
 	_health = max_health
@@ -123,6 +132,8 @@ func _add_frame_bar(owner_root: Node3D, size: Vector3, position: Vector3, materi
 
 
 func _spawn_sparks(position: Vector3) -> void:
+	if not is_instance_valid(effects_root):
+		return
 	for i in 6:
 		var spark := MeshInstance3D.new()
 		var mesh := SphereMesh.new()
@@ -135,7 +146,7 @@ func _spawn_sparks(position: Vector3) -> void:
 		material.emission_energy_multiplier = 4.0
 		mesh.material = material
 		spark.mesh = mesh
-		get_tree().current_scene.add_child(spark)
+		effects_root.add_child(spark)
 		spark.global_position = position
 		var target := position + Vector3(
 			randf_range(-0.45, 0.45),
@@ -148,6 +159,8 @@ func _spawn_sparks(position: Vector3) -> void:
 
 
 func _spawn_fragments(position: Vector3, tint: Color, count: int) -> void:
+	if not is_instance_valid(effects_root):
+		return
 	for i in count:
 		var fragment := MeshInstance3D.new()
 		var mesh := BoxMesh.new()
@@ -161,7 +174,7 @@ func _spawn_fragments(position: Vector3, tint: Color, count: int) -> void:
 		material.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA if tint.a < 1.0 else BaseMaterial3D.TRANSPARENCY_DISABLED
 		mesh.material = material
 		fragment.mesh = mesh
-		get_tree().current_scene.add_child(fragment)
+		effects_root.add_child(fragment)
 		fragment.global_position = position
 		var target := position + Vector3(
 			randf_range(-0.8, 0.8),

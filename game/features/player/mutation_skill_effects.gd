@@ -13,6 +13,12 @@ var kill_timer := 0.0
 var storm_tick := 0.0
 var acid_pools: Array[Dictionary] = []
 
+var effects_root: Node3D
+
+
+func configure_world(container: Node3D) -> void:
+	effects_root = container
+
 
 func configure(host: CharacterBody3D, infection: Node, guns: Array[Node3D]) -> void:
 	player = host
@@ -224,6 +230,8 @@ func _cast(skill_id: String) -> void:
 
 
 func _indicator(location: Vector3, tint: Color, duration: float, diameter: float) -> void:
+	if not is_instance_valid(effects_root):
+		return
 	var ring := MeshInstance3D.new()
 	var disc := CylinderMesh.new()
 	disc.top_radius = diameter * 0.5
@@ -235,7 +243,7 @@ func _indicator(location: Vector3, tint: Color, duration: float, diameter: float
 	material.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
 	disc.material = material
 	ring.mesh = disc
-	get_tree().current_scene.add_child(ring)
+	effects_root.add_child(ring)
 	ring.global_position = location + Vector3.UP * 0.06
 	ring.create_tween().tween_callback(ring.queue_free).set_delay(duration)
 

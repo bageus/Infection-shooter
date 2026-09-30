@@ -198,6 +198,15 @@ def validate_reference(
         )
 
 
+def validate_mission_scene_access(path: Path, text: str, layer: str, allowed: set[str], errors: list[str]) -> None:
+    if layer in allowed or "tests" in path.parts:
+        return
+    # Ignore authored strings/comments, including multiline GDScript shader text.
+    code = re.sub('"{3}[\\s\\S]*?"{3}|\'{3}[\\s\\S]*?\'{3}|"(?:\\\\.|[^"\\\\])*"|\'(?:\\\\.|[^\'\\\\])*\'|#[^\\n]*', "", text)
+    if re.search(r"\bcurrent_scene\b", code):
+        add_error(errors, f"{path}: mission current_scene lookup is forbidden in layer '{layer}'; inject collaborators")
+
+
 def validate_godot_files(
     modules: dict[str, tuple[Path, dict[str, Any]]],
     policy: dict[str, Any],
@@ -219,6 +228,7 @@ def validate_godot_files(
             owner = owner_for(path, modules)
             if path.suffix == ".gd" and owner is not None:
                 layer = owner[2].get("layer")
+                validate_mission_scene_access(path.relative_to(ROOT), text, layer, allowed_root_layers, errors)
                 if layer not in allowed_root_layers and (
                     "/root/" in text or "get_tree().root" in text
                 ):

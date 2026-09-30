@@ -15,5 +15,10 @@
     "features.infection_source",
     "features.character_animation",
     "features.pickups"
-  ]
+  ],
+  "runtime_contracts": {
+    "mission_wiring_v1": {
+      "configure_world": "configure_world(container: Node3D, impacts: Node) -> void"
+    }
+  }
 }

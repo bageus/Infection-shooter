@@ -1,5 +1,8 @@
 extends Node3D
 
+const WORLD_BINDINGS := preload("res://game/bootstrap/app/world_bindings.gd")
+const IMPACT_POOL := preload("res://game/features/combat/public/impact_effects.gd")
+
 const FALL_DEATH_Y: float = -4.0
 const PlanningMode = preload("res://game/bootstrap/app/planning_mode.gd")
 const ChunkStreamer = preload("res://game/bootstrap/app/chunk_streamer.gd")
@@ -19,6 +22,10 @@ const MISSION_LAYOUT := preload("res://game/bootstrap/app/mission_layout.gd")
 @onready var mutation_choice: Control = $MutationChoice
 @onready var infection_runtime: Node = $Gameplay/Player/InfectionRuntime
 
+var world_bindings: RefCounted
+var mission_objects: Node3D
+var impact_pool: Node3D
+
 var _ended := false
 var _pause_open := false
 var planning_mode: Node
@@ -37,6 +44,7 @@ func _ready() -> void:
 	game_over.hide()
 	pause_menu.hide()
 	planning_ui.hide()
+	_setup_world_bindings()
 	mutation_choice.hide()
 	mutation_choice.process_mode = Node.PROCESS_MODE_ALWAYS
 	infection_runtime.ability_choice_requested.connect(_on_mutation_choice_requested)
@@ -178,8 +186,10 @@ func _end_run(reason: String) -> void:
 	get_tree().paused = true
 
 
-func drop_weapon_pickup(index: int, world_position: Vector3) -> void:
-	mission_layout.call("spawn_weapon", index, world_position)
+func drop_weapon_pickup(index: int, world_position: Vector3) -> bool:
+	if not is_instance_valid(mission_layout):
+		return false
+	return bool(mission_layout.call("spawn_weapon", index, world_position))
 
 
 func _on_restart_pressed() -> void:
@@ -203,6 +213,7 @@ func _setup_blood_effects() -> void:
 
 
 func _bind_enemy_blood(enemy: Node) -> void:
+	bind_world_object(enemy)
 	if blood_effects == null or not enemy.has_signal("projectile_blood"):
 		return
 	var bindings := {
@@ -222,3 +233,22 @@ func _on_mutation_defeated() -> void:
 	if mutation_tree_ui != null and mutation_tree_ui.call("is_tree_open"):
 		mutation_tree_ui.call("close_tree")
 	_end_run("MUTATION OVERTOOK YOU")
+
+
+func _setup_world_bindings() -> void:
+	mission_objects = Node3D.new()
+	mission_objects.name = "MissionObjects"
+	add_child(mission_objects)
+	impact_pool = Node3D.new()
+	impact_pool.name = "ImpactEffects"
+	impact_pool.set_script(IMPACT_POOL)
+	add_child(impact_pool)
+	world_bindings = WORLD_BINDINGS.new(mission_objects, impact_pool, player, drop_weapon_pickup)
+	world_bindings.call("bind_scene", player)
+	for branch in [$Structure, planning_root, enemies]:
+		world_bindings.call("bind_scene", branch)
+
+
+func bind_world_object(node: Node) -> void:
+	if world_bindings != null:
+		world_bindings.call("bind_scene", node)

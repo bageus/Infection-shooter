@@ -2,7 +2,8 @@ extends RefCounted
 
 # One-shot GPU particles remain in world coordinates when the damaged prop moves.
 static func spawn(host: Node3D, location: Vector3, heavy: bool = false) -> void:
-	if host.get_tree().current_scene == null:
+	var container := host.get("effects_root") as Node3D
+	if not is_instance_valid(container):
 		return
 	var particles := GPUParticles3D.new()
 	particles.name = "ElectricalSparks"
@@ -30,7 +31,7 @@ static func spawn(host: Node3D, location: Vector3, heavy: bool = false) -> void:
 	glow.emission_energy_multiplier = 5.0
 	dot.material = glow
 	particles.draw_pass_1 = dot
-	host.get_tree().current_scene.add_child(particles)
+	container.add_child(particles)
 	particles.global_position = location
 	particles.emitting = true
 	host.get_tree().create_timer(1.2).timeout.connect(particles.queue_free)

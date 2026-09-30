@@ -11,6 +11,15 @@ var _lifetime := 4.0
 var _exploded := false
 var _visual: Node3D
 
+var effects_root: Node3D
+var impact_pool: Node
+
+
+# Public scene wiring v1; owned by the mission composition.
+func configure_world(container: Node3D, impacts: Node) -> void:
+	effects_root = container
+	impact_pool = impacts
+
 
 func setup(target: Vector3, firing_body: CollisionObject3D) -> void:
 	shooter = firing_body
@@ -49,5 +58,5 @@ func _physics_process(delta: float) -> void:
 
 
 func _explode_at(location: Vector3, normal: Vector3, collider: Object) -> void:
-	EXPLOSION.explode(self, location, normal, collider if is_instance_valid(collider) else null)
+	EXPLOSION.explode(self, location, normal, collider if is_instance_valid(collider) else null, effects_root, impact_pool)
 	queue_free()

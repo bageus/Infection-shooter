@@ -38,5 +38,11 @@
     "features.infected",
     "features.infection_source",
     "features.combat"
-  ]
+  ],
+  "runtime_contracts": {
+    "mission_wiring_v1": {
+      "configure_world": "configure_world(container: Node3D, impacts: Node) -> void",
+      "configure_player": "configure_player(actor: Node3D) -> void on structural roots"
+    }
+  }
 }

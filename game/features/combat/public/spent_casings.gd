@@ -8,9 +8,18 @@ var _casings: Array[RigidBody3D] = []
 var _born_at: Array[int] = []
 var _cleanup_accumulator := 0.0
 
+var effects_root: Node3D
+var impact_pool: Node
+
+
+# Public scene wiring v1; owned by the mission composition.
+func configure_world(container: Node3D, impacts: Node) -> void:
+	effects_root = container
+	impact_pool = impacts
+
 
 func spawn_casing(model: PackedScene, eject_transform: Transform3D, radius: float, shooter: CollisionObject3D) -> void:
-	if model == null or get_tree().current_scene == null:
+	if model == null or not is_instance_valid(effects_root):
 		return
 	var body := RigidBody3D.new()
 	body.name = "SpentCasing"
@@ -36,7 +45,7 @@ func spawn_casing(model: PackedScene, eject_transform: Transform3D, radius: floa
 		return
 	visual.scale *= CASING_SCALE
 	body.add_child(visual)
-	get_tree().current_scene.add_child(body)
+	effects_root.add_child(body)
 	body.global_transform = eject_transform
 	if shooter != null:
 		body.add_collision_exception_with(shooter)

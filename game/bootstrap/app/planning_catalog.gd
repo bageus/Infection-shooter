@@ -7,6 +7,7 @@ const PAPER_PROP_SCENE = preload("res://game/presentation/office_floor/public/pr
 const STAIRCASE_SCENE = preload("res://game/presentation/office_floor/public/structural/staircase.tscn")
 const WORKSTATIONS = preload("res://game/bootstrap/app/workstation_templates.gd")
 
+var bind_asset: Callable
 var active_catalog: Array = []
 var group_catalogs: Dictionary = {}
 var lighting_catalog = [
@@ -87,6 +88,13 @@ func _environment_scene_for(file_name: String) -> String:
 
 
 func _instantiate_asset(asset_path: String) -> Node3D:
+	var node := _create_asset(asset_path)
+	if node != null and bind_asset.is_valid():
+		bind_asset.call(node)
+	return node
+
+
+func _create_asset(asset_path: String) -> Node3D:
 	if asset_path.begins_with(ENVIRONMENT_ROOT + "/") and asset_path.ends_with(".glb"):
 		if asset_path.get_file().begins_with("09_") and WORKSTATIONS.VARIANTS["paper"].has(asset_path.get_file().get_basename()):
 			var paper = PAPER_PROP_SCENE.instantiate() as Node3D

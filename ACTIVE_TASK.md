@@ -13,6 +13,7 @@ updated: 2026-09-30
 Build the first playable combat-slice foundation with an authored office floor, player, combat, infected enemies, infection source, and observable fail states.
 
 ## In scope
+- owner-approved injection of mission collaborators to replace production current_scene lookups;
 - owner-requested planner decomposition, workstation test update and retirement of unused legacy scenes;
 - hand-authored office floor from the newly grouped 01-16 object library;
 - closed non-destructible perimeter with window/wall corner modules;
@@ -24,7 +25,7 @@ Build the first playable combat-slice foundation with an authored office floor, 
 READY game specification, accepted working agreement, architecture contract, and existing T001/T002 implementation.
 
 ## Affected modules
-presentation.office_floor, features.combat and bootstrap.app. Player health remains owned by features.player.
+presentation.office_floor, features.combat, features.player, features.infected and bootstrap.app. Player health remains owned by features.player.
 
 ## Out of scope
 Procedural generation, save/checkpoints, final HUD, monetization, platform SDKs and campaign-wide content remain outside this T002 increment.

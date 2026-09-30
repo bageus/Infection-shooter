@@ -44,6 +44,15 @@ var _blood_last_position := Vector3.ZERO
 var _blood_segment_start := Vector3.ZERO
 var _blood_distance := 0.0
 
+var effects_root: Node3D
+var impact_pool: Node
+
+
+# Public scene wiring v1; owned by the mission composition.
+func configure_world(container: Node3D, impacts: Node) -> void:
+	effects_root = container
+	impact_pool = impacts
+
 
 func _ready() -> void:
 	health = max_health
@@ -244,10 +253,11 @@ func _die() -> void:
 	blood_death.emit(global_position, _blood_exclusions(), get_instance_id())
 	if is_instance_valid(_target) and _target.has_method("mutation_enemy_killed"):
 		_target.call("mutation_enemy_killed", self)
-	var drop_table := DROP_TABLE_SCRIPT.new()
-	get_tree().current_scene.add_child(drop_table)
-	drop_table.call("drop_for_enemy", get_tree().current_scene, global_position)
-	drop_table.queue_free()
+	if is_instance_valid(effects_root):
+		var drop_table := DROP_TABLE_SCRIPT.new()
+		effects_root.add_child(drop_table)
+		drop_table.call("drop_for_enemy", effects_root, global_position)
+		drop_table.queue_free()
 	collision_layer = 0
 	collision_mask = 0
 	collision_shape.disabled = true

@@ -21,8 +21,8 @@ static func detonate(host: Node3D, location: Vector3, radius: float = 5.0, show_
 
 
 static func smoke(host: Node3D, location: Vector3) -> void:
-	var world := host.get_tree().current_scene
-	if world == null:
+	var world := host.get("effects_root") as Node3D
+	if not is_instance_valid(world):
 		return
 	var cloud := GPUParticles3D.new()
 	cloud.name = "ExtinguisherSmoke"
