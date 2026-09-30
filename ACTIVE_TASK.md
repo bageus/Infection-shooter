@@ -13,6 +13,7 @@ updated: 2026-10-01
 Build the first playable combat-slice foundation with an authored office floor, player, combat, infected enemies, infection source, and observable fail states.
 
 ## In scope
+- owner-reported main-scene parse failure after unresolved stash conflicts;
 - owner-requested discrete central mutation-tree connectors, with gradual progression confined to branches;
 - owner-requested individual lamp tint controls and backward-compatible map persistence;
 - owner-requested threefold reduction of carpet cast-shadow extent;
@@ -40,6 +41,8 @@ Procedural generation, save/checkpoints, final HUD, monetization, platform SDKs 
 - Structural modules visually touch edge-to-edge with no visible gaps and no overlap beyond a tiny seam tolerance.\n- Exterior corners face inward correctly.\n- Perimeter and authored interior walls block the player.\n- The expanded floor and defeat menu remain functional.
 
 ## Progress
+
+01.10.2026: устранён блокирующий запуск конфликт stash/upstream в main.tscn после авторского сохранения редактором (b1de4ce8): два блока ColorRow/AngleRow и SelectedLightColor/SelectedFlicker объединены без маркеров, с обоими ColorPickerButton и актуальными unique_id. Авторские настройки сцены, MSAA 4× и тени 2048 сохранены. Resource gate теперь выдаёт путь/номер строки для неразрешённых конфликтов в tscn/tres. Старое требование MSAA 2× в lighting test заменено проверкой сохранения выбранного проектом значения при запуске, планировании, загрузке и restart. Модуль bootstrap.app и инструмент валидации; API/форматы карт/владельцы состояния без изменений. Ожидается runtime CI; далее обновить main и открыть главную сцену в Godot 4.7.2.
 
 01.10.2026: по уточнению владельца центральный соединитель дерева появляется целыми участками только до последнего открытого по стабильности корня. Линия к закрытой следующей ветке скрыта, зелёный соединитель больше не интерполируется от mutation и не зависит от купленных/доступных узлов. Постепенная подсветка самих веток сохранена. Локальное представление bootstrap.app; без изменений домена, контрактов, состояния, сохранений и зависимостей. Существующие layout-проверки обновлены для нового правила, включая высокий mutation при закрытой ветке, снижение mutation и открытие следующей группы. Godot 4.7.2: полный validate_project, 255 ресурсов сцен, workstation/glass/scene-access, все 12 runtime-наборов и 180 кадров основной сцены прошли в CI https://github.com/bageus/Infection-shooter/actions/runs/36788845855. Mutation feedback: 0 failures. Editor import завершился 0 с прежними отсутствующими palette1.png/couches.png; runtime без SCRIPT ERROR/ERROR. Далее в рабочем движке визуально проверить переход стабильности 30→45→60 и рост/снижение mutation.
 
