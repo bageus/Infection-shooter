@@ -86,6 +86,8 @@ func _collect_layout_data() -> Dictionary:
 			"spawn_y": (node.get_meta("planning_spawn_transform") as Transform3D).origin.y if node.has_meta("planning_spawn_transform") else node.position.y,
 			"spawn_z": (node.get_meta("planning_spawn_transform") as Transform3D).origin.z if node.has_meta("planning_spawn_transform") else node.position.z
 		})
+		if node.has_method("get_authored_energy"):
+			records[-1]["energy_multiplier"] = float(node.get("energy_multiplier"))
 	return {"version": 5, "objects": records}
 
 
@@ -191,6 +193,7 @@ func _save_authored_scene() -> Error:
 		if node.has_meta("planning_zone"):
 			copy.set_meta("planning_zone", node.get_meta("planning_zone"))
 		if copy.has_method("configure_flicker"):
+			copy.set("energy_multiplier", node.get("energy_multiplier"))
 			copy.set_meta("planning_light_energy", node.get_meta("planning_light_energy", 3.0))
 			copy.set_meta("planning_light_angle", node.get_meta("planning_light_angle", 48.0))
 			copy.set_meta("planning_flicker_mode", node.get_meta("planning_flicker_mode", 0))
