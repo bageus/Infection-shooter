@@ -68,10 +68,9 @@ func _draw() -> void:
 		return
 	var dim := Color(0.36, 0.41, 0.44, 0.95)
 	var limit := trunk_available_x()
-	draw_line(Vector2(90, TRUNK_Y), Vector2(1160, TRUNK_Y), Color(0.11, 0.13, 0.16, 0.85), 9.0, true)
-	draw_line(Vector2(90, TRUNK_Y), Vector2(limit, TRUNK_Y), dim, 9.0, true)
-	if mutation >= 25.0:
-		draw_line(Vector2(90, TRUNK_Y), Vector2(minf(_trunk_fill_x(), limit), TRUNK_Y), LIT, 6.0, true)
+	if limit > 90.0:
+		draw_line(Vector2(90, TRUNK_Y), Vector2(limit, TRUNK_Y), dim, 9.0, true)
+		draw_line(Vector2(90, TRUNK_Y), Vector2(limit, TRUNK_Y), LIT, 6.0, true)
 	for index in BRANCHES.size():
 		var opened := index < branch_open.size() and branch_open[index]
 		var shade := dim if opened else Color(0.11, 0.13, 0.16, 0.85)
@@ -94,17 +93,10 @@ func _dotted(start: Vector2, finish: Vector2, shade: Color) -> void:
 		draw_circle(start.lerp(finish, float(i) / float(steps)), 1.5, shade)
 
 
-func _trunk_fill_x() -> float:
-	var finish := _threshold_x(mutation)
-	for index in progress.size():
-		if progress[index] >= 0 and index < branch_open.size() and branch_open[index]:
-			finish = maxf(finish, branch_origin(index).x)
-	return finish
-
-
 func trunk_available_x() -> float:
-	var limit := 1160.0
-	for index in BRANCHES.size():
-		if index < branch_open.size() and not branch_open[index]:
-			limit = minf(limit, branch_origin(index).x)
+	# A connector appears whole only when its destination branch opens.
+	var limit := 90.0
+	for index in mini(thresholds.size(), BRANCHES.size()):
+		if index < branch_open.size() and branch_open[index]:
+			limit = maxf(limit, branch_origin(index).x)
 	return limit

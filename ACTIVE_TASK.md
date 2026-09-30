@@ -4,7 +4,7 @@ task_id: T002
 status: IN_PROGRESS
 phase: 1
 owner: AI
-updated: 2026-09-30
+updated: 2026-10-01
 ---
 
 # Active task
@@ -13,6 +13,7 @@ updated: 2026-09-30
 Build the first playable combat-slice foundation with an authored office floor, player, combat, infected enemies, infection source, and observable fail states.
 
 ## In scope
+- owner-requested discrete central mutation-tree connectors, with gradual progression confined to branches;
 - owner-requested individual lamp tint controls and backward-compatible map persistence;
 - owner-requested threefold reduction of carpet cast-shadow extent;
 - owner-approved contact-lighting pass: SSAO in the game Environment and provisional MSAA 2x, with existing light/shadow power preserved;
@@ -39,6 +40,8 @@ Procedural generation, save/checkpoints, final HUD, monetization, platform SDKs 
 - Structural modules visually touch edge-to-edge with no visible gaps and no overlap beyond a tiny seam tolerance.\n- Exterior corners face inward correctly.\n- Perimeter and authored interior walls block the player.\n- The expanded floor and defeat menu remain functional.
 
 ## Progress
+
+01.10.2026: по уточнению владельца центральный соединитель дерева появляется целыми участками только до последнего открытого по стабильности корня. Линия к закрытой следующей ветке скрыта, зелёный соединитель больше не интерполируется от mutation и не зависит от купленных/доступных узлов. Постепенная подсветка самих веток сохранена. Локальное представление bootstrap.app; без изменений домена, контрактов, состояния, сохранений и зависимостей. Существующие layout-проверки обновлены для нового правила, включая высокий mutation при закрытой ветке, снижение mutation и открытие следующей группы. Godot 4.7.2: полный validate_project, 255 ресурсов сцен, workstation/glass/scene-access, все 12 runtime-наборов и 180 кадров основной сцены прошли в CI https://github.com/bageus/Infection-shooter/actions/runs/36788845855. Mutation feedback: 0 failures. Editor import завершился 0 с прежними отсутствующими palette1.png/couches.png; runtime без SCRIPT ERROR/ERROR. Далее в рабочем движке визуально проверить переход стабильности 30→45→60 и рост/снижение mutation.
 
 30.09.2026: по запросу владельца добавлен индивидуальный «Оттенок» выбранной лампы и цвет новых ламп в планировщике. Цвет принадлежит office_floor; planner_light_v1 дополнен get/set_authored_color, DTO v5 — optional light_color RGB (ADR-0013). Старые сцены/карты сохраняют собственные цвета, энергии и мерцание; глобальный свет, SSAO, MSAA и состояние локальных ламп не менялись. Undo объединяет непрерывный выбор цвета, Duplicate/Delete Undo и authored scene packing сохраняют оттенок. Визуальная приёмка picker в Windows/Web открыта: нет дисплея/GPU. Следующее действие: выбрать лампу → «Оттенок», изменить цвет, сохранить/загрузить карту и проверить изображение с включёнными локальными лампами. Godot 4.7.2: полный validate_project, 255 scene resources, workstation/glass/scene-access, все 12 runtime-наборов и main 180 кадров прошли. Headless editor import завершился 0 без SCRIPT ERROR/ERROR на существующем импортированном кеше; это не визуальная проверка.
 
