@@ -18,11 +18,11 @@
 [sub_resource type="Environment" id="env"]
 background_mode = 1
 background_color = Color(0.055, 0.075, 0.12, 1)
-ambient_light_source = 0
-ambient_light_color = Color(0, 0, 0, 1)
-ambient_light_energy = 0.0
+ambient_light_source = 2
+ambient_light_color = Color(0.62, 0.68, 0.78, 1.0)
+ambient_light_energy = 0.22
 reflected_light_source = 0
-ssr_enabled = true
+ssr_enabled = false
 ssr_max_steps = 48
 ssr_fade_in = 0.15
 ssr_fade_out = 1.5
@@ -176,6 +176,15 @@ layout_mode = 2
 size_flags_horizontal = 3
 text = "LIGHTING"
 
+
+[node name="LightingPreview" type="OptionButton" parent="PlanningUI/Panel/VBox"]
+layout_mode = 2
+item_count = 2
+selected = 0
+popup/item_0/text = "Игровое освещение"
+popup/item_0/id = 0
+popup/item_1/text = "Подсветка редактора"
+popup/item_1/id = 1
 
 [node name="GroupTabs" type="GridContainer" parent="PlanningUI/Panel/VBox"]
 layout_mode = 2

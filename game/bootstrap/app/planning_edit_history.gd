@@ -67,10 +67,8 @@ func undo() -> void:
 				node.transform = action["transform"]
 				node.scale = action["scale"]
 				if float(action["light_energy"]) >= 0.0:
-					var light := node.find_child("Light", true, false) as Light3D
-					if light != null:
-						light.light_energy = float(action["light_energy"])
-						node.set_meta("planning_light_energy", light.light_energy)
+					if node.has_method("set_authored_energy"):
+						node.call("set_authored_energy", float(action["light_energy"]))
 				if float(action["light_angle"]) >= 0.0:
 					var spot := node.find_child("Light", true, false) as SpotLight3D
 					if spot != null:
@@ -97,6 +95,7 @@ func _capture(node: Node3D) -> Dictionary:
 		"scale": node.scale, "parent": node.get_parent(), "kind": str(node.get_meta("planning_actor_kind", "")),
 		"desk_id": str(node.get_meta("planning_desk_id", "")), "attachment": str(node.get_meta("planning_attachment", "")),
 		"zone": int(node.get_meta("planning_zone", -1)), "light_energy": float(node.get_meta("planning_light_energy", -1.0)),
+		"energy_multiplier": float(node.get("energy_multiplier")) if node.has_method("get_authored_energy") else 0.65,
 		"light_angle": float(node.get_meta("planning_light_angle", -1.0)),
 		"flicker_mode": int(node.get_meta("planning_flicker_mode", 0)), "flicker_step": float(node.get_meta("planning_flicker_step", 0.2))}
 
@@ -127,10 +126,9 @@ func _restore(record: Dictionary, offset: Vector3, new_desk: bool) -> Node3D:
 	if int(record["zone"]) >= 0:
 		node.set_meta("planning_zone", record["zone"])
 	if float(record["light_energy"]) >= 0.0:
-		var light := node.find_child("Light", true, false) as Light3D
-		if light != null:
-			light.light_energy = float(record["light_energy"])
-			node.set_meta("planning_light_energy", light.light_energy)
+		if node.has_method("set_authored_energy"):
+			node.set("energy_multiplier", float(record.get("energy_multiplier", 0.65)))
+			node.call("set_authored_energy", float(record["light_energy"]))
 	if float(record["light_angle"]) >= 0.0:
 		var spot := node.find_child("Light", true, false) as SpotLight3D
 		if spot != null:

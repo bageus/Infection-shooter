@@ -402,12 +402,9 @@ func _apply_layout_data(data: Dictionary) -> void:
 			node.set_meta("planning_attachment", str(record["attachment"]))
 		if int(record.get("zone", -1)) >= 0:
 			node.set_meta("planning_zone", int(record["zone"]))
-		var saved_light_energy = float(record.get("light_energy", 0.0))
-		if saved_light_energy > 0.0:
-			var saved_light = node.find_child("Light", true, false) as Light3D
-			if saved_light != null:
-				saved_light.light_energy = saved_light_energy
-				node.set_meta("planning_light_energy", saved_light_energy)
+		if node.has_method("set_authored_energy"):
+			node.set("energy_multiplier", float(record.get("energy_multiplier", 0.65)))
+			node.call("set_authored_energy", float(record.get("light_energy", node.call("get_authored_energy"))))
 		var saved_light_angle = float(record.get("light_angle", 48.0))
 		var saved_spot = node.find_child("Light", true, false) as SpotLight3D
 		if saved_spot != null:

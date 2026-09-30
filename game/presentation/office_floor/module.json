@@ -9,6 +9,7 @@
     "public/base_office_layout.tscn",
     "public/base_floor_renderer.gd",
     "public/props/07_table.tscn",
+    "public/props/planner_light.tscn",
     "public/props/environment_prop.tscn",
     "public/props/bathroom_fixture.tscn",
     "public/props/paper_prop.tscn",

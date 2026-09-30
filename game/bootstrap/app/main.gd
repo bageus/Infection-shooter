@@ -67,7 +67,7 @@ func _ready() -> void:
 	planning_lighting = PlanningLighting.new()
 	planning_lighting.name = "PlanningLighting"
 	add_child(planning_lighting)
-	planning_lighting.setup($WorldEnvironment)
+	planning_lighting.setup($WorldEnvironment, $PlanningUI/Panel/VBox/LightingPreview)
 	mission_layout = MISSION_LAYOUT.new()
 	mission_layout.name = "MissionLayout"
 	gameplay.add_child(mission_layout)
