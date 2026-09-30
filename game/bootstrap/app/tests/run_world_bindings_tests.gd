@@ -50,6 +50,8 @@ func _run() -> void:
 	stage.queue_free()
 	decoy.queue_free()
 	await process_frame
+	# The audio mixer releases the explosion playback asynchronously after tree removal.
+	await create_timer(0.15).timeout
 	print("World bindings tests: %d failures" % _failures)
 	quit(_failures)
 

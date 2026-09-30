@@ -31,7 +31,7 @@ jobs:
         run: |
           set -o pipefail
           for suite in game/features/infection/tests/run_tests.gd game/bootstrap/app/tests/run_mutation_feedback_tests.gd game/features/player/tests/run_control_loss_tests.gd game/presentation/prototype_hud/tests/run_weapon_icon_tests.gd game/presentation/office_floor/tests/run_blood_effects_tests.gd game/presentation/office_floor/tests/run_elevator_collision_tests.gd game/features/infected/tests/run_blood_events_tests.gd game/features/pickups/tests/run_pickup_floor_tests.gd game/bootstrap/app/tests/run_planning_mode_tests.gd game/bootstrap/app/tests/run_world_bindings_tests.gd; do
-            timeout 120 godot --verbose --headless --path . --script "$suite" 2>&1 | tee /tmp/suite.log
+            timeout 120 godot --headless --path . --script "$suite" 2>&1 | tee /tmp/suite.log
             if grep -E 'SCRIPT ERROR|^ERROR:' /tmp/suite.log; then exit 1; fi
           done
       - name: Main scene

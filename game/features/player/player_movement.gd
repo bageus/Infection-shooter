@@ -148,8 +148,6 @@ func configure_world(container: Node3D, impacts: Node) -> void:
 		mutation_effects.call("configure_world", container)
 
 
-
-
 func configure_weapon_drop(command: Callable) -> void:
 	_drop_weapon_command = command
 

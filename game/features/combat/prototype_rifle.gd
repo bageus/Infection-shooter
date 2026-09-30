@@ -54,7 +54,6 @@ func try_fire() -> bool:
 	return try_fire_at(muzzle.global_position - muzzle.global_transform.basis.z * bullet_range)
 
 
-
 # Public scene wiring v1; owned by the mission composition.
 func configure_world(container: Node3D, impacts: Node) -> void:
 	effects_root = container

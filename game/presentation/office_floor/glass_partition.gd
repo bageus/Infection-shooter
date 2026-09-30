@@ -45,7 +45,7 @@ func _physics_process(delta: float) -> void:
 		return
 	var near := false
 	var partition := get_parent() as Node3D
-	if _player != null and partition != null:
+	if is_instance_valid(_player) and partition != null:
 		var local_player: Vector3 = partition.to_local(_player.global_position)
 		near = absf(local_player.x) < 0.85 and absf(local_player.z) < 0.55 and local_player.y > -0.5 and local_player.y < 3.2
 	if near and not _player_near_blinds:
