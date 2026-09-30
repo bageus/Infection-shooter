@@ -15,12 +15,14 @@
 [ext_resource type="PackedScene" path="res://game/presentation/office_floor/public/structural/window_double.tscn" id="window"]
 [ext_resource type="Script" path="res://game/presentation/office_floor/public/base_floor_renderer.gd" id="base_floor_renderer"]
 
+[ext_resource type="Script" path="res://game/bootstrap/app/planning_lighting.gd" id="planning_lighting"]
+
 [sub_resource type="Environment" id="env"]
 background_mode = 1
 background_color = Color(0.055, 0.075, 0.12, 1)
 ambient_light_source = 2
 ambient_light_color = Color(0.62, 0.68, 0.78, 1.0)
-ambient_light_energy = 0.22
+ambient_light_energy = 0.15
 reflected_light_source = 0
 ssr_enabled = false
 ssr_max_steps = 48
@@ -45,6 +47,27 @@ script = ExtResource("impact_effects")
 
 [node name="WorldEnvironment" type="WorldEnvironment" parent="." unique_id=968256143]
 environment = SubResource("env")
+
+[node name="GlobalOverheadLight" type="DirectionalLight3D" parent="."]
+rotation_degrees = Vector3(-65, 0, 0)
+light_color = Color(0.88, 0.93, 1, 1)
+light_energy = 0.6
+light_specular = 0.3
+shadow_enabled = true
+light_angular_distance = 0.0
+shadow_bias = 0.1
+shadow_normal_bias = 2.0
+shadow_blur = 1.0
+directional_shadow_mode = 1
+directional_shadow_split_1 = 0.35
+directional_shadow_blend_splits = true
+directional_shadow_max_distance = 64.0
+directional_shadow_fade_start = 0.9
+
+[node name="PlanningLighting" type="Node" parent="."]
+process_mode = 3
+script = ExtResource("planning_lighting")
+local_lights_enabled = false
 
 [node name="Floor" type="Node3D" parent="." unique_id=557799538]
 script = ExtResource("base_floor_renderer")
@@ -185,6 +208,10 @@ popup/item_0/text = "Игровое освещение"
 popup/item_0/id = 0
 popup/item_1/text = "Подсветка редактора"
 popup/item_1/id = 1
+
+[node name="LocalLights" type="CheckButton" parent="PlanningUI/Panel/VBox"]
+layout_mode = 2
+text = "Локальные лампы"
 
 [node name="GroupTabs" type="GridContainer" parent="PlanningUI/Panel/VBox"]
 layout_mode = 2

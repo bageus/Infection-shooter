@@ -3,7 +3,8 @@
   "layer": "presentation",
   "purpose": "Expose authored structural office modules with their own collision and the current office-floor composition.",
   "state_owner": [
-    "Blood textures, render marks, surface anchors, lifetime and density budgets"
+    "Blood textures, render marks, surface anchors, lifetime and density budgets",
+    "Authored lamp power and flicker phase; derived runtime light activation"
   ],
   "public_api": [
     "public/base_office_layout.tscn",

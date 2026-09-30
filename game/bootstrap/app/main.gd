@@ -6,7 +6,6 @@ const IMPACT_POOL := preload("res://game/features/combat/public/impact_effects.g
 const FALL_DEATH_Y: float = -4.0
 const PlanningMode = preload("res://game/bootstrap/app/planning_mode.gd")
 const ChunkStreamer = preload("res://game/bootstrap/app/chunk_streamer.gd")
-const PlanningLighting = preload("res://game/bootstrap/app/planning_lighting.gd")
 const TEST_CLOUD := preload("res://game/features/infection_source/public/mutagen_cloud.tscn")
 const MUTATION_UI := preload("res://game/bootstrap/app/mutation_tree_ui.gd")
 const BLOOD_EFFECTS := preload("res://game/presentation/office_floor/public/blood_effects_3d.tscn")
@@ -64,10 +63,8 @@ func _ready() -> void:
 	chunk_streamer.name = "ChunkStreamer"
 	add_child(chunk_streamer)
 	chunk_streamer.setup(player, [planning_root, $Structure])
-	planning_lighting = PlanningLighting.new()
-	planning_lighting.name = "PlanningLighting"
-	add_child(planning_lighting)
-	planning_lighting.setup($WorldEnvironment, $PlanningUI/Panel/VBox/LightingPreview)
+	planning_lighting = $PlanningLighting
+	planning_lighting.setup($WorldEnvironment, $PlanningUI/Panel/VBox/LightingPreview, $PlanningUI/Panel/VBox/LocalLights)
 	mission_layout = MISSION_LAYOUT.new()
 	mission_layout.name = "MissionLayout"
 	gameplay.add_child(mission_layout)

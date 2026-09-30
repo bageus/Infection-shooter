@@ -5,7 +5,8 @@
   "state_owner": [
     "Application lifecycle",
     "Current top-level application state",
-    "Mission staircase, pickup placement, and exit condition"
+    "Mission staircase, pickup placement, and exit condition",
+    "Game/editor ambient preview and the application-wide local-light enable setting"
   ],
   "public_api": [],
   "dependencies": [

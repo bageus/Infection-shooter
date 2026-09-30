@@ -59,6 +59,7 @@ func _test_ambient() -> void:
 func _test_lamps() -> void:
 	var lamp := LAMP.instantiate()
 	root.add_child(lamp)
+	lamp.set_local_lighting_enabled(true)
 	lamp.set_process(false)
 	var light := lamp.get_node("Light") as SpotLight3D
 	_check(is_equal_approx(light.light_energy, 1.95), "Old scene defaults to 3 * 0.65")
@@ -75,6 +76,7 @@ func _test_lamps() -> void:
 	legacy.remove_meta("planning_light_energy")
 	legacy.get_node("Light").light_energy = 6.0
 	root.add_child(legacy)
+	legacy.set_local_lighting_enabled(true)
 	legacy.set_process(false)
 	legacy.configure_flicker(0, 0.2)
 	legacy.set_runtime_light_active(true)
@@ -121,7 +123,7 @@ func _test_planner() -> void:
 	var authored: Environment = world.environment.duplicate()
 	_check(authored.ambient_light_source == Environment.AMBIENT_SOURCE_COLOR, "Startup ambient explicitly uses color")
 	_check(authored.ambient_light_color == Color(0.62, 0.68, 0.78, 1.0), "Startup ambient is cold")
-	_check(is_equal_approx(authored.ambient_light_energy, 0.22), "Startup ambient energy is 0.22")
+	_check(is_equal_approx(authored.ambient_light_energy, 0.15), "Startup ambient energy is 0.15")
 	_check(not authored.ssr_enabled, "First-pass lighting runs without SSR")
 	_check(authored.tonemap_mode == Environment.TONE_MAPPER_FILMIC, "Filmic is preserved")
 	for cycle in range(5):
@@ -133,6 +135,7 @@ func _test_planner() -> void:
 		controller.call("set_game_lighting", false)
 		planner.call("exit")
 		_check_ambient(world.environment, authored, "Real planner exit matches startup")
+	controller.call("set_local_lights_enabled", true)
 	_test_map_paths(planner)
 	planner.call("enter")
 	controller.call("set_game_lighting", false)
