@@ -1,0 +1,219 @@
+extends RefCounted
+
+const SAVE_PATH = "user://planned_layout.json"
+const MAPS_DIR = "user://maps"
+const AUTHORED_SCENE_PATH = "res://game/presentation/office_floor/public/base_office_layout.tscn"
+
+var map_name_edit: LineEdit
+var map_select: OptionButton
+
+var session: Variant
+var objects: Variant
+var controls: Variant
+var catalog: Variant
+
+
+func configure(context: Dictionary) -> void:
+	session = context["session"]
+	objects = context["objects"]
+	controls = context["controls"]
+	catalog = context["catalog"]
+
+
+func setup_widgets() -> void:
+	map_name_edit = session.ui.get_node("Panel/VBox/MapManager/Name")
+	map_select = session.ui.get_node("Panel/VBox/MapManager/Maps")
+
+
+func _ensure_maps_dir() -> void:
+	if not DirAccess.dir_exists_absolute(MAPS_DIR):
+		DirAccess.make_dir_recursive_absolute(MAPS_DIR)
+
+
+func _safe_map_name(raw_name: String) -> String:
+	var value = raw_name.strip_edges()
+	if value.is_empty():
+		value = "map"
+	var safe = ""
+	for ch in value:
+		if ch.is_valid_identifier() or ch.is_valid_int():
+			safe += ch
+		elif ch in [" ", "-", "_"]:
+			safe += "_"
+	while "__" in safe:
+		safe = safe.replace("__", "_")
+	return safe.strip_edges().to_lower()
+
+
+func _map_path(map_name: String) -> String:
+	return MAPS_DIR + "/" + _safe_map_name(map_name) + ".json"
+
+
+func _collect_layout_data() -> Dictionary:
+	var records: Array = []
+	if objects.player_spawn_defined:
+		records.append({
+			"scene":"res://game/features/player/public/player.tscn",
+			"x":objects.player_spawn_transform.origin.x, "y":objects.player_spawn_transform.origin.y, "z":objects.player_spawn_transform.origin.z,
+			"rotation_y":objects.player_spawn_transform.basis.get_euler().y * 180.0 / PI,
+			"scale_x":1.0, "scale_y":1.0, "scale_z":1.0
+		})
+	for node in objects.placed:
+		if not is_instance_valid(node):
+			continue
+		var scene_path = str(node.get_meta("planning_scene_path", ""))
+		if scene_path.is_empty():
+			continue
+		var save_position = node.position
+		if str(node.get_meta("planning_actor_kind", "")) == "enemy" and node.has_meta("planning_spawn_transform"):
+			var enemy_spawn: Transform3D = node.get_meta("planning_spawn_transform")
+			save_position = enemy_spawn.origin
+		records.append({
+			"scene": scene_path,
+			"desk_id": node.get_meta("planning_desk_id", ""),
+			"attachment": node.get_meta("planning_attachment", ""),
+			"zone": node.get_meta("planning_zone", -1),
+			"x": save_position.x, "y": save_position.y, "z": save_position.z,
+			"rotation_y": node.rotation_degrees.y,
+			"scale_x": node.scale.x, "scale_y": node.scale.y, "scale_z": node.scale.z,
+			"light_energy": node.get_meta("planning_light_energy", 0.0),
+			"light_angle": node.get_meta("planning_light_angle", 48.0),
+			"flicker_mode": node.get_meta("planning_flicker_mode", 0),
+			"flicker_step": node.get_meta("planning_flicker_step", 0.2),
+			"darkness": node.get("darkness") if node.get("darkness") != null else 0.0,
+			"permanent_darkness": node.get("permanent") if node.get("permanent") != null else false,
+			"spawn_x": (node.get_meta("planning_spawn_transform") as Transform3D).origin.x if node.has_meta("planning_spawn_transform") else node.position.x,
+			"spawn_y": (node.get_meta("planning_spawn_transform") as Transform3D).origin.y if node.has_meta("planning_spawn_transform") else node.position.y,
+			"spawn_z": (node.get_meta("planning_spawn_transform") as Transform3D).origin.z if node.has_meta("planning_spawn_transform") else node.position.z
+		})
+	return {"version": 5, "objects": records}
+
+
+func save_named_map() -> void:
+	_ensure_maps_dir()
+	var safe_name = _safe_map_name(map_name_edit.text)
+	var path = _map_path(safe_name)
+	var file = FileAccess.open(path, FileAccess.WRITE)
+	if file == null:
+		controls.status.text = "MAP SAVE ERROR"
+		return
+	file.store_string(JSON.stringify(_collect_layout_data(), "	"))
+	map_name_edit.text = safe_name
+	_refresh_map_list(safe_name)
+	controls.status.text = "MAP SAVED | " + safe_name
+
+
+func load_selected_map() -> void:
+	if map_select.item_count <= 0:
+		controls.status.text = "NO SAVED MAPS"
+		return
+	var selected_name = map_select.get_item_text(map_select.selected)
+	load_named_map(selected_name)
+
+
+func load_named_map(map_name: String) -> void:
+	var path = _map_path(map_name)
+	if not FileAccess.file_exists(path):
+		controls.status.text = "MAP NOT FOUND"
+		return
+	_load_layout_from_path(path)
+	map_name_edit.text = map_name
+	controls.status.text = "MAP LOADED | " + map_name
+
+
+func _refresh_map_list(select_name: String = "") -> void:
+	if map_select == null:
+		return
+	map_select.clear()
+	_ensure_maps_dir()
+	var dir = DirAccess.open(MAPS_DIR)
+	if dir == null:
+		return
+	dir.list_dir_begin()
+	var file_name = dir.get_next()
+	var index = 0
+	var selected_index = -1
+	while not file_name.is_empty():
+		if not dir.current_is_dir() and file_name.to_lower().ends_with(".json"):
+			var map_label = file_name.get_basename()
+			map_select.add_item(map_label)
+			if map_label == select_name:
+				selected_index = index
+			index += 1
+		file_name = dir.get_next()
+	dir.list_dir_end()
+	if selected_index >= 0:
+		map_select.select(selected_index)
+
+
+func _load_layout_from_path(path: String) -> void:
+	var file = FileAccess.open(path, FileAccess.READ)
+	if file == null:
+		return
+	var data: Variant = JSON.parse_string(file.get_as_text())
+	if not data is Dictionary:
+		return
+	objects._apply_layout_data(data as Dictionary)
+
+
+func save_layout() -> void:
+	var data = _collect_layout_data()
+	var records: Array = data.get("objects", [])
+	var file = FileAccess.open(SAVE_PATH, FileAccess.WRITE)
+	if file != null:
+		file.store_string(JSON.stringify(data, "\t"))
+	var scene_error = _save_authored_scene()
+	if scene_error == OK:
+		controls.status.text = "SAVED | %d objects" % records.size()
+	else:
+		controls.status.text = "SAVE ERROR %d" % scene_error
+
+
+func _save_authored_scene() -> Error:
+	var scene_root = Node3D.new()
+	scene_root.name = "BaseOfficeLayout"
+	for node in objects.placed:
+		if not is_instance_valid(node):
+			continue
+		var scene_path = str(node.get_meta("planning_scene_path", ""))
+		if scene_path.is_empty():
+			continue
+		var copy = catalog._instantiate_asset(scene_path)
+		if copy == null:
+			continue
+		scene_root.add_child(copy)
+		copy.owner = scene_root
+		copy.transform = node.transform
+		if node.has_meta("planning_desk_id"):
+			copy.set_meta("planning_desk_id", node.get_meta("planning_desk_id"))
+		if node.has_meta("planning_attachment"):
+			copy.set_meta("planning_attachment", node.get_meta("planning_attachment"))
+		if node.has_meta("planning_zone"):
+			copy.set_meta("planning_zone", node.get_meta("planning_zone"))
+		if copy.has_method("configure_flicker"):
+			copy.set_meta("planning_light_energy", node.get_meta("planning_light_energy", 3.0))
+			copy.set_meta("planning_light_angle", node.get_meta("planning_light_angle", 48.0))
+			copy.set_meta("planning_flicker_mode", node.get_meta("planning_flicker_mode", 0))
+			copy.set_meta("planning_flicker_step", node.get_meta("planning_flicker_step", 0.2))
+		if not scene_path.begins_with(catalog.ENVIRONMENT_ROOT + "/"):
+			_assign_owner_recursive(copy, scene_root)
+	var packed_layout = PackedScene.new()
+	var pack_error = packed_layout.pack(scene_root)
+	if pack_error != OK:
+		scene_root.free()
+		return pack_error
+	var save_error = ResourceSaver.save(packed_layout, AUTHORED_SCENE_PATH)
+	scene_root.free()
+	return save_error
+
+
+func _assign_owner_recursive(node: Node, scene_owner: Node) -> void:
+	for child in node.get_children():
+		child.owner = scene_owner
+		_assign_owner_recursive(child, scene_owner)
+
+
+func load_layout() -> void:
+	if not FileAccess.file_exists(SAVE_PATH):
+		return
+	_load_layout_from_path(SAVE_PATH)

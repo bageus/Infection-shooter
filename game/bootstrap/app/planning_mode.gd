@@ -1,23 +1,20 @@
 extends Node
 
-const SAVE_PATH := "user://planned_layout.json"
-const MAPS_DIR := "user://maps"
-const AUTHORED_SCENE_PATH := "res://game/presentation/office_floor/public/base_office_layout.tscn"
-const GRID_SIZE := 0.25
-const SNAP_DISTANCE := 0.8
-const FLOOR_WALL_SNAP := preload("res://game/bootstrap/app/floor_wall_snap.gd")
-const EXTINGUISHER_WALL := preload("res://game/bootstrap/app/extinguisher_wall_placement.gd")
+const OBJECTS := preload("res://game/bootstrap/app/planning_objects.gd")
+const GEOMETRY := preload("res://game/bootstrap/app/planning_geometry.gd")
+const CONTROLS := preload("res://game/bootstrap/app/planning_controls.gd")
+const CATALOG := preload("res://game/bootstrap/app/planning_catalog.gd")
+const STORAGE := preload("res://game/bootstrap/app/planning_storage.gd")
+
 const CAMERA_SPEED := 18.0
 const CAMERA_ZOOM_STEP := 2.5
 const CAMERA_MIN_HEIGHT := -15.0
 const CAMERA_MAX_HEIGHT := 55.0
 const SCALE_STEP := 0.1
 const HEIGHT_STEP := 0.25
-const LIGHT_DEFAULT_HEIGHT := HEIGHT_STEP * 10.0
-const DARKNESS_DEFAULT_HEIGHT := HEIGHT_STEP * 11.0
 const CAMERA_ROTATE_SPEED := 0.008
-const PLAN_HALF_WIDTH := 40.0
-const PLAN_HALF_DEPTH := 30.0
+const DESK_SETUP_MODE := preload("res://game/bootstrap/app/desk_setup_mode.gd")
+const EDIT_HISTORY := preload("res://game/bootstrap/app/planning_edit_history.gd")
 
 var host: Node3D
 var camera: Camera3D
@@ -26,35 +23,9 @@ var structure_root: Node3D
 var gameplay_root: Node3D
 var enemies_root: Node3D
 var main_player: Node3D
-var player_spawn_defined := false
-var player_spawn_transform := Transform3D.IDENTITY
 var ui: Control
-var palette: ItemList
-var status: Label
-var help: Label
-var help_button: Button
-var light_info: Label
-var light_level: ProgressBar
-var light_angle_info: Label
-var light_angle: ProgressBar
-var light_defaults: VBoxContainer
-var default_light_height: SpinBox
-var default_light_energy: SpinBox
-var default_light_angle: SpinBox
-var default_flicker_mode: OptionButton
-var default_flicker_step: SpinBox
-var selected_flicker_mode: OptionButton
-var selected_flicker_step: SpinBox
-var editing_flicker := false
 var hud_nodes: Array[Node] = []
 var active := false
-var selected_path := ""
-var selected_kind := ""
-var preview: Node3D
-var selected: Node3D
-var rotation_y := 0.0
-var last_mouse_world := Vector3.ZERO
-var placed: Array[Node3D] = []
 var camera_anchor := Vector3.ZERO
 var camera_height := 24.0
 var saved_camera_transform := Transform3D.IDENTITY
@@ -64,105 +35,15 @@ var camera_yaw := 0.0
 var camera_pitch := -0.75
 var planning_yaw := 0.0
 var planning_pitch := -0.75
-var selection_box: MeshInstance3D
-var selection_source_aabb := AABB()
-var planning_grid: MeshInstance3D
-var active_catalog: Array = []
-var map_name_edit: LineEdit
-var map_select: OptionButton
-
-const ENVIRONMENT_ROOT := "res://models/objects/enviroments"
-const ENVIRONMENT_SCENE := preload("res://game/presentation/office_floor/public/props/environment_prop.tscn")
-const BATHROOM_FIXTURE_SCENE := preload("res://game/presentation/office_floor/public/props/bathroom_fixture.tscn")
-const PAPER_PROP_SCENE := preload("res://game/presentation/office_floor/public/props/paper_prop.tscn")
-const STAIRCASE_SCENE := preload("res://game/presentation/office_floor/public/structural/staircase.tscn")
-const WORKSTATIONS := preload("res://game/bootstrap/app/workstation_templates.gd")
-const DESK_SETUP_MODE := preload("res://game/bootstrap/app/desk_setup_mode.gd")
-const EDIT_HISTORY := preload("res://game/bootstrap/app/planning_edit_history.gd")
-
-var workstation_transforms: Dictionary = {}
 var desk_setup: Node
-var desk_setup_button: Button
 var edit_history: RefCounted
-var planning_toolbar: PanelContainer
-var undo_button: Button
-var duplicate_button: Button
 var _drag_recorded := false
 
-var group_catalogs: Dictionary = {}
-
-
-func _build_environment_catalogs() -> void:
-	group_catalogs.clear()
-	for group_index in range(1, 14):
-		var group := "%02d" % group_index
-		var directory := ENVIRONMENT_ROOT + "/" + group
-		var entries: Array = []
-		group_catalogs[group] = entries
-		var handle := DirAccess.open(directory)
-		if handle == null:
-			continue
-		handle.list_dir_begin()
-		var file_name := handle.get_next()
-		while not file_name.is_empty():
-			if not handle.current_is_dir() and file_name.to_lower().ends_with(".glb") and file_name not in ["16_toilet_floor.glb", "16_wall_urinal.glb", "16_wall_hand_dryer.glb", "16_sink_pedestal.glb"]:
-				var model_path := directory + "/" + file_name
-				var special_scene := _environment_scene_for(file_name)
-				entries.append({
-					"name": _environment_display_name(file_name),
-					"path": special_scene if not special_scene.is_empty() else model_path,
-					"kind": "" if not special_scene.is_empty() else "environment"
-				})
-			file_name = handle.get_next()
-		handle.list_dir_end()
-		entries.sort_custom(func(a, b): return str(a["name"]).naturalnocasecmp_to(str(b["name"])) < 0)
-		group_catalogs[group] = entries
-
-
-func _environment_display_name(file_name: String) -> String:
-	if file_name.begins_with("01_floor_") and file_name != "01_floor_pad.glb":
-		return "Carpet " + file_name.trim_prefix("01_floor_").get_basename().replace("_", " ")
-	return file_name.get_basename().replace("_", " ")
-
-
-func _environment_scene_for(file_name: String) -> String:
-	var structural := {
-		"01_column.glb": "column", "01_elevator_cabin_freight.glb": "elevator_cabin_freight",
-		"01_elevator_cabin_passenger.glb": "elevator_cabin_passenger", "01_elevator_door.glb": "elevator_door",
-		"01_floor_pad.glb": "floor_pad", "01_wall_door.glb": "wall_door",
-		"01_wall_door_without.glb": "wall_door_2_without", "01_wall_emergency_door.glb": "wall_emergency_door",
-		"01_wall_half_panel.glb": "wall_half_panel", "01_wall_straight.glb": "wall_straight",
-		"01_window_double.glb": "window_double", "01_only_door.glb": "only_door_2",
-		"01_glass_door_breakable.glb": "sliding_glass_door",
-		"01_glass_partition_blinds_breakable.glb": "glass_partition_blinds",
-		"01_glass_partition_half_breakable.glb": "glass_partition_half",
-		"01_glass_wall_full_breakable.glb": "glass_wall_full"
-	}
-	if structural.has(file_name):
-		return "res://game/presentation/office_floor/public/structural/" + str(structural[file_name]) + ".tscn"
-	if file_name == "07_table.glb":
-		return "res://game/presentation/office_floor/public/props/07_table.tscn"
-	var pickups := {
-		"12_ammo_pistols.glb": "ammo_pistol_pickup", "12_ammo_shotgun.glb": "ammo_shotgun_pickup",
-		"12_ammo_uzi.glb": "ammo_uzi_pickup", "12_antidote.glb": "antidote_pickup",
-		"12_medkit.glb": "medkit_pickup"
-	}
-	if pickups.has(file_name):
-		return "res://game/features/pickups/public/" + str(pickups[file_name]) + ".tscn"
-	return ""
-
-
-var lighting_catalog := [
-	{"name":"Omni Light","path":"res://game/presentation/office_floor/public/props/planner_light.tscn","kind":"light"},
-	{"name":"Permanent Darkness","path":"res://game/presentation/office_floor/public/props/darkness_zone.tscn","kind":"darkness"},
-	{"name":"Exploration Darkness","path":"res://game/presentation/office_floor/public/props/darkness_zone.tscn","kind":"exploration_darkness"}
-]
-
-var actor_catalog := [
-	{"name":"Player Spawn","path":"","kind":"player"},
-	{"name":"Zombie L1","path":"res://game/features/infected/public/infected_capsule.tscn","kind":"enemy"},
-	{"name":"Mutant L2","path":"res://game/features/infected/public/mutant_level2.tscn","kind":"enemy"}
-]
+var objects = OBJECTS.new()
+var geometry = GEOMETRY.new()
+var controls = CONTROLS.new()
+var catalog = CATALOG.new()
+var storage = STORAGE.new()
 
 
 func setup(app_owner: Node3D, planning_root: Node3D, planning_ui: Control) -> void:
@@ -175,111 +56,55 @@ func setup(app_owner: Node3D, planning_root: Node3D, planning_ui: Control) -> vo
 	ui = planning_ui
 	camera_rig = host.get_node("Gameplay/Player/CameraRig") as Node3D
 	camera = host.get_node("Gameplay/Player/CameraRig/Camera3D")
-	palette = ui.get_node("Panel/VBox/Palette")
-	status = ui.get_node("Panel/VBox/Status")
-	help = ui.get_node("HelpPanel/VBox/Help")
-	help_button = Button.new()
-	help_button.text = "?"
-	help_button.tooltip_text = "Planning controls"
-	help_button.custom_minimum_size = Vector2(36, 36)
-	ui.add_child(help_button)
-	help_button.set_anchors_preset(Control.PRESET_TOP_RIGHT)
-	help_button.position = Vector2(-52, 8)
-	help_button.pressed.connect(_toggle_help)
-	ui.get_node("HelpPanel/VBox/Close").pressed.connect(_toggle_help)
-	light_info = ui.get_node("Panel/VBox/LightInfo")
-	light_level = ui.get_node("Panel/VBox/LightLevel")
-	light_angle_info = ui.get_node("Panel/VBox/LightAngleInfo")
-	light_angle = ui.get_node("Panel/VBox/LightAngle")
-	light_defaults = ui.get_node("Panel/VBox/LightDefaults")
-	default_light_height = ui.get_node("Panel/VBox/LightDefaults/HeightRow/Value")
-	default_light_energy = ui.get_node("Panel/VBox/LightDefaults/EnergyRow/Value")
-	default_light_angle = ui.get_node("Panel/VBox/LightDefaults/AngleRow/Value")
-	default_flicker_mode = ui.get_node("Panel/VBox/LightDefaults/FlickerRow/Mode")
-	default_flicker_step = ui.get_node("Panel/VBox/LightDefaults/FlickerStepRow/Value")
-	selected_flicker_mode = ui.get_node("Panel/VBox/SelectedFlicker/Mode")
-	selected_flicker_step = ui.get_node("Panel/VBox/SelectedFlickerStep/Value")
-	default_flicker_mode.item_selected.connect(_on_default_flicker_mode_changed)
-	selected_flicker_mode.item_selected.connect(_on_selected_flicker_changed)
-	selected_flicker_step.value_changed.connect(_on_selected_flicker_step_changed)
-	map_name_edit = ui.get_node("Panel/VBox/MapManager/Name")
-	map_select = ui.get_node("Panel/VBox/MapManager/Maps")
+	var context := {"session": self, "objects": objects, "geometry": geometry,
+		"controls": controls, "catalog": catalog, "storage": storage}
+	for component in [objects, geometry, controls, storage]:
+		component.configure(context)
+	add_child(objects)
+	add_child(controls)
+	edit_history = EDIT_HISTORY.new()
+	edit_history.set("planner", self)
+	controls.setup_controls()
+	storage.setup_widgets()
 	hud_nodes = [
 		host.get_node("PrototypeHUD"),
 		host.get_node("Crosshair"),
 		host.get_node("Radar"),
 		host.get_node_or_null("FogOfWar")
 	]
-	_build_environment_catalogs()
-	active_catalog = group_catalogs["01"]
-	_rebuild_palette()
-	palette.item_selected.connect(_on_palette_selected)
-	desk_setup_button = Button.new()
-	desk_setup_button.text = "Plan desk setup"
-	desk_setup_button.visible = false
-	ui.get_node("Panel/VBox").add_child(desk_setup_button)
-	ui.get_node("Panel/VBox").move_child(desk_setup_button, palette.get_index() + 1)
-	desk_setup_button.pressed.connect(_open_desk_setup)
+	catalog._build_environment_catalogs()
+	catalog.active_catalog = catalog.group_catalogs["01"]
+	controls._rebuild_palette()
+	controls.palette.item_selected.connect(objects._on_palette_selected)
 	desk_setup = DESK_SETUP_MODE.new()
 	add_child(desk_setup)
 	desk_setup.configure(self, ui)
-	_build_planning_toolbar()
-	ui.get_node("Panel/VBox/Tabs/Structure").pressed.connect(_show_structure_catalog)
-	ui.get_node("Panel/VBox/Tabs/Actors").pressed.connect(_show_actor_catalog)
-	ui.get_node("Panel/VBox/Tabs/Lighting").pressed.connect(_show_lighting_catalog)
+	ui.get_node("Panel/VBox/Tabs/Structure").pressed.connect(controls._show_structure_catalog)
+	ui.get_node("Panel/VBox/Tabs/Actors").pressed.connect(controls._show_actor_catalog)
+	ui.get_node("Panel/VBox/Tabs/Lighting").pressed.connect(controls._show_lighting_catalog)
 	for group_name in ["01","02","03","04","05","06","07","08","09","10","11","12","13"]:
 		var button := ui.get_node("Panel/VBox/GroupTabs/G" + group_name) as Button
-		button.pressed.connect(_show_structure_group.bind(group_name))
-	ui.get_node("Panel/VBox/MapManager/Buttons/SaveMap").pressed.connect(save_named_map)
-	ui.get_node("Panel/VBox/MapManager/Buttons/LoadMap").pressed.connect(load_selected_map)
-	ui.get_node("Panel/VBox/Save").pressed.connect(save_layout)
-	ui.get_node("Panel/VBox/Clear").pressed.connect(clear_layout)
+		button.pressed.connect(controls._show_structure_group.bind(group_name))
+	ui.get_node("Panel/VBox/MapManager/Buttons/SaveMap").pressed.connect(storage.save_named_map)
+	ui.get_node("Panel/VBox/MapManager/Buttons/LoadMap").pressed.connect(storage.load_selected_map)
+	ui.get_node("Panel/VBox/Save").pressed.connect(storage.save_layout)
+	ui.get_node("Panel/VBox/Clear").pressed.connect(objects.clear_layout)
 	ui.get_node("Panel/VBox/Close").pressed.connect(exit)
 	ui.hide()
-	_register_existing_scene_objects()
-	_register_actor_objects()
-	_ensure_maps_dir()
-	_refresh_map_list()
-	load_layout()
-
-
-func _build_planning_toolbar() -> void:
-	edit_history = EDIT_HISTORY.new()
-	edit_history.set("planner", self)
-	planning_toolbar = PanelContainer.new()
-	planning_toolbar.set_anchors_preset(Control.PRESET_CENTER_TOP)
-	planning_toolbar.offset_left = -165
-	planning_toolbar.offset_right = 165
-	planning_toolbar.offset_top = 8
-	planning_toolbar.offset_bottom = 48
-	planning_toolbar.mouse_filter = Control.MOUSE_FILTER_STOP
-	var toolbar_style := StyleBoxFlat.new()
-	toolbar_style.bg_color = Color(0.005, 0.035, 0.065, 0.95)
-	toolbar_style.border_color = Color(0.02, 0.72, 0.98)
-	toolbar_style.set_border_width_all(2)
-	toolbar_style.set_corner_radius_all(8)
-	planning_toolbar.add_theme_stylebox_override("panel", toolbar_style)
-	ui.add_child(planning_toolbar)
-	var toolbar_buttons := HBoxContainer.new()
-	planning_toolbar.add_child(toolbar_buttons)
-	undo_button = Button.new()
-	undo_button.text = "Undo last action"
-	undo_button.pressed.connect(func() -> void: edit_history.call("undo"))
-	toolbar_buttons.add_child(undo_button)
-	duplicate_button = Button.new()
-	duplicate_button.text = "Duplicate selected"
-	duplicate_button.pressed.connect(func() -> void: edit_history.call("duplicate_selected"))
-	toolbar_buttons.add_child(duplicate_button)
-	_update_history_buttons()
+	objects._register_existing_scene_objects()
+	objects._register_actor_objects()
+	storage._ensure_maps_dir()
+	storage._refresh_map_list()
+	storage.load_layout()
 
 
 func enter() -> void:
 	active = true
 	edit_history.set("stack", [])
-	_update_history_buttons()
-	help.get_parent().get_parent().hide()
-	help_button.show()
-	workstation_transforms.clear()
+	controls._update_history_buttons()
+	controls.help.get_parent().get_parent().hide()
+	controls.help_button.show()
+	objects.workstation_transforms.clear()
 	var planning_lighting := host.get_node_or_null("PlanningLighting")
 	if planning_lighting != null:
 		planning_lighting.call("set_planning_mode", true)
@@ -289,8 +114,8 @@ func enter() -> void:
 	planning_pitch = camera.global_rotation.x
 	camera_yaw = planning_yaw
 	camera_pitch = planning_pitch
-	_reset_selection()
-	_show_planning_grid()
+	objects._reset_selection()
+	geometry._show_planning_grid()
 	var chunk_streamer := host.get_node_or_null("ChunkStreamer")
 	if chunk_streamer != null:
 		chunk_streamer.call("set_runtime_enabled", false)
@@ -306,16 +131,16 @@ func enter() -> void:
 	Input.mouse_mode = Input.MOUSE_MODE_VISIBLE
 	camera_anchor = camera.global_position
 	camera_height = clampf(camera.global_position.y, CAMERA_MIN_HEIGHT, CAMERA_MAX_HEIGHT)
-	help.text = "PLANNING CONTROLS\n\nWASD  Move view\nALT + LMB drag  Rotate view (look up or down)\nWheel  Raise / lower camera, including below floor\nLMB  Select / Place\nLMB drag  Move selected\nRMB  Cancel current tool\nDelete  Delete selected\nQ / E  Rotate -/+15°\nR  Rotate +90°\n+ / -  Uniform scale\nX / Z  X size +/-\nC / V  Z size +/-\nArrow keys  Move selected on plane\nPgUp / PgDn  Move object up/down\n[ / ]  Light brightness\n, / .  Light cone angle\nESC  Exit planner"
-	status.text = "Choose an object"
+	controls.help.text = "PLANNING CONTROLS\n\nWASD  Move view\nALT + LMB drag  Rotate view (look up or down)\nWheel  Raise / lower camera, including below floor\nLMB  Select / Place\nLMB drag  Move selected\nRMB  Cancel current tool\nDelete  Delete selected\nQ / E  Rotate -/+15°\nR  Rotate +90°\n+ / -  Uniform scale\nX / Z  X size +/-\nC / V  Z size +/-\nArrow keys  Move selected on plane\nPgUp / PgDn  Move object up/down\n[ / ]  Light brightness\n, / .  Light cone angle\nESC  Exit planner"
+	controls.status.text = "Choose an object"
 
 
 func exit() -> void:
 	if desk_setup.active:
 		desk_setup.close()
 	active = false
-	help.get_parent().get_parent().hide()
-	help_button.hide()
+	controls.help.get_parent().get_parent().hide()
+	controls.help_button.hide()
 	var planning_lighting := host.get_node_or_null("PlanningLighting")
 	if planning_lighting != null:
 		planning_lighting.call("set_planning_mode", false)
@@ -323,7 +148,7 @@ func exit() -> void:
 	if chunk_streamer != null:
 		chunk_streamer.call("rebuild")
 		chunk_streamer.call("set_runtime_enabled", true)
-	_activate_all_enemies()
+	objects._activate_all_enemies()
 	camera_rig.transform = saved_camera_rig_transform
 	camera.transform = saved_camera_transform
 	for node in hud_nodes:
@@ -332,10 +157,10 @@ func exit() -> void:
 	var mutation_hud := host.get("mutation_tree_ui") as CanvasLayer
 	if mutation_hud != null:
 		mutation_hud.show()
-	_clear_preview()
+	objects._clear_preview()
 	_set_light_markers_visible(false)
-	_hide_planning_grid()
-	_select(null)
+	geometry._hide_planning_grid()
+	objects._select(null)
 	ui.hide()
 	get_tree().paused = false
 
@@ -343,7 +168,7 @@ func exit() -> void:
 func _process(delta: float) -> void:
 	if not active:
 		return
-	_sync_workstations()
+	objects._sync_workstations()
 	if desk_setup.active:
 		return
 	if _text_field_has_focus():
@@ -373,7 +198,7 @@ func _input(event: InputEvent) -> void:
 		if desk_setup.handle_input(event):
 			get_viewport().set_input_as_handled()
 		return
-	if event is InputEventMouse and planning_toolbar.get_global_rect().has_point(event.position):
+	if event is InputEventMouse and controls.planning_toolbar.get_global_rect().has_point(event.position):
 		return
 	if event is InputEventMouse and (ui.get_node("Panel") as Control).get_global_rect().has_point(event.position):
 		# _input precedes GUI dispatch: let the palette receive this event.
@@ -386,7 +211,7 @@ func _input(event: InputEvent) -> void:
 		return
 	if event is InputEventKey and event.pressed and not event.echo:
 		if event.keycode in [KEY_UP, KEY_DOWN, KEY_LEFT, KEY_RIGHT]:
-			_nudge_selected(Vector2(
+			objects._nudge_selected(Vector2(
 				-1.0 if event.keycode == KEY_LEFT else (1.0 if event.keycode == KEY_RIGHT else 0.0),
 				-1.0 if event.keycode == KEY_UP else (1.0 if event.keycode == KEY_DOWN else 0.0)
 			))
@@ -396,37 +221,37 @@ func _input(event: InputEvent) -> void:
 			KEY_ESCAPE:
 				exit()
 			KEY_DELETE:
-				_delete_selected()
+				objects._delete_selected()
 			KEY_Q:
-				_rotate_selected(-15.0)
+				objects._rotate_selected(-15.0)
 			KEY_E:
-				_rotate_selected(15.0)
+				objects._rotate_selected(15.0)
 			KEY_R:
-				_rotate_selected(90.0)
+				objects._rotate_selected(90.0)
 			KEY_EQUAL, KEY_KP_ADD:
-				_scale_selected(Vector3.ONE * SCALE_STEP)
+				objects._scale_selected(Vector3.ONE * SCALE_STEP)
 			KEY_MINUS, KEY_KP_SUBTRACT:
-				_scale_selected(Vector3.ONE * -SCALE_STEP)
+				objects._scale_selected(Vector3.ONE * -SCALE_STEP)
 			KEY_X:
-				_scale_selected(Vector3(SCALE_STEP, 0.0, 0.0))
+				objects._scale_selected(Vector3(SCALE_STEP, 0.0, 0.0))
 			KEY_Z:
-				_scale_selected(Vector3(-SCALE_STEP, 0.0, 0.0))
+				objects._scale_selected(Vector3(-SCALE_STEP, 0.0, 0.0))
 			KEY_C:
-				_scale_selected(Vector3(0.0, 0.0, SCALE_STEP))
+				objects._scale_selected(Vector3(0.0, 0.0, SCALE_STEP))
 			KEY_V:
-				_scale_selected(Vector3(0.0, 0.0, -SCALE_STEP))
+				objects._scale_selected(Vector3(0.0, 0.0, -SCALE_STEP))
 			KEY_PAGEUP:
-				_move_selected_height(HEIGHT_STEP)
+				objects._move_selected_height(HEIGHT_STEP)
 			KEY_PAGEDOWN:
-				_move_selected_height(-HEIGHT_STEP)
+				objects._move_selected_height(-HEIGHT_STEP)
 			KEY_BRACKETLEFT:
-				_adjust_selected_light(-0.25)
+				controls._adjust_selected_light(-0.25)
 			KEY_BRACKETRIGHT:
-				_adjust_selected_light(0.25)
+				controls._adjust_selected_light(0.25)
 			KEY_COMMA:
-				_adjust_selected_light_angle(-4.0)
+				controls._adjust_selected_light_angle(-4.0)
 			KEY_PERIOD:
-				_adjust_selected_light_angle(4.0)
+				controls._adjust_selected_light_angle(4.0)
 		get_viewport().set_input_as_handled()
 	if event is InputEventMouseButton:
 		if event.button_index == MOUSE_BUTTON_LEFT and not event.pressed:
@@ -436,664 +261,35 @@ func _input(event: InputEvent) -> void:
 		elif event.button_index == MOUSE_BUTTON_WHEEL_DOWN and event.pressed:
 			_zoom_camera(CAMERA_ZOOM_STEP)
 		elif event.button_index == MOUSE_BUTTON_LEFT and event.pressed:
-			_click_world(event.position)
+			objects._click_world(event.position)
 		elif event.button_index == MOUSE_BUTTON_RIGHT and event.pressed:
-			_reset_selection()
+			objects._reset_selection()
 	if event is InputEventMouseMotion:
 		if Input.is_mouse_button_pressed(MOUSE_BUTTON_LEFT) and Input.is_key_pressed(KEY_ALT):
 			_rotate_camera(event.relative)
-		elif Input.is_mouse_button_pressed(MOUSE_BUTTON_LEFT) and selected != null:
-			var world := _screen_to_floor(event.position)
+		elif Input.is_mouse_button_pressed(MOUSE_BUTTON_LEFT) and objects.selected != null:
+			var world: Vector3 = geometry._screen_to_floor(event.position)
 			if world.is_finite():
 				if not _drag_recorded:
-					edit_history.call("record_transform", selected)
+					edit_history.call("record_transform", objects.selected)
 					_drag_recorded = true
-				var locked_y := selected.global_position.y
-				selected.global_position = _snap_position_for(selected, world)
-				if _is_ceiling_tool(selected):
-					selected.global_position.y = locked_y
-				_update_status()
-		elif preview != null:
-			_update_preview(event.position)
+				var locked_y := objects.selected.global_position.y
+				objects.selected.global_position = geometry._snap_position_for(objects.selected, world)
+				if geometry._is_ceiling_tool(objects.selected):
+					objects.selected.global_position.y = locked_y
+				objects._update_status()
+		elif objects.preview != null:
+			objects._update_preview(event.position)
 
 
 func _text_field_has_focus() -> bool:
 	var focused := get_viewport().gui_get_focus_owner()
-	if focused == map_name_edit and focused != null:
+	if focused == storage.map_name_edit and focused != null:
 		return true
-	for field in [default_light_height, default_light_energy, default_light_angle, default_flicker_step, selected_flicker_step]:
+	for field in [controls.default_light_height, controls.default_light_energy, controls.default_light_angle, controls.default_flicker_step, controls.selected_flicker_step]:
 		if field != null and focused == (field as SpinBox).get_line_edit():
 			return true
 	return false
-
-
-func _reset_selection() -> void:
-	selected_path = ""
-	selected_kind = ""
-	rotation_y = 0.0
-	_clear_preview()
-	_select(null)
-	palette.deselect_all()
-	status.text = "Selection cleared"
-
-
-func _rebuild_palette() -> void:
-	palette.clear()
-	for entry: Dictionary in active_catalog:
-		palette.add_item(str(entry.get("name", "")))
-
-
-func _show_structure_catalog() -> void:
-	light_defaults.hide()
-	_reset_selection()
-	active_catalog = group_catalogs["01"]
-	ui.get_node("Panel/VBox/GroupTabs").show()
-	_rebuild_palette()
-	status.text = "STRUCTURE | choose building object"
-
-
-func _show_structure_group(group_name: String) -> void:
-	light_defaults.hide()
-	_reset_selection()
-	active_catalog = group_catalogs.get(group_name, [])
-	_rebuild_palette()
-	status.text = "STRUCTURE " + group_name
-
-
-func _show_lighting_catalog() -> void:
-	_reset_selection()
-	light_defaults.show()
-	ui.get_node("Panel/VBox/GroupTabs").hide()
-	active_catalog = lighting_catalog
-	_rebuild_palette()
-	status.text = "LIGHTING | lights and darkness zones"
-
-
-func _show_actor_catalog() -> void:
-	light_defaults.hide()
-	_reset_selection()
-	ui.get_node("Panel/VBox/GroupTabs").hide()
-	active_catalog = actor_catalog
-	_rebuild_palette()
-	status.text = "ACTORS | place/remove Player and Infected"
-
-
-func _set_light_markers_visible(value: bool) -> void:
-	for light_node in get_tree().get_nodes_in_group("planner_lights"):
-		if light_node.has_method("set_planning_visual"):
-			light_node.call("set_planning_visual", value)
-
-
-func _show_planning_grid() -> void:
-	if planning_grid != null and is_instance_valid(planning_grid):
-		return
-	planning_grid = MeshInstance3D.new()
-	var mesh := ImmediateMesh.new()
-	var material := StandardMaterial3D.new()
-	material.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
-	material.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
-	material.albedo_color = Color(0.1, 0.75, 1.0, 0.38)
-	mesh.surface_begin(Mesh.PRIMITIVE_LINES, material)
-	for x in range(-int(PLAN_HALF_WIDTH), int(PLAN_HALF_WIDTH) + 1):
-		mesh.surface_add_vertex(Vector3(x, 0.012, -PLAN_HALF_DEPTH))
-		mesh.surface_add_vertex(Vector3(x, 0.012, PLAN_HALF_DEPTH))
-	for z in range(-int(PLAN_HALF_DEPTH), int(PLAN_HALF_DEPTH) + 1):
-		mesh.surface_add_vertex(Vector3(-PLAN_HALF_WIDTH, 0.012, z))
-		mesh.surface_add_vertex(Vector3(PLAN_HALF_WIDTH, 0.012, z))
-	mesh.surface_end()
-	var red := StandardMaterial3D.new()
-	red.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
-	red.cull_mode = BaseMaterial3D.CULL_DISABLED
-	red.albedo_color = Color(1.0, 0.06, 0.06)
-	mesh.surface_begin(Mesh.PRIMITIVE_TRIANGLES, red)
-	_add_grid_rectangle(mesh, Vector3(-PLAN_HALF_WIDTH, 0.035, -0.045), Vector3(PLAN_HALF_WIDTH, 0.035, 0.045))
-	_add_grid_rectangle(mesh, Vector3(-0.045, 0.035, -PLAN_HALF_DEPTH), Vector3(0.045, 0.035, PLAN_HALF_DEPTH))
-	_add_grid_marker(mesh, Vector2.ZERO, 0.7)
-	for x in [-PLAN_HALF_WIDTH * 0.5, PLAN_HALF_WIDTH * 0.5]:
-		for z in [-PLAN_HALF_DEPTH * 0.5, PLAN_HALF_DEPTH * 0.5]:
-			_add_grid_marker(mesh, Vector2(x, z), 0.5)
-	mesh.surface_end()
-	planning_grid.mesh = mesh
-	host.add_child(planning_grid)
-
-
-func _add_grid_rectangle(mesh: ImmediateMesh, minimum: Vector3, maximum: Vector3) -> void:
-	var a := Vector3(minimum.x, minimum.y, minimum.z)
-	var b := Vector3(maximum.x, minimum.y, minimum.z)
-	var c := Vector3(maximum.x, minimum.y, maximum.z)
-	var d := Vector3(minimum.x, minimum.y, maximum.z)
-	for vertex in [a, b, c, a, c, d]:
-		mesh.surface_add_vertex(vertex)
-
-
-func _add_grid_marker(mesh: ImmediateMesh, center: Vector2, radius: float) -> void:
-	for sector in 16:
-		var first := TAU * float(sector) / 16.0
-		var second := TAU * float(sector + 1) / 16.0
-		mesh.surface_add_vertex(Vector3(center.x, 0.045, center.y))
-		mesh.surface_add_vertex(Vector3(center.x + cos(first) * radius, 0.045, center.y + sin(first) * radius))
-		mesh.surface_add_vertex(Vector3(center.x + cos(second) * radius, 0.045, center.y + sin(second) * radius))
-
-
-func _hide_planning_grid() -> void:
-	if planning_grid != null and is_instance_valid(planning_grid):
-		planning_grid.queue_free()
-	planning_grid = null
-
-
-func _on_palette_selected(index: int) -> void:
-	var entry: Dictionary = active_catalog[index]
-	selected_path = str(entry.get("path", ""))
-	selected_kind = str(entry.get("kind", ""))
-	rotation_y = 0.0
-	_select(null)
-	_rebuild_preview()
-
-
-func _click_world(screen_pos: Vector2) -> void:
-	if not selected_path.is_empty() or selected_kind == "player":
-		_place_selected(screen_pos)
-		return
-	var hit_node := _planned_object_at(screen_pos)
-	_select(hit_node)
-	if hit_node != null:
-		_clear_preview()
-
-
-func _select(node: Node3D) -> void:
-	_clear_selection_highlight()
-	selected = node
-	desk_setup_button.visible = selected != null and not WORKSTATIONS.desk_name(str(selected.get_meta("planning_scene_path", ""))).is_empty()
-	if selected != null:
-		_show_selection_highlight(selected)
-	_update_light_ui()
-	_update_status()
-	_update_history_buttons()
-
-
-func _update_history_buttons() -> void:
-	if undo_button != null:
-		undo_button.disabled = (edit_history.get("stack") as Array).is_empty()
-	if duplicate_button != null:
-		duplicate_button.disabled = selected == null or selected == main_player
-
-
-func _open_desk_setup() -> void:
-	if selected != null and desk_setup_button.visible:
-		desk_setup.open(selected)
-
-
-func _toggle_help() -> void:
-	var overlay := help.get_parent().get_parent() as Control
-	overlay.visible = not overlay.visible
-
-
-func _update_light_ui() -> void:
-	var target := selected
-	if target == null and preview != null and _selected_kind() == "light":
-		target = preview
-	var light: Light3D
-	if target != null:
-		light = target.find_child("Light", true, false) as Light3D
-	var show_light := light != null
-	light_info.visible = show_light
-	light_level.visible = show_light
-	light_angle_info.visible = show_light and light is SpotLight3D
-	light_angle.visible = show_light and light is SpotLight3D
-	ui.get_node("Panel/VBox/SelectedFlicker").visible = show_light and selected != null
-	ui.get_node("Panel/VBox/SelectedFlickerStep").visible = show_light and selected != null
-	if show_light:
-		light_info.text = "LIGHT %.2f / 16.00" % light.light_energy
-		light_level.value = light.light_energy
-		if light is SpotLight3D:
-			var spot := light as SpotLight3D
-			light_angle_info.text = "CONE %.0f°" % spot.spot_angle
-			light_angle.value = spot.spot_angle
-		if selected != null:
-			editing_flicker = true
-			selected_flicker_mode.select(int(target.get_meta("planning_flicker_mode", 0)))
-			selected_flicker_step.value = float(target.get_meta("planning_flicker_step", 0.2))
-			editing_flicker = false
-
-
-func _on_selected_flicker_changed(_index: int) -> void:
-	if not editing_flicker:
-		selected_flicker_step.value = _recommended_flicker_step(selected_flicker_mode.get_selected_id())
-	_apply_selected_flicker()
-
-
-func _on_default_flicker_mode_changed(_index: int) -> void:
-	default_flicker_step.value = _recommended_flicker_step(default_flicker_mode.get_selected_id())
-
-
-func _recommended_flicker_step(mode: int) -> float:
-	match mode:
-		1: return 0.12
-		2: return 0.75
-		3: return 1.5
-	return 0.2
-
-
-func _on_selected_flicker_step_changed(_value: float) -> void:
-	_apply_selected_flicker()
-
-
-func _apply_selected_flicker() -> void:
-	if editing_flicker or selected == null or not selected.has_method("configure_flicker"):
-		return
-	selected.call("configure_flicker", selected_flicker_mode.get_selected_id(), selected_flicker_step.value)
-
-
-func _show_selection_highlight(node: Node3D) -> void:
-	var aabb := _combined_aabb(node, true)
-	selection_source_aabb = aabb
-	if aabb.size.length_squared() <= 0.0001:
-		return
-	selection_box = MeshInstance3D.new()
-	var box := BoxMesh.new()
-	box.size = aabb.size + Vector3(0.08, 0.08, 0.08)
-	var material := StandardMaterial3D.new()
-	material.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
-	material.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
-	material.albedo_color = Color(0.1, 0.85, 1.0, 0.16)
-	material.no_depth_test = true
-	box.material = material
-	selection_box.mesh = box
-	selection_box.set_meta("planning_selection_highlight", true)
-	node.add_child(selection_box)
-	selection_box.position = aabb.get_center()
-
-
-func _clear_selection_highlight() -> void:
-	if selection_box != null and is_instance_valid(selection_box):
-		selection_box.queue_free()
-	selection_box = null
-	selection_source_aabb = AABB()
-
-
-func _register_existing_scene_objects() -> void:
-	_register_editable_children(structure_root)
-
-
-func _register_editable_children(parent: Node) -> void:
-	for child in parent.get_children():
-		if child is Node3D:
-			var node := child as Node3D
-			if _is_editable_scene_object(node):
-				if not placed.has(node):
-					placed.append(node)
-				node.set_meta("planning_existing", true)
-			else:
-				_register_editable_children(node)
-
-
-func _activate_all_enemies() -> void:
-	for child in enemies_root.get_children():
-		if child.has_method("set_target"):
-			child.call("set_target", main_player)
-
-
-func _register_actor_objects() -> void:
-	if main_player != null and not placed.has(main_player):
-		placed.append(main_player)
-		main_player.set_meta("planning_actor_kind", "player")
-		main_player.set_meta("planning_existing", true)
-	for child in enemies_root.get_children():
-		if child is Node3D:
-			var enemy := child as Node3D
-			if not placed.has(enemy):
-				placed.append(enemy)
-			enemy.set_meta("planning_actor_kind", "enemy")
-			enemy.set_meta("planning_existing", true)
-
-
-func _is_editable_scene_object(node: Node3D) -> bool:
-	if node == root or node == structure_root:
-		return false
-	return _find_collision_descendant(node) != null and node.get_parent() != host
-
-
-func _find_collision_descendant(node: Node) -> CollisionObject3D:
-	if node is CollisionObject3D:
-		return node as CollisionObject3D
-	for child in node.get_children():
-		var found := _find_collision_descendant(child)
-		if found != null:
-			return found
-	return null
-
-
-func _editable_root_from_collider(collider: Node) -> Node3D:
-	var node: Node = collider
-	while node != null:
-		if node.get_parent() == root:
-			return node as Node3D
-		if node is Node3D and placed.has(node):
-			return node as Node3D
-		if node.get_parent() == structure_root:
-			return node as Node3D
-		node = node.get_parent()
-	return null
-
-
-func _planned_object_at(screen_pos: Vector2) -> Node3D:
-	var direct := _visual_object_at(screen_pos)
-	if direct != null:
-		return direct
-	var origin := camera.project_ray_origin(screen_pos)
-	var end := origin + camera.project_ray_normal(screen_pos) * 300.0
-	var query := PhysicsRayQueryParameters3D.create(origin, end)
-	var hit := camera.get_world_3d().direct_space_state.intersect_ray(query)
-	if hit.is_empty():
-		return null
-	var collider := hit.get("collider") as Node
-	if collider == null:
-		return null
-	return _editable_root_from_collider(collider)
-
-
-func _visual_object_at(screen_pos: Vector2) -> Node3D:
-	var ray_origin := camera.project_ray_origin(screen_pos)
-	var ray_direction := camera.project_ray_normal(screen_pos)
-	var best: Node3D
-	var best_distance := INF
-	for node in placed:
-		if not is_instance_valid(node):
-			continue
-		var aabb := _combined_aabb(node)
-		if aabb.size.length_squared() <= 0.0001:
-			continue
-		var world_aabb := node.global_transform * aabb
-		var hit: Variant = world_aabb.intersects_ray(ray_origin, ray_direction)
-		if hit == null:
-			continue
-		var hit_position: Vector3 = hit as Vector3
-		var distance: float = ray_origin.distance_to(hit_position)
-		if distance < best_distance:
-			best_distance = distance
-			best = node
-	return best
-
-
-func _instantiate_asset(asset_path: String) -> Node3D:
-	if asset_path.begins_with(ENVIRONMENT_ROOT + "/") and asset_path.ends_with(".glb"):
-		if asset_path.get_file().begins_with("09_") and WORKSTATIONS.VARIANTS["paper"].has(asset_path.get_file().get_basename()):
-			var paper := PAPER_PROP_SCENE.instantiate() as Node3D
-			paper.set("model_path", asset_path)
-			return paper
-		if asset_path.get_file() in ["02_toilet_new.glb", "02_wall_urinal_improved.glb", "05_wall_hand_dryer_improved.glb", "02_sink_pedestal_improved.glb", "16_toilet_floor.glb", "16_wall_urinal.glb", "16_wall_hand_dryer.glb", "16_sink_pedestal.glb"]:
-			var fixture := BATHROOM_FIXTURE_SCENE.instantiate() as Node3D
-			fixture.set("model_path", asset_path)
-			return fixture
-		if asset_path.get_file() in ["01_stairs.glb", "01_stairs_2.glb"]:
-			var staircase := STAIRCASE_SCENE.instantiate() as Node3D
-			staircase.set("model_path", asset_path)
-			return staircase
-		var environment := ENVIRONMENT_SCENE.instantiate() as Node3D
-		environment.set("model_path", asset_path)
-		return environment
-	var packed := load(asset_path) as PackedScene
-	if packed == null:
-		return null
-	return packed.instantiate() as Node3D
-
-
-func _rebuild_preview() -> void:
-	_clear_preview()
-	if _selected_kind() == "player":
-		preview = _make_player_spawn_preview()
-		host.add_child(preview)
-		return
-	if selected_path.is_empty():
-		return
-	preview = _instantiate_asset(selected_path)
-	if preview == null:
-		return
-	host.add_child(preview)
-	if _selected_kind() == "light" and preview.has_method("set_planning_visual"):
-		preview.call_deferred("set_planning_visual", true)
-	_set_preview_collision(preview, true)
-	_apply_special_default_height(preview, _selected_kind())
-
-
-func _selected_kind() -> String:
-	return selected_kind
-
-
-func _make_player_spawn_preview() -> Node3D:
-	var marker := MeshInstance3D.new()
-	var mesh := CylinderMesh.new()
-	mesh.top_radius = 0.45
-	mesh.bottom_radius = 0.45
-	mesh.height = 1.8
-	var material := StandardMaterial3D.new()
-	material.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
-	material.albedo_color = Color(0.15, 0.55, 1.0, 0.45)
-	mesh.material = material
-	marker.mesh = mesh
-	marker.set_meta("planning_spawn_preview", true)
-	return marker
-
-
-func _clear_preview() -> void:
-	light_info.hide()
-	light_level.hide()
-	light_angle_info.hide()
-	light_angle.hide()
-	ui.get_node("Panel/VBox/SelectedFlicker").hide()
-	ui.get_node("Panel/VBox/SelectedFlickerStep").hide()
-	if preview != null and is_instance_valid(preview):
-		preview.queue_free()
-	preview = null
-
-
-func _update_preview(screen_pos: Vector2) -> void:
-	if preview == null:
-		return
-	var world := _screen_to_surface(screen_pos, preview)
-	if not world.is_finite():
-		preview.hide()
-		return
-	preview.show()
-	preview.global_position = _snap_position_for(preview, world)
-	_apply_special_default_height(preview, _selected_kind())
-	preview.rotation_degrees.y = rotation_y
-	_apply_wall_mount(preview)
-	_update_light_ui()
-
-
-func _place_selected(screen_pos: Vector2) -> void:
-	var placement_probe := preview
-	var world := _screen_to_surface(screen_pos, placement_probe)
-	if not world.is_finite():
-		if placement_probe != null and bool(placement_probe.get_meta("planning_wall_mount", false)):
-			status.text = "Aim at a wall to place this wall-mounted object."
-		return
-	var kind := _selected_kind()
-	if kind == "player":
-		edit_history.call("record_player_spawn")
-		main_player.global_position = _snap(world) + Vector3(0.0, 1.0, 0.0)
-		main_player.rotation_degrees.y = rotation_y
-		player_spawn_defined = true
-		player_spawn_transform = main_player.transform
-		main_player.set_meta("planning_scene_path", "res://game/features/player/public/player.tscn")
-		status.text = "Player spawn set"
-		_rebuild_preview()
-		return
-	if selected_path.is_empty():
-		return
-	var node := _instantiate_asset(selected_path)
-	if node == null:
-		return
-	if kind == "exploration_darkness":
-		node.set("permanent", false)
-		node.set_meta("planning_permanent", false)
-	elif kind == "darkness":
-		node.set("permanent", true)
-		node.set_meta("planning_permanent", true)
-	var target_parent := enemies_root if kind == "enemy" else root
-	target_parent.add_child(node)
-	if preview != null and preview.has_meta("planning_wall_normal"):
-		node.set_meta("planning_wall_normal", preview.get_meta("planning_wall_normal"))
-	if bool(node.get_meta("planning_wall_mount", false)) and not node.has_meta("planning_wall_normal"):
-		status.text = "Aim at a wall to place this wall-mounted object."
-		node.queue_free()
-		return
-	node.global_position = _snap_position_for(node, world)
-	_apply_special_default_height(node, kind)
-	if kind == "enemy":
-		node.global_position.y = 1.0
-		node.set_meta("planning_actor_kind", "enemy")
-		if node.has_method("set_target"):
-			node.call("set_target", main_player)
-	node.rotation_degrees.y = rotation_y
-	_apply_wall_mount(node)
-	if selected_path.get_file() == "06_conference_chair.glb":
-		_ground_conference_chair(node)
-	node.set_meta("planning_scene_path", selected_path)
-	placed.append(node)
-	edit_history.call("record_added", node)
-	if not WORKSTATIONS.desk_name(selected_path).is_empty():
-		var desk_id := str(Time.get_ticks_usec())
-		node.set_meta("planning_desk_id", desk_id)
-		var objects: Array[Node3D] = WORKSTATIONS.from_saved_template(node, selected_path, root, Callable(self, "_instantiate_asset"))
-		for object in objects:
-			object.set_meta("planning_attachment", desk_id)
-			placed.append(object)
-		workstation_transforms[desk_id] = node.global_transform
-	if kind == "light" and node.has_method("set_planning_visual"):
-		node.call("set_planning_visual", true)
-	_select(null)
-	_rebuild_preview()
-	if preview != null:
-		_update_preview(screen_pos)
-	status.text = "Placed | same object remains active | RMB cancel"
-
-
-func _delete_at(screen_pos: Vector2) -> void:
-	var node := _planned_object_at(screen_pos)
-	if node != null:
-		_delete_node(node)
-
-
-func _delete_selected() -> void:
-	if selected != null:
-		edit_history.call("record_deleted", selected)
-		_delete_node(selected)
-
-
-func _delete_node(node: Node3D) -> void:
-	if node == main_player or str(node.get_meta("planning_actor_kind", "")) == "player":
-		status.text = "Player spawn cannot be deleted; move it instead"
-		return
-	_clear_selection_highlight()
-	var desk_id := str(node.get_meta("planning_desk_id", ""))
-	if not desk_id.is_empty():
-		for object in placed.duplicate():
-			if is_instance_valid(object) and str(object.get_meta("planning_attachment", "")) == desk_id:
-				placed.erase(object)
-				object.queue_free()
-		workstation_transforms.erase(desk_id)
-	placed.erase(node)
-	if selected == node:
-		selected = null
-	node.queue_free()
-	_update_status()
-	_update_history_buttons()
-
-
-func _sync_workstations() -> void:
-	for desk in placed:
-		if not is_instance_valid(desk):
-			continue
-		var desk_id := str(desk.get_meta("planning_desk_id", ""))
-		if desk_id.is_empty():
-			continue
-		if not workstation_transforms.has(desk_id):
-			workstation_transforms[desk_id] = desk.global_transform
-			continue
-		var previous: Transform3D = workstation_transforms[desk_id]
-		if previous.is_equal_approx(desk.global_transform):
-			continue
-		var difference := desk.global_transform * previous.affine_inverse()
-		for object in placed:
-			if is_instance_valid(object) and str(object.get_meta("planning_attachment", "")) == desk_id:
-				object.global_transform = difference * object.global_transform
-		workstation_transforms[desk_id] = desk.global_transform
-
-
-func _rotate_selected(amount: float) -> void:
-	if selected != null:
-		edit_history.call("record_transform", selected)
-		selected.rotation_degrees.y = fmod(selected.rotation_degrees.y + amount + 360.0, 360.0)
-	elif preview != null:
-		rotation_y = fmod(rotation_y + amount + 360.0, 360.0)
-		preview.rotation_degrees.y = rotation_y
-	_update_status()
-
-
-func _scale_selected(delta_scale: Vector3) -> void:
-	if selected == null:
-		return
-	edit_history.call("record_transform", selected)
-	var next := selected.scale + delta_scale
-	next.x = maxf(next.x, 0.1)
-	next.y = maxf(next.y, 0.1)
-	next.z = maxf(next.z, 0.1)
-	selected.scale = next
-	_update_status()
-
-
-func _nudge_selected(input: Vector2) -> void:
-	if selected == null:
-		return
-	edit_history.call("record_transform", selected)
-	var forward := -camera.global_transform.basis.z
-	forward.y = 0.0
-	forward = forward.normalized()
-	var right := camera.global_transform.basis.x
-	right.y = 0.0
-	right = right.normalized()
-	var motion := (right * input.x + forward * -input.y) * GRID_SIZE
-	selected.global_position += motion
-	selected.global_position.x = roundf(selected.global_position.x / GRID_SIZE) * GRID_SIZE
-	selected.global_position.z = roundf(selected.global_position.z / GRID_SIZE) * GRID_SIZE
-	_update_status()
-
-
-func _adjust_selected_light_angle(amount: float) -> void:
-	if selected == null:
-		return
-	var light := selected.find_child("Light", true, false) as SpotLight3D
-	if light == null:
-		return
-	edit_history.call("record_transform", selected)
-	light.spot_angle = clampf(light.spot_angle + amount, 5.0, 89.0)
-	selected.set_meta("planning_light_angle", light.spot_angle)
-	_update_light_ui()
-	status.text = "LIGHT | cone %.0f° | , / . adjust" % light.spot_angle
-
-
-func _adjust_selected_light(amount: float) -> void:
-	if selected == null:
-		return
-	var light := selected.find_child("Light", true, false) as Light3D
-	if light == null:
-		return
-	edit_history.call("record_transform", selected)
-	light.light_energy = clampf(light.light_energy + amount, 0.0, 16.0)
-	selected.set_meta("planning_light_energy", light.light_energy)
-	_update_light_ui()
-	status.text = "LIGHT | brightness %.2f | [ / ] adjust" % light.light_energy
-
-
-func _move_selected_height(amount: float) -> void:
-	if selected != null:
-		edit_history.call("record_transform", selected)
-		selected.position.y += amount
-		_update_status()
-	elif preview != null:
-		preview.position.y += amount
 
 
 func _rotate_camera(relative: Vector2) -> void:
@@ -1111,519 +307,125 @@ func _zoom_camera(amount: float) -> void:
 	camera.global_position = p
 
 
-func _screen_to_surface(screen_pos: Vector2, placing: Node3D) -> Vector3:
-	var origin := camera.project_ray_origin(screen_pos)
-	var end := origin + camera.project_ray_normal(screen_pos) * 300.0
-	var query := PhysicsRayQueryParameters3D.create(origin, end)
-	if placing != null and placing.has_meta("planning_preview"):
-		query.exclude = []
-	var hit := camera.get_world_3d().direct_space_state.intersect_ray(query)
-	if not hit.is_empty():
-		var point: Vector3 = hit.get("position")
-		var normal: Vector3 = hit.get("normal")
-		if placing != null and bool(placing.get_meta("planning_wall_mount", false)) and absf(normal.y) < 0.35:
-			point += normal * 0.025
-			placing.set_meta("planning_wall_normal", normal)
-			return point
-		if placing != null and bool(placing.get_meta("planning_wall_mount", false)):
-			if selected_path.get_file() == "09_fire_extinguisher.glb" and normal.y > 0.55:
-				var mounted := EXTINGUISHER_WALL.from_floor(placing, point)
-				if mounted.is_finite():
-					return mounted
-			if placing.has_meta("planning_wall_normal"):
-				placing.remove_meta("planning_wall_normal")
-			return Vector3(INF, INF, INF)
-		if normal.y > 0.55:
-			return point
-	if placing != null and bool(placing.get_meta("planning_wall_mount", false)):
-		if placing.has_meta("planning_wall_normal"):
-			placing.remove_meta("planning_wall_normal")
-		return Vector3(INF, INF, INF)
-	return _screen_to_floor(screen_pos)
+func _set_light_markers_visible(value: bool) -> void:
+	for light_node in get_tree().get_nodes_in_group("planner_lights"):
+		if light_node.has_method("set_planning_visual"):
+			light_node.call("set_planning_visual", value)
+
+var player_spawn_defined: bool:
+	get:
+		return objects.player_spawn_defined
+	set(value):
+		objects.player_spawn_defined = value
+
+var player_spawn_transform: Transform3D:
+	get:
+		return objects.player_spawn_transform
+	set(value):
+		objects.player_spawn_transform = value
+
+var selected_path: String:
+	get:
+		return objects.selected_path
+	set(value):
+		objects.selected_path = value
+
+var selected_kind: String:
+	get:
+		return objects.selected_kind
+	set(value):
+		objects.selected_kind = value
+
+var preview: Node3D:
+	get:
+		return objects.preview
+	set(value):
+		objects.preview = value
+
+var selected: Node3D:
+	get:
+		return objects.selected
+	set(value):
+		objects.selected = value
+
+var rotation_y: float:
+	get:
+		return objects.rotation_y
+	set(value):
+		objects.rotation_y = value
+
+var placed: Array[Node3D]:
+	get:
+		return objects.placed
+	set(value):
+		objects.placed = value
+
+var workstation_transforms: Dictionary:
+	get:
+		return objects.workstation_transforms
+	set(value):
+		objects.workstation_transforms = value
+
+var palette: ItemList:
+	get:
+		return controls.palette
+
+var status: Label:
+	get:
+		return controls.status
+
+var help: Label:
+	get:
+		return controls.help
+
+var help_button: Button:
+	get:
+		return controls.help_button
+
+var desk_setup_button: Button:
+	get:
+		return controls.desk_setup_button
+
+var planning_toolbar: PanelContainer:
+	get:
+		return controls.planning_toolbar
 
 
-func _screen_to_floor(screen_pos: Vector2) -> Vector3:
-	var origin := camera.project_ray_origin(screen_pos)
-	var direction := camera.project_ray_normal(screen_pos)
-	if absf(direction.y) < 0.0001:
-		return Vector3(INF, INF, INF)
-	var distance := -origin.y / direction.y
-	if distance < 0.0:
-		return Vector3(INF, INF, INF)
-	return origin + direction * distance
+func _select(node: Node3D) -> void:
+	objects._select(node)
 
 
-func _is_ceiling_tool(node: Node3D) -> bool:
-	if node.is_in_group("planner_lights") or node.is_in_group("darkness_zone"):
-		return true
-	var kind := str(node.get_meta("planning_kind", ""))
-	return kind == "light" or kind == "darkness" or kind == "exploration_darkness"
+func _clear_preview() -> void:
+	objects._clear_preview()
 
 
-func _apply_special_default_height(node: Node3D, kind: String) -> void:
-	if kind == "light":
-		node.global_position.y = float(default_light_height.value) if default_light_height != null else LIGHT_DEFAULT_HEIGHT
-		_apply_new_light_defaults(node)
-	elif kind == "darkness" or kind == "exploration_darkness":
-		node.global_position.y = DARKNESS_DEFAULT_HEIGHT
+func _delete_node(node: Node3D) -> void:
+	objects._delete_node(node)
 
 
-func _apply_new_light_defaults(node: Node3D) -> void:
-	var spot := node.find_child("Light", true, false) as SpotLight3D
-	if spot == null:
-		return
-	var energy := float(default_light_energy.value) if default_light_energy != null else 3.0
-	var angle := float(default_light_angle.value) if default_light_angle != null else 48.0
-	spot.light_energy = energy
-	spot.spot_angle = angle
-	node.set_meta("planning_light_energy", energy)
-	node.set_meta("planning_light_angle", angle)
-	if node.has_method("configure_flicker"):
-		node.call("configure_flicker", default_flicker_mode.get_selected_id(), default_flicker_step.value)
-
-
-func _apply_wall_mount(node: Node3D) -> void:
-	if not bool(node.get_meta("planning_wall_mount", false)):
-		return
-	if not node.has_meta("planning_wall_normal"):
-		return
-	var normal: Vector3 = node.get_meta("planning_wall_normal")
-	var facing := atan2(normal.x, normal.z)
-	node.rotation.y = facing
-
-
-func _snap_position_for(node: Node3D, value: Vector3) -> Vector3:
-	var base := _snap(value)
-	var source_aabb := _combined_aabb(node)
-	if bool(node.get_meta("planning_wall_mount", false)) and node.has_meta("planning_wall_normal"):
-		return value
-	else:
-		var support_y := _support_height_at(node, base)
-		if value.y > 0.01:
-			support_y = maxf(support_y, value.y - source_aabb.position.y)
-		base.y = support_y - source_aabb.position.y
-	if source_aabb.size.length_squared() <= 0.0001:
-		return base
-	var source_sockets := _connection_sockets(node, base, source_aabb)
-	var best := base
-	var best_distance := SNAP_DISTANCE
-	for other in placed:
-		if other == node or not is_instance_valid(other):
-			continue
-		var other_aabb := _combined_aabb(other)
-		if other_aabb.size.length_squared() <= 0.0001:
-			continue
-		var other_sockets := _connection_sockets(other, other.global_position, other_aabb)
-		for source_socket: Vector3 in source_sockets:
-			for target_socket: Vector3 in other_sockets:
-				var distance := Vector2(source_socket.x - target_socket.x, source_socket.z - target_socket.z).length()
-				if distance < best_distance:
-					best_distance = distance
-					best = base + (target_socket - source_socket)
-					best.y = base.y
-	if node is RigidBody3D or bool(node.get_meta("planning_surface_placeable", false)):
-		return FLOOR_WALL_SNAP.position_for(node, source_aabb, best)
-	return best
-
-
-func _support_height_at(node: Node3D, base: Vector3) -> float:
-	var best_height := 0.0
-	var node_aabb := _combined_aabb(node)
-	var node_half := Vector2(node_aabb.size.x * 0.5, node_aabb.size.z * 0.5)
-	for other in placed:
-		if other == node or not is_instance_valid(other):
-			continue
-		var scene_path := str(other.get_meta("planning_scene_path", ""))
-		if not scene_path.ends_with("/floor_pad.tscn"):
-			continue
-		var pad_aabb := _combined_aabb(other)
-		if pad_aabb.size.length_squared() <= 0.0001:
-			continue
-		var pad_world := other.global_transform * pad_aabb
-		var center := pad_world.get_center()
-		var half := Vector2(pad_world.size.x * 0.5, pad_world.size.z * 0.5)
-		if absf(base.x - center.x) <= half.x + node_half.x * 0.25 and absf(base.z - center.z) <= half.y + node_half.y * 0.25:
-			best_height = maxf(best_height, pad_world.position.y + pad_world.size.y)
-	return best_height
-
-
-func _connection_sockets(node: Node3D, world_origin: Vector3, aabb: AABB) -> Array[Vector3]:
-	var center_local := Vector3(aabb.position.x + aabb.size.x * 0.5, 0.0, aabb.position.z + aabb.size.z * 0.5)
-	var half_x := aabb.size.x * 0.5
-	var half_z := aabb.size.z * 0.5
-	var local_points: Array[Vector3] = [
-		center_local + Vector3(-half_x, 0.0, 0.0),
-		center_local + Vector3(half_x, 0.0, 0.0),
-		center_local + Vector3(0.0, 0.0, -half_z),
-		center_local + Vector3(0.0, 0.0, half_z)
-	]
-	var basis := Basis(Vector3.UP, node.rotation.y)
-	var sockets: Array[Vector3] = []
-	for point: Vector3 in local_points:
-		var relative := point - Vector3(aabb.position.x + aabb.size.x * 0.5, 0.0, aabb.position.z + aabb.size.z * 0.5)
-		sockets.append(world_origin + basis * relative)
-	return sockets
-
-
-func _combined_aabb(node: Node3D, ignore_selection: bool = false) -> AABB:
-	var result := AABB()
-	var found := false
-	for child in node.find_children("*", "MeshInstance3D", true, false):
-		if ignore_selection and child == selection_box:
-			continue
-		if child.has_meta("planning_selection_highlight"):
-			continue
-		var mesh_instance := child as MeshInstance3D
-		if mesh_instance == null or mesh_instance.mesh == null or not mesh_instance.is_visible_in_tree() or absf(mesh_instance.global_basis.determinant()) < 0.000000000001:
-			continue
-		var local_transform := node.global_transform.affine_inverse() * mesh_instance.global_transform
-		var aabb := local_transform * mesh_instance.get_aabb()
-		if not found:
-			result = aabb
-			found = true
-		else:
-			result = result.merge(aabb)
-	return result
-
-
-func _ground_conference_chair(node: Node3D) -> void:
-	var bounds := _combined_aabb(node)
-	if bounds.size.length_squared() > 0.0001 and node.global_position.y < 0.25:
-		node.global_position.y = maxf(node.global_position.y, 0.025 - bounds.position.y)
-
-
-func _snap(value: Vector3) -> Vector3:
-	return Vector3(roundf(value.x / GRID_SIZE) * GRID_SIZE, 0.0, roundf(value.z / GRID_SIZE) * GRID_SIZE)
+func _sync_workstations() -> void:
+	objects._sync_workstations()
 
 
 func _update_status() -> void:
-	if selected == null:
-		status.text = "%d objects | select palette or object" % placed.size()
-		return
-	if selected.is_in_group("darkness_zone"):
-		status.text = "DARKNESS | scale X/Z changes covered area | Delete removes"
-		return
-	status.text = "SELECTED | pos %.1f %.1f | rot %.0f | scale %.2f %.2f %.2f" % [
-		selected.position.x, selected.position.z, selected.rotation_degrees.y,
-		selected.scale.x, selected.scale.y, selected.scale.z
-	]
-
-
-func _ensure_maps_dir() -> void:
-	if not DirAccess.dir_exists_absolute(MAPS_DIR):
-		DirAccess.make_dir_recursive_absolute(MAPS_DIR)
-
-
-func _safe_map_name(raw_name: String) -> String:
-	var value := raw_name.strip_edges()
-	if value.is_empty():
-		value = "map"
-	var safe := ""
-	for ch in value:
-		if ch.is_valid_identifier() or ch.is_valid_int():
-			safe += ch
-		elif ch in [" ", "-", "_"]:
-			safe += "_"
-	while "__" in safe:
-		safe = safe.replace("__", "_")
-	return safe.strip_edges().to_lower()
-
-
-func _map_path(map_name: String) -> String:
-	return MAPS_DIR + "/" + _safe_map_name(map_name) + ".json"
-
-
-func _collect_layout_data() -> Dictionary:
-	var objects: Array = []
-	if player_spawn_defined:
-		objects.append({
-			"scene":"res://game/features/player/public/player.tscn",
-			"x":player_spawn_transform.origin.x, "y":player_spawn_transform.origin.y, "z":player_spawn_transform.origin.z,
-			"rotation_y":player_spawn_transform.basis.get_euler().y * 180.0 / PI,
-			"scale_x":1.0, "scale_y":1.0, "scale_z":1.0
-		})
-	for node in placed:
-		if not is_instance_valid(node):
-			continue
-		var scene_path := str(node.get_meta("planning_scene_path", ""))
-		if scene_path.is_empty():
-			continue
-		var save_position := node.position
-		if str(node.get_meta("planning_actor_kind", "")) == "enemy" and node.has_meta("planning_spawn_transform"):
-			var enemy_spawn: Transform3D = node.get_meta("planning_spawn_transform")
-			save_position = enemy_spawn.origin
-		objects.append({
-			"scene": scene_path,
-			"desk_id": node.get_meta("planning_desk_id", ""),
-			"attachment": node.get_meta("planning_attachment", ""),
-			"zone": node.get_meta("planning_zone", -1),
-			"x": save_position.x, "y": save_position.y, "z": save_position.z,
-			"rotation_y": node.rotation_degrees.y,
-			"scale_x": node.scale.x, "scale_y": node.scale.y, "scale_z": node.scale.z,
-			"light_energy": node.get_meta("planning_light_energy", 0.0),
-			"light_angle": node.get_meta("planning_light_angle", 48.0),
-			"flicker_mode": node.get_meta("planning_flicker_mode", 0),
-			"flicker_step": node.get_meta("planning_flicker_step", 0.2),
-			"darkness": node.get("darkness") if node.get("darkness") != null else 0.0,
-			"permanent_darkness": node.get("permanent") if node.get("permanent") != null else false,
-			"spawn_x": (node.get_meta("planning_spawn_transform") as Transform3D).origin.x if node.has_meta("planning_spawn_transform") else node.position.x,
-			"spawn_y": (node.get_meta("planning_spawn_transform") as Transform3D).origin.y if node.has_meta("planning_spawn_transform") else node.position.y,
-			"spawn_z": (node.get_meta("planning_spawn_transform") as Transform3D).origin.z if node.has_meta("planning_spawn_transform") else node.position.z
-		})
-	return {"version": 5, "objects": objects}
-
-
-func save_named_map() -> void:
-	_ensure_maps_dir()
-	var safe_name := _safe_map_name(map_name_edit.text)
-	var path := _map_path(safe_name)
-	var file := FileAccess.open(path, FileAccess.WRITE)
-	if file == null:
-		status.text = "MAP SAVE ERROR"
-		return
-	file.store_string(JSON.stringify(_collect_layout_data(), "	"))
-	map_name_edit.text = safe_name
-	_refresh_map_list(safe_name)
-	status.text = "MAP SAVED | " + safe_name
-
-
-func load_selected_map() -> void:
-	if map_select.item_count <= 0:
-		status.text = "NO SAVED MAPS"
-		return
-	var selected_name := map_select.get_item_text(map_select.selected)
-	load_named_map(selected_name)
-
-
-func load_named_map(map_name: String) -> void:
-	var path := _map_path(map_name)
-	if not FileAccess.file_exists(path):
-		status.text = "MAP NOT FOUND"
-		return
-	_load_layout_from_path(path)
-	map_name_edit.text = map_name
-	status.text = "MAP LOADED | " + map_name
-
-
-func _refresh_map_list(select_name: String = "") -> void:
-	if map_select == null:
-		return
-	map_select.clear()
-	_ensure_maps_dir()
-	var dir := DirAccess.open(MAPS_DIR)
-	if dir == null:
-		return
-	dir.list_dir_begin()
-	var file_name := dir.get_next()
-	var index := 0
-	var selected_index := -1
-	while not file_name.is_empty():
-		if not dir.current_is_dir() and file_name.to_lower().ends_with(".json"):
-			var map_label := file_name.get_basename()
-			map_select.add_item(map_label)
-			if map_label == select_name:
-				selected_index = index
-			index += 1
-		file_name = dir.get_next()
-	dir.list_dir_end()
-	if selected_index >= 0:
-		map_select.select(selected_index)
-
-
-func _load_layout_from_path(path: String) -> void:
-	var file := FileAccess.open(path, FileAccess.READ)
-	if file == null:
-		return
-	var data: Variant = JSON.parse_string(file.get_as_text())
-	if not data is Dictionary:
-		return
-	_apply_layout_data(data as Dictionary)
-
-
-func _apply_layout_data(data: Dictionary) -> void:
-	clear_layout(false)
-	var records: Array = data.get("objects", [])
-	var player_records: Array = []
-	for record_value: Variant in records:
-		if record_value is Dictionary:
-			var candidate: Dictionary = record_value
-			var candidate_path := str(candidate.get("scene", ""))
-			if candidate_path == "res://game/features/player/public/player.tscn":
-				player_records.append(candidate)
-	if not player_records.is_empty():
-		player_spawn_defined = true
-		var latest: Dictionary = player_records[player_records.size() - 1]
-		main_player.position = Vector3(float(latest.get("x",0.0)),float(latest.get("y",1.0)),float(latest.get("z",0.0)))
-		main_player.rotation_degrees.y = float(latest.get("rotation_y",0.0))
-		player_spawn_transform = main_player.transform
-	for record_value: Variant in records:
-		if not record_value is Dictionary:
-			continue
-		var record: Dictionary = record_value
-		var scene_path := _migrate_scene_path(str(record.get("scene", "")))
-		if scene_path == "res://game/features/player/public/player.tscn":
-			continue
-		if scene_path.is_empty() or not ResourceLoader.exists(scene_path):
-			continue
-		var node := _instantiate_asset(scene_path)
-		if node == null:
-			continue
-		var load_kind := "enemy" if scene_path in [
-			"res://game/features/infected/public/infected_capsule.tscn",
-			"res://game/features/infected/public/mutant_level2.tscn"
-		] else ""
-		var target_parent := enemies_root if load_kind == "enemy" else root
-		target_parent.add_child(node)
-		node.position = Vector3(float(record.get("x",0.0)),float(record.get("y",0.0)),float(record.get("z",0.0)))
-		node.rotation_degrees.y = float(record.get("rotation_y",0.0))
-		node.scale = Vector3(float(record.get("scale_x",1.0)),float(record.get("scale_y",1.0)),float(record.get("scale_z",1.0)))
-		if scene_path.get_file() == "06_conference_chair.glb":
-			_ground_conference_chair(node)
-		node.set_meta("planning_scene_path", scene_path)
-		if record.has("desk_id"):
-			node.set_meta("planning_desk_id", str(record["desk_id"]))
-		if record.has("attachment"):
-			node.set_meta("planning_attachment", str(record["attachment"]))
-		if int(record.get("zone", -1)) >= 0:
-			node.set_meta("planning_zone", int(record["zone"]))
-		var saved_light_energy := float(record.get("light_energy", 0.0))
-		if saved_light_energy > 0.0:
-			var saved_light := node.find_child("Light", true, false) as Light3D
-			if saved_light != null:
-				saved_light.light_energy = saved_light_energy
-				node.set_meta("planning_light_energy", saved_light_energy)
-		var saved_light_angle := float(record.get("light_angle", 48.0))
-		var saved_spot := node.find_child("Light", true, false) as SpotLight3D
-		if saved_spot != null:
-			saved_spot.spot_angle = saved_light_angle
-			node.set_meta("planning_light_angle", saved_light_angle)
-		if node.has_method("configure_flicker"):
-			node.call("configure_flicker", int(record.get("flicker_mode", 0)), float(record.get("flicker_step", 0.2)))
-		if node.get("darkness") != null:
-			node.set("darkness", float(record.get("darkness", 0.88)))
-			node.set("permanent", bool(record.get("permanent_darkness", true)))
-			if node.has_method("configure_zone"):
-				node.call("configure_zone", Vector2(node.scale.x * 4.0, node.scale.z * 4.0), node.get("darkness"), node.get("permanent"))
-		if load_kind == "enemy":
-			node.set_meta("planning_actor_kind", "enemy")
-			node.set_meta("planning_spawn_transform", node.transform)
-			node.global_position.y = float(record.get("y", 1.0))
-			if node.has_method("set_target"):
-				node.call("set_target", main_player)
-		placed.append(node)
-	_update_status()
-
-
-func save_layout() -> void:
-	var data := _collect_layout_data()
-	var objects: Array = data.get("objects", [])
-	var file := FileAccess.open(SAVE_PATH, FileAccess.WRITE)
-	if file != null:
-		file.store_string(JSON.stringify(data, "\t"))
-	var scene_error := _save_authored_scene()
-	if scene_error == OK:
-		status.text = "SAVED | %d objects" % objects.size()
-	else:
-		status.text = "SAVE ERROR %d" % scene_error
-
-
-func _save_authored_scene() -> Error:
-	var scene_root := Node3D.new()
-	scene_root.name = "BaseOfficeLayout"
-	for node in placed:
-		if not is_instance_valid(node):
-			continue
-		var scene_path := str(node.get_meta("planning_scene_path", ""))
-		if scene_path.is_empty():
-			continue
-		var copy := _instantiate_asset(scene_path)
-		if copy == null:
-			continue
-		scene_root.add_child(copy)
-		copy.owner = scene_root
-		copy.transform = node.transform
-		if node.has_meta("planning_desk_id"):
-			copy.set_meta("planning_desk_id", node.get_meta("planning_desk_id"))
-		if node.has_meta("planning_attachment"):
-			copy.set_meta("planning_attachment", node.get_meta("planning_attachment"))
-		if node.has_meta("planning_zone"):
-			copy.set_meta("planning_zone", node.get_meta("planning_zone"))
-		if copy.has_method("configure_flicker"):
-			copy.set_meta("planning_light_energy", node.get_meta("planning_light_energy", 3.0))
-			copy.set_meta("planning_light_angle", node.get_meta("planning_light_angle", 48.0))
-			copy.set_meta("planning_flicker_mode", node.get_meta("planning_flicker_mode", 0))
-			copy.set_meta("planning_flicker_step", node.get_meta("planning_flicker_step", 0.2))
-		if not scene_path.begins_with(ENVIRONMENT_ROOT + "/"):
-			_assign_owner_recursive(copy, scene_root)
-	var packed_layout := PackedScene.new()
-	var pack_error := packed_layout.pack(scene_root)
-	if pack_error != OK:
-		scene_root.free()
-		return pack_error
-	var save_error := ResourceSaver.save(packed_layout, AUTHORED_SCENE_PATH)
-	scene_root.free()
-	return save_error
-
-
-func _assign_owner_recursive(node: Node, scene_owner: Node) -> void:
-	for child in node.get_children():
-		child.owner = scene_owner
-		_assign_owner_recursive(child, scene_owner)
-
-
-func load_layout() -> void:
-	if not FileAccess.file_exists(SAVE_PATH):
-		return
-	_load_layout_from_path(SAVE_PATH)
-
-
-func _migrate_scene_path(old_path: String) -> String:
-	var replacements := {
-		"res://models/objects/01_wall_door.glb": "res://game/presentation/office_floor/public/structural/wall_door.tscn",
-		"res://models/objects/01_wall_door_2.glb": "res://game/presentation/office_floor/public/structural/wall_door.tscn",
-		"res://models/objects/01_wall_inner_corner.blend": "",
-		"res://game/presentation/office_floor/public/structural/wall_inner_corner.tscn": ""
-	}
-	if replacements.has(old_path):
-		return str(replacements[old_path])
-	if old_path.begins_with("res://models/objects/Office_Set/"):
-		return ""
-	var legacy_prop := "res://game/presentation/office_floor/public/props/"
-	if old_path.begins_with(legacy_prop) and old_path.ends_with(".tscn"):
-		if old_path.get_file() in ["planner_light.tscn", "darkness_zone.tscn", "environment_prop.tscn"]:
-			return old_path
-		if old_path.get_file() == "07_table.tscn":
-			return old_path
-		var legacy_name := old_path.get_file().get_basename().substr(3).to_lower()
-		for group in group_catalogs.values():
-			for entry: Dictionary in group:
-				if str(entry["name"]).substr(3).replace(" ", "_").to_lower() == legacy_name:
-					return str(entry["path"])
-		return ""
-	return old_path
+	objects._update_status()
 
 
 func clear_layout(update_status: bool = true) -> void:
-	workstation_transforms.clear()
-	var retained: Array[Node3D] = []
-	for node in placed:
-		if not is_instance_valid(node):
-			continue
-		if bool(node.get_meta("planning_existing", false)):
-			retained.append(node)
-		else:
-			node.queue_free()
-	placed = retained
-	selected = null
-	if update_status:
-		_update_status()
+	objects.clear_layout(update_status)
 
 
-func _set_preview_collision(node: Node, disabled: bool) -> void:
-	if disabled and node is CollisionObject3D:
-		(node as CollisionObject3D).collision_layer = 0
-		(node as CollisionObject3D).collision_mask = 0
-	if node is CollisionShape3D:
-		(node as CollisionShape3D).disabled = disabled
-	for child in node.get_children():
-		_set_preview_collision(child, disabled)
+func _instantiate_asset(asset_path: String) -> Node3D:
+	return catalog._instantiate_asset(asset_path)
+
+
+func _planned_object_at(screen_pos: Vector2) -> Node3D:
+	return geometry._planned_object_at(screen_pos)
+
+
+func _clear_selection_highlight() -> void:
+	geometry._clear_selection_highlight()
+
+
+func _update_history_buttons() -> void:
+	controls._update_history_buttons()

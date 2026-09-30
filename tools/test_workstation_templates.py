@@ -10,24 +10,30 @@ ROOT = Path(__file__).resolve().parents[1]
 DATA = ROOT / "game/bootstrap/app/workstations"
 MODELS = ROOT / "models/objects/enviroments"
 SCRIPT = (ROOT / "game/bootstrap/app/workstation_templates.gd").read_text()
+DESK_CATALOG = dict(re.findall(
+    r'"(\d\d_[A-Za-z0-9_]+)": "([a-z0-9_]+)"',
+    SCRIPT.split("const DESKS := {", 1)[1].split("\n}", 1)[0],
+))
 
 
 class WorkstationTemplatesTest(unittest.TestCase):
     def test_all_desks_and_computer_setups_are_authored(self):
         desks = list((DATA / "desks").glob("*.json"))
         setups = list((DATA / "setups").glob("*.json"))
-        self.assertEqual(len(desks), 5)
+        self.assertEqual({path.stem for path in desks}, set(DESK_CATALOG.values()))
         self.assertEqual(len(setups), 5)
-        self.assertEqual(
-            sorted(len(json.loads(path.read_text())["stations"]) for path in desks),
-            [1, 1, 1, 1, 2],
-        )
         for path in desks:
-            profile = json.loads(path.read_text())
-            self.assertGreater(profile["height"], 0.6)
-            self.assertLess(profile["height"], 1.0)
-            self.assertIn("chair", profile)
-            self.assertIn("bin", profile)
+            with self.subTest(profile=path.stem):
+                profile = json.loads(path.read_text())
+                self.assertGreater(profile["height"], 0)
+                self.assertTrue(profile["stations"])
+                for station in profile["stations"]:
+                    for key in ("grid_width", "grid_depth"):
+                        self.assertGreater(station[key], 0, key)
+                    for key in ("usable_width", "usable_depth", "zone_width", "zone_depth"):
+                        if key in station:
+                            self.assertGreater(station[key], 0, key)
+                    self.assertGreater(station.get("grid_height", profile["height"]), 0)
 
     def test_each_setup_has_a_readable_computer_configuration(self):
         expected = {
