@@ -635,7 +635,7 @@ func _update_light_ui() -> void:
 	var light: Light3D
 	if target != null:
 		light = target.find_child("Light", true, false) as Light3D
-	var show_light := light != null
+	var show_light := light != null and target.has_method("get_authored_energy")
 	light_info.visible = show_light
 	light_level.visible = show_light
 	light_angle_info.visible = show_light and light is SpotLight3D
@@ -643,8 +643,8 @@ func _update_light_ui() -> void:
 	ui.get_node("Panel/VBox/SelectedFlicker").visible = show_light and selected != null
 	ui.get_node("Panel/VBox/SelectedFlickerStep").visible = show_light and selected != null
 	if show_light:
-		light_info.text = "LIGHT %.2f / 16.00" % light.light_energy
-		light_level.value = light.light_energy
+		light_info.text = "LIGHT %.2f / 16.00" % float(target.call("get_authored_energy"))
+		light_level.value = float(target.call("get_authored_energy"))
 		if light is SpotLight3D:
 			var spot := light as SpotLight3D
 			light_angle_info.text = "CONE %.0f°" % spot.spot_angle
@@ -1081,10 +1081,9 @@ func _adjust_selected_light(amount: float) -> void:
 	if light == null:
 		return
 	edit_history.call("record_transform", selected)
-	light.light_energy = clampf(light.light_energy + amount, 0.0, 16.0)
-	selected.set_meta("planning_light_energy", light.light_energy)
+	selected.call("set_authored_energy", clampf(float(selected.call("get_authored_energy")) + amount, 0.0, 16.0))
 	_update_light_ui()
-	status.text = "LIGHT | brightness %.2f | [ / ] adjust" % light.light_energy
+	status.text = "LIGHT | brightness %.2f | [ / ] adjust" % float(selected.call("get_authored_energy"))
 
 
 func _move_selected_height(amount: float) -> void:
@@ -1174,9 +1173,8 @@ func _apply_new_light_defaults(node: Node3D) -> void:
 		return
 	var energy := float(default_light_energy.value) if default_light_energy != null else 3.0
 	var angle := float(default_light_angle.value) if default_light_angle != null else 48.0
-	spot.light_energy = energy
+	node.call("set_authored_energy", energy)
 	spot.spot_angle = angle
-	node.set_meta("planning_light_energy", energy)
 	node.set_meta("planning_light_angle", angle)
 	if node.has_method("configure_flicker"):
 		node.call("configure_flicker", default_flicker_mode.get_selected_id(), default_flicker_step.value)
@@ -1370,6 +1368,8 @@ func _collect_layout_data() -> Dictionary:
 			"spawn_y": (node.get_meta("planning_spawn_transform") as Transform3D).origin.y if node.has_meta("planning_spawn_transform") else node.position.y,
 			"spawn_z": (node.get_meta("planning_spawn_transform") as Transform3D).origin.z if node.has_meta("planning_spawn_transform") else node.position.z
 		})
+		if node.has_method("get_authored_energy"):
+			objects[-1]["energy_multiplier"] = float(node.get("energy_multiplier"))
 	return {"version": 5, "objects": objects}
 
 
@@ -1486,12 +1486,9 @@ func _apply_layout_data(data: Dictionary) -> void:
 			node.set_meta("planning_attachment", str(record["attachment"]))
 		if int(record.get("zone", -1)) >= 0:
 			node.set_meta("planning_zone", int(record["zone"]))
-		var saved_light_energy := float(record.get("light_energy", 0.0))
-		if saved_light_energy > 0.0:
-			var saved_light := node.find_child("Light", true, false) as Light3D
-			if saved_light != null:
-				saved_light.light_energy = saved_light_energy
-				node.set_meta("planning_light_energy", saved_light_energy)
+		if node.has_method("set_authored_energy"):
+			node.set("energy_multiplier", float(record.get("energy_multiplier", 0.65)))
+			node.call("set_authored_energy", float(record.get("light_energy", node.call("get_authored_energy"))))
 		var saved_light_angle := float(record.get("light_angle", 48.0))
 		var saved_spot := node.find_child("Light", true, false) as SpotLight3D
 		if saved_spot != null:
@@ -1549,6 +1546,7 @@ func _save_authored_scene() -> Error:
 		if node.has_meta("planning_zone"):
 			copy.set_meta("planning_zone", node.get_meta("planning_zone"))
 		if copy.has_method("configure_flicker"):
+			copy.set("energy_multiplier", node.get("energy_multiplier"))
 			copy.set_meta("planning_light_energy", node.get_meta("planning_light_energy", 3.0))
 			copy.set_meta("planning_light_angle", node.get_meta("planning_light_angle", 48.0))
 			copy.set_meta("planning_flicker_mode", node.get_meta("planning_flicker_mode", 0))
