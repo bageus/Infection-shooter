@@ -3,7 +3,7 @@ extends SceneTree
 const MAIN := preload("res://game/bootstrap/app/main.tscn")
 const ENEMY := preload("res://game/features/infected/public/infected_capsule.tscn")
 const DOOR := "res://game/presentation/office_floor/public/structural/elevator_door.tscn"
-const DEVICE := "res://models/objects/enviroments/05/05_desktop.glb"
+const DEVICE := "res://models/objects/enviroments/05/05_PC_destructible.glb"
 var _failures := 0
 
 
