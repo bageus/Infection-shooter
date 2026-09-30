@@ -13,6 +13,7 @@ updated: 2026-09-30
 Build the first playable combat-slice foundation with an authored office floor, player, combat, infected enemies, infection source, and observable fail states.
 
 ## In scope
+- owner-requested planner decomposition, workstation test update and retirement of unused legacy scenes;
 - hand-authored office floor from the newly grouped 01-16 object library;
 - closed non-destructible perimeter with window/wall corner modules;
 - expanded 80 x 60 m floor plan with elevator lobby, short connector corridor, small hall, broad left/right circulation, open combat areas and a small enclosed office;
@@ -32,6 +33,11 @@ Procedural generation, save/checkpoints, final HUD, monetization, platform SDKs 
 - Structural modules visually touch edge-to-edge with no visible gaps and no overlap beyond a tiny seam tolerance.\n- Exterior corners face inward correctly.\n- Perimeter and authored interior walls block the player.\n- The expanded floor and defeat menu remain functional.
 
 ## Progress
+
+30.09.2026: завершено исправление оставшихся замечаний владельца поверх main 7712a3e. planning_mode.gd сокращён с 1629 до 431 строки: ввод/камера и жизненный цикл остаются в режиме, объекты, геометрия, контролы, каталог и сохранение разделены на локальные компоненты bootstrap.app. Зависимости внедрены явно, API desk setup/undo и карты DTO v5 сохранены. Динамические межмодульные пути каталога заменены полными литералами. Тест рабочих мест сверяет каталог с фактическими 22 профилями столов вместо ожидания пяти; положительные размеры полок также проверяются.
+Удалены 77 неиспользуемых старых сцен и только их office_floor.gd/UID. Удалён публичный путь старого демонстрационного офиса; текущий основной этаж и модели сохранены. Полный перечень и аудит: docs/RETIRED_SCENES.md; решение: ADR-0009. CI теперь проверяет наличие ext_resource и все профили. Варианты оставшихся current_scene описаны в docs/ARCHITECTURE_FOLLOWUP.md; широкая миграция не выполнена, поскольку владелец запросил варианты.
+Уже находившиеся в main исправления затенения ствола, новых иконок/рамок клавиш, автоматических гибридов, немедленной потери контроля и стен лифта сохранены и повторно проверены. T002 остаётся IN_PROGRESS.
+
 
 
 30.09.2026: повторная проверка полного checkout по замечаниям владельца. В настоящем `icon_interface.png` гранатомёт находится сверху, а светлые ореолы объединяют пять нижних предметов; прежний поиск компонент не мог выделить шесть иконок. HUD теперь извлекает шесть явных областей по границам рисунков, сохраняет aspect и кеширует текстуры. Проверена фактическая замена pistol → launcher → pistol в игроке/HUD, включая основной значок и слот. Исправлены пять явно нетипизированных mutation_before в доменных тестах. Расширены тесты ДНК: реальное physics-overlap, повторный подбор стоящим игроком раз в две секунды, уход/возврат и пауза; проверена геометрия всех четырёх GLB оружия.
@@ -142,6 +148,9 @@ The office-floor composition was rebuilt for the newly oriented grouped object l
 ## Risks
 Полный проект импортирует .blend только с установленным Blender. Изолированная сцена использует проверенный GLB; визуальное совпадение всех частей и коллизий в игровом Godot 4.7.2 ещё требует просмотра.
 ## Validation evidence
+
+GitHub Actions https://github.com/bageus/Infection-shooter/actions/runs/36774918397: полный validate_project.py прошёл без исключений (10 модулей, 18 зависимостей; 26 рекомендательных предупреждений размера). Все 254 ссылки ресурсов сцен существуют, 3 Python-теста шаблонов и 1 тест стеклянных проёмов прошли. В Godot 4.5.2 прошли 9 наборов: infection, mutation feedback, player control loss, atlas/HUD, blood effects, elevator collision, infected blood events, pickup floor, planning mode. Новый planning test проверил вход/выход и паузу/HUD, камеру, создание актуального стола/света, select/rotate/undo, desk setup, освещение, DTO v5 и round trip именованной карты. Основная сцена отработала 180 кадров без SCRIPT ERROR/ERROR. Import завершился кодом 0, но две существующие ошибки отсутствующих FBX-текстур palette1.png/couches.png остаются: импорт не называется чистым. Визуал и производительность Godot 4.7.2 этим headless запуском не подтверждены.
+
 Сверены 213 GLB в 13 папках нового пакета и ссылки 50 изменённых сцен: отсутствующих ресурсов и ссылок на старые модели среди этих сцен нет. Новая модель `07_table.glb` побайтово совпадает с прежней. Готовность спецификации и состояние рабочего процесса прошли, архитектурная проверка выявляет существующие вне изменения нарушения. Локальный бинарник Godot повреждён и завершается даже на `--version`; игровой импорт и визуальная проверка пока недоступны.
 
 Изолированный Godot 4.5.2 подтвердил ввод цифры в сфокусированный SpinBox и смену значения. Физические лучи через обычную и аварийную дверь подтвердили блокировку в закрытом положении, свободный проход в открытом и повторную блокировку после закрытия.
@@ -177,6 +186,9 @@ No product blocker. Exact imported .blend bounds still require visual confirmati
 Run repository gates, then measure imported structural mesh AABBs in Godot against `docs/ASSET_STANDARD.md`; correct the 13_* glass connection span to 4.0 m and any retained legacy cubicle partition to 3.0 m only after confirming source mesh bounds.
 
 ## Session handoff
+
+30.09.2026: актуальное состояние — описанные выше изменения проверены и готовы к сохранению в main. В установленном Godot 4.7.2 пройти визуальную приёмку рамок оружия/антидота, затенения ствола, автоматических гибридов, немедленной цепочки потери контроля, соседних стен лифта и открытого дверного проёма; затем проверить размещение, undo и сохранение/загрузку карты планировщика. Сценарии мутаций/HUD: docs/MUTATION_FEEDBACK_QA.md.
+
 
 2026-09-29: устранён показанный владельцем `Parser Error: Too many arguments for find_child()` в `book_stack_breakup.gd`: оба поиска меша используют один вспомогательный метод на `find_children`. Список других вызовов `find_child` проверен; следующий шаг: перезапустить Godot, убедиться, что парсер очищен, и обстрелять каждую из трёх книжных пачек.
 

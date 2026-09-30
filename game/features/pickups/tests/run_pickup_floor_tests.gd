@@ -43,7 +43,7 @@ func _run() -> void:
 	var empty_drop := PICKUP.new() as Area3D
 	stage.add_child(empty_drop)
 	empty_drop.position = Vector3(100, 1, 100)
-	var reference := weakref(empty_drop)
+	var reference: WeakRef = weakref(empty_drop)
 	empty_drop.call("settle_on_floor")
 	await physics_frame
 	await physics_frame
