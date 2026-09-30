@@ -143,6 +143,7 @@ func _selected_kind() -> String:
 
 
 func _clear_preview() -> void:
+	session.ui.get_node("Panel/VBox/SelectedLightColor").hide()
 	controls.light_info.hide()
 	controls.light_level.hide()
 	controls.light_angle_info.hide()
@@ -405,6 +406,10 @@ func _apply_layout_data(data: Dictionary) -> void:
 		if node.has_method("set_authored_energy"):
 			node.set("energy_multiplier", float(record.get("energy_multiplier", 0.65)))
 			node.call("set_authored_energy", float(record.get("light_energy", node.call("get_authored_energy"))))
+		if node.has_method("set_authored_color"):
+			var channels: Variant = record.get("light_color", [])
+			if channels is Array and channels.size() >= 3:
+				node.call("set_authored_color", Color(float(channels[0]), float(channels[1]), float(channels[2]), 1.0))
 		var saved_light_angle = float(record.get("light_angle", 48.0))
 		var saved_spot = node.find_child("Light", true, false) as SpotLight3D
 		if saved_spot != null:

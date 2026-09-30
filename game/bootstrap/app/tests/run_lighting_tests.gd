@@ -137,6 +137,7 @@ func _test_planner() -> void:
 		_check_ambient(world.environment, authored, "Real planner exit matches startup")
 	controller.call("set_local_lights_enabled", true)
 	_test_map_paths(planner)
+	_test_colors(planner)
 	planner.call("enter")
 	controller.call("set_game_lighting", false)
 	app.free()
@@ -189,6 +190,68 @@ func _test_map_paths(planner: Node) -> void:
 	planner.get("controls").call("_apply_new_light_defaults", copy)
 	_check(is_equal_approx(float(copy.call("get_authored_energy")), 4.0), "New-light defaults edit authoring state")
 	_check(is_equal_approx(copy.get_node("Light").light_energy, 4.0), "New-light defaults use the existing multiplier once")
+
+
+func _test_colors(planner: Node) -> void:
+	var tint := Color(0.35, 0.65, 0.95)
+	var data := {"version": 5, "objects": [
+		{"scene": LAMP.resource_path, "light_energy": 7.0, "light_color": [tint.r, tint.g, tint.b], "flicker_mode": 2},
+		{"scene": LAMP.resource_path}
+	]}
+	for cycle in range(5):
+		planner.objects._apply_layout_data(data)
+		var lamps := _planner_lamps(planner)
+		_check(lamps[0].get_authored_color().is_equal_approx(tint), "Map RGB survives five JSON round trips")
+		_check(lamps[1].get_authored_color().is_equal_approx(Color(1, 0.92, 0.78)), "Old map retains warm scene tint")
+		data = JSON.parse_string(JSON.stringify(planner.storage._collect_layout_data()))
+	var lamp: Node3D = _planner_lamps(planner)[0]
+	lamp.set_process(false)
+	lamp._process(0.3)
+	var before: float = lamp.get_node("Light").light_energy
+	var controls: Node = planner.controls
+	var picker: ColorPickerButton = controls.selected_light_color
+	planner._select(lamp)
+	var stack_size: int = planner.edit_history.stack.size()
+	picker.color_changed.emit(Color(0.9, 0.4, 0.2))
+	picker.color_changed.emit(Color(0.8, 0.3, 0.1))
+	picker.popup_closed.emit()
+	_check(planner.edit_history.stack.size() == stack_size + 1, "A continuous color gesture creates one undo action")
+	_check(is_equal_approx(lamp.get_node("Light").light_energy, before), "Editing color preserves flicker energy and phase")
+	planner.edit_history.undo()
+	_check(lamp.get_authored_color().is_equal_approx(tint), "Undo restores tint")
+	_check(picker.color.is_equal_approx(tint), "Undo refreshes the tint swatch")
+	planner.edit_history.duplicate_selected()
+	var copy: Node3D = planner.selected
+	_check(copy.get_authored_color().is_equal_approx(tint), "Duplicate preserves individual tint")
+	copy.set_local_lighting_enabled(false)
+	copy.set_authored_color(Color(0.7, 0.5, 0.3))
+	copy.set_runtime_light_active(true)
+	copy.set_local_lighting_enabled(true)
+	_check(copy.get_node("Light").light_color.is_equal_approx(Color(0.7, 0.5, 0.3)), "Activation preserves color edited while disabled")
+	planner.edit_history.record_deleted(copy)
+	planner._delete_node(copy)
+	planner.edit_history.undo()
+	_check(_planner_lamps(planner).back().get_authored_color().is_equal_approx(Color(0.7, 0.5, 0.3)), "Undo deletion restores tint")
+	controls.default_light_color.color = tint
+	controls._apply_new_light_defaults(lamp)
+	_check(lamp.get_authored_color().is_equal_approx(tint), "New-lamp defaults apply selected tint")
+	var legacy := LAMP.instantiate()
+	legacy.get_node("Light").light_color = Color(0.4, 0.8, 0.6)
+	root.add_child(legacy)
+	_check(legacy.get_authored_color().is_equal_approx(Color(0.4, 0.8, 0.6)), "Legacy per-instance Light color remains authored")
+	legacy.free()
+	var authored := Node3D.new()
+	var saved := LAMP.instantiate()
+	authored.add_child(saved)
+	saved.owner = authored
+	saved.set_authored_color(tint)
+	var packed := PackedScene.new()
+	_check(packed.pack(authored) == OK, "Authored lamp color packs into scene")
+	var restored := packed.instantiate()
+	root.add_child(restored)
+	_check(restored.get_child(0).get_authored_color().is_equal_approx(tint), "Scene reload retains tint set before ready")
+	authored.free()
+	restored.free()
 
 
 func _check_ambient(actual: Environment, expected: Environment, message: String) -> void:

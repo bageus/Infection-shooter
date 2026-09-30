@@ -309,6 +309,19 @@ max_value = 16.0
 step = 0.25
 value = 3.0
 
+[node name="ColorRow" type="HBoxContainer" parent="PlanningUI/Panel/VBox/LightDefaults"]
+layout_mode = 2
+[node name="Label" type="Label" parent="PlanningUI/Panel/VBox/LightDefaults/ColorRow"]
+layout_mode = 2
+text = "Оттенок"
+[node name="Value" type="ColorPickerButton" parent="PlanningUI/Panel/VBox/LightDefaults/ColorRow"]
+custom_minimum_size = Vector2(100, 28)
+layout_mode = 2
+size_flags_horizontal = 3
+color = Color(1, 0.92, 0.78, 1)
+edit_alpha = false
+edit_intensity = false
+
 [node name="AngleRow" type="HBoxContainer" parent="PlanningUI/Panel/VBox/LightDefaults"]
 layout_mode = 2
 [node name="Label" type="Label" parent="PlanningUI/Panel/VBox/LightDefaults/AngleRow"]
@@ -404,6 +417,20 @@ min_value = 5.0
 max_value = 89.0
 value = 48.0
 show_percentage = false
+
+[node name="SelectedLightColor" type="HBoxContainer" parent="PlanningUI/Panel/VBox"]
+visible = false
+layout_mode = 2
+[node name="Label" type="Label" parent="PlanningUI/Panel/VBox/SelectedLightColor"]
+layout_mode = 2
+text = "Оттенок"
+[node name="Value" type="ColorPickerButton" parent="PlanningUI/Panel/VBox/SelectedLightColor"]
+custom_minimum_size = Vector2(100, 28)
+layout_mode = 2
+size_flags_horizontal = 3
+color = Color(1, 0.92, 0.78, 1)
+edit_alpha = false
+edit_intensity = false
 
 [node name="SelectedFlicker" type="HBoxContainer" parent="PlanningUI/Panel/VBox"]
 visible = false

@@ -4,7 +4,7 @@
   "purpose": "Expose authored structural office modules with their own collision and the current office-floor composition.",
   "state_owner": [
     "Blood textures, render marks, surface anchors, lifetime and density budgets",
-    "Authored lamp power and flicker phase; derived runtime light activation"
+    "Authored lamp power, color and flicker phase; derived runtime light activation"
   ],
   "public_api": [
     "public/base_office_layout.tscn",
@@ -45,6 +45,10 @@
     "mission_wiring_v1": {
       "configure_world": "configure_world(container: Node3D, impacts: Node) -> void",
       "configure_player": "configure_player(actor: Node3D) -> void on structural roots"
+    },
+    "planner_light_v1": {
+      "get_authored_color": "get_authored_color() -> Color",
+      "set_authored_color": "set_authored_color(color: Color) -> void; RGB tint, alpha fixed to 1"
     }
   }
 }

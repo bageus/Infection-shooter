@@ -5,6 +5,12 @@ extends Node3D
 		energy_multiplier = maxf(value, 0.0)
 		_apply_energy()
 
+@export var light_color := Color(1.0, 0.92, 0.78, 1.0):
+	set(value):
+		light_color = Color(value.r, value.g, value.b, 1.0)
+		set_meta("planning_light_color", light_color)
+		_apply_color()
+
 @onready var marker: MeshInstance3D = $Marker
 @onready var light: SpotLight3D = $Light
 var flicker_mode := 0
@@ -27,6 +33,11 @@ func _ready() -> void:
 	if marker != null:
 		marker.visible = false
 	if light != null:
+		if not has_meta("planning_light_color"):
+			# Old authored scenes keep their original per-instance color.
+			light_color = light.light_color
+		else:
+			light_color = get_meta("planning_light_color")
 		# Capture a legacy scene value once, before applying the multiplier.
 		if not has_meta("planning_light_energy"):
 			set_meta("planning_light_energy", light.light_energy)
@@ -111,3 +122,16 @@ func set_authored_energy(energy: float) -> void:
 func _apply_energy() -> void:
 	if light != null:
 		light.light_energy = get_authored_energy() * energy_multiplier * _flicker_factor if _is_active() else 0.0
+
+
+func get_authored_color() -> Color:
+	return get_meta("planning_light_color", light_color)
+
+
+func set_authored_color(color: Color) -> void:
+	light_color = color
+
+
+func _apply_color() -> void:
+	if light != null:
+		light.light_color = light_color

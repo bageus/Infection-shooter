@@ -13,6 +13,7 @@ updated: 2026-09-30
 Build the first playable combat-slice foundation with an authored office floor, player, combat, infected enemies, infection source, and observable fail states.
 
 ## In scope
+- owner-requested individual lamp tint controls and backward-compatible map persistence;
 - owner-requested threefold reduction of carpet cast-shadow extent;
 - owner-approved contact-lighting pass: SSAO in the game Environment and provisional MSAA 2x, with existing light/shadow power preserved;
 
@@ -38,6 +39,8 @@ Procedural generation, save/checkpoints, final HUD, monetization, platform SDKs 
 - Structural modules visually touch edge-to-edge with no visible gaps and no overlap beyond a tiny seam tolerance.\n- Exterior corners face inward correctly.\n- Perimeter and authored interior walls block the player.\n- The expanded floor and defeat menu remain functional.
 
 ## Progress
+
+30.09.2026: по запросу владельца добавлен индивидуальный «Оттенок» выбранной лампы и цвет новых ламп в планировщике. Цвет принадлежит office_floor; planner_light_v1 дополнен get/set_authored_color, DTO v5 — optional light_color RGB (ADR-0013). Старые сцены/карты сохраняют собственные цвета, энергии и мерцание; глобальный свет, SSAO, MSAA и состояние локальных ламп не менялись. Undo объединяет непрерывный выбор цвета, Duplicate/Delete Undo и authored scene packing сохраняют оттенок. Визуальная приёмка picker в Windows/Web открыта: нет дисплея/GPU. Следующее действие: выбрать лампу → «Оттенок», изменить цвет, сохранить/загрузить карту и проверить изображение с включёнными локальными лампами. Godot 4.7.2: полный validate_project, 255 scene resources, workstation/glass/scene-access, все 12 runtime-наборов и main 180 кадров прошли. Headless editor import завершился 0 без SCRIPT ERROR/ERROR на существующем импортированном кеше; это не визуальная проверка.
 
 30.09.2026: по скриншоту владельца вынос падающей тени ковров сокращён втрое: локальный carpet_shadow сжимает только высоту shadow-only геометрии относительно поверхности базового пола 0.0135 м. Видимый GLB, UV, XZ размер, положение, другие предметы/свет и карты сохранены. Работает для всех 01_floor_* ковров environment_prop, включая восстановление/перемещение; floor_pad идёт отдельной структурной сценой. Исходные меши не отбрасывают дублирующую тень; планировщик исключает невидимый caster из размеров размещения. environment_prop выше мягкого порога: расчёт/жизненный цикл тени вынесен в самостоятельный локальный компонент, без API/зависимостей. SSAO из параллельного main сохранён; изменение касается падающей тени, не глобальной интенсивности SSAO. Godot 4.7.2: validate_project, 255 scene resources, workstation/glass/scene-access, все 12 runtime-наборов и main smoke 180 кадров прошли в https://github.com/bageus/Infection-shooter/actions/runs/36783136279. Editor import завершился 0 с прежними отсутствующими palette1.png/couches.png; runtime без SCRIPT ERROR/ERROR. Точный визуальный коэффициент в итоговом изображении ещё не подтверждён: проверить вынос тени ковров на базовом полу, перенос/поворот и скрытие/показ потокового участка.
 

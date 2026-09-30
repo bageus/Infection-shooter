@@ -88,6 +88,8 @@ func _collect_layout_data() -> Dictionary:
 		})
 		if node.has_method("get_authored_energy"):
 			records[-1]["energy_multiplier"] = float(node.get("energy_multiplier"))
+			var color: Color = node.call("get_authored_color")
+			records[-1]["light_color"] = [color.r, color.g, color.b]
 	return {"version": 5, "objects": records}
 
 
@@ -194,6 +196,7 @@ func _save_authored_scene() -> Error:
 			copy.set_meta("planning_zone", node.get_meta("planning_zone"))
 		if copy.has_method("configure_flicker"):
 			copy.set("energy_multiplier", node.get("energy_multiplier"))
+			copy.call("set_authored_color", node.call("get_authored_color"))
 			copy.set_meta("planning_light_energy", node.get_meta("planning_light_energy", 3.0))
 			copy.set_meta("planning_light_angle", node.get_meta("planning_light_angle", 48.0))
 			copy.set_meta("planning_flicker_mode", node.get_meta("planning_flicker_mode", 0))

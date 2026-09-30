@@ -8,6 +8,7 @@ var stack: Array[Dictionary] = []
 
 func record_transform(node: Node3D) -> void:
 	_record({"kind": "transform", "node": weakref(node), "transform": node.transform, "scale": node.scale,
+		"light_color": node.call("get_authored_color") if node.has_method("get_authored_color") else null,
 		"light_energy": node.get_meta("planning_light_energy", -1.0), "light_angle": node.get_meta("planning_light_angle", -1.0)})
 
 
@@ -66,6 +67,8 @@ func undo() -> void:
 			if is_instance_valid(node):
 				node.transform = action["transform"]
 				node.scale = action["scale"]
+				if action.get("light_color") is Color:
+					node.call("set_authored_color", action["light_color"])
 				if float(action["light_energy"]) >= 0.0:
 					if node.has_method("set_authored_energy"):
 						node.call("set_authored_energy", float(action["light_energy"]))
@@ -80,6 +83,7 @@ func undo() -> void:
 			planner.player_spawn_transform = action["transform"]
 			planner.main_player.transform = action["position"]
 	planner._update_history_buttons()
+	planner.controls._update_light_ui()
 	planner.status.text = "Last action undone"
 
 
@@ -95,6 +99,7 @@ func _capture(node: Node3D) -> Dictionary:
 		"scale": node.scale, "parent": node.get_parent(), "kind": str(node.get_meta("planning_actor_kind", "")),
 		"desk_id": str(node.get_meta("planning_desk_id", "")), "attachment": str(node.get_meta("planning_attachment", "")),
 		"zone": int(node.get_meta("planning_zone", -1)), "light_energy": float(node.get_meta("planning_light_energy", -1.0)),
+		"light_color": node.call("get_authored_color") if node.has_method("get_authored_color") else null,
 		"energy_multiplier": float(node.get("energy_multiplier")) if node.has_method("get_authored_energy") else 0.65,
 		"light_angle": float(node.get_meta("planning_light_angle", -1.0)),
 		"flicker_mode": int(node.get_meta("planning_flicker_mode", 0)), "flicker_step": float(node.get_meta("planning_flicker_step", 0.2))}
@@ -129,6 +134,8 @@ func _restore(record: Dictionary, offset: Vector3, new_desk: bool) -> Node3D:
 		if node.has_method("set_authored_energy"):
 			node.set("energy_multiplier", float(record.get("energy_multiplier", 0.65)))
 			node.call("set_authored_energy", float(record["light_energy"]))
+	if record.get("light_color") is Color:
+		node.call("set_authored_color", record["light_color"])
 	if float(record["light_angle"]) >= 0.0:
 		var spot := node.find_child("Light", true, false) as SpotLight3D
 		if spot != null:

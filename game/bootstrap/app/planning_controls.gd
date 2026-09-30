@@ -20,6 +20,9 @@ var default_flicker_step: SpinBox
 var selected_flicker_mode: OptionButton
 var selected_flicker_step: SpinBox
 var editing_flicker = false
+var default_light_color: ColorPickerButton
+var selected_light_color: ColorPickerButton
+var _color_edit_target: Node3D
 var desk_setup_button: Button
 var planning_toolbar: PanelContainer
 var undo_button: Button
@@ -61,6 +64,10 @@ func setup_controls() -> void:
 	default_flicker_step = session.ui.get_node("Panel/VBox/LightDefaults/FlickerStepRow/Value")
 	selected_flicker_mode = session.ui.get_node("Panel/VBox/SelectedFlicker/Mode")
 	selected_flicker_step = session.ui.get_node("Panel/VBox/SelectedFlickerStep/Value")
+	default_light_color = session.ui.get_node("Panel/VBox/LightDefaults/ColorRow/Value")
+	selected_light_color = session.ui.get_node("Panel/VBox/SelectedLightColor/Value")
+	selected_light_color.color_changed.connect(_on_selected_color_changed)
+	selected_light_color.popup_closed.connect(_on_color_popup_closed)
 	default_flicker_mode.item_selected.connect(_on_default_flicker_mode_changed)
 	selected_flicker_mode.item_selected.connect(_on_selected_flicker_changed)
 	selected_flicker_step.value_changed.connect(_on_selected_flicker_step_changed)
@@ -137,6 +144,7 @@ func _update_light_ui() -> void:
 	if target != null:
 		light = target.find_child("Light", true, false) as Light3D
 	var show_light = light != null and target.has_method("get_authored_energy")
+	session.ui.get_node("Panel/VBox/SelectedLightColor").visible = show_light and objects.selected != null
 	light_info.visible = show_light
 	light_level.visible = show_light
 	light_angle_info.visible = show_light and light is SpotLight3D
@@ -151,10 +159,29 @@ func _update_light_ui() -> void:
 			light_angle_info.text = "CONE %.0f°" % spot.spot_angle
 			light_angle.value = spot.spot_angle
 		if objects.selected != null:
+			selected_light_color.color = target.call("get_authored_color")
 			editing_flicker = true
 			selected_flicker_mode.select(int(target.get_meta("planning_flicker_mode", 0)))
 			selected_flicker_step.value = float(target.get_meta("planning_flicker_step", 0.2))
 			editing_flicker = false
+
+
+func _on_selected_color_changed(color: Color) -> void:
+	var target: Node3D = objects.selected
+	if target == null or not target.has_method("set_authored_color"):
+		return
+	if (target.call("get_authored_color") as Color).is_equal_approx(color):
+		return
+	# One picker gesture is one undo action, including continuous dragging.
+	if _color_edit_target != target:
+		session.edit_history.call("record_transform", target)
+		_color_edit_target = target
+	target.call("set_authored_color", color)
+	status.text = "LIGHT | оттенок #" + color.to_html(false)
+
+
+func _on_color_popup_closed() -> void:
+	_color_edit_target = null
 
 
 func _on_selected_flicker_changed(_index: int) -> void:
@@ -241,6 +268,7 @@ func _apply_new_light_defaults(node: Node3D) -> void:
 	var energy = float(default_light_energy.value) if default_light_energy != null else 3.0
 	var angle = float(default_light_angle.value) if default_light_angle != null else 48.0
 	node.call("set_authored_energy", energy)
+	node.call("set_authored_color", default_light_color.color)
 	spot.spot_angle = angle
 	node.set_meta("planning_light_angle", angle)
 	if node.has_method("configure_flicker"):
