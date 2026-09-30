@@ -30,7 +30,7 @@ godot --headless --path . --quit-after 180
 
 Явный коэффициент 1.0 также сохраняется при JSON round-trip. Тесты освещения работают с реальными сценами лампы и приложения и существующей сериализацией планировщика. Проверяют также нулевую энергию, сцену без metadata, карту без поля энергии и изменение игровых ambient-настроек между сессиями. Набор не сохраняет карты на диск и не переписывает авторскую сцену.
 
-Локально Godot 4.5.2: тесты освещения — 0 failures; основная сцена отработала по 180 headless-кадров с forward_plus и gl_compatibility без SCRIPT ERROR/ERROR. Editor import завершился 0, но содержит прежние ошибки отсутствующих FBX-текстур palette1.png/couches.png, поэтому импорт не считается чистым. Readiness/workflow/architecture проходят. Полный validate_project.py блокирует прежний planning_mode.gd (1627 > 600, исходно 1629); исключение лимита не добавлялось.
+Локально Godot 4.5.2: тесты освещения — 0 failures; основная сцена отработала по 180 headless-кадров с forward_plus и gl_compatibility без SCRIPT ERROR/ERROR. Editor import завершился 0, но содержит прежние ошибки отсутствующих FBX-текстур palette1.png/couches.png, поэтому импорт не считается чистым. Readiness/workflow/architecture проходят. После коррекции CI планировщик разделён по обязанностям (planning_mode.gd: 428 строк); полный validate_project.py проходит без исключений лимита. Подробности: PLANNER_REFACTOR_QA.md.
 
 ## Визуальная приёмка — НЕ ВЫПОЛНЕНА
 
