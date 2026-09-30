@@ -13,6 +13,7 @@ updated: 2026-09-30
 Build the first playable combat-slice foundation with an authored office floor, player, combat, infected enemies, infection source, and observable fail states.
 
 ## In scope
+- owner-requested chamfered HUD frames and rectangular buttons matching the supplied reference;
 - owner-approved injection of mission collaborators to replace production current_scene lookups;
 - owner-requested planner decomposition, workstation test update and retirement of unused legacy scenes;
 - hand-authored office floor from the newly grouped 01-16 object library;
@@ -34,6 +35,8 @@ Procedural generation, save/checkpoints, final HUD, monetization, platform SDKs 
 - Structural modules visually touch edge-to-edge with no visible gaps and no overlap beyond a tiny seam tolerance.\n- Exterior corners face inward correctly.\n- Perimeter and authored interior walls block the player.\n- The expanded floor and defeat menu remain functional.
 
 ## Progress
+
+30.09.2026: HUD рамки здоровья/мутации, оружия, антидота, слотов и клавиш получили прямые диагональные срезы вместо плавных скруглений. Панель и прямоугольные кнопки навыков используют ту же форму; внешний радар стал рамкой со срезами, круглая внутренняя шкала сохранена по референсу. Круги узлов дерева сохраняют обозначение навыков. Только оформление: API, состояние, раскладка и управление прежние. mutation_tree_ui выше мягкого порога 300 строк: добавлен лишь локальный помощник оформления кнопок, ответственность не расширена. Runtime и визуальная проверка ожидают CI/движка.
 
 30.09.2026: по прямому запросу владельца единая базовая схема этажа внесена непосредственно в main: GlobalOverheadLight (холодный 0.6, specular 0.3, вниз 25°), ambient 0.15, PSSM 2 Splits / 64 м / 2048 px / Soft Low. PlanningLighting владеет одним local_lights_enabled=false; общий запрет имеет приоритет над стримером и визуалом планировщика, останавливает мерцание без изменения авторской энергии. Поздние загрузки карт наследуют флаг, старые JSON не переписываются. ADR-0012 фиксирует совместимое дополнение API. После объединения с main 980c642 полный validate_project, scene resources (255), workstation (3), glass openings, scene access, все 12 runtime-наборов CI и оба 180-кадровых headless smoke прошли. Новый global lighting набор добавлен в существующий runtime CI. Editor import завершился 0 с прежними ошибками отсутствующих FBX-текстур. Следующее действие: визуально сравнить один/два участка теней на одинаковом маршруте Windows/Web и измерить FPS. Проверки и ограничения — docs/LIGHTING_QA.md; визуальная приёмка, сравнение одного/двух участков теней, Windows/Web и 60 FPS открыты (нет GPU/дисплея/export presets).
 

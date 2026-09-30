@@ -86,10 +86,21 @@ func _build_planning_toolbar() -> void:
 	toolbar_style.border_color = Color(0.02, 0.72, 0.98)
 	toolbar_style.set_border_width_all(2)
 	toolbar_style.set_corner_radius_all(8)
+	toolbar_style.corner_detail = 1
+	toolbar_style.anti_aliasing = false
 	planning_toolbar.add_theme_stylebox_override("panel", toolbar_style)
 	session.ui.add_child(planning_toolbar)
 	var toolbar_buttons = HBoxContainer.new()
 	planning_toolbar.add_child(toolbar_buttons)
+	var button_theme := Theme.new()
+	for state in ["normal", "hover", "pressed", "disabled", "focus"]:
+		var inherited := planning_toolbar.get_theme_stylebox(state, "Button")
+		if inherited is StyleBoxFlat:
+			var style := inherited.duplicate() as StyleBoxFlat
+			style.corner_detail = 1
+			style.anti_aliasing = false
+			button_theme.set_stylebox(state, "Button", style)
+	toolbar_buttons.theme = button_theme
 	undo_button = Button.new()
 	undo_button.text = "Undo last action"
 	undo_button.pressed.connect(func() -> void: session.edit_history.call("undo"))

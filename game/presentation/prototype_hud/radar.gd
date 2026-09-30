@@ -6,9 +6,16 @@ extends Control
 
 var player: Node3D
 var enemies: Node
+var _frame := StyleBoxFlat.new()
 
 
 func _ready() -> void:
+	_frame.bg_color = Color(0.005, 0.035, 0.065, 0.95)
+	_frame.border_color = Color(0.02, 0.72, 0.98)
+	_frame.set_border_width_all(2)
+	_frame.set_corner_radius_all(12)
+	_frame.corner_detail = 1
+	_frame.anti_aliasing = false
 	player = get_node(player_path)
 	enemies = get_node(enemies_path)
 	queue_redraw()
@@ -21,7 +28,7 @@ func _process(_delta: float) -> void:
 func _draw() -> void:
 	var center := size * 0.5
 	var radius := minf(size.x, size.y) * 0.42
-	draw_circle(center, radius + 8.0, Color(0.0, 0.18, 0.28, 0.92))
+	draw_style_box(_frame, Rect2(Vector2.ZERO, size))
 	draw_circle(center, radius, Color(0.008, 0.055, 0.09, 0.96))
 	draw_arc(center, radius, 0.0, TAU, 72, Color(0.08, 0.85, 1.0, 1.0), 2.0)
 	draw_arc(center, radius * 0.63, 0.0, TAU, 72, Color(0.07, 0.25, 0.34, 0.9), 1.0)

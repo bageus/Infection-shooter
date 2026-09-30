@@ -40,6 +40,7 @@ func configure(infection: Node) -> void:
 	points_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	title.add_child(points_label)
 	var close := Button.new()
+	_bevel_button(close)
 	close.text = "Close [Esc / M]"
 	close.pressed.connect(close_tree)
 	title.add_child(close)
@@ -65,6 +66,8 @@ func configure(infection: Node) -> void:
 	frame.border_color = Color(0.02, 0.72, 0.98)
 	frame.set_border_width_all(2)
 	frame.set_corner_radius_all(12)
+	frame.corner_detail = 1
+	frame.anti_aliasing = false
 	bar_panel.add_theme_stylebox_override("panel", frame)
 	root.add_child(bar_panel)
 	var bar_scroll := ScrollContainer.new()
@@ -223,6 +226,7 @@ func _refresh() -> void:
 		hybrid_index += 1
 	canvas.call("set_progress", progress, hybrids)
 	var open := Button.new()
+	_bevel_button(open)
 	open.text = "Mutations [M]"
 	open.pressed.connect(open_tree)
 	hotbar.add_child(open)
@@ -235,6 +239,7 @@ func _refresh() -> void:
 		if row.is_empty():
 			continue
 		var button := Button.new()
+		_bevel_button(button)
 		button.text = "%s %s" % [str(index + 4) if index < 4 else "•", row[1]]
 		button.tooltip_text = "%s\n%s" % [row[1], row[5]]
 		var skill_id: String = active_skills[index]
@@ -276,6 +281,7 @@ func _add_skill(canvas: Control, row: Array, center: Vector2) -> void:
 	canvas.add_child(button)
 	if learned and int(row[3]) != 3:
 		var lock := Button.new()
+		_bevel_button(lock)
 		lock.text = "L" if runtime.call("skill_locked", skill_id) else "+"
 		lock.tooltip_text = "Locked: kept when mutation drops" if runtime.call("skill_locked", skill_id) else "Lock skill against mutation loss"
 		lock.position = center + Vector2(35, -12)
@@ -307,3 +313,13 @@ func _add_section_labels(canvas: Control) -> void:
 func _on_control_loss_changed(active: bool) -> void:
 	if active and is_tree_open():
 		close_tree()
+
+
+func _bevel_button(button: Button) -> void:
+	for state in ["normal", "hover", "pressed", "disabled", "focus"]:
+		var inherited := button.get_theme_stylebox(state)
+		if inherited is StyleBoxFlat:
+			var style := inherited.duplicate() as StyleBoxFlat
+			style.corner_detail = 1
+			style.anti_aliasing = false
+			button.add_theme_stylebox_override(state, style)
