@@ -24,4 +24,5 @@ func drop_for_enemy(world: Node, at: Vector3) -> void:
 		scene = common[mini(int(floor(roll)), 3)]
 	var item := scene.instantiate()
 	world.add_child(item)
-	item.global_position = at + Vector3(0, 0.18, 0)
+	item.global_position = at
+	item.call("settle_on_floor")

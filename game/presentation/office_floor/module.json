@@ -2,7 +2,9 @@
   "id": "presentation.office_floor",
   "layer": "presentation",
   "purpose": "Expose authored structural office modules with their own collision and the current office-floor composition.",
-  "state_owner": [],
+  "state_owner": [
+    "Blood textures, render marks, surface anchors, lifetime and density budgets"
+  ],
   "public_api": [
     "public/base_office_layout.tscn",
     "public/office_floor.tscn",
@@ -29,7 +31,8 @@
     "public/structural/glass_wall_full.tscn",
     "public/structural/glass_partition_half.tscn",
     "public/structural/glass_partition_blinds.tscn",
-    "public/structural/sliding_glass_door.tscn"
+    "public/structural/sliding_glass_door.tscn",
+    "public/blood_effects_3d.tscn"
   ],
   "dependencies": [
     "features.player",

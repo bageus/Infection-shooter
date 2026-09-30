@@ -6,6 +6,7 @@ const ChunkStreamer = preload("res://game/bootstrap/app/chunk_streamer.gd")
 const PlanningLighting = preload("res://game/bootstrap/app/planning_lighting.gd")
 const TEST_CLOUD := preload("res://game/features/infection_source/public/mutagen_cloud.tscn")
 const MUTATION_UI := preload("res://game/bootstrap/app/mutation_tree_ui.gd")
+const BLOOD_EFFECTS := preload("res://game/presentation/office_floor/public/blood_effects_3d.tscn")
 const MISSION_LAYOUT := preload("res://game/bootstrap/app/mission_layout.gd")
 
 @onready var player: Node3D = $Gameplay/Player
@@ -25,6 +26,7 @@ var chunk_streamer: Node
 var planning_lighting: Node
 var mutation_tree_ui: CanvasLayer
 var mission_layout: Node3D
+var blood_effects: Node3D
 
 
 func _ready() -> void:
@@ -67,6 +69,7 @@ func _ready() -> void:
 	gameplay.add_child(mutagen_test_cloud)
 	mutagen_test_cloud.global_position = Vector3.ZERO
 	mutagen_test_cloud.call("activate")
+	_setup_blood_effects()
 	for enemy in enemies.get_children():
 		if enemy.has_method("set_target"):
 			enemy.call("set_target", player)
@@ -183,3 +186,27 @@ func _on_restart_pressed() -> void:
 func _on_exit_pressed() -> void:
 	get_tree().paused = false
 	get_tree().quit()
+
+
+func _setup_blood_effects() -> void:
+	blood_effects = BLOOD_EFFECTS.instantiate() as Node3D
+	add_child(blood_effects)
+	var blood_surfaces: Array[Node] = [$Structure, $Floor, $FloorBody, planning_root]
+	blood_effects.call("configure_environment", blood_surfaces)
+	enemies.child_entered_tree.connect(_bind_enemy_blood)
+	for enemy in enemies.get_children():
+		_bind_enemy_blood(enemy)
+
+
+func _bind_enemy_blood(enemy: Node) -> void:
+	if blood_effects == null or not enemy.has_signal("projectile_blood"):
+		return
+	var bindings := {
+		"projectile_blood": "splatter_hit", "blood_wounded": "small_stain",
+		"wounded_moved": "drops_trail", "body_dragged": "smear_drag", "blood_death": "death_pool"
+	}
+	for event in bindings:
+		var callback := Callable(blood_effects, bindings[event])
+		if not enemy.is_connected(event, callback):
+			enemy.connect(event, callback)
+	enemy.set("blood_drop_distance", blood_effects.call("movement_spacing"))

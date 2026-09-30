@@ -1,7 +1,7 @@
 {
   "id": "features.infected",
   "layer": "features",
-  "purpose": "Own prototype infected health, pursuit, melee attack, and death-to-mutagen transition.",
+  "purpose": "Own infected health, pursuit, attack, death-to-mutagen transition and blood event facts.",
   "state_owner": [
     "Prototype infected health",
     "Prototype infected attack cooldown",

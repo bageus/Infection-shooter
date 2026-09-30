@@ -1,0 +1,6 @@
+[gd_scene load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://game/presentation/office_floor/public/blood_effects_3d.gd" id="1"]
+
+[node name="BloodEffects3D" type="Node3D"]
+script = ExtResource("1")

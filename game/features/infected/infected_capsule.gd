@@ -1,8 +1,15 @@
 extends CharacterBody3D
 
-const BLOOD_SPLATTER_TEXTURE: Texture2D = preload("res://assets/vfx/blood_splatter.svg")
 const DROP_TABLE_SCRIPT := preload("res://game/features/pickups/public/drop_table.gd")
 
+# Public v1 presentation facts: no effect ownership or renderer dependency.
+signal projectile_blood(position: Vector3, direction: Vector3, weapon: String, excluded: Array[RID], source_id: int)
+signal blood_wounded(position: Vector3, excluded: Array[RID])
+signal wounded_moved(previous: Vector3, current: Vector3, excluded: Array[RID])
+signal body_dragged(previous: Vector3, current: Vector3, excluded: Array[RID])
+signal blood_death(position: Vector3, excluded: Array[RID], death_id: int)
+
+@export_range(0.4, 0.8) var blood_drop_distance := 0.6
 @export var max_health: float = 50.0
 @export var move_speed: float = 4.5
 @export var attack_range: float = 1.2
@@ -33,10 +40,15 @@ var _sleeping_far := false
 var _blast_stun_remaining := 0.0
 var mutation_poison_remaining := 0.0
 var _mutation_poison_damage := 0.0
+var _blood_last_position := Vector3.ZERO
+var _blood_segment_start := Vector3.ZERO
+var _blood_distance := 0.0
 
 
 func _ready() -> void:
 	health = max_health
+	_blood_last_position = global_position
+	_blood_segment_start = global_position
 	_ai_tick_offset = get_instance_id() % 4
 	_lod_frame_offset = get_instance_id() % 12
 	death_cloud.depleted.connect(_on_death_cloud_depleted)
@@ -60,8 +72,9 @@ func take_projectile_damage(
 	direction: Vector3,
 	weapon_name: String = "PISTOL"
 ) -> void:
-	_spawn_air_blood(hit_position, direction, weapon_name)
-	_spawn_surface_splatter(hit_position, direction, weapon_name)
+	if _dead or amount <= 0.0:
+		return
+	projectile_blood.emit(hit_position, direction, weapon_name, _blood_exclusions(), get_instance_id())
 	if is_instance_valid(_target) and _target.has_method("get_infection_skill"):
 		if bool(_target.call("get_infection_skill", "blood_scent")) and health < max_health * 0.7:
 			amount *= 1.22
@@ -71,7 +84,10 @@ func take_projectile_damage(
 func take_damage(amount: float) -> void:
 	if amount <= 0.0 or _dead:
 		return
+	var first_wound := is_equal_approx(health, max_health)
 	health = maxf(0.0, health - amount)
+	if first_wound:
+		blood_wounded.emit(global_position, _blood_exclusions())
 	if health <= 0.0:
 		_die()
 
@@ -88,6 +104,7 @@ func apply_mutation_poison(duration: float, damage_per_second: float, parasite: 
 
 
 func _physics_process(delta: float) -> void:
+	_track_blood_motion()
 	_blast_stun_remaining = maxf(0.0, _blast_stun_remaining - delta)
 	if mutation_poison_remaining > 0.0:
 		mutation_poison_remaining = maxf(0.0, mutation_poison_remaining - delta)
@@ -195,122 +212,36 @@ func _try_attack() -> void:
 	_attack_cooldown = attack_interval
 
 
-func _spawn_air_blood(hit_position: Vector3, direction: Vector3, weapon_name: String) -> void:
-	var count := 10 if weapon_name == "SHOTGUN" else 5
-	var spread := 0.72 if weapon_name == "SHOTGUN" else 0.34
-	for i in count:
-		var drop := MeshInstance3D.new()
-		var mesh := SphereMesh.new()
-		mesh.radius = randf_range(0.018, 0.048)
-		mesh.height = mesh.radius * randf_range(1.5, 3.8)
-		mesh.material = _blood_material()
-		drop.mesh = mesh
-		get_tree().current_scene.add_child(drop)
-		drop.global_position = hit_position
-		var target := hit_position + direction * randf_range(0.25, 0.9)
-		target += Vector3(randf_range(-spread, spread), randf_range(-0.2, 0.28), randf_range(-spread, spread))
-		var tween := drop.create_tween()
-		tween.tween_property(drop, "global_position", target, randf_range(0.1, 0.24))
-		tween.tween_callback(drop.queue_free)
+func _blood_exclusions() -> Array[RID]:
+	var excluded: Array[RID] = [get_rid()]
+	return excluded
 
 
-func _spawn_surface_splatter(hit_position: Vector3, direction: Vector3, weapon_name: String) -> void:
-	var rays := 18 if weapon_name == "SHOTGUN" else 8
-	var reach := 4.5 if weapon_name == "SHOTGUN" else 3.0
-	var spread := 0.9 if weapon_name == "SHOTGUN" else 0.35
-	for i in rays:
-		var ray_direction := direction.normalized()
-		ray_direction += Vector3(randf_range(-spread, spread), randf_range(-0.55, 0.2), randf_range(-spread, spread))
-		_cast_blood_ray(hit_position, ray_direction.normalized(), reach, weapon_name == "SHOTGUN")
-	for i in (8 if weapon_name == "SHOTGUN" else 4):
-		var floor_start := hit_position + Vector3(randf_range(-0.8, 0.8), 0.35, randf_range(-0.8, 0.8))
-		_cast_blood_ray(floor_start, Vector3.DOWN, 3.0, weapon_name == "SHOTGUN")
-
-
-func _cast_blood_ray(origin: Vector3, direction: Vector3, reach: float, heavy: bool) -> void:
-	var query := PhysicsRayQueryParameters3D.create(origin, origin + direction * reach, 1)
-	query.exclude = [get_rid()]
-	var hit := get_world_3d().direct_space_state.intersect_ray(query)
-	if hit.is_empty():
+func _track_blood_motion() -> void:
+	var current := global_position
+	var travelled := current.distance_to(_blood_last_position)
+	_blood_last_position = current
+	if travelled > 3.0 or (not _dead and health >= max_health):
+		_blood_segment_start = current
+		_blood_distance = 0.0
 		return
-	var normal: Vector3 = hit.get("normal")
-	if normal.y < -0.55:
+	_blood_distance += travelled
+	var spacing := 0.35 if _dead else blood_drop_distance
+	if _blood_distance < spacing:
 		return
-	_spawn_splatter_mark(hit.get("position"), normal, heavy)
-
-
-func _spawn_splatter_mark(hit_position: Vector3, normal: Vector3, heavy: bool) -> void:
-	var decal := Decal.new()
-	decal.size = Vector3(
-		randf_range(0.65, 1.25) if heavy else randf_range(0.28, 0.62),
-		0.08,
-		randf_range(0.5, 1.15) if heavy else randf_range(0.22, 0.55)
-	)
-	decal.texture_albedo = BLOOD_SPLATTER_TEXTURE
-	decal.modulate = Color(0.34, 0.0, 0.012, 0.96)
-	decal.upper_fade = 0.03
-	decal.lower_fade = 0.03
-	decal.normal_fade = 0.15
-	get_tree().current_scene.add_child(decal)
-	decal.global_position = hit_position
-	decal.global_basis = _decal_basis(normal)
-	_register_surface_decal(hit_position, normal, decal)
-	_spawn_satellite_decals(hit_position, normal, heavy)
-
-
-func _spawn_satellite_decals(hit_position: Vector3, normal: Vector3, heavy: bool) -> void:
-	var count := randi_range(3, 7) if heavy else randi_range(1, 4)
-	var splatter_basis := _basis_for_normal(normal)
-	for i in count:
-		var decal := Decal.new()
-		var radius := randf_range(0.05, 0.16) if heavy else randf_range(0.035, 0.1)
-		decal.size = Vector3(radius, 0.06, radius * randf_range(0.6, 2.0))
-		decal.texture_albedo = BLOOD_SPLATTER_TEXTURE
-		decal.modulate = Color(0.31, 0.0, 0.01, randf_range(0.82, 0.98))
-		decal.upper_fade = 0.02
-		decal.lower_fade = 0.02
-		decal.normal_fade = 0.15
-		get_tree().current_scene.add_child(decal)
-		var splatter_offset := splatter_basis * Vector3(randf_range(-0.75, 0.75), randf_range(-0.65, 0.65), 0)
-		decal.global_position = hit_position + splatter_offset
-		decal.global_basis = _decal_basis(normal)
-		_register_surface_decal(decal.global_position, normal, decal)
-
-
-func _register_surface_decal(hit_position: Vector3, normal: Vector3, decal: Decal) -> void:
-	var query := PhysicsRayQueryParameters3D.create(hit_position + normal * 0.08, hit_position - normal * 0.12, 1)
-	query.exclude = [get_rid()]
-	var hit := get_world_3d().direct_space_state.intersect_ray(query)
-	if hit.is_empty():
-		return
-	var collider: Object = hit.get("collider")
-	if collider != null and collider.has_method("add_blood_decal"):
-		collider.call("add_blood_decal", decal)
-
-
-func _decal_basis(normal: Vector3) -> Basis:
-	var surface_basis := _basis_for_normal(normal)
-	return Basis(surface_basis.x, surface_basis.z, -surface_basis.y)
-
-
-func _basis_for_normal(normal: Vector3) -> Basis:
-	var basis_z := normal.normalized()
-	var helper := Vector3.UP if absf(basis_z.dot(Vector3.UP)) < 0.92 else Vector3.FORWARD
-	var x := helper.cross(basis_z).normalized()
-	var y := basis_z.cross(x).normalized()
-	return Basis(x, y, basis_z)
-
-
-func _blood_material() -> StandardMaterial3D:
-	var material := StandardMaterial3D.new()
-	material.albedo_color = Color(0.33, 0.0, 0.012, 0.96)
-	material.roughness = 0.95
-	material.cull_mode = BaseMaterial3D.CULL_DISABLED
-	return material
+	if _dead:
+		body_dragged.emit(_blood_segment_start, current, _blood_exclusions())
+	else:
+		wounded_moved.emit(_blood_segment_start, current, _blood_exclusions())
+	_blood_distance = 0.0
+	_blood_segment_start = current
 
 
 func _die() -> void:
 	_dead = true
+	_blood_segment_start = global_position
+	_blood_distance = 0.0
+	blood_death.emit(global_position, _blood_exclusions(), get_instance_id())
 	if is_instance_valid(_target) and _target.has_method("mutation_enemy_killed"):
 		_target.call("mutation_enemy_killed", self)
 	var drop_table := DROP_TABLE_SCRIPT.new()

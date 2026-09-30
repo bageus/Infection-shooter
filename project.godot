@@ -113,3 +113,8 @@ pickup_weapon={
 [rendering]
 
 renderer/rendering_method.mobile="gl_compatibility"
+
+[layer_names]
+
+3d_physics/layer_8="Blood surfaces"
+3d_render/layer_8="Blood receivers"
