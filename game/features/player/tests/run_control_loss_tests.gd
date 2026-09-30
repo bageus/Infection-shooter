@@ -1,5 +1,6 @@
 extends SceneTree
 
+const IMPACTS := preload("res://game/features/combat/public/impact_effects.gd")
 const PLAYER := preload("res://game/features/player/public/player.tscn")
 var failures := 0
 
@@ -14,6 +15,10 @@ func _run() -> void:
 	current_scene = stage
 	var player := PLAYER.instantiate() as CharacterBody3D
 	stage.add_child(player)
+	var impacts := Node3D.new()
+	impacts.set_script(IMPACTS)
+	stage.add_child(impacts)
+	player.call("configure_world", stage, impacts)
 	player.set("gravity_acceleration", 0.0)
 	player.call("_select_weapon", 1)
 	var runtime := player.get_node("InfectionRuntime")

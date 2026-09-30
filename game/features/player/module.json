@@ -17,5 +17,11 @@
     "features.combat",
     "features.infection",
     "features.character_animation"
-  ]
+  ],
+  "runtime_contracts": {
+    "mission_wiring_v1": {
+      "configure_world": "configure_world(container: Node3D, impacts: Node) -> void",
+      "configure_weapon_drop": "configure_weapon_drop(command: Callable) -> void; command(index, world_position) -> bool"
+    }
+  }
 }

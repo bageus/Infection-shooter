@@ -94,7 +94,8 @@ Allowed:
 
 Forbidden:
 
-- searching the SceneTree for services;
+- searching the SceneTree for services or using `current_scene` from production features/presentation;
+- resolving mission containers or impact budgets by parent-name conventions;
 - absolute `/root/` lookups from gameplay;
 - embedding domain rules only in button handlers or animation callbacks;
 - using node groups as a hidden global dependency container;

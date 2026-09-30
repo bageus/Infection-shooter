@@ -1,5 +1,5 @@
 {
-  "version": 6,
+  "version": 7,
   "engine": {
     "name": "Godot",
     "major_version": 4,
@@ -99,7 +99,8 @@
     "cross-module internal access",
     "cyclic dependency",
     "gameplay dependency on concrete infrastructure",
-    "dynamic cross-module res path"
+    "dynamic cross-module res path",
+    "production feature/presentation current_scene access"
   ],
   "source_size_policy": {
     "extensions": [

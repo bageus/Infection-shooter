@@ -13,6 +13,8 @@ static func contains(model_path: String) -> bool:
 
 
 static func scatter(host: Node3D, visual: Node3D, hit_position: Vector3, direction: Vector3) -> void:
+	if not is_instance_valid(host.get("effects_root")):
+		return
 	var source_mesh := _first_mesh(visual)
 	if source_mesh == null:
 		return
@@ -23,7 +25,7 @@ static func scatter(host: Node3D, visual: Node3D, hit_position: Vector3, directi
 		var book := (BOOKS[index % BOOKS.size()] as PackedScene).instantiate() as Node3D
 		if book == null:
 			continue
-		host.get_tree().current_scene.add_child(book)
+		(host.get("effects_root") as Node3D).add_child(book)
 		book.global_rotation.y = host.global_rotation.y + randf_range(-0.15, 0.15)
 		var offset := (float(index) - float(count - 1) * 0.5) * 0.085
 		var target := bounds.get_center() + axis * offset

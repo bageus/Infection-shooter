@@ -44,6 +44,11 @@ var _mutation_control := CONTROL_LOSS.new()
 var _mutation_menu_open := false
 var _slot_weapons: Array[int] = [0, 1, 2]
 var _emergency_key := false
+var effects_root: Node3D
+var impact_pool: Node
+var _drop_weapon_command: Callable
+
+
 func _ready() -> void:
 	floor_snap_length = 0.45
 	_camera_distance=camera.position.length()
@@ -54,6 +59,7 @@ func _ready() -> void:
 	mutation_effects = MUTATION_EFFECTS.new()
 	add_child(mutation_effects)
 	mutation_effects.call("configure", self, infection_runtime, weapons)
+	configure_world(effects_root, impact_pool)
 func _physics_process(delta: float) -> void:
 	if _stun_remaining > 0.0:
 		_stun_remaining = maxf(0.0, _stun_remaining - delta)
@@ -128,6 +134,24 @@ func select_weapon_slot(index: int) -> bool:
 	_select_weapon(index)
 	return true
 
+
+# Public scene wiring v1; owned by the mission composition.
+func configure_world(container: Node3D, impacts: Node) -> void:
+	effects_root = container
+	impact_pool = impacts
+	if weapons.is_empty():
+		return
+	for gun in weapons:
+		gun.call("configure_world", container, impacts)
+	$AimPivot/SpentCasings.call("configure_world", container, impacts)
+	if is_instance_valid(mutation_effects):
+		mutation_effects.call("configure_world", container)
+
+
+func configure_weapon_drop(command: Callable) -> void:
+	_drop_weapon_command = command
+
+
 func get_current_weapon()->Node3D:
 	return weapons[_slot_weapons[current_weapon_index]]
 
@@ -138,11 +162,12 @@ func pickup_weapon(index: int) -> bool:
 	if index < 0 or index >= weapons.size() or _slot_weapons.has(index):
 		return false
 	var previous := _slot_weapons[current_weapon_index]
-	if not get_tree().current_scene.has_method("drop_weapon_pickup"):
+	if not _drop_weapon_command.is_valid():
 		return false
 	var offset := camera.global_basis.x
 	offset.y = 0.0
-	get_tree().current_scene.call("drop_weapon_pickup", previous, global_position + offset.normalized() * 1.3)
+	if not bool(_drop_weapon_command.call(previous, global_position + offset.normalized() * 1.3)):
+		return false
 	get_current_weapon().call("cancel_reload")
 	_slot_weapons[current_weapon_index] = index
 	_select_weapon(current_weapon_index)
@@ -313,6 +338,8 @@ func _update_aim()->void:
 		body_visual.look_at(body_visual.global_position+target_direction,Vector3.UP)
 
 func _spawn_floor_blood(amount:float)->void:
+	if not is_instance_valid(effects_root):
+		return
 	var count:=clampi(ceili(amount/8.0),2,6)
 	for i in count:
 		var mark:=MeshInstance3D.new()
@@ -329,7 +356,7 @@ func _spawn_floor_blood(amount:float)->void:
 			mesh.surface_add_vertex(Vector3.ZERO)
 			mesh.surface_add_vertex(Vector3(cos(a0)*width*r0,sin(a0)*height*r0,0))
 			mesh.surface_add_vertex(Vector3(cos(a1)*width*r1,sin(a1)*height*r1,0))
-		mesh.surface_end();mark.mesh=mesh;get_tree().current_scene.add_child(mark)
+		mesh.surface_end();mark.mesh=mesh;effects_root.add_child(mark)
 		mark.global_position=Vector3(global_position.x,0.025,global_position.z)+Vector3(randf_range(-0.5,0.5),0,randf_range(-0.5,0.5))
 		mark.rotation_degrees=Vector3(-90,randf_range(0,360),0)
 

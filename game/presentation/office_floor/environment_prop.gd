@@ -27,6 +27,17 @@ var _book_kick_cooldown := 0.0
 var _extinguisher_triggered := false
 var _extinguisher_fx: Node3D
 
+var effects_root: Node3D
+var impact_pool: Node
+
+
+# Public scene wiring v1; owned by the mission composition.
+func configure_world(container: Node3D, impacts: Node) -> void:
+	effects_root = container
+	impact_pool = impacts
+	if is_instance_valid(_extinguisher_fx):
+		_extinguisher_fx.call("configure_world", container, impacts)
+
 
 func _physics_process(delta: float) -> void:
 	_book_kick_cooldown = BOOK_CONTACT.kick_if_close(self, _book_kick_cooldown, delta)
@@ -88,6 +99,7 @@ func _ready() -> void:
 		_extinguisher_fx = EXTINGUISHER_FX.instantiate() as Node3D
 		add_child(_extinguisher_fx)
 		_extinguisher_fx.call("configure", self, _shape_meshes)
+		_extinguisher_fx.call("configure_world", effects_root, impact_pool)
 		_extinguisher_fx.connect("ruptured", _on_extinguisher_ruptured)
 	if "table" in model_path.get_file() or "desk" in model_path.get_file():
 		linear_damp = 3.0

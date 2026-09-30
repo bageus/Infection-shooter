@@ -13,6 +13,15 @@ var _radius := 3.0
 var _elapsed := 0.0
 var _cloud_lifetime := 3.6
 
+var effects_root: Node3D
+var impact_pool: Node
+
+
+# Public scene wiring v1; owned by the mission composition.
+func configure_world(container: Node3D, impacts: Node) -> void:
+	effects_root = container
+	impact_pool = impacts
+
 
 func _ready() -> void:
 	var torus := TorusMesh.new()
@@ -90,8 +99,8 @@ func _setup_particles(emitter: GPUParticles3D, amount: int, lifetime: float,
 
 
 func _spawn_fragments() -> void:
-	var world := get_tree().current_scene
-	if world == null:
+	var world := effects_root
+	if not is_instance_valid(world):
 		return
 	for index in 7:
 		var piece := RigidBody3D.new()

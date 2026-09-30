@@ -13,6 +13,7 @@ updated: 2026-09-30
 Build the first playable combat-slice foundation with an authored office floor, player, combat, infected enemies, infection source, and observable fail states.
 
 ## In scope
+- owner-approved injection of mission collaborators to replace production current_scene lookups;
 - owner-requested planner decomposition, workstation test update and retirement of unused legacy scenes;
 - hand-authored office floor from the newly grouped 01-16 object library;
 - closed non-destructible perimeter with window/wall corner modules;
@@ -24,7 +25,7 @@ Build the first playable combat-slice foundation with an authored office floor, 
 READY game specification, accepted working agreement, architecture contract, and existing T001/T002 implementation.
 
 ## Affected modules
-presentation.office_floor, features.combat and bootstrap.app. Player health remains owned by features.player.
+presentation.office_floor, features.combat, features.player, features.infected and bootstrap.app. Player health remains owned by features.player.
 
 ## Out of scope
 Procedural generation, save/checkpoints, final HUD, monetization, platform SDKs and campaign-wide content remain outside this T002 increment.
@@ -33,6 +34,8 @@ Procedural generation, save/checkpoints, final HUD, monetization, platform SDKs 
 - Structural modules visually touch edge-to-edge with no visible gaps and no overlap beyond a tiny seam tolerance.\n- Exterior corners face inward correctly.\n- Perimeter and authored interior walls block the player.\n- The expanded floor and defeat menu remain functional.
 
 ## Progress
+
+30.09.2026: по прямому продолжению запроса владельца внедрены конкретные зависимости вместо всех рабочих current_scene в combat/player/infected/office_floor. Bootstrap создаёт MissionObjects и ImpactEffects, связывает публичные корни и передаёт bool-команду выброса оружия. Корни связывают собственных детей; каталог планировщика получает bind_asset для новых объектов/карт. Новых глобальных реестров, сервис-локаторов и обработчиков node_added нет. Владелец состояния и 18 рёбер зависимостей сохранены. Контракт mission_wiring_v1 и grenade explode v2 зафиксированы ADR-0011/манифестами. Архитектурный валидатор теперь запрещает возвращение current_scene в рабочие feature/presentation; примеры/тесты строк, комментариев и алиасов SceneTree проверены. Добавлен постоянный runtime CI для 11 наборов и основной сцены. Итоговое сочетание с параллельно внесённым освещением прошло все проверки.
 
 30.09.2026: первый проход освещения согласован с актуальным main b9533c8, который уже разделил планировщик и восстановил gates. Его компоненты, state ownership, удаление legacy-сцен и дополнительные CI-проверки сохранены. В PR #17 lighting edits перенесены в planning_controls/objects/storage; planning_mode.gd остаётся 431 строк, все файлы <=600. Ambient COLOR Color(0.62,0.68,0.78,1) energy 0.22, Filmic прежний; SSR выключен. Lamp energy = authored × multiplier(0.65) × flicker_factor, тёплый цвет и геометрия прежние; сохранение авторской энергии, optional map multiplier, Undo/Duplicate и полное восстановление ambient проверены. Добавлен игровой/editor preview (0.38). Контракт ADR-0010 не конфликтует с существующим ADR-0009 разделения планировщика.
 Итоговые проверки на новом main: validate_project.py PASS; scene resources PASS (254 references); workstation tests PASS (3); Godot 4.5.2 lighting tests — 0 failures; актуальный run_planning_mode_tests — PASS, включая desk setup и настоящий JSON save/load. Визуальная приёмка, Godot 4.7.2, Windows/Web и FPS остаются открытыми. Подробности LIGHTING_QA.md/PLANNER_REFACTOR_QA.md. T002 остаётся IN_PROGRESS.
@@ -153,6 +156,9 @@ The office-floor composition was rebuilt for the newly oriented grouped object l
 Полный проект импортирует .blend только с установленным Blender. Изолированная сцена использует проверенный GLB; визуальное совпадение всех частей и коллизий в игровом Godot 4.7.2 ещё требует просмотра.
 ## Validation evidence
 
+30.09.2026: итоговое сочетание с освещением из main 83111aa6 проверено в GitHub Actions https://github.com/bageus/Infection-shooter/actions/runs/36778528091. validate_project.py PASS (10 модулей, 18 рёбер, 26 рекомендательных предупреждений размера), ресурсы сцен PASS (254), Python: workstation 3, glass openings 1, scene-access gate 3 — PASS. Godot 4.5.2: все 11 наборов PASS — infection, mutation feedback, player control loss, HUD/atlas, blood effects, elevator collision, infected blood events, pickup floor, planning mode, world bindings, lighting. Основная сцена прошла 180 кадров без SCRIPT ERROR/ERROR; cleanup нового теста также без оставшихся ресурсов. Проверка с чужой current_scene подтвердила маршрутизацию пуль/гранат/следов/дропа и сохранение слота при отказе команды. Настоящие новые дверь/мебель из каталога получили зависимости, обломок пережил удаление источника, новые враги связаны. Импорт exit 0, но старые отсутствующие FBX-текстуры palette1.png/couches.png остаются — импорт не чистый. Тест ждёт асинхронного освобождения audio playback перед quit; рабочий звук не изменён. Визуал целевой Godot 4.7.2, Windows/Web и 60 FPS не подтверждены этим headless запуском.
+
+
 GitHub Actions https://github.com/bageus/Infection-shooter/actions/runs/36774918397: полный validate_project.py прошёл без исключений (10 модулей, 18 зависимостей; 26 рекомендательных предупреждений размера). Все 254 ссылки ресурсов сцен существуют, 3 Python-теста шаблонов и 1 тест стеклянных проёмов прошли. В Godot 4.5.2 прошли 9 наборов: infection, mutation feedback, player control loss, atlas/HUD, blood effects, elevator collision, infected blood events, pickup floor, planning mode. Новый planning test проверил вход/выход и паузу/HUD, камеру, создание актуального стола/света, select/rotate/undo, desk setup, освещение, DTO v5 и round trip именованной карты. Основная сцена отработала 180 кадров без SCRIPT ERROR/ERROR. Import завершился кодом 0, но две существующие ошибки отсутствующих FBX-текстур palette1.png/couches.png остаются: импорт не называется чистым. Визуал и производительность Godot 4.7.2 этим headless запуском не подтверждены.
 
 Сверены 213 GLB в 13 папках нового пакета и ссылки 50 изменённых сцен: отсутствующих ресурсов и ссылок на старые модели среди этих сцен нет. Новая модель `07_table.glb` побайтово совпадает с прежней. Готовность спецификации и состояние рабочего процесса прошли, архитектурная проверка выявляет существующие вне изменения нарушения. Локальный бинарник Godot повреждён и завершается даже на `--version`; игровой импорт и визуальная проверка пока недоступны.
@@ -190,6 +196,9 @@ No product blocker. Exact imported .blend bounds still require visual confirmati
 Run repository gates, then measure imported structural mesh AABBs in Godot against `docs/ASSET_STANDARD.md`; correct the 13_* glass connection span to 4.0 m and any retained legacy cubicle partition to 3.0 m only after confirming source mesh bounds.
 
 ## Session handoff
+
+30.09.2026: актуальное продолжение — mission_wiring_v1/ADR-0011 выполнен, освещение main сохранено, автоматические проверки зелёные. В полном Godot 4.7.2 пройти визуальную приёмку Windows Forward+/desktop Web Compatibility: стрельба всеми оружиями, взрыв/гильзы/следы, выброс и повторный подбор оружия, гибель врага с дропом, эффекты мебели/воды/бумаги/огнетушителя и двери на сохранённой карте; совместно проверить освещение по docs/LIGHTING_QA.md и замерить 60 FPS. T002 остаётся IN_PROGRESS.
+
 
 30.09.2026: актуальное состояние — описанные выше изменения проверены и готовы к сохранению в main. В установленном Godot 4.7.2 пройти визуальную приёмку рамок оружия/антидота, затенения ствола, автоматических гибридов, немедленной цепочки потери контроля, соседних стен лифта и открытого дверного проёма; затем проверить размещение, undo и сохранение/загрузку карты планировщика. Сценарии мутаций/HUD: docs/MUTATION_FEEDBACK_QA.md.
 

@@ -33,6 +33,15 @@ var _anchor := Vector3.ZERO
 var _long_axis := Vector3.UP
 var _fall_direction := Vector3.FORWARD
 
+var effects_root: Node3D
+var impact_pool: Node
+
+
+# Public scene wiring v1; owned by the mission composition.
+func configure_world(container: Node3D, impacts: Node) -> void:
+	effects_root = container
+	impact_pool = impacts
+
 
 func _ready() -> void:
 	_configure_emitter(_jet, jet_count, jet_lifetime, 8.0, 11.0, 10.0, 0.12, 0.55)
@@ -126,10 +135,11 @@ func _rupture() -> void:
 	_mist.emitting = false
 	_hiss.stop()
 	var location := _body.global_position
-	var world := get_tree().current_scene
-	if world == null:
+	var world := effects_root
+	if not is_instance_valid(world):
 		return
 	var burst := BURST.instantiate() as Node3D
+	burst.call("configure_world", effects_root, impact_pool)
 	world.add_child(burst)
 	burst.global_position = location
 	burst.call("start", cloud_radius, cloud_lifetime, burst_count)

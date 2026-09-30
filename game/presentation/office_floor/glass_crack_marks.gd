@@ -26,7 +26,7 @@ static func spawn(pane: StaticBody3D, point: Vector3, normal: Vector3, max_size:
 	material.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
 	material.cull_mode = BaseMaterial3D.CULL_DISABLED
 	material.render_priority = 2
-	var pool := pane.get_tree().current_scene.get_node_or_null("ImpactEffects")
+	var pool := pane.get("impact_pool") as Node
 	var variant := randi_range(0, CRACK_TEXTURES.size() - 1)
 	material.albedo_texture = CRACK_TEXTURES[variant] as Texture2D
 	if material.albedo_texture != null:

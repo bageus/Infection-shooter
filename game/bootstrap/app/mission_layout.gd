@@ -33,13 +33,16 @@ func _process(delta: float) -> void:
 		_refresh_stairs()
 
 
-func spawn_weapon(index: int, world_position: Vector3) -> void:
+func spawn_weapon(index: int, world_position: Vector3) -> bool:
+	if index < 0 or index > 3:
+		return false
 	var item := WEAPON.new()
 	item.weapon_index = index
 	item.name = "DroppedLauncher" if index == 3 else "DroppedWeapon"
 	add_child(item)
 	item.global_position = Vector3(world_position.x, 0.25, world_position.z)
 	item.set("_base_position", item.global_position)
+	return true
 
 
 func goal_reached(location: Vector3) -> bool:

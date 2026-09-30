@@ -72,6 +72,7 @@ func setup(app_owner: Node3D, planning_root: Node3D, planning_ui: Control) -> vo
 		host.get_node("Radar"),
 		host.get_node_or_null("FogOfWar")
 	]
+	catalog.bind_asset = Callable(host, "bind_world_object")
 	catalog._build_environment_catalogs()
 	catalog.active_catalog = catalog.group_catalogs["01"]
 	controls._rebuild_palette()

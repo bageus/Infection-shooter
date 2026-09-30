@@ -14,6 +14,15 @@ const BLAST = preload("res://game/presentation/office_floor/blast_effect.gd")
 var _health := 110.0
 var _extinguisher_triggered := false
 
+var effects_root: Node3D
+var impact_pool: Node
+
+
+# Public scene wiring v1; owned by the mission composition.
+func configure_world(container: Node3D, impacts: Node) -> void:
+	effects_root = container
+	impact_pool = impacts
+
 
 func _damage_category() -> String:
 	var label := (name + " " + get_parent().name).to_lower()
@@ -94,6 +103,9 @@ func _integrate_forces(state: PhysicsDirectBodyState3D) -> void:
 
 
 func _break_physical_prop(hit_position: Vector3, direction: Vector3) -> void:
+	if not is_instance_valid(effects_root):
+		queue_free()
+		return
 	if is_queued_for_deletion():
 		return
 	if _damage_category() == "tech":
@@ -109,7 +121,7 @@ func _break_physical_prop(hit_position: Vector3, direction: Vector3) -> void:
 				fragment.mass = 0.6
 				fragment.collision_layer = 0
 				fragment.collision_mask = 1
-				get_tree().current_scene.add_child(fragment)
+				effects_root.add_child(fragment)
 				fragment.global_position = (child as MeshInstance3D).global_position
 				var copy := (child as MeshInstance3D).duplicate()
 				fragment.add_child(copy)

@@ -10,7 +10,6 @@ enum DoorMode { SWING_BIDIRECTIONAL, SWING_ONE_WAY, SLIDING_ELEVATOR, GLASS_SWIN
 @export var one_way_allowed_side: float = 1.0
 @export var slide_distance: float = 0.72
 @export var elevator_sync_radius: float = 4.0
-@export var player_path: NodePath
 @export var requires_emergency_key := false
 
 var _player: Node3D
@@ -30,16 +29,14 @@ var _fallback_leaf_collisions: Array[CollisionShape3D] = []
 var _key_hint: Label3D
 
 
+# Public structural scene wiring v1.
+func configure_player(actor: Node3D) -> void:
+	_player = actor
+
+
 func _ready() -> void:
 	process_mode = Node.PROCESS_MODE_PAUSABLE
 	add_to_group("interactive_doors")
-	_player = get_node_or_null(player_path) as Node3D if not player_path.is_empty() else null
-	if _player == null:
-		_player = get_tree().get_first_node_in_group("player") as Node3D
-	if _player == null:
-		var scene := get_tree().current_scene
-		if scene != null:
-			_player = scene.get_node_or_null("Gameplay/Player") as Node3D
 	if mode == DoorMode.SLIDING_ELEVATOR:
 		add_to_group("elevator_door_components")
 	if requires_emergency_key:
@@ -54,10 +51,8 @@ func _ready() -> void:
 
 
 func _physics_process(delta: float) -> void:
-	if _player == null or not is_instance_valid(_player):
-		_player = get_tree().get_first_node_in_group("player") as Node3D
-		if _player == null:
-			return
+	if not is_instance_valid(_player):
+		return
 	var wants_open := _requested_open and not requires_emergency_key
 	_requested_open = false
 	var local_player := to_local(_player.global_position)

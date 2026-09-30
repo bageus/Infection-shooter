@@ -8,9 +8,8 @@ const EXPLOSION_V1 := preload("res://game/features/combat/grenade_explosion_v1.t
 static var scorch_texture: Texture2D
 
 
-static func explode(projectile: Node3D, location: Vector3, normal: Vector3, contact: Object) -> void:
-	var scene := projectile.get_tree().current_scene as Node3D
-	if scene == null:
+static func explode(projectile: Node3D, location: Vector3, normal: Vector3, contact: Object, scene: Node3D, impacts: Node) -> void:
+	if not is_instance_valid(scene):
 		return
 	var effect := EXPLOSION_V1.instantiate() as Node3D
 	scene.add_child(effect)
@@ -47,13 +46,13 @@ static func explode(projectile: Node3D, location: Vector3, normal: Vector3, cont
 		if collider.has_method("apply_blast_stun") and float(collider.get("health")) > 0.0:
 			collider.call("apply_blast_stun", 3.0 + 2.0 * factor, factor)
 	if contact != null and (not contact.has_method("take_projectile_hit") or contact.has_method("get_projectile_material") and str(contact.call("get_projectile_material")) in ["concrete", "metal"]):
-		_scorch(scene, location, normal)
+		_scorch(scene, location, normal, impacts)
 	# Surrounding structural surfaces also receive small radial black marks.
 	for direction in [Vector3.DOWN, Vector3.LEFT, Vector3.RIGHT, Vector3.FORWARD, Vector3.BACK]:
 		var trace := PhysicsRayQueryParameters3D.create(location + direction * 0.08, location + direction * 2.7, 7)
 		var surface := projectile.get_world_3d().direct_space_state.intersect_ray(trace)
 		if not surface.is_empty() and not surface["collider"].has_method("take_projectile_hit"):
-			_scorch(scene, surface["position"], surface["normal"])
+			_scorch(scene, surface["position"], surface["normal"], impacts)
 
 
 static func _distance_to_shape(collider: Object, shape_index: int, location: Vector3, fallback: Vector3) -> float:
@@ -68,7 +67,7 @@ static func _distance_to_shape(collider: Object, shape_index: int, location: Vec
 	return fallback.distance_to(location)
 
 
-static func _scorch(scene: Node3D, hit_position: Vector3, normal: Vector3) -> void:
+static func _scorch(scene: Node3D, hit_position: Vector3, normal: Vector3, pool: Node) -> void:
 	if normal.length_squared() < 0.1:
 		return
 	if scorch_texture == null:
@@ -92,7 +91,6 @@ static func _scorch(scene: Node3D, hit_position: Vector3, normal: Vector3) -> vo
 	scene.add_child(mark)
 	mark.global_position = hit_position + normal * 0.023
 	mark.global_basis = Basis.looking_at(-normal, Vector3.FORWARD if absf(normal.y) > 0.9 else Vector3.UP)
-	var pool := scene.get_node_or_null("ImpactEffects")
 	if pool != null and pool.has_method("register_mark"):
 		pool.call("register_mark", mark)
 	# A direct callable disconnects automatically if the impact budget removes the mark first.

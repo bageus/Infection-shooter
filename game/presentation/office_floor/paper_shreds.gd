@@ -2,8 +2,8 @@ extends RefCounted
 
 
 static func spawn(host: Node3D, hit_position: Vector3, direction: Vector3) -> void:
-	var scene := host.get_tree().current_scene
-	if scene == null:
+	var scene := host.get("effects_root") as Node3D
+	if not is_instance_valid(scene):
 		return
 	var shreds := GPUParticles3D.new()
 	shreds.name = "TornPaper"

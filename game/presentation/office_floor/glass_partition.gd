@@ -19,6 +19,18 @@ var _player_near_blinds := false
 var _sway_strength := 0.0
 var _sway_time := 0.0
 
+var effects_root: Node3D
+var impact_pool: Node
+
+
+# Public scene wiring v1; owned by the mission composition.
+func configure_world(container: Node3D, impacts: Node) -> void:
+	effects_root = container
+	impact_pool = impacts
+
+func configure_player(actor: Node3D) -> void:
+	_player = actor
+
 
 func _ready() -> void:
 	_health = max_health
@@ -31,11 +43,9 @@ func _ready() -> void:
 func _physics_process(delta: float) -> void:
 	if not _broken or _blinds.is_empty():
 		return
-	if not is_instance_valid(_player):
-		_player = get_tree().get_first_node_in_group("player") as Node3D
 	var near := false
 	var partition := get_parent() as Node3D
-	if _player != null and partition != null:
+	if is_instance_valid(_player) and partition != null:
 		var local_player: Vector3 = partition.to_local(_player.global_position)
 		near = absf(local_player.x) < 0.85 and absf(local_player.z) < 0.55 and local_player.y > -0.5 and local_player.y < 3.2
 	if near and not _player_near_blinds:
