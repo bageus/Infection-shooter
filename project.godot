@@ -117,9 +117,6 @@ pickup_weapon={
 
 [rendering]
 
-anti_aliasing/quality/msaa_3d=1
-
-lights_and_shadows/directional_shadow/size=2048
-lights_and_shadows/directional_shadow/soft_shadow_filter_quality=2
-
 renderer/rendering_method.mobile="gl_compatibility"
+lights_and_shadows/directional_shadow/size=2048
+anti_aliasing/quality/msaa_3d=2
