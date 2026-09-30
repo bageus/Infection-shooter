@@ -7,12 +7,13 @@ const BUDGET := preload("res://game/presentation/office_floor/blood_mark_budget.
 @export_range(1, 200) var max_marks := 128
 @export_range(1.0, 300.0) var mark_lifetime := 90.0
 @export_range(0.1, 5.0) var fade_seconds := 1.2
-@export var splatter_size := Vector2(0.12, 0.45)
-@export var stain_size := Vector2(0.08, 0.30)
-@export var drops_size := Vector2(0.15, 0.60)
-@export var smear_size := Vector2(0.25, 0.90)
-@export var pool_size := Vector2(0.35, 0.90)
-@export var drop_spacing := Vector2(0.4, 0.8)
+@export var splatter_size := Vector2(0.24, 0.75)
+@export var stain_size := Vector2(0.16, 0.50)
+@export var drops_size := Vector2(0.25, 0.80)
+@export var smear_size := Vector2(0.35, 1.20)
+@export var pool_size := Vector2(0.65, 1.50)
+@export var drop_spacing := Vector2(0.4, 0.5)
+@export_range(1, 4) var splatters_per_hit := 3
 @export var pool_delay := Vector2(0.3, 0.8)
 @export var pool_growth := Vector2(1.0, 3.0)
 @export_range(0.03, 0.15) var projection_depth := 0.08
@@ -25,6 +26,7 @@ const BUDGET := preload("res://game/presentation/office_floor/blood_mark_budget.
 @export var fade_length := 12.0
 @export_range(1, 6) var mobile_per_surface_limit := 6
 @export_range(128, 1024) var texture_max_dimension := 512
+@export_range(0.8, 1.5) var blood_brightness := 1.18
 @export var preload_textures := true
 
 var _library := LIBRARY.new()
@@ -46,7 +48,7 @@ func _ready() -> void:
 	_diagnostics = {"version": 1, "engine": Engine.get_version_info().get("string", "unknown"), "renderer": method, "api_valid": _verify_engine_api()}
 	_decal = method in ["forward_plus", "mobile"]
 	if preload_textures:
-		_library.load_assets(texture_max_dimension)
+		_library.load_assets(texture_max_dimension, blood_brightness)
 	_surfaces = SURFACES.new() as Node3D
 	_surfaces.set("collision_mask", surface_collision_mask)
 	_surfaces.set("visual_mask", receiver_visual_mask)
@@ -155,7 +157,8 @@ func _emit_splatter_hit(position: Vector3, direction: Vector3, weapon: String, e
 	var surface: Dictionary = _surfaces.call("find_behind", position, direction, excluded)
 	if surface.is_empty():
 		surface = _surfaces.call("find_floor", position, excluded)
-	_submit("splatter", surface, direction, splatter_size, true, weapon == "SHOTGUN")
+	for mark in range(splatters_per_hit):
+		_submit("splatter", surface, direction, splatter_size, true, weapon == "SHOTGUN")
 
 
 func _emit_small_stain(position: Vector3, excluded: Array[RID]) -> void:
@@ -192,7 +195,7 @@ func _emit_death_pool(position: Vector3, excluded: Array[RID], death_id: int) ->
 
 
 func _submit(category: String, surface: Dictionary, direction: Vector3, sizes: Vector2, directed: bool = false, heavy: bool = false) -> void:
-	surface = _surfaces.call("jitter_surface", surface, 0.025)
+	surface = _surfaces.call("jitter_surface", surface, 0.12 if category == "splatter" else 0.025)
 	var definition := _definition(category, surface, direction, sizes, directed, heavy)
 	_budget.call("submit", definition, surface)
 
@@ -215,7 +218,7 @@ func _definition(category: String, surface: Dictionary, direction: Vector3, size
 		footprint = _surfaces.call("fit_quad", surface, basis, footprint)
 		if footprint == Vector2.ZERO:
 			return {}
-	return {"texture": entry["texture"], "footprint": footprint, "basis": basis, "local_basis": (hit["collider"] as Node3D).global_basis.inverse() * basis, "tint": Color(randf_range(0.86, 1.0), randf_range(0.86, 0.97), randf_range(0.86, 0.97), randf_range(0.85, 0.98))}
+	return {"texture": entry["texture"], "footprint": footprint, "basis": basis, "local_basis": (hit["collider"] as Node3D).global_basis.inverse() * basis, "tint": Color(1.0, randf_range(0.90, 1.0), randf_range(0.90, 1.0), randf_range(0.96, 1.0))}
 
 
 func clear_marks() -> void:

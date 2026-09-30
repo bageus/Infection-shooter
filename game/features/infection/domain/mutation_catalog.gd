@@ -24,8 +24,7 @@ const PASSIVE := [
 	["devourer", "Devourer", "Predator + Biomass", 3, "✚", "Melee kills restore health."],
 	["reactive_evolution", "Reactive Evolution", "Biomass + Adaptation", 3, "⬡", "Taking damage builds resistance."],
 	["retaliation", "Retaliation", "Adaptation + Neural System", 3, "⚡", "Taking damage releases an electric pulse."],
-	["hyperactive", "Hyperactive Organism", "Neural System + Metabolism", 3, "↯", "Kill streaks reduce ability cooldowns."],
-	["organic_ammo", "Organic Ammo", "Metabolism + Arsenal", 3, "❖", "Convert health into ammunition."]
+	["hyperactive", "Hyperactive Organism", "Neural System + Metabolism", 3, "↯", "Kill streaks reduce ability cooldowns."]
 ]
 
 const ACTIVE := [
@@ -48,8 +47,7 @@ const HYBRID_PARENTS := {
 	"devourer": ["claws", "hypertrophy"],
 	"reactive_evolution": ["hypertrophy", "bone_armor"],
 	"retaliation": ["bone_armor", "synapses"],
-	"hyperactive": ["synapses", "recycling"],
-	"organic_ammo": ["recycling", "muscle_memory"]
+	"hyperactive": ["synapses", "recycling"]
 }
 
 

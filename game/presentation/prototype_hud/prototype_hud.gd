@@ -1,5 +1,10 @@
 extends CanvasLayer
 
+const ICON_REGIONS := preload("res://game/presentation/prototype_hud/weapon_icon_regions.gd")
+# Reading order of the updated atlas: rifle, pistol, uzi, shotgun, syringe, launcher.
+@export var weapon_icon_cells := PackedInt32Array([1, 2, 3, 5])
+@export var antidote_icon_cell := 4
+
 @export var player_path: NodePath
 
 @onready var hp_bar: ProgressBar = $HealthPanel/HealthBar
@@ -22,6 +27,7 @@ extends CanvasLayer
 var player: Node
 var infection: Node
 var _perf_timer := 0.0
+var _control_notice: Label
 var _last_weapon_index := -1
 var _weapon_icons: Array[Texture2D] = []
 var _slot_weapon_indices := [-1, -1, -1]
@@ -33,9 +39,19 @@ func _ready() -> void:
 	hp_bar.max_value = player.max_health
 	mutation_bar.max_value = 100.0
 	_configure_icon_regions()
+	_control_notice = Label.new()
+	_control_notice.text = "CONTROL LOST — MUTATION TAKES OVER"
+	_control_notice.set_anchors_and_offsets_preset(Control.PRESET_TOP_WIDE)
+	_control_notice.position.y = 55.0
+	_control_notice.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	_control_notice.add_theme_font_size_override("font_size", 22)
+	_control_notice.add_theme_color_override("font_color", Color(1.0, 0.3, 0.2))
+	_control_notice.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	add_child(_control_notice)
 
 
 func _process(delta: float) -> void:
+	_control_notice.visible = bool(infection.call("is_control_lost"))
 	_update_vitals()
 	_update_weapon()
 	_perf_timer += delta
@@ -49,19 +65,15 @@ func _configure_icon_regions() -> void:
 	var texture := weapon_icon.texture
 	if texture == null:
 		return
-	var size := texture.get_size()
-	# Atlas order in icon_interface.png: rifle, pistol, uzi, shotgun, syringe.
-	var cell_width := size.x / 5.0
-	var regions: Array[Rect2] = []
-	for i in 5:
-		regions.append(Rect2(cell_width * i, 0.0, cell_width, size.y))
-	for region in [regions[1], regions[2], regions[3]]:
-		var atlas := AtlasTexture.new()
-		atlas.atlas = texture
-		atlas.region = region
-		_weapon_icons.append(atlas)
+	var icons := ICON_REGIONS.extract(texture)
+	_weapon_icons.clear()
+	for cell in weapon_icon_cells:
+		_weapon_icons.append(icons[cell] if cell >= 0 and cell < icons.size() else null)
+	if _weapon_icons.size() < 4 or _weapon_icons[3] == null:
+		push_warning("Weapon atlas: launcher cell unavailable; check weapon_icon_cells reading order.")
 	_refresh_slot_icons()
-	_set_region(antidote_icon, texture, regions[4])
+	if antidote_icon_cell >= 0 and antidote_icon_cell < icons.size():
+		antidote_icon.texture = icons[antidote_icon_cell]
 
 
 func _refresh_slot_icons() -> void:
@@ -130,7 +142,7 @@ func _update_reload_message(reloading: bool, empty: bool, reserve_ammo: int) -> 
 
 func _update_weapon_warning(empty: bool) -> void:
 	var warning_color := Color(1.0, 0.12, 0.08, 1.0)
-	var normal_color := Color(0.82, 0.93, 1.0, 1.0)
+	var normal_color := Color.WHITE
 	weapon_name.modulate = warning_color if empty else Color.WHITE
 	magazine.modulate = warning_color if empty else Color.WHITE
 	reload_label.modulate = warning_color if empty else Color(0.1, 0.9, 1.0, 1.0)

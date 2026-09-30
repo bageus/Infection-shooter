@@ -1,4 +1,5 @@
 extends CharacterBody3D
+const CONTROL_LOSS := preload("res://game/features/player/mutation_control_loss.gd")
 const MUTATION_EFFECTS := preload("res://game/features/player/mutation_skill_effects.gd")
 @export var move_speed: float = 6.0
 @export var sprint_speed: float = 9.0
@@ -39,6 +40,7 @@ var _stun_rotation := 0
 var _stun_ringing: AudioStreamPlayer
 var _original_master_volume := 0.0
 var mutation_effects: Node
+var _mutation_control := CONTROL_LOSS.new()
 var _mutation_menu_open := false
 var _slot_weapons: Array[int] = [0, 1, 2]
 var _emergency_key := false
@@ -62,13 +64,20 @@ func _physics_process(delta: float) -> void:
 	if absf(camera.position.length()-_camera_distance)>0.001:
 		camera.position=camera.position.normalized()*lerpf(camera.position.length(),_camera_distance,1.0-exp(-8.0*delta))
 	_roll_cooldown_remaining=maxf(0.0,_roll_cooldown_remaining-delta)
-	if not _mutation_menu_open:
+	var control_lost: bool = infection_runtime.call("is_control_lost")
+	_mutation_control.tick(delta, control_lost)
+	if control_lost:
+		_roll_remaining = 0.0
+	if not _mutation_menu_open and not control_lost:
 		_handle_actions()
 	_update_camera(delta)
-	_update_aim()
+	if control_lost:
+		_aim_uncontrolled()
+	else:
+		_update_aim()
 	_update_move(delta)
 	var w:=get_current_weapon()
-	if w != null and not _mutation_menu_open and _roll_remaining <= 0.0 and (Input.is_action_pressed("fire") if bool(w.call("wants_continuous_fire")) else Input.is_action_just_pressed("fire")):
+	if w != null and not _mutation_menu_open and _roll_remaining <= 0.0 and (control_lost or (Input.is_action_pressed("fire") if bool(w.call("wants_continuous_fire")) else Input.is_action_just_pressed("fire"))):
 		if int(w.call("get_magazine_ammo")) == 0:
 			mutation_effects.call("refill_organic_magazine")
 		w.call("try_fire_at", _aim_point)
@@ -218,11 +227,11 @@ func _update_move(delta:float)->void:
 	var d:=_move_direction()
 	if _roll_remaining>0.0:
 		_roll_remaining=maxf(0.0,_roll_remaining-delta);velocity.x=_roll_direction.x*roll_speed;velocity.z=_roll_direction.z*roll_speed
-	elif Input.is_action_just_pressed("roll") and d.length_squared()>0.0001 and _roll_cooldown_remaining<=0.0:
+	elif not bool(infection_runtime.call("is_control_lost")) and Input.is_action_just_pressed("roll") and d.length_squared()>0.0001 and _roll_cooldown_remaining<=0.0:
 		_roll_direction=d.normalized();_roll_remaining=roll_duration;_roll_cooldown_remaining=roll_cooldown
 		mutation_effects.call("on_roll")
 	else:
-		var target:=d*(sprint_speed if Input.is_action_pressed("sprint") else move_speed) * float(mutation_effects.call("movement_multiplier"))
+		var target:=d*(sprint_speed if Input.is_action_pressed("sprint") and not bool(infection_runtime.call("is_control_lost")) else move_speed) * float(mutation_effects.call("movement_multiplier"))
 		var accel:=ground_acceleration if d.length_squared()>0.0001 else ground_deceleration
 		velocity.x=move_toward(velocity.x,target.x,accel*delta);velocity.z=move_toward(velocity.z,target.z,accel*delta)
 	velocity.y=0.0 if is_on_floor() else velocity.y-gravity_acceleration*delta
@@ -258,6 +267,8 @@ func _push_roll_contacts()->void:
 func _move_direction()->Vector3:
 	if _mutation_menu_open:
 		return Vector3.ZERO
+	if bool(infection_runtime.call("is_control_lost")):
+		return _mutation_control.direction
 	var input:=Input.get_vector("move_left","move_right","move_up","move_down")
 	if _stun_remaining > 0.0 and _stun_intensity > 0.25:
 		input = input.rotated(float(_stun_rotation) * PI * 0.5)
@@ -311,3 +322,12 @@ func _spawn_floor_blood(amount:float)->void:
 		mesh.surface_end();mark.mesh=mesh;get_tree().current_scene.add_child(mark)
 		mark.global_position=Vector3(global_position.x,0.025,global_position.z)+Vector3(randf_range(-0.5,0.5),0,randf_range(-0.5,0.5))
 		mark.rotation_degrees=Vector3(-90,randf_range(0,360),0)
+
+
+func _aim_uncontrolled() -> void:
+	var direction: Vector3 = _mutation_control.direction
+	if direction.length_squared() < 0.0001:
+		return
+	_aim_point = aim_pivot.global_position + direction * 8.0
+	aim_pivot.look_at(_aim_point, Vector3.UP)
+	body_visual.look_at(body_visual.global_position + direction, Vector3.UP)

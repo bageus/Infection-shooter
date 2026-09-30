@@ -37,6 +37,7 @@ func configure(infection: Node) -> void:
 	layout.add_child(title)
 	points_label = Label.new()
 	points_label.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	points_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	title.add_child(points_label)
 	var close := Button.new()
 	close.text = "Close [Esc / M]"
@@ -49,6 +50,7 @@ func configure(infection: Node) -> void:
 	layout.add_child(content)
 	content.resized.connect(_fit_tree)
 	var hint := Label.new()
+	hint.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	hint.text = "Click a circle to unlock a skill. Hover for details. Lock a learned skill to keep it when mutation drops."
 	layout.add_child(hint)
 	panel.hide()
@@ -152,10 +154,10 @@ func _fit_tree() -> void:
 	if content == null or content.get_child_count() == 0:
 		return
 	var canvas := content.get_child(0) as Control
-	var design_size := Vector2(1280, 900)
+	var design_size: Vector2 = TREE_CANVAS.DESIGN_SIZE
 	var factor := minf(content.size.x / design_size.x, content.size.y / design_size.y)
 	canvas.scale = Vector2.ONE * factor
-	canvas.position = (content.size - design_size * factor) * 0.5
+	canvas.position = Vector2(0.0, maxf(0.0, (content.size.y - design_size.y * factor) * 0.5))
 
 
 func _refresh() -> void:
@@ -173,12 +175,15 @@ func _refresh() -> void:
 	content.add_child(canvas)
 	_fit_tree.call_deferred()
 	var thresholds: Array[float] = []
+	var opened: Array[bool] = []
 	for branch_index in TREE_CANVAS.BRANCHES.size():
 		for row in skills:
 			if int(row[3]) == 0 and str(row[2]) == TREE_CANVAS.BRANCHES[branch_index] and (skills.find(row) < 12) == (branch_index < 4):
 				var requirement: Dictionary = runtime.call("skill_requirements", str(row[0]))
 				thresholds.append(float(requirement["mutation"]))
-	canvas.call("configure_progression", thresholds, float(runtime.call("get_mutation")))
+				opened.append(bool(requirement["branch_open"]))
+	canvas.call("configure_progression", thresholds, float(runtime.call("get_mutation")), opened)
+	_add_section_labels(canvas)
 	var progress: Array[int] = []
 	for branch_index in TREE_CANVAS.BRANCHES.size():
 		var branch: String = TREE_CANVAS.BRANCHES[branch_index]
@@ -191,10 +196,11 @@ func _refresh() -> void:
 			requirements = runtime.call("skill_requirements", str(row[0]))
 			var rank := int(row[3])
 			_add_skill(canvas, row, canvas.call("skill_position", branch_index, rank))
-			if bool(runtime.call("has_skill", str(row[0]))) or bool(runtime.call("can_upgrade_skill", str(row[0]))):
+			if bool(requirements["path_reached"]):
 				furthest = maxi(furthest, rank)
 		var label := Label.new()
-		label.text = branch.to_upper() + ("  ·  ACTIVE" if group_is_active else "  ·  PASSIVE")
+		label.text = branch.to_upper()
+		label.modulate.a = 1.0 if bool(requirements["branch_open"]) else 0.35
 		label.position = canvas.call("label_position", branch_index)
 		label.add_theme_font_size_override("font_size", 14)
 		var gate := Label.new()
@@ -204,17 +210,13 @@ func _refresh() -> void:
 		canvas.add_child(gate)
 		canvas.add_child(label)
 		progress.append(furthest)
-	var hybrid_label := Label.new()
-	hybrid_label.text = "HYBRID SKILLS  ·  LINK TWO BRANCHES"
-	hybrid_label.position = Vector2(30, 790)
-	canvas.add_child(hybrid_label)
 	var hybrid_index := 0
 	var hybrids: Array[bool] = []
 	for row in skills:
 		if int(row[3]) != 3:
 			continue
 		_add_skill(canvas, row, canvas.call("hybrid_position", hybrid_index))
-		hybrids.append(bool(runtime.call("has_skill", str(row[0]))) or bool(runtime.call("can_upgrade_skill", str(row[0]))))
+		hybrids.append(bool(runtime.call("skill_requirements", str(row[0]))["path_reached"]))
 		hybrid_index += 1
 	canvas.call("set_progress", progress, hybrids)
 	var open := Button.new()
@@ -249,14 +251,15 @@ func _add_skill(canvas: Control, row: Array, center: Vector2) -> void:
 	button.position = center - Vector2(22, 22)
 	button.custom_minimum_size = Vector2(44, 44)
 	button.size = Vector2(44, 44)
-	button.tooltip_text = "%s\n%s\nRequires %d%% mutation · %d%% stability\n%s%s" % [row[1], row[5], roundi(level), roundi(requirements["stability"]), "Branch open" if requirements["branch_open"] else "Collect control ampules to open this branch", " · Learned" if learned else ""]
+	button.tooltip_text = "%s\n%s\nRequires %d%% mutation · %d%% stability\n%s%s" % [row[1], row[5], roundi(level), roundi(requirements["stability"]), "Branch open" if requirements["branch_open"] else "Collect DNA to open this branch", " · Learned" if learned else ""]
 	button.disabled = not available
+	button.modulate = Color.WHITE if bool(requirements["branch_open"]) else Color(0.35, 0.35, 0.35, 1.0)
 	button.focus_mode = Control.FOCUS_NONE
 	var style := StyleBoxFlat.new()
-	style.bg_color = Color(0.14, 0.57, 0.43) if enabled else (Color(0.19, 0.38, 0.36) if available else (Color(0.29, 0.43, 0.48) if learned else Color(0.15, 0.20, 0.26)))
-	style.border_color = Color(0.59, 0.98, 0.79) if enabled or available else Color(0.42, 0.53, 0.58)
+	style.bg_color = Color(0.16, 0.45, 0.06) if enabled else (Color(0.21, 0.36, 0.12) if available else Color(0.22, 0.25, 0.28))
+	style.border_color = Color(0.3, 0.95, 0.1) if enabled or available else Color(0.42, 0.53, 0.58)
 	if available:
-		style.shadow_color = Color(0.31, 0.92, 0.7, 0.36)
+		style.shadow_color = Color(0.3, 0.95, 0.1, 0.36)
 		style.shadow_size = 8
 	style.set_border_width_all(2)
 	style.set_corner_radius_all(22)
@@ -270,7 +273,7 @@ func _add_skill(canvas: Control, row: Array, center: Vector2) -> void:
 		var lock := Button.new()
 		lock.text = "L" if runtime.call("skill_locked", skill_id) else "+"
 		lock.tooltip_text = "Locked: kept when mutation drops" if runtime.call("skill_locked", skill_id) else "Lock skill against mutation loss"
-		lock.position = center + Vector2(18, 11)
+		lock.position = center + Vector2(35, -12)
 		lock.custom_minimum_size = Vector2(24, 24)
 		lock.size = Vector2(24, 24)
 		lock.pressed.connect(func() -> void: runtime.call("toggle_skill_lock", skill_id))
@@ -283,3 +286,14 @@ func _equipped() -> Array[String]:
 		if runtime.call("has_skill", str(row[0])):
 			result.append(str(row[0]))
 	return result
+
+
+
+func _add_section_labels(canvas: Control) -> void:
+	for entry in [["ACTIVE", 185.0], ["PASSIVE", 490.0], ["HYBRID", 650.0]]:
+		var label := Label.new()
+		label.text = str(entry[0])
+		label.position = Vector2(4, float(entry[1]))
+		label.add_theme_font_size_override("font_size", 13)
+		label.modulate = Color(0.72, 0.8, 0.86)
+		canvas.add_child(label)

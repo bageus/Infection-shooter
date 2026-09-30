@@ -4,7 +4,7 @@ task_id: T002
 status: IN_PROGRESS
 phase: 1
 owner: AI
-updated: 2026-09-23
+updated: 2026-09-30
 ---
 
 # Active task
@@ -32,6 +32,10 @@ Procedural generation, save/checkpoints, final HUD, monetization, platform SDKs 
 - Structural modules visually touch edge-to-edge with no visible gaps and no overlap beyond a tiny seam tolerance.\n- Exterior corners face inward correctly.\n- Perimeter and authored interior walls block the player.\n- The expanded floor and defeat menu remain functional.
 
 ## Progress
+
+30.09.2026: по последнему запросу владельца дерево получило независимое заполнение пути до последовательного доступного узла через read-only skill_requirements DTO v2/path_reached (покупка по-прежнему требует очко). Последние пассивные корни разделены; ACTIVE/PASSIVE/HYBRID обозначены слева, повторные категории/деления ствола удалены, lock/+ сдвинут вправо, гибриды располагаются между соседними пассивными ветками. Organic Ammo между первой/последней ветками удалён; reconcile очищает старый locked ID. Салатовый цвет совпадает с HUD, стабильностью закрытые ветки затемнены; меню компактно масштабируется и прижимается влево. Player использует существующую потерю контроля для автономного движения/прицеливания/стрельбы вопреки вводу; ручной перекат и команды оружия блокируются; runtime блокирует casts, main обрабатывает terminal defeat, HUD показывает потерю контроля. Таймеры 10с/5с/7с, эскалация, кап 95 и антидот прежние. Возле гранатомёта в (-17.5,0.5,-15) добавлен тестовый DNA: +5 stability через существующую команду, повторный подбор через 2 игровых секунды, без новых progression/save-состояний.
+Кровь крупнее (pool 0.65–1.5м), насыщеннее, по 3 следа на попадание с прежним throttle/лимитом128. Выпавшее оружие использует свои GLB pistol/uzi/shotgun/launcher через additive public make_pickup_visual(index). HUD извлекает видимые части нового атласа один раз и кеширует; mapping по умолчанию сохраняет 5 прежних иконок + launcher шестой. Точное расположение нового бинарного PNG не проверено: GitHub-коннектор возвращает пустой base64 и запрещает UTF-8 декодирование PNG. Добавлены тесты path/retired ID/cast, layout/DNA, actual-player control и 6-cell crop; см. docs/MUTATION_FEEDBACK_QA.md. Восстановлены исходники после автоматической очистки workspace; бинарного Godot и моделей здесь нет. Parser/readiness/architecture пройдены; runtime/визуал ожидают установленного движка, общий validator блокируется прежним planning_mode.gd. ADR-0007 фиксирует контракт и ответственность без архитектурного исключения.
+Следующее действие: в рабочем Godot 4.7.2 выполнить сценарии MUTATION_FEEDBACK_QA и подтвердить правильный индекс launcher в новом атласе (настройка weapon_icon_cells).
 
 30.09.2026: дополнение к крови по скриншоту владельца — drop_table больше не добавляет +0.18м к высоте врага. Выпавшие medkit/ammo/antidote один раз вызывают settle_on_floor в physics-фазе: raycast вниз исключает actors/areas, нижняя граница всех видимых мешей ставится на поверхность с 0.018м допуском под визуальную плитку. Если пола нет, лут удаляется вместо зависания. Подбор, количество и вероятность выпадения прежние. Добавлен pickup_floor test с тремя разными origin модели и отсутствующим полом; запуск ожидает рабочий Godot.
 

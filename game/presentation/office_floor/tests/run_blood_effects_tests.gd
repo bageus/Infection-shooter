@@ -148,6 +148,7 @@ func _setup_effects() -> void:
 	texture = ImageTexture.create_from_image(image)
 	effects = EFFECTS.instantiate() as Node3D
 	effects.set("preload_textures", false)
+	effects.set("splatters_per_hit", 1)
 	effects.set("mark_lifetime", 30.0)
 	effects.set("fade_seconds", 0.05)
 	effects.set("pool_delay", Vector2(0.4, 0.4))

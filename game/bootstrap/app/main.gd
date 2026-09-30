@@ -62,7 +62,7 @@ func _ready() -> void:
 	mission_layout = MISSION_LAYOUT.new()
 	mission_layout.name = "MissionLayout"
 	gameplay.add_child(mission_layout)
-	mission_layout.call("setup", self)
+	mission_layout.call("setup", self, player, infection_runtime)
 	var mutagen_test_cloud := TEST_CLOUD.instantiate()
 	mutagen_test_cloud.name = "PermanentTestMutagen"
 	mutagen_test_cloud.set("permanent", true)
@@ -98,6 +98,9 @@ func _process(_delta: float) -> void:
 		return
 	if mission_layout.call("goal_reached", player.global_position):
 		_end_run("MISSION COMPLETE")
+		return
+	if bool(infection_runtime.call("is_defeated")):
+		_end_run("MUTATION OVERTOOK YOU")
 		return
 	if player.global_position.y < FALL_DEATH_Y:
 		_end_run("YOU FELL OUTSIDE THE FLOOR")

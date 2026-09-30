@@ -27,6 +27,21 @@ static func launcher_model() -> PackedScene:
 	return null
 
 
+# Public v1 pickup art: weapon indices match the player's existing slots.
+static func make_pickup_visual(index: int) -> Node3D:
+	var paths := [
+		"res://models/objects/weapons/pistol_lowpoly.glb",
+		"res://models/objects/weapons/uzi_lowpoly.glb",
+		"res://models/objects/weapons/shotgun_lowpoly.glb",
+		"res://models/objects/weapons/six_chamber_launcher_lowpoly.glb"
+	]
+	if index < 0 or index >= paths.size() or not ResourceLoader.exists(paths[index]):
+		push_error("Weapon pickup model unavailable for index %d" % index)
+		return Node3D.new()
+	var model := load(paths[index]) as PackedScene
+	return model.instantiate() as Node3D if model != null else Node3D.new()
+
+
 static func casing_model() -> PackedScene:
 	var path := "res://models/objects/enviroments/12/12_launcher_casing_lowpoly.glb"
 	if ResourceLoader.exists(path):

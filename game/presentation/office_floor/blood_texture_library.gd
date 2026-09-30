@@ -6,7 +6,7 @@ var entries: Dictionary = {}
 var recent: Dictionary = {}
 
 
-func load_assets(max_dimension: int = 512) -> void:
+func load_assets(max_dimension: int = 512, brightness: float = 1.18) -> void:
 	if not entries.is_empty():
 		return
 	for category in CATEGORIES:
@@ -36,6 +36,7 @@ func load_assets(max_dimension: int = 512) -> void:
 			if longest > max_dimension:
 				var factor := float(max_dimension) / longest
 				image.resize(maxi(1, roundi(image.get_width() * factor)), maxi(1, roundi(image.get_height() * factor)), Image.INTERPOLATE_LANCZOS)
+			image.adjust_bcs(brightness, 1.0, 1.0)
 			image.generate_mipmaps()
 			entries[category].append({"texture": ImageTexture.create_from_image(image), "aspect": float(used.size.x) / used.size.y, "variant": index})
 

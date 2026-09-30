@@ -27,6 +27,9 @@ func _run() -> void:
 	_test_instability_resets_below_critical_threshold()
 	_test_mutagen_pauses_during_control_loss()
 	_test_progression_budget_and_stages()
+	_test_path_feedback_without_spare_points()
+	_test_retired_wraparound_hybrid()
+	_test_runtime_cast_control_guard()
 	_test_hybrid_stage_gates()
 	_test_ampule_notification_and_antidote()
 	_test_skill_tree_lock_and_reactivation()
@@ -109,9 +112,10 @@ func _test_hybrid_stage_gates() -> void:
 	_expect(not tree.can_upgrade("killer_instinct", 69.99, 90.0), "An early hybrid still requires 70 mutation.")
 	_expect(tree.can_upgrade("killer_instinct", 70.0, 45.0), "Existing hybrid parents remain valid.")
 	_expect(tree.upgrade("recycling", 100.0, 90.0), "Late hybrid parent learned.")
-	_expect(not tree.can_upgrade("organic_ammo", 94.99, 90.0), "A late hybrid requires 95 mutation.")
-	_expect(not tree.can_upgrade("organic_ammo", 100.0, 89.99), "A late hybrid cannot bypass the final stability gate.")
-	_expect(tree.can_upgrade("organic_ammo", 95.0, 90.0), "A late hybrid opens with its unchanged parents.")
+	_expect(tree.upgrade("synapses", 100.0, 90.0), "Adjacent late parent learned.")
+	_expect(not tree.can_upgrade("hyperactive", 94.99, 90.0), "A late hybrid requires 95 mutation.")
+	_expect(not tree.can_upgrade("hyperactive", 100.0, 89.99), "A late hybrid cannot bypass the final stability gate.")
+	_expect(tree.can_upgrade("hyperactive", 95.0, 90.0), "A late hybrid opens with its unchanged parents.")
 
 
 func _test_ampule_notification_and_antidote() -> void:
@@ -347,3 +351,37 @@ func _expect(condition: bool, message: String) -> void:
 
 func _expect_float(actual: float, expected: float, message: String) -> void:
 	_expect(is_equal_approx(actual, expected), "%s Expected %.4f, got %.4f." % [message, expected, actual])
+
+
+
+func _test_path_feedback_without_spare_points() -> void:
+	var tree := MutationTree.new()
+	tree.learned["acid_spit"] = true
+	_expect(tree.points(25.0) == 0, "Fixture has spent its only point.")
+	_expect(tree.path_reached("muscle_memory", 25.0, 30.0), "Reached first circle is visible even with no spare point.")
+	_expect(not tree.can_upgrade("muscle_memory", 25.0, 30.0), "Path feedback cannot buy a skill without a point.")
+	_expect(not tree.path_reached("blood_scent", 100.0, 95.0), "A later circle still requires its predecessor.")
+	_expect(not tree.path_reached("claws", 100.0, 30.0), "A closed stability gate cannot light a branch.")
+	_expect(tree.path_reached("claws", 40.0, 45.0), "The next stage fills through its first reachable skill.")
+
+
+func _test_retired_wraparound_hybrid() -> void:
+	var tree := MutationTree.new()
+	tree.learned["organic_ammo"] = true
+	tree.locked["organic_ammo"] = true
+	_expect(Catalog.find("organic_ammo").is_empty(), "No skill links the first and last passive branches.")
+	tree.reconcile(100.0)
+	_expect(not tree.learned.has("organic_ammo") and not tree.locked.has("organic_ammo"), "Retired locked progress is cleaned safely.")
+
+
+func _test_runtime_cast_control_guard() -> void:
+	var runtime := Runtime.new()
+	runtime.absorb_mutagen(6.0)
+	runtime.upgrade_skill("acid_spit")
+	_expect(runtime.has_skill("acid_spit"), "Fixture has an active learned ability.")
+	runtime.call("_physics_process", 10.0)
+	_expect(runtime.is_control_lost(), "Existing ten-second instability timer reaches the runtime.")
+	_expect(not runtime.cast_skill("acid_spit"), "Hotbar cannot bypass control loss.")
+	runtime.call("_physics_process", 5.0)
+	_expect(runtime.cast_skill("acid_spit"), "Casting returns after the normal control-loss duration.")
+	runtime.free()

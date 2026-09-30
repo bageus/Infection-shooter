@@ -65,7 +65,7 @@ func skill_requirements(skill_id: String) -> Dictionary:
 	if row.is_empty():
 		return {}
 	return {
-		"version": 1, "stage": CATALOG.stage(row) + 1,
+		"version": 2, "path_reached": tree.path_reached(skill_id, _domain.mutation, _domain.critical_threshold), "stage": CATALOG.stage(row) + 1,
 		"mutation": CATALOG.threshold(row), "stability": CATALOG.required_stability(row),
 		"branch_open": _domain.critical_threshold >= CATALOG.required_stability(row)
 	}
@@ -122,6 +122,8 @@ func toggle_skill_lock(skill_id: String) -> bool:
 
 
 func cast_skill(skill_id: String) -> bool:
+	if _domain.is_control_lost() or _domain.defeated:
+		return false
 	if not tree.cast(skill_id, _domain.mutation, _domain.critical_threshold):
 		return false
 	skill_cast.emit(skill_id)

@@ -27,7 +27,7 @@ func reconcile(mutation: float) -> bool:
 					protected[str(ancestor[0])] = true
 	for skill_id in learned.keys():
 		var row := CATALOG.find(str(skill_id))
-		if (row.is_empty() or mutation < CATALOG.threshold(row)) and not locked.has(skill_id) and not protected.has(skill_id):
+		if row.is_empty() or (mutation < CATALOG.threshold(row) and not locked.has(skill_id) and not protected.has(skill_id)):
 			learned.erase(skill_id)
 			locked.erase(skill_id)
 			changed = true
@@ -62,8 +62,13 @@ func is_active(skill_id: String, mutation: float, stability: float = 30.0) -> bo
 
 
 func can_upgrade(skill_id: String, mutation: float, stability: float = 30.0) -> bool:
+	return not learned.has(skill_id) and points(mutation) > 0 and path_reached(skill_id, mutation, stability)
+
+
+# Eligibility for drawing the path is independent of unspent points.
+func path_reached(skill_id: String, mutation: float, stability: float = 30.0) -> bool:
 	var row := CATALOG.find(skill_id)
-	if row.is_empty() or points(mutation) <= 0 or mutation < CATALOG.threshold(row) or learned.has(skill_id) or stability < CATALOG.required_stability(row):
+	if row.is_empty() or mutation < CATALOG.threshold(row) or stability < CATALOG.required_stability(row):
 		return false
 	var rank := int(row[3])
 	if rank > 0 and rank < 3 and not _has_previous(row, _branch_rows(row)):
