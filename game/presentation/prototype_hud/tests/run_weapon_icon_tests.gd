@@ -105,4 +105,4 @@ func _check_crop_pixels(icon: Image, crop: Image) -> void:
 			if pixel.a > 0.12:
 				visible += 1
 				faithful = faithful and pixel.is_equal_approx(crop.get_pixel(x, y))
-	_expect(visible > 1000 and faithful, "Visible artwork retains the atlas pixels; only neighbouring artwork is discarded.")
+	_expect(visible > 1000 and visible < icon.get_width() * icon.get_height() * 0.85 and faithful, "Visible artwork retains the atlas pixels; only neighbouring artwork is discarded.")
