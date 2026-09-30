@@ -1,77 +1,54 @@
-[gd_scene format=3]
+[gd_scene format=3 uid="uid://bmmfec4uitqs"]
 
-[ext_resource type="PackedScene" path="res://game/presentation/office_floor/public/structural/column.tscn" id="column"]
+[ext_resource type="Script" uid="uid://cqsuu1g00qloe" path="res://game/presentation/office_floor/public/base_floor_renderer.gd" id="base_floor_renderer"]
 [ext_resource type="PackedScene" path="res://game/presentation/prototype_hud/public/crosshair.tscn" id="crosshair"]
-[ext_resource type="PackedScene" path="res://game/presentation/office_floor/public/structural/wall_emergency_door.tscn" id="emergency"]
-[ext_resource type="PackedScene" path="res://game/presentation/office_floor/public/structural/wall_half_panel.tscn" id="half"]
 [ext_resource type="PackedScene" path="res://game/presentation/prototype_hud/public/prototype_hud.tscn" id="hud"]
+[ext_resource type="Script" uid="uid://b3y7ra5hab6bu" path="res://game/features/combat/public/impact_effects.gd" id="impact_effects"]
+[ext_resource type="Script" uid="uid://domorb0r68hpa" path="res://game/bootstrap/app/planning_lighting.gd" id="planning_lighting"]
 [ext_resource type="PackedScene" path="res://game/features/player/public/player.tscn" id="player"]
 [ext_resource type="PackedScene" path="res://game/presentation/prototype_hud/public/radar.tscn" id="radar"]
-[ext_resource type="Script" path="res://game/bootstrap/app/main.gd" id="script"]
-[ext_resource type="Script" path="res://game/features/combat/public/impact_effects.gd" id="impact_effects"]
-[ext_resource type="Script" path="res://game/presentation/prototype_hud/public/fog_overlay.gd" id="fog"]
-[ext_resource type="PackedScene" path="res://game/presentation/office_floor/public/structural/wall_straight.tscn" id="wall"]
-[ext_resource type="PackedScene" path="res://game/presentation/office_floor/public/structural/wall_door.tscn" id="wall_door"]
-[ext_resource type="PackedScene" path="res://game/presentation/office_floor/public/structural/window_double.tscn" id="window"]
-[ext_resource type="Script" path="res://game/presentation/office_floor/public/base_floor_renderer.gd" id="base_floor_renderer"]
-
-[ext_resource type="Script" path="res://game/bootstrap/app/planning_lighting.gd" id="planning_lighting"]
+[ext_resource type="Script" uid="uid://cjm3a57h7v5im" path="res://game/bootstrap/app/main.gd" id="script"]
 
 [sub_resource type="Environment" id="env"]
 background_mode = 1
 background_color = Color(0.055, 0.075, 0.12, 1)
 ambient_light_source = 2
-ambient_light_color = Color(0.62, 0.68, 0.78, 1.0)
+ambient_light_color = Color(0.62, 0.68, 0.78, 1)
 ambient_light_energy = 0.15
-reflected_light_source = 0
-ssr_enabled = false
+tonemap_mode = 2
+ssr_max_steps = 48
+ssr_fade_out = 1.5
 ssao_enabled = true
 ssao_radius = 0.35
 ssao_intensity = 0.6
-ssao_light_affect = 0.0
-ssr_max_steps = 48
-ssr_fade_in = 0.15
-ssr_fade_out = 1.5
-tonemap_mode = 2
 
 [sub_resource type="BoxShape3D" id="floor_shape"]
 size = Vector3(80, 0.2, 60)
 
-[sub_resource type="BoxShape3D" id="module_collision"]
-size = Vector3(2.06, 3, 0.28)
-
-[sub_resource type="BoxShape3D" id="column_collision"]
-size = Vector3(0.9, 3, 0.9)
-
 [node name="Main" type="Node3D" unique_id=479644666]
 script = ExtResource("script")
 
-[node name="ImpactEffects" type="Node3D" parent="."]
+[node name="ImpactEffects" type="Node3D" parent="." unique_id=1177998471]
 script = ExtResource("impact_effects")
 
 [node name="WorldEnvironment" type="WorldEnvironment" parent="." unique_id=968256143]
 environment = SubResource("env")
 
-[node name="GlobalOverheadLight" type="DirectionalLight3D" parent="."]
-rotation_degrees = Vector3(-65, 0, 0)
+[node name="GlobalOverheadLight" type="DirectionalLight3D" parent="." unique_id=56491957]
+transform = Transform3D(1, 0, 0, 0, 0.42261824, 0.9063078, 0, -0.9063078, 0.42261824, 0, 0, 0)
 light_color = Color(0.88, 0.93, 1, 1)
 light_energy = 0.6
 light_specular = 0.3
 shadow_enabled = true
-light_angular_distance = 0.0
-shadow_bias = 0.1
-shadow_normal_bias = 2.0
-shadow_blur = 1.0
 directional_shadow_mode = 1
 directional_shadow_split_1 = 0.35
 directional_shadow_blend_splits = true
-directional_shadow_max_distance = 64.0
 directional_shadow_fade_start = 0.9
+directional_shadow_max_distance = 64.0
 
-[node name="PlanningLighting" type="Node" parent="."]
+[node name="PlanningLighting" type="Node" parent="." unique_id=1786001174]
 process_mode = 3
 script = ExtResource("planning_lighting")
-local_lights_enabled = false
 
 [node name="Floor" type="Node3D" parent="." unique_id=557799538]
 script = ExtResource("base_floor_renderer")
@@ -83,12 +60,12 @@ collision_layer = 3
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.1, 0)
 shape = SubResource("floor_shape")
 
-[node name="Structure" type="Node3D" parent="."]
+[node name="Structure" type="Node3D" parent="." unique_id=1779365985]
 
+[node name="PlanningObjects" type="Node3D" parent="." unique_id=1936559446]
 
-[node name="PlanningObjects" type="Node3D" parent="."]
-
-[node name="PauseMenu" type="Control" parent="."]
+[node name="PauseMenu" type="Control" parent="." unique_id=465858440]
+process_mode = 3
 visible = false
 z_index = 100
 layout_mode = 3
@@ -98,9 +75,8 @@ anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
 mouse_filter = 2
-process_mode = 3
 
-[node name="Dim" type="ColorRect" parent="PauseMenu"]
+[node name="Dim" type="ColorRect" parent="PauseMenu" unique_id=586975896]
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
@@ -110,8 +86,7 @@ grow_vertical = 2
 mouse_filter = 2
 color = Color(0, 0, 0, 0.72)
 
-[node name="Panel" type="PanelContainer" parent="PauseMenu"]
-mouse_filter = 1
+[node name="Panel" type="PanelContainer" parent="PauseMenu" unique_id=1393908385]
 layout_mode = 1
 anchors_preset = 8
 anchor_left = 0.5
@@ -124,35 +99,36 @@ offset_right = 220.0
 offset_bottom = 175.0
 grow_horizontal = 2
 grow_vertical = 2
-
-[node name="VBox" type="VBoxContainer" parent="PauseMenu/Panel"]
 mouse_filter = 1
+
+[node name="VBox" type="VBoxContainer" parent="PauseMenu/Panel" unique_id=1129578003]
 layout_mode = 2
 theme_override_constants/separation = 16
 
-[node name="Title" type="Label" parent="PauseMenu/Panel/VBox"]
+[node name="Title" type="Label" parent="PauseMenu/Panel/VBox" unique_id=1221542917]
 layout_mode = 2
 theme_override_font_sizes/font_size = 30
 text = "PAUSED"
 horizontal_alignment = 1
 
-[node name="Resume" type="Button" parent="PauseMenu/Panel/VBox"]
+[node name="Resume" type="Button" parent="PauseMenu/Panel/VBox" unique_id=991412518]
 layout_mode = 2
 text = "CONTINUE"
 
-[node name="Planning" type="Button" parent="PauseMenu/Panel/VBox"]
+[node name="Planning" type="Button" parent="PauseMenu/Panel/VBox" unique_id=1904998848]
 layout_mode = 2
 text = "PLANNING MODE"
 
-[node name="Restart" type="Button" parent="PauseMenu/Panel/VBox"]
+[node name="Restart" type="Button" parent="PauseMenu/Panel/VBox" unique_id=1553239938]
 layout_mode = 2
 text = "RESTART LEVEL"
 
-[node name="Exit" type="Button" parent="PauseMenu/Panel/VBox"]
+[node name="Exit" type="Button" parent="PauseMenu/Panel/VBox" unique_id=400446870]
 layout_mode = 2
 text = "EXIT GAME"
 
-[node name="PlanningUI" type="Control" parent="."]
+[node name="PlanningUI" type="Control" parent="." unique_id=2053469496]
+process_mode = 3
 visible = false
 z_index = 110
 layout_mode = 3
@@ -162,132 +138,130 @@ anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
 mouse_filter = 2
-process_mode = 3
 
-[node name="Panel" type="PanelContainer" parent="PlanningUI"]
+[node name="Panel" type="PanelContainer" parent="PlanningUI" unique_id=1408241995]
 z_index = 10
 layout_mode = 0
+anchor_bottom = 1.0
 offset_left = 8.0
 offset_top = 8.0
 offset_right = 368.0
-anchor_bottom = 1.0
 offset_bottom = -8.0
-mouse_filter = 0
 
-[node name="VBox" type="VBoxContainer" parent="PlanningUI/Panel"]
+[node name="VBox" type="VBoxContainer" parent="PlanningUI/Panel" unique_id=797647768]
 layout_mode = 2
 theme_override_constants/separation = 5
 
-[node name="Title" type="Label" parent="PlanningUI/Panel/VBox"]
+[node name="Title" type="Label" parent="PlanningUI/Panel/VBox" unique_id=1680300432]
 layout_mode = 2
 theme_override_font_sizes/font_size = 22
 text = "LEVEL PLANNER"
 horizontal_alignment = 1
 
-[node name="Tabs" type="HBoxContainer" parent="PlanningUI/Panel/VBox"]
+[node name="Tabs" type="HBoxContainer" parent="PlanningUI/Panel/VBox" unique_id=460916093]
 layout_mode = 2
-mouse_filter = 1
 
-[node name="Structure" type="Button" parent="PlanningUI/Panel/VBox/Tabs"]
+[node name="Structure" type="Button" parent="PlanningUI/Panel/VBox/Tabs" unique_id=1682918369]
 layout_mode = 2
 size_flags_horizontal = 3
 text = "STRUCTURE"
 
-[node name="Actors" type="Button" parent="PlanningUI/Panel/VBox/Tabs"]
+[node name="Actors" type="Button" parent="PlanningUI/Panel/VBox/Tabs" unique_id=95914985]
 layout_mode = 2
 size_flags_horizontal = 3
 text = "ACTORS"
 
-[node name="Lighting" type="Button" parent="PlanningUI/Panel/VBox/Tabs"]
+[node name="Lighting" type="Button" parent="PlanningUI/Panel/VBox/Tabs" unique_id=35439410]
 layout_mode = 2
 size_flags_horizontal = 3
 text = "LIGHTING"
 
-
-[node name="LightingPreview" type="OptionButton" parent="PlanningUI/Panel/VBox"]
+[node name="LightingPreview" type="OptionButton" parent="PlanningUI/Panel/VBox" unique_id=1407521424]
 layout_mode = 2
-item_count = 2
 selected = 0
+item_count = 2
 popup/item_0/text = "Игровое освещение"
 popup/item_0/id = 0
 popup/item_1/text = "Подсветка редактора"
 popup/item_1/id = 1
 
-[node name="LocalLights" type="CheckButton" parent="PlanningUI/Panel/VBox"]
+[node name="LocalLights" type="CheckButton" parent="PlanningUI/Panel/VBox" unique_id=875768001]
 layout_mode = 2
 text = "Локальные лампы"
 
-[node name="GroupTabs" type="GridContainer" parent="PlanningUI/Panel/VBox"]
+[node name="GroupTabs" type="GridContainer" parent="PlanningUI/Panel/VBox" unique_id=1406905753]
 layout_mode = 2
 columns = 7
 
-[node name="G01" type="Button" parent="PlanningUI/Panel/VBox/GroupTabs"]
+[node name="G01" type="Button" parent="PlanningUI/Panel/VBox/GroupTabs" unique_id=1092191898]
 layout_mode = 2
 text = "01"
 
-[node name="G06" type="Button" parent="PlanningUI/Panel/VBox/GroupTabs"]
+[node name="G06" type="Button" parent="PlanningUI/Panel/VBox/GroupTabs" unique_id=549948615]
 layout_mode = 2
 text = "06"
 
-[node name="G07" type="Button" parent="PlanningUI/Panel/VBox/GroupTabs"]
+[node name="G07" type="Button" parent="PlanningUI/Panel/VBox/GroupTabs" unique_id=2106839198]
 layout_mode = 2
 text = "07"
 
-[node name="G08" type="Button" parent="PlanningUI/Panel/VBox/GroupTabs"]
+[node name="G08" type="Button" parent="PlanningUI/Panel/VBox/GroupTabs" unique_id=1358017693]
 layout_mode = 2
 text = "08"
 
-[node name="G10" type="Button" parent="PlanningUI/Panel/VBox/GroupTabs"]
+[node name="G10" type="Button" parent="PlanningUI/Panel/VBox/GroupTabs" unique_id=1349148096]
 layout_mode = 2
 text = "10"
 
-[node name="G11" type="Button" parent="PlanningUI/Panel/VBox/GroupTabs"]
+[node name="G11" type="Button" parent="PlanningUI/Panel/VBox/GroupTabs" unique_id=1443499770]
 layout_mode = 2
 text = "11"
 
-[node name="G02" type="Button" parent="PlanningUI/Panel/VBox/GroupTabs"]
+[node name="G02" type="Button" parent="PlanningUI/Panel/VBox/GroupTabs" unique_id=734673113]
 layout_mode = 2
 text = "02"
 
-[node name="G03" type="Button" parent="PlanningUI/Panel/VBox/GroupTabs"]
+[node name="G03" type="Button" parent="PlanningUI/Panel/VBox/GroupTabs" unique_id=1633854094]
 layout_mode = 2
 text = "03"
 
-[node name="G04" type="Button" parent="PlanningUI/Panel/VBox/GroupTabs"]
+[node name="G04" type="Button" parent="PlanningUI/Panel/VBox/GroupTabs" unique_id=1564370334]
 layout_mode = 2
 text = "04"
 
-[node name="G05" type="Button" parent="PlanningUI/Panel/VBox/GroupTabs"]
+[node name="G05" type="Button" parent="PlanningUI/Panel/VBox/GroupTabs" unique_id=237407917]
 layout_mode = 2
 text = "05"
 
-[node name="G09" type="Button" parent="PlanningUI/Panel/VBox/GroupTabs"]
+[node name="G09" type="Button" parent="PlanningUI/Panel/VBox/GroupTabs" unique_id=1570971516]
 layout_mode = 2
 text = "09"
 
-[node name="G12" type="Button" parent="PlanningUI/Panel/VBox/GroupTabs"]
+[node name="G12" type="Button" parent="PlanningUI/Panel/VBox/GroupTabs" unique_id=607549168]
 layout_mode = 2
 text = "12"
 
-[node name="G13" type="Button" parent="PlanningUI/Panel/VBox/GroupTabs"]
+[node name="G13" type="Button" parent="PlanningUI/Panel/VBox/GroupTabs" unique_id=408490121]
 layout_mode = 2
 text = "13"
 
-[node name="LightDefaults" type="VBoxContainer" parent="PlanningUI/Panel/VBox"]
+[node name="LightDefaults" type="VBoxContainer" parent="PlanningUI/Panel/VBox" unique_id=554629760]
 visible = false
 layout_mode = 2
 
-[node name="Title" type="Label" parent="PlanningUI/Panel/VBox/LightDefaults"]
+[node name="Title" type="Label" parent="PlanningUI/Panel/VBox/LightDefaults" unique_id=2002351046]
 layout_mode = 2
 text = "NEW LIGHT DEFAULTS"
 horizontal_alignment = 1
 
-[node name="HeightRow" type="HBoxContainer" parent="PlanningUI/Panel/VBox/LightDefaults"]
+[node name="HeightRow" type="HBoxContainer" parent="PlanningUI/Panel/VBox/LightDefaults" unique_id=1569724454]
 layout_mode = 2
-[node name="Label" type="Label" parent="PlanningUI/Panel/VBox/LightDefaults/HeightRow"]
+
+[node name="Label" type="Label" parent="PlanningUI/Panel/VBox/LightDefaults/HeightRow" unique_id=1254999596]
 layout_mode = 2
 text = "Height"
-[node name="Value" type="SpinBox" parent="PlanningUI/Panel/VBox/LightDefaults/HeightRow"]
+
+[node name="Value" type="SpinBox" parent="PlanningUI/Panel/VBox/LightDefaults/HeightRow" unique_id=59560468]
 layout_mode = 2
 size_flags_horizontal = 3
 min_value = 0.25
@@ -296,19 +270,21 @@ step = 0.25
 value = 2.5
 suffix = " m"
 
-[node name="EnergyRow" type="HBoxContainer" parent="PlanningUI/Panel/VBox/LightDefaults"]
+[node name="EnergyRow" type="HBoxContainer" parent="PlanningUI/Panel/VBox/LightDefaults" unique_id=101203122]
 layout_mode = 2
-[node name="Label" type="Label" parent="PlanningUI/Panel/VBox/LightDefaults/EnergyRow"]
+
+[node name="Label" type="Label" parent="PlanningUI/Panel/VBox/LightDefaults/EnergyRow" unique_id=1308128391]
 layout_mode = 2
 text = "Brightness"
-[node name="Value" type="SpinBox" parent="PlanningUI/Panel/VBox/LightDefaults/EnergyRow"]
+
+[node name="Value" type="SpinBox" parent="PlanningUI/Panel/VBox/LightDefaults/EnergyRow" unique_id=640178231]
 layout_mode = 2
 size_flags_horizontal = 3
-min_value = 0.0
 max_value = 16.0
 step = 0.25
 value = 3.0
 
+<<<<<<< Updated upstream
 [node name="ColorRow" type="HBoxContainer" parent="PlanningUI/Panel/VBox/LightDefaults"]
 layout_mode = 2
 [node name="Label" type="Label" parent="PlanningUI/Panel/VBox/LightDefaults/ColorRow"]
@@ -323,29 +299,36 @@ edit_alpha = false
 edit_intensity = false
 
 [node name="AngleRow" type="HBoxContainer" parent="PlanningUI/Panel/VBox/LightDefaults"]
+=======
+[node name="AngleRow" type="HBoxContainer" parent="PlanningUI/Panel/VBox/LightDefaults" unique_id=853970616]
+>>>>>>> Stashed changes
 layout_mode = 2
-[node name="Label" type="Label" parent="PlanningUI/Panel/VBox/LightDefaults/AngleRow"]
+
+[node name="Label" type="Label" parent="PlanningUI/Panel/VBox/LightDefaults/AngleRow" unique_id=719690250]
 layout_mode = 2
 text = "Cone"
-[node name="Value" type="SpinBox" parent="PlanningUI/Panel/VBox/LightDefaults/AngleRow"]
+
+[node name="Value" type="SpinBox" parent="PlanningUI/Panel/VBox/LightDefaults/AngleRow" unique_id=2011733554]
 layout_mode = 2
 size_flags_horizontal = 3
 min_value = 5.0
 max_value = 89.0
-step = 1.0
 value = 48.0
 suffix = "°"
 
-[node name="FlickerRow" type="HBoxContainer" parent="PlanningUI/Panel/VBox/LightDefaults"]
+[node name="FlickerRow" type="HBoxContainer" parent="PlanningUI/Panel/VBox/LightDefaults" unique_id=1520291259]
 layout_mode = 2
-[node name="Label" type="Label" parent="PlanningUI/Panel/VBox/LightDefaults/FlickerRow"]
+
+[node name="Label" type="Label" parent="PlanningUI/Panel/VBox/LightDefaults/FlickerRow" unique_id=997053088]
 layout_mode = 2
 text = "Flicker"
-[node name="Mode" type="OptionButton" parent="PlanningUI/Panel/VBox/LightDefaults/FlickerRow"]
+
+[node name="Mode" type="OptionButton" parent="PlanningUI/Panel/VBox/LightDefaults/FlickerRow" unique_id=1585021633]
 layout_mode = 2
 size_flags_horizontal = 3
 item_count = 4
 popup/item_0/text = "Steady"
+popup/item_0/id = 0
 popup/item_1/text = "Fast"
 popup/item_1/id = 1
 popup/item_2/text = "Slow"
@@ -353,12 +336,14 @@ popup/item_2/id = 2
 popup/item_3/text = "Occasional outage"
 popup/item_3/id = 3
 
-[node name="FlickerStepRow" type="HBoxContainer" parent="PlanningUI/Panel/VBox/LightDefaults"]
+[node name="FlickerStepRow" type="HBoxContainer" parent="PlanningUI/Panel/VBox/LightDefaults" unique_id=761621897]
 layout_mode = 2
-[node name="Label" type="Label" parent="PlanningUI/Panel/VBox/LightDefaults/FlickerStepRow"]
+
+[node name="Label" type="Label" parent="PlanningUI/Panel/VBox/LightDefaults/FlickerStepRow" unique_id=1234587202]
 layout_mode = 2
 text = "Step"
-[node name="Value" type="SpinBox" parent="PlanningUI/Panel/VBox/LightDefaults/FlickerStepRow"]
+
+[node name="Value" type="SpinBox" parent="PlanningUI/Panel/VBox/LightDefaults/FlickerStepRow" unique_id=668759934]
 layout_mode = 2
 size_flags_horizontal = 3
 min_value = 0.05
@@ -367,32 +352,30 @@ step = 0.05
 value = 0.2
 suffix = " s"
 
-[node name="Palette" type="ItemList" parent="PlanningUI/Panel/VBox"]
+[node name="Palette" type="ItemList" parent="PlanningUI/Panel/VBox" unique_id=169968514]
 custom_minimum_size = Vector2(330, 120)
 layout_mode = 2
 size_flags_vertical = 3
-size_flags_stretch_ratio = 1.0
-max_columns = 1
 theme_override_colors/font_color = Color(0.92, 0.96, 1, 1)
 theme_override_colors/font_hovered_color = Color(1, 1, 1, 1)
-theme_override_colors/font_selected_color = Color(1, 1, 1, 1)
 theme_override_colors/font_hovered_selected_color = Color(1, 1, 1, 1)
+theme_override_colors/font_selected_color = Color(1, 1, 1, 1)
 theme_override_colors/guide_color = Color(0.18, 0.22, 0.28, 1)
 theme_override_font_sizes/font_size = 18
 same_column_width = true
 fixed_column_width = 270
 icon_mode = 0
 
-[node name="LightInfo" type="Label" parent="PlanningUI/Panel/VBox"]
+[node name="LightInfo" type="Label" parent="PlanningUI/Panel/VBox" unique_id=259295799]
 visible = false
 custom_minimum_size = Vector2(330, 30)
 layout_mode = 2
-text = "LIGHT 3.00 / 16.00"
 theme_override_colors/font_color = Color(1, 0.86, 0.38, 1)
 theme_override_font_sizes/font_size = 16
+text = "LIGHT 3.00 / 16.00"
 horizontal_alignment = 1
 
-[node name="LightLevel" type="ProgressBar" parent="PlanningUI/Panel/VBox"]
+[node name="LightLevel" type="ProgressBar" parent="PlanningUI/Panel/VBox" unique_id=1423831744]
 visible = false
 custom_minimum_size = Vector2(330, 18)
 layout_mode = 2
@@ -400,16 +383,16 @@ max_value = 16.0
 value = 3.0
 show_percentage = false
 
-[node name="LightAngleInfo" type="Label" parent="PlanningUI/Panel/VBox"]
+[node name="LightAngleInfo" type="Label" parent="PlanningUI/Panel/VBox" unique_id=837770397]
 visible = false
 custom_minimum_size = Vector2(330, 24)
 layout_mode = 2
-text = "CONE 48°"
 theme_override_colors/font_color = Color(1, 0.78, 0.32, 1)
 theme_override_font_sizes/font_size = 14
+text = "CONE 48°"
 horizontal_alignment = 1
 
-[node name="LightAngle" type="ProgressBar" parent="PlanningUI/Panel/VBox"]
+[node name="LightAngle" type="ProgressBar" parent="PlanningUI/Panel/VBox" unique_id=1697650106]
 visible = false
 custom_minimum_size = Vector2(330, 14)
 layout_mode = 2
@@ -418,6 +401,7 @@ max_value = 89.0
 value = 48.0
 show_percentage = false
 
+<<<<<<< Updated upstream
 [node name="SelectedLightColor" type="HBoxContainer" parent="PlanningUI/Panel/VBox"]
 visible = false
 layout_mode = 2
@@ -433,16 +417,22 @@ edit_alpha = false
 edit_intensity = false
 
 [node name="SelectedFlicker" type="HBoxContainer" parent="PlanningUI/Panel/VBox"]
+=======
+[node name="SelectedFlicker" type="HBoxContainer" parent="PlanningUI/Panel/VBox" unique_id=1247356379]
+>>>>>>> Stashed changes
 visible = false
 layout_mode = 2
-[node name="Label" type="Label" parent="PlanningUI/Panel/VBox/SelectedFlicker"]
+
+[node name="Label" type="Label" parent="PlanningUI/Panel/VBox/SelectedFlicker" unique_id=525831230]
 layout_mode = 2
 text = "Flicker"
-[node name="Mode" type="OptionButton" parent="PlanningUI/Panel/VBox/SelectedFlicker"]
+
+[node name="Mode" type="OptionButton" parent="PlanningUI/Panel/VBox/SelectedFlicker" unique_id=1908332805]
 layout_mode = 2
 size_flags_horizontal = 3
 item_count = 4
 popup/item_0/text = "Steady"
+popup/item_0/id = 0
 popup/item_1/text = "Fast"
 popup/item_1/id = 1
 popup/item_2/text = "Slow"
@@ -450,13 +440,15 @@ popup/item_2/id = 2
 popup/item_3/text = "Occasional outage"
 popup/item_3/id = 3
 
-[node name="SelectedFlickerStep" type="HBoxContainer" parent="PlanningUI/Panel/VBox"]
+[node name="SelectedFlickerStep" type="HBoxContainer" parent="PlanningUI/Panel/VBox" unique_id=1795254728]
 visible = false
 layout_mode = 2
-[node name="Label" type="Label" parent="PlanningUI/Panel/VBox/SelectedFlickerStep"]
+
+[node name="Label" type="Label" parent="PlanningUI/Panel/VBox/SelectedFlickerStep" unique_id=474781725]
 layout_mode = 2
 text = "Step"
-[node name="Value" type="SpinBox" parent="PlanningUI/Panel/VBox/SelectedFlickerStep"]
+
+[node name="Value" type="SpinBox" parent="PlanningUI/Panel/VBox/SelectedFlickerStep" unique_id=1292966127]
 layout_mode = 2
 size_flags_horizontal = 3
 min_value = 0.05
@@ -465,61 +457,61 @@ step = 0.05
 value = 0.2
 suffix = " s"
 
-[node name="Status" type="Label" parent="PlanningUI/Panel/VBox"]
+[node name="Status" type="Label" parent="PlanningUI/Panel/VBox" unique_id=2101908996]
 custom_minimum_size = Vector2(330, 30)
 layout_mode = 2
 text = "Select an object"
 clip_text = true
 text_overrun_behavior = 3
 
-[node name="MapManager" type="VBoxContainer" parent="PlanningUI/Panel/VBox"]
+[node name="MapManager" type="VBoxContainer" parent="PlanningUI/Panel/VBox" unique_id=390232533]
 layout_mode = 2
 theme_override_constants/separation = 6
 
-[node name="Title" type="Label" parent="PlanningUI/Panel/VBox/MapManager"]
+[node name="Title" type="Label" parent="PlanningUI/Panel/VBox/MapManager" unique_id=516061365]
 layout_mode = 2
 text = "MAPS"
 horizontal_alignment = 1
 
-[node name="Name" type="LineEdit" parent="PlanningUI/Panel/VBox/MapManager"]
+[node name="Name" type="LineEdit" parent="PlanningUI/Panel/VBox/MapManager" unique_id=16376107]
 layout_mode = 2
-placeholder_text = "Map name"
 text = "default"
+placeholder_text = "Map name"
 
-[node name="Maps" type="OptionButton" parent="PlanningUI/Panel/VBox/MapManager"]
+[node name="Maps" type="OptionButton" parent="PlanningUI/Panel/VBox/MapManager" unique_id=878350764]
 layout_mode = 2
 tooltip_text = "Saved maps"
 
-[node name="Buttons" type="HBoxContainer" parent="PlanningUI/Panel/VBox/MapManager"]
+[node name="Buttons" type="HBoxContainer" parent="PlanningUI/Panel/VBox/MapManager" unique_id=138712479]
 layout_mode = 2
 theme_override_constants/separation = 6
 
-[node name="SaveMap" type="Button" parent="PlanningUI/Panel/VBox/MapManager/Buttons"]
+[node name="SaveMap" type="Button" parent="PlanningUI/Panel/VBox/MapManager/Buttons" unique_id=1683453220]
 layout_mode = 2
 size_flags_horizontal = 3
 text = "SAVE MAP"
 
-[node name="LoadMap" type="Button" parent="PlanningUI/Panel/VBox/MapManager/Buttons"]
+[node name="LoadMap" type="Button" parent="PlanningUI/Panel/VBox/MapManager/Buttons" unique_id=2119823752]
 layout_mode = 2
 size_flags_horizontal = 3
 text = "LOAD MAP"
 
-[node name="Save" type="Button" parent="PlanningUI/Panel/VBox"]
+[node name="Save" type="Button" parent="PlanningUI/Panel/VBox" unique_id=1267612715]
 custom_minimum_size = Vector2(0, 32)
 layout_mode = 2
 text = "SAVE LAYOUT"
 
-[node name="Clear" type="Button" parent="PlanningUI/Panel/VBox"]
+[node name="Clear" type="Button" parent="PlanningUI/Panel/VBox" unique_id=528535507]
 custom_minimum_size = Vector2(0, 32)
 layout_mode = 2
 text = "CLEAR PLACED"
 
-[node name="Close" type="Button" parent="PlanningUI/Panel/VBox"]
+[node name="Close" type="Button" parent="PlanningUI/Panel/VBox" unique_id=395389755]
 custom_minimum_size = Vector2(0, 32)
 layout_mode = 2
 text = "EXIT PLANNING"
 
-[node name="HelpPanel" type="PanelContainer" parent="PlanningUI"]
+[node name="HelpPanel" type="PanelContainer" parent="PlanningUI" unique_id=479548715]
 visible = false
 layout_mode = 1
 anchors_preset = 1
@@ -532,17 +524,16 @@ offset_bottom = 390.0
 grow_horizontal = 0
 mouse_filter = 2
 
-[node name="VBox" type="VBoxContainer" parent="PlanningUI/HelpPanel"]
+[node name="VBox" type="VBoxContainer" parent="PlanningUI/HelpPanel" unique_id=1825662765]
 layout_mode = 2
 
-[node name="Help" type="Label" parent="PlanningUI/HelpPanel/VBox"]
+[node name="Help" type="Label" parent="PlanningUI/HelpPanel/VBox" unique_id=546114360]
 layout_mode = 2
 theme_override_colors/font_color = Color(0.88, 0.95, 1, 1)
 theme_override_font_sizes/font_size = 16
 text = "PLANNING CONTROLS"
-vertical_alignment = 0
 
-[node name="Close" type="Button" parent="PlanningUI/HelpPanel/VBox"]
+[node name="Close" type="Button" parent="PlanningUI/HelpPanel/VBox" unique_id=1741122513]
 layout_mode = 2
 text = "CLOSE HELP"
 
@@ -559,7 +550,8 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 31, 1, 25)
 
 [node name="Radar" parent="." unique_id=86935713 instance=ExtResource("radar")]
 
-[node name="MutationChoice" type="Control" parent="."]
+[node name="MutationChoice" type="Control" parent="." unique_id=1625396211]
+process_mode = 3
 visible = false
 z_index = 115
 layout_mode = 3
@@ -568,9 +560,8 @@ anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
-process_mode = 3
 
-[node name="Dim" type="ColorRect" parent="MutationChoice"]
+[node name="Dim" type="ColorRect" parent="MutationChoice" unique_id=886830691]
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
@@ -579,7 +570,7 @@ grow_horizontal = 2
 grow_vertical = 2
 color = Color(0, 0, 0, 0.72)
 
-[node name="Panel" type="PanelContainer" parent="MutationChoice"]
+[node name="Panel" type="PanelContainer" parent="MutationChoice" unique_id=1180308851]
 layout_mode = 1
 anchors_preset = 8
 anchor_left = 0.5
@@ -593,41 +584,45 @@ offset_bottom = 145.0
 grow_horizontal = 2
 grow_vertical = 2
 
-[node name="VBox" type="VBoxContainer" parent="MutationChoice/Panel"]
+[node name="VBox" type="VBoxContainer" parent="MutationChoice/Panel" unique_id=391527765]
 layout_mode = 2
 theme_override_constants/separation = 16
 
-[node name="Title" type="Label" parent="MutationChoice/Panel/VBox"]
+[node name="Title" type="Label" parent="MutationChoice/Panel/VBox" unique_id=1628012952]
 layout_mode = 2
-text = "MUTATION LEVEL 1"
 theme_override_font_sizes/font_size = 28
+text = "MUTATION LEVEL 1"
 horizontal_alignment = 1
 
-[node name="Subtitle" type="Label" parent="MutationChoice/Panel/VBox"]
+[node name="Subtitle" type="Label" parent="MutationChoice/Panel/VBox" unique_id=1620045173]
 layout_mode = 2
 text = "Choose mutation direction"
 horizontal_alignment = 1
 
-[node name="Choices" type="HBoxContainer" parent="MutationChoice/Panel/VBox"]
+[node name="Choices" type="HBoxContainer" parent="MutationChoice/Panel/VBox" unique_id=396236103]
 layout_mode = 2
 theme_override_constants/separation = 12
 
-[node name="FastHands" type="Button" parent="MutationChoice/Panel/VBox/Choices"]
+[node name="FastHands" type="Button" parent="MutationChoice/Panel/VBox/Choices" unique_id=1077978598]
 custom_minimum_size = Vector2(240, 110)
 layout_mode = 2
-text = "FAST HANDS\nWeapon mutation"
+text = "FAST HANDS
+Weapon mutation"
 
-[node name="LegMutation" type="Button" parent="MutationChoice/Panel/VBox/Choices"]
+[node name="LegMutation" type="Button" parent="MutationChoice/Panel/VBox/Choices" unique_id=1419421881]
 custom_minimum_size = Vector2(240, 110)
 layout_mode = 2
-text = "LEG MUTATION\nMobility mutation"
+text = "LEG MUTATION
+Mobility mutation"
 
-[node name="EnhancedAmmo" type="Button" parent="MutationChoice/Panel/VBox/Choices"]
+[node name="EnhancedAmmo" type="Button" parent="MutationChoice/Panel/VBox/Choices" unique_id=738019098]
 custom_minimum_size = Vector2(240, 110)
 layout_mode = 2
-text = "ENHANCED AMMO\nCombat mutation"
+text = "ENHANCED AMMO
+Combat mutation"
 
 [node name="GameOver" type="Control" parent="." unique_id=915151426]
+process_mode = 3
 visible = false
 z_index = 120
 layout_mode = 3
@@ -637,16 +632,15 @@ anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
 mouse_filter = 2
-process_mode = 3
 
 [node name="Dim" type="ColorRect" parent="GameOver" unique_id=1236850566]
 layout_mode = 1
-mouse_filter = 2
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
+mouse_filter = 2
 color = Color(0, 0, 0, 0.72)
 
 [node name="Panel" type="PanelContainer" parent="GameOver" unique_id=80846730]
@@ -686,10 +680,9 @@ text = "RESTART MISSION"
 layout_mode = 2
 text = "EXIT"
 
-[connection signal="pressed" from="GameOver/Panel/VBox/Restart" to="." method="_on_restart_pressed"]
-[connection signal="pressed" from="GameOver/Panel/VBox/Exit" to="." method="_on_exit_pressed"]
-
 [connection signal="pressed" from="PauseMenu/Panel/VBox/Resume" to="." method="_on_resume_pressed"]
 [connection signal="pressed" from="PauseMenu/Panel/VBox/Planning" to="." method="_on_planning_pressed"]
 [connection signal="pressed" from="PauseMenu/Panel/VBox/Restart" to="." method="_on_restart_pressed"]
 [connection signal="pressed" from="PauseMenu/Panel/VBox/Exit" to="." method="_on_exit_pressed"]
+[connection signal="pressed" from="GameOver/Panel/VBox/Restart" to="." method="_on_restart_pressed"]
+[connection signal="pressed" from="GameOver/Panel/VBox/Exit" to="." method="_on_exit_pressed"]
