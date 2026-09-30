@@ -155,7 +155,7 @@ func _test_map_paths(planner: Node) -> void:
 		{"scene": LAMP.resource_path, "light_energy": 5.0, "energy_multiplier": 1.0}
 	]}
 	for cycle in range(5):
-		planner.call("_apply_layout_data", data)
+		planner.get("objects").call("_apply_layout_data", data)
 		var lamps := _planner_lamps(planner)
 		_check(lamps.size() == 4, "Legacy map without multiplier loads")
 		var lamp: Node3D = lamps[0]
@@ -165,13 +165,13 @@ func _test_map_paths(planner: Node) -> void:
 		_check(is_zero_approx(lamps[1].get_node("Light").light_energy), "Saved zero energy loads as zero")
 		_check(is_equal_approx(float(lamps[2].call("get_authored_energy")), 3.0), "Missing energy retains scene default")
 		_check(is_equal_approx(lamps[3].get_node("Light").light_energy, 5.0), "Explicit multiplier survives JSON round-trip")
-		data = JSON.parse_string(JSON.stringify(planner.call("_collect_layout_data")))
+		data = JSON.parse_string(JSON.stringify(planner.get("storage").call("_collect_layout_data")))
 	var lamp: Node3D = _planner_lamps(planner)[0]
 	lamp.call("_process", 0.3)
 	planner.call("_select", lamp)
-	planner.call("_adjust_selected_light", 0.25)
+	planner.get("controls").call("_adjust_selected_light", 0.25)
 	_check(is_equal_approx(float(lamp.call("get_authored_energy")), 7.25), "Planner adjustment ignores reduced instantaneous power")
-	_check(is_equal_approx((planner.get("light_level") as ProgressBar).value, 7.25), "Planner meter shows authored power")
+	_check(is_equal_approx((planner.get("controls").get("light_level") as ProgressBar).value, 7.25), "Planner meter shows authored power")
 	planner.get("edit_history").call("undo")
 	_check(is_equal_approx(float(lamp.call("get_authored_energy")), 7.0), "Undo restores authored energy")
 	planner.get("edit_history").call("duplicate_selected")
@@ -182,8 +182,8 @@ func _test_map_paths(planner: Node) -> void:
 	planner.get("edit_history").call("duplicate_selected")
 	copy = planner.get("selected")
 	_check(is_equal_approx(copy.get_node("Light").light_energy, 7.0), "Duplicate preserves an explicit multiplier")
-	(planner.get("default_light_energy") as SpinBox).value = 4.0
-	planner.call("_apply_new_light_defaults", copy)
+	(planner.get("controls").get("default_light_energy") as SpinBox).value = 4.0
+	planner.get("controls").call("_apply_new_light_defaults", copy)
 	_check(is_equal_approx(float(copy.call("get_authored_energy")), 4.0), "New-light defaults edit authoring state")
 	_check(is_equal_approx(copy.get_node("Light").light_energy, 4.0), "New-light defaults use the existing multiplier once")
 

@@ -7,7 +7,6 @@
   ],
   "public_api": [
     "public/base_office_layout.tscn",
-    "public/office_floor.tscn",
     "public/base_floor_renderer.gd",
     "public/props/07_table.tscn",
     "public/props/planner_light.tscn",

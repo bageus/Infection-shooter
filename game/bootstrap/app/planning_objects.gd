@@ -1,25 +1,72 @@
-extends RefCounted
-
-# Apply placement, selection picking and object edit commands.
-var planner: Variant
+extends Node
 
 
-func _init(context: Node) -> void:
-	planner = context
+var player_spawn_defined = false
+var player_spawn_transform = Transform3D.IDENTITY
+var selected_path = ""
+var selected_kind = ""
+var preview: Node3D
+var selected: Node3D
+var rotation_y = 0.0
+var last_mouse_world = Vector3.ZERO
+var placed: Array[Node3D] = []
+var workstation_transforms: Dictionary = {}
+
+var session: Variant
+var geometry: Variant
+var controls: Variant
+var catalog: Variant
+
+
+func configure(context: Dictionary) -> void:
+	session = context["session"]
+	geometry = context["geometry"]
+	controls = context["controls"]
+	catalog = context["catalog"]
+
+
+func _on_palette_selected(index: int) -> void:
+	var entry: Dictionary = catalog.active_catalog[index]
+	selected_path = str(entry.get("path", ""))
+	selected_kind = str(entry.get("kind", ""))
+	rotation_y = 0.0
+	_select(null)
+	_rebuild_preview()
 
 
 func _click_world(screen_pos: Vector2) -> void:
-	if not planner.selected_path.is_empty() or planner.selected_kind == "player":
+	if not selected_path.is_empty() or selected_kind == "player":
 		_place_selected(screen_pos)
 		return
-	var hit_node = _planned_object_at(screen_pos)
-	planner.view._select(hit_node)
+	var hit_node = geometry._planned_object_at(screen_pos)
+	_select(hit_node)
 	if hit_node != null:
 		_clear_preview()
 
 
+func _select(node: Node3D) -> void:
+	geometry._clear_selection_highlight()
+	selected = node
+	controls.desk_setup_button.visible = selected != null and not catalog.WORKSTATIONS.desk_name(str(selected.get_meta("planning_scene_path", ""))).is_empty()
+	if selected != null:
+		geometry._show_selection_highlight(selected)
+	controls._update_light_ui()
+	_update_status()
+	controls._update_history_buttons()
+
+
+func _reset_selection() -> void:
+	selected_path = ""
+	selected_kind = ""
+	rotation_y = 0.0
+	_clear_preview()
+	_select(null)
+	controls.palette.deselect_all()
+	controls.status.text = "Selection cleared"
+
+
 func _register_existing_scene_objects() -> void:
-	_register_editable_children(planner.structure_root)
+	_register_editable_children(session.structure_root)
 
 
 func _register_editable_children(parent: Node) -> void:
@@ -27,186 +74,122 @@ func _register_editable_children(parent: Node) -> void:
 		if child is Node3D:
 			var node = child as Node3D
 			if _is_editable_scene_object(node):
-				if not planner.placed.has(node):
-					planner.placed.append(node)
+				if not placed.has(node):
+					placed.append(node)
 				node.set_meta("planning_existing", true)
 			else:
 				_register_editable_children(node)
 
 
 func _activate_all_enemies() -> void:
-	for child in planner.enemies_root.get_children():
+	for child in session.enemies_root.get_children():
 		if child.has_method("set_target"):
-			child.call("set_target", planner.main_player)
+			child.call("set_target", session.main_player)
 
 
 func _register_actor_objects() -> void:
-	if planner.main_player != null and not planner.placed.has(planner.main_player):
-		planner.placed.append(planner.main_player)
-		planner.main_player.set_meta("planning_actor_kind", "player")
-		planner.main_player.set_meta("planning_existing", true)
-	for child in planner.enemies_root.get_children():
+	if session.main_player != null and not placed.has(session.main_player):
+		placed.append(session.main_player)
+		session.main_player.set_meta("planning_actor_kind", "player")
+		session.main_player.set_meta("planning_existing", true)
+	for child in session.enemies_root.get_children():
 		if child is Node3D:
 			var enemy = child as Node3D
-			if not planner.placed.has(enemy):
-				planner.placed.append(enemy)
+			if not placed.has(enemy):
+				placed.append(enemy)
 			enemy.set_meta("planning_actor_kind", "enemy")
 			enemy.set_meta("planning_existing", true)
 
 
 func _is_editable_scene_object(node: Node3D) -> bool:
-	if node == planner.root or node == planner.structure_root:
+	if node == session.root or node == session.structure_root:
 		return false
-	return _find_collision_descendant(node) != null and node.get_parent() != planner.host
-
-
-func _find_collision_descendant(node: Node) -> CollisionObject3D:
-	if node is CollisionObject3D:
-		return node as CollisionObject3D
-	for child in node.get_children():
-		var found = _find_collision_descendant(child)
-		if found != null:
-			return found
-	return null
+	return geometry._find_collision_descendant(node) != null and node.get_parent() != session.host
 
 
 func _editable_root_from_collider(collider: Node) -> Node3D:
 	var node: Node = collider
 	while node != null:
-		if node.get_parent() == planner.root:
+		if node.get_parent() == session.root:
 			return node as Node3D
-		if node is Node3D and planner.placed.has(node):
+		if node is Node3D and placed.has(node):
 			return node as Node3D
-		if node.get_parent() == planner.structure_root:
+		if node.get_parent() == session.structure_root:
 			return node as Node3D
 		node = node.get_parent()
 	return null
 
 
-func _planned_object_at(screen_pos: Vector2) -> Node3D:
-	var direct = _visual_object_at(screen_pos)
-	if direct != null:
-		return direct
-	var origin = planner.camera.project_ray_origin(screen_pos)
-	var end = origin + planner.camera.project_ray_normal(screen_pos) * 300.0
-	var query = PhysicsRayQueryParameters3D.create(origin, end)
-	var hit = planner.camera.get_world_3d().direct_space_state.intersect_ray(query)
-	if hit.is_empty():
-		return null
-	var collider = hit.get("collider") as Node
-	if collider == null:
-		return null
-	return _editable_root_from_collider(collider)
-
-
-func _visual_object_at(screen_pos: Vector2) -> Node3D:
-	var ray_origin = planner.camera.project_ray_origin(screen_pos)
-	var ray_direction = planner.camera.project_ray_normal(screen_pos)
-	var best: Node3D
-	var best_distance = INF
-	for node in planner.placed:
-		if not is_instance_valid(node):
-			continue
-		var aabb = planner.geometry._combined_aabb(node)
-		if aabb.size.length_squared() <= 0.0001:
-			continue
-		var world_aabb = node.global_transform * aabb
-		var hit: Variant = world_aabb.intersects_ray(ray_origin, ray_direction)
-		if hit == null:
-			continue
-		var hit_position: Vector3 = hit as Vector3
-		var distance: float = ray_origin.distance_to(hit_position)
-		if distance < best_distance:
-			best_distance = distance
-			best = node
-	return best
-
-
 func _rebuild_preview() -> void:
 	_clear_preview()
 	if _selected_kind() == "player":
-		planner.preview = _make_player_spawn_preview()
-		planner.host.add_child(planner.preview)
+		preview = geometry._make_player_spawn_preview()
+		session.host.add_child(preview)
 		return
-	if planner.selected_path.is_empty():
+	if selected_path.is_empty():
 		return
-	planner.preview = planner.catalog._instantiate_asset(planner.selected_path)
-	if planner.preview == null:
+	preview = catalog._instantiate_asset(selected_path)
+	if preview == null:
 		return
-	planner.host.add_child(planner.preview)
-	if _selected_kind() == "light" and planner.preview.has_method("set_planning_visual"):
-		planner.preview.call_deferred("set_planning_visual", true)
-	_set_preview_collision(planner.preview, true)
-	planner.geometry._apply_special_default_height(planner.preview, _selected_kind())
+	session.host.add_child(preview)
+	if _selected_kind() == "light" and preview.has_method("set_planning_visual"):
+		preview.call_deferred("set_planning_visual", true)
+	geometry._set_preview_collision(preview, true)
+	controls._apply_special_default_height(preview, _selected_kind())
 
 
 func _selected_kind() -> String:
-	return planner.selected_kind
-
-
-func _make_player_spawn_preview() -> Node3D:
-	var marker = MeshInstance3D.new()
-	var mesh = CylinderMesh.new()
-	mesh.top_radius = 0.45
-	mesh.bottom_radius = 0.45
-	mesh.height = 1.8
-	var material = StandardMaterial3D.new()
-	material.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
-	material.albedo_color = Color(0.15, 0.55, 1.0, 0.45)
-	mesh.material = material
-	marker.mesh = mesh
-	marker.set_meta("planning_spawn_preview", true)
-	return marker
+	return selected_kind
 
 
 func _clear_preview() -> void:
-	planner.light_info.hide()
-	planner.light_level.hide()
-	planner.light_angle_info.hide()
-	planner.light_angle.hide()
-	planner.ui.get_node("Panel/VBox/SelectedFlicker").hide()
-	planner.ui.get_node("Panel/VBox/SelectedFlickerStep").hide()
-	if planner.preview != null and is_instance_valid(planner.preview):
-		planner.preview.queue_free()
-	planner.preview = null
+	controls.light_info.hide()
+	controls.light_level.hide()
+	controls.light_angle_info.hide()
+	controls.light_angle.hide()
+	session.ui.get_node("Panel/VBox/SelectedFlicker").hide()
+	session.ui.get_node("Panel/VBox/SelectedFlickerStep").hide()
+	if preview != null and is_instance_valid(preview):
+		preview.queue_free()
+	preview = null
 
 
 func _update_preview(screen_pos: Vector2) -> void:
-	if planner.preview == null:
+	if preview == null:
 		return
-	var world = planner.geometry._screen_to_surface(screen_pos, planner.preview)
+	var world = geometry._screen_to_surface(screen_pos, preview)
 	if not world.is_finite():
-		planner.preview.hide()
+		preview.hide()
 		return
-	planner.preview.show()
-	planner.preview.global_position = planner.geometry._snap_position_for(planner.preview, world)
-	planner.geometry._apply_special_default_height(planner.preview, _selected_kind())
-	planner.preview.rotation_degrees.y = planner.rotation_y
-	planner.geometry._apply_wall_mount(planner.preview)
-	planner.view._update_light_ui()
+	preview.show()
+	preview.global_position = geometry._snap_position_for(preview, world)
+	controls._apply_special_default_height(preview, _selected_kind())
+	preview.rotation_degrees.y = rotation_y
+	geometry._apply_wall_mount(preview)
+	controls._update_light_ui()
 
 
 func _place_selected(screen_pos: Vector2) -> void:
-	var placement_probe = planner.preview
-	var world = planner.geometry._screen_to_surface(screen_pos, placement_probe)
+	var placement_probe = preview
+	var world = geometry._screen_to_surface(screen_pos, placement_probe)
 	if not world.is_finite():
 		if placement_probe != null and bool(placement_probe.get_meta("planning_wall_mount", false)):
-			planner.status.text = "Aim at a wall to place this wall-mounted object."
+			controls.status.text = "Aim at a wall to place this wall-mounted object."
 		return
 	var kind = _selected_kind()
 	if kind == "player":
-		planner.edit_history.call("record_player_spawn")
-		planner.main_player.global_position = planner.geometry._snap(world) + Vector3(0.0, 1.0, 0.0)
-		planner.main_player.rotation_degrees.y = planner.rotation_y
-		planner.player_spawn_defined = true
-		planner.player_spawn_transform = planner.main_player.transform
-		planner.main_player.set_meta("planning_scene_path", "res://game/features/player/public/player.tscn")
-		planner.status.text = "Player spawn set"
+		session.edit_history.call("record_player_spawn")
+		session.main_player.global_position = geometry._snap(world) + Vector3(0.0, 1.0, 0.0)
+		session.main_player.rotation_degrees.y = rotation_y
+		player_spawn_defined = true
+		player_spawn_transform = session.main_player.transform
+		session.main_player.set_meta("planning_scene_path", "res://game/features/player/public/player.tscn")
+		controls.status.text = "Player spawn set"
 		_rebuild_preview()
 		return
-	if planner.selected_path.is_empty():
+	if selected_path.is_empty():
 		return
-	var node = planner.catalog._instantiate_asset(planner.selected_path)
+	var node = catalog._instantiate_asset(selected_path)
 	if node == null:
 		return
 	if kind == "exploration_darkness":
@@ -215,191 +198,246 @@ func _place_selected(screen_pos: Vector2) -> void:
 	elif kind == "darkness":
 		node.set("permanent", true)
 		node.set_meta("planning_permanent", true)
-	var target_parent = planner.enemies_root if kind == "enemy" else planner.root
+	var target_parent = session.enemies_root if kind == "enemy" else session.root
 	target_parent.add_child(node)
-	if planner.preview != null and planner.preview.has_meta("planning_wall_normal"):
-		node.set_meta("planning_wall_normal", planner.preview.get_meta("planning_wall_normal"))
+	if preview != null and preview.has_meta("planning_wall_normal"):
+		node.set_meta("planning_wall_normal", preview.get_meta("planning_wall_normal"))
 	if bool(node.get_meta("planning_wall_mount", false)) and not node.has_meta("planning_wall_normal"):
-		planner.status.text = "Aim at a wall to place this wall-mounted object."
+		controls.status.text = "Aim at a wall to place this wall-mounted object."
 		node.queue_free()
 		return
-	node.global_position = planner.geometry._snap_position_for(node, world)
-	planner.geometry._apply_special_default_height(node, kind)
+	node.global_position = geometry._snap_position_for(node, world)
+	controls._apply_special_default_height(node, kind)
 	if kind == "enemy":
 		node.global_position.y = 1.0
 		node.set_meta("planning_actor_kind", "enemy")
 		if node.has_method("set_target"):
-			node.call("set_target", planner.main_player)
-	node.rotation_degrees.y = planner.rotation_y
-	planner.geometry._apply_wall_mount(node)
-	if planner.selected_path.get_file() == "06_conference_chair.glb":
-		planner.geometry._ground_conference_chair(node)
-	node.set_meta("planning_scene_path", planner.selected_path)
-	planner.placed.append(node)
-	planner.edit_history.call("record_added", node)
-	if not planner.WORKSTATIONS.desk_name(planner.selected_path).is_empty():
+			node.call("set_target", session.main_player)
+	node.rotation_degrees.y = rotation_y
+	geometry._apply_wall_mount(node)
+	if selected_path.get_file() == "06_conference_chair.glb":
+		_ground_conference_chair(node)
+	node.set_meta("planning_scene_path", selected_path)
+	placed.append(node)
+	session.edit_history.call("record_added", node)
+	if not catalog.WORKSTATIONS.desk_name(selected_path).is_empty():
 		var desk_id = str(Time.get_ticks_usec())
 		node.set_meta("planning_desk_id", desk_id)
-		var objects: Array[Node3D] = planner.WORKSTATIONS.from_saved_template(node, planner.selected_path, planner.root, Callable(planner, "_instantiate_asset"))
-		for object in objects:
+		var attachments: Array[Node3D] = catalog.WORKSTATIONS.from_saved_template(node, selected_path, session.root, Callable(catalog, "_instantiate_asset"))
+		for object in attachments:
 			object.set_meta("planning_attachment", desk_id)
-			planner.placed.append(object)
-		planner.workstation_transforms[desk_id] = node.global_transform
+			placed.append(object)
+		workstation_transforms[desk_id] = node.global_transform
 	if kind == "light" and node.has_method("set_planning_visual"):
 		node.call("set_planning_visual", true)
-	planner.view._select(null)
+	_select(null)
 	_rebuild_preview()
-	if planner.preview != null:
+	if preview != null:
 		_update_preview(screen_pos)
-	planner.status.text = "Placed | same object remains active | RMB cancel"
+	controls.status.text = "Placed | same object remains active | RMB cancel"
 
 
 func _delete_at(screen_pos: Vector2) -> void:
-	var node = _planned_object_at(screen_pos)
+	var node = geometry._planned_object_at(screen_pos)
 	if node != null:
 		_delete_node(node)
 
 
 func _delete_selected() -> void:
-	if planner.selected != null:
-		planner.edit_history.call("record_deleted", planner.selected)
-		_delete_node(planner.selected)
+	if selected != null:
+		session.edit_history.call("record_deleted", selected)
+		_delete_node(selected)
 
 
 func _delete_node(node: Node3D) -> void:
-	if node == planner.main_player or str(node.get_meta("planning_actor_kind", "")) == "player":
-		planner.status.text = "Player spawn cannot be deleted; move it instead"
+	if node == session.main_player or str(node.get_meta("planning_actor_kind", "")) == "player":
+		controls.status.text = "Player spawn cannot be deleted; move it instead"
 		return
-	planner.view._clear_selection_highlight()
+	geometry._clear_selection_highlight()
 	var desk_id = str(node.get_meta("planning_desk_id", ""))
 	if not desk_id.is_empty():
-		for object in planner.placed.duplicate():
+		for object in placed.duplicate():
 			if is_instance_valid(object) and str(object.get_meta("planning_attachment", "")) == desk_id:
-				planner.placed.erase(object)
+				placed.erase(object)
 				object.queue_free()
-		planner.workstation_transforms.erase(desk_id)
-	planner.placed.erase(node)
-	if planner.selected == node:
-		planner.selected = null
+		workstation_transforms.erase(desk_id)
+	placed.erase(node)
+	if selected == node:
+		selected = null
 	node.queue_free()
-	planner.view._update_status()
-	planner.view._update_history_buttons()
+	_update_status()
+	controls._update_history_buttons()
 
 
 func _sync_workstations() -> void:
-	for desk in planner.placed:
+	for desk in placed:
 		if not is_instance_valid(desk):
 			continue
 		var desk_id = str(desk.get_meta("planning_desk_id", ""))
 		if desk_id.is_empty():
 			continue
-		if not planner.workstation_transforms.has(desk_id):
-			planner.workstation_transforms[desk_id] = desk.global_transform
+		if not workstation_transforms.has(desk_id):
+			workstation_transforms[desk_id] = desk.global_transform
 			continue
-		var previous: Transform3D = planner.workstation_transforms[desk_id]
+		var previous: Transform3D = workstation_transforms[desk_id]
 		if previous.is_equal_approx(desk.global_transform):
 			continue
 		var difference = desk.global_transform * previous.affine_inverse()
-		for object in planner.placed:
+		for object in placed:
 			if is_instance_valid(object) and str(object.get_meta("planning_attachment", "")) == desk_id:
 				object.global_transform = difference * object.global_transform
-		planner.workstation_transforms[desk_id] = desk.global_transform
+		workstation_transforms[desk_id] = desk.global_transform
 
 
 func _rotate_selected(amount: float) -> void:
-	if planner.selected != null:
-		planner.edit_history.call("record_transform", planner.selected)
-		planner.selected.rotation_degrees.y = fmod(planner.selected.rotation_degrees.y + amount + 360.0, 360.0)
-	elif planner.preview != null:
-		planner.rotation_y = fmod(planner.rotation_y + amount + 360.0, 360.0)
-		planner.preview.rotation_degrees.y = planner.rotation_y
-	planner.view._update_status()
+	if selected != null:
+		session.edit_history.call("record_transform", selected)
+		selected.rotation_degrees.y = fmod(selected.rotation_degrees.y + amount + 360.0, 360.0)
+	elif preview != null:
+		rotation_y = fmod(rotation_y + amount + 360.0, 360.0)
+		preview.rotation_degrees.y = rotation_y
+	_update_status()
 
 
 func _scale_selected(delta_scale: Vector3) -> void:
-	if planner.selected == null:
+	if selected == null:
 		return
-	planner.edit_history.call("record_transform", planner.selected)
-	var next = planner.selected.scale + delta_scale
+	session.edit_history.call("record_transform", selected)
+	var next = selected.scale + delta_scale
 	next.x = maxf(next.x, 0.1)
 	next.y = maxf(next.y, 0.1)
 	next.z = maxf(next.z, 0.1)
-	planner.selected.scale = next
-	planner.view._update_status()
+	selected.scale = next
+	_update_status()
 
 
 func _nudge_selected(input: Vector2) -> void:
-	if planner.selected == null:
+	if selected == null:
 		return
-	planner.edit_history.call("record_transform", planner.selected)
-	var forward = -planner.camera.global_transform.basis.z
+	session.edit_history.call("record_transform", selected)
+	var forward = -session.camera.global_transform.basis.z
 	forward.y = 0.0
 	forward = forward.normalized()
-	var right = planner.camera.global_transform.basis.x
+	var right = session.camera.global_transform.basis.x
 	right.y = 0.0
 	right = right.normalized()
-	var motion = (right * input.x + forward * -input.y) * planner.GRID_SIZE
-	planner.selected.global_position += motion
-	planner.selected.global_position.x = roundf(planner.selected.global_position.x / planner.GRID_SIZE) * planner.GRID_SIZE
-	planner.selected.global_position.z = roundf(planner.selected.global_position.z / planner.GRID_SIZE) * planner.GRID_SIZE
-	planner.view._update_status()
-
-
-func _adjust_selected_light_angle(amount: float) -> void:
-	if planner.selected == null:
-		return
-	var light = planner.selected.find_child("Light", true, false) as SpotLight3D
-	if light == null:
-		return
-	planner.edit_history.call("record_transform", planner.selected)
-	light.spot_angle = clampf(light.spot_angle + amount, 5.0, 89.0)
-	planner.selected.set_meta("planning_light_angle", light.spot_angle)
-	planner.view._update_light_ui()
-	planner.status.text = "LIGHT | cone %.0f° | , / . adjust" % light.spot_angle
-
-
-func _adjust_selected_light(amount: float) -> void:
-	if planner.selected == null:
-		return
-	var light = planner.selected.find_child("Light", true, false) as Light3D
-	if light == null:
-		return
-	planner.edit_history.call("record_transform", planner.selected)
-	planner.selected.call("set_authored_energy", clampf(float(planner.selected.call("get_authored_energy")) + amount, 0.0, 16.0))
-	planner.view._update_light_ui()
-	planner.status.text = "LIGHT | brightness %.2f | [ / ] adjust" % float(planner.selected.call("get_authored_energy"))
+	var motion = (right * input.x + forward * -input.y) * geometry.GRID_SIZE
+	selected.global_position += motion
+	selected.global_position.x = roundf(selected.global_position.x / geometry.GRID_SIZE) * geometry.GRID_SIZE
+	selected.global_position.z = roundf(selected.global_position.z / geometry.GRID_SIZE) * geometry.GRID_SIZE
+	_update_status()
 
 
 func _move_selected_height(amount: float) -> void:
-	if planner.selected != null:
-		planner.edit_history.call("record_transform", planner.selected)
-		planner.selected.position.y += amount
-		planner.view._update_status()
-	elif planner.preview != null:
-		planner.preview.position.y += amount
+	if selected != null:
+		session.edit_history.call("record_transform", selected)
+		selected.position.y += amount
+		_update_status()
+	elif preview != null:
+		preview.position.y += amount
+
+
+func _ground_conference_chair(node: Node3D) -> void:
+	var bounds = geometry._combined_aabb(node)
+	if bounds.size.length_squared() > 0.0001 and node.global_position.y < 0.25:
+		node.global_position.y = maxf(node.global_position.y, 0.025 - bounds.position.y)
+
+
+func _update_status() -> void:
+	if selected == null:
+		controls.status.text = "%d objects | select palette or object" % placed.size()
+		return
+	if selected.is_in_group("darkness_zone"):
+		controls.status.text = "DARKNESS | scale X/Z changes covered area | Delete removes"
+		return
+	controls.status.text = "SELECTED | pos %.1f %.1f | rot %.0f | scale %.2f %.2f %.2f" % [
+		selected.position.x, selected.position.z, selected.rotation_degrees.y,
+		selected.scale.x, selected.scale.y, selected.scale.z
+	]
+
+
+func _apply_layout_data(data: Dictionary) -> void:
+	clear_layout(false)
+	var records: Array = data.get("objects", [])
+	var player_records: Array = []
+	for record_value: Variant in records:
+		if record_value is Dictionary:
+			var candidate: Dictionary = record_value
+			var candidate_path = str(candidate.get("scene", ""))
+			if candidate_path == "res://game/features/player/public/player.tscn":
+				player_records.append(candidate)
+	if not player_records.is_empty():
+		player_spawn_defined = true
+		var latest: Dictionary = player_records[player_records.size() - 1]
+		session.main_player.position = Vector3(float(latest.get("x",0.0)),float(latest.get("y",1.0)),float(latest.get("z",0.0)))
+		session.main_player.rotation_degrees.y = float(latest.get("rotation_y",0.0))
+		player_spawn_transform = session.main_player.transform
+	for record_value: Variant in records:
+		if not record_value is Dictionary:
+			continue
+		var record: Dictionary = record_value
+		var scene_path = catalog._migrate_scene_path(str(record.get("scene", "")))
+		if scene_path == "res://game/features/player/public/player.tscn":
+			continue
+		if scene_path.is_empty() or not ResourceLoader.exists(scene_path):
+			continue
+		var node = catalog._instantiate_asset(scene_path)
+		if node == null:
+			continue
+		var load_kind = "enemy" if scene_path in [
+			"res://game/features/infected/public/infected_capsule.tscn",
+			"res://game/features/infected/public/mutant_level2.tscn"
+		] else ""
+		var target_parent = session.enemies_root if load_kind == "enemy" else session.root
+		target_parent.add_child(node)
+		node.position = Vector3(float(record.get("x",0.0)),float(record.get("y",0.0)),float(record.get("z",0.0)))
+		node.rotation_degrees.y = float(record.get("rotation_y",0.0))
+		node.scale = Vector3(float(record.get("scale_x",1.0)),float(record.get("scale_y",1.0)),float(record.get("scale_z",1.0)))
+		if scene_path.get_file() == "06_conference_chair.glb":
+			_ground_conference_chair(node)
+		node.set_meta("planning_scene_path", scene_path)
+		if record.has("desk_id"):
+			node.set_meta("planning_desk_id", str(record["desk_id"]))
+		if record.has("attachment"):
+			node.set_meta("planning_attachment", str(record["attachment"]))
+		if int(record.get("zone", -1)) >= 0:
+			node.set_meta("planning_zone", int(record["zone"]))
+		if node.has_method("set_authored_energy"):
+			node.set("energy_multiplier", float(record.get("energy_multiplier", 0.65)))
+			node.call("set_authored_energy", float(record.get("light_energy", node.call("get_authored_energy"))))
+		var saved_light_angle = float(record.get("light_angle", 48.0))
+		var saved_spot = node.find_child("Light", true, false) as SpotLight3D
+		if saved_spot != null:
+			saved_spot.spot_angle = saved_light_angle
+			node.set_meta("planning_light_angle", saved_light_angle)
+		if node.has_method("configure_flicker"):
+			node.call("configure_flicker", int(record.get("flicker_mode", 0)), float(record.get("flicker_step", 0.2)))
+		if node.get("darkness") != null:
+			node.set("darkness", float(record.get("darkness", 0.88)))
+			node.set("permanent", bool(record.get("permanent_darkness", true)))
+			if node.has_method("configure_zone"):
+				node.call("configure_zone", Vector2(node.scale.x * 4.0, node.scale.z * 4.0), node.get("darkness"), node.get("permanent"))
+		if load_kind == "enemy":
+			node.set_meta("planning_actor_kind", "enemy")
+			node.set_meta("planning_spawn_transform", node.transform)
+			node.global_position.y = float(record.get("y", 1.0))
+			if node.has_method("set_target"):
+				node.call("set_target", session.main_player)
+		placed.append(node)
+	_update_status()
 
 
 func clear_layout(update_status: bool = true) -> void:
-	planner.workstation_transforms.clear()
+	workstation_transforms.clear()
 	var retained: Array[Node3D] = []
-	for node in planner.placed:
+	for node in placed:
 		if not is_instance_valid(node):
 			continue
 		if bool(node.get_meta("planning_existing", false)):
 			retained.append(node)
 		else:
 			node.queue_free()
-	planner.placed = retained
-	planner.selected = null
+	placed = retained
+	selected = null
 	if update_status:
-		planner.view._update_status()
-
-
-func _set_preview_collision(node: Node, disabled: bool) -> void:
-	if disabled and node is CollisionObject3D:
-		(node as CollisionObject3D).collision_layer = 0
-		(node as CollisionObject3D).collision_mask = 0
-	if node is CollisionShape3D:
-		(node as CollisionShape3D).disabled = disabled
-	for child in node.get_children():
-		_set_preview_collision(child, disabled)
+		_update_status()

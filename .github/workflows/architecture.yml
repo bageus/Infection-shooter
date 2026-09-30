@@ -23,3 +23,7 @@ jobs:
 
       - name: Validate project gates
         run: python tools/validate_project.py
+      - name: Validate scene resources and workstation profiles
+        run: |
+          python tools/validate_scene_resources.py
+          python tools/test_workstation_templates.py
