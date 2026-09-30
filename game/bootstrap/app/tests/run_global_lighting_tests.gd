@@ -13,6 +13,7 @@ func _run() -> void:
 	var app := MAIN.instantiate()
 	root.add_child(app)
 	await process_frame
+	_check_contact_settings(app, "startup")
 	var controller: Node = app.get("planning_lighting")
 	var overhead := app.get_node("GlobalOverheadLight") as DirectionalLight3D
 	_check(overhead.get_parent() == app, "Global light belongs to composition root")
@@ -35,9 +36,13 @@ func _run() -> void:
 	for cycle in range(5):
 		planner.call("enter")
 		controller.call("set_game_lighting", false)
+		_check_contact_settings(app, "editor preview")
+		controller.call("set_planning_mode", true)
 		_check(overhead.visible and overhead.shadow_enabled and is_equal_approx(overhead.light_energy, 0.6), "Editor ambient keeps the global source")
 		controller.call("set_game_lighting", true)
+		_check_contact_settings(app, "game preview")
 		planner.call("exit")
+		_check_contact_settings(app, "planner exit")
 		_check(overhead.global_basis == basis_before, "Planner does not rotate global light")
 	var player := app.get_node("Gameplay/Player") as Node3D
 	player.get_node("CameraRig").rotate_y(PI / 2.0)
@@ -51,6 +56,7 @@ func _run() -> void:
 	await process_frame
 	var restarted := MAIN.instantiate()
 	root.add_child(restarted)
+	_check_contact_settings(restarted, "restart")
 	_check(not restarted.get("planning_lighting").get("local_lights_enabled"), "Scene restart restores local-off default")
 	restarted.free()
 	await process_frame
@@ -107,6 +113,7 @@ func _test_disabled_map_loading(app: Node, controller: Node) -> void:
 	]}
 	for cycle in range(5):
 		planner.get("objects").call("_apply_layout_data", data)
+		_check_contact_settings(app, "old map reload")
 		var lamps: Array[Node3D] = []
 		for node: Node3D in planner.get("placed"):
 			if node.is_in_group("planner_lights"):
@@ -144,6 +151,18 @@ func _test_shadow_coverage(app: Node, overhead: DirectionalLight3D) -> void:
 	_check(max_depth < overhead.directional_shadow_max_distance * overhead.directional_shadow_fade_start, "Shadow distance covers visible floor before fade at both zoom limits")
 	print("Maximum floor view depth: %.2f; shadow range: %.2f" % [max_depth, overhead.directional_shadow_max_distance])
 	viewport.free()
+
+
+func _check_contact_settings(app: Node3D, context: String) -> void:
+	var world := app.get_node("WorldEnvironment") as WorldEnvironment
+	var environment := world.environment
+	var camera := app.get_node("Gameplay/Player/CameraRig/Camera3D") as Camera3D
+	_check(camera.environment == null and camera.get_world_3d().environment == environment, "Game camera uses WorldEnvironment: " + context)
+	_check(environment.ssao_enabled and is_equal_approx(environment.ssao_radius, 0.35)
+		and is_equal_approx(environment.ssao_intensity, 0.6)
+		and is_zero_approx(environment.ssao_light_affect), "SSAO survives " + context)
+	_check(root.msaa_3d == Viewport.MSAA_2X, "Game viewport retains MSAA 2x: " + context)
+	_check(int(ProjectSettings.get_setting("rendering/lights_and_shadows/directional_shadow/size")) == 2048, "Shadow atlas stays 2048: " + context)
 
 
 func _check_lamp_off(lamp: Node) -> void:
