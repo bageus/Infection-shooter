@@ -42,9 +42,10 @@ remain harmless for call compatibility; catalog checks disable the retired ID.
 Combat exposes additive public `make_pickup_visual(index)` on launcher_visual
 v1 to instantiate the four existing model paths. Existing launcher APIs stay
 compatible. Bootstrap no longer requests generic non-launcher art. HUD reads
-the updated atlas once, extracts visible connected artwork, and reuses cropped
-textures. Default reading order assumes the previous five icons plus launcher
-as sixth; exported mapping allows authored reorder without code changes.
+the updated atlas once, extracts six explicit artwork bounds, and reuses cropped
+textures. The actual launcher is on the upper row; semantic index 5 selects
+it while indices 0–4 preserve rifle/pistol/uzi/shotgun/syringe identity. The
+PNG remains unchanged; explicit bounds avoid connected pale halos.
 
 ## Alternatives considered
 
@@ -74,11 +75,13 @@ threshold; this change adds only local control checks without unrelated moves.
 Tree refresh is split by its existing layout lifecycle; no new state owner or
 hard-limit exception is introduced.
 
-The GitHub connector cannot deliver the updated binary atlas (base64 content
-empty / UTF-8-only read), so its exact icon order and appearance are not
-visually verified here. Runtime discovery must be checked in installed Godot.
-No Godot executable or binary model copy remains after workspace cleanup.
-Static validation is evidence of syntax/boundaries, not a runtime visual pass.
+Повторная проверка 30.09.2026: полный checkout содержит PNG и GLB. Атлас
+просмотрен; шесть явных областей проверены настоящим HUD при замене оружия.
+Godot 4.5.2 выполнил пять runtime suites без ошибок; основная сцена отработала
+180 кадров. ДНК проверена physics-overlap, включая повторный подбор и паузу.
+Импорт сообщает о двух старых отсутствующих FBX-текстурах; общий validator
+блокируется прежним размером planning_mode.gd. Визуал целевой 4.7.2 ещё требует
+приёмки. Повторная проверка не меняет API или архитектурные границы.
 
 ## Approval
 

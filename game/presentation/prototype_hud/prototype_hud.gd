@@ -1,7 +1,7 @@
 extends CanvasLayer
 
 const ICON_REGIONS := preload("res://game/presentation/prototype_hud/weapon_icon_regions.gd")
-# Reading order of the updated atlas: rifle, pistol, uzi, shotgun, syringe, launcher.
+# Semantic cells: rifle, pistol, uzi, shotgun, syringe, launcher (top row).
 @export var weapon_icon_cells := PackedInt32Array([1, 2, 3, 5])
 @export var antidote_icon_cell := 4
 

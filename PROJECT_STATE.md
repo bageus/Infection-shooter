@@ -1,4 +1,9 @@
 ---
+
+30.09.2026: повторная проверка полного checkout по замечаниям владельца. В настоящем `icon_interface.png` гранатомёт находится сверху, а светлые ореолы объединяют пять нижних предметов; прежний поиск компонент не мог выделить шесть иконок. HUD теперь извлекает шесть явных областей по границам рисунков, сохраняет aspect и кеширует текстуры. Проверена фактическая замена pistol → launcher → pistol в игроке/HUD, включая основной значок и слот. Исправлены пять явно нетипизированных mutation_before в доменных тестах. Расширены тесты ДНК: реальное physics-overlap, повторный подбор стоящим игроком раз в две секунды, уход/возврат и пауза; проверена геометрия всех четырёх GLB оружия.
+Godot 4.5.2: все пять наборов (infection, mutation feedback/DNA/models, player control loss, real atlas/HUD, blood) прошли с нулём ошибок. Основная сцена отработала 180 кадров без SCRIPT ERROR/ERROR. Headless editor import завершился кодом 0, но сообщил о двух прежних отсутствующих FBX-текстурах palette1.png/couches.png; это не чистый импорт. Readiness/workflow/architecture/diff-check проходят. validate_project.py остаётся заблокирован существующими 1629 строками planning_mode.gd. Изменений API, сцен, сохранений, архитектурных исключений и проектных зависимостей в повторной проверке нет. Визуал целевой Godot 4.7.2 ещё не подтверждён.
+Следующее действие: в Godot 4.7.2 пройти визуальную приёмку дерева, салатового заполнения, крупной крови и значков оружия по docs/MUTATION_FEEDBACK_QA.md.
+
 state_version: 1
 status: IMPLEMENTATION
 current_phase: 1
@@ -184,3 +189,5 @@ No product blocker. Godot visual/import verification remains required.
 
 ## Handoff notes
 Perimeter and interior wall collision is scene-authored. The latest correction tightens structural module spacing and fixes exterior corner orientation based on user runtime screenshots.
+
+30.09.2026: runtime-проверки и исправления готовы локально. Автоматическая проверка отклонила push в main, потребовав явного разрешения пользователя на изменение общей основной ветки. Удалённый main не обновлён этим исправлением. Следующее точное действие: получить разрешение на отправку локального коммита; затем fast-forward push без переписывания истории.

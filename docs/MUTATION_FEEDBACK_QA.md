@@ -25,9 +25,9 @@
 - PNG blood marks are larger and near full opacity; three splatters per
   accepted hit. The 0.12-second throttle, 128 total marks, Mobile density cap,
   non-emission materials and oldest-first cleanup remain.
-- HUD extracts connected visible artwork once, crops transparent borders,
+- HUD extracts six explicit artwork regions once, excludes broad atlas padding,
   preserves aspect and reuses textures. Main icon/name rectangles no longer
-  overlap. The new atlas's default reading-order indices are pistol=1, uzi=2,
+  overlap. The atlas's stable semantic indices are pistol=1, uzi=2,
   shotgun=3, syringe=4, launcher=5; `weapon_icon_cells` is author-configurable.
 
 ## Runtime suites
@@ -45,24 +45,27 @@ python tools/validate_project.py
 Tests cover zero-spare-point path feedback, predecessor/stability gates,
 retired locked IDs, loss/recovery cast gating, autonomous motion/fire and held-input override,
 unique late roots, in-bounds circles/locks, adjacent hybrids, exclusive DNA
-collection/2-second respawn and six-image atlas extraction without stretching.
+collection/2-second physics respawn while standing, pause/resume, all four GLB
+models, and the real six-image atlas/HUD launcher swap without stretching.
 The blood suite fixes splatters-per-hit to one for its pre-existing budget and
 throttle assertions; production defaults to three.
 
 ## Verification status and exact limits
 
-GDScript parser, readiness/workflow, architecture and diff checks are the local
-checks. Aggregate validation remains blocked by the pre-existing
-`planning_mode.gd` hard size limit; it is untouched. No architecture exception.
-Workspace maintenance removed the old Godot executable and model copies.
-Runtime suites and visuals are **not passed** in this environment.
+Повторная проверка полного checkout 30.09.2026: Godot 4.5.2 успешно выполнил
+все пять runtime suites выше. Основная сцена отработала 180 кадров без игровых
+ошибок. Проверки готовности, рабочего состояния, архитектуры и diff-check прошли.
+Общий validator по-прежнему блокируется прежним planning_mode.gd (1629 строк).
+Headless editor import завершился кодом 0, но две старые FBX-модели сообщили об
+отсутствующих palette1.png и couches.png. Визуальная приёмка в целевой 4.7.2 остаётся.
 
-GitHub confirms the new atlas SHA differs from the previous one. Its reader
-cannot transfer PNG binary data (empty base64 for >1MB contents, UTF-8-only blob
-read), so the actual atlas order/appearance is **not verified**. This commit
-preserves that asset and implements runtime extraction. If artwork contains
-separate disconnected large pieces, extraction/order must be checked; the
-default sixth launcher cell is an explicit assumption, not an observed crop.
+Настоящий бинарный атлас доступен и просмотрен: launcher расположен вверху,
+пять остальных иконок внизу имеют соединённые светлые ореолы. Поиск connected
+components заменён явными границами рисунков. Файл PNG сохранён без изменений;
+семантический порядок rifle/pistol/uzi/shotgun/syringe/launcher фиксирован. Тест
+подтверждает шесть отдельных текстур, их aspect и реальную смену pistol →
+launcher → pistol в основном HUD и слоте. ДНК проверена настоящим physics-overlap,
+включая повторный подбор без выхода из области и остановку таймера паузой.
 
 ## Visual acceptance on installed Godot 4.7.2
 
@@ -81,7 +84,7 @@ default sixth launcher cell is an explicit assumption, not an observed crop.
    hidden; the timer must resume with gameplay.
 5. Exchange each weapon with the launcher. Check all four world models, slot
    identity, cropped main/slot icons, aspect and the **actual launcher cell**.
-   Verify `weapon_icon_cells` against the updated asset; a missing cell warns.
+   The actual upper-row launcher crop is covered by the automated HUD swap test.
 6. Shoot enemies near a wall/on floor, kill them and exceed mark budget. Check
    abundant larger blood, no emission, bounded density/fading and performance.
 

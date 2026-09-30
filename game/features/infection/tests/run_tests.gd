@@ -212,7 +212,7 @@ func _test_ability_hysteresis_and_priority() -> void:
 func _test_control_ampule_threshold_cap() -> void:
 	var domain = InfectionDomain.new()
 	domain.absorb_mutagen(4.0)
-	var mutation_before := domain.mutation
+	var mutation_before: float = domain.mutation
 	for index in range(20):
 		domain.add_control_ampule()
 	_expect_float(domain.critical_threshold, 95.0, "Control ampules cap the critical threshold at 95.")
@@ -267,7 +267,7 @@ func _test_risk_window_expiry_resets_escalation() -> void:
 func _test_antidote_resets_risk_and_reduces_mutation() -> void:
 	var domain = _reach_first_control_loss()
 	domain.tick(5.0)
-	var mutation_before := domain.mutation
+	var mutation_before: float = domain.mutation
 	_expect(domain.use_antidote(), "Antidote is usable during the risk window.")
 	_expect_float(domain.mutation, maxf(0.0, mutation_before - 10.0), "Risk-window antidote reduces mutation.")
 	_expect_float(domain.risk_window_remaining, 0.0, "Risk-window antidote ends the window immediately.")
@@ -285,7 +285,7 @@ func _test_antidote_resets_second_risk_window() -> void:
 	domain.tick(10.0)
 	_expect(domain.active_control_loss_stage == 2, "Test setup reaches stage-two control loss.")
 	domain.tick(7.0)
-	var mutation_before := domain.mutation
+	var mutation_before: float = domain.mutation
 	_expect_float(domain.risk_window_remaining, 30.0, "Stage two opens the second risk window.")
 	_expect(domain.use_antidote(), "Antidote is usable during the second risk window.")
 	_expect_float(domain.mutation, maxf(0.0, mutation_before - 10.0), "Second-window antidote reduces mutation.")
@@ -298,7 +298,7 @@ func _test_antidote_resets_second_risk_window() -> void:
 
 func _test_antidote_is_blocked_during_control_loss() -> void:
 	var domain = _reach_first_control_loss()
-	var mutation_before := domain.mutation
+	var mutation_before: float = domain.mutation
 	_expect(not domain.use_antidote(), "Antidote cannot be used during active control loss.")
 	_expect_float(domain.mutation, mutation_before, "Blocked antidote does not change mutation.")
 	_expect(domain.active_control_loss_stage == 1, "Blocked antidote does not alter control-loss stage.")
@@ -330,7 +330,7 @@ func _test_instability_only_builds_at_critical_threshold() -> void:
 
 func _test_mutagen_pauses_during_control_loss() -> void:
 	var domain = _reach_first_control_loss()
-	var mutation_before := domain.mutation
+	var mutation_before: float = domain.mutation
 	_expect_float(domain.absorb_mutagen(2.0), 0.0, "Mutagen does not accumulate during control loss.")
 	_expect_float(domain.mutation, mutation_before, "Mutation remains unchanged during control loss.")
 
