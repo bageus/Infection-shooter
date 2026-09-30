@@ -216,3 +216,5 @@ Run repository gates, then measure imported structural mesh AABBs in Godot again
 T002 remains the only active task. After CI, visually verify seams and collision in Godot before adding furniture/content.
 
 30.09.2026: runtime-проверки и исправления готовы локально. Автоматическая проверка отклонила push в main, потребовав явного разрешения пользователя на изменение общей основной ветки. Удалённый main не обновлён этим исправлением. Следующее точное действие: получить разрешение на отправку локального коммита; затем fast-forward push без переписывания истории.
+
+2026-09-30 follow-up: owner authorized publication to main. Immediate critical crossing and consecutive 5s/7s losses, automatic hybrids after both complete parent paths, gated trunk shading, revised atlas/HUD key buttons, and renamed elevator wall collisions are under verification. T002 remains active; see ADR 0008 and mutation feedback QA. Previous push approval blocker is resolved by the owner's explicit authorization.

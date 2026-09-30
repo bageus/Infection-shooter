@@ -22,11 +22,17 @@ const ICON_REGIONS := preload("res://game/presentation/prototype_hud/weapon_icon
 @onready var slot_icons: Array[TextureRect] = [$WeaponPanel/Slot1/Icon, $WeaponPanel/Slot2/Icon, $WeaponPanel/Slot3/Icon]
 @onready var fps_label: Label = $FPS
 @onready var enemy_count_label: Label = $EnemyCount
-@onready var slot_frames: Array[PanelContainer] = [$WeaponPanel/Slot1, $WeaponPanel/Slot2, $WeaponPanel/Slot3]
+@onready var slot_keys: Array[Button] = [$WeaponPanel/Slot1/KeyHint, $WeaponPanel/Slot2/KeyHint, $WeaponPanel/Slot3/KeyHint]
+@onready var antidote_key: Button = $AntidotePanel/KeyHint
+@onready var emergency_key: Label = $AntidotePanel/EmergencyKey
+@onready var slot_frames: Array[Panel] = [$WeaponPanel/Slot1, $WeaponPanel/Slot2, $WeaponPanel/Slot3]
 
 var player: Node
 var infection: Node
 var _perf_timer := 0.0
+var _antidote_hint_remaining := 0.0
+var _key_outline: StyleBoxFlat
+var _key_filled: StyleBoxFlat
 var _control_notice: Label
 var _last_weapon_index := -1
 var _weapon_icons: Array[Texture2D] = []
@@ -39,6 +45,9 @@ func _ready() -> void:
 	hp_bar.max_value = player.max_health
 	mutation_bar.max_value = 100.0
 	_configure_icon_regions()
+	_configure_key_buttons()
+	weapon_name.hide()
+	weapon_name.text = ""
 	_control_notice = Label.new()
 	_control_notice.text = "CONTROL LOST — MUTATION TAKES OVER"
 	_control_notice.set_anchors_and_offsets_preset(Control.PRESET_TOP_WIDE)
@@ -54,6 +63,8 @@ func _process(delta: float) -> void:
 	_control_notice.visible = bool(infection.call("is_control_lost"))
 	_update_vitals()
 	_update_weapon()
+	_antidote_hint_remaining = maxf(0.0, _antidote_hint_remaining - delta)
+	_update_key_buttons()
 	_perf_timer += delta
 	if _perf_timer >= 0.25:
 		_perf_timer = 0.0
@@ -83,7 +94,7 @@ func _refresh_slot_icons() -> void:
 			continue
 		_slot_weapon_indices[i] = weapon_index
 		slot_icons[i].texture = _weapon_icons[weapon_index] if weapon_index >= 0 and weapon_index < _weapon_icons.size() else null
-		(slot_frames[i].get_node("Label") as Label).text = "%d GL" % (i + 1) if weapon_index == 3 else str(i + 1)
+		slot_keys[i].text = str(i + 1)
 
 
 func _set_region(target: TextureRect, source: Texture2D, region: Rect2) -> void:
@@ -109,14 +120,15 @@ func _update_vitals() -> void:
 	mutation_bar.value = mutation
 	mutation_value.text = "%d / 100" % roundi(mutation)
 	critical_marker.position.x = 78.0 + 264.0 * clampf(critical / 100.0, 0.0, 1.0)
-	antidote_count.text = str(player.antidotes) + ("  KEY" if player.has_emergency_key() else "")
+	antidote_count.text = str(player.antidotes)
+	emergency_key.visible = player.has_emergency_key()
 
 
 func _update_weapon() -> void:
 	var weapon: Node = player.get_current_weapon()
 	_refresh_slot_icons()
 	_set_active_weapon_icon(player.get_current_weapon_index())
-	weapon_name.text = weapon.call("get_weapon_name").to_upper()
+	weapon_icon.tooltip_text = weapon.call("get_weapon_name").to_upper()
 	var magazine_ammo: int = weapon.call("get_magazine_ammo")
 	var reserve_ammo: int = weapon.call("get_reserve_ammo")
 	var reloading: bool = weapon.call("is_reloading")
@@ -173,3 +185,54 @@ func _update_weapon_slots(empty: bool) -> void:
 			frame.modulate = Color.WHITE
 		frame.add_theme_stylebox_override("panel", style)
 	_last_weapon_index = active_index
+
+
+func _configure_key_buttons() -> void:
+	_key_outline = StyleBoxFlat.new()
+	_key_outline.bg_color = Color(0.005, 0.035, 0.065, 1.0)
+	_key_outline.border_color = Color(0.0, 0.95, 1.0, 1.0)
+	_key_outline.set_border_width_all(1)
+	_key_outline.set_corner_radius_all(4)
+	_key_outline.set_content_margin_all(0)
+	_key_filled = _key_outline.duplicate() as StyleBoxFlat
+	_key_filled.bg_color = _key_outline.border_color
+	for index in slot_keys.size():
+		slot_keys[index].pressed.connect(_on_weapon_key_pressed.bind(index))
+		slot_keys[index].focus_mode = Control.FOCUS_NONE
+	antidote_key.pressed.connect(_on_antidote_key_pressed)
+	antidote_key.focus_mode = Control.FOCUS_NONE
+	_update_key_buttons()
+
+
+func _on_weapon_key_pressed(index: int) -> void:
+	if player.call("select_weapon_slot", index):
+		_update_weapon()
+	_update_key_buttons()
+
+
+func _on_antidote_key_pressed() -> void:
+	if player.call("use_antidote"):
+		_antidote_hint_remaining = 0.18
+		_update_vitals()
+	_update_key_buttons()
+
+
+func _update_key_buttons() -> void:
+	var blocked := bool(infection.call("is_control_lost")) or bool(infection.call("is_defeated"))
+	var active: int = player.get_current_weapon_index()
+	for index in slot_keys.size():
+		_set_key_state(slot_keys[index], index == active, blocked)
+	var using_antidote := _antidote_hint_remaining > 0.0 or Input.is_action_pressed("antidote") or antidote_key.is_pressed()
+	_set_key_state(antidote_key, using_antidote, blocked or player.antidotes <= 0)
+
+
+func _set_key_state(button: Button, selected: bool, blocked: bool) -> void:
+	button.disabled = blocked
+	var style := _key_filled if selected else _key_outline
+	var ink := _key_outline.bg_color if selected else _key_outline.border_color
+	for state in ["normal", "hover", "disabled"]:
+		button.add_theme_stylebox_override(state, style)
+	button.add_theme_stylebox_override("pressed", _key_filled)
+	for state in ["font_color", "font_hover_color", "font_disabled_color"]:
+		button.add_theme_color_override(state, ink)
+	button.add_theme_color_override("font_pressed_color", _key_outline.bg_color)

@@ -23,6 +23,11 @@ func _run() -> void:
 	var values: Array[float] = [40, 70, 25, 55, 25, 40, 55, 70, 85, 85]
 	var opened: Array[bool] = [true, true, true, true, true, true, true, true, true, true]
 	canvas.configure_progression(values, 95.0, opened)
+	_expect(canvas.trunk_available_x() == 1160.0, "Fully open stability leaves the entire trunk gray/available.")
+	var initial: Array[bool] = [false, false, true, false, true, false, false, false, false, false]
+	canvas.configure_progression(values, 95.0, initial)
+	_expect(canvas.trunk_available_x() == canvas.branch_origin(5).x, "Trunk darkness starts at the first closed stability junction, even with high mutation.")
+	canvas.configure_progression(values, 95.0, opened)
 	_expect(canvas.branch_origin(8) != canvas.branch_origin(9), "Late passive roots are distinct.")
 	_expect(CANVAS.HYBRID_PARENTS.size() == 5, "Only adjacent passive branches have hybrids.")
 	for branch in range(10):

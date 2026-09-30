@@ -16,7 +16,6 @@ const BASE_CRITICAL_THRESHOLD := 30.0
 const CONTROL_AMPULE_BONUS := 5.0
 const MAX_CRITICAL_THRESHOLD := 95.0
 const ANTIDOTE_REDUCTION := 10.0
-const INSTABILITY_DURATION := 10.0
 const FIRST_CONTROL_LOSS_DURATION := 5.0
 const SECOND_CONTROL_LOSS_DURATION := 7.0
 const RISK_WINDOW_DURATION := 30.0
@@ -28,7 +27,6 @@ var priority_ability: int = AbilityChoice.NONE
 var ability_choice_pending: bool = false
 
 var critical_threshold: float = BASE_CRITICAL_THRESHOLD
-var instability_elapsed: float = 0.0
 var control_loss_remaining: float = 0.0
 var risk_window_remaining: float = 0.0
 var next_control_loss_stage: int = 1
@@ -79,8 +77,6 @@ func add_control_ampule() -> float:
 		critical_threshold + CONTROL_AMPULE_BONUS,
 		MAX_CRITICAL_THRESHOLD
 	)
-	if mutation < critical_threshold:
-		instability_elapsed = 0.0
 	return critical_threshold
 
 
@@ -93,7 +89,6 @@ func use_antidote() -> bool:
 	if risk_window_remaining > 0.0:
 		risk_window_remaining = 0.0
 		next_control_loss_stage = 1
-		instability_elapsed = 0.0
 
 	mutation = maxf(MUTATION_MIN, mutation - ANTIDOTE_REDUCTION)
 	_after_mutation_changed()
@@ -104,55 +99,24 @@ func tick(delta_seconds: float) -> void:
 	var remaining := maxf(delta_seconds, 0.0)
 	while remaining > EPSILON and not defeated:
 		if is_control_lost():
-			var loss_step := minf(remaining, control_loss_remaining)
-			control_loss_remaining -= loss_step
-			remaining -= loss_step
+			var step := minf(remaining, control_loss_remaining)
+			control_loss_remaining -= step
+			remaining -= step
 			if control_loss_remaining <= EPSILON:
 				control_loss_remaining = 0.0
 				_finish_control_loss()
 			continue
-
-		var at_or_above_critical := mutation >= critical_threshold
-		if not at_or_above_critical:
-			instability_elapsed = 0.0
-
-		var risk_time := INF
-		if risk_window_remaining > 0.0:
-			risk_time = risk_window_remaining
-
-		var instability_time := INF
-		if at_or_above_critical:
-			instability_time = maxf(0.0, INSTABILITY_DURATION - instability_elapsed)
-
-		var step := minf(remaining, minf(risk_time, instability_time))
-		if step <= EPSILON:
-			if at_or_above_critical and instability_time <= EPSILON:
-				_trigger_control_loss()
-				continue
-			if risk_window_remaining > 0.0 and risk_time <= EPSILON:
-				_expire_risk_window()
-				continue
-			break
-
-		var instability_hits := (
-			at_or_above_critical
-			and instability_time <= step + EPSILON
-		)
-		var risk_expires := (
-			risk_window_remaining > 0.0
-			and risk_time <= step + EPSILON
-		)
-
-		if risk_window_remaining > 0.0:
-			risk_window_remaining = maxf(0.0, risk_window_remaining - step)
-		if at_or_above_critical:
-			instability_elapsed += step
-		remaining -= step
-
-		if instability_hits:
+		if mutation > critical_threshold:
 			_trigger_control_loss()
-		elif risk_expires:
-			_expire_risk_window()
+			continue
+		if risk_window_remaining > 0.0:
+			var step := minf(remaining, risk_window_remaining)
+			risk_window_remaining = maxf(0.0, risk_window_remaining - step)
+			remaining -= step
+			if risk_window_remaining <= EPSILON:
+				_expire_risk_window()
+			continue
+		break
 
 
 func is_control_lost() -> bool:
@@ -161,8 +125,8 @@ func is_control_lost() -> bool:
 
 func _after_mutation_changed() -> void:
 	_refresh_ability_state()
-	if mutation < critical_threshold:
-		instability_elapsed = 0.0
+	if mutation > critical_threshold and not is_control_lost() and not defeated:
+		_trigger_control_loss()
 
 
 func _refresh_ability_state() -> void:
@@ -184,7 +148,6 @@ func _refresh_ability_state() -> void:
 
 
 func _trigger_control_loss() -> void:
-	instability_elapsed = 0.0
 	risk_window_remaining = 0.0
 	var stage := next_control_loss_stage
 
@@ -205,6 +168,8 @@ func _trigger_control_loss() -> void:
 func _finish_control_loss() -> void:
 	active_control_loss_stage = 0
 	risk_window_remaining = RISK_WINDOW_DURATION
+	if mutation > critical_threshold:
+		_trigger_control_loss()
 
 
 func _expire_risk_window() -> void:

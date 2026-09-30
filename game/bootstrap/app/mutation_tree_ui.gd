@@ -76,11 +76,12 @@ func configure(infection: Node) -> void:
 	runtime.connect("tree_changed", _refresh)
 	runtime.connect("mutation_changed", _on_mutation_changed)
 	runtime.connect("skill_available", _on_new_skill_available)
+	runtime.connect("control_loss_changed", _on_control_loss_changed)
 	_refresh()
 
 
 func _on_new_skill_available() -> void:
-	if visible and not get_tree().paused:
+	if visible and not get_tree().paused and not runtime.call("is_control_lost") and not runtime.call("is_defeated"):
 		open_tree()
 
 
@@ -134,6 +135,8 @@ func is_tree_open() -> bool:
 
 
 func _set_open(value: bool) -> void:
+	if value and (runtime.call("is_control_lost") or runtime.call("is_defeated")):
+		return
 	if panel.visible == value:
 		return
 	if value:
@@ -216,7 +219,7 @@ func _refresh() -> void:
 		if int(row[3]) != 3:
 			continue
 		_add_skill(canvas, row, canvas.call("hybrid_position", hybrid_index))
-		hybrids.append(bool(runtime.call("skill_requirements", str(row[0]))["path_reached"]))
+		hybrids.append(bool(runtime.call("has_skill", str(row[0]))))
 		hybrid_index += 1
 	canvas.call("set_progress", progress, hybrids)
 	var open := Button.new()
@@ -252,6 +255,8 @@ func _add_skill(canvas: Control, row: Array, center: Vector2) -> void:
 	button.custom_minimum_size = Vector2(44, 44)
 	button.size = Vector2(44, 44)
 	button.tooltip_text = "%s\n%s\nRequires %d%% mutation · %d%% stability\n%s%s" % [row[1], row[5], roundi(level), roundi(requirements["stability"]), "Branch open" if requirements["branch_open"] else "Collect DNA to open this branch", " · Learned" if learned else ""]
+	if int(row[3]) == 3:
+		button.tooltip_text = "%s\n%s\nAutomatic bonus: learn all three circles in both linked passive branches.\n%s" % [row[1], row[5], "Active" if enabled else "Inactive"]
 	button.disabled = not available
 	button.modulate = Color.WHITE if bool(requirements["branch_open"]) else Color(0.35, 0.35, 0.35, 1.0)
 	button.focus_mode = Control.FOCUS_NONE
@@ -269,7 +274,7 @@ func _add_skill(canvas: Control, row: Array, center: Vector2) -> void:
 	button.add_theme_stylebox_override("pressed", style)
 	button.pressed.connect(func() -> void: runtime.call("upgrade_skill", skill_id))
 	canvas.add_child(button)
-	if learned:
+	if learned and int(row[3]) != 3:
 		var lock := Button.new()
 		lock.text = "L" if runtime.call("skill_locked", skill_id) else "+"
 		lock.tooltip_text = "Locked: kept when mutation drops" if runtime.call("skill_locked", skill_id) else "Lock skill against mutation loss"
@@ -297,3 +302,8 @@ func _add_section_labels(canvas: Control) -> void:
 		label.add_theme_font_size_override("font_size", 13)
 		label.modulate = Color(0.72, 0.8, 0.86)
 		canvas.add_child(label)
+
+
+func _on_control_loss_changed(active: bool) -> void:
+	if active and is_tree_open():
+		close_tree()

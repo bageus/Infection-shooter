@@ -53,6 +53,7 @@ func _run() -> void:
 	_expect(bool(player.call("pickup_weapon", 0)), "Dropped pistol can replace the launcher again.")
 	hud.call("_update_weapon")
 	_expect(main_icon.texture.get_size() == ICONS.ARTWORK_BOUNDS[1].size, "Returning to pistol restores its own icon.")
+	_test_key_buttons(hud, player)
 	stage.queue_free()
 	await process_frame
 	print("Weapon icon tests: %d failures" % failures)
@@ -63,3 +64,33 @@ func _expect(value: bool, message: String) -> void:
 	if not value:
 		failures += 1
 		push_error(message)
+
+
+func _test_key_buttons(hud: Node, player: Node) -> void:
+	var second := hud.get_node("WeaponPanel/Slot2/KeyHint") as Button
+	second.pressed.emit()
+	_expect(int(player.call("get_current_weapon_index")) == 1, "Clicking the framed number switches its slot.")
+	var selected := second.get_theme_stylebox("normal") as StyleBoxFlat
+	_expect(selected.bg_color.is_equal_approx(Color(0, 0.95, 1, 1)), "Selected key badge is filled.")
+	_expect(second.get_theme_color("font_color").is_equal_approx(Color(0.005, 0.035, 0.065, 1)), "Selected digit uses the HUD background color.")
+	for index in range(1, 4):
+		var frame := hud.get_node("WeaponPanel/Slot%d" % index) as Panel
+		var key := frame.get_node("KeyHint") as Button
+		var icon := frame.get_node("Icon") as TextureRect
+		_expect(key.position.x + key.size.x <= icon.position.x, "Each key badge remains to the left of its artwork.")
+		_expect(key.text == str(index), "Slot keys never show a weapon-name abbreviation behind the icon.")
+	_expect(not (hud.get_node("WeaponPanel/WeaponName") as Label).visible, "The weapon name cannot render behind the artwork.")
+	player.call("absorb_mutagen", 2.0)
+	var before: int = player.get("antidotes")
+	var key := hud.get_node("AntidotePanel/KeyHint") as Button
+	key.pressed.emit()
+	_expect(int(player.get("antidotes")) == before - 1, "Clicking the F badge uses the linked antidote command.")
+	var count := hud.get_node("AntidotePanel/AntidoteCount") as Label
+	_expect(count.text == str(before - 1), "Antidote count is only a number in its own cell.")
+	_expect(count.position.x > key.position.x + key.size.x and count.position.y < key.position.y, "Count is at the upper right and the F badge is at the left.")
+	var isolated := Image.create(24, 12, false, Image.FORMAT_RGBA8)
+	isolated.fill(Color.TRANSPARENT)
+	isolated.fill_rect(Rect2i(2, 2, 10, 8), Color.WHITE)
+	isolated.fill_rect(Rect2i(18, 4, 4, 4), Color.WHITE)
+	ICONS._keep_largest_component(isolated)
+	_expect(isolated.get_pixel(4, 4).a == 1.0 and isolated.get_pixel(19, 5).a == 0.0, "An overlapping neighbour is removed while the main artwork remains.")

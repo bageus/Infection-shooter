@@ -10,6 +10,12 @@ var cooldowns: Dictionary = {}
 func reconcile(mutation: float) -> bool:
 	var changed := false
 	var protected: Dictionary = {}
+	# Old purchased hybrids become derived bonuses and refund their point.
+	for skill_id in CATALOG.HYBRID_PARENTS:
+		if learned.has(skill_id) or locked.has(skill_id):
+			learned.erase(skill_id)
+			locked.erase(skill_id)
+			changed = true
 	for skill_id in locked.keys():
 		if not learned.has(skill_id):
 			continue
@@ -53,16 +59,24 @@ func reconcile(mutation: float) -> bool:
 
 
 func points(mutation: float) -> int:
-	return maxi(0, CATALOG.point_budget(mutation) - learned.size())
+	var spent := 0
+	for skill_id in learned:
+		if not CATALOG.HYBRID_PARENTS.has(str(skill_id)):
+			spent += 1
+	return maxi(0, CATALOG.point_budget(mutation) - spent)
 
 
 func is_active(skill_id: String, mutation: float, stability: float = 30.0) -> bool:
 	var row := CATALOG.find(skill_id)
-	return learned.has(skill_id) and not row.is_empty() and mutation >= CATALOG.threshold(row) and stability >= CATALOG.required_stability(row)
+	if row.is_empty():
+		return false
+	if int(row[3]) == 3:
+		return path_reached(skill_id, mutation, stability)
+	return learned.has(skill_id) and mutation >= CATALOG.threshold(row) and stability >= CATALOG.required_stability(row)
 
 
 func can_upgrade(skill_id: String, mutation: float, stability: float = 30.0) -> bool:
-	return not learned.has(skill_id) and points(mutation) > 0 and path_reached(skill_id, mutation, stability)
+	return not CATALOG.HYBRID_PARENTS.has(skill_id) and not learned.has(skill_id) and points(mutation) > 0 and path_reached(skill_id, mutation, stability)
 
 
 # Eligibility for drawing the path is independent of unspent points.
@@ -73,9 +87,18 @@ func path_reached(skill_id: String, mutation: float, stability: float = 30.0) ->
 	var rank := int(row[3])
 	if rank > 0 and rank < 3 and not _has_previous(row, _branch_rows(row)):
 		return false
-	if rank == 3:
-		for parent in CATALOG.HYBRID_PARENTS.get(skill_id, []):
-			if not learned.has(parent):
+	if rank == 3 and not has_hybrid_parents(skill_id):
+		return false
+	return true
+
+
+func has_hybrid_parents(skill_id: String) -> bool:
+	if not CATALOG.HYBRID_PARENTS.has(skill_id):
+		return false
+	for parent_id in CATALOG.HYBRID_PARENTS[skill_id]:
+		var last := CATALOG.find(str(parent_id))
+		for row in CATALOG.PASSIVE:
+			if row[2] == last[2] and int(row[3]) < 3 and not learned.has(str(row[0])):
 				return false
 	return true
 
@@ -99,7 +122,7 @@ func upgrade(skill_id: String, mutation: float, stability: float = 30.0) -> bool
 
 
 func toggle_lock(skill_id: String) -> bool:
-	if not learned.has(skill_id):
+	if CATALOG.HYBRID_PARENTS.has(skill_id) or not learned.has(skill_id):
 		return false
 	if locked.has(skill_id):
 		locked.erase(skill_id)

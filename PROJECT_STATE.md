@@ -191,3 +191,5 @@ No product blocker. Godot visual/import verification remains required.
 Perimeter and interior wall collision is scene-authored. The latest correction tightens structural module spacing and fixes exterior corner orientation based on user runtime screenshots.
 
 30.09.2026: runtime-проверки и исправления готовы локально. Автоматическая проверка отклонила push в main, потребовав явного разрешения пользователя на изменение общей основной ветки. Удалённый main не обновлён этим исправлением. Следующее точное действие: получить разрешение на отправку локального коммита; затем fast-forward push без переписывания истории.
+
+2026-09-30 follow-up: prepared immediate control-loss escalation, automatic complete-path hybrids, stability-gated trunk, tightly cropped replacement atlas, clickable framed weapon/antidote keys and rename-safe elevator wall collision. Runtime verification pending in GitHub Actions because this session has no local execution environment. Visual acceptance still required in installed Godot.

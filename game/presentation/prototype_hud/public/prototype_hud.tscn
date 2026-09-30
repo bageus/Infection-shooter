@@ -1,4 +1,4 @@
-[gd_scene load_steps=13 format=3]
+[gd_scene load_steps=15 format=3]
 
 [ext_resource type="Script" path="res://game/presentation/prototype_hud/prototype_hud.gd" id="1"]
 [ext_resource type="Texture2D" path="res://assets/icon_interface.png" id="2_icons"]
@@ -103,6 +103,38 @@ corner_radius_top_right = 6
 corner_radius_bottom_left = 6
 corner_radius_bottom_right = 6
 
+[sub_resource type="StyleBoxFlat" id="KeyHintFrame"]
+bg_color = Color(0.005, 0.035, 0.065, 1)
+border_width_left = 1
+border_width_top = 1
+border_width_right = 1
+border_width_bottom = 1
+border_color = Color(0, 0.95, 1, 1)
+corner_radius_top_left = 4
+corner_radius_top_right = 4
+corner_radius_bottom_left = 4
+corner_radius_bottom_right = 4
+content_margin_left = 0.0
+content_margin_top = 0.0
+content_margin_right = 0.0
+content_margin_bottom = 0.0
+
+[sub_resource type="StyleBoxFlat" id="KeyHintFilled"]
+bg_color = Color(0, 0.95, 1, 1)
+border_width_left = 1
+border_width_top = 1
+border_width_right = 1
+border_width_bottom = 1
+border_color = Color(0, 0.95, 1, 1)
+corner_radius_top_left = 4
+corner_radius_top_right = 4
+corner_radius_bottom_left = 4
+corner_radius_bottom_right = 4
+content_margin_left = 0.0
+content_margin_top = 0.0
+content_margin_right = 0.0
+content_margin_bottom = 0.0
+
 [node name="PrototypeHUD" type="CanvasLayer"]
 layer = 5
 script = ExtResource("1")
@@ -202,39 +234,57 @@ anchors_preset = 2
 anchor_top = 1.0
 anchor_bottom = 1.0
 offset_left = 498.0
-offset_top = -112.0
-offset_right = 562.0
-offset_bottom = -18.0
+offset_top = -85.0
+offset_right = 603.0
+offset_bottom = -33.0
 grow_vertical = 0
 theme_override_styles/panel = SubResource("AntidoteFrame")
 
 [node name="Symbol" type="TextureRect" parent="AntidotePanel"]
-offset_left = 8.0
-offset_top = 8.0
-offset_right = 56.0
-offset_bottom = 52.0
+offset_left = 38.0
+offset_top = 5.0
+offset_right = 94.0
+offset_bottom = 47.0
+mouse_filter = 2
 texture = ExtResource("2_icons")
 expand_mode = 1
 stretch_mode = 5
 
-[node name="KeyHint" type="Label" parent="AntidotePanel"]
-offset_left = 8.0
-offset_top = 4.0
-offset_right = 24.0
-offset_bottom = 22.0
+[node name="KeyHint" type="Button" parent="AntidotePanel"]
+offset_left = 6.0
+offset_top = 11.0
+offset_right = 32.0
+offset_bottom = 41.0
+focus_mode = 0
 text = "F"
-theme_override_colors/font_color = Color(0.9, 0.98, 1, 1)
-theme_override_font_sizes/font_size = 11
+tooltip_text = "Use antidote [F]"
+theme_override_font_sizes/font_size = 16
+theme_override_colors/font_color = Color(0, 0.95, 1, 1)
+theme_override_colors/font_pressed_color = Color(0.005, 0.035, 0.065, 1)
+theme_override_styles/normal = SubResource("KeyHintFrame")
+theme_override_styles/pressed = SubResource("KeyHintFilled")
 
 [node name="AntidoteCount" type="Label" parent="AntidotePanel"]
-offset_left = 8.0
-offset_top = 54.0
-offset_right = 56.0
-offset_bottom = 86.0
+offset_left = 77.0
+offset_top = 0.0
+offset_right = 101.0
+offset_bottom = 22.0
+mouse_filter = 2
 text = "2"
 theme_override_colors/font_color = Color(0.9, 0.98, 1, 1)
-theme_override_font_sizes/font_size = 19
-horizontal_alignment = 1
+theme_override_font_sizes/font_size = 16
+horizontal_alignment = 2
+
+[node name="EmergencyKey" type="Label" parent="AntidotePanel"]
+visible = false
+offset_left = 0.0
+offset_top = -22.0
+offset_right = 105.0
+offset_bottom = -2.0
+mouse_filter = 2
+text = "KEY"
+theme_override_font_sizes/font_size = 13
+horizontal_alignment = 2
 
 [node name="EnemyCount" type="Label" parent="."]
 anchors_preset = 1
@@ -294,11 +344,12 @@ expand_mode = 1
 stretch_mode = 5
 
 [node name="WeaponName" type="Label" parent="WeaponPanel"]
+visible = false
 offset_left = 18.0
 offset_top = 58.0
 offset_right = 208.0
 offset_bottom = 83.0
-text = "PISTOL"
+text = ""
 theme_override_colors/font_color = Color(0.84, 0.94, 1, 1)
 theme_override_font_sizes/font_size = 16
 horizontal_alignment = 1
@@ -332,56 +383,95 @@ text = ""
 theme_override_font_sizes/font_size = 14
 horizontal_alignment = 2
 
-[node name="Slot1" type="PanelContainer" parent="WeaponPanel"]
+[node name="Slot1" type="Panel" parent="WeaponPanel"]
 offset_left = 16.0
 offset_top = 91.0
 offset_right = 121.0
 offset_bottom = 143.0
 theme_override_styles/panel = SubResource("ActiveSlotFrame")
 
-[node name="Label" type="Label" parent="WeaponPanel/Slot1"]
+[node name="KeyHint" type="Button" parent="WeaponPanel/Slot1"]
+offset_left = 6.0
+offset_top = 11.0
+offset_right = 32.0
+offset_bottom = 41.0
+focus_mode = 0
 text = "1"
-theme_override_colors/font_color = Color(0.88, 0.95, 1, 1)
-theme_override_font_sizes/font_size = 14
+tooltip_text = "Select weapon [1]"
+theme_override_font_sizes/font_size = 16
+theme_override_colors/font_color = Color(0, 0.95, 1, 1)
+theme_override_colors/font_pressed_color = Color(0.005, 0.035, 0.065, 1)
+theme_override_styles/normal = SubResource("KeyHintFrame")
+theme_override_styles/pressed = SubResource("KeyHintFilled")
 
 [node name="Icon" type="TextureRect" parent="WeaponPanel/Slot1"]
-layout_mode = 2
+offset_left = 38.0
+offset_top = 5.0
+offset_right = 99.0
+offset_bottom = 47.0
+mouse_filter = 2
 texture = ExtResource("2_icons")
 expand_mode = 1
 stretch_mode = 5
 
-[node name="Slot2" type="PanelContainer" parent="WeaponPanel"]
+[node name="Slot2" type="Panel" parent="WeaponPanel"]
 offset_left = 133.0
 offset_top = 91.0
 offset_right = 238.0
 offset_bottom = 143.0
 theme_override_styles/panel = SubResource("SlotFrame")
 
-[node name="Label" type="Label" parent="WeaponPanel/Slot2"]
+[node name="KeyHint" type="Button" parent="WeaponPanel/Slot2"]
+offset_left = 6.0
+offset_top = 11.0
+offset_right = 32.0
+offset_bottom = 41.0
+focus_mode = 0
 text = "2"
-theme_override_colors/font_color = Color(0.88, 0.95, 1, 1)
-theme_override_font_sizes/font_size = 14
+tooltip_text = "Select weapon [2]"
+theme_override_font_sizes/font_size = 16
+theme_override_colors/font_color = Color(0, 0.95, 1, 1)
+theme_override_colors/font_pressed_color = Color(0.005, 0.035, 0.065, 1)
+theme_override_styles/normal = SubResource("KeyHintFrame")
+theme_override_styles/pressed = SubResource("KeyHintFilled")
 
 [node name="Icon" type="TextureRect" parent="WeaponPanel/Slot2"]
-layout_mode = 2
+offset_left = 38.0
+offset_top = 5.0
+offset_right = 99.0
+offset_bottom = 47.0
+mouse_filter = 2
 texture = ExtResource("2_icons")
 expand_mode = 1
 stretch_mode = 5
 
-[node name="Slot3" type="PanelContainer" parent="WeaponPanel"]
+[node name="Slot3" type="Panel" parent="WeaponPanel"]
 offset_left = 250.0
 offset_top = 91.0
 offset_right = 355.0
 offset_bottom = 143.0
 theme_override_styles/panel = SubResource("SlotFrame")
 
-[node name="Label" type="Label" parent="WeaponPanel/Slot3"]
+[node name="KeyHint" type="Button" parent="WeaponPanel/Slot3"]
+offset_left = 6.0
+offset_top = 11.0
+offset_right = 32.0
+offset_bottom = 41.0
+focus_mode = 0
 text = "3"
-theme_override_colors/font_color = Color(0.88, 0.95, 1, 1)
-theme_override_font_sizes/font_size = 14
+tooltip_text = "Select weapon [3]"
+theme_override_font_sizes/font_size = 16
+theme_override_colors/font_color = Color(0, 0.95, 1, 1)
+theme_override_colors/font_pressed_color = Color(0.005, 0.035, 0.065, 1)
+theme_override_styles/normal = SubResource("KeyHintFrame")
+theme_override_styles/pressed = SubResource("KeyHintFilled")
 
 [node name="Icon" type="TextureRect" parent="WeaponPanel/Slot3"]
-layout_mode = 2
+offset_left = 38.0
+offset_top = 5.0
+offset_right = 99.0
+offset_bottom = 47.0
+mouse_filter = 2
 texture = ExtResource("2_icons")
 expand_mode = 1
 stretch_mode = 5

@@ -41,6 +41,7 @@ func _ready() -> void:
 	mutation_choice.process_mode = Node.PROCESS_MODE_ALWAYS
 	infection_runtime.ability_choice_requested.connect(_on_mutation_choice_requested)
 	infection_runtime.ability_changed.connect(_on_mutation_ability_changed)
+	infection_runtime.defeated.connect(_on_mutation_defeated)
 	mutation_tree_ui = MUTATION_UI.new()
 	add_child(mutation_tree_ui)
 	mutation_tree_ui.call("configure", infection_runtime)
@@ -213,3 +214,11 @@ func _bind_enemy_blood(enemy: Node) -> void:
 		if not enemy.is_connected(event, callback):
 			enemy.connect(event, callback)
 	enemy.set("blood_drop_distance", blood_effects.call("movement_spacing"))
+
+
+func _on_mutation_defeated() -> void:
+	if _ended:
+		return
+	if mutation_tree_ui != null and mutation_tree_ui.call("is_tree_open"):
+		mutation_tree_ui.call("close_tree")
+	_end_run("MUTATION OVERTOOK YOU")
