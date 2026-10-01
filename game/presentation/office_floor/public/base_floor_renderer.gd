@@ -64,7 +64,7 @@ func _build_materials() -> void:
 		var material := TILE_MATERIAL.duplicate(false) as StandardMaterial3D
 		var tint := 0.97 + float(index) * (0.06 / float(MATERIAL_VARIANTS - 1))
 		material.albedo_color = Color(0.56 * tint, 0.59 * tint, 0.61 * tint, 1.0)
-		material.roughness = 0.63 + float(index) * 0.006
+		material.roughness = TILE_MATERIAL.roughness + (float(index) - float(MATERIAL_VARIANTS - 1) * 0.5) * 0.006
 		material.uv1_offset = Vector3(float(index % 4) * 0.25, float(floori(float(index) / 4.0)) * 0.5, 0.0)
 		_materials.append(material)
 		var small_material := material.duplicate(false) as StandardMaterial3D
