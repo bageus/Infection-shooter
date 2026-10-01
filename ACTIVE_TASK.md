@@ -13,6 +13,7 @@ updated: 2026-10-01
 Build the first playable combat-slice foundation with an authored office floor, player, combat, infected enemies, infection source, and observable fail states.
 
 ## In scope
+- owner-requested subtle floor material variation and thinner visual seams; lighting remains unchanged;
 - owner-reported main-scene parse failure after unresolved stash conflicts;
 - owner-requested discrete central mutation-tree connectors, with gradual progression confined to branches;
 - owner-requested individual lamp tint controls and backward-compatible map persistence;
@@ -41,6 +42,8 @@ Procedural generation, save/checkpoints, final HUD, monetization, platform SDKs 
 - Structural modules visually touch edge-to-edge with no visible gaps and no overlap beyond a tiny seam tolerance.\n- Exterior corners face inward correctly.\n- Perimeter and authored interior walls block the player.\n- The expanded floor and defeat menu remain functional.
 
 ## Progress
+
+01.10.2026: по запросу владельца доработан базовый пол presentation.office_floor: общий StandardMaterial3D с двумя бесшовными NoiseTexture2D 256×256, умеренной фактурой и шероховатостью. Восемь детерминированных вариантов оттенка/UV и восемь вариантов для четвертей плиток делят текстуры; нет обработки кадров, новых контрактов, зависимостей или миграции карт. Визуальный зазор сужен с 15 до 2 мм; высота, центры, коллизии и лестничные отверстия прежние. Освещение/SSAO/MSAA/лампы/HUD сохранены. До очистки scratch validate_project и scene-access tests прошли; текущая восстановленная ветка проверяется CI. Графическая приёмка открыта. Следующее точное действие: проверить швы, grain и отражения при прежнем освещении в Godot 4.7.2.
 
 01.10.2026: устранён блокирующий запуск конфликт stash/upstream в main.tscn после авторского сохранения редактором (b1de4ce8): два блока ColorRow/AngleRow и SelectedLightColor/SelectedFlicker объединены без маркеров, с обоими ColorPickerButton и актуальными unique_id. Авторские настройки сцены, MSAA 4× и тени 2048 сохранены. Resource gate теперь выдаёт путь/номер строки для неразрешённых конфликтов в tscn/tres. Старое требование MSAA 2× в lighting test заменено проверкой сохранения выбранного проектом значения при запуске, планировании, загрузке и restart. Модуль bootstrap.app и инструмент валидации; API/форматы карт/владельцы состояния без изменений. Godot 4.7.2: validate_project, проверка 248 ссылок ресурсов сцен, workstation/glass/scene-access, все 12 runtime-наборов и основная сцена 180 кадров прошли в CI https://github.com/bageus/Infection-shooter/actions/runs/36790319901. Editor import завершился 0 с прежними отсутствующими palette1.png/couches.png; runtime без SCRIPT ERROR/ERROR. Следующее действие: обновить main и открыть главную сцену в Godot 4.7.2 на компьютере владельца.
 
