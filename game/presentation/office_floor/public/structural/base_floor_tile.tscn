@@ -1,13 +1,10 @@
 [gd_scene load_steps=3 format=3]
 
-[sub_resource type="StandardMaterial3D" id="TileMaterial"]
-albedo_color = Color(0.56, 0.59, 0.61, 1)
-metallic = 0.13
-roughness = 0.43
+[ext_resource type="Material" path="res://game/presentation/office_floor/floor_tile_material.tres" id="tile_material"]
 
 [sub_resource type="BoxMesh" id="TileMesh"]
-material = SubResource("TileMaterial")
-size = Vector3(1.985, 0.025, 1.985)
+material = ExtResource("tile_material")
+size = Vector3(1.998, 0.025, 1.998)
 
 [node name="BaseFloorTile" type="MeshInstance3D"]
 mesh = SubResource("TileMesh")
