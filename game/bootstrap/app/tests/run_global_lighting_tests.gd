@@ -3,6 +3,7 @@ extends SceneTree
 const MAIN := preload("res://game/bootstrap/app/main.tscn")
 const LAMP := preload("res://game/presentation/office_floor/public/props/planner_light.tscn")
 var _failures := 0
+var _authored_msaa: int
 
 
 func _initialize() -> void:
@@ -10,6 +11,7 @@ func _initialize() -> void:
 
 
 func _run() -> void:
+	_authored_msaa = int(ProjectSettings.get_setting("rendering/anti_aliasing/quality/msaa_3d", Viewport.MSAA_DISABLED))
 	var app := MAIN.instantiate()
 	root.add_child(app)
 	await process_frame
@@ -161,7 +163,7 @@ func _check_contact_settings(app: Node3D, context: String) -> void:
 	_check(environment.ssao_enabled and is_equal_approx(environment.ssao_radius, 0.35)
 		and is_equal_approx(environment.ssao_intensity, 0.6)
 		and is_zero_approx(environment.ssao_light_affect), "SSAO survives " + context)
-	_check(root.msaa_3d == Viewport.MSAA_2X, "Game viewport retains MSAA 2x: " + context)
+	_check(root.msaa_3d == _authored_msaa, "Game viewport retains authored MSAA: " + context)
 	_check(int(ProjectSettings.get_setting("rendering/lights_and_shadows/directional_shadow/size")) == 2048, "Shadow atlas stays 2048: " + context)
 
 
