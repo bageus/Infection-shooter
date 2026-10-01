@@ -6,6 +6,7 @@ import re
 import sys
 
 ROOT = Path(__file__).resolve().parents[1]
+CONFLICT_MARKER = re.compile(r"^(?:<{7}|={7}|>{7}|\|{7})(?: .*)?$")
 RESOURCE_PATH = re.compile(r'^\[ext_resource\b[^\n]*\bpath="res://([^"]+)"', re.MULTILINE)
 
 
@@ -15,7 +16,11 @@ def main() -> int:
     for path in sorted((ROOT / "game").rglob("*")):
         if path.suffix not in {".tscn", ".tres"}:
             continue
-        for target in RESOURCE_PATH.findall(path.read_text(encoding="utf-8")):
+        text = path.read_text(encoding="utf-8")
+        for number, line in enumerate(text.splitlines(), 1):
+            if CONFLICT_MARKER.fullmatch(line):
+                errors.append(f"{path.relative_to(ROOT)}:{number}: unresolved merge conflict")
+        for target in RESOURCE_PATH.findall(text):
             checked += 1
             if not (ROOT / target).is_file():
                 errors.append(f"{path.relative_to(ROOT)}: missing res://{target}")

@@ -284,7 +284,6 @@ max_value = 16.0
 step = 0.25
 value = 3.0
 
-<<<<<<< Updated upstream
 [node name="ColorRow" type="HBoxContainer" parent="PlanningUI/Panel/VBox/LightDefaults"]
 layout_mode = 2
 [node name="Label" type="Label" parent="PlanningUI/Panel/VBox/LightDefaults/ColorRow"]
@@ -298,10 +297,7 @@ color = Color(1, 0.92, 0.78, 1)
 edit_alpha = false
 edit_intensity = false
 
-[node name="AngleRow" type="HBoxContainer" parent="PlanningUI/Panel/VBox/LightDefaults"]
-=======
 [node name="AngleRow" type="HBoxContainer" parent="PlanningUI/Panel/VBox/LightDefaults" unique_id=853970616]
->>>>>>> Stashed changes
 layout_mode = 2
 
 [node name="Label" type="Label" parent="PlanningUI/Panel/VBox/LightDefaults/AngleRow" unique_id=719690250]
@@ -401,7 +397,6 @@ max_value = 89.0
 value = 48.0
 show_percentage = false
 
-<<<<<<< Updated upstream
 [node name="SelectedLightColor" type="HBoxContainer" parent="PlanningUI/Panel/VBox"]
 visible = false
 layout_mode = 2
@@ -416,10 +411,7 @@ color = Color(1, 0.92, 0.78, 1)
 edit_alpha = false
 edit_intensity = false
 
-[node name="SelectedFlicker" type="HBoxContainer" parent="PlanningUI/Panel/VBox"]
-=======
 [node name="SelectedFlicker" type="HBoxContainer" parent="PlanningUI/Panel/VBox" unique_id=1247356379]
->>>>>>> Stashed changes
 visible = false
 layout_mode = 2
 
