@@ -47,5 +47,5 @@ func _update_visual_anchor() -> void:
 		right = camera.global_basis.x
 	right = right.normalized()
 	var up := toward_camera.cross(right).normalized()
-	_visual.global_basis = Basis(right, up, toward_camera).scaled(Vector3(width, height, 1.0))
+	_visual.global_basis = Basis(right * width, up * height, toward_camera)
 	_visual.global_position = nozzle.global_position + right * width * (0.5 - tip_position)
