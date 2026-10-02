@@ -1,13 +1,11 @@
 extends Node3D
 const LAUNCHER_MODEL_PATH := "res://models/objects/weapons/six_chamber_launcher_lowpoly.glb"
+const ART_SETUP := preload("res://game/features/combat/weapon_art_setup.gd")
 
 # Imported art can be added later without changing weapon or pickup scenes.
 func _ready() -> void:
 	var visual := make_visual()
 	add_child(visual)
-	if launcher_model() != null:
-		# Authored barrel points along +X; the weapon muzzle points along -Z.
-		visual.rotation_degrees.y = 90.0
 
 
 static func launcher_model() -> PackedScene:
@@ -39,7 +37,14 @@ static func make_pickup_visual(index: int) -> Node3D:
 		push_error("Weapon pickup model unavailable for index %d" % index)
 		return Node3D.new()
 	var model := load(paths[index]) as PackedScene
-	return model.instantiate() as Node3D if model != null else Node3D.new()
+	var root := Node3D.new()
+	if model != null:
+		var visual := model.instantiate() as Node3D
+		root.add_child(visual)
+		var authored_root := ART_SETUP.find_marker(visual, "WeaponRoot")
+		if authored_root != null:
+			ART_SETUP.normalize_model(visual, authored_root)
+	return root
 
 
 static func casing_model() -> PackedScene:

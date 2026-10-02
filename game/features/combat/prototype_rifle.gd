@@ -1,5 +1,6 @@
 extends Node3D
 const MUZZLE_FLASH := preload("res://game/features/combat/muzzle_flash.tscn")
+const ART_SETUP := preload("res://game/features/combat/weapon_art_setup.gd")
 @export var weapon_name: String = "PISTOL"
 @export var fire_mode: String = "semi"
 @export var shots_per_second: float = 4.0
@@ -33,6 +34,9 @@ var impact_pool: Node
 func _ready() -> void:
 	_magazine_ammo = magazine_size
 	_reserve_ammo = starting_reserve_ammo
+	var model := get_node_or_null("Body") as Node3D
+	if model != null:
+		ART_SETUP.configure(self, model, weapon_name in ["SHOTGUN", "GRENADE LAUNCHER"])
 func _process(delta: float) -> void:
 	_cooldown_remaining = maxf(0.0, _cooldown_remaining - delta)
 	if not _reloading: return
@@ -72,7 +76,7 @@ func try_fire_at(target_point: Vector3) -> bool:
 	if wants_continuous_fire():
 		# A short burst stays tight; sustained fire gradually loses accuracy.
 		effective_spread *= lerpf(0.42, 1.65, clampf(float(_burst_shots) / 11.0, 0.0, 1.0))
-	var forward := -global_transform.basis.z.normalized()
+	var forward := -muzzle.global_basis.z.normalized()
 	forward.y = 0.0
 	forward = forward.normalized()
 	var muzzle_position := muzzle.global_position

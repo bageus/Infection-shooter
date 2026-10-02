@@ -8,5 +8,10 @@
   "public_api": [
     "public/character_animation_driver.gd"
   ],
-  "dependencies": []
+  "dependencies": [],
+  "runtime_contracts": {
+    "animation_selection_v1": {
+      "configure_clip_selector": "configure_clip_selector(selector: Callable) -> void; selector() -> StringName; optional local playback selection, no gameplay state"
+    }
+  }
 }
