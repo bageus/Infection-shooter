@@ -1,6 +1,7 @@
-[gd_scene load_steps=12 format=3]
+[gd_scene load_steps=13 format=3]
 [ext_resource type="Script" path="res://game/features/character_animation/public/character_animation_driver.gd" id="anim_driver"]
 [ext_resource type="Script" path="res://game/features/player/player_movement.gd" id="1"]
+[ext_resource type="Script" path="res://game/features/player/player_weapon_mount.gd" id="mount"]
 [ext_resource type="PackedScene" path="res://models/objects/characters/soldier_animated.glb" id="character_model"]
 [ext_resource type="PackedScene" path="res://game/features/combat/public/pistol.tscn" id="2"]
 [ext_resource type="PackedScene" path="res://game/features/combat/public/uzi.tscn" id="3"]
@@ -26,15 +27,10 @@ collision_mask=3
 script = ExtResource("casings")
 [node name="Body" parent="." instance=ExtResource("character_model")]
 rotation_degrees=Vector3(0,180,0)
-position = Vector3(0, -0.9, 0)
 [node name="Pistol" parent="AimPivot" instance=ExtResource("2")]
-position=Vector3(0.3,0.18,-0.2)
 [node name="Uzi" parent="AimPivot" instance=ExtResource("3")]
-position=Vector3(0.3,0.18,-0.23)
 [node name="Shotgun" parent="AimPivot" instance=ExtResource("4")]
-position=Vector3(0.32,0.18,-0.27)
 [node name="GrenadeLauncher" parent="AimPivot" instance=ExtResource("launcher")]
-position=Vector3(0.32,0.18,-0.28)
 [node name="CollisionShape3D" type="CollisionShape3D" parent="."]
 shape=SubResource("Shape")
 [node name="InfectionRuntime" type="Node" parent="."]
@@ -48,3 +44,6 @@ fov=50.0
 
 [node name="AnimationDriver" type="Node" parent="."]
 script = ExtResource("anim_driver")
+
+[node name="WeaponMount" type="Node" parent="."]
+script = ExtResource("mount")

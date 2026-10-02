@@ -26,7 +26,6 @@ bullet_speed=34.0
 bullet_range=15.0
 shotgun_shell_reload=true
 [node name="Body" parent="." instance=ExtResource("weapon_model")]
-rotation_degrees = Vector3(0, 180, 0)
 [node name="Muzzle" type="Marker3D" parent="."]
 position = Vector3(0, 0, -0.64)
 [node name="EjectionPort" type="Marker3D" parent="."]

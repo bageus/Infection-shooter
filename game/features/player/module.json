@@ -8,7 +8,8 @@
     "Mutation skill combat effects and temporary buffs",
     "Explosion disorientation and camera/audio recovery",
     "Owned weapon slots and emergency key possession",
-    "Uncontrolled mutation movement and aim phase"
+    "Uncontrolled mutation movement and aim phase",
+    "Player weapon presentation stance and gameplay activity timers"
   ],
   "public_api": [
     "public/player.tscn"

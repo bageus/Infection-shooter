@@ -23,7 +23,6 @@ bullet_damage=30.0
 bullet_speed=40.0
 bullet_range=36.0
 [node name="Body" parent="." instance=ExtResource("weapon_model")]
-rotation_degrees = Vector3(0, 180, 0)
 [node name="Muzzle" type="Marker3D" parent="."]
 position = Vector3(0, 0, -0.4)
 [node name="EjectionPort" type="Marker3D" parent="."]

@@ -1,6 +1,8 @@
 extends CharacterBody3D
 const CONTROL_LOSS := preload("res://game/features/player/mutation_control_loss.gd")
 const MUTATION_EFFECTS := preload("res://game/features/player/mutation_skill_effects.gd")
+const WEAPON_STANCE := preload("res://game/features/player/player_weapon_stance.gd")
+const ANIMATION_SELECTION := preload("res://game/features/player/player_animation_selection.gd")
 @export var move_speed: float = 6.0
 @export var sprint_speed: float = 9.0
 @export var ground_acceleration: float = 18.0
@@ -25,6 +27,9 @@ const MUTATION_EFFECTS := preload("res://game/features/player/mutation_skill_eff
 @onready var body_visual: Node3D = $Body
 @onready var weapons: Array[Node3D] = [$AimPivot/Pistol,$AimPivot/Uzi,$AimPivot/Shotgun,$AimPivot/GrenadeLauncher]
 @onready var infection_runtime: Node = $InfectionRuntime
+@onready var weapon_mount: Node = $WeaponMount
+var weapon_stance := WEAPON_STANCE.new()
+var _animation_selection := ANIMATION_SELECTION.new()
 var health: float
 var armor: float
 var antidotes: int
@@ -55,12 +60,15 @@ func _ready() -> void:
 	health=max_health
 	armor=max_armor
 	antidotes=starting_antidotes
+	_animation_selection.configure(self, aim_pivot, weapon_stance)
+	$AnimationDriver.call("configure_clip_selector", _animation_selection.select_clip)
 	_select_weapon(0)
 	mutation_effects = MUTATION_EFFECTS.new()
 	add_child(mutation_effects)
 	mutation_effects.call("configure", self, infection_runtime, weapons)
 	configure_world(effects_root, impact_pool)
 func _physics_process(delta: float) -> void:
+	weapon_stance.tick(delta, _has_presentation_activity())
 	if _stun_remaining > 0.0:
 		_stun_remaining = maxf(0.0, _stun_remaining - delta)
 		if _stun_remaining == 0.0:
@@ -86,10 +94,12 @@ func _physics_process(delta: float) -> void:
 	if w != null and not _mutation_menu_open and _roll_remaining <= 0.0 and (control_lost or (Input.is_action_pressed("fire") if bool(w.call("wants_continuous_fire")) else Input.is_action_just_pressed("fire"))):
 		if int(w.call("get_magazine_ammo")) == 0:
 			mutation_effects.call("refill_organic_magazine")
-		w.call("try_fire_at", _aim_point)
+		_fire_weapon(w)
 func _unhandled_input(event: InputEvent) -> void:
 	if get_tree().paused:
 		return
+	if event is InputEventMouseMotion:
+		weapon_stance.record_mouse_motion(event.relative)
 	if event is InputEventMouseButton and event.pressed:
 		if event.button_index == MOUSE_BUTTON_WHEEL_UP:
 			_camera_distance=clampf(_camera_distance-camera_zoom_step,camera_min_distance,camera_max_distance)
@@ -123,7 +133,27 @@ func _select_weapon(index:int)->void:
 	var old:=get_current_weapon()
 	if old!=null: old.call("cancel_reload")
 	current_weapon_index=index
+	weapon_stance.select_weapon(_slot_weapons[index])
 	for i in weapons.size(): weapons[i].visible=i==_slot_weapons[index]
+	weapon_mount.call("select_weapon", get_current_weapon())
+
+
+func _fire_weapon(weapon: Node3D) -> bool:
+	var previous := weapon_stance.begin_fire_attempt()
+	$AnimationDriver.call("configure_clip_selector", _animation_selection.select_clip)
+	weapon_mount.call("sync_weapon", weapon)
+	var fired := bool(weapon.call("try_fire_at", _aim_point))
+	weapon_stance.finish_fire_attempt(fired, previous)
+	return fired
+
+
+func _has_presentation_activity() -> bool:
+	if _roll_remaining > 0.0 or bool(infection_runtime.call("is_control_lost")):
+		return true
+	for action in ["move_left", "move_right", "move_up", "move_down", "fire", "reload", "weapon_1", "weapon_2", "weapon_3", "weapon_4", "roll", "camera_left", "camera_right"]:
+		if Input.is_action_pressed(action):
+			return true
+	return false
 
 # Public v1 command used by the HUD's slot buttons.
 func select_weapon_slot(index: int) -> bool:
@@ -335,7 +365,7 @@ func _update_aim()->void:
 	if flat_direction.length_squared()>0.0001:
 		var target_direction:=flat_direction.normalized()
 		aim_pivot.look_at(aim_pivot.global_position+target_direction,Vector3.UP)
-		body_visual.look_at(body_visual.global_position+target_direction,Vector3.UP)
+		body_visual.look_at(body_visual.global_position+target_direction,Vector3.UP,true)
 
 func _spawn_floor_blood(amount:float)->void:
 	if not is_instance_valid(effects_root):
@@ -367,4 +397,4 @@ func _aim_uncontrolled() -> void:
 		return
 	_aim_point = aim_pivot.global_position + direction * 8.0
 	aim_pivot.look_at(_aim_point, Vector3.UP)
-	body_visual.look_at(body_visual.global_position + direction, Vector3.UP)
+	body_visual.look_at(body_visual.global_position + direction, Vector3.UP, true)

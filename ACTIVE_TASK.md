@@ -4,7 +4,7 @@ task_id: T002
 status: IN_PROGRESS
 phase: 1
 owner: AI
-updated: 2026-10-01
+updated: 2026-10-02
 ---
 
 # Active task
@@ -13,6 +13,7 @@ updated: 2026-10-01
 Build the first playable combat-slice foundation with an authored office floor, player, combat, infected enemies, infection source, and observable fail states.
 
 ## In scope
+- owner-approved authored character/weapon mounting and automatic animation stances;
 - owner-requested subtle floor material variation and thinner visual seams; lighting remains unchanged;
 - owner-reported main-scene parse failure after unresolved stash conflicts;
 - owner-requested discrete central mutation-tree connectors, with gradual progression confined to branches;
@@ -33,7 +34,7 @@ Build the first playable combat-slice foundation with an authored office floor, 
 READY game specification, accepted working agreement, architecture contract, and existing T001/T002 implementation.
 
 ## Affected modules
-presentation.office_floor, features.combat, features.player, features.infected and bootstrap.app. Player health remains owned by features.player.
+presentation.office_floor, features.combat, features.player, features.character_animation, features.infected and bootstrap.app. Player health remains owned by features.player.
 
 ## Out of scope
 Procedural generation, save/checkpoints, final HUD, monetization, platform SDKs and campaign-wide content remain outside this T002 increment.
@@ -42,6 +43,8 @@ Procedural generation, save/checkpoints, final HUD, monetization, platform SDKs 
 - Structural modules visually touch edge-to-edge with no visible gaps and no overlap beyond a tiny seam tolerance.\n- Exterior corners face inward correctly.\n- Perimeter and authored interior walls block the player.\n- The expanded floor and defeat menu remain functional.
 
 ## Progress
+
+02.10.2026: после подтверждения владельцем плана подключаются canonical character/weapon GLB к прежнему gameplay parent-chain. Проверка импорта Godot 4.7.2 подтвердила Skeleton3D/RightHand/WeaponSocket_R и 52 клипа (Idle без _Loop). Player-local mount/stance/selector, authored Muzzle и root normalization в combat, optional animation_selection_v1 (ADR-0014); заражённые сохраняют fallback. Body использует +Z model front без старого Y offset; капсула/слоты/баланс/DTO прежние. Новые regression tests и визуальный маршрут добавлены. Godot 4.7.2: validate_project, scene resources, workstation/glass/scene-access, новый weapon presentation набор (0 failures), все 12 прежних runtime-наборов и main 180 кадров прошли в CI https://github.com/bageus/Infection-shooter/actions/runs/37024856817 на implementation 0a47a5c. Runtime без SCRIPT ERROR/ERROR. Editor import exit 0, но прежние palette1.png/couches.png и конфликт дублирующего Idle_Pistol_Down_001 из source GLB остаются; импорт не чистый. Визуальная приёмка хвата и Windows/Web остаётся открыта.
 
 01.10.2026: по уточнению владельца плитке добавлен умеренный глянец: metallic_specular 0.35→0.5, базовая roughness 0.65→0.4. Варианты теперь берут шероховатость общего материала с отклонением ±0.021, поэтому настройка ресурса не перезаписывается старым диапазоном 0.63–0.672. Metallic=0, фактура, геометрия и освещение прежние. Отражение света усилено материалом; новые SSR/probes не добавлены. Runtime CI и визуальная приёмка обновлённого варианта ожидаются.
 
