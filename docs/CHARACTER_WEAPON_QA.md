@@ -44,3 +44,18 @@ Headless не подтверждает визуальное прилегание
 кадре, ориентацию всех meshes, плавность blend или FPS. Новые бронежилет,
 рюкзак и наколенники не добавлялись. Старые вспомогательные art узлы с именем
 __OLD_SOCKET_UNUSED__ не используются как крепления и не удаляются из GLB.
+
+## Автоматическая проверка
+
+Implementation 0a47a5c проверен Godot 4.7.2 в CI:
+https://github.com/bageus/Infection-shooter/actions/runs/37024856817.
+Все четыре обязательных validator, 250 resource references, Python workstation
+(3), glass (1), scene-access (3), новый weapon presentation набор (0 failures),
+12 прежних runtime-наборов и main 180 кадров прошли. Runtime без ошибок.
+Editor import exit 0 с прежними отсутствующими palette1.png/couches.png и
+конфликтом имени дублирующего Idle_Pistol_Down_001 в исходном GLB: импорт не
+считается чистым. Эти ошибки присутствовали и до presentation-изменений в
+inspection CI 37023172595. Canonical выбранные idle/walk доступны и проверены.
+
+Следующее действие: открыть ветку в Godot 4.7.2 и пройти визуальный маршрут
+выше; художественный хват/стопы/левую руку/FPS headless не подтверждает.
