@@ -29,6 +29,7 @@ var _burst_shots: int = 0
 var _last_shot_time: float = -100.0
 var effects_root: Node3D
 var impact_pool: Node
+var _authored_muzzle: Node3D
 
 
 func _ready() -> void:
@@ -36,7 +37,7 @@ func _ready() -> void:
 	_reserve_ammo = starting_reserve_ammo
 	var model := get_node_or_null("Body") as Node3D
 	if model != null:
-		ART_SETUP.configure(self, model, weapon_name in ["SHOTGUN", "GRENADE LAUNCHER"])
+		_authored_muzzle = ART_SETUP.configure(self, model, weapon_name in ["SHOTGUN", "GRENADE LAUNCHER"])
 func _process(delta: float) -> void:
 	_cooldown_remaining = maxf(0.0, _cooldown_remaining - delta)
 	if not _reloading: return
@@ -108,7 +109,11 @@ func try_fire_at(target_point: Vector3) -> bool:
 
 
 func _show_muzzle_flash() -> void:
-	muzzle.add_child(MUZZLE_FLASH.instantiate())
+	var flash := MUZZLE_FLASH.instantiate()
+	var anchor := _authored_muzzle if is_instance_valid(_authored_muzzle) else muzzle
+	# Authored art uses +X; legacy gameplay-only scenes keep their -Z marker.
+	flash.set("barrel_axis", Vector3.RIGHT if anchor == _authored_muzzle else Vector3.FORWARD)
+	anchor.add_child(flash)
 
 
 func start_reload() -> void:
