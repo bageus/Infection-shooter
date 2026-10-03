@@ -99,7 +99,11 @@ func _build_content() -> void:
 		"failed": text("signal") + "\n" + text("lost"), "complete": text("samples") + "\n" + text("extracted")}[screen_kind]
 	var title := STYLE.label(headline.to_upper(), 62, true)
 	title.add_theme_constant_override("line_spacing", -10)
-	content.add_child(title)
+	var title_area := Control.new()
+	title_area.custom_minimum_size.y = title.get_minimum_size().y
+	content.add_child(title_area)
+	title_area.add_child(title)
+	title.scale.x = 0.78
 	var subtitle := STYLE.label(text({"main": "patient", "pause": "alpha", "failed": "failed", "complete": "notCured"}[screen_kind]).to_upper(), roundi(12 * factor))
 	subtitle.add_theme_color_override("font_color", STYLE.MUTED)
 	content.add_child(subtitle)
