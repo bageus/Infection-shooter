@@ -38,7 +38,7 @@ func _run() -> void:
 	var saved = PREFS.new()
 	saved.load_settings()
 	_check(saved.values.language == "en" and is_equal_approx(saved.values.text_scale, 1.3), "settings persist")
-	_check(menu.get("content").get_rect().end.y < root.size.y - 20, "130 percent menu fits viewport")
+	_check(menu.get("content_scroll").get_rect().end.y < menu.size.y - 20, "130 percent menu stays inside its scroll viewport")
 	_check(dialog.is_ancestor_of(root.gui_get_focus_owner()), "dialog owns focus")
 	event.keycode = KEY_ESCAPE
 	menu.call("_input", event)

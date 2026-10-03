@@ -40,11 +40,13 @@ jobs:
           timeout 120 godot --headless --path . res://game/bootstrap/app/main.tscn --quit-after 180 2>&1 | tee /tmp/main.log
           if grep -E 'SCRIPT ERROR|^ERROR:' /tmp/main.log; then exit 1; fi
       - name: Capture menu screens
+        if: always()
         run: |
           sudo apt-get update -qq
           sudo apt-get install -y -qq xvfb libgl1-mesa-dri
-          xvfb-run -a godot --path . --rendering-method gl_compatibility --script game/bootstrap/app/tests/capture_menu_screens.gd
+          timeout 60 xvfb-run -a godot --path . --rendering-method gl_compatibility --script game/bootstrap/app/tests/capture_menu_screens.gd
       - uses: actions/upload-artifact@v4
+        if: always()
         with:
           name: menu-previews
           path: /tmp/menu_previews/*.png

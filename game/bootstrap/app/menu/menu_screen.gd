@@ -17,6 +17,7 @@ var translations: Dictionary
 var modal: Control
 var buttons: Array[Button] = []
 var background: TextureRect
+var content_scroll: ScrollContainer
 var content: VBoxContainer
 var footer: Label
 var keyboard: Label
@@ -45,9 +46,14 @@ func _ready() -> void:
 	shade.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	add_child(shade)
 	shade.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	content_scroll = ScrollContainer.new()
+	content_scroll.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
+	content_scroll.follow_focus = true
+	add_child(content_scroll)
 	content = VBoxContainer.new()
+	content.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	content.add_theme_constant_override("separation", 8)
-	add_child(content)
+	content_scroll.add_child(content)
 	footer = STYLE.label("", 10)
 	add_child(footer)
 	keyboard = STYLE.label("", 10)
@@ -201,8 +207,8 @@ func _input(event: InputEvent) -> void:
 func _layout() -> void:
 	if content == null:
 		return
-	content.position = Vector2(size.x * 0.06, size.y * 0.10)
-	content.size.x = minf(380, size.x * 0.43)
+	content_scroll.position = Vector2(size.x * 0.06, size.y * 0.10)
+	content_scroll.size = Vector2(minf(400, size.x * 0.43), size.y * 0.80)
 	footer.position = Vector2(size.x * 0.06, size.y * 0.94)
 	keyboard.position = Vector2(size.x - keyboard.get_minimum_size().x - size.x * 0.04, size.y * 0.94)
 	keyboard.visible = size.x >= 1000

@@ -181,6 +181,8 @@ func _fullscreen() -> void:
 
 
 func _focus_first() -> void:
+	if not is_inside_tree():
+		return
 	var controls := _controls(layout)
 	if not controls.is_empty():
 		controls[0].grab_focus()
