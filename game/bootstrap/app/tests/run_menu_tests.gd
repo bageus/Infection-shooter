@@ -23,6 +23,8 @@ func _run() -> void:
 	var menu: Control = frontend.get_node("Menu")
 	_check(menu.get("screen_kind") == "main" and not paused, "entry opens main menu")
 	_check(menu.get("buttons")[1].disabled, "campaign continue is unavailable without a save")
+	var title_area := menu.get("content").get_child(0) as Control
+	_check(title_area.size.y >= (title_area.get_child(0) as Label).get_minimum_size().y, "condensed title reserves both lines without overlap")
 	var event := InputEventKey.new()
 	event.pressed = true
 	event.keycode = KEY_DOWN
