@@ -9,6 +9,7 @@ const BLAST = preload("res://game/presentation/office_floor/blast_effect.gd")
 const WALL_MOUNT = preload("res://game/presentation/office_floor/wall_mount_models.gd")
 const BOOK_STACK = preload("res://game/presentation/office_floor/book_stack_breakup.gd")
 const EXTINGUISHER_FX = preload("res://game/presentation/office_floor/extinguisher_hit_fx.tscn")
+const HIT_REACTION = preload("res://game/presentation/office_floor/prop_hit_reaction.gd")
 
 @export_file("*.glb") var model_path := ""
 
@@ -27,6 +28,7 @@ var _pending_full_break := false
 var _book_kick_cooldown := 0.0
 var _extinguisher_triggered := false
 var _extinguisher_fx: Node3D
+var _reaction := HIT_REACTION.new()
 
 var effects_root: Node3D
 var impact_pool: Node
@@ -65,6 +67,7 @@ func _ready() -> void:
 	visual.name = "Visual"
 	add_child(visual)
 	_visual = visual
+	_reaction.setup(self, visual)
 	_discover_stages()
 	if model_path.get_file() == "06_conference_chair.glb":
 		# Only the baked chair may affect its initial height or collision.
@@ -109,7 +112,8 @@ func _ready() -> void:
 	if "table" in model_path.get_file() or "desk" in model_path.get_file():
 		linear_damp = 3.0
 		angular_damp = 4.0
-	continuous_cd = true
+	# Continuous detection is costly; only small, light objects can be fast enough to tunnel.
+	continuous_cd = mass < 4.0
 
 
 func _add_shapes(node: Node) -> float:
@@ -235,6 +239,8 @@ func take_projectile_hit(damage: float, hit_position: Vector3, _normal: Vector3,
 			_pending_full_break = weapon == "GRENADE" and not _stages.is_empty()
 			_transition_pending = true
 			call_deferred("_apply_damage", hit_position, direction)
+		elif damage > 0.0 and weapon != "PISTOL":
+			_reaction.shudder(direction)
 	elif bool(get_meta("planning_wall_mount", false)) and freeze and not _broken:
 		_health -= BALANCE.object_damage(damage, weapon, _damage_category())
 		if _health <= 0.0:
@@ -272,6 +278,7 @@ func take_melee_hit(damage: float, hit_position: Vector3, direction: Vector3) ->
 func _apply_damage(hit_position: Vector3, direction: Vector3) -> void:
 	if _broken:
 		return
+	_reaction.cancel()
 	if _damage_category() == "tech":
 		SPARKS.spawn(self, hit_position, true)
 	if _variant_index + 1 < _variants.size() and not _pending_full_break:
@@ -301,6 +308,7 @@ func _apply_damage(hit_position: Vector3, direction: Vector3) -> void:
 			_stages[0].show()
 			_rebuild_shapes()
 			return
+		_reaction.break_dust(_shape_meshes)
 		_visual.hide()
 		for shape in _shapes:
 			shape.set_deferred("disabled", true)
@@ -310,6 +318,7 @@ func _apply_damage(hit_position: Vector3, direction: Vector3) -> void:
 
 
 func _rebuild_shapes() -> void:
+	_reaction.cancel()
 	for shape in _shapes:
 		shape.set_deferred("disabled", true)
 		shape.queue_free()

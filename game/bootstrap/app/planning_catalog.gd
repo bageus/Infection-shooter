@@ -15,10 +15,27 @@ var lighting_catalog = [
 	{"name":"Permanent Darkness","path":"res://game/presentation/office_floor/public/props/darkness_zone.tscn","kind":"darkness"},
 	{"name":"Exploration Darkness","path":"res://game/presentation/office_floor/public/props/darkness_zone.tscn","kind":"exploration_darkness"}
 ]
+# Scenes that are loaded and saved as enemies; keep in sync with actor_catalog.
+const ENEMY_SCENES := [
+	"res://game/features/infected/public/infected_capsule.tscn",
+	"res://game/features/infected/public/mutant_level2.tscn",
+	"res://game/features/infected/public/infected_hunger.tscn",
+	"res://game/features/infected/public/infected_revenant.tscn",
+	"res://game/features/infected/public/infected_brute.tscn",
+	"res://game/features/infected/public/infected_titan.tscn",
+	"res://game/features/infected/public/infected_colossus.tscn",
+	"res://game/features/infected/public/infected_horde.tscn"
+]
 var actor_catalog = [
 	{"name":"Player Spawn","path":"","kind":"player"},
-	{"name":"Zombie L1","path":"res://game/features/infected/public/infected_capsule.tscn","kind":"enemy"},
-	{"name":"Mutant L2","path":"res://game/features/infected/public/mutant_level2.tscn","kind":"enemy"}
+	{"name":"Zombie L1","path":ENEMY_SCENES[0],"kind":"enemy"},
+	{"name":"Mutant L2","path":ENEMY_SCENES[1],"kind":"enemy"},
+	{"name":"Hunger","path":ENEMY_SCENES[2],"kind":"enemy"},
+	{"name":"Revenant","path":ENEMY_SCENES[3],"kind":"enemy"},
+	{"name":"Brute","path":ENEMY_SCENES[4],"kind":"enemy"},
+	{"name":"Titan","path":ENEMY_SCENES[5],"kind":"enemy"},
+	{"name":"Colossus","path":ENEMY_SCENES[6],"kind":"enemy"},
+	{"name":"Horde","path":ENEMY_SCENES[7],"kind":"enemy"}
 ]
 
 

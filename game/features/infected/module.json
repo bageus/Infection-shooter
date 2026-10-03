@@ -9,7 +9,13 @@
   ],
   "public_api": [
     "public/infected_capsule.tscn",
-    "public/mutant_level2.tscn"
+    "public/mutant_level2.tscn",
+    "public/infected_hunger.tscn",
+    "public/infected_revenant.tscn",
+    "public/infected_brute.tscn",
+    "public/infected_titan.tscn",
+    "public/infected_colossus.tscn",
+    "public/infected_horde.tscn"
   ],
   "dependencies": [
     "features.infection_source",

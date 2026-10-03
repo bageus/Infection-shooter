@@ -1,0 +1,49 @@
+[gd_scene load_steps=6 format=3]
+
+[ext_resource type="Script" path="res://game/features/character_animation/public/character_animation_driver.gd" id="1_driver"]
+[ext_resource type="Script" path="res://game/features/infected/infected_capsule.gd" id="2_enemy"]
+[ext_resource type="PackedScene" path="res://game/features/infection_source/public/mutagen_cloud.tscn" id="3_cloud"]
+[ext_resource type="ArrayMesh" path="res://models/objects/characters/enemy/game/Hunger_game.res" id="4_mesh"]
+[ext_resource type="Material" path="res://models/objects/characters/enemy/game/Hunger_game.tres" id="5_material"]
+
+[sub_resource type="CapsuleShape3D" id="EnemyShape"]
+radius = 0.45
+height = 1.85
+
+[node name="InfectedHunger" type="CharacterBody3D" groups=["infected"]]
+collision_layer = 2
+collision_mask = 3
+safe_margin = 0.02
+floor_stop_on_slope = false
+script = ExtResource("2_enemy")
+max_health = 45.0
+move_speed = 5.4
+attack_range = 1.2
+attack_damage = 12.0
+attack_interval = 0.8
+
+[node name="Body" type="Node3D" parent="."]
+position = Vector3(0, 0.025, 0)
+rotation_degrees = Vector3(0, 180, 0)
+scale = Vector3(1.0, 1.0, 1.0)
+
+[node name="Visual" type="MeshInstance3D" parent="Body"]
+mesh = ExtResource("4_mesh")
+surface_material_override/0 = ExtResource("5_material")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="."]
+shape = SubResource("EnemyShape")
+
+[node name="DeathCloud" parent="." instance=ExtResource("3_cloud")]
+
+[node name="AnimationDriver" type="Node" parent="."]
+script = ExtResource("1_driver")
+run_speed_threshold = 3.0
+run_reference_speed = 5.4
+procedural_bob_height = 0.07
+procedural_sway_degrees = 5.0
+procedural_lean_degrees = 12.0
+procedural_stride_hz = 2.8
+procedural_attack_seconds = 0.45
+procedural_attack_lunge = 0.3
+procedural_death_seconds = 1.1

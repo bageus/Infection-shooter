@@ -22,10 +22,18 @@ signal blood_death(position: Vector3, excluded: Array[RID], death_id: int)
 @export var obstacle_attack_interval: float = 0.45
 @export var full_simulation_distance: float = 14.0
 @export var sleep_distance: float = 32.0
+## Fraction of the attack animation at which the blow lands.
+@export_range(0.1, 0.9) var attack_hit_fraction := 0.45
+## The target may step back during the wind-up by this factor of attack_range.
+@export var attack_reach_tolerance := 1.35
+@export var turn_speed := 14.0
+@export var death_linger_seconds := 0.9
+@export var death_sink_depth := 0.45
 
 @onready var body_visual: Node3D = $Body
 @onready var collision_shape: CollisionShape3D = $CollisionShape3D
 @onready var death_cloud: Area3D = $DeathCloud
+@onready var _animation: Node = get_node_or_null("AnimationDriver")
 
 var health: float
 var _target: Node3D
@@ -43,6 +51,8 @@ var _mutation_poison_damage := 0.0
 var _blood_last_position := Vector3.ZERO
 var _blood_segment_start := Vector3.ZERO
 var _blood_distance := 0.0
+var _pending_hit := -1.0
+var _face_direction := Vector3.ZERO
 
 var effects_root: Node3D
 var impact_pool: Node
@@ -97,6 +107,8 @@ func take_damage(amount: float) -> void:
 	health = maxf(0.0, health - amount)
 	if first_wound:
 		blood_wounded.emit(global_position, _blood_exclusions())
+	if health > 0.0 and _animation != null:
+		_animation.call("notify_hit")
 	if health <= 0.0:
 		_die()
 
@@ -123,18 +135,20 @@ func _physics_process(delta: float) -> void:
 		return
 	if _target == null or not is_instance_valid(_target):
 		return
+	_tick_pending_hit(delta)
 
 	var target_offset := _target.global_position - global_position
 	target_offset.y = 0.0
 	var distance_sq := target_offset.length_squared()
 	var physics_frame := Engine.get_physics_frames()
 
-	if distance_sq > sleep_distance * sleep_distance:
-		_sleeping_far = true
-		if physics_frame % 12 != _lod_frame_offset:
-			return
-	else:
-		_sleeping_far = false
+	var far := distance_sq > sleep_distance * sleep_distance
+	if far != _sleeping_far:
+		_sleeping_far = far
+		if _animation != null:
+			_animation.call("set_active", not far)
+	if far and physics_frame % 12 != _lod_frame_offset:
+		return
 
 	_attack_cooldown = maxf(0.0, _attack_cooldown - delta)
 	_obstacle_cooldown = maxf(0.0, _obstacle_cooldown - delta)
@@ -145,6 +159,8 @@ func _physics_process(delta: float) -> void:
 		_cached_desired = _desired_velocity_from_offset(target_offset)
 
 	var desired := Vector3.ZERO if _blast_stun_remaining > 0.0 else _cached_desired
+	if not _sleeping_far:
+		_turn_toward_face_direction(delta)
 	velocity.x = desired.x + _push_velocity.x
 	velocity.z = desired.z + _push_velocity.z
 	_push_velocity = _push_velocity.move_toward(Vector3.ZERO, push_decay * delta)
@@ -165,15 +181,22 @@ func _physics_process(delta: float) -> void:
 
 func _desired_velocity_from_offset(offset: Vector3) -> Vector3:
 	var distance := offset.length()
+	if distance > 0.0001:
+		_face_direction = offset / distance
 	if distance <= attack_range:
 		_try_attack()
 		return Vector3.ZERO
 	if distance <= 0.0001:
 		return Vector3.ZERO
-	var direction := offset / distance
-	if direction.length_squared() > 0.0001:
-		look_at(global_position + direction, Vector3.UP)
-	return direction * move_speed
+	return _face_direction * move_speed
+
+
+# Smooth yaw turn toward the target; also while standing in attack range.
+func _turn_toward_face_direction(delta: float) -> void:
+	if _face_direction.length_squared() < 0.0001:
+		return
+	var target_yaw := atan2(-_face_direction.x, -_face_direction.z)
+	rotation.y = lerp_angle(rotation.y, target_yaw, 1.0 - exp(-turn_speed * delta))
 
 
 
@@ -216,9 +239,40 @@ func _apply_gravity(delta: float) -> void:
 func _try_attack() -> void:
 	if _attack_cooldown > 0.0 or _blast_stun_remaining > 0.0:
 		return
-	if _target != null and _target.has_method("take_damage"):
-		_target.call("take_damage", attack_damage)
 	_attack_cooldown = attack_interval
+	var duration := _play_animation(&"attack")
+	if duration <= 0.0:
+		_deliver_attack()
+		return
+	_pending_hit = duration * attack_hit_fraction
+
+
+func _tick_pending_hit(delta: float) -> void:
+	if _pending_hit < 0.0:
+		return
+	if _blast_stun_remaining > 0.0:
+		_pending_hit = -1.0
+		return
+	_pending_hit -= delta
+	if _pending_hit < 0.0:
+		_deliver_attack()
+
+
+# The blow misses when the target has moved out of reach during the wind-up.
+func _deliver_attack() -> void:
+	if not is_instance_valid(_target) or not _target.has_method("take_damage"):
+		return
+	var offset := _target.global_position - global_position
+	offset.y = 0.0
+	if offset.length() > attack_range * attack_reach_tolerance:
+		return
+	_target.call("take_damage", attack_damage)
+
+
+func _play_animation(state: StringName) -> float:
+	if _animation == null:
+		return 0.0
+	return float(_animation.call("play_one_shot", state))
 
 
 func _blood_exclusions() -> Array[RID]:
@@ -248,6 +302,7 @@ func _track_blood_motion() -> void:
 
 func _die() -> void:
 	_dead = true
+	_pending_hit = -1.0
 	_blood_segment_start = global_position
 	_blood_distance = 0.0
 	blood_death.emit(global_position, _blood_exclusions(), get_instance_id())
@@ -261,8 +316,20 @@ func _die() -> void:
 	collision_layer = 0
 	collision_mask = 0
 	collision_shape.disabled = true
-	body_visual.visible = false
+	var death_length := _play_animation(&"death")
+	if death_length > 0.0:
+		_sink_corpse_after(death_length)
+	else:
+		body_visual.visible = false
 	death_cloud.call("activate")
+
+
+# The corpse stays visible while the death animation plays, then sinks away.
+func _sink_corpse_after(death_length: float) -> void:
+	var tween := create_tween()
+	tween.tween_interval(death_length + death_linger_seconds)
+	tween.tween_property(body_visual, "position:y", body_visual.position.y - death_sink_depth, 0.7).set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_IN)
+	tween.tween_callback(body_visual.hide)
 
 
 func _on_death_cloud_depleted() -> void:

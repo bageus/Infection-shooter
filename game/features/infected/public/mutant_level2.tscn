@@ -31,3 +31,6 @@ shape = SubResource("EnemyShape")
 
 [node name="AnimationDriver" type="Node" parent="."]
 script = ExtResource("anim_driver")
+run_speed_threshold = 3.0
+walk_reference_speed = 2.2
+run_reference_speed = 5.1

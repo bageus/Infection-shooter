@@ -6,10 +6,12 @@ current_milestone: P1_LOGIC
 active_task_id: T002
 last_completed_task_id: DISC-001
 build_status: T002_HEADLESS_VALIDATED_VISUAL_PENDING
-updated: 2026-10-02
+updated: 2026-10-03
 ---
 
 # Project state
+
+03.10.2026: по запросу владельца реализованы анимация врагов и жизненный цикл обломков (ADR-0015). Драйвер character_animation получил animation_events_v1 (play_one_shot, notify_hit, set_active), процедурный backend для 6 статичных врагов и лёгкие derivative-меши; удар на кадре попадания, анимация смерти, пауза далёких. Обломки: слой 3, коллизия со стенами и полом, бюджет 40, пыль, наследование скорости. Godot 4.7.2: 15 runtime-наборов (2 новых), main 180 кадров и валидаторы прошли локально; визуальная приёмка и баланс новых врагов открыты, см. docs/ENEMY_ANIMATION_DESTRUCTION_QA.md.
 
 02.10.2026: после подтверждения владельцем плана подключаются canonical character/weapon GLB к прежнему gameplay parent-chain. Проверка импорта Godot 4.7.2 подтвердила Skeleton3D/RightHand/WeaponSocket_R и 52 клипа (Idle без _Loop). Player-local mount/stance/selector, authored Muzzle и root normalization в combat, optional animation_selection_v1 (ADR-0014); заражённые сохраняют fallback. Body использует +Z model front без старого Y offset; капсула/слоты/баланс/DTO прежние. Новые regression tests и визуальный маршрут добавлены. Godot 4.7.2: validate_project, scene resources, workstation/glass/scene-access, новый weapon presentation набор (0 failures), все 12 прежних runtime-наборов и main 180 кадров прошли в CI https://github.com/bageus/Infection-shooter/actions/runs/37024856817 на implementation 0a47a5c. Runtime без SCRIPT ERROR/ERROR. Editor import exit 0, но прежние palette1.png/couches.png и конфликт дублирующего Idle_Pistol_Down_001 из source GLB остаются; импорт не чистый. Визуальная приёмка хвата и Windows/Web остаётся открыта.
 

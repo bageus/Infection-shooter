@@ -12,6 +12,12 @@
   "runtime_contracts": {
     "animation_selection_v1": {
       "configure_clip_selector": "configure_clip_selector(selector: Callable) -> void; selector() -> StringName; optional local playback selection, no gameplay state"
+    },
+    "animation_events_v1": {
+      "play_one_shot": "play_one_shot(state: StringName) -> float; states attack|death, returns clip length or 0.0 (death is final)",
+      "notify_hit": "notify_hit() -> void; short additive flinch",
+      "set_active": "set_active(active: bool) -> void; pauses animation for distant characters",
+      "one_shot_finished": "signal one_shot_finished(state: StringName)"
     }
   }
 }

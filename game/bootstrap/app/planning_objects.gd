@@ -210,7 +210,7 @@ func _place_selected(screen_pos: Vector2) -> void:
 	node.global_position = geometry._snap_position_for(node, world)
 	controls._apply_special_default_height(node, kind)
 	if kind == "enemy":
-		node.global_position.y = 1.0
+		node.global_position.y = _enemy_spawn_height(node)
 		node.set_meta("planning_actor_kind", "enemy")
 		if node.has_method("set_target"):
 			node.call("set_target", session.main_player)
@@ -385,10 +385,7 @@ func _apply_layout_data(data: Dictionary) -> void:
 		var node = catalog._instantiate_asset(scene_path)
 		if node == null:
 			continue
-		var load_kind = "enemy" if scene_path in [
-			"res://game/features/infected/public/infected_capsule.tscn",
-			"res://game/features/infected/public/mutant_level2.tscn"
-		] else ""
+		var load_kind = "enemy" if scene_path in catalog.ENEMY_SCENES else ""
 		var target_parent = session.enemies_root if load_kind == "enemy" else session.root
 		target_parent.add_child(node)
 		node.position = Vector3(float(record.get("x",0.0)),float(record.get("y",0.0)),float(record.get("z",0.0)))
@@ -446,3 +443,11 @@ func clear_layout(update_status: bool = true) -> void:
 	selected = null
 	if update_status:
 		_update_status()
+
+
+# Tall enemies (capsule up to 2.9 m) must start above the floor, not inside it.
+func _enemy_spawn_height(enemy: Node) -> float:
+	var shape_node := enemy.get_node_or_null("CollisionShape3D") as CollisionShape3D
+	if shape_node != null and shape_node.shape is CapsuleShape3D:
+		return maxf(1.0, (shape_node.shape as CapsuleShape3D).height * 0.5 + 0.1)
+	return 1.0
