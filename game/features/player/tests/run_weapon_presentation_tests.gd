@@ -127,6 +127,7 @@ func _test_player_wiring() -> void:
 		var pickup := ART.make_pickup_visual(index)
 		_check(_find_marker(pickup, "WeaponRoot") != null, "pickup uses authored weapon asset")
 		pickup.free()
+	_test_flash_anchors(player)
 	await _test_switch_and_fire(player, effects)
 	await _test_mount_and_pause(player, mount)
 	player.queue_free()
@@ -251,3 +252,27 @@ func _find_marker(node: Node, marker_name: String) -> Node3D:
 	if node.name == marker_name:
 		return node as Node3D
 	return node.find_child(marker_name, true, false) as Node3D
+
+
+func _test_flash_anchors(player: PLAYER_SCRIPT) -> void:
+	var camera: Camera3D = player.get_node("CameraRig/Camera3D")
+	camera.make_current()
+	for weapon in player.weapons:
+		var authored_root := _find_marker(weapon.get_node("Body"), "WeaponRoot")
+		var marker := _find_marker(authored_root, "Muzzle")
+		var original := marker.transform
+		marker.position += Vector3(0.07, 0.03, 0.01)
+		weapon.call("_show_muzzle_flash")
+		var flash := marker.get_child(marker.get_child_count() - 1) as Node3D
+		_check(flash.name == "MuzzleFlash", "flash is attached directly to authored Muzzle")
+		_check(flash.global_position.is_equal_approx(marker.global_position), "flash origin uses actual model marker")
+		var visual := flash.get_node("Visual") as MeshInstance3D
+		var tip := visual.global_transform * Vector3(float(flash.get("tip_position")) - 0.5, 0, 0)
+		_check(tip.distance_to(marker.global_position) < 0.0001, "texture emission anchor is correct on the creation frame")
+		marker.position += Vector3(0.02, 0, 0.02)
+		camera.position += Vector3(0.2, 0.1, 0)
+		flash.call("_process", 0.01)
+		tip = visual.global_transform * Vector3(float(flash.get("tip_position")) - 0.5, 0, 0)
+		_check(tip.distance_to(marker.global_position) < 0.0001, "flash follows marker and camera motion")
+		flash.free()
+		marker.transform = original
