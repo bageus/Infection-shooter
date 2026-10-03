@@ -17,6 +17,7 @@ func _ready() -> void:
 	art.scale = Vector3.ONE * 0.9
 	art.position.y = 0.0
 	_hint = Label3D.new()
+	_hint.font = preload("res://assets/interface/fonts/body.ttf")
 	_hint.text = "[G] Pick up: " + LABELS[weapon_index] + "\nCurrent weapon drops nearby"
 	_hint.font_size = 44
 	_hint.pixel_size = 0.006

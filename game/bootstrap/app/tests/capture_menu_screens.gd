@@ -1,6 +1,7 @@
 extends SceneTree
 
 const SCREEN := preload("res://game/bootstrap/app/menu/menu_screen.gd")
+const MAIN := preload("res://game/bootstrap/app/main.tscn")
 
 
 func _initialize() -> void:
@@ -24,4 +25,22 @@ func _capture() -> void:
 	await process_frame
 	await RenderingServer.frame_post_draw
 	root.get_texture().get_image().save_png("/tmp/menu_previews/settings.png")
+	menu.call("close_dialog")
+	menu.set("screen_kind", "main")
+	menu.get("preferences").values.text_scale = 1.3
+	menu.call("refresh")
+	await process_frame
+	await RenderingServer.frame_post_draw
+	root.get_texture().get_image().save_png("/tmp/menu_previews/main_130.png")
+	menu.free()
+	var game := MAIN.instantiate()
+	root.add_child(game)
+	current_scene = game
+	await process_frame
+	await RenderingServer.frame_post_draw
+	root.get_texture().get_image().save_png("/tmp/menu_previews/gameplay.png")
+	game.get("planning_mode").call("enter")
+	await process_frame
+	await RenderingServer.frame_post_draw
+	root.get_texture().get_image().save_png("/tmp/menu_previews/planner.png")
 	quit()

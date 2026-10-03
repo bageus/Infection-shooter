@@ -66,6 +66,8 @@ func _test_gameplay_font(app: Node) -> void:
 	var tree: CanvasLayer = app.get("mutation_tree_ui")
 	var points: Label = tree.get("points_label")
 	_check(points.get_theme_font("font") == BODY, "mutation tree uses same font")
+	for hint: Label3D in app.find_children("*", "Label3D", true, false):
+		_check(hint.font == BODY, "world hint uses same font: " + hint.text)
 
 
 func _test_pause_and_planner(app: Node) -> void:
