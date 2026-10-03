@@ -188,7 +188,8 @@ func _test_durability_scales_with_size(stage: Node3D) -> void:
 func _test_corpse_stays_shootable(stage: Node3D) -> void:
 	var enemy := await _spawn(stage, HUNGER, Vector3(24, 1.0, 0))
 	enemy.set("death_linger_seconds", 10.0)
-	enemy.call("take_damage", 500.0)
+	# Hunger has 45 HP: kill without the >=60 blast path randomly severing the test leg.
+	enemy.call("take_damage", float(enemy.get("health")))
 	await create_timer(1.6).timeout
 	var parts: Node = enemy.get("_parts")
 	var hitboxes := enemy.find_children("*", "StaticBody3D", true, false).filter(func(n: Node) -> bool: return n.has_method("take_projectile_hit"))
