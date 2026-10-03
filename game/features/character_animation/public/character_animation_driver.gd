@@ -9,6 +9,7 @@ extends Node
 signal one_shot_finished(state: StringName)
 
 const POSE := preload("res://game/features/character_animation/procedural_pose.gd")
+const GAIT := preload("res://game/features/character_animation/procedural_gait.gd")
 const STATE_ATTACK := &"attack"
 const STATE_DEATH := &"death"
 const LOCOMOTION_TOKENS := {
@@ -17,16 +18,23 @@ const LOCOMOTION_TOKENS := {
 	&"run": ["run", "sprint", "jog"],
 }
 const LOOPING_TOKENS := ["idle", "stand", "walk", "locomotion", "run", "sprint", "jog"]
-const NON_LOOPING_TOKENS := ["attack", "death", "hit", "aim"]
+const NON_LOOPING_TOKENS := ["attack", "death", "hit", "aim", "slam", "summon"]
 const ONE_SHOT_TOKENS := {
 	&"attack": ["attackleft", "attackright", "attack"],
 	&"death": ["death", "dead"],
+	&"slam": ["slam"],
+	&"summon": ["summon"],
 }
 const FLINCH_SECONDS := 0.16
 
 @export var character_path: NodePath = NodePath("..")
 @export var model_path: NodePath = NodePath("Body")
+## Optional clip set that replaces the model's own clips (ADR-0016).
+@export var animation_library: AnimationLibrary
 @export var run_speed_threshold := 6.8
+## Rebuild the legs with a speed-synchronised gait over the playing clip
+## (for authored upper-body clips whose leg motion limps or slides).
+@export var procedural_gait := false
 ## Playback speed is scaled by speed / reference while moving; 0 disables it.
 @export var walk_reference_speed := 0.0
 @export var run_reference_speed := 0.0
@@ -42,6 +50,7 @@ const FLINCH_SECONDS := 0.16
 
 var character: CharacterBody3D
 var animation_player: AnimationPlayer
+var gait: SkeletonModifier3D
 var _current := ""
 var _animations: Dictionary = {}
 var _locomotion: Dictionary = {}
@@ -72,10 +81,13 @@ func configure_clip_selector(selector: Callable) -> void:
 		_play_selected_clip()
 
 
-# Public animation_events_v1: plays a non-looping attack or death. Returns the
-# duration in seconds, or 0.0 when nothing could be played. Death is final.
+# Public animation_events_v1: plays a non-looping attack, death or a skeletal
+# special (slam, summon). Returns the duration in seconds, or 0.0 when nothing
+# could be played. Death is final.
 func play_one_shot(state: StringName) -> float:
-	if _dead or (state != STATE_ATTACK and state != STATE_DEATH):
+	if _dead or not ONE_SHOT_TOKENS.has(state):
+		return 0.0
+	if animation_player == null and state != STATE_ATTACK and state != STATE_DEATH:
 		return 0.0
 	var length := 0.0
 	if animation_player != null:
@@ -125,10 +137,13 @@ func _ready() -> void:
 		return
 	animation_player = _find_animation_player(model)
 	if animation_player != null:
+		_apply_animation_library()
 		_index_animations()
 		_configure_looping_clips()
 		_target = model as Node3D
 		_pose.feet = Vector3(0.0, _feet_height(model), 0.0)
+		if procedural_gait:
+			_attach_gait(model)
 		_play_locomotion(&"idle", 0.0)
 		return
 	_target = character.get_node_or_null(procedural_target_path) as Node3D
@@ -171,7 +186,7 @@ func _advance_one_shot(delta: float) -> void:
 		return
 	var finished := _one_shot
 	_one_shot = &""
-	if finished == STATE_ATTACK:
+	if finished != STATE_DEATH:
 		_current = ""
 	one_shot_finished.emit(finished)
 
@@ -344,6 +359,24 @@ func _should_loop(clip_name: String) -> bool:
 		if token in lower:
 			return true
 	return false
+
+
+func _attach_gait(model: Node) -> void:
+	var skeletons := model.find_children("*", "Skeleton3D", true, false)
+	if skeletons.is_empty():
+		return
+	gait = GAIT.new()
+	gait.name = "ProceduralGait"
+	gait.character = character
+	(skeletons[0] as Node).add_child(gait)
+
+
+func _apply_animation_library() -> void:
+	if animation_library == null:
+		return
+	for library_name in animation_player.get_animation_library_list():
+		animation_player.remove_animation_library(library_name)
+	animation_player.add_animation_library(&"", animation_library)
 
 
 func _feet_height(node: Node) -> float:

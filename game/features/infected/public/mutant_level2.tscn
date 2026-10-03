@@ -1,5 +1,6 @@
-[gd_scene load_steps=5 format=3]
+[gd_scene load_steps=6 format=3]
 
+[ext_resource type="AnimationLibrary" path="res://models/objects/characters/enemy/game/Mutant_anims.res" id="anim_clips"]
 [ext_resource type="Script" path="res://game/features/character_animation/public/character_animation_driver.gd" id="anim_driver"]
 [ext_resource type="Script" path="res://game/features/infected/infected_capsule.gd" id="1_enemy_script"]
 [ext_resource type="PackedScene" path="res://game/features/infection_source/public/mutagen_cloud.tscn" id="2_cloud"]
@@ -31,6 +32,7 @@ shape = SubResource("EnemyShape")
 
 [node name="AnimationDriver" type="Node" parent="."]
 script = ExtResource("anim_driver")
-run_speed_threshold = 3.0
-walk_reference_speed = 2.2
+animation_library = ExtResource("anim_clips")
+run_speed_threshold = 3.57
+walk_reference_speed = 2.04
 run_reference_speed = 5.1

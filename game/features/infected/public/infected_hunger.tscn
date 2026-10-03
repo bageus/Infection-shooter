@@ -1,10 +1,9 @@
-[gd_scene load_steps=6 format=3]
+[gd_scene load_steps=5 format=3]
 
 [ext_resource type="Script" path="res://game/features/character_animation/public/character_animation_driver.gd" id="1_driver"]
 [ext_resource type="Script" path="res://game/features/infected/infected_capsule.gd" id="2_enemy"]
 [ext_resource type="PackedScene" path="res://game/features/infection_source/public/mutagen_cloud.tscn" id="3_cloud"]
-[ext_resource type="ArrayMesh" path="res://models/objects/characters/enemy/game/Hunger_game.res" id="4_mesh"]
-[ext_resource type="Material" path="res://models/objects/characters/enemy/game/Hunger_game.tres" id="5_material"]
+[ext_resource type="PackedScene" path="res://models/objects/characters/enemy/game/Hunger_rig.tscn" id="4_rig"]
 
 [sub_resource type="CapsuleShape3D" id="EnemyShape"]
 radius = 0.45
@@ -27,9 +26,7 @@ position = Vector3(0, 0.025, 0)
 rotation_degrees = Vector3(0, 180, 0)
 scale = Vector3(1.0, 1.0, 1.0)
 
-[node name="Visual" type="MeshInstance3D" parent="Body"]
-mesh = ExtResource("4_mesh")
-surface_material_override/0 = ExtResource("5_material")
+[node name="Visual" parent="Body" instance=ExtResource("4_rig")]
 
 [node name="CollisionShape3D" type="CollisionShape3D" parent="."]
 shape = SubResource("EnemyShape")
@@ -38,12 +35,6 @@ shape = SubResource("EnemyShape")
 
 [node name="AnimationDriver" type="Node" parent="."]
 script = ExtResource("1_driver")
-run_speed_threshold = 3.0
+run_speed_threshold = 3.78
+walk_reference_speed = 2.16
 run_reference_speed = 5.4
-procedural_bob_height = 0.07
-procedural_sway_degrees = 5.0
-procedural_lean_degrees = 12.0
-procedural_stride_hz = 2.8
-procedural_attack_seconds = 0.45
-procedural_attack_lunge = 0.3
-procedural_death_seconds = 1.1

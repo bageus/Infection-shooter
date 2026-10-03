@@ -44,6 +44,7 @@ fov=50.0
 
 [node name="AnimationDriver" type="Node" parent="."]
 script = ExtResource("anim_driver")
+procedural_gait = true
 
 [node name="WeaponMount" type="Node" parent="."]
 script = ExtResource("mount")

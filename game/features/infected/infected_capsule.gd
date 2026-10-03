@@ -27,6 +27,10 @@ signal blood_death(position: Vector3, excluded: Array[RID], death_id: int)
 ## The target may step back during the wind-up by this factor of attack_range.
 @export var attack_reach_tolerance := 1.35
 @export var turn_speed := 14.0
+## Beyond charge_distance the enemy stalks at walk_speed_factor of move_speed
+## (walk clip); closer it charges at full speed (run clip). 0 always charges.
+@export var charge_distance := 9.0
+@export_range(0.2, 1.0) var walk_speed_factor := 0.4
 @export var death_linger_seconds := 0.9
 @export var death_sink_depth := 0.45
 
@@ -158,6 +162,7 @@ func _physics_process(delta: float) -> void:
 	if physics_frame % ai_divisor == _ai_tick_offset % ai_divisor:
 		_cached_desired = _desired_velocity_from_offset(target_offset)
 
+	_behaviour_tick(delta, target_offset)
 	var desired := Vector3.ZERO if _blast_stun_remaining > 0.0 else _cached_desired
 	if not _sleeping_far:
 		_turn_toward_face_direction(delta)
@@ -188,7 +193,22 @@ func _desired_velocity_from_offset(offset: Vector3) -> Vector3:
 		return Vector3.ZERO
 	if distance <= 0.0001:
 		return Vector3.ZERO
-	return _face_direction * move_speed
+	return _face_direction * _chase_speed(distance)
+
+
+func _chase_speed(distance: float) -> float:
+	if charge_distance <= 0.0 or distance <= charge_distance:
+		return move_speed
+	return move_speed * walk_speed_factor
+
+
+# Hook for specialised enemies (slam, ram, summon); runs every simulated tick.
+func _behaviour_tick(_delta: float, _target_offset: Vector3) -> void:
+	pass
+
+
+func is_dead() -> bool:
+	return _dead
 
 
 # Smooth yaw turn toward the target; also while standing in attack range.

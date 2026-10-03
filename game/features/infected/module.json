@@ -5,7 +5,10 @@
   "state_owner": [
     "Prototype infected health",
     "Prototype infected attack cooldown",
-    "Prototype infected death state"
+    "Prototype infected death state",
+    "Infected stalk/charge pace",
+    "Colossus slam cooldown and ground wave",
+    "Horde ram and summon state"
   ],
   "public_api": [
     "public/infected_capsule.tscn",

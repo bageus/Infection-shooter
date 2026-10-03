@@ -1,6 +1,6 @@
 # ADR-0015: Анимация врагов и жизненный цикл обломков
 
-- Status: accepted
+- Status: accepted; procedural enemy poses superseded by ADR-0016
 - Date: 2026-10-03
 - Owner: bageus
 - Modules: features.character_animation, features.infected, presentation.office_floor, bootstrap.app

@@ -14,6 +14,7 @@ Build the first playable combat-slice foundation with an authored office floor, 
 
 ## In scope
 - owner-requested enemy/character animation wiring and destruction/debris physics improvements (ADR-0015);
+- owner-requested rigged enemy clips (walk/run/wind-up attacks), Colossus slam wave, Horde ram and summon pulse, player gait fix (ADR-0016);
 - owner-approved authored character/weapon mounting and automatic animation stances;
 - owner-requested subtle floor material variation and thinner visual seams; lighting remains unchanged;
 - owner-reported main-scene parse failure after unresolved stash conflicts;

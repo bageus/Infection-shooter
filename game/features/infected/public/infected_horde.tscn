@@ -1,10 +1,11 @@
 [gd_scene load_steps=6 format=3]
 
 [ext_resource type="Script" path="res://game/features/character_animation/public/character_animation_driver.gd" id="1_driver"]
-[ext_resource type="Script" path="res://game/features/infected/infected_capsule.gd" id="2_enemy"]
+[ext_resource type="Script" path="res://game/features/infected/infected_horde.gd" id="2_enemy"]
 [ext_resource type="PackedScene" path="res://game/features/infection_source/public/mutagen_cloud.tscn" id="3_cloud"]
-[ext_resource type="ArrayMesh" path="res://models/objects/characters/enemy/game/Horde_game.res" id="4_mesh"]
-[ext_resource type="Material" path="res://models/objects/characters/enemy/game/Horde_game.tres" id="5_material"]
+[ext_resource type="PackedScene" path="res://models/objects/characters/enemy/game/Horde_rig.tscn" id="4_rig"]
+
+[ext_resource type="PackedScene" path="res://game/features/infected/public/infected_capsule.tscn" id="5_summon"]
 
 [sub_resource type="CapsuleShape3D" id="EnemyShape"]
 radius = 0.62
@@ -21,15 +22,14 @@ move_speed = 5.0
 attack_range = 1.3
 attack_damage = 14.0
 attack_interval = 0.6
+summon_scene = ExtResource("5_summon")
 
 [node name="Body" type="Node3D" parent="."]
 position = Vector3(0, -0.15, 0)
 rotation_degrees = Vector3(0, 180, 0)
 scale = Vector3(1.0, 1.0, 1.0)
 
-[node name="Visual" type="MeshInstance3D" parent="Body"]
-mesh = ExtResource("4_mesh")
-surface_material_override/0 = ExtResource("5_material")
+[node name="Visual" parent="Body" instance=ExtResource("4_rig")]
 
 [node name="CollisionShape3D" type="CollisionShape3D" parent="."]
 shape = SubResource("EnemyShape")
@@ -38,12 +38,6 @@ shape = SubResource("EnemyShape")
 
 [node name="AnimationDriver" type="Node" parent="."]
 script = ExtResource("1_driver")
-run_speed_threshold = 3.0
-run_reference_speed = 5.0
-procedural_bob_height = 0.12
-procedural_sway_degrees = 8.0
-procedural_lean_degrees = 2.0
-procedural_stride_hz = 3.2
-procedural_attack_seconds = 0.5
-procedural_attack_lunge = 0.25
-procedural_death_seconds = 1.0
+run_speed_threshold = 5.53
+walk_reference_speed = 2.42
+run_reference_speed = 8.64
