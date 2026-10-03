@@ -206,6 +206,9 @@ func _input(event: InputEvent) -> void:
 		var index := available.find(get_viewport().gui_get_focus_owner())
 		available[posmod(index + (1 if event.keycode == KEY_DOWN else -1), available.size())].grab_focus()
 		get_viewport().set_input_as_handled()
+	elif event.keycode not in [KEY_TAB, KEY_UP, KEY_DOWN, KEY_LEFT, KEY_RIGHT, KEY_ENTER, KEY_KP_ENTER, KEY_SPACE]:
+		# Leave GUI navigation to controls, but stop gameplay shortcuts behind menus.
+		get_viewport().set_input_as_handled()
 
 
 func _layout() -> void:

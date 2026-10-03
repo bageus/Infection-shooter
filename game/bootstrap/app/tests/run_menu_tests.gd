@@ -80,6 +80,12 @@ func _test_pause_and_planner(app: Node) -> void:
 	app.call("_open_pause_menu")
 	var pause: Control = app.get("pause_menu")
 	_check(paused and pause.visible and app.get("_pause_open"), "pause menu freezes simulation")
+	var gameplay_key := InputEventKey.new()
+	gameplay_key.pressed = true
+	gameplay_key.keycode = KEY_M
+	root.push_input(gameplay_key)
+	await process_frame
+	_check(not app.get("mutation_tree_ui").call("is_tree_open"), "pause consumes mutation-tree shortcut behind menu")
 	_check(pause.get("buttons")[1].text == "PLANNING MODE", "planner entry is in pause menu")
 	var infection := app.get_node("Gameplay/Player/InfectionRuntime")
 	var mutation_before := float(infection.call("get_mutation"))
