@@ -102,7 +102,8 @@ func _capture(node: Node3D) -> Dictionary:
 		"light_color": node.call("get_authored_color") if node.has_method("get_authored_color") else null,
 		"energy_multiplier": float(node.get("energy_multiplier")) if node.has_method("get_authored_energy") else 0.65,
 		"light_angle": float(node.get_meta("planning_light_angle", -1.0)),
-		"flicker_mode": int(node.get_meta("planning_flicker_mode", 0)), "flicker_step": float(node.get_meta("planning_flicker_step", 0.2))}
+		"flicker_mode": int(node.get_meta("planning_flicker_mode", 0)), "flicker_step": float(node.get_meta("planning_flicker_step", 0.2)),
+		"blood": node.call("get_blood_config") if node.has_method("get_blood_config") else {}}
 
 
 func _restore(record: Dictionary, offset: Vector3, new_desk: bool) -> Node3D:
@@ -112,6 +113,9 @@ func _restore(record: Dictionary, offset: Vector3, new_desk: bool) -> Node3D:
 	var node := planner._instantiate_asset(path) as Node3D
 	if node == null:
 		return null
+	var blood: Dictionary = record.get("blood", {})
+	if not blood.is_empty() and node.has_method("configure_blood"):
+		node.call("configure_blood", str(blood["texture"]), str(blood["surface"]))
 	var parent := record["parent"] as Node3D
 	if not is_instance_valid(parent):
 		parent = planner.root

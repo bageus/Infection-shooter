@@ -1,0 +1,41 @@
+[gd_scene load_steps=5 format=3]
+
+[ext_resource type="Script" path="res://game/features/character_animation/public/character_animation_driver.gd" id="1_driver"]
+[ext_resource type="Script" path="res://game/features/infected/infected_colossus.gd" id="2_enemy"]
+[ext_resource type="PackedScene" path="res://game/features/infection_source/public/mutagen_cloud.tscn" id="3_cloud"]
+[ext_resource type="PackedScene" path="res://models/objects/characters/enemy/game/Colossus_rig.tscn" id="4_rig"]
+
+[sub_resource type="CapsuleShape3D" id="EnemyShape"]
+radius = 0.65
+height = 2.9
+
+[node name="InfectedColossus" type="CharacterBody3D" groups=["infected"]]
+collision_layer = 2
+collision_mask = 3
+safe_margin = 0.02
+floor_stop_on_slope = false
+script = ExtResource("2_enemy")
+max_health = 420.0
+move_speed = 2.9
+attack_range = 1.8
+attack_damage = 50.0
+limb_loss_kills = false
+attack_interval = 1.5
+
+[node name="Body" type="Node3D" parent="."]
+position = Vector3(0, 0.0225, 0)
+rotation_degrees = Vector3(0, 180, 0)
+scale = Vector3(1.55, 1.55, 1.55)
+
+[node name="Visual" parent="Body" instance=ExtResource("4_rig")]
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="."]
+shape = SubResource("EnemyShape")
+
+[node name="DeathCloud" parent="." instance=ExtResource("3_cloud")]
+
+[node name="AnimationDriver" type="Node" parent="."]
+script = ExtResource("1_driver")
+run_speed_threshold = 2.03
+walk_reference_speed = 1.16
+run_reference_speed = 2.9

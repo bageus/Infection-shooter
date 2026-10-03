@@ -1,0 +1,12 @@
+[gd_scene load_steps=3 format=3]
+
+
+[ext_resource type="Script" path="res://game/features/infected/infected_corpse_decor.gd" id="1_script"]
+[ext_resource type="PackedScene" path="res://models/objects/characters/enemy/game/Brute_rig.tscn" id="2_res"]
+
+[node name="CorpseBrute" type="Node3D"]
+script = ExtResource("1_script")
+visual_scene = ExtResource("2_res")
+visual_scale = 1.1
+feet_offset = 0.95
+durability = 150.0

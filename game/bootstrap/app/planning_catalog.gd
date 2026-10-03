@@ -6,6 +6,10 @@ const BATHROOM_FIXTURE_SCENE = preload("res://game/presentation/office_floor/pub
 const PAPER_PROP_SCENE = preload("res://game/presentation/office_floor/public/props/paper_prop.tscn")
 const STAIRCASE_SCENE = preload("res://game/presentation/office_floor/public/structural/staircase.tscn")
 const WORKSTATIONS = preload("res://game/bootstrap/app/workstation_templates.gd")
+const BLOOD_DECAL_SCENE := "res://game/presentation/office_floor/public/props/blood_decal.tscn"
+# Texture ids of the in-game blood set ("<category>_<variant>"), see planner_decor_v1.
+const BLOOD_CATEGORIES := ["splatter", "stain", "smear", "pool", "drops"]
+const BLOOD_VARIANTS := 9
 
 var bind_asset: Callable
 var active_catalog: Array = []
@@ -15,11 +19,82 @@ var lighting_catalog = [
 	{"name":"Permanent Darkness","path":"res://game/presentation/office_floor/public/props/darkness_zone.tscn","kind":"darkness"},
 	{"name":"Exploration Darkness","path":"res://game/presentation/office_floor/public/props/darkness_zone.tscn","kind":"exploration_darkness"}
 ]
+# Scenes that are loaded and saved as enemies; keep in sync with actor_catalog.
+const ENEMY_SCENES := [
+	"res://game/features/infected/public/infected_capsule.tscn",
+	"res://game/features/infected/public/mutant_level2.tscn",
+	"res://game/features/infected/public/infected_hunger.tscn",
+	"res://game/features/infected/public/infected_revenant.tscn",
+	"res://game/features/infected/public/infected_brute.tscn",
+	"res://game/features/infected/public/infected_titan.tscn",
+	"res://game/features/infected/public/infected_colossus.tscn",
+	"res://game/features/infected/public/infected_horde.tscn"
+]
 var actor_catalog = [
 	{"name":"Player Spawn","path":"","kind":"player"},
-	{"name":"Zombie L1","path":"res://game/features/infected/public/infected_capsule.tscn","kind":"enemy"},
-	{"name":"Mutant L2","path":"res://game/features/infected/public/mutant_level2.tscn","kind":"enemy"}
+	{"name":"Zombie L1","path":ENEMY_SCENES[0],"kind":"enemy"},
+	{"name":"Mutant L2","path":ENEMY_SCENES[1],"kind":"enemy"},
+	{"name":"Hunger","path":ENEMY_SCENES[2],"kind":"enemy"},
+	{"name":"Revenant","path":ENEMY_SCENES[3],"kind":"enemy"},
+	{"name":"Brute","path":ENEMY_SCENES[4],"kind":"enemy"},
+	{"name":"Titan","path":ENEMY_SCENES[5],"kind":"enemy"},
+	{"name":"Colossus","path":ENEMY_SCENES[6],"kind":"enemy"},
+	{"name":"Horde","path":ENEMY_SCENES[7],"kind":"enemy"}
 ]
+
+
+# Dead infected and loose body parts placed as decoration (ADR-0017).
+var gore_catalog = [
+	{"name":"Corpse Zombie","path":"res://game/features/infected/public/decor/corpse_zombie.tscn","kind":"decor"},
+	{"name":"Corpse Zombie mutilated","path":"res://game/features/infected/public/decor/corpse_zombie_mutilated.tscn","kind":"decor"},
+	{"name":"Head Zombie","path":"res://game/features/infected/public/decor/part_zombie_head.tscn","kind":"decor"},
+	{"name":"Arm Zombie","path":"res://game/features/infected/public/decor/part_zombie_arm.tscn","kind":"decor"},
+	{"name":"Leg Zombie","path":"res://game/features/infected/public/decor/part_zombie_leg.tscn","kind":"decor"},
+	{"name":"Corpse Mutant","path":"res://game/features/infected/public/decor/corpse_mutant.tscn","kind":"decor"},
+	{"name":"Corpse Mutant mutilated","path":"res://game/features/infected/public/decor/corpse_mutant_mutilated.tscn","kind":"decor"},
+	{"name":"Head Mutant","path":"res://game/features/infected/public/decor/part_mutant_head.tscn","kind":"decor"},
+	{"name":"Arm Mutant","path":"res://game/features/infected/public/decor/part_mutant_arm.tscn","kind":"decor"},
+	{"name":"Leg Mutant","path":"res://game/features/infected/public/decor/part_mutant_leg.tscn","kind":"decor"},
+	{"name":"Corpse Hunger","path":"res://game/features/infected/public/decor/corpse_hunger.tscn","kind":"decor"},
+	{"name":"Corpse Hunger mutilated","path":"res://game/features/infected/public/decor/corpse_hunger_mutilated.tscn","kind":"decor"},
+	{"name":"Head Hunger","path":"res://game/features/infected/public/decor/part_hunger_head.tscn","kind":"decor"},
+	{"name":"Arm Hunger","path":"res://game/features/infected/public/decor/part_hunger_arm.tscn","kind":"decor"},
+	{"name":"Leg Hunger","path":"res://game/features/infected/public/decor/part_hunger_leg.tscn","kind":"decor"},
+	{"name":"Corpse Revenant","path":"res://game/features/infected/public/decor/corpse_revenant.tscn","kind":"decor"},
+	{"name":"Corpse Revenant mutilated","path":"res://game/features/infected/public/decor/corpse_revenant_mutilated.tscn","kind":"decor"},
+	{"name":"Head Revenant","path":"res://game/features/infected/public/decor/part_revenant_head.tscn","kind":"decor"},
+	{"name":"Arm Revenant","path":"res://game/features/infected/public/decor/part_revenant_arm.tscn","kind":"decor"},
+	{"name":"Leg Revenant","path":"res://game/features/infected/public/decor/part_revenant_leg.tscn","kind":"decor"},
+	{"name":"Corpse Brute","path":"res://game/features/infected/public/decor/corpse_brute.tscn","kind":"decor"},
+	{"name":"Corpse Brute mutilated","path":"res://game/features/infected/public/decor/corpse_brute_mutilated.tscn","kind":"decor"},
+	{"name":"Head Brute","path":"res://game/features/infected/public/decor/part_brute_head.tscn","kind":"decor"},
+	{"name":"Arm Brute","path":"res://game/features/infected/public/decor/part_brute_arm.tscn","kind":"decor"},
+	{"name":"Leg Brute","path":"res://game/features/infected/public/decor/part_brute_leg.tscn","kind":"decor"},
+	{"name":"Corpse Titan","path":"res://game/features/infected/public/decor/corpse_titan.tscn","kind":"decor"},
+	{"name":"Corpse Titan mutilated","path":"res://game/features/infected/public/decor/corpse_titan_mutilated.tscn","kind":"decor"},
+	{"name":"Head Titan","path":"res://game/features/infected/public/decor/part_titan_head.tscn","kind":"decor"},
+	{"name":"Arm Titan","path":"res://game/features/infected/public/decor/part_titan_arm.tscn","kind":"decor"},
+	{"name":"Leg Titan","path":"res://game/features/infected/public/decor/part_titan_leg.tscn","kind":"decor"},
+	{"name":"Corpse Colossus","path":"res://game/features/infected/public/decor/corpse_colossus.tscn","kind":"decor"},
+	{"name":"Corpse Colossus mutilated","path":"res://game/features/infected/public/decor/corpse_colossus_mutilated.tscn","kind":"decor"},
+	{"name":"Head Colossus","path":"res://game/features/infected/public/decor/part_colossus_head.tscn","kind":"decor"},
+	{"name":"Arm Colossus","path":"res://game/features/infected/public/decor/part_colossus_arm.tscn","kind":"decor"},
+	{"name":"Leg Colossus","path":"res://game/features/infected/public/decor/part_colossus_leg.tscn","kind":"decor"},
+	{"name":"Corpse Horde","path":"res://game/features/infected/public/decor/corpse_horde.tscn","kind":"decor"},
+	{"name":"Corpse Horde mutilated","path":"res://game/features/infected/public/decor/corpse_horde_mutilated.tscn","kind":"decor"},
+	{"name":"Tentacle Horde","path":"res://game/features/infected/public/decor/part_horde_tentacle.tscn","kind":"decor"}
+]
+
+
+# Blood decals from the in-game texture set; surface and size come from the
+# planner's blood options.
+func blood_catalog() -> Array:
+	var entries: Array = []
+	for category: String in BLOOD_CATEGORIES:
+		for variant in range(1, BLOOD_VARIANTS + 1):
+			var texture_id := "%s_%02d" % [category, variant]
+			entries.append({"name": "Blood " + texture_id.replace("_", " "), "path": BLOOD_DECAL_SCENE, "kind": "blood", "blood_texture": texture_id})
+	return entries
 
 
 func _build_environment_catalogs() -> void:
@@ -130,7 +205,7 @@ func _migrate_scene_path(old_path: String) -> String:
 		return ""
 	var legacy_prop = "res://game/presentation/office_floor/public/props/"
 	if old_path.begins_with(legacy_prop) and old_path.ends_with(".tscn"):
-		if old_path.get_file() in ["planner_light.tscn", "darkness_zone.tscn", "environment_prop.tscn"]:
+		if old_path.get_file() in ["planner_light.tscn", "darkness_zone.tscn", "environment_prop.tscn", "blood_decal.tscn"]:
 			return old_path
 		if old_path.get_file() == "07_table.tscn":
 			return old_path

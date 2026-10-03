@@ -4,21 +4,21 @@ const LIBRARY := preload("res://game/presentation/office_floor/blood_texture_lib
 const SURFACES := preload("res://game/presentation/office_floor/blood_surface_query.gd")
 const BUDGET := preload("res://game/presentation/office_floor/blood_mark_budget.gd")
 
-@export_range(1, 200) var max_marks := 128
+@export_range(1, 320) var max_marks := 220
 @export_range(1.0, 300.0) var mark_lifetime := 90.0
 @export_range(0.1, 5.0) var fade_seconds := 1.2
-@export var splatter_size := Vector2(0.24, 0.75)
+@export var splatter_size := Vector2(0.3, 0.95)
 @export var stain_size := Vector2(0.16, 0.50)
 @export var drops_size := Vector2(0.25, 0.80)
 @export var smear_size := Vector2(0.35, 1.20)
 @export var pool_size := Vector2(0.65, 1.50)
 @export var drop_spacing := Vector2(0.4, 0.5)
-@export_range(1, 4) var splatters_per_hit := 3
+@export_range(1, 8) var splatters_per_hit := 5
 @export var pool_delay := Vector2(0.3, 0.8)
 @export var pool_growth := Vector2(1.0, 3.0)
 @export_range(0.03, 0.15) var projection_depth := 0.08
 @export_range(0.001, 0.03) var quad_surface_offset := 0.018
-@export_range(0.05, 0.5) var hit_interval := 0.12
+@export_range(0.02, 0.5) var hit_interval := 0.06
 @export_flags_3d_physics var surface_collision_mask := 128
 @export_flags_3d_render var receiver_visual_mask := 128
 @export var distance_fade := true
@@ -108,6 +108,11 @@ func splatter_hit(position: Vector3, direction: Vector3, weapon: String, exclude
 	_queue_effect("_emit_splatter_hit", [position, direction, weapon, excluded, source_id])
 
 
+# Public v1 addition (ADR-0017): a burst of blood where a limb came off.
+func severed_burst(position: Vector3, direction: Vector3, excluded: Array[RID]) -> void:
+	_queue_effect("_emit_severed_burst", [position, direction, excluded])
+
+
 func small_stain(position: Vector3, excluded: Array[RID]) -> void:
 	_queue_effect("_emit_small_stain", [position, excluded])
 
@@ -159,6 +164,18 @@ func _emit_splatter_hit(position: Vector3, direction: Vector3, weapon: String, e
 		surface = _surfaces.call("find_floor", position, excluded)
 	for mark in range(splatters_per_hit):
 		_submit("splatter", surface, direction, splatter_size, true, weapon == "SHOTGUN")
+
+
+func _emit_severed_burst(position: Vector3, direction: Vector3, excluded: Array[RID]) -> void:
+	var flat := Vector3(direction.x, 0.0, direction.z)
+	for index in range(6):
+		var spread := Vector3(randf_range(-0.9, 0.9), 0.0, randf_range(-0.9, 0.9)) + flat.normalized() * randf_range(0.2, 1.2)
+		var surface: Dictionary = _surfaces.call("find_floor", position + spread, excluded)
+		_submit("splatter", surface, spread if spread.length_squared() > 0.01 else flat, splatter_size * 1.2, true, true)
+	var behind: Dictionary = _surfaces.call("find_behind", position, direction, excluded)
+	if not behind.is_empty():
+		_submit("splatter", behind, direction, splatter_size * 1.3, true, true)
+	_submit("stain", _surfaces.call("find_floor", position, excluded), Vector3.ZERO, stain_size * 1.6)
 
 
 func _emit_small_stain(position: Vector3, excluded: Array[RID]) -> void:

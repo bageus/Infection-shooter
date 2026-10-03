@@ -3,6 +3,11 @@ extends RigidBody3D
 const BALANCE = preload("res://game/features/combat/public/projectile_balance.gd")
 const SPARKS = preload("res://game/presentation/office_floor/electric_sparks.gd")
 const BLAST = preload("res://game/presentation/office_floor/blast_effect.gd")
+const DAMAGE = preload("res://game/presentation/office_floor/environment_damage.gd")
+const DEBRIS = preload("res://game/presentation/office_floor/debris_lifecycle.gd")
+const MAX_MODEL_PIECES := 12
+const MAX_PIECE_SIZE := 1.0
+const CRUMBLE_CHUNKS := 9
 
 @export var max_health := 110.0
 @export var bullet_impulse := 1.8
@@ -114,17 +119,28 @@ func _break_physical_prop(hit_position: Vector3, direction: Vector3) -> void:
 	var visual := get_node_or_null("Visual")
 	if visual == null and root != null:
 		visual = root.get_node_or_null("Visual")
+	var bounds := AABB()
+	var tint := Color(0.42, 0.34, 0.26)
+	var spawned := 0
 	if visual != null:
-		for child in visual.get_children():
-			if child is MeshInstance3D:
-				var fragment := RigidBody3D.new()
-				fragment.mass = 0.6
-				fragment.collision_layer = 0
-				fragment.collision_mask = 1
-				effects_root.add_child(fragment)
-				fragment.global_position = (child as MeshInstance3D).global_position
-				var copy := (child as MeshInstance3D).duplicate()
-				fragment.add_child(copy)
-				copy.transform = Transform3D.IDENTITY
-				fragment.apply_central_impulse(direction.normalized() * randf_range(0.4, 1.4) + Vector3.UP * randf_range(0.2, 0.8))
+		var found := false
+		for node in visual.find_children("*", "MeshInstance3D", true, false):
+			var mesh := node as MeshInstance3D
+			if mesh.mesh == null or not mesh.is_visible_in_tree():
+				continue
+			var mesh_bounds: AABB = mesh.global_transform * mesh.get_aabb()
+			bounds = mesh_bounds if not found else bounds.merge(mesh_bounds)
+			if not found:
+				var material := mesh.get_active_material(0) as BaseMaterial3D
+				if material != null:
+					tint = material.albedo_color
+			found = true
+			# Whole-cabinet sized meshes would leave a ghost object lying around.
+			if spawned < MAX_MODEL_PIECES and mesh_bounds.size.length() <= MAX_PIECE_SIZE:
+				if DAMAGE.spawn_piece(self, mesh, null, 0, spawned, direction, hit_position) != null:
+					spawned += 1
+	if bounds.size.length_squared() < 0.0001:
+		bounds = AABB(global_position - Vector3(0.25, 0.25, 0.25), Vector3(0.5, 0.5, 0.5))
+	DEBRIS.spawn_chunks(self, bounds, tint, CRUMBLE_CHUNKS if spawned < 3 else 4, direction, hit_position)
+	DEBRIS.dust_puff(self, bounds.get_center() - Vector3(0.0, bounds.size.y * 0.2, 0.0), bounds.size.length())
 	queue_free()

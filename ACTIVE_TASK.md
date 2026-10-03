@@ -4,7 +4,7 @@ task_id: T002
 status: IN_PROGRESS
 phase: 1
 owner: AI
-updated: 2026-10-02
+updated: 2026-10-03
 ---
 
 # Active task
@@ -13,6 +13,9 @@ updated: 2026-10-02
 Build the first playable combat-slice foundation with an authored office floor, player, combat, infected enemies, infection source, and observable fail states.
 
 ## In scope
+- owner-requested enemy/character animation wiring and destruction/debris physics improvements (ADR-0015);
+- owner-requested rigged enemy clips (walk/run/wind-up attacks), Colossus slam wave, Horde ram and summon pulse, player gait fix (ADR-0016);
+- owner-requested dismemberment, body wounds, more blood, larger Horde, Gore and Blood planner palettes (ADR-0017);
 - owner-approved authored character/weapon mounting and automatic animation stances;
 - owner-requested subtle floor material variation and thinner visual seams; lighting remains unchanged;
 - owner-reported main-scene parse failure after unresolved stash conflicts;

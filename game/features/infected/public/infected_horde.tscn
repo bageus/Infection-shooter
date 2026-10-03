@@ -1,0 +1,43 @@
+[gd_scene load_steps=6 format=3]
+
+[ext_resource type="Script" path="res://game/features/character_animation/public/character_animation_driver.gd" id="1_driver"]
+[ext_resource type="Script" path="res://game/features/infected/infected_horde.gd" id="2_enemy"]
+[ext_resource type="PackedScene" path="res://game/features/infection_source/public/mutagen_cloud.tscn" id="3_cloud"]
+[ext_resource type="PackedScene" path="res://models/objects/characters/enemy/game/Horde_rig.tscn" id="4_rig"]
+
+[ext_resource type="PackedScene" path="res://game/features/infected/public/infected_capsule.tscn" id="5_summon"]
+
+[sub_resource type="CapsuleShape3D" id="EnemyShape"]
+radius = 1.05
+height = 2.0
+
+[node name="InfectedHorde" type="CharacterBody3D" groups=["infected"]]
+collision_layer = 2
+collision_mask = 3
+safe_margin = 0.02
+floor_stop_on_slope = false
+script = ExtResource("2_enemy")
+max_health = 150.0
+move_speed = 5.0
+attack_range = 1.3
+attack_damage = 14.0
+attack_interval = 0.6
+summon_scene = ExtResource("5_summon")
+
+[node name="Body" type="Node3D" parent="."]
+position = Vector3(0, -0.065, 0)
+rotation_degrees = Vector3(0, 180, 0)
+scale = Vector3(1.7, 1.7, 1.7)
+
+[node name="Visual" parent="Body" instance=ExtResource("4_rig")]
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="."]
+shape = SubResource("EnemyShape")
+
+[node name="DeathCloud" parent="." instance=ExtResource("3_cloud")]
+
+[node name="AnimationDriver" type="Node" parent="."]
+script = ExtResource("1_driver")
+run_speed_threshold = 5.53
+walk_reference_speed = 3.2
+run_reference_speed = 11.0

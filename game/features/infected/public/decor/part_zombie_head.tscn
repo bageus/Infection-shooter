@@ -1,0 +1,13 @@
+[gd_scene load_steps=4 format=3]
+
+
+[ext_resource type="Script" path="res://game/features/infected/infected_body_part_decor.gd" id="1_script"]
+[ext_resource type="PackedScene" path="res://models/objects/characters/zombie_animated.glb" id="2_res"]
+[ext_resource type="AnimationLibrary" path="res://models/objects/characters/enemy/game/Zombie_anims.res" id="3_res"]
+
+[node name="PartZombieHead" type="RigidBody3D"]
+script = ExtResource("1_script")
+visual_scene = ExtResource("2_res")
+animation_library = ExtResource("3_res")
+visual_scale = 1.0
+part = &"head"

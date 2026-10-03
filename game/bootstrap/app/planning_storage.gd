@@ -86,11 +86,15 @@ func _collect_layout_data() -> Dictionary:
 			"spawn_y": (node.get_meta("planning_spawn_transform") as Transform3D).origin.y if node.has_meta("planning_spawn_transform") else node.position.y,
 			"spawn_z": (node.get_meta("planning_spawn_transform") as Transform3D).origin.z if node.has_meta("planning_spawn_transform") else node.position.z
 		})
+		if node.has_method("get_blood_config"):
+			var blood: Dictionary = node.call("get_blood_config")
+			records[-1]["blood_texture"] = str(blood["texture"])
+			records[-1]["blood_surface"] = str(blood["surface"])
 		if node.has_method("get_authored_energy"):
 			records[-1]["energy_multiplier"] = float(node.get("energy_multiplier"))
 			var color: Color = node.call("get_authored_color")
 			records[-1]["light_color"] = [color.r, color.g, color.b]
-	return {"version": 5, "objects": records}
+	return {"version": 6, "objects": records}
 
 
 func save_named_map() -> void:
@@ -188,6 +192,9 @@ func _save_authored_scene() -> Error:
 		scene_root.add_child(copy)
 		copy.owner = scene_root
 		copy.transform = node.transform
+		if node.has_method("get_blood_config"):
+			var blood: Dictionary = node.call("get_blood_config")
+			copy.call("configure_blood", str(blood["texture"]), str(blood["surface"]))
 		if node.has_meta("planning_desk_id"):
 			copy.set_meta("planning_desk_id", node.get_meta("planning_desk_id"))
 		if node.has_meta("planning_attachment"):

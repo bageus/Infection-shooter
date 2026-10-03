@@ -4,6 +4,7 @@ const PIECE_SCRIPT = preload("res://game/presentation/office_floor/table_piece.g
 const ASSEMBLY_SCRIPT = preload("res://game/presentation/office_floor/table_assembly.gd")
 const EFFECTS_SCRIPT = preload("res://game/features/combat/public/impact_effects.gd")
 const BALANCE = preload("res://game/features/combat/public/projectile_balance.gd")
+const DEBRIS = preload("res://game/presentation/office_floor/debris_lifecycle.gd")
 const LEG_IDS := ["Leg_BL", "Leg_BR", "Leg_FL", "Leg_FR"]
 const WOOD_MARKS := [
 	"res://models/objects/textures/Splintered Wood Fracture Decal.png",
@@ -285,7 +286,7 @@ func _settle_piece(body: RigidBody3D) -> void:
 		if not is_instance_valid(_retained[index]) or _retained[index].is_queued_for_deletion():
 			_retained.remove_at(index)
 	if _retained.size() >= _retention_target:
-		body.queue_free()
+		DEBRIS.fade_free(body)
 		return
 	# Retained pieces touch only the floor collision layer, never the player.
 	body.freeze = false
@@ -299,7 +300,7 @@ func _settle_piece(body: RigidBody3D) -> void:
 	get_tree().create_timer(35.0).timeout.connect(func() -> void:
 		var live_body: RigidBody3D = body_ref.get_ref() as RigidBody3D
 		if live_body != null:
-			live_body.queue_free()
+			DEBRIS.fade_free(live_body)
 	)
 
 

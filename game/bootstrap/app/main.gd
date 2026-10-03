@@ -215,9 +215,12 @@ func _bind_enemy_blood(enemy: Node) -> void:
 		return
 	var bindings := {
 		"projectile_blood": "splatter_hit", "blood_wounded": "small_stain",
-		"wounded_moved": "drops_trail", "body_dragged": "smear_drag", "blood_death": "death_pool"
+		"wounded_moved": "drops_trail", "body_dragged": "smear_drag", "blood_death": "death_pool",
+		"limb_severed": "severed_burst"
 	}
 	for event in bindings:
+		if not enemy.has_signal(event):
+			continue
 		var callback := Callable(blood_effects, bindings[event])
 		if not enemy.is_connected(event, callback):
 			enemy.connect(event, callback)

@@ -60,4 +60,17 @@ static func spawn_piece(host: Node3D, mesh: MeshInstance3D, owner: Node3D, stage
 	away.y = maxf(away.y, 0.1)
 	var impulse := (away.normalized() * 0.75 + direction.normalized() * 0.25 + Vector3.UP * 0.35).normalized() * fragment.mass * randf_range(1.5, 3.0) if blast else direction.normalized() * randf_range(0.15, 0.7) + Vector3.UP * 0.3
 	fragment.apply_impulse(impulse, (hit_point - fragment.global_position).limit_length(0.3))
+	_inherit_motion(host, fragment)
 	return fragment
+
+
+# Pieces of a moving or tipping object keep its motion instead of starting from rest,
+# plus a little tumble so they do not slide flat across the floor.
+static func _inherit_motion(host: Node3D, fragment: RigidBody3D) -> void:
+	if host is RigidBody3D:
+		var body := host as RigidBody3D
+		var lever := fragment.global_position - body.global_position
+		fragment.linear_velocity += body.linear_velocity + body.angular_velocity.cross(lever)
+		fragment.angular_velocity += body.angular_velocity
+	var tumble := 2.5 / (0.6 + fragment.mass)
+	fragment.angular_velocity += Vector3(randf_range(-1.0, 1.0), randf_range(-1.0, 1.0), randf_range(-1.0, 1.0)) * tumble

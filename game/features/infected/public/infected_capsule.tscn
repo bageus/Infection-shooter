@@ -1,5 +1,6 @@
-[gd_scene load_steps=7 format=3]
+[gd_scene load_steps=8 format=3]
 
+[ext_resource type="AnimationLibrary" path="res://models/objects/characters/enemy/game/Zombie_anims.res" id="anim_clips"]
 [ext_resource type="Script" path="res://game/features/character_animation/public/character_animation_driver.gd" id="anim_driver"]
 [ext_resource type="Script" path="res://game/features/infected/infected_capsule.gd" id="1_enemy_script"]
 [ext_resource type="PackedScene" path="res://models/objects/characters/zombie_animated.glb" id="character_model"]
@@ -37,3 +38,7 @@ shape = SubResource("EnemyShape")
 
 [node name="AnimationDriver" type="Node" parent="."]
 script = ExtResource("anim_driver")
+animation_library = ExtResource("anim_clips")
+run_speed_threshold = 3.15
+walk_reference_speed = 1.8
+run_reference_speed = 4.5
