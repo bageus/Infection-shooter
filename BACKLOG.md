@@ -21,6 +21,8 @@ updated: 2026-09-18
 
 ## Icebox
 
+- CI_WORLD_BINDINGS_CLEANUP: existing main 26a819a run 37148645355 fails after world bindings assertions pass because one resource remains in use at exit (2 ObjectDB instances). Reproduced before menu integration; investigate the existing mission/debris cleanup separately. No test error is suppressed by the menu change.
+
 Platform monetization and SDKs; full campaign content; cloud saves; window exits; gamepad; multiplayer; launcher; final rating and certification.
 
 T001 implementation is retained with repository gates passed. Its Godot headless test execution is still pending; the owner explicitly instructed work to continue with T002 before that runtime check.

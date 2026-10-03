@@ -14,7 +14,10 @@ CanvasLayer 200 закрывает HUD и не пропускает ввод в 
 Planning mode вызывает существующий переход в редактор и не создаёт второй режим.
 
 Общий `assets/interface/game_theme.tres` задаёт body.ttf через ProjectSettings
-gui/theme/custom. Заголовки меню используют title.ttf. HUD, дерево мутаций и
+gui/theme/custom. В тему встроены неизменённые bytes body.ttf, чтобы избежать
+зависимости загрузки project Theme от первого импорта TTF. Пересборка:
+`python tools/build_interface_theme.py`; тест сверяет font data с оригиналом.
+Заголовки меню используют title.ttf. HUD, дерево мутаций и
 планировщик получают тот же шрифт без изменения их компоновки и игрового состояния.
 Мировые Label3D подсказки оружия, ключа, DNA и двери имеют явный body.ttf;
 они не полагаются на наследование Control Theme. [Godot 3D text](https://docs.godotengine.org/en/4.4/tutorials/3d/3d_text.html).

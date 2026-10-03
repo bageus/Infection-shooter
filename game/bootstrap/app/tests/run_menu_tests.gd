@@ -60,14 +60,18 @@ func _run() -> void:
 
 func _test_gameplay_font(app: Node) -> void:
 	var hp := app.get_node("PrototypeHUD/HealthPanel/HealthValue") as Label
-	_check(hp.get_theme_font("font") == BODY, "combat HUD uses supplied menu body font")
+	_check(_is_body_font(hp.get_theme_font("font")), "combat HUD uses supplied menu body font")
 	var title := app.get_node("PlanningUI/Panel/VBox/Title") as Label
-	_check(title.get_theme_font("font") == BODY, "planner uses same font")
+	_check(_is_body_font(title.get_theme_font("font")), "planner uses same font")
 	var tree: CanvasLayer = app.get("mutation_tree_ui")
 	var points: Label = tree.get("points_label")
-	_check(points.get_theme_font("font") == BODY, "mutation tree uses same font")
+	_check(_is_body_font(points.get_theme_font("font")), "mutation tree uses same font")
 	for hint: Label3D in app.find_children("*", "Label3D", true, false):
 		_check(hint.font == BODY, "world hint uses same font: " + hint.text)
+
+
+func _is_body_font(font: Font) -> bool:
+	return font is FontFile and (font as FontFile).data == BODY.data
 
 
 func _test_pause_and_planner(app: Node) -> void:
