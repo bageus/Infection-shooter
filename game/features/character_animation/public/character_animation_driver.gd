@@ -21,6 +21,8 @@ const LOOPING_TOKENS := ["idle", "stand", "walk", "locomotion", "run", "sprint",
 const NON_LOOPING_TOKENS := ["attack", "death", "hit", "aim", "slam", "summon"]
 const ONE_SHOT_TOKENS := {
 	&"attack": ["attackleft", "attackright", "attack"],
+	&"attack_left": ["attackleft", "attack"],
+	&"attack_right": ["attackright", "attack"],
 	&"death": ["death", "dead"],
 	&"slam": ["slam"],
 	&"summon": ["summon"],
@@ -87,7 +89,7 @@ func configure_clip_selector(selector: Callable) -> void:
 func play_one_shot(state: StringName) -> float:
 	if _dead or not ONE_SHOT_TOKENS.has(state):
 		return 0.0
-	if animation_player == null and state != STATE_ATTACK and state != STATE_DEATH:
+	if animation_player == null and state in [&"slam", &"summon"]:
 		return 0.0
 	var length := 0.0
 	if animation_player != null:
@@ -209,7 +211,7 @@ func _process_procedural(speed: float, delta: float) -> void:
 	var pose := Transform3D.IDENTITY
 	if _one_shot == STATE_DEATH or (_dead and _one_shot.is_empty()):
 		pose = _pose.death(1.0 if _one_shot.is_empty() else _one_shot_elapsed / _one_shot_length)
-	elif _one_shot == STATE_ATTACK:
+	elif not _one_shot.is_empty():
 		pose = _pose.attack(_one_shot_elapsed / _one_shot_length)
 	else:
 		var reference := maxf(run_speed_threshold if run_reference_speed <= 0.0 else run_reference_speed, 0.1)

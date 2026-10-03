@@ -4,7 +4,8 @@
   "purpose": "Expose authored structural office modules with their own collision and the current office-floor composition.",
   "state_owner": [
     "Blood textures, render marks, surface anchors, lifetime and density budgets",
-    "Authored lamp power, color and flicker phase; derived runtime light activation"
+    "Authored lamp power, color and flicker phase; derived runtime light activation",
+    "Planner blood decorations: texture, surface and size"
   ],
   "public_api": [
     "public/base_office_layout.tscn",
@@ -33,7 +34,8 @@
     "public/structural/glass_partition_half.tscn",
     "public/structural/glass_partition_blinds.tscn",
     "public/structural/sliding_glass_door.tscn",
-    "public/blood_effects_3d.tscn"
+    "public/blood_effects_3d.tscn",
+    "public/props/blood_decal.tscn"
   ],
   "dependencies": [
     "features.player",
@@ -49,6 +51,10 @@
     "planner_light_v1": {
       "get_authored_color": "get_authored_color() -> Color",
       "set_authored_color": "set_authored_color(color: Color) -> void; RGB tint, alpha fixed to 1"
+    },
+    "planner_decor_v1": {
+      "configure_blood": "configure_blood(texture_id: String, surface: String) -> void; surface floor|wall",
+      "get_blood_config": "get_blood_config() -> Dictionary {texture, surface}"
     }
   }
 }

@@ -5,6 +5,7 @@ var player_spawn_defined = false
 var player_spawn_transform = Transform3D.IDENTITY
 var selected_path = ""
 var selected_kind = ""
+var selected_entry: Dictionary = {}
 var preview: Node3D
 var selected: Node3D
 var rotation_y = 0.0
@@ -29,6 +30,7 @@ func _on_palette_selected(index: int) -> void:
 	var entry: Dictionary = catalog.active_catalog[index]
 	selected_path = str(entry.get("path", ""))
 	selected_kind = str(entry.get("kind", ""))
+	selected_entry = entry
 	rotation_y = 0.0
 	_select(null)
 	_rebuild_preview()
@@ -58,6 +60,7 @@ func _select(node: Node3D) -> void:
 func _reset_selection() -> void:
 	selected_path = ""
 	selected_kind = ""
+	selected_entry = {}
 	rotation_y = 0.0
 	_clear_preview()
 	_select(null)
@@ -131,6 +134,7 @@ func _rebuild_preview() -> void:
 	preview = catalog._instantiate_asset(selected_path)
 	if preview == null:
 		return
+	controls._configure_new_asset(preview, selected_entry)
 	session.host.add_child(preview)
 	if _selected_kind() == "light" and preview.has_method("set_planning_visual"):
 		preview.call_deferred("set_planning_visual", true)
@@ -199,6 +203,7 @@ func _place_selected(screen_pos: Vector2) -> void:
 	elif kind == "darkness":
 		node.set("permanent", true)
 		node.set_meta("planning_permanent", true)
+	controls._configure_new_asset(node, selected_entry)
 	var target_parent = session.enemies_root if kind == "enemy" else session.root
 	target_parent.add_child(node)
 	if preview != null and preview.has_meta("planning_wall_normal"):
@@ -385,6 +390,8 @@ func _apply_layout_data(data: Dictionary) -> void:
 		var node = catalog._instantiate_asset(scene_path)
 		if node == null:
 			continue
+		if node.has_method("configure_blood") and record.has("blood_texture"):
+			node.call("configure_blood", str(record["blood_texture"]), str(record.get("blood_surface", "floor")))
 		var load_kind = "enemy" if scene_path in catalog.ENEMY_SCENES else ""
 		var target_parent = session.enemies_root if load_kind == "enemy" else session.root
 		target_parent.add_child(node)

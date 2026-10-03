@@ -31,6 +31,9 @@ var duplicate_button: Button
 var session: Variant
 var objects: Variant
 var catalog: Variant
+var blood_options: HBoxContainer
+var blood_surface: OptionButton
+var blood_size: SpinBox
 
 
 func configure(context: Dictionary) -> void:
@@ -77,7 +80,74 @@ func setup_controls() -> void:
 	session.ui.get_node("Panel/VBox").add_child(desk_setup_button)
 	session.ui.get_node("Panel/VBox").move_child(desk_setup_button, palette.get_index() + 1)
 	desk_setup_button.pressed.connect(_open_desk_setup)
+	_build_gore_controls()
 	_build_planning_toolbar()
+
+
+# Gore and Blood palettes (ADR-0017): dead infected, loose body parts and
+# blood decals with a surface choice (floor/wall) and a size.
+func _build_gore_controls() -> void:
+	var tabs: Node = session.ui.get_node_or_null("Panel/VBox/Tabs")
+	if tabs != null:
+		for entry in [["Gore", _show_gore_catalog], ["Blood", _show_blood_catalog]]:
+			var button := Button.new()
+			button.name = str(entry[0])
+			button.text = str(entry[0])
+			button.pressed.connect(entry[1])
+			tabs.add_child(button)
+	blood_options = HBoxContainer.new()
+	blood_options.name = "BloodOptions"
+	var surface_label := Label.new()
+	surface_label.text = "Surface"
+	blood_options.add_child(surface_label)
+	blood_surface = OptionButton.new()
+	blood_surface.add_item("Floor")
+	blood_surface.add_item("Wall")
+	blood_surface.item_selected.connect(func(_index: int) -> void: objects._rebuild_preview())
+	blood_options.add_child(blood_surface)
+	var size_label := Label.new()
+	size_label.text = "Size"
+	blood_options.add_child(size_label)
+	blood_size = SpinBox.new()
+	blood_size.min_value = 0.2
+	blood_size.max_value = 5.0
+	blood_size.step = 0.1
+	blood_size.value = 1.0
+	blood_size.value_changed.connect(func(_value: float) -> void: objects._rebuild_preview())
+	blood_options.add_child(blood_size)
+	blood_options.hide()
+	var box: Node = session.ui.get_node("Panel/VBox")
+	box.add_child(blood_options)
+	box.move_child(blood_options, palette.get_index())
+
+
+func _show_gore_catalog() -> void:
+	_enter_simple_catalog(catalog.gore_catalog, "GORE | dead infected and body parts")
+
+
+func _show_blood_catalog() -> void:
+	_enter_simple_catalog(catalog.blood_catalog(), "BLOOD | choose surface and size, then place")
+	blood_options.show()
+
+
+func _enter_simple_catalog(entries: Array, title: String) -> void:
+	light_defaults.hide()
+	blood_options.hide()
+	objects._reset_selection()
+	session.ui.get_node("Panel/VBox/GroupTabs").hide()
+	catalog.active_catalog = entries
+	_rebuild_palette()
+	status.text = title
+
+
+# Applies palette options to a freshly created object before it enters the tree.
+func _configure_new_asset(node: Node3D, entry: Dictionary) -> void:
+	if str(entry.get("kind", "")) != "blood" or not node.has_method("configure_blood"):
+		return
+	var surface := "wall" if blood_surface != null and blood_surface.selected == 1 else "floor"
+	node.call("configure_blood", str(entry.get("blood_texture", "splatter_01")), surface)
+	var size := float(blood_size.value) if blood_size != null else 1.0
+	node.scale = Vector3.ONE * size
 
 
 func _build_planning_toolbar() -> void:
@@ -219,6 +289,8 @@ func _rebuild_palette() -> void:
 
 
 func _show_structure_catalog() -> void:
+	if blood_options != null:
+		blood_options.hide()
 	light_defaults.hide()
 	objects._reset_selection()
 	catalog.active_catalog = catalog.group_catalogs["01"]
@@ -236,6 +308,8 @@ func _show_structure_group(group_name: String) -> void:
 
 
 func _show_lighting_catalog() -> void:
+	if blood_options != null:
+		blood_options.hide()
 	objects._reset_selection()
 	light_defaults.show()
 	session.ui.get_node("Panel/VBox/GroupTabs").hide()
@@ -245,6 +319,8 @@ func _show_lighting_catalog() -> void:
 
 
 func _show_actor_catalog() -> void:
+	if blood_options != null:
+		blood_options.hide()
 	light_defaults.hide()
 	objects._reset_selection()
 	session.ui.get_node("Panel/VBox/GroupTabs").hide()

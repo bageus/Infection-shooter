@@ -8,7 +8,8 @@
     "Prototype infected death state",
     "Infected stalk/charge pace",
     "Colossus slam cooldown and ground wave",
-    "Horde ram and summon state"
+    "Horde ram and summon state",
+    "Body part durability, severed parts, skin wounds and corpse hit volumes"
   ],
   "public_api": [
     "public/infected_capsule.tscn",
@@ -18,7 +19,45 @@
     "public/infected_brute.tscn",
     "public/infected_titan.tscn",
     "public/infected_colossus.tscn",
-    "public/infected_horde.tscn"
+    "public/infected_horde.tscn",
+    "public/decor/corpse_brute.tscn",
+    "public/decor/corpse_brute_mutilated.tscn",
+    "public/decor/corpse_colossus.tscn",
+    "public/decor/corpse_colossus_mutilated.tscn",
+    "public/decor/corpse_horde.tscn",
+    "public/decor/corpse_horde_mutilated.tscn",
+    "public/decor/corpse_hunger.tscn",
+    "public/decor/corpse_hunger_mutilated.tscn",
+    "public/decor/corpse_mutant.tscn",
+    "public/decor/corpse_mutant_mutilated.tscn",
+    "public/decor/corpse_revenant.tscn",
+    "public/decor/corpse_revenant_mutilated.tscn",
+    "public/decor/corpse_titan.tscn",
+    "public/decor/corpse_titan_mutilated.tscn",
+    "public/decor/corpse_zombie.tscn",
+    "public/decor/corpse_zombie_mutilated.tscn",
+    "public/decor/part_brute_arm.tscn",
+    "public/decor/part_brute_head.tscn",
+    "public/decor/part_brute_leg.tscn",
+    "public/decor/part_colossus_arm.tscn",
+    "public/decor/part_colossus_head.tscn",
+    "public/decor/part_colossus_leg.tscn",
+    "public/decor/part_horde_tentacle.tscn",
+    "public/decor/part_hunger_arm.tscn",
+    "public/decor/part_hunger_head.tscn",
+    "public/decor/part_hunger_leg.tscn",
+    "public/decor/part_mutant_arm.tscn",
+    "public/decor/part_mutant_head.tscn",
+    "public/decor/part_mutant_leg.tscn",
+    "public/decor/part_revenant_arm.tscn",
+    "public/decor/part_revenant_head.tscn",
+    "public/decor/part_revenant_leg.tscn",
+    "public/decor/part_titan_arm.tscn",
+    "public/decor/part_titan_head.tscn",
+    "public/decor/part_titan_leg.tscn",
+    "public/decor/part_zombie_arm.tscn",
+    "public/decor/part_zombie_head.tscn",
+    "public/decor/part_zombie_leg.tscn"
   ],
   "dependencies": [
     "features.infection_source",
@@ -28,6 +67,11 @@
   "runtime_contracts": {
     "mission_wiring_v1": {
       "configure_world": "configure_world(container: Node3D, impacts: Node) -> void"
+    },
+    "body_damage_v1": {
+      "limb_severed": "signal limb_severed(position: Vector3, direction: Vector3, excluded: Array[RID]); presentation fact like projectile_blood",
+      "severed_parts": "severed parts and pieces emit the same five blood signals as an infected when placed in the enemies container",
+      "decor": "public/decor/*.tscn corpses and body parts for the planner; shootable, never expire"
     }
   }
 }

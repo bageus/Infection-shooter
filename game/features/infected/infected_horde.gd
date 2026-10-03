@@ -15,14 +15,14 @@ enum State { CRAWL, BRACE, RAM, RECOVER, SUMMON }
 @export var ram_max_seconds := 1.4
 @export var ram_recover_seconds := 0.9
 @export var ram_cooldown := 3.0
-@export var ram_hit_radius := 1.5
+@export var ram_hit_radius := 2.3
 @export var ram_steer := 1.4
 @export var summon_scene: PackedScene
 @export var summon_interval := 12.0
 @export var summon_range := 24.0
 @export var summon_count := 3
 @export var summon_max_alive := 6
-@export var summon_spawn_radius := 2.6
+@export var summon_spawn_radius := 3.6
 
 var state: State = State.CRAWL
 var _state_time := 0.0
@@ -46,7 +46,7 @@ func _behaviour_tick(delta: float, target_offset: Vector3) -> void:
 				return
 			if _summon_cooldown <= 0.0 and distance <= summon_range and _alive_summoned() < summon_max_alive and distance > ram_hit_radius * 2.0:
 				_start_summon()
-			elif _ram_cooldown <= 0.0 and distance <= ram_trigger_distance:
+			elif _ram_cooldown <= 0.0 and distance <= ram_trigger_distance and can_ram():
 				_enter(State.BRACE)
 				_ram_direction = target_offset.normalized() if distance > 0.01 else -global_transform.basis.z
 		State.BRACE:
@@ -83,7 +83,7 @@ func _tick_ram(delta: float, target_offset: Vector3) -> void:
 		var angle := _ram_direction.signed_angle_to(wanted, Vector3.UP)
 		_ram_direction = _ram_direction.rotated(Vector3.UP, clampf(angle, -ram_steer * delta, ram_steer * delta))
 	_face_direction = _ram_direction
-	var speed := lerpf(crawl_speed, ram_speed, clampf(_state_time / 0.3, 0.0, 1.0))
+	var speed := lerpf(crawl_speed, ram_speed, clampf(_state_time / 0.3, 0.0, 1.0)) * _mobility
 	_cached_desired = _ram_direction * speed
 	if not _ram_struck and target_offset.length() <= ram_hit_radius:
 		_ram_struck = true
@@ -93,6 +93,18 @@ func _tick_ram(delta: float, target_offset: Vector3) -> void:
 		return
 	if _state_time >= ram_max_seconds or (_state_time > 0.25 and is_on_wall()):
 		_enter(State.RECOVER)
+
+
+# Each lost tentacle slows the Horde; with few left it can no longer ram.
+func _part_lost(part: StringName) -> void:
+	if String(part).begins_with("tentacle"):
+		_mobility = 0.35 + 0.65 * float(_parts.remaining("tentacle")) / 8.0
+		return
+	super._part_lost(part)
+
+
+func can_ram() -> bool:
+	return _parts == null or int(_parts.remaining("tentacle")) > 3
 
 
 # The Horde has no swipe: it only hurts by ramming.
@@ -109,7 +121,7 @@ func _desired_velocity_from_offset(offset: Vector3) -> Vector3:
 	_face_direction = offset / distance
 	if distance <= ram_hit_radius:
 		return Vector3.ZERO
-	return _face_direction * crawl_speed
+	return _face_direction * crawl_speed * _mobility
 
 
 func _start_summon() -> void:

@@ -228,6 +228,8 @@ func _apply_wall_mount(node: Node3D) -> void:
 
 
 func _snap_position_for(node: Node3D, value: Vector3) -> Vector3:
+	if bool(node.get_meta("planning_free_place", false)):
+		return value
 	var base = _snap(value)
 	var source_aabb = _combined_aabb(node)
 	if bool(node.get_meta("planning_wall_mount", false)) and node.has_meta("planning_wall_normal"):

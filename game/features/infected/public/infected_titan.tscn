@@ -19,6 +19,7 @@ max_health = 260.0
 move_speed = 3.3
 attack_range = 1.6
 attack_damage = 38.0
+limb_loss_kills = false
 attack_interval = 1.3
 
 [node name="Body" type="Node3D" parent="."]
