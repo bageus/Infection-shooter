@@ -19,6 +19,7 @@ func _ready() -> void:
 	_add_bar(Vector3(-0.35, 0, 0.085), Vector3(0.07, 0.07, 0.19), golden)
 	_add_bar(Vector3(-0.22, 0, 0.065), Vector3(0.07, 0.07, 0.15), golden)
 	var hint := Label3D.new()
+	hint.font = preload("res://assets/interface/fonts/body.ttf")
 	hint.text = "EMERGENCY KEY"
 	hint.font_size = 36
 	hint.pixel_size = 0.006
