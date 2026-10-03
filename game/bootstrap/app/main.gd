@@ -36,6 +36,7 @@ var blood_effects: Node3D
 
 
 func _ready() -> void:
+	get_window().title = "Infection Shooter"
 	process_mode = Node.PROCESS_MODE_PAUSABLE
 	game_over.process_mode = Node.PROCESS_MODE_ALWAYS
 	pause_menu.process_mode = Node.PROCESS_MODE_ALWAYS

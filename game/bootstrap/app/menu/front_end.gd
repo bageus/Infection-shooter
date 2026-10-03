@@ -4,6 +4,7 @@ extends Control
 
 
 func _ready() -> void:
+	get_window().title = "Infection Shooter"
 	get_tree().paused = false
 	Input.mouse_mode = Input.MOUSE_MODE_VISIBLE
 	menu.action_requested.connect(_action)
