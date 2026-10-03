@@ -9,6 +9,8 @@
 [ext_resource type="PackedScene" path="res://game/presentation/prototype_hud/public/radar.tscn" id="radar"]
 [ext_resource type="Script" uid="uid://cjm3a57h7v5im" path="res://game/bootstrap/app/main.gd" id="script"]
 
+[ext_resource type="Script" path="res://game/bootstrap/app/menu/menu_screen.gd" id="menu_screen"]
+
 [sub_resource type="Environment" id="env"]
 background_mode = 1
 background_color = Color(0.055, 0.075, 0.12, 1)
@@ -64,68 +66,31 @@ shape = SubResource("floor_shape")
 
 [node name="PlanningObjects" type="Node3D" parent="." unique_id=1936559446]
 
-[node name="PauseMenu" type="Control" parent="." unique_id=465858440]
+[node name="Menus" type="CanvasLayer" parent="."]
 process_mode = 3
+layer = 200
+
+[node name="PauseMenu" type="Control" parent="Menus"]
 visible = false
-z_index = 100
 layout_mode = 3
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
-mouse_filter = 2
+script = ExtResource("menu_screen")
+screen_kind = "pause"
 
-[node name="Dim" type="ColorRect" parent="PauseMenu" unique_id=586975896]
-layout_mode = 1
+[node name="GameOver" type="Control" parent="Menus"]
+visible = false
+layout_mode = 3
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
-mouse_filter = 2
-color = Color(0, 0, 0, 0.72)
-
-[node name="Panel" type="PanelContainer" parent="PauseMenu" unique_id=1393908385]
-layout_mode = 1
-anchors_preset = 8
-anchor_left = 0.5
-anchor_top = 0.5
-anchor_right = 0.5
-anchor_bottom = 0.5
-offset_left = -220.0
-offset_top = -175.0
-offset_right = 220.0
-offset_bottom = 175.0
-grow_horizontal = 2
-grow_vertical = 2
-mouse_filter = 1
-
-[node name="VBox" type="VBoxContainer" parent="PauseMenu/Panel" unique_id=1129578003]
-layout_mode = 2
-theme_override_constants/separation = 16
-
-[node name="Title" type="Label" parent="PauseMenu/Panel/VBox" unique_id=1221542917]
-layout_mode = 2
-theme_override_font_sizes/font_size = 30
-text = "PAUSED"
-horizontal_alignment = 1
-
-[node name="Resume" type="Button" parent="PauseMenu/Panel/VBox" unique_id=991412518]
-layout_mode = 2
-text = "CONTINUE"
-
-[node name="Planning" type="Button" parent="PauseMenu/Panel/VBox" unique_id=1904998848]
-layout_mode = 2
-text = "PLANNING MODE"
-
-[node name="Restart" type="Button" parent="PauseMenu/Panel/VBox" unique_id=1553239938]
-layout_mode = 2
-text = "RESTART LEVEL"
-
-[node name="Exit" type="Button" parent="PauseMenu/Panel/VBox" unique_id=400446870]
-layout_mode = 2
-text = "EXIT GAME"
+script = ExtResource("menu_screen")
+screen_kind = "failed"
 
 [node name="PlanningUI" type="Control" parent="." unique_id=2053469496]
 process_mode = 3
@@ -612,69 +577,3 @@ custom_minimum_size = Vector2(240, 110)
 layout_mode = 2
 text = "ENHANCED AMMO
 Combat mutation"
-
-[node name="GameOver" type="Control" parent="." unique_id=915151426]
-process_mode = 3
-visible = false
-z_index = 120
-layout_mode = 3
-anchors_preset = 15
-anchor_right = 1.0
-anchor_bottom = 1.0
-grow_horizontal = 2
-grow_vertical = 2
-mouse_filter = 2
-
-[node name="Dim" type="ColorRect" parent="GameOver" unique_id=1236850566]
-layout_mode = 1
-anchors_preset = 15
-anchor_right = 1.0
-anchor_bottom = 1.0
-grow_horizontal = 2
-grow_vertical = 2
-mouse_filter = 2
-color = Color(0, 0, 0, 0.72)
-
-[node name="Panel" type="PanelContainer" parent="GameOver" unique_id=80846730]
-layout_mode = 1
-anchors_preset = 8
-anchor_left = 0.5
-anchor_top = 0.5
-anchor_right = 0.5
-anchor_bottom = 0.5
-offset_left = -220.0
-offset_top = -125.0
-offset_right = 220.0
-offset_bottom = 125.0
-grow_horizontal = 2
-grow_vertical = 2
-
-[node name="VBox" type="VBoxContainer" parent="GameOver/Panel" unique_id=1123625005]
-layout_mode = 2
-theme_override_constants/separation = 18
-
-[node name="Title" type="Label" parent="GameOver/Panel/VBox" unique_id=363933443]
-layout_mode = 2
-theme_override_font_sizes/font_size = 32
-text = "MISSION FAILED"
-horizontal_alignment = 1
-
-[node name="Reason" type="Label" parent="GameOver/Panel/VBox" unique_id=260740357]
-layout_mode = 2
-text = "MISSION FAILED"
-horizontal_alignment = 1
-
-[node name="Restart" type="Button" parent="GameOver/Panel/VBox" unique_id=784562578]
-layout_mode = 2
-text = "RESTART MISSION"
-
-[node name="Exit" type="Button" parent="GameOver/Panel/VBox" unique_id=753602770]
-layout_mode = 2
-text = "EXIT"
-
-[connection signal="pressed" from="PauseMenu/Panel/VBox/Resume" to="." method="_on_resume_pressed"]
-[connection signal="pressed" from="PauseMenu/Panel/VBox/Planning" to="." method="_on_planning_pressed"]
-[connection signal="pressed" from="PauseMenu/Panel/VBox/Restart" to="." method="_on_restart_pressed"]
-[connection signal="pressed" from="PauseMenu/Panel/VBox/Exit" to="." method="_on_exit_pressed"]
-[connection signal="pressed" from="GameOver/Panel/VBox/Restart" to="." method="_on_restart_pressed"]
-[connection signal="pressed" from="GameOver/Panel/VBox/Exit" to="." method="_on_exit_pressed"]

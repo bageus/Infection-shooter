@@ -13,6 +13,7 @@ updated: 2026-10-03
 Build the first playable combat-slice foundation with an authored office floor, player, combat, infected enemies, infection source, and observable fail states.
 
 ## In scope
+- owner-requested native integration of supplied menu kit, shared gameplay font and pause Planning mode entry;
 - owner-requested enemy/character animation wiring and destruction/debris physics improvements (ADR-0015);
 - owner-requested rigged enemy clips (walk/run/wind-up attacks), Colossus slam wave, Horde ram and summon pulse, player gait fix (ADR-0016);
 - owner-requested dismemberment, body wounds, more blood, larger Horde, Gore and Blood planner palettes (ADR-0017);
@@ -40,12 +41,14 @@ READY game specification, accepted working agreement, architecture contract, and
 presentation.office_floor, features.combat, features.player, features.character_animation, features.infected and bootstrap.app. Player health remains owned by features.player.
 
 ## Out of scope
-Procedural generation, save/checkpoints, final HUD, monetization, platform SDKs and campaign-wide content remain outside this T002 increment.
+Procedural generation, save/checkpoints, unrequested HUD redesign, monetization, platform SDKs and campaign-wide content remain outside this T002 increment.
 
 ## Acceptance criteria
 - Structural modules visually touch edge-to-edge with no visible gaps and no overlap beyond a tiny seam tolerance.\n- Exterior corners face inward correctly.\n- Perimeter and authored interior walls block the player.\n- The expanded floor and defeat menu remain functional.
 
 ## Progress
+
+03.10.2026: запрошены интеграция меню из архива, общий шрифт игрового UI и Planning mode в паузе. Реализация: bootstrap.app/menu, общий assets/interface/game_theme.tres, fonts/backgrounds, явный шрифт world hints (office_floor и bootstrap); entry front_end.tscn, Planning mode в паузе. Project identity/user:// сохранены, видимый window title отдельно. Cold-import font встроен неизменёнными bytes, пересборка tools/build_interface_theme.py. Godot 4.7.2 CI 37154864305: меню 0 failures, все 18 остальных наборов assertions PASS, main 180 кадров PASS, gates/resources/architecture PASS; кадры Compatibility 1280×720/130 %/HUD/planner проверены. Runtime job остаётся FAIL из-за прежнего world_bindings resource cleanup ERROR, подтверждённого до правки main run 37148645355. Исправлен только случайный setup corpse test (500 damage запускал blast до leg assertion). Public APIs/gameplay balance/maps v6 прежние; additive interface_v1 ConfigFile. PR #23, не merged. Следующее действие: review экранов в Windows/Web и расследование существующего cleanup (BACKLOG); T002 в целом IN_PROGRESS.
 
 02.10.2026: после подтверждения владельцем плана подключаются canonical character/weapon GLB к прежнему gameplay parent-chain. Проверка импорта Godot 4.7.2 подтвердила Skeleton3D/RightHand/WeaponSocket_R и 52 клипа (Idle без _Loop). Player-local mount/stance/selector, authored Muzzle и root normalization в combat, optional animation_selection_v1 (ADR-0014); заражённые сохраняют fallback. Body использует +Z model front без старого Y offset; капсула/слоты/баланс/DTO прежние. Новые regression tests и визуальный маршрут добавлены. Godot 4.7.2: validate_project, scene resources, workstation/glass/scene-access, новый weapon presentation набор (0 failures), все 12 прежних runtime-наборов и main 180 кадров прошли в CI https://github.com/bageus/Infection-shooter/actions/runs/37024856817 на implementation 0a47a5c. Runtime без SCRIPT ERROR/ERROR. Editor import exit 0, но прежние palette1.png/couches.png и конфликт дублирующего Idle_Pistol_Down_001 из source GLB остаются; импорт не чистый. Визуальная приёмка хвата и Windows/Web остаётся открыта.
 
