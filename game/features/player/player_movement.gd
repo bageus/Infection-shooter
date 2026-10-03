@@ -3,6 +3,7 @@ const CONTROL_LOSS := preload("res://game/features/player/mutation_control_loss.
 const MUTATION_EFFECTS := preload("res://game/features/player/mutation_skill_effects.gd")
 const WEAPON_STANCE := preload("res://game/features/player/player_weapon_stance.gd")
 const ANIMATION_SELECTION := preload("res://game/features/player/player_animation_selection.gd")
+const PLAYER_AUDIO := preload("res://game/features/player/player_audio.gd")
 @export var move_speed: float = 6.0
 @export var sprint_speed: float = 9.0
 @export var ground_acceleration: float = 18.0
@@ -28,6 +29,7 @@ const ANIMATION_SELECTION := preload("res://game/features/player/player_animatio
 @onready var weapons: Array[Node3D] = [$AimPivot/Pistol,$AimPivot/Uzi,$AimPivot/Shotgun,$AimPivot/GrenadeLauncher]
 @onready var infection_runtime: Node = $InfectionRuntime
 @onready var weapon_mount: Node = $WeaponMount
+var audio: Node
 var weapon_stance := WEAPON_STANCE.new()
 var _animation_selection := ANIMATION_SELECTION.new()
 var health: float
@@ -67,6 +69,10 @@ func _ready() -> void:
 	add_child(mutation_effects)
 	mutation_effects.call("configure", self, infection_runtime, weapons)
 	configure_world(effects_root, impact_pool)
+	audio = PLAYER_AUDIO.new()
+	audio.name = "PlayerAudio"
+	add_child(audio)
+	audio.configure(self, camera_rig, $AnimationDriver)
 func _physics_process(delta: float) -> void:
 	weapon_stance.tick(delta, _has_presentation_activity())
 	if _stun_remaining > 0.0:
@@ -201,10 +207,22 @@ func pickup_weapon(index: int) -> bool:
 	get_current_weapon().call("cancel_reload")
 	_slot_weapons[current_weapon_index] = index
 	_select_weapon(current_weapon_index)
+	_play_sound(&"weapon_pickup")
 	return true
 
 func acquire_emergency_key() -> void:
 	_emergency_key = true
+	_play_sound(&"key_pickup")
+
+
+# Public sound wiring v1 (ADR-0018): item and pickup sounds on the player.
+func play_item_sound(event: StringName) -> void:
+	_play_sound(event)
+
+
+func _play_sound(event: StringName) -> void:
+	if audio != null:
+		audio.call("play", event)
 
 func has_emergency_key() -> bool:
 	return _emergency_key
@@ -227,7 +245,9 @@ func heal(amount:float)->float:
 func use_antidote()->bool:
 	if antidotes<=0:return false
 	var used:bool=infection_runtime.call("use_antidote")
-	if used:antidotes-=1
+	if used:
+		antidotes-=1
+		_play_sound(&"antidote_use")
 	return used
 func add_ammo_to_current_weapon(amount:int)->int:return get_current_weapon().call("add_reserve_ammo",amount)
 func add_ammo_for_weapon(weapon_name:String,amount:int)->int:

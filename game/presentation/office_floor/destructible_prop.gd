@@ -1,4 +1,5 @@
 extends StaticBody3D
+const SFX := preload("res://game/core/audio/public/sound_events.gd")
 
 const BALANCE = preload("res://game/features/combat/public/projectile_balance.gd")
 
@@ -72,6 +73,8 @@ func _break_prop(hit_position: Vector3) -> void:
 		return
 	_broken = true
 	_clear_blood_decals()
+	if break_effect == "glass" and get_parent() != null:
+		SFX.play(get_parent().get_parent() if get_parent().get_parent() != null else get_parent(), &"glass_break", hit_position)
 
 	var owner_root := get_parent()
 	var visual := owner_root.get_node_or_null("Visual") as Node3D

@@ -62,7 +62,8 @@
   "dependencies": [
     "features.infection_source",
     "features.character_animation",
-    "features.pickups"
+    "features.pickups",
+    "core.audio"
   ],
   "runtime_contracts": {
     "mission_wiring_v1": {

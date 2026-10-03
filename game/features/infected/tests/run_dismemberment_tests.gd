@@ -188,7 +188,7 @@ func _test_durability_scales_with_size(stage: Node3D) -> void:
 func _test_corpse_stays_shootable(stage: Node3D) -> void:
 	var enemy := await _spawn(stage, HUNGER, Vector3(24, 1.0, 0))
 	enemy.set("death_linger_seconds", 10.0)
-	enemy.call("take_damage", 500.0)
+	enemy.call("_apply_damage", 500.0, false) # a plain kill, not a limb-tearing blast
 	await create_timer(1.6).timeout
 	var parts: Node = enemy.get("_parts")
 	var hitboxes := enemy.find_children("*", "StaticBody3D", true, false).filter(func(n: Node) -> bool: return n.has_method("take_projectile_hit"))
@@ -197,12 +197,13 @@ func _test_corpse_stays_shootable(stage: Node3D) -> void:
 	for box in hitboxes:
 		if box.get("part") == &"leg_l":
 			leg_box = box
-	var before := _pieces(stage).size()
+	var dropped: Array = []
+	parts.part_severed.connect(func(_part: StringName, piece: RigidBody3D) -> void: dropped.append(piece))
 	if leg_box != null:
 		for i in 6:
 			leg_box.call("take_projectile_hit", 15.0, (leg_box as Node3D).global_position, Vector3.UP, Vector3(1, 0, 0), "PISTOL")
 	_expect(parts.is_severed(&"leg_l"), "Shooting the corpse's leg takes it off.")
-	_expect(_pieces(stage).size() == before + 1, "The corpse's leg drops as a piece.")
+	_expect(dropped.size() == 1 and dropped[0] != null, "The corpse's leg drops as a piece (%s)." % [dropped])
 	enemy.queue_free()
 	await process_frame
 	for piece in _pieces(stage):

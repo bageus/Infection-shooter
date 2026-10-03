@@ -38,6 +38,7 @@ func _start_slam() -> void:
 	_slam_cooldown = slam_cooldown
 	_attack_cooldown = maxf(_attack_cooldown, attack_interval)
 	var duration := _play_animation(&"slam")
+	audio.growl(2.0)
 	_cached_desired = Vector3.ZERO
 	if duration <= 0.0:
 		_release_slam()
@@ -53,6 +54,7 @@ func _release_slam() -> void:
 	var parent: Node = effects_root if is_instance_valid(effects_root) else get_parent()
 	parent.add_child(wave)
 	var feet := global_position + Vector3(0.0, -_half_height(), 0.0) - global_transform.basis.z * 0.9
+	audio.call("play", &"colossus_slam")
 	wave.configure(feet, slam_radius, slam_wave_speed, slam_player_damage, slam_object_damage, self, Color(0.6, 0.46, 0.34, 0.8))
 
 

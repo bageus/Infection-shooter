@@ -7,6 +7,8 @@ extends Node
 
 # Public animation_events_v1: emitted when an attack/death one-shot ends.
 signal one_shot_finished(state: StringName)
+# Public animation_events_v1 addition (ADR-0018): a procedural-gait foot landed.
+signal footstep(side: int, speed: float)
 
 const POSE := preload("res://game/features/character_animation/procedural_pose.gd")
 const GAIT := preload("res://game/features/character_animation/procedural_gait.gd")
@@ -370,6 +372,7 @@ func _attach_gait(model: Node) -> void:
 	gait = GAIT.new()
 	gait.name = "ProceduralGait"
 	gait.character = character
+	gait.connect("stepped", func(side: int, speed: float) -> void: footstep.emit(side, speed))
 	(skeletons[0] as Node).add_child(gait)
 
 

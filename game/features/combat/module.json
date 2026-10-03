@@ -22,7 +22,9 @@
     "public/projectile_balance.gd",
     "public/spent_casings.gd"
   ],
-  "dependencies": [],
+  "dependencies": [
+    "core.audio"
+  ],
   "runtime_contracts": {
     "mission_wiring_v1": {
       "configure_world": "configure_world(container: Node3D, impacts: Node) -> void"

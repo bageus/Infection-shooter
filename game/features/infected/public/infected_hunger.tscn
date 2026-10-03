@@ -10,6 +10,10 @@ radius = 0.45
 height = 1.85
 
 [node name="InfectedHunger" type="CharacterBody3D" groups=["infected"]]
+step_sound = &"step_light"
+growl_sound = &"growl_hunger"
+voice_pitch = 1.0
+step_pitch = 1.05
 collision_layer = 2
 collision_mask = 3
 safe_margin = 0.02

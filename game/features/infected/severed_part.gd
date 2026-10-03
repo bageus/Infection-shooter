@@ -12,6 +12,7 @@ signal blood_death(position: Vector3, excluded: Array[RID], death_id: int)
 signal limb_severed(position: Vector3, direction: Vector3, excluded: Array[RID])
 
 const FX := preload("res://game/features/infected/blood_drip_fx.gd")
+const SFX := preload("res://game/core/audio/public/sound_events.gd")
 const GROUP := "infected_severed_part"
 const HIT_LAYER := 4
 const WORLD_MASK := 3
@@ -70,6 +71,7 @@ func _physics_process(delta: float) -> void:
 	if not _stained and _age > 0.35 and linear_velocity.length() < 0.6:
 		_stained = true
 		blood_wounded.emit(global_position, _exclusions())
+		SFX.play(get_parent(), &"body_part_fall", global_position)
 
 
 func start_bleeding(cut_offset: Vector3, direction: Vector3, strength: float) -> void:
@@ -91,7 +93,7 @@ func take_melee_hit(damage: float, hit_position: Vector3, direction: Vector3) ->
 
 
 func get_projectile_material(_shape_index: int = -1) -> String:
-	return "light"
+	return "flesh"
 
 
 func expire(seconds: float = 0.8) -> void:

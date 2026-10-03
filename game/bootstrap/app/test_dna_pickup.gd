@@ -80,6 +80,8 @@ func _collect(body: Node3D) -> void:
 	if _waiting or body != _player or not is_instance_valid(_infection):
 		return
 	_infection.call("add_control_ampule")
+	if body.has_method("play_item_sound"):
+		body.call("play_item_sound", &"dna_pickup")
 	_waiting = true
 	_art.hide()
 	set_deferred("monitoring", false)

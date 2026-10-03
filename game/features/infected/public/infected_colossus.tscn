@@ -10,6 +10,10 @@ radius = 0.65
 height = 2.9
 
 [node name="InfectedColossus" type="CharacterBody3D" groups=["infected"]]
+step_sound = &"step_heavy"
+growl_sound = &"growl_colossus"
+voice_pitch = 1.0
+step_pitch = 0.78
 collision_layer = 2
 collision_mask = 3
 safe_margin = 0.02

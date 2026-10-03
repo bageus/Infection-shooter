@@ -1,0 +1,18 @@
+{
+  "id": "core.audio",
+  "layer": "core",
+  "purpose": "Play the game's positional sound effect events with natural variation and voice limits.",
+  "state_owner": [
+    "Sound event catalogue: variants, level, distance and voice limits"
+  ],
+  "public_api": [
+    "public/sound_events.gd"
+  ],
+  "dependencies": [],
+  "runtime_contracts": {
+    "sound_events_v1": {
+      "play": "play(parent: Node, event: StringName, position := Vector3.INF, volume_offset_db := 0.0, pitch := 1.0) -> AudioStreamPlayer3D; parent must outlive the sound, position INF follows the parent",
+      "has_event": "has_event(event: StringName) -> bool"
+    }
+  }
+}

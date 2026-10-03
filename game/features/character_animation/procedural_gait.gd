@@ -12,6 +12,9 @@ const SHIN_NAMES := ["Leg", "Shin", "LowerLeg", "Calf"]
 const FOOT_NAMES := ["Foot"]
 const SIDE_PREFIXES := [["Left", "L_", "left_"], ["Right", "R_", "right_"]]
 
+## Emitted when a foot lands (side 0 = left, 1 = right) while the gait owns the legs.
+signal stepped(side: int, speed: float)
+
 var character: CharacterBody3D
 ## Cycles per second at walking pace and the cap reached when sprinting.
 var base_cadence := 0.95
@@ -47,7 +50,14 @@ func _process_modification_with_delta(delta: float) -> void:
 		return
 	var leg_world := _leg_length * world_scale
 	var cadence := minf(max_cadence, base_cadence + cadence_per_mps * speed)
+	var previous_phase := phase
 	phase = fmod(phase + delta * cadence * TAU, TAU)
+	if weight > 0.5:
+		# A foot is planted when its leg reaches the front of the swing.
+		for side in 2:
+			var plant := PI * 0.5 + PI * float(side)
+			if _crossed(previous_phase, phase, plant):
+				stepped.emit(side, speed)
 	var flight := 1.0 + 0.25 * smoothstep(3.5, 6.0, speed)
 	var stride := speed / maxf(cadence, 0.1) / flight
 	var swing := minf(deg_to_rad(max_swing_degrees), asin(clampf(stride / maxf(4.0 * leg_world, 0.01), 0.0, 0.95)))
@@ -110,6 +120,12 @@ func _parent_basis_inverse(skeleton: Skeleton3D, bone: int) -> Basis:
 	if parent < 0:
 		return Basis.IDENTITY
 	return skeleton.get_bone_global_pose(parent).basis.inverse()
+
+
+static func _crossed(before: float, after: float, mark: float) -> bool:
+	if after >= before:
+		return before < mark and after >= mark
+	return before < mark or after >= mark
 
 
 func _resolve_bones(skeleton: Skeleton3D) -> bool:

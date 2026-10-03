@@ -24,4 +24,4 @@ func take_melee_hit(damage: float, hit_position: Vector3, direction: Vector3) ->
 
 
 func get_projectile_material(_shape_index: int = -1) -> String:
-	return "light"
+	return "flesh"

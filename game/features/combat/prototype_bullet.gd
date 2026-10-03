@@ -1,5 +1,11 @@
 extends Node3D
 
+const SFX := preload("res://game/core/audio/public/sound_events.gd")
+const IMPACT_SOUNDS := {
+	"metal": &"hit_metal", "wood": &"hit_wood", "light": &"hit_paper", "tech": &"hit_electronics",
+	"glass": &"hit_glass", "flesh": &"flesh_hit", "concrete": &"hit_wall", "solid": &"hit_wall",
+}
+
 const PROJECTILE_VISUAL := preload("res://game/features/combat/projectile_visual.gd")
 const BALANCE = preload("res://game/features/combat/public/projectile_balance.gd")
 
@@ -102,6 +108,7 @@ func _handle_hit(collider: Object, hit_position: Vector3, normal: Vector3, shape
 	if collider == null:
 		return true
 	_spawn_impact_decal(collider, hit_position, normal)
+	_play_impact(collider, hit_position, shape_index)
 
 	var distance := _collision_origin.distance_to(hit_position)
 	var hit_damage := _damage * BALANCE.distance_multiplier(_weapon_name, distance, _range) * (_remaining_energy / _initial_energy)
@@ -140,6 +147,14 @@ func _handle_hit(collider: Object, hit_position: Vector3, normal: Vector3, shape
 		))
 
 	return true
+
+
+# Surface sound of a bullet hit (ADR-0018); infected play their own flesh hits.
+func _play_impact(collider: Object, hit_position: Vector3, shape_index: int) -> void:
+	if not is_instance_valid(effects_root) or collider.has_method("take_projectile_damage"):
+		return
+	var event: StringName = IMPACT_SOUNDS.get(_hit_material(collider, shape_index), &"hit_wall")
+	SFX.play(effects_root, event, hit_position, -4.0 if _weapon_name == "SHOTGUN" else 0.0)
 
 
 func _hit_material(collider: Object, shape_index: int) -> String:
