@@ -6,7 +6,8 @@
     "Application lifecycle",
     "Current top-level application state",
     "Mission staircase, pickup placement, and exit condition",
-    "Game/editor ambient preview and the application-wide local-light enable setting"
+    "Game/editor ambient preview and the application-wide local-light enable setting",
+    "Local interface preferences and native menu navigation"
   ],
   "public_api": [],
   "dependencies": [

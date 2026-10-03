@@ -13,8 +13,8 @@ const MISSION_LAYOUT := preload("res://game/bootstrap/app/mission_layout.gd")
 
 @onready var player: Node3D = $Gameplay/Player
 @onready var enemies: Node3D = $Gameplay/Enemies
-@onready var game_over: Control = $GameOver
-@onready var pause_menu: Control = $PauseMenu
+@onready var game_over: Control = $Menus/GameOver
+@onready var pause_menu: Control = $Menus/PauseMenu
 @onready var planning_ui: Control = $PlanningUI
 @onready var planning_root: Node3D = $PlanningObjects
 @onready var gameplay: Node3D = $Gameplay
@@ -40,6 +40,8 @@ func _ready() -> void:
 	game_over.process_mode = Node.PROCESS_MODE_ALWAYS
 	pause_menu.process_mode = Node.PROCESS_MODE_ALWAYS
 	planning_ui.process_mode = Node.PROCESS_MODE_ALWAYS
+	game_over.connect("action_requested", _on_menu_action)
+	pause_menu.connect("action_requested", _on_menu_action)
 	game_over.hide()
 	pause_menu.hide()
 	planning_ui.hide()
@@ -118,7 +120,7 @@ func _process(_delta: float) -> void:
 
 func _open_pause_menu() -> void:
 	_pause_open = true
-	pause_menu.show()
+	pause_menu.call("show_screen", "pause")
 	pause_menu.move_to_front()
 	get_tree().paused = true
 	Input.mouse_mode = Input.MOUSE_MODE_VISIBLE
@@ -175,9 +177,10 @@ func _choose_enhanced_ammo() -> void:
 
 func _end_run(reason: String) -> void:
 	_ended = true
-	$GameOver/Panel/VBox/Title.text = "MISSION COMPLETE" if reason == "MISSION COMPLETE" else "MISSION FAILED"
-	$GameOver/Panel/VBox/Reason.text = reason
-	game_over.show()
+	var kind := "complete" if reason == "MISSION COMPLETE" else "failed"
+	var reason_key: String = {"MUTATION OVERTOOK YOU": "failedMutation",
+		"YOU FELL OUTSIDE THE FLOOR": "failedFall", "MISSION FAILED": "failedHealth"}.get(reason, "")
+	game_over.call("show_screen", kind, reason_key)
 	game_over.move_to_front()
 	Input.mouse_mode = Input.MOUSE_MODE_VISIBLE
 	get_tree().paused = true
@@ -187,6 +190,19 @@ func drop_weapon_pickup(index: int, world_position: Vector3) -> bool:
 	if not is_instance_valid(mission_layout):
 		return false
 	return bool(mission_layout.call("spawn_weapon", index, world_position))
+
+
+func _on_menu_action(action: String) -> void:
+	match action:
+		"resume":
+			_on_resume_pressed()
+		"planning":
+			_on_planning_pressed()
+		"restart", "start":
+			_on_restart_pressed()
+		"main", "quit":
+			get_tree().paused = false
+			get_tree().change_scene_to_file("res://game/bootstrap/app/menu/front_end.tscn")
 
 
 func _on_restart_pressed() -> void:

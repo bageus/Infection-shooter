@@ -10,8 +10,8 @@ config_version=5
 
 [application]
 
-config/name="Template Game"
-run/main_scene="res://game/bootstrap/app/main.tscn"
+config/name="Infection Shooter"
+run/main_scene="res://game/bootstrap/app/menu/front_end.tscn"
 config/features=PackedStringArray("4.7")
 
 [display]
@@ -21,6 +21,10 @@ window/size/viewport_height=720
 window/size/window_width_override=1280
 window/size/window_height_override=720
 window/stretch/mode="canvas_items"
+
+[gui]
+
+theme/custom="res://assets/interface/game_theme.tres"
 
 [input]
 
