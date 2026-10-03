@@ -26,6 +26,8 @@ gui/theme/custom. В тему встроены неизменённые bytes bo
 звука кнопок и его громкости сохраняются отдельно в `interface_settings.cfg`,
 секция `interface_v1`. Fullscreen управляет окном Godot. Переходов в меню нет.
 Это настройки интерфейса, а не сохранение кампании. Карты планировщика v6 прежние.
+Project config/name сохранён: он задаёт старый user:// каталог с картами.
+Видимый заголовок окна устанавливается в Infection Shooter отдельно.
 
 Продолжение кампании и возврат к checkpoint отключены с пояснением. Перезапуск
 загружает сцену заново. В паузе возврат в меню и перезапуск требуют игрового
@@ -43,7 +45,19 @@ gui/theme/custom. В тему встроены неизменённые bytes bo
 - capture_menu_screens: реальные кадры Godot Compatibility через Xvfb,
   1280×720, четыре экрана и настройки; artifact `menu-previews`.
 
-Результат Godot/графической проверки: ожидается CI.
+Godot 4.7.2, implementation CI https://github.com/bageus/Infection-shooter/actions/runs/37154864305:
+menu integration — 0 failures, остальные 18 наборов сообщили ноль assertions failures;
+main 180 кадров PASS; gates/resources/architecture PASS. Реальные кадры Compatibility
+1280×720 (четыре экрана, настройки, 130 %, HUD и planner) проверены. Новые ошибки
+cold-import theme/font устранены; прежние FBX palette1.png/couches.png и duplicate
+Idle_Pistol_Down_001 остаются (import exit 0, не чистый import).
+
+Общий runtime job FAIL: после нулевых failures world_bindings сообщает
+`1 resources still in use at exit`. Это воспроизведено в исходном main 26a819a,
+run 37148645355; ошибка не подавлена, внесена в BACKLOG. Для завершения проверки
+цикл CI теперь выполняет все наборы и возвращает накопленный ненулевой статус.
+Убрана случайность corpse fixture: обычная смерть Hunger вместо 500 damage,
+запускавшего blast severing до проверки отстрела ноги. Игровой код расчленения прежний.
 
 ## Проверка на целевой машине
 
