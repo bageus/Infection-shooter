@@ -42,6 +42,7 @@ func _ready() -> void:
 		add_to_group("elevator_door_components")
 	if requires_emergency_key:
 		_key_hint = Label3D.new()
+		_key_hint.font = preload("res://assets/interface/fonts/body.ttf")
 		_key_hint.text = "Emergency key required on this side"
 		_key_hint.font_size = 38
 		_key_hint.pixel_size = 0.006

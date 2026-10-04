@@ -60,6 +60,7 @@ func _build_helix() -> void:
 		bar.rotation.y = -angle
 		_art.add_child(bar)
 	var label := Label3D.new()
+	label.font = preload("res://assets/interface/fonts/body.ttf")
 	label.text = "DNA · STABILITY +5\nTEST PICKUP · RESPAWNS"
 	label.font_size = 32
 	label.pixel_size = 0.004
