@@ -71864,28 +71864,28 @@ metadata/planning_attachment = ""
 [node name="@RigidBody3D@16344" type="RigidBody3D" parent="." unique_id=2134186380 instance=ExtResource("6_50y8m")]
 transform = Transform3D(-4.371139e-08, 0, 1, 0, 1, 0, -1, 0, -4.371139e-08, 10.25, 2.381424, 1.5)
 script = ExtResource("7_qj577")
-model_path = "res://models/objects/enviroments/05/05_aircondition.glb"
+model_path = "res://models/objects/enviroments/05/05_aircondition_destructible.glb"
 metadata/planning_desk_id = ""
 metadata/planning_attachment = ""
 
 [node name="@RigidBody3D@16345" type="RigidBody3D" parent="." unique_id=1926299437 instance=ExtResource("6_50y8m")]
 transform = Transform3D(-4.371139e-08, 0, 1, 0, 1, 0, -1, 0, -4.371139e-08, 10.25, 2.381424, -1.75)
 script = ExtResource("7_qj577")
-model_path = "res://models/objects/enviroments/05/05_aircondition.glb"
+model_path = "res://models/objects/enviroments/05/05_aircondition_destructible.glb"
 metadata/planning_desk_id = ""
 metadata/planning_attachment = ""
 
 [node name="@RigidBody3D@16346" type="RigidBody3D" parent="." unique_id=1859640986 instance=ExtResource("6_50y8m")]
 transform = Transform3D(-4.371139e-08, 0, 1, 0, 1, 0, -1, 0, -4.371139e-08, 10.25, 2.381424, -11.25)
 script = ExtResource("7_qj577")
-model_path = "res://models/objects/enviroments/05/05_aircondition.glb"
+model_path = "res://models/objects/enviroments/05/05_aircondition_destructible.glb"
 metadata/planning_desk_id = ""
 metadata/planning_attachment = ""
 
 [node name="@RigidBody3D@16347" type="RigidBody3D" parent="." unique_id=1723026060 instance=ExtResource("6_50y8m")]
 transform = Transform3D(-4.371139e-08, 0, 1, 0, 1, 0, -1, 0, -4.371139e-08, 10.25, 2.631424, 8)
 script = ExtResource("7_qj577")
-model_path = "res://models/objects/enviroments/05/05_aircondition.glb"
+model_path = "res://models/objects/enviroments/05/05_aircondition_destructible.glb"
 metadata/planning_desk_id = ""
 metadata/planning_attachment = ""
 
