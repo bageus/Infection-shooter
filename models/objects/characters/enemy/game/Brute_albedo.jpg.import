@@ -3,15 +3,11 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://dimf86icpwsca"
-path="res://.godot/imported/Brute_albedo.jpg-e44c7d19b205bf8fea3d4d1a9af37ef3.ctex"
-metadata={
-"vram_texture": false
-}
+valid=false
 
 [deps]
 
 source_file="res://models/objects/characters/enemy/game/Brute_albedo.jpg"
-dest_files=["res://.godot/imported/Brute_albedo.jpg-e44c7d19b205bf8fea3d4d1a9af37ef3.ctex"]
 
 [params]
 

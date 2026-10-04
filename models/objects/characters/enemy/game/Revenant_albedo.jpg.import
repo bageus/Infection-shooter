@@ -3,15 +3,11 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://dm4i41ujwj4dm"
-path="res://.godot/imported/Revenant_albedo.jpg-c4d3ebaca23f4ca35992a6fa21b06480.ctex"
-metadata={
-"vram_texture": false
-}
+valid=false
 
 [deps]
 
 source_file="res://models/objects/characters/enemy/game/Revenant_albedo.jpg"
-dest_files=["res://.godot/imported/Revenant_albedo.jpg-c4d3ebaca23f4ca35992a6fa21b06480.ctex"]
 
 [params]
 

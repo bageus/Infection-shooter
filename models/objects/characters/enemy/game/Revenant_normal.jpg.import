@@ -3,15 +3,11 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://b7f1nbd1wckr2"
-path="res://.godot/imported/Revenant_normal.jpg-597e755ecd4a7ce2ffbc3ab8bc68688e.ctex"
-metadata={
-"vram_texture": false
-}
+valid=false
 
 [deps]
 
 source_file="res://models/objects/characters/enemy/game/Revenant_normal.jpg"
-dest_files=["res://.godot/imported/Revenant_normal.jpg-597e755ecd4a7ce2ffbc3ab8bc68688e.ctex"]
 
 [params]
 
