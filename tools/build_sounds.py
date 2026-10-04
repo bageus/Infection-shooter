@@ -38,7 +38,7 @@ RNG = np.random.default_rng(1977)
 LEVEL = {
     "gun": -9.0, "explosion": -8.0, "reload": -19.0, "casing": -23.0, "pickup": -17.0,
     "step": -22.0, "impact": -17.0, "glass": -14.0, "door": -18.0, "vocal": -15.0,
-    "flesh": -15.0, "gore": -13.0, "fall": -18.0, "slam": -9.0,
+    "flesh": -15.0, "gore": -13.0, "fall": -18.0, "slam": -9.0, "spray": -17.0,
 }
 
 
@@ -201,14 +201,14 @@ def clean(s: Sound, hp: float = 35.0) -> Sound:
 
 # ------------------------------------------------------------------ synthesis
 
-def modal(freqs: list[float], decays: list[float], amps: list[float], seconds: float, click_ms: float = 2.0) -> Sound:
+def modal(freqs: list[float], decays: list[float], amps: list[float], seconds: float, click_ms: float = 2.0, rng=None) -> Sound:
     """Struck metal/glass: decaying partials plus a short noise click."""
     t = np.arange(int(seconds * SR)) / SR
     x = np.zeros_like(t)
     for f, d, a in zip(freqs, decays, amps):
-        x += a * np.sin(2 * np.pi * f * t + RNG.uniform(0, 6.28)) * np.exp(-t / d)
+        x += a * np.sin(2 * np.pi * f * t + (rng or RNG).uniform(0, 6.28)) * np.exp(-t / d)
     n = int(SR * click_ms / 1000)
-    x[:n] += RNG.normal(0, 0.6, n) * np.linspace(1, 0, n)
+    x[:n] += (rng or RNG).normal(0, 0.6, n) * np.linspace(1, 0, n)
     return Sound(x, ["synthesised"])
 
 
@@ -400,7 +400,73 @@ def recipes(base: Path) -> dict[str, list[Sound]]:
     ev["fall_light"] = [take(base, f"{C}/smash_fail/plastic/smash_fail_plastic{s}.ogg", "fall", max_len=0.3, hp=150.0, offset_db=-3.0) for s in ("", "_1", "_2")] + [take(base, f"{R}/sfx/drop.ogg", "fall", max_len=0.4, offset_db=-3.0)]
     ev["fall_tech"] = [level(mix((take(base, f"{C}/smash_fail/plastic/smash_fail_plastic_2.ogg", "fall", max_len=0.3), 0.0, 0.0), (take(base, f"{C}/smash_fail/metal/smash_fail_metal_1.ogg", "fall", 0.0, 0.35, ratio=1.3, hp=400.0), 0.0, -8.0)), "fall")]
     ev["fall_debris"] = [take(base, f"{R}/sfx/debris{n}.ogg", "fall", max_len=0.6, hp=80.0, offset_db=-4.0) for n in ("", "2", "3")]
+    extinguisher_events(base, ev)
     return ev
+
+
+# Fire extinguisher (own RNG so earlier events stay bit-identical).
+XRNG = np.random.default_rng(2026)
+
+
+def band_noise(seconds: float, low: float, high: float, order: int = 2) -> np.ndarray:
+    x = XRNG.normal(0, 1, int(seconds * SR))
+    return signal.sosfilt(signal.butter(order, [low, high], "bandpass", fs=SR, output="sos"), x)
+
+
+def turbulence(seconds: float, low_hz: float, high_hz: float, depth: float) -> np.ndarray:
+    """Slow random amplitude wobble of a gas jet."""
+    n = int(seconds * SR)
+    x = signal.sosfilt(signal.butter(2, [low_hz, high_hz], "bandpass", fs=SR, output="sos"), XRNG.normal(0, 1, n))
+    return 1.0 + depth * x / (np.abs(x).max() + 1e-9)
+
+
+def extinguisher_spray(base: Path, seconds: float, ratio: float) -> Sound:
+    t = np.arange(int(seconds * SR)) / SR
+    # Pressure: full blast, then the jet weakens like the gameplay spray (1.0 -> ~0.5).
+    pressure = np.minimum(1.0, t / 0.012) * (0.5 + 0.5 * np.exp(-np.maximum(t - 0.35, 0.0) / 1.4))
+    bright = band_noise(seconds, 2200.0 * ratio, 11000.0, 3)
+    body = band_noise(seconds, 350.0 * ratio, 1800.0 * ratio, 2)
+    dull = band_noise(seconds, 900.0 * ratio, 4200.0 * ratio, 2)
+    fade_bright = np.clip(1.0 - (t - 0.4) / (seconds - 0.4), 0.25, 1.0)
+    x = bright * fade_bright + dull * (1.15 - fade_bright) * 0.8 + body * 0.32
+    x *= turbulence(seconds, 3.0, 14.0, 0.22) * pressure
+    # The last half second sputters as the charge runs out.
+    tail = t > seconds - 0.65
+    gaps = signal.sosfilt(signal.butter(2, 18.0, "lowpass", fs=SR, output="sos"), (XRNG.random(len(t)) < 0.0009).astype(float) * 400.0)
+    x[tail] *= np.clip(0.25 + gaps[tail], 0.0, 1.0)
+    jet = Sound(x, ["synthesised"])
+    valve = cut(clean(trim(load(base, f"{RE}/sfx/extinguish2.ogg"), -40.0), 300.0), 0.3, 120.0)
+    s = mix((jet, 0.0, 0.0), (valve, 0.0, -4.0))
+    return level(fade(s, 2.0, 220.0), "spray")
+
+
+def canister_drop(base: Path, ratio: float, roll: float) -> Sound:
+    def strike(scale: float) -> Sound:
+        return modal([410.0 * ratio, 1090.0 * ratio, 2120.0 * ratio, 3370.0 * ratio, 5150.0 * ratio],
+                     [0.42, 0.26, 0.16, 0.09, 0.05], [1.0, 0.7, 0.45, 0.3, 0.16], 1.2, 3.0, XRNG)
+    thud = lowpass(take(base, f"{CDDA}/smash_fail/metal/smash_fail_metal_2.ogg", "fall", 0.0, 0.5, ratio=0.8), 1800.0, 2)
+    t = np.arange(int(0.9 * SR)) / SR
+    rattle = band_noise(0.9, 700.0, 3200.0) * (0.5 + 0.5 * np.sin(2 * np.pi * roll * t) ** 8) * np.exp(-t / 0.35)
+    s = mix((strike(1.0), 0.0, -2.0), (thud, 0.0, 0.0), (strike(0.6), 0.17, -10.0), (strike(0.3), 0.29, -17.0),
+            (Sound(rattle, ["synthesised"]), 0.33, -14.0))
+    return level(fade(clean(s, 50.0), 1.0, 260.0), "fall", 3.0)
+
+
+def extinguisher_rupture(base: Path, ratio: float) -> Sound:
+    pop = clean(trim(load(base, f"{CDDA}/explosion/small/explosion_small.ogg"), -40.0), 40.0)
+    ring = modal([520.0 * ratio, 1380.0 * ratio, 2650.0 * ratio, 4100.0 * ratio], [0.5, 0.3, 0.18, 0.1], [1.0, 0.6, 0.4, 0.25], 1.4, 1.0, XRNG)
+    t = np.arange(int(1.8 * SR)) / SR
+    whoosh = band_noise(1.8, 250.0, 2600.0) * np.minimum(1.0, t / 0.03) * np.exp(-t / 0.55)
+    hiss = highpass(clean(load(base, f"{RE}/sfx/extinguish.ogg")), 900.0, 2)
+    s = mix((speed(pop, ratio), 0.0, 0.0), (ring, 0.004, -15.0), (Sound(whoosh, ["synthesised"]), 0.01, -7.0),
+            (decay_after(hiss, 0.2, 1.2), 0.03, -9.0))
+    return level(fade(s, 1.0, 200.0), "explosion", -1.0)
+
+
+def extinguisher_events(base: Path, ev: dict[str, list[Sound]]) -> None:
+    ev["extinguisher_spray"] = [extinguisher_spray(base, 3.4, r) for r in (1.0, 0.93)]
+    ev["canister_drop"] = [canister_drop(base, r, roll) for r, roll in ((1.0, 9.0), (0.94, 7.5), (1.06, 10.5))]
+    ev["extinguisher_burst"] = [extinguisher_rupture(base, r) for r in (1.0, 1.07)]
 
 
 # ------------------------------------------------------------------ output

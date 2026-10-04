@@ -144,6 +144,7 @@ the licence of their source (CC0 / CC-BY).
 | sfx/debris3.ogg | Red Eclipse team | CC-BY-SA 4.0 | https://github.com/redeclipse/sounds | Red Eclipse sounds |
 | sfx/drop.ogg | Red Eclipse team | CC-BY-SA 4.0 | https://github.com/redeclipse/sounds | Red Eclipse sounds |
 | sfx/extinguish.ogg | Red Eclipse team | CC-BY-SA 4.0 | https://github.com/redeclipse/sounds | Red Eclipse sounds |
+| sfx/extinguish2.ogg | Red Eclipse team | CC-BY-SA 4.0 | https://github.com/redeclipse/sounds | Red Eclipse sounds |
 | sfx/itemuse.ogg | Red Eclipse team | CC-BY-SA 4.0 | https://github.com/redeclipse/sounds | Red Eclipse sounds |
 | sfx/shell.ogg | Red Eclipse team | CC-BY-SA 4.0 | https://github.com/redeclipse/sounds | Red Eclipse sounds |
 | sfx/shell3.ogg | Red Eclipse team | CC-BY-SA 4.0 | https://github.com/redeclipse/sounds | Red Eclipse sounds |
@@ -165,6 +166,7 @@ the licence of their source (CC0 / CC-BY).
 - `attack_hit`: cdda/sound/CC-Sounds/melee_attack/monster_melee_hit/monster_melee_hit_1.ogg, cdda/sound/CC-Sounds/melee_attack/monster_melee_hit/monster_melee_hit_2.ogg, cdda/sound/CC-Sounds/melee_attack/monster_melee_hit/monster_melee_hit_3.ogg, cdda/sound/CC-Sounds/melee_attack/monster_melee_hit/monster_melee_hit_4.ogg
 - `attack_swing`: cdda/sound/CC-Sounds/melee_swing/big_bash/big_bash_swing_1.ogg, cdda/sound/CC-Sounds/melee_swing/small_bash/small_bash_swing_1.ogg, cdda/sound/CC-Sounds/melee_swing/small_bash/small_bash_swing_3.ogg, cdda/sound/CC-Sounds/melee_swing/small_bash/small_bash_swing_5.ogg
 - `body_part_fall`: cdda/sound/CC-Sounds/melee_hit_flesh/big_bash/big_bash_flesh_1.ogg, cdda/sound/CC-Sounds/melee_hit_flesh/big_bash/big_bash_flesh_2.ogg
+- `canister_drop`: cdda/sound/CC-Sounds/smash_fail/metal/smash_fail_metal_2.ogg, synthesised
 - `casing_brass`: cdda/sound/CC-Sounds/fire_gun/brass_eject.ogg, cdda/sound/CC-Sounds/fire_gun/brass_eject_1.ogg
 - `casing_heavy`: cdda/sound/CC-Sounds/smash_fail/metal/smash_fail_metal_1.ogg, cdda/sound/CC-Sounds/smash_fail/metal/smash_fail_metal_2.ogg, cdda/sound/CC-Sounds/smash_fail/metal/smash_fail_metal_4.ogg
 - `casing_shell`: redeclipse_sounds/sfx/shell.ogg, redeclipse_sounds/sfx/shell3.ogg, redeclipse_sounds/sfx/shell5.ogg, redeclipse_sounds/sfx/shell6.ogg
@@ -177,7 +179,8 @@ the licence of their source (CC0 / CC-BY).
 - `elevator_close`: cdda/sound/CC-Sounds/close_door/door_metal/close_door_metal.ogg, cdda/sound/CC-Sounds/humming/machinery.ogg, cdda/sound/CC-Sounds/open_door/gun_safe/open_safe.ogg
 - `elevator_open`: cdda/sound/CC-Sounds/humming/machinery.ogg, cdda/sound/CC-Sounds/open_door/gun_safe/open_safe.ogg, synthesised
 - `enemy_death`: cdda/sound/CC-Sounds/mon_death/zombie_death/zombie_death_1.ogg, cdda/sound/CC-Sounds/mon_death/zombie_death/zombie_death_2.ogg, cdda/sound/CC-Sounds/mon_death/zombie_death/zombie_death_3.ogg, cdda/sound/CC-Sounds/mon_death/zombie_death/zombie_death_4.ogg
-- `extinguisher_burst`: cdda/sound/CC-Sounds/explosion/small/explosion_small.ogg, redeclipse_sounds/sfx/extinguish.ogg
+- `extinguisher_burst`: cdda/sound/CC-Sounds/explosion/small/explosion_small.ogg, redeclipse_sounds/sfx/extinguish.ogg, synthesised
+- `extinguisher_spray`: redeclipse_sounds/sfx/extinguish2.ogg, synthesised
 - `fall_debris`: redeclipse_sounds/sfx/debris.ogg, redeclipse_sounds/sfx/debris2.ogg, redeclipse_sounds/sfx/debris3.ogg
 - `fall_light`: cdda/sound/CC-Sounds/smash_fail/plastic/smash_fail_plastic.ogg, cdda/sound/CC-Sounds/smash_fail/plastic/smash_fail_plastic_1.ogg, cdda/sound/CC-Sounds/smash_fail/plastic/smash_fail_plastic_2.ogg, redeclipse_sounds/sfx/drop.ogg
 - `fall_metal`: cdda/sound/CC-Sounds/smash_fail/metal/smash_fail_metal_2.ogg, cdda/sound/CC-Sounds/smash_fail/metal/smash_fail_metal_4.ogg

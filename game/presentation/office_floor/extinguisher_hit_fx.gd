@@ -3,6 +3,9 @@ extends Node3D
 const SHADER := preload("res://game/presentation/office_floor/extinguisher_particle.gdshader")
 const TEXTURE := preload("res://models/objects/textures/extinguisher_spray.png")
 const BURST := preload("res://game/presentation/office_floor/extinguisher_burst.tscn")
+const SFX := preload("res://game/core/audio/public/sound_events.gd")
+const FLIPBOOK := preload("res://game/core/vfx/public/sprite_flipbook.gd")
+const ATLASES := preload("res://game/core/vfx/public/effect_atlases.gd")
 
 signal ruptured(location: Vector3)
 
@@ -20,11 +23,12 @@ signal ruptured(location: Vector3)
 @export_range(0.5, 8.0, 0.1) var cloud_radius := 3.0
 @export_range(1.0, 8.0, 0.1) var cloud_lifetime := 3.6
 @export_range(1, 250, 1) var burst_count := 110
+## Spray cloud sprites from the extinguisher sheet, per second at full pressure.
+@export_range(0.0, 60.0, 1.0) var spray_sprites_per_second := 16.0
 
 @onready var _nozzle: Marker3D = $Nozzle
 @onready var _jet: GPUParticles3D = $Nozzle/Jet
 @onready var _mist: GPUParticles3D = $Nozzle/Mist
-@onready var _hiss: AudioStreamPlayer3D = $Nozzle/Hiss
 
 var _body: RigidBody3D
 var _active := false
@@ -32,6 +36,9 @@ var _elapsed := 0.0
 var _anchor := Vector3.ZERO
 var _long_axis := Vector3.UP
 var _fall_direction := Vector3.FORWARD
+var _spray_sound: AudioStreamPlayer3D
+var _landed := false
+var _sprite_clock := 0.0
 
 var effects_root: Node3D
 var impact_pool: Node
@@ -94,7 +101,8 @@ func start(hit_point: Vector3, bullet_direction: Vector3) -> void:
 	_body.angular_velocity = axis.cross(_fall_direction) * topple_speed + axis * spin_speed * 0.35
 	_jet.emitting = true
 	_mist.emitting = true
-	_hiss.play()
+	_landed = false
+	_spray_sound = SFX.play(_nozzle, &"extinguisher_spray")
 	set_physics_process(true)
 
 
@@ -105,13 +113,15 @@ func _physics_process(delta: float) -> void:
 		return
 	var pressure := 1.0 - clampf(_elapsed / maxf(spray_seconds, 0.01), 0.0, 1.0) * 0.48
 	_drive_motion(pressure, delta)
+	_check_landing()
 	if _elapsed >= spray_seconds:
 		_jet.emitting = false
 		_mist.emitting = false
-		_hiss.stop()
+		_stop_spray_sound()
 		return
 	_jet.amount_ratio = pressure
 	_mist.amount_ratio = pressure
+	_emit_spray_sprites(pressure, delta)
 	var recoil := _nozzle.global_basis.z.normalized() * recoil_force * pressure
 	_body.apply_force(recoil, _nozzle.global_position - _body.global_position)
 
@@ -129,11 +139,44 @@ func _drive_motion(pressure: float, delta: float) -> void:
 	_body.linear_velocity = _body.linear_velocity.limit_length(2.2)
 
 
+# The toppled cylinder hits the floor once: heavy hollow clang and a short roll.
+func _check_landing() -> void:
+	if _landed:
+		return
+	var axis := (_body.global_basis * _long_axis).normalized()
+	if absf(axis.y) < 0.45:
+		_landed = true
+		SFX.play(effects_root if is_instance_valid(effects_root) else _body, &"canister_drop", _body.global_position)
+
+
+func _stop_spray_sound() -> void:
+	if is_instance_valid(_spray_sound):
+		_spray_sound.queue_free()
+	_spray_sound = null
+
+
+# Billowing sheet sprites ride the jet: they leave the nozzle fast, slow down
+# in the air, swell and fade, so the stream reads as a dense powder cloud.
+func _emit_spray_sprites(pressure: float, delta: float) -> void:
+	if spray_sprites_per_second <= 0.0 or not is_instance_valid(effects_root) or not ATLASES.available(ATLASES.EXTINGUISHER_SPRAY):
+		return
+	_sprite_clock += delta * spray_sprites_per_second * pressure
+	while _sprite_clock >= 1.0:
+		_sprite_clock -= 1.0
+		var forward := -_nozzle.global_basis.z.normalized()
+		var jitter := Vector3(randf_range(-0.25, 0.25), randf_range(-0.15, 0.25), randf_range(-0.25, 0.25))
+		FLIPBOOK.spawn(effects_root, ATLASES.EXTINGUISHER_SPRAY, _nozzle.global_position + forward * 0.08, randf_range(0.22, 0.32), {
+			"velocity": (forward + jitter).normalized() * randf_range(3.0, 4.6) * pressure,
+			"drag": 2.4, "gravity": -0.25, "grow": randf_range(3.2, 4.2), "opacity": 0.75,
+			"spin": randf() * TAU, "spin_speed": randf_range(-1.5, 1.5), "speed": randf_range(1.0, 1.3), "fade_out": 0.4,
+		})
+
+
 func _rupture() -> void:
 	set_physics_process(false)
 	_jet.emitting = false
 	_mist.emitting = false
-	_hiss.stop()
+	_stop_spray_sound()
 	var location := _body.global_position
 	var world := effects_root
 	if not is_instance_valid(world):

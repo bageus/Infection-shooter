@@ -1,0 +1,25 @@
+{
+  "id": "core.vfx",
+  "layer": "core",
+  "purpose": "Play sprite-sheet (atlas) effects in 3D with per-frame timing and the procedural smoke shader shared by gameplay effects.",
+  "state_owner": [
+    "Atlas layouts (grid, frame count, frame timing) of supplied effect sprite sheets"
+  ],
+  "public_api": [
+    "public/sprite_flipbook.gd",
+    "public/flipbook.gdshader",
+    "public/effect_atlases.gd",
+    "public/smoke_puff.gdshader"
+  ],
+  "dependencies": [],
+  "runtime_contracts": {
+    "sprite_flipbook_v1": {
+      "spawn": "spawn(parent: Node, atlas: Dictionary, position: Vector3, size: float, options := {}) -> MeshInstance3D; null when the atlas texture is missing. The node frees itself after the last frame.",
+      "frame_at": "frame_at(atlas: Dictionary, seconds: float) -> float; fractional frame for a play time, -1 after the end"
+    },
+    "effect_atlases_v1": {
+      "atlas": "Dictionary {path, columns, rows, frames, durations: Array[float]} per supplied sheet",
+      "available": "available(atlas: Dictionary) -> bool"
+    }
+  }
+}

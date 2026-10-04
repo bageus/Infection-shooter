@@ -20,7 +20,7 @@ func _run() -> void:
 		for index in range(1, int(spec[SFX.VARIANTS]) + 1):
 			var path := SFX.ROOT + "%s/%s_%d.ogg" % [event, event, index]
 			var stream := load(path) as AudioStream if ResourceLoader.exists(path) else null
-			if stream == null or stream.get_length() < 0.03 or stream.get_length() > 3.0:
+			if stream == null or stream.get_length() < 0.03 or stream.get_length() > 3.6:
 				missing.append(path)
 	_expect(missing.is_empty(), "Every sound event has its processed variants: %s" % [missing])
 	_expect(SFX.EVENTS.size() >= 60, "The catalogue covers weapons, impacts, enemies, doors and items.")

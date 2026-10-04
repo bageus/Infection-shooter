@@ -16,7 +16,7 @@ func take_projectile_hit(_damage: float, hit_position: Vector3, _normal: Vector3
 	if _torn:
 		return false
 	_torn = true
-	SHREDS.spawn(self, hit_position, direction)
+	SHREDS.tear(self, hit_position, direction)
 	call_deferred("_remove_torn_paper")
 	return false
 
