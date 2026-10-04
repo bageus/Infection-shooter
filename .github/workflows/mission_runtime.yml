@@ -22,6 +22,7 @@ jobs:
       - name: Project gates and resource profiles
         run: |
           python tools/validate_project.py
+          python tools/check_import_files.py
           python tools/validate_scene_resources.py
           python tools/test_workstation_templates.py
           python tools/test_glass_openings.py
@@ -48,6 +49,18 @@ jobs:
           sudo apt-get update -qq
           sudo apt-get install -y -qq xvfb libgl1-mesa-dri
           timeout 60 xvfb-run -a godot --path . --audio-driver Dummy --rendering-method gl_compatibility --script game/bootstrap/app/tests/capture_menu_screens.gd
+      - name: Rendered effects smoke
+        # Headless runs never compile shaders or touch the GPU texture path;
+        # this catches broken shaders and textures that cannot be loaded.
+        if: always()
+        shell: bash
+        run: |
+          failed=0
+          for suite in game/presentation/office_floor/tests/run_hit_effect_tests.gd game/features/combat/tests/run_grenade_vfx_tests.gd game/features/infection_source/tests/run_mutagen_cloud_tests.gd game/features/infected/tests/run_enemy_animation_tests.gd; do
+            timeout 150 xvfb-run -a godot --path . --audio-driver Dummy --rendering-method gl_compatibility --script "$suite" > /tmp/rendered.log 2>&1 || failed=1
+            if grep -E 'Failed loading resource|SHADER ERROR|SCRIPT ERROR|failure\(s\)|failures' /tmp/rendered.log | grep -vE ' 0 failure| 0 failures'; then failed=1; fi
+          done
+          exit "$failed"
       - uses: actions/upload-artifact@v4
         if: always()
         with:

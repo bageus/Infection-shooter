@@ -1,11 +1,12 @@
 @tool
 extends EditorPlugin
-## Registers the staged GLB import extension. The first time the plugin runs in
-## a project whose cache was imported without it, multi-scene models are
-## reimported once so their damage stages become available.
+## Registers the staged GLB import extension. Reimporting is never started
+## automatically (it raced the editor's first import scan); when an old cache
+## lacks the damage stages use Project > Tools > Reimport staged destructible GLBs.
 
 const EXTENSION := preload("res://addons/staged_glb_import/staged_glb_extension.gd")
 const MODELS := "res://models/objects/enviroments"
+const MENU := "Reimport staged destructible GLBs"
 
 var _extension: GLTFDocumentExtension
 
@@ -13,13 +14,11 @@ var _extension: GLTFDocumentExtension
 func _enter_tree() -> void:
 	_extension = EXTENSION.new()
 	GLTFDocument.register_gltf_document_extension(_extension, true)
-	var settings := EditorInterface.get_editor_settings()
-	if int(settings.get_project_metadata("staged_glb_import", "version", 0)) < EXTENSION.VERSION:
-		settings.set_project_metadata("staged_glb_import", "version", EXTENSION.VERSION)
-		_reimport_staged.call_deferred()
+	add_tool_menu_item(MENU, _reimport_staged)
 
 
 func _exit_tree() -> void:
+	remove_tool_menu_item(MENU)
 	if _extension != null:
 		GLTFDocument.unregister_gltf_document_extension(_extension)
 		_extension = null
@@ -28,7 +27,8 @@ func _exit_tree() -> void:
 func _reimport_staged() -> void:
 	var filesystem := EditorInterface.get_resource_filesystem()
 	if filesystem.is_scanning():
-		await filesystem.filesystem_changed
+		push_warning("Wait for the editor to finish scanning, then run '%s' again." % MENU)
+		return
 	var paths := PackedStringArray()
 	_collect(MODELS, paths)
 	if not paths.is_empty():
