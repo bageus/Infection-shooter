@@ -6,7 +6,7 @@ const FLIPBOOK := preload("res://game/core/vfx/public/sprite_flipbook.gd")
 const ATLASES := preload("res://game/core/vfx/public/effect_atlases.gd")
 # Any texture serves as a 4x3 test sheet.
 const TEST_SHEET := {
-	"path": "res://models/objects/textures/grenade_explosion_layers/01_flash.png",
+	"path": "res://models/objects/textures/grenade_explosion_layers/Twelve-frame fiery explosion flipbook atlas.png",
 	"columns": 4, "rows": 3, "frames": 12,
 	"durations": [0.02, 0.02, 0.02, 0.02, 0.03, 0.03, 0.04, 0.05, 0.06, 0.08, 0.1, 0.13],
 }
@@ -44,6 +44,28 @@ func _run() -> void:
 	_expect(is_instance_valid(scrap) and scrap.global_position.x > 0.1, "A moving sprite travels with its velocity.")
 	await create_timer(0.4).timeout
 	_expect(not is_instance_valid(scrap), "A fixed-frame sprite frees itself after its lifetime.")
+	for atlas in [ATLASES.GRENADE_EXPLOSION, ATLASES.ELECTRIC_SPARK, ATLASES.TORN_PAPER, ATLASES.EXTINGUISHER_SPRAY]:
+		_expect(ATLASES.available(atlas), "Supplied sheet is in the project: " + str(atlas["path"]))
+		var texture := load(str(atlas["path"])) as Texture2D
+		var cell := Vector2(texture.get_width() / float(atlas["columns"]), texture.get_height() / float(atlas["rows"]))
+		_expect(absf(cell.x / cell.y - 1.0) < 0.05, "Sheet cells are square, so the grid is right: " + str(atlas["path"]))
+	var looping := FLIPBOOK.spawn(stage, TEST_SHEET, Vector3.ZERO, 1.0, {"first_frame": 0, "last_frame": 5, "loop_from": 3, "axis": Vector3.FORWARD})
+	var seen_low := 9.0
+	var seen_high := 0.0
+	for i in 40:
+		await process_frame
+	var until := Time.get_ticks_msec() + 600
+	while Time.get_ticks_msec() < until:
+		var frame := float(looping.get_instance_shader_parameter(&"frame_position"))
+		seen_low = minf(seen_low, frame)
+		seen_high = maxf(seen_high, frame)
+		await process_frame
+	_expect(is_instance_valid(looping), "A looping flipbook keeps playing.")
+	_expect(seen_low >= 2.99 and seen_low < 3.6 and seen_high <= 5.0 and seen_high > 4.4, "The loop swings between its frames (%.2f..%.2f)." % [seen_low, seen_high])
+	_expect(float(looping.get_instance_shader_parameter(&"axial")) > 0.5, "An axis turns the sprite into an axial billboard.")
+	looping.call("stop", 0.1)
+	await create_timer(0.3).timeout
+	_expect(not is_instance_valid(looping), "stop() fades a looping flipbook out.")
 	stage.queue_free()
 	await process_frame
 	print("Flipbook tests: %d failure(s)." % failures)

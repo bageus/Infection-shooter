@@ -13,7 +13,7 @@ static func short_circuit(host: Node3D, location: Vector3, normal: Vector3 = Vec
 	_flash(host, location + outward * 0.05)
 	if not ATLASES.available(ATLASES.ELECTRIC_SPARK):
 		return
-	_burst(host, location + outward * 0.03, 0.34)
+	_burst(host, location + outward * 0.1, 0.7)
 	var tree := host.get_tree()
 	var device: WeakRef = weakref(host)
 	for i in randi_range(2, 3):
@@ -21,7 +21,7 @@ static func short_circuit(host: Node3D, location: Vector3, normal: Vector3 = Vec
 		tree.create_timer(randf_range(0.12, 0.75)).timeout.connect(func() -> void:
 			var live := device.get_ref() as Node3D
 			if live != null and live.is_inside_tree():
-				_burst(live, location + outward * 0.03 + offset, randf_range(0.2, 0.3)))
+				_burst(live, location + outward * 0.1 + offset, randf_range(0.42, 0.6)))
 
 
 static func _burst(host: Node3D, location: Vector3, size: float) -> void:

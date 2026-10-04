@@ -24,17 +24,27 @@ static func tear(host: Node3D, hit_position: Vector3, direction: Vector3) -> voi
 		spawn(host, hit_position, direction)
 		return
 	var push := direction.normalized() if direction.length_squared() > 0.0001 else Vector3.ZERO
+	var floor_y := _floor_below(host, hit_position)
 	var frames := range(int(ATLASES.TORN_PAPER["frames"]))
 	frames.shuffle()
 	for i in randi_range(5, 6):
 		var spread := Vector3(randf_range(-1.0, 1.0), randf_range(0.35, 1.0), randf_range(-1.0, 1.0)).normalized()
 		var velocity := (spread * randf_range(0.9, 2.2) + push * randf_range(0.4, 1.4))
-		FLIPBOOK.spawn(scene, ATLASES.TORN_PAPER, hit_position + spread * 0.04, randf_range(0.11, 0.2), {
-			"billboard": false, "frame": frames[i], "lifetime": randf_range(1.9, 2.8), "fade_out": 0.6,
+		FLIPBOOK.spawn(scene, ATLASES.TORN_PAPER, hit_position + spread * 0.04, randf_range(0.2, 0.32), {
+			"billboard": false, "frame": frames[i], "lifetime": randf_range(3.6, 4.6), "fade_out": 0.8, "floor_y": floor_y,
 			"velocity": velocity, "gravity": 3.2, "drag": 2.1, "spin": randf() * TAU,
 			"tumble": Vector3(randf_range(-1.0, 1.0), randf_range(-1.0, 1.0), randf_range(-1.0, 1.0)).normalized() * randf_range(5.0, 11.0),
 		})
 	spawn(host, hit_position, direction, 14)
+
+
+# Height where the scraps come to rest: the first surface under the hit.
+static func _floor_below(host: Node3D, from: Vector3) -> float:
+	var query := PhysicsRayQueryParameters3D.create(from + Vector3.UP * 0.05, from + Vector3.DOWN * 6.0, 2 | 1)
+	if host is CollisionObject3D:
+		query.exclude = [(host as CollisionObject3D).get_rid()]
+	var hit := host.get_world_3d().direct_space_state.intersect_ray(query)
+	return (hit["position"] as Vector3).y + 0.012 if not hit.is_empty() else from.y - 6.0
 
 
 static func spawn(host: Node3D, hit_position: Vector3, direction: Vector3, amount: int = 38) -> void:

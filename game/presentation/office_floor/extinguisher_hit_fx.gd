@@ -6,6 +6,7 @@ const BURST := preload("res://game/presentation/office_floor/extinguisher_burst.
 const SFX := preload("res://game/core/audio/public/sound_events.gd")
 const FLIPBOOK := preload("res://game/core/vfx/public/sprite_flipbook.gd")
 const ATLASES := preload("res://game/core/vfx/public/effect_atlases.gd")
+const POWDER_SHADER := preload("res://game/core/vfx/public/smoke_puff.gdshader")
 
 signal ruptured(location: Vector3)
 
@@ -23,8 +24,8 @@ signal ruptured(location: Vector3)
 @export_range(0.5, 8.0, 0.1) var cloud_radius := 3.0
 @export_range(1.0, 8.0, 0.1) var cloud_lifetime := 3.6
 @export_range(1, 250, 1) var burst_count := 110
-## Spray cloud sprites from the extinguisher sheet, per second at full pressure.
-@export_range(0.0, 60.0, 1.0) var spray_sprites_per_second := 16.0
+## Length of the powder jet from the extinguisher sheet, metres.
+@export_range(0.2, 4.0, 0.05) var jet_sheet_size := 1.5
 
 @onready var _nozzle: Marker3D = $Nozzle
 @onready var _jet: GPUParticles3D = $Nozzle/Jet
@@ -38,7 +39,7 @@ var _long_axis := Vector3.UP
 var _fall_direction := Vector3.FORWARD
 var _spray_sound: AudioStreamPlayer3D
 var _landed := false
-var _sprite_clock := 0.0
+var _jet_sheet: Node3D
 
 var effects_root: Node3D
 var impact_pool: Node
@@ -99,10 +100,15 @@ func start(hit_point: Vector3, bullet_direction: Vector3) -> void:
 		axis = -axis
 	_body.apply_impulse(direction * bullet_impulse, (hit_point - _body.global_position).limit_length(0.35))
 	_body.angular_velocity = axis.cross(_fall_direction) * topple_speed + axis * spin_speed * 0.35
-	_jet.emitting = true
+	# With the sheet jet on the nozzle the particle jet would double it up;
+	# a thinner mist still drifts off the stream.
+	var sheet := ATLASES.available(ATLASES.EXTINGUISHER_SPRAY)
+	_jet.emitting = not sheet
 	_mist.emitting = true
+	_mist.amount_ratio = 0.35 if sheet else 1.0
 	_landed = false
 	_spray_sound = SFX.play(_nozzle, &"extinguisher_spray")
+	_start_jet_sheet()
 	set_physics_process(true)
 
 
@@ -118,10 +124,11 @@ func _physics_process(delta: float) -> void:
 		_jet.emitting = false
 		_mist.emitting = false
 		_stop_spray_sound()
+		_stop_jet_sheet(0.35)
 		return
 	_jet.amount_ratio = pressure
-	_mist.amount_ratio = pressure
-	_emit_spray_sprites(pressure, delta)
+	_mist.amount_ratio = pressure * (0.35 if is_instance_valid(_jet_sheet) else 1.0)
+	_steer_jet_sheet(pressure)
 	var recoil := _nozzle.global_basis.z.normalized() * recoil_force * pressure
 	_body.apply_force(recoil, _nozzle.global_position - _body.global_position)
 
@@ -155,21 +162,30 @@ func _stop_spray_sound() -> void:
 	_spray_sound = null
 
 
-# Billowing sheet sprites ride the jet: they leave the nozzle fast, slow down
-# in the air, swell and fade, so the stream reads as a dense powder cloud.
-func _emit_spray_sprites(pressure: float, delta: float) -> void:
-	if spray_sprites_per_second <= 0.0 or not is_instance_valid(effects_root) or not ATLASES.available(ATLASES.EXTINGUISHER_SPRAY):
+# The sheet's powder jet grows out of the nozzle (frames 0-5), then keeps
+# swirling (frames 3-5) while it sprays. It stays on the nozzle, follows the
+# spinning cylinder and weakens with the pressure.
+func _start_jet_sheet() -> void:
+	var atlas: Dictionary = ATLASES.EXTINGUISHER_SPRAY
+	var range_frames: Vector2i = atlas["spray_frames"]
+	_jet_sheet = FLIPBOOK.spawn(_nozzle, atlas, _nozzle.global_position, jet_sheet_size, {
+		"first_frame": range_frames.x, "last_frame": range_frames.y, "loop_from": int(atlas["spray_loop_from"]),
+		"axis": -_nozzle.global_basis.z, "atlas_angle": float(atlas["jet_angle"]), "opacity": 0.92,
+	})
+
+
+func _steer_jet_sheet(pressure: float) -> void:
+	if not is_instance_valid(_jet_sheet):
 		return
-	_sprite_clock += delta * spray_sprites_per_second * pressure
-	while _sprite_clock >= 1.0:
-		_sprite_clock -= 1.0
-		var forward := -_nozzle.global_basis.z.normalized()
-		var jitter := Vector3(randf_range(-0.25, 0.25), randf_range(-0.15, 0.25), randf_range(-0.25, 0.25))
-		FLIPBOOK.spawn(effects_root, ATLASES.EXTINGUISHER_SPRAY, _nozzle.global_position + forward * 0.08, randf_range(0.22, 0.32), {
-			"velocity": (forward + jitter).normalized() * randf_range(3.0, 4.6) * pressure,
-			"drag": 2.4, "gravity": -0.25, "grow": randf_range(3.2, 4.2), "opacity": 0.75,
-			"spin": randf() * TAU, "spin_speed": randf_range(-1.5, 1.5), "speed": randf_range(1.0, 1.3), "fade_out": 0.4,
-		})
+	_jet_sheet.call("set_axis", -_nozzle.global_basis.z)
+	_jet_sheet.call("set_opacity", 0.92 * pressure)
+	_jet_sheet.scale = Vector3.ONE * jet_sheet_size * lerpf(0.65, 1.0, pressure)
+
+
+func _stop_jet_sheet(fade: float) -> void:
+	if is_instance_valid(_jet_sheet):
+		_jet_sheet.call("stop", fade)
+	_jet_sheet = null
 
 
 func _rupture() -> void:
@@ -177,6 +193,7 @@ func _rupture() -> void:
 	_jet.emitting = false
 	_mist.emitting = false
 	_stop_spray_sound()
+	_stop_jet_sheet(0.08)
 	var location := _body.global_position
 	var world := effects_root
 	if not is_instance_valid(world):
@@ -211,8 +228,15 @@ func _configure_emitter(emitter: GPUParticles3D, amount: int, lifetime: float,
 	var particle := QuadMesh.new()
 	particle.size = Vector2.ONE * size
 	var material := ShaderMaterial.new()
-	material.shader = SHADER
-	material.set_shader_parameter("spray_texture", TEXTURE)
-	material.set_shader_parameter("opacity", opacity)
+	if emitter == _mist:
+		# The mist drifting off the stream is soft powder, not hard flakes.
+		material.shader = POWDER_SHADER
+		material.set_shader_parameter("smoke_color", Color(0.93, 0.94, 0.95))
+		material.set_shader_parameter("opacity", opacity)
+		material.set_shader_parameter("growth", 2.6)
+	else:
+		material.shader = SHADER
+		material.set_shader_parameter("spray_texture", TEXTURE)
+		material.set_shader_parameter("opacity", opacity)
 	particle.material = material
 	emitter.draw_pass_1 = particle
