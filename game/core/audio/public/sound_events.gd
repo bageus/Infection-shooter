@@ -31,6 +31,8 @@ const EVENTS := {
 	&"dry_fire": [2, -6.0, 15.0, 2.5, 0.05, 2],
 	&"grenade_explode": [2, 3.0, 120.0, 14.0, 0.05, 3],
 	&"extinguisher_burst": [2, 1.0, 80.0, 10.0, 0.05, 2],
+	&"extinguisher_spray": [2, -2.0, 40.0, 4.0, 0.03, 2],
+	&"canister_drop": [3, -1.0, 36.0, 3.5, 0.06, 2],
 	&"pistol_reload": [3, -2.0, 20.0, 3.0, 0.02, 1],
 	&"uzi_reload": [2, -2.0, 20.0, 3.0, 0.02, 1],
 	&"shotgun_shell_load": [4, -2.0, 20.0, 3.0, 0.03, 2],

@@ -7,6 +7,7 @@ const DAMAGE = preload("res://game/presentation/office_floor/environment_damage.
 const BALANCE = preload("res://game/features/combat/public/projectile_balance.gd")
 const BOOK_CONTACT = preload("res://game/presentation/office_floor/book_contact.gd")
 const SPARKS = preload("res://game/presentation/office_floor/electric_sparks.gd")
+const PAPER = preload("res://game/presentation/office_floor/paper_shreds.gd")
 const BLAST = preload("res://game/presentation/office_floor/blast_effect.gd")
 const WALL_MOUNT = preload("res://game/presentation/office_floor/wall_mount_models.gd")
 const BOOK_STACK = preload("res://game/presentation/office_floor/book_stack_breakup.gd")
@@ -24,6 +25,8 @@ var _shapes: Array[CollisionShape3D] = []
 var _shape_meshes: Array[MeshInstance3D] = []
 var _glass_broken := false
 var _broken := false
+var _short_circuited := false
+var _paper_torn := false
 var _health := 0.0
 var _transition_pending := false
 var _pending_full_break := false
@@ -223,8 +226,15 @@ func take_projectile_hit(damage: float, hit_position: Vector3, _normal: Vector3,
 	if "fire_extinguisher" in model_path.get_file():
 		_trigger_extinguisher(hit_position, direction)
 		return false
+	if PAPER.is_paper(model_path):
+		_tear_paper(hit_position, direction)
+		return false
 	if _damage_category() == "tech":
-		SPARKS.spawn(self, hit_position)
+		if _short_circuited:
+			SPARKS.spawn(self, hit_position)
+		else:
+			_short_circuited = true
+			SPARKS.short_circuit(self, hit_position, _normal)
 	if model_path.get_file() == "02_water_cooler_bottle.glb":
 		if not freeze:
 			sleeping = false
@@ -262,6 +272,21 @@ func take_projectile_hit(damage: float, hit_position: Vector3, _normal: Vector3,
 		sleeping = false
 		apply_impulse(direction.normalized() * maxf(0.4, mass * 0.3), hit_position - global_position)
 	return false
+
+
+# Any paper object is torn apart completely by a single shot.
+func _tear_paper(hit_position: Vector3, direction: Vector3) -> void:
+	if _paper_torn:
+		return
+	_paper_torn = true
+	_broken = true
+	PAPER.tear(self, hit_position, direction)
+	collision_layer = 0
+	if _visual != null:
+		_visual.hide()
+	for collision in _shapes:
+		collision.set_deferred("disabled", true)
+	queue_free.call_deferred()
 
 
 func _trigger_extinguisher(hit_position: Vector3, direction: Vector3) -> void:

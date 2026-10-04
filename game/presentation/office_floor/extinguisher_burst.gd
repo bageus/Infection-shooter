@@ -1,5 +1,7 @@
 extends Node3D
 const SFX := preload("res://game/core/audio/public/sound_events.gd")
+const FLIPBOOK := preload("res://game/core/vfx/public/sprite_flipbook.gd")
+const ATLASES := preload("res://game/core/vfx/public/effect_atlases.gd")
 
 const SHADER := preload("res://game/presentation/office_floor/extinguisher_particle.gdshader")
 const TEXTURE := preload("res://models/objects/textures/extinguisher_spray.png")
@@ -54,6 +56,13 @@ func start(radius: float, cloud_lifetime: float, burst_count: int) -> void:
 	_ring.visible = true
 	_flash.light_energy = 5.0
 	SFX.play(get_parent() if get_parent() != null else self, &"extinguisher_burst", global_position)
+	# Rupture cloud from the extinguisher sheet: a burst of powder swelling out.
+	for i in 3:
+		var offset := Vector3(randf_range(-0.3, 0.3), randf_range(0.1, 0.5), randf_range(-0.3, 0.3))
+		FLIPBOOK.spawn(self, ATLASES.EXTINGUISHER_SPRAY, global_position + offset, radius * randf_range(0.45, 0.6), {
+			"grow": randf_range(1.6, 2.1), "spin": randf() * TAU, "spin_speed": randf_range(-0.4, 0.4),
+			"speed": randf_range(0.55, 0.7), "fade_out": 0.8, "velocity": offset * 0.8, "drag": 1.2, "gravity": -0.15,
+		})
 	_spawn_fragments()
 	set_process(true)
 	get_tree().create_timer(_cloud_lifetime + 1.0).timeout.connect(queue_free)

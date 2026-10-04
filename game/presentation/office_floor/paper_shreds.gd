@@ -1,13 +1,49 @@
 extends RefCounted
+## Torn paper: a shot paper object is destroyed completely and bursts into
+## 5-6 scraps picked at random from the ten-frame torn paper sheet. The scraps
+## tumble and flutter down like a ripped sheet; fine shreds fill in between.
+
+const FLIPBOOK := preload("res://game/core/vfx/public/sprite_flipbook.gd")
+const ATLASES := preload("res://game/core/vfx/public/effect_atlases.gd")
+const PAPER_WORDS := ["paper", "notepad", "office_file", "document", "envelope", "newspaper", "magazine", "letter"]
 
 
-static func spawn(host: Node3D, hit_position: Vector3, direction: Vector3) -> void:
+static func is_paper(model_path: String) -> bool:
+	var file := model_path.get_file().to_lower()
+	for word in PAPER_WORDS:
+		if word in file:
+			return true
+	return false
+
+
+static func tear(host: Node3D, hit_position: Vector3, direction: Vector3) -> void:
+	var scene := host.get("effects_root") as Node3D
+	if not is_instance_valid(scene):
+		return
+	if not ATLASES.available(ATLASES.TORN_PAPER):
+		spawn(host, hit_position, direction)
+		return
+	var push := direction.normalized() if direction.length_squared() > 0.0001 else Vector3.ZERO
+	var frames := range(int(ATLASES.TORN_PAPER["frames"]))
+	frames.shuffle()
+	for i in randi_range(5, 6):
+		var spread := Vector3(randf_range(-1.0, 1.0), randf_range(0.35, 1.0), randf_range(-1.0, 1.0)).normalized()
+		var velocity := (spread * randf_range(0.9, 2.2) + push * randf_range(0.4, 1.4))
+		FLIPBOOK.spawn(scene, ATLASES.TORN_PAPER, hit_position + spread * 0.04, randf_range(0.11, 0.2), {
+			"billboard": false, "frame": frames[i], "lifetime": randf_range(1.9, 2.8), "fade_out": 0.6,
+			"velocity": velocity, "gravity": 3.2, "drag": 2.1, "spin": randf() * TAU,
+			"tumble": Vector3(randf_range(-1.0, 1.0), randf_range(-1.0, 1.0), randf_range(-1.0, 1.0)).normalized() * randf_range(5.0, 11.0),
+		})
+	spawn(host, hit_position, direction, 14)
+
+
+static func spawn(host: Node3D, hit_position: Vector3, direction: Vector3, amount: int = 38) -> void:
 	var scene := host.get("effects_root") as Node3D
 	if not is_instance_valid(scene):
 		return
 	var shreds := GPUParticles3D.new()
 	shreds.name = "TornPaper"
-	shreds.amount = 38
+	shreds.amount = amount
 	shreds.lifetime = 1.65
 	shreds.one_shot = true
 	shreds.explosiveness = 1.0
