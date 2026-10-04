@@ -4,8 +4,6 @@ const FLIPBOOK := preload("res://game/core/vfx/public/sprite_flipbook.gd")
 const ATLASES := preload("res://game/core/vfx/public/effect_atlases.gd")
 const POWDER_SHADER := preload("res://game/core/vfx/public/smoke_puff.gdshader")
 
-const SHADER := preload("res://game/presentation/office_floor/extinguisher_particle.gdshader")
-const TEXTURE := preload("res://models/objects/textures/extinguisher_spray.png")
 
 @onready var _flash: OmniLight3D = $Flash
 @onready var _ring: MeshInstance3D = $PressureRing

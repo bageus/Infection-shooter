@@ -1,7 +1,5 @@
 extends Node3D
 
-const SHADER := preload("res://game/presentation/office_floor/extinguisher_particle.gdshader")
-const TEXTURE := preload("res://models/objects/textures/extinguisher_spray.png")
 const BURST := preload("res://game/presentation/office_floor/extinguisher_burst.tscn")
 const SFX := preload("res://game/core/audio/public/sound_events.gd")
 const FLIPBOOK := preload("res://game/core/vfx/public/sprite_flipbook.gd")
@@ -227,16 +225,11 @@ func _configure_emitter(emitter: GPUParticles3D, amount: int, lifetime: float,
 	emitter.process_material = motion
 	var particle := QuadMesh.new()
 	particle.size = Vector2.ONE * size
+	# Soft powder puffs (the sheet draws the jet itself).
 	var material := ShaderMaterial.new()
-	if emitter == _mist:
-		# The mist drifting off the stream is soft powder, not hard flakes.
-		material.shader = POWDER_SHADER
-		material.set_shader_parameter("smoke_color", Color(0.93, 0.94, 0.95))
-		material.set_shader_parameter("opacity", opacity)
-		material.set_shader_parameter("growth", 2.6)
-	else:
-		material.shader = SHADER
-		material.set_shader_parameter("spray_texture", TEXTURE)
-		material.set_shader_parameter("opacity", opacity)
+	material.shader = POWDER_SHADER
+	material.set_shader_parameter("smoke_color", Color(0.93, 0.94, 0.95))
+	material.set_shader_parameter("opacity", opacity)
+	material.set_shader_parameter("growth", 2.6 if emitter == _mist else 1.6)
 	particle.material = material
 	emitter.draw_pass_1 = particle
