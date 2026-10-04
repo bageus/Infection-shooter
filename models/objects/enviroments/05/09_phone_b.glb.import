@@ -4,12 +4,12 @@ importer="scene"
 importer_version=1
 type="PackedScene"
 uid="uid://blyi2ielwl0iq"
-path="res://.godot/imported/09_phone_b.glb-03d328a793c5393c7f42e95aef4fd44f.scn"
+path="res://.godot/imported/09_phone_b.glb-b0d9726a21843d2fafda28a73263a5a1.scn"
 
 [deps]
 
-source_file="res://models/objects/enviroments/09/09_phone_b.glb"
-dest_files=["res://.godot/imported/09_phone_b.glb-03d328a793c5393c7f42e95aef4fd44f.scn"]
+source_file="res://models/objects/enviroments/05/09_phone_b.glb"
+dest_files=["res://.godot/imported/09_phone_b.glb-b0d9726a21843d2fafda28a73263a5a1.scn"]
 
 [params]
 
