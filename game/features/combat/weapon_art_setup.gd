@@ -1,11 +1,11 @@
 extends RefCounted
 
 
-static func configure(weapon: Node3D, model: Node3D, two_handed: bool) -> void:
+static func configure(weapon: Node3D, model: Node3D, two_handed: bool) -> Node3D:
 	var authored_root := find_marker(model, "WeaponRoot")
 	if authored_root == null:
 		push_error("%s: authored WeaponRoot missing" % weapon.name)
-		return
+		return null
 	normalize_model(model, authored_root)
 	for required in ["Grip_R", "Muzzle"]:
 		if find_marker(authored_root, required) == null:
@@ -25,6 +25,7 @@ static func configure(weapon: Node3D, model: Node3D, two_handed: bool) -> void:
 	var public_ejection := weapon.get_node_or_null("EjectionPort") as Marker3D
 	if authored_ejection != null and public_ejection != null:
 		public_ejection.transform = relative_transform(weapon, authored_ejection)
+	return authored_muzzle
 
 
 static func normalize_model(model: Node3D, authored_root: Node3D) -> void:

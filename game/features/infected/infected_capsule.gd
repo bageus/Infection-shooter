@@ -4,6 +4,7 @@ const DROP_TABLE_SCRIPT := preload("res://game/features/pickups/public/drop_tabl
 const BODY_PARTS := preload("res://game/features/infected/body_parts.gd")
 const BLOOD_FX := preload("res://game/features/infected/blood_drip_fx.gd")
 const BLAST_DISMEMBER_DAMAGE := 60.0
+const AUDIO := preload("res://game/features/infected/infected_audio.gd")
 
 # Public v1 presentation facts: no effect ownership or renderer dependency.
 signal projectile_blood(position: Vector3, direction: Vector3, weapon: String, excluded: Array[RID], source_id: int)
@@ -41,6 +42,11 @@ signal limb_severed(position: Vector3, direction: Vector3, excluded: Array[RID])
 ## Scales how much damage body parts take before they come off.
 @export var dismember_strength_scale := 1.0
 @export var death_linger_seconds := 3.5
+## Sound set (ADR-0018): footstep and voice events and their pitch.
+@export var step_sound: StringName = &"step_light"
+@export var growl_sound: StringName = &"growl_zombie"
+@export var voice_pitch := 1.0
+@export var step_pitch := 1.0
 @export var death_sink_depth := 0.45
 
 @onready var body_visual: Node3D = $Body
@@ -67,6 +73,7 @@ var _blood_distance := 0.0
 var _pending_hit := -1.0
 var _face_direction := Vector3.ZERO
 var _parts: Node
+var audio: AUDIO
 var _mobility := 1.0
 var _attack_scale := 1.0
 var _last_hit_position := Vector3.ZERO
@@ -90,6 +97,10 @@ func _ready() -> void:
 	_lod_frame_offset = get_instance_id() % 12
 	death_cloud.depleted.connect(_on_death_cloud_depleted)
 	_setup_body_parts()
+	audio = AUDIO.new()
+	audio.name = "Audio"
+	add_child(audio)
+	audio.setup(self, body_visual.scale.x if body_visual != null else 1.0)
 
 
 func _setup_body_parts() -> void:
@@ -132,6 +143,7 @@ func take_projectile_damage(
 		_parts.wound(part, hit_position, direction, BODY_PARTS.wound_radius(weapon_name))
 	projectile_blood.emit(hit_position, direction, weapon_name, _blood_exclusions(), get_instance_id())
 	BLOOD_FX.spray(get_parent() as Node3D, hit_position, direction, 16, 1.0)
+	audio.hit(hit_position)
 	if is_instance_valid(_target) and _target.has_method("get_infection_skill"):
 		if bool(_target.call("get_infection_skill", "blood_scent")) and health < max_health * 0.7:
 			amount *= 1.22
@@ -179,6 +191,7 @@ func _blast_limbs(amount: float) -> void:
 func _on_part_severed(part: StringName, piece: RigidBody3D) -> void:
 	var where := piece.global_position if piece != null else global_position + Vector3.UP
 	limb_severed.emit(where, _last_hit_direction, _blood_exclusions())
+	audio.severed(where)
 	if _dead:
 		return
 	_part_lost(part)
@@ -203,6 +216,7 @@ func _part_lost(part: StringName) -> void:
 func on_corpse_part_hit(_part: StringName, _damage: float, hit_position: Vector3, direction: Vector3, weapon: String) -> void:
 	_last_hit_direction = direction
 	projectile_blood.emit(hit_position, direction, weapon, _blood_exclusions(), get_instance_id())
+	audio.hit(hit_position)
 
 
 func apply_blast_stun(duration: float, intensity: float) -> void:
@@ -267,6 +281,7 @@ func _physics_process(delta: float) -> void:
 
 	_apply_gravity(delta)
 	move_and_slide()
+	audio.tick(delta, distance_sq <= charge_distance * charge_distance, distance_sq < 24.0 * 24.0)
 	_push_chair_contacts()
 	if near or physics_frame % 4 == _ai_tick_offset:
 		_try_break_blocking_props()
@@ -348,6 +363,7 @@ func _try_attack() -> void:
 	if _attack_cooldown > 0.0 or _blast_stun_remaining > 0.0:
 		return
 	_attack_cooldown = attack_interval
+	audio.attack_started()
 	var duration := _play_animation(_attack_state())
 	if duration <= 0.0:
 		_deliver_attack()
@@ -375,6 +391,7 @@ func _deliver_attack() -> void:
 	if offset.length() > attack_range * attack_reach_tolerance:
 		return
 	_target.call("take_damage", attack_damage * _attack_scale)
+	audio.attack_landed(_attack_scale < 1.0)
 
 
 # Swing with whichever arm is still attached.
@@ -423,6 +440,7 @@ func _track_blood_motion() -> void:
 
 func _die() -> void:
 	_dead = true
+	audio.died()
 	_pending_hit = -1.0
 	_blood_segment_start = global_position
 	_blood_distance = 0.0

@@ -48,6 +48,7 @@ func _behaviour_tick(delta: float, target_offset: Vector3) -> void:
 				_start_summon()
 			elif _ram_cooldown <= 0.0 and distance <= ram_trigger_distance and can_ram():
 				_enter(State.BRACE)
+				audio.growl(2.0)
 				_ram_direction = target_offset.normalized() if distance > 0.01 else -global_transform.basis.z
 		State.BRACE:
 			_cached_desired = Vector3.ZERO
@@ -89,6 +90,7 @@ func _tick_ram(delta: float, target_offset: Vector3) -> void:
 		_ram_struck = true
 		if is_instance_valid(_target) and _target.has_method("take_damage"):
 			_target.call("take_damage", attack_damage)
+			audio.call("play", &"horde_ram_hit")
 		_enter(State.RECOVER)
 		return
 	if _state_time >= ram_max_seconds or (_state_time > 0.25 and is_on_wall()):
@@ -128,6 +130,7 @@ func _start_summon() -> void:
 	_enter(State.SUMMON)
 	_summon_cooldown = summon_interval
 	var duration := _play_animation(&"summon")
+	audio.call("play", &"horde_summon")
 	_summon_pending = duration * SUMMON_PEAK if duration > 0.0 else 0.0
 	_summon_busy_until = duration
 

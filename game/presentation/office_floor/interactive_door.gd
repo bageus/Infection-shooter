@@ -27,6 +27,7 @@ var _glass_hinge_closed := Transform3D.IDENTITY
 var _elevator_lights: Array[Node3D] = []
 var _fallback_leaf_collisions: Array[CollisionShape3D] = []
 var _key_hint: Label3D
+const SFX := preload("res://game/core/audio/public/sound_events.gd")
 
 
 # Public structural scene wiring v1.
@@ -89,6 +90,7 @@ func _physics_process(delta: float) -> void:
 
 	if requires_emergency_key and _open_amount > 0.04 and _someone_in_doorway():
 		wants_open = true
+	var before := _open_amount
 	if wants_open:
 		_close_timer = close_delay
 		_open_amount = move_toward(_open_amount, 1.0, open_speed * delta)
@@ -99,6 +101,7 @@ func _physics_process(delta: float) -> void:
 			if _open_amount <= 0.001:
 				_swing_side = 0.0
 
+	_play_door_sound(before, _open_amount)
 	_apply_door_pose(local_player)
 	for collision in _fallback_leaf_collisions:
 		var should_disable := _open_amount >= 0.6
@@ -126,6 +129,29 @@ func _physics_process(delta: float) -> void:
 	for light_node in _elevator_lights:
 		if is_instance_valid(light_node):
 			_set_light_state(light_node, _open_amount >= 0.98)
+
+
+# Opening starts from shut; swing doors thud when they shut, the elevator
+# motor runs as soon as the doors start closing (ADR-0018).
+func _play_door_sound(before: float, after: float) -> void:
+	var opening := before <= 0.001 and after > 0.001
+	var closing := false
+	if mode == DoorMode.SLIDING_ELEVATOR:
+		closing = before >= 0.999 and after < 0.999
+	else:
+		closing = before > 0.001 and after <= 0.001
+	if not opening and not closing:
+		return
+	var kind := "door"
+	match mode:
+		DoorMode.SLIDING_ELEVATOR:
+			kind = "elevator"
+		DoorMode.GLASS_SWING:
+			kind = "glass_door"
+		_:
+			if requires_emergency_key:
+				kind = "metal_door"
+	SFX.play(self, StringName(kind + ("_open" if opening else "_close")))
 
 
 func is_open_for_exploration() -> bool:

@@ -1,4 +1,5 @@
 extends RigidBody3D
+const IMPACT_SOUND := preload("res://game/presentation/office_floor/impact_sound_watcher.gd")
 
 const BALANCE = preload("res://game/features/combat/public/projectile_balance.gd")
 const SPARKS = preload("res://game/presentation/office_floor/electric_sparks.gd")
@@ -49,6 +50,7 @@ func _ready() -> void:
 	collision_layer = 1
 	collision_mask = 3
 	can_sleep = true
+	IMPACT_SOUND.watch(self)
 
 func push_from_character(character_position: Vector3, movement: Vector3) -> void:
 	if movement.length_squared() < 0.01:

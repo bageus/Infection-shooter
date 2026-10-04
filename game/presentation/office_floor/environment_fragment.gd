@@ -1,4 +1,5 @@
 extends RigidBody3D
+const IMPACT_SOUND := preload("res://game/presentation/office_floor/impact_sound_watcher.gd")
 ## A loose piece of a destroyed environment object.
 ##
 ## Layers: pieces live on physics layer 3 (value 4) so bullets and grenades can
@@ -37,6 +38,7 @@ func _ready() -> void:
 	angular_damp = 0.9
 	can_sleep = true
 	_ignore_characters()
+	IMPACT_SOUND.watch(self, -6.0, &"fall_debris")
 	# Only kickable pieces poll for the player; all others cost no script time.
 	set_physics_process(kickable)
 	add_to_group(GROUP)

@@ -6,6 +6,7 @@ const FRAMES := 6
 @export_range(0.1, 1.4, 0.01) var width := 0.425
 @export_range(0.1, 1.0, 0.01) var height := 0.26
 @export_range(0.0, 1.0, 0.01) var tip_position := 0.20
+var barrel_axis := Vector3.FORWARD
 
 @onready var _visual: MeshInstance3D = $Visual
 
@@ -18,6 +19,7 @@ func _ready() -> void:
 	_visual.material_override = _material
 	_visual.scale = Vector3(width, height, 1.0)
 	_material.set_shader_parameter("frame_index", 0)
+	_update_visual_anchor()
 	set_process(true)
 
 
@@ -27,6 +29,10 @@ func _process(delta: float) -> void:
 		queue_free()
 		return
 	_material.set_shader_parameter("frame_index", mini(int(_elapsed / duration * FRAMES), FRAMES - 1))
+	_update_visual_anchor()
+
+
+func _update_visual_anchor() -> void:
 	var nozzle := get_parent() as Node3D
 	var camera := get_viewport().get_camera_3d()
 	if nozzle == null or camera == null:
@@ -35,11 +41,11 @@ func _process(delta: float) -> void:
 	if toward_camera.length_squared() < 0.0001:
 		return
 	toward_camera = toward_camera.normalized()
-	var fire_direction := -nozzle.global_basis.z.normalized()
+	var fire_direction := (nozzle.global_basis * barrel_axis).normalized()
 	var right := fire_direction - toward_camera * fire_direction.dot(toward_camera)
 	if right.length_squared() < 0.001:
 		right = camera.global_basis.x
 	right = right.normalized()
 	var up := toward_camera.cross(right).normalized()
-	_visual.global_basis = Basis(right, up, toward_camera).scaled(Vector3(width, height, 1.0))
+	_visual.global_basis = Basis(right * width, up * height, toward_camera)
 	_visual.global_position = nozzle.global_position + right * width * (0.5 - tip_position)

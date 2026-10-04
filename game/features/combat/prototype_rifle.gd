@@ -1,6 +1,16 @@
 extends Node3D
 const MUZZLE_FLASH := preload("res://game/features/combat/muzzle_flash.tscn")
 const ART_SETUP := preload("res://game/features/combat/weapon_art_setup.gd")
+const SFX := preload("res://game/core/audio/public/sound_events.gd")
+# Sound events per weapon (ADR-0018): [fire, reload, casing].
+const WEAPON_SOUNDS := {
+	"PISTOL": [&"pistol_fire", &"pistol_reload", &"casing_brass"],
+	"UZI": [&"uzi_fire", &"uzi_reload", &"casing_brass"],
+	"SHOTGUN": [&"shotgun_fire", &"shotgun_shell_load", &"casing_shell"],
+	"RIFLE": [&"rifle_fire", &"rifle_reload", &"casing_brass"],
+	"ASSAULT RIFLE": [&"assault_rifle_fire", &"rifle_reload", &"casing_brass"],
+	"GRENADE LAUNCHER": [&"launcher_fire", &"launcher_reload", &"casing_heavy"],
+}
 @export var weapon_name: String = "PISTOL"
 @export var fire_mode: String = "semi"
 @export var shots_per_second: float = 4.0
@@ -29,6 +39,8 @@ var _burst_shots: int = 0
 var _last_shot_time: float = -100.0
 var effects_root: Node3D
 var impact_pool: Node
+var _authored_muzzle: Node3D
+var _reload_sound: AudioStreamPlayer3D
 
 
 func _ready() -> void:
@@ -36,7 +48,7 @@ func _ready() -> void:
 	_reserve_ammo = starting_reserve_ammo
 	var model := get_node_or_null("Body") as Node3D
 	if model != null:
-		ART_SETUP.configure(self, model, weapon_name in ["SHOTGUN", "GRENADE LAUNCHER"])
+		_authored_muzzle = ART_SETUP.configure(self, model, weapon_name in ["SHOTGUN", "GRENADE LAUNCHER"])
 func _process(delta: float) -> void:
 	_cooldown_remaining = maxf(0.0, _cooldown_remaining - delta)
 	if not _reloading: return
@@ -47,6 +59,8 @@ func _process(delta: float) -> void:
 			_magazine_ammo += 1
 			_reserve_ammo -= 1
 			_reload_remaining = reload_time
+			if _reserve_ammo > 0 and _magazine_ammo < magazine_size:
+				_play_reload_sound()
 		else: _reloading = false
 	else:
 		var loaded := mini(magazine_size - _magazine_ammo, _reserve_ammo)
@@ -67,6 +81,7 @@ func configure_world(container: Node3D, impacts: Node) -> void:
 func try_fire_at(target_point: Vector3) -> bool:
 	if _cooldown_remaining > 0.0 or _reloading or bullet_scene == null or not is_instance_valid(effects_root): return false
 	if _magazine_ammo <= 0:
+		_dry_fire()
 		return false
 	var shooter := get_parent().get_parent() as CollisionObject3D
 	var now := Time.get_ticks_msec() * 0.001
@@ -103,19 +118,45 @@ func try_fire_at(target_point: Vector3) -> bool:
 	if casing_scene != null and ejection_port != null:
 		var casing_pool := get_parent().get_node_or_null("SpentCasings")
 		if casing_pool != null:
-			casing_pool.call("spawn_casing", casing_scene, ejection_port.global_transform, casing_radius, shooter)
+			casing_pool.call("spawn_casing", casing_scene, ejection_port.global_transform, casing_radius, shooter, sound_event(2))
+	SFX.play(self, sound_event(0), muzzle.global_position)
 	return true
 
 
+# Fire, reload or casing sound event of this weapon (0, 1, 2).
+func sound_event(kind: int) -> StringName:
+	var sounds: Array = WEAPON_SOUNDS.get(weapon_name, WEAPON_SOUNDS["PISTOL"])
+	return sounds[kind]
+
+
+func _dry_fire() -> void:
+	if _cooldown_remaining > 0.0:
+		return
+	_cooldown_remaining = 0.3
+	SFX.play(self, &"dry_fire", muzzle.global_position)
+
+
+func _play_reload_sound() -> void:
+	_reload_sound = SFX.play(self, sound_event(1))
+
+
 func _show_muzzle_flash() -> void:
-	muzzle.add_child(MUZZLE_FLASH.instantiate())
+	var flash := MUZZLE_FLASH.instantiate()
+	var anchor := _authored_muzzle if is_instance_valid(_authored_muzzle) else muzzle
+	# Authored art uses +X; legacy gameplay-only scenes keep their -Z marker.
+	flash.set("barrel_axis", Vector3.RIGHT if anchor == _authored_muzzle else Vector3.FORWARD)
+	anchor.add_child(flash)
 
 
 func start_reload() -> void:
 	if _reloading or _reserve_ammo <= 0 or _magazine_ammo >= magazine_size: return
 	_reloading = true
 	_reload_remaining = reload_time
-func cancel_reload() -> void: _reloading = false
+	_play_reload_sound()
+func cancel_reload() -> void:
+	_reloading = false
+	if is_instance_valid(_reload_sound):
+		_reload_sound.queue_free()
 func get_weapon_name() -> String: return weapon_name
 func get_magazine_ammo() -> int: return _magazine_ammo
 func get_reserve_ammo() -> int: return _reserve_ammo

@@ -1,4 +1,5 @@
 extends StaticBody3D
+const SFX := preload("res://game/core/audio/public/sound_events.gd")
 
 const DAMAGE = preload("res://game/presentation/office_floor/environment_damage.gd")
 const CRACKS = preload("res://game/presentation/office_floor/glass_crack_marks.gd")
@@ -128,6 +129,7 @@ func _break_glass(hit_position: Vector3) -> void:
 	if _broken:
 		return
 	_broken = true
+	SFX.play(self, &"glass_break", hit_position)
 	for glass in _glass_nodes:
 		if is_instance_valid(glass):
 			glass.visible = false

@@ -73,4 +73,23 @@ func _on_body_entered(body: Node) -> void:
 				accepted = bool(body.call("add_antidote", amount))
 	if accepted:
 		_consumed = true
+		_play_pickup_sound(body)
 		queue_free()
+
+
+# Sounds play on the collector, which outlives this pickup (ADR-0018).
+func _play_pickup_sound(body: Node) -> void:
+	if not body.has_method("play_item_sound"):
+		return
+	match pickup_type:
+		PickupType.MEDKIT:
+			body.call("play_item_sound", &"medkit_pickup")
+			var collector: WeakRef = weakref(body)
+			body.get_tree().create_timer(0.22).timeout.connect(func() -> void:
+				var live := collector.get_ref() as Node
+				if live != null:
+					live.call("play_item_sound", &"medkit_use"))
+		PickupType.ANTIDOTE:
+			body.call("play_item_sound", &"antidote_pickup")
+		_:
+			body.call("play_item_sound", &"ammo_pickup")

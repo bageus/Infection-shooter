@@ -17,7 +17,8 @@
   "dependencies": [
     "features.combat",
     "features.infection",
-    "features.character_animation"
+    "features.character_animation",
+    "core.audio"
   ],
   "runtime_contracts": {
     "mission_wiring_v1": {

@@ -1,5 +1,7 @@
 extends Node
 
+const SFX := preload("res://game/core/audio/public/sound_events.gd")
+
 const MAX_CASINGS := 40
 const LIFETIME_MSEC := 60000
 const CASING_SCALE := 3.0
@@ -18,7 +20,8 @@ func configure_world(container: Node3D, impacts: Node) -> void:
 	impact_pool = impacts
 
 
-func spawn_casing(model: PackedScene, eject_transform: Transform3D, radius: float, shooter: CollisionObject3D) -> void:
+# Public v1 + sound_event (ADR-0018): the casing clinks when it lands.
+func spawn_casing(model: PackedScene, eject_transform: Transform3D, radius: float, shooter: CollisionObject3D, sound_event: StringName = &"casing_brass") -> void:
 	if model == null or not is_instance_valid(effects_root):
 		return
 	var body := RigidBody3D.new()
@@ -55,6 +58,23 @@ func spawn_casing(model: PackedScene, eject_transform: Transform3D, radius: floa
 	_casings.append(body)
 	_born_at.append(Time.get_ticks_msec())
 	_cleanup()
+	if not sound_event.is_empty():
+		_schedule_clink(body, sound_event)
+
+
+# Casings land about a third of a second after ejection and bounce once.
+func _schedule_clink(body: RigidBody3D, sound_event: StringName) -> void:
+	var casing: WeakRef = weakref(body)
+	var landing := randf_range(0.3, 0.46)
+	get_tree().create_timer(landing).timeout.connect(func() -> void:
+		var live := casing.get_ref() as Node3D
+		if live != null and is_instance_valid(effects_root):
+			SFX.play(effects_root, sound_event, live.global_position))
+	if randf() < 0.6:
+		get_tree().create_timer(landing + randf_range(0.12, 0.22)).timeout.connect(func() -> void:
+			var live := casing.get_ref() as Node3D
+			if live != null and is_instance_valid(effects_root):
+				SFX.play(effects_root, sound_event, live.global_position, -8.0, 1.06))
 
 
 func _process(delta: float) -> void:

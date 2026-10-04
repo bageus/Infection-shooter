@@ -1,4 +1,6 @@
 extends RigidBody3D
+const SFX := preload("res://game/core/audio/public/sound_events.gd")
+const IMPACT_SOUND := preload("res://game/presentation/office_floor/impact_sound_watcher.gd")
 
 const CARPET_SHADOW := preload("res://game/presentation/office_floor/carpet_shadow.gd")
 const DAMAGE = preload("res://game/presentation/office_floor/environment_damage.gd")
@@ -114,6 +116,8 @@ func _ready() -> void:
 		angular_damp = 4.0
 	# Continuous detection is costly; only small, light objects can be fast enough to tunnel.
 	continuous_cd = mass < 4.0
+	if not freeze or wall_mounted:
+		IMPACT_SOUND.watch(self)
 
 
 func _add_shapes(node: Node) -> float:
@@ -358,6 +362,7 @@ func _shatter_glass(hit_position: Vector3, direction: Vector3) -> void:
 	if _glass_broken or _broken:
 		return
 	_glass_broken = true
+	SFX.play(self, &"glass_break", hit_position)
 	var glass_bounds := AABB()
 	var found := false
 	for i in _shape_meshes.size():

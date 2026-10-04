@@ -10,6 +10,10 @@ radius = 0.6
 height = 2.55
 
 [node name="InfectedTitan" type="CharacterBody3D" groups=["infected"]]
+step_sound = &"step_heavy"
+growl_sound = &"growl_titan"
+voice_pitch = 1.0
+step_pitch = 0.9
 collision_layer = 2
 collision_mask = 3
 safe_margin = 0.02

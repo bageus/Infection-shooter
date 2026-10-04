@@ -13,4 +13,7 @@ func _on_body_entered(body: Node) -> void:
 		return
 	_consumed = true
 	body.call("heal", heal_amount)
+	if body.has_method("play_item_sound"):
+		body.call("play_item_sound", &"medkit_pickup")
+		body.call("play_item_sound", &"medkit_use")
 	queue_free()

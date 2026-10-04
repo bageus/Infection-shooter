@@ -1,4 +1,5 @@
 extends Node3D
+const SFX := preload("res://game/core/audio/public/sound_events.gd")
 
 const FLASH := preload("res://models/objects/textures/grenade_explosion_layers/01_flash.png")
 const FIRE := preload("res://models/objects/textures/grenade_explosion_layers/02_fireball.png")
@@ -83,8 +84,8 @@ func start(surface_normal: Vector3) -> void:
 	light_fade.tween_property(_light, "light_energy", flash_brightness * 0.35, 0.07 * speed)
 	light_fade.parallel().tween_property(_light, "light_color", Color(1.0, 0.38, 0.08), 0.12 * speed)
 	light_fade.tween_property(_light, "light_energy", 0.0, 0.19 * speed)
-	_sound.play()
-	get_tree().create_timer(maxf(effect_duration + 0.2, _sound.stream.get_length() + 0.1)).timeout.connect(queue_free)
+	SFX.play(get_parent() if get_parent() != null else self, &"grenade_explode", global_position)
+	get_tree().create_timer(effect_duration + 0.2).timeout.connect(queue_free)
 
 
 func _prepare_layer(layer: MeshInstance3D, texture: Texture2D, additive: bool, brightness: float) -> void:
