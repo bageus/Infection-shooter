@@ -149,7 +149,9 @@ func _discover_stages() -> void:
 		var variant: Node3D = DAMAGE.find_named(_visual, name_part)
 		if variant != null:
 			_variants.append(variant)
-	for name_part in ["Modular", "Door_Off", "LargeParts", "Broken_7", "Fragments", "Primary", "Panels", "Medium", "Fine", "TopSecondary"]:
+	# Staged GLBs (addons/staged_glb_import) add LargeParts → Small/JaggedFragments,
+	# PlantDestroyed → PotFragments and the in-place DamageReady facade.
+	for name_part in ["Modular", "Door_Off", "LargeParts", "SmallFragments", "JaggedFragments", "PlantDestroyed", "PotFragments", "Broken_7", "Fragments", "Primary", "Panels", "Medium", "Fine", "TopSecondary", "DamageReady"]:
 		var stage: Node3D = DAMAGE.find_named(_visual, name_part)
 		if stage != null:
 			_stages.append(stage)
@@ -159,7 +161,9 @@ func _add_missing_bookcase_shelves() -> void:
 	if model_path.get_file() not in ["03_book_case.glb", "03_book_case_with_back.glb"] or _intact == null:
 		return
 	var baked := _intact.find_child("Intact*", true, false) as MeshInstance3D
-	var material: Material = baked.get_active_material(0) if baked != null else null
+	if baked == null:
+		return # Re-exported staged bookcases already contain their shelves.
+	var material: Material = baked.get_active_material(0)
 	if material == null:
 		var wood := StandardMaterial3D.new()
 		wood.albedo_color = Color(0.45, 0.27, 0.16)
@@ -245,6 +249,8 @@ func take_projectile_hit(damage: float, hit_position: Vector3, _normal: Vector3,
 			call_deferred("_apply_damage", hit_position, direction)
 		elif damage > 0.0 and weapon != "PISTOL":
 			_reaction.shudder(direction)
+	elif _broken and _is_facade_damage():
+		_chip_facade(hit_position, direction)
 	elif bool(get_meta("planning_wall_mount", false)) and freeze and not _broken:
 		_health -= BALANCE.object_damage(damage, weapon, _damage_category())
 		if _health <= 0.0:
@@ -299,7 +305,7 @@ func _apply_damage(hit_position: Vector3, direction: Vector3) -> void:
 		_rebuild_shapes()
 	elif not _stages.is_empty():
 		_broken = true
-		if "server_rack" in model_path.get_file():
+		if "server_rack" in model_path.get_file() or _is_facade_damage():
 			if _intact != null:
 				_intact.hide()
 			var rack_meshes: Array[MeshInstance3D] = DAMAGE.reveal_meshes(_stages[0])
@@ -319,6 +325,27 @@ func _apply_damage(hit_position: Vector3, direction: Vector3) -> void:
 		collision_layer = 0
 		freeze = true
 		_spawn_stage(0, "", hit_position, direction, _pending_full_break)
+
+
+# Localized damage (reception counter): the core stays, facade chips break off.
+func _is_facade_damage() -> bool:
+	return not _stages.is_empty() and _stages[0].name == "DamageReady"
+
+
+func _chip_facade(hit_position: Vector3, direction: Vector3) -> void:
+	var nearest: MeshInstance3D
+	var nearest_distance := 0.8
+	for mesh in DAMAGE.reveal_meshes(_stages[0]):
+		if mesh.visible and mesh.name.begins_with("Facade_Chip"):
+			var distance := (mesh.global_transform * mesh.get_aabb()).get_center().distance_to(hit_position)
+			if distance < nearest_distance:
+				nearest = mesh
+				nearest_distance = distance
+	if nearest == null:
+		return
+	DAMAGE.spawn_piece(self, nearest, null, _stages.size(), 0, direction, hit_position)
+	nearest.hide()
+	_rebuild_shapes()
 
 
 func _rebuild_shapes() -> void:
@@ -355,6 +382,12 @@ func hit_environment_fragment(fragment: RigidBody3D, hit_position: Vector3, dire
 			fragment.queue_free()
 			return
 		next_stage += 1
+	# A single-piece stage (a knocked-over plant pot) shatters into the whole next stage.
+	var stage_index := int(fragment.get("stage_index"))
+	if stage_index + 1 < _stages.size() and DAMAGE.reveal_meshes(_stages[stage_index]).size() == 1:
+		if _spawn_stage(stage_index + 1, "", hit_position, direction, true):
+			fragment.queue_free()
+			return
 	fragment.apply_central_impulse(direction.normalized() * 0.6)
 
 
