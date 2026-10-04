@@ -20,6 +20,7 @@ Build the first playable combat-slice foundation with an authored office floor, 
 - owner-requested sound effects: processed free-licence SFX, core.audio module and gameplay hooks (ADR-0018);
 - support for owner's multi-scene destructible GLBs and repair of references to removed models (ADR-0019);
 - owner-requested sprite-sheet hit effects: torn paper, device sparks, grenade explosion sheet and smoke, extinguisher spray/drop/rupture with sounds (ADR-0020);
+- owner-requested mutagen cloud rework: varied gas puffs from the two supplied sheets and a richer shader (ADR-0021);
 - owner-approved authored character/weapon mounting and automatic animation stances;
 - owner-requested subtle floor material variation and thinner visual seams; lighting remains unchanged;
 - owner-reported main-scene parse failure after unresolved stash conflicts;

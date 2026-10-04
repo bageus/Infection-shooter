@@ -2,9 +2,8 @@ extends Node3D
 const SFX := preload("res://game/core/audio/public/sound_events.gd")
 const FLIPBOOK := preload("res://game/core/vfx/public/sprite_flipbook.gd")
 const ATLASES := preload("res://game/core/vfx/public/effect_atlases.gd")
+const POWDER_SHADER := preload("res://game/core/vfx/public/smoke_puff.gdshader")
 
-const SHADER := preload("res://game/presentation/office_floor/extinguisher_particle.gdshader")
-const TEXTURE := preload("res://models/objects/textures/extinguisher_spray.png")
 
 @onready var _flash: OmniLight3D = $Flash
 @onready var _ring: MeshInstance3D = $PressureRing
@@ -56,13 +55,12 @@ func start(radius: float, cloud_lifetime: float, burst_count: int) -> void:
 	_ring.visible = true
 	_flash.light_energy = 5.0
 	SFX.play(get_parent() if get_parent() != null else self, &"extinguisher_burst", global_position)
-	# Rupture cloud from the extinguisher sheet: a burst of powder swelling out.
-	for i in 3:
-		var offset := Vector3(randf_range(-0.3, 0.3), randf_range(0.1, 0.5), randf_range(-0.3, 0.3))
-		FLIPBOOK.spawn(self, ATLASES.EXTINGUISHER_SPRAY, global_position + offset, radius * randf_range(0.45, 0.6), {
-			"grow": randf_range(1.6, 2.1), "spin": randf() * TAU, "spin_speed": randf_range(-0.4, 0.4),
-			"speed": randf_range(0.55, 0.7), "fade_out": 0.8, "velocity": offset * 0.8, "drag": 1.2, "gravity": -0.15,
-		})
+	# Rupture cloud: the sheet's burst frames (6-11) swell out of the canister.
+	var frames: Vector2i = ATLASES.EXTINGUISHER_SPRAY["burst_frames"]
+	FLIPBOOK.spawn(self, ATLASES.EXTINGUISHER_SPRAY, global_position + Vector3.UP * radius * 0.38, radius * 0.95, {
+		"first_frame": frames.x, "last_frame": frames.y, "pivot": Vector2(0.48, 0.55), "grow": 1.35,
+		"speed": 0.7, "fade_out": 0.5, "spin": randf_range(-0.4, 0.4),
+	})
 	_spawn_fragments()
 	set_process(true)
 	get_tree().create_timer(_cloud_lifetime + 1.0).timeout.connect(queue_free)
@@ -92,18 +90,23 @@ func _setup_particles(emitter: GPUParticles3D, amount: int, lifetime: float,
 	var motion := ParticleProcessMaterial.new()
 	motion.emission_shape = ParticleProcessMaterial.EMISSION_SHAPE_SPHERE
 	motion.emission_sphere_radius = 0.18
+	emitter.position = Vector3.UP * 0.35
+	# Upward hemisphere: puffs never start inside the floor.
 	motion.direction = Vector3.UP
-	motion.spread = 180.0
+	motion.spread = 80.0
 	motion.initial_velocity_min = low_speed
 	motion.initial_velocity_max = high_speed
 	motion.gravity = Vector3(0.0, -0.12, 0.0)
 	emitter.process_material = motion
 	var quad := QuadMesh.new()
 	quad.size = Vector2.ONE * size
+	# Soft procedural powder puffs: the white cloud billows and thins out.
 	var material := ShaderMaterial.new()
-	material.shader = SHADER
-	material.set_shader_parameter("spray_texture", TEXTURE)
+	material.shader = POWDER_SHADER
+	material.set_shader_parameter("smoke_color", Color(0.93, 0.94, 0.95))
 	material.set_shader_parameter("opacity", opacity)
+	material.set_shader_parameter("growth", 2.2)
+	material.set_shader_parameter("swirl", 0.6)
 	quad.material = material
 	emitter.draw_pass_1 = quad
 

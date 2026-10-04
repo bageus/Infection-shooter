@@ -74,10 +74,14 @@ func _test_extinguisher() -> void:
 	var effects: Node3D = setup[1]
 	prop.call("take_projectile_hit", 10.0, prop.global_position + Vector3(0, 0.3, 0), Vector3.BACK, Vector3.FORWARD, "PISTOL")
 	_expect(await _heard(&"extinguisher_spray", 0.5), "A shot extinguisher hisses as it sprays.")
+	await create_timer(0.3).timeout
+	var jet := prop.find_children("Flipbook*", "", true, false)
+	_expect(jet.size() == 1 and float((jet[0] as GeometryInstance3D).get_instance_shader_parameter(&"axial")) > 0.5, "The powder jet from the sheet streams out of the nozzle.")
 	_expect(await _heard(&"canister_drop", 3.0), "The toppled cylinder clangs on the floor.")
 	_expect(await _heard(&"extinguisher_burst", 4.5), "The extinguisher ruptures with a burst.")
 	await create_timer(0.2).timeout
 	_expect(_voices(&"extinguisher_spray") == 0, "The spray sound stops when it ruptures.")
+	_expect(not effects.find_children("Flipbook*", "", true, false).is_empty(), "The rupture plays the sheet's burst cloud.")
 	if is_instance_valid(prop):
 		prop.queue_free()
 	effects.queue_free()

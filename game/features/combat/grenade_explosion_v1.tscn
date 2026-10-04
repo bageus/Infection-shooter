@@ -1,25 +1,9 @@
-[gd_scene load_steps=3 format=3]
+[gd_scene load_steps=2 format=3]
 
 [ext_resource type="Script" path="res://game/features/combat/grenade_explosion_vfx.gd" id="1_vfx"]
-[ext_resource type="AudioStream" path="res://game/features/combat/assets/grenade_pop.wav" id="2_sound"]
 
 [node name="GrenadeExplosionVfx" type="Node3D"]
 script = ExtResource("1_vfx")
-
-[node name="Flash" type="MeshInstance3D" parent="."]
-visible = false
-
-[node name="Fireball" type="MeshInstance3D" parent="."]
-visible = false
-
-[node name="Shockwave" type="MeshInstance3D" parent="."]
-visible = false
-
-[node name="Sparks" type="MeshInstance3D" parent="."]
-visible = false
-
-[node name="Smoke" type="MeshInstance3D" parent="."]
-visible = false
 
 [node name="FireEmbers" type="GPUParticles3D" parent="."]
 emitting = false
@@ -47,7 +31,3 @@ emitting = false
 local_coords = false
 one_shot = true
 explosiveness = 1.0
-
-[node name="ExplosionSound" type="AudioStreamPlayer3D" parent="."]
-stream = ExtResource("2_sound")
-unit_size = 5.0

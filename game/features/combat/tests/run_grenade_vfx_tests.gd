@@ -23,11 +23,11 @@ func _run() -> void:
 	blast.call("start", Vector3.UP)
 	await process_frame
 	var sheet := blast.find_children("Flipbook*", "", false, false)
-	if ATLASES.available(ATLASES.GRENADE_EXPLOSION):
-		_expect(sheet.size() == 1, "The explosion plays the 12-frame sheet.")
-		_expect(not (blast.get_node("Flash") as Node3D).visible, "The sheet replaces the separate flash layer.")
-	else:
-		_expect(sheet.is_empty(), "Without the sheet the layered explosion plays.")
+	_expect(sheet.size() == 1, "The explosion plays the 12-frame sheet.")
+	_expect(blast.get_node_or_null("Flash") == null, "The sheet replaces the old layered sprites.")
+	if sheet.size() == 1:
+		await create_timer(0.08).timeout
+		_expect(float((sheet[0] as GeometryInstance3D).get_instance_shader_parameter(&"frame_position")) >= 2.0, "The flash frames go by quickly.")
 	var spans: Array = ATLASES.GRENADE_EXPLOSION["durations"]
 	_expect(float(spans[0]) * 4.0 <= float(spans[spans.size() - 1]), "Flash frames play fast and the closing smoke frames slowly.")
 	var wisps := blast.get_node("SmokeWisps") as GPUParticles3D

@@ -1,7 +1,7 @@
 extends RefCounted
 
 const RAYS := 48
-const RADIUS := 2.25
+const RADIUS := 3.2
 const HEIGHT := 0.8
 
 

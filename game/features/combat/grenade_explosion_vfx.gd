@@ -1,11 +1,6 @@
 extends Node3D
 const SFX := preload("res://game/core/audio/public/sound_events.gd")
 
-const FLASH := preload("res://models/objects/textures/grenade_explosion_layers/01_flash.png")
-const FIRE := preload("res://models/objects/textures/grenade_explosion_layers/02_fireball.png")
-const SHOCKWAVE := preload("res://models/objects/textures/grenade_explosion_layers/03_shockwave.png")
-const SPARKS := preload("res://models/objects/textures/grenade_explosion_layers/04_sparks.png")
-const SMOKE := preload("res://models/objects/textures/grenade_explosion_layers/05_smoke.png")
 const PARTICLE_SHADER := preload("res://game/features/combat/grenade_explosion_particle.gdshader")
 const SMOKE_SHADER := preload("res://game/core/vfx/public/smoke_puff.gdshader")
 const FLIPBOOK := preload("res://game/core/vfx/public/sprite_flipbook.gd")
@@ -20,34 +15,25 @@ const ATLASES := preload("res://game/core/vfx/public/effect_atlases.gd")
 @export_range(0.1, 12.0, 0.1) var flash_brightness := 4.8
 @export_range(0.1, 2.0, 0.05) var smoke_size := 0.85
 ## Size of the 12-frame explosion sheet relative to effect_radius.
-@export_range(0.1, 2.0, 0.05) var atlas_size := 0.62
+@export_range(0.1, 2.0, 0.05) var atlas_size := 0.78
 ## Lingering smoke that keeps rolling upwards after the blast.
-@export_range(0, 60, 1) var lingering_smoke_count := 18
+@export_range(0, 60, 1) var lingering_smoke_count := 26
 @export_range(0.5, 8.0, 0.1) var lingering_smoke_seconds := 3.4
 
-@onready var _flash: MeshInstance3D = $Flash
-@onready var _fire: MeshInstance3D = $Fireball
-@onready var _shockwave: MeshInstance3D = $Shockwave
-@onready var _sparks: MeshInstance3D = $Sparks
-@onready var _smoke: MeshInstance3D = $Smoke
 @onready var _embers: GPUParticles3D = $FireEmbers
 @onready var _spark_debris: GPUParticles3D = $SparkDebris
 @onready var _wisps: GPUParticles3D = $SmokeWisps
 @onready var _debris: GPUParticles3D = $Debris
 @onready var _light: OmniLight3D = $ImpactLight
-@onready var _sound: AudioStreamPlayer3D = $ExplosionSound
 
 var _started := false
+var _ember_texture: Texture2D
+var _spark_texture: Texture2D
 
 
 func _ready() -> void:
-	_prepare_layer(_flash, FLASH, true, flash_brightness)
-	_prepare_layer(_fire, FIRE, false, 1.0)
-	_prepare_layer(_shockwave, SHOCKWAVE, false, 1.0)
-	_prepare_layer(_sparks, SPARKS, true, 1.0)
-	_prepare_layer(_smoke, SMOKE, false, 1.0)
-	# Keep the pressure ring on the struck surface instead of facing the camera.
-	(_shockwave.material_override as StandardMaterial3D).billboard_mode = BaseMaterial3D.BILLBOARD_DISABLED
+	_ember_texture = _glow_texture(Color(1.0, 0.82, 0.45), Color(1.0, 0.35, 0.05, 0.0))
+	_spark_texture = _glow_texture(Color(1.0, 0.97, 0.85), Color(1.0, 0.6, 0.15, 0.0))
 
 
 func start(surface_normal: Vector3) -> void:
@@ -57,31 +43,16 @@ func start(surface_normal: Vector3) -> void:
 	var outward := surface_normal.normalized() if surface_normal.length_squared() > 0.01 else Vector3.UP
 	var speed := effect_duration / 2.0
 	var size_scale := effect_radius / 2.6
-	var sheet := _play_sheet(outward)
-	for layer in [_flash, _fire, _shockwave, _sparks, _smoke]:
-		layer.position = outward * 0.08
-	_flash.position = outward * 0.12
-	_fire.position = outward * 0.11
-	_smoke.position = outward * 0.16 + Vector3.UP * 0.16
+	_play_sheet(outward)
 	_embers.position = outward * 0.15 * size_scale
 	_wisps.position = outward * 0.12 * size_scale
 	_spark_debris.position = outward * 0.12
 	_debris.position = outward * 0.12
-	_shockwave.basis = Basis(Quaternion(Vector3.BACK, outward))
-	_animate_layer(_shockwave, 0.045, 0.48, 0.55 * size_scale, effect_radius * 1.8, 0.4, speed)
-	if sheet == null:
-		# Fallback while the explosion sheet is missing: the five separate layers.
-		_animate_layer(_flash, 0.0, 0.08, 0.35 * size_scale, 0.95 * size_scale, 0.65, speed)
-		_animate_layer(_fire, 0.02, 0.36, 0.65 * size_scale, effect_radius * 0.68, 0.82, speed)
-		_animate_layer(_sparks, 0.04, 0.3, 0.7 * size_scale, effect_radius * 0.9, 0.12, speed)
-		_animate_layer(_smoke, 0.24, 2.0, smoke_size * size_scale, effect_radius * 1.1, 0.14, speed)
-		var smoke_rise := create_tween()
-		smoke_rise.tween_property(_smoke, "position", _smoke.position + Vector3.UP * effect_radius * 0.2, 1.7 * speed).set_delay(0.24 * speed)
-	_configure_emitter(_embers, FIRE, ember_count, 0.58 * speed, 0.6 * size_scale, effect_radius * 0.65,
+	_configure_emitter(_embers, _ember_texture, ember_count, 0.58 * speed, 0.14 * size_scale, effect_radius * 0.65,
 		outward, 84.0, Vector3(0, 0.9, 0), Color(1, 0.88, 0.62), 0.85, 0.045)
-	_configure_emitter(_spark_debris, SPARKS, spark_count, 0.68 * speed, 0.055 * size_scale, effect_radius * 1.8,
+	_configure_emitter(_spark_debris, _spark_texture, spark_count, 0.68 * speed, 0.055 * size_scale, effect_radius * 1.8,
 		outward, 88.0, Vector3(0, -7.0, 0), Color(1, 0.76, 0.3), 0.95, 0.0)
-	_configure_emitter(_wisps, SMOKE, smoke_count, 1.7 * speed, smoke_size * size_scale, effect_radius * 0.32,
+	_configure_emitter(_wisps, _ember_texture, smoke_count, 1.7 * speed, smoke_size * size_scale, effect_radius * 0.32,
 		outward.lerp(Vector3.UP, 0.45).normalized(), 78.0, Vector3(0, 0.8, 0), Color(0.52, 0.52, 0.5), 0.42, 0.035)
 	(_wisps.draw_pass_1 as PrimitiveMesh).material = _smoke_material(1.8, 0.5, 2.6)
 	var lingering := _lingering_smoke(outward, size_scale)
@@ -104,9 +75,26 @@ func start(surface_normal: Vector3) -> void:
 
 # The supplied 12-frame explosion: flash frames fast, closing smoke frames slow.
 func _play_sheet(outward: Vector3) -> Node3D:
-	return FLIPBOOK.spawn(self, ATLASES.GRENADE_EXPLOSION, global_position + outward * 0.2 + Vector3.UP * effect_radius * 0.12,
-		effect_radius * atlas_size, {"brightness": 1.35, "spin": randf_range(-0.25, 0.25), "grow": 1.18,
+	# The sheet's base (ground ring) sits on the impact point; smoke rises from it.
+	return FLIPBOOK.spawn(self, ATLASES.GRENADE_EXPLOSION, global_position + outward * 0.12 + Vector3.UP * 0.05,
+		effect_radius * atlas_size, {"brightness": 1.35, "grow": 1.15,
 		"speed": 2.0 / effect_duration, "fade_out": 0.35})
+
+
+# Soft radial glow used by ember and spark particles.
+func _glow_texture(core: Color, edge: Color) -> Texture2D:
+	var gradient := Gradient.new()
+	gradient.set_color(0, core)
+	gradient.set_color(1, edge)
+	gradient.add_point(0.35, Color(core, 0.75))
+	var texture := GradientTexture2D.new()
+	texture.gradient = gradient
+	texture.fill = GradientTexture2D.FILL_RADIAL
+	texture.fill_from = Vector2(0.5, 0.5)
+	texture.fill_to = Vector2(1.0, 0.5)
+	texture.width = 64
+	texture.height = 64
+	return texture
 
 
 func _smoke_material(glow: float, opacity: float, growth: float) -> ShaderMaterial:
@@ -123,7 +111,7 @@ func _lingering_smoke(outward: Vector3, size_scale: float) -> GPUParticles3D:
 	var smoke := GPUParticles3D.new()
 	smoke.name = "LingeringSmoke"
 	add_child(smoke)
-	smoke.position = outward * 0.3 + Vector3.UP * 0.25
+	smoke.position = outward * 0.3 + Vector3.UP * effect_radius * 0.12
 	smoke.amount = lingering_smoke_count
 	smoke.lifetime = lingering_smoke_seconds
 	smoke.one_shot = true
@@ -147,50 +135,12 @@ func _lingering_smoke(outward: Vector3, size_scale: float) -> GPUParticles3D:
 	motion.damping_max = 0.8
 	smoke.process_material = motion
 	var quad := QuadMesh.new()
-	quad.size = Vector2.ONE * 1.25 * size_scale
-	quad.material = _smoke_material(0.6, 0.42, 3.0)
+	quad.size = Vector2.ONE * 0.85 * size_scale
+	var material := _smoke_material(0.3, 0.24, 3.2)
+	material.set_shader_parameter("smoke_color", Color(0.47, 0.46, 0.45))
+	quad.material = material
 	smoke.draw_pass_1 = quad
 	return smoke
-
-
-func _prepare_layer(layer: MeshInstance3D, texture: Texture2D, additive: bool, brightness: float) -> void:
-	var quad := QuadMesh.new()
-	quad.size = Vector2.ONE
-	layer.mesh = quad
-	var material := StandardMaterial3D.new()
-	material.albedo_texture = texture
-	material.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
-	material.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
-	material.cull_mode = BaseMaterial3D.CULL_DISABLED
-	material.billboard_mode = BaseMaterial3D.BILLBOARD_ENABLED
-	if additive:
-		material.blend_mode = BaseMaterial3D.BLEND_MODE_ADD
-		material.emission_enabled = true
-		material.emission = Color.WHITE
-		material.emission_texture = texture
-		material.emission_energy_multiplier = brightness
-	elif layer == _fire:
-		material.emission_enabled = true
-		material.emission_texture = texture
-		material.emission = Color(1.0, 0.72, 0.3)
-		material.emission_energy_multiplier = 1.8
-	layer.material_override = material
-	layer.visible = false
-
-
-func _animate_layer(layer: MeshInstance3D, begin: float, finish: float,
-		initial_size: float, final_size: float, opacity: float, time_scale: float) -> void:
-	layer.scale = Vector3.ONE * initial_size
-	var material := layer.material_override as StandardMaterial3D
-	material.albedo_color = Color(1, 1, 1, opacity)
-	var tween := create_tween()
-	if begin > 0.0:
-		tween.tween_interval(begin * time_scale)
-	tween.tween_callback(layer.show)
-	var span := (finish - begin) * time_scale
-	tween.tween_property(layer, "scale", Vector3.ONE * final_size, span).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_OUT)
-	tween.parallel().tween_property(material, "albedo_color", Color(1, 1, 1, 0), span * 0.88).set_delay(span * 0.12)
-	tween.tween_callback(layer.hide)
 
 
 func _configure_emitter(emitter: GPUParticles3D, texture: Texture2D, amount: int,

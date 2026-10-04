@@ -1,75 +1,161 @@
 shader_type spatial;
-render_mode blend_mix, unshaded, cull_disabled, depth_draw_never, skip_vertex_transform;
+// Mutagen cloud: a MultiMesh of camera-facing gas puffs (plus a ground haze
+// quad). Each puff shows one of 12 sheet variants, churns through a
+// domain-warped flow field, slowly morphs into a second variant, pulses its
+// glowing veins and dissolves through noise when it dies.
+//
+// INSTANCE_CUSTOM: r = variant / 12, g = random seed, b = signed spin
+// speed (rad/s), a = stagger (0..1: appear delay, or the cycle offset of a
+// permanent cloud). COLOR = per-puff tint.
+render_mode blend_mix, unshaded, cull_disabled, depth_draw_never, shadows_disabled;
 
-// Adapted from the supplied Sprite2D shader for a camera-facing 3D cloud.
-instance uniform float progress : hint_range(0.0, 1.0) = 0.0;
-instance uniform float phase = 0.0;
-
-uniform sampler2D cloud_texture : source_color, filter_linear_mipmap;
+uniform sampler2D atlas_a : source_color, filter_linear_mipmap, repeat_disable;
+uniform sampler2D atlas_b : source_color, filter_linear_mipmap, repeat_disable;
 uniform sampler2D wall_mask : filter_nearest, repeat_disable;
 uniform bool wall_mask_enabled = false;
-uniform float opacity : hint_range(0.0, 1.0) = 0.78;
-uniform float swirl_strength : hint_range(0.0, 0.15) = 0.085;
-uniform float swirl_speed : hint_range(0.0, 3.0) = 1.25;
-uniform vec4 tint : source_color = vec4(1.0);
+uniform float wall_radius = 2.25;
+uniform float opacity : hint_range(0.0, 1.0) = 0.82;
+uniform float flow_strength : hint_range(0.0, 0.2) = 0.07;
+uniform float flow_speed : hint_range(0.0, 2.0) = 0.35;
+uniform float morph_speed : hint_range(0.0, 1.0) = 0.12;
+uniform vec4 vein_color : source_color = vec4(0.72, 1.0, 0.22, 1.0);
+uniform float vein_glow : hint_range(0.0, 4.0) = 1.4;
+// Ground haze: the quad lies flat on the floor instead of facing the camera.
+uniform bool ground = false;
 
-float hash21(vec2 p) {
-    return fract(sin(dot(p, vec2(127.1, 311.7))) * 43758.5453);
+instance uniform float progress = 0.0;
+instance uniform float phase = 0.0;
+// 1 = permanent cloud: every puff loops on its own offset, never all at once.
+instance uniform float looping = 0.0;
+instance uniform float cycle_seconds = 14.0;
+instance uniform vec3 cloud_center = vec3(0.0);
+
+varying float v_life;
+varying float v_seed;
+varying float v_variant;
+varying float v_morph_variant;
+varying vec4 v_tint;
+varying float v_spin;
+
+float hash(vec2 p) {
+	return fract(sin(dot(p, vec2(127.1, 311.7))) * 43758.5453);
 }
 
-float value_noise(vec2 p) {
-    vec2 i = floor(p);
-    vec2 f = fract(p);
-    vec2 u = f * f * (3.0 - 2.0 * f);
-    float a = hash21(i);
-    float b = hash21(i + vec2(1.0, 0.0));
-    float c = hash21(i + vec2(0.0, 1.0));
-    float d = hash21(i + vec2(1.0, 1.0));
-    return mix(mix(a, b, u.x), mix(c, d, u.x), u.y);
+float noise(vec2 p) {
+	vec2 i = floor(p);
+	vec2 f = fract(p);
+	f = f * f * (3.0 - 2.0 * f);
+	return mix(mix(hash(i), hash(i + vec2(1.0, 0.0)), f.x), mix(hash(i + vec2(0.0, 1.0)), hash(i + vec2(1.0)), f.x), f.y);
+}
+
+float fbm(vec2 p) {
+	float value = 0.0;
+	float amplitude = 0.5;
+	for (int i = 0; i < 4; i++) {
+		value += amplitude * noise(p);
+		p = p * 2.02 + vec2(17.3, 9.1);
+		amplitude *= 0.5;
+	}
+	return value;
+}
+
+vec2 rotate(vec2 p, float angle) {
+	float c = cos(angle);
+	float s = sin(angle);
+	return mat2(vec2(c, s), vec2(-s, c)) * p;
 }
 
 void vertex() {
-    float life = clamp(progress, 0.0, 1.0);
-    vec2 size = vec2(length(MODEL_MATRIX[0].xyz), length(MODEL_MATRIX[1].xyz));
-    // Keep the plane facing the rendering camera without updating every cloud on the CPU.
-    float burst = 1.0 - pow(1.0 - clamp(life / 0.09, 0.0, 1.0), 3.0);
-    VERTEX = vec3(VERTEX.xy * size * mix(0.025, 1.0, burst) * (1.0 + life * 0.22), 0.0);
-    VERTEX.y += life * 0.28;
-    VERTEX += (VIEW_MATRIX * MODEL_MATRIX[3]).xyz;
-    NORMAL = vec3(0.0, 0.0, 1.0);
+	vec4 custom = INSTANCE_CUSTOM;
+	v_seed = custom.g;
+	v_variant = floor(custom.r * 12.0 + 0.5);
+	v_morph_variant = mod(v_variant + 3.0 + floor(v_seed * 5.0), 12.0);
+	v_tint = COLOR;
+	float life;
+	if (looping > 0.5) {
+		life = fract(TIME / max(cycle_seconds, 0.1) + custom.a + phase * 0.01);
+	} else {
+		// Puffs bloom one after another and die at their own moments.
+		float start = custom.a * 0.12;
+		float finish = mix(0.62, 1.0, fract(v_seed * 7.13));
+		life = (progress - start) / max(finish - start, 0.01);
+	}
+	v_life = life;
+	float shown = step(0.0, life) * step(life, 1.0);
+	float l = clamp(life, 0.0, 1.0);
+	float bloom = 1.0 - pow(1.0 - clamp(l / 0.14, 0.0, 1.0), 3.0);
+	float size = mix(0.12, 1.0, bloom) * (1.0 + l * 0.35) * shown;
+	v_spin = custom.b * (TIME + phase) + v_seed * 6.2831;
+	vec2 local = rotate(VERTEX.xy, v_spin) * size;
+	vec3 center = MODEL_MATRIX[3].xyz;
+	float scale = length(MODEL_MATRIX[0].xyz);
+	// Puffs drift outwards and rise as they age.
+	vec3 spread = center - cloud_center;
+	spread.y = 0.0;
+	center += spread * l * 0.28 + vec3(0.0, l * mix(0.25, 0.6, v_seed), 0.0);
+	vec3 world;
+	if (ground) {
+		world = center + (vec3(1.0, 0.0, 0.0) * local.x + vec3(0.0, 0.0, -1.0) * local.y) * scale;
+	} else {
+		world = center + (INV_VIEW_MATRIX[0].xyz * local.x + INV_VIEW_MATRIX[1].xyz * local.y) * scale;
+	}
+	POSITION = PROJECTION_MATRIX * VIEW_MATRIX * vec4(world, 1.0);
+}
+
+vec4 sample_variant(float variant, vec2 uv) {
+	float index = mod(variant, 6.0);
+	vec2 cell = vec2(mod(index, 3.0), floor(index / 3.0));
+	vec2 atlas_uv = (cell + clamp(uv, vec2(0.004), vec2(0.996))) / vec2(3.0, 2.0);
+	return variant < 6.0 ? texture(atlas_a, atlas_uv) : texture(atlas_b, atlas_uv);
 }
 
 void fragment() {
-    float life = clamp(progress, 0.0, 1.0);
-    float activity = pow(1.0 - life, 1.25);
-    float t = (TIME + phase) * swirl_speed;
+	float l = clamp(v_life, 0.0, 1.0);
+	float t = (TIME + phase) * flow_speed + v_seed * 31.0;
+	vec2 p = UV - 0.5;
+	// Swirl: stronger in the core, slowly turning both ways.
+	float radius = length(p);
+	float swirl = sin(t * 0.6 + v_seed * 4.0) * 0.55 * (1.0 - smoothstep(0.0, 0.5, radius));
+	vec2 swirled = rotate(p, swirl) + 0.5;
+	// Domain-warped flow field makes the gas churn instead of sliding.
+	vec2 warp = vec2(fbm(UV * 3.0 + vec2(t, -t * 0.7)), fbm(UV * 3.0 + vec2(-t * 0.8, t * 0.6) + 5.2)) - 0.5;
+	vec2 warp2 = vec2(fbm(UV * 5.5 - vec2(t * 1.3, t * 0.4) + 11.0), fbm(UV * 5.5 + vec2(t * 0.5, -t * 1.1) + 3.7)) - 0.5;
+	vec2 uv_a = swirled + warp * flow_strength * 1.6 + warp2 * flow_strength * 0.6;
+	vec2 uv_b = swirled - warp * flow_strength + warp2 * flow_strength;
+	vec4 gas = mix(sample_variant(v_variant, uv_a), sample_variant(v_variant, uv_b), 0.35);
+	// Slow morph into another variant through a moving noise mask.
+	float morph_mask = smoothstep(0.35, 0.65, fbm(UV * 2.2 + vec2(TIME * morph_speed, v_seed * 9.0)) + 0.35 * sin(TIME * morph_speed * 2.0 + v_seed * 6.0));
+	vec4 other = sample_variant(v_morph_variant, rotate(p, -swirl * 0.7) + 0.5 - warp * flow_strength);
+	gas = mix(gas, other, morph_mask * 0.6);
 
-    float n1 = value_noise(UV * 5.0 + vec2(t * 0.31, -t * 0.23));
-    float n2 = value_noise(UV * 8.0 + vec2(-t * 0.27, t * 0.34));
-    vec2 waves = vec2(sin(t * 0.85 + UV.y * 7.0), cos(t * 0.72 + UV.x * 6.0));
-    vec2 displacement = ((vec2(n1, n2) - vec2(0.5)) + waves * 0.55) * swirl_strength;
-    float angle = sin(t * 0.43) * 0.10;
-    mat2 rotation = mat2(vec2(cos(angle), sin(angle)), vec2(-sin(angle), cos(angle)));
-    vec2 flowing_uv = rotation * (UV - vec2(0.5)) + vec2(0.5) + displacement;
-    vec4 gas = texture(cloud_texture, clamp(flowing_uv, vec2(0.0), vec2(1.0)));
-    vec4 eddies = texture(cloud_texture, clamp(UV - displacement * 0.70, vec2(0.0), vec2(1.0)));
-    gas = mix(gas, eddies, 0.27);
+	float activity = 1.0 - smoothstep(0.35, 1.0, l);
+	vec3 color = gas.rgb * v_tint.rgb;
+	// Glowing veins: the brightest strands pulse with a slow toxic heartbeat.
+	float luminance = dot(gas.rgb, vec3(0.3, 0.59, 0.11));
+	float veins = smoothstep(0.5, 0.85, luminance);
+	float pulse = 0.55 + 0.45 * sin(TIME * 2.6 + v_seed * 12.0 + fbm(UV * 4.0 + t) * 5.0);
+	color += vein_color.rgb * veins * vein_glow * pulse * mix(0.35, 1.0, activity);
+	// Fresh gas flashes, old gas darkens.
+	color *= mix(0.62, 1.12, activity) + 0.5 * (1.0 - smoothstep(0.0, 0.08, l));
 
-    float pulse = 1.0 + 0.10 * activity * sin(t * 3.3 + n1 * 6.0);
-    float brightness = mix(0.40, 1.30, activity) * pulse;
-    float fade = smoothstep(0.0, 0.018, life) * (1.0 - smoothstep(0.42, 1.0, life));
-    float breathing = 0.87 + 0.13 * n2;
+	// Birth: quick fade in. Death: noise eats the gas from its thin edges.
+	float dissolve = smoothstep(0.5, 1.0, l);
+	float grain = fbm(UV * 4.0 + vec2(v_seed * 13.0, -t * 0.5));
+	float eaten = smoothstep(dissolve - 0.18, dissolve + 0.02, grain * (0.55 + 0.45 * gas.a));
+	float alpha = gas.a * v_tint.a * opacity * smoothstep(0.0, 0.05, l) * mix(1.0, eaten, step(0.001, dissolve));
+	alpha *= 1.0 - smoothstep(0.92, 1.0, l);
+	// Soft cell edge so no straight border of the sheet ever shows.
+	vec2 edge = min(UV, 1.0 - UV);
+	alpha *= smoothstep(0.0, 0.06, min(edge.x, edge.y));
 
-    float burst_flash = 0.45 * (1.0 - smoothstep(0.0, 0.07, life));
-    ALBEDO = gas.rgb * tint.rgb * brightness + vec3(0.25, 0.65, 0.12) * burst_flash;
-    EMISSION = ALBEDO * 0.35;
-    ALPHA = gas.a * tint.a * opacity * fade * breathing;
-    if (wall_mask_enabled) {
-        vec3 world_position = (INV_VIEW_MATRIX * vec4(VERTEX, 1.0)).xyz;
-        vec2 horizontal = world_position.xz - MODEL_MATRIX[3].xz;
-        float azimuth = atan(horizontal.y, horizontal.x);
-        float sample_index = floor((azimuth + PI) / TAU * 48.0);
-        float limit = texture(wall_mask, vec2((sample_index + 0.5) / 48.0, 0.5)).r * 2.25;
-        ALPHA *= 1.0 - smoothstep(limit - 0.08, limit, length(horizontal));
-    }
+	if (wall_mask_enabled) {
+		vec3 world_position = (INV_VIEW_MATRIX * vec4(VERTEX, 1.0)).xyz;
+		vec2 horizontal = world_position.xz - cloud_center.xz;
+		float azimuth = atan(horizontal.y, horizontal.x);
+		float sample_index = floor((azimuth + PI) / TAU * 48.0);
+		float limit = texture(wall_mask, vec2((sample_index + 0.5) / 48.0, 0.5)).r * wall_radius;
+		alpha *= 1.0 - smoothstep(limit - 0.1, limit, length(horizontal));
+	}
+	ALBEDO = color;
+	ALPHA = clamp(alpha, 0.0, 1.0);
 }

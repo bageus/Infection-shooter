@@ -1,29 +1,60 @@
-[gd_scene load_steps=7 format=3]
+[gd_scene load_steps=6 format=3]
 
 [ext_resource type="Script" path="res://game/features/infection_source/mutagen_cloud.gd" id="1_cloud_script"]
-[ext_resource type="Shader" path="res://game/features/infection_source/mutagen_cloud.gdshader" id="2_cloud_shader"]
-[ext_resource type="Texture2D" path="res://models/objects/textures/mutagen_cloud.png" id="3_cloud_texture"]
-
-[sub_resource type="ShaderMaterial" id="CloudMaterial"]
-shader = ExtResource("2_cloud_shader")
-shader_parameter/cloud_texture = ExtResource("3_cloud_texture")
-
-[sub_resource type="QuadMesh" id="CloudMesh"]
-material = SubResource("CloudMaterial")
-size = Vector2(4.3, 3.93)
 
 [sub_resource type="CylinderShape3D" id="CloudShape"]
 radius = 2.25
 height = 1.5
+
+[sub_resource type="ParticleProcessMaterial" id="SporeMotion"]
+emission_shape = 3
+emission_box_extents = Vector3(1.3, 0.6, 1.3)
+direction = Vector3(0, 1, 0)
+spread = 35.0
+initial_velocity_min = 0.12
+initial_velocity_max = 0.45
+gravity = Vector3(0, 0.04, 0)
+scale_min = 0.5
+scale_max = 1.3
+
+[sub_resource type="StandardMaterial3D" id="SporeMaterial"]
+transparency = 1
+blend_mode = 1
+shading_mode = 0
+vertex_color_use_as_albedo = true
+albedo_color = Color(0.66, 1, 0.3, 0.85)
+billboard_mode = 3
+billboard_keep_scale = true
+
+[sub_resource type="SphereMesh" id="SporeMesh"]
+material = SubResource("SporeMaterial")
+radius = 0.022
+height = 0.044
+radial_segments = 6
+rings = 3
 
 [node name="MutagenCloud" type="Area3D"]
 script = ExtResource("1_cloud_script")
 collision_layer = 0
 collision_mask = 1
 
-[node name="Visual" type="MeshInstance3D" parent="."]
-position = Vector3(0, 1.65, 0)
-mesh = SubResource("CloudMesh")
+[node name="Visual" type="MultiMeshInstance3D" parent="."]
+cast_shadow = 0
+custom_aabb = AABB(-4.5, -1, -4.5, 9, 6, 9)
+
+[node name="GroundHaze" type="MultiMeshInstance3D" parent="."]
+cast_shadow = 0
+custom_aabb = AABB(-4.5, -1, -4.5, 9, 3, 9)
+
+[node name="Spores" type="GPUParticles3D" parent="."]
+position = Vector3(0, 0.9, 0)
+emitting = false
+amount = 18
+lifetime = 2.6
+local_coords = false
+visibility_aabb = AABB(-4, -2, -4, 8, 6, 8)
+process_material = SubResource("SporeMotion")
+draw_pass_1 = SubResource("SporeMesh")
 
 [node name="CollisionShape3D" type="CollisionShape3D" parent="."]
 position = Vector3(0, 0.75, 0)
