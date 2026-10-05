@@ -79,9 +79,14 @@ func configure_world(container: Node3D, impacts: Node) -> void:
 
 
 func try_fire_at(target_point: Vector3) -> bool:
+	# A shell-by-shell reload is interrupted by firing once a shell is in.
+	if _reloading and shotgun_shell_reload and _magazine_ammo > 0:
+		cancel_reload()
 	if _cooldown_remaining > 0.0 or _reloading or bullet_scene == null or not is_instance_valid(effects_root): return false
 	if _magazine_ammo <= 0:
 		_dry_fire()
+		# The click of an empty gun starts a reload when there is ammo to load.
+		start_reload()
 		return false
 	var shooter := get_parent().get_parent() as CollisionObject3D
 	var now := Time.get_ticks_msec() * 0.001

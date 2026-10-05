@@ -17,6 +17,7 @@ func _run() -> void:
 	_test_ability_hysteresis_and_priority()
 	_test_control_ampule_threshold_cap()
 	_test_ordinary_antidote()
+	_test_last_circle_is_reachable()
 	_test_first_control_loss()
 	_test_escalation_to_defeat()
 	_test_risk_window_expiry_resets_escalation()
@@ -400,3 +401,14 @@ func _test_runtime_cast_control_guard() -> void:
 	terminal.free()
 	runtime.free()
 
+
+# The critical threshold caps at 95 and mutation above it means control loss,
+# so every skill threshold must sit below that cap.
+func _test_last_circle_is_reachable() -> void:
+	var highest := 0.0
+	for row in Catalog.all():
+		highest = maxf(highest, Catalog.threshold(row))
+	_expect(highest < InfectionDomain.MAX_CRITICAL_THRESHOLD, "Every skill threshold is below the critical cap (%.0f)." % highest)
+	for skill_id in ["reflex_arc", "battle_metabolism"]:
+		var row := Catalog.find(skill_id)
+		_expect(Catalog.threshold(row) <= 94.0, "%s opens below the critical cap." % skill_id)

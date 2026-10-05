@@ -7,10 +7,35 @@ enum PickupType { MEDKIT, AMMO_PISTOL, AMMO_UZI, AMMO_SHOTGUN, ANTIDOTE }
 @export_flags_3d_physics var floor_mask := 129
 @export_range(0.001, 0.05) var floor_clearance := 0.018
 var _consumed := false
+var _recheck := 0.0
 
 func _ready() -> void:
 	set_physics_process(false)
+	set_process(false)
 	body_entered.connect(_on_body_entered)
+
+
+## Removes an uncollected drop after `seconds`.
+func expire_after(seconds: float) -> void:
+	get_tree().create_timer(seconds, false).timeout.connect(func() -> void:
+		if not _consumed:
+			queue_free())
+
+
+# A pickup refused on entry (full health/ammo) is offered again while the
+# collector still stands on it, e.g. after taking damage.
+func _process(delta: float) -> void:
+	_recheck -= delta
+	if _recheck > 0.0:
+		return
+	_recheck = 0.5
+	var standing := false
+	for body in get_overlapping_bodies():
+		if body.has_method("heal") or body.has_method("add_ammo_for_weapon"):
+			standing = true
+			_on_body_entered(body)
+	if not standing or _consumed:
+		set_process(false)
 
 
 # Called after the drop's world position is assigned. Queries run in physics.
@@ -75,6 +100,8 @@ func _on_body_entered(body: Node) -> void:
 		_consumed = true
 		_play_pickup_sound(body)
 		queue_free()
+	elif not is_processing():
+		set_process(true)
 
 
 # Sounds play on the collector, which outlives this pickup (ADR-0018).

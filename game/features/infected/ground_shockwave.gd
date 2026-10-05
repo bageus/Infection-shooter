@@ -88,7 +88,23 @@ func _strike_passed_bodies() -> void:
 		if offset.y > MAX_HEIGHT or Vector2(offset.x, offset.z).length() > _radius + 0.3:
 			continue
 		_hit[collider.get_instance_id()] = true
+		if _sheltered(collider):
+			continue
 		_strike(collider, int(hit.get("shape", -1)), offset)
+
+
+# The ground wave does not pass through walls.
+func _sheltered(body: Node3D) -> bool:
+	var target := body.global_position + Vector3.UP * 0.4
+	var query := PhysicsRayQueryParameters3D.create(global_position + Vector3.UP * 0.4, target, 1)
+	var excluded: Array[RID] = []
+	if body is CollisionObject3D:
+		excluded.append((body as CollisionObject3D).get_rid())
+	if is_instance_valid(source) and source is CollisionObject3D:
+		excluded.append((source as CollisionObject3D).get_rid())
+	query.exclude = excluded
+	var hit := get_world_3d().direct_space_state.intersect_ray(query)
+	return not hit.is_empty() and hit.get("collider") is StaticBody3D
 
 
 func _strike(collider: Node3D, shape_index: int, offset: Vector3) -> void:

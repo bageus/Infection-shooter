@@ -3,7 +3,7 @@
 [ext_resource type="Script" path="res://game/features/infection_source/mutagen_cloud.gd" id="1_cloud_script"]
 
 [sub_resource type="CylinderShape3D" id="CloudShape"]
-radius = 2.25
+radius = 1.8
 height = 1.5
 
 [sub_resource type="ParticleProcessMaterial" id="SporeMotion"]

@@ -93,7 +93,12 @@ static func required_stability(row: Array) -> float:
 	return float(STABILITY_STAGES[stage(row)])
 
 
+# The critical threshold tops out at 95 and mutation above it means control
+# loss, so a 95 requirement could only be met at exactly 95.0. The last circle
+# opens one point earlier to leave a playable window.
+const HIGHEST_REACHABLE_THRESHOLD := 94.0
+
+
 static func threshold(row: Array) -> float:
-	if int(row[3]) == 3:
-		return FIRST_POINT + float(stage(row)) * 15.0 + 10.0
-	return FIRST_POINT + float(stage(row)) * 15.0 + float(row[3]) * POINT_STEP
+	var value := FIRST_POINT + float(stage(row)) * 15.0 + (10.0 if int(row[3]) == 3 else float(row[3]) * POINT_STEP)
+	return minf(value, HIGHEST_REACHABLE_THRESHOLD)

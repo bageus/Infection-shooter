@@ -8,6 +8,16 @@ const EXPLOSION_V1 := preload("res://game/features/combat/grenade_explosion_v1.t
 static var scorch_texture: Texture2D
 
 
+## True when a static wall stands between a blast centre and the body.
+static func is_sheltered(world: World3D, from: Vector3, body: Node3D) -> bool:
+	var target := body.global_position + Vector3.UP * 0.5
+	var query := PhysicsRayQueryParameters3D.create(from, target, 1)
+	if body is CollisionObject3D:
+		query.exclude = [(body as CollisionObject3D).get_rid()]
+	var hit := world.direct_space_state.intersect_ray(query)
+	return not hit.is_empty() and hit.get("collider") is StaticBody3D
+
+
 static func explode(projectile: Node3D, location: Vector3, normal: Vector3, contact: Object, scene: Node3D, impacts: Node) -> void:
 	if not is_instance_valid(scene):
 		return
@@ -30,6 +40,9 @@ static func explode(projectile: Node3D, location: Vector3, normal: Vector3, cont
 		var body := collider as Node3D
 		if body == null:
 			continue
+		# Walls shelter whoever stands behind them.
+		if collider != contact and is_sheltered(projectile.get_world_3d(), location + normal * 0.25, body):
+			continue
 		var distance := _distance_to_shape(collider, int(hit.get("shape", -1)), location, body.global_position)
 		var factor := pow(1.0 - clampf(distance / RADIUS, 0.0, 1.0), 1.15)
 		var direction := (body.global_position - location).normalized()
@@ -39,6 +52,10 @@ static func explode(projectile: Node3D, location: Vector3, normal: Vector3, cont
 			collider.call("take_projectile_hit_at_shape", 380.0 * factor, location, -direction, direction, "GRENADE", int(hit.get("shape", -1)))
 		elif collider.has_method("take_projectile_hit"):
 			collider.call("take_projectile_hit", 380.0 * factor, location, -direction, direction, "GRENADE")
+		elif collider.has_method("apply_blast_stun"):
+			collider.call("take_damage", 155.0 * factor, "fire") # the player: elemental (Hardened Tissue)
+		elif collider.has_method("take_blast_damage"):
+			collider.call("take_blast_damage", 155.0 * factor, location)
 		elif collider.has_method("take_damage"):
 			collider.call("take_damage", 155.0 * factor)
 		if collider is RigidBody3D and not (collider as RigidBody3D).freeze:

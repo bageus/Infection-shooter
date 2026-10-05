@@ -12,6 +12,9 @@ signal depleted
 @export var absorption_seconds: float = 2.0
 @export var lifetime_seconds: float = 14.0
 @export var permanent: bool = false
+## A fresh death cloud waits this long before it starts feeding mutagen, so
+## the player can step out of it.
+@export var absorb_delay: float = 0.6
 ## Gas puffs per cloud (random in range) and how far they spread from the centre.
 @export var puff_count_range := Vector2i(7, 10)
 @export var cloud_radius := 1.35
@@ -20,6 +23,7 @@ var _active: bool = false
 var _absorption_remaining: float = 0.0
 var _lifetime_remaining: float = 0.0
 var _cycle_elapsed: float = 0.0
+var _delay_remaining: float = 0.0
 # Variant, seed, spin and stagger of every puff (what the MultiMesh holds).
 var _puffs: Array[Color] = []
 @onready var _visual: MultiMeshInstance3D = $Visual
@@ -37,6 +41,7 @@ func activate() -> void:
 	_absorption_remaining = absorption_seconds
 	_lifetime_remaining = lifetime_seconds
 	_cycle_elapsed = 0.0
+	_delay_remaining = 0.0 if permanent else absorb_delay
 	var walls := WALL_FIELD.texture_for(self)
 	var phase := randf_range(0.0, 100.0)
 	# Every cloud is new: its own puffs, variants, layout, spin and shade.
@@ -77,6 +82,9 @@ func _physics_process(delta: float) -> void:
 	if _absorption_remaining <= 0.0:
 		# The mutagen is spent, but the visual cloud finishes dissipating naturally.
 		return
+	if _delay_remaining > 0.0:
+		_delay_remaining -= delta
+		return
 
 	var absorbing_body: Node = _find_absorbing_body()
 	if absorbing_body == null:
@@ -89,9 +97,16 @@ func _physics_process(delta: float) -> void:
 		monitoring = false
 
 
+# Overlapping clouds do not stack: a body absorbs from one cloud per frame.
 func _find_absorbing_body() -> Node:
+	var frame := Engine.get_physics_frames()
 	for body in get_overlapping_bodies():
-		if body != null and body.has_method("absorb_mutagen") and WALL_FIELD.clear_to(self, body):
+		if body == null or not body.has_method("absorb_mutagen"):
+			continue
+		if int(body.get_meta(&"mutagen_absorbed_frame", -1)) == frame:
+			continue
+		if WALL_FIELD.clear_to(self, body):
+			body.set_meta(&"mutagen_absorbed_frame", frame)
 			return body
 	return null
 

@@ -186,12 +186,13 @@ func _spawn_point(index: int, total: int) -> Vector3:
 
 
 func _alive_summoned() -> int:
-	var alive := 0
+	var living: Array[WeakRef] = []
 	for ref: WeakRef in _summoned:
 		var enemy := ref.get_ref() as Node
 		if enemy != null and not enemy.is_queued_for_deletion() and not bool(enemy.call("is_dead")):
-			alive += 1
-	return alive
+			living.append(ref)
+	_summoned = living # forget the dead
+	return living.size()
 
 
 func _half_height() -> float:

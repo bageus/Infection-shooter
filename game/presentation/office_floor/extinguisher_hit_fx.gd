@@ -195,6 +195,8 @@ func _rupture() -> void:
 	var location := _body.global_position
 	var world := effects_root
 	if not is_instance_valid(world):
+		# No effects container: still blow up so the host extinguisher is freed.
+		ruptured.emit(location)
 		return
 	var burst := BURST.instantiate() as Node3D
 	burst.call("configure_world", effects_root, impact_pool)

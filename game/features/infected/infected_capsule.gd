@@ -155,6 +155,12 @@ func take_projectile_damage(
 			_parts.sever(part, direction)
 
 
+## Explosion damage: limbs torn off fly away from the blast centre.
+func take_blast_damage(amount: float, origin: Vector3) -> void:
+	_last_hit_position = origin
+	take_damage(amount)
+
+
 func take_damage(amount: float) -> void:
 	_apply_damage(amount, amount >= BLAST_DISMEMBER_DAMAGE)
 
@@ -170,7 +176,8 @@ func _apply_damage(amount: float, blast: bool) -> void:
 	health = maxf(0.0, health - amount)
 	if first_wound:
 		blood_wounded.emit(global_position, _blood_exclusions())
-	if health > 0.0 and _animation != null:
+	# Damage over time arrives in tiny per-frame bits; only real hits flinch.
+	if health > 0.0 and _animation != null and amount >= 1.0:
 		_animation.call("notify_hit")
 	if health <= 0.0:
 		_die()
@@ -255,16 +262,18 @@ func _physics_process(delta: float) -> void:
 			_animation.call("set_active", not far)
 	if far and physics_frame % 12 != _lod_frame_offset:
 		return
+	# A far enemy ticks every 12th frame, so its clocks advance 12 frames' worth.
+	var step := delta * 12.0 if far else delta
 
-	_attack_cooldown = maxf(0.0, _attack_cooldown - delta)
-	_obstacle_cooldown = maxf(0.0, _obstacle_cooldown - delta)
+	_attack_cooldown = maxf(0.0, _attack_cooldown - step)
+	_obstacle_cooldown = maxf(0.0, _obstacle_cooldown - step)
 
 	var near := distance_sq < full_simulation_distance * full_simulation_distance
 	var ai_divisor := 1 if near else 4
 	if physics_frame % ai_divisor == _ai_tick_offset % ai_divisor:
 		_cached_desired = _desired_velocity_from_offset(target_offset)
 
-	_behaviour_tick(delta, target_offset)
+	_behaviour_tick(step, target_offset)
 	var desired := Vector3.ZERO if _blast_stun_remaining > 0.0 else _cached_desired
 	if not _sleeping_far:
 		_turn_toward_face_direction(delta)
@@ -273,10 +282,9 @@ func _physics_process(delta: float) -> void:
 	_push_velocity = _push_velocity.move_toward(Vector3.ZERO, push_decay * delta)
 
 	if _sleeping_far:
-		# Far enemies use cheap kinematic stepping and skip CharacterBody collision solving.
-		var step_delta := delta * 12.0
-		global_position.x += velocity.x * step_delta
-		global_position.z += velocity.z * step_delta
+		# Far enemies take one cheap collision-checked step (no sliding or
+		# gravity), so they still stop at walls and closed doors.
+		move_and_collide(Vector3(velocity.x, 0.0, velocity.z) * step)
 		return
 
 	_apply_gravity(delta)
@@ -440,6 +448,10 @@ func _track_blood_motion() -> void:
 
 func _die() -> void:
 	_dead = true
+	# An enemy killed while far had its animation paused; the death must play.
+	_sleeping_far = false
+	if _animation != null:
+		_animation.call("set_active", true)
 	audio.died()
 	_pending_hit = -1.0
 	_blood_segment_start = global_position
@@ -447,7 +459,8 @@ func _die() -> void:
 	blood_death.emit(global_position, _blood_exclusions(), get_instance_id())
 	if is_instance_valid(_target) and _target.has_method("mutation_enemy_killed"):
 		_target.call("mutation_enemy_killed", self)
-	if is_instance_valid(effects_root):
+	# Infected summoned by a Horde drop nothing: an endless summon is no loot farm.
+	if is_instance_valid(effects_root) and not has_meta("summoned_by"):
 		var drop_table := DROP_TABLE_SCRIPT.new()
 		effects_root.add_child(drop_table)
 		drop_table.call("drop_for_enemy", effects_root, global_position)

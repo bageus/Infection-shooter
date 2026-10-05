@@ -107,7 +107,9 @@ func _physics_process(delta: float) -> void:
 func _handle_hit(collider: Object, hit_position: Vector3, normal: Vector3, shape_index: int = -1) -> bool:
 	if collider == null:
 		return true
-	_spawn_impact_decal(collider, hit_position, normal)
+	# Bullet holes belong on surfaces, not on the infected or their limbs.
+	if not collider.has_method("take_projectile_damage") and _hit_material(collider, shape_index) != "flesh":
+		_spawn_impact_decal(collider, hit_position, normal)
 	_play_impact(collider, hit_position, shape_index)
 
 	var distance := _collision_origin.distance_to(hit_position)

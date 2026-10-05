@@ -98,8 +98,6 @@ func _physics_process(delta: float) -> void:
 	_update_move(delta)
 	var w:=get_current_weapon()
 	if w != null and not _mutation_menu_open and _roll_remaining <= 0.0 and (control_lost or (Input.is_action_pressed("fire") if bool(w.call("wants_continuous_fire")) else Input.is_action_just_pressed("fire"))):
-		if int(w.call("get_magazine_ammo")) == 0:
-			mutation_effects.call("refill_organic_magazine")
 		_fire_weapon(w)
 func _unhandled_input(event: InputEvent) -> void:
 	if get_tree().paused:
@@ -304,8 +302,23 @@ func apply_blast_stun(duration: float, intensity: float) -> void:
 	_stun_ringing.play()
 
 func _exit_tree() -> void:
-	if _stun_remaining > 0.0:
-		AudioServer.set_bus_volume_db(0, _original_master_volume)
+	_end_blast_stun()
+
+
+# Pause, game over and the planner must not keep the muffled, ringing mix.
+func _notification(what: int) -> void:
+	if what == NOTIFICATION_PAUSED:
+		_end_blast_stun()
+
+
+func _end_blast_stun() -> void:
+	if _stun_remaining <= 0.0:
+		return
+	_stun_remaining = 0.0
+	camera_rig.position = Vector3.ZERO
+	AudioServer.set_bus_volume_db(0, _original_master_volume)
+	if is_instance_valid(_stun_ringing):
+		_stun_ringing.stop()
 
 
 func _update_move(delta:float)->void:

@@ -10,6 +10,12 @@ var last_hit_time := -100.0
 var heart_cooldown := 0.0
 var kill_streak := 0
 var kill_timer := 0.0
+## Seconds between melee strikes; reach is measured to the enemy's surface.
+const MELEE_COOLDOWN := 0.5
+const MELEE_REACH := 1.1
+var melee_cooldown := 0.0
+var _melee_victim: WeakRef
+var _melee_time := -100.0
 var storm_tick := 0.0
 var acid_pools: Array[Dictionary] = []
 
@@ -56,6 +62,7 @@ func enabled(skill_id: String) -> bool:
 
 func _process(delta: float) -> void:
 	heart_cooldown = maxf(0.0, heart_cooldown - delta)
+	melee_cooldown = maxf(0.0, melee_cooldown - delta)
 	kill_timer = maxf(0.0, kill_timer - delta)
 	if kill_timer == 0.0:
 		kill_streak = 0
@@ -121,6 +128,8 @@ func survive_lethal() -> bool:
 
 func on_enemy_killed(enemy: Node3D) -> void:
 	var near := enemy.global_position.distance_to(player.global_position) < 4.0
+	# Predator skills reward kills made with a melee strike, as described.
+	var melee_kill: bool = _melee_victim != null and _melee_victim.get_ref() == enemy and Time.get_ticks_msec() / 1000.0 - _melee_time < 0.5
 	kill_streak = mini(6, kill_streak + 1) if kill_timer > 0.0 else 1
 	kill_timer = 5.0
 	if enabled("combat_reflex"): buffs["combat_reflex"] = 4.0
@@ -128,10 +137,10 @@ func on_enemy_killed(enemy: Node3D) -> void:
 	if enabled("hyperactive"):
 		runtime.call("reduce_skill_cooldowns", 1.0 + kill_streak * 0.15)
 	if near and enabled("adrenaline"): buffs["adrenaline"] = 5.0
-	if near and enabled("killer_instinct"):
+	if melee_kill and enabled("killer_instinct"):
 		(player.call("get_current_weapon") as Node3D).call("add_magazine_ammo", 2)
 		buffs["killer_instinct"] = 5.0
-	if near and enabled("devourer"):
+	if melee_kill and enabled("devourer"):
 		_heal_or_armor(8.0)
 	if active_buff("living_harvest"):
 		_heal_or_armor(14.0)
@@ -141,8 +150,6 @@ func on_enemy_killed(enemy: Node3D) -> void:
 			if other != enemy: other.call("apply_mutation_poison", 4.0, 5.0, true)
 	if enabled("recycling") and randf() < 0.35:
 		player.call("add_ammo_to_current_weapon", 5)
-	if enabled("organic_ammo"):
-		player.call("heal", 1.0)
 
 
 func movement_multiplier() -> float:
@@ -160,22 +167,30 @@ func on_roll() -> void:
 		buffs["reflex_arc"] = 3.0
 
 
-func melee() -> void:
-	for enemy in _enemies_near(player.global_position, 1.7):
-		if (enemy.global_position - player.global_position).normalized().dot(-(player.get_node("AimPivot") as Node3D).global_basis.z) > 0.0:
-			enemy.call("take_damage", 36.0 if enabled("claws") else 17.0)
-			return
+func melee() -> bool:
+	if melee_cooldown > 0.0:
+		return false
+	melee_cooldown = MELEE_COOLDOWN
+	var forward := -(player.get_node("AimPivot") as Node3D).global_basis.z
+	for enemy in _enemies_near(player.global_position, MELEE_REACH + 2.5):
+		var offset := enemy.global_position - player.global_position
+		offset.y = 0.0
+		if offset.length() - _body_radius(enemy) > MELEE_REACH or offset.normalized().dot(forward) <= 0.0:
+			continue
+		_melee_victim = weakref(enemy)
+		_melee_time = Time.get_ticks_msec() / 1000.0
+		enemy.call("take_damage", 36.0 if enabled("claws") else 17.0)
+		return true
+	return false
 
 
-func refill_organic_magazine() -> bool:
-	if not enabled("organic_ammo") or float(player.get("health")) <= 8.0:
-		return false
-	var gun := player.call("get_current_weapon") as Node3D
-	if gun == null or int(gun.call("get_magazine_ammo")) > 0:
-		return false
-	player.set("health", float(player.get("health")) - 6.0)
-	gun.call("add_magazine_ammo", maxi(1, floori(float(gun.get("magazine_size")) / 3.0)))
-	return true
+static func _body_radius(body: Node) -> float:
+	var shape := body.get_node_or_null("CollisionShape3D") as CollisionShape3D
+	if shape != null and shape.shape is CapsuleShape3D:
+		return (shape.shape as CapsuleShape3D).radius * absf(shape.global_basis.get_scale().x)
+	return 0.4
+
+
 
 
 func _update_weapons() -> void:
