@@ -54,7 +54,7 @@ static func _project_surface(receiver: MeshInstance3D, surface: int, projector: 
 			polygon = _clip(polygon, axis, volume.end[axis], false)
 		if polygon.size() < 3:
 			continue
-		var offset := .018 if world_normal.y > .85 else .0015
+		var offset := .018 if world_normal.y > .85 and bool(receiver.get_meta("procedural_floor_proxy", false)) else .0015
 		for fan in range(1, polygon.size() - 1):
 			for point in [polygon[0], polygon[fan], polygon[fan + 1]]:
 				output.positions.append(to_local * (projector * point + world_normal * offset))

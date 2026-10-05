@@ -47,7 +47,8 @@ func find_behind(position: Vector3, direction: Vector3, excluded: Array[RID]) ->
 
 func _cast(start: Vector3, finish: Vector3, excluded: Array[RID], floor_only: bool) -> Dictionary:
 	var query := PhysicsRayQueryParameters3D.create(start, finish, collision_mask)
-	query.exclude = excluded.duplicate()
+	var skipped: Array[RID] = excluded.duplicate()
+	query.exclude = skipped
 	query.collide_with_areas = false
 	for attempt in range(8):
 		var hit := get_world_3d().direct_space_state.intersect_ray(query)
@@ -59,7 +60,8 @@ func _cast(start: Vector3, finish: Vector3, excluded: Array[RID], floor_only: bo
 			return capture(hit["position"], normal, collider)
 		if collider == null:
 			return {}
-		query.exclude.append(collider.get_rid())
+		skipped.append(collider.get_rid())
+		query.exclude = skipped
 	return {}
 
 

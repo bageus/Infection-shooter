@@ -45,6 +45,7 @@ static func _collision_geometry(body: Node3D, projector: Transform3D, footprint:
 		if not child is CollisionShape3D or not child.shape is BoxShape3D or child.disabled:
 			continue
 		var receiver := MeshInstance3D.new()
+		receiver.set_meta("procedural_floor_proxy", true)
 		receiver.mesh = BoxMesh.new()
 		receiver.mesh.size = child.shape.size
 		receiver.transform = child.global_transform

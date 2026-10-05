@@ -1,5 +1,6 @@
 extends SceneTree
 const MAIN := preload("res://game/bootstrap/app/main.tscn")
+const EXPLOSION := preload("res://game/features/combat/public/grenade_explosion.gd")
 const POOL := preload("res://game/features/combat/public/impact_effects.gd")
 const PISTOL := preload("res://game/features/combat/public/pistol.tscn")
 const BLOOD := preload("res://game/presentation/office_floor/public/props/blood_decal.tscn")
@@ -72,6 +73,8 @@ func _projection() -> void:
 	for entry in entries:
 		for vertex in entry["mesh"].get_faces():
 			_check(absf(vertex.x) <= .0801 and vertex.z > 0, "End decal never overhangs the width or crosses to rear face")
+	EXPLOSION._scorch(stage, projector.origin, Vector3.BACK, pool, end)
+	await _capture("scorch_narrow_end", projector.origin)
 	projector.origin.x = 4.0
 	entries = pool.call("projected_geometry", left, projector, Vector2(1.6, 1.0), .18, true)
 	_check(entries.size() == 2, "A single stamp continues onto adjacent receiver")
@@ -83,8 +86,12 @@ func _projection() -> void:
 			if absf(world.x - 4.0) < .0001:
 				seams.append(arrays[Mesh.ARRAY_TEX_UV][index].x)
 	_check(seams.size() >= 4 and seams.all(func(value: float) -> bool: return absf(value - .5) < .0001), "Both objects share the same image coordinates at their seam")
+	EXPLOSION._scorch(stage, projector.origin, Vector3.BACK, pool, left)
+	await _capture("scorch_adjacent_walls", projector.origin)
 	projector.origin.x = 8.0
 	_check((pool.call("projected_geometry", glass, projector, Vector2.ONE, .18, true) as Array).is_empty(), "Scorch rejects glass")
+	EXPLOSION._scorch(stage, projector.origin, Vector3.BACK, pool, glass)
+	_check(not glass.get_child(1).get_children().any(func(node: Node) -> bool: return node.has_meta("surface_mark")), "Real explosion scorch leaves glass clean")
 	var blood := BLOOD.instantiate() as Node3D
 	blood.call("configure_world", stage, pool)
 	blood.call("configure_blood", "splatter_01", "object")
@@ -96,7 +103,7 @@ func _projection() -> void:
 	_check(visual.mesh is ArrayMesh and visual.mesh.get_surface_count() == 2, "Blood at table edge clips to table and adjacent chair")
 	for vertex in visual.mesh.get_faces():
 		var point := visual.global_transform * vertex
-		_check(point.y > .75 and point.y < .78, "Blood follows actual seat/table top, never floats on a bounding plane")
+		_check(point.y > .75 and point.y < .7525, "Blood follows actual seat/table top, never floats on a bounding plane")
 	await _capture("blood_table_chair", blood.global_position)
 	blood.queue_free()
 	for body in [end, left, right, glass, table, chair]:

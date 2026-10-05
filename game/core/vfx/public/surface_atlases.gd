@@ -11,8 +11,9 @@ static func material(texture: Texture2D, cell: int) -> ShaderMaterial:
 	var result := ShaderMaterial.new()
 	result.shader = SHADER
 	result.set_shader_parameter("atlas", texture)
+	result.set_shader_parameter("scorch", texture == BULLET and cell >= 5)
 	var guard := Vector2(.5 / texture.get_width(), .5 / texture.get_height())
 	result.set_shader_parameter("region", Vector4((cell % 4) * .25 + guard.x,
-		(cell / 4) * .5 + guard.y, .25 - guard.x * 2, .5 - guard.y * 2))
+		floori(float(cell) / 4.0) * .5 + guard.y, .25 - guard.x * 2, .5 - guard.y * 2))
 	result.render_priority = 1
 	return result
