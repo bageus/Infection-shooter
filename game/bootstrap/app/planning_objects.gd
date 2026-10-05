@@ -408,7 +408,8 @@ func _apply_layout_data(data: Dictionary) -> Dictionary:
 		if node.has_method("configure_display") and record.get("display") is Dictionary:
 			node.call("configure_display", record["display"])
 		if node.has_method("configure_blood_normal"):
-			var blood_normal: Array = record.get("blood_normal", [0, 1, 0])
+			var default_normal: Vector3 = node.get("surface_normal")
+			var blood_normal: Array = record.get("blood_normal", [default_normal.x, default_normal.y, default_normal.z])
 			node.call("configure_blood_normal", Vector3(float(blood_normal[0]), float(blood_normal[1]), float(blood_normal[2])))
 			node.call("configure_blood_attachment", record.get("blood_attachment", {}))
 		if record.has("object_id"):

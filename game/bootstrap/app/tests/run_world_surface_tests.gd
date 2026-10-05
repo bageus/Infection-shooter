@@ -146,9 +146,60 @@ func _planner_blood() -> void:
 	mark.global_position = point
 	_check((mark.get_node("BloodQuad") as Node3D).global_position.y > .0135, "Floor blood is above the visible floor")
 	mark.queue_free()
+	await _blood_roundtrip(planner, objects)
 	planner.call("exit")
 	stage.queue_free()
 	await process_frame
+
+
+func _blood_roundtrip(planner: Node, objects: Node) -> void:
+	var model := "res://models/objects/enviroments/10/10_couch_red_destructible.glb"
+	var prop := planner.call("_instantiate_asset", model) as Node3D
+	(planner.get("root") as Node3D).add_child(prop)
+	prop.set_meta("planning_scene_path", model)
+	prop.set_meta("planning_object_id", "surface_test_couch")
+	(objects.get("placed") as Array).append(prop)
+	var anchor: MeshInstance3D
+	for node in prop.find_children("*", "MeshInstance3D", true, false):
+		if node.is_visible_in_tree() and absf(node.global_basis.determinant()) > .00001:
+			anchor = node
+			break
+	_check(anchor != null, "Attachment uses an actual authored mesh")
+	if anchor == null:
+		return
+	var mark := BLOOD.instantiate() as Node3D
+	mark.call("configure_blood", "smear_04", "object")
+	(planner.get("root") as Node3D).add_child(mark)
+	mark.set_meta("planning_scene_path", "res://game/presentation/office_floor/public/props/blood_decal.tscn")
+	mark.call("configure_blood_normal", Vector3.BACK)
+	mark.position = Vector3(0, .6, .3)
+	mark.call("attach_blood", anchor, "surface_test_couch")
+	(objects.get("placed") as Array).append(mark)
+	var offset := prop.global_transform.affine_inverse() * mark.global_position
+	prop.position.x += 2
+	prop.rotation.y = .5
+	await process_frame
+	await process_frame
+	_check(mark.global_position.distance_to(prop.global_transform * offset) < .001, "Object blood follows translation and rotation")
+	var storage: RefCounted = planner.get("storage")
+	var data: Dictionary = storage.call("_collect_layout_data")
+	objects.call("_apply_layout_data", data)
+	await process_frame
+	var restored: Dictionary = storage.call("_collect_layout_data")
+	_check(restored["objects"].size() == data["objects"].size(), "Blood/object record count survives reload")
+	for i in range(mini(data["objects"].size(), restored["objects"].size())):
+		for key in data["objects"][i]:
+			var expected: Variant = data["objects"][i][key]
+			var actual: Variant = restored["objects"][i].get(key)
+			var matches: bool = is_equal_approx(float(expected), float(actual)) if expected is float else expected == actual
+			_check(matches, "Blood/object roundtrip field: " + key)
+	for item: Node3D in objects.get("placed"):
+		if item.has_method("get_blood_config"):
+			_check(item.get("_anchor") != null, "Loaded blood restores its mesh anchor")
+	objects.call("_apply_layout_data", {"version": 6, "objects": [{"scene": "res://game/presentation/office_floor/public/props/blood_decal.tscn", "blood_texture": "smear_04", "blood_surface": "wall"}]})
+	for item: Node3D in objects.get("placed"):
+		if item.has_method("get_blood_config"):
+			_check((item.get("surface_normal") as Vector3).is_equal_approx(Vector3.BACK), "Legacy wall blood stays vertical")
 
 
 func _check(condition: bool, message: String) -> void:

@@ -61,7 +61,7 @@ static func apply_probe(placing: Node3D, preview: Node3D) -> void:
 		owner = owner.get_parent()
 	if owner == null:
 		return
-	if not owner.has_meta("planning_object_id"):
+	if str(owner.get_meta("planning_object_id", "")).is_empty():
 		owner.set_meta("planning_object_id", "object_%d" % Time.get_ticks_usec())
 	placing.call("attach_blood", anchor, str(owner.get_meta("planning_object_id")))
 
