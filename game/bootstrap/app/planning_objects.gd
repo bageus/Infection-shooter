@@ -1,4 +1,5 @@
 extends Node
+const BLOOD_PLACEMENT := preload("res://game/bootstrap/app/planning_blood_placement.gd")
 
 
 var player_spawn_defined = false
@@ -79,7 +80,9 @@ func _register_editable_children(parent: Node) -> void:
 			if _is_editable_scene_object(node):
 				if not placed.has(node):
 					placed.append(node)
-				node.set_meta("planning_existing", true)
+				# Lamps are replaceable map entries even when baked into Structure.
+				if not node.is_in_group("planner_lights"):
+					node.set_meta("planning_existing", true)
 			else:
 				_register_editable_children(node)
 
@@ -107,6 +110,9 @@ func _register_actor_objects() -> void:
 func _is_editable_scene_object(node: Node3D) -> bool:
 	if node == session.root or node == session.structure_root:
 		return false
+	if node.is_in_group("planner_lights"):
+		node.set_meta("planning_scene_path", "res://game/presentation/office_floor/public/props/planner_light.tscn")
+		return true
 	return geometry._find_collision_descendant(node) != null and node.get_parent() != session.host
 
 
@@ -134,12 +140,14 @@ func _rebuild_preview() -> void:
 	preview = catalog._instantiate_asset(selected_path)
 	if preview == null:
 		return
+	preview.set_meta("planning_preview", true)
 	controls._configure_new_asset(preview, selected_entry)
 	session.host.add_child(preview)
 	if _selected_kind() == "light" and preview.has_method("set_planning_visual"):
 		preview.call_deferred("set_planning_visual", true)
 	geometry._set_preview_collision(preview, true)
 	controls._apply_special_default_height(preview, _selected_kind())
+	controls.display_options.update()
 
 
 func _selected_kind() -> String:
@@ -147,7 +155,10 @@ func _selected_kind() -> String:
 
 
 func _clear_preview() -> void:
+	if controls.display_options != null:
+		controls.display_options.hide()
 	session.ui.get_node("Panel/VBox/SelectedLightColor").hide()
+	controls.fixtures.selected_panel.hide()
 	controls.light_info.hide()
 	controls.light_level.hide()
 	controls.light_angle_info.hide()
@@ -208,7 +219,7 @@ func _place_selected(screen_pos: Vector2) -> void:
 	target_parent.add_child(node)
 	if preview != null and preview.has_meta("planning_wall_normal"):
 		node.set_meta("planning_wall_normal", preview.get_meta("planning_wall_normal"))
-	if bool(node.get_meta("planning_wall_mount", false)) and not node.has_meta("planning_wall_normal"):
+	if not node.has_method("get_blood_config") and bool(node.get_meta("planning_wall_mount", false)) and not node.has_meta("planning_wall_normal"):
 		controls.status.text = "Aim at a wall to place this wall-mounted object."
 		node.queue_free()
 		return
@@ -221,6 +232,7 @@ func _place_selected(screen_pos: Vector2) -> void:
 			node.call("set_target", session.main_player)
 	node.rotation_degrees.y = rotation_y
 	geometry._apply_wall_mount(node)
+	BLOOD_PLACEMENT.apply_probe(node, preview)
 	if selected_path.get_file() == "06_conference_chair.glb":
 		_ground_conference_chair(node)
 	node.set_meta("planning_scene_path", selected_path)
@@ -271,6 +283,7 @@ func _delete_node(node: Node3D) -> void:
 	if selected == node:
 		selected = null
 	node.queue_free()
+	controls._update_light_ui()
 	_update_status()
 	controls._update_history_buttons()
 
@@ -399,11 +412,20 @@ func _apply_layout_data(data: Dictionary) -> Dictionary:
 			continue
 		if node.has_method("configure_blood") and record.has("blood_texture"):
 			node.call("configure_blood", str(record["blood_texture"]), str(record.get("blood_surface", "floor")))
+		if node.has_method("configure_display") and record.get("display") is Dictionary:
+			node.call("configure_display", record["display"])
+		if node.has_method("configure_blood_normal"):
+			var default_normal: Vector3 = node.get("surface_normal")
+			var blood_normal: Array = record.get("blood_normal", [default_normal.x, default_normal.y, default_normal.z])
+			node.call("configure_blood_normal", Vector3(float(blood_normal[0]), float(blood_normal[1]), float(blood_normal[2])))
+			node.call("configure_blood_attachment", record.get("blood_attachment", {}))
+		if record.has("object_id"):
+			node.set_meta("planning_object_id", str(record["object_id"]))
 		var load_kind = "enemy" if scene_path in catalog.ENEMY_SCENES else ""
 		var target_parent = session.enemies_root if load_kind == "enemy" else session.root
 		target_parent.add_child(node)
 		node.position = Vector3(float(record.get("x",0.0)),float(record.get("y",0.0)),float(record.get("z",0.0)))
-		node.rotation_degrees.y = float(record.get("rotation_y",0.0))
+		node.rotation_degrees = Vector3(float(record.get("rotation_x", 0)), float(record.get("rotation_y", 0)), float(record.get("rotation_z", 0)))
 		node.scale = Vector3(float(record.get("scale_x",1.0)),float(record.get("scale_y",1.0)),float(record.get("scale_z",1.0)))
 		if scene_path.get_file() == "06_conference_chair.glb":
 			_ground_conference_chair(node)
@@ -414,6 +436,9 @@ func _apply_layout_data(data: Dictionary) -> Dictionary:
 			node.set_meta("planning_attachment", str(record["attachment"]))
 		if int(record.get("zone", -1)) >= 0:
 			node.set_meta("planning_zone", int(record["zone"]))
+		if node.has_method("configure_fixture"):
+			node.call("configure_fixture", str(record.get("fixture_shape", "point")), bool(record.get("fixture_visible_in_game", false)))
+			node.call("set_planning_visual", session.active)
 		if node.has_method("set_authored_energy"):
 			node.set("energy_multiplier", float(record.get("energy_multiplier", 0.65)))
 			node.call("set_authored_energy", float(record.get("light_energy", node.call("get_authored_energy"))))
@@ -442,6 +467,7 @@ func _apply_layout_data(data: Dictionary) -> Dictionary:
 				node.call("set_target", session.main_player)
 		placed.append(node)
 		loaded += 1
+	BLOOD_PLACEMENT.restore_attachments([session.root])
 	_update_status()
 	if controls != null:
 		controls.call("_update_history_buttons")
@@ -470,3 +496,4 @@ func _enemy_spawn_height(enemy: Node) -> float:
 	if shape_node != null and shape_node.shape is CapsuleShape3D:
 		return maxf(1.0, (shape_node.shape as CapsuleShape3D).height * 0.5 + 0.1)
 	return 1.0
+

@@ -55,7 +55,7 @@ func _run() -> void:
 	var wall_quad := on_wall.get_node("BloodQuad") as MeshInstance3D
 	_expect(bool(on_wall.get_meta("planning_wall_mount", false)), "Wall blood mounts on walls in the planner.")
 	_expect(absf(wall_quad.global_basis.z.y) < 0.01, "Wall blood stands upright against the wall.")
-	_expect(on_wall.call("get_blood_config") == {"texture": "smear_04", "surface": "wall"}, "Blood decal reports its saved configuration.")
+	_expect(on_wall.call("get_blood_config") == {"texture": "smear_04", "surface": "wall", "normal": [0.0, 0.0, 1.0]}, "Blood decal reports its saved configuration.")
 	on_wall.call("configure_blood", "smear_04", "floor")
 	await process_frame
 	_expect(not bool(on_wall.get_meta("planning_wall_mount", false)), "Switching surface rebuilds the decal.")

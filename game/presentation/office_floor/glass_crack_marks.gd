@@ -30,3 +30,5 @@ static func spawn(pane: StaticBody3D, point: Vector3, normal: Vector3, max_size:
 	if pool != null:
 		pool.call("register_mark", mark)
 	return mark
+
+

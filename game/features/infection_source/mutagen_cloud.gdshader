@@ -14,12 +14,12 @@ uniform sampler2D atlas_b : source_color, filter_linear_mipmap, repeat_disable;
 uniform sampler2D wall_mask : filter_nearest, repeat_disable;
 uniform bool wall_mask_enabled = false;
 uniform float wall_radius = 2.25;
-uniform float opacity : hint_range(0.0, 1.0) = 0.82;
+uniform float opacity : hint_range(0.0, 1.0) = 0.55;
 uniform float flow_strength : hint_range(0.0, 0.2) = 0.07;
 uniform float flow_speed : hint_range(0.0, 2.0) = 0.35;
 uniform float morph_speed : hint_range(0.0, 1.0) = 0.12;
 uniform vec4 vein_color : source_color = vec4(0.72, 1.0, 0.22, 1.0);
-uniform float vein_glow : hint_range(0.0, 4.0) = 1.4;
+uniform float vein_glow : hint_range(0.0, 4.0) = 0.35;
 // Ground haze: the quad lies flat on the floor instead of facing the camera.
 uniform bool ground = false;
 
@@ -136,7 +136,7 @@ void fragment() {
 	float pulse = 0.55 + 0.45 * sin(TIME * 2.6 + v_seed * 12.0 + fbm(UV * 4.0 + t) * 5.0);
 	color += vein_color.rgb * veins * vein_glow * pulse * mix(0.35, 1.0, activity);
 	// Fresh gas flashes, old gas darkens.
-	color *= mix(0.62, 1.12, activity) + 0.5 * (1.0 - smoothstep(0.0, 0.08, l));
+	color *= mix(0.72, 1.0, activity);
 
 	// Birth: quick fade in. Death: noise eats the gas from its thin edges.
 	float dissolve = smoothstep(0.5, 1.0, l);

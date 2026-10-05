@@ -92,8 +92,11 @@ func _test_mutation_tree() -> void:
 		_check(false, "Locked skill exposes an unlock control")
 	var disabled := _button_with_tooltip(ui.content, "Acid Spit\n")
 	if disabled != null:
+		var before := _count(ui, &"mutation_hover")
 		disabled.mouse_entered.emit()
-		_check(_count(ui, &"mutation_hover") == 1, "Inactive learned skill stays silent on hover")
+		disabled.pressed.emit()
+		_check(_count(ui, &"mutation_hover") == before, "Inactive/disabled skills are silent")
+		_check(_count(ui, &"mutation_click") == 1, "Disabled skill does not play a click cue")
 	_check(AudioServer.get_bus_index(&"UI") >= 0 and AudioServer.get_bus_effect_count(AudioServer.get_bus_index(&"UI")) == 0, "UI bus is dry without room reverb")
 	for child in ui.get_children():
 		if child is AudioStreamPlayer:

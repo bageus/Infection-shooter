@@ -4,8 +4,9 @@
   "purpose": "Expose authored structural office modules with their own collision and the current office-floor composition.",
   "state_owner": [
     "Blood textures, render marks, surface anchors, lifetime and density budgets",
-    "Authored lamp power, color and flicker phase; derived runtime light activation",
-    "Planner blood decorations: texture, surface and size"
+    "Authored lamp power, color, flicker phase, fixture shape and body visibility; derived runtime light activation",
+    "Planner blood decorations: texture, surface and size",
+    "Authored display power/content/seed, derived screen surfaces, runtime power, glow and contiguous television walls"
   ],
   "public_api": [
     "public/base_office_layout.tscn",
@@ -35,7 +36,8 @@
     "public/structural/glass_partition_blinds.tscn",
     "public/structural/sliding_glass_door.tscn",
     "public/blood_effects_3d.tscn",
-    "public/props/blood_decal.tscn"
+    "public/props/blood_decal.tscn",
+    "public/display_wall.gd"
   ],
   "dependencies": [
     "features.player",
@@ -53,7 +55,9 @@
     },
     "planner_light_v1": {
       "get_authored_color": "get_authored_color() -> Color",
-      "set_authored_color": "set_authored_color(color: Color) -> void; RGB tint, alpha fixed to 1"
+      "set_authored_color": "set_authored_color(color: Color) -> void; RGB tint, alpha fixed to 1",
+      "configure_fixture": "configure_fixture(shape: String, visible_in_game: bool) -> void; shape point|linear|rectangle; body visibility independent of emitted light",
+      "get_fixture_config": "get_fixture_config() -> Dictionary {shape, visible_in_game}"
     },
     "planner_decor_v1": {
       "configure_blood": "configure_blood(texture_id: String, surface: String) -> void; surface floor|wall",
@@ -61,6 +65,16 @@
     },
     "occlusion_visual_v1": {
       "camera_occluder": "Structural public scene roots carry camera_occluder; render classification only, not a service locator."
+    },
+    "display_v1": {
+      "has_display": "has_display() -> bool; visible screens only; closed laptops excluded",
+      "configure_display": "configure_display(config: Dictionary {power: on|off|auto, content: static|dynamic, seed: int}) -> void; TV content always dynamic",
+      "get_display_config": "get_display_config() -> Dictionary; exported authored config, never transient damage",
+      "configure_displays": "configure_displays(wall: Node) -> void; explicit mission-local display_wall registration"
+    },
+    "planner_decor_v2": {
+      "blood": "configure_blood(texture, surface), configure_blood_normal(Vector3), get_blood_config() -> {texture, surface: floor|wall|object, normal: Array[float]}",
+      "attachment": "attach_blood(anchor, stable_owner_id), configure_blood_attachment({owner, mesh}), get_blood_attachment(); follows mesh, hides on destruction; restored by bootstrap using stable object id"
     }
   }
 }

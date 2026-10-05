@@ -7,4 +7,3 @@ void fragment() {
 	ALBEDO = sampled.rgb;
 	ALPHA = sampled.a;
 }
-

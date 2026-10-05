@@ -16,4 +16,3 @@ static func material(texture: Texture2D, cell: int) -> ShaderMaterial:
 		(cell / 4) * .5 + guard.y, .25 - guard.x * 2, .5 - guard.y * 2))
 	result.render_priority = 1
 	return result
-

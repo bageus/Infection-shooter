@@ -1,6 +1,18 @@
 extends Node3D
 
 # One scene-local budget for bullet and wood marks, and another for settled debris.
+const SURFACES := preload("res://game/features/combat/impact_surface_geometry.gd")
+var _surfaces := SURFACES.new()
+
+
+func register_surface(collider: Node3D, visual: Node3D) -> void:
+	_surfaces.register(collider, visual)
+
+
+func resolve_surface(collider: Node3D, point: Vector3, direction: Vector3) -> Dictionary:
+	return _surfaces.resolve(collider, point, direction)
+
+
 const MAX_MARKS := 40
 const MAX_RETAINED := 40
 

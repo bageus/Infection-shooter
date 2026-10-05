@@ -15,7 +15,9 @@ var bind_asset: Callable
 var active_catalog: Array = []
 var group_catalogs: Dictionary = {}
 var lighting_catalog = [
-	{"name":"Omni Light","path":"res://game/presentation/office_floor/public/props/planner_light.tscn","kind":"light"},
+	{"name":"Точечный светильник","path":"res://game/presentation/office_floor/public/props/planner_light.tscn","kind":"light","fixture_shape":"point"},
+	{"name":"Длинный узкий светильник","path":"res://game/presentation/office_floor/public/props/planner_light.tscn","kind":"light","fixture_shape":"linear"},
+	{"name":"Прямоугольный светильник","path":"res://game/presentation/office_floor/public/props/planner_light.tscn","kind":"light","fixture_shape":"rectangle"},
 	{"name":"Permanent Darkness","path":"res://game/presentation/office_floor/public/props/darkness_zone.tscn","kind":"darkness"},
 	{"name":"Exploration Darkness","path":"res://game/presentation/office_floor/public/props/darkness_zone.tscn","kind":"exploration_darkness"}
 ]
@@ -214,3 +216,4 @@ func _migrate_scene_path(old_path: String) -> String:
 					return str(entry["path"])
 		return ""
 	return old_path
+

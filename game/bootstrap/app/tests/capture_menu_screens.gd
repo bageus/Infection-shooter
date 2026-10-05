@@ -54,4 +54,20 @@ func _capture() -> void:
 	await process_frame
 	await RenderingServer.frame_post_draw
 	root.get_texture().get_image().save_png("/tmp/menu_previews/planner.png")
+	var planner: Node = game.get("planning_mode")
+	planner.controls._show_lighting_catalog()
+	await process_frame
+	await RenderingServer.frame_post_draw
+	root.get_texture().get_image().save_png("/tmp/menu_previews/planner_lighting.png")
+	var lamp := planner.call("_instantiate_asset", "res://game/presentation/office_floor/public/props/planner_light.tscn") as Node3D
+	planner.root.add_child(lamp)
+	lamp.position = Vector3(0, 2.5, 0)
+	lamp.call("configure_fixture", "linear", false)
+	lamp.call("set_planning_visual", true)
+	planner.placed.append(lamp)
+	planner.call("_select", lamp)
+	await process_frame
+	await RenderingServer.frame_post_draw
+	root.get_texture().get_image().save_png("/tmp/menu_previews/planner_fixture.png")
 	quit()
+

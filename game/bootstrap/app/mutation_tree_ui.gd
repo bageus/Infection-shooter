@@ -281,9 +281,7 @@ func _add_skill(canvas: Control, row: Array, center: Vector2) -> void:
 	button.add_theme_stylebox_override("normal", style)
 	button.add_theme_stylebox_override("hover", style)
 	button.add_theme_stylebox_override("pressed", style)
-	button.mouse_entered.connect(func() -> void:
-		if not button.disabled:
-			_play_ui_sound(&"mutation_hover"))
+	button.mouse_entered.connect(_skill_hover.bind(button))
 	button.pressed.connect(_upgrade_skill.bind(skill_id))
 	canvas.add_child(button)
 	if learned and int(row[3]) != 3:
@@ -294,7 +292,7 @@ func _add_skill(canvas: Control, row: Array, center: Vector2) -> void:
 		lock.position = center + Vector2(35, -12)
 		lock.custom_minimum_size = Vector2(24, 24)
 		lock.size = Vector2(24, 24)
-		lock.mouse_entered.connect(_play_ui_sound.bind(&"mutation_hover"))
+		lock.mouse_entered.connect(_skill_hover.bind(lock))
 		lock.pressed.connect(_toggle_skill_lock.bind(skill_id))
 		canvas.add_child(lock)
 
@@ -338,7 +336,14 @@ func _play_ui_sound(event: StringName) -> void:
 	SFX.play_ui(self, event)
 
 
+func _skill_hover(button: BaseButton) -> void:
+	if not button.disabled:
+		_play_ui_sound(&"mutation_hover")
+
+
 func _upgrade_skill(skill_id: String) -> void:
+	if not runtime.call("can_upgrade_skill", skill_id):
+		return
 	_play_ui_sound(&"mutation_click")
 	runtime.call("upgrade_skill", skill_id)
 

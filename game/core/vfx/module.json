@@ -22,8 +22,8 @@
       "atlas": "Dictionary {path, columns, rows, frames, durations: Array[float]} per supplied sheet",
       "available": "available(atlas: Dictionary) -> bool"
     },
-    "surface_atlas_v1": {
-      "material": "material(texture: Texture2D, cell: int) -> ShaderMaterial; 4x2 row-major cells, bullet 0\u20134 / scorch 5\u20137, glass 0\u20137"
+    "surface_atlases_v1": {
+      "material": "material(texture: Texture2D, cell: int) -> ShaderMaterial; immutable BULLET/GLASS textures, row-major 4x2, bullet 0..4, scorch 5..7, glass 0..7; per-mark material"
     }
   }
 }

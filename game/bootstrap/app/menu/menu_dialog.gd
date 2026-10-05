@@ -207,3 +207,4 @@ func _input(event: InputEvent) -> void:
 		var index := controls.find(focused)
 		controls[posmod(index + (-1 if reverse else 1), controls.size())].grab_focus()
 		get_viewport().set_input_as_handled()
+
