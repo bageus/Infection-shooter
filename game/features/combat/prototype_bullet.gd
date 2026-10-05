@@ -9,10 +9,7 @@ const IMPACT_SOUNDS := {
 const PROJECTILE_VISUAL := preload("res://game/features/combat/projectile_visual.gd")
 const BALANCE = preload("res://game/features/combat/public/projectile_balance.gd")
 
-const IMPACT_TEXTURES := [
-	"res://models/objects/textures/Minimal dark bullet impact decal.png",
-	"res://models/objects/textures/Minimal transparent bullet impact decal.png"
-]
+const SURFACE_ATLASES := preload("res://game/core/vfx/public/surface_atlases.gd")
 
 var _direction := Vector3.ZERO
 var _shooter: CollisionObject3D
@@ -108,7 +105,7 @@ func _handle_hit(collider: Object, hit_position: Vector3, normal: Vector3, shape
 	if collider == null:
 		return true
 	# Bullet holes belong on surfaces, not on the infected or their limbs.
-	if not collider.has_method("take_projectile_damage") and _hit_material(collider, shape_index) != "flesh":
+	if not collider.has_method("take_projectile_damage") and _hit_material(collider, shape_index) not in ["flesh", "glass"]:
 		_spawn_impact_decal(collider, hit_position, normal)
 	_play_impact(collider, hit_position, shape_index)
 
@@ -165,44 +162,33 @@ func _hit_material(collider: Object, shape_index: int) -> String:
 	return "solid"
 
 
-# Two shared decal meshes (one per texture) instead of a new quad and
-# material for every bullet hole.
-static var _decal_meshes: Array[QuadMesh] = [null, null]
-
-
-static func _decal_mesh(texture_index: int, pool: Node) -> QuadMesh:
-	if _decal_meshes[texture_index] != null:
-		return _decal_meshes[texture_index]
-	var quad := QuadMesh.new()
-	quad.size = Vector2.ONE * (0.5 if texture_index == 1 else 0.3)
-	var material := StandardMaterial3D.new()
-	material.albedo_texture = pool.call("texture_for", IMPACT_TEXTURES[texture_index]) as Texture2D
-	material.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
-	material.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
-	material.cull_mode = BaseMaterial3D.CULL_DISABLED
-	material.render_priority = 1
-	quad.material = material
-	_decal_meshes[texture_index] = quad
-	return quad
-
-
 func _spawn_impact_decal(collider: Object, hit_position: Vector3, normal: Vector3) -> void:
 	if normal.is_zero_approx():
 		normal = -_direction if not _direction.is_zero_approx() else Vector3.UP
 	if not is_instance_valid(effects_root) or not is_instance_valid(impact_pool):
 		return
+	var surface: Dictionary = {"position": hit_position, "normal": normal, "anchor": effects_root}
+	if collider is Node3D:
+		surface = impact_pool.call("resolve_surface", collider, hit_position, _direction if not _direction.is_zero_approx() else -normal)
+	if surface.is_empty():
+		return
+	hit_position = surface["position"]
+	normal = surface["normal"]
 	var mark := MeshInstance3D.new()
-	var texture_index := 1 if randi() % 4 == 0 else 0
+	mark.set_meta("surface_mark", true)
+	var quad := QuadMesh.new()
+	quad.size = Vector2.ONE * randf_range(.12, .24)
+	quad.material = SURFACE_ATLASES.material(SURFACE_ATLASES.BULLET, randi_range(0, 4))
+	mark.mesh = quad
 	var pool := impact_pool
-	mark.mesh = _decal_mesh(texture_index, pool)
 	mark.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
-	var parent: Node3D = collider as Node3D
+	var parent: Node3D = surface["anchor"]
 	if parent == null:
 		parent = effects_root
 	if parent == null:
 		return
 	parent.add_child(mark)
-	mark.global_position = hit_position + normal * 0.018
+	mark.global_position = hit_position + normal * 0.0015
 	var up := Vector3.FORWARD if absf(normal.y) > 0.9 else Vector3.UP
 	mark.global_basis = Basis.looking_at(-normal, up)
 	if pool != null:

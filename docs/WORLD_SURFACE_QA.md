@@ -1,0 +1,7 @@
+# World surface QA
+
+Executed Godot 4.7.2 headless checks: actual glass door moves its existing crack, retains open collision, receives another hit and removes cracks on shattering; couch/armchair hits project from broad collision onto visible triangles; remote walls retain collision and genuinely destroyed collision stays disabled. Planner floor probe lands above rendered floor tiles. Local enemy A* selects a clear detour around a wall. Existing sound, glass, grenade, blood, mutagen and persistence suites are included in regression checks.
+
+CI additionally repeats hole/silhouette switches on the full authored map in both Compatibility and Vulkan Forward+ and checks renderer errors; local graphical display unavailable. Windows/Web native crash, visual acceptance and target-device FPS remain unverified.
+
+Manual acceptance: fire at closed/open glass doors, open after a shot, then shatter; marks follow and disappear. Shoot furniture and exploded surfaces from both sides. Confirm 5 bullet/3 scorch/8 glass atlas variants. Place blood in Floor/Wall/Object modes, rotate/scale/move the object, save/load/bake and damage it. Walk behind distant walls and test enemies navigating narrow passages. Compare mutagen against old floor reflection. Only sound toggle has hover audio in settings; unavailable mutation skills are silent.

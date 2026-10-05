@@ -1,4 +1,5 @@
 extends Node
+const BLOOD_PLACEMENT := preload("res://game/bootstrap/app/planning_blood_placement.gd")
 
 
 var player_spawn_defined = false
@@ -134,12 +135,14 @@ func _rebuild_preview() -> void:
 	preview = catalog._instantiate_asset(selected_path)
 	if preview == null:
 		return
+	preview.set_meta("planning_preview", true)
 	controls._configure_new_asset(preview, selected_entry)
 	session.host.add_child(preview)
 	if _selected_kind() == "light" and preview.has_method("set_planning_visual"):
 		preview.call_deferred("set_planning_visual", true)
 	geometry._set_preview_collision(preview, true)
 	controls._apply_special_default_height(preview, _selected_kind())
+	controls.display_options.update()
 
 
 func _selected_kind() -> String:
@@ -147,6 +150,8 @@ func _selected_kind() -> String:
 
 
 func _clear_preview() -> void:
+	if controls.display_options != null:
+		controls.display_options.hide()
 	session.ui.get_node("Panel/VBox/SelectedLightColor").hide()
 	controls.light_info.hide()
 	controls.light_level.hide()
@@ -208,7 +213,7 @@ func _place_selected(screen_pos: Vector2) -> void:
 	target_parent.add_child(node)
 	if preview != null and preview.has_meta("planning_wall_normal"):
 		node.set_meta("planning_wall_normal", preview.get_meta("planning_wall_normal"))
-	if bool(node.get_meta("planning_wall_mount", false)) and not node.has_meta("planning_wall_normal"):
+	if not node.has_method("get_blood_config") and bool(node.get_meta("planning_wall_mount", false)) and not node.has_meta("planning_wall_normal"):
 		controls.status.text = "Aim at a wall to place this wall-mounted object."
 		node.queue_free()
 		return
@@ -221,6 +226,7 @@ func _place_selected(screen_pos: Vector2) -> void:
 			node.call("set_target", session.main_player)
 	node.rotation_degrees.y = rotation_y
 	geometry._apply_wall_mount(node)
+	BLOOD_PLACEMENT.apply_probe(node, preview)
 	if selected_path.get_file() == "06_conference_chair.glb":
 		_ground_conference_chair(node)
 	node.set_meta("planning_scene_path", selected_path)
@@ -399,11 +405,19 @@ func _apply_layout_data(data: Dictionary) -> Dictionary:
 			continue
 		if node.has_method("configure_blood") and record.has("blood_texture"):
 			node.call("configure_blood", str(record["blood_texture"]), str(record.get("blood_surface", "floor")))
+		if node.has_method("configure_display") and record.get("display") is Dictionary:
+			node.call("configure_display", record["display"])
+		if node.has_method("configure_blood_normal"):
+			var blood_normal: Array = record.get("blood_normal", [0, 1, 0])
+			node.call("configure_blood_normal", Vector3(float(blood_normal[0]), float(blood_normal[1]), float(blood_normal[2])))
+			node.call("configure_blood_attachment", record.get("blood_attachment", {}))
+		if record.has("object_id"):
+			node.set_meta("planning_object_id", str(record["object_id"]))
 		var load_kind = "enemy" if scene_path in catalog.ENEMY_SCENES else ""
 		var target_parent = session.enemies_root if load_kind == "enemy" else session.root
 		target_parent.add_child(node)
 		node.position = Vector3(float(record.get("x",0.0)),float(record.get("y",0.0)),float(record.get("z",0.0)))
-		node.rotation_degrees.y = float(record.get("rotation_y",0.0))
+		node.rotation_degrees = Vector3(float(record.get("rotation_x", 0)), float(record.get("rotation_y", 0)), float(record.get("rotation_z", 0)))
 		node.scale = Vector3(float(record.get("scale_x",1.0)),float(record.get("scale_y",1.0)),float(record.get("scale_z",1.0)))
 		if scene_path.get_file() == "06_conference_chair.glb":
 			_ground_conference_chair(node)
@@ -442,6 +456,7 @@ func _apply_layout_data(data: Dictionary) -> Dictionary:
 				node.call("set_target", session.main_player)
 		placed.append(node)
 		loaded += 1
+	BLOOD_PLACEMENT.restore_attachments([session.root])
 	_update_status()
 	if controls != null:
 		controls.call("_update_history_buttons")

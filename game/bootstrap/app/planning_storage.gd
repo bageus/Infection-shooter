@@ -77,11 +77,13 @@ func _collect_layout_data() -> Dictionary:
 			node.set_meta("planning_spawn_transform", node.transform)
 		records.append({
 			"scene": scene_path,
+			"object_id": str(node.get_meta("planning_object_id", "")),
 			"desk_id": node.get_meta("planning_desk_id", ""),
 			"attachment": node.get_meta("planning_attachment", ""),
 			"zone": node.get_meta("planning_zone", -1),
 			"x": save_position.x, "y": save_position.y, "z": save_position.z,
 			"rotation_y": node.rotation_degrees.y,
+			"rotation_x": node.rotation_degrees.x, "rotation_z": node.rotation_degrees.z,
 			"scale_x": node.scale.x, "scale_y": node.scale.y, "scale_z": node.scale.z,
 			"light_energy": node.get_meta("planning_light_energy", 0.0),
 			"light_angle": node.get_meta("planning_light_angle", 48.0),
@@ -93,15 +95,19 @@ func _collect_layout_data() -> Dictionary:
 			"spawn_y": (node.get_meta("planning_spawn_transform") as Transform3D).origin.y if node.has_meta("planning_spawn_transform") else node.position.y,
 			"spawn_z": (node.get_meta("planning_spawn_transform") as Transform3D).origin.z if node.has_meta("planning_spawn_transform") else node.position.z
 		})
+		if node.has_method("has_display") and node.call("has_display"):
+			records[-1]["display"] = node.call("get_display_config")
 		if node.has_method("get_blood_config"):
 			var blood: Dictionary = node.call("get_blood_config")
 			records[-1]["blood_texture"] = str(blood["texture"])
 			records[-1]["blood_surface"] = str(blood["surface"])
+			records[-1]["blood_normal"] = blood["normal"]
+			records[-1]["blood_attachment"] = node.call("get_blood_attachment")
 		if node.has_method("get_authored_energy"):
 			records[-1]["energy_multiplier"] = float(node.get("energy_multiplier"))
 			var color: Color = node.call("get_authored_color")
 			records[-1]["light_color"] = [color.r, color.g, color.b]
-	return {"version": 6, "objects": records}
+	return {"version": 8, "objects": records}
 
 
 ## Remembers the current planner layout as the authored map.
@@ -260,9 +266,15 @@ func _save_authored_scene() -> Error:
 		scene_root.add_child(copy)
 		copy.owner = scene_root
 		copy.transform = node.transform
+		if node.has_meta("planning_object_id"):
+			copy.set_meta("planning_object_id", node.get_meta("planning_object_id"))
+		if node.has_method("has_display") and node.call("has_display"):
+			copy.call("configure_display", node.call("get_display_config"))
 		if node.has_method("get_blood_config"):
 			var blood: Dictionary = node.call("get_blood_config")
 			copy.call("configure_blood", str(blood["texture"]), str(blood["surface"]))
+			copy.call("configure_blood_normal", node.get("surface_normal"))
+			copy.call("configure_blood_attachment", node.call("get_blood_attachment"))
 		if node.has_meta("planning_desk_id"):
 			copy.set_meta("planning_desk_id", node.get_meta("planning_desk_id"))
 		if node.has_meta("planning_attachment"):

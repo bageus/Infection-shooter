@@ -5,12 +5,52 @@ extends Node3D
 ## every renderer and is selectable in the planner like other objects.
 
 const LIBRARY := preload("res://game/presentation/office_floor/blood_texture_library.gd")
-const FLOOR_OFFSET := 0.012
+const FLOOR_OFFSET := 0.002
 
 ## Texture id "<category>_<variant>", e.g. "splatter_03".
 @export var texture_name := "splatter_01"
 ## "floor" or "wall".
-@export var surface := "floor"
+@export_enum("floor", "wall", "object") var surface := "floor"
+@export var surface_normal := Vector3.UP
+@export var attachment_owner := ""
+@export var attachment_mesh := ""
+var _anchor: WeakRef
+var _anchor_transform := Transform3D.IDENTITY
+
+
+func configure_blood_normal(normal: Vector3) -> void:
+	surface_normal = normal.normalized() if not normal.is_zero_approx() else Vector3.UP
+	if is_inside_tree() and _visual != null:
+		_apply_surface()
+
+
+func get_blood_attachment() -> Dictionary:
+	return {"owner": attachment_owner, "mesh": attachment_mesh}
+
+
+func configure_blood_attachment(config: Dictionary) -> void:
+	attachment_owner = str(config.get("owner", ""))
+	attachment_mesh = str(config.get("mesh", ""))
+
+
+func attach_blood(anchor: Node3D, owner_id: String) -> void:
+	_anchor = weakref(anchor)
+	attachment_owner = owner_id
+	attachment_mesh = str(anchor.name)
+	_anchor_transform = anchor.global_transform.affine_inverse() * global_transform
+	process_mode = Node.PROCESS_MODE_ALWAYS
+	set_process(true)
+
+
+func _process(_delta: float) -> void:
+	var anchor := _anchor.get_ref() as Node3D if _anchor != null else null
+	if anchor == null:
+		set_process(false)
+		return
+	global_transform = anchor.global_transform * _anchor_transform
+	if _visual != null:
+		_visual.visible = anchor.is_visible_in_tree()
+
 
 static var _library: RefCounted
 var _visual: MeshInstance3D
@@ -22,12 +62,14 @@ func _init() -> void:
 
 func _ready() -> void:
 	_rebuild()
+	set_process(_anchor != null)
 
 
 # Public planner_decor_v1 (ADR-0017).
 func configure_blood(texture_id: String, surface_kind: String) -> void:
 	texture_name = texture_id
-	surface = "wall" if surface_kind == "wall" else "floor"
+	surface = surface_kind if surface_kind in ["floor", "wall", "object"] else "floor"
+	surface_normal = Vector3.BACK if surface == "wall" else Vector3.UP
 	if is_inside_tree():
 		_rebuild()
 	else:
@@ -35,7 +77,7 @@ func configure_blood(texture_id: String, surface_kind: String) -> void:
 
 
 func get_blood_config() -> Dictionary:
-	return {"texture": texture_name, "surface": surface}
+	return {"texture": texture_name, "surface": surface, "normal": [surface_normal.x, surface_normal.y, surface_normal.z]}
 
 
 func _rebuild() -> void:
@@ -57,12 +99,14 @@ func _rebuild() -> void:
 	material.cull_mode = BaseMaterial3D.CULL_DISABLED
 	quad.material = material
 	_visual.mesh = quad
-	if surface == "wall":
-		_visual.position = Vector3(0.0, 0.0, 0.004)
-	else:
-		_visual.rotation.x = -PI * 0.5
-		_visual.position.y = FLOOR_OFFSET
+	_apply_surface()
 	add_child(_visual)
+
+
+func _apply_surface() -> void:
+	var up := Vector3.FORWARD if absf(surface_normal.y) > .9 else Vector3.UP
+	_visual.basis = Basis.looking_at(-surface_normal, up)
+	_visual.position = surface_normal * FLOOR_OFFSET
 
 
 static func texture_entry(texture_id: String) -> Dictionary:

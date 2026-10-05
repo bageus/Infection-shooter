@@ -193,6 +193,12 @@ func _integration() -> void:
 		_check(not runtime.runtime_enabled and runtime.mode == 1, "planner suspends but keeps selection")
 		planner.call("exit")
 		_check(runtime.runtime_enabled and runtime.mode == 1, "planner restores selection")
+	# Exercise real authored map material allocation and teardown repeatedly.
+	for cycle in 12:
+		runtime.set_mode(cycle % 2)
+		for frame in 20:
+			await process_frame
+		_check(runtime.walls.pending.size() < 10000, "bounded material installation queue")
 	loaded.values.occlusion_mode = 0
 	loaded.apply_to_game(self)
 	_check(runtime.mode == 0, "runtime switch back")

@@ -1,5 +1,7 @@
 extends Node3D
 
+const BLOOD_PLACEMENT := preload("res://game/bootstrap/app/planning_blood_placement.gd")
+const DISPLAY_WALL := preload("res://game/presentation/office_floor/public/display_wall.gd")
 const WORLD_BINDINGS := preload("res://game/bootstrap/app/world_bindings.gd")
 const IMPACT_POOL := preload("res://game/features/combat/public/impact_effects.gd")
 
@@ -274,10 +276,15 @@ func _setup_world_bindings() -> void:
 		impact_pool.name = "ImpactEffects"
 		impact_pool.set_script(IMPACT_POOL)
 		add_child(impact_pool)
-	world_bindings = WORLD_BINDINGS.new(mission_objects, impact_pool, player, drop_weapon_pickup)
+	impact_pool.call("register_surface", $FloorBody, $Floor)
+	var display_wall := DISPLAY_WALL.new()
+	display_wall.name = "DisplayWall"
+	add_child(display_wall)
+	world_bindings = WORLD_BINDINGS.new(mission_objects, impact_pool, player, drop_weapon_pickup, display_wall)
 	world_bindings.call("bind_scene", player)
 	for branch in [$Structure, planning_root, enemies]:
 		world_bindings.call("bind_scene", branch)
+	BLOOD_PLACEMENT.restore_attachments([$Structure, planning_root])
 
 
 func bind_world_object(node: Node) -> void:
@@ -286,3 +293,4 @@ func bind_world_object(node: Node) -> void:
 	if world_bindings != null and not node.has_meta(&"world_bound"):
 		node.set_meta(&"world_bound", true)
 		world_bindings.call("bind_scene", node)
+

@@ -1,5 +1,8 @@
 extends Node
 
+const DISPLAY_OPTIONS := preload("res://game/bootstrap/app/planning_display_options.gd")
+var display_options: Node
+
 const LIGHT_DEFAULT_HEIGHT = 2.5
 const DARKNESS_DEFAULT_HEIGHT = 2.75
 
@@ -80,6 +83,9 @@ func setup_controls() -> void:
 	session.ui.get_node("Panel/VBox").add_child(desk_setup_button)
 	session.ui.get_node("Panel/VBox").move_child(desk_setup_button, palette.get_index() + 1)
 	desk_setup_button.pressed.connect(_open_desk_setup)
+	display_options = DISPLAY_OPTIONS.new()
+	add_child(display_options)
+	display_options.call("setup", session, objects)
 	_build_gore_controls()
 	_build_planning_toolbar()
 
@@ -101,9 +107,10 @@ func _build_gore_controls() -> void:
 	surface_label.text = "Surface"
 	blood_options.add_child(surface_label)
 	blood_surface = OptionButton.new()
-	blood_surface.add_item("Floor")
-	blood_surface.add_item("Wall")
-	blood_surface.item_selected.connect(func(_index: int) -> void: objects._rebuild_preview())
+	blood_surface.add_item("Пол")
+	blood_surface.add_item("Стена")
+	blood_surface.add_item("Объект")
+	blood_surface.item_selected.connect(_blood_surface_changed)
 	blood_options.add_child(blood_surface)
 	var size_label := Label.new()
 	size_label.text = "Size"
@@ -142,9 +149,10 @@ func _enter_simple_catalog(entries: Array, title: String) -> void:
 
 # Applies palette options to a freshly created object before it enters the tree.
 func _configure_new_asset(node: Node3D, entry: Dictionary) -> void:
+	display_options.call("configure_new", node)
 	if str(entry.get("kind", "")) != "blood" or not node.has_method("configure_blood"):
 		return
-	var surface := "wall" if blood_surface != null and blood_surface.selected == 1 else "floor"
+	var surface: String = ["floor", "wall", "object"][blood_surface.selected] if blood_surface != null else "floor"
 	node.call("configure_blood", str(entry.get("blood_texture", "splatter_01")), surface)
 	var size := float(blood_size.value) if blood_size != null else 1.0
 	node.scale = Vector3.ONE * size
@@ -207,6 +215,8 @@ func _toggle_help() -> void:
 
 
 func _update_light_ui() -> void:
+	if display_options != null:
+		display_options.call("update")
 	var target = objects.selected
 	if target == null and objects.preview != null and objects._selected_kind() == "light":
 		target = objects.preview
@@ -374,3 +384,8 @@ func _adjust_selected_light_angle(amount: float) -> void:
 	objects.selected.set_meta("planning_light_angle", light.spot_angle)
 	_update_light_ui()
 	status.text = "LIGHT | cone %.0f° | , / . adjust" % light.spot_angle
+
+
+func _blood_surface_changed(_index: int) -> void:
+	objects._rebuild_preview()
+	status.text = "КРОВЬ | выберите место: " + ["пол", "стена", "поверхность объекта"][blood_surface.selected]
