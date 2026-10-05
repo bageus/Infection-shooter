@@ -9,6 +9,7 @@ func _initialize() -> void:
 
 
 func _run() -> void:
+	root.size = Vector2i(1280, 720)
 	var had := FileAccess.file_exists(PREFS.FILE)
 	var saved := FileAccess.get_file_as_bytes(PREFS.FILE) if had else PackedByteArray()
 	var frontend := FRONT.instantiate()
@@ -39,7 +40,7 @@ func _run() -> void:
 	await process_frame
 	if DisplayServer.get_name() != "headless":
 		await RenderingServer.frame_post_draw
-	_check(dialog.settings.notices.popup.visible and dialog.settings.notices.popup.size.y >= 100, "Notice text opens in a visible popup with usable height")
+	_check(dialog.settings.notices.popup.visible and dialog.settings.notices.popup.size.y >= 100 and dialog.settings.notices.popup.size.y < dialog.get_viewport_rect().size.y - 24, "Notice text opens in a visible popup with usable height")
 	dialog.settings.notices.popup.hide()
 	tabs.current_tab = 1
 	var editor: RefCounted = dialog.settings.controls

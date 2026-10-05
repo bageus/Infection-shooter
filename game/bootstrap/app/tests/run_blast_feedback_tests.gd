@@ -22,9 +22,12 @@ func _run() -> void:
 	feedback = app.get_node("BlastFeedback")
 	original_volume = AudioServer.get_bus_volume_db(0)
 	player.set_physics_process(false)
+	print("Blast test lifecycle @", Time.get_ticks_msec())
 	_test_lifecycle()
 	await _render_checks()
+	print("Blast pixel checks finished @", Time.get_ticks_msec())
 	await _test_explosion()
+	print("Blast physics checks finished @", Time.get_ticks_msec())
 	# Complete a GPU frame while newly spawned blast resources are still alive.
 	if DisplayServer.get_name() != "headless":
 		await RenderingServer.frame_post_draw
@@ -35,6 +38,7 @@ func _run() -> void:
 		await RenderingServer.frame_post_draw
 	await create_timer(0.2).timeout
 	_check(is_equal_approx(AudioServer.get_bus_volume_db(0), original_volume), "exit restores audio")
+	print("Blast renderer released @", Time.get_ticks_msec())
 	print("Blast feedback tests: %d failures" % failures)
 	quit(0 if failures == 0 else 1)
 
@@ -113,7 +117,8 @@ func _render_checks() -> void:
 	_capture(after, "recovered")
 	hud.queue_free()
 	fixture.queue_free()
-	app.show()
+	# Proximity/cover checks below exercise physics; VFX rendering has its own suite.
+	# Keep mission geometry hidden to avoid compiling unasserted particle variants.
 	app.get("gameplay").process_mode = Node.PROCESS_MODE_INHERIT
 	(player.get("camera") as Camera3D).current = true
 

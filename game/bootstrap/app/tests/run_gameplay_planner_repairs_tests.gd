@@ -34,6 +34,7 @@ func _run() -> void:
 	stage.queue_free()
 	await process_frame
 	await process_frame
+	await create_timer(0.2).timeout
 	print("Gameplay/planner repairs tests: %d failures" % failures)
 	quit(failures)
 
