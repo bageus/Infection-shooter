@@ -14,6 +14,7 @@ var camera: Camera3D
 var world: Node3D
 var subjects: Array[RefCounted] = []
 var walls := WALLS.new()
+var rebuild_count := 0
 var _dirty := true
 var _elapsed := 0.0
 var _hero_blocked := false
@@ -80,6 +81,7 @@ func _process(_delta: float) -> void:
 
 
 func _rebuild() -> void:
+	rebuild_count += 1
 	# Changes include loaded maps, streamed geometry and newly summoned actors.
 	if mode == 0:
 		_clear()

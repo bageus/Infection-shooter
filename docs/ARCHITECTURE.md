@@ -230,6 +230,8 @@ Bootstrap owns occlusion_mode and transient render copies/overrides, with actor,
 
 Player owns blast disorientation/audio recovery and reports typed blast_feedback_v1 facts. Bootstrap injects the public player root into a scene-local CanvasLayer that owns only the visual envelope; gameplay does not reference UI. Subscriptions disconnect on teardown. Authored damage/cover/radius and module dependency direction remain unchanged. No singleton, map schema change or policy exception.
 
+
+Bootstrap settings and runtime diagnostics: ADR-0028 owns private controls_v1 keyboard/mouse bindings, additive interface_v1.test_mutagen (default false), four tab presentation and injected read-only F3 overlay. These do not change maps or dependency edges. The owner-requested surface_atlas_v1 helper is separately exposed by core.vfx for replacement bullet/scorch/glass materials.
 ## Display v1 (ADR-0026)
 
 presentation.office_floor owns authored display power/content/seed and derived screen materials, glow and TV groups. Bootstrap injects a mission-local public/display_wall.gd through world_bindings; no service lookup. Layout DTO v8 adds optional display; exported fields preserve scene bake. Legacy records default to stable auto/static.

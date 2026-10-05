@@ -39,16 +39,16 @@ func _run() -> void:
 	menu.activate("settings")
 	await process_frame
 	var modal: Control = menu.modal
+	var dialog_buttons := modal.find_children("*", "Button", true, false)
+	_check(not dialog_buttons.is_empty(), "Settings exposes controls")
 	var before := _count(menu, &"menu_hover")
-	for widget in modal.find_children("*", "Control", true, false):
-		if not widget is CheckButton:
-			widget.mouse_entered.emit()
-	_check(_count(menu, &"menu_hover") == before, "Settings buttons, sliders and choices are silent on hover")
-	var toggles := modal.find_children("*", "CheckButton", true, false)
-	_check(toggles.size() == 1, "Settings has one sound toggle")
-	if not toggles.is_empty():
-		toggles[0].mouse_entered.emit()
-		_check(_count(menu, &"menu_hover") == before + 1, "Only the sound toggle retains hover")
+	for button in dialog_buttons:
+		if button.name != "SoundToggle":
+			button.mouse_entered.emit()
+	_check(_count(menu, &"menu_hover") == before, "Settings buttons are silent on hover")
+	modal.settings.tabs.current_tab = 3
+	modal.find_child("SoundToggle", true, false).mouse_entered.emit()
+	_check(_count(menu, &"menu_hover") == before + 1, "Only audio toggle has settings hover sound")
 	frontend.queue_free()
 	await process_frame
 	await _test_mutation_tree()

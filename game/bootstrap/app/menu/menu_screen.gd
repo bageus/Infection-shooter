@@ -90,6 +90,7 @@ func refresh() -> void:
 	buttons.clear()
 	_build_content()
 	footer.text = "━━   " + text({"main": "quarantine", "pause": "floor", "failed": "lastSignal", "complete": "evac"}[screen_kind]).to_upper()
+	footer.visible = screen_kind != "main"
 	keyboard.text = text("keys")
 	_layout()
 	_focus_first()
@@ -110,14 +111,28 @@ func _build_content() -> void:
 	title.scale.x = 0.78
 	var subtitle := STYLE.label(text({"main": "patient", "pause": "alpha", "failed": "failed", "complete": "notCured"}[screen_kind]).to_upper(), roundi(12 * factor))
 	subtitle.add_theme_color_override("font_color", STYLE.MUTED)
-	content.add_child(subtitle)
+	if screen_kind != "main":
+		content.add_child(subtitle)
+	else:
+		subtitle.free()
 	var spacer := Control.new()
 	spacer.custom_minimum_size.y = 16
 	content.add_child(spacer)
 	match screen_kind:
 		"main":
 			_add_button("new", "briefing")
-			_add_button("continue", "continue", true).tooltip_text = text("noSave")
+			var disabled_continue := _add_button("continue", "continue", true)
+			disabled_continue.tooltip_text = text("noSave")
+			var row := HBoxContainer.new()
+			content.remove_child(disabled_continue)
+			content.add_child(row)
+			disabled_continue.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+			row.add_child(disabled_continue)
+			var no_save := STYLE.label(text("noSave"), roundi(10 * factor))
+			no_save.name = "NoSave"
+			no_save.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
+			no_save.add_theme_color_override("font_color", STYLE.MUTED)
+			row.add_child(no_save)
 			_add_button("settings", "settings")
 			_add_button("about", "about")
 			_add_button("exit", "quit")
@@ -138,7 +153,10 @@ func _build_content() -> void:
 	note.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	note.add_theme_color_override("font_color", STYLE.MUTED)
 	note.custom_minimum_size.y = 35
-	content.add_child(note)
+	if screen_kind != "main" or not reason_key.is_empty():
+		content.add_child(note)
+	else:
+		note.free()
 
 
 func _note_key() -> String:
@@ -191,6 +209,9 @@ func close_dialog() -> void:
 
 
 func _input(event: InputEvent) -> void:
+	if is_visible_in_tree() and is_instance_valid(modal) and modal.call("consume_binding_input", event):
+		get_viewport().set_input_as_handled()
+		return
 	if not is_visible_in_tree() or not event is InputEventKey or not event.pressed or event.echo:
 		return
 	if event.keycode == KEY_ESCAPE:

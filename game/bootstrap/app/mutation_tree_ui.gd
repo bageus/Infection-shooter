@@ -42,7 +42,7 @@ func configure(infection: Node) -> void:
 	title.add_child(points_label)
 	var close := Button.new()
 	_bevel_button(close)
-	close.text = "Close [Esc / M]"
+	close.text = "Close [Esc]"
 	close.mouse_entered.connect(_play_ui_sound.bind(&"menu_hover"))
 	close.pressed.connect(close_tree)
 	title.add_child(close)
@@ -102,7 +102,7 @@ func _on_mutation_changed(amount: float, _limit: float) -> void:
 
 
 func _input(event: InputEvent) -> void:
-	if is_tree_open() and event is InputEventKey and event.pressed and not event.echo and (event.keycode == KEY_F or event.physical_keycode == KEY_F):
+	if is_tree_open() and event.is_action_pressed("antidote") and not event.is_echo():
 		var player := runtime.get_parent()
 		if player != null and player.has_method("use_antidote") and bool(player.call("use_antidote")):
 			get_viewport().set_input_as_handled()
@@ -112,19 +112,21 @@ func _input(event: InputEvent) -> void:
 		get_viewport().set_input_as_handled()
 
 
-func _unhandled_key_input(event: InputEvent) -> void:
+func _unhandled_input(event: InputEvent) -> void:
 	if not visible:
 		return
-	if event is InputEventKey and event.pressed and not event.echo:
-		if event.keycode == KEY_M:
+	if (event is InputEventKey and event.pressed and not event.echo) or (event is InputEventMouseButton and event.pressed):
+		if event.is_action_pressed("mutation_tree"):
 			_set_open(not panel.visible)
 			get_viewport().set_input_as_handled()
-		elif event.keycode >= KEY_4 and event.keycode <= KEY_7:
+		else:
 			var skills: Array[String] = _equipped()
-			var index: int = int(event.keycode) - int(KEY_4)
-			if index < skills.size():
-				runtime.call("cast_skill", skills[index])
-				get_viewport().set_input_as_handled()
+			for index in range(4):
+				if event.is_action_pressed("skill_" + str(index + 1)):
+					if index < skills.size():
+						runtime.call("cast_skill", skills[index])
+					get_viewport().set_input_as_handled()
+					break
 
 
 func open_tree() -> void:
@@ -229,7 +231,7 @@ func _refresh() -> void:
 	canvas.call("set_progress", progress, hybrids)
 	var open := Button.new()
 	_bevel_button(open)
-	open.text = "Mutations [M]"
+	open.text = "Mutations [%s]" % _binding_label("mutation_tree")
 	open.pressed.connect(open_tree)
 	hotbar.add_child(open)
 	var active_skills := _equipped()
@@ -242,7 +244,7 @@ func _refresh() -> void:
 			continue
 		var button := Button.new()
 		_bevel_button(button)
-		button.text = "%s %s" % [str(index + 4) if index < 4 else "•", row[1]]
+		button.text = "%s %s" % [_binding_label("skill_%d" % (index + 1)) if index < 4 else "•", row[1]]
 		button.tooltip_text = "%s\n%s" % [row[1], row[5]]
 		var skill_id: String = active_skills[index]
 		button.pressed.connect(func() -> void: runtime.call("cast_skill", skill_id))
@@ -353,3 +355,14 @@ func _toggle_skill_lock(skill_id: String) -> void:
 	if locked != was_locked:
 		_play_ui_sound(&"mutation_lock" if locked else &"mutation_unlock")
 
+
+func _binding_label(action: String) -> String:
+	var events := InputMap.action_get_events(action)
+	if events.is_empty():
+		return "?"
+	var event: InputEvent = events[0]
+	if event is InputEventMouseButton:
+		return ["LMB", "RMB", "MMB"][event.button_index - 1]
+	if event is InputEventKey:
+		return OS.get_keycode_string(event.physical_keycode if event.physical_keycode else event.keycode)
+	return event.as_text()

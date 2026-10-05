@@ -12,6 +12,7 @@ const TEST_CLOUD := preload("res://game/features/infection_source/public/mutagen
 const MUTATION_UI := preload("res://game/bootstrap/app/mutation_tree_ui.gd")
 const BLOOD_EFFECTS := preload("res://game/presentation/office_floor/public/blood_effects_3d.tscn")
 const BLAST_FEEDBACK := preload("res://game/bootstrap/app/blast_feedback.gd")
+const DEBUG_OVERLAY := preload("res://game/bootstrap/app/runtime_debug_overlay.gd")
 const OCCLUSION := preload("res://game/bootstrap/app/occlusion_effects.gd")
 const MISSION_LAYOUT := preload("res://game/bootstrap/app/mission_layout.gd")
 
@@ -76,16 +77,14 @@ func _ready() -> void:
 	mission_layout.name = "MissionLayout"
 	gameplay.add_child(mission_layout)
 	mission_layout.call("setup", self, player, infection_runtime)
-	var mutagen_test_cloud := TEST_CLOUD.instantiate()
-	mutagen_test_cloud.name = "PermanentTestMutagen"
-	mutagen_test_cloud.set("permanent", true)
-	gameplay.add_child(mutagen_test_cloud)
-	mutagen_test_cloud.global_position = Vector3.ZERO
-	mutagen_test_cloud.call("activate")
 	var occlusion := OCCLUSION.new()
 	occlusion.name = "OcclusionEffects"
 	add_child(occlusion)
 	occlusion.setup(player, player.get("camera") as Camera3D, self)
+	var debug := DEBUG_OVERLAY.new()
+	debug.name = "RuntimeDebug"
+	add_child(debug)
+	debug.setup(infection_runtime, occlusion)
 	var feedback := BLAST_FEEDBACK.new()
 	feedback.name = "BlastFeedback"
 	add_child(feedback)
@@ -94,6 +93,28 @@ func _ready() -> void:
 	for enemy in enemies.get_children():
 		if enemy.has_method("set_target"):
 			enemy.call("set_target", player)
+
+
+func refresh_control_labels() -> void:
+	if mutation_tree_ui != null:
+		mutation_tree_ui.call("_refresh")
+
+
+func set_test_mutagen_enabled(enabled: bool) -> void:
+	var existing := gameplay.get_node_or_null("PermanentTestMutagen")
+	if existing != null:
+		existing.set_physics_process(enabled)
+		existing.set_deferred("monitoring", enabled)
+		existing.visible = enabled
+		return
+	if not enabled:
+		return
+	var cloud := TEST_CLOUD.instantiate()
+	cloud.name = "PermanentTestMutagen"
+	cloud.set("permanent", true)
+	gameplay.add_child(cloud)
+	cloud.global_position = Vector3.ZERO
+	cloud.call("activate")
 
 
 func _unhandled_key_input(event: InputEvent) -> void:
