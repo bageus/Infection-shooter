@@ -6,6 +6,7 @@ var messages: Dictionary = {}
 var buttons: Array[Button] = []
 var detail: Label
 var popup: PopupPanel
+var scroll: ScrollContainer
 
 
 func setup(dialog: Control, tab_view: TabContainer) -> void:
@@ -28,10 +29,14 @@ func setup(dialog: Control, tab_view: TabContainer) -> void:
 		button.hide()
 	popup = PopupPanel.new()
 	dialog.add_child(popup)
+	scroll = ScrollContainer.new()
+	scroll.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
+	popup.add_child(scroll)
 	var margin := MarginContainer.new()
+	margin.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	for edge in ["left", "right", "top", "bottom"]:
 		margin.add_theme_constant_override("margin_" + edge, 16)
-	popup.add_child(margin)
+	scroll.add_child(margin)
 	detail = Label.new()
 	detail.name = "SettingsNoticeText"
 	detail.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
@@ -52,13 +57,15 @@ func set_notice(index: int, message: String) -> void:
 
 func _show(index: int) -> void:
 	tabs.current_tab = index
-	detail.text = str(messages.get(index, ""))
-	if detail.text.is_empty():
+	var message := str(messages.get(index, ""))
+	if message.is_empty():
 		return
 	var available := host.get_viewport_rect().size
-	detail.custom_minimum_size.x = minf(420.0, available.x - 64.0)
-	popup.popup_centered.call_deferred(Vector2i(minf(452.0, available.x - 32.0), mini(160, int(available.y) - 32)))
-
+	scroll.custom_minimum_size = Vector2(minf(444.0, available.x - 48.0), minf(180.0, available.y - 64.0))
+	detail.custom_minimum_size.x = scroll.custom_minimum_size.x - 48.0
+	detail.size.x = detail.custom_minimum_size.x
+	detail.text = message
+	popup.popup_centered.call_deferred(Vector2i(scroll.custom_minimum_size) + Vector2i(8, 8))
 
 func dispose() -> void:
 	if is_instance_valid(popup):

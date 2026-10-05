@@ -24,6 +24,7 @@ func _run() -> void:
 	await _test_extinguisher()
 	stage.queue_free()
 	await process_frame
+	await create_timer(0.2).timeout
 	print("Hit effect tests: %d failure(s)." % failures)
 	quit(failures)
 

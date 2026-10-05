@@ -67,6 +67,7 @@ func _run() -> void:
 	await _test_horde_summon(stage)
 	stage.queue_free()
 	await process_frame
+	await create_timer(0.2).timeout
 	print("Enemy animation tests: %d failure(s)." % failures)
 	quit(failures)
 
