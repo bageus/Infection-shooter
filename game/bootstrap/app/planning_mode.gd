@@ -287,13 +287,9 @@ func _input(event: InputEvent) -> void:
 
 
 func _text_field_has_focus() -> bool:
+	# Any text entry (map name, spin boxes, the blood size field) keeps its keys.
 	var focused := get_viewport().gui_get_focus_owner()
-	if focused == storage.map_name_edit and focused != null:
-		return true
-	for field in [controls.default_light_height, controls.default_light_energy, controls.default_light_angle, controls.default_flicker_step, controls.selected_flicker_step]:
-		if field != null and focused == (field as SpinBox).get_line_edit():
-			return true
-	return false
+	return focused is LineEdit or focused is TextEdit
 
 
 func _rotate_camera(relative: Vector2) -> void:

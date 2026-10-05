@@ -13,6 +13,8 @@ var objects: Variant
 # tears paper and pushes props around; the planner edits and saves this
 # authored state, never the aftermath of a fight.
 var authored_layout: Dictionary = {}
+# Name of an existing map the user was warned about; a second press overwrites it.
+var _overwrite_pending := ""
 var controls: Variant
 var catalog: Variant
 
@@ -145,6 +147,11 @@ func save_named_map() -> void:
 		controls.status.text = "Type a map name (letters, digits, - or _)"
 		return
 	var path = _map_path(safe_name)
+	if FileAccess.file_exists(path) and _overwrite_pending != safe_name:
+		_overwrite_pending = safe_name
+		controls.status.text = "MAP '%s' EXISTS | press SAVE MAP again to overwrite" % safe_name
+		return
+	_overwrite_pending = ""
 	var file = FileAccess.open(path, FileAccess.WRITE)
 	if file == null:
 		controls.status.text = "MAP SAVE ERROR %d" % FileAccess.get_open_error()

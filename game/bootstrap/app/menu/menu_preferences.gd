@@ -30,3 +30,18 @@ func save_settings() -> Error:
 
 func reset() -> void:
 	values = DEFAULTS.duplicate()
+
+
+## Applies the settings to the running game, not just the menu: master
+## volume (the default 0.4 keeps the authored mix at 0 dB, up to +6 dB),
+## sound on/off and the 3D scene brightness.
+func apply_to_game(tree: SceneTree) -> void:
+	var master := AudioServer.get_bus_index(&"Master")
+	if master >= 0:
+		AudioServer.set_bus_mute(master, not bool(values.sound))
+		AudioServer.set_bus_volume_db(master, linear_to_db(clampf(float(values.volume) / float(DEFAULTS.volume), 0.0001, 2.0)))
+	var scene := tree.current_scene if tree != null else null
+	var world := scene.get_node_or_null("WorldEnvironment") as WorldEnvironment if scene != null else null
+	if world != null and world.environment != null:
+		world.environment.adjustment_enabled = true
+		world.environment.adjustment_brightness = float(values.brightness)

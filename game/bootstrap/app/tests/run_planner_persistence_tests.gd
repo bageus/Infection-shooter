@@ -13,6 +13,27 @@ const PLAYER_PATH := "res://game/features/player/public/player.tscn"
 var _failures := 0
 
 
+# Saving over an existing map asks for a second press; text fields keep keys.
+func _test_map_overwrite(storage: Variant, planner: Node) -> void:
+	var name_edit := storage.get("map_name_edit") as LineEdit
+	name_edit.text = "overwrite_check"
+	var path: String = storage.call("_map_path", "overwrite_check")
+	DirAccess.remove_absolute(path)
+	storage.call("save_named_map")
+	_check(FileAccess.file_exists(path), "A new map saves on the first press")
+	var first := FileAccess.get_modified_time(path)
+	storage.call("save_named_map")
+	var status := str((planner.get("controls").get("status") as Label).text)
+	_check(status.contains("EXISTS"), "Saving over an existing map warns first (%s)" % status)
+	storage.call("save_named_map")
+	_check(str((planner.get("controls").get("status") as Label).text).begins_with("MAP SAVED"), "A second press overwrites the map")
+	DirAccess.remove_absolute(path)
+	name_edit.grab_focus()
+	_check(bool(planner.call("_text_field_has_focus")), "Typing in a planner text field keeps its keys")
+	name_edit.release_focus()
+	await process_frame
+
+
 func _initialize() -> void:
 	call_deferred("_run")
 
@@ -48,6 +69,7 @@ func _run() -> void:
 	await process_frame
 
 	stage.call("_on_planning_pressed")
+	await _test_map_overwrite(storage, planner)
 	var data: Dictionary = storage.call("_collect_layout_data")
 	var players := (data["objects"] as Array).filter(func(r: Dictionary) -> bool: return r["scene"] == PLAYER_PATH)
 	_check(players.size() == 1 and Vector3(players[0]["x"], players[0]["y"], players[0]["z"]).distance_to(spawn) < 0.01, "The player is saved once, at its spawn point")

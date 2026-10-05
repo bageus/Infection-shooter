@@ -53,6 +53,7 @@ func _run() -> void:
 	var app: Node = current_scene
 	_check(app.scene_file_path == "res://game/bootstrap/app/main.tscn", "deployment loads combat scene")
 	_test_gameplay_font(app)
+	_test_settings_reach_game(app)
 	await _test_pause_and_planner(app)
 	await _test_results_and_return(app)
 	_restore_settings()
@@ -132,6 +133,24 @@ func _test_results_and_return(app: Node) -> void:
 	await process_frame
 	await process_frame
 	_check(current_scene.scene_file_path == FRONT.resource_path and not paused, "return opens main menu and clears pause")
+
+
+# Volume, sound and brightness act on the running game, not only the menu.
+func _test_settings_reach_game(app: Node) -> void:
+	var prefs = PREFS.new()
+	prefs.values.volume = 0.2
+	prefs.values.brightness = 1.3
+	prefs.apply_to_game(app.get_tree())
+	var master := AudioServer.get_bus_index(&"Master")
+	_check(AudioServer.get_bus_volume_db(master) < -5.0, "menu volume lowers the game's master bus")
+	var world := app.get_node_or_null("WorldEnvironment") as WorldEnvironment
+	_check(world != null and world.environment.adjustment_enabled and is_equal_approx(world.environment.adjustment_brightness, 1.3), "brightness reaches the game scene")
+	prefs.values.sound = false
+	prefs.apply_to_game(app.get_tree())
+	_check(AudioServer.is_bus_mute(master), "turning sound off mutes the game")
+	prefs.reset()
+	prefs.apply_to_game(app.get_tree())
+	_check(not AudioServer.is_bus_mute(master) and absf(AudioServer.get_bus_volume_db(master)) < 0.01, "default settings keep the authored mix")
 
 
 func _restore_settings() -> void:

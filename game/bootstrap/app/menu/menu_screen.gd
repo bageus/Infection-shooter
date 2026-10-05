@@ -31,6 +31,9 @@ func _ready() -> void:
 	mouse_filter = Control.MOUSE_FILTER_STOP
 	translations = JSON.parse_string(FileAccess.get_file_as_string("res://assets/interface/translations.json"))
 	preferences.load_settings()
+	# The game scene (and its environment) may not be current yet; apply once
+	# the tree has settled so saved volume and brightness hold from the start.
+	(func() -> void: preferences.apply_to_game(get_tree())).call_deferred()
 	_click_player = AudioStreamPlayer.new()
 	_click_player.stream = _click_stream()
 	add_child(_click_player)

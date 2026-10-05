@@ -146,6 +146,7 @@ func _change(key: String, value: Variant) -> void:
 	view.preferences.values[key] = value
 	if view.preferences.save_settings() != OK:
 		_copy("storeUnavailable")
+	view.preferences.apply_to_game(view.get_tree())
 	view.refresh()
 
 
@@ -163,6 +164,7 @@ func _defaults() -> void:
 	view.preferences.reset()
 	if view.preferences.save_settings() != OK:
 		_copy("storeUnavailable")
+	view.preferences.apply_to_game(view.get_tree())
 	view.refresh()
 	_rebuild()
 
