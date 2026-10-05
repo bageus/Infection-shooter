@@ -1,6 +1,8 @@
 extends SceneTree
 const MAIN := preload("res://game/bootstrap/app/main.tscn")
 const CORPSE := preload("res://game/features/infected/public/decor/corpse_hunger.tscn")
+const HORDE := preload("res://game/features/infected/public/decor/corpse_horde.tscn")
+const PART := preload("res://game/features/infected/public/decor/part_hunger_head.tscn")
 const PREFS := preload("res://game/bootstrap/app/menu/menu_preferences.gd")
 var failures := 0
 var stage: Node3D
@@ -77,7 +79,17 @@ func _particles(catalog: RefCounted) -> void:
 	_check(effects.get_child_count() > count, "Enabled repeat hit creates spark particles")
 
 func _corpse() -> void:
-	var corpse := CORPSE.instantiate()
+	for scene: PackedScene in [CORPSE, HORDE]:
+		await _settle(scene)
+	var part := PART.instantiate() as RigidBody3D
+	stage.add_child(part)
+	part.position = Vector3(30, 3, 5)
+	for tick in 90:
+		await physics_frame
+	_check(part.position.y < 1.0 and part.position.is_finite(), "Airborne severed parts fall to the floor")
+
+func _settle(scene: PackedScene) -> void:
+	var corpse := scene.instantiate()
 	corpse.call("configure_decor_pose", {"seed": 9, "pose": "seated", "facing": 0.0})
 	stage.add_child(corpse)
 	corpse.position = Vector3(27, 3, 4)
@@ -88,19 +100,28 @@ func _corpse() -> void:
 	var camera := stage.get_node("Gameplay/Player/CameraRig/Camera3D") as Camera3D
 	camera.global_position = corpse.global_position + Vector3(4, 2, 5)
 	camera.look_at(corpse.global_position - Vector3(0, 1.3, 0))
-	await _capture("corpse_authored")
+	await _capture(corpse.name + "_authored")
 	corpse.call("set_runtime_physics", true)
+	var simulation: PhysicalBoneSimulator3D = corpse.get("_physics").get("simulator")
+	var links: Array[Dictionary] = []
+	for child: PhysicalBone3D in simulation.get_children():
+		var parent_id := skeleton.get_bone_parent(child.get_bone_id())
+		var parent := simulation.get_node_or_null("Physics_" + skeleton.get_bone_name(parent_id)) as PhysicalBone3D if parent_id >= 0 else null
+		if parent != null:
+			links.append({"child": child, "parent": parent, "length": _joint(child).distance_to(_joint(parent))})
 	for frame in 90:
 		await physics_frame
-	var simulation: PhysicalBoneSimulator3D = corpse.get("_physics").get("simulator")
+	for link in links:
+		_check(absf(_joint(link["child"]).distance_to(_joint(link["parent"])) - float(link["length"])) < .065, "Joints retain anatomical segment lengths: " + corpse.name)
 	var physical: PhysicalBone3D = simulation.get_node("Physics_Hips")
 	var after := physical.global_transform
 	_check(physical.get_bone_id() == hips and physical.is_simulating_physics(), "Physical body is bound to the actual hips bone")
 	_check(after.origin.y < before.origin.y - .2, "Airborne corpse falls through physical bones")
 	_check(not after.basis.is_equal_approx(before.basis), "Articulated corpse changes its authored pose")
 	_check(after.origin.is_finite(), "Corpse physics remains finite")
-	await _capture("corpse_settled")
+	await _capture(corpse.name + "_settled")
 	corpse.call("set_runtime_physics", false)
+	corpse.queue_free()
 
 func _aim(player: Node3D) -> void:
 	var camera := player.get_node("CameraRig/Camera3D") as Camera3D
@@ -135,3 +156,6 @@ func _capture(label: String) -> void:
 	await RenderingServer.frame_post_draw
 	DirAccess.make_dir_recursive_absolute(directory)
 	root.get_texture().get_image().save_png(directory.path_join(label + "_" + RenderingServer.get_current_rendering_method() + ".png"))
+
+func _joint(bone: PhysicalBone3D) -> Vector3:
+	return bone.global_transform * bone.body_offset.affine_inverse().origin
