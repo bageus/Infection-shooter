@@ -1,4 +1,5 @@
 extends Node
+const LAYOUT_PROPERTIES := preload("res://game/bootstrap/app/planning_layout_properties.gd")
 const BLOOD_PLACEMENT := preload("res://game/bootstrap/app/planning_blood_placement.gd")
 
 
@@ -54,6 +55,9 @@ func _select(node: Node3D) -> void:
 	if selected != null:
 		geometry._show_selection_highlight(selected)
 	controls._update_light_ui()
+	if selected != null and selected.has_method("get_fixture_config"):
+		var panel := session.ui.get_node("Panel") as ScrollContainer
+		panel.ensure_control_visible.call_deferred(controls.light_info)
 	_update_status()
 	controls._update_history_buttons()
 
@@ -71,6 +75,11 @@ func _reset_selection() -> void:
 
 func _register_existing_scene_objects() -> void:
 	_register_editable_children(session.structure_root)
+	# Nested authored lamps remain selectable even inside a collidable container.
+	for node in session.structure_root.find_children("*", "Node3D", true, false):
+		if node.has_method("get_fixture_config") and not placed.has(node):
+			_is_editable_scene_object(node)
+			placed.append(node)
 
 
 func _register_editable_children(parent: Node) -> void:
@@ -108,7 +117,7 @@ func _register_actor_objects() -> void:
 
 
 func _is_editable_scene_object(node: Node3D) -> bool:
-	if node == session.root or node == session.structure_root:
+	if node == session.root or node == session.structure_root or node.scene_file_path.ends_with("base_office_layout.tscn"):
 		return false
 	if node.is_in_group("planner_lights"):
 		node.set_meta("planning_scene_path", "res://game/presentation/office_floor/public/props/planner_light.tscn")
@@ -182,6 +191,8 @@ func _update_preview(screen_pos: Vector2) -> void:
 	controls._apply_special_default_height(preview, _selected_kind())
 	preview.rotation_degrees.y = rotation_y
 	geometry._apply_wall_mount(preview)
+	controls.DECOR_POSES.place(preview)
+	BLOOD_PLACEMENT.preview_projection(preview)
 	controls._update_light_ui()
 
 
@@ -232,6 +243,7 @@ func _place_selected(screen_pos: Vector2) -> void:
 			node.call("set_target", session.main_player)
 	node.rotation_degrees.y = rotation_y
 	geometry._apply_wall_mount(node)
+	controls.DECOR_POSES.place(node)
 	BLOOD_PLACEMENT.apply_probe(node, preview)
 	if selected_path.get_file() == "06_conference_chair.glb":
 		_ground_conference_chair(node)
@@ -410,17 +422,7 @@ func _apply_layout_data(data: Dictionary) -> Dictionary:
 		if node == null:
 			skipped += 1
 			continue
-		if node.has_method("configure_blood") and record.has("blood_texture"):
-			node.call("configure_blood", str(record["blood_texture"]), str(record.get("blood_surface", "floor")))
-		if node.has_method("configure_display") and record.get("display") is Dictionary:
-			node.call("configure_display", record["display"])
-		if node.has_method("configure_blood_normal"):
-			var default_normal: Vector3 = node.get("surface_normal")
-			var blood_normal: Array = record.get("blood_normal", [default_normal.x, default_normal.y, default_normal.z])
-			node.call("configure_blood_normal", Vector3(float(blood_normal[0]), float(blood_normal[1]), float(blood_normal[2])))
-			node.call("configure_blood_attachment", record.get("blood_attachment", {}))
-		if record.has("object_id"):
-			node.set_meta("planning_object_id", str(record["object_id"]))
+		LAYOUT_PROPERTIES.restore(node, record)
 		var load_kind = "enemy" if scene_path in catalog.ENEMY_SCENES else ""
 		var target_parent = session.enemies_root if load_kind == "enemy" else session.root
 		target_parent.add_child(node)
@@ -429,6 +431,7 @@ func _apply_layout_data(data: Dictionary) -> Dictionary:
 		node.scale = Vector3(float(record.get("scale_x",1.0)),float(record.get("scale_y",1.0)),float(record.get("scale_z",1.0)))
 		if scene_path.get_file() == "06_conference_chair.glb":
 			_ground_conference_chair(node)
+		geometry._restore_floor_surface(node, scene_path)
 		node.set_meta("planning_scene_path", scene_path)
 		if record.has("desk_id"):
 			node.set_meta("planning_desk_id", str(record["desk_id"]))

@@ -37,6 +37,7 @@ func _ready() -> void:
 	(func() -> void: preferences.apply_to_game(get_tree())).call_deferred()
 	_click_player = AudioStreamPlayer.new()
 	_click_player.stream = _click_stream()
+	_click_player.bus = &"UI"
 	add_child(_click_player)
 	background = TextureRect.new()
 	background.expand_mode = TextureRect.EXPAND_IGNORE_SIZE

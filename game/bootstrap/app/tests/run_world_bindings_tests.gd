@@ -32,7 +32,14 @@ func _run() -> void:
 	_check(bullet != null, "Bullet goes into the injected container")
 	if bullet != null:
 		bullet.set_physics_process(false)
-		bullet.call("_spawn_impact_decal", null, Vector3.UP, Vector3.UP)
+		var receiver := StaticBody3D.new()
+		stage.add_child(receiver)
+		receiver.position = Vector3(0, .95, 0)
+		var shape := CollisionShape3D.new()
+		shape.shape = BoxShape3D.new()
+		shape.shape.size = Vector3(2, .1, 2)
+		receiver.add_child(shape)
+		bullet.call("_spawn_impact_decal", receiver, Vector3.UP, Vector3.UP)
 		_check(pool.get("_marks").size() > 0, "Impact uses the injected budget")
 	var launcher := player.get_node("AimPivot/GrenadeLauncher") as Node3D
 	_check(bool(launcher.call("try_fire_at", Vector3(0, 0, -8))), "Configured launcher fires")

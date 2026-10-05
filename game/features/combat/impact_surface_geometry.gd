@@ -12,21 +12,7 @@ func register(collider: Node3D, visual: Node3D) -> void:
 func resolve(collider: Node3D, point: Vector3, direction: Vector3) -> Dictionary:
 	if not is_instance_valid(collider):
 		return {}
-	var meshes: Array[MeshInstance3D] = []
-	if visuals.has(collider.get_instance_id()):
-		var visual := (visuals[collider.get_instance_id()] as WeakRef).get_ref() as Node
-		if visual != null:
-			_collect(visual, meshes)
-	_collect(collider, meshes)
-	if meshes.is_empty():
-		# Structural collision bodies are local siblings of their Visual branch.
-		var owner := collider.get_parent()
-		if owner != null:
-			var visual := owner.get_node_or_null("Visual")
-			if visual != null:
-				_collect(visual, meshes)
-			elif owner is MeshInstance3D:
-				_collect(owner, meshes)
+	var meshes := receivers(collider)
 	var from := point - direction * .12
 	var finish := point + direction * 3.0
 	var best := INF
@@ -60,9 +46,30 @@ func resolve(collider: Node3D, point: Vector3, direction: Vector3) -> Dictionary
 
 
 func _collect(node: Node, out: Array[MeshInstance3D]) -> void:
+	if node.has_meta("surface_mark") or node.has_meta("blood_effect"):
+		return
 	if node is MeshInstance3D:
 		var mesh := node as MeshInstance3D
-		if mesh.mesh != null and not mesh.mesh is QuadMesh and not mesh.has_meta("surface_mark") and mesh.is_visible_in_tree() and absf(mesh.global_basis.determinant()) > .00000001:
+		if mesh.mesh != null and not mesh.mesh is QuadMesh and not mesh.has_meta("surface_mark") and not mesh.has_meta("blood_effect") and mesh.cast_shadow != GeometryInstance3D.SHADOW_CASTING_SETTING_SHADOWS_ONLY and mesh.is_visible_in_tree() and absf(mesh.global_basis.determinant()) > .00000001:
 			out.append(mesh)
 	for child in node.get_children():
 		_collect(child, out)
+
+
+func receivers(collider: Node3D) -> Array[MeshInstance3D]:
+	var meshes: Array[MeshInstance3D] = []
+	if visuals.has(collider.get_instance_id()):
+		var visual := (visuals[collider.get_instance_id()] as WeakRef).get_ref() as Node
+		if visual != null:
+			_collect(visual, meshes)
+	_collect(collider, meshes)
+	if meshes.is_empty():
+		# Structural collision bodies are local siblings of their Visual branch.
+		var owner := collider.get_parent()
+		if owner != null:
+			var visual := owner.get_node_or_null("Visual")
+			if visual != null:
+				_collect(visual, meshes)
+			elif owner is MeshInstance3D:
+				_collect(owner, meshes)
+	return meshes

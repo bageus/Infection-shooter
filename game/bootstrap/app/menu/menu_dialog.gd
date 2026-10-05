@@ -39,9 +39,12 @@ func setup(owner_view: Control, dialog_kind: String) -> void:
 	panel.offset_bottom = 310
 	var scroll := ScrollContainer.new()
 	scroll.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
+	if kind == "settings":
+		scroll.vertical_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
 	panel.add_child(scroll)
 	layout = VBoxContainer.new()
 	layout.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	layout.size_flags_vertical = Control.SIZE_EXPAND_FILL
 	layout.add_theme_constant_override("separation", 12)
 	scroll.add_child(layout)
 	_build()
@@ -141,7 +144,7 @@ func _row(key: String, widget: Control) -> void:
 func _change(key: String, value: Variant) -> void:
 	view.preferences.values[key] = value
 	if view.preferences.save_settings() != OK:
-		_copy("storeUnavailable")
+		settings.notices.set_notice(settings_tab, view.text("storeUnavailable"))
 	view.preferences.apply_to_game(view.get_tree())
 	view.refresh()
 
@@ -159,7 +162,7 @@ func _scale_changed(index: int) -> void:
 func _defaults() -> void:
 	view.preferences.reset()
 	if view.preferences.save_settings() != OK:
-		_copy("storeUnavailable")
+		settings.notices.set_notice(settings_tab, view.text("storeUnavailable"))
 	view.preferences.apply_to_game(view.get_tree())
 	view.refresh()
 	_rebuild()

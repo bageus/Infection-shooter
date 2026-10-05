@@ -7,9 +7,6 @@ extends RigidBody3D
 signal projectile_blood(position: Vector3, direction: Vector3, weapon: String, excluded: Array[RID], source_id: int)
 signal blood_wounded(position: Vector3, excluded: Array[RID])
 signal wounded_moved(previous: Vector3, current: Vector3, excluded: Array[RID])
-signal body_dragged(previous: Vector3, current: Vector3, excluded: Array[RID])
-signal blood_death(position: Vector3, excluded: Array[RID], death_id: int)
-signal limb_severed(position: Vector3, direction: Vector3, excluded: Array[RID])
 
 const FX := preload("res://game/features/infected/blood_drip_fx.gd")
 const SFX := preload("res://game/core/audio/public/sound_events.gd")
@@ -25,7 +22,6 @@ var bleeding := true
 var blood_drop_distance := 0.45
 var _age := 0.0
 var _trail_from := Vector3.ZERO
-var _trail_length := 0.0
 var _stained := false
 var _fading := false
 

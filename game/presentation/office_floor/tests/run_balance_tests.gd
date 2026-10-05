@@ -177,10 +177,12 @@ func _test_caps() -> void:
 	player.set("effects_root", effects)
 	player.global_position = Vector3(120, 1, 0)
 	player.set_physics_process(false)
+	var hit_facts := [0]
+	player.connect("projectile_blood", func(_point: Vector3, _direction: Vector3, _weapon: String, _excluded: Array[RID], _source_id: int) -> void: hit_facts[0] += 1)
+	player.set("armor", 0.0)
 	for i in 40:
-		player.call("_spawn_floor_blood", 30.0)
-	var marks := (player.get("_floor_marks") as Array).size()
-	_expect(marks <= 60, "Player blood on the floor is capped (%d marks)." % marks)
+		player.call("take_damage", 1.0)
+	_expect(hit_facts[0] == 40, "Player damage uses the shared bounded blood renderer facts")
 	player.queue_free()
 	var clouds: Array[Area3D] = []
 	for i in 14:

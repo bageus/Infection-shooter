@@ -8,6 +8,7 @@ var _material: StandardMaterial3D
 var _growth: Tween
 var _fade: Tween
 var _depth := 0.08
+var _projected: Array[WeakRef] = []
 
 
 func _init() -> void:
@@ -50,18 +51,32 @@ func configure(hit: Dictionary, definition: Dictionary, settings: Dictionary) ->
 			_material.distance_fade_mode = BaseMaterial3D.DISTANCE_FADE_PIXEL_ALPHA
 			_material.distance_fade_min_distance = settings["fade_begin"]
 			_material.distance_fade_max_distance = settings["fade_begin"] + settings["fade_length"]
-		_quad = QuadMesh.new()
-		_quad.material = _material
-		visual.mesh = _quad
-		visual.rotation.x = -PI * 0.5
-		visual.position.y = settings["quad_offset"]
-		add_child(visual)
+		var reference: Variant = settings.get("projection_pool")
+		var pool: Node = reference.get_ref() if reference is WeakRef else null
+		if pool != null:
+			var basis: Basis = definition["basis"]
+			var projector := Transform3D(Basis(basis.x, -basis.z, basis.y), hit["position"])
+			for piece in pool.call("project_surface", body, projector, footprint, _material, _depth, false):
+				_projected.append(weakref(piece))
+			visual.queue_free()
+		else:
+			_quad = QuadMesh.new()
+			_quad.material = _material
+			visual.mesh = _quad
+			visual.rotation.x = -PI * 0.5
+			visual.position.y = settings["quad_offset"]
+			add_child(visual)
 	_set_dimensions(footprint)
 	if definition.get("pool", false):
-		_set_dimensions(footprint * 0.35)
 		_growth = create_tween()
 		_growth.set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_OUT)
-		_growth.tween_method(_set_dimensions, footprint * 0.35, footprint, definition.get("growth_seconds", settings["growth_seconds"]))
+		var duration: float = definition.get("growth_seconds", settings["growth_seconds"])
+		if _projected.is_empty():
+			_set_dimensions(footprint * .35)
+			_growth.tween_method(_set_dimensions, footprint * .35, footprint, duration)
+		else:
+			_set_opacity(.35)
+			_growth.tween_method(_set_opacity, .35, 1.0, duration)
 	_anchor = RemoteTransform3D.new()
 	_anchor.set_meta("blood_effect", true)
 	_anchor.update_scale = false
@@ -98,6 +113,10 @@ func fade_out(seconds: float, completed: Callable) -> void:
 
 
 func _exit_tree() -> void:
+	for reference in _projected:
+		var piece := reference.get_ref() as Node
+		if piece != null:
+			piece.queue_free()
 	if is_instance_valid(_anchor):
 		_anchor.remote_path = NodePath()
 		_anchor.queue_free()

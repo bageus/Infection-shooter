@@ -95,6 +95,8 @@ func _collect_layout_data() -> Dictionary:
 			"spawn_y": (node.get_meta("planning_spawn_transform") as Transform3D).origin.y if node.has_meta("planning_spawn_transform") else node.position.y,
 			"spawn_z": (node.get_meta("planning_spawn_transform") as Transform3D).origin.z if node.has_meta("planning_spawn_transform") else node.position.z
 		})
+		if node.has_method("get_decor_pose"):
+			records[-1]["decor_pose"] = node.call("get_decor_pose")
 		if node.has_method("has_display") and node.call("has_display"):
 			records[-1]["display"] = node.call("get_display_config")
 		if node.has_method("get_fixture_config"):
@@ -267,6 +269,8 @@ func _save_authored_scene() -> Error:
 		var copy = catalog._instantiate_asset(scene_path)
 		if copy == null:
 			continue
+		if node.has_method("get_decor_pose"):
+			copy.call("configure_decor_pose", node.call("get_decor_pose"))
 		scene_root.add_child(copy)
 		copy.owner = scene_root
 		copy.transform = node.transform

@@ -67,12 +67,14 @@ func _physics_process(delta: float) -> void:
 	if _shooter != null:
 		excluded.append(_shooter.get_rid())
 
+	var from_barrel := _first_step
 	var remaining_start := _collision_origin if _first_step else global_position
 	_first_step = false
 	var remaining_finish := finish
 	for pass_index in 5:
 		var query := PhysicsRayQueryParameters3D.create(remaining_start, remaining_finish, 7)
 		query.exclude = excluded
+		query.hit_from_inside = from_barrel and pass_index == 0
 		var hit := get_world_3d().direct_space_state.intersect_ray(query)
 		if hit.is_empty():
 			global_position = finish
@@ -81,6 +83,8 @@ func _physics_process(delta: float) -> void:
 
 		var hit_position: Vector3 = hit.get("position")
 		var normal: Vector3 = hit.get("normal")
+		if normal.is_zero_approx():
+			normal = -_direction
 		var collider: Object = hit.get("collider")
 		var shape_index := int(hit.get("shape", -1))
 		var stops_bullet := _handle_hit(collider, hit_position, normal, shape_index)
@@ -171,31 +175,14 @@ func _spawn_impact_decal(collider: Object, hit_position: Vector3, normal: Vector
 	if collider is Node3D:
 		surface = impact_pool.call("resolve_surface", collider, hit_position, _direction if not _direction.is_zero_approx() else -normal)
 	if surface.is_empty():
-		return
+		# Procedural floors have collision geometry and a separate MultiMesh renderer.
+		surface = {"position": hit_position, "normal": normal, "anchor": collider}
 	hit_position = surface["position"]
 	normal = surface["normal"]
-	var mark := MeshInstance3D.new()
-	mark.set_meta("surface_mark", true)
-	var quad := QuadMesh.new()
-	quad.size = Vector2.ONE * randf_range(.12, .24)
-	quad.material = SURFACE_ATLASES.material(SURFACE_ATLASES.BULLET, randi_range(0, 4))
-	mark.mesh = quad
-	var pool := impact_pool
-	mark.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
-	var parent: Node3D = surface["anchor"]
-	if parent == null:
-		parent = effects_root
-	if parent == null:
-		return
-	parent.add_child(mark)
-	mark.global_position = hit_position + normal * 0.0015
-	var up := Vector3.FORWARD if absf(normal.y) > 0.9 else Vector3.UP
-	mark.global_basis = Basis.looking_at(-normal, up)
-	if pool != null:
-		pool.call("register_mark", mark)
-	var mark_ref: WeakRef = weakref(mark)
-	get_tree().create_timer(24.0).timeout.connect(func() -> void:
-		var live_mark: MeshInstance3D = mark_ref.get_ref() as MeshInstance3D
-		if live_mark != null:
-			live_mark.queue_free()
-	)
+	var up := Vector3.FORWARD if absf(normal.y) > .9 else Vector3.UP
+	var projector := Transform3D(Basis.looking_at(-normal, up), hit_position)
+	var material := SURFACE_ATLASES.material(SURFACE_ATLASES.BULLET, randi_range(0, 4))
+	var marks: Array = impact_pool.call("project_surface", collider, projector, Vector2.ONE * randf_range(.12, .24), material, .08, true)
+	for mark in marks:
+		impact_pool.call("register_mark", mark)
+		get_tree().create_timer(24.0).timeout.connect(mark.queue_free)

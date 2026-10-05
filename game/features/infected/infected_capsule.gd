@@ -208,16 +208,16 @@ func _on_part_severed(part: StringName, piece: RigidBody3D) -> void:
 
 # Consequences of a lost part; specialised enemies extend this.
 func _part_lost(part: StringName) -> void:
-	var name := String(part)
+	var part_label := String(part)
 	if part == &"head":
 		_die()
-	elif name.begins_with("leg"):
+	elif part_label.begins_with("leg"):
 		var legs: int = _parts.remaining("leg")
 		if limb_loss_kills or legs == 0:
 			_die()
 		else:
 			_mobility = minf(_mobility, 0.45)
-	elif name.begins_with("arm") and _parts.remaining("arm") == 0:
+	elif part_label.begins_with("arm") and _parts.remaining("arm") == 0:
 		_attack_scale = 0.5
 
 

@@ -1,4 +1,6 @@
 extends Node3D
+const BARREL_GUARD := preload("res://game/features/combat/weapon_barrel_guard.gd")
+const AIM_GEOMETRY := preload("res://game/features/combat/weapon_aim_geometry.gd")
 const MUZZLE_FLASH := preload("res://game/features/combat/muzzle_flash.tscn")
 const ART_SETUP := preload("res://game/features/combat/weapon_art_setup.gd")
 const SFX := preload("res://game/core/audio/public/sound_events.gd")
@@ -78,6 +80,11 @@ func configure_world(container: Node3D, impacts: Node) -> void:
 	impact_pool = impacts
 
 
+# Public weapon_aim_v1: aligns the model, authored flash and gameplay muzzle.
+func aim_at(target_point: Vector3) -> void:
+	AIM_GEOMETRY.aim(self, muzzle, target_point)
+
+
 func try_fire_at(target_point: Vector3) -> bool:
 	# A shell-by-shell reload is interrupted by firing once a shell is in.
 	if _reloading and shotgun_shell_reload and _magazine_ammo > 0:
@@ -96,25 +103,20 @@ func try_fire_at(target_point: Vector3) -> bool:
 	if wants_continuous_fire():
 		# A short burst stays tight; sustained fire gradually loses accuracy.
 		effective_spread *= lerpf(0.42, 1.65, clampf(float(_burst_shots) / 11.0, 0.0, 1.0))
-	var forward := -muzzle.global_basis.z.normalized()
-	forward.y = 0.0
-	forward = forward.normalized()
-	var muzzle_position := muzzle.global_position
-	var aim_offset := target_point - muzzle_position
-	var horizontal := Vector3(aim_offset.x, 0.0, aim_offset.z)
-	if horizontal.length_squared() < 0.04 or horizontal.dot(forward) < 0.0:
-		horizontal = forward * 8.0
-	# Ray hits high surfaces near the camera must not send bullets into the sky.
-	var rise := clampf(aim_offset.y, -horizontal.length() * 0.22, horizontal.length() * 0.22)
-	var base_direction := (horizontal + Vector3.UP * rise).normalized()
+	aim_at(target_point)
+	var base_direction := -muzzle.global_basis.z.normalized()
+	var obstruction := BARREL_GUARD.obstruction(self, muzzle, shooter)
 	for pellet in pellets_per_shot:
 		var bullet := bullet_scene.instantiate()
 		bullet.call("configure_world", effects_root, impact_pool)
 		effects_root.add_child(bullet)
 		bullet.global_transform = muzzle.global_transform
 		var shot_direction := _spread_direction(base_direction, effective_spread)
-		var collision_origin := muzzle_position
+		var collision_origin := AIM_GEOMETRY.collision_origin(self, muzzle)
 		bullet.call("setup_projectile", shot_direction, shooter, bullet_damage * environment_damage_multiplier, bullet_speed, bullet_range, weapon_name, collision_origin)
+		if not obstruction.is_empty():
+			bullet.call("_handle_hit", obstruction["collider"], obstruction["position"], obstruction["normal"], int(obstruction.get("shape", -1)))
+			bullet.queue_free()
 	_magazine_ammo -= 1
 	_show_muzzle_flash()
 	_last_shot_time = now
@@ -179,4 +181,6 @@ func _spread_direction(base: Vector3, cone_degrees: float) -> Vector3:
 	var pitch := deg_to_rad(randf_range(-cone_degrees, cone_degrees))
 	var turned := base.rotated(Vector3.UP, yaw)
 	var right := turned.cross(Vector3.UP).normalized()
+	if right.is_zero_approx():
+		right = Vector3.RIGHT
 	return turned.rotated(right, pitch).normalized()

@@ -21,7 +21,7 @@ func configure_world(container: Node3D, impacts: Node) -> void:
 
 
 # Public v1 + sound_event (ADR-0018): the casing clinks when it lands.
-func spawn_casing(model: PackedScene, eject_transform: Transform3D, radius: float, shooter: CollisionObject3D, sound_event: StringName = &"casing_brass") -> void:
+func spawn_casing(model: PackedScene, eject_transform: Transform3D, radius: float, shooter: CollisionObject3D, sound_event: StringName = &"casing_brass", size_multiplier: float = 1.0) -> void:
 	if model == null or not is_instance_valid(effects_root):
 		return
 	var body := RigidBody3D.new()
@@ -38,7 +38,7 @@ func spawn_casing(model: PackedScene, eject_transform: Transform3D, radius: floa
 	body.physics_material_override = material
 	var collider := CollisionShape3D.new()
 	var shape := SphereShape3D.new()
-	shape.radius = radius * CASING_SCALE
+	shape.radius = radius * CASING_SCALE * size_multiplier
 	shape.margin = 0.001
 	collider.shape = shape
 	body.add_child(collider)
@@ -46,7 +46,7 @@ func spawn_casing(model: PackedScene, eject_transform: Transform3D, radius: floa
 	if visual == null:
 		body.queue_free()
 		return
-	visual.scale *= CASING_SCALE
+	visual.scale *= CASING_SCALE * size_multiplier
 	body.add_child(visual)
 	effects_root.add_child(body)
 	body.global_transform = eject_transform

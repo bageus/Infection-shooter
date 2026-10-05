@@ -30,6 +30,11 @@ func _run() -> void:
 	_check(tabs.get_child(0).find_child("Language", true, false) != null, "Language belongs to General")
 	_check(tabs.get_child(2).find_child("Occlusion", true, false) != null, "Occlusion belongs to Video")
 	_check(tabs.get_child(3).find_child("SoundToggle", true, false) != null, "Sound belongs to Audio")
+	var notice_row: Control = dialog.find_child("SettingsNotices", true, false)
+	_check(notice_row != null and not tabs.is_ancestor_of(notice_row), "Notice buttons stay outside scrolling tab contents")
+	_check(dialog.settings.notices.buttons[0].visible and dialog.settings.notices.buttons[1].visible and not dialog.settings.notices.buttons[3].visible, "Each tab exposes its own notice only when needed")
+	var page_margin := tabs.get_child(0).get_child(0) as MarginContainer
+	_check(page_margin.get_theme_constant("margin_top") >= 20, "Tab contents retain a readable top gap")
 	tabs.current_tab = 1
 	var editor: RefCounted = dialog.settings.controls
 	editor.begin("move_up")

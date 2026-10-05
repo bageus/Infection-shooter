@@ -79,9 +79,9 @@ static func valid(candidate: Variant) -> bool:
 
 static func event_for(config: Dictionary) -> InputEvent:
 	if config["kind"] == "mouse":
-		var event := InputEventMouseButton.new()
-		event.button_index = int(config["code"]) as MouseButton
-		return event
+		var mouse_event := InputEventMouseButton.new()
+		mouse_event.button_index = int(config["code"]) as MouseButton
+		return mouse_event
 	var event := InputEventKey.new()
 	event.physical_keycode = int(config["code"]) as Key
 	return event

@@ -113,6 +113,7 @@ offset_top = 8.0
 offset_right = 368.0
 offset_bottom = -8.0
 horizontal_scroll_mode = 0
+follow_focus = true
 
 [node name="VBox" type="VBoxContainer" parent="PlanningUI/Panel" unique_id=797647768]
 layout_mode = 2
@@ -122,6 +123,7 @@ theme_override_constants/separation = 5
 [node name="Title" type="Label" parent="PlanningUI/Panel/VBox" unique_id=1680300432]
 layout_mode = 2
 theme_override_font_sizes/font_size = 22
+visible = false
 text = "LEVEL PLANNER"
 horizontal_alignment = 1
 

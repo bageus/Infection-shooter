@@ -3,6 +3,7 @@ extends "res://game/features/infected/severed_part.gd"
 ## (ADR-0017). It is built from the same enemy model as the live part, can
 ## be shot around and never expires.
 
+@export var pose_seed := 0
 const BODY_PARTS := preload("res://game/features/infected/body_parts.gd")
 const MESH := preload("res://game/features/infected/body_part_mesh.gd")
 
@@ -67,6 +68,10 @@ func _assemble(built: Dictionary, cut_world: Vector3, cap_radius: float) -> void
 	var local_center: Vector3 = global_transform.affine_inverse() * built.center
 	var cut := global_transform.affine_inverse() * cut_world - local_center
 	var lie := Basis(Quaternion((-cut).normalized() if cut.length_squared() > 0.0001 else Vector3.RIGHT, Vector3.RIGHT))
+	if pose_seed > 0:
+		var rng := RandomNumberGenerator.new()
+		rng.seed = pose_seed
+		lie = Basis.from_euler(Vector3(rng.randf_range(-PI, PI), rng.randf_range(-PI, PI), rng.randf_range(-PI, PI))) * lie
 	var visual := MeshInstance3D.new()
 	visual.mesh = built.mesh
 	visual.basis = lie
@@ -92,3 +97,11 @@ func _assemble(built: Dictionary, cut_world: Vector3, cap_radius: float) -> void
 	for point: Vector3 in built.points:
 		bounds = bounds.expand(point)
 	mass = clampf(bounds.size.x * bounds.size.y * bounds.size.z * 120.0, 0.3, 25.0)
+
+
+func get_decor_pose() -> Dictionary:
+	return {"seed": pose_seed, "pose": "part"}
+
+
+func configure_decor_pose(config: Dictionary) -> void:
+	pose_seed = maxi(0, int(config.get("seed", 1)))

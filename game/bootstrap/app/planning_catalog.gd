@@ -34,7 +34,6 @@ const ENEMY_SCENES := [
 ]
 var actor_catalog = [
 	{"name":"Player Spawn","path":"","kind":"player"},
-	{"name":"Zombie L1","path":ENEMY_SCENES[0],"kind":"enemy"},
 	{"name":"Hunger","path":ENEMY_SCENES[2],"kind":"enemy"},
 	{"name":"Revenant","path":ENEMY_SCENES[3],"kind":"enemy"},
 	{"name":"Brute","path":ENEMY_SCENES[4],"kind":"enemy"},
@@ -46,11 +45,6 @@ var actor_catalog = [
 
 # Dead infected and loose body parts placed as decoration (ADR-0017).
 var gore_catalog = [
-	{"name":"Corpse Zombie","path":"res://game/features/infected/public/decor/corpse_zombie.tscn","kind":"decor"},
-	{"name":"Corpse Zombie mutilated","path":"res://game/features/infected/public/decor/corpse_zombie_mutilated.tscn","kind":"decor"},
-	{"name":"Head Zombie","path":"res://game/features/infected/public/decor/part_zombie_head.tscn","kind":"decor"},
-	{"name":"Arm Zombie","path":"res://game/features/infected/public/decor/part_zombie_arm.tscn","kind":"decor"},
-	{"name":"Leg Zombie","path":"res://game/features/infected/public/decor/part_zombie_leg.tscn","kind":"decor"},
 	{"name":"Corpse Hunger","path":"res://game/features/infected/public/decor/corpse_hunger.tscn","kind":"decor"},
 	{"name":"Corpse Hunger mutilated","path":"res://game/features/infected/public/decor/corpse_hunger_mutilated.tscn","kind":"decor"},
 	{"name":"Head Hunger","path":"res://game/features/infected/public/decor/part_hunger_head.tscn","kind":"decor"},

@@ -101,25 +101,16 @@ static func _distance_to_shape(collider: Object, shape_index: int, location: Vec
 static func _scorch(scene: Node3D, hit_position: Vector3, normal: Vector3, pool: Node, collider: Node3D = null) -> void:
 	if normal.length_squared() < 0.1:
 		return
-	var anchor := scene
-	if collider != null and pool != null:
-		var surface: Dictionary = pool.call("resolve_surface", collider, hit_position, -normal)
-		if not surface.is_empty():
-			hit_position = surface["position"]
-			normal = surface["normal"]
-			anchor = surface["anchor"]
-	var mark := MeshInstance3D.new()
-	var quad := QuadMesh.new()
-	quad.size = Vector2.ONE * randf_range(SCORCH_SIZE_MIN, SCORCH_SIZE_MAX)
+	if collider == null or pool == null:
+		return
+	if collider.has_method("get_projectile_material") and collider.call("get_projectile_material", -1) == "glass":
+		return
+	var up := Vector3.FORWARD if absf(normal.y) > .9 else Vector3.UP
+	var basis := Basis.looking_at(-normal, up).rotated(normal, randf() * TAU)
+	var projector := Transform3D(basis, hit_position)
 	var material := SURFACE_ATLASES.material(SURFACE_ATLASES.BULLET, randi_range(5, 7))
-	quad.material = material
-	mark.mesh = quad
-	mark.set_meta("surface_mark", true)
-	mark.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
-	anchor.add_child(mark)
-	mark.global_position = hit_position + normal * 0.0015
-	mark.global_basis = Basis.looking_at(-normal, Vector3.FORWARD if absf(normal.y) > 0.9 else Vector3.UP)
-	if pool != null and pool.has_method("register_mark"):
+	material.set_shader_parameter("opacity", .82)
+	var marks: Array = pool.call("project_surface", collider, projector, Vector2.ONE * randf_range(SCORCH_SIZE_MIN, SCORCH_SIZE_MAX), material, .18, true)
+	for mark in marks:
 		pool.call("register_mark", mark)
-	# A direct callable disconnects automatically if the impact budget removes the mark first.
-	scene.get_tree().create_timer(MARK_LIFETIME).timeout.connect(mark.queue_free)
+		scene.get_tree().create_timer(MARK_LIFETIME).timeout.connect(mark.queue_free)

@@ -71,8 +71,13 @@
     },
     "body_damage_v1": {
       "limb_severed": "signal limb_severed(position: Vector3, direction: Vector3, excluded: Array[RID]); presentation fact like projectile_blood",
-      "severed_parts": "severed parts and pieces emit the same five blood signals as an infected when placed in the enemies container",
+      "severed_parts": "severed parts emit projectile_blood, blood_wounded and wounded_moved facts; unsupported unused corpse/death facts are not declared",
       "decor": "public/decor/*.tscn corpses and body parts for the planner; shootable, never expire"
+    },
+    "decor_pose_v1": {
+      "get_decor_pose": "get_decor_pose() -> Dictionary {seed, pose, optional facing}",
+      "configure_decor_pose": "configure_decor_pose(config: Dictionary) -> void; before ready for parts, also retargets a ready corpse",
+      "get_planner_bounds": "get_planner_bounds() -> AABB; corpse posed and grounded local bounds; legacy returns empty"
     }
   }
 }

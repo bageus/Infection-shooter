@@ -36,10 +36,12 @@ var _decal := false
 var _hit_times: Dictionary = {}
 var _effect_requests: Array[Dictionary] = []
 var _diagnostics: Dictionary = {}
+var _projection_pool: Node
 
 
 func _init() -> void:
 	set_meta("blood_effect", true)
+	process_mode = Node.PROCESS_MODE_ALWAYS
 
 
 func _ready() -> void:
@@ -55,6 +57,7 @@ func _ready() -> void:
 	add_child(_surfaces)
 	_budget = BUDGET.new() as Node3D
 	_budget.name = "BloodMarkBudget"
+	_budget.process_mode = Node.PROCESS_MODE_PAUSABLE
 	_budget.set("max_marks", max_marks)
 	_budget.set("lifetime", mark_lifetime)
 	_budget.set("fade_seconds", fade_seconds)
@@ -98,6 +101,13 @@ func diagnostics() -> Dictionary:
 func configure_environment(roots: Array[Node]) -> void:
 	for node in roots:
 		_surfaces.call("watch_environment", node)
+
+
+func configure_world(_container: Node3D, impacts: Node) -> void:
+	_projection_pool = impacts
+	if _budget != null:
+		var settings: Dictionary = _budget.get("settings")
+		settings["projection_pool"] = weakref(impacts) if impacts != null else null
 
 
 func movement_spacing() -> float:
@@ -168,14 +178,17 @@ func _emit_splatter_hit(position: Vector3, direction: Vector3, weapon: String, e
 
 func _emit_severed_burst(position: Vector3, direction: Vector3, excluded: Array[RID]) -> void:
 	var flat := Vector3(direction.x, 0.0, direction.z)
-	for index in range(6):
+	for index in range(12):
 		var spread := Vector3(randf_range(-0.9, 0.9), 0.0, randf_range(-0.9, 0.9)) + flat.normalized() * randf_range(0.2, 1.2)
 		var surface: Dictionary = _surfaces.call("find_floor", position + spread, excluded)
-		_submit("splatter", surface, spread if spread.length_squared() > 0.01 else flat, splatter_size * 1.2, true, true)
-	var behind: Dictionary = _surfaces.call("find_behind", position, direction, excluded)
-	if not behind.is_empty():
-		_submit("splatter", behind, direction, splatter_size * 1.3, true, true)
-	_submit("stain", _surfaces.call("find_floor", position, excluded), Vector3.ZERO, stain_size * 1.6)
+		_submit("splatter", surface, spread if spread.length_squared() > 0.01 else flat, splatter_size * 1.8, true, true)
+	# Radial rays reach nearby walls on every side, never through an obstacle.
+	for index in 8:
+		var radial := Vector3.FORWARD.rotated(Vector3.UP, TAU * float(index) / 8.0)
+		var behind: Dictionary = _surfaces.call("find_behind", position, radial, excluded)
+		if not behind.is_empty():
+			_submit("splatter", behind, radial, splatter_size * 1.8, true, true)
+	_submit("stain", _surfaces.call("find_floor", position, excluded), Vector3.ZERO, pool_size * 1.5)
 
 
 func _emit_small_stain(position: Vector3, excluded: Array[RID]) -> void:
@@ -231,7 +244,7 @@ func _definition(category: String, surface: Dictionary, direction: Vector3, size
 	var footprint := Vector2(length, length / aspect) if aspect >= 1.0 else Vector2(length * aspect, length)
 	var angle := randf_range(-0.14, 0.14) if directed else randf_range(0.0, TAU)
 	var basis := SURFACES.surface_basis(hit["normal"], direction, aspect >= 1.0, angle)
-	if not _decal:
+	if not _decal and not is_instance_valid(_projection_pool):
 		footprint = _surfaces.call("fit_quad", surface, basis, footprint)
 		if footprint == Vector2.ZERO:
 			return {}
