@@ -101,6 +101,8 @@ func setup(app_owner: Node3D, planning_root: Node3D, planning_ui: Control) -> vo
 
 func enter() -> void:
 	active = true
+	# The planner edits the authored map, not what the fight left of it.
+	var restored: bool = storage.restore_authored()
 	edit_history.set("stack", [])
 	controls._update_history_buttons()
 	controls.help.get_parent().get_parent().hide()
@@ -133,12 +135,13 @@ func enter() -> void:
 	camera_anchor = camera.global_position
 	camera_height = clampf(camera.global_position.y, CAMERA_MIN_HEIGHT, CAMERA_MAX_HEIGHT)
 	controls.help.text = "PLANNING CONTROLS\n\nWASD  Move view\nALT + LMB drag  Rotate view (look up or down)\nWheel  Raise / lower camera, including below floor\nLMB  Select / Place\nLMB drag  Move selected\nRMB  Cancel current tool\nDelete  Delete selected\nQ / E  Rotate -/+15°\nR  Rotate +90°\n+ / -  Uniform scale\nX / Z  X size +/-\nC / V  Z size +/-\nArrow keys  Move selected on plane\nPgUp / PgDn  Move object up/down\n[ / ]  Light brightness\n, / .  Light cone angle\nESC  Exit planner"
-	controls.status.text = "Choose an object"
+	controls.status.text = "Map restored to its saved layout — choose an object" if restored else "Choose an object"
 
 
 func exit() -> void:
 	if desk_setup.active:
 		desk_setup.close()
+	storage.snapshot_authored()
 	active = false
 	controls.help.get_parent().get_parent().hide()
 	controls.help_button.hide()

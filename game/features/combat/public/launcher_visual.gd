@@ -15,10 +15,7 @@ static func launcher_model() -> PackedScene:
 	for index in range(1, 14):
 		folders.append("res://models/objects/enviroments/%02d/" % index)
 	for directory_path in folders:
-		var directory := DirAccess.open(directory_path)
-		if directory == null:
-			continue
-		for file in directory.get_files():
+		for file: String in ResourceLoader.list_directory(directory_path):
 			var lower := file.to_lower()
 			if file.ends_with(".glb") and "casing" not in lower and ("launcher" in lower or "grenade" in lower):
 				return load(directory_path + file) as PackedScene

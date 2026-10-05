@@ -9,6 +9,10 @@ var map_select: OptionButton
 
 var session: Variant
 var objects: Variant
+# The map as authored in the planner. Gameplay kills enemies, picks up items,
+# tears paper and pushes props around; the planner edits and saves this
+# authored state, never the aftermath of a fight.
+var authored_layout: Dictionary = {}
 var controls: Variant
 var catalog: Variant
 
@@ -30,19 +34,18 @@ func _ensure_maps_dir() -> void:
 		DirAccess.make_dir_recursive_absolute(MAPS_DIR)
 
 
-func _safe_map_name(raw_name: String) -> String:
-	var value = raw_name.strip_edges()
-	if value.is_empty():
-		value = "map"
-	var safe = ""
-	for ch in value:
-		if ch.is_valid_identifier() or ch.is_valid_int():
+# Letters of any alphabet (a Russian name stays readable), digits, - and _.
+# Returns "" when nothing usable is left.
+static func _safe_map_name(raw_name: String) -> String:
+	var safe := ""
+	for ch in raw_name.strip_edges():
+		if ch.to_upper() != ch.to_lower() or ch.is_valid_int() or ch == "-":
 			safe += ch
-		elif ch in [" ", "-", "_"]:
+		elif ch in [" ", "_", "."]:
 			safe += "_"
 	while "__" in safe:
 		safe = safe.replace("__", "_")
-	return safe.strip_edges().to_lower()
+	return safe.strip_edges().trim_prefix("_").trim_suffix("_").to_lower()
 
 
 func _map_path(map_name: String) -> String:
@@ -61,13 +64,15 @@ func _collect_layout_data() -> Dictionary:
 	for node in objects.placed:
 		if not is_instance_valid(node):
 			continue
+		# The player is saved once, as its spawn point above, not where it stands.
+		if str(node.get_meta("planning_actor_kind", "")) == "player":
+			continue
 		var scene_path = str(node.get_meta("planning_scene_path", ""))
 		if scene_path.is_empty():
 			continue
 		var save_position = node.position
-		if str(node.get_meta("planning_actor_kind", "")) == "enemy" and node.has_meta("planning_spawn_transform"):
-			var enemy_spawn: Transform3D = node.get_meta("planning_spawn_transform")
-			save_position = enemy_spawn.origin
+		if str(node.get_meta("planning_actor_kind", "")) == "enemy":
+			node.set_meta("planning_spawn_transform", node.transform)
 		records.append({
 			"scene": scene_path,
 			"desk_id": node.get_meta("planning_desk_id", ""),
@@ -97,13 +102,52 @@ func _collect_layout_data() -> Dictionary:
 	return {"version": 6, "objects": records}
 
 
+## Remembers the current planner layout as the authored map.
+func snapshot_authored() -> void:
+	authored_layout = _collect_layout_data()
+
+
+## Puts the world back to the authored map when gameplay changed it: killed
+## enemies and taken pickups return, pushed props go back. The player stays.
+func restore_authored() -> bool:
+	if authored_layout.is_empty():
+		return false
+	var current := _collect_layout_data()
+	if _signature(current) == _signature(authored_layout):
+		return false
+	var records: Array = []
+	for record in authored_layout.get("objects", []):
+		if str((record as Dictionary).get("scene", "")) != "res://game/features/player/public/player.tscn":
+			records.append(record)
+	var keep_spawn: bool = objects.player_spawn_defined
+	var spawn: Transform3D = objects.player_spawn_transform
+	objects._apply_layout_data({"version": authored_layout.get("version", 6), "objects": records})
+	objects.player_spawn_defined = keep_spawn
+	objects.player_spawn_transform = spawn
+	return true
+
+
+# Layout fingerprint that ignores physics jitter below 5 cm / 2 degrees.
+static func _signature(data: Dictionary) -> String:
+	var rows: Array[String] = []
+	for record in data.get("objects", []):
+		var row := record as Dictionary
+		rows.append("%s|%s|%s|%s|%s" % [row.get("scene", ""), snappedf(float(row.get("x", 0.0)), 0.05),
+			snappedf(float(row.get("y", 0.0)), 0.05), snappedf(float(row.get("z", 0.0)), 0.05), snappedf(float(row.get("rotation_y", 0.0)), 2.0)])
+	rows.sort()
+	return "\n".join(rows)
+
+
 func save_named_map() -> void:
 	_ensure_maps_dir()
 	var safe_name = _safe_map_name(map_name_edit.text)
+	if safe_name.is_empty():
+		controls.status.text = "Type a map name (letters, digits, - or _)"
+		return
 	var path = _map_path(safe_name)
 	var file = FileAccess.open(path, FileAccess.WRITE)
 	if file == null:
-		controls.status.text = "MAP SAVE ERROR"
+		controls.status.text = "MAP SAVE ERROR %d" % FileAccess.get_open_error()
 		return
 	file.store_string(JSON.stringify(_collect_layout_data(), "	"))
 	map_name_edit.text = safe_name
@@ -124,9 +168,13 @@ func load_named_map(map_name: String) -> void:
 	if not FileAccess.file_exists(path):
 		controls.status.text = "MAP NOT FOUND"
 		return
-	_load_layout_from_path(path)
+	var report := _load_layout_from_path(path)
+	if report.has("error"):
+		controls.status.text = "MAP LOAD ERROR | %s: %s" % [map_name, report["error"]]
+		return
 	map_name_edit.text = map_name
-	controls.status.text = "MAP LOADED | " + map_name
+	snapshot_authored()
+	controls.status.text = "MAP LOADED | %s%s (press SAVE LAYOUT to start with it)" % [map_name, _skipped_text(report)]
 
 
 func _refresh_map_list(select_name: String = "") -> void:
@@ -154,27 +202,40 @@ func _refresh_map_list(select_name: String = "") -> void:
 		map_select.select(selected_index)
 
 
-func _load_layout_from_path(path: String) -> void:
+## Loads a layout file; returns {"loaded", "skipped"} or {"error"}.
+func _load_layout_from_path(path: String) -> Dictionary:
 	var file = FileAccess.open(path, FileAccess.READ)
 	if file == null:
-		return
+		return {"error": "cannot open (%d)" % FileAccess.get_open_error()}
 	var data: Variant = JSON.parse_string(file.get_as_text())
 	if not data is Dictionary:
-		return
-	objects._apply_layout_data(data as Dictionary)
+		return {"error": "not a valid map file"}
+	return objects._apply_layout_data(data as Dictionary)
+
+
+static func _skipped_text(report: Dictionary) -> String:
+	var skipped := int(report.get("skipped", 0))
+	return "" if skipped == 0 else " | %d missing object(s) skipped" % skipped
 
 
 func save_layout() -> void:
 	var data = _collect_layout_data()
 	var records: Array = data.get("objects", [])
 	var file = FileAccess.open(SAVE_PATH, FileAccess.WRITE)
-	if file != null:
-		file.store_string(JSON.stringify(data, "\t"))
-	var scene_error = _save_authored_scene()
-	if scene_error == OK:
-		controls.status.text = "SAVED | %d objects" % records.size()
-	else:
-		controls.status.text = "SAVE ERROR %d" % scene_error
+	if file == null:
+		controls.status.text = "SAVE ERROR %d | layout not written" % FileAccess.get_open_error()
+		return
+	file.store_string(JSON.stringify(data, "\t"))
+	file.close()
+	authored_layout = data
+	# Baking the authored scene into the project only makes sense (and is only
+	# possible: res:// is read-only in a build) when running from the editor.
+	if OS.has_feature("editor"):
+		var scene_error = _save_authored_scene()
+		if scene_error != OK:
+			controls.status.text = "SAVED | %d objects | scene bake error %d" % [records.size(), scene_error]
+			return
+	controls.status.text = "SAVED | %d objects" % records.size()
 
 
 func _save_authored_scene() -> Error:
@@ -227,6 +288,10 @@ func _assign_owner_recursive(node: Node, scene_owner: Node) -> void:
 
 
 func load_layout() -> void:
-	if not FileAccess.file_exists(SAVE_PATH):
-		return
-	_load_layout_from_path(SAVE_PATH)
+	if FileAccess.file_exists(SAVE_PATH):
+		var report := _load_layout_from_path(SAVE_PATH)
+		if report.has("error"):
+			push_warning("Planned layout not loaded: %s" % report["error"])
+		elif int(report.get("skipped", 0)) > 0:
+			push_warning("Planned layout: %d missing object(s) skipped." % int(report["skipped"]))
+	snapshot_authored()

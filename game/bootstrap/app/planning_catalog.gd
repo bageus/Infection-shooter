@@ -104,13 +104,10 @@ func _build_environment_catalogs() -> void:
 		var directory = ENVIRONMENT_ROOT + "/" + group
 		var entries: Array = []
 		group_catalogs[group] = entries
-		var handle = DirAccess.open(directory)
-		if handle == null:
-			continue
-		handle.list_dir_begin()
-		var file_name = handle.get_next()
-		while not file_name.is_empty():
-			if not handle.current_is_dir() and file_name.to_lower().ends_with(".glb") and file_name not in ["16_toilet_floor.glb", "16_wall_urinal.glb", "16_wall_hand_dryer.glb", "16_sink_pedestal.glb"]:
+		# ResourceLoader also lists models in exported builds, where the source
+		# .glb files are replaced by their imported resources.
+		for file_name: String in ResourceLoader.list_directory(directory):
+			if file_name.to_lower().ends_with(".glb"):
 				var model_path = directory + "/" + file_name
 				var special_scene = _environment_scene_for(file_name)
 				entries.append({
@@ -118,8 +115,6 @@ func _build_environment_catalogs() -> void:
 					"path": special_scene if not special_scene.is_empty() else model_path,
 					"kind": "" if not special_scene.is_empty() else "environment"
 				})
-			file_name = handle.get_next()
-		handle.list_dir_end()
 		entries.sort_custom(func(a, b): return str(a["name"]).naturalnocasecmp_to(str(b["name"])) < 0)
 		group_catalogs[group] = entries
 
@@ -201,6 +196,15 @@ func _migrate_scene_path(old_path: String) -> String:
 	}
 	if replacements.has(old_path):
 		return str(replacements[old_path])
+	# The retired group 16 bathroom set was replaced by improved models.
+	var bathroom := {
+		"16_toilet_floor.glb": ENVIRONMENT_ROOT + "/02/02_toilet_new.glb",
+		"16_wall_urinal.glb": ENVIRONMENT_ROOT + "/02/02_wall_urinal_improved.glb",
+		"16_wall_hand_dryer.glb": ENVIRONMENT_ROOT + "/05/05_wall_hand_dryer_improved.glb",
+		"16_sink_pedestal.glb": ENVIRONMENT_ROOT + "/02/02_sink_pedestal_improved.glb",
+	}
+	if bathroom.has(old_path.get_file()):
+		return str(bathroom[old_path.get_file()])
 	if old_path.begins_with("res://models/objects/Office_Set/"):
 		return ""
 	var legacy_prop = "res://game/presentation/office_floor/public/props/"

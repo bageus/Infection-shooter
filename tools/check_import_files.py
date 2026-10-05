@@ -17,13 +17,26 @@ ROOT = Path(__file__).resolve().parents[1]
 def main() -> int:
     tracked = subprocess.run(["git", "ls-files", "*.import"], cwd=ROOT, capture_output=True, text=True, check=True).stdout.splitlines()
     broken = []
+    recompress = []
     for rel in tracked:
         path = ROOT / rel
-        if path.is_file() and "\nvalid=false" in path.read_text(encoding="utf-8", errors="ignore"):
+        if not path.is_file():
+            continue
+        text = path.read_text(encoding="utf-8", errors="ignore")
+        if "\nvalid=false" in text:
             broken.append(rel)
+        elif "detect_3d/compress_to=1" in text:
+            # The editor silently recompresses such textures to VRAM formats
+            # once it sees them in 3D; a failed recompression leaves valid=false.
+            recompress.append(rel)
     if broken:
         print("Failed imports committed (valid=false) — reimport them in the editor:")
         for rel in broken:
+            print("  -", rel)
+        return 1
+    if recompress:
+        print("Textures with detect_3d/compress_to=1 (set it to Disabled in the Import dock):")
+        for rel in recompress:
             print("  -", rel)
         return 1
     print(f"Import files valid: {len(tracked)} checked.")

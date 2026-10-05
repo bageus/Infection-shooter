@@ -67,7 +67,7 @@ static func from_saved_template(desk: Node3D, path: String, parent: Node3D, make
 			continue
 		var entry: Dictionary = value
 		var asset_path := str(entry.get("path", ""))
-		if not asset_path.begins_with(MODEL_ROOT) or not FileAccess.file_exists(asset_path):
+		if not asset_path.begins_with(MODEL_ROOT) or not ResourceLoader.exists(asset_path):
 			continue
 		var node := make_asset.call(asset_path) as Node3D
 		if node == null:
@@ -100,10 +100,7 @@ static func from_saved_template(desk: Node3D, path: String, parent: Node3D, make
 static func available_models() -> Array[String]:
 	var result: Array[String] = []
 	for group in ["02", "03", "05", "06", "09", "11"]:
-		var directory := DirAccess.open(MODEL_ROOT + group)
-		if directory == null:
-			continue
-		for file in directory.get_files():
+		for file: String in ResourceLoader.list_directory(MODEL_ROOT + group):
 			if file.ends_with(".glb") and (group != "03" or file == "03_file_cabinet_smaller.glb") and (group != "02" or file.begins_with("02_water_cooler_bottle")) and not _wall_or_large_fixture(file.get_basename()):
 				result.append(file.get_basename())
 	result.sort()
@@ -179,7 +176,7 @@ static func _model_path(model: String) -> String:
 	if model.length() < 2 or not model.substr(0, 2).is_valid_int():
 		return ""
 	var path := MODEL_ROOT + model.substr(0, 2) + "/" + model + ".glb"
-	return path if FileAccess.file_exists(path) else ""
+	return path if ResourceLoader.exists(path) else ""
 
 
 static func _add_item(entry: Dictionary, station: Dictionary, height: float, desk: Node3D, parent: Node3D, existing: Array[Node3D], created: Array[Node3D], occupied: Array[Rect2], random: RandomNumberGenerator, make_asset: Callable) -> void:

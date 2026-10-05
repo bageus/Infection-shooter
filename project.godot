@@ -30,6 +30,13 @@ enabled=PackedStringArray("res://addons/staged_glb_import/plugin.cfg")
 
 theme/custom="res://assets/interface/game_theme.tres"
 
+[importer_defaults]
+
+texture={
+"detect_3d/compress_to": 0,
+"mipmaps/generate": true
+}
+
 [input]
 
 move_left={

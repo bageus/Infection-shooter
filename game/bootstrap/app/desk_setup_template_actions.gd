@@ -70,7 +70,7 @@ static func load_selected(mode: Variant) -> void:
 			continue
 		var entry: Dictionary = entry_value
 		var asset_path := str(entry.get("path", ""))
-		if not asset_path.begins_with(MODEL_ROOT) or not FileAccess.file_exists(asset_path):
+		if not asset_path.begins_with(MODEL_ROOT) or not ResourceLoader.exists(asset_path):
 			continue
 		var object: Node3D = mode.planner._instantiate_asset(asset_path) as Node3D
 		if object == null:

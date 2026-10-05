@@ -90,7 +90,7 @@ static func duplicate_zone(mode: Variant, index: int) -> void:
 	var skipped := 0
 	for original_item in items:
 		var path := str(original_item.get_meta("planning_scene_path", ""))
-		if not path.begins_with(MODEL_ROOT) or not FileAccess.file_exists(path):
+		if not path.begins_with(MODEL_ROOT) or not ResourceLoader.exists(path):
 			skipped += 1
 			continue
 		var item: Node3D = mode.planner._instantiate_asset(path) as Node3D
@@ -224,7 +224,7 @@ static func place_model(mode: Variant, model: String, local: Vector3) -> void:
 		mode._notify_failure("%s is in %s; this zone accepts %s." % [model, RULES.category_for(model), str(zone["category"])])
 		return
 	var path := MODEL_ROOT + model.substr(0, 2) + "/" + model + ".glb"
-	if not FileAccess.file_exists(path):
+	if not ResourceLoader.exists(path):
 		mode._notify_failure("Model file is missing: " + model)
 		return
 	var object: Node3D = mode.planner._instantiate_asset(path) as Node3D

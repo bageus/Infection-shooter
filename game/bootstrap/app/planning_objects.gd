@@ -362,8 +362,13 @@ func _update_status() -> void:
 	]
 
 
-func _apply_layout_data(data: Dictionary) -> void:
+## Rebuilds the layout from saved data; returns {"loaded", "skipped"}.
+func _apply_layout_data(data: Dictionary) -> Dictionary:
 	clear_layout(false)
+	# Undo entries refer to the previous layout's objects.
+	session.edit_history.set("stack", [])
+	var loaded := 0
+	var skipped := 0
 	var records: Array = data.get("objects", [])
 	var player_records: Array = []
 	for record_value: Variant in records:
@@ -386,9 +391,11 @@ func _apply_layout_data(data: Dictionary) -> void:
 		if scene_path == "res://game/features/player/public/player.tscn":
 			continue
 		if scene_path.is_empty() or not ResourceLoader.exists(scene_path):
+			skipped += 1
 			continue
 		var node = catalog._instantiate_asset(scene_path)
 		if node == null:
+			skipped += 1
 			continue
 		if node.has_method("configure_blood") and record.has("blood_texture"):
 			node.call("configure_blood", str(record["blood_texture"]), str(record.get("blood_surface", "floor")))
@@ -425,7 +432,8 @@ func _apply_layout_data(data: Dictionary) -> void:
 			node.set("darkness", float(record.get("darkness", 0.88)))
 			node.set("permanent", bool(record.get("permanent_darkness", true)))
 			if node.has_method("configure_zone"):
-				node.call("configure_zone", Vector2(node.scale.x * 4.0, node.scale.z * 4.0), node.get("darkness"), node.get("permanent"))
+				# The restored node scale already stretches the 4 m base zone.
+				node.call("configure_zone", Vector2(4.0, 4.0), node.get("darkness"), node.get("permanent"))
 		if load_kind == "enemy":
 			node.set_meta("planning_actor_kind", "enemy")
 			node.set_meta("planning_spawn_transform", node.transform)
@@ -433,7 +441,11 @@ func _apply_layout_data(data: Dictionary) -> void:
 			if node.has_method("set_target"):
 				node.call("set_target", session.main_player)
 		placed.append(node)
+		loaded += 1
 	_update_status()
+	if controls != null:
+		controls.call("_update_history_buttons")
+	return {"loaded": loaded, "skipped": skipped}
 
 
 func clear_layout(update_status: bool = true) -> void:
