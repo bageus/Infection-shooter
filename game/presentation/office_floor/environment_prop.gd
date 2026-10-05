@@ -266,6 +266,7 @@ func take_projectile_hit(damage: float, hit_position: Vector3, _normal: Vector3,
 		if _health <= 0.0:
 			_broken = true
 			freeze = false
+			IMPACT_SOUND.wake(self)
 			sleeping = false
 			apply_central_impulse((direction.normalized() + Vector3.UP * 0.2).normalized() * maxf(0.5, mass * 0.12))
 	elif not freeze:

@@ -14,12 +14,33 @@ var _direction := Vector3.RIGHT
 
 func configure(weapon: String, direction: Vector3) -> void:
 	_direction = direction.normalized()
+	var meshes: Array = _meshes_for(weapon)
+	if meshes[0] != null:
+		var face := MeshInstance3D.new()
+		face.mesh = meshes[0]
+		add_child(face)
+	var core := MeshInstance3D.new()
+	core.mesh = meshes[1]
+	core.scale.x = 1.5
+	core.position.x = float(meshes[2]) * 0.12
+	add_child(core)
+	_align()
+
+
+# One face quad, one core sphere and their materials per weapon, shared by
+# every bullet in flight instead of being built for each shot.
+static var _meshes: Dictionary = {}
+
+
+static func _meshes_for(weapon: String) -> Array:
+	if _meshes.has(weapon):
+		return _meshes[weapon]
 	var path: String = TEXTURES.get(weapon, TEXTURES["PISTOL"])
 	var texture := _texture(path)
 	var length := 0.13 if weapon == "SHOTGUN" else (0.44 if weapon == "GRENADE LAUNCHER" else 0.32)
+	var quad: QuadMesh = null
 	if texture != null:
-		var face := MeshInstance3D.new()
-		var quad := QuadMesh.new()
+		quad = QuadMesh.new()
 		var aspect := float(texture.get_width()) / maxf(1.0, float(texture.get_height()))
 		quad.size = Vector2(length, length / aspect)
 		var material := StandardMaterial3D.new()
@@ -32,22 +53,18 @@ func configure(weapon: String, direction: Vector3) -> void:
 		material.emission = Color(0.3, 0.24, 0.16)
 		material.emission_energy_multiplier = 0.35
 		quad.material = material
-		face.mesh = quad
-		add_child(face)
-	var core := MeshInstance3D.new()
 	var sphere := SphereMesh.new()
 	sphere.radius = length * 0.11
 	sphere.height = length * 0.22
+	sphere.radial_segments = 8
+	sphere.rings = 4
 	var metal := StandardMaterial3D.new()
 	metal.albedo_color = Color(0.3, 0.35, 0.18) if weapon == "GRENADE LAUNCHER" else Color(0.78, 0.42, 0.14)
 	metal.metallic = 0.65
 	metal.roughness = 0.28
 	sphere.material = metal
-	core.mesh = sphere
-	core.scale.x = 1.5
-	core.position.x = length * 0.12
-	add_child(core)
-	_align()
+	_meshes[weapon] = [quad, sphere, length]
+	return _meshes[weapon]
 
 
 static func _texture(path: String) -> Texture2D:

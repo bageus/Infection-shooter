@@ -37,6 +37,7 @@ func _run() -> void:
 	await _test_far_enemy_wall()
 	await _test_clouds_do_not_stack()
 	await _test_drops()
+	await _test_caps()
 	stage.queue_free()
 	await process_frame
 	print("Balance tests: %d failure(s)." % failures)
@@ -153,6 +154,31 @@ func _test_drops() -> void:
 		_expect(get_nodes_in_group(DROPS.DROP_GROUP).size() == before, "An uncollected drop disappears after its lifetime.")
 	enemy.queue_free()
 	table.queue_free()
+	await process_frame
+
+
+func _test_caps() -> void:
+	var player := PLAYER.instantiate() as CharacterBody3D
+	stage.add_child(player)
+	player.set("effects_root", effects)
+	player.global_position = Vector3(120, 1, 0)
+	player.set_physics_process(false)
+	for i in 40:
+		player.call("_spawn_floor_blood", 30.0)
+	var marks := (player.get("_floor_marks") as Array).size()
+	_expect(marks <= 60, "Player blood on the floor is capped (%d marks)." % marks)
+	player.queue_free()
+	var clouds: Array[Area3D] = []
+	for i in 14:
+		var cloud := CLOUD.instantiate() as Area3D
+		stage.add_child(cloud)
+		cloud.global_position = Vector3(140 + i * 6, 0, 0)
+		cloud.call("activate")
+		clouds.append(cloud)
+	var spent := clouds.filter(func(c: Area3D) -> bool: return float(c.get("_absorption_remaining")) <= 0.0).size()
+	_expect(spent == 4, "Past ten death clouds the oldest dissipate early (%d)." % spent)
+	for cloud in clouds:
+		cloud.queue_free()
 	await process_frame
 
 

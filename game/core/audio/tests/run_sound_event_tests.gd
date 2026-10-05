@@ -37,6 +37,7 @@ func _run() -> void:
 	_expect(played == 1, "Per-event voice limits stop pile-ups (%d)." % played)
 	stage.queue_free()
 	await process_frame
+	_expect(SFX._voices == 0 and int(SFX._per_event.get(&"elevator_open", 0)) == 0, "Voice counts return to zero when sounds end (%d)." % SFX._voices)
 	print("Sound event tests: %d failure(s)." % failures)
 	quit(failures)
 

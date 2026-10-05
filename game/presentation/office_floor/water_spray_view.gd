@@ -23,23 +23,7 @@ func configure(host: Node3D, outlet: Vector3, reverse_direction: bool) -> void:
 func _ready() -> void:
 	name = "BrokenPipeWater"
 	global_position = _outlet
-	var droplet := SphereMesh.new()
-	droplet.radius = 0.5
-	droplet.height = 1.0
-	var material := ShaderMaterial.new()
-	var shader := Shader.new()
-	shader.code = """
-shader_type spatial;
-render_mode unshaded, cull_disabled, depth_draw_never;
-void fragment() {
-	float shimmer = 0.86 + 0.14 * sin(TIME * 23.0 + UV.y * 19.0);
-	ALBEDO = vec3(0.28, 0.68, 0.92) * shimmer;
-	EMISSION = vec3(0.06, 0.21, 0.32) * shimmer;
-	ALPHA = 0.66;
-}
-"""
-	material.shader = shader
-	droplet.material = material
+	var droplet := _droplet_mesh()
 	var multi := MultiMesh.new()
 	multi.transform_format = MultiMesh.TRANSFORM_3D
 	multi.mesh = droplet
@@ -93,3 +77,30 @@ func _reset_drop(index: int) -> void:
 
 func _hide_drop(index: int) -> void:
 	_renderer.multimesh.set_instance_transform(index, Transform3D(Basis().scaled(Vector3.ZERO), Vector3.ZERO))
+
+
+# One droplet mesh and shader shared by every spraying fixture.
+static var _droplet: SphereMesh
+
+
+static func _droplet_mesh() -> SphereMesh:
+	if _droplet != null:
+		return _droplet
+	var shader := Shader.new()
+	shader.code = """
+shader_type spatial;
+render_mode unshaded, cull_disabled, depth_draw_never;
+void fragment() {
+	float shimmer = 0.86 + 0.14 * sin(TIME * 23.0 + UV.y * 19.0);
+	ALBEDO = vec3(0.28, 0.68, 0.92) * shimmer;
+	EMISSION = vec3(0.06, 0.21, 0.32) * shimmer;
+	ALPHA = 0.66;
+}
+"""
+	var material := ShaderMaterial.new()
+	material.shader = shader
+	_droplet = SphereMesh.new()
+	_droplet.radius = 0.5
+	_droplet.height = 1.0
+	_droplet.material = material
+	return _droplet

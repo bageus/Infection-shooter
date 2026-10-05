@@ -161,8 +161,17 @@ func _update_weapon_warning(empty: bool) -> void:
 	weapon_icon.modulate = warning_color if empty else normal_color
 
 
+var _slot_state := Vector2i(-99, -1)
+var _key_states: Dictionary = {}
+
+
 func _update_weapon_slots(empty: bool) -> void:
 	var active_index: int = player.get_current_weapon_index()
+	# Styles are rebuilt only when the active slot or empty state changes.
+	var state := Vector2i(active_index, int(empty))
+	if state == _slot_state:
+		return
+	_slot_state = state
 	var warning_color := Color(1.0, 0.12, 0.08, 1.0)
 	for i in slot_frames.size():
 		var frame := slot_frames[i]
@@ -229,6 +238,10 @@ func _update_key_buttons() -> void:
 
 
 func _set_key_state(button: Button, selected: bool, blocked: bool) -> void:
+	var key_state := int(selected) + 2 * int(blocked)
+	if int(_key_states.get(button.get_instance_id(), -1)) == key_state:
+		return
+	_key_states[button.get_instance_id()] = key_state
 	button.disabled = blocked
 	var style := _key_filled if selected else _key_outline
 	var ink := _key_outline.bg_color if selected else _key_outline.border_color

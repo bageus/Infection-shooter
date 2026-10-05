@@ -54,10 +54,14 @@ static func spray(parent: Node3D, world_position: Vector3, direction: Vector3, a
 			live.queue_free())
 
 
+static var _active := 0
+
+
 static func _make(parent: Node3D, amount: int, lifetime: float, one_shot: bool) -> GPUParticles3D:
 	if not is_instance_valid(parent) or not parent.is_inside_tree():
 		return null
-	if parent.get_tree().get_nodes_in_group(GROUP).size() >= MAX_ACTIVE:
+	# A running count instead of scanning the group on every hit.
+	if _active >= MAX_ACTIVE:
 		return null
 	if _droplet == null:
 		_material = StandardMaterial3D.new()
@@ -73,6 +77,8 @@ static func _make(parent: Node3D, amount: int, lifetime: float, one_shot: bool) 
 	var particles := GPUParticles3D.new()
 	particles.name = "BloodDrops"
 	particles.add_to_group(GROUP)
+	_active += 1
+	particles.tree_exiting.connect(func() -> void: _active -= 1)
 	particles.amount = maxi(1, amount)
 	particles.lifetime = lifetime
 	particles.one_shot = one_shot

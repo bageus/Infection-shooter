@@ -1,11 +1,27 @@
 extends RefCounted
 
-const RAYS := 48
+const RAYS := 24
 const RADIUS := 3.2
 const HEIGHT := 0.8
 
 
+# Masks for recent cloud spots: a crowd dying in one place shares one mask.
+static var _cache: Dictionary = {}
+const CACHE_LIMIT := 48
+
+
 static func texture_for(cloud: Area3D) -> ImageTexture:
+	var key := (cloud.global_position * 2.0).round()
+	if _cache.has(key):
+		return _cache[key]
+	if _cache.size() >= CACHE_LIMIT:
+		_cache.clear()
+	var texture := _build_texture(cloud)
+	_cache[key] = texture
+	return texture
+
+
+static func _build_texture(cloud: Area3D) -> ImageTexture:
 	var image := Image.create(RAYS, 1, false, Image.FORMAT_RF)
 	var origin := cloud.global_position + Vector3.UP * HEIGHT
 	for index in RAYS:

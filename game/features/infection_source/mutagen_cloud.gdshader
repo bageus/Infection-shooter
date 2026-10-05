@@ -152,8 +152,8 @@ void fragment() {
 		vec3 world_position = (INV_VIEW_MATRIX * vec4(VERTEX, 1.0)).xyz;
 		vec2 horizontal = world_position.xz - cloud_center.xz;
 		float azimuth = atan(horizontal.y, horizontal.x);
-		float sample_index = floor((azimuth + PI) / TAU * 48.0);
-		float limit = texture(wall_mask, vec2((sample_index + 0.5) / 48.0, 0.5)).r * wall_radius;
+		float sample_index = floor((azimuth + PI) / TAU * 24.0);
+		float limit = texture(wall_mask, vec2((sample_index + 0.5) / 24.0, 0.5)).r * wall_radius;
 		alpha *= 1.0 - smoothstep(limit - 0.1, limit, length(horizontal));
 	}
 	ALBEDO = color;

@@ -68,8 +68,21 @@ static func spawn(host: Node3D, hit_position: Vector3, direction: Vector3, amoun
 	motion.angular_velocity_min = -450.0
 	motion.angular_velocity_max = 450.0
 	shreds.process_material = motion
-	var scrap := QuadMesh.new()
-	scrap.size = Vector2(0.085, 0.065)
+	var scrap := _scrap_mesh()
+	shreds.draw_pass_1 = scrap
+	scene.add_child(shreds)
+	shreds.global_position = hit_position
+	shreds.emitting = true
+	scene.get_tree().create_timer(shreds.lifetime + 0.35).timeout.connect(shreds.queue_free)
+
+
+# One shred quad and shader for all torn paper.
+static var _scrap: QuadMesh
+
+
+static func _scrap_mesh() -> QuadMesh:
+	if _scrap != null:
+		return _scrap
 	var shader := Shader.new()
 	shader.code = """
 shader_type spatial;
@@ -86,9 +99,7 @@ void fragment() {
 """
 	var paper_material := ShaderMaterial.new()
 	paper_material.shader = shader
-	scrap.material = paper_material
-	shreds.draw_pass_1 = scrap
-	scene.add_child(shreds)
-	shreds.global_position = hit_position
-	shreds.emitting = true
-	scene.get_tree().create_timer(shreds.lifetime + 0.35).timeout.connect(shreds.queue_free)
+	_scrap = QuadMesh.new()
+	_scrap.size = Vector2(0.085, 0.065)
+	_scrap.material = paper_material
+	return _scrap

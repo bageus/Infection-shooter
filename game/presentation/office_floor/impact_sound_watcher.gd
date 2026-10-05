@@ -35,15 +35,26 @@ func _ready() -> void:
 		queue_free()
 		return
 	_body.sleeping_state_changed.connect(_on_sleeping_changed)
-	set_physics_process(not _body.sleeping)
+	# Frozen (wall-mounted) props never report sleeping; they wait for wake().
+	set_physics_process(not _body.sleeping and not _body.freeze)
+
+
+## Resumes watching a body that was just unfrozen (a prop knocked off a wall).
+static func wake(body: Node) -> void:
+	var watcher := body.get_node_or_null("ImpactSound")
+	if watcher != null:
+		watcher.set_physics_process(true)
 
 
 func _on_sleeping_changed() -> void:
-	set_physics_process(not _body.sleeping)
+	set_physics_process(not _body.sleeping and not _body.freeze)
 	_last_velocity = _body.linear_velocity
 
 
 func _physics_process(delta: float) -> void:
+	if _body.freeze:
+		set_physics_process(false)
+		return
 	_quiet -= delta
 	var velocity := _body.linear_velocity
 	var loss := _last_velocity.length() - velocity.length()

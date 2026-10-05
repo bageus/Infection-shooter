@@ -56,7 +56,7 @@ func get_mutation() -> float:
 
 
 func skill_catalog() -> Array:
-	return CATALOG.all()
+	return CATALOG.all().duplicate() # callers must not edit the shared rows
 
 
 # Read-only versioned requirements DTO; UI never duplicates progression rules.

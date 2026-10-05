@@ -98,15 +98,18 @@ static func has_event(event: StringName) -> bool:
 
 
 # Plays `event` under `parent`; at `position` when given, else on the parent.
+static var _voices := 0
+static var _per_event: Dictionary = {}
+
+
 static func play(parent: Node, event: StringName, position := Vector3.INF, volume_offset_db := 0.0, pitch := 1.0) -> AudioStreamPlayer3D:
 	if parent == null or not parent.is_inside_tree() or not EVENTS.has(event):
 		return null
 	var spec: Array = EVENTS[event]
 	var tree := parent.get_tree()
 	var group := StringName("sfx_" + String(event))
-	if tree.get_nodes_in_group(group).size() >= int(spec[MAX_SAME]):
-		return null
-	if tree.get_nodes_in_group(VOICE_GROUP).size() >= MAX_VOICES:
+	# Running counts instead of scanning groups for every footstep and clink.
+	if int(_per_event.get(event, 0)) >= int(spec[MAX_SAME]) or _voices >= MAX_VOICES:
 		return null
 	var path := ROOT + "%s/%s_%d.ogg" % [event, event, randi_range(1, int(spec[VARIANTS]))]
 	var stream := load(path) as AudioStream
@@ -127,6 +130,11 @@ static func play(parent: Node, event: StringName, position := Vector3.INF, volum
 	player.doppler_tracking = AudioStreamPlayer3D.DOPPLER_TRACKING_DISABLED
 	player.add_to_group(VOICE_GROUP)
 	player.add_to_group(group)
+	_voices += 1
+	_per_event[event] = int(_per_event.get(event, 0)) + 1
+	player.tree_exiting.connect(func() -> void:
+		_voices -= 1
+		_per_event[event] = int(_per_event.get(event, 1)) - 1, CONNECT_ONE_SHOT)
 	player.finished.connect(player.queue_free)
 	parent.add_child(player)
 	if position.is_finite():

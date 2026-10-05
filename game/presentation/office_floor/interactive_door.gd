@@ -126,9 +126,14 @@ func _physics_process(delta: float) -> void:
 	for recess in _door_recess_nodes:
 		if is_instance_valid(recess):
 			recess.visible = _open_amount <= 0.001
-	for light_node in _elevator_lights:
-		if is_instance_valid(light_node):
-			_set_light_state(light_node, _open_amount >= 0.98)
+	# Elevator lights switch only when the open/shut state changes, not every
+	# physics frame (each switch rebuilds their materials).
+	var lights_on := _open_amount >= 0.98
+	if lights_on != _lights_on:
+		_lights_on = lights_on
+		for light_node in _elevator_lights:
+			if is_instance_valid(light_node):
+				_set_light_state(light_node, lights_on)
 
 
 # Opening starts from shut; swing doors thud when they shut, the elevator
@@ -282,6 +287,10 @@ func _add_elevator_leaf_collision(part: Node3D) -> void:
 	body.add_child(collision)
 
 
+var _lights_on := true # first frame applies the real state
+var _light_material_cache: Dictionary = {}
+
+
 func _collect_elevator_lights(node: Node) -> void:
 	if node is Node3D:
 		var lower := node.name.to_lower()
@@ -291,23 +300,35 @@ func _collect_elevator_lights(node: Node) -> void:
 		_collect_elevator_lights(child)
 
 
+# Collected light nodes include their own descendants, so no recursion here.
 func _set_light_state(node: Node3D, enabled: bool) -> void:
 	if node is Light3D:
 		(node as Light3D).visible = enabled
 	if node is MeshInstance3D:
 		var mesh_instance := node as MeshInstance3D
 		for surface in mesh_instance.get_surface_override_material_count():
-			var material := mesh_instance.get_active_material(surface)
-			if material is StandardMaterial3D:
-				var material_copy := material.duplicate() as StandardMaterial3D
-				material_copy.emission_enabled = enabled
-				if enabled:
-					material_copy.emission = Color(1.0, 0.78, 0.28)
-					material_copy.emission_energy_multiplier = 4.0
-				mesh_instance.set_surface_override_material(surface, material_copy)
-	for child in node.get_children():
-		if child is Node3D:
-			_set_light_state(child as Node3D, enabled)
+			var pair: Array = _light_materials(mesh_instance, surface)
+			if not pair.is_empty():
+				mesh_instance.set_surface_override_material(surface, pair[1] if enabled else pair[0])
+
+
+# Original (off) and lit copies of a light surface, made once.
+func _light_materials(mesh_instance: MeshInstance3D, surface: int) -> Array:
+	var key := "%d:%d" % [mesh_instance.get_instance_id(), surface]
+	if _light_material_cache.has(key):
+		return _light_material_cache[key]
+	var material := mesh_instance.get_active_material(surface)
+	var pair: Array = []
+	if material is StandardMaterial3D:
+		var off := material.duplicate() as StandardMaterial3D
+		off.emission_enabled = false
+		var lit := material.duplicate() as StandardMaterial3D
+		lit.emission_enabled = true
+		lit.emission = Color(1.0, 0.78, 0.28)
+		lit.emission_energy_multiplier = 4.0
+		pair = [off, lit]
+	_light_material_cache[key] = pair
+	return pair
 
 
 func _build_glass_hinge(visual: Node3D) -> void:

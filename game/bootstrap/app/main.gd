@@ -256,10 +256,14 @@ func _setup_world_bindings() -> void:
 	mission_objects = Node3D.new()
 	mission_objects.name = "MissionObjects"
 	add_child(mission_objects)
-	impact_pool = Node3D.new()
-	impact_pool.name = "ImpactEffects"
-	impact_pool.set_script(IMPACT_POOL)
-	add_child(impact_pool)
+	# The scene already holds the impact pool; a second one doubled the
+	# mark and retained-debris budgets.
+	impact_pool = get_node_or_null("ImpactEffects") as Node3D
+	if impact_pool == null:
+		impact_pool = Node3D.new()
+		impact_pool.name = "ImpactEffects"
+		impact_pool.set_script(IMPACT_POOL)
+		add_child(impact_pool)
 	world_bindings = WORLD_BINDINGS.new(mission_objects, impact_pool, player, drop_weapon_pickup)
 	world_bindings.call("bind_scene", player)
 	for branch in [$Structure, planning_root, enemies]:
@@ -267,5 +271,8 @@ func _setup_world_bindings() -> void:
 
 
 func bind_world_object(node: Node) -> void:
-	if world_bindings != null:
+	# The planner catalog binds what it creates; the enemies root binds again
+	# when the node enters it. Once is enough.
+	if world_bindings != null and not node.has_meta(&"world_bound"):
+		node.set_meta(&"world_bound", true)
 		world_bindings.call("bind_scene", node)

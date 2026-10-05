@@ -400,28 +400,57 @@ func _update_aim()->void:
 		aim_pivot.look_at(aim_pivot.global_position+target_direction,Vector3.UP)
 		body_visual.look_at(body_visual.global_position+target_direction,Vector3.UP,true)
 
+# Player blood on the floor: a few shared blob meshes and one material, at
+# most FLOOR_BLOOD_LIMIT marks (oldest go first), each gone after a while.
+const FLOOR_BLOOD_LIMIT := 60
+const FLOOR_BLOOD_SECONDS := 45.0
+static var _blood_material: StandardMaterial3D
+static var _blood_shapes: Array[Mesh] = []
+var _floor_marks: Array[Node3D] = []
+
+
 func _spawn_floor_blood(amount:float)->void:
 	if not is_instance_valid(effects_root):
 		return
+	if _blood_shapes.is_empty():
+		_build_blood_shapes()
 	var count:=clampi(ceili(amount/8.0),2,6)
 	for i in count:
 		var mark:=MeshInstance3D.new()
-		var mesh:=ImmediateMesh.new()
-		var material:=StandardMaterial3D.new()
-		material.albedo_color=Color(0.34,0.0,0.015,0.92);material.roughness=1.0;material.cull_mode=BaseMaterial3D.CULL_DISABLED
-		mesh.surface_begin(Mesh.PRIMITIVE_TRIANGLES,material)
+		mark.mesh=_blood_shapes[randi()%_blood_shapes.size()]
+		mark.cast_shadow=GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+		effects_root.add_child(mark)
+		mark.global_position=Vector3(global_position.x,0.025,global_position.z)+Vector3(randf_range(-0.5,0.5),0,randf_range(-0.5,0.5))
+		mark.rotation_degrees=Vector3(-90,randf_range(0,360),0)
+		mark.scale=Vector3.ONE*randf_range(0.6,1.25)
+		get_tree().create_timer(FLOOR_BLOOD_SECONDS,false).timeout.connect(mark.queue_free)
+		_floor_marks.append(mark)
+	_floor_marks=_floor_marks.filter(func(m:Node3D)->bool:return is_instance_valid(m))
+	while _floor_marks.size()>FLOOR_BLOOD_LIMIT:
+		_floor_marks.pop_front().queue_free()
+
+
+static func _build_blood_shapes()->void:
+	_blood_material=StandardMaterial3D.new()
+	_blood_material.albedo_color=Color(0.34,0.0,0.015,0.92);_blood_material.roughness=1.0;_blood_material.cull_mode=BaseMaterial3D.CULL_DISABLED
+	for shape in 6:
+		var mesh:=ArrayMesh.new()
+		var vertices:=PackedVector3Array()
 		var points:=randi_range(7,11)
-		var width:=randf_range(0.08,0.24)
+		var width:=randf_range(0.1,0.2)
 		var height:=width*randf_range(0.45,1.7)
 		for p in points:
 			var a0:=TAU*float(p)/points;var a1:=TAU*float(p+1)/points
 			var r0:=randf_range(0.45,1.2);var r1:=randf_range(0.45,1.2)
-			mesh.surface_add_vertex(Vector3.ZERO)
-			mesh.surface_add_vertex(Vector3(cos(a0)*width*r0,sin(a0)*height*r0,0))
-			mesh.surface_add_vertex(Vector3(cos(a1)*width*r1,sin(a1)*height*r1,0))
-		mesh.surface_end();mark.mesh=mesh;effects_root.add_child(mark)
-		mark.global_position=Vector3(global_position.x,0.025,global_position.z)+Vector3(randf_range(-0.5,0.5),0,randf_range(-0.5,0.5))
-		mark.rotation_degrees=Vector3(-90,randf_range(0,360),0)
+			vertices.append(Vector3.ZERO)
+			vertices.append(Vector3(cos(a0)*width*r0,sin(a0)*height*r0,0))
+			vertices.append(Vector3(cos(a1)*width*r1,sin(a1)*height*r1,0))
+		var arrays:=[]
+		arrays.resize(Mesh.ARRAY_MAX)
+		arrays[Mesh.ARRAY_VERTEX]=vertices
+		mesh.add_surface_from_arrays(Mesh.PRIMITIVE_TRIANGLES,arrays)
+		mesh.surface_set_material(0,_blood_material)
+		_blood_shapes.append(mesh)
 
 
 func _aim_uncontrolled() -> void:

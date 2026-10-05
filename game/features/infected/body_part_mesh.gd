@@ -193,38 +193,24 @@ static func build_piece(data: Dictionary, chain: PackedInt32Array, skeleton: Ske
 		var stride: int = surface.stride
 		if bones.is_empty():
 			continue
-		var member := PackedByteArray()
-		member.resize(vertices.size())
-		for index in vertices.size():
-			var share := 0.0
-			for k in stride:
-				if chain.has(bones[index * stride + k]):
-					share += weights[index * stride + k]
-			member[index] = 1 if share >= CHAIN_MEMBERSHIP else 0
+		var member_corners := _member_triangles(data, chain, surface_index)
 		var remap := {}
 		var positions := PackedVector3Array()
 		var normals := PackedVector3Array()
 		var uvs := PackedVector2Array()
 		var rest := PackedFloat32Array()
 		var out_indices := PackedInt32Array()
-		var source_indices: PackedInt32Array = surface.indices
 		var source_normals: PackedVector3Array = surface.normals
 		var source_uvs: PackedVector2Array = surface.uvs
-		for t in range(0, source_indices.size(), 3):
-			var a := source_indices[t]
-			var b := source_indices[t + 1]
-			var c := source_indices[t + 2]
-			if member[a] == 0 or member[b] == 0 or member[c] == 0:
-				continue
-			for corner in [a, b, c]:
-				if not remap.has(corner):
-					remap[corner] = positions.size()
-					var transform := _blend(skinning, bones, weights, stride, corner)
-					positions.append(transform * vertices[corner])
-					normals.append((transform.basis * (source_normals[corner] if not source_normals.is_empty() else Vector3.UP)).normalized())
-					uvs.append(source_uvs[corner] if not source_uvs.is_empty() else Vector2.ZERO)
-					rest.append_array([vertices[corner].x, vertices[corner].y, vertices[corner].z, 1.0])
-				out_indices.append(int(remap[corner]))
+		for corner in member_corners:
+			if not remap.has(corner):
+				remap[corner] = positions.size()
+				var transform := _blend(skinning, bones, weights, stride, corner)
+				positions.append(transform * vertices[corner])
+				normals.append((transform.basis * (source_normals[corner] if not source_normals.is_empty() else Vector3.UP)).normalized())
+				uvs.append(source_uvs[corner] if not source_uvs.is_empty() else Vector2.ZERO)
+				rest.append_array([vertices[corner].x, vertices[corner].y, vertices[corner].z, 1.0])
+			out_indices.append(int(remap[corner]))
 		if out_indices.is_empty():
 			continue
 		all_points.append_array(positions)
@@ -255,6 +241,38 @@ static func build_piece(data: Dictionary, chain: PackedInt32Array, skeleton: Ske
 	for index in range(0, all_points.size(), step):
 		hull.append(all_points[index] - center)
 	return {"mesh": mesh, "center": center, "points": hull}
+
+
+# Triangle corners of a surface that belong to `chain`, worked out once per
+# enemy model and part: every later sever of that part reuses the list.
+static func _member_triangles(data: Dictionary, chain: PackedInt32Array, surface_index: int) -> PackedInt32Array:
+	var cache: Dictionary = data.get_or_add("piece_cache", {})
+	var key := "%s|%d" % [chain, surface_index]
+	if cache.has(key):
+		return cache[key]
+	var surface: Dictionary = data.surfaces[surface_index]
+	var vertices: PackedVector3Array = surface.vertices
+	var bones: PackedInt32Array = surface.bones
+	var weights: PackedFloat32Array = surface.weights
+	var stride: int = surface.stride
+	var member := PackedByteArray()
+	member.resize(vertices.size())
+	for index in vertices.size():
+		var share := 0.0
+		for k in stride:
+			if chain.has(bones[index * stride + k]):
+				share += weights[index * stride + k]
+		member[index] = 1 if share >= CHAIN_MEMBERSHIP else 0
+	var corners := PackedInt32Array()
+	var source_indices: PackedInt32Array = surface.indices
+	for t in range(0, source_indices.size(), 3):
+		var a := source_indices[t]
+		var b := source_indices[t + 1]
+		var c := source_indices[t + 2]
+		if member[a] != 0 and member[b] != 0 and member[c] != 0:
+			corners.append_array([a, b, c])
+	cache[key] = corners
+	return corners
 
 
 static func _blend(skinning: Dictionary, bones: PackedInt32Array, weights: PackedFloat32Array, stride: int, vertex: int) -> Transform3D:

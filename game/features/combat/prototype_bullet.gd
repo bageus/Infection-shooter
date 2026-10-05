@@ -165,24 +165,37 @@ func _hit_material(collider: Object, shape_index: int) -> String:
 	return "solid"
 
 
-func _spawn_impact_decal(collider: Object, hit_position: Vector3, normal: Vector3) -> void:
-	if normal.is_zero_approx():
-		normal = -_direction if not _direction.is_zero_approx() else Vector3.UP
-	if not is_instance_valid(effects_root) or not is_instance_valid(impact_pool):
-		return
-	var mark := MeshInstance3D.new()
+# Two shared decal meshes (one per texture) instead of a new quad and
+# material for every bullet hole.
+static var _decal_meshes: Array[QuadMesh] = [null, null]
+
+
+static func _decal_mesh(texture_index: int, pool: Node) -> QuadMesh:
+	if _decal_meshes[texture_index] != null:
+		return _decal_meshes[texture_index]
 	var quad := QuadMesh.new()
-	var texture_index := 1 if randi() % 4 == 0 else 0
 	quad.size = Vector2.ONE * (0.5 if texture_index == 1 else 0.3)
 	var material := StandardMaterial3D.new()
-	var pool := impact_pool
 	material.albedo_texture = pool.call("texture_for", IMPACT_TEXTURES[texture_index]) as Texture2D
 	material.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
 	material.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
 	material.cull_mode = BaseMaterial3D.CULL_DISABLED
 	material.render_priority = 1
 	quad.material = material
-	mark.mesh = quad
+	_decal_meshes[texture_index] = quad
+	return quad
+
+
+func _spawn_impact_decal(collider: Object, hit_position: Vector3, normal: Vector3) -> void:
+	if normal.is_zero_approx():
+		normal = -_direction if not _direction.is_zero_approx() else Vector3.UP
+	if not is_instance_valid(effects_root) or not is_instance_valid(impact_pool):
+		return
+	var mark := MeshInstance3D.new()
+	var texture_index := 1 if randi() % 4 == 0 else 0
+	var pool := impact_pool
+	mark.mesh = _decal_mesh(texture_index, pool)
+	mark.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
 	var parent: Node3D = collider as Node3D
 	if parent == null:
 		parent = effects_root

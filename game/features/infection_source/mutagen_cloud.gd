@@ -60,6 +60,8 @@ func activate() -> void:
 	_spores.emitting = true
 	monitoring = true
 	visible = true
+	if not permanent:
+		_register_death_cloud()
 
 
 func _physics_process(delta: float) -> void:
@@ -151,14 +153,41 @@ func _build_haze(shade: float) -> MultiMesh:
 	return multimesh
 
 
+static var _quad: QuadMesh
+# Death clouds alive at once; past the cap the oldest dissipates early.
+const MAX_DEATH_CLOUDS := 10
+static var _death_clouds: Array[WeakRef] = []
+
+
+func _register_death_cloud() -> void:
+	var alive: Array[WeakRef] = []
+	for ref in _death_clouds:
+		var cloud := ref.get_ref() as Node
+		if cloud != null and bool(cloud.get("_active")):
+			alive.append(ref)
+	alive.append(weakref(self))
+	while alive.size() > MAX_DEATH_CLOUDS:
+		var oldest := alive.pop_front().get_ref() as Node
+		if oldest != null:
+			oldest.call("_dissipate_early")
+	_death_clouds = alive
+
+
+## Jumps to the dissolving part of the cloud's life (no new absorption).
+func _dissipate_early() -> void:
+	_absorption_remaining = 0.0
+	_lifetime_remaining = minf(_lifetime_remaining, lifetime_seconds * 0.25)
+
+
 func _multimesh(count: int) -> MultiMesh:
 	var multimesh := MultiMesh.new()
 	multimesh.transform_format = MultiMesh.TRANSFORM_3D
 	multimesh.use_colors = true
 	multimesh.use_custom_data = true
-	var quad := QuadMesh.new()
-	quad.size = Vector2.ONE
-	multimesh.mesh = quad
+	if _quad == null:
+		_quad = QuadMesh.new()
+		_quad.size = Vector2.ONE
+	multimesh.mesh = _quad
 	multimesh.instance_count = count
 	return multimesh
 

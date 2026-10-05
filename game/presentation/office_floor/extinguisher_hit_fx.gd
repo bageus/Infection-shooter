@@ -83,6 +83,9 @@ func start(hit_point: Vector3, bullet_direction: Vector3) -> void:
 	_anchor = _body.global_position
 	_body.freeze = false
 	_body.sleeping = false
+	var watcher := _body.get_node_or_null("ImpactSound")
+	if watcher != null:
+		watcher.set_physics_process(true)
 	var direction := bullet_direction.normalized() if bullet_direction.length_squared() > 0.0001 else _body.global_basis.z
 	_fall_direction = _body.get_meta("planning_wall_normal", direction)
 	_fall_direction.y = 0.0

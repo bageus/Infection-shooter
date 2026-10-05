@@ -6,9 +6,19 @@ var entries: Dictionary = {}
 var recent: Dictionary = {}
 
 
+# Processed textures are shared by every library with the same settings, so
+# restarts and planner decals do not decode and resize the 45 images again.
+static var _shared: Dictionary = {}
+
+
 func load_assets(max_dimension: int = 512, brightness: float = 1.18) -> void:
 	if not entries.is_empty():
 		return
+	var key := "%d|%.3f" % [max_dimension, brightness]
+	if _shared.has(key):
+		entries = _shared[key]
+		return
+	_shared[key] = entries
 	for category in CATEGORIES:
 		entries[category] = []
 		for index in range(1, 10):

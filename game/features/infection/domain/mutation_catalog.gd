@@ -64,15 +64,22 @@ const POINT_STEP := 5.0
 const STABILITY_STAGES := [30.0, 45.0, 60.0, 75.0, 90.0]
 
 
+static var _all: Array = []
+static var _by_id: Dictionary = {}
+
+
+# Built once: these lookups run several times per frame (skill effects).
 static func all() -> Array:
-	return ACTIVE + PASSIVE
+	if _all.is_empty():
+		_all = ACTIVE + PASSIVE
+	return _all
 
 
 static func find(skill_id: String) -> Array:
-	for row in all():
-		if str(row[0]) == skill_id:
-			return row
-	return []
+	if _by_id.is_empty():
+		for row in all():
+			_by_id[str(row[0])] = row
+	return _by_id.get(skill_id, [])
 
 
 static func point_budget(mutation: float) -> int:
