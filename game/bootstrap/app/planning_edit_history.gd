@@ -11,6 +11,7 @@ func record_transform(node: Node3D) -> void:
 	_record({"kind": "transform", "node": weakref(node), "transform": node.transform, "scale": node.scale,
 		"display": node.call("get_display_config") if node.has_method("has_display") and node.call("has_display") else {},
 		"blood": node.call("get_blood_config") if node.has_method("get_blood_config") else {},
+		"fixture": node.call("get_fixture_config") if node.has_method("get_fixture_config") else {},
 		"light_color": node.call("get_authored_color") if node.has_method("get_authored_color") else null,
 		"light_energy": node.get_meta("planning_light_energy", -1.0), "light_angle": node.get_meta("planning_light_angle", -1.0)})
 
@@ -74,6 +75,9 @@ func undo() -> void:
 					_apply_blood(node, action["blood"])
 				if not (action.get("display", {}) as Dictionary).is_empty():
 					node.call("configure_display", action["display"])
+				if node.has_method("configure_fixture"):
+					var fixture: Dictionary = action.get("fixture", {})
+					node.call("configure_fixture", str(fixture.get("shape", "point")), bool(fixture.get("visible_in_game", false)))
 				if action.get("light_color") is Color:
 					node.call("set_authored_color", action["light_color"])
 				if float(action["light_energy"]) >= 0.0:
@@ -85,6 +89,8 @@ func undo() -> void:
 						spot.spot_angle = float(action["light_angle"])
 						node.set_meta("planning_light_angle", spot.spot_angle)
 				planner._sync_workstations()
+				if planner.selected == node:
+					planner._select(node)
 		"player":
 			planner.player_spawn_defined = bool(action["defined"])
 			planner.player_spawn_transform = action["transform"]
@@ -109,6 +115,7 @@ func _capture(node: Node3D) -> Dictionary:
 		"blood_attachment": node.call("get_blood_attachment") if node.has_method("get_blood_attachment") else {},
 		"zone": int(node.get_meta("planning_zone", -1)), "light_energy": float(node.get_meta("planning_light_energy", -1.0)),
 		"display": node.call("get_display_config") if node.has_method("has_display") and node.call("has_display") else {},
+		"fixture": node.call("get_fixture_config") if node.has_method("get_fixture_config") else {},
 		"light_color": node.call("get_authored_color") if node.has_method("get_authored_color") else null,
 		"energy_multiplier": float(node.get("energy_multiplier")) if node.has_method("get_authored_energy") else 0.65,
 		"light_angle": float(node.get_meta("planning_light_angle", -1.0)),
@@ -134,7 +141,12 @@ func _restore(record: Dictionary, offset: Vector3, new_desk: bool) -> Node3D:
 	var parent := record["parent"] as Node3D
 	if not is_instance_valid(parent):
 		parent = planner.root
+	if node.has_method("configure_fixture"):
+		var fixture: Dictionary = record.get("fixture", {})
+		node.call("configure_fixture", str(fixture.get("shape", "point")), bool(fixture.get("visible_in_game", false)))
 	parent.add_child(node)
+	if node.has_method("set_planning_visual"):
+		node.call("set_planning_visual", planner.active)
 	node.transform = record["transform"]
 	node.position += offset
 	node.scale = record["scale"]

@@ -97,6 +97,10 @@ func _collect_layout_data() -> Dictionary:
 		})
 		if node.has_method("has_display") and node.call("has_display"):
 			records[-1]["display"] = node.call("get_display_config")
+		if node.has_method("get_fixture_config"):
+			var fixture: Dictionary = node.call("get_fixture_config")
+			records[-1]["fixture_shape"] = str(fixture["shape"])
+			records[-1]["fixture_visible_in_game"] = bool(fixture["visible_in_game"])
 		if node.has_method("get_blood_config"):
 			var blood: Dictionary = node.call("get_blood_config")
 			records[-1]["blood_texture"] = str(blood["texture"])
@@ -129,7 +133,7 @@ func restore_authored() -> bool:
 			records.append(record)
 	var keep_spawn: bool = objects.player_spawn_defined
 	var spawn: Transform3D = objects.player_spawn_transform
-	objects._apply_layout_data({"version": authored_layout.get("version", 6), "objects": records})
+	objects._apply_layout_data({"version": authored_layout.get("version", 7), "objects": records})
 	objects.player_spawn_defined = keep_spawn
 	objects.player_spawn_transform = spawn
 	return true
@@ -270,6 +274,9 @@ func _save_authored_scene() -> Error:
 			copy.set_meta("planning_object_id", node.get_meta("planning_object_id"))
 		if node.has_method("has_display") and node.call("has_display"):
 			copy.call("configure_display", node.call("get_display_config"))
+		if node.has_method("get_fixture_config"):
+			var fixture: Dictionary = node.call("get_fixture_config")
+			copy.call("configure_fixture", str(fixture["shape"]), bool(fixture["visible_in_game"]))
 		if node.has_method("get_blood_config"):
 			var blood: Dictionary = node.call("get_blood_config")
 			copy.call("configure_blood", str(blood["texture"]), str(blood["surface"]))
@@ -314,3 +321,4 @@ func load_layout() -> void:
 		elif int(report.get("skipped", 0)) > 0:
 			push_warning("Planned layout: %d missing object(s) skipped." % int(report["skipped"]))
 	snapshot_authored()
+

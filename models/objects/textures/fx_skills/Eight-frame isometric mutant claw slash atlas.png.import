@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://dyvbpaqtt3bm4"
-path="res://.godot/imported/Eight-panel bullet and scorch decal atlas.png-84e185a5fafce41940a0fe044a938099.ctex"
+uid="uid://cmutx08syhg74"
+path="res://.godot/imported/Eight-frame isometric mutant claw slash atlas.png-7fd76e9f449f30252105768b1753c336.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://models/objects/textures/bullet_decals/Eight-panel bullet and scorch decal atlas.png"
-dest_files=["res://.godot/imported/Eight-panel bullet and scorch decal atlas.png-84e185a5fafce41940a0fe044a938099.ctex"]
+source_file="res://models/objects/textures/fx_skills/Eight-frame isometric mutant claw slash atlas.png"
+dest_files=["res://.godot/imported/Eight-frame isometric mutant claw slash atlas.png-7fd76e9f449f30252105768b1753c336.ctex"]
 
 [params]
 

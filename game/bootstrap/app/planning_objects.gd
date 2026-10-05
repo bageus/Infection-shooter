@@ -80,7 +80,9 @@ func _register_editable_children(parent: Node) -> void:
 			if _is_editable_scene_object(node):
 				if not placed.has(node):
 					placed.append(node)
-				node.set_meta("planning_existing", true)
+				# Lamps are replaceable map entries even when baked into Structure.
+				if not node.is_in_group("planner_lights"):
+					node.set_meta("planning_existing", true)
 			else:
 				_register_editable_children(node)
 
@@ -108,6 +110,9 @@ func _register_actor_objects() -> void:
 func _is_editable_scene_object(node: Node3D) -> bool:
 	if node == session.root or node == session.structure_root:
 		return false
+	if node.is_in_group("planner_lights"):
+		node.set_meta("planning_scene_path", "res://game/presentation/office_floor/public/props/planner_light.tscn")
+		return true
 	return geometry._find_collision_descendant(node) != null and node.get_parent() != session.host
 
 
@@ -153,6 +158,7 @@ func _clear_preview() -> void:
 	if controls.display_options != null:
 		controls.display_options.hide()
 	session.ui.get_node("Panel/VBox/SelectedLightColor").hide()
+	controls.fixtures.selected_panel.hide()
 	controls.light_info.hide()
 	controls.light_level.hide()
 	controls.light_angle_info.hide()
@@ -277,6 +283,7 @@ func _delete_node(node: Node3D) -> void:
 	if selected == node:
 		selected = null
 	node.queue_free()
+	controls._update_light_ui()
 	_update_status()
 	controls._update_history_buttons()
 
@@ -429,6 +436,9 @@ func _apply_layout_data(data: Dictionary) -> Dictionary:
 			node.set_meta("planning_attachment", str(record["attachment"]))
 		if int(record.get("zone", -1)) >= 0:
 			node.set_meta("planning_zone", int(record["zone"]))
+		if node.has_method("configure_fixture"):
+			node.call("configure_fixture", str(record.get("fixture_shape", "point")), bool(record.get("fixture_visible_in_game", false)))
+			node.call("set_planning_visual", session.active)
 		if node.has_method("set_authored_energy"):
 			node.set("energy_multiplier", float(record.get("energy_multiplier", 0.65)))
 			node.call("set_authored_energy", float(record.get("light_energy", node.call("get_authored_energy"))))
@@ -486,3 +496,4 @@ func _enemy_spawn_height(enemy: Node) -> float:
 	if shape_node != null and shape_node.shape is CapsuleShape3D:
 		return maxf(1.0, (shape_node.shape as CapsuleShape3D).height * 0.5 + 0.1)
 	return 1.0
+

@@ -2,6 +2,8 @@ extends Node
 
 const DISPLAY_OPTIONS := preload("res://game/bootstrap/app/planning_display_options.gd")
 var display_options: Node
+const FIXTURE_CONTROLS := preload("res://game/bootstrap/app/planning_light_fixtures.gd")
+var fixtures = FIXTURE_CONTROLS.new()
 
 const LIGHT_DEFAULT_HEIGHT = 2.5
 const DARKNESS_DEFAULT_HEIGHT = 2.75
@@ -86,6 +88,7 @@ func setup_controls() -> void:
 	display_options = DISPLAY_OPTIONS.new()
 	add_child(display_options)
 	display_options.call("setup", session, objects)
+	fixtures.setup(self)
 	_build_gore_controls()
 	_build_planning_toolbar()
 
@@ -143,6 +146,7 @@ func _enter_simple_catalog(entries: Array, title: String) -> void:
 	objects._reset_selection()
 	session.ui.get_node("Panel/VBox/GroupTabs").hide()
 	catalog.active_catalog = entries
+	light_defaults.hide()
 	_rebuild_palette()
 	status.text = title
 
@@ -150,6 +154,7 @@ func _enter_simple_catalog(entries: Array, title: String) -> void:
 # Applies palette options to a freshly created object before it enters the tree.
 func _configure_new_asset(node: Node3D, entry: Dictionary) -> void:
 	display_options.call("configure_new", node)
+	fixtures.configure_new_asset(node, entry)
 	if str(entry.get("kind", "")) != "blood" or not node.has_method("configure_blood"):
 		return
 	var surface: String = ["floor", "wall", "object"][blood_surface.selected] if blood_surface != null else "floor"
@@ -224,6 +229,8 @@ func _update_light_ui() -> void:
 	if target != null:
 		light = target.find_child("Light", true, false) as Light3D
 	var show_light = light != null and target.has_method("get_authored_energy")
+	fixtures.update_selection(objects.selected)
+	light_defaults.visible = objects.selected == null and catalog.active_catalog == catalog.lighting_catalog
 	session.ui.get_node("Panel/VBox/SelectedLightColor").visible = show_light and objects.selected != null
 	light_info.visible = show_light
 	light_level.visible = show_light
@@ -304,6 +311,7 @@ func _show_structure_catalog() -> void:
 	light_defaults.hide()
 	objects._reset_selection()
 	catalog.active_catalog = catalog.group_catalogs["01"]
+	light_defaults.hide()
 	session.ui.get_node("Panel/VBox/GroupTabs").show()
 	_rebuild_palette()
 	status.text = "STRUCTURE | choose building object"
@@ -313,6 +321,7 @@ func _show_structure_group(group_name: String) -> void:
 	light_defaults.hide()
 	objects._reset_selection()
 	catalog.active_catalog = catalog.group_catalogs.get(group_name, [])
+	light_defaults.hide()
 	_rebuild_palette()
 	status.text = "STRUCTURE " + group_name
 
@@ -335,6 +344,7 @@ func _show_actor_catalog() -> void:
 	objects._reset_selection()
 	session.ui.get_node("Panel/VBox/GroupTabs").hide()
 	catalog.active_catalog = catalog.actor_catalog
+	light_defaults.hide()
 	_rebuild_palette()
 	status.text = "ACTORS | place/remove Player and Infected"
 

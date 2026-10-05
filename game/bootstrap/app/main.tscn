@@ -112,6 +112,7 @@ offset_left = 8.0
 offset_top = 8.0
 offset_right = 368.0
 offset_bottom = -8.0
+horizontal_scroll_mode = 0
 
 [node name="VBox" type="VBoxContainer" parent="PlanningUI/Panel" unique_id=797647768]
 layout_mode = 2
@@ -578,3 +579,4 @@ custom_minimum_size = Vector2(240, 110)
 layout_mode = 2
 text = "ENHANCED AMMO
 Combat mutation"
+

@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://dyvbpaqtt3bm4"
-path="res://.godot/imported/Eight-panel bullet and scorch decal atlas.png-84e185a5fafce41940a0fe044a938099.ctex"
+uid="uid://eshevb11cyp"
+path="res://.godot/imported/Eight-frame isometric electric pulse atlas.png-f6e285fb08fb938046f93c169555a71e.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://models/objects/textures/bullet_decals/Eight-panel bullet and scorch decal atlas.png"
-dest_files=["res://.godot/imported/Eight-panel bullet and scorch decal atlas.png-84e185a5fafce41940a0fe044a938099.ctex"]
+source_file="res://models/objects/textures/fx_skills/Eight-frame isometric electric pulse atlas.png"
+dest_files=["res://.godot/imported/Eight-frame isometric electric pulse atlas.png-f6e285fb08fb938046f93c169555a71e.ctex"]
 
 [params]
 

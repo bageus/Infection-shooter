@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://dyvbpaqtt3bm4"
-path="res://.godot/imported/Eight-panel bullet and scorch decal atlas.png-84e185a5fafce41940a0fe044a938099.ctex"
+uid="uid://dyd45aqyjuy0u"
+path="res://.godot/imported/Isometric cyan blade orbit atlas.png-6d6693fb3262787fd8d433bfcc584ae5.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://models/objects/textures/bullet_decals/Eight-panel bullet and scorch decal atlas.png"
-dest_files=["res://.godot/imported/Eight-panel bullet and scorch decal atlas.png-84e185a5fafce41940a0fe044a938099.ctex"]
+source_file="res://models/objects/textures/fx_skills/Isometric cyan blade orbit atlas.png"
+dest_files=["res://.godot/imported/Isometric cyan blade orbit atlas.png-6d6693fb3262787fd8d433bfcc584ae5.ctex"]
 
 [params]
 
