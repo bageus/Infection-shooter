@@ -8,7 +8,7 @@ permissions:
 jobs:
   runtime:
     runs-on: ubuntu-latest
-    timeout-minutes: 20
+    timeout-minutes: 45
     steps:
       - uses: actions/checkout@v4
       - name: Install Godot
@@ -35,7 +35,7 @@ jobs:
         run: |
           set -o pipefail
           failed=0
-          for suite in game/bootstrap/app/tests/run_surface_pose_tests.gd game/features/combat/tests/run_cursor_aim_tests.gd game/bootstrap/app/tests/run_gameplay_planner_repairs_tests.gd game/bootstrap/app/tests/run_settings_tabs_tests.gd game/bootstrap/app/tests/run_runtime_debug_tests.gd game/bootstrap/app/tests/run_blast_feedback_tests.gd game/bootstrap/app/tests/run_occlusion_tests.gd game/bootstrap/app/tests/run_ui_sound_tests.gd game/features/infected/tests/run_horde_escalation_tests.gd game/bootstrap/app/tests/run_menu_tests.gd game/features/player/tests/run_weapon_presentation_tests.gd game/features/infection/tests/run_tests.gd game/bootstrap/app/tests/run_mutation_feedback_tests.gd game/features/player/tests/run_control_loss_tests.gd game/presentation/prototype_hud/tests/run_weapon_icon_tests.gd game/presentation/office_floor/tests/run_blood_effects_tests.gd game/presentation/office_floor/tests/run_elevator_collision_tests.gd game/features/infected/tests/run_blood_events_tests.gd game/features/pickups/tests/run_pickup_floor_tests.gd game/bootstrap/app/tests/run_planning_mode_tests.gd game/bootstrap/app/tests/run_world_bindings_tests.gd game/bootstrap/app/tests/run_lighting_tests.gd game/bootstrap/app/tests/run_global_lighting_tests.gd game/features/infected/tests/run_enemy_animation_tests.gd game/presentation/office_floor/tests/run_debris_tests.gd game/features/character_animation/tests/run_gait_tests.gd game/features/infected/tests/run_dismemberment_tests.gd game/presentation/office_floor/tests/run_blood_decor_tests.gd game/core/audio/tests/run_sound_event_tests.gd game/presentation/office_floor/tests/run_sound_hook_tests.gd game/presentation/office_floor/tests/run_staged_glb_tests.gd game/core/vfx/tests/run_flipbook_tests.gd game/presentation/office_floor/tests/run_hit_effect_tests.gd game/features/combat/tests/run_grenade_vfx_tests.gd game/features/infection_source/tests/run_mutagen_cloud_tests.gd game/bootstrap/app/tests/run_planner_persistence_tests.gd game/presentation/office_floor/tests/run_balance_tests.gd game/presentation/office_floor/tests/run_glass_crack_tests.gd game/features/infected/tests/run_chase_route_tests.gd game/bootstrap/app/tests/run_world_surface_tests.gd game/presentation/office_floor/tests/run_display_tests.gd game/bootstrap/app/tests/run_display_planner_tests.gd; do
+          for suite in game/bootstrap/app/tests/run_planner_extension_tests.gd game/bootstrap/app/tests/run_surface_pose_tests.gd game/features/combat/tests/run_cursor_aim_tests.gd game/bootstrap/app/tests/run_gameplay_planner_repairs_tests.gd game/bootstrap/app/tests/run_settings_tabs_tests.gd game/bootstrap/app/tests/run_runtime_debug_tests.gd game/bootstrap/app/tests/run_blast_feedback_tests.gd game/bootstrap/app/tests/run_occlusion_tests.gd game/bootstrap/app/tests/run_ui_sound_tests.gd game/features/infected/tests/run_horde_escalation_tests.gd game/bootstrap/app/tests/run_menu_tests.gd game/features/player/tests/run_weapon_presentation_tests.gd game/features/infection/tests/run_tests.gd game/bootstrap/app/tests/run_mutation_feedback_tests.gd game/features/player/tests/run_control_loss_tests.gd game/presentation/prototype_hud/tests/run_weapon_icon_tests.gd game/presentation/office_floor/tests/run_blood_effects_tests.gd game/presentation/office_floor/tests/run_elevator_collision_tests.gd game/features/infected/tests/run_blood_events_tests.gd game/features/pickups/tests/run_pickup_floor_tests.gd game/bootstrap/app/tests/run_planning_mode_tests.gd game/bootstrap/app/tests/run_world_bindings_tests.gd game/bootstrap/app/tests/run_lighting_tests.gd game/bootstrap/app/tests/run_global_lighting_tests.gd game/features/infected/tests/run_enemy_animation_tests.gd game/presentation/office_floor/tests/run_debris_tests.gd game/features/character_animation/tests/run_gait_tests.gd game/features/infected/tests/run_dismemberment_tests.gd game/presentation/office_floor/tests/run_blood_decor_tests.gd game/core/audio/tests/run_sound_event_tests.gd game/presentation/office_floor/tests/run_sound_hook_tests.gd game/presentation/office_floor/tests/run_staged_glb_tests.gd game/core/vfx/tests/run_flipbook_tests.gd game/presentation/office_floor/tests/run_hit_effect_tests.gd game/features/combat/tests/run_grenade_vfx_tests.gd game/features/infection_source/tests/run_mutagen_cloud_tests.gd game/bootstrap/app/tests/run_planner_persistence_tests.gd game/presentation/office_floor/tests/run_balance_tests.gd game/presentation/office_floor/tests/run_glass_crack_tests.gd game/features/infected/tests/run_chase_route_tests.gd game/bootstrap/app/tests/run_world_surface_tests.gd game/presentation/office_floor/tests/run_display_tests.gd game/bootstrap/app/tests/run_display_planner_tests.gd; do
             suite_failed=0
             if ! timeout 120 godot --headless --path . --script "$suite" 2>&1 | tee /tmp/suite.log; then suite_failed=1; fi
             if grep -E 'SCRIPT ERROR|^ERROR:' /tmp/suite.log; then suite_failed=1; fi
@@ -57,7 +57,7 @@ jobs:
         run: |
           sudo apt-get update -qq
           sudo apt-get install -y -qq xvfb libgl1-mesa-dri mesa-vulkan-drivers libvulkan1
-          timeout 60 xvfb-run -a godot --path . --audio-driver Dummy --rendering-method gl_compatibility --script game/bootstrap/app/tests/capture_menu_screens.gd
+          timeout 90 xvfb-run -a godot --path . --audio-driver Dummy --rendering-method gl_compatibility --script game/bootstrap/app/tests/capture_menu_screens.gd
       - name: Rendered effects smoke
         # Headless runs never compile shaders or touch the GPU texture path;
         # this catches broken shaders and textures that cannot be loaded.
@@ -67,6 +67,8 @@ jobs:
           failed=0
           for suite in game/presentation/office_floor/tests/run_hit_effect_tests.gd game/features/combat/tests/run_grenade_vfx_tests.gd game/features/infection_source/tests/run_mutagen_cloud_tests.gd game/features/infected/tests/run_enemy_animation_tests.gd; do
             timeout 150 xvfb-run -a godot --path . --audio-driver Dummy --rendering-method gl_compatibility --script "$suite" > /tmp/rendered.log 2>&1 || failed=1
+            echo "$suite"
+            cat /tmp/rendered.log
             if grep -E 'Failed loading resource|SHADER ERROR|SCRIPT ERROR|failure\(s\)|failures' /tmp/rendered.log | grep -vE ' 0 failure| 0 failures'; then failed=1; fi
           done
           exit "$failed"
@@ -80,8 +82,17 @@ jobs:
         run: |
           failed=0
           for renderer in gl_compatibility forward_plus; do
-            for suite in game/bootstrap/app/tests/run_surface_pose_tests.gd game/features/combat/tests/run_cursor_aim_tests.gd game/bootstrap/app/tests/run_gameplay_planner_repairs_tests.gd game/presentation/office_floor/tests/run_display_tests.gd game/bootstrap/app/tests/run_runtime_debug_tests.gd game/bootstrap/app/tests/run_occlusion_tests.gd game/bootstrap/app/tests/run_blast_feedback_tests.gd; do
-              timeout 180 xvfb-run -a godot --path . --audio-driver Dummy --rendering-method "$renderer" --script "$suite" > /tmp/occlusion.log 2>&1 || failed=1
+            for suite in game/bootstrap/app/tests/run_planner_extension_tests.gd game/bootstrap/app/tests/run_settings_tabs_tests.gd game/bootstrap/app/tests/run_surface_pose_tests.gd game/features/combat/tests/run_cursor_aim_tests.gd game/bootstrap/app/tests/run_gameplay_planner_repairs_tests.gd game/presentation/office_floor/tests/run_display_tests.gd game/bootstrap/app/tests/run_runtime_debug_tests.gd game/bootstrap/app/tests/run_occlusion_tests.gd game/bootstrap/app/tests/run_blast_feedback_tests.gd; do
+              suite_status=0
+              started_at=$(date +%s)
+              timeout 180 xvfb-run -a godot --path . --audio-driver Dummy --rendering-method "$renderer" --script "$suite" > /tmp/occlusion.log 2>&1 || suite_status=$?
+              elapsed=$(( $(date +%s) - started_at ))
+              echo "$renderer: $suite exited $suite_status in ${elapsed}s"
+              if [ "$suite_status" != 0 ]; then
+                failed=1
+                echo "::error title=Rendered suite exit::$renderer $suite exited $suite_status in ${elapsed}s"
+              fi
+              cp /tmp/occlusion.log /tmp/menu_previews/$(basename "$suite" .gd)_${renderer}.log
               cat /tmp/occlusion.log
               if grep -E 'SHADER ERROR|SCRIPT ERROR|^ERROR:' /tmp/occlusion.log; then failed=1; fi
             done
@@ -91,4 +102,8 @@ jobs:
         if: always()
         with:
           name: menu-previews
-          path: /tmp/menu_previews/*.png
+          path: |
+            /tmp/menu_previews/*
+            /tmp/import.log
+            /tmp/main.log
+            /tmp/rendered.log

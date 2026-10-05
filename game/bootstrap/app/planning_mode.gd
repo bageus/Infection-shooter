@@ -97,6 +97,7 @@ func setup(app_owner: Node3D, planning_root: Node3D, planning_ui: Control) -> vo
 	storage._ensure_maps_dir()
 	storage._refresh_map_list()
 	storage.load_layout()
+	preload("res://game/bootstrap/app/planning_physics.gd").resume(objects.placed)
 
 
 func enter() -> void:
@@ -168,6 +169,7 @@ func exit() -> void:
 	geometry._hide_planning_grid()
 	objects._select(null)
 	ui.hide()
+	preload("res://game/bootstrap/app/planning_physics.gd").resume(objects.placed)
 	get_tree().paused = false
 
 

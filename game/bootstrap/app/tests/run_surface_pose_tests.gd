@@ -105,6 +105,10 @@ func _projection() -> void:
 		var point := visual.global_transform * vertex
 		_check(point.y > .75 and point.y < .7525, "Blood follows actual seat/table top, never floats on a bounding plane")
 	await _capture("blood_table_chair", blood.global_position)
+	chair.position.x += 3.0
+	await process_frame
+	await process_frame
+	_check(visual.mesh.get_surface_count() == 1, "Moving the adjacent chair removes its old unsupported blood fragment")
 	blood.queue_free()
 	for body in [end, left, right, glass, table, chair]:
 		body.queue_free()

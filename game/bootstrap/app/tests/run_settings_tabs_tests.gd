@@ -35,6 +35,12 @@ func _run() -> void:
 	_check(dialog.settings.notices.buttons[0].visible and dialog.settings.notices.buttons[1].visible and not dialog.settings.notices.buttons[3].visible, "Each tab exposes its own notice only when needed")
 	var page_margin := tabs.get_child(0).get_child(0) as MarginContainer
 	_check(page_margin.get_theme_constant("margin_top") >= 20, "Tab contents retain a readable top gap")
+	dialog.settings.notices._show(1)
+	await process_frame
+	if DisplayServer.get_name() != "headless":
+		await RenderingServer.frame_post_draw
+	_check(dialog.settings.notices.popup.visible and dialog.settings.notices.popup.size.y >= 100, "Notice text opens in a visible popup with usable height")
+	dialog.settings.notices.popup.hide()
 	tabs.current_tab = 1
 	var editor: RefCounted = dialog.settings.controls
 	editor.begin("move_up")
@@ -68,6 +74,7 @@ func _run() -> void:
 	_check(InputMap.action_has_event("mutation_tree", mouse), "Mouse button rebinding applies to mutation action")
 	dialog.call("_language_changed", 1)
 	await process_frame
+	_check(dialog.find_children("*", "PopupPanel", true, false).size() == 1, "Language rebuild frees the previous notice popup")
 	_check(dialog.settings.tabs.current_tab == 1 and dialog.settings.tabs.get_tab_title(1) == "Controls", "Language change preserves active tab")
 	dialog.call("_defaults")
 	_check(menu.preferences.bindings.values.move_up.code == KEY_W, "Reset restores authored controls")
@@ -89,6 +96,7 @@ func _run() -> void:
 	else:
 		DirAccess.remove_absolute(PREFS.FILE)
 	InputMap.load_from_project_settings()
+	await create_timer(0.2).timeout
 	print("Settings tabs tests: %d failures" % failures)
 	quit(failures)
 

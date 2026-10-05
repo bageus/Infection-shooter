@@ -89,7 +89,7 @@ func blood_catalog() -> Array:
 
 func _build_environment_catalogs() -> void:
 	group_catalogs.clear()
-	for group_index in range(1, 13): # model groups 01-12
+	for group_index in range(1, 14): # model groups 01-13
 		var group = "%02d" % group_index
 		var directory = ENVIRONMENT_ROOT + "/" + group
 		var entries: Array = []

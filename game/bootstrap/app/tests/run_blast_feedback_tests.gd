@@ -25,10 +25,15 @@ func _run() -> void:
 	_test_lifecycle()
 	await _render_checks()
 	await _test_explosion()
+	# Complete a GPU frame while newly spawned blast resources are still alive.
+	if DisplayServer.get_name() != "headless":
+		await RenderingServer.frame_post_draw
 	app.free()
 	paused = false
 	await process_frame
-	await create_timer(0.15).timeout
+	if DisplayServer.get_name() != "headless":
+		await RenderingServer.frame_post_draw
+	await create_timer(0.2).timeout
 	_check(is_equal_approx(AudioServer.get_bus_volume_db(0), original_volume), "exit restores audio")
 	print("Blast feedback tests: %d failures" % failures)
 	quit(0 if failures == 0 else 1)

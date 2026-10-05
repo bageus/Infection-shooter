@@ -37,7 +37,9 @@ func setup(dialog: Control, tab_view: TabContainer) -> void:
 	detail.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	detail.add_theme_font_size_override("font_size", 12)
 	margin.add_child(detail)
-	tabs.tab_changed.connect(func(_index: int) -> void: popup.hide())
+	tabs.tab_changed.connect(func(_index: int) -> void:
+		if is_instance_valid(popup):
+			popup.hide())
 
 
 func set_notice(index: int, message: String) -> void:
@@ -55,4 +57,10 @@ func _show(index: int) -> void:
 		return
 	var available := host.get_viewport_rect().size
 	detail.custom_minimum_size.x = minf(420.0, available.x - 64.0)
-	popup.popup_centered(Vector2i(minf(452.0, available.x - 32.0), 0))
+	popup.popup_centered.call_deferred(Vector2i(minf(452.0, available.x - 32.0), mini(160, int(available.y) - 32)))
+
+
+func dispose() -> void:
+	if is_instance_valid(popup):
+		popup.hide()
+		popup.queue_free()

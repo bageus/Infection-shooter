@@ -21,6 +21,7 @@ const BODY_PARTS := preload("res://game/features/infected/body_parts.gd")
 @export var durability := 60.0
 
 var parts: Node
+var _physics: RefCounted
 
 
 func _ready() -> void:
@@ -95,3 +96,11 @@ func _notification(what: int) -> void:
 			var mesh := entry.get("instance") as MeshInstance3D
 			if is_instance_valid(mesh):
 				mesh.mesh = null
+
+
+func set_runtime_physics(enabled: bool) -> void:
+	if enabled and _physics == null and parts != null:
+		_physics = preload("res://game/features/infected/corpse_physics.gd").new()
+		_physics.call("setup", parts)
+	if _physics != null:
+		_physics.call("set_enabled", enabled)

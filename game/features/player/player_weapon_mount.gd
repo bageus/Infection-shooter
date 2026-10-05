@@ -5,6 +5,9 @@ var socket: Node3D
 var _remote: RemoteTransform3D
 var _aim_target := Vector3.INF
 var _active: Node3D
+var _aim_modifying := false
+var _hand := -1
+var _socket_offset := Transform3D.IDENTITY
 
 
 func _ready() -> void:
@@ -23,6 +26,17 @@ func _ready() -> void:
 		socket.name = "WeaponSocket_R"
 		attachment.add_child(socket)
 		push_warning("Character has no authored WeaponSocket_R; using hand origin")
+	_hand = skeleton.find_bone("RightHand")
+	var attachment_root := socket.get_parent()
+	while attachment_root != null and not attachment_root is BoneAttachment3D:
+		attachment_root = attachment_root.get_parent()
+	if attachment_root is BoneAttachment3D:
+		_socket_offset = (attachment_root as Node3D).global_transform.affine_inverse() * socket.global_transform
+	var aim := preload("res://game/features/player/player_body_aim.gd").new()
+	aim.name = "BodyAim"
+	aim.mount = self
+	skeleton.add_child(aim)
+	skeleton.skeleton_updated.connect(_sync_active)
 	_remote = RemoteTransform3D.new()
 	_remote.name = "ActiveWeaponTransform"
 	_remote.update_scale = false
@@ -41,14 +55,15 @@ func select_weapon(weapon: Node3D) -> void:
 
 
 func sync_weapon(weapon: Node3D) -> void:
-	if socket == null:
+	if not is_instance_valid(socket) or not socket.is_inside_tree() or not weapon.is_inside_tree():
 		return
 	# Also synchronize at the firing boundary, before pending transform notifications.
+	if socket.get_parent() is BoneAttachment3D:
+		_socket_offset = socket.transform
 	var original_scale := weapon.scale
-	weapon.global_transform = Transform3D(socket.global_basis.orthonormalized(), socket.global_position)
+	var hand := skeleton.global_transform * skeleton.get_bone_global_pose(_hand) * _socket_offset if _aim_modifying else socket.global_transform
+	weapon.global_transform = Transform3D(hand.basis.orthonormalized(), hand.origin)
 	weapon.scale = original_scale
-	if _aim_target.is_finite() and weapon.has_method("aim_at"):
-		weapon.call("aim_at", _aim_target)
 
 
 func _find_skeleton(node: Node) -> Skeleton3D:
@@ -75,3 +90,13 @@ func aim_at(target: Vector3) -> void:
 	_aim_target = target
 	if is_instance_valid(_active):
 		sync_weapon(_active)
+
+
+func _sync_active() -> void:
+	if is_instance_valid(_active):
+		sync_weapon(_active)
+
+
+func _exit_tree() -> void:
+	if is_instance_valid(skeleton) and skeleton.skeleton_updated.is_connected(_sync_active):
+		skeleton.skeleton_updated.disconnect(_sync_active)

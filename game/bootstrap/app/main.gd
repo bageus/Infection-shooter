@@ -316,3 +316,8 @@ func bind_world_object(node: Node) -> void:
 	if world_bindings != null and not node.has_meta(&"world_bound"):
 		node.set_meta(&"world_bound", true)
 		world_bindings.call("bind_scene", node)
+
+
+func set_electronic_particles_enabled(enabled: bool) -> void:
+	if world_bindings != null:
+		world_bindings.call("set_electronic_particles_enabled", enabled)

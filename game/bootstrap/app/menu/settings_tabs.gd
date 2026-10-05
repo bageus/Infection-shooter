@@ -84,6 +84,12 @@ func _video() -> void:
 	occlusion.selected = dialog.view.preferences.values.occlusion_mode
 	occlusion.item_selected.connect(func(index: int) -> void: dialog.call("_change", "occlusion_mode", index))
 	dialog.call("_row", "occlusion", occlusion)
+	var particles := CheckButton.new()
+	particles.name = "ElectronicParticles"
+	particles.text = dialog.view.text("electronicParticles")
+	particles.button_pressed = dialog.view.preferences.values.electronic_particles
+	particles.toggled.connect(func(value: bool) -> void: dialog.call("_change", "electronic_particles", value))
+	dialog.get("layout").add_child(particles)
 	dialog.call("_button", "fullscreen", dialog._fullscreen)
 
 

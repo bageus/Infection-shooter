@@ -20,14 +20,16 @@ var _projection_pool: Node
 var _projection_anchor: WeakRef
 var _footprint := Vector2.ONE
 var _surface_material: StandardMaterial3D
+var _receivers: Array[Dictionary] = []
 var _projection_dirty := true
 var _projection_transform := Transform3D()
 var _last_anchor_transform := Transform3D()
 
 
 func configure_blood_normal(normal: Vector3) -> void:
-	_projection_dirty = true
-	surface_normal = normal.normalized() if not normal.is_zero_approx() else Vector3.UP
+	var next := normal.normalized() if not normal.is_zero_approx() else Vector3.UP
+	_projection_dirty = _projection_dirty or not surface_normal.is_equal_approx(next)
+	surface_normal = next
 	if is_inside_tree() and _visual != null:
 		if _projection_anchor == null:
 			_apply_surface()
@@ -166,7 +168,7 @@ static func texture_ids() -> PackedStringArray:
 
 
 func _project_surface() -> void:
-	if not _projection_dirty and global_transform.is_equal_approx(_projection_transform) and _visual.mesh is ArrayMesh:
+	if not _projection_dirty and global_transform.is_equal_approx(_projection_transform) and _visual.mesh is ArrayMesh and not _receivers_changed():
 		return
 	_projection_dirty = false
 	_projection_transform = global_transform
@@ -180,7 +182,9 @@ func _project_surface() -> void:
 	var entries: Array = _projection_pool.call("projected_geometry", anchor, projector, size, .16, false)
 	var combined := ArrayMesh.new()
 	var local := global_transform.affine_inverse()
+	_receivers.clear()
 	for entry in entries:
+		_receivers.append({"source": weakref(entry["anchor"]), "transform": entry["anchor"].global_transform})
 		var mesh: ArrayMesh = entry["mesh"]
 		var transform: Transform3D = local * entry["anchor"].global_transform
 		var arrays := mesh.surface_get_arrays(0)
@@ -195,3 +199,13 @@ func _project_surface() -> void:
 		combined.surface_set_material(combined.get_surface_count() - 1, _surface_material)
 	_visual.mesh = combined
 	_visual.transform = Transform3D.IDENTITY
+
+
+func _receivers_changed() -> bool:
+	for receiver in _receivers:
+		var source := (receiver["source"] as WeakRef).get_ref() as Node3D
+		if source == null or not source.is_inside_tree() or source.is_queued_for_deletion():
+			return true
+		if not source.global_transform.is_equal_approx(receiver["transform"]):
+			return true
+	return false

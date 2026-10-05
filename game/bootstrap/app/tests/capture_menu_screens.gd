@@ -33,7 +33,13 @@ func _capture() -> void:
 		menu.modal.settings.notices._show(1)
 		await process_frame
 		await RenderingServer.frame_post_draw
+		print("Notice popup: ", menu.modal.settings.notices.popup.visible, " ", menu.modal.settings.notices.popup.size)
+		if not menu.modal.settings.notices.popup.visible:
+			push_error("Settings notice popup must remain visible")
+			quit(1)
+			return
 		root.get_texture().get_image().save_png("/tmp/menu_previews/settings_notice_%s.png" % language)
+		menu.modal.settings.notices.popup.get_texture().get_image().save_png("/tmp/menu_previews/notice_detail_%s.png" % language)
 		menu.call("close_dialog")
 	menu.preferences.values.language = "ru"
 	menu.call("activate", "about")

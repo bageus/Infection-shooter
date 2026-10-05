@@ -169,6 +169,8 @@ func _defaults() -> void:
 
 
 func _rebuild() -> void:
+	if settings != null:
+		settings.notices.dispose()
 	for child in layout.get_children():
 		layout.remove_child(child)
 		child.queue_free()

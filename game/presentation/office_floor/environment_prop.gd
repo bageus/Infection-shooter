@@ -6,6 +6,13 @@ const CARPET_SHADOW := preload("res://game/presentation/office_floor/carpet_shad
 const DAMAGE = preload("res://game/presentation/office_floor/environment_damage.gd")
 const BALANCE = preload("res://game/features/combat/public/projectile_balance.gd")
 const BOOK_CONTACT = preload("res://game/presentation/office_floor/book_contact.gd")
+var repeated_electronic_particles := true
+
+
+func configure_damage_particles(enabled: bool) -> void:
+	repeated_electronic_particles = enabled
+
+
 const SPARKS = preload("res://game/presentation/office_floor/electric_sparks.gd")
 const PAPER = preload("res://game/presentation/office_floor/paper_shreds.gd")
 const BLAST = preload("res://game/presentation/office_floor/blast_effect.gd")
@@ -139,7 +146,7 @@ func _ready() -> void:
 			primary.hide()
 	_health = _stage_health()
 	# Architectural pieces and carpets stay anchored; all other groups are movable.
-	freeze = wall_mounted or model_path.begins_with("res://models/objects/enviroments/01/") or "server_rack" in model_path.get_file()
+	freeze = wall_mounted or model_path.begins_with("res://models/objects/enviroments/01/")
 	if freeze and "01_floor_" in model_path:
 		var shadow := CARPET_SHADOW.new()
 		shadow.name = "CarpetShadow"
@@ -282,7 +289,8 @@ func take_projectile_hit(damage: float, hit_position: Vector3, _normal: Vector3,
 		return false
 	if _damage_category() == "tech":
 		if _short_circuited:
-			SPARKS.spawn(self, hit_position)
+			if repeated_electronic_particles:
+				SPARKS.spawn(self, hit_position)
 		else:
 			_short_circuited = true
 			if is_instance_valid(_display):
@@ -546,3 +554,16 @@ func push_from_character(character_position: Vector3, movement: Vector3) -> void
 	var direction := away.normalized() if away.length_squared() > 0.01 else movement.normalized()
 	sleeping = false
 	apply_central_impulse(direction * minf(mass * 0.45, 3.0))
+
+
+func get_display_edges() -> Dictionary:
+	if not is_instance_valid(_display) or not bool(_display.get("tiled")):
+		return {}
+	var profile: Dictionary = (_display.get("screens") as Array)[0]["profile"]
+	return {"frame": _display.call("wall_frame"), "size": Vector2(float(profile["size"][0]), float(profile["size"][1]))}
+
+
+func snap_display_edges(neighbors: Array[Dictionary]) -> void:
+	var source := get_display_edges()
+	if not source.is_empty():
+		global_position += preload("res://game/presentation/office_floor/display_edge_snap.gd").position(source, neighbors)

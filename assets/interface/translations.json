@@ -133,7 +133,8 @@
     "testMutagen": "Тестовое облако мутагена",
     "testMutagenHint": "Создаёт заражающее облако у точки появления. По умолчанию выключено. F3 показывает состояние мутации и производительность.",
     "effectsVolume": "Громкость эффектов",
-    "musicVolume": "Громкость музыки"
+    "musicVolume": "Громкость музыки",
+    "electronicParticles": "Искры при повторных попаданиях в электронику"
   },
   "en": {
     "demo": "INTERACTIVE UI DEMO",
@@ -269,6 +270,7 @@
     "testMutagen": "Test mutagen cloud",
     "testMutagenHint": "Creates an infectious cloud at the spawn point. Disabled by default. F3 shows mutation and performance diagnostics.",
     "effectsVolume": "Effects volume",
-    "musicVolume": "Music volume"
+    "musicVolume": "Music volume",
+    "electronicParticles": "Sparks on repeated hits to electronics"
   }
 }

@@ -229,6 +229,14 @@ func _apply_wall_mount(node: Node3D) -> void:
 		return
 	var normal: Vector3 = node.get_meta("planning_wall_normal")
 	SURFACE_PLACEMENT.mount(node, _combined_aabb(node), normal)
+	if node.has_method("snap_display_edges"):
+		var neighbors: Array[Dictionary] = []
+		for other: Node3D in objects.placed:
+			if is_instance_valid(other) and other != node and other.has_method("get_display_edges"):
+				var edges: Dictionary = other.call("get_display_edges")
+				if not edges.is_empty():
+					neighbors.append(edges)
+		node.call("snap_display_edges", neighbors)
 
 
 func _snap_position_for(node: Node3D, value: Vector3) -> Vector3:

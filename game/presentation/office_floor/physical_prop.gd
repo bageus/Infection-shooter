@@ -2,6 +2,13 @@ extends RigidBody3D
 const IMPACT_SOUND := preload("res://game/presentation/office_floor/impact_sound_watcher.gd")
 
 const BALANCE = preload("res://game/features/combat/public/projectile_balance.gd")
+var repeated_electronic_particles := true
+
+
+func configure_damage_particles(enabled: bool) -> void:
+	repeated_electronic_particles = enabled
+
+
 const SPARKS = preload("res://game/presentation/office_floor/electric_sparks.gd")
 const BLAST = preload("res://game/presentation/office_floor/blast_effect.gd")
 const DAMAGE = preload("res://game/presentation/office_floor/environment_damage.gd")
@@ -72,7 +79,7 @@ func take_projectile_hit(damage: float, hit_position: Vector3, _hit_normal: Vect
 			apply_central_impulse((direction.normalized() + Vector3.UP) * 1.5)
 			get_tree().create_timer(0.55).timeout.connect(_rupture_extinguisher.bind(hit_position))
 		return true
-	if _damage_category() == "tech":
+	if _damage_category() == "tech" and (_health >= max_health or repeated_electronic_particles):
 		SPARKS.spawn(self, hit_position)
 	var multiplier := 1.1 if weapon_name == "SHOTGUN" else (0.7 if weapon_name == "UZI" else 1.0)
 	# Shotgun pellets each deliver a separate hit; share a modest kick across

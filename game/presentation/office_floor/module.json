@@ -76,6 +76,13 @@
       "blood": "configure_blood(texture, surface), configure_blood_normal(Vector3), get_blood_config() -> {texture, surface: floor|wall|object, normal: Array[float]}",
       "attachment": "attach_blood(anchor, stable_owner_id), configure_blood_attachment({owner, mesh}), get_blood_attachment(); follows mesh, hides on destruction; restored by bootstrap using stable object id",
       "configure_projection": "configure_projection(anchor: Node3D) -> void; clipped multi-receiver blood in every renderer, optional mission-wiring collaborator"
+    },
+    "damage_particles_v1": {
+      "configure_damage_particles": "configure_damage_particles(enabled: bool) -> void; repeated electronics sparks only"
+    },
+    "display_placement_v1": {
+      "get_display_edges": "get_display_edges() -> Dictionary {frame: Transform3D, size: Vector2}; empty when not a frameless TV",
+      "snap_display_edges": "snap_display_edges(neighbors: Array[Dictionary]) -> void; .18m, coplanar edges only"
     }
   }
 }
