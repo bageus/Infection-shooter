@@ -82,6 +82,20 @@ func _test_grenade_shelter() -> void:
 	_expect(float(exposed.get_meta("damage", 0.0)) > 0.0, "A grenade hurts what it can reach.")
 	_expect(float(hidden.get_meta("damage", 0.0)) == 0.0, "A wall shelters from the blast.")
 	await process_frame
+	# A real infected (not a stand-in): the blast must hurt it, not only stun it.
+	var zombie := ENEMY.instantiate() as CharacterBody3D
+	stage.add_child(zombie)
+	zombie.global_position = Vector3(50, 1.0, 0)
+	await physics_frame
+	await physics_frame
+	var before := float(zombie.get("health"))
+	GRENADE.explode(anchor, Vector3(51.5, 0.2, 0), Vector3.UP, null, effects, null)
+	await process_frame
+	var hurt := not is_instance_valid(zombie) or bool(zombie.get("_dead")) or float(zombie.get("health")) < before
+	_expect(hurt, "A grenade wounds or kills a real infected.")
+	if is_instance_valid(zombie):
+		zombie.queue_free()
+	await process_frame
 
 
 func _test_far_enemy_wall() -> void:

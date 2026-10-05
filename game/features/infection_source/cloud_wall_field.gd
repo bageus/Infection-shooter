@@ -5,19 +5,24 @@ const RADIUS := 3.2
 const HEIGHT := 0.8
 
 
-# Masks for recent cloud spots: a crowd dying in one place shares one mask.
+# Masks for recent cloud spots: a crowd dying in one place (one grenade)
+# shares one mask. Entries live a few seconds, so walls the planner moved or
+# a blast broke are never clipped against a stale mask.
 static var _cache: Dictionary = {}
-const CACHE_LIMIT := 48
+const CACHE_SECONDS := 3.0
 
 
 static func texture_for(cloud: Area3D) -> ImageTexture:
+	var now := Time.get_ticks_msec() / 1000.0
 	var key := (cloud.global_position * 2.0).round()
-	if _cache.has(key):
-		return _cache[key]
-	if _cache.size() >= CACHE_LIMIT:
-		_cache.clear()
+	var entry: Array = _cache.get(key, [])
+	if not entry.is_empty() and now - float(entry[0]) < CACHE_SECONDS:
+		return entry[1]
+	for old_key in _cache.keys():
+		if now - float(_cache[old_key][0]) >= CACHE_SECONDS:
+			_cache.erase(old_key)
 	var texture := _build_texture(cloud)
-	_cache[key] = texture
+	_cache[key] = [now, texture]
 	return texture
 
 

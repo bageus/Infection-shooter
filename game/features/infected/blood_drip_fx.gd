@@ -78,7 +78,8 @@ static func _make(parent: Node3D, amount: int, lifetime: float, one_shot: bool) 
 	particles.name = "BloodDrops"
 	particles.add_to_group(GROUP)
 	_active += 1
-	particles.tree_exiting.connect(func() -> void: _active -= 1)
+	# One shot: a severed part reparents its bleeding emitter before freeing it.
+	particles.tree_exiting.connect(func() -> void: _active -= 1, CONNECT_ONE_SHOT)
 	particles.amount = maxi(1, amount)
 	particles.lifetime = lifetime
 	particles.one_shot = one_shot
