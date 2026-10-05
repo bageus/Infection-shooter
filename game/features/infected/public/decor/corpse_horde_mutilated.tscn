@@ -7,7 +7,7 @@
 [node name="CorpseHordeMutilated" type="Node3D"]
 script = ExtResource("1_script")
 visual_scene = ExtResource("2_res")
-visual_scale = 1.7
+visual_scale = 2.21
 feet_offset = 0.55
 durability = 255.0
 severed_parts = PackedStringArray("tentacle_0", "tentacle_3", "tentacle_5")

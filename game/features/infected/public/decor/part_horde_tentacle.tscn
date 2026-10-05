@@ -7,5 +7,5 @@
 [node name="PartHordeTentacle" type="RigidBody3D"]
 script = ExtResource("1_script")
 visual_scene = ExtResource("2_res")
-visual_scale = 1.7
+visual_scale = 2.21
 part = &"tentacle_0"

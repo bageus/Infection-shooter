@@ -1,5 +1,6 @@
 extends CanvasLayer
 
+const SFX := preload("res://game/core/audio/public/sound_events.gd")
 const TREE_CANVAS := preload("res://game/bootstrap/app/mutation_tree_canvas.gd")
 
 var runtime: Node
@@ -42,6 +43,7 @@ func configure(infection: Node) -> void:
 	var close := Button.new()
 	_bevel_button(close)
 	close.text = "Close [Esc / M]"
+	close.mouse_entered.connect(_play_ui_sound.bind(&"menu_hover"))
 	close.pressed.connect(close_tree)
 	title.add_child(close)
 	content = Control.new()
@@ -277,7 +279,8 @@ func _add_skill(canvas: Control, row: Array, center: Vector2) -> void:
 	button.add_theme_stylebox_override("normal", style)
 	button.add_theme_stylebox_override("hover", style)
 	button.add_theme_stylebox_override("pressed", style)
-	button.pressed.connect(func() -> void: runtime.call("upgrade_skill", skill_id))
+	button.mouse_entered.connect(_play_ui_sound.bind(&"mutation_hover"))
+	button.pressed.connect(_upgrade_skill.bind(skill_id))
 	canvas.add_child(button)
 	if learned and int(row[3]) != 3:
 		var lock := Button.new()
@@ -287,7 +290,8 @@ func _add_skill(canvas: Control, row: Array, center: Vector2) -> void:
 		lock.position = center + Vector2(35, -12)
 		lock.custom_minimum_size = Vector2(24, 24)
 		lock.size = Vector2(24, 24)
-		lock.pressed.connect(func() -> void: runtime.call("toggle_skill_lock", skill_id))
+		lock.mouse_entered.connect(_play_ui_sound.bind(&"mutation_hover"))
+		lock.pressed.connect(_toggle_skill_lock.bind(skill_id))
 		canvas.add_child(lock)
 
 
@@ -323,3 +327,21 @@ func _bevel_button(button: Button) -> void:
 			style.corner_detail = 1
 			style.anti_aliasing = false
 			button.add_theme_stylebox_override(state, style)
+
+
+func _play_ui_sound(event: StringName) -> void:
+	# The persistent layer outlives buttons rebuilt by tree_changed.
+	SFX.play_ui(self, event)
+
+
+func _upgrade_skill(skill_id: String) -> void:
+	_play_ui_sound(&"mutation_click")
+	runtime.call("upgrade_skill", skill_id)
+
+
+func _toggle_skill_lock(skill_id: String) -> void:
+	var was_locked: bool = runtime.call("skill_locked", skill_id)
+	runtime.call("toggle_skill_lock", skill_id)
+	var locked: bool = runtime.call("skill_locked", skill_id)
+	if locked != was_locked:
+		_play_ui_sound(&"mutation_lock" if locked else &"mutation_unlock")

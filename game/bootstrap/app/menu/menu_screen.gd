@@ -2,6 +2,7 @@ extends Control
 
 signal action_requested(action: String)
 
+const SFX := preload("res://game/core/audio/public/sound_events.gd")
 const STYLE := preload("res://game/bootstrap/app/menu/menu_style.gd")
 const PREFERENCES := preload("res://game/bootstrap/app/menu/menu_preferences.gd")
 const DIALOG := preload("res://game/bootstrap/app/menu/menu_dialog.gd")
@@ -151,6 +152,7 @@ func _add_button(key: String, action: String, disabled: bool = false) -> Button:
 	button.name = action.to_pascal_case()
 	if is_instance_valid(modal):
 		button.focus_mode = Control.FOCUS_NONE
+	button.mouse_entered.connect(play_hover.bind(button))
 	content.add_child(button)
 	buttons.append(button)
 	return button
@@ -251,3 +253,10 @@ func _click_stream() -> AudioStreamWAV:
 	stream.mix_rate = 22050
 	stream.data = data
 	return stream
+
+
+func play_hover(control: Control) -> void:
+	if not is_visible_in_tree() or (control is BaseButton and control.disabled):
+		return
+	if preferences.values.sound and preferences.values.volume > 0:
+		SFX.play_ui(self, &"menu_hover")

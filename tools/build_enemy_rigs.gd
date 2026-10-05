@@ -9,8 +9,8 @@ extends SceneTree
 ##   <Name>_rig_mesh.res  skinned copy of <Name>_game.res (4 weights/vertex)
 ##   <Name>_anims.res     AnimationLibrary (Idle, Walk, Run, attacks, Death, extras)
 ##   <Name>_rig.tscn      Visual > Skeleton3D > Mesh + AnimationPlayer
-## The zombie and mutant GLB skeletons only get a new <Name>_anims.res; their
-## scenes pass it to the shared animation driver. Source models stay unchanged.
+## The zombie GLB skeleton gets a new Zombie_anims.res; its
+## scene passes it to the shared animation driver. Source models stay unchanged.
 
 const AUTHOR := preload("res://tools/enemy_animation_author.gd")
 const HORDE_AUTHOR := preload("res://tools/horde_animation_author.gd")
@@ -40,11 +40,9 @@ const STYLES := {
 	"Titan": {"scale": 1.35, "walk_mps": 1.32, "run_mps": 3.3, "walk_swing": 24.0, "run_swing": 32.0, "lean": 20.0, "reach": 0.4, "heavy": 0.7, "attack_seconds": 1.3, "death_seconds": 2.0},
 	"Colossus": {"scale": 1.55, "walk_mps": 1.16, "run_mps": 2.9, "walk_swing": 22.0, "run_swing": 30.0, "lean": 18.0, "reach": 0.3, "heavy": 1.0, "attack_seconds": 1.4, "death_seconds": 2.2, "slam": true, "slam_seconds": 1.7},
 	"Zombie": {"scale": 1.0, "walk_mps": 1.8, "run_mps": 4.5, "walk_swing": 28.0, "run_swing": 38.0, "lean": 28.0, "reach": 0.9, "heavy": 0.0, "attack_seconds": 0.95, "death_seconds": 1.6},
-	"Mutant": {"scale": 1.0, "walk_mps": 2.04, "run_mps": 5.1, "walk_swing": 28.0, "run_swing": 38.0, "lean": 26.0, "reach": 0.8, "heavy": 0.25, "attack_seconds": 1.05, "death_seconds": 1.8},
 }
 const GLB_RIGS := {
 	"Zombie": "res://models/objects/characters/zombie_animated.glb",
-	"Mutant": "res://models/objects/characters/mutant_animated.glb",
 }
 
 

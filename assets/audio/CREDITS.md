@@ -226,3 +226,7 @@ the licence of their source (CC0 / CC-BY).
 - `uzi_fire`: cdda/sound/CC-Sounds/fire_gun/machineguns/machinegun_1.ogg
 - `uzi_reload`: cdda/sound/CC-Sounds/reload/default.ogg, redeclipse_sounds/weapons/smg/reload.ogg
 - `weapon_pickup`: cdda/sound/CC-Sounds/plmove/clear_obstacle/clear_obstacle_2.ogg, cdda/sound/CC-Sounds/reload/default.ogg, cdda/sound/CC-Sounds/reload/pocket_pistol/pocket_pistol_load_03.ogg
+
+## Interface cues (2026-10-05)
+
+assets/audio/ui/*.tres: original procedural synthesis for this project, dedicated to CC0-1.0. Generated reproducibly by tools/build_ui_sounds.py using Python standard library only; no source recordings. Menu hover, mutation hover/click, lock and its reversed unlock cue.

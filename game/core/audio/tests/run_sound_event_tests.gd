@@ -35,11 +35,31 @@ func _run() -> void:
 		if SFX.play(stage, &"elevator_open") != null:
 			played += 1
 	_expect(played == 1, "Per-event voice limits stop pile-ups (%d)." % played)
+	_test_ui(stage)
 	stage.queue_free()
 	await process_frame
 	_expect(SFX._voices == 0 and int(SFX._per_event.get(&"elevator_open", 0)) == 0, "Voice counts return to zero when sounds end (%d)." % SFX._voices)
 	print("Sound event tests: %d failure(s)." % failures)
 	quit(failures)
+
+
+func _test_ui(stage: Node) -> void:
+	for event: StringName in SFX.UI_EVENTS:
+		var stream: AudioStreamWAV = SFX.UI_EVENTS[event][0]
+		_expect(stream.get_length() > 0.03 and stream.get_length() < 0.5 and not stream.data.is_empty(), "UI cue contains short PCM: " + String(event))
+		_expect(SFX.has_event(event), "Interface cue is discoverable: " + String(event))
+	_expect(SFX.play_ui(stage, &"missing") == null, "Unknown UI events are ignored")
+	_expect(SFX.play_ui(null, &"menu_hover") == null, "UI playback rejects missing owners")
+	var count := 0
+	for i in 8:
+		if SFX.play_ui(stage, &"menu_hover") != null:
+			count += 1
+	_expect(count == 3, "Rapid hover has a per-event limit")
+	for event in [&"mutation_hover", &"mutation_click", &"mutation_lock"]:
+		for i in 3:
+			SFX.play_ui(stage, event)
+	_expect(get_node_count_in_group(SFX.UI_GROUP) == SFX.UI_MAX_VOICES, "UI has a separate eight-voice budget")
+	_expect(SFX.play_ui(stage, &"mutation_unlock") == null, "UI budget prevents unbounded overlap")
 
 
 func _expect(condition: bool, message: String) -> void:

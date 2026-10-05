@@ -90,6 +90,7 @@ func _copy(key: String, prefix: String = "") -> void:
 
 func _button(key: String, callback: Callable) -> Button:
 	var result := STYLE.button(view.text(key), callback)
+	result.mouse_entered.connect(view.play_hover.bind(result))
 	layout.add_child(result)
 	return result
 
@@ -102,6 +103,7 @@ func _settings() -> void:
 	sound.text = view.text("sound")
 	sound.button_pressed = view.preferences.values.sound
 	sound.toggled.connect(func(value: bool) -> void: _change("sound", value))
+	sound.mouse_entered.connect(view.play_hover.bind(sound))
 	layout.add_child(sound)
 	var language := OptionButton.new()
 	language.add_item("Русский")
@@ -138,6 +140,7 @@ func _row(key: String, widget: Control) -> void:
 	var label := STYLE.label(view.text(key), 13)
 	label.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	row.add_child(label)
+	widget.mouse_entered.connect(view.play_hover.bind(widget))
 	row.add_child(widget)
 	layout.add_child(row)
 

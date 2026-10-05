@@ -94,7 +94,7 @@ const EVENTS := {
 
 
 static func has_event(event: StringName) -> bool:
-	return EVENTS.has(event)
+	return EVENTS.has(event) or UI_EVENTS.has(event)
 
 
 # Plays `event` under `parent`; at `position` when given, else on the parent.
@@ -149,4 +149,45 @@ static func play(parent: Node, event: StringName, position := Vector3.INF, volum
 				live.queue_free())
 		return player
 	player.play()
+	return player
+
+
+# Non-positional interface cues use a dry bus and their own small voice budget,
+# so combat sound limits cannot silence menu feedback.
+const UI_GROUP := &"ui_sfx_voice"
+const UI_MAX_VOICES := 8
+const UI_EVENTS := {
+	&"menu_hover": [preload("res://assets/audio/ui/menu_hover.tres"), -8.0],
+	&"mutation_hover": [preload("res://assets/audio/ui/mutation_hover.tres"), -9.0],
+	&"mutation_click": [preload("res://assets/audio/ui/mutation_click.tres"), -6.0],
+	&"mutation_lock": [preload("res://assets/audio/ui/mutation_lock.tres"), -7.0],
+	&"mutation_unlock": [preload("res://assets/audio/ui/mutation_unlock.tres"), -7.0],
+}
+
+
+static func play_ui(parent: Node, event: StringName) -> AudioStreamPlayer:
+	if parent == null or not parent.is_inside_tree() or not UI_EVENTS.has(event):
+		return null
+	var tree := parent.get_tree()
+	var group := StringName("ui_sfx_" + String(event))
+	if tree.get_node_count_in_group(UI_GROUP) >= UI_MAX_VOICES or tree.get_node_count_in_group(group) >= 3:
+		return null
+	var player := AudioStreamPlayer.new()
+	player.name = "UiSfx_" + String(event)
+	player.process_mode = Node.PROCESS_MODE_ALWAYS
+	player.stream = UI_EVENTS[event][0]
+	player.volume_db = float(UI_EVENTS[event][1])
+	player.bus = &"UI" if AudioServer.get_bus_index(&"UI") >= 0 else &"Master"
+	player.add_to_group(UI_GROUP)
+	player.add_to_group(group)
+	player.finished.connect(player.queue_free)
+	parent.add_child(player)
+	if DisplayServer.get_name() == "headless":
+		var voice: WeakRef = weakref(player)
+		tree.create_timer(player.stream.get_length()).timeout.connect(func() -> void:
+			var live := voice.get_ref() as Node
+			if live != null:
+				live.queue_free())
+	else:
+		player.play()
 	return player

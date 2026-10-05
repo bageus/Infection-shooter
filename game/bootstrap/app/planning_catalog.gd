@@ -19,7 +19,7 @@ var lighting_catalog = [
 	{"name":"Permanent Darkness","path":"res://game/presentation/office_floor/public/props/darkness_zone.tscn","kind":"darkness"},
 	{"name":"Exploration Darkness","path":"res://game/presentation/office_floor/public/props/darkness_zone.tscn","kind":"exploration_darkness"}
 ]
-# Scenes that are loaded and saved as enemies; keep in sync with actor_catalog.
+# Enemy paths accepted by map loading; includes the retired mutant alias.
 const ENEMY_SCENES := [
 	"res://game/features/infected/public/infected_capsule.tscn",
 	"res://game/features/infected/public/mutant_level2.tscn",
@@ -33,7 +33,6 @@ const ENEMY_SCENES := [
 var actor_catalog = [
 	{"name":"Player Spawn","path":"","kind":"player"},
 	{"name":"Zombie L1","path":ENEMY_SCENES[0],"kind":"enemy"},
-	{"name":"Mutant L2","path":ENEMY_SCENES[1],"kind":"enemy"},
 	{"name":"Hunger","path":ENEMY_SCENES[2],"kind":"enemy"},
 	{"name":"Revenant","path":ENEMY_SCENES[3],"kind":"enemy"},
 	{"name":"Brute","path":ENEMY_SCENES[4],"kind":"enemy"},
@@ -50,11 +49,6 @@ var gore_catalog = [
 	{"name":"Head Zombie","path":"res://game/features/infected/public/decor/part_zombie_head.tscn","kind":"decor"},
 	{"name":"Arm Zombie","path":"res://game/features/infected/public/decor/part_zombie_arm.tscn","kind":"decor"},
 	{"name":"Leg Zombie","path":"res://game/features/infected/public/decor/part_zombie_leg.tscn","kind":"decor"},
-	{"name":"Corpse Mutant","path":"res://game/features/infected/public/decor/corpse_mutant.tscn","kind":"decor"},
-	{"name":"Corpse Mutant mutilated","path":"res://game/features/infected/public/decor/corpse_mutant_mutilated.tscn","kind":"decor"},
-	{"name":"Head Mutant","path":"res://game/features/infected/public/decor/part_mutant_head.tscn","kind":"decor"},
-	{"name":"Arm Mutant","path":"res://game/features/infected/public/decor/part_mutant_arm.tscn","kind":"decor"},
-	{"name":"Leg Mutant","path":"res://game/features/infected/public/decor/part_mutant_leg.tscn","kind":"decor"},
 	{"name":"Corpse Hunger","path":"res://game/features/infected/public/decor/corpse_hunger.tscn","kind":"decor"},
 	{"name":"Corpse Hunger mutilated","path":"res://game/features/infected/public/decor/corpse_hunger_mutilated.tscn","kind":"decor"},
 	{"name":"Head Hunger","path":"res://game/features/infected/public/decor/part_hunger_head.tscn","kind":"decor"},

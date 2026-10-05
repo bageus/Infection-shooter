@@ -5,6 +5,7 @@ extends "res://game/features/infected/infected_capsule.gd"
 
 const SHOCKWAVE := preload("res://game/features/infected/ground_shockwave.gd")
 const SUMMON_PEAK := 0.45
+const SUMMON_RULE := preload("res://game/features/infected/domain/horde_summon.gd")
 
 enum State { CRAWL, BRACE, RAM, RECOVER, SUMMON }
 
@@ -18,10 +19,11 @@ enum State { CRAWL, BRACE, RAM, RECOVER, SUMMON }
 @export var ram_hit_radius := 2.3
 @export var ram_steer := 1.4
 @export var summon_scene: PackedScene
+@export var summon_revenant_scene: PackedScene
+@export var summon_brute_scene: PackedScene
 @export var summon_interval := 12.0
 @export var summon_range := 24.0
 @export var summon_count := 3
-@export var summon_max_alive := 6
 @export var summon_spawn_radius := 3.6
 
 var state: State = State.CRAWL
@@ -31,7 +33,6 @@ var _ram_cooldown := 1.5
 var _ram_struck := false
 var _summon_cooldown := 5.0
 var _summon_pending := -1.0
-var _summoned: Array = []
 var _summon_busy_until := 0.0
 
 
@@ -44,7 +45,7 @@ func _behaviour_tick(delta: float, target_offset: Vector3) -> void:
 		State.CRAWL:
 			if _blast_stun_remaining > 0.0:
 				return
-			if _summon_cooldown <= 0.0 and distance <= summon_range and _alive_summoned() < summon_max_alive and distance > ram_hit_radius * 2.0:
+			if _summon_cooldown <= 0.0 and distance <= summon_range and distance > ram_hit_radius * 2.0:
 				_start_summon()
 			elif _ram_cooldown <= 0.0 and distance <= ram_trigger_distance and can_ram():
 				_enter(State.BRACE)
@@ -141,58 +142,63 @@ func _animation_busy() -> bool:
 
 func _release_summon() -> void:
 	_summon_pending = -1.0
+	if _dead or health <= 0.0 or get_parent() == null:
+		return
 	var parent: Node = effects_root if is_instance_valid(effects_root) else get_parent()
 	var pulse := SHOCKWAVE.new()
 	pulse.name = "SummonPulse"
 	parent.add_child(pulse)
-	pulse.configure(global_position + Vector3(0.0, -0.5, 0.0), 7.0, 11.0, 0.0, 0.0, self, Color(0.78, 0.22, 0.3, 0.7))
-	if summon_scene == null or get_parent() == null:
+	pulse.configure(global_position + Vector3(0.0, -_half_height(), 0.0), 7.0, 11.0, 0.0, 0.0, self, Color(0.78, 0.22, 0.3, 0.7))
+	var scene := _summon_scene_for_health()
+	if scene == null:
 		return
-	var free_slots := mini(summon_count, summon_max_alive - _alive_summoned())
-	for index in free_slots:
-		var spot := _spawn_point(index, free_slots)
+	# No alive-count gate: every cooldown may add another full wave.
+	for index in summon_count:
+		var enemy := scene.instantiate() as CharacterBody3D
+		var shape := (enemy.get_node("CollisionShape3D") as CollisionShape3D).shape as CapsuleShape3D
+		var spot := _spawn_point(index, summon_count, shape.radius, shape.height * 0.5)
 		if spot == Vector3.INF:
+			enemy.free()
 			continue
-		var enemy := summon_scene.instantiate() as Node3D
-		# Place before entering the tree: a body added at the origin would
-		# overlap the Horde until transforms flush and shove it away.
+		# Place before entering the tree to avoid overlap at the origin.
 		var parent_node := get_parent() as Node3D
 		enemy.position = parent_node.global_transform.affine_inverse() * spot if parent_node != null else spot
-		get_parent().add_child(enemy)
 		enemy.set_meta("summoned_by", get_instance_id())
+		get_parent().add_child(enemy)
 		if enemy.has_method("configure_world"):
 			enemy.call("configure_world", effects_root, impact_pool)
 		if enemy.has_method("set_target") and is_instance_valid(_target):
 			enemy.call("set_target", _target)
-		_summoned.append(weakref(enemy))
 
 
-# A free point on a ring around the Horde, checked against walls and props.
-func _spawn_point(index: int, total: int) -> Vector3:
+func _summon_scene_for_health() -> PackedScene:
+	match SUMMON_RULE.tier(health, max_health):
+		SUMMON_RULE.Tier.BRUTE:
+			return summon_brute_scene
+		SUMMON_RULE.Tier.REVENANT:
+			return summon_revenant_scene
+	return summon_scene
+
+
+# Check the selected species' entire capsule against walls and props.
+func _spawn_point(index: int, total: int, radius := 0.45, half_height := 1.0) -> Vector3:
 	var space := get_world_3d().direct_space_state
-	var probe := SphereShape3D.new()
-	probe.radius = 0.45
+	var probe := CapsuleShape3D.new()
+	probe.radius = radius + 0.05
+	probe.height = maxf(half_height * 2.0, probe.radius * 2.0)
+	var floor_y := global_position.y - _half_height()
 	for attempt in 6:
 		var angle := TAU * (float(index) + 0.37 * float(attempt)) / float(maxi(total, 1)) + randf_range(-0.3, 0.3)
 		var point := global_position + Vector3(sin(angle), 0.0, cos(angle)) * summon_spawn_radius
+		point.y = floor_y + half_height + 0.02
 		var query := PhysicsShapeQueryParameters3D.new()
 		query.shape = probe
-		query.transform = Transform3D(Basis.IDENTITY, point + Vector3(0.0, 0.6, 0.0))
+		query.transform = Transform3D(Basis.IDENTITY, point)
 		query.collision_mask = 1
 		query.exclude = [get_rid()]
 		if space.intersect_shape(query, 1).is_empty():
-			return Vector3(point.x, global_position.y - _half_height() + 1.0, point.z)
+			return point
 	return Vector3.INF
-
-
-func _alive_summoned() -> int:
-	var living: Array[WeakRef] = []
-	for ref: WeakRef in _summoned:
-		var enemy := ref.get_ref() as Node
-		if enemy != null and not enemy.is_queued_for_deletion() and not bool(enemy.call("is_dead")):
-			living.append(ref)
-	_summoned = living # forget the dead
-	return living.size()
 
 
 func _half_height() -> float:
