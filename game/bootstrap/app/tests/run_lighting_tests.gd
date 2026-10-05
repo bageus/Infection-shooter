@@ -310,6 +310,7 @@ func _test_fixtures(planner: Node) -> void:
 	_check(not bool(legacy.call("get_fixture_config")["visible_in_game"]), "Legacy maps keep invisible fixtures")
 	legacy.call("configure_fixture", "unknown", false)
 	_check(legacy.call("get_fixture_config")["shape"] == "point", "Unknown shape falls back safely")
+	_test_baked_fixture_replacement(planner)
 
 
 func _test_fixture_visibility(lamp: Node3D) -> void:
@@ -378,3 +379,15 @@ func _test_fixture_edits(planner: Node, lamp: Node3D) -> void:
 	_check(baked_lamp.scale.is_equal_approx(Vector3(2, 0.5, 1.5)), "Baked scenes retain model scale")
 	baked.free()
 	authored.free()
+
+
+func _test_baked_fixture_replacement(planner: Node) -> void:
+	var authored := LAMP.instantiate()
+	planner.structure_root.add_child(authored)
+	authored.configure_fixture("rectangle", true)
+	planner.objects._register_existing_scene_objects()
+	_check(planner.placed.has(authored), "Baked fixtures are selectable without a collision body")
+	_check(not bool(authored.get_meta("planning_existing", false)), "A baked fixture participates in map replacement")
+	var data: Dictionary = planner.storage._collect_layout_data()
+	planner.objects._apply_layout_data(data)
+	_check(_planner_lamps(planner).size() == 2, "Reload does not retain an extra baked lamp")

@@ -4,7 +4,7 @@
   "purpose": "Expose authored structural office modules with their own collision and the current office-floor composition.",
   "state_owner": [
     "Blood textures, render marks, surface anchors, lifetime and density budgets",
-    "Authored lamp power, color and flicker phase; derived runtime light activation",
+    "Authored lamp power, color, flicker phase, fixture shape and body visibility; derived runtime light activation",
     "Planner blood decorations: texture, surface and size"
   ],
   "public_api": [

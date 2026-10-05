@@ -79,7 +79,9 @@ func _register_editable_children(parent: Node) -> void:
 			if _is_editable_scene_object(node):
 				if not placed.has(node):
 					placed.append(node)
-				node.set_meta("planning_existing", true)
+				# Lamps are replaceable map entries even when baked into Structure.
+				if not node.is_in_group("planner_lights"):
+					node.set_meta("planning_existing", true)
 			else:
 				_register_editable_children(node)
 
