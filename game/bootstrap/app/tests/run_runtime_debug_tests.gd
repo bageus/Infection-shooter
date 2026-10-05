@@ -26,22 +26,7 @@ func _run() -> void:
 	_check(effects.mode == 1, "Saved hole mode applies at launch")
 	_check(app.gameplay.get_node_or_null("PermanentTestMutagen") == null, "Normal launch has no infectious test cloud")
 	var start: Vector3 = hero.global_position
-	var blocker := StaticBody3D.new()
-	blocker.add_to_group("camera_occluder")
-	var mesh := MeshInstance3D.new()
-	var box := BoxMesh.new()
-	box.size = Vector3(20, 20, .4)
-	mesh.mesh = box
-	mesh.material_override = StandardMaterial3D.new()
-	blocker.add_child(mesh)
-	var collision := CollisionShape3D.new()
-	var shape := BoxShape3D.new()
-	shape.size = box.size
-	collision.shape = shape
-	blocker.add_child(collision)
-	app.add_child(blocker)
-	blocker.global_position = effects.camera.global_position.lerp(start + Vector3.UP * .8, .5)
-	blocker.global_basis = effects.camera.global_basis
+	var mesh := _blocker(app, effects, start)
 	for frame in 150:
 		# Move through different camera occlusion positions without combat exposure.
 		hero.global_position = start + Vector3(sin(frame * .08) * 2.0, 0, cos(frame * .08))
@@ -114,3 +99,22 @@ func _check(condition: bool, message: String) -> void:
 	if not condition:
 		failures += 1
 		push_error(message)
+
+func _blocker(app: Node3D, effects: Node, start: Vector3) -> MeshInstance3D:
+	var blocker := StaticBody3D.new()
+	blocker.add_to_group("camera_occluder")
+	var mesh := MeshInstance3D.new()
+	var box := BoxMesh.new()
+	box.size = Vector3(20, 20, .4)
+	mesh.mesh = box
+	mesh.material_override = StandardMaterial3D.new()
+	blocker.add_child(mesh)
+	var collision := CollisionShape3D.new()
+	var shape := BoxShape3D.new()
+	shape.size = box.size
+	collision.shape = shape
+	blocker.add_child(collision)
+	app.add_child(blocker)
+	blocker.global_position = effects.camera.global_position.lerp(start + Vector3.UP * .8, .5)
+	blocker.global_basis = effects.camera.global_basis
+	return mesh
