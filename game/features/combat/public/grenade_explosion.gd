@@ -1,11 +1,11 @@
 extends RefCounted
+const SURFACE_ATLASES := preload("res://game/core/vfx/public/surface_atlases.gd")
 
 const RADIUS := 5.5
 const MARK_LIFETIME := 25.0
 const SCORCH_SIZE_MIN := 2.55
 const SCORCH_SIZE_MAX := 4.05
 const EXPLOSION_V1 := preload("res://game/features/combat/grenade_explosion_v1.tscn")
-static var scorch_texture: Texture2D
 
 
 ## True when a static wall stands between a blast centre and the body.
@@ -77,13 +77,13 @@ static func explode(projectile: Node3D, location: Vector3, normal: Vector3, cont
 		if collider.has_method("apply_blast_stun") and float(collider.get("health")) > 0.0:
 			collider.call("apply_blast_stun", 3.0 + 2.0 * factor, factor)
 	if contact != null and (not contact.has_method("take_projectile_hit") or contact.has_method("get_projectile_material") and str(contact.call("get_projectile_material")) in ["concrete", "metal"]):
-		_scorch(scene, location, normal, impacts)
+		_scorch(scene, location, normal, impacts, contact as Node3D)
 	# Surrounding structural surfaces also receive small radial black marks.
 	for direction in [Vector3.DOWN, Vector3.LEFT, Vector3.RIGHT, Vector3.FORWARD, Vector3.BACK]:
 		var trace := PhysicsRayQueryParameters3D.create(location + direction * 0.08, location + direction * 2.7, 7)
 		var surface := projectile.get_world_3d().direct_space_state.intersect_ray(trace)
 		if not surface.is_empty() and not surface["collider"].has_method("take_projectile_hit"):
-			_scorch(scene, surface["position"], surface["normal"], impacts)
+			_scorch(scene, surface["position"], surface["normal"], impacts, surface["collider"] as Node3D)
 
 
 static func _distance_to_shape(collider: Object, shape_index: int, location: Vector3, fallback: Vector3) -> float:
@@ -98,29 +98,26 @@ static func _distance_to_shape(collider: Object, shape_index: int, location: Vec
 	return fallback.distance_to(location)
 
 
-static func _scorch(scene: Node3D, hit_position: Vector3, normal: Vector3, pool: Node) -> void:
+static func _scorch(scene: Node3D, hit_position: Vector3, normal: Vector3, pool: Node, collider: Node3D = null) -> void:
 	if normal.length_squared() < 0.1:
 		return
-	if scorch_texture == null:
-		var image := Image.create(64, 64, false, Image.FORMAT_RGBA8)
-		for y in 64:
-			for x in 64:
-				var radius := Vector2(x - 32, y - 32).length() / 32.0
-				image.set_pixel(x, y, Color(0.035, 0.028, 0.023, pow(maxf(0.0, 1.0 - radius), 1.6) * 0.88))
-		scorch_texture = ImageTexture.create_from_image(image)
+	var anchor := scene
+	if collider != null and pool != null:
+		var surface: Dictionary = pool.call("resolve_surface", collider, hit_position, -normal)
+		if not surface.is_empty():
+			hit_position = surface["position"]
+			normal = surface["normal"]
+			anchor = surface["anchor"]
 	var mark := MeshInstance3D.new()
 	var quad := QuadMesh.new()
 	quad.size = Vector2.ONE * randf_range(SCORCH_SIZE_MIN, SCORCH_SIZE_MAX)
-	var material := StandardMaterial3D.new()
-	material.albedo_texture = scorch_texture
-	material.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
-	material.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
-	material.cull_mode = BaseMaterial3D.CULL_DISABLED
-	material.render_priority = 1
+	var material := SURFACE_ATLASES.material(SURFACE_ATLASES.BULLET, randi_range(5, 7))
 	quad.material = material
 	mark.mesh = quad
-	scene.add_child(mark)
-	mark.global_position = hit_position + normal * 0.023
+	mark.set_meta("surface_mark", true)
+	mark.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+	anchor.add_child(mark)
+	mark.global_position = hit_position + normal * 0.0015
 	mark.global_basis = Basis.looking_at(-normal, Vector3.FORWARD if absf(normal.y) > 0.9 else Vector3.UP)
 	if pool != null and pool.has_method("register_mark"):
 		pool.call("register_mark", mark)

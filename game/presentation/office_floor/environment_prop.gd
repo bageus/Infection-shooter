@@ -14,7 +14,54 @@ const BOOK_STACK = preload("res://game/presentation/office_floor/book_stack_brea
 const EXTINGUISHER_FX = preload("res://game/presentation/office_floor/extinguisher_hit_fx.tscn")
 const HIT_REACTION = preload("res://game/presentation/office_floor/prop_hit_reaction.gd")
 
+const DISPLAY_VIEW := preload("res://game/presentation/office_floor/display_view.gd")
+const DISPLAY_PROFILES := preload("res://game/presentation/office_floor/display_surface_profiles.gd")
+
 @export_file("*.glb") var model_path := ""
+@export_enum("on", "off", "auto") var display_power := "auto"
+@export_enum("static", "dynamic") var display_content := "static"
+@export var display_seed := 0
+var _display: Node3D
+var _display_wall: Node
+
+
+func has_display() -> bool:
+	return model_path.get_file() in DISPLAY_PROFILES.MODELS
+
+
+func configure_display(config: Dictionary) -> void:
+	var power := str(config.get("power", "auto"))
+	var content_type := str(config.get("content", "static"))
+	display_power = power if power in ["on", "off", "auto"] else "auto"
+	display_content = content_type if content_type in ["static", "dynamic"] else "static"
+	if "wall_TV" in model_path.get_file():
+		display_content = "dynamic"
+	display_seed = clampi(int(config.get("seed", display_seed)), 0, 2147483646)
+	if is_instance_valid(_display):
+		_display.call("configure", get_display_config())
+
+
+func get_display_config() -> Dictionary:
+	if display_seed == 0:
+		display_seed = randi_range(1, 2147483646)
+	return {"power": display_power, "content": "dynamic" if "wall_TV" in model_path.get_file() else display_content,
+		"seed": display_seed}
+
+
+func configure_displays(wall: Node) -> void:
+	_display_wall = wall
+	if is_instance_valid(_display):
+		_display.call("set_registry", wall)
+
+
+func _setup_display() -> void:
+	if not has_display():
+		return
+	_display = DISPLAY_VIEW.new()
+	_display.name = "Display"
+	_visual.add_child(_display)
+	_display.call("setup", self, model_path, get_display_config(), _display_wall)
+
 
 var _visual: Node3D
 var _intact: Node3D
@@ -70,6 +117,9 @@ func _ready() -> void:
 	if visual == null:
 		return
 	visual.name = "Visual"
+	if "wall_TV" in model_path.get_file():
+		# Authored televisions lie in XZ; wall placement expects a +Z front.
+		visual.rotation.x = PI / 2.0
 	add_child(visual)
 	_visual = visual
 	_reaction.setup(self, visual)
@@ -97,6 +147,7 @@ func _ready() -> void:
 		shadow.configure(visual)
 		return # Carpet lies on the level floor and must not create a raised obstacle.
 	var volume := _add_shapes(visual)
+	_setup_display()
 	if model_path.get_file() == "06_conference_chair.glb" and global_position.y < 0.25:
 		var lowest := INF
 		for mesh in _shape_meshes:
@@ -234,6 +285,8 @@ func take_projectile_hit(damage: float, hit_position: Vector3, _normal: Vector3,
 			SPARKS.spawn(self, hit_position)
 		else:
 			_short_circuited = true
+			if is_instance_valid(_display):
+				_display.call("disable")
 			SPARKS.short_circuit(self, hit_position, _normal)
 	if model_path.get_file() == "02_water_cooler_bottle.glb":
 		if not freeze:

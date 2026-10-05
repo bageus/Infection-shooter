@@ -49,7 +49,9 @@ func activate() -> void:
 	_visual.multimesh = _build_puffs(randi_range(puff_count_range.x, puff_count_range.y), shade)
 	_visual.material_override = _cloud_material(walls, false)
 	_haze.multimesh = _build_haze(shade)
-	_haze.material_override = _cloud_material(walls, true)
+	_haze.material_override = _cloud_material(walls, false)
+	(_haze.material_override as ShaderMaterial).set_shader_parameter("opacity", .18)
+	(_haze.material_override as ShaderMaterial).set_shader_parameter("vein_glow", .1)
 	for layer in [_visual, _haze]:
 		layer.set_instance_shader_parameter("phase", phase)
 		layer.set_instance_shader_parameter("progress", 0.0)
@@ -144,12 +146,16 @@ func _build_puffs(count: int, shade: float) -> MultiMesh:
 	return multimesh
 
 
-# A wide, faint layer of gas creeping over the floor under the cloud.
+# Faint low billboards mix into the cloud; no flat floor image/reflection.
 func _build_haze(shade: float) -> MultiMesh:
-	var multimesh := _multimesh(1)
-	multimesh.set_instance_transform(0, Transform3D(Basis.from_scale(Vector3.ONE * cloud_radius * 3.4), Vector3(0, 0.06, 0)))
-	multimesh.set_instance_custom_data(0, Color(float(randi() % 12) / 12.0, randf(), randf_range(-0.06, 0.06), 0.0))
-	multimesh.set_instance_color(0, Color(EMERALD.lerp(TOXIC, shade) * 0.8, 0.5))
+	var multimesh := _multimesh(3)
+	for i in range(3):
+		var angle := float(i) * TAU / 3.0 + randf_range(-.3, .3)
+		var origin := Vector3(cos(angle) * .45, randf_range(.25, .45), sin(angle) * .45)
+		var size := randf_range(.9, 1.3)
+		multimesh.set_instance_transform(i, Transform3D(Basis.from_scale(Vector3.ONE * size), origin))
+		multimesh.set_instance_custom_data(i, Color(float(randi() % 12) / 12.0, randf(), randf_range(-.03, .03), .1 * i))
+		multimesh.set_instance_color(i, Color(EMERALD.lerp(TOXIC, shade) * .8, .5))
 	return multimesh
 
 

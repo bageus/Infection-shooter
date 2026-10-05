@@ -1,4 +1,6 @@
 extends CharacterBody3D
+const CHASE_ROUTE := preload("res://game/features/infected/chase_route.gd")
+var _route := CHASE_ROUTE.new()
 
 const DROP_TABLE_SCRIPT := preload("res://game/features/pickups/public/drop_table.gd")
 const BODY_PARTS := preload("res://game/features/infected/body_parts.gd")
@@ -299,12 +301,18 @@ func _desired_velocity_from_offset(offset: Vector3) -> Vector3:
 	var distance := offset.length()
 	if distance > 0.0001:
 		_face_direction = offset / distance
-	if distance <= attack_range:
-		_try_attack()
-		return Vector3.ZERO
 	if distance <= 0.0001:
 		return Vector3.ZERO
-	return _face_direction * _chase_speed(distance)
+	var radius := .35
+	if collision_shape != null and collision_shape.shape is CapsuleShape3D:
+		radius = (collision_shape.shape as CapsuleShape3D).radius * global_basis.x.length()
+	var route_direction: Vector3 = _route.direction(self, _target, radius)
+	if distance <= attack_range and _route.direct_clear():
+		_try_attack()
+		return Vector3.ZERO
+	if not route_direction.is_zero_approx():
+		_face_direction = route_direction
+	return route_direction * _chase_speed(distance)
 
 
 func _chase_speed(distance: float) -> float:

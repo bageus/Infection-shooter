@@ -39,11 +39,16 @@ func _run() -> void:
 	menu.activate("settings")
 	await process_frame
 	var modal: Control = menu.modal
-	var dialog_buttons := modal.find_children("*", "Button", true, false)
-	_check(not dialog_buttons.is_empty(), "Settings exposes hover-enabled buttons")
-	if not dialog_buttons.is_empty():
-		dialog_buttons[0].mouse_entered.emit()
-		_check(_count(menu, &"menu_hover") > 0, "Dialog hover uses the same menu cue")
+	var before := _count(menu, &"menu_hover")
+	for widget in modal.find_children("*", "Control", true, false):
+		if not widget is CheckButton:
+			widget.mouse_entered.emit()
+	_check(_count(menu, &"menu_hover") == before, "Settings buttons, sliders and choices are silent on hover")
+	var toggles := modal.find_children("*", "CheckButton", true, false)
+	_check(toggles.size() == 1, "Settings has one sound toggle")
+	if not toggles.is_empty():
+		toggles[0].mouse_entered.emit()
+		_check(_count(menu, &"menu_hover") == before + 1, "Only the sound toggle retains hover")
 	frontend.queue_free()
 	await process_frame
 	await _test_mutation_tree()
@@ -87,8 +92,11 @@ func _test_mutation_tree() -> void:
 		_check(false, "Locked skill exposes an unlock control")
 	var disabled := _button_with_tooltip(ui.content, "Acid Spit\n")
 	if disabled != null:
+		var before := _count(ui, &"mutation_hover")
 		disabled.mouse_entered.emit()
-		_check(_count(ui, &"mutation_hover") >= 2, "Learned skill still gives hover feedback")
+		disabled.pressed.emit()
+		_check(_count(ui, &"mutation_hover") == before, "Inactive/disabled skills are silent")
+		_check(_count(ui, &"mutation_click") == 1, "Disabled skill does not play a click cue")
 	_check(AudioServer.get_bus_index(&"UI") >= 0 and AudioServer.get_bus_effect_count(AudioServer.get_bus_index(&"UI")) == 0, "UI bus is dry without room reverb")
 	for child in ui.get_children():
 		if child is AudioStreamPlayer:

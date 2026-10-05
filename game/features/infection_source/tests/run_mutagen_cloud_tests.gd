@@ -36,7 +36,7 @@ func _run() -> void:
 	_expect(spins.size() >= 1, "Puffs spin.")
 	_expect(_layout(first) != _layout(second), "Two clouds never look the same.")
 	var haze := first.get_node("GroundHaze") as MultiMeshInstance3D
-	_expect(haze.multimesh != null and haze.multimesh.instance_count == 1, "A haze creeps over the floor under the cloud.")
+	_expect(haze.multimesh != null and haze.multimesh.instance_count == 3, "Low billboards merge into the gas without a flat floor reflection.")
 	var material := (first.get_node("Visual") as GeometryInstance3D).material_override as ShaderMaterial
 	_expect(material != null and material.get_shader_parameter("atlas_a") != null and material.get_shader_parameter("atlas_b") != null, "The cloud draws from both mutagen sheets.")
 	_expect(bool(material.get_shader_parameter("wall_mask_enabled")), "Walls still clip the gas.")

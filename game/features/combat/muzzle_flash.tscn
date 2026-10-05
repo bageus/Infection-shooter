@@ -2,7 +2,7 @@
 
 [ext_resource type="Script" path="res://game/features/combat/muzzle_flash.gd" id="1_script"]
 [ext_resource type="Shader" path="res://game/features/combat/muzzle_flash.gdshader" id="2_shader"]
-[ext_resource type="Texture2D" path="res://models/objects/textures/gun_fog.png" id="3_atlas"]
+[ext_resource type="Texture2D" path="res://models/objects/textures/gun_fog/gun_fog.png" id="3_atlas"]
 
 [sub_resource type="ShaderMaterial" id="FlashMaterial"]
 shader = ExtResource("2_shader")

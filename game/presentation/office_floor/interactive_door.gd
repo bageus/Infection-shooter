@@ -24,6 +24,9 @@ var _swing_side := 0.0
 var _door_recess_nodes: Array[Node3D] = []
 var _glass_hinge: Node3D
 var _glass_hinge_closed := Transform3D.IDENTITY
+var _glass_body: StaticBody3D
+var _glass_body_closed := Transform3D.IDENTITY
+var _glass_hinge_root_closed := Transform3D.IDENTITY
 var _elevator_lights: Array[Node3D] = []
 var _fallback_leaf_collisions: Array[CollisionShape3D] = []
 var _key_hint: Label3D
@@ -112,8 +115,8 @@ func _physics_process(delta: float) -> void:
 		if glass_body != null:
 			var broken := bool(glass_body.get("_broken"))
 			for child in glass_body.get_children():
-				if child is CollisionShape3D and (child as CollisionShape3D).disabled != (broken or _open_amount >= 0.15):
-					(child as CollisionShape3D).set_deferred("disabled", broken or _open_amount >= 0.15)
+				if child is CollisionShape3D and (child as CollisionShape3D).disabled != (broken):
+					(child as CollisionShape3D).set_deferred("disabled", broken)
 	if mode == DoorMode.GLASS_SWING and _glass_hinge != null:
 		var swing_side := _swing_side
 		if swing_side == 0.0:
@@ -123,6 +126,9 @@ func _physics_process(delta: float) -> void:
 		var eased := _open_amount * _open_amount * (3.0 - 2.0 * _open_amount)
 		hinge_transform.basis = _glass_hinge_closed.basis.rotated(Vector3.UP, deg_to_rad(open_angle_degrees * swing_side * eased))
 		_glass_hinge.transform = hinge_transform
+		if is_instance_valid(_glass_body):
+			var root_space := (get_parent() as Node3D).global_transform.affine_inverse() * _glass_hinge.global_transform
+			_glass_body.transform = root_space * _glass_hinge_root_closed.affine_inverse() * _glass_body_closed
 	for recess in _door_recess_nodes:
 		if is_instance_valid(recess):
 			recess.visible = _open_amount <= 0.001
@@ -342,6 +348,10 @@ func _build_glass_hinge(visual: Node3D) -> void:
 	var hinge_local := Vector3(bounds.position.x, bounds.position.y, bounds.get_center().z)
 	_glass_hinge.position = hinge_local
 	_glass_hinge_closed = _glass_hinge.transform
+	_glass_body = get_parent().get_node_or_null("GlassBody") as StaticBody3D
+	if _glass_body != null:
+		_glass_body_closed = _glass_body.transform
+		_glass_hinge_root_closed = (get_parent() as Node3D).global_transform.affine_inverse() * _glass_hinge.global_transform
 	for wanted in ["doorglass", "doorhandle", "doortoppanel"]:
 		var part := _find_exact_named_node(visual, wanted)
 		if part != null:

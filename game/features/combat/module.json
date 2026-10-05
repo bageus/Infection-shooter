@@ -30,6 +30,10 @@
     "mission_wiring_v1": {
       "configure_world": "configure_world(container: Node3D, impacts: Node) -> void"
     },
-    "grenade_explosion_v2": "explode(projectile, location, normal, contact, container: Node3D, impacts: Node) -> void"
+    "grenade_explosion_v2": "explode(projectile, location, normal, contact, container: Node3D, impacts: Node) -> void",
+    "impact_surface_v1": {
+      "resolve_surface": "resolve_surface(collider: Node, point: Vector3, direction: Vector3) -> Dictionary {position, normal, anchor: MeshInstance3D}, empty when no visible triangle is hit",
+      "register_surface": "register_surface(collider: Node, visual: Node3D) -> void; mission-local weak reference for separately authored render roots"
+    }
   }
 }

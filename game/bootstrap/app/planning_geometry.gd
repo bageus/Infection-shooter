@@ -1,4 +1,5 @@
 extends RefCounted
+const BLOOD_PLACEMENT := preload("res://game/bootstrap/app/planning_blood_placement.gd")
 
 const GRID_SIZE = 0.25
 const SNAP_DISTANCE = 0.8
@@ -169,6 +170,8 @@ func _visual_object_at(screen_pos: Vector2) -> Node3D:
 
 
 func _screen_to_surface(screen_pos: Vector2, placing: Node3D) -> Vector3:
+	if placing != null and placing.has_method("get_blood_config"):
+		return BLOOD_PLACEMENT.probe(session, placing, screen_pos)
 	var origin = session.camera.project_ray_origin(screen_pos)
 	var end = origin + session.camera.project_ray_normal(screen_pos) * 300.0
 	var query = PhysicsRayQueryParameters3D.create(origin, end)
@@ -218,6 +221,8 @@ func _is_ceiling_tool(node: Node3D) -> bool:
 
 
 func _apply_wall_mount(node: Node3D) -> void:
+	if node.has_method("get_blood_config"):
+		return # Blood uses the exact probed surface normal.
 	if not bool(node.get_meta("planning_wall_mount", false)):
 		return
 	if not node.has_meta("planning_wall_normal"):

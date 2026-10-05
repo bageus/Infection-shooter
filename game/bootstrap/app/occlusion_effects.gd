@@ -81,7 +81,8 @@ func _process(_delta: float) -> void:
 
 func _rebuild() -> void:
 	# Changes include loaded maps, streamed geometry and newly summoned actors.
-	_clear()
+	if mode == 0:
+		_clear()
 	_collect(world)
 	_dirty = false
 	_elapsed = CHECK_INTERVAL
@@ -156,6 +157,9 @@ func _update_hole() -> void:
 	var center := camera.unproject_position(point)
 	var side := camera.unproject_position(point + camera.global_basis.x * HOLE_RADIUS)
 	var size := get_viewport().get_visible_rect().size
+	if size.x < 1.0 or size.y < 1.0 or not center.is_finite() or camera.is_position_behind(point):
+		walls.update_hole(Vector2(-10, -10), Vector2.ONE, 0.0, 0.0)
+		return
 	var depth := -(camera.global_transform.affine_inverse() * point).z
 	walls.update_hole(center / size, size, center.distance_to(side) if _hero_blocked else 0.0, depth)
 
@@ -173,3 +177,4 @@ func _exit_tree() -> void:
 		get_tree().node_added.disconnect(_scene_changed)
 		get_tree().node_removed.disconnect(_scene_changed)
 	_clear()
+
