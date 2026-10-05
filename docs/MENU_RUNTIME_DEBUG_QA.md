@@ -1,7 +1,7 @@
 # Menu and runtime debug acceptance
 
 ## Automated checks
-Godot 4.7.2 headless suites and project/resource/import/workstation/glass/scene-access gates must pass. Runtime CI also captures all four settings tabs in RU/EN at 130% and the company page. Compatibility and Forward+ run occlusion pixel checks and runtime debug movement checks.
+Godot 4.7.2: all 35 headless suites passed, with the four repaired suites rerun; final menu/settings/debug/audio/mutation suites and cold-cache debug/main smoke also passed. Project/resource/import/workstation/glass/scene-access gates passed. Initial CI 37365943743 succeeded including Compatibility and Vulkan Forward+ pixel tests; final-head CI must also pass. Runtime CI also captures all four settings tabs in RU/EN at 130% and the company page. Compatibility and Forward+ run occlusion pixel checks and runtime debug movement checks.
 
 ## Manual acceptance
 1. Main: no patient/quarantine captions; disabled Continue has small No save beside it. Company heading is centred; review the proposed military-contractor history.
@@ -13,3 +13,5 @@ Godot 4.7.2 headless suites and project/resource/import/workstation/glass/scene-
 
 ## Limits
 Headless does not prove shader pixels, target-device FPS or Windows/Web behavior. GPU CI uses software-rendered Linux. PR #25 has overlapping hole-cache files; check merge resolution if both PRs are applied.
+
+Visual review of the initial CI images confirmed four RU/EN pages at 130%, scrollable controls, fixed action buttons, the small no-save caption and centred company heading. Old master-volume/brightness captions were corrected after this review.
