@@ -60,7 +60,7 @@ func bind(action: String, event: InputEvent) -> String:
 static func from_event(event: InputEvent) -> Dictionary:
 	if event is InputEventKey:
 		var code: int = event.physical_keycode if event.physical_keycode != 0 else event.keycode
-		if event.ctrl_pressed or event.alt_pressed or event.meta_pressed or (event.shift_pressed and code != KEY_SHIFT):
+		if (event.ctrl_pressed and code != KEY_CTRL) or (event.alt_pressed and code != KEY_ALT) or (event.meta_pressed and code != KEY_META) or (event.shift_pressed and code != KEY_SHIFT):
 			return {}
 		return {"kind": "key", "code": code}
 	if event is InputEventMouseButton:

@@ -35,6 +35,12 @@ func _run() -> void:
 	editor.begin("move_up")
 	var event := InputEventKey.new()
 	event.pressed = true
+	event.physical_keycode = KEY_CTRL
+	event.ctrl_pressed = true
+	_check(not menu.preferences.bindings.from_event(event).is_empty(), "Standalone Ctrl is a bindable key")
+	event.physical_keycode = KEY_I
+	_check(menu.preferences.bindings.from_event(event).is_empty(), "Ctrl plus another key is rejected as a chord")
+	event.ctrl_pressed = false
 	event.physical_keycode = KEY_D
 	menu.call("_input", event)
 	_check(not editor.pending.is_empty(), "Conflicting assignment is rejected")
