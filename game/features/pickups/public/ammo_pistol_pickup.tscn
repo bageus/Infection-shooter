@@ -4,7 +4,7 @@
 [sub_resource type="BoxShape3D" id="PickupShape"]
 size = Vector3(1.1, 0.75, 0.8)
 
-[node name="Pickup" type="Area3D"]
+[node name="Pickup" type="Area3D" groups=["occlusion_items"]]
 script = ExtResource("2_script")
 pickup_type = 1
 amount = 30

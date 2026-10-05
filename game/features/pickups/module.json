@@ -10,5 +10,10 @@
     "public/ammo_orange_pickup.tscn",
     "public/drop_table.gd"
   ],
-  "dependencies": []
+  "dependencies": [],
+  "runtime_contracts": {
+    "occlusion_visual_v1": {
+      "occlusion_items": "Public health/ammo scene roots carry occlusion_items; render classification only."
+    }
+  }
 }

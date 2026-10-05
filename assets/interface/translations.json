@@ -82,7 +82,10 @@
     "failedHealth": "Здоровье исчерпано.",
     "failedMutation": "Мутация перехватила контроль.",
     "failedFall": "Боец упал за пределы этажа.",
-    "webQuit": "Закройте вкладку браузера, чтобы выйти."
+    "webQuit": "Закройте вкладку браузера, чтобы выйти.",
+    "occlusion": "Перекрытие объектов",
+    "occlusionSilhouettes": "Цветные силуэты",
+    "occlusionHole": "Отверстие вокруг героя"
   },
   "en": {
     "demo": "INTERACTIVE UI DEMO",
@@ -167,6 +170,9 @@
     "failedHealth": "Health depleted.",
     "failedMutation": "Mutation overtook the operator.",
     "failedFall": "The operator fell outside the floor.",
-    "webQuit": "Close the browser tab to quit."
+    "webQuit": "Close the browser tab to quit.",
+    "occlusion": "Occluded objects",
+    "occlusionSilhouettes": "Colored silhouettes",
+    "occlusionHole": "Hole around hero"
   }
 }

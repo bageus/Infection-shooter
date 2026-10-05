@@ -117,6 +117,12 @@ func _settings() -> void:
 	scale.selected = [1.0, 1.15, 1.3].find(view.preferences.values.text_scale)
 	scale.item_selected.connect(_scale_changed)
 	_row("scale", scale)
+	var occlusion := OptionButton.new()
+	occlusion.add_item(view.text("occlusionSilhouettes"))
+	occlusion.add_item(view.text("occlusionHole"))
+	occlusion.selected = view.preferences.values.occlusion_mode
+	occlusion.item_selected.connect(func(index: int) -> void: _change("occlusion_mode", index))
+	_row("occlusion", occlusion)
 	_copy("savedSettings")
 	_button("fullscreen", _fullscreen)
 	_button("defaults", _defaults)

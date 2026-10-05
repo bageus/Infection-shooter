@@ -3,7 +3,7 @@
 [ext_resource type="PackedScene" path="res://models/objects/enviroments/01/01_wall_door_without.glb" id="1_model"]
 [ext_resource type="Script" path="res://game/presentation/office_floor/mesh_collision_builder.gd" id="2_collision"]
 
-[node name="WallDoor2Without" type="Node3D"]
+[node name="WallDoor2Without" type="Node3D" groups=["camera_occluder"]]
 script = ExtResource("2_collision")
 use_simple_collision = false
 

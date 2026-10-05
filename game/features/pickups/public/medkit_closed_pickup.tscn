@@ -6,7 +6,7 @@
 [sub_resource type="SphereShape3D" id="PickupShape"]
 radius = 1.15
 
-[node name="MedkitClosedPickup" type="Area3D"]
+[node name="MedkitClosedPickup" type="Area3D" groups=["occlusion_items"]]
 script = ExtResource("2_script")
 heal_amount = 35
 collision_layer = 0

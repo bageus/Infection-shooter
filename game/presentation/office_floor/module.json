@@ -58,6 +58,9 @@
     "planner_decor_v1": {
       "configure_blood": "configure_blood(texture_id: String, surface: String) -> void; surface floor|wall",
       "get_blood_config": "get_blood_config() -> Dictionary {texture, surface}"
+    },
+    "occlusion_visual_v1": {
+      "camera_occluder": "Structural public scene roots carry camera_occluder; render classification only, not a service locator."
     }
   }
 }

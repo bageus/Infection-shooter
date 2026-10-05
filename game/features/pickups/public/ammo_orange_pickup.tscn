@@ -6,7 +6,7 @@
 [sub_resource type="SphereShape3D" id="PickupShape"]
 radius = 1.15
 
-[node name="AmmoOrangePickup" type="Area3D"]
+[node name="AmmoOrangePickup" type="Area3D" groups=["occlusion_items"]]
 script = ExtResource("2_script")
 ammo_amount = 60
 collision_layer = 0

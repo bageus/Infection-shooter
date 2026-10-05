@@ -4,15 +4,18 @@ task_id: T002
 status: IN_PROGRESS
 phase: 1
 owner: AI
-updated: 2026-10-03
+updated: 2026-10-05
 ---
 
 # Active task
+
+05.10.2026 (6): два режима перекрытия реализованы в bootstrap.app: цветные скрытые фрагменты героя/врагов/предметов и локальное отверстие радиусом 2 м. Esc → Settings → Перекрытие объектов, additive interface_v1.occlusion_mode (0/1), немедленное применение при паузе. Рендер-классификации public structural/pickup roots задокументированы occlusion_visual_v1; maps DTO прежние. Planner приостанавливает эффект, возвращает исходные overrides; live mesh/skin/skeleton копий сохраняют анимацию и расчленение. Блокеры определяются по структурным корням, generic furniture не активирует эффект; поздние spawn/remove отслеживаются, VFX не вызывают пересборку. Godot 4.7.2: все 31 runtime-наборов, main 180 кадров, повторный editor import без ERROR, validate_project и resource/import/workstation/glass/scene-access gates прошли; Compatibility и настоящий Vulkan Forward+ на llvmpipe уже подтвердили три цвета, видимые исходные цвета и локальный круг, пять восстановлений материалов, три planner cycles, persistence. QA — docs/OCCLUSION_QA.md. Ни Windows/Web export, ни FPS на целевом устройстве не подтверждены. Точное следующее действие: после завершения gates/CI обновить main и проверить оба режима в движении с реальными стенами/колоннами по QA. T002 остаётся IN_PROGRESS; исключений нет.
 
 ## Goal
 Build the first playable combat-slice foundation with an authored office floor, player, combat, infected enemies, infection source, and observable fail states.
 
 ## In scope
+- owner-requested switchable hidden-object silhouettes and localized wall/column opening (ADR-0023);
 - owner-requested further 30% Horde growth, health-based Hunger/Revenant/Brute waves without waiting for earlier kills, retired mutant model and distinct menu/skill/lock UI sounds;
 - owner-requested native integration of supplied menu kit, shared gameplay font and pause Planning mode entry;
 - owner-requested enemy/character animation wiring and destruction/debris physics improvements (ADR-0015);

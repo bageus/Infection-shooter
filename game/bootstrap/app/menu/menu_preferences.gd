@@ -2,7 +2,7 @@ extends RefCounted
 
 const FILE := "user://interface_settings.cfg"
 const DEFAULTS := {"language": "ru", "brightness": 1.0, "text_scale": 1.0,
-	"volume": 0.4, "sound": true}
+	"volume": 0.4, "sound": true, "occlusion_mode": 0}
 var values: Dictionary = DEFAULTS.duplicate()
 
 
@@ -16,6 +16,7 @@ func load_settings() -> void:
 			values[key] = value
 	values.language = "en" if values.language == "en" else "ru"
 	values.brightness = clampf(values.brightness, 0.8, 1.4)
+	values.occlusion_mode = clampi(values.occlusion_mode, 0, 1)
 	values.volume = clampf(values.volume, 0.0, 1.0)
 	if values.text_scale not in [1.0, 1.15, 1.3]:
 		values.text_scale = 1.0
@@ -45,3 +46,6 @@ func apply_to_game(tree: SceneTree) -> void:
 	if world != null and world.environment != null:
 		world.environment.adjustment_enabled = true
 		world.environment.adjustment_brightness = float(values.brightness)
+	var occlusion := scene.get_node_or_null("OcclusionEffects") if scene != null else null
+	if occlusion != null:
+		occlusion.call("set_mode", int(values.occlusion_mode))

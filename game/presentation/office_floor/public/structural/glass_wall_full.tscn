@@ -5,7 +5,7 @@
 [ext_resource type="Script" path="res://game/presentation/office_floor/glass_partition.gd" id="3_glass"]
 [ext_resource type="Script" path="res://game/presentation/office_floor/glass_collision_builder.gd" id="5_glass_collision"]
 
-[node name="GlassWallFull" type="Node3D"]
+[node name="GlassWallFull" type="Node3D" groups=["camera_occluder"]]
 script = ExtResource("2_collision")
 exclude_name_tokens = PackedStringArray("glass", "blinds")
 use_simple_collision = false
