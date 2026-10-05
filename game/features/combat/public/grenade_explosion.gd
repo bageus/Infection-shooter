@@ -1,11 +1,11 @@
 extends RefCounted
+const ATLAS := preload("res://game/core/vfx/public/surface_atlases.gd")
 
 const RADIUS := 5.5
 const MARK_LIFETIME := 25.0
 const SCORCH_SIZE_MIN := 2.55
 const SCORCH_SIZE_MAX := 4.05
 const EXPLOSION_V1 := preload("res://game/features/combat/grenade_explosion_v1.tscn")
-static var scorch_texture: Texture2D
 
 
 ## True when a static wall stands between a blast centre and the body.
@@ -101,22 +101,10 @@ static func _distance_to_shape(collider: Object, shape_index: int, location: Vec
 static func _scorch(scene: Node3D, hit_position: Vector3, normal: Vector3, pool: Node) -> void:
 	if normal.length_squared() < 0.1:
 		return
-	if scorch_texture == null:
-		var image := Image.create(64, 64, false, Image.FORMAT_RGBA8)
-		for y in 64:
-			for x in 64:
-				var radius := Vector2(x - 32, y - 32).length() / 32.0
-				image.set_pixel(x, y, Color(0.035, 0.028, 0.023, pow(maxf(0.0, 1.0 - radius), 1.6) * 0.88))
-		scorch_texture = ImageTexture.create_from_image(image)
 	var mark := MeshInstance3D.new()
 	var quad := QuadMesh.new()
 	quad.size = Vector2.ONE * randf_range(SCORCH_SIZE_MIN, SCORCH_SIZE_MAX)
-	var material := StandardMaterial3D.new()
-	material.albedo_texture = scorch_texture
-	material.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
-	material.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
-	material.cull_mode = BaseMaterial3D.CULL_DISABLED
-	material.render_priority = 1
+	var material := ATLAS.material(ATLAS.BULLET, randi_range(5, 7))
 	quad.material = material
 	mark.mesh = quad
 	scene.add_child(mark)

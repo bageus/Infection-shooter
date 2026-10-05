@@ -125,6 +125,27 @@ pickup_weapon={
 ]
 }
 
+mutation_tree={
+"deadzone": 0.5,
+"events": [Object(InputEventKey,"physical_keycode":77)]
+}
+skill_1={
+"deadzone": 0.5,
+"events": [Object(InputEventKey,"physical_keycode":52)]
+}
+skill_2={
+"deadzone": 0.5,
+"events": [Object(InputEventKey,"physical_keycode":53)]
+}
+skill_3={
+"deadzone": 0.5,
+"events": [Object(InputEventKey,"physical_keycode":54)]
+}
+skill_4={
+"deadzone": 0.5,
+"events": [Object(InputEventKey,"physical_keycode":55)]
+}
+
 [layer_names]
 
 3d_render/layer_8="Blood receivers"

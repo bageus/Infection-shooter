@@ -40,10 +40,15 @@ func _run() -> void:
 	await process_frame
 	var modal: Control = menu.modal
 	var dialog_buttons := modal.find_children("*", "Button", true, false)
-	_check(not dialog_buttons.is_empty(), "Settings exposes hover-enabled buttons")
-	if not dialog_buttons.is_empty():
-		dialog_buttons[0].mouse_entered.emit()
-		_check(_count(menu, &"menu_hover") > 0, "Dialog hover uses the same menu cue")
+	_check(not dialog_buttons.is_empty(), "Settings exposes controls")
+	var before := _count(menu, &"menu_hover")
+	for button in dialog_buttons:
+		if button.name != "SoundToggle":
+			button.mouse_entered.emit()
+	_check(_count(menu, &"menu_hover") == before, "Settings buttons are silent on hover")
+	modal.settings.tabs.current_tab = 3
+	modal.find_child("SoundToggle", true, false).mouse_entered.emit()
+	_check(_count(menu, &"menu_hover") == before + 1, "Only audio toggle has settings hover sound")
 	frontend.queue_free()
 	await process_frame
 	await _test_mutation_tree()
@@ -88,7 +93,7 @@ func _test_mutation_tree() -> void:
 	var disabled := _button_with_tooltip(ui.content, "Acid Spit\n")
 	if disabled != null:
 		disabled.mouse_entered.emit()
-		_check(_count(ui, &"mutation_hover") >= 2, "Learned skill still gives hover feedback")
+		_check(_count(ui, &"mutation_hover") == 1, "Inactive learned skill stays silent on hover")
 	_check(AudioServer.get_bus_index(&"UI") >= 0 and AudioServer.get_bus_effect_count(AudioServer.get_bus_index(&"UI")) == 0, "UI bus is dry without room reverb")
 	for child in ui.get_children():
 		if child is AudioStreamPlayer:

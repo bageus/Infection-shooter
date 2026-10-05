@@ -229,3 +229,6 @@ Bootstrap owns occlusion_mode and transient render copies/overrides, with actor,
 ## Blast screen feedback (ADR-0024)
 
 Player owns blast disorientation/audio recovery and reports typed blast_feedback_v1 facts. Bootstrap injects the public player root into a scene-local CanvasLayer that owns only the visual envelope; gameplay does not reference UI. Subscriptions disconnect on teardown. Authored damage/cover/radius and module dependency direction remain unchanged. No singleton, map schema change or policy exception.
+
+
+Bootstrap settings and runtime diagnostics: ADR-0028 owns private controls_v1 keyboard/mouse bindings, additive interface_v1.test_mutagen (default false), four tab presentation and injected read-only F3 overlay. These do not change maps, module public APIs or dependency edges.

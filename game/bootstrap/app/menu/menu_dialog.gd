@@ -1,5 +1,9 @@
 extends Control
 
+const SETTINGS := preload("res://game/bootstrap/app/menu/settings_tabs.gd")
+var settings: RefCounted
+var settings_tab := 0
+
 const STYLE := preload("res://game/bootstrap/app/menu/menu_style.gd")
 const MARK := preload("res://assets/interface/branding/vectrion_mark.svg")
 var view
@@ -29,8 +33,8 @@ func setup(owner_view: Control, dialog_kind: String) -> void:
 	panel.add_theme_stylebox_override("panel", style)
 	add_child(panel)
 	panel.set_anchors_preset(Control.PRESET_CENTER)
-	panel.offset_left = -290
-	panel.offset_right = 290
+	panel.offset_left = -350 if kind == "settings" else -290
+	panel.offset_right = 350 if kind == "settings" else 290
 	panel.offset_top = -310
 	panel.offset_bottom = 310
 	var scroll := ScrollContainer.new()
@@ -56,12 +60,15 @@ func _build() -> void:
 			logo.custom_minimum_size = Vector2(70, 70)
 			layout.add_child(logo)
 			_heading("VECTRION", false)
+			(layout.get_child(layout.get_child_count() - 1) as Label).horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 			_copy("corporation")
-			_copy("corpNote")
-			_copy("aboutNote")
+			(layout.get_child(layout.get_child_count() - 1) as Label).horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+			for index in range(1, 7):
+				_heading("corpChapter" + str(index))
+				_copy("corpHistory" + str(index))
 			_button("back", view.close_dialog)
 		"briefing":
-			_heading("patient")
+			_heading("briefingTitle")
 			for index in range(1, 4):
 				_copy("brief" + str(index), str(index) + ". ")
 			_copy("warning")
@@ -90,43 +97,22 @@ func _copy(key: String, prefix: String = "") -> void:
 
 func _button(key: String, callback: Callable) -> Button:
 	var result := STYLE.button(view.text(key), callback)
-	result.mouse_entered.connect(view.play_hover.bind(result))
+	if kind != "settings":
+		result.mouse_entered.connect(view.play_hover.bind(result))
 	layout.add_child(result)
 	return result
 
 
 func _settings() -> void:
 	_heading("settings")
-	_slider("volume", "volume", 0, 1, 0.05)
-	_slider("brightness", "brightness", 0.8, 1.4, 0.05)
-	var sound := CheckButton.new()
-	sound.text = view.text("sound")
-	sound.button_pressed = view.preferences.values.sound
-	sound.toggled.connect(func(value: bool) -> void: _change("sound", value))
-	sound.mouse_entered.connect(view.play_hover.bind(sound))
-	layout.add_child(sound)
-	var language := OptionButton.new()
-	language.add_item("Русский")
-	language.add_item("English")
-	language.selected = 1 if view.preferences.values.language == "en" else 0
-	language.item_selected.connect(_language_changed)
-	_row("language", language)
-	var scale := OptionButton.new()
-	for percent in [100, 115, 130]:
-		scale.add_item(str(percent) + "%")
-	scale.selected = [1.0, 1.15, 1.3].find(view.preferences.values.text_scale)
-	scale.item_selected.connect(_scale_changed)
-	_row("scale", scale)
-	var occlusion := OptionButton.new()
-	occlusion.add_item(view.text("occlusionSilhouettes"))
-	occlusion.add_item(view.text("occlusionHole"))
-	occlusion.selected = view.preferences.values.occlusion_mode
-	occlusion.item_selected.connect(func(index: int) -> void: _change("occlusion_mode", index))
-	_row("occlusion", occlusion)
-	_copy("savedSettings")
-	_button("fullscreen", _fullscreen)
+	settings = SETTINGS.new()
+	settings.setup(self, settings_tab)
 	_button("defaults", _defaults)
 	_button("done", view.close_dialog)
+
+
+func consume_binding_input(event: InputEvent) -> bool:
+	return settings != null and settings.controls.consume(event)
 
 
 func _slider(label_key: String, setting_key: String, minimum: float, maximum: float, step_size: float) -> void:
@@ -146,7 +132,8 @@ func _row(key: String, widget: Control) -> void:
 	var label := STYLE.label(view.text(key), 13)
 	label.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	row.add_child(label)
-	widget.mouse_entered.connect(view.play_hover.bind(widget))
+	if kind != "settings":
+		widget.mouse_entered.connect(view.play_hover.bind(widget))
 	row.add_child(widget)
 	layout.add_child(row)
 
@@ -202,7 +189,7 @@ func _focus_first() -> void:
 func _controls(parent: Node) -> Array[Control]:
 	var result: Array[Control] = []
 	for child in parent.get_children():
-		if child is Control and child.focus_mode == Control.FOCUS_ALL:
+		if child is Control and child.is_visible_in_tree() and child.focus_mode == Control.FOCUS_ALL:
 			result.append(child)
 		result.append_array(_controls(child))
 	return result
@@ -212,6 +199,8 @@ func _input(event: InputEvent) -> void:
 	if not event is InputEventKey or not event.pressed or event.echo:
 		return
 	var controls := _controls(layout)
+	if controls.is_empty():
+		return
 	var focused := get_viewport().gui_get_focus_owner()
 	if event.keycode == KEY_TAB or (event.keycode in [KEY_UP, KEY_DOWN] and focused is Button and not focused is OptionButton):
 		var reverse: bool = event.shift_pressed if event.keycode == KEY_TAB else event.keycode == KEY_UP

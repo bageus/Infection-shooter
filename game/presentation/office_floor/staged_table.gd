@@ -7,8 +7,8 @@ const BALANCE = preload("res://game/features/combat/public/projectile_balance.gd
 const DEBRIS = preload("res://game/presentation/office_floor/debris_lifecycle.gd")
 const LEG_IDS := ["Leg_BL", "Leg_BR", "Leg_FL", "Leg_FR"]
 const WOOD_MARKS := [
-	"res://models/objects/textures/Splintered Wood Fracture Decal.png",
-	"res://models/objects/textures/Flat tan wood scuff decal.png"
+	"res://models/objects/textures/wood_decals/Splintered Wood Fracture Decal.png",
+	"res://models/objects/textures/wood_decals/Flat tan wood scuff decal.png"
 ]
 
 @export var fragment_impulse := 1.8

@@ -9,10 +9,7 @@ const IMPACT_SOUNDS := {
 const PROJECTILE_VISUAL := preload("res://game/features/combat/projectile_visual.gd")
 const BALANCE = preload("res://game/features/combat/public/projectile_balance.gd")
 
-const IMPACT_TEXTURES := [
-	"res://models/objects/textures/Minimal dark bullet impact decal.png",
-	"res://models/objects/textures/Minimal transparent bullet impact decal.png"
-]
+const ATLAS := preload("res://game/core/vfx/public/surface_atlases.gd")
 
 var _direction := Vector3.ZERO
 var _shooter: CollisionObject3D
@@ -165,9 +162,8 @@ func _hit_material(collider: Object, shape_index: int) -> String:
 	return "solid"
 
 
-# Two shared decal meshes (one per texture) instead of a new quad and
-# material for every bullet hole.
-static var _decal_meshes: Array[QuadMesh] = [null, null]
+# Five shared meshes, one for each bullet cell of the 4x2 atlas.
+static var _decal_meshes: Array[QuadMesh] = [null, null, null, null, null]
 
 
 static func _decal_mesh(texture_index: int, pool: Node) -> QuadMesh:
@@ -175,12 +171,7 @@ static func _decal_mesh(texture_index: int, pool: Node) -> QuadMesh:
 		return _decal_meshes[texture_index]
 	var quad := QuadMesh.new()
 	quad.size = Vector2.ONE * (0.5 if texture_index == 1 else 0.3)
-	var material := StandardMaterial3D.new()
-	material.albedo_texture = pool.call("texture_for", IMPACT_TEXTURES[texture_index]) as Texture2D
-	material.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
-	material.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
-	material.cull_mode = BaseMaterial3D.CULL_DISABLED
-	material.render_priority = 1
+	var material := ATLAS.material(ATLAS.BULLET, texture_index)
 	quad.material = material
 	_decal_meshes[texture_index] = quad
 	return quad
@@ -192,7 +183,7 @@ func _spawn_impact_decal(collider: Object, hit_position: Vector3, normal: Vector
 	if not is_instance_valid(effects_root) or not is_instance_valid(impact_pool):
 		return
 	var mark := MeshInstance3D.new()
-	var texture_index := 1 if randi() % 4 == 0 else 0
+	var texture_index := randi_range(0, 4)
 	var pool := impact_pool
 	mark.mesh = _decal_mesh(texture_index, pool)
 	mark.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
