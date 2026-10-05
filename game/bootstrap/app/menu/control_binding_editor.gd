@@ -54,7 +54,7 @@ func consume(event: InputEvent) -> bool:
 		notice.text = dialog.view.text("bindingConflict") + dialog.view.text("bind_" + error) if error in BINDINGS.ACTIONS else dialog.view.text(error)
 		return true
 	pending = ""
-	dialog.view.preferences.bindings.apply()
+	dialog.view.preferences.apply_to_game(dialog.get_tree())
 	notice.text = "" if dialog.view.preferences.save_settings() == OK else dialog.view.text("storeUnavailable")
 	refresh()
 	return true

@@ -93,6 +93,11 @@ func _ready() -> void:
 			enemy.call("set_target", player)
 
 
+func refresh_control_labels() -> void:
+	if mutation_tree_ui != null:
+		mutation_tree_ui.call("_refresh")
+
+
 func set_test_mutagen_enabled(enabled: bool) -> void:
 	var existing := gameplay.get_node_or_null("PermanentTestMutagen")
 	if existing != null:

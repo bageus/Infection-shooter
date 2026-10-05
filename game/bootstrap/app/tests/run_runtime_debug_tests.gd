@@ -26,12 +26,29 @@ func _run() -> void:
 	_check(effects.mode == 1, "Saved hole mode applies at launch")
 	_check(app.gameplay.get_node_or_null("PermanentTestMutagen") == null, "Normal launch has no infectious test cloud")
 	var start: Vector3 = hero.global_position
+	var blocker := StaticBody3D.new()
+	blocker.add_to_group("camera_occluder")
+	var mesh := MeshInstance3D.new()
+	var box := BoxMesh.new()
+	box.size = Vector3(20, 20, .4)
+	mesh.mesh = box
+	mesh.material_override = StandardMaterial3D.new()
+	blocker.add_child(mesh)
+	var collision := CollisionShape3D.new()
+	var shape := BoxShape3D.new()
+	shape.size = box.size
+	collision.shape = shape
+	blocker.add_child(collision)
+	app.add_child(blocker)
+	blocker.global_position = effects.camera.global_position.lerp(start + Vector3.UP * .8, .5)
+	blocker.global_basis = effects.camera.global_basis
 	for frame in 150:
 		# Move through different camera occlusion positions without combat exposure.
 		hero.global_position = start + Vector3(sin(frame * .08) * 2.0, 0, cos(frame * .08))
 		await physics_frame
 		await process_frame
 	_check(is_zero_approx(float(runtime.call("get_mutation"))) and not runtime.call("is_control_lost"), "Hole rendering does not infect or remove player control")
+	_check(effects._hero_blocked and effects.walls.records.has(mesh.get_instance_id()), "Moving player is behind a real installed structural blocker")
 	_check(effects.walls.pending.is_empty(), "Wall installation queue drains during movement")
 	var variants: Array = effects.walls.active_materials.duplicate()
 	var late := Node3D.new()
@@ -50,6 +67,19 @@ func _run() -> void:
 	debug.call("_unhandled_key_input", key)
 	_check(debug.label.visible and debug.label.text.contains("Mutation"), "F3 shows runtime diagnostics")
 	_check(float(runtime.call("get_mutation")) == mutation_before, "Diagnostics are read-only")
+	var mouse := InputEventMouseButton.new()
+	mouse.pressed = true
+	mouse.button_index = MOUSE_BUTTON_RIGHT
+	_check(prefs.bindings.bind("mutation_tree", mouse).is_empty(), "Mutation tree can use a mouse binding")
+	prefs.apply_to_game(self)
+	var ui: Node = app.mutation_tree_ui
+	ui.call("_unhandled_input", mouse)
+	_check(ui.call("is_tree_open"), "Rebound mouse event opens the actual mutation UI")
+	ui.call("close_tree")
+	var visible_binding := false
+	for button in ui.hotbar.get_children():
+		visible_binding = visible_binding or button.text == "Mutations [RMB]"
+	_check(visible_binding, "HUD reflects the edited binding immediately")
 	app.set_test_mutagen_enabled(true)
 	var cloud: Node = app.gameplay.get_node("PermanentTestMutagen")
 	_check(cloud.is_physics_processing() and cloud.visible, "Test cloud requires explicit opt-in")

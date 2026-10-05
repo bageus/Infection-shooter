@@ -49,6 +49,8 @@ func apply_to_game(tree: SceneTree) -> void:
 		AudioServer.set_bus_mute(master, not bool(values.sound))
 		AudioServer.set_bus_volume_db(master, linear_to_db(clampf(float(values.volume) / float(DEFAULTS.volume), 0.0001, 2.0)))
 	var scene := tree.current_scene if tree != null else null
+	if scene != null and scene.has_method("refresh_control_labels"):
+		scene.call("refresh_control_labels")
 	var world := scene.get_node_or_null("WorldEnvironment") as WorldEnvironment if scene != null else null
 	if world != null and world.environment != null:
 		world.environment.adjustment_enabled = true
