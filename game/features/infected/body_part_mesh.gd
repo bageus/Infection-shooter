@@ -45,7 +45,8 @@ static func prepare(mesh_instance: MeshInstance3D, skeleton: Skeleton3D) -> Dict
 		if format & Mesh.ARRAY_FLAG_USE_8_BONE_WEIGHTS:
 			flags |= Mesh.ARRAY_FLAG_USE_8_BONE_WEIGHTS
 		converted.add_surface_from_arrays(Mesh.PRIMITIVE_TRIANGLES, arrays, [], {}, flags)
-		converted.surface_set_material(surface, source.surface_get_material(surface))
+		var source_material := mesh_instance.get_active_material(surface)
+		converted.surface_set_material(surface, source_material if source_material != null else StandardMaterial3D.new())
 		var bones: PackedInt32Array = arrays[Mesh.ARRAY_BONES] if arrays[Mesh.ARRAY_BONES] != null else PackedInt32Array()
 		var mapped := PackedInt32Array()
 		mapped.resize(bones.size())
@@ -194,7 +195,7 @@ static func build_piece(data: Dictionary, chain: PackedInt32Array, skeleton: Ske
 		if bones.is_empty():
 			continue
 		var member_corners := _member_triangles(data, chain, surface_index)
-		var remap := {}
+		var index_map := {}
 		var positions := PackedVector3Array()
 		var normals := PackedVector3Array()
 		var uvs := PackedVector2Array()
@@ -203,14 +204,14 @@ static func build_piece(data: Dictionary, chain: PackedInt32Array, skeleton: Ske
 		var source_normals: PackedVector3Array = surface.normals
 		var source_uvs: PackedVector2Array = surface.uvs
 		for corner in member_corners:
-			if not remap.has(corner):
-				remap[corner] = positions.size()
+			if not index_map.has(corner):
+				index_map[corner] = positions.size()
 				var transform := _blend(skinning, bones, weights, stride, corner)
 				positions.append(transform * vertices[corner])
 				normals.append((transform.basis * (source_normals[corner] if not source_normals.is_empty() else Vector3.UP)).normalized())
 				uvs.append(source_uvs[corner] if not source_uvs.is_empty() else Vector2.ZERO)
 				rest.append_array([vertices[corner].x, vertices[corner].y, vertices[corner].z, 1.0])
-			out_indices.append(int(remap[corner]))
+			out_indices.append(int(index_map[corner]))
 		if out_indices.is_empty():
 			continue
 		all_points.append_array(positions)
@@ -237,7 +238,7 @@ static func build_piece(data: Dictionary, chain: PackedInt32Array, skeleton: Ske
 		if entry.material != null:
 			mesh.surface_set_material(mesh.get_surface_count() - 1, entry.material)
 	var hull := PackedVector3Array()
-	var step := maxi(1, all_points.size() / 48)
+	var step := maxi(1, floori(all_points.size() / 48.0))
 	for index in range(0, all_points.size(), step):
 		hull.append(all_points[index] - center)
 	return {"mesh": mesh, "center": center, "points": hull}

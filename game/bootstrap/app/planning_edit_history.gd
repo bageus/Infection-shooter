@@ -11,6 +11,7 @@ func record_transform(node: Node3D) -> void:
 	_record({"kind": "transform", "node": weakref(node), "transform": node.transform, "scale": node.scale,
 		"display": node.call("get_display_config") if node.has_method("has_display") and node.call("has_display") else {},
 		"blood": node.call("get_blood_config") if node.has_method("get_blood_config") else {},
+		"decor_pose": node.call("get_decor_pose") if node.has_method("get_decor_pose") else {},
 		"fixture": node.call("get_fixture_config") if node.has_method("get_fixture_config") else {},
 		"light_color": node.call("get_authored_color") if node.has_method("get_authored_color") else null,
 		"light_energy": node.get_meta("planning_light_energy", -1.0), "light_angle": node.get_meta("planning_light_angle", -1.0)})
@@ -115,6 +116,7 @@ func _capture(node: Node3D) -> Dictionary:
 		"blood_attachment": node.call("get_blood_attachment") if node.has_method("get_blood_attachment") else {},
 		"zone": int(node.get_meta("planning_zone", -1)), "light_energy": float(node.get_meta("planning_light_energy", -1.0)),
 		"display": node.call("get_display_config") if node.has_method("has_display") and node.call("has_display") else {},
+		"decor_pose": node.call("get_decor_pose") if node.has_method("get_decor_pose") else {},
 		"fixture": node.call("get_fixture_config") if node.has_method("get_fixture_config") else {},
 		"light_color": node.call("get_authored_color") if node.has_method("get_authored_color") else null,
 		"energy_multiplier": float(node.get("energy_multiplier")) if node.has_method("get_authored_energy") else 0.65,
@@ -130,6 +132,8 @@ func _restore(record: Dictionary, offset: Vector3, new_desk: bool) -> Node3D:
 	var node := planner._instantiate_asset(path) as Node3D
 	if node == null:
 		return null
+	if node.has_method("configure_decor_pose") and not (record.get("decor_pose", {}) as Dictionary).is_empty():
+		node.call("configure_decor_pose", record["decor_pose"])
 	if not (record.get("display", {}) as Dictionary).is_empty() and node.has_method("configure_display"):
 		node.call("configure_display", record["display"])
 	var blood: Dictionary = record.get("blood", {})

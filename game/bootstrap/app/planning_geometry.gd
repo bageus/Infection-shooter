@@ -1,6 +1,7 @@
 extends RefCounted
 const BLOOD_PLACEMENT := preload("res://game/bootstrap/app/planning_blood_placement.gd")
 
+const SURFACE_PLACEMENT := preload("res://game/bootstrap/app/planning_surface_placement.gd")
 const GRID_SIZE = 0.25
 const SNAP_DISTANCE = 0.8
 const FLOOR_WALL_SNAP = preload("res://game/bootstrap/app/floor_wall_snap.gd")
@@ -182,7 +183,6 @@ func _screen_to_surface(screen_pos: Vector2, placing: Node3D) -> Vector3:
 		var point: Vector3 = hit.get("position")
 		var normal: Vector3 = hit.get("normal")
 		if placing != null and bool(placing.get_meta("planning_wall_mount", false)) and absf(normal.y) < 0.35:
-			point += normal * 0.025
 			placing.set_meta("planning_wall_normal", normal)
 			return point
 		if placing != null and bool(placing.get_meta("planning_wall_mount", false)):
@@ -228,8 +228,7 @@ func _apply_wall_mount(node: Node3D) -> void:
 	if not node.has_meta("planning_wall_normal"):
 		return
 	var normal: Vector3 = node.get_meta("planning_wall_normal")
-	var facing = atan2(normal.x, normal.z)
-	node.rotation.y = facing
+	SURFACE_PLACEMENT.mount(node, _combined_aabb(node), normal)
 
 
 func _snap_position_for(node: Node3D, value: Vector3) -> Vector3:
@@ -242,8 +241,8 @@ func _snap_position_for(node: Node3D, value: Vector3) -> Vector3:
 	else:
 		var support_y = _support_height_at(node, base)
 		if value.y > 0.01:
-			support_y = maxf(support_y, value.y - source_aabb.position.y)
-		base.y = support_y - source_aabb.position.y
+			support_y = maxf(support_y, value.y)
+		base.y = SURFACE_PLACEMENT.ground_height(node, source_aabb, support_y)
 	if source_aabb.size.length_squared() <= 0.0001:
 		return base
 	var source_sockets = _connection_sockets(node, base, source_aabb)
@@ -269,7 +268,7 @@ func _snap_position_for(node: Node3D, value: Vector3) -> Vector3:
 
 
 func _support_height_at(node: Node3D, base: Vector3) -> float:
-	var best_height = 0.0
+	var best_height = SURFACE_PLACEMENT.BASE_FLOOR_TOP
 	var node_aabb = _combined_aabb(node)
 	var node_half = Vector2(node_aabb.size.x * 0.5, node_aabb.size.z * 0.5)
 	for other in objects.placed:
@@ -308,6 +307,10 @@ func _connection_sockets(node: Node3D, world_origin: Vector3, aabb: AABB) -> Arr
 
 
 func _combined_aabb(node: Node3D, ignore_selection: bool = false) -> AABB:
+	if node.has_method("get_planner_bounds"):
+		var posed: AABB = node.call("get_planner_bounds")
+		if posed.size.length_squared() > .0001:
+			return posed
 	var result = AABB()
 	var found = false
 	for child in node.find_children("*", "MeshInstance3D", true, false):
@@ -342,3 +345,12 @@ func _set_preview_collision(node: Node, disabled: bool) -> void:
 		(node as CollisionShape3D).disabled = disabled
 	for child in node.get_children():
 		_set_preview_collision(child, disabled)
+
+
+func _restore_floor_surface(node: Node3D, scene_path: String) -> void:
+	if not scene_path.get_file().begins_with("01_floor_"):
+		return
+	var bounds := node.global_transform * _combined_aabb(node)
+	var top := SURFACE_PLACEMENT.BASE_FLOOR_TOP + SURFACE_PLACEMENT.CLEARANCE
+	if bounds.position.y < top:
+		node.global_position.y += top - bounds.position.y

@@ -1,4 +1,6 @@
 extends RefCounted
+const NOTICES := preload("res://game/bootstrap/app/menu/settings_notices.gd")
+var notices := NOTICES.new()
 const EDITOR := preload("res://game/bootstrap/app/menu/control_binding_editor.gd")
 var dialog: Control
 var tabs: TabContainer
@@ -9,11 +11,13 @@ func setup(owner_dialog: Control, selected_tab: int) -> void:
 	dialog = owner_dialog
 	tabs = TabContainer.new()
 	tabs.name = "SettingsTabs"
-	tabs.custom_minimum_size = Vector2(530, 390)
+	tabs.custom_minimum_size = Vector2(530, 280)
 	tabs.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	tabs.size_flags_vertical = Control.SIZE_EXPAND_FILL
 	tabs.tab_alignment = TabBar.ALIGNMENT_CENTER
 	var outer: VBoxContainer = dialog.get("layout")
 	outer.add_child(tabs)
+	notices.setup(dialog, tabs)
 	for index in 4:
 		var page := ScrollContainer.new()
 		page.name = ["General", "Controls", "Video", "Audio"][index]
@@ -21,10 +25,14 @@ func setup(owner_dialog: Control, selected_tab: int) -> void:
 		page.follow_focus = true
 		tabs.add_child(page)
 		tabs.set_tab_title(index, dialog.view.text(["tabGeneral", "tabControls", "tabVideo", "tabAudio"][index]))
+		var margin := MarginContainer.new()
+		margin.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		margin.add_theme_constant_override("margin_top", 20)
+		page.add_child(margin)
 		var box := VBoxContainer.new()
 		box.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 		box.add_theme_constant_override("separation", 12)
-		page.add_child(box)
+		margin.add_child(box)
 		dialog.set("layout", box)
 		match index:
 			0: _general()
@@ -57,7 +65,7 @@ func _general() -> void:
 	cloud.button_pressed = dialog.view.preferences.values.test_mutagen
 	cloud.toggled.connect(func(value: bool) -> void: dialog.call("_change", "test_mutagen", value))
 	dialog.get("layout").add_child(cloud)
-	dialog.call("_copy", "testMutagenHint")
+	notices.set_notice(0, dialog.view.text("testMutagenHint"))
 
 
 func _video() -> void:
@@ -81,6 +89,8 @@ func _video() -> void:
 
 func _audio() -> void:
 	dialog.call("_slider", "volume", "volume", 0, 1, .05)
+	dialog.call("_slider", "effectsVolume", "effects_volume", 0, 1, .05)
+	dialog.call("_slider", "musicVolume", "music_volume", 0, 1, .05)
 	var sound := CheckButton.new()
 	sound.name = "SoundToggle"
 	sound.text = dialog.view.text("sound")

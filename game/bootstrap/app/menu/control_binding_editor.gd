@@ -3,21 +3,17 @@ const BINDINGS := preload("res://game/bootstrap/app/menu/control_bindings.gd")
 var dialog: Control
 var pending := ""
 var buttons: Dictionary = {}
-var notice: Label
 
 
 func setup(owner_dialog: Control) -> void:
 	dialog = owner_dialog
-	dialog.call("_copy", "bindingHint")
+	dialog.settings.notices.set_notice(1, dialog.view.text("bindingHint"))
 	for action in BINDINGS.ACTIONS:
 		var button := Button.new()
 		button.custom_minimum_size.x = 130
 		buttons[action] = button
 		button.pressed.connect(begin.bind(action))
 		dialog.call("_row", "bind_" + action, button)
-	notice = Label.new()
-	notice.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-	dialog.get("layout").add_child(notice)
 	refresh()
 
 
@@ -31,7 +27,7 @@ func begin(action: String) -> void:
 	cancel()
 	pending = action
 	buttons[action].text = dialog.view.text("bindingWaiting")
-	notice.text = dialog.view.text("bindingHint")
+	dialog.settings.notices.set_notice(1, dialog.view.text("bindingHint"))
 
 
 func cancel() -> void:
@@ -51,10 +47,10 @@ func consume(event: InputEvent) -> bool:
 		return true
 	var error: String = dialog.view.preferences.bindings.bind(pending, event)
 	if not error.is_empty():
-		notice.text = dialog.view.text("bindingConflict") + dialog.view.text("bind_" + error) if error in BINDINGS.ACTIONS else dialog.view.text(error)
+		dialog.settings.notices.set_notice(1, dialog.view.text("bindingConflict") + dialog.view.text("bind_" + error) if error in BINDINGS.ACTIONS else dialog.view.text(error))
 		return true
 	pending = ""
 	dialog.view.preferences.apply_to_game(dialog.get_tree())
-	notice.text = "" if dialog.view.preferences.save_settings() == OK else dialog.view.text("storeUnavailable")
+	dialog.settings.notices.set_notice(1, dialog.view.text("bindingHint") if dialog.view.preferences.save_settings() == OK else dialog.view.text("storeUnavailable"))
 	refresh()
 	return true

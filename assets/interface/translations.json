@@ -131,7 +131,9 @@
     "corpChapter6": "Карантин",
     "corpHistory6": "Теперь штаб-квартира находится под карантином. Причина первоначального нарушения пока не установлена: документы фрагментарны, каналы связи обрываются, а сведения из разных зон противоречат друг другу. Известен результат — опасные изменения вышли за пределы контролируемых испытаний. Помещения, предназначенные для работы и исследования, стали средой распространения заражения; часть людей превратилась в угрозу для остальных.\n\nАвтоматика продолжает выполнять свои инструкции. На экранах сменяются рабочие таблицы, схемы исследований и корпоративные заставки, словно обычный рабочий день ещё не закончился. Но за этой привычной оболочкой прежний порядок уже разрушен. Герой оказывается внутри комплекса, где средства защиты, антидоты и сами мутации могут помочь выжить — и одновременно приблизить момент потери контроля.\n\nVECTRION появилась, чтобы дать человеку преимущество перед биологической угрозой. Её нынешнее состояние ставит другой вопрос: кто останется хозяином этого преимущества, если изменённое тело больше не подчиняется человеку? Ответ скрыт в комплексе, из которого теперь нужно выбраться.",
     "testMutagen": "Тестовое облако мутагена",
-    "testMutagenHint": "Создаёт заражающее облако у точки появления. По умолчанию выключено. F3 показывает состояние мутации и производительность."
+    "testMutagenHint": "Создаёт заражающее облако у точки появления. По умолчанию выключено. F3 показывает состояние мутации и производительность.",
+    "effectsVolume": "Громкость эффектов",
+    "musicVolume": "Громкость музыки"
   },
   "en": {
     "demo": "INTERACTIVE UI DEMO",
@@ -265,6 +267,8 @@
     "corpChapter6": "Quarantine",
     "corpHistory6": "Headquarters is now under quarantine. The initial breach has not been established: records are fragmented, communications fail and reports from different sectors contradict one another. The result is clear. Dangerous changes have escaped controlled trials. Workspaces and research facilities have become routes for infection, and some personnel have become a threat to everyone else.\n\nAutomation still follows its instructions. Screens cycle through tables, research diagrams and corporate screensavers as though the working day never ended. Behind that familiar appearance, the old order has collapsed. The protagonist is trapped in a complex where protective equipment, antidotes and mutations may enable survival while bringing the loss of control closer.\n\nVECTRION was founded to give humanity an advantage over biological danger. Its present condition poses a different question: who controls that advantage when an altered body no longer obeys its owner? The answer lies inside the complex from which escape is now essential.",
     "testMutagen": "Test mutagen cloud",
-    "testMutagenHint": "Creates an infectious cloud at the spawn point. Disabled by default. F3 shows mutation and performance diagnostics."
+    "testMutagenHint": "Creates an infectious cloud at the spawn point. Disabled by default. F3 shows mutation and performance diagnostics.",
+    "effectsVolume": "Effects volume",
+    "musicVolume": "Music volume"
   }
 }

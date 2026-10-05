@@ -30,6 +30,10 @@ func _capture() -> void:
 			await process_frame
 			await RenderingServer.frame_post_draw
 			root.get_texture().get_image().save_png("/tmp/menu_previews/settings_%s_%d.png" % [language, tab])
+		menu.modal.settings.notices._show(1)
+		await process_frame
+		await RenderingServer.frame_post_draw
+		root.get_texture().get_image().save_png("/tmp/menu_previews/settings_notice_%s.png" % language)
 		menu.call("close_dialog")
 	menu.preferences.values.language = "ru"
 	menu.call("activate", "about")
@@ -69,5 +73,12 @@ func _capture() -> void:
 	await process_frame
 	await RenderingServer.frame_post_draw
 	root.get_texture().get_image().save_png("/tmp/menu_previews/planner_fixture.png")
+	planner.controls.selected_light_color.get_popup().popup()
+	await process_frame
+	await process_frame
+	await RenderingServer.frame_post_draw
+	root.get_texture().get_image().save_png("/tmp/menu_previews/planner_color_picker.png")
+	game.free()
+	await process_frame
 	quit()
 

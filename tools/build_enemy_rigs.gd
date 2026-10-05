@@ -9,8 +9,6 @@ extends SceneTree
 ##   <Name>_rig_mesh.res  skinned copy of <Name>_game.res (4 weights/vertex)
 ##   <Name>_anims.res     AnimationLibrary (Idle, Walk, Run, attacks, Death, extras)
 ##   <Name>_rig.tscn      Visual > Skeleton3D > Mesh + AnimationPlayer
-## The zombie GLB skeleton gets a new Zombie_anims.res; its
-## scene passes it to the shared animation driver. Source models stay unchanged.
 
 const AUTHOR := preload("res://tools/enemy_animation_author.gd")
 const HORDE_AUTHOR := preload("res://tools/horde_animation_author.gd")
@@ -39,10 +37,6 @@ const STYLES := {
 	"Brute": {"scale": 1.1, "walk_mps": 1.64, "run_mps": 4.1, "walk_swing": 26.0, "run_swing": 36.0, "lean": 24.0, "reach": 0.6, "heavy": 0.35, "attack_seconds": 1.1, "death_seconds": 1.7},
 	"Titan": {"scale": 1.35, "walk_mps": 1.32, "run_mps": 3.3, "walk_swing": 24.0, "run_swing": 32.0, "lean": 20.0, "reach": 0.4, "heavy": 0.7, "attack_seconds": 1.3, "death_seconds": 2.0},
 	"Colossus": {"scale": 1.55, "walk_mps": 1.16, "run_mps": 2.9, "walk_swing": 22.0, "run_swing": 30.0, "lean": 18.0, "reach": 0.3, "heavy": 1.0, "attack_seconds": 1.4, "death_seconds": 2.2, "slam": true, "slam_seconds": 1.7},
-	"Zombie": {"scale": 1.0, "walk_mps": 1.8, "run_mps": 4.5, "walk_swing": 28.0, "run_swing": 38.0, "lean": 28.0, "reach": 0.9, "heavy": 0.0, "attack_seconds": 0.95, "death_seconds": 1.6},
-}
-const GLB_RIGS := {
-	"Zombie": "res://models/objects/characters/zombie_animated.glb",
 }
 
 
@@ -57,9 +51,6 @@ func _run() -> void:
 		if enemy_name.begins_with("_"):
 			continue
 		if not _build_humanoid(enemy_name, joints[enemy_name]):
-			failures += 1
-	for enemy_name: String in GLB_RIGS:
-		if not _build_glb_library(enemy_name, GLB_RIGS[enemy_name]):
 			failures += 1
 	if not _build_horde():
 		failures += 1
@@ -433,25 +424,6 @@ func _save_rig(enemy_name: String, skeleton: Skeleton3D, arrays: Array, dense: A
 		return false
 	print("%s rig: %d bones, %d vertices -> %s" % [enemy_name, skin.get_bind_count(), count, scene_path])
 	return true
-
-
-func _build_glb_library(enemy_name: String, path: String) -> bool:
-	var scene := load(path) as PackedScene
-	if scene == null:
-		return false
-	var instance := scene.instantiate()
-	var skeletons := instance.find_children("*", "Skeleton3D", true, false)
-	if skeletons.is_empty():
-		instance.free()
-		return false
-	var author := AUTHOR.new()
-	author.setup(skeletons[0] as Skeleton3D)
-	var style: Dictionary = STYLES[enemy_name]
-	var library: AnimationLibrary = author.build_humanoid_library(style)
-	print("%s: pace %s, hips %.2f, leg %.2f" % [enemy_name, author.pace(style), author.hips_height, author.leg_length])
-	var error := ResourceSaver.save(library, OUTPUT_DIR + enemy_name + "_anims.res")
-	instance.free()
-	return error == OK
 
 
 # ---------------------------------------------------------------- horde

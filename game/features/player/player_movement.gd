@@ -1,5 +1,12 @@
 extends CharacterBody3D
 
+signal projectile_blood(position: Vector3, direction: Vector3, weapon: String, excluded: Array[RID], source_id: int)
+signal blood_wounded(position: Vector3, excluded: Array[RID])
+signal wounded_moved(previous: Vector3, current: Vector3, excluded: Array[RID])
+signal blood_death(position: Vector3, excluded: Array[RID], death_id: int)
+var blood_drop_distance := 0.45
+var _blood_motion_start := Vector3.ZERO
+
 signal blast_stun_started(duration: float, intensity: float)
 signal blast_stun_ended()
 
@@ -102,6 +109,7 @@ func _physics_process(delta: float) -> void:
 		_aim_uncontrolled()
 	else:
 		_update_aim()
+	weapon_mount.call("aim_at", _aim_point)
 	_update_move(delta)
 	var w:=get_current_weapon()
 	if w != null and not _mutation_menu_open and _roll_remaining <= 0.0 and (control_lost or (Input.is_action_pressed("fire") if bool(w.call("wants_continuous_fire")) else Input.is_action_just_pressed("fire"))):
@@ -233,6 +241,24 @@ func has_emergency_key() -> bool:
 	return _emergency_key
 func get_current_weapon_index()->int: return current_weapon_index
 func take_damage(amount: float, damage_type: String = "physical") -> void:
+	_apply_damage(amount, damage_type, global_position, Vector3.FORWARD, damage_type)
+
+
+func get_projectile_material(_shape_index: int = -1) -> String:
+	return "flesh"
+
+
+func take_projectile_damage(amount: float, point: Vector3, direction: Vector3, weapon: String) -> void:
+	_apply_damage(amount, "physical", point, direction, weapon)
+
+
+func take_blast_damage(amount: float, origin: Vector3) -> void:
+	_apply_damage(amount, "fire", global_position, (global_position - origin).normalized(), "GRENADE")
+
+
+func _apply_damage(amount: float, damage_type: String, point: Vector3, direction: Vector3, weapon: String) -> void:
+	if amount <= 0.0 or health <= 0.0:
+		return
 	var remaining: float = mutation_effects.call("on_player_hit", maxf(amount, 0.0), damage_type)
 	var absorbed:=minf(armor,remaining)
 	armor-=absorbed
@@ -240,7 +266,12 @@ func take_damage(amount: float, damage_type: String = "physical") -> void:
 	health=maxf(0.0,health-remaining)
 	if health <= 0.0 and mutation_effects.call("survive_lethal"):
 		health = 1.0
-	if amount > 0.0: _spawn_floor_blood(amount)
+	if remaining > 0.0:
+		var excluded: Array[RID] = [get_rid()]
+		projectile_blood.emit(point, direction, weapon, excluded, get_instance_id())
+		blood_wounded.emit(global_position, excluded)
+		if health <= 0.0:
+			blood_death.emit(global_position, excluded, get_instance_id())
 func heal(amount:float)->float:
 	var previous:=health
 	if mutation_effects.call("enabled", "assimilation"):
@@ -292,6 +323,7 @@ func apply_blast_stun(duration: float, intensity: float) -> void:
 	if _stun_ringing == null:
 		_stun_ringing = AudioStreamPlayer.new()
 		_stun_ringing.name = "BlastRinging"
+		_stun_ringing.bus = &"SFX"
 		add_child(_stun_ringing)
 		var tone := AudioStreamWAV.new()
 		tone.mix_rate = 22050
@@ -343,6 +375,13 @@ func _update_move(delta:float)->void:
 		velocity.x=move_toward(velocity.x,target.x,accel*delta);velocity.z=move_toward(velocity.z,target.z,accel*delta)
 	velocity.y=0.0 if is_on_floor() else velocity.y-gravity_acceleration*delta
 	move_and_slide()
+	if health < max_health and _blood_motion_start.distance_to(global_position) >= blood_drop_distance:
+		if _blood_motion_start.distance_to(global_position) < 3.0:
+			var excluded: Array[RID] = [get_rid()]
+			wounded_moved.emit(_blood_motion_start, global_position, excluded)
+		_blood_motion_start = global_position
+	elif health >= max_health:
+		_blood_motion_start = global_position
 	_push_chair_contacts()
 	if _roll_remaining>0.0: _push_roll_contacts()
 func _push_chair_contacts()->void:
@@ -408,59 +447,6 @@ func _update_aim()->void:
 		var target_direction:=flat_direction.normalized()
 		aim_pivot.look_at(aim_pivot.global_position+target_direction,Vector3.UP)
 		body_visual.look_at(body_visual.global_position+target_direction,Vector3.UP,true)
-
-# Player blood on the floor: a few shared blob meshes and one material, at
-# most FLOOR_BLOOD_LIMIT marks (oldest go first), each gone after a while.
-const FLOOR_BLOOD_LIMIT := 60
-const FLOOR_BLOOD_SECONDS := 45.0
-static var _blood_material: StandardMaterial3D
-static var _blood_shapes: Array[Mesh] = []
-var _floor_marks: Array[Node3D] = []
-
-
-func _spawn_floor_blood(amount:float)->void:
-	if not is_instance_valid(effects_root):
-		return
-	if _blood_shapes.is_empty():
-		_build_blood_shapes()
-	var count:=clampi(ceili(amount/8.0),2,6)
-	for i in count:
-		var mark:=MeshInstance3D.new()
-		mark.mesh=_blood_shapes[randi()%_blood_shapes.size()]
-		mark.cast_shadow=GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
-		effects_root.add_child(mark)
-		mark.global_position=Vector3(global_position.x,0.025,global_position.z)+Vector3(randf_range(-0.5,0.5),0,randf_range(-0.5,0.5))
-		mark.rotation_degrees=Vector3(-90,randf_range(0,360),0)
-		mark.scale=Vector3.ONE*randf_range(0.6,1.25)
-		get_tree().create_timer(FLOOR_BLOOD_SECONDS,false).timeout.connect(mark.queue_free)
-		_floor_marks.append(mark)
-	_floor_marks=_floor_marks.filter(func(m:Node3D)->bool:return is_instance_valid(m))
-	while _floor_marks.size()>FLOOR_BLOOD_LIMIT:
-		_floor_marks.pop_front().queue_free()
-
-
-static func _build_blood_shapes()->void:
-	_blood_material=StandardMaterial3D.new()
-	_blood_material.albedo_color=Color(0.34,0.0,0.015,0.92);_blood_material.roughness=1.0;_blood_material.cull_mode=BaseMaterial3D.CULL_DISABLED
-	for shape in 6:
-		var mesh:=ArrayMesh.new()
-		var vertices:=PackedVector3Array()
-		var points:=randi_range(7,11)
-		var width:=randf_range(0.1,0.2)
-		var height:=width*randf_range(0.45,1.7)
-		for p in points:
-			var a0:=TAU*float(p)/points;var a1:=TAU*float(p+1)/points
-			var r0:=randf_range(0.45,1.2);var r1:=randf_range(0.45,1.2)
-			vertices.append(Vector3.ZERO)
-			vertices.append(Vector3(cos(a0)*width*r0,sin(a0)*height*r0,0))
-			vertices.append(Vector3(cos(a1)*width*r1,sin(a1)*height*r1,0))
-		var arrays:=[]
-		arrays.resize(Mesh.ARRAY_MAX)
-		arrays[Mesh.ARRAY_VERTEX]=vertices
-		mesh.add_surface_from_arrays(Mesh.PRIMITIVE_TRIANGLES,arrays)
-		mesh.surface_set_material(0,_blood_material)
-		_blood_shapes.append(mesh)
-
 
 func _aim_uncontrolled() -> void:
 	var direction: Vector3 = _mutation_control.direction

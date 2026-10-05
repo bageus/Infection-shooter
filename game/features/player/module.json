@@ -28,6 +28,16 @@
     "blast_feedback_v1": {
       "blast_stun_started": "signal blast_stun_started(duration: float, intensity: float); actual remaining duration and intensity after apply_blast_stun",
       "blast_stun_ended": "signal blast_stun_ended(); natural expiry, pause, game over or exit"
+    },
+    "blood_events_v1": {
+      "projectile_blood": "signal projectile_blood(position: Vector3, direction: Vector3, weapon: String, excluded: Array[RID], source_id: int)",
+      "blood_wounded": "signal blood_wounded(position: Vector3, excluded: Array[RID])",
+      "wounded_moved": "signal wounded_moved(previous: Vector3, current: Vector3, excluded: Array[RID])",
+      "blood_death": "signal blood_death(position: Vector3, excluded: Array[RID], death_id: int)",
+      "blood_drop_distance": "injected movement spacing in metres",
+      "take_projectile_damage": "take_projectile_damage(amount: float, point: Vector3, direction: Vector3, weapon: String) -> void",
+      "take_blast_damage": "take_blast_damage(amount: float, origin: Vector3) -> void",
+      "get_projectile_material": "get_projectile_material(shape_index = -1) -> String; flesh"
     }
   }
 }

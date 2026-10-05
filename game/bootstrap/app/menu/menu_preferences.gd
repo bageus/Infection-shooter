@@ -5,7 +5,7 @@ var bindings := BINDINGS.new()
 
 const FILE := "user://interface_settings.cfg"
 const DEFAULTS := {"language": "ru", "brightness": 1.0, "text_scale": 1.0,
-	"volume": 0.4, "sound": true, "occlusion_mode": 0, "test_mutagen": false}
+	"volume": 0.4, "effects_volume": 1.0, "music_volume": 1.0, "sound": true, "occlusion_mode": 0, "test_mutagen": false}
 var values: Dictionary = DEFAULTS.duplicate()
 
 
@@ -22,6 +22,8 @@ func load_settings() -> void:
 	values.brightness = clampf(values.brightness, 0.8, 1.4)
 	values.occlusion_mode = clampi(values.occlusion_mode, 0, 1)
 	values.volume = clampf(values.volume, 0.0, 1.0)
+	values.effects_volume = clampf(values.effects_volume, 0.0, 1.0)
+	values.music_volume = clampf(values.music_volume, 0.0, 1.0)
 	if values.text_scale not in [1.0, 1.15, 1.3]:
 		values.text_scale = 1.0
 
@@ -48,6 +50,12 @@ func apply_to_game(tree: SceneTree) -> void:
 	if master >= 0:
 		AudioServer.set_bus_mute(master, not bool(values.sound))
 		AudioServer.set_bus_volume_db(master, linear_to_db(clampf(float(values.volume) / float(DEFAULTS.volume), 0.0001, 2.0)))
+	for bus_name in [&"SFX", &"UI", &"Music"]:
+		var index := AudioServer.get_bus_index(bus_name)
+		if index >= 0:
+			var level := float(values.music_volume if bus_name == &"Music" else values.effects_volume)
+			AudioServer.set_bus_volume_db(index, linear_to_db(maxf(level, 0.0001)))
+			AudioServer.set_bus_mute(index, level <= 0.0)
 	var scene := tree.current_scene if tree != null else null
 	if scene != null and scene.has_method("refresh_control_labels"):
 		scene.call("refresh_control_labels")

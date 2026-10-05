@@ -16,12 +16,21 @@ const FLOOR_OFFSET := 0.002
 @export var attachment_mesh := ""
 var _anchor: WeakRef
 var _anchor_transform := Transform3D.IDENTITY
+var _projection_pool: Node
+var _projection_anchor: WeakRef
+var _footprint := Vector2.ONE
+var _surface_material: StandardMaterial3D
+var _projection_dirty := true
+var _projection_transform := Transform3D()
+var _last_anchor_transform := Transform3D()
 
 
 func configure_blood_normal(normal: Vector3) -> void:
+	_projection_dirty = true
 	surface_normal = normal.normalized() if not normal.is_zero_approx() else Vector3.UP
 	if is_inside_tree() and _visual != null:
-		_apply_surface()
+		if _projection_anchor == null:
+			_apply_surface()
 
 
 func get_blood_attachment() -> Dictionary:
@@ -38,8 +47,24 @@ func attach_blood(anchor: Node3D, owner_id: String) -> void:
 	attachment_owner = owner_id
 	attachment_mesh = str(anchor.name)
 	_anchor_transform = anchor.global_transform.affine_inverse() * global_transform
+	_last_anchor_transform = anchor.global_transform
 	process_mode = Node.PROCESS_MODE_ALWAYS
 	set_process(true)
+	configure_projection(anchor)
+
+
+func configure_world(_container: Node3D, impacts: Node) -> void:
+	_projection_pool = impacts
+
+
+func configure_projection(anchor: Node3D) -> void:
+	var previous: Node3D = _projection_anchor.get_ref() if _projection_anchor != null else null
+	_projection_dirty = _projection_dirty or previous != anchor
+	_projection_anchor = weakref(anchor) if anchor != null else null
+	if anchor == null and previous != null and _visual != null:
+		_rebuild()
+	if _visual != null:
+		_project_surface()
 
 
 func _process(_delta: float) -> void:
@@ -49,7 +74,12 @@ func _process(_delta: float) -> void:
 			_visual.hide()
 		set_process(false)
 		return
-	global_transform = anchor.global_transform * _anchor_transform
+	if not anchor.global_transform.is_equal_approx(_last_anchor_transform):
+		global_transform = anchor.global_transform * _anchor_transform
+	else:
+		_anchor_transform = anchor.global_transform.affine_inverse() * global_transform
+	_last_anchor_transform = anchor.global_transform
+	_project_surface()
 	if _visual != null:
 		_visual.visible = anchor.is_visible_in_tree()
 
@@ -90,11 +120,14 @@ func _rebuild() -> void:
 	var entry := texture_entry(texture_name)
 	_visual = MeshInstance3D.new()
 	_visual.name = "BloodQuad"
+	_visual.set_meta("surface_mark", true)
 	_visual.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
 	var quad := QuadMesh.new()
 	var aspect: float = entry.get("aspect", 1.0)
 	quad.size = Vector2(1.0, 1.0 / aspect) if aspect >= 1.0 else Vector2(aspect, 1.0)
+	_footprint = quad.size
 	var material := StandardMaterial3D.new()
+	_surface_material = material
 	material.albedo_texture = entry.get("texture")
 	material.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
 	material.roughness = 0.35
@@ -130,3 +163,35 @@ static func texture_ids() -> PackedStringArray:
 		for variant in range(1, 10):
 			ids.append("%s_%02d" % [category, variant])
 	return ids
+
+
+func _project_surface() -> void:
+	if not _projection_dirty and global_transform.is_equal_approx(_projection_transform) and _visual.mesh is ArrayMesh:
+		return
+	_projection_dirty = false
+	_projection_transform = global_transform
+	var anchor := _projection_anchor.get_ref() as Node3D if _projection_anchor != null else null
+	if anchor == null or not is_instance_valid(_projection_pool):
+		return
+	var up := Vector3.FORWARD if absf(surface_normal.y) > .9 else Vector3.UP
+	var plane := global_basis * Basis.looking_at(-surface_normal, up)
+	var projector := Transform3D(plane.orthonormalized(), global_position)
+	var size := Vector2(_footprint.x * plane.x.length(), _footprint.y * plane.y.length())
+	var entries: Array = _projection_pool.call("projected_geometry", anchor, projector, size, .16, false)
+	var combined := ArrayMesh.new()
+	var local := global_transform.affine_inverse()
+	for entry in entries:
+		var mesh: ArrayMesh = entry["mesh"]
+		var transform: Transform3D = local * entry["anchor"].global_transform
+		var arrays := mesh.surface_get_arrays(0)
+		var vertices: PackedVector3Array = arrays[Mesh.ARRAY_VERTEX]
+		var normals: PackedVector3Array = arrays[Mesh.ARRAY_NORMAL]
+		for index in vertices.size():
+			vertices[index] = transform * vertices[index]
+			normals[index] = (transform.basis.inverse().transposed() * normals[index]).normalized()
+		arrays[Mesh.ARRAY_VERTEX] = vertices
+		arrays[Mesh.ARRAY_NORMAL] = normals
+		combined.add_surface_from_arrays(Mesh.PRIMITIVE_TRIANGLES, arrays)
+		combined.surface_set_material(combined.get_surface_count() - 1, _surface_material)
+	_visual.mesh = combined
+	_visual.transform = Transform3D.IDENTITY

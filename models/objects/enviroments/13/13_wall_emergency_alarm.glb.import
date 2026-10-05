@@ -3,13 +3,13 @@
 importer="scene"
 importer_version=1
 type="PackedScene"
-uid="uid://cva4i0kaxbh40"
-path="res://.godot/imported/zombie_animated.glb-a8a82c14d4bb1f6bc15d016d3b27acd3.scn"
+uid="uid://cdfary13hstky"
+path="res://.godot/imported/13_wall_emergency_alarm.glb-c85c0272f3fa4537a03c418c79a07c83.scn"
 
 [deps]
 
-source_file="res://models/objects/characters/zombie_animated.glb"
-dest_files=["res://.godot/imported/zombie_animated.glb-a8a82c14d4bb1f6bc15d016d3b27acd3.scn"]
+source_file="res://models/objects/enviroments/13/13_wall_emergency_alarm.glb"
+dest_files=["res://.godot/imported/13_wall_emergency_alarm.glb-c85c0272f3fa4537a03c418c79a07c83.scn"]
 
 [params]
 

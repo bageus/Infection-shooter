@@ -252,11 +252,13 @@ func _on_exit_pressed() -> void:
 func _setup_blood_effects() -> void:
 	blood_effects = BLOOD_EFFECTS.instantiate() as Node3D
 	add_child(blood_effects)
+	blood_effects.call("configure_world", mission_objects, impact_pool)
 	var blood_surfaces: Array[Node] = [$Structure, $Floor, $FloorBody, planning_root]
 	blood_effects.call("configure_environment", blood_surfaces)
 	enemies.child_entered_tree.connect(_bind_enemy_blood)
 	for enemy in enemies.get_children():
 		_bind_enemy_blood(enemy)
+	_bind_enemy_blood(player)
 
 
 func _bind_enemy_blood(enemy: Node) -> void:

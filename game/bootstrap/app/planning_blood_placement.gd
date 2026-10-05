@@ -52,7 +52,7 @@ static func apply_probe(placing: Node3D, preview: Node3D) -> void:
 		return
 	var normal: Vector3 = preview.get("surface_normal")
 	placing.call("configure_blood_normal", placing.global_basis.inverse() * (preview.global_basis * normal))
-	var reference: Variant = preview.get_meta("blood_probe_anchor", null)
+	var reference: Variant = preview.get_meta("blood_probe_anchor") if preview.has_meta("blood_probe_anchor") else null
 	var anchor: Node3D = reference.get_ref() if reference is WeakRef else null
 	if anchor == null:
 		return
@@ -110,3 +110,11 @@ static func _wall_surface(node: Node) -> bool:
 			return true
 		node = node.get_parent()
 	return false
+
+
+static func preview_projection(placing: Node3D) -> void:
+	if not placing.has_method("configure_projection"):
+		return
+	var reference: Variant = placing.get_meta("blood_probe_anchor") if placing.has_meta("blood_probe_anchor") else null
+	var anchor: Node3D = reference.get_ref() if reference is WeakRef else null
+	placing.call("configure_projection", anchor)

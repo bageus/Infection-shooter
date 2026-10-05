@@ -34,6 +34,12 @@
     "impact_surface_v1": {
       "resolve_surface": "resolve_surface(collider: Node, point: Vector3, direction: Vector3) -> Dictionary {position, normal, anchor: MeshInstance3D}, empty when no visible triangle is hit",
       "register_surface": "register_surface(collider: Node, visual: Node3D) -> void; mission-local weak reference for separately authored render roots"
+    },
+    "weapon_aim_v1": "aim_at(target_point: Vector3) -> void; public weapon scenes align barrel with straight or ballistic launch direction",
+    "casing_v1": "spawn_casing(model, transform, radius, shooter, sound_event = casing_brass, size_multiplier: float = 1.0) -> void; multiplier applies to visible art and collision",
+    "impact_projection_v1": {
+      "projected_geometry": "projected_geometry(collider, projector, footprint, depth = .12, skip_glass = false) -> Array[Dictionary {anchor, mesh}]; up to 12 actual receivers, caller owns output meshes",
+      "project_surface": "project_surface(collider, projector, footprint, material, depth = .12, skip_glass = false) -> Array[MeshInstance3D]; caller owns lifetime and budget, receivers own transforms"
     }
   }
 }

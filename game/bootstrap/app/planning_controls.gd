@@ -1,5 +1,7 @@
 extends Node
 
+const DECOR_POSES := preload("res://game/bootstrap/app/planning_decor_poses.gd")
+const COLOR_POPUP := preload("res://game/bootstrap/app/planner_color_popup.gd")
 const DISPLAY_OPTIONS := preload("res://game/bootstrap/app/planning_display_options.gd")
 var display_options: Node
 const FIXTURE_CONTROLS := preload("res://game/bootstrap/app/planning_light_fixtures.gd")
@@ -74,6 +76,8 @@ func setup_controls() -> void:
 	selected_flicker_step = session.ui.get_node("Panel/VBox/SelectedFlickerStep/Value")
 	default_light_color = session.ui.get_node("Panel/VBox/LightDefaults/ColorRow/Value")
 	selected_light_color = session.ui.get_node("Panel/VBox/SelectedLightColor/Value")
+	COLOR_POPUP.bind(default_light_color)
+	COLOR_POPUP.bind(selected_light_color)
 	selected_light_color.color_changed.connect(_on_selected_color_changed)
 	selected_light_color.popup_closed.connect(_on_color_popup_closed)
 	default_flicker_mode.item_selected.connect(_on_default_flicker_mode_changed)
@@ -89,6 +93,9 @@ func setup_controls() -> void:
 	add_child(display_options)
 	display_options.call("setup", session, objects)
 	fixtures.setup(self)
+	var box: Node = session.ui.get_node("Panel/VBox")
+	for control_name in ["LightInfo", "LightLevel", "LightAngleInfo", "LightAngle", "SelectedLightColor", "SelectedFlicker", "SelectedFlickerStep", "SelectedFixture"]:
+		box.move_child(box.get_node(control_name), palette.get_index())
 	_build_gore_controls()
 	_build_planning_toolbar()
 
@@ -153,6 +160,7 @@ func _enter_simple_catalog(entries: Array, title: String) -> void:
 
 # Applies palette options to a freshly created object before it enters the tree.
 func _configure_new_asset(node: Node3D, entry: Dictionary) -> void:
+	DECOR_POSES.configure_new(node, objects.preview)
 	display_options.call("configure_new", node)
 	fixtures.configure_new_asset(node, entry)
 	if str(entry.get("kind", "")) != "blood" or not node.has_method("configure_blood"):

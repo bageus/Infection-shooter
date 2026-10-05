@@ -43,6 +43,12 @@ func schedule_pool(death_id: int, definition: Dictionary, surface: Dictionary, d
 		return
 	_death_ids[death_id] = true
 	if not definition.is_empty() and not surface.is_empty():
+		if get_tree().paused:
+			# Game-over freezes simulation; still show the already reported death.
+			definition = definition.duplicate()
+			definition["pool"] = false
+			_admit(definition, surface)
+			return
 		_deaths.append({"definition": definition, "surface": surface, "due": _clock + delay})
 
 

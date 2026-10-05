@@ -160,6 +160,10 @@ func _break_glass(hit_position: Vector3, direction: Vector3 = Vector3.ZERO) -> v
 		if is_instance_valid(mark):
 			mark.queue_free()
 	_crack_marks.clear()
+	# Also discard old/externally registered marks owned by this pane.
+	for child in get_children():
+		if child.has_meta("surface_mark"):
+			child.queue_free()
 	for glass in _glass_nodes:
 		if is_instance_valid(glass):
 			glass.visible = false

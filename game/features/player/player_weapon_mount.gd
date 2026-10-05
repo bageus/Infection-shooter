@@ -3,6 +3,8 @@ extends Node
 var skeleton: Skeleton3D
 var socket: Node3D
 var _remote: RemoteTransform3D
+var _aim_target := Vector3.INF
+var _active: Node3D
 
 
 func _ready() -> void:
@@ -24,6 +26,7 @@ func _ready() -> void:
 	_remote = RemoteTransform3D.new()
 	_remote.name = "ActiveWeaponTransform"
 	_remote.update_scale = false
+	_remote.update_rotation = false
 	_remote.use_global_coordinates = true
 	socket.add_child(_remote)
 
@@ -31,6 +34,7 @@ func _ready() -> void:
 func select_weapon(weapon: Node3D) -> void:
 	if socket == null or _remote == null:
 		return
+	_active = weapon
 	_remote.remote_path = _remote.get_path_to(weapon)
 	_remote.force_update_cache()
 	sync_weapon(weapon)
@@ -43,6 +47,8 @@ func sync_weapon(weapon: Node3D) -> void:
 	var original_scale := weapon.scale
 	weapon.global_transform = Transform3D(socket.global_basis.orthonormalized(), socket.global_position)
 	weapon.scale = original_scale
+	if _aim_target.is_finite() and weapon.has_method("aim_at"):
+		weapon.call("aim_at", _aim_target)
 
 
 func _find_skeleton(node: Node) -> Skeleton3D:
@@ -63,3 +69,9 @@ func _find_socket(node: Node) -> Node3D:
 		if found != null:
 			return found
 	return null
+
+
+func aim_at(target: Vector3) -> void:
+	_aim_target = target
+	if is_instance_valid(_active):
+		sync_weapon(_active)

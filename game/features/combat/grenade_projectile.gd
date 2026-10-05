@@ -9,6 +9,7 @@ var shooter: CollisionObject3D
 var _velocity := Vector3.ZERO
 var _lifetime := 4.0
 var _exploded := false
+var collision_origin := Vector3.INF
 var _visual: Node3D
 
 var effects_root: Node3D
@@ -23,16 +24,20 @@ func configure_world(container: Node3D, impacts: Node) -> void:
 
 func setup(target: Vector3, firing_body: CollisionObject3D) -> void:
 	shooter = firing_body
-	var offset := target - global_position
+	_velocity = launch_velocity(global_position, target)
+	_visual = PROJECTILE_VISUAL.new() as Node3D
+	add_child(_visual)
+	_visual.call("configure", "GRENADE LAUNCHER", _velocity)
+
+
+static func launch_velocity(origin: Vector3, target: Vector3) -> Vector3:
+	var offset := target - origin
 	var horizontal := Vector3(offset.x, 0, offset.z)
 	# Short targets need a slower horizontal launch, otherwise the projectile
 	# overshoots before gravity can bring it back to the cursor's surface.
 	var duration := clampf(horizontal.length() / SPEED, 0.42, 1.6)
 	var rise := (offset.y + 0.5 * GRAVITY * duration * duration) / duration
-	_velocity = horizontal / duration + Vector3.UP * rise
-	_visual = PROJECTILE_VISUAL.new() as Node3D
-	add_child(_visual)
-	_visual.call("configure", "GRENADE LAUNCHER", _velocity)
+	return horizontal / duration + Vector3.UP * rise
 
 
 func _physics_process(delta: float) -> void:
@@ -41,11 +46,16 @@ func _physics_process(delta: float) -> void:
 	_lifetime -= delta
 	var displacement := _velocity * delta + Vector3.DOWN * (0.5 * GRAVITY * delta * delta)
 	var next := global_position + displacement
-	var cast := PhysicsRayQueryParameters3D.create(global_position, next, 7)
+	var from_barrel := collision_origin.is_finite()
+	var cast := PhysicsRayQueryParameters3D.create(collision_origin if collision_origin.is_finite() else global_position, next, 7)
+	cast.hit_from_inside = from_barrel
+	collision_origin = Vector3.INF
 	if shooter != null and is_instance_valid(shooter):
 		cast.exclude = [shooter.get_rid()]
 	var hit := get_world_3d().direct_space_state.intersect_ray(cast)
 	if not hit.is_empty():
+		if (hit["normal"] as Vector3).is_zero_approx():
+			hit["normal"] = -_velocity.normalized()
 		_exploded = true
 		call_deferred("_explode_at", hit["position"], hit["normal"], hit["collider"])
 		return
