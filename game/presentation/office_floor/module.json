@@ -4,7 +4,7 @@
   "purpose": "Expose authored structural office modules with their own collision and the current office-floor composition.",
   "state_owner": [
     "Blood textures, render marks, surface anchors, lifetime and density budgets",
-    "Authored lamp power, color and flicker phase; derived runtime light activation",
+    "Authored lamp power, color, flicker phase, fixture shape and body visibility; derived runtime light activation",
     "Planner blood decorations: texture, surface and size"
   ],
   "public_api": [
@@ -53,7 +53,9 @@
     },
     "planner_light_v1": {
       "get_authored_color": "get_authored_color() -> Color",
-      "set_authored_color": "set_authored_color(color: Color) -> void; RGB tint, alpha fixed to 1"
+      "set_authored_color": "set_authored_color(color: Color) -> void; RGB tint, alpha fixed to 1",
+      "configure_fixture": "configure_fixture(shape: String, visible_in_game: bool) -> void; shape point|linear|rectangle; body visibility independent of emitted light",
+      "get_fixture_config": "get_fixture_config() -> Dictionary {shape, visible_in_game}"
     },
     "planner_decor_v1": {
       "configure_blood": "configure_blood(texture_id: String, surface: String) -> void; surface floor|wall",

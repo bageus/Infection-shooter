@@ -93,6 +93,10 @@ func _collect_layout_data() -> Dictionary:
 			"spawn_y": (node.get_meta("planning_spawn_transform") as Transform3D).origin.y if node.has_meta("planning_spawn_transform") else node.position.y,
 			"spawn_z": (node.get_meta("planning_spawn_transform") as Transform3D).origin.z if node.has_meta("planning_spawn_transform") else node.position.z
 		})
+		if node.has_method("get_fixture_config"):
+			var fixture: Dictionary = node.call("get_fixture_config")
+			records[-1]["fixture_shape"] = str(fixture["shape"])
+			records[-1]["fixture_visible_in_game"] = bool(fixture["visible_in_game"])
 		if node.has_method("get_blood_config"):
 			var blood: Dictionary = node.call("get_blood_config")
 			records[-1]["blood_texture"] = str(blood["texture"])
@@ -101,7 +105,7 @@ func _collect_layout_data() -> Dictionary:
 			records[-1]["energy_multiplier"] = float(node.get("energy_multiplier"))
 			var color: Color = node.call("get_authored_color")
 			records[-1]["light_color"] = [color.r, color.g, color.b]
-	return {"version": 6, "objects": records}
+	return {"version": 7, "objects": records}
 
 
 ## Remembers the current planner layout as the authored map.
@@ -123,7 +127,7 @@ func restore_authored() -> bool:
 			records.append(record)
 	var keep_spawn: bool = objects.player_spawn_defined
 	var spawn: Transform3D = objects.player_spawn_transform
-	objects._apply_layout_data({"version": authored_layout.get("version", 6), "objects": records})
+	objects._apply_layout_data({"version": authored_layout.get("version", 7), "objects": records})
 	objects.player_spawn_defined = keep_spawn
 	objects.player_spawn_transform = spawn
 	return true
@@ -260,6 +264,9 @@ func _save_authored_scene() -> Error:
 		scene_root.add_child(copy)
 		copy.owner = scene_root
 		copy.transform = node.transform
+		if node.has_method("get_fixture_config"):
+			var fixture: Dictionary = node.call("get_fixture_config")
+			copy.call("configure_fixture", str(fixture["shape"]), bool(fixture["visible_in_game"]))
 		if node.has_method("get_blood_config"):
 			var blood: Dictionary = node.call("get_blood_config")
 			copy.call("configure_blood", str(blood["texture"]), str(blood["surface"]))
@@ -302,3 +309,4 @@ func load_layout() -> void:
 		elif int(report.get("skipped", 0)) > 0:
 			push_warning("Planned layout: %d missing object(s) skipped." % int(report["skipped"]))
 	snapshot_authored()
+

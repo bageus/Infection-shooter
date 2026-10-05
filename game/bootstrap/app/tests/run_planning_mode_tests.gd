@@ -111,7 +111,7 @@ func _exercise_maps(planner: Node) -> void:
 	var storage: RefCounted = planner.get("storage")
 	var editor: Node = planner.get("objects")
 	var snapshot: Dictionary = storage.call("_collect_layout_data")
-	_check(snapshot.get("version") == 6, "Layout uses DTO version 6")
+	_check(snapshot.get("version") == 7, "Layout uses DTO version 7")
 	var light_records: Array = snapshot["objects"].filter(func(record: Dictionary) -> bool: return record["scene"] == LIGHT_PATH)
 	_check(light_records.size() == 1 and light_records[0].get("light_energy", 0.0) > 0.0, "Layout captures edited light")
 	var name := "codex_planning_regression_%d" % Time.get_ticks_usec()
@@ -137,3 +137,4 @@ func _check(condition: bool, message: String) -> void:
 	if not condition:
 		_failures += 1
 		push_error(message)
+

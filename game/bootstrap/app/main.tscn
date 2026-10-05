@@ -104,7 +104,7 @@ grow_horizontal = 2
 grow_vertical = 2
 mouse_filter = 2
 
-[node name="Panel" type="PanelContainer" parent="PlanningUI" unique_id=1408241995]
+[node name="Panel" type="ScrollContainer" parent="PlanningUI" unique_id=1408241995]
 z_index = 10
 layout_mode = 0
 anchor_bottom = 1.0
@@ -112,9 +112,11 @@ offset_left = 8.0
 offset_top = 8.0
 offset_right = 368.0
 offset_bottom = -8.0
+horizontal_scroll_mode = 0
 
 [node name="VBox" type="VBoxContainer" parent="PlanningUI/Panel" unique_id=797647768]
 layout_mode = 2
+size_flags_horizontal = 3
 theme_override_constants/separation = 5
 
 [node name="Title" type="Label" parent="PlanningUI/Panel/VBox" unique_id=1680300432]
@@ -577,3 +579,4 @@ custom_minimum_size = Vector2(240, 110)
 layout_mode = 2
 text = "ENHANCED AMMO
 Combat mutation"
+

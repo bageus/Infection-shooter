@@ -138,6 +138,7 @@ func _test_planner() -> void:
 	controller.call("set_local_lights_enabled", true)
 	_test_map_paths(planner)
 	_test_colors(planner)
+	_test_fixtures(planner)
 	planner.call("enter")
 	controller.call("set_game_lighting", false)
 	app.free()
@@ -272,3 +273,121 @@ func _planner_lamps(planner: Node) -> Array[Node3D]:
 		if node.has_method("get_authored_energy"):
 			lamps.append(node)
 	return lamps
+
+
+
+func _test_fixtures(planner: Node) -> void:
+	var entries: Array = planner.catalog.lighting_catalog.filter(func(entry: Dictionary) -> bool: return entry.get("kind") == "light")
+	_check(entries.size() == 3, "Lighting palette has three fixture shapes")
+	for entry: Dictionary in entries:
+		var fresh := LAMP.instantiate()
+		planner.controls._configure_new_asset(fresh, entry)
+		root.add_child(fresh)
+		_check(fresh.get_fixture_config()["shape"] == entry["fixture_shape"], "Palette applies the chosen fixture")
+		_check(fresh.fixture_visible_in_game, "New fixtures are visible in game by default")
+		fresh.free()
+	var records: Array = []
+	for shape: String in ["point", "linear", "rectangle"]:
+		records.append({"scene": LAMP.resource_path, "fixture_shape": shape,
+			"fixture_visible_in_game": shape != "linear", "scale_x": 2.0, "scale_y": 0.5, "scale_z": 1.5,
+			"light_energy": 7.0, "light_color": [0.2, 0.6, 0.9]})
+	var data := {"version": 7, "objects": records}
+	for cycle in range(3):
+		planner.objects._apply_layout_data(data)
+		var lamps := _planner_lamps(planner)
+		_check(lamps.size() == 3, "All fixture shapes reload")
+		for index in lamps.size():
+			var lamp: Node3D = lamps[index]
+			var config: Dictionary = lamp.call("get_fixture_config")
+			_check(config["shape"] == records[index]["fixture_shape"], "JSON preserves fixture shape")
+			_check(config["visible_in_game"] == records[index]["fixture_visible_in_game"], "JSON preserves game visibility")
+			_check(lamp.scale.is_equal_approx(Vector3(2, 0.5, 1.5)), "JSON preserves model scale")
+			_test_fixture_visibility(lamp)
+		data = JSON.parse_string(JSON.stringify(planner.storage._collect_layout_data()))
+	_test_fixture_edits(planner, _planner_lamps(planner)[1])
+	planner.objects._apply_layout_data({"version": 6, "objects": [{"scene": LAMP.resource_path}]})
+	var legacy: Node3D = _planner_lamps(planner)[0]
+	_check(not bool(legacy.call("get_fixture_config")["visible_in_game"]), "Legacy maps keep invisible fixtures")
+	legacy.call("configure_fixture", "unknown", false)
+	_check(legacy.call("get_fixture_config")["shape"] == "point", "Unknown shape falls back safely")
+	_test_baked_fixture_replacement(planner)
+
+
+func _test_fixture_visibility(lamp: Node3D) -> void:
+	lamp.call("set_local_lighting_enabled", true)
+	lamp.call("configure_flicker", 0, 0.2)
+	var energy: float = lamp.get_node("Light").light_energy
+	var shown: bool = lamp.call("get_fixture_config")["visible_in_game"]
+	lamp.call("set_planning_visual", true)
+	_check(lamp.get_node("Fixture").visible, "Every fixture can be seen and selected in the planner")
+	lamp.call("set_planning_visual", false)
+	_check(lamp.get_node("Fixture").visible == shown, "Leaving the planner applies authored visibility")
+	_check(is_equal_approx(lamp.get_node("Light").light_energy, energy), "Hiding a body preserves its emitted light")
+	var housing := lamp.get_node("Fixture/Housing") as MeshInstance3D
+	var shape: String = lamp.call("get_fixture_config")["shape"]
+	if shape == "point":
+		_check(housing.mesh is CylinderMesh, "Point fixture has a round body")
+	else:
+		var size: Vector3 = (housing.mesh as BoxMesh).size
+		_check(size.x > size.z * 5.0 if shape == "linear" else size.z > 0.5, "Linear and rectangular footprints differ")
+	lamp.call("set_planning_visual", true)
+
+
+func _test_fixture_edits(planner: Node, lamp: Node3D) -> void:
+	planner._select(lamp)
+	var fields = planner.controls.fixtures
+	fields.selected_shape.select(2)
+	fields.selected_shape.item_selected.emit(2)
+	_check(lamp.call("get_fixture_config")["shape"] == "rectangle", "Inspector changes the selected shape")
+	planner.edit_history.undo()
+	_check(lamp.call("get_fixture_config")["shape"] == "linear", "Undo restores shape")
+	fields.selected_visible.button_pressed = true
+	_check(bool(lamp.call("get_fixture_config")["visible_in_game"]), "Inspector enables game visibility")
+	planner.edit_history.undo()
+	_check(not bool(lamp.call("get_fixture_config")["visible_in_game"]), "Undo restores body visibility")
+	var scale_before := lamp.scale
+	var energy_before: float = lamp.get_node("Light").light_energy
+	planner.objects._scale_selected(Vector3(0.1, 0, 0))
+	_check(is_equal_approx(lamp.scale.x, scale_before.x + 0.1), "Existing scale controls resize the lamp model")
+	_check(is_equal_approx(lamp.get_node("Light").light_energy, energy_before), "Model resizing preserves authored brightness")
+	planner.edit_history.undo()
+	_check(lamp.scale.is_equal_approx(scale_before), "Undo restores model scale")
+	planner.edit_history.duplicate_selected()
+	var copy: Node3D = planner.selected
+	_check(copy.call("get_fixture_config") == lamp.call("get_fixture_config"), "Duplicate preserves fixture settings")
+	_check(copy.scale.is_equal_approx(lamp.scale), "Duplicate preserves fixture scale")
+	copy.call("set_authored_color", Color.RED)
+	var original_material := lamp.get_node("Fixture/Diffuser").material_override as StandardMaterial3D
+	_check(original_material.albedo_color.is_equal_approx(lamp.call("get_authored_color")), "Fixture materials are isolated per instance")
+	planner.edit_history.record_deleted(copy)
+	planner._delete_node(copy)
+	planner.edit_history.undo()
+	var restored: Node3D = _planner_lamps(planner).back()
+	_check(restored.call("get_fixture_config") == lamp.call("get_fixture_config"), "Delete Undo restores fixture settings")
+	var authored := Node3D.new()
+	var saved := LAMP.instantiate()
+	saved.configure_fixture("rectangle", true)
+	saved.scale = Vector3(2, 0.5, 1.5)
+	authored.add_child(saved)
+	saved.owner = authored
+	var packed := PackedScene.new()
+	_check(packed.pack(authored) == OK, "Fixture authoring state packs before ready")
+	var baked := packed.instantiate()
+	root.add_child(baked)
+	var baked_lamp: Node3D = baked.get_child(0)
+	_check(baked_lamp.call("get_fixture_config") == {"shape": "rectangle", "visible_in_game": true}, "Baked scenes retain fixture settings")
+	_check(baked_lamp.scale.is_equal_approx(Vector3(2, 0.5, 1.5)), "Baked scenes retain model scale")
+	baked.free()
+	authored.free()
+
+
+func _test_baked_fixture_replacement(planner: Node) -> void:
+	var authored := LAMP.instantiate()
+	planner.structure_root.add_child(authored)
+	authored.configure_fixture("rectangle", true)
+	planner.objects._register_existing_scene_objects()
+	_check(planner.placed.has(authored), "Baked fixtures are selectable without a collision body")
+	_check(not bool(authored.get_meta("planning_existing", false)), "A baked fixture participates in map replacement")
+	var data: Dictionary = planner.storage._collect_layout_data()
+	planner.objects._apply_layout_data(data)
+	_check(_planner_lamps(planner).size() == 2, "Reload does not retain an extra baked lamp")

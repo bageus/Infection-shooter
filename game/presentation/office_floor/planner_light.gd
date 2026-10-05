@@ -11,6 +11,13 @@ extends Node3D
 		set_meta("planning_light_color", light_color)
 		_apply_color()
 
+# Defaults preserve invisible fixtures in legacy authored scenes/maps.
+@export_enum("point", "linear", "rectangle") var fixture_shape := "point"
+@export var fixture_visible_in_game := false
+var _planning_visual := false
+var _fixture: Node3D
+var _diffuser_material: StandardMaterial3D
+
 @onready var marker: MeshInstance3D = $Marker
 @onready var light: SpotLight3D = $Light
 var flicker_mode := 0
@@ -42,6 +49,7 @@ func _ready() -> void:
 		if not has_meta("planning_light_energy"):
 			set_meta("planning_light_energy", light.light_energy)
 		configure_flicker(int(get_meta("planning_flicker_mode", 0)), float(get_meta("planning_flicker_step", 0.2)))
+	_build_fixture()
 
 
 func configure_flicker(mode: int, step_seconds: float) -> void:
@@ -95,6 +103,7 @@ func _is_active() -> bool:
 
 func _sync_activation() -> void:
 	visible = true
+	_sync_fixture_visibility()
 	set_process(_is_active() and flicker_mode != 0)
 	if light != null:
 		light.visible = _is_active()
@@ -102,6 +111,7 @@ func _sync_activation() -> void:
 
 
 func set_planning_visual(enabled: bool) -> void:
+	_planning_visual = enabled
 	visible = true
 	if marker != null:
 		marker.visible = enabled
@@ -122,6 +132,8 @@ func set_authored_energy(energy: float) -> void:
 func _apply_energy() -> void:
 	if light != null:
 		light.light_energy = get_authored_energy() * energy_multiplier * _flicker_factor if _is_active() else 0.0
+	if _diffuser_material != null:
+		_diffuser_material.emission_energy_multiplier = minf(light.light_energy, 2.0) if light != null else 0.0
 
 
 func get_authored_color() -> Color:
@@ -135,3 +147,70 @@ func set_authored_color(color: Color) -> void:
 func _apply_color() -> void:
 	if light != null:
 		light.light_color = light_color
+	if _diffuser_material != null:
+		_diffuser_material.albedo_color = light_color
+		_diffuser_material.emission = light_color
+
+
+func configure_fixture(shape: String, visible_in_game: bool) -> void:
+	var next_shape := shape if shape in ["point", "linear", "rectangle"] else "point"
+	var rebuild := fixture_shape != next_shape
+	fixture_shape = next_shape
+	fixture_visible_in_game = visible_in_game
+	if is_node_ready() and (_fixture == null or rebuild):
+		_build_fixture()
+	_sync_fixture_visibility()
+
+
+func get_fixture_config() -> Dictionary:
+	return {"shape": fixture_shape, "visible_in_game": fixture_visible_in_game}
+
+
+func _build_fixture() -> void:
+	# Geometry and materials are per-instance; shared scene resources stay immutable.
+	if _fixture == null:
+		_fixture = Node3D.new()
+		_fixture.name = "Fixture"
+		add_child(_fixture)
+	for child in _fixture.get_children():
+		child.free()
+	var housing := MeshInstance3D.new()
+	housing.name = "Housing"
+	housing.mesh = _fixture_mesh(false)
+	var frame := StandardMaterial3D.new()
+	frame.albedo_color = Color(0.16, 0.18, 0.21)
+	frame.metallic = 0.65
+	frame.roughness = 0.4
+	housing.material_override = frame
+	_fixture.add_child(housing)
+	var diffuser := MeshInstance3D.new()
+	diffuser.name = "Diffuser"
+	diffuser.mesh = _fixture_mesh(true)
+	diffuser.position.y = -0.046
+	_diffuser_material = StandardMaterial3D.new()
+	_diffuser_material.emission_enabled = true
+	diffuser.material_override = _diffuser_material
+	_fixture.add_child(diffuser)
+	_apply_color()
+	_apply_energy()
+	_sync_fixture_visibility()
+
+
+func _fixture_mesh(diffuser: bool) -> PrimitiveMesh:
+	if fixture_shape == "point":
+		var cylinder := CylinderMesh.new()
+		cylinder.top_radius = 0.145 if diffuser else 0.18
+		cylinder.bottom_radius = cylinder.top_radius
+		cylinder.height = 0.012 if diffuser else 0.08
+		return cylinder
+	var box := BoxMesh.new()
+	var footprint := Vector2(1.2, 0.16) if fixture_shape == "linear" else Vector2(0.8, 0.6)
+	if diffuser:
+		footprint -= Vector2(0.04, 0.04)
+	box.size = Vector3(footprint.x, 0.012 if diffuser else 0.08, footprint.y)
+	return box
+
+
+func _sync_fixture_visibility() -> void:
+	if _fixture != null:
+		_fixture.visible = _planning_visual or (fixture_visible_in_game and _runtime_active)
