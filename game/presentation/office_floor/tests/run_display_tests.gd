@@ -141,7 +141,7 @@ func _rect(view: Node3D) -> Vector4:
 
 
 func _test_pixels() -> void:
-	# Render one face with a front receiver and a rear receiver in a black room.
+	# Render one extracted face in a black room.
 	# Shader compilation and real GPU texture loads happen only in this path.
 	var world := WorldEnvironment.new()
 	world.environment = Environment.new()
