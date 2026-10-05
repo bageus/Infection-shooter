@@ -9,6 +9,7 @@ const ChunkStreamer = preload("res://game/bootstrap/app/chunk_streamer.gd")
 const TEST_CLOUD := preload("res://game/features/infection_source/public/mutagen_cloud.tscn")
 const MUTATION_UI := preload("res://game/bootstrap/app/mutation_tree_ui.gd")
 const BLOOD_EFFECTS := preload("res://game/presentation/office_floor/public/blood_effects_3d.tscn")
+const BLAST_FEEDBACK := preload("res://game/bootstrap/app/blast_feedback.gd")
 const OCCLUSION := preload("res://game/bootstrap/app/occlusion_effects.gd")
 const MISSION_LAYOUT := preload("res://game/bootstrap/app/mission_layout.gd")
 
@@ -83,6 +84,10 @@ func _ready() -> void:
 	occlusion.name = "OcclusionEffects"
 	add_child(occlusion)
 	occlusion.setup(player, player.get("camera") as Camera3D, self)
+	var feedback := BLAST_FEEDBACK.new()
+	feedback.name = "BlastFeedback"
+	add_child(feedback)
+	feedback.configure(player)
 	_setup_blood_effects()
 	for enemy in enemies.get_children():
 		if enemy.has_method("set_target"):

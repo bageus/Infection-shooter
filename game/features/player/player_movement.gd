@@ -1,4 +1,8 @@
 extends CharacterBody3D
+
+signal blast_stun_started(duration: float, intensity: float)
+signal blast_stun_ended()
+
 const CONTROL_LOSS := preload("res://game/features/player/mutation_control_loss.gd")
 const MUTATION_EFFECTS := preload("res://game/features/player/mutation_skill_effects.gd")
 const WEAPON_STANCE := preload("res://game/features/player/player_weapon_stance.gd")
@@ -81,6 +85,9 @@ func _physics_process(delta: float) -> void:
 			camera_rig.position = Vector3.ZERO
 			AudioServer.set_bus_volume_db(0, _original_master_volume)
 			if is_instance_valid(_stun_ringing): _stun_ringing.stop()
+			blast_stun_ended.emit()
+		elif is_instance_valid(_stun_ringing):
+			_stun_ringing.volume_db = -19.0 + 6.0 * _stun_intensity + linear_to_db(clampf(_stun_remaining / 0.8, 0.0001, 1.0))
 	if absf(camera.position.length()-_camera_distance)>0.001:
 		camera.position=camera.position.normalized()*lerpf(camera.position.length(),_camera_distance,1.0-exp(-8.0*delta))
 	_roll_cooldown_remaining=maxf(0.0,_roll_cooldown_remaining-delta)
@@ -295,11 +302,12 @@ func apply_blast_stun(duration: float, intensity: float) -> void:
 		var samples := PackedByteArray()
 		samples.resize(22050)
 		for i in 11025:
-			samples.encode_s16(i * 2, roundi(sin(float(i) * TAU * 730.0 / 22050.0) * 750.0))
+			samples.encode_s16(i * 2, roundi((0.75 * sin(float(i) * TAU * 2800.0 / 22050.0) + 0.25 * sin(float(i) * TAU * 3200.0 / 22050.0)) * 2200.0))
 		tone.data = samples
 		_stun_ringing.stream = tone
 	_stun_ringing.volume_db = -19.0 + 6.0 * _stun_intensity
 	_stun_ringing.play()
+	blast_stun_started.emit(_stun_remaining, _stun_intensity)
 
 func _exit_tree() -> void:
 	_end_blast_stun()
@@ -319,6 +327,7 @@ func _end_blast_stun() -> void:
 	AudioServer.set_bus_volume_db(0, _original_master_volume)
 	if is_instance_valid(_stun_ringing):
 		_stun_ringing.stop()
+	blast_stun_ended.emit()
 
 
 func _update_move(delta:float)->void:

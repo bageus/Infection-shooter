@@ -225,3 +225,7 @@ passes without exceptions.
 ## Occlusion presentation (ADR-0023)
 
 Bootstrap owns occlusion_mode and transient render copies/overrides, with actor, camera and world injected by main. Public structural and pickup roots expose versioned occlusion_visual_v1 classification groups, not service lookup. Gameplay never depends on this effect. Shared authored mesh/material resources remain immutable; skeletons are shared read-only. Planner commands temporarily suspend rendering without changing the persisted mode. No layer, dependency or policy exception is introduced; architecture/policy.json remains unchanged.
+
+## Blast screen feedback (ADR-0024)
+
+Player owns blast disorientation/audio recovery and reports typed blast_feedback_v1 facts. Bootstrap injects the public player root into a scene-local CanvasLayer that owns only the visual envelope; gameplay does not reference UI. Subscriptions disconnect on teardown. Authored damage/cover/radius and module dependency direction remain unchanged. No singleton, map schema change or policy exception.

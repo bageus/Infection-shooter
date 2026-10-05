@@ -24,6 +24,10 @@
     "mission_wiring_v1": {
       "configure_world": "configure_world(container: Node3D, impacts: Node) -> void",
       "configure_weapon_drop": "configure_weapon_drop(command: Callable) -> void; command(index, world_position) -> bool"
+    },
+    "blast_feedback_v1": {
+      "blast_stun_started": "signal blast_stun_started(duration: float, intensity: float); actual remaining duration and intensity after apply_blast_stun",
+      "blast_stun_ended": "signal blast_stun_ended(); natural expiry, pause, game over or exit"
     }
   }
 }
