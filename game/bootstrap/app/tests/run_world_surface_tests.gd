@@ -196,6 +196,12 @@ func _blood_roundtrip(planner: Node, objects: Node) -> void:
 	for item: Node3D in objects.get("placed"):
 		if item.has_method("get_blood_config"):
 			_check(item.get("_anchor") != null, "Loaded blood restores its mesh anchor")
+			var reference: WeakRef = item.get("_anchor")
+			var restored_anchor := reference.get_ref() as Node3D
+			restored_anchor.queue_free()
+			await process_frame
+			await process_frame
+			_check(not item.get_node("BloodQuad").visible, "Deleted object never leaves floating blood")
 	objects.call("_apply_layout_data", {"version": 6, "objects": [{"scene": "res://game/presentation/office_floor/public/props/blood_decal.tscn", "blood_texture": "smear_04", "blood_surface": "wall"}]})
 	for item: Node3D in objects.get("placed"):
 		if item.has_method("get_blood_config"):

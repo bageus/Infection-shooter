@@ -45,6 +45,8 @@ func attach_blood(anchor: Node3D, owner_id: String) -> void:
 func _process(_delta: float) -> void:
 	var anchor := _anchor.get_ref() as Node3D if _anchor != null else null
 	if anchor == null:
+		if _visual != null:
+			_visual.hide()
 		set_process(false)
 		return
 	global_transform = anchor.global_transform * _anchor_transform
