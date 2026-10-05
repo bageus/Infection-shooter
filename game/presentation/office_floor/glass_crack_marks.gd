@@ -19,7 +19,7 @@ const IMPACT_CENTERS = [
 ]
 
 
-static func spawn(pane: StaticBody3D, point: Vector3, normal: Vector3, max_size: float = 0.65) -> void:
+static func spawn(pane: StaticBody3D, point: Vector3, normal: Vector3, max_size: float = 0.65) -> MeshInstance3D:
 	var mark := MeshInstance3D.new()
 	var material := StandardMaterial3D.new()
 	material.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
@@ -46,6 +46,7 @@ static func spawn(pane: StaticBody3D, point: Vector3, normal: Vector3, max_size:
 	mark.global_basis = Basis.looking_at(-outward, up) * Basis(Vector3.FORWARD, randf() * TAU)
 	if pool != null:
 		pool.call("register_mark", mark)
+	return mark
 
 
 static func _fallback_fracture(material: Material) -> Mesh:

@@ -9,9 +9,17 @@ const CRACKS = preload("res://game/presentation/office_floor/glass_crack_marks.g
 @export var blinds_pass_through := false
 @export var preserve_open_frame := false
 @export var unbreakable := false
+## Cracked hits a pane takes (random in range) before the next one shatters it.
+@export var cracks_before_break := Vector2i(2, 4)
+## Shards this close to the hit burst out at once; the rest crumble from
+## their own places, later the further they are.
+@export var burst_radius := 0.45
+@export var crumble_seconds_per_metre := 0.22
 
 var _health := 0.0
 var _broken := false
+var _cracks_needed := 0
+var _crack_marks: Array[Node3D] = []
 var _glass_nodes: Array[Node3D] = []
 var _blinds: Array[Node3D] = []
 var _blinds_rest: Array[Basis] = []
@@ -35,6 +43,7 @@ func configure_player(actor: Node3D) -> void:
 
 func _ready() -> void:
 	_health = max_health
+	_cracks_needed = randi_range(cracks_before_break.x, cracks_before_break.y)
 	_collect_glass(get_parent().get_node_or_null("Visual"))
 	if blinds_pass_through:
 		_collect_blinds(get_parent().get_node_or_null("Visual"))
@@ -78,8 +87,25 @@ func take_projectile_hit(_damage: float, hit_position: Vector3, hit_normal: Vect
 		return false
 	if _broken:
 		return false
-	_break_glass(hit_position)
+	# Bullets crack the pane first; a blast or the hit after the last crack
+	# shatters it.
+	if _weapon_name != "GRENADE" and _crack_marks.size() < _cracks_needed:
+		_add_crack(hit_position, hit_normal)
+		return false
+	_break_glass(hit_position, _direction)
 	return false
+
+
+func _add_crack(hit_position: Vector3, hit_normal: Vector3) -> void:
+	var size := _glass_mark_size(hit_position)
+	var mark: Node3D = CRACKS.spawn(self, hit_position, hit_normal, size if size >= 0.12 else 0.4)
+	if mark != null:
+		_crack_marks.append(mark)
+
+
+## Cracks shown on the pane (0 once it has shattered).
+func crack_count() -> int:
+	return _crack_marks.size()
 
 
 func _glass_mark_size(point: Vector3) -> float:
@@ -113,7 +139,7 @@ func take_melee_hit(damage: float, hit_position: Vector3, _direction: Vector3) -
 		return
 	_health -= maxf(damage, 0.0)
 	if _health <= 0.0:
-		_break_glass(hit_position)
+		_break_glass(hit_position, _direction)
 
 
 func _collect_glass(node: Node) -> void:
@@ -125,11 +151,15 @@ func _collect_glass(node: Node) -> void:
 		_collect_glass(child)
 
 
-func _break_glass(hit_position: Vector3) -> void:
+func _break_glass(hit_position: Vector3, direction: Vector3 = Vector3.ZERO) -> void:
 	if _broken:
 		return
 	_broken = true
 	SFX.play(self, &"glass_break", hit_position)
+	for mark in _crack_marks:
+		if is_instance_valid(mark):
+			mark.queue_free()
+	_crack_marks.clear()
 	for glass in _glass_nodes:
 		if is_instance_valid(glass):
 			glass.visible = false
@@ -146,7 +176,7 @@ func _break_glass(hit_position: Vector3) -> void:
 	collision_layer = 0
 	collision_mask = 0
 	# Only GlassBody is disabled; the surrounding frame keeps its own collision.
-	_spawn_fragments(hit_position)
+	_spawn_fragments(hit_position, direction)
 
 
 func _replace_frame_collision() -> void:
@@ -245,14 +275,29 @@ func _hide_named(node: Node, token: String) -> void:
 		_hide_named(child, token)
 
 
-func _spawn_fragments(hit_position: Vector3) -> void:
+func _spawn_fragments(hit_position: Vector3, direction: Vector3 = Vector3.ZERO) -> void:
 	var visual := get_parent().get_node_or_null("Visual") as Node3D
 	var group: Node3D = DAMAGE.find_named(visual, "Glass_Shards") if visual != null else null
 	if group != null:
+		# Every shard stays in its place in the frame and falls from there.
 		var shards: Array[MeshInstance3D] = DAMAGE.reveal_meshes(group)
-		for index in mini(shards.size(), 12):
-			DAMAGE.spawn_piece(self, shards[index], null, 0, index, Vector3.UP, hit_position)
-		group.hide()
+		group.show()
+		var push := direction.normalized() if direction.length_squared() > 0.0001 else Vector3.ZERO
+		var host: WeakRef = weakref(self)
+		for index in shards.size():
+			var shard := shards[index]
+			var center: Vector3 = (shard.global_transform * shard.get_aabb()).get_center()
+			var distance := center.distance_to(hit_position)
+			if distance <= burst_radius:
+				_drop_shard(shard, index, push + Vector3.DOWN * 0.1, hit_position, true)
+				continue
+			var delay := distance * crumble_seconds_per_metre + randf_range(0.0, 0.12)
+			var piece: WeakRef = weakref(shard)
+			get_tree().create_timer(delay, false).timeout.connect(func() -> void:
+				var pane := host.get_ref() as Node
+				var source := piece.get_ref() as MeshInstance3D
+				if pane != null and source != null and source.is_visible_in_tree():
+					pane.call("_drop_shard", source, index, push * 0.35 + Vector3.DOWN, hit_position, false))
 		return
 	# Older window models have a pane but no shard geometry.
 	for index in 6:
@@ -268,3 +313,9 @@ func _spawn_fragments(hit_position: Vector3) -> void:
 		source.global_position = hit_position + Vector3(randf_range(-0.35, 0.35), randf_range(-0.35, 0.35), 0)
 		DAMAGE.spawn_piece(self, source, null, 0, index, Vector3.UP, hit_position)
 		source.queue_free()
+
+
+# Turns one shard of the pane into a falling piece at the shard's own place.
+func _drop_shard(shard: MeshInstance3D, index: int, direction: Vector3, hit_position: Vector3, burst: bool) -> void:
+	DAMAGE.spawn_piece(self, shard, null, 0, index, direction, hit_position, burst)
+	shard.hide()
