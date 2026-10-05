@@ -3,16 +3,31 @@
 .import/
 .mono/
 
+# Export output and engine packages
+/build/
+/export/
+*.pck
+*.zip
+*.exe
+*.x86_64
+*.apk
+*.aab
+*.wasm
+*.dmg
+
 # Local/editor files
 *.tmp
 *.translation
 .DS_Store
 Thumbs.db
+__pycache__/
+*.pyc
 
-# Blender aggregate/source workspace (local only)
+# Blender backups and the local aggregate/source workspace
+*.blend1
 models/objects/01_all.blend
-models/objects/01_all.blend1
 models/objects/01_all.blend.import
 
-# Local layout authored by the in-game planning tool
-game/levels/authored/base_office_layout.tscn
+# Generated reports
+model_structure_audit*.txt
+model_structure_audit*.csv
