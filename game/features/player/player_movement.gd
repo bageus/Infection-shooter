@@ -17,6 +17,9 @@ const ANIMATION_SELECTION := preload("res://game/features/player/player_animatio
 const PLAYER_AUDIO := preload("res://game/features/player/player_audio.gd")
 @export var move_speed: float = 6.0
 @export var sprint_speed: float = 9.0
+## Body strength for pushing items (prop_weight_v1); 1.0 moves up to 22 kg.
+@export var push_strength: float = 1.0
+var _intended_motion := Vector3.ZERO
 @export var ground_acceleration: float = 18.0
 @export var ground_deceleration: float = 13.0
 @export var roll_speed: float = 13.0
@@ -374,6 +377,7 @@ func _update_move(delta:float)->void:
 		var accel:=ground_acceleration if d.length_squared()>0.0001 else ground_deceleration
 		velocity.x=move_toward(velocity.x,target.x,accel*delta);velocity.z=move_toward(velocity.z,target.z,accel*delta)
 	velocity.y=0.0 if is_on_floor() else velocity.y-gravity_acceleration*delta
+	_intended_motion=Vector3(velocity.x,0.0,velocity.z)
 	move_and_slide()
 	if health < max_health and _blood_motion_start.distance_to(global_position) >= blood_drop_distance:
 		if _blood_motion_start.distance_to(global_position) < 3.0:
@@ -384,13 +388,14 @@ func _update_move(delta:float)->void:
 		_blood_motion_start = global_position
 	_push_chair_contacts()
 	if _roll_remaining>0.0: _push_roll_contacts()
+# Sliding zeroes the velocity into an item, so pushes use the intended motion.
 func _push_chair_contacts()->void:
+	var pushed:={}
 	for i in get_slide_collision_count():
-		var collision:=get_slide_collision(i)
-		var collider:=collision.get_collider()
-		if collider!=null and collider.has_method("push_from_character"):
-			var movement:=Vector3(velocity.x,0.0,velocity.z)
-			collider.call("push_from_character",global_position,movement)
+		var collider:=get_slide_collision(i).get_collider()
+		if collider!=null and not pushed.has(collider) and collider.has_method("push_from_character"):
+			pushed[collider]=true
+			collider.call("push_from_character",global_position,_intended_motion,push_strength)
 
 func _push_roll_contacts()->void:
 	for i in get_slide_collision_count():

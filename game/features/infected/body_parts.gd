@@ -37,6 +37,11 @@ var _wound_cursor := 0
 var _modifier: SkeletonModifier3D
 var _hitboxes: Dictionary = {}
 var _cap_material: StandardMaterial3D
+# Bleeding stumps: [WeakRef holder, until msec, last mark position, last mark msec].
+var _bleeding_stumps: Array = []
+const STUMP_BLEED_SECONDS := 3.5
+const DRIP_MARK_DISTANCE := 0.3
+const DRIP_MARK_INTERVAL_MS := 900
 
 
 # strength: durability budget (usually the owner's max health scaled by size).
@@ -309,7 +314,29 @@ func _add_stump(root: int, joint_world: Vector3, rest_radius: float, bleed: bool
 	var outward := local.normalized() if local.length_squared() > 0.0001 else Vector3.UP
 	_attach_cap(holder, Vector3.ZERO, rest_radius, outward)
 	if bleed:
-		FX.bleed(holder, Vector3.ZERO, outward, 3.5, 1.0)
+		FX.bleed(holder, Vector3.ZERO, outward, STUMP_BLEED_SECONDS, 1.0)
+		_bleeding_stumps.append([weakref(holder), Time.get_ticks_msec() + int(STUMP_BLEED_SECONDS * 1000.0), Vector3.INF, 0])
+
+
+## Points where dripping stumps should leave a floor mark now: once on a new
+## spot, again after moving DRIP_MARK_DISTANCE or after a pause, so drips form
+## a trail while walking and a growing patch while standing.
+func drip_mark_points() -> Array[Vector3]:
+	var now := Time.get_ticks_msec()
+	var points: Array[Vector3] = []
+	for index in range(_bleeding_stumps.size() - 1, -1, -1):
+		var entry: Array = _bleeding_stumps[index]
+		var holder := (entry[0] as WeakRef).get_ref() as Node3D
+		if holder == null or not holder.is_inside_tree() or now > int(entry[1]):
+			_bleeding_stumps.remove_at(index)
+			continue
+		var point := holder.global_position
+		var last: Vector3 = entry[2]
+		if last == Vector3.INF or point.distance_to(last) >= DRIP_MARK_DISTANCE or now - int(entry[3]) >= DRIP_MARK_INTERVAL_MS:
+			entry[2] = point
+			entry[3] = now
+			points.append(point)
+	return points
 
 
 # A flattened wet disc closing the cut, its flat side facing along `axis`.

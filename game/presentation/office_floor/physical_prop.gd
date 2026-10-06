@@ -13,13 +13,18 @@ const SPARKS = preload("res://game/presentation/office_floor/electric_sparks.gd"
 const BLAST = preload("res://game/presentation/office_floor/blast_effect.gd")
 const DAMAGE = preload("res://game/presentation/office_floor/environment_damage.gd")
 const DEBRIS = preload("res://game/presentation/office_floor/debris_lifecycle.gd")
+const CONTACT = preload("res://game/presentation/office_floor/prop_contact.gd")
+const WEIGHT = preload("res://game/presentation/office_floor/prop_weight.gd")
 const MAX_MODEL_PIECES := 12
 const MAX_PIECE_SIZE := 1.0
 const CRUMBLE_CHUNKS := 9
 
 @export var max_health := 110.0
 @export var bullet_impulse := 1.8
+# Melee knock-back; walking pushes follow weight_kg (prop_weight_v1).
 @export var character_push_impulse := 2.8
+## Item weight in kg for character pushes; 0 uses the catalogue, then the mass.
+@export var weight_kg := 0.0
 @export var breakable := true
 @export var max_linear_speed := 7.0
 @export var max_angular_speed := 8.0
@@ -50,6 +55,10 @@ func get_projectile_material(_shape_index: int = -1) -> String:
 
 func _ready() -> void:
 	_health = max_health
+	if weight_kg <= 0.0:
+		var source := scene_file_path if not scene_file_path.is_empty() or owner == null else owner.scene_file_path
+		var catalogued := WEIGHT.known_weight(source.get_file())
+		weight_kg = catalogued if catalogued > 0.0 else mass
 	add_to_group("physical_props")
 	contact_monitor = true
 	max_contacts_reported = 8
@@ -59,16 +68,8 @@ func _ready() -> void:
 	can_sleep = true
 	IMPACT_SOUND.watch(self)
 
-func push_from_character(character_position: Vector3, movement: Vector3) -> void:
-	if movement.length_squared() < 0.01:
-		return
-	var direction := movement.normalized()
-	var offset := global_position - character_position
-	offset.y = 0.0
-	if offset.length_squared() > 0.001:
-		direction = (direction * 0.7 + offset.normalized() * 0.3).normalized()
-	sleeping = false
-	apply_central_impulse(direction * character_push_impulse)
+func push_from_character(character_position: Vector3, movement: Vector3, strength: float = 1.0) -> void:
+	CONTACT.push(self, weight_kg, character_position, movement, strength)
 
 func take_projectile_hit(damage: float, hit_position: Vector3, _hit_normal: Vector3, direction: Vector3, weapon_name: String) -> bool:
 	if "extinguisher" in (name + get_parent().name).to_lower():

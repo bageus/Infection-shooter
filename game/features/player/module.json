@@ -38,6 +38,9 @@
       "take_projectile_damage": "take_projectile_damage(amount: float, point: Vector3, direction: Vector3, weapon: String) -> void",
       "take_blast_damage": "take_blast_damage(amount: float, origin: Vector3) -> void",
       "get_projectile_material": "get_projectile_material(shape_index = -1) -> String; flesh"
+    },
+    "character_push_v1": {
+      "push_strength": "push_strength: float = 1.0; passed to push_from_character with the intended pre-slide velocity"
     }
   }
 }
