@@ -77,12 +77,13 @@ jobs:
           OCCLUSION_CAPTURE_DIR: /tmp/menu_previews
           DISPLAY_CAPTURE_DIR: /tmp/menu_previews
           POSE_CAPTURE_DIR: /tmp/menu_previews
+          RUNTIME_PROFILE_DIR: /tmp/menu_previews
         if: always()
         shell: bash
         run: |
           failed=0
           for renderer in gl_compatibility forward_plus; do
-            for suite in game/presentation/prototype_hud/tests/run_radar_tests.gd game/presentation/office_floor/tests/run_floor_batch_tests.gd game/features/combat/tests/run_grenade_vfx_tests.gd game/features/infected/tests/run_corpse_physics_tests.gd game/bootstrap/app/tests/run_planner_extension_tests.gd game/bootstrap/app/tests/run_settings_tabs_tests.gd game/bootstrap/app/tests/run_surface_pose_tests.gd game/features/combat/tests/run_cursor_aim_tests.gd game/bootstrap/app/tests/run_gameplay_planner_repairs_tests.gd game/presentation/office_floor/tests/run_display_tests.gd game/bootstrap/app/tests/run_runtime_debug_tests.gd game/bootstrap/app/tests/run_occlusion_tests.gd game/bootstrap/app/tests/run_blast_feedback_tests.gd; do
+            for suite in game/presentation/office_floor/tests/run_display_shadow_profile.gd game/presentation/prototype_hud/tests/run_radar_tests.gd game/presentation/office_floor/tests/run_floor_batch_tests.gd game/features/combat/tests/run_grenade_vfx_tests.gd game/features/infected/tests/run_corpse_physics_tests.gd game/bootstrap/app/tests/run_planner_extension_tests.gd game/bootstrap/app/tests/run_settings_tabs_tests.gd game/bootstrap/app/tests/run_surface_pose_tests.gd game/features/combat/tests/run_cursor_aim_tests.gd game/bootstrap/app/tests/run_gameplay_planner_repairs_tests.gd game/presentation/office_floor/tests/run_display_tests.gd game/bootstrap/app/tests/run_runtime_debug_tests.gd game/bootstrap/app/tests/run_occlusion_tests.gd game/bootstrap/app/tests/run_blast_feedback_tests.gd; do
               suite_status=0
               started_at=$(date +%s)
               timeout 180 xvfb-run -a godot --verbose --path . --audio-driver Dummy --rendering-method "$renderer" --script "$suite" > /tmp/occlusion.log 2>&1 || suite_status=$?
