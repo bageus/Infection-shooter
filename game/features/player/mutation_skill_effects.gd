@@ -23,6 +23,19 @@ var _melee_victim: WeakRef
 var _melee_time := -100.0
 var storm_tick := 0.0
 var acid_pools: Array[Dictionary] = []
+## Retaliation answers a burst of damage, not one heavy blow.
+const RETALIATION_WINDOW := 3.0
+const RETALIATION_DAMAGE := 50.0
+var _clock := 0.0
+var _recent_hits: Array[Vector2] = []
+## Second Heart's emergency regeneration after a survived lethal hit.
+const SECOND_HEART_HEAL := 10.0
+const SECOND_HEART_DURATION := 5.0
+## Predator Dash strikes everything it passes, once per dash.
+const DASH_STRIKE_TIME := 0.45
+const DASH_REACH := 1.6
+const DASH_DAMAGE := 30.0
+var _dash_struck: Dictionary = {}
 
 var effects_root: Node3D
 var vfx: SKILL_VFX
@@ -61,6 +74,13 @@ func _release_spores(location: Vector3) -> void:
 		enemy.call("apply_mutation_poison", 5.0, 5.0)
 
 
+# Blood Scent: wounded enemies take extra damage from melee as well as bullets.
+func _scented(enemy: Node3D, amount: float) -> float:
+	if enabled("blood_scent") and float(enemy.get("health")) < float(enemy.get("max_health")) * 0.7:
+		return amount * 1.22
+	return amount
+
+
 func _refresh_stats() -> void:
 	var next_max := 125.0 if enabled("hypertrophy") else 100.0
 	player.set("max_health", next_max)
@@ -74,6 +94,7 @@ func enabled(skill_id: String) -> bool:
 
 
 func _process(delta: float) -> void:
+	_clock += delta
 	heart_cooldown = maxf(0.0, heart_cooldown - delta)
 	melee_cooldown = maxf(0.0, melee_cooldown - delta)
 	kill_timer = maxf(0.0, kill_timer - delta)
@@ -89,6 +110,10 @@ func _process(delta: float) -> void:
 				vfx.buff_ended(key)
 	if enabled("regeneration") and Time.get_ticks_msec() * 0.001 - last_hit_time > 5.0:
 		player.call("heal", 1.4 * delta)
+	if active_buff("second_heart"):
+		player.call("heal", SECOND_HEART_HEAL * delta)
+	if active_buff("predator_dash"):
+		_dash_strike()
 	storm_tick -= delta
 	if storm_tick <= 0.0:
 		storm_tick = 0.6
@@ -134,11 +159,25 @@ func on_player_hit(amount: float, damage_type: String = "physical") -> float:
 		var key := "adaptation_" + damage_type
 		reduction += minf(0.2, float(buffs.get(key, 0.0)) * 0.03)
 		buffs[key] = minf(6.0, float(buffs.get(key, 0.0)) + 1.0)
-	if enabled("retaliation") and amount >= 20.0:
+	if enabled("retaliation") and _retaliation_due(amount):
 		vfx.electric_pulse(player.global_position, 3.0)
 		for enemy in _enemies_near(player.global_position, 3.0):
 			enemy.call("apply_blast_stun", 1.2, 0.6)
 	return amount * (1.0 - minf(0.75, reduction))
+
+
+func _retaliation_due(amount: float) -> bool:
+	_recent_hits.append(Vector2(_clock, amount))
+	var total := 0.0
+	for i in range(_recent_hits.size() - 1, -1, -1):
+		if _clock - _recent_hits[i].x > RETALIATION_WINDOW:
+			_recent_hits.remove_at(i)
+		else:
+			total += _recent_hits[i].y
+	if total < RETALIATION_DAMAGE:
+		return false
+	_recent_hits.clear()
+	return true
 
 
 func survive_lethal() -> bool:
@@ -147,6 +186,7 @@ func survive_lethal() -> bool:
 	heart_cooldown = 110.0
 	last_hit_time = -100.0
 	vfx.heartbeat()
+	buffs["second_heart"] = SECOND_HEART_DURATION
 	return true
 
 
@@ -205,7 +245,7 @@ func melee() -> bool:
 		_melee_time = Time.get_ticks_msec() / 1000.0
 		if enabled("claws"):
 			vfx.claw_slash(enemy)
-		enemy.call("take_damage", 36.0 if enabled("claws") else 17.0)
+		enemy.call("take_damage", _scented(enemy, 36.0 if enabled("claws") else 17.0))
 		return true
 	return false
 
@@ -284,7 +324,23 @@ func _cast(skill_id: String) -> void:
 		"predator_dash":
 			player.call("mutation_dash")
 			vfx.dash_trail(0.4)
-			for enemy in _enemies_near(player.global_position, 2.5): enemy.call("take_damage", 30.0)
+			_dash_struck.clear()
+			buffs["predator_dash"] = DASH_STRIKE_TIME
+			_dash_strike()
+
+
+# Hits enemies along the dash path instead of a ring around the start point.
+func _dash_strike() -> void:
+	var heading: Vector3 = player.get("_roll_direction")
+	for enemy in _enemies_near(player.global_position, DASH_REACH + 0.6):
+		var offset := enemy.global_position - player.global_position
+		offset.y = 0.0
+		if _dash_struck.has(enemy.get_instance_id()) or offset.length() - _body_radius(enemy) > DASH_REACH:
+			continue
+		if heading.length_squared() > 0.0 and offset.length() > 0.3 and offset.normalized().dot(heading) < -0.2:
+			continue
+		_dash_struck[enemy.get_instance_id()] = true
+		enemy.call("take_damage", DASH_DAMAGE)
 
 
 func _enemies_near(center: Vector3, radius: float, nearest_first: bool = false) -> Array[Node3D]:
