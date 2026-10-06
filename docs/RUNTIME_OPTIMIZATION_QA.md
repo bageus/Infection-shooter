@@ -98,3 +98,53 @@ SCRIPT/SHADER/ERROR нет. Architecture 37469570293 SUCCESS. Последующ
 
 https://github.com/bageus/Infection-shooter/actions/runs/37469570276
 https://github.com/bageus/Infection-shooter/actions/runs/37469570293
+
+
+## Индекс поверхностей попаданий — PR #45
+
+База сравнения: main 91c3783. features.combat хранит локальный BVH для faces
+ресурса Mesh (до 128 ресурсов) и weak-кеш состава веток (до 128 корней).
+Mesh.changed помечает индекс для перестроения при следующем запросе;
+child_order_changed инвалидирует состав ветки. Видимость/metadata родителей,
+shadow mode, ресурс меша и transform проверяются при каждом запросе.
+У каждого наблюдателя собственная идентичность и weak-ссылка на владельца;
+вытеснение и уничтожение отключают сигналы. Публичные контракты и UV-проекция
+surface_stamp_v1 остаются прежними; архитектурных исключений нет.
+
+Регрессия сравнивает 240 лучей с полным перебором: попадание/промах, координата
+и нормаль при повороте, неравномерном и отрицательном масштабе. Отдельно проверяет
+скрытие/показ, metadata, коллапс damage-stage, добавление/удаление/reparent,
+замену/изменение/совместное использование Mesh, вложенные и независимые кеши,
+ограничение 128 индексов и отключение callbacks. На меше из 8192 треугольников
+локальное попадание выполняет 8 точных segment_intersects_triangle вместо 8192.
+Это число геометрических проверок в контрольном случае, не коэффициент FPS.
+
+```bash
+godot --headless --path . --script res://game/features/combat/tests/run_impact_geometry_index_tests.gd
+```
+
+Отдельный Impact geometry regressions CI запускает эти scene-free helpers без
+импорта игровых ассетов и выдаёт быстрый диагностический журнал. Полный Mission
+runtime regressions сохраняет этот же тест и проверки реальных следов/стрельбы
+в headless, Compatibility и Forward+.
+
+Для целевого профиля сравнить одинаковую карту и маршрут стрельбы на 91c3783
+и этой ревизии. Измерять отдельно первый выстрел по сложному объекту (ленивое
+построение индекса) и последующие попадания; затем разрушение, перенос/падение,
+появление новой геометрии и серии попаданий по разным объектам. Проверить кровь
+и копоть на торцах, столах, стульях, соседних объектах и отсутствие копоти на
+стекле. FPS Windows/Web и стоимость первого построения пока не измерены.
+
+
+Проверенный код f5fece95: architecture 37505074242 SUCCESS, focused geometry
+37505073991 SUCCESS и полный runtime 37505074182 SUCCESS. Godot 4.7.2:
+clean import/project/resource gates, 54 headless набора, main 180 кадров,
+menu captures, smoke и оба native renderer. Фактических SCRIPT/SHADER/ERROR нет.
+Первые прогоны обнаружили вызов instance helper из RefCounted PREDELETE и
+повторное подключение static bound callbacks у независимых/вложенных кешей.
+Исправлены прямая очистка и отдельные weak-наблюдатели; регрессия проверяет оба
+случая и shared Mesh. Последующий коммит записывает только документацию.
+
+https://github.com/bageus/Infection-shooter/actions/runs/37505074182
+https://github.com/bageus/Infection-shooter/actions/runs/37505073991
+https://github.com/bageus/Infection-shooter/actions/runs/37505074242
