@@ -152,6 +152,11 @@ static func texture_entry(texture_id: String) -> Dictionary:
 		_library.call("load_assets")
 	var category := texture_id.get_slice("_", 0)
 	var variant := int(texture_id.get_slice("_", 1))
+	# Layouts saved before the atlases may name a variant the category no
+	# longer has (pool had nine images, its atlas has eight frames).
+	var count: int = LIBRARY.frame_count(category)
+	if count > 0 and variant > count:
+		variant = posmod(variant - 1, count) + 1
 	for entry: Dictionary in (_library.get("entries") as Dictionary).get(category, []):
 		if int(entry.variant) == variant:
 			return entry
@@ -162,7 +167,7 @@ static func texture_entry(texture_id: String) -> Dictionary:
 static func texture_ids() -> PackedStringArray:
 	var ids := PackedStringArray()
 	for category: String in LIBRARY.CATEGORIES:
-		for variant in range(1, 10):
+		for variant in range(1, LIBRARY.frame_count(category) + 1):
 			ids.append("%s_%02d" % [category, variant])
 	return ids
 
