@@ -1,4 +1,6 @@
 extends CharacterBody3D
+# Living infected only; the "infected" group keeps corpses until they vanish.
+const ALIVE_GROUP := "infected_alive"
 const CHASE_ROUTE := preload("res://game/features/infected/chase_route.gd")
 var _route := CHASE_ROUTE.new()
 
@@ -119,6 +121,11 @@ func _ready() -> void:
 	status_fx = STATUS_FX.new()
 	add_child(status_fx)
 	status_fx.setup(self, body_visual, _head_height())
+	add_to_group(ALIVE_GROUP)
+	# Debris fallen before this spawn added exceptions only for those alive then.
+	for piece in get_tree().get_nodes_in_group("contactless_debris"):
+		if piece is CollisionObject3D:
+			add_collision_exception_with(piece)
 
 
 # Top of the collision capsule plus a little: where stun stars circle.
@@ -504,6 +511,7 @@ func _mark_stump_drips() -> void:
 
 func _die() -> void:
 	_dead = true
+	remove_from_group(ALIVE_GROUP)
 	# An enemy killed while far had its animation paused; the death must play.
 	_sleeping_far = false
 	if _animation != null:

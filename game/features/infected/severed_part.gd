@@ -11,6 +11,8 @@ signal wounded_moved(previous: Vector3, current: Vector3, excluded: Array[RID])
 const FX := preload("res://game/features/infected/blood_drip_fx.gd")
 const SFX := preload("res://game/core/audio/public/sound_events.gd")
 const GROUP := "infected_severed_part"
+# Every infected that enters the mission later skips contact with this group.
+const CONTACTLESS_GROUP := "contactless_debris"
 const HIT_LAYER := 4
 const WORLD_MASK := 3
 const MAX_PARTS := 28
@@ -44,6 +46,7 @@ func _ready() -> void:
 		for node in get_tree().get_nodes_in_group(group):
 			if node is CollisionObject3D:
 				add_collision_exception_with(node)
+	add_to_group(CONTACTLESS_GROUP)
 	_trail_from = global_position
 	# Decorations never expire and stay outside the debris budget.
 	if lifetime < INF:
