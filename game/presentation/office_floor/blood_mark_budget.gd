@@ -2,6 +2,7 @@ extends Node3D
 
 const MARK := preload("res://game/presentation/office_floor/blood_mark_3d.gd")
 const SURFACES := preload("res://game/presentation/office_floor/blood_surface_query.gd")
+const FIFO := preload("res://game/presentation/office_floor/blood_mark_fifo.gd")
 
 var max_marks := 128
 var per_surface_limit := 0
@@ -15,18 +16,21 @@ var _records: Dictionary = {}
 var _pending: Array[Dictionary] = []
 var _deaths: Array[Dictionary] = []
 var _death_ids: Dictionary = {}
+var _surfaces: Dictionary = {}
+var _active := FIFO.new()
+var _fading := 0
+var _timer: Timer
 
 
 func _ready() -> void:
 	container = Node3D.new()
 	container.name = "BloodMarks"
 	add_child(container)
-	var timer := Timer.new()
-	timer.wait_time = 0.1
-	timer.process_callback = Timer.TIMER_PROCESS_PHYSICS
-	timer.timeout.connect(_maintenance)
-	add_child(timer)
-	timer.start()
+	_timer = Timer.new()
+	_timer.wait_time = 0.1
+	_timer.process_callback = Timer.TIMER_PROCESS_PHYSICS
+	_timer.timeout.connect(_maintenance)
+	add_child(_timer)
 
 
 func submit(definition: Dictionary, surface: Dictionary) -> void:
@@ -36,6 +40,7 @@ func submit(definition: Dictionary, surface: Dictionary) -> void:
 		if _pending.size() >= 16:
 			_pending.pop_front()
 		_pending.append({"definition": definition, "surface": surface, "until": _clock + 3.0})
+	_wake()
 
 
 func schedule_pool(death_id: int, definition: Dictionary, surface: Dictionary, delay: float) -> void:
@@ -50,6 +55,7 @@ func schedule_pool(death_id: int, definition: Dictionary, surface: Dictionary, d
 			_admit(definition, surface)
 			return
 		_deaths.append({"definition": definition, "surface": surface, "due": _clock + delay})
+		_wake()
 
 
 func _admit(definition: Dictionary, surface: Dictionary) -> bool:
@@ -58,28 +64,14 @@ func _admit(definition: Dictionary, surface: Dictionary) -> bool:
 		return true
 	var body: Node3D = hit["collider"]
 	var key := body.get_instance_id()
-	var count := 0
-	var victim := -1
-	var surface_fading := 0
-	var total_fading := 0
-	for id in _records:
-		if _records[id]["fading"]:
-			total_fading += 1
-		if _records[id]["key"] == key:
-			if _records[id]["fading"]:
-				surface_fading += 1
-			count += 1
-			if victim < 0 and not _records[id]["fading"]:
-				victim = id
-	if per_surface_limit > 0 and count >= per_surface_limit:
-		if victim >= 0 and surface_fading == 0:
-			_retire(victim)
+	var state: Dictionary = _surfaces[key] if _surfaces.has(key) else {"count": 0, "fading": 0, "active": FIFO.new()}
+	if per_surface_limit > 0 and state["count"] >= per_surface_limit:
+		if state["active"].first >= 0 and state["fading"] == 0:
+			_retire(state["active"].first)
 		return false
 	if _records.size() >= maxi(max_marks, 1):
-		for id in _records:
-			if not _records[id]["fading"] and total_fading < mini(8, _pending.size() + 1):
-				_retire(id)
-				break
+		if _active.first >= 0 and _fading < mini(8, _pending.size() + 1):
+			_retire(_active.first)
 		return false
 	var mark := MARK.new() as Node3D
 	container.add_child(mark)
@@ -89,6 +81,11 @@ func _admit(definition: Dictionary, surface: Dictionary) -> bool:
 	mark.call("configure", hit, render_definition, settings)
 	_next_id += 1
 	_records[_next_id] = {"mark": weakref(mark), "key": key, "expires": _clock + lifetime, "fading": false}
+	state["count"] += 1
+	state["active"].append(_next_id)
+	_surfaces[key] = state
+	_active.append(_next_id)
+	_wake()
 	return true
 
 
@@ -109,6 +106,17 @@ func _maintenance() -> void:
 	for request in _pending.duplicate():
 		if request["until"] < _clock or _admit(request["definition"], request["surface"]):
 			_pending.erase(request)
+	_sleep_if_empty()
+
+
+func _wake() -> void:
+	if _timer != null and _timer.is_stopped():
+		_timer.start()
+
+
+func _sleep_if_empty() -> void:
+	if _timer != null and _records.is_empty() and _pending.is_empty() and _deaths.is_empty():
+		_timer.stop()
 
 
 func _surface_alive(mark: Node3D) -> bool:
@@ -124,17 +132,33 @@ func _retire(id: int) -> void:
 		_remove(id)
 		return
 	_records[id]["fading"] = true
+	var state: Dictionary = _surfaces[_records[id]["key"]]
+	state["fading"] += 1
+	_fading += 1
+	state["active"].remove(id)
+	_active.remove(id)
 	mark.call("fade_out", fade_seconds, _remove.bind(id))
 
 
 func _remove(id: int) -> void:
 	if not _records.has(id):
 		return
+	var key: int = _records[id]["key"]
+	var state: Dictionary = _surfaces[key]
+	state["count"] -= 1
+	if _records[id]["fading"]:
+		state["fading"] -= 1
+		_fading -= 1
+	state["active"].remove(id)
+	_active.remove(id)
+	if state["count"] == 0:
+		_surfaces.erase(key)
 	var mark := (_records[id]["mark"] as WeakRef).get_ref() as Node3D
 	if mark != null:
 		container.remove_child(mark)
 		mark.queue_free()
 	_records.erase(id)
+	_sleep_if_empty()
 
 
 func clear_marks() -> void:

@@ -9,6 +9,8 @@ on:
       - 'game/features/combat/impact_cache_watch.gd'
       - 'game/features/combat/tests/run_impact_geometry_index_tests.gd'
       - 'game/core/vfx/**'
+      - 'game/presentation/office_floor/blood_mark_fifo.gd'
+      - 'game/presentation/office_floor/tests/run_blood_fifo_tests.gd'
       - '.github/workflows/impact_geometry.yml'
   pull_request:
     paths:
@@ -18,6 +20,8 @@ on:
       - 'game/features/combat/impact_cache_watch.gd'
       - 'game/features/combat/tests/run_impact_geometry_index_tests.gd'
       - 'game/core/vfx/**'
+      - 'game/presentation/office_floor/blood_mark_fifo.gd'
+      - 'game/presentation/office_floor/tests/run_blood_fifo_tests.gd'
       - '.github/workflows/impact_geometry.yml'
 permissions:
   contents: read
@@ -48,3 +52,8 @@ jobs:
           cp -r game/core/vfx /tmp/impact_geometry/game/core/
           timeout 120 godot --headless --path /tmp/impact_geometry --script res://game/core/vfx/tests/run_stamp_cache_tests.gd 2>&1 | tee /tmp/stamp_cache.log
           if grep -E 'SCRIPT ERROR|^ERROR:' /tmp/stamp_cache.log; then exit 1; fi
+          mkdir -p /tmp/impact_geometry/game/presentation/office_floor/tests
+          cp game/presentation/office_floor/blood_mark_fifo.gd /tmp/impact_geometry/game/presentation/office_floor/
+          cp game/presentation/office_floor/tests/run_blood_fifo_tests.gd /tmp/impact_geometry/game/presentation/office_floor/tests/
+          timeout 120 godot --headless --path /tmp/impact_geometry --script res://game/presentation/office_floor/tests/run_blood_fifo_tests.gd 2>&1 | tee /tmp/blood_fifo.log
+          if grep -E 'SCRIPT ERROR|^ERROR:' /tmp/blood_fifo.log; then exit 1; fi

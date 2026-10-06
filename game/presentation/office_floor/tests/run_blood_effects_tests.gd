@@ -88,12 +88,16 @@ func _run() -> void:
 	var budget := effects.get("_budget") as Node3D
 	budget.set("max_marks", 3)
 	budget.set("per_surface_limit", 2)
+	_expect((budget.get("_timer") as Timer).is_stopped(), "Empty blood budget does not tick")
 	for i in range(20):
 		effects.call("small_stain", Vector3(i * 0.01, 1, 0), excluded)
 	await create_timer(0.6).timeout
 	_expect(_stats()["marks"] <= 2 and _stats()["pending"] <= 16, "Local density and global budget include fading marks.")
 	effects.call("clear_marks")
 	_expect(_stats()["marks"] == 0 and _stats()["pending"] == 0, "Clear removes all marks and pending work.")
+	_expect((budget.get("_timer") as Timer).is_stopped(), "Clear stops blood maintenance")
+	_expect(budget.get("_surfaces").is_empty() and budget.get("_fading") == 0 and budget.get("_active").first == -1, "Clear releases counters and FIFO")
+	await _test_budget_index()
 	await _test_hit_throttle_and_expiry()
 	await _test_decal_growth(floor_hit)
 	stage.queue_free()
@@ -191,3 +195,24 @@ func _expect(condition: bool, message: String) -> void:
 	if not condition:
 		failures += 1
 		push_error(message)
+
+func _test_budget_index() -> void:
+	var budget := effects.get("_budget") as Node3D
+	budget.set("max_marks", 3)
+	budget.set("per_surface_limit", 0)
+	for i in 3:
+		effects.call("small_stain", Vector3(i, 1, 0), excluded)
+	var records: Dictionary = budget.get("_records")
+	var ids := records.keys()
+	_expect(ids.size() == 3, "Three marks enter global FIFO")
+	if ids.size() == 3:
+		var key: int = records[ids[0]]["key"]
+		var counts: Dictionary = budget.get("_surfaces")
+		_expect(counts[key]["count"] == 3, "Surface counter includes every mark")
+		budget.call("_retire", ids[1])
+		_expect(budget.get("_active").first == ids[0], "Retiring middle mark preserves oldest active")
+		budget.call("_remove", ids[0])
+		_expect(budget.get("_active").first == ids[2], "Deleting oldest advances FIFO")
+		_expect(counts[key]["count"] == 2 and counts[key]["fading"] == 1 and budget.get("_fading") == 1, "Fading continues to consume density budget")
+	effects.call("clear_marks")
+	await process_frame
