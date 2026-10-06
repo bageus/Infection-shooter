@@ -1,9 +1,10 @@
 extends RefCounted
-## One persistent notice button per tab, independent of page scrolling.
+## A single "!" badge in the tab bar that shows only the active tab's notice,
+## independent of page scrolling.
 var tabs: TabContainer
 var host: Control
 var messages: Dictionary = {}
-var buttons: Array[Button] = []
+var badge: Button
 var detail: Label
 var popup: PopupPanel
 var scroll: ScrollContainer
@@ -12,21 +13,33 @@ var scroll: ScrollContainer
 func setup(dialog: Control, tab_view: TabContainer) -> void:
 	host = dialog
 	tabs = tab_view
-	var row := HBoxContainer.new()
-	row.name = "SettingsNotices"
-	row.alignment = BoxContainer.ALIGNMENT_END
-	row.add_theme_constant_override("separation", 10)
-	dialog.get("layout").add_child(row)
-	dialog.get("layout").move_child(row, tabs.get_index())
-	for index in 4:
-		var button := Button.new()
-		button.text = "! " + dialog.view.text(["tabGeneral", "tabControls", "tabVideo", "tabAudio"][index])
-		button.custom_minimum_size.y = 28
-		button.add_theme_font_size_override("font_size", 12)
-		button.pressed.connect(_show.bind(index))
-		row.add_child(button)
-		buttons.append(button)
-		button.hide()
+	badge = Button.new()
+	badge.name = "SettingsNotices"
+	badge.text = "!"
+	badge.focus_mode = Control.FOCUS_NONE
+	badge.custom_minimum_size = Vector2(26, 26)
+	badge.add_theme_font_size_override("font_size", 15)
+	for state in ["normal", "hover", "pressed", "focus"]:
+		var style := StyleBoxFlat.new()
+		style.bg_color = Color("9a3a40") if state == "normal" else Color("b8464d")
+		style.border_color = Color("e2dfd4")
+		style.set_border_width_all(1)
+		style.set_corner_radius_all(13)
+		style.set_content_margin_all(0)
+		badge.add_theme_stylebox_override(state, style)
+	for state in ["font_color", "font_hover_color", "font_pressed_color", "font_focus_color"]:
+		badge.add_theme_color_override(state, Color("f4f1e8"))
+	badge.pressed.connect(func() -> void: _show(tabs.current_tab))
+	# The tab bar spans the full dialog width while tabs stay centred, so the
+	# badge sits on its free right edge without taking a row of its own.
+	var bar := tabs.get_tab_bar()
+	bar.add_child(badge)
+	badge.set_anchors_preset(Control.PRESET_CENTER_RIGHT)
+	badge.offset_left = -30
+	badge.offset_right = -4
+	badge.offset_top = -13
+	badge.offset_bottom = 13
+	badge.hide()
 	popup = PopupPanel.new()
 	dialog.add_child(popup)
 	scroll = ScrollContainer.new()
@@ -44,15 +57,23 @@ func setup(dialog: Control, tab_view: TabContainer) -> void:
 	margin.add_child(detail)
 	tabs.tab_changed.connect(func(_index: int) -> void:
 		if is_instance_valid(popup):
-			popup.hide())
+			popup.hide()
+		_refresh())
 
 
 func set_notice(index: int, message: String) -> void:
 	messages[index] = message
-	buttons[index].visible = not message.is_empty()
-	buttons[index].tooltip_text = message
+	_refresh()
 	if popup.visible and tabs.current_tab == index:
 		detail.text = message
+
+
+func _refresh() -> void:
+	if not is_instance_valid(badge):
+		return
+	var message := str(messages.get(tabs.current_tab, ""))
+	badge.visible = not message.is_empty()
+	badge.tooltip_text = message
 
 
 func _show(index: int) -> void:

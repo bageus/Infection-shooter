@@ -31,11 +31,7 @@ func _run() -> void:
 	_check(tabs.get_child(0).find_child("Language", true, false) != null, "Language belongs to General")
 	_check(tabs.get_child(2).find_child("Occlusion", true, false) != null, "Occlusion belongs to Video")
 	_check(tabs.get_child(3).find_child("SoundToggle", true, false) != null, "Sound belongs to Audio")
-	var notice_row: Control = dialog.find_child("SettingsNotices", true, false)
-	_check(notice_row != null and not tabs.is_ancestor_of(notice_row), "Notice buttons stay outside scrolling tab contents")
-	_check(dialog.settings.notices.buttons[0].visible and dialog.settings.notices.buttons[1].visible and not dialog.settings.notices.buttons[3].visible, "Each tab exposes its own notice only when needed")
-	var page_margin := tabs.get_child(0).get_child(0) as MarginContainer
-	_check(page_margin.get_theme_constant("margin_top") >= 20, "Tab contents retain a readable top gap")
+	_check_notice_badge(dialog, tabs)
 	dialog.settings.notices._show(1)
 	await process_frame
 	if DisplayServer.get_name() != "headless":
@@ -106,3 +102,22 @@ func _check(condition: bool, message: String) -> void:
 	if not condition:
 		failures += 1
 		push_error(message)
+
+
+func _check_notice_badge(dialog: Control, tabs: TabContainer) -> void:
+	var notices: RefCounted = dialog.settings.notices
+	var badge: Button = notices.badge
+	_check(badge.is_inside_tree() and dialog.is_ancestor_of(badge) and badge.text == "!", "One shared ! badge serves every tab")
+	for page_index in 4:
+		_check(not tabs.get_child(page_index).is_ancestor_of(badge), "Notice badge stays outside scrolling tab contents")
+	tabs.current_tab = 0
+	_check(badge.visible, "General shows its own notice")
+	tabs.current_tab = 3
+	_check(not badge.visible, "Audio without a notice hides the badge")
+	tabs.current_tab = 1
+	_check(badge.visible and badge.tooltip_text == notices.messages[1], "Badge follows the active tab's notice")
+	tabs.current_tab = 0
+	var page_margin := tabs.get_child(0).get_child(0) as MarginContainer
+	_check(page_margin.get_theme_constant("margin_top") >= 24, "Tab contents keep a clear gap below the tabs")
+	var page_style := tabs.get_theme_stylebox("panel") as StyleBoxFlat
+	_check(page_style != null and page_style.bg_color.a == 0.0, "Tab pages share the dialog background")
