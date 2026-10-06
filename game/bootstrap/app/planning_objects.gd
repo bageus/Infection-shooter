@@ -359,6 +359,24 @@ func _nudge_selected(input: Vector2) -> void:
 	_update_status()
 
 
+func _drag_selected(screen_pos: Vector2) -> void:
+	if bool(selected.get_meta("planning_wall_mount", false)) and not selected.has_method("get_blood_config"):
+		var point: Vector3 = geometry._screen_to_wall(screen_pos, selected)
+		if point.is_finite():
+			selected.global_position = point
+			geometry._apply_wall_mount(selected)
+		_update_status()
+		return
+	var world: Vector3 = geometry._screen_to_floor(screen_pos)
+	if not world.is_finite():
+		return
+	var locked_y: float = selected.global_position.y
+	selected.global_position = geometry._snap_position_for(selected, world)
+	if geometry._is_ceiling_tool(selected):
+		selected.global_position.y = locked_y
+	_update_status()
+
+
 func _move_selected_height(amount: float) -> void:
 	if selected != null:
 		session.edit_history.call("record_transform", selected)

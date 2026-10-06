@@ -24,9 +24,11 @@ func _run() -> void:
 	stage.add_child(wall)
 	_check(wall.get_meta("planning_wall_mount", false) and wall.freeze, "Group 13 stays attached to wall")
 	_snap(catalog)
+	await _wall_drag(planner, catalog)
 	await _particles(catalog)
 	await _corpse()
 	await _aim(player)
+	await _installed_lamps(planner)
 	stage.queue_free()
 	await process_frame
 	await create_timer(.2).timeout
@@ -55,6 +57,80 @@ func _snap(catalog: RefCounted) -> void:
 	var before := second.position
 	second.call("snap_display_edges", neighbors)
 	_check(second.position.is_equal_approx(before), "TV does not snap across wall planes")
+
+func _wall_drag(planner: Node, catalog: RefCounted) -> void:
+	# A placed wall object slides along its wall and keeps TV edge snapping.
+	var wall := StaticBody3D.new()
+	var box := CollisionShape3D.new()
+	box.shape = BoxShape3D.new()
+	box.shape.size = Vector3(20, 6, .2)
+	wall.add_child(box)
+	stage.add_child(wall)
+	wall.global_position = Vector3(0, 3, 300.1)
+	var camera: Camera3D = planner.get("camera")
+	camera.global_position = Vector3(0, 2.5, 292)
+	camera.look_at(Vector3(0, 2.5, 300))
+	await physics_frame
+	await physics_frame
+	var objects: Node = planner.get("objects")
+	var path := "res://models/objects/enviroments/05/05_wall_TV_frameless_destructible.glb"
+	var tvs: Array[Node3D] = []
+	for x in [0.0, 2.6]:
+		var tv: Node3D = catalog.call("_instantiate_asset", path)
+		stage.add_child(tv)
+		tv.global_position = Vector3(x, 2.5, 300)
+		tv.set_meta("planning_wall_normal", Vector3.BACK * -1.0)
+		planner.get("geometry").call("_apply_wall_mount", tv)
+		objects.placed.append(tv)
+		tvs.append(tv)
+	var a: Dictionary = tvs[0].call("get_display_edges")
+	var frame: Transform3D = a["frame"]
+	var span: float = (a["size"] as Vector2).x
+	objects.call("_select", tvs[1])
+	var target := tvs[0].global_position + frame.basis.x.normalized() * (span + .08) + Vector3.UP * .03
+	objects.call("_drag_selected", camera.unproject_position(target))
+	var b: Transform3D = tvs[1].call("get_display_edges")["frame"]
+	var local := frame.affine_inverse() * b.origin
+	_check(absf(local.z) < .01 and absf(absf(local.x) - span) < .001 and absf(local.y) < .1, "Dragged TV stays on the wall and snaps to its neighbour")
+	var floor_y := tvs[1].global_position.y
+	objects.call("_drag_selected", camera.unproject_position(Vector3(40, 2.5, 300)))
+	_check(is_equal_approx(tvs[1].global_position.y, floor_y), "Dragging off the wall keeps the last wall position")
+	objects.call("_select", null)
+	for tv in tvs:
+		objects.placed.erase(tv)
+		tv.queue_free()
+	wall.queue_free()
+
+
+func _installed_lamps(planner: Node) -> void:
+	var objects: Node = planner.get("objects")
+	var controls: Node = planner.get("controls")
+	var lamp_path := "res://game/presentation/office_floor/public/props/planner_light.tscn"
+	var records: Array = []
+	for shape in ["point", "linear", "rectangle"]:
+		records.append({"scene": lamp_path, "fixture_shape": shape, "fixture_visible_in_game": true, "x": 0.0, "y": 2.5, "z": 0.0})
+	objects.call("_apply_layout_data", {"version": 8, "objects": records})
+	var fixtures: RefCounted = controls.get("fixtures")
+	var lamps := (objects.get("placed") as Array).filter(func(node: Node3D) -> bool: return node.has_method("get_fixture_config"))
+	_check(lamps.size() == 3, "Every lamp shape loads from a saved map")
+	for lamp: Node3D in lamps:
+		objects.call("_select", lamp)
+		var shape := str(lamp.call("get_fixture_config")["shape"])
+		_check(fixtures.selected_panel.visible and controls.selected_light_color.get_parent().visible, "Installed lamp shows its settings: " + shape)
+		for spin: SpinBox in [fixtures.selected_height, fixtures.selected_energy, fixtures.selected_angle]:
+			_check(spin.get_parent().visible, "Installed lamp shows editable %s: %s" % [spin.get_parent().name, shape])
+		fixtures.selected_height.value = 3.75
+		_check(is_equal_approx(lamp.global_position.y, 3.75), "Height field moves the installed lamp: " + shape)
+		fixtures.selected_energy.value = 9.5
+		_check(is_equal_approx(float(lamp.call("get_authored_energy")), 9.5), "Brightness field edits the installed lamp: " + shape)
+		fixtures.selected_angle.value = 30.0
+		_check(is_equal_approx((lamp.get_node("Light") as SpotLight3D).spot_angle, 30.0), "Cone field edits the installed lamp: " + shape)
+		planner.get("edit_history").call("undo")
+		_check(not is_equal_approx((lamp.get_node("Light") as SpotLight3D).spot_angle, 30.0), "Cone edit is undoable: " + shape)
+		objects.call("_select", lamp)
+		_check(is_equal_approx(fixtures.selected_height.value, lamp.global_position.y), "Fields refresh from the selected lamp: " + shape)
+	objects.call("_select", null)
+
 
 func _particles(catalog: RefCounted) -> void:
 	var prop = catalog.call("_instantiate_asset", "res://models/objects/enviroments/05/05_wall_TV_frameless_destructible.glb")
