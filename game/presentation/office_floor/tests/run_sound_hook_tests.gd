@@ -21,7 +21,7 @@ class Surface:
 class Collector:
 	extends CharacterBody3D
 	var events: Array[StringName] = []
-	func heal(amount: float) -> float:
+	func heal(amount: float, _source: StringName = &"") -> float:
 		return amount
 	func play_item_sound(event: StringName) -> void:
 		events.append(event)

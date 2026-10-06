@@ -9,12 +9,16 @@ var _blood_motion_start := Vector3.ZERO
 
 signal blast_stun_started(duration: float, intensity: float)
 signal blast_stun_ended()
+## Health actually restored (after caps and skill bonuses); source is
+## &"medkit" for medkit pickups and empty for other healing.
+signal healed(amount: float, source: StringName)
 
 const CONTROL_LOSS := preload("res://game/features/player/mutation_control_loss.gd")
 const MUTATION_EFFECTS := preload("res://game/features/player/mutation_skill_effects.gd")
 const WEAPON_STANCE := preload("res://game/features/player/player_weapon_stance.gd")
 const ANIMATION_SELECTION := preload("res://game/features/player/player_animation_selection.gd")
 const PLAYER_AUDIO := preload("res://game/features/player/player_audio.gd")
+const HEAL_FEEDBACK := preload("res://game/features/player/player_heal_feedback.gd")
 @export var move_speed: float = 6.0
 @export var sprint_speed: float = 9.0
 ## Body strength for pushing items (prop_weight_v1); 1.0 moves up to 22 kg.
@@ -87,6 +91,10 @@ func _ready() -> void:
 	audio.name = "PlayerAudio"
 	add_child(audio)
 	audio.configure(self, camera_rig, $AnimationDriver)
+	var heal_feedback := HEAL_FEEDBACK.new()
+	heal_feedback.name = "HealFeedback"
+	add_child(heal_feedback)
+	heal_feedback.configure(self)
 func _physics_process(delta: float) -> void:
 	weapon_stance.tick(delta, _has_presentation_activity())
 	if _stun_remaining > 0.0:
@@ -275,12 +283,15 @@ func _apply_damage(amount: float, damage_type: String, point: Vector3, direction
 		blood_wounded.emit(global_position, excluded)
 		if health <= 0.0:
 			blood_death.emit(global_position, excluded, get_instance_id())
-func heal(amount:float)->float:
+func heal(amount:float, source: StringName = &"")->float:
 	var previous:=health
 	if mutation_effects.call("enabled", "assimilation"):
 		amount *= 1.25
 	health=minf(max_health,health+maxf(amount,0.0))
-	return health-previous
+	var gained:=health-previous
+	if gained > 0.0:
+		healed.emit(gained, source)
+	return gained
 func use_antidote()->bool:
 	if antidotes<=0:return false
 	var used:bool=infection_runtime.call("use_antidote")
