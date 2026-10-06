@@ -7,6 +7,8 @@ const BODY_PARTS := preload("res://game/features/infected/body_parts.gd")
 const BLOOD_FX := preload("res://game/features/infected/blood_drip_fx.gd")
 const BLAST_DISMEMBER_DAMAGE := 60.0
 const AUDIO := preload("res://game/features/infected/infected_audio.gd")
+const DEATH_FALL := preload("res://game/features/infected/death_fall.gd")
+const KILLING_PUSH_MSEC := 300
 
 # Public v1 presentation facts: no effect ownership or renderer dependency.
 signal projectile_blood(position: Vector3, direction: Vector3, weapon: String, excluded: Array[RID], source_id: int)
@@ -83,6 +85,8 @@ var _mobility := 1.0
 var _attack_scale := 1.0
 var _last_hit_position := Vector3.ZERO
 var _last_hit_direction := Vector3.ZERO
+var _death_push := Vector3.ZERO
+var _death_push_msec := -KILLING_PUSH_MSEC
 
 var effects_root: Node3D
 var impact_pool: Node
@@ -142,6 +146,8 @@ func take_projectile_damage(
 		return
 	_last_hit_position = hit_position
 	_last_hit_direction = direction
+	var shooter_distance := global_position.distance_to(_target.global_position) if is_instance_valid(_target) else INF
+	_set_death_push(DEATH_FALL.hit_push(weapon_name, direction, shooter_distance))
 	var part: StringName = BODY_PARTS.TORSO
 	if _parts != null:
 		part = _parts.pick_part(hit_position, direction)
@@ -163,7 +169,14 @@ func take_projectile_damage(
 ## Explosion damage: limbs torn off fly away from the blast centre.
 func take_blast_damage(amount: float, origin: Vector3) -> void:
 	_last_hit_position = origin
+	_set_death_push(DEATH_FALL.blast_push(origin, global_position, amount / 155.0))
 	take_damage(amount)
+
+
+# A blow only throws the body if it is the one that kills.
+func _set_death_push(push: Vector3) -> void:
+	_death_push = push
+	_death_push_msec = Time.get_ticks_msec()
 
 
 func take_damage(amount: float) -> void:
@@ -476,9 +489,13 @@ func _die() -> void:
 		_animation.call("set_active", true)
 	audio.died()
 	_pending_hit = -1.0
+	var fresh := Time.get_ticks_msec() - _death_push_msec <= KILLING_PUSH_MSEC
+	var size := body_visual.scale.x if body_visual != null else 1.0
+	var fall := DEATH_FALL.resolve(Vector3(velocity.x, 0.0, velocity.z), _death_push if fresh else Vector3.ZERO, -global_basis.z, size)
+	var landing: Vector3 = DEATH_FALL.landing(self, fall["slide"], 0.35 * size)
 	_blood_segment_start = global_position
 	_blood_distance = 0.0
-	blood_death.emit(global_position, _blood_exclusions(), get_instance_id())
+	blood_death.emit(global_position + landing, _blood_exclusions(), get_instance_id())
 	if is_instance_valid(_target) and _target.has_method("mutation_enemy_killed"):
 		_target.call("mutation_enemy_killed", self)
 	# Infected summoned by a Horde drop nothing: an endless summon is no loot farm.
@@ -492,7 +509,8 @@ func _die() -> void:
 	collision_shape.disabled = true
 	if _parts != null:
 		_parts.enable_corpse_hitboxes()
-	var death_length := _play_animation(&"death")
+	DEATH_FALL.throw(self, float(fall["turn"]), landing)
+	var death_length := _play_animation(fall["state"])
 	if death_length > 0.0:
 		_sink_corpse_after(death_length)
 	else:

@@ -83,6 +83,9 @@
     "decor_physics_v1": {
       "set_runtime_physics": "set_runtime_physics(enabled: bool) -> void; authored corpse pose -> articulated physical settling after map snapshot"
     },
+    "death_fall_v1": {
+      "fall": "killing blow push + 60% momentum picks death_forward|death_back|death, turns the body up to 90 degrees into the fall and slides it up to 1.8 m short of world layer 1; blood_death fires at the landing point (ADR-0033)"
+    },
     "character_push_v1": {
       "push_strength": "push_strength: float = 1.0 (Brute 2.0, Titan 2.6, Colossus 3.2); passed to push_from_character with the intended pre-slide velocity"
     }

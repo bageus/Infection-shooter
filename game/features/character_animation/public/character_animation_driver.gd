@@ -14,6 +14,8 @@ const POSE := preload("res://game/features/character_animation/procedural_pose.g
 const GAIT := preload("res://game/features/character_animation/procedural_gait.gd")
 const STATE_ATTACK := &"attack"
 const STATE_DEATH := &"death"
+# Directional deaths (ADR-0033) fall back to the plain death clip.
+const DEATH_STATES := [&"death", &"death_forward", &"death_back"]
 const LOCOMOTION_TOKENS := {
 	&"idle": ["idle", "stand"],
 	&"walk": ["walk", "locomotion"],
@@ -26,6 +28,8 @@ const ONE_SHOT_TOKENS := {
 	&"attack_left": ["attackleft", "attack"],
 	&"attack_right": ["attackright", "attack"],
 	&"death": ["death", "dead"],
+	&"death_forward": ["deathforward", "death", "dead"],
+	&"death_back": ["deathback", "death", "dead"],
 	&"slam": ["slam"],
 	&"summon": ["summon"],
 }
@@ -103,13 +107,14 @@ func play_one_shot(state: StringName) -> float:
 		animation_player.play(clip, 0.08)
 		length = animation_player.get_animation(clip).length
 	elif _target != null:
-		length = procedural_death_seconds if state == STATE_DEATH else procedural_attack_seconds
+		length = procedural_death_seconds if state in DEATH_STATES else procedural_attack_seconds
 	else:
 		return 0.0
 	_one_shot = state
 	_one_shot_elapsed = 0.0
 	_one_shot_length = length
-	_dead = state == STATE_DEATH
+	_dead = state in DEATH_STATES
+	_pose.death_forward = state == &"death_forward"
 	return length
 
 
@@ -190,7 +195,7 @@ func _advance_one_shot(delta: float) -> void:
 		return
 	var finished := _one_shot
 	_one_shot = &""
-	if finished != STATE_DEATH:
+	if finished not in DEATH_STATES:
 		_current = ""
 	one_shot_finished.emit(finished)
 
@@ -211,7 +216,7 @@ func _process_skeletal(speed: float) -> void:
 
 func _process_procedural(speed: float, delta: float) -> void:
 	var pose := Transform3D.IDENTITY
-	if _one_shot == STATE_DEATH or (_dead and _one_shot.is_empty()):
+	if _dead:
 		pose = _pose.death(1.0 if _one_shot.is_empty() else _one_shot_elapsed / _one_shot_length)
 	elif not _one_shot.is_empty():
 		pose = _pose.attack(_one_shot_elapsed / _one_shot_length)
