@@ -132,35 +132,33 @@ const BLADE_ORBIT := {
 	"ground_stretch": 1.6,
 }
 
-# Stand-ins drawn by tools/build_skill_fx_placeholders.py until the supplied
-# "Isometric golden stun star animation atlas", "Four emerald acid puddles"
-# and "Cartoon anatomical heart heartbeat sprite sheet" are added; replace the
-# path (and grid) here.
+# Three gold stars on a ring, 4x2: loops over a stunned enemy's head.
 const STUN_STARS := {
-	"path": SKILL_ROOT + "placeholder/stun_stars_placeholder.png",
+	"path": SKILL_ROOT + "Isometric golden stun star animation atlas.png",
 	"columns": 4, "rows": 2, "frames": 8,
 	"durations": [0.08, 0.08, 0.08, 0.08, 0.08, 0.08, 0.08, 0.08],
 	"pivot": Vector2(0.5, 0.5),
 }
 
-# Four puddle variants, one fixed frame per pool.
+# Four acid puddle variants, 2x2 with 3:2 cells; one fixed frame per pool.
+# A square quad squeezes the cell, so ground_stretch also undoes that.
 const ACID_PUDDLES := {
-	"path": SKILL_ROOT + "placeholder/acid_puddles_placeholder.png",
-	"columns": 4, "rows": 1, "frames": 4,
+	"path": SKILL_ROOT + "Four emerald acid puddles.png",
+	"columns": 2, "rows": 2, "frames": 4,
 	"durations": [],
 	"pivot": Vector2(0.5, 0.5),
-	"extent": 0.8,
-	"ground_stretch": 1.0,
+	"extent": 0.86,
+	"ground_stretch": 1.17,
+	"cell_aspect": 1.5,
 }
 
-# Heart beating twice per loop.
+# Anatomical heart, 3x2: six beat frames, looped.
 const HEARTBEAT := {
-	"path": SKILL_ROOT + "placeholder/heartbeat_placeholder.png",
-	"columns": 4, "rows": 2, "frames": 8,
-	"durations": [0.07, 0.07, 0.07, 0.08, 0.1, 0.12, 0.12, 0.12],
+	"path": SKILL_ROOT + "Cartoon anatomical heart heartbeat sprite sheet.png",
+	"columns": 3, "rows": 2, "frames": 6,
+	"durations": [0.09, 0.09, 0.09, 0.09, 0.09, 0.09],
 	"pivot": Vector2(0.5, 0.5),
 }
-
 
 static func available(atlas: Dictionary) -> bool:
 	return not atlas.is_empty() and ResourceLoader.exists(str(atlas.get("path", "")))

@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://cmutx08syhg74"
-path="res://.godot/imported/Eight-frame isometric mutant claw slash atlas.png-7fd76e9f449f30252105768b1753c336.ctex"
+uid="uid://vnibbxxfuo2e"
+path="res://.godot/imported/Isometric golden stun star animation atlas.png-9d79b608d7dda80ef65fa043d7dc0fe6.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://models/objects/textures/fx_skills/Eight-frame isometric mutant claw slash atlas.png"
-dest_files=["res://.godot/imported/Eight-frame isometric mutant claw slash atlas.png-7fd76e9f449f30252105768b1753c336.ctex"]
+source_file="res://models/objects/textures/FX_skills/Isometric golden stun star animation atlas.png"
+dest_files=["res://.godot/imported/Isometric golden stun star animation atlas.png-9d79b608d7dda80ef65fa043d7dc0fe6.ctex"]
 
 [params]
 

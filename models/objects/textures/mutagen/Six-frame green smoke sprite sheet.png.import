@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://cwxm52oiwps5o"
-path="res://.godot/imported/Eight-Frame Isometric Electric Field.png-58688a579f4596d80e3f9298c510b198.ctex"
+uid="uid://dqh3v4rc2os7h"
+path="res://.godot/imported/Six-frame green smoke sprite sheet.png-0eb84dac210a2cd0a7f295a775b21690.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://models/objects/textures/fx_skills/Eight-Frame Isometric Electric Field.png"
-dest_files=["res://.godot/imported/Eight-Frame Isometric Electric Field.png-58688a579f4596d80e3f9298c510b198.ctex"]
+source_file="res://models/objects/textures/mutagen/Six-frame green smoke sprite sheet.png"
+dest_files=["res://.godot/imported/Six-frame green smoke sprite sheet.png-0eb84dac210a2cd0a7f295a775b21690.ctex"]
 
 [params]
 

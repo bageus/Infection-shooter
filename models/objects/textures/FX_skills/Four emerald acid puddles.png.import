@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://dn73ehnw80gy6"
-path="res://.godot/imported/acid_puddles_placeholder.png-54eef6eab6f9adaaecfa4986ae922598.ctex"
+uid="uid://dohkpbtuolpbp"
+path="res://.godot/imported/Four emerald acid puddles.png-67a00c379d7b2499cedb4c324614cf1d.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://models/objects/textures/FX_skills/placeholder/acid_puddles_placeholder.png"
-dest_files=["res://.godot/imported/acid_puddles_placeholder.png-54eef6eab6f9adaaecfa4986ae922598.ctex"]
+source_file="res://models/objects/textures/FX_skills/Four emerald acid puddles.png"
+dest_files=["res://.godot/imported/Four emerald acid puddles.png-67a00c379d7b2499cedb4c324614cf1d.ctex"]
 
 [params]
 

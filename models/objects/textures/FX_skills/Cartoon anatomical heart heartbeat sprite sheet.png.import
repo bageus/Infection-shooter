@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://cl1do4jofyu68"
-path="res://.godot/imported/Mutant growth mutagen burst sprite atlas.png-153f1f285f59e7f41d473b31c517f067.ctex"
+uid="uid://dx2natcihbw1u"
+path="res://.godot/imported/Cartoon anatomical heart heartbeat sprite sheet.png-cd308514a6e58f89366e86a605dd0e25.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://models/objects/textures/fx_skills/Mutant growth mutagen burst sprite atlas.png"
-dest_files=["res://.godot/imported/Mutant growth mutagen burst sprite atlas.png-153f1f285f59e7f41d473b31c517f067.ctex"]
+source_file="res://models/objects/textures/FX_skills/Cartoon anatomical heart heartbeat sprite sheet.png"
+dest_files=["res://.godot/imported/Cartoon anatomical heart heartbeat sprite sheet.png-cd308514a6e58f89366e86a605dd0e25.ctex"]
 
 [params]
 

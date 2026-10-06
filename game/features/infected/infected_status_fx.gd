@@ -6,7 +6,7 @@ extends Node
 const FLIPBOOK := preload("res://game/core/vfx/public/sprite_flipbook.gd")
 const ATLASES := preload("res://game/core/vfx/public/effect_atlases.gd")
 const POISON_SHADER := preload("res://game/features/infected/poison_tint.gdshader")
-const STAR_SIZE := 0.95
+const STAR_SIZE := 0.85
 const TINT_FADE := 0.4
 
 static var _poison_material: ShaderMaterial

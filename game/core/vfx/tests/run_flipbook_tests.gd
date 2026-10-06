@@ -102,7 +102,7 @@ func _check_skill_sheets() -> void:
 		_expect(ATLASES.available(atlas), "Skill sheet is in the project: " + str(atlas["path"]))
 		var texture := load(str(atlas["path"])) as Texture2D
 		var cell := Vector2(texture.get_width() / float(atlas["columns"]), texture.get_height() / float(atlas["rows"]))
-		_expect(absf(cell.x / cell.y - 1.0) < 0.05, "Skill sheet cells are square: " + str(atlas["path"]))
+		_expect(absf(cell.x / cell.y - float(atlas.get("cell_aspect", 1.0))) < 0.05, "Skill sheet grid matches its cells: " + str(atlas["path"]))
 		var spans: Array = atlas["durations"]
 		_expect(spans.is_empty() or spans.size() == int(atlas["frames"]), "Every skill frame has a time: " + str(atlas["path"]))
 	_expect(is_equal_approx(ATLASES.size_for_radius(ATLASES.ELECTRIC_FIELD, 4.0), 8.0 / 0.9), "A ring of radius R plays at 2R / extent.")
