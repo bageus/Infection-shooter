@@ -1,4 +1,5 @@
 extends RefCounted
+const CHASE_BUDGET := preload("res://game/features/infected/public/chase_search_budget.gd")
 
 # Mission composition only: explicit collaborators, no global context or lookup API.
 var _container: Node3D
@@ -8,6 +9,7 @@ var _drop_weapon: Callable
 var _particle_targets: Dictionary = {}
 var _electronic_particles := true
 var _displays: Node
+var _chase_budget: Node
 
 
 func _init(container: Node3D, impacts: Node, player: Node3D, drop_weapon: Callable, displays: Node = null) -> void:
@@ -16,6 +18,10 @@ func _init(container: Node3D, impacts: Node, player: Node3D, drop_weapon: Callab
 	_player = player
 	_drop_weapon = drop_weapon
 	_displays = displays
+	if is_instance_valid(_container):
+		_chase_budget = CHASE_BUDGET.new()
+		_chase_budget.name = "ChaseSearchBudget"
+		_container.add_child(_chase_budget)
 
 
 func bind_scene(node: Node) -> void:
@@ -24,6 +30,8 @@ func bind_scene(node: Node) -> void:
 
 
 func _bind_collaborators(node: Node) -> void:
+	if node.has_method("configure_chase_budget"):
+		node.call("configure_chase_budget", _chase_budget)
 	if node.has_method("configure_displays"):
 		node.call("configure_displays", _displays)
 	if node.has_method("configure_weapon_drop"):

@@ -127,6 +127,7 @@ func _exercise_factory(stage: Node, player: Node3D, container: Node3D, pool: Nod
 	var enemy := ENEMY.instantiate() as Node3D
 	stage.get_node("Gameplay/Enemies").add_child(enemy)
 	_check(enemy.get("effects_root") == container, "Dynamically added enemy is wired")
+	_check(enemy.get("_route").get("_budget") == stage.get("world_bindings").get("_chase_budget"), "Dynamic enemy receives the mission's shared route budget")
 	seed(7)
 	# Exercise real drops across several deaths, without asserting a particular item type.
 	var before := container.get_child_count()
