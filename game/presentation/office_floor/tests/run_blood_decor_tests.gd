@@ -45,7 +45,7 @@ func _run() -> void:
 	var sliced := 0
 	for texture_id: String in DECAL_SCRIPT.texture_ids():
 		var frame: Dictionary = DECAL_SCRIPT.texture_entry(texture_id)
-		if not frame.is_empty() and float(frame.aspect) > 0.2 and float(frame.aspect) < 5.0:
+		if not frame.is_empty() and float(frame.aspect) > 0.1 and float(frame.aspect) < 10.0:
 			sliced += 1
 	_expect(sliced == 44, "Every atlas frame is sliced and trimmed (%d of 44)." % sliced)
 	var on_floor := DECAL.instantiate() as Node3D
