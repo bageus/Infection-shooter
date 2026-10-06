@@ -39,9 +39,15 @@ func _run() -> void:
 		await physics_frame
 	var container := (effects.get("_budget") as Node).get("container") as Node3D
 	_expect(container.get_child_count() >= 5, "A severed limb leaves a burst of blood (%d marks)." % container.get_child_count())
-	_expect(DECAL_SCRIPT.texture_ids().size() == 45, "Planner blood uses the 45 in-game textures.")
-	for texture_id in ["splatter_01", "pool_09", "drops_05"]:
+	_expect(DECAL_SCRIPT.texture_ids().size() == 44, "Planner blood uses the 44 in-game atlas frames.")
+	for texture_id in ["splatter_01", "pool_08", "pool_09", "drops_09"]:
 		_expect(not DECAL_SCRIPT.texture_entry(texture_id).is_empty(), "Blood texture loads: " + texture_id)
+	var sliced := 0
+	for texture_id: String in DECAL_SCRIPT.texture_ids():
+		var frame: Dictionary = DECAL_SCRIPT.texture_entry(texture_id)
+		if not frame.is_empty() and float(frame.aspect) > 0.2 and float(frame.aspect) < 5.0:
+			sliced += 1
+	_expect(sliced == 44, "Every atlas frame is sliced and trimmed (%d of 44)." % sliced)
 	var on_floor := DECAL.instantiate() as Node3D
 	on_floor.call("configure_blood", "pool_02", "floor")
 	stage.add_child(on_floor)

@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://cgbh1b1eb33vl"
-path="res://.godot/imported/Six-Frame Toxic Gas Cloud Atlas-1.png-eae6b860d05cf8283069457c81b7be9b.ctex"
+uid="uid://hdgi4yegj35j"
+path="res://.godot/imported/pool_atlas_4x2.png-94e6377308f4ad6ae6b6de7de343afa4.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://models/objects/textures/mutagen/Six-Frame Toxic Gas Cloud Atlas-1.png"
-dest_files=["res://.godot/imported/Six-Frame Toxic Gas Cloud Atlas-1.png-eae6b860d05cf8283069457c81b7be9b.ctex"]
+source_file="res://models/objects/textures/blood_decals_45/pool/pool_atlas_4x2.png"
+dest_files=["res://.godot/imported/pool_atlas_4x2.png-94e6377308f4ad6ae6b6de7de343afa4.ctex"]
 
 [params]
 

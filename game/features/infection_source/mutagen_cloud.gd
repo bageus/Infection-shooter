@@ -3,7 +3,7 @@ extends Area3D
 const WALL_FIELD := preload("res://game/features/infection_source/cloud_wall_field.gd")
 const CLOUD_SHADER := preload("res://game/features/infection_source/mutagen_cloud.gdshader")
 const ATLAS_A := preload("res://models/objects/textures/mutagen/Six Emerald Gas Cloud Sprites-2.png")
-const ATLAS_B := preload("res://models/objects/textures/mutagen/Six-Frame Toxic Gas Cloud Atlas-1.png")
+const ATLAS_B := preload("res://models/objects/textures/mutagen/Six-frame green smoke sprite sheet.png")
 const EMERALD := Color(0.86, 1.06, 0.84)
 const TOXIC := Color(1.08, 1.1, 0.68)
 
