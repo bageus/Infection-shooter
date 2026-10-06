@@ -1,5 +1,5 @@
 extends RefCounted
-## Which way a killed infected falls (ADR-0033). The body keeps its running
+## Which way a killed infected falls (ADR-0034). The body keeps its running
 ## momentum and gets the push of the killing blow: bullets from afar barely
 ## push, so a charging infected falls forward on its face; a close shotgun
 ## blast throws it backward; a grenade throws it away from the explosion.

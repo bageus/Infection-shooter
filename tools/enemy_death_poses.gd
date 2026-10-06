@@ -1,5 +1,5 @@
 extends RefCounted
-## Build-time key poses of the directional enemy deaths (ADR-0033), in the
+## Build-time key poses of the directional enemy deaths (ADR-0034), in the
 ## parameter space of tools/enemy_animation_author.gd (degrees, model frame:
 ## +Z is the front, +X the character's left; positive hips_pitch tips forward).
 ## The game turns and slides the body so these falls line up with the blow.

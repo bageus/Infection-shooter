@@ -15,7 +15,7 @@ var attack_duration := 0.55
 var attack_lunge := 0.28
 var death_duration := 1.2
 var death_pitch_degrees := -88.0
-## Fall on the face instead of the back (ADR-0033).
+## Fall on the face instead of the back (ADR-0034).
 var death_forward := false
 var feet := Vector3.ZERO
 

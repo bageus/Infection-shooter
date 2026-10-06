@@ -1,5 +1,5 @@
 extends SceneTree
-## Directional enemy deaths (ADR-0033): a moving infected shot from afar falls
+## Directional enemy deaths (ADR-0034): a moving infected shot from afar falls
 ## forward, a close shotgun blast throws it back, a grenade throws it away
 ## from the explosion, and walls stop a thrown body.
 

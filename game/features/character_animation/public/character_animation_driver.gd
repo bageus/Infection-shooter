@@ -14,7 +14,7 @@ const POSE := preload("res://game/features/character_animation/procedural_pose.g
 const GAIT := preload("res://game/features/character_animation/procedural_gait.gd")
 const STATE_ATTACK := &"attack"
 const STATE_DEATH := &"death"
-# Directional deaths (ADR-0033) fall back to the plain death clip.
+# Directional deaths (ADR-0034) fall back to the plain death clip.
 const DEATH_STATES := [&"death", &"death_forward", &"death_back"]
 const LOCOMOTION_TOKENS := {
 	&"idle": ["idle", "stand"],
