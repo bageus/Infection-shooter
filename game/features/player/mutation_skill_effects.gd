@@ -1,6 +1,8 @@
 extends Node
 
 # Host-side effects. The infection runtime owns selection and cooldown state.
+const SKILL_VFX := preload("res://game/features/player/mutation_skill_vfx.gd")
+const VFX_BUFFS := ["storm_pulse", "bone_blades", "berserk"]
 var player: CharacterBody3D
 var runtime: Node
 var weapons: Array[Node3D] = []
@@ -23,16 +25,23 @@ var storm_tick := 0.0
 var acid_pools: Array[Dictionary] = []
 
 var effects_root: Node3D
+var vfx: SKILL_VFX
 
 
 func configure_world(container: Node3D) -> void:
 	effects_root = container
+	if vfx != null:
+		vfx.configure_world(container)
 
 
 func configure(host: CharacterBody3D, infection: Node, guns: Array[Node3D]) -> void:
 	player = host
 	runtime = infection
 	weapons = guns
+	vfx = SKILL_VFX.new()
+	add_child(vfx)
+	vfx.setup(host)
+	vfx.configure_world(effects_root)
 	for gun in guns:
 		baselines.append({"reload_time": gun.get("reload_time"), "spread_degrees": gun.get("spread_degrees"), "shots_per_second": gun.get("shots_per_second"), "bullet_damage": gun.get("bullet_damage")})
 	runtime.connect("skill_cast", _cast)
@@ -56,6 +65,7 @@ func _refresh_stats() -> void:
 	var next_max := 125.0 if enabled("hypertrophy") else 100.0
 	player.set("max_health", next_max)
 	player.set("health", minf(float(player.get("health")), next_max))
+	vfx.set_passives(enabled("bone_armor"), enabled("hardened"))
 	_update_weapons()
 
 
@@ -72,8 +82,11 @@ func _process(delta: float) -> void:
 	for key in buffs.keys():
 		var previous := float(buffs[key])
 		buffs[key] = maxf(0.0, previous - delta)
-		if previous > 0.0 and float(buffs[key]) == 0.0 and key in WEAPON_BUFFS:
-			_weapons_dirty = true
+		if previous > 0.0 and float(buffs[key]) == 0.0:
+			if key in WEAPON_BUFFS:
+				_weapons_dirty = true
+			if key in VFX_BUFFS:
+				vfx.buff_ended(key)
 	if enabled("regeneration") and Time.get_ticks_msec() * 0.001 - last_hit_time > 5.0:
 		player.call("heal", 1.4 * delta)
 	storm_tick -= delta
@@ -107,6 +120,8 @@ func on_player_hit(amount: float, damage_type: String = "physical") -> float:
 	var reserve := float(buffs.get("temporary_armor", 0.0))
 	var absorbed := minf(amount, reserve)
 	buffs["temporary_armor"] = reserve - absorbed
+	if absorbed > 0.0:
+		vfx.energy_shield()
 	amount -= absorbed
 	var reduction := 0.14 if enabled("bone_armor") else 0.0
 	if damage_type in ["acid", "fire", "electric"] and enabled("hardened"):
@@ -120,6 +135,7 @@ func on_player_hit(amount: float, damage_type: String = "physical") -> float:
 		reduction += minf(0.2, float(buffs.get(key, 0.0)) * 0.03)
 		buffs[key] = minf(6.0, float(buffs.get(key, 0.0)) + 1.0)
 	if enabled("retaliation") and amount >= 20.0:
+		vfx.electric_pulse(player.global_position, 3.0)
 		for enemy in _enemies_near(player.global_position, 3.0):
 			enemy.call("apply_blast_stun", 1.2, 0.6)
 	return amount * (1.0 - minf(0.75, reduction))
@@ -130,6 +146,7 @@ func survive_lethal() -> bool:
 		return false
 	heart_cooldown = 110.0
 	last_hit_time = -100.0
+	vfx.heartbeat()
 	return true
 
 
@@ -186,6 +203,8 @@ func melee() -> bool:
 			continue
 		_melee_victim = weakref(enemy)
 		_melee_time = Time.get_ticks_msec() / 1000.0
+		if enabled("claws"):
+			vfx.claw_slash(enemy)
 		enemy.call("take_damage", 36.0 if enabled("claws") else 17.0)
 		return true
 	return false
@@ -204,6 +223,8 @@ func _start_buff(skill_id: String, duration: float) -> void:
 	buffs[skill_id] = duration
 	if skill_id in WEAPON_BUFFS:
 		_weapons_dirty = true
+	if skill_id in VFX_BUFFS:
+		vfx.buff_started(skill_id)
 
 
 func _update_weapons() -> void:
@@ -232,7 +253,7 @@ func _update_weapons() -> void:
 func _cast(skill_id: String) -> void:
 	match skill_id:
 		"blood_burst":
-			_indicator(player.global_position, Color(0.7, 0.04, 0.15, 0.45), 0.4, 4.0)
+			vfx.spike_burst(player.global_position, 4.0)
 			for enemy in _enemies_near(player.global_position, 4.0):
 				enemy.call("take_damage", 22.0)
 				enemy.call("apply_player_push", (enemy.global_position - player.global_position).normalized(), 5.0)
@@ -242,19 +263,19 @@ func _cast(skill_id: String) -> void:
 		"living_harvest", "overload", "storm_pulse", "bone_blades", "berserk":
 			_start_buff(skill_id, 6.0 if skill_id != "berserk" else 8.0)
 		"discharge":
-			_indicator(player.global_position, Color(0.12, 0.73, 1.0, 0.55), 0.35, 3.0)
-			var count := 0
+			var chain: Array[Vector3] = [player.global_position]
 			for enemy in _enemies_near(player.global_position, 9.0, true):
+				chain.append(enemy.global_position)
 				enemy.call("take_damage", 25.0)
 				enemy.call("apply_blast_stun", 1.0, 0.8)
-				count += 1
-				if count == 4: break
+				if chain.size() == 5: break
+			vfx.chain_lightning(chain)
 		"acid_spit":
 			acid_pools.append({"position": player.get("_aim_point"), "remaining": 6.0})
-			_indicator(player.get("_aim_point"), Color(0.25, 0.94, 0.04, 0.45), 6.0, 2.1)
+			vfx.acid_pool(player.get("_aim_point"), 2.2, 6.0)
 		"spore_cocoon":
 			var location: Vector3 = player.get("_aim_point")
-			_indicator(location, Color(0.71, 0.77, 0.12, 0.45), 3.0, 2.6)
+			vfx.spore_cocoon(location, 3.0, 2.0)
 			get_tree().create_timer(2.0).timeout.connect(_release_spores.bind(location))
 		"epidemic":
 			for enemy in _enemies_near(player.global_position, 15.0):
@@ -262,26 +283,8 @@ func _cast(skill_id: String) -> void:
 					for neighbor in _enemies_near(enemy.global_position, 3.5): neighbor.call("apply_mutation_poison", 3.0, 4.0)
 		"predator_dash":
 			player.call("mutation_dash")
+			vfx.dash_trail(0.4)
 			for enemy in _enemies_near(player.global_position, 2.5): enemy.call("take_damage", 30.0)
-
-
-func _indicator(location: Vector3, tint: Color, duration: float, diameter: float) -> void:
-	if not is_instance_valid(effects_root):
-		return
-	var ring := MeshInstance3D.new()
-	var disc := CylinderMesh.new()
-	disc.top_radius = diameter * 0.5
-	disc.bottom_radius = diameter * 0.5
-	disc.height = 0.02
-	var material := StandardMaterial3D.new()
-	material.albedo_color = tint
-	material.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
-	material.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
-	disc.material = material
-	ring.mesh = disc
-	effects_root.add_child(ring)
-	ring.global_position = location + Vector3.UP * 0.06
-	ring.create_tween().tween_callback(ring.queue_free).set_delay(duration)
 
 
 func _enemies_near(center: Vector3, radius: float, nearest_first: bool = false) -> Array[Node3D]:
@@ -298,3 +301,4 @@ func _heal_or_armor(amount: float) -> void:
 	var gained: float = player.call("heal", amount)
 	if gained < amount:
 		buffs["temporary_armor"] = minf(35.0, float(buffs.get("temporary_armor", 0.0)) + amount - gained)
+		vfx.energy_shield()

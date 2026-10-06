@@ -28,6 +28,7 @@ var _time_scale := 1.0
 var _first := 0
 var _last := 0
 var _loop_from := -1
+var _cycle := false
 var _intro := 0.0
 var _floor_y := -INF
 var _landed := false
@@ -37,9 +38,13 @@ var _landed := false
 ## frame (fixed frame index), lifetime (for a fixed frame), speed (time scale),
 ## first_frame / last_frame (play a range), loop_from (after the range, swing
 ## back and forth between this frame and last_frame until stop()),
+## cycle (true: repeat the whole sheet in order, last frame blending into the
+## first, until stop() — for sheets drawn as a seamless loop),
 ## pivot (UV point at the origin), axis + atlas_angle (axial billboard),
 ## fade_out (seconds), velocity, gravity, drag, spin, spin_speed, tumble, grow,
-## floor_y (a falling sprite settles flat on this height).
+## floor_y (a falling sprite settles flat on this height),
+## ground (lie flat on the floor facing away from the camera, stretched in
+## depth by the atlas's ground_stretch).
 static func spawn(parent: Node, atlas: Dictionary, point: Vector3, size: float, options := {}) -> MeshInstance3D:
 	if parent == null or not parent.is_inside_tree() or not ATLASES.available(atlas):
 		return null
@@ -88,6 +93,13 @@ func _setup(atlas: Dictionary, size: float, options: Dictionary) -> void:
 	_length = float(options.get("lifetime", 1.0)) if _fixed_frame >= 0 else _intro / time_scale
 	if _loop_from >= _first and _loop_from < _last and _fixed_frame < 0:
 		_length = INF
+	_cycle = bool(options.get("cycle", false)) and _fixed_frame < 0
+	if _cycle:
+		_first = 0
+		_last = frames - 1
+		_intro = _span(_first, _last)
+		_length = INF
+		set_instance_shader_parameter(&"cycle", 1.0)
 	_time_scale = time_scale
 	_fade_out = float(options.get("fade_out", 0.0))
 	_opacity = float(options.get("opacity", 1.0))
@@ -103,6 +115,9 @@ func _setup(atlas: Dictionary, size: float, options: Dictionary) -> void:
 	set_instance_shader_parameter(&"frame_count", float(atlas.get("frames", 1)))
 	set_instance_shader_parameter(&"tint", options.get("tint", Color.WHITE))
 	set_instance_shader_parameter(&"pivot", options.get("pivot", atlas.get("pivot", Vector2(0.5, 0.5))))
+	if bool(options.get("ground", false)):
+		set_instance_shader_parameter(&"ground", 1.0)
+		set_instance_shader_parameter(&"ground_stretch", float(atlas.get("ground_stretch", 1.0)))
 	if options.has("axis"):
 		set_axis(options["axis"])
 		set_instance_shader_parameter(&"atlas_angle", float(options.get("atlas_angle", 0.0)))
@@ -167,12 +182,15 @@ func _span(from: int, to: int) -> float:
 func _frame_for(seconds: float) -> float:
 	var durations: Array = _atlas.get("durations", [])
 	var t := seconds * _time_scale
-	if t < _intro or _loop_from < 0:
+	if _cycle and _intro > 0.0:
+		t = fmod(t, _intro)
+	if _cycle or t < _intro or _loop_from < 0:
 		var start := 0.0
 		for index in range(_first, _last + 1):
 			var span := float(durations[index]) if index < durations.size() else 0.1
 			if t < start + span:
-				return minf(index + clampf((t - start) / maxf(span, 0.0001), 0.0, 0.999), float(_last))
+				var frame := index + clampf((t - start) / maxf(span, 0.0001), 0.0, 0.999)
+				return frame if _cycle else minf(frame, float(_last))
 			start += span
 		return float(_last)
 	var swing := float(_last - _loop_from)

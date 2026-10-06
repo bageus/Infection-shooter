@@ -18,7 +18,8 @@
     "features.combat",
     "features.infection",
     "features.character_animation",
-    "core.audio"
+    "core.audio",
+    "core.vfx"
   ],
   "runtime_contracts": {
     "mission_wiring_v1": {
