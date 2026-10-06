@@ -42,12 +42,16 @@ func configure_player(actor: Node3D) -> void:
 	_player = actor
 
 
+func _enter_tree() -> void:
+	if mode == DoorMode.SLIDING_ELEVATOR:
+		call_deferred("_bind_elevator_neighbors")
+
+
 func _ready() -> void:
 	process_mode = Node.PROCESS_MODE_PAUSABLE
 	add_to_group("interactive_doors")
 	if mode == DoorMode.SLIDING_ELEVATOR:
 		add_to_group("elevator_door_components")
-		call_deferred("_bind_elevator_neighbors")
 	if requires_emergency_key:
 		_key_hint = Label3D.new()
 		_key_hint.font = preload("res://assets/interface/fonts/body.ttf")
@@ -206,6 +210,8 @@ func _remember_elevator(other: Node3D) -> void:
 
 
 func _bind_elevator_neighbors() -> void:
+	if not is_inside_tree():
+		return
 	# Discover this module's components once, then bind later additions reciprocally.
 	for node in get_tree().get_nodes_in_group("elevator_door_components"):
 		if node != self and node is Node3D and node.has_method("_remember_elevator"):

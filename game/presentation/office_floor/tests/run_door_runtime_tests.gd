@@ -64,6 +64,17 @@ func _test_elevators(stage: Node3D) -> void:
 	c.queue_free()
 	await _settle()
 	a.call("_request_nearby_elevator_open")
+	stage.remove_child(b)
+	a.call("_request_nearby_elevator_open")
+	stage.add_child(b)
+	b.position.x = 2
+	await _settle()
+	b.set("_requested_open", false)
+	a.call("_request_nearby_elevator_open")
+	_expect(b.get("_requested_open"), "Tree reentry restores elevator binding")
+	_test_pose(a)
+
+func _test_pose(a: Node3D) -> void:
 	var part := Node3D.new()
 	a.add_child(part)
 	a.get("_door_parts").append(part)

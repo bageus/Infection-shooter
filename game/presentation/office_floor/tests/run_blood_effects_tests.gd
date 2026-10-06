@@ -98,6 +98,7 @@ func _run() -> void:
 	_expect((budget.get("_timer") as Timer).is_stopped(), "Clear stops blood maintenance")
 	_expect(budget.get("_surfaces").is_empty() and budget.get("_fading") == 0 and budget.get("_active").first == -1, "Clear releases counters and FIFO")
 	await _test_budget_index()
+	await _test_empty_pool_clear(floor_hit)
 	await _test_hit_throttle_and_expiry()
 	await _test_decal_growth(floor_hit)
 	stage.queue_free()
@@ -216,3 +217,11 @@ func _test_budget_index() -> void:
 		_expect(counts[key]["count"] == 2 and counts[key]["fading"] == 1 and budget.get("_fading") == 1, "Fading continues to consume density budget")
 	effects.call("clear_marks")
 	await process_frame
+
+func _test_empty_pool_clear(surface: Dictionary) -> void:
+	var budget := effects.get("_budget") as Node3D
+	var definition := {"texture": texture, "basis": Basis.IDENTITY, "footprint": Vector2.ONE, "tint": Color.RED}
+	budget.call("schedule_pool", 991, definition, surface, 5.0)
+	_expect(not (budget.get("_timer") as Timer).is_stopped(), "Delayed pool wakes empty budget")
+	budget.call("clear_marks")
+	_expect((budget.get("_timer") as Timer).is_stopped(), "Clearing only delayed requests stops timer immediately")

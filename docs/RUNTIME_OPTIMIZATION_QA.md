@@ -148,3 +148,56 @@ menu captures, smoke и оба native renderer. Фактических SCRIPT/SH
 https://github.com/bageus/Infection-shooter/actions/runs/37505074182
 https://github.com/bageus/Infection-shooter/actions/runs/37505073991
 https://github.com/bageus/Infection-shooter/actions/runs/37505074242
+
+## Последовательная оптимизация эффектов и дверей — 06.10.2026
+
+Согласованный порядок: surface_stamp → взрывы → кровь → двери → части тел.
+
+- core.vfx/surface_stamp_cache: caller-owned cap 128 Mesh, immutable arrays/BVH,
+  Mesh.changed invalidation, раздельные weak observers и teardown. Старый
+  surface_stamp.build остаётся stateless и служит эталоном. Временный proxy
+  процедурного пола не задерживается в кеше. Точные clipping, normal/UV,
+  glass/material, offset и output cap 4096 прежние. Контракт — ADR-0037.
+- combat/grenade_explosion: до shelter rays отбрасываются только объекты без
+  damage/stun callbacks и без возможности rigid impulse. Frozen damageable
+  остаются; factor=0 не исключает старый base impulse 2. Порядок damage,
+  исключение contact, wall shelter, scorch и баланс прежние.
+- office_floor/blood_mark_budget: global/per-surface counts учитывают fading;
+  связанные FIFO выбирают прежний oldest non-fading без полного прохода и
+  сдвига массивов. Таймер 0.1 s останавливается без marks/pending/deaths;
+  относительный clock и pause-aware fade/death delay сохраняются. Пока есть
+  следы, bounded weak/surface/expiry sweep оставлен для прежнего lifecycle.
+- office_floor/interactive_door: локальная Area отбирает физические тела для
+  emergency doorway, затем прежние actor groups, health и origin bounds.
+  Elevator peers связываются при enter_tree и взаимно при новых экземплярах;
+  WeakRef и текущие distance/group membership проверяются при request.
+  Leaves/recesses/hinge получают pose только при изменении open amount и
+  первоначальной инициализации. Glass break collision и key hint остаются live.
+  Разделение рассмотрено: private door_presence отвечает за локальный broad
+  phase; анимация/состояние/авторинг остаются в существующем door script.
+- infected/body_part_topology: в существующих prepared data кешируются first
+  appearance unique IDs, remapped indices и weighted bone IDs. Membership
+  уже кешировался ранее; повторный remap и ненужные bone matrices устранены.
+  Current skeleton pose, skinning, normals, UV, CUSTOM0, center/hull/materials
+  вычисляются для каждого sever. Публичных изменений у infected нет.
+
+Автоматические regressions: stamp cache vs stateless (80 transforms + dense,
+Mesh mutation/replacement, glass, singular scale, cap/cleanup); FIFO vs array
+после 2000 случайных удалений; body topology vs frozen baseline (4/8 weights,
+80 poses × 3 chains, arrays/center/hull); door presence/health/bounds, moved,
+added/deleted/reentered peers и отсутствие stationary pose writes; blood
+counters/retirement/clear/idle/wake. Frozen baseline — только test oracle.
+Все source-size production limits соблюдены; существующий door script
+по-прежнему выше 300 строк. Новое предупреждение касается только сохранённого
+66-строчного baseline build_piece в тестовой fixture.
+
+Focused Godot 4.7.2 run 37517775924 PASS: impact geometry 0 failures, stamp
+32/2048 кандидатов и 0 failures, blood FIFO PASS, body topology 0 failures.
+Полный runtime последней ревизии ожидается; это не замер FPS Windows/Web.
+
+Ручная приёмка: одинаковые карта/seed/оружие/настройки и 60-секундный маршрут
+до/после; повторные попадания и взрывы у сложной мебели, кровь/разрушение
+получателя, emergency door с толпой/ключом, elevator и glass swing, sever в
+разных позах. Сравнить profiler spikes/CPU physics и видимые pixels, а также
+память первого и повторного запроса. Не переносить software-CI FPS на целевое
+устройство. Тест 32/2048 характеризует выборку геометрии, а не весь кадр.

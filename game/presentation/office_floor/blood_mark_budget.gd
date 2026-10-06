@@ -167,6 +167,7 @@ func clear_marks() -> void:
 	_death_ids.clear()
 	for id in _records.keys():
 		_remove(id)
+	_sleep_if_empty()
 
 
 func statistics() -> Dictionary:
