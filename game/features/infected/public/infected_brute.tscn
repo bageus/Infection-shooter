@@ -21,6 +21,7 @@ floor_stop_on_slope = false
 script = ExtResource("2_enemy")
 max_health = 135.0
 move_speed = 4.1
+push_strength = 2.0
 attack_range = 1.35
 attack_damage = 24.0
 limb_loss_kills = false

@@ -5,7 +5,8 @@ const IMPACT_SOUND := preload("res://game/presentation/office_floor/impact_sound
 const CARPET_SHADOW := preload("res://game/presentation/office_floor/carpet_shadow.gd")
 const DAMAGE = preload("res://game/presentation/office_floor/environment_damage.gd")
 const BALANCE = preload("res://game/features/combat/public/projectile_balance.gd")
-const BOOK_CONTACT = preload("res://game/presentation/office_floor/book_contact.gd")
+const WEIGHT = preload("res://game/presentation/office_floor/prop_weight.gd")
+const CONTACT = preload("res://game/presentation/office_floor/prop_contact.gd")
 var repeated_electronic_particles := true
 
 
@@ -84,7 +85,8 @@ var _paper_torn := false
 var _health := 0.0
 var _transition_pending := false
 var _pending_full_break := false
-var _book_kick_cooldown := 0.0
+## Item weight in kg (prop_weight_v1); the RigidBody mass stays as authored.
+var weight_kg := 0.0
 var _extinguisher_triggered := false
 var _extinguisher_fx: Node3D
 var _reaction := HIT_REACTION.new()
@@ -101,21 +103,12 @@ func configure_world(container: Node3D, impacts: Node) -> void:
 		_extinguisher_fx.call("configure_world", container, impacts)
 
 
-func _physics_process(delta: float) -> void:
-	_book_kick_cooldown = BOOK_CONTACT.kick_if_close(self, _book_kick_cooldown, delta)
-
 func _ready() -> void:
 	if model_path.is_empty():
 		return
 	var wall_mounted: bool = WALL_MOUNT.contains(model_path)
 	if wall_mounted:
 		set_meta("planning_wall_mount", true)
-	var is_book := model_path.get_file().begins_with("09_book")
-	set_physics_process(is_book)
-	if is_book:
-		# Player/enemy masks use layers 1-2. Bullets and aiming include layer 3.
-		collision_layer = 4
-		collision_mask = 3
 	var packed := load(model_path) as PackedScene
 	if packed == null:
 		push_error("Environment model unavailable: " + model_path)
@@ -177,6 +170,7 @@ func _ready() -> void:
 		angular_damp = 4.0
 	# Continuous detection is costly; only small, light objects can be fast enough to tunnel.
 	continuous_cd = mass < 4.0
+	_setup_weight(volume)
 	if not freeze or wall_mounted:
 		IMPACT_SOUND.watch(self)
 
@@ -546,14 +540,23 @@ func _spawn_fallback_glass(bounds: AABB, hit_position: Vector3, direction: Vecto
 		part.queue_free()
 
 
-func push_from_character(character_position: Vector3, movement: Vector3) -> void:
-	if freeze or movement.length_squared() < 0.01:
+# Light, low items stop blocking characters (layer 3) and are kicked aside by
+# feet; everything else is pushed according to its weight.
+func _setup_weight(volume: float) -> void:
+	weight_kg = WEIGHT.weight_kg(model_path.get_file(), volume)
+	if freeze:
 		return
-	var away := global_position - character_position
-	away.y = 0.0
-	var direction := away.normalized() if away.length_squared() > 0.01 else movement.normalized()
-	sleeping = false
-	apply_central_impulse(direction * minf(mass * 0.45, 3.0))
+	var bounds := AABB()
+	for index in _shape_meshes.size():
+		var mesh_bounds: AABB = _shape_meshes[index].global_transform * _shape_meshes[index].get_aabb()
+		bounds = mesh_bounds if index == 0 else bounds.merge(mesh_bounds)
+	if WEIGHT.is_kickable(weight_kg, bounds.size):
+		CONTACT.make_kickable(self)
+		body_entered.connect(func(body: Node) -> void: CONTACT.kick(self, weight_kg, body))
+
+
+func push_from_character(character_position: Vector3, movement: Vector3, strength: float = 1.0) -> void:
+	CONTACT.push(self, weight_kg, character_position, movement, strength)
 
 
 func get_display_edges() -> Dictionary:

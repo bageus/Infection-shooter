@@ -26,6 +26,9 @@ signal limb_severed(position: Vector3, direction: Vector3, excluded: Array[RID])
 @export var gravity_acceleration: float = 24.0
 @export var push_decay: float = 10.0
 @export var max_push_speed: float = 6.0
+## Body strength for pushing items (prop_weight_v1); 1.0 moves up to 22 kg.
+@export var push_strength: float = 1.0
+var _intended_motion := Vector3.ZERO
 @export var obstacle_damage: float = 34.0
 @export var obstacle_attack_interval: float = 0.45
 @export var full_simulation_distance: float = 14.0
@@ -241,6 +244,7 @@ func apply_mutation_poison(duration: float, damage_per_second: float, parasite: 
 
 func _physics_process(delta: float) -> void:
 	_track_blood_motion()
+	_mark_stump_drips()
 	_blast_stun_remaining = maxf(0.0, _blast_stun_remaining - delta)
 	if mutation_poison_remaining > 0.0:
 		mutation_poison_remaining = maxf(0.0, mutation_poison_remaining - delta)
@@ -290,6 +294,7 @@ func _physics_process(delta: float) -> void:
 		return
 
 	_apply_gravity(delta)
+	_intended_motion = Vector3(velocity.x, 0.0, velocity.z)
 	move_and_slide()
 	audio.tick(delta, distance_sq <= charge_distance * charge_distance, distance_sq < 24.0 * 24.0)
 	_push_chair_contacts()
@@ -340,13 +345,14 @@ func _turn_toward_face_direction(delta: float) -> void:
 
 
 
+# Sliding zeroes the velocity into an item, so pushes use the intended motion.
 func _push_chair_contacts() -> void:
+	var pushed := {}
 	for i in get_slide_collision_count():
-		var collision := get_slide_collision(i)
-		var collider := collision.get_collider()
-		if collider != null and collider.has_method("push_from_character"):
-			var movement := Vector3(velocity.x, 0.0, velocity.z)
-			collider.call("push_from_character", global_position, movement)
+		var collider := get_slide_collision(i).get_collider()
+		if collider != null and not pushed.has(collider) and collider.has_method("push_from_character"):
+			pushed[collider] = true
+			collider.call("push_from_character", global_position, _intended_motion, push_strength)
 
 
 func _try_break_blocking_props() -> void:
@@ -452,6 +458,14 @@ func _track_blood_motion() -> void:
 		wounded_moved.emit(_blood_segment_start, current, _blood_exclusions())
 	_blood_distance = 0.0
 	_blood_segment_start = current
+
+
+# Blood dripping from torn-off limbs leaves marks under the stump.
+func _mark_stump_drips() -> void:
+	if _parts == null or Engine.get_physics_frames() % 6 != _ai_tick_offset % 6:
+		return
+	for point in _parts.drip_mark_points():
+		blood_wounded.emit(point, _blood_exclusions())
 
 
 func _die() -> void:

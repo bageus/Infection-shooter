@@ -116,6 +116,17 @@ func _test_arm_shot_off(stage: Node3D) -> void:
 	var pieces := _pieces(stage)
 	_expect(pieces.size() == before + 1, "The arm drops as a separate physics piece.")
 	_expect(enemy.call("_attack_state") == &"attack_right", "A one-armed enemy attacks with the remaining arm.")
+	var first_drips: Array[Vector3] = parts.drip_mark_points()
+	_expect(first_drips.size() == 1, "The bleeding stump asks for a floor mark under it.")
+	_expect(parts.drip_mark_points().is_empty(), "A stump standing still does not stack marks every frame.")
+	var drip_marks := [0]
+	enemy.connect("blood_wounded", func(_p: Vector3, _e: Array[RID]) -> void: drip_marks[0] += 1)
+	enemy.global_position.x += 0.5
+	enemy.set_physics_process(true)
+	for frame in 8:
+		await physics_frame
+	enemy.set_physics_process(false)
+	_expect(drip_marks[0] >= 1, "A moving bleeding body leaves drip marks on the floor.")
 	if pieces.size() > before:
 		var piece := pieces[pieces.size() - 1] as RigidBody3D
 		var bled := [false]

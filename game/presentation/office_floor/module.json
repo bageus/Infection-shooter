@@ -6,7 +6,8 @@
     "Blood textures, render marks, surface anchors, lifetime and density budgets",
     "Authored lamp power, color, flicker phase, fixture shape and body visibility; derived runtime light activation",
     "Planner blood decorations: texture, surface and size",
-    "Authored display power/content/seed, derived screen surfaces, runtime power, glow and contiguous television walls"
+    "Authored display power/content/seed, derived screen surfaces, runtime power, glow and contiguous television walls",
+    "Item weight catalogue and character push/kick rules"
   ],
   "public_api": [
     "public/base_office_layout.tscn",
@@ -83,6 +84,11 @@
     "display_placement_v1": {
       "get_display_edges": "get_display_edges() -> Dictionary {frame: Transform3D, size: Vector2}; empty when not a frameless TV",
       "snap_display_edges": "snap_display_edges(neighbors: Array[Dictionary]) -> void; .18m, coplanar edges only"
+    },
+    "prop_weight_v1": {
+      "push_from_character": "push_from_character(character_position: Vector3, movement: Vector3, strength: float = 1.0) -> void; movement is the intended pre-slide velocity, weight-limited push",
+      "weight_kg": "weight_kg: float on environment and physical props; RigidBody mass unchanged",
+      "kickable": "items <= 2 kg and <= 0.45 m high use layer value 4/mask 7, never block characters and are kicked by touching CharacterBody3D feet"
     }
   }
 }

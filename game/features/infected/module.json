@@ -72,7 +72,8 @@
     "body_damage_v1": {
       "limb_severed": "signal limb_severed(position: Vector3, direction: Vector3, excluded: Array[RID]); presentation fact like projectile_blood",
       "severed_parts": "severed parts emit projectile_blood, blood_wounded and wounded_moved facts; unsupported unused corpse/death facts are not declared",
-      "decor": "public/decor/*.tscn corpses and body parts for the planner; shootable, never expire"
+      "decor": "public/decor/*.tscn corpses and body parts for the planner; shootable, never expire",
+      "stump_drips": "bleeding stumps emit blood_wounded at the stump after 0.3 m of movement or 0.9 s"
     },
     "decor_pose_v1": {
       "get_decor_pose": "get_decor_pose() -> Dictionary {seed, pose, optional facing}",
@@ -81,6 +82,9 @@
     },
     "decor_physics_v1": {
       "set_runtime_physics": "set_runtime_physics(enabled: bool) -> void; authored corpse pose -> articulated physical settling after map snapshot"
+    },
+    "character_push_v1": {
+      "push_strength": "push_strength: float = 1.0 (Brute 2.0, Titan 2.6, Colossus 3.2); passed to push_from_character with the intended pre-slide velocity"
     }
   }
 }
