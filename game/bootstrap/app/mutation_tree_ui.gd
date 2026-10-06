@@ -141,26 +141,33 @@ func _divider() -> ColorRect:
 
 
 func _build_hotbar(root: Control) -> void:
+	# Sits above the combat HUD vitals and shares their graphite frame.
 	var bar_panel := PanelContainer.new()
 	bar_panel.set_anchors_preset(Control.PRESET_BOTTOM_LEFT)
 	bar_panel.offset_left = 18
-	bar_panel.offset_right = 492
-	bar_panel.offset_top = -216
-	bar_panel.offset_bottom = -164
+	bar_panel.offset_right = 544
+	bar_panel.offset_top = -168
+	bar_panel.offset_bottom = -122
+	bar_panel.theme = STYLE.make_theme(1.0)
 	var frame := StyleBoxFlat.new()
-	frame.bg_color = Color(0.005, 0.035, 0.065, 0.95)
-	frame.border_color = Color(0.02, 0.72, 0.98)
-	frame.set_border_width_all(2)
-	frame.set_corner_radius_all(12)
-	frame.corner_detail = 1
-	frame.anti_aliasing = false
+	frame.bg_color = Color("151a1ce0")
+	frame.border_color = Color("646760b3")
+	frame.set_border_width_all(1)
+	frame.content_margin_left = 6
+	frame.content_margin_right = 6
+	frame.content_margin_top = 5
+	frame.content_margin_bottom = 5
+	frame.shadow_color = Color(0, 0, 0, 0.35)
+	frame.shadow_size = 8
 	bar_panel.add_theme_stylebox_override("panel", frame)
 	root.add_child(bar_panel)
 	var bar_scroll := ScrollContainer.new()
-	bar_scroll.custom_minimum_size = Vector2(466, 46)
+	bar_scroll.custom_minimum_size = Vector2(512, 34)
 	bar_scroll.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_AUTO
+	bar_scroll.vertical_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
 	bar_panel.add_child(bar_scroll)
 	hotbar = HBoxContainer.new()
+	hotbar.add_theme_constant_override("separation", 4)
 	bar_scroll.add_child(hotbar)
 
 
@@ -326,10 +333,10 @@ func _add_branch_label(canvas: Control, branch_index: int, requirements: Diction
 
 func _fill_hotbar(skills: Array) -> void:
 	var open := Button.new()
-	_bevel_button(open)
 	open.text = "Mutations [%s]" % _binding_label("mutation_tree")
 	open.pressed.connect(open_tree)
 	hotbar.add_child(open)
+	_hotbar_button(open)
 	var active_skills := _equipped()
 	for index in active_skills.size():
 		var row: Array = []
@@ -339,12 +346,12 @@ func _fill_hotbar(skills: Array) -> void:
 		if row.is_empty():
 			continue
 		var button := Button.new()
-		_bevel_button(button)
 		button.text = "%s %s" % [_binding_label("skill_%d" % (index + 1)) if index < 4 else "•", row[1]]
 		button.tooltip_text = "%s\n%s" % [row[1], row[5]]
 		var skill_id: String = active_skills[index]
 		button.pressed.connect(func() -> void: runtime.call("cast_skill", skill_id))
 		hotbar.add_child(button)
+		_hotbar_button(button)
 
 
 func _add_skill(canvas: Control, row: Array, center: Vector2, skills: Array) -> void:
@@ -475,14 +482,19 @@ func _on_control_loss_changed(active: bool) -> void:
 		close_tree()
 
 
-func _bevel_button(button: Button) -> void:
-	for state in ["normal", "hover", "pressed", "disabled", "focus"]:
-		var inherited := button.get_theme_stylebox(state)
-		if inherited is StyleBoxFlat:
-			var style := inherited.duplicate() as StyleBoxFlat
-			style.corner_detail = 1
-			style.anti_aliasing = false
-			button.add_theme_stylebox_override(state, style)
+func _hotbar_button(button: Button) -> void:
+	# Menu button look, compacted to fit one HUD row.
+	button.focus_mode = Control.FOCUS_NONE
+	button.custom_minimum_size.y = 34
+	for state in ["normal", "hover", "pressed", "disabled"]:
+		var style := button.get_theme_stylebox(state, "Button").duplicate() as StyleBox
+		style.content_margin_left = 12
+		style.content_margin_right = 12
+		style.content_margin_top = 4
+		style.content_margin_bottom = 4
+		if style is StyleBoxFlat:
+			(style as StyleBoxFlat).border_width_bottom = 0
+		button.add_theme_stylebox_override(state, style)
 
 
 func _play_ui_sound(event: StringName) -> void:

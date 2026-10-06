@@ -1,161 +1,92 @@
-[gd_scene load_steps=15 format=3]
+[gd_scene format=3]
 
 [ext_resource type="Script" path="res://game/presentation/prototype_hud/prototype_hud.gd" id="1"]
 [ext_resource type="Texture2D" path="res://assets/icon_interface.png" id="2_icons"]
+[ext_resource type="FontFile" path="res://assets/interface/fonts/title.ttf" id="3_title"]
+[ext_resource type="Script" path="res://game/presentation/prototype_hud/key_icon.gd" id="4_key"]
 
 [sub_resource type="StyleBoxFlat" id="HudFrame"]
-corner_detail = 1
-anti_aliasing = false
-bg_color = Color(0.005, 0.035, 0.065, 0.95)
-border_width_left = 2
-border_width_top = 2
-border_width_right = 2
-border_width_bottom = 2
-border_color = Color(0.02, 0.72, 0.98, 1)
-corner_radius_top_left = 12
-corner_radius_top_right = 12
-corner_radius_bottom_left = 12
-corner_radius_bottom_right = 12
-shadow_color = Color(0.0, 0.45, 0.8, 0.28)
-shadow_size = 10
+bg_color = Color(0.0824, 0.102, 0.1098, 0.8784)
+border_width_left = 1
+border_width_top = 1
+border_width_right = 1
+border_width_bottom = 1
+border_color = Color(0.3922, 0.4039, 0.3765, 0.702)
+shadow_color = Color(0, 0, 0, 0.35)
+shadow_size = 8
+
 
 [sub_resource type="StyleBoxFlat" id="BarBackground"]
-corner_detail = 1
-anti_aliasing = false
-bg_color = Color(0.02, 0.07, 0.11, 0.95)
-border_width_left = 2
-border_width_top = 2
-border_width_right = 2
-border_width_bottom = 2
-border_color = Color(0.16, 0.3, 0.4, 1)
-corner_radius_top_left = 5
-corner_radius_top_right = 5
-corner_radius_bottom_left = 5
-corner_radius_bottom_right = 5
+bg_color = Color(0.0392, 0.051, 0.0549, 0.902)
+border_width_left = 1
+border_width_top = 1
+border_width_right = 1
+border_width_bottom = 1
+border_color = Color(0.2314, 0.251, 0.2471, 0.8)
+
 
 [sub_resource type="StyleBoxFlat" id="HealthFill"]
-corner_detail = 1
-anti_aliasing = false
-bg_color = Color(0.95, 0.04, 0.18, 1)
-corner_radius_top_left = 4
-corner_radius_top_right = 4
-corner_radius_bottom_left = 4
-corner_radius_bottom_right = 4
+bg_color = Color(0.7608, 0.2275, 0.2431, 1)
+
 
 [sub_resource type="StyleBoxFlat" id="MutationFill"]
-corner_detail = 1
-anti_aliasing = false
-bg_color = Color(0.3, 0.95, 0.1, 1)
-corner_radius_top_left = 4
-corner_radius_top_right = 4
-corner_radius_bottom_left = 4
-corner_radius_bottom_right = 4
+bg_color = Color(0.4196, 0.8588, 0.251, 1)
+
 
 [sub_resource type="StyleBoxFlat" id="SlotFrame"]
-corner_detail = 1
-anti_aliasing = false
-bg_color = Color(0.015, 0.055, 0.09, 0.98)
+bg_color = Color(0.0588, 0.0745, 0.0824, 0.851)
 border_width_left = 1
 border_width_top = 1
 border_width_right = 1
 border_width_bottom = 1
-border_color = Color(0.12, 0.3, 0.42, 1)
-corner_radius_top_left = 6
-corner_radius_top_right = 6
-corner_radius_bottom_left = 6
-corner_radius_bottom_right = 6
+border_color = Color(0.2314, 0.251, 0.2471, 0.8)
 
-[sub_resource type="StyleBoxFlat" id="AntidoteFrame"]
-corner_detail = 1
-anti_aliasing = false
-bg_color = Color(0.008, 0.045, 0.075, 0.98)
-border_width_left = 2
-border_width_top = 2
-border_width_right = 2
-border_width_bottom = 2
-border_color = Color(0.02, 0.72, 0.98, 1)
-corner_radius_top_left = 8
-corner_radius_top_right = 8
-corner_radius_bottom_left = 8
-corner_radius_bottom_right = 8
-
-[sub_resource type="StyleBoxFlat" id="HealthIconFrame"]
-corner_detail = 1
-anti_aliasing = false
-bg_color = Color(0.73, 0.04, 0.12, 1)
-border_width_left = 2
-border_width_top = 2
-border_width_right = 2
-border_width_bottom = 2
-border_color = Color(1, 0.18, 0.24, 1)
-corner_radius_top_left = 6
-corner_radius_top_right = 6
-corner_radius_bottom_left = 6
-corner_radius_bottom_right = 6
-
-[sub_resource type="StyleBoxFlat" id="MutationIconFrame"]
-corner_detail = 1
-anti_aliasing = false
-bg_color = Color(0.04, 0.16, 0.02, 1)
-border_width_left = 2
-border_width_top = 2
-border_width_right = 2
-border_width_bottom = 2
-border_color = Color(0.35, 1, 0.08, 1)
-corner_radius_top_left = 6
-corner_radius_top_right = 6
-corner_radius_bottom_left = 6
-corner_radius_bottom_right = 6
 
 [sub_resource type="StyleBoxFlat" id="ActiveSlotFrame"]
-corner_detail = 1
-anti_aliasing = false
-bg_color = Color(0.0, 0.12, 0.17, 1)
-border_width_left = 2
-border_width_top = 2
-border_width_right = 2
-border_width_bottom = 2
-border_color = Color(0.0, 0.95, 1.0, 1)
-corner_radius_top_left = 6
-corner_radius_top_right = 6
-corner_radius_bottom_left = 6
-corner_radius_bottom_right = 6
+bg_color = Color(0.1412, 0.1647, 0.1725, 0.9412)
+border_width_left = 1
+border_width_top = 1
+border_width_right = 1
+border_width_bottom = 1
+border_color = Color(0.6471, 0.1765, 0.1882, 1)
+
+
+[sub_resource type="StyleBoxFlat" id="ItemFrame"]
+bg_color = Color(0.0824, 0.102, 0.1098, 0.8784)
+border_width_left = 1
+border_width_top = 1
+border_width_right = 1
+border_width_bottom = 1
+border_color = Color(0.3922, 0.4039, 0.3765, 0.702)
+shadow_color = Color(0, 0, 0, 0.35)
+shadow_size = 8
+
 
 [sub_resource type="StyleBoxFlat" id="KeyHintFrame"]
-corner_detail = 1
-anti_aliasing = false
-bg_color = Color(0.005, 0.035, 0.065, 1)
+bg_color = Color(0, 0, 0, 0)
 border_width_left = 1
 border_width_top = 1
 border_width_right = 1
 border_width_bottom = 1
-border_color = Color(0, 0.95, 1, 1)
-corner_radius_top_left = 4
-corner_radius_top_right = 4
-corner_radius_bottom_left = 4
-corner_radius_bottom_right = 4
+border_color = Color(0.4863, 0.4902, 0.4627, 1)
 content_margin_left = 0.0
 content_margin_top = 0.0
 content_margin_right = 0.0
 content_margin_bottom = 0.0
 
+
 [sub_resource type="StyleBoxFlat" id="KeyHintFilled"]
-corner_detail = 1
-anti_aliasing = false
-bg_color = Color(0, 0.95, 1, 1)
+bg_color = Color(0.6471, 0.1765, 0.1882, 1)
 border_width_left = 1
 border_width_top = 1
 border_width_right = 1
 border_width_bottom = 1
-border_color = Color(0, 0.95, 1, 1)
-corner_radius_top_left = 4
-corner_radius_top_right = 4
-corner_radius_bottom_left = 4
-corner_radius_bottom_right = 4
+border_color = Color(0.6471, 0.1765, 0.1882, 1)
 content_margin_left = 0.0
 content_margin_top = 0.0
 content_margin_right = 0.0
 content_margin_bottom = 0.0
+
 
 [node name="PrototypeHUD" type="CanvasLayer"]
 layer = 5
@@ -167,106 +98,111 @@ anchors_preset = 2
 anchor_top = 1.0
 anchor_bottom = 1.0
 offset_left = 18.0
-offset_top = -156.0
-offset_right = 492.0
+offset_top = -112.0
+offset_right = 380.0
 offset_bottom = -18.0
 grow_vertical = 0
 theme_override_styles/panel = SubResource("HudFrame")
 
-[node name="HealthIconBox" type="PanelContainer" parent="HealthPanel"]
-offset_left = 18.0
-offset_top = 16.0
-offset_right = 66.0
-offset_bottom = 56.0
-theme_override_styles/panel = SubResource("HealthIconFrame")
+[node name="Accent" type="ColorRect" parent="HealthPanel"]
+anchors_preset = 9
+anchor_bottom = 1.0
+offset_right = 3.0
+grow_vertical = 2
+mouse_filter = 2
+color = Color(0.6471, 0.1765, 0.1882, 1)
 
-[node name="HealthIcon" type="Label" parent="HealthPanel/HealthIconBox"]
-text = "+"
-theme_override_font_sizes/font_size = 30
-horizontal_alignment = 1
+[node name="HealthCaption" type="Label" parent="HealthPanel"]
+offset_left = 18.0
+offset_top = 8.0
+offset_right = 200.0
+offset_bottom = 28.0
+mouse_filter = 2
+text = "HEALTH"
+theme_override_colors/font_color = Color(0.7176, 0.7137, 0.6784, 1)
+theme_override_font_sizes/font_size = 11
+vertical_alignment = 1
+
+[node name="HealthValue" type="Label" parent="HealthPanel"]
+offset_left = 200.0
+offset_top = 6.0
+offset_right = 344.0
+offset_bottom = 28.0
+mouse_filter = 2
+text = "100 / 100"
+theme_override_colors/font_color = Color(0.8863, 0.8745, 0.8314, 1)
+theme_override_font_sizes/font_size = 17
+horizontal_alignment = 2
 vertical_alignment = 1
 
 [node name="HealthBar" type="ProgressBar" parent="HealthPanel"]
-offset_left = 78.0
-offset_top = 20.0
-offset_right = 342.0
-offset_bottom = 42.0
+offset_left = 18.0
+offset_top = 30.0
+offset_right = 344.0
+offset_bottom = 38.0
+mouse_filter = 2
 value = 100.0
 show_percentage = false
 theme_override_styles/background = SubResource("BarBackground")
 theme_override_styles/fill = SubResource("HealthFill")
 
-[node name="HealthValue" type="Label" parent="HealthPanel"]
-offset_left = 355.0
-offset_top = 14.0
-offset_right = 454.0
-offset_bottom = 47.0
-text = "100 / 100"
-theme_override_colors/font_color = Color(0.88, 0.95, 1, 1)
-theme_override_font_sizes/font_size = 21
+[node name="MutationCaption" type="Label" parent="HealthPanel"]
+offset_left = 18.0
+offset_top = 48.0
+offset_right = 200.0
+offset_bottom = 68.0
+mouse_filter = 2
+text = "MUTATION"
+theme_override_colors/font_color = Color(0.7176, 0.7137, 0.6784, 1)
+theme_override_font_sizes/font_size = 11
+vertical_alignment = 1
+
+[node name="MutationValue" type="Label" parent="HealthPanel"]
+offset_left = 200.0
+offset_top = 46.0
+offset_right = 344.0
+offset_bottom = 68.0
+mouse_filter = 2
+text = "0 / 100"
+theme_override_colors/font_color = Color(0.8863, 0.8745, 0.8314, 1)
+theme_override_font_sizes/font_size = 17
 horizontal_alignment = 2
 vertical_alignment = 1
 
-[node name="ArmorSegments" type="HBoxContainer" parent="HealthPanel"]
-visible = false
-
-[node name="MutationIconBox" type="PanelContainer" parent="HealthPanel"]
-offset_left = 18.0
-offset_top = 76.0
-offset_right = 66.0
-offset_bottom = 116.0
-theme_override_styles/panel = SubResource("MutationIconFrame")
-
-[node name="MutationIcon" type="Label" parent="HealthPanel/MutationIconBox"]
-text = "☣"
-theme_override_colors/font_color = Color(0.63, 1, 0.18, 1)
-theme_override_font_sizes/font_size = 27
-horizontal_alignment = 1
-vertical_alignment = 1
-
 [node name="MutationBar" type="ProgressBar" parent="HealthPanel"]
-offset_left = 78.0
-offset_top = 80.0
-offset_right = 342.0
-offset_bottom = 102.0
+offset_left = 18.0
+offset_top = 70.0
+offset_right = 344.0
+offset_bottom = 78.0
+mouse_filter = 2
 show_percentage = false
 theme_override_styles/background = SubResource("BarBackground")
 theme_override_styles/fill = SubResource("MutationFill")
 
 [node name="CriticalMarker" type="ColorRect" parent="HealthPanel"]
-offset_left = 158.0
-offset_top = 76.0
-offset_right = 161.0
-offset_bottom = 106.0
-color = Color(1, 0.28, 0.04, 1)
-
-[node name="MutationValue" type="Label" parent="HealthPanel"]
-offset_left = 355.0
-offset_top = 74.0
-offset_right = 454.0
-offset_bottom = 107.0
-text = "0 / 100"
-theme_override_colors/font_color = Color(0.88, 0.95, 1, 1)
-theme_override_font_sizes/font_size = 21
-horizontal_alignment = 2
-vertical_alignment = 1
+offset_left = 99.0
+offset_top = 66.0
+offset_right = 101.0
+offset_bottom = 82.0
+mouse_filter = 2
+color = Color(0.9098, 0.5686, 0.2275, 1)
 
 [node name="AntidotePanel" type="Panel" parent="."]
 anchors_preset = 2
 anchor_top = 1.0
 anchor_bottom = 1.0
-offset_left = 498.0
-offset_top = -85.0
-offset_right = 603.0
-offset_bottom = -33.0
+offset_left = 388.0
+offset_top = -82.0
+offset_right = 462.0
+offset_bottom = -18.0
 grow_vertical = 0
-theme_override_styles/panel = SubResource("AntidoteFrame")
+theme_override_styles/panel = SubResource("ItemFrame")
 
 [node name="Symbol" type="TextureRect" parent="AntidotePanel"]
-offset_left = 38.0
-offset_top = 5.0
-offset_right = 94.0
-offset_bottom = 47.0
+offset_left = 28.0
+offset_top = 20.0
+offset_right = 68.0
+offset_bottom = 58.0
 mouse_filter = 2
 texture = ExtResource("2_icons")
 expand_mode = 1
@@ -274,73 +210,109 @@ stretch_mode = 5
 
 [node name="KeyHint" type="Button" parent="AntidotePanel"]
 offset_left = 6.0
-offset_top = 11.0
-offset_right = 32.0
-offset_bottom = 41.0
+offset_top = 38.0
+offset_right = 26.0
+offset_bottom = 58.0
 focus_mode = 0
 text = "F"
 tooltip_text = "Use antidote [F]"
-theme_override_font_sizes/font_size = 16
-theme_override_colors/font_color = Color(0, 0.95, 1, 1)
-theme_override_colors/font_pressed_color = Color(0.005, 0.035, 0.065, 1)
+theme_override_font_sizes/font_size = 13
+theme_override_colors/font_color = Color(0.4863, 0.4902, 0.4627, 1)
+theme_override_colors/font_pressed_color = Color(0.8863, 0.8745, 0.8314, 1)
 theme_override_styles/normal = SubResource("KeyHintFrame")
 theme_override_styles/pressed = SubResource("KeyHintFilled")
 
 [node name="AntidoteCount" type="Label" parent="AntidotePanel"]
-offset_left = 77.0
-offset_top = 0.0
-offset_right = 101.0
-offset_bottom = 22.0
+offset_left = 48.0
+offset_top = 3.0
+offset_right = 68.0
+offset_bottom = 21.0
 mouse_filter = 2
 text = "2"
-theme_override_colors/font_color = Color(0.9, 0.98, 1, 1)
-theme_override_font_sizes/font_size = 16
+theme_override_colors/font_color = Color(0.8863, 0.8745, 0.8314, 1)
+theme_override_font_sizes/font_size = 14
 horizontal_alignment = 2
+vertical_alignment = 1
 
 [node name="EmergencyKey" type="Label" parent="AntidotePanel"]
-visible = false
 offset_left = 0.0
 offset_top = -22.0
-offset_right = 105.0
-offset_bottom = -2.0
+offset_right = 74.0
+offset_bottom = -4.0
+mouse_filter = 2
+text = ""
+theme_override_colors/font_color = Color(0.7176, 0.7137, 0.6784, 1)
+theme_override_font_sizes/font_size = 11
+vertical_alignment = 1
+visible = false
+
+[node name="KeyPanel" type="Panel" parent="."]
+anchors_preset = 2
+anchor_top = 1.0
+anchor_bottom = 1.0
+offset_left = 470.0
+offset_top = -82.0
+offset_right = 544.0
+offset_bottom = -18.0
+grow_vertical = 0
+theme_override_styles/panel = SubResource("ItemFrame")
+visible = false
+tooltip_text = "Emergency key"
+
+[node name="KeyIcon" type="Control" parent="KeyPanel"]
+offset_left = 10.0
+offset_top = 10.0
+offset_right = 64.0
+offset_bottom = 40.0
+mouse_filter = 2
+script = ExtResource("4_key")
+
+[node name="KeyCaption" type="Label" parent="KeyPanel"]
+offset_left = 0.0
+offset_top = 40.0
+offset_right = 74.0
+offset_bottom = 60.0
 mouse_filter = 2
 text = "KEY"
-theme_override_font_sizes/font_size = 13
-horizontal_alignment = 2
+theme_override_colors/font_color = Color(0.7176, 0.7137, 0.6784, 1)
+theme_override_font_sizes/font_size = 11
+horizontal_alignment = 1
+vertical_alignment = 1
 
 [node name="EnemyCount" type="Label" parent="."]
 anchors_preset = 1
 anchor_left = 1.0
 anchor_right = 1.0
-offset_left = -199.0
-offset_top = 1.0
-offset_right = -20.0
-offset_bottom = 27.0
 grow_horizontal = 0
+offset_left = -150.0
+offset_top = 256.0
+offset_right = -20.0
+offset_bottom = 276.0
+mouse_filter = 2
 text = "ENEMIES 0"
-theme_override_colors/font_color = Color(0.88, 0.95, 1, 1)
+theme_override_colors/font_color = Color(0.8863, 0.8745, 0.8314, 1)
 theme_override_colors/font_shadow_color = Color(0, 0, 0, 0.9)
-theme_override_constants/shadow_offset_x = 2
-theme_override_constants/shadow_offset_y = 2
-theme_override_font_sizes/font_size = 18
+theme_override_constants/shadow_offset_x = 1
+theme_override_constants/shadow_offset_y = 1
+theme_override_font_sizes/font_size = 13
 horizontal_alignment = 2
 
 [node name="FPS" type="Label" parent="."]
 anchors_preset = 1
 anchor_left = 1.0
 anchor_right = 1.0
-offset_left = -390.0
-offset_top = 18.0
-offset_right = -211.0
-offset_bottom = 48.0
 grow_horizontal = 0
+offset_left = -250.0
+offset_top = 256.0
+offset_right = -160.0
+offset_bottom = 276.0
+mouse_filter = 2
 text = "FPS 0"
-theme_override_colors/font_color = Color(0.2, 0.95, 1, 1)
+theme_override_colors/font_color = Color(0.7176, 0.7137, 0.6784, 1)
 theme_override_colors/font_shadow_color = Color(0, 0, 0, 0.9)
-theme_override_constants/shadow_offset_x = 2
-theme_override_constants/shadow_offset_y = 2
-theme_override_font_sizes/font_size = 18
-horizontal_alignment = 2
+theme_override_constants/shadow_offset_x = 1
+theme_override_constants/shadow_offset_y = 1
+theme_override_font_sizes/font_size = 13
 
 [node name="WeaponPanel" type="Panel" parent="."]
 anchors_preset = 3
@@ -349,88 +321,106 @@ anchor_top = 1.0
 anchor_right = 1.0
 anchor_bottom = 1.0
 offset_left = -392.0
-offset_top = -176.0
+offset_top = -150.0
 offset_right = -18.0
 offset_bottom = -18.0
 grow_horizontal = 0
 grow_vertical = 0
 theme_override_styles/panel = SubResource("HudFrame")
 
+[node name="Accent" type="ColorRect" parent="WeaponPanel"]
+anchors_preset = 9
+anchor_bottom = 1.0
+offset_right = 3.0
+grow_vertical = 2
+mouse_filter = 2
+color = Color(0.6471, 0.1765, 0.1882, 1)
+
 [node name="WeaponIcon" type="TextureRect" parent="WeaponPanel"]
 offset_left = 18.0
-offset_top = 8.0
-offset_right = 210.0
+offset_top = 10.0
+offset_right = 190.0
 offset_bottom = 58.0
+mouse_filter = 2
 texture = ExtResource("2_icons")
 expand_mode = 1
 stretch_mode = 5
 
 [node name="WeaponName" type="Label" parent="WeaponPanel"]
-visible = false
 offset_left = 18.0
 offset_top = 58.0
-offset_right = 208.0
-offset_bottom = 83.0
+offset_right = 190.0
+offset_bottom = 76.0
+mouse_filter = 2
 text = ""
-theme_override_colors/font_color = Color(0.84, 0.94, 1, 1)
-theme_override_font_sizes/font_size = 16
+theme_override_colors/font_color = Color(0.7176, 0.7137, 0.6784, 1)
+theme_override_font_sizes/font_size = 13
 horizontal_alignment = 1
+vertical_alignment = 1
+visible = false
 
 [node name="Magazine" type="Label" parent="WeaponPanel"]
-offset_left = 232.0
-offset_top = 12.0
-offset_right = 303.0
-offset_bottom = 60.0
+offset_left = 196.0
+offset_top = 2.0
+offset_right = 298.0
+offset_bottom = 58.0
+mouse_filter = 2
 text = "15"
-theme_override_colors/font_color = Color(0.95, 0.98, 1, 1)
-theme_override_font_sizes/font_size = 42
+theme_override_colors/font_color = Color(0.8863, 0.8745, 0.8314, 1)
+theme_override_font_sizes/font_size = 40
+horizontal_alignment = 2
+vertical_alignment = 1
+theme_override_fonts/font = ExtResource("3_title")
+
+[node name="Reserve" type="Label" parent="WeaponPanel"]
+offset_left = 302.0
+offset_top = 24.0
+offset_right = 360.0
+offset_bottom = 50.0
+mouse_filter = 2
+text = "/ 75"
+theme_override_colors/font_color = Color(0.7176, 0.7137, 0.6784, 1)
+theme_override_font_sizes/font_size = 16
+vertical_alignment = 1
+
+[node name="Reload" type="Label" parent="WeaponPanel"]
+offset_left = 160.0
+offset_top = 56.0
+offset_right = 356.0
+offset_bottom = 74.0
+mouse_filter = 2
+text = ""
+theme_override_colors/font_color = Color(0.8863, 0.8745, 0.8314, 1)
+theme_override_font_sizes/font_size = 12
 horizontal_alignment = 2
 vertical_alignment = 1
 
-[node name="Reserve" type="Label" parent="WeaponPanel"]
-offset_left = 306.0
-offset_top = 31.0
-offset_right = 360.0
-offset_bottom = 58.0
-text = "/ 75"
-theme_override_colors/font_color = Color(0.84, 0.94, 1, 1)
-theme_override_font_sizes/font_size = 18
-
-[node name="Reload" type="Label" parent="WeaponPanel"]
-offset_left = 188.0
-offset_top = 61.0
-offset_right = 360.0
-offset_bottom = 82.0
-text = ""
-theme_override_font_sizes/font_size = 14
-horizontal_alignment = 2
-
 [node name="Slot1" type="Panel" parent="WeaponPanel"]
-offset_left = 16.0
-offset_top = 91.0
-offset_right = 121.0
-offset_bottom = 143.0
+offset_left = 18.0
+offset_top = 78.0
+offset_right = 125.0
+offset_bottom = 120.0
 theme_override_styles/panel = SubResource("ActiveSlotFrame")
 
 [node name="KeyHint" type="Button" parent="WeaponPanel/Slot1"]
 offset_left = 6.0
 offset_top = 11.0
-offset_right = 32.0
-offset_bottom = 41.0
+offset_right = 26.0
+offset_bottom = 31.0
 focus_mode = 0
 text = "1"
 tooltip_text = "Select weapon [1]"
-theme_override_font_sizes/font_size = 16
-theme_override_colors/font_color = Color(0, 0.95, 1, 1)
-theme_override_colors/font_pressed_color = Color(0.005, 0.035, 0.065, 1)
+theme_override_font_sizes/font_size = 13
+theme_override_colors/font_color = Color(0.4863, 0.4902, 0.4627, 1)
+theme_override_colors/font_pressed_color = Color(0.8863, 0.8745, 0.8314, 1)
 theme_override_styles/normal = SubResource("KeyHintFrame")
 theme_override_styles/pressed = SubResource("KeyHintFilled")
 
 [node name="Icon" type="TextureRect" parent="WeaponPanel/Slot1"]
-offset_left = 38.0
-offset_top = 5.0
-offset_right = 99.0
-offset_bottom = 47.0
+offset_left = 32.0
+offset_top = 4.0
+offset_right = 101.0
+offset_bottom = 38.0
 mouse_filter = 2
 texture = ExtResource("2_icons")
 expand_mode = 1
@@ -438,61 +428,61 @@ stretch_mode = 5
 
 [node name="Slot2" type="Panel" parent="WeaponPanel"]
 offset_left = 133.0
-offset_top = 91.0
-offset_right = 238.0
-offset_bottom = 143.0
+offset_top = 78.0
+offset_right = 240.0
+offset_bottom = 120.0
 theme_override_styles/panel = SubResource("SlotFrame")
 
 [node name="KeyHint" type="Button" parent="WeaponPanel/Slot2"]
 offset_left = 6.0
 offset_top = 11.0
-offset_right = 32.0
-offset_bottom = 41.0
+offset_right = 26.0
+offset_bottom = 31.0
 focus_mode = 0
 text = "2"
 tooltip_text = "Select weapon [2]"
-theme_override_font_sizes/font_size = 16
-theme_override_colors/font_color = Color(0, 0.95, 1, 1)
-theme_override_colors/font_pressed_color = Color(0.005, 0.035, 0.065, 1)
+theme_override_font_sizes/font_size = 13
+theme_override_colors/font_color = Color(0.4863, 0.4902, 0.4627, 1)
+theme_override_colors/font_pressed_color = Color(0.8863, 0.8745, 0.8314, 1)
 theme_override_styles/normal = SubResource("KeyHintFrame")
 theme_override_styles/pressed = SubResource("KeyHintFilled")
 
 [node name="Icon" type="TextureRect" parent="WeaponPanel/Slot2"]
-offset_left = 38.0
-offset_top = 5.0
-offset_right = 99.0
-offset_bottom = 47.0
+offset_left = 32.0
+offset_top = 4.0
+offset_right = 101.0
+offset_bottom = 38.0
 mouse_filter = 2
 texture = ExtResource("2_icons")
 expand_mode = 1
 stretch_mode = 5
 
 [node name="Slot3" type="Panel" parent="WeaponPanel"]
-offset_left = 250.0
-offset_top = 91.0
+offset_left = 248.0
+offset_top = 78.0
 offset_right = 355.0
-offset_bottom = 143.0
+offset_bottom = 120.0
 theme_override_styles/panel = SubResource("SlotFrame")
 
 [node name="KeyHint" type="Button" parent="WeaponPanel/Slot3"]
 offset_left = 6.0
 offset_top = 11.0
-offset_right = 32.0
-offset_bottom = 41.0
+offset_right = 26.0
+offset_bottom = 31.0
 focus_mode = 0
 text = "3"
 tooltip_text = "Select weapon [3]"
-theme_override_font_sizes/font_size = 16
-theme_override_colors/font_color = Color(0, 0.95, 1, 1)
-theme_override_colors/font_pressed_color = Color(0.005, 0.035, 0.065, 1)
+theme_override_font_sizes/font_size = 13
+theme_override_colors/font_color = Color(0.4863, 0.4902, 0.4627, 1)
+theme_override_colors/font_pressed_color = Color(0.8863, 0.8745, 0.8314, 1)
 theme_override_styles/normal = SubResource("KeyHintFrame")
 theme_override_styles/pressed = SubResource("KeyHintFilled")
 
 [node name="Icon" type="TextureRect" parent="WeaponPanel/Slot3"]
-offset_left = 38.0
-offset_top = 5.0
-offset_right = 99.0
-offset_bottom = 47.0
+offset_left = 32.0
+offset_top = 4.0
+offset_right = 101.0
+offset_bottom = 38.0
 mouse_filter = 2
 texture = ExtResource("2_icons")
 expand_mode = 1
