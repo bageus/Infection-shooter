@@ -17,6 +17,7 @@ func _initialize() -> void:
 func _run() -> void:
 	_test_stance_sequences()
 	_test_inactivity()
+	_test_uzi_pistol_rounds()
 	await _test_player_wiring()
 	await _test_generic_fallback()
 	await process_frame
@@ -29,6 +30,16 @@ func _check(condition: bool, message: String) -> void:
 	if not condition:
 		failures += 1
 		print("FAIL: ", message)
+
+
+# The Uzi fires pistol rounds: same spent casing and flight speed.
+func _test_uzi_pistol_rounds() -> void:
+	var pistol := load("res://game/features/combat/public/pistol.tscn").instantiate()
+	var uzi := load("res://game/features/combat/public/uzi.tscn").instantiate()
+	for property in ["casing_scene", "casing_radius", "bullet_speed", "bullet_scene"]:
+		_check(uzi.get(property) == pistol.get(property), "Uzi %s matches pistol" % property)
+	pistol.free()
+	uzi.free()
 
 
 func _shot(state: STANCE, fired: bool = true) -> void:
