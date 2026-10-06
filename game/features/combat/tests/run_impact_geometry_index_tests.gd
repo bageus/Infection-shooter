@@ -83,6 +83,14 @@ func _receiver_lifecycle() -> void:
 	var rebuilds: int = cache.rebuilds
 	cache.gather(body)
 	_check(cache.rebuilds == rebuilds, "Repeated lookup reuses tree composition")
+	var overlapping := RECEIVERS.new()
+	_check(overlapping.gather(body) == [mesh], "Independent pools can cache the same live branch")
+	_check(cache.gather(branch) == [mesh], "Nested roots can be cached independently")
+	overlapping = null
+	cache = null
+	cache = RECEIVERS.new()
+	cache.gather(body)
+	rebuilds = cache.rebuilds
 	branch.hide()
 	_check(cache.gather(body).is_empty(), "Hidden ancestor suppresses cached receiver")
 	branch.show()
