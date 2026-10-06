@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://cgbh1b1eb33vl"
-path="res://.godot/imported/Six-Frame Toxic Gas Cloud Atlas-1.png-eae6b860d05cf8283069457c81b7be9b.ctex"
+uid="uid://dqh3v4rc2os7h"
+path="res://.godot/imported/Six-frame green smoke sprite sheet.png-0eb84dac210a2cd0a7f295a775b21690.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://models/objects/textures/mutagen/Six-Frame Toxic Gas Cloud Atlas-1.png"
-dest_files=["res://.godot/imported/Six-Frame Toxic Gas Cloud Atlas-1.png-eae6b860d05cf8283069457c81b7be9b.ctex"]
+source_file="res://models/objects/textures/mutagen/Six-frame green smoke sprite sheet.png"
+dest_files=["res://.godot/imported/Six-frame green smoke sprite sheet.png-0eb84dac210a2cd0a7f295a775b21690.ctex"]
 
 [params]
 
