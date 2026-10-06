@@ -76,6 +76,7 @@ func _test_mutation_tree() -> void:
 	_check(skill != null and not skill.disabled, "A real mutation skill is available")
 	if skill != null:
 		_check(skill.tooltip_text.is_empty(), "Skill circle has no plain engine tooltip")
+		_check(skill.icon != null and skill.text.is_empty(), "Skill circle shows its atlas icon")
 		skill.mouse_entered.emit()
 		_check(_count(ui, &"mutation_hover") == 1 and _count(ui, &"menu_hover") == 0, "Skill hover uses a distinct cue")
 		_check(ui.card.visible and ui.card.anchor_id == "acid_spit", "Skill hover opens the detail card")

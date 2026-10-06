@@ -3,6 +3,8 @@ extends SceneTree
 const CANVAS := preload("res://game/bootstrap/app/mutation_tree_canvas.gd")
 const PICKUP_ART := preload("res://game/features/combat/public/launcher_visual.gd")
 const DNA := preload("res://game/bootstrap/app/test_dna_pickup.gd")
+const SKILL_ICONS := preload("res://game/bootstrap/app/mutation_skill_icons.gd")
+const INFECTION := preload("res://game/features/infection/public/infection_runtime.gd")
 
 class FakeRuntime:
 	extends Node
@@ -90,6 +92,7 @@ func _run() -> void:
 		_expect(not art.find_children("*", "MeshInstance3D", true, false).is_empty(), "Each weapon pickup has its authored GLB geometry.")
 		art.free()
 	stage.queue_free()
+	_check_skill_icons()
 	print("Mutation feedback tests: %d failures" % failures)
 	quit(failures)
 
@@ -98,3 +101,18 @@ func _expect(value: bool, message: String) -> void:
 	if not value:
 		failures += 1
 		push_error(message)
+
+
+func _check_skill_icons() -> void:
+	var infection := INFECTION.new()
+	var regions: Array[Rect2] = []
+	for row in infection.skill_catalog():
+		var icon := SKILL_ICONS.for_skill(str(row[0])) as AtlasTexture
+		_expect(icon != null, "Skill %s has an atlas icon." % row[0])
+		if icon != null:
+			_expect(not regions.has(icon.region), "Skill %s has its own atlas cell." % row[0])
+			_expect(Rect2(Vector2.ZERO, icon.atlas.get_size()).encloses(icon.region), "Skill %s icon lies inside the atlas." % row[0])
+			regions.append(icon.region)
+	_expect(SKILL_ICONS.for_skill("muscle_memory").region.position == Vector2.ZERO, "Atlas cell 1 is Muscle Memory.")
+	_expect(SKILL_ICONS.for_skill("berserk").region.end == SKILL_ICONS.ATLAS.get_size(), "Atlas cell 36 is Berserk.")
+	infection.free()
