@@ -9,7 +9,11 @@ updated: 2026-10-05
 
 # Active task
 
-06.10.2026 (3): по запросу владельца Узи стреляет пистолетными патронами: выбрасывает ту же гильзу 12_pistol_casing (радиус 0.012), пуля летит с той же скоростью 40 м/с и тем же видом ammo_pistols. Урон, дальность, разброс, темп и пробитие Узи прежние. run_weapon_presentation_tests.gd сверяет гильзу/скорость с пистолетом. Следующее действие: проверить гильзы Узи в Windows/Web.
+06.10.2026 (5): по запросу владельца Узи стреляет пистолетными патронами: выбрасывает ту же гильзу 12_pistol_casing (радиус 0.012), пуля летит с той же скоростью 40 м/с и тем же видом ammo_pistols. Урон, дальность, разброс, темп и пробитие Узи прежние. run_weapon_presentation_tests.gd сверяет гильзу/скорость с пистолетом. Следующее действие: проверить гильзы Узи в Windows/Web.
+
+06.10.2026 (4): по запросу владельца смерть врагов зависит от причины (death_fall_v1, ADR-0034): движущийся враг, убитый из пистолета/автомата издалека, падает вперёд (новый клип DeathForward) и проезжает по инерции; дробовик вблизи отбрасывает назад (DeathBack) до ~1.6 м; граната отбрасывает от центра взрыва с разворотом корпуса. Тело останавливается перед стенами, лужа крови — в точке падения. Клипы запечены для пяти гуманоидов, меши/сцены rig и DTO прежние, исключений нет. Новый run_death_fall_tests.gd. Следующее действие: проверить ощущение падений в игре на Windows/Web.
+
+06.10.2026 (3): по запросу владельца добавлена отделка офиса (surface_decor_v1, ADR-0033): conference table (07_table_longest) — шоколадная деревянная столешница и графитовая рама (новые бесшовные текстуры, triplanar; обломки сохраняют отделку); случайный документ из атласа 6 документов на верхнем листе бумаги (стопка, отдельный лист, файлы), уложенный по поверхности листа; 0–3 стикера из атласа 8 стикеров по краям мониторов, стабильно по display_seed. DTO карт прежние, исключений нет. Новый run_surface_decor_tests.gd. Следующее действие: визуально проверить стол, бумаги и мониторы в Windows/Web.
 
 06.10.2026 (2): по запросу владельца меню мутаций приведено к стилю главного меню и настроек: затемнение поверх игры, панель #151a1c с серой рамкой, заголовок MUTATIONS шрифтом меню, отдельные показатели мутации/очков/стабильности, кнопка закрытия и подписи клавиш как в меню, приглушённая палитра линий и кругов; дерево центрируется. Описание навыка при наведении вместо системной подсказки показывается в компактной HUD-плашке рядом с кругом (тип/ветка/стадия, название, описание, требования с отметками выполнено/нет, статус); плашка сохраняется после покупки/фиксации и не выходит за экран. Логика навыков, публичные API и форматы прежние, исключений нет. Обновлены run_ui_sound_tests.gd и run_menu_tests.gd. Следующее действие: визуальная приёмка меню мутаций в Windows/Web.
 
@@ -34,6 +38,7 @@ updated: 2026-10-05
 Build the first playable combat-slice foundation with an authored office floor, player, combat, infected enemies, infection source, and observable fail states.
 
 ## In scope
+- owner-requested conference table chocolate/graphite finish, random document prints on top paper sheets and 0-3 monitor-edge stickers (ADR-0033);
 - owner-requested mutation-tree hover detail card and restyle matching the main/settings menus;
 - owner follow-up: shared pinned tab notices/spacing, installed lamp controls, blocked muzzle wall guard, clipped multi-receiver blood/scorch (excluding glass), random corpse and XYZ part poses, reported editor warning fixes (ADR-0030);
 - owner-requested integrated PRs, player/enemy textured blood, retired zombie art, floor/wall placement, unclipped planner color picker, separate effects/music mix, exact cursor/barrel aim and 30% smaller launcher casings (ADR-0029);
