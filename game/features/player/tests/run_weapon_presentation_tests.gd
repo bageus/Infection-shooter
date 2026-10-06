@@ -34,8 +34,8 @@ func _check(condition: bool, message: String) -> void:
 
 # The Uzi fires pistol rounds: same spent casing and flight speed.
 func _test_uzi_pistol_rounds() -> void:
-	var pistol := load("res://game/features/combat/public/pistol.tscn").instantiate()
-	var uzi := load("res://game/features/combat/public/uzi.tscn").instantiate()
+	var pistol: Node = load("res://game/features/combat/public/pistol.tscn").instantiate()
+	var uzi: Node = load("res://game/features/combat/public/uzi.tscn").instantiate()
 	for property in ["casing_scene", "casing_radius", "bullet_speed", "bullet_scene"]:
 		_check(uzi.get(property) == pistol.get(property), "Uzi %s matches pistol" % property)
 	pistol.free()
