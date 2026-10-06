@@ -33,17 +33,34 @@ func _run() -> void:
 	for subject in effects.subjects:
 		_check(not subject.copies[0].visible, "visible subjects are not highlighted")
 	wall.position.x = 0.0
+	var rebuilds: int = effects.rebuild_count
+	var hero_copy: MeshInstance3D = effects.subjects[0].copies[0]
 	var added := _actor(Vector3(1, 0, 0), "infected")
 	await _settle()
 	_check(effects.subjects.size() == 4, "late spawned enemy is registered")
+	_check(effects.rebuild_count == rebuilds and is_instance_valid(hero_copy), "Spawning an enemy preserves existing silhouettes without rebuilding the world")
 	added.queue_free()
 	await _settle()
 	_check(effects.subjects.size() == 3, "removed enemy is released")
+	_check(effects.rebuild_count == rebuilds and is_instance_valid(hero_copy), "Removing an enemy preserves existing silhouettes")
+	var outsider := Node3D.new()
+	outsider.add_to_group("infected")
+	root.add_child(outsider)
+	await _settle()
+	_check(effects.subjects.size() == 3, "Objects outside the injected world are ignored")
+	outsider.queue_free()
 	for cycle in 5:
 		effects.set_mode(1)
 		await _settle()
 		_check(effects.walls.records.size() == 1 and effects.subjects.is_empty(), "hole mode only overrides structural wall")
 		_check(effects.get("_hero_blocked"), "hole is gated by hero blocker")
+		var wall_rebuilds: int = effects.rebuild_count
+		scene.remove_child(wall)
+		await _settle()
+		_check(_wall_mesh().material_override == original and effects.walls.records.is_empty(), "Detached wall restores authored materials")
+		scene.add_child(wall)
+		await _settle()
+		_check(effects.walls.records.size() == 1 and effects.rebuild_count == wall_rebuilds, "Reattached wall is installed without rebuilding other roots")
 		effects.set_runtime_enabled(false)
 		_check(_wall_mesh().material_override == original, "planner restores material_override")
 		_check(_wall_mesh().get_surface_override_material(0) == null, "planner restores original surface override exactly")

@@ -264,12 +264,6 @@ func _disable_collision_recursive(node: Node) -> void:
 		_disable_collision_recursive(child)
 
 
-func _disable_glass_named_collision(body: StaticBody3D) -> void:
-	for child in body.get_children():
-		if child is CollisionShape3D and ("glass" in child.name.to_lower() or "door" in child.name.to_lower()):
-			(child as CollisionShape3D).set_deferred("disabled", true)
-
-
 func _hide_named(node: Node, token: String) -> void:
 	if node == null:
 		return

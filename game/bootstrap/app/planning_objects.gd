@@ -267,12 +267,6 @@ func _place_selected(screen_pos: Vector2) -> void:
 	controls.status.text = "Placed | same object remains active | RMB cancel"
 
 
-func _delete_at(screen_pos: Vector2) -> void:
-	var node = geometry._planned_object_at(screen_pos)
-	if node != null:
-		_delete_node(node)
-
-
 func _delete_selected() -> void:
 	if selected != null:
 		session.edit_history.call("record_deleted", selected)
@@ -520,4 +514,3 @@ func _enemy_spawn_height(enemy: Node) -> float:
 	if shape_node != null and shape_node.shape is CapsuleShape3D:
 		return maxf(1.0, (shape_node.shape as CapsuleShape3D).height * 0.5 + 0.1)
 	return 1.0
-

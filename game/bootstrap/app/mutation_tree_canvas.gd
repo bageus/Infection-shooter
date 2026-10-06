@@ -66,14 +66,14 @@ func set_progress(new_progress: Array[int], new_hybrids: Array[bool]) -> void:
 func _draw() -> void:
 	if thresholds.size() != BRANCHES.size():
 		return
-	var dim := Color(0.36, 0.41, 0.44, 0.95)
+	var dim := Color(0.39, 0.4, 0.38, 0.95)
 	var limit := trunk_available_x()
 	if limit > 90.0:
 		draw_line(Vector2(90, TRUNK_Y), Vector2(limit, TRUNK_Y), dim, 9.0, true)
 		draw_line(Vector2(90, TRUNK_Y), Vector2(limit, TRUNK_Y), LIT, 6.0, true)
 	for index in BRANCHES.size():
 		var opened := index < branch_open.size() and branch_open[index]
-		var shade := dim if opened else Color(0.11, 0.13, 0.16, 0.85)
+		var shade := dim if opened else Color(0.16, 0.18, 0.19, 0.9)
 		var start := branch_origin(index)
 		for rank in range(3):
 			var end := skill_position(index, rank)
@@ -82,7 +82,7 @@ func _draw() -> void:
 				draw_line(start, end, LIT, 4.0, true)
 			start = end
 	for index in HYBRID_PARENTS.size():
-		var shade := LIT if index < hybrids.size() and hybrids[index] else Color(0.36, 0.41, 0.44, 0.25)
+		var shade := LIT if index < hybrids.size() and hybrids[index] else Color(0.39, 0.4, 0.38, 0.35)
 		for parent in HYBRID_PARENTS[index]:
 			_dotted(skill_position(parent, 2), hybrid_position(index), shade)
 

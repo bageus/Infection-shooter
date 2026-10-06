@@ -187,8 +187,3 @@ func _spawn_fragments(point: Vector3, tint: Color, count: int) -> void:
 		var tween := fragment.create_tween()
 		tween.tween_property(fragment, "global_position", target, randf_range(0.2, 0.45))
 		tween.tween_callback(fragment.queue_free)
-
-
-func _expire_node(node: Node, seconds: float) -> void:
-	var timer := get_tree().create_timer(seconds)
-	timer.timeout.connect(node.queue_free)

@@ -13,6 +13,9 @@ var kill_timer := 0.0
 ## Seconds between melee strikes; reach is measured to the enemy's surface.
 const MELEE_COOLDOWN := 0.5
 const MELEE_REACH := 1.1
+const WEAPON_BUFFS := ["overload", "combat_reflex", "battle_metabolism", "killer_instinct", "berserk", "reflex_arc"]
+var _weapons_dirty := false
+var _weapon_factors := Vector4.ZERO
 var melee_cooldown := 0.0
 var _melee_victim: WeakRef
 var _melee_time := -100.0
@@ -67,7 +70,10 @@ func _process(delta: float) -> void:
 	if kill_timer == 0.0:
 		kill_streak = 0
 	for key in buffs.keys():
-		buffs[key] = maxf(0.0, float(buffs[key]) - delta)
+		var previous := float(buffs[key])
+		buffs[key] = maxf(0.0, previous - delta)
+		if previous > 0.0 and float(buffs[key]) == 0.0 and key in WEAPON_BUFFS:
+			_weapons_dirty = true
 	if enabled("regeneration") and Time.get_ticks_msec() * 0.001 - last_hit_time > 5.0:
 		player.call("heal", 1.4 * delta)
 	storm_tick -= delta
@@ -88,7 +94,8 @@ func _process(delta: float) -> void:
 			continue
 		for enemy in _enemies_near(pool["position"], 2.2):
 			enemy.call("take_damage", 5.0 * delta)
-	_update_weapons()
+	if _weapons_dirty:
+		_update_weapons()
 
 
 func active_buff(skill_id: String) -> bool:
@@ -132,19 +139,19 @@ func on_enemy_killed(enemy: Node3D) -> void:
 	var melee_kill: bool = _melee_victim != null and _melee_victim.get_ref() == enemy and Time.get_ticks_msec() / 1000.0 - _melee_time < 0.5
 	kill_streak = mini(6, kill_streak + 1) if kill_timer > 0.0 else 1
 	kill_timer = 5.0
-	if enabled("combat_reflex"): buffs["combat_reflex"] = 4.0
-	if enabled("battle_metabolism"): buffs["battle_metabolism"] = 6.0
+	if enabled("combat_reflex"): _start_buff("combat_reflex", 4.0)
+	if enabled("battle_metabolism"): _start_buff("battle_metabolism", 6.0)
 	if enabled("hyperactive"):
 		runtime.call("reduce_skill_cooldowns", 1.0 + kill_streak * 0.15)
-	if near and enabled("adrenaline"): buffs["adrenaline"] = 5.0
+	if near and enabled("adrenaline"): _start_buff("adrenaline", 5.0)
 	if melee_kill and enabled("killer_instinct"):
 		(player.call("get_current_weapon") as Node3D).call("add_magazine_ammo", 2)
-		buffs["killer_instinct"] = 5.0
+		_start_buff("killer_instinct", 5.0)
 	if melee_kill and enabled("devourer"):
 		_heal_or_armor(8.0)
 	if active_buff("living_harvest"):
 		_heal_or_armor(14.0)
-	if active_buff("berserk"): buffs["berserk"] = minf(13.0, float(buffs["berserk"]) + 2.0)
+	if active_buff("berserk"): _start_buff("berserk", minf(13.0, float(buffs["berserk"]) + 2.0))
 	if enemy.has_meta("mutation_parasite"):
 		for other in _enemies_near(enemy.global_position, 3.0):
 			if other != enemy: other.call("apply_mutation_poison", 4.0, 5.0, true)
@@ -164,7 +171,7 @@ func movement_multiplier() -> float:
 
 func on_roll() -> void:
 	if enabled("reflex_arc"):
-		buffs["reflex_arc"] = 3.0
+		_start_buff("reflex_arc", 3.0)
 
 
 func melee() -> bool:
@@ -172,7 +179,7 @@ func melee() -> bool:
 		return false
 	melee_cooldown = MELEE_COOLDOWN
 	var forward := -(player.get_node("AimPivot") as Node3D).global_basis.z
-	for enemy in _enemies_near(player.global_position, MELEE_REACH + 2.5):
+	for enemy in _enemies_near(player.global_position, MELEE_REACH + 2.5, true):
 		var offset := enemy.global_position - player.global_position
 		offset.y = 0.0
 		if offset.length() - _body_radius(enemy) > MELEE_REACH or offset.normalized().dot(forward) <= 0.0:
@@ -193,19 +200,33 @@ static func _body_radius(body: Node) -> float:
 
 
 
+func _start_buff(skill_id: String, duration: float) -> void:
+	buffs[skill_id] = duration
+	if skill_id in WEAPON_BUFFS:
+		_weapons_dirty = true
+
+
 func _update_weapons() -> void:
+	_weapons_dirty = false
+	var reload_factor := (0.8 if enabled("muscle_memory") else 1.0) * (0.65 if active_buff("overload") else 1.0)
+	var spread_factor := 0.7 if enabled("stabilizers") else 1.0
+	var attack_speed := (1.22 if active_buff("combat_reflex") else 1.0) * (1.25 if active_buff("overload") else 1.0)
+	if enabled("reflex_arc") and active_buff("reflex_arc"):
+		attack_speed *= 1.2
+	var damage := 1.0 + (0.18 if active_buff("battle_metabolism") else 0.0)
+	if active_buff("killer_instinct"): damage += 0.15
+	if active_buff("berserk"): damage += 0.3
+	var factors := Vector4(reload_factor, spread_factor, attack_speed, damage)
+	if factors.is_equal_approx(_weapon_factors):
+		return
+	_weapon_factors = factors
 	for i in weapons.size():
 		var gun := weapons[i]
 		var base: Dictionary = baselines[i]
-		gun.set("reload_time", float(base["reload_time"]) * (0.8 if enabled("muscle_memory") else 1.0) * (0.65 if active_buff("overload") else 1.0))
-		gun.set("spread_degrees", float(base["spread_degrees"]) * (0.7 if enabled("stabilizers") else 1.0))
-		var attack_speed := (1.22 if active_buff("combat_reflex") else 1.0) * (1.25 if active_buff("overload") else 1.0)
-		if enabled("reflex_arc") and active_buff("reflex_arc"): attack_speed *= 1.2
-		gun.set("shots_per_second", float(base["shots_per_second"]) * attack_speed)
-		var damage := 1.0 + (0.18 if active_buff("battle_metabolism") else 0.0)
-		if active_buff("killer_instinct"): damage += 0.15
-		if active_buff("berserk"): damage += 0.3
-		gun.set("bullet_damage", float(base["bullet_damage"]) * damage)
+		gun.set("reload_time", float(base["reload_time"]) * factors.x)
+		gun.set("spread_degrees", float(base["spread_degrees"]) * factors.y)
+		gun.set("shots_per_second", float(base["shots_per_second"]) * factors.z)
+		gun.set("bullet_damage", float(base["bullet_damage"]) * factors.w)
 
 
 func _cast(skill_id: String) -> void:
@@ -216,14 +237,14 @@ func _cast(skill_id: String) -> void:
 				enemy.call("take_damage", 22.0)
 				enemy.call("apply_player_push", (enemy.global_position - player.global_position).normalized(), 5.0)
 		"parasite":
-			var targets := _enemies_near(player.global_position, 12.0)
+			var targets := _enemies_near(player.global_position, 12.0, true)
 			if not targets.is_empty(): targets[0].call("apply_mutation_poison", 6.0, 6.0, true)
 		"living_harvest", "overload", "storm_pulse", "bone_blades", "berserk":
-			buffs[skill_id] = 6.0 if skill_id != "berserk" else 8.0
+			_start_buff(skill_id, 6.0 if skill_id != "berserk" else 8.0)
 		"discharge":
 			_indicator(player.global_position, Color(0.12, 0.73, 1.0, 0.55), 0.35, 3.0)
 			var count := 0
-			for enemy in _enemies_near(player.global_position, 9.0):
+			for enemy in _enemies_near(player.global_position, 9.0, true):
 				enemy.call("take_damage", 25.0)
 				enemy.call("apply_blast_stun", 1.0, 0.8)
 				count += 1
@@ -263,12 +284,13 @@ func _indicator(location: Vector3, tint: Color, duration: float, diameter: float
 	ring.create_tween().tween_callback(ring.queue_free).set_delay(duration)
 
 
-func _enemies_near(center: Vector3, radius: float) -> Array[Node3D]:
+func _enemies_near(center: Vector3, radius: float, nearest_first: bool = false) -> Array[Node3D]:
 	var result: Array[Node3D] = []
 	for node in get_tree().get_nodes_in_group("infected"):
-		if node is Node3D and (node as Node3D).global_position.distance_to(center) <= radius and float(node.get("health")) > 0.0:
+		if node is Node3D and (node as Node3D).global_position.distance_squared_to(center) <= radius * radius and float(node.get("health")) > 0.0:
 			result.append(node as Node3D)
-	result.sort_custom(func(a: Node3D, b: Node3D) -> bool: return a.global_position.distance_squared_to(center) < b.global_position.distance_squared_to(center))
+	if nearest_first:
+		result.sort_custom(func(a: Node3D, b: Node3D) -> bool: return a.global_position.distance_squared_to(center) < b.global_position.distance_squared_to(center))
 	return result
 
 

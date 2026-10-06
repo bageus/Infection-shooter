@@ -4,7 +4,24 @@ const MAIN := preload("res://game/bootstrap/app/main.tscn")
 const ENEMY := preload("res://game/features/infected/public/infected_capsule.tscn")
 const DOOR := "res://game/presentation/office_floor/public/structural/elevator_door.tscn"
 const DEVICE := "res://models/objects/enviroments/05/05_PC_destructible.glb"
+const BINDINGS := preload("res://game/bootstrap/app/world_bindings.gd")
 var _failures := 0
+
+
+class ParticleTarget extends Node:
+	var configurations := 0
+	var enabled := true
+
+	func configure_damage_particles(value: bool) -> void:
+		configurations += 1
+		enabled = value
+
+
+class PublicRoot extends Node:
+	var configurations := 0
+
+	func configure_world(_container: Node3D, _impacts: Node) -> void:
+		configurations += 1
 
 
 func _initialize() -> void:
@@ -12,6 +29,7 @@ func _initialize() -> void:
 
 
 func _run() -> void:
+	_exercise_particle_binding()
 	var decoy := Node3D.new()
 	root.add_child(decoy)
 	current_scene = decoy # The actual mission must never discover this unrelated root.
@@ -63,6 +81,30 @@ func _run() -> void:
 	quit(_failures)
 
 
+func _exercise_particle_binding() -> void:
+	var bindings := BINDINGS.new(null, null, null, Callable())
+	var branch := Node.new()
+	var middle := Node.new()
+	var target := ParticleTarget.new()
+	var public_root := PublicRoot.new()
+	var nested := ParticleTarget.new()
+	branch.add_child(middle)
+	middle.add_child(target)
+	branch.add_child(public_root)
+	public_root.add_child(nested)
+	bindings.bind_scene(branch)
+	_check(target.configurations == 1 and nested.configurations == 1, "Nested particle targets are configured once, including descendants of a public root")
+	_check(public_root.configurations == 1, "Public root receives collaborators once")
+	bindings.bind_scene(branch)
+	_check(target.configurations == 1 and nested.configurations == 1, "Repeated scene binding does not register duplicate particle targets")
+	bindings.set_electronic_particles_enabled(false)
+	_check(target.configurations == 2 and nested.configurations == 2 and not target.enabled and not nested.enabled, "Setting change reaches each registered target once")
+	target.free()
+	bindings.set_electronic_particles_enabled(true)
+	_check(bindings.get("_particle_targets").size() == 1 and nested.enabled, "Freed targets are pruned without losing live targets")
+	branch.free()
+
+
 func _exercise_factory(stage: Node, player: Node3D, container: Node3D, pool: Node) -> void:
 	var planner: Node = stage.get("planning_mode")
 	var door := planner.call("_instantiate_asset", DOOR) as Node3D
@@ -85,6 +127,7 @@ func _exercise_factory(stage: Node, player: Node3D, container: Node3D, pool: Nod
 	var enemy := ENEMY.instantiate() as Node3D
 	stage.get_node("Gameplay/Enemies").add_child(enemy)
 	_check(enemy.get("effects_root") == container, "Dynamically added enemy is wired")
+	_check(enemy.get("_route").get("_budget") == stage.get("world_bindings").get("_chase_budget"), "Dynamic enemy receives the mission's shared route budget")
 	seed(7)
 	# Exercise real drops across several deaths, without asserting a particular item type.
 	var before := container.get_child_count()

@@ -5,8 +5,7 @@ const IMPACTS := preload("res://game/features/combat/public/impact_effects.gd")
 const PROP := preload("res://game/presentation/office_floor/public/props/environment_prop.tscn")
 const BLOOD := preload("res://game/presentation/office_floor/public/props/blood_decal.tscn")
 const BLOOD_PLACEMENT := preload("res://game/bootstrap/app/planning_blood_placement.gd")
-const CHUNKS := preload("res://game/bootstrap/app/chunk_streamer.gd")
-const VISIBILITY := preload("res://game/bootstrap/app/visibility_manager.gd")
+const ACTIVATION := preload("res://game/bootstrap/app/world_activation.gd")
 var failures := 0
 
 
@@ -107,18 +106,13 @@ func _streaming(stage: Node3D) -> void:
 	var shape := CollisionShape3D.new()
 	shape.shape = BoxShape3D.new()
 	wall.add_child(shape)
-	var chunks := CHUNKS.new()
-	var visibility := VISIBILITY.new()
-	stage.add_child(chunks)
-	stage.add_child(visibility)
-	chunks.setup(actor, [structure])
-	visibility.setup(actor, [structure])
-	chunks.set_runtime_enabled(true)
-	visibility.set_runtime_enabled(true)
+	var activation := ACTIVATION.new()
+	stage.add_child(activation)
+	activation.setup([structure])
 	await physics_frame
 	_check(wall.visible and not shape.disabled, "Remote walls keep visuals and collision")
 	shape.disabled = true
-	chunks.rebuild()
+	activation.rebuild()
 	await physics_frame
 	_check(shape.disabled, "Retired streaming never resurrects genuinely destroyed collision")
 

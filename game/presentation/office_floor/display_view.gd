@@ -14,6 +14,7 @@ var damaged := false
 var powered := false
 var elapsed := 0.0
 var _group_index := -1
+var _next_frame_time := 0.0
 
 
 func setup(owner_prop: Node3D, path: String, authored: Dictionary, wall: Node) -> void:
@@ -33,10 +34,11 @@ func set_registry(wall: Node) -> void:
 	if is_instance_valid(registry):
 		registry.call("unregister_display", self)
 	registry = wall
+	_next_frame_time = 0.0
 	if is_instance_valid(registry):
 		content = registry.get("content")
 		registry.call("register_display", self)
-	set_process(registry == null)
+	set_process(registry == null and powered and _has_animation())
 
 
 func configure(authored: Dictionary) -> void:
@@ -44,6 +46,7 @@ func configure(authored: Dictionary) -> void:
 	powered = not damaged and (str(config.get("power", "auto")) == "on" or
 		(str(config.get("power", "auto")) == "auto" and int(config.get("seed", 1)) % 2 == 0))
 	_group_index = -1
+	_next_frame_time = 0.0
 	for i in range(screens.size()):
 		var screen := screens[i]
 		var dynamic := television or str(config.get("content", "static")) == "dynamic"
@@ -52,12 +55,22 @@ func configure(authored: Dictionary) -> void:
 		var index := (noise_seed % count + i * (1 + noise_seed % (count - 1))) % count
 		screen["index"] = index
 		screen["dynamic"] = dynamic
+		screen["atlas_rect"] = Vector4(-1, -1, -1, -1)
 		var material := content.material(dynamic, index)
 		material.set_shader_parameter("powered", powered)
 		(screen["mesh"] as MeshInstance3D).material_override = material
 		(screen["light"] as SpotLight3D).visible = powered
+	set_process(registry == null and powered and _has_animation())
 	if is_instance_valid(registry):
+		registry.call("update_animation", self)
 		registry.call("request_layout")
+
+
+func _has_animation() -> bool:
+	for screen in screens:
+		if screen["dynamic"]:
+			return true
+	return false
 
 
 func disable() -> void:
@@ -74,14 +87,23 @@ func tick(seconds: float, frames: Array[Vector4]) -> void:
 		if not bool(screen["dynamic"]):
 			continue
 		var material := (screen["mesh"] as MeshInstance3D).material_override as ShaderMaterial
-		material.set_shader_parameter("atlas_rect", frames[int(screen["index"])])
+		var rectangle := frames[int(screen["index"])]
+		if screen.get("atlas_rect") == rectangle:
+			continue
+		screen["atlas_rect"] = rectangle
+		material.set_shader_parameter("atlas_rect", rectangle)
 
 
 func _process(delta: float) -> void:
 	elapsed += delta
+	if elapsed < _next_frame_time:
+		return
 	var frames: Array[Vector4] = []
+	var delay := INF
 	for i in range(3):
 		frames.append(content.frame_rect(i, elapsed))
+		delay = minf(delay, content.frame_delay(i, elapsed))
+	_next_frame_time = elapsed + delay
 	tick(elapsed, frames)
 
 
@@ -137,6 +159,9 @@ func set_wall_content(index: int, rectangle: Rect2) -> void:
 		_group_index = index
 		screen["index"] = index
 		(screen["mesh"] as MeshInstance3D).material_override = content.material(true, index)
+		screen["atlas_rect"] = Vector4(-1, -1, -1, -1)
+		if is_instance_valid(registry):
+			registry.call("update_animation", self)
 	var material := (screen["mesh"] as MeshInstance3D).material_override as ShaderMaterial
 	material.set_shader_parameter("powered", powered)
 	material.set_shader_parameter("content_rect", Vector4(rectangle.position.x, rectangle.position.y,

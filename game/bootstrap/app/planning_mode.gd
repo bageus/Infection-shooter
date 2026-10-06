@@ -121,9 +121,9 @@ func enter() -> void:
 	camera_pitch = planning_pitch
 	objects._reset_selection()
 	geometry._show_planning_grid()
-	var chunk_streamer := host.get_node_or_null("ChunkStreamer")
-	if chunk_streamer != null:
-		chunk_streamer.call("set_runtime_enabled", false)
+	var world_activation := host.get_node_or_null("WorldActivation")
+	if world_activation != null:
+		world_activation.call("rebuild")
 	_set_light_markers_visible(true)
 	for node in hud_nodes:
 		if node != null:
@@ -151,10 +151,9 @@ func exit() -> void:
 	var planning_lighting := host.get_node_or_null("PlanningLighting")
 	if planning_lighting != null:
 		planning_lighting.call("set_planning_mode", false)
-	var chunk_streamer := host.get_node_or_null("ChunkStreamer")
-	if chunk_streamer != null:
-		chunk_streamer.call("rebuild")
-		chunk_streamer.call("set_runtime_enabled", true)
+	var world_activation := host.get_node_or_null("WorldActivation")
+	if world_activation != null:
+		world_activation.call("rebuild")
 	objects._activate_all_enemies()
 	camera_rig.transform = saved_camera_rig_transform
 	camera.transform = saved_camera_transform

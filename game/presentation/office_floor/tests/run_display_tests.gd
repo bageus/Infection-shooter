@@ -22,6 +22,7 @@ func _run() -> void:
 	_test_timing()
 	for model: String in PROFILES.MODELS:
 		_test_model(model)
+	_test_animation_updates()
 	await _test_wall()
 	if DisplayServer.get_name() != "headless":
 		await _test_pixels()
@@ -182,3 +183,34 @@ func _check(condition: bool, message: String) -> void:
 	if not condition:
 		failures += 1
 		push_error(message)
+
+
+func _test_animation_updates() -> void:
+	var prop := _spawn("05_monitor2_destructible.glb", 2, "dynamic")
+	var view: Node3D = prop.get("_display")
+	_check((wall.get("_animated") as Array).has(view), "Powered dynamic display joins animation updates")
+	wall.set("elapsed", 0.0)
+	wall.set("_next_frame_time", 0.0)
+	wall.call("_process", .001)
+	var screen: Dictionary = view.get("screens")[0]
+	var material := screen["mesh"].material_override as ShaderMaterial
+	var held: Vector4 = material.get_shader_parameter("atlas_rect")
+	var deadline: float = wall.get("_next_frame_time")
+	wall.call("_process", .001)
+	_check(float(wall.get("_next_frame_time")) == deadline and material.get_shader_parameter("atlas_rect") == held, "Held frame does not recompute the timeline")
+	wall.call("_process", deadline)
+	_check(material.get_shader_parameter("atlas_rect") != held, "Animation advances at an authored boundary")
+	prop.call("configure_display", {"power": "on", "content": "static", "seed": 2})
+	_check(not (wall.get("_animated") as Array).has(view), "Static display leaves animation updates")
+	prop.call("configure_display", {"power": "off", "content": "dynamic", "seed": 2})
+	_check(not (wall.get("_animated") as Array).has(view), "Powered-off display leaves animation updates")
+	prop.call("configure_display", {"power": "on", "content": "dynamic", "seed": 2})
+	_check((wall.get("_animated") as Array).has(view), "Power-on restores animation updates")
+	view.call("set_registry", null)
+	_check(view.is_processing() and not (wall.get("_animated") as Array).has(view), "Standalone display retains its own animation clock")
+	view.call("set_registry", wall)
+	_check(not view.is_processing() and (wall.get("_animated") as Array).has(view), "An already configured display resumes animation after mission rebinding")
+	view.call("set_registry", null)
+	prop.call("configure_display", {"power": "off", "seed": 2})
+	_check(not view.is_processing(), "Standalone off display has no idle callback")
+	prop.queue_free()

@@ -8,7 +8,8 @@
     "Weapon fire cooldown",
     "Temporary impact mark and retained debris budgets",
     "Spent casing lifetime and quantity",
-    "Grenade explosion damage and scorch budget"
+    "Grenade explosion damage and scorch budget",
+    "Environment prop durability, damage variant progression and one-shot damage state"
   ],
   "public_api": [
     "public/pistol.tscn",
@@ -20,7 +21,8 @@
     "public/prototype_bullet.tscn",
     "public/impact_effects.gd",
     "public/projectile_balance.gd",
-    "public/spent_casings.gd"
+    "public/spent_casings.gd",
+    "public/prop_damage_state.gd"
   ],
   "dependencies": [
     "core.audio",
@@ -40,6 +42,11 @@
     "impact_projection_v1": {
       "projected_geometry": "projected_geometry(collider, projector, footprint, depth = .12, skip_glass = false) -> Array[Dictionary {anchor, mesh}]; up to 12 actual receivers, caller owns output meshes",
       "project_surface": "project_surface(collider, projector, footprint, material, depth = .12, skip_glass = false) -> Array[MeshInstance3D]; caller owns lifetime and budget, receivers own transforms"
+    },
+    "prop_damage_state_v1": {
+      "configure": "configure(model_name, variant_count, has_fragments) -> void; initialize one runtime state",
+      "hit": "hit(amount, weapon, book_stack, wall_mounted, anchored, facade) -> HitAction; scene-free existing balance",
+      "complete_transition": "complete_transition() -> Transition; returns VARIANT, BREAK or NONE; presentation applies geometry"
     }
   }
 }

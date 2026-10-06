@@ -72,26 +72,39 @@ func _test_mutation_tree() -> void:
 	ui.configure(runtime)
 	ui.open_tree()
 	_check(paused, "Mutation tree pauses gameplay")
-	var skill := _button_with_tooltip(ui.content, "Acid Spit\n")
+	var skill := _tree_button(ui.content, "skill_id", "acid_spit")
 	_check(skill != null and not skill.disabled, "A real mutation skill is available")
 	if skill != null:
+		_check(skill.tooltip_text.is_empty(), "Skill circle has no plain engine tooltip")
 		skill.mouse_entered.emit()
 		_check(_count(ui, &"mutation_hover") == 1 and _count(ui, &"menu_hover") == 0, "Skill hover uses a distinct cue")
+		_check(ui.card.visible and ui.card.anchor_id == "acid_spit", "Skill hover opens the detail card")
+		var card_text := ""
+		for label: Label in ui.card.find_children("*", "Label", true, false):
+			card_text += label.text + "\n"
+		_check(card_text.contains("ACID SPIT") and card_text.contains("Leave a corrosive acid pool."), "Detail card shows the skill name and description")
+		_check(card_text.contains("CLICK TO LEARN") and card_text.contains("Mutation"), "Detail card shows status and requirements")
+		_check(ui.window.get_global_rect().encloses(ui.card.get_global_rect()), "Detail card stays on screen")
+		skill.mouse_exited.emit()
+		_check(not ui.card.visible, "Leaving the circle hides the detail card")
+		skill.mouse_entered.emit()
 		skill.pressed.emit()
 		_check(runtime.skill_learned("acid_spit"), "Click still buys the skill")
 		_check(_count(ui, &"mutation_click") == 1, "Click cue survives synchronous UI rebuild")
-	var lock := _button_with_tooltip(ui.content, "Lock skill against")
+		await process_frame
+		_check(ui.card.visible and ui.card.anchor_id == "acid_spit", "Detail card follows the rebuilt circle after buying")
+	var lock := _tree_button(ui.content, "lock_skill_id", "acid_spit")
 	_check(lock != null, "Learned skill has a lock")
 	if lock != null:
 		lock.pressed.emit()
 		_check(runtime.skill_locked("acid_spit") and _count(ui, &"mutation_lock") == 1, "Lock transition plays its own cue")
-	var unlock := _button_with_tooltip(ui.content, "Locked: kept")
+	var unlock := _tree_button(ui.content, "lock_skill_id", "acid_spit")
 	if unlock != null:
 		unlock.pressed.emit()
 		_check(not runtime.skill_locked("acid_spit") and _count(ui, &"mutation_unlock") == 1, "Unlock transition plays the reverse cue")
 	else:
 		_check(false, "Locked skill exposes an unlock control")
-	var disabled := _button_with_tooltip(ui.content, "Acid Spit\n")
+	var disabled := _tree_button(ui.content, "skill_id", "acid_spit")
 	if disabled != null:
 		var before := _count(ui, &"mutation_hover")
 		disabled.mouse_entered.emit()
@@ -111,15 +124,16 @@ func _test_mutation_tree() -> void:
 		reversed = reversed and lock_stream.data[index] == unlock_stream.data[other] and lock_stream.data[index + 1] == unlock_stream.data[other + 1]
 	_check(reversed, "Unlock is the exact reversed PCM lock cue")
 	ui.close_tree()
+	_check(not ui.card.visible, "Closing the tree hides the detail card")
 	ui.queue_free()
 	host.queue_free()
 	await process_frame
 	_check(get_node_count_in_group(SFX.UI_GROUP) == 0, "Freeing UI releases its voices")
 
 
-func _button_with_tooltip(parent: Node, prefix: String) -> Button:
+func _tree_button(parent: Node, key: String, skill_id: String) -> Button:
 	for node in parent.find_children("*", "Button", true, false):
-		if node.tooltip_text.begins_with(prefix) and not node.is_queued_for_deletion():
+		if node.get_meta(key, "") == skill_id and not node.is_queued_for_deletion():
 			return node
 	return null
 

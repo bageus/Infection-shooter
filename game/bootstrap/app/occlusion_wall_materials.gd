@@ -46,6 +46,18 @@ func _install(mesh: MeshInstance3D) -> void:
 		mesh.set_surface_override_material(index, replacements[index] if replacements[index] != null else fallback)
 
 
+func remove_root(root: Node) -> void:
+	var meshes := root.find_children("*", "MeshInstance3D", true, false)
+	if root is MeshInstance3D:
+		meshes.append(root)
+	for mesh: MeshInstance3D in meshes:
+		var id := mesh.get_instance_id()
+		queued.erase(id)
+		if records.has(id):
+			_restore(records[id])
+			records.erase(id)
+
+
 func _copy_surface(source: BaseMaterial3D) -> ShaderMaterial:
 	if surface_cache.has(source):
 		return surface_cache[source]
@@ -82,7 +94,7 @@ func update_hole(center: Vector2, size: Vector2, radius: float, depth: float) ->
 	# Bound initial GPU resource/compilation work when a real map has many walls.
 	for _i in mini(SURFACES_PER_FRAME, pending.size()):
 		var mesh := pending.pop_front().get_ref() as MeshInstance3D
-		if mesh != null:
+		if mesh != null and mesh.is_inside_tree() and queued.has(mesh.get_instance_id()):
 			queued.erase(mesh.get_instance_id())
 			_install(mesh)
 	for id in records.keys():
@@ -97,12 +109,7 @@ func update_hole(center: Vector2, size: Vector2, radius: float, depth: float) ->
 
 func clear() -> void:
 	for record in records.values():
-		var mesh := record.mesh.get_ref() as MeshInstance3D
-		if mesh == null:
-			continue
-		mesh.material_override = record.override
-		for index in mini(record.saved.size(), mesh.mesh.get_surface_count()) if mesh.mesh != null else 0:
-			mesh.set_surface_override_material(index, record.saved[index])
+		_restore(record)
 	records.clear()
 	pending.clear()
 	queued.clear()
@@ -111,6 +118,14 @@ func clear() -> void:
 	active_materials.clear()
 
 
+func _restore(record: Dictionary) -> void:
+	var mesh := record.mesh.get_ref() as MeshInstance3D
+	if mesh == null:
+		return
+	mesh.material_override = record.override
+	for index in mini(record.saved.size(), mesh.mesh.get_surface_count()) if mesh.mesh != null else 0:
+		mesh.set_surface_override_material(index, record.saved[index])
+
+
 func _channel(channel: int) -> Vector4:
 	return [Vector4(1, 0, 0, 0), Vector4(0, 1, 0, 0), Vector4(0, 0, 1, 0), Vector4(0, 0, 0, 1), Vector4(0.333333, 0.333333, 0.333333, 0)][clampi(channel, 0, 4)]
-

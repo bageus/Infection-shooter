@@ -1,6 +1,9 @@
 extends CanvasLayer
 
 const ICON_REGIONS := preload("res://game/presentation/prototype_hud/weapon_icon_regions.gd")
+const PALETTE := preload("res://game/presentation/prototype_hud/hud_palette.gd")
+const ICON_TINT := preload("res://game/presentation/prototype_hud/icon_tint.gdshader")
+const TITLE_FONT := preload("res://assets/interface/fonts/title.ttf")
 # Semantic cells: rifle, pistol, uzi, shotgun, syringe, launcher (top row).
 @export var weapon_icon_cells := PackedInt32Array([1, 2, 3, 5])
 @export var antidote_icon_cell := 4
@@ -24,7 +27,7 @@ const ICON_REGIONS := preload("res://game/presentation/prototype_hud/weapon_icon
 @onready var enemy_count_label: Label = $EnemyCount
 @onready var slot_keys: Array[Button] = [$WeaponPanel/Slot1/KeyHint, $WeaponPanel/Slot2/KeyHint, $WeaponPanel/Slot3/KeyHint]
 @onready var antidote_key: Button = $AntidotePanel/KeyHint
-@onready var emergency_key: Label = $AntidotePanel/EmergencyKey
+@onready var key_panel: Panel = $KeyPanel
 @onready var slot_frames: Array[Panel] = [$WeaponPanel/Slot1, $WeaponPanel/Slot2, $WeaponPanel/Slot3]
 
 var player: Node
@@ -37,6 +40,10 @@ var _control_notice: Label
 var _last_weapon_index := -1
 var _weapon_icons: Array[Texture2D] = []
 var _slot_weapon_indices := [-1, -1, -1]
+var _vital_snapshot: Array = []
+var _weapon_snapshot: Array = []
+
+var _has_key := false
 
 
 func _ready() -> void:
@@ -44,6 +51,7 @@ func _ready() -> void:
 	infection = player.get_node("InfectionRuntime")
 	hp_bar.max_value = player.max_health
 	mutation_bar.max_value = 100.0
+	_configure_icon_tints()
 	_configure_icon_regions()
 	_configure_key_buttons()
 	weapon_name.hide()
@@ -53,8 +61,10 @@ func _ready() -> void:
 	_control_notice.set_anchors_and_offsets_preset(Control.PRESET_TOP_WIDE)
 	_control_notice.position.y = 55.0
 	_control_notice.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	_control_notice.add_theme_font_size_override("font_size", 22)
-	_control_notice.add_theme_color_override("font_color", Color(1.0, 0.3, 0.2))
+	_control_notice.add_theme_font_override("font", TITLE_FONT)
+	_control_notice.add_theme_font_size_override("font_size", 24)
+	_control_notice.add_theme_color_override("font_color", PALETTE.WARNING)
+	_control_notice.add_theme_color_override("font_shadow_color", Color(0, 0, 0, 0.9))
 	_control_notice.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	add_child(_control_notice)
 
@@ -87,6 +97,18 @@ func _configure_icon_regions() -> void:
 		antidote_icon.texture = icons[antidote_icon_cell]
 
 
+func _configure_icon_tints() -> void:
+	for rect: TextureRect in [weapon_icon, antidote_icon] + slot_icons:
+		var material := ShaderMaterial.new()
+		material.shader = ICON_TINT
+		material.set_shader_parameter("tint", PALETTE.INK)
+		rect.material = material
+
+
+func _tint(rect: TextureRect, color: Color) -> void:
+	(rect.material as ShaderMaterial).set_shader_parameter("tint", color)
+
+
 func _refresh_slot_icons() -> void:
 	for i in slot_icons.size():
 		var weapon_index: int = player.get_weapon_in_slot(i)
@@ -97,13 +119,6 @@ func _refresh_slot_icons() -> void:
 		slot_keys[i].text = str(i + 1)
 
 
-func _set_region(target: TextureRect, source: Texture2D, region: Rect2) -> void:
-	var atlas := AtlasTexture.new()
-	atlas.atlas = source
-	atlas.region = region
-	target.texture = atlas
-
-
 func _set_active_weapon_icon(index: int) -> void:
 	if index < 0 or index >= slot_icons.size():
 		weapon_icon.texture = null
@@ -112,27 +127,48 @@ func _set_active_weapon_icon(index: int) -> void:
 
 
 func _update_vitals() -> void:
-	hp_bar.value = player.health
-	hp_value.text = "%d / %d" % [roundi(player.health), roundi(player.max_health)]
-
 	var mutation: float = infection.call("get_mutation")
 	var critical: float = infection.call("get_critical_threshold")
+	var has_key: bool = player.has_emergency_key()
+	var snapshot: Array = [player.health, player.max_health, mutation, critical, player.antidotes, has_key]
+	if snapshot == _vital_snapshot:
+		return
+	_vital_snapshot = snapshot
+	hp_bar.max_value = player.max_health
+	hp_bar.value = player.health
+	hp_value.text = "%d / %d" % [roundi(player.health), roundi(player.max_health)]
 	mutation_bar.value = mutation
 	mutation_value.text = "%d / 100" % roundi(mutation)
-	critical_marker.position.x = 78.0 + 264.0 * clampf(critical / 100.0, 0.0, 1.0)
+	critical_marker.position.x = mutation_bar.position.x - 1.0 + mutation_bar.size.x * clampf(critical / 100.0, 0.0, 1.0)
 	antidote_count.text = str(player.antidotes)
-	emergency_key.visible = player.has_emergency_key()
+	_update_key_cell(has_key)
+
+
+func _update_key_cell(has_key: bool) -> void:
+	if has_key == _has_key:
+		return
+	_has_key = has_key
+	key_panel.visible = has_key
+	if has_key and is_inside_tree():
+		# Brief flash so the newly filled cell is noticed in combat.
+		key_panel.modulate = Color(1.8, 1.6, 1.1)
+		create_tween().tween_property(key_panel, "modulate", Color.WHITE, 0.9)
 
 
 func _update_weapon() -> void:
 	var weapon: Node = player.get_current_weapon()
 	_refresh_slot_icons()
-	_set_active_weapon_icon(player.get_current_weapon_index())
-	weapon_icon.tooltip_text = weapon.call("get_weapon_name").to_upper()
 	var magazine_ammo: int = weapon.call("get_magazine_ammo")
 	var reserve_ammo: int = weapon.call("get_reserve_ammo")
 	var reloading: bool = weapon.call("is_reloading")
 	var empty := magazine_ammo == 0
+	var active: int = player.get_current_weapon_index()
+	var snapshot: Array = [weapon, active, magazine_ammo, reserve_ammo, reloading, _slot_weapon_indices.duplicate()]
+	if snapshot == _weapon_snapshot:
+		return
+	_weapon_snapshot = snapshot
+	_set_active_weapon_icon(active)
+	weapon_icon.tooltip_text = weapon.call("get_weapon_name").to_upper()
 
 	magazine.text = str(magazine_ammo)
 	reserve.text = "/ %d" % reserve_ammo
@@ -153,12 +189,10 @@ func _update_reload_message(reloading: bool, empty: bool, reserve_ammo: int) -> 
 
 
 func _update_weapon_warning(empty: bool) -> void:
-	var warning_color := Color(1.0, 0.12, 0.08, 1.0)
-	var normal_color := Color.WHITE
-	weapon_name.modulate = warning_color if empty else Color.WHITE
-	magazine.modulate = warning_color if empty else Color.WHITE
-	reload_label.modulate = warning_color if empty else Color(0.1, 0.9, 1.0, 1.0)
-	weapon_icon.modulate = warning_color if empty else normal_color
+	var ink := PALETTE.WARNING if empty else PALETTE.INK
+	weapon_name.add_theme_color_override("font_color", ink)
+	magazine.add_theme_color_override("font_color", ink)
+	reload_label.add_theme_color_override("font_color", PALETTE.WARNING if empty else PALETTE.MUTED)
 
 
 var _slot_state := Vector2i(-99, -1)
@@ -172,41 +206,30 @@ func _update_weapon_slots(empty: bool) -> void:
 	if state == _slot_state:
 		return
 	_slot_state = state
-	var warning_color := Color(1.0, 0.12, 0.08, 1.0)
+	_tint(weapon_icon, PALETTE.WARNING if empty else PALETTE.INK)
 	for i in slot_frames.size():
 		var frame := slot_frames[i]
 		var style := frame.get_theme_stylebox("panel").duplicate() as StyleBoxFlat
-		if i == active_index:
-			style.border_width_left = 2
-			style.border_width_top = 2
-			style.border_width_right = 2
-			style.border_width_bottom = 2
-			style.border_color = warning_color if empty else Color(0.0, 0.95, 1.0, 1.0)
-			style.bg_color = Color(0.0, 0.12, 0.17, 1.0)
-			frame.modulate = Color.WHITE
-		else:
-			style.border_width_left = 1
-			style.border_width_top = 1
-			style.border_width_right = 1
-			style.border_width_bottom = 1
-			style.border_color = Color(0.12, 0.3, 0.42, 1.0)
-			style.bg_color = Color(0.015, 0.055, 0.09, 0.98)
-			frame.modulate = Color.WHITE
+		var active := i == active_index
+		# Active slot: lighter cell with the menus' red focus underline.
+		style.set_border_width_all(1)
+		style.border_width_bottom = 2 if active else 1
+		style.border_color = (PALETTE.WARNING if empty else PALETTE.ACCENT) if active else PALETTE.BORDER_DIM
+		style.bg_color = PALETTE.CELL_ACTIVE if active else PALETTE.CELL
 		frame.add_theme_stylebox_override("panel", style)
+		_tint(slot_icons[i], PALETTE.INK if active else PALETTE.FAINT)
 	_last_weapon_index = active_index
 
 
 func _configure_key_buttons() -> void:
 	_key_outline = StyleBoxFlat.new()
-	_key_outline.bg_color = Color(0.005, 0.035, 0.065, 1.0)
-	_key_outline.border_color = Color(0.0, 0.95, 1.0, 1.0)
+	_key_outline.bg_color = Color.TRANSPARENT
+	_key_outline.border_color = PALETTE.FAINT
 	_key_outline.set_border_width_all(1)
-	_key_outline.set_corner_radius_all(4)
-	_key_outline.corner_detail = 1
-	_key_outline.anti_aliasing = false
 	_key_outline.set_content_margin_all(0)
 	_key_filled = _key_outline.duplicate() as StyleBoxFlat
-	_key_filled.bg_color = _key_outline.border_color
+	_key_filled.bg_color = PALETTE.ACCENT
+	_key_filled.border_color = PALETTE.ACCENT
 	for index in slot_keys.size():
 		slot_keys[index].pressed.connect(_on_weapon_key_pressed.bind(index))
 		slot_keys[index].focus_mode = Control.FOCUS_NONE
@@ -244,10 +267,10 @@ func _set_key_state(button: Button, selected: bool, blocked: bool) -> void:
 	_key_states[button.get_instance_id()] = key_state
 	button.disabled = blocked
 	var style := _key_filled if selected else _key_outline
-	var ink := _key_outline.bg_color if selected else _key_outline.border_color
+	var ink := PALETTE.INK if selected else PALETTE.MUTED
 	for state in ["normal", "hover", "disabled"]:
 		button.add_theme_stylebox_override(state, style)
 	button.add_theme_stylebox_override("pressed", _key_filled)
 	for state in ["font_color", "font_hover_color", "font_disabled_color"]:
 		button.add_theme_color_override(state, ink)
-	button.add_theme_color_override("font_pressed_color", _key_outline.bg_color)
+	button.add_theme_color_override("font_pressed_color", PALETTE.INK)
