@@ -263,4 +263,3 @@ static func _blend(skinning: Dictionary, bones: PackedInt32Array, weights: Packe
 	if total <= 0.0:
 		return Transform3D.IDENTITY
 	return Transform3D(Basis(basis_sum.x / total, basis_sum.y / total, basis_sum.z / total), origin / total)
-

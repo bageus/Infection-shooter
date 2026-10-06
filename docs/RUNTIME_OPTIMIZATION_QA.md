@@ -220,3 +220,26 @@ job запускает actual main и door/blood/grenade/body tests; его trig
 разных позах. Сравнить profiler spikes/CPU physics и видимые pixels, а также
 память первого и повторного запроса. Не переносить software-CI FPS на целевое
 устройство. Тест 32/2048 характеризует выборку геометрии, а не весь кадр.
+
+## Повторная проверка PR #49 после замены атласов крови
+
+Неуспешные focused 37521591716 и runtime 37521591754 использовали merge
+184d69d (head 46bd894 + main 5676aae). В этой версии main 45 отдельных PNG
+крови уже удалены, а библиотека продолжала загружать category_01..09.png.
+Ошибки Image.load_from_file (Error 7) оставляли пустые категории; поэтому
+падали assertions следов крови и строгие runtime ERROR gates, включая main.
+Изолированные geometry и architecture jobs при этом прошли.
+
+Исправление: объединён текущий main ad79895 с завершённой миграцией
+e8d5a27 — slicing пяти атласов, 44 кадра, совместимый pool_09 fallback.
+Оптимизации #49 сохранены; оба списка runtime suites объединены (62 набора),
+конфликтующие записи документации сохранены. Focused CI отслеживает PNG
+крови, библиотеку и planner decal, запускает blood_decor и gameplay repairs.
+
+Локально Godot 4.7.2: импорт exit 0 и main 180 кадров exit 0, без SCRIPT
+ERROR/ERROR. validate_project PASS; 708 import profiles и 399 scene references
+PASS; Python workstation 3, glass openings 1, scene-access 3 PASS; YAML и
+diff-check PASS. Все 62 headless-набора прошли (0 failed), включая blood_decor, blood_effects,
+gameplay_planner_repairs, door/elevator, FIFO/cache/topology и новые suites main.
+Повторный полный GitHub Actions CI выполняется после отправки ветки. Из-за ограниченного доступа к /proc локальный Godot пишет
+системное WARNING о get_executable_path; это не ошибка скрипта/ресурса.

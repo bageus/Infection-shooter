@@ -41,6 +41,7 @@ var _last_weapon_index := -1
 var _weapon_icons: Array[Texture2D] = []
 var _slot_weapon_indices := [-1, -1, -1]
 var _vital_snapshot: Array = []
+var _hp_flash: Tween
 var _weapon_snapshot: Array = []
 
 var _has_key := false
@@ -133,7 +134,10 @@ func _update_vitals() -> void:
 	var snapshot: Array = [player.health, player.max_health, mutation, critical, player.antidotes, has_key]
 	if snapshot == _vital_snapshot:
 		return
+	var previous_health: float = float(_vital_snapshot[0]) if not _vital_snapshot.is_empty() else float(player.health)
 	_vital_snapshot = snapshot
+	if player.health - previous_health >= 3.0:
+		_flash_health_bar()
 	hp_bar.max_value = player.max_health
 	hp_bar.value = player.health
 	hp_value.text = "%d / %d" % [roundi(player.health), roundi(player.max_health)]
@@ -142,6 +146,17 @@ func _update_vitals() -> void:
 	critical_marker.position.x = mutation_bar.position.x - 1.0 + mutation_bar.size.x * clampf(critical / 100.0, 0.0, 1.0)
 	antidote_count.text = str(player.antidotes)
 	_update_key_cell(has_key)
+
+
+# A green pulse on the health bar marks a noticeable heal (medkit, kill heal).
+func _flash_health_bar() -> void:
+	if not is_inside_tree():
+		return
+	if _hp_flash != null:
+		_hp_flash.kill()
+	hp_bar.modulate = Color(0.75, 1.9, 0.9)
+	_hp_flash = create_tween()
+	_hp_flash.tween_property(hp_bar, "modulate", Color.WHITE, 0.6).set_ease(Tween.EASE_IN)
 
 
 func _update_key_cell(has_key: bool) -> void:

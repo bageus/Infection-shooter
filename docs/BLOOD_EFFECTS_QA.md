@@ -13,9 +13,11 @@ clears pending requests, pools and active marks. `diagnostics()` returns a copy
 of contract version, actual engine version, renderer and ClassDB API check;
 `statistics()` reports marks, pending work and pending pools.
 
-All 45 existing PNG paths are in `models/objects/textures/blood_decals_45`.
-The cache loads once, preserves RGBA, crops transparent padding and retains the
-visible rectangle's aspect. Copies are limited to 512 pixels with mipmaps;
+The 44 marks are five atlases in `models/objects/textures/blood_decals_45`
+(3×3 per category, pool 4×2; frames numbered row by row). The cache loads once,
+slices evenly sized cells, preserves RGBA, crops transparent padding (ignoring
+faint alpha noise below 6/255 after box averaging) and retains the visible
+rectangle's aspect. Copies are limited to 512 pixels with mipmaps;
 source PNGs are untouched. Empty/missing assets warn and produce no mark.
 
 Defaults: 128 marks, 90-second lifetime, 1.2-second fade; 0.08m projection
