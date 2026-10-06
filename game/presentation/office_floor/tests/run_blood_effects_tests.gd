@@ -203,6 +203,8 @@ func _test_budget_index() -> void:
 	budget.set("per_surface_limit", 0)
 	for i in 3:
 		effects.call("small_stain", Vector3(i, 1, 0), excluded)
+	await physics_frame
+	await physics_frame
 	var records: Dictionary = budget.get("_records")
 	var ids := records.keys()
 	_expect(ids.size() == 3, "Three marks enter global FIFO")
