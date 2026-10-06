@@ -1,6 +1,11 @@
 extends RefCounted
 ## Project a broad-phase collider hit onto the visible mesh, not its bounding box.
-var faces: Dictionary = {}
+const TRIANGLE_INDEX := preload("res://game/features/combat/impact_triangle_index.gd")
+const RECEIVER_CACHE := preload("res://game/features/combat/impact_receiver_cache.gd")
+const MAX_INDEXED_MESHES := 128
+var _indices: Dictionary = {}
+var _receivers := RECEIVER_CACHE.new()
+var last_triangle_tests := 0
 var visuals: Dictionary = {}
 
 
@@ -10,6 +15,7 @@ func register(collider: Node3D, visual: Node3D) -> void:
 
 
 func resolve(collider: Node3D, point: Vector3, direction: Vector3) -> Dictionary:
+	last_triangle_tests = 0
 	if not is_instance_valid(collider):
 		return {}
 	var meshes := receivers(collider)
@@ -18,17 +24,15 @@ func resolve(collider: Node3D, point: Vector3, direction: Vector3) -> Dictionary
 	var best := INF
 	var result: Dictionary = {}
 	for mesh in meshes:
-		if not faces.has(mesh.mesh):
-			if faces.size() >= 128:
-				faces.clear()
-			faces[mesh.mesh] = mesh.mesh.get_faces()
-		var triangles: PackedVector3Array = faces[mesh.mesh]
 		var inverse := mesh.global_transform.affine_inverse()
 		var a := inverse * from
 		var b := inverse * finish
 		if mesh.get_aabb().grow(.001).intersects_segment(a, b) == null:
 			continue
-		for i in range(0, triangles.size(), 3):
+		var index: RefCounted = _index_for(mesh.mesh)
+		var triangles: PackedVector3Array = index.get("triangles")
+		for i in index.call("candidates", a, b):
+			last_triangle_tests += 1
 			var hit: Variant = Geometry3D.segment_intersects_triangle(a, b, triangles[i], triangles[i + 1], triangles[i + 2])
 			if hit == null:
 				continue
@@ -45,31 +49,58 @@ func resolve(collider: Node3D, point: Vector3, direction: Vector3) -> Dictionary
 	return result
 
 
-func _collect(node: Node, out: Array[MeshInstance3D]) -> void:
-	if node.has_meta("surface_mark") or node.has_meta("blood_effect"):
-		return
-	if node is MeshInstance3D:
-		var mesh := node as MeshInstance3D
-		if mesh.mesh != null and not mesh.mesh is QuadMesh and not mesh.has_meta("surface_mark") and not mesh.has_meta("blood_effect") and mesh.cast_shadow != GeometryInstance3D.SHADOW_CASTING_SETTING_SHADOWS_ONLY and mesh.is_visible_in_tree() and absf(mesh.global_basis.determinant()) > .00000001:
-			out.append(mesh)
-	for child in node.get_children():
-		_collect(child, out)
-
-
 func receivers(collider: Node3D) -> Array[MeshInstance3D]:
 	var meshes: Array[MeshInstance3D] = []
 	if visuals.has(collider.get_instance_id()):
 		var visual := (visuals[collider.get_instance_id()] as WeakRef).get_ref() as Node
 		if visual != null:
-			_collect(visual, meshes)
-	_collect(collider, meshes)
+			meshes.append_array(_receivers.gather(visual))
+	meshes.append_array(_receivers.gather(collider))
 	if meshes.is_empty():
 		# Structural collision bodies are local siblings of their Visual branch.
 		var owner := collider.get_parent()
 		if owner != null:
 			var visual := owner.get_node_or_null("Visual")
 			if visual != null:
-				_collect(visual, meshes)
+				meshes.append_array(_receivers.gather(visual))
 			elif owner is MeshInstance3D:
-				_collect(owner, meshes)
+				meshes.append_array(_receivers.gather(owner))
 	return meshes
+
+
+
+func _index_for(mesh: Mesh) -> RefCounted:
+	if not _indices.has(mesh):
+		while _indices.size() >= MAX_INDEXED_MESHES:
+			_remove_index(_indices.keys()[0])
+		var id := mesh.get_instance_id()
+		var callback := _changed.bind(weakref(self), id)
+		_indices[mesh] = {"index": TRIANGLE_INDEX.new(mesh.get_faces()), "callback": callback}
+		mesh.changed.connect(callback)
+	return _indices[mesh]["index"]
+
+
+func _invalidate_index(id: int) -> void:
+	for mesh: Mesh in _indices.keys():
+		if mesh.get_instance_id() == id:
+			_remove_index(mesh)
+			return
+
+
+func _remove_index(mesh: Mesh) -> void:
+	var callback: Callable = _indices[mesh]["callback"]
+	if mesh.changed.is_connected(callback):
+		mesh.changed.disconnect(callback)
+	_indices.erase(mesh)
+
+
+func _notification(what: int) -> void:
+	if what == NOTIFICATION_PREDELETE:
+		for mesh: Mesh in _indices.keys():
+			_remove_index(mesh)
+
+
+static func _changed(reference: WeakRef, id: int) -> void:
+	var geometry: RefCounted = reference.get_ref()
+	if geometry != null:
+		geometry.call("_invalidate_index", id)
