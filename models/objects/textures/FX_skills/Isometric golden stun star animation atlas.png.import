@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://bkjmfmswhjpng"
-path="res://.godot/imported/Isometric chain lightning VFX atlas.png-44dcb34c74ff48ffb884be1fe970b179.ctex"
+uid="uid://vnibbxxfuo2e"
+path="res://.godot/imported/Isometric golden stun star animation atlas.png-9d79b608d7dda80ef65fa043d7dc0fe6.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://models/objects/textures/fx_skills/Isometric chain lightning VFX atlas.png"
-dest_files=["res://.godot/imported/Isometric chain lightning VFX atlas.png-44dcb34c74ff48ffb884be1fe970b179.ctex"]
+source_file="res://models/objects/textures/FX_skills/Isometric golden stun star animation atlas.png"
+dest_files=["res://.godot/imported/Isometric golden stun star animation atlas.png-9d79b608d7dda80ef65fa043d7dc0fe6.ctex"]
 
 [params]
 

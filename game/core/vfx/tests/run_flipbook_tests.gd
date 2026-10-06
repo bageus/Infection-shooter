@@ -66,10 +66,46 @@ func _run() -> void:
 	looping.call("stop", 0.1)
 	await create_timer(0.3).timeout
 	_expect(not is_instance_valid(looping), "stop() fades a looping flipbook out.")
+	await _check_cycle_and_ground(stage)
+	_check_skill_sheets()
 	stage.queue_free()
 	await process_frame
 	print("Flipbook tests: %d failure(s)." % failures)
 	quit(failures)
+
+
+# Cycle mode repeats the whole sheet in order (last frame blends into the
+# first); ground mode lays the quad on the floor with the atlas stretch.
+func _check_cycle_and_ground(stage: Node3D) -> void:
+	var sheet := {"path": TEST_SHEET["path"], "columns": 4, "rows": 3, "frames": 12, "durations": TEST_SHEET["durations"], "ground_stretch": 2.5}
+	var ring := FLIPBOOK.spawn(stage, sheet, Vector3.ZERO, 2.0, {"cycle": true, "ground": true})
+	_expect(float(ring.get_instance_shader_parameter(&"ground")) > 0.5, "Ground mode is passed to the shader.")
+	_expect(is_equal_approx(float(ring.get_instance_shader_parameter(&"ground_stretch")), 2.5), "Ground mode uses the sheet's stretch.")
+	_expect(float(ring.get_instance_shader_parameter(&"cycle")) > 0.5, "Cycle mode is passed to the shader.")
+	var wrapped := false
+	var previous := -1.0
+	var until := Time.get_ticks_msec() + int(FLIPBOOK.length_of(sheet) * 2500.0)
+	while Time.get_ticks_msec() < until:
+		var frame := float(ring.get_instance_shader_parameter(&"frame_position"))
+		wrapped = wrapped or (previous > 9.0 and frame < 2.0)
+		previous = frame
+		await process_frame
+	_expect(is_instance_valid(ring), "A cycling flipbook outlives its sheet.")
+	_expect(wrapped, "A cycling flipbook starts over from the first frame.")
+	ring.call("stop", 0.05)
+	await create_timer(0.2).timeout
+	_expect(not is_instance_valid(ring), "stop() ends a cycling flipbook.")
+
+
+func _check_skill_sheets() -> void:
+	for atlas: Dictionary in [ATLASES.ELECTRIC_FIELD, ATLASES.CLAW_SLASH, ATLASES.ELECTRIC_PULSE, ATLASES.SPIKE_BURST, ATLASES.ENERGY_SHIELD, ATLASES.CHAIN_LIGHTNING, ATLASES.SPORE_COCOON, ATLASES.BLADE_ORBIT, ATLASES.STUN_STARS, ATLASES.ACID_PUDDLES, ATLASES.HEARTBEAT]:
+		_expect(ATLASES.available(atlas), "Skill sheet is in the project: " + str(atlas["path"]))
+		var texture := load(str(atlas["path"])) as Texture2D
+		var cell := Vector2(texture.get_width() / float(atlas["columns"]), texture.get_height() / float(atlas["rows"]))
+		_expect(absf(cell.x / cell.y - float(atlas.get("cell_aspect", 1.0))) < 0.05, "Skill sheet grid matches its cells: " + str(atlas["path"]))
+		var spans: Array = atlas["durations"]
+		_expect(spans.is_empty() or spans.size() == int(atlas["frames"]), "Every skill frame has a time: " + str(atlas["path"]))
+	_expect(is_equal_approx(ATLASES.size_for_radius(ATLASES.ELECTRIC_FIELD, 4.0), 8.0 / 0.9), "A ring of radius R plays at 2R / extent.")
 
 
 func _expect(condition: bool, message: String) -> void:

@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://bd1kdq664fsc2"
-path="res://.godot/imported/Oblique isometric spike burst atlas.png-19a8ca748863e6c760f4458aec331df9.ctex"
+uid="uid://dx2natcihbw1u"
+path="res://.godot/imported/Cartoon anatomical heart heartbeat sprite sheet.png-cd308514a6e58f89366e86a605dd0e25.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://models/objects/textures/fx_skills/Oblique isometric spike burst atlas.png"
-dest_files=["res://.godot/imported/Oblique isometric spike burst atlas.png-19a8ca748863e6c760f4458aec331df9.ctex"]
+source_file="res://models/objects/textures/FX_skills/Cartoon anatomical heart heartbeat sprite sheet.png"
+dest_files=["res://.godot/imported/Cartoon anatomical heart heartbeat sprite sheet.png-cd308514a6e58f89366e86a605dd0e25.ctex"]
 
 [params]
 
