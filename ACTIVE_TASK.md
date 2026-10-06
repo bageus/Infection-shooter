@@ -9,6 +9,8 @@ updated: 2026-10-05
 
 # Active task
 
+06.10.2026 (6): по запросу владельца боевой HUD приведён к стилю меню: графитовые панели #151a1c с тонкой серой рамкой и красной акцентной полосой вместо голубых неоновых рамок, подписи HEALTH/MUTATION, тонкие полосы здоровья/мутации с оранжевой отметкой порога, крупный счётчик патронов шрифтом меню, слоты оружия с красным подчёркиванием активного, бейджи клавиш с красной заливкой; иконки атласа перекрашиваются шейдером icon_tint в цвета палитры (красные при пустом магазине). Радар, подписи FPS/ENEMIES и панель мутаций/навыков переведены в ту же палитру. Добавлена отдельная ячейка ключа рядом с антидотом: появляется с короткой вспышкой, когда подобран аварийный ключ (прежняя текстовая метка KEY заменена). Логика, публичные API и форматы прежние, исключений нет. Обновлён run_weapon_icon_tests.gd, добавлен capture_hud_screens.gd. Следующее действие: визуальная приёмка HUD в Windows/Web.
+
 06.10.2026 (5): по запросу владельца Узи стреляет пистолетными патронами: выбрасывает ту же гильзу 12_pistol_casing (радиус 0.012), пуля летит с той же скоростью 40 м/с и тем же видом ammo_pistols. Урон, дальность, разброс, темп и пробитие Узи прежние. run_weapon_presentation_tests.gd сверяет гильзу/скорость с пистолетом. Следующее действие: проверить гильзы Узи в Windows/Web.
 
 06.10.2026 (4): по запросу владельца смерть врагов зависит от причины (death_fall_v1, ADR-0034): движущийся враг, убитый из пистолета/автомата издалека, падает вперёд (новый клип DeathForward) и проезжает по инерции; дробовик вблизи отбрасывает назад (DeathBack) до ~1.6 м; граната отбрасывает от центра взрыва с разворотом корпуса. Тело останавливается перед стенами, лужа крови — в точке падения. Клипы запечены для пяти гуманоидов, меши/сцены rig и DTO прежние, исключений нет. Новый run_death_fall_tests.gd. Следующее действие: проверить ощущение падений в игре на Windows/Web.
@@ -38,6 +40,7 @@ updated: 2026-10-05
 Build the first playable combat-slice foundation with an authored office floor, player, combat, infected enemies, infection source, and observable fail states.
 
 ## In scope
+- owner-requested combat HUD restyle matching the menus and an explicit emergency-key cell;
 - owner-requested conference table chocolate/graphite finish, random document prints on top paper sheets and 0-3 monitor-edge stickers (ADR-0033);
 - owner-requested mutation-tree hover detail card and restyle matching the main/settings menus;
 - owner follow-up: shared pinned tab notices/spacing, installed lamp controls, blocked muzzle wall guard, clipped multi-receiver blood/scorch (excluding glass), random corpse and XYZ part poses, reported editor warning fixes (ADR-0030);
