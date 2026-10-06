@@ -1,6 +1,7 @@
 extends SceneTree
 
 const ICONS := preload("res://game/presentation/prototype_hud/weapon_icon_regions.gd")
+const PALETTE := preload("res://game/presentation/prototype_hud/hud_palette.gd")
 const HUD := preload("res://game/presentation/prototype_hud/public/prototype_hud.tscn")
 const PLAYER := preload("res://game/features/player/public/player.tscn")
 
@@ -56,6 +57,7 @@ func _run() -> void:
 	hud.call("_update_weapon")
 	_expect(main_icon.texture.get_size() == ICONS.ARTWORK_BOUNDS[1].size, "Returning to pistol restores its own icon.")
 	_test_key_buttons(hud, player)
+	_test_key_cell(hud, player)
 	stage.queue_free()
 	await process_frame
 	print("Weapon icon tests: %d failures" % failures)
@@ -73,8 +75,8 @@ func _test_key_buttons(hud: Node, player: Node) -> void:
 	second.pressed.emit()
 	_expect(int(player.call("get_current_weapon_index")) == 1, "Clicking the framed number switches its slot.")
 	var selected := second.get_theme_stylebox("normal") as StyleBoxFlat
-	_expect(selected.bg_color.is_equal_approx(Color(0, 0.95, 1, 1)), "Selected key badge is filled.")
-	_expect(second.get_theme_color("font_color").is_equal_approx(Color(0.005, 0.035, 0.065, 1)), "Selected digit uses the HUD background color.")
+	_expect(selected.bg_color.is_equal_approx(PALETTE.ACCENT), "Selected key badge is filled with the menu accent.")
+	_expect(second.get_theme_color("font_color").is_equal_approx(PALETTE.INK), "Selected digit uses the menu ink colour.")
 	for index in range(1, 4):
 		var frame := hud.get_node("WeaponPanel/Slot%d" % index) as Panel
 		var slot_key := frame.get_node("KeyHint") as Button
@@ -96,6 +98,19 @@ func _test_key_buttons(hud: Node, player: Node) -> void:
 	isolated.fill_rect(Rect2i(18, 4, 4, 4), Color.WHITE)
 	ICONS._keep_largest_component(isolated)
 	_expect(isolated.get_pixel(4, 4).a == 1.0 and isolated.get_pixel(19, 5).a == 0.0, "An overlapping neighbour is removed while the main artwork remains.")
+
+
+func _test_key_cell(hud: Node, player: Node) -> void:
+	var cell := hud.get_node("KeyPanel") as Panel
+	hud.call("_update_vitals")
+	_expect(not cell.visible, "Key cell stays hidden until the emergency key is picked up.")
+	player.call("acquire_emergency_key")
+	hud.call("_update_vitals")
+	_expect(cell.visible, "Key cell appears once the emergency key is held.")
+	var antidote := hud.get_node("AntidotePanel") as Panel
+	_expect(cell.position.y == antidote.position.y and cell.size == antidote.size, "Key cell matches the antidote cell row and size.")
+	_expect(cell.position.x >= antidote.position.x + antidote.size.x, "Key cell sits beside the antidote cell without overlap.")
+	_expect(cell.get_theme_stylebox("panel") == antidote.get_theme_stylebox("panel"), "Key cell shares the HUD item frame.")
 
 
 func _check_crop_pixels(icon: Image, crop: Image) -> void:

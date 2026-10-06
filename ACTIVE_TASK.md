@@ -9,6 +9,8 @@ updated: 2026-10-05
 
 # Active task
 
+06.10.2026 (3): по запросу владельца боевой HUD приведён к стилю меню: графитовые панели #151a1c с тонкой серой рамкой и красной акцентной полосой вместо голубых неоновых рамок, подписи HEALTH/MUTATION, тонкие полосы здоровья/мутации с оранжевой отметкой порога, крупный счётчик патронов шрифтом меню, слоты оружия с красным подчёркиванием активного, бейджи клавиш с красной заливкой; иконки атласа перекрашиваются шейдером icon_tint в цвета палитры (красные при пустом магазине). Радар, подписи FPS/ENEMIES и панель мутаций/навыков переведены в ту же палитру. Добавлена отдельная ячейка ключа рядом с антидотом: появляется с короткой вспышкой, когда подобран аварийный ключ (прежняя текстовая метка KEY заменена). Логика, публичные API и форматы прежние, исключений нет. Обновлён run_weapon_icon_tests.gd, добавлен capture_hud_screens.gd. Следующее действие: визуальная приёмка HUD в Windows/Web.
+
 06.10.2026 (2): по запросу владельца меню мутаций приведено к стилю главного меню и настроек: затемнение поверх игры, панель #151a1c с серой рамкой, заголовок MUTATIONS шрифтом меню, отдельные показатели мутации/очков/стабильности, кнопка закрытия и подписи клавиш как в меню, приглушённая палитра линий и кругов; дерево центрируется. Описание навыка при наведении вместо системной подсказки показывается в компактной HUD-плашке рядом с кругом (тип/ветка/стадия, название, описание, требования с отметками выполнено/нет, статус); плашка сохраняется после покупки/фиксации и не выходит за экран. Логика навыков, публичные API и форматы прежние, исключений нет. Обновлены run_ui_sound_tests.gd и run_menu_tests.gd. Следующее действие: визуальная приёмка меню мутаций в Windows/Web.
 
 06.10.2026 (1): по запросу владельца введён вес предметов (prop_weight_v1, ADR-0032): каталог в кг, толкание при ходьбе по намеренной скорости до скольжения, ёмкость 22 кг × push_strength (игрок/обычные 1.0, Brute 2.0, Titan 2.6, Colossus 3.2), скорость предмета падает с весом; картонные коробки сдвигаются, 12 кг ящик медленно, 32 кг военный ящик — только сильные враги, автоматы не сдвигаются. Мелочь ≤ 2 кг и ≤ 0.45 м не стопорит персонажей и отлетает от ног игрока и врагов (заменяет book_contact). Капли из обрубков оставляют следы через существующий blood_wounded. Масса RigidBody и DTO карт прежние, исключений нет. Новый run_prop_weight_tests.gd и расширенный run_dismemberment_tests.gd. Следующее действие: проверить ощущение толкания и следы крови в Windows/Web.
@@ -32,6 +34,7 @@ updated: 2026-10-05
 Build the first playable combat-slice foundation with an authored office floor, player, combat, infected enemies, infection source, and observable fail states.
 
 ## In scope
+- owner-requested combat HUD restyle matching the menus and an explicit emergency-key cell;
 - owner-requested mutation-tree hover detail card and restyle matching the main/settings menus;
 - owner follow-up: shared pinned tab notices/spacing, installed lamp controls, blocked muzzle wall guard, clipped multi-receiver blood/scorch (excluding glass), random corpse and XYZ part poses, reported editor warning fixes (ADR-0030);
 - owner-requested integrated PRs, player/enemy textured blood, retired zombie art, floor/wall placement, unclipped planner color picker, separate effects/music mix, exact cursor/barrel aim and 30% smaller launcher casings (ADR-0029);
