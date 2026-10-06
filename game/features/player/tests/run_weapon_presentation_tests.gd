@@ -172,10 +172,10 @@ func _test_switch_and_fire(player: PLAYER_SCRIPT, effects: Node3D) -> void:
 		for other in player.weapons:
 			_check(other.visible == (other == weapon), "visibility switches exclusively")
 		var before := int(weapon.call("get_magazine_ammo"))
-		var count := effects.get_child_count()
+		var emitted_before := effects.get_child_count()
 		_check(bool(player.call("_fire_weapon", weapon)), "configured weapon fires")
 		_check(int(weapon.call("get_magazine_ammo")) == before - 1, "one shell/bullet consumed per shot")
-		_check(effects.get_child_count() > count, "projectile or pellets emitted")
+		_check(effects.get_child_count() > emitted_before, "projectile or pellets emitted")
 		_check(not bool(player.call("_fire_weapon", weapon)), "cooldown refuses second attempt")
 		_check(int(weapon.call("get_magazine_ammo")) == before - 1, "failed attempt preserves ammunition")
 		weapon.call("start_reload")

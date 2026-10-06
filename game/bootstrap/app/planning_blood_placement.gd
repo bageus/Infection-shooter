@@ -43,8 +43,8 @@ static func probe(session: Variant, placing: Node3D, screen: Vector2) -> Vector3
 
 
 static func _floor_height(session: Variant) -> float:
-	var floor: Node3D = session.host.get_node_or_null("Floor")
-	return floor.global_position.y + float(floor.get("tile_y")) + .0125 if floor != null else .0135
+	var floor_body: Node3D = session.host.get_node_or_null("Floor")
+	return floor_body.global_position.y + float(floor_body.get("tile_y")) + .0125 if floor_body != null else .0135
 
 
 static func apply_probe(placing: Node3D, preview: Node3D) -> void:
@@ -52,8 +52,8 @@ static func apply_probe(placing: Node3D, preview: Node3D) -> void:
 		return
 	var normal: Vector3 = preview.get("surface_normal")
 	placing.call("configure_blood_normal", placing.global_basis.inverse() * (preview.global_basis * normal))
-	var reference: Variant = preview.get_meta("blood_probe_anchor") if preview.has_meta("blood_probe_anchor") else null
-	var anchor: Node3D = reference.get_ref() if reference is WeakRef else null
+	var anchor_ref: Variant = preview.get_meta("blood_probe_anchor") if preview.has_meta("blood_probe_anchor") else null
+	var anchor: Node3D = anchor_ref.get_ref() if anchor_ref is WeakRef else null
 	if anchor == null:
 		return
 	var owner: Node = anchor
@@ -115,6 +115,6 @@ static func _wall_surface(node: Node) -> bool:
 static func preview_projection(placing: Node3D) -> void:
 	if not placing.has_method("configure_projection"):
 		return
-	var reference: Variant = placing.get_meta("blood_probe_anchor") if placing.has_meta("blood_probe_anchor") else null
-	var anchor: Node3D = reference.get_ref() if reference is WeakRef else null
+	var anchor_ref: Variant = placing.get_meta("blood_probe_anchor") if placing.has_meta("blood_probe_anchor") else null
+	var anchor: Node3D = anchor_ref.get_ref() if anchor_ref is WeakRef else null
 	placing.call("configure_projection", anchor)

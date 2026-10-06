@@ -113,8 +113,8 @@ func _build_parts(strength: float) -> void:
 
 func _torso_child_joint(bone: int) -> Variant:
 	for child in skeleton.get_bone_children(bone):
-		var name := skeleton.get_bone_name(child)
-		if name in ["Spine", "Chest", "Neck", "Head", "Body", "Crown", "L_UpperArm", "R_UpperArm"]:
+		var part_name := skeleton.get_bone_name(child)
+		if part_name in ["Spine", "Chest", "Neck", "Head", "Body", "Crown", "L_UpperArm", "R_UpperArm"]:
 			return MESH.joint(_data, child, skeleton)
 	return null
 

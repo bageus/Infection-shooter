@@ -129,8 +129,8 @@ static func _crossed(before: float, after: float, mark: float) -> bool:
 
 
 func _resolve_bones(skeleton: Skeleton3D) -> bool:
-	for name: String in HIPS_NAMES:
-		_hips = skeleton.find_bone(name)
+	for bone_name: String in HIPS_NAMES:
+		_hips = skeleton.find_bone(bone_name)
 		if _hips >= 0:
 			break
 	if _hips < 0:
@@ -150,8 +150,8 @@ func _resolve_bones(skeleton: Skeleton3D) -> bool:
 
 func _find(skeleton: Skeleton3D, prefixes: Array, names: Array) -> int:
 	for prefix: String in prefixes:
-		for name: String in names:
-			for candidate in [prefix + name, "mixamorig:" + prefix + name]:
+		for bone_name: String in names:
+			for candidate in [prefix + bone_name, "mixamorig:" + prefix + bone_name]:
 				var index := skeleton.find_bone(candidate)
 				if index >= 0:
 					return index

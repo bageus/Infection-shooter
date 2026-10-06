@@ -17,14 +17,14 @@ func _run() -> void:
 	var stage := Node3D.new()
 	root.add_child(stage)
 	current_scene = stage
-	var floor := StaticBody3D.new()
+	var floor_body := StaticBody3D.new()
 	var shape := CollisionShape3D.new()
 	var box := BoxShape3D.new()
 	box.size = Vector3(40, 0.2, 40)
 	shape.shape = box
-	floor.add_child(shape)
-	stage.add_child(floor)
-	floor.position.y = -0.1
+	floor_body.add_child(shape)
+	stage.add_child(floor_body)
+	floor_body.position.y = -0.1
 	var effects := EFFECTS.instantiate() as Node3D
 	stage.add_child(effects)
 	var roots: Array[Node] = [stage]

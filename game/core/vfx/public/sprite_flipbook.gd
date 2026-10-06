@@ -40,13 +40,13 @@ var _landed := false
 ## pivot (UV point at the origin), axis + atlas_angle (axial billboard),
 ## fade_out (seconds), velocity, gravity, drag, spin, spin_speed, tumble, grow,
 ## floor_y (a falling sprite settles flat on this height).
-static func spawn(parent: Node, atlas: Dictionary, position: Vector3, size: float, options := {}) -> MeshInstance3D:
+static func spawn(parent: Node, atlas: Dictionary, point: Vector3, size: float, options := {}) -> MeshInstance3D:
 	if parent == null or not parent.is_inside_tree() or not ATLASES.available(atlas):
 		return null
 	var node: MeshInstance3D = load(SELF).new()
 	node.call("_setup", atlas, size, options)
 	parent.add_child(node, true)
-	node.global_position = position
+	node.global_position = point
 	return node
 
 

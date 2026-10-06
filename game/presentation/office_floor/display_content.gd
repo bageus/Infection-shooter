@@ -19,6 +19,7 @@ var timelines: Dictionary = {}
 
 
 func material(dynamic: bool, index: int) -> ShaderMaterial:
+	@warning_ignore("integer_division")
 	var path := ANIMATED_PATHS[index % 3] if dynamic else STATIC_PATHS[index / 8]
 	if not textures.has(path):
 		textures[path] = load(path)
@@ -33,6 +34,7 @@ func material(dynamic: bool, index: int) -> ShaderMaterial:
 		var texture := textures[path] as Texture2D
 		var guard := Vector2(.5 / texture.get_width(), .5 / texture.get_height())
 		var cell := index % 8
+		@warning_ignore("integer_division")
 		result.set_shader_parameter("atlas_rect", Vector4((cell % 4) * .25 + guard.x,
 			(cell / 4) * .5 + guard.y, .25 - guard.x * 2, .5 - guard.y * 2))
 	return result
@@ -66,6 +68,7 @@ func frame_rect(index: int, seconds: float) -> Vector4:
 	var image: Array = data["frame_size"]
 	var width := float(columns * int(cell[0]))
 	var height := float(rows * int(cell[1]))
+	@warning_ignore("integer_division")
 	return Vector4((frame % columns * int(cell[0]) + 1.5) / width,
 		(frame / columns * int(cell[1]) + 1.5) / height,
 		(float(image[0]) - 1.0) / width, (float(image[1]) - 1.0) / height)

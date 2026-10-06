@@ -21,7 +21,7 @@ func _test_map_overwrite(storage: Variant, planner: Node) -> void:
 	DirAccess.remove_absolute(path)
 	storage.call("save_named_map")
 	_check(FileAccess.file_exists(path), "A new map saves on the first press")
-	var first := FileAccess.get_modified_time(path)
+	var _first := FileAccess.get_modified_time(path)
 	storage.call("save_named_map")
 	var status := str((planner.get("controls").get("status") as Label).text)
 	_check(status.contains("EXISTS"), "Saving over an existing map warns first (%s)" % status)

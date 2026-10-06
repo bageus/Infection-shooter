@@ -186,13 +186,13 @@ func _project_surface() -> void:
 	for entry in entries:
 		_receivers.append({"source": weakref(entry["anchor"]), "transform": entry["anchor"].global_transform})
 		var mesh: ArrayMesh = entry["mesh"]
-		var transform: Transform3D = local * entry["anchor"].global_transform
+		var mark_transform: Transform3D = local * entry["anchor"].global_transform
 		var arrays := mesh.surface_get_arrays(0)
 		var vertices: PackedVector3Array = arrays[Mesh.ARRAY_VERTEX]
 		var normals: PackedVector3Array = arrays[Mesh.ARRAY_NORMAL]
 		for index in vertices.size():
-			vertices[index] = transform * vertices[index]
-			normals[index] = (transform.basis.inverse().transposed() * normals[index]).normalized()
+			vertices[index] = mark_transform * vertices[index]
+			normals[index] = (mark_transform.basis.inverse().transposed() * normals[index]).normalized()
 		arrays[Mesh.ARRAY_VERTEX] = vertices
 		arrays[Mesh.ARRAY_NORMAL] = normals
 		combined.add_surface_from_arrays(Mesh.PRIMITIVE_TRIANGLES, arrays)

@@ -9,7 +9,6 @@ const POWDER_SHADER := preload("res://game/core/vfx/public/smoke_puff.gdshader")
 @onready var _ring: MeshInstance3D = $PressureRing
 @onready var _burst: GPUParticles3D = $PowderBurst
 @onready var _cloud: GPUParticles3D = $PowderCloud
-@onready var _pop: AudioStreamPlayer3D = $Pop
 
 var _radius := 3.0
 var _elapsed := 0.0

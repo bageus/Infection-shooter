@@ -54,8 +54,8 @@ func configure(hit: Dictionary, definition: Dictionary, settings: Dictionary) ->
 		var reference: Variant = settings.get("projection_pool")
 		var pool: Node = reference.get_ref() if reference is WeakRef else null
 		if pool != null:
-			var basis: Basis = definition["basis"]
-			var projector := Transform3D(Basis(basis.x, -basis.z, basis.y), hit["position"])
+			var mark_basis: Basis = definition["basis"]
+			var projector := Transform3D(Basis(mark_basis.x, -mark_basis.z, mark_basis.y), hit["position"])
 			for piece in pool.call("project_surface", body, projector, footprint, _material, _depth, false):
 				_projected.append(weakref(piece))
 			visual.queue_free()

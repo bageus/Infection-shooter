@@ -132,7 +132,7 @@ func _planner_blood() -> void:
 	var planner: Node = stage.get("planning_mode")
 	var controls: Node = planner.get("controls")
 	controls.call("_show_blood_catalog")
-	var entries: Array = planner.get("catalog").get("active_catalog")
+	var _entries: Array = planner.get("catalog").get("active_catalog")
 	var objects: Node = planner.get("objects")
 	objects.call("_on_palette_selected", 0)
 	var preview: Node3D = objects.get("preview")

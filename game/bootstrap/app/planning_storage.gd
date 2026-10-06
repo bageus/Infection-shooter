@@ -323,6 +323,6 @@ func load_layout() -> void:
 		if report.has("error"):
 			push_warning("Planned layout not loaded: %s" % report["error"])
 		elif int(report.get("skipped", 0)) > 0:
-			push_warning("Planned layout: %d missing object(s) skipped." % int(report["skipped"]))
+			push_warning("Planned layout: %d missing object(s) skipped: %s" % [int(report["skipped"]), ", ".join(report.get("missing", []))])
 	snapshot_authored()
 

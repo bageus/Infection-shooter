@@ -23,7 +23,7 @@ func _run() -> void:
 	var wall = catalog.call("_instantiate_asset", "res://models/objects/enviroments/13/13_wall_cafeteria.glb")
 	stage.add_child(wall)
 	_check(wall.get_meta("planning_wall_mount", false) and wall.freeze, "Group 13 stays attached to wall")
-	await _snap(catalog)
+	_snap(catalog)
 	await _particles(catalog)
 	await _corpse()
 	await _aim(player)

@@ -387,13 +387,14 @@ func _update_status() -> void:
 	]
 
 
-## Rebuilds the layout from saved data; returns {"loaded", "skipped"}.
+## Rebuilds the layout from saved data; returns {"loaded", "skipped", "missing"}.
 func _apply_layout_data(data: Dictionary) -> Dictionary:
 	clear_layout(false)
 	# Undo entries refer to the previous layout's objects.
 	session.edit_history.set("stack", [])
 	var loaded := 0
 	var skipped := 0
+	var missing: Array[String] = []
 	var records: Array = data.get("objects", [])
 	var player_records: Array = []
 	for record_value: Variant in records:
@@ -417,10 +418,12 @@ func _apply_layout_data(data: Dictionary) -> Dictionary:
 			continue
 		if scene_path.is_empty() or not ResourceLoader.exists(scene_path):
 			skipped += 1
+			missing.append(str(record.get("scene", "")))
 			continue
 		var node = catalog._instantiate_asset(scene_path)
 		if node == null:
 			skipped += 1
+			missing.append(scene_path)
 			continue
 		LAYOUT_PROPERTIES.restore(node, record)
 		var load_kind = "enemy" if scene_path in catalog.ENEMY_SCENES else ""
@@ -474,7 +477,7 @@ func _apply_layout_data(data: Dictionary) -> Dictionary:
 	_update_status()
 	if controls != null:
 		controls.call("_update_history_buttons")
-	return {"loaded": loaded, "skipped": skipped}
+	return {"loaded": loaded, "skipped": skipped, "missing": missing}
 
 
 func clear_layout(update_status: bool = true) -> void:

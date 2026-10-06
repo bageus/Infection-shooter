@@ -133,6 +133,7 @@ func _test_expire_fades_and_frees(stage: Node3D) -> void:
 
 func _test_budget(stage: Node3D) -> void:
 	for i in 55:
+		@warning_ignore("integer_division")
 		_fragment(stage, Vector3(8 + (i % 8) * 0.5, 0.5 + i * 0.01, -8 + (i / 8) * 0.5))
 	await physics_frame
 	var live := 0

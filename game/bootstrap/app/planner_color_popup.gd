@@ -22,4 +22,5 @@ static func fit(popup: PopupPanel, viewport_size: Vector2) -> void:
 	var scroll := popup.get_child(popup.get_child_count() - 1) as ScrollContainer
 	scroll.custom_minimum_size = Vector2(mini(330, available.x), mini(480, available.y))
 	popup.size = Vector2i(scroll.custom_minimum_size) + Vector2i(8, 8)
+	@warning_ignore("integer_division")
 	popup.position = (Vector2i(viewport_size) - popup.size) / 2

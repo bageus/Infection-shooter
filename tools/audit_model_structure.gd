@@ -13,9 +13,9 @@ func _initialize() -> void:
 			push_warning("Cannot load model: %s" % path)
 			failures += 1
 			continue
-		var root := packed.instantiate()
-		_print_tree(path, root, "", "")
-		root.free()
+		var model_root := packed.instantiate()
+		_print_tree(path, model_root, "", "")
+		model_root.free()
 	print("MODEL_AUDIT_SUMMARY models=%d failures=%d" % [files.size(), failures])
 	quit(1 if failures > 0 else 0)
 

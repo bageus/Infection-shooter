@@ -48,8 +48,8 @@ func configure(authored: Dictionary) -> void:
 		var screen := screens[i]
 		var dynamic := television or str(config.get("content", "static")) == "dynamic"
 		var count := 3 if dynamic else 16
-		var seed := int(config.get("seed", 1))
-		var index := (seed % count + i * (1 + seed % (count - 1))) % count
+		var noise_seed := int(config.get("seed", 1))
+		var index := (noise_seed % count + i * (1 + noise_seed % (count - 1))) % count
 		screen["index"] = index
 		screen["dynamic"] = dynamic
 		var material := content.material(dynamic, index)
