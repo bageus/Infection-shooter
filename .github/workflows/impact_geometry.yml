@@ -8,6 +8,7 @@ on:
       - 'game/features/combat/impact_receiver_cache.gd'
       - 'game/features/combat/impact_cache_watch.gd'
       - 'game/features/combat/tests/run_impact_geometry_index_tests.gd'
+      - 'game/core/vfx/**'
       - '.github/workflows/impact_geometry.yml'
   pull_request:
     paths:
@@ -16,6 +17,7 @@ on:
       - 'game/features/combat/impact_receiver_cache.gd'
       - 'game/features/combat/impact_cache_watch.gd'
       - 'game/features/combat/tests/run_impact_geometry_index_tests.gd'
+      - 'game/core/vfx/**'
       - '.github/workflows/impact_geometry.yml'
 permissions:
   contents: read
@@ -42,3 +44,7 @@ jobs:
           cp game/features/combat/tests/run_impact_geometry_index_tests.gd /tmp/impact_geometry/game/features/combat/tests/
           timeout 120 godot --headless --path /tmp/impact_geometry --script res://game/features/combat/tests/run_impact_geometry_index_tests.gd 2>&1 | tee /tmp/impact_geometry.log
           if grep -E 'SCRIPT ERROR|^ERROR:' /tmp/impact_geometry.log; then exit 1; fi
+          mkdir -p /tmp/impact_geometry/game/core
+          cp -r game/core/vfx /tmp/impact_geometry/game/core/
+          timeout 120 godot --headless --path /tmp/impact_geometry --script res://game/core/vfx/tests/run_stamp_cache_tests.gd 2>&1 | tee /tmp/stamp_cache.log
+          if grep -E 'SCRIPT ERROR|^ERROR:' /tmp/stamp_cache.log; then exit 1; fi

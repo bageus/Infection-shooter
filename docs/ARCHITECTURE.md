@@ -264,3 +264,5 @@ Prototype HUD сравнивает снимки перед записями, ф�
 перерисовку. Infected владеет локальными expiry Timer частей; combat владеет
 immutable cache физических ресурсов гильз. Публичные методы и DTO v8 прежние;
 новых зависимостей, глобального clock/пула или политик дальних коллизий нет.
+
+ADR-0037: core.vfx предоставляет opt-in surface_stamp_cache_v1; instance принадлежит существующему combat impact pool. Stateless v1 совместим; snapshots/indices ограничены 128 Mesh, invalidation Mesh.changed, teardown отключает observers. Новых зависимостей и глобального состояния нет.
