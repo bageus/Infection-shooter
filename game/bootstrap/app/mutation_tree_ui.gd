@@ -5,6 +5,7 @@ const TREE_CANVAS := preload("res://game/bootstrap/app/mutation_tree_canvas.gd")
 const SKILL_CARD := preload("res://game/bootstrap/app/mutation_skill_card.gd")
 const SKILL_INFO := preload("res://game/bootstrap/app/mutation_skill_info.gd")
 const STYLE := preload("res://game/bootstrap/app/menu/menu_style.gd")
+const SKILL_ICONS := preload("res://game/bootstrap/app/mutation_skill_icons.gd")
 const LIT := Color(0.3, 0.95, 0.1)
 
 var runtime: Node
@@ -349,6 +350,7 @@ func _fill_hotbar(skills: Array) -> void:
 		button.text = "%s %s" % [_binding_label("skill_%d" % (index + 1)) if index < 4 else "•", row[1]]
 		button.tooltip_text = "%s\n%s" % [row[1], row[5]]
 		var skill_id: String = active_skills[index]
+		_set_icon(button, skill_id, 22)
 		button.pressed.connect(func() -> void: runtime.call("cast_skill", skill_id))
 		hotbar.add_child(button)
 		_hotbar_button(button)
@@ -361,7 +363,8 @@ func _add_skill(canvas: Control, row: Array, center: Vector2, skills: Array) -> 
 	var enabled: bool = runtime.call("has_skill", skill_id)
 	var available: bool = runtime.call("can_upgrade_skill", skill_id)
 	var button := Button.new()
-	button.text = str(row[4])
+	if not _set_icon(button, skill_id, 28):
+		button.text = str(row[4])
 	button.position = center - Vector2(22, 22)
 	button.custom_minimum_size = Vector2(44, 44)
 	button.size = Vector2(44, 44)
@@ -387,6 +390,7 @@ func _add_skill(canvas: Control, row: Array, center: Vector2, skills: Array) -> 
 		style.border_color = Color("646760")
 	style.set_border_width_all(2)
 	style.set_corner_radius_all(22)
+	style.set_content_margin_all(8)
 	var hover := style.duplicate() as StyleBoxFlat
 	hover.border_color = STYLE.INK
 	for state in ["normal", "pressed", "disabled"]:
@@ -400,6 +404,21 @@ func _add_skill(canvas: Control, row: Array, center: Vector2, skills: Array) -> 
 	canvas.add_child(button)
 	if learned and int(row[3]) != 3:
 		_add_lock(canvas, row, center)
+
+
+func _set_icon(button: Button, skill_id: String, icon_size: int) -> bool:
+	var icon := SKILL_ICONS.for_skill(skill_id)
+	if icon == null:
+		return false
+	button.icon = icon
+	# Circles fit the icon inside their margins; labelled buttons cap its width.
+	button.expand_icon = button.text.is_empty()
+	button.icon_alignment = HORIZONTAL_ALIGNMENT_CENTER if button.expand_icon else HORIZONTAL_ALIGNMENT_LEFT
+	button.add_theme_constant_override("icon_max_width", icon_size)
+	button.add_theme_color_override("icon_disabled_color", STYLE.MUTED)
+	# 209 px cells shrink to ~28 px; mipmaps keep the white strokes clean.
+	button.texture_filter = CanvasItem.TEXTURE_FILTER_LINEAR_WITH_MIPMAPS
+	return true
 
 
 func _add_lock(canvas: Control, row: Array, center: Vector2) -> void:
