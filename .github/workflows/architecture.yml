@@ -26,5 +26,6 @@ jobs:
       - name: Validate scene resources and workstation profiles
         run: |
           python tools/validate_scene_resources.py
+          python tools/check_resource_paths.py
           python tools/test_workstation_templates.py
           python tools/test_architecture_scene_access.py

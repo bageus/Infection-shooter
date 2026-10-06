@@ -27,6 +27,7 @@ jobs:
           python tools/validate_project.py
           python tools/check_import_files.py
           python tools/validate_scene_resources.py
+          python tools/check_resource_paths.py
           python tools/test_workstation_templates.py
           python tools/test_glass_openings.py
           python tools/test_architecture_scene_access.py

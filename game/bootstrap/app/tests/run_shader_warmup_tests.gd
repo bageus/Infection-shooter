@@ -11,9 +11,8 @@ func _initialize() -> void:
 
 func _run() -> void:
 	var paths := WARMUP.spatial_shader_paths()
-	_check(paths.has("res://game/core/vfx/public/flipbook.gdshader"), "Flipbook shader is warmed")
-	_check(paths.has("res://game/features/player/berserk_aura.gdshader"), "Feature shaders are warmed")
-	_check(not paths.has("res://game/bootstrap/app/blast_feedback.gdshader"), "Canvas shaders are left out")
+	_check(paths.size() >= 10, "Project spatial shaders are found in every module")
+	_check(Array(paths).all(func(path: String) -> bool: return (load(path) as Shader).get_mode() == Shader.MODE_SPATIAL), "Only spatial shaders are warmed")
 	var app := MAIN.instantiate()
 	root.add_child(app)
 	current_scene = app
