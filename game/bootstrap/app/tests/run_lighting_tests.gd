@@ -94,11 +94,11 @@ func _test_flicker(lamp: Node3D, light: SpotLight3D) -> void:
 		var saw_recovery := false
 		for frame in range(600):
 			lamp._process(1.0 / 60.0)
-			var factor: float = lamp.get("_flicker_factor")
+			var step_factor: float = lamp.get("_flicker_factor")
 			_check(light.light_energy >= 0.0 and light.light_energy <= 4.55001, "Flicker stays inside effective base")
-			saw_dip = saw_dip or factor < 0.99
-			saw_blackout = saw_blackout or is_zero_approx(factor)
-			saw_recovery = saw_recovery or (saw_blackout and factor > 0.8)
+			saw_dip = saw_dip or step_factor < 0.99
+			saw_blackout = saw_blackout or is_zero_approx(step_factor)
+			saw_recovery = saw_recovery or (saw_blackout and step_factor > 0.8)
 			var before := light.light_energy
 			lamp.set_runtime_light_active(true)
 			_check(is_equal_approx(light.light_energy, before), "Runtime restore preserves flicker phase")
@@ -163,10 +163,10 @@ func _test_map_paths(planner: Node) -> void:
 		planner.get("objects").call("_apply_layout_data", data)
 		var lamps := _planner_lamps(planner)
 		_check(lamps.size() == 4, "Legacy map without multiplier loads")
-		var lamp: Node3D = lamps[0]
-		lamp.set_process(false)
-		_check(is_equal_approx(float(lamp.call("get_authored_energy")), 7.0), "Reload preserves authored energy")
-		_check(is_equal_approx(lamp.get_node("Light").light_energy, 4.55), "Reload applies 0.65 once")
+		var reloaded: Node3D = lamps[0]
+		reloaded.set_process(false)
+		_check(is_equal_approx(float(reloaded.call("get_authored_energy")), 7.0), "Reload preserves authored energy")
+		_check(is_equal_approx(reloaded.get_node("Light").light_energy, 4.55), "Reload applies 0.65 once")
 		_check(is_zero_approx(lamps[1].get_node("Light").light_energy), "Saved zero energy loads as zero")
 		_check(is_equal_approx(float(lamps[2].call("get_authored_energy")), 3.0), "Missing energy retains scene default")
 		_check(is_equal_approx(lamps[3].get_node("Light").light_energy, 5.0), "Explicit multiplier survives JSON round-trip")

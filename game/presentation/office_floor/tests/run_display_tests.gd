@@ -32,10 +32,10 @@ func _run() -> void:
 	quit(0 if failures == 0 else 1)
 
 
-func _spawn(model: String, seed: int = 2, mode: String = "static") -> Node3D:
+func _spawn(model: String, display_seed: int = 2, mode: String = "static") -> Node3D:
 	var prop := PROP.instantiate() as Node3D
 	prop.set("model_path", MODEL_ROOT + model)
-	prop.call("configure_display", {"power": "on", "content": mode, "seed": seed})
+	prop.call("configure_display", {"power": "on", "content": mode, "seed": display_seed})
 	prop.call("configure_displays", wall)
 	stage.add_child(prop)
 	prop.set("freeze", true)

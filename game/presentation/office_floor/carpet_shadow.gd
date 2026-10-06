@@ -41,11 +41,11 @@ func _notification(what: int) -> void:
 
 func _update_casters() -> void:
 	for index in _sources.size():
-		var transform := _sources[index].global_transform
+		var shadow_transform := _sources[index].global_transform
 		# Affine compression toward the floor keeps the footprint/UVs intact.
-		transform.basis.x.y *= HEIGHT_RATIO
-		transform.basis.y.y *= HEIGHT_RATIO
-		transform.basis.z.y *= HEIGHT_RATIO
-		transform.origin.y = FLOOR_SURFACE_Y + (transform.origin.y - FLOOR_SURFACE_Y) * HEIGHT_RATIO
-		_casters[index].global_transform = transform
+		shadow_transform.basis.x.y *= HEIGHT_RATIO
+		shadow_transform.basis.y.y *= HEIGHT_RATIO
+		shadow_transform.basis.z.y *= HEIGHT_RATIO
+		shadow_transform.origin.y = FLOOR_SURFACE_Y + (shadow_transform.origin.y - FLOOR_SURFACE_Y) * HEIGHT_RATIO
+		_casters[index].global_transform = shadow_transform
 		_casters[index].visible = _sources[index].visible

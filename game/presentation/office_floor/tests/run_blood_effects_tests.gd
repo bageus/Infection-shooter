@@ -23,8 +23,8 @@ func _run() -> void:
 	current_scene = stage
 	query = SURFACES.new()
 	stage.add_child(query)
-	var floor := _surface(Vector3.ZERO, Vector3(40, 0.2, 40))
-	floor.position.y = -0.1
+	var floor_body := _surface(Vector3.ZERO, Vector3(40, 0.2, 40))
+	floor_body.position.y = -0.1
 	var wall := _surface(Vector3(0, 1.5, -2), Vector3(4, 3, 0.2))
 	var slope := _surface(Vector3(5, 0.4, 0), Vector3(3, 0.2, 3))
 	slope.rotation.z = 0.35
@@ -40,7 +40,7 @@ func _run() -> void:
 	await physics_frame
 	_expect(actor.collision_layer & 128 == 0, "Actor is excluded from the surface layer.")
 	var floor_hit: Dictionary = query.call("find_floor", Vector3(0, 1, 0), excluded)
-	_expect(SURFACES.resolve(floor_hit).get("collider") == floor, "Down ray finds floor rather than the actor.")
+	_expect(SURFACES.resolve(floor_hit).get("collider") == floor_body, "Down ray finds floor rather than the actor.")
 	var wall_hit: Dictionary = query.call("find_behind", Vector3(0, 1, 0), Vector3.FORWARD, excluded)
 	_expect(SURFACES.resolve(wall_hit).get("collider") == wall, "Projectile ray finds the wall behind the hit.")
 	var slope_hit: Dictionary = query.call("find_floor", Vector3(5, 2, 0), excluded)

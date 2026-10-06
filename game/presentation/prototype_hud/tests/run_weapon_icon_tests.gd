@@ -77,10 +77,10 @@ func _test_key_buttons(hud: Node, player: Node) -> void:
 	_expect(second.get_theme_color("font_color").is_equal_approx(Color(0.005, 0.035, 0.065, 1)), "Selected digit uses the HUD background color.")
 	for index in range(1, 4):
 		var frame := hud.get_node("WeaponPanel/Slot%d" % index) as Panel
-		var key := frame.get_node("KeyHint") as Button
+		var slot_key := frame.get_node("KeyHint") as Button
 		var icon := frame.get_node("Icon") as TextureRect
-		_expect(key.position.x + key.size.x <= icon.position.x, "Each key badge remains to the left of its artwork.")
-		_expect(key.text == str(index), "Slot keys never show a weapon-name abbreviation behind the icon.")
+		_expect(slot_key.position.x + slot_key.size.x <= icon.position.x, "Each key badge remains to the left of its artwork.")
+		_expect(slot_key.text == str(index), "Slot keys never show a weapon-name abbreviation behind the icon.")
 	_expect(not (hud.get_node("WeaponPanel/WeaponName") as Label).visible, "The weapon name cannot render behind the artwork.")
 	player.call("absorb_mutagen", 2.0)
 	var before: int = player.get("antidotes")

@@ -20,16 +20,16 @@ func apply(displays: Array) -> void:
 		for rectangle: Rect2 in bounds:
 			combined = combined.merge(rectangle)
 		# Lowest authored seed keeps the choice independent of registration order.
-		var seed := int(first.get("config").get("seed", 1))
+		var lowest_seed := int(first.get("config").get("seed", 1))
 		for display in group:
-			seed = mini(seed, int(display.get("config").get("seed", 1)))
+			lowest_seed = mini(lowest_seed, int(display.get("config").get("seed", 1)))
 		for i in range(group.size()):
 			var rectangle := bounds[i]
 			var origin := (rectangle.position - combined.position) / combined.size
 			var size := rectangle.size / combined.size
 			# Screen UV origin is at the top left; geometric bounds grow upward.
 			origin.y = 1.0 - origin.y - size.y
-			group[i].call("set_wall_content", seed % 3, Rect2(origin, size))
+			group[i].call("set_wall_content", lowest_seed % 3, Rect2(origin, size))
 
 
 func _collect(pending: Array, group: Array[Node3D], bounds: Array[Rect2], frame: Transform3D) -> void:
@@ -55,9 +55,9 @@ func _coplanar(a: Transform3D, b: Transform3D) -> bool:
 	return a.basis.get_scale().is_equal_approx(b.basis.get_scale())
 
 
-func _bounds(display: Node3D, reference: Transform3D) -> Rect2:
+func _bounds(display: Node3D, anchor: Transform3D) -> Rect2:
 	var frame: Transform3D = display.call("wall_frame")
-	var center := reference.affine_inverse() * frame.origin
+	var center := anchor.affine_inverse() * frame.origin
 	var profile: Dictionary = (display.get("screens") as Array)[0]["profile"]
 	var size := Vector2(float(profile["size"][0]), float(profile["size"][1]))
 	return Rect2(Vector2(center.x, center.y) - size / 2.0, size)

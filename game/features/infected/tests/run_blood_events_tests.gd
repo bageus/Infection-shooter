@@ -4,6 +4,7 @@ const ENEMY := preload("res://game/features/infected/infected_capsule.gd")
 
 class FakeCloud:
 	extends Area3D
+	@warning_ignore("unused_signal")
 	signal depleted
 	func activate() -> void:
 		pass

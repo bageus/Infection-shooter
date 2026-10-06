@@ -114,17 +114,17 @@ func movement_spacing() -> float:
 	return randf_range(drop_spacing.x, drop_spacing.y)
 
 
-func splatter_hit(position: Vector3, direction: Vector3, weapon: String, excluded: Array[RID], source_id: int) -> void:
-	_queue_effect("_emit_splatter_hit", [position, direction, weapon, excluded, source_id])
+func splatter_hit(point: Vector3, direction: Vector3, weapon: String, excluded: Array[RID], source_id: int) -> void:
+	_queue_effect("_emit_splatter_hit", [point, direction, weapon, excluded, source_id])
 
 
 # Public v1 addition (ADR-0017): a burst of blood where a limb came off.
-func severed_burst(position: Vector3, direction: Vector3, excluded: Array[RID]) -> void:
-	_queue_effect("_emit_severed_burst", [position, direction, excluded])
+func severed_burst(point: Vector3, direction: Vector3, excluded: Array[RID]) -> void:
+	_queue_effect("_emit_severed_burst", [point, direction, excluded])
 
 
-func small_stain(position: Vector3, excluded: Array[RID]) -> void:
-	_queue_effect("_emit_small_stain", [position, excluded])
+func small_stain(point: Vector3, excluded: Array[RID]) -> void:
+	_queue_effect("_emit_small_stain", [point, excluded])
 
 
 func drops_trail(previous: Vector3, current: Vector3, excluded: Array[RID]) -> void:
@@ -135,8 +135,8 @@ func smear_drag(previous: Vector3, current: Vector3, excluded: Array[RID]) -> vo
 	_queue_effect("_emit_smear_drag", [previous, current, excluded])
 
 
-func death_pool(position: Vector3, excluded: Array[RID], death_id: int) -> void:
-	_queue_effect("_emit_death_pool", [position, excluded, death_id])
+func death_pool(point: Vector3, excluded: Array[RID], death_id: int) -> void:
+	_queue_effect("_emit_death_pool", [point, excluded, death_id])
 
 
 func _queue_effect(method: String, arguments: Array) -> void:
@@ -160,7 +160,7 @@ func _physics_process(_delta: float) -> void:
 	set_physics_process(not _effect_requests.is_empty())
 
 
-func _emit_splatter_hit(position: Vector3, direction: Vector3, weapon: String, excluded: Array[RID], source_id: int) -> void:
+func _emit_splatter_hit(point: Vector3, direction: Vector3, weapon: String, excluded: Array[RID], source_id: int) -> void:
 	var now := Time.get_ticks_msec() * 0.001
 	if now - float(_hit_times.get(source_id, -10.0)) < hit_interval:
 		return
@@ -169,30 +169,30 @@ func _emit_splatter_hit(position: Vector3, direction: Vector3, weapon: String, e
 		for id in _hit_times.keys():
 			if now - _hit_times[id] > 5.0:
 				_hit_times.erase(id)
-	var surface: Dictionary = _surfaces.call("find_behind", position, direction, excluded)
+	var surface: Dictionary = _surfaces.call("find_behind", point, direction, excluded)
 	if surface.is_empty():
-		surface = _surfaces.call("find_floor", position, excluded)
+		surface = _surfaces.call("find_floor", point, excluded)
 	for mark in range(splatters_per_hit):
 		_submit("splatter", surface, direction, splatter_size, true, weapon == "SHOTGUN")
 
 
-func _emit_severed_burst(position: Vector3, direction: Vector3, excluded: Array[RID]) -> void:
+func _emit_severed_burst(point: Vector3, direction: Vector3, excluded: Array[RID]) -> void:
 	var flat := Vector3(direction.x, 0.0, direction.z)
 	for index in range(12):
 		var spread := Vector3(randf_range(-0.9, 0.9), 0.0, randf_range(-0.9, 0.9)) + flat.normalized() * randf_range(0.2, 1.2)
-		var surface: Dictionary = _surfaces.call("find_floor", position + spread, excluded)
+		var surface: Dictionary = _surfaces.call("find_floor", point + spread, excluded)
 		_submit("splatter", surface, spread if spread.length_squared() > 0.01 else flat, splatter_size * 1.8, true, true)
 	# Radial rays reach nearby walls on every side, never through an obstacle.
 	for index in 8:
 		var radial := Vector3.FORWARD.rotated(Vector3.UP, TAU * float(index) / 8.0)
-		var behind: Dictionary = _surfaces.call("find_behind", position, radial, excluded)
+		var behind: Dictionary = _surfaces.call("find_behind", point, radial, excluded)
 		if not behind.is_empty():
 			_submit("splatter", behind, radial, splatter_size * 1.8, true, true)
-	_submit("stain", _surfaces.call("find_floor", position, excluded), Vector3.ZERO, pool_size * 1.5)
+	_submit("stain", _surfaces.call("find_floor", point, excluded), Vector3.ZERO, pool_size * 1.5)
 
 
-func _emit_small_stain(position: Vector3, excluded: Array[RID]) -> void:
-	_submit("stain", _surfaces.call("find_floor", position, excluded), Vector3.ZERO, stain_size)
+func _emit_small_stain(point: Vector3, excluded: Array[RID]) -> void:
+	_submit("stain", _surfaces.call("find_floor", point, excluded), Vector3.ZERO, stain_size)
 
 
 func _emit_drops_trail(previous: Vector3, current: Vector3, excluded: Array[RID]) -> void:
@@ -213,8 +213,8 @@ func _emit_smear_drag(previous: Vector3, current: Vector3, excluded: Array[RID])
 		_submit("smear", surface, motion, smear_size, true)
 
 
-func _emit_death_pool(position: Vector3, excluded: Array[RID], death_id: int) -> void:
-	var surface: Dictionary = _surfaces.call("find_floor", position, excluded)
+func _emit_death_pool(point: Vector3, excluded: Array[RID], death_id: int) -> void:
+	var surface: Dictionary = _surfaces.call("find_floor", point, excluded)
 	var definition := _definition("pool", surface, Vector3.ZERO, pool_size, false)
 	if definition.is_empty():
 		_budget.call("schedule_pool", death_id, {}, {}, 0.0)
@@ -243,12 +243,12 @@ func _definition(category: String, surface: Dictionary, direction: Vector3, size
 	var aspect: float = entry["aspect"]
 	var footprint := Vector2(length, length / aspect) if aspect >= 1.0 else Vector2(length * aspect, length)
 	var angle := randf_range(-0.14, 0.14) if directed else randf_range(0.0, TAU)
-	var basis := SURFACES.surface_basis(hit["normal"], direction, aspect >= 1.0, angle)
+	var mark_basis := SURFACES.surface_basis(hit["normal"], direction, aspect >= 1.0, angle)
 	if not _decal and not is_instance_valid(_projection_pool):
-		footprint = _surfaces.call("fit_quad", surface, basis, footprint)
+		footprint = _surfaces.call("fit_quad", surface, mark_basis, footprint)
 		if footprint == Vector2.ZERO:
 			return {}
-	return {"texture": entry["texture"], "footprint": footprint, "basis": basis, "local_basis": (hit["collider"] as Node3D).global_basis.inverse() * basis, "tint": Color(1.0, randf_range(0.90, 1.0), randf_range(0.90, 1.0), randf_range(0.96, 1.0))}
+	return {"texture": entry["texture"], "footprint": footprint, "basis": mark_basis, "local_basis": (hit["collider"] as Node3D).global_basis.inverse() * mark_basis, "tint": Color(1.0, randf_range(0.90, 1.0), randf_range(0.90, 1.0), randf_range(0.96, 1.0))}
 
 
 func clear_marks() -> void:

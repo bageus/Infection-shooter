@@ -34,15 +34,15 @@ func _tag_node(node: Node) -> void:
 		(node as GeometryInstance3D).layers |= visual_mask
 
 
-func find_floor(position: Vector3, excluded: Array[RID]) -> Dictionary:
-	return _cast(position + Vector3.UP * 0.3, position + Vector3.DOWN * floor_reach, excluded, true)
+func find_floor(point: Vector3, excluded: Array[RID]) -> Dictionary:
+	return _cast(point + Vector3.UP * 0.3, point + Vector3.DOWN * floor_reach, excluded, true)
 
 
-func find_behind(position: Vector3, direction: Vector3, excluded: Array[RID]) -> Dictionary:
+func find_behind(point: Vector3, direction: Vector3, excluded: Array[RID]) -> Dictionary:
 	if direction.length_squared() < 0.0001:
 		return {}
 	var axis := direction.normalized()
-	return _cast(position + axis * 0.035, position + axis * wall_reach, excluded, false)
+	return _cast(point + axis * 0.035, point + axis * wall_reach, excluded, false)
 
 
 func _cast(start: Vector3, finish: Vector3, excluded: Array[RID], floor_only: bool) -> Dictionary:
@@ -65,8 +65,8 @@ func _cast(start: Vector3, finish: Vector3, excluded: Array[RID], floor_only: bo
 	return {}
 
 
-static func capture(position: Vector3, normal: Vector3, collider: Node3D) -> Dictionary:
-	return {"surface": weakref(collider), "local_position": collider.to_local(position), "local_normal": collider.global_basis.transposed() * normal.normalized()}
+static func capture(point: Vector3, normal: Vector3, collider: Node3D) -> Dictionary:
+	return {"surface": weakref(collider), "local_position": collider.to_local(point), "local_normal": collider.global_basis.transposed() * normal.normalized()}
 
 
 static func resolve(surface: Dictionary) -> Dictionary:
@@ -94,16 +94,16 @@ func jitter_surface(surface: Dictionary, amount: float) -> Dictionary:
 	var hit := resolve(surface)
 	if hit.is_empty():
 		return {}
-	var basis := surface_basis(hit["normal"], Vector3.ZERO, false, 0.0)
-	var point: Vector3 = hit["position"] + basis.x * randf_range(-amount, amount) + basis.z * randf_range(-amount, amount)
-	var query := PhysicsRayQueryParameters3D.create(point + basis.y * 0.08, point - basis.y * 0.08, collision_mask)
+	var mark_basis := surface_basis(hit["normal"], Vector3.ZERO, false, 0.0)
+	var point: Vector3 = hit["position"] + mark_basis.x * randf_range(-amount, amount) + mark_basis.z * randf_range(-amount, amount)
+	var query := PhysicsRayQueryParameters3D.create(point + mark_basis.y * 0.08, point - mark_basis.y * 0.08, collision_mask)
 	var check := get_world_3d().direct_space_state.intersect_ray(query)
 	if not check.is_empty() and check.get("collider") == hit["collider"]:
 		return capture(check["position"], check["normal"], check["collider"])
 	return surface
 
 
-func fit_quad(surface: Dictionary, basis: Basis, footprint: Vector2) -> Vector2:
+func fit_quad(surface: Dictionary, mark_basis: Basis, footprint: Vector2) -> Vector2:
 	var hit := resolve(surface)
 	if hit.is_empty():
 		return Vector2.ZERO
@@ -112,10 +112,10 @@ func fit_quad(surface: Dictionary, basis: Basis, footprint: Vector2) -> Vector2:
 	for attempt in range(4):
 		var fits := true
 		for corner in [Vector2(-0.5, -0.5), Vector2(-0.5, 0.5), Vector2(0.5, -0.5), Vector2(0.5, 0.5)]:
-			var point: Vector3 = hit["position"] + basis.x * corner.x * size.x + basis.z * corner.y * size.y
-			var query := PhysicsRayQueryParameters3D.create(point + basis.y * 0.08, point - basis.y * 0.08, collision_mask)
+			var point: Vector3 = hit["position"] + mark_basis.x * corner.x * size.x + mark_basis.z * corner.y * size.y
+			var query := PhysicsRayQueryParameters3D.create(point + mark_basis.y * 0.08, point - mark_basis.y * 0.08, collision_mask)
 			var check := get_world_3d().direct_space_state.intersect_ray(query)
-			if check.is_empty() or check.get("collider") != body or (check["normal"] as Vector3).dot(basis.y) < 0.95:
+			if check.is_empty() or check.get("collider") != body or (check["normal"] as Vector3).dot(mark_basis.y) < 0.95:
 				fits = false
 				break
 		if fits:

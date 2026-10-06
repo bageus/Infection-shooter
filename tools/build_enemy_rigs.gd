@@ -206,8 +206,8 @@ func _dijkstra(graph: Dictionary, vertices: PackedVector3Array, seeds: PackedInt
 	best.fill(INF)
 	var heap_cost := PackedFloat32Array()
 	var heap_node := PackedInt32Array()
-	for seed in seeds:
-		var c := canonical[seed]
+	for seed_index in seeds:
+		var c := canonical[seed_index]
 		if best[c] > 0.0:
 			best[c] = 0.0
 			_heap_push(heap_cost, heap_node, 0.0, c)
@@ -236,6 +236,7 @@ static func _heap_push(costs: PackedFloat32Array, nodes: PackedInt32Array, cost:
 	nodes.append(node)
 	var i := costs.size() - 1
 	while i > 0:
+		@warning_ignore("integer_division")
 		var parent := (i - 1) / 2
 		if costs[parent] <= costs[i]:
 			break

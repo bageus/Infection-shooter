@@ -10,10 +10,10 @@ static func aim(weapon: Node3D, muzzle: Node3D, target: Vector3) -> void:
 	var along := offset.dot(axis)
 	var transverse := offset - axis * along
 	var reach := sqrt(maxf(0.0, target_offset.length_squared() - transverse.length_squared()))
-	var reference := transverse + axis * reach
-	if reference.length_squared() < 0.000001:
-		reference = axis
-	var turn := Basis(Quaternion(reference.normalized(), target_offset.normalized()))
+	var aligned := transverse + axis * reach
+	if aligned.length_squared() < 0.000001:
+		aligned = axis
+	var turn := Basis(Quaternion(aligned.normalized(), target_offset.normalized()))
 	weapon.global_basis = turn * weapon.global_basis
 
 

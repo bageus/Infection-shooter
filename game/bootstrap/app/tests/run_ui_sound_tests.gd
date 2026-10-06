@@ -9,6 +9,7 @@ var failures := 0
 
 class Host:
 	extends Node
+	@warning_ignore("unused_private_class_variable")
 	var _mutation_menu_open := false
 
 

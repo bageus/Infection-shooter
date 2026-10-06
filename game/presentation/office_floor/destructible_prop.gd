@@ -124,17 +124,17 @@ func _spawn_replacement_frame(owner_root: Node3D) -> void:
 	_add_frame_bar(owner_root, Vector3(bar, size.y, maxf(size.z, 0.07)), Vector3(size.x * 0.5 - bar * 0.5, size.y * 0.5, 0), material)
 
 
-func _add_frame_bar(owner_root: Node3D, size: Vector3, position: Vector3, material: Material) -> void:
+func _add_frame_bar(owner_root: Node3D, size: Vector3, point: Vector3, material: Material) -> void:
 	var piece := MeshInstance3D.new()
 	var mesh := BoxMesh.new()
 	mesh.size = size
 	mesh.material = material
 	piece.mesh = mesh
-	piece.position = position
+	piece.position = point
 	owner_root.add_child(piece)
 
 
-func _spawn_sparks(position: Vector3) -> void:
+func _spawn_sparks(point: Vector3) -> void:
 	if not is_instance_valid(effects_root):
 		return
 	for i in 6:
@@ -150,8 +150,8 @@ func _spawn_sparks(position: Vector3) -> void:
 		mesh.material = material
 		spark.mesh = mesh
 		effects_root.add_child(spark)
-		spark.global_position = position
-		var target := position + Vector3(
+		spark.global_position = point
+		var target := point + Vector3(
 			randf_range(-0.45, 0.45),
 			randf_range(0.1, 0.7),
 			randf_range(-0.45, 0.45)
@@ -161,7 +161,7 @@ func _spawn_sparks(position: Vector3) -> void:
 		tween.tween_callback(spark.queue_free)
 
 
-func _spawn_fragments(position: Vector3, tint: Color, count: int) -> void:
+func _spawn_fragments(point: Vector3, tint: Color, count: int) -> void:
 	if not is_instance_valid(effects_root):
 		return
 	for i in count:
@@ -178,8 +178,8 @@ func _spawn_fragments(position: Vector3, tint: Color, count: int) -> void:
 		mesh.material = material
 		fragment.mesh = mesh
 		effects_root.add_child(fragment)
-		fragment.global_position = position
-		var target := position + Vector3(
+		fragment.global_position = point
+		var target := point + Vector3(
 			randf_range(-0.8, 0.8),
 			randf_range(0.15, 0.95),
 			randf_range(-0.8, 0.8)

@@ -63,6 +63,7 @@ func _build(enemy_name: String) -> bool:
 		instance.free()
 		return false
 	var bounds := mesh.get_aabb()
+	@warning_ignore("integer_division")
 	var triangles := (compact[Mesh.ARRAY_INDEX] as PackedInt32Array).size() / 3
 	print("%s: lod %d -> %d triangles, %d vertices, aabb %s" % [enemy_name, chosen, triangles, (compact[Mesh.ARRAY_VERTEX] as PackedVector3Array).size(), bounds])
 	var ok := _write_texture(enemy_name, 0, "albedo") and _write_texture(enemy_name, 2, "normal")
@@ -80,16 +81,16 @@ func _choose_lod(importer: ImporterMesh) -> int:
 
 # Re-index the vertex streams so only vertices used by the chosen LOD remain.
 func _compact(arrays: Array, indices: PackedInt32Array) -> Array:
-	var remap := {}
+	var index_remap := {}
 	var order := PackedInt32Array()
 	var new_indices := PackedInt32Array()
 	new_indices.resize(indices.size())
 	for i in indices.size():
 		var old := indices[i]
-		var mapped: int = remap.get(old, -1)
+		var mapped: int = index_remap.get(old, -1)
 		if mapped < 0:
 			mapped = order.size()
-			remap[old] = mapped
+			index_remap[old] = mapped
 			order.append(old)
 		new_indices[i] = mapped
 	var result: Array = []
