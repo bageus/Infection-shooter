@@ -15,6 +15,7 @@ func setup(owner_dialog: Control, selected_tab: int) -> void:
 	tabs.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	tabs.size_flags_vertical = Control.SIZE_EXPAND_FILL
 	tabs.tab_alignment = TabBar.ALIGNMENT_CENTER
+	_style_tabs()
 	var outer: VBoxContainer = dialog.get("layout")
 	outer.add_child(tabs)
 	notices.setup(dialog, tabs)
@@ -27,7 +28,7 @@ func setup(owner_dialog: Control, selected_tab: int) -> void:
 		tabs.set_tab_title(index, dialog.view.text(["tabGeneral", "tabControls", "tabVideo", "tabAudio"][index]))
 		var margin := MarginContainer.new()
 		margin.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-		margin.add_theme_constant_override("margin_top", 20)
+		margin.add_theme_constant_override("margin_top", 28)
 		page.add_child(margin)
 		var box := VBoxContainer.new()
 		box.size_flags_horizontal = Control.SIZE_EXPAND_FILL
@@ -44,6 +45,34 @@ func setup(owner_dialog: Control, selected_tab: int) -> void:
 	dialog.set("layout", outer)
 	tabs.current_tab = clampi(selected_tab, 0, 3)
 	tabs.tab_changed.connect(_tab_changed)
+
+
+## Pages share the dialog's own background; the tab strip is separated from
+## the page by a thin rule and a gap instead of a differently tinted panel.
+func _style_tabs() -> void:
+	var page := StyleBoxFlat.new()
+	page.bg_color = Color.TRANSPARENT
+	page.border_color = Color(0.64, 0.64, 0.61, 0.32)
+	page.border_width_top = 1
+	page.content_margin_top = 6
+	tabs.add_theme_stylebox_override("panel", page)
+	for state in ["tab_unselected", "tab_hovered", "tab_selected", "tab_focus", "tab_disabled"]:
+		var tab := StyleBoxFlat.new()
+		tab.bg_color = Color("74262b66") if state == "tab_hovered" else Color.TRANSPARENT
+		tab.border_color = Color("b8464d")
+		tab.border_width_bottom = 2 if state == "tab_selected" else 0
+		tab.content_margin_left = 16
+		tab.content_margin_right = 16
+		tab.content_margin_top = 8
+		tab.content_margin_bottom = 8
+		if state == "tab_focus":
+			tab.border_width_bottom = 0
+			tab.draw_center = false
+		tabs.add_theme_stylebox_override(state, tab)
+	tabs.add_theme_stylebox_override("tabbar_background", StyleBoxEmpty.new())
+	tabs.add_theme_color_override("font_selected_color", Color("f4f1e8"))
+	tabs.add_theme_color_override("font_unselected_color", Color("b7b6ad"))
+	tabs.add_theme_color_override("font_hovered_color", Color("e2dfd4"))
 
 
 func _tab_changed(index: int) -> void:
