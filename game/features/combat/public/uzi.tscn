@@ -2,7 +2,7 @@
 [ext_resource type="Script" path="res://game/features/combat/prototype_rifle.gd" id="1"]
 [ext_resource type="PackedScene" path="res://game/features/combat/public/prototype_bullet.tscn" id="2"]
 [ext_resource type="PackedScene" path="res://models/objects/weapons/uzi_lowpoly.glb" id="weapon_model"]
-[ext_resource type="PackedScene" path="res://models/objects/enviroments/12/12_rifle_casing.glb" id="casing_model"]
+[ext_resource type="PackedScene" path="res://models/objects/enviroments/12/12_pistol_casing.glb" id="casing_model"]
 [sub_resource type="StandardMaterial3D" id="Mat"]
 albedo_color = Color(0.07,0.11,0.15,1)
 [sub_resource type="CapsuleMesh" id="Mesh"]
@@ -13,7 +13,6 @@ height = 0.6
 script = ExtResource("1")
 bullet_scene = ExtResource("2")
 casing_scene = ExtResource("casing_model")
-casing_radius = 0.013
 weapon_name="UZI"
 fire_mode="auto"
 shots_per_second=12.0
@@ -22,7 +21,7 @@ starting_reserve_ammo=144
 reload_time=0.8
 spread_degrees=5.0
 bullet_damage=11.0
-bullet_speed=38.0
+bullet_speed=40.0
 bullet_range=20.0
 [node name="Body" parent="." instance=ExtResource("weapon_model")]
 [node name="Muzzle" type="Marker3D" parent="."]
