@@ -9,6 +9,9 @@ on:
       - 'game/features/combat/impact_cache_watch.gd'
       - 'game/features/combat/tests/run_impact_geometry_index_tests.gd'
       - 'game/core/vfx/**'
+      - 'game/features/infected/body_part*.gd'
+      - 'game/features/infected/tests/run_body_topology_tests.gd'
+      - 'game/features/infected/tests/fixtures/body_piece_baseline.gd'
       - 'game/presentation/office_floor/blood_mark_fifo.gd'
       - 'game/presentation/office_floor/tests/run_blood_fifo_tests.gd'
       - '.github/workflows/impact_geometry.yml'
@@ -20,6 +23,9 @@ on:
       - 'game/features/combat/impact_cache_watch.gd'
       - 'game/features/combat/tests/run_impact_geometry_index_tests.gd'
       - 'game/core/vfx/**'
+      - 'game/features/infected/body_part*.gd'
+      - 'game/features/infected/tests/run_body_topology_tests.gd'
+      - 'game/features/infected/tests/fixtures/body_piece_baseline.gd'
       - 'game/presentation/office_floor/blood_mark_fifo.gd'
       - 'game/presentation/office_floor/tests/run_blood_fifo_tests.gd'
       - '.github/workflows/impact_geometry.yml'
@@ -57,3 +63,9 @@ jobs:
           cp game/presentation/office_floor/tests/run_blood_fifo_tests.gd /tmp/impact_geometry/game/presentation/office_floor/tests/
           timeout 120 godot --headless --path /tmp/impact_geometry --script res://game/presentation/office_floor/tests/run_blood_fifo_tests.gd 2>&1 | tee /tmp/blood_fifo.log
           if grep -E 'SCRIPT ERROR|^ERROR:' /tmp/blood_fifo.log; then exit 1; fi
+          mkdir -p /tmp/impact_geometry/game/features/infected/tests/fixtures
+          cp game/features/infected/body_part_mesh.gd game/features/infected/body_part_topology.gd game/features/infected/body_wound.gdshader /tmp/impact_geometry/game/features/infected/
+          cp game/features/infected/tests/run_body_topology_tests.gd /tmp/impact_geometry/game/features/infected/tests/
+          cp game/features/infected/tests/fixtures/body_piece_baseline.gd /tmp/impact_geometry/game/features/infected/tests/fixtures/
+          timeout 120 godot --headless --path /tmp/impact_geometry --script res://game/features/infected/tests/run_body_topology_tests.gd 2>&1 | tee /tmp/body_topology.log
+          if grep -E 'SCRIPT ERROR|^ERROR:' /tmp/body_topology.log; then exit 1; fi

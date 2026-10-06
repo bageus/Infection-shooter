@@ -30,6 +30,10 @@ var _glass_hinge_root_closed := Transform3D.IDENTITY
 var _elevator_lights: Array[Node3D] = []
 var _fallback_leaf_collisions: Array[CollisionShape3D] = []
 var _key_hint: Label3D
+const PRESENCE := preload("res://game/presentation/office_floor/door_presence.gd")
+var _presence: Area3D
+var _elevator_neighbors: Array[WeakRef] = []
+var _pose_ready := false
 const SFX := preload("res://game/core/audio/public/sound_events.gd")
 
 
@@ -43,6 +47,7 @@ func _ready() -> void:
 	add_to_group("interactive_doors")
 	if mode == DoorMode.SLIDING_ELEVATOR:
 		add_to_group("elevator_door_components")
+		call_deferred("_bind_elevator_neighbors")
 	if requires_emergency_key:
 		_key_hint = Label3D.new()
 		_key_hint.font = preload("res://assets/interface/fonts/body.ttf")
@@ -53,6 +58,9 @@ func _ready() -> void:
 		_key_hint.position = Vector3(0, 2.5, 0)
 		add_child(_key_hint)
 	_collect_door_parts()
+	if requires_emergency_key:
+		_presence = PRESENCE.new()
+		add_child(_presence)
 
 
 func _physics_process(delta: float) -> void:
@@ -105,11 +113,15 @@ func _physics_process(delta: float) -> void:
 				_swing_side = 0.0
 
 	_play_door_sound(before, _open_amount)
-	_apply_door_pose(local_player)
-	for collision in _fallback_leaf_collisions:
-		var should_disable := _open_amount >= 0.6
-		if collision.disabled != should_disable:
-			collision.set_deferred("disabled", should_disable)
+	_refresh_glass_collision()
+	if mode == DoorMode.GLASS_SWING and _glass_hinge != null and _swing_side == 0.0:
+		_swing_side = _player_side(local_player)
+	if before != _open_amount or not _pose_ready:
+		_update_door_visuals(local_player)
+		_pose_ready = true
+
+
+func _refresh_glass_collision() -> void:
 	if mode == DoorMode.GLASS_SWING:
 		var glass_body := get_parent().get_node_or_null("GlassBody") as StaticBody3D
 		if glass_body != null:
@@ -117,6 +129,14 @@ func _physics_process(delta: float) -> void:
 			for child in glass_body.get_children():
 				if child is CollisionShape3D and (child as CollisionShape3D).disabled != (broken):
 					(child as CollisionShape3D).set_deferred("disabled", broken)
+
+
+func _update_door_visuals(local_player: Vector3) -> void:
+	_apply_door_pose(local_player)
+	for collision in _fallback_leaf_collisions:
+		var should_disable := _open_amount >= 0.6
+		if collision.disabled != should_disable:
+			collision.set_deferred("disabled", should_disable)
 	if mode == DoorMode.GLASS_SWING and _glass_hinge != null:
 		var swing_side := _swing_side
 		if swing_side == 0.0:
@@ -175,23 +195,31 @@ func request_open() -> void:
 
 
 func _someone_in_doorway() -> bool:
-	for group in ["player", "infected"]:
-		for actor in get_tree().get_nodes_in_group(group):
-			if actor is Node3D:
-				if float(actor.get("health")) <= 0.0:
-					continue
-				var local := to_local((actor as Node3D).global_position)
-				if absf(local.x) < 1.15 and absf(local.z) < 1.15 and absf(local.y) < 2.2:
-					return true
-	return false
+	return _presence != null and _presence.call("occupied", self)
+
+
+func _remember_elevator(other: Node3D) -> void:
+	for reference in _elevator_neighbors:
+		if reference.get_ref() == other:
+			return
+	_elevator_neighbors.append(weakref(other))
+
+
+func _bind_elevator_neighbors() -> void:
+	# Discover this module's components once, then bind later additions reciprocally.
+	for node in get_tree().get_nodes_in_group("elevator_door_components"):
+		if node != self and node is Node3D and node.has_method("_remember_elevator"):
+			_remember_elevator(node)
+			node.call("_remember_elevator", self)
 
 
 func _request_nearby_elevator_open() -> void:
-	for node in get_tree().get_nodes_in_group("elevator_door_components"):
-		if node == self or not node is Node3D:
+	for i in range(_elevator_neighbors.size() - 1, -1, -1):
+		var other := _elevator_neighbors[i].get_ref() as Node3D
+		if other == null or not other.is_inside_tree():
+			_elevator_neighbors.remove_at(i)
 			continue
-		var other := node as Node3D
-		if global_position.distance_to(other.global_position) <= elevator_sync_radius and other.has_method("request_open"):
+		if other.is_in_group("elevator_door_components") and global_position.distance_to(other.global_position) <= elevator_sync_radius:
 			other.call("request_open")
 
 
