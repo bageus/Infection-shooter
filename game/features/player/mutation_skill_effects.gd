@@ -21,6 +21,19 @@ var _melee_victim: WeakRef
 var _melee_time := -100.0
 var storm_tick := 0.0
 var acid_pools: Array[Dictionary] = []
+## Retaliation answers a burst of damage, not one heavy blow.
+const RETALIATION_WINDOW := 3.0
+const RETALIATION_DAMAGE := 50.0
+var _clock := 0.0
+var _recent_hits: Array[Vector2] = []
+## Second Heart's emergency regeneration after a survived lethal hit.
+const SECOND_HEART_HEAL := 10.0
+const SECOND_HEART_DURATION := 5.0
+## Predator Dash strikes everything it passes, once per dash.
+const DASH_STRIKE_TIME := 0.45
+const DASH_REACH := 1.6
+const DASH_DAMAGE := 30.0
+var _dash_struck: Dictionary = {}
 
 var effects_root: Node3D
 
@@ -52,6 +65,13 @@ func _release_spores(location: Vector3) -> void:
 		enemy.call("apply_mutation_poison", 5.0, 5.0)
 
 
+# Blood Scent: wounded enemies take extra damage from melee as well as bullets.
+func _scented(enemy: Node3D, amount: float) -> float:
+	if enabled("blood_scent") and float(enemy.get("health")) < float(enemy.get("max_health")) * 0.7:
+		return amount * 1.22
+	return amount
+
+
 func _refresh_stats() -> void:
 	var next_max := 125.0 if enabled("hypertrophy") else 100.0
 	player.set("max_health", next_max)
@@ -64,6 +84,7 @@ func enabled(skill_id: String) -> bool:
 
 
 func _process(delta: float) -> void:
+	_clock += delta
 	heart_cooldown = maxf(0.0, heart_cooldown - delta)
 	melee_cooldown = maxf(0.0, melee_cooldown - delta)
 	kill_timer = maxf(0.0, kill_timer - delta)
@@ -76,6 +97,10 @@ func _process(delta: float) -> void:
 			_weapons_dirty = true
 	if enabled("regeneration") and Time.get_ticks_msec() * 0.001 - last_hit_time > 5.0:
 		player.call("heal", 1.4 * delta)
+	if active_buff("second_heart"):
+		player.call("heal", SECOND_HEART_HEAL * delta)
+	if active_buff("predator_dash"):
+		_dash_strike()
 	storm_tick -= delta
 	if storm_tick <= 0.0:
 		storm_tick = 0.6
@@ -119,10 +144,24 @@ func on_player_hit(amount: float, damage_type: String = "physical") -> float:
 		var key := "adaptation_" + damage_type
 		reduction += minf(0.2, float(buffs.get(key, 0.0)) * 0.03)
 		buffs[key] = minf(6.0, float(buffs.get(key, 0.0)) + 1.0)
-	if enabled("retaliation") and amount >= 20.0:
+	if enabled("retaliation") and _retaliation_due(amount):
 		for enemy in _enemies_near(player.global_position, 3.0):
 			enemy.call("apply_blast_stun", 1.2, 0.6)
 	return amount * (1.0 - minf(0.75, reduction))
+
+
+func _retaliation_due(amount: float) -> bool:
+	_recent_hits.append(Vector2(_clock, amount))
+	var total := 0.0
+	for i in range(_recent_hits.size() - 1, -1, -1):
+		if _clock - _recent_hits[i].x > RETALIATION_WINDOW:
+			_recent_hits.remove_at(i)
+		else:
+			total += _recent_hits[i].y
+	if total < RETALIATION_DAMAGE:
+		return false
+	_recent_hits.clear()
+	return true
 
 
 func survive_lethal() -> bool:
@@ -130,6 +169,7 @@ func survive_lethal() -> bool:
 		return false
 	heart_cooldown = 110.0
 	last_hit_time = -100.0
+	buffs["second_heart"] = SECOND_HEART_DURATION
 	return true
 
 
@@ -186,7 +226,7 @@ func melee() -> bool:
 			continue
 		_melee_victim = weakref(enemy)
 		_melee_time = Time.get_ticks_msec() / 1000.0
-		enemy.call("take_damage", 36.0 if enabled("claws") else 17.0)
+		enemy.call("take_damage", _scented(enemy, 36.0 if enabled("claws") else 17.0))
 		return true
 	return false
 
@@ -232,7 +272,7 @@ func _update_weapons() -> void:
 func _cast(skill_id: String) -> void:
 	match skill_id:
 		"blood_burst":
-			_indicator(player.global_position, Color(0.7, 0.04, 0.15, 0.45), 0.4, 4.0)
+			_indicator(player.global_position, Color(0.7, 0.04, 0.15, 0.45), 0.4, 8.0)
 			for enemy in _enemies_near(player.global_position, 4.0):
 				enemy.call("take_damage", 22.0)
 				enemy.call("apply_player_push", (enemy.global_position - player.global_position).normalized(), 5.0)
@@ -251,10 +291,10 @@ func _cast(skill_id: String) -> void:
 				if count == 4: break
 		"acid_spit":
 			acid_pools.append({"position": player.get("_aim_point"), "remaining": 6.0})
-			_indicator(player.get("_aim_point"), Color(0.25, 0.94, 0.04, 0.45), 6.0, 2.1)
+			_indicator(player.get("_aim_point"), Color(0.25, 0.94, 0.04, 0.45), 6.0, 4.4)
 		"spore_cocoon":
 			var location: Vector3 = player.get("_aim_point")
-			_indicator(location, Color(0.71, 0.77, 0.12, 0.45), 3.0, 2.6)
+			_indicator(location, Color(0.71, 0.77, 0.12, 0.45), 2.0, 6.0)
 			get_tree().create_timer(2.0).timeout.connect(_release_spores.bind(location))
 		"epidemic":
 			for enemy in _enemies_near(player.global_position, 15.0):
@@ -262,7 +302,23 @@ func _cast(skill_id: String) -> void:
 					for neighbor in _enemies_near(enemy.global_position, 3.5): neighbor.call("apply_mutation_poison", 3.0, 4.0)
 		"predator_dash":
 			player.call("mutation_dash")
-			for enemy in _enemies_near(player.global_position, 2.5): enemy.call("take_damage", 30.0)
+			_dash_struck.clear()
+			buffs["predator_dash"] = DASH_STRIKE_TIME
+			_dash_strike()
+
+
+# Hits enemies along the dash path instead of a ring around the start point.
+func _dash_strike() -> void:
+	var heading: Vector3 = player.get("_roll_direction")
+	for enemy in _enemies_near(player.global_position, DASH_REACH + 0.6):
+		var offset := enemy.global_position - player.global_position
+		offset.y = 0.0
+		if _dash_struck.has(enemy.get_instance_id()) or offset.length() - _body_radius(enemy) > DASH_REACH:
+			continue
+		if heading.length_squared() > 0.0 and offset.length() > 0.3 and offset.normalized().dot(heading) < -0.2:
+			continue
+		_dash_struck[enemy.get_instance_id()] = true
+		enemy.call("take_damage", DASH_DAMAGE)
 
 
 func _indicator(location: Vector3, tint: Color, duration: float, diameter: float) -> void:
