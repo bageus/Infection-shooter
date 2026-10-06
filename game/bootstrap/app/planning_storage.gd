@@ -2,7 +2,11 @@ extends RefCounted
 
 const SAVE_PATH = "user://planned_layout.json"
 const MAPS_DIR = "user://maps"
-const AUTHORED_SCENE_PATH = "res://game/presentation/office_floor/public/base_office_layout.tscn"
+const LAYOUT_DIR = "res://game/presentation/office_floor/public/"
+const AUTHORED_SCENE_PATH = LAYOUT_DIR + "base_office_layout.tscn"
+# The shipped map: saved next to the baked scene from the editor and loaded
+# when this computer has no planned_layout.json of its own (fresh install, Web).
+const DEFAULT_MAP_PATH = LAYOUT_DIR + "base_office_map.json"
 
 var map_name_edit: LineEdit
 var map_select: OptionButton
@@ -250,6 +254,10 @@ func save_layout() -> void:
 	# Baking the authored scene into the project only makes sense (and is only
 	# possible: res:// is read-only in a build) when running from the editor.
 	if OS.has_feature("editor"):
+		var shipped := FileAccess.open(DEFAULT_MAP_PATH, FileAccess.WRITE)
+		if shipped != null:
+			shipped.store_string(JSON.stringify(data, "\t"))
+			shipped.close()
 		var scene_error = _save_authored_scene()
 		if scene_error != OK:
 			controls.status.text = "SAVED | %d objects | scene bake error %d" % [records.size(), scene_error]
@@ -257,7 +265,7 @@ func save_layout() -> void:
 	controls.status.text = "SAVED | %d objects" % records.size()
 
 
-func _save_authored_scene() -> Error:
+func _save_authored_scene(target: String = AUTHORED_SCENE_PATH) -> Error:
 	var scene_root = Node3D.new()
 	scene_root.name = "BaseOfficeLayout"
 	for node in objects.placed:
@@ -299,14 +307,16 @@ func _save_authored_scene() -> Error:
 			copy.set_meta("planning_light_angle", node.get_meta("planning_light_angle", 48.0))
 			copy.set_meta("planning_flicker_mode", node.get_meta("planning_flicker_mode", 0))
 			copy.set_meta("planning_flicker_step", node.get_meta("planning_flicker_step", 0.2))
-		if not scene_path.begins_with(catalog.ENVIRONMENT_ROOT + "/"):
+		# An instanced scene restores its own children on load; owning them
+		# here too saved a second copy of every wall and pane on each bake.
+		if copy.scene_file_path.is_empty() and not scene_path.begins_with(catalog.ENVIRONMENT_ROOT + "/"):
 			_assign_owner_recursive(copy, scene_root)
 	var packed_layout = PackedScene.new()
 	var pack_error = packed_layout.pack(scene_root)
 	if pack_error != OK:
 		scene_root.free()
 		return pack_error
-	var save_error = ResourceSaver.save(packed_layout, AUTHORED_SCENE_PATH)
+	var save_error = ResourceSaver.save(packed_layout, target)
 	scene_root.free()
 	return save_error
 
@@ -318,8 +328,9 @@ func _assign_owner_recursive(node: Node, scene_owner: Node) -> void:
 
 
 func load_layout() -> void:
-	if FileAccess.file_exists(SAVE_PATH):
-		var report := _load_layout_from_path(SAVE_PATH)
+	var path := SAVE_PATH if FileAccess.file_exists(SAVE_PATH) else DEFAULT_MAP_PATH
+	if FileAccess.file_exists(path):
+		var report := _load_layout_from_path(path)
 		if report.has("error"):
 			push_warning("Planned layout not loaded: %s" % report["error"])
 		elif int(report.get("skipped", 0)) > 0:
