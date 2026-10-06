@@ -147,11 +147,16 @@ func _test_humanoid_clips(stage: Node3D, scene: PackedScene, label: String) -> v
 	_expect(reach_ok, label + " runs reaching forward with both hands.")
 	_expect(feet_swap.has(1.0) and feet_swap.has(-1.0), label + " run alternates the legs.")
 	var walk_length := player.get_animation("Walk").length
-	var walk_a := _pose(player, "Walk", walk_length * 0.25, bones)
-	var walk_b := _pose(player, "Walk", walk_length * 0.75, bones)
+	# Walk cycles start at the left heel strike; the right one lands half a cycle later.
+	var walk_a := _pose(player, "Walk", 0.0, bones)
+	var walk_b := _pose(player, "Walk", walk_length * 0.5, bones)
 	var lead_a := (walk_a["L_Foot"] as Vector3).z - (walk_a["R_Foot"] as Vector3).z
 	var lead_b := (walk_b["L_Foot"] as Vector3).z - (walk_b["R_Foot"] as Vector3).z
 	_expect(lead_a * lead_b < 0.0 and absf(lead_a) > 0.12 * height, label + " walk steps with each leg in turn (not a limp).")
+	# Feet land under the body instead of straddling (the rest pose is an A-frame).
+	var idle_width := absf((idle["L_Foot"] as Vector3).x - (idle["R_Foot"] as Vector3).x)
+	var walk_width := maxf(absf((walk_a["L_Foot"] as Vector3).x - (walk_a["R_Foot"] as Vector3).x), absf((walk_b["L_Foot"] as Vector3).x - (walk_b["R_Foot"] as Vector3).x))
+	_expect(walk_width < 0.75 * idle_width, "%s walk keeps the feet under the hips (%.2f vs stance %.2f)." % [label, walk_width, idle_width])
 	# Attacks wind up above the head before striking forward.
 	var attack_length := player.get_animation("AttackRight").length
 	var windup := _pose(player, "AttackRight", attack_length * 0.38, bones)

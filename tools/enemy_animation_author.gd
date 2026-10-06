@@ -18,7 +18,7 @@ const BONES := [
 	"L_Thigh", "L_Shin", "L_Foot", "L_Toe",
 	"R_Thigh", "R_Shin", "R_Foot", "R_Toe",
 ]
-const SIDED_PARAMS := ["swing", "knee", "ankle", "abd_leg", "flex", "abd", "elbow", "wrist", "shrug", "protract"]
+const SIDED_PARAMS := ["swing", "knee", "ankle", "sole", "abd_leg", "flex", "abd", "elbow", "wrist", "shrug", "protract"]
 const MIRRORED_PARAMS := ["twist", "side_bend", "hips_roll", "hips_x", "hips_yaw", "head_tilt", "head_turn"]
 
 var skeleton: Skeleton3D
@@ -29,6 +29,10 @@ var _elbow_axis := {}
 var _wrist_axis := {}
 var hips_height := 1.0 # Hips joint above the floor, model units.
 var leg_length := 0.9
+var thigh_length := 0.45
+var shin_length := 0.45
+var _splay := {}
+var _hip_width := {}
 
 
 func setup(target: Skeleton3D) -> void:
@@ -43,6 +47,15 @@ func setup(target: Skeleton3D) -> void:
 		floor_y = minf(floor_y, _global("L_Toe").y - 0.05)
 	hips_height = _global("Hips").y - floor_y
 	leg_length = _global("L_Thigh").distance_to(_global("L_Foot"))
+	thigh_length = _global("L_Thigh").distance_to(_global("L_Shin"))
+	shin_length = _global("L_Shin").distance_to(_global("L_Foot"))
+	for prefix: String in SIDES:
+		var side: float = SIDES[prefix]
+		var hip := _global(prefix + "Thigh")
+		var ankle := _global(prefix + "Foot")
+		# Outward lean of the rest leg in degrees (auto-rigs stand in an A-frame).
+		_splay[prefix] = rad_to_deg(atan2(side * (ankle.x - hip.x), hip.y - ankle.y))
+		_hip_width[prefix] = side * hip.x
 	for prefix: String in SIDES:
 		var side: float = SIDES[prefix]
 		var arm := (_global(prefix + "Forearm") - _global(prefix + "UpperArm")).normalized()
@@ -127,20 +140,24 @@ func _walk(t: float, style: Dictionary) -> Dictionary:
 	var phase := t * float(style.walk_hz) * TAU
 	var amplitude := float(style.walk_swing)
 	var p := _stance(style)
-	p.lean = 11.0 + 6.0 * heavy
-	_gait(p, phase, amplitude, 48.0 + 10.0 * heavy, 0.035 + 0.02 * heavy)
-	# Shambling arms: carried slightly forward, swinging against the legs.
+	# Heavy-footed shuffle: the hips sink into each step, the torso rolls over it.
+	p.lean = 10.0 + 6.0 * heavy + 2.0 * cos(2.0 * phase)
+	_gait(p, phase, amplitude, [WALK_THIGH, WALK_KNEE, WALK_SOLE], 1.0 + 0.2 * heavy, 0.07 + 0.14 * heavy, 0.02, 4.0)
+	p.side_bend = 4.0 * cos(phase)
+	# Loose arms hang a little forward and swing against the legs, lagging behind.
 	var reach := float(style.reach)
-	p.L_flex = 14.0 + 18.0 * reach - 16.0 * sin(phase)
-	p.R_flex = 22.0 + 22.0 * reach + 16.0 * sin(phase)
-	p.L_elbow = 22.0 + 8.0 * maxf(0.0, sin(phase))
-	p.R_elbow = 28.0 + 8.0 * maxf(0.0, -sin(phase))
-	p.L_wrist = 10.0
-	p.R_wrist = 14.0
-	p.twist = 6.0 * sin(phase)
-	p.head_tilt = 8.0 + 3.0 * sin(phase * 2.0)
+	p.L_flex = 10.0 + 12.0 * reach - 18.0 * sin(phase - 0.5)
+	p.R_flex = 16.0 + 16.0 * reach + 18.0 * sin(phase - 0.5)
+	p.L_abd = 6.0 + 4.0 * heavy
+	p.R_abd = 8.0 + 4.0 * heavy
+	p.L_elbow = 20.0 + 10.0 * maxf(0.0, sin(phase - 0.5))
+	p.R_elbow = 26.0 + 10.0 * maxf(0.0, -sin(phase - 0.5))
+	p.L_wrist = 12.0
+	p.R_wrist = 16.0
+	p.twist = 7.0 * sin(phase)
+	p.head_tilt = 7.0 + 4.0 * sin(phase)
 	p.neck = 8.0
-	p.head = -6.0 + 2.0 * cos(phase * 2.0)
+	p.head = -6.0 + 3.0 * cos(phase * 2.0 + 0.6)
 	return p
 
 
@@ -148,43 +165,100 @@ func _run(t: float, style: Dictionary) -> Dictionary:
 	var heavy := float(style.heavy)
 	var phase := t * float(style.run_hz) * TAU
 	var p := _stance(style)
-	p.lean = float(style.lean) + 3.0 * sin(phase * 2.0)
-	_gait(p, phase, float(style.run_swing), 92.0 - 18.0 * heavy, 0.06 + 0.02 * heavy)
-	# Lunging run: both arms thrust forward, alternately grabbing at the target.
-	var reach := 66.0 + 20.0 * float(style.reach)
+	# Predator sprint: torso thrown forward, dipping on every landing, head up
+	# and locked on the prey, legs driving long strides with a high heel kick.
+	p.lean = float(style.lean) + 6.0 + 4.0 * cos(2.0 * phase - 0.8)
+	_gait(p, phase, float(style.run_swing), [RUN_THIGH, RUN_KNEE, RUN_SOLE], 1.0 - 0.25 * heavy, 0.04 + 0.12 * heavy, 0.015, 12.0 - 4.0 * heavy)
+	p.hips_y -= 0.03 * hips_height * (1.0 + heavy)
+	p.hips_z = 0.03 * hips_height
+	# Clawing arms pump against the legs, thrown forward to grab, never quite in step.
+	var reach := 52.0 + 16.0 * float(style.reach)
 	for prefix: String in SIDES:
 		var side: float = SIDES[prefix]
-		var grab := sin(phase + (PI if side > 0.0 else 0.0))
-		p[prefix + "flex"] = reach + 22.0 * grab
-		p[prefix + "abd"] = -10.0 + 4.0 * grab
-		p[prefix + "elbow"] = 30.0 - 22.0 * grab
-		p[prefix + "wrist"] = -28.0 * cos(phase + (PI if side > 0.0 else 0.0)) - 6.0
-		p[prefix + "protract"] = 10.0 + 12.0 * maxf(0.0, grab)
-		p[prefix + "shrug"] = 6.0
-	p.twist = -9.0 * sin(phase)
-	p.neck = 14.0
-	p.head = -24.0 - 3.0 * sin(phase * 2.0)
-	p.head_tilt = 4.0 * sin(phase)
+		var lag := 0.0 if side > 0.0 else 0.06
+		var u := fposmod(phase / TAU + (0.0 if side > 0.0 else 0.5) - lag, 1.0)
+		var pump := -_cycle(u, RUN_THIGH) * (1.0 if side > 0.0 else 1.15)
+		p[prefix + "flex"] = reach + 40.0 * pump
+		p[prefix + "abd"] = 12.0 + 8.0 * maxf(0.0, -pump) + 4.0 * heavy
+		p[prefix + "elbow"] = 52.0 - 26.0 * pump
+		p[prefix + "wrist"] = -22.0 + 10.0 * pump
+		p[prefix + "protract"] = 8.0 + 12.0 * maxf(0.0, pump)
+		p[prefix + "shrug"] = 10.0 + 4.0 * heavy
+	p.twist = -12.0 * sin(phase)
+	p.side_bend = 3.0 * cos(phase)
+	p.neck = 16.0
+	p.head = -0.75 * (float(p.lean) + float(p.hips_pitch)) - 4.0 * cos(2.0 * phase - 0.8)
+	p.head_turn = 4.0 * sin(3.0 * phase)
+	p.head_tilt = 5.0 * sin(phase)
 	return p
 
 
-# Alternating leg cycle. phase 0 = left leg passing under the body.
-func _gait(p: Dictionary, phase: float, amplitude: float, knee_lift: float, bob: float) -> void:
+# Gait curves over one leg cycle, u = 0 at that foot's heel strike. Thigh
+# values are fractions of the stride swing (+ forward), knee values degrees of
+# flexion, sole values the foot's pitch in degrees (+ toe down).
+const WALK_THIGH := [[0.0, 1.0], [0.15, 0.7], [0.5, -0.8], [0.62, -0.55], [0.8, 0.75], [0.9, 1.05]]
+const WALK_KNEE := [[0.0, 4.0], [0.12, 18.0], [0.38, 5.0], [0.55, 30.0], [0.7, 60.0], [0.84, 26.0], [0.94, 2.0]]
+const WALK_SOLE := [[0.0, -14.0], [0.1, 0.0], [0.42, 0.0], [0.6, 30.0], [0.72, 12.0], [0.86, -4.0], [0.95, -14.0]]
+# Sprint: short stance (to 0.36), flight, heel kicked high, knee driven forward.
+const RUN_THIGH := [[0.0, 0.7], [0.16, 0.05], [0.36, -0.85], [0.5, -0.45], [0.7, 0.95], [0.86, 1.0]]
+const RUN_KNEE := [[0.0, 22.0], [0.12, 40.0], [0.32, 20.0], [0.42, 55.0], [0.56, 108.0], [0.7, 88.0], [0.86, 38.0]]
+const RUN_SOLE := [[0.0, -6.0], [0.14, 0.0], [0.34, 42.0], [0.46, 30.0], [0.66, 8.0], [0.88, -10.0]]
+
+
+# Alternating leg cycle. phase 0 = left heel strike, right heel strikes at PI
+# (or a little later with `limp`). The feet are tucked under the body to
+# `width` (fraction of hips height from the midline), the soles roll from heel
+# to toe and the hips ride on the supporting leg.
+func _gait(p: Dictionary, phase: float, amplitude: float, keys: Array, knee_scale: float, width: float, limp: float = 0.0, pitch: float = 0.0) -> void:
+	var lowest := INF
+	# The pelvis tips forward by `pitch`; thighs compensate so the legs keep their world arc.
+	p.hips_pitch = pitch
 	for prefix: String in SIDES:
-		var local := phase + (0.0 if prefix == "L_" else PI)
-		var swing := amplitude * sin(local)
-		var forward := cos(local)
-		var knee := knee_lift * pow(maxf(0.0, cos(local - 0.25)), 1.6) + 8.0 + 6.0 * maxf(0.0, sin(local - 0.6))
-		p[prefix + "swing"] = swing
+		var offset := 0.0 if prefix == "L_" else 0.5 + limp
+		var u := fposmod(phase / TAU + offset, 1.0)
+		# A limping leg takes a shorter, later step.
+		var favour := 1.0 - (3.0 * limp if prefix == "R_" else 0.0)
+		var swing := amplitude * _cycle(u, keys[0]) * favour
+		var knee := _cycle(u, keys[1]) * knee_scale
+		p[prefix + "swing"] = swing + pitch
 		p[prefix + "knee"] = knee
-		# Keep the sole near level; lift the heel as the leg pushes off.
-		var push_off := 18.0 * maxf(0.0, -sin(local)) * maxf(0.0, -forward)
-		p[prefix + "ankle"] = 0.8 * (swing - knee) + push_off
-		p[prefix + "abd_leg"] = 2.0
-	p.hips_y = -bob * hips_height * 0.5 * (1.0 - cos(2.0 * phase))
-	p.hips_x = -0.025 * hips_height * cos(phase)
+		p[prefix + "sole"] = _cycle(u, keys[2])
+		# Lean the leg in so the ankle lands `width` from the midline.
+		var lateral := rad_to_deg(atan2(width * hips_height - float(_hip_width[prefix]), leg_length))
+		p[prefix + "abd_leg"] = lateral - float(_splay[prefix])
+		var t := deg_to_rad(swing)
+		var reach := thigh_length * cos(t) + shin_length * cos(t - deg_to_rad(knee))
+		lowest = minf(lowest, thigh_length + shin_length - reach)
+	# The supporting (longer) leg keeps its foot on the floor.
+	p.hips_y = -lowest
+	p.hips_x = -0.02 * hips_height * cos(phase)
 	p.hips_yaw = -7.0 * sin(phase)
 	p.hips_roll = -3.0 * cos(phase)
+
+
+## Periodic Catmull-Rom curve through [u, value] keys sorted by u in [0, 1).
+static func _cycle(u: float, keys: Array) -> float:
+	var count := keys.size()
+	var t := fposmod(u, 1.0)
+	var index := count - 1
+	for i in count:
+		if float(keys[i][0]) > t:
+			index = i - 1
+			break
+	if index < 0:
+		index = count - 1
+	var start := float(keys[index][0])
+	var finish := float(keys[(index + 1) % count][0])
+	if finish <= start:
+		finish += 1.0
+	if t < start:
+		t += 1.0
+	var k := (t - start) / maxf(finish - start, 0.0001)
+	var p0 := float(keys[(index - 1 + count) % count][1])
+	var p1 := float(keys[index][1])
+	var p2 := float(keys[(index + 1) % count][1])
+	var p3 := float(keys[(index + 2) % count][1])
+	return 0.5 * ((2.0 * p1) + (-p0 + p2) * k + (2.0 * p0 - 5.0 * p1 + 4.0 * p2 - p3) * k * k + (-p0 + 3.0 * p1 - 3.0 * p2 + p3) * k * k * k)
 
 
 func _attack_keys(style: Dictionary) -> Array:
@@ -319,8 +393,15 @@ func pose_rotations(p: Dictionary) -> Dictionary:
 		q[prefix + "Hand"] = Quaternion(_wrist_axis[prefix], _value(p, prefix + "wrist"))
 		q[prefix + "Thigh"] = Quaternion(Vector3.RIGHT, -_value(p, prefix + "swing")) * Quaternion(Vector3.BACK, side * _value(p, prefix + "abd_leg"))
 		q[prefix + "Shin"] = Quaternion(Vector3.RIGHT, _value(p, prefix + "knee"))
-		q[prefix + "Foot"] = Quaternion(Vector3.RIGHT, _value(p, prefix + "ankle"))
-		q[prefix + "Toe"] = Quaternion(Vector3.RIGHT, -0.5 * maxf(0.0, _value(p, prefix + "ankle")))
+		if p.has(prefix + "sole"):
+			# Gait clips give the sole's pitch in the model frame: undo the hips,
+			# thigh and knee rotations so the foot rolls flat heel-to-toe.
+			var leg := (q["Hips"] as Quaternion) * (q[prefix + "Thigh"] as Quaternion) * (q[prefix + "Shin"] as Quaternion)
+			q[prefix + "Foot"] = leg.inverse() * Quaternion(Vector3.RIGHT, _value(p, prefix + "sole"))
+			q[prefix + "Toe"] = Quaternion(Vector3.RIGHT, -0.7 * maxf(0.0, _value(p, prefix + "sole")))
+		else:
+			q[prefix + "Foot"] = Quaternion(Vector3.RIGHT, _value(p, prefix + "ankle"))
+			q[prefix + "Toe"] = Quaternion(Vector3.RIGHT, -0.5 * maxf(0.0, _value(p, prefix + "ankle")))
 	return q
 
 
