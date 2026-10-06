@@ -7,6 +7,8 @@ extends SceneTree
 ## Writes <out_dir>/<subject>.png: side view on the top row and front view on
 ## the bottom row, eight evenly spaced frames of one cycle. Enemy rows sample
 ## the baked clips; the player row runs the procedural gait at walk speed.
+## An optional second argument lists enemy clips to sheet instead, e.g.
+##   -- <out_dir> Death,DeathForward,DeathBack
 
 const PLAYER_MODEL := preload("res://models/objects/characters/soldier_animated.glb")
 const DRIVER := preload("res://game/features/character_animation/public/character_animation_driver.gd")
@@ -18,12 +20,15 @@ const CELL := Vector2i(260, 340)
 var _out_dir := "/tmp/gait_sheets"
 var _side: SubViewport
 var _front: SubViewport
+var _clips: PackedStringArray = []
 
 
 func _initialize() -> void:
 	var args := OS.get_cmdline_user_args()
 	if not args.is_empty():
 		_out_dir = args[0]
+	if args.size() > 1:
+		_clips = args[1].split(",")
 	call_deferred("_capture")
 
 
@@ -34,10 +39,15 @@ func _capture() -> void:
 	_build_stage(stage)
 	_side = _view(stage, Vector3(0.0, 1.9, 5.0), Vector3(0.0, 1.15, 0.0))
 	_front = _view(stage, Vector3(5.0, 1.9, 0.0), Vector3(0.0, 1.15, 0.0))
-	await _capture_player(stage, 6.0, "player_walk")
-	await _capture_player(stage, 9.0, "player_sprint")
+	if _clips.is_empty():
+		await _capture_player(stage, 6.0, "player_walk")
+		await _capture_player(stage, 9.0, "player_sprint")
+	else:
+		# Falls cover more ground than a stride.
+		for view in [_side, _front]:
+			(view.get_camera_3d()).size = 4.4
 	for enemy: String in ENEMIES:
-		for clip in ["Walk", "Run"]:
+		for clip in (["Walk", "Run"] if _clips.is_empty() else Array(_clips)):
 			await _capture_enemy(stage, enemy, clip)
 	print("Gait sheets written to ", _out_dir)
 	quit(0)
@@ -87,7 +97,9 @@ func _capture_enemy(stage: Node3D, enemy: String, clip: String) -> void:
 	var length := player.get_animation(clip).length
 	var images: Array = []
 	for frame in FRAMES:
-		player.seek(length * float(frame) / FRAMES, true)
+		# One-shot clips end on their last frame; loops wrap.
+		var span := FRAMES - 1 if player.get_animation(clip).loop_mode == Animation.LOOP_NONE else FRAMES
+		player.seek(length * float(frame) / span, true)
 		await process_frame
 		images.append(await _shoot())
 	_save(images, enemy.to_lower() + "_" + clip.to_lower())
