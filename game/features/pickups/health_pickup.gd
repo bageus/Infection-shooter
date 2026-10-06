@@ -12,7 +12,7 @@ func _on_body_entered(body: Node) -> void:
 	if _consumed or body == null or not body.has_method("heal"):
 		return
 	_consumed = true
-	body.call("heal", heal_amount)
+	body.call("heal", heal_amount, &"medkit")
 	if body.has_method("play_item_sound"):
 		body.call("play_item_sound", &"medkit_pickup")
 		body.call("play_item_sound", &"medkit_use")

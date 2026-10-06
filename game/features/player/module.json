@@ -9,7 +9,8 @@
     "Explosion disorientation and camera/audio recovery",
     "Owned weapon slots and emergency key possession",
     "Uncontrolled mutation movement and aim phase",
-    "Player weapon presentation stance and gameplay activity timers"
+    "Player weapon presentation stance and gameplay activity timers",
+    "Heal feedback effects (pickup burst, sparkles, floating HP numbers)"
   ],
   "public_api": [
     "public/player.tscn"
@@ -41,6 +42,10 @@
     },
     "character_push_v1": {
       "push_strength": "push_strength: float = 1.0; passed to push_from_character with the intended pre-slide velocity"
+    },
+    "heal_feedback_v1": {
+      "heal": "heal(amount: float, source: StringName = &\"\") -> float; restored health after caps and skill bonuses; medkit pickups pass &\"medkit\"",
+      "healed": "signal healed(amount: float, source: StringName); emitted only when health actually increased"
     }
   }
 }
