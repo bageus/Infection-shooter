@@ -21,7 +21,7 @@ func _run() -> void:
 	piece.bleeding = false
 	piece.freeze = true
 	stage.add_child(piece)
-	var reference := weakref(piece)
+	var reference: WeakRef = weakref(piece)
 	_check(not piece.is_physics_processing(), "Expiry timer works without a per-frame script callback")
 	paused = true
 	await create_timer(.25).timeout
