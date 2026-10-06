@@ -239,3 +239,19 @@ presentation.office_floor owns authored display power/content/seed and derived s
 ## Surface repair contracts (ADR-0027)
 
 core.vfx surface_atlases_v1 supplies immutable atlas textures; features.combat impact_surface_v1 owns mission-local visible-triangle projection and injected visual registration. presentation.office_floor planner_decor_v2 owns blood surface normal and follows injected mesh anchors. bootstrap maps DTO v8 adds optional blood_normal, blood_attachment, object_id and rotation_x/z alongside display_v1. features.infected owns local bounded route caches. Retired distance visibility/chunk adapters never disable collision or hide world roots. Hole materials remain bootstrap-owned and cached with bounded installation.
+
+## Оптимизации исполнения — ADR-0033
+
+- bootstrap создаёт одну mission-local очередь полного поиска пути infected.
+  `configure_chase_budget` внедряет её в начальных и призванных врагов.
+  FIFO и бюджет двух A* за физический кадр принадлежат features.infected;
+  глобальные счётчики/Autoload не добавлены.
+- features.combat.public.prop_damage_state владеет здоровьем, индексом
+  варианта, ожидающим переходом и одноразовыми флагами environment_prop.
+  Presentation передаёт факты геометрии/крепления, отображает результат
+  HitAction/Transition и управляет коллизиями/физикой/эффектами.
+  Поле `_broken` сцены остаётся совместимым read-only представлением.
+- Occlusion обновляет только добавленные/удалённые корни; полная пересборка
+  нужна при старте, переключении режима или выходе из планировщика.
+- Стриминг по дистанции не возвращается: WorldActivation лишь восстанавливает
+  видимость/обработку корней и старые явно помеченные streamed-коллизии.
