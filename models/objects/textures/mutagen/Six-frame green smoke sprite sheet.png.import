@@ -3,19 +3,20 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://dqh3v4rc2os7h"
-path="res://.godot/imported/Six-frame green smoke sprite sheet.png-0eb84dac210a2cd0a7f295a775b21690.ctex"
+path.s3tc="res://.godot/imported/Six-frame green smoke sprite sheet.png-0eb84dac210a2cd0a7f295a775b21690.s3tc.ctex"
 metadata={
-"vram_texture": false
+"imported_formats": ["s3tc_bptc"],
+"vram_texture": true
 }
 
 [deps]
 
 source_file="res://models/objects/textures/mutagen/Six-frame green smoke sprite sheet.png"
-dest_files=["res://.godot/imported/Six-frame green smoke sprite sheet.png-0eb84dac210a2cd0a7f295a775b21690.ctex"]
+dest_files=["res://.godot/imported/Six-frame green smoke sprite sheet.png-0eb84dac210a2cd0a7f295a775b21690.s3tc.ctex"]
 
 [params]
 
-compress/mode=0
+compress/mode=2
 compress/high_quality=false
 compress/lossy_quality=0.7
 compress/uastc_level=0
