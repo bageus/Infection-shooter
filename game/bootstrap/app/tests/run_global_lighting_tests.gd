@@ -49,7 +49,7 @@ func _run() -> void:
 	var player := app.get_node("Gameplay/Player") as Node3D
 	player.get_node("CameraRig").rotate_y(PI / 2.0)
 	player.position += Vector3(32.0, 0.0, 32.0)
-	app.get("chunk_streamer").call("rebuild")
+	app.get("world_activation").call("rebuild")
 	_check(overhead.global_basis == basis_before and overhead.visible, "Camera rotation/chunk changes leave global light active")
 	for node: Node in get_nodes_in_group("planner_lights"):
 		_check_lamp_off(node)

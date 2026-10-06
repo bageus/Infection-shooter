@@ -97,13 +97,6 @@ func _refresh_slot_icons() -> void:
 		slot_keys[i].text = str(i + 1)
 
 
-func _set_region(target: TextureRect, source: Texture2D, region: Rect2) -> void:
-	var atlas := AtlasTexture.new()
-	atlas.atlas = source
-	atlas.region = region
-	target.texture = atlas
-
-
 func _set_active_weapon_icon(index: int) -> void:
 	if index < 0 or index >= slot_icons.size():
 		weapon_icon.texture = null

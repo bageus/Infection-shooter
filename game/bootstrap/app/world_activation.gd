@@ -1,13 +1,9 @@
 extends Node
-## Legacy planner lifecycle adapter. Distance-based world streaming is retired.
-## Geometry, collisions and silhouettes remain present at every player position.
-var player: Node3D
+## Restore authored roots when leaving planning; distance never disables geometry.
 var roots: Array = []
-var enabled := false
 
 
-func setup(target: Node3D, managed_roots: Array) -> void:
-	player = target
+func setup(managed_roots: Array) -> void:
 	roots = managed_roots
 	rebuild()
 
@@ -22,11 +18,6 @@ func rebuild() -> void:
 				if child.process_mode == Node.PROCESS_MODE_DISABLED:
 					child.process_mode = Node.PROCESS_MODE_INHERIT
 				_restore_streamed_collision(child)
-
-
-func set_runtime_enabled(_value: bool) -> void:
-	enabled = false
-	rebuild()
 
 
 func _restore_streamed_collision(node: Node) -> void:
