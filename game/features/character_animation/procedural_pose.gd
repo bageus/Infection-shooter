@@ -15,6 +15,8 @@ var attack_duration := 0.55
 var attack_lunge := 0.28
 var death_duration := 1.2
 var death_pitch_degrees := -88.0
+## Fall on the face instead of the back (ADR-0034).
+var death_forward := false
 var feet := Vector3.ZERO
 
 
@@ -57,12 +59,12 @@ func attack(progress: float) -> Transform3D:
 	return pose
 
 
-# Topples backwards around the feet and settles slightly into the floor.
+# Topples backwards (or forwards) around the feet and settles slightly into the floor.
 func death(progress: float) -> Transform3D:
 	var t := clampf(progress, 0.0, 1.0)
 	var fall := t * t * (3.0 - 2.0 * t)
 	var settle := clampf((t - 0.8) / 0.2, 0.0, 1.0)
-	var pitch := deg_to_rad(death_pitch_degrees) * fall
+	var pitch := deg_to_rad(death_pitch_degrees) * fall * (-1.0 if death_forward else 1.0)
 	var pose := _about_feet(Basis(Vector3.RIGHT, pitch))
 	pose.origin.y -= 0.06 * settle
 	return pose
