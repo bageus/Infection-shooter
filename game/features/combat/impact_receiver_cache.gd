@@ -64,8 +64,13 @@ func _remove(id: int) -> void:
 
 func _notification(what: int) -> void:
 	if what == NOTIFICATION_PREDELETE:
-		for id in _entries.keys():
-			_remove(id)
+		# RefCounted is already at zero: clean entries without instance helpers.
+		for entry: Dictionary in _entries.values():
+			for reference: WeakRef in entry["nodes"]:
+				var node := reference.get_ref() as Node
+				if node != null and node.child_order_changed.is_connected(entry["callback"]):
+					node.child_order_changed.disconnect(entry["callback"])
+		_entries.clear()
 
 
 static func _changed(reference: WeakRef, id: int) -> void:

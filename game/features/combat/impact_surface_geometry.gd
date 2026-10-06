@@ -97,7 +97,11 @@ func _remove_index(mesh: Mesh) -> void:
 func _notification(what: int) -> void:
 	if what == NOTIFICATION_PREDELETE:
 		for mesh: Mesh in _indices.keys():
-			_remove_index(mesh)
+			# RefCounted is already at zero: do not call instance helpers here.
+			var callback: Callable = _indices[mesh]["callback"]
+			if mesh.changed.is_connected(callback):
+				mesh.changed.disconnect(callback)
+		_indices.clear()
 
 
 static func _changed(reference: WeakRef, id: int) -> void:
