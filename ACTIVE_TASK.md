@@ -9,6 +9,8 @@ updated: 2026-10-05
 
 # Active task
 
+06.10.2026 (2): по запросу владельца добавлена отделка офиса (surface_decor_v1, ADR-0033): conference table (07_table_longest) — шоколадная деревянная столешница и графитовая рама (новые бесшовные текстуры, triplanar; обломки сохраняют отделку); случайный документ из атласа 6 документов на верхнем листе бумаги (стопка, отдельный лист, файлы), уложенный по поверхности листа; 0–3 стикера из атласа 8 стикеров по краям мониторов, стабильно по display_seed. DTO карт прежние, исключений нет. Новый run_surface_decor_tests.gd. Следующее действие: визуально проверить стол, бумаги и мониторы в Windows/Web.
+
 06.10.2026 (1): по запросу владельца введён вес предметов (prop_weight_v1, ADR-0032): каталог в кг, толкание при ходьбе по намеренной скорости до скольжения, ёмкость 22 кг × push_strength (игрок/обычные 1.0, Brute 2.0, Titan 2.6, Colossus 3.2), скорость предмета падает с весом; картонные коробки сдвигаются, 12 кг ящик медленно, 32 кг военный ящик — только сильные враги, автоматы не сдвигаются. Мелочь ≤ 2 кг и ≤ 0.45 м не стопорит персонажей и отлетает от ног игрока и врагов (заменяет book_contact). Капли из обрубков оставляют следы через существующий blood_wounded. Масса RigidBody и DTO карт прежние, исключений нет. Новый run_prop_weight_tests.gd и расширенный run_dismemberment_tests.gd. Следующее действие: проверить ощущение толкания и следы крови в Windows/Web.
 
 05.10.2026 (11): по запросу владельца переделаны ходьба игрока (procedural_gait) и ходьба/бег всех гуманоидных врагов (перепечены *_anims.res): стопы под тазом вместо «буквы А», перекат пятка-носок, бег — наклонённый спринт с когтистыми руками. ADR-0016 дополнен, контракты прежние. Godot 4.7.2: editor import без ERROR, все наборы CI и main 180 кадров PASS, validate_project PASS. Визуальная приёмка в игре ожидается.
@@ -30,6 +32,7 @@ updated: 2026-10-05
 Build the first playable combat-slice foundation with an authored office floor, player, combat, infected enemies, infection source, and observable fail states.
 
 ## In scope
+- owner-requested conference table chocolate/graphite finish, random document prints on top paper sheets and 0-3 monitor-edge stickers (ADR-0033);
 - owner follow-up: shared pinned tab notices/spacing, installed lamp controls, blocked muzzle wall guard, clipped multi-receiver blood/scorch (excluding glass), random corpse and XYZ part poses, reported editor warning fixes (ADR-0030);
 - owner-requested integrated PRs, player/enemy textured blood, retired zombie art, floor/wall placement, unclipped planner color picker, separate effects/music mix, exact cursor/barrel aim and 30% smaller launcher casings (ADR-0029);
 - owner-requested four settings tabs, editable controls, menu copy/company history draft, read-only runtime debug and asset/occlusion repairs (ADR-0028);

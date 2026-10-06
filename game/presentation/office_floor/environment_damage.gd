@@ -52,6 +52,8 @@ static func spawn_piece(host: Node3D, mesh: MeshInstance3D, owner: Node3D, stage
 	var copy := MeshInstance3D.new()
 	copy.mesh = mesh.mesh
 	copy.material_override = mesh.material_override
+	for surface in mesh.get_surface_override_material_count():
+		copy.set_surface_override_material(surface, mesh.get_surface_override_material(surface))
 	fragment.add_child(copy)
 	(host.get("effects_root") as Node3D).add_child(fragment)
 	fragment.global_position = bounds.get_center()
