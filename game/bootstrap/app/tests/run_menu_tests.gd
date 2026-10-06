@@ -1,5 +1,6 @@
 extends SceneTree
 
+const MENU_STYLE := preload("res://game/bootstrap/app/menu/menu_style.gd")
 const FRONT := preload("res://game/bootstrap/app/menu/front_end.tscn")
 const BODY := preload("res://assets/interface/fonts/body.ttf")
 const PREFS := preload("res://game/bootstrap/app/menu/menu_preferences.gd")
@@ -67,8 +68,10 @@ func _test_gameplay_font(app: Node) -> void:
 	var title := app.get_node("PlanningUI/Panel/VBox/Title") as Label
 	_check(_is_body_font(title.get_theme_font("font")), "planner uses same font")
 	var tree: CanvasLayer = app.get("mutation_tree_ui")
+	var keys: Label = tree.get("keys_label")
+	_check(_is_body_font(keys.get_theme_font("font")), "mutation tree uses same font")
 	var points: Label = tree.get("points_label")
-	_check(_is_body_font(points.get_theme_font("font")), "mutation tree uses same font")
+	_check(points.get_theme_font("font") == MENU_STYLE.TITLE, "mutation tree headline numbers use the menu title font")
 	for hint: Label3D in app.find_children("*", "Label3D", true, false):
 		_check(hint.font == BODY, "world hint uses same font: " + hint.text)
 
