@@ -15,6 +15,13 @@ var _space: PhysicsDirectSpaceState3D
 var _excluded: Array[RID] = []
 var _shape := SphereShape3D.new()
 var _height := 1.0
+var _budget: Node
+
+
+func configure_budget(budget: Node) -> void:
+	if is_instance_valid(_budget):
+		_budget.call("cancel", self)
+	_budget = budget
 
 
 func direction(actor: CharacterBody3D, target: Node3D, radius: float) -> Vector3:
@@ -33,12 +40,15 @@ func direction(actor: CharacterBody3D, target: Node3D, radius: float) -> Vector3
 		_next_probe = frame + 6
 		_direct = clear_segment(from, to)
 	if _direct:
+		if is_instance_valid(_budget):
+			_budget.call("cancel", self)
 		path.clear()
 		return (to - from).normalized()
 	if frame >= _next_search or _goal.distance_squared_to(to) > 2.0:
-		_next_search = frame + 45 + int(actor.get_instance_id() % 20)
-		_goal = to
-		path = _search(from, to)
+		if is_instance_valid(_budget):
+			_budget.call("request", self, actor, target)
+		else:
+			search_requested(actor, target)
 	while not path.is_empty() and from.distance_to(path[0]) < .28:
 		path.pop_front()
 	if path.is_empty():
@@ -50,6 +60,23 @@ func direction(actor: CharacterBody3D, target: Node3D, radius: float) -> Vector3
 		_next_search = 0
 		return Vector3.ZERO
 	return (path[0] - from).normalized()
+
+
+func search_requested(actor: CharacterBody3D, target: Node3D) -> bool:
+	# The target can move while queued; search from the current positions.
+	_space = actor.get_world_3d().direct_space_state
+	_excluded = [actor.get_rid()]
+	if target is CollisionObject3D:
+		_excluded.append((target as CollisionObject3D).get_rid())
+	_height = actor.global_position.y
+	var from := actor.global_position
+	var to := target.global_position
+	to.y = _height
+	_next_search = Engine.get_physics_frames() + 45 + int(actor.get_instance_id() % 20)
+	_goal = to
+	_direct = clear_segment(from, to)
+	path = [] if _direct else _search(from, to)
+	return not _direct
 
 
 func clear_segment(from: Vector3, to: Vector3) -> bool:

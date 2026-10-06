@@ -9,9 +9,15 @@ const CASING_SCALE := 3.0
 var _casings: Array[RigidBody3D] = []
 var _born_at: Array[int] = []
 var _cleanup_accumulator := 0.0
+var _surface: PhysicsMaterial
+var _shapes: Dictionary = {}
 
 var effects_root: Node3D
 var impact_pool: Node
+
+
+func _ready() -> void:
+	set_process(false)
 
 
 # Public scene wiring v1; owned by the mission composition.
@@ -32,15 +38,19 @@ func spawn_casing(model: PackedScene, eject_transform: Transform3D, radius: floa
 	body.continuous_cd = true
 	body.linear_damp = 0.4
 	body.angular_damp = 1.1
-	var material := PhysicsMaterial.new()
-	material.bounce = 0.48
-	material.friction = 0.65
-	body.physics_material_override = material
+	if _surface == null:
+		_surface = PhysicsMaterial.new()
+		_surface.bounce = 0.48
+		_surface.friction = 0.65
+	body.physics_material_override = _surface
 	var collider := CollisionShape3D.new()
-	var shape := SphereShape3D.new()
-	shape.radius = radius * CASING_SCALE * size_multiplier
-	shape.margin = 0.001
-	collider.shape = shape
+	var scaled_radius := radius * CASING_SCALE * size_multiplier
+	if not _shapes.has(scaled_radius):
+		var shape := SphereShape3D.new()
+		shape.radius = scaled_radius
+		shape.margin = .001
+		_shapes[scaled_radius] = shape
+	collider.shape = _shapes[scaled_radius]
 	body.add_child(collider)
 	var visual := model.instantiate() as Node3D
 	if visual == null:
@@ -58,6 +68,7 @@ func spawn_casing(model: PackedScene, eject_transform: Transform3D, radius: floa
 	_casings.append(body)
 	_born_at.append(Time.get_ticks_msec())
 	_cleanup()
+	set_process(true)
 	if not sound_event.is_empty():
 		_schedule_clink(body, sound_event)
 
@@ -99,3 +110,6 @@ func _cleanup() -> void:
 		_born_at.pop_front()
 		if is_instance_valid(oldest):
 			oldest.queue_free()
+
+
+	set_process(not _casings.is_empty())

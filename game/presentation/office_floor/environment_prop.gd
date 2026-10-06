@@ -4,7 +4,8 @@ const IMPACT_SOUND := preload("res://game/presentation/office_floor/impact_sound
 
 const CARPET_SHADOW := preload("res://game/presentation/office_floor/carpet_shadow.gd")
 const DAMAGE = preload("res://game/presentation/office_floor/environment_damage.gd")
-const BALANCE = preload("res://game/features/combat/public/projectile_balance.gd")
+const PROP_DAMAGE := preload("res://game/features/combat/public/prop_damage_state.gd")
+var _damage := PROP_DAMAGE.new()
 const WEIGHT = preload("res://game/presentation/office_floor/prop_weight.gd")
 const CONTACT = preload("res://game/presentation/office_floor/prop_contact.gd")
 var repeated_electronic_particles := true
@@ -76,19 +77,14 @@ var _visual: Node3D
 var _intact: Node3D
 var _stages: Array[Node3D] = []
 var _variants: Array[Node3D] = []
-var _variant_index := -1
 var _shapes: Array[CollisionShape3D] = []
 var _shape_meshes: Array[MeshInstance3D] = []
-var _glass_broken := false
-var _broken := false
-var _short_circuited := false
-var _paper_torn := false
-var _health := 0.0
-var _transition_pending := false
-var _pending_full_break := false
+# Read-only compatibility for existing diagnostic callers.
+var _broken: bool:
+	get:
+		return _damage.broken
 ## Item weight in kg (prop_weight_v1); the RigidBody mass stays as authored.
 var weight_kg := 0.0
-var _extinguisher_triggered := false
 var _extinguisher_fx: Node3D
 var _reaction := HIT_REACTION.new()
 
@@ -138,7 +134,7 @@ func _ready() -> void:
 		var primary := DAMAGE.find_named(_visual, "Primary")
 		if primary != null:
 			primary.hide()
-	_health = _stage_health()
+	_damage.configure(model_path.get_file(), _variants.size(), not _stages.is_empty())
 	# Architectural pieces and carpets stay anchored; all other groups are movable.
 	freeze = wall_mounted or model_path.begins_with("res://models/objects/enviroments/01/")
 	if freeze and "01_floor_" in model_path:
@@ -262,20 +258,6 @@ func get_projectile_material(shape_index: int = -1) -> String:
 	return "wood"
 
 
-func _damage_category() -> String:
-	var group := model_path.get_file().substr(0, 2)
-	if group == "05": return "tech"
-	if group == "09" or group == "11" or group == "12": return "small"
-	return "large"
-
-
-func _stage_health() -> float:
-	match _damage_category():
-		"tech": return 65.0
-		"small": return 42.0
-	return 155.0
-
-
 func take_projectile_hit(damage: float, hit_position: Vector3, _normal: Vector3, direction: Vector3, weapon: String) -> bool:
 	if "fire_extinguisher" in model_path.get_file():
 		_trigger_extinguisher(hit_position, direction)
@@ -283,12 +265,11 @@ func take_projectile_hit(damage: float, hit_position: Vector3, _normal: Vector3,
 	if PAPER.is_paper(model_path):
 		_tear_paper(hit_position, direction)
 		return false
-	if _damage_category() == "tech":
-		if _short_circuited:
+	if _damage.category == "tech":
+		if not _damage.short_circuit():
 			if repeated_electronic_particles:
 				SPARKS.spawn(self, hit_position)
 		else:
-			_short_circuited = true
 			if is_instance_valid(_display):
 				_display.call("disable")
 			SPARKS.short_circuit(self, hit_position, _normal)
@@ -302,42 +283,33 @@ func take_projectile_hit(damage: float, hit_position: Vector3, _normal: Vector3,
 		var is_table := "table" in model_path.get_file() or "desk" in model_path.get_file()
 		var push := direction.normalized() if is_table else (direction.normalized() + Vector3.UP * 0.18).normalized()
 		apply_central_impulse(push * clampf(mass * (0.004 if is_table else 0.015), 0.025, 0.15 if is_table else 0.32))
-	if BOOK_STACK.contains(model_path) and not _broken:
-		_health -= BALANCE.object_damage(damage, weapon, "small")
-		if _health <= 0.0:
-			_broken = true
+	var action := _damage.hit(damage, weapon, BOOK_STACK.contains(model_path),
+		bool(get_meta("planning_wall_mount", false)), freeze, _is_facade_damage())
+	match action:
+		PROP_DAMAGE.HitAction.SCATTER:
 			BOOK_STACK.scatter(self, _visual, hit_position, direction)
 			queue_free()
-	elif not _broken and not _transition_pending and (_variant_index + 1 < _variants.size() or not _stages.is_empty()):
-		_health -= BALANCE.object_damage(damage, weapon, _damage_category())
-		if _health <= 0.0:
-			_pending_full_break = weapon == "GRENADE" and not _stages.is_empty()
-			_transition_pending = true
+		PROP_DAMAGE.HitAction.TRANSITION:
 			call_deferred("_apply_damage", hit_position, direction)
-		elif damage > 0.0 and weapon != "PISTOL":
+		PROP_DAMAGE.HitAction.SHUDDER:
 			_reaction.shudder(direction)
-	elif _broken and _is_facade_damage():
-		_chip_facade(hit_position, direction)
-	elif bool(get_meta("planning_wall_mount", false)) and freeze and not _broken:
-		_health -= BALANCE.object_damage(damage, weapon, _damage_category())
-		if _health <= 0.0:
-			_broken = true
+		PROP_DAMAGE.HitAction.CHIP_FACADE:
+			_chip_facade(hit_position, direction)
+		PROP_DAMAGE.HitAction.DETACH:
 			freeze = false
 			IMPACT_SOUND.wake(self)
 			sleeping = false
 			apply_central_impulse((direction.normalized() + Vector3.UP * 0.2).normalized() * maxf(0.5, mass * 0.12))
-	elif not freeze:
-		sleeping = false
-		apply_impulse(direction.normalized() * maxf(0.4, mass * 0.3), hit_position - global_position)
+		PROP_DAMAGE.HitAction.PUSH:
+			sleeping = false
+			apply_impulse(direction.normalized() * maxf(0.4, mass * 0.3), hit_position - global_position)
 	return false
 
 
 # Any paper object is torn apart completely by a single shot.
 func _tear_paper(hit_position: Vector3, direction: Vector3) -> void:
-	if _paper_torn:
+	if not _damage.tear_paper():
 		return
-	_paper_torn = true
-	_broken = true
 	PAPER.tear(self, hit_position, direction)
 	collision_layer = 0
 	if _visual != null:
@@ -348,9 +320,8 @@ func _tear_paper(hit_position: Vector3, direction: Vector3) -> void:
 
 
 func _trigger_extinguisher(hit_position: Vector3, direction: Vector3) -> void:
-	if _extinguisher_triggered:
+	if not _damage.trigger_extinguisher():
 		return
-	_extinguisher_triggered = true
 	if _extinguisher_fx != null:
 		_extinguisher_fx.call("start", hit_position, direction)
 
@@ -372,22 +343,20 @@ func _apply_damage(hit_position: Vector3, direction: Vector3) -> void:
 	if _broken:
 		return
 	_reaction.cancel()
-	if _damage_category() == "tech":
+	if _damage.category == "tech":
 		SPARKS.spawn(self, hit_position, true)
-	if _variant_index + 1 < _variants.size() and not _pending_full_break:
+	var previous_variant := _damage.variant_index
+	var transition := _damage.complete_transition()
+	if transition == PROP_DAMAGE.Transition.VARIANT:
 		if _intact != null:
 			_intact.hide()
-		if _variant_index >= 0:
-			_variants[_variant_index].hide()
-		_variant_index += 1
-		var variant := _variants[_variant_index]
+		if previous_variant >= 0:
+			_variants[previous_variant].hide()
+		var variant := _variants[_damage.variant_index]
 		DAMAGE.reveal_meshes(variant)
 		variant.show()
-		_health = _stage_health() * 0.8
-		_transition_pending = false
 		_rebuild_shapes()
-	elif not _stages.is_empty():
-		_broken = true
+	elif transition == PROP_DAMAGE.Transition.BREAK:
 		if "server_rack" in model_path.get_file() or _is_facade_damage():
 			if _intact != null:
 				_intact.hide()
@@ -407,7 +376,7 @@ func _apply_damage(hit_position: Vector3, direction: Vector3) -> void:
 			shape.set_deferred("disabled", true)
 		collision_layer = 0
 		freeze = true
-		_spawn_stage(0, "", hit_position, direction, _pending_full_break)
+		_spawn_stage(0, "", hit_position, direction, _damage.full_break)
 
 
 # Localized damage (reception counter): the core stays, facade chips break off.
@@ -475,9 +444,8 @@ func hit_environment_fragment(fragment: RigidBody3D, hit_position: Vector3, dire
 
 
 func _shatter_glass(hit_position: Vector3, direction: Vector3) -> void:
-	if _glass_broken or _broken:
+	if not _damage.break_glass():
 		return
-	_glass_broken = true
 	SFX.play(self, &"glass_break", hit_position)
 	var glass_bounds := AABB()
 	var found := false

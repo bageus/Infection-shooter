@@ -49,16 +49,20 @@ func _ready() -> void:
 	if lifetime < INF:
 		add_to_group(GROUP)
 		_enforce_budget()
+		var expiry := Timer.new()
+		expiry.one_shot = true
+		expiry.process_callback = Timer.TIMER_PROCESS_PHYSICS
+		expiry.wait_time = maxf(lifetime, .001)
+		expiry.timeout.connect(expire)
+		add_child(expiry)
+		expiry.start()
+	set_physics_process(bleeding and not _fading)
 
 
 func _physics_process(delta: float) -> void:
 	_age += delta
-	if _age >= lifetime and not _fading:
-		expire()
-		return
 	if not bleeding or _age > BLEED_SECONDS + 2.0:
-		if _stained:
-			set_physics_process(_age < lifetime)
+		set_physics_process(false)
 		return
 	var travelled := global_position.distance_to(_trail_from)
 	if _age < BLEED_SECONDS and travelled >= blood_drop_distance:
@@ -96,6 +100,7 @@ func expire(seconds: float = 0.8) -> void:
 	if _fading:
 		return
 	_fading = true
+	set_physics_process(false)
 	collision_layer = 0
 	var pivot := Node3D.new()
 	add_child(pivot)

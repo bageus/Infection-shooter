@@ -7,7 +7,7 @@ const IMPACT_POOL := preload("res://game/features/combat/public/impact_effects.g
 
 const FALL_DEATH_Y: float = -4.0
 const PlanningMode = preload("res://game/bootstrap/app/planning_mode.gd")
-const ChunkStreamer = preload("res://game/bootstrap/app/chunk_streamer.gd")
+const WorldActivation = preload("res://game/bootstrap/app/world_activation.gd")
 const TEST_CLOUD := preload("res://game/features/infection_source/public/mutagen_cloud.tscn")
 const MUTATION_UI := preload("res://game/bootstrap/app/mutation_tree_ui.gd")
 const BLOOD_EFFECTS := preload("res://game/presentation/office_floor/public/blood_effects_3d.tscn")
@@ -33,7 +33,7 @@ var impact_pool: Node3D
 var _ended := false
 var _pause_open := false
 var planning_mode: Node
-var chunk_streamer: Node
+var world_activation: Node
 var planning_lighting: Node
 var mutation_tree_ui: CanvasLayer
 var mission_layout: Node3D
@@ -67,10 +67,10 @@ func _ready() -> void:
 	add_child(planning_mode)
 	planning_mode.process_mode = Node.PROCESS_MODE_ALWAYS
 	planning_mode.setup(self, planning_root, planning_ui)
-	chunk_streamer = ChunkStreamer.new()
-	chunk_streamer.name = "ChunkStreamer"
-	add_child(chunk_streamer)
-	chunk_streamer.setup(player, [planning_root, $Structure])
+	world_activation = WorldActivation.new()
+	world_activation.name = "WorldActivation"
+	add_child(world_activation)
+	world_activation.setup([planning_root, $Structure])
 	planning_lighting = $PlanningLighting
 	planning_lighting.setup($WorldEnvironment, $PlanningUI/Panel/VBox/LightingPreview, $PlanningUI/Panel/VBox/LocalLights)
 	mission_layout = MISSION_LAYOUT.new()
@@ -167,12 +167,10 @@ func _resume_game() -> void:
 
 
 func _on_resume_pressed() -> void:
-	chunk_streamer.set_runtime_enabled(true)
 	_resume_game()
 
 
 func _on_planning_pressed() -> void:
-	chunk_streamer.set_runtime_enabled(false)
 	_pause_open = false
 	pause_menu.hide()
 	planning_mode.enter()
@@ -242,11 +240,6 @@ func _on_menu_action(action: String) -> void:
 func _on_restart_pressed() -> void:
 	get_tree().paused = false
 	get_tree().reload_current_scene()
-
-
-func _on_exit_pressed() -> void:
-	get_tree().paused = false
-	get_tree().quit()
 
 
 func _setup_blood_effects() -> void:

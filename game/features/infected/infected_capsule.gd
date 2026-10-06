@@ -98,6 +98,10 @@ func configure_world(container: Node3D, impacts: Node) -> void:
 	impact_pool = impacts
 
 
+func configure_chase_budget(budget: Node) -> void:
+	_route.configure_budget(budget)
+
+
 func _ready() -> void:
 	health = max_health
 	_blood_last_position = global_position

@@ -3,11 +3,14 @@ extends Node3D
 const TILE_SCENE := preload("res://game/presentation/office_floor/public/structural/base_floor_tile.tscn")
 const TILE_MATERIAL := preload("res://game/presentation/office_floor/floor_tile_material.tres")
 const MATERIAL_VARIANTS := 8
+const SECTION_TILES := 8
 
 @export var floor_size := Vector2(80.0, 60.0)
 @export var tile_step := 2.0
 @export var tile_y := 0.001
 var openings: Array[Rect2] = []
+var _batches: Dictionary = {}
+var _tile_mesh: Mesh
 var _materials: Array[StandardMaterial3D] = []
 var _small_materials: Array[StandardMaterial3D] = []
 
@@ -18,7 +21,13 @@ func _build_tiles() -> void:
 	if _materials.is_empty():
 		_build_materials()
 	for child in get_children():
+		remove_child(child)
 		child.queue_free()
+	_batches.clear()
+	if _tile_mesh == null:
+		var tile := TILE_SCENE.instantiate() as MeshInstance3D
+		_tile_mesh = tile.mesh
+		tile.free()
 	var columns := ceili(floor_size.x / tile_step)
 	var rows := ceili(floor_size.y / tile_step)
 	var start_x := -floor_size.x * 0.5 + tile_step * 0.5
@@ -46,16 +55,35 @@ func _build_tiles() -> void:
 					if not covered:
 						_add_tile(center, 0.25)
 
+	_flush_batches()
+
 
 func _add_tile(center: Vector2, tile_scale: float) -> void:
-	var tile := TILE_SCENE.instantiate() as MeshInstance3D
-	# Opening pieces inherit their parent tile's appearance.
+	# Partition by location and material so camera culling stays local.
 	var cell := Vector2i(floori((center.x + floor_size.x * 0.5) / tile_step), floori((center.y + floor_size.y * 0.5) / tile_step))
 	var variant := posmod(hash(cell), MATERIAL_VARIANTS)
-	tile.material_override = _small_materials[variant] if tile_scale < 1.0 else _materials[variant]
-	add_child(tile)
-	tile.position = Vector3(center.x, tile_y, center.y)
-	tile.scale = Vector3(tile_scale, 1.0, tile_scale)
+	var key := Vector4i(floori(float(cell.x) / SECTION_TILES), floori(float(cell.y) / SECTION_TILES), variant, int(tile_scale < 1.0))
+	if not _batches.has(key):
+		_batches[key] = []
+	var transform := Transform3D(Basis.from_scale(Vector3(tile_scale, 1.0, tile_scale)), Vector3(center.x, tile_y, center.y))
+	_batches[key].append(transform)
+
+
+func _flush_batches() -> void:
+	for key: Vector4i in _batches:
+		var transforms: Array = _batches[key]
+		var instances := MultiMesh.new()
+		instances.transform_format = MultiMesh.TRANSFORM_3D
+		instances.mesh = _tile_mesh
+		instances.instance_count = transforms.size()
+		for index in transforms.size():
+			instances.set_instance_transform(index, transforms[index])
+		var section := MultiMeshInstance3D.new()
+		section.name = "FloorSection_%d_%d_%d_%d" % [key.x, key.y, key.z, key.w]
+		section.multimesh = instances
+		section.material_override = _small_materials[key.z] if key.w == 1 else _materials[key.z]
+		add_child(section)
+	_batches.clear()
 
 
 func _build_materials() -> void:

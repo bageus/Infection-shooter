@@ -18,6 +18,9 @@ var rebuild_count := 0
 var _dirty := true
 var _elapsed := 0.0
 var _hero_blocked := false
+var _subjects_by_id: Dictionary = {}
+var _added_roots: Dictionary = {}
+var _removed_roots: Dictionary = {}
 
 
 func setup(actor: Node3D, view: Camera3D, scene: Node3D) -> void:
@@ -25,8 +28,8 @@ func setup(actor: Node3D, view: Camera3D, scene: Node3D) -> void:
 	camera = view
 	world = scene
 	process_mode = Node.PROCESS_MODE_ALWAYS
-	get_tree().node_added.connect(_scene_changed)
-	get_tree().node_removed.connect(_scene_changed)
+	get_tree().node_added.connect(_node_added)
+	get_tree().node_removed.connect(_node_removed)
 
 
 func set_mode(value: int) -> void:
@@ -44,14 +47,20 @@ func set_runtime_enabled(value: bool) -> void:
 	_dirty = true
 
 
-func _scene_changed(node: Node) -> void:
+func _node_added(node: Node) -> void:
 	if node.has_meta("occlusion_copy") or not node is Node3D:
 		return
-	if _is_classified(node):
-		_dirty = true
-	elif node.is_inside_tree():
-		# weapon_pickups registers in _ready, after node_added.
-		call_deferred("_check_added_root", weakref(node))
+	# Classification and imported children can be installed in _ready.
+	call_deferred("_check_added_root", weakref(node))
+
+
+func _node_removed(node: Node) -> void:
+	if node.has_meta("occlusion_copy"):
+		return
+	var id := node.get_instance_id()
+	if _subjects_by_id.has(id) or node.is_in_group("camera_occluder") or walls.records.has(id) or walls.queued.has(id):
+		_removed_roots[id] = weakref(node)
+	_added_roots.erase(id)
 
 
 func _is_classified(node: Node) -> bool:
@@ -60,8 +69,8 @@ func _is_classified(node: Node) -> bool:
 
 func _check_added_root(reference: WeakRef) -> void:
 	var node := reference.get_ref() as Node
-	if node != null and _is_classified(node):
-		_dirty = true
+	if node != null and node.is_inside_tree() and world.is_ancestor_of(node) and _is_classified(node):
+		_added_roots[node.get_instance_id()] = weakref(node)
 
 
 func _physics_process(delta: float) -> void:
@@ -69,6 +78,8 @@ func _physics_process(delta: float) -> void:
 		return
 	if _dirty:
 		_rebuild()
+	else:
+		_apply_pending_roots()
 	_elapsed += delta
 	if _elapsed >= CHECK_INTERVAL:
 		_elapsed = 0.0
@@ -82,12 +93,28 @@ func _process(_delta: float) -> void:
 
 func _rebuild() -> void:
 	rebuild_count += 1
-	# Changes include loaded maps, streamed geometry and newly summoned actors.
-	if mode == 0:
-		_clear()
+	_clear()
 	_collect(world)
 	_dirty = false
 	_elapsed = CHECK_INTERVAL
+
+
+func _apply_pending_roots() -> void:
+	for id in _removed_roots:
+		if _subjects_by_id.has(id):
+			var subject: RefCounted = _subjects_by_id[id]
+			subject.clear()
+			subjects.erase(subject)
+			_subjects_by_id.erase(id)
+		var removed: Node = _removed_roots[id].get_ref()
+		if removed != null:
+			walls.remove_root(removed)
+	_removed_roots.clear()
+	for reference: WeakRef in _added_roots.values():
+		var node := reference.get_ref() as Node
+		if node != null and node.is_inside_tree() and world.is_ancestor_of(node):
+			_collect(node)
+	_added_roots.clear()
 
 
 func _collect(node: Node) -> void:
@@ -97,14 +124,21 @@ func _collect(node: Node) -> void:
 		if mode == 1 and node.is_in_group("camera_occluder"):
 			walls.add_root(node)
 		elif mode == 0:
-			if node == player:
-				subjects.append(SUBJECT.new(node, HERO_COLOR))
-			elif node.is_in_group("infected"):
-				subjects.append(SUBJECT.new(node, ENEMY_COLOR))
-			elif node.is_in_group("occlusion_items") or node.is_in_group("weapon_pickups"):
-				subjects.append(SUBJECT.new(node, ITEM_COLOR))
+			if not _subjects_by_id.has(node.get_instance_id()):
+				if node == player:
+					_add_subject(node, HERO_COLOR)
+				elif node.is_in_group("infected"):
+					_add_subject(node, ENEMY_COLOR)
+				elif node.is_in_group("occlusion_items") or node.is_in_group("weapon_pickups"):
+					_add_subject(node, ITEM_COLOR)
 	for child in node.get_children():
 		_collect(child)
+
+
+func _add_subject(node: Node3D, tint: Color) -> void:
+	var subject := SUBJECT.new(node, tint)
+	_subjects_by_id[node.get_instance_id()] = subject
+	subjects.append(subject)
 
 
 func _check_subjects() -> void:
@@ -170,13 +204,15 @@ func _clear() -> void:
 	for subject in subjects:
 		subject.clear()
 	subjects.clear()
+	_subjects_by_id.clear()
+	_added_roots.clear()
+	_removed_roots.clear()
 	walls.clear()
 	_hero_blocked = false
 
 
 func _exit_tree() -> void:
-	if get_tree().node_added.is_connected(_scene_changed):
-		get_tree().node_added.disconnect(_scene_changed)
-		get_tree().node_removed.disconnect(_scene_changed)
+	if get_tree().node_added.is_connected(_node_added):
+		get_tree().node_added.disconnect(_node_added)
+		get_tree().node_removed.disconnect(_node_removed)
 	_clear()
-

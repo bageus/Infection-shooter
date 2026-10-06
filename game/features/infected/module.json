@@ -9,7 +9,8 @@
     "Infected stalk/charge pace",
     "Colossus slam cooldown and ground wave",
     "Horde ram and summon state",
-    "Body part durability, severed parts, skin wounds and corpse hit volumes"
+    "Body part durability, severed parts, skin wounds and corpse hit volumes",
+    "Mission-local FIFO and per-frame budget for infected route searches"
   ],
   "public_api": [
     "public/infected_capsule.tscn",
@@ -57,7 +58,8 @@
     "public/decor/part_titan_leg.tscn",
     "public/decor/part_zombie_arm.tscn",
     "public/decor/part_zombie_head.tscn",
-    "public/decor/part_zombie_leg.tscn"
+    "public/decor/part_zombie_leg.tscn",
+    "public/chase_search_budget.gd"
   ],
   "dependencies": [
     "features.infection_source",
@@ -88,6 +90,10 @@
     },
     "character_push_v1": {
       "push_strength": "push_strength: float = 1.0 (Brute 2.0, Titan 2.6, Colossus 3.2); passed to push_from_character with the intended pre-slide velocity"
+    },
+    "chase_budget_v1": {
+      "configure_chase_budget": "configure_chase_budget(budget: Node) -> void; bootstrap injects one mission-owned search queue",
+      "searches_per_frame": "Maximum completed local A* searches per physics frame; default 2; each search remains bounded to 192 expansions"
     }
   }
 }

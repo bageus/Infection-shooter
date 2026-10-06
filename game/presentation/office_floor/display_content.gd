@@ -72,3 +72,13 @@ func frame_rect(index: int, seconds: float) -> Vector4:
 	return Vector4((frame % columns * int(cell[0]) + 1.5) / width,
 		(frame / columns * int(cell[1]) + 1.5) / height,
 		(float(image[0]) - 1.0) / width, (float(image[1]) - 1.0) / height)
+
+
+# Delay to the next authored frame boundary, including the loop boundary.
+func frame_delay(index: int, seconds: float) -> float:
+	var data := timeline(index)
+	var time := fposmod(seconds, float(data["total"]))
+	for end: float in data["ends"]:
+		if end > time:
+			return end - time
+	return float(data["total"]) - time

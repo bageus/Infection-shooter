@@ -164,6 +164,8 @@ func _release_summon() -> void:
 		var parent_node := get_parent() as Node3D
 		enemy.position = parent_node.global_transform.affine_inverse() * spot if parent_node != null else spot
 		enemy.set_meta("summoned_by", get_instance_id())
+		if enemy.has_method("configure_chase_budget"):
+			enemy.call("configure_chase_budget", _route.get("_budget"))
 		get_parent().add_child(enemy)
 		if enemy.has_method("configure_world"):
 			enemy.call("configure_world", effects_root, impact_pool)

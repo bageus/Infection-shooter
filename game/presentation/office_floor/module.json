@@ -7,7 +7,8 @@
     "Authored lamp power, color, flicker phase, fixture shape and body visibility; derived runtime light activation",
     "Planner blood decorations: texture, surface and size",
     "Authored display power/content/seed, derived screen surfaces, runtime power, glow and contiguous television walls",
-    "Item weight catalogue and character push/kick rules"
+    "Item weight catalogue and character push/kick rules",
+    "Environment prop visual stages and physical reactions; durability rules owned by features.combat"
   ],
   "public_api": [
     "public/base_office_layout.tscn",
