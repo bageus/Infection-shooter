@@ -37,6 +37,8 @@ var _control_notice: Label
 var _last_weapon_index := -1
 var _weapon_icons: Array[Texture2D] = []
 var _slot_weapon_indices := [-1, -1, -1]
+var _vital_snapshot: Array = []
+var _weapon_snapshot: Array = []
 
 
 func _ready() -> void:
@@ -105,27 +107,37 @@ func _set_active_weapon_icon(index: int) -> void:
 
 
 func _update_vitals() -> void:
-	hp_bar.value = player.health
-	hp_value.text = "%d / %d" % [roundi(player.health), roundi(player.max_health)]
-
 	var mutation: float = infection.call("get_mutation")
 	var critical: float = infection.call("get_critical_threshold")
+	var has_key: bool = player.has_emergency_key()
+	var snapshot: Array = [player.health, player.max_health, mutation, critical, player.antidotes, has_key]
+	if snapshot == _vital_snapshot:
+		return
+	_vital_snapshot = snapshot
+	hp_bar.max_value = player.max_health
+	hp_bar.value = player.health
+	hp_value.text = "%d / %d" % [roundi(player.health), roundi(player.max_health)]
 	mutation_bar.value = mutation
 	mutation_value.text = "%d / 100" % roundi(mutation)
 	critical_marker.position.x = 78.0 + 264.0 * clampf(critical / 100.0, 0.0, 1.0)
 	antidote_count.text = str(player.antidotes)
-	emergency_key.visible = player.has_emergency_key()
+	emergency_key.visible = has_key
 
 
 func _update_weapon() -> void:
 	var weapon: Node = player.get_current_weapon()
 	_refresh_slot_icons()
-	_set_active_weapon_icon(player.get_current_weapon_index())
-	weapon_icon.tooltip_text = weapon.call("get_weapon_name").to_upper()
 	var magazine_ammo: int = weapon.call("get_magazine_ammo")
 	var reserve_ammo: int = weapon.call("get_reserve_ammo")
 	var reloading: bool = weapon.call("is_reloading")
 	var empty := magazine_ammo == 0
+	var active: int = player.get_current_weapon_index()
+	var snapshot: Array = [weapon, active, magazine_ammo, reserve_ammo, reloading, _slot_weapon_indices.duplicate()]
+	if snapshot == _weapon_snapshot:
+		return
+	_weapon_snapshot = snapshot
+	_set_active_weapon_icon(active)
+	weapon_icon.tooltip_text = weapon.call("get_weapon_name").to_upper()
 
 	magazine.text = str(magazine_ammo)
 	reserve.text = "/ %d" % reserve_ammo
