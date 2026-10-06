@@ -14,6 +14,7 @@ var damaged := false
 var powered := false
 var elapsed := 0.0
 var _group_index := -1
+var _next_frame_time := 0.0
 
 
 func setup(owner_prop: Node3D, path: String, authored: Dictionary, wall: Node) -> void:
@@ -44,6 +45,7 @@ func configure(authored: Dictionary) -> void:
 	powered = not damaged and (str(config.get("power", "auto")) == "on" or
 		(str(config.get("power", "auto")) == "auto" and int(config.get("seed", 1)) % 2 == 0))
 	_group_index = -1
+	_next_frame_time = 0.0
 	for i in range(screens.size()):
 		var screen := screens[i]
 		var dynamic := television or str(config.get("content", "static")) == "dynamic"
@@ -93,9 +95,14 @@ func tick(seconds: float, frames: Array[Vector4]) -> void:
 
 func _process(delta: float) -> void:
 	elapsed += delta
+	if elapsed < _next_frame_time:
+		return
 	var frames: Array[Vector4] = []
+	var delay := INF
 	for i in range(3):
 		frames.append(content.frame_rect(i, elapsed))
+		delay = minf(delay, content.frame_delay(i, elapsed))
+	_next_frame_time = elapsed + delay
 	tick(elapsed, frames)
 
 
