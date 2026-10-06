@@ -51,6 +51,11 @@ func _run() -> void:
 		if signf(leads[i]) != signf(leads[i - 1]):
 			swaps += 1
 	_expect(swaps >= 4, "The legs keep alternating (%d swaps in 1.5 s)." % swaps)
+	var width := 0.0
+	for sample in _samples:
+		width = maxf(width, absf(sample.x))
+	# The rest pose stands with the ankles 0.47 m apart; a natural gait steps close to the midline.
+	_expect(width < 0.3, "The feet step under the hips, not straddling (%.2f m apart)." % width)
 	_expect(gait.get("weight") > 0.95, "The gait owns the legs while moving.")
 	character.velocity = Vector3.ZERO
 	await create_timer(0.6).timeout
