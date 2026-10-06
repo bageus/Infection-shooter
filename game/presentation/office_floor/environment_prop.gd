@@ -25,6 +25,7 @@ const HIT_REACTION = preload("res://game/presentation/office_floor/prop_hit_reac
 
 const DISPLAY_VIEW := preload("res://game/presentation/office_floor/display_view.gd")
 const DISPLAY_PROFILES := preload("res://game/presentation/office_floor/display_surface_profiles.gd")
+const SURFACE_DECOR := preload("res://game/presentation/office_floor/office_surface_decor.gd")
 
 @export_file("*.glb") var model_path := ""
 @export_enum("on", "off", "auto") var display_power := "auto"
@@ -144,6 +145,7 @@ func _ready() -> void:
 		return # Carpet lies on the level floor and must not create a raised obstacle.
 	var volume := _add_shapes(visual)
 	_setup_display()
+	SURFACE_DECOR.apply(visual, model_path, _display, display_seed)
 	if model_path.get_file() == "06_conference_chair.glb" and global_position.y < 0.25:
 		var lowest := INF
 		for mesh in _shape_meshes:

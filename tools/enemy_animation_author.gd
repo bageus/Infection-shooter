@@ -10,6 +10,7 @@ extends RefCounted
 ## Used by tools/build_enemy_rigs.gd; the game only plays the baked clips.
 
 const FPS := 30.0
+const DEATH_POSES := preload("res://tools/enemy_death_poses.gd")
 const SIDES := {"L_": 1.0, "R_": -1.0}
 const BONES := [
 	"Hips", "Spine", "Chest", "Neck", "Head",
@@ -97,6 +98,12 @@ func build_humanoid_library(source_style: Dictionary) -> AnimationLibrary:
 	library.add_animation(&"AttackLeft", _bake(func(t: float) -> Dictionary: return _mirror(_keyed(t / attack_length, _attack_keys(style), style)), attack_length, false))
 	var death_length := float(style.death_seconds)
 	library.add_animation(&"Death", _bake(func(t: float) -> Dictionary: return _keyed(t / death_length, _death_keys(style), style), death_length, false))
+	# Directional deaths (ADR-0034): a forward fall and a thrown-back fall.
+	var forward_keys := DEATH_POSES.forward_keys(_stance(style), hips_height)
+	library.add_animation(&"DeathForward", _bake(func(t: float) -> Dictionary: return _keyed(t / death_length, forward_keys, style), death_length, false))
+	var back_length := death_length * 0.85
+	var back_keys := DEATH_POSES.back_keys(_stance(style), hips_height)
+	library.add_animation(&"DeathBack", _bake(func(t: float) -> Dictionary: return _keyed(t / back_length, back_keys, style), back_length, false))
 	if bool(style.get("slam", false)):
 		var slam_length := float(style.slam_seconds)
 		library.add_animation(&"Slam", _bake(func(t: float) -> Dictionary: return _keyed(t / slam_length, _slam_keys(style), style), slam_length, false))

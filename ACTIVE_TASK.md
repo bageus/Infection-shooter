@@ -9,6 +9,8 @@ updated: 2026-10-06
 
 # Active task
 
+06.10.2026 (интеграция PR #41): объединён актуальный main с декором офиса и направленными падениями врагов. Сохранены обе серии тестов; ADR оптимизаций перенумерованы в 0035/0036 без изменения решений. Проверки объединённой ревизии ожидаются. Точное следующее действие: дождаться CI и влить PR #41 по указанию владельца.
+
 06.10.2026 (второй проход оптимизаций): выполнен согласованный порядок T002:
 MultiMesh пола по пространственным секциям/материалам (1200 плиток → ≤160
 визуальных узлов для 80×60 без лестниц); включённые дисплеи обновляются по
@@ -17,7 +19,7 @@ GIF-дедлайнам; HUD сравнивает снимки, радар — д
 отключены; гильзы переиспользуют immutable формы/материал, сохраняя cap 40.
 Тени экранов измерены отдельным 24-screen ABBA-сценарием в обоих renderer;
 по software CI эффект зависит от renderer, поэтому настройки игры прежние.
-ADR-0034 и docs/RUNTIME_OPTIMIZATION_QA.md; владельцы/зависимости/public API,
+ADR-0036 и docs/RUNTIME_OPTIMIZATION_QA.md; владельцы/зависимости/public API,
 DTO v8, баланс и коллизии сохранены, архитектурных исключений нет.
 Код 3b6ce879 проверен Godot 4.7.2: architecture 37469570293 SUCCESS;
 https://github.com/bageus/Infection-shooter/actions/runs/37469570276 SUCCESS:
@@ -37,7 +39,7 @@ PR #41 без конфликтов; последующий коммит меня
 частиц; частичное обновление occlusion; mission-local FIFO полного A* (2/кадр);
 пересчёт оружия по изменениям; удаление пяти внутренних функций и замена двух
 старых адаптеров на WorldActivation; engine-light prop_damage_state в combat.
-ADR-0033, аддитивные chase_budget_v1/prop_damage_state_v1; map DTO v8 и баланс
+ADR-0035, аддитивные chase_budget_v1/prop_damage_state_v1; map DTO v8 и баланс
 прежние. Новые тесты оружия/состояния разрушения и расширенные bindings, occlusion,
 chase-route regressions подключены к CI. Локальный validate_project и 3 Python scene-access tests PASS.
 Код 02e007c проверен Godot 4.7.2 в CI: architecture 37463282812 и runtime
@@ -50,6 +52,10 @@ Windows/Web и фактический прирост FPS остаются руч
 Точное следующее действие: ревью PR #41, затем замер кадра на целевом устройстве
 на одинаковой карте с толпой/разрушениями. Общая T002 остаётся IN_PROGRESS.
 
+
+06.10.2026 (4): по запросу владельца смерть врагов зависит от причины (death_fall_v1, ADR-0034): движущийся враг, убитый из пистолета/автомата издалека, падает вперёд (новый клип DeathForward) и проезжает по инерции; дробовик вблизи отбрасывает назад (DeathBack) до ~1.6 м; граната отбрасывает от центра взрыва с разворотом корпуса. Тело останавливается перед стенами, лужа крови — в точке падения. Клипы запечены для пяти гуманоидов, меши/сцены rig и DTO прежние, исключений нет. Новый run_death_fall_tests.gd. Следующее действие: проверить ощущение падений в игре на Windows/Web.
+
+06.10.2026 (3): по запросу владельца добавлена отделка офиса (surface_decor_v1, ADR-0033): conference table (07_table_longest) — шоколадная деревянная столешница и графитовая рама (новые бесшовные текстуры, triplanar; обломки сохраняют отделку); случайный документ из атласа 6 документов на верхнем листе бумаги (стопка, отдельный лист, файлы), уложенный по поверхности листа; 0–3 стикера из атласа 8 стикеров по краям мониторов, стабильно по display_seed. DTO карт прежние, исключений нет. Новый run_surface_decor_tests.gd. Следующее действие: визуально проверить стол, бумаги и мониторы в Windows/Web.
 
 06.10.2026 (2): по запросу владельца меню мутаций приведено к стилю главного меню и настроек: затемнение поверх игры, панель #151a1c с серой рамкой, заголовок MUTATIONS шрифтом меню, отдельные показатели мутации/очков/стабильности, кнопка закрытия и подписи клавиш как в меню, приглушённая палитра линий и кругов; дерево центрируется. Описание навыка при наведении вместо системной подсказки показывается в компактной HUD-плашке рядом с кругом (тип/ветка/стадия, название, описание, требования с отметками выполнено/нет, статус); плашка сохраняется после покупки/фиксации и не выходит за экран. Логика навыков, публичные API и форматы прежние, исключений нет. Обновлены run_ui_sound_tests.gd и run_menu_tests.gd. Следующее действие: визуальная приёмка меню мутаций в Windows/Web.
 
@@ -74,6 +80,7 @@ Windows/Web и фактический прирост FPS остаются руч
 Build the first playable combat-slice foundation with an authored office floor, player, combat, infected enemies, infection source, and observable fail states.
 
 ## In scope
+- owner-requested conference table chocolate/graphite finish, random document prints on top paper sheets and 0-3 monitor-edge stickers (ADR-0033);
 - owner-requested mutation-tree hover detail card and restyle matching the main/settings menus;
 - owner follow-up: shared pinned tab notices/spacing, installed lamp controls, blocked muzzle wall guard, clipped multi-receiver blood/scorch (excluding glass), random corpse and XYZ part poses, reported editor warning fixes (ADR-0030);
 - owner-requested integrated PRs, player/enemy textured blood, retired zombie art, floor/wall placement, unclipped planner color picker, separate effects/music mix, exact cursor/barrel aim and 30% smaller launcher casings (ADR-0029);
