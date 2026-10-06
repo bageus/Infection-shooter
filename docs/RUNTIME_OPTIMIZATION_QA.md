@@ -193,7 +193,26 @@ counters/retirement/clear/idle/wake. Frozen baseline — только test oracl
 
 Focused Godot 4.7.2 run 37517775924 PASS: impact geometry 0 failures, stamp
 32/2048 кандидатов и 0 failures, blood FIFO PASS, body topology 0 failures.
-Полный runtime последней ревизии ожидается; это не замер FPS Windows/Web.
+Финальный код 65196f4d: architecture 37519444419 SUCCESS; focused geometry
++ integration 37519444758 SUCCESS (door/blood/grenade/body 0 failures).
+Полный runtime https://github.com/bageus/Infection-shooter/actions/runs/37519444432
+SUCCESS: чистый import, project/resource/Python gates, 58 headless наборов,
+main 180 кадров, menus, rendered smoke и 28 native запусков (14 в каждом
+Compatibility/Forward+). Все native exit 0; фактических SCRIPT/SHADER/ERROR
+нет. Локально validate_project, 3 Python scene-access tests, YAML parse и
+diff-check PASS. Последующий коммит только обновляет результаты и path
+triggers focused workflow, тестовые assertions/production code прежние.
+Это не замер FPS Windows/Web.
+
+Интеграционная проверка обнаружила уже существовавший дефект main 5b7e07:
+PNG Toxic Gas Cloud Atlas удалён, но mutagen_cloud оставлял его preload.
+Ссылка заменена на добавленный владельцем Six-frame green smoke sprite
+sheet.png; пользовательские изображения сохранены. Новый blood FIFO test
+сначала читал records до обработки public deferred effect queue: добавлены
+два physics_frame ожидания, production logic не менялась. Быстрый integration
+job запускает actual main и door/blood/grenade/body tests; его triggers также
+включают атласы мутагена, чтобы replacement path проверялся при следующей
+замене. Визуальная субъективная приёмка нового атласа остаётся ручной.
 
 Ручная приёмка: одинаковые карта/seed/оружие/настройки и 60-секундный маршрут
 до/после; повторные попадания и взрывы у сложной мебели, кровь/разрушение
