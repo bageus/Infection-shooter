@@ -90,5 +90,11 @@ GPU timestamp. Сравнить медианы двух проходов каж�
 matrix queries в новом тесте, а также неуказанный WeakRef в lifetime test.
 Основная сцена, импорт, прежние gameplay/native suites, дисплеи, HUD, радар,
 гильзы и shadow profile прошли. Матрицы/геометрия пола проверяются в обоих native
-проходах; headless проверяет ресурсы/количество/пересборку. Исправленный полный
-run должен пройти перед завершением инкремента.
+проходах; headless проверяет ресурсы/количество/пересборку. Исправленный полный run 37469570276 на 3b6ce879 прошёл: 51 headless набор,
+main 180 кадров, menu captures, rendered smoke и 28 native запусков (14 в каждом
+renderer), clean import/project/resource gates. Все native exit 0, фактических
+SCRIPT/SHADER/ERROR нет. Architecture 37469570293 SUCCESS. Последующая запись
+этих результатов меняет только документацию; код и тесты остаются прежними.
+
+https://github.com/bageus/Infection-shooter/actions/runs/37469570276
+https://github.com/bageus/Infection-shooter/actions/runs/37469570293
