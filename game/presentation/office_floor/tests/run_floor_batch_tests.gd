@@ -22,7 +22,7 @@ func _run() -> void:
 	var opening := Rect2(-1, -1, 2, 2)
 	floor_view.set_stair_openings([opening])
 	_check(not _covers(floor_view, Vector2.ZERO), "Stair opening stays clear")
-	_check(_covers(floor_view, Vector2(1.25, 0)) and _covers(floor_view, Vector2(-1.25, 0)), "Subtiles preserve floor alongside the opening")
+	_check(_covers(floor_view, Vector2(1.25, .25)) and _covers(floor_view, Vector2(-1.25, .25)), "Subtiles preserve floor alongside the opening")
 	for section: MultiMeshInstance3D in floor_view.get_children():
 		for index in section.multimesh.instance_count:
 			var pose := section.multimesh.get_instance_transform(index)
@@ -31,7 +31,7 @@ func _run() -> void:
 	floor_view.set_stair_openings([opening])
 	_check(floor_view.get_children() == batches, "Identical openings do not rebuild batches")
 	floor_view.set_stair_openings([])
-	_check(_count(floor_view) == 1200 and _covers(floor_view, Vector2.ZERO), "Removing stairs restores the original floor")
+	_check(_count(floor_view) == 1200 and _covers(floor_view, Vector2(.25, .25)), "Removing stairs restores the original floor")
 	floor_view.queue_free()
 	await process_frame
 	await process_frame

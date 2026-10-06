@@ -34,6 +34,7 @@ func set_registry(wall: Node) -> void:
 	if is_instance_valid(registry):
 		registry.call("unregister_display", self)
 	registry = wall
+	_next_frame_time = 0.0
 	if is_instance_valid(registry):
 		content = registry.get("content")
 		registry.call("register_display", self)

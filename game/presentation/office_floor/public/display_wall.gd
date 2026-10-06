@@ -21,6 +21,7 @@ var _layout := LAYOUT.new()
 func register_display(display: Node3D) -> void:
 	if not displays.has(display):
 		displays.append(display)
+	update_animation(display)
 	request_layout()
 
 
