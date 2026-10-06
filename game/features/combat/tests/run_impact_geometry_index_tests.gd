@@ -125,9 +125,14 @@ func _resource_lifecycle() -> void:
 	var hit: Dictionary = geometry.resolve(body, point, Vector3.FORWARD)
 	_check(is_equal_approx(hit["position"].z, .5), "Initial box surface is found")
 	var shared := mesh.mesh as BoxMesh
+	var independent := GEOMETRY.new()
+	independent.resolve(body, point, Vector3.FORWARD)
 	shared.size = Vector3.ONE * .4
 	hit = geometry.resolve(body, point, Vector3.FORWARD)
 	_check(is_equal_approx(hit["position"].z, .2), "Resource.changed rebuilds triangle index")
+	hit = independent.resolve(body, point, Vector3.FORWARD)
+	_check(is_equal_approx(hit["position"].z, .2), "Shared resources invalidate independent geometry pools")
+	independent = null
 	mesh.mesh = BoxMesh.new()
 	hit = geometry.resolve(body, point, Vector3.FORWARD)
 	_check(is_equal_approx(hit["position"].z, .5), "Replacing the mesh uses its own index")

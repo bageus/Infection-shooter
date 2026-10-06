@@ -1,6 +1,7 @@
 extends RefCounted
 ## Cache tree composition, never visibility, resource assignments or transforms.
 const MAX_ROOTS := 128
+const WATCH := preload("res://game/features/combat/impact_cache_watch.gd")
 var _entries: Dictionary = {}
 var rebuilds := 0
 
@@ -11,8 +12,9 @@ func gather(root: Node) -> Array[MeshInstance3D]:
 		_remove(id)
 		while _entries.size() >= MAX_ROOTS:
 			_remove(_entries.keys()[0])
-		var callback := _changed.bind(weakref(self), id)
-		var entry := {"dirty": false, "meshes": [], "nodes": [], "callback": callback}
+		var watch := WATCH.new(self, &"_invalidate", id)
+		var callback: Callable = watch.changed
+		var entry := {"dirty": false, "meshes": [], "nodes": [], "callback": callback, "watch": watch}
 		_collect(root, entry)
 		_entries[id] = entry
 		rebuilds += 1
@@ -71,9 +73,3 @@ func _notification(what: int) -> void:
 				if node != null and node.child_order_changed.is_connected(entry["callback"]):
 					node.child_order_changed.disconnect(entry["callback"])
 		_entries.clear()
-
-
-static func _changed(reference: WeakRef, id: int) -> void:
-	var cache: RefCounted = reference.get_ref()
-	if cache != null:
-		cache.call("_invalidate", id)

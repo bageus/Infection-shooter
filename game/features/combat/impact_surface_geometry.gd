@@ -2,6 +2,7 @@ extends RefCounted
 ## Project a broad-phase collider hit onto the visible mesh, not its bounding box.
 const TRIANGLE_INDEX := preload("res://game/features/combat/impact_triangle_index.gd")
 const RECEIVER_CACHE := preload("res://game/features/combat/impact_receiver_cache.gd")
+const WATCH := preload("res://game/features/combat/impact_cache_watch.gd")
 const MAX_INDEXED_MESHES := 128
 var _indices: Dictionary = {}
 var _receivers := RECEIVER_CACHE.new()
@@ -70,12 +71,15 @@ func receivers(collider: Node3D) -> Array[MeshInstance3D]:
 
 
 func _index_for(mesh: Mesh) -> RefCounted:
+	if _indices.has(mesh) and _indices[mesh]["dirty"]:
+		_remove_index(mesh)
 	if not _indices.has(mesh):
 		while _indices.size() >= MAX_INDEXED_MESHES:
 			_remove_index(_indices.keys()[0])
 		var id := mesh.get_instance_id()
-		var callback := _changed.bind(weakref(self), id)
-		_indices[mesh] = {"index": TRIANGLE_INDEX.new(mesh.get_faces()), "callback": callback}
+		var watch := WATCH.new(self, &"_invalidate_index", id)
+		var callback: Callable = watch.changed
+		_indices[mesh] = {"index": TRIANGLE_INDEX.new(mesh.get_faces()), "callback": callback, "watch": watch, "dirty": false}
 		mesh.changed.connect(callback)
 	return _indices[mesh]["index"]
 
@@ -83,7 +87,7 @@ func _index_for(mesh: Mesh) -> RefCounted:
 func _invalidate_index(id: int) -> void:
 	for mesh: Mesh in _indices.keys():
 		if mesh.get_instance_id() == id:
-			_remove_index(mesh)
+			_indices[mesh]["dirty"] = true
 			return
 
 
@@ -102,9 +106,3 @@ func _notification(what: int) -> void:
 			if mesh.changed.is_connected(callback):
 				mesh.changed.disconnect(callback)
 		_indices.clear()
-
-
-static func _changed(reference: WeakRef, id: int) -> void:
-	var geometry: RefCounted = reference.get_ref()
-	if geometry != null:
-		geometry.call("_invalidate_index", id)

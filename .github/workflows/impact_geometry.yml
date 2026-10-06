@@ -6,6 +6,7 @@ on:
       - 'game/features/combat/impact_*geometry.gd'
       - 'game/features/combat/impact_triangle_index.gd'
       - 'game/features/combat/impact_receiver_cache.gd'
+      - 'game/features/combat/impact_cache_watch.gd'
       - 'game/features/combat/tests/run_impact_geometry_index_tests.gd'
       - '.github/workflows/impact_geometry.yml'
   pull_request:
@@ -13,6 +14,7 @@ on:
       - 'game/features/combat/impact_*geometry.gd'
       - 'game/features/combat/impact_triangle_index.gd'
       - 'game/features/combat/impact_receiver_cache.gd'
+      - 'game/features/combat/impact_cache_watch.gd'
       - 'game/features/combat/tests/run_impact_geometry_index_tests.gd'
       - '.github/workflows/impact_geometry.yml'
 permissions:
@@ -36,7 +38,7 @@ jobs:
           # These private helpers depend only on engine types, never game assets.
           mkdir -p /tmp/impact_geometry/game/features/combat/tests
           echo 'config_version=5' > /tmp/impact_geometry/project.godot
-          cp game/features/combat/impact_surface_geometry.gd game/features/combat/impact_triangle_index.gd game/features/combat/impact_receiver_cache.gd /tmp/impact_geometry/game/features/combat/
+          cp game/features/combat/impact_cache_watch.gd game/features/combat/impact_surface_geometry.gd game/features/combat/impact_triangle_index.gd game/features/combat/impact_receiver_cache.gd /tmp/impact_geometry/game/features/combat/
           cp game/features/combat/tests/run_impact_geometry_index_tests.gd /tmp/impact_geometry/game/features/combat/tests/
           timeout 120 godot --headless --path /tmp/impact_geometry --script res://game/features/combat/tests/run_impact_geometry_index_tests.gd 2>&1 | tee /tmp/impact_geometry.log
           if grep -E 'SCRIPT ERROR|^ERROR:' /tmp/impact_geometry.log; then exit 1; fi
