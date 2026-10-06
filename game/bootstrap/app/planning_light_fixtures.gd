@@ -7,6 +7,9 @@ var default_visible: CheckButton
 var selected_panel: VBoxContainer
 var selected_shape: OptionButton
 var selected_visible: CheckButton
+var selected_height: SpinBox
+var selected_energy: SpinBox
+var selected_angle: SpinBox
 var _updating := false
 
 
@@ -31,6 +34,10 @@ func setup(owner_controls: Node) -> void:
 		selected_shape.add_item(title)
 	row.add_child(selected_shape)
 	selected_panel.add_child(row)
+	# Installed lamps expose the same editable values as the new-lamp defaults.
+	selected_height = _spin_row("Высота", 0.25, 10.0, 0.05, " m")
+	selected_energy = _spin_row("Яркость", 0.0, 16.0, 0.25, "")
+	selected_angle = _spin_row("Угол конуса", 5.0, 89.0, 1.0, "°")
 	selected_visible = CheckButton.new()
 	selected_visible.text = "Виден в игре"
 	selected_visible.tooltip_text = "Скрывается только корпус; источник света продолжает работать."
@@ -45,6 +52,26 @@ func setup(owner_controls: Node) -> void:
 	selected_panel.hide()
 	selected_shape.item_selected.connect(_on_shape_changed)
 	selected_visible.toggled.connect(_on_visibility_changed)
+	selected_height.value_changed.connect(_on_height_changed)
+	selected_energy.value_changed.connect(_on_energy_changed)
+	selected_angle.value_changed.connect(_on_angle_changed)
+
+
+func _spin_row(title: String, minimum: float, maximum: float, step: float, suffix: String) -> SpinBox:
+	var row := HBoxContainer.new()
+	row.name = title
+	var label := Label.new()
+	label.text = title
+	row.add_child(label)
+	var spin := SpinBox.new()
+	spin.min_value = minimum
+	spin.max_value = maximum
+	spin.step = step
+	spin.suffix = suffix
+	spin.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	row.add_child(spin)
+	selected_panel.add_child(row)
+	return spin
 
 
 func configure_new_asset(node: Node3D, entry: Dictionary) -> void:
@@ -60,7 +87,39 @@ func update_selection(node: Node3D) -> void:
 	_updating = true
 	selected_shape.select(maxi(SHAPES.find(str(config["shape"])), 0))
 	selected_visible.set_pressed_no_signal(bool(config["visible_in_game"]))
+	var spot := node.find_child("Light", true, false) as SpotLight3D
+	selected_height.set_value_no_signal(node.global_position.y)
+	selected_energy.set_value_no_signal(float(node.call("get_authored_energy")))
+	selected_angle.get_parent().visible = spot != null
+	if spot != null:
+		selected_angle.set_value_no_signal(spot.spot_angle)
 	_updating = false
+
+
+func _on_height_changed(value: float) -> void:
+	var node: Node3D = controls.objects.selected
+	if _updating or node == null or is_equal_approx(node.global_position.y, value):
+		return
+	controls.session.edit_history.call("record_transform", node)
+	node.global_position.y = value
+	controls.session.geometry._clear_selection_highlight()
+	controls.session.geometry._show_selection_highlight(node)
+	controls.status.text = "СВЕТИЛЬНИК | высота %.2f м" % value
+
+
+func _on_energy_changed(value: float) -> void:
+	var node: Node3D = controls.objects.selected
+	if _updating or node == null or not node.has_method("set_authored_energy"):
+		return
+	controls._adjust_selected_light(value - float(node.call("get_authored_energy")))
+
+
+func _on_angle_changed(value: float) -> void:
+	var node: Node3D = controls.objects.selected
+	var spot: SpotLight3D = node.find_child("Light", true, false) as SpotLight3D if node != null else null
+	if _updating or spot == null:
+		return
+	controls._adjust_selected_light_angle(value - spot.spot_angle)
 
 
 func _on_default_visibility_changed(_enabled: bool) -> void:

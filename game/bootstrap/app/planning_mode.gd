@@ -276,16 +276,10 @@ func _input(event: InputEvent) -> void:
 		if Input.is_mouse_button_pressed(MOUSE_BUTTON_LEFT) and Input.is_key_pressed(KEY_ALT):
 			_rotate_camera(event.relative)
 		elif Input.is_mouse_button_pressed(MOUSE_BUTTON_LEFT) and objects.selected != null:
-			var world: Vector3 = geometry._screen_to_floor(event.position)
-			if world.is_finite():
-				if not _drag_recorded:
-					edit_history.call("record_transform", objects.selected)
-					_drag_recorded = true
-				var locked_y: float = objects.selected.global_position.y
-				objects.selected.global_position = geometry._snap_position_for(objects.selected, world)
-				if geometry._is_ceiling_tool(objects.selected):
-					objects.selected.global_position.y = locked_y
-				objects._update_status()
+			if not _drag_recorded:
+				edit_history.call("record_transform", objects.selected)
+				_drag_recorded = true
+			objects._drag_selected(event.position)
 		elif objects.preview != null:
 			objects._update_preview(event.position)
 

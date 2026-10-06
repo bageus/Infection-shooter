@@ -202,6 +202,24 @@ func _screen_to_surface(screen_pos: Vector2, placing: Node3D) -> Vector3:
 	return _screen_to_floor(screen_pos)
 
 
+# Wall point under the cursor for an already placed wall object, ignoring the
+# object's own collision so it slides along the wall instead of onto the floor.
+func _screen_to_wall(screen_pos: Vector2, node: Node3D) -> Vector3:
+	var origin = session.camera.project_ray_origin(screen_pos)
+	var query = PhysicsRayQueryParameters3D.create(origin, origin + session.camera.project_ray_normal(screen_pos) * 300.0)
+	var excluded: Array[RID] = []
+	for body in node.find_children("*", "CollisionObject3D", true, false):
+		excluded.append((body as CollisionObject3D).get_rid())
+	if node is CollisionObject3D:
+		excluded.append((node as CollisionObject3D).get_rid())
+	query.exclude = excluded
+	var hit = session.camera.get_world_3d().direct_space_state.intersect_ray(query)
+	if hit.is_empty() or absf((hit["normal"] as Vector3).y) >= 0.35:
+		return Vector3(INF, INF, INF)
+	node.set_meta("planning_wall_normal", hit["normal"])
+	return hit["position"]
+
+
 func _screen_to_floor(screen_pos: Vector2) -> Vector3:
 	var origin = session.camera.project_ray_origin(screen_pos)
 	var direction = session.camera.project_ray_normal(screen_pos)
