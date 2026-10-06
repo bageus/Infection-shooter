@@ -27,6 +27,13 @@ instance uniform vec2 pivot = vec2(0.5, 0.5);
 instance uniform float axial = 0.0;
 instance uniform vec3 axis = vec3(1.0, 0.0, 0.0);
 instance uniform float atlas_angle = 0.0;
+// Ground mode: the quad lies flat on the floor, turned so the sheet's top
+// points away from the camera, and stretched in depth by ground_stretch so
+// a ring drawn as a camera-angle ellipse lies on the floor as a circle.
+instance uniform float ground = 0.0;
+instance uniform float ground_stretch = 1.0;
+// Cycle mode: the last frame crossfades into the first (seamless loops).
+instance uniform float cycle = 0.0;
 
 vec4 frame_sample(float frame, vec2 uv) {
 	float index = clamp(floor(frame), 0.0, frame_count - 1.0);
@@ -40,7 +47,14 @@ void vertex() {
 	vec2 local = VERTEX.xy - vec2(pivot.x - 0.5, 0.5 - pivot.y);
 	float scale = length(MODEL_MATRIX[0].xyz);
 	vec3 origin = MODEL_MATRIX[3].xyz;
-	if (axial > 0.5) {
+	if (ground > 0.5) {
+		vec3 away = origin - INV_VIEW_MATRIX[3].xyz;
+		away.y = 0.0;
+		away = length(away) > 0.001 ? normalize(away) : vec3(0.0, 0.0, -1.0);
+		vec3 right = vec3(-away.z, 0.0, away.x);
+		vec3 world = origin + (right * local.x + away * local.y * ground_stretch) * scale;
+		POSITION = PROJECTION_MATRIX * VIEW_MATRIX * vec4(world, 1.0);
+	} else if (axial > 0.5) {
 		float a = -atlas_angle;
 		local = mat2(vec2(cos(a), sin(a)), vec2(-sin(a), cos(a))) * local;
 		vec3 along = normalize(axis);
@@ -65,7 +79,9 @@ void fragment() {
 	vec2 uv = clamp(UV, vec2(0.002), vec2(0.998));
 	float blend = fract(frame_position);
 	vec4 current = frame_sample(frame_position, uv);
-	vec4 next = frame_sample(min(frame_position + 1.0, frame_count - 1.0), uv);
+	float following = frame_position + 1.0;
+	following = cycle > 0.5 ? mod(following, frame_count) : min(following, frame_count - 1.0);
+	vec4 next = frame_sample(following, uv);
 	vec4 color = mix(current, next, blend) * tint;
 	vec2 edge = min(UV, 1.0 - UV);
 	float soft = edge_softness > 0.0 ? smoothstep(0.0, edge_softness, min(edge.x, edge.y)) : 1.0;

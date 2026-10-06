@@ -2,13 +2,31 @@ extends RefCounted
 
 const ROOT := "res://models/objects/textures/blood_decals_45"
 const CATEGORIES := ["splatter", "stain", "smear", "pool", "drops"]
+# Each category is one atlas of evenly sized cells, read row by row; the
+# frame's 1-based position is its variant ("pool_03" is the third cell).
+const ATLASES := {
+	"splatter": {"file": "splatter/splatter_atlas_3x3.png", "grid": Vector2i(3, 3)},
+	"stain": {"file": "stain/stain_atlas_3x3.png", "grid": Vector2i(3, 3)},
+	"smear": {"file": "smear/smear_atlas_3x3.png", "grid": Vector2i(3, 3)},
+	"pool": {"file": "pool/pool_atlas_4x2.png", "grid": Vector2i(4, 2)},
+	"drops": {"file": "drops/drops_atlas_3x3.png", "grid": Vector2i(3, 3)},
+}
+# The atlases carry faint alpha noise around each mark; cells are trimmed to
+# pixels above this alpha after box-averaging, so noise does not widen them.
+const TRIM_ALPHA := 6.0 / 255.0
+const TRIM_SHRINKS := 4
 var entries: Dictionary = {}
 var recent: Dictionary = {}
 
 
 # Processed textures are shared by every library with the same settings, so
-# restarts and planner decals do not decode and resize the 45 images again.
+# restarts and planner decals do not decode and slice the atlases again.
 static var _shared: Dictionary = {}
+
+
+static func frame_count(category: String) -> int:
+	var grid: Vector2i = ATLASES[category]["grid"] if ATLASES.has(category) else Vector2i.ZERO
+	return grid.x * grid.y
 
 
 func load_assets(max_dimension: int = 512, brightness: float = 1.18) -> void:
@@ -21,24 +39,16 @@ func load_assets(max_dimension: int = 512, brightness: float = 1.18) -> void:
 	_shared[key] = entries
 	for category in CATEGORIES:
 		entries[category] = []
-		for index in range(1, 10):
-			var path := ROOT.path_join(category).path_join("%s_%02d.png" % [category, index])
-			var image: Image
-			if ResourceLoader.exists(path):
-				var imported := load(path) as Texture2D
-				if imported != null:
-					image = imported.get_image()
-			if image == null:
-				image = Image.load_from_file(path)
-			if image == null or image.is_empty():
-				push_warning("Blood texture unavailable: " + path)
-				continue
-			if image.is_compressed():
-				if image.decompress() != OK:
-					push_warning("Blood texture could not be decompressed: " + path)
-					continue
-			image.convert(Image.FORMAT_RGBA8)
-			var used := image.get_used_rect()
+		var path := ROOT.path_join(ATLASES[category]["file"])
+		var atlas := _load_image(path)
+		if atlas == null:
+			continue
+		var grid: Vector2i = ATLASES[category]["grid"]
+		var cell := Vector2i(atlas.get_width() / grid.x, atlas.get_height() / grid.y)
+		for index in grid.x * grid.y:
+			var origin := Vector2i(index % grid.x, index / grid.x) * cell
+			var image := atlas.get_region(Rect2i(origin, cell))
+			var used := _visible_rect(image)
 			if not used.has_area():
 				continue
 			image = image.get_region(used)
@@ -48,7 +58,51 @@ func load_assets(max_dimension: int = 512, brightness: float = 1.18) -> void:
 				image.resize(maxi(1, roundi(image.get_width() * factor)), maxi(1, roundi(image.get_height() * factor)), Image.INTERPOLATE_LANCZOS)
 			image.adjust_bcs(brightness, 1.0, 1.0)
 			image.generate_mipmaps()
-			entries[category].append({"texture": ImageTexture.create_from_image(image), "aspect": float(used.size.x) / used.size.y, "variant": index})
+			entries[category].append({"texture": ImageTexture.create_from_image(image), "aspect": float(used.size.x) / used.size.y, "variant": index + 1})
+
+
+func _load_image(path: String) -> Image:
+	var image: Image
+	if ResourceLoader.exists(path):
+		var imported := load(path) as Texture2D
+		if imported != null:
+			image = imported.get_image()
+	if image == null:
+		image = Image.load_from_file(path)
+	if image == null or image.is_empty():
+		push_warning("Blood atlas unavailable: " + path)
+		return null
+	if image.is_compressed() and image.decompress() != OK:
+		push_warning("Blood atlas could not be decompressed: " + path)
+		return null
+	image.clear_mipmaps()
+	image.convert(Image.FORMAT_RGBA8)
+	return image
+
+
+# Visible rectangle of one cell, found on a box-averaged copy so isolated
+# near-transparent pixels are ignored; two coarse pixels of margin keep the
+# outermost droplets.
+static func _visible_rect(image: Image) -> Rect2i:
+	var coarse := image.duplicate() as Image
+	var scale := 1
+	for i in TRIM_SHRINKS:
+		if coarse.get_width() < 2 or coarse.get_height() < 2:
+			break
+		coarse.shrink_x2()
+		scale *= 2
+	var low := Vector2i(coarse.get_width(), coarse.get_height())
+	var high := Vector2i(-1, -1)
+	for y in coarse.get_height():
+		for x in coarse.get_width():
+			if coarse.get_pixel(x, y).a > TRIM_ALPHA:
+				low = Vector2i(mini(low.x, x), mini(low.y, y))
+				high = Vector2i(maxi(high.x, x), maxi(high.y, y))
+	if high.x < 0:
+		return Rect2i()
+	var start := (low - Vector2i(2, 2)) * scale
+	var end := (high + Vector2i(3, 3)) * scale
+	return Rect2i(Vector2i.ZERO, image.get_size()).intersection(Rect2i(start, end - start))
 
 
 func choose(category: String) -> Dictionary:

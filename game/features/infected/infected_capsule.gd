@@ -8,6 +8,7 @@ const BLOOD_FX := preload("res://game/features/infected/blood_drip_fx.gd")
 const BLAST_DISMEMBER_DAMAGE := 60.0
 const AUDIO := preload("res://game/features/infected/infected_audio.gd")
 const DEATH_FALL := preload("res://game/features/infected/death_fall.gd")
+const STATUS_FX := preload("res://game/features/infected/infected_status_fx.gd")
 const KILLING_PUSH_MSEC := 300
 
 # Public v1 presentation facts: no effect ownership or renderer dependency.
@@ -81,6 +82,7 @@ var _pending_hit := -1.0
 var _face_direction := Vector3.ZERO
 var _parts: Node
 var audio: AUDIO
+var status_fx: STATUS_FX
 var _mobility := 1.0
 var _attack_scale := 1.0
 var _last_hit_position := Vector3.ZERO
@@ -114,6 +116,17 @@ func _ready() -> void:
 	audio.name = "Audio"
 	add_child(audio)
 	audio.setup(self, body_visual.scale.x if body_visual != null else 1.0)
+	status_fx = STATUS_FX.new()
+	add_child(status_fx)
+	status_fx.setup(self, body_visual, _head_height())
+
+
+# Top of the collision capsule plus a little: where stun stars circle.
+func _head_height() -> float:
+	var capsule := collision_shape.shape as CapsuleShape3D
+	if capsule == null:
+		return 1.9
+	return collision_shape.position.y + capsule.height * 0.5 * absf(collision_shape.scale.y) + 0.3
 
 
 func _setup_body_parts() -> void:
@@ -250,11 +263,15 @@ func on_corpse_part_hit(_part: StringName, _damage: float, hit_position: Vector3
 
 func apply_blast_stun(duration: float, intensity: float) -> void:
 	_blast_stun_remaining = maxf(_blast_stun_remaining, duration * maxf(intensity, 0.25))
+	if not _dead and status_fx != null:
+		status_fx.stunned(_blast_stun_remaining)
 
 
 func apply_mutation_poison(duration: float, damage_per_second: float, parasite: bool = false) -> void:
 	mutation_poison_remaining = maxf(mutation_poison_remaining, duration)
 	_mutation_poison_damage = maxf(_mutation_poison_damage, damage_per_second)
+	if not _dead and status_fx != null:
+		status_fx.poisoned(mutation_poison_remaining)
 	if parasite:
 		set_meta("mutation_parasite", true)
 
@@ -492,6 +509,8 @@ func _die() -> void:
 	if _animation != null:
 		_animation.call("set_active", true)
 	audio.died()
+	if status_fx != null:
+		status_fx.clear()
 	_pending_hit = -1.0
 	var fresh := Time.get_ticks_msec() - _death_push_msec <= KILLING_PUSH_MSEC
 	var size := body_visual.scale.x if body_visual != null else 1.0

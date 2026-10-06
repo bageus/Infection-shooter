@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://dyd45aqyjuy0u"
-path="res://.godot/imported/Isometric cyan blade orbit atlas.png-6d6693fb3262787fd8d433bfcc584ae5.ctex"
+uid="uid://b1g88elcmu0rd"
+path="res://.godot/imported/smear_atlas_3x3.png-72cdaa38e3ecaca11f05747640866f77.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://models/objects/textures/fx_skills/Isometric cyan blade orbit atlas.png"
-dest_files=["res://.godot/imported/Isometric cyan blade orbit atlas.png-6d6693fb3262787fd8d433bfcc584ae5.ctex"]
+source_file="res://models/objects/textures/blood_decals_45/smear/smear_atlas_3x3.png"
+dest_files=["res://.godot/imported/smear_atlas_3x3.png-72cdaa38e3ecaca11f05747640866f77.ctex"]
 
 [params]
 

@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://dntbowh2bf1js"
-path="res://.godot/imported/Eight-frame isometric energy shield atlas.png-2786df424333f24b0dfada0b6d434593.ctex"
+uid="uid://bd1kdq664fsc2"
+path="res://.godot/imported/Oblique isometric spike burst atlas.png-fb8a824d16336e87f4451f4ab72810d6.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://models/objects/textures/fx_skills/Eight-frame isometric energy shield atlas.png"
-dest_files=["res://.godot/imported/Eight-frame isometric energy shield atlas.png-2786df424333f24b0dfada0b6d434593.ctex"]
+source_file="res://models/objects/textures/FX_skills/Oblique isometric spike burst atlas.png"
+dest_files=["res://.godot/imported/Oblique isometric spike burst atlas.png-fb8a824d16336e87f4451f4ab72810d6.ctex"]
 
 [params]
 

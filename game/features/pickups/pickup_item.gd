@@ -83,7 +83,7 @@ func _on_body_entered(body: Node) -> void:
 	match pickup_type:
 		PickupType.MEDKIT:
 			if body.has_method("heal"):
-				accepted = float(body.call("heal", float(amount))) > 0.0
+				accepted = float(body.call("heal", float(amount), &"medkit")) > 0.0
 		PickupType.AMMO_PISTOL:
 			if body.has_method("add_ammo_for_weapon"):
 				accepted = int(body.call("add_ammo_for_weapon", "PISTOL", amount)) > 0

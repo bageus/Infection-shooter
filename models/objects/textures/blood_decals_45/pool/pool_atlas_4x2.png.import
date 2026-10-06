@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://cmutx08syhg74"
-path="res://.godot/imported/Eight-frame isometric mutant claw slash atlas.png-7fd76e9f449f30252105768b1753c336.ctex"
+uid="uid://hdgi4yegj35j"
+path="res://.godot/imported/pool_atlas_4x2.png-94e6377308f4ad6ae6b6de7de343afa4.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://models/objects/textures/fx_skills/Eight-frame isometric mutant claw slash atlas.png"
-dest_files=["res://.godot/imported/Eight-frame isometric mutant claw slash atlas.png-7fd76e9f449f30252105768b1753c336.ctex"]
+source_file="res://models/objects/textures/blood_decals_45/pool/pool_atlas_4x2.png"
+dest_files=["res://.godot/imported/pool_atlas_4x2.png-94e6377308f4ad6ae6b6de7de343afa4.ctex"]
 
 [params]
 

@@ -17,11 +17,13 @@
   "runtime_contracts": {
     "sprite_flipbook_v1": {
       "spawn": "spawn(parent: Node, atlas: Dictionary, position: Vector3, size: float, options := {}) -> MeshInstance3D; null when the atlas texture is missing. The node frees itself after the last frame.",
-      "frame_at": "frame_at(atlas: Dictionary, seconds: float) -> float; fractional frame for a play time, -1 after the end"
+      "frame_at": "frame_at(atlas: Dictionary, seconds: float) -> float; fractional frame for a play time, -1 after the end",
+      "options": "additive option keys (missing = previous behaviour): cycle (repeat the whole sheet in order until stop()), ground (flat on the floor, top away from the camera, stretched by the atlas ground_stretch)"
     },
     "effect_atlases_v1": {
       "atlas": "Dictionary {path, columns, rows, frames, durations: Array[float]} per supplied sheet",
-      "available": "available(atlas: Dictionary) -> bool"
+      "available": "available(atlas: Dictionary) -> bool",
+      "size_for_radius": "size_for_radius(atlas: Dictionary, radius: float) -> float; quad size whose drawn ring/spread (atlas extent) covers the radius"
     },
     "surface_atlases_v1": {
       "material": "material(texture: Texture2D, cell: int) -> ShaderMaterial; immutable BULLET/GLASS textures, row-major 4x2, bullet 0..4, scorch 5..7, glass 0..7; per-mark material"

@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://bkjmfmswhjpng"
-path="res://.godot/imported/Isometric chain lightning VFX atlas.png-44dcb34c74ff48ffb884be1fe970b179.ctex"
+uid="uid://dohkpbtuolpbp"
+path="res://.godot/imported/Four emerald acid puddles.png-67a00c379d7b2499cedb4c324614cf1d.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://models/objects/textures/fx_skills/Isometric chain lightning VFX atlas.png"
-dest_files=["res://.godot/imported/Isometric chain lightning VFX atlas.png-44dcb34c74ff48ffb884be1fe970b179.ctex"]
+source_file="res://models/objects/textures/FX_skills/Four emerald acid puddles.png"
+dest_files=["res://.godot/imported/Four emerald acid puddles.png-67a00c379d7b2499cedb4c324614cf1d.ctex"]
 
 [params]
 

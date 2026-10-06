@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://eshevb11cyp"
-path="res://.godot/imported/Eight-frame isometric electric pulse atlas.png-f6e285fb08fb938046f93c169555a71e.ctex"
+uid="uid://bnet8dbab6jb4"
+path="res://.godot/imported/splatter_atlas_3x3.png-768ad3eecf3554ada841150c6c3e170f.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://models/objects/textures/fx_skills/Eight-frame isometric electric pulse atlas.png"
-dest_files=["res://.godot/imported/Eight-frame isometric electric pulse atlas.png-f6e285fb08fb938046f93c169555a71e.ctex"]
+source_file="res://models/objects/textures/blood_decals_45/splatter/splatter_atlas_3x3.png"
+dest_files=["res://.godot/imported/splatter_atlas_3x3.png-768ad3eecf3554ada841150c6c3e170f.ctex"]
 
 [params]
 

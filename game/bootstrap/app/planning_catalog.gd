@@ -9,7 +9,8 @@ const WORKSTATIONS = preload("res://game/bootstrap/app/workstation_templates.gd"
 const BLOOD_DECAL_SCENE := "res://game/presentation/office_floor/public/props/blood_decal.tscn"
 # Texture ids of the in-game blood set ("<category>_<variant>"), see planner_decor_v1.
 const BLOOD_CATEGORIES := ["splatter", "stain", "smear", "pool", "drops"]
-const BLOOD_VARIANTS := 9
+# Frames per category in the blood atlases (blood_texture_library.gd).
+const BLOOD_VARIANTS := {"splatter": 9, "stain": 9, "smear": 9, "pool": 8, "drops": 9}
 
 var bind_asset: Callable
 var active_catalog: Array = []
@@ -81,7 +82,7 @@ var gore_catalog = [
 func blood_catalog() -> Array:
 	var entries: Array = []
 	for category: String in BLOOD_CATEGORIES:
-		for variant in range(1, BLOOD_VARIANTS + 1):
+		for variant in range(1, int(BLOOD_VARIANTS[category]) + 1):
 			var texture_id := "%s_%02d" % [category, variant]
 			entries.append({"name": "Blood " + texture_id.replace("_", " "), "path": BLOOD_DECAL_SCENE, "kind": "blood", "blood_texture": texture_id})
 	return entries
