@@ -2,30 +2,20 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://eshevb11cyp"
-<<<<<<< Updated upstream
-path.s3tc="res://.godot/imported/Eight-frame isometric electric pulse atlas.png-919f1bc345afe0337a280e0e4a6e0ab5.s3tc.ctex"
-=======
+uid="uid://dgo2tvu6aoppw"
 path="res://.godot/imported/Eight-frame isometric electric pulse atlas.png-f6e285fb08fb938046f93c169555a71e.ctex"
->>>>>>> Stashed changes
 metadata={
-"imported_formats": ["s3tc_bptc"],
-"vram_texture": true
+"vram_texture": false
 }
 
 [deps]
 
-<<<<<<< Updated upstream
-source_file="res://models/objects/textures/FX_skills/Eight-frame isometric electric pulse atlas.png"
-dest_files=["res://.godot/imported/Eight-frame isometric electric pulse atlas.png-919f1bc345afe0337a280e0e4a6e0ab5.s3tc.ctex"]
-=======
 source_file="res://models/objects/textures/fx_skills/Eight-frame isometric electric pulse atlas.png"
 dest_files=["res://.godot/imported/Eight-frame isometric electric pulse atlas.png-f6e285fb08fb938046f93c169555a71e.ctex"]
->>>>>>> Stashed changes
 
 [params]
 
-compress/mode=2
+compress/mode=0
 compress/high_quality=false
 compress/lossy_quality=0.7
 compress/uastc_level=0

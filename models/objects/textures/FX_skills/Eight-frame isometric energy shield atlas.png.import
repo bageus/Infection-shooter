@@ -2,30 +2,20 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://dntbowh2bf1js"
-<<<<<<< Updated upstream
-path.s3tc="res://.godot/imported/Eight-frame isometric energy shield atlas.png-50dcc00151929eb590fe27efbc07d3a4.s3tc.ctex"
-=======
+uid="uid://b56qqbs35668c"
 path="res://.godot/imported/Eight-frame isometric energy shield atlas.png-2786df424333f24b0dfada0b6d434593.ctex"
->>>>>>> Stashed changes
 metadata={
-"imported_formats": ["s3tc_bptc"],
-"vram_texture": true
+"vram_texture": false
 }
 
 [deps]
 
-<<<<<<< Updated upstream
-source_file="res://models/objects/textures/FX_skills/Eight-frame isometric energy shield atlas.png"
-dest_files=["res://.godot/imported/Eight-frame isometric energy shield atlas.png-50dcc00151929eb590fe27efbc07d3a4.s3tc.ctex"]
-=======
 source_file="res://models/objects/textures/fx_skills/Eight-frame isometric energy shield atlas.png"
 dest_files=["res://.godot/imported/Eight-frame isometric energy shield atlas.png-2786df424333f24b0dfada0b6d434593.ctex"]
->>>>>>> Stashed changes
 
 [params]
 
-compress/mode=2
+compress/mode=0
 compress/high_quality=false
 compress/lossy_quality=0.7
 compress/uastc_level=0
