@@ -5,6 +5,7 @@ extends SceneTree
 
 const PLAYER := preload("res://game/features/player/public/player.tscn")
 const DASH_TRAIL := preload("res://game/features/player/dash_trail.gd")
+const RANGE_DOME := preload("res://game/features/player/range_dome.gd")
 
 var failures := 0
 
@@ -29,8 +30,10 @@ func _run() -> void:
 	_expect(vfx.call("has_loop", "storm_pulse"), "Storm Pulse shows its electric field.")
 	effects.call("_start_buff", "bone_blades", 0.3)
 	_expect(vfx.call("has_loop", "bone_blades"), "Bone Blades show their orbit.")
+	_expect(vfx.call("has_range_dome", "storm_pulse") and vfx.call("has_range_dome", "bone_blades"), "Area buffs show their range dome.")
 	await create_timer(0.9).timeout
 	_expect(not vfx.call("has_loop", "storm_pulse") and not vfx.call("has_loop", "bone_blades"), "Buff loops end with their buffs.")
+	_expect(not vfx.call("has_range_dome", "storm_pulse") and not vfx.call("has_range_dome", "bone_blades"), "Range domes end with their buffs.")
 
 	var meshes := player.get_node("Body").find_children("*", "MeshInstance3D", true, false)
 	vfx.call("set_passives", true, true)
@@ -55,7 +58,18 @@ func _run() -> void:
 	vfx.call("chain_lightning", chain)
 	vfx.call("acid_pool", Vector3(2, 0, 0), 2.2, 0.3)
 	vfx.call("spore_cocoon", Vector3(-2, 0, 0), 3.0, 0.2)
-	_expect(stage.get_child_count() == before + 6, "Cast effects appear in the world (%d)." % (stage.get_child_count() - before))
+	# 6 sheets (two chain links) plus range domes for the four area casts.
+	_expect(stage.get_child_count() == before + 10, "Cast effects appear in the world (%d)." % (stage.get_child_count() - before))
+	var domes: Array[Node] = stage.get_children().filter(func(node: Node) -> bool: return node.get_script() == RANGE_DOME)
+	_expect(domes.size() == 4, "Each area cast shows its range dome (%d)." % domes.size())
+	var burst_dome: MeshInstance3D = null
+	for dome in domes:
+		if (dome as Node3D).global_position.distance_to(Vector3.ZERO) < 0.1 and is_equal_approx((dome as Node3D).scale.x, 4.0):
+			burst_dome = dome
+	_expect(burst_dome != null, "The Blood Burst dome covers its 4 m radius.")
+	if burst_dome != null:
+		var top := burst_dome.get_aabb().end.y * burst_dome.scale.y
+		_expect(top > 0.3 and top <= 0.91, "The range dome stays low over the floor (%.2f m)." % top)
 	vfx.call("energy_shield")
 	vfx.call("energy_shield")
 	vfx.call("heartbeat", 0.2)
