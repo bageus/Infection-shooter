@@ -124,7 +124,9 @@ func _on_angle_changed(value: float) -> void:
 
 func _on_default_visibility_changed(_enabled: bool) -> void:
 	if controls.objects._selected_kind() == "light":
-		controls.objects._rebuild_preview()
+		var preview: Node3D = controls.objects.preview
+		if preview != null:
+			configure_new_asset(preview, controls.objects.selected_entry)
 
 
 func _on_shape_changed(_index: int) -> void:

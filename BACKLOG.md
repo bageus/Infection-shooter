@@ -33,3 +33,5 @@ T001 implementation is retained with repository gates passed. Its Godot headless
 |---|---|---|
 | SETUP-001 | Workflow, architecture guardrails, and validators | Before 2026-09-17 |
 | DISC-001 | Owner-approved discovery specification | 2026-09-17 |
+
+- PLANNER_BASELINE_8A8E527: при проверке Lights исходный main воспроизводит run_planning_mode_tests: число сохранённых lamps > 1 и строгая dictionary equality после round-trip (разница rotation_y ~8e-6); run_planner_extension_tests: падение airborne part и четыре torso/barrel aim assertions. Те же ошибки до/после Lights; исправить отдельно, тесты не ослаблять.
