@@ -1,8 +1,10 @@
 extends SceneTree
 ## prop_weight_v1 (ADR-0032): item weights, walking pushes limited by weight
-## and character strength, feet kicking light items aside instead of blocking.
+## and character strength, feet kicking light items aside instead of blocking,
+## and every gunshot shoving loose items by their weight.
 
 const WEIGHT := preload("res://game/presentation/office_floor/prop_weight.gd")
+const BULLET_PUSH := preload("res://game/presentation/office_floor/bullet_push.gd")
 const PROP_SCENE := preload("res://game/presentation/office_floor/public/props/environment_prop.tscn")
 const MODELS := "res://models/objects/enviroments/"
 const BOX := MODELS + "04/04_cardboard_box_closed.glb"
@@ -11,6 +13,9 @@ const MILITARY := MODELS + "04/04_military_crate.glb"
 const VENDING := MODELS + "02/02_vending_automat_1_dented.glb"
 const MUG := MODELS + "09/09_mug.glb"
 const SMALL_BOX := MODELS + "04/04_cardboard_boxes_1.glb"
+const CHAIR := MODELS + "06/06_simple_chair.glb"
+const TRASH_BIN := MODELS + "09/09_trash_bin.glb"
+const LONG_TABLE := MODELS + "07/07_table_longest.glb"
 
 # Mirrors the player/infected contact loop: pushes use the intended motion.
 class Walker:
@@ -42,6 +47,7 @@ func _run() -> void:
 	await _test_strength()
 	await _test_heavy_blocks()
 	await _test_kicks()
+	await _test_shots_move_items()
 	print("Prop weight tests: %d failure(s)." % failures)
 	quit(failures)
 
@@ -158,6 +164,34 @@ func _test_kicks() -> void:
 		_expect(prop.global_position.distance_to(start) > 0.3, "%s is kicked away (moved %.2f m)." % [model.get_file(), prop.global_position.distance_to(start)])
 		stage.queue_free()
 		await process_frame
+
+
+# Every weapon moves every loose item; the lighter it is the further it goes.
+func _test_shots_move_items() -> void:
+	_expect(BULLET_PUSH.speed("PISTOL", 2.5) > BULLET_PUSH.speed("PISTOL", 4.5) and BULLET_PUSH.speed("PISTOL", 4.5) > BULLET_PUSH.speed("PISTOL", 150.0) * 10.0, "Shots push light items much further than heavy ones.")
+	_expect(BULLET_PUSH.speed("PISTOL", 0.01) <= BULLET_PUSH.MAX_SPEED, "A single hit never launches an item faster than the cap.")
+	_expect(BULLET_PUSH.speed("RIFLE", 4.5) > BULLET_PUSH.speed("UZI", 4.5), "A rifle round pushes harder than an Uzi round.")
+	var stage := _stage()
+	var chair := _prop(stage, CHAIR, Vector3(0, 0.05, 0))
+	var bin := _prop(stage, TRASH_BIN, Vector3(4, 0.05, 0))
+	var table := _prop(stage, LONG_TABLE, Vector3(10, 0.05, 0))
+	for frame in 40:
+		await physics_frame
+	var starts := [chair.global_position, bin.global_position, table.global_position]
+	for shot in 3:
+		for item: RigidBody3D in [chair, bin, table]:
+			item.call("take_projectile_hit", 6.0, item.global_position + Vector3(0, 0.4, 0), Vector3.UP, Vector3(1, 0, 0), "PISTOL")
+		await create_timer(0.15).timeout
+	await create_timer(0.8).timeout
+	var moved: Array[float] = []
+	for index in 3:
+		var item: RigidBody3D = [chair, bin, table][index]
+		moved.append(Vector2(item.global_position.x - starts[index].x, item.global_position.z - starts[index].z).length())
+	_expect(moved[0] > 0.05, "Pistol shots move a chair (%.2f m)." % moved[0])
+	_expect(moved[1] > moved[0], "A trash bin flies further than a chair (%.2f vs %.2f m)." % [moved[1], moved[0]])
+	_expect(moved[2] < 0.1, "A long table barely creeps (%.2f m)." % moved[2])
+	stage.queue_free()
+	await process_frame
 
 
 func _expect(condition: bool, message: String) -> void:
