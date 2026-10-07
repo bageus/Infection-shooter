@@ -98,11 +98,10 @@ func chain_lightning(points: Array[Vector3]) -> void:
 
 
 ## Acid Spit: a pool of acid lying for `seconds`.
-func acid_pool(center: Vector3, radius: float, seconds: float) -> void:
+func acid_pool(center: Vector3, radius: float, seconds: float) -> Node3D:
 	if procedural:
-		PROCEDURAL.acid_pool(_world(), center, radius, seconds)
 		RANGE_DOME.spawn(_world(), center, radius, ACID_RANGE, seconds)
-		return
+		return PROCEDURAL.acid_pool(_world(), center, radius, seconds)
 	var atlas := ATLASES.ACID_PUDDLES
 	var pool := FLIPBOOK.spawn(_world(), atlas, center + Vector3.UP * GROUND_LIFT, ATLASES.size_for_radius(atlas, radius), {
 		"flat": true, "frame": randi() % int(atlas["frames"]), "lifetime": seconds, "fade_out": 0.8, "opacity": 0.9,

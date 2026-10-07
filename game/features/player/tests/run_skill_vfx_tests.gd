@@ -114,7 +114,7 @@ func _check_procedural(stage: Node3D, player: Node3D, effects: Node, vfx: Node) 
 	vfx.call("electric_pulse", Vector3.ZERO, 3.0)
 	var chain: Array[Vector3] = [Vector3.ZERO, Vector3(3, 0, 0), Vector3(3, 0, 3)]
 	vfx.call("chain_lightning", chain)
-	vfx.call("acid_pool", Vector3(2, 0, 0), 2.2, 0.3)
+	vfx.call("acid_pool", Vector3(2, 0, 0), 1.7, 0.3)
 	vfx.call("spore_cocoon", Vector3(-2, 0, 0), 3.0, 0.2)
 	# One node per cast plus range domes for the four area casts.
 	_expect(stage.get_child_count() == before + 9, "Procedural casts appear in the world (%d)." % (stage.get_child_count() - before))
