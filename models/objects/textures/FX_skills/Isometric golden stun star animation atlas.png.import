@@ -3,7 +3,11 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://vnibbxxfuo2e"
+<<<<<<< Updated upstream
 path.s3tc="res://.godot/imported/Isometric golden stun star animation atlas.png-9d79b608d7dda80ef65fa043d7dc0fe6.s3tc.ctex"
+=======
+path="res://.godot/imported/Isometric golden stun star animation atlas.png-53df0f3481cb04c565106a5cbe61475b.ctex"
+>>>>>>> Stashed changes
 metadata={
 "imported_formats": ["s3tc_bptc"],
 "vram_texture": true
@@ -11,8 +15,13 @@ metadata={
 
 [deps]
 
+<<<<<<< Updated upstream
 source_file="res://models/objects/textures/FX_skills/Isometric golden stun star animation atlas.png"
 dest_files=["res://.godot/imported/Isometric golden stun star animation atlas.png-9d79b608d7dda80ef65fa043d7dc0fe6.s3tc.ctex"]
+=======
+source_file="res://models/objects/textures/fx_skills/Isometric golden stun star animation atlas.png"
+dest_files=["res://.godot/imported/Isometric golden stun star animation atlas.png-53df0f3481cb04c565106a5cbe61475b.ctex"]
+>>>>>>> Stashed changes
 
 [params]
 

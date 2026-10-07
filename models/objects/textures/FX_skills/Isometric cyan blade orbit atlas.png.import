@@ -3,7 +3,11 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://dyd45aqyjuy0u"
+<<<<<<< Updated upstream
 path.s3tc="res://.godot/imported/Isometric cyan blade orbit atlas.png-1f05da9d995ba9026da92e22c6ed59fb.s3tc.ctex"
+=======
+path="res://.godot/imported/Isometric cyan blade orbit atlas.png-6d6693fb3262787fd8d433bfcc584ae5.ctex"
+>>>>>>> Stashed changes
 metadata={
 "imported_formats": ["s3tc_bptc"],
 "vram_texture": true
@@ -11,8 +15,13 @@ metadata={
 
 [deps]
 
+<<<<<<< Updated upstream
 source_file="res://models/objects/textures/FX_skills/Isometric cyan blade orbit atlas.png"
 dest_files=["res://.godot/imported/Isometric cyan blade orbit atlas.png-1f05da9d995ba9026da92e22c6ed59fb.s3tc.ctex"]
+=======
+source_file="res://models/objects/textures/fx_skills/Isometric cyan blade orbit atlas.png"
+dest_files=["res://.godot/imported/Isometric cyan blade orbit atlas.png-6d6693fb3262787fd8d433bfcc584ae5.ctex"]
+>>>>>>> Stashed changes
 
 [params]
 

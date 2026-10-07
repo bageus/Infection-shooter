@@ -3,7 +3,11 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://cmutx08syhg74"
+<<<<<<< Updated upstream
 path.s3tc="res://.godot/imported/Eight-frame isometric mutant claw slash atlas.png-ce65cff7a8e4b45e03ec493fa5de17b1.s3tc.ctex"
+=======
+path="res://.godot/imported/Eight-frame isometric mutant claw slash atlas.png-7fd76e9f449f30252105768b1753c336.ctex"
+>>>>>>> Stashed changes
 metadata={
 "imported_formats": ["s3tc_bptc"],
 "vram_texture": true
@@ -11,8 +15,13 @@ metadata={
 
 [deps]
 
+<<<<<<< Updated upstream
 source_file="res://models/objects/textures/FX_skills/Eight-frame isometric mutant claw slash atlas.png"
 dest_files=["res://.godot/imported/Eight-frame isometric mutant claw slash atlas.png-ce65cff7a8e4b45e03ec493fa5de17b1.s3tc.ctex"]
+=======
+source_file="res://models/objects/textures/fx_skills/Eight-frame isometric mutant claw slash atlas.png"
+dest_files=["res://.godot/imported/Eight-frame isometric mutant claw slash atlas.png-7fd76e9f449f30252105768b1753c336.ctex"]
+>>>>>>> Stashed changes
 
 [params]
 

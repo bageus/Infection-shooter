@@ -3,7 +3,11 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://cwxm52oiwps5o"
+<<<<<<< Updated upstream
 path.s3tc="res://.godot/imported/Eight-Frame Isometric Electric Field.png-a12d2bc17f47f8a55021d14a0fb354d7.s3tc.ctex"
+=======
+path="res://.godot/imported/Eight-Frame Isometric Electric Field.png-58688a579f4596d80e3f9298c510b198.ctex"
+>>>>>>> Stashed changes
 metadata={
 "imported_formats": ["s3tc_bptc"],
 "vram_texture": true
@@ -11,8 +15,13 @@ metadata={
 
 [deps]
 
+<<<<<<< Updated upstream
 source_file="res://models/objects/textures/FX_skills/Eight-Frame Isometric Electric Field.png"
 dest_files=["res://.godot/imported/Eight-Frame Isometric Electric Field.png-a12d2bc17f47f8a55021d14a0fb354d7.s3tc.ctex"]
+=======
+source_file="res://models/objects/textures/fx_skills/Eight-Frame Isometric Electric Field.png"
+dest_files=["res://.godot/imported/Eight-Frame Isometric Electric Field.png-58688a579f4596d80e3f9298c510b198.ctex"]
+>>>>>>> Stashed changes
 
 [params]
 

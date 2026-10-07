@@ -3,7 +3,11 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://dohkpbtuolpbp"
+<<<<<<< Updated upstream
 path.s3tc="res://.godot/imported/Four emerald acid puddles.png-67a00c379d7b2499cedb4c324614cf1d.s3tc.ctex"
+=======
+path="res://.godot/imported/Four emerald acid puddles.png-3a94e168aefa4f9cbd1d639cfeb46aa8.ctex"
+>>>>>>> Stashed changes
 metadata={
 "imported_formats": ["s3tc_bptc"],
 "vram_texture": true
@@ -11,8 +15,13 @@ metadata={
 
 [deps]
 
+<<<<<<< Updated upstream
 source_file="res://models/objects/textures/FX_skills/Four emerald acid puddles.png"
 dest_files=["res://.godot/imported/Four emerald acid puddles.png-67a00c379d7b2499cedb4c324614cf1d.s3tc.ctex"]
+=======
+source_file="res://models/objects/textures/fx_skills/Four emerald acid puddles.png"
+dest_files=["res://.godot/imported/Four emerald acid puddles.png-3a94e168aefa4f9cbd1d639cfeb46aa8.ctex"]
+>>>>>>> Stashed changes
 
 [params]
 

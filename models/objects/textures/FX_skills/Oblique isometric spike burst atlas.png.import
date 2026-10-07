@@ -3,7 +3,11 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://bd1kdq664fsc2"
+<<<<<<< Updated upstream
 path.s3tc="res://.godot/imported/Oblique isometric spike burst atlas.png-fb8a824d16336e87f4451f4ab72810d6.s3tc.ctex"
+=======
+path="res://.godot/imported/Oblique isometric spike burst atlas.png-19a8ca748863e6c760f4458aec331df9.ctex"
+>>>>>>> Stashed changes
 metadata={
 "imported_formats": ["s3tc_bptc"],
 "vram_texture": true
@@ -11,8 +15,13 @@ metadata={
 
 [deps]
 
+<<<<<<< Updated upstream
 source_file="res://models/objects/textures/FX_skills/Oblique isometric spike burst atlas.png"
 dest_files=["res://.godot/imported/Oblique isometric spike burst atlas.png-fb8a824d16336e87f4451f4ab72810d6.s3tc.ctex"]
+=======
+source_file="res://models/objects/textures/fx_skills/Oblique isometric spike burst atlas.png"
+dest_files=["res://.godot/imported/Oblique isometric spike burst atlas.png-19a8ca748863e6c760f4458aec331df9.ctex"]
+>>>>>>> Stashed changes
 
 [params]
 

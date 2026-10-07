@@ -3,7 +3,11 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://dx2natcihbw1u"
+<<<<<<< Updated upstream
 path.s3tc="res://.godot/imported/Cartoon anatomical heart heartbeat sprite sheet.png-cd308514a6e58f89366e86a605dd0e25.s3tc.ctex"
+=======
+path="res://.godot/imported/Cartoon anatomical heart heartbeat sprite sheet.png-b364277c97530e06ae620954220c2d99.ctex"
+>>>>>>> Stashed changes
 metadata={
 "imported_formats": ["s3tc_bptc"],
 "vram_texture": true
@@ -11,8 +15,13 @@ metadata={
 
 [deps]
 
+<<<<<<< Updated upstream
 source_file="res://models/objects/textures/FX_skills/Cartoon anatomical heart heartbeat sprite sheet.png"
 dest_files=["res://.godot/imported/Cartoon anatomical heart heartbeat sprite sheet.png-cd308514a6e58f89366e86a605dd0e25.s3tc.ctex"]
+=======
+source_file="res://models/objects/textures/fx_skills/Cartoon anatomical heart heartbeat sprite sheet.png"
+dest_files=["res://.godot/imported/Cartoon anatomical heart heartbeat sprite sheet.png-b364277c97530e06ae620954220c2d99.ctex"]
+>>>>>>> Stashed changes
 
 [params]
 

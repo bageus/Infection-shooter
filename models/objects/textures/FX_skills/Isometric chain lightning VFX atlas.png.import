@@ -3,7 +3,11 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://bkjmfmswhjpng"
+<<<<<<< Updated upstream
 path.s3tc="res://.godot/imported/Isometric chain lightning VFX atlas.png-582a4360cdcf51518bbd773ce50f05d4.s3tc.ctex"
+=======
+path="res://.godot/imported/Isometric chain lightning VFX atlas.png-44dcb34c74ff48ffb884be1fe970b179.ctex"
+>>>>>>> Stashed changes
 metadata={
 "imported_formats": ["s3tc_bptc"],
 "vram_texture": true
@@ -11,8 +15,13 @@ metadata={
 
 [deps]
 
+<<<<<<< Updated upstream
 source_file="res://models/objects/textures/FX_skills/Isometric chain lightning VFX atlas.png"
 dest_files=["res://.godot/imported/Isometric chain lightning VFX atlas.png-582a4360cdcf51518bbd773ce50f05d4.s3tc.ctex"]
+=======
+source_file="res://models/objects/textures/fx_skills/Isometric chain lightning VFX atlas.png"
+dest_files=["res://.godot/imported/Isometric chain lightning VFX atlas.png-44dcb34c74ff48ffb884be1fe970b179.ctex"]
+>>>>>>> Stashed changes
 
 [params]
 
