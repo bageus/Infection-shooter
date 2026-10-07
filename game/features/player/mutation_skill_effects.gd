@@ -25,6 +25,10 @@ var storm_tick := 0.0
 var acid_pools: Array[Dictionary] = []
 ## Acid Spit pool radius: 3.4 m across.
 const ACID_POOL_RADIUS := 1.7
+## Acid probes walls above desk height and stops this far short of them.
+const ACID_WALL_PROBE_HEIGHT := 1.5
+const ACID_WALL_GAP := 0.35
+const ACID_SURFACE_MASK := 129
 ## Retaliation answers a burst of damage, not one heavy blow.
 const RETALIATION_WINDOW := 3.0
 const RETALIATION_DAMAGE := 50.0
@@ -349,8 +353,9 @@ func _cast(skill_id: String) -> void:
 				if chain.size() == 5: break
 			vfx.chain_lightning(chain)
 		"acid_spit":
-			acid_pools.append({"position": player.get("_aim_point"), "remaining": 6.0})
-			vfx.acid_pool(player.get("_aim_point"), ACID_POOL_RADIUS, 6.0)
+			var puddle := acid_floor_point(player.get("_aim_point"))
+			acid_pools.append({"position": puddle, "remaining": 6.0})
+			vfx.acid_pool(puddle, ACID_POOL_RADIUS, 6.0)
 		"spore_cocoon":
 			var location: Vector3 = player.get("_aim_point")
 			vfx.spore_cocoon(location, 3.0, 2.0)
@@ -380,6 +385,47 @@ func _dash_strike() -> void:
 			continue
 		_dash_struck[enemy.get_instance_id()] = true
 		enemy.call("take_damage", DASH_DAMAGE)
+
+
+## Where an Acid Spit aimed at `aim` lands: always on the floor the player
+## stands on. An aim on a wall (or a body, or a desk top) is brought back to
+## the floor in front of it, short of the wall.
+func acid_floor_point(aim: Vector3) -> Vector3:
+	var space := player.get_world_3d().direct_space_state
+	var feet := player.global_position
+	var ground := _environment_ray(space, feet, feet + Vector3.DOWN * 3.0)
+	feet.y = (ground["position"] as Vector3).y if not ground.is_empty() else feet.y - 0.9
+	var target := Vector3(aim.x, feet.y, aim.z)
+	var lift := Vector3.UP * ACID_WALL_PROBE_HEIGHT
+	# Reach a little past the aim so a point on a wall face still meets the wall.
+	var past := (target - feet).normalized() * 0.2 if target.distance_squared_to(feet) > 0.0001 else Vector3.ZERO
+	var hit := _environment_ray(space, feet + lift, target + past + lift)
+	if not hit.is_empty():
+		var wall := hit["position"] as Vector3
+		wall.y = feet.y
+		var back := feet - wall
+		target = wall + back.normalized() * minf(ACID_WALL_GAP, back.length()) if back.length_squared() > 0.0001 else feet
+	var down := _environment_ray(space, target + Vector3.UP * 0.6, target + Vector3.DOWN * 3.0)
+	if not down.is_empty() and (down["normal"] as Vector3).y > 0.7 and absf((down["position"] as Vector3).y - feet.y) < 0.6:
+		return down["position"]
+	return target
+
+
+# Static scenery only: the player, enemies and loose props never count.
+func _environment_ray(space: PhysicsDirectSpaceState3D, from: Vector3, to: Vector3) -> Dictionary:
+	var query := PhysicsRayQueryParameters3D.create(from, to, ACID_SURFACE_MASK)
+	var skipped: Array[RID] = [player.get_rid()]
+	query.exclude = skipped
+	for attempt in 8:
+		var hit := space.intersect_ray(query)
+		if hit.is_empty():
+			return hit
+		var body := hit.get("collider") as Object
+		if not (body is CharacterBody3D or body is RigidBody3D):
+			return hit
+		skipped.append(hit["rid"])
+		query.exclude = skipped
+	return {}
 
 
 func _enemies_near(center: Vector3, radius: float, nearest_first: bool = false) -> Array[Node3D]:
