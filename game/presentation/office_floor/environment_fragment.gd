@@ -10,6 +10,8 @@ const IMPACT_SOUND := preload("res://game/presentation/office_floor/impact_sound
 const BALANCE = preload("res://game/features/combat/public/projectile_balance.gd")
 const DEBRIS = preload("res://game/presentation/office_floor/debris_lifecycle.gd")
 const GROUP := "fallen_environment_fragment"
+# Infected spawned after this piece skip contact with it as well.
+const CONTACTLESS_GROUP := "contactless_debris"
 const HIT_LAYER := 4
 const WORLD_MASK := 3
 const MAX_FRAGMENTS := 40
@@ -42,6 +44,7 @@ func _ready() -> void:
 	# Only kickable pieces poll for the player; all others cost no script time.
 	set_physics_process(kickable)
 	add_to_group(GROUP)
+	add_to_group(CONTACTLESS_GROUP)
 	var tween := create_tween()
 	tween.tween_interval(32.0 if kickable else 14.0)
 	tween.tween_callback(expire)

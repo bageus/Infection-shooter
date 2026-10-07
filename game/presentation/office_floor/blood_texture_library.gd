@@ -15,6 +15,10 @@ const ATLASES := {
 # pixels above this alpha after box-averaging, so noise does not widen them.
 const TRIM_ALPHA := 6.0 / 255.0
 const TRIM_SHRINKS := 4
+# tools/build_blood_atlases.gd cuts the full-size sheets in source/ into
+# BUILT_CELL slots; cells.json holds each frame's used size in its slot.
+const BUILT_CELL := 512
+const CELLS_FILE := "cells.json"
 var entries: Dictionary = {}
 var recent: Dictionary = {}
 
@@ -37,6 +41,7 @@ func load_assets(max_dimension: int = 512, brightness: float = 1.18) -> void:
 		entries = _shared[key]
 		return
 	_shared[key] = entries
+	var cells := _built_cells()
 	for category in CATEGORIES:
 		entries[category] = []
 		var path := ROOT.path_join(ATLASES[category]["file"])
@@ -45,13 +50,18 @@ func load_assets(max_dimension: int = 512, brightness: float = 1.18) -> void:
 			continue
 		var grid: Vector2i = ATLASES[category]["grid"]
 		var cell := Vector2i(atlas.get_width() / grid.x, atlas.get_height() / grid.y)
+		var built: Array = cells.get(category, [])
 		for index in grid.x * grid.y:
 			var origin := Vector2i(index % grid.x, index / grid.x) * cell
-			var image := atlas.get_region(Rect2i(origin, cell))
-			var used := _visible_rect(image)
+			var used: Rect2i
+			if built.size() == grid.x * grid.y:
+				used = Rect2i(origin, Vector2i(int(built[index][0]), int(built[index][1])))
+			else:
+				used = _visible_rect(atlas.get_region(Rect2i(origin, cell)))
+				used.position += origin
 			if not used.has_area():
 				continue
-			image = image.get_region(used)
+			var image := atlas.get_region(used)
 			var longest := maxi(image.get_width(), image.get_height())
 			if longest > max_dimension:
 				var factor := float(max_dimension) / longest
@@ -61,12 +71,21 @@ func load_assets(max_dimension: int = 512, brightness: float = 1.18) -> void:
 			entries[category].append({"texture": ImageTexture.create_from_image(image), "aspect": float(used.size.x) / used.size.y, "variant": index + 1})
 
 
+static func _built_cells() -> Dictionary:
+	var path := ROOT.path_join(CELLS_FILE)
+	var json := load(path) as JSON if ResourceLoader.exists(path) else null
+	return json.data if json != null and json.data is Dictionary else {}
+
+
 func _load_image(path: String) -> Image:
 	var image: Image
 	if ResourceLoader.exists(path):
-		var imported := load(path) as Texture2D
-		if imported != null:
-			image = imported.get_image()
+		# The atlases import as Image, so nothing is uploaded to the GPU here.
+		var imported: Resource = load(path)
+		if imported is Image:
+			image = (imported as Image).duplicate() as Image
+		elif imported is Texture2D:
+			image = (imported as Texture2D).get_image()
 	if image == null:
 		image = Image.load_from_file(path)
 	if image == null or image.is_empty():

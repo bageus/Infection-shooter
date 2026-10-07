@@ -417,7 +417,7 @@ func _push_roll_contacts()->void:
 			direction.y=0.0
 			if direction.length_squared()<0.001: direction=_roll_direction
 			collider.call("apply_player_push",direction.normalized(),roll_push_strength)
-	for node in get_tree().get_nodes_in_group("infected"):
+	for node in get_tree().get_nodes_in_group("infected_alive"):
 		if not node is Node3D: continue
 		var enemy:=node as Node3D
 		var offset:Vector3=enemy.global_position-global_position

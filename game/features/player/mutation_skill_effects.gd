@@ -345,7 +345,7 @@ func _dash_strike() -> void:
 
 func _enemies_near(center: Vector3, radius: float, nearest_first: bool = false) -> Array[Node3D]:
 	var result: Array[Node3D] = []
-	for node in get_tree().get_nodes_in_group("infected"):
+	for node in get_tree().get_nodes_in_group("infected_alive"):
 		if node is Node3D and (node as Node3D).global_position.distance_squared_to(center) <= radius * radius and float(node.get("health")) > 0.0:
 			result.append(node as Node3D)
 	if nearest_first:

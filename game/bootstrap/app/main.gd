@@ -11,6 +11,7 @@ const WorldActivation = preload("res://game/bootstrap/app/world_activation.gd")
 const TEST_CLOUD := preload("res://game/features/infection_source/public/mutagen_cloud.tscn")
 const MUTATION_UI := preload("res://game/bootstrap/app/mutation_tree_ui.gd")
 const BLOOD_EFFECTS := preload("res://game/presentation/office_floor/public/blood_effects_3d.tscn")
+const SHADER_WARMUP := preload("res://game/bootstrap/app/shader_warmup.gd")
 const BLAST_FEEDBACK := preload("res://game/bootstrap/app/blast_feedback.gd")
 const DEBUG_OVERLAY := preload("res://game/bootstrap/app/runtime_debug_overlay.gd")
 const OCCLUSION := preload("res://game/bootstrap/app/occlusion_effects.gd")
@@ -90,6 +91,7 @@ func _ready() -> void:
 	add_child(feedback)
 	feedback.configure(player)
 	_setup_blood_effects()
+	SHADER_WARMUP.new().setup(player.get("camera") as Camera3D)
 	for enemy in enemies.get_children():
 		if enemy.has_method("set_target"):
 			enemy.call("set_target", player)

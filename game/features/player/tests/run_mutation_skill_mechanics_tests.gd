@@ -67,6 +67,7 @@ func _run() -> void:
 func _enemy(at: Vector3) -> Enemy:
 	var enemy := Enemy.new()
 	enemy.add_to_group("infected")
+	enemy.add_to_group("infected_alive")
 	root.add_child(enemy)
 	enemy.global_position = at
 	return enemy

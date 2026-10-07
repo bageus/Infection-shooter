@@ -80,7 +80,7 @@ func _process(delta: float) -> void:
 	if _perf_timer >= 0.25:
 		_perf_timer = 0.0
 		fps_label.text = "FPS %d" % Engine.get_frames_per_second()
-		enemy_count_label.text = "ENEMIES %d" % get_tree().get_nodes_in_group("infected").size()
+		enemy_count_label.text = "ENEMIES %d" % get_tree().get_nodes_in_group("infected_alive").size()
 
 
 func _configure_icon_regions() -> void:

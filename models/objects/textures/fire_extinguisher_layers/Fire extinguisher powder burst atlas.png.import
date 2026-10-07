@@ -3,19 +3,20 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://cu4v78nqy4evd"
-path="res://.godot/imported/Fire extinguisher powder burst atlas.png-3f45fdf891357a33afbb6cf93ce4cf6d.ctex"
+path.s3tc="res://.godot/imported/Fire extinguisher powder burst atlas.png-3f45fdf891357a33afbb6cf93ce4cf6d.s3tc.ctex"
 metadata={
-"vram_texture": false
+"imported_formats": ["s3tc_bptc"],
+"vram_texture": true
 }
 
 [deps]
 
 source_file="res://models/objects/textures/fire_extinguisher_layers/Fire extinguisher powder burst atlas.png"
-dest_files=["res://.godot/imported/Fire extinguisher powder burst atlas.png-3f45fdf891357a33afbb6cf93ce4cf6d.ctex"]
+dest_files=["res://.godot/imported/Fire extinguisher powder burst atlas.png-3f45fdf891357a33afbb6cf93ce4cf6d.s3tc.ctex"]
 
 [params]
 
-compress/mode=0
+compress/mode=2
 compress/high_quality=false
 compress/lossy_quality=0.7
 compress/uastc_level=0

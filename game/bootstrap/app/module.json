@@ -10,7 +10,8 @@
     "Local interface preferences and native menu navigation",
     "Occlusion visualization mode, transient silhouette copies and structural material overrides",
     "Temporary blast screen blur, oscillating ghost images and glitch envelope",
-    "Versioned local keyboard/mouse bindings and read-only runtime diagnostics"
+    "Versioned local keyboard/mouse bindings and read-only runtime diagnostics",
+    "One-time shader warm-up quads at mission start"
   ],
   "public_api": [],
   "dependencies": [
