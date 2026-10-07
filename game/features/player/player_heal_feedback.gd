@@ -8,8 +8,10 @@ const BODY_FONT := preload("res://assets/interface/fonts/body.ttf")
 const RING_SHADER := preload("res://game/features/player/player_heal_ring.gdshader")
 const HEAL_COLOR := Color(0.42, 0.95, 0.55)
 const NUMBER_COLOR := Color(0.62, 1.0, 0.66)
-const NUMBER_RISE := 0.95
-const NUMBER_TIME := 1.1
+const NUMBER_RISE := 0.8
+const NUMBER_TIME := 1.5
+## The number fades in and grows this long before it drifts and fades out.
+const NUMBER_APPEAR := 0.25
 const RING_TIME := 0.55
 ## Restored health below this is summed until the next flush.
 const SUM_FLUSH_SECONDS := 0.9
@@ -88,12 +90,19 @@ func _spawn_number(amount: float, large: bool) -> void:
 	_number_stack += 1
 	label.position = Vector3(side, 2.15, 0.0)
 	add_child(label)
+	# One soft motion: fade and grow in without overshoot, drift up while
+	# slowing down, fade out over the second half.
 	var tween := label.create_tween()
-	label.scale = Vector3.ONE * 0.55
-	tween.tween_property(label, "scale", Vector3.ONE, 0.16).set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)
-	tween.parallel().tween_property(label, "position:y", label.position.y + NUMBER_RISE, NUMBER_TIME).set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_OUT)
-	tween.parallel().tween_property(label, "modulate:a", 0.0, NUMBER_TIME * 0.4).set_delay(NUMBER_TIME * 0.6)
-	tween.parallel().tween_property(label, "outline_modulate:a", 0.0, NUMBER_TIME * 0.4).set_delay(NUMBER_TIME * 0.6)
+	label.scale = Vector3.ONE * 0.8
+	label.modulate.a = 0.0
+	var outline_alpha := label.outline_modulate.a
+	label.outline_modulate.a = 0.0
+	tween.tween_property(label, "scale", Vector3.ONE, NUMBER_APPEAR).set_trans(Tween.TRANS_CUBIC).set_ease(Tween.EASE_OUT)
+	tween.parallel().tween_property(label, "modulate:a", 1.0, NUMBER_APPEAR * 0.7).set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_OUT)
+	tween.parallel().tween_property(label, "outline_modulate:a", outline_alpha, NUMBER_APPEAR * 0.7).set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_OUT)
+	tween.parallel().tween_property(label, "position:y", label.position.y + NUMBER_RISE, NUMBER_TIME).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_OUT)
+	tween.parallel().tween_property(label, "modulate:a", 0.0, NUMBER_TIME * 0.5).set_delay(NUMBER_TIME * 0.5).set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_IN_OUT)
+	tween.parallel().tween_property(label, "outline_modulate:a", 0.0, NUMBER_TIME * 0.5).set_delay(NUMBER_TIME * 0.5).set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_IN_OUT)
 	tween.tween_callback(func() -> void:
 		_number_stack = maxi(0, _number_stack - 1)
 		label.queue_free())
