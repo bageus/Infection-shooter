@@ -71,6 +71,14 @@ func _run() -> void:
 	app.set_test_mutagen_enabled(false)
 	await physics_frame
 	_check(not cloud.is_physics_processing() and not cloud.visible and not cloud.monitoring, "Disabling test cloud stops absorption and hides it")
+	prefs.values.infinite_antidotes = true
+	prefs.apply_to_game(self)
+	hero.set("antidotes", 0)
+	runtime.call("absorb_mutagen", 2.0)
+	_check(hero.call("use_antidote") and int(hero.get("antidotes")) == 0, "Infinite antidotes work with an empty stock and are not spent")
+	prefs.values.infinite_antidotes = false
+	prefs.apply_to_game(self)
+	_check(not hero.call("use_antidote"), "Turning infinite antidotes off restores the normal stock")
 	runtime.call("absorb_mutagen", 6.2)
 	_check(runtime.call("is_control_lost"), "Legitimate mutation control loss is preserved")
 	runtime.call("add_control_ampule")
