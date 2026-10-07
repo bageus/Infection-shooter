@@ -9,7 +9,8 @@
     "Temporary impact mark and retained debris budgets",
     "Spent casing lifetime and quantity",
     "Grenade explosion damage and scorch budget",
-    "Environment prop durability, damage variant progression and one-shot damage state"
+    "Environment prop durability, damage variant progression and one-shot damage state",
+    "Mission-local bounded projection Mesh snapshots and spatial indices"
   ],
   "public_api": [
     "public/pistol.tscn",

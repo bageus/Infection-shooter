@@ -7,7 +7,7 @@ extends RefCounted
 ## meshes of a severed part in its current pose.
 
 const WOUND_SHADER := preload("res://game/features/infected/body_wound.gdshader")
-const CHAIN_MEMBERSHIP := 0.5
+const TOPOLOGY := preload("res://game/features/infected/body_part_topology.gd")
 
 static var _cache: Dictionary = {}
 
@@ -182,8 +182,13 @@ static func wound_material(original: Material) -> ShaderMaterial:
 # Returns {mesh, center, points} or {} when the chain owns no geometry.
 static func build_piece(data: Dictionary, chain: PackedInt32Array, skeleton: Skeleton3D, materials: Array) -> Dictionary:
 	var skinning := {}
-	for bone: int in (data.binds as Dictionary):
-		skinning[bone] = skeleton.global_transform * skeleton.get_bone_global_pose(bone) * (data.binds[bone] as Transform3D)
+	var topologies: Array[Dictionary] = []
+	for i in (data.surfaces as Array).size():
+		var topology := TOPOLOGY.for_surface(data, chain, i)
+		topologies.append(topology)
+		for bone: int in topology["bones"]:
+			if not skinning.has(bone) and data.binds.has(bone):
+				skinning[bone] = skeleton.global_transform * skeleton.get_bone_global_pose(bone) * (data.binds[bone] as Transform3D)
 	var surfaces_out: Array = []
 	var all_points := PackedVector3Array()
 	for surface_index in (data.surfaces as Array).size():
@@ -194,24 +199,20 @@ static func build_piece(data: Dictionary, chain: PackedInt32Array, skeleton: Ske
 		var stride: int = surface.stride
 		if bones.is_empty():
 			continue
-		var member_corners := _member_triangles(data, chain, surface_index)
-		var index_map := {}
+		var topology: Dictionary = topologies[surface_index]
 		var positions := PackedVector3Array()
 		var normals := PackedVector3Array()
 		var uvs := PackedVector2Array()
 		var rest := PackedFloat32Array()
-		var out_indices := PackedInt32Array()
+		var out_indices: PackedInt32Array = topology["indices"]
 		var source_normals: PackedVector3Array = surface.normals
 		var source_uvs: PackedVector2Array = surface.uvs
-		for corner in member_corners:
-			if not index_map.has(corner):
-				index_map[corner] = positions.size()
-				var transform := _blend(skinning, bones, weights, stride, corner)
-				positions.append(transform * vertices[corner])
-				normals.append((transform.basis * (source_normals[corner] if not source_normals.is_empty() else Vector3.UP)).normalized())
-				uvs.append(source_uvs[corner] if not source_uvs.is_empty() else Vector2.ZERO)
-				rest.append_array([vertices[corner].x, vertices[corner].y, vertices[corner].z, 1.0])
-			out_indices.append(int(index_map[corner]))
+		for corner: int in topology["vertices"]:
+			var transform := _blend(skinning, bones, weights, stride, corner)
+			positions.append(transform * vertices[corner])
+			normals.append((transform.basis * (source_normals[corner] if not source_normals.is_empty() else Vector3.UP)).normalized())
+			uvs.append(source_uvs[corner] if not source_uvs.is_empty() else Vector2.ZERO)
+			rest.append_array([vertices[corner].x, vertices[corner].y, vertices[corner].z, 1.0])
 		if out_indices.is_empty():
 			continue
 		all_points.append_array(positions)
@@ -242,38 +243,6 @@ static func build_piece(data: Dictionary, chain: PackedInt32Array, skeleton: Ske
 	for index in range(0, all_points.size(), step):
 		hull.append(all_points[index] - center)
 	return {"mesh": mesh, "center": center, "points": hull}
-
-
-# Triangle corners of a surface that belong to `chain`, worked out once per
-# enemy model and part: every later sever of that part reuses the list.
-static func _member_triangles(data: Dictionary, chain: PackedInt32Array, surface_index: int) -> PackedInt32Array:
-	var cache: Dictionary = data.get_or_add("piece_cache", {})
-	var key := "%s|%d" % [chain, surface_index]
-	if cache.has(key):
-		return cache[key]
-	var surface: Dictionary = data.surfaces[surface_index]
-	var vertices: PackedVector3Array = surface.vertices
-	var bones: PackedInt32Array = surface.bones
-	var weights: PackedFloat32Array = surface.weights
-	var stride: int = surface.stride
-	var member := PackedByteArray()
-	member.resize(vertices.size())
-	for index in vertices.size():
-		var share := 0.0
-		for k in stride:
-			if chain.has(bones[index * stride + k]):
-				share += weights[index * stride + k]
-		member[index] = 1 if share >= CHAIN_MEMBERSHIP else 0
-	var corners := PackedInt32Array()
-	var source_indices: PackedInt32Array = surface.indices
-	for t in range(0, source_indices.size(), 3):
-		var a := source_indices[t]
-		var b := source_indices[t + 1]
-		var c := source_indices[t + 2]
-		if member[a] != 0 and member[b] != 0 and member[c] != 0:
-			corners.append_array([a, b, c])
-	cache[key] = corners
-	return corners
 
 
 static func _blend(skinning: Dictionary, bones: PackedInt32Array, weights: PackedFloat32Array, stride: int, vertex: int) -> Transform3D:

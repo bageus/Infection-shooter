@@ -1,7 +1,7 @@
 extends RefCounted
 const STAMP := preload("res://game/core/vfx/public/surface_stamp.gd")
 
-static func geometry(surfaces: RefCounted, collider: Node3D, projector: Transform3D, footprint: Vector2, depth: float, skip_glass: bool) -> Array[Dictionary]:
+static func geometry(surfaces: RefCounted, stamps: RefCounted, collider: Node3D, projector: Transform3D, footprint: Vector2, depth: float, skip_glass: bool) -> Array[Dictionary]:
 	if not is_instance_valid(collider) or not collider.is_inside_tree():
 		return []
 	var world := collider.get_world_3d()
@@ -31,7 +31,7 @@ static func geometry(surfaces: RefCounted, collider: Node3D, projector: Transfor
 			if seen.has(receiver.get_instance_id()):
 				continue
 			seen[receiver.get_instance_id()] = true
-			var mesh := STAMP.build(receiver, projector, footprint, depth, skip_glass)
+			var mesh: ArrayMesh = stamps.build(receiver, projector, footprint, depth, skip_glass)
 			if mesh != null:
 				result.append({"anchor": receiver, "mesh": mesh})
 			if result.size() >= 12:

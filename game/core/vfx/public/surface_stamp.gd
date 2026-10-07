@@ -3,6 +3,11 @@ extends RefCounted
 const MAX_TRIANGLES := 4096
 
 static func build(receiver: MeshInstance3D, projector: Transform3D, size: Vector2, depth: float, skip_glass: bool = false) -> ArrayMesh:
+	return _build(receiver, projector, size, depth, skip_glass, [])
+
+
+# Prepared surfaces are supplied only by the core.vfx owned-cache adapter.
+static func _build(receiver: MeshInstance3D, projector: Transform3D, size: Vector2, depth: float, skip_glass: bool, prepared: Array) -> ArrayMesh:
 	if receiver.mesh == null or absf(_transform(receiver).basis.determinant()) < 1e-10:
 		return null
 	var to_projector := projector.affine_inverse() * _transform(receiver)
@@ -14,7 +19,7 @@ static func build(receiver: MeshInstance3D, projector: Transform3D, size: Vector
 	for surface in receiver.mesh.get_surface_count():
 		if skip_glass and _glass(receiver, surface):
 			continue
-		_project_surface(receiver, surface, projector, to_projector, volume, size, output)
+		_project_surface(receiver, surface, projector, to_projector, volume, size, output, prepared[surface] if not prepared.is_empty() else {})
 		if output.positions.size() >= MAX_TRIANGLES * 3:
 			break
 	if output.positions.is_empty():
@@ -29,15 +34,16 @@ static func build(receiver: MeshInstance3D, projector: Transform3D, size: Vector
 	return mesh
 
 
-static func _project_surface(receiver: MeshInstance3D, surface: int, projector: Transform3D, to_projector: Transform3D, volume: AABB, size: Vector2, output: Dictionary) -> void:
-	var arrays := receiver.mesh.surface_get_arrays(surface)
+static func _project_surface(receiver: MeshInstance3D, surface: int, projector: Transform3D, to_projector: Transform3D, volume: AABB, size: Vector2, output: Dictionary, prepared: Dictionary) -> void:
+	var arrays: Array = prepared["arrays"] if not prepared.is_empty() else receiver.mesh.surface_get_arrays(surface)
 	var vertices: PackedVector3Array = arrays[Mesh.ARRAY_VERTEX]
 	var normals: PackedVector3Array = arrays[Mesh.ARRAY_NORMAL] if arrays[Mesh.ARRAY_NORMAL] != null else PackedVector3Array()
 	var indices: PackedInt32Array = arrays[Mesh.ARRAY_INDEX] if arrays[Mesh.ARRAY_INDEX] != null else PackedInt32Array()
 	var count := indices.size() if not indices.is_empty() else vertices.size()
 	var normal_transform := _transform(receiver).basis.inverse().transposed()
 	var to_local := _transform(receiver).affine_inverse()
-	for triangle in range(0, count - 2, 3):
+	var candidates: Variant = prepared["candidates"] if not prepared.is_empty() else range(0, count - 2, 3)
+	for triangle: int in candidates:
 		var ids := [indices[triangle], indices[triangle + 1], indices[triangle + 2]] if not indices.is_empty() else [triangle, triangle + 1, triangle + 2]
 		var polygon := PackedVector3Array([to_projector * vertices[ids[0]], to_projector * vertices[ids[1]], to_projector * vertices[ids[2]]])
 		var tri_bounds := AABB(polygon[0], Vector3.ZERO).expand(polygon[1]).expand(polygon[2]).grow(.00001)

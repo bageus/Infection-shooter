@@ -148,3 +148,98 @@ menu captures, smoke и оба native renderer. Фактических SCRIPT/SH
 https://github.com/bageus/Infection-shooter/actions/runs/37505074182
 https://github.com/bageus/Infection-shooter/actions/runs/37505073991
 https://github.com/bageus/Infection-shooter/actions/runs/37505074242
+
+## Последовательная оптимизация эффектов и дверей — 06.10.2026
+
+Согласованный порядок: surface_stamp → взрывы → кровь → двери → части тел.
+
+- core.vfx/surface_stamp_cache: caller-owned cap 128 Mesh, immutable arrays/BVH,
+  Mesh.changed invalidation, раздельные weak observers и teardown. Старый
+  surface_stamp.build остаётся stateless и служит эталоном. Временный proxy
+  процедурного пола не задерживается в кеше. Точные clipping, normal/UV,
+  glass/material, offset и output cap 4096 прежние. Контракт — ADR-0037.
+- combat/grenade_explosion: до shelter rays отбрасываются только объекты без
+  damage/stun callbacks и без возможности rigid impulse. Frozen damageable
+  остаются; factor=0 не исключает старый base impulse 2. Порядок damage,
+  исключение contact, wall shelter, scorch и баланс прежние.
+- office_floor/blood_mark_budget: global/per-surface counts учитывают fading;
+  связанные FIFO выбирают прежний oldest non-fading без полного прохода и
+  сдвига массивов. Таймер 0.1 s останавливается без marks/pending/deaths;
+  относительный clock и pause-aware fade/death delay сохраняются. Пока есть
+  следы, bounded weak/surface/expiry sweep оставлен для прежнего lifecycle.
+- office_floor/interactive_door: локальная Area отбирает физические тела для
+  emergency doorway, затем прежние actor groups, health и origin bounds.
+  Elevator peers связываются при enter_tree и взаимно при новых экземплярах;
+  WeakRef и текущие distance/group membership проверяются при request.
+  Leaves/recesses/hinge получают pose только при изменении open amount и
+  первоначальной инициализации. Glass break collision и key hint остаются live.
+  Разделение рассмотрено: private door_presence отвечает за локальный broad
+  phase; анимация/состояние/авторинг остаются в существующем door script.
+- infected/body_part_topology: в существующих prepared data кешируются first
+  appearance unique IDs, remapped indices и weighted bone IDs. Membership
+  уже кешировался ранее; повторный remap и ненужные bone matrices устранены.
+  Current skeleton pose, skinning, normals, UV, CUSTOM0, center/hull/materials
+  вычисляются для каждого sever. Публичных изменений у infected нет.
+
+Автоматические regressions: stamp cache vs stateless (80 transforms + dense,
+Mesh mutation/replacement, glass, singular scale, cap/cleanup); FIFO vs array
+после 2000 случайных удалений; body topology vs frozen baseline (4/8 weights,
+80 poses × 3 chains, arrays/center/hull); door presence/health/bounds, moved,
+added/deleted/reentered peers и отсутствие stationary pose writes; blood
+counters/retirement/clear/idle/wake. Frozen baseline — только test oracle.
+Все source-size production limits соблюдены; существующий door script
+по-прежнему выше 300 строк. Новое предупреждение касается только сохранённого
+66-строчного baseline build_piece в тестовой fixture.
+
+Focused Godot 4.7.2 run 37517775924 PASS: impact geometry 0 failures, stamp
+32/2048 кандидатов и 0 failures, blood FIFO PASS, body topology 0 failures.
+Финальный код 65196f4d: architecture 37519444419 SUCCESS; focused geometry
++ integration 37519444758 SUCCESS (door/blood/grenade/body 0 failures).
+Полный runtime https://github.com/bageus/Infection-shooter/actions/runs/37519444432
+SUCCESS: чистый import, project/resource/Python gates, 58 headless наборов,
+main 180 кадров, menus, rendered smoke и 28 native запусков (14 в каждом
+Compatibility/Forward+). Все native exit 0; фактических SCRIPT/SHADER/ERROR
+нет. Локально validate_project, 3 Python scene-access tests, YAML parse и
+diff-check PASS. Последующий коммит только обновляет результаты и path
+triggers focused workflow, тестовые assertions/production code прежние.
+Это не замер FPS Windows/Web.
+
+Интеграционная проверка обнаружила уже существовавший дефект main 5b7e07:
+PNG Toxic Gas Cloud Atlas удалён, но mutagen_cloud оставлял его preload.
+Ссылка заменена на добавленный владельцем Six-frame green smoke sprite
+sheet.png; пользовательские изображения сохранены. Новый blood FIFO test
+сначала читал records до обработки public deferred effect queue: добавлены
+два physics_frame ожидания, production logic не менялась. Быстрый integration
+job запускает actual main и door/blood/grenade/body tests; его triggers также
+включают атласы мутагена, чтобы replacement path проверялся при следующей
+замене. Визуальная субъективная приёмка нового атласа остаётся ручной.
+
+Ручная приёмка: одинаковые карта/seed/оружие/настройки и 60-секундный маршрут
+до/после; повторные попадания и взрывы у сложной мебели, кровь/разрушение
+получателя, emergency door с толпой/ключом, elevator и glass swing, sever в
+разных позах. Сравнить profiler spikes/CPU physics и видимые pixels, а также
+память первого и повторного запроса. Не переносить software-CI FPS на целевое
+устройство. Тест 32/2048 характеризует выборку геометрии, а не весь кадр.
+
+## Повторная проверка PR #49 после замены атласов крови
+
+Неуспешные focused 37521591716 и runtime 37521591754 использовали merge
+184d69d (head 46bd894 + main 5676aae). В этой версии main 45 отдельных PNG
+крови уже удалены, а библиотека продолжала загружать category_01..09.png.
+Ошибки Image.load_from_file (Error 7) оставляли пустые категории; поэтому
+падали assertions следов крови и строгие runtime ERROR gates, включая main.
+Изолированные geometry и architecture jobs при этом прошли.
+
+Исправление: объединён текущий main ad79895 с завершённой миграцией
+e8d5a27 — slicing пяти атласов, 44 кадра, совместимый pool_09 fallback.
+Оптимизации #49 сохранены; оба списка runtime suites объединены (62 набора),
+конфликтующие записи документации сохранены. Focused CI отслеживает PNG
+крови, библиотеку и planner decal, запускает blood_decor и gameplay repairs.
+
+Локально Godot 4.7.2: импорт exit 0 и main 180 кадров exit 0, без SCRIPT
+ERROR/ERROR. validate_project PASS; 708 import profiles и 399 scene references
+PASS; Python workstation 3, glass openings 1, scene-access 3 PASS; YAML и
+diff-check PASS. Все 62 headless-набора прошли (0 failed), включая blood_decor, blood_effects,
+gameplay_planner_repairs, door/elevator, FIFO/cache/topology и новые suites main.
+Повторный полный GitHub Actions CI выполняется после отправки ветки. Из-за ограниченного доступа к /proc локальный Godot пишет
+системное WARNING о get_executable_path; это не ошибка скрипта/ресурса.

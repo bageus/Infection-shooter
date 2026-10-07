@@ -51,7 +51,7 @@ static func explode(projectile: Node3D, location: Vector3, normal: Vector3, cont
 			continue
 		hit_ids[collider.get_instance_id()] = true
 		var body := collider as Node3D
-		if body == null:
+		if body == null or not _receives_blast(body):
 			continue
 		# Walls shelter whoever stands behind them.
 		if collider != contact and is_sheltered(projectile.get_world_3d(), location + normal * 0.25, body):
@@ -84,6 +84,15 @@ static func explode(projectile: Node3D, location: Vector3, normal: Vector3, cont
 		var surface := projectile.get_world_3d().direct_space_state.intersect_ray(trace)
 		if not surface.is_empty() and not surface["collider"].has_method("take_projectile_hit"):
 			_scorch(scene, surface["position"], surface["normal"], impacts, surface["collider"] as Node3D)
+
+
+static func _receives_blast(body: Node3D) -> bool:
+	if body is RigidBody3D and not body.freeze:
+		return true
+	for method in [&"take_projectile_hit_at_shape", &"take_projectile_hit", &"take_blast_damage", &"apply_blast_stun", &"take_damage"]:
+		if body.has_method(method):
+			return true
+	return false
 
 
 static func _distance_to_shape(collider: Object, shape_index: int, location: Vector3, fallback: Vector3) -> float:
