@@ -10,6 +10,7 @@ var view
 var kind := ""
 var layout: VBoxContainer
 var panel: PanelContainer
+var _fixed_actions: VBoxContainer
 var _focus_return: Control
 
 
@@ -41,7 +42,18 @@ func setup(owner_view: Control, dialog_kind: String) -> void:
 	scroll.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
 	if kind == "settings":
 		scroll.vertical_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
-	panel.add_child(scroll)
+	if kind == "about":
+		var body := VBoxContainer.new()
+		body.add_theme_constant_override("separation", 16)
+		panel.add_child(body)
+		scroll.size_flags_vertical = Control.SIZE_EXPAND_FILL
+		body.add_child(scroll)
+		_fixed_actions = VBoxContainer.new()
+		body.add_child(_fixed_actions)
+		resized.connect(_fit_about_panel)
+		_fit_about_panel()
+	else:
+		panel.add_child(scroll)
 	layout = VBoxContainer.new()
 	layout.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	layout.size_flags_vertical = Control.SIZE_EXPAND_FILL
@@ -69,7 +81,8 @@ func _build() -> void:
 			for index in range(1, 7):
 				_heading("corpChapter" + str(index))
 				_copy("corpHistory" + str(index))
-			_button("back", view.close_dialog)
+			var back := _button("back", view.close_dialog)
+			back.reparent(_fixed_actions)
 		"briefing":
 			_heading("briefingTitle")
 			for index in range(1, 4):
@@ -186,9 +199,24 @@ func _fullscreen() -> void:
 func _focus_first() -> void:
 	if not is_inside_tree():
 		return
-	var controls := _controls(layout)
+	var controls := _dialog_controls()
 	if not controls.is_empty():
 		controls[0].grab_focus()
+
+
+func _fit_about_panel() -> void:
+	var half := Vector2(minf(290, (size.x - 48) * 0.5), minf(310, (size.y - 48) * 0.5))
+	panel.offset_left = -half.x
+	panel.offset_right = half.x
+	panel.offset_top = -half.y
+	panel.offset_bottom = half.y
+
+
+func _dialog_controls() -> Array[Control]:
+	var controls := _controls(layout)
+	if _fixed_actions != null:
+		controls.append_array(_controls(_fixed_actions))
+	return controls
 
 
 func _controls(parent: Node) -> Array[Control]:
@@ -203,7 +231,7 @@ func _controls(parent: Node) -> Array[Control]:
 func _input(event: InputEvent) -> void:
 	if not event is InputEventKey or not event.pressed or event.echo:
 		return
-	var controls := _controls(layout)
+	var controls := _dialog_controls()
 	if controls.is_empty():
 		return
 	var focused := get_viewport().gui_get_focus_owner()
