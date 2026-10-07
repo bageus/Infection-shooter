@@ -3,15 +3,15 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://dse7yid7antpn"
-path="res://.godot/imported/Oblique isometric spike burst atlas.png-19a8ca748863e6c760f4458aec331df9.ctex"
+path="res://.godot/imported/Oblique isometric spike burst atlas.png-fb8a824d16336e87f4451f4ab72810d6.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://models/objects/textures/fx_skills/Oblique isometric spike burst atlas.png"
-dest_files=["res://.godot/imported/Oblique isometric spike burst atlas.png-19a8ca748863e6c760f4458aec331df9.ctex"]
+source_file="res://models/objects/textures/FX_skills/Oblique isometric spike burst atlas.png"
+dest_files=["res://.godot/imported/Oblique isometric spike burst atlas.png-fb8a824d16336e87f4451f4ab72810d6.ctex"]
 
 [params]
 

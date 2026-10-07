@@ -119,6 +119,10 @@ func set_test_mutagen_enabled(enabled: bool) -> void:
 	cloud.call("activate")
 
 
+func set_infinite_antidotes_enabled(enabled: bool) -> void:
+	player.set("infinite_antidotes", enabled)
+
+
 func _unhandled_key_input(event: InputEvent) -> void:
 	if event is InputEventKey and event.pressed and not event.echo and event.keycode == KEY_ESCAPE:
 		if mutation_tree_ui != null and bool(mutation_tree_ui.call("is_tree_open")):

@@ -94,6 +94,12 @@ func _general() -> void:
 	cloud.button_pressed = dialog.view.preferences.values.test_mutagen
 	cloud.toggled.connect(func(value: bool) -> void: dialog.call("_change", "test_mutagen", value))
 	dialog.get("layout").add_child(cloud)
+	var antidotes := CheckButton.new()
+	antidotes.name = "InfiniteAntidotes"
+	antidotes.text = dialog.view.text("infiniteAntidotes")
+	antidotes.button_pressed = dialog.view.preferences.values.infinite_antidotes
+	antidotes.toggled.connect(func(value: bool) -> void: dialog.call("_change", "infinite_antidotes", value))
+	dialog.get("layout").add_child(antidotes)
 	notices.set_notice(0, dialog.view.text("testMutagenHint"))
 
 
