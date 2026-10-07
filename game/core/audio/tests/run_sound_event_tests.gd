@@ -4,6 +4,9 @@ extends SceneTree
 
 const SFX := preload("res://game/core/audio/public/sound_events.gd")
 
+## Beds that run for a whole skill effect (storm field, acid pool, blade orbit).
+const LASTING := [&"extinguisher_spray", &"skill_storm_field", &"acid_sizzle", &"bone_blades_whirl"]
+
 var failures := 0
 
 
@@ -20,7 +23,8 @@ func _run() -> void:
 		for index in range(1, int(spec[SFX.VARIANTS]) + 1):
 			var path := SFX.ROOT + "%s/%s_%d.ogg" % [event, event, index]
 			var stream := load(path) as AudioStream if ResourceLoader.exists(path) else null
-			if stream == null or stream.get_length() < 0.03 or stream.get_length() > 3.6:
+			var longest := 6.5 if event in LASTING else 3.6
+			if stream == null or stream.get_length() < 0.03 or stream.get_length() > longest:
 				missing.append(path)
 	_expect(missing.is_empty(), "Every sound event has its processed variants: %s" % [missing])
 	_expect(SFX.EVENTS.size() >= 60, "The catalogue covers weapons, impacts, enemies, doors and items.")
