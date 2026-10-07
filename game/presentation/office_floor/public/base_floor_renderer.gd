@@ -11,8 +11,7 @@ const SECTION_TILES := 8
 var openings: Array[Rect2] = []
 var _batches: Dictionary = {}
 var _tile_mesh: Mesh
-var _materials: Array[StandardMaterial3D] = []
-var _small_materials: Array[StandardMaterial3D] = []
+var _materials: Array[ShaderMaterial] = []
 
 func _ready() -> void:
 	_build_tiles()
@@ -42,7 +41,7 @@ func _build_tiles() -> void:
 					intersects_opening = true
 					break
 			if not intersects_opening:
-				_add_tile(tile_position, 1.0)
+				_add_tile(tile_position, 1.0, Vector2.ZERO)
 				continue
 			for sub_z in 4:
 				for sub_x in 4:
@@ -53,12 +52,12 @@ func _build_tiles() -> void:
 							covered = true
 							break
 					if not covered:
-						_add_tile(center, 0.25)
+						_add_tile(center, 0.25, center - tile_position)
 
 	_flush_batches()
 
 
-func _add_tile(center: Vector2, tile_scale: float) -> void:
+func _add_tile(center: Vector2, tile_scale: float, tile_offset: Vector2) -> void:
 	# Partition by location and material so camera culling stays local.
 	var cell := Vector2i(floori((center.x + floor_size.x * 0.5) / tile_step), floori((center.y + floor_size.y * 0.5) / tile_step))
 	var variant := posmod(hash(cell), MATERIAL_VARIANTS)
@@ -66,7 +65,8 @@ func _add_tile(center: Vector2, tile_scale: float) -> void:
 	if not _batches.has(key):
 		_batches[key] = []
 	var tile_transform := Transform3D(Basis.from_scale(Vector3(tile_scale, 1.0, tile_scale)), Vector3(center.x, tile_y, center.y))
-	_batches[key].append(tile_transform)
+	# The shader draws seams in parent-tile space, so subtiles keep the 2 m grid.
+	_batches[key].append([tile_transform, Color(tile_offset.x, tile_offset.y, tile_scale, 0.0)])
 
 
 func _flush_batches() -> void:
@@ -74,14 +74,16 @@ func _flush_batches() -> void:
 		var transforms: Array = _batches[key]
 		var instances := MultiMesh.new()
 		instances.transform_format = MultiMesh.TRANSFORM_3D
+		instances.use_custom_data = true
 		instances.mesh = _tile_mesh
 		instances.instance_count = transforms.size()
 		for index in transforms.size():
-			instances.set_instance_transform(index, transforms[index])
+			instances.set_instance_transform(index, transforms[index][0])
+			instances.set_instance_custom_data(index, transforms[index][1])
 		var section := MultiMeshInstance3D.new()
 		section.name = "FloorSection_%d_%d_%d_%d" % [key.x, key.y, key.z, key.w]
 		section.multimesh = instances
-		section.material_override = _small_materials[key.z] if key.w == 1 else _materials[key.z]
+		section.material_override = _materials[key.z]
 		add_child(section)
 	_batches.clear()
 
@@ -89,15 +91,10 @@ func _flush_batches() -> void:
 func _build_materials() -> void:
 	for index in MATERIAL_VARIANTS:
 		# Shallow copies share the generated textures across the entire floor.
-		var material := TILE_MATERIAL.duplicate(false) as StandardMaterial3D
-		var tint := 0.97 + float(index) * (0.06 / float(MATERIAL_VARIANTS - 1))
-		material.albedo_color = Color(0.56 * tint, 0.59 * tint, 0.61 * tint, 1.0)
-		material.roughness = TILE_MATERIAL.roughness + (float(index) - float(MATERIAL_VARIANTS - 1) * 0.5) * 0.006
-		material.uv1_offset = Vector3(float(index % 4) * 0.25, float(floori(float(index) / 4.0)) * 0.5, 0.0)
+		var material := TILE_MATERIAL.duplicate(false) as ShaderMaterial
+		material.set_shader_parameter("tint", 0.97 + float(index) * (0.06 / float(MATERIAL_VARIANTS - 1)))
+		material.set_shader_parameter("roughness_offset", (float(index) - float(MATERIAL_VARIANTS - 1) * 0.5) * 0.006)
 		_materials.append(material)
-		var small_material := material.duplicate(false) as StandardMaterial3D
-		small_material.uv1_scale = Vector3(0.25, 0.25, 1.0)
-		_small_materials.append(small_material)
 
 
 func set_stair_openings(areas: Array[Rect2]) -> void:
