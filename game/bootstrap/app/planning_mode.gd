@@ -141,6 +141,7 @@ func enter() -> void:
 
 
 func exit() -> void:
+	controls.light_view.set_enabled(false)
 	if desk_setup.active:
 		desk_setup.close()
 	storage.snapshot_authored()
@@ -187,7 +188,7 @@ func _process(delta: float) -> void:
 	if Input.is_key_pressed(KEY_D): input.x += 1.0
 	if input.length_squared() > 0.0:
 		input = input.normalized()
-		var forward := -camera.global_transform.basis.z
+		var forward: Vector3 = controls.light_view.forward() if controls.light_view.active else -camera.global_transform.basis.z
 		forward.y = 0.0
 		forward = forward.normalized()
 		var right := camera.global_transform.basis.x
@@ -290,6 +291,7 @@ func _text_field_has_focus() -> bool:
 
 
 func _rotate_camera(relative: Vector2) -> void:
+	controls.light_view.set_enabled(false)
 	planning_yaw -= relative.x * CAMERA_ROTATE_SPEED
 	planning_pitch = clampf(planning_pitch - relative.y * CAMERA_ROTATE_SPEED, deg_to_rad(-80.0), deg_to_rad(80.0))
 	var current_position := camera.global_position
@@ -298,6 +300,9 @@ func _rotate_camera(relative: Vector2) -> void:
 
 
 func _zoom_camera(amount: float) -> void:
+	if controls.light_view.active:
+		controls.light_view.zoom(amount)
+		return
 	camera_height = clampf(camera_height + amount, CAMERA_MIN_HEIGHT, CAMERA_MAX_HEIGHT)
 	var p := camera.global_position
 	p.y = camera_height
