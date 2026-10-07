@@ -46,20 +46,20 @@ const EXTINGUISHER_SPRAY := {
 }
 
 
-# --- Mutation skill sheets (FX_skills). Rings and spreads are drawn as seen
+# --- Mutation skill sheets (fx_skills). Rings and spreads are drawn as seen
 # from a low camera; they play flat on the floor (sprite_flipbook `ground`)
 # with `ground_stretch` undoing the drawn ellipse. `extent` is the
 # share of the frame width the effect's ring or spread covers: a radius R
 # plays at size 2R / extent.
-const SKILL_ROOT := ROOT + "FX_skills/"
+const SKILL_ROOT := ROOT + "fx_skills/"
 
 # Storm Pulse field around the player: 8 variations of the same field, looped.
 const ELECTRIC_FIELD := {
 	"path": SKILL_ROOT + "Eight-Frame Isometric Electric Field.png",
 	"columns": 4, "rows": 2, "frames": 8,
 	"durations": [0.07, 0.07, 0.07, 0.07, 0.07, 0.07, 0.07, 0.07],
-	"pivot": Vector2(0.5, 0.67),
-	"extent": 0.9,
+	"pivot": Vector2(0.5, 0.62),
+	"extent": 0.75,
 	"ground_stretch": 2.3,
 }
 
@@ -128,7 +128,7 @@ const BLADE_ORBIT := {
 	"columns": 4, "rows": 2, "frames": 8,
 	"durations": [0.06, 0.06, 0.06, 0.06, 0.06, 0.06, 0.06, 0.06],
 	"pivot": Vector2(0.5, 0.55),
-	"extent": 0.95,
+	"extent": 0.68,
 	"ground_stretch": 1.6,
 }
 

@@ -68,8 +68,8 @@ func _test_gameplay_font(app: Node) -> void:
 	var title := app.get_node("PlanningUI/Panel/VBox/Title") as Label
 	_check(_is_body_font(title.get_theme_font("font")), "planner uses same font")
 	var tree: CanvasLayer = app.get("mutation_tree_ui")
-	var keys: Label = tree.get("keys_label")
-	_check(_is_body_font(keys.get_theme_font("font")), "mutation tree uses same font")
+	var tree_hint: Label = tree.get("hint_label")
+	_check(_is_body_font(tree_hint.get_theme_font("font")), "mutation tree uses same font")
 	var points: Label = tree.get("points_label")
 	_check(points.get_theme_font("font") == MENU_STYLE.TITLE, "mutation tree headline numbers use the menu title font")
 	for hint: Label3D in app.find_children("*", "Label3D", true, false):

@@ -13,7 +13,7 @@ func _ready() -> void:
 		set_meta("planning_wall_mount", true)
 
 
-func take_projectile_hit(_damage: float, hit_position: Vector3, _normal: Vector3, direction: Vector3, _weapon: String) -> bool:
+func take_projectile_hit(_hit_damage: float, hit_position: Vector3, _normal: Vector3, direction: Vector3, _weapon: String) -> bool:
 	if _fixture_broken:
 		return true
 	_fixture_broken = true

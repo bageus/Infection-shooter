@@ -70,10 +70,10 @@ func _test_table() -> void:
 func _test_paper(model: String) -> void:
 	var paper := _spawn(MODELS + "09/" + model)
 	var visual := paper.get_node("Visual") as Node3D
-	var prints := visual.find_children("DocumentPrint", "MeshInstance3D", false, false)
-	_check(prints.size() == 1, "%s gets exactly one document print" % model)
-	if prints.size() == 1:
-		var overlay := prints[0] as MeshInstance3D
+	var document_prints := visual.find_children("DocumentPrint", "MeshInstance3D", false, false)
+	_check(document_prints.size() == 1, "%s gets exactly one document print" % model)
+	if document_prints.size() == 1:
+		var overlay := document_prints[0] as MeshInstance3D
 		var top := -INF
 		for node in visual.find_children("*", "MeshInstance3D", true, false):
 			var mesh := node as MeshInstance3D

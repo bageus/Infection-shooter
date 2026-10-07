@@ -1,12 +1,21 @@
 extends Node
 ## Presentation of mutation skills on and around the player: the supplied
-## FX_skills sheets for casts and buffs, the Predator Dash speed trail, and
+## fx_skills sheets for casts and buffs, the Predator Dash speed trail, and
 ## the body overlay for Bone Armor, Hardened Tissue and Berserk (aura and red
 ## mask eyes). Gameplay stays in mutation_skill_effects.gd, which reports here.
 
 const FLIPBOOK := preload("res://game/core/vfx/public/sprite_flipbook.gd")
 const ATLASES := preload("res://game/core/vfx/public/effect_atlases.gd")
 const DASH_TRAIL := preload("res://game/features/player/dash_trail.gd")
+const RANGE_DOME := preload("res://game/features/player/range_dome.gd")
+## The drawn spikes reach past the burst, so they play at this share of it.
+const SPIKE_VISUAL_SHARE := 0.55
+## Range dome colours per skill area.
+const BLOOD_RANGE := Color(0.85, 0.08, 0.1)
+const STORM_RANGE := Color(0.25, 0.65, 1.0)
+const ACID_RANGE := Color(0.35, 0.95, 0.2)
+const SPORE_RANGE := Color(0.75, 0.9, 0.2)
+const BLADE_RANGE := Color(0.5, 0.95, 1.0)
 const SKIN_SHADER := preload("res://game/features/player/mutation_skin.gdshader")
 const AURA_SHADER := preload("res://game/features/player/berserk_aura.gdshader")
 const EYES_SHADER := preload("res://game/features/player/berserk_eyes.gdshader")
@@ -20,6 +29,7 @@ const OVERLAY_FADE_SPEED := 3.0
 var player: Node3D
 var effects_root: Node3D
 var _loops := {}
+var _domes := {}
 var _skin: ShaderMaterial
 var _aura: ShaderMaterial
 var _eyes: ShaderMaterial
@@ -46,12 +56,14 @@ func configure_world(container: Node3D) -> void:
 
 ## Blood Burst: spikes thrown out around the player.
 func spike_burst(center: Vector3, radius: float) -> void:
-	_ground(ATLASES.SPIKE_BURST, center, radius, {"additive": 0.15})
+	_ground(ATLASES.SPIKE_BURST, center, radius * SPIKE_VISUAL_SHARE, {"additive": 0.15})
+	RANGE_DOME.spawn(_world(), center, radius, BLOOD_RANGE, 0.6)
 
 
 ## Retaliation: a stunning electric ring.
 func electric_pulse(center: Vector3, radius: float) -> void:
 	_ground(ATLASES.ELECTRIC_PULSE, center, radius, {"additive": 1.0, "brightness": 1.3})
+	RANGE_DOME.spawn(_world(), center, radius, STORM_RANGE, 0.5)
 
 
 ## Discharge: one lightning link from each point to the next.
@@ -73,6 +85,7 @@ func chain_lightning(points: Array[Vector3]) -> void:
 func acid_pool(center: Vector3, radius: float, seconds: float) -> void:
 	var atlas := ATLASES.ACID_PUDDLES
 	_ground(atlas, center, radius, {"frame": randi() % int(atlas["frames"]), "lifetime": seconds, "fade_out": 0.8, "opacity": 0.9})
+	RANGE_DOME.spawn(_world(), center, radius, ACID_RANGE, seconds)
 
 
 ## Spore Cocoon: the cocoon swells for `fuse` seconds, then bursts.
@@ -86,6 +99,8 @@ func spore_cocoon(center: Vector3, radius: float, fuse: float) -> void:
 	FLIPBOOK.spawn(_world(), atlas, center, ATLASES.size_for_radius(atlas, radius * 0.75), {
 		"billboard": true, "speed": swell / maxf(fuse, 0.1), "fade_out": 0.4,
 	})
+	# The dome marks where the spores will land for the fuse and the burst.
+	RANGE_DOME.spawn(_world(), center, radius, SPORE_RANGE, fuse + 0.5)
 
 
 ## Claws: a slash on the struck enemy.
@@ -127,9 +142,9 @@ func dash_trail(seconds: float) -> void:
 func buff_started(skill_id: String) -> void:
 	match skill_id:
 		"storm_pulse":
-			_loop(skill_id, ATLASES.ELECTRIC_FIELD, 4.0, {"additive": 1.0, "opacity": 0.85})
+			_loop(skill_id, ATLASES.ELECTRIC_FIELD, 4.0, {"additive": 1.0, "opacity": 0.85}, STORM_RANGE)
 		"bone_blades":
-			_loop(skill_id, ATLASES.BLADE_ORBIT, 1.7, {"additive": 0.35})
+			_loop(skill_id, ATLASES.BLADE_ORBIT, 1.7, {"additive": 0.35}, BLADE_RANGE)
 		"berserk":
 			_targets["eyes"] = 1.0
 			_set_aura(true)
@@ -141,6 +156,10 @@ func buff_ended(skill_id: String) -> void:
 		var loop: WeakRef = _loops[skill_id]
 		_loops.erase(skill_id)
 		_stop(loop, 0.35)
+	if _domes.has(skill_id):
+		var dome: WeakRef = _domes[skill_id]
+		_domes.erase(skill_id)
+		_stop(dome, 0.35)
 	if skill_id == "berserk":
 		_targets["eyes"] = 0.0
 		set_process(true)
@@ -163,6 +182,10 @@ func aura_visible() -> bool:
 
 func has_loop(skill_id: String) -> bool:
 	return _loops.has(skill_id) and (_loops[skill_id] as WeakRef).get_ref() != null
+
+
+func has_range_dome(skill_id: String) -> bool:
+	return _domes.has(skill_id) and (_domes[skill_id] as WeakRef).get_ref() != null
 
 
 func _process(delta: float) -> void:
@@ -201,8 +224,9 @@ func _ground(atlas: Dictionary, center: Vector3, radius: float, options: Diction
 	return FLIPBOOK.spawn(_world(), atlas, center + Vector3.UP * GROUND_LIFT, ATLASES.size_for_radius(atlas, radius), settings)
 
 
-# A looping sheet that rides on the player until its buff ends.
-func _loop(skill_id: String, atlas: Dictionary, radius: float, options: Dictionary) -> void:
+# A looping sheet that rides on the player, with its range dome, until the
+# buff ends.
+func _loop(skill_id: String, atlas: Dictionary, radius: float, options: Dictionary, range_tint: Color) -> void:
 	if has_loop(skill_id):
 		return
 	var settings := options.duplicate()
@@ -211,6 +235,9 @@ func _loop(skill_id: String, atlas: Dictionary, radius: float, options: Dictiona
 	var node := FLIPBOOK.spawn(player, atlas, player.global_position + Vector3.UP * GROUND_LIFT, ATLASES.size_for_radius(atlas, radius), settings)
 	if node != null:
 		_loops[skill_id] = weakref(node)
+	var dome: MeshInstance3D = null if has_range_dome(skill_id) else RANGE_DOME.spawn(player, player.global_position, radius, range_tint)
+	if dome != null:
+		_domes[skill_id] = weakref(dome)
 
 
 func _stop(node_ref: WeakRef, fade: float) -> void:

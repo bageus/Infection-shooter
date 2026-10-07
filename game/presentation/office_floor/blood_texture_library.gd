@@ -49,9 +49,11 @@ func load_assets(max_dimension: int = 512, brightness: float = 1.18) -> void:
 		if atlas == null:
 			continue
 		var grid: Vector2i = ATLASES[category]["grid"]
+		@warning_ignore("integer_division")
 		var cell := Vector2i(atlas.get_width() / grid.x, atlas.get_height() / grid.y)
 		var built: Array = cells.get(category, [])
 		for index in grid.x * grid.y:
+			@warning_ignore("integer_division")
 			var origin := Vector2i(index % grid.x, index / grid.x) * cell
 			var used: Rect2i
 			if built.size() == grid.x * grid.y:

@@ -28,6 +28,7 @@ func _run() -> void:
 		prop.call("configure_display", {"power": "on", "content": "dynamic", "seed": index})
 		stage.add_child(prop)
 		prop.set("freeze", true)
+		@warning_ignore("integer_division")
 		prop.position = Vector3(float(index % 8) * .8 - 2.8, float(index / 8) * .8, 0)
 		for screen: Dictionary in prop.get("_display").get("screens"):
 			lights.append(screen["light"])

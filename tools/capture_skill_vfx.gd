@@ -17,7 +17,6 @@ var _stage: Node3D
 var _player: CharacterBody3D
 var _vfx: Node
 var _enemies: Array[Node3D] = []
-var _view: SubViewport
 var _camera: Camera3D
 
 

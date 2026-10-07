@@ -210,5 +210,10 @@ func _migrate_scene_path(old_path: String) -> String:
 				if str(entry["name"]).substr(3).replace(" ", "_").to_lower() == legacy_name:
 					return str(entry["path"])
 		return ""
+	# A retired plain model reloads as its destructible twin (same geometry).
+	if old_path.ends_with(".glb") and not ResourceLoader.exists(old_path):
+		var twin := old_path.get_basename() + "_destructible.glb"
+		if ResourceLoader.exists(twin):
+			return twin
 	return old_path
 

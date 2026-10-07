@@ -4,10 +4,14 @@ task_id: T002
 status: IN_PROGRESS
 phase: 1
 owner: AI
-updated: 2026-10-06
+updated: 2026-10-07
 ---
 
 # Active task
+
+07.10.2026 (кнопка «Назад» в «О корпорации», запрос владельца): bootstrap.app/menu/menu_dialog.gd размещает историю в растягиваемой области ScrollContainer, а кнопку — в отдельной нижней строке VBox с отступом 16 px. Кнопка видна при любой позиции прокрутки, не перекрывает описание, участвует в Tab/стрелках и закрывает окно. About-panel ограничен доступным размером окна с внешним отступом 24 px, в том числе при изменении размера открытого окна. Декомпозиция: menu_dialog сохраняет одну ответственность локального диалога (менее 300 строк); разделение модуля не требуется. Godot 4.7.2: импорт, run_menu_tests, run_settings_tabs_tests PASS; отдельная проверка геометрии и действия кнопки в 12 сочетаниях RU/EN × 100/130% × 1280×720/960×540/640×480, scroll top/middle/end и live resize PASS. validate_project и diff-check PASS. Сцены, ресурсы, публичные контракты, сохранения и зависимости не изменены, архитектурных исключений нет. T002 остаётся IN_PROGRESS; точное следующее действие: визуальная приёмка кнопки владельцем в меню «О корпорации».
+
+07.10.2026 (радиус навыков): по отзыву владельца разлёт шипов Кровавого выброса уменьшен до 55% радиуса урона; навыки с областью показывают радиус полупрозрачным куполом на полу (range_dome.gd, дополнение ADR-0037), поле Грозового импульса и орбита Костяных клинков подогнаны под него. .import атласов FX_skills указывают на реальную папку FX_skills. Баланс прежний. run_skill_vfx_tests.gd расширен. Следующее действие: визуальная приёмка в игре.
 
 06.10.2026 (аудит и исправления по поручению владельца, в рамках T002): атласы крови нарезаются заранее (tools/build_blood_atlases.gd; полноразмерные листы в blood_decals_45/source/ под .gdignore, игра читает атласы 1536 px с импортом Image и cells.json; загрузка библиотеки 3,9 с → 0,4 с headless, кадры прежние). 26 атласов эффектов, декалей, патронов и бумаги импортируются VRAM Compressed (≈4× меньше видеопамяти, рендеры навыков без видимых отличий), атлас трещин стекла ограничен 2048 px; UI, экраны и таблички с текстом без изменений. Прогрев всех spatial-шейдеров при старте миссии (shader_warmup.gd). tools/check_resource_paths.py в обоих workflow ловит несуществующие res:// пути и осиротевшие .import; удалены мёртвая копия уровня game/levels/authored, fps_counter.gd и 14 .import без исходников. Обломки и отрубленные части не сталкиваются с врагами поздних волн (группа contactless_debris); счётчик ENEMIES, навыки и перекат используют группу infected_alive. Планировщик: запекание сцены больше не дублирует содержимое инстансов (стеклянная стена 135 → 47 узлов), сохранение из редактора пишет public/base_office_map.json, игра грузит его при отсутствии user://planned_layout.json (до первого сохранения владельцем карта в репозитории отсутствует, на чистой установке уровень пуст). Новые тесты run_shader_warmup_tests, run_late_spawn_debris_tests, run_layout_bake_tests. Следующее действие: владельцу сохранить карту в планировщике из редактора, чтобы base_office_map.json и очищенный base_office_layout.tscn попали в репозиторий.
 
@@ -100,6 +104,7 @@ Windows/Web и фактический прирост FPS остаются руч
 Build the first playable combat-slice foundation with an authored office floor, player, combat, infected enemies, infection source, and observable fail states.
 
 ## In scope
+- owner-requested compact mutation-skill HUD with cooldowns, ready highlight, passive-trigger feed and updated icon atlas;
 - owner-requested combat HUD restyle matching the menus and an explicit emergency-key cell;
 - owner-requested conference table chocolate/graphite finish, random document prints on top paper sheets and 0-3 monitor-edge stickers (ADR-0033);
 - owner-requested mutation-tree hover detail card and restyle matching the main/settings menus;
@@ -150,6 +155,8 @@ Procedural generation, save/checkpoints, unrequested HUD redesign, monetization,
 - Structural modules visually touch edge-to-edge with no visible gaps and no overlap beyond a tiny seam tolerance.\n- Exterior corners face inward correctly.\n- Perimeter and authored interior walls block the player.\n- The expanded floor and defeat menu remain functional.
 
 ## Progress
+
+07.10.2026: по скриншотам консоли владельца: устранены новые предупреждения GDScript (base_floor_renderer, impact_receiver_cache, blood_texture_library, bathroom_fixture/paper_prop и тесты); папка атласов навыков в git переименована в models/objects/textures/fx_skills (на Windows-диске владельца она уже в нижнем регистре, отсюда Case mismatch у оглушения, шипов и лезвий); старые карты с удалённым 05_aircondition.glb загружают 05_aircondition_destructible.glb (геометрия совпадает); chase_route.search_requested больше не присваивает нетипизированный [] в Array[Vector3] (регрессионная проверка в run_chase_route_tests).
 
 06.10.2026: по скриншотам консоли владельца устранены все 56 предупреждений GDScript (затенение position/basis/transform/name/reference, имена floor/seed/remap, целочисленное деление через @warning_ignore, неиспользуемые _pop/переменные тестов) без изменения поведения; полная загрузка 220 скриптов с отладчиком теперь без WARNING. Предупреждение «N missing object(s) skipped» перечисляет пути пропущенных сцен (report.missing): это модели, удалённые из репозитория после сохранения user://planned_layout.json. Все gates, 44 headless-набора и main 180 кадров PASS локально на Godot 4.7.2.
 
