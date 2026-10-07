@@ -94,8 +94,15 @@ func _physics_process(delta: float) -> void:
 	if absorbing_body == null:
 		return
 
-	var step := minf(delta, _absorption_remaining)
-	absorbing_body.call("absorb_mutagen", step)
+	_feed(absorbing_body, minf(delta, _absorption_remaining))
+
+
+# The cloud only spends what the body actually takes: while the player has
+# lost control the infection refuses mutagen, and the cloud keeps it.
+func _feed(body: Node, step: float) -> void:
+	var gained: Variant = body.call("absorb_mutagen", step)
+	if gained is float and float(gained) <= 0.0:
+		return
 	_absorption_remaining -= step
 	if _absorption_remaining <= 0.0:
 		monitoring = false

@@ -23,6 +23,8 @@ var _melee_victim: WeakRef
 var _melee_time := -100.0
 var storm_tick := 0.0
 var acid_pools: Array[Dictionary] = []
+## Acid Spit pool radius: 3.4 m across.
+const ACID_POOL_RADIUS := 1.7
 ## Retaliation answers a burst of damage, not one heavy blow.
 const RETALIATION_WINDOW := 3.0
 const RETALIATION_DAMAGE := 50.0
@@ -136,7 +138,7 @@ func _process(delta: float) -> void:
 		if float(pool["remaining"]) <= 0.0:
 			acid_pools.remove_at(i)
 			continue
-		for enemy in _enemies_near(pool["position"], 2.2):
+		for enemy in _enemies_near(pool["position"], ACID_POOL_RADIUS):
 			enemy.call("take_damage", 5.0 * delta)
 	if _weapons_dirty:
 		_update_weapons()
@@ -337,7 +339,7 @@ func _cast(skill_id: String) -> void:
 			vfx.chain_lightning(chain)
 		"acid_spit":
 			acid_pools.append({"position": player.get("_aim_point"), "remaining": 6.0})
-			vfx.acid_pool(player.get("_aim_point"), 2.2, 6.0)
+			vfx.acid_pool(player.get("_aim_point"), ACID_POOL_RADIUS, 6.0)
 		"spore_cocoon":
 			var location: Vector3 = player.get("_aim_point")
 			vfx.spore_cocoon(location, 3.0, 2.0)

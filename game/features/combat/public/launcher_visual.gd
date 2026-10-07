@@ -41,6 +41,10 @@ static func make_pickup_visual(index: int) -> Node3D:
 		var authored_root := ART_SETUP.find_marker(visual, "WeaponRoot")
 		if authored_root != null:
 			ART_SETUP.normalize_model(visual, authored_root)
+			# WeaponRoot is authored for the hand socket with the barrel below
+			# the grip; on the floor the gun turns over its barrel to stand
+			# the right way up.
+			visual.transform = Transform3D(Basis(Vector3.RIGHT, PI), Vector3.ZERO) * visual.transform
 	return root
 
 
