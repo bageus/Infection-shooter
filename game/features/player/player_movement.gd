@@ -53,6 +53,8 @@ var _animation_selection := ANIMATION_SELECTION.new()
 var health: float
 var armor: float
 var antidotes: int
+## Settings toggle: antidote syringes are not spent while it is on.
+var infinite_antidotes: bool = false
 var current_weapon_index: int = 0
 var _roll_direction := Vector3.ZERO
 var _roll_remaining: float = 0.0
@@ -293,10 +295,10 @@ func heal(amount:float, source: StringName = &"")->float:
 		healed.emit(gained, source)
 	return gained
 func use_antidote()->bool:
-	if antidotes<=0:return false
+	if antidotes<=0 and not infinite_antidotes:return false
 	var used:bool=infection_runtime.call("use_antidote")
 	if used:
-		antidotes-=1
+		if not infinite_antidotes:antidotes-=1
 		_play_sound(&"antidote_use")
 	return used
 func add_ammo_to_current_weapon(amount:int)->int:return get_current_weapon().call("add_reserve_ammo",amount)

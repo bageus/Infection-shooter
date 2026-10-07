@@ -105,7 +105,7 @@ func _check_skill_sheets() -> void:
 		_expect(absf(cell.x / cell.y - float(atlas.get("cell_aspect", 1.0))) < 0.05, "Skill sheet grid matches its cells: " + str(atlas["path"]))
 		var spans: Array = atlas["durations"]
 		_expect(spans.is_empty() or spans.size() == int(atlas["frames"]), "Every skill frame has a time: " + str(atlas["path"]))
-	_expect(is_equal_approx(ATLASES.size_for_radius(ATLASES.ELECTRIC_FIELD, 4.0), 8.0 / 0.9), "A ring of radius R plays at 2R / extent.")
+	_expect(is_equal_approx(ATLASES.size_for_radius(ATLASES.ELECTRIC_FIELD, 4.0), 8.0 / float(ATLASES.ELECTRIC_FIELD["extent"])), "A ring of radius R plays at 2R / extent.")
 
 
 func _expect(condition: bool, message: String) -> void:

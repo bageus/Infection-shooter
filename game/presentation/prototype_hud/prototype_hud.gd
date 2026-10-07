@@ -4,9 +4,10 @@ const ICON_REGIONS := preload("res://game/presentation/prototype_hud/weapon_icon
 const PALETTE := preload("res://game/presentation/prototype_hud/hud_palette.gd")
 const ICON_TINT := preload("res://game/presentation/prototype_hud/icon_tint.gdshader")
 const TITLE_FONT := preload("res://assets/interface/fonts/title.ttf")
-# Semantic cells: rifle, pistol, uzi, shotgun, syringe, launcher (top row).
+# Semantic cells: rifle, pistol, uzi, shotgun, syringe, launcher, key.
 @export var weapon_icon_cells := PackedInt32Array([1, 2, 3, 5])
 @export var antidote_icon_cell := 4
+@export var key_icon_cell := 6
 
 @export var player_path: NodePath
 
@@ -28,6 +29,7 @@ const TITLE_FONT := preload("res://assets/interface/fonts/title.ttf")
 @onready var slot_keys: Array[Button] = [$WeaponPanel/Slot1/KeyHint, $WeaponPanel/Slot2/KeyHint, $WeaponPanel/Slot3/KeyHint]
 @onready var antidote_key: Button = $AntidotePanel/KeyHint
 @onready var key_panel: Panel = $KeyPanel
+@onready var key_icon: TextureRect = $KeyPanel/KeyIcon
 @onready var slot_frames: Array[Panel] = [$WeaponPanel/Slot1, $WeaponPanel/Slot2, $WeaponPanel/Slot3]
 
 var player: Node
@@ -96,14 +98,17 @@ func _configure_icon_regions() -> void:
 	_refresh_slot_icons()
 	if antidote_icon_cell >= 0 and antidote_icon_cell < icons.size():
 		antidote_icon.texture = icons[antidote_icon_cell]
+	if key_icon_cell >= 0 and key_icon_cell < icons.size():
+		key_icon.texture = icons[key_icon_cell]
 
 
 func _configure_icon_tints() -> void:
-	for rect: TextureRect in [weapon_icon, antidote_icon] + slot_icons:
+	for rect: TextureRect in [weapon_icon, antidote_icon, key_icon] + slot_icons:
 		var material := ShaderMaterial.new()
 		material.shader = ICON_TINT
 		material.set_shader_parameter("tint", PALETTE.INK)
 		rect.material = material
+	_tint(key_icon, PALETTE.KEY_GOLD)
 
 
 func _tint(rect: TextureRect, color: Color) -> void:
@@ -131,7 +136,7 @@ func _update_vitals() -> void:
 	var mutation: float = infection.call("get_mutation")
 	var critical: float = infection.call("get_critical_threshold")
 	var has_key: bool = player.has_emergency_key()
-	var snapshot: Array = [player.health, player.max_health, mutation, critical, player.antidotes, has_key]
+	var snapshot: Array = [player.health, player.max_health, mutation, critical, player.antidotes, player.infinite_antidotes, has_key]
 	if snapshot == _vital_snapshot:
 		return
 	var previous_health: float = float(_vital_snapshot[0]) if not _vital_snapshot.is_empty() else float(player.health)
@@ -144,7 +149,7 @@ func _update_vitals() -> void:
 	mutation_bar.value = mutation
 	mutation_value.text = "%d / 100" % roundi(mutation)
 	critical_marker.position.x = mutation_bar.position.x - 1.0 + mutation_bar.size.x * clampf(critical / 100.0, 0.0, 1.0)
-	antidote_count.text = str(player.antidotes)
+	antidote_count.text = "∞" if player.infinite_antidotes else str(player.antidotes)
 	_update_key_cell(has_key)
 
 
@@ -272,7 +277,7 @@ func _update_key_buttons() -> void:
 	for index in slot_keys.size():
 		_set_key_state(slot_keys[index], index == active, blocked)
 	var using_antidote := _antidote_hint_remaining > 0.0 or Input.is_action_pressed("antidote") or antidote_key.is_pressed()
-	_set_key_state(antidote_key, using_antidote, blocked or player.antidotes <= 0)
+	_set_key_state(antidote_key, using_antidote, blocked or (player.antidotes <= 0 and not player.infinite_antidotes))
 
 
 func _set_key_state(button: Button, selected: bool, blocked: bool) -> void:
