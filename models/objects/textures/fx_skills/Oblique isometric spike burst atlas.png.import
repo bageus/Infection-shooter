@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://dgo2tvu6aoppw"
-path="res://.godot/imported/Eight-frame isometric electric pulse atlas.png-919f1bc345afe0337a280e0e4a6e0ab5.ctex"
+uid="uid://dse7yid7antpn"
+path="res://.godot/imported/Oblique isometric spike burst atlas.png-19a8ca748863e6c760f4458aec331df9.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://models/objects/textures/FX_skills/Eight-frame isometric electric pulse atlas.png"
-dest_files=["res://.godot/imported/Eight-frame isometric electric pulse atlas.png-919f1bc345afe0337a280e0e4a6e0ab5.ctex"]
+source_file="res://models/objects/textures/fx_skills/Oblique isometric spike burst atlas.png"
+dest_files=["res://.godot/imported/Oblique isometric spike burst atlas.png-19a8ca748863e6c760f4458aec331df9.ctex"]
 
 [params]
 

@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://bjjtcb40wi3n0"
-path="res://.godot/imported/Four emerald acid puddles.png-67a00c379d7b2499cedb4c324614cf1d.ctex"
+uid="uid://6c5pice5cwgw"
+path="res://.godot/imported/Mutant growth mutagen burst sprite atlas.png-153f1f285f59e7f41d473b31c517f067.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://models/objects/textures/FX_skills/Four emerald acid puddles.png"
-dest_files=["res://.godot/imported/Four emerald acid puddles.png-67a00c379d7b2499cedb4c324614cf1d.ctex"]
+source_file="res://models/objects/textures/fx_skills/Mutant growth mutagen burst sprite atlas.png"
+dest_files=["res://.godot/imported/Mutant growth mutagen burst sprite atlas.png-153f1f285f59e7f41d473b31c517f067.ctex"]
 
 [params]
 

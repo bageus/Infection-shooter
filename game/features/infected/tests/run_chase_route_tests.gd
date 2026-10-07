@@ -44,6 +44,8 @@ func _run() -> void:
 		await physics_frame
 	direction = route.direction(actor, target, .35)
 	_check(route.direct_clear() and direction.x > .99, "Opening the route returns to direct chase")
+	# A queued search that finds the way clear must store a typed empty path.
+	_check(not bool(route.search_requested(actor, target)) and route.path.is_empty(), "A clear queued search leaves an empty typed path")
 	stage.queue_free()
 	await process_frame
 	print("Chase route tests: %d failures" % failures)

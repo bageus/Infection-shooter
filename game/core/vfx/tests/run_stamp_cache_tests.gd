@@ -18,8 +18,8 @@ func _run() -> void:
 		receiver.transform = Transform3D(basis, Vector3(2, -3, 4))
 		var point := Vector3(rng.randf_range(-14, 14), rng.randf_range(-14, 14), 0)
 		var normal := (basis.inverse().transposed() * Vector3.BACK).normalized()
-		var projector := Transform3D(Basis.looking_at(-normal, Vector3.UP).rotated(normal, rng.randf_range(-PI, PI)), receiver.transform * point)
-		_compare(STAMP.build(receiver, projector, Vector2(1.4, 2.1), .3), cache.build(receiver, projector, Vector2(1.4, 2.1), .3), "Transformed projection %d" % i)
+		var turned := Transform3D(Basis.looking_at(-normal, Vector3.UP).rotated(normal, rng.randf_range(-PI, PI)), receiver.transform * point)
+		_compare(STAMP.build(receiver, turned, Vector2(1.4, 2.1), .3), cache.build(receiver, turned, Vector2(1.4, 2.1), .3), "Transformed projection %d" % i)
 	receiver.transform = Transform3D.IDENTITY
 	var projector := Transform3D.IDENTITY
 	_compare(STAMP.build(receiver, projector, Vector2.ONE, .2), cache.build(receiver, projector, Vector2.ONE, .2), "Dense projection")

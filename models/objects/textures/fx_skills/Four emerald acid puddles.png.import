@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://btand2qwa11ku"
-path="res://.godot/imported/Eight-Frame Isometric Electric Field.png-a12d2bc17f47f8a55021d14a0fb354d7.ctex"
+uid="uid://bjjtcb40wi3n0"
+path="res://.godot/imported/Four emerald acid puddles.png-3a94e168aefa4f9cbd1d639cfeb46aa8.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://models/objects/textures/FX_skills/Eight-Frame Isometric Electric Field.png"
-dest_files=["res://.godot/imported/Eight-Frame Isometric Electric Field.png-a12d2bc17f47f8a55021d14a0fb354d7.ctex"]
+source_file="res://models/objects/textures/fx_skills/Four emerald acid puddles.png"
+dest_files=["res://.godot/imported/Four emerald acid puddles.png-3a94e168aefa4f9cbd1d639cfeb46aa8.ctex"]
 
 [params]
 

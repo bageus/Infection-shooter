@@ -75,7 +75,10 @@ func search_requested(actor: CharacterBody3D, target: Node3D) -> bool:
 	_next_search = Engine.get_physics_frames() + 45 + int(actor.get_instance_id() % 20)
 	_goal = to
 	_direct = clear_segment(from, to)
-	path = [] if _direct else _search(from, to)
+	# A typed empty literal: the ternary form yields an untyped Array.
+	path = []
+	if not _direct:
+		path = _search(from, to)
 	return not _direct
 
 

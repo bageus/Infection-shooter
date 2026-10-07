@@ -19,8 +19,8 @@ func gather(root: Node) -> Array[MeshInstance3D]:
 		_entries[id] = entry
 		rebuilds += 1
 	var result: Array[MeshInstance3D] = []
-	for reference: WeakRef in _entries[id]["meshes"]:
-		var mesh := reference.get_ref() as MeshInstance3D
+	for mesh_ref: WeakRef in _entries[id]["meshes"]:
+		var mesh := mesh_ref.get_ref() as MeshInstance3D
 		if mesh != null and _eligible(mesh, root):
 			result.append(mesh)
 	return result
@@ -57,8 +57,8 @@ func _remove(id: int) -> void:
 	if not _entries.has(id):
 		return
 	var entry: Dictionary = _entries[id]
-	for reference: WeakRef in entry["nodes"]:
-		var node := reference.get_ref() as Node
+	for node_ref: WeakRef in entry["nodes"]:
+		var node := node_ref.get_ref() as Node
 		if node != null and node.child_order_changed.is_connected(entry["callback"]):
 			node.child_order_changed.disconnect(entry["callback"])
 	_entries.erase(id)
@@ -68,8 +68,8 @@ func _notification(what: int) -> void:
 	if what == NOTIFICATION_PREDELETE:
 		# RefCounted is already at zero: clean entries without instance helpers.
 		for entry: Dictionary in _entries.values():
-			for reference: WeakRef in entry["nodes"]:
-				var node := reference.get_ref() as Node
+			for node_ref: WeakRef in entry["nodes"]:
+				var node := node_ref.get_ref() as Node
 				if node != null and node.child_order_changed.is_connected(entry["callback"]):
 					node.child_order_changed.disconnect(entry["callback"])
 		_entries.clear()

@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://bx4rttq15iuoo"
-path="res://.godot/imported/Isometric cyan blade orbit atlas.png-1f05da9d995ba9026da92e22c6ed59fb.ctex"
+uid="uid://ckw3rt8mqqssp"
+path="res://.godot/imported/Cartoon anatomical heart heartbeat sprite sheet.png-b364277c97530e06ae620954220c2d99.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://models/objects/textures/FX_skills/Isometric cyan blade orbit atlas.png"
-dest_files=["res://.godot/imported/Isometric cyan blade orbit atlas.png-1f05da9d995ba9026da92e22c6ed59fb.ctex"]
+source_file="res://models/objects/textures/fx_skills/Cartoon anatomical heart heartbeat sprite sheet.png"
+dest_files=["res://.godot/imported/Cartoon anatomical heart heartbeat sprite sheet.png-b364277c97530e06ae620954220c2d99.ctex"]
 
 [params]
 

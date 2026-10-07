@@ -83,8 +83,9 @@ func _run() -> void:
 		{"scene": TABLE_PATH, "x": 1.0, "y": 0.0, "z": 1.0},
 		{"scene": "res://models/objects/enviroments/11/11_bamboo_one.glb", "x": 0.0, "y": 0.0, "z": 0.0},
 		{"scene": "res://models/objects/enviroments/16/16_wall_urinal.glb", "x": 2.0, "y": 1.0, "z": 0.0},
+		{"scene": "res://models/objects/enviroments/05/05_aircondition.glb", "x": 3.0, "y": 2.0, "z": 0.0},
 	]})
-	_check(int(report.get("skipped", -1)) == 1 and int(report.get("loaded", -1)) == 2, "Missing models are counted and the old bathroom set migrates (%s)" % report)
+	_check(int(report.get("skipped", -1)) == 1 and int(report.get("loaded", -1)) == 3, "Missing models are counted; the old bathroom set and retired air conditioner migrate (%s)" % report)
 	planner.call("exit")
 	stage.queue_free()
 	await process_frame

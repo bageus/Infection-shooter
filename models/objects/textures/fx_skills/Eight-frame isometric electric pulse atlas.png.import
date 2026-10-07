@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://6c5pice5cwgw"
-path="res://.godot/imported/Mutant growth mutagen burst sprite atlas.png-2d7096014d82aab429c499efdc8efd0e.ctex"
+uid="uid://dgo2tvu6aoppw"
+path="res://.godot/imported/Eight-frame isometric electric pulse atlas.png-f6e285fb08fb938046f93c169555a71e.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://models/objects/textures/FX_skills/Mutant growth mutagen burst sprite atlas.png"
-dest_files=["res://.godot/imported/Mutant growth mutagen burst sprite atlas.png-2d7096014d82aab429c499efdc8efd0e.ctex"]
+source_file="res://models/objects/textures/fx_skills/Eight-frame isometric electric pulse atlas.png"
+dest_files=["res://.godot/imported/Eight-frame isometric electric pulse atlas.png-f6e285fb08fb938046f93c169555a71e.ctex"]
 
 [params]
 

@@ -28,7 +28,7 @@ func _run() -> void:
 	await _particles(catalog)
 	await _corpse()
 	await _aim(player)
-	await _installed_lamps(planner)
+	_installed_lamps(planner)
 	stage.queue_free()
 	await process_frame
 	await create_timer(.2).timeout

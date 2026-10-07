@@ -12,7 +12,7 @@ func _ready() -> void:
 	collision_mask = 3
 
 
-func take_projectile_hit(_damage: float, hit_position: Vector3, _normal: Vector3, direction: Vector3, _weapon: String) -> bool:
+func take_projectile_hit(_hit_damage: float, hit_position: Vector3, _normal: Vector3, direction: Vector3, _weapon: String) -> bool:
 	if _torn:
 		return false
 	_torn = true

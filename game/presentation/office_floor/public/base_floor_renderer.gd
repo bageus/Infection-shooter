@@ -65,8 +65,8 @@ func _add_tile(center: Vector2, tile_scale: float) -> void:
 	var key := Vector4i(floori(float(cell.x) / SECTION_TILES), floori(float(cell.y) / SECTION_TILES), variant, int(tile_scale < 1.0))
 	if not _batches.has(key):
 		_batches[key] = []
-	var transform := Transform3D(Basis.from_scale(Vector3(tile_scale, 1.0, tile_scale)), Vector3(center.x, tile_y, center.y))
-	_batches[key].append(transform)
+	var tile_transform := Transform3D(Basis.from_scale(Vector3(tile_scale, 1.0, tile_scale)), Vector3(center.x, tile_y, center.y))
+	_batches[key].append(tile_transform)
 
 
 func _flush_batches() -> void:

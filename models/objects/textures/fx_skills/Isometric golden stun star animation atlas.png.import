@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://b56qqbs35668c"
-path="res://.godot/imported/Eight-frame isometric energy shield atlas.png-50dcc00151929eb590fe27efbc07d3a4.ctex"
+uid="uid://db3ngakkf4a7x"
+path="res://.godot/imported/Isometric golden stun star animation atlas.png-53df0f3481cb04c565106a5cbe61475b.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://models/objects/textures/FX_skills/Eight-frame isometric energy shield atlas.png"
-dest_files=["res://.godot/imported/Eight-frame isometric energy shield atlas.png-50dcc00151929eb590fe27efbc07d3a4.ctex"]
+source_file="res://models/objects/textures/fx_skills/Isometric golden stun star animation atlas.png"
+dest_files=["res://.godot/imported/Isometric golden stun star animation atlas.png-53df0f3481cb04c565106a5cbe61475b.ctex"]
 
 [params]
 
