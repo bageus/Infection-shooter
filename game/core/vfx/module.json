@@ -11,7 +11,8 @@
     "public/effect_atlases.gd",
     "public/smoke_puff.gdshader",
     "public/surface_atlases.gd",
-    "public/surface_stamp.gd"
+    "public/surface_stamp.gd",
+    "public/surface_stamp_cache.gd"
   ],
   "dependencies": [],
   "runtime_contracts": {
@@ -28,6 +29,7 @@
     "surface_atlases_v1": {
       "material": "material(texture: Texture2D, cell: int) -> ShaderMaterial; immutable BULLET/GLASS textures, row-major 4x2, bullet 0..4, scorch 5..7, glass 0..7; per-mark material"
     },
-    "surface_stamp_v1": "build(receiver: MeshInstance3D, projector: Transform3D, size: Vector2, depth: float, skip_glass = false) -> ArrayMesh; immutable receiver, clipped real triangles, continuous projector UV, null if no receiving faces"
+    "surface_stamp_v1": "build(receiver: MeshInstance3D, projector: Transform3D, size: Vector2, depth: float, skip_glass = false) -> ArrayMesh; immutable receiver, clipped real triangles, continuous projector UV, null if no receiving faces",
+    "surface_stamp_cache_v1": "Owned RefCounted instance: build(receiver, projector, size, depth, skip_glass = false) -> ArrayMesh; same geometry as surface_stamp_v1; bounded 128 immutable Mesh snapshots/indices; Mesh.changed invalidation; destroying owner disconnects observers. Caller owns cache and output."
   }
 }

@@ -3,7 +3,9 @@ extends Node3D
 # One scene-local budget for bullet and wood marks, and another for settled debris.
 const PROJECTION := preload("res://game/features/combat/impact_projection.gd")
 const SURFACES := preload("res://game/features/combat/impact_surface_geometry.gd")
+const STAMPS := preload("res://game/core/vfx/public/surface_stamp_cache.gd")
 var _surfaces := SURFACES.new()
+var _stamps := STAMPS.new()
 
 
 func register_surface(collider: Node3D, visual: Node3D) -> void:
@@ -76,7 +78,7 @@ func _prune_retained() -> void:
 
 
 func projected_geometry(collider: Node3D, projector: Transform3D, footprint: Vector2, depth: float = .12, skip_glass: bool = false) -> Array[Dictionary]:
-	return PROJECTION.geometry(_surfaces, collider, projector, footprint, depth, skip_glass)
+	return PROJECTION.geometry(_surfaces, _stamps, collider, projector, footprint, depth, skip_glass)
 
 
 func project_surface(collider: Node3D, projector: Transform3D, footprint: Vector2, material: Material, depth: float = .12, skip_glass: bool = false) -> Array[MeshInstance3D]:

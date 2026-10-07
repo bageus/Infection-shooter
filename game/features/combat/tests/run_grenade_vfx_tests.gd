@@ -7,6 +7,11 @@ const ATLASES := preload("res://game/core/vfx/public/effect_atlases.gd")
 const FLIPBOOK := preload("res://game/core/vfx/public/sprite_flipbook.gd")
 const SMOKE_SHADER := preload("res://game/core/vfx/public/smoke_puff.gdshader")
 
+const DAMAGE := preload("res://game/features/combat/public/grenade_explosion.gd")
+class Recipient extends StaticBody3D:
+	func take_damage(_amount: float) -> void:
+		pass
+
 var failures := 0
 
 
@@ -15,6 +20,7 @@ func _init() -> void:
 
 
 func _run() -> void:
+	_test_recipients()
 	var stage := Node3D.new()
 	root.add_child(stage)
 	var blast := EXPLOSION.instantiate() as Node3D
@@ -52,3 +58,17 @@ func _expect(condition: bool, message: String) -> void:
 	if not condition:
 		failures += 1
 		push_error(message)
+
+
+func _test_recipients() -> void:
+	var wall := StaticBody3D.new()
+	var damageable := Recipient.new()
+	var debris := RigidBody3D.new()
+	_expect(not DAMAGE._receives_blast(wall), "Inert walls skip shelter rays")
+	_expect(DAMAGE._receives_blast(damageable), "Damage callback keeps its recipient")
+	_expect(DAMAGE._receives_blast(debris), "Impulse-only debris remains a recipient")
+	debris.freeze = true
+	_expect(not DAMAGE._receives_blast(debris), "Frozen inert debris skips shelter rays")
+	wall.free()
+	damageable.free()
+	debris.free()
