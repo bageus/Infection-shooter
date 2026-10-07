@@ -3,15 +3,15 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://unkw8kmjmwd6"
-path="res://.godot/imported/Eight-frame isometric mutant claw slash atlas.png-ce65cff7a8e4b45e03ec493fa5de17b1.ctex"
+path="res://.godot/imported/Eight-frame isometric mutant claw slash atlas.png-7fd76e9f449f30252105768b1753c336.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://models/objects/textures/FX_skills/Eight-frame isometric mutant claw slash atlas.png"
-dest_files=["res://.godot/imported/Eight-frame isometric mutant claw slash atlas.png-ce65cff7a8e4b45e03ec493fa5de17b1.ctex"]
+source_file="res://models/objects/textures/fx_skills/Eight-frame isometric mutant claw slash atlas.png"
+dest_files=["res://.godot/imported/Eight-frame isometric mutant claw slash atlas.png-7fd76e9f449f30252105768b1753c336.ctex"]
 
 [params]
 

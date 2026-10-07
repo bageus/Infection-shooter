@@ -3,15 +3,15 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://db3ngakkf4a7x"
-path="res://.godot/imported/Isometric golden stun star animation atlas.png-9d79b608d7dda80ef65fa043d7dc0fe6.ctex"
+path="res://.godot/imported/Isometric golden stun star animation atlas.png-53df0f3481cb04c565106a5cbe61475b.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://models/objects/textures/FX_skills/Isometric golden stun star animation atlas.png"
-dest_files=["res://.godot/imported/Isometric golden stun star animation atlas.png-9d79b608d7dda80ef65fa043d7dc0fe6.ctex"]
+source_file="res://models/objects/textures/fx_skills/Isometric golden stun star animation atlas.png"
+dest_files=["res://.godot/imported/Isometric golden stun star animation atlas.png-53df0f3481cb04c565106a5cbe61475b.ctex"]
 
 [params]
 
