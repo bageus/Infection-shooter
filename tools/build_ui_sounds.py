@@ -33,7 +33,9 @@ def save(name, samples):
 
 def main():
     OUT.mkdir(parents=True, exist_ok=True)
-    save('menu_hover', cue(0.055, 430, 610, 0.15))
+    # Two whole tones (4 semitones) above the original 430-610 Hz chirp: a brighter sci-fi tick.
+    up = 2 ** (4 / 12)
+    save('menu_hover', cue(0.055, 430 * up, 610 * up, 0.15))
     save('mutation_hover', cue(0.075, 900, 1250, 0.06))
     save('mutation_click', cue(0.10, 320, 95, 0.25))
     lock = cue(0.055, 650, 650) + [0.0] * 220 + cue(0.085, 1050, 1050)

@@ -96,6 +96,7 @@ func _ready() -> void:
 	audio.name = "PlayerAudio"
 	add_child(audio)
 	audio.configure(self, camera_rig, $AnimationDriver)
+	audio.configure_skills(infection_runtime)
 	var heal_feedback := HEAL_FEEDBACK.new()
 	heal_feedback.name = "HealFeedback"
 	add_child(heal_feedback)
