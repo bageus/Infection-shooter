@@ -27,10 +27,14 @@ func _run() -> void:
 	audio.setup(body, 1.0)
 	_expect(audio.scream_sound == &"roar_heavy" and not audio._howls, "Heavy infected roar and do not howl.")
 	audio._growl_wait = 99.0
-	for attempt in 12:
+	# The alert scream is a 70% roll; retry fresh charges until one screams,
+	# then stop so the rest it started is still running below.
+	for attempt in 40:
 		audio._alert_wait = 0.0
 		audio.tick(0.016, false, true)
 		audio.tick(0.016, true, true)
+		if audio._alert_wait > 0.0:
+			break
 	_expect(_count(body, &"roar_heavy") >= 1, "Starting a charge screams.")
 	_expect(audio._alert_wait > 0.0, "An alert scream starts a rest.")
 	var rest: float = audio._alert_wait
