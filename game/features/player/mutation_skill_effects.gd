@@ -23,6 +23,8 @@ var _melee_victim: WeakRef
 var _melee_time := -100.0
 var storm_tick := 0.0
 var acid_pools: Array[Dictionary] = []
+## Acid Spit pool radius: 3.4 m across.
+const ACID_POOL_RADIUS := 1.7
 ## Retaliation answers a burst of damage, not one heavy blow.
 const RETALIATION_WINDOW := 3.0
 const RETALIATION_DAMAGE := 50.0
@@ -138,7 +140,7 @@ func _process(delta: float) -> void:
 		if float(pool["remaining"]) <= 0.0:
 			acid_pools.remove_at(i)
 			continue
-		for enemy in _enemies_near(pool["position"], 2.2):
+		for enemy in _enemies_near(pool["position"], ACID_POOL_RADIUS):
 			enemy.call("take_damage", 5.0 * delta)
 	if _weapons_dirty:
 		_update_weapons()
@@ -286,8 +288,15 @@ func _passive_buff(skill_id: String, duration: float) -> void:
 	_passive(skill_id, duration)
 
 
+# Lasting active effects are reported so the HUD can show their remaining time.
+func _skill_effect(skill_id: String, duration: float) -> void:
+	if runtime.has_method("report_skill_effect"):
+		runtime.call("report_skill_effect", skill_id, duration)
+
+
 func _start_buff(skill_id: String, duration: float) -> void:
 	buffs[skill_id] = duration
+	_skill_effect(skill_id, duration)
 	if skill_id in WEAPON_BUFFS:
 		_weapons_dirty = true
 	if skill_id in VFX_BUFFS:
@@ -326,7 +335,9 @@ func _cast(skill_id: String) -> void:
 				enemy.call("apply_player_push", (enemy.global_position - player.global_position).normalized(), 5.0)
 		"parasite":
 			var targets := _enemies_near(player.global_position, 12.0, true)
-			if not targets.is_empty(): targets[0].call("apply_mutation_poison", 6.0, 6.0, true)
+			if not targets.is_empty():
+				targets[0].call("apply_mutation_poison", 6.0, 6.0, true)
+				_skill_effect(skill_id, 6.0)
 		"living_harvest", "overload", "storm_pulse", "bone_blades", "berserk":
 			_start_buff(skill_id, 6.0 if skill_id != "berserk" else 8.0)
 		"discharge":
@@ -339,10 +350,11 @@ func _cast(skill_id: String) -> void:
 			vfx.chain_lightning(chain)
 		"acid_spit":
 			acid_pools.append({"position": player.get("_aim_point"), "remaining": 6.0})
-			vfx.acid_pool(player.get("_aim_point"), 2.2, 6.0)
+			vfx.acid_pool(player.get("_aim_point"), ACID_POOL_RADIUS, 6.0)
 		"spore_cocoon":
 			var location: Vector3 = player.get("_aim_point")
 			vfx.spore_cocoon(location, 3.0, 2.0)
+			_skill_effect(skill_id, 2.0)
 			get_tree().create_timer(2.0).timeout.connect(_release_spores.bind(location))
 		"epidemic":
 			for enemy in _enemies_near(player.global_position, 15.0):

@@ -90,6 +90,30 @@ const EVENTS := {
 	&"fall_light": [4, -5.0, 22.0, 2.5, 0.1, 4],
 	&"fall_tech": [1, -4.0, 26.0, 3.0, 0.08, 3],
 	&"fall_debris": [3, -6.0, 26.0, 3.0, 0.1, 4],
+	# Mutation skills (cast on the player; fields last as long as the effect).
+	&"skill_blood_burst": [2, 1.0, 50.0, 7.0, 0.04, 2],
+	&"skill_parasite": [2, -1.0, 30.0, 4.0, 0.05, 2],
+	&"skill_living_harvest": [2, -1.0, 30.0, 4.0, 0.03, 1],
+	&"skill_discharge": [2, 0.0, 60.0, 7.0, 0.05, 2],
+	&"skill_overload": [2, -1.0, 36.0, 5.0, 0.03, 1],
+	&"skill_storm_pulse": [2, 0.0, 60.0, 7.0, 0.04, 2],
+	&"skill_storm_field": [2, -3.0, 30.0, 4.0, 0.02, 1],
+	&"skill_acid_spit": [2, -1.0, 34.0, 4.0, 0.05, 2],
+	&"acid_sizzle": [2, -4.0, 22.0, 3.0, 0.04, 3],
+	&"skill_spore_cocoon": [2, -1.0, 30.0, 4.0, 0.05, 2],
+	&"spore_burst": [2, 0.0, 46.0, 6.0, 0.05, 3],
+	&"skill_epidemic": [2, -1.0, 40.0, 5.0, 0.04, 1],
+	&"skill_predator_dash": [2, 0.0, 34.0, 5.0, 0.05, 2],
+	&"skill_bone_blades": [2, 0.0, 34.0, 5.0, 0.04, 1],
+	&"bone_blades_whirl": [2, 2.0, 24.0, 3.5, 0.02, 1],
+	&"skill_berserk": [2, 1.0, 60.0, 8.0, 0.03, 1],
+	&"skill_second_heart": [1, 0.0, 30.0, 5.0, 0.0, 1],
+	&"skill_retaliation": [2, 0.0, 46.0, 6.0, 0.05, 1],
+	# Infected voices beyond growls: alert screams, shrieks, heavy roars, distant howls.
+	&"scream_zombie": [5, 0.0, 48.0, 5.5, 0.07, 2],
+	&"scream_shrill": [4, -1.0, 48.0, 5.5, 0.06, 2],
+	&"roar_heavy": [4, 2.0, 70.0, 8.0, 0.05, 2],
+	&"howl_infected": [4, -2.0, 80.0, 9.0, 0.06, 1],
 }
 
 

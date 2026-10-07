@@ -104,8 +104,11 @@ func acid_pool(center: Vector3, radius: float, seconds: float) -> void:
 		RANGE_DOME.spawn(_world(), center, radius, ACID_RANGE, seconds)
 		return
 	var atlas := ATLASES.ACID_PUDDLES
-	_ground(atlas, center, radius, {"frame": randi() % int(atlas["frames"]), "lifetime": seconds, "fade_out": 0.8, "opacity": 0.9})
+	var pool := FLIPBOOK.spawn(_world(), atlas, center + Vector3.UP * GROUND_LIFT, ATLASES.size_for_radius(atlas, radius), {
+		"flat": true, "frame": randi() % int(atlas["frames"]), "lifetime": seconds, "fade_out": 0.8, "opacity": 0.9,
+	})
 	RANGE_DOME.spawn(_world(), center, radius, ACID_RANGE, seconds)
+	return pool
 
 
 ## Spore Cocoon: the cocoon swells for `fuse` seconds, then bursts.

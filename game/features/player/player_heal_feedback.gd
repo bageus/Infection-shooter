@@ -74,9 +74,9 @@ func _spawn_number(amount: float, large: bool) -> void:
 	label.name = "HealNumber"
 	label.font = BODY_FONT
 	label.text = "+%d" % floori(amount)
-	label.font_size = 64 if large else 44
+	label.font_size = 50 if large else 34
 	label.pixel_size = 0.0065
-	label.outline_size = 14
+	label.outline_size = 11
 	label.outline_modulate = Color(0.02, 0.12, 0.05, 0.9)
 	label.modulate = NUMBER_COLOR
 	label.billboard = BaseMaterial3D.BILLBOARD_ENABLED
@@ -196,7 +196,7 @@ func _make_cross_particles(amount: int, lifetime: float) -> CPUParticles3D:
 	shrink.add_point(Vector2(1.0, 0.35))
 	particles.scale_amount_curve = shrink
 	var quad := QuadMesh.new()
-	quad.size = Vector2(0.2, 0.2)
+	quad.size = Vector2(0.12, 0.12)
 	var material := StandardMaterial3D.new()
 	material.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
 	material.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
