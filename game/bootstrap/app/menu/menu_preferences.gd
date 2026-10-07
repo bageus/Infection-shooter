@@ -5,7 +5,7 @@ var bindings := BINDINGS.new()
 
 const FILE := "user://interface_settings.cfg"
 const DEFAULTS := {"language": "ru", "brightness": 1.0, "text_scale": 1.0,
-	"volume": 0.4, "effects_volume": 1.0, "music_volume": 1.0, "sound": true, "occlusion_mode": 0, "test_mutagen": false, "electronic_particles": true}
+	"volume": 0.4, "effects_volume": 1.0, "music_volume": 1.0, "sound": true, "occlusion_mode": 0, "test_mutagen": false, "infinite_antidotes": false, "electronic_particles": true}
 var values: Dictionary = DEFAULTS.duplicate()
 
 
@@ -65,6 +65,8 @@ func apply_to_game(tree: SceneTree) -> void:
 		world.environment.adjustment_brightness = float(values.brightness)
 	if scene != null and scene.has_method("set_test_mutagen_enabled"):
 		scene.call("set_test_mutagen_enabled", bool(values.test_mutagen))
+	if scene != null and scene.has_method("set_infinite_antidotes_enabled"):
+		scene.call("set_infinite_antidotes_enabled", bool(values.infinite_antidotes))
 	if scene != null and scene.has_method("set_electronic_particles_enabled"):
 		scene.call("set_electronic_particles_enabled", bool(values.electronic_particles))
 	var occlusion := scene.get_node_or_null("OcclusionEffects") if scene != null else null

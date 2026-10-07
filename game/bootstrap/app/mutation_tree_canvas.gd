@@ -8,6 +8,8 @@ const DESIGN_SIZE := Vector2(1200, 800)
 const TRUNK_Y := 370.0
 const HYBRID_PARENTS := [[4, 5], [5, 6], [6, 7], [7, 8], [8, 9]]
 const LIT := Color(0.3, 0.95, 0.1, 1.0)
+const LABEL_MAX_WIDTH := 170.0
+const LABEL_GAP := 8.0
 var progress: Array[int] = []
 var hybrids: Array[bool] = []
 var thresholds: Array[float] = []
@@ -47,14 +49,26 @@ func skill_position(branch_index: int, rank: int) -> Vector2:
 	return Vector2(origin.x + rank * step, 290.0 - rank * 85.0 if branch_index < 4 else 450.0 + rank * 85.0)
 
 
-func label_position(index: int) -> Vector2:
-	var x := clampf(skill_position(index, 0).x - 63.0, 70.0, 1020.0)
-	return Vector2(x, 42.0 if index < 4 else 730.0)
+# Branch titles are centred over the branch's own circles and never wider
+# than the gap to the neighbouring branch titles.
+func label_rect(index: int) -> Rect2:
+	var center := _branch_center_x(index)
+	var group := range(0, 4) if index < 4 else range(4, BRANCHES.size())
+	var width := LABEL_MAX_WIDTH
+	for other in group:
+		if other != index:
+			width = minf(width, absf(_branch_center_x(other) - center) - LABEL_GAP)
+	var x := clampf(center - width * 0.5, 0.0, DESIGN_SIZE.x - width)
+	return Rect2(x, 42.0 if index < 4 else 730.0, width, 0.0)
+
+
+func _branch_center_x(index: int) -> float:
+	return (skill_position(index, 0).x + skill_position(index, 2).x) * 0.5
 
 
 func hybrid_position(index: int) -> Vector2:
 	var parents: Array = HYBRID_PARENTS[index]
-	return (skill_position(parents[0], 2) + skill_position(parents[1], 2)) * 0.5 + Vector2(0, 42)
+	return (skill_position(parents[0], 2) + skill_position(parents[1], 2)) * 0.5 + Vector2(0, 56)
 
 
 func set_progress(new_progress: Array[int], new_hybrids: Array[bool]) -> void:

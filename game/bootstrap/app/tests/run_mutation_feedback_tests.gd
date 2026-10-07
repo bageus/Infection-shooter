@@ -93,6 +93,7 @@ func _run() -> void:
 		art.free()
 	stage.queue_free()
 	_check_skill_icons()
+	_check_branch_labels()
 	print("Mutation feedback tests: %d failures" % failures)
 	quit(failures)
 
@@ -113,6 +114,25 @@ func _check_skill_icons() -> void:
 			_expect(not regions.has(icon.region), "Skill %s has its own atlas cell." % row[0])
 			_expect(Rect2(Vector2.ZERO, icon.atlas.get_size()).encloses(icon.region), "Skill %s icon lies inside the atlas." % row[0])
 			regions.append(icon.region)
-	_expect(SKILL_ICONS.for_skill("muscle_memory").region.position == Vector2.ZERO, "Atlas cell 1 is Muscle Memory.")
-	_expect(SKILL_ICONS.for_skill("berserk").region.end == SKILL_ICONS.ATLAS.get_size(), "Atlas cell 36 is Berserk.")
+	var cell := SKILL_ICONS.ATLAS.get_size() / SKILL_ICONS.GRID
+	_expect(Rect2(Vector2.ZERO, cell).encloses((SKILL_ICONS.for_skill("muscle_memory") as AtlasTexture).region), "Atlas cell 1 is Muscle Memory.")
+	_expect(Rect2(cell * 5, cell).encloses((SKILL_ICONS.for_skill("berserk") as AtlasTexture).region), "Atlas cell 36 is Berserk.")
+	var claws: Rect2 = (SKILL_ICONS.for_skill("claws") as AtlasTexture).region
+	_expect(is_equal_approx(claws.size.x, claws.size.y) and claws.size.x < cell.x, "Icons are trimmed to a square around the glyph.")
 	infection.free()
+
+
+func _check_branch_labels() -> void:
+	var canvas := CANVAS.new()
+	var values: Array[float] = [40, 70, 25, 55, 25, 40, 55, 70, 85, 85]
+	var opened: Array[bool] = [true, true, true, true, true, true, true, true, true, true]
+	canvas.configure_progression(values, 95.0, opened)
+	for index in CANVAS.BRANCHES.size():
+		var area: Rect2 = canvas.label_rect(index)
+		var middle := (canvas.skill_position(index, 0).x + canvas.skill_position(index, 2).x) * 0.5
+		_expect(is_equal_approx(area.get_center().x, middle), "Branch %d title is centred over its circles." % index)
+		for other in range(index + 1, CANVAS.BRANCHES.size()):
+			if (other < 4) == (index < 4):
+				var next: Rect2 = canvas.label_rect(other)
+				_expect(area.end.x <= next.position.x or next.end.x <= area.position.x, "Branch titles %d and %d do not overlap." % [index, other])
+	canvas.free()
