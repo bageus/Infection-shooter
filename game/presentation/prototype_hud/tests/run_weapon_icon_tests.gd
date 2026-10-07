@@ -25,9 +25,9 @@ func _run() -> void:
 		image.decompress()
 	var original := image.get_data()
 	var icons := ICONS.extract(ATLAS)
-	_expect(icons.size() == 6, "Real atlas extracts six separate icons despite connected halos.")
-	if icons.size() == 6:
-		for index in range(6):
+	_expect(icons.size() == 7, "Real atlas extracts seven separate icons despite connected halos.")
+	if icons.size() == 7:
+		for index in range(7):
 			var bounds: Rect2 = ICONS.ARTWORK_BOUNDS[index]
 			_expect(icons[index].get_width() == int(bounds.size.x) and icons[index].get_height() == int(bounds.size.y), "Visible artwork bounds preserve native aspect.")
 			var crop := image.get_region(Rect2i(bounds))
@@ -112,6 +112,8 @@ func _test_key_cell(hud: Node, player: Node) -> void:
 	_expect(cell.position.y == antidote.position.y and cell.size == antidote.size, "Key cell matches the antidote cell row and size.")
 	_expect(cell.position.x >= antidote.position.x + antidote.size.x, "Key cell sits beside the antidote cell without overlap.")
 	_expect(cell.get_theme_stylebox("panel") == antidote.get_theme_stylebox("panel"), "Key cell shares the HUD item frame.")
+	var key_icon := cell.get_node("KeyIcon") as TextureRect
+	_expect(key_icon.texture != null and key_icon.texture.get_size() == ICONS.ARTWORK_BOUNDS[6].size, "Key cell shows the atlas key artwork.")
 
 
 func _check_crop_pixels(icon: Image, crop: Image) -> void:
