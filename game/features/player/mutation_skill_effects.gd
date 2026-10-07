@@ -286,8 +286,15 @@ func _passive_buff(skill_id: String, duration: float) -> void:
 	_passive(skill_id, duration)
 
 
+# Lasting active effects are reported so the HUD can show their remaining time.
+func _skill_effect(skill_id: String, duration: float) -> void:
+	if runtime.has_method("report_skill_effect"):
+		runtime.call("report_skill_effect", skill_id, duration)
+
+
 func _start_buff(skill_id: String, duration: float) -> void:
 	buffs[skill_id] = duration
+	_skill_effect(skill_id, duration)
 	if skill_id in WEAPON_BUFFS:
 		_weapons_dirty = true
 	if skill_id in VFX_BUFFS:
@@ -326,7 +333,9 @@ func _cast(skill_id: String) -> void:
 				enemy.call("apply_player_push", (enemy.global_position - player.global_position).normalized(), 5.0)
 		"parasite":
 			var targets := _enemies_near(player.global_position, 12.0, true)
-			if not targets.is_empty(): targets[0].call("apply_mutation_poison", 6.0, 6.0, true)
+			if not targets.is_empty():
+				targets[0].call("apply_mutation_poison", 6.0, 6.0, true)
+				_skill_effect(skill_id, 6.0)
 		"living_harvest", "overload", "storm_pulse", "bone_blades", "berserk":
 			_start_buff(skill_id, 6.0 if skill_id != "berserk" else 8.0)
 		"discharge":
@@ -343,6 +352,7 @@ func _cast(skill_id: String) -> void:
 		"spore_cocoon":
 			var location: Vector3 = player.get("_aim_point")
 			vfx.spore_cocoon(location, 3.0, 2.0)
+			_skill_effect(skill_id, 2.0)
 			get_tree().create_timer(2.0).timeout.connect(_release_spores.bind(location))
 		"epidemic":
 			for enemy in _enemies_near(player.global_position, 15.0):
