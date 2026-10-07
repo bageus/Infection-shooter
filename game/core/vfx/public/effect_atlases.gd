@@ -58,8 +58,8 @@ const ELECTRIC_FIELD := {
 	"path": SKILL_ROOT + "Eight-Frame Isometric Electric Field.png",
 	"columns": 4, "rows": 2, "frames": 8,
 	"durations": [0.07, 0.07, 0.07, 0.07, 0.07, 0.07, 0.07, 0.07],
-	"pivot": Vector2(0.5, 0.67),
-	"extent": 0.9,
+	"pivot": Vector2(0.5, 0.62),
+	"extent": 0.75,
 	"ground_stretch": 2.3,
 }
 
@@ -128,7 +128,7 @@ const BLADE_ORBIT := {
 	"columns": 4, "rows": 2, "frames": 8,
 	"durations": [0.06, 0.06, 0.06, 0.06, 0.06, 0.06, 0.06, 0.06],
 	"pivot": Vector2(0.5, 0.55),
-	"extent": 0.95,
+	"extent": 0.68,
 	"ground_stretch": 1.6,
 }
 
