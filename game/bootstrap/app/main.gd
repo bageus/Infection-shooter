@@ -123,6 +123,13 @@ func set_infinite_antidotes_enabled(enabled: bool) -> void:
 	player.set("infinite_antidotes", enabled)
 
 
+## Settings: self-made procedural skill effects instead of the sprite sheets.
+func set_procedural_skill_effects(enabled: bool) -> void:
+	var effects: Node = player.get("mutation_effects")
+	if effects != null and effects.get("vfx") != null:
+		effects.get("vfx").set("procedural", enabled)
+
+
 func _unhandled_key_input(event: InputEvent) -> void:
 	if event is InputEventKey and event.pressed and not event.echo and event.keycode == KEY_ESCAPE:
 		if mutation_tree_ui != null and bool(mutation_tree_ui.call("is_tree_open")):

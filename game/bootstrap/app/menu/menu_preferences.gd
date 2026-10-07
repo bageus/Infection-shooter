@@ -5,7 +5,7 @@ var bindings := BINDINGS.new()
 
 const FILE := "user://interface_settings.cfg"
 const DEFAULTS := {"language": "ru", "brightness": 1.0, "text_scale": 1.0,
-	"volume": 0.4, "effects_volume": 1.0, "music_volume": 1.0, "sound": true, "occlusion_mode": 0, "test_mutagen": false, "infinite_antidotes": false, "electronic_particles": true}
+	"volume": 0.4, "effects_volume": 1.0, "music_volume": 1.0, "sound": true, "occlusion_mode": 0, "test_mutagen": false, "infinite_antidotes": false, "electronic_particles": true, "skill_effects": 0}
 var values: Dictionary = DEFAULTS.duplicate()
 
 
@@ -21,6 +21,7 @@ func load_settings() -> void:
 	values.language = "en" if values.language == "en" else "ru"
 	values.brightness = clampf(values.brightness, 0.8, 1.4)
 	values.occlusion_mode = clampi(values.occlusion_mode, 0, 1)
+	values.skill_effects = clampi(values.skill_effects, 0, 1)
 	values.volume = clampf(values.volume, 0.0, 1.0)
 	values.effects_volume = clampf(values.effects_volume, 0.0, 1.0)
 	values.music_volume = clampf(values.music_volume, 0.0, 1.0)
@@ -67,6 +68,8 @@ func apply_to_game(tree: SceneTree) -> void:
 		scene.call("set_test_mutagen_enabled", bool(values.test_mutagen))
 	if scene != null and scene.has_method("set_infinite_antidotes_enabled"):
 		scene.call("set_infinite_antidotes_enabled", bool(values.infinite_antidotes))
+	if scene != null and scene.has_method("set_procedural_skill_effects"):
+		scene.call("set_procedural_skill_effects", int(values.skill_effects) == 1)
 	if scene != null and scene.has_method("set_electronic_particles_enabled"):
 		scene.call("set_electronic_particles_enabled", bool(values.electronic_particles))
 	var occlusion := scene.get_node_or_null("OcclusionEffects") if scene != null else null
