@@ -1,6 +1,7 @@
 extends Node
 ## Presentation of mutation skills on and around the player: the supplied
-## fx_skills sheets for casts and buffs, the Predator Dash speed trail, and
+## fx_skills sheets for casts and buffs (or the self-made procedural set,
+## picked in the settings), the Predator Dash speed trail, and
 ## the body overlay for Bone Armor, Hardened Tissue and Berserk (aura and red
 ## mask eyes). Gameplay stays in mutation_skill_effects.gd, which reports here.
 
@@ -8,8 +9,12 @@ const FLIPBOOK := preload("res://game/core/vfx/public/sprite_flipbook.gd")
 const ATLASES := preload("res://game/core/vfx/public/effect_atlases.gd")
 const DASH_TRAIL := preload("res://game/features/player/dash_trail.gd")
 const RANGE_DOME := preload("res://game/features/player/range_dome.gd")
+const PROCEDURAL := preload("res://game/features/player/skill_fx/procedural_skill_fx.gd")
 ## The drawn spikes reach past the burst, so they play at this share of it.
 const SPIKE_VISUAL_SHARE := 0.55
+## Spore Cocoon sheet: half the old size, played twice as fast.
+const SPORE_VISUAL_SHARE := 0.375
+const SPORE_SPEED := 2.0
 ## Range dome colours per skill area.
 const BLOOD_RANGE := Color(0.85, 0.08, 0.1)
 const STORM_RANGE := Color(0.25, 0.65, 1.0)
@@ -28,6 +33,8 @@ const OVERLAY_FADE_SPEED := 3.0
 
 var player: Node3D
 var effects_root: Node3D
+## true: self-made procedural effects instead of the sprite sheets.
+var procedural := false
 var _loops := {}
 var _domes := {}
 var _skin: ShaderMaterial
@@ -56,18 +63,27 @@ func configure_world(container: Node3D) -> void:
 
 ## Blood Burst: spikes thrown out around the player.
 func spike_burst(center: Vector3, radius: float) -> void:
-	_ground(ATLASES.SPIKE_BURST, center, radius * SPIKE_VISUAL_SHARE, {"additive": 0.15})
 	RANGE_DOME.spawn(_world(), center, radius, BLOOD_RANGE, 0.6)
+	if procedural:
+		PROCEDURAL.spike_burst(_world(), center, radius)
+		return
+	_ground(ATLASES.SPIKE_BURST, center, radius * SPIKE_VISUAL_SHARE, {"additive": 0.15})
 
 
 ## Retaliation: a stunning electric ring.
 func electric_pulse(center: Vector3, radius: float) -> void:
-	_ground(ATLASES.ELECTRIC_PULSE, center, radius, {"additive": 1.0, "brightness": 1.3})
 	RANGE_DOME.spawn(_world(), center, radius, STORM_RANGE, 0.5)
+	if procedural:
+		PROCEDURAL.electric_pulse(_world(), center, radius)
+		return
+	_ground(ATLASES.ELECTRIC_PULSE, center, radius, {"additive": 1.0, "brightness": 1.3})
 
 
 ## Discharge: one lightning link from each point to the next.
 func chain_lightning(points: Array[Vector3]) -> void:
+	if procedural:
+		PROCEDURAL.chain_lightning(_world(), points)
+		return
 	var atlas := ATLASES.CHAIN_LIGHTNING
 	for i in points.size() - 1:
 		var from := points[i] + Vector3.UP * 1.0
@@ -81,9 +97,11 @@ func chain_lightning(points: Array[Vector3]) -> void:
 		})
 
 
-## Acid Spit: a pool of acid lying for `seconds`, fixed on the floor like a
-## texture so it does not turn with the camera.
-func acid_pool(center: Vector3, radius: float, seconds: float) -> MeshInstance3D:
+## Acid Spit: a pool of acid lying for `seconds`.
+func acid_pool(center: Vector3, radius: float, seconds: float) -> Node3D:
+	if procedural:
+		RANGE_DOME.spawn(_world(), center, radius, ACID_RANGE, seconds)
+		return PROCEDURAL.acid_pool(_world(), center, radius, seconds)
 	var atlas := ATLASES.ACID_PUDDLES
 	var pool := FLIPBOOK.spawn(_world(), atlas, center + Vector3.UP * GROUND_LIFT, ATLASES.size_for_radius(atlas, radius), {
 		"flat": true, "frame": randi() % int(atlas["frames"]), "lifetime": seconds, "fade_out": 0.8, "opacity": 0.9,
@@ -94,17 +112,29 @@ func acid_pool(center: Vector3, radius: float, seconds: float) -> MeshInstance3D
 
 ## Spore Cocoon: the cocoon swells for `fuse` seconds, then bursts.
 func spore_cocoon(center: Vector3, radius: float, fuse: float) -> void:
+	# The dome marks where the spores will land for the fuse and the burst.
+	RANGE_DOME.spawn(_world(), center, radius, SPORE_RANGE, fuse + 0.5)
+	if procedural:
+		PROCEDURAL.spore_cocoon(_world(), center, radius, fuse)
+		return
+	# The sheet plays at SPORE_SPEED and starts late so its burst still lands
+	# on the fuse; until then only the dome shows.
+	var delay := maxf(fuse - fuse / SPORE_SPEED, 0.0)
+	if delay <= 0.0:
+		_play_cocoon(center, radius, fuse)
+	else:
+		get_tree().create_timer(delay, false).timeout.connect(_play_cocoon.bind(center, radius, fuse))
+
+
+func _play_cocoon(center: Vector3, radius: float, fuse: float) -> void:
 	var atlas := ATLASES.SPORE_COCOON
 	var swell := 0.0
 	var spans: Array = atlas["durations"]
 	for i in int(atlas["fuse_frames"]):
 		swell += float(spans[i])
-	# The cloud reaches the poison radius; the cocoon itself stays smaller.
-	FLIPBOOK.spawn(_world(), atlas, center, ATLASES.size_for_radius(atlas, radius * 0.75), {
-		"billboard": true, "speed": swell / maxf(fuse, 0.1), "fade_out": 0.4,
+	FLIPBOOK.spawn(_world(), atlas, center, ATLASES.size_for_radius(atlas, radius * SPORE_VISUAL_SHARE), {
+		"billboard": true, "speed": swell * SPORE_SPEED / maxf(fuse, 0.1), "fade_out": 0.3,
 	})
-	# The dome marks where the spores will land for the fuse and the burst.
-	RANGE_DOME.spawn(_world(), center, radius, SPORE_RANGE, fuse + 0.5)
 
 
 ## Claws: a slash on the struck enemy.
@@ -112,6 +142,9 @@ func claw_slash(enemy: Node3D) -> void:
 	if not is_instance_valid(enemy):
 		return
 	var height := 1.1 * (enemy.get_node("Body") as Node3D).scale.y if enemy.has_node("Body") else 1.1
+	if procedural:
+		PROCEDURAL.claw_slash(_world(), enemy.global_position + Vector3.UP * height)
+		return
 	FLIPBOOK.spawn(_world(), ATLASES.CLAW_SLASH, enemy.global_position + Vector3.UP * height, 2.0, {
 		"additive": 0.6, "brightness": 1.2, "spin": randf_range(-0.5, 0.5),
 	})
@@ -123,6 +156,9 @@ func energy_shield() -> void:
 	if now < _shield_ready:
 		return
 	_shield_ready = now + SHIELD_COOLDOWN
+	if procedural:
+		PROCEDURAL.energy_shield(player, player.global_position)
+		return
 	var atlas := ATLASES.ENERGY_SHIELD
 	FLIPBOOK.spawn(player, atlas, player.global_position + Vector3.UP * 0.02, ATLASES.size_for_radius(atlas, 0.95), {
 		"additive": 0.7, "fade_out": 0.25, "opacity": 0.8,
@@ -131,6 +167,9 @@ func energy_shield() -> void:
 
 ## Second Heart: a beating heart above the player for a while.
 func heartbeat(seconds: float = 2.4) -> void:
+	if procedural:
+		PROCEDURAL.heartbeat(player, player.global_position + Vector3.UP * 2.5, seconds)
+		return
 	var heart := FLIPBOOK.spawn(player, ATLASES.HEARTBEAT, player.global_position + Vector3.UP * 2.5, 1.0, {"cycle": true})
 	if heart != null:
 		get_tree().create_timer(seconds, false).timeout.connect(_stop.bind(weakref(heart), 0.35))
@@ -233,10 +272,14 @@ func _ground(atlas: Dictionary, center: Vector3, radius: float, options: Diction
 func _loop(skill_id: String, atlas: Dictionary, radius: float, options: Dictionary, range_tint: Color) -> void:
 	if has_loop(skill_id):
 		return
-	var settings := options.duplicate()
-	settings["ground"] = true
-	settings["cycle"] = true
-	var node := FLIPBOOK.spawn(player, atlas, player.global_position + Vector3.UP * GROUND_LIFT, ATLASES.size_for_radius(atlas, radius), settings)
+	var node: Node3D
+	if procedural:
+		node = PROCEDURAL.storm_field(player, player.global_position, radius) if skill_id == "storm_pulse" else PROCEDURAL.blade_orbit(player, player.global_position, radius)
+	else:
+		var settings := options.duplicate()
+		settings["ground"] = true
+		settings["cycle"] = true
+		node = FLIPBOOK.spawn(player, atlas, player.global_position + Vector3.UP * GROUND_LIFT, ATLASES.size_for_radius(atlas, radius), settings)
 	if node != null:
 		_loops[skill_id] = weakref(node)
 	var dome: MeshInstance3D = null if has_range_dome(skill_id) else RANGE_DOME.spawn(player, player.global_position, radius, range_tint)

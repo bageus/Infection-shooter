@@ -119,6 +119,13 @@ func _video() -> void:
 	occlusion.selected = dialog.view.preferences.values.occlusion_mode
 	occlusion.item_selected.connect(func(index: int) -> void: dialog.call("_change", "occlusion_mode", index))
 	dialog.call("_row", "occlusion", occlusion)
+	var skill_effects := OptionButton.new()
+	skill_effects.name = "SkillEffects"
+	skill_effects.add_item(dialog.view.text("skillEffectsSheets"))
+	skill_effects.add_item(dialog.view.text("skillEffectsProcedural"))
+	skill_effects.selected = dialog.view.preferences.values.skill_effects
+	skill_effects.item_selected.connect(func(index: int) -> void: dialog.call("_change", "skill_effects", index))
+	dialog.call("_row", "skillEffects", skill_effects)
 	var particles := CheckButton.new()
 	particles.name = "ElectronicParticles"
 	particles.text = dialog.view.text("electronicParticles")

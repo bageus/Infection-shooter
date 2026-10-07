@@ -37,6 +37,8 @@ const SECOND_HEART_DURATION := 5.0
 const DASH_STRIKE_TIME := 0.45
 const DASH_REACH := 1.6
 const DASH_DAMAGE := 30.0
+## Blood Burst reach (was 4 m; cut by 40%).
+const BLOOD_BURST_RADIUS := 2.4
 var _dash_struck: Dictionary = {}
 var _regenerating := false
 
@@ -327,8 +329,8 @@ func _update_weapons() -> void:
 func _cast(skill_id: String) -> void:
 	match skill_id:
 		"blood_burst":
-			vfx.spike_burst(player.global_position, 4.0)
-			for enemy in _enemies_near(player.global_position, 4.0):
+			vfx.spike_burst(player.global_position, BLOOD_BURST_RADIUS)
+			for enemy in _enemies_near(player.global_position, BLOOD_BURST_RADIUS):
 				enemy.call("take_damage", 22.0)
 				enemy.call("apply_player_push", (enemy.global_position - player.global_position).normalized(), 5.0)
 		"parasite":
