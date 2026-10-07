@@ -32,6 +32,7 @@ func _run() -> void:
 	_expect(events.is_empty(), "Full health emits no heal event.")
 	_expect(_numbers(feedback).is_empty(), "Full health shows no heal number.")
 	await _test_medkit_and_regen(player, feedback, events)
+	_test_bleeding_follows_damage(player)
 	stage.queue_free()
 	await process_frame
 	if failures == 0:
@@ -70,6 +71,22 @@ func _test_medkit_and_regen(player: Node3D, feedback: Node3D, events: Array) -> 
 	await _wait_until_clear(feedback)
 	_expect(_numbers(feedback).is_empty() and feedback.get_node_or_null("HealRing") == null and feedback.get_node_or_null("HealLight") == null and feedback.get_node_or_null("HealBurst") == null, "Heal effects free themselves.")
 	_expect(not bool((feedback.get_node("HealSparkles") as CPUParticles3D).emitting), "Sparkles stop once healing ends.")
+
+
+# Raising max health (Hypertrophy) leaves a gap below the cap; only real
+# damage makes the player bleed, and healing it back stops the bleeding.
+func _test_bleeding_follows_damage(player: Node3D) -> void:
+	player.call("heal", 1000.0)
+	_expect(not bool(player.call("is_wounded")), "A full health bar does not bleed.")
+	player.set("max_health", float(player.get("max_health")) + 25.0)
+	_expect(not bool(player.call("is_wounded")), "Raising max health does not make the player bleed.")
+	player.set("armor", 0.0)
+	player.call("take_damage", 10.0)
+	_expect(bool(player.call("is_wounded")), "Damage makes the player bleed.")
+	player.call("heal", 10.0)
+	_expect(not bool(player.call("is_wounded")), "Healing the damage stops the bleeding below the raised cap.")
+	player.set("max_health", float(player.get("max_health")) - 25.0)
+	player.call("heal", 1000.0)
 
 
 func _numbers(feedback: Node) -> Array[Label3D]:

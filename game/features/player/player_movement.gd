@@ -6,6 +6,9 @@ signal wounded_moved(previous: Vector3, current: Vector3, excluded: Array[RID])
 signal blood_death(position: Vector3, excluded: Array[RID], death_id: int)
 var blood_drop_distance := 0.45
 var _blood_motion_start := Vector3.ZERO
+## Health lost to damage and not yet healed. Raising max health leaves a gap
+## below the cap that is not a wound, so only this makes the player bleed.
+var _wound := 0.0
 
 signal blast_stun_started(duration: float, intensity: float)
 signal blast_stun_ended()
@@ -276,6 +279,7 @@ func _apply_damage(amount: float, damage_type: String, point: Vector3, direction
 	var absorbed:=minf(armor,remaining)
 	armor-=absorbed
 	remaining-=absorbed
+	_wound += minf(remaining, health)
 	health=maxf(0.0,health-remaining)
 	if health <= 0.0 and mutation_effects.call("survive_lethal"):
 		health = 1.0
@@ -285,12 +289,16 @@ func _apply_damage(amount: float, damage_type: String, point: Vector3, direction
 		blood_wounded.emit(global_position, excluded)
 		if health <= 0.0:
 			blood_death.emit(global_position, excluded, get_instance_id())
+## True while damage taken is still unhealed; a full bar never bleeds.
+func is_wounded() -> bool:
+	return minf(_wound, max_health - health) > 0.01
 func heal(amount:float, source: StringName = &"")->float:
 	var previous:=health
 	if mutation_effects.call("enabled", "assimilation"):
 		amount *= 1.25
 	health=minf(max_health,health+maxf(amount,0.0))
 	var gained:=health-previous
+	_wound = maxf(0.0, _wound - gained)
 	if gained > 0.0:
 		healed.emit(gained, source)
 	return gained
@@ -392,12 +400,12 @@ func _update_move(delta:float)->void:
 	velocity.y=0.0 if is_on_floor() else velocity.y-gravity_acceleration*delta
 	_intended_motion=Vector3(velocity.x,0.0,velocity.z)
 	move_and_slide()
-	if health < max_health and _blood_motion_start.distance_to(global_position) >= blood_drop_distance:
+	if is_wounded() and _blood_motion_start.distance_to(global_position) >= blood_drop_distance:
 		if _blood_motion_start.distance_to(global_position) < 3.0:
 			var excluded: Array[RID] = [get_rid()]
 			wounded_moved.emit(_blood_motion_start, global_position, excluded)
 		_blood_motion_start = global_position
-	elif health >= max_health:
+	elif not is_wounded():
 		_blood_motion_start = global_position
 	_push_chair_contacts()
 	if _roll_remaining>0.0: _push_roll_contacts()

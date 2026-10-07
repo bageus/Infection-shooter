@@ -45,6 +45,7 @@ func _run() -> void:
 	forever.set("permanent", true)
 	forever.call("activate")
 	_expect(float((forever.get_node("Visual") as GeometryInstance3D).get_instance_shader_parameter(&"looping")) > 0.5, "A permanent cloud loops its puffs.")
+	_check_refused_mutagen_stays(stage)
 	var depleted := [false]
 	first.connect("depleted", func() -> void: depleted[0] = true)
 	await create_timer(1.0).timeout
@@ -60,6 +61,30 @@ func _run() -> void:
 	await process_frame
 	print("Mutagen cloud tests: %d failure(s)." % failures)
 	quit(failures)
+
+
+class Absorber extends Node:
+	var accepts := true
+	func absorb_mutagen(seconds: float) -> float:
+		return seconds * 5.0 if accepts else 0.0
+
+
+# During loss of control the infection takes no mutagen; the cloud keeps it
+# for when control returns instead of draining for nothing.
+func _check_refused_mutagen_stays(stage: Node3D) -> void:
+	var cloud := _spawn(stage, Vector3(30, 0, 0), 14.0)
+	cloud.call("activate")
+	var body := Absorber.new()
+	stage.add_child(body)
+	var full := float(cloud.get("_absorption_remaining"))
+	body.accepts = false
+	cloud.call("_feed", body, 0.5)
+	_expect(is_equal_approx(float(cloud.get("_absorption_remaining")), full), "A cloud keeps its mutagen while the player cannot absorb it.")
+	body.accepts = true
+	cloud.call("_feed", body, 0.5)
+	_expect(is_equal_approx(float(cloud.get("_absorption_remaining")), full - 0.5), "Absorbed mutagen is spent from the cloud.")
+	body.queue_free()
+	cloud.queue_free()
 
 
 func _spawn(stage: Node3D, at: Vector3, lifetime: float) -> Area3D:
