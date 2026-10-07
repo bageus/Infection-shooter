@@ -14,6 +14,8 @@ signal skill_available
 signal skill_cast(skill_id: String)
 ## Fact: a passive skill's effect just fired (duration 0 for instant effects).
 signal passive_triggered(skill_id: String, duration: float)
+## Fact: an active skill's lasting effect started or was extended.
+signal skill_effect_started(skill_id: String, duration: float)
 
 var _domain = InfectionDomain.new()
 var tree = MUTATION_TREE.new()
@@ -23,12 +25,16 @@ var _was_choice_pending: bool = false
 var _last_active_ability: int = 0
 var _available_skills: Dictionary = {}
 var _cooldown_totals: Dictionary = {}
+var _effects: Dictionary = {}
+var _effect_totals: Dictionary = {}
 
 
 func _physics_process(delta: float) -> void:
 	var previous_mutation: float = _domain.mutation
 	_domain.tick(delta)
 	tree.tick(delta)
+	for skill_id in _effects.keys():
+		_effects[skill_id] = maxf(0.0, float(_effects[skill_id]) - delta)
 	_emit_state_changes(previous_mutation)
 
 
@@ -152,6 +158,26 @@ func skill_cooldown_ratio(skill_id: String) -> float:
 func can_cast_skill(skill_id: String) -> bool:
 	return not _domain.is_control_lost() and not _domain.defeated and CATALOG.find(skill_id) in CATALOG.ACTIVE \
 		and has_skill(skill_id) and skill_cooldown_remaining(skill_id) <= 0.0
+
+
+func report_skill_effect(skill_id: String, duration: float) -> void:
+	if duration <= 0.0 or CATALOG.find(skill_id) not in CATALOG.ACTIVE:
+		return
+	# An extension of a running effect keeps the larger total so the sweep never jumps past full.
+	var running := skill_effect_remaining(skill_id) > 0.0
+	_effect_totals[skill_id] = maxf(duration, float(_effect_totals.get(skill_id, 0.0))) if running else duration
+	_effects[skill_id] = duration
+	skill_effect_started.emit(skill_id, duration)
+
+
+func skill_effect_remaining(skill_id: String) -> float:
+	return float(_effects.get(skill_id, 0.0))
+
+
+## 1.0 when a lasting effect starts, falling to 0.0 when it ends.
+func skill_effect_ratio(skill_id: String) -> float:
+	var total := float(_effect_totals.get(skill_id, 0.0))
+	return clampf(skill_effect_remaining(skill_id) / total, 0.0, 1.0) if total > 0.0 else 0.0
 
 
 func report_passive(skill_id: String, duration: float = 0.0) -> void:

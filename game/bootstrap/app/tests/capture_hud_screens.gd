@@ -55,6 +55,7 @@ func _capture_skills(game: Node, player: Node) -> void:
 	for i in 20:
 		await process_frame
 	# Software rendering is slow; fire the passives right before the shot.
+	runtime.call("cast_skill", "acid_spit")
 	runtime.call("report_passive", "hypertrophy", 0.0)
 	runtime.call("report_passive", "regeneration", 6.0)
 	await process_frame

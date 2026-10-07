@@ -1,9 +1,10 @@
 extends Control
 
 # Combat HUD strip for mutation skills: a key badge that opens the tree, one
-# icon circle per active skill (cooldown sweep while charging, green ring when
-# ready) and a short feed above it naming passives as they fire. Hidden while
-# the player has no active skill. Never wider than the vitals panel.
+# icon circle per active skill (blue sweep while its effect lasts, dark sweep
+# while recharging, green ring when ready) and a short feed above it naming
+# passives as they fire. The badge stays visible before any skill is learned.
+# Never wider than the vitals panel.
 
 const SKILL_ICONS := preload("res://game/bootstrap/app/mutation_skill_icons.gd")
 const BODY := preload("res://assets/interface/fonts/body.ttf")
@@ -15,6 +16,7 @@ const INK := Color("e2dfd4")
 const MUTED := Color("b7b6ad")
 const FAINT := Color("7c7d76")
 const READY := Color(0.42, 0.86, 0.25)
+const EFFECT := Color(0.22, 0.56, 1.0)
 const TRACK := Color("0a0d0ee6")
 ## Matches the vitals panel (18..380) so the strip never sticks out past it.
 const MAX_WIDTH := 362.0
@@ -48,6 +50,8 @@ class SkillCircle extends Control:
 	var ratio := 0.0
 	var remaining := 0.0
 	var castable := false
+	var effect_ratio := 0.0
+	var effect_left := 0.0
 	var _flash := 0.0
 	var _font: Font
 
@@ -59,6 +63,10 @@ class SkillCircle extends Control:
 		texture_filter = CanvasItem.TEXTURE_FILTER_LINEAR_WITH_MIPMAPS
 		mouse_default_cursor_shape = Control.CURSOR_POINTING_HAND
 
+	func set_effect(fraction: float, seconds: float) -> void:
+		effect_ratio = fraction
+		effect_left = seconds
+
 	func refresh(cooldown_ratio: float, seconds: float, can_cast: bool, delta: float) -> void:
 		var was_ready := castable
 		castable = can_cast
@@ -69,29 +77,40 @@ class SkillCircle extends Control:
 		remaining = seconds
 		queue_redraw()
 
+	func _sweep(center: Vector2, radius: float, fraction: float, color: Color) -> void:
+		var points := PackedVector2Array([center])
+		var steps := maxi(2, ceili(48.0 * fraction))
+		for i in steps + 1:
+			var angle := -PI * 0.5 + TAU * fraction * float(i) / float(steps)
+			points.append(center + Vector2(cos(angle), sin(angle)) * radius)
+		draw_colored_polygon(points, color)
+
+	func _seconds(center: Vector2, radius: float, seconds: float, color: Color) -> void:
+		var text := str(ceili(seconds))
+		var font_size := roundi(radius * 0.8)
+		var text_size := _font.get_string_size(text, HORIZONTAL_ALIGNMENT_CENTER, -1, font_size)
+		draw_string(_font, center + Vector2(-text_size.x * 0.5, text_size.y * 0.32), text, HORIZONTAL_ALIGNMENT_CENTER, -1, font_size, color)
+
 	func _draw() -> void:
 		var center := size * 0.5
 		var radius := minf(size.x, size.y) * 0.5 - 2.0
 		draw_circle(center, radius, TRACK)
-		if castable:
+		if castable and effect_left <= 0.0:
 			draw_arc(center, radius + 1.0, 0.0, TAU, 48, Color(READY, 0.28 + _flash), 4.0, true)
 		if icon != null:
 			var side := radius * 1.25
 			var tint := INK if castable else (MUTED if ratio > 0.0 else FAINT)
 			draw_texture_rect(icon, Rect2(center - Vector2(side, side) * 0.5, Vector2(side, side)), false, tint)
-		if ratio > 0.0:
+		if effect_left > 0.0:
+			# A lasting effect takes precedence: blue sweep with the seconds it still runs.
+			_sweep(center, radius, effect_ratio, Color(EFFECT, 0.5))
+			_seconds(center, radius, effect_left, Color("cfe2ff"))
+		elif ratio > 0.0:
 			# Dark sweep shrinking clockwise from twelve o'clock as the skill recharges.
-			var points := PackedVector2Array([center])
-			var steps := maxi(2, ceili(48.0 * ratio))
-			for i in steps + 1:
-				var angle := -PI * 0.5 + TAU * ratio * float(i) / float(steps)
-				points.append(center + Vector2(cos(angle), sin(angle)) * radius)
-			draw_colored_polygon(points, Color(0, 0, 0, 0.62))
-			var text := str(ceili(remaining))
-			var font_size := roundi(radius * 0.8)
-			var text_size := _font.get_string_size(text, HORIZONTAL_ALIGNMENT_CENTER, -1, font_size)
-			draw_string(_font, center + Vector2(-text_size.x * 0.5, text_size.y * 0.32), text, HORIZONTAL_ALIGNMENT_CENTER, -1, font_size, INK)
-		draw_arc(center, radius, 0.0, TAU, 48, READY if castable else BORDER, 1.5 if castable else 1.0, true)
+			_sweep(center, radius, ratio, Color(0, 0, 0, 0.62))
+			_seconds(center, radius, remaining, INK)
+		var rim := EFFECT if effect_left > 0.0 else (READY if castable else BORDER)
+		draw_arc(center, radius, 0.0, TAU, 48, rim, 1.0 if rim == BORDER else 1.5, true)
 		if not binding.is_empty():
 			var label_size := roundi(maxf(9.0, radius * 0.48))
 			var width := _font.get_string_size(binding, HORIZONTAL_ALIGNMENT_LEFT, -1, label_size).x
@@ -210,7 +229,7 @@ func _layout() -> void:
 		item.position = Vector2(x, PAD)
 		item.size = Vector2(circle, circle)
 		x += circle + gap
-	_strip.visible = count > 0
+	_strip.visible = true
 	_place_feed()
 
 
@@ -231,6 +250,9 @@ func _process(delta: float) -> void:
 
 func _update_circles(delta: float) -> void:
 	for circle in circles:
+		circle.set_effect(
+			float(runtime.call("skill_effect_ratio", circle.skill_id)),
+			float(runtime.call("skill_effect_remaining", circle.skill_id)))
 		circle.refresh(
 			float(runtime.call("skill_cooldown_ratio", circle.skill_id)),
 			float(runtime.call("skill_cooldown_remaining", circle.skill_id)),
