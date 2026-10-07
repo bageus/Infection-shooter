@@ -3,15 +3,15 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://btand2qwa11ku"
-path="res://.godot/imported/Eight-Frame Isometric Electric Field.png-58688a579f4596d80e3f9298c510b198.ctex"
+path="res://.godot/imported/Eight-Frame Isometric Electric Field.png-a12d2bc17f47f8a55021d14a0fb354d7.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://models/objects/textures/fx_skills/Eight-Frame Isometric Electric Field.png"
-dest_files=["res://.godot/imported/Eight-Frame Isometric Electric Field.png-58688a579f4596d80e3f9298c510b198.ctex"]
+source_file="res://models/objects/textures/FX_skills/Eight-Frame Isometric Electric Field.png"
+dest_files=["res://.godot/imported/Eight-Frame Isometric Electric Field.png-a12d2bc17f47f8a55021d14a0fb354d7.ctex"]
 
 [params]
 

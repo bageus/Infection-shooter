@@ -21,6 +21,10 @@ const CELLS := {
 	"predator_dash": 33, "bone_blades": 34, "berserk": 35
 }
 
+# Coarse alpha scan used to find each glyph inside its cell.
+const PROBE := 64
+const OPAQUE := 0.1
+
 static var _cache: Dictionary = {}
 
 
@@ -32,6 +36,27 @@ static func for_skill(skill_id: String) -> Texture2D:
 		var size := ATLAS.get_size() / GRID
 		var icon := AtlasTexture.new()
 		icon.atlas = ATLAS
-		icon.region = Rect2(Vector2(cell % GRID, floori(float(cell) / GRID)) * size, size)
+		icon.region = _centered(Rect2(Vector2(cell % GRID, floori(float(cell) / GRID)) * size, size))
 		_cache[skill_id] = icon
 	return _cache[skill_id]
+
+
+# Glyphs sit off-centre in their cells; a square around the glyph's bounds
+# lets circles centre the drawing itself rather than the cell.
+static func _centered(cell: Rect2) -> Rect2:
+	var image := ATLAS.get_image().get_region(Rect2i(cell))
+	image.resize(PROBE, PROBE, Image.INTERPOLATE_BILINEAR)
+	var low := Vector2(PROBE, PROBE)
+	var high := Vector2(-1, -1)
+	for y in PROBE:
+		for x in PROBE:
+			if image.get_pixel(x, y).a > OPAQUE:
+				low = low.min(Vector2(x, y))
+				high = high.max(Vector2(x + 1, y + 1))
+	if high.x < 0:
+		return cell
+	var scale := cell.size.x / PROBE
+	var bounds := Rect2(low * scale, (high - low) * scale)
+	var side := minf(maxf(bounds.size.x, bounds.size.y), cell.size.x)
+	var origin := (bounds.get_center() - Vector2(side, side) * 0.5).clamp(Vector2.ZERO, cell.size - Vector2(side, side))
+	return Rect2(cell.position + origin, Vector2(side, side))

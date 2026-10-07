@@ -136,7 +136,7 @@ func _update_vitals() -> void:
 	var mutation: float = infection.call("get_mutation")
 	var critical: float = infection.call("get_critical_threshold")
 	var has_key: bool = player.has_emergency_key()
-	var snapshot: Array = [player.health, player.max_health, mutation, critical, player.antidotes, has_key]
+	var snapshot: Array = [player.health, player.max_health, mutation, critical, player.antidotes, player.infinite_antidotes, has_key]
 	if snapshot == _vital_snapshot:
 		return
 	var previous_health: float = float(_vital_snapshot[0]) if not _vital_snapshot.is_empty() else float(player.health)
@@ -149,7 +149,7 @@ func _update_vitals() -> void:
 	mutation_bar.value = mutation
 	mutation_value.text = "%d / 100" % roundi(mutation)
 	critical_marker.position.x = mutation_bar.position.x - 1.0 + mutation_bar.size.x * clampf(critical / 100.0, 0.0, 1.0)
-	antidote_count.text = str(player.antidotes)
+	antidote_count.text = "∞" if player.infinite_antidotes else str(player.antidotes)
 	_update_key_cell(has_key)
 
 
@@ -277,7 +277,7 @@ func _update_key_buttons() -> void:
 	for index in slot_keys.size():
 		_set_key_state(slot_keys[index], index == active, blocked)
 	var using_antidote := _antidote_hint_remaining > 0.0 or Input.is_action_pressed("antidote") or antidote_key.is_pressed()
-	_set_key_state(antidote_key, using_antidote, blocked or player.antidotes <= 0)
+	_set_key_state(antidote_key, using_antidote, blocked or (player.antidotes <= 0 and not player.infinite_antidotes))
 
 
 func _set_key_state(button: Button, selected: bool, blocked: bool) -> void:

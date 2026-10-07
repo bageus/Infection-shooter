@@ -8,6 +8,8 @@ const STYLE := preload("res://game/bootstrap/app/menu/menu_style.gd")
 const SKILL_ICONS := preload("res://game/bootstrap/app/mutation_skill_icons.gd")
 const SKILL_BAR := preload("res://game/bootstrap/app/mutation_skill_bar.gd")
 const LIT := Color(0.3, 0.95, 0.1)
+const CIRCLE := 66.0
+const CIRCLE_ICON := 42
 
 var runtime: Node
 var window: Control
@@ -16,7 +18,7 @@ var card: PanelContainer
 var points_label: Label
 var mutation_value: Label
 var stability_value: Label
-var keys_label: Label
+var hint_label: Label
 var content: Control
 var skill_bar: SKILL_BAR
 var _last_skill_tier := -1
@@ -122,15 +124,11 @@ func _stat(header: HBoxContainer, caption: String) -> Label:
 
 func _build_footer() -> HBoxContainer:
 	var footer := HBoxContainer.new()
-	var hint := STYLE.label("━━   Click a circle to unlock a skill. Lock a learned skill to keep it when mutation drops.", 11)
-	hint.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-	hint.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	hint.add_theme_color_override("font_color", STYLE.MUTED)
-	footer.add_child(hint)
-	keys_label = STYLE.label("", 10)
-	keys_label.add_theme_color_override("font_color", STYLE.MUTED)
-	keys_label.size_flags_vertical = Control.SIZE_SHRINK_CENTER
-	footer.add_child(keys_label)
+	hint_label = STYLE.label("━━   Click a circle to unlock a skill. Lock a learned skill to keep it when mutation drops.", 11)
+	hint_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	hint_label.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	hint_label.add_theme_color_override("font_color", STYLE.MUTED)
+	footer.add_child(hint_label)
 	return footer
 
 
@@ -249,7 +247,6 @@ func _refresh() -> void:
 		content.remove_child(child)
 		child.queue_free()
 	_update_stats(float(runtime.call("get_mutation")))
-	keys_label.text = "LMB  LEARN      HOVER  DETAILS      %s  ANTIDOTE      %s / ESC  CLOSE" % [_binding_label("antidote"), _binding_label("mutation_tree")]
 	var skills: Array = runtime.call("skill_catalog")
 	var canvas := TREE_CANVAS.new() as Control
 	content.add_child(canvas)
@@ -297,10 +294,16 @@ func _add_branch_label(canvas: Control, branch_index: int, requirements: Diction
 	var opened := bool(requirements["branch_open"])
 	var label := STYLE.label(str(TREE_CANVAS.BRANCHES[branch_index]).to_upper(), 14, true)
 	label.modulate.a = 1.0 if opened else 0.4
-	label.position = canvas.call("label_position", branch_index)
+	var area: Rect2 = canvas.call("label_rect", branch_index)
 	var gate := STYLE.label("S%d · STABILITY %d%%%s" % [requirements["stage"], roundi(requirements["stability"]), " · LOCKED" if not opened else ""], 10)
 	gate.add_theme_color_override("font_color", STYLE.MUTED if opened else Color("8a6a62"))
-	gate.position = label.position + Vector2(0, 19)
+	for line: Label in [label, gate]:
+		line.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+		line.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+		line.custom_minimum_size.x = area.size.x
+		line.size.x = area.size.x
+	label.position = area.position
+	gate.position = area.position + Vector2(0, 19)
 	canvas.add_child(gate)
 	canvas.add_child(label)
 
@@ -320,11 +323,11 @@ func _add_skill(canvas: Control, row: Array, center: Vector2, skills: Array) -> 
 	var enabled: bool = runtime.call("has_skill", skill_id)
 	var available: bool = runtime.call("can_upgrade_skill", skill_id)
 	var button := Button.new()
-	if not _set_icon(button, skill_id, 28):
+	if not _set_icon(button, skill_id, CIRCLE_ICON):
 		button.text = str(row[4])
-	button.position = center - Vector2(22, 22)
-	button.custom_minimum_size = Vector2(44, 44)
-	button.size = Vector2(44, 44)
+	button.position = center - Vector2.ONE * CIRCLE * 0.5
+	button.custom_minimum_size = Vector2.ONE * CIRCLE
+	button.size = Vector2.ONE * CIRCLE
 	button.set_meta("skill_id", skill_id)
 	button.set_meta("card_info", SKILL_INFO.describe(runtime, row, skills))
 	button.disabled = not available
@@ -346,8 +349,8 @@ func _add_skill(canvas: Control, row: Array, center: Vector2, skills: Array) -> 
 		style.bg_color = Color("1c2225")
 		style.border_color = Color("646760")
 	style.set_border_width_all(2)
-	style.set_corner_radius_all(22)
-	style.set_content_margin_all(8)
+	style.set_corner_radius_all(int(CIRCLE * 0.5))
+	style.set_content_margin_all((CIRCLE - CIRCLE_ICON) * 0.5)
 	var hover := style.duplicate() as StyleBoxFlat
 	hover.border_color = STYLE.INK
 	for state in ["normal", "pressed", "disabled"]:
@@ -373,7 +376,7 @@ func _set_icon(button: Button, skill_id: String, icon_size: int) -> bool:
 	button.icon_alignment = HORIZONTAL_ALIGNMENT_CENTER if button.expand_icon else HORIZONTAL_ALIGNMENT_LEFT
 	button.add_theme_constant_override("icon_max_width", icon_size)
 	button.add_theme_color_override("icon_disabled_color", STYLE.MUTED)
-	# 209 px cells shrink to ~28 px; mipmaps keep the white strokes clean.
+	# ~200 px glyphs shrink to ~42 px; mipmaps keep the white strokes clean.
 	button.texture_filter = CanvasItem.TEXTURE_FILTER_LINEAR_WITH_MIPMAPS
 	return true
 
@@ -383,7 +386,7 @@ func _add_lock(canvas: Control, row: Array, center: Vector2) -> void:
 	var locked: bool = runtime.call("skill_locked", skill_id)
 	var lock := Button.new()
 	lock.text = "L" if locked else "+"
-	lock.position = center + Vector2(33, -12)
+	lock.position = center + Vector2(CIRCLE * 0.5 + 8.0, -12)
 	lock.custom_minimum_size = Vector2(24, 24)
 	lock.size = Vector2(24, 24)
 	lock.focus_mode = Control.FOCUS_NONE
@@ -440,7 +443,7 @@ func _equipped() -> Array[String]:
 
 
 func _add_section_labels(canvas: Control) -> void:
-	for entry in [["ACTIVE", 185.0], ["PASSIVE", 490.0], ["HYBRID", 650.0]]:
+	for entry in [["ACTIVE", 185.0], ["PASSIVE", 490.0], ["HYBRID", 664.0]]:
 		var marker := ColorRect.new()
 		marker.color = SKILL_CARD.ACCENT
 		marker.position = Vector2(4, float(entry[1]) + 7.0)
