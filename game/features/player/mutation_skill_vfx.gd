@@ -1,6 +1,6 @@
 extends Node
 ## Presentation of mutation skills on and around the player: the supplied
-## FX_skills sheets for casts and buffs, the Predator Dash speed trail, and
+## fx_skills sheets for casts and buffs, the Predator Dash speed trail, and
 ## the body overlay for Bone Armor, Hardened Tissue and Berserk (aura and red
 ## mask eyes). Gameplay stays in mutation_skill_effects.gd, which reports here.
 

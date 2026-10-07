@@ -145,7 +145,7 @@ func _spawn(stage: Node3D, at: Vector3) -> CharacterBody3D:
 
 func _clip(enemy: Node) -> String:
 	var player := enemy.get_node("AnimationDriver").get("animation_player") as AnimationPlayer
-	return player.current_animation if player != null else ""
+	return str(player.current_animation) if player != null else ""
 
 
 func _add_box(stage: Node3D, at: Vector3, size: Vector3, layer: int) -> StaticBody3D:

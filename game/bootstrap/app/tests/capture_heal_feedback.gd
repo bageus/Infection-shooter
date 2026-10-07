@@ -51,5 +51,6 @@ func _shot(player: Node3D, camera: Camera3D) -> Image:
 	await RenderingServer.frame_post_draw
 	var image := root.get_texture().get_image()
 	var centre := camera.unproject_position(player.global_position + Vector3.UP * 1.2)
+	@warning_ignore("integer_division")
 	var origin := Vector2i(clampi(int(centre.x) - CROP.x / 2, 0, 1280 - CROP.x), clampi(int(centre.y) - CROP.y / 2, 0, 720 - CROP.y))
 	return image.get_region(Rect2i(origin, CROP))

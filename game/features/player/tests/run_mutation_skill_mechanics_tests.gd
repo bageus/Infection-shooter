@@ -19,7 +19,9 @@ class Host extends CharacterBody3D:
 
 class Runtime extends Node:
 	signal skill_cast(skill_id: String)
+	@warning_ignore("unused_signal")
 	signal tree_changed
+	@warning_ignore("unused_signal")
 	signal mutation_changed(amount: float, threshold: float)
 	var skills: Dictionary = {}
 

@@ -98,7 +98,7 @@ func _run() -> void:
 	_expect((budget.get("_timer") as Timer).is_stopped(), "Clear stops blood maintenance")
 	_expect(budget.get("_surfaces").is_empty() and budget.get("_fading") == 0 and budget.get("_active").first == -1, "Clear releases counters and FIFO")
 	await _test_budget_index()
-	await _test_empty_pool_clear(floor_hit)
+	_test_empty_pool_clear(floor_hit)
 	await _test_hit_throttle_and_expiry()
 	await _test_decal_growth(floor_hit)
 	stage.queue_free()
