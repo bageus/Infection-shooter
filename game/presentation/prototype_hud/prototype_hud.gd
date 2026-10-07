@@ -4,9 +4,10 @@ const ICON_REGIONS := preload("res://game/presentation/prototype_hud/weapon_icon
 const PALETTE := preload("res://game/presentation/prototype_hud/hud_palette.gd")
 const ICON_TINT := preload("res://game/presentation/prototype_hud/icon_tint.gdshader")
 const TITLE_FONT := preload("res://assets/interface/fonts/title.ttf")
-# Semantic cells: rifle, pistol, uzi, shotgun, syringe, launcher (top row).
+# Semantic cells: rifle, pistol, uzi, shotgun, syringe, launcher, key.
 @export var weapon_icon_cells := PackedInt32Array([1, 2, 3, 5])
 @export var antidote_icon_cell := 4
+@export var key_icon_cell := 6
 
 @export var player_path: NodePath
 
@@ -28,6 +29,7 @@ const TITLE_FONT := preload("res://assets/interface/fonts/title.ttf")
 @onready var slot_keys: Array[Button] = [$WeaponPanel/Slot1/KeyHint, $WeaponPanel/Slot2/KeyHint, $WeaponPanel/Slot3/KeyHint]
 @onready var antidote_key: Button = $AntidotePanel/KeyHint
 @onready var key_panel: Panel = $KeyPanel
+@onready var key_icon: TextureRect = $KeyPanel/KeyIcon
 @onready var slot_frames: Array[Panel] = [$WeaponPanel/Slot1, $WeaponPanel/Slot2, $WeaponPanel/Slot3]
 
 var player: Node
@@ -96,14 +98,17 @@ func _configure_icon_regions() -> void:
 	_refresh_slot_icons()
 	if antidote_icon_cell >= 0 and antidote_icon_cell < icons.size():
 		antidote_icon.texture = icons[antidote_icon_cell]
+	if key_icon_cell >= 0 and key_icon_cell < icons.size():
+		key_icon.texture = icons[key_icon_cell]
 
 
 func _configure_icon_tints() -> void:
-	for rect: TextureRect in [weapon_icon, antidote_icon] + slot_icons:
+	for rect: TextureRect in [weapon_icon, antidote_icon, key_icon] + slot_icons:
 		var material := ShaderMaterial.new()
 		material.shader = ICON_TINT
 		material.set_shader_parameter("tint", PALETTE.INK)
 		rect.material = material
+	_tint(key_icon, PALETTE.KEY_GOLD)
 
 
 func _tint(rect: TextureRect, color: Color) -> void:

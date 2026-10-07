@@ -4,7 +4,7 @@ task_id: T002
 status: IN_PROGRESS
 phase: 1
 owner: AI
-updated: 2026-10-06
+updated: 2026-10-07
 ---
 
 # Active task
@@ -102,6 +102,7 @@ Windows/Web и фактический прирост FPS остаются руч
 Build the first playable combat-slice foundation with an authored office floor, player, combat, infected enemies, infection source, and observable fail states.
 
 ## In scope
+- owner-requested compact mutation-skill HUD with cooldowns, ready highlight, passive-trigger feed and updated icon atlas;
 - owner-requested combat HUD restyle matching the menus and an explicit emergency-key cell;
 - owner-requested conference table chocolate/graphite finish, random document prints on top paper sheets and 0-3 monitor-edge stickers (ADR-0033);
 - owner-requested mutation-tree hover detail card and restyle matching the main/settings menus;

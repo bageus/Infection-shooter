@@ -1,15 +1,17 @@
 extends RefCounted
 
-# Measured against the owner's transparent atlas on 2026-09-30.
-# Stable semantic order: rifle, pistol, uzi, shotgun, antidote, launcher.
+# Measured against the owner's transparent atlas on 2026-10-07 (alpha > 0.12
+# component bounds, padded 4 px for the antialiased halo).
+# Stable semantic order: rifle, pistol, uzi, shotgun, antidote, launcher, key.
 const REFERENCE_SIZE := Vector2(1774, 887)
 const ARTWORK_BOUNDS := [
-	Rect2(20, 529, 456, 245), # Rifle
-	Rect2(490, 546, 256, 222), # Pistol
-	Rect2(789, 541, 324, 254), # Uzi
-	Rect2(1090, 547, 459, 237), # Shotgun
-	Rect2(1520, 538, 220, 240), # Antidote
-	Rect2(623, 108, 542, 276), # Grenade launcher
+	Rect2(310, 617, 481, 233), # Rifle (M4)
+	Rect2(494, 356, 250, 220), # Pistol
+	Rect2(767, 350, 315, 251), # Uzi
+	Rect2(1084, 357, 439, 237), # Shotgun
+	Rect2(1534, 351, 211, 233), # Antidote
+	Rect2(642, 30, 495, 256), # Grenade launcher
+	Rect2(40, 634, 222, 211), # Emergency key
 ]
 
 

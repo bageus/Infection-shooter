@@ -6,7 +6,7 @@ current_milestone: P1_LOGIC
 active_task_id: T002
 last_completed_task_id: DISC-001
 build_status: T002_HEADLESS_VALIDATED_VISUAL_PENDING
-updated: 2026-10-06
+updated: 2026-10-07
 ---
 
 06.10.2026 (исправление CI PR #49): логи 37521591716/37521591754 выявили обращения blood_texture_library к 45 удалённым отдельным PNG. Проверялся merge 184d69d с main 5676aae: атласы уже заменили файлы, но загрузчик ещё не был перенесён. Ветка обновлена с main ad79895, содержащим завершённую миграцию e8d5a27 (44 кадра, pool_09 совместимо переводится в существующий кадр). Конфликты ACTIVE_TASK и mission_runtime разрешены с сохранением записей и всех 62 наборов обеих веток. Быстрый impact_geometry workflow теперь отслеживает blood atlas/library/decal и запускает blood_decor/gameplay_planner_repairs. Оптимизации #49 и пользовательские ресурсы сохранены; новых контрактов, DTO, сцен или исключений эта коррекция не вводит. Локально Godot 4.7.2: все 62 headless-набора PASS (0 failures), импорт и main 180 кадров без SCRIPT ERROR/ERROR; project/resource/import/Python/YAML/diff gates PASS. Следующее действие: проверить повторный GitHub Actions CI обновлённой ветки #49.

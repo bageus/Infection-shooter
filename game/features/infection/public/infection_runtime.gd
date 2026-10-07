@@ -12,6 +12,8 @@ signal ability_changed(choice: int)
 signal tree_changed
 signal skill_available
 signal skill_cast(skill_id: String)
+## Fact: a passive skill's effect just fired (duration 0 for instant effects).
+signal passive_triggered(skill_id: String, duration: float)
 
 var _domain = InfectionDomain.new()
 var tree = MUTATION_TREE.new()
@@ -20,6 +22,7 @@ var _was_defeated: bool = false
 var _was_choice_pending: bool = false
 var _last_active_ability: int = 0
 var _available_skills: Dictionary = {}
+var _cooldown_totals: Dictionary = {}
 
 
 func _physics_process(delta: float) -> void:
@@ -131,8 +134,29 @@ func cast_skill(skill_id: String) -> bool:
 	skill_cast.emit(skill_id)
 	if has_skill("neurostim"):
 		tree.cooldowns[skill_id] = float(tree.cooldowns[skill_id]) * 0.8
+	_cooldown_totals[skill_id] = float(tree.cooldowns[skill_id])
 	tree_changed.emit()
 	return true
+
+
+func skill_cooldown_remaining(skill_id: String) -> float:
+	return float(tree.cooldowns.get(skill_id, 0.0))
+
+
+## 1.0 right after casting, falling to 0.0 when the skill is ready again.
+func skill_cooldown_ratio(skill_id: String) -> float:
+	var total := float(_cooldown_totals.get(skill_id, 0.0))
+	return clampf(skill_cooldown_remaining(skill_id) / total, 0.0, 1.0) if total > 0.0 else 0.0
+
+
+func can_cast_skill(skill_id: String) -> bool:
+	return not _domain.is_control_lost() and not _domain.defeated and CATALOG.find(skill_id) in CATALOG.ACTIVE \
+		and has_skill(skill_id) and skill_cooldown_remaining(skill_id) <= 0.0
+
+
+func report_passive(skill_id: String, duration: float = 0.0) -> void:
+	if has_skill(skill_id):
+		passive_triggered.emit(skill_id, duration)
 
 
 func is_ability_choice_pending() -> bool:
