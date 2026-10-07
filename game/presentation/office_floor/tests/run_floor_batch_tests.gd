@@ -32,6 +32,10 @@ func _run() -> void:
 			for index in section.multimesh.instance_count:
 				var pose := section.multimesh.get_instance_transform(index)
 				_check(not opening.has_point(Vector2(pose.origin.x, pose.origin.z)), "No instance centre covers the stair opening")
+				var custom := section.multimesh.get_instance_custom_data(index)
+				_check(is_equal_approx(custom.b, 1.0) or is_equal_approx(custom.b, .25), "Instances carry their tile scale for seam placement")
+				var parent := Vector2(pose.origin.x, pose.origin.z) - Vector2(custom.r, custom.g)
+				_check(is_equal_approx(fposmod(parent.x, 2.0), 1.0) and is_equal_approx(fposmod(parent.y, 2.0), 1.0), "Subtile seams follow their parent 2 m tile")
 	var batches := floor_view.get_children()
 	floor_view.set_stair_openings([opening])
 	_check(floor_view.get_children() == batches, "Identical openings do not rebuild batches")
