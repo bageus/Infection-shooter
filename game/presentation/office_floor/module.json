@@ -48,7 +48,8 @@
     "features.combat",
     "features.pickups",
     "core.audio",
-    "core.vfx"
+    "core.vfx",
+    "core.world_badge"
   ],
   "runtime_contracts": {
     "mission_wiring_v1": {
