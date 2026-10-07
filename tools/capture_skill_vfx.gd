@@ -55,7 +55,7 @@ func _capture() -> void:
 	_vfx.call("chain_lightning", chain)
 	await _shot("discharge_chain", 0.2)
 	await _wait(0.4)
-	_vfx.call("acid_pool", center + Vector3(2.5, 0, -1.0), 2.2, 3.0)
+	_vfx.call("acid_pool", center + Vector3(2.5, 0, -1.0), 1.7, 3.0)
 	await _shot("acid_spit_pool", 0.3)
 	_vfx.call("spore_cocoon", center + Vector3(-2.5, 0, 1.0), 3.0, 2.0)
 	await _shot("spore_cocoon_swell", 1.2)

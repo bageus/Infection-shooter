@@ -137,6 +137,12 @@ func _test_player_wiring() -> void:
 		_check(_find_marker(authored_root, "Grip_L") != null, "left grip available")
 		var pickup := ART.make_pickup_visual(index)
 		_check(_find_marker(pickup, "WeaponRoot") != null, "pickup uses authored weapon asset")
+		var pickup_muzzle := _find_marker(pickup, "Muzzle")
+		var pickup_grip := _find_marker(pickup, "Grip_R")
+		if pickup_muzzle != null and pickup_grip != null:
+			var muzzle_height := (_local_to(pickup, pickup_muzzle).origin).y
+			var grip_height := (_local_to(pickup, pickup_grip).origin).y
+			_check(muzzle_height > grip_height, "floor pickup lies barrel up, grip down")
 		pickup.free()
 	_test_flash_anchors(player)
 	await _test_switch_and_fire(player, effects)
@@ -287,3 +293,13 @@ func _test_flash_anchors(player: PLAYER_SCRIPT) -> void:
 		_check(tip.distance_to(marker.global_position) < 0.0001, "flash follows marker and camera motion")
 		flash.free()
 		marker.transform = original
+
+
+func _local_to(boundary: Node3D, marker: Node3D) -> Transform3D:
+	var result := Transform3D.IDENTITY
+	var node: Node = marker
+	while node != boundary and node != null:
+		if node is Node3D:
+			result = (node as Node3D).transform * result
+		node = node.get_parent()
+	return result

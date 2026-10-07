@@ -44,7 +44,9 @@ var _landed := false
 ## fade_out (seconds), velocity, gravity, drag, spin, spin_speed, tumble, grow,
 ## floor_y (a falling sprite settles flat on this height),
 ## ground (lie flat on the floor facing away from the camera, stretched in
-## depth by the atlas's ground_stretch).
+## depth by the atlas's ground_stretch),
+## flat (like ground, but turned once to the camera at spawn and then fixed
+## in the world like a floor texture, so it does not turn with the camera).
 static func spawn(parent: Node, atlas: Dictionary, point: Vector3, size: float, options := {}) -> MeshInstance3D:
 	if parent == null or not parent.is_inside_tree() or not ATLASES.available(atlas):
 		return null
@@ -52,6 +54,8 @@ static func spawn(parent: Node, atlas: Dictionary, point: Vector3, size: float, 
 	node.call("_setup", atlas, size, options)
 	parent.add_child(node, true)
 	node.global_position = point
+	if bool(options.get("flat", false)):
+		node.call("_lay_flat", atlas, size)
 	return node
 
 
@@ -82,7 +86,8 @@ func _setup(atlas: Dictionary, size: float, options: Dictionary) -> void:
 	quad.size = Vector2.ONE
 	mesh = quad
 	cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
-	material_override = _material(atlas, bool(options.get("billboard", true)), float(options.get("additive", 0.0)), float(options.get("brightness", 1.0)))
+	var billboard := bool(options.get("billboard", true)) and not bool(options.get("flat", false))
+	material_override = _material(atlas, billboard, float(options.get("additive", 0.0)), float(options.get("brightness", 1.0)))
 	_fixed_frame = int(options.get("frame", -1))
 	var time_scale := maxf(float(options.get("speed", 1.0)), 0.01)
 	var frames := int(atlas.get("frames", 1))
@@ -141,6 +146,21 @@ func _process(delta: float) -> void:
 		rotate_object_local(_tumble.normalized(), _tumble.length() * delta)
 	_spin += _spin_speed * delta
 	_apply(_time)
+
+
+# Lies on the floor with the sheet's top pointing away from the camera that
+# sees it now, stretched in depth like ground mode, and stays put after.
+func _lay_flat(atlas: Dictionary, size: float) -> void:
+	var away := Vector3(0.0, 0.0, -1.0)
+	var camera := get_viewport().get_camera_3d() if get_viewport() != null else null
+	if camera != null:
+		var offset := global_position - camera.global_position
+		offset.y = 0.0
+		if offset.length_squared() > 0.000001:
+			away = offset.normalized()
+	var right := Vector3(-away.z, 0.0, away.x)
+	var stretch := float(atlas.get("ground_stretch", 1.0))
+	global_basis = Basis(right * size, away * size * stretch, Vector3.UP * size)
 
 
 # Lands flat on the floor and stays there until it fades.
