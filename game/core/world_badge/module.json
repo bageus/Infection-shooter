@@ -1,0 +1,20 @@
+{
+  "id": "core.world_badge",
+  "layer": "core",
+  "purpose": "Float HUD-style key caps and icon cells over world objects as billboards, drawn with the combat HUD palette.",
+  "state_owner": [
+    "Badge look and key-press animation timing"
+  ],
+  "public_api": [
+    "public/world_badge.gd"
+  ],
+  "dependencies": [],
+  "runtime_contracts": {
+    "world_badge_v1": {
+      "key": "key(label: String, height := 0.0) -> Node3D; a key cap that keeps playing a press animation while visible",
+      "icon": "icon(texture: Texture2D, region: Rect2, tint: Color, height := 0.0) -> Node3D; an atlas icon in a panel cell; empty region uses the whole texture",
+      "set_label": "set_label(label: String) -> void on a key badge",
+      "visibility": "Hidden badges stop rendering; showing one renders it again."
+    }
+  }
+}

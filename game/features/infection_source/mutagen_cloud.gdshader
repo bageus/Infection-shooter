@@ -1,10 +1,11 @@
 shader_type spatial;
 // Mutagen cloud: a MultiMesh of camera-facing gas puffs (plus a ground haze
-// quad). Each puff shows one of 12 sheet variants, churns through a
-// domain-warped flow field, slowly morphs into a second variant, pulses its
-// glowing veins and dissolves through noise when it dies.
+// quad). Each puff plays one of the two 6-frame sheets as an animation
+// (cross-faded flipbook), turns slowly, pulses its glowing veins and
+// dissolves through noise when it dies.
 //
-// INSTANCE_CUSTOM: r = variant / 12, g = random seed, b = signed spin
+// INSTANCE_CUSTOM: r = variant / 12 (sheet = variant / 6, start frame =
+// variant % 6), g = random seed, b = signed spin
 // speed (rad/s), a = stagger (0..1: appear delay, or the cycle offset of a
 // permanent cloud). COLOR = per-puff tint.
 render_mode blend_mix, unshaded, cull_disabled, depth_draw_never, shadows_disabled;
@@ -15,9 +16,10 @@ uniform sampler2D wall_mask : filter_nearest, repeat_disable;
 uniform bool wall_mask_enabled = false;
 uniform float wall_radius = 2.25;
 uniform float opacity : hint_range(0.0, 1.0) = 0.55;
-uniform float flow_strength : hint_range(0.0, 0.2) = 0.07;
+uniform float flow_strength : hint_range(0.0, 0.2) = 0.035;
 uniform float flow_speed : hint_range(0.0, 2.0) = 0.35;
-uniform float morph_speed : hint_range(0.0, 1.0) = 0.12;
+// Sheet frames per second (each puff varies it by -20..+25%).
+uniform float frame_rate : hint_range(0.5, 12.0) = 5.0;
 uniform vec4 vein_color : source_color = vec4(0.72, 1.0, 0.22, 1.0);
 uniform float vein_glow : hint_range(0.0, 4.0) = 0.35;
 // Ground haze: the quad lies flat on the floor instead of facing the camera.
@@ -33,7 +35,7 @@ instance uniform vec3 cloud_center = vec3(0.0);
 varying float v_life;
 varying float v_seed;
 varying float v_variant;
-varying float v_morph_variant;
+varying float v_sheet;
 varying vec4 v_tint;
 varying float v_spin;
 
@@ -69,7 +71,7 @@ void vertex() {
 	vec4 custom = INSTANCE_CUSTOM;
 	v_seed = custom.g;
 	v_variant = floor(custom.r * 12.0 + 0.5);
-	v_morph_variant = mod(v_variant + 3.0 + floor(v_seed * 5.0), 12.0);
+	v_sheet = step(5.5, v_variant);
 	v_tint = COLOR;
 	float life;
 	if (looping > 0.5) {
@@ -102,38 +104,36 @@ void vertex() {
 	POSITION = PROJECTION_MATRIX * VIEW_MATRIX * vec4(world, 1.0);
 }
 
-vec4 sample_variant(float variant, vec2 uv) {
-	float index = mod(variant, 6.0);
+// One frame of a sheet: 3 x 2 cells, frames run left to right, top to bottom.
+vec4 sample_frame(float sheet, float frame, vec2 uv) {
+	float index = mod(frame, 6.0);
 	vec2 cell = vec2(mod(index, 3.0), floor(index / 3.0));
 	vec2 atlas_uv = (cell + clamp(uv, vec2(0.004), vec2(0.996))) / vec2(3.0, 2.0);
-	return variant < 6.0 ? texture(atlas_a, atlas_uv) : texture(atlas_b, atlas_uv);
+	return sheet < 0.5 ? texture(atlas_a, atlas_uv) : texture(atlas_b, atlas_uv);
 }
 
 void fragment() {
 	float l = clamp(v_life, 0.0, 1.0);
 	float t = (TIME + phase) * flow_speed + v_seed * 31.0;
-	vec2 p = UV - 0.5;
-	// Swirl: stronger in the core, slowly turning both ways.
-	float radius = length(p);
-	float swirl = sin(t * 0.6 + v_seed * 4.0) * 0.55 * (1.0 - smoothstep(0.0, 0.5, radius));
-	vec2 swirled = rotate(p, swirl) + 0.5;
-	// Domain-warped flow field makes the gas churn instead of sliding.
-	vec2 warp = vec2(fbm(UV * 3.0 + vec2(t, -t * 0.7)), fbm(UV * 3.0 + vec2(-t * 0.8, t * 0.6) + 5.2)) - 0.5;
-	vec2 warp2 = vec2(fbm(UV * 5.5 - vec2(t * 1.3, t * 0.4) + 11.0), fbm(UV * 5.5 + vec2(t * 0.5, -t * 1.1) + 3.7)) - 0.5;
-	vec2 uv_a = swirled + warp * flow_strength * 1.6 + warp2 * flow_strength * 0.6;
-	vec2 uv_b = swirled - warp * flow_strength + warp2 * flow_strength;
-	vec4 gas = mix(sample_variant(v_variant, uv_a), sample_variant(v_variant, uv_b), 0.35);
-	// Slow morph into another variant through a moving noise mask.
-	float morph_mask = smoothstep(0.35, 0.65, fbm(UV * 2.2 + vec2(TIME * morph_speed, v_seed * 9.0)) + 0.35 * sin(TIME * morph_speed * 2.0 + v_seed * 6.0));
-	vec4 other = sample_variant(v_morph_variant, rotate(p, -swirl * 0.7) + 0.5 - warp * flow_strength);
-	gas = mix(gas, other, morph_mask * 0.6);
+	// The sheet plays as a looping flipbook: each puff starts on its own
+	// frame and runs at its own rate; neighbouring frames cross-fade.
+	float clock = (TIME + phase) * frame_rate * mix(0.8, 1.25, v_seed) + v_variant;
+	float frame = floor(clock);
+	float blend = smoothstep(0.0, 1.0, fract(clock));
+	// A light flow drags the gas along while one frame dissolves into the next.
+	vec2 drift = (vec2(noise(UV * 3.0 + vec2(t, -t * 0.7)), noise(UV * 3.0 + vec2(-t * 0.8, t * 0.6) + 5.2)) - 0.5) * flow_strength;
+	vec4 current = sample_frame(v_sheet, frame, UV + drift * (1.0 + blend));
+	vec4 next = sample_frame(v_sheet, frame + 1.0, UV + drift * blend);
+	vec4 gas = mix(current, next, blend);
+	// Cross-fading thins the gas between frames; keep the density steady.
+	gas.a = clamp(gas.a * (1.0 + 0.35 * blend * (1.0 - blend) * 4.0), 0.0, 1.0);
 
 	float activity = 1.0 - smoothstep(0.35, 1.0, l);
 	vec3 color = gas.rgb * v_tint.rgb;
 	// Glowing veins: the brightest strands pulse with a slow toxic heartbeat.
 	float luminance = dot(gas.rgb, vec3(0.3, 0.59, 0.11));
 	float veins = smoothstep(0.5, 0.85, luminance);
-	float pulse = 0.55 + 0.45 * sin(TIME * 2.6 + v_seed * 12.0 + fbm(UV * 4.0 + t) * 5.0);
+	float pulse = 0.55 + 0.45 * sin(TIME * 2.6 + v_seed * 12.0);
 	color += vein_color.rgb * veins * vein_glow * pulse * mix(0.35, 1.0, activity);
 	// Fresh gas flashes, old gas darkens.
 	color *= mix(0.72, 1.0, activity);
@@ -147,7 +147,6 @@ void fragment() {
 	// Soft cell edge so no straight border of the sheet ever shows.
 	vec2 edge = min(UV, 1.0 - UV);
 	alpha *= smoothstep(0.0, 0.06, min(edge.x, edge.y));
-
 	if (wall_mask_enabled) {
 		vec3 world_position = (INV_VIEW_MATRIX * vec4(VERTEX, 1.0)).xyz;
 		vec2 horizontal = world_position.xz - cloud_center.xz;

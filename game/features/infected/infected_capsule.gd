@@ -10,6 +10,7 @@ const BLOOD_FX := preload("res://game/features/infected/blood_drip_fx.gd")
 const BLAST_DISMEMBER_DAMAGE := 60.0
 const AUDIO := preload("res://game/features/infected/infected_audio.gd")
 const DEATH_FALL := preload("res://game/features/infected/death_fall.gd")
+const DEATH_OBSTACLE := preload("res://game/features/infected/death_obstacle.gd")
 const STATUS_FX := preload("res://game/features/infected/infected_status_fx.gd")
 const KILLING_PUSH_MSEC := 300
 
@@ -91,6 +92,7 @@ var _last_hit_position := Vector3.ZERO
 var _last_hit_direction := Vector3.ZERO
 var _death_push := Vector3.ZERO
 var _death_push_msec := -KILLING_PUSH_MSEC
+var _fall_watch: RefCounted
 
 var effects_root: Node3D
 var impact_pool: Node
@@ -292,6 +294,8 @@ func _physics_process(delta: float) -> void:
 		take_damage(_mutation_poison_damage * delta)
 	if _dead:
 		velocity = Vector3.ZERO
+		if _fall_watch != null and not _fall_watch.call("step", delta):
+			_fall_watch = null
 		return
 	if _target == null or not is_instance_valid(_target):
 		return
@@ -523,6 +527,7 @@ func _die() -> void:
 	var fresh := Time.get_ticks_msec() - _death_push_msec <= KILLING_PUSH_MSEC
 	var size := body_visual.scale.x if body_visual != null else 1.0
 	var fall := DEATH_FALL.resolve(Vector3(velocity.x, 0.0, velocity.z), _death_push if fresh else Vector3.ZERO, -global_basis.z, size)
+	fall = DEATH_OBSTACLE.adjust(self, _parts, fall, size)
 	var landing: Vector3 = DEATH_FALL.landing(self, fall["slide"], 0.35 * size)
 	_blood_segment_start = global_position
 	_blood_distance = 0.0
@@ -542,6 +547,9 @@ func _die() -> void:
 		_parts.enable_corpse_hitboxes()
 	DEATH_FALL.throw(self, float(fall["turn"]), landing)
 	var death_length := _play_animation(fall["state"])
+	_fall_watch = DEATH_OBSTACLE.new()
+	if not _fall_watch.call("start", self, _parts, _animation, fall, death_length):
+		_fall_watch = null
 	if death_length > 0.0:
 		_sink_corpse_after(death_length)
 	else:

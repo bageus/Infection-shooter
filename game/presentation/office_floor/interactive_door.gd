@@ -29,12 +29,15 @@ var _glass_body_closed := Transform3D.IDENTITY
 var _glass_hinge_root_closed := Transform3D.IDENTITY
 var _elevator_lights: Array[Node3D] = []
 var _fallback_leaf_collisions: Array[CollisionShape3D] = []
-var _key_hint: Label3D
+var _key_hint: Node3D
 const PRESENCE := preload("res://game/presentation/office_floor/door_presence.gd")
 var _presence: Area3D
 var _elevator_neighbors: Array[WeakRef] = []
 var _pose_ready := false
 const SFX := preload("res://game/core/audio/public/sound_events.gd")
+const BADGE := preload("res://game/core/world_badge/public/world_badge.gd")
+const LOCKED_ICON := preload("res://assets/interface/icon/locked_door.png")
+const LOCKED_TINT := Color("dcae4a")
 
 
 # Public structural scene wiring v1.
@@ -53,13 +56,9 @@ func _ready() -> void:
 	if mode == DoorMode.SLIDING_ELEVATOR:
 		add_to_group("elevator_door_components")
 	if requires_emergency_key:
-		_key_hint = Label3D.new()
-		_key_hint.font = preload("res://assets/interface/fonts/body.ttf")
-		_key_hint.text = "Emergency key required on this side"
-		_key_hint.font_size = 38
-		_key_hint.pixel_size = 0.006
-		_key_hint.billboard = BaseMaterial3D.BILLBOARD_ENABLED
-		_key_hint.position = Vector3(0, 2.5, 0)
+		# Locked-door icon in the HUD style, gold like the emergency key cell.
+		_key_hint = BADGE.icon(LOCKED_ICON, Rect2(), LOCKED_TINT, 2.5)
+		_key_hint.name = "LockedDoorIcon"
 		add_child(_key_hint)
 	_collect_door_parts()
 	if requires_emergency_key:

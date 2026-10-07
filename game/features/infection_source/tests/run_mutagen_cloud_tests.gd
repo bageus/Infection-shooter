@@ -1,6 +1,7 @@
 extends SceneTree
 ## Runtime checks for the mutagen cloud look: each activation builds its own
-## random set of gas puffs from both sheets (12 variants), a ground haze and
+## random set of gas puffs that play both sheets as animations (12 start
+## frames), a ground haze and
 ## spores; permanent clouds loop their puffs; a death cloud dissipates and
 ## reports depletion.
 
@@ -39,6 +40,8 @@ func _run() -> void:
 	_expect(haze.multimesh != null and haze.multimesh.instance_count == 3, "Low billboards merge into the gas without a flat floor reflection.")
 	var material := (first.get_node("Visual") as GeometryInstance3D).material_override as ShaderMaterial
 	_expect(material != null and material.get_shader_parameter("atlas_a") != null and material.get_shader_parameter("atlas_b") != null, "The cloud draws from both mutagen sheets.")
+	var uniforms := material.shader.get_shader_uniform_list().map(func(entry: Dictionary) -> String: return str(entry["name"]))
+	_expect("frame_rate" in uniforms, "Each puff plays its sheet as an animation.")
 	_expect(bool(material.get_shader_parameter("wall_mask_enabled")), "Walls still clip the gas.")
 	_expect((first.get_node("Spores") as GPUParticles3D).emitting, "Glowing spores rise from a fresh cloud.")
 	var forever := _spawn(stage, Vector3(20, 0, 0), 14.0)
