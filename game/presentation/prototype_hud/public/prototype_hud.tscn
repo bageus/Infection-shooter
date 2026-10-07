@@ -3,7 +3,6 @@
 [ext_resource type="Script" path="res://game/presentation/prototype_hud/prototype_hud.gd" id="1"]
 [ext_resource type="Texture2D" path="res://assets/icon_interface.png" id="2_icons"]
 [ext_resource type="FontFile" path="res://assets/interface/fonts/title.ttf" id="3_title"]
-[ext_resource type="Script" path="res://game/presentation/prototype_hud/key_icon.gd" id="4_key"]
 
 [sub_resource type="StyleBoxFlat" id="HudFrame"]
 bg_color = Color(0.0824, 0.102, 0.1098, 0.8784)
@@ -259,13 +258,14 @@ theme_override_styles/panel = SubResource("ItemFrame")
 visible = false
 tooltip_text = "Emergency key"
 
-[node name="KeyIcon" type="Control" parent="KeyPanel"]
-offset_left = 10.0
-offset_top = 10.0
-offset_right = 64.0
-offset_bottom = 40.0
+[node name="KeyIcon" type="TextureRect" parent="KeyPanel"]
+offset_left = 14.0
+offset_top = 6.0
+offset_right = 60.0
+offset_bottom = 42.0
 mouse_filter = 2
-script = ExtResource("4_key")
+expand_mode = 1
+stretch_mode = 5
 
 [node name="KeyCaption" type="Label" parent="KeyPanel"]
 offset_left = 0.0

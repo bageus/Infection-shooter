@@ -61,9 +61,7 @@ func _run() -> void:
 	ui.call("_unhandled_input", mouse)
 	_check(ui.call("is_tree_open"), "Rebound mouse event opens the actual mutation UI")
 	ui.call("close_tree")
-	var visible_binding := false
-	for button in ui.hotbar.get_children():
-		visible_binding = visible_binding or button.text == "Mutations [RMB]"
+	var visible_binding: bool = ui.skill_bar.open_badge.text == "RMB"
 	_check(visible_binding, "HUD reflects the edited binding immediately")
 	app.set_test_mutagen_enabled(true)
 	var cloud: Node = app.gameplay.get_node("PermanentTestMutagen")

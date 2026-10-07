@@ -36,6 +36,7 @@ const DASH_STRIKE_TIME := 0.45
 const DASH_REACH := 1.6
 const DASH_DAMAGE := 30.0
 var _dash_struck: Dictionary = {}
+var _regenerating := false
 
 var effects_root: Node3D
 var vfx: SKILL_VFX
@@ -108,8 +109,13 @@ func _process(delta: float) -> void:
 				_weapons_dirty = true
 			if key in VFX_BUFFS:
 				vfx.buff_ended(key)
-	if enabled("regeneration") and Time.get_ticks_msec() * 0.001 - last_hit_time > 5.0:
+	var regenerating := enabled("regeneration") and Time.get_ticks_msec() * 0.001 - last_hit_time > 5.0
+	if regenerating:
 		player.call("heal", 1.4 * delta)
+	regenerating = regenerating and float(player.get("health")) < float(player.get("max_health"))
+	if regenerating and not _regenerating:
+		_passive("regeneration")
+	_regenerating = regenerating
 	if active_buff("second_heart"):
 		player.call("heal", SECOND_HEART_HEAL * delta)
 	if active_buff("predator_dash"):
@@ -151,15 +157,19 @@ func on_player_hit(amount: float, damage_type: String = "physical") -> float:
 	var reduction := 0.14 if enabled("bone_armor") else 0.0
 	if damage_type in ["acid", "fire", "electric"] and enabled("hardened"):
 		reduction += 0.22
+		_passive("hardened")
 	if enabled("pain_block") and float(player.get("health")) < float(player.get("max_health")) * 0.3:
 		reduction += 0.25
+		_passive("pain_block")
 	if active_buff("berserk"):
 		reduction += 0.2
 	if enabled("reactive_evolution"):
 		var key := "adaptation_" + damage_type
 		reduction += minf(0.2, float(buffs.get(key, 0.0)) * 0.03)
 		buffs[key] = minf(6.0, float(buffs.get(key, 0.0)) + 1.0)
+		_passive("reactive_evolution")
 	if enabled("retaliation") and _retaliation_due(amount):
+		_passive("retaliation")
 		vfx.electric_pulse(player.global_position, 3.0)
 		for enemy in _enemies_near(player.global_position, 3.0):
 			enemy.call("apply_blast_stun", 1.2, 0.6)
@@ -187,6 +197,7 @@ func survive_lethal() -> bool:
 	last_hit_time = -100.0
 	vfx.heartbeat()
 	buffs["second_heart"] = SECOND_HEART_DURATION
+	_passive("second_heart", SECOND_HEART_DURATION)
 	return true
 
 
@@ -196,16 +207,18 @@ func on_enemy_killed(enemy: Node3D) -> void:
 	var melee_kill: bool = _melee_victim != null and _melee_victim.get_ref() == enemy and Time.get_ticks_msec() / 1000.0 - _melee_time < 0.5
 	kill_streak = mini(6, kill_streak + 1) if kill_timer > 0.0 else 1
 	kill_timer = 5.0
-	if enabled("combat_reflex"): _start_buff("combat_reflex", 4.0)
-	if enabled("battle_metabolism"): _start_buff("battle_metabolism", 6.0)
+	if enabled("combat_reflex"): _passive_buff("combat_reflex", 4.0)
+	if enabled("battle_metabolism"): _passive_buff("battle_metabolism", 6.0)
 	if enabled("hyperactive"):
 		runtime.call("reduce_skill_cooldowns", 1.0 + kill_streak * 0.15)
-	if near and enabled("adrenaline"): _start_buff("adrenaline", 5.0)
+		_passive("hyperactive")
+	if near and enabled("adrenaline"): _passive_buff("adrenaline", 5.0)
 	if melee_kill and enabled("killer_instinct"):
 		(player.call("get_current_weapon") as Node3D).call("add_magazine_ammo", 2)
-		_start_buff("killer_instinct", 5.0)
+		_passive_buff("killer_instinct", 5.0)
 	if melee_kill and enabled("devourer"):
 		_heal_or_armor(8.0)
+		_passive("devourer")
 	if active_buff("living_harvest"):
 		_heal_or_armor(14.0)
 	if active_buff("berserk"): _start_buff("berserk", minf(13.0, float(buffs["berserk"]) + 2.0))
@@ -214,6 +227,7 @@ func on_enemy_killed(enemy: Node3D) -> void:
 			if other != enemy: other.call("apply_mutation_poison", 4.0, 5.0, true)
 	if enabled("recycling") and randf() < 0.35:
 		player.call("add_ammo_to_current_weapon", 5)
+		_passive("recycling")
 
 
 func movement_multiplier() -> float:
@@ -228,7 +242,7 @@ func movement_multiplier() -> float:
 
 func on_roll() -> void:
 	if enabled("reflex_arc"):
-		_start_buff("reflex_arc", 3.0)
+		_passive_buff("reflex_arc", 3.0)
 
 
 func melee() -> bool:
@@ -257,6 +271,17 @@ static func _body_radius(body: Node) -> float:
 	return 0.4
 
 
+
+
+# Reports a passive firing so the HUD can show which one worked.
+func _passive(skill_id: String, duration: float = 0.0) -> void:
+	if runtime.has_method("report_passive"):
+		runtime.call("report_passive", skill_id, duration)
+
+
+func _passive_buff(skill_id: String, duration: float) -> void:
+	_start_buff(skill_id, duration)
+	_passive(skill_id, duration)
 
 
 func _start_buff(skill_id: String, duration: float) -> void:

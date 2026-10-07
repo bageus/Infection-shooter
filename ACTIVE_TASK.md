@@ -4,10 +4,12 @@ task_id: T002
 status: IN_PROGRESS
 phase: 1
 owner: AI
-updated: 2026-10-06
+updated: 2026-10-07
 ---
 
 # Active task
+
+07.10.2026 (1): по запросу владельца панель навыков мутаций в боевом HUD переделана (mutation_skill_bar.gd): не шире блока здоровья, клавиша дерева — бейдж как F/1/2/3, только иконки активных навыков в кружках с клавишей в углу; во время перезарядки кружок затемняется секторной заливкой с секундами, готовый навык подсвечен зелёным кольцом с короткой вспышкой при готовности; без активных навыков панель скрыта. Над панелью короткая лента сработавших пассивных навыков (иконка, название, кольцо оставшегося действия; повтор обновляет запись, до 4 записей). Infection runtime: факт passive_triggered/report_passive, skill_cooldown_remaining/ratio, can_cast_skill; эффекты игрока сообщают срабатывания (combat reflex, battle metabolism, hyperactive, adrenaline, killer instinct, devourer, recycling, second heart, retaliation, reflex arc, regeneration, hardened, pain block, reactive evolution). Обновлённый атлас icon_interface: заново измерены рамки (M4 перемещён), ячейка ключа показывает иконку ключа из атласа (key_icon.gd удалён), восстановлен удалённый icon_interface.png.import с прежним uid. Новый run_skill_bar_tests.gd, обновлены run_weapon_icon_tests.gd и run_runtime_debug_tests.gd. Форматы сохранений прежние, исключений нет. Следующее действие: визуальная приёмка панели навыков в Windows/Web.
 
 06.10.2026 (аудит и исправления по поручению владельца, в рамках T002): атласы крови нарезаются заранее (tools/build_blood_atlases.gd; полноразмерные листы в blood_decals_45/source/ под .gdignore, игра читает атласы 1536 px с импортом Image и cells.json; загрузка библиотеки 3,9 с → 0,4 с headless, кадры прежние). 26 атласов эффектов, декалей, патронов и бумаги импортируются VRAM Compressed (≈4× меньше видеопамяти, рендеры навыков без видимых отличий), атлас трещин стекла ограничен 2048 px; UI, экраны и таблички с текстом без изменений. Прогрев всех spatial-шейдеров при старте миссии (shader_warmup.gd). tools/check_resource_paths.py в обоих workflow ловит несуществующие res:// пути и осиротевшие .import; удалены мёртвая копия уровня game/levels/authored, fps_counter.gd и 14 .import без исходников. Обломки и отрубленные части не сталкиваются с врагами поздних волн (группа contactless_debris); счётчик ENEMIES, навыки и перекат используют группу infected_alive. Планировщик: запекание сцены больше не дублирует содержимое инстансов (стеклянная стена 135 → 47 узлов), сохранение из редактора пишет public/base_office_map.json, игра грузит его при отсутствии user://planned_layout.json (до первого сохранения владельцем карта в репозитории отсутствует, на чистой установке уровень пуст). Новые тесты run_shader_warmup_tests, run_late_spawn_debris_tests, run_layout_bake_tests. Следующее действие: владельцу сохранить карту в планировщике из редактора, чтобы base_office_map.json и очищенный base_office_layout.tscn попали в репозиторий.
 
@@ -100,6 +102,7 @@ Windows/Web и фактический прирост FPS остаются руч
 Build the first playable combat-slice foundation with an authored office floor, player, combat, infected enemies, infection source, and observable fail states.
 
 ## In scope
+- owner-requested compact mutation-skill HUD with cooldowns, ready highlight, passive-trigger feed and updated icon atlas;
 - owner-requested combat HUD restyle matching the menus and an explicit emergency-key cell;
 - owner-requested conference table chocolate/graphite finish, random document prints on top paper sheets and 0-3 monitor-edge stickers (ADR-0033);
 - owner-requested mutation-tree hover detail card and restyle matching the main/settings menus;

@@ -6,6 +6,7 @@ const SKILL_CARD := preload("res://game/bootstrap/app/mutation_skill_card.gd")
 const SKILL_INFO := preload("res://game/bootstrap/app/mutation_skill_info.gd")
 const STYLE := preload("res://game/bootstrap/app/menu/menu_style.gd")
 const SKILL_ICONS := preload("res://game/bootstrap/app/mutation_skill_icons.gd")
+const SKILL_BAR := preload("res://game/bootstrap/app/mutation_skill_bar.gd")
 const LIT := Color(0.3, 0.95, 0.1)
 
 var runtime: Node
@@ -17,7 +18,7 @@ var mutation_value: Label
 var stability_value: Label
 var keys_label: Label
 var content: Control
-var hotbar: HBoxContainer
+var skill_bar: SKILL_BAR
 var _last_skill_tier := -1
 var _previous_pause := false
 
@@ -142,34 +143,9 @@ func _divider() -> ColorRect:
 
 
 func _build_hotbar(root: Control) -> void:
-	# Sits above the combat HUD vitals and shares their graphite frame.
-	var bar_panel := PanelContainer.new()
-	bar_panel.set_anchors_preset(Control.PRESET_BOTTOM_LEFT)
-	bar_panel.offset_left = 18
-	bar_panel.offset_right = 544
-	bar_panel.offset_top = -168
-	bar_panel.offset_bottom = -122
-	bar_panel.theme = STYLE.make_theme(1.0)
-	var frame := StyleBoxFlat.new()
-	frame.bg_color = Color("151a1ce0")
-	frame.border_color = Color("646760b3")
-	frame.set_border_width_all(1)
-	frame.content_margin_left = 6
-	frame.content_margin_right = 6
-	frame.content_margin_top = 5
-	frame.content_margin_bottom = 5
-	frame.shadow_color = Color(0, 0, 0, 0.35)
-	frame.shadow_size = 8
-	bar_panel.add_theme_stylebox_override("panel", frame)
-	root.add_child(bar_panel)
-	var bar_scroll := ScrollContainer.new()
-	bar_scroll.custom_minimum_size = Vector2(512, 34)
-	bar_scroll.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_AUTO
-	bar_scroll.vertical_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
-	bar_panel.add_child(bar_scroll)
-	hotbar = HBoxContainer.new()
-	hotbar.add_theme_constant_override("separation", 4)
-	bar_scroll.add_child(hotbar)
+	skill_bar = SKILL_BAR.new()
+	root.add_child(skill_bar)
+	skill_bar.configure(runtime, open_tree)
 
 
 func _on_new_skill_available() -> void:
@@ -240,7 +216,7 @@ func _set_open(value: bool) -> void:
 		get_tree().paused = _previous_pause
 	window.visible = value
 	card.dismiss()
-	hotbar.get_parent().get_parent().visible = not value
+	skill_bar.visible = not value
 	if runtime != null and runtime.get_parent() != null:
 		runtime.get_parent().set("_mutation_menu_open", value)
 	_refresh()
@@ -271,9 +247,6 @@ func _refresh() -> void:
 		return
 	for child in content.get_children():
 		content.remove_child(child)
-		child.queue_free()
-	for child in hotbar.get_children():
-		hotbar.remove_child(child)
 		child.queue_free()
 	_update_stats(float(runtime.call("get_mutation")))
 	keys_label.text = "LMB  LEARN      HOVER  DETAILS      %s  ANTIDOTE      %s / ESC  CLOSE" % [_binding_label("antidote"), _binding_label("mutation_tree")]
@@ -316,7 +289,7 @@ func _refresh() -> void:
 		hybrids.append(bool(runtime.call("has_skill", str(row[0]))))
 		hybrid_index += 1
 	canvas.call("set_progress", progress, hybrids)
-	_fill_hotbar(skills)
+	_fill_hotbar()
 	_restore_card()
 
 
@@ -332,28 +305,12 @@ func _add_branch_label(canvas: Control, branch_index: int, requirements: Diction
 	canvas.add_child(label)
 
 
-func _fill_hotbar(skills: Array) -> void:
-	var open := Button.new()
-	open.text = "Mutations [%s]" % _binding_label("mutation_tree")
-	open.pressed.connect(open_tree)
-	hotbar.add_child(open)
-	_hotbar_button(open)
+func _fill_hotbar() -> void:
 	var active_skills := _equipped()
+	var keys: Array[String] = []
 	for index in active_skills.size():
-		var row: Array = []
-		for entry in skills:
-			if entry[0] == active_skills[index]:
-				row = entry
-		if row.is_empty():
-			continue
-		var button := Button.new()
-		button.text = "%s %s" % [_binding_label("skill_%d" % (index + 1)) if index < 4 else "•", row[1]]
-		button.tooltip_text = "%s\n%s" % [row[1], row[5]]
-		var skill_id: String = active_skills[index]
-		_set_icon(button, skill_id, 22)
-		button.pressed.connect(func() -> void: runtime.call("cast_skill", skill_id))
-		hotbar.add_child(button)
-		_hotbar_button(button)
+		keys.append(_binding_label("skill_%d" % (index + 1)) if index < 4 else "")
+	skill_bar.rebuild(active_skills, keys, _binding_label("mutation_tree"))
 
 
 func _add_skill(canvas: Control, row: Array, center: Vector2, skills: Array) -> void:
@@ -499,21 +456,6 @@ func _add_section_labels(canvas: Control) -> void:
 func _on_control_loss_changed(active: bool) -> void:
 	if active and is_tree_open():
 		close_tree()
-
-
-func _hotbar_button(button: Button) -> void:
-	# Menu button look, compacted to fit one HUD row.
-	button.focus_mode = Control.FOCUS_NONE
-	button.custom_minimum_size.y = 34
-	for state in ["normal", "hover", "pressed", "disabled"]:
-		var style := button.get_theme_stylebox(state, "Button").duplicate() as StyleBox
-		style.content_margin_left = 12
-		style.content_margin_right = 12
-		style.content_margin_top = 4
-		style.content_margin_bottom = 4
-		if style is StyleBoxFlat:
-			(style as StyleBoxFlat).border_width_bottom = 0
-		button.add_theme_stylebox_override(state, style)
 
 
 func _play_ui_sound(event: StringName) -> void:
