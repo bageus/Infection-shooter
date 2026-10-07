@@ -16,7 +16,7 @@ signal depleted
 ## the player can step out of it.
 @export var absorb_delay: float = 0.6
 ## Gas puffs per cloud (random in range) and how far they spread from the centre.
-@export var puff_count_range := Vector2i(7, 10)
+@export var puff_count_range := Vector2i(4, 6)
 @export var cloud_radius := 1.35
 
 var _active: bool = false
@@ -129,7 +129,8 @@ func _set_progress(value: float) -> void:
 		_spores.emitting = false
 
 
-# Puffs: big ones low in the core, smaller ones higher and further out.
+# Puffs: a big one low in the core, smaller ones higher and further out.
+# Each plays a gas sheet as an animation in the shader.
 func _build_puffs(count: int, shade: float) -> MultiMesh:
 	var multimesh := _multimesh(count)
 	var variants := range(12)
@@ -137,11 +138,13 @@ func _build_puffs(count: int, shade: float) -> MultiMesh:
 	var stagger := range(count)
 	stagger.shuffle()
 	_puffs.clear()
+	var ring_turn := randf() * TAU
 	for i in count:
-		var reach := sqrt(randf()) * cloud_radius
-		var angle := randf() * TAU
+		# One puff holds the core; the rest ring it evenly so no side is bare.
+		var reach := randf_range(0.0, 0.25) * cloud_radius if i == 0 else randf_range(0.55, 0.95) * cloud_radius
+		var angle := float(i) * TAU / float(maxi(count - 1, 1)) + ring_turn + randf_range(-0.35, 0.35)
 		var height := lerpf(0.75, 2.05, randf() * 0.5 + reach / cloud_radius * 0.5)
-		var size := lerpf(2.9, 1.7, reach / cloud_radius) * randf_range(0.85, 1.1)
+		var size := lerpf(3.3, 2.1, reach / cloud_radius) * randf_range(0.9, 1.1)
 		var origin := Vector3(cos(angle) * reach, height, sin(angle) * reach)
 		multimesh.set_instance_transform(i, Transform3D(Basis.from_scale(Vector3.ONE * size), origin))
 		var spin := randf_range(0.05, 0.22) * (1.0 if randf() < 0.5 else -1.0)

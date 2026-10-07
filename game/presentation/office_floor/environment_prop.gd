@@ -3,11 +3,13 @@ const SFX := preload("res://game/core/audio/public/sound_events.gd")
 const IMPACT_SOUND := preload("res://game/presentation/office_floor/impact_sound_watcher.gd")
 
 const CARPET_SHADOW := preload("res://game/presentation/office_floor/carpet_shadow.gd")
+const CONTACT_SHADOW := preload("res://game/presentation/office_floor/prop_contact_shadow.gd")
 const DAMAGE = preload("res://game/presentation/office_floor/environment_damage.gd")
 const PROP_DAMAGE := preload("res://game/features/combat/public/prop_damage_state.gd")
 var _damage := PROP_DAMAGE.new()
 const WEIGHT = preload("res://game/presentation/office_floor/prop_weight.gd")
 const CONTACT = preload("res://game/presentation/office_floor/prop_contact.gd")
+const BULLET_PUSH = preload("res://game/presentation/office_floor/bullet_push.gd")
 var repeated_electronic_particles := true
 
 
@@ -169,8 +171,20 @@ func _ready() -> void:
 	# Continuous detection is costly; only small, light objects can be fast enough to tunnel.
 	continuous_cd = mass < 4.0
 	_setup_weight(volume)
+	_add_contact_shadow(wall_mounted)
 	if not freeze or wall_mounted:
 		IMPACT_SOUND.watch(self)
+
+
+# Furniture standing on the floor gets a light shadow under it.
+func _add_contact_shadow(wall_mounted: bool) -> void:
+	if wall_mounted or has_meta(&"kickable_prop"):
+		return
+	var shadow := CONTACT_SHADOW.new()
+	shadow.name = "ContactShadow"
+	add_child(shadow)
+	if not shadow.configure(self, _visual, _shape_meshes):
+		shadow.queue_free()
 
 
 func _add_shapes(node: Node) -> float:
@@ -260,6 +274,7 @@ func get_projectile_material(shape_index: int = -1) -> String:
 
 func take_projectile_hit(damage: float, hit_position: Vector3, _normal: Vector3, direction: Vector3, weapon: String) -> bool:
 	if "fire_extinguisher" in model_path.get_file():
+		BULLET_PUSH.apply(self, weight_kg, weapon, direction, hit_position)
 		_trigger_extinguisher(hit_position, direction)
 		return false
 	if PAPER.is_paper(model_path):
@@ -278,11 +293,8 @@ func take_projectile_hit(damage: float, hit_position: Vector3, _normal: Vector3,
 			sleeping = false
 			apply_central_impulse((direction.normalized() + Vector3.UP * 0.25).normalized() * (mass * 0.055 if weapon == "SHOTGUN" else mass * 0.2))
 		return false
-	if not freeze and weapon == "SHOTGUN":
-		sleeping = false
-		var is_table := "table" in model_path.get_file() or "desk" in model_path.get_file()
-		var push := direction.normalized() if is_table else (direction.normalized() + Vector3.UP * 0.18).normalized()
-		apply_central_impulse(push * clampf(mass * (0.004 if is_table else 0.015), 0.025, 0.15 if is_table else 0.32))
+	# Every loose item moves when shot, by its weight (anchored ones stay).
+	BULLET_PUSH.apply(self, weight_kg, weapon, direction, hit_position)
 	var action := _damage.hit(damage, weapon, BOOK_STACK.contains(model_path),
 		bool(get_meta("planning_wall_mount", false)), freeze, _is_facade_damage())
 	match action:
@@ -300,9 +312,6 @@ func take_projectile_hit(damage: float, hit_position: Vector3, _normal: Vector3,
 			IMPACT_SOUND.wake(self)
 			sleeping = false
 			apply_central_impulse((direction.normalized() + Vector3.UP * 0.2).normalized() * maxf(0.5, mass * 0.12))
-		PROP_DAMAGE.HitAction.PUSH:
-			sleeping = false
-			apply_impulse(direction.normalized() * maxf(0.4, mass * 0.3), hit_position - global_position)
 	return false
 
 
