@@ -153,9 +153,22 @@ func _test_scope_pixels(effects: Node3D, scope: Control) -> void:
 	target.mesh = box
 	effects.add_child(target)
 	target.global_position = Vector3(0, .4, -30)
-	await process_frame
-	await RenderingServer.frame_post_draw
-	var image: Image = scope.view.get_texture().get_image()
-	var center := image.get_pixel(image.get_width() / 2, image.get_height() / 2)
-	_check(center.r > .6 and center.g < .2, "Native scope actually renders the target under its reticle")
+	var center := Color.BLACK
+	# A newly registered mesh may need several rendered frames to compile its
+	# pipeline. Require the actual target pixel within a bounded frame budget.
+	for frame in 12:
+		await process_frame
+		await RenderingServer.frame_post_draw
+		var image: Image = scope.view.get_texture().get_image()
+		center = image.get_pixel(image.get_width() / 2, image.get_height() / 2)
+		if center.r > .6 and center.g < .2:
+			break
+	if not (center.r > .6 and center.g < .2):
+		print("Scope probe camera=%s target=%s update=%s" % [scope.camera.global_transform, target.global_position, scope.view.render_target_update_mode])
+		var directory := OS.get_environment("POSE_CAPTURE_DIR")
+		if not directory.is_empty():
+			DirAccess.make_dir_recursive_absolute(directory)
+			scope.view.get_texture().get_image().save_png(directory.path_join("scope_target_" + RenderingServer.get_current_rendering_method() + ".png"))
+	_check(scope.camera.is_current(), "Scope keeps its camera active after sharing the world")
+	_check(center.r > .6 and center.g < .2, "Native scope actually renders the target under its reticle: %s" % center)
 	target.queue_free()

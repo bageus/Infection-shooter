@@ -1,4 +1,5 @@
 extends SceneTree
+const LAYOUT_ASSERTIONS := preload("res://game/bootstrap/app/tests/layout_assertions.gd")
 
 const MAIN := preload("res://game/bootstrap/app/main.tscn")
 const LIGHT_PATH := "res://game/presentation/office_floor/public/props/planner_light.tscn"
@@ -61,6 +62,7 @@ func _exercise_edits(planner: Node) -> void:
 	var light := planner.call("_instantiate_asset", LIGHT_PATH) as Node3D
 	(planner.get("root") as Node3D).add_child(light)
 	light.set_meta("planning_scene_path", LIGHT_PATH)
+	light.set_meta("planning_object_id", "regression_light")
 	(editor.get("placed") as Array).append(light)
 	planner.call("_select", light)
 	controls.call("_adjust_selected_light", 0.25)
@@ -112,7 +114,7 @@ func _exercise_maps(planner: Node) -> void:
 	var editor: Node = planner.get("objects")
 	var snapshot: Dictionary = storage.call("_collect_layout_data")
 	_check(snapshot.get("version") == 8, "Layout uses DTO version 8")
-	var light_records: Array = snapshot["objects"].filter(func(record: Dictionary) -> bool: return record["scene"] == LIGHT_PATH)
+	var light_records: Array = snapshot["objects"].filter(func(record: Dictionary) -> bool: return record.get("object_id", "") == "regression_light")
 	_check(light_records.size() == 1 and light_records[0].get("light_energy", 0.0) > 0.0, "Layout captures edited light")
 	var name := "codex_planning_regression_%d" % Time.get_ticks_usec()
 	(storage.get("map_name_edit") as LineEdit).text = name
@@ -123,8 +125,8 @@ func _exercise_maps(planner: Node) -> void:
 	await process_frame
 	storage.call("load_named_map", name)
 	var restored: Dictionary = storage.call("_collect_layout_data")
-	_check(restored == snapshot, "Named map round trip preserves all object records")
-	if restored != snapshot:
+	_check(LAYOUT_ASSERTIONS.equivalent(restored, snapshot), "Named map round trip preserves all object records")
+	if not LAYOUT_ASSERTIONS.equivalent(restored, snapshot):
 		for i in mini(restored["objects"].size(), snapshot["objects"].size()):
 			if restored["objects"][i] != snapshot["objects"][i]:
 				print("DIFF ", snapshot["objects"][i], "\n  -> ", restored["objects"][i])

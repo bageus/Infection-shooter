@@ -43,6 +43,7 @@ func _run() -> void:
 	_check(STORAGE._safe_map_name("  ../?*  ").is_empty(), "A name without letters is rejected instead of saving '.json'")
 	var stage := MAIN.instantiate()
 	root.add_child(stage)
+	(stage.get("player") as Node).set_physics_process(false)
 	current_scene = stage
 	await process_frame
 	await physics_frame

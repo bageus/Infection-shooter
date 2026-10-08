@@ -14,6 +14,7 @@ func _run() -> void:
 	stage = MAIN.instantiate()
 	root.add_child(stage)
 	current_scene = stage
+	(stage.get_node("Gameplay/Enemies") as Node).process_mode = Node.PROCESS_MODE_DISABLED
 	await process_frame
 	var player: Node3D = stage.get("player")
 	player.set_physics_process(false)
@@ -159,10 +160,19 @@ func _corpse() -> void:
 		await _settle(scene)
 	var part := PART.instantiate() as RigidBody3D
 	stage.add_child(part)
-	part.position = Vector3(30, 3, 5)
+	var floor_body := StaticBody3D.new()
+	var floor_shape := CollisionShape3D.new()
+	floor_shape.shape = BoxShape3D.new()
+	floor_shape.shape.size = Vector3(10, .2, 10)
+	floor_body.add_child(floor_shape)
+	stage.add_child(floor_body)
+	floor_body.position = Vector3(1000, -.1, 1000)
+	part.position = Vector3(1000, 3, 1000)
 	for tick in 90:
 		await physics_frame
 	_check(part.position.y < 1.0 and part.position.is_finite(), "Airborne severed parts fall to the floor")
+	floor_body.queue_free()
+	part.queue_free()
 
 func _settle(scene: PackedScene) -> void:
 	var corpse := scene.instantiate()
@@ -210,7 +220,8 @@ func _aim(player: Node3D) -> void:
 		for height in [.1, 3.0]:
 			var target := player.global_position + Vector3(0, height, 5)
 			mount.call("aim_at", target)
-			await process_frame
+			await physics_frame
+			await physics_frame
 			await process_frame
 			var expected: Transform3D = (mount.get("socket") as Node3D).global_transform
 			_check(weapon.global_position.distance_to(expected.origin) < .001, "Weapon remains at its hand socket")

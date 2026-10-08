@@ -404,7 +404,7 @@ func _update_status() -> void:
 
 ## Rebuilds the layout from saved data; returns {"loaded", "skipped", "missing"}.
 func _apply_layout_data(data: Dictionary) -> Dictionary:
-	clear_layout(false)
+	clear_layout(false, true)
 	# Undo entries refer to the previous layout's objects.
 	session.edit_history.set("stack", [])
 	var loaded := 0
@@ -495,7 +495,7 @@ func _apply_layout_data(data: Dictionary) -> Dictionary:
 	return {"loaded": loaded, "skipped": skipped, "missing": missing}
 
 
-func clear_layout(update_status: bool = true) -> void:
+func clear_layout(update_status: bool = true, immediate: bool = false) -> void:
 	workstation_transforms.clear()
 	var retained: Array[Node3D] = []
 	for node in placed:
@@ -504,7 +504,10 @@ func clear_layout(update_status: bool = true) -> void:
 		if bool(node.get_meta("planning_existing", false)):
 			retained.append(node)
 		else:
-			node.queue_free()
+			if immediate:
+				node.free()
+			else:
+				node.queue_free()
 	placed = retained
 	selected = null
 	if update_status:

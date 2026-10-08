@@ -43,7 +43,10 @@ func update_view(state: Dictionary) -> void:
 	view.render_target_update_mode = SubViewport.UPDATE_ALWAYS if visible and is_visible_in_tree() else SubViewport.UPDATE_DISABLED
 	if not visible:
 		return
-	view.world_3d = source.get_world_3d()
+	if view.world_3d != source.get_world_3d():
+		view.world_3d = source.get_world_3d()
+	if not camera.is_current():
+		camera.make_current()
 	camera.global_transform = source.global_transform
 	camera.cull_mask = source.cull_mask
 	camera.near = source.near
