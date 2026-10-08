@@ -1,6 +1,8 @@
 extends RefCounted
 ## Exact keys/order/values, with Godot float precision for numeric fields.
 static func equivalent(a: Variant, b: Variant) -> bool:
+	if a is int and b is int:
+		return a == b
 	if (a is float or a is int) and (b is float or b is int):
 		return is_equal_approx(float(a), float(b))
 	if a is Dictionary and b is Dictionary:
