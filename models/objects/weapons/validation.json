@@ -1,0 +1,254 @@
+{
+  "models": [
+    {
+      "file": "pistol_lowpoly(2).glb",
+      "status": "PASS",
+      "triangle_count_preserved": 764,
+      "nodes_preserved": 11,
+      "kind": "textured_original",
+      "attachment_markers": [
+        "Muzzle",
+        "Grip_L",
+        "Grip_R"
+      ],
+      "dimensions_m": [
+        0.07435268553998906,
+        0.20902619073547934,
+        0.2792866324839167
+      ],
+      "triangles": 764
+    },
+    {
+      "file": "shotgun_lowpoly.glb",
+      "status": "PASS",
+      "triangle_count_preserved": 1208,
+      "nodes_preserved": 6,
+      "kind": "textured_original",
+      "attachment_markers": [
+        "Muzzle",
+        "Grip_L",
+        "Grip_R"
+      ],
+      "dimensions_m": [
+        0.9007985914139989,
+        0.24765263544994442,
+        0.30238947729567756
+      ],
+      "triangles": 1208
+    },
+    {
+      "file": "uzi_lowpoly.glb",
+      "status": "PASS",
+      "triangle_count_preserved": 1072,
+      "nodes_preserved": 6,
+      "kind": "textured_original",
+      "attachment_markers": [
+        "Muzzle",
+        "Grip_L",
+        "Grip_R"
+      ],
+      "dimensions_m": [
+        0.3877387548132575,
+        0.38077888097734536,
+        0.0982402228210517
+      ],
+      "triangles": 1072
+    },
+    {
+      "file": "six_chamber_launcher_lowpoly.glb",
+      "status": "PASS",
+      "triangle_count_preserved": 2272,
+      "nodes_preserved": 6,
+      "kind": "textured_original",
+      "attachment_markers": [
+        "Muzzle",
+        "Grip_L",
+        "Grip_R"
+      ],
+      "dimensions_m": [
+        0.8277727422312983,
+        0.3498895706701436,
+        0.26023049687601074
+      ],
+      "triangles": 2272
+    },
+    {
+      "file": "ak_rifle_lowpoly.glb",
+      "status": "PASS",
+      "triangle_count_preserved": 1136,
+      "nodes_preserved": 8,
+      "kind": "new_model",
+      "attachment_markers": [
+        "Muzzle",
+        "Grip_L",
+        "Grip_R"
+      ],
+      "dimensions_m": [
+        1.1259999871253967,
+        0.43400000035762787,
+        0.11649999767541885
+      ],
+      "triangles": 1136
+    },
+    {
+      "file": "aviation_minigun_lowpoly.glb",
+      "status": "PASS",
+      "triangle_count_preserved": 1884,
+      "nodes_preserved": 9,
+      "kind": "new_model",
+      "attachment_markers": [
+        "Muzzle",
+        "Grip_L",
+        "Grip_R"
+      ],
+      "dimensions_m": [
+        1.234499990940094,
+        0.4519999921321869,
+        0.49299998581409454
+      ],
+      "triangles": 1884
+    },
+    {
+      "file": "m4_rifle_lowpoly.glb",
+      "status": "PASS",
+      "triangle_count_preserved": 1944,
+      "nodes_preserved": 8,
+      "kind": "new_model",
+      "attachment_markers": [
+        "Muzzle",
+        "Grip_L",
+        "Grip_R"
+      ],
+      "dimensions_m": [
+        1.0459999740123749,
+        0.41349999606609344,
+        0.11050000041723251
+      ],
+      "triangles": 1944
+    },
+    {
+      "file": "minigun_ammo_backpack_lowpoly.glb",
+      "status": "PASS",
+      "triangle_count_preserved": 676,
+      "nodes_preserved": 5,
+      "kind": "new_model",
+      "attachment_markers": [
+        "BackSocket",
+        "FeedPort"
+      ],
+      "dimensions_m": [
+        0.48500001430511475,
+        0.5769999921321869,
+        0.346000000834465
+      ],
+      "triangles": 676
+    },
+    {
+      "file": "sniper_rifle_lowpoly.glb",
+      "status": "PASS",
+      "triangle_count_preserved": 1444,
+      "nodes_preserved": 10,
+      "kind": "new_model",
+      "attachment_markers": [
+        "Muzzle",
+        "Grip_L",
+        "Grip_R"
+      ],
+      "dimensions_m": [
+        1.4780000448226929,
+        0.42350001633167267,
+        0.15850000083446503
+      ],
+      "triangles": 1444
+    }
+  ],
+  "conversion": [
+    {
+      "file": "pistol_lowpoly(2).glb",
+      "opaque_surfaces": 4,
+      "glass_surfaces_preserved": 0,
+      "original_opaque_vertices": 2292,
+      "atlas_opaque_vertices": 2292,
+      "source_bytes": 64064,
+      "output_bytes": 188940
+    },
+    {
+      "file": "shotgun_lowpoly.glb",
+      "opaque_surfaces": 4,
+      "glass_surfaces_preserved": 0,
+      "original_opaque_vertices": 3624,
+      "atlas_opaque_vertices": 3624,
+      "source_bytes": 98300,
+      "output_bytes": 292404
+    },
+    {
+      "file": "uzi_lowpoly.glb",
+      "opaque_surfaces": 4,
+      "glass_surfaces_preserved": 0,
+      "original_opaque_vertices": 3216,
+      "atlas_opaque_vertices": 3216,
+      "source_bytes": 87484,
+      "output_bytes": 260368
+    },
+    {
+      "file": "six_chamber_launcher_lowpoly.glb",
+      "opaque_surfaces": 6,
+      "glass_surfaces_preserved": 0,
+      "original_opaque_vertices": 6816,
+      "atlas_opaque_vertices": 6816,
+      "source_bytes": 183012,
+      "output_bytes": 545496
+    },
+    {
+      "file": "ak_rifle_lowpoly.glb",
+      "opaque_surfaces": 6,
+      "glass_surfaces_preserved": 0,
+      "original_opaque_vertices": 3408,
+      "atlas_opaque_vertices": 3408,
+      "source_bytes": 192944,
+      "output_bytes": 379004
+    },
+    {
+      "file": "aviation_minigun_lowpoly.glb",
+      "opaque_surfaces": 8,
+      "glass_surfaces_preserved": 0,
+      "original_opaque_vertices": 5652,
+      "atlas_opaque_vertices": 5652,
+      "source_bytes": 298268,
+      "output_bytes": 602952
+    },
+    {
+      "file": "m4_rifle_lowpoly.glb",
+      "opaque_surfaces": 6,
+      "glass_surfaces_preserved": 0,
+      "original_opaque_vertices": 5832,
+      "atlas_opaque_vertices": 5832,
+      "source_bytes": 317240,
+      "output_bytes": 629356
+    },
+    {
+      "file": "minigun_ammo_backpack_lowpoly.glb",
+      "opaque_surfaces": 6,
+      "glass_surfaces_preserved": 0,
+      "original_opaque_vertices": 2028,
+      "atlas_opaque_vertices": 2028,
+      "source_bytes": 112560,
+      "output_bytes": 226748
+    },
+    {
+      "file": "sniper_rifle_lowpoly.glb",
+      "opaque_surfaces": 11,
+      "glass_surfaces_preserved": 0,
+      "original_opaque_vertices": 4332,
+      "atlas_opaque_vertices": 4332,
+      "source_bytes": 237404,
+      "output_bytes": 476196
+    }
+  ],
+  "source_texture_size": [
+    1774,
+    887
+  ],
+  "normal_maps": "artistic synthesized tangent-space OpenGL, not scanned",
+  "uv_scale_m": 0.75
+}

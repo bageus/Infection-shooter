@@ -1,0 +1,25 @@
+{
+  "AK_CurvedMagazine_receiver_overlap_m": [
+    0.15300001204013824,
+    0.015000000596046448,
+    0.04899999871850014
+  ],
+  "AK_Trigger_receiver_overlap_m": [
+    0.0279999990016222,
+    0.02199999988079071,
+    0.012000000104308128
+  ],
+  "AK_TriggerGuardFront_receiver_overlap_m": [
+    0.009999999776482582,
+    0.01600000262260437,
+    0.017999999225139618
+  ],
+  "AK_TriggerGuardRear_receiver_overlap_m": [
+    0.01000000536441803,
+    0.01600000262260437,
+    0.017999999225139618
+  ],
+  "AK_rib_parts_within_outline_and_embedded": 24,
+  "M4_rib_parts_within_outline_and_embedded": 6,
+  "sniper_bipod_removed": true
+}

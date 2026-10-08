@@ -1,0 +1,171 @@
+{
+  "master_size": [
+    4096,
+    2048
+  ],
+  "runtime_size": [
+    2048,
+    1024
+  ],
+  "gutter_master_px": 32,
+  "gutter_runtime_px": 16,
+  "origin": "top-left",
+  "grid": [
+    4,
+    2
+  ],
+  "tiles": [
+    {
+      "slot": 1,
+      "id": "blued_gunmetal",
+      "title": "Воронёный металл",
+      "pixel_rect_master": [
+        32,
+        32,
+        960,
+        960
+      ],
+      "uv_rect": [
+        0.0078125,
+        0.015625,
+        0.234375,
+        0.46875
+      ],
+      "roughness_mean": 0.34,
+      "metallic": 1
+    },
+    {
+      "slot": 2,
+      "id": "worn_steel",
+      "title": "Светлый металл кромок",
+      "pixel_rect_master": [
+        1056,
+        32,
+        960,
+        960
+      ],
+      "uv_rect": [
+        0.2578125,
+        0.015625,
+        0.234375,
+        0.46875
+      ],
+      "roughness_mean": 0.28,
+      "metallic": 1
+    },
+    {
+      "slot": 3,
+      "id": "black_polymer",
+      "title": "Чёрный полимер",
+      "pixel_rect_master": [
+        2080,
+        32,
+        960,
+        960
+      ],
+      "uv_rect": [
+        0.5078125,
+        0.015625,
+        0.234375,
+        0.46875
+      ],
+      "roughness_mean": 0.52,
+      "metallic": 0
+    },
+    {
+      "slot": 4,
+      "id": "coyote_polymer",
+      "title": "Коричневый полимер",
+      "pixel_rect_master": [
+        3104,
+        32,
+        960,
+        960
+      ],
+      "uv_rect": [
+        0.7578125,
+        0.015625,
+        0.234375,
+        0.46875
+      ],
+      "roughness_mean": 0.56,
+      "metallic": 0
+    },
+    {
+      "slot": 5,
+      "id": "olive_paint",
+      "title": "Оливковая краска",
+      "pixel_rect_master": [
+        32,
+        1056,
+        960,
+        960
+      ],
+      "uv_rect": [
+        0.0078125,
+        0.515625,
+        0.234375,
+        0.46875
+      ],
+      "roughness_mean": 0.48,
+      "metallic": 0
+    },
+    {
+      "slot": 6,
+      "id": "walnut",
+      "title": "Тёмный орех",
+      "pixel_rect_master": [
+        1056,
+        1056,
+        960,
+        960
+      ],
+      "uv_rect": [
+        0.2578125,
+        0.515625,
+        0.234375,
+        0.46875
+      ],
+      "roughness_mean": 0.44,
+      "metallic": 0
+    },
+    {
+      "slot": 7,
+      "id": "cordura",
+      "title": "Ткань рюкзака",
+      "pixel_rect_master": [
+        2080,
+        1056,
+        960,
+        960
+      ],
+      "uv_rect": [
+        0.5078125,
+        0.515625,
+        0.234375,
+        0.46875
+      ],
+      "roughness_mean": 0.92,
+      "metallic": 0
+    },
+    {
+      "slot": 8,
+      "id": "brass",
+      "title": "Латунь",
+      "pixel_rect_master": [
+        3104,
+        1056,
+        960,
+        960
+      ],
+      "uv_rect": [
+        0.7578125,
+        0.515625,
+        0.234375,
+        0.46875
+      ],
+      "roughness_mean": 0.28,
+      "metallic": 1
+    }
+  ]
+}
