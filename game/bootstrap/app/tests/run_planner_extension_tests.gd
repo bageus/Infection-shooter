@@ -11,6 +11,8 @@ func _initialize() -> void:
 	call_deferred("_run")
 
 func _run() -> void:
+	# Bound software-GPU cost while retaining the full authored scene.
+	root.size = Vector2i(640, 360)
 	stage = MAIN.instantiate()
 	root.add_child(stage)
 	current_scene = stage
@@ -223,11 +225,16 @@ func _aim(player: Node3D) -> void:
 			await physics_frame
 			await physics_frame
 			await process_frame
+			if DisplayServer.get_name() != "headless":
+				await RenderingServer.frame_post_draw
 			var expected: Transform3D = (mount.get("socket") as Node3D).global_transform
 			_check(weapon.global_position.distance_to(expected.origin) < .001, "Weapon remains at its hand socket")
 			_check(weapon.global_basis.orthonormalized().is_equal_approx(expected.basis.orthonormalized()), "Weapon rotates with the hand rather than independently")
 			var muzzle: Node3D = weapon.get_node("Muzzle")
-			_check((-muzzle.global_basis.z.normalized()).dot((target - muzzle.global_position).normalized()) > .995, "Torso and barrel aim at 3D target")
+			var alignment := (-muzzle.global_basis.z.normalized()).dot((target - muzzle.global_position).normalized())
+			if alignment <= .995:
+				print("Aim diagnostic: slot=%d height=%.1f dot=%f requested=%s actual=%s physics=%s paused=%s" % [slot, height, alignment, target, mount.get("_aim_target"), player.is_physics_processing(), paused])
+			_check(alignment > .995, "Torso and barrel aim at 3D target")
 			await _capture("aim_%d_%.1f" % [slot, height])
 
 func _check(value: bool, message: String) -> void:
