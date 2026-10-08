@@ -179,6 +179,14 @@ func _create_asset(asset_path: String) -> Node3D:
 
 
 func _migrate_scene_path(old_path: String) -> String:
+	# Group 01 packs were briefly uploaded under models/. Keep those saved maps
+	# loadable after restoring the runtime paths used by structural scenes.
+	var group_one := ENVIRONMENT_ROOT + "/01/"
+	if old_path.begins_with(group_one) and old_path.ends_with(".glb"):
+		var filename := old_path.get_file().replace("01_glass_wall_full_breakable(1).glb", "01_glass_wall_full_breakable.glb")
+		var canonical := group_one + filename
+		if ResourceLoader.exists(canonical):
+			return canonical
 	var replacements = {
 		"res://models/objects/01_wall_door.glb": "res://game/presentation/office_floor/public/structural/wall_door.tscn",
 		"res://models/objects/01_wall_door_2.glb": "res://game/presentation/office_floor/public/structural/wall_door.tscn",

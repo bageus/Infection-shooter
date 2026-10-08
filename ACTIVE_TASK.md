@@ -4,8 +4,14 @@ task_id: T002
 status: IN_PROGRESS
 phase: 1
 owner: AI
-updated: 2026-10-07
+updated: 2026-10-08
 ---
+
+08.10.2026 (группа 01 — проверка подключения): 25 GLB доступны по прежним runtime-путям, 9 общих карт разделены между architecture/carpet/stairs_elevators; полная стеклянная стена возвращена к каноническому имени без (1). bootstrap.app/planning_catalog поддерживает сохранённые вложенные пути; новый run_group01_asset_tests включён в headless CI. presentation.office_floor использует прежние сцены; игровые правила, публичные API, DTO карт, зависимости и владельцы состояния не изменены, архитектурных исключений нет. Источники/превью/альтернативные карты исключены из импорта; исходная CSV-таблица перенесена под sources/reference_metadata, чтобы Godot не считал её переводом. Локально Godot 4.7.2: чистый editor import и main 180 кадров без SCRIPT ERROR/ERROR; group01 assets, elevator_collision, door_runtime, glass_crack, world_surface, world_bindings, layout_bake, occlusion, staged_glb — 9 наборов PASS. validate_project, validate_scene_resources, check_resource_paths, check_import_files, Python workstation/scene-access/glass-openings и diff-check PASS. run_planning_mode_tests: два известных assertion (Layout captures edited light; Named map round trip preserves all object records) повторяются с исходным planning_catalog из main и с инкрементом; тесты не ослаблены, исправление планировщика не включено в замену ресурсов. T002 IN_PROGRESS. Публикация в main прямо поручена владельцем; точное следующее действие — визуально проверить группу 01 в палитре и существующей карте при игровом освещении, отдельно исправить подтверждённые ошибки планировщика.
+
+
+08.10.2026 (группа 01, прямой запрос владельца): текущий инкремент T002 подключает 25 подготовленных GLB и три комплекта общих PBR-карт. Модели возвращаются из вложенной models/ на прежние пути группы 01; карты стен, ковров и лестниц/лифтов разделены, чтобы одинаковые имена атласов не перезаписывали друг друга. Имена узлов, геометрия, игровые сцены и DTO карт сохраняются. Проверки и публикация в main выполняются в рамках явного поручения владельца.
+
 
 # Active task
 
