@@ -1,0 +1,71 @@
+{
+  "models": [
+    {
+      "file": "01_stairs.glb",
+      "status": "PASS",
+      "triangle_count_preserved": 788,
+      "nodes_preserved": 14,
+      "untextured_light_and_display_surfaces_preserved": 0
+    },
+    {
+      "file": "01_stairs_2.glb",
+      "status": "PASS",
+      "triangle_count_preserved": 788,
+      "nodes_preserved": 14,
+      "untextured_light_and_display_surfaces_preserved": 0
+    },
+    {
+      "file": "01_elevator_cabin_freight.glb",
+      "status": "PASS",
+      "triangle_count_preserved": 1088,
+      "nodes_preserved": 35,
+      "untextured_light_and_display_surfaces_preserved": 3
+    },
+    {
+      "file": "01_elevator_cabin_passenger.glb",
+      "status": "PASS",
+      "triangle_count_preserved": 868,
+      "nodes_preserved": 28,
+      "untextured_light_and_display_surfaces_preserved": 2
+    }
+  ],
+  "conversion": [
+    {
+      "file": "01_stairs.glb",
+      "opaque_surfaces": 11,
+      "original_opaque_vertices": 1584,
+      "atlas_opaque_vertices": 2364,
+      "source_bytes": 63820,
+      "output_bytes": 199104,
+      "untextured_light_and_display_surfaces_preserved": 0
+    },
+    {
+      "file": "01_stairs_2.glb",
+      "opaque_surfaces": 11,
+      "original_opaque_vertices": 1584,
+      "atlas_opaque_vertices": 2364,
+      "source_bytes": 63820,
+      "output_bytes": 199104,
+      "untextured_light_and_display_surfaces_preserved": 0
+    },
+    {
+      "file": "01_elevator_cabin_freight.glb",
+      "opaque_surfaces": 31,
+      "original_opaque_vertices": 1724,
+      "atlas_opaque_vertices": 3156,
+      "source_bytes": 64516,
+      "output_bytes": 258924,
+      "untextured_light_and_display_surfaces_preserved": 3
+    },
+    {
+      "file": "01_elevator_cabin_passenger.glb",
+      "opaque_surfaces": 25,
+      "original_opaque_vertices": 1384,
+      "atlas_opaque_vertices": 2532,
+      "source_bytes": 52848,
+      "output_bytes": 209792,
+      "untextured_light_and_display_surfaces_preserved": 2
+    }
+  ],
+  "note": "Authored node hierarchy, transforms, triangle positions and normals preserved; Light and Door_Gap materials and primitives unchanged."
+}
