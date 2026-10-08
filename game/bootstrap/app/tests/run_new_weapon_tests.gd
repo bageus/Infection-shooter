@@ -20,8 +20,9 @@ func _drop(index: int, _point: Vector3) -> bool:
 
 func _run() -> void:
 	var actor := PLAYER.instantiate() as CharacterBody3D
-	actor.set_physics_process(false)
 	root.add_child(actor)
+	actor.set_physics_process(false)
+	_check(not actor.is_physics_processing(), "Scope fixture remains stationary after player ready")
 	var effects := Node3D.new()
 	root.add_child(effects)
 	actor.call("configure_world", effects, null)
