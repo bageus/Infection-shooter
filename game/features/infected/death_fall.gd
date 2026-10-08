@@ -69,11 +69,13 @@ static func landing(body: CollisionObject3D, slide: Vector3, radius: float) -> V
 	if distance < 0.02 or not body.is_inside_tree():
 		return Vector3.ZERO
 	var direction := slide / distance
-	var from := body.global_position
-	var query := PhysicsRayQueryParameters3D.create(from, from + direction * (distance + radius), 1, [body.get_rid()])
-	var hit := body.get_world_3d().direct_space_state.intersect_ray(query)
-	if not hit.is_empty():
-		distance = maxf(0.0, from.distance_to(hit["position"]) - radius)
+	# Along the middle of the body and lower down, where table tops are.
+	for drop: float in [0.0, radius * 1.3]:
+		var from := body.global_position - Vector3.UP * drop
+		var query := PhysicsRayQueryParameters3D.create(from, from + direction * (distance + radius), 1, [body.get_rid()])
+		var hit := body.get_world_3d().direct_space_state.intersect_ray(query)
+		if not hit.is_empty():
+			distance = maxf(0.0, from.distance_to(hit["position"]) - radius)
 	return direction * distance
 
 

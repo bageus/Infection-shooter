@@ -36,6 +36,8 @@ func _on_palette_selected(index: int) -> void:
 	rotation_y = 0.0
 	_select(null)
 	_rebuild_preview()
+	if selected_kind == "light":
+		(session.ui.get_node("Panel") as ScrollContainer).ensure_control_visible.call_deferred(controls.light_defaults)
 
 
 func _click_world(screen_pos: Vector2) -> void:
@@ -157,6 +159,7 @@ func _rebuild_preview() -> void:
 	geometry._set_preview_collision(preview, true)
 	controls._apply_special_default_height(preview, _selected_kind())
 	controls.display_options.update()
+	controls._update_light_ui()
 
 
 func _selected_kind() -> String:

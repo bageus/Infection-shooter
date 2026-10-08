@@ -109,11 +109,9 @@ const EVENTS := {
 	&"skill_berserk": [2, 1.0, 60.0, 8.0, 0.03, 1],
 	&"skill_second_heart": [1, 0.0, 30.0, 5.0, 0.0, 1],
 	&"skill_retaliation": [2, 0.0, 46.0, 6.0, 0.05, 1],
-	# Infected voices beyond growls: alert screams, shrieks, heavy roars, distant howls.
-	&"scream_zombie": [5, 0.0, 48.0, 5.5, 0.07, 2],
-	&"scream_shrill": [4, -1.0, 48.0, 5.5, 0.06, 2],
+	# Call-out when an infected first spots the player (roar for heavy ones).
+	&"scream_zombie": [5, 0.0, 60.0, 6.5, 0.07, 2],
 	&"roar_heavy": [4, 2.0, 70.0, 8.0, 0.05, 2],
-	&"howl_infected": [4, -2.0, 80.0, 9.0, 0.06, 1],
 }
 
 

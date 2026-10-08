@@ -361,7 +361,7 @@ def recipes(base: Path) -> dict[str, list[Sound]]:
     def vocal(rel: str, ratio: float, lp: float = 9000.0, offset: float = 0.0, max_len: float = 1.2) -> Sound:
         return take(base, rel, "vocal", max_len=max_len, ratio=ratio, hp=70.0, lp=lp, gate_db=-40.0, offset_db=offset, fade_ms=150.0)
     ev["growl_zombie"] = [vocal(g, 1.0) for g in groans]
-    ev["growl_hunger"] = [vocal(f"{C}/speech/ferals/male_heavy_breathing_1.ogg", 1.05, max_len=0.9), vocal(f"{C}/speech/ferals/female_scream_1.ogg", 0.82, 6000.0, -2.0), vocal(groans[3], 1.18)]
+    ev["growl_hunger"] = [vocal(f"{C}/speech/ferals/male_heavy_breathing_1.ogg", 1.05, max_len=0.9), vocal(groans[0], 1.12, 7000.0), vocal(groans[3], 1.18)]
     ev["growl_revenant"] = [vocal(f"{C}/speech/ferals/female_mad_whisper_2.ogg", 0.85, offset=-3.0), vocal(groans[1], 1.12), vocal(f"{C}/speech/ferals/creepy_laugh.ogg", 0.8, 5000.0, -3.0)]
     ev["growl_brute"] = [vocal(g, 0.8, 6000.0) for g in groans[:3]]
     ev["growl_titan"] = [vocal(g, 0.68, 4500.0, max_len=1.4) for g in groans[1:4]]
@@ -771,32 +771,20 @@ def scream_events(base: Path, ev: dict[str, list[Sound]]) -> None:
         s = lowpass(speed(trim(s, -55.0), ratio), lp)
         return cut(saturate(s, drive), max_len, 200.0)
 
-    # Infected screams: human screams slowed, torn by throat rasp, a groan under it.
+    # Call-out scream when an infected first spots the player: male screams
+    # slowed and torn by throat rasp, a groan under it (no shrill takes).
     zombie = []
-    for rel, ratio, g in ((f"{ferals}/male_scream_1.ogg", 0.86, 0), (f"{ferals}/male_scream_2.ogg", 0.8, 2), (f"{ferals}/female_scream_1.ogg", 0.74, 1),
-                          (f"{ferals}/female_scream_2.ogg", 0.7, 3), (f"{C}/deal_damage/hurt_m/hurt_m_1.ogg", 0.78, 4)):
-        s = mix((voice(rel, ratio, 5500.0, 2.6), 0.0, 0.0), (voice(groans[g], 0.9, 4000.0, 1.5), 0.0, -9.0))
+    for rel, ratio, g in ((f"{ferals}/male_scream_1.ogg", 0.86, 0), (f"{ferals}/male_scream_2.ogg", 0.8, 2), (f"{ferals}/male_scream_1.ogg", 0.74, 1),
+                          (f"{ferals}/male_scream_2.ogg", 0.72, 3), (f"{C}/deal_damage/hurt_m/hurt_m_1.ogg", 0.78, 4)):
+        s = mix((voice(rel, ratio, 5000.0, 2.6), 0.0, 0.0), (voice(groans[g], 0.9, 4000.0, 1.5), 0.0, -8.0))
         zombie.append(level(reverb(s, 0.6, -15.0), "vocal", 1.0))
     ev["scream_zombie"] = zombie
-    # Hunger and Revenant: thin, shrill shrieks.
-    shrill = []
-    for rel, ratio in ((f"{ferals}/female_scream_1.ogg", 1.04), (f"{ferals}/female_scream_2.ogg", 0.96), (f"{C}/deal_damage/hurt_f/hurt_f_3.ogg", 0.9), (f"{ferals}/creepy_laugh.ogg", 1.15)):
-        s = tilt(voice(rel, ratio, 8000.0, 3.2, 180.0), -3.0, 3.0, 1500.0)
-        shrill.append(level(reverb(s, 0.7, -14.0, 6000.0), "vocal", 0.0))
-    ev["scream_shrill"] = shrill
     # Brute, Titan, Colossus, Horde: deep roars.
     roars = []
-    for rel, ratio, g in ((f"{ferals}/male_scream_1.ogg", 0.58, 1), (f"{ferals}/male_scream_2.ogg", 0.54, 3), (f"{ferals}/female_scream_1.ogg", 0.46, 0), (f"{C}/deal_damage/hurt_m/hurt_m_2.ogg", 0.5, 2)):
+    for rel, ratio, g in ((f"{ferals}/male_scream_1.ogg", 0.58, 1), (f"{ferals}/male_scream_2.ogg", 0.54, 3), (f"{ferals}/male_scream_1.ogg", 0.5, 0), (f"{C}/deal_damage/hurt_m/hurt_m_2.ogg", 0.5, 2)):
         s = mix((voice(rel, ratio, 3200.0, 3.0, 50.0, 2.0), 0.0, 0.0), (voice(groans[g], 0.6, 2500.0, 2.0, 50.0, 2.0), 0.0, -5.0), (tone(1.6, 55.0, 40.0, 0.9, (1.0, 0.4)), 0.0, -14.0))
         roars.append(level(reverb(s, 0.9, -13.0, 2500.0), "vocal", 2.0))
     ev["roar_heavy"] = roars
-    # Distant hunting howls: long eerie wails with a corridor tail.
-    howls = []
-    for rel, ratio in ((f"{ferals}/female_scream_1.ogg", 0.62), (f"{ferals}/male_scream_1.ogg", 0.7), (f"{ferals}/female_scream_2.ogg", 0.58), (f"{ferals}/male_scream_2.ogg", 0.66)):
-        s = voice(rel, ratio, 3800.0, 1.8, 120.0, 2.2)
-        s.x = s.x * (1.0 + 0.25 * np.sin(2 * np.pi * 5.5 * np.arange(len(s.x)) / SR))
-        howls.append(level(reverb(s, 1.4, -8.0, 3000.0), "vocal", -1.0))
-    ev["howl_infected"] = howls
 
 
 # ------------------------------------------------------------------ output
