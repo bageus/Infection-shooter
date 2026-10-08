@@ -47,6 +47,7 @@
     "heal_feedback_v1": {
       "heal": "heal(amount: float, source: StringName = &\"\") -> float; restored health after caps and skill bonuses; medkit pickups pass &\"medkit\"",
       "healed": "signal healed(amount: float, source: StringName); emitted only when health actually increased"
-    }
+    },
+    "weapon_view_v1": "get_weapon_view() -> Dictionary {camera: Camera3D, target: Vector3, magnification: float}; transient read-only view, never persisted"
   }
 }

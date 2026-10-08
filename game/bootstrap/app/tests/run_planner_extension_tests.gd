@@ -11,9 +11,12 @@ func _initialize() -> void:
 	call_deferred("_run")
 
 func _run() -> void:
+	# Bound software-GPU cost while retaining the full authored scene.
+	root.size = Vector2i(640, 360)
 	stage = MAIN.instantiate()
 	root.add_child(stage)
 	current_scene = stage
+	(stage.get_node("Gameplay/Enemies") as Node).process_mode = Node.PROCESS_MODE_DISABLED
 	await process_frame
 	var player: Node3D = stage.get("player")
 	player.set_physics_process(false)
@@ -159,10 +162,19 @@ func _corpse() -> void:
 		await _settle(scene)
 	var part := PART.instantiate() as RigidBody3D
 	stage.add_child(part)
-	part.position = Vector3(30, 3, 5)
+	var floor_body := StaticBody3D.new()
+	var floor_shape := CollisionShape3D.new()
+	floor_shape.shape = BoxShape3D.new()
+	floor_shape.shape.size = Vector3(10, .2, 10)
+	floor_body.add_child(floor_shape)
+	stage.add_child(floor_body)
+	floor_body.position = Vector3(1000, -.1, 1000)
+	part.position = Vector3(1000, 3, 1000)
 	for tick in 90:
 		await physics_frame
 	_check(part.position.y < 1.0 and part.position.is_finite(), "Airborne severed parts fall to the floor")
+	floor_body.queue_free()
+	part.queue_free()
 
 func _settle(scene: PackedScene) -> void:
 	var corpse := scene.instantiate()
@@ -210,13 +222,19 @@ func _aim(player: Node3D) -> void:
 		for height in [.1, 3.0]:
 			var target := player.global_position + Vector3(0, height, 5)
 			mount.call("aim_at", target)
+			await physics_frame
+			await physics_frame
 			await process_frame
-			await process_frame
+			if DisplayServer.get_name() != "headless":
+				await RenderingServer.frame_post_draw
 			var expected: Transform3D = (mount.get("socket") as Node3D).global_transform
 			_check(weapon.global_position.distance_to(expected.origin) < .001, "Weapon remains at its hand socket")
 			_check(weapon.global_basis.orthonormalized().is_equal_approx(expected.basis.orthonormalized()), "Weapon rotates with the hand rather than independently")
 			var muzzle: Node3D = weapon.get_node("Muzzle")
-			_check((-muzzle.global_basis.z.normalized()).dot((target - muzzle.global_position).normalized()) > .995, "Torso and barrel aim at 3D target")
+			var alignment := (-muzzle.global_basis.z.normalized()).dot((target - muzzle.global_position).normalized())
+			if alignment <= .995:
+				print("Aim diagnostic: slot=%d height=%.1f dot=%f requested=%s actual=%s physics=%s paused=%s" % [slot, height, alignment, target, mount.get("_aim_target"), player.is_physics_processing(), paused])
+			_check(alignment > .995, "Torso and barrel aim at 3D target")
 			await _capture("aim_%d_%.1f" % [slot, height])
 
 func _check(value: bool, message: String) -> void:

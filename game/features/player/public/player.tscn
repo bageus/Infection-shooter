@@ -1,4 +1,4 @@
-[gd_scene load_steps=13 format=3]
+[gd_scene load_steps=17 format=3]
 [ext_resource type="Script" path="res://game/features/character_animation/public/character_animation_driver.gd" id="anim_driver"]
 [ext_resource type="Script" path="res://game/features/player/player_movement.gd" id="1"]
 [ext_resource type="Script" path="res://game/features/player/player_weapon_mount.gd" id="mount"]
@@ -9,6 +9,10 @@
 [ext_resource type="Script" path="res://game/features/infection/public/infection_runtime.gd" id="5"]
 [ext_resource type="Script" path="res://game/features/combat/public/spent_casings.gd" id="casings"]
 [ext_resource type="PackedScene" path="res://game/features/combat/public/grenade_launcher.tscn" id="launcher"]
+[ext_resource type="PackedScene" path="res://game/features/combat/public/ak_rifle.tscn" id="ak_rifle"]
+[ext_resource type="PackedScene" path="res://game/features/combat/public/m4_rifle.tscn" id="m4_rifle"]
+[ext_resource type="PackedScene" path="res://game/features/combat/public/sniper_rifle.tscn" id="sniper_rifle"]
+[ext_resource type="PackedScene" path="res://game/features/combat/public/minigun.tscn" id="minigun"]
 [sub_resource type="StandardMaterial3D" id="Mat"]
 albedo_color=Color(0.06,0.2,0.62,1)
 [sub_resource type="CapsuleMesh" id="Mesh"]
@@ -31,6 +35,10 @@ rotation_degrees=Vector3(0,180,0)
 [node name="Uzi" parent="AimPivot" instance=ExtResource("3")]
 [node name="Shotgun" parent="AimPivot" instance=ExtResource("4")]
 [node name="GrenadeLauncher" parent="AimPivot" instance=ExtResource("launcher")]
+[node name="AkRifle" parent="AimPivot" instance=ExtResource("ak_rifle")]
+[node name="M4Rifle" parent="AimPivot" instance=ExtResource("m4_rifle")]
+[node name="SniperRifle" parent="AimPivot" instance=ExtResource("sniper_rifle")]
+[node name="Minigun" parent="AimPivot" instance=ExtResource("minigun")]
 [node name="CollisionShape3D" type="CollisionShape3D" parent="."]
 shape=SubResource("Shape")
 [node name="InfectionRuntime" type="Node" parent="."]

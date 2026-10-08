@@ -1,5 +1,7 @@
 extends Node
 
+const EQUIPMENT_POSE := preload("res://game/features/player/player_equipment_pose.gd")
+var equipment_pose: SkeletonModifier3D
 var skeleton: Skeleton3D
 var socket: Node3D
 var _remote: RemoteTransform3D
@@ -32,6 +34,10 @@ func _ready() -> void:
 		attachment_root = attachment_root.get_parent()
 	if attachment_root is BoneAttachment3D:
 		_socket_offset = (attachment_root as Node3D).global_transform.affine_inverse() * socket.global_transform
+	equipment_pose = EQUIPMENT_POSE.new()
+	equipment_pose.name = "EquipmentPose"
+	equipment_pose.mount = self
+	skeleton.add_child(equipment_pose)
 	var aim := preload("res://game/features/player/player_body_aim.gd").new()
 	aim.name = "BodyAim"
 	aim.mount = self

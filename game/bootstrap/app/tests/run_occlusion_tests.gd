@@ -188,6 +188,9 @@ func _render_checks() -> void:
 
 
 func _integration() -> void:
+	# Pixel assertions above use the original viewport. Material lifecycle below
+	# still uses the entire map, at bounded software-renderer resolution.
+	root.size = Vector2i(320, 180)
 	var had := FileAccess.file_exists(PREFS.FILE)
 	var saved := FileAccess.get_file_as_bytes(PREFS.FILE) if had else PackedByteArray()
 	var prefs := PREFS.new()

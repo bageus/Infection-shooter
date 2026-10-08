@@ -2,24 +2,20 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://coos1pqfar7da"
-path.s3tc="res://.godot/imported/08_divider_black_high_half_dividers.jpg-6d4f015d8712dc98fafe79723474bb54.s3tc.ctex"
+uid="uid://4fqiv8rt4np8"
+path="res://.godot/imported/weapon_m4.png-65e242f0af9504cbfc9c2b0d0780a9d7.ctex"
 metadata={
-"imported_formats": ["s3tc_bptc"],
-"vram_texture": true
-}
-generator_parameters={
-"md5": "81b63b66dc8859e364941f6e841084c3"
+"vram_texture": false
 }
 
 [deps]
 
-source_file="res://models/objects/enviroments/08/08_divider_black_high_half_dividers.jpg"
-dest_files=["res://.godot/imported/08_divider_black_high_half_dividers.jpg-6d4f015d8712dc98fafe79723474bb54.s3tc.ctex"]
+source_file="res://assets/interface/icon/weapon_m4.png"
+dest_files=["res://.godot/imported/weapon_m4.png-65e242f0af9504cbfc9c2b0d0780a9d7.ctex"]
 
 [params]
 
-compress/mode=2
+compress/mode=0
 compress/high_quality=false
 compress/lossy_quality=0.7
 compress/uastc_level=0

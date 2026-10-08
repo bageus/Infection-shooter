@@ -19,6 +19,8 @@ func setup(stage: Node3D, player: Node3D, infection: Node) -> void:
 	add_child(key)
 	key.global_position = Vector3(20, 0.25, 15)
 	spawn_weapon(3, Vector3(-20, 0.25, -15))
+	for entry in [[4, Vector3(-18, 0.25, -12)], [5, Vector3(-15, 0.25, -12)], [6, Vector3(-12, 0.25, -12)], [7, Vector3(-9, 0.25, -12)]]:
+		spawn_weapon(entry[0], entry[1])
 	var dna := TEST_DNA.new()
 	dna.name = "RespawningTestDNA"
 	dna.position = Vector3(-17.5, 0.5, -15)
@@ -34,11 +36,11 @@ func _process(delta: float) -> void:
 
 
 func spawn_weapon(index: int, world_position: Vector3) -> bool:
-	if index < 0 or index > 3:
+	if index < 0 or index > 7:
 		return false
 	var item := WEAPON.new()
 	item.weapon_index = index
-	item.name = "DroppedLauncher" if index == 3 else "DroppedWeapon"
+	item.name = ["DroppedPistol", "DroppedUzi", "DroppedShotgun", "DroppedLauncher", "DroppedAK", "DroppedM4", "DroppedSniper", "DroppedMinigun"][index]
 	add_child(item)
 	item.global_position = Vector3(world_position.x, 0.25, world_position.z)
 	item.set("_base_position", item.global_position)

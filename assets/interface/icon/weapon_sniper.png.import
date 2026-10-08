@@ -2,24 +2,20 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://mu7as2xctwtd"
-path.s3tc="res://.godot/imported/08_divider_black_low_dividers.jpg-75159d287c7417a4503aad11c99ae209.s3tc.ctex"
+uid="uid://mktdfw0b1tfm"
+path="res://.godot/imported/weapon_sniper.png-69405a917629f93c631a0cb8e4839cd7.ctex"
 metadata={
-"imported_formats": ["s3tc_bptc"],
-"vram_texture": true
-}
-generator_parameters={
-"md5": "81b63b66dc8859e364941f6e841084c3"
+"vram_texture": false
 }
 
 [deps]
 
-source_file="res://models/objects/enviroments/08/08_divider_black_low_dividers.jpg"
-dest_files=["res://.godot/imported/08_divider_black_low_dividers.jpg-75159d287c7417a4503aad11c99ae209.s3tc.ctex"]
+source_file="res://assets/interface/icon/weapon_sniper.png"
+dest_files=["res://.godot/imported/weapon_sniper.png-69405a917629f93c631a0cb8e4839cd7.ctex"]
 
 [params]
 
-compress/mode=2
+compress/mode=0
 compress/high_quality=false
 compress/lossy_quality=0.7
 compress/uastc_level=0
