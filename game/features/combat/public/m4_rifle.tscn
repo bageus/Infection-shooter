@@ -1,0 +1,29 @@
+[gd_scene load_steps=5 format=3]
+[ext_resource type="Script" path="res://game/features/combat/prototype_rifle.gd" id="script"]
+[ext_resource type="PackedScene" path="res://game/features/combat/public/prototype_bullet.tscn" id="bullet"]
+[ext_resource type="PackedScene" path="res://models/objects/weapons/m4_rifle_lowpoly.glb" id="model"]
+[ext_resource type="PackedScene" path="res://models/objects/enviroments/12/12_rifle_casing.glb" id="casing"]
+[node name="M4Rifle" type="Node3D"]
+script = ExtResource("script")
+bullet_scene = ExtResource("bullet")
+casing_scene = ExtResource("casing")
+weapon_name = "M4"
+fire_mode = "auto"
+shots_per_second = 11.0
+magazine_size = 36
+starting_reserve_ammo = 144
+max_reserve_ammo = 360
+reload_time = 1.5
+spread_degrees = 1.5
+bullet_damage = 23.0
+bullet_speed = 58.0
+bullet_range = 50.0
+casing_size_multiplier = 1.0
+camera_distance_bonus = 3.0
+scope_magnification = 0.0
+direct_reserve_feed = false
+align_authored_grip = true
+[node name="Body" parent="." instance=ExtResource("model")]
+[node name="Muzzle" type="Marker3D" parent="."]
+[node name="EjectionPort" type="Marker3D" parent="."]
+position = Vector3(0.15, -0.10, 0.07)

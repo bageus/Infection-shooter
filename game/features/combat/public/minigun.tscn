@@ -1,0 +1,29 @@
+[gd_scene load_steps=5 format=3]
+[ext_resource type="Script" path="res://game/features/combat/prototype_rifle.gd" id="script"]
+[ext_resource type="PackedScene" path="res://game/features/combat/public/prototype_bullet.tscn" id="bullet"]
+[ext_resource type="PackedScene" path="res://models/objects/weapons/aviation_minigun_lowpoly.glb" id="model"]
+[ext_resource type="PackedScene" path="res://models/objects/enviroments/12/12_rifle_casing.glb" id="casing"]
+[node name="Minigun" type="Node3D"]
+script = ExtResource("script")
+bullet_scene = ExtResource("bullet")
+casing_scene = ExtResource("casing")
+weapon_name = "MINIGUN"
+fire_mode = "auto"
+shots_per_second = 24.0
+magazine_size = 0
+starting_reserve_ammo = 400
+max_reserve_ammo = 400
+reload_time = 0.0
+spread_degrees = 2.0
+bullet_damage = 20.0
+bullet_speed = 60.0
+bullet_range = 50.0
+casing_size_multiplier = 1.15
+camera_distance_bonus = 3.0
+scope_magnification = 0.0
+direct_reserve_feed = true
+align_authored_grip = true
+[node name="Body" parent="." instance=ExtResource("model")]
+[node name="Muzzle" type="Marker3D" parent="."]
+[node name="EjectionPort" type="Marker3D" parent="."]
+position = Vector3(0.15, -0.10, 0.07)

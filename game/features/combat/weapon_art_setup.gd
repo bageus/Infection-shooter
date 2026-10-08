@@ -7,6 +7,12 @@ static func configure(weapon: Node3D, model: Node3D, two_handed: bool) -> Node3D
 		push_error("%s: authored WeaponRoot missing" % weapon.name)
 		return null
 	normalize_model(model, authored_root)
+	if bool(weapon.get("align_authored_grip")):
+		var grip := find_marker(authored_root, "Grip_R")
+		if grip != null:
+			# New kit has +Y up; the existing hand socket expects -Y up.
+			var turn := Basis(Vector3.RIGHT, PI)
+			model.transform = Transform3D(turn, -(turn * relative_transform(authored_root, grip).origin)) * model.transform
 	for required in ["Grip_R", "Muzzle"]:
 		if find_marker(authored_root, required) == null:
 			push_error("%s: authored %s missing" % [weapon.name, required])

@@ -4,7 +4,7 @@ const ART := preload("res://game/features/combat/public/launcher_visual.gd")
 const BADGE := preload("res://game/core/world_badge/public/world_badge.gd")
 const ACTION := "pickup_weapon"
 
-@export_range(0, 3) var weapon_index := 3
+@export_range(0, 7) var weapon_index := 3
 var _base_position := Vector3.ZERO
 var _time := 0.0
 var _hint: Node3D

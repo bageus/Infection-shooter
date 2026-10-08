@@ -95,6 +95,7 @@ func _configure_icon_regions() -> void:
 		_weapon_icons.append(icons[cell] if cell >= 0 and cell < icons.size() else null)
 	if _weapon_icons.size() < 4 or _weapon_icons[3] == null:
 		push_warning("Weapon atlas: launcher cell unavailable; check weapon_icon_cells reading order.")
+	_weapon_icons.append_array([preload("res://assets/interface/icon/weapon_ak.png"), preload("res://assets/interface/icon/weapon_m4.png"), preload("res://assets/interface/icon/weapon_sniper.png"), preload("res://assets/interface/icon/weapon_minigun.png")])
 	_refresh_slot_icons()
 	if antidote_icon_cell >= 0 and antidote_icon_cell < icons.size():
 		antidote_icon.texture = icons[antidote_icon_cell]
@@ -191,7 +192,7 @@ func _update_weapon() -> void:
 	weapon_icon.tooltip_text = weapon.call("get_weapon_name").to_upper()
 
 	magazine.text = str(magazine_ammo)
-	reserve.text = "/ %d" % reserve_ammo
+	reserve.text = "TOTAL" if bool(weapon.get("direct_reserve_feed")) else "/ %d" % reserve_ammo
 	_update_reload_message(reloading, empty, reserve_ammo)
 	_update_weapon_warning(empty)
 	_update_weapon_slots(empty)

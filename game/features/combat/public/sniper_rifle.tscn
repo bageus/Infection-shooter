@@ -1,0 +1,29 @@
+[gd_scene load_steps=5 format=3]
+[ext_resource type="Script" path="res://game/features/combat/prototype_rifle.gd" id="script"]
+[ext_resource type="PackedScene" path="res://game/features/combat/public/prototype_bullet.tscn" id="bullet"]
+[ext_resource type="PackedScene" path="res://models/objects/weapons/sniper_rifle_lowpoly.glb" id="model"]
+[ext_resource type="PackedScene" path="res://models/objects/enviroments/12/12_rifle_casing.glb" id="casing"]
+[node name="SniperRifle" type="Node3D"]
+script = ExtResource("script")
+bullet_scene = ExtResource("bullet")
+casing_scene = ExtResource("casing")
+weapon_name = "SNIPER RIFLE"
+fire_mode = "semi"
+shots_per_second = 0.8
+magazine_size = 4
+starting_reserve_ammo = 24
+max_reserve_ammo = 80
+reload_time = 2.2
+spread_degrees = 0.15
+bullet_damage = 105.0
+bullet_speed = 100.0
+bullet_range = 90.0
+casing_size_multiplier = 1.15
+camera_distance_bonus = 8.0
+scope_magnification = 2.5
+direct_reserve_feed = false
+align_authored_grip = true
+[node name="Body" parent="." instance=ExtResource("model")]
+[node name="Muzzle" type="Marker3D" parent="."]
+[node name="EjectionPort" type="Marker3D" parent="."]
+position = Vector3(0.15, -0.10, 0.07)

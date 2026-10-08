@@ -10,6 +10,12 @@ static func distance_multiplier(weapon: String, distance: float, max_range: floa
 	elif weapon == "UZI":
 		full_damage_distance = 3.0
 		minimum = 0.2
+	elif weapon == "SNIPER RIFLE":
+		full_damage_distance = 55.0
+		minimum = 0.72
+	elif weapon in ["AK", "M4", "MINIGUN"]:
+		full_damage_distance = 16.0
+		minimum = 0.35
 	var fraction := clampf((distance - full_damage_distance) / maxf(max_range - full_damage_distance, 0.01), 0.0, 1.0)
 	# Damage begins to decay just beyond the effective range and reaches its
 	# weapon-specific minimum at the projectile's maximum travel distance.
@@ -21,6 +27,10 @@ static func projectile_energy(weapon: String) -> float:
 		"PISTOL": return 19.0
 		"UZI": return 38.0
 		"SHOTGUN": return 32.0
+		"AK": return 65.0
+		"M4": return 58.0
+		"SNIPER RIFLE": return 110.0
+		"MINIGUN": return 70.0
 	return 24.0
 
 

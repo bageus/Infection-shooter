@@ -83,3 +83,8 @@ python scripts/render_weapon_preview.py --models /path/to/new_output/models --ou
 ```
 
 Скрипт проверки Godot содержит абсолютный путь к проверенной сборке; измените `folder` перед запуском на другом компьютере. Изменения в main-проект этим комплектом автоматически не вносятся.
+
+
+## Интеграция в игру 08.10.2026
+
+Рабочие модели находятся непосредственно в weapons/; встроенные URI указывают на textures/. Подкаталог models/ сохраняет исходный pack с .gdignore. Pistol имеет прежнее имя pistol_lowpoly.glb. Активные игровые сцены — public/ak_rifle.tscn, m4_rifle.tscn, sniper_rifle.tscn, minigun.tscn в features.combat. Реальный хват, рюкзак, camera/scope и QA описаны в docs/adr/0038-rifle-kit-and-sniper-view.md.

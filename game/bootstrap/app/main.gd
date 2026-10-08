@@ -53,6 +53,7 @@ func _ready() -> void:
 	pause_menu.hide()
 	planning_ui.hide()
 	_setup_world_bindings()
+	$Crosshair.call("configure", player)
 	mutation_choice.hide()
 	mutation_choice.process_mode = Node.PROCESS_MODE_ALWAYS
 	infection_runtime.ability_choice_requested.connect(_on_mutation_choice_requested)
