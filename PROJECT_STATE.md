@@ -6,8 +6,12 @@ current_milestone: P1_LOGIC
 active_task_id: T002
 last_completed_task_id: DISC-001
 build_status: T002_HEADLESS_VALIDATED_VISUAL_PENDING
-updated: 2026-10-09
+updated: 2026-10-10
 ---
+
+10.10.2026 (оптимизация, этап 1): внутренний кэш body_part_mesh отделён в body_mesh_cache: authored asset path + SHA256 привязок скелета, runtime identity для безымянных generated meshes, LRU до 16 entries и 64 МиБ учтённой геометрии; материалы/текстуры и накладные расходы renderer в этот бюджет не входят. Eviction сохраняет data/mesh у живых consumers. Cache unit tests проверяют повторную загрузку новых source IDs, разные bone mappings, LRU, count/byte limits, replacement и oversized result; headless/native PASS. Enemy LOD 17 levels, dismemberment, corpse physics и topology PASS; полная текущая authored карта с тремя restart PASS, cache entry count постоянен. Для актуальной карты startup test вычисляет число записей из BASE; удалены только четыре redundant private script overrides в инстансах public infected scene, размещение/настройки сохранены. Аудит source GLB: 240 active models, 39 rework candidates, репродуцируемый tools/audit_destruction_meshes.py и docs/qa/destruction_model_rework.md/json; 5 unit tests PASS. Результаты относятся к публичным исходникам, не данным устройства владельца. Existing spawn_stage cap 32 и glass cap 12 сохранены; размер стадии не равен числу одновременно spawned physics bodies. Public API/DTO/owners/dependencies прежние; архитектурных исключений нет. Следующее действие: этап 2 — ленивое создание стадий разрушения, начиная с частых chairs группы 06; затем blood preparation/cache, display/glass atlases и индекс workstation attachments.
+
+
 
 09.10.2026 (image(7), повторный вылет): скриншот содержит только INTEGER_DIVISION body_part_mesh.gd:88, без crash stack. Целочисленное деление LOD buffer намеренное; добавлен локальный warning_ignore с объяснением. На main b732dd7 чистый Godot 4.7.2 import, enemy LOD 17 levels, project/resource/import gates PASS. Native Compatibility full map + restart + 180 frames: 1034 objects / 403 furniture, 0 failures; allocator peak 442,8 МиБ, Linux RSS 1676,7 МиБ, video monitor 802,7 МиБ. Windows crash не воспроизведён и исправленным не объявляется. Архитектурных изменений нет. Следующее действие: получить godot.log непосредственно после вылета на Windows; проверить, что запущена актуальная версия в Compatibility.
 

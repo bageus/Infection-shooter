@@ -8,8 +8,9 @@ extends RefCounted
 
 const WOUND_SHADER := preload("res://game/features/infected/body_wound.gdshader")
 const TOPOLOGY := preload("res://game/features/infected/body_part_topology.gd")
+const CACHE := preload("res://game/features/infected/body_mesh_cache.gd")
 
-static var _cache: Dictionary = {}
+static var _cache := CACHE.new()
 
 
 # Returns {mesh, surfaces:[{vertices, normals, tangents, uvs, bones, weights,
@@ -18,16 +19,14 @@ static func prepare(mesh_instance: MeshInstance3D, skeleton: Skeleton3D) -> Dict
 	var source := mesh_instance.mesh as ArrayMesh
 	if source == null:
 		return {}
-	var key := source.get_instance_id()
-	if source.has_meta("body_part_source"):
-		key = int(source.get_meta("body_part_source"))
-	if _cache.has(key):
-		var cached: Dictionary = _cache[key]
+	var bind_bones := _bind_bones(mesh_instance, skeleton)
+	var key := _cache.key(source, bind_bones)
+	var cached: Dictionary = _cache.get_data(key)
+	if not cached.is_empty():
 		mesh_instance.mesh = cached.mesh
 		return cached
-	var bind_bones := _bind_bones(mesh_instance, skeleton)
 	var converted := ArrayMesh.new()
-	converted.set_meta("body_part_source", key)
+	converted.set_meta("body_part_source", _cache.source_identity(source))
 	var surfaces: Array = []
 	for surface in source.get_surface_count():
 		var arrays := source.surface_get_arrays(surface)
@@ -72,7 +71,7 @@ static func prepare(mesh_instance: MeshInstance3D, skeleton: Skeleton3D) -> Dict
 		if int(entry.bone) >= 0:
 			binds[int(entry.bone)] = entry.pose
 	var data := {"mesh": converted, "surfaces": surfaces, "binds": binds, "bone_stats": {}}
-	_cache[key] = data
+	_cache.put(key, data)
 	mesh_instance.mesh = converted
 	return data
 

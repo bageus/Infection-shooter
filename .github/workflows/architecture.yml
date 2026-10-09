@@ -32,5 +32,6 @@ jobs:
           python tools/build_display_surfaces.py --check
           python tools/check_model_textures.py
           python tools/test_model_textures.py
+          python tools/test_destruction_mesh_audit.py
           python tools/test_workstation_templates.py
           python tools/test_architecture_scene_access.py

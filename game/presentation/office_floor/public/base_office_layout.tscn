@@ -31,7 +31,6 @@
 [ext_resource type="PackedScene" path="res://game/presentation/office_floor/public/structural/glass_partition_half.tscn" id="29_lw7rm"]
 [ext_resource type="PackedScene" path="res://game/presentation/office_floor/public/structural/column.tscn" id="30_rhgew"]
 [ext_resource type="PackedScene" path="res://game/features/infected/public/infected_revenant.tscn" id="31_50y8m"]
-[ext_resource type="Script" path="res://game/features/infected/infected_capsule.gd" id="32_qj577"]
 
 [node name="BaseOfficeLayout" type="Node3D" unique_id=841551716]
 
@@ -9201,7 +9200,6 @@ collision_layer = 2
 collision_mask = 3
 floor_stop_on_slope = false
 safe_margin = 0.02
-script = ExtResource("32_qj577")
 max_health = 75.0
 move_speed = 4.6
 attack_range = 1.25
@@ -9217,7 +9215,6 @@ collision_layer = 2
 collision_mask = 3
 floor_stop_on_slope = false
 safe_margin = 0.02
-script = ExtResource("32_qj577")
 max_health = 75.0
 move_speed = 4.6
 attack_range = 1.25
@@ -9233,7 +9230,6 @@ collision_layer = 2
 collision_mask = 3
 floor_stop_on_slope = false
 safe_margin = 0.02
-script = ExtResource("32_qj577")
 max_health = 75.0
 move_speed = 4.6
 attack_range = 1.25
@@ -9249,7 +9245,6 @@ collision_layer = 2
 collision_mask = 3
 floor_stop_on_slope = false
 safe_margin = 0.02
-script = ExtResource("32_qj577")
 max_health = 75.0
 move_speed = 4.6
 attack_range = 1.25
