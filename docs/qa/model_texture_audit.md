@@ -1,10 +1,10 @@
 # Аудит текстур моделей
 
-Дата: 09.10.2026. Проверено 258 активных моделей; 162 используют текстуры. Обновлены 15 GLB группы 03: все поверхности имеют встроенные base-color/normal/ORM изображения и UV. Все модели доступны через автоматически собираемую палитру группы 03; 03_file_cabinet_small_with_shelfs уже размещён на карте дважды. Старые изображения и удалённые кресла не возвращаются.
+Дата: 09.10.2026. Проверено 257 активных моделей; 161 используют текстуры. Обновлены 15 GLB группы 03: все поверхности имеют встроенные base-color/normal/ORM изображения и UV. Все модели доступны через автоматически собираемую палитру группы 03; 03_file_cabinet_small_with_shelfs уже размещён на карте дважды. Старые изображения и удалённые кресла не возвращаются.
 
 У server_rack найдены 11 неиспользуемых мешей GLB: runtime-аудит проверяет только меши, достижимые из сцен, включая сцены разрушения. Таблица ниже описывает весь исходный mesh payload. У server_rack3 удалена старая однотонная замена повреждённых материалов, чтобы сохранялись авторские PBR-текстуры. В CI добавлена загрузка всех 15 моделей через игровой каталог и проверка visual/collision/textures; staged regression проверяет сохранение материалов после повреждения стойки.
 
-Локально project/resource/import gates и 11 Python tests PASS. Godot 4.7.2 в текущей среде аварийно завершается до импорта. На исходном main импорт, main/menu и два native renderer jobs прошли, но общий аудит упал; несколько cold-import jobs остановлены timeout 240 с. Лимит cold import увеличен до 600 с; assertions сохранены. Новая ревизия требует подтверждения CI. API, DTO, зависимости и архитектура прежние.
+Локально project/resource/import gates и 11 Python tests PASS. Godot 4.7.2 в текущей среде аварийно завершается до импорта. На исходном main импорт, main/menu и два native renderer jobs прошли, но общий аудит упал; несколько cold-import jobs остановлены timeout 240 с. Лимит cold import увеличен до 600 с; assertions сохранены. Новая ревизия требует подтверждения CI. API, DTO, зависимости и архитектура прежние. Учтено новое удаление military_crate в main 2bb8397b: ассет не восстановлен; strength-test использует существующий crate с прежней контрольной массой 32 кг.
 
 Источник: активные GLB текущего репозитория; папки с `.gdignore` исключены. Проверяются изображения, привязки материалов и UV. Наличие изображений само по себе не означает их использование.
 
@@ -94,7 +94,6 @@
 | `models/objects/enviroments/04/04_cardboard_boxes_1.glb` | 2 | 21/29 | 29/29 | baseColorTexture |
 | `models/objects/enviroments/04/04_crate_large_broken.glb` | 0 | 0/143 | 0/143 | Только материал/цвет |
 | `models/objects/enviroments/04/04_crate_small_broken.glb` | 0 | 0/135 | 0/135 | Только материал/цвет |
-| `models/objects/enviroments/04/04_military_crate.glb` | 12 | 4/4 | 4/4 | baseColorTexture, metallicRoughnessTexture, normalTexture |
 | `models/objects/enviroments/05/05_MFU_2_extra_trays_destructible.glb` | 0 | 0/15 | 0/15 | Только материал/цвет |
 | `models/objects/enviroments/05/05_MFU_destructible.glb` | 0 | 0/10 | 0/10 | Только материал/цвет |
 | `models/objects/enviroments/05/05_PC_destructible.glb` | 0 | 0/5 | 0/5 | Только материал/цвет |
