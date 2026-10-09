@@ -85,6 +85,8 @@ static func _surface_lods(source: ArrayMesh, surface: int) -> Dictionary:
 	for lod: Dictionary in stored.get("lods", []):
 		var bytes: PackedByteArray = lod.index_data
 		var indices := PackedInt32Array()
+		# Index buffers contain whole 16/32-bit entries; truncation is intentional.
+		@warning_ignore("integer_division")
 		indices.resize(bytes.size() / stride)
 		for index in indices.size():
 			indices[index] = bytes.decode_u16(index * stride) if stride == 2 else bytes.decode_u32(index * stride)

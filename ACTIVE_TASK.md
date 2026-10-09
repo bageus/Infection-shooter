@@ -7,6 +7,10 @@ owner: AI
 updated: 2026-10-09
 ---
 
+09.10.2026 (image(7), повторный вылет): скриншот содержит только INTEGER_DIVISION body_part_mesh.gd:88, без crash stack. Целочисленное деление LOD buffer намеренное; добавлен локальный warning_ignore с объяснением. На main b732dd7 чистый Godot 4.7.2 import, enemy LOD 17 levels, project/resource/import gates PASS. Native Compatibility full map + restart + 180 frames: 1034 objects / 403 furniture, 0 failures; allocator peak 442,8 МиБ, Linux RSS 1676,7 МиБ, video monitor 802,7 МиБ. Windows crash не воспроизведён и исправленным не объявляется. Архитектурных изменений нет. Следующее действие: получить godot.log непосредственно после вылета на Windows; проверить, что запущена актуальная версия в Compatibility.
+
+
+
 09.10.2026 (сбой Vulkan после PR #76, image(4)): main 2537eff3 уже содержит сжатие текстур. Скриншот показывает realloc/alloc null, Malformed smolv Fragment, shader cache load и free_rid render-thread errors; он не доказывает отдельную причину в GLB или шейдере. В project.godot отсутствовал desktop rendering_method и использовался Forward+ по умолчанию. Для обычного запуска закреплён gl_compatibility и соответствующий config/features; mobile override сохранён. Это обход RenderingDevice/Vulkan, а не доказательство исправления драйвера или всех причин OOM. Игровые сцены, PBR-ресурсы, public API, DTO, owners/dependencies прежние; архитектурных исключений нет. T002 IN_PROGRESS. Godot 4.7.2: editor import/project gates, default-renderer native full map + restart + 180 frames (0 failures; allocator 442,8 МиБ, RSS 1702,1 МиБ), shader warmup/global lighting PASS. Без ERROR/SCRIPT/SHADER ERROR. Точное следующее действие: обновить проект, полностью перезапустить Godot в Compatibility и проверить F5/start/restart на Windows. Детали docs/qa/startup_memory.md; Windows/Iris Xe и визуальные различия требуют приёмки владельцем.
 
 

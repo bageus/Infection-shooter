@@ -8,7 +8,7 @@ var _had_save := false
 var _save := PackedByteArray()
 const SAVE := "user://planned_layout.json"
 const BASE := "res://game/presentation/office_floor/public/base_office_map.json"
-const ALLOCATOR_LIMIT := 1280 * 1024 * 1024
+const ALLOCATOR_LIMIT := 896 * 1024 * 1024
 
 func _initialize() -> void:
 	root.size = Vector2i(320, 180)
@@ -53,7 +53,7 @@ func _run() -> void:
 	print("Full map peak video MiB: ", float(peak_video) / 1048576.0)
 	if DisplayServer.get_name() == "headless" and peak_memory > ALLOCATOR_LIMIT:
 		failures += 1
-		push_error("Startup resources exceeded the 1280 MiB allocator budget")
+		push_error("Startup resources exceeded the 896 MiB allocator budget")
 	_restore_save()
 	print("Full map startup/restart failures: ", failures)
 	quit(failures)

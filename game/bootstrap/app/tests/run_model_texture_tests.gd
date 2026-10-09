@@ -56,8 +56,8 @@ func _run() -> void:
 	_check_directory("res://models")
 	await _check_catalog_models()
 	await _check_column_variant()
-	if map_bytes > 192 * 1024 * 1024 or map_references <= shared_maps.size():
-		_fail("Updated model textures must share compressed resources within 192 MiB.")
+	if map_bytes > 48 * 1024 * 1024 or map_references <= shared_maps.size():
+		_fail("Updated model textures must share compressed resources within 48 MiB.")
 	print("Updated model maps: %d references, %d shared textures, %.1f MiB" %
 		[map_references, shared_maps.size(), float(map_bytes) / (1024 * 1024)])
 	print("Model texture tests: %d models, %d textured models, %d failures" % [models, textured_models, failures])
@@ -99,6 +99,8 @@ func _check_model(path: String) -> void:
 		_fail(path + ": cannot load imported model")
 		return
 	var instance := scene.instantiate()
+	if path.begins_with("res://models/objects/enviroments/"):
+		_check_runtime_profile(instance, path)
 	var found: Dictionary = {"base": 0, "normal": 0, "orm": 0}
 	_inspect(instance, found)
 	for slot: String in expected:
@@ -107,6 +109,21 @@ func _check_model(path: String) -> void:
 	models += 1
 	textured_models += int(int(found.base) + int(found.normal) + int(found.orm) > 0)
 	instance.free()
+
+
+func _check_runtime_profile(instance: Node, path: String) -> void:
+	for node: Node in instance.find_children("*", "MeshInstance3D", true, false):
+		var mesh := node as MeshInstance3D
+		for surface in mesh.mesh.get_surface_count():
+			var material := mesh.get_active_material(surface) as BaseMaterial3D
+			if material == null:
+				continue
+			for slot in BaseMaterial3D.TEXTURE_MAX:
+				var texture := material.get_texture(slot)
+				if texture == null or texture.resource_path.begins_with("res://models/objects/textures/"):
+					continue
+				if maxi(texture.get_width(), texture.get_height()) > 1024:
+					_fail("Runtime environment map exceeds 1024 pixels: " + path)
 
 func _source_mesh_indices(document: Dictionary) -> Dictionary:
 	var pending: Array = []
@@ -187,6 +204,8 @@ func _record_maps(material: BaseMaterial3D) -> void:
 		var path := texture.resource_path
 		if not texture is ImageTexture and not path.begins_with("res://models/objects/enviroments/"):
 			continue
+		if maxi(texture.get_width(), texture.get_height()) > 1024:
+			_fail("Runtime model map exceeds 1024 pixels: " + path)
 		if texture is ImageTexture and not path.begins_with("res://assets/runtime_shared_maps/"):
 			_fail("Updated embedded map was not shared: " + path)
 			continue
