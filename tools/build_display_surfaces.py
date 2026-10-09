@@ -1,4 +1,5 @@
 """Extract only planar screen faces from the authored staged GLBs (stdlib only)."""
+import argparse
 import hashlib
 import json
 import math
@@ -44,6 +45,9 @@ def extract(name, profile):
         return [struct.unpack_from(fmt, buffer, offset+i*stride) for i in range(a['count'])]
 
     stage, material, desired = profile
+    # Material ordering can change when an asset receives new PBR materials.
+    material = next((i for i, item in enumerate(gltf["materials"])
+                     if item.get("name") == "Dark_Display_Glass"), material)
     front = unit(desired)
     node = next(n for n in gltf['nodes'] if n.get('name') == stage)
     assert 'rotation' not in node and 'scale' not in node, 'Re-export requires profile review'
@@ -91,15 +95,28 @@ def extract(name, profile):
                                (dot(p, right)-min(xs))/width, 1-(dot(p, up)-min(ys))/height])
         screens.append({'center': center, 'right': right, 'up': up, 'normal': normal,
                         'size': [width, height], 'vertices': result})
+    if '_server_' in name and screens:
+        # The updated dual monitors also assign display glass to the supports.
+        # Both actual screens lie on the outermost forward-facing plane.
+        front_plane = max(dot(screen['center'], front) for screen in screens)
+        screens = [screen for screen in screens
+                   if abs(dot(screen['center'], front) - front_plane) < .00001]
     assert len(screens) == (2 if '_server_' in name else 1), name
     return {'source_sha256': hashlib.sha256(data).hexdigest(), 'screens': screens}
 
 
-def build():
+def build(check=False):
     profiles = {name + '.glb': extract(name, profile) for name, profile in PROFILES.items()}
-    OUTPUT.write_text(json.dumps({'version': 1, 'profiles': profiles}, indent=2) + '\n')
+    result = {'version': 1, 'profiles': profiles}
+    if check:
+        if json.loads(OUTPUT.read_text()) != result:
+            raise SystemExit('Display profiles are stale: run python tools/build_display_surfaces.py')
+    else:
+        OUTPUT.write_text(json.dumps(result, indent=2) + '\n')
     print('Screen profiles:', len(profiles))
 
 
 if __name__ == '__main__':
-    build()
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument("--check", action="store_true")
+    build(parser.parse_args().check)

@@ -1,10 +1,10 @@
 # Аудит текстур моделей
 
-Дата: 09.10.2026. Проверено 257 активных моделей; 161 используют текстуры. Обновлены 15 GLB группы 03: все поверхности имеют встроенные base-color/normal/ORM изображения и UV. Все модели доступны через автоматически собираемую палитру группы 03; 03_file_cabinet_small_with_shelfs уже размещён на карте дважды. Старые изображения и удалённые кресла не возвращаются.
+09.10.2026: проверены 24 обновлённые GLB группы 05. Все поверхности имеют встроенные base-color/normal/ORM, UV и валидные изображения: 103 payloads, 12 уникальных. Аудит всего проекта: 257 моделей / 184 с текстурами, ошибок нет. Палитра группы 05 автоматически подключает текущие имена; три переименованных телефона получают совместимые aliases для старых карт. Исходные GLB, карта и намеренно удалённые ассеты не изменены.
 
-У server_rack найдены 11 неиспользуемых мешей GLB: runtime-аудит проверяет только меши, достижимые из сцен, включая сцены разрушения. Таблица ниже описывает весь исходный mesh payload. У server_rack3 удалена старая однотонная замена повреждённых материалов, чтобы сохранялись авторские PBR-текстуры. В CI добавлена загрузка всех 15 моделей через игровой каталог и проверка visual/collision/textures; staged regression проверяет сохранение материалов после повреждения стойки.
+Пересобраны девять display profiles по новым SHA: физические screens полностью совпадают с прежними, generator теперь выбирает Dark_Display_Glass по имени и исключает опоры dual monitors по передней плоскости. --check в Architecture CI ловит устаревшие профили. Imported model CI дополнен проверкой всех 24 моделей через игровой каталог (visual/collision/textures) и aliases телефонов. Display suite перенесён из общего списка в отдельный ранний шаг runtime CI, assertions сохранены.
 
-Локально project/resource/import gates и 11 Python tests PASS. Godot 4.7.2 в текущей среде аварийно завершается до импорта. На исходном main импорт, main/menu и два native renderer jobs прошли, но общий аудит упал; несколько cold-import jobs остановлены timeout 240 с. Лимит cold import увеличен до 600 с; assertions сохранены. Новая ревизия требует подтверждения CI. API, DTO, зависимости и архитектура прежние. Учтено новое удаление military_crate в main 2bb8397b: ассет не восстановлен; strength-test использует существующий crate с прежней контрольной массой 32 кг.
+Локально project/resource/import gates, 11 Python tests, декодирование изображений, сравнение границ девяти экранов и generator --check PASS. Godot локально аварийно завершался до импорта; новый runtime проверяется CI. Предыдущий PR #72 слит; его полный Architecture/Mission CI f97d6bb PASS. API, DTO, владельцы состояния и зависимости прежние; архитектурных исключений нет.
 
 Источник: активные GLB текущего репозитория; папки с `.gdignore` исключены. Проверяются изображения, привязки материалов и UV. Наличие изображений само по себе не означает их использование.
 
@@ -94,31 +94,31 @@
 | `models/objects/enviroments/04/04_cardboard_boxes_1.glb` | 2 | 21/29 | 29/29 | baseColorTexture |
 | `models/objects/enviroments/04/04_crate_large_broken.glb` | 0 | 0/143 | 0/143 | Только материал/цвет |
 | `models/objects/enviroments/04/04_crate_small_broken.glb` | 0 | 0/135 | 0/135 | Только материал/цвет |
-| `models/objects/enviroments/05/05_MFU_2_extra_trays_destructible.glb` | 0 | 0/15 | 0/15 | Только материал/цвет |
-| `models/objects/enviroments/05/05_MFU_destructible.glb` | 0 | 0/10 | 0/10 | Только материал/цвет |
+| `models/objects/enviroments/05/05_MFU_2_extra_trays_destructible.glb` | 6 | 15/15 | 15/15 | baseColorTexture, metallicRoughnessTexture, normalTexture, occlusionTexture |
+| `models/objects/enviroments/05/05_MFU_destructible.glb` | 6 | 10/10 | 10/10 | baseColorTexture, metallicRoughnessTexture, normalTexture, occlusionTexture |
 | `models/objects/enviroments/05/05_PC_destructible.glb` | 0 | 0/5 | 0/5 | Только материал/цвет |
-| `models/objects/enviroments/05/05_aircondition_destructible.glb` | 0 | 0/6 | 6/6 | Только материал/цвет |
-| `models/objects/enviroments/05/05_computer_mouse.glb` | 0 | 0/1 | 0/1 | Только материал/цвет |
-| `models/objects/enviroments/05/05_computer_tower_destructible.glb` | 0 | 0/5 | 0/5 | Только материал/цвет |
-| `models/objects/enviroments/05/05_desk_phone.glb` | 0 | 0/3 | 0/3 | Только материал/цвет |
-| `models/objects/enviroments/05/05_keyboard.glb` | 2 | 2/2 | 2/2 | baseColorTexture |
-| `models/objects/enviroments/05/05_lamp.glb` | 0 | 0/3 | 3/3 | Только материал/цвет |
-| `models/objects/enviroments/05/05_laptop2_destructible.glb` | 0 | 0/5 | 5/5 | Только материал/цвет |
-| `models/objects/enviroments/05/05_laptop_close_destructible.glb` | 0 | 0/21 | 0/21 | Только материал/цвет |
-| `models/objects/enviroments/05/05_laptop_destructible.glb` | 0 | 0/21 | 0/21 | Только материал/цвет |
-| `models/objects/enviroments/05/05_minipc.glb` | 0 | 0/2 | 2/2 | Только материал/цвет |
-| `models/objects/enviroments/05/05_monitor2_destructible.glb` | 0 | 0/7 | 7/7 | Только материал/цвет |
-| `models/objects/enviroments/05/05_monitor3_server_destructible.glb` | 0 | 0/11 | 11/11 | Только материал/цвет |
-| `models/objects/enviroments/05/05_monitor4_server_destructible.glb` | 0 | 0/11 | 11/11 | Только материал/цвет |
-| `models/objects/enviroments/05/05_monitor_destructible.glb` | 0 | 0/9 | 9/9 | Только материал/цвет |
-| `models/objects/enviroments/05/05_monitor_wide_destructible.glb` | 0 | 0/9 | 9/9 | Только материал/цвет |
-| `models/objects/enviroments/05/05_printer_destructible.glb` | 0 | 0/20 | 20/20 | Только материал/цвет |
-| `models/objects/enviroments/05/05_wall_TV_destructible.glb` | 0 | 0/8 | 0/8 | Только материал/цвет |
-| `models/objects/enviroments/05/05_wall_TV_frameless_destructible.glb` | 0 | 0/5 | 0/5 | Только материал/цвет |
-| `models/objects/enviroments/05/05_wall_hand_dryer_improved.glb` | 0 | 0/5 | 0/5 | Только материал/цвет |
-| `models/objects/enviroments/05/09_phone_a_base.glb` | 0 | 0/1 | 1/1 | Только материал/цвет |
-| `models/objects/enviroments/05/09_phone_a_base_hang.glb` | 0 | 0/2 | 2/2 | Только материал/цвет |
-| `models/objects/enviroments/05/09_phone_b.glb` | 0 | 0/1 | 1/1 | Только материал/цвет |
+| `models/objects/enviroments/05/05_aircondition_destructible.glb` | 3 | 6/6 | 6/6 | baseColorTexture, metallicRoughnessTexture, normalTexture, occlusionTexture |
+| `models/objects/enviroments/05/05_computer_mouse.glb` | 3 | 1/1 | 1/1 | baseColorTexture, metallicRoughnessTexture, normalTexture, occlusionTexture |
+| `models/objects/enviroments/05/05_computer_tower_destructible.glb` | 6 | 5/5 | 5/5 | baseColorTexture, metallicRoughnessTexture, normalTexture, occlusionTexture |
+| `models/objects/enviroments/05/05_desk_phone.glb` | 4 | 5/5 | 5/5 | baseColorTexture, metallicRoughnessTexture, normalTexture, occlusionTexture |
+| `models/objects/enviroments/05/05_keyboard.glb` | 4 | 3/3 | 3/3 | baseColorTexture, metallicRoughnessTexture, normalTexture, occlusionTexture |
+| `models/objects/enviroments/05/05_lamp.glb` | 6 | 3/3 | 3/3 | baseColorTexture, metallicRoughnessTexture, normalTexture, occlusionTexture |
+| `models/objects/enviroments/05/05_laptop2_destructible.glb` | 3 | 6/6 | 6/6 | baseColorTexture, metallicRoughnessTexture, normalTexture, occlusionTexture |
+| `models/objects/enviroments/05/05_laptop_close_destructible.glb` | 6 | 21/21 | 21/21 | baseColorTexture, metallicRoughnessTexture, normalTexture, occlusionTexture |
+| `models/objects/enviroments/05/05_laptop_destructible.glb` | 6 | 21/21 | 21/21 | baseColorTexture, metallicRoughnessTexture, normalTexture, occlusionTexture |
+| `models/objects/enviroments/05/05_minipc.glb` | 6 | 2/2 | 2/2 | baseColorTexture, metallicRoughnessTexture, normalTexture, occlusionTexture |
+| `models/objects/enviroments/05/05_monitor2_destructible.glb` | 3 | 8/8 | 8/8 | baseColorTexture, metallicRoughnessTexture, normalTexture, occlusionTexture |
+| `models/objects/enviroments/05/05_monitor3_server_destructible.glb` | 3 | 11/11 | 11/11 | baseColorTexture, metallicRoughnessTexture, normalTexture, occlusionTexture |
+| `models/objects/enviroments/05/05_monitor4_server_destructible.glb` | 3 | 11/11 | 11/11 | baseColorTexture, metallicRoughnessTexture, normalTexture, occlusionTexture |
+| `models/objects/enviroments/05/05_monitor_destructible.glb` | 3 | 9/9 | 9/9 | baseColorTexture, metallicRoughnessTexture, normalTexture, occlusionTexture |
+| `models/objects/enviroments/05/05_monitor_wide_destructible.glb` | 3 | 9/9 | 9/9 | baseColorTexture, metallicRoughnessTexture, normalTexture, occlusionTexture |
+| `models/objects/enviroments/05/05_phone_a_base.glb` | 4 | 2/2 | 2/2 | baseColorTexture, metallicRoughnessTexture, normalTexture, occlusionTexture |
+| `models/objects/enviroments/05/05_phone_a_base_hang.glb` | 4 | 3/3 | 3/3 | baseColorTexture, metallicRoughnessTexture, normalTexture, occlusionTexture |
+| `models/objects/enviroments/05/05_phone_b.glb` | 3 | 1/1 | 1/1 | baseColorTexture, metallicRoughnessTexture, normalTexture, occlusionTexture |
+| `models/objects/enviroments/05/05_printer_destructible.glb` | 6 | 20/20 | 20/20 | baseColorTexture, metallicRoughnessTexture, normalTexture, occlusionTexture |
+| `models/objects/enviroments/05/05_wall_TV_destructible.glb` | 3 | 8/8 | 8/8 | baseColorTexture, metallicRoughnessTexture, normalTexture, occlusionTexture |
+| `models/objects/enviroments/05/05_wall_TV_frameless_destructible.glb` | 3 | 5/5 | 5/5 | baseColorTexture, metallicRoughnessTexture, normalTexture, occlusionTexture |
+| `models/objects/enviroments/05/05_wall_hand_dryer_improved.glb` | 6 | 5/5 | 5/5 | baseColorTexture, metallicRoughnessTexture, normalTexture, occlusionTexture |
 | `models/objects/enviroments/06/06_conference_chair.glb` | 12 | 99/99 | 99/99 | baseColorTexture, metallicRoughnessTexture, normalTexture, occlusionTexture |
 | `models/objects/enviroments/06/06_office_chair.glb` | 15 | 232/232 | 232/232 | baseColorTexture, metallicRoughnessTexture, normalTexture, occlusionTexture |
 | `models/objects/enviroments/06/06_office_chair_2.glb` | 15 | 254/254 | 254/254 | baseColorTexture, metallicRoughnessTexture, normalTexture, occlusionTexture |
