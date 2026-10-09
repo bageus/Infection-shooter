@@ -9,6 +9,9 @@ build_status: T002_HEADLESS_VALIDATED_VISUAL_PENDING
 updated: 2026-10-09
 ---
 
+09.10.2026 (PR #71, уточнение владельца): удаление устаревших ресурсов было намеренным. Удалены 17 возвращённых изображений и их .import; две beanbag GLB, их импорты и изображения с импортами. Четыре размещения кресел удалены и из base_office_map.json, и из base_office_layout.tscn; остальные записи карты побайтно сохранены, JSON дополнительно сравнен структурно. Ссылка на кресло удалена также из tools/capture_furniture_shadows.gd. Project gates, scene/resource/import checks и 11 Python tests PASS. Текущие GLB сохранены; 258 активных моделей, 149 с текстурами, статический аудит без ошибок. Предыдущие результаты runtime относятся к старой ревизии. Новых зависимостей, API/DTO/owners и архитектурных исключений нет. T002 IN_PROGRESS. Следующее точное действие: проверить CI обновлённого PR #71 перед слиянием; локально Godot отсутствует.
+
+
 09.10.2026 (PR #71, итог проверки): на d854adc Architecture, effects-smoke, weapon-rendering и planner-rendering в Compatibility/Forward+ PASS. Forward+ planner_extension: 0 failures, все physics/pose/aim assertions сохранены; occlusion: 0 failures. Полный общий runtime 4d627a0 PASS (37915383675), включая оба native renderer; повторный общий runtime d854adc ещё выполняется (37916693102). Полный локальный headless 68/68, дополнительный аудит 260 моделей, main 180 кадров, gates и Python tests PASS. PR #71 готов к ревью и не слит. PR #69 со светильниками тоже является предком main, light_view/defaults сохранены. API/DTO/owners/зависимости прежние, исключений нет. Точный следующий шаг: проверить окончательный общий CI PR #71 перед слиянием, затем ручная Windows/Web визуальная приёмка и FPS. T002 остаётся IN_PROGRESS общей приёмки MVP.
 
 

@@ -14,7 +14,6 @@ const MODELS := [
 	["res://models/objects/enviroments/06/06_conference_chair.glb", Vector3(0.6, 0, 1.2), PI],
 	["res://models/objects/enviroments/03/03_file_cabinet_smaller.glb", Vector3(3.2, 0, -1.4), 0.0],
 	["res://models/objects/enviroments/07/07_round_dining_table.glb", Vector3(-3.4, 0, -0.6), 0.0],
-	["res://models/objects/enviroments/10/10_beanbag_green.glb", Vector3(3.0, 0, 1.6), 0.0],
 	["res://models/objects/enviroments/09/09_trash_bin.glb", Vector3(-2.2, 0, 1.9), 0.0],
 ]
 

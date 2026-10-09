@@ -7043,42 +7043,6 @@ metadata/planning_object_id = ""
 metadata/planning_desk_id = ""
 metadata/planning_attachment = ""
 
-[node name="@RigidBody3D@31836" type="RigidBody3D" parent="." unique_id=689093052 instance=ExtResource("3_yfotv")]
-transform = Transform3D(-0.7071019, 0, -0.70711166, 0, 1, 0, 0.70711166, 0, -0.7071019, -11.250065, -0.09788688, 25.751213)
-script = ExtResource("4_c1db3")
-model_path = "res://models/objects/enviroments/10/10_beanbag_blue.glb"
-metadata/world_bound = true
-metadata/planning_object_id = ""
-metadata/planning_desk_id = ""
-metadata/planning_attachment = ""
-
-[node name="@RigidBody3D@31837" type="RigidBody3D" parent="." unique_id=529160175 instance=ExtResource("3_yfotv")]
-transform = Transform3D(-1.4742228e-06, 0, 1, 0, 1, 0, -1, 0, -1.4742228e-06, -13.749993, -0.09789156, 24.749994)
-script = ExtResource("4_c1db3")
-model_path = "res://models/objects/enviroments/10/10_beanbag_blue.glb"
-metadata/world_bound = true
-metadata/planning_object_id = ""
-metadata/planning_desk_id = ""
-metadata/planning_attachment = ""
-
-[node name="@RigidBody3D@31838" type="RigidBody3D" parent="." unique_id=348453001 instance=ExtResource("3_yfotv")]
-transform = Transform3D(0.9999997, 0, -0.0007546414, 0, 1, 0, 0.0007546414, 0, 0.9999997, -10.499936, -0.09788979, 23.748789)
-script = ExtResource("4_c1db3")
-model_path = "res://models/objects/enviroments/10/10_beanbag_green.glb"
-metadata/world_bound = true
-metadata/planning_object_id = ""
-metadata/planning_desk_id = ""
-metadata/planning_attachment = ""
-
-[node name="@RigidBody3D@31839" type="RigidBody3D" parent="." unique_id=468363030 instance=ExtResource("3_yfotv")]
-transform = Transform3D(1, 0, 6.461725e-07, 0, 1, 0, -6.461725e-07, 0, 1, -12.385979, -0.09789414, 22.499998)
-script = ExtResource("4_c1db3")
-model_path = "res://models/objects/enviroments/10/10_beanbag_green.glb"
-metadata/world_bound = true
-metadata/planning_object_id = ""
-metadata/planning_desk_id = ""
-metadata/planning_attachment = ""
-
 [node name="@RigidBody3D@31840" type="RigidBody3D" parent="." unique_id=1839137571 instance=ExtResource("3_yfotv")]
 transform = Transform3D(-1, 0, -4.2041115e-06, 0, 1, 0, 4.2041115e-06, 0, -1, -10.999998, -0.0027214435, 28.749992)
 script = ExtResource("4_c1db3")

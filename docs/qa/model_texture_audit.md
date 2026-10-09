@@ -1,12 +1,12 @@
 # Аудит текстур моделей
 
-Дата: 09.10.2026. Проверено 260 моделей; 149 используют текстуры. Все 33 сохранившиеся GLB, обновлённые после слияния PR #70, используют текстуры на каждой поверхности и имеют UV.
+Дата: 09.10.2026. Проверено 258 моделей; 149 используют текстуры. Все 33 сохранившиеся GLB, обновлённые после слияния PR #70, используют текстуры на каждой поверхности и имеют UV.
 
-PR #70 корректно слит: финальный коммит 81f0547 является предком main; merge 6ea56fb прошёл все три CI workflow. Восстановлены 17 изображений для оставшихся .import и две модели beanbag с ресурсами, на которые ссылается карта. Кресла-мешки — прежние ассеты, не новые модели.
+PR #70 корректно слит: финальный коммит 81f0547 является предком main; merge 6ea56fb прошёл все три CI workflow. По уточнению владельца удалены 17 устаревших `.import` и возвращённые в PR изображения. Удалённые владельцем кресла-мешки не восстанавливаются: две модели с ресурсами и все четыре размещения удалены из JSON-карты и сцены. Другие записи карты сохранены без изменений; актуальные GLB и их встроенные текстуры сохранены.
 
 Каталог планировщика автоматически подключает GLB групп 01–13 через ResourceLoader.list_directory; новые модели в этих группах не требуют ручных записей. Оружие из PR #70 подключено публичными сценами и pickup; new_weapon regression проверяет его оборудование.
 
-Наличие текстур проверено также после импорта Godot 4.7.2: runtime-тест 260 моделей сравнил импортированные карты albedo/normal/roughness с authored GLB; 0 failures. Внешний вид и FPS на Windows/Web требуют ручной приёмки.
+Предыдущая ревизия проверена после импорта Godot 4.7.2: runtime-тест 260 моделей сравнил импортированные карты albedo/normal/roughness с authored GLB; 0 failures. После удаления кресел статический аудит оставшихся 258 моделей: 149 используют текстуры, ошибок нет. Локально Godot отсутствует; импорт и runtime новой ревизии проверяются CI. Внешний вид и FPS на Windows/Web требуют ручной приёмки.
 
 Источник: активные GLB текущего репозитория; папки с `.gdignore` исключены. Проверяются изображения, привязки материалов и UV. Наличие изображений само по себе не означает их использование.
 
@@ -230,8 +230,6 @@ PR #70 корректно слит: финальный коммит 81f0547 яв
 | `models/objects/enviroments/09/09_white_board_big.glb` | 0 | 0/2 | 2/2 | Только материал/цвет |
 | `models/objects/enviroments/09/09_white_board_stand.glb` | 0 | 0/2 | 2/2 | Только материал/цвет |
 | `models/objects/enviroments/10/10_armchair_green_destructible.glb` | 6 | 181/181 | 181/181 | baseColorTexture, metallicRoughnessTexture, normalTexture, occlusionTexture |
-| `models/objects/enviroments/10/10_beanbag_blue.glb` | 0 | 0/1 | 1/1 | Только материал/цвет |
-| `models/objects/enviroments/10/10_beanbag_green.glb` | 0 | 0/1 | 1/1 | Только материал/цвет |
 | `models/objects/enviroments/10/10_couch_large_blue_destructible.glb` | 6 | 197/197 | 197/197 | baseColorTexture, metallicRoughnessTexture, normalTexture, occlusionTexture |
 | `models/objects/enviroments/10/10_couch_red_destructible.glb` | 6 | 189/189 | 189/189 | baseColorTexture, metallicRoughnessTexture, normalTexture, occlusionTexture |
 | `models/objects/enviroments/11/11_bamboo.glb` | 9 | 28/28 | 28/28 | baseColorTexture, metallicRoughnessTexture, normalTexture, occlusionTexture |
