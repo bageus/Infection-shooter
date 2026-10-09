@@ -1,12 +1,10 @@
 # Аудит текстур моделей
 
-Дата: 09.10.2026. Проверено 258 моделей; 149 используют текстуры. Все 33 сохранившиеся GLB, обновлённые после слияния PR #70, используют текстуры на каждой поверхности и имеют UV.
+Дата: 09.10.2026. Проверено 257 активных моделей; 161 используют текстуры. Обновлены 15 GLB группы 03: все поверхности имеют встроенные base-color/normal/ORM изображения и UV. Все модели доступны через автоматически собираемую палитру группы 03; 03_file_cabinet_small_with_shelfs уже размещён на карте дважды. Старые изображения и удалённые кресла не возвращаются.
 
-PR #70 корректно слит: финальный коммит 81f0547 является предком main; merge 6ea56fb прошёл все три CI workflow. По уточнению владельца удалены 17 устаревших `.import` и возвращённые в PR изображения. Удалённые владельцем кресла-мешки не восстанавливаются: две модели с ресурсами и все четыре размещения удалены из JSON-карты и сцены. Другие записи карты сохранены без изменений; актуальные GLB и их встроенные текстуры сохранены.
+У server_rack найдены 11 неиспользуемых мешей GLB: runtime-аудит проверяет только меши, достижимые из сцен, включая сцены разрушения. Таблица ниже описывает весь исходный mesh payload. У server_rack3 удалена старая однотонная замена повреждённых материалов, чтобы сохранялись авторские PBR-текстуры. В CI добавлена загрузка всех 15 моделей через игровой каталог и проверка visual/collision/textures; staged regression проверяет сохранение материалов после повреждения стойки.
 
-Каталог планировщика автоматически подключает GLB групп 01–13 через ResourceLoader.list_directory; новые модели в этих группах не требуют ручных записей. Оружие из PR #70 подключено публичными сценами и pickup; new_weapon regression проверяет его оборудование.
-
-Предыдущая ревизия проверена после импорта Godot 4.7.2: runtime-тест 260 моделей сравнил импортированные карты albedo/normal/roughness с authored GLB; 0 failures. После удаления кресел статический аудит оставшихся 258 моделей: 149 используют текстуры, ошибок нет. Локально Godot отсутствует; импорт и runtime новой ревизии проверяются CI. Внешний вид и FPS на Windows/Web требуют ручной приёмки.
+Локально project/resource/import gates и 11 Python tests PASS. Godot 4.7.2 в текущей среде аварийно завершается до импорта. На исходном main импорт, main/menu и два native renderer jobs прошли, но общий аудит упал; несколько cold-import jobs остановлены timeout 240 с. Лимит cold import увеличен до 600 с; assertions сохранены. Новая ревизия требует подтверждения CI. API, DTO, зависимости и архитектура прежние. Учтено новое удаление military_crate в main 2bb8397b: ассет не восстановлен; strength-test использует существующий crate с прежней контрольной массой 32 кг.
 
 Источник: активные GLB текущего репозитория; папки с `.gdignore` исключены. Проверяются изображения, привязки материалов и UV. Наличие изображений само по себе не означает их использование.
 
@@ -71,24 +69,24 @@ PR #70 корректно слит: финальный коммит 81f0547 яв
 | `models/objects/enviroments/02/02_vending_machine_fantas_dented.glb` | 7 | 28/28 | 28/28 | baseColorTexture, emissiveTexture, metallicRoughnessTexture, normalTexture, occlusionTexture |
 | `models/objects/enviroments/02/02_wall_urinal_improved.glb` | 6 | 7/7 | 7/7 | baseColorTexture, metallicRoughnessTexture, normalTexture, occlusionTexture |
 | `models/objects/enviroments/02/02_washing_machine_dented.glb` | 15 | 41/41 | 41/41 | baseColorTexture, metallicRoughnessTexture, normalTexture, occlusionTexture |
-| `models/objects/enviroments/02/02_water_cooler_bottle.glb` | 1 | 1/1 | 1/1 | baseColorTexture |
-| `models/objects/enviroments/02/02_water_cooler_bottle_attached_destructible.glb` | 1 | 18/20 | 20/20 | baseColorTexture |
-| `models/objects/enviroments/02/02_water_cooler_destructible.glb` | 1 | 16/18 | 18/18 | baseColorTexture |
-| `models/objects/enviroments/03/03_book_case.glb` | 0 | 0/25 | 0/25 | Только материал/цвет |
-| `models/objects/enviroments/03/03_book_case_small.glb` | 0 | 0/23 | 0/23 | Только материал/цвет |
-| `models/objects/enviroments/03/03_book_case_with_back.glb` | 0 | 0/27 | 0/27 | Только материал/цвет |
-| `models/objects/enviroments/03/03_book_case_with_back_small.glb` | 0 | 0/49 | 0/49 | Только материал/цвет |
-| `models/objects/enviroments/03/03_bookshelf.glb` | 0 | 0/44 | 0/44 | Только материал/цвет |
-| `models/objects/enviroments/03/03_box_1_metal_dented.glb` | 0 | 0/8 | 8/8 | Только материал/цвет |
-| `models/objects/enviroments/03/03_file_cabinet_large_shelf_fancy.glb` | 0 | 0/31 | 0/31 | Только материал/цвет |
-| `models/objects/enviroments/03/03_file_cabinet_largest.glb` | 0 | 0/145 | 0/145 | Только материал/цвет |
-| `models/objects/enviroments/03/03_file_cabinet_small_shelf_fancy.glb` | 0 | 0/29 | 0/29 | Только материал/цвет |
-| `models/objects/enviroments/03/03_file_cabinet_small_with_shelfs.glb` | 0 | 0/95 | 0/95 | Только материал/цвет |
-| `models/objects/enviroments/03/03_file_cabinet_smaller.glb` | 0 | 0/84 | 0/84 | Только материал/цвет |
-| `models/objects/enviroments/03/03_locker_tall_dented.glb` | 2 | 8/47 | 47/47 | baseColorTexture |
-| `models/objects/enviroments/03/03_server_rack.glb` | 4 | 111/122 | 111/122 | baseColorTexture, emissiveTexture, metallicRoughnessTexture, normalTexture, occlusionTexture |
-| `models/objects/enviroments/03/03_server_rack2.glb` | 0 | 0/101 | 101/101 | Только материал/цвет |
-| `models/objects/enviroments/03/03_server_rack3.glb` | 0 | 0/31 | 31/31 | Только материал/цвет |
+| `models/objects/enviroments/02/02_water_cooler_bottle.glb` | 6 | 2/2 | 2/2 | baseColorTexture, metallicRoughnessTexture, normalTexture, occlusionTexture |
+| `models/objects/enviroments/02/02_water_cooler_bottle_attached_destructible.glb` | 12 | 32/32 | 32/32 | baseColorTexture, metallicRoughnessTexture, normalTexture, occlusionTexture |
+| `models/objects/enviroments/02/02_water_cooler_destructible.glb` | 9 | 28/28 | 28/28 | baseColorTexture, metallicRoughnessTexture, normalTexture, occlusionTexture |
+| `models/objects/enviroments/03/03_book_case.glb` | 9 | 78/78 | 78/78 | baseColorTexture, metallicRoughnessTexture, normalTexture, occlusionTexture |
+| `models/objects/enviroments/03/03_book_case_small.glb` | 9 | 74/74 | 74/74 | baseColorTexture, metallicRoughnessTexture, normalTexture, occlusionTexture |
+| `models/objects/enviroments/03/03_book_case_with_back.glb` | 9 | 102/102 | 102/102 | baseColorTexture, metallicRoughnessTexture, normalTexture, occlusionTexture |
+| `models/objects/enviroments/03/03_book_case_with_back_small.glb` | 9 | 115/115 | 115/115 | baseColorTexture, metallicRoughnessTexture, normalTexture, occlusionTexture |
+| `models/objects/enviroments/03/03_bookshelf.glb` | 9 | 71/71 | 71/71 | baseColorTexture, metallicRoughnessTexture, normalTexture, occlusionTexture |
+| `models/objects/enviroments/03/03_box_1_metal_dented.glb` | 6 | 8/8 | 8/8 | baseColorTexture, metallicRoughnessTexture, normalTexture, occlusionTexture |
+| `models/objects/enviroments/03/03_file_cabinet_large_shelf_fancy.glb` | 9 | 69/69 | 69/69 | baseColorTexture, metallicRoughnessTexture, normalTexture, occlusionTexture |
+| `models/objects/enviroments/03/03_file_cabinet_largest.glb` | 9 | 331/331 | 331/331 | baseColorTexture, metallicRoughnessTexture, normalTexture, occlusionTexture |
+| `models/objects/enviroments/03/03_file_cabinet_small_shelf_fancy.glb` | 9 | 65/65 | 65/65 | baseColorTexture, metallicRoughnessTexture, normalTexture, occlusionTexture |
+| `models/objects/enviroments/03/03_file_cabinet_small_with_shelfs.glb` | 9 | 415/415 | 415/415 | baseColorTexture, metallicRoughnessTexture, normalTexture, occlusionTexture |
+| `models/objects/enviroments/03/03_file_cabinet_smaller.glb` | 9 | 200/200 | 200/200 | baseColorTexture, metallicRoughnessTexture, normalTexture, occlusionTexture |
+| `models/objects/enviroments/03/03_locker_tall_dented.glb` | 6 | 47/47 | 47/47 | baseColorTexture, metallicRoughnessTexture, normalTexture, occlusionTexture |
+| `models/objects/enviroments/03/03_server_rack.glb` | 7 | 122/122 | 122/122 | baseColorTexture, emissiveTexture, metallicRoughnessTexture, normalTexture, occlusionTexture |
+| `models/objects/enviroments/03/03_server_rack2.glb` | 10 | 158/158 | 158/158 | baseColorTexture, emissiveTexture, metallicRoughnessTexture, normalTexture, occlusionTexture |
+| `models/objects/enviroments/03/03_server_rack3.glb` | 10 | 43/43 | 43/43 | baseColorTexture, emissiveTexture, metallicRoughnessTexture, normalTexture, occlusionTexture |
 | `models/objects/enviroments/04/04_cardboard_archive_box.glb` | 2 | 39/52 | 52/52 | baseColorTexture |
 | `models/objects/enviroments/04/04_cardboard_box_closed.glb` | 2 | 23/36 | 36/36 | baseColorTexture |
 | `models/objects/enviroments/04/04_cardboard_box_open.glb` | 3 | 73/73 | 73/73 | baseColorTexture |
@@ -96,7 +94,6 @@ PR #70 корректно слит: финальный коммит 81f0547 яв
 | `models/objects/enviroments/04/04_cardboard_boxes_1.glb` | 2 | 21/29 | 29/29 | baseColorTexture |
 | `models/objects/enviroments/04/04_crate_large_broken.glb` | 0 | 0/143 | 0/143 | Только материал/цвет |
 | `models/objects/enviroments/04/04_crate_small_broken.glb` | 0 | 0/135 | 0/135 | Только материал/цвет |
-| `models/objects/enviroments/04/04_military_crate.glb` | 12 | 4/4 | 4/4 | baseColorTexture, metallicRoughnessTexture, normalTexture |
 | `models/objects/enviroments/05/05_MFU_2_extra_trays_destructible.glb` | 0 | 0/15 | 0/15 | Только материал/цвет |
 | `models/objects/enviroments/05/05_MFU_destructible.glb` | 0 | 0/10 | 0/10 | Только материал/цвет |
 | `models/objects/enviroments/05/05_PC_destructible.glb` | 0 | 0/5 | 0/5 | Только материал/цвет |

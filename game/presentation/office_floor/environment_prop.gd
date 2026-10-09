@@ -369,13 +369,7 @@ func _apply_damage(hit_position: Vector3, direction: Vector3) -> void:
 		if "server_rack" in model_path.get_file() or _is_facade_damage():
 			if _intact != null:
 				_intact.hide()
-			var rack_meshes: Array[MeshInstance3D] = DAMAGE.reveal_meshes(_stages[0])
-			if model_path.get_file() == "03_server_rack3.glb":
-				var dark_metal := StandardMaterial3D.new()
-				dark_metal.albedo_color = Color(0.055, 0.075, 0.09)
-				dark_metal.metallic = 0.55
-				for rack_mesh in rack_meshes:
-					rack_mesh.material_override = dark_metal
+			DAMAGE.reveal_meshes(_stages[0])
 			_stages[0].show()
 			_rebuild_shapes()
 			return
