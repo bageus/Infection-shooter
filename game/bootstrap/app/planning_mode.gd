@@ -46,7 +46,7 @@ var catalog = CATALOG.new()
 var storage = STORAGE.new()
 
 
-func setup(app_owner: Node3D, planning_root: Node3D, planning_ui: Control) -> void:
+func setup(app_owner: Node3D, planning_root: Node3D, planning_ui: Control, load_saved_layout: bool = true) -> void:
 	host = app_owner
 	root = planning_root
 	structure_root = host.get_node("Structure")
@@ -96,8 +96,9 @@ func setup(app_owner: Node3D, planning_root: Node3D, planning_ui: Control) -> vo
 	objects._register_actor_objects()
 	storage._ensure_maps_dir()
 	storage._refresh_map_list()
-	storage.load_layout()
-	preload("res://game/bootstrap/app/planning_physics.gd").resume(objects.placed)
+	if load_saved_layout:
+		storage.load_layout()
+		preload("res://game/bootstrap/app/planning_physics.gd").resume(objects.placed)
 
 
 func enter() -> void:

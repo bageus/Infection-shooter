@@ -1,5 +1,4 @@
 extends Node
-const LAYOUT_PROPERTIES := preload("res://game/bootstrap/app/planning_layout_properties.gd")
 const BLOOD_PLACEMENT := preload("res://game/bootstrap/app/planning_blood_placement.gd")
 
 
@@ -402,97 +401,9 @@ func _update_status() -> void:
 	]
 
 
-## Rebuilds the layout from saved data; returns {"loaded", "skipped", "missing"}.
+## Validate and stage the replacement before touching the current layout.
 func _apply_layout_data(data: Dictionary) -> Dictionary:
-	clear_layout(false, true)
-	# Undo entries refer to the previous layout's objects.
-	session.edit_history.set("stack", [])
-	var loaded := 0
-	var skipped := 0
-	var missing: Array[String] = []
-	var records: Array = data.get("objects", [])
-	var player_records: Array = []
-	for record_value: Variant in records:
-		if record_value is Dictionary:
-			var candidate: Dictionary = record_value
-			var candidate_path = str(candidate.get("scene", ""))
-			if candidate_path == "res://game/features/player/public/player.tscn":
-				player_records.append(candidate)
-	if not player_records.is_empty():
-		player_spawn_defined = true
-		var latest: Dictionary = player_records[player_records.size() - 1]
-		session.main_player.position = Vector3(float(latest.get("x",0.0)),float(latest.get("y",1.0)),float(latest.get("z",0.0)))
-		session.main_player.rotation_degrees.y = float(latest.get("rotation_y",0.0))
-		player_spawn_transform = session.main_player.transform
-	for record_value: Variant in records:
-		if not record_value is Dictionary:
-			continue
-		var record: Dictionary = record_value
-		var scene_path = catalog._migrate_scene_path(str(record.get("scene", "")))
-		if scene_path == "res://game/features/player/public/player.tscn":
-			continue
-		if scene_path.is_empty() or not ResourceLoader.exists(scene_path):
-			skipped += 1
-			missing.append(str(record.get("scene", "")))
-			continue
-		var node = catalog._instantiate_asset(scene_path)
-		if node == null:
-			skipped += 1
-			missing.append(scene_path)
-			continue
-		LAYOUT_PROPERTIES.restore(node, record)
-		var load_kind = "enemy" if scene_path in catalog.ENEMY_SCENES else ""
-		var target_parent = session.enemies_root if load_kind == "enemy" else session.root
-		target_parent.add_child(node)
-		node.position = Vector3(float(record.get("x",0.0)),float(record.get("y",0.0)),float(record.get("z",0.0)))
-		node.rotation_degrees = Vector3(float(record.get("rotation_x", 0)), float(record.get("rotation_y", 0)), float(record.get("rotation_z", 0)))
-		node.scale = Vector3(float(record.get("scale_x",1.0)),float(record.get("scale_y",1.0)),float(record.get("scale_z",1.0)))
-		if scene_path.get_file() == "06_conference_chair.glb":
-			_ground_conference_chair(node)
-		geometry._restore_floor_surface(node, scene_path)
-		node.set_meta("planning_scene_path", scene_path)
-		if record.has("desk_id"):
-			node.set_meta("planning_desk_id", str(record["desk_id"]))
-		if record.has("attachment"):
-			node.set_meta("planning_attachment", str(record["attachment"]))
-		if int(record.get("zone", -1)) >= 0:
-			node.set_meta("planning_zone", int(record["zone"]))
-		if node.has_method("configure_fixture"):
-			node.call("configure_fixture", str(record.get("fixture_shape", "point")), bool(record.get("fixture_visible_in_game", false)))
-			node.call("set_planning_visual", session.active)
-		if node.has_method("set_authored_energy"):
-			node.set("energy_multiplier", float(record.get("energy_multiplier", 0.65)))
-			node.call("set_authored_energy", float(record.get("light_energy", node.call("get_authored_energy"))))
-		if node.has_method("set_authored_color"):
-			var channels: Variant = record.get("light_color", [])
-			if channels is Array and channels.size() >= 3:
-				node.call("set_authored_color", Color(float(channels[0]), float(channels[1]), float(channels[2]), 1.0))
-		var saved_light_angle = float(record.get("light_angle", 48.0))
-		var saved_spot = node.find_child("Light", true, false) as SpotLight3D
-		if saved_spot != null:
-			saved_spot.spot_angle = saved_light_angle
-			node.set_meta("planning_light_angle", saved_light_angle)
-		if node.has_method("configure_flicker"):
-			node.call("configure_flicker", int(record.get("flicker_mode", 0)), float(record.get("flicker_step", 0.2)))
-		if node.get("darkness") != null:
-			node.set("darkness", float(record.get("darkness", 0.88)))
-			node.set("permanent", bool(record.get("permanent_darkness", true)))
-			if node.has_method("configure_zone"):
-				# The restored node scale already stretches the 4 m base zone.
-				node.call("configure_zone", Vector2(4.0, 4.0), node.get("darkness"), node.get("permanent"))
-		if load_kind == "enemy":
-			node.set_meta("planning_actor_kind", "enemy")
-			node.set_meta("planning_spawn_transform", node.transform)
-			node.global_position.y = float(record.get("y", 1.0))
-			if node.has_method("set_target"):
-				node.call("set_target", session.main_player)
-		placed.append(node)
-		loaded += 1
-	BLOOD_PLACEMENT.restore_attachments([session.root])
-	_update_status()
-	if controls != null:
-		controls.call("_update_history_buttons")
-	return {"loaded": loaded, "skipped": skipped, "missing": missing}
+	return preload("res://game/bootstrap/app/planning_layout_loader.gd").new(self).apply(data)
 
 
 func clear_layout(update_status: bool = true, immediate: bool = false) -> void:

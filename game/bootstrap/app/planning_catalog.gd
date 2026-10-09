@@ -175,7 +175,11 @@ func _create_asset(asset_path: String) -> Node3D:
 	var packed = load(asset_path) as PackedScene
 	if packed == null:
 		return null
-	return packed.instantiate() as Node3D
+	var instance := packed.instantiate()
+	if not instance is Node3D:
+		instance.free()
+		return null
+	return instance as Node3D
 
 
 func _migrate_scene_path(old_path: String) -> String:

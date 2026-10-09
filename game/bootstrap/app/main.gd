@@ -31,6 +31,8 @@ var world_bindings: RefCounted
 var mission_objects: Node3D
 var impact_pool: Node3D
 
+var defer_layout_loading := false
+var _mission_loading := false
 var _ended := false
 var _pause_open := false
 var planning_mode: Node
@@ -68,7 +70,7 @@ func _ready() -> void:
 	planning_mode = PlanningMode.new()
 	add_child(planning_mode)
 	planning_mode.process_mode = Node.PROCESS_MODE_ALWAYS
-	planning_mode.setup(self, planning_root, planning_ui)
+	planning_mode.setup(self, planning_root, planning_ui, not defer_layout_loading)
 	world_activation = WorldActivation.new()
 	world_activation.name = "WorldActivation"
 	add_child(world_activation)
@@ -239,6 +241,8 @@ func drop_weapon_pickup(index: int, world_position: Vector3) -> bool:
 
 
 func _on_menu_action(action: String) -> void:
+	if _mission_loading:
+		return
 	match action:
 		"resume":
 			_on_resume_pressed()
@@ -252,8 +256,13 @@ func _on_menu_action(action: String) -> void:
 
 
 func _on_restart_pressed() -> void:
-	get_tree().paused = false
-	get_tree().reload_current_scene()
+	if _mission_loading:
+		return
+	_mission_loading = true
+	var loader := preload("res://game/bootstrap/app/menu/mission_loader.gd").new()
+	add_child(loader)
+	loader.completed.connect(func(_success: bool) -> void: _mission_loading = false)
+	loader.start()
 
 
 func _setup_blood_effects() -> void:

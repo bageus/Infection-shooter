@@ -227,13 +227,23 @@ func _refresh_map_list(select_name: String = "") -> void:
 
 ## Loads a layout file; returns {"loaded", "skipped"} or {"error"}.
 func _load_layout_from_path(path: String) -> Dictionary:
-	var file = FileAccess.open(path, FileAccess.READ)
+	var read := _read_layout_file(path)
+	return read if read.has("error") else objects._apply_layout_data(read.data)
+
+
+func read_startup_layout() -> Dictionary:
+	var path := SAVE_PATH if FileAccess.file_exists(SAVE_PATH) else DEFAULT_MAP_PATH
+	return _read_layout_file(path)
+
+
+func _read_layout_file(path: String) -> Dictionary:
+	var file := FileAccess.open(path, FileAccess.READ)
 	if file == null:
-		return {"error": "cannot open (%d)" % FileAccess.get_open_error()}
+		return {"error": "cannot open map (%d)" % FileAccess.get_open_error()}
 	var data: Variant = JSON.parse_string(file.get_as_text())
 	if not data is Dictionary:
 		return {"error": "not a valid map file"}
-	return objects._apply_layout_data(data as Dictionary)
+	return {"data": data}
 
 
 static func _skipped_text(report: Dictionary) -> String:
