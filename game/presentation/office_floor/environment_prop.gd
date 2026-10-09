@@ -1,5 +1,8 @@
 extends RigidBody3D
-const SFX := preload("res://game/core/audio/public/sound_events.gd")
+## Scene boundary for prop physics, hit commands and authored display configuration.
+const GEOMETRY := preload("res://game/presentation/office_floor/environment_prop_geometry.gd")
+const BREAKUP := preload("res://game/presentation/office_floor/environment_prop_breakup.gd")
+var _geometry := GEOMETRY.new()
 const IMPACT_SOUND := preload("res://game/presentation/office_floor/impact_sound_watcher.gd")
 
 const CARPET_SHADOW := preload("res://game/presentation/office_floor/carpet_shadow.gd")
@@ -75,12 +78,25 @@ func _setup_display() -> void:
 	_display.call("setup", self, model_path, get_display_config(), _display_wall)
 
 
-var _visual: Node3D
-var _intact: Node3D
-var _stages: Array[Node3D] = []
-var _variants: Array[Node3D] = []
-var _shapes: Array[CollisionShape3D] = []
-var _shape_meshes: Array[MeshInstance3D] = []
+# Diagnostic and inherited views; geometry owns the collections.
+var _visual: Node3D:
+	get:
+		return _geometry.visual
+var _intact: Node3D:
+	get:
+		return _geometry.intact
+var _stages: Array[Node3D]:
+	get:
+		return _geometry.stages
+var _variants: Array[Node3D]:
+	get:
+		return _geometry.variants
+var _shapes: Array[CollisionShape3D]:
+	get:
+		return _geometry.shapes
+var _shape_meshes: Array[MeshInstance3D]:
+	get:
+		return _geometry.meshes
 # Read-only compatibility for existing diagnostic callers.
 var _broken: bool:
 	get:
@@ -108,34 +124,11 @@ func _ready() -> void:
 	var wall_mounted: bool = WALL_MOUNT.contains(model_path)
 	if wall_mounted:
 		set_meta("planning_wall_mount", true)
-	var packed := load(model_path) as PackedScene
-	if packed == null:
-		push_error("Environment model unavailable: " + model_path)
+	if not _geometry.load_visual(self, model_path):
 		return
-	var visual := packed.instantiate() as Node3D
-	if visual == null:
-		return
-	visual.name = "Visual"
-	if "wall_TV" in model_path.get_file():
-		# Authored televisions lie in XZ; wall placement expects a +Z front.
-		visual.rotation.x = PI / 2.0
-	add_child(visual)
-	_visual = visual
+	var visual := _visual
 	_reaction.setup(self, visual)
-	_discover_stages()
-	if model_path.get_file() == "06_conference_chair.glb":
-		# Only the baked chair may affect its initial height or collision.
-		for stage in _stages:
-			stage.hide()
-		for variant in _variants:
-			variant.hide()
-	_add_missing_bookcase_shelves()
-	# This GLB exports the complete table alongside a visible Primary debris group.
-	# Keep the authored intact root as the only initial mesh and collision source.
-	if model_path.get_file() == "07_table_square.glb":
-		var primary := DAMAGE.find_named(_visual, "Primary")
-		if primary != null:
-			primary.hide()
+	_geometry.prepare_stages(model_path)
 	_damage.configure(model_path.get_file(), _variants.size(), not _stages.is_empty())
 	# Architectural pieces and carpets stay anchored; all other groups are movable.
 	freeze = wall_mounted or model_path.begins_with("res://models/objects/enviroments/01/")
@@ -145,7 +138,7 @@ func _ready() -> void:
 		add_child(shadow)
 		shadow.configure(visual)
 		return # Carpet lies on the level floor and must not create a raised obstacle.
-	var volume := _add_shapes(visual)
+	var volume := _geometry.add_shapes(self, visual)
 	_setup_display()
 	SURFACE_DECOR.apply(visual, model_path, _display, display_seed)
 	if model_path.get_file() == "06_conference_chair.glb" and global_position.y < 0.25:
@@ -187,71 +180,12 @@ func _add_contact_shadow(wall_mounted: bool) -> void:
 		shadow.queue_free()
 
 
-func _add_shapes(node: Node) -> float:
-	var volume := 0.0
-	if node is MeshInstance3D:
-		var mesh := node as MeshInstance3D
-		if mesh.mesh != null and mesh.is_visible_in_tree() and absf(mesh.global_basis.determinant()) > 0.000000000001:
-			var box := BoxShape3D.new()
-			var bounds := mesh.get_aabb()
-			box.size = Vector3(maxf(bounds.size.x, 0.02), maxf(bounds.size.y, 0.02), maxf(bounds.size.z, 0.02))
-			var shape := CollisionShape3D.new()
-			shape.name = mesh.name
-			shape.shape = box
-			add_child(shape)
-			_shapes.append(shape)
-			_shape_meshes.append(mesh)
-			var local := global_transform.affine_inverse() * mesh.global_transform
-			shape.transform = local
-			shape.position += local.basis * bounds.get_center()
-			volume += box.size.x * box.size.y * box.size.z * absf(local.basis.determinant())
-	for child in node.get_children():
-		volume += _add_shapes(child)
-	return volume
-
-
-func _discover_stages() -> void:
-	_intact = DAMAGE.find_named(_visual, "Intact")
-	for name_part in ["Hit_01", "Dent_01", "Dent_02", "Dent_03", "Power_Off"]:
-		var variant: Node3D = DAMAGE.find_named(_visual, name_part)
-		if variant != null:
-			_variants.append(variant)
-	# Staged GLBs (addons/staged_glb_import) add LargeParts → Small/JaggedFragments,
-	# PlantDestroyed → PotFragments and the in-place DamageReady facade.
-	for name_part in ["Modular", "Door_Off", "LargeParts", "SmallFragments", "JaggedFragments", "PlantDestroyed", "PotFragments", "Broken_7", "Fragments", "Primary", "Panels", "Medium", "Fine", "TopSecondary", "DamageReady"]:
-		var stage: Node3D = DAMAGE.find_named(_visual, name_part)
-		if stage != null:
-			_stages.append(stage)
-
-
-func _add_missing_bookcase_shelves() -> void:
-	if model_path.get_file() not in ["03_book_case.glb", "03_book_case_with_back.glb"] or _intact == null:
-		return
-	var baked := _intact.find_child("Intact*", true, false) as MeshInstance3D
-	if baked == null:
-		return # Re-exported staged bookcases already contain their shelves.
-	var material: Material = baked.get_active_material(0)
-	if material == null:
-		var wood := StandardMaterial3D.new()
-		wood.albedo_color = Color(0.45, 0.27, 0.16)
-		material = wood
-	for shelf_height in [0.50, 0.95, 1.40, 1.85, 2.30]:
-		var shelf := MeshInstance3D.new()
-		shelf.name = "VisibleShelf"
-		var mesh := BoxMesh.new()
-		mesh.size = Vector3(1.94, 0.035, 0.46)
-		mesh.material = material
-		shelf.mesh = mesh
-		_intact.add_child(shelf)
-		shelf.position.y = shelf_height
-
-
 func take_projectile_hit_at_shape(damage: float, hit_position: Vector3, normal: Vector3, direction: Vector3, weapon: String, shape_index: int) -> bool:
 	if shape_index >= 0:
 		var owner_id := shape_find_owner(shape_index)
 		var collision := shape_owner_get_owner(owner_id) as CollisionShape3D
 		var mesh_index := _shapes.find(collision)
-		if mesh_index >= 0 and _is_glass_mesh(_shape_meshes[mesh_index]):
+		if mesh_index >= 0 and GEOMETRY.is_glass_mesh(_shape_meshes[mesh_index]):
 			call_deferred("_shatter_glass", hit_position, direction)
 			if weapon != "GRENADE":
 				return false
@@ -262,7 +196,7 @@ func get_projectile_material(shape_index: int = -1) -> String:
 	if shape_index >= 0:
 		var shape_owner := shape_owner_get_owner(shape_find_owner(shape_index)) as CollisionShape3D
 		var mesh_index := _shapes.find(shape_owner)
-		if mesh_index >= 0 and _is_glass_mesh(_shape_meshes[mesh_index]):
+		if mesh_index >= 0 and GEOMETRY.is_glass_mesh(_shape_meshes[mesh_index]):
 			return "glass"
 	var group := model_path.get_file().substr(0, 2)
 	if group == "01": return "concrete"
@@ -306,7 +240,8 @@ func take_projectile_hit(damage: float, hit_position: Vector3, _normal: Vector3,
 		PROP_DAMAGE.HitAction.SHUDDER:
 			_reaction.shudder(direction)
 		PROP_DAMAGE.HitAction.CHIP_FACADE:
-			_chip_facade(hit_position, direction)
+			if BREAKUP.chip_facade(self, _geometry, hit_position, direction):
+				_rebuild_shapes()
 		PROP_DAMAGE.HitAction.DETACH:
 			freeze = false
 			IMPACT_SOUND.wake(self)
@@ -379,138 +314,25 @@ func _apply_damage(hit_position: Vector3, direction: Vector3) -> void:
 			shape.set_deferred("disabled", true)
 		collision_layer = 0
 		freeze = true
-		_spawn_stage(0, "", hit_position, direction, _damage.full_break)
+		BREAKUP.spawn_stage(self, _geometry, 0, "", hit_position, direction, _damage.full_break)
 
 
-# Localized damage (reception counter): the core stays, facade chips break off.
 func _is_facade_damage() -> bool:
 	return not _stages.is_empty() and _stages[0].name == "DamageReady"
 
 
-func _chip_facade(hit_position: Vector3, direction: Vector3) -> void:
-	var nearest: MeshInstance3D
-	var nearest_distance := 0.8
-	for mesh in DAMAGE.reveal_meshes(_stages[0]):
-		if mesh.visible and mesh.name.begins_with("Facade_Chip"):
-			var distance := (mesh.global_transform * mesh.get_aabb()).get_center().distance_to(hit_position)
-			if distance < nearest_distance:
-				nearest = mesh
-				nearest_distance = distance
-	if nearest == null:
-		return
-	DAMAGE.spawn_piece(self, nearest, null, _stages.size(), 0, direction, hit_position)
-	nearest.hide()
-	_rebuild_shapes()
-
-
 func _rebuild_shapes() -> void:
 	_reaction.cancel()
-	for shape in _shapes:
-		shape.set_deferred("disabled", true)
-		shape.queue_free()
-	_shapes.clear()
-	_shape_meshes.clear()
-	_add_shapes(_visual)
-
-
-func _spawn_stage(stage_index: int, prefix: String, hit_position: Vector3, direction: Vector3, blast: bool = false) -> bool:
-	if stage_index >= _stages.size():
-		return false
-	var meshes: Array[MeshInstance3D] = DAMAGE.reveal_meshes(_stages[stage_index])
-	var spawned := 0
-	for mesh in meshes:
-		if not prefix.is_empty() and mesh.name != prefix and not mesh.name.begins_with(prefix + "_"):
-			continue
-		if spawned >= 32:
-			break
-		var body: RigidBody3D = DAMAGE.spawn_piece(self, mesh, self, stage_index, spawned, direction, hit_position, blast)
-		if body != null:
-			spawned += 1
-	return spawned > 0
+	_geometry.rebuild(self)
 
 
 func hit_environment_fragment(fragment: RigidBody3D, hit_position: Vector3, direction: Vector3) -> void:
-	var name_part: String = fragment.get("piece_name")
-	var next_stage: int = int(fragment.get("stage_index")) + 1
-	while next_stage < _stages.size():
-		if _spawn_stage(next_stage, name_part, hit_position, direction):
-			fragment.queue_free()
-			return
-		next_stage += 1
-	# A single-piece stage (a knocked-over plant pot) shatters into the whole next stage.
-	var stage_index := int(fragment.get("stage_index"))
-	if stage_index + 1 < _stages.size() and DAMAGE.reveal_meshes(_stages[stage_index]).size() == 1:
-		if _spawn_stage(stage_index + 1, "", hit_position, direction, true):
-			fragment.queue_free()
-			return
-	fragment.apply_central_impulse(direction.normalized() * 0.6)
+	BREAKUP.hit_fragment(self, _geometry, fragment, hit_position, direction)
 
 
 func _shatter_glass(hit_position: Vector3, direction: Vector3) -> void:
-	if not _damage.break_glass():
-		return
-	SFX.play(self, &"glass_break", hit_position)
-	var glass_bounds := AABB()
-	var found := false
-	for i in _shape_meshes.size():
-		var mesh := _shape_meshes[i]
-		if not is_instance_valid(mesh) or not _is_glass_mesh(mesh):
-			continue
-		var bounds: AABB = mesh.global_transform * mesh.get_aabb()
-		glass_bounds = bounds if not found else glass_bounds.merge(bounds)
-		found = true
-		if "glass" in mesh.name.to_lower() or "mirror" in mesh.name.to_lower() or mesh.mesh.get_surface_count() == 1:
-			mesh.hide()
-			_shapes[i].set_deferred("disabled", true)
-	if not found:
-		return
-	var shards: Node3D = DAMAGE.find_named(_visual, "Glass_Shards")
-	if shards != null:
-		# Vending machines keep their shard group below a hidden damage variant.
-		# Reveal its parents only while copying shard geometry.
-		var hidden_parents: Array[Node3D] = []
-		var ancestor := shards.get_parent() as Node3D
-		while ancestor != null and ancestor != _visual:
-			if ancestor.scale.length_squared() < 0.000001:
-				hidden_parents.append(ancestor)
-				ancestor.scale = Vector3.ONE
-			ancestor = ancestor.get_parent() as Node3D
-		var meshes: Array[MeshInstance3D] = DAMAGE.reveal_meshes(shards)
-		for index in mini(meshes.size(), 12):
-			DAMAGE.spawn_piece(self, meshes[index], self, _stages.size(), index, direction, hit_position)
-		for hidden in hidden_parents:
-			hidden.scale = Vector3.ZERO
-	else:
-		_spawn_fallback_glass(glass_bounds, hit_position, direction)
-
-
-func _is_glass_mesh(mesh: MeshInstance3D) -> bool:
-	if mesh == null or mesh.mesh == null:
-		return false
-	var lower := mesh.name.to_lower()
-	if "glass" in lower or "mirror" in lower:
-		return true
-	for surface in mesh.mesh.get_surface_count():
-		var material := mesh.get_active_material(surface)
-		if material != null and ("glass" in material.resource_name.to_lower() or "mirror" in material.resource_name.to_lower()):
-			return true
-	return false
-
-
-func _spawn_fallback_glass(bounds: AABB, hit_position: Vector3, direction: Vector3) -> void:
-	for i in 6:
-		var part := MeshInstance3D.new()
-		var box := BoxMesh.new()
-		box.size = Vector3(0.09, 0.12, 0.025)
-		var material := StandardMaterial3D.new()
-		material.albedo_color = Color(0.55, 0.84, 0.95, 0.7)
-		material.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
-		box.material = material
-		part.mesh = box
-		_visual.add_child(part)
-		part.global_position = bounds.position + Vector3(randf() * bounds.size.x, randf() * bounds.size.y, randf() * bounds.size.z)
-		DAMAGE.spawn_piece(self, part, null, _stages.size(), i, direction, hit_position)
-		part.queue_free()
+	if _damage.break_glass():
+		BREAKUP.shatter_glass(self, _geometry, hit_position, direction)
 
 
 # Light, low items stop blocking characters (layer 3) and are kicked aside by

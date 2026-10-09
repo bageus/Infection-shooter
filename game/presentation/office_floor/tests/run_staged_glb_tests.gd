@@ -28,6 +28,7 @@ func _run() -> void:
 	await _test_reception(stage)
 	await _test_power_off(stage)
 	await _test_rack_textures(stage)
+	await _test_instance_isolation(stage)
 	stage.queue_free()
 	await process_frame
 	print("Staged GLB tests: %d failure(s)." % failures)
@@ -135,6 +136,32 @@ func _test_rack_textures(stage: Node3D) -> void:
 		_expect((key[0] as MeshInstance3D).get_active_material(key[1]) == material,
 			"Damage preserves the updated rack's textured material.")
 	await _clear(prop, effects)
+
+
+func _test_instance_isolation(stage: Node3D) -> void:
+	var first := await _spawn(stage, CABINET, Vector3(0, 0, -10))
+	var second := await _spawn(stage, CABINET, Vector3(6, 0, -10))
+	var damaged: RigidBody3D = first[0]
+	var untouched: RigidBody3D = second[0]
+	var shapes: Array = untouched.get("_shapes").duplicate()
+	var meshes: Array = untouched.get("_shape_meshes").duplicate()
+	var intact := untouched.get_node("Visual/Intact") as Node3D
+	var parts := untouched.get_node("Visual/LargeParts") as Node3D
+	_expect(not shapes.is_empty() and shapes.size() == meshes.size(),
+		"Each prop exposes matching collider and mesh lists.")
+	for shape: CollisionShape3D in shapes:
+		_expect(shape.get_parent() == untouched and not damaged.get("_shapes").has(shape),
+			"Collision shapes belong to one prop instance only.")
+	await _break(damaged)
+	_expect(not bool(untouched.get("_broken")) and intact.visible and parts.scale == Vector3.ZERO,
+		"Breaking one prop leaves the other instance's geometry and durability intact.")
+	_expect(untouched.get("_shapes") == shapes and untouched.get("_shape_meshes") == meshes,
+		"Breaking one prop does not replace the other instance's collider mapping.")
+	for shape: CollisionShape3D in shapes:
+		_expect(is_instance_valid(shape) and not shape.disabled,
+			"The untouched prop's collision remains enabled.")
+	await _clear(damaged, first[1])
+	await _clear(untouched, second[1])
 
 
 func _spawn(stage: Node3D, path: String, position: Vector3) -> Array:
