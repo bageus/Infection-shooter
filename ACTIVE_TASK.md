@@ -7,6 +7,9 @@ owner: AI
 updated: 2026-10-09
 ---
 
+09.10.2026 (новые текстуры группы 05): 24 обновлённых GLB имеют base-color/normal/ORM и UV на всех поверхностях; 103 embedded images / 12 уникальных валидны. Аудит 257 моделей / 184 textured без ошибок. Исправлены extractor display surfaces после смены material indices и назначения glass на опоры double monitors; девять профилей пересобраны, экранная геометрия прежняя. Добавлены --check в CI, catalog tests 24 моделей и aliases трёх переименованных телефонов для старых карт. Display suite выделен в ранний шаг CI без изменения assertions. Локальные gates и 11 Python tests PASS; локальный Godot ранее segfault до импорта. API/DTO/owners/зависимости прежние, исключений нет. PR #72 слит, полный Architecture/Mission f97d6bb PASS. T002 IN_PROGRESS. Точный следующий шаг: подтвердить импорт, catalog и display CI новой ревизии перед слиянием.
+
+
 09.10.2026 (15 обновлённых GLB группы 03): встроенные base-color/normal/ORM и UV есть на всех поверхностях; все модели автоматически подключаются к палитре, шкаф small_with_shelfs размещён дважды. Статический аудит 257 моделей / 161 textured без ошибок, project/resource/import gates и 11 Python tests PASS. Исправлена однотонная material_override повреждённого server_rack3. Runtime-аудит считает только используемые сценами meshes (11 orphan meshes server_rack не отображаются); добавлены catalog visual/collision/textures checks всех 15 и regression повреждённой стойки. CI cold import 240 с давал timeout 124 без ошибок; увеличен до 600 с. Локальный Godot 4.7.2 segfault до запуска, новый runtime проверяется CI. API/DTO/owners/зависимости прежние, исключений нет. T002 IN_PROGRESS. Точный следующий шаг: проверить CI этой ревизии перед слиянием. Учтено новое удаление military_crate в main 2bb8397b: ассет не восстановлен; strength-test использует существующий crate с прежней контрольной массой 32 кг.
 
 
