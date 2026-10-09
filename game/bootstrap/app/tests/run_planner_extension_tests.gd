@@ -11,8 +11,10 @@ func _initialize() -> void:
 	call_deferred("_run")
 
 func _run() -> void:
-	# Bound software-GPU cost while retaining the full authored scene.
-	root.size = Vector2i(640, 360)
+	# Geometry/physics assertions retain the full authored scene. A small
+	# viewport bounds llvmpipe cost with the updated PBR models; no pixel
+	# assertions depend on resolution in this suite.
+	root.size = Vector2i(320, 180)
 	stage = MAIN.instantiate()
 	root.add_child(stage)
 	current_scene = stage
@@ -26,11 +28,15 @@ func _run() -> void:
 	var wall = catalog.call("_instantiate_asset", "res://models/objects/enviroments/13/13_wall_cafeteria.glb")
 	stage.add_child(wall)
 	_check(wall.get_meta("planning_wall_mount", false) and wall.freeze, "Group 13 stays attached to wall")
+	print("Planner extension: wall mounting @%d" % Time.get_ticks_msec())
 	_snap(catalog)
 	await _wall_drag(planner, catalog)
 	await _particles(catalog)
+	print("Planner extension: particles @%d" % Time.get_ticks_msec())
 	await _corpse()
+	print("Planner extension: corpse physics @%d" % Time.get_ticks_msec())
 	await _aim(player)
+	print("Planner extension: aim @%d" % Time.get_ticks_msec())
 	_installed_lamps(planner)
 	stage.queue_free()
 	await process_frame
