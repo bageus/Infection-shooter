@@ -118,6 +118,7 @@ func _environment_display_name(file_name: String) -> String:
 
 func _environment_scene_for(file_name: String) -> String:
 	var structural = {
+		"01_column_2.glb": "res://game/presentation/office_floor/public/structural/column_2.tscn",
 		"01_column.glb": "res://game/presentation/office_floor/public/structural/column.tscn", "01_elevator_cabin_freight.glb": "res://game/presentation/office_floor/public/structural/elevator_cabin_freight.tscn",
 		"01_elevator_cabin_passenger.glb": "res://game/presentation/office_floor/public/structural/elevator_cabin_passenger.tscn", "01_elevator_door.glb": "res://game/presentation/office_floor/public/structural/elevator_door.tscn",
 		"01_floor_pad.glb": "res://game/presentation/office_floor/public/structural/floor_pad.tscn", "01_wall_door.glb": "res://game/presentation/office_floor/public/structural/wall_door.tscn",
@@ -190,6 +191,8 @@ func _migrate_scene_path(old_path: String) -> String:
 		var filename := old_path.get_file().replace("01_glass_wall_full_breakable(1).glb", "01_glass_wall_full_breakable.glb")
 		var canonical := group_one + filename
 		if ResourceLoader.exists(canonical):
+			if filename == "01_column_2.glb":
+				return _environment_scene_for(filename)
 			return canonical
 	var replacements = {
 		"res://models/objects/enviroments/05/09_phone_a_base.glb": "res://models/objects/enviroments/05/05_phone_a_base.glb",

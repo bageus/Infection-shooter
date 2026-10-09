@@ -54,6 +54,7 @@ func _run() -> void:
 		_fail("Source audit must exclude meshes not attached to any scene.")
 	_check_directory("res://models")
 	await _check_catalog_models()
+	await _check_column_variant()
 	if map_bytes > 192 * 1024 * 1024 or map_references <= shared_maps.size():
 		_fail("Updated model textures must share compressed resources within 192 MiB.")
 	print("Updated model maps: %d references, %d shared textures, %.1f MiB" %
@@ -236,3 +237,39 @@ func _normal_textures(model: Node3D) -> Array[Texture2D]:
 			if material != null and material.normal_texture != null and material.normal_texture not in result:
 				result.append(material.normal_texture)
 	return result
+
+
+func _check_column_variant() -> void:
+	var catalog := CATALOG.new()
+	catalog._build_environment_catalogs()
+	var path := "res://game/presentation/office_floor/public/structural/column_2.tscn"
+	if catalog._migrate_scene_path("res://models/objects/enviroments/01/01_column_2.glb") != path:
+		_fail("Saved raw Column 2 must reload as a structural column")
+	var listed := false
+	for entry: Dictionary in catalog.group_catalogs["01"]:
+		listed = listed or (entry.path == path and entry.kind == "")
+	if not listed:
+		_fail("Column 2 is missing from the structural planner palette")
+	var column := catalog._instantiate_asset(path)
+	if column == null:
+		_fail("Column 2 cannot be instantiated for gameplay")
+		return
+	# Exercise the same hidden parent used during asynchronous mission startup.
+	var mission := Node3D.new()
+	mission.hide()
+	root.add_child(mission)
+	mission.add_child(column)
+	await process_frame
+	await process_frame
+	var maps := {"base": 0, "normal": 0, "orm": 0}
+	_inspect(column, maps, true)
+	for slot: String in maps:
+		if int(maps[slot]) == 0:
+			_fail("Column 2 lost its " + slot + " texture")
+	var body := column.get_node_or_null("Body") as StaticBody3D
+	if body == null or body.get_child_count() == 0:
+		_fail("Column 2 must have static collision under a hidden mission")
+	if not column.is_in_group("camera_occluder"):
+		_fail("Column 2 must participate in camera occlusion")
+	mission.queue_free()
+	await process_frame
