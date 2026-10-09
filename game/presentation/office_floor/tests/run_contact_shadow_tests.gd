@@ -35,7 +35,8 @@ func _run() -> void:
 	if quad == null:
 		_finish(stage)
 		return
-	var half: Vector2 = quad.get_instance_shader_parameter(&"half_size")
+	_expect(quad.material_override != _quad(chair).material_override, "Contact shadows keep per-prop state outside the global instance buffer.")
+	var half: Vector2 = (quad.material_override as ShaderMaterial).get_shader_parameter(&"half_size")
 	_expect(half.x > 1.0 or half.y > 1.0, "The shadow covers the long table's footprint (%s)." % half)
 	_expect(absf(quad.global_position.y - 0.0165) < 0.005, "The shadow lies on the floor (%.4f)." % quad.global_position.y)
 	var before := quad.global_position.z
@@ -44,10 +45,10 @@ func _run() -> void:
 	_expect(absf(quad.global_position.z - before - 2.0) < 0.05, "The shadow follows a moved table (%.2f m)." % (quad.global_position.z - before))
 	table.global_position += Vector3(0, 1.0, 0)
 	await process_frame
-	_expect(float(quad.get_instance_shader_parameter(&"presence")) < 0.1, "A lifted table leaves its shadow behind faded.")
+	_expect(float((quad.material_override as ShaderMaterial).get_shader_parameter(&"presence")) < 0.1, "A lifted table leaves its shadow behind faded.")
 	table.global_position -= Vector3(0, 1.0, 0)
 	await process_frame
-	_expect(float(quad.get_instance_shader_parameter(&"presence")) > 0.9, "Back on the floor the shadow returns.")
+	_expect(float((quad.material_override as ShaderMaterial).get_shader_parameter(&"presence")) > 0.9, "Back on the floor the shadow returns.")
 	(table.get("_visual") as Node3D).hide()
 	_expect(not quad.is_visible_in_tree(), "A broken (hidden) table takes its shadow with it.")
 	_finish(stage)

@@ -52,6 +52,7 @@ func _run() -> void:
 		"meshes": [{}, {}]}
 	if _source_mesh_indices(fixture).keys() != [1]:
 		_fail("Source audit must exclude meshes not attached to any scene.")
+	_check_shared_pbr_resources()
 	_check_directory("res://models")
 	await _check_catalog_models()
 	await _check_column_variant()
@@ -181,13 +182,15 @@ func _record_maps(material: BaseMaterial3D) -> void:
 	for slot in BaseMaterial3D.TEXTURE_MAX:
 		var texture := material.get_texture(slot)
 		# Authored external decals (e.g. sticky notes) have a separate import policy.
-		if not texture is ImageTexture or maxi(texture.get_width(), texture.get_height()) < 512:
+		if texture == null or maxi(texture.get_width(), texture.get_height()) < 512:
 			continue
-		map_references += 1
 		var path := texture.resource_path
-		if not path.begins_with("res://assets/runtime_shared_maps/"):
+		if not texture is ImageTexture and not path.begins_with("res://models/objects/enviroments/"):
+			continue
+		if texture is ImageTexture and not path.begins_with("res://assets/runtime_shared_maps/"):
 			_fail("Updated embedded map was not shared: " + path)
 			continue
+		map_references += 1
 		if shared_maps.has(path):
 			if shared_maps[path] != texture:
 				_fail("Duplicate allocation for shared map: " + path)

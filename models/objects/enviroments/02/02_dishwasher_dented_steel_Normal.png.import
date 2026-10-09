@@ -3,9 +3,10 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://5a6lawqec7sm"
-path="res://.godot/imported/02_dishwasher_dented_steel_Normal.png-b7f1cbd6f60bed93f44d30d4cb662fe6.ctex"
+path.s3tc="res://.godot/imported/02_dishwasher_dented_steel_Normal.png-b7f1cbd6f60bed93f44d30d4cb662fe6.s3tc.ctex"
 metadata={
-"vram_texture": false
+"imported_formats": ["s3tc_bptc"],
+"vram_texture": true
 }
 generator_parameters={
 "md5": "51d0feb7e0dd9c312c0f1735fc00f6e9"
@@ -14,11 +15,11 @@ generator_parameters={
 [deps]
 
 source_file="res://models/objects/enviroments/02/02_dishwasher_dented_steel_Normal.png"
-dest_files=["res://.godot/imported/02_dishwasher_dented_steel_Normal.png-b7f1cbd6f60bed93f44d30d4cb662fe6.ctex"]
+dest_files=["res://.godot/imported/02_dishwasher_dented_steel_Normal.png-b7f1cbd6f60bed93f44d30d4cb662fe6.s3tc.ctex"]
 
 [params]
 
-compress/mode=0
+compress/mode=2
 compress/high_quality=false
 compress/lossy_quality=0.7
 compress/uastc_level=0

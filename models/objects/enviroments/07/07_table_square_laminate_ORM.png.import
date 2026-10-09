@@ -3,9 +3,10 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://bwt7c0v3jps0t"
-path="res://.godot/imported/07_table_square_laminate_ORM.png-47411675f47418c589ba850e42e98f0f.ctex"
+path.s3tc="res://.godot/imported/07_table_square_laminate_ORM.png-47411675f47418c589ba850e42e98f0f.s3tc.ctex"
 metadata={
-"vram_texture": false
+"imported_formats": ["s3tc_bptc"],
+"vram_texture": true
 }
 generator_parameters={
 "md5": "3a084a4d12ec3da69022c0f0f4cd5162"
@@ -14,11 +15,11 @@ generator_parameters={
 [deps]
 
 source_file="res://models/objects/enviroments/07/07_table_square_laminate_ORM.png"
-dest_files=["res://.godot/imported/07_table_square_laminate_ORM.png-47411675f47418c589ba850e42e98f0f.ctex"]
+dest_files=["res://.godot/imported/07_table_square_laminate_ORM.png-47411675f47418c589ba850e42e98f0f.s3tc.ctex"]
 
 [params]
 
-compress/mode=0
+compress/mode=2
 compress/high_quality=false
 compress/lossy_quality=0.7
 compress/uastc_level=0

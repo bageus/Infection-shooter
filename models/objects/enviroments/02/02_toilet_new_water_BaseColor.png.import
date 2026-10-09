@@ -3,9 +3,10 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://cotwsgm2y472m"
-path="res://.godot/imported/02_toilet_new_water_BaseColor.png-49026c10863e680d04e90238f515584f.ctex"
+path.s3tc="res://.godot/imported/02_toilet_new_water_BaseColor.png-49026c10863e680d04e90238f515584f.s3tc.ctex"
 metadata={
-"vram_texture": false
+"imported_formats": ["s3tc_bptc"],
+"vram_texture": true
 }
 generator_parameters={
 "md5": "a89cdcc61726ad88cafe20b8f1ec9bf0"
@@ -14,11 +15,11 @@ generator_parameters={
 [deps]
 
 source_file="res://models/objects/enviroments/02/02_toilet_new_water_BaseColor.png"
-dest_files=["res://.godot/imported/02_toilet_new_water_BaseColor.png-49026c10863e680d04e90238f515584f.ctex"]
+dest_files=["res://.godot/imported/02_toilet_new_water_BaseColor.png-49026c10863e680d04e90238f515584f.s3tc.ctex"]
 
 [params]
 
-compress/mode=0
+compress/mode=2
 compress/high_quality=false
 compress/lossy_quality=0.7
 compress/uastc_level=0

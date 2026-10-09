@@ -3,9 +3,10 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://c3r3vaagi6gy2"
-path="res://.godot/imported/12_rifle_casing_brass_Normal.png-ef3be2f3b6738fa6716231d0f483ebae.ctex"
+path.s3tc="res://.godot/imported/12_rifle_casing_brass_Normal.png-ef3be2f3b6738fa6716231d0f483ebae.s3tc.ctex"
 metadata={
-"vram_texture": false
+"imported_formats": ["s3tc_bptc"],
+"vram_texture": true
 }
 generator_parameters={
 "md5": "26c3dc2c7bdffcfb166ac584cd34e83d"
@@ -14,11 +15,11 @@ generator_parameters={
 [deps]
 
 source_file="res://models/objects/enviroments/12/12_rifle_casing_brass_Normal.png"
-dest_files=["res://.godot/imported/12_rifle_casing_brass_Normal.png-ef3be2f3b6738fa6716231d0f483ebae.ctex"]
+dest_files=["res://.godot/imported/12_rifle_casing_brass_Normal.png-ef3be2f3b6738fa6716231d0f483ebae.s3tc.ctex"]
 
 [params]
 
-compress/mode=0
+compress/mode=2
 compress/high_quality=false
 compress/lossy_quality=0.7
 compress/uastc_level=0

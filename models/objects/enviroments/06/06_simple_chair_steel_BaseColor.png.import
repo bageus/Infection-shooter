@@ -3,9 +3,10 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://ba6qqpayjscth"
-path="res://.godot/imported/06_simple_chair_steel_BaseColor.png-7f3102e78140d0795169d11fb7526c44.ctex"
+path.s3tc="res://.godot/imported/06_simple_chair_steel_BaseColor.png-7f3102e78140d0795169d11fb7526c44.s3tc.ctex"
 metadata={
-"vram_texture": false
+"imported_formats": ["s3tc_bptc"],
+"vram_texture": true
 }
 generator_parameters={
 "md5": "a688a113c8ed06cb75ac7a7b50cea726"
@@ -14,11 +15,11 @@ generator_parameters={
 [deps]
 
 source_file="res://models/objects/enviroments/06/06_simple_chair_steel_BaseColor.png"
-dest_files=["res://.godot/imported/06_simple_chair_steel_BaseColor.png-7f3102e78140d0795169d11fb7526c44.ctex"]
+dest_files=["res://.godot/imported/06_simple_chair_steel_BaseColor.png-7f3102e78140d0795169d11fb7526c44.s3tc.ctex"]
 
 [params]
 
-compress/mode=0
+compress/mode=2
 compress/high_quality=false
 compress/lossy_quality=0.7
 compress/uastc_level=0

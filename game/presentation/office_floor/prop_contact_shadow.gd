@@ -13,7 +13,7 @@ const MARGIN := 0.22
 ## Lifted this high above its resting floor the shadow is gone.
 const FADE_HEIGHT := 0.6
 
-static var _material: ShaderMaterial
+var _material: ShaderMaterial
 static var _quad: QuadMesh
 
 var _owner_prop: Node3D
@@ -45,7 +45,7 @@ func configure(prop: Node3D, visual: Node3D, meshes: Array[MeshInstance3D]) -> b
 	_shadow = MeshInstance3D.new()
 	_shadow.name = "ContactShadowQuad"
 	_shadow.mesh = _shared_quad()
-	_shadow.material_override = _shared_material()
+	_shadow.material_override = _local_material()
 	_shadow.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
 	_shadow.top_level = true
 	add_child(_shadow)
@@ -84,10 +84,10 @@ func _update() -> void:
 	# The quad faces +Z; lay it flat with its width along right.
 	var shadow_basis := Basis(right * half.x * 2.0, ahead * half.y * 2.0, Vector3.UP)
 	_shadow.global_transform = Transform3D(shadow_basis, center)
-	_shadow.set_instance_shader_parameter(&"half_size", half)
-	_shadow.set_instance_shader_parameter(&"margin", MARGIN)
+	_material.set_shader_parameter(&"half_size", half)
+	_material.set_shader_parameter(&"margin", MARGIN)
 	var lift := maxf(bottom - _floor_y, 0.0)
-	_shadow.set_instance_shader_parameter(&"presence", 1.0 - smoothstep(0.05, FADE_HEIGHT, lift))
+	_material.set_shader_parameter(&"presence", 1.0 - smoothstep(0.05, FADE_HEIGHT, lift))
 	_shadow.visible = _visual.is_visible_in_tree()
 
 
@@ -98,7 +98,7 @@ static func _shared_quad() -> QuadMesh:
 	return _quad
 
 
-static func _shared_material() -> ShaderMaterial:
+func _local_material() -> ShaderMaterial:
 	if _material == null:
 		_material = ShaderMaterial.new()
 		_material.shader = SHADER

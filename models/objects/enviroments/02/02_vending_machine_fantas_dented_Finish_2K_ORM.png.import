@@ -3,9 +3,10 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://dk05y6q6d5232"
-path="res://.godot/imported/02_vending_machine_fantas_dented_Finish_2K_ORM.png-c692e53a72dcb3d00f8749e60fcd676a.ctex"
+path.s3tc="res://.godot/imported/02_vending_machine_fantas_dented_Finish_2K_ORM.png-c692e53a72dcb3d00f8749e60fcd676a.s3tc.ctex"
 metadata={
-"vram_texture": false
+"imported_formats": ["s3tc_bptc"],
+"vram_texture": true
 }
 generator_parameters={
 "md5": "e7ec0e35c0b1dce5edf9aaca7987926e"
@@ -14,11 +15,11 @@ generator_parameters={
 [deps]
 
 source_file="res://models/objects/enviroments/02/02_vending_machine_fantas_dented_Finish_2K_ORM.png"
-dest_files=["res://.godot/imported/02_vending_machine_fantas_dented_Finish_2K_ORM.png-c692e53a72dcb3d00f8749e60fcd676a.ctex"]
+dest_files=["res://.godot/imported/02_vending_machine_fantas_dented_Finish_2K_ORM.png-c692e53a72dcb3d00f8749e60fcd676a.s3tc.ctex"]
 
 [params]
 
-compress/mode=0
+compress/mode=2
 compress/high_quality=false
 compress/lossy_quality=0.7
 compress/uastc_level=0

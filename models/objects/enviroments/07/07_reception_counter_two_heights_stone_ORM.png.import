@@ -3,9 +3,10 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://bolgq8p5gg1xm"
-path="res://.godot/imported/07_reception_counter_two_heights_stone_ORM.png-10f6841b278858258a1ba3e07cab814e.ctex"
+path.s3tc="res://.godot/imported/07_reception_counter_two_heights_stone_ORM.png-10f6841b278858258a1ba3e07cab814e.s3tc.ctex"
 metadata={
-"vram_texture": false
+"imported_formats": ["s3tc_bptc"],
+"vram_texture": true
 }
 generator_parameters={
 "md5": "abddb506435a3b050c7f9c2400fc4701"
@@ -14,11 +15,11 @@ generator_parameters={
 [deps]
 
 source_file="res://models/objects/enviroments/07/07_reception_counter_two_heights_stone_ORM.png"
-dest_files=["res://.godot/imported/07_reception_counter_two_heights_stone_ORM.png-10f6841b278858258a1ba3e07cab814e.ctex"]
+dest_files=["res://.godot/imported/07_reception_counter_two_heights_stone_ORM.png-10f6841b278858258a1ba3e07cab814e.s3tc.ctex"]
 
 [params]
 
-compress/mode=0
+compress/mode=2
 compress/high_quality=false
 compress/lossy_quality=0.7
 compress/uastc_level=0

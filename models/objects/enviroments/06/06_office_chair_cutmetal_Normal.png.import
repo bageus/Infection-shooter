@@ -3,9 +3,10 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://c8dgsqr5y36q2"
-path="res://.godot/imported/06_office_chair_cutmetal_Normal.png-1b53b75acf514d09ab015747f38c6f1f.ctex"
+path.s3tc="res://.godot/imported/06_office_chair_cutmetal_Normal.png-1b53b75acf514d09ab015747f38c6f1f.s3tc.ctex"
 metadata={
-"vram_texture": false
+"imported_formats": ["s3tc_bptc"],
+"vram_texture": true
 }
 generator_parameters={
 "md5": "149805c362a70caa0d5eff378bdcca7d"
@@ -14,11 +15,11 @@ generator_parameters={
 [deps]
 
 source_file="res://models/objects/enviroments/06/06_office_chair_cutmetal_Normal.png"
-dest_files=["res://.godot/imported/06_office_chair_cutmetal_Normal.png-1b53b75acf514d09ab015747f38c6f1f.ctex"]
+dest_files=["res://.godot/imported/06_office_chair_cutmetal_Normal.png-1b53b75acf514d09ab015747f38c6f1f.s3tc.ctex"]
 
 [params]
 
-compress/mode=0
+compress/mode=2
 compress/high_quality=false
 compress/lossy_quality=0.7
 compress/uastc_level=0

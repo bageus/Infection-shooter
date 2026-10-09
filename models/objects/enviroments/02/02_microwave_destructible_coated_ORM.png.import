@@ -3,9 +3,10 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://df6b0pyw4eibi"
-path="res://.godot/imported/02_microwave_destructible_coated_ORM.png-d4e815fc23ea2a2edffa3b82701a8a8c.ctex"
+path.s3tc="res://.godot/imported/02_microwave_destructible_coated_ORM.png-d4e815fc23ea2a2edffa3b82701a8a8c.s3tc.ctex"
 metadata={
-"vram_texture": false
+"imported_formats": ["s3tc_bptc"],
+"vram_texture": true
 }
 generator_parameters={
 "md5": "8bdd5845e68918c7c4ef729df9b5111c"
@@ -14,11 +15,11 @@ generator_parameters={
 [deps]
 
 source_file="res://models/objects/enviroments/02/02_microwave_destructible_coated_ORM.png"
-dest_files=["res://.godot/imported/02_microwave_destructible_coated_ORM.png-d4e815fc23ea2a2edffa3b82701a8a8c.ctex"]
+dest_files=["res://.godot/imported/02_microwave_destructible_coated_ORM.png-d4e815fc23ea2a2edffa3b82701a8a8c.s3tc.ctex"]
 
 [params]
 
-compress/mode=0
+compress/mode=2
 compress/high_quality=false
 compress/lossy_quality=0.7
 compress/uastc_level=0

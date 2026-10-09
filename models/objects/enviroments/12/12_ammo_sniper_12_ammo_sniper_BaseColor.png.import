@@ -3,9 +3,10 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://s7qlyqidc81g"
-path="res://.godot/imported/12_ammo_sniper_12_ammo_sniper_BaseColor.png-dea09d535b90ce8447a48038ee1380d9.ctex"
+path.s3tc="res://.godot/imported/12_ammo_sniper_12_ammo_sniper_BaseColor.png-dea09d535b90ce8447a48038ee1380d9.s3tc.ctex"
 metadata={
-"vram_texture": false
+"imported_formats": ["s3tc_bptc"],
+"vram_texture": true
 }
 generator_parameters={
 "md5": "852a458f48c46f04f85a8593959f28e9"
@@ -14,11 +15,11 @@ generator_parameters={
 [deps]
 
 source_file="res://models/objects/enviroments/12/12_ammo_sniper_12_ammo_sniper_BaseColor.png"
-dest_files=["res://.godot/imported/12_ammo_sniper_12_ammo_sniper_BaseColor.png-dea09d535b90ce8447a48038ee1380d9.ctex"]
+dest_files=["res://.godot/imported/12_ammo_sniper_12_ammo_sniper_BaseColor.png-dea09d535b90ce8447a48038ee1380d9.s3tc.ctex"]
 
 [params]
 
-compress/mode=0
+compress/mode=2
 compress/high_quality=false
 compress/lossy_quality=0.7
 compress/uastc_level=0

@@ -56,7 +56,7 @@ func add_shapes(body: RigidBody3D, node: Node) -> float:
 	var volume := 0.0
 	if node is MeshInstance3D:
 		var mesh := node as MeshInstance3D
-		if mesh.mesh != null and mesh.is_visible_in_tree() and absf(mesh.global_basis.determinant()) > 0.000000000001:
+		if mesh.mesh != null and _locally_visible(mesh) and absf(mesh.global_basis.determinant()) > 0.000000000001:
 			var box := BoxShape3D.new()
 			var bounds := mesh.get_aabb()
 			box.size = Vector3(maxf(bounds.size.x, 0.02), maxf(bounds.size.y, 0.02), maxf(bounds.size.z, 0.02))
@@ -73,6 +73,17 @@ func add_shapes(body: RigidBody3D, node: Node) -> float:
 	for child in node.get_children():
 		volume += add_shapes(body, child)
 	return volume
+
+
+func _locally_visible(node: Node) -> bool:
+	# A hidden mission must not remove authored intact geometry from physics.
+	while node != null:
+		if node is Node3D and not (node as Node3D).visible:
+			return false
+		if node == visual:
+			return true
+		node = node.get_parent()
+	return false
 
 
 func discover_stages() -> void:

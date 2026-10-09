@@ -3,9 +3,10 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://bxpjnelaeiw7l"
-path="res://.godot/imported/02_water_cooler_bottle_trim_ORM_2K.png-0eed01453ed4fcb63d8a958aa78b2444.ctex"
+path.s3tc="res://.godot/imported/02_water_cooler_bottle_trim_ORM_2K.png-0eed01453ed4fcb63d8a958aa78b2444.s3tc.ctex"
 metadata={
-"vram_texture": false
+"imported_formats": ["s3tc_bptc"],
+"vram_texture": true
 }
 generator_parameters={
 "md5": "67608bed6e2e60863489ea935eb7e48f"
@@ -14,11 +15,11 @@ generator_parameters={
 [deps]
 
 source_file="res://models/objects/enviroments/02/02_water_cooler_bottle_trim_ORM_2K.png"
-dest_files=["res://.godot/imported/02_water_cooler_bottle_trim_ORM_2K.png-0eed01453ed4fcb63d8a958aa78b2444.ctex"]
+dest_files=["res://.godot/imported/02_water_cooler_bottle_trim_ORM_2K.png-0eed01453ed4fcb63d8a958aa78b2444.s3tc.ctex"]
 
 [params]
 
-compress/mode=0
+compress/mode=2
 compress/high_quality=false
 compress/lossy_quality=0.7
 compress/uastc_level=0

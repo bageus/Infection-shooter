@@ -3,9 +3,10 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://ctg3urymfn2fa"
-path="res://.godot/imported/02_capboard_down_destructible_steel_ORM.png-f9a9ed6904306b7138acee9c7f1f8153.ctex"
+path.s3tc="res://.godot/imported/02_capboard_down_destructible_steel_ORM.png-f9a9ed6904306b7138acee9c7f1f8153.s3tc.ctex"
 metadata={
-"vram_texture": false
+"imported_formats": ["s3tc_bptc"],
+"vram_texture": true
 }
 generator_parameters={
 "md5": "191983772f4270cf13853487fe24ecba"
@@ -14,11 +15,11 @@ generator_parameters={
 [deps]
 
 source_file="res://models/objects/enviroments/02/02_capboard_down_destructible_steel_ORM.png"
-dest_files=["res://.godot/imported/02_capboard_down_destructible_steel_ORM.png-f9a9ed6904306b7138acee9c7f1f8153.ctex"]
+dest_files=["res://.godot/imported/02_capboard_down_destructible_steel_ORM.png-f9a9ed6904306b7138acee9c7f1f8153.s3tc.ctex"]
 
 [params]
 
-compress/mode=0
+compress/mode=2
 compress/high_quality=false
 compress/lossy_quality=0.7
 compress/uastc_level=0

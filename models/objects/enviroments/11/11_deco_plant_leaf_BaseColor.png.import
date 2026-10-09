@@ -3,9 +3,10 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://p6jo7fi45r22"
-path="res://.godot/imported/11_deco_plant_leaf_BaseColor.png-86a66b0a535adf68cce7b87f8aaadfc7.ctex"
+path.s3tc="res://.godot/imported/11_deco_plant_leaf_BaseColor.png-86a66b0a535adf68cce7b87f8aaadfc7.s3tc.ctex"
 metadata={
-"vram_texture": false
+"imported_formats": ["s3tc_bptc"],
+"vram_texture": true
 }
 generator_parameters={
 "md5": "8a2a156aaa28754659b7bc7bf062e3e4"
@@ -14,11 +15,11 @@ generator_parameters={
 [deps]
 
 source_file="res://models/objects/enviroments/11/11_deco_plant_leaf_BaseColor.png"
-dest_files=["res://.godot/imported/11_deco_plant_leaf_BaseColor.png-86a66b0a535adf68cce7b87f8aaadfc7.ctex"]
+dest_files=["res://.godot/imported/11_deco_plant_leaf_BaseColor.png-86a66b0a535adf68cce7b87f8aaadfc7.s3tc.ctex"]
 
 [params]
 
-compress/mode=0
+compress/mode=2
 compress/high_quality=false
 compress/lossy_quality=0.7
 compress/uastc_level=0

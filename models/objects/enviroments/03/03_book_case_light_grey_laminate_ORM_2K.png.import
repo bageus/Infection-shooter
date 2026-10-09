@@ -3,9 +3,10 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://cf5og8i57i2al"
-path="res://.godot/imported/03_book_case_light_grey_laminate_ORM_2K.png-c2f57f91aa8946163bf186e3c0477bef.ctex"
+path.s3tc="res://.godot/imported/03_book_case_light_grey_laminate_ORM_2K.png-c2f57f91aa8946163bf186e3c0477bef.s3tc.ctex"
 metadata={
-"vram_texture": false
+"imported_formats": ["s3tc_bptc"],
+"vram_texture": true
 }
 generator_parameters={
 "md5": "6058a291131d1392da09785042698431"
@@ -14,11 +15,11 @@ generator_parameters={
 [deps]
 
 source_file="res://models/objects/enviroments/03/03_book_case_light_grey_laminate_ORM_2K.png"
-dest_files=["res://.godot/imported/03_book_case_light_grey_laminate_ORM_2K.png-c2f57f91aa8946163bf186e3c0477bef.ctex"]
+dest_files=["res://.godot/imported/03_book_case_light_grey_laminate_ORM_2K.png-c2f57f91aa8946163bf186e3c0477bef.s3tc.ctex"]
 
 [params]
 
-compress/mode=0
+compress/mode=2
 compress/high_quality=false
 compress/lossy_quality=0.7
 compress/uastc_level=0

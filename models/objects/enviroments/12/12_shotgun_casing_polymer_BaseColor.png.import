@@ -3,9 +3,10 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://bx1net0gd0q7p"
-path="res://.godot/imported/12_shotgun_casing_polymer_BaseColor.png-110418770b1fa25538d6047ff0fc7ab4.ctex"
+path.s3tc="res://.godot/imported/12_shotgun_casing_polymer_BaseColor.png-110418770b1fa25538d6047ff0fc7ab4.s3tc.ctex"
 metadata={
-"vram_texture": false
+"imported_formats": ["s3tc_bptc"],
+"vram_texture": true
 }
 generator_parameters={
 "md5": "73ffb61ff9acd598e1c62f9588f15864"
@@ -14,11 +15,11 @@ generator_parameters={
 [deps]
 
 source_file="res://models/objects/enviroments/12/12_shotgun_casing_polymer_BaseColor.png"
-dest_files=["res://.godot/imported/12_shotgun_casing_polymer_BaseColor.png-110418770b1fa25538d6047ff0fc7ab4.ctex"]
+dest_files=["res://.godot/imported/12_shotgun_casing_polymer_BaseColor.png-110418770b1fa25538d6047ff0fc7ab4.s3tc.ctex"]
 
 [params]
 
-compress/mode=0
+compress/mode=2
 compress/high_quality=false
 compress/lossy_quality=0.7
 compress/uastc_level=0

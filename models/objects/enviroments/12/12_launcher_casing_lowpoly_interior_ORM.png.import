@@ -3,9 +3,10 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://cottwoxnmdemu"
-path="res://.godot/imported/12_launcher_casing_lowpoly_interior_ORM.png-dfde1ba0b4b3f7111d19ed3e7041ecfd.ctex"
+path.s3tc="res://.godot/imported/12_launcher_casing_lowpoly_interior_ORM.png-dfde1ba0b4b3f7111d19ed3e7041ecfd.s3tc.ctex"
 metadata={
-"vram_texture": false
+"imported_formats": ["s3tc_bptc"],
+"vram_texture": true
 }
 generator_parameters={
 "md5": "5925ff3da2381f81ff794aad6806a71b"
@@ -14,11 +15,11 @@ generator_parameters={
 [deps]
 
 source_file="res://models/objects/enviroments/12/12_launcher_casing_lowpoly_interior_ORM.png"
-dest_files=["res://.godot/imported/12_launcher_casing_lowpoly_interior_ORM.png-dfde1ba0b4b3f7111d19ed3e7041ecfd.ctex"]
+dest_files=["res://.godot/imported/12_launcher_casing_lowpoly_interior_ORM.png-dfde1ba0b4b3f7111d19ed3e7041ecfd.s3tc.ctex"]
 
 [params]
 
-compress/mode=0
+compress/mode=2
 compress/high_quality=false
 compress/lossy_quality=0.7
 compress/uastc_level=0

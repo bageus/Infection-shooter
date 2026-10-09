@@ -5,10 +5,10 @@ shader_type spatial;
 render_mode blend_mix, unshaded, cull_disabled, depth_draw_never, shadows_disabled, fog_disabled;
 
 uniform float strength : hint_range(0.0, 1.0) = 0.55;
-instance uniform vec2 half_size = vec2(0.5);
-instance uniform float margin = 0.2;
+uniform vec2 half_size = vec2(0.5);
+uniform float margin = 0.2;
 // 1 on the floor, fading to 0 as the prop is lifted or thrown.
-instance uniform float presence = 1.0;
+uniform float presence = 1.0;
 
 void fragment() {
 	vec2 p = (UV - 0.5) * 2.0 * half_size;

@@ -3,9 +3,10 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://dtl6auownbkke"
-path="res://.godot/imported/02_capboard_down_sink_destructible_coated_ORM.png-743ef41b8b9ced7baddef94e6f31cc2e.ctex"
+path.s3tc="res://.godot/imported/02_capboard_down_sink_destructible_coated_ORM.png-743ef41b8b9ced7baddef94e6f31cc2e.s3tc.ctex"
 metadata={
-"vram_texture": false
+"imported_formats": ["s3tc_bptc"],
+"vram_texture": true
 }
 generator_parameters={
 "md5": "9b7a8cb376360b3fcff724bd7b570abc"
@@ -14,11 +15,11 @@ generator_parameters={
 [deps]
 
 source_file="res://models/objects/enviroments/02/02_capboard_down_sink_destructible_coated_ORM.png"
-dest_files=["res://.godot/imported/02_capboard_down_sink_destructible_coated_ORM.png-743ef41b8b9ced7baddef94e6f31cc2e.ctex"]
+dest_files=["res://.godot/imported/02_capboard_down_sink_destructible_coated_ORM.png-743ef41b8b9ced7baddef94e6f31cc2e.s3tc.ctex"]
 
 [params]
 
-compress/mode=0
+compress/mode=2
 compress/high_quality=false
 compress/lossy_quality=0.7
 compress/uastc_level=0

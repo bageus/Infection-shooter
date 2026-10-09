@@ -3,9 +3,10 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://c1yv2nrkikhd8"
-path="res://.godot/imported/03_file_cabinet_largest_core_BaseColor_2K.png-bc5d40fad7d7d46dabecfecb4fc8ac9c.ctex"
+path.s3tc="res://.godot/imported/03_file_cabinet_largest_core_BaseColor_2K.png-bc5d40fad7d7d46dabecfecb4fc8ac9c.s3tc.ctex"
 metadata={
-"vram_texture": false
+"imported_formats": ["s3tc_bptc"],
+"vram_texture": true
 }
 generator_parameters={
 "md5": "60f4d9446fc6b04c6a5f59278437d54e"
@@ -14,11 +15,11 @@ generator_parameters={
 [deps]
 
 source_file="res://models/objects/enviroments/03/03_file_cabinet_largest_core_BaseColor_2K.png"
-dest_files=["res://.godot/imported/03_file_cabinet_largest_core_BaseColor_2K.png-bc5d40fad7d7d46dabecfecb4fc8ac9c.ctex"]
+dest_files=["res://.godot/imported/03_file_cabinet_largest_core_BaseColor_2K.png-bc5d40fad7d7d46dabecfecb4fc8ac9c.s3tc.ctex"]
 
 [params]
 
-compress/mode=0
+compress/mode=2
 compress/high_quality=false
 compress/lossy_quality=0.7
 compress/uastc_level=0

@@ -3,9 +3,10 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://cm3hp111rm1ge"
-path="res://.godot/imported/12_launcher_casing_lowpoly_olive_Normal.png-b301e691de09e7cb7b6b3acead43bb37.ctex"
+path.s3tc="res://.godot/imported/12_launcher_casing_lowpoly_olive_Normal.png-b301e691de09e7cb7b6b3acead43bb37.s3tc.ctex"
 metadata={
-"vram_texture": false
+"imported_formats": ["s3tc_bptc"],
+"vram_texture": true
 }
 generator_parameters={
 "md5": "69057721a8660188d3e18ed395d40ff9"
@@ -14,11 +15,11 @@ generator_parameters={
 [deps]
 
 source_file="res://models/objects/enviroments/12/12_launcher_casing_lowpoly_olive_Normal.png"
-dest_files=["res://.godot/imported/12_launcher_casing_lowpoly_olive_Normal.png-b301e691de09e7cb7b6b3acead43bb37.ctex"]
+dest_files=["res://.godot/imported/12_launcher_casing_lowpoly_olive_Normal.png-b301e691de09e7cb7b6b3acead43bb37.s3tc.ctex"]
 
 [params]
 
-compress/mode=0
+compress/mode=2
 compress/high_quality=false
 compress/lossy_quality=0.7
 compress/uastc_level=0

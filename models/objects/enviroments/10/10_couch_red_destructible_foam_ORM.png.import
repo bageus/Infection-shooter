@@ -3,9 +3,10 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://77ybprb7slmd"
-path="res://.godot/imported/10_couch_red_destructible_foam_ORM.png-2acff81a54945787bd47e0e18e2ec00c.ctex"
+path.s3tc="res://.godot/imported/10_couch_red_destructible_foam_ORM.png-2acff81a54945787bd47e0e18e2ec00c.s3tc.ctex"
 metadata={
-"vram_texture": false
+"imported_formats": ["s3tc_bptc"],
+"vram_texture": true
 }
 generator_parameters={
 "md5": "743c099729382241bdd50c75fdba0480"
@@ -14,11 +15,11 @@ generator_parameters={
 [deps]
 
 source_file="res://models/objects/enviroments/10/10_couch_red_destructible_foam_ORM.png"
-dest_files=["res://.godot/imported/10_couch_red_destructible_foam_ORM.png-2acff81a54945787bd47e0e18e2ec00c.ctex"]
+dest_files=["res://.godot/imported/10_couch_red_destructible_foam_ORM.png-2acff81a54945787bd47e0e18e2ec00c.s3tc.ctex"]
 
 [params]
 
-compress/mode=0
+compress/mode=2
 compress/high_quality=false
 compress/lossy_quality=0.7
 compress/uastc_level=0
