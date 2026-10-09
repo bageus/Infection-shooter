@@ -12,6 +12,7 @@ var progress: ProgressBar
 var back: Button
 var pending: Node3D
 var _started := false
+var _logged_phase := ""
 var _previous_scene: Node3D
 var _previous_visible := true
 var _previous_camera: Camera3D
@@ -56,6 +57,8 @@ func start() -> void:
 	if _started:
 		return
 	_started = true
+	print("Mission begin: texture profile 1K; renderer %s; allocator %.1f MiB" % [
+		RenderingServer.get_current_rendering_method(), float(OS.get_static_memory_usage()) / 1048576.0])
 	var tree := get_tree()
 	var previous := tree.current_scene
 	if previous is Node3D:
@@ -144,6 +147,11 @@ func _request_scene(tree: SceneTree) -> PackedScene:
 
 
 func _set_progress(value: float, phase: String) -> void:
+	if phase != _logged_phase:
+		_logged_phase = phase
+		print("Mission phase: %s; allocator %.1f MiB; video %.1f MiB" % [phase,
+			float(OS.get_static_memory_usage()) / 1048576.0,
+			float(Performance.get_monitor(Performance.RENDER_VIDEO_MEM_USED)) / 1048576.0])
 	progress.value = maxf(progress.value, value * 100.0)
 	var names := {"resources": "Загрузка ресурсов…", "prepare": "Подготовка карты…", "objects": "Создание локации…", "ready": "Готово"} if _ru else {"resources": "Loading resources…", "prepare": "Preparing map…", "objects": "Building location…", "ready": "Ready"}
 	label.text = names[phase]

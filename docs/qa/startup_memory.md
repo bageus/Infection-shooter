@@ -100,3 +100,21 @@ Shader warmup и global lighting native suites: 0 failures. Известное
 предупреждение V-Sync относится к software display. Windows не проверен.
 Следующий шаг: обновить проект до этого изменения, полностью перезапустить
 редактор в Compatibility, подтвердить F5/start/restart на Windows/Iris Xe.
+
+
+## alloc_static null в Compatibility на Iris Xe — 09.10.2026
+
+09.10.2026 (godot.log владельца, Iris Xe/OpenGL): Compatibility уже активен; alloc_static(mem=null) предшествует signal 11. Без символов стек не определяет конкретный ресурс или размер запроса. В рамках T002 снижен footprint: 275 активных внешних import profiles окружения — VRAM compression и лимит 1024 px; встроенные карты 46 GLB ограничены на импорте, post-import wrapper переименован и профили обновлены для автоматического переимпорта. Исходные GLB/PNG/JPG, UV, PBR slots, карта и сохранения сохранены; игровые карты вблизи могут быть менее резкими. Bootstrap пишет renderer/profile/phase/path и allocator/video MiB в godot.log. Native Linux Compatibility start/restart/180 frames: 0 failures; RSS 1676,7→1322,4 МиБ, video 802,7→500,5 МиБ; allocator 442,8→442,9 МиБ (практически без изменения). Model textures: 258 models / 185 textured, 0 failures; groups03/05 136→34 МиБ, CI cap 48 МиБ. Headless start/restart: allocator 769,3 МиБ, RSS 914,8 МиБ, 0 failures; CI cap снижен 1280→896 МиБ. Project/resource/import/Python texture gates PASS. Windows fix не подтверждён; это измеренное снижение памяти и диагностика для следующего сбоя. Public API/DTO/owners/dependencies прежние; архитектурных исключений нет. Следующее действие: после обновления дождаться импорта, полностью перезапустить Godot и проверить start/restart на Windows; при сбое взять новый godot.log с Mission begin/profile 1K и последним resource/phase.
+
+
+| Метрика, native Linux/Mesa | До | После |
+|---|---:|---:|
+| Пик RSS процесса | 1676,7 МиБ | 1322,4 МиБ |
+| Пик video monitor | 802,7 МиБ | 500,5 МиБ |
+| Пик Godot allocator | 442,8 МиБ | 442,9 МиБ |
+
+Обе native проверки: один Godot 4.7.2, тот же main b732dd7, чистый импорт, Compatibility, 320x180, полная authored карта, start + restart + 180 кадров. Software GPU использует системную память; video monitor показывает ресурсы движка, а не физическую VRAM Intel. Пики семплируются на кадрах во время переходов. RSS после импорта относится к отдельному игровому процессу, не сумме редактора и игры. На Windows фактическое снижение и отсутствие crash ещё не проверены.
+
+Регенерация встроенных текстур запускается изменением import_script/path на bounded_texture_post_import.gd с сохранением UID wrapper. Без обновления GLB profiles старый импорт мог бы сохранить прежние 2K карты. Старые игнорируемые assets/runtime_shared_maps остаются на диске, но новые сцены используют ресурсы 1K; удалять пользовательские кэши автоматически не требуется.
+
+Бюджеты 192/1280 МиБ выше описывают прежние проверки; текущие бюджеты 48/896 МиБ. Model suite проверяет размеры игровых карт всех environment GLB и сохранение PBR/UV/palette/collisions; отдельные display decals не переводятся на этот профиль.

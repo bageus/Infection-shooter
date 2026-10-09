@@ -4,6 +4,7 @@ extends RefCounted
 ## Derived assets are regenerated from GLBs; their visible resource paths also
 ## let the exporter include the shared maps as ordinary scene dependencies.
 const CACHE := "res://assets/runtime_shared_maps/"
+const MAX_DIMENSION := 1024
 
 
 static func process(root: Node) -> Error:
@@ -41,8 +42,19 @@ static func _shared(texture: Texture2D, normal: bool) -> Texture2D:
 	var image := texture.get_image()
 	if image == null or image.is_empty():
 		return null
-	if image.is_compressed() or maxi(image.get_width(), image.get_height()) < 512:
+	if maxi(image.get_width(), image.get_height()) < 512:
 		return texture
+	if image.is_compressed() and maxi(image.get_width(), image.get_height()) <= MAX_DIMENSION:
+		return texture
+	image = image.duplicate() as Image
+	if image.is_compressed() and image.decompress() != OK:
+		return null
+	var longest := maxi(image.get_width(), image.get_height())
+	if longest > MAX_DIMENSION:
+		image.clear_mipmaps()
+		var factor := float(MAX_DIMENSION) / longest
+		image.resize(maxi(1, roundi(image.get_width() * factor)),
+			maxi(1, roundi(image.get_height() * factor)), Image.INTERPOLATE_LANCZOS)
 	# Include layout and semantic usage: equal bytes alone are insufficient.
 	var hashing := HashingContext.new()
 	hashing.start(HashingContext.HASH_SHA256)
@@ -51,7 +63,6 @@ static func _shared(texture: Texture2D, normal: bool) -> Texture2D:
 		image.get_format(), int(image.has_mipmaps()), int(normal), hashing.finish().hex_encode()]
 	if FileAccess.file_exists(path):
 		return _load_registered(path)
-	image = image.duplicate() as Image
 	if not image.has_mipmaps():
 		image.generate_mipmaps(normal)
 	var source := Image.COMPRESS_SOURCE_NORMAL if normal else Image.COMPRESS_SOURCE_GENERIC

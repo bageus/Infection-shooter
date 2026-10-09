@@ -74,6 +74,7 @@ func _load_resources(paths: Array[String], tree: SceneTree, progress: Callable) 
 	var started := Time.get_ticks_msec()
 	while index < paths.size():
 		var path := paths[index]
+		print("Mission resource [%d/%d]: %s; allocator %.1f MiB" % [index + 1, paths.size(), path, float(OS.get_static_memory_usage()) / 1048576.0])
 		if not await _scripts.prepare(path, tree):
 			return "cannot prepare scene scripts: " + path
 		if ResourceLoader.load_threaded_request(path, "PackedScene", false) != OK:
