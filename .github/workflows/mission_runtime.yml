@@ -145,6 +145,11 @@ jobs:
           set -o pipefail
           timeout 240 godot --headless --path . --editor --quit 2>&1 | tee /tmp/import.log
           if grep -E 'SCRIPT ERROR|^ERROR:' /tmp/import.log; then exit 1; fi
+      - name: Imported model textures
+        run: |
+          set -o pipefail
+          timeout 180 godot --headless --path . --script game/bootstrap/app/tests/run_model_texture_tests.gd 2>&1 | tee /tmp/model-textures.log
+          if grep -E 'SCRIPT ERROR|^ERROR:' /tmp/model-textures.log; then exit 1; fi
       - name: Project gates and resource profiles
         run: |
           python tools/validate_project.py

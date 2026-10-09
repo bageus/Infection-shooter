@@ -27,5 +27,7 @@ jobs:
         run: |
           python tools/validate_scene_resources.py
           python tools/check_resource_paths.py
+          python tools/check_model_textures.py
+          python tools/test_model_textures.py
           python tools/test_workstation_templates.py
           python tools/test_architecture_scene_access.py
