@@ -184,7 +184,7 @@ func _screen_to_surface(screen_pos: Vector2, placing: Node3D) -> Vector3:
 		var normal: Vector3 = hit.get("normal")
 		if placing != null and bool(placing.get_meta("planning_wall_mount", false)) and absf(normal.y) < 0.35:
 			placing.set_meta("planning_wall_normal", normal)
-			return point
+			return SURFACE_PLACEMENT.visual_wall_point(point, normal, hit.get("collider") as Node3D)
 		if placing != null and bool(placing.get_meta("planning_wall_mount", false)):
 			if objects.selected_path.get_file() == "09_fire_extinguisher.glb" and normal.y > 0.55:
 				var mounted = EXTINGUISHER_WALL.from_floor(placing, point)
@@ -217,7 +217,7 @@ func _screen_to_wall(screen_pos: Vector2, node: Node3D) -> Vector3:
 	if hit.is_empty() or absf((hit["normal"] as Vector3).y) >= 0.35:
 		return Vector3(INF, INF, INF)
 	node.set_meta("planning_wall_normal", hit["normal"])
-	return hit["position"]
+	return SURFACE_PLACEMENT.visual_wall_point(hit["position"], hit["normal"], hit.get("collider") as Node3D)
 
 
 func _screen_to_floor(screen_pos: Vector2) -> Vector3:
@@ -258,6 +258,8 @@ func _apply_wall_mount(node: Node3D) -> void:
 
 
 func _snap_position_for(node: Node3D, value: Vector3) -> Vector3:
+	if bool(node.get_meta("planning_wall_mount", false)) and node.has_meta("planning_wall_normal"):
+		return SURFACE_PLACEMENT.wall_grid(value, node.get_meta("planning_wall_normal"), GRID_SIZE)
 	if bool(node.get_meta("planning_free_place", false)):
 		return value
 	var base = _snap(value)
