@@ -9,6 +9,9 @@ build_status: T002_HEADLESS_VALIDATED_VISUAL_PENDING
 updated: 2026-10-09
 ---
 
+09.10.2026 (15 обновлённых GLB группы 03): встроенные base-color/normal/ORM и UV есть на всех поверхностях; все модели автоматически подключаются к палитре, шкаф small_with_shelfs размещён дважды. Статический аудит 258 моделей / 162 textured без ошибок, project/resource/import gates и 11 Python tests PASS. Исправлена однотонная material_override повреждённого server_rack3. Runtime-аудит считает только используемые сценами meshes (11 orphan meshes server_rack не отображаются); добавлены catalog visual/collision/textures checks всех 15 и regression повреждённой стойки. CI cold import 240 с давал timeout 124 без ошибок; увеличен до 600 с. Локальный Godot 4.7.2 segfault до запуска, новый runtime проверяется CI. API/DTO/owners/зависимости прежние, исключений нет. T002 IN_PROGRESS. Точный следующий шаг: проверить CI этой ревизии перед слиянием.
+
+
 09.10.2026 (PR #71, уточнение владельца): удаление устаревших ресурсов было намеренным. Удалены 17 возвращённых изображений и их .import; две beanbag GLB, их импорты и изображения с импортами. Четыре размещения кресел удалены и из base_office_map.json, и из base_office_layout.tscn; остальные записи карты побайтно сохранены, JSON дополнительно сравнен структурно. Ссылка на кресло удалена также из tools/capture_furniture_shadows.gd. Project gates, scene/resource/import checks и 11 Python tests PASS. Текущие GLB сохранены; 258 активных моделей, 149 с текстурами, статический аудит без ошибок. Предыдущие результаты runtime относятся к старой ревизии. Новых зависимостей, API/DTO/owners и архитектурных исключений нет. T002 IN_PROGRESS. Следующее точное действие: проверить CI обновлённого PR #71 перед слиянием; локально Godot отсутствует.
 
 
