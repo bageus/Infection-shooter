@@ -2,8 +2,8 @@ extends Node3D
 
 const TILE_SCENE := preload("res://game/presentation/office_floor/public/structural/base_floor_tile.tscn")
 const TILE_MATERIAL := preload("res://game/presentation/office_floor/floor_tile_material.tres")
-const MATERIAL_VARIANTS := 8
-const SECTION_TILES := 8
+const MATERIAL_VARIANTS := 2
+const SECTION_TILES := 4
 
 @export var floor_size := Vector2(80.0, 60.0)
 @export var tile_step := 2.0
@@ -92,7 +92,7 @@ func _build_materials() -> void:
 	for index in MATERIAL_VARIANTS:
 		# Shallow copies share the generated textures across the entire floor.
 		var material := TILE_MATERIAL.duplicate(false) as ShaderMaterial
-		material.set_shader_parameter("tint", 0.97 + float(index) * (0.06 / float(MATERIAL_VARIANTS - 1)))
+		material.set_shader_parameter("tint", 0.99 + float(index) * (0.02 / float(MATERIAL_VARIANTS - 1)))
 		material.set_shader_parameter("roughness_offset", (float(index) - float(MATERIAL_VARIANTS - 1) * 0.5) * 0.006)
 		_materials.append(material)
 

@@ -13,6 +13,7 @@ func _run() -> void:
 	_check(floor_view.get_child_count() <= 160, "Spatial material batches replace individual tile nodes")
 
 	for section: MultiMeshInstance3D in floor_view.get_children():
+		_check(section.multimesh.instance_count <= 16, "Each initial lighting section covers at most sixteen tiles")
 		_check(section.material_override != null, "Every batch retains its material variant")
 	# Dummy rendering does not round-trip MultiMesh transforms. Geometry and
 	# pixels are checked by this same suite in both required native CI passes.

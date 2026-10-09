@@ -45,7 +45,7 @@ void fragment() {
 
 	// Per-tile shade: every tile is a slightly different batch of stone.
 	vec2 cell = floor((world_xz - tile_pos) * 0.5 + 0.5);
-	float tile_shade = 0.965 + tile_hash(cell) * 0.07;
+	float tile_shade = 0.99 + tile_hash(cell) * 0.02;
 
 	float mottle = texture(surface_noise, world_xz * 0.045).r;
 	float grime = texture(surface_noise, world_xz * 0.13 + vec2(0.37, 0.71)).r;
@@ -58,14 +58,14 @@ void fragment() {
 	float marks = smoothstep(0.8, 0.93, texture(detail_noise, world_xz * 0.23 + vec2(0.13, 0.57)).r) * traffic;
 	float dull = smoothstep(0.35, 0.85, texture(surface_noise, world_xz * 0.3 + vec2(0.61, 0.19)).r) * wear_amount;
 
-	vec3 color = base_color * tint * tile_shade * mix(0.9, 1.05, mottle);
-	color *= 1.0 - 0.1 * traffic;
-	color *= 1.0 - 0.16 * scuff;
-	color *= 1.0 - 0.2 * marks;
+	vec3 color = base_color * tint * tile_shade * mix(0.98, 1.02, mottle);
+	color *= 1.0 - 0.025 * traffic;
+	color *= 1.0 - 0.035 * scuff;
+	color *= 1.0 - 0.04 * marks;
 	color *= 1.0 - 0.14 * bevel;
 	ALBEDO = mix(color, grout_color, grout);
 
-	float wear = clamp(dull * 0.45 + scuff + marks * 0.8 + traffic * 0.25, 0.0, 1.0);
+	float wear = clamp(dull * 0.25 + scuff * 0.30 + marks * 0.20 + traffic * 0.10, 0.0, 1.0);
 	ROUGHNESS = mix(clamp(roughness_polished + roughness_offset, 0.0, 1.0), roughness_worn, wear);
 	ROUGHNESS = mix(ROUGHNESS, 0.9, grout);
 	METALLIC = 0.0;
