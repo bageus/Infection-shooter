@@ -28,6 +28,12 @@ func _run() -> void:
 			_check(outside, "Building keeps 30m gap outside 80x60 location")
 			_check(center.y - half.y <= -64.9, "Building continues below playable floor")
 	_check(count == 144, "Bounded 144 building budget")
+	var low_roofs := 0
+	for index in 32:
+		var transform: Transform3D = city.building_transforms[index]
+		if transform.origin.y + transform.basis.get_scale().y * 0.5 < 0.0:
+			low_roofs += 1
+	_check(low_roofs >= 8, "Nearby roofs below player reveal middle skyline")
 	var second := CITY.instantiate() as Node3D
 	root.add_child(second)
 	await process_frame

@@ -4,7 +4,7 @@ extends Node3D
 const FACADE := preload("res://game/presentation/office_floor/city_facade.gdshader")
 
 @export var location_size := Vector2(80.0, 60.0)
-@export_range(20.0, 100.0) var street_gap := 30.0
+@export_range(20.0, 100.0) var street_gap := 48.0
 @export var skyline_seed := 1042
 var building_transforms: Array[Transform3D] = []
 
@@ -34,9 +34,11 @@ func _build_side(side: int, layer: int, random: RandomNumberGenerator, mesh: Mes
 	for index in instances.instance_count:
 		var width := random.randf_range(16.0, 24.0)
 		var depth := random.randf_range(16.0, 24.0)
-		var height := random.randf_range(72.0, 128.0) + float(layer) * 12.0
-		var along := (float(index) - float(instances.instance_count - 1) * 0.5) * (32.0 + layer * 8.0)
-		var across := direction * (boundary + street_gap + float(layer) * 100.0 + depth * 0.5)
+		var height := random.randf_range(42.0, 86.0) + float(layer) * 18.0
+		if layer == 0 and index % 4 == 0:
+			height = 104.0
+		var along := (float(index) - float(instances.instance_count - 1) * 0.5) * (42.0 + layer * 12.0)
+		var across := direction * (boundary + street_gap + float(layer) * 120.0 + depth * 0.5 + float(index % 2) * 12.0)
 		var center := Vector3(along, -65.0 + height * 0.5, across)
 		var size := Vector3(width, height, depth)
 		if not along_x:
@@ -70,9 +72,8 @@ func _build_roofs(mesh: Mesh) -> void:
 	add_child(roofs)
 
 func _build_streets() -> void:
-	var material := StandardMaterial3D.new()
-	material.albedo_color = Color(0.065, 0.085, 0.11)
-	material.roughness = 1.0
+	var material := ShaderMaterial.new()
+	material.shader = preload("res://game/presentation/office_floor/city_street.gdshader")
 	for side in 4:
 		var ground := MeshInstance3D.new()
 		ground.name = "Street%d" % side
