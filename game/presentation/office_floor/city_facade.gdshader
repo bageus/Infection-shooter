@@ -12,6 +12,9 @@ void vertex() {
 }
 
 void fragment() {
+	float city_distance = length(VERTEX);
+	vec3 fog_color = vec3(0.34, 0.44, 0.58);
+	float fog = clamp(1.0 - exp(-city_distance * 0.010), 0.18, 0.985);
 	float horizontal = abs(facade_normal.x) > 0.5 ? facade_position.z : facade_position.x;
 	float variant = floor(min(style.r, 0.999) * 3.0);
 	vec2 grid = vec2(horizontal / (2.2 + variant * 0.4), facade_position.y / 3.2);
@@ -23,6 +26,12 @@ void fragment() {
 	pane *= 1.0 - step(0.5, abs(facade_normal.y));
 	float seed = dot(floor(grid), vec2(12.9898, 78.233)) + style.b * 97.0;
 	float occupied = step(0.78, fract(sin(seed) * 43758.5453));
+	if (style.g > 0.75 || city_distance > 220.0) {
+		// Distant blocks retain only low-contrast silhouettes and sparse dim lights.
+		vec3 silhouette = vec3(0.16, 0.23, 0.33);
+		float light_dot = pane * occupied * 0.10;
+		ALBEDO = mix(silhouette, fog_color, max(fog, 0.88)) + vec3(0.45, 0.33, 0.16) * light_dot * (1.0 - fog);
+	} else {
 	float reflection = 0.5 + 0.5 * sin(horizontal * 0.06 + facade_position.y * 0.03 + style.b * 6.0);
 	vec3 concrete = mix(vec3(0.24, 0.30, 0.39), vec3(0.45, 0.49, 0.56), style.r);
 	vec3 glass = mix(vec3(0.11, 0.19, 0.29), vec3(0.29, 0.40, 0.53), reflection);
@@ -33,6 +42,7 @@ void fragment() {
 	vec3 surface = mix(concrete, window, pane);
 	float side_shade = 0.82 + 0.18 * max(facade_normal.z, 0.0);
 	surface *= side_shade;
-	float haze = style.g * 0.76;
-	ALBEDO = mix(surface, vec3(0.34, 0.44, 0.58), haze);
+	float haze = max(fog, style.g * 0.90);
+	ALBEDO = mix(surface, fog_color, haze);
+	}
 }

@@ -9,4 +9,6 @@ void fragment() {
 	float lane = step(abs(across - 0.5), 0.006) * dash;
 	ALBEDO = mix(vec3(0.075, 0.10, 0.15), vec3(0.20, 0.25, 0.31), min(edge, 1.0));
 	ALBEDO = mix(ALBEDO, vec3(0.60, 0.50, 0.29), lane);
+	float fog = clamp(1.0 - exp(-length(VERTEX) * 0.025), 0.88, 0.99);
+	ALBEDO = mix(ALBEDO, vec3(0.34, 0.44, 0.58), fog);
 }
