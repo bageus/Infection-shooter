@@ -12,7 +12,7 @@ config_version=5
 
 config/name="Template Game"
 run/main_scene="res://game/bootstrap/app/menu/front_end.tscn"
-config/features=PackedStringArray("4.7")
+config/features=PackedStringArray("4.7", "GL Compatibility")
 
 [display]
 
@@ -157,6 +157,7 @@ skill_4={
 
 [rendering]
 
+renderer/rendering_method="gl_compatibility"
 renderer/rendering_method.mobile="gl_compatibility"
 lights_and_shadows/directional_shadow/size=2048
 anti_aliasing/quality/msaa_3d=2
