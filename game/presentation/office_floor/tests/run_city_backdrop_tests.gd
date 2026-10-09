@@ -10,7 +10,7 @@ func _run() -> void:
 	var city := CITY.instantiate() as Node3D
 	root.add_child(city)
 	await process_frame
-	_check(city.get_child_count() == 17, "Twelve facade batches, roofs and four streets")
+	_check(city.get_child_count() == 18, "Twelve facade batches, roofs, four streets and fog ground")
 	var count := 0
 	for child in city.get_children():
 		_check(not child is CollisionObject3D, "No physics")

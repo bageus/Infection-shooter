@@ -14,7 +14,9 @@ void vertex() {
 void fragment() {
 	float city_distance = length(VERTEX);
 	vec3 fog_color = vec3(0.34, 0.44, 0.58);
-	float fog = clamp(1.0 - exp(-city_distance * 0.010), 0.18, 0.985);
+	float distance_fog = clamp(1.0 - exp(-city_distance * 0.010), 0.18, 0.985);
+	float lower_fog = 1.0 - smoothstep(-65.0, -12.0, facade_position.y);
+	float fog = 1.0 - (1.0 - distance_fog) * (1.0 - lower_fog);
 	float horizontal = abs(facade_normal.x) > 0.5 ? facade_position.z : facade_position.x;
 	float variant = floor(min(style.r, 0.999) * 3.0);
 	vec2 grid = vec2(horizontal / (2.2 + variant * 0.4), facade_position.y / 3.2);

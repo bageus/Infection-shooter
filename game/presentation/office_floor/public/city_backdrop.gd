@@ -21,6 +21,7 @@ func _ready() -> void:
 			_build_side(side, layer, random, mesh)
 	_build_roofs(mesh)
 	_build_streets()
+	_build_fog_ground()
 
 func _build_side(side: int, layer: int, random: RandomNumberGenerator, mesh: Mesh) -> void:
 	var instances := MultiMesh.new()
@@ -86,3 +87,18 @@ func _build_streets() -> void:
 		ground.position = Vector3(0, -65.2, direction * (location_size.y + street_gap) * 0.5) if along_x else Vector3(direction * (location_size.x + street_gap) * 0.5, -65.2, 0)
 		ground.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
 		add_child(ground)
+
+func _build_fog_ground() -> void:
+	# Cover every gap below streets/buildings, including the spaces between city rings.
+	var material := StandardMaterial3D.new()
+	material.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
+	material.albedo_color = Color(0.34, 0.44, 0.58)
+	var mesh := PlaneMesh.new()
+	mesh.size = Vector2(3000, 3000)
+	mesh.material = material
+	var ground := MeshInstance3D.new()
+	ground.name = "FogGround"
+	ground.mesh = mesh
+	ground.position.y = -65.4
+	ground.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+	add_child(ground)
