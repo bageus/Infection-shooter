@@ -10,12 +10,12 @@ func _run() -> void:
 	var city := CITY.instantiate() as Node3D
 	root.add_child(city)
 	await process_frame
-	_check(city.get_child_count() == 4, "Four directional batches")
+	_check(city.get_child_count() == 17, "Twelve facade batches, roofs and four streets")
 	var count := 0
 	for child in city.get_children():
+		_check(not child is CollisionObject3D, "No physics")
 		var batch := child as MultiMeshInstance3D
-		_check(batch != null, "Only render batches, no physics")
-		if batch == null:
+		if batch == null or child.name == "RoofSetbacks":
 			continue
 		_check(batch.cast_shadow == GeometryInstance3D.SHADOW_CASTING_SETTING_OFF, "No shadow allocation")
 		var instances := batch.multimesh
@@ -27,11 +27,11 @@ func _run() -> void:
 			var outside := absf(center.x) - half.x >= 69.99 or absf(center.z) - half.z >= 59.99
 			_check(outside, "Building keeps 30m gap outside 80x60 location")
 			_check(center.y - half.y <= -64.9, "Building continues below playable floor")
-	_check(count == 32, "Bounded 32 building budget")
+	_check(count == 144, "Bounded 144 building budget")
 	var second := CITY.instantiate() as Node3D
 	root.add_child(second)
 	await process_frame
-	for index in 32:
+	for index in 144:
 		_check(city.building_transforms[index].is_equal_approx(second.building_transforms[index]), "Deterministic restart")
 	city.queue_free()
 	second.queue_free()

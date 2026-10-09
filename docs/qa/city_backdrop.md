@@ -7,3 +7,9 @@
 Проверить: из окон видны соседние фасады, при Q/E фон не исчезает, ближайшее здание не перекрывает границы этажа, restart не меняет городской силуэт. Автотест run_city_backdrop_tests.gd проверяет бюджет, отсутствие physics children, отключение shadow, зазор и воспроизводимость.
 
 Проверено локально Godot 4.7.2: editor headless import без ERROR; run_city_backdrop_tests — 0 failures. validate_project/resource paths/scene resources PASS. Native shader compilation, итоговый вид из окон и FPS не проверены: графический display в окружении отсутствует. Headless dummy renderer не возвращает MultiMesh transforms, поэтому тест размещения проверяет сохранённые authored transforms, передаваемые в MultiMesh, а не driver readback.
+
+## Глубина города — 10.10.2026
+
+144 здания в 12 MultiMesh batches (32 близких, 48 средних, 64 дальних), 32 roof setbacks в одном batch, 4 street planes. Всего 17 render nodes и 2160 треугольников. Три фасадных варианта задаются instance color; голубая дымка статична по слою и не затрагивает помещение. Небо процедурное, ambient lighting прежнее. Без импортированных текстур, физических тел и источников света.
+
+City tests: 0 failures. Полный project gate обнаружил существующую на origin/main 34da3d3 приватную ссылку base_office_layout.tscn → infected_capsule.gd, вне изменений города; source size/spec/workflow PASS. Native вид/FPS не измерены. Следующая приёмка: окна, Q/E, skyline gaps, restart на Windows.
