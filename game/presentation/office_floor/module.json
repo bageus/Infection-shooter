@@ -19,6 +19,7 @@
     "public/props/bathroom_fixture.tscn",
     "public/props/paper_prop.tscn",
     "public/structural/column.tscn",
+    "public/structural/column_2.tscn",
     "public/structural/wall_straight.tscn",
     "public/structural/wall_half_panel.tscn",
     "public/structural/wall_door.tscn",
