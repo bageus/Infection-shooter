@@ -23,9 +23,9 @@ func _ready() -> void:
 	image.texture = view.get_texture()
 	image.position = Vector2.ONE * (-DIAMETER * .5)
 	image.size = Vector2.ONE * DIAMETER
-	var material := ShaderMaterial.new()
-	material.shader = MASK
-	image.material = material
+	var mask_material := ShaderMaterial.new()
+	mask_material.shader = MASK
+	image.material = mask_material
 	add_child(image)
 	# The reticle draws above its image, never under the viewport texture.
 	var reticle := Control.new()

@@ -39,7 +39,7 @@ static func _collect(directory: String, paths: PackedStringArray) -> void:
 	for sub in DirAccess.get_directories_at(directory):
 		_collect(directory.path_join(sub), paths)
 	for file in DirAccess.get_files_at(directory):
-		if file.get_extension() == "glb" and _scene_count(directory.path_join(file)) > 1:
+		if file.get_extension() == "glb" and (directory.get_file() in ["03", "05"] or _scene_count(directory.path_join(file)) > 1):
 			paths.append(directory.path_join(file))
 
 
