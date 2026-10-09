@@ -82,8 +82,8 @@ func _update() -> void:
 	var center := right * middle.x + ahead * middle.y
 	center.y = _floor_y
 	# The quad faces +Z; lay it flat with its width along right.
-	var basis := Basis(right * half.x * 2.0, ahead * half.y * 2.0, Vector3.UP)
-	_shadow.global_transform = Transform3D(basis, center)
+	var shadow_basis := Basis(right * half.x * 2.0, ahead * half.y * 2.0, Vector3.UP)
+	_shadow.global_transform = Transform3D(shadow_basis, center)
 	_shadow.set_instance_shader_parameter(&"half_size", half)
 	_shadow.set_instance_shader_parameter(&"margin", MARGIN)
 	var lift := maxf(bottom - _floor_y, 0.0)

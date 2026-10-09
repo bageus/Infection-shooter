@@ -104,10 +104,10 @@ func _level_right_hand(skeleton: Skeleton3D) -> void:
 	_set_hand_basis(skeleton, "Right", hand_basis)
 
 
-func _set_hand_basis(skeleton: Skeleton3D, side: String, basis: Basis) -> void:
+func _set_hand_basis(skeleton: Skeleton3D, side: String, hand_basis: Basis) -> void:
 	var hand := skeleton.find_bone(side + "Hand")
 	var parent := skeleton.get_bone_parent(hand)
-	var local := skeleton.get_bone_global_pose(parent).basis.inverse() * basis
+	var local := skeleton.get_bone_global_pose(parent).basis.inverse() * hand_basis
 	skeleton.set_bone_pose_rotation(hand, local.orthonormalized().get_rotation_quaternion())
 
 

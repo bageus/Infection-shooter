@@ -40,6 +40,9 @@ const UPDATED_ELECTRONICS: Array[String] = [
 var failures: int = 0
 var models: int = 0
 var textured_models: int = 0
+var shared_maps: Dictionary = {}
+var map_bytes := 0
+var map_references := 0
 
 func _initialize() -> void:
 	_run.call_deferred()
@@ -51,7 +54,10 @@ func _run() -> void:
 		_fail("Source audit must exclude meshes not attached to any scene.")
 	_check_directory("res://models")
 	await _check_catalog_models()
-	_check_shared_pbr_resources()
+	if map_bytes > 192 * 1024 * 1024 or map_references <= shared_maps.size():
+		_fail("Updated model textures must share compressed resources within 192 MiB.")
+	print("Updated model maps: %d references, %d shared textures, %.1f MiB" %
+		[map_references, shared_maps.size(), float(map_bytes) / (1024 * 1024)])
 	print("Model texture tests: %d models, %d textured models, %d failures" % [models, textured_models, failures])
 	quit(1 if failures > 0 else 0)
 
@@ -145,7 +151,7 @@ func _check_catalog_models() -> void:
 		root.add_child(prop)
 		prop.freeze = true
 		var found: Dictionary = {"base": 0, "normal": 0, "orm": 0}
-		_inspect(prop, found)
+		_inspect(prop, found, true)
 		for slot: String in expected:
 			if int(found[slot]) < int(expected[slot]):
 				_fail(path + ": gameplay prop lost " + slot + " textures")
@@ -155,7 +161,7 @@ func _check_catalog_models() -> void:
 		await process_frame
 		print("Planner model textures OK: " + name)
 
-func _inspect(node: Node, found: Dictionary) -> void:
+func _inspect(node: Node, found: Dictionary, check_memory: bool = false) -> void:
 	if node is MeshInstance3D:
 		var mesh := node as MeshInstance3D
 		for surface in range(mesh.mesh.get_surface_count()):
@@ -165,8 +171,32 @@ func _inspect(node: Node, found: Dictionary) -> void:
 			found.base += int(material.albedo_texture != null)
 			found.normal += int(material.normal_enabled and material.normal_texture != null)
 			found.orm += int(material.get_texture(BaseMaterial3D.TEXTURE_ORM) != null or material.roughness_texture != null)
+			if check_memory:
+				_record_maps(material)
 	for child: Node in node.get_children():
-		_inspect(child, found)
+		_inspect(child, found, check_memory)
+
+func _record_maps(material: BaseMaterial3D) -> void:
+	for slot in BaseMaterial3D.TEXTURE_MAX:
+		var texture := material.get_texture(slot)
+		# Authored external decals (e.g. sticky notes) have a separate import policy.
+		if not texture is ImageTexture or maxi(texture.get_width(), texture.get_height()) < 512:
+			continue
+		map_references += 1
+		var path := texture.resource_path
+		if not path.begins_with("res://assets/runtime_shared_maps/"):
+			_fail("Updated embedded map was not shared: " + path)
+			continue
+		if shared_maps.has(path):
+			if shared_maps[path] != texture:
+				_fail("Duplicate allocation for shared map: " + path)
+			continue
+		shared_maps[path] = texture
+		var image := texture.get_image()
+		if image == null or not image.is_compressed() or not image.has_mipmaps():
+			_fail("Shared map must be VRAM compressed with mipmaps: " + path)
+		else:
+			map_bytes += image.get_data_size()
 
 func _fail(message: String) -> void:
 	failures += 1
