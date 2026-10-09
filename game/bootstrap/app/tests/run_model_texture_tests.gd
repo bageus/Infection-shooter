@@ -51,6 +51,7 @@ func _run() -> void:
 		_fail("Source audit must exclude meshes not attached to any scene.")
 	_check_directory("res://models")
 	await _check_catalog_models()
+	_check_shared_pbr_resources()
 	print("Model texture tests: %d models, %d textured models, %d failures" % [models, textured_models, failures])
 	quit(1 if failures > 0 else 0)
 
@@ -170,3 +171,38 @@ func _inspect(node: Node, found: Dictionary) -> void:
 func _fail(message: String) -> void:
 	failures += 1
 	push_error(message)
+
+
+func _check_shared_pbr_resources() -> void:
+	var models: Array[Node3D] = []
+	for name: String in ["03_book_case", "03_book_case_small"]:
+		var path := "res://models/objects/enviroments/03/" + name + ".glb"
+		var scene := load(path) as PackedScene
+		if scene == null:
+			_fail("Cannot load shared PBR fixture: " + path)
+			for model in models:
+				model.free()
+			return
+		models.append(scene.instantiate() as Node3D)
+	var first := _normal_textures(models[0])
+	var second := _normal_textures(models[1])
+	var shared := false
+	for texture: Texture2D in first:
+		if not texture.resource_path.is_empty() and texture in second:
+			shared = true
+			break
+	if not shared:
+		_fail("Bookcase variants must reuse the same external normal Texture2D resource.")
+	for model in models:
+		model.free()
+
+
+func _normal_textures(model: Node3D) -> Array[Texture2D]:
+	var result: Array[Texture2D] = []
+	for node in model.find_children("*", "MeshInstance3D", true, false):
+		var mesh := node as MeshInstance3D
+		for surface in mesh.mesh.get_surface_count():
+			var material := mesh.get_active_material(surface) as BaseMaterial3D
+			if material != null and material.normal_texture != null and material.normal_texture not in result:
+				result.append(material.normal_texture)
+	return result

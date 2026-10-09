@@ -27,6 +27,8 @@ jobs:
         run: |
           python tools/validate_scene_resources.py
           python tools/check_resource_paths.py
+          python tools/deduplicate_model_textures.py --check
+          python tools/test_texture_deduplication.py
           python tools/build_display_surfaces.py --check
           python tools/check_model_textures.py
           python tools/test_model_textures.py

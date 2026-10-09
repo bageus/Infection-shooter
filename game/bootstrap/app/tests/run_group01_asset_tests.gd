@@ -43,7 +43,10 @@ func _check_model(model: Node3D, filename: String) -> void:
 	elif filename.begins_with("01_stairs") or filename.begins_with("01_elevator_cabin"):
 		family = "stairs_elevators"
 	var prefix := "carpet" if family == "carpet" else "architecture"
-	var expected := load(ROOT_PATH + "textures/" + family + "/" + prefix + "_albedo.png") as Texture2D
+	var texture_path := ROOT_PATH + "textures/" + family + "/" + prefix + "_albedo.png"
+	if family == "stairs_elevators":
+		texture_path = ROOT_PATH + "textures/architecture_albedo.png"
+	var expected := load(texture_path) as Texture2D
 	_check(expected != null, "Shared texture exists: " + family)
 	var opaque := 0
 	var glass := 0
