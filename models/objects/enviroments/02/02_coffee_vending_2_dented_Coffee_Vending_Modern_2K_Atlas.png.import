@@ -3,9 +3,10 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://dprygxgrt4bkv"
-path="res://.godot/imported/02_coffee_vending_2_dented_Coffee_Vending_Modern_2K_Atlas.png-bee5a419c1476f4e9696408287f26884.ctex"
+path.s3tc="res://.godot/imported/02_coffee_vending_2_dented_Coffee_Vending_Modern_2K_Atlas.png-bee5a419c1476f4e9696408287f26884.s3tc.ctex"
 metadata={
-"vram_texture": false
+"imported_formats": ["s3tc_bptc"],
+"vram_texture": true
 }
 generator_parameters={
 "md5": "5315146b0a92d3d6389ca1dd04ff76ae"
@@ -14,11 +15,11 @@ generator_parameters={
 [deps]
 
 source_file="res://models/objects/enviroments/02/02_coffee_vending_2_dented_Coffee_Vending_Modern_2K_Atlas.png"
-dest_files=["res://.godot/imported/02_coffee_vending_2_dented_Coffee_Vending_Modern_2K_Atlas.png-bee5a419c1476f4e9696408287f26884.ctex"]
+dest_files=["res://.godot/imported/02_coffee_vending_2_dented_Coffee_Vending_Modern_2K_Atlas.png-bee5a419c1476f4e9696408287f26884.s3tc.ctex"]
 
 [params]
 
-compress/mode=0
+compress/mode=2
 compress/high_quality=false
 compress/lossy_quality=0.7
 compress/uastc_level=0

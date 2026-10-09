@@ -3,9 +3,10 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://74ot1e2rojuw"
-path="res://.godot/imported/02_toilet_new_steel_Normal.png-23f134c973b2ce3831203f17f800bfb5.ctex"
+path.s3tc="res://.godot/imported/02_toilet_new_steel_Normal.png-23f134c973b2ce3831203f17f800bfb5.s3tc.ctex"
 metadata={
-"vram_texture": false
+"imported_formats": ["s3tc_bptc"],
+"vram_texture": true
 }
 generator_parameters={
 "md5": "bde48d9a15d534c87d40b8f9c1b0eae6"
@@ -14,11 +15,11 @@ generator_parameters={
 [deps]
 
 source_file="res://models/objects/enviroments/02/02_toilet_new_steel_Normal.png"
-dest_files=["res://.godot/imported/02_toilet_new_steel_Normal.png-23f134c973b2ce3831203f17f800bfb5.ctex"]
+dest_files=["res://.godot/imported/02_toilet_new_steel_Normal.png-23f134c973b2ce3831203f17f800bfb5.s3tc.ctex"]
 
 [params]
 
-compress/mode=0
+compress/mode=2
 compress/high_quality=false
 compress/lossy_quality=0.7
 compress/uastc_level=0

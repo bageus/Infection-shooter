@@ -3,9 +3,10 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://ctxk4l4u7auos"
-path="res://.godot/imported/05_desk_phone_05_desk_phone_Legends_2K.png-2644ce3cb4e8b4b295bdbada1b3ff6b7.ctex"
+path.s3tc="res://.godot/imported/05_desk_phone_05_desk_phone_Legends_2K.png-2644ce3cb4e8b4b295bdbada1b3ff6b7.s3tc.ctex"
 metadata={
-"vram_texture": false
+"imported_formats": ["s3tc_bptc"],
+"vram_texture": true
 }
 generator_parameters={
 "md5": "f63fb2716ce86cd1cf15510b57262e9b"
@@ -14,11 +15,11 @@ generator_parameters={
 [deps]
 
 source_file="res://models/objects/enviroments/05/05_desk_phone_05_desk_phone_Legends_2K.png"
-dest_files=["res://.godot/imported/05_desk_phone_05_desk_phone_Legends_2K.png-2644ce3cb4e8b4b295bdbada1b3ff6b7.ctex"]
+dest_files=["res://.godot/imported/05_desk_phone_05_desk_phone_Legends_2K.png-2644ce3cb4e8b4b295bdbada1b3ff6b7.s3tc.ctex"]
 
 [params]
 
-compress/mode=0
+compress/mode=2
 compress/high_quality=false
 compress/lossy_quality=0.7
 compress/uastc_level=0

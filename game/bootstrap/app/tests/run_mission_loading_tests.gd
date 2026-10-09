@@ -51,6 +51,7 @@ func _run() -> void:
 	var failure: Node = stage.find_children("*", "CanvasLayer", true, false).filter(func(node: Node) -> bool: return node.get_script() != null and node.get_script().resource_path.ends_with("mission_loader.gd"))[0]
 	await _wait(func() -> bool: return (failure.get("back") as Button).visible)
 	_expect(current_scene == stage and root.get_camera_3d() == camera, "Failed restart preserves the previous mission and camera")
+	_expect(stage.visible, "Failed restart restores the previous mission visuals")
 	failure.call("_close_error")
 	await process_frame
 	_write(JSON.stringify({"version": 8, "objects": records}))
@@ -58,6 +59,7 @@ func _run() -> void:
 	stage.call("_on_restart_pressed")
 	stage.call("_on_restart_pressed")
 	_expect(current_scene == before and paused, "Restart also retains and pauses the previous mission while loading")
+	_expect(not before.visible, "Restart suspends old floor rendering behind the loading overlay")
 	await _wait(func() -> bool: return current_scene != before)
 	_expect(current_scene != before and not paused, "Restart completes via the same asynchronous pipeline")
 	await process_frame

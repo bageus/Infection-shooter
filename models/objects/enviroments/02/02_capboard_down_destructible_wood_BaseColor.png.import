@@ -3,9 +3,10 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://dvt8fflvsuc5n"
-path="res://.godot/imported/02_capboard_down_destructible_wood_BaseColor.png-2c8115e49e5a630bace15702bffc202a.ctex"
+path.s3tc="res://.godot/imported/02_capboard_down_destructible_wood_BaseColor.png-2c8115e49e5a630bace15702bffc202a.s3tc.ctex"
 metadata={
-"vram_texture": false
+"imported_formats": ["s3tc_bptc"],
+"vram_texture": true
 }
 generator_parameters={
 "md5": "19430fa373f216ffd6d477779f6055e8"
@@ -14,11 +15,11 @@ generator_parameters={
 [deps]
 
 source_file="res://models/objects/enviroments/02/02_capboard_down_destructible_wood_BaseColor.png"
-dest_files=["res://.godot/imported/02_capboard_down_destructible_wood_BaseColor.png-2c8115e49e5a630bace15702bffc202a.ctex"]
+dest_files=["res://.godot/imported/02_capboard_down_destructible_wood_BaseColor.png-2c8115e49e5a630bace15702bffc202a.s3tc.ctex"]
 
 [params]
 
-compress/mode=0
+compress/mode=2
 compress/high_quality=false
 compress/lossy_quality=0.7
 compress/uastc_level=0

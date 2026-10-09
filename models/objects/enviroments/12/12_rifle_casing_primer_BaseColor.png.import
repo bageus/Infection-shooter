@@ -3,9 +3,10 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://b7wpb2lytjcui"
-path="res://.godot/imported/12_rifle_casing_primer_BaseColor.png-d13cb576e7d5081739d9da446302508c.ctex"
+path.s3tc="res://.godot/imported/12_rifle_casing_primer_BaseColor.png-d13cb576e7d5081739d9da446302508c.s3tc.ctex"
 metadata={
-"vram_texture": false
+"imported_formats": ["s3tc_bptc"],
+"vram_texture": true
 }
 generator_parameters={
 "md5": "2bbfc587cdfc60d9f9ee2b215413f074"
@@ -14,11 +15,11 @@ generator_parameters={
 [deps]
 
 source_file="res://models/objects/enviroments/12/12_rifle_casing_primer_BaseColor.png"
-dest_files=["res://.godot/imported/12_rifle_casing_primer_BaseColor.png-d13cb576e7d5081739d9da446302508c.ctex"]
+dest_files=["res://.godot/imported/12_rifle_casing_primer_BaseColor.png-d13cb576e7d5081739d9da446302508c.s3tc.ctex"]
 
 [params]
 
-compress/mode=0
+compress/mode=2
 compress/high_quality=false
 compress/lossy_quality=0.7
 compress/uastc_level=0

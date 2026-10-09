@@ -3,9 +3,10 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://cb1xext4u3mfd"
-path="res://.godot/imported/05_minipc_powder_BaseColor_2K.png-09eded45b33740d4c4ad68c849be4a22.ctex"
+path.s3tc="res://.godot/imported/05_minipc_powder_BaseColor_2K.png-09eded45b33740d4c4ad68c849be4a22.s3tc.ctex"
 metadata={
-"vram_texture": false
+"imported_formats": ["s3tc_bptc"],
+"vram_texture": true
 }
 generator_parameters={
 "md5": "1c89a85061b5b38079c8534d929b3acb"
@@ -14,11 +15,11 @@ generator_parameters={
 [deps]
 
 source_file="res://models/objects/enviroments/05/05_minipc_powder_BaseColor_2K.png"
-dest_files=["res://.godot/imported/05_minipc_powder_BaseColor_2K.png-09eded45b33740d4c4ad68c849be4a22.ctex"]
+dest_files=["res://.godot/imported/05_minipc_powder_BaseColor_2K.png-09eded45b33740d4c4ad68c849be4a22.s3tc.ctex"]
 
 [params]
 
-compress/mode=0
+compress/mode=2
 compress/high_quality=false
 compress/lossy_quality=0.7
 compress/uastc_level=0

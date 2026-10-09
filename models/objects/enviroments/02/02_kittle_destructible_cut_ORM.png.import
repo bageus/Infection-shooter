@@ -3,9 +3,10 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://co5fsgym2bs4a"
-path="res://.godot/imported/02_kittle_destructible_cut_ORM.png-7994dde61a65c4d429830e892e2a1609.ctex"
+path.s3tc="res://.godot/imported/02_kittle_destructible_cut_ORM.png-7994dde61a65c4d429830e892e2a1609.s3tc.ctex"
 metadata={
-"vram_texture": false
+"imported_formats": ["s3tc_bptc"],
+"vram_texture": true
 }
 generator_parameters={
 "md5": "4e1b5fd4251da701faa48801eb068358"
@@ -14,11 +15,11 @@ generator_parameters={
 [deps]
 
 source_file="res://models/objects/enviroments/02/02_kittle_destructible_cut_ORM.png"
-dest_files=["res://.godot/imported/02_kittle_destructible_cut_ORM.png-7994dde61a65c4d429830e892e2a1609.ctex"]
+dest_files=["res://.godot/imported/02_kittle_destructible_cut_ORM.png-7994dde61a65c4d429830e892e2a1609.s3tc.ctex"]
 
 [params]
 
-compress/mode=0
+compress/mode=2
 compress/high_quality=false
 compress/lossy_quality=0.7
 compress/uastc_level=0

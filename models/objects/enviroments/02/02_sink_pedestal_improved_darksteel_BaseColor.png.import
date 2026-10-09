@@ -3,9 +3,10 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://vsw5ihkpbcu5"
-path="res://.godot/imported/02_sink_pedestal_improved_darksteel_BaseColor.png-fc0127cedd218af14771741982f0c04c.ctex"
+path.s3tc="res://.godot/imported/02_sink_pedestal_improved_darksteel_BaseColor.png-fc0127cedd218af14771741982f0c04c.s3tc.ctex"
 metadata={
-"vram_texture": false
+"imported_formats": ["s3tc_bptc"],
+"vram_texture": true
 }
 generator_parameters={
 "md5": "a1ed430eeb822de95ed9faaba2f3c4a6"
@@ -14,11 +15,11 @@ generator_parameters={
 [deps]
 
 source_file="res://models/objects/enviroments/02/02_sink_pedestal_improved_darksteel_BaseColor.png"
-dest_files=["res://.godot/imported/02_sink_pedestal_improved_darksteel_BaseColor.png-fc0127cedd218af14771741982f0c04c.ctex"]
+dest_files=["res://.godot/imported/02_sink_pedestal_improved_darksteel_BaseColor.png-fc0127cedd218af14771741982f0c04c.s3tc.ctex"]
 
 [params]
 
-compress/mode=0
+compress/mode=2
 compress/high_quality=false
 compress/lossy_quality=0.7
 compress/uastc_level=0

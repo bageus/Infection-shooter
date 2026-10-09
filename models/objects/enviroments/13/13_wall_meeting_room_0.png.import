@@ -3,9 +3,10 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://dkdjptlgk5aqb"
-path="res://.godot/imported/13_wall_meeting_room_0.png-f21f95e78765fe7fa28349eb33259d72.ctex"
+path.s3tc="res://.godot/imported/13_wall_meeting_room_0.png-f21f95e78765fe7fa28349eb33259d72.s3tc.ctex"
 metadata={
-"vram_texture": false
+"imported_formats": ["s3tc_bptc"],
+"vram_texture": true
 }
 generator_parameters={
 "md5": "eace8e2f36b8faee326a0886260cfa0e"
@@ -14,11 +15,11 @@ generator_parameters={
 [deps]
 
 source_file="res://models/objects/enviroments/13/13_wall_meeting_room_0.png"
-dest_files=["res://.godot/imported/13_wall_meeting_room_0.png-f21f95e78765fe7fa28349eb33259d72.ctex"]
+dest_files=["res://.godot/imported/13_wall_meeting_room_0.png-f21f95e78765fe7fa28349eb33259d72.s3tc.ctex"]
 
 [params]
 
-compress/mode=0
+compress/mode=2
 compress/high_quality=false
 compress/lossy_quality=0.7
 compress/uastc_level=0

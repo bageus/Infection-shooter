@@ -3,9 +3,10 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://ca2ffph3bsno6"
-path="res://.godot/imported/02_capboard_down_destructible_laminate_ORM.png-152e1ae4267b25a8f96f716e3186c27e.ctex"
+path.s3tc="res://.godot/imported/02_capboard_down_destructible_laminate_ORM.png-152e1ae4267b25a8f96f716e3186c27e.s3tc.ctex"
 metadata={
-"vram_texture": false
+"imported_formats": ["s3tc_bptc"],
+"vram_texture": true
 }
 generator_parameters={
 "md5": "b1a5a89e3f5367061c63ce6eee89fbe4"
@@ -14,11 +15,11 @@ generator_parameters={
 [deps]
 
 source_file="res://models/objects/enviroments/02/02_capboard_down_destructible_laminate_ORM.png"
-dest_files=["res://.godot/imported/02_capboard_down_destructible_laminate_ORM.png-152e1ae4267b25a8f96f716e3186c27e.ctex"]
+dest_files=["res://.godot/imported/02_capboard_down_destructible_laminate_ORM.png-152e1ae4267b25a8f96f716e3186c27e.s3tc.ctex"]
 
 [params]
 
-compress/mode=0
+compress/mode=2
 compress/high_quality=false
 compress/lossy_quality=0.7
 compress/uastc_level=0

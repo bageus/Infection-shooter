@@ -3,9 +3,10 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://b3bt43i8ka253"
-path="res://.godot/imported/06_simple_chair_leather_Normal.png-00629425c9be1822e4c020749892723c.ctex"
+path.s3tc="res://.godot/imported/06_simple_chair_leather_Normal.png-00629425c9be1822e4c020749892723c.s3tc.ctex"
 metadata={
-"vram_texture": false
+"imported_formats": ["s3tc_bptc"],
+"vram_texture": true
 }
 generator_parameters={
 "md5": "743c4be4ec62d885573cb41c6381a95b"
@@ -14,11 +15,11 @@ generator_parameters={
 [deps]
 
 source_file="res://models/objects/enviroments/06/06_simple_chair_leather_Normal.png"
-dest_files=["res://.godot/imported/06_simple_chair_leather_Normal.png-00629425c9be1822e4c020749892723c.ctex"]
+dest_files=["res://.godot/imported/06_simple_chair_leather_Normal.png-00629425c9be1822e4c020749892723c.s3tc.ctex"]
 
 [params]
 
-compress/mode=0
+compress/mode=2
 compress/high_quality=false
 compress/lossy_quality=0.7
 compress/uastc_level=0

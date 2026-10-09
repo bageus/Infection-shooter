@@ -12,6 +12,8 @@ var progress: ProgressBar
 var back: Button
 var pending: Node3D
 var _started := false
+var _previous_scene: Node3D
+var _previous_visible := true
 var _previous_camera: Camera3D
 var _previous_pause := false
 var _previous_mouse := Input.MOUSE_MODE_VISIBLE
@@ -56,6 +58,11 @@ func start() -> void:
 	_started = true
 	var tree := get_tree()
 	var previous := tree.current_scene
+	if previous is Node3D:
+		_previous_scene = previous
+		_previous_visible = previous.visible
+		# Retain rollback state, but do not render the old floor behind the overlay.
+		previous.hide()
 	_previous_camera = get_viewport().get_camera_3d()
 	_previous_pause = tree.paused
 	_previous_mouse = Input.mouse_mode
@@ -110,6 +117,7 @@ func start() -> void:
 	tree.paused = false
 	Input.mouse_mode = Input.MOUSE_MODE_CAPTURED
 	pending = null
+	_previous_scene = null
 	completed.emit(true)
 	if is_instance_valid(previous):
 		previous.queue_free()
@@ -124,7 +132,7 @@ func _request_scene(tree: SceneTree) -> PackedScene:
 	while status == ResourceLoader.THREAD_LOAD_IN_PROGRESS:
 		var fraction: Array = []
 		status = ResourceLoader.load_threaded_get_status(scene_path, fraction)
-		_set_progress(0.15 * float(fraction[0]) if not fraction.is_empty() else 0, "resources")
+		_set_progress(0.15 * float(fraction[0]) if not fraction.is_empty() else 0.0, "resources")
 		await tree.process_frame
 	if status != ResourceLoader.THREAD_LOAD_LOADED:
 		_fail("Не удалось загрузить миссию." if _ru else "Cannot load mission.")
@@ -142,6 +150,7 @@ func _set_progress(value: float, phase: String) -> void:
 
 
 func _fail(reason: String) -> void:
+	_restore_previous_visual()
 	if pending != null:
 		pending.queue_free()
 		pending = null
@@ -161,6 +170,12 @@ func _close_error() -> void:
 	queue_free()
 
 
+func _restore_previous_visual() -> void:
+	if is_instance_valid(_previous_scene):
+		_previous_scene.visible = _previous_visible
+
+
 func _exit_tree() -> void:
+	_restore_previous_visual()
 	if is_instance_valid(pending):
 		pending.queue_free()

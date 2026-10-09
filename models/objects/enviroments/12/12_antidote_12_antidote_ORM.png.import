@@ -3,9 +3,10 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://em4cwqf40653"
-path="res://.godot/imported/12_antidote_12_antidote_ORM.png-446d7508001fa4eb396242cf49da5a4d.ctex"
+path.s3tc="res://.godot/imported/12_antidote_12_antidote_ORM.png-446d7508001fa4eb396242cf49da5a4d.s3tc.ctex"
 metadata={
-"vram_texture": false
+"imported_formats": ["s3tc_bptc"],
+"vram_texture": true
 }
 generator_parameters={
 "md5": "6fc53fa92ee173566a5fbb4cf0970146"
@@ -14,11 +15,11 @@ generator_parameters={
 [deps]
 
 source_file="res://models/objects/enviroments/12/12_antidote_12_antidote_ORM.png"
-dest_files=["res://.godot/imported/12_antidote_12_antidote_ORM.png-446d7508001fa4eb396242cf49da5a4d.ctex"]
+dest_files=["res://.godot/imported/12_antidote_12_antidote_ORM.png-446d7508001fa4eb396242cf49da5a4d.s3tc.ctex"]
 
 [params]
 
-compress/mode=0
+compress/mode=2
 compress/high_quality=false
 compress/lossy_quality=0.7
 compress/uastc_level=0

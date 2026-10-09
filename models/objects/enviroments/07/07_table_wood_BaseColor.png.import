@@ -3,9 +3,10 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://dnaoaookl0irt"
-path="res://.godot/imported/07_table_wood_BaseColor.png-20813752ad90b3118927a147d2445f86.ctex"
+path.s3tc="res://.godot/imported/07_table_wood_BaseColor.png-20813752ad90b3118927a147d2445f86.s3tc.ctex"
 metadata={
-"vram_texture": false
+"imported_formats": ["s3tc_bptc"],
+"vram_texture": true
 }
 generator_parameters={
 "md5": "4eee3302b786a1645f3ee890a0e414bf"
@@ -14,11 +15,11 @@ generator_parameters={
 [deps]
 
 source_file="res://models/objects/enviroments/07/07_table_wood_BaseColor.png"
-dest_files=["res://.godot/imported/07_table_wood_BaseColor.png-20813752ad90b3118927a147d2445f86.ctex"]
+dest_files=["res://.godot/imported/07_table_wood_BaseColor.png-20813752ad90b3118927a147d2445f86.s3tc.ctex"]
 
 [params]
 
-compress/mode=0
+compress/mode=2
 compress/high_quality=false
 compress/lossy_quality=0.7
 compress/uastc_level=0

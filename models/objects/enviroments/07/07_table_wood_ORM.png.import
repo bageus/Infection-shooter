@@ -3,9 +3,10 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://dy7ne4ranqfr"
-path="res://.godot/imported/07_table_wood_ORM.png-754e44582a541c771e0dc4a8335e0061.ctex"
+path.s3tc="res://.godot/imported/07_table_wood_ORM.png-754e44582a541c771e0dc4a8335e0061.s3tc.ctex"
 metadata={
-"vram_texture": false
+"imported_formats": ["s3tc_bptc"],
+"vram_texture": true
 }
 generator_parameters={
 "md5": "16048f690b1bff2c273f07931ee8d4ff"
@@ -14,11 +15,11 @@ generator_parameters={
 [deps]
 
 source_file="res://models/objects/enviroments/07/07_table_wood_ORM.png"
-dest_files=["res://.godot/imported/07_table_wood_ORM.png-754e44582a541c771e0dc4a8335e0061.ctex"]
+dest_files=["res://.godot/imported/07_table_wood_ORM.png-754e44582a541c771e0dc4a8335e0061.s3tc.ctex"]
 
 [params]
 
-compress/mode=0
+compress/mode=2
 compress/high_quality=false
 compress/lossy_quality=0.7
 compress/uastc_level=0

@@ -3,9 +3,10 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://d2r5vaas4jb40"
-path="res://.godot/imported/02_microwave_destructible_glass_ORM.png-c628c3f6155f70a879eff41cd52f518c.ctex"
+path.s3tc="res://.godot/imported/02_microwave_destructible_glass_ORM.png-c628c3f6155f70a879eff41cd52f518c.s3tc.ctex"
 metadata={
-"vram_texture": false
+"imported_formats": ["s3tc_bptc"],
+"vram_texture": true
 }
 generator_parameters={
 "md5": "59c0880d0a4063ae64035641ab1ccf9b"
@@ -14,11 +15,11 @@ generator_parameters={
 [deps]
 
 source_file="res://models/objects/enviroments/02/02_microwave_destructible_glass_ORM.png"
-dest_files=["res://.godot/imported/02_microwave_destructible_glass_ORM.png-c628c3f6155f70a879eff41cd52f518c.ctex"]
+dest_files=["res://.godot/imported/02_microwave_destructible_glass_ORM.png-c628c3f6155f70a879eff41cd52f518c.s3tc.ctex"]
 
 [params]
 
-compress/mode=0
+compress/mode=2
 compress/high_quality=false
 compress/lossy_quality=0.7
 compress/uastc_level=0

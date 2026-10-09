@@ -3,9 +3,10 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://dm28c805fvqou"
-path="res://.godot/imported/02_vending_machine_fantas_dented_Neutral_DRINKS_Corrected_Label.png-9bcb35970b001f90591cca5e0e036f0a.ctex"
+path.s3tc="res://.godot/imported/02_vending_machine_fantas_dented_Neutral_DRINKS_Corrected_Label.png-9bcb35970b001f90591cca5e0e036f0a.s3tc.ctex"
 metadata={
-"vram_texture": false
+"imported_formats": ["s3tc_bptc"],
+"vram_texture": true
 }
 generator_parameters={
 "md5": "151d6c68f4ed179b1b4f5b1c8ea951ce"
@@ -14,11 +15,11 @@ generator_parameters={
 [deps]
 
 source_file="res://models/objects/enviroments/02/02_vending_machine_fantas_dented_Neutral_DRINKS_Corrected_Label.png"
-dest_files=["res://.godot/imported/02_vending_machine_fantas_dented_Neutral_DRINKS_Corrected_Label.png-9bcb35970b001f90591cca5e0e036f0a.ctex"]
+dest_files=["res://.godot/imported/02_vending_machine_fantas_dented_Neutral_DRINKS_Corrected_Label.png-9bcb35970b001f90591cca5e0e036f0a.s3tc.ctex"]
 
 [params]
 
-compress/mode=0
+compress/mode=2
 compress/high_quality=false
 compress/lossy_quality=0.7
 compress/uastc_level=0

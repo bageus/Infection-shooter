@@ -3,9 +3,10 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://b4escguf68big"
-path="res://.godot/imported/11_deco_plant_leaf_ORM.png-daf71ab74832d2f977257f48342eb9b7.ctex"
+path.s3tc="res://.godot/imported/11_deco_plant_leaf_ORM.png-daf71ab74832d2f977257f48342eb9b7.s3tc.ctex"
 metadata={
-"vram_texture": false
+"imported_formats": ["s3tc_bptc"],
+"vram_texture": true
 }
 generator_parameters={
 "md5": "debe1df42d78015cac5179342b3b9466"
@@ -14,11 +15,11 @@ generator_parameters={
 [deps]
 
 source_file="res://models/objects/enviroments/11/11_deco_plant_leaf_ORM.png"
-dest_files=["res://.godot/imported/11_deco_plant_leaf_ORM.png-daf71ab74832d2f977257f48342eb9b7.ctex"]
+dest_files=["res://.godot/imported/11_deco_plant_leaf_ORM.png-daf71ab74832d2f977257f48342eb9b7.s3tc.ctex"]
 
 [params]
 
-compress/mode=0
+compress/mode=2
 compress/high_quality=false
 compress/lossy_quality=0.7
 compress/uastc_level=0

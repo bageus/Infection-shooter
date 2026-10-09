@@ -3,9 +3,10 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://dt5aixlmcfbhr"
-path="res://.godot/imported/02_toilet_new_ceramic_ORM.png-17b9cd3152b1de3d4fb7359ca50b1054.ctex"
+path.s3tc="res://.godot/imported/02_toilet_new_ceramic_ORM.png-17b9cd3152b1de3d4fb7359ca50b1054.s3tc.ctex"
 metadata={
-"vram_texture": false
+"imported_formats": ["s3tc_bptc"],
+"vram_texture": true
 }
 generator_parameters={
 "md5": "15c3ba4f7adcc515f79761b6c1c3d70d"
@@ -14,11 +15,11 @@ generator_parameters={
 [deps]
 
 source_file="res://models/objects/enviroments/02/02_toilet_new_ceramic_ORM.png"
-dest_files=["res://.godot/imported/02_toilet_new_ceramic_ORM.png-17b9cd3152b1de3d4fb7359ca50b1054.ctex"]
+dest_files=["res://.godot/imported/02_toilet_new_ceramic_ORM.png-17b9cd3152b1de3d4fb7359ca50b1054.s3tc.ctex"]
 
 [params]
 
-compress/mode=0
+compress/mode=2
 compress/high_quality=false
 compress/lossy_quality=0.7
 compress/uastc_level=0
