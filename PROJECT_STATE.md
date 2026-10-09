@@ -9,6 +9,9 @@ build_status: T002_HEADLESS_VALIDATED_VISUAL_PENDING
 updated: 2026-10-09
 ---
 
+09.10.2026 (PR #71, итог проверки): на d854adc Architecture, effects-smoke, weapon-rendering и planner-rendering в Compatibility/Forward+ PASS. Forward+ planner_extension: 0 failures, все physics/pose/aim assertions сохранены; occlusion: 0 failures. Полный общий runtime 4d627a0 PASS (37915383675), включая оба native renderer; повторный общий runtime d854adc ещё выполняется (37916693102). Полный локальный headless 68/68, дополнительный аудит 260 моделей, main 180 кадров, gates и Python tests PASS. PR #71 готов к ревью и не слит. PR #69 со светильниками тоже является предком main, light_view/defaults сохранены. API/DTO/owners/зависимости прежние, исключений нет. Точный следующий шаг: проверить окончательный общий CI PR #71 перед слиянием, затем ручная Windows/Web визуальная приёмка и FPS. T002 остаётся IN_PROGRESS общей приёмки MVP.
+
+
 09.10.2026 (PR #71, native planner timeout): первый CI 37915383675 прошёл импорт, Architecture, оба weapon-rendering, effects-smoke и Compatibility planner; Forward+ planner_extension остановлен timeout 180 секунд без ERROR/assertion failure. Software-GPU тратит время на отрисовку полной карты с обновлёнными PBR-материалами во время ожидания физических кадров. Тестовый viewport уменьшен 640×360 → 320×180; вся authored карта, 90 физических кадров, позы/aim/lamps/particles assertions сохранены, в этом наборе нет pixel assertions. Добавлены timestamps этапов для диагностики. Игровые разрешения/ресурсы/код прежние. Полный headless до этой правки 68/68 PASS; после правки focused planner_extension (24 с, 0 failures) и project gates PASS. Следующий точный шаг: подтвердить исправленный native planner в обоих renderer и итоговый runtime CI. T002 IN_PROGRESS.
 
 
