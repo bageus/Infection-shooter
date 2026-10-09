@@ -9,7 +9,6 @@ const PROP_SCENE := preload("res://game/presentation/office_floor/public/props/e
 const MODELS := "res://models/objects/enviroments/"
 const BOX := MODELS + "04/04_cardboard_box_closed.glb"
 const CRATE := MODELS + "04/04_crate_large_broken.glb"
-const MILITARY := MODELS + "04/04_military_crate.glb"
 const VENDING := MODELS + "02/02_vending_automat_1_dented.glb"
 const MUG := MODELS + "09/09_mug.glb"
 const SMALL_BOX := MODELS + "04/04_cardboard_boxes_1.glb"
@@ -105,9 +104,11 @@ func _walker(stage: Node3D, at: Vector3, strength := 1.0) -> Walker:
 
 
 # Lets the item settle, then walks toward +X for `seconds`; returns the item's travel.
-func _walk_into(model: String, seconds: float, strength := 1.0) -> Dictionary:
+func _walk_into(model: String, seconds: float, strength := 1.0, weight_override := -1.0) -> Dictionary:
 	var stage := _stage()
 	var prop := _prop(stage, model, Vector3(2.0, 0.05, 0))
+	if weight_override > 0.0:
+		prop.set("weight_kg", weight_override)
 	for frame in 30:
 		await physics_frame
 	var walker := _walker(stage, Vector3(0, 0.92, 0), strength)
@@ -137,10 +138,10 @@ func _test_weight_slows_push() -> void:
 
 
 func _test_strength() -> void:
-	var player := await _walk_into(MILITARY, 1.2)
-	var brute := await _walk_into(MILITARY, 2.0, 2.0)
-	_expect(float(player["moved"]) < 0.08, "The player cannot push a 32 kg military crate (moved %.2f m)." % float(player["moved"]))
-	_expect(float(brute["moved"]) > 0.15, "A Brute shoves the military crate (moved %.2f m)." % float(brute["moved"]))
+	var player := await _walk_into(CRATE, 1.2, 1.0, 32.0)
+	var brute := await _walk_into(CRATE, 2.0, 2.0, 32.0)
+	_expect(float(player["moved"]) < 0.08, "The player cannot push a 32 kg crate (moved %.2f m)." % float(player["moved"]))
+	_expect(float(brute["moved"]) > 0.15, "A Brute shoves the 32 kg crate (moved %.2f m)." % float(brute["moved"]))
 
 
 func _test_heavy_blocks() -> void:

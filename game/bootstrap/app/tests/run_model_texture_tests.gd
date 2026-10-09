@@ -1,5 +1,15 @@
 extends SceneTree
 
+const CATALOG := preload("res://game/bootstrap/app/planning_catalog.gd")
+const UPDATED_MODELS: Array[String] = [
+	"03_book_case", "03_book_case_small", "03_book_case_with_back",
+	"03_book_case_with_back_small", "03_bookshelf", "03_box_1_metal_dented",
+	"03_file_cabinet_large_shelf_fancy", "03_file_cabinet_largest",
+	"03_file_cabinet_small_shelf_fancy", "03_file_cabinet_small_with_shelfs",
+	"03_file_cabinet_smaller", "03_locker_tall_dented",
+	"03_server_rack", "03_server_rack2", "03_server_rack3"
+]
+
 var failures: int = 0
 var models: int = 0
 var textured_models: int = 0
@@ -8,7 +18,12 @@ func _initialize() -> void:
 	_run.call_deferred()
 
 func _run() -> void:
+	var fixture := {"scenes": [{"nodes": [0]}], "nodes": [{"mesh": 1}],
+		"meshes": [{}, {}]}
+	if _source_mesh_indices(fixture).keys() != [1]:
+		_fail("Source audit must exclude meshes not attached to any scene.")
 	_check_directory("res://models")
+	await _check_catalog_models()
 	print("Model texture tests: %d models, %d textured models, %d failures" % [models, textured_models, failures])
 	quit(1 if failures > 0 else 0)
 
@@ -22,6 +37,7 @@ func _check_directory(path: String) -> void:
 			_check_model(path + "/" + entry)
 
 func _check_model(path: String) -> void:
+	print("Checking model textures: " + path)
 	var file := FileAccess.open(path, FileAccess.READ)
 	if file == null:
 		_fail(path + ": cannot read source")
@@ -31,7 +47,8 @@ func _check_model(path: String) -> void:
 	file.get_32()
 	var document: Dictionary = JSON.parse_string(file.get_buffer(length).get_string_from_utf8())
 	var expected: Dictionary = {"base": 0, "normal": 0, "orm": 0}
-	for mesh: Dictionary in document.get("meshes", []):
+	for mesh_index: int in _source_mesh_indices(document):
+		var mesh: Dictionary = document["meshes"][mesh_index]
 		for primitive: Dictionary in mesh.get("primitives", []):
 			var index: int = primitive.get("material", -1)
 			if index < 0:
@@ -54,6 +71,55 @@ func _check_model(path: String) -> void:
 	models += 1
 	textured_models += int(int(found.base) + int(found.normal) + int(found.orm) > 0)
 	instance.free()
+
+func _source_mesh_indices(document: Dictionary) -> Dictionary:
+	var pending: Array = []
+	for scene: Dictionary in document.get("scenes", []):
+		pending.append_array(scene.get("nodes", []))
+	var visited: Dictionary = {}
+	var meshes: Dictionary = {}
+	while not pending.is_empty():
+		var index: int = pending.pop_back()
+		if visited.has(index):
+			continue
+		visited[index] = true
+		var node: Dictionary = document["nodes"][index]
+		if node.has("mesh"):
+			meshes[int(node["mesh"])] = true
+		pending.append_array(node.get("children", []))
+	return meshes
+
+func _check_catalog_models() -> void:
+	var catalog := CATALOG.new()
+	catalog._build_environment_catalogs()
+	var entries: Array = catalog.group_catalogs["03"]
+	for name: String in UPDATED_MODELS:
+		var path := "res://models/objects/enviroments/03/" + name + ".glb"
+		var listed := false
+		for entry: Dictionary in entries:
+			listed = listed or entry.path == path
+		if not listed:
+			_fail(path + ": missing from planner group 03")
+		var source := (load(path) as PackedScene).instantiate()
+		var expected: Dictionary = {"base": 0, "normal": 0, "orm": 0}
+		_inspect(source, expected)
+		source.free()
+		var prop := catalog._instantiate_asset(path) as RigidBody3D
+		if prop == null:
+			_fail(path + ": planner cannot instantiate prop")
+			continue
+		root.add_child(prop)
+		prop.freeze = true
+		var found: Dictionary = {"base": 0, "normal": 0, "orm": 0}
+		_inspect(prop, found)
+		for slot: String in expected:
+			if int(found[slot]) < int(expected[slot]):
+				_fail(path + ": gameplay prop lost " + slot + " textures")
+		if prop.get_node_or_null("Visual") == null or prop.get("_shapes").is_empty():
+			_fail(path + ": gameplay visual or collision missing")
+		prop.queue_free()
+		await process_frame
+		print("Planner model textures OK: " + name)
 
 func _inspect(node: Node, found: Dictionary) -> void:
 	if node is MeshInstance3D:
