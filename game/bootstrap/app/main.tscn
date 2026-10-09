@@ -11,6 +11,8 @@
 
 [ext_resource type="Script" path="res://game/bootstrap/app/menu/menu_screen.gd" id="menu_screen"]
 
+[ext_resource type="PackedScene" path="res://game/presentation/office_floor/public/city_backdrop.tscn" id="city_backdrop"]
+
 [sub_resource type="Environment" id="env"]
 background_mode = 1
 background_color = Color(0.055, 0.075, 0.12, 1)
@@ -29,6 +31,8 @@ size = Vector3(80, 0.2, 60)
 
 [node name="Main" type="Node3D" unique_id=479644666]
 script = ExtResource("script")
+
+[node name="CityBackdrop" parent="." instance=ExtResource("city_backdrop")]
 
 [node name="ImpactEffects" type="Node3D" parent="." unique_id=1177998471]
 script = ExtResource("impact_effects")

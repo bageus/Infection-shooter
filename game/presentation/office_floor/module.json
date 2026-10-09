@@ -8,7 +8,8 @@
     "Planner blood decorations: texture, surface and size",
     "Authored display power/content/seed, derived screen surfaces, runtime power, glow and contiguous television walls",
     "Item weight catalogue and character push/kick rules",
-    "Environment prop visual stages and physical reactions; durability rules owned by features.combat"
+    "Environment prop visual stages and physical reactions; durability rules owned by features.combat",
+    "Mission-local decorative neighboring skyline geometry and facade material"
   ],
   "public_api": [
     "public/base_office_layout.tscn",
@@ -40,7 +41,8 @@
     "public/structural/sliding_glass_door.tscn",
     "public/blood_effects_3d.tscn",
     "public/props/blood_decal.tscn",
-    "public/display_wall.gd"
+    "public/display_wall.gd",
+    "public/city_backdrop.tscn"
   ],
   "dependencies": [
     "features.player",

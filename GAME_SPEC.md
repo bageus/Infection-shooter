@@ -928,3 +928,5 @@ Deferred, non-blocking: exact hardware/browser matrix; Yandex and itch SDK detai
 
 
 08.10.2026: прямой запрос владельца добавляет в T002 АК (auto, 30 патронов, 28 урона, spread 2.2°), M4 (auto, 36, 23, 1.5°), sniper (semi, 4, 105, 0.15°) и миниган (auto, единый запас 400 без перезарядки, 20, 2°). Это начальные настраиваемые числа, не итоговый баланс. Rifle/minigun camera +3 м; sniper +8 м и scope 2.5× у курсора сразу при выборе, подтверждено владельцем. ammo_automate, rifle casing; casing sniper/minigun ×1.15. Рюкзак комплектен минигану, на земле скрыт, на спине при экипировке; низкая стойка на уровне живота. Форматы сохранений прежние.
+
+10.10.2026: по запросу владельца добавлен городской фон соседних высоток: 32 здания, 4 MultiMesh batches, procedural окна без текстур/физики/теней. Headless import, city_backdrop tests и project gates PASS; вид из окон и FPS требуют native проверки. Следующее действие: проверить окна, Q/E и restart на Windows.
