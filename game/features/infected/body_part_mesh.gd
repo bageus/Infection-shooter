@@ -44,7 +44,7 @@ static func prepare(mesh_instance: MeshInstance3D, skeleton: Skeleton3D) -> Dict
 		var flags := Mesh.ARRAY_CUSTOM_RGBA_FLOAT << Mesh.ARRAY_FORMAT_CUSTOM0_SHIFT
 		if format & Mesh.ARRAY_FLAG_USE_8_BONE_WEIGHTS:
 			flags |= Mesh.ARRAY_FLAG_USE_8_BONE_WEIGHTS
-		converted.add_surface_from_arrays(Mesh.PRIMITIVE_TRIANGLES, arrays, [], {}, flags)
+		converted.add_surface_from_arrays(source.surface_get_primitive_type(surface), arrays, [], _surface_lods(source, surface), flags)
 		var source_material := mesh_instance.get_active_material(surface)
 		converted.surface_set_material(surface, source_material if source_material != null else StandardMaterial3D.new())
 		var bones: PackedInt32Array = arrays[Mesh.ARRAY_BONES] if arrays[Mesh.ARRAY_BONES] != null else PackedInt32Array()
@@ -75,6 +75,21 @@ static func prepare(mesh_instance: MeshInstance3D, skeleton: Skeleton3D) -> Dict
 	_cache[key] = data
 	mesh_instance.mesh = converted
 	return data
+
+
+# LODs only change triangle indices; CUSTOM0 leaves vertex numbering intact.
+static func _surface_lods(source: ArrayMesh, surface: int) -> Dictionary:
+	var stored := RenderingServer.mesh_get_surface(source.get_rid(), surface)
+	var stride := RenderingServer.mesh_surface_get_format_index_stride(stored.format, stored.vertex_count)
+	var result := {}
+	for lod: Dictionary in stored.get("lods", []):
+		var bytes: PackedByteArray = lod.index_data
+		var indices := PackedInt32Array()
+		indices.resize(bytes.size() / stride)
+		for index in indices.size():
+			indices[index] = bytes.decode_u16(index * stride) if stride == 2 else bytes.decode_u32(index * stride)
+		result[float(lod.edge_length)] = indices
+	return result
 
 
 static func _bind_bones(mesh_instance: MeshInstance3D, skeleton: Skeleton3D) -> Dictionary:

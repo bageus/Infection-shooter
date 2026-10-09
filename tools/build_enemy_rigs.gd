@@ -385,8 +385,10 @@ func _save_rig(enemy_name: String, skeleton: Skeleton3D, arrays: Array, dense: A
 	var skinned := arrays.duplicate()
 	skinned[Mesh.ARRAY_BONES] = bones
 	skinned[Mesh.ARRAY_WEIGHTS] = weights
-	var mesh := ArrayMesh.new()
-	mesh.add_surface_from_arrays(Mesh.PRIMITIVE_TRIANGLES, skinned)
+	var lod_builder := ImporterMesh.new()
+	lod_builder.add_surface(Mesh.PRIMITIVE_TRIANGLES, skinned)
+	lod_builder.generate_lods(25.0, 60.0, [])
+	var mesh := lod_builder.get_mesh()
 	mesh.resource_name = enemy_name + "_rig"
 	var mesh_path := OUTPUT_DIR + enemy_name + "_rig_mesh.res"
 	var library_path := OUTPUT_DIR + enemy_name + "_anims.res"

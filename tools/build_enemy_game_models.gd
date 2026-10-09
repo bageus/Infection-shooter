@@ -53,8 +53,10 @@ func _build(enemy_name: String) -> bool:
 	var chosen := _choose_lod(importer)
 	var indices: PackedInt32Array = importer.get_surface_lod_indices(0, chosen) if chosen >= 0 else arrays[Mesh.ARRAY_INDEX]
 	var compact := _compact(arrays, indices)
-	var mesh := ArrayMesh.new()
-	mesh.add_surface_from_arrays(Mesh.PRIMITIVE_TRIANGLES, compact)
+	var lod_builder := ImporterMesh.new()
+	lod_builder.add_surface(Mesh.PRIMITIVE_TRIANGLES, compact)
+	lod_builder.generate_lods(25.0, 60.0, [])
+	var mesh := lod_builder.get_mesh()
 	mesh.resource_name = enemy_name + "_game"
 	var mesh_path := OUTPUT_DIR + enemy_name + "_game.res"
 	var error := ResourceSaver.save(mesh, mesh_path)
