@@ -48,7 +48,7 @@ func _build_side(side: int, layer: int, random: RandomNumberGenerator, mesh: Mes
 		var building_transform := Transform3D(Basis.from_scale(size), center)
 		building_transforms.append(building_transform)
 		instances.set_instance_transform(index, building_transform)
-		instances.set_instance_color(index, Color(random.randf(), float(layer) / 2.0, random.randf(), 1.0))
+		instances.set_instance_color(index, Color(random.randf_range(0.0, 0.30) if index % 3 == 0 else random.randf_range(0.34, 0.99), float(layer) / 2.0, random.randf(), 1.0))
 	var batch := MultiMeshInstance3D.new()
 	batch.name = "CityLayer%dSide%d" % [layer, side]
 	batch.multimesh = instances

@@ -5,7 +5,7 @@ var bindings := BINDINGS.new()
 
 const FILE := "user://interface_settings.cfg"
 const DEFAULTS := {"language": "ru", "brightness": 1.0, "text_scale": 1.0,
-	"volume": 0.4, "effects_volume": 1.0, "music_volume": 1.0, "sound": true, "occlusion_mode": 0, "test_mutagen": false, "infinite_antidotes": false, "electronic_particles": true, "skill_effects": 0}
+	"volume": 0.4, "effects_volume": 1.0, "music_volume": 1.0, "sound": true, "occlusion_mode": 0, "test_mutagen": false, "infinite_antidotes": false, "lighting": true, "electronic_particles": true, "skill_effects": 0}
 var values: Dictionary = DEFAULTS.duplicate()
 
 
@@ -72,6 +72,12 @@ func apply_to_game(tree: SceneTree) -> void:
 		scene.call("set_procedural_skill_effects", int(values.skill_effects) == 1)
 	if scene != null and scene.has_method("set_electronic_particles_enabled"):
 		scene.call("set_electronic_particles_enabled", bool(values.electronic_particles))
+	var lighting := scene.get_node_or_null("PlanningLighting") if scene != null else null
+	if lighting != null:
+		lighting.call("set_local_lights_enabled", bool(values.lighting))
+	var overhead := scene.get_node_or_null("GlobalOverheadLight") as DirectionalLight3D if scene != null else null
+	if overhead != null:
+		overhead.visible = bool(values.lighting)
 	var occlusion := scene.get_node_or_null("OcclusionEffects") if scene != null else null
 	if occlusion != null:
 		occlusion.call("set_mode", int(values.occlusion_mode))

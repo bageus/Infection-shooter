@@ -51,7 +51,14 @@ func update_view(state: Dictionary) -> void:
 	camera.cull_mask = source.cull_mask
 	camera.near = source.near
 	camera.far = source.far
-	camera.fov = rad_to_deg(2.0 * atan(tan(deg_to_rad(source.fov) * .5) / magnification))
+	# Match angular coverage per displayed pixel, including the small lens size.
+	var source_size := source.get_viewport().get_visible_rect().size
+	var source_span := source_size.y if source.keep_aspect == Camera3D.KEEP_HEIGHT else source_size.x
+	var lens_ratio := float(DIAMETER) / maxf(source_span, 1.0) / magnification
+	camera.projection = source.projection
+	camera.keep_aspect = source.keep_aspect
+	camera.size = source.size * lens_ratio
+	camera.fov = rad_to_deg(2.0 * atan(tan(deg_to_rad(source.fov) * .5) * lens_ratio))
 	var target: Vector3 = state.get("target", Vector3.INF)
 	if target.is_finite() and camera.global_position.distance_squared_to(target) > .01:
 		camera.look_at(target, source.global_basis.y)

@@ -22,9 +22,11 @@ void fragment() {
 	vec2 grid = vec2(horizontal / (2.2 + variant * 0.4), facade_position.y / 3.2);
 	vec2 cell = fract(grid);
 	vec2 aa = min(fwidth(grid), vec2(0.1));
-	float border = variant < 1.0 ? 0.035 : 0.10;
+	float border = variant < 1.0 ? 0.018 : 0.10;
+	float sill = variant < 1.0 ? 0.018 : 0.11;
+	float top = variant < 1.0 ? 0.982 : 0.94;
 	float pane = smoothstep(border, border + aa.x, cell.x) * (1.0 - smoothstep(1.0-border-aa.x, 1.0-border, cell.x));
-	pane *= smoothstep(0.11, 0.11 + aa.y, cell.y) * (1.0 - smoothstep(0.94-aa.y, 0.94, cell.y));
+	pane *= smoothstep(sill, sill + aa.y, cell.y) * (1.0 - smoothstep(top-aa.y, top, cell.y));
 	pane *= 1.0 - step(0.5, abs(facade_normal.y));
 	float seed = dot(floor(grid), vec2(12.9898, 78.233)) + style.b * 97.0;
 	float occupied = step(0.78, fract(sin(seed) * 43758.5453));
@@ -41,7 +43,9 @@ void fragment() {
 	float divider = step(0.48, cell.x) * step(cell.x, 0.53);
 	vec3 window = mix(glass, warm, occupied * 0.85);
 	window = mix(window, vec3(0.12, 0.17, 0.24), divider * 0.65);
-	vec3 surface = mix(concrete, window, pane);
+	// Glass office towers have glass spandrels too, with thin mullions.
+	vec3 cladding = variant < 1.0 ? glass * 0.65 : concrete;
+	vec3 surface = mix(cladding, window, pane);
 	float side_shade = 0.82 + 0.18 * max(facade_normal.z, 0.0);
 	surface *= side_shade;
 	float haze = max(fog, style.g * 0.90);

@@ -118,7 +118,7 @@ func start() -> void:
 	preferences.load_settings()
 	preferences.apply_to_game(tree)
 	tree.paused = false
-	Input.mouse_mode = Input.MOUSE_MODE_CAPTURED
+	Input.mouse_mode = Input.MOUSE_MODE_VISIBLE
 	pending = null
 	_previous_scene = null
 	completed.emit(true)

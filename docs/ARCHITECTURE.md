@@ -286,3 +286,6 @@ Root остаётся выше порога 300 строк: его оставш�
 ## Группа 03: ресурсы стадий по требованию
 
 Office-floor Geometry сохраняет владение visual/stages/collision и удерживает immutable PackedScene стадий в течение жизни объекта. Post-import добавляет пустые именованные группы с lazy_stage_path; Geometry наполняет группу при переходе. ResourceLoader разделяет ресурсы, scene nodes остаются локальными. Manifest относится к assets, не DTO сохранений. Глобальный cache, новый owner, dependency или публичный API не добавлены.
+
+
+ADR-0039: bootstrap interface_v1.lighting — optional bool с default true, применяемый к существующим лампам и global overhead; layout DTO прежний. HUD корректирует покрытие линзы на экранный пиксель; infection_source рисует ограниченный procedural smoke; office_floor владеет glass facade variant. Владельцы и зависимости прежние.

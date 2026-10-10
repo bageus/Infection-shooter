@@ -43,6 +43,7 @@ func _run() -> void:
 	_expect(is_instance_valid(stage) and stage.scene_file_path == "res://game/bootstrap/app/main.tscn", "Retry activates the completed mission")
 	_expect(Engine.get_process_frames() - first_frame >= 8, "Frames continue during resource preparation and object creation")
 	_expect(not paused, "Gameplay resumes only after startup")
+	_expect(Input.mouse_mode == Input.MOUSE_MODE_VISIBLE, "Mission startup leaves the aiming cursor free")
 	var planner: Node = stage.get("planning_mode")
 	_expect(planner.get("storage").get("authored_layout").get("objects").size() == 64, "All map records are committed before activation")
 	var camera := root.get_camera_3d()
@@ -62,6 +63,7 @@ func _run() -> void:
 	_expect(not before.visible, "Restart suspends old floor rendering behind the loading overlay")
 	await _wait(func() -> bool: return current_scene != before)
 	_expect(current_scene != before and not paused, "Restart completes via the same asynchronous pipeline")
+	_expect(Input.mouse_mode == Input.MOUSE_MODE_VISIBLE, "Restart leaves the aiming cursor free")
 	await process_frame
 	_expect(not is_instance_valid(before), "Successful restart releases the previous mission")
 	current_scene.queue_free()
