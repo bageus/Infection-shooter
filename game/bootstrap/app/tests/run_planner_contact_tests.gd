@@ -2,6 +2,7 @@ extends SceneTree
 const SNAP := preload("res://game/bootstrap/app/planning_edge_snap.gd")
 const FLOOR := preload("res://game/bootstrap/app/floor_wall_snap.gd")
 const GEOMETRY := preload("res://game/bootstrap/app/planning_geometry.gd")
+const OBJECTS := preload("res://game/bootstrap/app/planning_objects.gd")
 const CATALOG := preload("res://game/bootstrap/app/planning_catalog.gd")
 var failures := 0
 var stage: Node3D
@@ -15,6 +16,7 @@ func _run() -> void:
 	_test_edges()
 	_test_walls()
 	await _test_floor_walls()
+	await _test_wall_probe()
 	_test_cabinets()
 	await _capture_contacts()
 	stage.queue_free()
@@ -194,3 +196,34 @@ func _capture_contacts() -> void:
 	var image := root.get_texture().get_image()
 	_check(not image.is_empty(), "Native contact fixture renders")
 	image.save_png("/tmp/planner_contacts_" + RenderingServer.get_current_rendering_method() + ".png")
+
+func _test_wall_probe() -> void:
+	var wall := _wall(Vector3(8, 3, .3), Vector3(0, 1.5, -1))
+	var catalog := CATALOG.new()
+	var geometry := GEOMETRY.new()
+	var objects := OBJECTS.new()
+	var camera := Camera3D.new()
+	stage.add_child(camera)
+	camera.position = Vector3(0, 2, 8)
+	camera.look_at(Vector3(0, 1.5, -1))
+	camera.current = true
+	var neighbor := catalog._instantiate_asset("res://models/objects/enviroments/02/02_capboard_up_double_destructible.glb")
+	stage.add_child(neighbor)
+	neighbor.position = Vector3(0, 1.5, -.4)
+	objects.placed.append(neighbor)
+	geometry.session = {"camera": camera}
+	geometry.objects = objects
+	var placing := _node(Vector3.ZERO)
+	placing.set_meta("planning_wall_mount", true)
+	await physics_frame
+	var bounds: AABB = neighbor.global_transform * geometry._combined_aabb(neighbor)
+	var point := camera.unproject_position(bounds.get_center())
+	var surface: Vector3 = geometry._screen_to_surface(point, placing)
+	_check(absf(surface.z + .85) < .0001, "Wall probe passes through neighboring wall cabinet to wall plane")
+	surface = geometry._screen_to_wall(point, placing)
+	_check(absf(surface.z + .85) < .0001, "Wall drag ignores neighboring wall cabinet front")
+	objects.free()
+	neighbor.free()
+	placing.free()
+	wall.free()
+	camera.free()

@@ -177,8 +177,8 @@ func _screen_to_surface(screen_pos: Vector2, placing: Node3D) -> Vector3:
 	var origin = session.camera.project_ray_origin(screen_pos)
 	var end = origin + session.camera.project_ray_normal(screen_pos) * 300.0
 	var query = PhysicsRayQueryParameters3D.create(origin, end)
-	if placing != null and placing.has_meta("planning_preview"):
-		query.exclude = []
+	if placing != null and bool(placing.get_meta("planning_wall_mount", false)):
+		query.exclude = _mount_exclusions(placing)
 	var hit = session.camera.get_world_3d().direct_space_state.intersect_ray(query)
 	if not hit.is_empty():
 		var point: Vector3 = hit.get("position")
@@ -208,17 +208,26 @@ func _screen_to_surface(screen_pos: Vector2, placing: Node3D) -> Vector3:
 func _screen_to_wall(screen_pos: Vector2, node: Node3D) -> Vector3:
 	var origin = session.camera.project_ray_origin(screen_pos)
 	var query = PhysicsRayQueryParameters3D.create(origin, origin + session.camera.project_ray_normal(screen_pos) * 300.0)
-	var excluded: Array[RID] = []
-	for body in node.find_children("*", "CollisionObject3D", true, false):
-		excluded.append((body as CollisionObject3D).get_rid())
-	if node is CollisionObject3D:
-		excluded.append((node as CollisionObject3D).get_rid())
-	query.exclude = excluded
+	query.exclude = _mount_exclusions(node)
 	var hit = session.camera.get_world_3d().direct_space_state.intersect_ray(query)
 	if hit.is_empty() or absf((hit["normal"] as Vector3).y) >= 0.35:
 		return Vector3(INF, INF, INF)
 	node.set_meta("planning_wall_normal", hit["normal"])
 	return SURFACE_PLACEMENT.visual_wall_point(hit["position"], hit["normal"], hit.get("collider") as Node3D)
+
+
+func _mount_exclusions(node: Node3D) -> Array[RID]:
+	var excluded: Array[RID] = []
+	var candidates: Array = [node]
+	for other: Node3D in objects.placed:
+		if other != node and is_instance_valid(other) and bool(other.get_meta("planning_wall_mount", false)):
+			candidates.append(other)
+	for candidate: Node3D in candidates:
+		if candidate is CollisionObject3D:
+			excluded.append((candidate as CollisionObject3D).get_rid())
+		for body in candidate.find_children("*", "CollisionObject3D", true, false):
+			excluded.append((body as CollisionObject3D).get_rid())
+	return excluded
 
 
 func _screen_to_floor(screen_pos: Vector2) -> Vector3:
