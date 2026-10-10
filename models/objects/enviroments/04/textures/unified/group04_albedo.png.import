@@ -2,20 +2,17 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://cuoj66ai6cdoe"
-path.s3tc="res://.godot/imported/04_cardboard_box_open_Image_0.png-eded5eabf4966b5e8d322d2187d8076c.s3tc.ctex"
+uid="uid://b0n4erl2wri51"
+path.s3tc="res://.godot/imported/group04_albedo.png-745bec2b4053a8143339d9ec1a29f700.s3tc.ctex"
 metadata={
 "imported_formats": ["s3tc_bptc"],
 "vram_texture": true
 }
-generator_parameters={
-"md5": "ef1450d652f140a2255bd6f1c4ef7c08"
-}
 
 [deps]
 
-source_file="res://models/objects/enviroments/04/04_cardboard_box_open_Image_0.png"
-dest_files=["res://.godot/imported/04_cardboard_box_open_Image_0.png-eded5eabf4966b5e8d322d2187d8076c.s3tc.ctex"]
+source_file="res://models/objects/enviroments/04/textures/unified/group04_albedo.png"
+dest_files=["res://.godot/imported/group04_albedo.png-745bec2b4053a8143339d9ec1a29f700.s3tc.ctex"]
 
 [params]
 
