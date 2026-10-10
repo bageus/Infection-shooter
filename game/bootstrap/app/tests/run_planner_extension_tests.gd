@@ -181,11 +181,20 @@ func _corpse() -> void:
 	stage.add_child(floor_body)
 	floor_body.position = Vector3(1000, -.1, 1000)
 	part.position = Vector3(1000, 3, 1000)
-	for tick in 90:
-		await physics_frame
+	await _physics_ticks(90)
 	_check(part.position.y < 1.0 and part.position.is_finite(), "Airborne severed parts fall to the floor")
 	floor_body.queue_free()
 	part.queue_free()
+
+func _physics_ticks(count: int) -> void:
+	# No pixel assertions sample the settling interval. Keep the full scene,
+	# physical bodies and tick count; render the authored/settled captures.
+	var disabled := root.disable_3d
+	root.disable_3d = true
+	for tick in count:
+		await physics_frame
+	root.disable_3d = disabled
+	await process_frame # Complete the last step before inspecting joints.
 
 func _settle(scene: PackedScene) -> void:
 	var corpse := scene.instantiate()
@@ -208,8 +217,7 @@ func _settle(scene: PackedScene) -> void:
 		var parent := simulation.get_node_or_null("Physics_" + skeleton.get_bone_name(parent_id)) as PhysicalBone3D if parent_id >= 0 else null
 		if parent != null:
 			links.append({"child": child, "parent": parent, "length": _joint(child).distance_to(_joint(parent))})
-	for frame in 90:
-		await physics_frame
+	await _physics_ticks(90)
 	for link in links:
 		_check(absf(_joint(link["child"]).distance_to(_joint(link["parent"])) - float(link["length"])) < .065, "Joints retain anatomical segment lengths: " + corpse.name)
 	var physical: PhysicalBone3D = simulation.get_node("Physics_Hips")
