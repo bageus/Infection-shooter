@@ -57,6 +57,8 @@ func _shared_budget(stage: Node3D, actor: CharacterBody3D, target: Node3D) -> vo
 	var budget := BUDGET.new()
 	stage.add_child(budget)
 	budget.set_physics_process(false)
+	# Prove resumption with a deterministic node cap, independent of host speed.
+	budget.expansions_per_frame = 8
 	var routes: Array[RefCounted] = []
 	for index in 7:
 		var route := ROUTE.new()

@@ -11,6 +11,8 @@ JSON сначала пишется в соседний `.tmp`, flush/close и re
 полные байты и schema. Предыдущая **валидная** карта аналогично готовится
 в `.bak.tmp` и заменяет `.bak`; только затем заменяется основной JSON.
 Ошибки открытия, записи, проверки, backup и replacement показываются в UI.
+Если существующая карта недоступна для чтения, replacement отменяется: это
+не трактуется как повреждённый JSON, который можно заменить без backup.
 Authored snapshot меняется только после успешной записи. Временные файлы
 не считаются картами, recovery copies не коммитятся.
 
@@ -44,7 +46,7 @@ cancel/expired/dead actors очищаются. Изменение цели/по�
 Мягкий бюджет одного physics tick — **2000 мкс**, дополнительный safety cap
 **64 раскрытия** и **2 завершения**. Состояние текущего узла и соседа позволяет
 передать работу следующему кадру между cast_motion. Один physics cast и его
-обработка не прерываются, поэтому возможен небольшой overshoot. Старый
+обработка не прерываются, поэтому возможен overshoot; это не жёсткая гарантия wall-clock кадра. Старый
 проверенный путь используется во время ожидания, при отсутствии пути враг ждёт.
 Clearance memoization не переживает физический кадр/порцию; открывшаяся дверь
 и движущаяся преграда проверяются снова. Shortcuts ограничены четырьмя за запрос
@@ -58,7 +60,12 @@ CPU sample одинаковой стены и 32 route requests, Godot 4.7.2 hea
 | Завершение 32 запросов | 16 порций | 50 physics ticks |
 | Незавершённых запросов в конце | 0 | 0 |
 
-Это один локальный CPU sample, без оценки всего игрового кадра/FPS. Tradeoff —
+Это один локальный CPU sample, без оценки всего игрового кадра/FPS.
+Стресс-стена 40м (192-expansion cap), 32 маршрута: baseline p95/peak 14,65мс;
+P1 p95 4,31мс, peak 24,65мс. Повтор с probe instrumentation дал p95 2,117мс,
+peak 2,419мс и max cast_motion 0,371мс. Причина разброса wall-clock timings не
+установлена. Жёсткий предел 2мс не заявляется; оценивать надо весь игровой
+кадр на целевом устройстве, включая задержку получения пути. Tradeoff —
 меньше пиковых порций, больше задержка полного пути в толпе. Regression с
 постоянными ближайшими запросами завершил дальний путь за 120 ticks при
 намеренно сниженном cap 4 expansions. FPS Windows/Web не измерен.
@@ -75,7 +82,7 @@ SpotLight в **24м**, до **4** теней в **16м**. Без camera отде
 
 Native A/B profile теперь сравнивает все 24 света/тени с новой bounded policy
 в ABBA порядке; sample удерживает policy, чтобы registry не отменял baseline
-в середине измерения. Native цифры и визуальная приёмка ожидают CI.
+в середине измерения. Native цифры и визуальная приёмка ожидают CI; строгая величина FPS не заявляется.
 
 ## Проверки
 
@@ -85,19 +92,24 @@ Godot 4.7.2 clean import завершён, без ERROR/SCRIPT ERROR.
 остаются его ответственностью, новое verified IO выделено отдельно. Ни один
 production файл не пересекает hard limit. Новые tests включены в runtime CI.
 
-Локально 15 focused suites и main 180 кадров PASS. Основные 10: map_file, chase_route, display, layout_loading,
+Локально полный runtime loop **74/74 PASS** (386,81с), плюс 15 focused suites
+и main 180 кадров PASS. Final IO guard проверен повторно map_file и
+mission_loading; после интеграции main повторены ещё шесть affected suites. Основные 10: map_file, chase_route, display, layout_loading,
 mission_loading, planner_persistence, display_planner, world_bindings,
 planning_mode, menu. Map tests проверяют две записи/backup, invalid schema,
 ошибку temporary/backup preparation, игнорирование interrupted temp, сохранность
 corrupt evidence/last-good backup и fresh install. Mission tests проверяют
 предложение обоих recovery вариантов, сохранность предыдущей сцены, запуск
-64 записей из backup и повторный click. Route tests проверяют collision clearance,
+64 записей из backup и повторный click. Route tests используют явный cap 8 для доказательства распределения по
+кадрам, чтобы assertion не зависел от скорости CI-host. Проверяют collision clearance,
 бюджеты, resumability, dedup/cancel/expired, priority/aging и открытие стены.
 Display tests проверяют 24 экрана, лимиты, far/offscreen/power-off и сохранённую
 emission. Дополнительно enemy_lod, horde_escalation, late_spawn_debris,
 global_lighting и lighting PASS. Включён main `299f6961` (PR #85); новый
 свободный курсор и все его assertions сохранены, интегрированный import и
-project gate повторены. Статус GitHub CI фиксируется в PR, полный native PASS здесь не заявлен.
+project gate повторены. CI кода 804c600: Architecture, все 74 headless, main, weapon/planner в обоих
+renderer и effects PASS. Общий native batch выполняется; финальный статус
+GitHub CI фиксируется в PR, полный native PASS здесь не заявлен.
 
 Откат — revert task commit: schema, authored models и карта не менялись;
 пользовательские `.bak` не удалять.
