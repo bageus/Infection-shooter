@@ -10,7 +10,7 @@
     "Colossus slam cooldown and ground wave",
     "Horde ram and summon state",
     "Body part durability, severed parts, skin wounds and corpse hit volumes",
-    "Mission-local FIFO and per-frame budget for infected route searches"
+    "Mission-local priority queue and time/expansion budget for infected route searches"
   ],
   "public_api": [
     "public/infected_capsule.tscn",
@@ -94,7 +94,7 @@
     },
     "chase_budget_v1": {
       "configure_chase_budget": "configure_chase_budget(budget: Node) -> void; bootstrap injects one mission-owned search queue",
-      "searches_per_frame": "Maximum completed local A* searches per physics frame; default 2; each search remains bounded to 192 expansions"
+      "searches_per_frame": "Maximum completed local A* searches per physics frame; default 2; incremental slices share a 2000 usec soft budget and 64 expansions per tick, each search remains bounded to 192 expansions"
     }
   }
 }

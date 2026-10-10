@@ -33,3 +33,6 @@ models/objects/01_all.blend.import
 # Generated reports
 model_structure_audit*.txt
 model_structure_audit*.csv
+
+# Verified planner recovery copies (runtime/editor-local, not authored assets)
+*.json.bak

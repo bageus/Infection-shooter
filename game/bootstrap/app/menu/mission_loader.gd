@@ -19,6 +19,10 @@ var _previous_camera: Camera3D
 var _previous_pause := false
 var _previous_mouse := Input.MOUSE_MODE_VISIBLE
 var _ru := false
+var _recovery_path := ""
+var _recovery_requested := false
+var _choices: VBoxContainer
+var _column: VBoxContainer
 
 
 func _ready() -> void:
@@ -35,6 +39,7 @@ func _ready() -> void:
 	shade.add_child(center)
 	center.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 	var column := VBoxContainer.new()
+	_column = column
 	column.custom_minimum_size = Vector2(440, 0)
 	column.add_theme_constant_override("separation", 18)
 	center.add_child(column)
@@ -96,9 +101,10 @@ func start() -> void:
 	await tree.process_frame
 	var planner: Node = pending.get("planning_mode")
 	var storage: Variant = planner.get("storage")
-	var read: Dictionary = storage.read_startup_layout()
+	var read: Dictionary = storage.read_startup_layout(_recovery_path)
 	if read.has("error"):
 		_fail(str(read.error))
+		_offer_recovery(read.get("recovery", []))
 		return
 	var layout := LAYOUT.new(planner.get("objects"))
 	var prepared := await layout.prepare_async(read.data, tree, _set_progress)
@@ -158,6 +164,7 @@ func _set_progress(value: float, phase: String) -> void:
 
 
 func _fail(reason: String) -> void:
+	_recovery_requested = false
 	_restore_previous_visual()
 	if pending != null:
 		pending.queue_free()
@@ -187,3 +194,30 @@ func _exit_tree() -> void:
 	_restore_previous_visual()
 	if is_instance_valid(pending):
 		pending.queue_free()
+
+
+func _offer_recovery(choices: Array) -> void:
+	if choices.is_empty():
+		return
+	label.text += "\n" + ("Сохранение не изменено. Выберите карту для запуска:" if _ru else "Your save is unchanged. Choose a map to start:")
+	_choices = VBoxContainer.new()
+	_column.add_child(_choices)
+	for candidate: Dictionary in choices:
+		var button := Button.new()
+		button.text = ("Загрузить резервную копию" if _ru else "Load backup") if candidate.kind == "backup" else ("Загрузить штатную карту" if _ru else "Load shipped map")
+		button.pressed.connect(_retry_recovery.bind(str(candidate.path)))
+		_choices.add_child(button)
+
+
+func _retry_recovery(path: String) -> void:
+	if _recovery_requested:
+		return
+	_recovery_requested = true
+	_recovery_path = path
+	if is_instance_valid(_choices):
+		_choices.queue_free()
+	back.hide()
+	progress.show()
+	progress.value = 0
+	_started = false
+	start()
