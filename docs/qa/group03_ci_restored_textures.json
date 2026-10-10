@@ -1,0 +1,416 @@
+[
+  {
+    "path": "models/objects/enviroments/02/02_capboard_down_destructible_laminate_BaseColor.png",
+    "source_ref": "f49af602b5bb533bdf18e9d12e74a30b2706a9c4^",
+    "sha256": "708a1274f6a5afa114062728c648676bab7714ac425b7233b14e9e97aa5488b6",
+    "bytes": 1136648
+  },
+  {
+    "path": "models/objects/enviroments/02/02_capboard_down_destructible_laminate_Normal.png",
+    "source_ref": "f49af602b5bb533bdf18e9d12e74a30b2706a9c4^",
+    "sha256": "10e0233a1429d02288c6d6cdbe65edca5de559ca8e34d9354793e750892c667c",
+    "bytes": 3102178
+  },
+  {
+    "path": "models/objects/enviroments/02/02_capboard_down_destructible_laminate_ORM.png",
+    "source_ref": "f49af602b5bb533bdf18e9d12e74a30b2706a9c4^",
+    "sha256": "7d2c02e366e5bfba656c78a48786d4f0a081fb23196247a123152b436900e183",
+    "bytes": 2272243
+  },
+  {
+    "path": "models/objects/enviroments/02/02_capboard_down_destructible_steel_BaseColor.png",
+    "source_ref": "f49af602b5bb533bdf18e9d12e74a30b2706a9c4^",
+    "sha256": "f4378bcb05292dbc9b3a41bb3e38620d070d068d2f2f4811053ef7e909f40e42",
+    "bytes": 540130
+  },
+  {
+    "path": "models/objects/enviroments/02/02_capboard_down_destructible_steel_Normal.png",
+    "source_ref": "f49af602b5bb533bdf18e9d12e74a30b2706a9c4^",
+    "sha256": "dad80800a593302b4091071355e3cc283013d54f0aa94e2faab99f8b6d2058c1",
+    "bytes": 793866
+  },
+  {
+    "path": "models/objects/enviroments/02/02_capboard_down_destructible_steel_ORM.png",
+    "source_ref": "f49af602b5bb533bdf18e9d12e74a30b2706a9c4^",
+    "sha256": "499af7f65834a216b891fdda2a3d18d0e79e4b8e4ed99120646d798d7eb91274",
+    "bytes": 898469
+  },
+  {
+    "path": "models/objects/enviroments/02/02_capboard_down_destructible_stone_BaseColor.png",
+    "source_ref": "f49af602b5bb533bdf18e9d12e74a30b2706a9c4^",
+    "sha256": "0299b6b2918ead06d2884bd8c3d07c48bff4664c4a1f2849a4948c54b1c25365",
+    "bytes": 1293334
+  },
+  {
+    "path": "models/objects/enviroments/02/02_capboard_down_destructible_stone_Normal.png",
+    "source_ref": "f49af602b5bb533bdf18e9d12e74a30b2706a9c4^",
+    "sha256": "53ac9d2abadcc2c9d383fcd867b6c079f5edaeef76862b5dd0639e2d13dea465",
+    "bytes": 3102720
+  },
+  {
+    "path": "models/objects/enviroments/02/02_capboard_down_destructible_stone_ORM.png",
+    "source_ref": "f49af602b5bb533bdf18e9d12e74a30b2706a9c4^",
+    "sha256": "10908f7bd01c44a7de53dc7254110c6eaa0db3d630e9a47f5ab4def8058e273c",
+    "bytes": 1876554
+  },
+  {
+    "path": "models/objects/enviroments/02/02_capboard_down_destructible_wood_BaseColor.png",
+    "source_ref": "f49af602b5bb533bdf18e9d12e74a30b2706a9c4^",
+    "sha256": "af3f84972247883b474ea5f2617fe6b4d615057a00f1d0d2da6b1ae030c81b4f",
+    "bytes": 641734
+  },
+  {
+    "path": "models/objects/enviroments/02/02_capboard_down_destructible_wood_Normal.png",
+    "source_ref": "f49af602b5bb533bdf18e9d12e74a30b2706a9c4^",
+    "sha256": "f8d4088e6989edca05a3928bdc078e4e0b4628daacdc46ac98bbc8c828c01e2d",
+    "bytes": 327287
+  },
+  {
+    "path": "models/objects/enviroments/02/02_capboard_down_destructible_wood_ORM.png",
+    "source_ref": "f49af602b5bb533bdf18e9d12e74a30b2706a9c4^",
+    "sha256": "23242892d4669c207bf1feefd27bc099e674a68528351232872c3bb8a5a6963a",
+    "bytes": 1676396
+  },
+  {
+    "path": "models/objects/enviroments/02/02_capboard_down_sink_destructible_coated_BaseColor.png",
+    "source_ref": "f49af602b5bb533bdf18e9d12e74a30b2706a9c4^",
+    "sha256": "12671e0df3b7e430db3de18a014277975ebb532ae470026b0e2542fecfde9a69",
+    "bytes": 1134721
+  },
+  {
+    "path": "models/objects/enviroments/02/02_capboard_down_sink_destructible_coated_Normal.png",
+    "source_ref": "f49af602b5bb533bdf18e9d12e74a30b2706a9c4^",
+    "sha256": "0b273af0a55179b45ac50dc8f4dd028d745d903f5fd3e04bc4aca42950ed98e2",
+    "bytes": 3102212
+  },
+  {
+    "path": "models/objects/enviroments/02/02_capboard_down_sink_destructible_coated_ORM.png",
+    "source_ref": "f49af602b5bb533bdf18e9d12e74a30b2706a9c4^",
+    "sha256": "a5f095d61a417d678bab878740482f9f7494f95a9d2387b51a2b91e121c6202e",
+    "bytes": 2272040
+  },
+  {
+    "path": "models/objects/enviroments/02/02_coffee_vending_1_dented_Finish_2K_Normal.png",
+    "source_ref": "f49af602b5bb533bdf18e9d12e74a30b2706a9c4^",
+    "sha256": "073a3a39907c51a338e6efbd561eaad8a50c66c337b52f0bf9bdd302eaad82d0",
+    "bytes": 2181722
+  },
+  {
+    "path": "models/objects/enviroments/02/02_coffee_vending_1_dented_Finish_2K_ORM.png",
+    "source_ref": "f49af602b5bb533bdf18e9d12e74a30b2706a9c4^",
+    "sha256": "5a8e86e6b00938dbcb1de13e3cf0a14e90020a33a62f1b9db8333f3051170caf",
+    "bytes": 4462538
+  },
+  {
+    "path": "models/objects/enviroments/02/02_coffee_vending_2_dented_Coffee_Vending_Modern_2K_Atlas.png",
+    "source_ref": "f49af602b5bb533bdf18e9d12e74a30b2706a9c4^",
+    "sha256": "a6da5109ca64caf59b9ae6734c2abfafa3d5ea2a7c8bdaab02d72b65bde46986",
+    "bytes": 777399
+  },
+  {
+    "path": "models/objects/enviroments/02/02_coffee_vending_2_dented_Finish_2K_Normal.png",
+    "source_ref": "f49af602b5bb533bdf18e9d12e74a30b2706a9c4^",
+    "sha256": "cbab792d96325c167da5e2350ee0725dcb8e4970e83ccd6bc07298c1e78c8448",
+    "bytes": 633880
+  },
+  {
+    "path": "models/objects/enviroments/02/02_coffee_vending_2_dented_Finish_2K_ORM.png",
+    "source_ref": "f49af602b5bb533bdf18e9d12e74a30b2706a9c4^",
+    "sha256": "3b3e1660e333508f0196fe3d5659b8361477d752a8b421046c2555223dc4cc62",
+    "bytes": 706572
+  },
+  {
+    "path": "models/objects/enviroments/02/02_coffee_vending_2_dented_coffee_machine.jpg",
+    "source_ref": "f49af602b5bb533bdf18e9d12e74a30b2706a9c4^",
+    "sha256": "ba54f4d3c932867adb2f87d9dc15192e61288cbe333be277cd2b929a677c7b5f",
+    "bytes": 23946
+  },
+  {
+    "path": "models/objects/enviroments/02/02_dishwasher_dented_steel_BaseColor.png",
+    "source_ref": "f49af602b5bb533bdf18e9d12e74a30b2706a9c4^",
+    "sha256": "64aaeb54e2548985225cf96d4cb285a2044d9ec305c8a5d8447a612b38aa0c61",
+    "bytes": 275420
+  },
+  {
+    "path": "models/objects/enviroments/02/02_dishwasher_dented_steel_Normal.png",
+    "source_ref": "f49af602b5bb533bdf18e9d12e74a30b2706a9c4^",
+    "sha256": "508cb894ce19097f4520c1ec607fe9e14f4822452c37384d1e578e946ebe4140",
+    "bytes": 322818
+  },
+  {
+    "path": "models/objects/enviroments/02/02_dishwasher_dented_steel_ORM.png",
+    "source_ref": "f49af602b5bb533bdf18e9d12e74a30b2706a9c4^",
+    "sha256": "22dbdf3c6d0cc570160dc9935215e5b787ee785d127a3675e0fa57c1336fa8ed",
+    "bytes": 342204
+  },
+  {
+    "path": "models/objects/enviroments/02/02_frige_dented_enamel_BaseColor.png",
+    "source_ref": "f49af602b5bb533bdf18e9d12e74a30b2706a9c4^",
+    "sha256": "356dafda1f71aaee58465b8e3303bbab52d87aef8079acf270140041345f92c1",
+    "bytes": 368504
+  },
+  {
+    "path": "models/objects/enviroments/02/02_frige_dented_enamel_Normal.png",
+    "source_ref": "f49af602b5bb533bdf18e9d12e74a30b2706a9c4^",
+    "sha256": "10c5542ba3c86a4f5ba20a126bd19440d2ad74ef347925d66568c9c32deb6715",
+    "bytes": 753632
+  },
+  {
+    "path": "models/objects/enviroments/02/02_frige_dented_enamel_ORM.png",
+    "source_ref": "f49af602b5bb533bdf18e9d12e74a30b2706a9c4^",
+    "sha256": "ed71165cbba5fbe5e8f6705806290d8f8981723bef18c6f238f2956edc10d96c",
+    "bytes": 555542
+  },
+  {
+    "path": "models/objects/enviroments/02/02_frige_dented_polymer_BaseColor.png",
+    "source_ref": "f49af602b5bb533bdf18e9d12e74a30b2706a9c4^",
+    "sha256": "25ec946d27de85aa05c0de2d5fccd58f8587186f0409ff95ea1df3ae32086571",
+    "bytes": 377079
+  },
+  {
+    "path": "models/objects/enviroments/02/02_frige_dented_polymer_Normal.png",
+    "source_ref": "f49af602b5bb533bdf18e9d12e74a30b2706a9c4^",
+    "sha256": "f631eda70533c5ae294f1ffe0a2a13647fc8a51d66fbb8b6d10e680b3a75432c",
+    "bytes": 751807
+  },
+  {
+    "path": "models/objects/enviroments/02/02_frige_dented_polymer_ORM.png",
+    "source_ref": "f49af602b5bb533bdf18e9d12e74a30b2706a9c4^",
+    "sha256": "ff527706d9fe2bd16863b128b2dd4855e1acb26de3b9978205611355068cd935",
+    "bytes": 555633
+  },
+  {
+    "path": "models/objects/enviroments/02/02_kittle_destructible_cut_BaseColor.png",
+    "source_ref": "f49af602b5bb533bdf18e9d12e74a30b2706a9c4^",
+    "sha256": "8c9ce8e5c567c7c2fe106bfe1d506531f253d17c1c3fb7de99b235778f9cc913",
+    "bytes": 538533
+  },
+  {
+    "path": "models/objects/enviroments/02/02_kittle_destructible_cut_Normal.png",
+    "source_ref": "f49af602b5bb533bdf18e9d12e74a30b2706a9c4^",
+    "sha256": "f8543055329749002f7dc5d18b639619d8608d812c3a345b93f2d9748c16bb51",
+    "bytes": 1007081
+  },
+  {
+    "path": "models/objects/enviroments/02/02_kittle_destructible_cut_ORM.png",
+    "source_ref": "f49af602b5bb533bdf18e9d12e74a30b2706a9c4^",
+    "sha256": "db28d6466a92b67a65065a25281321d69e812aceb1bb4f9dab76a27cb716b5ef",
+    "bytes": 596487
+  },
+  {
+    "path": "models/objects/enviroments/02/02_microwave_destructible_coated_BaseColor.png",
+    "source_ref": "f49af602b5bb533bdf18e9d12e74a30b2706a9c4^",
+    "sha256": "3c2d8a3a0ed35673ebcb5cdd8fc2230f4d6f824063b4aa8bbaa97d8e35c84e33",
+    "bytes": 356510
+  },
+  {
+    "path": "models/objects/enviroments/02/02_microwave_destructible_coated_Normal.png",
+    "source_ref": "f49af602b5bb533bdf18e9d12e74a30b2706a9c4^",
+    "sha256": "6dac352f1bd954bf21b7944b42f4a5a4638e9764263316a6d7cf9c63f1b7dd58",
+    "bytes": 753469
+  },
+  {
+    "path": "models/objects/enviroments/02/02_microwave_destructible_coated_ORM.png",
+    "source_ref": "f49af602b5bb533bdf18e9d12e74a30b2706a9c4^",
+    "sha256": "95671a05e102266fd561c63563f6d8d33b45976ea49bea0e7db114b3ffabe4e0",
+    "bytes": 555791
+  },
+  {
+    "path": "models/objects/enviroments/02/02_microwave_destructible_glass_BaseColor.png",
+    "source_ref": "f49af602b5bb533bdf18e9d12e74a30b2706a9c4^",
+    "sha256": "75cb6fd074cd52ac37c9ae3e7e79995849b79cb8a638d104b877168e1bb96a76",
+    "bytes": 65180
+  },
+  {
+    "path": "models/objects/enviroments/02/02_microwave_destructible_glass_Normal.png",
+    "source_ref": "f49af602b5bb533bdf18e9d12e74a30b2706a9c4^",
+    "sha256": "b97f7318795041409d2fe89ae3f21f86941ddb4d618c29ee1c13abc9390ab112",
+    "bytes": 603991
+  },
+  {
+    "path": "models/objects/enviroments/02/02_microwave_destructible_glass_ORM.png",
+    "source_ref": "f49af602b5bb533bdf18e9d12e74a30b2706a9c4^",
+    "sha256": "83217bf5699482211fd08f4365ace9efb02d847528b76ac927e4120ab99182c7",
+    "bytes": 59326
+  },
+  {
+    "path": "models/objects/enviroments/02/02_sink_pedestal_improved_darksteel_BaseColor.png",
+    "source_ref": "f49af602b5bb533bdf18e9d12e74a30b2706a9c4^",
+    "sha256": "e638e320c7a15d716db76e1daeee32d2f4af441aa84fc1e178776b68b0a41844",
+    "bytes": 180318
+  },
+  {
+    "path": "models/objects/enviroments/02/02_sink_pedestal_improved_darksteel_Normal.png",
+    "source_ref": "f49af602b5bb533bdf18e9d12e74a30b2706a9c4^",
+    "sha256": "ce7248a3c0c141a0316de86ac3ed98abe1748c0785b3c12b69943abd6c640593",
+    "bytes": 709157
+  },
+  {
+    "path": "models/objects/enviroments/02/02_sink_pedestal_improved_darksteel_ORM.png",
+    "source_ref": "f49af602b5bb533bdf18e9d12e74a30b2706a9c4^",
+    "sha256": "36735e7eb353ce29dd6d2eb20e7a8e42e542d5c6ac41d317c5da4b79f2b8e10d",
+    "bytes": 735165
+  },
+  {
+    "path": "models/objects/enviroments/02/02_toilet_new_ceramic_BaseColor.png",
+    "source_ref": "f49af602b5bb533bdf18e9d12e74a30b2706a9c4^",
+    "sha256": "e9c0802fc909cd854eff4d7bc53246ec6ec59685a3d9417955043431ea3865c8",
+    "bytes": 141939
+  },
+  {
+    "path": "models/objects/enviroments/02/02_toilet_new_ceramic_Normal.png",
+    "source_ref": "f49af602b5bb533bdf18e9d12e74a30b2706a9c4^",
+    "sha256": "ad1fa4c3b0f11355f78b5cf3b8d054c62015abc0556410b5b5e31b7404dc5196",
+    "bytes": 3371858
+  },
+  {
+    "path": "models/objects/enviroments/02/02_toilet_new_ceramic_ORM.png",
+    "source_ref": "f49af602b5bb533bdf18e9d12e74a30b2706a9c4^",
+    "sha256": "0c1e6a47fb494bef3628fa9c7afdf192af76b5715a8a9b75646600e950c12003",
+    "bytes": 1976492
+  },
+  {
+    "path": "models/objects/enviroments/02/02_toilet_new_steel_BaseColor.png",
+    "source_ref": "f49af602b5bb533bdf18e9d12e74a30b2706a9c4^",
+    "sha256": "89e968399e198b255d5ea0555cbe371a01cbae95a8aa5cb04c553faaeb033e73",
+    "bytes": 181808
+  },
+  {
+    "path": "models/objects/enviroments/02/02_toilet_new_steel_Normal.png",
+    "source_ref": "f49af602b5bb533bdf18e9d12e74a30b2706a9c4^",
+    "sha256": "b7a518784977fa857bb696252c4cacb2b85c764e90d8573263fa31e5853cf09b",
+    "bytes": 708513
+  },
+  {
+    "path": "models/objects/enviroments/02/02_toilet_new_steel_ORM.png",
+    "source_ref": "f49af602b5bb533bdf18e9d12e74a30b2706a9c4^",
+    "sha256": "375ae5d0109c90cfd6e3cc88e289ab96b83facbcf1382f36958d60346f4c3c25",
+    "bytes": 733139
+  },
+  {
+    "path": "models/objects/enviroments/02/02_toilet_new_water_BaseColor.png",
+    "source_ref": "f49af602b5bb533bdf18e9d12e74a30b2706a9c4^",
+    "sha256": "1aeda4d7bbd88da4eb5f32cf463fba8cbf8ba67070aea4d03307f0006ab7257b",
+    "bytes": 59326
+  },
+  {
+    "path": "models/objects/enviroments/02/02_toilet_new_water_Normal.png",
+    "source_ref": "f49af602b5bb533bdf18e9d12e74a30b2706a9c4^",
+    "sha256": "afa525ecf076a0e96848b513772b4c0fe7d6e09b373d028c518b48e67b638ded",
+    "bytes": 496100
+  },
+  {
+    "path": "models/objects/enviroments/02/02_toilet_new_water_ORM.png",
+    "source_ref": "f49af602b5bb533bdf18e9d12e74a30b2706a9c4^",
+    "sha256": "db6ec822ea1c0c02a79e8580bdf93a3c44757ae4382e2c2f958c39be322b74b3",
+    "bytes": 59326
+  },
+  {
+    "path": "models/objects/enviroments/02/02_vending_automat_1_dented_Finish_2K_Normal_6.png",
+    "source_ref": "f49af602b5bb533bdf18e9d12e74a30b2706a9c4^",
+    "sha256": "cc93c60e02a3f9e39028112d5bd991804b66dbb20ec30189ce88ea94f43850ec",
+    "bytes": 59326
+  },
+  {
+    "path": "models/objects/enviroments/02/02_vending_automat_1_dented_Finish_2K_ORM.png",
+    "source_ref": "f49af602b5bb533bdf18e9d12e74a30b2706a9c4^",
+    "sha256": "ed718d24e0636e6d401ee515f0bf2929fb8158dc6c8e08e29b4cb93a3e889f7e",
+    "bytes": 1069566
+  },
+  {
+    "path": "models/objects/enviroments/02/02_vending_automat_1_dented_Finish_2K_ORM_5.png",
+    "source_ref": "f49af602b5bb533bdf18e9d12e74a30b2706a9c4^",
+    "sha256": "83217bf5699482211fd08f4365ace9efb02d847528b76ac927e4120ab99182c7",
+    "bytes": 59326
+  },
+  {
+    "path": "models/objects/enviroments/02/02_vending_machine_fantas_dented_Finish_2K_Normal.png",
+    "source_ref": "f49af602b5bb533bdf18e9d12e74a30b2706a9c4^",
+    "sha256": "6d1111f8f8ec7015841a8df69535e8483b2322a7743a4e648b273c108f90ba7b",
+    "bytes": 1294131
+  },
+  {
+    "path": "models/objects/enviroments/02/02_vending_machine_fantas_dented_Finish_2K_ORM.png",
+    "source_ref": "f49af602b5bb533bdf18e9d12e74a30b2706a9c4^",
+    "sha256": "a07be90b15a12bd3443167f33ff1c25ba62bfecf1db36d889fb014d8f3a08d52",
+    "bytes": 2776237
+  },
+  {
+    "path": "models/objects/enviroments/02/02_vending_machine_fantas_dented_Neutral_DRINKS_Corrected_Label.png",
+    "source_ref": "f49af602b5bb533bdf18e9d12e74a30b2706a9c4^",
+    "sha256": "b9eda896b9ae5b8e3cb68db4ed5d4295442aaceea1a18977b4bc028fc40ce573",
+    "bytes": 173031
+  },
+  {
+    "path": "models/objects/enviroments/02/02_water_cooler_bottle_pet_BaseColor_2K.png",
+    "source_ref": "f49af602b5bb533bdf18e9d12e74a30b2706a9c4^",
+    "sha256": "410a3c601e2ade0c99f7bf6fbbee902d4c23bac3a1ab9d5c53019969f287e1be",
+    "bytes": 88612
+  },
+  {
+    "path": "models/objects/enviroments/02/02_water_cooler_bottle_pet_Normal_2K.png",
+    "source_ref": "f49af602b5bb533bdf18e9d12e74a30b2706a9c4^",
+    "sha256": "6d2555733ede487d5f9f0f4dda12311ad8e6bcc3cfdc36d45b6a6bdd65bdf3f3",
+    "bytes": 2563534
+  },
+  {
+    "path": "models/objects/enviroments/02/02_water_cooler_bottle_pet_ORM_2K.png",
+    "source_ref": "f49af602b5bb533bdf18e9d12e74a30b2706a9c4^",
+    "sha256": "a1848fbf4c4d98695753053a3d8b3b299f3b1ac1b28aea1d808acf8a7525156a",
+    "bytes": 1595759
+  },
+  {
+    "path": "models/objects/enviroments/02/02_water_cooler_bottle_trim_BaseColor_2K.png",
+    "source_ref": "f49af602b5bb533bdf18e9d12e74a30b2706a9c4^",
+    "sha256": "08a160443bb1a9f4e24d4755079308a50d64da1f721ded84aeb5e2854055a27f",
+    "bytes": 151697
+  },
+  {
+    "path": "models/objects/enviroments/02/02_water_cooler_bottle_trim_Normal_2K.png",
+    "source_ref": "f49af602b5bb533bdf18e9d12e74a30b2706a9c4^",
+    "sha256": "f9efedd31d51669256de79b75a106dad3d4d4037ea7761592dcc97678a7f7280",
+    "bytes": 3323151
+  },
+  {
+    "path": "models/objects/enviroments/02/02_water_cooler_bottle_trim_ORM_2K.png",
+    "source_ref": "f49af602b5bb533bdf18e9d12e74a30b2706a9c4^",
+    "sha256": "1ca52273d36cf35978acc07f1c20bb7f1117a15f7a553fa7b7bdb469f02fff34",
+    "bytes": 2256446
+  },
+  {
+    "path": "models/objects/enviroments/02/02_water_cooler_destructible_cut_BaseColor_2K.png",
+    "source_ref": "f49af602b5bb533bdf18e9d12e74a30b2706a9c4^",
+    "sha256": "91c4715895e315b696a4f6ca6c31655efdf412c0a23de16461800b18c99acc6f",
+    "bytes": 152292
+  },
+  {
+    "path": "models/objects/enviroments/02/02_water_cooler_destructible_cut_Normal_2K.png",
+    "source_ref": "f49af602b5bb533bdf18e9d12e74a30b2706a9c4^",
+    "sha256": "80f02e96393594c7ad0fca859bd6e1fa26dc4a0571edeff7834eedb001576279",
+    "bytes": 5627327
+  },
+  {
+    "path": "models/objects/enviroments/02/02_water_cooler_destructible_cut_ORM_2K.png",
+    "source_ref": "f49af602b5bb533bdf18e9d12e74a30b2706a9c4^",
+    "sha256": "ae68a4360d9d881f6475e6959b967c968cafa5349b39a865d777f0f2b6cfeb48",
+    "bytes": 2986019
+  },
+  {
+    "path": "models/objects/enviroments/02/02_water_cooler_destructible_steel_BaseColor_2K.png",
+    "source_ref": "f49af602b5bb533bdf18e9d12e74a30b2706a9c4^",
+    "sha256": "f6b1456c780fdb741887f89db3da6b31b6cda100c6c863125c53cb574e63ea8f",
+    "bytes": 230208
+  },
+  {
+    "path": "models/objects/enviroments/02/02_water_cooler_destructible_steel_Normal_2K.png",
+    "source_ref": "f49af602b5bb533bdf18e9d12e74a30b2706a9c4^",
+    "sha256": "506205ac9437dcb8379a5d068c53175862e1d09f421d39e91afb6cb5f03d6987",
+    "bytes": 739617
+  },
+  {
+    "path": "models/objects/enviroments/02/02_water_cooler_destructible_steel_ORM_2K.png",
+    "source_ref": "f49af602b5bb533bdf18e9d12e74a30b2706a9c4^",
+    "sha256": "6efa26252bc440b6981657332ba74a46123f5cf04927d7e5c7581ad5fb17704a",
+    "bytes": 749624
+  }
+]

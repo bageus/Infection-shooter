@@ -21,6 +21,9 @@ jobs:
         with:
           python-version: "3.12"
 
+      - name: Install atlas validation dependencies
+        run: python -m pip install numpy==2.3.5 Pillow==12.3.0
+
       - name: Validate project gates
         run: python tools/validate_project.py
       - name: Validate scene resources and workstation profiles
