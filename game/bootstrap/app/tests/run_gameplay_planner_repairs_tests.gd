@@ -85,7 +85,7 @@ func _blood(player: Node3D) -> void:
 	await physics_frame
 	_check(effects.call("statistics")["marks"] == 0, "Armour absorption creates no tissue blood")
 	var wall := _wall(player.global_position + Vector3(0, 0, -1.0))
-	var surfaces: Array[Node] = [wall]
+	var surfaces: Array[Node] = [wall, support]
 	effects.call("configure_environment", surfaces)
 	await physics_frame
 	await physics_frame
