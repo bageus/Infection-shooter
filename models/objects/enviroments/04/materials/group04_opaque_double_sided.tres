@@ -1,0 +1,17 @@
+[gd_resource type="ORMMaterial3D" load_steps=4 format=3]
+
+[ext_resource type="Texture2D" path="res://models/objects/enviroments/04/textures/unified/group04_albedo.png" id="1_albedo"]
+[ext_resource type="Texture2D" path="res://models/objects/enviroments/04/textures/unified/group04_normal.png" id="2_normal"]
+[ext_resource type="Texture2D" path="res://models/objects/enviroments/04/textures/unified/group04_orm.png" id="3_orm"]
+
+[resource]
+resource_name = "Group04OpaqueDoubleSided"
+albedo_texture = ExtResource("1_albedo")
+normal_enabled = true
+normal_texture = ExtResource("2_normal")
+orm_texture = ExtResource("3_orm")
+metallic = 1.0
+roughness = 1.0
+texture_filter = 5
+texture_repeat = false
+cull_mode = 2

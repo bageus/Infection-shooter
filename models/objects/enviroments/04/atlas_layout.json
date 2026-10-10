@@ -1,0 +1,151 @@
+{
+  "version": 1,
+  "source_ref": "a48e5a49028b0871852f4418eeb8eb2670671ea2",
+  "size": [
+    1024,
+    1024
+  ],
+  "runtime_size": {
+    "albedo": [
+      1024,
+      1024
+    ],
+    "normal": [
+      512,
+      512
+    ],
+    "orm": [
+      512,
+      512
+    ]
+  },
+  "gutter_px": 8,
+  "origin": "top-left",
+  "normal_convention": "OpenGL +Y",
+  "orm_channels": {
+    "R": "neutral AO",
+    "G": "roughness",
+    "B": "metallic"
+  },
+  "tiles": [
+    {
+      "id": "light_cardboard",
+      "pixel_rect": [
+        8,
+        8,
+        496,
+        496
+      ],
+      "uv_rect": [
+        0.0078125,
+        0.0078125,
+        0.484375,
+        0.484375
+      ],
+      "roughness": 0.82,
+      "metallic": 0
+    },
+    {
+      "id": "brown_cardboard",
+      "pixel_rect": [
+        520,
+        8,
+        496,
+        496
+      ],
+      "uv_rect": [
+        0.5078125,
+        0.0078125,
+        0.484375,
+        0.484375
+      ],
+      "roughness": 0.82,
+      "metallic": 0
+    },
+    {
+      "id": "dark_interior",
+      "pixel_rect": [
+        8,
+        520,
+        496,
+        496
+      ],
+      "uv_rect": [
+        0.0078125,
+        0.5078125,
+        0.484375,
+        0.484375
+      ],
+      "roughness": 0.82,
+      "metallic": 0
+    },
+    {
+      "id": "ivory",
+      "pixel_rect": [
+        520,
+        520,
+        240,
+        240
+      ],
+      "uv_rect": [
+        0.5078125,
+        0.5078125,
+        0.234375,
+        0.234375
+      ],
+      "roughness": 0.78,
+      "metallic": 0
+    },
+    {
+      "id": "tan_cardboard",
+      "pixel_rect": [
+        776,
+        520,
+        240,
+        240
+      ],
+      "uv_rect": [
+        0.7578125,
+        0.5078125,
+        0.234375,
+        0.234375
+      ],
+      "roughness": 0.65,
+      "metallic": 0
+    },
+    {
+      "id": "brown_flat_cardboard",
+      "pixel_rect": [
+        520,
+        776,
+        240,
+        240
+      ],
+      "uv_rect": [
+        0.5078125,
+        0.7578125,
+        0.234375,
+        0.234375
+      ],
+      "roughness": 0.65,
+      "metallic": 0
+    },
+    {
+      "id": "olive_painted_wood",
+      "pixel_rect": [
+        776,
+        776,
+        240,
+        240
+      ],
+      "uv_rect": [
+        0.7578125,
+        0.7578125,
+        0.234375,
+        0.234375
+      ],
+      "roughness": 0.56,
+      "metallic": 0
+    }
+  ]
+}

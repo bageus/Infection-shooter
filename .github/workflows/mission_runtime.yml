@@ -145,6 +145,13 @@ jobs:
           set -o pipefail
           timeout 600 godot --headless --path . --editor --quit 2>&1 | tee /tmp/import.log
           if grep -E 'SCRIPT ERROR|^ERROR:' /tmp/import.log; then exit 1; fi
+      - name: Group 04 atlas and destruction
+        if: always()
+        run: |
+          set -o pipefail
+          python tools/check_group04_atlas.py
+          timeout 120 godot --headless --path . --script game/bootstrap/app/tests/run_group04_asset_tests.gd 2>&1 | tee /tmp/group04.log
+          if grep -E 'SCRIPT ERROR|^ERROR:' /tmp/group04.log; then exit 1; fi
       - name: Imported model textures
         run: |
           set -o pipefail
@@ -230,3 +237,4 @@ jobs:
             /tmp/import.log
             /tmp/main.log
             /tmp/rendered.log
+            /tmp/group04.log
