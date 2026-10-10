@@ -34,7 +34,7 @@ static func visual_wall_point(point: Vector3, normal: Vector3, collider: Node3D)
 	var correction := 0.0
 	for child in root.find_children("*", "MeshInstance3D", true, false):
 		var visual := child as MeshInstance3D
-		if visual.mesh == null or not visual.is_visible_in_tree() or visual.has_meta("planning_selection_highlight"):
+		if visual.mesh == null or not visual.is_visible_in_tree() or visual.has_meta("planning_selection_highlight") or bool(visual.get_meta("planning_bounds_excluded", false)):
 			continue
 		if visual.cast_shadow == GeometryInstance3D.SHADOW_CASTING_SETTING_SHADOWS_ONLY:
 			continue

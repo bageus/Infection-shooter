@@ -7,12 +7,14 @@ extends GLTFDocumentExtension
 ## get zero scale, the same hidden-stage convention the game already reveals
 ## (environment_damage.gd restores the scale when a stage is shown).
 
+const FLATTENED := preload("res://addons/staged_glb_import/flattened_stage_repair.gd")
+
 const META := &"staged_glb_version"
 const VERSION := 1
 
 
 func _import_post_parse(state: GLTFState) -> Error:
-	var scenes: Array = state.json.get("scenes", [])
+	var scenes: Array = FLATTENED.scenes_for(state, state.json.get("scenes", []))
 	var filled: Array[int] = []
 	for i in scenes.size():
 		if not (scenes[i] as Dictionary).get("nodes", []).is_empty():

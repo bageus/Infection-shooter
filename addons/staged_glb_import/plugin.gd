@@ -43,7 +43,7 @@ static func _collect(directory: String, paths: PackedStringArray) -> void:
 			paths.append(directory.path_join(file))
 
 
-# Number of non-empty glTF scenes, read from the GLB JSON chunk only.
+# Number of authored scene labels, including flattened-stage export markers.
 static func _scene_count(path: String) -> int:
 	var file := FileAccess.open(path, FileAccess.READ)
 	if file == null or file.get_32() != 0x46546C67:
@@ -55,8 +55,4 @@ static func _scene_count(path: String) -> int:
 	var json: Variant = JSON.parse_string(file.get_buffer(length).get_string_from_utf8())
 	if not json is Dictionary:
 		return 0
-	var count := 0
-	for scene in (json as Dictionary).get("scenes", []):
-		if not (scene as Dictionary).get("nodes", []).is_empty():
-			count += 1
-	return count
+	return (json as Dictionary).get("scenes", []).size()

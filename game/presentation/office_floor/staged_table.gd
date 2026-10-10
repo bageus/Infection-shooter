@@ -60,16 +60,22 @@ func _ready() -> void:
 	var visual := get_node("Visual")
 	_intact = _find(visual, "Intact")
 	_modular = _find(visual, "Modular")
+	if _modular == null:
+		_modular = _find(visual, "LargeParts")
 	_fragments = _find(visual, "Fragments")
+	if _fragments == null:
+		_fragments = _find(visual, "SmallFragments")
 	_secondary = _find(visual, "TopSecondary")
-	if _intact == null or _modular == null or _fragments == null or _secondary == null:
+	if _intact == null or _modular == null or _fragments == null:
 		push_error("07_table.glb is missing a destruction group")
 		return
 	_modular.hide()
 	_fragments.hide()
-	_secondary.hide()
-	for group in [_modular, _fragments, _secondary]:
-		_collect_parts(group)
+	for group: Node3D in [_modular, _fragments, _secondary]:
+		if group != null:
+			group.scale = Vector3.ONE
+			group.hide()
+			_collect_parts(group)
 	for part_id in _parts:
 		_rest_transforms[part_id] = _mesh_transform(_parts[part_id])
 	for part_id in ["Top"] + LEG_IDS:
@@ -124,7 +130,15 @@ func _transition_piece(part_id: String, body: RigidBody3D, hit_position: Vector3
 	else:
 		body.queue_free()
 	original.hide()
-	if part_id == "Top":
+	var authored_fragments: Array = _parts.keys().filter(func(key: String) -> bool: return key.begins_with(part_id + "_fragment_"))
+	if not authored_fragments.is_empty():
+		for fragment_id: String in authored_fragments:
+			_spawn_piece(fragment_id, part_id, original_transform, hit_position, direction, true)
+		if part_id == "Top":
+			_drop_remaining_legs(hit_position, direction)
+		elif part_id in LEG_IDS and body == _assembly:
+			_on_leg_lost(part_id, hit_position)
+	elif part_id == "Top":
 		for index in range(1, 9):
 			_spawn_piece("Top_%02d" % index, part_id, original_transform, hit_position, direction, false)
 		_drop_remaining_legs(hit_position, direction)
