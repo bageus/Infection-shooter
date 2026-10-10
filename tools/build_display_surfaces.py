@@ -29,8 +29,30 @@ def cross(a, b): return [a[1]*b[2]-a[2]*b[1], a[2]*b[0]-a[0]*b[2], a[0]*b[1]-a[1
 def unit(a): return [x / math.sqrt(dot(a, a)) for x in a]
 
 
+def connected_triangles(candidates):
+    """Dual screens can share one material primitive; keep disconnected faces separate."""
+    parents=list(range(len(candidates)))
+    def root(i):
+        while parents[i]!=i:
+            parents[i]=parents[parents[i]];i=parents[i]
+        return i
+    seen={}
+    for i,(_,triangle) in enumerate(candidates):
+        for point in triangle:
+            key=tuple(round(v,6) for v in point)
+            if key in seen:parents[root(i)]=root(seen[key])
+            seen[key]=i
+    groups={}
+    for i,item in enumerate(candidates):groups.setdefault(root(i),[]).append(item)
+    return list(groups.values())
+
+
 def extract(name, profile):
-    data = (MODELS / (name + '.glb')).read_bytes()
+    source = MODELS / (name + '.glb')
+    deferred = MODELS / 'damage' / (name + '_' + profile[0].lower() + '.glb')
+    if deferred.is_file():
+        source = deferred
+    data = source.read_bytes()
     length = struct.unpack_from('<I', data, 12)[0]
     gltf = json.loads(data[20:20+length])
     buffer = data[28+length:]
@@ -47,9 +69,9 @@ def extract(name, profile):
     stage, material, desired = profile
     # Material ordering can change when an asset receives new PBR materials.
     material = next((i for i, item in enumerate(gltf["materials"])
-                     if item.get("name", "").split(".")[0] == "Dark_Display_Glass"), material)
+                     if item.get("name", "").split("__")[0].split(".")[0] == "Dark_Display_Glass"), material)
     front = unit(desired)
-    node = next(n for n in gltf['nodes'] if n.get('name') == stage)
+    node = next(n for n in gltf['nodes'] if 'mesh' in n and n.get('name') in [stage, stage+'Geometry'])
     assert 'rotation' not in node and 'scale' not in node, 'Re-export requires profile review'
     screens = []
     for primitive in gltf['meshes'][node['mesh']]['primitives']:
@@ -70,21 +92,7 @@ def extract(name, profile):
                 candidates.append((area, triangle))
         if not candidates:
             continue
-        # Atlas exports can merge the two disjoint screen surfaces into one
-        # primitive. Split by shared positions, including vertices at UV seams.
-        groups = []
-        for candidate in candidates:
-            points = {tuple(round(v, 6) for v in p) for p in candidate[1]}
-            joined = [group for group in groups if group[0] & points]
-            merged = [candidate]
-            for group in joined:
-                points.update(group[0])
-                merged.extend(group[1])
-                groups.remove(group)
-            groups.append((points, merged))
-        if "_server_" not in name:
-            groups = [(set(), candidates)]
-        for _, candidates in groups:
+        for candidates in connected_triangles(candidates) if '_server_' in name else [candidates]:
             largest = max(candidates, key=lambda item: item[0])[1]
             normal = unit(cross(sub(largest[1], largest[0]), sub(largest[2], largest[0])))
             if dot(normal, front) < 0:
@@ -98,6 +106,8 @@ def extract(name, profile):
             xs = [dot(p, right) for p in points]
             ys = [dot(p, up) for p in points]
             width, height = max(xs)-min(xs), max(ys)-min(ys)
+            if '_server_' in name and min(width,height) < .08:
+                continue # Thin bezel/support strips share the exported glass material.
             translation = node.get('translation', [0, 0, 0])
             center = [(min(xs)+max(xs))/2*right[i]+(min(ys)+max(ys))/2*up[i]+plane*normal[i]+translation[i] for i in range(3)]
             result = []
@@ -111,8 +121,6 @@ def extract(name, profile):
             screens.append({'center': center, 'right': right, 'up': up, 'normal': normal,
                             'size': [width, height], 'vertices': result})
     if '_server_' in name and screens:
-        # The single atlas material also covers thin bezel/support faces.
-        screens = [screen for screen in screens if min(screen['size']) > .05]
         # The updated dual monitors also assign display glass to the supports.
         # Both actual screens lie on the outermost forward-facing plane.
         front_plane = max(dot(screen['center'], front) for screen in screens)

@@ -1,0 +1,928 @@
+{
+  "source_ref": "a48e5a49028b0871852f4418eeb8eb2670671ea2",
+  "texture_ref": "8d2452437ea8a6465b44bbb2cedcd402df302ce5",
+  "metal_ref": "f49af602b5bb533bdf18e9d12e74a30b2706a9c4^",
+  "size": 2048,
+  "gutter": 16,
+  "tiles": [
+    {
+      "id": "Brushed_Gunmetal_Drawer_Handles",
+      "uv_rect": [
+        0.0078125,
+        0.0078125,
+        0.234375,
+        0.234375
+      ],
+      "sources": [
+        {
+          "path": "models/objects/enviroments/05/05_lamp_steel_BaseColor_2K.png",
+          "ref": "f49af602b5bb533bdf18e9d12e74a30b2706a9c4^",
+          "sha256": "973540898f40652acb2c8a56cc97d2f907a10064c1f70ddc3dfa5864e03af935"
+        },
+        {
+          "path": "models/objects/enviroments/05/05_lamp_steel_ORM_2K.png",
+          "ref": "f49af602b5bb533bdf18e9d12e74a30b2706a9c4^",
+          "sha256": "2b5115dc629bcecd4ca6de759676e6deaf4ceae2390698702311e77512402f82"
+        },
+        {
+          "path": "models/objects/enviroments/05/05_lamp_steel_ORM_2K.png",
+          "ref": "f49af602b5bb533bdf18e9d12e74a30b2706a9c4^",
+          "sha256": "2b5115dc629bcecd4ca6de759676e6deaf4ceae2390698702311e77512402f82"
+        },
+        {
+          "path": "models/objects/enviroments/05/05_lamp_steel_Normal_2K.png",
+          "ref": "f49af602b5bb533bdf18e9d12e74a30b2706a9c4^",
+          "sha256": "efca55cc622e965d43f9403a57af38f7daa28c65cc3bd534a6a9f18e4151e5f6"
+        }
+      ]
+    },
+    {
+      "id": "Brushed_Stainless_Hardware",
+      "uv_rect": [
+        0.2578125,
+        0.0078125,
+        0.234375,
+        0.234375
+      ],
+      "sources": [
+        {
+          "path": "models/objects/enviroments/05/05_lamp_steel_BaseColor_2K.png",
+          "ref": "f49af602b5bb533bdf18e9d12e74a30b2706a9c4^",
+          "sha256": "973540898f40652acb2c8a56cc97d2f907a10064c1f70ddc3dfa5864e03af935"
+        },
+        {
+          "path": "models/objects/enviroments/05/05_lamp_steel_ORM_2K.png",
+          "ref": "f49af602b5bb533bdf18e9d12e74a30b2706a9c4^",
+          "sha256": "2b5115dc629bcecd4ca6de759676e6deaf4ceae2390698702311e77512402f82"
+        },
+        {
+          "path": "models/objects/enviroments/05/05_lamp_steel_ORM_2K.png",
+          "ref": "f49af602b5bb533bdf18e9d12e74a30b2706a9c4^",
+          "sha256": "2b5115dc629bcecd4ca6de759676e6deaf4ceae2390698702311e77512402f82"
+        },
+        {
+          "path": "models/objects/enviroments/05/05_lamp_steel_Normal_2K.png",
+          "ref": "f49af602b5bb533bdf18e9d12e74a30b2706a9c4^",
+          "sha256": "efca55cc622e965d43f9403a57af38f7daa28c65cc3bd534a6a9f18e4151e5f6"
+        }
+      ]
+    },
+    {
+      "id": "Cool_Grey_Drawer_Faces",
+      "uv_rect": [
+        0.5078125,
+        0.0078125,
+        0.234375,
+        0.234375
+      ],
+      "sources": [
+        {
+          "path": "models/objects/enviroments/03/03_file_cabinet_largest_shell_BaseColor_2K.png",
+          "ref": "8d2452437ea8a6465b44bbb2cedcd402df302ce5",
+          "sha256": "376b7be8a4bd29fa7b592deb5382347f9bf03f961c01536e40082603bda5f36c"
+        },
+        {
+          "path": "models/objects/enviroments/03/03_file_cabinet_largest_shell_ORM_2K.png",
+          "ref": "8d2452437ea8a6465b44bbb2cedcd402df302ce5",
+          "sha256": "8aabc368053b24d1238eacebf751f4a2006c8614dd14ef0538ec075217bb9e8a"
+        },
+        {
+          "path": "models/objects/enviroments/03/03_file_cabinet_largest_shell_ORM_2K.png",
+          "ref": "8d2452437ea8a6465b44bbb2cedcd402df302ce5",
+          "sha256": "8aabc368053b24d1238eacebf751f4a2006c8614dd14ef0538ec075217bb9e8a"
+        },
+        {
+          "path": "models/objects/enviroments/03/03_file_cabinet_largest_shell_Normal_2K.png",
+          "ref": "8d2452437ea8a6465b44bbb2cedcd402df302ce5",
+          "sha256": "89b1f91be2c418a61f61108965f4719a7bf01ffa7aabb3dbe9df36530e1d382d"
+        }
+      ]
+    },
+    {
+      "id": "Cool_Grey_Powder_Coated_Steel",
+      "uv_rect": [
+        0.7578125,
+        0.0078125,
+        0.234375,
+        0.234375
+      ],
+      "sources": [
+        {
+          "path": "models/objects/enviroments/05/05_minipc_powder_BaseColor_2K.png",
+          "ref": "f49af602b5bb533bdf18e9d12e74a30b2706a9c4^",
+          "sha256": "40cd48e3fd0cabef8dbfd5c62c54669a504e6c4b56908639b3aa3dcb743376b0"
+        },
+        {
+          "path": "models/objects/enviroments/05/05_minipc_powder_ORM_2K.png",
+          "ref": "f49af602b5bb533bdf18e9d12e74a30b2706a9c4^",
+          "sha256": "2f1cf2c3db514199e238a1a816ba88992848803a1355e0aca3a65d3b5331b771"
+        },
+        {
+          "path": "models/objects/enviroments/05/05_minipc_powder_ORM_2K.png",
+          "ref": "f49af602b5bb533bdf18e9d12e74a30b2706a9c4^",
+          "sha256": "2f1cf2c3db514199e238a1a816ba88992848803a1355e0aca3a65d3b5331b771"
+        },
+        {
+          "path": "models/objects/enviroments/05/05_minipc_powder_Normal_2K.png",
+          "ref": "f49af602b5bb533bdf18e9d12e74a30b2706a9c4^",
+          "sha256": "6a65a57e5d816cee4e73d82dce854543216d7f969ca2d33bd117d3d88f44ea25"
+        }
+      ]
+    },
+    {
+      "id": "Dark_Graphite_Trim",
+      "uv_rect": [
+        0.0078125,
+        0.2578125,
+        0.234375,
+        0.234375
+      ],
+      "sources": [
+        {
+          "path": "models/objects/enviroments/05/05_minipc_powder_BaseColor_2K.png",
+          "ref": "f49af602b5bb533bdf18e9d12e74a30b2706a9c4^",
+          "sha256": "40cd48e3fd0cabef8dbfd5c62c54669a504e6c4b56908639b3aa3dcb743376b0"
+        },
+        {
+          "path": "models/objects/enviroments/05/05_minipc_powder_ORM_2K.png",
+          "ref": "f49af602b5bb533bdf18e9d12e74a30b2706a9c4^",
+          "sha256": "2f1cf2c3db514199e238a1a816ba88992848803a1355e0aca3a65d3b5331b771"
+        },
+        {
+          "path": "models/objects/enviroments/05/05_minipc_powder_ORM_2K.png",
+          "ref": "f49af602b5bb533bdf18e9d12e74a30b2706a9c4^",
+          "sha256": "2f1cf2c3db514199e238a1a816ba88992848803a1355e0aca3a65d3b5331b771"
+        },
+        {
+          "path": "models/objects/enviroments/05/05_minipc_powder_Normal_2K.png",
+          "ref": "f49af602b5bb533bdf18e9d12e74a30b2706a9c4^",
+          "sha256": "6a65a57e5d816cee4e73d82dce854543216d7f969ca2d33bd117d3d88f44ea25"
+        }
+      ]
+    },
+    {
+      "id": "Exposed_Composite_Core",
+      "uv_rect": [
+        0.2578125,
+        0.2578125,
+        0.234375,
+        0.234375
+      ],
+      "sources": [
+        {
+          "path": "models/objects/enviroments/03/03_file_cabinet_largest_core_BaseColor_2K.png",
+          "ref": "8d2452437ea8a6465b44bbb2cedcd402df302ce5",
+          "sha256": "c28dbb5668db8d04a510d65ce4f9b78691ca9df0f0ed21b7b877cdaebc36c1a3"
+        },
+        {
+          "path": "models/objects/enviroments/03/03_file_cabinet_largest_core_ORM_2K.png",
+          "ref": "8d2452437ea8a6465b44bbb2cedcd402df302ce5",
+          "sha256": "b4ce032ffe758561eabf16206137fd1aea497302885b16a7233b22f40c572633"
+        },
+        {
+          "path": "models/objects/enviroments/03/03_file_cabinet_largest_core_ORM_2K.png",
+          "ref": "8d2452437ea8a6465b44bbb2cedcd402df302ce5",
+          "sha256": "b4ce032ffe758561eabf16206137fd1aea497302885b16a7233b22f40c572633"
+        },
+        {
+          "path": "models/objects/enviroments/03/03_file_cabinet_largest_core_Normal_2K.png",
+          "ref": "8d2452437ea8a6465b44bbb2cedcd402df302ce5",
+          "sha256": "cea8071a1ad6e23397c37232ade8e762d7688148af9f45a737cc8a1d15ee479e"
+        }
+      ]
+    },
+    {
+      "id": "Exposed_Wood_Fibre_Core",
+      "uv_rect": [
+        0.5078125,
+        0.2578125,
+        0.234375,
+        0.234375
+      ],
+      "sources": [
+        {
+          "path": "models/objects/enviroments/03/textures/core_BaseColor_2K.png",
+          "ref": "8d2452437ea8a6465b44bbb2cedcd402df302ce5",
+          "sha256": "504997db0c7116a74e86add8fed76d12ef0859b081128ec30c8cd967e00f99e4"
+        },
+        {
+          "path": "models/objects/enviroments/03/03_book_case_core_ORM_2K.png",
+          "ref": "8d2452437ea8a6465b44bbb2cedcd402df302ce5",
+          "sha256": "c3e41518010e2708a16eb46750d0b6018308cd69987e061f228304a8f546d704"
+        },
+        {
+          "path": "models/objects/enviroments/03/03_book_case_core_ORM_2K.png",
+          "ref": "8d2452437ea8a6465b44bbb2cedcd402df302ce5",
+          "sha256": "c3e41518010e2708a16eb46750d0b6018308cd69987e061f228304a8f546d704"
+        },
+        {
+          "path": "models/objects/enviroments/03/03_book_case_core_Normal_2K.png",
+          "ref": "8d2452437ea8a6465b44bbb2cedcd402df302ce5",
+          "sha256": "39221b99b5f503b9a7e4bec076fdd0a95c03e5feeaa1ee2c47624ff7ba2acd02"
+        }
+      ]
+    },
+    {
+      "id": "Graphite_Powder_Coated_Metal",
+      "uv_rect": [
+        0.7578125,
+        0.2578125,
+        0.234375,
+        0.234375
+      ],
+      "sources": [
+        {
+          "path": "models/objects/enviroments/05/05_minipc_powder_BaseColor_2K.png",
+          "ref": "f49af602b5bb533bdf18e9d12e74a30b2706a9c4^",
+          "sha256": "40cd48e3fd0cabef8dbfd5c62c54669a504e6c4b56908639b3aa3dcb743376b0"
+        },
+        {
+          "path": "models/objects/enviroments/03/03_server_rack_powder_ORM_2K.png",
+          "ref": "8d2452437ea8a6465b44bbb2cedcd402df302ce5",
+          "sha256": "2f1cf2c3db514199e238a1a816ba88992848803a1355e0aca3a65d3b5331b771"
+        },
+        {
+          "path": "models/objects/enviroments/03/03_server_rack_powder_ORM_2K.png",
+          "ref": "8d2452437ea8a6465b44bbb2cedcd402df302ce5",
+          "sha256": "2f1cf2c3db514199e238a1a816ba88992848803a1355e0aca3a65d3b5331b771"
+        },
+        {
+          "path": "models/objects/enviroments/03/03_server_rack_powder_Normal_2K.png",
+          "ref": "8d2452437ea8a6465b44bbb2cedcd402df302ce5",
+          "sha256": "6a65a57e5d816cee4e73d82dce854543216d7f969ca2d33bd117d3d88f44ea25"
+        }
+      ]
+    },
+    {
+      "id": "LED_GREEN",
+      "uv_rect": [
+        0.0078125,
+        0.5078125,
+        0.234375,
+        0.234375
+      ],
+      "sources": [
+        {
+          "path": "models/objects/enviroments/03/03_server_rack2_led_BaseColor_2K.png",
+          "ref": "8d2452437ea8a6465b44bbb2cedcd402df302ce5",
+          "sha256": "ab74b1ef8cfbf95e50e3237405f398300fe189406a09b7d0d48f1a5fcf87067d"
+        },
+        {
+          "path": "models/objects/enviroments/03/03_server_rack2_led_ORM_2K.png",
+          "ref": "8d2452437ea8a6465b44bbb2cedcd402df302ce5",
+          "sha256": "5b54ee23605abef5bd64967a03375eba8e4e6c1611e4b0ac334a4f692026b66c"
+        },
+        {
+          "path": "models/objects/enviroments/03/03_server_rack2_led_ORM_2K.png",
+          "ref": "8d2452437ea8a6465b44bbb2cedcd402df302ce5",
+          "sha256": "5b54ee23605abef5bd64967a03375eba8e4e6c1611e4b0ac334a4f692026b66c"
+        },
+        {
+          "path": "models/objects/enviroments/03/03_server_rack2_led_Normal_2K.png",
+          "ref": "8d2452437ea8a6465b44bbb2cedcd402df302ce5",
+          "sha256": "e8a7c51e5513cb6989ebc7494110b2f6b9a92cf28d24767ea6ee564916d2b568"
+        },
+        {
+          "path": "models/objects/enviroments/03/03_server_rack2_led_BaseColor_2K.png",
+          "ref": "8d2452437ea8a6465b44bbb2cedcd402df302ce5",
+          "sha256": "ab74b1ef8cfbf95e50e3237405f398300fe189406a09b7d0d48f1a5fcf87067d"
+        }
+      ]
+    },
+    {
+      "id": "LED_RED",
+      "uv_rect": [
+        0.2578125,
+        0.5078125,
+        0.234375,
+        0.234375
+      ],
+      "sources": [
+        {
+          "path": "models/objects/enviroments/03/03_server_rack2_led_BaseColor_2K.png",
+          "ref": "8d2452437ea8a6465b44bbb2cedcd402df302ce5",
+          "sha256": "ab74b1ef8cfbf95e50e3237405f398300fe189406a09b7d0d48f1a5fcf87067d"
+        },
+        {
+          "path": "models/objects/enviroments/03/03_server_rack2_led_ORM_2K.png",
+          "ref": "8d2452437ea8a6465b44bbb2cedcd402df302ce5",
+          "sha256": "5b54ee23605abef5bd64967a03375eba8e4e6c1611e4b0ac334a4f692026b66c"
+        },
+        {
+          "path": "models/objects/enviroments/03/03_server_rack2_led_ORM_2K.png",
+          "ref": "8d2452437ea8a6465b44bbb2cedcd402df302ce5",
+          "sha256": "5b54ee23605abef5bd64967a03375eba8e4e6c1611e4b0ac334a4f692026b66c"
+        },
+        {
+          "path": "models/objects/enviroments/03/03_server_rack2_led_Normal_2K.png",
+          "ref": "8d2452437ea8a6465b44bbb2cedcd402df302ce5",
+          "sha256": "e8a7c51e5513cb6989ebc7494110b2f6b9a92cf28d24767ea6ee564916d2b568"
+        },
+        {
+          "path": "models/objects/enviroments/03/03_server_rack2_led_BaseColor_2K.png",
+          "ref": "8d2452437ea8a6465b44bbb2cedcd402df302ce5",
+          "sha256": "ab74b1ef8cfbf95e50e3237405f398300fe189406a09b7d0d48f1a5fcf87067d"
+        }
+      ]
+    },
+    {
+      "id": "Light_Grey_Satin_Laminate",
+      "uv_rect": [
+        0.5078125,
+        0.5078125,
+        0.234375,
+        0.234375
+      ],
+      "sources": [
+        {
+          "path": "models/objects/enviroments/03/textures/light_grey_laminate_BaseColor_2K.png",
+          "ref": "8d2452437ea8a6465b44bbb2cedcd402df302ce5",
+          "sha256": "e8f292597c89191ea83b32bc88055bfb40a99f180803c279c95597c98a6b0ae7"
+        },
+        {
+          "path": "models/objects/enviroments/03/03_book_case_light_grey_laminate_ORM_2K.png",
+          "ref": "8d2452437ea8a6465b44bbb2cedcd402df302ce5",
+          "sha256": "8f90010fe3e90a2d73f515e140ff867b67acb87803ab92dd0f3b23d33a2b4d9e"
+        },
+        {
+          "path": "models/objects/enviroments/03/03_book_case_light_grey_laminate_ORM_2K.png",
+          "ref": "8d2452437ea8a6465b44bbb2cedcd402df302ce5",
+          "sha256": "8f90010fe3e90a2d73f515e140ff867b67acb87803ab92dd0f3b23d33a2b4d9e"
+        },
+        {
+          "path": "models/objects/enviroments/03/03_bookshelf_graphite_Normal_2K.png",
+          "ref": "8d2452437ea8a6465b44bbb2cedcd402df302ce5",
+          "sha256": "b12c9b846ae6f834767491d9fb1e0cfdd45d2656e84b22fdfd31e37bff6fb23a"
+        }
+      ]
+    },
+    {
+      "id": "Pearl_White_Satin_Laminate",
+      "uv_rect": [
+        0.7578125,
+        0.5078125,
+        0.234375,
+        0.234375
+      ],
+      "sources": [
+        {
+          "path": "models/objects/enviroments/03/03_file_cabinet_largest_shell_BaseColor_2K.png",
+          "ref": "8d2452437ea8a6465b44bbb2cedcd402df302ce5",
+          "sha256": "376b7be8a4bd29fa7b592deb5382347f9bf03f961c01536e40082603bda5f36c"
+        },
+        {
+          "path": "models/objects/enviroments/03/03_file_cabinet_largest_shell_ORM_2K.png",
+          "ref": "8d2452437ea8a6465b44bbb2cedcd402df302ce5",
+          "sha256": "8aabc368053b24d1238eacebf751f4a2006c8614dd14ef0538ec075217bb9e8a"
+        },
+        {
+          "path": "models/objects/enviroments/03/03_file_cabinet_largest_shell_ORM_2K.png",
+          "ref": "8d2452437ea8a6465b44bbb2cedcd402df302ce5",
+          "sha256": "8aabc368053b24d1238eacebf751f4a2006c8614dd14ef0538ec075217bb9e8a"
+        },
+        {
+          "path": "models/objects/enviroments/03/03_file_cabinet_largest_shell_Normal_2K.png",
+          "ref": "8d2452437ea8a6465b44bbb2cedcd402df302ce5",
+          "sha256": "89b1f91be2c418a61f61108965f4719a7bf01ffa7aabb3dbe9df36530e1d382d"
+        }
+      ]
+    },
+    {
+      "id": "Saturated_Blue_Powder_Coated_Steel",
+      "uv_rect": [
+        0.0078125,
+        0.7578125,
+        0.234375,
+        0.234375
+      ],
+      "sources": [
+        {
+          "path": "models/objects/enviroments/05/05_minipc_powder_BaseColor_2K.png",
+          "ref": "f49af602b5bb533bdf18e9d12e74a30b2706a9c4^",
+          "sha256": "40cd48e3fd0cabef8dbfd5c62c54669a504e6c4b56908639b3aa3dcb743376b0"
+        },
+        {
+          "path": "models/objects/enviroments/05/05_minipc_powder_ORM_2K.png",
+          "ref": "f49af602b5bb533bdf18e9d12e74a30b2706a9c4^",
+          "sha256": "2f1cf2c3db514199e238a1a816ba88992848803a1355e0aca3a65d3b5331b771"
+        },
+        {
+          "path": "models/objects/enviroments/05/05_minipc_powder_ORM_2K.png",
+          "ref": "f49af602b5bb533bdf18e9d12e74a30b2706a9c4^",
+          "sha256": "2f1cf2c3db514199e238a1a816ba88992848803a1355e0aca3a65d3b5331b771"
+        },
+        {
+          "path": "models/objects/enviroments/05/05_minipc_powder_Normal_2K.png",
+          "ref": "f49af602b5bb533bdf18e9d12e74a30b2706a9c4^",
+          "sha256": "6a65a57e5d816cee4e73d82dce854543216d7f969ca2d33bd117d3d88f44ea25"
+        }
+      ]
+    },
+    {
+      "id": "Server_Front_PBR_INDICATORS_ON",
+      "uv_rect": [
+        0.2578125,
+        0.7578125,
+        0.234375,
+        0.234375
+      ],
+      "sources": [
+        {
+          "path": "models/objects/enviroments/03/03_server_rack_reference_server_BaseColor_2K.png",
+          "ref": "8d2452437ea8a6465b44bbb2cedcd402df302ce5",
+          "sha256": "96f14228afa3393ddb12425371ba16c44e86996ac51ae84eabba672b8650c4e6"
+        },
+        {
+          "path": "models/objects/enviroments/03/03_server_rack_reference_server_ORM_2K.png",
+          "ref": "8d2452437ea8a6465b44bbb2cedcd402df302ce5",
+          "sha256": "8cf0ad7e83ecb07242a4912b3135d41987dde360e6df71a732c4bc962b50ab0e"
+        },
+        {
+          "path": "models/objects/enviroments/03/03_server_rack_reference_server_ORM_2K.png",
+          "ref": "8d2452437ea8a6465b44bbb2cedcd402df302ce5",
+          "sha256": "8cf0ad7e83ecb07242a4912b3135d41987dde360e6df71a732c4bc962b50ab0e"
+        },
+        {
+          "path": "models/objects/enviroments/03/03_server_rack_reference_server_Normal_2K.png",
+          "ref": "8d2452437ea8a6465b44bbb2cedcd402df302ce5",
+          "sha256": "b849c621c4fd05cd441185eba134a5fafb22f5a81570011a9ccb7c77fc6246ea"
+        },
+        {
+          "path": "models/objects/enviroments/03/03_server_rack_reference_server_Emission_2K.png",
+          "ref": "8d2452437ea8a6465b44bbb2cedcd402df302ce5",
+          "sha256": "45fef1a5a7c848b55016c5247129c82473a89af8ec44722191fb077eb94614c2"
+        }
+      ]
+    },
+    {
+      "id": "Server_Modules_INDICATORS_ON",
+      "uv_rect": [
+        0.5078125,
+        0.7578125,
+        0.234375,
+        0.234375
+      ],
+      "sources": [
+        {
+          "path": "models/objects/enviroments/03/03_server_rack2_03_server_rack2_Front_BaseColor_2K.png",
+          "ref": "8d2452437ea8a6465b44bbb2cedcd402df302ce5",
+          "sha256": "c9c51baa82d5fe177aea7b3754416215377d1cd236e8883637cbd19dd4e68195"
+        },
+        {
+          "path": "models/objects/enviroments/03/03_server_rack2_03_server_rack2_Front_ORM_2K.png",
+          "ref": "8d2452437ea8a6465b44bbb2cedcd402df302ce5",
+          "sha256": "8b22fca6a5665c3f7cddeb8f2e74a394023d0c3c112b65d0cb618ba4f5103127"
+        },
+        {
+          "path": "models/objects/enviroments/03/03_server_rack2_03_server_rack2_Front_ORM_2K.png",
+          "ref": "8d2452437ea8a6465b44bbb2cedcd402df302ce5",
+          "sha256": "8b22fca6a5665c3f7cddeb8f2e74a394023d0c3c112b65d0cb618ba4f5103127"
+        },
+        {
+          "path": "models/objects/enviroments/03/03_server_rack2_03_server_rack2_Front_Normal_2K.png",
+          "ref": "8d2452437ea8a6465b44bbb2cedcd402df302ce5",
+          "sha256": "ce6e72e4dd5e8a76f5e952c2acebde89759c894917f93477b48563b0bc0dd199"
+        },
+        {
+          "path": "models/objects/enviroments/03/03_server_rack2_03_server_rack2_Front_Emission_2K.png",
+          "ref": "8d2452437ea8a6465b44bbb2cedcd402df302ce5",
+          "sha256": "513ee9a1e795e61d049d0efe3345d7d0f3d2d6c2cc57bc336c03729755081310"
+        }
+      ]
+    },
+    {
+      "id": "Soft_Graphite_Matte_Back_Panel",
+      "uv_rect": [
+        0.7578125,
+        0.7578125,
+        0.234375,
+        0.234375
+      ],
+      "sources": [
+        {
+          "path": "models/objects/enviroments/03/textures/graphite_BaseColor_2K.png",
+          "ref": "8d2452437ea8a6465b44bbb2cedcd402df302ce5",
+          "sha256": "a7f8f6fda9c62b45ff7ac32fe042b90fd077278c3077e31fc068f4739b1ccff8"
+        },
+        {
+          "path": "models/objects/enviroments/03/textures/graphite_ORM_2K.png",
+          "ref": "8d2452437ea8a6465b44bbb2cedcd402df302ce5",
+          "sha256": "e0c0697c92e9545376bccc379df3329ba59be800022fb24ad75784d37ae42411"
+        },
+        {
+          "path": "models/objects/enviroments/03/textures/graphite_ORM_2K.png",
+          "ref": "8d2452437ea8a6465b44bbb2cedcd402df302ce5",
+          "sha256": "e0c0697c92e9545376bccc379df3329ba59be800022fb24ad75784d37ae42411"
+        },
+        {
+          "path": "models/objects/enviroments/03/textures/graphite_Normal_2K.png",
+          "ref": "8d2452437ea8a6465b44bbb2cedcd402df302ce5",
+          "sha256": "b12c9b846ae6f834767491d9fb1e0cfdd45d2656e84b22fdfd31e37bff6fb23a"
+        }
+      ]
+    }
+  ],
+  "models": {
+    "03_book_case.glb": [
+      {
+        "stage": "Intact",
+        "source_mesh_nodes": 1,
+        "mesh_nodes": 1,
+        "surfaces": 1,
+        "bytes": 48448
+      },
+      {
+        "stage": "LargeParts",
+        "source_mesh_nodes": 7,
+        "mesh_nodes": 7,
+        "surfaces": 7,
+        "bytes": 56892
+      },
+      {
+        "stage": "SmallFragments",
+        "source_mesh_nodes": 35,
+        "mesh_nodes": 14,
+        "surfaces": 14,
+        "bytes": 259524
+      }
+    ],
+    "03_book_case_small.glb": [
+      {
+        "stage": "Intact",
+        "source_mesh_nodes": 1,
+        "mesh_nodes": 1,
+        "surfaces": 1,
+        "bytes": 32224
+      },
+      {
+        "stage": "LargeParts",
+        "source_mesh_nodes": 7,
+        "mesh_nodes": 7,
+        "surfaces": 7,
+        "bytes": 40724
+      },
+      {
+        "stage": "SmallFragments",
+        "source_mesh_nodes": 33,
+        "mesh_nodes": 14,
+        "surfaces": 14,
+        "bytes": 232836
+      }
+    ],
+    "03_book_case_with_back.glb": [
+      {
+        "stage": "Intact",
+        "source_mesh_nodes": 1,
+        "mesh_nodes": 1,
+        "surfaces": 1,
+        "bytes": 54780
+      },
+      {
+        "stage": "LargeParts",
+        "source_mesh_nodes": 8,
+        "mesh_nodes": 8,
+        "surfaces": 8,
+        "bytes": 65516
+      },
+      {
+        "stage": "SmallFragments",
+        "source_mesh_nodes": 36,
+        "mesh_nodes": 16,
+        "surfaces": 16,
+        "bytes": 313776
+      }
+    ],
+    "03_book_case_with_back_small.glb": [
+      {
+        "stage": "Intact",
+        "source_mesh_nodes": 1,
+        "mesh_nodes": 1,
+        "surfaces": 1,
+        "bytes": 37548
+      },
+      {
+        "stage": "LargeParts",
+        "source_mesh_nodes": 8,
+        "mesh_nodes": 8,
+        "surfaces": 8,
+        "bytes": 47244
+      },
+      {
+        "stage": "SmallFragments",
+        "source_mesh_nodes": 40,
+        "mesh_nodes": 16,
+        "surfaces": 16,
+        "bytes": 333844
+      }
+    ],
+    "03_bookshelf.glb": [
+      {
+        "stage": "Intact",
+        "source_mesh_nodes": 1,
+        "mesh_nodes": 1,
+        "surfaces": 1,
+        "bytes": 34292
+      },
+      {
+        "stage": "LargeParts",
+        "source_mesh_nodes": 8,
+        "mesh_nodes": 8,
+        "surfaces": 8,
+        "bytes": 42156
+      },
+      {
+        "stage": "SmallFragments",
+        "source_mesh_nodes": 35,
+        "mesh_nodes": 16,
+        "surfaces": 16,
+        "bytes": 373360
+      }
+    ],
+    "03_box_1_metal_dented.glb": [
+      {
+        "stage": "Intact",
+        "source_mesh_nodes": 1,
+        "mesh_nodes": 1,
+        "surfaces": 1,
+        "bytes": 49484
+      },
+      {
+        "stage": "Dent_01",
+        "source_mesh_nodes": 1,
+        "mesh_nodes": 1,
+        "surfaces": 1,
+        "bytes": 1707240
+      },
+      {
+        "stage": "Dent_02",
+        "source_mesh_nodes": 1,
+        "mesh_nodes": 1,
+        "surfaces": 1,
+        "bytes": 1703136
+      },
+      {
+        "stage": "Dent_03",
+        "source_mesh_nodes": 1,
+        "mesh_nodes": 1,
+        "surfaces": 1,
+        "bytes": 1702412
+      }
+    ],
+    "03_file_cabinet_large_shelf_fancy.glb": [
+      {
+        "stage": "Intact",
+        "source_mesh_nodes": 1,
+        "mesh_nodes": 1,
+        "surfaces": 2,
+        "bytes": 64880
+      },
+      {
+        "stage": "LargeParts",
+        "source_mesh_nodes": 5,
+        "mesh_nodes": 5,
+        "surfaces": 6,
+        "bytes": 91780
+      },
+      {
+        "stage": "SmallFragments",
+        "source_mesh_nodes": 25,
+        "mesh_nodes": 10,
+        "surfaces": 11,
+        "bytes": 281960
+      }
+    ],
+    "03_file_cabinet_largest.glb": [
+      {
+        "stage": "Intact",
+        "source_mesh_nodes": 1,
+        "mesh_nodes": 1,
+        "surfaces": 2,
+        "bytes": 221140
+      },
+      {
+        "stage": "LargeParts",
+        "source_mesh_nodes": 26,
+        "mesh_nodes": 26,
+        "surfaces": 30,
+        "bytes": 389348
+      },
+      {
+        "stage": "SmallFragments",
+        "source_mesh_nodes": 118,
+        "mesh_nodes": 52,
+        "surfaces": 56,
+        "bytes": 1458040
+      }
+    ],
+    "03_file_cabinet_small_shelf_fancy.glb": [
+      {
+        "stage": "Intact",
+        "source_mesh_nodes": 1,
+        "mesh_nodes": 1,
+        "surfaces": 2,
+        "bytes": 52700
+      },
+      {
+        "stage": "LargeParts",
+        "source_mesh_nodes": 5,
+        "mesh_nodes": 5,
+        "surfaces": 6,
+        "bytes": 56300
+      },
+      {
+        "stage": "SmallFragments",
+        "source_mesh_nodes": 23,
+        "mesh_nodes": 10,
+        "surfaces": 11,
+        "bytes": 220004
+      }
+    ],
+    "03_file_cabinet_small_with_shelfs.glb": [
+      {
+        "stage": "Intact",
+        "source_mesh_nodes": 1,
+        "mesh_nodes": 1,
+        "surfaces": 2,
+        "bytes": 243540
+      },
+      {
+        "stage": "LargeParts",
+        "source_mesh_nodes": 28,
+        "mesh_nodes": 28,
+        "surfaces": 32,
+        "bytes": 291984
+      },
+      {
+        "stage": "SmallFragments",
+        "source_mesh_nodes": 126,
+        "mesh_nodes": 56,
+        "surfaces": 60,
+        "bytes": 1174104
+      }
+    ],
+    "03_file_cabinet_smaller.glb": [
+      {
+        "stage": "Intact",
+        "source_mesh_nodes": 1,
+        "mesh_nodes": 1,
+        "surfaces": 2,
+        "bytes": 119692
+      },
+      {
+        "stage": "LargeParts",
+        "source_mesh_nodes": 16,
+        "mesh_nodes": 16,
+        "surfaces": 18,
+        "bytes": 142612
+      },
+      {
+        "stage": "SmallFragments",
+        "source_mesh_nodes": 67,
+        "mesh_nodes": 32,
+        "surfaces": 34,
+        "bytes": 765360
+      }
+    ],
+    "03_locker_tall_dented.glb": [
+      {
+        "stage": "Intact",
+        "source_mesh_nodes": 14,
+        "mesh_nodes": 1,
+        "surfaces": 1,
+        "bytes": 242848
+      },
+      {
+        "stage": "Dent_01",
+        "source_mesh_nodes": 14,
+        "mesh_nodes": 1,
+        "surfaces": 1,
+        "bytes": 1174824
+      },
+      {
+        "stage": "Dent_02",
+        "source_mesh_nodes": 14,
+        "mesh_nodes": 1,
+        "surfaces": 1,
+        "bytes": 1172776
+      },
+      {
+        "stage": "Dent_03",
+        "source_mesh_nodes": 14,
+        "mesh_nodes": 1,
+        "surfaces": 1,
+        "bytes": 1170272
+      }
+    ],
+    "03_server_rack.glb": [
+      {
+        "stage": "Intact",
+        "source_mesh_nodes": 1,
+        "mesh_nodes": 1,
+        "surfaces": 1,
+        "bytes": 64980
+      },
+      {
+        "stage": "Modular",
+        "source_mesh_nodes": 10,
+        "mesh_nodes": 10,
+        "surfaces": 10,
+        "bytes": 76944
+      },
+      {
+        "stage": "Primary",
+        "source_mesh_nodes": 20,
+        "mesh_nodes": 20,
+        "surfaces": 20,
+        "bytes": 48808
+      },
+      {
+        "stage": "Medium",
+        "source_mesh_nodes": 40,
+        "mesh_nodes": 40,
+        "surfaces": 40,
+        "bytes": 96516
+      },
+      {
+        "stage": "Fine",
+        "source_mesh_nodes": 40,
+        "mesh_nodes": 40,
+        "surfaces": 40,
+        "bytes": 96592
+      }
+    ],
+    "03_server_rack2.glb": [
+      {
+        "stage": "Intact",
+        "source_mesh_nodes": 10,
+        "mesh_nodes": 2,
+        "surfaces": 3,
+        "bytes": 357268
+      },
+      {
+        "stage": "Modular",
+        "source_mesh_nodes": 10,
+        "mesh_nodes": 10,
+        "surfaces": 10,
+        "bytes": 317720
+      },
+      {
+        "stage": "Primary",
+        "source_mesh_nodes": 16,
+        "mesh_nodes": 16,
+        "surfaces": 16,
+        "bytes": 88984
+      },
+      {
+        "stage": "Medium",
+        "source_mesh_nodes": 32,
+        "mesh_nodes": 32,
+        "surfaces": 32,
+        "bytes": 148020
+      },
+      {
+        "stage": "Fine",
+        "source_mesh_nodes": 32,
+        "mesh_nodes": 32,
+        "surfaces": 32,
+        "bytes": 148084
+      }
+    ],
+    "03_server_rack3.glb": [
+      {
+        "stage": "Intact",
+        "source_mesh_nodes": 9,
+        "mesh_nodes": 1,
+        "surfaces": 2,
+        "bytes": 233744
+      },
+      {
+        "stage": "Modular",
+        "source_mesh_nodes": 2,
+        "mesh_nodes": 2,
+        "surfaces": 2,
+        "bytes": 185752
+      },
+      {
+        "stage": "Primary",
+        "source_mesh_nodes": 4,
+        "mesh_nodes": 4,
+        "surfaces": 4,
+        "bytes": 71604
+      },
+      {
+        "stage": "Medium",
+        "source_mesh_nodes": 8,
+        "mesh_nodes": 8,
+        "surfaces": 8,
+        "bytes": 114352
+      },
+      {
+        "stage": "Fine",
+        "source_mesh_nodes": 8,
+        "mesh_nodes": 8,
+        "surfaces": 8,
+        "bytes": 114364
+      }
+    ]
+  }
+}

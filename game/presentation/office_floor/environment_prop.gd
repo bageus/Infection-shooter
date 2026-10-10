@@ -297,6 +297,8 @@ func _apply_damage(hit_position: Vector3, direction: Vector3) -> void:
 		if previous_variant >= 0:
 			_variants[previous_variant].hide()
 		var variant := _variants[_damage.variant_index]
+		if not _geometry.ensure_group(variant):
+			return
 		DAMAGE.reveal_meshes(variant)
 		variant.show()
 		_rebuild_shapes()
@@ -304,6 +306,8 @@ func _apply_damage(hit_position: Vector3, direction: Vector3) -> void:
 		if "server_rack" in model_path.get_file() or _is_facade_damage():
 			if _intact != null:
 				_intact.hide()
+			if not _geometry.ensure_group(_stages[0]):
+				return
 			DAMAGE.reveal_meshes(_stages[0])
 			_stages[0].show()
 			_rebuild_shapes()
