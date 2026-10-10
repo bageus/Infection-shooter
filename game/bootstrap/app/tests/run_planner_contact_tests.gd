@@ -61,6 +61,10 @@ func _test_edges() -> void:
 	target.set_meta("planning_wall_normal", Vector3.FORWARD)
 	var value := Vector3(1.15, 0, 0)
 	_check(SNAP.position_for(source, shallow, value, [{"node": target, "bounds": deep}], true) == value, "Opposite wall faces never join")
+	target.remove_meta("planning_wall_normal")
+	var offset := AABB(Vector3(-.5, 0, -.7), Vector3(1, 2, .5))
+	result = SNAP.position_for(source, offset, Vector3(1.15, 0, .2), [{"node": target, "bounds": deep}], true)
+	_check(result.is_equal_approx(Vector3(1, 0, .2)), "Reloaded wall cabinet and offset pivots share real back plane")
 	target.free()
 	source.free()
 

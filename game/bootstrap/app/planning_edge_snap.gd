@@ -19,10 +19,11 @@ static func position_for(node: Node3D, bounds: AABB, position: Vector3, neighbor
 		var target: Transform3D = other.global_transform
 		var box: AABB = record["bounds"]
 		if mounted:
-			if not bool(other.get_meta("planning_wall_mount", false)) or not other.has_meta("planning_wall_normal"):
+			if not bool(other.get_meta("planning_wall_mount", false)):
 				continue
 			var normal: Vector3 = node.get_meta("planning_wall_normal")
-			if normal.dot(other.get_meta("planning_wall_normal")) < .999 or absf((position - target.origin).dot(normal)) > .03:
+			var target_normal: Vector3 = other.get_meta("planning_wall_normal", target.basis.z.normalized())
+			if normal.dot(target_normal) < .999 or absf(_back_plane(source, bounds, normal) - _back_plane(target, box, normal)) > .03:
 				continue
 		elif bool(other.get_meta("planning_wall_mount", false)):
 			continue
@@ -75,3 +76,9 @@ static func _face(bounds: AABB, axis: int, side: float, align_back: bool) -> Vec
 	if align_back and axis == 0:
 		point.z = bounds.position.z # Cabinet backs align even with different depths.
 	return point
+
+static func _back_plane(frame: Transform3D, bounds: AABB, normal: Vector3) -> float:
+	var back := INF
+	for index in 8:
+		back = minf(back, (frame * bounds.get_endpoint(index)).dot(normal))
+	return back
