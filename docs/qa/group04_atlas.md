@@ -56,6 +56,11 @@ of `04_cardboard_boxes_1` become constant UVs, avoiding mesh explosion.
 - PASS: `validate_project`, `validate_scene_resources`, `check_import_files`, dedup audit, seven texture-validator unit tests and ten texture-dedup unit tests.
 - Godot editor import executed. The first full import of the untouched baseline emitted missing-image errors outside group 04; final incremental import and focused group-04 execution contain no ERROR/SCRIPT ERROR.
 
+GitHub CI run `38064618775` at `d12ef99` also passes the explicit
+`Group 04 atlas and destruction` step. Its overall Import fails on missing
+external images in the baseline; native planner jobs likewise stop at Import.
+Architecture run `38064454683` confirms the missing-phone resource-path failure.
+
 ## Existing main failures
 
 The untouched baseline has 315 static texture audit errors, predominantly missing
