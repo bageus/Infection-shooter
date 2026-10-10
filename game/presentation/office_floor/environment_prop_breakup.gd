@@ -24,7 +24,7 @@ static func chip_facade(body: RigidBody3D, geometry: GEOMETRY, hit_position: Vec
 
 
 static func spawn_stage(body: RigidBody3D, geometry: GEOMETRY, stage_index: int, prefix: String, hit_position: Vector3, direction: Vector3, blast: bool = false) -> bool:
-	if stage_index >= geometry.stages.size():
+	if stage_index >= geometry.stages.size() or not geometry.ensure_group(geometry.stages[stage_index]):
 		return false
 	var meshes: Array[MeshInstance3D] = DAMAGE.reveal_meshes(geometry.stages[stage_index])
 	var spawned := 0

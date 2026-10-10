@@ -1,0 +1,184 @@
+{
+  "03_book_case.glb": [
+    {
+      "name": "LargeParts",
+      "path": "res://models/objects/enviroments/03/damage/03_book_case_largeparts.glb"
+    },
+    {
+      "name": "SmallFragments",
+      "path": "res://models/objects/enviroments/03/damage/03_book_case_smallfragments.glb"
+    }
+  ],
+  "03_book_case_small.glb": [
+    {
+      "name": "LargeParts",
+      "path": "res://models/objects/enviroments/03/damage/03_book_case_small_largeparts.glb"
+    },
+    {
+      "name": "SmallFragments",
+      "path": "res://models/objects/enviroments/03/damage/03_book_case_small_smallfragments.glb"
+    }
+  ],
+  "03_book_case_with_back.glb": [
+    {
+      "name": "LargeParts",
+      "path": "res://models/objects/enviroments/03/damage/03_book_case_with_back_largeparts.glb"
+    },
+    {
+      "name": "SmallFragments",
+      "path": "res://models/objects/enviroments/03/damage/03_book_case_with_back_smallfragments.glb"
+    }
+  ],
+  "03_book_case_with_back_small.glb": [
+    {
+      "name": "LargeParts",
+      "path": "res://models/objects/enviroments/03/damage/03_book_case_with_back_small_largeparts.glb"
+    },
+    {
+      "name": "SmallFragments",
+      "path": "res://models/objects/enviroments/03/damage/03_book_case_with_back_small_smallfragments.glb"
+    }
+  ],
+  "03_bookshelf.glb": [
+    {
+      "name": "LargeParts",
+      "path": "res://models/objects/enviroments/03/damage/03_bookshelf_largeparts.glb"
+    },
+    {
+      "name": "SmallFragments",
+      "path": "res://models/objects/enviroments/03/damage/03_bookshelf_smallfragments.glb"
+    }
+  ],
+  "03_box_1_metal_dented.glb": [
+    {
+      "name": "Dent_01",
+      "path": "res://models/objects/enviroments/03/damage/03_box_1_metal_dented_dent_01.glb"
+    },
+    {
+      "name": "Dent_02",
+      "path": "res://models/objects/enviroments/03/damage/03_box_1_metal_dented_dent_02.glb"
+    },
+    {
+      "name": "Dent_03",
+      "path": "res://models/objects/enviroments/03/damage/03_box_1_metal_dented_dent_03.glb"
+    }
+  ],
+  "03_file_cabinet_large_shelf_fancy.glb": [
+    {
+      "name": "LargeParts",
+      "path": "res://models/objects/enviroments/03/damage/03_file_cabinet_large_shelf_fancy_largeparts.glb"
+    },
+    {
+      "name": "SmallFragments",
+      "path": "res://models/objects/enviroments/03/damage/03_file_cabinet_large_shelf_fancy_smallfragments.glb"
+    }
+  ],
+  "03_file_cabinet_largest.glb": [
+    {
+      "name": "LargeParts",
+      "path": "res://models/objects/enviroments/03/damage/03_file_cabinet_largest_largeparts.glb"
+    },
+    {
+      "name": "SmallFragments",
+      "path": "res://models/objects/enviroments/03/damage/03_file_cabinet_largest_smallfragments.glb"
+    }
+  ],
+  "03_file_cabinet_small_shelf_fancy.glb": [
+    {
+      "name": "LargeParts",
+      "path": "res://models/objects/enviroments/03/damage/03_file_cabinet_small_shelf_fancy_largeparts.glb"
+    },
+    {
+      "name": "SmallFragments",
+      "path": "res://models/objects/enviroments/03/damage/03_file_cabinet_small_shelf_fancy_smallfragments.glb"
+    }
+  ],
+  "03_file_cabinet_small_with_shelfs.glb": [
+    {
+      "name": "LargeParts",
+      "path": "res://models/objects/enviroments/03/damage/03_file_cabinet_small_with_shelfs_largeparts.glb"
+    },
+    {
+      "name": "SmallFragments",
+      "path": "res://models/objects/enviroments/03/damage/03_file_cabinet_small_with_shelfs_smallfragments.glb"
+    }
+  ],
+  "03_file_cabinet_smaller.glb": [
+    {
+      "name": "LargeParts",
+      "path": "res://models/objects/enviroments/03/damage/03_file_cabinet_smaller_largeparts.glb"
+    },
+    {
+      "name": "SmallFragments",
+      "path": "res://models/objects/enviroments/03/damage/03_file_cabinet_smaller_smallfragments.glb"
+    }
+  ],
+  "03_locker_tall_dented.glb": [
+    {
+      "name": "Dent_01",
+      "path": "res://models/objects/enviroments/03/damage/03_locker_tall_dented_dent_01.glb"
+    },
+    {
+      "name": "Dent_02",
+      "path": "res://models/objects/enviroments/03/damage/03_locker_tall_dented_dent_02.glb"
+    },
+    {
+      "name": "Dent_03",
+      "path": "res://models/objects/enviroments/03/damage/03_locker_tall_dented_dent_03.glb"
+    }
+  ],
+  "03_server_rack.glb": [
+    {
+      "name": "Modular",
+      "path": "res://models/objects/enviroments/03/damage/03_server_rack_modular.glb"
+    },
+    {
+      "name": "Primary",
+      "path": "res://models/objects/enviroments/03/damage/03_server_rack_primary.glb"
+    },
+    {
+      "name": "Medium",
+      "path": "res://models/objects/enviroments/03/damage/03_server_rack_medium.glb"
+    },
+    {
+      "name": "Fine",
+      "path": "res://models/objects/enviroments/03/damage/03_server_rack_fine.glb"
+    }
+  ],
+  "03_server_rack2.glb": [
+    {
+      "name": "Modular",
+      "path": "res://models/objects/enviroments/03/damage/03_server_rack2_modular.glb"
+    },
+    {
+      "name": "Primary",
+      "path": "res://models/objects/enviroments/03/damage/03_server_rack2_primary.glb"
+    },
+    {
+      "name": "Medium",
+      "path": "res://models/objects/enviroments/03/damage/03_server_rack2_medium.glb"
+    },
+    {
+      "name": "Fine",
+      "path": "res://models/objects/enviroments/03/damage/03_server_rack2_fine.glb"
+    }
+  ],
+  "03_server_rack3.glb": [
+    {
+      "name": "Modular",
+      "path": "res://models/objects/enviroments/03/damage/03_server_rack3_modular.glb"
+    },
+    {
+      "name": "Primary",
+      "path": "res://models/objects/enviroments/03/damage/03_server_rack3_primary.glb"
+    },
+    {
+      "name": "Medium",
+      "path": "res://models/objects/enviroments/03/damage/03_server_rack3_medium.glb"
+    },
+    {
+      "name": "Fine",
+      "path": "res://models/objects/enviroments/03/damage/03_server_rack3_fine.glb"
+    }
+  ]
+}

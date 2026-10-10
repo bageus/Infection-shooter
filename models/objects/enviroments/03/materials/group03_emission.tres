@@ -1,0 +1,25 @@
+[gd_resource type="ORMMaterial3D" load_steps=5 format=3]
+
+[ext_resource type="Texture2D" path="res://models/objects/enviroments/03/textures/unified/group03_albedo.png" id="1_albedo"]
+[ext_resource type="Texture2D" path="res://models/objects/enviroments/03/textures/unified/group03_normal.png" id="2_normal"]
+[ext_resource type="Texture2D" path="res://models/objects/enviroments/03/textures/unified/group03_orm.png" id="3_orm"]
+
+[ext_resource type="Texture2D" path="res://models/objects/enviroments/03/textures/unified/group03_emission.png" id="4_emission"]
+
+[resource]
+resource_name = "Group03Emission"
+albedo_texture = ExtResource("1_albedo")
+normal_enabled = true
+normal_texture = ExtResource("2_normal")
+orm_texture = ExtResource("3_orm")
+metallic = 1.0
+roughness = 1.0
+texture_filter = 5
+texture_repeat = false
+
+cull_mode = 2
+vertex_color_use_as_albedo = true
+emission_enabled = true
+emission = Color(1, 1, 1, 1)
+emission_energy_multiplier = 2.5
+emission_texture = ExtResource("4_emission")

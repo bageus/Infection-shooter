@@ -128,7 +128,7 @@ func _check_runtime_profile(instance: Node, path: String) -> void:
 				var texture := material.get_texture(slot)
 				if texture == null or texture.resource_path.begins_with("res://models/objects/textures/"):
 					continue
-				var limit := 2048 if texture.resource_path == GROUP01_MAPS[0] else 1024
+				var limit := 2048 if texture.resource_path in [GROUP01_MAPS[0], "res://models/objects/enviroments/03/textures/unified/group03_albedo.png"] else 1024
 				if maxi(texture.get_width(), texture.get_height()) > limit:
 					_fail("Runtime environment map exceeds its %d-pixel budget: %s" % [limit, path])
 
@@ -211,7 +211,7 @@ func _record_maps(material: BaseMaterial3D) -> void:
 		var path := texture.resource_path
 		if not texture is ImageTexture and not path.begins_with("res://models/objects/enviroments/"):
 			continue
-		var limit := 2048 if path == GROUP01_MAPS[0] else 1024
+		var limit := 2048 if path in [GROUP01_MAPS[0], "res://models/objects/enviroments/03/textures/unified/group03_albedo.png"] else 1024
 		if maxi(texture.get_width(), texture.get_height()) > limit:
 			_fail("Runtime model map exceeds its %d-pixel budget: %s" % [limit, path])
 		if texture is ImageTexture and not path.begins_with("res://assets/runtime_shared_maps/"):
