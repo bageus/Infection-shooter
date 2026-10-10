@@ -93,3 +93,48 @@ Public methods, map DTO, state owners и dependencies прежние. Архит
 
 Следующее действие: CI PR и ручная приёмка Windows/Web с большим числом врагов,
 серией разрушений и замером FPS/памяти на целевом устройстве.
+
+
+## PR #89 regression repairs (10 October 2026)
+
+CI reproduced the baseline airborne-Horde failure and a Forward+ occlusion timeout.
+The authored furniture at (27, 3, 4) overlaps Horde, so this is not a free-fall
+fixture. Both corpses now settle on the same isolated floor as the severed-part
+check while the full mission, 90 physics ticks, joint tolerances and fall/pose
+assertions remain loaded and unchanged. Surface/pose no longer assumes that the
+editable base map contains more than ten lamps: it installs and checks all twelve
+shape/visibility/energy fixture combinations explicitly. Its non-pixel planner
+roundtrip keeps the complete map with viewport 3D rasterization disabled; all
+projection and pose captures before it still render.
+
+Occlusion pixel assertions retain rendering. The full-map material lifecycle
+section keeps its twelve cycles and 240 process frames, with viewport 3D rendering
+disabled during those non-pixel assertions. Material allocation, pending queues,
+physics and live mesh/skin ownership still run; CI timeouts are unchanged.
+
+Blood surface queries now refine physics-proxy hits onto the visible mesh using
+the already injected impact adapter. Compatibility marks that cannot project onto
+any receiver are discarded before entering the mark budget, surface counters or
+FIFO. The office-floor blood suite covers a proxy top 0.4 m above its visible
+mesh and verifies that unsupported projections leave no phantom records.
+
+Focused headless extension, surface/pose, gameplay/planner repairs, blood effects,
+blood decor and corpse physics suites PASS. Gameplay/planner blood additionally
+passes with seeds 1, 17, 29051, 104729 and 20261010. The new blood regression fails four
+assertions on untouched baseline 6e902fe and passes on the candidate.
+
+Full headless regressions: 77/77 PASS; final surface/pose recheck PASS. Project
+gates and final Godot import PASS. Final native checks (Godot 4.7.2, actual Mesa
+OpenGL/Vulkan llvmpipe, screenshots enabled, local LP_NUM_THREADS=4):
+
+| Suite | Compatibility | Forward+ |
+| --- | --- | --- |
+| planner_extension | PASS, 23.8 s | PASS, 57.8 s |
+| occlusion | PASS, 28.6 s | PASS, 43.7 s |
+| surface_pose | PASS, 44.4 s | PASS, 51.5 s |
+| gameplay_planner_repairs | PASS, 36.5 s | PASS, 73.9 s |
+
+An earlier unrestricted parallel Vulkan attempt was killed under the local 8 GiB
+cgroup limit. All final native cases completed with four software-renderer threads.
+The repaired code revision is ready for CI confirmation. No public API, authored asset, save format, state
+owner, dependency or architecture exception changes.

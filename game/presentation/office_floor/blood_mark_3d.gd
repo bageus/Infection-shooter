@@ -15,7 +15,7 @@ func _init() -> void:
 	set_meta("blood_effect", true)
 
 
-func configure(hit: Dictionary, definition: Dictionary, settings: Dictionary) -> void:
+func configure(hit: Dictionary, definition: Dictionary, settings: Dictionary) -> bool:
 	set_meta("blood_effect", true)
 	_depth = settings["depth"]
 	var body: Node3D = hit["collider"]
@@ -58,7 +58,9 @@ func configure(hit: Dictionary, definition: Dictionary, settings: Dictionary) ->
 			var projector := Transform3D(Basis(mark_basis.x, -mark_basis.z, mark_basis.y), hit["position"])
 			for piece in pool.call("project_surface", body, projector, footprint, _material, _depth, false):
 				_projected.append(weakref(piece))
-			visual.queue_free()
+			visual.free()
+			if _projected.is_empty():
+				return false
 		else:
 			_quad = QuadMesh.new()
 			_quad.material = _material
@@ -83,6 +85,7 @@ func configure(hit: Dictionary, definition: Dictionary, settings: Dictionary) ->
 	body.add_child(_anchor)
 	_anchor.global_transform = global_transform
 	_anchor.remote_path = _anchor.get_path_to(self)
+	return true
 
 
 func _set_dimensions(footprint: Vector2) -> void:

@@ -191,22 +191,25 @@ func _poses() -> void:
 
 
 func _planner_roundtrip() -> void:
+	# Projection/pose captures above still render. This section checks registration,
+	# controls and DTOs, so keep the complete map without rasterizing every frame.
+	var rendering_disabled := root.disable_3d
+	root.disable_3d = true
 	var game := MAIN.instantiate()
 	root.add_child(game)
 	current_scene = game
 	await process_frame
-	var authored: SceneState = load("res://game/presentation/office_floor/public/base_office_layout.tscn").get_state()
-	for node_index in authored.get_node_count():
-		var properties: Dictionary = {}
-		for property_index in authored.get_node_property_count(node_index):
-			properties[str(authored.get_node_property_name(node_index, property_index))] = authored.get_node_property_value(node_index, property_index)
-		var script: Variant = properties.get("script")
-		if script is Script and script.resource_path.ends_with("/planner_light.gd"):
-			var lamp: Node3D = load("res://game/presentation/office_floor/public/props/planner_light.tscn").instantiate()
-			for key in properties:
-				if key != "script":
-					lamp.set(key, properties[key])
-			game.get_node("Structure").add_child(lamp)
+	# The editable base map no longer contains lamps. Install a deterministic
+	# fixture covering every shape and visibility combination, independent of it.
+	var installed: Array[Node3D] = []
+	for shape in ["point", "linear", "rectangle"]:
+		for visible_in_game in [false, true]:
+			for energy in [2.0, 9.5]:
+				var lamp: Node3D = load("res://game/presentation/office_floor/public/props/planner_light.tscn").instantiate()
+				lamp.call("configure_fixture", shape, visible_in_game)
+				lamp.call("set_authored_energy", energy)
+				game.get_node("Structure").add_child(lamp)
+				installed.append(lamp)
 	game.call("_on_planning_pressed")
 	var planner: Node = game.get("planning_mode")
 	var objects: Node = planner.get("objects")
@@ -214,12 +217,12 @@ func _planner_roundtrip() -> void:
 	objects.call("_register_existing_scene_objects")
 	var inspected := 0
 	for lamp: Node3D in (objects.get("placed") as Array):
-		if not lamp.has_method("get_fixture_config"):
+		if not installed.has(lamp):
 			continue
 		objects.call("_select", lamp)
 		_check(controls.fixtures.selected_panel.visible and controls.selected_light_color.get_parent().visible and controls.light_info.visible, "Installed lamp exposes fixture/color/energy parameters")
 		inspected += 1
-	_check(inspected > 10, "Every authored installed lamp was checked")
+	_check(inspected == installed.size() and inspected == 12, "Every installed fixture combination was registered and checked")
 	var corpse := planner.call("_instantiate_asset", "res://game/features/infected/public/decor/corpse_hunger.tscn") as Node3D
 	corpse.call("configure_decor_pose", {"seed": 77, "pose": "stomach", "facing": .7})
 	planner.root.add_child(corpse)
@@ -239,6 +242,7 @@ func _planner_roundtrip() -> void:
 	game.queue_free()
 	await process_frame
 	await process_frame
+	root.disable_3d = rendering_disabled
 
 
 func _check(ok: bool, message: String) -> void:
