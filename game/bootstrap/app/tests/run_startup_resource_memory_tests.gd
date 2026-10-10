@@ -81,7 +81,9 @@ func _check() -> void:
 	var placed: Array = planner.get("objects").get("placed")
 	print("Full map placed: ", placed.size())
 	var authored: Dictionary = planner.get("storage").get("authored_layout")
-	if placed.size() < 1033 or authored["objects"].size() != 1034:
+	var base: Dictionary = JSON.parse_string(FileAccess.get_file_as_string(BASE))
+	var expected: int = base["objects"].size()
+	if placed.size() < expected - 1 or authored["objects"].size() != expected:
 		failures += 1
 		push_error("Full map object count changed")
 	var furniture := 0

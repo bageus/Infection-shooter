@@ -39,7 +39,10 @@ static func probe(session: Variant, placing: Node3D, screen: Vector2) -> Vector3
 		return Vector3.INF
 	placing.call("configure_blood_normal", Vector3.UP)
 	placing.set_meta("blood_probe_anchor", null)
-	return origin + direction * distance
+	var point := origin + direction * distance
+	# Avoid cancellation in the long camera ray moving the mark below the plane.
+	point.y = _floor_height(session)
+	return point
 
 
 static func _floor_height(session: Variant) -> float:
