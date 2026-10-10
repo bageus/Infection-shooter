@@ -158,7 +158,11 @@ func _particles(catalog: RefCounted) -> void:
 	_check(prefs.values.electronic_particles, "Old settings preserve sparks by default")
 	# First-hit effects finish before measuring only subsequent hits.
 	prop.call("take_projectile_hit", 0.0, prop.global_position, Vector3.BACK, Vector3.FORWARD, "PISTOL")
+	var disabled := root.disable_3d
+	root.disable_3d = true
 	await create_timer(1.3).timeout
+	root.disable_3d = disabled
+	await process_frame
 	var effects := stage.get("mission_objects") as Node3D
 	var count := effects.get_child_count()
 	prop.call("take_projectile_hit", 0.0, prop.global_position, Vector3.BACK, Vector3.FORWARD, "PISTOL")
@@ -169,8 +173,18 @@ func _particles(catalog: RefCounted) -> void:
 	_check(effects.get_child_count() > count, "Enabled repeat hit creates spark particles")
 
 func _corpse() -> void:
+	# Authored office furniture must not catch this airborne physics fixture.
+	var support := StaticBody3D.new()
+	var shape := CollisionShape3D.new()
+	shape.shape = BoxShape3D.new()
+	shape.shape.size = Vector3(10, .2, 10)
+	support.add_child(shape)
+	stage.add_child(support)
+	support.position = Vector3(1000, -.1, 1000)
 	for scene: PackedScene in [CORPSE, HORDE]:
 		await _settle(scene)
+	support.queue_free()
+	await physics_frame
 	var part := PART.instantiate() as RigidBody3D
 	stage.add_child(part)
 	var floor_body := StaticBody3D.new()
@@ -200,7 +214,7 @@ func _settle(scene: PackedScene) -> void:
 	var corpse := scene.instantiate()
 	corpse.call("configure_decor_pose", {"seed": 9, "pose": "seated", "facing": 0.0})
 	stage.add_child(corpse)
-	corpse.position = Vector3(27, 3, 4)
+	corpse.position = Vector3(1000, 3, 1000)
 	var skeleton: Skeleton3D = corpse.get("parts").get("skeleton")
 	var hips := skeleton.find_bone("Hips")
 	var before := skeleton.global_transform * skeleton.get_bone_global_pose(hips)
@@ -241,9 +255,7 @@ func _aim(player: Node3D) -> void:
 		for height in [.1, 3.0]:
 			var target := player.global_position + Vector3(0, height, 5)
 			mount.call("aim_at", target)
-			await physics_frame
-			await physics_frame
-			await process_frame
+			await _physics_ticks(2)
 			if DisplayServer.get_name() != "headless":
 				await RenderingServer.frame_post_draw
 			var expected: Transform3D = (mount.get("socket") as Node3D).global_transform

@@ -57,5 +57,5 @@ process_material = SubResource("SporeMotion")
 draw_pass_1 = SubResource("SporeMesh")
 
 [node name="CollisionShape3D" type="CollisionShape3D" parent="."]
-position = Vector3(0, 0.75, 0)
+position = Vector3(0, 1.25, 0)
 shape = SubResource("CloudShape")

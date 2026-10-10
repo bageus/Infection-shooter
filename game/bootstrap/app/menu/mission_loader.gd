@@ -3,6 +3,8 @@ extends CanvasLayer
 signal completed(success: bool)
 const RESOURCE_PREPARATION := preload("res://game/bootstrap/app/scene_resource_preparation.gd")
 const LAYOUT := preload("res://game/bootstrap/app/planning_layout_loader.gd")
+const MATERIAL_WARMUP := preload("res://game/bootstrap/app/mission_material_warmup.gd")
+var warmed_materials := 0
 const PHYSICS := preload("res://game/bootstrap/app/planning_physics.gd")
 const PREFERENCES := preload("res://game/bootstrap/app/menu/menu_preferences.gd")
 const MAIN_PATH := "res://game/bootstrap/app/main.tscn"
@@ -115,6 +117,11 @@ func start() -> void:
 	if int(report.skipped) > 0:
 		push_warning("Planned layout: %d missing object(s) skipped: %s" % [report.skipped, ", ".join(report.missing)])
 	storage.snapshot_authored()
+	# Keep physics paused and cover the first real material draws with the overlay.
+	pending.show()
+	var warmup := MATERIAL_WARMUP.new()
+	await warmup.prepare(pending, pending.get_viewport().get_camera_3d(), tree, _set_progress)
+	warmed_materials = warmup.material_count
 	PHYSICS.resume(planner.get("objects").get("placed"))
 	_set_progress(1.0, "ready")
 	await tree.process_frame
@@ -159,7 +166,7 @@ func _set_progress(value: float, phase: String) -> void:
 			float(OS.get_static_memory_usage()) / 1048576.0,
 			float(Performance.get_monitor(Performance.RENDER_VIDEO_MEM_USED)) / 1048576.0])
 	progress.value = maxf(progress.value, value * 100.0)
-	var names := {"resources": "Загрузка ресурсов…", "prepare": "Подготовка карты…", "objects": "Создание локации…", "ready": "Готово"} if _ru else {"resources": "Loading resources…", "prepare": "Preparing map…", "objects": "Building location…", "ready": "Ready"}
+	var names := {"resources": "Загрузка ресурсов…", "prepare": "Подготовка карты…", "objects": "Создание локации…", "materials": "Подготовка текстур…", "ready": "Готово"} if _ru else {"resources": "Loading resources…", "prepare": "Preparing map…", "objects": "Building location…", "materials": "Preparing textures…", "ready": "Ready"}
 	label.text = names[phase]
 
 

@@ -17,6 +17,7 @@ signal depleted
 @export var puff_count_range := Vector2i(3, 4)
 @export var cloud_radius := 1.35
 
+var _floor_offset := 0.0
 var _active: bool = false
 var _absorption_remaining: float = 0.0
 var _lifetime_remaining: float = 0.0
@@ -40,6 +41,8 @@ func activate() -> void:
 	_lifetime_remaining = lifetime_seconds
 	_cycle_elapsed = 0.0
 	_delay_remaining = 0.0 if permanent else absorb_delay
+	_floor_offset = _support_height() - global_position.y
+	($CollisionShape3D as CollisionShape3D).position.y = _floor_offset + 1.25
 	var walls := WALL_FIELD.texture_for(self)
 	var phase := randf_range(0.0, 100.0)
 	# Every cloud is new: its own puffs, variants, layout, spin and shade.
@@ -55,12 +58,34 @@ func activate() -> void:
 		layer.set_instance_shader_parameter("progress", 0.0)
 		layer.set_instance_shader_parameter("looping", 1.0 if permanent else 0.0)
 		layer.set_instance_shader_parameter("cycle_seconds", maxf(lifetime_seconds, 1.0))
-		layer.set_instance_shader_parameter("cloud_center", global_position)
+		layer.set_instance_shader_parameter("cloud_center", global_position + Vector3.UP * _floor_offset)
 	_spores.emitting = false
 	monitoring = true
 	visible = true
 	if not permanent:
 		_register_death_cloud()
+
+
+func _support_height() -> float:
+	var query := PhysicsRayQueryParameters3D.create(global_position + Vector3.UP * .1, global_position - Vector3.UP * 6.0, 3)
+	var excluded: Array[RID] = []
+	var ancestor := get_parent()
+	while ancestor != null:
+		if ancestor is CollisionObject3D:
+			excluded.append((ancestor as CollisionObject3D).get_rid())
+		ancestor = ancestor.get_parent()
+	query.exclude = excluded
+	for _attempt in 16:
+		var hit := get_world_3d().direct_space_state.intersect_ray(query)
+		if hit.is_empty():
+			break
+		var collider: Node = hit["collider"]
+		if collider is CharacterBody3D or (collider is RigidBody3D and not (collider as RigidBody3D).freeze):
+			excluded.append(hit["rid"])
+			query.exclude = excluded
+			continue
+		return (hit["position"] as Vector3).y
+	return global_position.y
 
 
 func _physics_process(delta: float) -> void:
@@ -140,9 +165,9 @@ func _build_puffs(count: int, shade: float) -> MultiMesh:
 		# One puff holds the core; the rest ring it evenly so no side is bare.
 		var reach := randf_range(0.0, 0.25) * cloud_radius if i == 0 else randf_range(0.55, 0.95) * cloud_radius
 		var angle := float(i) * TAU / float(maxi(count - 1, 1)) + ring_turn + randf_range(-0.35, 0.35)
-		var height := lerpf(0.75, 2.05, randf() * 0.5 + reach / cloud_radius * 0.5)
+		var height := lerpf(0.9, 1.45, randf() * 0.5 + reach / cloud_radius * 0.5)
 		var size := lerpf(3.3, 2.1, reach / cloud_radius) * randf_range(0.9, 1.1)
-		var origin := Vector3(cos(angle) * reach, height, sin(angle) * reach)
+		var origin := Vector3(cos(angle) * reach, height + _floor_offset, sin(angle) * reach)
 		multimesh.set_instance_transform(i, Transform3D(Basis.from_scale(Vector3.ONE * size), origin))
 		var spin := randf_range(0.05, 0.22) * (1.0 if randf() < 0.5 else -1.0)
 		var data := Color(float(variants[i % 12]) / 12.0, randf(), spin, float(stagger[i]) / float(count))
@@ -158,7 +183,7 @@ func _build_haze(shade: float) -> MultiMesh:
 	var multimesh := _multimesh(1)
 	for i in range(1):
 		var angle := float(i) * TAU / 3.0 + randf_range(-.3, .3)
-		var origin := Vector3(cos(angle) * .45, randf_range(.25, .45), sin(angle) * .45)
+		var origin := Vector3(cos(angle) * .45, randf_range(.65, .85) + _floor_offset, sin(angle) * .45)
 		var size := randf_range(.9, 1.3)
 		multimesh.set_instance_transform(i, Transform3D(Basis.from_scale(Vector3.ONE * size), origin))
 		multimesh.set_instance_custom_data(i, Color(float(randi() % 12) / 12.0, randf(), randf_range(-.03, .03), .1 * i))

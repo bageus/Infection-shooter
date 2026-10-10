@@ -8,11 +8,11 @@ const ACTION := "pickup_weapon"
 var _base_position := Vector3.ZERO
 var _time := 0.0
 var _hint: Node3D
+var _runtime_active := false
 
 
 func _ready() -> void:
 	add_to_group("weapon_pickups")
-	_base_position = global_position
 	var art := ART.make_pickup_visual(weapon_index)
 	add_child(art)
 	art.scale = Vector3.ONE * 0.9
@@ -21,11 +21,17 @@ func _ready() -> void:
 	_hint = BADGE.key(binding_label(), 0.78)
 	_hint.visible = false
 	add_child(_hint)
+	for mesh in _hint.find_children("*", "MeshInstance3D", true, false):
+		mesh.set_meta("planning_bounds_excluded", true)
 
 
 func _process(delta: float) -> void:
+	if not _runtime_active:
+		# Map loading restores the transform after _ready. Capture on first tick.
+		_base_position = global_position
+		_runtime_active = true
 	_time += delta
-	global_position.y = _base_position.y + sin(_time * 1.6) * 0.07
+	global_position.y = _base_position.y + (absf(sin(_time * 1.6)) if has_meta("planning_scene_path") else sin(_time * 1.6)) * 0.07
 	rotation.y += delta * 0.55
 	var player := get_tree().get_first_node_in_group("player") as Node3D
 	var near := player != null and player.global_position.distance_to(global_position) <= 2.4

@@ -2,6 +2,8 @@ extends RefCounted
 ## Owns the imported prop geometry, ordered damage groups and their collision shapes.
 ## The scene root supplies the body; no gameplay durability or effects live here.
 
+const SHELF_COLLISION := preload("res://game/presentation/office_floor/shelf_collision_geometry.gd")
+var shelf_collision := false
 const DAMAGE := preload("res://game/presentation/office_floor/environment_damage.gd")
 var visual: Node3D
 var intact: Node3D
@@ -13,6 +15,7 @@ var _stage_resources: Array[PackedScene] = []
 
 
 func load_visual(body: RigidBody3D, model_path: String) -> bool:
+	shelf_collision = SHELF_COLLISION.applies(model_path)
 	var packed := load(model_path) as PackedScene
 	if packed == null:
 		push_error("Environment model unavailable: " + model_path)
@@ -58,19 +61,24 @@ func add_shapes(body: RigidBody3D, node: Node) -> float:
 	if node is MeshInstance3D:
 		var mesh := node as MeshInstance3D
 		if mesh.mesh != null and _locally_visible(mesh) and absf(mesh.global_basis.determinant()) > 0.000000000001:
-			var box := BoxShape3D.new()
-			var bounds := mesh.get_aabb()
-			box.size = Vector3(maxf(bounds.size.x, 0.02), maxf(bounds.size.y, 0.02), maxf(bounds.size.z, 0.02))
-			var shape := CollisionShape3D.new()
-			shape.name = mesh.name
-			shape.shape = box
-			body.add_child(shape)
-			shapes.append(shape)
-			meshes.append(mesh)
+			var bounds: Array[AABB] = []
+			if shelf_collision:
+				bounds = SHELF_COLLISION.panels(mesh.mesh)
+			if bounds.is_empty():
+				bounds.append(mesh.get_aabb())
 			var local := body.global_transform.affine_inverse() * mesh.global_transform
-			shape.transform = local
-			shape.position += local.basis * bounds.get_center()
-			volume += box.size.x * box.size.y * box.size.z * absf(local.basis.determinant())
+			for panel: AABB in bounds:
+				var box := BoxShape3D.new()
+				box.size = Vector3(maxf(panel.size.x, 0.02), maxf(panel.size.y, 0.02), maxf(panel.size.z, 0.02))
+				var shape := CollisionShape3D.new()
+				shape.name = mesh.name
+				shape.shape = box
+				body.add_child(shape)
+				shapes.append(shape)
+				meshes.append(mesh)
+				shape.transform = local
+				shape.position += local.basis * panel.get_center()
+				volume += box.size.x * box.size.y * box.size.z * absf(local.basis.determinant())
 	for child in node.get_children():
 		volume += add_shapes(body, child)
 	return volume
