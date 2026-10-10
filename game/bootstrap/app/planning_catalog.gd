@@ -43,6 +43,17 @@ var actor_catalog = [
 	{"name":"Horde","path":ENEMY_SCENES[7],"kind":"enemy"}
 ]
 
+var weapon_catalog = [
+	{"name":"PISTOL","path":"res://game/bootstrap/app/weapon_pickups/pistol.tscn","kind":"weapon"},
+	{"name":"UZI","path":"res://game/bootstrap/app/weapon_pickups/uzi.tscn","kind":"weapon"},
+	{"name":"SHOTGUN","path":"res://game/bootstrap/app/weapon_pickups/shotgun.tscn","kind":"weapon"},
+	{"name":"LAUNCHER","path":"res://game/bootstrap/app/weapon_pickups/launcher.tscn","kind":"weapon"},
+	{"name":"AK","path":"res://game/bootstrap/app/weapon_pickups/ak.tscn","kind":"weapon"},
+	{"name":"M4","path":"res://game/bootstrap/app/weapon_pickups/m4.tscn","kind":"weapon"},
+	{"name":"SNIPER","path":"res://game/bootstrap/app/weapon_pickups/sniper.tscn","kind":"weapon"},
+	{"name":"MINIGUN","path":"res://game/bootstrap/app/weapon_pickups/minigun.tscn","kind":"weapon"}
+]
+
 
 # Dead infected and loose body parts placed as decoration (ADR-0017).
 var gore_catalog = [

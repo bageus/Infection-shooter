@@ -1,41 +1,65 @@
 {
-  "height": 0.76,
+  "height": 1.3973,
   "stations": [
     {
-      "x": 0,
-      "z": 0,
+      "x": 0.0,
+      "z": -0.00035,
+      "angle": 0,
+      "grid_height": 0.048,
+      "grid_width": 0.4448,
+      "grid_depth": 0.4847,
+      "usable_width": 0.4448,
+      "usable_depth": 0.4847,
+      "zone_width": 0.29802,
+      "zone_depth": 0.38776
+    },
+    {
+      "x": 0.0,
+      "z": 0.0,
       "angle": 0,
       "grid_height": 0.39,
-      "grid_width": 0.4,
-      "grid_depth": 0.35,
-      "usable_width": 0.4,
-      "usable_depth": 0.35,
-      "zone_width": 0.27,
-      "zone_depth": 0.24
+      "grid_width": 0.3998,
+      "grid_depth": 0.484,
+      "usable_width": 0.3998,
+      "usable_depth": 0.484,
+      "zone_width": 0.26787,
+      "zone_depth": 0.3872
     },
     {
-      "x": 0,
-      "z": 0,
+      "x": 0.0,
+      "z": 0.0,
       "angle": 0,
-      "grid_height": 0.76,
-      "grid_width": 0.4,
-      "grid_depth": 0.35,
-      "usable_width": 0.4,
-      "usable_depth": 0.35,
-      "zone_width": 0.27,
-      "zone_depth": 0.24
+      "grid_height": 0.732,
+      "grid_width": 0.3998,
+      "grid_depth": 0.484,
+      "usable_width": 0.3998,
+      "usable_depth": 0.484,
+      "zone_width": 0.26787,
+      "zone_depth": 0.3872
     },
     {
-      "x": 0,
-      "z": 0,
+      "x": 0.0,
+      "z": 0.0,
       "angle": 0,
-      "grid_height": 1.13,
-      "grid_width": 0.4,
-      "grid_depth": 0.35,
-      "usable_width": 0.4,
-      "usable_depth": 0.35,
-      "zone_width": 0.27,
-      "zone_depth": 0.24
+      "grid_height": 1.074,
+      "grid_width": 0.3998,
+      "grid_depth": 0.484,
+      "usable_width": 0.3998,
+      "usable_depth": 0.484,
+      "zone_width": 0.26787,
+      "zone_depth": 0.3872
+    },
+    {
+      "x": 0.0,
+      "z": -0.00035,
+      "angle": 0,
+      "grid_height": 1.3973,
+      "grid_width": 0.4448,
+      "grid_depth": 0.4847,
+      "usable_width": 0.4448,
+      "usable_depth": 0.4847,
+      "zone_width": 0.29802,
+      "zone_depth": 0.38776
     }
   ]
 }

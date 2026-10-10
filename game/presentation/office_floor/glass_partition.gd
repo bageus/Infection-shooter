@@ -145,10 +145,22 @@ func take_melee_hit(damage: float, hit_position: Vector3, _direction: Vector3) -
 func _collect_glass(node: Node) -> void:
 	if node == null:
 		return
-	if node is MeshInstance3D and "glass" in node.name.to_lower() and (node as MeshInstance3D).is_visible_in_tree() and absf((node as MeshInstance3D).global_basis.determinant()) > 0.000000000001:
+	if node is MeshInstance3D and "glass" in node.name.to_lower() and _authored_visible(node) and absf((node as MeshInstance3D).global_basis.determinant()) > 0.000000000001:
 		_glass_nodes.append(node as Node3D)
 	for child in node.get_children():
 		_collect_glass(child)
+
+
+func _authored_visible(node: Node3D) -> bool:
+	var visual := get_parent().get_node_or_null("Visual")
+	var ancestor: Node = node
+	while ancestor != null:
+		if ancestor is Node3D and not (ancestor as Node3D).visible:
+			return false
+		if ancestor == visual:
+			return true # Loading may hide the enclosing mission.
+		ancestor = ancestor.get_parent()
+	return false
 
 
 func _break_glass(hit_position: Vector3, direction: Vector3 = Vector3.ZERO) -> void:
@@ -248,7 +260,7 @@ func _drop_lower_panel(hit_position: Vector3) -> void:
 func _find_visible_frame(node: Node) -> MeshInstance3D:
 	if node == null:
 		return null
-	if node is MeshInstance3D and "frame" in node.name.to_lower() and (node as MeshInstance3D).is_visible_in_tree() and absf((node as MeshInstance3D).global_basis.determinant()) > 0.000000000001:
+	if node is MeshInstance3D and "frame" in node.name.to_lower() and _authored_visible(node) and absf((node as MeshInstance3D).global_basis.determinant()) > 0.000000000001:
 		return node as MeshInstance3D
 	for child in node.get_children():
 		var found := _find_visible_frame(child)

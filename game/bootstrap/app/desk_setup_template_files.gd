@@ -20,12 +20,27 @@ static func save(desk_type: String, name_part: String, payload: Dictionary) -> b
 		return false
 	if desk_type.is_empty() or DirAccess.make_dir_recursive_absolute(ProjectSettings.globalize_path(ROOT)) != OK:
 		return false
-	var file := FileAccess.open(ROOT + "/" + desk_type + "_" + safe + ".json", FileAccess.WRITE)
+	var path := ROOT + "/" + desk_type + "_" + safe + ".json"
+	var temporary := path + ".tmp"
+	var file := FileAccess.open(temporary, FileAccess.WRITE)
 	if file == null:
 		return false
 	file.store_string(JSON.stringify(payload, "  "))
 	file.flush()
-	return file.get_error() == OK
+	var written := file.get_error() == OK
+	file.close()
+	if not written:
+		DirAccess.remove_absolute(temporary)
+		return false
+	var check := FileAccess.open(temporary, FileAccess.READ)
+	if check == null:
+		return false
+	var decoded: Variant = JSON.parse_string(check.get_as_text())
+	check.close()
+	if not decoded is Dictionary or decoded.get("version") != 1 or decoded.get("desk") != desk_type:
+		DirAccess.remove_absolute(temporary)
+		return false
+	return DirAccess.rename_absolute(temporary, path) == OK
 
 
 static func list_for(desk_type: String) -> Array[Dictionary]:
@@ -37,6 +52,7 @@ static func list_for(desk_type: String) -> Array[Dictionary]:
 	for file in folder.get_files():
 		if file.begins_with(prefix) and file.ends_with(".json"):
 			results.append({"name": file.trim_prefix(prefix).trim_suffix(".json"), "path": ROOT + "/" + file})
+	results.sort_custom(func(a: Dictionary, b: Dictionary) -> bool: return str(a.name).naturalnocasecmp_to(str(b.name)) < 0)
 	return results
 
 

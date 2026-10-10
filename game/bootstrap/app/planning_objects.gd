@@ -152,6 +152,7 @@ func _rebuild_preview() -> void:
 		return
 	preview.set_meta("planning_preview", true)
 	controls._configure_new_asset(preview, selected_entry)
+	preview.process_mode = Node.PROCESS_MODE_DISABLED
 	session.host.add_child(preview)
 	if _selected_kind() == "light" and preview.has_method("set_planning_visual"):
 		preview.call_deferred("set_planning_visual", true)
