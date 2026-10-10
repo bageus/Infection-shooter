@@ -1,0 +1,501 @@
+{
+  "source_ref": "a48e5a49028b0871852f4418eeb8eb2670671ea2",
+  "models": {
+    "05_MFU_2_extra_trays_destructible.glb": {
+      "source_sha256": "8b60949e23ecec839e73d287df67c11102d75e88ad5b80f2a3ec187ae212aca3",
+      "source_bytes": 864984,
+      "stages": [
+        {
+          "stage": "Intact",
+          "bytes": 271092,
+          "meshes": 1,
+          "surfaces": 4
+        },
+        {
+          "stage": "LargeParts",
+          "bytes": 299492,
+          "meshes": 5,
+          "surfaces": 11
+        }
+      ],
+      "repaired_scene_membership": false
+    },
+    "05_MFU_destructible.glb": {
+      "source_sha256": "6e45ad57226592f5267267bab11a8c8495eb0cf6fb69f5681533225c4c48e31a",
+      "source_bytes": 804712,
+      "stages": [
+        {
+          "stage": "Intact",
+          "bytes": 281104,
+          "meshes": 1,
+          "surfaces": 4
+        },
+        {
+          "stage": "LargeParts",
+          "bytes": 283136,
+          "meshes": 2,
+          "surfaces": 6
+        }
+      ],
+      "repaired_scene_membership": false
+    },
+    "05_PC_destructible.glb": {
+      "source_sha256": "117f841664530a85ddacc5050e19c81b8ec636f27c2a16ae58b63d5e40f095c2",
+      "source_bytes": 186584,
+      "stages": [
+        {
+          "stage": "Intact",
+          "bytes": 40684,
+          "meshes": 1,
+          "surfaces": 2
+        },
+        {
+          "stage": "LargeParts",
+          "bytes": 42044,
+          "meshes": 3,
+          "surfaces": 3
+        },
+        {
+          "stage": "SmallFragments",
+          "bytes": 50696,
+          "meshes": 5,
+          "surfaces": 9
+        }
+      ],
+      "repaired_scene_membership": false
+    },
+    "05_aircondition_destructible.glb": {
+      "source_sha256": "29131547fff6f6fe807800b3d1d7a367488699d551435dc8594e269fc9c89a18",
+      "source_bytes": 731724,
+      "stages": [
+        {
+          "stage": "Intact",
+          "bytes": 120892,
+          "meshes": 1,
+          "surfaces": 4
+        },
+        {
+          "stage": "LargeParts",
+          "bytes": 124140,
+          "meshes": 2,
+          "surfaces": 5
+        },
+        {
+          "stage": "Power_Off",
+          "bytes": 120884,
+          "meshes": 1,
+          "surfaces": 4
+        }
+      ],
+      "repaired_scene_membership": false
+    },
+    "05_computer_mouse.glb": {
+      "source_sha256": "37531a3cdbef703cce732e20fb8fb6330e85278eb8c0ee08375fa07b8819c08b",
+      "source_bytes": 9216,
+      "stages": [
+        {
+          "stage": "Intact",
+          "bytes": 7172,
+          "meshes": 1,
+          "surfaces": 1
+        }
+      ],
+      "repaired_scene_membership": false
+    },
+    "05_computer_tower_destructible.glb": {
+      "source_sha256": "9f71b2b87dfc8f88011e5910545ab316bfdcea82480d401a4b5cfafe22d58cb4",
+      "source_bytes": 82276,
+      "stages": [
+        {
+          "stage": "Intact",
+          "bytes": 10164,
+          "meshes": 1,
+          "surfaces": 2
+        },
+        {
+          "stage": "LargeParts",
+          "bytes": 11456,
+          "meshes": 3,
+          "surfaces": 3
+        },
+        {
+          "stage": "SmallFragments",
+          "bytes": 25508,
+          "meshes": 6,
+          "surfaces": 10
+        }
+      ],
+      "repaired_scene_membership": false
+    },
+    "05_desk_phone.glb": {
+      "source_sha256": "56f08d67af33036ba7f16c4616bd7464175dc4c026af5a2d8257ba7c9367371a",
+      "source_bytes": 81800,
+      "stages": [
+        {
+          "stage": "Intact",
+          "bytes": 19524,
+          "meshes": 1,
+          "surfaces": 2
+        },
+        {
+          "stage": "LargeParts",
+          "bytes": 20888,
+          "meshes": 2,
+          "surfaces": 3
+        }
+      ],
+      "repaired_scene_membership": false
+    },
+    "05_keyboard.glb": {
+      "source_sha256": "07db9dff46e6a832114e3f75bb28f644d03472e8abe128ac3484332a763a4db2",
+      "source_bytes": 670712,
+      "stages": [
+        {
+          "stage": "Intact",
+          "bytes": 267872,
+          "meshes": 1,
+          "surfaces": 3
+        }
+      ],
+      "repaired_scene_membership": false
+    },
+    "05_lamp.glb": {
+      "source_sha256": "c394706b5385937d1d3a75efac31b061ecff0769aae1f42c2d4be48a200c8179",
+      "source_bytes": 488364,
+      "stages": [
+        {
+          "stage": "Intact",
+          "bytes": 305496,
+          "meshes": 1,
+          "surfaces": 3
+        }
+      ],
+      "repaired_scene_membership": false
+    },
+    "05_laptop2_destructible.glb": {
+      "source_sha256": "3b3f87fed2349578513731b67e5a379c63ddb203539767df5723a27aa3596d71",
+      "source_bytes": 45584,
+      "stages": [
+        {
+          "stage": "Intact",
+          "bytes": 8564,
+          "meshes": 1,
+          "surfaces": 2
+        },
+        {
+          "stage": "Power_Off",
+          "bytes": 8592,
+          "meshes": 1,
+          "surfaces": 2
+        },
+        {
+          "stage": "LargeParts",
+          "bytes": 8724,
+          "meshes": 2,
+          "surfaces": 2
+        }
+      ],
+      "repaired_scene_membership": true
+    },
+    "05_laptop_close_destructible.glb": {
+      "source_sha256": "5f0383aa7fb2a62c1c9f372c38a212ed020f146ef5aef23411ebe988c91d298e",
+      "source_bytes": 7297748,
+      "stages": [
+        {
+          "stage": "Intact",
+          "bytes": 1019188,
+          "meshes": 1,
+          "surfaces": 4
+        },
+        {
+          "stage": "LargeParts",
+          "bytes": 1027656,
+          "meshes": 2,
+          "surfaces": 6
+        },
+        {
+          "stage": "Power_Off",
+          "bytes": 1019252,
+          "meshes": 1,
+          "surfaces": 4
+        }
+      ],
+      "repaired_scene_membership": false
+    },
+    "05_laptop_destructible.glb": {
+      "source_sha256": "aba60f9f3f859a9fb050f8aa11e1f925e963e92fc0dbe85e2f6061902b00d87f",
+      "source_bytes": 7323332,
+      "stages": [
+        {
+          "stage": "Intact",
+          "bytes": 1030020,
+          "meshes": 1,
+          "surfaces": 4
+        },
+        {
+          "stage": "LargeParts",
+          "bytes": 1028800,
+          "meshes": 2,
+          "surfaces": 6
+        },
+        {
+          "stage": "Power_Off",
+          "bytes": 1030088,
+          "meshes": 1,
+          "surfaces": 4
+        }
+      ],
+      "repaired_scene_membership": false
+    },
+    "05_minipc.glb": {
+      "source_sha256": "40707077f937b0525a3e556728740a769887911dc5f678ce138a14e1b36dcbca",
+      "source_bytes": 150172,
+      "stages": [
+        {
+          "stage": "Intact",
+          "bytes": 96428,
+          "meshes": 1,
+          "surfaces": 2
+        }
+      ],
+      "repaired_scene_membership": false
+    },
+    "05_monitor2_destructible.glb": {
+      "source_sha256": "a5985f65d6f4786aac0856c3d2103243b0e4966b0301e120a5414e12254d3d1b",
+      "source_bytes": 78880,
+      "stages": [
+        {
+          "stage": "Intact",
+          "bytes": 8520,
+          "meshes": 1,
+          "surfaces": 2
+        },
+        {
+          "stage": "Power_Off",
+          "bytes": 8548,
+          "meshes": 1,
+          "surfaces": 2
+        },
+        {
+          "stage": "LargeParts",
+          "bytes": 9704,
+          "meshes": 3,
+          "surfaces": 3
+        },
+        {
+          "stage": "SmallFragments",
+          "bytes": 18308,
+          "meshes": 2,
+          "surfaces": 3
+        }
+      ],
+      "repaired_scene_membership": true
+    },
+    "05_monitor3_server_destructible.glb": {
+      "source_sha256": "a9869c47fee5c07da45df344cc8189795e722075f7a1f8ae9e201cf971f4c82f",
+      "source_bytes": 225804,
+      "stages": [
+        {
+          "stage": "Intact",
+          "bytes": 21776,
+          "meshes": 1,
+          "surfaces": 1
+        },
+        {
+          "stage": "Power_Off",
+          "bytes": 21804,
+          "meshes": 1,
+          "surfaces": 1
+        },
+        {
+          "stage": "LargeParts",
+          "bytes": 24572,
+          "meshes": 4,
+          "surfaces": 4
+        },
+        {
+          "stage": "SmallFragments",
+          "bytes": 39784,
+          "meshes": 5,
+          "surfaces": 5
+        }
+      ],
+      "repaired_scene_membership": true
+    },
+    "05_monitor4_server_destructible.glb": {
+      "source_sha256": "4e8f0d4b1b057fa60930a39eb0448d464fe5716aab9b1cdde6c96ab1b183e8df",
+      "source_bytes": 224316,
+      "stages": [
+        {
+          "stage": "Intact",
+          "bytes": 21616,
+          "meshes": 1,
+          "surfaces": 1
+        },
+        {
+          "stage": "Power_Off",
+          "bytes": 21644,
+          "meshes": 1,
+          "surfaces": 1
+        },
+        {
+          "stage": "LargeParts",
+          "bytes": 24696,
+          "meshes": 4,
+          "surfaces": 4
+        },
+        {
+          "stage": "SmallFragments",
+          "bytes": 39016,
+          "meshes": 4,
+          "surfaces": 4
+        }
+      ],
+      "repaired_scene_membership": true
+    },
+    "05_monitor_destructible.glb": {
+      "source_sha256": "4f03d9a38ed0c3205457e3b79facb99d4aaf73c7a1aad7ddb173c990cef7c987",
+      "source_bytes": 348628,
+      "stages": [
+        {
+          "stage": "Intact",
+          "bytes": 42296,
+          "meshes": 1,
+          "surfaces": 2
+        },
+        {
+          "stage": "Power_Off",
+          "bytes": 42324,
+          "meshes": 1,
+          "surfaces": 2
+        },
+        {
+          "stage": "LargeParts",
+          "bytes": 43268,
+          "meshes": 2,
+          "surfaces": 3
+        },
+        {
+          "stage": "SmallFragments",
+          "bytes": 57660,
+          "meshes": 2,
+          "surfaces": 5
+        }
+      ],
+      "repaired_scene_membership": true
+    },
+    "05_monitor_wide_destructible.glb": {
+      "source_sha256": "4cf55ff0dae360322152df88bf0e6f5d3e7db3e75852ba87c389b46992e2b372",
+      "source_bytes": 351252,
+      "stages": [
+        {
+          "stage": "Intact",
+          "bytes": 42360,
+          "meshes": 1,
+          "surfaces": 2
+        },
+        {
+          "stage": "Power_Off",
+          "bytes": 42388,
+          "meshes": 1,
+          "surfaces": 2
+        },
+        {
+          "stage": "LargeParts",
+          "bytes": 43340,
+          "meshes": 2,
+          "surfaces": 3
+        },
+        {
+          "stage": "SmallFragments",
+          "bytes": 59556,
+          "meshes": 3,
+          "surfaces": 8
+        }
+      ],
+      "repaired_scene_membership": true
+    },
+    "05_printer_destructible.glb": {
+      "source_sha256": "93f864fb3296dd00eca44b6ac9573e69e7c434372e277ca19b4faca9c3c24ba2",
+      "source_bytes": 7173580,
+      "stages": [
+        {
+          "stage": "Intact",
+          "bytes": 431000,
+          "meshes": 1,
+          "surfaces": 6
+        },
+        {
+          "stage": "LargeParts",
+          "bytes": 435096,
+          "meshes": 4,
+          "surfaces": 8
+        },
+        {
+          "stage": "Power_Off",
+          "bytes": 429288,
+          "meshes": 1,
+          "surfaces": 3
+        }
+      ],
+      "repaired_scene_membership": false
+    },
+    "05_wall_TV_destructible.glb": {
+      "source_sha256": "5ebfe1d5ed9e14eabc0f487550030d7cc16298d725374114bbf7819b7c6b3085",
+      "source_bytes": 42540,
+      "stages": [
+        {
+          "stage": "Intact",
+          "bytes": 7392,
+          "meshes": 1,
+          "surfaces": 2
+        },
+        {
+          "stage": "LargeParts",
+          "bytes": 16432,
+          "meshes": 4,
+          "surfaces": 6
+        }
+      ],
+      "repaired_scene_membership": false
+    },
+    "05_wall_TV_frameless_destructible.glb": {
+      "source_sha256": "551e1a9ff2e5a4e43334675871d3c8b77fe3b3f9762d130c90bde27dc5db6ca4",
+      "source_bytes": 35656,
+      "stages": [
+        {
+          "stage": "Intact",
+          "bytes": 5476,
+          "meshes": 1,
+          "surfaces": 2
+        },
+        {
+          "stage": "LargeParts",
+          "bytes": 6772,
+          "meshes": 3,
+          "surfaces": 3
+        },
+        {
+          "stage": "SmallFragments",
+          "bytes": 13776,
+          "meshes": 5,
+          "surfaces": 7
+        }
+      ],
+      "repaired_scene_membership": false
+    },
+    "05_wall_hand_dryer_improved.glb": {
+      "source_sha256": "95633fabf7a5c6f1b7c33d1648c1197fa4a7bdaeac0ee5ecba32a61d4cf9b089",
+      "source_bytes": 63168,
+      "stages": [
+        {
+          "stage": "Intact",
+          "bytes": 43944,
+          "meshes": 1,
+          "surfaces": 5
+        }
+      ],
+      "repaired_scene_membership": false
+    }
+  }
+}

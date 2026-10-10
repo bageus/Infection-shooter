@@ -1,0 +1,181 @@
+{
+  "05_MFU_2_extra_trays_destructible.glb": [
+    {
+      "name": "LargeParts",
+      "path": "res://models/objects/enviroments/05/damage/05_MFU_2_extra_trays_destructible_largeparts.glb"
+    }
+  ],
+  "05_MFU_destructible.glb": [
+    {
+      "name": "LargeParts",
+      "path": "res://models/objects/enviroments/05/damage/05_MFU_destructible_largeparts.glb"
+    }
+  ],
+  "05_PC_destructible.glb": [
+    {
+      "name": "LargeParts",
+      "path": "res://models/objects/enviroments/05/damage/05_PC_destructible_largeparts.glb"
+    },
+    {
+      "name": "SmallFragments",
+      "path": "res://models/objects/enviroments/05/damage/05_PC_destructible_smallfragments.glb"
+    }
+  ],
+  "05_aircondition_destructible.glb": [
+    {
+      "name": "LargeParts",
+      "path": "res://models/objects/enviroments/05/damage/05_aircondition_destructible_largeparts.glb"
+    },
+    {
+      "name": "Power_Off",
+      "path": "res://models/objects/enviroments/05/damage/05_aircondition_destructible_power_off.glb"
+    }
+  ],
+  "05_computer_mouse.glb": [],
+  "05_computer_tower_destructible.glb": [
+    {
+      "name": "LargeParts",
+      "path": "res://models/objects/enviroments/05/damage/05_computer_tower_destructible_largeparts.glb"
+    },
+    {
+      "name": "SmallFragments",
+      "path": "res://models/objects/enviroments/05/damage/05_computer_tower_destructible_smallfragments.glb"
+    }
+  ],
+  "05_desk_phone.glb": [
+    {
+      "name": "LargeParts",
+      "path": "res://models/objects/enviroments/05/damage/05_desk_phone_largeparts.glb"
+    }
+  ],
+  "05_keyboard.glb": [],
+  "05_lamp.glb": [],
+  "05_laptop2_destructible.glb": [
+    {
+      "name": "Power_Off",
+      "path": "res://models/objects/enviroments/05/damage/05_laptop2_destructible_power_off.glb"
+    },
+    {
+      "name": "LargeParts",
+      "path": "res://models/objects/enviroments/05/damage/05_laptop2_destructible_largeparts.glb"
+    }
+  ],
+  "05_laptop_close_destructible.glb": [
+    {
+      "name": "LargeParts",
+      "path": "res://models/objects/enviroments/05/damage/05_laptop_close_destructible_largeparts.glb"
+    },
+    {
+      "name": "Power_Off",
+      "path": "res://models/objects/enviroments/05/damage/05_laptop_close_destructible_power_off.glb"
+    }
+  ],
+  "05_laptop_destructible.glb": [
+    {
+      "name": "LargeParts",
+      "path": "res://models/objects/enviroments/05/damage/05_laptop_destructible_largeparts.glb"
+    },
+    {
+      "name": "Power_Off",
+      "path": "res://models/objects/enviroments/05/damage/05_laptop_destructible_power_off.glb"
+    }
+  ],
+  "05_minipc.glb": [],
+  "05_monitor2_destructible.glb": [
+    {
+      "name": "Power_Off",
+      "path": "res://models/objects/enviroments/05/damage/05_monitor2_destructible_power_off.glb"
+    },
+    {
+      "name": "LargeParts",
+      "path": "res://models/objects/enviroments/05/damage/05_monitor2_destructible_largeparts.glb"
+    },
+    {
+      "name": "SmallFragments",
+      "path": "res://models/objects/enviroments/05/damage/05_monitor2_destructible_smallfragments.glb"
+    }
+  ],
+  "05_monitor3_server_destructible.glb": [
+    {
+      "name": "Power_Off",
+      "path": "res://models/objects/enviroments/05/damage/05_monitor3_server_destructible_power_off.glb"
+    },
+    {
+      "name": "LargeParts",
+      "path": "res://models/objects/enviroments/05/damage/05_monitor3_server_destructible_largeparts.glb"
+    },
+    {
+      "name": "SmallFragments",
+      "path": "res://models/objects/enviroments/05/damage/05_monitor3_server_destructible_smallfragments.glb"
+    }
+  ],
+  "05_monitor4_server_destructible.glb": [
+    {
+      "name": "Power_Off",
+      "path": "res://models/objects/enviroments/05/damage/05_monitor4_server_destructible_power_off.glb"
+    },
+    {
+      "name": "LargeParts",
+      "path": "res://models/objects/enviroments/05/damage/05_monitor4_server_destructible_largeparts.glb"
+    },
+    {
+      "name": "SmallFragments",
+      "path": "res://models/objects/enviroments/05/damage/05_monitor4_server_destructible_smallfragments.glb"
+    }
+  ],
+  "05_monitor_destructible.glb": [
+    {
+      "name": "Power_Off",
+      "path": "res://models/objects/enviroments/05/damage/05_monitor_destructible_power_off.glb"
+    },
+    {
+      "name": "LargeParts",
+      "path": "res://models/objects/enviroments/05/damage/05_monitor_destructible_largeparts.glb"
+    },
+    {
+      "name": "SmallFragments",
+      "path": "res://models/objects/enviroments/05/damage/05_monitor_destructible_smallfragments.glb"
+    }
+  ],
+  "05_monitor_wide_destructible.glb": [
+    {
+      "name": "Power_Off",
+      "path": "res://models/objects/enviroments/05/damage/05_monitor_wide_destructible_power_off.glb"
+    },
+    {
+      "name": "LargeParts",
+      "path": "res://models/objects/enviroments/05/damage/05_monitor_wide_destructible_largeparts.glb"
+    },
+    {
+      "name": "SmallFragments",
+      "path": "res://models/objects/enviroments/05/damage/05_monitor_wide_destructible_smallfragments.glb"
+    }
+  ],
+  "05_printer_destructible.glb": [
+    {
+      "name": "LargeParts",
+      "path": "res://models/objects/enviroments/05/damage/05_printer_destructible_largeparts.glb"
+    },
+    {
+      "name": "Power_Off",
+      "path": "res://models/objects/enviroments/05/damage/05_printer_destructible_power_off.glb"
+    }
+  ],
+  "05_wall_TV_destructible.glb": [
+    {
+      "name": "LargeParts",
+      "path": "res://models/objects/enviroments/05/damage/05_wall_TV_destructible_largeparts.glb"
+    }
+  ],
+  "05_wall_TV_frameless_destructible.glb": [
+    {
+      "name": "LargeParts",
+      "path": "res://models/objects/enviroments/05/damage/05_wall_TV_frameless_destructible_largeparts.glb"
+    },
+    {
+      "name": "SmallFragments",
+      "path": "res://models/objects/enviroments/05/damage/05_wall_TV_frameless_destructible_smallfragments.glb"
+    }
+  ],
+  "05_wall_hand_dryer_improved.glb": []
+}
