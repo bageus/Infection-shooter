@@ -9,6 +9,9 @@ build_status: T002_HEADLESS_VALIDATED_VISUAL_PENDING
 updated: 2026-10-10
 ---
 
+11.10.2026 (CI repair PR #88): integration падает на texture-bearing blood visual, planner extension в обоих native renderers — на airborne corpse fall. Эти сценарии используют координаты редактируемого office layout, обновлённого в main. Перенесены на известные видимые floor/wall receivers и отдельную опору вне карты; прежние assertions, физические 90 ticks и captures сохранены. Изменены только тестовые fixtures, API/DTO/owners/dependencies прежние. Project gate PASS; локальный полный игровой прогон остановлен при высокой загрузке памяти. Исправленная ревизия проверяется в CI. Следующее действие: подтвердить integration, оба native planner jobs и runtime PR #88.
+
+
 10.10.2026 (общий патч по запросу владельца): физические доски шести книжных полок и профили уровней исправлены; книги удерживаются на каждом уровне при повороте/масштабе. Стекло регистрируется даже в скрытой pending миссии; разрушение скрывает panes. Материалы прогреваются под loading overlay до возобновления игры. Газ ограничен 0.5–2 м над опорой, включая enemy pivot выше пола. Godot 4.7.2 import, project gates, Python workstation tests и focused shelf/glass/loading, mission_loading, shader_warmup, mutagen_cloud, placement/templates/weapons, glass_crack, destruction suites PASS. Native Windows/Web texture/visual acceptance pending. Public API/DTO/owners/dependencies прежние. Подробности docs/qa/shelf_glass_loading.md. Запрос владельца разрешает общий draft PR; прежний publication blocker снят. Следующий шаг: публикация PR и проверка CI.
 
 
