@@ -1,0 +1,178 @@
+[
+  {
+    "model": "05_MFU_2_extra_trays_destructible.glb",
+    "nodes": 6,
+    "materials": 4,
+    "source_maps": "shared atlas or identical embedded copies",
+    "hierarchy_preserved": true,
+    "shared_maps": 3
+  },
+  {
+    "model": "05_MFU_destructible.glb",
+    "nodes": 3,
+    "materials": 4,
+    "source_maps": "shared atlas or identical embedded copies",
+    "hierarchy_preserved": true,
+    "shared_maps": 3
+  },
+  {
+    "model": "05_PC_destructible.glb",
+    "nodes": 8,
+    "materials": 3,
+    "source_maps": "shared atlas or identical embedded copies",
+    "hierarchy_preserved": true,
+    "shared_maps": 3
+  },
+  {
+    "model": "05_aircondition_destructible.glb",
+    "nodes": 4,
+    "materials": 4,
+    "source_maps": "shared atlas or identical embedded copies",
+    "hierarchy_preserved": true,
+    "shared_maps": 3
+  },
+  {
+    "model": "05_computer_mouse.glb",
+    "nodes": 1,
+    "materials": 1,
+    "source_maps": "missing external maps replaced",
+    "hierarchy_preserved": true,
+    "shared_maps": 3
+  },
+  {
+    "model": "05_computer_tower_destructible.glb",
+    "nodes": 10,
+    "materials": 3,
+    "source_maps": "shared atlas or identical embedded copies",
+    "hierarchy_preserved": true,
+    "shared_maps": 3
+  },
+  {
+    "model": "05_desk_phone.glb",
+    "nodes": 3,
+    "materials": 2,
+    "source_maps": "missing external maps replaced",
+    "hierarchy_preserved": true,
+    "shared_maps": 3
+  },
+  {
+    "model": "05_keyboard.glb",
+    "nodes": 1,
+    "materials": 3,
+    "source_maps": "missing external maps replaced",
+    "hierarchy_preserved": true,
+    "shared_maps": 3
+  },
+  {
+    "model": "05_lamp.glb",
+    "nodes": 1,
+    "materials": 3,
+    "source_maps": "missing external maps replaced",
+    "hierarchy_preserved": true,
+    "shared_maps": 3
+  },
+  {
+    "model": "05_laptop2_destructible.glb",
+    "nodes": 4,
+    "materials": 2,
+    "source_maps": "shared atlas or identical embedded copies",
+    "hierarchy_preserved": true,
+    "shared_maps": 3
+  },
+  {
+    "model": "05_laptop_close_destructible.glb",
+    "nodes": 4,
+    "materials": 4,
+    "source_maps": "shared atlas or identical embedded copies",
+    "hierarchy_preserved": true,
+    "shared_maps": 3
+  },
+  {
+    "model": "05_laptop_destructible.glb",
+    "nodes": 4,
+    "materials": 4,
+    "source_maps": "shared atlas or identical embedded copies",
+    "hierarchy_preserved": true,
+    "shared_maps": 3
+  },
+  {
+    "model": "05_minipc.glb",
+    "nodes": 1,
+    "materials": 2,
+    "source_maps": "missing external maps replaced",
+    "hierarchy_preserved": true,
+    "shared_maps": 3
+  },
+  {
+    "model": "05_monitor2_destructible.glb",
+    "nodes": 7,
+    "materials": 3,
+    "source_maps": "shared atlas or identical embedded copies",
+    "hierarchy_preserved": true,
+    "shared_maps": 3
+  },
+  {
+    "model": "05_monitor3_server_destructible.glb",
+    "nodes": 11,
+    "materials": 1,
+    "source_maps": "shared atlas or identical embedded copies",
+    "hierarchy_preserved": true,
+    "shared_maps": 3
+  },
+  {
+    "model": "05_monitor4_server_destructible.glb",
+    "nodes": 10,
+    "materials": 1,
+    "source_maps": "shared atlas or identical embedded copies",
+    "hierarchy_preserved": true,
+    "shared_maps": 3
+  },
+  {
+    "model": "05_monitor_destructible.glb",
+    "nodes": 6,
+    "materials": 3,
+    "source_maps": "shared atlas or identical embedded copies",
+    "hierarchy_preserved": true,
+    "shared_maps": 3
+  },
+  {
+    "model": "05_monitor_wide_destructible.glb",
+    "nodes": 7,
+    "materials": 3,
+    "source_maps": "shared atlas or identical embedded copies",
+    "hierarchy_preserved": true,
+    "shared_maps": 3
+  },
+  {
+    "model": "05_printer_destructible.glb",
+    "nodes": 6,
+    "materials": 6,
+    "source_maps": "shared atlas or identical embedded copies",
+    "hierarchy_preserved": true,
+    "shared_maps": 3
+  },
+  {
+    "model": "05_wall_TV_destructible.glb",
+    "nodes": 5,
+    "materials": 3,
+    "source_maps": "shared atlas or identical embedded copies",
+    "hierarchy_preserved": true,
+    "shared_maps": 3
+  },
+  {
+    "model": "05_wall_TV_frameless_destructible.glb",
+    "nodes": 8,
+    "materials": 3,
+    "source_maps": "shared atlas or identical embedded copies",
+    "hierarchy_preserved": true,
+    "shared_maps": 3
+  },
+  {
+    "model": "05_wall_hand_dryer_improved.glb",
+    "nodes": 2,
+    "materials": 3,
+    "source_maps": "missing external maps replaced",
+    "hierarchy_preserved": true,
+    "shared_maps": 3
+  }
+]
