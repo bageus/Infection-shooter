@@ -154,6 +154,7 @@ skill_4={
 
 3d_render/layer_8="Blood receivers"
 3d_physics/layer_8="Blood surfaces"
+3d_physics/layer_9="Structural occlusion queries"
 
 [rendering]
 

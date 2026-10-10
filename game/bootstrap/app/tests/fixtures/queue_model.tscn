@@ -1,0 +1,7 @@
+[gd_scene load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://game/bootstrap/app/tests/fixtures/queue_model.gd" id="script"]
+
+[node name="QueueModel" type="Node3D"]
+script = ExtResource("script")
+model_path = "res://game/bootstrap/app/tests/fixtures/invalid_layout_object.tscn"

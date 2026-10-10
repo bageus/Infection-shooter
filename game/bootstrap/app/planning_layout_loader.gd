@@ -1,6 +1,6 @@
 extends RefCounted
 ## Prepare a complete map before replacing it; optionally commit between frames.
-const RESOURCE_PREPARATION := preload("res://game/bootstrap/app/scene_resource_preparation.gd")
+const RESOURCE_QUEUE := preload("res://game/bootstrap/app/scene_resource_queue.gd")
 const VALIDATOR := preload("res://game/bootstrap/app/planning_layout_validator.gd")
 const LAYOUT_PROPERTIES := preload("res://game/bootstrap/app/planning_layout_properties.gd")
 const BLOOD_PLACEMENT := preload("res://game/bootstrap/app/planning_blood_placement.gd")
@@ -11,7 +11,8 @@ var catalog: Variant
 var geometry: Variant
 var controls: Variant
 var _resources: Array[Resource] = []
-var _scripts := RESOURCE_PREPARATION.new()
+var resource_queue := RESOURCE_QUEUE.new()
+var timings := {"instantiate_usec": 0, "ready_usec": 0}
 
 
 func _init(editor: Node) -> void:
@@ -45,6 +46,8 @@ func prepare(data: Dictionary) -> Dictionary:
 
 
 func prepare_async(data: Dictionary, tree: SceneTree, progress: Callable) -> Dictionary:
+	_resources.clear()
+	timings = {"instantiate_usec": 0, "ready_usec": 0}
 	var problem := VALIDATOR.error(data)
 	if not problem.is_empty():
 		return {"error": problem}
@@ -70,39 +73,9 @@ func prepare_async(data: Dictionary, tree: SceneTree, progress: Callable) -> Dic
 
 
 func _load_resources(paths: Array[String], tree: SceneTree, progress: Callable) -> String:
-	var index := 0
-	var started := Time.get_ticks_msec()
-	while index < paths.size():
-		var path := paths[index]
-		print("Mission resource [%d/%d]: %s; allocator %.1f MiB" % [index + 1, paths.size(), path, float(OS.get_static_memory_usage()) / 1048576.0])
-		if not await _scripts.prepare(path, tree):
-			return "cannot prepare scene scripts: " + path
-		if ResourceLoader.load_threaded_request(path, "PackedScene", false) != OK:
-			return "cannot request scene: " + path
-		var status := ResourceLoader.load_threaded_get_status(path)
-		while status == ResourceLoader.THREAD_LOAD_IN_PROGRESS:
-			await tree.process_frame
-			status = ResourceLoader.load_threaded_get_status(path)
-		if status != ResourceLoader.THREAD_LOAD_LOADED:
-			return "cannot load scene: " + path
-		var packed := ResourceLoader.load_threaded_get(path) as PackedScene
-		if packed == null:
-			return "not a scene: " + path
-		_resources.append(packed)
-		# model_path is a string, so threaded scene loading alone does not load it.
-		var state := packed.get_state()
-		for node in state.get_node_count():
-			for property in state.get_node_property_count(node):
-				if state.get_node_property_name(node, property) == &"model_path":
-					var model: String = state.get_node_property_value(node, property)
-					if not model.is_empty() and ResourceLoader.exists(model) and not paths.has(model):
-						paths.append(model)
-		index += 1
-		progress.call(0.15 + 0.35 * float(index) / paths.size(), "resources")
-		if index % 16 == 0 or Time.get_ticks_msec() - started >= 4:
-			await tree.process_frame
-			started = Time.get_ticks_msec()
-	return ""
+	var problem := await resource_queue.load_all(paths, tree, progress)
+	_resources.assign(resource_queue.resources)
+	return problem
 
 
 func commit_async(prepared: Dictionary, tree: SceneTree, progress: Callable) -> Dictionary:
@@ -129,7 +102,9 @@ func _stage(record: Dictionary, prepared: Dictionary) -> bool:
 	if path.is_empty() or not ResourceLoader.exists(path):
 		prepared.missing.append(record.scene)
 		return true
+	var started := Time.get_ticks_usec()
 	var node: Node3D = catalog._create_asset(path)
+	timings.instantiate_usec += Time.get_ticks_usec() - started
 	if node == null:
 		return false
 	prepared.entries.append({"node": node, "record": record, "scene": path})
@@ -146,6 +121,8 @@ func _check_plan(data: Dictionary, prepared: Dictionary) -> Dictionary:
 func _discard(prepared: Dictionary) -> void:
 	for entry: Dictionary in prepared.entries:
 		(entry.node as Node).free()
+	_resources.clear()
+	resource_queue.resources.clear()
 
 
 func _begin(prepared: Dictionary) -> void:
@@ -168,7 +145,9 @@ func _place(entry: Dictionary) -> void:
 	LAYOUT_PROPERTIES.restore(node, record)
 	var load_kind = "enemy" if scene_path in catalog.ENEMY_SCENES else ""
 	var target_parent = session.enemies_root if load_kind == "enemy" else session.root
+	var ready_started := Time.get_ticks_usec()
 	target_parent.add_child(node)
+	timings.ready_usec += Time.get_ticks_usec() - ready_started
 	node.position = Vector3(float(record.get("x",0.0)),float(record.get("y",0.0)),float(record.get("z",0.0)))
 	node.rotation_degrees = Vector3(float(record.get("rotation_x", 0)), float(record.get("rotation_y", 0)), float(record.get("rotation_z", 0)))
 	node.scale = Vector3(float(record.get("scale_x",1.0)),float(record.get("scale_y",1.0)),float(record.get("scale_z",1.0)))
@@ -219,4 +198,7 @@ func _finish(prepared: Dictionary) -> Dictionary:
 	objects._update_status()
 	if controls != null:
 		controls.call("_update_history_buttons")
+	print("Mission loading: %s; instantiate %.2f ms; add_child/_ready %.2f ms" % [resource_queue.stats, timings.instantiate_usec / 1000.0, timings.ready_usec / 1000.0])
+	_resources.clear()
+	resource_queue.resources.clear()
 	return {"loaded": prepared.entries.size(), "skipped": prepared.missing.size(), "missing": prepared.missing}

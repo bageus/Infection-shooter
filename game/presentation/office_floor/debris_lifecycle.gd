@@ -9,6 +9,16 @@ const FAST_FADE_SECONDS := 0.25
 const MAX_DUST_PUFFS := 6
 const DUST_GROUP := "debris_dust_puff"
 const FADING_META := "debris_fading"
+const RUNTIME := preload("res://game/presentation/office_floor/fragment_runtime.gd")
+
+
+static func runtime_for(effects: Node) -> Node:
+	var runtime := effects.get_node_or_null("FragmentRuntime")
+	if runtime == null:
+		runtime = RUNTIME.new()
+		runtime.name = "FragmentRuntime"
+		effects.add_child(runtime)
+	return runtime
 
 
 # Shrinks every visual child of the body to nothing, then frees it. Pieces keep
@@ -19,6 +29,21 @@ static func fade_free(body: Node3D, seconds: float = FADE_SECONDS) -> void:
 	body.set_meta(FADING_META, true)
 	if body is CollisionObject3D:
 		(body as CollisionObject3D).collision_layer = 0
+		(body as CollisionObject3D).collision_mask = 0
+	if body is RigidBody3D:
+		(body as RigidBody3D).freeze = true
+	body.set_physics_process(false)
+	var watcher := body.get_node_or_null("ImpactSound")
+	if watcher != null:
+		watcher.set_physics_process(false)
+	if body.has_method("retire_from_budget"):
+		body.call("retire_from_budget")
+	if body.get("pool_owner") != null:
+		var visual := body.get_node("Visual") as Node3D
+		var pooled_tween := body.create_tween()
+		pooled_tween.tween_property(visual, "scale", Vector3.ONE * 0.01, seconds).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_IN)
+		pooled_tween.tween_callback(body.call.bind("recycle_chunk"))
+		return
 	var pivot := Node3D.new()
 	pivot.name = "FadePivot"
 	body.add_child(pivot)
@@ -90,30 +115,16 @@ static func spawn_chunks(host: Node3D, bounds: AABB, tint: Color, count: int, di
 	var world := host.get("effects_root") as Node3D
 	if not is_instance_valid(world):
 		return
-	var fragment_script := load(FRAGMENT_PATH) as Script
+	var runtime := runtime_for(world)
 	for index in count:
-		var chunk := RigidBody3D.new()
-		chunk.set_script(fragment_script)
+		var size := Vector3(randf_range(0.04, 0.14), randf_range(0.03, 0.1), randf_range(0.04, 0.12))
+		var chunk: RigidBody3D = runtime.acquire(size, tint.darkened(randf_range(0.0, 0.3)))
+		if chunk == null:
+			break
 		chunk.name = "Chunk_%d" % index
 		chunk.set("piece_name", "Chunk")
 		chunk.set("stage_index", 99)
 		chunk.set("kickable", index % 4 == 0)
-		chunk.mass = 0.15
-		var size := Vector3(randf_range(0.04, 0.14), randf_range(0.03, 0.1), randf_range(0.04, 0.12))
-		var shape := CollisionShape3D.new()
-		var box := BoxShape3D.new()
-		box.size = size
-		shape.shape = box
-		chunk.add_child(shape)
-		var visual := MeshInstance3D.new()
-		var mesh := BoxMesh.new()
-		mesh.size = size
-		var material := StandardMaterial3D.new()
-		material.albedo_color = tint.darkened(randf_range(0.0, 0.3))
-		material.roughness = 0.9
-		mesh.material = material
-		visual.mesh = mesh
-		chunk.add_child(visual)
 		world.add_child(chunk)
 		var spot := bounds.position + Vector3(randf() * bounds.size.x, randf() * bounds.size.y, randf() * bounds.size.z)
 		chunk.global_position = spot
