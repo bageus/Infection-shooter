@@ -31,6 +31,7 @@ jobs:
           python tools/test_texture_deduplication.py
           python tools/build_display_surfaces.py --check
           python tools/check_model_textures.py
+          python tools/check_group01_atlas.py
           python tools/test_model_textures.py
           python tools/test_destruction_mesh_audit.py
           python tools/test_workstation_templates.py

@@ -3,13 +3,50 @@
 from __future__ import annotations
 
 import argparse
+import functools
 import json
 import struct
 import subprocess
+import zlib
 from pathlib import Path
 from urllib.parse import unquote
 
 ROOT = Path(__file__).resolve().parents[1]
+
+
+def validate_png(data: bytes) -> None:
+    """Catch truncated chunks/streams before Godot's expensive import step."""
+    if data[:8] != b'\x89PNG\r\n\x1a\n':
+        raise ValueError('Invalid PNG signature')
+    offset, compressed = 8, bytearray()
+    while offset + 12 <= len(data):
+        size = struct.unpack_from('>I', data, offset)[0]
+        end = offset + size + 12
+        if end > len(data):
+            raise ValueError('Truncated PNG chunk')
+        kind = data[offset + 4:offset + 8]
+        payload = data[offset + 8:end - 4]
+        crc = struct.unpack_from('>I', data, end - 4)[0]
+        if zlib.crc32(kind + payload) & 0xffffffff != crc:
+            raise ValueError('Invalid PNG chunk CRC')
+        if kind == b'IDAT':
+            compressed.extend(payload)
+        if kind == b'IEND':
+            decoder = zlib.decompressobj()
+            try:
+                decoder.decompress(compressed)
+            except zlib.error as error:
+                raise ValueError('Invalid PNG image stream') from error
+            if not decoder.eof:
+                raise ValueError('Truncated PNG image stream')
+            return
+        offset = end
+    raise ValueError('Missing PNG IEND')
+
+
+@functools.lru_cache(maxsize=None)
+def validate_external_png(path: Path) -> None:
+    validate_png(path.read_bytes())
 
 
 def active(path: Path) -> bool:
@@ -60,9 +97,19 @@ def audit(path: Path) -> dict:
             start, size = view.get('byteOffset', 0), view['byteLength']
             if view.get('buffer', 0) != 0 or size <= 0 or start + size > len(binary):
                 errors.append(f'image {index}: invalid embedded payload')
+            elif image.get('mimeType') == 'image/png' or binary[start:start + 8] == b'\x89PNG\r\n\x1a\n':
+                try:
+                    validate_png(binary[start:start + size])
+                except ValueError as error:
+                    errors.append(f'image {index}: {error}')
         elif 'uri' not in image or (not image['uri'].startswith('data:')
                 and not (path.parent / unquote(image['uri'])).is_file()):
             errors.append(f'image {index}: missing external image')
+        elif not image['uri'].startswith('data:') and Path(unquote(image['uri'])).suffix.lower() == '.png':
+            try:
+                validate_external_png(path.parent / unquote(image['uri']))
+            except ValueError as error:
+                errors.append(f'image {index}: {error}')
     for index, texture in enumerate(textures):
         source = texture.get('source')
         if source is None:
