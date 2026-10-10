@@ -189,6 +189,7 @@ func _update_preview(screen_pos: Vector2) -> void:
 		preview.hide()
 		return
 	preview.show()
+	preview.rotation_degrees.y = rotation_y
 	preview.global_position = geometry._snap_position_for(preview, world)
 	controls._apply_special_default_height(preview, _selected_kind())
 	preview.rotation_degrees.y = rotation_y
@@ -236,6 +237,7 @@ func _place_selected(screen_pos: Vector2) -> void:
 		controls.status.text = "Aim at a wall to place this wall-mounted object."
 		node.queue_free()
 		return
+	node.rotation_degrees.y = rotation_y
 	node.global_position = geometry._snap_position_for(node, world)
 	controls._apply_special_default_height(node, kind)
 	if kind == "enemy":

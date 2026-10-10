@@ -7,6 +7,10 @@ owner: AI
 updated: 2026-10-10
 ---
 
+10.10.2026 (стыки планировщика и разрушение, запрос владельца): контактные грани учитывают pivot/rotation/scale; настенные и напольные шкафы стыкуются боками/задними плоскостями, floor objects примыкают торцами/задней стороной к видимой стене, включая угол. ContactShadow исключён из placement bounds. Прямые стены перекрываются на 1 мм, угловые/T соединения учитывают толщину. Импорт восстанавливает 13 flattened-stage экспортов, включая 07_reception_counter_two_heights; GLB/материалы прежние. Geometry распознаёт DamageParts, staged_table совместим с новыми авторскими группами/фрагментами. Аудит каталога 230 моделей / 98 staged / 0 failures, headless и native Forward+/Compatibility contacts PASS; полный runtime/CI выполняются. Public методы, owners/dependencies, DTO v8 и balance прежние; exceptions нет. T002 IN_PROGRESS. Подробности docs/qa/planner_contacts_destruction.md. Следующее точное действие: подтвердить полный runtime и CI ветки fix/planner-joints-destruction.
+
+
+
 10.10.2026 (исправление CI PR #85): Architecture/runtime падали на deduplicate_model_textures --check: четыре dented GLB группы 02 сохраняли 13 embedded копий доступных PNG, ещё один PNG был побайтным дублем. Применён существующий deduplicator; semantic_digest всех четырёх GLB совпадает, удалены лишь точный дубль и его import; экономия 5.54 МиБ embedded + 1.08 МиБ файла. Все проверки Python Architecture и model texture audit 292/223/0 errors PASS. Native Forward+ planner_extension остановился timeout 180 без assertion failure: для этого geometry/physics suite ограничены тестовые shadow atlases 256, при сохранённых shadows, сцене, 90 ticks и assertions. Игровые профили и пороги CI прежние. Native Forward+ planner_extension PASS: 89.19 с, zero errors/assertions, 320×180 screenshots сохранены; исходный CI timeout 180 сек. Полный 73-suite и Compatibility приёмка выполняются. T002 IN_PROGRESS. Следующий шаг: подтвердить native/local suite, обновить ветку PR #85 и дождаться нового CI. 
 
 

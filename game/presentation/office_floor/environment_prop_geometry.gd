@@ -95,7 +95,7 @@ func discover_stages() -> void:
 			variants.append(variant)
 	# Staged GLBs (addons/staged_glb_import) add LargeParts → Small/JaggedFragments,
 	# PlantDestroyed → PotFragments and the in-place DamageReady facade.
-	for name_part in ["Modular", "Door_Off", "LargeParts", "SmallFragments", "JaggedFragments", "PlantDestroyed", "PotFragments", "Broken_7", "Fragments", "Primary", "Panels", "Medium", "Fine", "TopSecondary", "DamageReady"]:
+	for name_part in ["Modular", "Door_Off", "LargeParts", "SmallFragments", "JaggedFragments", "PlantDestroyed", "PotFragments", "Broken_7", "Fragments", "Primary", "Panels", "Medium", "Fine", "TopSecondary", "DamageReady", "DamageParts"]:
 		var stage: Node3D = DAMAGE.find_named(visual, name_part)
 		if stage != null:
 			stages.append(stage)

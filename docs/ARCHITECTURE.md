@@ -289,3 +289,6 @@ Office-floor Geometry сохраняет владение visual/stages/collisio
 
 
 ADR-0039: bootstrap interface_v1.lighting — optional bool с default true, применяемый к существующим лампам и global overhead; layout DTO прежний. HUD корректирует покрытие линзы на экранный пиксель; infection_source рисует ограниченный procedural smoke; office_floor владеет glass facade variant. Владельцы и зависимости прежние.
+
+
+Стыки планировщика (T002, 10.10.2026): bootstrap planning_edge_snap владеет только производным расчётом позиции по геометрии; состояния/DTO прежние. Render helper ContactShadowQuad помечается planning_bounds_excluded для пропуска в существующем geometry probe. Import extension восстанавливает известные flattened-stage exports, без изменения исходных GLB; office_floor Geometry и staged_table сохраняют свои обязанности. Public методы, зависимости, policy и owners прежние; исключений нет.

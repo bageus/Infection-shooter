@@ -44,6 +44,7 @@ func configure(prop: Node3D, visual: Node3D, meshes: Array[MeshInstance3D]) -> b
 	_floor_y = maxf(world.position.y, FLOOR_Y - 0.003) + 0.003
 	_shadow = MeshInstance3D.new()
 	_shadow.name = "ContactShadowQuad"
+	_shadow.set_meta("planning_bounds_excluded", true)
 	_shadow.mesh = _shared_quad()
 	_shadow.material_override = _local_material()
 	_shadow.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF

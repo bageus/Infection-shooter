@@ -2,6 +2,7 @@ extends RefCounted
 const BLOOD_PLACEMENT := preload("res://game/bootstrap/app/planning_blood_placement.gd")
 
 const SURFACE_PLACEMENT := preload("res://game/bootstrap/app/planning_surface_placement.gd")
+const EDGE_SNAP := preload("res://game/bootstrap/app/planning_edge_snap.gd")
 const GRID_SIZE = 0.25
 const SNAP_DISTANCE = 0.8
 const FLOOR_WALL_SNAP = preload("res://game/bootstrap/app/floor_wall_snap.gd")
@@ -247,6 +248,7 @@ func _apply_wall_mount(node: Node3D) -> void:
 		return
 	var normal: Vector3 = node.get_meta("planning_wall_normal")
 	SURFACE_PLACEMENT.mount(node, _combined_aabb(node), normal)
+	node.global_position = EDGE_SNAP.position_for(node, _combined_aabb(node), node.global_position, _snap_neighbors(node), true)
 	if node.has_method("snap_display_edges"):
 		var neighbors: Array[Dictionary] = []
 		for other: Node3D in objects.placed:
@@ -273,23 +275,7 @@ func _snap_position_for(node: Node3D, value: Vector3) -> Vector3:
 		base.y = SURFACE_PLACEMENT.ground_height(node, source_aabb, support_y)
 	if source_aabb.size.length_squared() <= 0.0001:
 		return base
-	var source_sockets = _connection_sockets(node, base, source_aabb)
-	var best = base
-	var best_distance = SNAP_DISTANCE
-	for other in objects.placed:
-		if other == node or not is_instance_valid(other):
-			continue
-		var other_aabb = _combined_aabb(other)
-		if other_aabb.size.length_squared() <= 0.0001:
-			continue
-		var other_sockets = _connection_sockets(other, other.global_position, other_aabb)
-		for source_socket: Vector3 in source_sockets:
-			for target_socket: Vector3 in other_sockets:
-				var distance = Vector2(source_socket.x - target_socket.x, source_socket.z - target_socket.z).length()
-				if distance < best_distance:
-					best_distance = distance
-					best = base + (target_socket - source_socket)
-					best.y = base.y
+	var best := EDGE_SNAP.position_for(node, source_aabb, base, _snap_neighbors(node))
 	if node is RigidBody3D or bool(node.get_meta("planning_surface_placeable", false)):
 		return FLOOR_WALL_SNAP.position_for(node, source_aabb, best)
 	return best
@@ -316,22 +302,15 @@ func _support_height_at(node: Node3D, base: Vector3) -> float:
 	return best_height
 
 
-func _connection_sockets(node: Node3D, world_origin: Vector3, aabb: AABB) -> Array[Vector3]:
-	var center_local = Vector3(aabb.position.x + aabb.size.x * 0.5, 0.0, aabb.position.z + aabb.size.z * 0.5)
-	var half_x = aabb.size.x * 0.5
-	var half_z = aabb.size.z * 0.5
-	var local_points: Array[Vector3] = [
-		center_local + Vector3(-half_x, 0.0, 0.0),
-		center_local + Vector3(half_x, 0.0, 0.0),
-		center_local + Vector3(0.0, 0.0, -half_z),
-		center_local + Vector3(0.0, 0.0, half_z)
-	]
-	var basis = Basis(Vector3.UP, node.rotation.y)
-	var sockets: Array[Vector3] = []
-	for point: Vector3 in local_points:
-		var relative = point - Vector3(aabb.position.x + aabb.size.x * 0.5, 0.0, aabb.position.z + aabb.size.z * 0.5)
-		sockets.append(world_origin + basis * relative)
-	return sockets
+func _snap_neighbors(node: Node3D) -> Array[Dictionary]:
+	var neighbors: Array[Dictionary] = []
+	for other: Node3D in objects.placed:
+		if other == node or not is_instance_valid(other) or other.is_queued_for_deletion():
+			continue
+		var bounds := _combined_aabb(other)
+		if bounds.size.length_squared() > .0001:
+			neighbors.append({"node": other, "bounds": bounds})
+	return neighbors
 
 
 func _combined_aabb(node: Node3D, ignore_selection: bool = false) -> AABB:
@@ -344,7 +323,7 @@ func _combined_aabb(node: Node3D, ignore_selection: bool = false) -> AABB:
 	for child in node.find_children("*", "MeshInstance3D", true, false):
 		if ignore_selection and child == selection_box:
 			continue
-		if child.has_meta("planning_selection_highlight"):
+		if child.has_meta("planning_selection_highlight") or bool(child.get_meta("planning_bounds_excluded", false)):
 			continue
 		var mesh_instance = child as MeshInstance3D
 		if mesh_instance != null and mesh_instance.cast_shadow == GeometryInstance3D.SHADOW_CASTING_SETTING_SHADOWS_ONLY:
