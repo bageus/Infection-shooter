@@ -30,6 +30,7 @@ jobs:
           python tools/deduplicate_model_textures.py --check
           python tools/test_texture_deduplication.py
           python tools/build_display_surfaces.py --check
+          python tools/test_display_surfaces.py
           python tools/check_model_textures.py
           python tools/check_group01_atlas.py
           python tools/check_group04_atlas.py
