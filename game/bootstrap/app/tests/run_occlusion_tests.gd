@@ -191,6 +191,8 @@ func _integration() -> void:
 	# Pixel assertions above use the original viewport. Material lifecycle below
 	# still uses the entire map, at bounded software-renderer resolution.
 	root.size = Vector2i(320, 180)
+	root.positional_shadow_atlas_size = 256
+	RenderingServer.directional_shadow_atlas_set_size(256, true)
 	var had := FileAccess.file_exists(PREFS.FILE)
 	var saved := FileAccess.get_file_as_bytes(PREFS.FILE) if had else PackedByteArray()
 	var prefs := PREFS.new()
@@ -216,8 +218,16 @@ func _integration() -> void:
 	# Exercise real authored map material allocation and teardown repeatedly.
 	for cycle in 12:
 		runtime.set_mode(cycle % 2)
+		# Material queue processing needs frames, not 20 full-map raster passes.
+		# Render each installed mode once, preserving real GPU allocation/teardown.
+		var disabled := root.disable_3d
+		root.disable_3d = true
 		for frame in 20:
 			await process_frame
+		root.disable_3d = disabled
+		await process_frame
+		if DisplayServer.get_name() != "headless":
+			await RenderingServer.frame_post_draw
 		_check(runtime.walls.pending.size() < 10000, "bounded material installation queue")
 	loaded.values.occlusion_mode = 0
 	loaded.apply_to_game(self)
