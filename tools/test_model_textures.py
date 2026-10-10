@@ -2,11 +2,34 @@ import json
 import struct
 import tempfile
 import unittest
+import zlib
 from pathlib import Path
-from check_model_textures import audit
+from check_model_textures import audit, validate_png
 
 
 class ModelTexturesTests(unittest.TestCase):
+    def png(self, compressed=None):
+        def chunk(kind, payload):
+            return struct.pack('>I', len(payload)) + kind + payload + struct.pack('>I', zlib.crc32(kind + payload))
+        image = zlib.compress(b'\x00\x80\x80\xff') if compressed is None else compressed
+        return (b'\x89PNG\r\n\x1a\n' + chunk(b'IHDR', struct.pack('>IIBBBBB', 1, 1, 8, 2, 0, 0, 0))
+                + chunk(b'IDAT', image) + chunk(b'IEND', b''))
+
+    def test_png_integrity(self):
+        validate_png(self.png())
+        for bad in (self.png()[:-14], self.png()[:-12]):
+            with self.assertRaises(ValueError):
+                validate_png(bad)
+        with self.assertRaisesRegex(ValueError, 'Truncated PNG image stream'):
+            validate_png(self.png(zlib.compress(b'\x00\x80\x80\xff')[:-3]))
+
+    def test_embedded_corrupt_png(self):
+        document = self.document()
+        broken = self.png()[:-14]
+        document['bufferViews'][0]['byteLength'] = len(broken)
+        document['images'][0]['mimeType'] = 'image/png'
+        self.assertTrue(any('PNG' in error for error in self.check_document(document, broken)['errors']))
+
     def check_document(self, document, binary=b'png!'):
         with tempfile.TemporaryDirectory(dir=Path(__file__).resolve().parents[1]) as folder:
             path = Path(folder) / 'fixture.glb'

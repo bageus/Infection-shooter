@@ -10,7 +10,10 @@ const TABLE_GRAPHITE := preload("res://models/objects/textures/table/conference_
 
 const TABLE_MODELS: Array[String] = ["07_table_longest.glb"]
 # Source material name -> finish. The white top becomes chocolate wood, the frame graphite.
-const TABLE_FINISH := {"Modern_Warm_White": "wood", "Modern_Graphite": "graphite"}
+const TABLE_FINISH := {
+	"Modern_Warm_White": "wood", "Modern_Graphite": "graphite",
+	"Warm_White_Laminate": "wood", "Graphite_Surface_Metal": "graphite",
+}
 # Flat sheets whose top face is seen from the gameplay camera.
 const PAPER_MODELS: Array[String] = ["09_paper_stack.glb", "09_paper_stray.glb", "09_office_files_a.glb",
 	"09_office_files_a_2.glb", "09_office_file_single.glb"]

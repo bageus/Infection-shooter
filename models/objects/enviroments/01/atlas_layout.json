@@ -1,171 +1,227 @@
 {
-  "master_size": [
-    4096,
+  "version": 2,
+  "size": [
+    2048,
     2048
   ],
-  "runtime_size": [
-    2048,
-    1024
-  ],
-  "gutter_master_px": 32,
-  "gutter_runtime_px": 16,
+  "gutter_px": 16,
   "origin": "top-left",
-  "grid": [
-    4,
-    2
-  ],
+  "normal_convention": "OpenGL +Y",
+  "orm_channels": {
+    "R": "neutral AO",
+    "G": "roughness",
+    "B": "metallic"
+  },
   "tiles": [
     {
-      "slot": 1,
+      "id": "painted_plaster",
+      "pixel_rect": [
+        16,
+        16,
+        480,
+        480
+      ],
+      "uv_rect": [
+        0.0078125,
+        0.0078125,
+        0.234375,
+        0.234375
+      ]
+    },
+    {
+      "id": "column_paint",
+      "pixel_rect": [
+        528,
+        16,
+        480,
+        480
+      ],
+      "uv_rect": [
+        0.2578125,
+        0.0078125,
+        0.234375,
+        0.234375
+      ]
+    },
+    {
       "id": "graphite_coating",
-      "title": "Графитовая краска",
-      "pixel_rect_master": [
-        32,
-        32,
-        960,
-        960
-      ],
-      "uv_rect": [
-        0.0078125,
-        0.015625,
-        0.234375,
-        0.46875
-      ],
-      "roughness_mean": 0.57,
-      "metallic": 0
-    },
-    {
-      "slot": 2,
-      "id": "light_epoxy",
-      "title": "Светло-серая эпоксидная краска",
-      "pixel_rect_master": [
-        1056,
-        32,
-        960,
-        960
-      ],
-      "uv_rect": [
-        0.2578125,
-        0.015625,
-        0.234375,
-        0.46875
-      ],
-      "roughness_mean": 0.55,
-      "metallic": 0
-    },
-    {
-      "slot": 3,
-      "id": "stair_grip",
-      "title": "Нескользящее покрытие ступеней",
-      "pixel_rect_master": [
-        2080,
-        32,
-        960,
-        960
+      "pixel_rect": [
+        1040,
+        16,
+        480,
+        480
       ],
       "uv_rect": [
         0.5078125,
-        0.015625,
+        0.0078125,
         0.234375,
-        0.46875
-      ],
-      "roughness_mean": 0.87,
-      "metallic": 0
+        0.234375
+      ]
     },
     {
-      "slot": 4,
-      "id": "passenger_terrazzo",
-      "title": "Тёмный мелкозернистый терраццо",
-      "pixel_rect_master": [
-        3104,
-        32,
-        960,
-        960
+      "id": "graphite_door",
+      "pixel_rect": [
+        1552,
+        16,
+        480,
+        480
       ],
       "uv_rect": [
         0.7578125,
-        0.015625,
+        0.0078125,
         0.234375,
-        0.46875
-      ],
-      "roughness_mean": 0.53,
-      "metallic": 0
+        0.234375
+      ]
     },
     {
-      "slot": 5,
       "id": "brushed_steel",
-      "title": "Шлифованная сталь",
-      "pixel_rect_master": [
-        32,
-        1056,
-        960,
-        960
+      "pixel_rect": [
+        16,
+        528,
+        480,
+        480
       ],
       "uv_rect": [
         0.0078125,
-        0.515625,
+        0.2578125,
         0.234375,
-        0.46875
-      ],
-      "roughness_mean": 0.34,
-      "metallic": 1
+        0.234375
+      ]
     },
     {
-      "slot": 6,
-      "id": "freight_rubber",
-      "title": "Резиновый пол грузового лифта",
-      "pixel_rect_master": [
-        1056,
-        1056,
-        960,
-        960
+      "id": "oak_longitudinal",
+      "pixel_rect": [
+        528,
+        528,
+        480,
+        480
       ],
       "uv_rect": [
         0.2578125,
-        0.515625,
+        0.2578125,
         0.234375,
-        0.46875
-      ],
-      "roughness_mean": 0.89,
-      "metallic": 0
+        0.234375
+      ]
     },
     {
-      "slot": 7,
-      "id": "smoked_steel",
-      "title": "Тонированная шлифованная сталь",
-      "pixel_rect_master": [
-        2080,
-        1056,
-        960,
-        960
+      "id": "oak_endgrain",
+      "pixel_rect": [
+        1040,
+        528,
+        480,
+        480
       ],
       "uv_rect": [
         0.5078125,
-        0.515625,
+        0.2578125,
         0.234375,
-        0.46875
-      ],
-      "roughness_mean": 0.39,
-      "metallic": 1
+        0.234375
+      ]
     },
     {
-      "slot": 8,
-      "id": "ceiling_white",
-      "title": "Светлое покрытие потолка",
-      "pixel_rect_master": [
-        3104,
-        1056,
-        960,
-        960
+      "id": "ivory_coating",
+      "pixel_rect": [
+        1552,
+        528,
+        480,
+        480
       ],
       "uv_rect": [
         0.7578125,
-        0.515625,
+        0.2578125,
         0.234375,
-        0.46875
+        0.234375
+      ]
+    },
+    {
+      "id": "stair_grip",
+      "pixel_rect": [
+        16,
+        1040,
+        480,
+        480
       ],
-      "roughness_mean": 0.57,
-      "metallic": 0
+      "uv_rect": [
+        0.0078125,
+        0.5078125,
+        0.234375,
+        0.234375
+      ]
+    },
+    {
+      "id": "passenger_terrazzo",
+      "pixel_rect": [
+        528,
+        1040,
+        480,
+        480
+      ],
+      "uv_rect": [
+        0.2578125,
+        0.5078125,
+        0.234375,
+        0.234375
+      ]
+    },
+    {
+      "id": "freight_rubber",
+      "pixel_rect": [
+        16,
+        1552,
+        480,
+        480
+      ],
+      "uv_rect": [
+        0.0078125,
+        0.7578125,
+        0.234375,
+        0.234375
+      ]
+    },
+    {
+      "id": "smoked_steel",
+      "pixel_rect": [
+        528,
+        1552,
+        480,
+        480
+      ],
+      "uv_rect": [
+        0.2578125,
+        0.7578125,
+        0.234375,
+        0.234375
+      ]
+    },
+    {
+      "id": "carpet",
+      "pixel_rect": [
+        1040,
+        1040,
+        992,
+        992
+      ],
+      "uv_rect": [
+        0.5078125,
+        0.5078125,
+        0.484375,
+        0.484375
+      ]
     }
-  ]
+  ],
+  "source_ref": "61e80037955ad211cb12055264381accd42ea0c2",
+  "runtime_size": {
+    "albedo": [
+      2048,
+      2048
+    ],
+    "normal": [
+      1024,
+      1024
+    ],
+    "orm": [
+      1024,
+      1024
+    ]
+  }
 }
