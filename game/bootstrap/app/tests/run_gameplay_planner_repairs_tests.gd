@@ -169,7 +169,7 @@ func _placement() -> void:
 			item.set_meta("planning_wall_normal", Vector3.LEFT)
 			geometry.call("_apply_wall_mount", item)
 			var mounted: AABB = item.global_transform * bounds
-			_check(absf(mounted.end.x - (3.0 - SURFACE.CLEARANCE)) < .0001, "Actual scaled back plane touches wall: " + model)
+			_check(absf(mounted.end.x - (3.0 - SURFACE.WALL_CLEARANCE)) < .0001, "Actual scaled back plane touches wall: " + model)
 		if "floor" in model:
 			item.global_position.y = -.2
 			geometry.call("_restore_floor_surface", item, model)

@@ -13,8 +13,11 @@ func _run() -> void:
 	var catalog := CATALOG.new()
 	catalog.call("_build_environment_catalogs")
 	var entries: Array = catalog.group_catalogs["01"]
-	_check(entries.size() == 25, "Group 01 exposes all 25 assets once")
+	_check(entries.size() == 26, "Group 01 exposes all 26 assets once")
+	var palette_paths := {}
 	for entry: Dictionary in entries:
+		_check(not palette_paths.has(entry.path), "Palette entry is unique: " + str(entry.path))
+		palette_paths[entry.path] = true
 		_check(ResourceLoader.exists(str(entry.path)), "Palette entry loads: " + str(entry.name))
 	var count := 0
 	for filename: String in ResourceLoader.list_directory(ROOT_PATH):
@@ -28,8 +31,11 @@ func _run() -> void:
 		var model := packed.instantiate() as Node3D
 		_check_model(model, filename)
 		model.free()
-		_check(catalog.call("_migrate_scene_path", ROOT_PATH + "models/" + filename) == ROOT_PATH + filename, "Nested saved path migrates: " + filename)
-	_check(count == 25, "Runtime folder contains all 25 models")
+		var migrated := ROOT_PATH + filename
+		if filename == "01_column_2.glb":
+			migrated = catalog.call("_environment_scene_for", filename)
+		_check(catalog.call("_migrate_scene_path", ROOT_PATH + "models/" + filename) == migrated, "Nested saved path migrates: " + filename)
+	_check(count == 26, "Runtime folder contains all 26 models")
 	_check(catalog.call("_migrate_scene_path", ROOT_PATH + "models/01_glass_wall_full_breakable(1).glb") == ROOT_PATH + "01_glass_wall_full_breakable.glb", "Glass wall upload name migrates")
 	_check(catalog.call("_environment_scene_for", "01_glass_wall_full_breakable.glb").ends_with("glass_wall_full.tscn"), "Glass wall uses its destructible structural scene")
 	print("Group 01 asset tests: %d failures" % failures)
@@ -46,6 +52,8 @@ func _check_model(model: Node3D, filename: String) -> void:
 	var texture_path := ROOT_PATH + "textures/" + family + "/" + prefix + "_albedo.png"
 	if family == "stairs_elevators":
 		texture_path = ROOT_PATH + "textures/architecture_albedo.png"
+	if filename == "01_column_2.glb":
+		texture_path = ROOT_PATH + "01_column_2_Image_0.jpg"
 	var expected := load(texture_path) as Texture2D
 	_check(expected != null, "Shared texture exists: " + family)
 	var opaque := 0
@@ -75,6 +83,10 @@ func _check_model(model: Node3D, filename: String) -> void:
 				checked_materials[material] = true
 				var actual := material.albedo_texture.get_image()
 				var reference := expected.get_image()
+				if actual.is_compressed():
+					_check(actual.decompress() == OK, "Albedo image decompresses: " + filename)
+				if reference.is_compressed():
+					_check(reference.decompress() == OK, "Reference image decompresses: " + filename)
 				_check(actual.get_size() == reference.get_size() and actual.get_pixel(100, 100).is_equal_approx(reference.get_pixel(100, 100)), "Correct atlas family: " + filename)
 	_check(opaque > 0, "Model has textured surfaces: " + filename)
 	if filename.begins_with("01_glass_"):
