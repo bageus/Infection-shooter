@@ -7,6 +7,9 @@ owner: AI
 updated: 2026-10-10
 ---
 
+10.10.2026 (P0 аудита, запрос владельца): устранён сбой deduplicate_model_textures.py --check на main 33b7b1f. В четырёх GLB группы 02 встроенные 13 изображений заменены ссылками на существующие byte-identical PNG с прежними import profiles; общий Image_0 автомата 2 ссылается на PNG автомата 1, удалён только подтверждённый дубликат с import. Semantic digest всех четырёх моделей совпадает с исходным: геометрия, UV, узлы, сцены, материалы и байты изображений прежние. Сокращение 6,624 МиБ. 17 Python gates/suites PASS, включая весь Architecture block; static audit 292 моделей / 223 textured / 0 errors. Godot 4.7.2 import exit 0 без ERROR/SCRIPT ERROR; model_texture (292/223/0), staged_glb, debris, display PASS. API/DTO/owners/dependencies прежние, исключений нет. T002 IN_PROGRESS. Следующее действие: подтвердить CI PR исправления и визуально принять Windows/Web. Подробности docs/qa/p0_group02_texture_dedup.md.
+
+
 10.10.2026 (PR #82, проверка объединённой версии): clean Godot 4.7.2 import exit 0 без ERROR/SCRIPT ERROR; group03/group04, model_texture (292/223/0 failures, 10 shared updated maps/10.0 МиБ), staged_glb, display, debris, prop_weight PASS. Project и весь Architecture Python block PASS. Первый clean import дал внутренний thread/root сбой Godot, второй остановлен при зависании шрифта; успешная пустая-кеш версия и CI проверяются без ослабления настроек. Полный 73-suite прогон и CI нового head выполняются. T002 IN_PROGRESS; следующий шаг: результат CI интегрированного PR #82.
 
 
