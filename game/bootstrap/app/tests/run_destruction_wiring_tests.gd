@@ -1,7 +1,7 @@
 extends SceneTree
 ## Audit actual catalog wrappers, rather than only glTF group names.
 const CATALOG := preload("res://game/bootstrap/app/planning_catalog.gd")
-const STAGE_NAMES := ["Modular", "Door_Off", "LargeParts", "SmallFragments", "JaggedFragments", "PlantDestroyed", "PotFragments", "Broken_7", "Fragments", "Primary", "Panels", "Medium", "Fine", "TopSecondary", "DamageReady", "DamageParts"]
+const STAGE_NAMES := ["Modular", "Door_Off", "LargeParts", "SmallFragments", "JaggedFragments", "PlantDestroyed", "PotFragments", "Broken_7", "Fragments", "Primary", "Panels", "Medium", "Fine", "TopSecondary", "DamageReady"]
 const VARIANT_NAMES := ["Hit_01", "Dent_01", "Dent_02", "Dent_03", "Power_Off"]
 var failures := 0
 var rows: Array[Dictionary] = []
