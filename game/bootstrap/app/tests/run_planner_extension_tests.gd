@@ -12,9 +12,14 @@ func _initialize() -> void:
 
 func _run() -> void:
 	# Geometry/physics assertions retain the full authored scene. A small
-	# viewport bounds llvmpipe cost with the updated PBR models; no pixel
+	# viewport bounds llvmpipe cost in Forward+ while all 90 physics ticks
+	# and the full authored scene remain unchanged; no pixel
 	# assertions depend on resolution in this suite.
 	root.size = Vector2i(320, 180)
+	# Shadow-map rasterization dominates software Vulkan even at small output
+	# sizes. Keep shadows enabled, but bound their test-only pixel budget.
+	root.positional_shadow_atlas_size = 256
+	RenderingServer.directional_shadow_atlas_set_size(256, true)
 	stage = MAIN.instantiate()
 	root.add_child(stage)
 	current_scene = stage

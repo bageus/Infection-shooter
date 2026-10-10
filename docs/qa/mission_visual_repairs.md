@@ -29,3 +29,12 @@ Godot 4.7.2:
 Public API, сцены, владельцы и зависимости прежние. Аддитивная приватная опция interface_v1.lighting=true совместима со старым конфигом; map/campaign/network DTO прежние. Архитектурных исключений нет.
 
 Следующая целевая проверка: повторить start/restart, sniper на разных разрешениях, серию одновременных death clouds и light OFF→ON в Windows/Web; проверить CI draft PR.
+
+
+## Исправление CI PR #85
+
+Run 38073379819 (Architecture) и runtime job 114275213313 run 38073379826 остановились на `deduplicate_model_textures.py --check`: duplicate_files=1, externalized_images=13, changed_models=4. Эти модели пришли из base main 33b7b1f и не входили в исходные visual changes. Существующий deduplicator применён к четырём dented vending models группы 02; их semantic_digest (geometry/material/scene/image payload) до/после одинаков. 02_vending_automat_2_dented_Image_0.png заменён побайтно идентичным 02_vending_automat_1_dented_Image_0.png с тем же import profile. Удалены только заменённый дубль/import. Сэкономлено 5.54 МиБ embedded и 1.08 МиБ отдельного файла. Повторный dedup check: zero duplicates/externalized candidates/unmatched images.
+
+Planner-rendering Forward+ job 114275213481 оборвал planner_extension на 180 сек, без ERROR/assertion failures; следующий occlusion suite прошёл. Отдельные weapon/effects и Compatibility planner прошли. На software Vulkan размер root viewport сам по себе не ограничивает rasterization directional shadow map 2048². Fixture сохраняет 320×180 viewport, всю сцену, источники/тени, capture lifecycle и все 90 physics ticks; только directional/positional shadow atlases ограничены 256². Pixel assertions в этом suite отсутствуют, отдельные shadow/render tests сохраняют реальные профили. Ни production renderer, ни тайм-ауты/assertions CI не ослаблены.
+
+После исправления: Python Architecture block целиком PASS (включая profiles/atlases и unit tests), model audit 292/223/0 errors, semantic_digest четырёх GLB PASS, clean import без ERROR. Native Vulkan Forward+ planner_extension PASS за 89.19 с: все assertions, corpse/aim screenshots 320×180, прежний лимит 180 сек. Полный 73-suite и Compatibility завершаются; новая CI ревизия проверяется после публикации.

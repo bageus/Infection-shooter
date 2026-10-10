@@ -7,6 +7,9 @@ owner: AI
 updated: 2026-10-10
 ---
 
+10.10.2026 (исправление CI PR #85): Architecture/runtime падали на deduplicate_model_textures --check: четыре dented GLB группы 02 сохраняли 13 embedded копий доступных PNG, ещё один PNG был побайтным дублем. Применён существующий deduplicator; semantic_digest всех четырёх GLB совпадает, удалены лишь точный дубль и его import; экономия 5.54 МиБ embedded + 1.08 МиБ файла. Все проверки Python Architecture и model texture audit 292/223/0 errors PASS. Native Forward+ planner_extension остановился timeout 180 без assertion failure: для этого geometry/physics suite ограничены тестовые shadow atlases 256, при сохранённых shadows, сцене, 90 ticks и assertions. Игровые профили и пороги CI прежние. Native Forward+ planner_extension PASS: 89.19 с, zero errors/assertions, 320×180 screenshots сохранены; исходный CI timeout 180 сек. Полный 73-suite и Compatibility приёмка выполняются. T002 IN_PROGRESS. Следующий шаг: подтвердить native/local suite, обновить ветку PR #85 и дождаться нового CI. 
+
+
 10.10.2026 (исправления по запросу владельца): startup/restart сохраняют свободный курсор; HUD прицел учитывает экранный размер линзы для действительных 2.5×; procedural green smoke без PNG, 3–4 puffs + 1 haze и без симуляции спор; каждый третий skyscraper со стеклянной облицовкой; Video lighting сохраняет bool и управляет глобальным светом/лампами, включая late lamps. Владельцы, зависимости, public API, layout/campaign DTO прежние; optional interface_v1.lighting=true описан ADR-0039. T002 IN_PROGRESS. Godot 4.7.2 clean/final import, project gates, 9 focused headless suites и 3 suites в каждом native Compatibility/Vulkan Forward+ PASS. Smoke capture визуально проверен. FPS Windows/Web и полный CI остаются открытыми; docs/qa/mission_visual_repairs.md. Следующий шаг: опубликовать draft PR и проверить CI, затем целевую Windows/Web приёмку.
 
 
