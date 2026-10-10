@@ -140,7 +140,7 @@ func _build_screen(profile: Dictionary) -> void:
 	light.light_energy = .16
 	light.light_color = Color(.45, .72, 1.0)
 	light.spot_attenuation = 1.5
-	light.shadow_enabled = true
+	light.shadow_enabled = false
 	add_child(light)
 	screens.append({"mesh": mesh, "light": light, "profile": profile, "index": 0, "dynamic": false})
 

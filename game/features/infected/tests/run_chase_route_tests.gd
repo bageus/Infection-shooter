@@ -37,6 +37,7 @@ func _run() -> void:
 		from = point
 	_check(from.distance_to(target.position) < 1.0, "Route reaches the target side of the wall")
 	await _shared_budget(stage, actor, target)
+	await _priority_and_age(stage, actor, target)
 	wall.queue_free()
 	await physics_frame
 	await process_frame
@@ -56,6 +57,8 @@ func _shared_budget(stage: Node3D, actor: CharacterBody3D, target: Node3D) -> vo
 	var budget := BUDGET.new()
 	stage.add_child(budget)
 	budget.set_physics_process(false)
+	# Prove resumption with a deterministic node cap, independent of host speed.
+	budget.expansions_per_frame = 8
 	var routes: Array[RefCounted] = []
 	for index in 7:
 		var route := ROUTE.new()
@@ -64,13 +67,26 @@ func _shared_budget(stage: Node3D, actor: CharacterBody3D, target: Node3D) -> vo
 		route.direction(actor, target, .35)
 		route.direction(actor, target, .35)
 	_check(budget.pending_count() == 7 and budget.total_searches == 0, "Repeated requests are deduplicated and do not search synchronously")
-	for frame in 4:
+	var ticks := 0
+	while budget.pending_count() > 0 and ticks < 240:
+		ticks += 1
 		await physics_frame
 		budget.call("_physics_process", 0.0)
 		_check(budget.searches_last_frame <= 2, "Shared search work stays within the per-frame budget")
-	_check(budget.pending_count() == 0 and budget.total_searches == 7, "FIFO eventually services every waiting route")
+		_check(budget.expansions_last_frame <= budget.expansions_per_frame, "Search slices obey the node expansion budget")
+	_check(ticks > 4, "Expensive routes are spread across physics frames")
+	_check(budget.pending_count() == 0 and budget.total_searches == 7, "Incremental priority queue eventually services every waiting route")
 	for route in routes:
 		_check(not route.path.is_empty(), "Each serviced enemy obtains a collision-checked route")
+	# One microsecond prevents a whole A* from running to completion.
+	var sliced := ROUTE.new()
+	sliced.configure_budget(budget)
+	sliced.direction(actor, target, .35)
+	budget.time_budget_usec = 1
+	budget.call("_physics_process", 0.0)
+	_check(budget.pending_count() == 1 and budget.searches_last_frame == 0, "Exhausted time budget retains resumable work")
+	budget.cancel(sliced)
+	budget.time_budget_usec = 2000
 	var cancelled := ROUTE.new()
 	cancelled.configure_budget(budget)
 	cancelled.direction(actor, target, .35)
@@ -89,3 +105,33 @@ func _check(condition: bool, message: String) -> void:
 	if not condition:
 		failures += 1
 		push_error(message)
+
+
+func _priority_and_age(stage: Node3D, actor: CharacterBody3D, target: Node3D) -> void:
+	var budget := BUDGET.new()
+	stage.add_child(budget)
+	budget.set_physics_process(false)
+	budget.searches_per_frame = 1
+	budget.expansions_per_frame = 4
+	var far_route := ROUTE.new()
+	far_route.configure_budget(budget)
+	far_route.direction(actor, target, .35)
+	var nearby := Node3D.new()
+	stage.add_child(nearby)
+	nearby.position = actor.position + Vector3(.3, 0, 0)
+	var near_route := ROUTE.new()
+	budget.request(near_route, actor, nearby)
+	budget.call("_physics_process", 0.0)
+	_check(budget.total_searches == 1 and far_route.get("_search_state").is_empty(), "Nearby request is serviced before an older distant request")
+	var ticks := 0
+	while far_route.path.is_empty() and ticks < 300:
+		ticks += 1
+		await physics_frame
+		budget.request(near_route, actor, nearby)
+		budget.call("_physics_process", 0.0)
+	_check(not far_route.path.is_empty(), "Aged distant route completes under a continuous stream of nearby requests")
+	print("Priority route: %d ticks with continuous nearby requests" % ticks)
+	budget.cancel(far_route)
+	budget.cancel(near_route)
+	nearby.queue_free()
+	budget.queue_free()

@@ -244,7 +244,7 @@ core.vfx surface_atlases_v1 supplies immutable atlas textures; features.combat i
 
 - bootstrap создаёт одну mission-local очередь полного поиска пути infected.
   `configure_chase_budget` внедряет её в начальных и призванных врагов.
-  FIFO и бюджет двух A* за физический кадр принадлежат features.infected;
+  Priority heap, лимит двух завершений, мягкий бюджет 2000 мкс и 64 раскрытий за физический кадр принадлежат features.infected;
   глобальные счётчики/Autoload не добавлены.
 - features.combat.public.prop_damage_state владеет здоровьем, индексом
   варианта, ожидающим переходом и одноразовыми флагами environment_prop.
@@ -287,5 +287,25 @@ Root остаётся выше порога 300 строк: его оставш�
 
 Office-floor Geometry сохраняет владение visual/stages/collision и удерживает immutable PackedScene стадий в течение жизни объекта. Post-import добавляет пустые именованные группы с lazy_stage_path; Geometry наполняет группу при переходе. ResourceLoader разделяет ресурсы, scene nodes остаются локальными. Manifest относится к assets, не DTO сохранений. Глобальный cache, новый owner, dependency или публичный API не добавлены.
 
+
+## P1 аудита — безопасная запись и ограничение кадра
+
+bootstrap.app сохраняет владение картой и стартом миссии. Приватный
+planning_map_file записывает JSON во временный соседний файл, проверяет байты
+и прежнюю schema v1–v8, готовит проверенную .bak предыдущей валидной карты,
+затем заменяет основной файл. mission_loader предлагает backup/default при
+повреждении, не исправляя пользовательский файл без команды сохранения.
+
+features.infected сохраняет route/budget_v1: A* frontier и очередь порций
+используют приватный stable binary heap, ожидание повышает приоритет дальних
+запросов. Physics cast не прерывается посередине: 2000 мкс — мягкая граница,
+дополненная лимитом 64 раскрытий и прежними 192 раскрытиями на поиск.
+Clearance memoization ограничена кадром/порцией; после изменений препятствий
+в следующем физическом кадре запрос выполняется снова. Пройденный путь
+проверяется перед движением, движение через коллизии не разрешается.
+
+office_floor/display_wall сохраняет derived lighting: до 16 видимых близких
+screen lights и 4 shadow lights; emission/content независимы от этого лимита.
+DTO, методы публичных сцен, зависимости и владельцы состояния прежние.
 
 ADR-0039: bootstrap interface_v1.lighting — optional bool с default true, применяемый к существующим лампам и global overhead; layout DTO прежний. HUD корректирует покрытие линзы на экранный пиксель; infection_source рисует ограниченный procedural smoke; office_floor владеет glass facade variant. Владельцы и зависимости прежние.

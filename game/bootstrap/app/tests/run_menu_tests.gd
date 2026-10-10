@@ -60,6 +60,11 @@ func _run() -> void:
 	await _test_pause_and_planner(app)
 	await _test_results_and_return(app)
 	_restore_settings()
+	# Finish scene teardown before the renderer shuts down, including queued frees.
+	current_scene.queue_free()
+	current_scene = null
+	await process_frame
+	await process_frame
 	print("Menu integration tests: %d failures" % failures)
 	quit(0 if failures == 0 else 1)
 

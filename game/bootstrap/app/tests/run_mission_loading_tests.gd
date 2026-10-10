@@ -5,6 +5,8 @@ const SAVE := "user://planned_layout.json"
 var failures := 0
 var _had_save := false
 var _saved_bytes := PackedByteArray()
+var _had_backup := false
+var _backup_bytes := PackedByteArray()
 
 
 func _initialize() -> void:
@@ -15,6 +17,10 @@ func _run() -> void:
 	_had_save = FileAccess.file_exists(SAVE)
 	if _had_save:
 		_saved_bytes = FileAccess.get_file_as_bytes(SAVE)
+	_had_backup = FileAccess.file_exists(SAVE + ".bak")
+	if _had_backup:
+		_backup_bytes = FileAccess.get_file_as_bytes(SAVE + ".bak")
+		DirAccess.remove_absolute(SAVE + ".bak")
 	_write('{"objects":"damaged"}')
 	var frontend := FRONT.instantiate()
 	root.add_child(frontend)
@@ -29,6 +35,8 @@ func _run() -> void:
 	await _wait(func() -> bool: return is_instance_valid(loader) and (loader.get("back") as Button).visible)
 	_expect(current_scene == frontend and is_instance_valid(frontend) and not paused, "Invalid map preserves the previous menu and pause state")
 	_expect(loader.get("pending") == null, "Failed pending mission is released")
+	_expect(loader.get("_choices") != null and (loader.get("_choices") as VBoxContainer).get_child_count() == 1, "Corrupt save offers the valid shipped map")
+	_expect("objects must be an array" in str((loader.get("label") as Label).text), "Recovery UI explains schema corruption")
 	loader.call("_close_error")
 	await process_frame
 	_expect(not frontend.get("_loading"), "Error dismissal permits retry")
@@ -46,6 +54,9 @@ func _run() -> void:
 	_expect(Input.mouse_mode == Input.MOUSE_MODE_VISIBLE, "Mission startup leaves the aiming cursor free")
 	var planner: Node = stage.get("planning_mode")
 	_expect(planner.get("storage").get("authored_layout").get("objects").size() == 64, "All map records are committed before activation")
+	var backup := FileAccess.open(SAVE + ".bak", FileAccess.WRITE)
+	backup.store_string(JSON.stringify({"version": 8, "objects": records}))
+	backup.close()
 	var camera := root.get_camera_3d()
 	_write('{"objects":null}')
 	stage.call("_on_restart_pressed")
@@ -68,6 +79,22 @@ func _run() -> void:
 	_expect(not is_instance_valid(before), "Successful restart releases the previous mission")
 	current_scene.queue_free()
 	await process_frame
+	# Corrupt JSON must not block a deliberate backup start, or rewrite evidence.
+	var recovery_menu := FRONT.instantiate()
+	root.add_child(recovery_menu)
+	current_scene = recovery_menu
+	_write("{interrupted")
+	recovery_menu.call("_action", "start")
+	var recovery_loader: Node = recovery_menu.find_children("*", "CanvasLayer", true, false)[0]
+	await _wait(func() -> bool: return (recovery_loader.get("back") as Button).visible)
+	_expect((recovery_loader.get("_choices") as VBoxContainer).get_child_count() == 2, "Recovery offers both valid backup and shipped map")
+	(recovery_loader.get("_choices") as VBoxContainer).get_child(0).emit_signal("pressed")
+	(recovery_loader.get("_choices") as VBoxContainer).get_child(0).emit_signal("pressed")
+	await _wait(func() -> bool: return current_scene != recovery_menu)
+	_expect(current_scene.get("planning_mode").get("storage").authored_layout.objects.size() == 64, "Selecting backup activates its full map")
+	_expect(FileAccess.get_file_as_string(SAVE) == "{interrupted", "Backup launch does not overwrite the corrupt save")
+	current_scene.queue_free()
+	await process_frame
 	_restore_save()
 	print("Mission loading tests: %d failures" % failures)
 	quit(0 if failures == 0 else 1)
@@ -87,6 +114,12 @@ func _write(text: String) -> void:
 
 
 func _restore_save() -> void:
+	if _had_backup:
+		var backup := FileAccess.open(SAVE + ".bak", FileAccess.WRITE)
+		backup.store_buffer(_backup_bytes)
+		backup.close()
+	else:
+		DirAccess.remove_absolute(SAVE + ".bak")
 	if _had_save:
 		var file := FileAccess.open(SAVE, FileAccess.WRITE)
 		file.store_buffer(_saved_bytes)
