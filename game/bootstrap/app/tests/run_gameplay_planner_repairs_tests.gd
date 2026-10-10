@@ -71,6 +71,12 @@ func _audio() -> void:
 
 
 func _blood(player: Node3D) -> void:
+	# Run splatter against known visible receivers outside the editable office.
+	var original := player.global_position
+	player.global_position = Vector3(1000, 1, 1000)
+	var support := _wall(Vector3(1000, -.1, 1000))
+	(support.get_child(0) as CollisionShape3D).shape.size = Vector3(20, .2, 20)
+	(support.get_child(1) as MeshInstance3D).mesh.size = Vector3(20, .2, 20)
 	var effects: Node3D = stage.get("blood_effects")
 	_check(player.is_connected("projectile_blood", Callable(effects, "splatter_hit")), "Bootstrap binds player to common blood renderer")
 	effects.call("clear_marks")
@@ -123,6 +129,8 @@ func _blood(player: Node3D) -> void:
 	paused = false
 	player.set("health", player.get("max_health"))
 	effects.call("clear_marks")
+	player.global_position = original
+	support.queue_free()
 	wall.queue_free()
 	await process_frame
 

@@ -169,8 +169,18 @@ func _particles(catalog: RefCounted) -> void:
 	_check(effects.get_child_count() > count, "Enabled repeat hit creates spark particles")
 
 func _corpse() -> void:
+	# Authored office furniture must not catch this airborne physics fixture.
+	var support := StaticBody3D.new()
+	var shape := CollisionShape3D.new()
+	shape.shape = BoxShape3D.new()
+	shape.shape.size = Vector3(10, .2, 10)
+	support.add_child(shape)
+	stage.add_child(support)
+	support.position = Vector3(1000, -.1, 1000)
 	for scene: PackedScene in [CORPSE, HORDE]:
 		await _settle(scene)
+	support.queue_free()
+	await physics_frame
 	var part := PART.instantiate() as RigidBody3D
 	stage.add_child(part)
 	var floor_body := StaticBody3D.new()
@@ -200,7 +210,7 @@ func _settle(scene: PackedScene) -> void:
 	var corpse := scene.instantiate()
 	corpse.call("configure_decor_pose", {"seed": 9, "pose": "seated", "facing": 0.0})
 	stage.add_child(corpse)
-	corpse.position = Vector3(27, 3, 4)
+	corpse.position = Vector3(1000, 3, 1000)
 	var skeleton: Skeleton3D = corpse.get("parts").get("skeleton")
 	var hips := skeleton.find_bone("Hips")
 	var before := skeleton.global_transform * skeleton.get_bone_global_pose(hips)
