@@ -12,7 +12,7 @@ func push(entry: Dictionary, score: float) -> void:
 	entries.append(entry)
 	var index := entries.size() - 1
 	while index > 0:
-		var parent := (index - 1) / 2
+		var parent := (index - 1) >> 1
 		if not _before(entries[index], entries[parent]):
 			break
 		var swap := entries[parent]

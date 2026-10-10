@@ -18,6 +18,7 @@ instance uniform float looping = 0.0;
 instance uniform float cycle_seconds = 14.0;
 instance uniform vec3 cloud_center = vec3(0.0);
 
+varying vec3 v_world_position;
 varying float v_life;
 varying float v_seed;
 varying float v_variant;
@@ -77,10 +78,14 @@ void vertex() {
 	} else {
 		world = center + (INV_VIEW_MATRIX[0].xyz * local.x + INV_VIEW_MATRIX[1].xyz * local.y) * scale;
 	}
+	v_world_position = world;
 	POSITION = PROJECTION_MATRIX * VIEW_MATRIX * vec4(world, 1.0);
 }
 
 void fragment() {
+	if (v_world_position.y < cloud_center.y + 0.5 || v_world_position.y > cloud_center.y + 2.0) {
+		discard;
+	}
 	vec2 centered = UV * 2.0 - 1.0;
 	float radial = dot(centered, centered);
 	if (radial >= 1.0 || v_life <= 0.0 || v_life >= 1.0) {
@@ -94,9 +99,11 @@ void fragment() {
 	float edge = 1.0 - smoothstep(0.18, 1.0, radial);
 	float envelope = smoothstep(0.0, 0.08, l) * (1.0 - smoothstep(0.55, 1.0, l));
 	float alpha = edge * smoothstep(0.15, 0.85, density) * opacity * v_tint.a * envelope;
+	float height = v_world_position.y - cloud_center.y;
+	alpha *= smoothstep(0.5, 0.65, height) * (1.0 - smoothstep(1.85, 2.0, height));
 	vec3 color = mix(vec3(0.12, 0.30, 0.08), vec3(0.38, 0.66, 0.22), density) * v_tint.rgb;
 	if (wall_mask_enabled) {
-		vec3 world_position = (INV_VIEW_MATRIX * vec4(VERTEX, 1.0)).xyz;
+		vec3 world_position = v_world_position;
 		vec2 horizontal = world_position.xz - cloud_center.xz;
 		float azimuth = atan(horizontal.y, horizontal.x);
 		float sample_index = floor((azimuth + PI) / TAU * 24.0);

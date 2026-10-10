@@ -177,7 +177,8 @@ func _screen_to_surface(screen_pos: Vector2, placing: Node3D) -> Vector3:
 	var origin = session.camera.project_ray_origin(screen_pos)
 	var end = origin + session.camera.project_ray_normal(screen_pos) * 300.0
 	var query = PhysicsRayQueryParameters3D.create(origin, end)
-	if placing != null and bool(placing.get_meta("planning_wall_mount", false)):
+	if placing != null:
+		# Deferred model setup may recreate collision after preview disabling.
 		query.exclude = _mount_exclusions(placing)
 	var hit = session.camera.get_world_3d().direct_space_state.intersect_ray(query)
 	if not hit.is_empty():
@@ -220,7 +221,7 @@ func _mount_exclusions(node: Node3D) -> Array[RID]:
 	var excluded: Array[RID] = []
 	var candidates: Array = [node]
 	for other: Node3D in objects.placed:
-		if other != node and is_instance_valid(other) and bool(other.get_meta("planning_wall_mount", false)):
+		if bool(node.get_meta("planning_wall_mount", false)) and other != node and is_instance_valid(other) and bool(other.get_meta("planning_wall_mount", false)):
 			candidates.append(other)
 	for candidate: Node3D in candidates:
 		if candidate is CollisionObject3D:
@@ -354,6 +355,8 @@ func _snap(value: Vector3) -> Vector3:
 
 
 func _set_preview_collision(node: Node, disabled: bool) -> void:
+	if disabled and node is RigidBody3D:
+		(node as RigidBody3D).freeze = true
 	if disabled and node is CollisionObject3D:
 		(node as CollisionObject3D).collision_layer = 0
 		(node as CollisionObject3D).collision_mask = 0

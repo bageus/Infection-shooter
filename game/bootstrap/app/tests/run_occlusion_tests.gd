@@ -204,6 +204,9 @@ func _integration() -> void:
 	var loaded := PREFS.new()
 	loaded.load_settings()
 	_check(loaded.values.occlusion_mode == 1, "preference reloaded")
+	print("Occlusion integration: instantiate @%d" % Time.get_ticks_msec())
+	var render_disabled := root.disable_3d
+	root.disable_3d = true
 	var app := MAIN.instantiate()
 	root.add_child(app)
 	current_scene = app
@@ -221,8 +224,16 @@ func _integration() -> void:
 	# Exercise real authored map material allocation and teardown repeatedly.
 	for cycle in 12:
 		runtime.set_mode(cycle % 2)
+		# Material queue processing needs frames, not 20 full-map raster passes.
+		# Render each installed mode once, preserving real GPU allocation/teardown.
 		for frame in 20:
 			await process_frame
+		root.disable_3d = render_disabled
+		await process_frame
+		if DisplayServer.get_name() != "headless":
+			await RenderingServer.frame_post_draw
+		root.disable_3d = true
+		print("Occlusion integration: cycle %d @%d" % [cycle, Time.get_ticks_msec()])
 		_check(runtime.walls.pending.size() < 10000, "bounded material installation queue")
 	loaded.values.occlusion_mode = 0
 	loaded.apply_to_game(self)

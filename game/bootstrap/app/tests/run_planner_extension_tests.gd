@@ -158,7 +158,11 @@ func _particles(catalog: RefCounted) -> void:
 	_check(prefs.values.electronic_particles, "Old settings preserve sparks by default")
 	# First-hit effects finish before measuring only subsequent hits.
 	prop.call("take_projectile_hit", 0.0, prop.global_position, Vector3.BACK, Vector3.FORWARD, "PISTOL")
+	var disabled := root.disable_3d
+	root.disable_3d = true
 	await create_timer(1.3).timeout
+	root.disable_3d = disabled
+	await process_frame
 	var effects := stage.get("mission_objects") as Node3D
 	var count := effects.get_child_count()
 	prop.call("take_projectile_hit", 0.0, prop.global_position, Vector3.BACK, Vector3.FORWARD, "PISTOL")
@@ -242,9 +246,7 @@ func _aim(player: Node3D) -> void:
 		for height in [.1, 3.0]:
 			var target := player.global_position + Vector3(0, height, 5)
 			mount.call("aim_at", target)
-			await physics_frame
-			await physics_frame
-			await process_frame
+			await _physics_ticks(2)
 			if DisplayServer.get_name() != "headless":
 				await RenderingServer.frame_post_draw
 			var expected: Transform3D = (mount.get("socket") as Node3D).global_transform

@@ -115,6 +115,13 @@ func _build_gore_controls() -> void:
 			button.text = str(entry[0])
 			button.pressed.connect(entry[1])
 			tabs.add_child(button)
+	var weapons := Button.new()
+	weapons.name = "Weapons"
+	weapons.text = "Weapons"
+	weapons.pressed.connect(_show_weapon_catalog)
+	var palette_box: Node = session.ui.get_node("Panel/VBox")
+	palette_box.add_child(weapons)
+	palette_box.move_child(weapons, palette.get_index())
 	blood_options = HBoxContainer.new()
 	blood_options.name = "BloodOptions"
 	var surface_label := Label.new()
@@ -351,6 +358,17 @@ func _show_lighting_catalog() -> void:
 	_rebuild_palette()
 	status.text = "LIGHTING | lights and darkness zones"
 	_update_light_ui()
+
+
+func _show_weapon_catalog() -> void:
+	if blood_options != null:
+		blood_options.hide()
+	light_defaults.hide()
+	objects._reset_selection()
+	session.ui.get_node("Panel/VBox/GroupTabs").hide()
+	catalog.active_catalog = catalog.weapon_catalog
+	_rebuild_palette()
+	status.text = "WEAPONS | place weapon pickups"
 
 
 func _show_actor_catalog() -> void:
