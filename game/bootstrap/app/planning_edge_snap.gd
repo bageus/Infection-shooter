@@ -55,7 +55,8 @@ static func position_for(node: Node3D, bounds: AABB, position: Vector3, neighbor
 						else:
 							if absf(shift.y) > .3:
 								continue
-							shift.y = 0.0
+							if not wall:
+								shift.y = 0.0
 						if wall:
 							var overlap := WALL_OVERLAP
 							if perpendicular:

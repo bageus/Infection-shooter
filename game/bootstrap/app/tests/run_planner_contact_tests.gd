@@ -68,8 +68,9 @@ func _test_walls() -> void:
 	var box := AABB(Vector3(-1.03, 0, -.15), Vector3(2.06, 2.8, .3))
 	var target := _node(Vector3.ZERO, 0, true)
 	var source := _node(Vector3.ZERO, 0, true)
-	var result := SNAP.position_for(source, box, Vector3(2.2, 0, 0), [{"node": target, "bounds": box}])
+	var result := SNAP.position_for(source, box, Vector3(2.2, .0155, 0), [{"node": target, "bounds": box}])
 	_check(is_equal_approx(result.x, 2.06 - SNAP.WALL_OVERLAP), "Straight walls overlap by 1mm")
+	_check(is_zero_approx(result.y), "New wall aligns bottom with authored wall despite floor clearance")
 	source.rotation.y = PI / 2
 	for x in [0.0, 1.03]:
 		result = SNAP.position_for(source, box, Vector3(x, 0, -1.15), [{"node": target, "bounds": box}])
@@ -159,10 +160,9 @@ func _capture_contacts() -> void:
 		wall.position = point
 		if walls.size() == 2:
 			wall.rotation.y = PI / 2
-		var neighbors: Array[Dictionary] = []
-		for other: Node3D in walls:
-			neighbors.append({"node": other, "bounds": geometry._combined_aabb(other)})
-		wall.position = SNAP.position_for(wall, geometry._combined_aabb(wall), point, neighbors)
+		if not walls.is_empty():
+			geometry.objects = {"placed": walls}
+			wall.position = geometry._snap_position_for(wall, point)
 		walls.append(wall)
 	_wall(Vector3(12, .1, 9), Vector3(0, -.05, 0))
 	for index in 2:
