@@ -69,7 +69,7 @@ jobs:
           mkdir -p /tmp/effects-smoke
           set -o pipefail
           failed=0
-          for suite in game/presentation/office_floor/tests/run_hit_effect_tests.gd game/features/combat/tests/run_grenade_vfx_tests.gd game/features/infection_source/tests/run_mutagen_cloud_tests.gd game/presentation/office_floor/tests/run_contact_shadow_tests.gd game/features/infected/tests/run_enemy_animation_tests.gd; do
+          for suite in game/bootstrap/app/tests/run_group05_asset_tests.gd game/presentation/office_floor/tests/run_hit_effect_tests.gd game/features/combat/tests/run_grenade_vfx_tests.gd game/features/infection_source/tests/run_mutagen_cloud_tests.gd game/presentation/office_floor/tests/run_contact_shadow_tests.gd game/features/infected/tests/run_enemy_animation_tests.gd; do
             log=/tmp/effects-smoke/$(basename "$suite" .gd).log
             status=0
             timeout 150 xvfb-run -a godot --path . --audio-driver Dummy --rendering-method gl_compatibility --script "$suite" > "$log" 2>&1 || status=$?
