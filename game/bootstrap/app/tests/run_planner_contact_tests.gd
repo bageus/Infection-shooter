@@ -65,6 +65,11 @@ func _test_edges() -> void:
 	source.free()
 
 func _test_walls() -> void:
+	for path: String in ["glass_partition_half.tscn", "glass_partition_blinds.tscn", "sliding_glass_door.tscn"]:
+		var panel := _node(Vector3.ZERO)
+		panel.set_meta("planning_scene_path", path)
+		_check(SNAP.is_wall(panel), "Public glass structural alias joins walls: " + path)
+		panel.free()
 	var box := AABB(Vector3(-1.03, 0, -.15), Vector3(2.06, 2.8, .3))
 	var target := _node(Vector3.ZERO, 0, true)
 	var source := _node(Vector3.ZERO, 0, true)

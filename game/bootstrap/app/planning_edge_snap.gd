@@ -7,7 +7,7 @@ static func is_wall(node: Node3D) -> bool:
 	var path := str(node.get_meta("planning_scene_path", node.scene_file_path)).get_file().to_lower()
 	if "model_path" in node:
 		path = str(node.get("model_path")).get_file().to_lower()
-	return path.begins_with("wall_") or path.begins_with("01_wall_") or path.begins_with("01_glass_") or path.begins_with("glass_wall_") or path.begins_with("window_")
+	return path.begins_with("wall_") or path.begins_with("01_wall_") or path.begins_with("01_glass_") or path.begins_with("glass_wall_") or path.begins_with("window_") or path.begins_with("glass_partition_") or path.begins_with("sliding_glass_door")
 
 static func position_for(node: Node3D, bounds: AABB, position: Vector3, neighbors: Array[Dictionary], mounted: bool = false) -> Vector3:
 	var source := Transform3D(node.global_basis, position)
