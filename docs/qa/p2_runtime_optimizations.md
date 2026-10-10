@@ -59,7 +59,20 @@ Authoring sources в трёх папках занимают около 68 МиБ
 - Project gates, import (849), scene refs (349), resource paths: PASS.
 - Model textures: 292 GLB / 223 textured / 0 errors; dedup unchanged.
 - Python architecture scene-access: 3 tests PASS.
-- Полный набор CI headless regressions и actual-renderer тесты проверяются.
+- Полный headless набор: 74/77 PASS после повторного startup suite с Dummy
+  fallback; три исходных failures ниже. Новые error-drain/recovery/dedup проверки
+  очереди также PASS.
+- Native Compatibility queue/mask PASS (concurrency=2); полный startup
+  1998 объектов / 1444 furniture / 133 resources PASS без RID ошибок.
+  Native Forward+ queue/mask/error-drain/recovery PASS на Vulkan 1.4.318
+  llvmpipe (без fallback). Native Compatibility full-map startup/restart
+  подтвердили 1998 объектов / 1444 furniture дважды, resources=133 и
+  concurrency=2 без SCRIPT ERROR/ERROR. Startup 47.5 с, restart 90.1 с:
+  оставшиеся 180 rendered frames превысили общий timeout 180 с на llvmpipe.
+  Полный native memory suite поэтому не объявляется PASS; отдельный headless
+  startup/restart suite PASS. Software-renderer время не является FPS замером
+  Windows GPU.
+- GitHub Architecture CI первой ревизии PR #89 PASS.
 
 В исходном main воспроизведены:
 

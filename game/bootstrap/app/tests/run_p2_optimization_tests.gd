@@ -100,6 +100,12 @@ func _resources() -> void:
 	for index in range(1, values.size()):
 		_expect(values[index] >= values[index - 1], "Resource progress never moves backwards")
 	queue.resources.clear()
+	var invalid: Array[String] = [paths[0], "res://game/bootstrap/app/tests/fixtures/queue_model.gd", paths[2]]
+	result = await queue.load_all(invalid, self, func(_value: float, _phase: String) -> void: pass)
+	_expect(not result.is_empty() and queue.resources.is_empty(), "A non-scene payload drains jobs and discards retained resources")
+	var duplicate: Array[String] = [paths[0], paths[0]]
+	result = await queue.load_all(duplicate, self, func(_value: float, _phase: String) -> void: pass)
+	_expect(result.is_empty() and queue.resources.size() == 1, "A queue can recover after failure and deduplicates paths")
 	result = await queue.load_all([], self, func(_value: float, _phase: String) -> void: pass)
 	_expect(result.is_empty() and queue.resources.is_empty(), "A repeated empty load releases retained resources")
 
