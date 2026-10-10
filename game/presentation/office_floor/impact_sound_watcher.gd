@@ -51,6 +51,12 @@ func _on_sleeping_changed() -> void:
 	_last_velocity = _body.linear_velocity
 
 
+func reset_fragment() -> void:
+	_quiet = 0.4
+	_last_velocity = Vector3.ZERO
+	set_physics_process(not _body.sleeping and not _body.freeze)
+
+
 func _physics_process(delta: float) -> void:
 	if _body.freeze:
 		set_physics_process(false)

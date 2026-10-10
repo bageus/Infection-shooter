@@ -26,9 +26,15 @@ var kickable := false
 var _kick_cooldown := 0.0
 var _age := 0.0
 var _piece_health := 55.0
+var pool_owner: Node
+var _runtime: Node
+var _expiry: Tween
 
 
 func _ready() -> void:
+	_age = 0.0
+	_kick_cooldown = 0.0
+	_piece_health = 55.0
 	collision_layer = HIT_LAYER
 	collision_mask = WORLD_MASK
 	if _surface == null:
@@ -40,15 +46,26 @@ func _ready() -> void:
 	angular_damp = 0.9
 	can_sleep = true
 	_ignore_characters()
-	IMPACT_SOUND.watch(self, -6.0, &"fall_debris")
+	var watcher := get_node_or_null("ImpactSound")
+	if watcher == null:
+		IMPACT_SOUND.watch(self, -6.0, &"fall_debris")
+	else:
+		watcher.call("reset_fragment")
 	# Only kickable pieces poll for the player; all others cost no script time.
 	set_physics_process(kickable)
 	add_to_group(GROUP)
 	add_to_group(CONTACTLESS_GROUP)
-	var tween := create_tween()
-	tween.tween_interval(32.0 if kickable else 14.0)
-	tween.tween_callback(expire)
-	_enforce_budget()
+	_expiry = create_tween()
+	_expiry.tween_interval(32.0 if kickable else 14.0)
+	_expiry.tween_callback(expire)
+	call_deferred("_register_budget")
+
+
+func _register_budget() -> void:
+	if not is_inside_tree() or is_queued_for_deletion() or DEBRIS.is_fading(self):
+		return
+	_runtime = DEBRIS.runtime_for(get_parent())
+	_runtime.register(self)
 
 
 func _physics_process(delta: float) -> void:
@@ -86,13 +103,22 @@ func _ignore_characters() -> void:
 				add_collision_exception_with(node)
 
 
-func _enforce_budget() -> void:
-	var live: Array[Node] = []
-	for piece in get_tree().get_nodes_in_group(GROUP):
-		if not DEBRIS.is_fading(piece) and not piece.is_queued_for_deletion():
-			live.append(piece)
-	while live.size() > MAX_FRAGMENTS:
-		(live.pop_front() as Node).call("expire_fast")
+func retire_from_budget() -> void:
+	if _expiry != null:
+		_expiry.kill()
+	if is_instance_valid(_runtime):
+		_runtime.unregister(self)
+
+
+func recycle_chunk() -> void:
+	if is_instance_valid(pool_owner):
+		pool_owner.recycle(self)
+	else:
+		queue_free()
+
+
+func _exit_tree() -> void:
+	retire_from_budget()
 
 
 # Debris absorbs weak shots but lets stronger bullets continue through it.

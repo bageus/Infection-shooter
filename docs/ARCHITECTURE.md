@@ -312,3 +312,22 @@ ADR-0039: bootstrap interface_v1.lighting — optional bool с default true, п�
 
 
 Стыки планировщика (T002, 10.10.2026): bootstrap planning_edge_snap владеет только производным расчётом позиции по геометрии; состояния/DTO прежние. Render helper ContactShadowQuad помечается planning_bounds_excluded для пропуска в существующем geometry probe. Import extension восстанавливает известные flattened-stage exports, без изменения исходных GLB; office_floor Geometry и staged_table сохраняют свои обязанности. Public методы, зависимости, policy и owners прежние; исключений нет.
+
+
+## P2: ограниченные очереди представления и загрузки
+
+bootstrap.app сохраняет владельца occlusion visuals и загрузки карт. Приватная
+occlusion_query_layer добавляет/снимает только бит layer 9 на structural bodies;
+исходные gameplay bits не заменяются. Round robin ограничен 8 subjects/24 rays
+за physics tick. scene_resource_queue удерживает не более двух background
+requests, с мягким allocator headroom 128 МиБ и headless Dummy fallback=1;
+Script preparation остаётся на main thread. Loader освобождает payload refs
+после commit/discard и отдельно измеряет instantiate/add_child.
+
+presentation.office_floor сохраняет владельца физических визуальных фрагментов:
+FragmentRuntime является дочерним private узлом явно переданного effects root,
+без Autoload, глобального пула или поиска сервиса по SceneTree. FIFO содержит
+WeakRef и generation identity, чтобы повторное использование Node не совпадало
+со старым tombstone. Generic pool живёт/освобождается вместе с контейнером.
+Fade снимает collision mask/layer, freeze и callbacks до анимации.
+Public API, layout DTO v8, balance, dependency edges и policy прежние.

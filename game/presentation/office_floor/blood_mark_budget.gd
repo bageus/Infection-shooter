@@ -78,7 +78,10 @@ func _admit(definition: Dictionary, surface: Dictionary) -> bool:
 	var render_definition := definition.duplicate()
 	if render_definition.has("local_basis"):
 		render_definition["basis"] = (body.global_basis * render_definition["local_basis"]).orthonormalized()
-	mark.call("configure", hit, render_definition, settings)
+	if not mark.call("configure", hit, render_definition, settings):
+		# An unsupported projection is not a rendered mark and consumes no budget.
+		mark.free()
+		return true
 	_next_id += 1
 	_records[_next_id] = {"mark": weakref(mark), "key": key, "expires": _clock + lifetime, "fading": false}
 	state["count"] += 1

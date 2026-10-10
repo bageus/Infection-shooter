@@ -191,8 +191,11 @@ func _integration() -> void:
 	# Pixel assertions above use the original viewport. Material lifecycle below
 	# still uses the entire map, at bounded software-renderer resolution.
 	root.size = Vector2i(320, 180)
-	root.positional_shadow_atlas_size = 256
-	RenderingServer.directional_shadow_atlas_set_size(256, true)
+	# Lifecycle assertions inspect materials, queues and live mesh/skin ownership,
+	# not pixels. Keep the entire map and all 240 process frames, but avoid
+	# rasterizing it each frame on llvmpipe. Pixel checks above still render.
+	var rendering_disabled := root.disable_3d
+	root.disable_3d = true
 	var had := FileAccess.file_exists(PREFS.FILE)
 	var saved := FileAccess.get_file_as_bytes(PREFS.FILE) if had else PackedByteArray()
 	var prefs := PREFS.new()
@@ -247,7 +250,7 @@ func _integration() -> void:
 				if skeleton is Skeleton3D:
 					_check(copy.get_node(copy.skeleton) == skeleton, "copy follows the real skeleton")
 	app.free()
-	root.disable_3d = render_disabled
+	root.disable_3d = rendering_disabled
 	paused = false
 	await process_frame
 	if had:

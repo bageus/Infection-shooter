@@ -5,6 +5,7 @@ var visual_mask := 128
 var floor_reach := 3.2
 var wall_reach := 3.0
 var _awaiting_ready: Dictionary = {}
+var projection_pool: WeakRef
 
 
 func watch_environment(node: Node) -> void:
@@ -57,12 +58,25 @@ func _cast(start: Vector3, finish: Vector3, excluded: Array[RID], floor_only: bo
 		var collider := hit.get("collider") as PhysicsBody3D
 		var normal: Vector3 = hit["normal"]
 		if collider != null and not collider is CharacterBody3D and (not floor_only or normal.y > 0.3):
-			return capture(hit["position"], normal, collider)
+			return _capture_hit(hit)
 		if collider == null:
 			return {}
 		skipped.append(collider.get_rid())
 		query.exclude = skipped
 	return {}
+
+
+func _capture_hit(hit: Dictionary) -> Dictionary:
+	var pool := projection_pool.get_ref() as Node if projection_pool != null else null
+	if pool != null:
+		# Physics proxies can extend beyond the visible model. Project from the
+		# proxy onto its actual mesh before stamping, rather than into empty air.
+		var visible: Dictionary = pool.call("resolve_surface", hit["collider"], hit["position"], -Vector3(hit["normal"]))
+		if not visible.is_empty():
+			return capture(visible["position"], visible["normal"], hit["collider"])
+	# Procedural floor colliders have separate MultiMesh visuals; the projection
+	# adapter supplies their explicit collision geometry fallback.
+	return capture(hit["position"], hit["normal"], hit["collider"])
 
 
 static func capture(point: Vector3, normal: Vector3, collider: Node3D) -> Dictionary:
@@ -99,7 +113,7 @@ func jitter_surface(surface: Dictionary, amount: float) -> Dictionary:
 	var query := PhysicsRayQueryParameters3D.create(point + mark_basis.y * 0.08, point - mark_basis.y * 0.08, collision_mask)
 	var check := get_world_3d().direct_space_state.intersect_ray(query)
 	if not check.is_empty() and check.get("collider") == hit["collider"]:
-		return capture(check["position"], check["normal"], check["collider"])
+		return _capture_hit(check)
 	return surface
 
 
