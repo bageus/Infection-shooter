@@ -84,7 +84,7 @@ SpotLight в **24м**, до **4** теней в **16м**. Без camera отде
 
 Native A/B profile теперь сравнивает все 24 света/тени с новой bounded policy
 в ABBA порядке; sample удерживает policy, чтобы registry не отменял baseline
-в середине измерения. Native цифры и визуальная приёмка ожидают CI; строгая величина FPS не заявляется.
+в середине измерения. CI 08f50fc: Compatibility median 277–278мс → 94,7–95,2мс, draw calls 1175 → 374; Forward+ 106,2–106,7мс → 104,3–104,6мс. Это software renderer в CI; FPS целевого устройства и визуальная приёмка Windows/Web остаются непроверенными.
 
 ## Проверки
 
@@ -115,3 +115,13 @@ GitHub CI фиксируется в PR, полный native PASS здесь не
 
 Откат — revert task commit: schema, authored models и карта не менялись;
 пользовательские `.bak` не удалять.
+
+## Завершение теста меню
+
+CI 08f50fc выполнил все 74 runtime assertions и весь native batch без
+assertion/shader ошибок, но exit run_menu_tests сообщил об одном DummyMesh
+RID leak. На четвёртом локальном verbose-повторе получен такой же exit.
+Fixture явно освобождает текущую scene и ждёт queued frees до quit, вместо
+того чтобы оставлять teardown последней сцены на shutdown SceneTree.
+CI grep ERROR и все прежние assertions сохранены. Финальная проверка
+исправления и полный статус CI — в PR #86.
