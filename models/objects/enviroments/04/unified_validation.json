@@ -1,0 +1,105 @@
+{
+  "source_ref": "a48e5a49028b0871852f4418eeb8eb2670671ea2",
+  "models": [
+    {
+      "file": "04_cardboard_archive_box.glb",
+      "source_bytes": 131720,
+      "output_bytes": 178880,
+      "source_surfaces": 52,
+      "output_surfaces": 38,
+      "source_triangles": 928,
+      "output_triangles": 1042,
+      "nodes_preserved": 38,
+      "source_material_tiles": [
+        "brown_cardboard",
+        "ivory",
+        "light_cardboard"
+      ]
+    },
+    {
+      "file": "04_cardboard_box_closed.glb",
+      "source_bytes": 123624,
+      "output_bytes": 149000,
+      "source_surfaces": 36,
+      "output_surfaces": 30,
+      "source_triangles": 964,
+      "output_triangles": 1018,
+      "nodes_preserved": 30,
+      "source_material_tiles": [
+        "ivory",
+        "light_cardboard",
+        "dark_interior"
+      ]
+    },
+    {
+      "file": "04_cardboard_box_open.glb",
+      "source_bytes": 185740,
+      "output_bytes": 254692,
+      "source_surfaces": 73,
+      "output_surfaces": 45,
+      "source_triangles": 1336,
+      "output_triangles": 1402,
+      "nodes_preserved": 45,
+      "source_material_tiles": [
+        "brown_cardboard",
+        "dark_interior",
+        "light_cardboard"
+      ]
+    },
+    {
+      "file": "04_cardboard_boxes.glb",
+      "source_bytes": 28656,
+      "output_bytes": 31184,
+      "source_surfaces": 16,
+      "output_surfaces": 12,
+      "source_triangles": 156,
+      "output_triangles": 156,
+      "nodes_preserved": 12,
+      "source_material_tiles": [
+        "tan_cardboard",
+        "brown_flat_cardboard"
+      ]
+    },
+    {
+      "file": "04_cardboard_boxes_1.glb",
+      "source_bytes": 84328,
+      "output_bytes": 107876,
+      "source_surfaces": 29,
+      "output_surfaces": 24,
+      "source_triangles": 616,
+      "output_triangles": 650,
+      "nodes_preserved": 24,
+      "source_material_tiles": [
+        "light_cardboard",
+        "ivory",
+        "dark_interior"
+      ]
+    },
+    {
+      "file": "04_crate_large_broken.glb",
+      "source_bytes": 436588,
+      "output_bytes": 581628,
+      "source_surfaces": 143,
+      "output_surfaces": 143,
+      "source_triangles": 4620,
+      "output_triangles": 4620,
+      "nodes_preserved": 143,
+      "source_material_tiles": [
+        "olive_painted_wood"
+      ]
+    },
+    {
+      "file": "04_crate_small_broken.glb",
+      "source_bytes": 426268,
+      "output_bytes": 564412,
+      "source_surfaces": 135,
+      "output_surfaces": 135,
+      "source_triangles": 4564,
+      "output_triangles": 4564,
+      "nodes_preserved": 135,
+      "source_material_tiles": [
+        "olive_painted_wood"
+      ]
+    }
+  ]
+}

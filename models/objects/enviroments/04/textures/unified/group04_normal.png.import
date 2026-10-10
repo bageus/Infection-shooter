@@ -2,20 +2,17 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://d2k1o6c153y2g"
-path.s3tc="res://.godot/imported/04_cardboard_archive_box_Image_0.png-8f95b645b770e8bf46aba954345b81ea.s3tc.ctex"
+uid="uid://w5156p2pp8et"
+path.s3tc="res://.godot/imported/group04_normal.png-a0b9b95e08b0486967e105200d73c709.s3tc.ctex"
 metadata={
 "imported_formats": ["s3tc_bptc"],
 "vram_texture": true
 }
-generator_parameters={
-"md5": "5490e01b7c1284513dfb91dba364add9"
-}
 
 [deps]
 
-source_file="res://models/objects/enviroments/04/04_cardboard_archive_box_Image_0.png"
-dest_files=["res://.godot/imported/04_cardboard_archive_box_Image_0.png-8f95b645b770e8bf46aba954345b81ea.s3tc.ctex"]
+source_file="res://models/objects/enviroments/04/textures/unified/group04_normal.png"
+dest_files=["res://.godot/imported/group04_normal.png-a0b9b95e08b0486967e105200d73c709.s3tc.ctex"]
 
 [params]
 
@@ -25,12 +22,12 @@ compress/lossy_quality=0.7
 compress/uastc_level=0
 compress/rdo_quality_loss=0.0
 compress/hdr_compression=1
-compress/normal_map=0
+compress/normal_map=1
 compress/channel_pack=0
 mipmaps/generate=true
 mipmaps/limit=-1
-roughness/mode=0
-roughness/src_normal=""
+roughness/mode=1
+roughness/src_normal="res://models/objects/enviroments/04/textures/unified/group04_normal.png"
 process/channel_remap/red=0
 process/channel_remap/green=1
 process/channel_remap/blue=2
@@ -40,5 +37,5 @@ process/premult_alpha=false
 process/normal_map_invert_y=false
 process/hdr_as_srgb=false
 process/hdr_clamp_exposure=false
-process/size_limit=1024
+process/size_limit=512
 detect_3d/compress_to=0
