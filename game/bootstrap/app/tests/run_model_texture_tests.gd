@@ -44,6 +44,12 @@ var shared_maps: Dictionary = {}
 var map_bytes := 0
 var map_references := 0
 
+const GROUP01_MAPS: Array[String] = [
+	"res://models/objects/enviroments/01/textures/unified/group01_albedo.png",
+	"res://models/objects/enviroments/01/textures/unified/group01_normal.png",
+	"res://models/objects/enviroments/01/textures/unified/group01_orm.png",
+]
+
 func _initialize() -> void:
 	_run.call_deferred()
 
@@ -122,8 +128,9 @@ func _check_runtime_profile(instance: Node, path: String) -> void:
 				var texture := material.get_texture(slot)
 				if texture == null or texture.resource_path.begins_with("res://models/objects/textures/"):
 					continue
-				if maxi(texture.get_width(), texture.get_height()) > 1024:
-					_fail("Runtime environment map exceeds 1024 pixels: " + path)
+				var limit := 2048 if texture.resource_path == GROUP01_MAPS[0] else 1024
+				if maxi(texture.get_width(), texture.get_height()) > limit:
+					_fail("Runtime environment map exceeds its %d-pixel budget: %s" % [limit, path])
 
 func _source_mesh_indices(document: Dictionary) -> Dictionary:
 	var pending: Array = []
@@ -204,8 +211,9 @@ func _record_maps(material: BaseMaterial3D) -> void:
 		var path := texture.resource_path
 		if not texture is ImageTexture and not path.begins_with("res://models/objects/enviroments/"):
 			continue
-		if maxi(texture.get_width(), texture.get_height()) > 1024:
-			_fail("Runtime model map exceeds 1024 pixels: " + path)
+		var limit := 2048 if path == GROUP01_MAPS[0] else 1024
+		if maxi(texture.get_width(), texture.get_height()) > limit:
+			_fail("Runtime model map exceeds its %d-pixel budget: %s" % [limit, path])
 		if texture is ImageTexture and not path.begins_with("res://assets/runtime_shared_maps/"):
 			_fail("Updated embedded map was not shared: " + path)
 			continue

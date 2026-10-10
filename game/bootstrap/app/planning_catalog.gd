@@ -157,6 +157,8 @@ func _instantiate_asset(asset_path: String) -> Node3D:
 
 
 func _create_asset(asset_path: String) -> Node3D:
+	if asset_path == ENVIRONMENT_ROOT + "/01/01_stairs_2.glb":
+		asset_path = ENVIRONMENT_ROOT + "/01/01_stairs.glb"
 	if asset_path.begins_with(ENVIRONMENT_ROOT + "/") and asset_path.ends_with(".glb"):
 		if asset_path.get_file().begins_with("09_") and WORKSTATIONS.VARIANTS["paper"].has(asset_path.get_file().get_basename()):
 			var paper = PAPER_PROP_SCENE.instantiate() as Node3D
@@ -188,7 +190,7 @@ func _migrate_scene_path(old_path: String) -> String:
 	# loadable after restoring the runtime paths used by structural scenes.
 	var group_one := ENVIRONMENT_ROOT + "/01/"
 	if old_path.begins_with(group_one) and old_path.ends_with(".glb"):
-		var filename := old_path.get_file().replace("01_glass_wall_full_breakable(1).glb", "01_glass_wall_full_breakable.glb")
+		var filename := old_path.get_file().replace("01_glass_wall_full_breakable(1).glb", "01_glass_wall_full_breakable.glb").replace("01_stairs_2.glb", "01_stairs.glb")
 		var canonical := group_one + filename
 		if ResourceLoader.exists(canonical):
 			if filename == "01_column_2.glb":
