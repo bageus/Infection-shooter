@@ -9,6 +9,7 @@ var stages: Array[Node3D] = []
 var variants: Array[Node3D] = []
 var shapes: Array[CollisionShape3D] = []
 var meshes: Array[MeshInstance3D] = []
+var _stage_resources: Array[PackedScene] = []
 
 
 func load_visual(body: RigidBody3D, model_path: String) -> bool:
@@ -133,3 +134,33 @@ static func is_glass_mesh(mesh: MeshInstance3D) -> bool:
 		if material != null and ("glass" in material.resource_name.to_lower() or "mirror" in material.resource_name.to_lower()):
 			return true
 	return false
+
+
+# Placeholder identity remains stable for damage state and per-instance visibility.
+# PackedScene resources are shared by ResourceLoader; geometry owns their lifetime.
+func ensure_group(group: Node3D) -> bool:
+	if group == null:
+		return false
+	if not group.has_meta(&"lazy_stage_path"):
+		return true
+	var path := str(group.get_meta(&"lazy_stage_path"))
+	var packed := load(path) as PackedScene
+	if packed == null:
+		push_error("Damage stage unavailable: " + path)
+		return false
+	var source := packed.instantiate() as Node3D
+	if source == null:
+		return false
+	var authored := DAMAGE.find_named(source, str(group.name))
+	if authored == null:
+		source.free()
+		push_error("Damage group missing: " + path)
+		return false
+	for child: Node in authored.get_children():
+		child.owner = null
+		authored.remove_child(child)
+		group.add_child(child)
+	source.free()
+	group.remove_meta(&"lazy_stage_path")
+	_stage_resources.append(packed)
+	return true

@@ -28,9 +28,6 @@ const UPDATED_ELECTRONICS: Array[String] = [
 	"05_monitor4_server_destructible",
 	"05_monitor_destructible",
 	"05_monitor_wide_destructible",
-	"05_phone_a_base",
-	"05_phone_a_base_hang",
-	"05_phone_b",
 	"05_printer_destructible",
 	"05_wall_TV_destructible",
 	"05_wall_TV_frameless_destructible",
@@ -128,7 +125,7 @@ func _check_runtime_profile(instance: Node, path: String) -> void:
 				var texture := material.get_texture(slot)
 				if texture == null or texture.resource_path.begins_with("res://models/objects/textures/"):
 					continue
-				var limit := 2048 if texture.resource_path == GROUP01_MAPS[0] else 1024
+				var limit := 2048 if texture.resource_path in [GROUP01_MAPS[0], "res://models/objects/enviroments/03/textures/unified/group03_albedo.png"] else 1024
 				if maxi(texture.get_width(), texture.get_height()) > limit:
 					_fail("Runtime environment map exceeds its %d-pixel budget: %s" % [limit, path])
 
@@ -154,7 +151,7 @@ func _check_catalog_models() -> void:
 	catalog._build_environment_catalogs()
 	for phone: String in ["phone_a_base", "phone_a_base_hang", "phone_b"]:
 		var old_path := "res://models/objects/enviroments/05/09_" + phone + ".glb"
-		var new_path := "res://models/objects/enviroments/05/05_" + phone + ".glb"
+		var new_path := "res://models/objects/enviroments/05/05_desk_phone.glb"
 		if catalog._migrate_scene_path(old_path) != new_path or not ResourceLoader.exists(new_path):
 			_fail(old_path + ": renamed phone is unavailable to saved maps")
 	for name: String in UPDATED_MODELS + UPDATED_ELECTRONICS:
@@ -211,7 +208,7 @@ func _record_maps(material: BaseMaterial3D) -> void:
 		var path := texture.resource_path
 		if not texture is ImageTexture and not path.begins_with("res://models/objects/enviroments/"):
 			continue
-		var limit := 2048 if path == GROUP01_MAPS[0] else 1024
+		var limit := 2048 if path in [GROUP01_MAPS[0], "res://models/objects/enviroments/03/textures/unified/group03_albedo.png"] else 1024
 		if maxi(texture.get_width(), texture.get_height()) > limit:
 			_fail("Runtime model map exceeds its %d-pixel budget: %s" % [limit, path])
 		if texture is ImageTexture and not path.begins_with("res://assets/runtime_shared_maps/"):
