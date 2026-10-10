@@ -6,7 +6,7 @@ const VALIDATOR := preload("res://game/bootstrap/app/planning_layout_validator.g
 static func read(path: String) -> Dictionary:
 	var file := FileAccess.open(path, FileAccess.READ)
 	if file == null:
-		return {"error": "cannot open map (%d)" % FileAccess.get_open_error()}
+		return {"error": "cannot open map (%d)" % FileAccess.get_open_error(), "io_error": true}
 	var parser := JSON.new()
 	if parser.parse(file.get_as_text()) != OK:
 		return {"error": "invalid JSON at line %d: %s" % [parser.get_error_line(), parser.get_error_message()]}
@@ -26,7 +26,10 @@ static func write(path: String, data: Dictionary) -> Dictionary:
 	if not error.is_empty():
 		return {"error": error}
 	# Keep the last valid map, not a corrupt current file, as the recovery copy.
-	if FileAccess.file_exists(path) and not read(path).has("error"):
+	var previous := read(path) if FileAccess.file_exists(path) else {}
+	if previous.get("io_error", false):
+		return {"error": "current map cannot be read; replacement cancelled"}
+	if FileAccess.file_exists(path) and not previous.has("error"):
 		var old := FileAccess.get_file_as_string(path)
 		error = _write_verified(path + ".bak.tmp", old)
 		if not error.is_empty():
