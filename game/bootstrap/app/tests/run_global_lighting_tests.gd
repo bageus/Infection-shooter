@@ -1,6 +1,7 @@
 extends SceneTree
 
 const MAIN := preload("res://game/bootstrap/app/main.tscn")
+const PREFS := preload("res://game/bootstrap/app/menu/menu_preferences.gd")
 const LAMP := preload("res://game/presentation/office_floor/public/props/planner_light.tscn")
 var _failures := 0
 var _authored_msaa: int
@@ -53,6 +54,7 @@ func _run() -> void:
 	_check(overhead.global_basis == basis_before and overhead.visible, "Camera rotation/chunk changes leave global light active")
 	for node: Node in get_nodes_in_group("planner_lights"):
 		_check_lamp_off(node)
+	_test_lighting_preferences(app, controller, overhead)
 	app.free()
 	paused = false
 	await process_frame
@@ -177,3 +179,20 @@ func _check(condition: bool, message: String) -> void:
 	if not condition:
 		_failures += 1
 		push_error(message)
+
+
+func _test_lighting_preferences(app: Node, controller: Node, overhead: DirectionalLight3D) -> void:
+	var preferences := PREFS.new()
+	current_scene = app
+	preferences.values.lighting = false
+	preferences.apply_to_game(self)
+	_check(not overhead.visible and not controller.get("local_lights_enabled"), "Settings disable global and local light sources")
+	var late := LAMP.instantiate()
+	app.get_node("PlanningObjects").add_child(late)
+	_check_lamp_off(late)
+	preferences.values.lighting = true
+	preferences.apply_to_game(self)
+	_check(overhead.visible and controller.get("local_lights_enabled"), "Settings re-enable global and local light sources")
+	_check(late.get_node("Light").visible, "Late lamps follow the persisted setting without changing authored power")
+	controller.call("set_local_lights_enabled", false)
+	current_scene = null

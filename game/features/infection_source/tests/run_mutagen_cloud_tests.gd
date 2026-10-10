@@ -1,9 +1,5 @@
 extends SceneTree
-## Runtime checks for the mutagen cloud look: each activation builds its own
-## random set of gas puffs that play both sheets as animations (12 start
-## frames), a ground haze and
-## spores; permanent clouds loop their puffs; a death cloud dissipates and
-## reports depletion.
+## Procedural smoke lifecycle, bounded layers and absorption regression checks.
 
 const CLOUD := preload("res://game/features/infection_source/public/mutagen_cloud.tscn")
 
@@ -32,18 +28,19 @@ func _run() -> void:
 	for data in recorded:
 		variants[int(round(data.r * 12.0))] = true
 		spins[signf(data.b)] = true
-		_expect(data.r >= 0.0 and data.r < 1.0, "Puff variant indexes one of the 12 sheet cells.")
+		_expect(data.r >= 0.0 and data.r < 1.0, "Puff variant decorrelates procedural noise.")
 	_expect(variants.size() == mini(puffs.instance_count, 12), "Every puff shows a different gas variant (%s of %d)." % [variants.keys(), puffs.instance_count])
 	_expect(spins.size() >= 1, "Puffs spin.")
 	_expect(_layout(first) != _layout(second), "Two clouds never look the same.")
 	var haze := first.get_node("GroundHaze") as MultiMeshInstance3D
-	_expect(haze.multimesh != null and haze.multimesh.instance_count == 3, "Low billboards merge into the gas without a flat floor reflection.")
+	_expect(haze.multimesh != null and haze.multimesh.instance_count == 1, "Low billboards merge into the gas without a flat floor reflection.")
 	var material := (first.get_node("Visual") as GeometryInstance3D).material_override as ShaderMaterial
-	_expect(material != null and material.get_shader_parameter("atlas_a") != null and material.get_shader_parameter("atlas_b") != null, "The cloud draws from both mutagen sheets.")
+	_expect(material != null, "The cloud uses a procedural smoke material.")
 	var uniforms := material.shader.get_shader_uniform_list().map(func(entry: Dictionary) -> String: return str(entry["name"]))
-	_expect("frame_rate" in uniforms, "Each puff plays its sheet as an animation.")
+	_expect("atlas_a" not in uniforms and "atlas_b" not in uniforms and "flow_speed" in uniforms, "Smoke is animated without PNG sprite samplers.")
 	_expect(bool(material.get_shader_parameter("wall_mask_enabled")), "Walls still clip the gas.")
-	_expect((first.get_node("Spores") as GPUParticles3D).emitting, "Glowing spores rise from a fresh cloud.")
+	_expect(not (first.get_node("Spores") as GPUParticles3D).emitting, "Smoke activation avoids a separate GPU particle simulation.")
+	_expect(puffs.instance_count + haze.multimesh.instance_count <= 5, "Transparent layers stay within the smoke budget.")
 	var forever := _spawn(stage, Vector3(20, 0, 0), 14.0)
 	forever.set("permanent", true)
 	forever.call("activate")

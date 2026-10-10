@@ -126,6 +126,12 @@ func _video() -> void:
 	skill_effects.selected = dialog.view.preferences.values.skill_effects
 	skill_effects.item_selected.connect(func(index: int) -> void: dialog.call("_change", "skill_effects", index))
 	dialog.call("_row", "skillEffects", skill_effects)
+	var lighting := CheckButton.new()
+	lighting.name = "Lighting"
+	lighting.text = dialog.view.text("lighting")
+	lighting.button_pressed = dialog.view.preferences.values.lighting
+	lighting.toggled.connect(func(value: bool) -> void: dialog.call("_change", "lighting", value))
+	dialog.get("layout").add_child(lighting)
 	var particles := CheckButton.new()
 	particles.name = "ElectronicParticles"
 	particles.text = dialog.view.text("electronicParticles")

@@ -21,6 +21,9 @@ func _run() -> void:
 		var instances := batch.multimesh
 		count += instances.instance_count
 		for index in instances.instance_count:
+			var style := instances.get_instance_color(index)
+			if DisplayServer.get_name() != "headless":
+				_check((style.r < 1.0 / 3.0) == (index % 3 == 0), "Every third tower has full glass cladding")
 			var transform: Transform3D = city.building_transforms[count - instances.instance_count + index]
 			var half := transform.basis.get_scale() * 0.5
 			var center := transform.origin

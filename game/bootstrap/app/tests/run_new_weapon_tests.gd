@@ -76,6 +76,12 @@ func _test_rifles(actor: CharacterBody3D, effects: Node3D, crosshair: Node) -> v
 			_check(crosshair.scope.visible and not crosshair.crosshair.visible, "Selecting sniper swaps crosshair to scope")
 			_check(crosshair.scope.view.world_3d == actor.get_world_3d(), "Scope renders the actual shared world")
 			_check(crosshair.scope.camera.fov < actor.get("camera").fov, "Scope lens genuinely magnifies with narrower FOV")
+			# FOV alone is insufficient: measure world units per displayed pixel.
+			var source: Camera3D = actor.get("camera")
+			var span := source.get_viewport().get_visible_rect().size.y
+			var pixel_scale := tan(deg_to_rad(source.fov) * .5) / span
+			var lens_scale: float = tan(deg_to_rad(crosshair.scope.camera.fov) * .5) / crosshair.scope.DIAMETER
+			_check(is_equal_approx(pixel_scale / lens_scale, gun.scope_magnification), "Scope magnifies by the authored factor per screen pixel")
 			await _test_scope_pixels(effects, crosshair.scope)
 			for shot in 3:
 				gun.set("_cooldown_remaining", 0.0)

@@ -7,6 +7,9 @@ owner: AI
 updated: 2026-10-10
 ---
 
+10.10.2026 (исправления по запросу владельца): startup/restart сохраняют свободный курсор; HUD прицел учитывает экранный размер линзы для действительных 2.5×; procedural green smoke без PNG, 3–4 puffs + 1 haze и без симуляции спор; каждый третий skyscraper со стеклянной облицовкой; Video lighting сохраняет bool и управляет глобальным светом/лампами, включая late lamps. Владельцы, зависимости, public API, layout/campaign DTO прежние; optional interface_v1.lighting=true описан ADR-0039. T002 IN_PROGRESS. Godot 4.7.2 clean/final import, project gates, 9 focused headless suites и 3 suites в каждом native Compatibility/Vulkan Forward+ PASS. Smoke capture визуально проверен. FPS Windows/Web и полный CI остаются открытыми; docs/qa/mission_visual_repairs.md. Следующий шаг: опубликовать draft PR и проверить CI, затем целевую Windows/Web приёмку.
+
+
 10.10.2026 (PR #82, проверка объединённой версии): clean Godot 4.7.2 import exit 0 без ERROR/SCRIPT ERROR; group03/group04, model_texture (292/223/0 failures, 10 shared updated maps/10.0 МиБ), staged_glb, display, debris, prop_weight PASS. Project и весь Architecture Python block PASS. Первый clean import дал внутренний thread/root сбой Godot, второй остановлен при зависании шрифта; успешная пустая-кеш версия и CI проверяются без ослабления настроек. Полный 73-suite прогон и CI нового head выполняются. T002 IN_PROGRESS; следующий шаг: результат CI интегрированного PR #82.
 
 
