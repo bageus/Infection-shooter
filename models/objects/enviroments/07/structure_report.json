@@ -1,0 +1,76 @@
+[
+  {
+    "model": "07_coffee_table(1).glb",
+    "large_parts": 5,
+    "final_layer_nodes": 19,
+    "repairs": []
+  },
+  {
+    "model": "07_coffee_table2(7).glb",
+    "large_parts": 8,
+    "final_layer_nodes": 14,
+    "repairs": [
+      "side_left: incompatible fragment bounds/volume; preserved as whole part",
+      "side_right: incompatible fragment bounds/volume; preserved as whole part"
+    ]
+  },
+  {
+    "model": "07_reception_counter_two_heights(1).glb",
+    "large_parts": 20,
+    "final_layer_nodes": 93,
+    "repairs": []
+  },
+  {
+    "model": "07_reception_counter_two_heights_2(1).glb",
+    "large_parts": 1,
+    "final_layer_nodes": 13,
+    "repairs": [
+      "Preserved permanent structure and localized facade chips"
+    ]
+  },
+  {
+    "model": "07_round_dining_table(1).glb",
+    "large_parts": 3,
+    "final_layer_nodes": 11,
+    "repairs": [
+      "Pedestal: incompatible fragment bounds/volume; preserved as whole part"
+    ]
+  },
+  {
+    "model": "07_table(1).glb",
+    "large_parts": 5,
+    "final_layer_nodes": 14,
+    "repairs": []
+  },
+  {
+    "model": "07_table_circular(1).glb",
+    "large_parts": 8,
+    "final_layer_nodes": 12,
+    "repairs": [
+      "Pedestal: incompatible fragment bounds/volume; preserved as whole part",
+      "Foot_05: incompatible fragment bounds/volume; preserved as whole part",
+      "Foot_06: incompatible fragment bounds/volume; preserved as whole part"
+    ]
+  },
+  {
+    "model": "07_table_longest(1).glb",
+    "large_parts": 5,
+    "final_layer_nodes": 21,
+    "repairs": []
+  },
+  {
+    "model": "07_table_square(1).glb",
+    "large_parts": 5,
+    "final_layer_nodes": 15,
+    "repairs": []
+  },
+  {
+    "model": "07_table_square_tall(1).glb",
+    "large_parts": 8,
+    "final_layer_nodes": 15,
+    "repairs": [
+      "Foot_04: incompatible fragment bounds/volume; preserved as whole part",
+      "Foot_05: incompatible fragment bounds/volume; preserved as whole part"
+    ]
+  }
+]

@@ -1,0 +1,73 @@
+{
+  "layout": "3x3",
+  "basecolor": "tables_basecolor.png",
+  "normal": "tables_normal.png",
+  "orm": "tables_orm.png",
+  "color_spaces": {
+    "basecolor": "sRGB",
+    "normal": "linear",
+    "orm": "linear"
+  },
+  "orm_channels": {
+    "R": "occlusion",
+    "G": "roughness",
+    "B": "metallic"
+  },
+  "slots": [
+    {
+      "index": 0,
+      "name": "Pale_Oak",
+      "row": 0,
+      "column": 0
+    },
+    {
+      "index": 1,
+      "name": "Warm_Walnut",
+      "row": 0,
+      "column": 1
+    },
+    {
+      "index": 2,
+      "name": "Brushed_Steel",
+      "row": 0,
+      "column": 2
+    },
+    {
+      "index": 3,
+      "name": "Warm_White_Laminate",
+      "row": 1,
+      "column": 0
+    },
+    {
+      "index": 4,
+      "name": "Pale_Marble",
+      "row": 1,
+      "column": 1
+    },
+    {
+      "index": 5,
+      "name": "Dark_Marble",
+      "row": 1,
+      "column": 2
+    },
+    {
+      "index": 6,
+      "name": "Cut_Wood",
+      "row": 2,
+      "column": 0
+    },
+    {
+      "index": 7,
+      "name": "Cut_Stone",
+      "row": 2,
+      "column": 1
+    },
+    {
+      "index": 8,
+      "name": "Graphite_Surface",
+      "row": 2,
+      "column": 2
+    }
+  ],
+  "uv_inset": 0.006
+}
