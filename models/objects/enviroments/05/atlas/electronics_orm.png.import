@@ -2,20 +2,17 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://cuoj66ai6cdoe"
-path.s3tc="res://.godot/imported/04_cardboard_box_open_Image_0.png-eded5eabf4966b5e8d322d2187d8076c.s3tc.ctex"
+uid="uid://bmjmi7v65aoga"
+path.s3tc="res://.godot/imported/electronics_orm.png-87584597c03abfbdf572542bd2cae0ff.s3tc.ctex"
 metadata={
 "imported_formats": ["s3tc_bptc"],
 "vram_texture": true
 }
-generator_parameters={
-"md5": "ef1450d652f140a2255bd6f1c4ef7c08"
-}
 
 [deps]
 
-source_file="res://models/objects/enviroments/04/04_cardboard_box_open_Image_0.png"
-dest_files=["res://.godot/imported/04_cardboard_box_open_Image_0.png-eded5eabf4966b5e8d322d2187d8076c.s3tc.ctex"]
+source_file="res://models/objects/enviroments/05/atlas/electronics_orm.png"
+dest_files=["res://.godot/imported/electronics_orm.png-87584597c03abfbdf572542bd2cae0ff.s3tc.ctex"]
 
 [params]
 
