@@ -236,6 +236,12 @@ func _test_light_budget() -> void:
 			lit += int(screen.light.visible)
 			shadows += int(screen.light.visible and screen.light.shadow_enabled)
 	_check(lit <= 16 and lit > 0 and shadows <= 4, "Crowded screens obey shared glow and shadow budgets")
+	var visibility_changes := {"count": 0}
+	for prop in props:
+		for screen: Dictionary in prop.get("_display").screens:
+			screen.light.visibility_changed.connect(func() -> void: visibility_changes.count += 1)
+	wall.call("_refresh_lights")
+	_check(visibility_changes.count == 0, "Stable camera refresh does not toggle screen light visibility")
 	camera.position = Vector3(0, 1, 40)
 	wall.call("_refresh_lights")
 	for prop in props:

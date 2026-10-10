@@ -79,26 +79,34 @@ func update_animation(display: Node3D) -> void:
 
 func _refresh_lights() -> void:
 	var camera := get_viewport().get_camera_3d()
+	var settings: Array[Dictionary] = []
 	var candidates: Array[Dictionary] = []
 	for display in displays:
 		if not is_instance_valid(display):
 			continue
 		for screen: Dictionary in display.get("screens"):
 			var light := screen.light as SpotLight3D
-			light.shadow_enabled = false
-			light.visible = bool(display.get("powered")) and display.is_visible_in_tree()
-			if not light.visible or camera == null:
+			var powered := bool(display.get("powered")) and display.is_visible_in_tree()
+			var setting := {"light": light, "visible": powered and camera == null, "shadows": false}
+			settings.append(setting)
+			if not powered or camera == null:
 				continue
 			var distance := camera.global_position.distance_to(light.global_position)
-			light.visible = false
 			if distance <= GLOW_DISTANCE and camera.is_position_in_frustum(light.global_position):
-				candidates.append({"light": light, "distance": distance})
+				setting["distance"] = distance
+				candidates.append(setting)
 	candidates.sort_custom(func(a: Dictionary, b: Dictionary) -> bool: return float(a.distance) < float(b.distance))
 	var shadow_count := 0
 	for index in mini(MAX_GLOW_LIGHTS, candidates.size()):
-		var candidate := candidates[index]
-		var light := candidate.light as SpotLight3D
-		light.visible = true
-		if float(candidate.distance) <= SHADOW_DISTANCE and shadow_count < MAX_SHADOW_LIGHTS:
-			light.shadow_enabled = true
+		var setting := candidates[index]
+		setting.visible = true
+		if float(setting.distance) <= SHADOW_DISTANCE and shadow_count < MAX_SHADOW_LIGHTS:
+			setting.shadows = true
 			shadow_count += 1
+	# Apply the complete decision once, avoiding shadow-atlas churn every .2s.
+	for setting in settings:
+		var light := setting.light as SpotLight3D
+		if light.visible != bool(setting.visible):
+			light.visible = setting.visible
+		if light.shadow_enabled != bool(setting.shadows):
+			light.shadow_enabled = setting.shadows
