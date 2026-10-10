@@ -6,6 +6,7 @@ const WALL := preload("res://game/presentation/office_floor/public/display_wall.
 const MODEL := "res://models/objects/enviroments/05/05_monitor2_destructible.glb"
 var failures := 0
 var lights: Array[SpotLight3D] = []
+var registry: Node
 
 func _initialize() -> void:
 	call_deferred("_run")
@@ -20,6 +21,7 @@ func _run() -> void:
 	var stage := Node3D.new()
 	root.add_child(stage)
 	var wall := WALL.new()
+	registry = wall
 	stage.add_child(wall)
 	for index in 24:
 		var prop := PROP.instantiate() as Node3D
@@ -58,7 +60,7 @@ func _run() -> void:
 	for enabled: bool in [true, false, false, true]:
 		samples.append(await _sample(enabled))
 	var output := {"renderer": RenderingServer.get_current_rendering_method(), "screens": lights.size(),
-		"samples": samples, "note": "CI software-renderer wall frame time; repeat on target Windows/Web before changing defaults"}
+		"samples": samples, "note": "All lights/shadows versus distance/visibility/16 glow/4 shadow budget; software-renderer sample, not target FPS"}
 	print("Display shadow profile: " + JSON.stringify(output))
 	var folder := OS.get_environment("RUNTIME_PROFILE_DIR")
 	if not folder.is_empty():
@@ -76,8 +78,14 @@ func _run() -> void:
 	quit(0 if failures == 0 else 1)
 
 func _sample(shadows: bool) -> Dictionary:
-	for light in lights:
-		light.shadow_enabled = shadows
+	# Hold a static policy during the A/B sample; animate screen content as usual.
+	registry.set("_lighting_wait", INF)
+	if shadows:
+		for light in lights:
+			light.visible = true
+			light.shadow_enabled = true
+	else:
+		registry.call("_refresh_lights")
 	for frame in 16:
 		await process_frame
 		await RenderingServer.frame_post_draw
@@ -88,7 +96,15 @@ func _sample(shadows: bool) -> Dictionary:
 		await RenderingServer.frame_post_draw
 		times.append(float(Time.get_ticks_usec() - started) / 1000.0)
 	times.sort()
-	return {"shadows": shadows, "median_frame_ms": times[24], "p95_frame_ms": times[45],
+	var active := 0
+	var shadowed := 0
+	for light in lights:
+		active += int(light.visible)
+		shadowed += int(light.visible and light.shadow_enabled)
+	if not shadows and (active > 16 or shadowed > 4):
+		failures += 1
+		push_error("Optimized native sample exceeded display light budget")
+	return {"policy": "all" if shadows else "budget", "active_lights": active, "shadow_lights": shadowed, "median_frame_ms": times[24], "p95_frame_ms": times[45],
 		"draw_calls": Performance.get_monitor(Performance.RENDER_TOTAL_DRAW_CALLS_IN_FRAME),
 		"process_ms": Performance.get_monitor(Performance.TIME_PROCESS) * 1000.0,
 		"physics_ms": Performance.get_monitor(Performance.TIME_PHYSICS_PROCESS) * 1000.0}
