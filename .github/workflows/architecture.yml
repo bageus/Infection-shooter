@@ -9,6 +9,11 @@ on:
 permissions:
   contents: read
 
+# Superseded PR runs are cancelled; pushes to main keep their own sha group and always finish.
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event_name == 'pull_request' && github.head_ref || github.sha }}
+  cancel-in-progress: true
+
 jobs:
   validate:
     runs-on: ubuntu-latest

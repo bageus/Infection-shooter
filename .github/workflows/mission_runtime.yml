@@ -2,9 +2,15 @@ name: Mission runtime regressions
 on:
   push:
     branches: [main]
+    # Docs-only changes cannot affect Godot runs; architecture.yml still runs the project gates on every PR.
+    paths-ignore: ['**/*.md', 'docs/**']
   pull_request:
+    paths-ignore: ['**/*.md', 'docs/**']
 permissions:
   contents: read
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event_name == 'pull_request' && github.head_ref || github.sha }}
+  cancel-in-progress: true
 # Avoid llvmpipe oversubscription on shared CI CPUs; both real renderers remain enabled.
 env:
   LP_NUM_THREADS: 4
@@ -43,6 +49,7 @@ jobs:
       - uses: actions/upload-artifact@v4
         if: always()
         with:
+          retention-days: 7
           name: weapon-rendering-${{ matrix.renderer }}
           path: |
             /tmp/weapon-previews/*
@@ -87,6 +94,7 @@ jobs:
       - uses: actions/upload-artifact@v4
         if: always()
         with:
+          retention-days: 7
           name: effects-smoke
           path: |
             /tmp/effects-smoke/*
@@ -129,6 +137,7 @@ jobs:
       - uses: actions/upload-artifact@v4
         if: always()
         with:
+          retention-days: 7
           name: planner-rendering-${{ matrix.renderer }}
           path: |
             /tmp/planner-previews/*
@@ -249,6 +258,7 @@ jobs:
       - uses: actions/upload-artifact@v4
         if: always()
         with:
+          retention-days: 7
           name: menu-previews
           path: |
             /tmp/menu_previews/*
