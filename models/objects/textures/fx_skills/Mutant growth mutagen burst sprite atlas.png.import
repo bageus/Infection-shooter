@@ -3,19 +3,20 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://6c5pice5cwgw"
-path="res://.godot/imported/Mutant growth mutagen burst sprite atlas.png-153f1f285f59e7f41d473b31c517f067.ctex"
+path.s3tc="res://.godot/imported/Mutant growth mutagen burst sprite atlas.png-153f1f285f59e7f41d473b31c517f067.s3tc.ctex"
 metadata={
-"vram_texture": false
+"imported_formats": ["s3tc_bptc"],
+"vram_texture": true
 }
 
 [deps]
 
 source_file="res://models/objects/textures/fx_skills/Mutant growth mutagen burst sprite atlas.png"
-dest_files=["res://.godot/imported/Mutant growth mutagen burst sprite atlas.png-153f1f285f59e7f41d473b31c517f067.ctex"]
+dest_files=["res://.godot/imported/Mutant growth mutagen burst sprite atlas.png-153f1f285f59e7f41d473b31c517f067.s3tc.ctex"]
 
 [params]
 
-compress/mode=0
+compress/mode=2
 compress/high_quality=false
 compress/lossy_quality=0.7
 compress/uastc_level=0
