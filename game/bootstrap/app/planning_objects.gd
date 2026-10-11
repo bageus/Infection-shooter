@@ -12,6 +12,8 @@ var selected: Node3D
 var rotation_y = 0.0
 var last_mouse_world = Vector3.ZERO
 var placed: Array[Node3D] = []
+# Nodes clear_layout leaves alone once (planner restore reuses untouched ones).
+var keep_on_clear: Dictionary = {}
 var workstation_transforms: Dictionary = {}
 
 var session: Variant
@@ -415,7 +417,7 @@ func clear_layout(update_status: bool = true, immediate: bool = false) -> void:
 	for node in placed:
 		if not is_instance_valid(node):
 			continue
-		if bool(node.get_meta("planning_existing", false)):
+		if bool(node.get_meta("planning_existing", false)) or keep_on_clear.has(node):
 			retained.append(node)
 		else:
 			if immediate:

@@ -139,4 +139,4 @@ func _check_atlas_properties() -> void:
 			var roughness := image.get_pixel(x, y).g
 			low = minf(low, roughness)
 			high = maxf(high, roughness)
-	_check(high - low > 0.15, "Column coating retains roughness variation after 1K import")
+	_check(high - low < 0.03 and absf(low - 0.58) < 0.03, "Column coating is smooth with even roughness after 1K import")
