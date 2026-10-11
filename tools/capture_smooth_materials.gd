@@ -82,7 +82,7 @@ func _desk_shot(model: String, profile_name: String, zones: Array[Dictionary]) -
 	stage.add_child(visuals)
 	visuals.configure(desk, profile)
 	visuals.redraw(zones, 0, 0)
-	await _shoot(stage, model, Vector3(0, 3.6, 2.4), Vector3(0, 0.8, 0))
+	await _shoot(stage, model, Vector3(0, 4.6, 0.6), Vector3(0, 0.8, -0.05))
 
 
 func _capture() -> void:
