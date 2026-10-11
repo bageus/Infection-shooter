@@ -67,6 +67,9 @@ func add_shapes(body: RigidBody3D, node: Node) -> float:
 			if bounds.is_empty():
 				bounds.append(mesh.get_aabb())
 			var local := body.global_transform.affine_inverse() * mesh.global_transform
+			if shelf_collision:
+				# Collision decomposition must not change the authored mass estimate.
+				volume += mesh.get_aabb().get_volume() * absf(local.basis.determinant())
 			for panel: AABB in bounds:
 				var box := BoxShape3D.new()
 				box.size = Vector3(maxf(panel.size.x, 0.02), maxf(panel.size.y, 0.02), maxf(panel.size.z, 0.02))
@@ -78,7 +81,8 @@ func add_shapes(body: RigidBody3D, node: Node) -> float:
 				meshes.append(mesh)
 				shape.transform = local
 				shape.position += local.basis * panel.get_center()
-				volume += box.size.x * box.size.y * box.size.z * absf(local.basis.determinant())
+				if not shelf_collision:
+					volume += box.size.x * box.size.y * box.size.z * absf(local.basis.determinant())
 	for child in node.get_children():
 		volume += add_shapes(body, child)
 	return volume

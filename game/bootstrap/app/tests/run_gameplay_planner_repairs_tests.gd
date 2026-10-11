@@ -11,6 +11,9 @@ var planner: Node
 
 
 func _initialize() -> void:
+	# Keep the complete map and UI pixels; bound only software shadow rasterization.
+	root.positional_shadow_atlas_size = 256
+	RenderingServer.directional_shadow_atlas_set_size(256, true)
 	call_deferred("_run")
 
 

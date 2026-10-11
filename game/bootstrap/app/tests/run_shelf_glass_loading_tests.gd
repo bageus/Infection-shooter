@@ -33,6 +33,8 @@ func _shelves(stage: Node3D) -> void:
 		var shelf := PROP.instantiate() as RigidBody3D
 		shelf.set("model_path", ROOT + "03/" + str(model) + ".glb")
 		stage.add_child(shelf)
+		_check_mass(shelf)
+		_check(not shelf.continuous_cd, "Full-size shelf does not acquire small-prop CCD from decomposed boards")
 		shelf.freeze = true
 		shelf.rotation.y = .6
 		shelf.scale = Vector3.ONE * 1.1
@@ -50,6 +52,10 @@ func _shelves(stage: Node3D) -> void:
 			_check(hit.get("collider") == shelf, "%s has a physical surface at %.2f" % [model, height])
 			if hit.get("collider") != shelf:
 				continue
+			var clearance_start := shelf.to_global(Vector3(float(station.x), height + .15, float(station.z)))
+			var clearance_end := shelf.to_global(Vector3(float(station.x), height + .11, float(station.z)))
+			var clearance := stage.get_world_3d().direct_space_state.intersect_ray(PhysicsRayQueryParameters3D.create(clearance_start, clearance_end))
+			_check(clearance.get("collider") != shelf, "%s keeps the opening above each shelf" % model)
 			supported += 1
 			var book := PROP.instantiate() as RigidBody3D
 			book.set("model_path", ROOT + "09/09_book_small.glb")
@@ -60,7 +66,7 @@ func _shelves(stage: Node3D) -> void:
 			book.set_meta("expected_bottom", (hit.position as Vector3).y)
 			books.append(book)
 		_check(supported == profile.stations.size(), "Every authored shelf supports a book")
-		_check((shelf.get("_shapes") as Array).size() < 100, "%s collision stays bounded (%d)" % [model, (shelf.get("_shapes") as Array).size()])
+		_check((shelf.get("_shapes") as Array).size() <= 32, "%s collision stays bounded (%d)" % [model, (shelf.get("_shapes") as Array).size()])
 		for tick in 120:
 			await physics_frame
 		for book in books:
@@ -69,6 +75,18 @@ func _shelves(stage: Node3D) -> void:
 			_check(absf(bounds.position.y - expected) < .07, "%s book rests on shelf: %.3f vs %.3f" % [model, bounds.position.y, expected])
 			book.free()
 		shelf.free()
+
+
+func _check_mass(shelf: RigidBody3D) -> void:
+	var seen: Dictionary = {}
+	var volume := 0.0
+	for mesh: MeshInstance3D in shelf.get("_shape_meshes"):
+		if seen.has(mesh.get_instance_id()):
+			continue
+		seen[mesh.get_instance_id()] = true
+		var local := shelf.global_transform.affine_inverse() * mesh.global_transform
+		volume += mesh.get_aabb().get_volume() * absf(local.basis.determinant())
+	_check(is_equal_approx(shelf.mass, clampf(volume * 18.0, .12, 55.0)), "Board collision decomposition preserves the original model mass estimate")
 
 
 func _hidden_glass(stage: Node3D) -> void:

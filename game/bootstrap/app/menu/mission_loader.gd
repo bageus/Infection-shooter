@@ -17,6 +17,7 @@ var _started := false
 var _logged_phase := ""
 var _previous_scene: Node3D
 var _previous_visible := true
+var _previous_collisions: Array[Dictionary] = []
 var _previous_camera: Camera3D
 var _previous_pause := false
 var _previous_mouse := Input.MOUSE_MODE_VISIBLE
@@ -73,6 +74,7 @@ func start() -> void:
 		_previous_visible = previous.visible
 		# Retain rollback state, but do not render the old floor behind the overlay.
 		previous.hide()
+		_suspend_previous_collisions(previous)
 	_previous_camera = get_viewport().get_camera_3d()
 	_previous_pause = tree.paused
 	_previous_mouse = Input.mouse_mode
@@ -133,6 +135,7 @@ func start() -> void:
 	tree.paused = false
 	Input.mouse_mode = Input.MOUSE_MODE_VISIBLE
 	pending = null
+	_previous_collisions.clear()
 	_previous_scene = null
 	completed.emit(true)
 	if is_instance_valid(previous):
@@ -192,7 +195,23 @@ func _close_error() -> void:
 	queue_free()
 
 
+func _suspend_previous_collisions(node: Node) -> void:
+	if node is CollisionObject3D:
+		var body := node as CollisionObject3D
+		_previous_collisions.append({"node": weakref(body), "layer": body.collision_layer, "mask": body.collision_mask})
+		body.collision_layer = 0
+		body.collision_mask = 0
+	for child in node.get_children():
+		_suspend_previous_collisions(child)
+
+
 func _restore_previous_visual() -> void:
+	for saved in _previous_collisions:
+		var body := (saved.node as WeakRef).get_ref() as CollisionObject3D
+		if is_instance_valid(body):
+			body.collision_layer = int(saved.layer)
+			body.collision_mask = int(saved.mask)
+	_previous_collisions.clear()
 	if is_instance_valid(_previous_scene):
 		_previous_scene.visible = _previous_visible
 
