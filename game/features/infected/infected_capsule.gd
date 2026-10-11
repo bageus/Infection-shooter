@@ -2,7 +2,9 @@ extends CharacterBody3D
 # Living infected only; the "infected" group keeps corpses until they vanish.
 const ALIVE_GROUP := "infected_alive"
 const CHASE_ROUTE := preload("res://game/features/infected/chase_route.gd")
+const CHASE_PACE := preload("res://game/features/infected/chase_pace.gd")
 var _route := CHASE_ROUTE.new()
+var _pace := CHASE_PACE.new()
 
 const DROP_TABLE_SCRIPT := preload("res://game/features/pickups/public/drop_table.gd")
 const BODY_PARTS := preload("res://game/features/infected/body_parts.gd")
@@ -45,7 +47,8 @@ var _intended_motion := Vector3.ZERO
 @export var attack_reach_tolerance := 1.35
 @export var turn_speed := 14.0
 ## Beyond charge_distance the enemy stalks at walk_speed_factor of move_speed
-## (walk clip); closer it charges at full speed (run clip). 0 always charges.
+## (walk clip); closer it charges at full speed (run clip) in bursts with short
+## walks between them (chase_pace.gd). 0 always charges.
 @export var charge_distance := 9.0
 @export_range(0.2, 1.0) var walk_speed_factor := 0.4
 ## Small infected die from losing a leg; large ones limp on (ADR-0017).
@@ -90,6 +93,9 @@ var _mobility := 1.0
 var _attack_scale := 1.0
 var _last_hit_position := Vector3.ZERO
 var _last_hit_direction := Vector3.ZERO
+# Where the damage being applied came from, for the hit reaction.
+var _reaction_point := Vector3.ZERO
+var _reaction_direction := Vector3.ZERO
 var _death_push := Vector3.ZERO
 var _death_push_msec := -KILLING_PUSH_MSEC
 var _fall_watch: RefCounted
@@ -113,6 +119,7 @@ func _ready() -> void:
 	_blood_last_position = global_position
 	_blood_segment_start = global_position
 	_ai_tick_offset = get_instance_id() % 4
+	_pace = CHASE_PACE.new(get_instance_id())
 	_lod_frame_offset = get_instance_id() % 12
 	death_cloud.depleted.connect(_on_death_cloud_depleted)
 	_setup_body_parts()
@@ -172,6 +179,8 @@ func take_projectile_damage(
 		return
 	_last_hit_position = hit_position
 	_last_hit_direction = direction
+	_reaction_point = hit_position
+	_reaction_direction = direction
 	var shooter_distance := global_position.distance_to(_target.global_position) if is_instance_valid(_target) else INF
 	_set_death_push(DEATH_FALL.hit_push(weapon_name, direction, shooter_distance))
 	var part: StringName = BODY_PARTS.TORSO
@@ -196,6 +205,8 @@ func take_projectile_damage(
 func take_blast_damage(amount: float, origin: Vector3) -> void:
 	_last_hit_position = origin
 	_set_death_push(DEATH_FALL.blast_push(origin, global_position, amount / 155.0))
+	_reaction_point = global_position + Vector3.UP
+	_reaction_direction = Vector3(global_position.x - origin.x, 0.0, global_position.z - origin.z).normalized()
 	take_damage(amount)
 
 
@@ -222,7 +233,8 @@ func _apply_damage(amount: float, blast: bool) -> void:
 		blood_wounded.emit(global_position, _blood_exclusions())
 	# Damage over time arrives in tiny per-frame bits; only real hits flinch.
 	if health > 0.0 and _animation != null and amount >= 1.0:
-		_animation.call("notify_hit")
+		_animation.call("notify_hit", _reaction_point, _reaction_direction, clampf(amount / (max_health * 0.2), 0.6, 1.3))
+	_reaction_direction = Vector3.ZERO
 	if health <= 0.0:
 		_die()
 
@@ -317,6 +329,7 @@ func _physics_process(delta: float) -> void:
 	var step := delta * 12.0 if far else delta
 
 	_attack_cooldown = maxf(0.0, _attack_cooldown - step)
+	_pace.tick(step, sqrt(distance_sq), charge_distance, move_speed, walk_speed_factor)
 	_obstacle_cooldown = maxf(0.0, _obstacle_cooldown - step)
 
 	var near := distance_sq < full_simulation_distance * full_simulation_distance
@@ -365,10 +378,8 @@ func _desired_velocity_from_offset(offset: Vector3) -> Vector3:
 	return route_direction * _chase_speed(distance)
 
 
-func _chase_speed(distance: float) -> float:
-	if charge_distance <= 0.0 or distance <= charge_distance:
-		return move_speed * _mobility
-	return move_speed * walk_speed_factor * _mobility
+func _chase_speed(_distance: float) -> float:
+	return _pace.speed * _mobility
 
 
 # Hook for specialised enemies (slam, ram, summon); runs every simulated tick.

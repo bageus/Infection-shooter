@@ -58,6 +58,8 @@ func _run() -> void:
 	await _test_one_shots(stage)
 	await _test_skinned_rig(stage)
 	await _test_stalk_then_charge(stage)
+	for path: String in HUMANOIDS.slice(2):
+		await _test_knees_follow_feet(stage, load(path) as PackedScene, path.get_file())
 	await _test_attack_lands_on_hit_frame(stage)
 	await _test_attack_misses_when_target_leaves(stage)
 	await _test_death_animation_then_sink(stage)
@@ -255,11 +257,35 @@ func _test_stalk_then_charge(stage: Node3D) -> void:
 	var far_speed := Vector2(enemy.velocity.x, enemy.velocity.z).length()
 	_expect(absf(far_speed - move_speed * float(enemy.get("walk_speed_factor"))) < 0.05, "A distant enemy stalks at walking speed (%.2f)." % far_speed)
 	target.global_position = enemy.global_position + Vector3(0, 0, -6)
-	await _physics(10)
+	# The charge eases up from walking pace (chase_pace.gd).
+	await _physics(45)
 	var near_speed := Vector2(enemy.velocity.x, enemy.velocity.z).length()
 	_expect(absf(near_speed - move_speed) < 0.05, "A close enemy charges at full speed (%.2f)." % near_speed)
 	enemy.queue_free()
 	target.queue_free()
+	await process_frame
+
+
+# Walk and run knees bend toward where the feet point, seen from above (the
+# auto-rig rest legs are bent sideways; ADR-0040 straightens them).
+func _test_knees_follow_feet(stage: Node3D, scene: PackedScene, label: String) -> void:
+	var enemy := await _spawn(stage, scene)
+	var player := _player_of(enemy)
+	var worst := 0.0
+	for clip in ["Walk", "Run"]:
+		var length := player.get_animation(clip).length
+		for i in 12:
+			var pose := _pose(player, clip, length * i / 12.0, ["L_Thigh", "L_Shin", "L_Foot", "L_Toe", "R_Thigh", "R_Shin", "R_Foot", "R_Toe"])
+			for side in ["L_", "R_"]:
+				var hip: Vector3 = pose[side + "Thigh"]
+				var axis: Vector3 = (pose[side + "Foot"] - hip).normalized()
+				var out: Vector3 = (pose[side + "Shin"] - hip) - axis * (pose[side + "Shin"] - hip).dot(axis)
+				if out.length() < 0.25 * (pose[side + "Shin"] - hip).length():
+					continue
+				var foot: Vector3 = pose[side + "Toe"] - pose[side + "Foot"]
+				worst = maxf(worst, rad_to_deg(absf(Vector3(out.x, 0, out.z).signed_angle_to(Vector3(foot.x, 0, foot.z), Vector3.UP))))
+	_expect(worst < 12.0, "%s knees bend the way the feet point (worst %.0f degrees)." % [label, worst])
+	enemy.queue_free()
 	await process_frame
 
 

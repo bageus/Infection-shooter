@@ -45,6 +45,10 @@ var _leg_length := 0.9
 var _thigh_length := 0.45
 var _shin_length := 0.45
 var _splay := [0.0, 0.0] # rest outward lean of each leg, radians, signed for roll_axis
+# Rest knees sit a little off the hip-ankle line; the shin is first turned to
+# continue the thigh so the knee hinge stays in the plane the foot points along.
+var _shin_align: Array = [Quaternion.IDENTITY, Quaternion.IDENTITY]
+var _knee_hinge: Array = [Vector3.RIGHT, Vector3.RIGHT] # rest hinge, square to the thigh
 var _ready_bones := false
 
 
@@ -101,12 +105,14 @@ func _process_modification_with_delta(delta: float) -> void:
 		var leg_angle: Array = angles[side]
 		# Bring the foot in under the hip: rest poses stand with splayed legs.
 		var tuck := -float(_splay[side]) * (1.0 + 0.1 * run)
-		var thigh_rotation := Quaternion(swing_axis, leg_angle[0]) * Quaternion(roll_axis, tuck) * Quaternion(Vector3.UP, yaw * 0.6)
-		var knee_axis := thigh_rotation * lateral
+		# Thigh, knee hinge and foot all face the step direction, so the knee
+		# always bends in the plane the foot points along.
+		var thigh_rotation := Quaternion(roll_axis, tuck) * Quaternion(swing_axis, leg_angle[0]) * leg_yaw
+		var knee_axis := thigh_rotation * (_knee_hinge[side] as Vector3)
 		var knee_rotation := Quaternion(knee_axis, leg_angle[1])
-		var level := (thigh_rotation * knee_rotation).inverse()
-		var foot_rotation := Quaternion(lateral, leg_angle[2]) * level
-		_place_leg(skeleton, hips_global, bones, [thigh_rotation, knee_rotation, foot_rotation])
+		var shin_rotation := knee_rotation * thigh_rotation * (_shin_align[side] as Quaternion)
+		var foot_rotation := Quaternion(lateral, leg_angle[2]) * leg_yaw
+		_place_leg(skeleton, hips_global, bones, [thigh_rotation, shin_rotation, foot_rotation])
 
 
 # [left, right, reach]: each leg's [thigh, knee, sole] radians at the current
@@ -158,18 +164,17 @@ static func _cycle(u: float, keys: Array) -> float:
 	return 0.5 * ((2.0 * p1) + (-p0 + p2) * k + (2.0 * p0 - 5.0 * p1 + 4.0 * p2 - p3) * k * k + (-p0 + 3.0 * p1 - 3.0 * p2 + p3) * k * k * k)
 
 
-# Rebuild thigh, shin and foot from rest offsets with skeleton-space rotations,
-# then blend the local result into the authored pose by the gait weight.
+# Rebuild thigh, shin and foot from rest offsets with skeleton-space rotations
+# (each relative to that bone's rest), then blend the local result into the
+# authored pose by the gait weight.
 func _place_leg(skeleton: Skeleton3D, hips_global: Transform3D, bones: Array, rotations: Array) -> void:
 	var parent_global := hips_global
-	var accumulated := Quaternion.IDENTITY
 	for index in 3:
 		var bone: int = bones[index]
 		var rest := skeleton.get_bone_rest(bone)
 		var start := parent_global * rest
-		accumulated = (rotations[index] as Quaternion) * accumulated
 		var rest_global_basis := _rest_global_basis(skeleton, bone)
-		var wanted := Transform3D(Basis(accumulated) * rest_global_basis, start.origin)
+		var wanted := Transform3D(Basis(rotations[index] as Quaternion) * rest_global_basis, start.origin)
 		var local := parent_global.affine_inverse() * wanted
 		var current := skeleton.get_bone_pose_rotation(bone)
 		var target := local.basis.get_rotation_quaternion()
@@ -216,10 +221,15 @@ func _resolve_bones(skeleton: Skeleton3D) -> bool:
 	for side in 2:
 		var bones: Array = _legs[side]
 		var hip := skeleton.get_bone_global_rest(bones[0]).origin
+		var knee := skeleton.get_bone_global_rest(bones[1]).origin
 		var ankle := skeleton.get_bone_global_rest(bones[2]).origin
-		# Keep a narrow natural step width: the ankle ends up a little outside the hip line.
+		var thigh_direction := (knee - hip).normalized()
+		_shin_align[side] = Quaternion((ankle - knee).normalized(), thigh_direction)
+		_knee_hinge[side] = Vector3.BACK.cross(thigh_direction).normalized()
+		# Keep a narrow natural step width: the straightened leg lands its ankle
+		# a little outside the hip line.
 		var target_x := hip.x * 0.65
-		_splay[side] = atan2(ankle.x - target_x, hip.y - ankle.y)
+		_splay[side] = atan2(thigh_direction.x, -thigh_direction.y) - atan2(target_x - hip.x, _thigh_length + _shin_length)
 	return true
 
 

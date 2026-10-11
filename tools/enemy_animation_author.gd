@@ -32,8 +32,13 @@ var hips_height := 1.0 # Hips joint above the floor, model units.
 var leg_length := 0.9
 var thigh_length := 0.45
 var shin_length := 0.45
-var _splay := {}
 var _hip_width := {}
+# Gait clips straighten the rest legs (auto-rig knees sit off the hip-ankle
+# line): the thigh is turned to hang straight down, the shin to continue it,
+# and the knee bends around the axis that is the side axis once straightened.
+var _thigh_align := {}
+var _shin_align := {}
+var _knee_axis := {}
 
 
 func setup(target: Skeleton3D) -> void:
@@ -54,9 +59,12 @@ func setup(target: Skeleton3D) -> void:
 		var side: float = SIDES[prefix]
 		var hip := _global(prefix + "Thigh")
 		var ankle := _global(prefix + "Foot")
-		# Outward lean of the rest leg in degrees (auto-rigs stand in an A-frame).
-		_splay[prefix] = rad_to_deg(atan2(side * (ankle.x - hip.x), hip.y - ankle.y))
 		_hip_width[prefix] = side * hip.x
+		var thigh_direction := (_global(prefix + "Shin") - hip).normalized()
+		var shin_direction := (ankle - _global(prefix + "Shin")).normalized()
+		_thigh_align[prefix] = Quaternion(thigh_direction, Vector3.DOWN)
+		_shin_align[prefix] = Quaternion(shin_direction, thigh_direction)
+		_knee_axis[prefix] = ((_thigh_align[prefix] as Quaternion).inverse() * Vector3.RIGHT).normalized()
 	for prefix: String in SIDES:
 		var side: float = SIDES[prefix]
 		var arm := (_global(prefix + "Forearm") - _global(prefix + "UpperArm")).normalized()
@@ -76,8 +84,10 @@ const RUN_FLIGHT := 1.25 # running strides cover more ground than the leg arc
 # Cycles per second that move the feet at the style's gameplay speeds.
 func pace(style: Dictionary) -> Dictionary:
 	var scale := float(style.get("scale", 1.0))
-	var walk_cycle := 4.0 * leg_length * scale * sin(deg_to_rad(float(style.walk_swing)))
-	var run_cycle := RUN_FLIGHT * 4.0 * leg_length * scale * sin(deg_to_rad(float(style.run_swing)))
+	# Gait clips straighten the legs: a stride spans the full thigh + shin.
+	var straight := thigh_length + shin_length
+	var walk_cycle := 4.0 * straight * scale * sin(deg_to_rad(float(style.walk_swing)))
+	var run_cycle := RUN_FLIGHT * 4.0 * straight * scale * sin(deg_to_rad(float(style.run_swing)))
 	var walk_hz := clampf(float(style.walk_mps) / walk_cycle, 0.6, 1.9)
 	var run_hz := clampf(float(style.run_mps) / run_cycle, 0.9, 2.4)
 	return {"walk_hz": walk_hz, "run_hz": run_hz, "walk_mps": walk_hz * walk_cycle, "run_mps": run_hz * run_cycle}
@@ -217,7 +227,6 @@ const RUN_SOLE := [[0.0, -6.0], [0.14, 0.0], [0.34, 42.0], [0.46, 30.0], [0.66, 
 # `width` (fraction of hips height from the midline), the soles roll from heel
 # to toe and the hips ride on the supporting leg.
 func _gait(p: Dictionary, phase: float, amplitude: float, keys: Array, knee_scale: float, width: float, limp: float = 0.0, pitch: float = 0.0) -> void:
-	var lowest := INF
 	# The pelvis tips forward by `pitch`; thighs compensate so the legs keep their world arc.
 	p.hips_pitch = pitch
 	for prefix: String in SIDES:
@@ -226,21 +235,30 @@ func _gait(p: Dictionary, phase: float, amplitude: float, keys: Array, knee_scal
 		# A limping leg takes a shorter, later step.
 		var favour := 1.0 - (3.0 * limp if prefix == "R_" else 0.0)
 		var swing := amplitude * _cycle(u, keys[0]) * favour
-		var knee := _cycle(u, keys[1]) * knee_scale
 		p[prefix + "swing"] = swing + pitch
-		p[prefix + "knee"] = knee
+		p[prefix + "knee"] = _cycle(u, keys[1]) * knee_scale
 		p[prefix + "sole"] = _cycle(u, keys[2])
-		# Lean the leg in so the ankle lands `width` from the midline.
-		var lateral := rad_to_deg(atan2(width * hips_height - float(_hip_width[prefix]), leg_length))
-		p[prefix + "abd_leg"] = lateral - float(_splay[prefix])
-		var t := deg_to_rad(swing)
-		var reach := thigh_length * cos(t) + shin_length * cos(t - deg_to_rad(knee))
-		lowest = minf(lowest, thigh_length + shin_length - reach)
-	# The supporting (longer) leg keeps its foot on the floor.
-	p.hips_y = -lowest
+		# Lean the straightened leg in so the ankle lands `width` from the midline.
+		p[prefix + "abd_leg"] = rad_to_deg(atan2(width * hips_height - float(_hip_width[prefix]), thigh_length + shin_length))
 	p.hips_x = -0.02 * hips_height * cos(phase)
 	p.hips_yaw = -7.0 * sin(phase)
 	p.hips_roll = -3.0 * cos(phase)
+	# The supporting (lower) foot stays on the floor.
+	p.hips_y = 0.0
+	p.hips_y = -_ankle_drop(p)
+
+
+# How far below its rest height the lower ankle hangs in pose p (hips at rest height).
+func _ankle_drop(p: Dictionary) -> float:
+	var q := pose_rotations(p)
+	var drop := -INF
+	for prefix: String in SIDES:
+		var thigh: Vector3 = (_rest_local[prefix + "Thigh"] as Transform3D).origin
+		var shin: Vector3 = (_rest_local[prefix + "Shin"] as Transform3D).origin
+		var foot: Vector3 = (_rest_local[prefix + "Foot"] as Transform3D).origin
+		var posed := (q["Hips"] as Quaternion) * (thigh + (q[prefix + "Thigh"] as Quaternion) * (shin + (q[prefix + "Shin"] as Quaternion) * foot))
+		drop = maxf(drop, (thigh + shin + foot).y - posed.y)
+	return drop
 
 
 ## Periodic Catmull-Rom curve through [u, value] keys sorted by u in [0, 1).
@@ -398,8 +416,15 @@ func pose_rotations(p: Dictionary) -> Dictionary:
 		q[prefix + "UpperArm"] = Quaternion(Vector3.RIGHT, -_value(p, prefix + "flex")) * Quaternion(Vector3.BACK, side * _value(p, prefix + "abd")) * (_arm_align[prefix] as Quaternion)
 		q[prefix + "Forearm"] = Quaternion(_elbow_axis[prefix], _value(p, prefix + "elbow"))
 		q[prefix + "Hand"] = Quaternion(_wrist_axis[prefix], _value(p, prefix + "wrist"))
-		q[prefix + "Thigh"] = Quaternion(Vector3.RIGHT, -_value(p, prefix + "swing")) * Quaternion(Vector3.BACK, side * _value(p, prefix + "abd_leg"))
-		q[prefix + "Shin"] = Quaternion(Vector3.RIGHT, _value(p, prefix + "knee"))
+		if p.has(prefix + "sole"):
+			# Gait legs are posed in the model frame, independent of the pelvis
+			# sway, so knees always point the way the feet do.
+			var hanging := Quaternion(Vector3.RIGHT, -_value(p, prefix + "swing") + _value(p, "hips_pitch")) * Quaternion(Vector3.BACK, side * _value(p, prefix + "abd_leg")) * (_thigh_align[prefix] as Quaternion)
+			q[prefix + "Thigh"] = (q["Hips"] as Quaternion).inverse() * hanging
+			q[prefix + "Shin"] = Quaternion(_knee_axis[prefix], _value(p, prefix + "knee")) * (_shin_align[prefix] as Quaternion)
+		else:
+			q[prefix + "Thigh"] = Quaternion(Vector3.RIGHT, -_value(p, prefix + "swing")) * Quaternion(Vector3.BACK, side * _value(p, prefix + "abd_leg"))
+			q[prefix + "Shin"] = Quaternion(Vector3.RIGHT, _value(p, prefix + "knee"))
 		if p.has(prefix + "sole"):
 			# Gait clips give the sole's pitch in the model frame: undo the hips,
 			# thigh and knee rotations so the foot rolls flat heel-to-toe.
