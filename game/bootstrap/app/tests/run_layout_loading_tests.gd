@@ -71,11 +71,16 @@ func _run() -> void:
 	file.close()
 	_expect(storage._load_layout_from_path(path).has("error") and is_instance_valid(original), "File loading validates before clearing")
 	DirAccess.remove_absolute(path)
+	var ready_transforms: Array[Transform3D] = []
+	objects.catalog.bind_asset = func(node: Node3D) -> void:
+		node.ready.connect(func() -> void: ready_transforms.append(node.transform))
 	var mixed := {"version": 8, "objects": [{"scene": ASSET, "x": 7}, {"scene": "res://missing_layout_scene.tscn"}, {"scene": PLAYER, "x": 11}]}
 	var report: Dictionary = objects._apply_layout_data(mixed)
 	_expect(report.loaded == 1 and report.skipped == 1, "Valid records load; missing assets retain legacy skip report")
 	_expect(not is_instance_valid(original) and history.stack.is_empty(), "Successful commit replaces old layout and undo (old valid=%s, undo=%s)" % [is_instance_valid(original), history.stack])
 	_expect(objects.placed[0].position.x == 7 and player.position.x == 11, "Object and player transforms restored")
+	_expect(ready_transforms[0] == objects.placed[0].transform, "Synchronous ready registers physics at the saved transform")
+	ready_transforms.clear()
 	var records: Array = []
 	for index in 64:
 		records.append({"scene": ASSET, "x": index})
@@ -87,6 +92,8 @@ func _run() -> void:
 	report = await loader.commit_async(prepared, self, func(_value: float, _phase: String) -> void: pass)
 	_expect(Engine.get_process_frames() - frame >= 4 and report.loaded == 64, "Async commit builds the layout over multiple frames")
 	_expect(objects.placed[63].position.x == 63, "Async commit retains record order")
+	for index in 64:
+		_expect(ready_transforms[index] == objects.placed[index].transform, "Async ready registers each object at its saved transform")
 	_expect(not objects._apply_layout_data({"objects": []}).has("error") and objects.placed.is_empty(), "Explicit empty map is a valid clear operation")
 	world.queue_free()
 	await process_frame

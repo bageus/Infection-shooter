@@ -38,7 +38,7 @@ static func _prune(panels: Array[AABB]) -> Array[AABB]:
 		changed = false
 		for i in panels.size():
 			for j in range(i + 1, panels.size()):
-				if _adjacent(panels[i], panels[j]):
+				if _adjacent(panels[i], panels[j]) or _board_faces(panels[i], panels[j]):
 					panels[i] = panels[i].merge(panels[j])
 					panels.remove_at(j)
 					changed = true
@@ -67,6 +67,21 @@ static func _adjacent(a: AABB, b: AABB) -> bool:
 		if aligned and a.end[axis] + .0002 >= b.position[axis] and b.end[axis] + .0002 >= a.position[axis]:
 			return true
 	return false
+
+
+static func _board_faces(a: AABB, b: AABB) -> bool:
+	# Opposite/bevel faces of one board are one collider, not overlapping slabs.
+	var axis := a.size.min_axis_index()
+	if axis != b.size.min_axis_index() or a.size[axis] > .09 or b.size[axis] > .09:
+		return false
+	if a.merge(b).size[axis] > .09:
+		return false
+	var x := (axis + 1) % 3
+	var y := (axis + 2) % 3
+	var ar := Rect2(Vector2(a.position[x], a.position[y]), Vector2(a.size[x], a.size[y]))
+	var br := Rect2(Vector2(b.position[x], b.position[y]), Vector2(b.size[x], b.size[y]))
+	# One face must cover the other: adjoining shelves and L-shaped gaps stay apart.
+	return ar.grow(.0002).encloses(br) or br.grow(.0002).encloses(ar)
 
 
 static func _components(faces: PackedVector3Array) -> Array[PackedVector3Array]:

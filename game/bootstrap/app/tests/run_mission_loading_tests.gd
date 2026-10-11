@@ -57,13 +57,19 @@ func _run() -> void:
 	var backup := FileAccess.open(SAVE + ".bak", FileAccess.WRITE)
 	backup.store_string(JSON.stringify({"version": 8, "objects": records}))
 	backup.close()
+	var rollback_body := StaticBody3D.new()
+	rollback_body.collision_layer = 512
+	rollback_body.collision_mask = 129
+	stage.add_child(rollback_body)
 	var camera := root.get_camera_3d()
 	_write('{"objects":null}')
 	stage.call("_on_restart_pressed")
+	_expect(rollback_body.collision_layer == 0 and rollback_body.collision_mask == 0, "Restart suspends old physics participation while retaining rollback")
 	var failure: Node = stage.find_children("*", "CanvasLayer", true, false).filter(func(node: Node) -> bool: return node.get_script() != null and node.get_script().resource_path.ends_with("mission_loader.gd"))[0]
 	await _wait(func() -> bool: return (failure.get("back") as Button).visible)
 	_expect(current_scene == stage and root.get_camera_3d() == camera, "Failed restart preserves the previous mission and camera")
 	_expect(stage.visible, "Failed restart restores the previous mission visuals")
+	_expect(rollback_body.collision_layer == 512 and rollback_body.collision_mask == 129, "Failed restart restores exact gameplay/query collision bits")
 	failure.call("_close_error")
 	await process_frame
 	_write(JSON.stringify({"version": 8, "objects": records}))
@@ -72,6 +78,7 @@ func _run() -> void:
 	stage.call("_on_restart_pressed")
 	_expect(current_scene == before and paused, "Restart also retains and pauses the previous mission while loading")
 	_expect(not before.visible, "Restart suspends old floor rendering behind the loading overlay")
+	_expect(rollback_body.collision_layer == 0 and rollback_body.collision_mask == 0, "Successful retry suspends restored old collisions again")
 	await _wait(func() -> bool: return current_scene != before)
 	_expect(current_scene != before and not paused, "Restart completes via the same asynchronous pipeline")
 	_expect(Input.mouse_mode == Input.MOUSE_MODE_VISIBLE, "Restart leaves the aiming cursor free")
