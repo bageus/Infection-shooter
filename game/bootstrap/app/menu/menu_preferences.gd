@@ -1,11 +1,13 @@
 extends RefCounted
 
+const SHADOWS := preload("res://game/bootstrap/app/menu/shadow_quality.gd")
 const BINDINGS := preload("res://game/bootstrap/app/menu/control_bindings.gd")
 var bindings := BINDINGS.new()
 
 const FILE := "user://interface_settings.cfg"
 const DEFAULTS := {"language": "ru", "brightness": 1.0, "text_scale": 1.0,
-	"volume": 0.4, "effects_volume": 1.0, "music_volume": 1.0, "sound": true, "occlusion_mode": 0, "test_mutagen": false, "infinite_antidotes": false, "lighting": true, "electronic_particles": true, "skill_effects": 0}
+	"volume": 0.4, "effects_volume": 1.0, "music_volume": 1.0, "sound": true, "occlusion_mode": 0, "test_mutagen": false, "infinite_antidotes": false, "lighting": true, "electronic_particles": true, "skill_effects": 0,
+	"shadows": true, "shadow_quality": 2}
 var values: Dictionary = DEFAULTS.duplicate()
 
 
@@ -22,6 +24,7 @@ func load_settings() -> void:
 	values.brightness = clampf(values.brightness, 0.8, 1.4)
 	values.occlusion_mode = clampi(values.occlusion_mode, 0, 1)
 	values.skill_effects = clampi(values.skill_effects, 0, 1)
+	values.shadow_quality = clampi(values.shadow_quality, 0, SHADOWS.level_count() - 1)
 	values.volume = clampf(values.volume, 0.0, 1.0)
 	values.effects_volume = clampf(values.effects_volume, 0.0, 1.0)
 	values.music_volume = clampf(values.music_volume, 0.0, 1.0)
@@ -78,6 +81,7 @@ func apply_to_game(tree: SceneTree) -> void:
 	var overhead := scene.get_node_or_null("GlobalOverheadLight") as DirectionalLight3D if scene != null else null
 	if overhead != null:
 		overhead.visible = bool(values.lighting)
+	SHADOWS.apply(tree, bool(values.shadows), int(values.shadow_quality))
 	var occlusion := scene.get_node_or_null("OcclusionEffects") if scene != null else null
 	if occlusion != null:
 		occlusion.call("set_mode", int(values.occlusion_mode))
