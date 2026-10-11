@@ -417,7 +417,9 @@ func _desk_path() -> String:
 
 
 func _desk_id() -> String:
-	return str(desk.get_meta("planning_desk_id", ""))
+	if str(desk.get_meta("planning_desk_id", "")).is_empty():
+		desk.set_meta("planning_desk_id", "desk_%d" % desk.get_instance_id())  # empty ids match every loose object
+	return str(desk.get_meta("planning_desk_id"))
 
 
 func _place_model(model: String, local: Vector3) -> void:

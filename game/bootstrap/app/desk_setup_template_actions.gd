@@ -71,9 +71,11 @@ static func load_selected(mode: Variant) -> void:
 		var entry: Dictionary = entry_value
 		var asset_path := str(entry.get("path", ""))
 		if not asset_path.begins_with(MODEL_ROOT) or not ResourceLoader.exists(asset_path):
+			skipped += 1
 			continue
 		var object: Node3D = mode.planner._instantiate_asset(asset_path) as Node3D
 		if object == null:
+			skipped += 1
 			continue
 		mode.planner.root.add_child(object)
 		object.global_position = mode.desk.to_global(Vector3(float(entry.get("x", 0)), float(entry.get("y", 0)), float(entry.get("z", 0))))

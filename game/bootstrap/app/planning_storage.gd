@@ -18,6 +18,9 @@ var objects: Variant
 # tears paper and pushes props around; the planner edits and saves this
 # authored state, never the aftermath of a fight.
 var authored_layout: Dictionary = {}
+# Fingerprint of each placed node when the authored map was snapshotted, so restoring
+# keeps the nodes gameplay left untouched instead of freeing and rebuilding them all.
+var _node_marks: Dictionary = {}
 # Name of an existing map the user was warned about; a second press overwrites it.
 var _overwrite_pending := ""
 var controls: Variant
@@ -124,6 +127,37 @@ func _collect_layout_data() -> Dictionary:
 ## Remembers the current planner layout as the authored map.
 func snapshot_authored() -> void:
 	authored_layout = _collect_layout_data()
+	_remember_marks()
+
+
+func _remember_marks() -> void:
+	_node_marks.clear()
+	for node in objects.placed:
+		if is_instance_valid(node):
+			_node_marks[node] = _mark(node)
+
+
+# Cheap structural fingerprint (descendant count): breaking or detaching parts changes it.
+# Visibility is not part of it because world activation toggles that during play.
+static func _mark(node: Node) -> String:
+	return str(_count(node))
+
+
+static func _count(node: Node) -> int:
+	var total := 1
+	for child in node.get_children():
+		total += _count(child)
+	return total
+
+
+# Removes and returns the candidate within 5 cm / 2 degrees of the authored place, if any.
+static func _take_match(candidates: Array, home: Vector3, yaw: float) -> Node3D:
+	for i in candidates.size():
+		var node: Node3D = candidates[i]
+		if node.position.distance_to(home) <= 0.05 and absf(angle_difference(deg_to_rad(node.rotation_degrees.y), deg_to_rad(yaw))) <= deg_to_rad(2.0):
+			candidates.remove_at(i)
+			return node
+	return null
 
 
 ## Puts the world back to the authored map when gameplay changed it: killed
@@ -140,10 +174,47 @@ func restore_authored() -> bool:
 			records.append(record)
 	var keep_spawn: bool = objects.player_spawn_defined
 	var spawn: Transform3D = objects.player_spawn_transform
-	objects._apply_layout_data({"version": authored_layout.get("version", 7), "objects": records})
+	var pending := _reusable_nodes()
+	var missing: Array = []
+	var kept := {}
+	for record in records:
+		var home := Vector3(float(record.get("x", 0.0)), float(record.get("y", 0.0)), float(record.get("z", 0.0)))
+		var node := _take_match(pending.get(str(record.get("scene", "")), []), home, float(record.get("rotation_y", 0.0)))
+		if node == null:
+			missing.append(record)
+			continue
+		kept[node] = true
+		node.position = Vector3(float(record.get("x", 0.0)), float(record.get("y", 0.0)), float(record.get("z", 0.0)))
+		node.rotation_degrees = Vector3(float(record.get("rotation_x", 0)), float(record.get("rotation_y", 0)), float(record.get("rotation_z", 0)))
+		if node is RigidBody3D:
+			(node as RigidBody3D).linear_velocity = Vector3.ZERO
+			(node as RigidBody3D).angular_velocity = Vector3.ZERO
+	objects.keep_on_clear = kept
+	if missing.is_empty():
+		objects.clear_layout(false, true)
+	else:
+		objects._apply_layout_data({"version": authored_layout.get("version", 7), "objects": missing})
+	objects.keep_on_clear = {}
+	_remember_marks()
 	objects.player_spawn_defined = keep_spawn
 	objects.player_spawn_transform = spawn
 	return true
+
+
+# Untouched static nodes grouped by scene path. Actors keep health and ammo, so
+# they are always rebuilt; so is anything whose structure changed since the snapshot.
+func _reusable_nodes() -> Dictionary:
+	var pool := {}
+	for node in objects.placed:
+		if not is_instance_valid(node) or bool(node.get_meta("planning_existing", false)) or node.has_meta("planning_actor_kind"):
+			continue
+		if str(node.get_meta("planning_scene_path", "")) in catalog.ENEMY_SCENES or _node_marks.get(node, "") != _mark(node):
+			continue
+		var scene := str(node.get_meta("planning_scene_path", ""))
+		if not pool.has(scene):
+			pool[scene] = []
+		pool[scene].append(node)
+	return pool
 
 
 # Layout fingerprint that ignores physics jitter below 5 cm / 2 degrees.
