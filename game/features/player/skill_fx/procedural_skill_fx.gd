@@ -180,7 +180,7 @@ static func spore_cocoon(parent: Node, center: Vector3, radius: float, fuse: flo
 	var spores := _droplets(fx, 26, radius * 2.2, Color(0.75, 1.0, 0.3), Color(0.5, 1.0, 0.1), 0.35, 3.0)
 	for drop in spores:
 		drop["node"].visible = false
-	fx.step = func(age: float, fade: float) -> void:
+	fx.step = func(age: float, _fade: float) -> void:
 		var size := 0.55
 		if age < fuse:
 			var grow := _ease_out_back(clampf(age / 0.25, 0.0, 1.0))

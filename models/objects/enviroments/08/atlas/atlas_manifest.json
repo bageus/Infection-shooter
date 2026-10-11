@@ -1,0 +1,45 @@
+{
+  "version": 1,
+  "images": {
+    "basecolor": "office_basecolor.png",
+    "normal": "office_normal.png",
+    "orm": "office_orm.png"
+  },
+  "color_space": {
+    "basecolor": "sRGB",
+    "normal": "linear",
+    "orm": "linear"
+  },
+  "orm_channels": {
+    "R": "occlusion",
+    "G": "roughness",
+    "B": "metallic"
+  },
+  "slots": [
+    {
+      "name": "Fabric_Sand",
+      "quadrant": "top_left",
+      "physical_material": "wood",
+      "metallic": 0
+    },
+    {
+      "name": "Graphite_Frame",
+      "quadrant": "top_right",
+      "physical_material": "metal",
+      "metallic": 1
+    },
+    {
+      "name": "Oak_Veneer",
+      "quadrant": "bottom_left",
+      "physical_material": "wood",
+      "metallic": 0
+    },
+    {
+      "name": "Exposed_Wood",
+      "quadrant": "bottom_right",
+      "physical_material": "wood",
+      "metallic": 0
+    }
+  ],
+  "uv_inset": 0.008
+}

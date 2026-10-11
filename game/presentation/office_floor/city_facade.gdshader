@@ -1,0 +1,54 @@
+shader_type spatial;
+// Decorative city has baked facade illumination independent of office lights.
+render_mode unshaded, cull_back;
+varying vec3 facade_position;
+varying vec3 facade_normal;
+varying vec3 style;
+
+void vertex() {
+	facade_position = (MODEL_MATRIX * vec4(VERTEX, 1.0)).xyz;
+	facade_normal = NORMAL;
+	style = COLOR.rgb;
+}
+
+void fragment() {
+	float city_distance = length(VERTEX);
+	vec3 fog_color = vec3(0.34, 0.44, 0.58);
+	float distance_fog = clamp(1.0 - exp(-city_distance * 0.010), 0.18, 0.985);
+	float lower_fog = 1.0 - smoothstep(-65.0, -12.0, facade_position.y);
+	float fog = 1.0 - (1.0 - distance_fog) * (1.0 - lower_fog);
+	float horizontal = abs(facade_normal.x) > 0.5 ? facade_position.z : facade_position.x;
+	float variant = floor(min(style.r, 0.999) * 3.0);
+	vec2 grid = vec2(horizontal / (2.2 + variant * 0.4), facade_position.y / 3.2);
+	vec2 cell = fract(grid);
+	vec2 aa = min(fwidth(grid), vec2(0.1));
+	float border = variant < 1.0 ? 0.018 : 0.10;
+	float sill = variant < 1.0 ? 0.018 : 0.11;
+	float top = variant < 1.0 ? 0.982 : 0.94;
+	float pane = smoothstep(border, border + aa.x, cell.x) * (1.0 - smoothstep(1.0-border-aa.x, 1.0-border, cell.x));
+	pane *= smoothstep(sill, sill + aa.y, cell.y) * (1.0 - smoothstep(top-aa.y, top, cell.y));
+	pane *= 1.0 - step(0.5, abs(facade_normal.y));
+	float seed = dot(floor(grid), vec2(12.9898, 78.233)) + style.b * 97.0;
+	float occupied = step(0.78, fract(sin(seed) * 43758.5453));
+	if (style.g > 0.75 || city_distance > 220.0) {
+		// Distant blocks retain only low-contrast silhouettes and sparse dim lights.
+		vec3 silhouette = vec3(0.16, 0.23, 0.33);
+		float light_dot = pane * occupied * 0.10;
+		ALBEDO = mix(silhouette, fog_color, max(fog, 0.88)) + vec3(0.45, 0.33, 0.16) * light_dot * (1.0 - fog);
+	} else {
+	float reflection = 0.5 + 0.5 * sin(horizontal * 0.06 + facade_position.y * 0.03 + style.b * 6.0);
+	vec3 concrete = mix(vec3(0.24, 0.30, 0.39), vec3(0.45, 0.49, 0.56), style.r);
+	vec3 glass = mix(vec3(0.11, 0.19, 0.29), vec3(0.29, 0.40, 0.53), reflection);
+	vec3 warm = vec3(0.78, 0.59, 0.32);
+	float divider = step(0.48, cell.x) * step(cell.x, 0.53);
+	vec3 window = mix(glass, warm, occupied * 0.85);
+	window = mix(window, vec3(0.12, 0.17, 0.24), divider * 0.65);
+	// Glass office towers have glass spandrels too, with thin mullions.
+	vec3 cladding = variant < 1.0 ? glass * 0.65 : concrete;
+	vec3 surface = mix(cladding, window, pane);
+	float side_shade = 0.82 + 0.18 * max(facade_normal.z, 0.0);
+	surface *= side_shade;
+	float haze = max(fog, style.g * 0.90);
+	ALBEDO = mix(surface, fog_color, haze);
+	}
+}

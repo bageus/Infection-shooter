@@ -3,7 +3,7 @@
 importer="scene"
 importer_version=1
 type="PackedScene"
-uid="uid://d2h4selol3kl"
+uid="uid://ca52x07j3pihj"
 path="res://.godot/imported/01_wall_door.glb-53472026c1472437dde5f8771fe9a3b8.scn"
 
 [deps]
@@ -35,7 +35,7 @@ animation/fps=30
 animation/trimming=false
 animation/remove_immutable_tracks=true
 animation/import_rest_as_RESET=false
-import_script/path=""
+import_script/path="res://addons/staged_glb_import/group01_material_post_import.gd"
 materials/extract=0
 materials/extract_format=0
 materials/extract_path=""

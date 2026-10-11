@@ -1,0 +1,87 @@
+{
+  "godot_version": {
+    "build": "official",
+    "hash": "ed1daf0bf001b61586d9930840f2f1394092c079",
+    "hex": 263938,
+    "major": 4,
+    "minor": 7,
+    "patch": 2,
+    "status": "stable",
+    "string": "4.7.2-stable (official)",
+    "timestamp": 0
+  },
+  "models": [
+    {
+      "file": "ak_rifle_lowpoly.glb",
+      "import_error": 0,
+      "materials": 8,
+      "meshes": 2,
+      "pbr_materials_with_all_maps": 8,
+      "scene_generated": true
+    },
+    {
+      "file": "aviation_minigun_lowpoly.glb",
+      "import_error": 0,
+      "materials": 8,
+      "meshes": 2,
+      "pbr_materials_with_all_maps": 8,
+      "scene_generated": true
+    },
+    {
+      "file": "m4_rifle_lowpoly.glb",
+      "import_error": 0,
+      "materials": 8,
+      "meshes": 2,
+      "pbr_materials_with_all_maps": 8,
+      "scene_generated": true
+    },
+    {
+      "file": "minigun_ammo_backpack_lowpoly.glb",
+      "import_error": 0,
+      "materials": 8,
+      "meshes": 1,
+      "pbr_materials_with_all_maps": 8,
+      "scene_generated": true
+    },
+    {
+      "file": "pistol_lowpoly(2).glb",
+      "import_error": 0,
+      "materials": 4,
+      "meshes": 4,
+      "pbr_materials_with_all_maps": 4,
+      "scene_generated": true
+    },
+    {
+      "file": "shotgun_lowpoly.glb",
+      "import_error": 0,
+      "materials": 4,
+      "meshes": 1,
+      "pbr_materials_with_all_maps": 4,
+      "scene_generated": true
+    },
+    {
+      "file": "six_chamber_launcher_lowpoly.glb",
+      "import_error": 0,
+      "materials": 6,
+      "meshes": 1,
+      "pbr_materials_with_all_maps": 6,
+      "scene_generated": true
+    },
+    {
+      "file": "sniper_rifle_lowpoly.glb",
+      "import_error": 0,
+      "materials": 8,
+      "meshes": 4,
+      "pbr_materials_with_all_maps": 8,
+      "scene_generated": true
+    },
+    {
+      "file": "uzi_lowpoly.glb",
+      "import_error": 0,
+      "materials": 4,
+      "meshes": 1,
+      "pbr_materials_with_all_maps": 4,
+      "scene_generated": true
+    }
+  ]
+}

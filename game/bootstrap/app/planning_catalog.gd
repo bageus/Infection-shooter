@@ -43,6 +43,17 @@ var actor_catalog = [
 	{"name":"Horde","path":ENEMY_SCENES[7],"kind":"enemy"}
 ]
 
+var weapon_catalog = [
+	{"name":"PISTOL","path":"res://game/bootstrap/app/weapon_pickups/pistol.tscn","kind":"weapon"},
+	{"name":"UZI","path":"res://game/bootstrap/app/weapon_pickups/uzi.tscn","kind":"weapon"},
+	{"name":"SHOTGUN","path":"res://game/bootstrap/app/weapon_pickups/shotgun.tscn","kind":"weapon"},
+	{"name":"LAUNCHER","path":"res://game/bootstrap/app/weapon_pickups/launcher.tscn","kind":"weapon"},
+	{"name":"AK","path":"res://game/bootstrap/app/weapon_pickups/ak.tscn","kind":"weapon"},
+	{"name":"M4","path":"res://game/bootstrap/app/weapon_pickups/m4.tscn","kind":"weapon"},
+	{"name":"SNIPER","path":"res://game/bootstrap/app/weapon_pickups/sniper.tscn","kind":"weapon"},
+	{"name":"MINIGUN","path":"res://game/bootstrap/app/weapon_pickups/minigun.tscn","kind":"weapon"}
+]
+
 
 # Dead infected and loose body parts placed as decoration (ADR-0017).
 var gore_catalog = [
@@ -118,6 +129,7 @@ func _environment_display_name(file_name: String) -> String:
 
 func _environment_scene_for(file_name: String) -> String:
 	var structural = {
+		"01_column_2.glb": "res://game/presentation/office_floor/public/structural/column_2.tscn",
 		"01_column.glb": "res://game/presentation/office_floor/public/structural/column.tscn", "01_elevator_cabin_freight.glb": "res://game/presentation/office_floor/public/structural/elevator_cabin_freight.tscn",
 		"01_elevator_cabin_passenger.glb": "res://game/presentation/office_floor/public/structural/elevator_cabin_passenger.tscn", "01_elevator_door.glb": "res://game/presentation/office_floor/public/structural/elevator_door.tscn",
 		"01_floor_pad.glb": "res://game/presentation/office_floor/public/structural/floor_pad.tscn", "01_wall_door.glb": "res://game/presentation/office_floor/public/structural/wall_door.tscn",
@@ -156,6 +168,8 @@ func _instantiate_asset(asset_path: String) -> Node3D:
 
 
 func _create_asset(asset_path: String) -> Node3D:
+	if asset_path == ENVIRONMENT_ROOT + "/01/01_stairs_2.glb":
+		asset_path = ENVIRONMENT_ROOT + "/01/01_stairs.glb"
 	if asset_path.begins_with(ENVIRONMENT_ROOT + "/") and asset_path.ends_with(".glb"):
 		if asset_path.get_file().begins_with("09_") and WORKSTATIONS.VARIANTS["paper"].has(asset_path.get_file().get_basename()):
 			var paper = PAPER_PROP_SCENE.instantiate() as Node3D
@@ -175,11 +189,28 @@ func _create_asset(asset_path: String) -> Node3D:
 	var packed = load(asset_path) as PackedScene
 	if packed == null:
 		return null
-	return packed.instantiate() as Node3D
+	var instance := packed.instantiate()
+	if not instance is Node3D:
+		instance.free()
+		return null
+	return instance as Node3D
 
 
 func _migrate_scene_path(old_path: String) -> String:
+	# Group 01 packs were briefly uploaded under models/. Keep those saved maps
+	# loadable after restoring the runtime paths used by structural scenes.
+	var group_one := ENVIRONMENT_ROOT + "/01/"
+	if old_path.begins_with(group_one) and old_path.ends_with(".glb"):
+		var filename := old_path.get_file().replace("01_glass_wall_full_breakable(1).glb", "01_glass_wall_full_breakable.glb").replace("01_stairs_2.glb", "01_stairs.glb")
+		var canonical := group_one + filename
+		if ResourceLoader.exists(canonical):
+			if filename == "01_column_2.glb":
+				return _environment_scene_for(filename)
+			return canonical
 	var replacements = {
+		"res://models/objects/enviroments/05/09_phone_a_base.glb": "res://models/objects/enviroments/05/05_desk_phone.glb",
+		"res://models/objects/enviroments/05/09_phone_a_base_hang.glb": "res://models/objects/enviroments/05/05_desk_phone.glb",
+		"res://models/objects/enviroments/05/09_phone_b.glb": "res://models/objects/enviroments/05/05_desk_phone.glb",
 		"res://models/objects/01_wall_door.glb": "res://game/presentation/office_floor/public/structural/wall_door.tscn",
 		"res://models/objects/01_wall_door_2.glb": "res://game/presentation/office_floor/public/structural/wall_door.tscn",
 		"res://models/objects/01_wall_inner_corner.blend": "",

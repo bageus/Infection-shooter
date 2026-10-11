@@ -1,6 +1,6 @@
 extends SceneTree
 ## Runtime checks for the upper-body hit reaction and the charge/walk pace
-## (ADR-0038): a shot to one side of the torso swings that shoulder back while
+## (ADR-0040): a shot to one side of the torso swings that shoulder back while
 ## hips and legs keep the clip, the body is never moved as a whole, the torso
 ## settles again; charges come in bursts with walks between them, the final
 ## approach is always a charge and pace changes are eased.

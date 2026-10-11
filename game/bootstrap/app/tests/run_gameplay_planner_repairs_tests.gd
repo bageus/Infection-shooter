@@ -11,6 +11,9 @@ var planner: Node
 
 
 func _initialize() -> void:
+	# Keep the complete map and UI pixels; bound only software shadow rasterization.
+	root.positional_shadow_atlas_size = 256
+	RenderingServer.directional_shadow_atlas_set_size(256, true)
 	call_deferred("_run")
 
 
@@ -71,6 +74,12 @@ func _audio() -> void:
 
 
 func _blood(player: Node3D) -> void:
+	# Run splatter against known visible receivers outside the editable office.
+	var original := player.global_position
+	player.global_position = Vector3(1000, 1, 1000)
+	var support := _wall(Vector3(1000, -.1, 1000))
+	(support.get_child(0) as CollisionShape3D).shape.size = Vector3(20, .2, 20)
+	(support.get_child(1) as MeshInstance3D).mesh.size = Vector3(20, .2, 20)
 	var effects: Node3D = stage.get("blood_effects")
 	_check(player.is_connected("projectile_blood", Callable(effects, "splatter_hit")), "Bootstrap binds player to common blood renderer")
 	effects.call("clear_marks")
@@ -79,7 +88,7 @@ func _blood(player: Node3D) -> void:
 	await physics_frame
 	_check(effects.call("statistics")["marks"] == 0, "Armour absorption creates no tissue blood")
 	var wall := _wall(player.global_position + Vector3(0, 0, -1.0))
-	var surfaces: Array[Node] = [wall]
+	var surfaces: Array[Node] = [wall, support]
 	effects.call("configure_environment", surfaces)
 	await physics_frame
 	await physics_frame
@@ -123,6 +132,8 @@ func _blood(player: Node3D) -> void:
 	paused = false
 	player.set("health", player.get("max_health"))
 	effects.call("clear_marks")
+	player.global_position = original
+	support.queue_free()
 	wall.queue_free()
 	await process_frame
 
@@ -169,7 +180,7 @@ func _placement() -> void:
 			item.set_meta("planning_wall_normal", Vector3.LEFT)
 			geometry.call("_apply_wall_mount", item)
 			var mounted: AABB = item.global_transform * bounds
-			_check(absf(mounted.end.x - (3.0 - SURFACE.CLEARANCE)) < .0001, "Actual scaled back plane touches wall: " + model)
+			_check(absf(mounted.end.x - (3.0 - SURFACE.WALL_CLEARANCE)) < .0001, "Actual scaled back plane touches wall: " + model)
 		if "floor" in model:
 			item.global_position.y = -.2
 			geometry.call("_restore_floor_surface", item, model)

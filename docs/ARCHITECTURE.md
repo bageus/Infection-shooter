@@ -244,7 +244,7 @@ core.vfx surface_atlases_v1 supplies immutable atlas textures; features.combat i
 
 - bootstrap создаёт одну mission-local очередь полного поиска пути infected.
   `configure_chase_budget` внедряет её в начальных и призванных врагов.
-  FIFO и бюджет двух A* за физический кадр принадлежат features.infected;
+  Priority heap, лимит двух завершений, мягкий бюджет 2000 мкс и 64 раскрытий за физический кадр принадлежат features.infected;
   глобальные счётчики/Autoload не добавлены.
 - features.combat.public.prop_damage_state владеет здоровьем, индексом
   варианта, ожидающим переходом и одноразовыми флагами environment_prop.
@@ -267,4 +267,69 @@ immutable cache физических ресурсов гильз. Публичн
 
 ADR-0037: core.vfx предоставляет opt-in surface_stamp_cache_v1; instance принадлежит существующему combat impact pool. Stateless v1 совместим; snapshots/indices ограничены 128 Mesh, invalidation Mesh.changed, teardown отключает observers. Новых зависимостей и глобального состояния нет.
 
-ADR-0038: features.character_animation владеет аддитивной реакцией корпуса на попадание (SkeletonModifier3D hit_reaction: позвоночник, грудь, запаздывающая голова; бёдра и ноги не трогаются) и выпрямлением колена в процедурной походке; notify_hit аддитивно принимает точку, направление и силу. features.infected владеет темпом погони chase_pace (рывки бега и шаг между ними, ускорение без скачков). Новых зависимостей, глобального состояния и изменений DTO нет.
+## Локальная декомпозиция EnvironmentProp
+
+presentation.office_floor сохраняет прежнего владельца состояния и публичную
+сцену environment_prop. Root принимает команды попаданий, применяет результат
+features.combat.prop_damage_state и конфигурирует своё RigidBody и дисплей.
+EnvironmentPropGeometry владеет импортированным Visual, упорядоченными
+вариантами/стадиями и соответствием collision shape → mesh.
+EnvironmentPropBreakup отображает разрушение: фасадные сколы, последовательные
+обломки и стекло; body и geometry передаются явно. Глобальных кэшей нет.
+
+Root остаётся выше порога 300 строк: его оставшиеся методы являются адаптерами
+публичной сцены и локальной композицией физического тела. Декомпозиция выполнена
+по причинам изменения, не по числу строк; наследники и диагностические поля
+сохранены. Дополнительные pass-through классы для лимита не вводятся.
+Контракты, DTO, балансы, модульные зависимости и policy не меняются.
+
+## Группа 03: ресурсы стадий по требованию
+
+Office-floor Geometry сохраняет владение visual/stages/collision и удерживает immutable PackedScene стадий в течение жизни объекта. Post-import добавляет пустые именованные группы с lazy_stage_path; Geometry наполняет группу при переходе. ResourceLoader разделяет ресурсы, scene nodes остаются локальными. Manifest относится к assets, не DTO сохранений. Глобальный cache, новый owner, dependency или публичный API не добавлены.
+
+
+## P1 аудита — безопасная запись и ограничение кадра
+
+bootstrap.app сохраняет владение картой и стартом миссии. Приватный
+planning_map_file записывает JSON во временный соседний файл, проверяет байты
+и прежнюю schema v1–v8, готовит проверенную .bak предыдущей валидной карты,
+затем заменяет основной файл. mission_loader предлагает backup/default при
+повреждении, не исправляя пользовательский файл без команды сохранения.
+
+features.infected сохраняет route/budget_v1: A* frontier и очередь порций
+используют приватный stable binary heap, ожидание повышает приоритет дальних
+запросов. Physics cast не прерывается посередине: 2000 мкс — мягкая граница,
+дополненная лимитом 64 раскрытий и прежними 192 раскрытиями на поиск.
+Clearance memoization ограничена кадром/порцией; после изменений препятствий
+в следующем физическом кадре запрос выполняется снова. Пройденный путь
+проверяется перед движением, движение через коллизии не разрешается.
+
+office_floor/display_wall сохраняет derived lighting: до 16 видимых близких
+screen lights и 4 shadow lights; emission/content независимы от этого лимита.
+DTO, методы публичных сцен, зависимости и владельцы состояния прежние.
+
+ADR-0039: bootstrap interface_v1.lighting — optional bool с default true, применяемый к существующим лампам и global overhead; layout DTO прежний. HUD корректирует покрытие линзы на экранный пиксель; infection_source рисует ограниченный procedural smoke; office_floor владеет glass facade variant. Владельцы и зависимости прежние.
+
+
+Стыки планировщика (T002, 10.10.2026): bootstrap planning_edge_snap владеет только производным расчётом позиции по геометрии; состояния/DTO прежние. Render helper ContactShadowQuad помечается planning_bounds_excluded для пропуска в существующем geometry probe. Import extension восстанавливает известные flattened-stage exports, без изменения исходных GLB; office_floor Geometry и staged_table сохраняют свои обязанности. Public методы, зависимости, policy и owners прежние; исключений нет.
+
+
+## P2: ограниченные очереди представления и загрузки
+
+bootstrap.app сохраняет владельца occlusion visuals и загрузки карт. Приватная
+occlusion_query_layer добавляет/снимает только бит layer 9 на structural bodies;
+исходные gameplay bits не заменяются. Round robin ограничен 8 subjects/24 rays
+за physics tick. scene_resource_queue удерживает не более двух background
+requests, с мягким allocator headroom 128 МиБ и headless Dummy fallback=1;
+Script preparation остаётся на main thread. Loader освобождает payload refs
+после commit/discard и отдельно измеряет instantiate/add_child.
+
+presentation.office_floor сохраняет владельца физических визуальных фрагментов:
+FragmentRuntime является дочерним private узлом явно переданного effects root,
+без Autoload, глобального пула или поиска сервиса по SceneTree. FIFO содержит
+WeakRef и generation identity, чтобы повторное использование Node не совпадало
+со старым tombstone. Generic pool живёт/освобождается вместе с контейнером.
+Fade снимает collision mask/layer, freeze и callbacks до анимации.
+Public API, layout DTO v8, balance, dependency edges и policy прежние.
+
+ADR-0040: features.character_animation владеет аддитивной реакцией корпуса на попадание (SkeletonModifier3D hit_reaction: позвоночник, грудь, запаздывающая голова; бёдра и ноги не трогаются) и выпрямлением колена в процедурной походке; notify_hit аддитивно принимает точку, направление и силу. features.infected владеет темпом погони chase_pace (рывки бега и шаг между ними, ускорение без скачков). Новых зависимостей, глобального состояния и изменений DTO нет.

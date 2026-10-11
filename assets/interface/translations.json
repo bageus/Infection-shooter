@@ -138,7 +138,8 @@
     "electronicParticles": "Искры при повторных попаданиях в электронику",
     "skillEffects": "Эффекты навыков",
     "skillEffectsSheets": "Спрайтовые (ассеты)",
-    "skillEffectsProcedural": "Процедурные (свои)"
+    "skillEffectsProcedural": "Процедурные (свои)",
+    "lighting": "Освещение"
   },
   "en": {
     "demo": "INTERACTIVE UI DEMO",
@@ -279,6 +280,7 @@
     "electronicParticles": "Sparks on repeated hits to electronics",
     "skillEffects": "Skill effects",
     "skillEffectsSheets": "Sprite sheets (assets)",
-    "skillEffectsProcedural": "Procedural (own)"
+    "skillEffectsProcedural": "Procedural (own)",
+    "lighting": "Lighting"
   }
 }

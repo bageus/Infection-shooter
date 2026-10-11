@@ -1,5 +1,5 @@
 extends SkeletonModifier3D
-## Additive upper-body hit reaction layered over the playing clip (ADR-0038).
+## Additive upper-body hit reaction layered over the playing clip (ADR-0040).
 ##
 ## A shot is an angular impulse on the torso: the lever from the spine to the
 ## hit point crossed with the shot direction. A shot to the right of the chest

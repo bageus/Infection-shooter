@@ -1,25 +1,13 @@
 shader_type spatial;
-// Mutagen cloud: a MultiMesh of camera-facing gas puffs (plus a ground haze
-// quad). Each puff shows one of 12 sheet variants, churns through a
-// domain-warped flow field, slowly morphs into a second variant, pulses its
-// glowing veins and dissolves through noise when it dies.
-//
-// INSTANCE_CUSTOM: r = variant / 12, g = random seed, b = signed spin
-// speed (rad/s), a = stagger (0..1: appear delay, or the cycle offset of a
-// permanent cloud). COLOR = per-puff tint.
+// Procedural translucent green smoke. No sprite textures or flipbooks.
+// INSTANCE_CUSTOM carries variant, seed, spin and life offset; COLOR is tint.
 render_mode blend_mix, unshaded, cull_disabled, depth_draw_never, shadows_disabled;
 
-uniform sampler2D atlas_a : source_color, filter_linear_mipmap, repeat_disable;
-uniform sampler2D atlas_b : source_color, filter_linear_mipmap, repeat_disable;
 uniform sampler2D wall_mask : filter_nearest, repeat_disable;
 uniform bool wall_mask_enabled = false;
 uniform float wall_radius = 2.25;
 uniform float opacity : hint_range(0.0, 1.0) = 0.55;
-uniform float flow_strength : hint_range(0.0, 0.2) = 0.07;
 uniform float flow_speed : hint_range(0.0, 2.0) = 0.35;
-uniform float morph_speed : hint_range(0.0, 1.0) = 0.12;
-uniform vec4 vein_color : source_color = vec4(0.72, 1.0, 0.22, 1.0);
-uniform float vein_glow : hint_range(0.0, 4.0) = 0.35;
 // Ground haze: the quad lies flat on the floor instead of facing the camera.
 uniform bool ground = false;
 
@@ -30,15 +18,17 @@ instance uniform float looping = 0.0;
 instance uniform float cycle_seconds = 14.0;
 instance uniform vec3 cloud_center = vec3(0.0);
 
+varying vec3 v_world_position;
 varying float v_life;
 varying float v_seed;
 varying float v_variant;
-varying float v_morph_variant;
 varying vec4 v_tint;
 varying float v_spin;
 
 float hash(vec2 p) {
-	return fract(sin(dot(p, vec2(127.1, 311.7))) * 43758.5453);
+	vec3 q = fract(vec3(p.xyx) * 0.1031);
+	q += dot(q, q.yzx + 33.33);
+	return fract((q.x + q.y) * q.z);
 }
 
 float noise(vec2 p) {
@@ -46,17 +36,6 @@ float noise(vec2 p) {
 	vec2 f = fract(p);
 	f = f * f * (3.0 - 2.0 * f);
 	return mix(mix(hash(i), hash(i + vec2(1.0, 0.0)), f.x), mix(hash(i + vec2(0.0, 1.0)), hash(i + vec2(1.0)), f.x), f.y);
-}
-
-float fbm(vec2 p) {
-	float value = 0.0;
-	float amplitude = 0.5;
-	for (int i = 0; i < 4; i++) {
-		value += amplitude * noise(p);
-		p = p * 2.02 + vec2(17.3, 9.1);
-		amplitude *= 0.5;
-	}
-	return value;
 }
 
 vec2 rotate(vec2 p, float angle) {
@@ -69,7 +48,7 @@ void vertex() {
 	vec4 custom = INSTANCE_CUSTOM;
 	v_seed = custom.g;
 	v_variant = floor(custom.r * 12.0 + 0.5);
-	v_morph_variant = mod(v_variant + 3.0 + floor(v_seed * 5.0), 12.0);
+
 	v_tint = COLOR;
 	float life;
 	if (looping > 0.5) {
@@ -99,57 +78,32 @@ void vertex() {
 	} else {
 		world = center + (INV_VIEW_MATRIX[0].xyz * local.x + INV_VIEW_MATRIX[1].xyz * local.y) * scale;
 	}
+	v_world_position = world;
 	POSITION = PROJECTION_MATRIX * VIEW_MATRIX * vec4(world, 1.0);
 }
 
-vec4 sample_variant(float variant, vec2 uv) {
-	float index = mod(variant, 6.0);
-	vec2 cell = vec2(mod(index, 3.0), floor(index / 3.0));
-	vec2 atlas_uv = (cell + clamp(uv, vec2(0.004), vec2(0.996))) / vec2(3.0, 2.0);
-	return variant < 6.0 ? texture(atlas_a, atlas_uv) : texture(atlas_b, atlas_uv);
-}
-
 void fragment() {
+	if (v_world_position.y < cloud_center.y + 0.5 || v_world_position.y > cloud_center.y + 2.0) {
+		discard;
+	}
+	vec2 centered = UV * 2.0 - 1.0;
+	float radial = dot(centered, centered);
+	if (radial >= 1.0 || v_life <= 0.0 || v_life >= 1.0) {
+		discard;
+	}
 	float l = clamp(v_life, 0.0, 1.0);
-	float t = (TIME + phase) * flow_speed + v_seed * 31.0;
-	vec2 p = UV - 0.5;
-	// Swirl: stronger in the core, slowly turning both ways.
-	float radius = length(p);
-	float swirl = sin(t * 0.6 + v_seed * 4.0) * 0.55 * (1.0 - smoothstep(0.0, 0.5, radius));
-	vec2 swirled = rotate(p, swirl) + 0.5;
-	// Domain-warped flow field makes the gas churn instead of sliding.
-	vec2 warp = vec2(fbm(UV * 3.0 + vec2(t, -t * 0.7)), fbm(UV * 3.0 + vec2(-t * 0.8, t * 0.6) + 5.2)) - 0.5;
-	vec2 warp2 = vec2(fbm(UV * 5.5 - vec2(t * 1.3, t * 0.4) + 11.0), fbm(UV * 5.5 + vec2(t * 0.5, -t * 1.1) + 3.7)) - 0.5;
-	vec2 uv_a = swirled + warp * flow_strength * 1.6 + warp2 * flow_strength * 0.6;
-	vec2 uv_b = swirled - warp * flow_strength + warp2 * flow_strength;
-	vec4 gas = mix(sample_variant(v_variant, uv_a), sample_variant(v_variant, uv_b), 0.35);
-	// Slow morph into another variant through a moving noise mask.
-	float morph_mask = smoothstep(0.35, 0.65, fbm(UV * 2.2 + vec2(TIME * morph_speed, v_seed * 9.0)) + 0.35 * sin(TIME * morph_speed * 2.0 + v_seed * 6.0));
-	vec4 other = sample_variant(v_morph_variant, rotate(p, -swirl * 0.7) + 0.5 - warp * flow_strength);
-	gas = mix(gas, other, morph_mask * 0.6);
-
-	float activity = 1.0 - smoothstep(0.35, 1.0, l);
-	vec3 color = gas.rgb * v_tint.rgb;
-	// Glowing veins: the brightest strands pulse with a slow toxic heartbeat.
-	float luminance = dot(gas.rgb, vec3(0.3, 0.59, 0.11));
-	float veins = smoothstep(0.5, 0.85, luminance);
-	float pulse = 0.55 + 0.45 * sin(TIME * 2.6 + v_seed * 12.0 + fbm(UV * 4.0 + t) * 5.0);
-	color += vein_color.rgb * veins * vein_glow * pulse * mix(0.35, 1.0, activity);
-	// Fresh gas flashes, old gas darkens.
-	color *= mix(0.72, 1.0, activity);
-
-	// Birth: quick fade in. Death: noise eats the gas from its thin edges.
-	float dissolve = smoothstep(0.5, 1.0, l);
-	float grain = fbm(UV * 4.0 + vec2(v_seed * 13.0, -t * 0.5));
-	float eaten = smoothstep(dissolve - 0.18, dissolve + 0.02, grain * (0.55 + 0.45 * gas.a));
-	float alpha = gas.a * v_tint.a * opacity * smoothstep(0.0, 0.05, l) * mix(1.0, eaten, step(0.001, dissolve));
-	alpha *= 1.0 - smoothstep(0.92, 1.0, l);
-	// Soft cell edge so no straight border of the sheet ever shows.
-	vec2 edge = min(UV, 1.0 - UV);
-	alpha *= smoothstep(0.0, 0.06, min(edge.x, edge.y));
-
+	float t = (TIME + phase) * flow_speed;
+	vec2 flow = UV * 3.5 + vec2(v_seed * 19.0 + v_variant, -t);
+	// Two low-frequency noise layers; animation runs entirely on the GPU.
+	float density = noise(flow) * 0.7 + noise(flow * 2.03 + vec2(t * 0.3, 7.1)) * 0.3;
+	float edge = 1.0 - smoothstep(0.18, 1.0, radial);
+	float envelope = smoothstep(0.0, 0.08, l) * (1.0 - smoothstep(0.55, 1.0, l));
+	float alpha = edge * smoothstep(0.15, 0.85, density) * opacity * v_tint.a * envelope;
+	float height = v_world_position.y - cloud_center.y;
+	alpha *= smoothstep(0.5, 0.65, height) * (1.0 - smoothstep(1.85, 2.0, height));
+	vec3 color = mix(vec3(0.12, 0.30, 0.08), vec3(0.38, 0.66, 0.22), density) * v_tint.rgb;
 	if (wall_mask_enabled) {
-		vec3 world_position = (INV_VIEW_MATRIX * vec4(VERTEX, 1.0)).xyz;
+		vec3 world_position = v_world_position;
 		vec2 horizontal = world_position.xz - cloud_center.xz;
 		float azimuth = atan(horizontal.y, horizontal.x);
 		float sample_index = floor((azimuth + PI) / TAU * 24.0);

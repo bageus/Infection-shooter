@@ -64,19 +64,22 @@ func _draw() -> void:
 	var center := size * 0.5
 	var radius := minf(size.x, size.y) * 0.42
 
-	var heading := Vector2(0, -11)
-	var left := Vector2(-6, 7)
-	var right := Vector2(6, 7)
+	# Marks keep their proportions as the radar is resized (authored at 230 px).
+	var scale_factor := clampf(radius / 96.0, 0.5, 1.0)
+	var heading := Vector2(0, -11) * scale_factor
+	var left := Vector2(-6, 7) * scale_factor
+	var right := Vector2(6, 7) * scale_factor
 	draw_colored_polygon(PackedVector2Array([center + heading, center + left, center + right]), PALETTE.INK)
 
 	for enemy in enemies.get_children():
 		if enemy is Node3D:
-			_draw_blip(center, radius, enemy.global_position, PALETTE.WARNING, 3.5)
+			_draw_blip(center, radius, enemy.global_position, PALETTE.WARNING, 3.5 * scale_factor)
 
 
 func _draw_blip(center: Vector2, radius: float, world_position: Vector3, color: Color, blip_radius: float) -> void:
 	var delta := world_position - player.global_position
 	var point := Vector2(delta.x, delta.z) / world_radius * radius
-	if point.length() > radius - 6.0:
-		point = point.normalized() * (radius - 6.0)
+	var edge := radius - blip_radius - 2.0
+	if point.length() > edge:
+		point = point.normalized() * edge
 	draw_circle(center + point, blip_radius, color)

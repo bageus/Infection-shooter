@@ -22,6 +22,7 @@ func _run() -> void:
 	_test_timing()
 	for model: String in PROFILES.MODELS:
 		_test_model(model)
+	_test_light_budget()
 	_test_animation_updates()
 	await _test_wall()
 	if DisplayServer.get_name() != "headless":
@@ -214,3 +215,49 @@ func _test_animation_updates() -> void:
 	prop.call("configure_display", {"power": "off", "seed": 2})
 	_check(not view.is_processing(), "Standalone off display has no idle callback")
 	prop.queue_free()
+
+
+func _test_light_budget() -> void:
+	var camera := Camera3D.new()
+	stage.add_child(camera)
+	camera.global_position = Vector3(0, 1, 4)
+	camera.look_at(Vector3(0, 1, 0))
+	camera.current = true
+	var props: Array[Node3D] = []
+	for index in 24:
+		var prop := _spawn("05_monitor2_destructible.glb")
+		prop.position = Vector3(float(index % 8) * .25 - .9, 1, 0)
+		props.append(prop)
+	wall.call("_refresh_lights")
+	var lit := 0
+	var shadows := 0
+	for display in wall.get("displays"):
+		for screen: Dictionary in display.get("screens"):
+			lit += int(screen.light.visible)
+			shadows += int(screen.light.visible and screen.light.shadow_enabled)
+	_check(lit <= 16 and lit > 0 and shadows <= 4, "Crowded screens obey shared glow and shadow budgets")
+	var visibility_changes := {"count": 0}
+	for prop in props:
+		for screen: Dictionary in prop.get("_display").screens:
+			screen.light.visibility_changed.connect(func() -> void: visibility_changes.count += 1)
+	wall.call("_refresh_lights")
+	_check(visibility_changes.count == 0, "Stable camera refresh does not toggle screen light visibility")
+	camera.position = Vector3(0, 1, 40)
+	wall.call("_refresh_lights")
+	for prop in props:
+		var view: Node3D = prop.get("_display")
+		_check(not view.screens[0].light.visible, "Distant screen has no local light")
+		_check(view.screens[0].mesh.material_override.get_shader_parameter("powered"), "Distant screen keeps powered image and emission")
+	camera.position = Vector3(0, 1, -4)
+	camera.look_at(Vector3(0, 1, -10))
+	wall.call("_refresh_lights")
+	for prop in props:
+		_check(not prop.get("_display").screens[0].light.visible, "Offscreen screens have no local light")
+	camera.position = Vector3(0, 1, 4)
+	camera.look_at(Vector3(0, 1, 0))
+	props[0].call("configure_display", {"power": "off", "seed": 2})
+	wall.call("_refresh_lights")
+	_check(not props[0].get("_display").screens[0].light.visible, "Power-off stays dark after budget update")
+	for prop in props:
+		prop.free()
+	camera.free()

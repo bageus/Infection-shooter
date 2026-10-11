@@ -5,6 +5,10 @@ const TEXTURES := {
 	"PISTOL": "res://models/objects/textures/ammo/ammo_pistols.png",
 	"UZI": "res://models/objects/textures/ammo/ammo_pistols.png",
 	"RIFLE": "res://models/objects/textures/ammo/ammo_automate.png",
+	"AK": "res://models/objects/textures/ammo/ammo_automate.png",
+	"M4": "res://models/objects/textures/ammo/ammo_automate.png",
+	"SNIPER RIFLE": "res://models/objects/textures/ammo/ammo_automate.png",
+	"MINIGUN": "res://models/objects/textures/ammo/ammo_automate.png",
 	"SHOTGUN": "res://models/objects/textures/ammo/ammo_shutgun.png",
 	"GRENADE LAUNCHER": "res://models/objects/textures/ammo/ammo_granade.png"
 }

@@ -65,6 +65,7 @@ func configure(owner_planner: Node, planning_ui: Control) -> void:
 	title.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	header.add_child(title)
 	_button(header, "?", _toggle_help)
+	_button(box, "TOP VIEW", func() -> void: markers.call("show_top_view", planner.camera))
 	front_button = _button(box, "Front: seated side", _switch_front)
 	var zone_scroll := ScrollContainer.new()
 	zone_scroll.custom_minimum_size.y = 105

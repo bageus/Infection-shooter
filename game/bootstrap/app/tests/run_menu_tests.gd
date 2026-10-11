@@ -49,8 +49,10 @@ func _run() -> void:
 	menu.call("activate", "briefing")
 	_check(menu.get("modal") != null, "new operation opens real briefing")
 	menu.call("dispatch", "start")
-	await process_frame
-	await process_frame
+	var deadline := Time.get_ticks_msec() + 90000
+	while current_scene == frontend and Time.get_ticks_msec() < deadline:
+		await process_frame
+	_check(current_scene != frontend, "deployment completes within the loading timeout")
 	var app: Node = current_scene
 	_check(app.scene_file_path == "res://game/bootstrap/app/main.tscn", "deployment loads combat scene")
 	_test_gameplay_font(app)
@@ -58,6 +60,11 @@ func _run() -> void:
 	await _test_pause_and_planner(app)
 	await _test_results_and_return(app)
 	_restore_settings()
+	# Finish scene teardown before the renderer shuts down, including queued frees.
+	current_scene.queue_free()
+	current_scene = null
+	await process_frame
+	await process_frame
 	print("Menu integration tests: %d failures" % failures)
 	quit(0 if failures == 0 else 1)
 
@@ -124,8 +131,10 @@ func _test_results_and_return(app: Node) -> void:
 	_check(result.get("screen_kind") == "complete", "floor goal uses success artwork")
 	_check(result.call("text", "samples") == "Floor", "success describes current floor instead of campaign extraction")
 	result.call("dispatch", "restart")
-	await process_frame
-	await process_frame
+	var deadline := Time.get_ticks_msec() + 90000
+	while current_scene == app and Time.get_ticks_msec() < deadline:
+		await process_frame
+	_check(current_scene != app, "restart completes within the loading timeout")
 	app = current_scene
 	_check(not paused and not app.get("_ended"), "restart restores active combat")
 	app.call("_open_pause_menu")

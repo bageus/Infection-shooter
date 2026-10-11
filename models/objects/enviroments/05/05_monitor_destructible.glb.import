@@ -3,7 +3,7 @@
 importer="scene"
 importer_version=1
 type="PackedScene"
-uid="uid://bxtpyc5dehygy"
+uid="uid://c6a8iaxft3c21"
 path="res://.godot/imported/05_monitor_destructible.glb-d8eb5664b270b3aa6b8e30974eb5f265.scn"
 
 [deps]
@@ -14,7 +14,7 @@ dest_files=["res://.godot/imported/05_monitor_destructible.glb-d8eb5664b270b3aa6
 [params]
 
 nodes/root_type=""
-nodes/root_name=""
+nodes/root_name="05_monitor_destructible"
 nodes/root_script=null
 mesh_library/use_node_names_as_mesh_names=false
 array_mesh/deduplicate_surfaces=true

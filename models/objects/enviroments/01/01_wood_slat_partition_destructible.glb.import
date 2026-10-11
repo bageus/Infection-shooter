@@ -3,7 +3,7 @@
 importer="scene"
 importer_version=1
 type="PackedScene"
-uid="uid://835broj3k38f"
+uid="uid://da4f2o6ktfexh"
 path="res://.godot/imported/01_wood_slat_partition_destructible.glb-9f124bb3a489be78f1e560d2c4368cb2.scn"
 
 [deps]
@@ -35,7 +35,7 @@ animation/fps=30
 animation/trimming=false
 animation/remove_immutable_tracks=true
 animation/import_rest_as_RESET=false
-import_script/path=""
+import_script/path="res://addons/staged_glb_import/group01_material_post_import.gd"
 materials/extract=0
 materials/extract_format=0
 materials/extract_path=""

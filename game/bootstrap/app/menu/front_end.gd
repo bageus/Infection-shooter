@@ -1,6 +1,7 @@
 extends Control
 
 @onready var menu = $Menu
+var _loading := false
 
 
 func _ready() -> void:
@@ -11,9 +12,15 @@ func _ready() -> void:
 
 
 func _action(action: String) -> void:
+	if _loading:
+		return
 	match action:
 		"start", "restart":
-			get_tree().change_scene_to_file("res://game/bootstrap/app/main.tscn")
+			_loading = true
+			var loader := preload("res://game/bootstrap/app/menu/mission_loader.gd").new()
+			add_child(loader)
+			loader.completed.connect(func(_success: bool) -> void: _loading = false)
+			loader.start()
 		"quit":
 			if OS.has_feature("web"):
 				menu.reason_key = "webQuit"

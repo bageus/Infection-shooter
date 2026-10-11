@@ -1,0 +1,35 @@
+{
+  "resolution": 2048,
+  "grid": [
+    4,
+    4
+  ],
+  "cell_size": 512,
+  "padding": 8,
+  "basecolor": "sRGB",
+  "normal": "linear",
+  "orm": {
+    "space": "linear",
+    "R": "AO",
+    "G": "roughness",
+    "B": "metallic"
+  },
+  "cells": {
+    "0": "Graphite_ABS",
+    "1": "Pearl_White_ABS",
+    "2": "Satin_Aluminium",
+    "3": "Neutral_Tintable_ABS",
+    "4": "Dark_Display_Glass",
+    "5": "Dark_Rubber",
+    "6": "Electronics_Interior",
+    "7": "Keyboard_Legends",
+    "8": "Raw_Plastic_Core",
+    "9": "Amber_ABS",
+    "10": "Red_ABS",
+    "11": "Phone_Panel_Legends",
+    "12": "Blue_Sensor_Glass",
+    "13": "Warm_Lamp_Diffuser",
+    "14": "Rubber_Tintable",
+    "15": "Spare_Light_ABS"
+  }
+}

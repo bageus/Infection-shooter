@@ -1,53 +1,65 @@
 {
-  "height": 2.0,
+  "height": 2.51,
   "stations": [
     {
-      "x": 0,
-      "z": 0,
+      "x": 0.0,
+      "z": 0.0,
       "angle": 0,
-      "grid_height": 0.5,
-      "grid_width": 0.9,
-      "grid_depth": 0.43,
-      "usable_width": 0.9,
-      "usable_depth": 0.43,
-      "zone_width": 0.6,
-      "zone_depth": 0.34
+      "grid_height": 0.04,
+      "grid_width": 0.9726,
+      "grid_depth": 0.46,
+      "usable_width": 0.9726,
+      "usable_depth": 0.46,
+      "zone_width": 0.65164,
+      "zone_depth": 0.368
     },
     {
-      "x": 0,
-      "z": 0,
+      "x": 0.0,
+      "z": -0.00785,
       "angle": 0,
-      "grid_height": 1.0,
-      "grid_width": 0.9,
-      "grid_depth": 0.43,
-      "usable_width": 0.9,
-      "usable_depth": 0.43,
-      "zone_width": 0.6,
-      "zone_depth": 0.34
+      "grid_height": 0.6563,
+      "grid_width": 0.9564,
+      "grid_depth": 0.4277,
+      "usable_width": 0.9564,
+      "usable_depth": 0.4277,
+      "zone_width": 0.64079,
+      "zone_depth": 0.34216
     },
     {
-      "x": 0,
-      "z": 0,
+      "x": 0.0,
+      "z": -0.00785,
       "angle": 0,
-      "grid_height": 1.5,
-      "grid_width": 0.9,
-      "grid_depth": 0.43,
-      "usable_width": 0.9,
-      "usable_depth": 0.43,
-      "zone_width": 0.6,
-      "zone_depth": 0.34
+      "grid_height": 1.3346,
+      "grid_width": 0.9564,
+      "grid_depth": 0.4277,
+      "usable_width": 0.9564,
+      "usable_depth": 0.4277,
+      "zone_width": 0.64079,
+      "zone_depth": 0.34216
     },
     {
-      "x": 0,
-      "z": 0,
+      "x": 0.0,
+      "z": -0.00785,
       "angle": 0,
-      "grid_height": 2.0,
-      "grid_width": 0.9,
-      "grid_depth": 0.43,
-      "usable_width": 0.9,
-      "usable_depth": 0.43,
-      "zone_width": 0.6,
-      "zone_depth": 0.34
+      "grid_height": 1.9167,
+      "grid_width": 0.9564,
+      "grid_depth": 0.4277,
+      "usable_width": 0.9564,
+      "usable_depth": 0.4277,
+      "zone_width": 0.64079,
+      "zone_depth": 0.34216
+    },
+    {
+      "x": 0.0,
+      "z": 0.0,
+      "angle": 0,
+      "grid_height": 2.51,
+      "grid_width": 0.9726,
+      "grid_depth": 0.46,
+      "usable_width": 0.9726,
+      "usable_depth": 0.46,
+      "zone_width": 0.65164,
+      "zone_depth": 0.368
     }
   ]
 }

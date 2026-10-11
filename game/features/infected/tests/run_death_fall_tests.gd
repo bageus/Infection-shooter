@@ -1,7 +1,9 @@
 extends SceneTree
 ## Directional enemy deaths (ADR-0034): a moving infected shot from afar falls
 ## forward, a close shotgun blast throws it back, a grenade throws it away
-## from the explosion, and walls stop a thrown body.
+## from the explosion, and walls stop a thrown body. A body that falls
+## against a table stays lying across it; a wall close in front turns the
+## fall aside; a wall further away leaves the body lying at its foot.
 
 const FALL := preload("res://game/features/infected/death_fall.gd")
 const HUNGER := preload("res://game/features/infected/public/infected_hunger.tscn")
@@ -29,6 +31,9 @@ func _run() -> void:
 	await _test_close_shotgun_throws_back(stage)
 	await _test_grenade_throws_away(stage)
 	await _test_wall_stops_body(stage)
+	await _test_body_rests_on_table(stage)
+	await _test_wall_ahead_turns_fall(stage)
+	await _test_body_ends_at_wall(stage)
 	print("Death fall tests: %d failures" % failures)
 	quit(1 if failures > 0 else 0)
 
@@ -132,6 +137,62 @@ func _test_wall_stops_body(stage: Node3D) -> void:
 	enemy.queue_free()
 	wall.queue_free()
 	await process_frame
+
+
+# A charging infected killed in front of a table falls onto it and stays
+# lying across the top instead of sinking through it.
+func _test_body_rests_on_table(stage: Node3D) -> void:
+	var table := _add_box(stage, Vector3(40, 0.375, -1.0), Vector3(3, 0.75, 0.8), 1)
+	var enemy := await _spawn(stage, Vector3(40, 1, 0))
+	enemy.velocity = Vector3(0, 0, -5.4)
+	enemy.call("take_projectile_damage", 1000.0, enemy.global_position, Vector3(0, 0, 1), "PISTOL")
+	_expect(_clip(enemy) == "DeathForward", "The infected falls forward toward the table (%s)." % _clip(enemy))
+	await create_timer(2.0).timeout
+	var player := enemy.get_node("AnimationDriver").get("animation_player") as AnimationPlayer
+	var length := player.get_animation(player.assigned_animation).length
+	_expect(not player.is_playing() and player.current_animation_position < length - 0.05, "The fall stops on the table (%.2f of %.2f s)." % [player.current_animation_position, length])
+	var head := _bone(enemy, "Head")
+	_expect(head.y > 0.6, "The head rests on the table, not on the floor (%.2f m)." % head.y)
+	enemy.queue_free()
+	table.queue_free()
+	await process_frame
+
+
+# A wall right in front: the body falls to a free side instead of into it.
+func _test_wall_ahead_turns_fall(stage: Node3D) -> void:
+	var wall := _add_box(stage, Vector3(50, 1, -0.6), Vector3(4, 2, 0.2), 1)
+	var enemy := await _spawn(stage, Vector3(50, 1, 0))
+	var yaw := enemy.rotation.y
+	enemy.velocity = Vector3(0, 0, -5.4)
+	enemy.call("take_projectile_damage", 1000.0, enemy.global_position, Vector3(0, 0, 1), "PISTOL")
+	await create_timer(2.0).timeout
+	_expect(absf(angle_difference(yaw, enemy.rotation.y)) > 0.8, "The body turns away from the wall in front.")
+	var head := _bone(enemy, "Head")
+	_expect(head.z > -0.5, "The head does not go through the wall (z %.2f)." % head.z)
+	enemy.queue_free()
+	wall.queue_free()
+	await process_frame
+
+
+# A wall a little further away: the body does not stay leaning upright on it,
+# it ends lying at its foot.
+func _test_body_ends_at_wall(stage: Node3D) -> void:
+	var wall := _add_box(stage, Vector3(60, 1, -1.55), Vector3(4, 2, 0.2), 1)
+	var enemy := await _spawn(stage, Vector3(60, 1, 0))
+	enemy.velocity = Vector3(0, 0, -5.4)
+	enemy.call("take_projectile_damage", 1000.0, enemy.global_position, Vector3(0, 0, 1), "PISTOL")
+	await create_timer(2.0).timeout
+	var head := _bone(enemy, "Head")
+	_expect(head.z > -1.5, "The head stays in front of the wall (z %.2f)." % head.z)
+	_expect(head.y < 0.5, "The body lies at the foot of the wall (head %.2f m high)." % head.y)
+	enemy.queue_free()
+	wall.queue_free()
+	await process_frame
+
+
+func _bone(enemy: Node, bone_name: String) -> Vector3:
+	var skeleton := enemy.find_children("*", "Skeleton3D", true, false)[0] as Skeleton3D
+	return skeleton.global_transform * skeleton.get_bone_global_pose(skeleton.find_bone(bone_name)).origin
 
 
 func _spawn(stage: Node3D, at: Vector3) -> CharacterBody3D:

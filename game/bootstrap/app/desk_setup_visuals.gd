@@ -11,6 +11,7 @@ var surface_height := 0.89
 var orbit_yaw := PI
 var orbit_pitch := 0.58
 var orbit_distance := 5.6
+var top_view := false
 
 
 func configure(target: Node3D, profile: Dictionary) -> void:
@@ -45,6 +46,7 @@ func clear() -> void:
 
 
 func reset_view(camera: Camera3D) -> void:
+	top_view = false
 	orbit_yaw = PI
 	orbit_pitch = 0.58
 	orbit_distance = 5.6
@@ -52,6 +54,7 @@ func reset_view(camera: Camera3D) -> void:
 
 
 func rotate_view(camera: Camera3D, movement: Vector2) -> void:
+	top_view = false
 	orbit_yaw -= movement.x * 0.008
 	orbit_pitch = clampf(orbit_pitch + movement.y * 0.008, 0.12, 1.35)
 	_update_camera(camera)
@@ -62,10 +65,19 @@ func zoom_view(camera: Camera3D, distance: float) -> void:
 	_update_camera(camera)
 
 
+func show_top_view(camera: Camera3D) -> void:
+	top_view = true
+	_update_camera(camera)
+
+
 func _update_camera(camera: Camera3D) -> void:
 	if desk == null:
 		return
 	var target := desk.to_global(Vector3(0, surface_height * 0.5, 0))
+	if top_view:
+		camera.global_position = target + Vector3.UP * orbit_distance
+		camera.look_at(target, -desk.global_basis.z.normalized())
+		return
 	camera.global_position = target + desk.global_basis * Vector3(sin(orbit_yaw) * cos(orbit_pitch) * orbit_distance, sin(orbit_pitch) * orbit_distance, cos(orbit_yaw) * cos(orbit_pitch) * orbit_distance)
 	camera.look_at(target, Vector3.UP)
 

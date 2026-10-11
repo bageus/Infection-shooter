@@ -105,6 +105,8 @@ func configure_environment(roots: Array[Node]) -> void:
 
 func configure_world(_container: Node3D, impacts: Node) -> void:
 	_projection_pool = impacts
+	if _surfaces != null:
+		_surfaces.set("projection_pool", weakref(impacts) if impacts != null else null)
 	if _budget != null:
 		var settings: Dictionary = _budget.get("settings")
 		settings["projection_pool"] = weakref(impacts) if impacts != null else null

@@ -9,10 +9,19 @@ const WEAPON_SOUNDS := {
 	"PISTOL": [&"pistol_fire", &"pistol_reload", &"casing_brass"],
 	"UZI": [&"uzi_fire", &"uzi_reload", &"casing_brass"],
 	"SHOTGUN": [&"shotgun_fire", &"shotgun_shell_load", &"casing_shell"],
+	"SNIPER RIFLE": [&"rifle_fire", &"rifle_reload", &"casing_brass"],
+	"AK": [&"rifle_fire", &"rifle_reload", &"casing_brass"],
+	"M4": [&"assault_rifle_fire", &"rifle_reload", &"casing_brass"],
+	"MINIGUN": [&"assault_rifle_fire", &"rifle_reload", &"casing_brass"],
 	"RIFLE": [&"rifle_fire", &"rifle_reload", &"casing_brass"],
 	"ASSAULT RIFLE": [&"assault_rifle_fire", &"rifle_reload", &"casing_brass"],
 	"GRENADE LAUNCHER": [&"launcher_fire", &"launcher_reload", &"casing_heavy"],
 }
+@export var direct_reserve_feed := false
+@export var casing_size_multiplier := 1.0
+@export var camera_distance_bonus := 0.0
+@export var scope_magnification := 0.0
+@export var align_authored_grip := false
 @export var weapon_name: String = "PISTOL"
 @export var fire_mode: String = "semi"
 @export var shots_per_second: float = 4.0
@@ -43,6 +52,8 @@ var effects_root: Node3D
 var impact_pool: Node
 var _authored_muzzle: Node3D
 var _reload_sound: AudioStreamPlayer3D
+var _barrel_cluster: Node3D
+var _barrel_angle := 0.0
 
 
 func _ready() -> void:
@@ -50,8 +61,15 @@ func _ready() -> void:
 	_reserve_ammo = starting_reserve_ammo
 	var model := get_node_or_null("Body") as Node3D
 	if model != null:
-		_authored_muzzle = ART_SETUP.configure(self, model, weapon_name in ["SHOTGUN", "GRENADE LAUNCHER"])
+		_authored_muzzle = ART_SETUP.configure(self, model, weapon_name in ["SHOTGUN", "GRENADE LAUNCHER", "AK", "M4", "SNIPER RIFLE", "MINIGUN"])
+		if weapon_name == "MINIGUN":
+			_barrel_cluster = model.find_child("BarrelCluster", true, false) as Node3D
 func _process(delta: float) -> void:
+	if _barrel_cluster != null and visible and _cooldown_remaining > 0.0:
+		_barrel_angle = fmod(_barrel_angle + 35.0 * delta, TAU)
+		var turn := Basis(Vector3.RIGHT, _barrel_angle)
+		var center := Vector3(0, .103, 0)
+		_barrel_cluster.transform = Transform3D(turn, center - turn * center)
 	_cooldown_remaining = maxf(0.0, _cooldown_remaining - delta)
 	if not _reloading: return
 	_reload_remaining -= delta
@@ -90,7 +108,7 @@ func try_fire_at(target_point: Vector3) -> bool:
 	if _reloading and shotgun_shell_reload and _magazine_ammo > 0:
 		cancel_reload()
 	if _cooldown_remaining > 0.0 or _reloading or bullet_scene == null or not is_instance_valid(effects_root): return false
-	if _magazine_ammo <= 0:
+	if (_reserve_ammo if direct_reserve_feed else _magazine_ammo) <= 0:
 		_dry_fire()
 		# The click of an empty gun starts a reload when there is ammo to load.
 		start_reload()
@@ -117,7 +135,10 @@ func try_fire_at(target_point: Vector3) -> bool:
 		if not obstruction.is_empty():
 			bullet.call("_handle_hit", obstruction["collider"], obstruction["position"], obstruction["normal"], int(obstruction.get("shape", -1)))
 			bullet.queue_free()
-	_magazine_ammo -= 1
+	if direct_reserve_feed:
+		_reserve_ammo -= 1
+	else:
+		_magazine_ammo -= 1
 	_show_muzzle_flash()
 	_last_shot_time = now
 	_burst_shots += 1
@@ -125,7 +146,7 @@ func try_fire_at(target_point: Vector3) -> bool:
 	if casing_scene != null and ejection_port != null:
 		var casing_pool := get_parent().get_node_or_null("SpentCasings")
 		if casing_pool != null:
-			casing_pool.call("spawn_casing", casing_scene, ejection_port.global_transform, casing_radius, shooter, sound_event(2))
+			casing_pool.call("spawn_casing", casing_scene, ejection_port.global_transform, casing_radius, shooter, sound_event(2), casing_size_multiplier)
 	SFX.play(self, sound_event(0), muzzle.global_position)
 	return true
 
@@ -156,7 +177,7 @@ func _show_muzzle_flash() -> void:
 
 
 func start_reload() -> void:
-	if _reloading or _reserve_ammo <= 0 or _magazine_ammo >= magazine_size: return
+	if direct_reserve_feed or _reloading or _reserve_ammo <= 0 or _magazine_ammo >= magazine_size: return
 	_reloading = true
 	_reload_remaining = reload_time
 	_play_reload_sound()
@@ -165,14 +186,16 @@ func cancel_reload() -> void:
 	if is_instance_valid(_reload_sound):
 		_reload_sound.queue_free()
 func get_weapon_name() -> String: return weapon_name
-func get_magazine_ammo() -> int: return _magazine_ammo
-func get_reserve_ammo() -> int: return _reserve_ammo
+func get_magazine_ammo() -> int: return _reserve_ammo if direct_reserve_feed else _magazine_ammo
+func get_reserve_ammo() -> int: return 0 if direct_reserve_feed else _reserve_ammo
 func is_reloading() -> bool: return _reloading
 func add_reserve_ammo(amount: int) -> int:
 	var previous := _reserve_ammo
 	_reserve_ammo = mini(max_reserve_ammo, _reserve_ammo + maxi(amount, 0))
 	return _reserve_ammo - previous
 func add_magazine_ammo(amount: int) -> int:
+	if direct_reserve_feed:
+		return add_reserve_ammo(amount)
 	var before := _magazine_ammo
 	_magazine_ammo = mini(magazine_size, _magazine_ammo + maxi(0, amount))
 	return _magazine_ammo - before

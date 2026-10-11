@@ -32,7 +32,7 @@ func _weapon_family() -> String:
 	match _stance.weapon_index:
 		2:
 			return "Shotgun"
-		3:
+		3, 4, 5, 6, 7:
 			return "Launcher"
 	return "Pistol_TwoHand" if _stance.stance == STANCE.WeaponStance.TWO_HAND else "Pistol_OneHand"
 

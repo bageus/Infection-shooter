@@ -54,6 +54,9 @@ func _capture() -> void:
 	await RenderingServer.frame_post_draw
 	root.get_texture().get_image().save_png("/tmp/menu_previews/main_130.png")
 	menu.free()
+	# Preserve full-size UI captures and the complete game; bound software shadows.
+	root.positional_shadow_atlas_size = 256
+	RenderingServer.directional_shadow_atlas_set_size(256, true)
 	var game := MAIN.instantiate()
 	root.add_child(game)
 	current_scene = game

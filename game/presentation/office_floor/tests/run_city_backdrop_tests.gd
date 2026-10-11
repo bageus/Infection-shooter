@@ -1,0 +1,54 @@
+extends SceneTree
+
+const CITY := preload("res://game/presentation/office_floor/public/city_backdrop.tscn")
+var failures := 0
+
+func _initialize() -> void:
+	call_deferred("_run")
+
+func _run() -> void:
+	var city := CITY.instantiate() as Node3D
+	root.add_child(city)
+	await process_frame
+	_check(city.get_child_count() == 18, "Twelve facade batches, roofs, four streets and fog ground")
+	var count := 0
+	for child in city.get_children():
+		_check(not child is CollisionObject3D, "No physics")
+		var batch := child as MultiMeshInstance3D
+		if batch == null or child.name == "RoofSetbacks":
+			continue
+		_check(batch.cast_shadow == GeometryInstance3D.SHADOW_CASTING_SETTING_OFF, "No shadow allocation")
+		var instances := batch.multimesh
+		count += instances.instance_count
+		for index in instances.instance_count:
+			var style := instances.get_instance_color(index)
+			if DisplayServer.get_name() != "headless":
+				_check((style.r < 1.0 / 3.0) == (index % 3 == 0), "Every third tower has full glass cladding")
+			var transform: Transform3D = city.building_transforms[count - instances.instance_count + index]
+			var half := transform.basis.get_scale() * 0.5
+			var center := transform.origin
+			var outside := absf(center.x) - half.x >= 69.99 or absf(center.z) - half.z >= 59.99
+			_check(outside, "Building keeps 30m gap outside 80x60 location")
+			_check(center.y - half.y <= -64.9, "Building continues below playable floor")
+	_check(count == 144, "Bounded 144 building budget")
+	var low_roofs := 0
+	for index in 32:
+		var transform: Transform3D = city.building_transforms[index]
+		if transform.origin.y + transform.basis.get_scale().y * 0.5 < 0.0:
+			low_roofs += 1
+	_check(low_roofs >= 8, "Nearby roofs below player reveal middle skyline")
+	var second := CITY.instantiate() as Node3D
+	root.add_child(second)
+	await process_frame
+	for index in 144:
+		_check(city.building_transforms[index].is_equal_approx(second.building_transforms[index]), "Deterministic restart")
+	city.queue_free()
+	second.queue_free()
+	await process_frame
+	print("City backdrop failures: ", failures)
+	quit(0 if failures == 0 else 1)
+
+func _check(condition: bool, description: String) -> void:
+	if not condition:
+		failures += 1
+		push_error(description)

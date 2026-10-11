@@ -1,4 +1,5 @@
 extends SceneTree
+const LAYOUT_ASSERTIONS := preload("res://game/bootstrap/app/tests/layout_assertions.gd")
 
 const MAIN := preload("res://game/bootstrap/app/main.tscn")
 const MODEL := "res://models/objects/enviroments/05/05_monitor3_server_destructible.glb"
@@ -48,7 +49,7 @@ func _run() -> void:
 	objects.call("_apply_layout_data", data)
 	await process_frame
 	var restored: Dictionary = storage.call("_collect_layout_data")
-	_check(restored == data, "Display layout round trip preserves every field")
+	_check(LAYOUT_ASSERTIONS.equivalent(restored, data), "Display layout round trip preserves every field")
 	objects.call("_apply_layout_data", {"version": 6, "objects": [{"scene": MODEL, "x": 0, "y": 0, "z": 0}]})
 	await process_frame
 	var legacy: Dictionary = storage.call("_collect_layout_data")

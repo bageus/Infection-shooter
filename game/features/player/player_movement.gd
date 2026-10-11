@@ -47,7 +47,7 @@ var _intended_motion := Vector3.ZERO
 @onready var camera: Camera3D = $CameraRig/Camera3D
 @onready var aim_pivot: Node3D = $AimPivot
 @onready var body_visual: Node3D = $Body
-@onready var weapons: Array[Node3D] = [$AimPivot/Pistol,$AimPivot/Uzi,$AimPivot/Shotgun,$AimPivot/GrenadeLauncher]
+@onready var weapons: Array[Node3D] = [$AimPivot/Pistol,$AimPivot/Uzi,$AimPivot/Shotgun,$AimPivot/GrenadeLauncher,$AimPivot/AkRifle,$AimPivot/M4Rifle,$AimPivot/SniperRifle,$AimPivot/Minigun]
 @onready var infection_runtime: Node = $InfectionRuntime
 @onready var weapon_mount: Node = $WeaponMount
 var audio: Node
@@ -112,8 +112,6 @@ func _physics_process(delta: float) -> void:
 			blast_stun_ended.emit()
 		elif is_instance_valid(_stun_ringing):
 			_stun_ringing.volume_db = -19.0 + 6.0 * _stun_intensity + linear_to_db(clampf(_stun_remaining / 0.8, 0.0001, 1.0))
-	if absf(camera.position.length()-_camera_distance)>0.001:
-		camera.position=camera.position.normalized()*lerpf(camera.position.length(),_camera_distance,1.0-exp(-8.0*delta))
 	_roll_cooldown_remaining=maxf(0.0,_roll_cooldown_remaining-delta)
 	var control_lost: bool = infection_runtime.call("is_control_lost")
 	_mutation_control.tick(delta, control_lost)
@@ -332,6 +330,10 @@ func get_mutation()->float:return infection_runtime.call("get_mutation")
 func get_infection_skill(skill_id: String) -> bool:
 	return bool(infection_runtime.call("has_skill", skill_id))
 func _update_camera(delta: float) -> void:
+	var bonus: Variant = get_current_weapon().get("camera_distance_bonus")
+	var view_distance := _camera_distance + (float(bonus) if bonus != null else 0.0)
+	if absf(camera.position.length() - view_distance) > 0.001:
+		camera.position = camera.position.normalized() * lerpf(camera.position.length(), view_distance, 1.0 - exp(-8.0 * delta))
 	var turn := Input.get_axis("camera_left", "camera_right")
 	if _stun_remaining > 0.0 and _stun_intensity > 0.35:
 		turn = -turn
@@ -482,3 +484,10 @@ func _aim_uncontrolled() -> void:
 	_aim_point = aim_pivot.global_position + direction * 8.0
 	aim_pivot.look_at(_aim_point, Vector3.UP)
 	body_visual.look_at(body_visual.global_position + direction, Vector3.UP, true)
+
+
+# Public weapon_view_v1: read-only view data, never persisted.
+func get_weapon_view() -> Dictionary:
+	var weapon := get_current_weapon()
+	var magnification: Variant = weapon.get("scope_magnification")
+	return {"camera": camera, "target": _aim_point, "magnification": float(magnification) if magnification != null else 0.0}

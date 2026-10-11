@@ -3,6 +3,7 @@ extends SceneTree
 const SURFACES := preload("res://game/presentation/office_floor/blood_surface_query.gd")
 const LIBRARY := preload("res://game/presentation/office_floor/blood_texture_library.gd")
 const EFFECTS := preload("res://game/presentation/office_floor/public/blood_effects_3d.tscn")
+const IMPACTS := preload("res://game/features/combat/public/impact_effects.gd")
 const MARK := preload("res://game/presentation/office_floor/blood_mark_3d.gd")
 var failures := 0
 var stage: Node3D
@@ -101,6 +102,7 @@ func _run() -> void:
 	_test_empty_pool_clear(floor_hit)
 	await _test_hit_throttle_and_expiry()
 	await _test_decal_growth(floor_hit)
+	await _test_proxy_projection()
 	stage.queue_free()
 	print("Blood effects tests: %d failure(s)." % failures)
 	quit(failures)
@@ -227,3 +229,39 @@ func _test_empty_pool_clear(surface: Dictionary) -> void:
 	_expect(not (budget.get("_timer") as Timer).is_stopped(), "Delayed pool wakes empty budget")
 	budget.call("clear_marks")
 	_expect((budget.get("_timer") as Timer).is_stopped(), "Clearing only delayed requests stops timer immediately")
+
+
+func _test_proxy_projection() -> void:
+	var pool := IMPACTS.new() as Node3D
+	stage.add_child(pool)
+	effects.call("configure_world", stage, pool)
+	var budget := effects.get("_budget") as Node3D
+	budget.get("settings")["decal"] = false
+	budget.set("lifetime", 30.0)
+	var body := _surface(Vector3(20, 0.5, 0), Vector3(2, 1, 2))
+	var mesh := MeshInstance3D.new()
+	mesh.mesh = BoxMesh.new()
+	mesh.mesh.size = Vector3(2, 0.6, 2)
+	mesh.position.y = -.2 # Visual top .6, proxy top 1.0: outside projection depth.
+	body.add_child(mesh)
+	query.call("watch_environment", body)
+	query.set("projection_pool", weakref(pool))
+	await physics_frame
+	await physics_frame
+	var surface: Dictionary = query.call("find_floor", Vector3(20, 2, 0), excluded)
+	var hit := SURFACES.resolve(surface)
+	_expect(is_equal_approx(float(hit["position"].y), .6), "Blood ray refines proxy hit onto visible model")
+	var definition := {"texture": texture, "basis": Basis.IDENTITY, "footprint": Vector2.ONE, "tint": Color.RED}
+	budget.call("submit", definition, surface)
+	_expect(_stats()["marks"] == 1 and not (_marks()[0].get("_projected") as Array).is_empty(), "Refined proxy receives a textured mesh projection")
+	effects.call("clear_marks")
+	# A surface outside every receiver produces no phantom node, FIFO or counter.
+	var unsupported := SURFACES.capture(Vector3(20, 3, 0), Vector3.UP, body)
+	budget.call("submit", definition, unsupported)
+	_expect(_stats()["marks"] == 0 and _marks().is_empty(), "Unsupported projection consumes no mark budget")
+	_expect(budget.get("_surfaces").is_empty() and budget.get("_active").first == -1, "Unsupported projection leaves no surface or FIFO record")
+	query.set("projection_pool", null)
+	effects.call("configure_world", stage, null)
+	body.queue_free()
+	pool.queue_free()
+	await process_frame

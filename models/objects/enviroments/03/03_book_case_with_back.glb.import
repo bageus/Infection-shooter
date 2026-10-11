@@ -3,7 +3,7 @@
 importer="scene"
 importer_version=1
 type="PackedScene"
-uid="uid://xqdy8la8v4kx"
+uid="uid://c0jeqkr2qgl6g"
 path="res://.godot/imported/03_book_case_with_back.glb-974c19ec1cc7178d5d5675c14146e9be.scn"
 
 [deps]
@@ -35,11 +35,11 @@ animation/fps=30
 animation/trimming=false
 animation/remove_immutable_tracks=true
 animation/import_rest_as_RESET=false
-import_script/path=""
+import_script/path="res://addons/staged_glb_import/group03_material_post_import.gd"
 materials/extract=0
 materials/extract_format=0
 materials/extract_path=""
 _subresources={}
 gltf/naming_version=2
-gltf/embedded_image_handling=1
+gltf/embedded_image_handling=3
 gltf/texture_map_mode=1

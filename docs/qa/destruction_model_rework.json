@@ -1,0 +1,3151 @@
+{
+  "schema_version": 1,
+  "models": [
+    {
+      "path": "models/objects/enviroments/06/06_simple_chair.glb",
+      "source_mesh_nodes": 99,
+      "source_triangles": 8844,
+      "stages": {
+        "Fine": {
+          "meshes": 52,
+          "triangles": 3258
+        },
+        "Medium": {
+          "meshes": 28,
+          "triangles": 2394
+        },
+        "Modular": {
+          "meshes": 6,
+          "triangles": 900
+        },
+        "Primary": {
+          "meshes": 12,
+          "triangles": 1392
+        }
+      },
+      "largest_stage_meshes": 52,
+      "base_map_placements": 71,
+      "stage_meshes_times_placements": 3692
+    },
+    {
+      "path": "models/objects/enviroments/06/06_conference_chair.glb",
+      "source_mesh_nodes": 49,
+      "source_triangles": 1684,
+      "stages": {
+        "Fine": {
+          "meshes": 25,
+          "triangles": 572
+        },
+        "Medium": {
+          "meshes": 13,
+          "triangles": 396
+        },
+        "Modular": {
+          "meshes": 3,
+          "triangles": 212
+        },
+        "Primary": {
+          "meshes": 7,
+          "triangles": 292
+        }
+      },
+      "largest_stage_meshes": 25,
+      "base_map_placements": 30,
+      "stage_meshes_times_placements": 750
+    },
+    {
+      "path": "models/objects/enviroments/07/07_reception_counter_two_heights.glb",
+      "source_mesh_nodes": 114,
+      "source_triangles": 1764,
+      "stages": {
+        "LargeParts": {
+          "meshes": 20,
+          "triangles": 240
+        },
+        "SmallFragments": {
+          "meshes": 93,
+          "triangles": 1284
+        }
+      },
+      "largest_stage_meshes": 93,
+      "base_map_placements": 8,
+      "stage_meshes_times_placements": 744
+    },
+    {
+      "path": "models/objects/enviroments/07/07_table_square_tall.glb",
+      "source_mesh_nodes": 97,
+      "source_triangles": 1414,
+      "stages": {
+        "LargeParts": {
+          "meshes": 8,
+          "triangles": 196
+        },
+        "SmallFragments": {
+          "meshes": 88,
+          "triangles": 1066
+        }
+      },
+      "largest_stage_meshes": 88,
+      "base_map_placements": 6,
+      "stage_meshes_times_placements": 528
+    },
+    {
+      "path": "models/objects/enviroments/07/07_table_longest.glb",
+      "source_mesh_nodes": 74,
+      "source_triangles": 2264,
+      "stages": {
+        "LargeParts": {
+          "meshes": 5,
+          "triangles": 220
+        },
+        "SmallFragments": {
+          "meshes": 68,
+          "triangles": 1824
+        }
+      },
+      "largest_stage_meshes": 68,
+      "base_map_placements": 6,
+      "stage_meshes_times_placements": 408
+    },
+    {
+      "path": "models/objects/enviroments/07/07_round_dining_table.glb",
+      "source_mesh_nodes": 52,
+      "source_triangles": 1740,
+      "stages": {
+        "LargeParts": {
+          "meshes": 3,
+          "triangles": 240
+        },
+        "SmallFragments": {
+          "meshes": 48,
+          "triangles": 1260
+        }
+      },
+      "largest_stage_meshes": 48,
+      "base_map_placements": 8,
+      "stage_meshes_times_placements": 384
+    },
+    {
+      "path": "models/objects/enviroments/03/03_file_cabinet_small_with_shelfs.glb",
+      "source_mesh_nodes": 155,
+      "source_triangles": 6208,
+      "stages": {
+        "LargeParts": {
+          "meshes": 28,
+          "triangles": 748
+        },
+        "SmallFragments": {
+          "meshes": 126,
+          "triangles": 4712
+        }
+      },
+      "largest_stage_meshes": 126,
+      "base_map_placements": 2,
+      "stage_meshes_times_placements": 252
+    },
+    {
+      "path": "models/objects/enviroments/07/07_coffee_table.glb",
+      "source_mesh_nodes": 86,
+      "source_triangles": 1440,
+      "stages": {
+        "LargeParts": {
+          "meshes": 5,
+          "triangles": 60
+        },
+        "SmallFragments": {
+          "meshes": 80,
+          "triangles": 1320
+        }
+      },
+      "largest_stage_meshes": 80,
+      "base_map_placements": 3,
+      "stage_meshes_times_placements": 240
+    },
+    {
+      "path": "models/objects/enviroments/10/10_couch_large_blue_destructible.glb",
+      "source_mesh_nodes": 129,
+      "source_triangles": 5126,
+      "stages": {
+        "Modular": {
+          "meshes": 14,
+          "triangles": 440
+        },
+        "Primary": {
+          "meshes": 22,
+          "triangles": 688
+        },
+        "Medium": {
+          "meshes": 38,
+          "triangles": 1368
+        },
+        "Fine": {
+          "meshes": 54,
+          "triangles": 2136
+        }
+      },
+      "largest_stage_meshes": 54,
+      "base_map_placements": 3,
+      "stage_meshes_times_placements": 162
+    },
+    {
+      "path": "models/objects/enviroments/06/06_simple_chair_fell.glb",
+      "source_mesh_nodes": 99,
+      "source_triangles": 8844,
+      "stages": {
+        "Fine": {
+          "meshes": 52,
+          "triangles": 3258
+        },
+        "Medium": {
+          "meshes": 28,
+          "triangles": 2394
+        },
+        "Modular": {
+          "meshes": 6,
+          "triangles": 900
+        },
+        "Primary": {
+          "meshes": 12,
+          "triangles": 1392
+        }
+      },
+      "largest_stage_meshes": 52,
+      "base_map_placements": 3,
+      "stage_meshes_times_placements": 156
+    },
+    {
+      "path": "models/objects/enviroments/02/02_capboard_down_destructible.glb",
+      "source_mesh_nodes": 24,
+      "source_triangles": 1792,
+      "stages": {
+        "Door_Off": {
+          "meshes": 9,
+          "triangles": 580
+        },
+        "Panels": {
+          "meshes": 12,
+          "triangles": 584
+        }
+      },
+      "largest_stage_meshes": 12,
+      "base_map_placements": 6,
+      "stage_meshes_times_placements": 72
+    },
+    {
+      "path": "models/objects/enviroments/10/10_couch_red_destructible.glb",
+      "source_mesh_nodes": 121,
+      "source_triangles": 4686,
+      "stages": {
+        "Modular": {
+          "meshes": 12,
+          "triangles": 352
+        },
+        "Primary": {
+          "meshes": 20,
+          "triangles": 600
+        },
+        "Medium": {
+          "meshes": 36,
+          "triangles": 1280
+        },
+        "Fine": {
+          "meshes": 52,
+          "triangles": 2048
+        }
+      },
+      "largest_stage_meshes": 52,
+      "base_map_placements": 1,
+      "stage_meshes_times_placements": 52
+    },
+    {
+      "path": "models/objects/enviroments/10/10_armchair_green_destructible.glb",
+      "source_mesh_nodes": 113,
+      "source_triangles": 4246,
+      "stages": {
+        "Modular": {
+          "meshes": 10,
+          "triangles": 264
+        },
+        "Primary": {
+          "meshes": 18,
+          "triangles": 512
+        },
+        "Medium": {
+          "meshes": 34,
+          "triangles": 1192
+        },
+        "Fine": {
+          "meshes": 50,
+          "triangles": 1960
+        }
+      },
+      "largest_stage_meshes": 50,
+      "base_map_placements": 1,
+      "stage_meshes_times_placements": 50
+    },
+    {
+      "path": "models/objects/enviroments/04/04_cardboard_archive_box.glb",
+      "source_mesh_nodes": 38,
+      "source_triangles": 928,
+      "stages": {
+        "LargeParts": {
+          "meshes": 37,
+          "triangles": 752
+        }
+      },
+      "largest_stage_meshes": 37,
+      "base_map_placements": 1,
+      "stage_meshes_times_placements": 37
+    },
+    {
+      "path": "models/objects/enviroments/02/02_capboard_down_sink_destructible.glb",
+      "source_mesh_nodes": 30,
+      "source_triangles": 5492,
+      "stages": {
+        "Door_Off": {
+          "meshes": 10,
+          "triangles": 1800
+        },
+        "Panels": {
+          "meshes": 17,
+          "triangles": 1836
+        }
+      },
+      "largest_stage_meshes": 17,
+      "base_map_placements": 2,
+      "stage_meshes_times_placements": 34
+    },
+    {
+      "path": "models/objects/enviroments/05/05_wall_TV_frameless_destructible.glb",
+      "source_mesh_nodes": 4,
+      "source_triangles": 68,
+      "stages": {
+        "LargeParts": {
+          "meshes": 3,
+          "triangles": 34
+        }
+      },
+      "largest_stage_meshes": 3,
+      "base_map_placements": 9,
+      "stage_meshes_times_placements": 27
+    },
+    {
+      "path": "models/objects/enviroments/04/04_cardboard_boxes_1.glb",
+      "source_mesh_nodes": 24,
+      "source_triangles": 616,
+      "stages": {
+        "LargeParts": {
+          "meshes": 23,
+          "triangles": 484
+        }
+      },
+      "largest_stage_meshes": 23,
+      "base_map_placements": 1,
+      "stage_meshes_times_placements": 23
+    },
+    {
+      "path": "models/objects/enviroments/02/02_capboard_down_one_destructible.glb",
+      "source_mesh_nodes": 21,
+      "source_triangles": 1152,
+      "stages": {
+        "Door_Off": {
+          "meshes": 8,
+          "triangles": 364
+        },
+        "Panels": {
+          "meshes": 11,
+          "triangles": 368
+        }
+      },
+      "largest_stage_meshes": 11,
+      "base_map_placements": 2,
+      "stage_meshes_times_placements": 22
+    },
+    {
+      "path": "models/objects/enviroments/05/05_aircondition_destructible.glb",
+      "source_mesh_nodes": 5,
+      "source_triangles": 412,
+      "stages": {
+        "LargeParts": {
+          "meshes": 3,
+          "triangles": 216
+        }
+      },
+      "largest_stage_meshes": 3,
+      "base_map_placements": 7,
+      "stage_meshes_times_placements": 21
+    },
+    {
+      "path": "models/objects/enviroments/02/02_water_cooler_bottle_attached_destructible.glb",
+      "source_mesh_nodes": 7,
+      "source_triangles": 1208,
+      "stages": {
+        "LargeParts": {
+          "meshes": 3,
+          "triangles": 320
+        }
+      },
+      "largest_stage_meshes": 3,
+      "base_map_placements": 4,
+      "stage_meshes_times_placements": 12
+    },
+    {
+      "path": "models/objects/enviroments/04/04_cardboard_boxes.glb",
+      "source_mesh_nodes": 12,
+      "source_triangles": 156,
+      "stages": {
+        "LargeParts": {
+          "meshes": 11,
+          "triangles": 132
+        }
+      },
+      "largest_stage_meshes": 11,
+      "base_map_placements": 1,
+      "stage_meshes_times_placements": 11
+    },
+    {
+      "path": "models/objects/enviroments/02/02_kittle_destructible.glb",
+      "source_mesh_nodes": 7,
+      "source_triangles": 1856,
+      "stages": {
+        "LargeParts": {
+          "meshes": 5,
+          "triangles": 740
+        }
+      },
+      "largest_stage_meshes": 5,
+      "base_map_placements": 2,
+      "stage_meshes_times_placements": 10
+    },
+    {
+      "path": "models/objects/enviroments/02/02_coffee_machine_destructible.glb",
+      "source_mesh_nodes": 10,
+      "source_triangles": 1046,
+      "stages": {
+        "LargeParts": {
+          "meshes": 8,
+          "triangles": 398
+        }
+      },
+      "largest_stage_meshes": 8,
+      "base_map_placements": 1,
+      "stage_meshes_times_placements": 8
+    },
+    {
+      "path": "models/objects/enviroments/02/02_microwave_destructible.glb",
+      "source_mesh_nodes": 8,
+      "source_triangles": 877,
+      "stages": {
+        "LargeParts": {
+          "meshes": 4,
+          "triangles": 307
+        }
+      },
+      "largest_stage_meshes": 4,
+      "base_map_placements": 2,
+      "stage_meshes_times_placements": 8
+    },
+    {
+      "path": "models/objects/enviroments/05/05_laptop2_destructible.glb",
+      "source_mesh_nodes": 4,
+      "source_triangles": 312,
+      "stages": {
+        "LargeParts": {
+          "meshes": 2,
+          "triangles": 104
+        }
+      },
+      "largest_stage_meshes": 2,
+      "base_map_placements": 1,
+      "stage_meshes_times_placements": 2
+    },
+    {
+      "path": "models/objects/enviroments/03/03_file_cabinet_largest.glb",
+      "source_mesh_nodes": 145,
+      "source_triangles": 6284,
+      "stages": {
+        "LargeParts": {
+          "meshes": 26,
+          "triangles": 680
+        },
+        "SmallFragments": {
+          "meshes": 118,
+          "triangles": 4624
+        }
+      },
+      "largest_stage_meshes": 118,
+      "base_map_placements": 0,
+      "stage_meshes_times_placements": 0
+    },
+    {
+      "path": "models/objects/enviroments/04/04_crate_large_broken.glb",
+      "source_mesh_nodes": 143,
+      "source_triangles": 4620,
+      "stages": {
+        "LargeParts": {
+          "meshes": 25,
+          "triangles": 300
+        },
+        "SmallFragments": {
+          "meshes": 117,
+          "triangles": 4020
+        }
+      },
+      "largest_stage_meshes": 117,
+      "base_map_placements": 0,
+      "stage_meshes_times_placements": 0
+    },
+    {
+      "path": "models/objects/enviroments/04/04_crate_small_broken.glb",
+      "source_mesh_nodes": 135,
+      "source_triangles": 4564,
+      "stages": {
+        "LargeParts": {
+          "meshes": 25,
+          "triangles": 300
+        },
+        "SmallFragments": {
+          "meshes": 109,
+          "triangles": 3964
+        }
+      },
+      "largest_stage_meshes": 109,
+      "base_map_placements": 0,
+      "stage_meshes_times_placements": 0
+    },
+    {
+      "path": "models/objects/enviroments/01/01_VECTRION_Destructible.glb",
+      "source_mesh_nodes": 121,
+      "source_triangles": 14636,
+      "stages": {
+        "LargeParts": {
+          "meshes": 21,
+          "triangles": 4324
+        },
+        "JaggedFragments": {
+          "meshes": 99,
+          "triangles": 5996
+        }
+      },
+      "largest_stage_meshes": 99,
+      "base_map_placements": 0,
+      "stage_meshes_times_placements": 0
+    },
+    {
+      "path": "models/objects/enviroments/08/08_divider_full_U_desk.glb",
+      "source_mesh_nodes": 169,
+      "source_triangles": 3992,
+      "stages": {
+        "Fine": {
+          "meshes": 96,
+          "triangles": 2004
+        },
+        "Medium": {
+          "meshes": 48,
+          "triangles": 1132
+        },
+        "Modular": {
+          "meshes": 4,
+          "triangles": 124
+        },
+        "Primary": {
+          "meshes": 16,
+          "triangles": 484
+        }
+      },
+      "largest_stage_meshes": 96,
+      "base_map_placements": 0,
+      "stage_meshes_times_placements": 0
+    },
+    {
+      "path": "models/objects/enviroments/07/07_table_circular.glb",
+      "source_mesh_nodes": 97,
+      "source_triangles": 2062,
+      "stages": {
+        "LargeParts": {
+          "meshes": 8,
+          "triangles": 396
+        },
+        "SmallFragments": {
+          "meshes": 88,
+          "triangles": 1318
+        }
+      },
+      "largest_stage_meshes": 88,
+      "base_map_placements": 0,
+      "stage_meshes_times_placements": 0
+    },
+    {
+      "path": "models/objects/enviroments/07/07_table_square.glb",
+      "source_mesh_nodes": 86,
+      "source_triangles": 2728,
+      "stages": {
+        "LargeParts": {
+          "meshes": 5,
+          "triangles": 220
+        },
+        "SmallFragments": {
+          "meshes": 80,
+          "triangles": 2288
+        }
+      },
+      "largest_stage_meshes": 80,
+      "base_map_placements": 0,
+      "stage_meshes_times_placements": 0
+    },
+    {
+      "path": "models/objects/enviroments/08/08_divider_black_high.glb",
+      "source_mesh_nodes": 134,
+      "source_triangles": 3162,
+      "stages": {
+        "Fine": {
+          "meshes": 75,
+          "triangles": 1578
+        },
+        "Medium": {
+          "meshes": 39,
+          "triangles": 918
+        },
+        "Modular": {
+          "meshes": 4,
+          "triangles": 98
+        },
+        "Primary": {
+          "meshes": 15,
+          "triangles": 470
+        }
+      },
+      "largest_stage_meshes": 75,
+      "base_map_placements": 0,
+      "stage_meshes_times_placements": 0
+    },
+    {
+      "path": "models/objects/enviroments/08/08_divider_full_H_desk.glb",
+      "source_mesh_nodes": 128,
+      "source_triangles": 4484,
+      "stages": {
+        "Fine": {
+          "meshes": 73,
+          "triangles": 2100
+        },
+        "Medium": {
+          "meshes": 37,
+          "triangles": 1284
+        },
+        "Modular": {
+          "meshes": 4,
+          "triangles": 216
+        },
+        "Primary": {
+          "meshes": 13,
+          "triangles": 668
+        }
+      },
+      "largest_stage_meshes": 73,
+      "base_map_placements": 0,
+      "stage_meshes_times_placements": 0
+    },
+    {
+      "path": "models/objects/enviroments/08/08_divider_full_H.glb",
+      "source_mesh_nodes": 124,
+      "source_triangles": 3672,
+      "stages": {
+        "Fine": {
+          "meshes": 72,
+          "triangles": 1800
+        },
+        "Medium": {
+          "meshes": 36,
+          "triangles": 1040
+        },
+        "Modular": {
+          "meshes": 3,
+          "triangles": 148
+        },
+        "Primary": {
+          "meshes": 12,
+          "triangles": 536
+        }
+      },
+      "largest_stage_meshes": 72,
+      "base_map_placements": 0,
+      "stage_meshes_times_placements": 0
+    },
+    {
+      "path": "models/objects/enviroments/08/08_divider_full_U.glb",
+      "source_mesh_nodes": 124,
+      "source_triangles": 3008,
+      "stages": {
+        "Fine": {
+          "meshes": 72,
+          "triangles": 1536
+        },
+        "Medium": {
+          "meshes": 36,
+          "triangles": 868
+        },
+        "Modular": {
+          "meshes": 3,
+          "triangles": 112
+        },
+        "Primary": {
+          "meshes": 12,
+          "triangles": 380
+        }
+      },
+      "largest_stage_meshes": 72,
+      "base_map_placements": 0,
+      "stage_meshes_times_placements": 0
+    },
+    {
+      "path": "models/objects/enviroments/03/03_file_cabinet_smaller.glb",
+      "source_mesh_nodes": 84,
+      "source_triangles": 3668,
+      "stages": {
+        "LargeParts": {
+          "meshes": 16,
+          "triangles": 376
+        },
+        "SmallFragments": {
+          "meshes": 67,
+          "triangles": 2748
+        }
+      },
+      "largest_stage_meshes": 67,
+      "base_map_placements": 0,
+      "stage_meshes_times_placements": 0
+    },
+    {
+      "path": "models/objects/enviroments/08/08_office_desk_4_coner.glb",
+      "source_mesh_nodes": 137,
+      "source_triangles": 1944,
+      "stages": {
+        "Modular": {
+          "meshes": 6,
+          "triangles": 88
+        },
+        "Primary": {
+          "meshes": 20,
+          "triangles": 292
+        },
+        "Medium": {
+          "meshes": 50,
+          "triangles": 668
+        },
+        "Fine": {
+          "meshes": 60,
+          "triangles": 788
+        }
+      },
+      "largest_stage_meshes": 60,
+      "base_map_placements": 0,
+      "stage_meshes_times_placements": 0
+    },
+    {
+      "path": "models/objects/enviroments/06/06_office_chair.glb",
+      "source_mesh_nodes": 87,
+      "source_triangles": 3678,
+      "stages": {
+        "Fine": {
+          "meshes": 49,
+          "triangles": 1324
+        },
+        "Medium": {
+          "meshes": 25,
+          "triangles": 922
+        },
+        "Modular": {
+          "meshes": 3,
+          "triangles": 428
+        },
+        "Primary": {
+          "meshes": 9,
+          "triangles": 576
+        }
+      },
+      "largest_stage_meshes": 49,
+      "base_map_placements": 0,
+      "stage_meshes_times_placements": 0
+    },
+    {
+      "path": "models/objects/enviroments/06/06_office_chair_2.glb",
+      "source_mesh_nodes": 89,
+      "source_triangles": 36704,
+      "stages": {
+        "Fine": {
+          "meshes": 49,
+          "triangles": 8880
+        },
+        "Medium": {
+          "meshes": 25,
+          "triangles": 7944
+        },
+        "Modular": {
+          "meshes": 3,
+          "triangles": 6392
+        },
+        "Primary": {
+          "meshes": 9,
+          "triangles": 6876
+        }
+      },
+      "largest_stage_meshes": 49,
+      "base_map_placements": 0,
+      "stage_meshes_times_placements": 0
+    },
+    {
+      "path": "models/objects/enviroments/06/06_office_chair_2_fell.glb",
+      "source_mesh_nodes": 87,
+      "source_triangles": 36484,
+      "stages": {
+        "Fine": {
+          "meshes": 49,
+          "triangles": 8880
+        },
+        "Medium": {
+          "meshes": 25,
+          "triangles": 7944
+        },
+        "Modular": {
+          "meshes": 3,
+          "triangles": 6392
+        },
+        "Primary": {
+          "meshes": 9,
+          "triangles": 6876
+        }
+      },
+      "largest_stage_meshes": 49,
+      "base_map_placements": 0,
+      "stage_meshes_times_placements": 0
+    },
+    {
+      "path": "models/objects/enviroments/04/04_cardboard_box_open.glb",
+      "source_mesh_nodes": 45,
+      "source_triangles": 1336,
+      "stages": {
+        "LargeParts": {
+          "meshes": 44,
+          "triangles": 1072
+        }
+      },
+      "largest_stage_meshes": 44,
+      "base_map_placements": 0,
+      "stage_meshes_times_placements": 0
+    },
+    {
+      "path": "models/objects/enviroments/03/03_book_case_with_back_small.glb",
+      "source_mesh_nodes": 49,
+      "source_triangles": 1568,
+      "stages": {
+        "LargeParts": {
+          "meshes": 8,
+          "triangles": 96
+        },
+        "SmallFragments": {
+          "meshes": 40,
+          "triangles": 1376
+        }
+      },
+      "largest_stage_meshes": 40,
+      "base_map_placements": 0,
+      "stage_meshes_times_placements": 0
+    },
+    {
+      "path": "models/objects/enviroments/03/03_server_rack.glb",
+      "source_mesh_nodes": 111,
+      "source_triangles": 2688,
+      "stages": {
+        "Modular": {
+          "meshes": 10,
+          "triangles": 744
+        },
+        "Primary": {
+          "meshes": 20,
+          "triangles": 240
+        },
+        "Medium": {
+          "meshes": 40,
+          "triangles": 480
+        },
+        "Fine": {
+          "meshes": 40,
+          "triangles": 480
+        }
+      },
+      "largest_stage_meshes": 40,
+      "base_map_placements": 0,
+      "stage_meshes_times_placements": 0
+    },
+    {
+      "path": "models/objects/enviroments/03/03_book_case_with_back.glb",
+      "source_mesh_nodes": 45,
+      "source_triangles": 1200,
+      "stages": {
+        "LargeParts": {
+          "meshes": 8,
+          "triangles": 96
+        },
+        "SmallFragments": {
+          "meshes": 36,
+          "triangles": 1008
+        }
+      },
+      "largest_stage_meshes": 36,
+      "base_map_placements": 0,
+      "stage_meshes_times_placements": 0
+    },
+    {
+      "path": "models/objects/enviroments/03/03_book_case.glb",
+      "source_mesh_nodes": 43,
+      "source_triangles": 1028,
+      "stages": {
+        "LargeParts": {
+          "meshes": 7,
+          "triangles": 84
+        },
+        "SmallFragments": {
+          "meshes": 35,
+          "triangles": 860
+        }
+      },
+      "largest_stage_meshes": 35,
+      "base_map_placements": 0,
+      "stage_meshes_times_placements": 0
+    },
+    {
+      "path": "models/objects/enviroments/03/03_bookshelf.glb",
+      "source_mesh_nodes": 44,
+      "source_triangles": 1512,
+      "stages": {
+        "LargeParts": {
+          "meshes": 8,
+          "triangles": 78
+        },
+        "SmallFragments": {
+          "meshes": 35,
+          "triangles": 1356
+        }
+      },
+      "largest_stage_meshes": 35,
+      "base_map_placements": 0,
+      "stage_meshes_times_placements": 0
+    },
+    {
+      "path": "models/objects/enviroments/01/01_glass_door_breakable.glb",
+      "source_mesh_nodes": 39,
+      "source_triangles": 1164,
+      "stages": {
+        "Glass_Shards": {
+          "meshes": 34,
+          "triangles": 548
+        }
+      },
+      "largest_stage_meshes": 34,
+      "base_map_placements": 0,
+      "stage_meshes_times_placements": 0
+    },
+    {
+      "path": "models/objects/enviroments/01/01_glass_partition_blinds_breakable.glb",
+      "source_mesh_nodes": 39,
+      "source_triangles": 3904,
+      "stages": {
+        "Glass_Shards": {
+          "meshes": 34,
+          "triangles": 604
+        }
+      },
+      "largest_stage_meshes": 34,
+      "base_map_placements": 0,
+      "stage_meshes_times_placements": 0
+    },
+    {
+      "path": "models/objects/enviroments/01/01_glass_wall_full_breakable.glb",
+      "source_mesh_nodes": 36,
+      "source_triangles": 992,
+      "stages": {
+        "Glass_Shards": {
+          "meshes": 33,
+          "triangles": 596
+        }
+      },
+      "largest_stage_meshes": 33,
+      "base_map_placements": 0,
+      "stage_meshes_times_placements": 0
+    },
+    {
+      "path": "models/objects/enviroments/03/03_book_case_small.glb",
+      "source_mesh_nodes": 41,
+      "source_triangles": 1044,
+      "stages": {
+        "LargeParts": {
+          "meshes": 7,
+          "triangles": 84
+        },
+        "SmallFragments": {
+          "meshes": 33,
+          "triangles": 876
+        }
+      },
+      "largest_stage_meshes": 33,
+      "base_map_placements": 0,
+      "stage_meshes_times_placements": 0
+    },
+    {
+      "path": "models/objects/enviroments/01/01_glass_partition_half_breakable.glb",
+      "source_mesh_nodes": 35,
+      "source_triangles": 1060,
+      "stages": {
+        "Glass_Shards": {
+          "meshes": 32,
+          "triangles": 576
+        }
+      },
+      "largest_stage_meshes": 32,
+      "base_map_placements": 0,
+      "stage_meshes_times_placements": 0
+    },
+    {
+      "path": "models/objects/enviroments/03/03_server_rack2.glb",
+      "source_mesh_nodes": 100,
+      "source_triangles": 3208,
+      "stages": {
+        "Modular": {
+          "meshes": 10,
+          "triangles": 1076
+        },
+        "Primary": {
+          "meshes": 16,
+          "triangles": 192
+        },
+        "Medium": {
+          "meshes": 32,
+          "triangles": 384
+        },
+        "Fine": {
+          "meshes": 32,
+          "triangles": 384
+        }
+      },
+      "largest_stage_meshes": 32,
+      "base_map_placements": 0,
+      "stage_meshes_times_placements": 0
+    },
+    {
+      "path": "models/objects/enviroments/04/04_cardboard_box_closed.glb",
+      "source_mesh_nodes": 30,
+      "source_triangles": 964,
+      "stages": {
+        "LargeParts": {
+          "meshes": 29,
+          "triangles": 700
+        }
+      },
+      "largest_stage_meshes": 29,
+      "base_map_placements": 0,
+      "stage_meshes_times_placements": 0
+    },
+    {
+      "path": "models/objects/enviroments/07/07_coffee_table2.glb",
+      "source_mesh_nodes": 35,
+      "source_triangles": 1064,
+      "stages": {
+        "LargeParts": {
+          "meshes": 8,
+          "triangles": 152
+        },
+        "SmallFragments": {
+          "meshes": 26,
+          "triangles": 824
+        }
+      },
+      "largest_stage_meshes": 26,
+      "base_map_placements": 0,
+      "stage_meshes_times_placements": 0
+    },
+    {
+      "path": "models/objects/enviroments/03/03_file_cabinet_large_shelf_fancy.glb",
+      "source_mesh_nodes": 31,
+      "source_triangles": 1300,
+      "stages": {
+        "LargeParts": {
+          "meshes": 5,
+          "triangles": 152
+        },
+        "SmallFragments": {
+          "meshes": 25,
+          "triangles": 908
+        }
+      },
+      "largest_stage_meshes": 25,
+      "base_map_placements": 0,
+      "stage_meshes_times_placements": 0
+    },
+    {
+      "path": "models/objects/enviroments/07/07_table.glb",
+      "source_mesh_nodes": 30,
+      "source_triangles": 432,
+      "stages": {
+        "LargeParts": {
+          "meshes": 5,
+          "triangles": 60
+        },
+        "SmallFragments": {
+          "meshes": 24,
+          "triangles": 312
+        }
+      },
+      "largest_stage_meshes": 24,
+      "base_map_placements": 0,
+      "stage_meshes_times_placements": 0
+    },
+    {
+      "path": "models/objects/enviroments/08/08_office_desk_2.glb",
+      "source_mesh_nodes": 56,
+      "source_triangles": 1500,
+      "stages": {
+        "Fine": {
+          "meshes": 24,
+          "triangles": 452
+        },
+        "Medium": {
+          "meshes": 20,
+          "triangles": 536
+        },
+        "Modular": {
+          "meshes": 3,
+          "triangles": 108
+        },
+        "Primary": {
+          "meshes": 8,
+          "triangles": 296
+        }
+      },
+      "largest_stage_meshes": 24,
+      "base_map_placements": 0,
+      "stage_meshes_times_placements": 0
+    },
+    {
+      "path": "models/objects/enviroments/03/03_file_cabinet_small_shelf_fancy.glb",
+      "source_mesh_nodes": 29,
+      "source_triangles": 1268,
+      "stages": {
+        "LargeParts": {
+          "meshes": 5,
+          "triangles": 152
+        },
+        "SmallFragments": {
+          "meshes": 23,
+          "triangles": 876
+        }
+      },
+      "largest_stage_meshes": 23,
+      "base_map_placements": 0,
+      "stage_meshes_times_placements": 0
+    },
+    {
+      "path": "models/objects/enviroments/11/11_bamboo.glb",
+      "source_mesh_nodes": 24,
+      "source_triangles": 12124,
+      "stages": {
+        "PlantDestroyed": {
+          "meshes": 1,
+          "triangles": 2808
+        },
+        "PotFragments": {
+          "meshes": 20,
+          "triangles": 2760
+        }
+      },
+      "largest_stage_meshes": 20,
+      "base_map_placements": 0,
+      "stage_meshes_times_placements": 0
+    },
+    {
+      "path": "models/objects/enviroments/11/11_deco_2.glb",
+      "source_mesh_nodes": 24,
+      "source_triangles": 11236,
+      "stages": {
+        "PlantDestroyed": {
+          "meshes": 1,
+          "triangles": 2760
+        },
+        "PotFragments": {
+          "meshes": 20,
+          "triangles": 2712
+        }
+      },
+      "largest_stage_meshes": 20,
+      "base_map_placements": 0,
+      "stage_meshes_times_placements": 0
+    },
+    {
+      "path": "models/objects/enviroments/11/11_deco_3.glb",
+      "source_mesh_nodes": 24,
+      "source_triangles": 12076,
+      "stages": {
+        "PlantDestroyed": {
+          "meshes": 1,
+          "triangles": 2796
+        },
+        "PotFragments": {
+          "meshes": 20,
+          "triangles": 2748
+        }
+      },
+      "largest_stage_meshes": 20,
+      "base_map_placements": 0,
+      "stage_meshes_times_placements": 0
+    },
+    {
+      "path": "models/objects/enviroments/11/11_deco_plant.glb",
+      "source_mesh_nodes": 24,
+      "source_triangles": 11504,
+      "stages": {
+        "PlantDestroyed": {
+          "meshes": 1,
+          "triangles": 2788
+        },
+        "PotFragments": {
+          "meshes": 20,
+          "triangles": 2740
+        }
+      },
+      "largest_stage_meshes": 20,
+      "base_map_placements": 0,
+      "stage_meshes_times_placements": 0
+    },
+    {
+      "path": "models/objects/enviroments/11/11_plant_large.glb",
+      "source_mesh_nodes": 24,
+      "source_triangles": 14368,
+      "stages": {
+        "PlantDestroyed": {
+          "meshes": 1,
+          "triangles": 2836
+        },
+        "PotFragments": {
+          "meshes": 20,
+          "triangles": 2788
+        }
+      },
+      "largest_stage_meshes": 20,
+      "base_map_placements": 0,
+      "stage_meshes_times_placements": 0
+    },
+    {
+      "path": "models/objects/enviroments/11/11_plant_medium.glb",
+      "source_mesh_nodes": 24,
+      "source_triangles": 13280,
+      "stages": {
+        "PlantDestroyed": {
+          "meshes": 1,
+          "triangles": 2756
+        },
+        "PotFragments": {
+          "meshes": 20,
+          "triangles": 2708
+        }
+      },
+      "largest_stage_meshes": 20,
+      "base_map_placements": 0,
+      "stage_meshes_times_placements": 0
+    },
+    {
+      "path": "models/objects/enviroments/11/11_plant_small.glb",
+      "source_mesh_nodes": 24,
+      "source_triangles": 12208,
+      "stages": {
+        "PlantDestroyed": {
+          "meshes": 1,
+          "triangles": 2632
+        },
+        "PotFragments": {
+          "meshes": 20,
+          "triangles": 2584
+        }
+      },
+      "largest_stage_meshes": 20,
+      "base_map_placements": 0,
+      "stage_meshes_times_placements": 0
+    },
+    {
+      "path": "models/objects/enviroments/08/08_divider_black_high_half.glb",
+      "source_mesh_nodes": 34,
+      "source_triangles": 1066,
+      "stages": {
+        "Fine": {
+          "meshes": 15,
+          "triangles": 442
+        },
+        "Medium": {
+          "meshes": 9,
+          "triangles": 286
+        },
+        "Modular": {
+          "meshes": 4,
+          "triangles": 98
+        },
+        "Primary": {
+          "meshes": 5,
+          "triangles": 142
+        }
+      },
+      "largest_stage_meshes": 15,
+      "base_map_placements": 0,
+      "stage_meshes_times_placements": 0
+    },
+    {
+      "path": "models/objects/enviroments/08/08_divider_black_low.glb",
+      "source_mesh_nodes": 34,
+      "source_triangles": 1018,
+      "stages": {
+        "Fine": {
+          "meshes": 15,
+          "triangles": 418
+        },
+        "Medium": {
+          "meshes": 9,
+          "triangles": 270
+        },
+        "Modular": {
+          "meshes": 4,
+          "triangles": 98
+        },
+        "Primary": {
+          "meshes": 5,
+          "triangles": 134
+        }
+      },
+      "largest_stage_meshes": 15,
+      "base_map_placements": 0,
+      "stage_meshes_times_placements": 0
+    },
+    {
+      "path": "models/objects/enviroments/08/08_divider_black_low_half.glb",
+      "source_mesh_nodes": 39,
+      "source_triangles": 1250,
+      "stages": {
+        "Fine": {
+          "meshes": 15,
+          "triangles": 430
+        },
+        "Medium": {
+          "meshes": 9,
+          "triangles": 286
+        },
+        "Modular": {
+          "meshes": 4,
+          "triangles": 98
+        },
+        "Primary": {
+          "meshes": 5,
+          "triangles": 142
+        }
+      },
+      "largest_stage_meshes": 15,
+      "base_map_placements": 0,
+      "stage_meshes_times_placements": 0
+    },
+    {
+      "path": "models/objects/enviroments/07/07_reception_counter_two_heights_2.glb",
+      "source_mesh_nodes": 14,
+      "source_triangles": 1872,
+      "stages": {
+        "DamageReady": {
+          "meshes": 13,
+          "triangles": 936
+        }
+      },
+      "largest_stage_meshes": 13,
+      "base_map_placements": 0,
+      "stage_meshes_times_placements": 0
+    },
+    {
+      "path": "models/objects/enviroments/09/09_books.glb",
+      "source_mesh_nodes": 14,
+      "source_triangles": 990,
+      "stages": {
+        "LargeParts": {
+          "meshes": 13,
+          "triangles": 694
+        }
+      },
+      "largest_stage_meshes": 13,
+      "base_map_placements": 0,
+      "stage_meshes_times_placements": 0
+    },
+    {
+      "path": "models/objects/enviroments/09/09_books_alt_2.glb",
+      "source_mesh_nodes": 10,
+      "source_triangles": 594,
+      "stages": {
+        "LargeParts": {
+          "meshes": 9,
+          "triangles": 380
+        }
+      },
+      "largest_stage_meshes": 9,
+      "base_map_placements": 0,
+      "stage_meshes_times_placements": 0
+    },
+    {
+      "path": "models/objects/enviroments/02/02_capboard_up_double_destructible.glb",
+      "source_mesh_nodes": 19,
+      "source_triangles": 1656,
+      "stages": {
+        "Door_Off": {
+          "meshes": 8,
+          "triangles": 536
+        },
+        "Panels": {
+          "meshes": 8,
+          "triangles": 536
+        }
+      },
+      "largest_stage_meshes": 8,
+      "base_map_placements": 0,
+      "stage_meshes_times_placements": 0
+    },
+    {
+      "path": "models/objects/enviroments/03/03_server_rack3.glb",
+      "source_mesh_nodes": 31,
+      "source_triangles": 976,
+      "stages": {
+        "Modular": {
+          "meshes": 2,
+          "triangles": 320
+        },
+        "Primary": {
+          "meshes": 4,
+          "triangles": 48
+        },
+        "Medium": {
+          "meshes": 8,
+          "triangles": 96
+        },
+        "Fine": {
+          "meshes": 8,
+          "triangles": 96
+        }
+      },
+      "largest_stage_meshes": 8,
+      "base_map_placements": 0,
+      "stage_meshes_times_placements": 0
+    },
+    {
+      "path": "models/objects/enviroments/02/02_capboard_up_one_destructible.glb",
+      "source_mesh_nodes": 16,
+      "source_triangles": 1008,
+      "stages": {
+        "Door_Off": {
+          "meshes": 7,
+          "triangles": 320
+        },
+        "Panels": {
+          "meshes": 7,
+          "triangles": 320
+        }
+      },
+      "largest_stage_meshes": 7,
+      "base_map_placements": 0,
+      "stage_meshes_times_placements": 0
+    },
+    {
+      "path": "models/objects/enviroments/09/09_books_alt.glb",
+      "source_mesh_nodes": 7,
+      "source_triangles": 427,
+      "stages": {
+        "LargeParts": {
+          "meshes": 6,
+          "triangles": 297
+        }
+      },
+      "largest_stage_meshes": 6,
+      "base_map_placements": 0,
+      "stage_meshes_times_placements": 0
+    },
+    {
+      "path": "models/objects/enviroments/05/05_MFU_2_extra_trays_destructible.glb",
+      "source_mesh_nodes": 6,
+      "source_triangles": 6396,
+      "stages": {
+        "LargeParts": {
+          "meshes": 5,
+          "triangles": 3198
+        }
+      },
+      "largest_stage_meshes": 5,
+      "base_map_placements": 0,
+      "stage_meshes_times_placements": 0
+    },
+    {
+      "path": "models/objects/enviroments/05/05_monitor3_server_destructible.glb",
+      "source_mesh_nodes": 6,
+      "source_triangles": 1068,
+      "stages": {
+        "LargeParts": {
+          "meshes": 4,
+          "triangles": 356
+        }
+      },
+      "largest_stage_meshes": 4,
+      "base_map_placements": 0,
+      "stage_meshes_times_placements": 0
+    },
+    {
+      "path": "models/objects/enviroments/05/05_monitor4_server_destructible.glb",
+      "source_mesh_nodes": 6,
+      "source_triangles": 1068,
+      "stages": {
+        "LargeParts": {
+          "meshes": 4,
+          "triangles": 356
+        }
+      },
+      "largest_stage_meshes": 4,
+      "base_map_placements": 0,
+      "stage_meshes_times_placements": 0
+    },
+    {
+      "path": "models/objects/enviroments/05/05_printer_destructible.glb",
+      "source_mesh_nodes": 12,
+      "source_triangles": 54156,
+      "stages": {
+        "LargeParts": {
+          "meshes": 4,
+          "triangles": 18052
+        }
+      },
+      "largest_stage_meshes": 4,
+      "base_map_placements": 0,
+      "stage_meshes_times_placements": 0
+    },
+    {
+      "path": "models/objects/enviroments/05/05_wall_TV_destructible.glb",
+      "source_mesh_nodes": 5,
+      "source_triangles": 232,
+      "stages": {
+        "LargeParts": {
+          "meshes": 4,
+          "triangles": 154
+        }
+      },
+      "largest_stage_meshes": 4,
+      "base_map_placements": 0,
+      "stage_meshes_times_placements": 0
+    },
+    {
+      "path": "models/objects/enviroments/02/02_water_cooler_destructible.glb",
+      "source_mesh_nodes": 5,
+      "source_triangles": 832,
+      "stages": {
+        "LargeParts": {
+          "meshes": 3,
+          "triangles": 320
+        }
+      },
+      "largest_stage_meshes": 3,
+      "base_map_placements": 0,
+      "stage_meshes_times_placements": 0
+    },
+    {
+      "path": "models/objects/enviroments/05/05_PC_destructible.glb",
+      "source_mesh_nodes": 4,
+      "source_triangles": 1192,
+      "stages": {
+        "LargeParts": {
+          "meshes": 3,
+          "triangles": 596
+        }
+      },
+      "largest_stage_meshes": 3,
+      "base_map_placements": 0,
+      "stage_meshes_times_placements": 0
+    },
+    {
+      "path": "models/objects/enviroments/05/05_computer_tower_destructible.glb",
+      "source_mesh_nodes": 4,
+      "source_triangles": 216,
+      "stages": {
+        "LargeParts": {
+          "meshes": 3,
+          "triangles": 108
+        }
+      },
+      "largest_stage_meshes": 3,
+      "base_map_placements": 0,
+      "stage_meshes_times_placements": 0
+    },
+    {
+      "path": "models/objects/enviroments/05/05_monitor2_destructible.glb",
+      "source_mesh_nodes": 5,
+      "source_triangles": 276,
+      "stages": {
+        "LargeParts": {
+          "meshes": 3,
+          "triangles": 92
+        }
+      },
+      "largest_stage_meshes": 3,
+      "base_map_placements": 0,
+      "stage_meshes_times_placements": 0
+    },
+    {
+      "path": "models/objects/enviroments/05/05_MFU_destructible.glb",
+      "source_mesh_nodes": 3,
+      "source_triangles": 5988,
+      "stages": {
+        "LargeParts": {
+          "meshes": 2,
+          "triangles": 2994
+        }
+      },
+      "largest_stage_meshes": 2,
+      "base_map_placements": 0,
+      "stage_meshes_times_placements": 0
+    },
+    {
+      "path": "models/objects/enviroments/05/05_desk_phone.glb",
+      "source_mesh_nodes": 3,
+      "source_triangles": 216,
+      "stages": {
+        "LargeParts": {
+          "meshes": 2,
+          "triangles": 108
+        }
+      },
+      "largest_stage_meshes": 2,
+      "base_map_placements": 0,
+      "stage_meshes_times_placements": 0
+    },
+    {
+      "path": "models/objects/enviroments/05/05_laptop_close_destructible.glb",
+      "source_mesh_nodes": 4,
+      "source_triangles": 55137,
+      "stages": {
+        "LargeParts": {
+          "meshes": 2,
+          "triangles": 18425
+        }
+      },
+      "largest_stage_meshes": 2,
+      "base_map_placements": 0,
+      "stage_meshes_times_placements": 0
+    },
+    {
+      "path": "models/objects/enviroments/05/05_laptop_destructible.glb",
+      "source_mesh_nodes": 4,
+      "source_triangles": 55331,
+      "stages": {
+        "LargeParts": {
+          "meshes": 2,
+          "triangles": 18411
+        }
+      },
+      "largest_stage_meshes": 2,
+      "base_map_placements": 0,
+      "stage_meshes_times_placements": 0
+    },
+    {
+      "path": "models/objects/enviroments/05/05_monitor_destructible.glb",
+      "source_mesh_nodes": 4,
+      "source_triangles": 1830,
+      "stages": {
+        "LargeParts": {
+          "meshes": 2,
+          "triangles": 610
+        }
+      },
+      "largest_stage_meshes": 2,
+      "base_map_placements": 0,
+      "stage_meshes_times_placements": 0
+    },
+    {
+      "path": "models/objects/enviroments/05/05_monitor_wide_destructible.glb",
+      "source_mesh_nodes": 4,
+      "source_triangles": 1830,
+      "stages": {
+        "LargeParts": {
+          "meshes": 2,
+          "triangles": 610
+        }
+      },
+      "largest_stage_meshes": 2,
+      "base_map_placements": 0,
+      "stage_meshes_times_placements": 0
+    },
+    {
+      "path": "models/objects/enviroments/01/01_column.glb",
+      "source_mesh_nodes": 3,
+      "source_triangles": 36,
+      "stages": {},
+      "largest_stage_meshes": 0,
+      "base_map_placements": 0,
+      "stage_meshes_times_placements": 0
+    },
+    {
+      "path": "models/objects/enviroments/01/01_column_2.glb",
+      "source_mesh_nodes": 1,
+      "source_triangles": 13872,
+      "stages": {},
+      "largest_stage_meshes": 0,
+      "base_map_placements": 0,
+      "stage_meshes_times_placements": 0
+    },
+    {
+      "path": "models/objects/enviroments/01/01_elevator_cabin_freight.glb",
+      "source_mesh_nodes": 34,
+      "source_triangles": 1088,
+      "stages": {},
+      "largest_stage_meshes": 0,
+      "base_map_placements": 0,
+      "stage_meshes_times_placements": 0
+    },
+    {
+      "path": "models/objects/enviroments/01/01_elevator_cabin_passenger.glb",
+      "source_mesh_nodes": 27,
+      "source_triangles": 868,
+      "stages": {},
+      "largest_stage_meshes": 0,
+      "base_map_placements": 0,
+      "stage_meshes_times_placements": 0
+    },
+    {
+      "path": "models/objects/enviroments/01/01_elevator_door.glb",
+      "source_mesh_nodes": 4,
+      "source_triangles": 384,
+      "stages": {},
+      "largest_stage_meshes": 0,
+      "base_map_placements": 0,
+      "stage_meshes_times_placements": 0
+    },
+    {
+      "path": "models/objects/enviroments/01/01_floor_1x1.glb",
+      "source_mesh_nodes": 1,
+      "source_triangles": 2,
+      "stages": {},
+      "largest_stage_meshes": 0,
+      "base_map_placements": 0,
+      "stage_meshes_times_placements": 0
+    },
+    {
+      "path": "models/objects/enviroments/01/01_floor_2x2.glb",
+      "source_mesh_nodes": 1,
+      "source_triangles": 2,
+      "stages": {},
+      "largest_stage_meshes": 0,
+      "base_map_placements": 0,
+      "stage_meshes_times_placements": 0
+    },
+    {
+      "path": "models/objects/enviroments/01/01_floor_3x3.glb",
+      "source_mesh_nodes": 1,
+      "source_triangles": 2,
+      "stages": {},
+      "largest_stage_meshes": 0,
+      "base_map_placements": 0,
+      "stage_meshes_times_placements": 0
+    },
+    {
+      "path": "models/objects/enviroments/01/01_floor_corner_round.glb",
+      "source_mesh_nodes": 1,
+      "source_triangles": 2,
+      "stages": {},
+      "largest_stage_meshes": 0,
+      "base_map_placements": 5,
+      "stage_meshes_times_placements": 0
+    },
+    {
+      "path": "models/objects/enviroments/01/01_floor_corner_round_half.glb",
+      "source_mesh_nodes": 1,
+      "source_triangles": 2,
+      "stages": {},
+      "largest_stage_meshes": 0,
+      "base_map_placements": 0,
+      "stage_meshes_times_placements": 0
+    },
+    {
+      "path": "models/objects/enviroments/01/01_floor_pad.glb",
+      "source_mesh_nodes": 1,
+      "source_triangles": 24,
+      "stages": {},
+      "largest_stage_meshes": 0,
+      "base_map_placements": 0,
+      "stage_meshes_times_placements": 0
+    },
+    {
+      "path": "models/objects/enviroments/01/01_only_door.glb",
+      "source_mesh_nodes": 1,
+      "source_triangles": 24,
+      "stages": {},
+      "largest_stage_meshes": 0,
+      "base_map_placements": 0,
+      "stage_meshes_times_placements": 0
+    },
+    {
+      "path": "models/objects/enviroments/01/01_stairs.glb",
+      "source_mesh_nodes": 9,
+      "source_triangles": 788,
+      "stages": {},
+      "largest_stage_meshes": 0,
+      "base_map_placements": 2,
+      "stage_meshes_times_placements": 0
+    },
+    {
+      "path": "models/objects/enviroments/01/01_stairs_2.glb",
+      "source_mesh_nodes": 9,
+      "source_triangles": 788,
+      "stages": {},
+      "largest_stage_meshes": 0,
+      "base_map_placements": 0,
+      "stage_meshes_times_placements": 0
+    },
+    {
+      "path": "models/objects/enviroments/01/01_wall_door.glb",
+      "source_mesh_nodes": 2,
+      "source_triangles": 108,
+      "stages": {},
+      "largest_stage_meshes": 0,
+      "base_map_placements": 0,
+      "stage_meshes_times_placements": 0
+    },
+    {
+      "path": "models/objects/enviroments/01/01_wall_door_without.glb",
+      "source_mesh_nodes": 1,
+      "source_triangles": 84,
+      "stages": {},
+      "largest_stage_meshes": 0,
+      "base_map_placements": 0,
+      "stage_meshes_times_placements": 0
+    },
+    {
+      "path": "models/objects/enviroments/01/01_wall_emergency_door.glb",
+      "source_mesh_nodes": 2,
+      "source_triangles": 568,
+      "stages": {},
+      "largest_stage_meshes": 0,
+      "base_map_placements": 0,
+      "stage_meshes_times_placements": 0
+    },
+    {
+      "path": "models/objects/enviroments/01/01_wall_half_panel.glb",
+      "source_mesh_nodes": 2,
+      "source_triangles": 60,
+      "stages": {},
+      "largest_stage_meshes": 0,
+      "base_map_placements": 0,
+      "stage_meshes_times_placements": 0
+    },
+    {
+      "path": "models/objects/enviroments/01/01_wall_straight.glb",
+      "source_mesh_nodes": 1,
+      "source_triangles": 24,
+      "stages": {},
+      "largest_stage_meshes": 0,
+      "base_map_placements": 0,
+      "stage_meshes_times_placements": 0
+    },
+    {
+      "path": "models/objects/enviroments/01/01_window_double.glb",
+      "source_mesh_nodes": 2,
+      "source_triangles": 72,
+      "stages": {},
+      "largest_stage_meshes": 0,
+      "base_map_placements": 0,
+      "stage_meshes_times_placements": 0
+    },
+    {
+      "path": "models/objects/enviroments/01/01_wood_slat_partition_destructible.glb",
+      "source_mesh_nodes": 28,
+      "source_triangles": 648,
+      "stages": {
+        "LargeParts": {
+          "meshes": 0,
+          "triangles": 0
+        }
+      },
+      "largest_stage_meshes": 0,
+      "base_map_placements": 0,
+      "stage_meshes_times_placements": 0
+    },
+    {
+      "path": "models/objects/enviroments/02/02_arcade_machine_V1.glb",
+      "source_mesh_nodes": 1,
+      "source_triangles": 1045,
+      "stages": {},
+      "largest_stage_meshes": 0,
+      "base_map_placements": 0,
+      "stage_meshes_times_placements": 0
+    },
+    {
+      "path": "models/objects/enviroments/02/02_arcade_machine_V2.glb",
+      "source_mesh_nodes": 1,
+      "source_triangles": 858,
+      "stages": {},
+      "largest_stage_meshes": 0,
+      "base_map_placements": 0,
+      "stage_meshes_times_placements": 0
+    },
+    {
+      "path": "models/objects/enviroments/02/02_arcade_machine_V3.glb",
+      "source_mesh_nodes": 1,
+      "source_triangles": 1328,
+      "stages": {},
+      "largest_stage_meshes": 0,
+      "base_map_placements": 0,
+      "stage_meshes_times_placements": 0
+    },
+    {
+      "path": "models/objects/enviroments/02/02_arcade_machine_V4.glb",
+      "source_mesh_nodes": 1,
+      "source_triangles": 1030,
+      "stages": {},
+      "largest_stage_meshes": 0,
+      "base_map_placements": 0,
+      "stage_meshes_times_placements": 0
+    },
+    {
+      "path": "models/objects/enviroments/02/02_arcade_machine_V5.glb",
+      "source_mesh_nodes": 1,
+      "source_triangles": 2852,
+      "stages": {},
+      "largest_stage_meshes": 0,
+      "base_map_placements": 0,
+      "stage_meshes_times_placements": 0
+    },
+    {
+      "path": "models/objects/enviroments/02/02_arcade_machine_V6.glb",
+      "source_mesh_nodes": 1,
+      "source_triangles": 2850,
+      "stages": {},
+      "largest_stage_meshes": 0,
+      "base_map_placements": 0,
+      "stage_meshes_times_placements": 0
+    },
+    {
+      "path": "models/objects/enviroments/02/02_coffee_vending_1_dented.glb",
+      "source_mesh_nodes": 4,
+      "source_triangles": 31262,
+      "stages": {},
+      "largest_stage_meshes": 0,
+      "base_map_placements": 2,
+      "stage_meshes_times_placements": 0
+    },
+    {
+      "path": "models/objects/enviroments/02/02_coffee_vending_2_dented.glb",
+      "source_mesh_nodes": 4,
+      "source_triangles": 11956,
+      "stages": {},
+      "largest_stage_meshes": 0,
+      "base_map_placements": 1,
+      "stage_meshes_times_placements": 0
+    },
+    {
+      "path": "models/objects/enviroments/02/02_dishwasher_dented.glb",
+      "source_mesh_nodes": 8,
+      "source_triangles": 74872,
+      "stages": {},
+      "largest_stage_meshes": 0,
+      "base_map_placements": 1,
+      "stage_meshes_times_placements": 0
+    },
+    {
+      "path": "models/objects/enviroments/02/02_frige_dented.glb",
+      "source_mesh_nodes": 12,
+      "source_triangles": 36456,
+      "stages": {},
+      "largest_stage_meshes": 0,
+      "base_map_placements": 5,
+      "stage_meshes_times_placements": 0
+    },
+    {
+      "path": "models/objects/enviroments/02/02_sink_pedestal_improved.glb",
+      "source_mesh_nodes": 3,
+      "source_triangles": 11088,
+      "stages": {},
+      "largest_stage_meshes": 0,
+      "base_map_placements": 18,
+      "stage_meshes_times_placements": 0
+    },
+    {
+      "path": "models/objects/enviroments/02/02_toilet_new.glb",
+      "source_mesh_nodes": 3,
+      "source_triangles": 8932,
+      "stages": {},
+      "largest_stage_meshes": 0,
+      "base_map_placements": 16,
+      "stage_meshes_times_placements": 0
+    },
+    {
+      "path": "models/objects/enviroments/02/02_vending_automat_1_dented.glb",
+      "source_mesh_nodes": 15,
+      "source_triangles": 18984,
+      "stages": {},
+      "largest_stage_meshes": 0,
+      "base_map_placements": 1,
+      "stage_meshes_times_placements": 0
+    },
+    {
+      "path": "models/objects/enviroments/02/02_vending_automat_2_dented.glb",
+      "source_mesh_nodes": 15,
+      "source_triangles": 31234,
+      "stages": {},
+      "largest_stage_meshes": 0,
+      "base_map_placements": 1,
+      "stage_meshes_times_placements": 0
+    },
+    {
+      "path": "models/objects/enviroments/02/02_vending_machine_fantas_dented.glb",
+      "source_mesh_nodes": 28,
+      "source_triangles": 94668,
+      "stages": {},
+      "largest_stage_meshes": 0,
+      "base_map_placements": 1,
+      "stage_meshes_times_placements": 0
+    },
+    {
+      "path": "models/objects/enviroments/02/02_wall_urinal_improved.glb",
+      "source_mesh_nodes": 3,
+      "source_triangles": 6112,
+      "stages": {},
+      "largest_stage_meshes": 0,
+      "base_map_placements": 12,
+      "stage_meshes_times_placements": 0
+    },
+    {
+      "path": "models/objects/enviroments/02/02_washing_machine_dented.glb",
+      "source_mesh_nodes": 28,
+      "source_triangles": 13428,
+      "stages": {},
+      "largest_stage_meshes": 0,
+      "base_map_placements": 0,
+      "stage_meshes_times_placements": 0
+    },
+    {
+      "path": "models/objects/enviroments/02/02_water_cooler_bottle.glb",
+      "source_mesh_nodes": 1,
+      "source_triangles": 188,
+      "stages": {},
+      "largest_stage_meshes": 0,
+      "base_map_placements": 10,
+      "stage_meshes_times_placements": 0
+    },
+    {
+      "path": "models/objects/enviroments/03/03_box_1_metal_dented.glb",
+      "source_mesh_nodes": 4,
+      "source_triangles": 33712,
+      "stages": {},
+      "largest_stage_meshes": 0,
+      "base_map_placements": 0,
+      "stage_meshes_times_placements": 0
+    },
+    {
+      "path": "models/objects/enviroments/03/03_locker_tall_dented.glb",
+      "source_mesh_nodes": 56,
+      "source_triangles": 19420,
+      "stages": {},
+      "largest_stage_meshes": 0,
+      "base_map_placements": 0,
+      "stage_meshes_times_placements": 0
+    },
+    {
+      "path": "models/objects/enviroments/05/05_computer_mouse.glb",
+      "source_mesh_nodes": 1,
+      "source_triangles": 32,
+      "stages": {},
+      "largest_stage_meshes": 0,
+      "base_map_placements": 0,
+      "stage_meshes_times_placements": 0
+    },
+    {
+      "path": "models/objects/enviroments/05/05_keyboard.glb",
+      "source_mesh_nodes": 1,
+      "source_triangles": 1804,
+      "stages": {},
+      "largest_stage_meshes": 0,
+      "base_map_placements": 0,
+      "stage_meshes_times_placements": 0
+    },
+    {
+      "path": "models/objects/enviroments/05/05_lamp.glb",
+      "source_mesh_nodes": 1,
+      "source_triangles": 2364,
+      "stages": {},
+      "largest_stage_meshes": 0,
+      "base_map_placements": 0,
+      "stage_meshes_times_placements": 0
+    },
+    {
+      "path": "models/objects/enviroments/05/05_minipc.glb",
+      "source_mesh_nodes": 1,
+      "source_triangles": 716,
+      "stages": {},
+      "largest_stage_meshes": 0,
+      "base_map_placements": 0,
+      "stage_meshes_times_placements": 0
+    },
+    {
+      "path": "models/objects/enviroments/05/05_phone_a_base.glb",
+      "source_mesh_nodes": 1,
+      "source_triangles": 168,
+      "stages": {},
+      "largest_stage_meshes": 0,
+      "base_map_placements": 0,
+      "stage_meshes_times_placements": 0
+    },
+    {
+      "path": "models/objects/enviroments/05/05_phone_a_base_hang.glb",
+      "source_mesh_nodes": 2,
+      "source_triangles": 234,
+      "stages": {},
+      "largest_stage_meshes": 0,
+      "base_map_placements": 0,
+      "stage_meshes_times_placements": 0
+    },
+    {
+      "path": "models/objects/enviroments/05/05_phone_b.glb",
+      "source_mesh_nodes": 1,
+      "source_triangles": 66,
+      "stages": {},
+      "largest_stage_meshes": 0,
+      "base_map_placements": 0,
+      "stage_meshes_times_placements": 0
+    },
+    {
+      "path": "models/objects/enviroments/05/05_wall_hand_dryer_improved.glb",
+      "source_mesh_nodes": 1,
+      "source_triangles": 268,
+      "stages": {},
+      "largest_stage_meshes": 0,
+      "base_map_placements": 16,
+      "stage_meshes_times_placements": 0
+    },
+    {
+      "path": "models/objects/enviroments/09/09_board_stand_white.glb",
+      "source_mesh_nodes": 6,
+      "source_triangles": 464,
+      "stages": {},
+      "largest_stage_meshes": 0,
+      "base_map_placements": 1,
+      "stage_meshes_times_placements": 0
+    },
+    {
+      "path": "models/objects/enviroments/09/09_book_big.glb",
+      "source_mesh_nodes": 1,
+      "source_triangles": 44,
+      "stages": {},
+      "largest_stage_meshes": 0,
+      "base_map_placements": 0,
+      "stage_meshes_times_placements": 0
+    },
+    {
+      "path": "models/objects/enviroments/09/09_book_fat.glb",
+      "source_mesh_nodes": 1,
+      "source_triangles": 44,
+      "stages": {},
+      "largest_stage_meshes": 0,
+      "base_map_placements": 0,
+      "stage_meshes_times_placements": 0
+    },
+    {
+      "path": "models/objects/enviroments/09/09_book_filearchive.glb",
+      "source_mesh_nodes": 1,
+      "source_triangles": 66,
+      "stages": {},
+      "largest_stage_meshes": 0,
+      "base_map_placements": 0,
+      "stage_meshes_times_placements": 0
+    },
+    {
+      "path": "models/objects/enviroments/09/09_book_folder.glb",
+      "source_mesh_nodes": 1,
+      "source_triangles": 64,
+      "stages": {},
+      "largest_stage_meshes": 0,
+      "base_map_placements": 0,
+      "stage_meshes_times_placements": 0
+    },
+    {
+      "path": "models/objects/enviroments/09/09_book_small.glb",
+      "source_mesh_nodes": 1,
+      "source_triangles": 68,
+      "stages": {},
+      "largest_stage_meshes": 0,
+      "base_map_placements": 0,
+      "stage_meshes_times_placements": 0
+    },
+    {
+      "path": "models/objects/enviroments/09/09_book_st.glb",
+      "source_mesh_nodes": 1,
+      "source_triangles": 54,
+      "stages": {},
+      "largest_stage_meshes": 0,
+      "base_map_placements": 0,
+      "stage_meshes_times_placements": 0
+    },
+    {
+      "path": "models/objects/enviroments/09/09_camera.glb",
+      "source_mesh_nodes": 1,
+      "source_triangles": 3592,
+      "stages": {},
+      "largest_stage_meshes": 0,
+      "base_map_placements": 1,
+      "stage_meshes_times_placements": 0
+    },
+    {
+      "path": "models/objects/enviroments/09/09_case_with_money_close.glb",
+      "source_mesh_nodes": 1,
+      "source_triangles": 1132,
+      "stages": {},
+      "largest_stage_meshes": 0,
+      "base_map_placements": 1,
+      "stage_meshes_times_placements": 0
+    },
+    {
+      "path": "models/objects/enviroments/09/09_case_with_money_open.glb",
+      "source_mesh_nodes": 6,
+      "source_triangles": 6306,
+      "stages": {},
+      "largest_stage_meshes": 0,
+      "base_map_placements": 0,
+      "stage_meshes_times_placements": 0
+    },
+    {
+      "path": "models/objects/enviroments/09/09_casehand_1.glb",
+      "source_mesh_nodes": 1,
+      "source_triangles": 184,
+      "stages": {},
+      "largest_stage_meshes": 0,
+      "base_map_placements": 0,
+      "stage_meshes_times_placements": 0
+    },
+    {
+      "path": "models/objects/enviroments/09/09_casehand_2.glb",
+      "source_mesh_nodes": 1,
+      "source_triangles": 372,
+      "stages": {},
+      "largest_stage_meshes": 0,
+      "base_map_placements": 0,
+      "stage_meshes_times_placements": 0
+    },
+    {
+      "path": "models/objects/enviroments/09/09_file_binder.glb",
+      "source_mesh_nodes": 1,
+      "source_triangles": 28,
+      "stages": {},
+      "largest_stage_meshes": 0,
+      "base_map_placements": 0,
+      "stage_meshes_times_placements": 0
+    },
+    {
+      "path": "models/objects/enviroments/09/09_file_binder_alt_1.glb",
+      "source_mesh_nodes": 1,
+      "source_triangles": 28,
+      "stages": {
+        "LargeParts": {
+          "meshes": 0,
+          "triangles": 0
+        },
+        "LargeParts.001": {
+          "meshes": 0,
+          "triangles": 0
+        },
+        "SmallFragments": {
+          "meshes": 0,
+          "triangles": 0
+        },
+        "SmallFragments.001": {
+          "meshes": 0,
+          "triangles": 0
+        }
+      },
+      "largest_stage_meshes": 0,
+      "base_map_placements": 0,
+      "stage_meshes_times_placements": 0
+    },
+    {
+      "path": "models/objects/enviroments/09/09_file_binder_alt_1_fell.glb",
+      "source_mesh_nodes": 1,
+      "source_triangles": 28,
+      "stages": {
+        "LargeParts": {
+          "meshes": 0,
+          "triangles": 0
+        },
+        "LargeParts.001": {
+          "meshes": 0,
+          "triangles": 0
+        },
+        "SmallFragments": {
+          "meshes": 0,
+          "triangles": 0
+        },
+        "SmallFragments.001": {
+          "meshes": 0,
+          "triangles": 0
+        }
+      },
+      "largest_stage_meshes": 0,
+      "base_map_placements": 0,
+      "stage_meshes_times_placements": 0
+    },
+    {
+      "path": "models/objects/enviroments/09/09_file_binder_alt_2.glb",
+      "source_mesh_nodes": 1,
+      "source_triangles": 28,
+      "stages": {
+        "LargeParts": {
+          "meshes": 0,
+          "triangles": 0
+        },
+        "SmallFragments": {
+          "meshes": 0,
+          "triangles": 0
+        }
+      },
+      "largest_stage_meshes": 0,
+      "base_map_placements": 0,
+      "stage_meshes_times_placements": 0
+    },
+    {
+      "path": "models/objects/enviroments/09/09_file_binder_alt_2_fell.glb",
+      "source_mesh_nodes": 1,
+      "source_triangles": 28,
+      "stages": {
+        "LargeParts": {
+          "meshes": 0,
+          "triangles": 0
+        },
+        "LargeParts.001": {
+          "meshes": 0,
+          "triangles": 0
+        },
+        "LargeParts.002": {
+          "meshes": 0,
+          "triangles": 0
+        },
+        "LargeParts.003": {
+          "meshes": 0,
+          "triangles": 0
+        },
+        "LargeParts.004": {
+          "meshes": 0,
+          "triangles": 0
+        },
+        "LargeParts.005": {
+          "meshes": 0,
+          "triangles": 0
+        },
+        "LargeParts.006": {
+          "meshes": 0,
+          "triangles": 0
+        },
+        "SmallFragments": {
+          "meshes": 0,
+          "triangles": 0
+        },
+        "SmallFragments.001": {
+          "meshes": 0,
+          "triangles": 0
+        },
+        "SmallFragments.002": {
+          "meshes": 0,
+          "triangles": 0
+        },
+        "SmallFragments.003": {
+          "meshes": 0,
+          "triangles": 0
+        },
+        "SmallFragments.004": {
+          "meshes": 0,
+          "triangles": 0
+        },
+        "SmallFragments.005": {
+          "meshes": 0,
+          "triangles": 0
+        },
+        "SmallFragments.006": {
+          "meshes": 0,
+          "triangles": 0
+        }
+      },
+      "largest_stage_meshes": 0,
+      "base_map_placements": 0,
+      "stage_meshes_times_placements": 0
+    },
+    {
+      "path": "models/objects/enviroments/09/09_file_binder_alt_fell.glb",
+      "source_mesh_nodes": 1,
+      "source_triangles": 28,
+      "stages": {
+        "LargeParts": {
+          "meshes": 0,
+          "triangles": 0
+        },
+        "SmallFragments": {
+          "meshes": 0,
+          "triangles": 0
+        }
+      },
+      "largest_stage_meshes": 0,
+      "base_map_placements": 0,
+      "stage_meshes_times_placements": 0
+    },
+    {
+      "path": "models/objects/enviroments/09/09_file_binder_fell.glb",
+      "source_mesh_nodes": 1,
+      "source_triangles": 28,
+      "stages": {
+        "LargeParts": {
+          "meshes": 0,
+          "triangles": 0
+        },
+        "LargeParts.001": {
+          "meshes": 0,
+          "triangles": 0
+        },
+        "SmallFragments": {
+          "meshes": 0,
+          "triangles": 0
+        },
+        "SmallFragments.001": {
+          "meshes": 0,
+          "triangles": 0
+        }
+      },
+      "largest_stage_meshes": 0,
+      "base_map_placements": 0,
+      "stage_meshes_times_placements": 0
+    },
+    {
+      "path": "models/objects/enviroments/09/09_fire_extinguisher.glb",
+      "source_mesh_nodes": 1,
+      "source_triangles": 34621,
+      "stages": {},
+      "largest_stage_meshes": 0,
+      "base_map_placements": 0,
+      "stage_meshes_times_placements": 0
+    },
+    {
+      "path": "models/objects/enviroments/09/09_fruit_apple.glb",
+      "source_mesh_nodes": 1,
+      "source_triangles": 110,
+      "stages": {},
+      "largest_stage_meshes": 0,
+      "base_map_placements": 0,
+      "stage_meshes_times_placements": 0
+    },
+    {
+      "path": "models/objects/enviroments/09/09_fruit_banana.glb",
+      "source_mesh_nodes": 1,
+      "source_triangles": 206,
+      "stages": {},
+      "largest_stage_meshes": 0,
+      "base_map_placements": 0,
+      "stage_meshes_times_placements": 0
+    },
+    {
+      "path": "models/objects/enviroments/09/09_fruit_banana_b.glb",
+      "source_mesh_nodes": 1,
+      "source_triangles": 142,
+      "stages": {},
+      "largest_stage_meshes": 0,
+      "base_map_placements": 0,
+      "stage_meshes_times_placements": 0
+    },
+    {
+      "path": "models/objects/enviroments/09/09_fruit_orange.glb",
+      "source_mesh_nodes": 1,
+      "source_triangles": 126,
+      "stages": {},
+      "largest_stage_meshes": 0,
+      "base_map_placements": 0,
+      "stage_meshes_times_placements": 0
+    },
+    {
+      "path": "models/objects/enviroments/09/09_fruit_plate.glb",
+      "source_mesh_nodes": 1,
+      "source_triangles": 188,
+      "stages": {},
+      "largest_stage_meshes": 0,
+      "base_map_placements": 0,
+      "stage_meshes_times_placements": 0
+    },
+    {
+      "path": "models/objects/enviroments/09/09_fruit_plate_2.glb",
+      "source_mesh_nodes": 1,
+      "source_triangles": 140,
+      "stages": {},
+      "largest_stage_meshes": 0,
+      "base_map_placements": 0,
+      "stage_meshes_times_placements": 0
+    },
+    {
+      "path": "models/objects/enviroments/09/09_glass.glb",
+      "source_mesh_nodes": 1,
+      "source_triangles": 36,
+      "stages": {},
+      "largest_stage_meshes": 0,
+      "base_map_placements": 0,
+      "stage_meshes_times_placements": 0
+    },
+    {
+      "path": "models/objects/enviroments/09/09_glass_2.glb",
+      "source_mesh_nodes": 1,
+      "source_triangles": 36,
+      "stages": {},
+      "largest_stage_meshes": 0,
+      "base_map_placements": 0,
+      "stage_meshes_times_placements": 0
+    },
+    {
+      "path": "models/objects/enviroments/09/09_glass_water_bottle_clear_250ml.glb",
+      "source_mesh_nodes": 3,
+      "source_triangles": 848,
+      "stages": {},
+      "largest_stage_meshes": 0,
+      "base_map_placements": 12,
+      "stage_meshes_times_placements": 0
+    },
+    {
+      "path": "models/objects/enviroments/09/09_glass_water_bottle_green_330ml.glb",
+      "source_mesh_nodes": 3,
+      "source_triangles": 704,
+      "stages": {},
+      "largest_stage_meshes": 0,
+      "base_map_placements": 3,
+      "stage_meshes_times_placements": 0
+    },
+    {
+      "path": "models/objects/enviroments/09/09_marker.glb",
+      "source_mesh_nodes": 1,
+      "source_triangles": 166,
+      "stages": {},
+      "largest_stage_meshes": 0,
+      "base_map_placements": 0,
+      "stage_meshes_times_placements": 0
+    },
+    {
+      "path": "models/objects/enviroments/09/09_marker_eraser.glb",
+      "source_mesh_nodes": 1,
+      "source_triangles": 70,
+      "stages": {},
+      "largest_stage_meshes": 0,
+      "base_map_placements": 0,
+      "stage_meshes_times_placements": 0
+    },
+    {
+      "path": "models/objects/enviroments/09/09_mug.glb",
+      "source_mesh_nodes": 1,
+      "source_triangles": 204,
+      "stages": {},
+      "largest_stage_meshes": 0,
+      "base_map_placements": 1,
+      "stage_meshes_times_placements": 0
+    },
+    {
+      "path": "models/objects/enviroments/09/09_mug_alt_1.glb",
+      "source_mesh_nodes": 1,
+      "source_triangles": 204,
+      "stages": {},
+      "largest_stage_meshes": 0,
+      "base_map_placements": 1,
+      "stage_meshes_times_placements": 0
+    },
+    {
+      "path": "models/objects/enviroments/09/09_mug_alt_2.glb",
+      "source_mesh_nodes": 1,
+      "source_triangles": 204,
+      "stages": {},
+      "largest_stage_meshes": 0,
+      "base_map_placements": 1,
+      "stage_meshes_times_placements": 0
+    },
+    {
+      "path": "models/objects/enviroments/09/09_mug_alt_3.glb",
+      "source_mesh_nodes": 1,
+      "source_triangles": 204,
+      "stages": {},
+      "largest_stage_meshes": 0,
+      "base_map_placements": 1,
+      "stage_meshes_times_placements": 0
+    },
+    {
+      "path": "models/objects/enviroments/09/09_notepad.glb",
+      "source_mesh_nodes": 1,
+      "source_triangles": 40,
+      "stages": {},
+      "largest_stage_meshes": 0,
+      "base_map_placements": 1,
+      "stage_meshes_times_placements": 0
+    },
+    {
+      "path": "models/objects/enviroments/09/09_office_file_single.glb",
+      "source_mesh_nodes": 3,
+      "source_triangles": 132,
+      "stages": {},
+      "largest_stage_meshes": 0,
+      "base_map_placements": 0,
+      "stage_meshes_times_placements": 0
+    },
+    {
+      "path": "models/objects/enviroments/09/09_office_files_a.glb",
+      "source_mesh_nodes": 1,
+      "source_triangles": 60,
+      "stages": {},
+      "largest_stage_meshes": 0,
+      "base_map_placements": 1,
+      "stage_meshes_times_placements": 0
+    },
+    {
+      "path": "models/objects/enviroments/09/09_office_files_a_2.glb",
+      "source_mesh_nodes": 7,
+      "source_triangles": 180,
+      "stages": {},
+      "largest_stage_meshes": 0,
+      "base_map_placements": 0,
+      "stage_meshes_times_placements": 0
+    },
+    {
+      "path": "models/objects/enviroments/09/09_office_files_d_custom.glb",
+      "source_mesh_nodes": 3,
+      "source_triangles": 132,
+      "stages": {},
+      "largest_stage_meshes": 0,
+      "base_map_placements": 0,
+      "stage_meshes_times_placements": 0
+    },
+    {
+      "path": "models/objects/enviroments/09/09_office_files_e.glb",
+      "source_mesh_nodes": 1,
+      "source_triangles": 60,
+      "stages": {},
+      "largest_stage_meshes": 0,
+      "base_map_placements": 0,
+      "stage_meshes_times_placements": 0
+    },
+    {
+      "path": "models/objects/enviroments/09/09_office_files_e_2.glb",
+      "source_mesh_nodes": 1,
+      "source_triangles": 60,
+      "stages": {},
+      "largest_stage_meshes": 0,
+      "base_map_placements": 0,
+      "stage_meshes_times_placements": 0
+    },
+    {
+      "path": "models/objects/enviroments/09/09_office_files_f.glb",
+      "source_mesh_nodes": 1,
+      "source_triangles": 108,
+      "stages": {},
+      "largest_stage_meshes": 0,
+      "base_map_placements": 0,
+      "stage_meshes_times_placements": 0
+    },
+    {
+      "path": "models/objects/enviroments/09/09_office_files_f_2.glb",
+      "source_mesh_nodes": 1,
+      "source_triangles": 108,
+      "stages": {},
+      "largest_stage_meshes": 0,
+      "base_map_placements": 0,
+      "stage_meshes_times_placements": 0
+    },
+    {
+      "path": "models/objects/enviroments/09/09_office_files_f_3.glb",
+      "source_mesh_nodes": 1,
+      "source_triangles": 108,
+      "stages": {},
+      "largest_stage_meshes": 0,
+      "base_map_placements": 0,
+      "stage_meshes_times_placements": 0
+    },
+    {
+      "path": "models/objects/enviroments/09/09_painting.glb",
+      "source_mesh_nodes": 1,
+      "source_triangles": 28,
+      "stages": {},
+      "largest_stage_meshes": 0,
+      "base_map_placements": 0,
+      "stage_meshes_times_placements": 0
+    },
+    {
+      "path": "models/objects/enviroments/09/09_painting_small.glb",
+      "source_mesh_nodes": 1,
+      "source_triangles": 28,
+      "stages": {},
+      "largest_stage_meshes": 0,
+      "base_map_placements": 0,
+      "stage_meshes_times_placements": 0
+    },
+    {
+      "path": "models/objects/enviroments/09/09_painting_small_2.glb",
+      "source_mesh_nodes": 1,
+      "source_triangles": 38,
+      "stages": {},
+      "largest_stage_meshes": 0,
+      "base_map_placements": 0,
+      "stage_meshes_times_placements": 0
+    },
+    {
+      "path": "models/objects/enviroments/09/09_paper_A4_compact_crumpled_wad.glb",
+      "source_mesh_nodes": 1,
+      "source_triangles": 432,
+      "stages": {},
+      "largest_stage_meshes": 0,
+      "base_map_placements": 0,
+      "stage_meshes_times_placements": 0
+    },
+    {
+      "path": "models/objects/enviroments/09/09_paper_A4_heavily_crumpled.glb",
+      "source_mesh_nodes": 1,
+      "source_triangles": 552,
+      "stages": {},
+      "largest_stage_meshes": 0,
+      "base_map_placements": 0,
+      "stage_meshes_times_placements": 0
+    },
+    {
+      "path": "models/objects/enviroments/09/09_paper_A4_moderately_crumpled.glb",
+      "source_mesh_nodes": 1,
+      "source_triangles": 552,
+      "stages": {},
+      "largest_stage_meshes": 0,
+      "base_map_placements": 0,
+      "stage_meshes_times_placements": 0
+    },
+    {
+      "path": "models/objects/enviroments/09/09_paper_A4_slightly_crumpled.glb",
+      "source_mesh_nodes": 1,
+      "source_triangles": 552,
+      "stages": {},
+      "largest_stage_meshes": 0,
+      "base_map_placements": 0,
+      "stage_meshes_times_placements": 0
+    },
+    {
+      "path": "models/objects/enviroments/09/09_paper_stack.glb",
+      "source_mesh_nodes": 1,
+      "source_triangles": 12,
+      "stages": {},
+      "largest_stage_meshes": 0,
+      "base_map_placements": 0,
+      "stage_meshes_times_placements": 0
+    },
+    {
+      "path": "models/objects/enviroments/09/09_paper_stray.glb",
+      "source_mesh_nodes": 1,
+      "source_triangles": 100,
+      "stages": {},
+      "largest_stage_meshes": 0,
+      "base_map_placements": 0,
+      "stage_meshes_times_placements": 0
+    },
+    {
+      "path": "models/objects/enviroments/09/09_paper_towel_roll_h.glb",
+      "source_mesh_nodes": 8,
+      "source_triangles": 384,
+      "stages": {},
+      "largest_stage_meshes": 0,
+      "base_map_placements": 0,
+      "stage_meshes_times_placements": 0
+    },
+    {
+      "path": "models/objects/enviroments/09/09_paper_towel_roll_v.glb",
+      "source_mesh_nodes": 1,
+      "source_triangles": 384,
+      "stages": {},
+      "largest_stage_meshes": 0,
+      "base_map_placements": 0,
+      "stage_meshes_times_placements": 0
+    },
+    {
+      "path": "models/objects/enviroments/09/09_pen_1.glb",
+      "source_mesh_nodes": 1,
+      "source_triangles": 42,
+      "stages": {},
+      "largest_stage_meshes": 0,
+      "base_map_placements": 0,
+      "stage_meshes_times_placements": 0
+    },
+    {
+      "path": "models/objects/enviroments/09/09_pen_2.glb",
+      "source_mesh_nodes": 1,
+      "source_triangles": 42,
+      "stages": {},
+      "largest_stage_meshes": 0,
+      "base_map_placements": 0,
+      "stage_meshes_times_placements": 0
+    },
+    {
+      "path": "models/objects/enviroments/09/09_pen_3.glb",
+      "source_mesh_nodes": 1,
+      "source_triangles": 46,
+      "stages": {},
+      "largest_stage_meshes": 0,
+      "base_map_placements": 0,
+      "stage_meshes_times_placements": 0
+    },
+    {
+      "path": "models/objects/enviroments/09/09_pen_4.glb",
+      "source_mesh_nodes": 1,
+      "source_triangles": 42,
+      "stages": {},
+      "largest_stage_meshes": 0,
+      "base_map_placements": 0,
+      "stage_meshes_times_placements": 0
+    },
+    {
+      "path": "models/objects/enviroments/09/09_pen_5.glb",
+      "source_mesh_nodes": 1,
+      "source_triangles": 42,
+      "stages": {},
+      "largest_stage_meshes": 0,
+      "base_map_placements": 0,
+      "stage_meshes_times_placements": 0
+    },
+    {
+      "path": "models/objects/enviroments/09/09_pen_6.glb",
+      "source_mesh_nodes": 1,
+      "source_triangles": 34,
+      "stages": {},
+      "largest_stage_meshes": 0,
+      "base_map_placements": 1,
+      "stage_meshes_times_placements": 0
+    },
+    {
+      "path": "models/objects/enviroments/09/09_pencil.glb",
+      "source_mesh_nodes": 1,
+      "source_triangles": 218,
+      "stages": {},
+      "largest_stage_meshes": 0,
+      "base_map_placements": 1,
+      "stage_meshes_times_placements": 0
+    },
+    {
+      "path": "models/objects/enviroments/09/09_pencil_box.glb",
+      "source_mesh_nodes": 1,
+      "source_triangles": 264,
+      "stages": {},
+      "largest_stage_meshes": 0,
+      "base_map_placements": 0,
+      "stage_meshes_times_placements": 0
+    },
+    {
+      "path": "models/objects/enviroments/09/09_pencil_holder.glb",
+      "source_mesh_nodes": 1,
+      "source_triangles": 252,
+      "stages": {},
+      "largest_stage_meshes": 0,
+      "base_map_placements": 0,
+      "stage_meshes_times_placements": 0
+    },
+    {
+      "path": "models/objects/enviroments/09/09_plastic_water_bottle_blue_500ml.glb",
+      "source_mesh_nodes": 1,
+      "source_triangles": 1056,
+      "stages": {},
+      "largest_stage_meshes": 0,
+      "base_map_placements": 16,
+      "stage_meshes_times_placements": 0
+    },
+    {
+      "path": "models/objects/enviroments/09/09_plastic_water_bottle_clear_330ml.glb",
+      "source_mesh_nodes": 1,
+      "source_triangles": 1056,
+      "stages": {},
+      "largest_stage_meshes": 0,
+      "base_map_placements": 8,
+      "stage_meshes_times_placements": 0
+    },
+    {
+      "path": "models/objects/enviroments/09/09_stapler.glb",
+      "source_mesh_nodes": 1,
+      "source_triangles": 136,
+      "stages": {},
+      "largest_stage_meshes": 0,
+      "base_map_placements": 0,
+      "stage_meshes_times_placements": 0
+    },
+    {
+      "path": "models/objects/enviroments/09/09_tablet.glb",
+      "source_mesh_nodes": 1,
+      "source_triangles": 586,
+      "stages": {},
+      "largest_stage_meshes": 0,
+      "base_map_placements": 0,
+      "stage_meshes_times_placements": 0
+    },
+    {
+      "path": "models/objects/enviroments/09/09_toilet_paper_roll_h.glb",
+      "source_mesh_nodes": 1,
+      "source_triangles": 384,
+      "stages": {},
+      "largest_stage_meshes": 0,
+      "base_map_placements": 1,
+      "stage_meshes_times_placements": 0
+    },
+    {
+      "path": "models/objects/enviroments/09/09_toilet_paper_roll_v.glb",
+      "source_mesh_nodes": 1,
+      "source_triangles": 384,
+      "stages": {},
+      "largest_stage_meshes": 0,
+      "base_map_placements": 39,
+      "stage_meshes_times_placements": 0
+    },
+    {
+      "path": "models/objects/enviroments/09/09_trash_bin.glb",
+      "source_mesh_nodes": 1,
+      "source_triangles": 28,
+      "stages": {},
+      "largest_stage_meshes": 0,
+      "base_map_placements": 13,
+      "stage_meshes_times_placements": 0
+    },
+    {
+      "path": "models/objects/enviroments/09/09_trash_bin_small.glb",
+      "source_mesh_nodes": 1,
+      "source_triangles": 28,
+      "stages": {},
+      "largest_stage_meshes": 0,
+      "base_map_placements": 16,
+      "stage_meshes_times_placements": 0
+    },
+    {
+      "path": "models/objects/enviroments/09/09_wall_clock.glb",
+      "source_mesh_nodes": 1,
+      "source_triangles": 60,
+      "stages": {},
+      "largest_stage_meshes": 0,
+      "base_map_placements": 4,
+      "stage_meshes_times_placements": 0
+    },
+    {
+      "path": "models/objects/enviroments/09/09_wall_mirror.glb",
+      "source_mesh_nodes": 2,
+      "source_triangles": 24,
+      "stages": {},
+      "largest_stage_meshes": 0,
+      "base_map_placements": 6,
+      "stage_meshes_times_placements": 0
+    },
+    {
+      "path": "models/objects/enviroments/09/09_white_board_big.glb",
+      "source_mesh_nodes": 1,
+      "source_triangles": 52,
+      "stages": {},
+      "largest_stage_meshes": 0,
+      "base_map_placements": 4,
+      "stage_meshes_times_placements": 0
+    },
+    {
+      "path": "models/objects/enviroments/09/09_white_board_stand.glb",
+      "source_mesh_nodes": 1,
+      "source_triangles": 52,
+      "stages": {},
+      "largest_stage_meshes": 0,
+      "base_map_placements": 0,
+      "stage_meshes_times_placements": 0
+    },
+    {
+      "path": "models/objects/enviroments/12/12_ammo_automate.glb",
+      "source_mesh_nodes": 1,
+      "source_triangles": 812,
+      "stages": {},
+      "largest_stage_meshes": 0,
+      "base_map_placements": 0,
+      "stage_meshes_times_placements": 0
+    },
+    {
+      "path": "models/objects/enviroments/12/12_ammo_minigun.glb",
+      "source_mesh_nodes": 1,
+      "source_triangles": 948,
+      "stages": {},
+      "largest_stage_meshes": 0,
+      "base_map_placements": 0,
+      "stage_meshes_times_placements": 0
+    },
+    {
+      "path": "models/objects/enviroments/12/12_ammo_pistols.glb",
+      "source_mesh_nodes": 3,
+      "source_triangles": 684,
+      "stages": {},
+      "largest_stage_meshes": 0,
+      "base_map_placements": 0,
+      "stage_meshes_times_placements": 0
+    },
+    {
+      "path": "models/objects/enviroments/12/12_ammo_shotgun.glb",
+      "source_mesh_nodes": 3,
+      "source_triangles": 708,
+      "stages": {},
+      "largest_stage_meshes": 0,
+      "base_map_placements": 0,
+      "stage_meshes_times_placements": 0
+    },
+    {
+      "path": "models/objects/enviroments/12/12_ammo_sniper.glb",
+      "source_mesh_nodes": 1,
+      "source_triangles": 884,
+      "stages": {},
+      "largest_stage_meshes": 0,
+      "base_map_placements": 0,
+      "stage_meshes_times_placements": 0
+    },
+    {
+      "path": "models/objects/enviroments/12/12_ammo_uzi.glb",
+      "source_mesh_nodes": 3,
+      "source_triangles": 708,
+      "stages": {},
+      "largest_stage_meshes": 0,
+      "base_map_placements": 0,
+      "stage_meshes_times_placements": 0
+    },
+    {
+      "path": "models/objects/enviroments/12/12_antidote.glb",
+      "source_mesh_nodes": 4,
+      "source_triangles": 600,
+      "stages": {},
+      "largest_stage_meshes": 0,
+      "base_map_placements": 0,
+      "stage_meshes_times_placements": 0
+    },
+    {
+      "path": "models/objects/enviroments/12/12_launcher_casing_lowpoly.glb",
+      "source_mesh_nodes": 1,
+      "source_triangles": 312,
+      "stages": {},
+      "largest_stage_meshes": 0,
+      "base_map_placements": 0,
+      "stage_meshes_times_placements": 0
+    },
+    {
+      "path": "models/objects/enviroments/12/12_medkit.glb",
+      "source_mesh_nodes": 3,
+      "source_triangles": 72,
+      "stages": {},
+      "largest_stage_meshes": 0,
+      "base_map_placements": 0,
+      "stage_meshes_times_placements": 0
+    },
+    {
+      "path": "models/objects/enviroments/12/12_pistol_casing.glb",
+      "source_mesh_nodes": 1,
+      "source_triangles": 312,
+      "stages": {},
+      "largest_stage_meshes": 0,
+      "base_map_placements": 0,
+      "stage_meshes_times_placements": 0
+    },
+    {
+      "path": "models/objects/enviroments/12/12_rifle_casing.glb",
+      "source_mesh_nodes": 1,
+      "source_triangles": 408,
+      "stages": {},
+      "largest_stage_meshes": 0,
+      "base_map_placements": 0,
+      "stage_meshes_times_placements": 0
+    },
+    {
+      "path": "models/objects/enviroments/12/12_shotgun_casing.glb",
+      "source_mesh_nodes": 1,
+      "source_triangles": 312,
+      "stages": {},
+      "largest_stage_meshes": 0,
+      "base_map_placements": 0,
+      "stage_meshes_times_placements": 0
+    },
+    {
+      "path": "models/objects/enviroments/13/13_wall_cafeteria.glb",
+      "source_mesh_nodes": 2,
+      "source_triangles": 14,
+      "stages": {},
+      "largest_stage_meshes": 0,
+      "base_map_placements": 0,
+      "stage_meshes_times_placements": 0
+    },
+    {
+      "path": "models/objects/enviroments/13/13_wall_elevator.glb",
+      "source_mesh_nodes": 2,
+      "source_triangles": 14,
+      "stages": {},
+      "largest_stage_meshes": 0,
+      "base_map_placements": 0,
+      "stage_meshes_times_placements": 0
+    },
+    {
+      "path": "models/objects/enviroments/13/13_wall_emergency_alarm.glb",
+      "source_mesh_nodes": 8,
+      "source_triangles": 96,
+      "stages": {},
+      "largest_stage_meshes": 0,
+      "base_map_placements": 0,
+      "stage_meshes_times_placements": 0
+    },
+    {
+      "path": "models/objects/enviroments/13/13_wall_exit_lit.glb",
+      "source_mesh_nodes": 2,
+      "source_triangles": 14,
+      "stages": {},
+      "largest_stage_meshes": 0,
+      "base_map_placements": 0,
+      "stage_meshes_times_placements": 0
+    },
+    {
+      "path": "models/objects/enviroments/13/13_wall_fire_call_point.glb",
+      "source_mesh_nodes": 2,
+      "source_triangles": 14,
+      "stages": {},
+      "largest_stage_meshes": 0,
+      "base_map_placements": 0,
+      "stage_meshes_times_placements": 0
+    },
+    {
+      "path": "models/objects/enviroments/13/13_wall_fire_door.glb",
+      "source_mesh_nodes": 2,
+      "source_triangles": 14,
+      "stages": {},
+      "largest_stage_meshes": 0,
+      "base_map_placements": 0,
+      "stage_meshes_times_placements": 0
+    },
+    {
+      "path": "models/objects/enviroments/13/13_wall_light_switch.glb",
+      "source_mesh_nodes": 2,
+      "source_triangles": 24,
+      "stages": {},
+      "largest_stage_meshes": 0,
+      "base_map_placements": 0,
+      "stage_meshes_times_placements": 0
+    },
+    {
+      "path": "models/objects/enviroments/13/13_wall_meeting_room.glb",
+      "source_mesh_nodes": 2,
+      "source_triangles": 14,
+      "stages": {},
+      "largest_stage_meshes": 0,
+      "base_map_placements": 0,
+      "stage_meshes_times_placements": 0
+    },
+    {
+      "path": "models/objects/enviroments/13/13_wall_toilet_female.glb",
+      "source_mesh_nodes": 2,
+      "source_triangles": 14,
+      "stages": {},
+      "largest_stage_meshes": 0,
+      "base_map_placements": 0,
+      "stage_meshes_times_placements": 0
+    },
+    {
+      "path": "models/objects/enviroments/13/13_wall_toilet_male.glb",
+      "source_mesh_nodes": 2,
+      "source_triangles": 14,
+      "stages": {},
+      "largest_stage_meshes": 0,
+      "base_map_placements": 0,
+      "stage_meshes_times_placements": 0
+    }
+  ]
+}

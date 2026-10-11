@@ -28,7 +28,11 @@ static func make_pickup_visual(index: int) -> Node3D:
 		"res://models/objects/weapons/pistol_lowpoly.glb",
 		"res://models/objects/weapons/uzi_lowpoly.glb",
 		"res://models/objects/weapons/shotgun_lowpoly.glb",
-		"res://models/objects/weapons/six_chamber_launcher_lowpoly.glb"
+		"res://models/objects/weapons/six_chamber_launcher_lowpoly.glb",
+		"res://models/objects/weapons/ak_rifle_lowpoly.glb",
+		"res://models/objects/weapons/m4_rifle_lowpoly.glb",
+		"res://models/objects/weapons/sniper_rifle_lowpoly.glb",
+		"res://models/objects/weapons/aviation_minigun_lowpoly.glb"
 	]
 	if index < 0 or index >= paths.size() or not ResourceLoader.exists(paths[index]):
 		push_error("Weapon pickup model unavailable for index %d" % index)
@@ -44,7 +48,8 @@ static func make_pickup_visual(index: int) -> Node3D:
 			# WeaponRoot is authored for the hand socket with the barrel below
 			# the grip; on the floor the gun turns over its barrel to stand
 			# the right way up.
-			visual.transform = Transform3D(Basis(Vector3.RIGHT, PI), Vector3.ZERO) * visual.transform
+			if index < 4:
+				visual.transform = Transform3D(Basis(Vector3.RIGHT, PI), Vector3.ZERO) * visual.transform
 	return root
 
 

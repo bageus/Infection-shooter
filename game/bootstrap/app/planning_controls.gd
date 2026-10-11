@@ -6,6 +6,8 @@ const DISPLAY_OPTIONS := preload("res://game/bootstrap/app/planning_display_opti
 var display_options: Node
 const FIXTURE_CONTROLS := preload("res://game/bootstrap/app/planning_light_fixtures.gd")
 var fixtures = FIXTURE_CONTROLS.new()
+var light_view = preload("res://game/bootstrap/app/planning_light_view.gd").new()
+var light_default_editor = preload("res://game/bootstrap/app/planning_light_defaults.gd").new()
 
 const LIGHT_DEFAULT_HEIGHT = 2.5
 const DARKNESS_DEFAULT_HEIGHT = 2.75
@@ -93,6 +95,8 @@ func setup_controls() -> void:
 	add_child(display_options)
 	display_options.call("setup", session, objects)
 	fixtures.setup(self)
+	light_view.setup(self)
+	light_default_editor.setup(self)
 	var box: Node = session.ui.get_node("Panel/VBox")
 	for control_name in ["LightInfo", "LightLevel", "LightAngleInfo", "LightAngle", "SelectedLightColor", "SelectedFlicker", "SelectedFlickerStep", "SelectedFixture"]:
 		box.move_child(box.get_node(control_name), palette.get_index())
@@ -111,6 +115,13 @@ func _build_gore_controls() -> void:
 			button.text = str(entry[0])
 			button.pressed.connect(entry[1])
 			tabs.add_child(button)
+	var weapons := Button.new()
+	weapons.name = "Weapons"
+	weapons.text = "Weapons"
+	weapons.pressed.connect(_show_weapon_catalog)
+	var palette_box: Node = session.ui.get_node("Panel/VBox")
+	palette_box.add_child(weapons)
+	palette_box.move_child(weapons, palette.get_index())
 	blood_options = HBoxContainer.new()
 	blood_options.name = "BloodOptions"
 	var surface_label := Label.new()
@@ -238,7 +249,9 @@ func _update_light_ui() -> void:
 		light = target.find_child("Light", true, false) as Light3D
 	var show_light = light != null and target.has_method("get_authored_energy")
 	fixtures.update_selection(objects.selected)
-	light_defaults.visible = objects.selected == null and catalog.active_catalog == catalog.lighting_catalog
+	light_defaults.visible = objects.selected == null and objects._selected_kind() == "light"
+	if light_defaults.visible:
+		light_defaults.get_node("Title").text = str(objects.selected_entry.get("name", "Светильник"))
 	session.ui.get_node("Panel/VBox/SelectedLightColor").visible = show_light and objects.selected != null
 	light_info.visible = show_light
 	light_level.visible = show_light
@@ -308,6 +321,7 @@ func _apply_selected_flicker() -> void:
 
 
 func _rebuild_palette() -> void:
+	light_view.update_catalog()
 	palette.clear()
 	for entry: Dictionary in catalog.active_catalog:
 		palette.add_item(str(entry.get("name", "")))
@@ -343,6 +357,18 @@ func _show_lighting_catalog() -> void:
 	catalog.active_catalog = catalog.lighting_catalog
 	_rebuild_palette()
 	status.text = "LIGHTING | lights and darkness zones"
+	_update_light_ui()
+
+
+func _show_weapon_catalog() -> void:
+	if blood_options != null:
+		blood_options.hide()
+	light_defaults.hide()
+	objects._reset_selection()
+	session.ui.get_node("Panel/VBox/GroupTabs").hide()
+	catalog.active_catalog = catalog.weapon_catalog
+	_rebuild_palette()
+	status.text = "WEAPONS | place weapon pickups"
 
 
 func _show_actor_catalog() -> void:

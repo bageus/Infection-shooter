@@ -2,8 +2,6 @@ extends Area3D
 
 const WALL_FIELD := preload("res://game/features/infection_source/cloud_wall_field.gd")
 const CLOUD_SHADER := preload("res://game/features/infection_source/mutagen_cloud.gdshader")
-const ATLAS_A := preload("res://models/objects/textures/mutagen/Six Emerald Gas Cloud Sprites-2.png")
-const ATLAS_B := preload("res://models/objects/textures/mutagen/Six-frame green smoke sprite sheet.png")
 const EMERALD := Color(0.86, 1.06, 0.84)
 const TOXIC := Color(1.08, 1.1, 0.68)
 
@@ -16,9 +14,10 @@ signal depleted
 ## the player can step out of it.
 @export var absorb_delay: float = 0.6
 ## Gas puffs per cloud (random in range) and how far they spread from the centre.
-@export var puff_count_range := Vector2i(7, 10)
+@export var puff_count_range := Vector2i(3, 4)
 @export var cloud_radius := 1.35
 
+var _floor_offset := 0.0
 var _active: bool = false
 var _absorption_remaining: float = 0.0
 var _lifetime_remaining: float = 0.0
@@ -42,6 +41,8 @@ func activate() -> void:
 	_lifetime_remaining = lifetime_seconds
 	_cycle_elapsed = 0.0
 	_delay_remaining = 0.0 if permanent else absorb_delay
+	_floor_offset = _support_height() - global_position.y
+	($CollisionShape3D as CollisionShape3D).position.y = _floor_offset + 1.25
 	var walls := WALL_FIELD.texture_for(self)
 	var phase := randf_range(0.0, 100.0)
 	# Every cloud is new: its own puffs, variants, layout, spin and shade.
@@ -51,19 +52,40 @@ func activate() -> void:
 	_haze.multimesh = _build_haze(shade)
 	_haze.material_override = _cloud_material(walls, false)
 	(_haze.material_override as ShaderMaterial).set_shader_parameter("opacity", .18)
-	(_haze.material_override as ShaderMaterial).set_shader_parameter("vein_glow", .1)
+	(_haze.material_override as ShaderMaterial).set_shader_parameter("flow_speed", .2)
 	for layer in [_visual, _haze]:
 		layer.set_instance_shader_parameter("phase", phase)
 		layer.set_instance_shader_parameter("progress", 0.0)
 		layer.set_instance_shader_parameter("looping", 1.0 if permanent else 0.0)
 		layer.set_instance_shader_parameter("cycle_seconds", maxf(lifetime_seconds, 1.0))
-		layer.set_instance_shader_parameter("cloud_center", global_position)
-	_spores.restart()
-	_spores.emitting = true
+		layer.set_instance_shader_parameter("cloud_center", global_position + Vector3.UP * _floor_offset)
+	_spores.emitting = false
 	monitoring = true
 	visible = true
 	if not permanent:
 		_register_death_cloud()
+
+
+func _support_height() -> float:
+	var query := PhysicsRayQueryParameters3D.create(global_position + Vector3.UP * .1, global_position - Vector3.UP * 6.0, 3)
+	var excluded: Array[RID] = []
+	var ancestor := get_parent()
+	while ancestor != null:
+		if ancestor is CollisionObject3D:
+			excluded.append((ancestor as CollisionObject3D).get_rid())
+		ancestor = ancestor.get_parent()
+	query.exclude = excluded
+	for _attempt in 16:
+		var hit := get_world_3d().direct_space_state.intersect_ray(query)
+		if hit.is_empty():
+			break
+		var collider: Node = hit["collider"]
+		if collider is CharacterBody3D or (collider is RigidBody3D and not (collider as RigidBody3D).freeze):
+			excluded.append(hit["rid"])
+			query.exclude = excluded
+			continue
+		return (hit["position"] as Vector3).y
+	return global_position.y
 
 
 func _physics_process(delta: float) -> void:
@@ -129,7 +151,8 @@ func _set_progress(value: float) -> void:
 		_spores.emitting = false
 
 
-# Puffs: big ones low in the core, smaller ones higher and further out.
+# Puffs: a big one low in the core, smaller ones higher and further out.
+# Each carries an independent noise seed and flow phase.
 func _build_puffs(count: int, shade: float) -> MultiMesh:
 	var multimesh := _multimesh(count)
 	var variants := range(12)
@@ -137,12 +160,14 @@ func _build_puffs(count: int, shade: float) -> MultiMesh:
 	var stagger := range(count)
 	stagger.shuffle()
 	_puffs.clear()
+	var ring_turn := randf() * TAU
 	for i in count:
-		var reach := sqrt(randf()) * cloud_radius
-		var angle := randf() * TAU
-		var height := lerpf(0.75, 2.05, randf() * 0.5 + reach / cloud_radius * 0.5)
-		var size := lerpf(2.9, 1.7, reach / cloud_radius) * randf_range(0.85, 1.1)
-		var origin := Vector3(cos(angle) * reach, height, sin(angle) * reach)
+		# One puff holds the core; the rest ring it evenly so no side is bare.
+		var reach := randf_range(0.0, 0.25) * cloud_radius if i == 0 else randf_range(0.55, 0.95) * cloud_radius
+		var angle := float(i) * TAU / float(maxi(count - 1, 1)) + ring_turn + randf_range(-0.35, 0.35)
+		var height := lerpf(0.9, 1.45, randf() * 0.5 + reach / cloud_radius * 0.5)
+		var size := lerpf(3.3, 2.1, reach / cloud_radius) * randf_range(0.9, 1.1)
+		var origin := Vector3(cos(angle) * reach, height + _floor_offset, sin(angle) * reach)
 		multimesh.set_instance_transform(i, Transform3D(Basis.from_scale(Vector3.ONE * size), origin))
 		var spin := randf_range(0.05, 0.22) * (1.0 if randf() < 0.5 else -1.0)
 		var data := Color(float(variants[i % 12]) / 12.0, randf(), spin, float(stagger[i]) / float(count))
@@ -155,10 +180,10 @@ func _build_puffs(count: int, shade: float) -> MultiMesh:
 
 # Faint low billboards mix into the cloud; no flat floor image/reflection.
 func _build_haze(shade: float) -> MultiMesh:
-	var multimesh := _multimesh(3)
-	for i in range(3):
+	var multimesh := _multimesh(1)
+	for i in range(1):
 		var angle := float(i) * TAU / 3.0 + randf_range(-.3, .3)
-		var origin := Vector3(cos(angle) * .45, randf_range(.25, .45), sin(angle) * .45)
+		var origin := Vector3(cos(angle) * .45, randf_range(.65, .85) + _floor_offset, sin(angle) * .45)
 		var size := randf_range(.9, 1.3)
 		multimesh.set_instance_transform(i, Transform3D(Basis.from_scale(Vector3.ONE * size), origin))
 		multimesh.set_instance_custom_data(i, Color(float(randi() % 12) / 12.0, randf(), randf_range(-.03, .03), .1 * i))
@@ -208,14 +233,11 @@ func _multimesh(count: int) -> MultiMesh:
 func _cloud_material(walls: Texture2D, ground: bool) -> ShaderMaterial:
 	var material := ShaderMaterial.new()
 	material.shader = CLOUD_SHADER
-	material.set_shader_parameter("atlas_a", ATLAS_A)
-	material.set_shader_parameter("atlas_b", ATLAS_B)
 	material.set_shader_parameter("wall_mask", walls)
 	material.set_shader_parameter("wall_mask_enabled", true)
 	material.set_shader_parameter("wall_radius", WALL_FIELD.RADIUS)
 	material.set_shader_parameter("ground", ground)
 	if ground:
-		material.set_shader_parameter("vein_glow", 0.6)
 		material.set_shader_parameter("flow_speed", 0.2)
 	return material
 

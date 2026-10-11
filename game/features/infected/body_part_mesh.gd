@@ -8,8 +8,9 @@ extends RefCounted
 
 const WOUND_SHADER := preload("res://game/features/infected/body_wound.gdshader")
 const TOPOLOGY := preload("res://game/features/infected/body_part_topology.gd")
+const CACHE := preload("res://game/features/infected/body_mesh_cache.gd")
 
-static var _cache: Dictionary = {}
+static var _cache := CACHE.new()
 
 
 # Returns {mesh, surfaces:[{vertices, normals, tangents, uvs, bones, weights,
@@ -18,16 +19,14 @@ static func prepare(mesh_instance: MeshInstance3D, skeleton: Skeleton3D) -> Dict
 	var source := mesh_instance.mesh as ArrayMesh
 	if source == null:
 		return {}
-	var key := source.get_instance_id()
-	if source.has_meta("body_part_source"):
-		key = int(source.get_meta("body_part_source"))
-	if _cache.has(key):
-		var cached: Dictionary = _cache[key]
+	var bind_bones := _bind_bones(mesh_instance, skeleton)
+	var key := _cache.key(source, bind_bones)
+	var cached: Dictionary = _cache.get_data(key)
+	if not cached.is_empty():
 		mesh_instance.mesh = cached.mesh
 		return cached
-	var bind_bones := _bind_bones(mesh_instance, skeleton)
 	var converted := ArrayMesh.new()
-	converted.set_meta("body_part_source", key)
+	converted.set_meta("body_part_source", _cache.source_identity(source))
 	var surfaces: Array = []
 	for surface in source.get_surface_count():
 		var arrays := source.surface_get_arrays(surface)
@@ -44,7 +43,7 @@ static func prepare(mesh_instance: MeshInstance3D, skeleton: Skeleton3D) -> Dict
 		var flags := Mesh.ARRAY_CUSTOM_RGBA_FLOAT << Mesh.ARRAY_FORMAT_CUSTOM0_SHIFT
 		if format & Mesh.ARRAY_FLAG_USE_8_BONE_WEIGHTS:
 			flags |= Mesh.ARRAY_FLAG_USE_8_BONE_WEIGHTS
-		converted.add_surface_from_arrays(Mesh.PRIMITIVE_TRIANGLES, arrays, [], {}, flags)
+		converted.add_surface_from_arrays(source.surface_get_primitive_type(surface), arrays, [], _surface_lods(source, surface), flags)
 		var source_material := mesh_instance.get_active_material(surface)
 		converted.surface_set_material(surface, source_material if source_material != null else StandardMaterial3D.new())
 		var bones: PackedInt32Array = arrays[Mesh.ARRAY_BONES] if arrays[Mesh.ARRAY_BONES] != null else PackedInt32Array()
@@ -72,9 +71,26 @@ static func prepare(mesh_instance: MeshInstance3D, skeleton: Skeleton3D) -> Dict
 		if int(entry.bone) >= 0:
 			binds[int(entry.bone)] = entry.pose
 	var data := {"mesh": converted, "surfaces": surfaces, "binds": binds, "bone_stats": {}}
-	_cache[key] = data
+	_cache.put(key, data)
 	mesh_instance.mesh = converted
 	return data
+
+
+# LODs only change triangle indices; CUSTOM0 leaves vertex numbering intact.
+static func _surface_lods(source: ArrayMesh, surface: int) -> Dictionary:
+	var stored := RenderingServer.mesh_get_surface(source.get_rid(), surface)
+	var stride := RenderingServer.mesh_surface_get_format_index_stride(stored.format, stored.vertex_count)
+	var result := {}
+	for lod: Dictionary in stored.get("lods", []):
+		var bytes: PackedByteArray = lod.index_data
+		var indices := PackedInt32Array()
+		# Index buffers contain whole 16/32-bit entries; truncation is intentional.
+		@warning_ignore("integer_division")
+		indices.resize(bytes.size() / stride)
+		for index in indices.size():
+			indices[index] = bytes.decode_u16(index * stride) if stride == 2 else bytes.decode_u32(index * stride)
+		result[float(lod.edge_length)] = indices
+	return result
 
 
 static func _bind_bones(mesh_instance: MeshInstance3D, skeleton: Skeleton3D) -> Dictionary:

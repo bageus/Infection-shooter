@@ -267,7 +267,7 @@ func _test_stalk_then_charge(stage: Node3D) -> void:
 
 
 # Walk and run knees bend toward where the feet point, seen from above (the
-# auto-rig rest legs are bent sideways; ADR-0038 straightens them).
+# auto-rig rest legs are bent sideways; ADR-0040 straightens them).
 func _test_knees_follow_feet(stage: Node3D, scene: PackedScene, label: String) -> void:
 	var enemy := await _spawn(stage, scene)
 	var player := _player_of(enemy)

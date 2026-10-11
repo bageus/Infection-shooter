@@ -23,6 +23,7 @@
     "features.pickups",
     "features.combat",
     "core.audio",
-    "features.infection"
+    "features.infection",
+    "core.world_badge"
   ]
 }

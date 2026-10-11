@@ -1,5 +1,5 @@
 extends RefCounted
-## Stalk/charge pace of a hunting infected (ADR-0038). Beyond charge range it
+## Stalk/charge pace of a hunting infected (ADR-0040). Beyond charge range it
 ## stalks at walking pace. Inside it charges in bursts: a sprint of a few
 ## seconds, then it drops back to a walk to recover before the next burst.
 ## Near the prey it always charges (the final lunge). Changes of pace are eased,

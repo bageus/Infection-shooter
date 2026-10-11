@@ -30,6 +30,13 @@ func _run() -> void:
 	_check(tabs.get_tab_title(0) == "Основные" and tabs.get_tab_title(3) == "Аудио", "Tabs have translated names")
 	_check(tabs.get_child(0).find_child("Language", true, false) != null, "Language belongs to General")
 	_check(tabs.get_child(2).find_child("Occlusion", true, false) != null, "Occlusion belongs to Video")
+	var lighting := tabs.get_child(2).find_child("Lighting", true, false) as CheckButton
+	_check(lighting != null and lighting.button_pressed, "Lighting belongs to Video and defaults on")
+	lighting.set_pressed(false)
+	var light_prefs := PREFS.new()
+	light_prefs.load_settings()
+	_check(not light_prefs.values.lighting, "Lighting toggle survives settings reload")
+	lighting.set_pressed(true)
 	_check(tabs.get_child(3).find_child("SoundToggle", true, false) != null, "Sound belongs to Audio")
 	_check_notice_badge(dialog, tabs)
 	dialog.settings.notices._show(1)

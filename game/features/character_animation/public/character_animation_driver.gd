@@ -124,7 +124,7 @@ func play_one_shot(state: StringName) -> float:
 
 
 # Public animation_events_v1: hit reaction. Skeletal models twist and rock the
-# torso away from where the shot landed (hit_reaction_v1, ADR-0038); without a
+# torso away from where the shot landed (hit_reaction_v1, ADR-0040); without a
 # point and direction it rocks back. Models without a spine flinch as a whole.
 func notify_hit(world_point: Vector3 = Vector3.ZERO, world_direction: Vector3 = Vector3.ZERO, strength: float = 1.0) -> void:
 	if _target == null or _dead:

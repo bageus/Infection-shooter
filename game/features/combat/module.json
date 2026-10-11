@@ -23,7 +23,11 @@
     "public/impact_effects.gd",
     "public/projectile_balance.gd",
     "public/spent_casings.gd",
-    "public/prop_damage_state.gd"
+    "public/prop_damage_state.gd",
+    "public/ak_rifle.tscn",
+    "public/m4_rifle.tscn",
+    "public/sniper_rifle.tscn",
+    "public/minigun.tscn"
   ],
   "dependencies": [
     "core.audio",

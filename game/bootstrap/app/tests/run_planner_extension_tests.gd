@@ -11,9 +11,19 @@ func _initialize() -> void:
 	call_deferred("_run")
 
 func _run() -> void:
+	# Geometry/physics assertions retain the full authored scene. A small
+	# viewport bounds llvmpipe cost in Forward+ while all 90 physics ticks
+	# and the full authored scene remain unchanged; no pixel
+	# assertions depend on resolution in this suite.
+	root.size = Vector2i(320, 180)
+	# Shadow-map rasterization dominates software Vulkan even at small output
+	# sizes. Keep shadows enabled, but bound their test-only pixel budget.
+	root.positional_shadow_atlas_size = 256
+	RenderingServer.directional_shadow_atlas_set_size(256, true)
 	stage = MAIN.instantiate()
 	root.add_child(stage)
 	current_scene = stage
+	(stage.get_node("Gameplay/Enemies") as Node).process_mode = Node.PROCESS_MODE_DISABLED
 	await process_frame
 	var player: Node3D = stage.get("player")
 	player.set_physics_process(false)
@@ -23,11 +33,15 @@ func _run() -> void:
 	var wall = catalog.call("_instantiate_asset", "res://models/objects/enviroments/13/13_wall_cafeteria.glb")
 	stage.add_child(wall)
 	_check(wall.get_meta("planning_wall_mount", false) and wall.freeze, "Group 13 stays attached to wall")
+	print("Planner extension: wall mounting @%d" % Time.get_ticks_msec())
 	_snap(catalog)
 	await _wall_drag(planner, catalog)
 	await _particles(catalog)
+	print("Planner extension: particles @%d" % Time.get_ticks_msec())
 	await _corpse()
+	print("Planner extension: corpse physics @%d" % Time.get_ticks_msec())
 	await _aim(player)
+	print("Planner extension: aim @%d" % Time.get_ticks_msec())
 	_installed_lamps(planner)
 	stage.queue_free()
 	await process_frame
@@ -144,7 +158,11 @@ func _particles(catalog: RefCounted) -> void:
 	_check(prefs.values.electronic_particles, "Old settings preserve sparks by default")
 	# First-hit effects finish before measuring only subsequent hits.
 	prop.call("take_projectile_hit", 0.0, prop.global_position, Vector3.BACK, Vector3.FORWARD, "PISTOL")
+	var disabled := root.disable_3d
+	root.disable_3d = true
 	await create_timer(1.3).timeout
+	root.disable_3d = disabled
+	await process_frame
 	var effects := stage.get("mission_objects") as Node3D
 	var count := effects.get_child_count()
 	prop.call("take_projectile_hit", 0.0, prop.global_position, Vector3.BACK, Vector3.FORWARD, "PISTOL")
@@ -155,20 +173,39 @@ func _particles(catalog: RefCounted) -> void:
 	_check(effects.get_child_count() > count, "Enabled repeat hit creates spark particles")
 
 func _corpse() -> void:
+	var floor_body := StaticBody3D.new()
+	var floor_shape := CollisionShape3D.new()
+	floor_shape.shape = BoxShape3D.new()
+	floor_shape.shape.size = Vector3(10, .2, 10)
+	floor_body.add_child(floor_shape)
+	stage.add_child(floor_body)
+	floor_body.position = Vector3(1000, -.1, 1000)
+	# Keep the full mission loaded, but settle outside mutable authored furniture.
 	for scene: PackedScene in [CORPSE, HORDE]:
 		await _settle(scene)
 	var part := PART.instantiate() as RigidBody3D
 	stage.add_child(part)
-	part.position = Vector3(30, 3, 5)
-	for tick in 90:
-		await physics_frame
+	part.position = Vector3(1000, 3, 1000)
+	await _physics_ticks(90)
 	_check(part.position.y < 1.0 and part.position.is_finite(), "Airborne severed parts fall to the floor")
+	floor_body.queue_free()
+	part.queue_free()
+
+func _physics_ticks(count: int) -> void:
+	# No pixel assertions sample the settling interval. Keep the full scene,
+	# physical bodies and tick count; render the authored/settled captures.
+	var disabled := root.disable_3d
+	root.disable_3d = true
+	for tick in count:
+		await physics_frame
+	root.disable_3d = disabled
+	await process_frame # Complete the last step before inspecting joints.
 
 func _settle(scene: PackedScene) -> void:
 	var corpse := scene.instantiate()
 	corpse.call("configure_decor_pose", {"seed": 9, "pose": "seated", "facing": 0.0})
 	stage.add_child(corpse)
-	corpse.position = Vector3(27, 3, 4)
+	corpse.position = Vector3(1000, 3, 1000)
 	var skeleton: Skeleton3D = corpse.get("parts").get("skeleton")
 	var hips := skeleton.find_bone("Hips")
 	var before := skeleton.global_transform * skeleton.get_bone_global_pose(hips)
@@ -185,8 +222,7 @@ func _settle(scene: PackedScene) -> void:
 		var parent := simulation.get_node_or_null("Physics_" + skeleton.get_bone_name(parent_id)) as PhysicalBone3D if parent_id >= 0 else null
 		if parent != null:
 			links.append({"child": child, "parent": parent, "length": _joint(child).distance_to(_joint(parent))})
-	for frame in 90:
-		await physics_frame
+	await _physics_ticks(90)
 	for link in links:
 		_check(absf(_joint(link["child"]).distance_to(_joint(link["parent"])) - float(link["length"])) < .065, "Joints retain anatomical segment lengths: " + corpse.name)
 	var physical: PhysicalBone3D = simulation.get_node("Physics_Hips")
@@ -210,13 +246,17 @@ func _aim(player: Node3D) -> void:
 		for height in [.1, 3.0]:
 			var target := player.global_position + Vector3(0, height, 5)
 			mount.call("aim_at", target)
-			await process_frame
-			await process_frame
+			await _physics_ticks(2)
+			if DisplayServer.get_name() != "headless":
+				await RenderingServer.frame_post_draw
 			var expected: Transform3D = (mount.get("socket") as Node3D).global_transform
 			_check(weapon.global_position.distance_to(expected.origin) < .001, "Weapon remains at its hand socket")
 			_check(weapon.global_basis.orthonormalized().is_equal_approx(expected.basis.orthonormalized()), "Weapon rotates with the hand rather than independently")
 			var muzzle: Node3D = weapon.get_node("Muzzle")
-			_check((-muzzle.global_basis.z.normalized()).dot((target - muzzle.global_position).normalized()) > .995, "Torso and barrel aim at 3D target")
+			var alignment := (-muzzle.global_basis.z.normalized()).dot((target - muzzle.global_position).normalized())
+			if alignment <= .995:
+				print("Aim diagnostic: slot=%d height=%.1f dot=%f requested=%s actual=%s physics=%s paused=%s" % [slot, height, alignment, target, mount.get("_aim_target"), player.is_physics_processing(), paused])
+			_check(alignment > .995, "Torso and barrel aim at 3D target")
 			await _capture("aim_%d_%.1f" % [slot, height])
 
 func _check(value: bool, message: String) -> void:

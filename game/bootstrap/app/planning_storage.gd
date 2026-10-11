@@ -1,4 +1,5 @@
 extends RefCounted
+const MAP_FILE := preload("res://game/bootstrap/app/planning_map_file.gd")
 
 const SAVE_PATH = "user://planned_layout.json"
 const MAPS_DIR = "user://maps"
@@ -168,11 +169,10 @@ func save_named_map() -> void:
 		controls.status.text = "MAP '%s' EXISTS | press SAVE MAP again to overwrite" % safe_name
 		return
 	_overwrite_pending = ""
-	var file = FileAccess.open(path, FileAccess.WRITE)
-	if file == null:
-		controls.status.text = "MAP SAVE ERROR %d" % FileAccess.get_open_error()
+	var result := MAP_FILE.write(path, _collect_layout_data())
+	if result.has("error"):
+		controls.status.text = "MAP SAVE ERROR | " + str(result.error)
 		return
-	file.store_string(JSON.stringify(_collect_layout_data(), "	"))
 	map_name_edit.text = safe_name
 	_refresh_map_list(safe_name)
 	controls.status.text = "MAP SAVED | " + safe_name
@@ -227,13 +227,16 @@ func _refresh_map_list(select_name: String = "") -> void:
 
 ## Loads a layout file; returns {"loaded", "skipped"} or {"error"}.
 func _load_layout_from_path(path: String) -> Dictionary:
-	var file = FileAccess.open(path, FileAccess.READ)
-	if file == null:
-		return {"error": "cannot open (%d)" % FileAccess.get_open_error()}
-	var data: Variant = JSON.parse_string(file.get_as_text())
-	if not data is Dictionary:
-		return {"error": "not a valid map file"}
-	return objects._apply_layout_data(data as Dictionary)
+	var read := _read_layout_file(path)
+	return read if read.has("error") else objects._apply_layout_data(read.data)
+
+
+func read_startup_layout(recovery_path: String = "") -> Dictionary:
+	return MAP_FILE.startup(SAVE_PATH, DEFAULT_MAP_PATH) if recovery_path.is_empty() else MAP_FILE.read(recovery_path)
+
+
+func _read_layout_file(path: String) -> Dictionary:
+	return MAP_FILE.read(path)
 
 
 static func _skipped_text(report: Dictionary) -> String:
@@ -244,20 +247,18 @@ static func _skipped_text(report: Dictionary) -> String:
 func save_layout() -> void:
 	var data = _collect_layout_data()
 	var records: Array = data.get("objects", [])
-	var file = FileAccess.open(SAVE_PATH, FileAccess.WRITE)
-	if file == null:
-		controls.status.text = "SAVE ERROR %d | layout not written" % FileAccess.get_open_error()
+	var result := MAP_FILE.write(SAVE_PATH, data)
+	if result.has("error"):
+		controls.status.text = "SAVE ERROR | " + str(result.error)
 		return
-	file.store_string(JSON.stringify(data, "\t"))
-	file.close()
 	authored_layout = data
 	# Baking the authored scene into the project only makes sense (and is only
 	# possible: res:// is read-only in a build) when running from the editor.
 	if OS.has_feature("editor"):
-		var shipped := FileAccess.open(DEFAULT_MAP_PATH, FileAccess.WRITE)
-		if shipped != null:
-			shipped.store_string(JSON.stringify(data, "\t"))
-			shipped.close()
+		var shipped := MAP_FILE.write(DEFAULT_MAP_PATH, data)
+		if shipped.has("error"):
+			controls.status.text = "SAVED | shipped map error: " + str(shipped.error)
+			return
 		var scene_error = _save_authored_scene()
 		if scene_error != OK:
 			controls.status.text = "SAVED | %d objects | scene bake error %d" % [records.size(), scene_error]

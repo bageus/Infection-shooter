@@ -3,7 +3,7 @@
 importer="scene"
 importer_version=1
 type="PackedScene"
-uid="uid://b8fmtpoie2p3x"
+uid="uid://dnqdb20w6v0m8"
 path="res://.godot/imported/01_glass_partition_blinds_breakable.glb-ab3320269ecd31f8664c421fe577d316.scn"
 
 [deps]
@@ -35,7 +35,7 @@ animation/fps=30
 animation/trimming=false
 animation/remove_immutable_tracks=true
 animation/import_rest_as_RESET=false
-import_script/path=""
+import_script/path="res://addons/staged_glb_import/group01_material_post_import.gd"
 materials/extract=0
 materials/extract_format=0
 materials/extract_path=""

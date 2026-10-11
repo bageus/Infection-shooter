@@ -1,5 +1,6 @@
 extends RefCounted
 ## Bounded local A*: paths use actual physics clearance and never disable walls.
+const HEAP := preload("res://game/features/infected/route_priority_queue.gd")
 const CELL := .8
 const MAX_EXPANSIONS := 192
 const SEARCH_RADIUS := 18
@@ -16,6 +17,11 @@ var _excluded: Array[RID] = []
 var _shape := SphereShape3D.new()
 var _height := 1.0
 var _budget: Node
+var _search_state: Dictionary = {}
+var _clearance_cache: Dictionary = {}
+var _cache_frame := -1
+var probes_last_slice := 0
+var expansions_last_slice := 0
 
 
 func configure_budget(budget: Node) -> void:
@@ -26,6 +32,7 @@ func configure_budget(budget: Node) -> void:
 
 func direction(actor: CharacterBody3D, target: Node3D, radius: float) -> Vector3:
 	var frame := Engine.get_physics_frames()
+	_clearance_cache.clear()
 	_space = actor.get_world_3d().direct_space_state
 	_excluded = [actor.get_rid()]
 	if target is CollisionObject3D:
@@ -54,7 +61,9 @@ func direction(actor: CharacterBody3D, target: Node3D, radius: float) -> Vector3
 	if path.is_empty():
 		return Vector3.ZERO
 	# Skip intermediate cells only when the actor's whole width fits.
-	while path.size() > 1 and clear_segment(from, path[1]):
+	var shortcuts := 0
+	while path.size() > 1 and shortcuts < 4 and clear_segment(from, path[1]):
+		shortcuts += 1
 		path.pop_front()
 	if not clear_segment(from, path[0]):
 		_next_search = 0
@@ -63,7 +72,15 @@ func direction(actor: CharacterBody3D, target: Node3D, radius: float) -> Vector3
 
 
 func search_requested(actor: CharacterBody3D, target: Node3D) -> bool:
-	# The target can move while queued; search from the current positions.
+	# Standalone fixtures keep synchronous compatibility; missions use slices.
+	begin_search(actor, target)
+	var blocked := not _direct
+	while not _search_state.is_empty():
+		step_search(0, MAX_EXPANSIONS)
+	return blocked
+
+
+func begin_search(actor: CharacterBody3D, target: Node3D) -> void:
 	_space = actor.get_world_3d().direct_space_state
 	_excluded = [actor.get_rid()]
 	if target is CollisionObject3D:
@@ -72,17 +89,98 @@ func search_requested(actor: CharacterBody3D, target: Node3D) -> bool:
 	var from := actor.global_position
 	var to := target.global_position
 	to.y = _height
-	_next_search = Engine.get_physics_frames() + 45 + int(actor.get_instance_id() % 20)
-	_goal = to
+	_clearance_cache.clear()
 	_direct = clear_segment(from, to)
-	# A typed empty literal: the ternary form yields an untyped Array.
-	path = []
-	if not _direct:
-		path = _search(from, to)
-	return not _direct
+	_search_state.clear()
+	if _direct:
+		path.clear()
+		return
+	var start := _cell(from)
+	var goal := _cell(to)
+	var heap := HEAP.new()
+	heap.push({"cell": start, "cost": 0.0}, _heuristic(start, goal))
+	_search_state = {"from": from, "to": to, "height": _height, "cooldown": 45 + int(actor.get_instance_id() % 20), "start": start, "goal": goal,
+		"open": heap, "cost": {start: 0.0}, "parents": {}, "closed": {},
+		"best": start, "best_distance": _heuristic(start, goal), "count": 0,
+		"current": {}, "offset": 0}
+
+
+func cancel_search() -> void:
+	_search_state.clear()
+
+
+func step_search(deadline_usec: int, max_expansions: int = 4) -> bool:
+	_clearance_cache.clear() # Physics obstacles may move between slices/frames.
+	probes_last_slice = 0
+	expansions_last_slice = 0
+	if _search_state.is_empty():
+		return true
+	var state := _search_state
+	_height = float(state.height)
+	while deadline_usec == 0 or Time.get_ticks_usec() < deadline_usec:
+		if state.current.is_empty():
+			if state.count >= MAX_EXPANSIONS or state.open.entries.is_empty():
+				return _finish_search(state)
+			if expansions_last_slice >= max_expansions:
+				return false
+			var entry: Dictionary = state.open.pop()
+			var cell: Vector2i = entry.cell
+			if state.closed.has(cell) or float(entry.cost) != float(state.cost.get(cell, INF)):
+				continue
+			state.closed[cell] = true
+			state.current = entry
+			state.offset = 0
+			state.count += 1
+			expansions_last_slice += 1
+			var distance := _heuristic(cell, state.goal)
+			if distance < float(state.best_distance):
+				state.best = cell
+				state.best_distance = distance
+			if cell == state.goal:
+				state.best = cell
+				return _finish_search(state)
+		if int(state.offset) >= DIRECTIONS.size():
+			state.current = {}
+			continue
+		_expand_neighbor(state)
+	return false
+
+
+func _expand_neighbor(state: Dictionary) -> void:
+	var current: Vector2i = state.current.cell
+	var offset: Vector2i = DIRECTIONS[int(state.offset)]
+	state.offset += 1
+	var next := current + offset
+	var start: Vector2i = state.start
+	if state.closed.has(next) or absi(next.x - start.x) > SEARCH_RADIUS or absi(next.y - start.y) > SEARCH_RADIUS:
+		return
+	var next_cost := float(state.cost[current]) + Vector2(offset).length()
+	if next_cost >= float(state.cost.get(next, INF)):
+		return
+	var a: Vector3 = state.from if current == start else _point(current)
+	if not clear_segment(a, _point(next)):
+		return
+	state.cost[next] = next_cost
+	state.parents[next] = current
+	state.open.push({"cell": next, "cost": next_cost}, next_cost + _heuristic(next, state.goal))
+
+
+func _finish_search(state: Dictionary) -> bool:
+	path = _trace(state.parents, state.best, state.start)
+	_goal = state.to
+	_next_search = Engine.get_physics_frames() + int(state.cooldown)
+	_search_state = {}
+	return true
 
 
 func clear_segment(from: Vector3, to: Vector3) -> bool:
+	var frame := Engine.get_physics_frames()
+	if frame != _cache_frame:
+		_cache_frame = frame
+		_clearance_cache.clear()
+	var key := [from, to, _radius]
+	if _clearance_cache.has(key):
+		return _clearance_cache[key]
 	var query := PhysicsShapeQueryParameters3D.new()
 	query.shape = _shape
 	query.transform.origin = from
@@ -91,50 +189,14 @@ func clear_segment(from: Vector3, to: Vector3) -> bool:
 	query.exclude = _excluded
 	query.margin = .02
 	var motion := _space.cast_motion(query)
-	return not motion.is_empty() and motion[0] >= .999
+	probes_last_slice += 1
+	var clear := not motion.is_empty() and motion[0] >= .999
+	_clearance_cache[key] = clear
+	return clear
 
 
 func direct_clear() -> bool:
 	return _direct
-
-
-func _search(from: Vector3, to: Vector3) -> Array[Vector3]:
-	var start := _cell(from)
-	var goal := _cell(to)
-	var open: Array[Vector2i] = [start]
-	var cost: Dictionary = {start: 0.0}
-	var parents: Dictionary = {}
-	var closed: Dictionary = {}
-	var best := start
-	var best_distance := _heuristic(start, goal)
-	for _expansion in range(MAX_EXPANSIONS):
-		if open.is_empty():
-			break
-		var index := _lowest(open, cost, goal)
-		var current := open[index]
-		open.remove_at(index)
-		closed[current] = true
-		var distance := _heuristic(current, goal)
-		if distance < best_distance:
-			best = current
-			best_distance = distance
-		if current == goal:
-			return _trace(parents, current, start)
-		for offset in DIRECTIONS:
-			var next := current + offset
-			if closed.has(next) or absi(next.x - start.x) > SEARCH_RADIUS or absi(next.y - start.y) > SEARCH_RADIUS:
-				continue
-			var next_cost := float(cost[current]) + Vector2(offset).length()
-			if next_cost >= float(cost.get(next, INF)):
-				continue
-			var a := from if current == start else _point(current)
-			if not clear_segment(a, _point(next)):
-				continue
-			cost[next] = next_cost
-			parents[next] = current
-			if not open.has(next):
-				open.append(next)
-	return _trace(parents, best, start)
 
 
 func _trace(parents: Dictionary, goal: Vector2i, start: Vector2i) -> Array[Vector3]:
@@ -144,17 +206,6 @@ func _trace(parents: Dictionary, goal: Vector2i, start: Vector2i) -> Array[Vecto
 		result.push_front(_point(cell))
 		cell = parents[cell]
 	return result
-
-
-func _lowest(open: Array[Vector2i], cost: Dictionary, goal: Vector2i) -> int:
-	var best := 0
-	var lowest := INF
-	for i in range(open.size()):
-		var score := float(cost[open[i]]) + _heuristic(open[i], goal)
-		if score < lowest:
-			lowest = score
-			best = i
-	return best
 
 
 func _cell(point: Vector3) -> Vector2i:

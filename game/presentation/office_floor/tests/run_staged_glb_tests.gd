@@ -8,6 +8,7 @@ const MODELS := "res://models/objects/enviroments/"
 const CABINET := MODELS + "03/03_file_cabinet_largest.glb"
 const PLANT := MODELS + "11/11_plant_small.glb"
 const RECEPTION := MODELS + "07/07_reception_counter_two_heights_2.glb"
+const SERVER_RACK := MODELS + "03/03_server_rack3.glb"
 const LAPTOP := MODELS + "05/05_laptop_destructible.glb"
 
 var failures := 0
@@ -26,6 +27,8 @@ func _run() -> void:
 	await _test_plant(stage)
 	await _test_reception(stage)
 	await _test_power_off(stage)
+	await _test_rack_textures(stage)
+	await _test_instance_isolation(stage)
 	stage.queue_free()
 	await process_frame
 	print("Staged GLB tests: %d failure(s)." % failures)
@@ -39,8 +42,8 @@ func _test_stage_groups() -> void:
 	var fragments := model.get_node_or_null("SmallFragments") as Node3D
 	_expect(int(model.get_meta(&"staged_glb_version", 0)) >= 1, "Multi-scene GLB is imported by the staged extension.")
 	_expect(intact != null and intact.scale == Vector3.ONE, "The default Intact scene stays visible.")
-	_expect(parts != null and parts.scale == Vector3.ZERO and parts.get_child_count() == 26, "LargeParts is imported hidden with all 26 parts.")
-	_expect(fragments != null and fragments.scale == Vector3.ZERO and fragments.get_child_count() == 118, "SmallFragments is imported hidden with all 118 fragments.")
+	_expect(parts != null and parts.scale == Vector3.ZERO and parts.get_child_count() == 0 and parts.has_meta(&"lazy_stage_path"), "LargeParts is a cold placeholder; geometry is not instantiated.")
+	_expect(fragments != null and fragments.scale == Vector3.ZERO and fragments.get_child_count() == 0 and fragments.has_meta(&"lazy_stage_path"), "SmallFragments is a cold placeholder; geometry is not instantiated.")
 	model.free()
 
 
@@ -108,6 +111,58 @@ func _test_power_off(stage: Node3D) -> void:
 		await process_frame
 	_expect(power_off != null and power_off.scale == Vector3.ONE and power_off.visible, "Damage switches the laptop to its Power_Off stage.")
 	await _clear(prop, effects)
+
+
+func _test_rack_textures(stage: Node3D) -> void:
+	var setup := await _spawn(stage, SERVER_RACK, Vector3(10, 0, 8))
+	var prop: RigidBody3D = setup[0]
+	var effects: Node3D = setup[1]
+	var damaged := prop.get_node("Visual").find_child("Modular", true, false) as Node3D
+	_expect(damaged != null, "Updated rack contains its damaged Modular stage.")
+	var materials: Dictionary = {}
+	_expect(damaged != null and damaged.get_child_count() == 0, "Rack damage geometry starts cold.")
+	await _break(prop)
+	if damaged != null:
+		for node in damaged.find_children("*", "MeshInstance3D", true, false):
+			var mesh := node as MeshInstance3D
+			for surface in mesh.mesh.get_surface_count():
+				materials[[mesh, surface]] = mesh.get_active_material(surface)
+	_expect(bool(prop.get("_broken")) and damaged != null and damaged.visible,
+		"Damaged rack becomes visible after projectile damage.")
+	_expect(not materials.is_empty(), "Damaged rack has authored materials.")
+	for key: Array in materials:
+		var material := materials[key] as BaseMaterial3D
+		_expect(material != null and material.albedo_texture != null,
+			"Damaged rack has an authored base-color texture.")
+		_expect((key[0] as MeshInstance3D).get_active_material(key[1]) == material,
+			"Damage preserves the updated rack's textured material.")
+	await _clear(prop, effects)
+
+
+func _test_instance_isolation(stage: Node3D) -> void:
+	var first := await _spawn(stage, CABINET, Vector3(0, 0, -10))
+	var second := await _spawn(stage, CABINET, Vector3(6, 0, -10))
+	var damaged: RigidBody3D = first[0]
+	var untouched: RigidBody3D = second[0]
+	var shapes: Array = untouched.get("_shapes").duplicate()
+	var meshes: Array = untouched.get("_shape_meshes").duplicate()
+	var intact := untouched.get_node("Visual/Intact") as Node3D
+	var parts := untouched.get_node("Visual/LargeParts") as Node3D
+	_expect(not shapes.is_empty() and shapes.size() == meshes.size(),
+		"Each prop exposes matching collider and mesh lists.")
+	for shape: CollisionShape3D in shapes:
+		_expect(shape.get_parent() == untouched and not damaged.get("_shapes").has(shape),
+			"Collision shapes belong to one prop instance only.")
+	await _break(damaged)
+	_expect(not bool(untouched.get("_broken")) and intact.visible and parts.scale == Vector3.ZERO,
+		"Breaking one prop leaves the other instance's geometry and durability intact.")
+	_expect(untouched.get("_shapes") == shapes and untouched.get("_shape_meshes") == meshes,
+		"Breaking one prop does not replace the other instance's collider mapping.")
+	for shape: CollisionShape3D in shapes:
+		_expect(is_instance_valid(shape) and not shape.disabled,
+			"The untouched prop's collision remains enabled.")
+	await _clear(damaged, first[1])
+	await _clear(untouched, second[1])
 
 
 func _spawn(stage: Node3D, path: String, position: Vector3) -> Array:

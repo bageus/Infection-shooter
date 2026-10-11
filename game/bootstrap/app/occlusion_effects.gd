@@ -2,11 +2,13 @@ extends Node
 ## Bootstrap-owned visual mode. Injected actors/world, no gameplay mutations.
 const SUBJECT := preload("res://game/bootstrap/app/occlusion_subject.gd")
 const WALLS := preload("res://game/bootstrap/app/occlusion_wall_materials.gd")
+const QUERY_LAYER := preload("res://game/bootstrap/app/occlusion_query_layer.gd")
 const HERO_COLOR := Color(0.2, 0.85, 1.0, 0.9)
 const ENEMY_COLOR := Color(1.0, 0.24, 0.28, 0.9)
 const ITEM_COLOR := Color(1.0, 0.78, 0.22, 0.9)
 const HOLE_RADIUS := 2.0
 const CHECK_INTERVAL := 0.1
+const SUBJECTS_PER_TICK := 8
 var mode := 0
 var runtime_enabled := true
 var player: Node3D
@@ -14,6 +16,11 @@ var camera: Camera3D
 var world: Node3D
 var subjects: Array[RefCounted] = []
 var walls := WALLS.new()
+var query_layer := QUERY_LAYER.new()
+var checks_last_tick := 0
+var rays_last_tick := 0
+var _subject_cursor := 0
+var _check_credit := 0.0
 var rebuild_count := 0
 var _dirty := true
 var _elapsed := 0.0
@@ -58,7 +65,7 @@ func _node_removed(node: Node) -> void:
 	if node.has_meta("occlusion_copy"):
 		return
 	var id := node.get_instance_id()
-	if _subjects_by_id.has(id) or node.is_in_group("camera_occluder") or walls.records.has(id) or walls.queued.has(id):
+	if _subjects_by_id.has(id) or node.is_in_group("camera_occluder") or walls.records.has(id) or walls.queued.has(id) or query_layer.records.has(id):
 		_removed_roots[id] = weakref(node)
 	_added_roots.erase(id)
 
@@ -69,21 +76,36 @@ func _is_classified(node: Node) -> bool:
 
 func _check_added_root(reference: WeakRef) -> void:
 	var node := reference.get_ref() as Node
+	if node is CollisionObject3D and world.is_ancestor_of(node):
+		var ancestor := node.get_parent()
+		while ancestor != null and ancestor != world:
+			if ancestor is Node3D and ancestor.is_in_group("camera_occluder"):
+				query_layer.add_root(ancestor)
+				break
+			ancestor = ancestor.get_parent()
 	if node != null and node.is_inside_tree() and world.is_ancestor_of(node) and _is_classified(node):
 		_added_roots[node.get_instance_id()] = weakref(node)
 
 
 func _physics_process(delta: float) -> void:
+	checks_last_tick = 0
+	rays_last_tick = 0
 	if not runtime_enabled or not is_instance_valid(player) or not is_instance_valid(camera):
 		return
 	if _dirty:
 		_rebuild()
 	else:
 		_apply_pending_roots()
-	_elapsed += delta
-	if _elapsed >= CHECK_INTERVAL:
-		_elapsed = 0.0
-		_check_subjects()
+	if mode == 0:
+		_check_credit = minf(_check_credit + delta * subjects.size() / CHECK_INTERVAL, SUBJECTS_PER_TICK)
+		var count := mini(int(_check_credit), SUBJECTS_PER_TICK)
+		_check_credit -= count
+		_check_subjects(count)
+	else:
+		_elapsed += delta
+		if _elapsed >= CHECK_INTERVAL:
+			_elapsed = 0.0
+			_check_subjects()
 
 
 func _process(_delta: float) -> void:
@@ -109,6 +131,7 @@ func _apply_pending_roots() -> void:
 		var removed: Node = _removed_roots[id].get_ref()
 		if removed != null:
 			walls.remove_root(removed)
+			query_layer.remove_root(removed)
 	_removed_roots.clear()
 	for reference: WeakRef in _added_roots.values():
 		var node := reference.get_ref() as Node
@@ -121,6 +144,8 @@ func _collect(node: Node) -> void:
 	if node.has_meta("occlusion_copy"):
 		return
 	if node is Node3D:
+		if node.is_in_group("camera_occluder"):
+			query_layer.add_root(node)
 		if mode == 1 and node.is_in_group("camera_occluder"):
 			walls.add_root(node)
 		elif mode == 0:
@@ -141,11 +166,15 @@ func _add_subject(node: Node3D, tint: Color) -> void:
 	subjects.append(subject)
 
 
-func _check_subjects() -> void:
+func _check_subjects(limit: int = SUBJECTS_PER_TICK) -> void:
 	if mode == 1:
 		_hero_blocked = _blocked(player)
 		return
-	for subject in subjects:
+	for index in mini(limit, subjects.size()):
+		_subject_cursor %= subjects.size()
+		var subject: RefCounted = subjects[_subject_cursor]
+		_subject_cursor += 1
+		checks_last_tick += 1
 		var node := subject.target.get_ref() as Node3D
 		var live := node != null and node.is_visible_in_tree()
 		if live and node.has_method("is_dead"):
@@ -166,25 +195,18 @@ func _blocked(node: Node3D) -> bool:
 
 
 func _ray_blocked(point: Vector3, target: Node3D) -> bool:
-	var query := PhysicsRayQueryParameters3D.create(camera.global_position, point, 3)
-	var excluded: Array[RID] = []
-	if player is CollisionObject3D:
-		excluded.append(player.get_rid())
+	var query := PhysicsRayQueryParameters3D.create(camera.global_position, point, QUERY_LAYER.MASK)
 	if target is CollisionObject3D:
-		excluded.append(target.get_rid())
-	# Pass through actors/furniture, only structural roots trigger this effect.
-	for attempt in 8:
-		query.exclude = excluded
-		var hit := world.get_world_3d().direct_space_state.intersect_ray(query)
-		if hit.is_empty():
-			return false
-		var collider := hit.collider as Node
-		var ancestor := collider
-		while ancestor != null and ancestor != world:
-			if ancestor.is_in_group("camera_occluder") and (ancestor as Node3D).is_visible_in_tree():
-				return true
-			ancestor = ancestor.get_parent()
-		excluded.append(hit.rid)
+		query.exclude = [target.get_rid()]
+	rays_last_tick += 1
+	var hit := world.get_world_3d().direct_space_state.intersect_ray(query)
+	if hit.is_empty():
+		return false
+	var ancestor := hit.collider as Node
+	while ancestor != null and ancestor != world:
+		if ancestor.is_in_group("camera_occluder") and (ancestor as Node3D).is_visible_in_tree():
+			return true
+		ancestor = ancestor.get_parent()
 	return false
 
 
@@ -208,6 +230,9 @@ func _clear() -> void:
 	_added_roots.clear()
 	_removed_roots.clear()
 	walls.clear()
+	query_layer.clear()
+	_subject_cursor = 0
+	_check_credit = 0.0
 	_hero_blocked = false
 
 
