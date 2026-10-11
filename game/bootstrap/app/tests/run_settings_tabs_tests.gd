@@ -37,6 +37,35 @@ func _run() -> void:
 	light_prefs.load_settings()
 	_check(not light_prefs.values.lighting, "Lighting toggle survives settings reload")
 	lighting.set_pressed(true)
+	var shadows := tabs.get_child(2).find_child("Shadows", true, false) as CheckButton
+	var quality := tabs.get_child(2).find_child("ShadowQuality", true, false) as HSlider
+	_check(shadows != null and shadows.button_pressed, "Shadows toggle belongs to Video and defaults on")
+	_check(quality != null and quality.value == 2.0 and quality.max_value == 3.0 and quality.step == 1.0, "Shadow quality slider has 4 levels and defaults to High")
+	quality.value = 0.0
+	_check(PREFS.new().values.shadow_quality == 2, "Fresh preferences keep the default quality")
+	var shadow_prefs := PREFS.new()
+	shadow_prefs.load_settings()
+	_check(int(shadow_prefs.values.shadow_quality) == 0, "Shadow quality survives settings reload")
+	_check(dialog.view.text("shadowQuality0") == "Низкое", "Shadow quality level is named")
+	var stage := Node3D.new()
+	var sun := DirectionalLight3D.new()
+	sun.name = "GlobalOverheadLight"
+	sun.shadow_enabled = true
+	stage.add_child(sun)
+	root.add_child(stage)
+	var previous_scene := current_scene
+	current_scene = stage
+	shadow_prefs.values.shadows = false
+	shadow_prefs.values.shadow_quality = 0
+	shadow_prefs.apply_to_game(self)
+	_check(not sun.shadow_enabled and sun.directional_shadow_max_distance == 32.0, "Low quality shortens range and off disables shadows")
+	shadow_prefs.values.shadows = true
+	shadow_prefs.values.shadow_quality = 2
+	shadow_prefs.apply_to_game(self)
+	_check(sun.shadow_enabled and sun.directional_shadow_max_distance == 64.0 and sun.directional_shadow_mode == DirectionalLight3D.SHADOW_PARALLEL_2_SPLITS, "High quality restores the authored shadow setup")
+	current_scene = previous_scene
+	stage.queue_free()
+	quality.value = 2.0
 	_check(tabs.get_child(3).find_child("SoundToggle", true, false) != null, "Sound belongs to Audio")
 	_check_notice_badge(dialog, tabs)
 	dialog.settings.notices._show(1)

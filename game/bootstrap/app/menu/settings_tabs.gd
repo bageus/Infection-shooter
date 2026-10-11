@@ -1,6 +1,7 @@
 extends RefCounted
 const NOTICES := preload("res://game/bootstrap/app/menu/settings_notices.gd")
 var notices := NOTICES.new()
+const SHADOWS := preload("res://game/bootstrap/app/menu/shadow_quality.gd")
 const EDITOR := preload("res://game/bootstrap/app/menu/control_binding_editor.gd")
 var dialog: Control
 var tabs: TabContainer
@@ -132,6 +133,17 @@ func _video() -> void:
 	lighting.button_pressed = dialog.view.preferences.values.lighting
 	lighting.toggled.connect(func(value: bool) -> void: dialog.call("_change", "lighting", value))
 	dialog.get("layout").add_child(lighting)
+	var shadows := CheckButton.new()
+	shadows.name = "Shadows"
+	shadows.text = dialog.view.text("shadows")
+	shadows.button_pressed = dialog.view.preferences.values.shadows
+	dialog.get("layout").add_child(shadows)
+	_shadow_quality()
+	var quality := dialog.get("layout").find_child("ShadowQuality", true, false) as HSlider
+	quality.editable = shadows.button_pressed
+	shadows.toggled.connect(func(value: bool) -> void:
+		quality.editable = value
+		dialog.call("_change", "shadows", value))
 	var particles := CheckButton.new()
 	particles.name = "ElectronicParticles"
 	particles.text = dialog.view.text("electronicParticles")
@@ -139,6 +151,29 @@ func _video() -> void:
 	particles.toggled.connect(func(value: bool) -> void: dialog.call("_change", "electronic_particles", value))
 	dialog.get("layout").add_child(particles)
 	dialog.call("_button", "fullscreen", dialog._fullscreen)
+
+
+func _shadow_quality() -> void:
+	var name_label := Label.new()
+	name_label.name = "ShadowQualityName"
+	name_label.custom_minimum_size.x = 90
+	name_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
+	var slider := HSlider.new()
+	slider.name = "ShadowQuality"
+	slider.custom_minimum_size.x = 160
+	slider.min_value = 0
+	slider.max_value = SHADOWS.level_count() - 1
+	slider.step = 1
+	slider.tick_count = SHADOWS.level_count()
+	slider.value = dialog.view.preferences.values.shadow_quality
+	name_label.text = dialog.view.text("shadowQuality" + str(int(slider.value)))
+	slider.value_changed.connect(func(value: float) -> void:
+		name_label.text = dialog.view.text("shadowQuality" + str(int(value)))
+		dialog.call("_change", "shadow_quality", int(value)))
+	var box := HBoxContainer.new()
+	box.add_child(slider)
+	box.add_child(name_label)
+	dialog.call("_row", "shadowQuality", box)
 
 
 func _audio() -> void:
