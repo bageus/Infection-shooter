@@ -15,13 +15,14 @@
     },
     "animation_events_v1": {
       "play_one_shot": "play_one_shot(state: StringName) -> float; states attack|death|death_forward|death_back|slam|summon (slam/summon need a matching skeletal clip; directional deaths fall back to Death, ADR-0034), returns clip length or 0.0 (death is final)",
-      "notify_hit": "notify_hit() -> void; short additive flinch",
+      "notify_hit": "notify_hit(world_point: Vector3 = ZERO, world_direction: Vector3 = ZERO, strength: float = 1.0) -> void; skeletal models twist/rock the torso away from the hit with a damped spring, hips and legs keep the clip (hit_reaction_v1, ADR-0038); no direction rocks back; models without a spine bone flinch as a whole",
       "set_active": "set_active(active: bool) -> void; pauses animation for distant characters",
       "one_shot_finished": "signal one_shot_finished(state: StringName)"
     },
     "animation_assets_v1": {
       "animation_library": "@export AnimationLibrary; optional clip set replacing the model's own clips (ADR-0016)",
-      "procedural_gait": "@export bool; speed-synchronised leg gait layered over authored clips, presentation only (ADR-0016)"
+      "procedural_gait": "@export bool; speed-synchronised leg gait layered over authored clips, presentation only (ADR-0016); knees bend in the plane the foot points along (ADR-0038)",
+      "run_exit_ratio": "@export float = 0.85; a running character keeps the run clip down to this share of run_speed_threshold (ADR-0038)"
     }
   }
 }

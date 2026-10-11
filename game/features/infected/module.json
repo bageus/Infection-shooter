@@ -92,6 +92,9 @@
     "character_push_v1": {
       "push_strength": "push_strength: float = 1.0 (Brute 2.0, Titan 2.6, Colossus 3.2); passed to push_from_character with the intended pre-slide velocity"
     },
+    "chase_pace_v1": {
+      "pace": "beyond charge_distance (+1.5 m hysteresis once inside) the infected walks at walk_speed_factor; inside it sprints 2.4-4.2 s, then walks 1.1-2.2 s, repeating; within 3.5 m it always charges; speed eases at 1.4 (up) / 1.0 (down) move speeds per second; charge_distance 0 always charges (ADR-0038)"
+    },
     "chase_budget_v1": {
       "configure_chase_budget": "configure_chase_budget(budget: Node) -> void; bootstrap injects one mission-owned search queue",
       "searches_per_frame": "Maximum completed local A* searches per physics frame; default 2; each search remains bounded to 192 expansions"

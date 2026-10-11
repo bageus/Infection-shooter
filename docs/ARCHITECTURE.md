@@ -266,3 +266,5 @@ immutable cache физических ресурсов гильз. Публичн
 новых зависимостей, глобального clock/пула или политик дальних коллизий нет.
 
 ADR-0037: core.vfx предоставляет opt-in surface_stamp_cache_v1; instance принадлежит существующему combat impact pool. Stateless v1 совместим; snapshots/indices ограничены 128 Mesh, invalidation Mesh.changed, teardown отключает observers. Новых зависимостей и глобального состояния нет.
+
+ADR-0038: features.character_animation владеет аддитивной реакцией корпуса на попадание (SkeletonModifier3D hit_reaction: позвоночник, грудь, запаздывающая голова; бёдра и ноги не трогаются) и выпрямлением колена в процедурной походке; notify_hit аддитивно принимает точку, направление и силу. features.infected владеет темпом погони chase_pace (рывки бега и шаг между ними, ускорение без скачков). Новых зависимостей, глобального состояния и изменений DTO нет.

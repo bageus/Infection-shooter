@@ -12,6 +12,7 @@ signal footstep(side: int, speed: float)
 
 const POSE := preload("res://game/features/character_animation/procedural_pose.gd")
 const GAIT := preload("res://game/features/character_animation/procedural_gait.gd")
+const HIT_REACTION := preload("res://game/features/character_animation/hit_reaction.gd")
 const STATE_ATTACK := &"attack"
 const STATE_DEATH := &"death"
 # Directional deaths (ADR-0034) fall back to the plain death clip.
@@ -40,6 +41,9 @@ const FLINCH_SECONDS := 0.16
 ## Optional clip set that replaces the model's own clips (ADR-0016).
 @export var animation_library: AnimationLibrary
 @export var run_speed_threshold := 6.8
+## A running character keeps the run clip down to this share of the threshold,
+## so speed wobble around it does not flicker between walk and run.
+@export_range(0.5, 1.0) var run_exit_ratio := 0.85
 ## Rebuild the legs with a speed-synchronised gait over the playing clip
 ## (for authored upper-body clips whose leg motion limps or slides).
 @export var procedural_gait := false
@@ -59,6 +63,7 @@ const FLINCH_SECONDS := 0.16
 var character: CharacterBody3D
 var animation_player: AnimationPlayer
 var gait: SkeletonModifier3D
+var hit_reaction: SkeletonModifier3D
 var _current := ""
 var _animations: Dictionary = {}
 var _locomotion: Dictionary = {}
@@ -118,9 +123,14 @@ func play_one_shot(state: StringName) -> float:
 	return length
 
 
-# Public animation_events_v1: short additive flinch on the visual pivot.
-func notify_hit() -> void:
+# Public animation_events_v1: hit reaction. Skeletal models twist and rock the
+# torso away from where the shot landed (hit_reaction_v1, ADR-0038); without a
+# point and direction it rocks back. Models without a spine flinch as a whole.
+func notify_hit(world_point: Vector3 = Vector3.ZERO, world_direction: Vector3 = Vector3.ZERO, strength: float = 1.0) -> void:
 	if _target == null or _dead:
+		return
+	if hit_reaction != null:
+		hit_reaction.call("push", world_point, world_direction, strength)
 		return
 	if animation_player != null and _flinch_elapsed < 0.0:
 		# Skeletal visuals may be rotated by their owner; capture the pose now.
@@ -133,6 +143,8 @@ func set_active(active: bool) -> void:
 	set_process(active)
 	if animation_player != null:
 		animation_player.active = active
+	if hit_reaction != null:
+		hit_reaction.active = active
 
 
 func _ready() -> void:
@@ -153,6 +165,7 @@ func _ready() -> void:
 		_pose.feet = Vector3(0.0, _feet_height(model), 0.0)
 		if procedural_gait:
 			_attach_gait(model)
+		_attach_hit_reaction(model)
 		_play_locomotion(&"idle", 0.0)
 		return
 	_target = character.get_node_or_null(procedural_target_path) as Node3D
@@ -206,7 +219,8 @@ func _process_skeletal(speed: float) -> void:
 		return
 	if _play_selected_clip():
 		return
-	if speed > run_speed_threshold or (speed > 0.15 and _locomotion.get(&"walk", "").is_empty()):
+	var run_floor := run_speed_threshold * (run_exit_ratio if _current == _locomotion.get(&"run", "") else 1.0)
+	if speed > run_floor or (speed > 0.15 and _locomotion.get(&"walk", "").is_empty()):
 		_play_locomotion(&"run", speed)
 	elif speed > 0.15:
 		_play_locomotion(&"walk", speed)
@@ -379,6 +393,19 @@ func _attach_gait(model: Node) -> void:
 	gait.character = character
 	gait.connect("stepped", func(side: int, speed: float) -> void: footstep.emit(side, speed))
 	(skeletons[0] as Node).add_child(gait)
+
+
+func _attach_hit_reaction(model: Node) -> void:
+	var skeletons := model.find_children("*", "Skeleton3D", true, false)
+	if skeletons.is_empty():
+		return
+	var reaction := HIT_REACTION.new()
+	reaction.name = "HitReaction"
+	if not reaction.setup(skeletons[0] as Skeleton3D):
+		reaction.free()
+		return
+	(skeletons[0] as Node).add_child(reaction)
+	hit_reaction = reaction
 
 
 func _apply_animation_library() -> void:

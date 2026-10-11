@@ -2,12 +2,14 @@ extends SceneTree
 ## Runtime checks for the procedural leg gait (ADR-0016): the authored player
 ## walk clips step with one leg only; the gait must alternate both legs at the
 ## character's real speed and hand the legs back to the clip when standing.
+## In every direction of travel each knee bends toward where its foot points.
 
 const DRIVER := preload("res://game/features/character_animation/public/character_animation_driver.gd")
 const MODEL := preload("res://models/objects/characters/soldier_animated.glb")
 
 var failures := 0
 var _samples: Array[Vector3] = []
+var _knee_errors: Array[float] = []
 
 
 func _init() -> void:
@@ -36,6 +38,7 @@ func _run() -> void:
 	var right := skeleton.find_bone("RightFoot")
 	# Poses are read right after the modifiers ran for the frame.
 	skeleton.skeleton_updated.connect(func() -> void: _samples.append(skeleton.get_bone_global_pose(left).origin - skeleton.get_bone_global_pose(right).origin))
+	skeleton.skeleton_updated.connect(func() -> void: _record_knees(skeleton))
 	character.velocity = Vector3(0, 0, 6.0)
 	await create_timer(0.5).timeout
 	_samples.clear()
@@ -68,7 +71,32 @@ func _run() -> void:
 	for sample in _samples:
 		fore_aft = maxf(fore_aft, absf(sample.z))
 	_expect(fore_aft > 0.15, "Strafing turns the legs into diagonal steps (%.2f m fore-aft)." % fore_aft)
+	for heading in [Vector3(1, 0, 1), Vector3(1, 0, -1), Vector3(0, 0, -1), Vector3(-1, 0, 0)]:
+		character.velocity = heading.normalized() * 5.0
+		await create_timer(0.4).timeout
+		_knee_errors.clear()
+		await create_timer(1.0).timeout
+		var worst: float = _knee_errors.max() if not _knee_errors.is_empty() else 180.0
+		_expect(worst < 25.0, "Walking toward %s, the knees bend the way the feet point (worst %.0f degrees)." % [heading, worst])
 	_finish()
+
+
+# Angle between where a bent knee sticks out of the hip-ankle line and where
+# its foot points, seen from above; nearly straight legs are skipped.
+func _record_knees(skeleton: Skeleton3D) -> void:
+	for side in ["Left", "Right"]:
+		var hip := skeleton.get_bone_global_pose(skeleton.find_bone(side + "UpLeg")).origin
+		var knee := skeleton.get_bone_global_pose(skeleton.find_bone(side + "Leg")).origin
+		var ankle := skeleton.get_bone_global_pose(skeleton.find_bone(side + "Foot")).origin
+		var toe := skeleton.get_bone_global_pose(skeleton.find_bone(side + "ToeBase")).origin
+		var axis := (ankle - hip).normalized()
+		var out := (knee - hip) - axis * (knee - hip).dot(axis)
+		if out.length() < 0.3 * (knee - hip).length():
+			continue
+		out.y = 0.0
+		var foot := toe - ankle
+		foot.y = 0.0
+		_knee_errors.append(rad_to_deg(absf(out.signed_angle_to(foot, Vector3.UP))))
 
 
 func _finish() -> void:
