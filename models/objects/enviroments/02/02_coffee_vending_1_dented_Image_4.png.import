@@ -3,9 +3,10 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://bhch4lt30yd0o"
-path="res://.godot/imported/02_coffee_vending_1_dented_Image_4.png-98716d5cdece7b6ab143494a9bd14b77.ctex"
+path.s3tc="res://.godot/imported/02_coffee_vending_1_dented_Image_4.png-98716d5cdece7b6ab143494a9bd14b77.s3tc.ctex"
 metadata={
-"vram_texture": false
+"imported_formats": ["s3tc_bptc"],
+"vram_texture": true
 }
 generator_parameters={
 "md5": "6fd96ed310a81f47387205659a026799"
@@ -14,11 +15,11 @@ generator_parameters={
 [deps]
 
 source_file="res://models/objects/enviroments/02/02_coffee_vending_1_dented_Image_4.png"
-dest_files=["res://.godot/imported/02_coffee_vending_1_dented_Image_4.png-98716d5cdece7b6ab143494a9bd14b77.ctex"]
+dest_files=["res://.godot/imported/02_coffee_vending_1_dented_Image_4.png-98716d5cdece7b6ab143494a9bd14b77.s3tc.ctex"]
 
 [params]
 
-compress/mode=0
+compress/mode=2
 compress/high_quality=false
 compress/lossy_quality=0.7
 compress/uastc_level=0

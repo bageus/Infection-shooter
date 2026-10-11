@@ -3,9 +3,10 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://dqd3lumyfac1g"
-path="res://.godot/imported/02_coffee_vending_1_dented_Image_5.png-85c7e19e5e2ec1d0d6d21932a528fd75.ctex"
+path.s3tc="res://.godot/imported/02_coffee_vending_1_dented_Image_5.png-85c7e19e5e2ec1d0d6d21932a528fd75.s3tc.ctex"
 metadata={
-"vram_texture": false
+"imported_formats": ["s3tc_bptc"],
+"vram_texture": true
 }
 generator_parameters={
 "md5": "c3c9c9b112372141f463f90bf1480676"
@@ -14,17 +15,17 @@ generator_parameters={
 [deps]
 
 source_file="res://models/objects/enviroments/02/02_coffee_vending_1_dented_Image_5.png"
-dest_files=["res://.godot/imported/02_coffee_vending_1_dented_Image_5.png-85c7e19e5e2ec1d0d6d21932a528fd75.ctex"]
+dest_files=["res://.godot/imported/02_coffee_vending_1_dented_Image_5.png-85c7e19e5e2ec1d0d6d21932a528fd75.s3tc.ctex"]
 
 [params]
 
-compress/mode=0
+compress/mode=2
 compress/high_quality=false
 compress/lossy_quality=0.7
 compress/uastc_level=0
 compress/rdo_quality_loss=0.0
 compress/hdr_compression=1
-compress/normal_map=0
+compress/normal_map=1
 compress/channel_pack=0
 mipmaps/generate=true
 mipmaps/limit=-1

@@ -3,9 +3,10 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://dlw4npnn2i21d"
-path="res://.godot/imported/02_vending_machine_fantas_dented_Image_3.png-d256e2f7a1bc9c0f3c6f8b104b78f574.ctex"
+path.s3tc="res://.godot/imported/02_vending_machine_fantas_dented_Image_3.png-d256e2f7a1bc9c0f3c6f8b104b78f574.s3tc.ctex"
 metadata={
-"vram_texture": false
+"imported_formats": ["s3tc_bptc"],
+"vram_texture": true
 }
 generator_parameters={
 "md5": "da173384b0f197867a39ae4248c30433"
@@ -14,17 +15,17 @@ generator_parameters={
 [deps]
 
 source_file="res://models/objects/enviroments/02/02_vending_machine_fantas_dented_Image_3.png"
-dest_files=["res://.godot/imported/02_vending_machine_fantas_dented_Image_3.png-d256e2f7a1bc9c0f3c6f8b104b78f574.ctex"]
+dest_files=["res://.godot/imported/02_vending_machine_fantas_dented_Image_3.png-d256e2f7a1bc9c0f3c6f8b104b78f574.s3tc.ctex"]
 
 [params]
 
-compress/mode=0
+compress/mode=2
 compress/high_quality=false
 compress/lossy_quality=0.7
 compress/uastc_level=0
 compress/rdo_quality_loss=0.0
 compress/hdr_compression=1
-compress/normal_map=0
+compress/normal_map=1
 compress/channel_pack=0
 mipmaps/generate=true
 mipmaps/limit=-1
