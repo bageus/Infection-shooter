@@ -98,8 +98,7 @@ func _check_test_column(model: Node3D) -> void:
 		var material := mesh.get_active_material(0) as BaseMaterial3D
 		_check(material != null, "Test column retains its material")
 		if material != null:
-			_check(material.albedo_texture.resource_path == ROOT_PATH + "01_column_2_Image_0.jpg", "Test column retains albedo")
-			_check(material.normal_texture.resource_path == ROOT_PATH + "01_column_2_Image_2.jpg", "Test column retains normal")
+			_check(material.albedo_texture == null and material.normal_texture == null, "Test column uses a smooth solid finish without maps")
 
 
 func _check_legacy_stairs(catalog: RefCounted) -> void:

@@ -93,29 +93,50 @@ func redraw(zones: Array[Dictionary], selected: int, front: int) -> void:
 	var right := maxf(FLOOR_RADIUS, footprint.end.x + 0.85)
 	var back := minf(-FLOOR_RADIUS, footprint.position.y - 0.85)
 	var forward := maxf(FLOOR_RADIUS, footprint.end.y + 0.85)
-	_add_grid(left, right, back, forward, 0.025, FLOOR_STEP, Color(0.15, 0.66, 0.82, 0.16))
+	_add_grid(left, right, back, forward, 0.025, FLOOR_STEP, Color(0.15, 0.66, 0.82, 0.28))
 	for station_value in stations:
 		var station: Dictionary = station_value
 		var x := float(station.get("grid_x", station.get("x", 0.0)))
 		var z := float(station.get("grid_z", station.get("z", 0.0)))
 		var half_width := float(station.get("grid_width", 1.8)) * 0.5
 		var half_depth := float(station.get("grid_depth", 1.1)) * 0.5
-		_add_grid(x - half_width, x + half_width, z - half_depth, z + half_depth, float(station.get("grid_height", surface_height)) + 0.025, SURFACE_STEP, Color(0.85, 0.95, 1.0, 0.22))
+		_add_grid(x - half_width, x + half_width, z - half_depth, z + half_depth, float(station.get("grid_height", surface_height)) + 0.006, SURFACE_STEP, Color(0.9, 0.97, 1.0, 0.55))
 	for i in zones.size():
 		var zone: Dictionary = zones[i]
+		var selected_zone := i == selected
 		var box := BoxMesh.new()
-		box.size = Vector3(float(zone["width"]), 0.006, float(zone["depth"]))
-		var color := Color(1.0, 0.52, 0.25, 0.12) if i == selected else Color(0.12, 0.8, 1.0, 0.055)
-		box.material = _material(color, true)
+		box.size = Vector3(float(zone["width"]), 0.002, float(zone["depth"]))
+		box.material = _material(Color(1.0, 0.52, 0.25, 0.3) if selected_zone else Color(0.12, 0.8, 1.0, 0.16))
 		var region := MeshInstance3D.new()
 		region.mesh = box
 		add_child(region)
-		region.global_transform = desk.global_transform * Transform3D(Basis(Vector3.UP, deg_to_rad(float(zone.get("angle", 0.0)))), Vector3(float(zone["x"]), float(zone["height"]) + 0.035, float(zone["z"])))
+		var zone_basis := Basis(Vector3.UP, deg_to_rad(float(zone.get("angle", 0.0))))
+		var zone_height := float(zone["height"])
+		region.global_transform = desk.global_transform * Transform3D(zone_basis, Vector3(float(zone["x"]), zone_height + 0.008, float(zone["z"])))
+		_add_zone_outline(zone, zone_basis, zone_height + 0.012, Color(1.0, 0.75, 0.2, 1.0) if selected_zone else Color(0.3, 0.95, 1.0, 0.95))
 		_add_zone_arrow(zone, Color(1.0, 0.9, 0.3) if i == selected else Color(0.93, 0.96, 1.0))
 	var direction := BoxMesh.new()
 	direction.size = Vector3(0.3, 0.015, 0.08)
 	direction.material = _material(Color(1.0, 0.08, 0.04), true)
 	_add_mesh(direction, Vector3(0, surface_height + 0.06, 0.87 if front else -0.87))
+
+
+func _add_zone_outline(zone: Dictionary, zone_basis: Basis, height: float, color: Color) -> void:
+	var half_width := float(zone["width"]) * 0.5
+	var half_depth := float(zone["depth"]) * 0.5
+	var corners: Array[Vector3] = [
+		Vector3(-half_width, 0, -half_depth), Vector3(half_width, 0, -half_depth),
+		Vector3(half_width, 0, half_depth), Vector3(-half_width, 0, half_depth)]
+	var outline := ImmediateMesh.new()
+	outline.surface_begin(Mesh.PRIMITIVE_LINES, _material(color))
+	for i in 4:
+		outline.surface_add_vertex(corners[i])
+		outline.surface_add_vertex(corners[(i + 1) % 4])
+	outline.surface_end()
+	var instance := MeshInstance3D.new()
+	instance.mesh = outline
+	add_child(instance)
+	instance.global_transform = desk.global_transform * Transform3D(zone_basis, Vector3(float(zone["x"]), height, float(zone["z"])))
 
 
 func _add_zone_arrow(zone: Dictionary, color: Color) -> void:
@@ -150,14 +171,23 @@ func _add_mesh(source: Mesh, local_position: Vector3) -> void:
 func _add_grid(left: float, right: float, back: float, front: float, height: float, step: float, color: Color) -> void:
 	var lines := ImmediateMesh.new()
 	lines.surface_begin(Mesh.PRIMITIVE_LINES, _material(color))
-	var x_count := roundi((right - left) / step)
-	var z_count := roundi((front - back) / step)
+	# Whole steps only, so no line falls outside the bounds; the perimeter closes a partial last cell.
+	var x_count := floori((right - left) / step + 0.0001)
+	var z_count := floori((front - back) / step + 0.0001)
+	var x_edges: Array[float] = []
+	var z_edges: Array[float] = []
 	for i in x_count + 1:
-		var x := left + i * step
+		x_edges.append(left + i * step)
+	for i in z_count + 1:
+		z_edges.append(back + i * step)
+	if right - x_edges[-1] > 0.001:
+		x_edges.append(right)
+	if front - z_edges[-1] > 0.001:
+		z_edges.append(front)
+	for x in x_edges:
 		lines.surface_add_vertex(Vector3(x, height, back))
 		lines.surface_add_vertex(Vector3(x, height, front))
-	for i in z_count + 1:
-		var z := back + i * step
+	for z in z_edges:
 		lines.surface_add_vertex(Vector3(left, height, z))
 		lines.surface_add_vertex(Vector3(right, height, z))
 	lines.surface_end()

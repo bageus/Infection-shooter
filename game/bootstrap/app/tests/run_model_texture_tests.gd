@@ -291,8 +291,8 @@ func _check_column_variant() -> void:
 	var maps := {"base": 0, "normal": 0, "orm": 0}
 	_inspect(column, maps, true)
 	for slot: String in maps:
-		if int(maps[slot]) == 0:
-			_fail("Column 2 lost its " + slot + " texture")
+		if int(maps[slot]) != 0:
+			_fail("Column 2 must keep a smooth solid finish without " + slot + " texture")
 	var body := column.get_node_or_null("Body") as StaticBody3D
 	if body == null or body.get_child_count() == 0:
 		_fail("Column 2 must have static collision under a hidden mission")

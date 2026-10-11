@@ -79,7 +79,15 @@ def build_maps(source, output):
                 sx, sy = (original_slot % 4) * cell, (original_slot // 4) * cell
                 image = image.crop((sx + 16, sy + 16, sx + cell - 16, sy + cell - 16))
             tiles[kind] = resize_map(image, width, kind == 'normal')
-        if slot == 1:
+        if slot in (0, 1):
+            # Plaster and column paint are smooth: constant mean colour, flat normal,
+            # even roughness; no grain survives mipmapping.
+            mean = tiles['albedo'].reshape(-1, 3).mean(axis=0)
+            tiles['albedo'][:] = np.rint(mean).astype('uint8')
+            tiles['normal'][:] = (128, 128, 255)
+            tiles['orm'][:, :, 1] = np.rint(.58 * 255)
+            tiles['orm'][:, :, 2] = 0
+        if False:
             # Large-scale variation remains visible after mipmapping; no baked light.
             field = gaussian_filter(rng.normal(size=(width, width)), 13, mode='wrap')
             field = np.clip(field / max(field.std(), .0001), -2, 2)
