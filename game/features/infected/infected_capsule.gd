@@ -6,7 +6,7 @@ const CHASE_PACE := preload("res://game/features/infected/chase_pace.gd")
 var _route := CHASE_ROUTE.new()
 var _pace := CHASE_PACE.new()
 
-const DROP_TABLE_SCRIPT := preload("res://game/features/pickups/public/drop_table.gd")
+const AUTHORING := preload("res://game/features/infected/infected_authoring.gd")
 const BODY_PARTS := preload("res://game/features/infected/body_parts.gd")
 const BLOOD_FX := preload("res://game/features/infected/blood_drip_fx.gd")
 const BLAST_DISMEMBER_DAMAGE := 60.0
@@ -92,6 +92,7 @@ var audio: AUDIO
 var status_fx: STATUS_FX
 var _mobility := 1.0
 var _attack_scale := 1.0
+var _authoring := AUTHORING.new(self)
 var _last_hit_position := Vector3.ZERO
 var _last_hit_direction := Vector3.ZERO
 # Where the damage being applied came from, for the hit reaction.
@@ -112,11 +113,19 @@ func configure_world(container: Node3D, impacts: Node) -> void:
 	impact_pool = impacts
 
 
+func configure_loot_drop(drop_weapon: Callable) -> void: _authoring.drop_weapon = drop_weapon
+func configure_loot(config: Dictionary) -> void: _authoring.set_loot(config)
+func get_loot_config() -> Dictionary: return _authoring.loot()
+func configure_stats(config: Dictionary) -> void: _authoring.set_stats(config)
+func get_enemy_stats() -> Dictionary: return _authoring.stats()
+
+
 func configure_chase_budget(budget: Node) -> void:
 	_route.configure_budget(budget)
 
 
 func _ready() -> void:
+	_authoring.apply_saved_stats()
 	health = max_health
 	_blood_last_position = global_position
 	_blood_segment_start = global_position
@@ -549,24 +558,18 @@ func _die() -> void:
 		_target.call("mutation_enemy_killed", self)
 	# Infected summoned by a Horde drop nothing: an endless summon is no loot farm.
 	if is_instance_valid(effects_root) and not has_meta("summoned_by"):
-		var drop_table := DROP_TABLE_SCRIPT.new()
-		effects_root.add_child(drop_table)
-		drop_table.call("drop_for_enemy", effects_root, global_position)
-		drop_table.queue_free()
+		_authoring.release(effects_root, global_position)
 	collision_layer = 0
 	collision_mask = 0
 	collision_shape.disabled = true
 	if _parts != null:
 		_parts.enable_corpse_hitboxes()
-	_ragdoll = DEATH_RAGDOLL.start(_parts, _animation, Vector3(velocity.x, 0.0, velocity.z), _death_push if fresh else Vector3.ZERO, size)
-	if _ragdoll != null:
-		DEATH_RAGDOLL.release_after(self, _ragdoll, death_linger_seconds, _hide_corpse)
-	else:
+	_ragdoll = DEATH_RAGDOLL.start(self, _parts, _animation, Vector3(velocity.x, 0.0, velocity.z), _death_push if fresh else Vector3.ZERO, size)
+	if _ragdoll == null:
 		_play_death_clip(fall, landing)
 	death_cloud.call("activate")
 
 
-# Bodies without a free ragdoll fall with a clip (ADR-0034).
 func _play_death_clip(fall: Dictionary, landing: Vector3) -> void:
 	DEATH_FALL.throw(self, float(fall["turn"]), landing)
 	var death_length := _play_animation(fall["state"])

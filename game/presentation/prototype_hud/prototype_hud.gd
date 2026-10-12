@@ -4,6 +4,7 @@ const ICON_REGIONS := preload("res://game/presentation/prototype_hud/weapon_icon
 const PALETTE := preload("res://game/presentation/prototype_hud/hud_palette.gd")
 const ICON_TINT := preload("res://game/presentation/prototype_hud/icon_tint.gdshader")
 const TITLE_FONT := preload("res://assets/interface/fonts/title.ttf")
+const MUTATION_ALARM := preload("res://game/presentation/prototype_hud/mutation_alarm_pulse.gd")
 # Semantic cells: rifle, pistol, uzi, shotgun, syringe, launcher, key.
 @export var weapon_icon_cells := PackedInt32Array([1, 2, 3, 5])
 @export var antidote_icon_cell := 4
@@ -47,6 +48,7 @@ var _hp_flash: Tween
 var _weapon_snapshot: Array = []
 
 var _has_key := false
+var _mutation_alarm: RefCounted
 
 
 func _ready() -> void:
@@ -54,6 +56,7 @@ func _ready() -> void:
 	infection = player.get_node("InfectionRuntime")
 	hp_bar.max_value = player.max_health
 	mutation_bar.max_value = 100.0
+	_mutation_alarm = MUTATION_ALARM.new(mutation_bar)
 	_configure_icon_tints()
 	_configure_icon_regions()
 	_configure_key_buttons()
@@ -74,6 +77,7 @@ func _ready() -> void:
 
 func _process(delta: float) -> void:
 	_control_notice.visible = bool(infection.call("is_control_lost"))
+	_mutation_alarm.update(delta, _control_notice.visible)
 	_update_vitals()
 	_update_weapon()
 	_antidote_hint_remaining = maxf(0.0, _antidote_hint_remaining - delta)

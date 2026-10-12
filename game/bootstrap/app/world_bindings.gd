@@ -36,6 +36,8 @@ func _bind_collaborators(node: Node) -> void:
 		node.call("configure_displays", _displays)
 	if node.has_method("configure_weapon_drop"):
 		node.call("configure_weapon_drop", _drop_weapon)
+	if node.has_method("configure_loot_drop"):
+		node.call("configure_loot_drop", _drop_weapon)
 	if node.has_method("configure_player"):
 		node.call("configure_player", _player)
 	if node.has_method("configure_world"):

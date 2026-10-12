@@ -13,7 +13,8 @@ static var _active := 0
 
 
 ## Returns the running corpse physics, or null when the clips must play instead.
-static func start(parts: Node, animation: Node, momentum: Vector3, push: Vector3, size: float) -> RefCounted:
+## The owner's death_linger_seconds and _hide_corpse() end it.
+static func start(owner: Node, parts: Node, animation: Node, momentum: Vector3, push: Vector3, size: float) -> RefCounted:
 	if parts == null or _active >= MAX_ACTIVE:
 		return null
 	var physics := CORPSE_PHYSICS.new()
@@ -27,6 +28,7 @@ static func start(parts: Node, animation: Node, momentum: Vector3, push: Vector3
 	physics.call("launch", DEATH_FALL.velocity(momentum, push, size))
 	_active += 1
 	simulator.tree_exited.connect(_released)
+	release_after(owner, physics, owner.get("death_linger_seconds"), Callable(owner, "_hide_corpse"))
 	return physics
 
 

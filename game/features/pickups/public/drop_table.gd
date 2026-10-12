@@ -47,7 +47,10 @@ func drop_for_enemy(world: Node, at: Vector3) -> void:
 	item.add_to_group(DROP_GROUP)
 	var drops := world.get_tree().get_nodes_in_group(DROP_GROUP)
 	if drops.size() > MAX_DROPS:
-		(drops[0] as Node).queue_free()
+		for old in drops:
+			if not old.has_meta(&"persistent_loot"):
+				old.queue_free()
+				break
 
 
 ## The kill point, or the nearest spot around it that no other drop covers
