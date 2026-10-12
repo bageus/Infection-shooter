@@ -11,6 +11,14 @@ enum DoorMode { SWING_BIDIRECTIONAL, SWING_ONE_WAY, SLIDING_ELEVATOR, GLASS_SWIN
 @export var slide_distance: float = 0.72
 @export var elevator_sync_radius: float = 4.0
 @export var requires_emergency_key := false
+# Sealed for good: never opens, not even with the emergency key or from the exit side.
+@export var permanently_locked := false
+
+# Planner lock setting, in menu order; saved per door in the layout.
+const LOCK_OPEN := &"open"
+const LOCK_KEY := &"key"
+const LOCK_SEALED := &"sealed"
+const LOCK_STATES := [LOCK_OPEN, LOCK_KEY, LOCK_SEALED]
 
 var _player: Node3D
 var _door_parts: Array[Node3D] = []
@@ -36,10 +44,16 @@ const PRESENCE := preload("res://game/presentation/office_floor/door_presence.gd
 var _presence: Area3D
 var _elevator_neighbors: Array[WeakRef] = []
 var _pose_ready := false
+var _locked_cue_armed := true
 const SFX := preload("res://game/core/audio/public/sound_events.gd")
 const BADGE := preload("res://game/core/world_badge/public/world_badge.gd")
 const LOCKED_ICON := preload("res://assets/interface/icon/locked_door.png")
 const LOCKED_TINT := Color("dcae4a")
+# Badge centre height in the door's local space, and its size next to the old one.
+const LOCK_ICON_HEIGHT := 1.1
+const LOCK_ICON_SCALE := 0.8
+# Beyond this distance the next approach plays the locked cue again.
+const LOCKED_CUE_REARM_DISTANCE := 0.5
 
 
 # Public structural scene wiring v1.
@@ -57,15 +71,41 @@ func _ready() -> void:
 	add_to_group("interactive_doors")
 	if mode == DoorMode.SLIDING_ELEVATOR:
 		add_to_group("elevator_door_components")
-	if requires_emergency_key:
-		# Locked-door icon in the HUD style, gold like the emergency key cell.
-		_key_hint = BADGE.icon(LOCKED_ICON, Rect2(), LOCKED_TINT, 2.5)
-		_key_hint.name = "LockedDoorIcon"
-		add_child(_key_hint)
 	_collect_door_parts()
-	if requires_emergency_key:
+	_apply_lock_visuals()
+
+
+# Planner setting: open, closed (the emergency key opens it) or sealed for good.
+func get_lock_state() -> StringName:
+	if permanently_locked:
+		return LOCK_SEALED
+	return LOCK_KEY if requires_emergency_key else LOCK_OPEN
+
+
+func configure_lock_state(state: StringName) -> void:
+	requires_emergency_key = state != LOCK_OPEN
+	permanently_locked = state == LOCK_SEALED
+	if is_node_ready():
+		_apply_lock_visuals()
+
+
+# Elevator doors are not locked; the planner leaves them out of the setting.
+func is_lockable() -> bool:
+	return mode != DoorMode.SLIDING_ELEVATOR
+
+
+func _apply_lock_visuals() -> void:
+	if requires_emergency_key and _key_hint == null:
+		# Locked-door icon in the HUD style, gold like the emergency key cell.
+		_key_hint = BADGE.icon(LOCKED_ICON, Rect2(), LOCKED_TINT, LOCK_ICON_HEIGHT)
+		_key_hint.name = "LockedDoorIcon"
+		_key_hint.scale = Vector3.ONE * LOCK_ICON_SCALE
+		add_child(_key_hint)
+	if requires_emergency_key and _presence == null:
 		_presence = PRESENCE.new()
 		add_child(_presence)
+	if _key_hint != null:
+		_key_hint.visible = requires_emergency_key
 
 
 func _physics_process(delta: float) -> void:
@@ -82,11 +122,14 @@ func _physics_process(delta: float) -> void:
 	var emergency_exit_side := signf(local_player.z) == signf(one_way_allowed_side)
 	var has_emergency_key := _player.has_method("has_emergency_key") and bool(_player.call("has_emergency_key"))
 	if _key_hint != null:
-		_key_hint.visible = horizontal_distance < 3.0 and not emergency_exit_side and not has_emergency_key
+		_key_hint.visible = requires_emergency_key and horizontal_distance < 3.0 and (permanently_locked or (not emergency_exit_side and not has_emergency_key))
+	var blocked := permanently_locked or (requires_emergency_key and not emergency_exit_side and not has_emergency_key)
+	if horizontal_distance > trigger_distance + LOCKED_CUE_REARM_DISTANCE:
+		_locked_cue_armed = true
 
 	if horizontal_distance <= trigger_distance:
-		if requires_emergency_key and not emergency_exit_side and not has_emergency_key:
-			pass
+		if blocked:
+			_announce_locked()
 		else:
 			match mode:
 				DoorMode.SWING_BIDIRECTIONAL:
@@ -124,6 +167,14 @@ func _physics_process(delta: float) -> void:
 	if before != _open_amount or not _pose_ready:
 		_update_door_visuals(local_player)
 		_pose_ready = true
+
+
+# One rattle per approach: the cue re-arms only after the player walks away.
+func _announce_locked() -> void:
+	if not _locked_cue_armed:
+		return
+	_locked_cue_armed = false
+	SFX.play_ui(self, &"door_locked")
 
 
 func _refresh_glass_collision() -> void:

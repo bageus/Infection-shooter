@@ -70,6 +70,8 @@ func _select(node: Node3D) -> void:
 		panel.ensure_control_visible.call_deferred(controls.light_info)
 	if selected != null and controls.loot_options.panel.visible:
 		(session.ui.get_node("Panel") as ScrollContainer).ensure_control_visible.call_deferred(controls.loot_options.panel)
+	if selected != null and controls.door_options.panel.visible:
+		(session.ui.get_node("Panel") as ScrollContainer).ensure_control_visible.call_deferred(controls.door_options.panel)
 	_update_status()
 	controls._update_history_buttons()
 
@@ -182,6 +184,8 @@ func _clear_preview() -> void:
 		controls.display_options.hide()
 	if controls.loot_options != null:
 		controls.loot_options.hide()
+	if controls.door_options != null:
+		controls.door_options.hide()
 	session.ui.get_node("Panel/VBox/SelectedLightColor").hide()
 	controls.fixtures.selected_panel.hide()
 	controls.light_info.hide()
