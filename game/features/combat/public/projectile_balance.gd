@@ -44,7 +44,12 @@ static func material_cost(material: String) -> float:
 	return INF # Concrete, structural frames and unknown geometry stop shots.
 
 
+const OFFICE_PISTOL_FACTOR := 0.4
+
+
 static func object_damage(amount: float, weapon: String, category: String) -> float:
+	if weapon == "PISTOL" and category == "office":
+		return amount * OFFICE_PISTOL_FACTOR # Thin desks and partitions give way to a pistol, slowly.
 	if weapon == "PISTOL" and category != "small" and category != "tech":
 		return 0.0
 	if weapon == "SHOTGUN":

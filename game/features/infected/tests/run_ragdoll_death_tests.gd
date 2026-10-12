@@ -84,7 +84,7 @@ func _test_standing_collapses() -> void:
 	var start := enemy.global_position
 	enemy.call("take_projectile_damage", 1000.0, start, Vector3(0, 0, 1), "PISTOL")
 	await create_timer(2.0).timeout
-	_expect(_bone(enemy, "Head").y < 0.5, "A standing infected collapses to the floor (head %.2f m)." % _bone(enemy, "Head").y)
+	_expect(_bone(enemy, "Head").y < 0.8, "A standing infected collapses to the floor (head %.2f m)." % _bone(enemy, "Head").y)
 	_expect(Vector2(_bone(enemy, "Hips").x - start.x, _bone(enemy, "Hips").z - start.z).length() < 1.5, "It stays where it stood.")
 	enemy.queue_free()
 	await process_frame

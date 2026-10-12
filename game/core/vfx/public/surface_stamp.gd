@@ -43,6 +43,8 @@ static func _project_surface(receiver: MeshInstance3D, surface: int, projector: 
 	var normal_transform := _transform(receiver).basis.inverse().transposed()
 	var to_local := _transform(receiver).affine_inverse()
 	var candidates: Variant = prepared["candidates"] if not prepared.is_empty() else range(0, count - 2, 3)
+	# Marks on a transparent pane need clearance, or the pane's own blend hides them.
+	var glass_offset := .006 if _glass(receiver, surface) else .0
 	for triangle: int in candidates:
 		var ids := [indices[triangle], indices[triangle + 1], indices[triangle + 2]] if not indices.is_empty() else [triangle, triangle + 1, triangle + 2]
 		var polygon := PackedVector3Array([to_projector * vertices[ids[0]], to_projector * vertices[ids[1]], to_projector * vertices[ids[2]]])
@@ -60,7 +62,7 @@ static func _project_surface(receiver: MeshInstance3D, surface: int, projector: 
 			polygon = _clip(polygon, axis, volume.end[axis], false)
 		if polygon.size() < 3:
 			continue
-		var offset := .018 if world_normal.y > .85 and bool(receiver.get_meta("procedural_floor_proxy", false)) else .0015
+		var offset := .018 if world_normal.y > .85 and bool(receiver.get_meta("procedural_floor_proxy", false)) else maxf(.0015, glass_offset)
 		for fan in range(1, polygon.size() - 1):
 			for point in [polygon[0], polygon[fan], polygon[fan + 1]]:
 				output.positions.append(to_local * (projector * point + world_normal * offset))
@@ -85,6 +87,15 @@ static func _clip(input: PackedVector3Array, axis: int, limit: float, minimum: b
 		previous = current
 		before = inside
 	return result
+
+
+static func is_glass(receiver: MeshInstance3D) -> bool:
+	if receiver == null or receiver.mesh == null:
+		return false
+	for surface in receiver.mesh.get_surface_count():
+		if _glass(receiver, surface):
+			return true
+	return false
 
 
 static func _glass(receiver: MeshInstance3D, surface: int) -> bool:
