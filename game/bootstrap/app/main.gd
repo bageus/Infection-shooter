@@ -13,6 +13,7 @@ const MUTATION_UI := preload("res://game/bootstrap/app/mutation_tree_ui.gd")
 const BLOOD_EFFECTS := preload("res://game/presentation/office_floor/public/blood_effects_3d.tscn")
 const SHADER_WARMUP := preload("res://game/bootstrap/app/shader_warmup.gd")
 const HIT_EFFECT_WARMUP := preload("res://game/presentation/office_floor/public/hit_effect_warmup.gd")
+const GRENADE_EXPLOSION := preload("res://game/features/combat/public/grenade_explosion.gd")
 const BLAST_FEEDBACK := preload("res://game/bootstrap/app/blast_feedback.gd")
 const DEBUG_OVERLAY := preload("res://game/bootstrap/app/runtime_debug_overlay.gd")
 const OCCLUSION := preload("res://game/bootstrap/app/occlusion_effects.gd")
@@ -96,7 +97,9 @@ func _ready() -> void:
 	feedback.configure(player)
 	_setup_blood_effects()
 	SHADER_WARMUP.new().setup(player.get("camera") as Camera3D)
-	HIT_EFFECT_WARMUP.new().setup(self)
+	var hit_warmup := HIT_EFFECT_WARMUP.new()
+	hit_warmup.setup(self)
+	GRENADE_EXPLOSION.warm_up(hit_warmup, Vector3(0.0, 0.0, -2.0))
 	for enemy in enemies.get_children():
 		if enemy.has_method("set_target"):
 			enemy.call("set_target", player)
@@ -167,7 +170,7 @@ func _process(_delta: float) -> void:
 		return
 	var health_value: Variant = player.get("health")
 	if health_value != null and float(health_value) <= 0.0:
-		_end_run("MISSION FAILED")
+		_end_run("YOU DIED")
 
 
 func _open_pause_menu() -> void:
@@ -229,7 +232,7 @@ func _end_run(reason: String) -> void:
 	_ended = true
 	var kind := "complete" if reason == "MISSION COMPLETE" else "failed"
 	var reason_key: String = {"MUTATION OVERTOOK YOU": "failedMutation",
-		"YOU FELL OUTSIDE THE FLOOR": "failedFall", "MISSION FAILED": "failedHealth"}.get(reason, "")
+		"YOU FELL OUTSIDE THE FLOOR": "failedFall", "YOU DIED": "failedHealth"}.get(reason, "")
 	game_over.call("show_screen", kind, reason_key)
 	game_over.move_to_front()
 	Input.mouse_mode = Input.MOUSE_MODE_VISIBLE

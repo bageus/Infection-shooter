@@ -19,10 +19,11 @@ func _run() -> void:
 	_test_ordinary_antidote()
 	_test_last_circle_is_reachable()
 	_test_first_control_loss()
-	_test_escalation_to_defeat()
-	_test_risk_window_expiry_resets_escalation()
-	_test_antidote_resets_risk_and_reduces_mutation()
-	_test_antidote_resets_second_risk_window()
+	_test_contact_escalates_to_second_loss()
+	_test_third_contact_defeats_without_loss()
+	_test_loss_does_not_escalate_on_timer()
+	_test_antidote_resets_escalation()
+	_test_antidote_resets_after_second_loss()
 	_test_antidote_is_blocked_during_control_loss()
 	_test_exact_threshold_and_immediate_crossing()
 	_test_below_threshold_has_no_delayed_loss()
@@ -250,61 +251,71 @@ func _test_first_control_loss() -> void:
 	var domain = _reach_first_control_loss()
 	_expect(domain.is_control_lost(), "Crossing the critical threshold starts loss inside absorb_mutagen.")
 	_expect(domain.active_control_loss_stage == 1, "The first loss is stage one.")
-	_expect_float(domain.control_loss_remaining, 5.0, "Stage one still lasts five seconds.")
-	domain.add_control_ampule()
-	domain.tick(5.0)
-	_expect(not domain.is_control_lost(), "Raised stability permits recovery after the five-second loss.")
-	_expect_float(domain.risk_window_remaining, 30.0, "Safe recovery opens the existing risk window.")
+	_expect_float(domain.control_loss_remaining, 2.0, "Stage one lasts two seconds.")
+	_expect(not domain.is_escalated(), "The first loss is not yet an escalation.")
+	domain.tick(2.0)
+	_expect(not domain.is_control_lost(), "Control returns after the two-second loss.")
+	_expect(not domain.defeated, "Returning control after the first loss does not end the run.")
 
 
-func _test_escalation_to_defeat() -> void:
+func _test_contact_escalates_to_second_loss() -> void:
 	var domain = _reach_first_control_loss()
+	domain.tick(2.0)
+	var mutation_before: float = domain.mutation
+	_expect_float(domain.absorb_mutagen(1.0), 0.0, "Touching the cloud above the limit absorbs nothing.")
+	_expect_float(domain.mutation, mutation_before, "Mutation stays at the limit when the cloud is touched.")
+	_expect(domain.active_control_loss_stage == 2, "The next contact starts the second loss.")
+	_expect_float(domain.control_loss_remaining, 5.0, "The second loss lasts five seconds.")
+	_expect(domain.is_escalated(), "The second loss is escalated.")
 	domain.tick(5.0)
-	_expect(domain.active_control_loss_stage == 2, "Remaining above the threshold starts stage two at the recovery boundary.")
-	_expect_float(domain.control_loss_remaining, 7.0, "Stage two starts with its full seven-second duration.")
-	domain.tick(7.0)
-	_expect(domain.defeated, "Remaining above the threshold defeats immediately at the second recovery boundary.")
-	_expect(domain.active_control_loss_stage == 3, "The third loss has no playable duration.")
-	var combined = _reach_first_control_loss()
-	combined.tick(12.0)
-	_expect(combined.defeated, "A large simulation step processes both losses and immediate defeat.")
+	_expect(not domain.is_control_lost(), "Control returns after the five-second loss.")
+	_expect(not domain.defeated, "Control returns after the second loss without defeat until the next contact.")
 
 
-func _test_risk_window_expiry_resets_escalation() -> void:
+func _test_third_contact_defeats_without_loss() -> void:
 	var domain = _reach_first_control_loss()
-	domain.add_control_ampule()
-	domain.tick(5.0)
-	domain.tick(30.0)
-	_expect_float(domain.risk_window_remaining, 0.0, "A safe risk window expires.")
-	_expect(domain.next_control_loss_stage == 1, "Risk-window expiry resets escalation.")
+	domain.tick(2.0)
 	domain.absorb_mutagen(1.0)
-	_expect(domain.active_control_loss_stage == 1, "The next threshold crossing is immediately a first-stage loss.")
-
-
-func _test_antidote_resets_risk_and_reduces_mutation() -> void:
-	var domain = _reach_first_control_loss()
-	domain.add_control_ampule()
 	domain.tick(5.0)
+	domain.absorb_mutagen(0.5)
+	_expect(domain.defeated, "The third contact with the cloud above the limit defeats the run.")
+	_expect(not domain.is_control_lost(), "The third contact does not start a playable loss.")
+	_expect(domain.active_control_loss_stage == 3, "The defeat is recorded as the third stage.")
+
+	var combined = _reach_first_control_loss()
+	combined.tick(7.0)
+	_expect(not combined.defeated and not combined.is_control_lost(), "Time alone never defeats or starts a loss.")
+
+
+func _test_loss_does_not_escalate_on_timer() -> void:
+	var domain = _reach_first_control_loss()
+	domain.tick(2.0)
+	domain.tick(100.0)
+	_expect(not domain.is_control_lost(), "Staying above the limit without contact never starts a second loss.")
+	_expect(not domain.defeated, "Staying above the limit without contact never defeats the run.")
+	_expect(domain.next_control_loss_stage == 2, "The second loss stays armed for the next contact.")
+
+
+func _test_antidote_resets_escalation() -> void:
+	var domain = _reach_first_control_loss()
+	domain.tick(2.0)
 	var before: float = domain.mutation
-	_expect(domain.use_antidote(), "Antidote remains usable after safe recovery.")
-	_expect_float(domain.mutation, before - 10.0, "Antidote preserves its existing ten-point reduction.")
-	_expect_float(domain.risk_window_remaining, 0.0, "Antidote ends the risk window.")
+	_expect(domain.use_antidote(), "Antidote is usable after the first loss.")
+	_expect_float(domain.mutation, before - 10.0, "Antidote keeps its ten-point reduction.")
+	_expect(not domain.is_control_lost(), "An antidote that brings mutation under the limit leaves control with the player.")
 	_expect(domain.next_control_loss_stage == 1, "Antidote resets escalation.")
 	domain.absorb_mutagen(3.0)
-	_expect(domain.active_control_loss_stage == 1, "A new threshold crossing starts stage one immediately.")
+	_expect(domain.active_control_loss_stage == 1, "The next crossing after an antidote is a first-stage loss again.")
 
 
-func _test_antidote_resets_second_risk_window() -> void:
+func _test_antidote_resets_after_second_loss() -> void:
 	var domain = _reach_first_control_loss()
+	domain.tick(2.0)
+	domain.absorb_mutagen(1.0)
 	domain.tick(5.0)
-	_expect(domain.active_control_loss_stage == 2, "The second loss follows immediately.")
-	domain.add_control_ampule()
-	domain.tick(7.0)
-	_expect(not domain.is_control_lost(), "DNA during stage two can make recovery safe.")
-	_expect(domain.use_antidote(), "Antidote is usable after stage-two recovery.")
-	_expect(domain.next_control_loss_stage == 1, "Second-window antidote resets escalation.")
-	domain.absorb_mutagen(3.0)
-	_expect(domain.active_control_loss_stage == 1, "The next crossing follows the reset stage immediately.")
+	_expect(domain.use_antidote(), "Antidote is usable after the second loss.")
+	_expect(domain.next_control_loss_stage == 1, "Antidote after the second loss resets escalation.")
+	_expect(not domain.defeated, "Antidote prevents the third-contact defeat.")
 
 
 func _test_antidote_is_blocked_during_control_loss() -> void:
@@ -332,7 +343,7 @@ func _test_exact_threshold_and_immediate_crossing() -> void:
 	_expect(not domain.is_control_lost(), "Equality is safe: loss needs a crossing above the boundary.")
 	domain.absorb_mutagen(0.001)
 	_expect(domain.is_control_lost(), "The smallest positive crossing triggers without a timer tick.")
-	_expect_float(domain.control_loss_remaining, 5.0, "The instantaneous trigger has not consumed any loss duration.")
+	_expect_float(domain.control_loss_remaining, 2.0, "The instantaneous trigger has not consumed any loss duration.")
 
 
 func _test_mutagen_pauses_during_control_loss() -> void:
@@ -389,15 +400,19 @@ func _test_runtime_cast_control_guard() -> void:
 	_expect(runtime.is_control_lost(), "The runtime observes the immediate crossing.")
 	_expect(not runtime.cast_skill("acid_spit"), "Hotbar cannot bypass control loss.")
 	runtime.add_control_ampule()
-	runtime.call("_physics_process", 5.0)
+	runtime.call("_physics_process", 2.0)
 	_expect(runtime.cast_skill("acid_spit"), "Casting returns after safe recovery.")
 	var terminal := Runtime.new()
 	var defeats := [0]
 	terminal.defeated.connect(func() -> void: defeats[0] += 1)
 	terminal.absorb_mutagen(6.2)
+	terminal.call("_physics_process", 2.0)
+	terminal.absorb_mutagen(0.2)
 	terminal.call("_physics_process", 5.0)
-	terminal.call("_physics_process", 7.0)
-	_expect(terminal.is_defeated() and defeats[0] == 1, "Third loss publishes terminal defeat once in the same simulation step.")
+	terminal.absorb_mutagen(0.2)
+	_expect(terminal.is_defeated() and defeats[0] == 1, "Third contact publishes terminal defeat once.")
+	terminal.absorb_mutagen(0.2)
+	_expect(defeats[0] == 1, "Terminal defeat is published only once.")
 	terminal.free()
 	runtime.free()
 
