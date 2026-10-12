@@ -140,9 +140,10 @@ func _video() -> void:
 	dialog.get("layout").add_child(shadows)
 	_shadow_quality()
 	var quality := dialog.get("layout").find_child("ShadowQuality", true, false) as HSlider
-	quality.editable = shadows.button_pressed
+	var quality_name := dialog.get("layout").find_child("ShadowQualityName", true, false) as Label
+	_set_shadow_quality_enabled(quality, quality_name, shadows.button_pressed)
 	shadows.toggled.connect(func(value: bool) -> void:
-		quality.editable = value
+		_set_shadow_quality_enabled(quality, quality_name, value)
 		dialog.call("_change", "shadows", value))
 	var particles := CheckButton.new()
 	particles.name = "ElectronicParticles"
@@ -174,6 +175,13 @@ func _shadow_quality() -> void:
 	box.add_child(slider)
 	box.add_child(name_label)
 	dialog.call("_row", "shadowQuality", box)
+
+
+## Quality only applies while shadows are on: the whole row is dimmed and locked.
+func _set_shadow_quality_enabled(slider: HSlider, name_label: Label, enabled: bool) -> void:
+	slider.editable = enabled
+	slider.modulate.a = 1.0 if enabled else .4
+	name_label.modulate.a = 1.0 if enabled else .4
 
 
 func _audio() -> void:

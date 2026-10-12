@@ -62,6 +62,10 @@ func _ready() -> void:
 	hp_bar.max_value = player.max_health
 	mutation_bar.max_value = 100.0
 	_mutation_alarm = MUTATION_ALARM.new(mutation_bar)
+	_vitals_fx = VITALS_FX.new()
+	_vitals_fx.name = "VitalsScreenFx"
+	add_child(_vitals_fx)
+	move_child(_vitals_fx, 0)
 	_configure_icon_tints()
 	_configure_icon_regions()
 	_configure_key_buttons()
@@ -116,6 +120,7 @@ func _build_objective() -> void:
 func _process(delta: float) -> void:
 	_control_notice.visible = bool(infection.call("is_control_lost"))
 	_mutation_alarm.update(delta, _control_notice.visible)
+	_vitals_fx.update(delta, float(infection.call("get_mutation")), float(infection.call("get_critical_threshold")), _control_notice.visible, float(player.health), float(player.max_health))
 	_update_vitals()
 	_update_weapon()
 	_antidote_hint_remaining = maxf(0.0, _antidote_hint_remaining - delta)

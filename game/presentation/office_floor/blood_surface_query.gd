@@ -71,9 +71,9 @@ func _capture_hit(hit: Dictionary) -> Dictionary:
 	if pool != null:
 		# Physics proxies can extend beyond the visible model. Project from the
 		# proxy onto its actual mesh before stamping, rather than into empty air.
-		var visible: Dictionary = pool.call("resolve_surface", hit["collider"], hit["position"], -Vector3(hit["normal"]))
-		if not visible.is_empty():
-			return capture(visible["position"], visible["normal"], hit["collider"])
+		var visible_point: Dictionary = pool.call("resolve_surface", hit["collider"], hit["position"], -Vector3(hit["normal"]))
+		if not visible_point.is_empty():
+			return capture(visible_point["position"], visible_point["normal"], hit["collider"])
 	# Procedural floor colliders have separate MultiMesh visuals; the projection
 	# adapter supplies their explicit collision geometry fallback.
 	return capture(hit["position"], hit["normal"], hit["collider"])
