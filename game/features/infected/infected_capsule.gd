@@ -13,6 +13,7 @@ const BLAST_DISMEMBER_DAMAGE := 60.0
 const AUDIO := preload("res://game/features/infected/infected_audio.gd")
 const DEATH_FALL := preload("res://game/features/infected/death_fall.gd")
 const DEATH_OBSTACLE := preload("res://game/features/infected/death_obstacle.gd")
+const DEATH_RAGDOLL := preload("res://game/features/infected/death_ragdoll.gd")
 const STATUS_FX := preload("res://game/features/infected/infected_status_fx.gd")
 const KILLING_PUSH_MSEC := 300
 
@@ -99,6 +100,7 @@ var _reaction_direction := Vector3.ZERO
 var _death_push := Vector3.ZERO
 var _death_push_msec := -KILLING_PUSH_MSEC
 var _fall_watch: RefCounted
+var _ragdoll: RefCounted
 
 var effects_root: Node3D
 var impact_pool: Node
@@ -556,6 +558,16 @@ func _die() -> void:
 	collision_shape.disabled = true
 	if _parts != null:
 		_parts.enable_corpse_hitboxes()
+	_ragdoll = DEATH_RAGDOLL.start(_parts, _animation, Vector3(velocity.x, 0.0, velocity.z), _death_push if fresh else Vector3.ZERO, size)
+	if _ragdoll != null:
+		DEATH_RAGDOLL.release_after(self, _ragdoll, death_linger_seconds, _hide_corpse)
+	else:
+		_play_death_clip(fall, landing)
+	death_cloud.call("activate")
+
+
+# Bodies without a free ragdoll fall with a clip (ADR-0034).
+func _play_death_clip(fall: Dictionary, landing: Vector3) -> void:
 	DEATH_FALL.throw(self, float(fall["turn"]), landing)
 	var death_length := _play_animation(fall["state"])
 	_fall_watch = DEATH_OBSTACLE.new()
@@ -565,7 +577,6 @@ func _die() -> void:
 		_sink_corpse_after(death_length)
 	else:
 		body_visual.visible = false
-	death_cloud.call("activate")
 
 
 # The corpse stays visible while the death animation plays, then sinks away.

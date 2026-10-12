@@ -3,6 +3,8 @@ extends RefCounted
 var simulator: PhysicalBoneSimulator3D
 var skeleton: Skeleton3D
 var _bones: Dictionary = {}
+var _guard: Node
+const GUARD := preload("res://game/features/infected/corpse_guard.gd")
 
 
 func setup(parts: Node) -> void:
@@ -37,10 +39,14 @@ func setup(parts: Node) -> void:
 		bone.set("joint_constraints/twist_span", 25.0)
 	# All volumes are linked at skeleton joints; own limbs never collide.
 	var volumes := simulator.get_children()
-	for a: PhysicalBone3D in volumes:
-		for b: PhysicalBone3D in volumes:
-			if a != b:
-				a.add_collision_exception_with(b)
+	for i in volumes.size():
+		for j in range(i + 1, volumes.size()):
+			(volumes[i] as PhysicalBone3D).add_collision_exception_with(volumes[j])
+	_guard = GUARD.new()
+	_guard.name = "CorpseGuard"
+	skeleton.add_child(_guard)
+	_guard.set_physics_process(false)
+	_refresh_guard()
 	parts.connect("part_severed", _severed)
 
 
@@ -84,9 +90,54 @@ func set_enabled(enabled: bool) -> void:
 	if enabled:
 		simulator.active = true
 		simulator.physical_bones_start_simulation()
+		_guard.set_physics_process(not _guard.frozen)
 	else:
+		_guard.set_physics_process(false)
 		simulator.physical_bones_stop_simulation()
 		simulator.active = false
+
+
+## Gives every bone the same start velocity; the upper body leads a little so a
+## standing body topples instead of sliding on its feet. Call after set_enabled.
+func launch(velocity: Vector3) -> void:
+	if not is_instance_valid(simulator):
+		return
+	var bones := simulator.get_children()
+	var middle := 0.0
+	var lift := _floor_lift()
+	for bone: PhysicalBone3D in bones:
+		bone.global_position.y += lift
+		middle += bone.global_position.y / bones.size()
+	for bone: PhysicalBone3D in bones:
+		bone.linear_velocity = velocity * (1.0 if bone.global_position.y >= middle else 0.5)
+
+
+# Feet of a standing body sink a little into the floor; the solver would shove
+# them out violently, so the whole body starts just above the surface.
+func _floor_lift() -> float:
+	var space := simulator.get_world_3d().direct_space_state
+	var lift := 0.0
+	for bone: PhysicalBone3D in simulator.get_children():
+		var capsule := (bone.get_child(0) as CollisionShape3D).shape as CapsuleShape3D
+		var axis_y := absf((bone.global_basis * Vector3.UP).normalized().y)
+		var lowest := bone.global_position.y - (axis_y * (capsule.height * 0.5 - capsule.radius) + capsule.radius)
+		var top := bone.global_position + Vector3.UP * 0.5
+		var hit := space.intersect_ray(PhysicsRayQueryParameters3D.create(top, Vector3(top.x, lowest - 0.5, top.z), 1))
+		if not hit.is_empty():
+			lift = maxf(lift, float(hit["position"].y) - lowest + 0.01)
+	return minf(lift, 0.3)
+
+
+## Lets the body fall through the floor, then the owner hides it.
+func sink() -> void:
+	if not is_instance_valid(simulator):
+		return
+	_guard.set_physics_process(false)
+	for bone: PhysicalBone3D in simulator.get_children():
+		bone.collision_mask = 0
+		bone.gravity_scale = 1.0
+		bone.linear_damp = 0.0
+		bone.linear_velocity = Vector3.DOWN * 1.5
 
 
 func _severed(part: StringName, _piece: RigidBody3D) -> void:
@@ -94,3 +145,14 @@ func _severed(part: StringName, _piece: RigidBody3D) -> void:
 		if is_instance_valid(bone):
 			bone.queue_free()
 	_bones.erase(part)
+	_refresh_guard.call_deferred()
+
+
+func _refresh_guard() -> void:
+	if not is_instance_valid(_guard):
+		return
+	var alive: Array[PhysicalBone3D] = []
+	for bone: PhysicalBone3D in simulator.get_children():
+		if not bone.is_queued_for_deletion():
+			alive.append(bone)
+	_guard.setup(alive, skeleton)
