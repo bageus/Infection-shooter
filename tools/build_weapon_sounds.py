@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Build per-weapon fire variants and the minigun spin-up from the existing sfx.
+"""Build per-weapon fire variants, the minigun spin loop and pickup sounds.
 
   python tools/build_weapon_sounds.py [--only event,event]
 
@@ -83,11 +83,6 @@ def ak(x: np.ndarray) -> np.ndarray:
     return sos_filter(y, "highpass", 70)
 
 
-def m4(x: np.ndarray) -> np.ndarray:
-    # Tighter and brighter, slightly faster report.
-    y = resample_speed(x, 1.04)
-    y = peak_boost(y, 4200, 3.0, 1.0)
-    return sos_filter(y, "highpass", 130)
 
 
 def sniper(x: np.ndarray) -> np.ndarray:
@@ -106,33 +101,6 @@ def sniper(x: np.ndarray) -> np.ndarray:
     return out
 
 
-def minigun(x: np.ndarray) -> np.ndarray:
-    # Short, rattling bursts: quicker, cleaner, with a light flutter.
-    y = resample_speed(x, 1.12)[: int(SR * 0.09)]
-    y = sos_filter(y, "highpass", 180)
-    t = np.arange(len(y)) / SR
-    flutter = 0.82 + 0.18 * np.sin(2 * np.pi * 38 * t)
-    return y * flutter
-
-
-def spin_up() -> np.ndarray:
-    # 1.1 s whine: pitch and noise rise as the barrels reach speed, then fade out.
-    n = int(SR * 1.1)
-    t = np.arange(n) / SR
-    progress = (t / t[-1]) ** 1.6
-    freq = 150 + 430 * progress
-    phase = 2 * np.pi * np.cumsum(freq) / SR
-    whine = sum(np.sin(k * phase) / k for k in range(1, 5))
-    noise = signal.lfilter(*signal.butter(2, [900, 4200], "bandpass", fs=SR), RNG.standard_normal(n))
-    clicks = np.zeros(n)
-    rate = 18 + 60 * progress
-    tick_at = np.cumsum(rate) / SR
-    for when in tick_at[tick_at < t[-1]]:
-        clicks[int(when * SR)] = 1.0
-    clicks = signal.lfilter(*signal.butter(2, 1800, "highpass", fs=SR), clicks)
-    envelope = np.minimum(1.0, t / 0.25) * (0.35 + 0.65 * progress) * np.clip((t[-1] - t) / 0.12, 0, 1)
-    y = whine * 0.7 + noise * (0.15 + 0.4 * progress) + clicks * 0.25
-    return fade(y * envelope, 5.0, 40.0)
 
 
 def write_ogg(out: Path, x: np.ndarray) -> None:
@@ -150,11 +118,88 @@ def write_ogg(out: Path, x: np.ndarray) -> None:
         )
 
 
-EVENTS = {
+def envelope(n: int, decay: float) -> np.ndarray:
+    return np.exp(-np.arange(n) / SR / decay)
+
+
+def bandnoise(n: int, lo: float, hi: float) -> np.ndarray:
+    return signal.lfilter(*signal.butter(2, [lo, hi], "bandpass", fs=SR), RNG.standard_normal(n))
+
+
+def minigun_shot() -> np.ndarray:
+    # Heavy aviation-style burst: deep thump, sharp breech crack and a mechanical clack.
+    n = int(SR * 0.14)
+    t = np.arange(n) / SR
+    thump = np.sin(2 * np.pi * (110 - 40 * t / 0.14) * t) * envelope(n, 0.03)
+    crack = bandnoise(n, 1500, 6000) * envelope(n, 0.018)
+    clack = np.zeros(n)
+    for offset in (0.0, 0.011):
+        i = int(offset * SR)
+        clack[i: i + 300] += RNG.standard_normal(min(300, n - i)) * np.linspace(1, 0, min(300, n - i))
+    return fade(thump * 0.9 + crack * 0.8 + clack * 0.4, 0.5, 20.0)
+
+
+def m4_shot() -> np.ndarray:
+    # Sharp 5.56 crack with a short, light body.
+    n = int(SR * 0.13)
+    t = np.arange(n) / SR
+    crack = bandnoise(n, 2000, 8000) * envelope(n, 0.014)
+    body = np.sin(2 * np.pi * (200 - 80 * t / 0.13) * t) * envelope(n, 0.045)
+    return fade(crack * 1.0 + body * 0.45, 0.3, 20.0)
+
+
+def minigun_spin_loop() -> np.ndarray:
+    # 2 s steady whine with ticks and a slight tremolo; the ends are crossfaded so it loops cleanly.
+    n = int(SR * 2.0)
+    t = np.arange(n) / SR
+    whine = sum(np.sin(2 * np.pi * 190 * k * t) / k for k in (1, 2, 3, 4))
+    tremolo = 0.9 + 0.1 * np.sin(2 * np.pi * 9 * t)
+    ticks = np.zeros(n)
+    step = int(SR / 30)
+    ticks[::step] = 1.0
+    ticks = signal.lfilter(*signal.butter(2, 2500, "highpass", fs=SR), ticks)
+    y = whine * tremolo * 0.6 + bandnoise(n, 800, 4000) * 0.25 + ticks * 0.3
+    fade_len = int(SR * 0.2)
+    ramp = np.linspace(0, 1, fade_len)
+    y[:fade_len] = y[:fade_len] * ramp + y[-fade_len:] * (1 - ramp)
+    return y[:-fade_len]
+
+
+def key_pickup(variant: int) -> np.ndarray:
+    # Brass key rattle: three inharmonic metal partials struck in quick succession.
+    n = int(SR * 0.5)
+    out = np.zeros(n)
+    partials = [(1137, 0.12), (2760, 0.09), (5410, 0.05)]
+    for index, start in enumerate([0.0, 0.07, 0.15]):
+        i = int(start * SR) + variant * 37
+        length = n - i
+        t = np.arange(length) / SR
+        strike = sum(np.sin(2 * np.pi * f * (1 + 0.004 * index) * t) * a for f, a in partials)
+        out[i:] += strike * envelope(length, 0.09 - 0.02 * index)
+    out += bandnoise(n, 2000, 7000) * envelope(n, 0.01) * 0.6
+    return fade(out, 1.0, 40.0)
+
+
+def dna_pickup(variant: int) -> np.ndarray:
+    # Warm organic pulse: a rising glide with vibrato over a soft body and a wet pop.
+    n = int(SR * 0.45)
+    t = np.arange(n) / SR
+    freq = 260 + 420 * (t / t[-1]) ** 0.7 + 6 * np.sin(2 * np.pi * (6 + variant) * t)
+    phase = 2 * np.pi * np.cumsum(freq) / SR
+    tone = sum(np.sin(k * phase) / k ** 1.4 for k in (1, 2, 3))
+    body = np.sin(2 * np.pi * 150 * t) * envelope(n, 0.12) * 0.7
+    pop = bandnoise(n, 400, 1800) * envelope(n, 0.02) * 0.35
+    return fade(tone * envelope(n, 0.22) + body + pop, 4.0, 60.0)
+
+
+SOURCED = {
     "ak_fire": ("rifle_fire", ak),
-    "m4_fire": ("assault_rifle_fire", m4),
     "sniper_fire": ("rifle_fire", sniper),
-    "minigun_fire": ("assault_rifle_fire", minigun),
+}
+
+EVENTS = {
+    "minigun_fire": (None, minigun_shot),
+    "m4_fire": (None, m4_shot),
 }
 
 
@@ -162,16 +207,28 @@ def main(argv: list[str]) -> int:
     only = None
     if "--only" in argv:
         only = set(argv[argv.index("--only") + 1].split(","))
-    for event, (source, transform) in EVENTS.items():
+    for event, (source, transform) in SOURCED.items():
         if only and event not in only:
             continue
         clips = variants_of(source, transform)
         for index, clip in enumerate(clips, start=1):
             write_ogg(SFX / event / f"{event}_{index}.ogg", clip)
         print(f"{event}: {len(clips)} variants from {source}")
-    if not only or "minigun_spinup" in only:
-        write_ogg(SFX / "minigun_spinup" / "minigun_spinup_1.ogg", spin_up())
-        print("minigun_spinup: 1 variant (synthesised)")
+    for event, (_, make) in EVENTS.items():
+        if only and event not in only:
+            continue
+        for variant in (1, 2, 3):
+            write_ogg(SFX / event / f"{event}_{variant}.ogg", make())
+        print(f"{event}: 3 variants (synthesised)")
+    if not only or "minigun_spin" in only:
+        write_ogg(SFX / "minigun_spin" / "minigun_spin_1.ogg", minigun_spin_loop())
+        print("minigun_spin: 1 looping variant (synthesised)")
+    for event, make in (("key_pickup", key_pickup), ("dna_pickup", dna_pickup)):
+        if only and event not in only:
+            continue
+        for variant in (1, 2):
+            write_ogg(SFX / event / f"{event}_{variant}.ogg", make(variant))
+        print(f"{event}: 2 variants (synthesised)")
     return 0
 
 
