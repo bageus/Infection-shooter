@@ -275,6 +275,15 @@ def split_hits(base: Path, rel: str, category: str, window: float, threshold_db:
     return result
 
 
+def dna_power_up(ratio: float) -> Sound:
+    """DNA ampule: a short body thump with a rising two-note shimmer, as if the host grows a little stronger."""
+    thump = tone(0.34, 110 * ratio, 62 * ratio, 0.09, (1.0, 0.45), attack_ms=4.0)
+    rise = tone(0.3, 330 * ratio, 495 * ratio, 0.16, (1.0, 0.35, 0.12), attack_ms=8.0)
+    chime = tone(0.42, 660 * ratio, 990 * ratio, 0.2, (1.0, 0.3), attack_ms=6.0)
+    sparkle = tone(0.3, 1320 * ratio, 1980 * ratio, 0.1, (1.0,), attack_ms=4.0)
+    return level(lowpass(mix((thump, 0.0, -1.0), (rise, 0.02, -4.0), (chime, 0.1, -6.0), (sparkle, 0.14, -14.0)), 9000.0), "pickup", -1.0)
+
+
 def recipes(base: Path) -> dict[str, list[Sound]]:
     C, R = CDDA, RE
     ev: dict[str, list[Sound]] = {}
@@ -333,7 +342,7 @@ def recipes(base: Path) -> dict[str, list[Sound]]:
         hits = [modal([2150 * f, 3870 * f, 5310 * f, 7400 * f], [0.09, 0.06, 0.04, 0.025], [1.0, 0.6, 0.35, 0.2], 0.4) for f in RNG.uniform(0.9, 1.25, 5)]
         keys.append(level(lowpass(mix(*[(h, 0.035 * i + RNG.uniform(0, 0.02), RNG.uniform(-6, 0)) for i, h in enumerate(hits)]), 11000.0), "pickup", -3.0))
     ev["key_pickup"] = keys
-    ev["dna_pickup"] = [level(mix((take(base, f"{R}/sfx/itemuse.ogg", "pickup", 0.5, None, max_len=0.5, lp=7000.0), 0.0, -2.0), (take(base, f"{C}/melee_hit_flesh/small_stabbing/small_stabbing_flesh_{i}.ogg", "pickup", max_len=0.3, lp=2500.0), 0.0, -4.0)), "pickup") for i in (2, 5)]
+    ev["dna_pickup"] = [dna_power_up(r) for r in (1.0, 1.06)]
     # ---- footsteps
     ev["step_player"] = [take(base, f"{C}/plmove/walk_t_floor/walk_t_floor_{i}.ogg", "step", max_len=0.3, hp=70.0, fade_ms=80.0) for i in range(1, 7)]
     ev["step_player"] += [take(base, f"{R}/player/step{side}{n}.ogg", "step", max_len=0.3, hp=70.0, lp=9000.0, gate_db=None) for side in ("l", "r") for n in ("", "3")]

@@ -1,9 +1,12 @@
 extends Area3D
 
+const BEACON := preload("res://game/bootstrap/app/pickup_beacon.gd")
+
 @export_range(0.1, 10.0) var respawn_seconds := 2.0
 var _player: Node3D
 var _infection: Node
 var _art: Node3D
+var _beacon: Node3D
 var _timer: Timer
 var _waiting := false
 var _time := 0.0
@@ -33,40 +36,87 @@ func _ready() -> void:
 
 
 func _build_helix() -> void:
-	var green := StandardMaterial3D.new()
-	green.albedo_color = Color(0.3, 0.95, 0.1)
-	green.metallic = 0.35
-	green.roughness = 0.3
-	var white := StandardMaterial3D.new()
-	white.albedo_color = Color(0.78, 0.95, 0.86)
+	var strand_material := StandardMaterial3D.new()
+	strand_material.albedo_color = Color(0.3, 0.95, 0.1)
+	strand_material.emission_enabled = true
+	strand_material.emission = Color(0.2, 0.9, 0.08)
+	strand_material.emission_energy_multiplier = 0.6
+	strand_material.metallic = 0.3
+	strand_material.roughness = 0.3
+	var rung_material := StandardMaterial3D.new()
+	rung_material.albedo_color = Color(0.78, 0.95, 0.86)
+	rung_material.emission_enabled = true
+	rung_material.emission = Color(0.6, 0.95, 0.75)
+	rung_material.emission_energy_multiplier = 0.35
+	var link := CylinderMesh.new()
+	link.top_radius = 0.016
+	link.bottom_radius = 0.016
+	link.height = 1.0
+	link.radial_segments = 8
+	link.rings = 1
+	link.material = strand_material
+	var rung := CylinderMesh.new()
+	rung.top_radius = 0.009
+	rung.bottom_radius = 0.009
+	rung.height = 1.0
+	rung.radial_segments = 6
+	rung.rings = 1
+	rung.material = rung_material
 	var bead := SphereMesh.new()
-	bead.radius = 0.055
-	bead.height = 0.11
-	bead.material = green
-	for i in range(12):
-		var angle := i * 0.65
-		var left := Vector3(cos(angle) * 0.18, (i - 5.5) * 0.055, sin(angle) * 0.18)
-		for point in [left, Vector3(-left.x, left.y, -left.z)]:
-			var dot := MeshInstance3D.new()
-			dot.mesh = bead
-			dot.position = point
-			_art.add_child(dot)
-		var bar := MeshInstance3D.new()
-		var mesh := BoxMesh.new()
-		mesh.size = Vector3(0.36, 0.025, 0.025)
-		mesh.material = white
-		bar.mesh = mesh
-		bar.position.y = left.y
-		bar.rotation.y = -angle
-		_art.add_child(bar)
-	var label := Label3D.new()
-	label.font = preload("res://assets/interface/fonts/body.ttf")
-	label.text = "DNA · STABILITY +5\nTEST PICKUP · RESPAWNS"
-	label.font_size = 32
-	label.pixel_size = 0.004
-	label.billboard = BaseMaterial3D.BILLBOARD_ENABLED
-	label.position.y = 0.55
-	_art.add_child(label)
+	bead.radius = 0.026
+	bead.height = 0.052
+	bead.radial_segments = 10
+	bead.rings = 5
+	bead.material = strand_material
+	var links: Array[Transform3D] = []
+	var rungs: Array[Transform3D] = []
+	var beads: Array[Transform3D] = []
+	var steps := 36
+	var turns := 2.0
+	var radius := 0.075
+	var height := 0.42
+	for i in range(steps + 1):
+		var angle := TAU * turns * i / steps
+		var y := (float(i) / steps - 0.5) * height
+		var a := Vector3(cos(angle) * radius, y, sin(angle) * radius)
+		var b := Vector3(-a.x, y, -a.z)
+		beads.append(Transform3D(Basis(), a))
+		beads.append(Transform3D(Basis(), b))
+		if i % 3 == 0:
+			rungs.append(_segment(a, b))
+		if i > 0:
+			var prev_angle := TAU * turns * (i - 1) / steps
+			var prev_y := (float(i - 1) / steps - 0.5) * height
+			var pa := Vector3(cos(prev_angle) * radius, prev_y, sin(prev_angle) * radius)
+			links.append(_segment(pa, a))
+			links.append(_segment(Vector3(-pa.x, prev_y, -pa.z), b))
+	_add_multimesh(link, links)
+	_add_multimesh(rung, rungs)
+	_add_multimesh(bead, beads)
+	# Glow only; the arrow marks the pickup from a distance.
+	_beacon = BEACON.make(Color(0.3, 1.0, 0.2), 0.65, 0.95, 0.9)
+	add_child(_beacon)
+
+
+## Unit-height cylinder stretched between two points.
+func _segment(from: Vector3, to: Vector3) -> Transform3D:
+	var along := to - from
+	var up := along.normalized()
+	var side := up.cross(Vector3.FORWARD if absf(up.dot(Vector3.FORWARD)) < 0.99 else Vector3.RIGHT).normalized()
+	return Transform3D(Basis(side, up * along.length(), side.cross(up)), (from + to) * 0.5)
+
+
+func _add_multimesh(mesh: Mesh, transforms: Array[Transform3D]) -> void:
+	var multi := MultiMesh.new()
+	multi.transform_format = MultiMesh.TRANSFORM_3D
+	multi.mesh = mesh
+	multi.instance_count = transforms.size()
+	for index in transforms.size():
+		multi.set_instance_transform(index, transforms[index])
+	var instance := MultiMeshInstance3D.new()
+	instance.multimesh = multi
+	instance.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+	_art.add_child(instance)
 
 
 func _process(delta: float) -> void:
@@ -85,6 +135,7 @@ func _collect(body: Node3D) -> void:
 		body.call("play_item_sound", &"dna_pickup")
 	_waiting = true
 	_art.hide()
+	_beacon.hide()
 	set_deferred("monitoring", false)
 	_timer.start(respawn_seconds)
 
@@ -92,4 +143,5 @@ func _collect(body: Node3D) -> void:
 func _respawn() -> void:
 	_waiting = false
 	_art.show()
+	_beacon.show()
 	set_deferred("monitoring", true)
