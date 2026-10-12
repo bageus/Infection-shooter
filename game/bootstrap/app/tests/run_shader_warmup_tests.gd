@@ -22,6 +22,8 @@ func _run() -> void:
 	var hit_viewport := app.get_node_or_null("HitEffectWarmup") as SubViewport
 	var hit_effects := hit_viewport.get_node_or_null("HitEffects") if hit_viewport != null else null
 	_check(hit_effects != null and hit_effects.get("effect_count") >= 8, "Hit effects (sparks, smoke, paper, dust, sheets, water) play once in a hidden viewport")
+	var blast := hit_effects.get_node_or_null("GrenadeExplosionVfx") if hit_effects != null else null
+	_check(blast != null and blast.get("muted") == true and blast.get_node("ImpactLight") != null, "A silent grenade blast (particles, smoke, light) plays in the hidden viewport")
 	for i in 8:
 		await process_frame
 	_check(app.get_node_or_null("HitEffectWarmup") == null, "Hidden hit-effect viewport is freed after a few frames")
