@@ -16,7 +16,7 @@ static func find_bottle(meshes: Array) -> int:
 	return -1
 
 
-static func burst(host: Node3D, mesh: MeshInstance3D, shape: CollisionShape3D, effects: Node3D, hit_position: Vector3, direction: Vector3) -> void:
+static func burst(host: Node3D, mesh: MeshInstance3D, shape: CollisionShape3D, effects: Node3D, _hit_position: Vector3, direction: Vector3) -> void:
 	if not is_instance_valid(mesh) or not mesh.visible:
 		return
 	mesh.hide()

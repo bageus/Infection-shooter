@@ -17,8 +17,8 @@ func add_root(node: Node3D) -> void:
 			add_root(child)
 
 
-func _visibility_changed(reference: WeakRef) -> void:
-	var body := reference.get_ref() as CollisionObject3D
+func _visibility_changed(weak_body: WeakRef) -> void:
+	var body := weak_body.get_ref() as CollisionObject3D
 	if body != null:
 		_sync(body)
 
