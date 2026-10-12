@@ -3,14 +3,14 @@ render_mode unshaded, blend_mix;
 
 // Screen-edge feedback in one pass, no screen texture read:
 // green mutagen smoke rises from the bottom edge to mid-screen,
-// blood streaks run down from the top edge to mid-screen.
+// a red blood haze spreads down from the top edge to mid-screen.
 
 uniform float smoke : hint_range(0.0, 1.0) = 0.0;
 uniform float blood : hint_range(0.0, 1.0) = 0.0;
 uniform float pulse : hint_range(0.0, 1.0) = 1.0;
 uniform float aspect = 1.7778;
 uniform vec3 smoke_color : source_color = vec3(0.16, 0.62, 0.2);
-uniform vec3 blood_color : source_color = vec3(0.5, 0.02, 0.03);
+uniform vec3 blood_color : source_color = vec3(0.62, 0.03, 0.04);
 
 float hash21(vec2 p) {
 	p = fract(p * vec2(123.34, 456.21));
@@ -59,25 +59,19 @@ void fragment() {
 	}
 
 	if (blood > 0.001) {
-		float columns = 46.0;
-		float cell = floor(uv.x * columns);
-		float local_x = fract(uv.x * columns) - 0.5;
-		float h = hash21(vec2(cell, 3.0));
-		float h2 = hash21(vec2(cell, 9.0));
-		float side = 1.0 - smoothstep(0.0, 0.3, edge_x);
-		// Streaks are longer near the side edges and never pass mid-screen.
-		float length_limit = 0.5 * blood * (0.25 + 0.75 * side) * (0.35 + 0.65 * h);
-		float along = clamp(uv.y / max(length_limit, 0.001), 0.0, 1.0);
-		// Wide at the top edge, tapering to a thin tail with a slight bulge near the end.
-		float width = mix(0.18, 0.5, h2) * (1.0 - 0.75 * along) * (1.0 + 0.5 * side) + 0.12 * smoothstep(0.7, 0.92, along) * (1.0 - smoothstep(0.92, 1.0, along));
-		float streak = (1.0 - smoothstep(width * 0.6, width, abs(local_x))) * step(uv.y, length_limit);
-		float drop = 0.0;
-		float top_band = (1.0 - smoothstep(0.0, 0.07 + 0.1 * blood, uv.y)) * (0.4 + 0.6 * side);
-		float vignette = (1.0 - smoothstep(0.0, 0.5, uv.y)) * side * 0.5 * blood;
-		float amount = clamp(max(max(streak, drop * 0.9), top_band * blood) + vignette, 0.0, 1.0);
-		float shade = 0.75 + 0.5 * value_noise(vec2(uv.x * 30.0, uv.y * 8.0));
-		vec4 blood_layer = vec4(blood_color * shade, amount * 0.9);
-		// Over the smoke: blood on top.
+		float from_top = uv.y;
+		float reach = 0.5 * blood;
+		float fall = 1.0 - smoothstep(0.0, max(reach, 0.001), from_top);
+		float side = 1.0 - smoothstep(0.0, 0.2 + 0.25 * blood, edge_x);
+		float ceiling_band = 1.0 - smoothstep(0.0, 0.14 + 0.14 * blood, from_top);
+		vec2 p = vec2(uv.x * aspect, uv.y) * 2.4;
+		float n = fbm(p + vec2(TIME * 0.03, TIME * 0.05) + 11.0);
+		float n2 = fbm(p * 1.7 - vec2(TIME * 0.02, TIME * 0.04) + 5.0);
+		float cloud = smoothstep(0.25, 0.8, n * 0.6 + n2 * 0.55);
+		float density = max(fall * side * 1.5, ceiling_band * 1.0) * (0.55 + 0.9 * cloud);
+		density = clamp(density, 0.0, 1.0) * clamp(blood * 1.4, 0.0, 1.0);
+		vec3 tint = mix(blood_color * 0.45, blood_color * 1.0, cloud);
+		vec4 blood_layer = vec4(tint, clamp(density * 1.1, 0.0, 0.92));
 		result.rgb = mix(result.rgb, blood_layer.rgb, blood_layer.a);
 		result.a = max(result.a, blood_layer.a);
 	}
