@@ -33,6 +33,9 @@ static func apply(tree: SceneTree, enabled: bool, level: int) -> void:
 		overhead.shadow_enabled = enabled
 		overhead.directional_shadow_mode = preset.mode
 		overhead.directional_shadow_max_distance = float(preset.distance)
+	var lighting := scene.get_node_or_null("PlanningLighting")
+	if lighting != null and lighting.has_method("set_shadows_allowed"):
+		lighting.call("set_shadows_allowed", enabled)
 	var wall := scene.get_node_or_null("DisplayWall")
 	if wall != null and wall.has_method("set_shadows_allowed"):
 		wall.call("set_shadows_allowed", enabled)

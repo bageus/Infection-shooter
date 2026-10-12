@@ -16,6 +16,13 @@ var _saved_source := Environment.AMBIENT_SOURCE_DISABLED
 var _saved_color := Color.WHITE
 var _planning := false
 var _game_lighting := true
+# Compatibility renders only a fixed number of lights per frame and silently drops
+# the rest, so only the lamps nearest to the camera are lit (and shadowed).
+const MAX_LIGHTS := 28
+const MAX_SHADOW_LIGHTS := 6
+const REFRESH_SECONDS := 0.15
+var shadows_allowed := true
+var _refresh_left := 0.0
 
 
 func setup(environment_node: WorldEnvironment, selector: OptionButton = null, local_toggle: CheckButton = null) -> void:
@@ -42,18 +49,69 @@ func setup(environment_node: WorldEnvironment, selector: OptionButton = null, lo
 		selector.item_selected.connect(_on_preview_selected)
 
 
+func _ready() -> void:
+	process_mode = Node.PROCESS_MODE_ALWAYS
+
+
+func _process(delta: float) -> void:
+	_refresh_left -= delta
+	if _refresh_left <= 0.0:
+		_refresh_left = REFRESH_SECONDS
+		refresh_light_budget()
+
+
+func set_shadows_allowed(allowed: bool) -> void:
+	shadows_allowed = allowed
+	refresh_light_budget()
+
+
+## Lights the lamps nearest to the camera focus first until the budget is spent;
+## the nearest few also cast shadows so light does not pass through walls and columns.
+func refresh_light_budget() -> void:
+	var tree := get_tree()
+	if tree == null or not local_lights_enabled:
+		return
+	var camera := get_viewport().get_camera_3d() if get_viewport() != null else null
+	var focus := Vector3.ZERO if camera == null else camera.global_position
+	if camera != null:
+		var forward := -camera.global_transform.basis.z
+		if forward.y < -0.05:
+			focus = camera.global_position + forward * (camera.global_position.y / -forward.y)
+	var lamps: Array[Node] = tree.get_nodes_in_group("budget_lights")
+	var ranked: Array[Dictionary] = []
+	for lamp in lamps:
+		if lamp is Node3D and lamp.is_inside_tree() and lamp.has_method("set_budget_lit"):
+			var offset: Vector3 = (lamp as Node3D).global_position - focus
+			offset.y = 0.0
+			ranked.append({"node": lamp, "distance": offset.length_squared()})
+	ranked.sort_custom(func(a: Dictionary, b: Dictionary) -> bool: return a.distance < b.distance)
+	var used := 0
+	var shadowed := 0
+	for entry in ranked:
+		var lamp: Node = entry.node
+		var cost: int = lamp.call("get_light_cost")
+		var lit := used + cost <= MAX_LIGHTS
+		var shadow := lit and shadows_allowed and shadowed + cost <= MAX_SHADOW_LIGHTS
+		if lit:
+			used += cost
+		if shadow:
+			shadowed += cost
+		lamp.call("set_budget_lit", lit, shadow)
+
+
 func set_local_lights_enabled(enabled: bool) -> void:
 	local_lights_enabled = enabled
 
 
 func _apply_local_lights() -> void:
-	for lamp: Node in get_tree().get_nodes_in_group("planner_lights"):
+	for lamp: Node in get_tree().get_nodes_in_group("budget_lights"):
 		_on_node_added(lamp)
+	refresh_light_budget()
 
 
 func _on_node_added(node: Node) -> void:
 	# Late map loads and planner duplicates obey the same application setting.
-	if node.is_in_group("planner_lights") and node.has_method("set_local_lighting_enabled"):
+	if node.is_in_group("budget_lights") and node.has_method("set_local_lighting_enabled"):
 		node.call("set_local_lighting_enabled", local_lights_enabled)
 
 
