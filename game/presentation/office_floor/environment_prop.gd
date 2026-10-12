@@ -1,5 +1,6 @@
 extends RigidBody3D
 ## Scene boundary for prop physics, hit commands and authored display configuration.
+const BUDGET_LIGHT := preload("res://game/presentation/office_floor/budget_omni_light.gd")
 const GEOMETRY := preload("res://game/presentation/office_floor/environment_prop_geometry.gd")
 const BREAKUP := preload("res://game/presentation/office_floor/environment_prop_breakup.gd")
 var _geometry := GEOMETRY.new()
@@ -198,8 +199,20 @@ func _ready() -> void:
 	continuous_cd = mass < 4.0
 	_setup_weight(volume)
 	_add_contact_shadow(wall_mounted)
+	if model_path.get_file() == "05_lamp.glb":
+		_add_desk_lamp_light()
 	if not freeze or wall_mounted:
 		IMPACT_SOUND.watch(self)
+
+
+# The desk lamp lights its own surroundings from under the shade.
+func _add_desk_lamp_light() -> void:
+	var shade := _visual.find_child("Lamp_*", true, false) as Node3D
+	if shade == null:
+		return
+	var glow := BUDGET_LIGHT.create(Color(1.0, 0.86, 0.62), 1.1, 2.8)
+	glow.position = Vector3(0.0, 0.12, 0.0)
+	shade.add_child(glow)
 
 
 # Furniture standing on the floor gets a light shadow under it.
