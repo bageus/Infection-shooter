@@ -20,8 +20,18 @@ func _run() -> void:
 	var objects: Node = planner.objects
 	var door := (load(DOOR_PATH) as PackedScene).instantiate() as Node3D
 	planner.root.add_child(door)
-	door.global_position = planner.camera.global_position + (-planner.camera.global_transform.basis.z) * 8.0 + planner.camera.global_transform.basis.x * 6.0
 	objects.placed.append(door)
+	# Park the door where nothing else (player, furniture) shares its screen pixel.
+	var clear := false
+	var visible_area := Rect2(Vector2(420, 60), root.get_visible_rect().size - Vector2(460, 120))
+	for step in 24:
+		var side := 1.0 if step % 2 == 0 else -1.0
+		door.global_position = planner.camera.global_position + (-planner.camera.global_transform.basis.z) * 8.0 + planner.camera.global_transform.basis.x * side * (1.0 + step * 0.6)
+		var at: Vector2 = planner.camera.unproject_position(door.global_position)
+		if visible_area.has_point(at) and planner.geometry._planned_object_at(at) == door:
+			clear = true
+			break
+	_check(clear, "The test door can be picked on its own")
 	objects.selected_path = DOOR_PATH
 	objects.selected_entry = {"path": DOOR_PATH, "name": "Door"}
 	objects._rebuild_preview()
@@ -34,7 +44,8 @@ func _run() -> void:
 		event.pressed = pressed
 		event.position = screen
 		event.global_position = screen
-		root.push_input(event)
+		# The planner's own input handler, so a headless window's stretch cannot move the click.
+		planner._input(event)
 		await process_frame
 	_check(objects.placed.size() == count, "Clicking an installed door places nothing")
 	_check(objects.selected == door, "Clicking an installed door selects it")
