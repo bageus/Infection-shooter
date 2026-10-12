@@ -50,7 +50,8 @@ static func plan(entries: Array, blockers: Array) -> Dictionary:
 ## previous automatic fixtures with fresh ones.
 static func apply(objects: Node, loader: RefCounted) -> Dictionary:
 	for node in objects.placed.duplicate():
-		if is_instance_valid(node) and node.has_meta(META):
+		# Extinguishers are hung once and kept: a column that has one is never given another.
+		if is_instance_valid(node) and node.has_meta(META) and str(node.get_meta(META)) != "extinguisher":
 			objects.placed.erase(node)
 			node.queue_free()
 	var entries: Array = []

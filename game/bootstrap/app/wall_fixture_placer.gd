@@ -6,7 +6,12 @@ const SWITCH := "res://models/objects/enviroments/13/13_wall_light_switch.glb"
 const ALARM := "res://models/objects/enviroments/13/13_wall_emergency_alarm.glb"
 const CALL_POINT := "res://models/objects/enviroments/13/13_wall_fire_call_point.glb"
 # Distance from the model origin back to its mounting plane (model bounds).
-const BACK := {SWITCH: 0.012, ALARM: 0.055, CALL_POINT: 0.045}
+const EXTINGUISHER := "res://models/objects/enviroments/09/09_fire_extinguisher.glb"
+const BACK := {SWITCH: 0.012, ALARM: 0.055, CALL_POINT: 0.045, EXTINGUISHER: 0.149}
+const EXTINGUISHER_HEIGHT := 1.5
+const EXTINGUISHER_BANDS := [Vector2(1.45, 2.15)]
+# The extinguisher origin sits 5 cm off the centre of its body along the wall.
+const EXTINGUISHER_SHIFT := 0.051
 const SWITCH_HEIGHT := 0.75
 const ALARM_HEIGHT := 2.5
 const CALL_POINT_HEIGHT := 1.0
@@ -31,6 +36,7 @@ func _init(model: RefCounted) -> void:
 func run() -> Array:
 	for level in geometry.levels():
 		var doors := _doors_of(level)
+		_extinguishers(level)
 		_switches[level] = []
 		var left := 0
 		for index in doors.size():
@@ -39,6 +45,23 @@ func run() -> Array:
 		_spread_switches(level, left + glass * SWITCHES_PER_DOOR)
 		_spread_alarms(level, (doors.size() + glass) * ALARMS_PER_DOOR)
 	return records
+
+
+## One extinguisher per column at 1.5 m, on its first free face; a column that
+## already has one is left alone.
+func _extinguishers(level: int) -> void:
+	for piece: Dictionary in geometry.pieces:
+		if piece.level != level or not piece.box or geometry.column_has_extinguisher(piece):
+			continue
+		for face: Dictionary in geometry.faces_of_level(level):
+			if face.piece == piece.id and geometry.clear_spot(face, 0.0, 0.12, EXTINGUISHER_BANDS):
+				var across := Vector2(face.n.y, -face.n.x)
+				var point: Vector2 = geometry.face_point(face, 0.0) + face.n * float(BACK[EXTINGUISHER]) + across * EXTINGUISHER_SHIFT
+				records.append({"scene": EXTINGUISHER, "x": point.x, "y": face.base + EXTINGUISHER_HEIGHT, "z": point.y,
+					"rotation_y": rad_to_deg(atan2(face.n.x, face.n.y)), "scale_x": 1.0, "scale_y": 1.0, "scale_z": 1.0,
+					"auto_fixture": "extinguisher"})
+				geometry.add_blocker(AABB(Vector3(point.x - 0.15, face.base + 1.45, point.y - 0.15), Vector3(0.3, 0.7, 0.3)))
+				break
 
 
 func _glass_count(level: int) -> int:

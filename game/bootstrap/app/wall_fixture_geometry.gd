@@ -36,6 +36,7 @@ var faces: Array[Dictionary] = []
 var doors: Array[Dictionary] = []
 var glass_doors: Array[Dictionary] = [] # count toward the totals but carry no fixtures of their own
 var blockers: Array[AABB] = []
+var extinguishers: Array[Vector3] = [] # (x, height, z) of every extinguisher already in the layout
 var _piece_grid := {}
 var _blocker_grid := {}
 var _all_pieces: Array[Dictionary] = []
@@ -54,6 +55,8 @@ static func axes(yaw_degrees: float) -> Array[Vector2]:
 func load_records(records: Array) -> void:
 	for record: Dictionary in records:
 		var scene := str(record.get("scene", ""))
+		if scene.get_file() == "09_fire_extinguisher.glb":
+			extinguishers.append(Vector3(float(record.get("x", 0.0)), float(record.get("y", 0.0)), float(record.get("z", 0.0))))
 		if not scene.begins_with(STRUCTURAL):
 			continue
 		var file := scene.get_file().get_basename()
@@ -140,6 +143,15 @@ func _distance_to_piece(piece: Dictionary, point: Vector2) -> float:
 	var along: float = absf(local.dot(piece.t)) - piece.half.x
 	var across: float = absf(local.dot(piece.n)) - piece.half.y
 	return Vector2(maxf(along, 0.0), maxf(across, 0.0)).length()
+
+
+## True when an extinguisher already hangs on (or right beside) the column.
+func column_has_extinguisher(column: Dictionary) -> bool:
+	for spot in extinguishers:
+		var local: Vector2 = Vector2(spot.x, spot.z) - column.c
+		if absf(local.dot(column.t)) <= column.half.x + 0.5 and absf(local.dot(column.n)) <= column.half.y + 0.5 and spot.y > column.base + 0.6 and spot.y < column.base + 2.4:
+			return true
+	return false
 
 
 func faces_of_level(level: int) -> Array[Dictionary]:

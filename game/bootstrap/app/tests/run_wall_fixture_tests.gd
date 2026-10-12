@@ -65,8 +65,11 @@ func _door_rules() -> void:
 	var records: Array = plan.records
 	_check(_count(records, "switch") == 6, "Wall door and glass door get three switch points each, the elevator none (%d)" % _count(records, "switch"))
 	_check(_count(records, "alarm") == 8 and _count(records, "call_point") == 8, "Each of those doors gets four alarm points, each with a call point")
+	_check(_count(records, "extinguisher") == 1, "The column gets one extinguisher (%d)" % _count(records, "extinguisher"))
+	var hung := _corridor([{"scene": PLACER.EXTINGUISHER, "x": -7.0, "y": 1.5, "z": 0.9, "rotation_y": 0.0}])
+	_check(_count(FIXTURES.plan(hung, []).records, "extinguisher") == 0, "A column that already has an extinguisher gets no second one")
 	for record: Dictionary in records:
-		var wanted := {"switch": 0.75, "alarm": 2.5, "call_point": 1.0}[record.auto_fixture] as float
+		var wanted := {"switch": 0.75, "alarm": 2.5, "call_point": 1.0, "extinguisher": 1.5}[record.auto_fixture] as float
 		_check(is_equal_approx(float(record.y), wanted), "%s hangs at %.2f m" % [record.auto_fixture, wanted])
 	_check(_mounted_on_walls(layout, records), "Every fixture sits on a wall or column face")
 	var again: Array = FIXTURES.plan(layout, []).records
@@ -143,7 +146,7 @@ func _levels() -> void:
 	layout.append({"scene": SIGN, "x": 6.0, "y": -1.0, "z": 0.1, "rotation_y": 0.0})
 	var plan := FIXTURES.plan(layout, [])
 	_check(_count(plan.records, "switch") == 6 and _count(plan.records, "alarm") == 8, "Each level gets its own count")
-	_check(plan.records.filter(func(r: Dictionary) -> bool: return is_equal_approx(float(r.y), -3.0 + 0.75) or is_equal_approx(float(r.y), 0.75) or is_equal_approx(float(r.y), -3.0 + 1.0) or is_equal_approx(float(r.y), 1.0) or is_equal_approx(float(r.y), -0.5) or is_equal_approx(float(r.y), 2.5)).size() == plan.records.size(), "Lower-level fixtures are measured from the lower floor")
+	_check(plan.records.filter(func(r: Dictionary) -> bool: return is_equal_approx(float(r.y), -3.0 + 0.75) or is_equal_approx(float(r.y), 0.75) or is_equal_approx(float(r.y), -3.0 + 1.0) or is_equal_approx(float(r.y), 1.0) or is_equal_approx(float(r.y), -0.5) or is_equal_approx(float(r.y), 1.5) or is_equal_approx(float(r.y), -1.5) or is_equal_approx(float(r.y), 2.5)).size() == plan.records.size(), "Lower-level fixtures are measured from the lower floor")
 	_check(plan.sign_fixes.size() == 1 and is_equal_approx(float(plan.sign_fixes[0].y), -3.0 + 1.75), "A sign on the lower level hangs 1.75 m above that floor")
 
 
@@ -187,12 +190,13 @@ func _planner() -> void:
 		records.append({"scene": STRUCT + "wall_straight.tscn", "x": x, "y": 0.0, "z": 20.0})
 	records.append({"scene": STRUCT + "wall_door.tscn", "x": 1.0, "y": 0.0, "z": 20.0})
 	records.append({"scene": SIGN, "x": 4.0, "y": 2.0, "z": 20.1})
+	records.append({"scene": STRUCT + "column.tscn", "x": -8.0, "y": 0.0, "z": 20.0})
 	var report: Dictionary = objects.call("_apply_layout_data", {"version": 8, "objects": records})
-	_check(int(report.get("loaded", 0)) == 6, "Planner test layout loads")
+	_check(int(report.get("loaded", 0)) == 7, "Planner test layout loads")
 	var text: String = storage.call("enforce_wall_fixtures")
 	await process_frame
 	var auto: Array = objects.placed.filter(func(n: Node3D) -> bool: return is_instance_valid(n) and n.has_meta("planning_auto_fixture"))
-	_check(auto.size() == 3 + 8, "Save adds 3 switches, 4 alarms and 4 call points (%d)" % auto.size())
+	_check(auto.size() == 3 + 8 + 1, "Save adds 3 switches, 4 alarms, 4 call points and a column extinguisher (%d)" % auto.size())
 	_check(text.contains("signs adjusted 1"), "Save reports the corrected sign: " + text)
 	var wall_sign: Node3D = objects.placed.filter(func(n: Node3D) -> bool: return str(n.get_meta("planning_scene_path", "")) == SIGN)[0]
 	_check(is_equal_approx(wall_sign.position.y, 1.75), "The sign was moved to 1.75 m")
@@ -204,6 +208,8 @@ func _planner() -> void:
 	for index in mini(first_records.size(), second_records.size()):
 		same = same and Vector3(first_records[index].x - second_records[index].x, first_records[index].y - second_records[index].y, first_records[index].z - second_records[index].z).length() < 0.001 and first_records[index].scene == second_records[index].scene
 	_check(same, "A second save places the fixtures in the same spots and order")
+	var extinguishers: Array = objects.placed.filter(func(n: Node3D) -> bool: return is_instance_valid(n) and str(n.get_meta("planning_scene_path", "")) == PLACER.EXTINGUISHER)
+	_check(extinguishers.size() == 1, "Saving twice leaves one extinguisher on the column (%d)" % extinguishers.size())
 	var again: Array = objects.placed.filter(func(n: Node3D) -> bool: return is_instance_valid(n) and not n.is_queued_for_deletion() and n.has_meta("planning_auto_fixture"))
 	_check(again.size() == auto.size(), "Saving twice does not duplicate the fixtures (%d)" % again.size())
 	var saved: Array = storage.call("_collect_layout_data").objects.filter(func(r: Dictionary) -> bool: return r.has("auto_fixture"))
