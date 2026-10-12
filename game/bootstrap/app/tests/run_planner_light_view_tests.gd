@@ -28,6 +28,7 @@ func _run() -> void:
 	planner._zoom_camera(-2.5)
 	_check(camera.size < size_before and is_equal_approx(camera.global_position.y, 24.0), "Wheel zooms overhead without moving below lamps")
 	var center := root.get_visible_rect().size * 0.5
+	var expected: Array = []
 	for index in 3:
 		planner.objects._on_palette_selected(index)
 		_check(controls.light_defaults.visible, "Palette lamp exposes editable fields immediately")
@@ -45,19 +46,37 @@ func _run() -> void:
 		_check(lamp.get_authored_color().is_equal_approx(controls.default_light_color.color), "Placed lamp keeps palette color")
 		_check(is_equal_approx(lamp.get_node("Light").spot_angle, controls.default_light_angle.value), "Placed lamp keeps palette cone")
 		_check(lamp.get_fixture_config().shape == controls.fixtures.SHAPES[index], "Each palette shape is preserved")
+		# The palette lamp is still active here: a plain click on the installed lamp must pick it.
+		var placed_before: int = planner.objects.placed.size()
+		await _click(planner.camera.unproject_position(lamp.global_position))
+		_check(planner.objects.placed.size() == placed_before and planner.objects.selected == lamp, "Plain click on an installed lamp selects it instead of placing another")
+		_check(controls.light_defaults.visible and is_equal_approx(controls.default_light_energy.value, lamp.get_authored_energy()), "Selection shows the lamp's own parameters")
+		controls.default_light_energy.value = 6.25 + index
+		_check(is_equal_approx(lamp.get_authored_energy(), 6.25 + index), "Editing the selected lamp applies live")
+		expected.append([lamp, 6.25 + index, lamp.global_position.y, controls.default_light_color.color])
 		planner.objects._reset_selection()
 		_check_click_picks_lamp(planner, lamp)
 		planner.objects._select(lamp)
-		_check(controls.fixtures.selected_panel.visible and not controls.light_defaults.visible, "Installed lamp shows its own settings")
+		_check(controls.fixtures.selected_panel.visible and controls.light_defaults.visible, "Installed lamp opens the same editor as before placing")
+		_check(is_equal_approx(controls.default_light_height.value, lamp.global_position.y) and is_equal_approx(controls.default_light_energy.value, lamp.get_authored_energy()), "Editor is bound to the installed lamp")
 		var height_before := lamp.global_position.y
-		controls.fixtures.selected_height.value = height_before + 0.25
+		controls.default_light_height.value = height_before + 0.25
 		_check(is_equal_approx(lamp.global_position.y, height_before + 0.25), "Installed lamp height remains editable")
 		planner.edit_history.undo()
 		_check(is_equal_approx(lamp.global_position.y, height_before), "Undo restores height")
+	var saved: Dictionary = JSON.parse_string(JSON.stringify(planner.storage._collect_layout_data()))
+	planner.objects._apply_layout_data(saved)
+	for entry: Array in expected:
+		var found := false
+		for node: Node3D in planner.objects.placed:
+			if is_instance_valid(node) and node.has_method("get_fixture_config") and is_equal_approx(node.get_authored_energy(), entry[1]) and is_equal_approx(node.global_position.y, entry[2]) and node.get_authored_color().is_equal_approx(entry[3]):
+				found = true
+		_check(found, "Edited lamp parameters survive save and reload")
+	planner.objects._select(planner.objects.placed.filter(func(node: Node3D) -> bool: return is_instance_valid(node) and node.has_method("get_fixture_config")).back())
 	view.button.button_pressed = false
 	_check(camera.global_transform.is_equal_approx(original) and camera.projection == projection, "Normal view restores original camera")
 	var lamp: Node3D = planner.objects.selected
-	controls.fixtures.selected_energy.value = 9.0
+	controls.default_light_energy.value = 9.0
 	_check(is_equal_approx(lamp.get_authored_energy(), 9.0), "Normal view can refine installed brightness")
 	view.button.button_pressed = true
 	camera.global_position += Vector3(4, 0, -3)
@@ -94,6 +113,17 @@ func _check_click_picks_lamp(planner: Node, lamp: Node3D) -> void:
 	_check(picked == lamp, "Clicking an installed lamp selects the lamp, not a box around it")
 	planner.objects.placed.erase(blocker)
 	blocker.free()
+
+
+func _click(position: Vector2) -> void:
+	for pressed: bool in [true, false]:
+		var event := InputEventMouseButton.new()
+		event.button_index = MOUSE_BUTTON_LEFT
+		event.pressed = pressed
+		event.position = position
+		event.global_position = position
+		root.push_input(event)
+		await process_frame
 
 
 func _check(condition: bool, message: String) -> void:

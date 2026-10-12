@@ -220,7 +220,7 @@ func _planner_roundtrip() -> void:
 		if not installed.has(lamp):
 			continue
 		objects.call("_select", lamp)
-		_check(controls.fixtures.selected_panel.visible and controls.selected_light_color.get_parent().visible and controls.light_info.visible, "Installed lamp exposes fixture/color/energy parameters")
+		_check(controls.fixtures.selected_panel.visible and controls.default_light_color.get_parent().visible and controls.light_defaults.visible and controls.light_info.visible, "Installed lamp exposes fixture/color/energy parameters")
 		inspected += 1
 	_check(inspected == installed.size() and inspected == 12, "Every installed fixture combination was registered and checked")
 	var corpse := planner.call("_instantiate_asset", "res://game/features/infected/public/decor/corpse_hunger.tscn") as Node3D

@@ -50,6 +50,12 @@ func _click_world(screen_pos: Vector2) -> void:
 			_select(existing)
 		return
 	if not selected_path.is_empty() or selected_kind == "player":
+		# A lamp that is already installed is picked, not covered by another one.
+		var lamp: Node3D = geometry.lamp_at(screen_pos) if selected_kind == "light" else null
+		if lamp != null:
+			_reset_selection()
+			_select(lamp)
+			return
 		_place_selected(screen_pos)
 		return
 	var hit_node = geometry._planned_object_at(screen_pos)
@@ -67,7 +73,7 @@ func _select(node: Node3D) -> void:
 	controls._update_light_ui()
 	if selected != null and selected.has_method("get_fixture_config"):
 		var panel := session.ui.get_node("Panel") as ScrollContainer
-		panel.ensure_control_visible.call_deferred(controls.light_info)
+		panel.ensure_control_visible.call_deferred(controls.light_defaults)
 	if selected != null and controls.loot_options.panel.visible:
 		(session.ui.get_node("Panel") as ScrollContainer).ensure_control_visible.call_deferred(controls.loot_options.panel)
 	_update_status()
@@ -182,14 +188,11 @@ func _clear_preview() -> void:
 		controls.display_options.hide()
 	if controls.loot_options != null:
 		controls.loot_options.hide()
-	session.ui.get_node("Panel/VBox/SelectedLightColor").hide()
 	controls.fixtures.selected_panel.hide()
 	controls.light_info.hide()
 	controls.light_level.hide()
 	controls.light_angle_info.hide()
 	controls.light_angle.hide()
-	session.ui.get_node("Panel/VBox/SelectedFlicker").hide()
-	session.ui.get_node("Panel/VBox/SelectedFlickerStep").hide()
 	if preview != null and is_instance_valid(preview):
 		preview.queue_free()
 	preview = null
