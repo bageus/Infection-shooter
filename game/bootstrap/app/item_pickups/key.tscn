@@ -1,0 +1,7 @@
+[gd_scene load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://game/bootstrap/app/item_pickups/placed_key.gd" id="1"]
+
+[node name="Key" type="Node3D"]
+script = ExtResource("1")
+metadata/planning_surface_placeable = true

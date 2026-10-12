@@ -1,6 +1,6 @@
 extends Area3D
 
-enum PickupType { MEDKIT, AMMO_PISTOL, AMMO_UZI, AMMO_SHOTGUN, ANTIDOTE }
+enum PickupType { MEDKIT, AMMO_PISTOL, AMMO_UZI, AMMO_SHOTGUN, ANTIDOTE, DNA }
 
 @export var pickup_type: PickupType = PickupType.MEDKIT
 @export var amount: int = 20
@@ -96,6 +96,11 @@ func _on_body_entered(body: Node) -> void:
 		PickupType.ANTIDOTE:
 			if body.has_method("add_antidote"):
 				accepted = bool(body.call("add_antidote", amount))
+		PickupType.DNA:
+			var runtime: Object = body.get("infection_runtime")
+			if runtime != null and runtime.has_method("add_control_ampule"):
+				runtime.call("add_control_ampule")
+				accepted = true
 	if accepted:
 		_consumed = true
 		_play_pickup_sound(body)
@@ -118,5 +123,7 @@ func _play_pickup_sound(body: Node) -> void:
 					live.call("play_item_sound", &"medkit_use"))
 		PickupType.ANTIDOTE:
 			body.call("play_item_sound", &"antidote_pickup")
+		PickupType.DNA:
+			body.call("play_item_sound", &"dna_pickup")
 		_:
 			body.call("play_item_sound", &"ammo_pickup")

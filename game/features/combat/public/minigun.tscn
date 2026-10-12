@@ -10,6 +10,7 @@ casing_scene = ExtResource("casing")
 weapon_name = "MINIGUN"
 fire_mode = "auto"
 shots_per_second = 24.0
+spin_up_time = 0.9
 magazine_size = 0
 starting_reserve_ammo = 400
 max_reserve_ammo = 400

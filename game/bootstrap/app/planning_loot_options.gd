@@ -1,0 +1,181 @@
+extends Node
+## Planner panel: loot of crates and infected, plus infected toughness and damage.
+## Works on the selected object, or on the palette preview until it is placed.
+
+const CONFIG := preload("res://game/features/pickups/public/loot_config.gd")
+const MODE_LABELS := ["Пусто", "Вручную", "Авто"]
+const ITEM_LABELS := {
+	"ammo_pistol": "Патроны пистолет", "ammo_uzi": "Патроны UZI", "ammo_shotgun": "Патроны дробовик",
+	"medkit": "Аптечка", "antidote": "Антидот", "dna": "ДНК",
+}
+
+var session: Variant
+var objects: Variant
+var panel: VBoxContainer
+var title: Label
+var mode: OptionButton
+var items_box: GridContainer
+var item_spins: Dictionary = {}
+var auto_note: Label
+var stats_box: VBoxContainer
+var health: SpinBox
+var damage: SpinBox
+var _updating := false
+# What the next placed crate / infected starts with (kept between placements).
+var loot_defaults: Dictionary = {}
+var stats_defaults: Dictionary = {}
+
+
+func setup(context: Variant, planner_objects: Variant) -> void:
+	session = context
+	objects = planner_objects
+	panel = VBoxContainer.new()
+	panel.name = "LootOptions"
+	title = Label.new()
+	panel.add_child(title)
+	var row := HBoxContainer.new()
+	var label := Label.new()
+	label.text = "Содержимое"
+	row.add_child(label)
+	mode = OptionButton.new()
+	mode.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	for text: String in MODE_LABELS:
+		mode.add_item(text)
+	mode.item_selected.connect(_changed)
+	row.add_child(mode)
+	panel.add_child(row)
+	items_box = GridContainer.new()
+	items_box.columns = 2
+	for id in CONFIG.item_ids():
+		var caption := Label.new()
+		var weapon := CONFIG.weapon_index(id)
+		caption.text = ITEM_LABELS[id] if weapon < 0 else "Оружие: " + CONFIG.WEAPON_NAMES[weapon]
+		caption.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		items_box.add_child(caption)
+		var spin := SpinBox.new()
+		spin.min_value = 0
+		spin.max_value = CONFIG.MAX_COUNT
+		spin.step = 1
+		spin.value_changed.connect(_changed)
+		items_box.add_child(spin)
+		item_spins[id] = spin
+	panel.add_child(items_box)
+	auto_note = Label.new()
+	auto_note.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	auto_note.custom_minimum_size.x = 220
+	panel.add_child(auto_note)
+	stats_box = VBoxContainer.new()
+	health = _stat_row("Живучесть, %")
+	damage = _stat_row("Урон, %")
+	panel.add_child(stats_box)
+	var box: Node = session.ui.get_node("Panel/VBox")
+	box.add_child(panel)
+	box.move_child(panel, session.ui.get_node("Panel/VBox/Palette").get_index() + 1)
+	panel.hide()
+
+
+func _stat_row(text: String) -> SpinBox:
+	var row := HBoxContainer.new()
+	var label := Label.new()
+	label.text = text
+	label.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	row.add_child(label)
+	var spin := SpinBox.new()
+	spin.min_value = CONFIG.STAT_MIN
+	spin.max_value = CONFIG.STAT_MAX
+	spin.step = 5
+	spin.value = 100
+	spin.suffix = "%"
+	spin.value_changed.connect(_changed)
+	row.add_child(spin)
+	stats_box.add_child(row)
+	return spin
+
+
+func _target() -> Node3D:
+	return objects.selected if objects.selected != null else objects.preview
+
+
+func _has_loot(target: Node3D) -> bool:
+	return target != null and target.has_method("configure_loot") and (not target.has_method("has_loot") or bool(target.call("has_loot")))
+
+
+func _has_stats(target: Node3D) -> bool:
+	return target != null and target.has_method("configure_stats")
+
+
+func update() -> void:
+	var target := _target()
+	var loot := _has_loot(target)
+	var stats := _has_stats(target)
+	panel.visible = loot or stats
+	if not panel.visible:
+		return
+	_updating = true
+	var suffix := "" if objects.selected != null else " | размещение"
+	title.text = ("ВРАГ" if stats else "ЯЩИК") + suffix
+	var config: Dictionary = target.call("get_loot_config")
+	mode.select(maxi(CONFIG.MODES.find(str(config["mode"])), 0))
+	for id: String in item_spins:
+		(item_spins[id] as SpinBox).set_value_no_signal(float((config["items"] as Dictionary).get(id, 0)))
+	var manual: bool = str(config["mode"]) == "manual"
+	items_box.visible = manual
+	auto_note.visible = not manual
+	auto_note.text = _note(str(config["mode"]), stats)
+	stats_box.visible = stats
+	if stats:
+		var values: Dictionary = target.call("get_enemy_stats")
+		health.set_value_no_signal(float(values["health"]))
+		damage.set_value_no_signal(float(values["damage"]))
+	_updating = false
+
+
+func _note(mode_name: String, enemy: bool) -> String:
+	if mode_name == "empty":
+		return "Ничего не выпадает."
+	if enemy:
+		return "Случайная добыча как раньше: аптечки, патроны, иногда антидот."
+	return "Случайный набор из патронов, аптечек, антидота и ДНК; большой ящик содержит больше."
+
+
+func hide() -> void:
+	if panel != null:
+		panel.hide()
+
+
+## A freshly created object starts with the options last chosen in the panel.
+func configure_new(target: Node3D) -> void:
+	if _has_loot(target) and not loot_defaults.is_empty():
+		target.call("configure_loot", loot_defaults)
+	if _has_stats(target) and not stats_defaults.is_empty():
+		target.call("configure_stats", stats_defaults)
+
+
+func _read_config() -> Dictionary:
+	var items := {}
+	for id: String in item_spins:
+		var count := int((item_spins[id] as SpinBox).value)
+		if count > 0:
+			items[id] = count
+	return {"mode": CONFIG.MODES[mode.selected], "items": items}
+
+
+func _changed(_value: Variant = null) -> void:
+	if _updating:
+		return
+	var target := _target()
+	if target == null:
+		return
+	if objects.selected != null:
+		session.edit_history.call("record_transform", target)
+	var config := _read_config()
+	if _has_loot(target):
+		target.call("configure_loot", config)
+		if objects.selected == null:
+			loot_defaults = config
+	if _has_stats(target):
+		var stats := {"health": health.value, "damage": damage.value}
+		target.call("configure_stats", stats)
+		if objects.selected == null:
+			stats_defaults = stats
+	update()

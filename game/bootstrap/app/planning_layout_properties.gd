@@ -8,6 +8,10 @@ static func restore(node: Node3D, record: Dictionary) -> void:
 		node.call("configure_decor_pose", record["decor_pose"])
 	if node.has_method("configure_display") and record.get("display") is Dictionary:
 		node.call("configure_display", record["display"])
+	if node.has_method("configure_loot") and record.get("loot") is Dictionary:
+		node.call("configure_loot", record["loot"])
+	if node.has_method("configure_stats") and record.get("enemy_stats") is Dictionary:
+		node.call("configure_stats", record["enemy_stats"])
 	if node.has_method("configure_blood_normal"):
 		var default_normal: Vector3 = node.get("surface_normal")
 		var blood_normal: Array = record.get("blood_normal", [default_normal.x, default_normal.y, default_normal.z])

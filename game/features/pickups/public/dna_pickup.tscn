@@ -1,0 +1,17 @@
+[gd_scene load_steps=4 format=3]
+[ext_resource type="Script" path="res://game/features/pickups/pickup_item.gd" id="2_script"]
+[ext_resource type="Script" path="res://game/features/pickups/dna_visual.gd" id="3_visual"]
+[sub_resource type="BoxShape3D" id="PickupShape"]
+size = Vector3(0.7, 0.7, 0.7)
+
+[node name="Pickup" type="Area3D" groups=["occlusion_items"]]
+script = ExtResource("2_script")
+pickup_type = 5
+amount = 1
+collision_layer = 0
+collision_mask = 1
+[node name="Visual" type="Node3D" parent="."]
+script = ExtResource("3_visual")
+[node name="CollisionShape3D" type="CollisionShape3D" parent="."]
+position = Vector3(0,0.3,0)
+shape = SubResource("PickupShape")

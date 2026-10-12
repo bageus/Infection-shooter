@@ -9,14 +9,15 @@ const WEAPON_SOUNDS := {
 	"PISTOL": [&"pistol_fire", &"pistol_reload", &"casing_brass"],
 	"UZI": [&"uzi_fire", &"uzi_reload", &"casing_brass"],
 	"SHOTGUN": [&"shotgun_fire", &"shotgun_shell_load", &"casing_shell"],
-	"SNIPER RIFLE": [&"rifle_fire", &"rifle_reload", &"casing_brass"],
-	"AK": [&"rifle_fire", &"rifle_reload", &"casing_brass"],
-	"M4": [&"assault_rifle_fire", &"rifle_reload", &"casing_brass"],
-	"MINIGUN": [&"assault_rifle_fire", &"rifle_reload", &"casing_brass"],
+	"SNIPER RIFLE": [&"sniper_fire", &"rifle_reload", &"casing_brass"],
+	"AK": [&"ak_fire", &"rifle_reload", &"casing_brass"],
+	"M4": [&"m4_fire", &"rifle_reload", &"casing_brass"],
+	"MINIGUN": [&"minigun_fire", &"rifle_reload", &"casing_brass"],
 	"RIFLE": [&"rifle_fire", &"rifle_reload", &"casing_brass"],
 	"ASSAULT RIFLE": [&"assault_rifle_fire", &"rifle_reload", &"casing_brass"],
 	"GRENADE LAUNCHER": [&"launcher_fire", &"launcher_reload", &"casing_heavy"],
 }
+const SPIN_HOLD := 0.12
 @export var direct_reserve_feed := false
 @export var casing_size_multiplier := 1.0
 @export var camera_distance_bonus := 0.0
@@ -25,6 +26,8 @@ const WEAPON_SOUNDS := {
 @export var weapon_name: String = "PISTOL"
 @export var fire_mode: String = "semi"
 @export var shots_per_second: float = 4.0
+## Barrel spin-up before the first shot; 0 means the weapon fires at once.
+@export var spin_up_time: float = 0.0
 @export var magazine_size: int = 15
 @export var starting_reserve_ammo: int = 75
 @export var max_reserve_ammo: int = 240
@@ -54,6 +57,9 @@ var _authored_muzzle: Node3D
 var _reload_sound: AudioStreamPlayer3D
 var _barrel_cluster: Node3D
 var _barrel_angle := 0.0
+# Spin from 0 (still) to 1 (full speed) and the time the trigger is still held.
+var _spin := 0.0
+var _spin_hold := 0.0
 
 
 func _ready() -> void:
@@ -65,8 +71,12 @@ func _ready() -> void:
 		if weapon_name == "MINIGUN":
 			_barrel_cluster = model.find_child("BarrelCluster", true, false) as Node3D
 func _process(delta: float) -> void:
-	if _barrel_cluster != null and visible and _cooldown_remaining > 0.0:
-		_barrel_angle = fmod(_barrel_angle + 35.0 * delta, TAU)
+	_spin_hold = maxf(0.0, _spin_hold - delta)
+	if spin_up_time > 0.0:
+		_spin = move_toward(_spin, 1.0 if _spin_hold > 0.0 else 0.0, delta / spin_up_time)
+	var speed := _spin if spin_up_time > 0.0 else 1.0
+	if _barrel_cluster != null and visible and (_cooldown_remaining > 0.0 or _spin > 0.0):
+		_barrel_angle = fmod(_barrel_angle + 35.0 * delta * speed, TAU)
 		var turn := Basis(Vector3.RIGHT, _barrel_angle)
 		var center := Vector3(0, .103, 0)
 		_barrel_cluster.transform = Transform3D(turn, center - turn * center)
@@ -107,6 +117,12 @@ func try_fire_at(target_point: Vector3) -> bool:
 	# A shell-by-shell reload is interrupted by firing once a shell is in.
 	if _reloading and shotgun_shell_reload and _magazine_ammo > 0:
 		cancel_reload()
+	if spin_up_time > 0.0:
+		# The barrels must reach full speed before the first bullet leaves.
+		if _spin_hold <= 0.0 and _spin <= 0.0:
+			SFX.play(self, &"minigun_spinup", muzzle.global_position)
+		_spin_hold = SPIN_HOLD
+		if _spin < 1.0: return false
 	if _cooldown_remaining > 0.0 or _reloading or bullet_scene == null or not is_instance_valid(effects_root): return false
 	if (_reserve_ammo if direct_reserve_feed else _magazine_ammo) <= 0:
 		_dry_fire()
