@@ -4,6 +4,7 @@ const AIM_GEOMETRY := preload("res://game/features/combat/weapon_aim_geometry.gd
 const MUZZLE_FLASH := preload("res://game/features/combat/muzzle_flash.tscn")
 const ART_SETUP := preload("res://game/features/combat/weapon_art_setup.gd")
 const SFX := preload("res://game/core/audio/public/sound_events.gd")
+const SPIN_LOOP := "res://assets/audio/sfx/minigun_spin/minigun_spin_1.ogg"
 # Sound events per weapon (ADR-0018): [fire, reload, casing].
 const WEAPON_SOUNDS := {
 	"PISTOL": [&"pistol_fire", &"pistol_reload", &"casing_brass"],
@@ -60,6 +61,7 @@ var _barrel_angle := 0.0
 # Spin from 0 (still) to 1 (full speed) and the time the trigger is still held.
 var _spin := 0.0
 var _spin_hold := 0.0
+var _spin_sound: AudioStreamPlayer3D
 
 
 func _ready() -> void:
@@ -70,11 +72,27 @@ func _ready() -> void:
 		_authored_muzzle = ART_SETUP.configure(self, model, weapon_name in ["SHOTGUN", "GRENADE LAUNCHER", "AK", "M4", "SNIPER RIFLE", "MINIGUN"])
 		if weapon_name == "MINIGUN":
 			_barrel_cluster = model.find_child("BarrelCluster", true, false) as Node3D
+	if spin_up_time > 0.0:
+		# The whine loops while the barrels turn and fades with them.
+		var loop := load(SPIN_LOOP) as AudioStreamOggVorbis
+		loop.loop = true
+		_spin_sound = AudioStreamPlayer3D.new()
+		_spin_sound.stream = loop
+		_spin_sound.unit_size = 8.0
+		_spin_sound.max_distance = 60.0
+		_spin_sound.volume_db = -60.0
+		add_child(_spin_sound)
 func _process(delta: float) -> void:
 	_spin_hold = maxf(0.0, _spin_hold - delta)
 	if spin_up_time > 0.0:
 		_spin = move_toward(_spin, 1.0 if _spin_hold > 0.0 else 0.0, delta / spin_up_time)
 	var speed := _spin if spin_up_time > 0.0 else 1.0
+	if _spin_sound != null:
+		_spin_sound.volume_db = lerpf(-60.0, -4.0, _spin)
+		if _spin > 0.001 and not _spin_sound.playing:
+			_spin_sound.play()
+		elif _spin <= 0.001 and _spin_sound.playing:
+			_spin_sound.stop()
 	if _barrel_cluster != null and visible and (_cooldown_remaining > 0.0 or _spin > 0.0):
 		_barrel_angle = fmod(_barrel_angle + 35.0 * delta * speed, TAU)
 		var turn := Basis(Vector3.RIGHT, _barrel_angle)
@@ -119,8 +137,6 @@ func try_fire_at(target_point: Vector3) -> bool:
 		cancel_reload()
 	if spin_up_time > 0.0:
 		# The barrels must reach full speed before the first bullet leaves.
-		if _spin_hold <= 0.0 and _spin <= 0.0:
-			SFX.play(self, &"minigun_spinup", muzzle.global_position)
 		_spin_hold = SPIN_HOLD
 		if _spin < 1.0: return false
 	if _cooldown_remaining > 0.0 or _reloading or bullet_scene == null or not is_instance_valid(effects_root): return false
