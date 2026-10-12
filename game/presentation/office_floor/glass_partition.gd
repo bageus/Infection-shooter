@@ -176,6 +176,7 @@ func _break_glass(hit_position: Vector3, direction: Vector3 = Vector3.ZERO) -> v
 	for child in get_children():
 		if child.has_meta("surface_mark"):
 			child.queue_free()
+	_drop_mounted_signs()
 	for glass in _glass_nodes:
 		if is_instance_valid(glass):
 			glass.visible = false
@@ -193,6 +194,21 @@ func _break_glass(hit_position: Vector3, direction: Vector3 = Vector3.ZERO) -> v
 	collision_mask = 0
 	# Only GlassBody is disabled; the surrounding frame keeps its own collision.
 	_spawn_fragments(hit_position, direction)
+
+
+# Wall signs fixed to the pane fall together with it.
+func _drop_mounted_signs() -> void:
+	var signs := get_tree().get_nodes_in_group(&"wall_signs")
+	if signs.is_empty():
+		return
+	for glass in _glass_nodes:
+		var pane := glass as MeshInstance3D
+		if pane == null or not is_instance_valid(pane):
+			continue
+		var area := (pane.global_transform * pane.get_aabb()).grow(0.2)
+		for wall_sign in signs:
+			if is_instance_valid(wall_sign) and area.has_point((wall_sign as Node3D).global_position):
+				wall_sign.call("fall_off_with_glass")
 
 
 func _replace_frame_collision() -> void:
