@@ -37,6 +37,16 @@ static func is_sheltered(world: World3D, from: Vector3, body: Node3D) -> bool:
 	return false
 
 
+## Plays one silent blast under `parent` so the particle, smoke and light pipelines
+## compile at load instead of as a freeze on the first real grenade.
+static func warm_up(parent: Node3D, point: Vector3) -> void:
+	var effect := EXPLOSION_V1.instantiate() as Node3D
+	effect.set("muted", true)
+	parent.add_child(effect)
+	effect.global_position = point
+	effect.call("start", Vector3.UP)
+
+
 static func explode(projectile: Node3D, location: Vector3, normal: Vector3, contact: Object, scene: Node3D, impacts: Node) -> void:
 	if not is_instance_valid(scene):
 		return

@@ -4,6 +4,7 @@ const ICONS := preload("res://game/presentation/prototype_hud/weapon_icon_region
 const PALETTE := preload("res://game/presentation/prototype_hud/hud_palette.gd")
 const HUD := preload("res://game/presentation/prototype_hud/public/prototype_hud.tscn")
 const PLAYER := preload("res://game/features/player/public/player.tscn")
+const UI_TRANSLATIONS := preload("res://game/core/localization/public/ui_translations.gd")
 
 class TestMission:
 	extends Node3D
@@ -20,6 +21,7 @@ func _init() -> void:
 
 
 func _run() -> void:
+	UI_TRANSLATIONS.apply_language("ru")
 	var image := ATLAS.get_image()
 	if image.is_compressed():
 		image.decompress()
@@ -116,7 +118,7 @@ func _test_key_cell(hud: Node, player: Node) -> void:
 	_expect(key_icon.texture != null and key_icon.texture.get_size() == ICONS.ARTWORK_BOUNDS[6].size, "Key cell shows the atlas key artwork.")
 	var objective := hud.get_node("Objective") as Control
 	_expect(objective.visible, "The mission goal appears once the key is held.")
-	_expect(_label_text(objective) == "Двигайся к пожарному выходу!", "The mission goal names the fire exit.")
+	_expect(_label_text(objective) == "Двигайся к пожарному выходу!", "The mission goal names the fire exit in Russian.")
 	_expect(objective.get_parent() == hud and objective.get_global_rect().get_center().x > hud.get_viewport().get_visible_rect().size.x * 0.4, "The mission goal sits at the top centre.")
 
 
@@ -151,7 +153,7 @@ func _test_cached_updates(hud: Node, player: Node) -> void:
 	weapon.set("_magazine_ammo", 0)
 	hud.call("_update_weapon")
 	_expect((hud.get("magazine") as Label).text == "0", "Ammo depletion updates the cached HUD")
-	_expect((hud.get("reload_label") as Label).text in ["RELOAD [R]", "NO AMMO", "RELOADING"], "Empty magazine preserves reload feedback")
+	_expect((hud.get("reload_label") as Label).text in [tr("hudReload"), tr("hudNoAmmo"), tr("hudReloading")], "Empty magazine preserves reload feedback")
 	weapon.set("_magazine_ammo", 1)
 	hud.call("_update_weapon")
 	_expect((hud.get("magazine") as Label).text == "1", "Ammo recovery clears the empty presentation")

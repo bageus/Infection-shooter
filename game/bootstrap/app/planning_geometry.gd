@@ -175,6 +175,10 @@ func _visual_object_at(screen_pos: Vector2) -> Node3D:
 	return best
 
 
+func lamp_at(screen_pos: Vector2) -> Node3D:
+	return _lamp_marker_at(session.camera.project_ray_origin(screen_pos), session.camera.project_ray_normal(screen_pos))
+
+
 # A lamp is only a small marker, so a wall or desk box around it must not win the click.
 func _lamp_marker_at(ray_origin: Vector3, ray_direction: Vector3) -> Node3D:
 	var best: Node3D

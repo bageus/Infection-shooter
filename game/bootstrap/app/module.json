@@ -24,6 +24,7 @@
     "features.combat",
     "core.audio",
     "features.infection",
-    "core.world_badge"
+    "core.world_badge",
+    "core.localization"
   ]
 }

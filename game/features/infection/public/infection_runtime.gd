@@ -215,6 +215,11 @@ func is_defeated() -> bool:
 	return _domain.defeated
 
 
+## True once a second loss has started or the next mutagen contact ends the run.
+func is_escalated() -> bool:
+	return _domain.is_escalated()
+
+
 func _emit_state_changes(previous_mutation: float, stability_changed: bool = false) -> void:
 	if stability_changed or not is_equal_approx(previous_mutation, _domain.mutation):
 		if tree.reconcile(_domain.mutation):

@@ -82,7 +82,7 @@ func _capture() -> void:
 	await process_frame
 	await RenderingServer.frame_post_draw
 	root.get_texture().get_image().save_png("/tmp/menu_previews/planner_fixture.png")
-	planner.controls.selected_light_color.get_popup().popup()
+	planner.controls.default_light_color.get_popup().popup()
 	await process_frame
 	await process_frame
 	await RenderingServer.frame_post_draw

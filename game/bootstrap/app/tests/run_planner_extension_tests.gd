@@ -130,19 +130,19 @@ func _installed_lamps(planner: Node) -> void:
 	for lamp: Node3D in lamps:
 		objects.call("_select", lamp)
 		var shape := str(lamp.call("get_fixture_config")["shape"])
-		_check(fixtures.selected_panel.visible and controls.selected_light_color.get_parent().visible, "Installed lamp shows its settings: " + shape)
-		for spin: SpinBox in [fixtures.selected_height, fixtures.selected_energy, fixtures.selected_angle]:
+		_check(controls.light_defaults.visible and fixtures.selected_panel.visible and controls.default_light_color.get_parent().visible, "Installed lamp shows the palette lamp editor: " + shape)
+		for spin: SpinBox in [controls.default_light_height, controls.default_light_energy, controls.default_light_angle]:
 			_check(spin.get_parent().visible, "Installed lamp shows editable %s: %s" % [spin.get_parent().name, shape])
-		fixtures.selected_height.value = 3.75
+		controls.default_light_height.value = 3.75
 		_check(is_equal_approx(lamp.global_position.y, 3.75), "Height field moves the installed lamp: " + shape)
-		fixtures.selected_energy.value = 9.5
+		controls.default_light_energy.value = 9.5
 		_check(is_equal_approx(float(lamp.call("get_authored_energy")), 9.5), "Brightness field edits the installed lamp: " + shape)
-		fixtures.selected_angle.value = 30.0
+		controls.default_light_angle.value = 30.0
 		_check(is_equal_approx((lamp.get_node("Light") as SpotLight3D).spot_angle, 30.0), "Cone field edits the installed lamp: " + shape)
 		planner.get("edit_history").call("undo")
 		_check(not is_equal_approx((lamp.get_node("Light") as SpotLight3D).spot_angle, 30.0), "Cone edit is undoable: " + shape)
 		objects.call("_select", lamp)
-		_check(is_equal_approx(fixtures.selected_height.value, lamp.global_position.y), "Fields refresh from the selected lamp: " + shape)
+		_check(is_equal_approx(controls.default_light_height.value, lamp.global_position.y), "Fields refresh from the selected lamp: " + shape)
 	objects.call("_select", null)
 
 
