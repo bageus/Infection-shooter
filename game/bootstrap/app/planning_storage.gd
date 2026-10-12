@@ -1,5 +1,7 @@
 extends RefCounted
 const MAP_FILE := preload("res://game/bootstrap/app/planning_map_file.gd")
+const WALL_FIXTURES := preload("res://game/bootstrap/app/planning_wall_fixtures.gd")
+const LAYOUT_LOADER := preload("res://game/bootstrap/app/planning_layout_loader.gd")
 
 const SAVE_PATH = "user://planned_layout.json"
 const MAPS_DIR = "user://maps"
@@ -103,6 +105,8 @@ func _collect_layout_data() -> Dictionary:
 			"spawn_y": (node.get_meta("planning_spawn_transform") as Transform3D).origin.y if node.has_meta("planning_spawn_transform") else node.position.y,
 			"spawn_z": (node.get_meta("planning_spawn_transform") as Transform3D).origin.z if node.has_meta("planning_spawn_transform") else node.position.z
 		})
+		if node.has_meta("planning_auto_fixture"):
+			records[-1]["auto_fixture"] = str(node.get_meta("planning_auto_fixture"))
 		if node.has_method("get_decor_pose"):
 			records[-1]["decor_pose"] = node.call("get_decor_pose")
 		if node.has_method("has_display") and node.call("has_display"):
@@ -232,6 +236,15 @@ static func _signature(data: Dictionary) -> String:
 	return "\n".join(rows)
 
 
+## Level checks that run on every save: group 13 signs at 1.75 m, automatic
+## light switches and fire alarm points on walls and columns.
+func enforce_wall_fixtures() -> String:
+	var report: Dictionary = WALL_FIXTURES.apply(objects, LAYOUT_LOADER.new(objects))
+	var text := " | signs adjusted %d, wall fixtures %d" % [int(report["signs"]), int(report["fixtures"])]
+	var missing: int = int(report["shortfall"]["switch"]) + int(report["shortfall"]["alarm"])
+	return text + ("" if missing == 0 else ", %d without free wall space" % missing)
+
+
 func save_named_map() -> void:
 	_ensure_maps_dir()
 	var safe_name = _safe_map_name(map_name_edit.text)
@@ -244,13 +257,14 @@ func save_named_map() -> void:
 		controls.status.text = "MAP '%s' EXISTS | press SAVE MAP again to overwrite" % safe_name
 		return
 	_overwrite_pending = ""
+	var fixtures := enforce_wall_fixtures()
 	var result := MAP_FILE.write(path, _collect_layout_data())
 	if result.has("error"):
 		controls.status.text = "MAP SAVE ERROR | " + str(result.error)
 		return
 	map_name_edit.text = safe_name
 	_refresh_map_list(safe_name)
-	controls.status.text = "MAP SAVED | " + safe_name
+	controls.status.text = "MAP SAVED | " + safe_name + fixtures
 
 
 func load_selected_map() -> void:
@@ -320,6 +334,7 @@ static func _skipped_text(report: Dictionary) -> String:
 
 
 func save_layout() -> void:
+	var fixtures := enforce_wall_fixtures()
 	var data = _collect_layout_data()
 	var records: Array = data.get("objects", [])
 	var result := MAP_FILE.write(SAVE_PATH, data)
@@ -338,7 +353,7 @@ func save_layout() -> void:
 		if scene_error != OK:
 			controls.status.text = "SAVED | %d objects | scene bake error %d" % [records.size(), scene_error]
 			return
-	controls.status.text = "SAVED | %d objects" % records.size()
+	controls.status.text = "SAVED | %d objects%s" % [records.size(), fixtures]
 
 
 func _save_authored_scene(target: String = AUTHORED_SCENE_PATH) -> Error:
