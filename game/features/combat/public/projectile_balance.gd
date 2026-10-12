@@ -44,7 +44,12 @@ static func material_cost(material: String) -> float:
 	return INF # Concrete, structural frames and unknown geometry stop shots.
 
 
+const BLAST_BREAK_DAMAGE := 100000.0
+
+
 static func object_damage(amount: float, weapon: String, category: String) -> float:
+	if weapon == "GRENADE" and amount > 0.0:
+		return BLAST_BREAK_DAMAGE # A grenade blast breaks everything it reaches.
 	if weapon == "PISTOL" and category != "small" and category != "tech":
 		return 0.0
 	if weapon == "SHOTGUN":

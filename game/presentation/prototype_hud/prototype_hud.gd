@@ -6,7 +6,13 @@ const ICON_TINT := preload("res://game/presentation/prototype_hud/icon_tint.gdsh
 const TITLE_FONT := preload("res://assets/interface/fonts/title.ttf")
 const MUTATION_ALARM := preload("res://game/presentation/prototype_hud/mutation_alarm_pulse.gd")
 const VITALS_FX := preload("res://game/presentation/prototype_hud/vitals_screen_fx.gd")
+const MUTATION_VEIL := preload("res://game/presentation/prototype_hud/mutation_veil.gd")
+const SFX := preload("res://game/core/audio/public/sound_events.gd")
 const OBJECTIVE_TEXT := "Двигайся к пожарному выходу!"
+const CONTROL_NOTICE_TEXT := "CONTROL LOST — MUTATION TAKES OVER"
+const CONTROL_NOTICE_TOP := 60.0
+const ANTIDOTE_FLASH_SECONDS := 1.0
+const ANTIDOTE_FLASH_BLINK := 0.25
 const DNA_BLINK_COUNT := 3
 const DNA_BLINK_STEP := 0.12
 # Semantic cells: rifle, pistol, uzi, shotgun, syringe, launcher, key.
@@ -43,7 +49,7 @@ var _perf_timer := 0.0
 var _antidote_hint_remaining := 0.0
 var _key_outline: StyleBoxFlat
 var _key_filled: StyleBoxFlat
-var _control_notice: Label
+var _control_notice: PanelContainer
 var _last_weapon_index := -1
 var _weapon_icons: Array[Texture2D] = []
 var _slot_weapon_indices := [-1, -1, -1]
@@ -56,6 +62,9 @@ var _mutation_alarm: RefCounted
 var _vitals_fx: Control
 var _objective: PanelContainer
 var _scale_blink: Tween
+var _veil: ColorRect
+var _antidote_flash_remaining := 0.0
+var _was_control_lost := false
 
 
 func _ready() -> void:
@@ -73,16 +82,14 @@ func _ready() -> void:
 	_configure_key_buttons()
 	weapon_name.hide()
 	weapon_name.text = ""
-	_control_notice = Label.new()
-	_control_notice.text = "CONTROL LOST — MUTATION TAKES OVER"
-	_control_notice.set_anchors_and_offsets_preset(Control.PRESET_TOP_WIDE)
-	_control_notice.position.y = 55.0
-	_control_notice.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	_control_notice.add_theme_font_override("font", TITLE_FONT)
-	_control_notice.add_theme_font_size_override("font_size", 24)
-	_control_notice.add_theme_color_override("font_color", PALETTE.WARNING)
-	_control_notice.add_theme_color_override("font_shadow_color", Color(0, 0, 0, 0.9))
-	_control_notice.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	_veil = MUTATION_VEIL.new()
+	_veil.name = "MutationVeil"
+	add_child(_veil)
+	move_child(_veil, 0)
+	_control_notice = _make_banner(CONTROL_NOTICE_TEXT, PALETTE.WARNING)
+	_control_notice.name = "ControlNotice"
+	_control_notice.offset_top = CONTROL_NOTICE_TOP
+	_control_notice.visible = false
 	add_child(_control_notice)
 	_build_objective()
 	infection.connect("control_ampule_collected", _on_control_ampule_collected)
@@ -90,6 +97,14 @@ func _ready() -> void:
 
 # Current goal shown once the emergency key is in hand, styled like the HUD frames.
 func _build_objective() -> void:
+	_objective = _make_banner(OBJECTIVE_TEXT, PALETTE.INK)
+	_objective.name = "Objective"
+	_objective.visible = false
+	add_child(_objective)
+
+
+# Top-centre banner in the shared HUD frame; objective and control-loss notices use the same look.
+func _make_banner(message: String, ink: Color) -> PanelContainer:
 	var frame := StyleBoxFlat.new()
 	frame.bg_color = PALETTE.PANEL
 	frame.border_color = PALETTE.BORDER
@@ -102,25 +117,28 @@ func _build_objective() -> void:
 	frame.shadow_color = Color(0, 0, 0, 0.35)
 	frame.shadow_size = 8
 	var text := Label.new()
-	text.text = OBJECTIVE_TEXT
+	text.text = message
 	text.add_theme_font_override("font", TITLE_FONT)
 	text.add_theme_font_size_override("font_size", 16)
-	text.add_theme_color_override("font_color", PALETTE.INK)
+	text.add_theme_color_override("font_color", ink)
 	text.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	_objective = PanelContainer.new()
-	_objective.name = "Objective"
-	_objective.set_anchors_and_offsets_preset(Control.PRESET_CENTER_TOP)
-	_objective.grow_horizontal = Control.GROW_DIRECTION_BOTH
-	_objective.offset_top = 16.0
-	_objective.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	_objective.add_theme_stylebox_override("panel", frame)
-	_objective.add_child(text)
-	_objective.visible = false
-	add_child(_objective)
+	var banner := PanelContainer.new()
+	banner.set_anchors_and_offsets_preset(Control.PRESET_CENTER_TOP)
+	banner.grow_horizontal = Control.GROW_DIRECTION_BOTH
+	banner.offset_top = 16.0
+	banner.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	banner.add_theme_stylebox_override("panel", frame)
+	banner.add_child(text)
+	return banner
 
 
 func _process(delta: float) -> void:
 	_control_notice.visible = bool(infection.call("is_control_lost"))
+	if _was_control_lost and not _control_notice.visible:
+		_start_antidote_flash()
+	_was_control_lost = _control_notice.visible
+	_veil.call("update", delta, bool(infection.call("is_escalated")))
+	_antidote_flash_remaining = maxf(0.0, _antidote_flash_remaining - delta)
 	_mutation_alarm.update(delta, _control_notice.visible)
 	_vitals_fx.update(delta, float(infection.call("get_mutation")), float(infection.call("get_critical_threshold")), _control_notice.visible, float(player.health), float(player.max_health))
 	_update_vitals()
@@ -342,8 +360,17 @@ func _update_key_buttons() -> void:
 	var active: int = player.get_current_weapon_index()
 	for index in slot_keys.size():
 		_set_key_state(slot_keys[index], index == active, blocked)
-	var using_antidote := _antidote_hint_remaining > 0.0 or Input.is_action_pressed("antidote") or antidote_key.is_pressed()
+	var flashing := _antidote_flash_remaining > 0.0 and fmod(_antidote_flash_remaining, ANTIDOTE_FLASH_BLINK * 2.0) > ANTIDOTE_FLASH_BLINK
+	var using_antidote := flashing or _antidote_hint_remaining > 0.0 or Input.is_action_pressed("antidote") or antidote_key.is_pressed()
 	_set_key_state(antidote_key, using_antidote, blocked or (player.antidotes <= 0 and not player.infinite_antidotes))
+
+
+# Control returned: a usable antidote blinks for a second with a soft cue.
+func _start_antidote_flash() -> void:
+	if player.antidotes <= 0 and not player.infinite_antidotes:
+		return
+	_antidote_flash_remaining = ANTIDOTE_FLASH_SECONDS
+	SFX.play_ui(self, &"mutation_hover")
 
 
 func _set_key_state(button: Button, selected: bool, blocked: bool) -> void:
