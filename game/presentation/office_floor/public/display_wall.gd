@@ -17,6 +17,7 @@ var dirty := false
 var _layout_wait := 0.0
 var _layout := LAYOUT.new()
 var _lighting_wait := 0.0
+var shadows_allowed := true
 const MAX_GLOW_LIGHTS := 16
 const MAX_SHADOW_LIGHTS := 4
 const GLOW_DISTANCE := 24.0
@@ -28,6 +29,11 @@ func register_display(display: Node3D) -> void:
 		displays.append(display)
 	update_animation(display)
 	request_layout()
+	_lighting_wait = 0.0
+
+
+func set_shadows_allowed(allowed: bool) -> void:
+	shadows_allowed = allowed
 	_lighting_wait = 0.0
 
 
@@ -100,7 +106,7 @@ func _refresh_lights() -> void:
 	for index in mini(MAX_GLOW_LIGHTS, candidates.size()):
 		var setting := candidates[index]
 		setting.visible = true
-		if float(setting.distance) <= SHADOW_DISTANCE and shadow_count < MAX_SHADOW_LIGHTS:
+		if shadows_allowed and float(setting.distance) <= SHADOW_DISTANCE and shadow_count < MAX_SHADOW_LIGHTS:
 			setting.shadows = true
 			shadow_count += 1
 	# Apply the complete decision once, avoiding shadow-atlas churn every .2s.

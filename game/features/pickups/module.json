@@ -8,7 +8,10 @@
     "public/med_case_green_pickup.tscn",
     "public/ammo_red_pickup.tscn",
     "public/ammo_orange_pickup.tscn",
-    "public/drop_table.gd"
+    "public/drop_table.gd",
+    "public/dna_pickup.tscn",
+    "public/loot_config.gd",
+    "public/loot_drop.gd"
   ],
   "dependencies": [],
   "runtime_contracts": {

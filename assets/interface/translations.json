@@ -139,7 +139,13 @@
     "skillEffects": "Эффекты навыков",
     "skillEffectsSheets": "Спрайтовые (ассеты)",
     "skillEffectsProcedural": "Процедурные (свои)",
-    "lighting": "Освещение"
+    "lighting": "Освещение",
+    "shadows": "Тени",
+    "shadowQuality": "Качество теней",
+    "shadowQuality0": "Низкое",
+    "shadowQuality1": "Среднее",
+    "shadowQuality2": "Высокое",
+    "shadowQuality3": "Максимум"
   },
   "en": {
     "demo": "INTERACTIVE UI DEMO",
@@ -281,6 +287,12 @@
     "skillEffects": "Skill effects",
     "skillEffectsSheets": "Sprite sheets (assets)",
     "skillEffectsProcedural": "Procedural (own)",
-    "lighting": "Lighting"
+    "lighting": "Lighting",
+    "shadows": "Shadows",
+    "shadowQuality": "Shadow quality",
+    "shadowQuality0": "Low",
+    "shadowQuality1": "Medium",
+    "shadowQuality2": "High",
+    "shadowQuality3": "Maximum"
   }
 }

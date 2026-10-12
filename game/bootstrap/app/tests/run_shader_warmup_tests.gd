@@ -19,8 +19,12 @@ func _run() -> void:
 	var camera := (app.get("player") as Node).get("camera") as Camera3D
 	var warmup := camera.get_node_or_null("ShaderWarmup")
 	_check(warmup != null and warmup.get_child_count() == paths.size(), "One quad per spatial shader under the camera")
-	for i in 5:
+	var hit_viewport := app.get_node_or_null("HitEffectWarmup") as SubViewport
+	var hit_effects := hit_viewport.get_node_or_null("HitEffects") if hit_viewport != null else null
+	_check(hit_effects != null and hit_effects.get("effect_count") >= 8, "Hit effects (sparks, smoke, paper, dust, sheets, water) play once in a hidden viewport")
+	for i in 8:
 		await process_frame
+	_check(app.get_node_or_null("HitEffectWarmup") == null, "Hidden hit-effect viewport is freed after a few frames")
 	_check(camera.get_node_or_null("ShaderWarmup") == null, "Warm-up quads are freed after a few frames")
 	app.queue_free()
 	await process_frame
