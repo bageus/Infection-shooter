@@ -2,6 +2,9 @@ extends RefCounted
 const SURFACE_ATLASES := preload("res://game/core/vfx/public/surface_atlases.gd")
 
 const RADIUS := 5.5
+const MOUNT_CLEARANCE := 0.35
+const QUERY_BATCH := 64
+const MAX_QUERY_PASSES := 24
 const MARK_LIFETIME := 25.0
 const SCORCH_SIZE_MIN := 2.55
 const SCORCH_SIZE_MAX := 4.05
@@ -21,6 +24,9 @@ static func is_sheltered(world: World3D, from: Vector3, body: Node3D) -> bool:
 			return false
 		var collider := hit.get("collider") as CollisionObject3D
 		if collider == null:
+			return false
+		# A wall the body hangs on touches it; that is not a wall in front of it.
+		if from.distance_to(hit.get("position") as Vector3) > from.distance_to(target) - MOUNT_CLEARANCE:
 			return false
 		# Only real walls shelter: not the target's own body-part hitboxes
 		# (static bodies on its bones) and nothing that takes bullet hits.
@@ -45,7 +51,7 @@ static func explode(projectile: Node3D, location: Vector3, normal: Vector3, cont
 	query.transform.origin = location
 	query.collision_mask = 7
 	var hit_ids := {}
-	for hit in projectile.get_world_3d().direct_space_state.intersect_shape(query, 256):
+	for hit in _blast_hits(projectile.get_world_3d().direct_space_state, query):
 		var collider: Object = hit.get("collider")
 		if collider == null or hit_ids.has(collider.get_instance_id()):
 			continue
@@ -84,6 +90,24 @@ static func explode(projectile: Node3D, location: Vector3, normal: Vector3, cont
 		var surface := projectile.get_world_3d().direct_space_state.intersect_ray(trace)
 		if not surface.is_empty() and not surface["collider"].has_method("take_projectile_hit"):
 			_scorch(scene, surface["position"], surface["normal"], impacts, surface["collider"] as Node3D)
+
+
+## Every body in the blast sphere. Floors and walls own many shapes and would
+## fill a single query, so each pass excludes the bodies already found.
+static func _blast_hits(space: PhysicsDirectSpaceState3D, query: PhysicsShapeQueryParameters3D) -> Array[Dictionary]:
+	var found: Array[Dictionary] = []
+	var excluded: Array[RID] = []
+	for _pass in MAX_QUERY_PASSES:
+		query.exclude = excluded
+		var batch := space.intersect_shape(query, QUERY_BATCH)
+		if batch.is_empty():
+			break
+		for hit in batch:
+			var rid: RID = hit.get("rid", RID())
+			if not excluded.has(rid):
+				excluded.append(rid)
+				found.append(hit)
+	return found
 
 
 static func _receives_blast(body: Node3D) -> bool:

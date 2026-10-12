@@ -19,6 +19,8 @@ const WEAPON_SOUNDS := {
 	"GRENADE LAUNCHER": [&"launcher_fire", &"launcher_reload", &"casing_heavy"],
 }
 const SPIN_HOLD := 0.12
+# Time the barrels keep turning at full speed after the trigger is released.
+const SPIN_COAST := 0.35
 @export var direct_reserve_feed := false
 @export var casing_size_multiplier := 1.0
 @export var camera_distance_bonus := 0.0
@@ -61,6 +63,7 @@ var _barrel_angle := 0.0
 # Spin from 0 (still) to 1 (full speed) and the time the trigger is still held.
 var _spin := 0.0
 var _spin_hold := 0.0
+var _spin_coast := 0.0
 var _spin_sound: AudioStreamPlayer3D
 
 
@@ -84,11 +87,14 @@ func _ready() -> void:
 		add_child(_spin_sound)
 func _process(delta: float) -> void:
 	_spin_hold = maxf(0.0, _spin_hold - delta)
+	_spin_coast = SPIN_COAST if _spin_hold > 0.0 else maxf(0.0, _spin_coast - delta)
 	if spin_up_time > 0.0:
-		_spin = move_toward(_spin, 1.0 if _spin_hold > 0.0 else 0.0, delta / spin_up_time)
+		_spin = move_toward(_spin, 1.0 if _spin_coast > 0.0 else 0.0, delta / spin_up_time)
 	var speed := _spin if spin_up_time > 0.0 else 1.0
 	if _spin_sound != null:
-		_spin_sound.volume_db = lerpf(-60.0, -4.0, _spin)
+		# Pitch and level fall together as the barrels slow down after release.
+		_spin_sound.pitch_scale = lerpf(0.6, 1.0, _spin)
+		_spin_sound.volume_db = lerpf(-60.0, -12.0, _spin)
 		if _spin > 0.001 and not _spin_sound.playing:
 			_spin_sound.play()
 		elif _spin <= 0.001 and _spin_sound.playing:
