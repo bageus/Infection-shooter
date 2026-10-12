@@ -2,6 +2,7 @@ extends RefCounted
 const NOTICES := preload("res://game/bootstrap/app/menu/settings_notices.gd")
 var notices := NOTICES.new()
 const SHADOWS := preload("res://game/bootstrap/app/menu/shadow_quality.gd")
+const SETTLE_SECONDS := 0.35
 const EDITOR := preload("res://game/bootstrap/app/menu/control_binding_editor.gd")
 var dialog: Control
 var tabs: TabContainer
@@ -145,6 +146,12 @@ func _video() -> void:
 	shadows.toggled.connect(func(value: bool) -> void:
 		_set_shadow_quality_enabled(quality, quality_name, value)
 		dialog.call("_change", "shadows", value))
+	var mesh_lod := CheckButton.new()
+	mesh_lod.name = "MeshLod"
+	mesh_lod.text = dialog.view.text("meshLod")
+	mesh_lod.button_pressed = dialog.view.preferences.values.mesh_lod
+	mesh_lod.toggled.connect(func(value: bool) -> void: dialog.call("_change", "mesh_lod", value))
+	dialog.get("layout").add_child(mesh_lod)
 	var particles := CheckButton.new()
 	particles.name = "ElectronicParticles"
 	particles.text = dialog.view.text("electronicParticles")
@@ -168,9 +175,17 @@ func _shadow_quality() -> void:
 	slider.tick_count = SHADOWS.level_count()
 	slider.value = dialog.view.preferences.values.shadow_quality
 	name_label.text = dialog.view.text("shadowQuality" + str(int(slider.value)))
+	# Applying rewrites the settings file, rebuilds the menu and resizes the shadow atlas,
+	# so it waits until the slider has stopped moving.
+	var settle := Timer.new()
+	settle.one_shot = true
+	settle.wait_time = SETTLE_SECONDS
+	slider.add_child(settle)
+	settle.timeout.connect(func() -> void: dialog.call("_change", "shadow_quality", int(slider.value)))
 	slider.value_changed.connect(func(value: float) -> void:
 		name_label.text = dialog.view.text("shadowQuality" + str(int(value)))
-		dialog.call("_change", "shadow_quality", int(value)))
+		dialog.view.preferences.values.shadow_quality = int(value)
+		settle.start())
 	var box := HBoxContainer.new()
 	box.add_child(slider)
 	box.add_child(name_label)
