@@ -293,3 +293,13 @@ the licence of their source (CC0 / CC-BY).
 ## Interface cues (2026-10-05)
 
 assets/audio/ui/*.tres: original procedural synthesis for this project, dedicated to CC0-1.0. Generated reproducibly by tools/build_ui_sounds.py using Python standard library only; no source recordings. Menu hover, mutation hover/click, lock and its reversed unlock cue.
+
+## Weapon variants (tools/build_weapon_sounds.py)
+
+| Event | Derived from | Processing |
+|---|---|---|
+| ak_fire | rifle_fire (see table above) | mid crack, light drive |
+| m4_fire | assault_rifle_fire (see table above) | faster, brighter report |
+| sniper_fire | rifle_fire (see table above) | lower, longer report with a boom and echo tail |
+| minigun_fire | assault_rifle_fire (see table above) | short, rattling bursts with a light flutter |
+| minigun_spinup | *synthesised* by tools/build_weapon_sounds.py | rising whine with ticks |

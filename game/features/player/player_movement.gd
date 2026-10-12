@@ -18,6 +18,7 @@ signal healed(amount: float, source: StringName)
 
 const CONTROL_LOSS := preload("res://game/features/player/mutation_control_loss.gd")
 const MUTATION_EFFECTS := preload("res://game/features/player/mutation_skill_effects.gd")
+const SCOPE_RAISE := preload("res://game/features/player/scope_raise_state.gd")
 const WEAPON_STANCE := preload("res://game/features/player/player_weapon_stance.gd")
 const ANIMATION_SELECTION := preload("res://game/features/player/player_animation_selection.gd")
 const PLAYER_AUDIO := preload("res://game/features/player/player_audio.gd")
@@ -53,6 +54,7 @@ var _intended_motion := Vector3.ZERO
 var audio: Node
 var weapon_stance := WEAPON_STANCE.new()
 var _animation_selection := ANIMATION_SELECTION.new()
+var _scope_raise := SCOPE_RAISE.new()
 var health: float
 var armor: float
 var antidotes: int
@@ -127,7 +129,10 @@ func _physics_process(delta: float) -> void:
 	weapon_mount.call("aim_at", _aim_point)
 	_update_move(delta)
 	var w:=get_current_weapon()
-	if w != null and not _mutation_menu_open and _roll_remaining <= 0.0 and (control_lost or (Input.is_action_pressed("fire") if bool(w.call("wants_continuous_fire")) else Input.is_action_just_pressed("fire"))):
+	var fire_pressed := w != null and not _mutation_menu_open and _roll_remaining <= 0.0 and (control_lost or (Input.is_action_pressed("fire") if bool(w.call("wants_continuous_fire")) else Input.is_action_just_pressed("fire")))
+	if w != null and _scope_raise.step(delta, _scope_magnification(w) > 1.0, fire_pressed and not control_lost):
+		_fire_weapon(w)
+	elif fire_pressed and control_lost:
 		_fire_weapon(w)
 func _unhandled_input(event: InputEvent) -> void:
 	if get_tree().paused:
@@ -140,6 +145,9 @@ func _unhandled_input(event: InputEvent) -> void:
 			get_viewport().set_input_as_handled()
 		elif event.button_index == MOUSE_BUTTON_WHEEL_DOWN:
 			_camera_distance=clampf(_camera_distance+camera_zoom_step,camera_min_distance,camera_max_distance)
+			get_viewport().set_input_as_handled()
+		elif event.button_index == MOUSE_BUTTON_RIGHT and not _mutation_menu_open and not infection_runtime.call("is_control_lost"):
+			_scope_raise.toggle(_scope_magnification(get_current_weapon()) > 1.0)
 			get_viewport().set_input_as_handled()
 func _handle_actions() -> void:
 	if Input.is_action_just_pressed("weapon_1"): _select_weapon(0)
@@ -167,6 +175,7 @@ func _select_weapon(index:int)->void:
 	var old:=get_current_weapon()
 	if old!=null: old.call("cancel_reload")
 	current_weapon_index=index
+	_scope_raise.reset()
 	weapon_stance.select_weapon(_slot_weapons[index])
 	for i in weapons.size(): weapons[i].visible=i==_slot_weapons[index]
 	weapon_mount.call("select_weapon", get_current_weapon())
@@ -489,5 +498,10 @@ func _aim_uncontrolled() -> void:
 # Public weapon_view_v1: read-only view data, never persisted.
 func get_weapon_view() -> Dictionary:
 	var weapon := get_current_weapon()
-	var magnification: Variant = weapon.get("scope_magnification")
-	return {"camera": camera, "target": _aim_point, "magnification": float(magnification) if magnification != null else 0.0}
+	var magnification := 0.0 if _scope_raise.hidden else _scope_magnification(weapon)
+	return {"camera": camera, "target": _aim_point, "magnification": magnification}
+
+
+func _scope_magnification(weapon: Node3D) -> float:
+	var magnification: Variant = weapon.get("scope_magnification") if weapon != null else null
+	return float(magnification) if magnification != null else 0.0
