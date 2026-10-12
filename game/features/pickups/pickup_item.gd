@@ -53,7 +53,8 @@ func _physics_process(_delta: float) -> void:
 	set_physics_process(false)
 	var query := PhysicsRayQueryParameters3D.create(global_position + Vector3.UP * 0.5, global_position + Vector3.DOWN * 32.0, floor_mask)
 	query.collide_with_areas = false
-	query.exclude = [get_rid()]
+	var skipped: Array[RID] = [get_rid()]
+	query.exclude = skipped
 	for attempt in range(16):
 		var hit := get_world_3d().direct_space_state.intersect_ray(query)
 		if hit.is_empty():
@@ -66,7 +67,9 @@ func _physics_process(_delta: float) -> void:
 			return
 		if receiver == null:
 			break
-		query.exclude.append(receiver.get_rid())
+		# The property hands back a copy, so appending to it excluded nothing.
+		skipped.append(receiver.get_rid())
+		query.exclude = skipped
 	queue_free()
 
 

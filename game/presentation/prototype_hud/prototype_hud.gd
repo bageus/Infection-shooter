@@ -5,7 +5,6 @@ const PALETTE := preload("res://game/presentation/prototype_hud/hud_palette.gd")
 const ICON_TINT := preload("res://game/presentation/prototype_hud/icon_tint.gdshader")
 const TITLE_FONT := preload("res://assets/interface/fonts/title.ttf")
 const MUTATION_ALARM := preload("res://game/presentation/prototype_hud/mutation_alarm_pulse.gd")
-const VITALS_FX := preload("res://game/presentation/prototype_hud/vitals_screen_fx.gd")
 const OBJECTIVE_TEXT := "Двигайся к пожарному выходу!"
 const DNA_BLINK_COUNT := 3
 const DNA_BLINK_STEP := 0.12
@@ -48,7 +47,6 @@ var _last_weapon_index := -1
 var _weapon_icons: Array[Texture2D] = []
 var _slot_weapon_indices := [-1, -1, -1]
 var _vital_snapshot: Array = []
-var _vitals_fx: Control
 var _hp_flash: Tween
 var _weapon_snapshot: Array = []
 
