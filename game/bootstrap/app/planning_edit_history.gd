@@ -14,7 +14,8 @@ func record_transform(node: Node3D) -> void:
 		"decor_pose": node.call("get_decor_pose") if node.has_method("get_decor_pose") else {},
 		"fixture": node.call("get_fixture_config") if node.has_method("get_fixture_config") else {},
 		"light_color": node.call("get_authored_color") if node.has_method("get_authored_color") else null,
-		"light_energy": node.get_meta("planning_light_energy", -1.0), "light_angle": node.get_meta("planning_light_angle", -1.0)})
+		"light_energy": node.get_meta("planning_light_energy", -1.0), "light_angle": node.get_meta("planning_light_angle", -1.0),
+		"loot": _loot_of(node), "enemy_stats": node.call("get_enemy_stats") if node.has_method("configure_stats") else {}})
 
 
 func record_player_spawn() -> void:
@@ -89,6 +90,7 @@ func undo() -> void:
 					if spot != null:
 						spot.spot_angle = float(action["light_angle"])
 						node.set_meta("planning_light_angle", spot.spot_angle)
+				_apply_loot(node, action.get("loot", {}), action.get("enemy_stats", {}))
 				planner._sync_workstations()
 				if planner.selected == node:
 					planner._select(node)
@@ -122,7 +124,25 @@ func _capture(node: Node3D) -> Dictionary:
 		"energy_multiplier": float(node.get("energy_multiplier")) if node.has_method("get_authored_energy") else 0.65,
 		"light_angle": float(node.get_meta("planning_light_angle", -1.0)),
 		"flicker_mode": int(node.get_meta("planning_flicker_mode", 0)), "flicker_step": float(node.get_meta("planning_flicker_step", 0.2)),
-		"blood": node.call("get_blood_config") if node.has_method("get_blood_config") else {}}
+		"blood": node.call("get_blood_config") if node.has_method("get_blood_config") else {},
+		"loot": _loot_of(node), "enemy_stats": node.call("get_enemy_stats") if node.has_method("configure_stats") else {}}
+
+
+## Authored loot is kept only where it was set, so old objects stay untouched.
+func _loot_of(node: Node3D) -> Dictionary:
+	if node.has_method("get_loot_config") and node.has_meta(&"planning_loot"):
+		return node.call("get_loot_config")
+	return {}
+
+
+func _apply_loot(node: Node3D, loot: Dictionary, stats: Dictionary) -> void:
+	if node.has_method("configure_loot"):
+		if loot.is_empty():
+			node.remove_meta(&"planning_loot")
+		else:
+			node.call("configure_loot", loot)
+	if node.has_method("configure_stats") and not stats.is_empty():
+		node.call("configure_stats", stats)
 
 
 func _restore(record: Dictionary, offset: Vector3, new_desk: bool) -> Node3D:
@@ -178,6 +198,7 @@ func _restore(record: Dictionary, offset: Vector3, new_desk: bool) -> Node3D:
 			node.set_meta("planning_light_angle", spot.spot_angle)
 	if node.has_method("configure_flicker"):
 		node.call("configure_flicker", int(record["flicker_mode"]), float(record["flicker_step"]))
+	_apply_loot(node, record.get("loot", {}), record.get("enemy_stats", {}))
 	if node.has_method("set_target") and str(record["kind"]) == "enemy":
 		node.call("set_target", planner.main_player)
 	planner.placed.append(node)
