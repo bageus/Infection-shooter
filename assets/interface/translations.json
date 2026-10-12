@@ -146,7 +146,21 @@
     "shadowQuality1": "Среднее",
     "shadowQuality2": "Высокое",
     "shadowQuality3": "Максимум",
-    "meshLod": "Упрощение дальних моделей (LOD)"
+    "meshLod": "Упрощение дальних моделей (LOD)",
+    "controlLost": "КОНТРОЛЬ ПОТЕРЯН — МУТАЦИЯ ВЗЯЛА ВЕРХ",
+    "objectiveFireExit": "Двигайся к пожарному выходу!",
+    "hudHealth": "ЗДОРОВЬЕ",
+    "hudMutation": "МУТАЦИЯ",
+    "hudKey": "КЛЮЧ",
+    "hudEnemies": "ВРАГИ %d",
+    "hudFps": "FPS %d",
+    "hudTotal": "ВСЕГО",
+    "hudReloading": "ПЕРЕЗАРЯДКА",
+    "hudReload": "ПЕРЕЗАРЯДКА [R]",
+    "hudNoAmmo": "НЕТ ПАТРОНОВ",
+    "hudAntidoteTip": "Использовать антидот [F]",
+    "hudEmergencyKeyTip": "Аварийный ключ",
+    "hudSelectWeapon": "Выбрать оружие [%d]"
   },
   "en": {
     "demo": "INTERACTIVE UI DEMO",
@@ -295,6 +309,20 @@
     "shadowQuality1": "Medium",
     "shadowQuality2": "High",
     "shadowQuality3": "Maximum",
-    "meshLod": "Far model simplification (LOD)"
+    "meshLod": "Far model simplification (LOD)",
+    "controlLost": "CONTROL LOST — MUTATION TAKES OVER",
+    "objectiveFireExit": "Head for the fire exit!",
+    "hudHealth": "HEALTH",
+    "hudMutation": "MUTATION",
+    "hudKey": "KEY",
+    "hudEnemies": "ENEMIES %d",
+    "hudFps": "FPS %d",
+    "hudTotal": "TOTAL",
+    "hudReloading": "RELOADING",
+    "hudReload": "RELOAD [R]",
+    "hudNoAmmo": "NO AMMO",
+    "hudAntidoteTip": "Use antidote [F]",
+    "hudEmergencyKeyTip": "Emergency key",
+    "hudSelectWeapon": "Select weapon [%d]"
   }
 }

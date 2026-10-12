@@ -2,6 +2,7 @@ extends RefCounted
 
 const SHADOWS := preload("res://game/bootstrap/app/menu/shadow_quality.gd")
 const BINDINGS := preload("res://game/bootstrap/app/menu/control_bindings.gd")
+const UI_TRANSLATIONS := preload("res://game/core/localization/public/ui_translations.gd")
 var bindings := BINDINGS.new()
 
 const FILE := "user://interface_settings.cfg"
@@ -50,6 +51,7 @@ func reset() -> void:
 ## sound on/off and the 3D scene brightness.
 func apply_to_game(tree: SceneTree) -> void:
 	bindings.apply()
+	UI_TRANSLATIONS.apply_language(str(values.language))
 	var master := AudioServer.get_bus_index(&"Master")
 	if master >= 0:
 		AudioServer.set_bus_mute(master, not bool(values.sound))

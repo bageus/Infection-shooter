@@ -11,7 +11,8 @@
   ],
   "dependencies": [
     "features.player",
-    "core.audio"
+    "core.audio",
+    "core.localization"
   ],
   "runtime_contracts": {
     "crosshair_wiring_v1": "configure(actor: Node) -> void; injected player weapon_view_v1 query"

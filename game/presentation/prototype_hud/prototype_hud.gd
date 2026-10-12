@@ -8,8 +8,7 @@ const MUTATION_ALARM := preload("res://game/presentation/prototype_hud/mutation_
 const VITALS_FX := preload("res://game/presentation/prototype_hud/vitals_screen_fx.gd")
 const MUTATION_VEIL := preload("res://game/presentation/prototype_hud/mutation_veil.gd")
 const SFX := preload("res://game/core/audio/public/sound_events.gd")
-const OBJECTIVE_TEXT := "Двигайся к пожарному выходу!"
-const CONTROL_NOTICE_TEXT := "CONTROL LOST — MUTATION TAKES OVER"
+const UI_TRANSLATIONS := preload("res://game/core/localization/public/ui_translations.gd")
 const CONTROL_NOTICE_TOP := 60.0
 const ANTIDOTE_FLASH_SECONDS := 1.0
 const ANTIDOTE_FLASH_BLINK := 0.25
@@ -41,6 +40,9 @@ const DNA_BLINK_STEP := 0.12
 @onready var antidote_key: Button = $AntidotePanel/KeyHint
 @onready var key_panel: Panel = $KeyPanel
 @onready var key_icon: TextureRect = $KeyPanel/KeyIcon
+@onready var health_caption: Label = $HealthPanel/HealthCaption
+@onready var mutation_caption: Label = $HealthPanel/MutationCaption
+@onready var key_caption: Label = $KeyPanel/KeyCaption
 @onready var slot_frames: Array[Panel] = [$WeaponPanel/Slot1, $WeaponPanel/Slot2, $WeaponPanel/Slot3]
 
 var player: Node
@@ -61,6 +63,7 @@ var _has_key := false
 var _mutation_alarm: RefCounted
 var _vitals_fx: Control
 var _objective: PanelContainer
+var _texts_locale := ""
 var _scale_blink: Tween
 var _veil: ColorRect
 var _antidote_flash_remaining := 0.0
@@ -68,6 +71,7 @@ var _was_control_lost := false
 
 
 func _ready() -> void:
+	UI_TRANSLATIONS.ensure_registered()
 	player = get_node(player_path)
 	infection = player.get_node("InfectionRuntime")
 	hp_bar.max_value = player.max_health
@@ -86,18 +90,35 @@ func _ready() -> void:
 	_veil.name = "MutationVeil"
 	add_child(_veil)
 	move_child(_veil, 0)
-	_control_notice = _make_banner(CONTROL_NOTICE_TEXT, PALETTE.WARNING)
+	_control_notice = _make_banner("", PALETTE.WARNING)
 	_control_notice.name = "ControlNotice"
 	_control_notice.offset_top = CONTROL_NOTICE_TOP
 	_control_notice.visible = false
 	add_child(_control_notice)
 	_build_objective()
+	_apply_texts()
 	infection.connect("control_ampule_collected", _on_control_ampule_collected)
+
+
+# Static HUD text follows the UI language; the dynamic labels refresh on their next update.
+func _apply_texts() -> void:
+	_texts_locale = TranslationServer.get_locale()
+	(_control_notice.get_child(0) as Label).text = tr("controlLost")
+	(_objective.get_child(0) as Label).text = tr("objectiveFireExit")
+	health_caption.text = tr("hudHealth")
+	mutation_caption.text = tr("hudMutation")
+	key_caption.text = tr("hudKey")
+	antidote_key.tooltip_text = tr("hudAntidoteTip")
+	key_panel.tooltip_text = tr("hudEmergencyKeyTip")
+	for index in slot_keys.size():
+		slot_keys[index].tooltip_text = tr("hudSelectWeapon") % (index + 1)
+	_vital_snapshot = []
+	_weapon_snapshot = []
 
 
 # Current goal shown once the emergency key is in hand, styled like the HUD frames.
 func _build_objective() -> void:
-	_objective = _make_banner(OBJECTIVE_TEXT, PALETTE.INK)
+	_objective = _make_banner("", PALETTE.INK)
 	_objective.name = "Objective"
 	_objective.visible = false
 	add_child(_objective)
@@ -133,6 +154,8 @@ func _make_banner(message: String, ink: Color) -> PanelContainer:
 
 
 func _process(delta: float) -> void:
+	if TranslationServer.get_locale() != _texts_locale:
+		_apply_texts()
 	_control_notice.visible = bool(infection.call("is_control_lost"))
 	if _was_control_lost and not _control_notice.visible:
 		_start_antidote_flash()
@@ -148,8 +171,8 @@ func _process(delta: float) -> void:
 	_perf_timer += delta
 	if _perf_timer >= 0.25:
 		_perf_timer = 0.0
-		fps_label.text = "FPS %d" % Engine.get_frames_per_second()
-		enemy_count_label.text = "ENEMIES %d" % get_tree().get_nodes_in_group("infected_alive").size()
+		fps_label.text = tr("hudFps") % Engine.get_frames_per_second()
+		enemy_count_label.text = tr("hudEnemies") % get_tree().get_nodes_in_group("infected_alive").size()
 
 
 func _configure_icon_regions() -> void:
@@ -275,7 +298,7 @@ func _update_weapon() -> void:
 	weapon_icon.tooltip_text = weapon.call("get_weapon_name").to_upper()
 
 	magazine.text = str(magazine_ammo)
-	reserve.text = "TOTAL" if bool(weapon.get("direct_reserve_feed")) else "/ %d" % reserve_ammo
+	reserve.text = tr("hudTotal") if bool(weapon.get("direct_reserve_feed")) else "/ %d" % reserve_ammo
 	_update_reload_message(reloading, empty, reserve_ammo)
 	_update_weapon_warning(empty)
 	_update_weapon_slots(empty)
@@ -283,11 +306,11 @@ func _update_weapon() -> void:
 
 func _update_reload_message(reloading: bool, empty: bool, reserve_ammo: int) -> void:
 	if reloading:
-		reload_label.text = "RELOADING"
+		reload_label.text = tr("hudReloading")
 	elif empty and reserve_ammo > 0:
-		reload_label.text = "RELOAD [R]"
+		reload_label.text = tr("hudReload")
 	elif empty:
-		reload_label.text = "NO AMMO"
+		reload_label.text = tr("hudNoAmmo")
 	else:
 		reload_label.text = ""
 
