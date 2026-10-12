@@ -11,6 +11,8 @@ var buffs: Dictionary = {}
 var last_hit_time := -100.0
 var heart_cooldown := 0.0
 var kill_streak := 0
+var _alive_cache: Array = []
+var _alive_frame := -1
 var kill_timer := 0.0
 ## Seconds between melee strikes; reach is measured to the enemy's surface.
 const MELEE_COOLDOWN := 0.5
@@ -428,10 +430,22 @@ func _environment_ray(space: PhysicsDirectSpaceState3D, from: Vector3, to: Vecto
 	return {}
 
 
+# One group scan per frame: acid pools, dashes and epidemic all query it
+# several times a frame. Freed members are skipped when the list is read.
+func _alive_enemies() -> Array:
+	var frame := Engine.get_process_frames()
+	if frame != _alive_frame:
+		_alive_frame = frame
+		_alive_cache.clear()
+		_alive_cache.assign(get_tree().get_nodes_in_group("infected_alive"))
+	return _alive_cache
+
+
 func _enemies_near(center: Vector3, radius: float, nearest_first: bool = false) -> Array[Node3D]:
 	var result: Array[Node3D] = []
-	for node in get_tree().get_nodes_in_group("infected_alive"):
-		if node is Node3D and (node as Node3D).global_position.distance_squared_to(center) <= radius * radius and float(node.get("health")) > 0.0:
+	var reach := radius * radius
+	for node in _alive_enemies():
+		if is_instance_valid(node) and node is Node3D and node.global_position.distance_squared_to(center) <= reach and float(node.get("health")) > 0.0:
 			result.append(node as Node3D)
 	if nearest_first:
 		result.sort_custom(func(a: Node3D, b: Node3D) -> bool: return a.global_position.distance_squared_to(center) < b.global_position.distance_squared_to(center))
