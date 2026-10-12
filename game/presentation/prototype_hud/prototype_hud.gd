@@ -5,6 +5,7 @@ const PALETTE := preload("res://game/presentation/prototype_hud/hud_palette.gd")
 const ICON_TINT := preload("res://game/presentation/prototype_hud/icon_tint.gdshader")
 const TITLE_FONT := preload("res://assets/interface/fonts/title.ttf")
 const MUTATION_ALARM := preload("res://game/presentation/prototype_hud/mutation_alarm_pulse.gd")
+const VITALS_FX := preload("res://game/presentation/prototype_hud/vitals_screen_fx.gd")
 # Semantic cells: rifle, pistol, uzi, shotgun, syringe, launcher, key.
 @export var weapon_icon_cells := PackedInt32Array([1, 2, 3, 5])
 @export var antidote_icon_cell := 4
@@ -49,6 +50,7 @@ var _weapon_snapshot: Array = []
 
 var _has_key := false
 var _mutation_alarm: RefCounted
+var _vitals_fx: Control
 
 
 func _ready() -> void:
@@ -57,6 +59,10 @@ func _ready() -> void:
 	hp_bar.max_value = player.max_health
 	mutation_bar.max_value = 100.0
 	_mutation_alarm = MUTATION_ALARM.new(mutation_bar)
+	_vitals_fx = VITALS_FX.new()
+	_vitals_fx.name = "VitalsScreenFx"
+	add_child(_vitals_fx)
+	move_child(_vitals_fx, 0)
 	_configure_icon_tints()
 	_configure_icon_regions()
 	_configure_key_buttons()
@@ -78,6 +84,7 @@ func _ready() -> void:
 func _process(delta: float) -> void:
 	_control_notice.visible = bool(infection.call("is_control_lost"))
 	_mutation_alarm.update(delta, _control_notice.visible)
+	_vitals_fx.update(delta, float(infection.call("get_mutation")), float(infection.call("get_critical_threshold")), _control_notice.visible, float(player.health), float(player.max_health))
 	_update_vitals()
 	_update_weapon()
 	_antidote_hint_remaining = maxf(0.0, _antidote_hint_remaining - delta)
