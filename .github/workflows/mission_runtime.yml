@@ -242,7 +242,8 @@ jobs:
             for suite in game/bootstrap/app/tests/run_planner_light_view_tests.gd game/presentation/office_floor/tests/run_display_shadow_profile.gd game/presentation/prototype_hud/tests/run_radar_tests.gd game/presentation/office_floor/tests/run_floor_batch_tests.gd game/features/combat/tests/run_grenade_vfx_tests.gd game/features/infected/tests/run_corpse_physics_tests.gd game/bootstrap/app/tests/run_settings_tabs_tests.gd game/bootstrap/app/tests/run_surface_pose_tests.gd game/features/combat/tests/run_cursor_aim_tests.gd game/bootstrap/app/tests/run_gameplay_planner_repairs_tests.gd game/bootstrap/app/tests/run_runtime_debug_tests.gd game/bootstrap/app/tests/run_blast_feedback_tests.gd; do
               suite_status=0
               started_at=$(date +%s)
-              timeout 180 xvfb-run -a godot --path . --audio-driver Dummy --rendering-method "$renderer" --script "$suite" > /tmp/occlusion.log 2>&1 || suite_status=$?
+              # 300 s: full-mission rendered suites run 85-200 s on the software renderer (run_runtime_debug_tests: 84 s this morning, ~190 s on current main) and 180 s+ on shared runners.
+              timeout 300 xvfb-run -a godot --path . --audio-driver Dummy --rendering-method "$renderer" --script "$suite" > /tmp/occlusion.log 2>&1 || suite_status=$?
               elapsed=$(( $(date +%s) - started_at ))
               echo "$renderer: $suite exited $suite_status in ${elapsed}s"
               if [ "$suite_status" != 0 ]; then

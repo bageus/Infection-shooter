@@ -145,7 +145,8 @@
     "shadowQuality0": "Низкое",
     "shadowQuality1": "Среднее",
     "shadowQuality2": "Высокое",
-    "shadowQuality3": "Максимум"
+    "shadowQuality3": "Максимум",
+    "meshLod": "Упрощение дальних моделей (LOD)"
   },
   "en": {
     "demo": "INTERACTIVE UI DEMO",
@@ -293,6 +294,7 @@
     "shadowQuality0": "Low",
     "shadowQuality1": "Medium",
     "shadowQuality2": "High",
-    "shadowQuality3": "Maximum"
+    "shadowQuality3": "Maximum",
+    "meshLod": "Far model simplification (LOD)"
   }
 }

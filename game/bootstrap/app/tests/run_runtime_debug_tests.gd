@@ -7,7 +7,8 @@ func _initialize() -> void:
 	call_deferred("_run")
 
 func _run() -> void:
-	# Keep the full scene, live rendering and all 150 movement frames.
+	# Keep the full scene, live rendering and 96 movement frames (two thirds of a full
+	# sine sweep; software rendering of the full mission is ~0.7 s per frame).
 	# This suite checks state/material lifecycle, not pixel resolution.
 	root.size = Vector2i(320, 180)
 	var had := FileAccess.file_exists(PREFS.FILE)
@@ -30,7 +31,7 @@ func _run() -> void:
 	_check(app.gameplay.get_node_or_null("PermanentTestMutagen") == null, "Normal launch has no infectious test cloud")
 	var start: Vector3 = hero.global_position
 	var mesh := _blocker(app, effects, start)
-	for frame in 150:
+	for frame in 96:
 		# Move through different camera occlusion positions without combat exposure.
 		hero.global_position = start + Vector3(sin(frame * .08) * 2.0, 0, cos(frame * .08))
 		await physics_frame

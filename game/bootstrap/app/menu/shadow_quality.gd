@@ -1,14 +1,20 @@
 extends RefCounted
 ## Shadow quality presets for the video settings. Level 2 (High) equals the
-## authored defaults (2048 atlas, soft low, 64 m, two splits) so a fresh install
-## looks exactly as before; lower levels shrink the atlas, filter and distance.
+## authored defaults (2048 atlas, 64 m) so a fresh install looks exactly as before.
+##
+## Only the atlas size and the range change at runtime. Switching the directional
+## split mode, the soft-shadow filter or a light's shadow flag makes the renderer
+## recompile the scene shaders (measured at 4-56 s each with the software renderer),
+## which froze the menu on every slider step. "Off" therefore shrinks the sun's
+## range to half a metre instead of disabling the light's shadow.
 
 const DEFAULT_LEVEL := 2
+const OFF_DISTANCE := 0.5
 const LEVELS: Array[Dictionary] = [
-	{"atlas": 1024, "filter": RenderingServer.SHADOW_QUALITY_HARD, "distance": 32.0, "mode": DirectionalLight3D.SHADOW_ORTHOGONAL},
-	{"atlas": 2048, "filter": RenderingServer.SHADOW_QUALITY_SOFT_VERY_LOW, "distance": 48.0, "mode": DirectionalLight3D.SHADOW_PARALLEL_2_SPLITS},
-	{"atlas": 2048, "filter": RenderingServer.SHADOW_QUALITY_SOFT_LOW, "distance": 64.0, "mode": DirectionalLight3D.SHADOW_PARALLEL_2_SPLITS},
-	{"atlas": 4096, "filter": RenderingServer.SHADOW_QUALITY_SOFT_MEDIUM, "distance": 64.0, "mode": DirectionalLight3D.SHADOW_PARALLEL_2_SPLITS},
+	{"atlas": 1024, "distance": 32.0},
+	{"atlas": 2048, "distance": 48.0},
+	{"atlas": 2048, "distance": 64.0},
+	{"atlas": 4096, "distance": 64.0},
 ]
 
 
@@ -20,8 +26,6 @@ static func level_count() -> int:
 static func apply(tree: SceneTree, enabled: bool, level: int) -> void:
 	var preset := LEVELS[clampi(level, 0, LEVELS.size() - 1)]
 	RenderingServer.directional_shadow_atlas_set_size(int(preset.atlas), true)
-	RenderingServer.directional_soft_shadow_filter_set_quality(int(preset.filter))
-	RenderingServer.positional_soft_shadow_filter_set_quality(int(preset.filter))
 	if tree == null:
 		return
 	tree.root.positional_shadow_atlas_size = int(preset.atlas)
@@ -30,9 +34,7 @@ static func apply(tree: SceneTree, enabled: bool, level: int) -> void:
 		return
 	var overhead := scene.get_node_or_null("GlobalOverheadLight") as DirectionalLight3D
 	if overhead != null:
-		overhead.shadow_enabled = enabled
-		overhead.directional_shadow_mode = preset.mode
-		overhead.directional_shadow_max_distance = float(preset.distance)
+		overhead.directional_shadow_max_distance = float(preset.distance) if enabled else OFF_DISTANCE
 	var lighting := scene.get_node_or_null("PlanningLighting")
 	if lighting != null and lighting.has_method("set_shadows_allowed"):
 		lighting.call("set_shadows_allowed", enabled)
