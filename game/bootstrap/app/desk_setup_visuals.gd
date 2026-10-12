@@ -4,6 +4,8 @@ extends Node3D
 const FLOOR_RADIUS := 2.75
 const FLOOR_STEP := 0.25
 const SURFACE_STEP := 0.1
+const BOARD_SNAP := 0.08
+const BOARD_MIN_AREA := 0.05
 
 var desk: Node3D
 var stations: Array = []
@@ -28,8 +30,10 @@ func configure(target: Node3D, profile: Dictionary) -> void:
 			station["grid_x"] = station["x"]
 			station["grid_z"] = station["z"]
 		stations.append(station)
-	# Older shelf profiles start at the next shelf, although the bottom frame supports objects.
 	var model := str(desk.get_meta("planning_scene_path", "")).get_file().get_basename()
+	if model.begins_with("03_"):
+		_snap_to_boards(desk, stations)
+	# Older shelf profiles start at the next shelf, although the bottom frame supports objects.
 	if model.begins_with("03_") and stations.size() > 1 and float(stations[0].get("grid_height", 0.0)) > 0.12:
 		var bottom: Dictionary = stations[0].duplicate()
 		bottom["grid_height"] = 0.035
@@ -211,3 +215,46 @@ func _visible_footprint() -> Rect2:
 		area = area.merge(region) if found else region
 		found = true
 	return area
+
+
+## Authored shelf heights can drift from this instance's boards, so each station takes the
+## nearest measured board top. Objects and zones then rest on the surface that is drawn.
+func _snap_to_boards(target: Node3D, shelf_stations: Array) -> void:
+	var tops := _board_tops(target)
+	if tops.is_empty():
+		return
+	for value in shelf_stations:
+		var station: Dictionary = value
+		var height := float(station.get("grid_height", 0.0))
+		var nearest := -1.0
+		for top in tops:
+			if nearest < 0.0 or absf(top - height) < absf(nearest - height):
+				nearest = top
+		if absf(nearest - height) <= BOARD_SNAP:
+			station["grid_height"] = nearest
+
+
+## Heights (desk space) of upward-facing surfaces that carry at least BOARD_MIN_AREA square metres.
+func _board_tops(target: Node3D) -> Array[float]:
+	var area_by_height := {}
+	var to_desk := target.global_transform.affine_inverse()
+	for descendant in target.find_children("*", "MeshInstance3D", true, false):
+		var mesh := descendant as MeshInstance3D
+		if mesh.mesh == null or not mesh.is_visible_in_tree() or "Shadow" in mesh.name:
+			continue
+		var faces := mesh.mesh.get_faces()
+		var mesh_to_desk := to_desk * mesh.global_transform
+		for index in range(0, faces.size() - 2, 3):
+			var a := mesh_to_desk * faces[index]
+			var b := mesh_to_desk * faces[index + 1]
+			var c := mesh_to_desk * faces[index + 2]
+			var normal := (b - a).cross(c - a)
+			var area := normal.length() * 0.5
+			if area > 0.000001 and normal.normalized().y > 0.95:
+				var height := snappedf((a.y + b.y + c.y) / 3.0, 0.002)
+				area_by_height[height] = float(area_by_height.get(height, 0.0)) + area
+	var tops: Array[float] = []
+	for height in area_by_height:
+		if float(area_by_height[height]) >= BOARD_MIN_AREA:
+			tops.append(float(height))
+	return tops
