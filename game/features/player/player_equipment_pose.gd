@@ -41,7 +41,7 @@ func _process_modification_with_delta(_delta: float) -> void:
 	# arms can reach the new, longer kit without stretching bones.
 	# Rifle stocks extend behind the rear hand, so the hand sits ahead of the
 	# chest; the sniper's longer stock needs a little more clearance.
-	var rifle_depth := .20 if name_value == "SNIPER RIFLE" else .19
+	var rifle_depth := .17 if name_value == "SNIPER RIFLE" else .19
 	var rifle_side := .03 if name_value == "SNIPER RIFLE" else -.13
 	var target_right := Vector3(-.27, .23, .08) if name_value == "MINIGUN" else Vector3(rifle_side, .43, rifle_depth)
 	_fit_arm(skeleton, "Right", target_right, Vector3(-.65, .15, .10))

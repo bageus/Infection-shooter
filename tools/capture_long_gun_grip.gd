@@ -64,7 +64,7 @@ func _capture() -> void:
 	for index in [4, 5, 6, 7]:
 		actor.call("pickup_weapon", index)
 		actor.set("_aim_point", Vector3(0, .4, -30))
-		for i in 2:
+		for i in 4:
 			await process_frame
 		var skel := actor.find_children("*", "Skeleton3D", true, false)[0] as Skeleton3D
 		var center: Vector3 = skel.global_transform * skel.get_bone_global_pose(skel.find_bone("Spine2")).origin
