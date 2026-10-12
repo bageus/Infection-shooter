@@ -28,8 +28,10 @@ var _glass_body: StaticBody3D
 var _glass_body_closed := Transform3D.IDENTITY
 var _glass_hinge_root_closed := Transform3D.IDENTITY
 var _elevator_lights: Array[Node3D] = []
+var _indicator_glow: OmniLight3D
 var _fallback_leaf_collisions: Array[CollisionShape3D] = []
 var _key_hint: Node3D
+const BUDGET_LIGHT := preload("res://game/presentation/office_floor/budget_omni_light.gd")
 const PRESENCE := preload("res://game/presentation/office_floor/door_presence.gd")
 var _presence: Area3D
 var _elevator_neighbors: Array[WeakRef] = []
@@ -163,6 +165,8 @@ func _update_door_visuals(local_player: Vector3) -> void:
 		for light_node in _elevator_lights:
 			if is_instance_valid(light_node):
 				_set_light_state(light_node, lights_on)
+		if is_instance_valid(_indicator_glow):
+			_indicator_glow.set_wanted(lights_on)
 
 
 # Opening starts from shut; swing doors thud when they shut, the elevator
@@ -236,6 +240,7 @@ func _collect_door_parts() -> void:
 		_collect_elevator_parts(visual)
 		_collect_named_nodes(visual, "doorrecess", _door_recess_nodes)
 		_collect_elevator_lights(visual)
+		_add_indicator_glow()
 	elif mode == DoorMode.GLASS_SWING:
 		_build_glass_hinge(visual)
 	else:
@@ -339,16 +344,54 @@ func _collect_elevator_lights(node: Node) -> void:
 		_collect_elevator_lights(child)
 
 
+# The lamp above the doors really lights the lobby while the doors stand open.
+func _add_indicator_glow() -> void:
+	for node in _elevator_lights:
+		if node is MeshInstance3D and node.name.to_lower().contains("indicator"):
+			_indicator_glow = BUDGET_LIGHT.create(Color(1.0, 0.78, 0.4), 1.6, 3.0)
+			_indicator_glow.position = Vector3(0.0, -0.3, -0.45)
+			_indicator_glow.set_wanted(false)
+			node.add_child(_indicator_glow)
+			return
+
+
 # Collected light nodes include their own descendants, so no recursion here.
 func _set_light_state(node: Node3D, enabled: bool) -> void:
 	if node is Light3D:
 		(node as Light3D).visible = enabled
 	if node is MeshInstance3D:
 		var mesh_instance := node as MeshInstance3D
+		var lens := _lens_surface(mesh_instance)
 		for surface in mesh_instance.get_surface_override_material_count():
+			if surface != lens:
+				continue
 			var pair: Array = _light_materials(mesh_instance, surface)
 			if not pair.is_empty():
 				mesh_instance.set_surface_override_material(surface, pair[1] if enabled else pair[0])
+
+
+# The lens is the smallest surface of an indicator housing; the rest is the frame.
+func _lens_surface(mesh_instance: MeshInstance3D) -> int:
+	var best := -1
+	var best_volume := INF
+	var mesh := mesh_instance.mesh
+	if mesh == null:
+		return best
+	for surface in mesh.get_surface_count():
+		var vertices: PackedVector3Array = mesh.surface_get_arrays(surface)[Mesh.ARRAY_VERTEX]
+		if vertices.is_empty():
+			continue
+		var low := vertices[0]
+		var high := vertices[0]
+		for vertex in vertices:
+			low = low.min(vertex)
+			high = high.max(vertex)
+		var size := high - low
+		var volume := size.x * size.y * size.z
+		if volume < best_volume:
+			best_volume = volume
+			best = surface
+	return best
 
 
 # Original (off) and lit copies of a light surface, made once.
@@ -358,10 +401,11 @@ func _light_materials(mesh_instance: MeshInstance3D, surface: int) -> Array:
 		return _light_material_cache[key]
 	var material := mesh_instance.get_active_material(surface)
 	var pair: Array = []
-	if material is StandardMaterial3D:
-		var off := material.duplicate() as StandardMaterial3D
+	# The model's materials are ORM materials, which are not StandardMaterial3D.
+	if material is BaseMaterial3D:
+		var off := material.duplicate() as BaseMaterial3D
 		off.emission_enabled = false
-		var lit := material.duplicate() as StandardMaterial3D
+		var lit := material.duplicate() as BaseMaterial3D
 		lit.emission_enabled = true
 		lit.emission = Color(1.0, 0.78, 0.28)
 		lit.emission_energy_multiplier = 4.0
@@ -385,7 +429,9 @@ func _build_glass_hinge(visual: Node3D) -> void:
 	if _glass_body != null:
 		_glass_body_closed = _glass_body.transform
 		_glass_hinge_root_closed = (get_parent() as Node3D).global_transform.affine_inverse() * _glass_hinge.global_transform
-	for wanted in ["doorglass", "doorhandle", "doortoppanel"]:
+	for wanted in ["doorglass", "doorhandle", "doortoppanel", "Glass_Shards"]:
+		# The hidden shard set travels with the leaf, so a pane broken while the
+		# door is open crumbles where the glass stands, not in the closed pose.
 		var part := _find_exact_named_node(visual, wanted)
 		if part != null:
 			part.reparent(_glass_hinge, true)

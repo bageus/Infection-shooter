@@ -4,6 +4,7 @@ extends Node3D
 const PROJECTION := preload("res://game/features/combat/impact_projection.gd")
 const SURFACES := preload("res://game/features/combat/impact_surface_geometry.gd")
 const STAMPS := preload("res://game/core/vfx/public/surface_stamp_cache.gd")
+const STAMP := preload("res://game/core/vfx/public/surface_stamp.gd")
 var _surfaces := SURFACES.new()
 var _stamps := STAMPS.new()
 
@@ -89,6 +90,11 @@ func project_surface(collider: Node3D, projector: Transform3D, footprint: Vector
 		mark.mesh = entry["mesh"]
 		mark.material_override = material
 		mark.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
-		entry["anchor"].add_child(mark)
+		var anchor: Node = entry["anchor"]
+		if anchor is MeshInstance3D and STAMP.is_glass(anchor as MeshInstance3D):
+			# Transparent surfaces blend in camera-distance order; draw the mark after the pane.
+			if material is BaseMaterial3D:
+				(material as BaseMaterial3D).render_priority = 2
+		anchor.add_child(mark)
 		result.append(mark)
 	return result

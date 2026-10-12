@@ -28,9 +28,15 @@ var _flicker_factor := 1.0
 var _rng := RandomNumberGenerator.new()
 var _local_lighting_enabled := false
 var _runtime_active := true
+# The renderer drops lights beyond its per-frame limit, so PlanningLighting keeps
+# only the lamps nearest to the camera lit and tells each one whether it may cast shadows.
+var _budget_lit := true
+var _budget_shadow := false
+var _sub_lights: Array[SpotLight3D] = []
 
 func _enter_tree() -> void:
 	add_to_group("planner_lights")
+	add_to_group("budget_lights")
 
 
 func _ready() -> void:
@@ -97,8 +103,44 @@ func set_runtime_light_active(enabled: bool) -> void:
 		light.spot_angle = float(get_meta("planning_light_angle"))
 
 
-func _is_active() -> bool:
+func _is_on() -> bool:
 	return _local_lighting_enabled and _runtime_active
+
+
+func _is_active() -> bool:
+	return _is_on() and _budget_lit
+
+
+## Number of spot lights this fixture needs while lit (the renderer limit is shared).
+func get_light_cost() -> int:
+	return 1 + _sub_lights.size()
+
+
+func set_budget_lit(lit: bool, shadow: bool) -> void:
+	if lit == _budget_lit and shadow == _budget_shadow:
+		return
+	_budget_lit = lit
+	_budget_shadow = shadow
+	_sync_activation()
+
+
+func get_budget_lit() -> bool:
+	return _budget_lit
+
+
+## Spot lights of a long fixture copy the cone/color of the authored main light.
+func sync_sub_lights() -> void:
+	if light == null:
+		return
+	light.shadow_enabled = _budget_shadow and light.visible
+	for extra in _sub_lights:
+		extra.spot_angle = light.spot_angle
+		extra.spot_range = light.spot_range
+		extra.spot_angle_attenuation = light.spot_angle_attenuation
+		extra.spot_attenuation = light.spot_attenuation
+		extra.light_color = light.light_color
+		extra.visible = light.visible
+		extra.shadow_enabled = _budget_shadow and light.visible
 
 
 func _sync_activation() -> void:
@@ -131,9 +173,16 @@ func set_authored_energy(energy: float) -> void:
 
 func _apply_energy() -> void:
 	if light != null:
-		light.light_energy = get_authored_energy() * energy_multiplier * _flicker_factor if _is_active() else 0.0
+		var split := _sub_lights.size() + 1
+		# A long fixture shares its output between its lights, slightly brighter in total.
+		var share := 1.0 if split == 1 else 0.7 / float(split)
+		light.light_energy = get_authored_energy() * energy_multiplier * _flicker_factor * share if _is_active() else 0.0
+		for extra in _sub_lights:
+			extra.light_energy = light.light_energy
+		sync_sub_lights()
 	if _diffuser_material != null:
-		_diffuser_material.emission_energy_multiplier = minf(light.light_energy, 2.0) if light != null else 0.0
+		var glow := get_authored_energy() * energy_multiplier * _flicker_factor if _is_on() else 0.0
+		_diffuser_material.emission_energy_multiplier = minf(glow, 2.0)
 
 
 func get_authored_color() -> Color:
@@ -147,6 +196,8 @@ func set_authored_color(color: Color) -> void:
 func _apply_color() -> void:
 	if light != null:
 		light.light_color = light_color
+		for extra in _sub_lights:
+			extra.light_color = light_color
 	if _diffuser_material != null:
 		_diffuser_material.albedo_color = light_color
 		_diffuser_material.emission = light_color
@@ -182,6 +233,8 @@ func _build_fixture() -> void:
 	frame.metallic = 0.65
 	frame.roughness = 0.4
 	housing.material_override = frame
+	# The fixture hangs under the ceiling: nothing above it lights it, so it casts no shadow.
+	housing.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
 	_fixture.add_child(housing)
 	var diffuser := MeshInstance3D.new()
 	diffuser.name = "Diffuser"
@@ -190,10 +243,40 @@ func _build_fixture() -> void:
 	_diffuser_material = StandardMaterial3D.new()
 	_diffuser_material.emission_enabled = true
 	diffuser.material_override = _diffuser_material
+	diffuser.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
 	_fixture.add_child(diffuser)
+	_build_sub_lights()
 	_apply_color()
 	_apply_energy()
 	_sync_fixture_visibility()
+
+
+# Where the spot lights sit on the fixture so the glow spreads over the whole
+# emitting surface: along a linear fixture, over a rectangle's corners.
+func _light_offsets() -> Array[Vector2]:
+	match fixture_shape:
+		"linear":
+			return [Vector2(-0.4, 0.0), Vector2(0.4, 0.0)]
+		"rectangle":
+			return [Vector2(-0.22, -0.16), Vector2(0.22, -0.16), Vector2(-0.22, 0.16), Vector2(0.22, 0.16)]
+	return [Vector2.ZERO]
+
+
+func _build_sub_lights() -> void:
+	for extra in _sub_lights:
+		if is_instance_valid(extra):
+			extra.free()
+	_sub_lights.clear()
+	if light == null:
+		return
+	var offsets := _light_offsets()
+	light.position = Vector3(offsets[0].x, light.position.y, offsets[0].y)
+	for index in range(1, offsets.size()):
+		var extra := light.duplicate() as SpotLight3D
+		extra.name = "SubLight%d" % index
+		extra.position = Vector3(offsets[index].x, light.position.y, offsets[index].y)
+		add_child(extra)
+		_sub_lights.append(extra)
 
 
 func _fixture_mesh(diffuser: bool) -> PrimitiveMesh:

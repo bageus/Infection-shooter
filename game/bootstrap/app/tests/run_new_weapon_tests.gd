@@ -55,6 +55,12 @@ func _test_rifles(actor: CharacterBody3D, effects: Node3D, crosshair: Node) -> v
 		actor.set("_aim_point", Vector3(0, .4, -30))
 		await process_frame
 		await process_frame
+		# The first ~0.1 s after equipping still blend in from the previous stance;
+		# wait until the Launcher clip has settled before measuring the hand.
+		for _frame in 90:
+			if actor.get_node("AnimationDriver").animation_player.current_animation_position > .15:
+				break
+			await process_frame
 		_check(String(actor.get_node("AnimationDriver").animation_player.current_animation).contains("Launcher"), "Rifles reuse Launcher two-hand stance")
 		_check(gun.casing_scene.resource_path.ends_with("12_rifle_casing.glb"), "Rifle casing model assigned")
 		_check(is_equal_approx(gun.casing_size_multiplier, 1.15 if index == 6 else 1.0), "Only sniper has enlarged rifle casings")
