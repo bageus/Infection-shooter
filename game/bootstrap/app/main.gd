@@ -13,6 +13,7 @@ const MUTATION_UI := preload("res://game/bootstrap/app/mutation_tree_ui.gd")
 const BLOOD_EFFECTS := preload("res://game/presentation/office_floor/public/blood_effects_3d.tscn")
 const SHADER_WARMUP := preload("res://game/bootstrap/app/shader_warmup.gd")
 const HIT_EFFECT_WARMUP := preload("res://game/presentation/office_floor/public/hit_effect_warmup.gd")
+const GRENADE_EXPLOSION := preload("res://game/features/combat/public/grenade_explosion.gd")
 const BLAST_FEEDBACK := preload("res://game/bootstrap/app/blast_feedback.gd")
 const DEBUG_OVERLAY := preload("res://game/bootstrap/app/runtime_debug_overlay.gd")
 const OCCLUSION := preload("res://game/bootstrap/app/occlusion_effects.gd")
@@ -96,7 +97,9 @@ func _ready() -> void:
 	feedback.configure(player)
 	_setup_blood_effects()
 	SHADER_WARMUP.new().setup(player.get("camera") as Camera3D)
-	HIT_EFFECT_WARMUP.new().setup(self)
+	var hit_warmup := HIT_EFFECT_WARMUP.new()
+	hit_warmup.setup(self)
+	GRENADE_EXPLOSION.warm_up(hit_warmup, Vector3(0.0, 0.0, -2.0))
 	for enemy in enemies.get_children():
 		if enemy.has_method("set_target"):
 			enemy.call("set_target", player)
