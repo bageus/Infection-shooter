@@ -13,6 +13,7 @@ var heart_cooldown := 0.0
 var kill_streak := 0
 var _alive_cache: Array = []
 var _alive_frame := -1
+var _alive_count := -1
 var kill_timer := 0.0
 ## Seconds between melee strikes; reach is measured to the enemy's surface.
 const MELEE_COOLDOWN := 0.5
@@ -431,11 +432,14 @@ func _environment_ray(space: PhysicsDirectSpaceState3D, from: Vector3, to: Vecto
 
 
 # One group scan per frame: acid pools, dashes and epidemic all query it
-# several times a frame. Freed members are skipped when the list is read.
+# several times a frame. A spawn or removal rebuilds it; freed members are
+# skipped when the list is read.
 func _alive_enemies() -> Array:
 	var frame := Engine.get_process_frames()
-	if frame != _alive_frame:
+	var count := get_tree().get_node_count_in_group("infected_alive")
+	if frame != _alive_frame or count != _alive_count:
 		_alive_frame = frame
+		_alive_count = count
 		_alive_cache.clear()
 		_alive_cache.assign(get_tree().get_nodes_in_group("infected_alive"))
 	return _alive_cache
