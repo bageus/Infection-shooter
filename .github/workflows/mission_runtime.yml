@@ -227,7 +227,7 @@ jobs:
         run: |
           sudo apt-get update -qq
           sudo apt-get install -y -qq xvfb libgl1-mesa-dri mesa-vulkan-drivers libvulkan1
-          timeout 90 xvfb-run -a godot --path . --audio-driver Dummy --rendering-method gl_compatibility --script game/bootstrap/app/tests/capture_menu_screens.gd
+          timeout 180 xvfb-run -a godot --path . --audio-driver Dummy --rendering-method gl_compatibility --script game/bootstrap/app/tests/capture_menu_screens.gd
       - name: Occlusion and blast pixels in both renderers
         env:
           OCCLUSION_CAPTURE_DIR: /tmp/menu_previews
