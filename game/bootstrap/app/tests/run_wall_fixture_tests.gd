@@ -21,6 +21,7 @@ func _run() -> void:
 	_door_rules()
 	_blocked_fronts()
 	_signs()
+	_mount_heights()
 	_levels()
 	_base_map()
 	await _planner()
@@ -62,15 +63,15 @@ func _door_rules() -> void:
 	var layout := _corridor([_wall("sliding_glass_door", 20.0, 0.0), _wall("elevator_door", 30.0, 0.0)])
 	var plan := FIXTURES.plan(layout, [])
 	var records: Array = plan.records
-	_check(_count(records, "switch") == 3, "A door gets three switch points; glass and elevator doors none (%d)" % _count(records, "switch"))
-	_check(_count(records, "alarm") == 4 and _count(records, "call_point") == 4, "A door gets four alarm points, each with a call point")
+	_check(_count(records, "switch") == 6, "Wall door and glass door get three switch points each, the elevator none (%d)" % _count(records, "switch"))
+	_check(_count(records, "alarm") == 8 and _count(records, "call_point") == 8, "Each of those doors gets four alarm points, each with a call point")
 	for record: Dictionary in records:
 		var wanted := {"switch": 0.75, "alarm": 2.5, "call_point": 1.0}[record.auto_fixture] as float
 		_check(is_equal_approx(float(record.y), wanted), "%s hangs at %.2f m" % [record.auto_fixture, wanted])
 	_check(_mounted_on_walls(layout, records), "Every fixture sits on a wall or column face")
 	var again: Array = FIXTURES.plan(layout, []).records
 	_check(JSON.stringify(again) == JSON.stringify(records), "The pass is deterministic")
-	var near_door := records.filter(func(r: Dictionary) -> bool: return r.auto_fixture == "switch")
+	var near_door := records.filter(func(r: Dictionary) -> bool: return r.auto_fixture == "switch" and absf(float(r.x) - 1.0) < 3.0)
 	var sides := {}
 	for record: Dictionary in near_door:
 		sides[signf(float(record.z))] = int(sides.get(signf(float(record.z)), 0)) + 1
@@ -124,6 +125,14 @@ func _signs() -> void:
 	_check(not FIXTURES.is_sign(PLACER.SWITCH) and not FIXTURES.is_sign(PLACER.ALARM) and FIXTURES.is_sign(SIGN), "Switches and alarms are not treated as signs")
 
 
+func _mount_heights() -> void:
+	var layout := _corridor()
+	layout.append({"scene": "res://models/objects/enviroments/02/02_wall_urinal_improved.glb", "x": -3.0, "y": 0.3, "z": 0.1, "rotation_y": 0.0})
+	layout.append({"scene": "res://models/objects/enviroments/05/05_wall_hand_dryer_improved.glb", "x": 3.0, "y": 1.5, "z": 0.1, "rotation_y": 0.0})
+	var fixes: Array = FIXTURES.plan(layout, []).sign_fixes
+	_check(fixes.size() == 2 and is_equal_approx(float(fixes[0].y), 0.75) and is_equal_approx(float(fixes[1].y), 1.25), "Urinals go to 0.75 m and hand dryers to 1.25 m")
+
+
 func _levels() -> void:
 	# A second storey three metres down: heights are measured from its own floor.
 	var layout := _corridor()
@@ -142,9 +151,9 @@ func _base_map() -> void:
 	var data: Dictionary = JSON.parse_string(FileAccess.get_file_as_string(BASE_MAP))
 	var doors: int = data.objects.filter(func(r: Dictionary) -> bool:
 		var file := str(r.scene).get_file()
-		return file.begins_with("wall_door") or file == "wall_emergency_door.tscn").size()
+		return file.begins_with("wall_door") or file == "wall_emergency_door.tscn" or file == "sliding_glass_door.tscn").size()
 	var plan := FIXTURES.plan(data.objects, [])
-	_check(_count(plan.records, "switch") + plan.shortfall.switch == doors * 3, "Base map: three switch points per door (%d doors)" % doors)
+	_check(_count(plan.records, "switch") + plan.shortfall.switch == doors * 3, "Base map: three switch points per door (%d doors incl. glass)" % doors)
 	_check(_count(plan.records, "alarm") + plan.shortfall.alarm == doors * 4 and _count(plan.records, "call_point") == _count(plan.records, "alarm"), "Base map: four alarm points per door, one call point under each")
 	_check(plan.shortfall.switch == 0 and plan.shortfall.alarm == 0, "Base map has room for every point")
 	_check(_mounted_on_walls(data.objects, plan.records), "Base map: every fixture sits on a wall or column face")
@@ -160,7 +169,7 @@ func _base_map() -> void:
 			continue
 		var twin: Array = plan.records.filter(func(r: Dictionary) -> bool: return r.auto_fixture == "alarm" and Vector2(float(r.x) - float(record.x), float(r.z) - float(record.z)).length() < 0.02)
 		_check(not twin.is_empty(), "A call point has an alarm directly above it")
-	var heights: Array = data.objects.filter(func(r: Dictionary) -> bool: return FIXTURES.is_sign(str(r.scene)))
+	var heights: Array = data.objects.filter(func(r: Dictionary) -> bool: return FIXTURES.mount_height(str(r.scene)) >= 0.0)
 	_check(heights.size() > 0 and plan.sign_fixes.size() <= heights.size(), "Base map signs are checked")
 
 
@@ -187,8 +196,14 @@ func _planner() -> void:
 	_check(text.contains("signs adjusted 1"), "Save reports the corrected sign: " + text)
 	var wall_sign: Node3D = objects.placed.filter(func(n: Node3D) -> bool: return str(n.get_meta("planning_scene_path", "")) == SIGN)[0]
 	_check(is_equal_approx(wall_sign.position.y, 1.75), "The sign was moved to 1.75 m")
+	var first_records: Array = storage.call("_collect_layout_data").objects.filter(func(r: Dictionary) -> bool: return r.has("auto_fixture"))
 	storage.call("enforce_wall_fixtures")
 	await process_frame
+	var second_records: Array = storage.call("_collect_layout_data").objects.filter(func(r: Dictionary) -> bool: return r.has("auto_fixture"))
+	var same := first_records.size() == second_records.size()
+	for index in mini(first_records.size(), second_records.size()):
+		same = same and Vector3(first_records[index].x - second_records[index].x, first_records[index].y - second_records[index].y, first_records[index].z - second_records[index].z).length() < 0.001 and first_records[index].scene == second_records[index].scene
+	_check(same, "A second save places the fixtures in the same spots and order")
 	var again: Array = objects.placed.filter(func(n: Node3D) -> bool: return is_instance_valid(n) and not n.is_queued_for_deletion() and n.has_meta("planning_auto_fixture"))
 	_check(again.size() == auto.size(), "Saving twice does not duplicate the fixtures (%d)" % again.size())
 	var saved: Array = storage.call("_collect_layout_data").objects.filter(func(r: Dictionary) -> bool: return r.has("auto_fixture"))

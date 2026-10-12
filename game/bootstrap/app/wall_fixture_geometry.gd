@@ -27,13 +27,14 @@ const OTHER := {
 	"glass_partition_blinds": {"half": Vector2(1.0, 0.06)},
 	"glass_partition_half": {"half": Vector2(1.0, 0.06)},
 	"wall_half_panel": {"half": Vector2(1.0, 0.096)},
-	"sliding_glass_door": {"half": Vector2(1.0, 0.07), "shift": -2.0},
+	"sliding_glass_door": {"half": Vector2(1.0, 0.07), "shift": -2.0, "glass_door": true},
 	"elevator_door": {"half": Vector2(2.0, 0.17)}
 }
 
 var pieces: Array[Dictionary] = []
 var faces: Array[Dictionary] = []
 var doors: Array[Dictionary] = []
+var glass_doors: Array[Dictionary] = [] # count toward the totals but carry no fixtures of their own
 var blockers: Array[AABB] = []
 var _piece_grid := {}
 var _blocker_grid := {}
@@ -76,6 +77,8 @@ func _add_piece(record: Dictionary, file: String, spec: Dictionary) -> void:
 		"box": bool(spec.get("box", false)), "mount": SOLID.has(file), "file": file,
 		"pivot": Vector2(float(record.get("x", 0.0)), float(record.get("z", 0.0)))}
 	_all_pieces.append(piece)
+	if spec.get("glass_door", false):
+		glass_doors.append(piece)
 	var reach := half.x + half.y + 0.7
 	_index(_piece_grid, centre, reach, piece)
 	if piece.mount:
@@ -149,7 +152,7 @@ func faces_of_level(level: int) -> Array[Dictionary]:
 
 func levels() -> Array[int]:
 	var out: Array[int] = []
-	for piece in pieces:
+	for piece in pieces + glass_doors:
 		if not out.has(piece.level):
 			out.append(piece.level)
 	out.sort()

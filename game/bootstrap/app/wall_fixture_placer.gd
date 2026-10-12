@@ -35,9 +35,14 @@ func run() -> Array:
 		var left := 0
 		for index in doors.size():
 			left += _switches_for_door(doors[index], index)
-		_spread_switches(level, left)
-		_spread_alarms(level, doors.size() * ALARMS_PER_DOOR)
+		var glass := _glass_count(level)
+		_spread_switches(level, left + glass * SWITCHES_PER_DOOR)
+		_spread_alarms(level, (doors.size() + glass) * ALARMS_PER_DOOR)
 	return records
+
+
+func _glass_count(level: int) -> int:
+	return geometry.glass_doors.filter(func(door: Dictionary) -> bool: return door.level == level).size()
 
 
 func _doors_of(level: int) -> Array:
@@ -79,7 +84,7 @@ func _place_gang(door: Dictionary, sides: Array, size: int) -> bool:
 			if face.n.dot(door.n * side) < 0.98 or absf((face.o - door.c).dot(door.n * side) - door.half.y) > 0.12:
 				continue
 			for along in _positions(face, half_width, 0.05):
-				var distance := absf((geometry.face_point(face, along) - door.c).dot(door.t))
+				var distance := snappedf(absf((geometry.face_point(face, along) - door.c).dot(door.t)), 0.002)
 				if distance < best_distance and distance < 3.2 and geometry.clear_spot(face, along, half_width, SWITCH_BANDS):
 					best_distance = distance
 					best = {"face": face, "along": along}
@@ -142,7 +147,7 @@ func _spread(level: int, count: int, half_width: float, bands: Array, seeds: Arr
 	for candidate in candidates:
 		var distance := INF
 		for anchor: Vector2 in seeds:
-			distance = minf(distance, candidate.at.distance_to(anchor))
+			distance = snappedf(minf(distance, candidate.at.distance_to(anchor)), 0.002)
 		nearest.append(distance)
 	var picks: Array = []
 	while picks.size() < count and not candidates.is_empty():
@@ -158,5 +163,5 @@ func _spread(level: int, count: int, half_width: float, bands: Array, seeds: Arr
 		picks.append(pick)
 		geometry.add_blocker(AABB(Vector3(pick.at.x - 0.07, pick.face.base + bands[0].x, pick.at.y - 0.07), Vector3(0.14, bands[0].y - bands[0].x, 0.14)))
 		for index in candidates.size():
-			nearest[index] = minf(nearest[index], candidates[index].at.distance_to(pick.at))
+			nearest[index] = snappedf(minf(nearest[index], candidates[index].at.distance_to(pick.at)), 0.002)
 	return picks

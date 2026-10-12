@@ -1,10 +1,14 @@
 extends RefCounted
-## Planner save pass for group 13: wall signs hang 1.75 m above their floor, and
-## light switches, fire alarm sounders and call points are placed automatically.
+## Planner save pass: wall signs hang 1.75 m above their floor, urinals 0.75 m,
+## hand dryers 1.25 m; light switches, fire alarm sounders and call points are
+## placed automatically.
 
 const GEOMETRY := preload("res://game/bootstrap/app/wall_fixture_geometry.gd")
 const PLACER := preload("res://game/bootstrap/app/wall_fixture_placer.gd")
 const SIGN_HEIGHT := 1.75
+# Origin height above the floor for wall-mounted models that sit at one level.
+const MOUNT_HEIGHTS := {"02_wall_urinal_improved": 0.75, "16_wall_urinal": 0.75,
+	"05_wall_hand_dryer_improved": 1.25, "16_wall_hand_dryer": 1.25}
 const META := &"planning_auto_fixture"
 const SKIPPED_PATHS := ["planner_light", "darkness_zone", "blood_decal", "floor_pad", "/enviroments/12/", "/enviroments/01/01_floor_",
 	"player.tscn", "corpse_", "part_hunger", "infected_"]
@@ -12,6 +16,13 @@ const SKIPPED_PATHS := ["planner_light", "darkness_zone", "blood_decal", "floor_
 
 static func is_sign(scene: String) -> bool:
 	return "/enviroments/13/" in scene and not scene in [PLACER.SWITCH, PLACER.ALARM, PLACER.CALL_POINT]
+
+
+## Height above the floor the model hangs at, or -1 when the pass leaves it alone.
+static func mount_height(scene: String) -> float:
+	if is_sign(scene):
+		return SIGN_HEIGHT
+	return float(MOUNT_HEIGHTS.get(scene.get_file().get_basename(), -1.0))
 
 
 ## entries: {scene, x, y, z, rotation_y} of every placed object; blockers: world AABBs.
@@ -22,11 +33,12 @@ static func plan(entries: Array, blockers: Array) -> Dictionary:
 	var sign_fixes: Array = []
 	for index in entries.size():
 		var entry: Dictionary = entries[index]
-		if not is_sign(str(entry.scene)):
+		var height := mount_height(str(entry.scene))
+		if height < 0.0:
 			continue
 		var floor_y: float = geometry.floor_at(Vector2(float(entry.x), float(entry.z)), float(entry.y))
-		if absf(float(entry.y) - (floor_y + SIGN_HEIGHT)) > 0.001:
-			sign_fixes.append({"index": index, "y": floor_y + SIGN_HEIGHT})
+		if absf(float(entry.y) - (floor_y + height)) > 0.001:
+			sign_fixes.append({"index": index, "y": floor_y + height})
 	for box: AABB in blockers:
 		geometry.add_blocker(box)
 	var placer := PLACER.new(geometry)
@@ -50,7 +62,9 @@ static func apply(objects: Node, loader: RefCounted) -> Dictionary:
 		var scene := str(node.get_meta("planning_scene_path", ""))
 		if scene.is_empty():
 			continue
-		entries.append({"scene": scene, "x": node.position.x, "y": node.position.y, "z": node.position.z, "rotation_y": node.rotation_degrees.y})
+		# Physics jitter below a millimetre must not flip a tie and move a fixture.
+		entries.append({"scene": scene, "x": snappedf(node.position.x, 0.001), "y": snappedf(node.position.y, 0.001),
+			"z": snappedf(node.position.z, 0.001), "rotation_y": snappedf(node.rotation_degrees.y, 0.01)})
 		nodes.append(node)
 		var box := _blocker_box(node, scene)
 		if box.size != Vector3.ZERO:
