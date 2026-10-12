@@ -1,6 +1,5 @@
 extends RefCounted
 const MAP_FILE := preload("res://game/bootstrap/app/planning_map_file.gd")
-const DOOR_OPTIONS := preload("res://game/bootstrap/app/planning_door_options.gd")
 const WALL_FIXTURES := preload("res://game/bootstrap/app/planning_wall_fixtures.gd")
 const LAYOUT_LOADER := preload("res://game/bootstrap/app/planning_layout_loader.gd")
 const DOOR_OPTIONS := preload("res://game/bootstrap/app/planning_door_options.gd")
