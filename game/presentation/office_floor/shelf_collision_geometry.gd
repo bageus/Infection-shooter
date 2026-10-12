@@ -29,29 +29,29 @@ static func panels(mesh: Mesh) -> Array[AABB]:
 	return _prune(result)
 
 
-static func _prune(panels: Array[AABB]) -> Array[AABB]:
-	for i in panels.size():
-		var panel := panels[i]
+static func _prune(boards: Array[AABB]) -> Array[AABB]:
+	for i in boards.size():
+		var panel := boards[i]
 		for axis in 3:
 			if panel.size[axis] < .02:
 				panel.position[axis] -= (.02 - panel.size[axis]) * .5
 				panel.size[axis] = .02
-		panels[i] = panel
+		boards[i] = panel
 	var changed := true
 	while changed:
 		changed = false
-		for i in panels.size():
-			for j in range(i + 1, panels.size()):
-				if _adjacent(panels[i], panels[j]) or _board_faces(panels[i], panels[j]):
-					panels[i] = panels[i].merge(panels[j])
-					panels.remove_at(j)
+		for i in boards.size():
+			for j in range(i + 1, boards.size()):
+				if _adjacent(boards[i], boards[j]) or _board_faces(boards[i], boards[j]):
+					boards[i] = boards[i].merge(boards[j])
+					boards.remove_at(j)
 					changed = true
 					break
 			if changed:
 				break
-	panels.sort_custom(func(a: AABB, b: AABB) -> bool: return a.get_volume() > b.get_volume())
+	boards.sort_custom(func(a: AABB, b: AABB) -> bool: return a.get_volume() > b.get_volume())
 	var result: Array[AABB] = []
-	for panel in panels:
+	for panel in boards:
 		var covered := false
 		for existing in result:
 			if existing.grow(.0001).encloses(panel):
