@@ -29,15 +29,12 @@
 [ext_resource type="PackedScene" path="res://game/presentation/office_floor/public/structural/glass_partition_half.tscn" id="27_41rug"]
 [ext_resource type="PackedScene" path="res://game/presentation/office_floor/public/structural/column.tscn" id="28_l585w"]
 [ext_resource type="PackedScene" path="res://game/features/infected/public/infected_revenant.tscn" id="29_lw7rm"]
-[ext_resource type="Script" path="res://game/features/infected/infected_capsule.gd" id="30_rhgew"]
 [ext_resource type="PackedScene" path="res://game/presentation/office_floor/public/props/planner_light.tscn" id="31_50y8m"]
 [ext_resource type="Script" path="res://game/presentation/office_floor/planner_light.gd" id="32_qj577"]
 [ext_resource type="PackedScene" path="res://game/features/infected/public/decor/part_hunger_arm.tscn" id="33_vvvom"]
-[ext_resource type="Script" path="res://game/features/infected/infected_body_part_decor.gd" id="34_sytgd"]
 [ext_resource type="PackedScene" path="res://models/objects/characters/enemy/game/Hunger_rig.tscn" id="35_f7vw0"]
 [ext_resource type="PackedScene" path="res://game/features/infected/public/decor/part_hunger_leg.tscn" id="36_se0rm"]
 [ext_resource type="PackedScene" path="res://game/features/infected/public/decor/corpse_hunger_mutilated.tscn" id="37_gccn8"]
-[ext_resource type="Script" path="res://game/features/infected/infected_corpse_decor.gd" id="38_nt3vp"]
 [ext_resource type="PackedScene" path="res://game/features/infected/public/decor/corpse_hunger.tscn" id="39_fbhie"]
 [ext_resource type="PackedScene" path="res://game/presentation/office_floor/public/props/blood_decal.tscn" id="40_c7wfx"]
 [ext_resource type="Script" path="res://game/presentation/office_floor/blood_decal_prop.gd" id="41_h0rje"]
@@ -17159,7 +17156,6 @@ collision_layer = 2
 collision_mask = 3
 floor_stop_on_slope = false
 safe_margin = 0.02
-script = ExtResource("30_rhgew")
 max_health = 75.0
 move_speed = 4.6
 attack_range = 1.25
@@ -17175,7 +17171,6 @@ collision_layer = 2
 collision_mask = 3
 floor_stop_on_slope = false
 safe_margin = 0.02
-script = ExtResource("30_rhgew")
 max_health = 75.0
 move_speed = 4.6
 attack_range = 1.25
@@ -17191,7 +17186,6 @@ collision_layer = 2
 collision_mask = 3
 floor_stop_on_slope = false
 safe_margin = 0.02
-script = ExtResource("30_rhgew")
 max_health = 75.0
 move_speed = 4.6
 attack_range = 1.25
@@ -17207,7 +17201,6 @@ collision_layer = 2
 collision_mask = 3
 floor_stop_on_slope = false
 safe_margin = 0.02
-script = ExtResource("30_rhgew")
 max_health = 75.0
 move_speed = 4.6
 attack_range = 1.25
@@ -20311,7 +20304,6 @@ metadata/planning_attachment = ""
 
 [node name="PartHungerArm" type="RigidBody3D" parent="." unique_id=1277708990 instance=ExtResource("33_vvvom")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 34.5, 1.8641633, -6.25)
-script = ExtResource("34_sytgd")
 pose_seed = 669662207
 visual_scene = ExtResource("35_f7vw0")
 metadata/world_bound = true
@@ -20321,7 +20313,6 @@ metadata/planning_attachment = ""
 
 [node name="@RigidBody3D@45996" type="RigidBody3D" parent="." unique_id=1837092592 instance=ExtResource("33_vvvom")]
 transform = Transform3D(0.70710635, 0, -0.70710725, 0, 1, 0, 0.70710725, 0, 0.70710635, 34.75, 1.9502468, -6.5)
-script = ExtResource("34_sytgd")
 pose_seed = 155724935
 visual_scene = ExtResource("35_f7vw0")
 metadata/world_bound = true
@@ -20331,7 +20322,6 @@ metadata/planning_attachment = ""
 
 [node name="@RigidBody3D@45997" type="RigidBody3D" parent="." unique_id=1671613840 instance=ExtResource("33_vvvom")]
 transform = Transform3D(0.70710635, 0, -0.70710725, 0, 1, 0, 0.70710725, 0, 0.70710635, 13.5, 0.8348275, 19.75)
-script = ExtResource("34_sytgd")
 pose_seed = 1230820123
 visual_scene = ExtResource("35_f7vw0")
 metadata/world_bound = true
@@ -20341,7 +20331,6 @@ metadata/planning_attachment = ""
 
 [node name="PartHungerLeg" type="RigidBody3D" parent="." unique_id=423744287 instance=ExtResource("36_se0rm")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 16.25, 0.79672194, 20)
-script = ExtResource("34_sytgd")
 pose_seed = 939043723
 visual_scene = ExtResource("35_f7vw0")
 part = &"leg_l"
@@ -20352,7 +20341,6 @@ metadata/planning_attachment = ""
 
 [node name="CorpseHungerMutilated" type="Node3D" parent="." unique_id=1494089672 instance=ExtResource("37_gccn8")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 17.26388, 0.5287671, 20)
-script = ExtResource("38_nt3vp")
 pose_seed = 532592120
 pose_variant = "seated"
 pose_facing = -1.570796314870016
@@ -20367,7 +20355,6 @@ metadata/planning_attachment = ""
 
 [node name="@Node3D@45998" type="Node3D" parent="." unique_id=1102112110 instance=ExtResource("37_gccn8")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 16.75, 0.0155, 17)
-script = ExtResource("38_nt3vp")
 pose_seed = 224844963
 pose_variant = "right_side"
 pose_facing = -1.6165926535897932
@@ -20379,7 +20366,6 @@ metadata/world_bound = true
 
 [node name="@Node3D@45999" type="Node3D" parent="." unique_id=1891142961 instance=ExtResource("37_gccn8")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 18.5, 0.0155, 16.75)
-script = ExtResource("38_nt3vp")
 pose_seed = 859473161
 pose_variant = "stomach"
 pose_facing = -0.3995926535897931
@@ -20391,7 +20377,6 @@ metadata/world_bound = true
 
 [node name="CorpseHunger" type="Node3D" parent="." unique_id=1898425370 instance=ExtResource("39_fbhie")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 13.25, 0.0155, 12.5)
-script = ExtResource("38_nt3vp")
 pose_seed = 763204124
 pose_variant = "back"
 pose_facing = -1.3105926535897932
@@ -20403,7 +20388,6 @@ metadata/world_bound = true
 
 [node name="@Node3D@46000" type="Node3D" parent="." unique_id=1773876538 instance=ExtResource("39_fbhie")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 16, 0.015499919, 12.274148)
-script = ExtResource("38_nt3vp")
 pose_seed = 411847756
 pose_variant = "seated"
 visual_scene = ExtResource("35_f7vw0")
