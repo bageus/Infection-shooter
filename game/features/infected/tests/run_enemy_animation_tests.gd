@@ -322,18 +322,16 @@ func _test_attack_misses_when_target_leaves(stage: Node3D) -> void:
 	await process_frame
 
 
+# Deaths are ragdolls (ADR-0041): no clip plays, the body drops through the floor after
+# the linger time and is then hidden.
 func _test_death_animation_then_sink(stage: Node3D) -> void:
 	var enemy := await _spawn(stage, HUNGER)
 	enemy.set("death_linger_seconds", 0.1)
 	var body := enemy.get_node("Body") as Node3D
-	var start_y := body.position.y
-	var length := _player_of(enemy).get_animation("Death").length
 	enemy.call("take_damage", 1000.0)
-	await create_timer(length * 0.5).timeout
-	_expect(body.visible and is_equal_approx(body.position.y, start_y), "The corpse stays while the death animation plays.")
-	await create_timer(length * 0.5 + 0.45).timeout
-	_expect(body.visible and body.position.y < start_y, "The corpse sinks after the animation.")
-	await create_timer(0.9).timeout
+	_expect(enemy.get("_ragdoll") != null, "A killed enemy becomes a ragdoll.")
+	_expect(body.visible, "The corpse stays visible while it falls.")
+	await create_timer(1.8).timeout
 	_expect(not body.visible, "The corpse is hidden after sinking.")
 	enemy.queue_free()
 	await process_frame
