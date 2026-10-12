@@ -55,10 +55,10 @@ func _test_rifles(actor: CharacterBody3D, effects: Node3D, crosshair: Node) -> v
 		actor.set("_aim_point", Vector3(0, .4, -30))
 		await process_frame
 		await process_frame
-		# The first frames after equipping still show the previous stance; wait
-		# until the Launcher clip has actually advanced before measuring the hand.
-		for _frame in 30:
-			if actor.get_node("AnimationDriver").animation_player.current_animation_position > 0.0:
+		# The first ~0.1 s after equipping still blend in from the previous stance;
+		# wait until the Launcher clip has settled before measuring the hand.
+		for _frame in 90:
+			if actor.get_node("AnimationDriver").animation_player.current_animation_position > .15:
 				break
 			await process_frame
 		_check(String(actor.get_node("AnimationDriver").animation_player.current_animation).contains("Launcher"), "Rifles reuse Launcher two-hand stance")
