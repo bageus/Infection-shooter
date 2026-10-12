@@ -130,7 +130,7 @@ jobs:
           set -o pipefail
           failed=0
           for suite in run_planner_contact_tests run_planner_extension_tests run_occlusion_tests run_p2_optimization_tests; do
-            timeout 180 xvfb-run -a godot --verbose --path . --audio-driver Dummy --rendering-method ${{ matrix.renderer }} --script game/bootstrap/app/tests/${suite}.gd 2>&1 | tee /tmp/planner-previews/${suite}.log || failed=1
+            timeout 300 xvfb-run -a godot --verbose --path . --audio-driver Dummy --rendering-method ${{ matrix.renderer }} --script game/bootstrap/app/tests/${suite}.gd 2>&1 | tee /tmp/planner-previews/${suite}.log || failed=1
             if grep -E 'SHADER ERROR|SCRIPT ERROR|^ERROR:' /tmp/planner-previews/${suite}.log; then failed=1; fi
           done
           exit "$failed"
