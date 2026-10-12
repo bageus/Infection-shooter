@@ -2,6 +2,7 @@ extends SceneTree
 ## Solid shelves, hidden-start glass and pre-play material preparation.
 const PROP := preload("res://game/presentation/office_floor/public/props/environment_prop.tscn")
 const WORKSTATIONS := preload("res://game/bootstrap/app/workstation_templates.gd")
+const VISUALS := preload("res://game/bootstrap/app/desk_setup_visuals.gd")
 const WARMUP := preload("res://game/bootstrap/app/mission_material_warmup.gd")
 const CLOUD := preload("res://game/features/infection_source/public/mutagen_cloud.tscn")
 const GLASS := preload("res://game/presentation/office_floor/public/structural/glass_wall_full.tscn")
@@ -41,6 +42,18 @@ func _shelves(stage: Node3D) -> void:
 		await physics_frame
 		await physics_frame
 		var profile := WORKSTATIONS.profile(str(model) + ".glb")
+		# Planner zones and objects use the measured board tops, not the authored heights.
+		var visuals := VISUALS.new()
+		shelf.set_meta("planning_scene_path", ROOT + "03/" + str(model) + ".glb")
+		visuals.call("configure", shelf, profile)
+		var tops: Array = visuals.call("_board_tops", shelf)
+		for station_value in visuals.get("stations"):
+			var planned := float((station_value as Dictionary).get("grid_height", 0.0))
+			var nearest := INF
+			for top in tops:
+				nearest = minf(nearest, absf(float(top) - planned))
+			_check(nearest < .003, "%s planner level %.3f sits on a board top" % [model, planned])
+		visuals.free()
 		var supported := 0
 		var books: Array[RigidBody3D] = []
 		for station: Dictionary in profile.stations:
