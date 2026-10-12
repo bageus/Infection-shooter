@@ -14,12 +14,9 @@ var _background: RadarBackground
 
 class RadarBackground:
 	extends Control
-	var frame := StyleBoxFlat.new()
 	func _draw() -> void:
 		var center := size * 0.5
 		var radius := minf(size.x, size.y) * 0.42
-		draw_style_box(frame, Rect2(Vector2.ZERO, size))
-		draw_rect(Rect2(0, 0, 3, size.y), PALETTE.ACCENT)
 		draw_circle(center, radius, PALETTE.TRACK)
 		draw_arc(center, radius, 0.0, TAU, 72, PALETTE.BORDER, 1.0, true)
 		draw_arc(center, radius * 0.63, 0.0, TAU, 72, PALETTE.BORDER_DIM, 1.0, true)
@@ -32,11 +29,6 @@ func _ready() -> void:
 	_background = RadarBackground.new()
 	_background.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	_background.show_behind_parent = true
-	_background.frame.bg_color = PALETTE.PANEL
-	_background.frame.border_color = PALETTE.BORDER
-	_background.frame.set_border_width_all(1)
-	_background.frame.shadow_color = Color(0, 0, 0, 0.35)
-	_background.frame.shadow_size = 8
 	add_child(_background)
 	_background.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 	resized.connect(_on_resized)
