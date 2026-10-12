@@ -41,6 +41,9 @@ def main():
     lock = cue(0.055, 650, 650) + [0.0] * 220 + cue(0.085, 1050, 1050)
     save('mutation_lock', lock)
     save('mutation_unlock', list(reversed(lock)))
+    # Locked door: two handle rattles, then the latch thunking into the frame.
+    rattle = cue(0.045, 1500, 1150, 0.5) + [0.0] * 500 + cue(0.04, 1500, 1100, 0.5)
+    save('door_locked', rattle + [0.0] * 300 + cue(0.16, 150, 95, 0.35))
 
 
 if __name__ == '__main__':

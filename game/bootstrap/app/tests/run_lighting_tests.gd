@@ -210,7 +210,7 @@ func _test_colors(planner: Node) -> void:
 	lamp._process(0.3)
 	var before: float = lamp.get_node("Light").light_energy
 	var controls: Node = planner.controls
-	var picker: ColorPickerButton = controls.selected_light_color
+	var picker: ColorPickerButton = controls.default_light_color
 	planner._select(lamp)
 	var stack_size: int = planner.edit_history.stack.size()
 	picker.color_changed.emit(Color(0.9, 0.4, 0.2))
@@ -341,7 +341,7 @@ func _test_fixture_edits(planner: Node, lamp: Node3D) -> void:
 	_check(lamp.call("get_fixture_config")["shape"] == "rectangle", "Inspector changes the selected shape")
 	planner.edit_history.undo()
 	_check(lamp.call("get_fixture_config")["shape"] == "linear", "Undo restores shape")
-	fields.selected_visible.button_pressed = true
+	fields.default_visible.button_pressed = true
 	_check(bool(lamp.call("get_fixture_config")["visible_in_game"]), "Inspector enables game visibility")
 	planner.edit_history.undo()
 	_check(not bool(lamp.call("get_fixture_config")["visible_in_game"]), "Undo restores body visibility")

@@ -1,6 +1,7 @@
 extends RefCounted
 ## Validate saved map structure before touching the live world.
 const NUMBERS := ["x", "y", "z", "rotation_x", "rotation_y", "rotation_z", "scale_x", "scale_y", "scale_z", "zone", "light_energy", "light_angle", "energy_multiplier", "flicker_mode", "flicker_step", "darkness", "spawn_x", "spawn_y", "spawn_z"]
+const DOOR_OPTIONS := preload("res://game/bootstrap/app/planning_door_options.gd")
 
 
 static func error(data: Dictionary) -> String:
@@ -31,6 +32,8 @@ static func error(data: Dictionary) -> String:
 			for number: String in ["seed", "facing"]:
 				if config.has(number) and not _number(config[number]):
 					return "object %d has an invalid %s.%s" % [index, field, number]
+		if record.has("door_lock") and not DOOR_OPTIONS.is_valid_state(record["door_lock"]):
+			return "object %d has an invalid door_lock" % index
 		for field: String in ["light_color", "blood_normal"]:
 			if record.has(field) and not _vector(record[field]):
 				return "object %d has an invalid %s" % [index, field]

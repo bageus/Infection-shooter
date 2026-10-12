@@ -50,12 +50,28 @@ func _click_world(screen_pos: Vector2) -> void:
 			_select(existing)
 		return
 	if not selected_path.is_empty() or selected_kind == "player":
+		# A lamp or door that is already installed is picked, not covered by another one.
+		var installed := _installed_same_kind_at(screen_pos)
+		if installed != null:
+			_reset_selection()
+			_select(installed)
+			return
 		_place_selected(screen_pos)
 		return
 	var hit_node = geometry._planned_object_at(screen_pos)
 	_select(hit_node)
 	if hit_node != null:
 		_clear_preview()
+
+
+func _installed_same_kind_at(screen_pos: Vector2) -> Node3D:
+	if selected_kind == "light":
+		return geometry.lamp_at(screen_pos)
+	if controls.door_options.lockable_controller(preview) != null:
+		var existing: Node3D = geometry._planned_object_at(screen_pos)
+		if controls.door_options.lockable_controller(existing) != null:
+			return existing
+	return null
 
 
 func _select(node: Node3D) -> void:
@@ -67,9 +83,11 @@ func _select(node: Node3D) -> void:
 	controls._update_light_ui()
 	if selected != null and selected.has_method("get_fixture_config"):
 		var panel := session.ui.get_node("Panel") as ScrollContainer
-		panel.ensure_control_visible.call_deferred(controls.light_info)
+		panel.ensure_control_visible.call_deferred(controls.light_defaults)
 	if selected != null and controls.loot_options.panel.visible:
 		(session.ui.get_node("Panel") as ScrollContainer).ensure_control_visible.call_deferred(controls.loot_options.panel)
+	if selected != null and controls.door_options.panel.visible:
+		(session.ui.get_node("Panel") as ScrollContainer).ensure_control_visible.call_deferred(controls.door_options.panel)
 	_update_status()
 	controls._update_history_buttons()
 
@@ -182,14 +200,13 @@ func _clear_preview() -> void:
 		controls.display_options.hide()
 	if controls.loot_options != null:
 		controls.loot_options.hide()
-	session.ui.get_node("Panel/VBox/SelectedLightColor").hide()
+	if controls.door_options != null:
+		controls.door_options.hide()
 	controls.fixtures.selected_panel.hide()
 	controls.light_info.hide()
 	controls.light_level.hide()
 	controls.light_angle_info.hide()
 	controls.light_angle.hide()
-	session.ui.get_node("Panel/VBox/SelectedFlicker").hide()
-	session.ui.get_node("Panel/VBox/SelectedFlickerStep").hide()
 	if preview != null and is_instance_valid(preview):
 		preview.queue_free()
 	preview = null
