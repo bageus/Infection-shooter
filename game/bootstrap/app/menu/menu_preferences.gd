@@ -7,7 +7,7 @@ var bindings := BINDINGS.new()
 const FILE := "user://interface_settings.cfg"
 const DEFAULTS := {"language": "ru", "brightness": 1.0, "text_scale": 1.0,
 	"volume": 0.4, "effects_volume": 1.0, "music_volume": 1.0, "sound": true, "occlusion_mode": 0, "test_mutagen": false, "infinite_antidotes": false, "lighting": true, "electronic_particles": true, "skill_effects": 0,
-	"shadows": true, "shadow_quality": 2}
+	"shadows": true, "shadow_quality": 2, "mesh_lod": true}
 var values: Dictionary = DEFAULTS.duplicate()
 
 
@@ -82,6 +82,9 @@ func apply_to_game(tree: SceneTree) -> void:
 	if overhead != null:
 		overhead.visible = bool(values.lighting)
 	SHADOWS.apply(tree, bool(values.shadows), int(values.shadow_quality))
+	if tree != null:
+		# 0 turns automatic mesh LOD off; 1 is the engine default. No shader recompile.
+		tree.root.mesh_lod_threshold = 1.0 if values.mesh_lod else 0.0
 	var occlusion := scene.get_node_or_null("OcclusionEffects") if scene != null else null
 	if occlusion != null:
 		occlusion.call("set_mode", int(values.occlusion_mode))

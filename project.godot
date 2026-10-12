@@ -156,6 +156,10 @@ skill_4={
 3d_physics/layer_8="Blood surfaces"
 3d_physics/layer_9="Structural occlusion queries"
 
+[physics]
+
+3d/physics_engine="Jolt Physics"
+
 [rendering]
 
 renderer/rendering_method="gl_compatibility"

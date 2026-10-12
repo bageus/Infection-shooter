@@ -37,7 +37,7 @@ func _run() -> void:
 	light_prefs.load_settings()
 	_check(not light_prefs.values.lighting, "Lighting toggle survives settings reload")
 	lighting.set_pressed(true)
-	_shadow_checks(tabs, dialog)
+	await _shadow_checks(tabs, dialog)
 	_check(tabs.get_child(3).find_child("SoundToggle", true, false) != null, "Sound belongs to Audio")
 	_check_notice_badge(dialog, tabs)
 	dialog.settings.notices._show(1)
@@ -105,12 +105,16 @@ func _run() -> void:
 	print("Settings tabs tests: %d failures" % failures)
 	quit(failures)
 
+const SHADOWS_OFF_DISTANCE := 0.5
+
+
 func _shadow_checks(tabs: TabContainer, dialog: Control) -> void:
 	var shadows := tabs.get_child(2).find_child("Shadows", true, false) as CheckButton
 	var quality := tabs.get_child(2).find_child("ShadowQuality", true, false) as HSlider
 	_check(shadows != null and shadows.button_pressed, "Shadows toggle belongs to Video and defaults on")
 	_check(quality != null and quality.value == 2.0 and quality.max_value == 3.0 and quality.step == 1.0, "Shadow quality slider has 4 levels and defaults to High")
 	quality.value = 0.0
+	await create_timer(0.6).timeout
 	_check(PREFS.new().values.shadow_quality == 2, "Fresh preferences keep the default quality")
 	var shadow_prefs := PREFS.new()
 	shadow_prefs.load_settings()
@@ -120,6 +124,7 @@ func _shadow_checks(tabs: TabContainer, dialog: Control) -> void:
 	var sun := DirectionalLight3D.new()
 	sun.name = "GlobalOverheadLight"
 	sun.shadow_enabled = true
+	sun.directional_shadow_mode = DirectionalLight3D.SHADOW_PARALLEL_2_SPLITS
 	stage.add_child(sun)
 	root.add_child(stage)
 	var previous_scene := current_scene
@@ -127,11 +132,24 @@ func _shadow_checks(tabs: TabContainer, dialog: Control) -> void:
 	shadow_prefs.values.shadows = false
 	shadow_prefs.values.shadow_quality = 0
 	shadow_prefs.apply_to_game(self)
-	_check(not sun.shadow_enabled and sun.directional_shadow_max_distance == 32.0, "Low quality shortens range and off disables shadows")
+	_check(sun.shadow_enabled and is_equal_approx(sun.directional_shadow_max_distance, SHADOWS_OFF_DISTANCE), "Off shrinks the sun's range without touching shader-variant switches")
 	shadow_prefs.values.shadows = true
 	shadow_prefs.values.shadow_quality = 2
 	shadow_prefs.apply_to_game(self)
 	_check(sun.shadow_enabled and sun.directional_shadow_max_distance == 64.0 and sun.directional_shadow_mode == DirectionalLight3D.SHADOW_PARALLEL_2_SPLITS, "High quality restores the authored shadow setup")
+	shadow_prefs.values.shadow_quality = 0
+	shadow_prefs.apply_to_game(self)
+	_check(sun.directional_shadow_max_distance == 32.0 and sun.directional_shadow_mode == DirectionalLight3D.SHADOW_PARALLEL_2_SPLITS, "Low quality shortens range and keeps the split mode")
+	shadow_prefs.values.shadow_quality = 2
+	shadow_prefs.apply_to_game(self)
+	var mesh_lod := tabs.get_child(2).find_child("MeshLod", true, false) as CheckButton
+	_check(mesh_lod != null and mesh_lod.button_pressed and PREFS.new().values.mesh_lod, "LOD toggle belongs to Video and defaults on")
+	shadow_prefs.values.mesh_lod = false
+	shadow_prefs.apply_to_game(self)
+	_check(root.mesh_lod_threshold == 0.0, "LOD off disables automatic mesh LOD")
+	shadow_prefs.values.mesh_lod = true
+	shadow_prefs.apply_to_game(self)
+	_check(root.mesh_lod_threshold == 1.0, "LOD on restores the engine default")
 	current_scene = previous_scene
 	stage.queue_free()
 	quality.value = 2.0
