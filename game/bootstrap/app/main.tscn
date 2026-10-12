@@ -380,58 +380,6 @@ max_value = 89.0
 value = 48.0
 show_percentage = false
 
-[node name="SelectedLightColor" type="HBoxContainer" parent="PlanningUI/Panel/VBox"]
-visible = false
-layout_mode = 2
-[node name="Label" type="Label" parent="PlanningUI/Panel/VBox/SelectedLightColor"]
-layout_mode = 2
-text = "Оттенок"
-[node name="Value" type="ColorPickerButton" parent="PlanningUI/Panel/VBox/SelectedLightColor"]
-custom_minimum_size = Vector2(100, 28)
-layout_mode = 2
-size_flags_horizontal = 3
-color = Color(1, 0.92, 0.78, 1)
-edit_alpha = false
-edit_intensity = false
-
-[node name="SelectedFlicker" type="HBoxContainer" parent="PlanningUI/Panel/VBox" unique_id=1247356379]
-visible = false
-layout_mode = 2
-
-[node name="Label" type="Label" parent="PlanningUI/Panel/VBox/SelectedFlicker" unique_id=525831230]
-layout_mode = 2
-text = "Flicker"
-
-[node name="Mode" type="OptionButton" parent="PlanningUI/Panel/VBox/SelectedFlicker" unique_id=1908332805]
-layout_mode = 2
-size_flags_horizontal = 3
-item_count = 4
-popup/item_0/text = "Steady"
-popup/item_0/id = 0
-popup/item_1/text = "Fast"
-popup/item_1/id = 1
-popup/item_2/text = "Slow"
-popup/item_2/id = 2
-popup/item_3/text = "Occasional outage"
-popup/item_3/id = 3
-
-[node name="SelectedFlickerStep" type="HBoxContainer" parent="PlanningUI/Panel/VBox" unique_id=1795254728]
-visible = false
-layout_mode = 2
-
-[node name="Label" type="Label" parent="PlanningUI/Panel/VBox/SelectedFlickerStep" unique_id=474781725]
-layout_mode = 2
-text = "Step"
-
-[node name="Value" type="SpinBox" parent="PlanningUI/Panel/VBox/SelectedFlickerStep" unique_id=1292966127]
-layout_mode = 2
-size_flags_horizontal = 3
-min_value = 0.05
-max_value = 3.0
-step = 0.05
-value = 0.2
-suffix = " s"
-
 [node name="Status" type="Label" parent="PlanningUI/Panel/VBox" unique_id=2101908996]
 custom_minimum_size = Vector2(330, 30)
 layout_mode = 2
