@@ -3,7 +3,7 @@ extends Control
 ##
 ## Mutagen near the loss-of-control threshold: green smoke rises from the bottom
 ## edge and pulses faster with a low rising pressure drone. Low health: blood
-## streaks run from the top edge and heavy breathing gets louder. Both fade out
+## haze spreads from the top edge and heavy breathing gets louder. Both fade out
 ## smoothly when the value recovers. One shader rect, no extra viewports.
 
 const SHADER := preload("res://game/presentation/prototype_hud/vitals_screen_fx.gdshader")
