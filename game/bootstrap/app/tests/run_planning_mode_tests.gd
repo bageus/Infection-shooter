@@ -119,6 +119,8 @@ func _exercise_maps(planner: Node) -> void:
 	var name := "codex_planning_regression_%d" % Time.get_ticks_usec()
 	(storage.get("map_name_edit") as LineEdit).text = name
 	storage.call("save_named_map")
+	# Saving adds the automatic wall fixtures, so compare against the state the save left.
+	snapshot = storage.call("_collect_layout_data")
 	var path: String = storage.call("_map_path", name)
 	_check(FileAccess.file_exists(path), "Named map saves")
 	editor.call("clear_layout", false)

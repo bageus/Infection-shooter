@@ -160,6 +160,8 @@ func _place(entry: Dictionary) -> void:
 		node.set_meta("planning_desk_id", str(record["desk_id"]))
 	if record.has("attachment"):
 		node.set_meta("planning_attachment", str(record["attachment"]))
+	if record.has("auto_fixture"):
+		node.set_meta("planning_auto_fixture", str(record["auto_fixture"]))
 	if int(record.get("zone", -1)) >= 0:
 		node.set_meta("planning_zone", int(record["zone"]))
 	if node.has_method("configure_fixture"):
@@ -192,6 +194,19 @@ func _place(entry: Dictionary) -> void:
 		if node.has_method("set_target"):
 			node.call("set_target", session.main_player)
 	objects.placed.append(node)
+
+
+## Adds records to the current map without clearing it; returns how many were placed.
+func append(records: Array) -> int:
+	var prepared := _empty_plan()
+	for record: Dictionary in records:
+		if not _stage(record, prepared):
+			_discard(prepared)
+			return 0
+	for entry: Dictionary in prepared.entries:
+		_place(entry)
+	objects._update_status()
+	return prepared.entries.size()
 
 
 func _finish(prepared: Dictionary) -> Dictionary:
