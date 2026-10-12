@@ -78,8 +78,17 @@ static func _make(parent: Node3D, amount: int, lifetime: float, one_shot: bool) 
 	particles.name = "BloodDrops"
 	particles.add_to_group(GROUP)
 	_active += 1
-	# One shot: a severed part reparents its bleeding emitter before freeing it.
-	particles.tree_exiting.connect(func() -> void: _active -= 1, CONNECT_ONE_SHOT)
+	# A severed part reparents its bleeding emitter, which leaves and re-enters
+	# the tree; the emitter counts only while it is inside the tree.
+	var counted := [true]
+	particles.tree_exiting.connect(func() -> void:
+		if counted[0]:
+			counted[0] = false
+			_active -= 1)
+	particles.tree_entered.connect(func() -> void:
+		if not counted[0]:
+			counted[0] = true
+			_active += 1)
 	particles.amount = maxi(1, amount)
 	particles.lifetime = lifetime
 	particles.one_shot = one_shot

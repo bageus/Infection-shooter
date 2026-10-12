@@ -60,7 +60,7 @@ func spawn_casing(model: PackedScene, eject_transform: Transform3D, radius: floa
 	body.add_child(visual)
 	effects_root.add_child(body)
 	body.global_transform = eject_transform
-	if shooter != null:
+	if is_instance_valid(shooter):
 		body.add_collision_exception_with(shooter)
 	var basis := eject_transform.basis.orthonormalized()
 	body.linear_velocity = basis.x * randf_range(1.5, 2.3) + Vector3.UP * randf_range(1.4, 2.2) + basis.z * randf_range(-0.5, 0.2)
@@ -77,15 +77,17 @@ func spawn_casing(model: PackedScene, eject_transform: Transform3D, radius: floa
 func _schedule_clink(body: RigidBody3D, sound_event: StringName) -> void:
 	var casing: WeakRef = weakref(body)
 	var landing := randf_range(0.3, 0.46)
-	get_tree().create_timer(landing).timeout.connect(func() -> void:
-		var live := casing.get_ref() as Node3D
-		if live != null and is_instance_valid(effects_root):
-			SFX.play(effects_root, sound_event, live.global_position))
+	# Bound methods, not lambdas: a timer outliving this pool (restart, back to
+	# the menu) drops the call instead of touching the freed instance.
+	get_tree().create_timer(landing).timeout.connect(_play_clink.bind(casing, sound_event, 0.0, 1.0))
 	if randf() < 0.6:
-		get_tree().create_timer(landing + randf_range(0.12, 0.22)).timeout.connect(func() -> void:
-			var live := casing.get_ref() as Node3D
-			if live != null and is_instance_valid(effects_root):
-				SFX.play(effects_root, sound_event, live.global_position, -8.0, 1.06))
+		get_tree().create_timer(landing + randf_range(0.12, 0.22)).timeout.connect(_play_clink.bind(casing, sound_event, -8.0, 1.06))
+
+
+func _play_clink(casing: WeakRef, sound_event: StringName, volume_db: float, pitch: float) -> void:
+	var live := casing.get_ref() as Node3D
+	if live != null and is_instance_valid(effects_root):
+		SFX.play(effects_root, sound_event, live.global_position, volume_db, pitch)
 
 
 func _process(delta: float) -> void:
