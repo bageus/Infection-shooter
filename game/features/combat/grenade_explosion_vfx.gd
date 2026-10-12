@@ -27,6 +27,8 @@ const ATLASES := preload("res://game/core/vfx/public/effect_atlases.gd")
 @onready var _light: OmniLight3D = $ImpactLight
 
 var _started := false
+## Set by the load-time warm-up, which plays the blast out of earshot.
+var muted := false
 var _ember_texture: Texture2D
 var _spark_texture: Texture2D
 
@@ -69,7 +71,8 @@ func start(surface_normal: Vector3) -> void:
 	light_fade.tween_property(_light, "light_energy", flash_brightness * 0.35, 0.07 * speed)
 	light_fade.parallel().tween_property(_light, "light_color", Color(1.0, 0.38, 0.08), 0.12 * speed)
 	light_fade.tween_property(_light, "light_energy", 0.0, 0.19 * speed)
-	SFX.play(get_parent() if get_parent() != null else self, &"grenade_explode", global_position)
+	if not muted:
+		SFX.play(get_parent() if get_parent() != null else self, &"grenade_explode", global_position)
 	get_tree().create_timer(maxf(effect_duration, 0.3 * speed + lingering_smoke_seconds + 0.8) + 0.2).timeout.connect(queue_free)
 
 
@@ -211,6 +214,6 @@ func _configure_debris(outward: Vector3, size_scale: float, time_scale: float) -
 func _emit_after(emitter: GPUParticles3D, delay: float) -> void:
 	# Binding the tween to the emitter cancels it when that emitter leaves the tree.
 	var tween := emitter.create_tween()
-	tween.tween_interval(delay)
+	tween.tween_interval(0.0 if muted else delay)
 	tween.tween_callback(emitter.restart)
 	tween.tween_callback(emitter.set.bind("emitting", true))
