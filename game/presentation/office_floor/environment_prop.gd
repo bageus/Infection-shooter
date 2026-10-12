@@ -28,6 +28,7 @@ const WALL_MOUNT = preload("res://game/presentation/office_floor/wall_mount_mode
 const BOOK_STACK = preload("res://game/presentation/office_floor/book_stack_breakup.gd")
 const EXTINGUISHER_FX = preload("res://game/presentation/office_floor/extinguisher_hit_fx.tscn")
 const HIT_REACTION = preload("res://game/presentation/office_floor/prop_hit_reaction.gd")
+const SIGN_LIFETIME := 1.0
 const BOTTLE_BURST := preload("res://game/presentation/office_floor/water_bottle_burst.gd")
 
 const LOOT_DROP := preload("res://game/features/pickups/public/loot_drop.gd")
@@ -158,6 +159,8 @@ func _ready() -> void:
 	var wall_mounted: bool = WALL_MOUNT.contains(model_path)
 	if wall_mounted:
 		set_meta("planning_wall_mount", true)
+		if "/enviroments/13/" in model_path:
+			add_to_group(&"wall_signs")
 	if not _geometry.load_visual(self, model_path):
 		return
 	var visual := _visual
@@ -275,6 +278,8 @@ func take_projectile_hit(damage: float, hit_position: Vector3, _normal: Vector3,
 		_tear_paper(hit_position, direction)
 		return false
 	if _damage.category == "tech":
+		if damage > 0.0 and model_path.get_file() == "05_lamp.glb":
+			_put_out_lamp()
 		if not _damage.short_circuit():
 			if repeated_electronic_particles:
 				SPARKS.spawn(self, hit_position)
@@ -305,11 +310,40 @@ func take_projectile_hit(damage: float, hit_position: Vector3, _normal: Vector3,
 			if BREAKUP.chip_facade(self, _geometry, hit_position, direction):
 				_rebuild_shapes()
 		PROP_DAMAGE.HitAction.DETACH:
-			freeze = false
-			IMPACT_SOUND.wake(self)
-			sleeping = false
-			apply_central_impulse((direction.normalized() + Vector3.UP * 0.2).normalized() * maxf(0.5, mass * 0.12))
+			_detach(direction)
 	return false
+
+
+func _detach(direction: Vector3) -> void:
+	freeze = false
+	IMPACT_SOUND.wake(self)
+	sleeping = false
+	apply_central_impulse((direction.normalized() + Vector3.UP * 0.2).normalized() * maxf(0.5, mass * 0.12))
+	if is_in_group(&"wall_signs"):
+		_vanish_after(SIGN_LIFETIME)
+
+
+## A wall sign mounted on a glass pane drops with it when the pane breaks.
+func fall_off_with_glass() -> void:
+	if not is_in_group(&"wall_signs") or not freeze or _damage.broken:
+		return
+	_damage.broken = true
+	_detach(Vector3.DOWN)
+
+
+func _vanish_after(seconds: float) -> void:
+	await get_tree().create_timer(seconds).timeout
+	if not is_inside_tree():
+		return
+	collision_layer = 0
+	collision_mask = 0
+	queue_free()
+
+
+func _put_out_lamp() -> void:
+	var glow := find_child("BudgetLight", true, false)
+	if glow != null:
+		glow.call("set_wanted", false)
 
 
 # Any paper object is torn apart completely by a single shot.
