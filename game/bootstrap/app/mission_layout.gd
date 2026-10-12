@@ -1,6 +1,5 @@
 extends Node3D
 
-const TEST_DNA := preload("res://game/bootstrap/app/test_dna_pickup.gd")
 const KEY := preload("res://game/bootstrap/app/mission_key.gd")
 const WEAPON := preload("res://game/bootstrap/app/weapon_pickup.gd")
 const FLOOR_BOUNDS := Rect2(-40, -30, 80, 60)
@@ -11,21 +10,13 @@ var _openings: Array[Rect2] = []
 var _scan_remaining := 0.0
 
 
-func setup(stage: Node3D, player: Node3D, infection: Node) -> void:
+func setup(stage: Node3D, _player: Node3D, _infection: Node) -> void:
 	_stage = stage
 	_refresh_stairs()
 	var key := KEY.new()
 	key.name = "EmergencyKey"
 	add_child(key)
 	key.global_position = Vector3(20, 0.25, 15)
-	spawn_weapon(3, Vector3(-20, 0.25, -15))
-	for entry in [[4, Vector3(-18, 0.25, -12)], [5, Vector3(-15, 0.25, -12)], [6, Vector3(-12, 0.25, -12)], [7, Vector3(-9, 0.25, -12)]]:
-		spawn_weapon(entry[0], entry[1])
-	var dna := TEST_DNA.new()
-	dna.name = "RespawningTestDNA"
-	dna.position = Vector3(-17.5, 0.5, -15)
-	dna.call("configure", player, infection)
-	add_child(dna)
 
 
 func _process(delta: float) -> void:
