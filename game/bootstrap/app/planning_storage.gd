@@ -107,6 +107,10 @@ func _collect_layout_data() -> Dictionary:
 			records[-1]["decor_pose"] = node.call("get_decor_pose")
 		if node.has_method("has_display") and node.call("has_display"):
 			records[-1]["display"] = node.call("get_display_config")
+		if node.has_method("get_loot_config") and node.has_meta(&"planning_loot"):
+			records[-1]["loot"] = node.call("get_loot_config")
+		if node.has_method("get_enemy_stats") and node.has_meta(&"planning_enemy_stats"):
+			records[-1]["enemy_stats"] = node.call("get_enemy_stats")
 		if node.has_method("get_fixture_config"):
 			var fixture: Dictionary = node.call("get_fixture_config")
 			records[-1]["fixture_shape"] = str(fixture["shape"])
@@ -358,6 +362,10 @@ func _save_authored_scene(target: String = AUTHORED_SCENE_PATH) -> Error:
 			copy.set_meta("planning_object_id", node.get_meta("planning_object_id"))
 		if node.has_method("has_display") and node.call("has_display"):
 			copy.call("configure_display", node.call("get_display_config"))
+		if node.has_method("get_loot_config") and node.has_meta(&"planning_loot"):
+			copy.call("configure_loot", node.call("get_loot_config"))
+		if node.has_method("get_enemy_stats") and node.has_meta(&"planning_enemy_stats"):
+			copy.call("configure_stats", node.call("get_enemy_stats"))
 		if node.has_method("get_fixture_config"):
 			var fixture: Dictionary = node.call("get_fixture_config")
 			copy.call("configure_fixture", str(fixture["shape"]), bool(fixture["visible_in_game"]))

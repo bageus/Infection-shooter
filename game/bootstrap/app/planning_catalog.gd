@@ -43,6 +43,16 @@ var actor_catalog = [
 	{"name":"Horde","path":ENEMY_SCENES[7],"kind":"enemy"}
 ]
 
+var item_catalog = [
+	{"name":"Ключ","path":"res://game/bootstrap/app/item_pickups/key.tscn","kind":"item"},
+	{"name":"ДНК","path":"res://game/features/pickups/public/dna_pickup.tscn","kind":"item"},
+	{"name":"Патроны: пистолет","path":"res://game/features/pickups/public/ammo_pistol_pickup.tscn","kind":"item"},
+	{"name":"Патроны: UZI","path":"res://game/features/pickups/public/ammo_uzi_pickup.tscn","kind":"item"},
+	{"name":"Патроны: дробовик","path":"res://game/features/pickups/public/ammo_shotgun_pickup.tscn","kind":"item"},
+	{"name":"Аптечка","path":"res://game/features/pickups/public/medkit_pickup.tscn","kind":"item"},
+	{"name":"Антидот","path":"res://game/features/pickups/public/antidote_pickup.tscn","kind":"item"}
+]
+
 var weapon_catalog = [
 	{"name":"PISTOL","path":"res://game/bootstrap/app/weapon_pickups/pistol.tscn","kind":"weapon"},
 	{"name":"UZI","path":"res://game/bootstrap/app/weapon_pickups/uzi.tscn","kind":"weapon"},

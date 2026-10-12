@@ -42,6 +42,13 @@ func _on_palette_selected(index: int) -> void:
 
 
 func _click_world(screen_pos: Vector2) -> void:
+	# Ctrl+LMB picks an installed object even while a palette item is active.
+	if Input.is_key_pressed(KEY_CTRL) and (not selected_path.is_empty() or selected_kind == "player"):
+		var existing = geometry._planned_object_at(screen_pos)
+		if existing != null:
+			_reset_selection()
+			_select(existing)
+		return
 	if not selected_path.is_empty() or selected_kind == "player":
 		_place_selected(screen_pos)
 		return
@@ -61,6 +68,8 @@ func _select(node: Node3D) -> void:
 	if selected != null and selected.has_method("get_fixture_config"):
 		var panel := session.ui.get_node("Panel") as ScrollContainer
 		panel.ensure_control_visible.call_deferred(controls.light_info)
+	if selected != null and controls.loot_options.panel.visible:
+		(session.ui.get_node("Panel") as ScrollContainer).ensure_control_visible.call_deferred(controls.loot_options.panel)
 	_update_status()
 	controls._update_history_buttons()
 
@@ -171,6 +180,8 @@ func _selected_kind() -> String:
 func _clear_preview() -> void:
 	if controls.display_options != null:
 		controls.display_options.hide()
+	if controls.loot_options != null:
+		controls.loot_options.hide()
 	session.ui.get_node("Panel/VBox/SelectedLightColor").hide()
 	controls.fixtures.selected_panel.hide()
 	controls.light_info.hide()
