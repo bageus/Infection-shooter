@@ -3,10 +3,12 @@ extends Node3D
 ## a green light and a burst of rising crosses; any restored health shows
 ## soft rising sparkles and a short-lived floating "+HP" number. Continuous
 ## healing (regeneration) is summed so numbers do not spam every frame.
+## A DNA ampule gets the same ring and light with a burst of small rising arrows.
 
 const BODY_FONT := preload("res://assets/interface/fonts/body.ttf")
 const RING_SHADER := preload("res://game/features/player/player_heal_ring.gdshader")
 const HEAL_COLOR := Color(0.42, 0.95, 0.55)
+const DNA_COLOR := Color(0.45, 1.0, 0.25)
 const NUMBER_COLOR := Color(0.62, 1.0, 0.66)
 const NUMBER_RISE := 0.8
 const NUMBER_TIME := 1.5
@@ -18,6 +20,7 @@ const SUM_FLUSH_SECONDS := 0.9
 const SPARKLE_LINGER := 0.45
 
 static var _cross_texture: Texture2D
+static var _arrow_texture: Texture2D
 
 var _player: Node3D
 var _sparkles: CPUParticles3D
@@ -31,6 +34,9 @@ func configure(player: Node3D) -> void:
 	_player = player
 	if player.has_signal("healed"):
 		player.connect("healed", _on_healed)
+	var runtime := player.get_node_or_null("InfectionRuntime")
+	if runtime != null and runtime.has_signal("control_ampule_collected"):
+		runtime.connect("control_ampule_collected", _on_control_ampule_collected)
 	_sparkles = _make_sparkles()
 	add_child(_sparkles)
 	set_process(false)
@@ -50,6 +56,12 @@ func _on_healed(amount: float, source: StringName) -> void:
 		if _pending >= 5.0:
 			_flush_pending()
 	set_process(true)
+
+
+func _on_control_ampule_collected(_critical_threshold: float) -> void:
+	if not is_inside_tree():
+		return
+	_play_pickup_burst(DNA_COLOR, _arrow())
 
 
 func _process(delta: float) -> void:
@@ -109,6 +121,10 @@ func _spawn_number(amount: float, large: bool) -> void:
 
 
 func _play_medkit_burst() -> void:
+	_play_pickup_burst(HEAL_COLOR, _cross())
+
+
+func _play_pickup_burst(tint: Color, glyph: Texture2D) -> void:
 	var ring := MeshInstance3D.new()
 	ring.name = "HealRing"
 	var quad := QuadMesh.new()
@@ -117,7 +133,7 @@ func _play_medkit_burst() -> void:
 	ring.mesh = quad
 	var material := ShaderMaterial.new()
 	material.shader = RING_SHADER
-	material.set_shader_parameter("tint", HEAL_COLOR)
+	material.set_shader_parameter("tint", tint)
 	material.set_shader_parameter("progress", 0.0)
 	ring.material_override = material
 	ring.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
@@ -126,14 +142,14 @@ func _play_medkit_burst() -> void:
 	var ring_tween := ring.create_tween()
 	ring_tween.tween_method(func(value: float) -> void: material.set_shader_parameter("progress", value), 0.0, 1.0, RING_TIME).set_ease(Tween.EASE_OUT).set_trans(Tween.TRANS_CUBIC)
 	ring_tween.tween_callback(ring.queue_free)
-	_flash_light()
-	_burst_crosses()
+	_flash_light(tint)
+	_burst_glyphs(tint, glyph)
 
 
-func _flash_light() -> void:
+func _flash_light(tint: Color) -> void:
 	var light := OmniLight3D.new()
 	light.name = "HealLight"
-	light.light_color = HEAL_COLOR
+	light.light_color = tint
 	light.omni_range = 3.2
 	light.light_energy = 0.0
 	light.shadow_enabled = false
@@ -145,8 +161,8 @@ func _flash_light() -> void:
 	light_tween.tween_callback(light.queue_free)
 
 
-func _burst_crosses() -> void:
-	var burst := _make_cross_particles(12, 0.95)
+func _burst_glyphs(tint: Color, glyph: Texture2D) -> void:
+	var burst := _make_glyph_particles(12, 0.95, tint, glyph)
 	burst.name = "HealBurst"
 	burst.one_shot = true
 	burst.explosiveness = 0.7
@@ -166,7 +182,7 @@ func _burst_crosses() -> void:
 
 
 func _make_sparkles() -> CPUParticles3D:
-	var sparkles := _make_cross_particles(8, 0.85)
+	var sparkles := _make_glyph_particles(8, 0.85, HEAL_COLOR, _cross())
 	sparkles.name = "HealSparkles"
 	sparkles.emitting = false
 	sparkles.emission_shape = CPUParticles3D.EMISSION_SHAPE_RING
@@ -182,7 +198,7 @@ func _make_sparkles() -> CPUParticles3D:
 	return sparkles
 
 
-func _make_cross_particles(amount: int, lifetime: float) -> CPUParticles3D:
+func _make_glyph_particles(amount: int, lifetime: float, tint: Color, glyph: Texture2D) -> CPUParticles3D:
 	var particles := CPUParticles3D.new()
 	particles.amount = amount
 	particles.lifetime = lifetime
@@ -194,10 +210,10 @@ func _make_cross_particles(amount: int, lifetime: float) -> CPUParticles3D:
 	particles.damping_max = 1.2
 	particles.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
 	var fade := Gradient.new()
-	fade.set_color(0, Color(HEAL_COLOR, 0.0))
-	fade.set_color(1, Color(HEAL_COLOR, 0.0))
-	fade.add_point(0.15, Color(0.85, 1.0, 0.88, 1.0))
-	fade.add_point(0.5, Color(HEAL_COLOR, 0.85))
+	fade.set_color(0, Color(tint, 0.0))
+	fade.set_color(1, Color(tint, 0.0))
+	fade.add_point(0.15, Color(tint.lightened(0.6), 1.0))
+	fade.add_point(0.5, Color(tint, 0.85))
 	particles.color_ramp = fade
 	var shrink := Curve.new()
 	shrink.add_point(Vector2(0.0, 0.6))
@@ -212,7 +228,7 @@ func _make_cross_particles(amount: int, lifetime: float) -> CPUParticles3D:
 	material.texture_filter = BaseMaterial3D.TEXTURE_FILTER_LINEAR_WITH_MIPMAPS
 	material.billboard_mode = BaseMaterial3D.BILLBOARD_PARTICLES
 	material.vertex_color_use_as_albedo = true
-	material.albedo_texture = _cross()
+	material.albedo_texture = glyph
 	material.disable_receive_shadows = true
 	quad.material = material
 	particles.mesh = quad
@@ -239,3 +255,22 @@ static func _cross() -> Texture2D:
 			image.set_pixel(x, y, Color(1.0, 1.0, 1.0, maxf(alpha, glow)))
 	_cross_texture = ImageTexture.create_from_image(image)
 	return _cross_texture
+
+
+# A small upward arrowhead on a stem, generated once; the DNA burst uses it.
+static func _arrow() -> Texture2D:
+	if _arrow_texture != null:
+		return _arrow_texture
+	const SIZE := 64
+	var image := Image.create(SIZE, SIZE, false, Image.FORMAT_RGBA8)
+	var half := (SIZE - 1) * 0.5
+	for y in range(SIZE):
+		for x in range(SIZE):
+			var u := (x - half) / half
+			var v := (y - half) / half
+			# Head: a triangle with its apex at the top; stem: a bar below it.
+			var head := v >= -0.9 and v <= -0.1 and absf(u) <= 0.62 * (v + 0.9) / 0.8
+			var stem := v > -0.15 and v <= 0.9 and absf(u) <= 0.2
+			image.set_pixel(x, y, Color(1.0, 1.0, 1.0, 1.0 if head or stem else 0.0))
+	_arrow_texture = ImageTexture.create_from_image(image)
+	return _arrow_texture

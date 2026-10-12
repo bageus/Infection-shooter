@@ -114,6 +114,14 @@ func _test_key_cell(hud: Node, player: Node) -> void:
 	_expect(cell.get_theme_stylebox("panel") == antidote.get_theme_stylebox("panel"), "Key cell shares the HUD item frame.")
 	var key_icon := cell.get_node("KeyIcon") as TextureRect
 	_expect(key_icon.texture != null and key_icon.texture.get_size() == ICONS.ARTWORK_BOUNDS[6].size, "Key cell shows the atlas key artwork.")
+	var objective := hud.get_node("Objective") as Control
+	_expect(objective.visible, "The mission goal appears once the key is held.")
+	_expect(_label_text(objective) == "Двигайся к пожарному выходу!", "The mission goal names the fire exit.")
+	_expect(objective.get_parent() == hud and objective.get_global_rect().get_center().x > hud.get_viewport().get_visible_rect().size.x * 0.4, "The mission goal sits at the top centre.")
+
+
+func _label_text(panel: Node) -> String:
+	return (panel.get_child(0) as Label).text
 
 
 func _check_crop_pixels(icon: Image, crop: Image) -> void:

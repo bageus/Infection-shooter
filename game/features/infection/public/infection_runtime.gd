@@ -16,6 +16,8 @@ signal skill_cast(skill_id: String)
 signal passive_triggered(skill_id: String, duration: float)
 ## Fact: an active skill's lasting effect started or was extended.
 signal skill_effect_started(skill_id: String, duration: float)
+## Fact: a DNA ampule was collected; the control threshold rose to `critical_threshold`.
+signal control_ampule_collected(critical_threshold: float)
 
 var _domain = InfectionDomain.new()
 var tree = MUTATION_TREE.new()
@@ -57,6 +59,7 @@ func add_control_ampule() -> float:
 	var previous_stability: float = _domain.critical_threshold
 	var threshold: float = _domain.add_control_ampule()
 	_emit_state_changes(previous_mutation, not is_equal_approx(previous_stability, threshold))
+	control_ampule_collected.emit(threshold)
 	return threshold
 
 

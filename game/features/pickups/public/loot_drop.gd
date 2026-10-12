@@ -47,9 +47,6 @@ static func spawn(world: Node, ids: Array[String], at: Vector3, drop_weapon: Cal
 			continue
 		var item: Node3D = (SCENES[id] as PackedScene).instantiate()
 		world.add_child(item)
-		var visual := item.get_node_or_null("Visual") as Node3D
-		if visual != null:
-			visual.scale *= DROP_TABLE.DROP_SCALE
 		item.global_position = spot
 		item.call("settle_on_floor")
 		# Authored loot stays until collected; enemy drops fade (drop_table.gd).

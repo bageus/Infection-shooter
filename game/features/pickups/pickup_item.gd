@@ -2,6 +2,9 @@ extends Area3D
 
 enum PickupType { MEDKIT, AMMO_PISTOL, AMMO_UZI, AMMO_SHOTGUN, ANTIDOTE, DNA }
 
+## Single size for every supply, placed in planning or dropped by infected.
+const VISUAL_SCALE := 0.5
+
 @export var pickup_type: PickupType = PickupType.MEDKIT
 @export var amount: int = 20
 @export_flags_3d_physics var floor_mask := 129
@@ -12,6 +15,9 @@ var _recheck := 0.0
 func _ready() -> void:
 	set_physics_process(false)
 	set_process(false)
+	var visual := get_node_or_null("Visual") as Node3D
+	if visual != null:
+		visual.scale *= VISUAL_SCALE
 	body_entered.connect(_on_body_entered)
 
 

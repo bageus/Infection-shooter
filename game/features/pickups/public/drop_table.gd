@@ -9,8 +9,6 @@ const ANTIDOTE := preload("res://game/features/pickups/public/antidote_pickup.ts
 const DROP_LIFETIME := 75.0
 const MAX_DROPS := 40
 const DROP_GROUP := &"enemy_drops"
-## Dropped supplies are half the size of placed ones.
-const DROP_SCALE := 0.5
 ## Centre-to-centre gap that keeps two half-size drops from overlapping.
 const DROP_SPACING := 0.7
 ## Rings searched around the kill for a free spot, and spots per ring.
@@ -37,9 +35,6 @@ func drop_for_enemy(world: Node, at: Vector3) -> void:
 	var spot := free_spot(world, at)
 	var item := scene.instantiate()
 	world.add_child(item)
-	var visual := item.get_node_or_null("Visual") as Node3D
-	if visual != null:
-		visual.scale *= DROP_SCALE
 	item.global_position = spot
 	item.call("settle_on_floor")
 	# Drops do not pile up forever: they fade after a while, oldest first.
