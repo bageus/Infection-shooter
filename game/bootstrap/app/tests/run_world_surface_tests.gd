@@ -188,10 +188,13 @@ func _blood_roundtrip(planner: Node, objects: Node) -> void:
 			var matches: bool = is_equal_approx(float(expected), float(actual)) if expected is float else expected == actual
 			_check(matches, "Blood/object roundtrip field: " + key)
 	for item: Node3D in objects.get("placed"):
-		if item.has_method("get_blood_config"):
+		# The authored base map has floor/wall blood of its own; only object blood is anchored.
+		if item.has_method("get_blood_config") and item.get("surface") == "object":
 			_check(item.get("_anchor") != null, "Loaded blood restores its mesh anchor")
 			var reference: WeakRef = item.get("_anchor")
 			var restored_anchor := reference.get_ref() as Node3D
+			if restored_anchor == null:
+				continue
 			restored_anchor.queue_free()
 			await process_frame
 			await process_frame

@@ -44,10 +44,15 @@ static func blast_push(origin: Vector3, position: Vector3, factor: float) -> Vec
 	return away.normalized() * lerpf(BLAST_PUSH_MIN, BLAST_PUSH_MAX, clampf(factor, 0.0, 1.0))
 
 
+## Planar velocity of the falling body: its running momentum plus the killing push.
+static func velocity(momentum: Vector3, push: Vector3, size: float) -> Vector3:
+	return _flat(momentum) * MOMENTUM_SHARE + _flat(push) / pow(maxf(size, 0.5), 1.5)
+
+
 ## Returns {state: death clip state, turn: yaw radians that line the clip's fall
 ## up with the fall direction, slide: planar travel of the body}.
 static func resolve(momentum: Vector3, push: Vector3, forward: Vector3, size: float) -> Dictionary:
-	var fall := _flat(momentum) * MOMENTUM_SHARE + _flat(push) / pow(maxf(size, 0.5), 1.5)
+	var fall := velocity(momentum, push, size)
 	var speed := fall.length()
 	var facing := _flat(forward).normalized()
 	if speed < COLLAPSE_SPEED or facing.is_zero_approx():
