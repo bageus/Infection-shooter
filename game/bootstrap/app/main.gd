@@ -167,7 +167,7 @@ func _process(_delta: float) -> void:
 		return
 	var health_value: Variant = player.get("health")
 	if health_value != null and float(health_value) <= 0.0:
-		_end_run("MISSION FAILED")
+		_end_run("YOU DIED")
 
 
 func _open_pause_menu() -> void:
@@ -229,7 +229,7 @@ func _end_run(reason: String) -> void:
 	_ended = true
 	var kind := "complete" if reason == "MISSION COMPLETE" else "failed"
 	var reason_key: String = {"MUTATION OVERTOOK YOU": "failedMutation",
-		"YOU FELL OUTSIDE THE FLOOR": "failedFall", "MISSION FAILED": "failedHealth"}.get(reason, "")
+		"YOU FELL OUTSIDE THE FLOOR": "failedFall", "YOU DIED": "failedHealth"}.get(reason, "")
 	game_over.call("show_screen", kind, reason_key)
 	game_over.move_to_front()
 	Input.mouse_mode = Input.MOUSE_MODE_VISIBLE
