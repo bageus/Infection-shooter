@@ -161,6 +161,6 @@ skill_4={
 renderer/rendering_method="gl_compatibility"
 renderer/rendering_method.mobile="gl_compatibility"
 lights_and_shadows/directional_shadow/size=2048
+anti_aliasing/quality/msaa_3d=2
 limits/opengl/max_renderable_lights=40
 limits/opengl/max_lights_per_object=12
-anti_aliasing/quality/msaa_3d=2
