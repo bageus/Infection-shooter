@@ -17,7 +17,7 @@ const SOLID := {
 	"wall_door_3": {"half": Vector2(1.0, 0.1375), "door": true},
 	"wall_door_3_without": {"half": Vector2(1.0, 0.1375), "door": true},
 	"wall_emergency_door": {"half": Vector2(1.0, 0.1375), "door": true, "fire": true},
-	"column": {"half": Vector2(0.6, 0.6), "box": true},
+	"column": {"half": Vector2(0.6, 0.6), "box": true, "face": 0.512}, # body, inside its plinth and cap
 	"column_2": {"half": Vector2(0.6, 0.6), "box": true}
 }
 # Pieces that only block the space in front of a wall (glass, windows, elevator).
@@ -55,7 +55,7 @@ static func axes(yaw_degrees: float) -> Array[Vector2]:
 func load_records(records: Array) -> void:
 	for record: Dictionary in records:
 		var scene := str(record.get("scene", ""))
-		if scene.get_file() == "09_fire_extinguisher.glb":
+		if scene.get_file() == "09_fire_extinguisher.glb" and not bool(record.get("auto", false)):
 			extinguishers.append(Vector3(float(record.get("x", 0.0)), float(record.get("y", 0.0)), float(record.get("z", 0.0))))
 		if not scene.begins_with(STRUCTURAL):
 			continue
@@ -77,7 +77,7 @@ func _add_piece(record: Dictionary, file: String, spec: Dictionary) -> void:
 	var half: Vector2 = spec.half
 	var piece := {"id": _all_pieces.size(), "c": centre, "t": frame[0], "n": frame[1], "half": half, "base": base,
 		"level": level_of(base), "door": bool(spec.get("door", false)), "fire": bool(spec.get("fire", false)),
-		"box": bool(spec.get("box", false)), "mount": SOLID.has(file), "file": file,
+		"box": bool(spec.get("box", false)), "face": float(spec.get("face", 0.0)), "mount": SOLID.has(file), "file": file,
 		"pivot": Vector2(float(record.get("x", 0.0)), float(record.get("z", 0.0)))}
 	_all_pieces.append(piece)
 	if spec.get("glass_door", false):
@@ -90,16 +90,17 @@ func _add_piece(record: Dictionary, file: String, spec: Dictionary) -> void:
 
 func _add_faces(piece: Dictionary) -> void:
 	var half: Vector2 = piece.half
-	var main := [Vector2(-half.x, -OPENING), Vector2(OPENING, half.x)] if piece.door else [Vector2(-half.x, half.x)]
+	var face_half: Vector2 = Vector2(piece.face, piece.face) if piece.face > 0.0 else half
+	var main := [Vector2(-half.x, -OPENING), Vector2(OPENING, half.x)] if piece.door else [Vector2(-face_half.x, face_half.x)]
 	for side in [1.0, -1.0]:
-		_add_face(piece, piece.c + piece.n * side * half.y, piece.n * side, piece.t, main)
+		_add_face(piece, piece.c + piece.n * side * face_half.y, piece.n * side, piece.t, main)
 		if piece.box:
-			_add_face(piece, piece.c + piece.t * side * half.x, piece.t * side, piece.n, [Vector2(-half.y, half.y)])
+			_add_face(piece, piece.c + piece.t * side * face_half.x, piece.t * side, piece.n, [Vector2(-face_half.y, face_half.y)])
 
 
 func _add_face(piece: Dictionary, origin: Vector2, normal: Vector2, tangent: Vector2, ranges: Array) -> void:
 	faces.append({"piece": piece.id, "o": origin, "n": normal, "t": tangent, "ranges": ranges,
-		"base": piece.base, "level": piece.level, "door": piece.door})
+		"base": piece.base, "level": piece.level, "door": piece.door, "column": piece.box})
 
 
 func add_blocker(box: AABB) -> void:

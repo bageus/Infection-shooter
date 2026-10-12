@@ -1,5 +1,5 @@
 extends RefCounted
-## Planner save pass: wall signs hang 1.75 m above their floor, urinals 0.75 m,
+## Planner save pass: wall signs hang 1.75 m above their floor, urinals 0.25 m,
 ## hand dryers 1.25 m; light switches, fire alarm sounders and call points are
 ## placed automatically.
 
@@ -7,7 +7,7 @@ const GEOMETRY := preload("res://game/bootstrap/app/wall_fixture_geometry.gd")
 const PLACER := preload("res://game/bootstrap/app/wall_fixture_placer.gd")
 const SIGN_HEIGHT := 1.75
 # Origin height above the floor for wall-mounted models that sit at one level.
-const MOUNT_HEIGHTS := {"02_wall_urinal_improved": 0.75, "16_wall_urinal": 0.75,
+const MOUNT_HEIGHTS := {"02_wall_urinal_improved": 0.25, "16_wall_urinal": 0.25,
 	"05_wall_hand_dryer_improved": 1.25, "16_wall_hand_dryer": 1.25}
 const META := &"planning_auto_fixture"
 const SKIPPED_PATHS := ["planner_light", "darkness_zone", "blood_decal", "floor_pad", "/enviroments/12/", "/enviroments/01/01_floor_",
@@ -50,8 +50,7 @@ static func plan(entries: Array, blockers: Array) -> Dictionary:
 ## previous automatic fixtures with fresh ones.
 static func apply(objects: Node, loader: RefCounted) -> Dictionary:
 	for node in objects.placed.duplicate():
-		# Extinguishers are hung once and kept: a column that has one is never given another.
-		if is_instance_valid(node) and node.has_meta(META) and str(node.get_meta(META)) != "extinguisher":
+		if is_instance_valid(node) and node.has_meta(META):
 			objects.placed.erase(node)
 			node.queue_free()
 	var entries: Array = []

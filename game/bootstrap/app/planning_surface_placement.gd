@@ -15,7 +15,8 @@ static func mount(node: Node3D, bounds: AABB, normal: Vector3) -> void:
 		back = minf(back, (node.global_basis * bounds.get_endpoint(index)).dot(normal))
 	node.global_position += normal * (WALL_CLEARANCE - back)
 
-const WALL_CLEARANCE := 0.0005
+# Wall-mounted objects stand 5 mm off the wall surface.
+const WALL_CLEARANCE := 0.005
 
 static func wall_grid(point: Vector3, normal: Vector3, step: float = 0.25) -> Vector3:
 	var n := Vector3(normal.x, 0.0, normal.z).normalized()
