@@ -1,11 +1,15 @@
 extends RefCounted
-## Recover solid boards from flattened shelf meshes without closing their slots.
+## Recover solid boards from flattened shelf and divider meshes without closing their slots.
 const PLANE_STEP := 0.002
 const MIN_THICKNESS := 0.012
 
 
 static func applies(path: String) -> bool:
 	var file := path.get_file()
+	# Office dividers are one flattened mesh too: a single box would close the desk
+	# between the walls and leave an invisible lid at panel height.
+	if file.begins_with("08_divider_full"):
+		return true
 	return file.begins_with("03_") and ("book_case" in file or "bookshelf" in file or "with_shelfs" in file)
 
 
