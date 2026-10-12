@@ -1,0 +1,17 @@
+{
+  "id": "core.localization",
+  "layer": "core",
+  "purpose": "Register the single UI string table with TranslationServer so menus and the in-game HUD resolve text through tr(key).",
+  "state_owner": [
+    "Registered translation tables (read once from assets/interface/translations.json)"
+  ],
+  "public_api": [
+    "public/ui_translations.gd"
+  ],
+  "dependencies": [],
+  "runtime_contracts": {
+    "ui_translations_v1": {
+      "apply_language": "apply_language(language: String) -> void; 'en' selects English, anything else Russian; registers the table on first call"
+    }
+  }
+}
