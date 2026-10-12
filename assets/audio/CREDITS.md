@@ -298,11 +298,9 @@ assets/audio/ui/*.tres: original procedural synthesis for this project, dedicate
 | Event | Derived from | Processing |
 |---|---|---|
 | ak_fire | rifle_fire (see table above) | mid crack, light drive |
-| m4_fire | assault_rifle_fire (see table above) | faster, brighter report |
 | sniper_fire | rifle_fire (see table above) | lower, longer report with a boom and echo tail |
-| minigun_fire | assault_rifle_fire (see table above) | short, rattling bursts with a light flutter |
-| minigun_spinup | *synthesised* by tools/build_weapon_sounds.py | rising whine with ticks |
-
-## Vitals loops
-
-`assets/audio/vitals/heavy_breathing.ogg` and `mutagen_pressure.ogg` are *synthesised* by `tools/build_vitals_sounds.py` (no external recordings).
+| minigun_fire | *synthesised* by tools/build_weapon_sounds.py | deep thump, breech crack and mechanical clack |
+| m4_fire | *synthesised* by tools/build_weapon_sounds.py | sharp 5.56 crack with a light body |
+| minigun_spin | *synthesised* by tools/build_weapon_sounds.py | looping steady whine with ticks, played while the barrels turn |
+| key_pickup | *synthesised* by tools/build_weapon_sounds.py | three inharmonic brass partials struck in turn |
+| dna_pickup | *synthesised* by tools/build_weapon_sounds.py | rising warm glide with vibrato and a soft pop |
