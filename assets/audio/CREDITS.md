@@ -302,3 +302,7 @@ assets/audio/ui/*.tres: original procedural synthesis for this project, dedicate
 | sniper_fire | rifle_fire (see table above) | lower, longer report with a boom and echo tail |
 | minigun_fire | assault_rifle_fire (see table above) | short, rattling bursts with a light flutter |
 | minigun_spinup | *synthesised* by tools/build_weapon_sounds.py | rising whine with ticks |
+
+## Vitals loops
+
+`assets/audio/vitals/heavy_breathing.ogg` and `mutagen_pressure.ogg` are *synthesised* by `tools/build_vitals_sounds.py` (no external recordings).
