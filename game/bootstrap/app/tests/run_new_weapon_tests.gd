@@ -72,7 +72,7 @@ func _test_rifles(actor: CharacterBody3D, effects: Node3D, crosshair: Node) -> v
 		_check(not actor.call("_fire_weapon", gun), "Cooldown prevents duplicate shot")
 		if index == 6:
 			_check(not gun.call("wants_continuous_fire") and gun.magazine_size == 4, "Sniper is semi-auto with four-round magazine")
-			_check(gun.call("sound_event", 0) == &"rifle_fire", "Sniper uses the recorded rifle report")
+			_check(gun.call("sound_event", 0) == &"sniper_fire", "Sniper uses its own rifle report")
 			_check(crosshair.scope.visible and not crosshair.crosshair.visible, "Selecting sniper swaps crosshair to scope")
 			_check(crosshair.scope.view.world_3d == actor.get_world_3d(), "Scope renders the actual shared world")
 			_check(crosshair.scope.camera.fov < actor.get("camera").fov, "Scope lens genuinely magnifies with narrower FOV")
@@ -90,6 +90,17 @@ func _test_rifles(actor: CharacterBody3D, effects: Node3D, crosshair: Node) -> v
 			gun.call("start_reload")
 			gun.call("_process", 3.0)
 			_check(gun.call("get_magazine_ammo") == 4 and gun.call("get_reserve_ammo") == 20, "Sniper reload transfers exactly four reserve rounds")
+			var scope_raise: RefCounted = actor.get("_scope_raise")
+			var right := InputEventMouseButton.new()
+			right.button_index = MOUSE_BUTTON_RIGHT
+			right.pressed = true
+			actor.call("_unhandled_input", right)
+			_check(scope_raise.hidden and actor.call("get_weapon_view")["magnification"] == 0.0, "Right click hides the sniper scope")
+			_check(not scope_raise.step(0.0, true, true), "Shot with hidden scope waits for the scope to rise")
+			_check(not scope_raise.step(0.1, true, false) and scope_raise.step(0.1, true, false), "Deferred shot fires once the scope is raised")
+			_check(not scope_raise.hidden and actor.call("get_weapon_view")["magnification"] > 1.0, "Raised scope renders again")
+			actor.call("_unhandled_input", right)
+			_check(scope_raise.hidden, "Second right click hides the scope again")
 		else:
 			_check(not crosshair.scope.visible, "Assault rifles use the standard crosshair")
 		for bullet in effects.get_children():
@@ -109,11 +120,13 @@ func _test_minigun(actor: CharacterBody3D, effects: Node3D, crosshair: Node) -> 
 	_check(pose.backpack.get_parent() is BoneAttachment3D, "Backpack follows the spine")
 	_check(not crosshair.scope.visible, "Switching to minigun disables scope render")
 	_check(gun.call("get_magazine_ammo") == 400 and gun.call("get_reserve_ammo") == 0, "HUD exposes one 400-round belt")
+	_check(not actor.call("_fire_weapon", gun), "Minigun does not fire before its barrels spin up")
 	gun.call("start_reload")
 	_check(not gun.call("is_reloading"), "Minigun never enters reload")
 	_check(gun.casing_size_multiplier == 1.15 and gun.casing_scene.resource_path.ends_with("12_rifle_casing.glb"), "Minigun uses enlarged rifle casings")
 	for shot in 400:
 		gun.set("_cooldown_remaining", 0.0)
+		gun.set("_spin", 1.0)
 		_check(actor.call("_fire_weapon", gun), "Every minigun belt round fires")
 		if shot == 0:
 			gun.call("_process", .01)
