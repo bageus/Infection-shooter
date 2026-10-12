@@ -68,9 +68,17 @@ func _run() -> void:
 	quit(0 if _failures == 0 else 1)
 
 
+# Only the lamps nearest to the camera focus are lit (light budget), so test
+# lamps stand there.
+func _place_in_budget(app: Node, lamp: Node3D) -> void:
+	var focus: Vector3 = app.get("planning_lighting").call("get_light_focus")
+	lamp.global_position = Vector3(focus.x, lamp.global_position.y, focus.z)
+
+
 func _test_local_toggle(app: Node, controller: Node, toggle: CheckButton) -> void:
 	var lamp := LAMP.instantiate()
 	app.get_node("PlanningObjects").add_child(lamp)
+	_place_in_budget(app, lamp)
 	lamp.set_authored_energy(7.0)
 	var light := lamp.get_node("Light") as SpotLight3D
 	light.shadow_enabled = true
@@ -103,6 +111,7 @@ func _test_local_toggle(app: Node, controller: Node, toggle: CheckButton) -> voi
 		_check(light.visible, "Runtime gate reopens only with global permission")
 		var late := LAMP.instantiate()
 		app.get_node("PlanningObjects").add_child(late)
+		_place_in_budget(app, late)
 		_check(late.get_node("Light").visible and is_equal_approx(late.get_node("Light").light_energy, 1.95), "Late map/new lamps inherit enabled setting")
 		late.free()
 		controller.call("set_local_lights_enabled", false)
@@ -189,6 +198,7 @@ func _test_lighting_preferences(app: Node, controller: Node, overhead: Direction
 	_check(not overhead.visible and not controller.get("local_lights_enabled"), "Settings disable global and local light sources")
 	var late := LAMP.instantiate()
 	app.get_node("PlanningObjects").add_child(late)
+	_place_in_budget(app, late)
 	_check_lamp_off(late)
 	preferences.values.lighting = true
 	preferences.apply_to_game(self)
