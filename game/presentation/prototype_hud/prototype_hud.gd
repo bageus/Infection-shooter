@@ -5,6 +5,9 @@ const PALETTE := preload("res://game/presentation/prototype_hud/hud_palette.gd")
 const ICON_TINT := preload("res://game/presentation/prototype_hud/icon_tint.gdshader")
 const TITLE_FONT := preload("res://assets/interface/fonts/title.ttf")
 const MUTATION_ALARM := preload("res://game/presentation/prototype_hud/mutation_alarm_pulse.gd")
+const OBJECTIVE_TEXT := "Двигайся к пожарному выходу!"
+const DNA_BLINK_COUNT := 3
+const DNA_BLINK_STEP := 0.12
 # Semantic cells: rifle, pistol, uzi, shotgun, syringe, launcher, key.
 @export var weapon_icon_cells := PackedInt32Array([1, 2, 3, 5])
 @export var antidote_icon_cell := 4
@@ -49,6 +52,8 @@ var _weapon_snapshot: Array = []
 
 var _has_key := false
 var _mutation_alarm: RefCounted
+var _objective: PanelContainer
+var _scale_blink: Tween
 
 
 func _ready() -> void:
@@ -73,6 +78,39 @@ func _ready() -> void:
 	_control_notice.add_theme_color_override("font_shadow_color", Color(0, 0, 0, 0.9))
 	_control_notice.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	add_child(_control_notice)
+	_build_objective()
+	infection.connect("control_ampule_collected", _on_control_ampule_collected)
+
+
+# Current goal shown once the emergency key is in hand, styled like the HUD frames.
+func _build_objective() -> void:
+	var frame := StyleBoxFlat.new()
+	frame.bg_color = PALETTE.PANEL
+	frame.border_color = PALETTE.BORDER
+	frame.set_border_width_all(1)
+	frame.set_content_margin_all(0)
+	frame.content_margin_left = 16.0
+	frame.content_margin_right = 16.0
+	frame.content_margin_top = 6.0
+	frame.content_margin_bottom = 6.0
+	frame.shadow_color = Color(0, 0, 0, 0.35)
+	frame.shadow_size = 8
+	var text := Label.new()
+	text.text = OBJECTIVE_TEXT
+	text.add_theme_font_override("font", TITLE_FONT)
+	text.add_theme_font_size_override("font_size", 16)
+	text.add_theme_color_override("font_color", PALETTE.INK)
+	text.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	_objective = PanelContainer.new()
+	_objective.name = "Objective"
+	_objective.set_anchors_and_offsets_preset(Control.PRESET_CENTER_TOP)
+	_objective.grow_horizontal = Control.GROW_DIRECTION_BOTH
+	_objective.offset_top = 16.0
+	_objective.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	_objective.add_theme_stylebox_override("panel", frame)
+	_objective.add_child(text)
+	_objective.visible = false
+	add_child(_objective)
 
 
 func _process(delta: float) -> void:
@@ -174,10 +212,26 @@ func _update_key_cell(has_key: bool) -> void:
 		return
 	_has_key = has_key
 	key_panel.visible = has_key
+	_objective.visible = has_key
 	if has_key and is_inside_tree():
 		# Brief flash so the newly filled cell is noticed in combat.
 		key_panel.modulate = Color(1.8, 1.6, 1.1)
 		create_tween().tween_property(key_panel, "modulate", Color.WHITE, 0.9)
+		_objective.modulate = Color(1, 1, 1, 0)
+		create_tween().tween_property(_objective, "modulate:a", 1.0, 0.4)
+
+
+# Three quick dips of the mutation scale and its critical marker: the DNA moved it.
+func _on_control_ampule_collected(_critical_threshold: float) -> void:
+	if not is_inside_tree():
+		return
+	if _scale_blink != null:
+		_scale_blink.kill()
+	_scale_blink = create_tween().set_loops(DNA_BLINK_COUNT)
+	_scale_blink.tween_property(mutation_bar, "self_modulate:a", 0.2, DNA_BLINK_STEP)
+	_scale_blink.parallel().tween_property(critical_marker, "modulate:a", 0.2, DNA_BLINK_STEP)
+	_scale_blink.tween_property(mutation_bar, "self_modulate:a", 1.0, DNA_BLINK_STEP)
+	_scale_blink.parallel().tween_property(critical_marker, "modulate:a", 1.0, DNA_BLINK_STEP)
 
 
 func _update_weapon() -> void:

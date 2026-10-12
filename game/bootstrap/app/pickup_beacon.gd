@@ -3,6 +3,8 @@ extends Node3D
 ## bobs above the item (1-2 m). Meshes are unshaded and cast no shadows.
 
 const GLOW_TEXTURE_SIZE := 64
+const ARROW_BLINK_PERIOD := 0.8
+const ARROW_MIN_ALPHA := 0.55
 static var _glow_texture: GradientTexture2D
 
 var _arrow: Node3D
@@ -79,8 +81,8 @@ func _process(delta: float) -> void:
 	_glow_material.albedo_color.a = 0.55 * _glow_energy * pulse
 	if _arrow != null:
 		_arrow.position.y = _arrow_base + sin(_time * 3.4) * 0.14
-		# Square blink: bright most of the cycle, dipping low so it reads as flashing.
-		_arrow_material.albedo_color.a = 1.0 if fmod(_time, 0.8) < 0.5 else 0.22
+		# Smooth blink: eases between full and a visible floor, so the arrow never vanishes.
+		_arrow_material.albedo_color.a = lerpf(ARROW_MIN_ALPHA, 1.0, 0.5 + 0.5 * sin(_time * TAU / ARROW_BLINK_PERIOD))
 
 
 static func _glow_gradient() -> GradientTexture2D:

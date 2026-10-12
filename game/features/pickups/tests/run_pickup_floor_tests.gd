@@ -80,11 +80,16 @@ func _test_drops_spread(stage: Node3D) -> void:
 	for i in drops.size():
 		var drop := drops[i] as Node3D
 		_expect(drop.global_position.x < 1.0, "Drops stay on the kill's side of the wall.")
-		_expect(is_equal_approx((drop.get_node("Visual") as Node3D).scale.x, DROPS.DROP_SCALE), "Drops are half size.")
+		_expect(is_equal_approx((drop.get_node("Visual") as Node3D).scale.x, PICKUP.VISUAL_SCALE), "Drops use the shared item size.")
 		for j in range(i + 1, drops.size()):
 			var other := drops[j] as Node3D
 			var gap := Vector2(drop.global_position.x - other.global_position.x, drop.global_position.z - other.global_position.z).length()
 			_expect(gap >= DROPS.DROP_SPACING - 0.01, "Drops do not overlap (%.2f m apart)." % gap)
+	# The planner instantiates the scene directly; it must match the drop size.
+	var placed := (load("res://game/features/pickups/public/medkit_pickup.tscn") as PackedScene).instantiate() as Node3D
+	stage.add_child(placed)
+	_expect(is_equal_approx((placed.get_node("Visual") as Node3D).scale.x, PICKUP.VISUAL_SCALE), "Placed items use the drop size.")
+	placed.queue_free()
 	for drop in drops:
 		drop.queue_free()
 	table.queue_free()

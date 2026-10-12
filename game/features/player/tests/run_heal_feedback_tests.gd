@@ -33,6 +33,7 @@ func _run() -> void:
 	_expect(_numbers(feedback).is_empty(), "Full health shows no heal number.")
 	await _test_medkit_and_regen(player, feedback, events)
 	_test_bleeding_follows_damage(player)
+	_test_dna_burst(player, feedback)
 	stage.queue_free()
 	await process_frame
 	if failures == 0:
@@ -87,6 +88,16 @@ func _test_bleeding_follows_damage(player: Node3D) -> void:
 	_expect(not bool(player.call("is_wounded")), "Healing the damage stops the bleeding below the raised cap.")
 	player.set("max_health", float(player.get("max_health")) - 25.0)
 	player.call("heal", 1000.0)
+
+
+func _test_dna_burst(player: Node, feedback: Node3D) -> void:
+	var runtime := player.get_node("InfectionRuntime")
+	var numbers_before := _numbers(feedback).size()
+	runtime.call("add_control_ampule")
+	_expect(feedback.get_node_or_null("HealRing") != null and feedback.get_node_or_null("HealBurst") != null, "A DNA ampule plays the pickup burst around the player.")
+	var burst := feedback.get_node("HealBurst") as CPUParticles3D
+	_expect(burst.mesh.material.albedo_texture == feedback.call("_arrow"), "The DNA burst uses rising arrows, not crosses.")
+	_expect(_numbers(feedback).size() == numbers_before, "A DNA ampule shows no HP number.")
 
 
 func _numbers(feedback: Node) -> Array[Label3D]:
