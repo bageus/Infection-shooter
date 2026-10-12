@@ -1,5 +1,6 @@
 extends RefCounted
 const MAP_FILE := preload("res://game/bootstrap/app/planning_map_file.gd")
+const DOOR_OPTIONS := preload("res://game/bootstrap/app/planning_door_options.gd")
 
 const SAVE_PATH = "user://planned_layout.json"
 const MAPS_DIR = "user://maps"
@@ -109,6 +110,9 @@ func _collect_layout_data() -> Dictionary:
 			records[-1]["display"] = node.call("get_display_config")
 		if node.has_method("get_loot_config") and node.has_meta(&"planning_loot"):
 			records[-1]["loot"] = node.call("get_loot_config")
+		var door := DOOR_OPTIONS.lockable_controller(node)
+		if door != null:
+			records[-1]["door_lock"] = str(door.call("get_lock_state"))
 		if node.has_method("get_enemy_stats") and node.has_meta(&"planning_enemy_stats"):
 			records[-1]["enemy_stats"] = node.call("get_enemy_stats")
 		if node.has_method("get_fixture_config"):
@@ -364,6 +368,10 @@ func _save_authored_scene(target: String = AUTHORED_SCENE_PATH) -> Error:
 			copy.call("configure_display", node.call("get_display_config"))
 		if node.has_method("get_loot_config") and node.has_meta(&"planning_loot"):
 			copy.call("configure_loot", node.call("get_loot_config"))
+		var door := DOOR_OPTIONS.lockable_controller(node)
+		var copy_door := DOOR_OPTIONS.lockable_controller(copy)
+		if door != null and copy_door != null:
+			copy_door.call("configure_lock_state", door.call("get_lock_state"))
 		if node.has_method("get_enemy_stats") and node.has_meta(&"planning_enemy_stats"):
 			copy.call("configure_stats", node.call("get_enemy_stats"))
 		if node.has_method("get_fixture_config"):
