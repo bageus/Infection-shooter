@@ -19,7 +19,7 @@ var _has_fragments := false
 
 func configure(model_name: String, variant_count: int, has_fragments: bool) -> void:
 	var group := model_name.substr(0, 2)
-	category = "tech" if group == "05" else ("small" if group in ["09", "11", "12"] else ("office" if group == "08" else "large"))
+	category = "tech" if group == "05" else ("small" if group in ["09", "11", "12"] else ("office" if group in ["07", "08"] else "large"))
 	_variant_count = variant_count
 	_has_fragments = has_fragments
 	health = _stage_health()
