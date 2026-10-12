@@ -9,6 +9,7 @@ const FLOOR_WALL_SNAP = preload("res://game/bootstrap/app/floor_wall_snap.gd")
 const EXTINGUISHER_WALL = preload("res://game/bootstrap/app/extinguisher_wall_placement.gd")
 const PLAN_HALF_WIDTH = 40.0
 const PLAN_HALF_DEPTH = 30.0
+const LAMP_PICK_RADIUS := 0.3
 
 var selection_box: MeshInstance3D
 var selection_source_aabb = AABB()
@@ -151,6 +152,9 @@ func _planned_object_at(screen_pos: Vector2) -> Node3D:
 func _visual_object_at(screen_pos: Vector2) -> Node3D:
 	var ray_origin = session.camera.project_ray_origin(screen_pos)
 	var ray_direction = session.camera.project_ray_normal(screen_pos)
+	var lamp := _lamp_marker_at(ray_origin, ray_direction)
+	if lamp != null:
+		return lamp
 	var best: Node3D
 	var best_distance = INF
 	for node in objects.placed:
@@ -168,6 +172,23 @@ func _visual_object_at(screen_pos: Vector2) -> Node3D:
 		if distance < best_distance:
 			best_distance = distance
 			best = node
+	return best
+
+
+# A lamp is only a small marker, so a wall or desk box around it must not win the click.
+func _lamp_marker_at(ray_origin: Vector3, ray_direction: Vector3) -> Node3D:
+	var best: Node3D
+	var best_along := INF
+	for node in objects.placed:
+		if not is_instance_valid(node) or not node.is_in_group("planner_lights"):
+			continue
+		var to_lamp: Vector3 = node.global_position - ray_origin
+		var along := to_lamp.dot(ray_direction)
+		if along <= 0.0 or along >= best_along:
+			continue
+		if (to_lamp - ray_direction * along).length() <= LAMP_PICK_RADIUS:
+			best = node
+			best_along = along
 	return best
 
 
