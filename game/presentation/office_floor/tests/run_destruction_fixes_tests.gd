@@ -1,7 +1,7 @@
 extends SceneTree
 ## Open glass door shards, cooler bottle burst, and blood marks on panes.
 
-const CATALOG := preload("res://game/bootstrap/app/planning_catalog.gd")
+const PROP := preload("res://game/presentation/office_floor/public/props/environment_prop.tscn")
 const DOOR := preload("res://game/presentation/office_floor/public/structural/sliding_glass_door.tscn")
 const WALL := preload("res://game/presentation/office_floor/public/structural/glass_wall_full.tscn")
 const IMPACTS := preload("res://game/features/combat/public/impact_effects.gd")
@@ -60,11 +60,10 @@ func _gap(door: Node3D, pane: StaticBody3D) -> float:
 
 
 func _cooler() -> void:
-	var catalog := CATALOG.new()
-	catalog._build_environment_catalogs()
 	var effects := Node3D.new()
 	stage.add_child(effects)
-	var prop: RigidBody3D = catalog.call("_instantiate_asset", "res://models/objects/enviroments/02/02_water_cooler_bottle_attached_destructible.glb")
+	var prop: RigidBody3D = PROP.instantiate()
+	prop.set("model_path", "res://models/objects/enviroments/02/02_water_cooler_bottle_attached_destructible.glb")
 	stage.add_child(prop)
 	prop.position = Vector3(30, 0.02, 0)
 	prop.call("configure_world", effects, null)
