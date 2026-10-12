@@ -27,6 +27,7 @@ const WALL_MOUNT = preload("res://game/presentation/office_floor/wall_mount_mode
 const BOOK_STACK = preload("res://game/presentation/office_floor/book_stack_breakup.gd")
 const EXTINGUISHER_FX = preload("res://game/presentation/office_floor/extinguisher_hit_fx.tscn")
 const HIT_REACTION = preload("res://game/presentation/office_floor/prop_hit_reaction.gd")
+const BOTTLE_BURST := preload("res://game/presentation/office_floor/water_bottle_burst.gd")
 
 const DISPLAY_VIEW := preload("res://game/presentation/office_floor/display_view.gd")
 const DISPLAY_PROFILES := preload("res://game/presentation/office_floor/display_surface_profiles.gd")
@@ -189,7 +190,21 @@ func take_projectile_hit_at_shape(damage: float, hit_position: Vector3, normal: 
 			call_deferred("_shatter_glass", hit_position, direction)
 			if weapon != "GRENADE":
 				return false
+		if _is_cooler_bottle_shape(mesh_index) and damage > 0.0 and weapon != "GRENADE":
+			_burst_bottle(mesh_index, hit_position, direction)
+			return false
 	return take_projectile_hit(damage, hit_position, normal, direction, weapon)
+
+
+# Only the bottle bursts; the cooler body behind it stays standing.
+func _is_cooler_bottle_shape(mesh_index: int) -> bool:
+	if not model_path.get_file().begins_with("02_water_cooler_bottle_attached"):
+		return false
+	return mesh_index >= 0 and mesh_index < _shape_meshes.size() and BOTTLE_BURST.find_bottle([_shape_meshes[mesh_index]]) == 0
+
+
+func _burst_bottle(mesh_index: int, hit_position: Vector3, direction: Vector3) -> void:
+	BOTTLE_BURST.burst(self, _shape_meshes[mesh_index], _shapes[mesh_index], effects_root, hit_position, direction)
 
 
 func get_projectile_material(shape_index: int = -1) -> String:
@@ -223,9 +238,11 @@ func take_projectile_hit(damage: float, hit_position: Vector3, _normal: Vector3,
 				_display.call("disable")
 			SPARKS.short_circuit(self, hit_position, _normal)
 	if model_path.get_file() == "02_water_cooler_bottle.glb":
-		if not freeze:
-			sleeping = false
-			apply_central_impulse((direction.normalized() + Vector3.UP * 0.25).normalized() * (mass * 0.055 if weapon == "SHOTGUN" else mass * 0.2))
+		var bottle := BOTTLE_BURST.find_bottle(_shape_meshes)
+		if bottle >= 0 and damage > 0.0:
+			_burst_bottle(bottle, hit_position, direction)
+			collision_layer = 0
+			queue_free.call_deferred()
 		return false
 	# Every loose item moves when shot, by its weight (anchored ones stay).
 	BULLET_PUSH.apply(self, weight_kg, weapon, direction, hit_position)
@@ -313,6 +330,10 @@ func _apply_damage(hit_position: Vector3, direction: Vector3) -> void:
 			_rebuild_shapes()
 			return
 		_reaction.break_dust(_shape_meshes)
+		if model_path.get_file().begins_with("02_water_cooler_bottle_attached"):
+			var intact_bottle := BOTTLE_BURST.find_bottle(_shape_meshes)
+			if intact_bottle >= 0:
+				_burst_bottle(intact_bottle, hit_position, direction)
 		_visual.hide()
 		for shape in _shapes:
 			shape.set_deferred("disabled", true)

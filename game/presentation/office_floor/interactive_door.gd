@@ -385,7 +385,9 @@ func _build_glass_hinge(visual: Node3D) -> void:
 	if _glass_body != null:
 		_glass_body_closed = _glass_body.transform
 		_glass_hinge_root_closed = (get_parent() as Node3D).global_transform.affine_inverse() * _glass_hinge.global_transform
-	for wanted in ["doorglass", "doorhandle", "doortoppanel"]:
+	for wanted in ["doorglass", "doorhandle", "doortoppanel", "Glass_Shards"]:
+		# The hidden shard set travels with the leaf, so a pane broken while the
+		# door is open crumbles where the glass stands, not in the closed pose.
 		var part := _find_exact_named_node(visual, wanted)
 		if part != null:
 			part.reparent(_glass_hinge, true)
