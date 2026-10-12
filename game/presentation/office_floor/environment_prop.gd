@@ -28,7 +28,10 @@ const WALL_MOUNT = preload("res://game/presentation/office_floor/wall_mount_mode
 const BOOK_STACK = preload("res://game/presentation/office_floor/book_stack_breakup.gd")
 const EXTINGUISHER_FX = preload("res://game/presentation/office_floor/extinguisher_hit_fx.tscn")
 const HIT_REACTION = preload("res://game/presentation/office_floor/prop_hit_reaction.gd")
+const BOTTLE_BURST := preload("res://game/presentation/office_floor/water_bottle_burst.gd")
 
+const LOOT_DROP := preload("res://game/features/pickups/public/loot_drop.gd")
+const LOOT_CONFIG := preload("res://game/features/pickups/public/loot_config.gd")
 const DISPLAY_VIEW := preload("res://game/presentation/office_floor/display_view.gd")
 const DISPLAY_PROFILES := preload("res://game/presentation/office_floor/display_surface_profiles.gd")
 const SURFACE_DECOR := preload("res://game/presentation/office_floor/office_surface_decor.gd")
@@ -108,6 +111,7 @@ var _extinguisher_fx: Node3D
 var _reaction := HIT_REACTION.new()
 
 var effects_root: Node3D
+var _drop_weapon: Callable
 var impact_pool: Node
 
 
@@ -117,6 +121,35 @@ func configure_world(container: Node3D, impacts: Node) -> void:
 	impact_pool = impacts
 	if is_instance_valid(_extinguisher_fx):
 		_extinguisher_fx.call("configure_world", container, impacts)
+
+
+## Crates can hold loot (planner); it falls out when the crate breaks.
+func has_loot() -> bool:
+	return "crate" in model_path.get_file()
+
+
+func configure_loot(config: Dictionary) -> void:
+	if has_loot():
+		set_meta(&"planning_loot", LOOT_CONFIG.sanitize(config, "empty"))
+
+
+## A crate without authored loot stays empty, as before.
+func get_loot_config() -> Dictionary:
+	return LOOT_CONFIG.sanitize((get_meta(&"planning_loot") if has_meta(&"planning_loot") else null), "empty")
+
+
+func configure_loot_drop(drop_weapon: Callable) -> void:
+	_drop_weapon = drop_weapon
+
+
+func _release_loot() -> void:
+	if not has_loot() or not has_meta(&"planning_loot"):
+		return
+	var world: Node = effects_root if is_instance_valid(effects_root) else get_parent()
+	if world == null:
+		return
+	var size_hint := "large" if "large" in model_path.get_file() else "small"
+	LOOT_DROP.release_crate(world, global_position, get_loot_config(), size_hint, _drop_weapon)
 
 
 func _ready() -> void:
@@ -202,7 +235,21 @@ func take_projectile_hit_at_shape(damage: float, hit_position: Vector3, normal: 
 			call_deferred("_shatter_glass", hit_position, direction)
 			if weapon != "GRENADE":
 				return false
+		if _is_cooler_bottle_shape(mesh_index) and damage > 0.0 and weapon != "GRENADE":
+			_burst_bottle(mesh_index, hit_position, direction)
+			return false
 	return take_projectile_hit(damage, hit_position, normal, direction, weapon)
+
+
+# Only the bottle bursts; the cooler body behind it stays standing.
+func _is_cooler_bottle_shape(mesh_index: int) -> bool:
+	if not model_path.get_file().begins_with("02_water_cooler_bottle_attached"):
+		return false
+	return mesh_index >= 0 and mesh_index < _shape_meshes.size() and BOTTLE_BURST.find_bottle([_shape_meshes[mesh_index]]) == 0
+
+
+func _burst_bottle(mesh_index: int, hit_position: Vector3, direction: Vector3) -> void:
+	BOTTLE_BURST.burst(self, _shape_meshes[mesh_index], _shapes[mesh_index], effects_root, hit_position, direction)
 
 
 func get_projectile_material(shape_index: int = -1) -> String:
@@ -236,9 +283,11 @@ func take_projectile_hit(damage: float, hit_position: Vector3, _normal: Vector3,
 				_display.call("disable")
 			SPARKS.short_circuit(self, hit_position, _normal)
 	if model_path.get_file() == "02_water_cooler_bottle.glb":
-		if not freeze:
-			sleeping = false
-			apply_central_impulse((direction.normalized() + Vector3.UP * 0.25).normalized() * (mass * 0.055 if weapon == "SHOTGUN" else mass * 0.2))
+		var bottle := BOTTLE_BURST.find_bottle(_shape_meshes)
+		if bottle >= 0 and damage > 0.0:
+			_burst_bottle(bottle, hit_position, direction)
+			collision_layer = 0
+			queue_free.call_deferred()
 		return false
 	# Every loose item moves when shot, by its weight (anchored ones stay).
 	BULLET_PUSH.apply(self, weight_kg, weapon, direction, hit_position)
@@ -325,7 +374,12 @@ func _apply_damage(hit_position: Vector3, direction: Vector3) -> void:
 			_stages[0].show()
 			_rebuild_shapes()
 			return
+		_release_loot()
 		_reaction.break_dust(_shape_meshes)
+		if model_path.get_file().begins_with("02_water_cooler_bottle_attached"):
+			var intact_bottle := BOTTLE_BURST.find_bottle(_shape_meshes)
+			if intact_bottle >= 0:
+				_burst_bottle(intact_bottle, hit_position, direction)
 		_visual.hide()
 		for shape in _shapes:
 			shape.set_deferred("disabled", true)
