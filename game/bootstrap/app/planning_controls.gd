@@ -5,7 +5,9 @@ const COLOR_POPUP := preload("res://game/bootstrap/app/planner_color_popup.gd")
 const DISPLAY_OPTIONS := preload("res://game/bootstrap/app/planning_display_options.gd")
 var display_options: Node
 const LOOT_OPTIONS := preload("res://game/bootstrap/app/planning_loot_options.gd")
+const DOOR_OPTIONS := preload("res://game/bootstrap/app/planning_door_options.gd")
 var loot_options: Node
+var door_options: Node
 const FIXTURE_CONTROLS := preload("res://game/bootstrap/app/planning_light_fixtures.gd")
 var fixtures = FIXTURE_CONTROLS.new()
 var light_view = preload("res://game/bootstrap/app/planning_light_view.gd").new()
@@ -86,6 +88,9 @@ func setup_controls() -> void:
 	loot_options = LOOT_OPTIONS.new()
 	add_child(loot_options)
 	loot_options.call("setup", session, objects)
+	door_options = DOOR_OPTIONS.new()
+	add_child(door_options)
+	door_options.call("setup", session, objects)
 	fixtures.setup(self)
 	light_view.setup(self)
 	light_default_editor.setup(self)
@@ -243,6 +248,8 @@ func _update_light_ui() -> void:
 		display_options.call("update")
 	if loot_options != null:
 		loot_options.call("update")
+	if door_options != null:
+		door_options.call("update")
 	var target = objects.selected
 	if target == null and objects.preview != null and objects._selected_kind() == "light":
 		target = objects.preview

@@ -145,6 +145,14 @@ func _test_minigun(actor: CharacterBody3D, effects: Node3D, crosshair: Node) -> 
 	_check(gun.call("get_magazine_ammo") == 0 and gun.get("_reserve_ammo") == 0, "400 shots consume the entire direct reserve")
 	gun.set("_cooldown_remaining", 0.0)
 	_check(not actor.call("_fire_weapon", gun) and not gun.call("is_reloading"), "Empty belt cannot shoot or auto-reload")
+	# After release the barrels keep full speed for a moment, then slow down.
+	gun.set("_spin_hold", 0.0)
+	gun.set("_spin_coast", 0.35)
+	gun.set("_spin", 1.0)
+	gun.call("_process", 0.2)
+	_check(is_equal_approx(gun.get("_spin"), 1.0), "Barrels keep full speed just after trigger release")
+	gun.call("_process", 0.3)
+	_check(gun.get("_spin") < 1.0 and gun.get("_spin") > 0.0, "Barrels slow down once the coast ends")
 	_check(gun.call("add_reserve_ammo", 999) == 400, "Ammo pickup is capped to the belt capacity")
 	_check(actor.call("select_weapon_slot", 1), "Normal weapon switch remains usable")
 	await process_frame

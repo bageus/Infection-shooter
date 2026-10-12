@@ -37,8 +37,8 @@ func _run() -> void:
 	_expect((player.call("_move_direction") as Vector3).distance_to(control.get("direction")) < 0.001, "Movement follows mutation direction rather than held player input.")
 	_expect(not bool(player.call("select_weapon_slot", 2)), "HUD slot commands are blocked during loss.")
 	runtime.call("add_control_ampule")
-	runtime.call("_physics_process", 5.0)
-	_expect(not bool(runtime.call("is_control_lost")), "Control returns after its existing duration.")
+	runtime.call("_physics_process", 2.0)
+	_expect(not bool(runtime.call("is_control_lost")), "Control returns after the two-second first loss.")
 	for frame in range(4):
 		await physics_frame
 	_expect(player.global_position.distance_to(before) > 0.001, "Held movement resumes after recovery.")

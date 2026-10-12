@@ -31,7 +31,7 @@ const EVENTS := {
 	&"ak_fire": [3, 0.5, 85.0, 10.0, 0.04, 4],
 	&"m4_fire": [3, 0.0, 80.0, 9.0, 0.04, 5],
 	&"sniper_fire": [3, 8.0, 150.0, 14.0, 0.02, 2],
-	&"minigun_fire": [3, -1.0, 75.0, 9.0, 0.05, 5],
+	&"minigun_fire": [3, 7.0, 90.0, 10.0, 0.05, 5],
 	&"dry_fire": [2, -6.0, 15.0, 2.5, 0.05, 2],
 	&"grenade_explode": [2, 3.0, 120.0, 14.0, 0.05, 3],
 	&"extinguisher_burst": [2, 1.0, 80.0, 10.0, 0.05, 2],
@@ -188,6 +188,7 @@ const UI_EVENTS := {
 	&"mutation_click": [preload("res://assets/audio/ui/mutation_click.tres"), -6.0],
 	&"mutation_lock": [preload("res://assets/audio/ui/mutation_lock.tres"), -7.0],
 	&"mutation_unlock": [preload("res://assets/audio/ui/mutation_unlock.tres"), -7.0],
+	&"door_locked": [preload("res://assets/audio/ui/door_locked.tres"), -5.0],
 }
 
 

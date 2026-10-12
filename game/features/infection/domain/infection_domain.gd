@@ -16,9 +16,8 @@ const BASE_CRITICAL_THRESHOLD := 30.0
 const CONTROL_AMPULE_BONUS := 5.0
 const MAX_CRITICAL_THRESHOLD := 95.0
 const ANTIDOTE_REDUCTION := 10.0
-const FIRST_CONTROL_LOSS_DURATION := 5.0
-const SECOND_CONTROL_LOSS_DURATION := 7.0
-const RISK_WINDOW_DURATION := 30.0
+const FIRST_CONTROL_LOSS_DURATION := 2.0
+const SECOND_CONTROL_LOSS_DURATION := 5.0
 const EPSILON := 0.00001
 
 var mutation: float = 0.0
@@ -28,7 +27,6 @@ var ability_choice_pending: bool = false
 
 var critical_threshold: float = BASE_CRITICAL_THRESHOLD
 var control_loss_remaining: float = 0.0
-var risk_window_remaining: float = 0.0
 var next_control_loss_stage: int = 1
 var active_control_loss_stage: int = 0
 var defeated: bool = false
@@ -36,6 +34,10 @@ var defeated: bool = false
 
 func absorb_mutagen(delta_seconds: float) -> float:
 	if delta_seconds <= 0.0 or defeated or is_control_lost():
+		return 0.0
+	# Above the limit the cloud is no longer absorbed; touching it escalates the loss.
+	if mutation > critical_threshold:
+		_trigger_control_loss()
 		return 0.0
 
 	var previous := mutation
@@ -83,40 +85,22 @@ func add_control_ampule() -> float:
 func use_antidote() -> bool:
 	if defeated or is_control_lost():
 		return false
-	if mutation <= MUTATION_MIN and risk_window_remaining <= 0.0:
+	if mutation <= MUTATION_MIN:
 		return false
 
-	if risk_window_remaining > 0.0:
-		risk_window_remaining = 0.0
-		next_control_loss_stage = 1
-
+	next_control_loss_stage = 1
 	mutation = maxf(MUTATION_MIN, mutation - ANTIDOTE_REDUCTION)
 	_after_mutation_changed()
 	return true
 
 
 func tick(delta_seconds: float) -> void:
-	var remaining := maxf(delta_seconds, 0.0)
-	while remaining > EPSILON and not defeated:
-		if is_control_lost():
-			var step := minf(remaining, control_loss_remaining)
-			control_loss_remaining -= step
-			remaining -= step
-			if control_loss_remaining <= EPSILON:
-				control_loss_remaining = 0.0
-				_finish_control_loss()
-			continue
-		if mutation > critical_threshold:
-			_trigger_control_loss()
-			continue
-		if risk_window_remaining > 0.0:
-			var step := minf(remaining, risk_window_remaining)
-			risk_window_remaining = maxf(0.0, risk_window_remaining - step)
-			remaining -= step
-			if risk_window_remaining <= EPSILON:
-				_expire_risk_window()
-			continue
-		break
+	if not is_control_lost() or defeated:
+		return
+	control_loss_remaining = maxf(0.0, control_loss_remaining - maxf(delta_seconds, 0.0))
+	if control_loss_remaining <= EPSILON:
+		control_loss_remaining = 0.0
+		active_control_loss_stage = 0
 
 
 func is_control_lost() -> bool:
@@ -127,6 +111,11 @@ func _after_mutation_changed() -> void:
 	_refresh_ability_state()
 	if mutation > critical_threshold and not is_control_lost() and not defeated:
 		_trigger_control_loss()
+
+
+## True once the next contact ends the run, or while the second loss is running.
+func is_escalated() -> bool:
+	return active_control_loss_stage == 2 or next_control_loss_stage >= 3
 
 
 func _refresh_ability_state() -> void:
@@ -148,7 +137,6 @@ func _refresh_ability_state() -> void:
 
 
 func _trigger_control_loss() -> void:
-	risk_window_remaining = 0.0
 	var stage := next_control_loss_stage
 
 	if stage >= 3:
@@ -163,18 +151,6 @@ func _trigger_control_loss() -> void:
 	else:
 		control_loss_remaining = SECOND_CONTROL_LOSS_DURATION
 	next_control_loss_stage = stage + 1
-
-
-func _finish_control_loss() -> void:
-	active_control_loss_stage = 0
-	risk_window_remaining = RISK_WINDOW_DURATION
-	if mutation > critical_threshold:
-		_trigger_control_loss()
-
-
-func _expire_risk_window() -> void:
-	risk_window_remaining = 0.0
-	next_control_loss_stage = 1
 
 
 func _is_valid_ability(choice: int) -> bool:
