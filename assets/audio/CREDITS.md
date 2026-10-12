@@ -165,7 +165,6 @@ the licence of their source (CC0 / CC-BY).
 | sfx/drop.ogg | Red Eclipse team | CC-BY-SA 4.0 | https://github.com/redeclipse/sounds | Red Eclipse sounds |
 | sfx/extinguish.ogg | Red Eclipse team | CC-BY-SA 4.0 | https://github.com/redeclipse/sounds | Red Eclipse sounds |
 | sfx/extinguish2.ogg | Red Eclipse team | CC-BY-SA 4.0 | https://github.com/redeclipse/sounds | Red Eclipse sounds |
-| sfx/itemuse.ogg | Red Eclipse team | CC-BY-SA 4.0 | https://github.com/redeclipse/sounds | Red Eclipse sounds |
 | sfx/regen_begin.ogg | Red Eclipse team | CC-BY-SA 4.0 | https://github.com/redeclipse/sounds | Red Eclipse sounds |
 | sfx/shell.ogg | Red Eclipse team | CC-BY-SA 4.0 | https://github.com/redeclipse/sounds | Red Eclipse sounds |
 | sfx/shell3.ogg | Red Eclipse team | CC-BY-SA 4.0 | https://github.com/redeclipse/sounds | Red Eclipse sounds |
@@ -217,7 +216,7 @@ the licence of their source (CC0 / CC-BY).
 - `casing_shell`: redeclipse_sounds/sfx/shell.ogg, redeclipse_sounds/sfx/shell3.ogg, redeclipse_sounds/sfx/shell5.ogg, redeclipse_sounds/sfx/shell6.ogg
 - `colossus_slam`: cdda/sound/CC-Sounds/explosion/huge/explosion_huge_2.ogg, cdda/sound/CC-Sounds/explosion/small/explosion_small.ogg, cdda/sound/CC-Sounds/melee_hit_flesh/big_bash/big_bash_flesh_1.ogg, cdda/sound/CC-Sounds/smash_success/concrete/smash_success_concrete.ogg
 - `dismember`: cdda/sound/CC-Sounds/melee_hit_flesh/big_cutting/big_cutting_flesh_1.ogg, cdda/sound/CC-Sounds/melee_hit_flesh/big_cutting/big_cutting_flesh_2.ogg, cdda/sound/CC-Sounds/mon_death/zombie_gibbed/zombie_gibbed_1.ogg, cdda/sound/CC-Sounds/mon_death/zombie_gibbed/zombie_gibbed_2.ogg
-- `dna_pickup`: cdda/sound/CC-Sounds/melee_hit_flesh/small_stabbing/small_stabbing_flesh_2.ogg, cdda/sound/CC-Sounds/melee_hit_flesh/small_stabbing/small_stabbing_flesh_5.ogg, redeclipse_sounds/sfx/itemuse.ogg
+- `dna_pickup`: synthesised
 - `door_close`: cdda/sound/CC-Sounds/close_door/door_wood/close_door.ogg
 - `door_open`: cdda/sound/CC-Sounds/open_door/door_wood/open_door.ogg
 - `dry_fire`: cdda/sound/CC-Sounds/fire_gun/empty.ogg, cdda/sound/CC-Sounds/fire_gun/empty_1.ogg

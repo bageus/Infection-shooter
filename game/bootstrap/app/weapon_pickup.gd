@@ -3,6 +3,7 @@ extends Node3D
 const ART := preload("res://game/features/combat/public/launcher_visual.gd")
 const BADGE := preload("res://game/core/world_badge/public/world_badge.gd")
 const ACTION := "pickup_weapon"
+const BEACON := preload("res://game/bootstrap/app/pickup_beacon.gd")
 
 @export_range(0, 7) var weapon_index := 3
 var _base_position := Vector3.ZERO
@@ -17,6 +18,8 @@ func _ready() -> void:
 	add_child(art)
 	art.scale = Vector3.ONE * 0.9
 	art.position.y = 0.0
+	# Light highlight only; weapons get no arrow.
+	add_child(BEACON.make(Color(0.75, 0.85, 1.0), 0.8, 0.0, 0.45))
 	# Pick-up prompt: the bound key as a HUD key cap that keeps "pressing".
 	_hint = BADGE.key(binding_label(), 0.78)
 	_hint.visible = false
