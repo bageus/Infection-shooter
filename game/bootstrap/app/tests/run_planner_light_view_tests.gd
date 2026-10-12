@@ -122,7 +122,7 @@ func _click(position: Vector2) -> void:
 		event.pressed = pressed
 		event.position = position
 		event.global_position = position
-		root.push_input(event)
+		root.push_input(event, true)
 		await process_frame
 
 
