@@ -188,6 +188,7 @@ const UI_EVENTS := {
 	&"mutation_click": [preload("res://assets/audio/ui/mutation_click.tres"), -6.0],
 	&"mutation_lock": [preload("res://assets/audio/ui/mutation_lock.tres"), -7.0],
 	&"mutation_unlock": [preload("res://assets/audio/ui/mutation_unlock.tres"), -7.0],
+	&"door_locked": [preload("res://assets/audio/ui/door_locked.tres"), -5.0],
 }
 
 
