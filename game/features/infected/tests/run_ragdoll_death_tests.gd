@@ -96,8 +96,9 @@ func _test_wall_stops_body() -> void:
 	var start := enemy.global_position
 	enemy.call("take_blast_damage", 155.0, start + Vector3(0, -0.8, -0.5))
 	await create_timer(2.0).timeout
-	for bone in ["Head", "Hips", "Chest"]:
-		_expect(_bone(enemy, bone).z < 1.0, "A wall stops the thrown %s (%.2f)." % [bone, _bone(enemy, bone).z])
+	# A blast may tear limbs off, so every remaining volume is checked.
+	for bone: PhysicalBone3D in enemy.find_children("Physics_*", "PhysicalBone3D", true, false):
+		_expect(bone.global_position.z < 1.0, "A wall stops the thrown %s (%.2f)." % [bone.name, bone.global_position.z])
 	enemy.queue_free()
 	wall.queue_free()
 	await process_frame
@@ -183,7 +184,10 @@ func _joint(bone: PhysicalBone3D) -> Vector3:
 
 # Centre of the physical volume of a bone: what the skin follows.
 func _bone(owner: Node, bone_name: String) -> Vector3:
-	return (owner.find_child("Physics_" + bone_name, true, false) as PhysicalBone3D).global_position
+	var volume := owner.find_child("Physics_" + bone_name, true, false) as PhysicalBone3D
+	if volume == null: # The part was shot off; the torso stays.
+		volume = owner.find_child("Physics_Hips", true, false) as PhysicalBone3D
+	return volume.global_position
 
 
 func _spawn(at: Vector3) -> CharacterBody3D:
