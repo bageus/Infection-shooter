@@ -2,21 +2,20 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://w5156p2pp8et"
-path.s3tc="res://.godot/imported/group04_normal.png-a0b9b95e08b0486967e105200d73c709.s3tc.ctex"
+uid="uid://x5guqvjtq2b8"
+path="res://.godot/imported/group04_normal.png-a0b9b95e08b0486967e105200d73c709.ctex"
 metadata={
-"imported_formats": ["s3tc_bptc"],
-"vram_texture": true
+"vram_texture": false
 }
 
 [deps]
 
 source_file="res://models/objects/enviroments/04/textures/unified/group04_normal.png"
-dest_files=["res://.godot/imported/group04_normal.png-a0b9b95e08b0486967e105200d73c709.s3tc.ctex"]
+dest_files=["res://.godot/imported/group04_normal.png-a0b9b95e08b0486967e105200d73c709.ctex"]
 
 [params]
 
-compress/mode=2
+compress/mode=0
 compress/high_quality=false
 compress/lossy_quality=0.7
 compress/uastc_level=0
@@ -37,5 +36,5 @@ process/premult_alpha=false
 process/normal_map_invert_y=false
 process/hdr_as_srgb=false
 process/hdr_clamp_exposure=false
-process/size_limit=512
+process/size_limit=0
 detect_3d/compress_to=0
