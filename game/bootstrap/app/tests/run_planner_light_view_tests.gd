@@ -46,6 +46,7 @@ func _run() -> void:
 		_check(is_equal_approx(lamp.get_node("Light").spot_angle, controls.default_light_angle.value), "Placed lamp keeps palette cone")
 		_check(lamp.get_fixture_config().shape == controls.fixtures.SHAPES[index], "Each palette shape is preserved")
 		planner.objects._reset_selection()
+		_check_click_picks_lamp(planner, lamp)
 		planner.objects._select(lamp)
 		_check(controls.fixtures.selected_panel.visible and not controls.light_defaults.visible, "Installed lamp shows its own settings")
 		var height_before := lamp.global_position.y
@@ -76,6 +77,23 @@ func _run() -> void:
 	await process_frame
 	print("Planner light view tests: %d failure(s)." % failures)
 	quit(1 if failures > 0 else 0)
+
+
+# A wall or desk box around the lamp must not steal the click from its marker.
+func _check_click_picks_lamp(planner: Node, lamp: Node3D) -> void:
+	var blocker := Node3D.new()
+	var mesh := MeshInstance3D.new()
+	var box := BoxMesh.new()
+	box.size = Vector3(8.0, 8.0, 8.0)
+	mesh.mesh = box
+	blocker.add_child(mesh)
+	planner.structure_root.add_child(blocker)
+	blocker.global_position = lamp.global_position
+	planner.objects.placed.append(blocker)
+	var picked: Node3D = planner.geometry._planned_object_at(planner.camera.unproject_position(lamp.global_position))
+	_check(picked == lamp, "Clicking an installed lamp selects the lamp, not a box around it")
+	planner.objects.placed.erase(blocker)
+	blocker.free()
 
 
 func _check(condition: bool, message: String) -> void:
