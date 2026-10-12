@@ -65,18 +65,25 @@ func set_shadows_allowed(allowed: bool) -> void:
 	refresh_light_budget()
 
 
+## Ground point the camera looks at; lamps are ranked by distance to it.
+func get_light_focus() -> Vector3:
+	var camera := get_viewport().get_camera_3d() if get_viewport() != null else null
+	if camera == null:
+		return Vector3.ZERO
+	var focus := camera.global_position
+	var forward := -camera.global_transform.basis.z
+	if forward.y < -0.05:
+		focus += forward * (camera.global_position.y / -forward.y)
+	return focus
+
+
 ## Lights the lamps nearest to the camera focus first until the budget is spent;
 ## the nearest few also cast shadows so light does not pass through walls and columns.
 func refresh_light_budget() -> void:
 	var tree := get_tree()
 	if tree == null or not local_lights_enabled:
 		return
-	var camera := get_viewport().get_camera_3d() if get_viewport() != null else null
-	var focus := Vector3.ZERO if camera == null else camera.global_position
-	if camera != null:
-		var forward := -camera.global_transform.basis.z
-		if forward.y < -0.05:
-			focus = camera.global_position + forward * (camera.global_position.y / -forward.y)
+	var focus := get_light_focus()
 	var lamps: Array[Node] = tree.get_nodes_in_group("budget_lights")
 	var ranked: Array[Dictionary] = []
 	for lamp in lamps:
