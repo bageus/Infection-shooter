@@ -11,7 +11,8 @@
     "public/drop_table.gd",
     "public/dna_pickup.tscn",
     "public/loot_config.gd",
-    "public/loot_drop.gd"
+    "public/loot_drop.gd",
+    "public/pickup_beacon.gd"
   ],
   "dependencies": [],
   "runtime_contracts": {

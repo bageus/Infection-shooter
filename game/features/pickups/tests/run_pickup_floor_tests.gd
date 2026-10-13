@@ -51,6 +51,7 @@ func _run() -> void:
 	await process_frame
 	_expect(not is_instance_valid(reference.get_ref()), "A missing floor does not leave a floating pickup.")
 	await _test_drops_spread(stage)
+	await _test_dna_beacon(stage)
 	stage.queue_free()
 	print("Pickup floor tests: %d failure(s)." % failures)
 	quit(failures)
@@ -94,6 +95,37 @@ func _test_drops_spread(stage: Node3D) -> void:
 		drop.queue_free()
 	table.queue_free()
 	wall.queue_free()
+
+
+# Every DNA gets the rising arrow, whichever way it reaches the level.
+func _test_dna_beacon(stage: Node3D) -> void:
+	var dna_scene := load("res://game/features/pickups/public/dna_pickup.tscn") as PackedScene
+	var from_scene := dna_scene.instantiate() as Node3D
+	var from_code := PICKUP.new() as Area3D
+	from_code.pickup_type = PICKUP.PickupType.DNA
+	var medkit := (load("res://game/features/pickups/public/medkit_pickup.tscn") as PackedScene).instantiate() as Node3D
+	var items: Array[Node3D] = [from_scene, from_code, medkit]
+	for item in items:
+		stage.add_child(item)
+		item.position = Vector3(3.0, 1.2, 0.0)
+	await physics_frame
+	for item in [from_scene, from_code]:
+		var beacon := item.get_node_or_null("PickupBeacon") as Node3D
+		_expect(beacon != null and beacon.get("_arrow") != null, "A DNA pickup shows its arrow marker.")
+	_expect(medkit.get_node_or_null("PickupBeacon") == null, "Other pickups get no DNA arrow.")
+	# The arrow floats above the item; the floor must still rest the DNA on the tiles.
+	from_scene.call("settle_on_floor")
+	await physics_frame
+	await physics_frame
+	# Measured on the helix alone, not through _visual_bottom_offset, which the marker could also skew.
+	var helix_bottom := INF
+	for mesh in (from_scene.get_node("Visual") as Node3D).find_children("*", "MeshInstance3D", true, false):
+		var part := mesh as MeshInstance3D
+		for corner in range(8):
+			helix_bottom = minf(helix_bottom, (part.global_transform * part.get_aabb().get_endpoint(corner)).y)
+	_expect(is_equal_approx(helix_bottom, 0.018), "A DNA pickup with its arrow still rests on the floor (%.3f)." % helix_bottom)
+	for item in items:
+		item.queue_free()
 
 
 func _expect(condition: bool, message: String) -> void:

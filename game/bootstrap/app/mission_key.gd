@@ -1,6 +1,6 @@
 extends Node3D
 
-const BEACON := preload("res://game/bootstrap/app/pickup_beacon.gd")
+const BEACON := preload("res://game/features/pickups/public/pickup_beacon.gd")
 const GOLD := Color(0.95, 0.7, 0.16)
 const HOVER := 0.3
 
