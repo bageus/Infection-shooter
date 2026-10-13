@@ -32,6 +32,7 @@ func _run() -> void:
 	stage.add_child(query)
 	var effects := EFFECTS.instantiate() as Node3D
 	effects.set("preload_textures", false)
+	effects.set("floor_bake_enabled", false)
 	var image := Image.create(16, 8, false, Image.FORMAT_RGBA8)
 	image.fill(Color(0.5, 0.02, 0.01, 0.8))
 	var texture := ImageTexture.create_from_image(image)
