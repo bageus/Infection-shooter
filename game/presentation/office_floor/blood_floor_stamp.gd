@@ -3,6 +3,8 @@ extends RefCounted
 
 const TILE_METERS := 4.0
 const TILE_PIXELS := 128
+const MAX_CELL_SPAN := 4
+const MAX_CELL_INDEX := 100000.0
 const PIXELS_PER_METER := TILE_PIXELS / TILE_METERS
 const SOURCE_MAX_SIDE := 64
 const SOURCE_CACHE_LIMIT := 32
@@ -35,15 +37,24 @@ func source_image(texture: Texture2D) -> Image:
 
 ## Cells whose tiles a stain of this footprint touches.
 static func cells_touched(position: Vector3, mark_basis: Basis, footprint: Vector2) -> Array[Vector2i]:
+	var cells: Array[Vector2i] = []
+	if not position.is_finite() or not footprint.is_finite() or not mark_basis.is_finite():
+		return cells
 	var half_x := (absf(mark_basis.x.x) * footprint.x + absf(mark_basis.z.x) * footprint.y) * 0.5
 	var half_z := (absf(mark_basis.x.z) * footprint.x + absf(mark_basis.z.z) * footprint.y) * 0.5
-	var low := Vector2i(floori((position.x - half_x) / TILE_METERS), floori((position.z - half_z) / TILE_METERS))
-	var high := Vector2i(floori((position.x + half_x) / TILE_METERS), floori((position.z + half_z) / TILE_METERS))
-	var cells: Array[Vector2i] = []
+	var low := Vector2i(_cell_index(position.x - half_x), _cell_index(position.z - half_z))
+	var high := Vector2i(_cell_index(position.x + half_x), _cell_index(position.z + half_z))
+	# A floor stain is at most a few metres across; anything wider is not a real mark.
+	if high.x - low.x >= MAX_CELL_SPAN or high.y - low.y >= MAX_CELL_SPAN:
+		return cells
 	for x in range(low.x, high.x + 1):
 		for z in range(low.y, high.y + 1):
 			cells.append(Vector2i(x, z))
 	return cells
+
+
+static func _cell_index(world_coordinate: float) -> int:
+	return floori(clampf(world_coordinate / TILE_METERS, -MAX_CELL_INDEX, MAX_CELL_INDEX))
 
 
 ## Blends the stain into the tile at `cell`. u runs along world +x and v along +z,

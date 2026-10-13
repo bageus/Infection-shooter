@@ -3,6 +3,7 @@ extends SceneTree
 const SURFACES := preload("res://game/presentation/office_floor/blood_surface_query.gd")
 const EFFECTS := preload("res://game/presentation/office_floor/public/blood_effects_3d.tscn")
 const LIBRARY := preload("res://game/presentation/office_floor/blood_texture_library.gd")
+const STAMP := preload("res://game/presentation/office_floor/blood_floor_stamp.gd")
 var failures := 0
 var stage: Node3D
 var camera: Camera3D
@@ -87,6 +88,12 @@ func _run() -> void:
 	_expect(_count(bake, "MeshInstance3D") == 1, "The quad fallback shows one mesh per tile")
 	budget.call("clear_marks")
 	print("Blood floor bake tests: %d failures" % failures)
+	var nan_cells: Array[Vector2i] = STAMP.cells_touched(Vector3(NAN, 0.0, 0.0), Basis.IDENTITY, Vector2.ONE * 0.5)
+	_expect(nan_cells.is_empty(), "A non-finite stain position touches no tiles")
+	var huge_cells: Array[Vector2i] = STAMP.cells_touched(Vector3(1.0e9, 0.0, 0.0), Basis.IDENTITY, Vector2.ONE * 0.5)
+	_expect(huge_cells.is_empty() or huge_cells.size() <= 4, "An absurd position is clamped, never a large cell list")
+	var wide_cells: Array[Vector2i] = STAMP.cells_touched(Vector3.ZERO, Basis.IDENTITY, Vector2(50.0, 0.5))
+	_expect(wide_cells.is_empty(), "A stain wider than the span limit touches no tiles")
 	quit(0 if failures == 0 else 1)
 
 
