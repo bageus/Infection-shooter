@@ -2,6 +2,8 @@ extends "res://game/features/combat/prototype_rifle.gd"
 
 const PROJECTILE := preload("res://game/features/combat/grenade_projectile.gd")
 const ART := preload("res://game/features/combat/public/launcher_visual.gd")
+## Set by mutation effects: damage bonuses also strengthen the blast.
+var explosion_damage_multiplier := 1.0
 
 func aim_at(target_point: Vector3) -> void:
 	# Solve launch and muzzle position together; convergence is bounded.
@@ -27,6 +29,7 @@ func try_fire_at(target_point: Vector3) -> bool:
 	projectile.global_position = muzzle.global_position
 	projectile.collision_origin = AIM_GEOMETRY.collision_origin(self, muzzle)
 	projectile.setup(target_point, get_parent().get_parent() as CollisionObject3D)
+	projectile.damage_multiplier = explosion_damage_multiplier
 	var obstruction := BARREL_GUARD.obstruction(self, muzzle, get_parent().get_parent() as CollisionObject3D)
 	if not obstruction.is_empty():
 		projectile.set_physics_process(false)

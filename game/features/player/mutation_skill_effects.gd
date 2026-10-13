@@ -11,10 +11,11 @@ var buffs: Dictionary = {}
 var last_hit_time := -100.0
 var heart_cooldown := 0.0
 var kill_streak := 0
+var kill_timer := 0.0
+var battle_stacks := 0
 var _alive_cache: Array = []
 var _alive_frame := -1
 var _alive_count := -1
-var kill_timer := 0.0
 ## Seconds between melee strikes; reach is measured to the enemy's surface.
 const MELEE_COOLDOWN := 0.5
 const MELEE_REACH := 1.1
@@ -24,7 +25,6 @@ var _weapon_factors := Vector4.ZERO
 var melee_cooldown := 0.0
 var _melee_victim: WeakRef
 var _melee_time := -100.0
-var storm_tick := 0.0
 var acid_pools: Array[Dictionary] = []
 ## Acid Spit pool radius: 3.4 m across.
 const ACID_POOL_RADIUS := 1.7
@@ -32,22 +32,68 @@ const ACID_POOL_RADIUS := 1.7
 const ACID_WALL_PROBE_HEIGHT := 1.5
 const ACID_WALL_GAP := 0.35
 const ACID_SURFACE_MASK := 129
+const ACID_TIME := 4.0
+const ACID_DPS := 6.0
+var _clock := 0.0
+var _blade_tick := 0.0
+var _storm_tick := 0.0
+var _claw_timer := 0.0
+## Enemies the Claws pulse is about to kill, by instance id, with the time.
+var _claw_kills: Dictionary = {}
+var _recent_hits: Array[Vector2] = []
+var _dash_struck: Dictionary = {}
+var _adapt_damage: Dictionary = {}
+var _regenerating := false
+
 ## Retaliation answers a burst of damage, not one heavy blow.
 const RETALIATION_WINDOW := 3.0
 const RETALIATION_DAMAGE := 50.0
-var _clock := 0.0
-var _recent_hits: Array[Vector2] = []
+const RETALIATION_STUN_RADIUS := 6.0
 ## Second Heart's emergency regeneration after a survived lethal hit.
 const SECOND_HEART_HEAL := 10.0
 const SECOND_HEART_DURATION := 5.0
+const REGENERATION_DELAY := 4.0
 ## Predator Dash strikes everything it passes, once per dash.
 const DASH_STRIKE_TIME := 0.45
 const DASH_REACH := 1.6
-const DASH_DAMAGE := 30.0
+const DASH_DAMAGE := 20.0
 ## Blood Burst reach (was 4 m; cut by 40%).
 const BLOOD_BURST_RADIUS := 2.4
-var _dash_struck: Dictionary = {}
-var _regenerating := false
+const BLOOD_BURST_DAMAGE := 20.0
+## Claws: a pulse around the body every few seconds.
+const CLAW_INTERVAL := 3.0
+const CLAW_RADIUS := 2.0
+const CLAW_DAMAGE := 25.0
+const CLAW_KILL_WINDOW := 0.5
+## Reactive Evolution: damage of one type builds a block for a while.
+const ADAPT_THRESHOLD := 50.0
+const ADAPT_DURATION := 15.0
+## Bone Blades: 40 damage per second in a short radius.
+const BLADE_TICK := 0.2
+const BLADE_DAMAGE := 8.0
+const BLADE_RADIUS := 2.2
+## Storm Pulse: periodic shock and stun around the body.
+const STORM_INTERVAL := 1.2
+const STORM_RADIUS := 3.0
+const STORM_DAMAGE := 3.0
+const STORM_STUN := 2.0
+const STORM_STUN_INTENSITY := 0.5
+const SPORE_DELAY := 1.2
+const SPORE_RADIUS := 3.0
+const SPORE_DAMAGE := 30.0
+const PARASITE_DPS := 5.0
+const PARASITE_EXPLOSION := 40.0
+const PARASITE_EXPLOSION_RADIUS := 3.0
+const DISCHARGE_RANGE := 9.0
+const DISCHARGE_CHAIN_RANGE := 6.0
+const DISCHARGE_JUMPS := 6
+const DISCHARGE_STEP_DAMAGE := 10.0
+## Living Harvest: healing per second for its duration; overflow becomes armour.
+const HARVEST_HEAL_PER_SECOND := 5.0
+const ARMOR_CAP := 35.0
+## Devourer: full health on a kill grants a short armour block.
+const DEVOURER_ARMOR := 50.0
+const DEVOURER_ARMOR_TIME := 5.0
 
 var effects_root: Node3D
 var vfx: SKILL_VFX
@@ -79,10 +125,11 @@ func _on_mutation_changed(_amount: float, _threshold: float) -> void:
 	_refresh_stats()
 
 
-func _release_spores(location: Vector3) -> void:
+func _spore_burst(location: Vector3) -> void:
 	if not is_instance_valid(player) or player.is_queued_for_deletion():
 		return
-	for enemy in _enemies_near(location, 3.0):
+	for enemy in _enemies_near(location, SPORE_RADIUS):
+		enemy.call("take_damage", SPORE_DAMAGE)
 		enemy.call("apply_mutation_poison", 5.0, 5.0)
 
 
@@ -118,9 +165,13 @@ func _process(delta: float) -> void:
 		if previous > 0.0 and float(buffs[key]) == 0.0:
 			if key in WEAPON_BUFFS:
 				_weapons_dirty = true
+			if key == "battle_metabolism":
+				battle_stacks = 0
+			if key == "devourer_armor":
+				buffs["temporary_armor"] = 0.0
 			if key in VFX_BUFFS:
 				vfx.buff_ended(key)
-	var regenerating := enabled("regeneration") and Time.get_ticks_msec() * 0.001 - last_hit_time > 5.0
+	var regenerating := enabled("regeneration") and _clock - last_hit_time > REGENERATION_DELAY
 	if regenerating:
 		player.call("heal", 1.4 * delta)
 	regenerating = regenerating and float(player.get("health")) < float(player.get("max_health"))
@@ -129,18 +180,15 @@ func _process(delta: float) -> void:
 	_regenerating = regenerating
 	if active_buff("second_heart"):
 		player.call("heal", SECOND_HEART_HEAL * delta)
+	if active_buff("living_harvest"):
+		_harvest_tick(delta)
+	# Hyperactive: a kill every second for five seconds doubles ability recovery.
+	if enabled("hyperactive") and kill_streak >= 5 and kill_timer > 0.0:
+		runtime.call("reduce_skill_cooldowns", delta)
 	if active_buff("predator_dash"):
 		_dash_strike()
-	storm_tick -= delta
-	if storm_tick <= 0.0:
-		storm_tick = 0.6
-		if active_buff("storm_pulse"):
-			for enemy in _enemies_near(player.global_position, 4.0):
-				enemy.call("take_damage", 3.5)
-				enemy.call("apply_blast_stun", 0.7, 0.4)
-		if active_buff("bone_blades"):
-			for enemy in _enemies_near(player.global_position, 1.7):
-				enemy.call("take_damage", 18.0)
+	_claw_tick(delta)
+	_blade_and_storm_tick(delta)
 	for i in range(acid_pools.size() - 1, -1, -1):
 		var pool := acid_pools[i]
 		pool["remaining"] = float(pool["remaining"]) - delta
@@ -148,7 +196,7 @@ func _process(delta: float) -> void:
 			acid_pools.remove_at(i)
 			continue
 		for enemy in _enemies_near(pool["position"], ACID_POOL_RADIUS):
-			enemy.call("take_damage", 5.0 * delta)
+			enemy.call("take_damage", ACID_DPS * delta)
 	if _weapons_dirty:
 		_update_weapons()
 
@@ -158,32 +206,45 @@ func active_buff(skill_id: String) -> bool:
 
 
 func on_player_hit(amount: float, damage_type: String = "physical") -> float:
-	last_hit_time = Time.get_ticks_msec() * 0.001
+	last_hit_time = _clock
 	var reserve := float(buffs.get("temporary_armor", 0.0))
 	var absorbed := minf(amount, reserve)
 	buffs["temporary_armor"] = reserve - absorbed
 	if absorbed > 0.0:
 		vfx.energy_shield()
 	amount -= absorbed
-	var reduction := 0.14 if enabled("bone_armor") else 0.0
-	if damage_type in ["acid", "fire", "electric"] and enabled("hardened"):
-		reduction += 0.22
-		_passive("hardened")
-	if enabled("pain_block") and float(player.get("health")) < float(player.get("max_health")) * 0.3:
+	var reduction := 0.0
+	if damage_type == "physical":
+		if enabled("bone_armor"):
+			reduction += 0.20
+			_passive("bone_armor")
+		if enabled("hardened"):
+			reduction += 0.17
+			_passive("hardened")
+	elif damage_type in ["acid", "fire", "electric"] and enabled("hardened"):
 		reduction += 0.25
+		_passive("hardened")
+	if enabled("pain_block") and float(player.get("health")) < float(player.get("max_health")) * 0.25:
+		reduction += 0.35
 		_passive("pain_block")
 	if active_buff("berserk"):
-		reduction += 0.2
+		reduction += 0.33
 	if enabled("reactive_evolution"):
-		var key := "adaptation_" + damage_type
-		reduction += minf(0.2, float(buffs.get(key, 0.0)) * 0.03)
-		buffs[key] = minf(6.0, float(buffs.get(key, 0.0)) + 1.0)
-		_passive("reactive_evolution")
+		var key := "adapted_" + damage_type
+		if active_buff(key):
+			reduction += 0.30
+			_passive("reactive_evolution")
+		else:
+			var gathered := float(_adapt_damage.get(damage_type, 0.0)) + amount
+			_adapt_damage[damage_type] = gathered
+			if gathered >= ADAPT_THRESHOLD:
+				_start_buff(key, ADAPT_DURATION)
+				_adapt_damage[damage_type] = 0.0
 	if enabled("retaliation") and _retaliation_due(amount):
 		_passive("retaliation")
-		vfx.electric_pulse(player.global_position, 3.0)
-		for enemy in _enemies_near(player.global_position, 3.0):
-			enemy.call("apply_blast_stun", 1.2, 0.6)
+		vfx.electric_pulse(player.global_position, RETALIATION_STUN_RADIUS)
+		for enemy in _enemies_near(player.global_position, RETALIATION_STUN_RADIUS):
+			enemy.call("apply_blast_stun", 3.0, 1.0)
 	return amount * (1.0 - minf(0.75, reduction))
 
 
@@ -204,38 +265,39 @@ func _retaliation_due(amount: float) -> bool:
 func survive_lethal() -> bool:
 	if not enabled("second_heart") or heart_cooldown > 0.0:
 		return false
-	heart_cooldown = 110.0
+	heart_cooldown = 60.0
 	last_hit_time = -100.0
 	vfx.heartbeat()
-	buffs["second_heart"] = SECOND_HEART_DURATION
-	_passive("second_heart", SECOND_HEART_DURATION)
+	_passive_buff("second_heart", SECOND_HEART_DURATION)
 	return true
 
 
 func on_enemy_killed(enemy: Node3D) -> void:
-	var near := enemy.global_position.distance_to(player.global_position) < 4.0
+	var id := enemy.get_instance_id()
+	var claw_kill := _claw_kills.has(id) and _clock - float(_claw_kills[id]) <= CLAW_KILL_WINDOW
+	_claw_kills.erase(id)
 	# Predator skills reward kills made with a melee strike, as described.
 	var melee_kill: bool = _melee_victim != null and _melee_victim.get_ref() == enemy and Time.get_ticks_msec() / 1000.0 - _melee_time < 0.5
-	kill_streak = mini(6, kill_streak + 1) if kill_timer > 0.0 else 1
-	kill_timer = 5.0
-	if enabled("combat_reflex"): _passive_buff("combat_reflex", 4.0)
-	if enabled("battle_metabolism"): _passive_buff("battle_metabolism", 6.0)
-	if enabled("hyperactive"):
-		runtime.call("reduce_skill_cooldowns", 1.0 + kill_streak * 0.15)
-		_passive("hyperactive")
-	if near and enabled("adrenaline"): _passive_buff("adrenaline", 5.0)
+	kill_streak = kill_streak + 1 if kill_timer > 0.0 else 1
+	kill_timer = 1.0
+	if enabled("combat_reflex"): _passive_buff("combat_reflex", 3.0)
+	if enabled("battle_metabolism"): _battle_kill()
+	if claw_kill and enabled("adrenaline"):
+		_passive_buff("adrenaline", 4.0)
 	if melee_kill and enabled("killer_instinct"):
-		(player.call("get_current_weapon") as Node3D).call("add_magazine_ammo", 2)
-		_passive_buff("killer_instinct", 5.0)
-	if melee_kill and enabled("devourer"):
-		_heal_or_armor(8.0)
+		(player.call("get_current_weapon") as Node3D).call("add_magazine_ammo", 9999)
+		_passive_buff("killer_instinct", 2.0)
+	if enabled("devourer") and float(player.get("health")) >= float(player.get("max_health")):
+		buffs["temporary_armor"] = maxf(float(buffs.get("temporary_armor", 0.0)), DEVOURER_ARMOR)
+		_passive_buff("devourer_armor", DEVOURER_ARMOR_TIME)
 		_passive("devourer")
-	if active_buff("living_harvest"):
-		_heal_or_armor(14.0)
-	if active_buff("berserk"): _start_buff("berserk", minf(13.0, float(buffs["berserk"]) + 2.0))
+	if active_buff("berserk"): _start_buff("berserk", minf(12.0, float(buffs["berserk"]) + 1.0))
 	if enemy.has_meta("mutation_parasite"):
-		for other in _enemies_near(enemy.global_position, 3.0):
-			if other != enemy: other.call("apply_mutation_poison", 4.0, 5.0, true)
+		for other in _enemies_near(enemy.global_position, PARASITE_EXPLOSION_RADIUS):
+			if other != enemy: other.call("take_damage", PARASITE_EXPLOSION)
+	if enabled("epidemic") and float(enemy.get("mutation_poison_remaining")) > 0.0:
+		for neighbor in _enemies_near(enemy.global_position, 4.0):
+			neighbor.call("apply_mutation_poison", 4.0, 5.0)
 	if enabled("recycling") and randf() < 0.35:
 		player.call("add_ammo_to_current_weapon", 5)
 		_passive("recycling")
@@ -243,11 +305,11 @@ func on_enemy_killed(enemy: Node3D) -> void:
 
 func movement_multiplier() -> float:
 	var speed := 1.0
-	if enabled("synapses"): speed += 0.12
-	if active_buff("adrenaline"): speed += 0.18
-	if enabled("hyperactive") and kill_streak >= 3: speed += 0.12
-	if active_buff("overload"): speed += 0.38
-	if active_buff("berserk"): speed += 0.3
+	if enabled("synapses"): speed += 0.15
+	if active_buff("adrenaline"): speed += 0.5
+	if enabled("hyperactive") and kill_streak >= 5 and kill_timer > 0.0: speed += 0.2
+	if active_buff("overload"): speed += 0.3
+	if active_buff("berserk"): speed += 0.5
 	return speed
 
 
@@ -268,9 +330,7 @@ func melee() -> bool:
 			continue
 		_melee_victim = weakref(enemy)
 		_melee_time = Time.get_ticks_msec() / 1000.0
-		if enabled("claws"):
-			vfx.claw_slash(enemy)
-		enemy.call("take_damage", _scented(enemy, 36.0 if enabled("claws") else 17.0))
+		enemy.call("take_damage", _scented(enemy, 17.0))
 		return true
 	return false
 
@@ -280,8 +340,6 @@ static func _body_radius(body: Node) -> float:
 	if shape != null and shape.shape is CapsuleShape3D:
 		return (shape.shape as CapsuleShape3D).radius * absf(shape.global_basis.get_scale().x)
 	return 0.4
-
-
 
 
 # Reports a passive firing so the HUD can show which one worked.
@@ -310,16 +368,26 @@ func _start_buff(skill_id: String, duration: float) -> void:
 		vfx.buff_started(skill_id)
 
 
+# Battle Metabolism: each kill inside the window adds a stack and extends it.
+func _battle_kill() -> void:
+	if active_buff("battle_metabolism"):
+		battle_stacks = mini(3, battle_stacks + 1)
+		_passive_buff("battle_metabolism", float(buffs["battle_metabolism"]) + 3.0)
+	else:
+		battle_stacks = 1
+		_passive_buff("battle_metabolism", 3.0)
+
+
 func _update_weapons() -> void:
 	_weapons_dirty = false
-	var reload_factor := (0.8 if enabled("muscle_memory") else 1.0) * (0.65 if active_buff("overload") else 1.0)
+	var reload_factor := (0.7 if enabled("muscle_memory") else 1.0) * (1.0 / 1.3 if active_buff("overload") else 1.0)
 	var spread_factor := 0.7 if enabled("stabilizers") else 1.0
-	var attack_speed := (1.22 if active_buff("combat_reflex") else 1.0) * (1.25 if active_buff("overload") else 1.0)
+	var attack_speed := (1.3 if active_buff("combat_reflex") else 1.0) * (1.3 if active_buff("overload") else 1.0)
 	if enabled("reflex_arc") and active_buff("reflex_arc"):
-		attack_speed *= 1.2
-	var damage := 1.0 + (0.18 if active_buff("battle_metabolism") else 0.0)
-	if active_buff("killer_instinct"): damage += 0.15
-	if active_buff("berserk"): damage += 0.3
+		attack_speed *= 1.25
+	var damage := 1.0 + 0.05 * float(battle_stacks)
+	if active_buff("killer_instinct"): damage *= 2.0
+	if active_buff("berserk"): damage *= 1.5
 	var factors := Vector4(reload_factor, spread_factor, attack_speed, damage)
 	if factors.is_equal_approx(_weapon_factors):
 		return
@@ -331,6 +399,51 @@ func _update_weapons() -> void:
 		gun.set("spread_degrees", float(base["spread_degrees"]) * factors.y)
 		gun.set("shots_per_second", float(base["shots_per_second"]) * factors.z)
 		gun.set("bullet_damage", float(base["bullet_damage"]) * factors.w)
+		# Grenade blasts do not read bullet damage: they take the same damage bonus.
+		if "explosion_damage_multiplier" in gun:
+			gun.set("explosion_damage_multiplier", factors.w)
+
+
+func _claw_tick(delta: float) -> void:
+	_claw_timer -= delta
+	if _claw_timer > 0.0 or not enabled("claws"):
+		return
+	_claw_timer = CLAW_INTERVAL
+	for id in _claw_kills.keys():
+		if _clock - float(_claw_kills[id]) > CLAW_KILL_WINDOW:
+			_claw_kills.erase(id)
+	for enemy in _enemies_near(player.global_position, CLAW_RADIUS):
+		vfx.claw_slash(enemy)
+		# Marked before the hit: a lethal hit reports its kill synchronously.
+		if float(enemy.get("health")) <= CLAW_DAMAGE:
+			_claw_kills[enemy.get_instance_id()] = _clock
+		enemy.call("take_damage", CLAW_DAMAGE)
+
+
+func _blade_and_storm_tick(delta: float) -> void:
+	_blade_tick -= delta
+	if _blade_tick <= 0.0:
+		_blade_tick = BLADE_TICK
+		if active_buff("bone_blades"):
+			for enemy in _enemies_near(player.global_position, BLADE_RADIUS):
+				enemy.call("take_damage", BLADE_DAMAGE)
+	_storm_tick -= delta
+	if _storm_tick <= 0.0:
+		_storm_tick = STORM_INTERVAL
+		if active_buff("storm_pulse"):
+			for enemy in _enemies_near(player.global_position, STORM_RADIUS):
+				enemy.call("take_damage", STORM_DAMAGE)
+				enemy.call("apply_blast_stun", STORM_STUN, STORM_STUN_INTENSITY)
+
+
+# Living Harvest heals per second; healing beyond full health becomes armour.
+func _harvest_tick(delta: float) -> void:
+	var amount := HARVEST_HEAL_PER_SECOND * delta
+	var gained: float = player.call("heal", amount)
+	var overflow := amount - gained
+	if overflow > 0.0:
+		buffs["temporary_armor"] = minf(ARMOR_CAP, float(buffs.get("temporary_armor", 0.0)) + overflow)
+		vfx.energy_shield()
 
 
 func _cast(skill_id: String) -> void:
@@ -338,32 +451,29 @@ func _cast(skill_id: String) -> void:
 		"blood_burst":
 			vfx.spike_burst(player.global_position, BLOOD_BURST_RADIUS)
 			for enemy in _enemies_near(player.global_position, BLOOD_BURST_RADIUS):
-				enemy.call("take_damage", 22.0)
+				enemy.call("take_damage", BLOOD_BURST_DAMAGE)
 				enemy.call("apply_player_push", (enemy.global_position - player.global_position).normalized(), 5.0)
 		"parasite":
 			var targets := _enemies_near(player.global_position, 12.0, true)
 			if not targets.is_empty():
-				targets[0].call("apply_mutation_poison", 6.0, 6.0, true)
-				_skill_effect(skill_id, 6.0)
-		"living_harvest", "overload", "storm_pulse", "bone_blades", "berserk":
-			_start_buff(skill_id, 6.0 if skill_id != "berserk" else 8.0)
+				targets[0].call("apply_mutation_poison", 60.0, PARASITE_DPS, true)
+				_skill_effect(skill_id, 60.0)
+		"living_harvest", "overload", "storm_pulse", "bone_blades":
+			var durations := {"living_harvest": 5.0, "overload": 5.0, "storm_pulse": 6.0, "bone_blades": 4.0}
+			_start_buff(skill_id, float(durations[skill_id]))
+		"berserk":
+			_start_buff("berserk", 6.0)
 		"discharge":
-			var chain: Array[Vector3] = [player.global_position]
-			for enemy in _enemies_near(player.global_position, 9.0, true):
-				chain.append(enemy.global_position)
-				enemy.call("take_damage", 25.0)
-				enemy.call("apply_blast_stun", 1.0, 0.8)
-				if chain.size() == 5: break
-			vfx.chain_lightning(chain)
+			_discharge()
 		"acid_spit":
 			var puddle := acid_floor_point(player.get("_aim_point"))
-			acid_pools.append({"position": puddle, "remaining": 6.0})
-			vfx.acid_pool(puddle, ACID_POOL_RADIUS, 6.0)
+			acid_pools.append({"position": puddle, "remaining": ACID_TIME})
+			vfx.acid_pool(puddle, ACID_POOL_RADIUS, ACID_TIME)
 		"spore_cocoon":
 			var location: Vector3 = player.get("_aim_point")
-			vfx.spore_cocoon(location, 3.0, 2.0)
-			_skill_effect(skill_id, 2.0)
-			get_tree().create_timer(2.0).timeout.connect(_release_spores.bind(location))
+			vfx.spore_cocoon(location, SPORE_RADIUS, SPORE_DELAY)
+			_skill_effect(skill_id, SPORE_DELAY)
+			get_tree().create_timer(SPORE_DELAY).timeout.connect(_spore_burst.bind(location))
 		"epidemic":
 			for enemy in _enemies_near(player.global_position, 15.0):
 				if float(enemy.get("mutation_poison_remaining")) > 0.0:
@@ -374,6 +484,35 @@ func _cast(skill_id: String) -> void:
 			_dash_struck.clear()
 			buffs["predator_dash"] = DASH_STRIKE_TIME
 			_dash_strike()
+
+
+# Chain lightning: each jump hits the nearest unhit enemy and deals more damage.
+func _discharge() -> void:
+	var first := _enemies_near(player.global_position, DISCHARGE_RANGE, true)
+	if first.is_empty():
+		return
+	var chain: Array[Vector3] = [player.global_position]
+	var hit: Dictionary = {}
+	var target: Node3D = first[0]
+	for jump in DISCHARGE_JUMPS:
+		hit[target.get_instance_id()] = true
+		chain.append(target.global_position)
+		target.call("take_damage", DISCHARGE_STEP_DAMAGE * float(jump + 1))
+		target.call("apply_blast_stun", 1.0, 0.8)
+		var origin := target.global_position
+		var next: Node3D = null
+		var best := DISCHARGE_CHAIN_RANGE * DISCHARGE_CHAIN_RANGE
+		for candidate in _enemies_near(origin, DISCHARGE_CHAIN_RANGE):
+			if hit.has(candidate.get_instance_id()):
+				continue
+			var distance := candidate.global_position.distance_squared_to(origin)
+			if distance < best:
+				best = distance
+				next = candidate
+		if next == null:
+			break
+		target = next
+	vfx.chain_lightning(chain)
 
 
 # Hits enemies along the dash path instead of a ring around the start point.
@@ -454,10 +593,3 @@ func _enemies_near(center: Vector3, radius: float, nearest_first: bool = false) 
 	if nearest_first:
 		result.sort_custom(func(a: Node3D, b: Node3D) -> bool: return a.global_position.distance_squared_to(center) < b.global_position.distance_squared_to(center))
 	return result
-
-
-func _heal_or_armor(amount: float) -> void:
-	var gained: float = player.call("heal", amount)
-	if gained < amount:
-		buffs["temporary_armor"] = minf(35.0, float(buffs.get("temporary_armor", 0.0)) + amount - gained)
-		vfx.energy_shield()
