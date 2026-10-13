@@ -60,6 +60,7 @@ static func explode(projectile: Node3D, location: Vector3, normal: Vector3, cont
 	query.shape = sphere
 	query.transform.origin = location
 	query.collision_mask = 7
+	var power := 1.0 if projectile.get("damage_multiplier") == null else float(projectile.get("damage_multiplier"))
 	var hit_ids := {}
 	for hit in _blast_hits(projectile.get_world_3d().direct_space_state, query):
 		var collider: Object = hit.get("collider")
@@ -73,7 +74,7 @@ static func explode(projectile: Node3D, location: Vector3, normal: Vector3, cont
 		if collider != contact and is_sheltered(projectile.get_world_3d(), location + normal * 0.25, body):
 			continue
 		var distance := _distance_to_shape(collider, int(hit.get("shape", -1)), location, body.global_position)
-		var factor := pow(1.0 - clampf(distance / RADIUS, 0.0, 1.0), 1.15)
+		var factor := pow(1.0 - clampf(distance / RADIUS, 0.0, 1.0), 1.15) * power
 		var direction := (body.global_position - location).normalized()
 		if direction.length_squared() < 0.01:
 			direction = Vector3.UP

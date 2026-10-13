@@ -54,7 +54,7 @@ func _run() -> void:
 	runtime.report_skill_effect("muscle_memory", 4.0)
 	_expect(is_zero_approx(runtime.skill_effect_remaining("muscle_memory")), "Only active skills carry effect timers.")
 	bar.call("_update_circles", 0.0)
-	_expect(circle.ratio > 0.15 and circle.ratio < 0.25 and not circle.castable, "Cooldown sweep returns after the effect and drains with the remaining cooldown.")
+	_expect(is_zero_approx(circle.ratio) and circle.castable, "Acid Spit has an eight-second cooldown, so the sweep is empty after eight seconds.")
 	runtime.call("_physics_process", 5.5)
 	bar.call("_update_circles", 0.0)
 	_expect(circle.castable and is_zero_approx(circle.ratio), "Skill is highlighted again once recharged.")

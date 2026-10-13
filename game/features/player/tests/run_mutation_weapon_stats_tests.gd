@@ -65,18 +65,18 @@ func _run() -> void:
 	_check(weapon.writes == initial, "Idle frames do not rewrite weapon properties")
 	runtime.skills["muscle_memory"] = true
 	runtime.tree_changed.emit()
-	_check(is_equal_approx(weapon.reload_time, 1.6), "Learning a passive immediately recalculates weapon stats")
+	_check(is_equal_approx(weapon.reload_time, 1.4), "Learning a passive immediately recalculates weapon stats")
 	initial = weapon.writes
 	runtime.mutation_changed.emit(40.0, 45.0)
 	_check(weapon.writes == initial, "Mutation changes with identical modifiers do not rewrite weapons")
 	runtime.skill_cast.emit("overload")
 	effects.call("_process", 0.0)
-	_check(is_equal_approx(weapon.reload_time, 1.04) and is_equal_approx(weapon.shots_per_second, 5.0), "Starting Overload applies existing reload/fire modifiers")
+	_check(is_equal_approx(weapon.reload_time, 2.0 * 0.7 / 1.3) and is_equal_approx(weapon.shots_per_second, 5.2), "Starting Overload applies its reload/fire modifiers")
 	initial = weapon.writes
 	effects.call("_process", 1.0)
 	_check(weapon.writes == initial, "Active buff countdown does not rewrite unchanged stats")
 	effects.call("_process", 5.1)
-	_check(is_equal_approx(weapon.reload_time, 1.6) and is_equal_approx(weapon.shots_per_second, 4.0), "Buff expiry restores the passive-adjusted baseline")
+	_check(is_equal_approx(weapon.reload_time, 1.4) and is_equal_approx(weapon.shots_per_second, 4.0), "Buff expiry restores the passive-adjusted baseline")
 	runtime.skills.erase("muscle_memory")
 	runtime.tree_changed.emit()
 	_check(is_equal_approx(weapon.reload_time, 2.0), "Losing a passive restores its original baseline")
@@ -94,16 +94,15 @@ func _kill_and_roll_buffs(effects: Node, runtime: Runtime, weapon: Weapon) -> vo
 	runtime.skills["battle_metabolism"] = true
 	effects.call("on_enemy_killed", victim)
 	effects.call("_process", 0.0)
-	_check(is_equal_approx(weapon.shots_per_second, 4.88) and is_equal_approx(weapon.bullet_damage, 23.6), "Kill buffs immediately apply their existing multipliers")
-	var initial := weapon.writes
+	_check(is_equal_approx(weapon.shots_per_second, 5.2) and is_equal_approx(weapon.bullet_damage, 21.0), "Kill buffs immediately apply their multipliers")
 	effects.call("on_enemy_killed", victim)
 	effects.call("_process", 0.0)
-	_check(weapon.writes == initial, "Refreshing a kill buff does not rewrite identical stats")
+	_check(is_equal_approx(weapon.bullet_damage, 22.0) and is_equal_approx(weapon.shots_per_second, 5.2), "A second kill in the window adds a Battle Metabolism stack")
 	effects.call("_process", 6.1)
 	runtime.skills["reflex_arc"] = true
 	effects.call("on_roll")
 	effects.call("_process", 0.0)
-	_check(is_equal_approx(weapon.shots_per_second, 4.8), "Roll buff changes fire rate")
+	_check(is_equal_approx(weapon.shots_per_second, 5.0), "Roll buff changes fire rate")
 	effects.call("_process", 3.1)
 	_check(is_equal_approx(weapon.shots_per_second, 4.0), "Roll buff expiry restores fire rate")
 	victim.queue_free()

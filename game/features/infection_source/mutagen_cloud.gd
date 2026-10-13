@@ -16,6 +16,9 @@ signal depleted
 ## Gas puffs per cloud (random in range) and how far they spread from the centre.
 @export var puff_count_range := Vector2i(3, 4)
 @export var cloud_radius := 1.35
+## Devourer: visitors inside the cloud are healed while it lasts.
+@export var heals_visitors := false
+const HEAL_PER_SECOND := 2.0
 
 var _floor_offset := 0.0
 var _active: bool = false
@@ -105,6 +108,8 @@ func _physics_process(delta: float) -> void:
 		_finish()
 		return
 
+	if heals_visitors:
+		_heal_visitors(delta)
 	if _absorption_remaining <= 0.0:
 		# The mutagen is spent, but the visual cloud finishes dissipating naturally.
 		return
@@ -126,8 +131,14 @@ func _feed(body: Node, step: float) -> void:
 	if gained is float and float(gained) <= 0.0:
 		return
 	_absorption_remaining -= step
-	if _absorption_remaining <= 0.0:
+	if _absorption_remaining <= 0.0 and not heals_visitors:
 		monitoring = false
+
+
+func _heal_visitors(delta: float) -> void:
+	for body in get_overlapping_bodies():
+		if body != null and body.has_method("absorb_mutagen") and WALL_FIELD.clear_to(self, body):
+			body.call("heal", HEAL_PER_SECOND * delta)
 
 
 # Overlapping clouds do not stack: a body absorbs from one cloud per frame.
