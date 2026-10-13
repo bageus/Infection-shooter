@@ -154,7 +154,7 @@ func settle_resting(step: float) -> void:
 	var player := get_tree().get_first_node_in_group("player") as Node3D
 	for id in active.keys():
 		var body := active[id].get_ref() as RigidBody3D
-		if body == null or body.is_queued_for_deletion() or body.has_meta("debris_fading"):
+		if body == null or body.is_queued_for_deletion() or body.has_meta("debris_fading") or not _is_box_chunk(body):
 			continue
 		if not body.sleeping:
 			body.set("rest_time", 0.0)
@@ -164,6 +164,12 @@ func settle_resting(step: float) -> void:
 			continue
 		if not _fold_into_batch(body):
 			return
+
+
+# Only pooled box chunks fold; pieces cut from a real model keep their own mesh.
+func _is_box_chunk(body: RigidBody3D) -> bool:
+	var visual := body.get_node_or_null("Visual") as MeshInstance3D
+	return visual != null and visual.mesh is BoxMesh and visual.material_override is StandardMaterial3D
 
 
 func _rested_enough(body: RigidBody3D, player: Node3D) -> bool:
