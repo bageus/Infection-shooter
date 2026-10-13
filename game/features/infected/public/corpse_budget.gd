@@ -32,6 +32,23 @@ static func clip_tail(tween: Tween, owner: Node, parts: Node, visual: Node3D, si
 	tween.tween_callback(hide)
 
 
+## The death mutagen cloud ending used to free the whole body. A retained body
+## keeps its node until it is hidden; the first of the two events frees it.
+static func cloud_gone(owner: Node, shown: bool) -> void:
+	owner.set_meta(&"cloud_gone", true)
+	if not keep or not shown:
+		owner.queue_free()
+
+
+## Called when a body is hidden: its hitboxes go, and a body whose cloud has
+## already ended is freed.
+static func hidden(owner: Node, parts: Node) -> void:
+	if parts != null:
+		parts.call("remove_corpse_hitboxes")
+	if owner.has_meta(&"cloud_gone"):
+		owner.queue_free()
+
+
 static func count() -> int:
 	_prune()
 	return _corpses.size()
