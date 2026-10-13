@@ -302,7 +302,8 @@ jobs:
           game/core/world_badge/tests/run_world_badge_tests.gd
           game/bootstrap/app/tests/run_wall_grid_tests.gd
           game/bootstrap/app/tests/run_map_file_tests.gd
-          game/bootstrap/app/tests/run_ammo_box_tests.gd game/bootstrap/app/tests/run_placed_ammo_pickup_tests.gd
+          game/bootstrap/app/tests/run_ammo_box_tests.gd
+          game/bootstrap/app/tests/run_placed_ammo_pickup_tests.gd
           EOF
           tools/run_runtime_suites.sh /tmp/runtime-suites.txt /tmp/runtime-suites 3
 
