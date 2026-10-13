@@ -49,6 +49,9 @@ var item_catalog = [
 	{"name":"Патроны: пистолет","path":"res://game/features/pickups/public/ammo_pistol_pickup.tscn","kind":"item"},
 	{"name":"Патроны: UZI","path":"res://game/features/pickups/public/ammo_uzi_pickup.tscn","kind":"item"},
 	{"name":"Патроны: дробовик","path":"res://game/features/pickups/public/ammo_shotgun_pickup.tscn","kind":"item"},
+	{"name":"Патроны: автомат","path":"res://game/features/pickups/public/ammo_automate_pickup.tscn","kind":"item"},
+	{"name":"Патроны: снайперка","path":"res://game/features/pickups/public/ammo_sniper_pickup.tscn","kind":"item"},
+	{"name":"Патроны: миниган","path":"res://game/features/pickups/public/ammo_minigun_pickup.tscn","kind":"item"},
 	{"name":"Аптечка","path":"res://game/features/pickups/public/medkit_pickup.tscn","kind":"item"},
 	{"name":"Антидот","path":"res://game/features/pickups/public/antidote_pickup.tscn","kind":"item"}
 ]
