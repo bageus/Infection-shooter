@@ -45,14 +45,20 @@ var _display: Node3D
 var _display_wall: Node
 
 
+## Screens have power and content settings; the desk lamp shares the power setting (on or off).
 func has_display() -> bool:
-	return model_path.get_file() in DISPLAY_PROFILES.MODELS
+	return model_path.get_file() in DISPLAY_PROFILES.MODELS or is_desk_lamp()
+
+
+func is_desk_lamp() -> bool:
+	return model_path.get_file() == "05_lamp.glb"
 
 
 func configure_display(config: Dictionary) -> void:
 	var power := str(config.get("power", "auto"))
 	var content_type := str(config.get("content", "static"))
 	display_power = power if power in ["on", "off", "auto"] else "auto"
+	_apply_lamp_power()
 	display_content = content_type if content_type in ["static", "dynamic"] else "static"
 	if "wall_TV" in model_path.get_file():
 		display_content = "dynamic"
@@ -75,7 +81,7 @@ func configure_displays(wall: Node) -> void:
 
 
 func _setup_display() -> void:
-	if not has_display():
+	if not model_path.get_file() in DISPLAY_PROFILES.MODELS:
 		return
 	_display = DISPLAY_VIEW.new()
 	_display.name = "Display"
@@ -202,7 +208,7 @@ func _ready() -> void:
 	continuous_cd = mass < 4.0
 	_setup_weight(volume)
 	_add_contact_shadow(wall_mounted)
-	if model_path.get_file() == "05_lamp.glb":
+	if is_desk_lamp():
 		_add_desk_lamp_light()
 	if not freeze or wall_mounted:
 		IMPACT_SOUND.watch(self)
@@ -216,6 +222,16 @@ func _add_desk_lamp_light() -> void:
 	var glow := BUDGET_LIGHT.create(Color(1.0, 0.86, 0.62), 1.1, 2.8)
 	glow.position = Vector3(0.0, 0.12, 0.0)
 	shade.add_child(glow)
+	_apply_lamp_power()
+
+
+# The planner can switch a desk lamp off; a lamp put out by damage stays out.
+func _apply_lamp_power() -> void:
+	if not is_desk_lamp() or not is_inside_tree():
+		return
+	var glow := find_child("BudgetLight", true, false)
+	if glow != null:
+		glow.call("set_wanted", display_power != "off")
 
 
 # Furniture standing on the floor gets a light shadow under it.
