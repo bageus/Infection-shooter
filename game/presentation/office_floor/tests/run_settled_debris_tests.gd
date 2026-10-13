@@ -46,7 +46,7 @@ func _settling() -> void:
 		settled.call("add", Transform3D.IDENTITY, Vector3.ONE * 0.1, Color.WHITE)
 	_expect(settled.call("count") == 256, "Batch fills up to its capacity")
 	_expect(not settled.call("add", Transform3D.IDENTITY, Vector3.ONE * 0.1, Color.WHITE), "Batch refuses pieces when full")
-	_expect(settled.collision_layer == 4, "Settled batch is hittable on the debris layer")
+	_expect(settled.get_child_count() == 2 and settled.collision_layer == 4, "Settled batch is hittable on the debris layer")
 	var before: int = settled.call("count")
 	settled.call("take_projectile_hit", 10.0, Vector3.ZERO, Vector3.UP, Vector3.FORWARD, "AK")
 	_expect(settled.call("count") == before - 1, "A hit knocks one settled piece out of the batch")
