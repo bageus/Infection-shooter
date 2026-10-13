@@ -179,7 +179,7 @@ func _fold_into_batch(body: RigidBody3D) -> bool:
 	var size := (visual.mesh as BoxMesh).size
 	var piece_basis := visual.global_basis * Basis.from_scale(size)
 	var tint := (visual.material_override as StandardMaterial3D).albedo_color
-	if not _settled.call("add", Transform3D(piece_basis, visual.global_position), tint):
+	if not _settled.call("add", Transform3D(piece_basis, visual.global_position), size, tint):
 		return false
 	body.call("retire_from_budget")
 	recycle(body)

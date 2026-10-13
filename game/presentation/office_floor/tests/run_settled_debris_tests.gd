@@ -43,9 +43,16 @@ func _settling() -> void:
 	_expect(batch.multimesh.get_instance_color(0).g < 0.1, "Folded piece keeps its tint (red chunk)")
 	var settled: Node3D = runtime.get_node("SettledPieces")
 	for index in 252:
-		settled.call("add", Transform3D.IDENTITY, Color.WHITE)
+		settled.call("add", Transform3D.IDENTITY, Vector3.ONE * 0.1, Color.WHITE)
 	_expect(settled.call("count") == 256, "Batch fills up to its capacity")
-	_expect(not settled.call("add", Transform3D.IDENTITY, Color.WHITE), "Batch refuses pieces when full")
+	_expect(not settled.call("add", Transform3D.IDENTITY, Vector3.ONE * 0.1, Color.WHITE), "Batch refuses pieces when full")
+	_expect(settled.collision_layer == 4, "Settled batch is hittable on the debris layer")
+	var before: int = settled.call("count")
+	settled.call("take_projectile_hit", 10.0, Vector3.ZERO, Vector3.UP, Vector3.FORWARD, "AK")
+	_expect(settled.call("count") == before - 1, "A hit knocks one settled piece out of the batch")
+	_expect(batch.multimesh.visible_instance_count == before - 1, "The batch draws one piece fewer after a hit")
+	settled.call("take_projectile_hit", 10.0, Vector3(50, 50, 50), Vector3.UP, Vector3.FORWARD, "AK")
+	_expect(settled.call("count") == before - 1, "A hit far from every piece removes nothing")
 
 
 func _expect(condition: bool, message: String) -> void:
