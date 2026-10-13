@@ -304,6 +304,7 @@ jobs:
           game/bootstrap/app/tests/run_map_file_tests.gd
           game/bootstrap/app/tests/run_ammo_box_tests.gd
           game/bootstrap/app/tests/run_placed_ammo_pickup_tests.gd
+          game/bootstrap/app/tests/run_item_palette_ammo_tests.gd
           EOF
           tools/run_runtime_suites.sh /tmp/runtime-suites.txt /tmp/runtime-suites 3
 
