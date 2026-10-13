@@ -1,11 +1,13 @@
 ---
 task_version: 1
 task_id: T003
-status: IN_PROGRESS
+status: DONE
 phase: 1
 owner: AI
 updated: 2026-10-13
 ---
+
+13.10.2026 (T003 закрыта как DONE, запрос владельца «Постоянные следы и обломки»): вариант 2 (#141, марки далеко от камеры выгружаются и возвращаются), вариант 3 (#144, floor-марки запекаются в CPU-тайлы 128 px на 4 м, до 16 живых декалей), вариант 4 (#140, осевшие коробчатые обломки в один MultiMesh). Исправление падения «Visual» для кусков из моделей в #145. Проверка на свежем main (ae43a10c): run_settled_debris, run_blood_floor_bake, run_blood_dormant, run_blood_effects, run_blood_fifo, run_blood_decor, run_fragment_pool — 0 ошибок; run_debris_tests — 3 старых падения, как и на main до T003. Исключений нет.
 
 13.10.2026 (T002 закрыта как DONE: ящики с патронами слиты в main, тред завершён; T003 заведена по запросу владельца «Постоянные следы и обломки»). T003, вариант 4: осевшие обломки (покой 10 с рядом с игроком или 5 с, когда игрок дальше 8 м) сворачиваются в один MultiMesh на эффекты (settled_debris.gd, до 256 штук, без коллизии и попаданий), тело возвращается в пул. Изменены fragment_runtime.gd (settle_resting, _process 0.5 с), environment_fragment.gd (rest_time). Тест run_settled_debris_tests.gd добавлен в mission_runtime CI. run_fragment_pool_tests зелёный; run_debris_tests падает на 3 проверках и на main без изменений (проверено stash). Варианты 2 (выгрузка марок по расстоянию) и 3 (запекание в текстуру) ещё не начаты. Следующий шаг: вариант 2.
 
