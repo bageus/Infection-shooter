@@ -568,6 +568,7 @@ func _die() -> void:
 	_ragdoll = DEATH_RAGDOLL.start(self, _parts, _animation, Vector3(velocity.x, 0.0, velocity.z), _death_push if fresh else Vector3.ZERO, size)
 	if _ragdoll == null:
 		_play_death_clip(fall, landing)
+	death_cloud.set("heals_visitors", is_instance_valid(_target) and _target.has_method("get_infection_skill") and bool(_target.call("get_infection_skill", "devourer")))
 	death_cloud.call("activate")
 
 

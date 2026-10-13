@@ -10,6 +10,7 @@ var _velocity := Vector3.ZERO
 var _lifetime := 4.0
 var _exploded := false
 var collision_origin := Vector3.INF
+var damage_multiplier := 1.0
 var _visual: Node3D
 
 var effects_root: Node3D

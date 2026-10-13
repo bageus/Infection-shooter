@@ -5,9 +5,9 @@ const PASSIVE := [
 	["muscle_memory", "Muscle Memory", "Arsenal", 0, "◉", "Reload weapons faster."],
 	["stabilizers", "Stabilizers", "Arsenal", 1, "◎", "Reduce weapon spread."],
 	["combat_reflex", "Combat Reflex", "Arsenal", 2, "✦", "Kills briefly increase fire rate."],
-	["claws", "Claws", "Predator", 0, "✣", "Deal more melee damage."],
+	["claws", "Claws", "Predator", 0, "✣", "Pulse damage to nearby enemies every 3 seconds."],
 	["blood_scent", "Blood Scent", "Predator", 1, "◈", "Deal more damage to wounded enemies."],
-	["adrenaline", "Adrenaline Rush", "Predator", 2, "⚡", "Nearby kills increase movement speed."],
+	["adrenaline", "Adrenaline Rush", "Predator", 2, "⚡", "Kills made by Claws boost movement speed."],
 	["hypertrophy", "Hypertrophy", "Biomass", 0, "✚", "Increase maximum health."],
 	["regeneration", "Regeneration", "Biomass", 1, "✿", "Regain health over time."],
 	["second_heart", "Second Heart", "Biomass", 2, "♥", "Survive a lethal hit."],
@@ -20,18 +20,18 @@ const PASSIVE := [
 	["recycling", "Recycling", "Metabolism", 0, "▣", "Get more ammo from enemies."],
 	["assimilation", "Assimilation", "Metabolism", 1, "◉", "Heal more effectively."],
 	["battle_metabolism", "Battle Metabolism", "Metabolism", 2, "✹", "Kills increase your damage."],
-	["killer_instinct", "Killer Instinct", "Arsenal + Predator", 3, "★", "Melee kills refill the magazine."],
-	["devourer", "Devourer", "Predator + Biomass", 3, "✚", "Melee kills restore health."],
-	["reactive_evolution", "Reactive Evolution", "Biomass + Adaptation", 3, "⬡", "Taking damage builds resistance."],
+	["killer_instinct", "Killer Instinct", "Arsenal + Predator", 3, "★", "Melee kills refill the magazine and double damage."],
+	["devourer", "Devourer", "Predator + Biomass", 3, "✚", "Kills leave a healing mutagen cloud; full health grants armour."],
+	["reactive_evolution", "Reactive Evolution", "Biomass + Adaptation", 3, "⬡", "Repeated damage of one type builds a block against it."],
 	["retaliation", "Retaliation", "Adaptation + Neural System", 3, "⚡", "Taking damage releases an electric pulse."],
-	["hyperactive", "Hyperactive Organism", "Neural System + Metabolism", 3, "↯", "Kill streaks reduce ability cooldowns."]
+	["hyperactive", "Hyperactive Organism", "Neural System + Metabolism", 3, "↯", "Kill streaks speed up ability recovery."]
 ]
 
 const ACTIVE := [
 	["blood_burst", "Blood Burst", "Biomass", 0, "✹", "Damage and knock back nearby enemies."],
 	["parasite", "Parasite", "Biomass", 1, "✿", "Infect a target; its death spreads infection."],
 	["living_harvest", "Living Harvest", "Biomass", 2, "♥", "Kills restore health and armor."],
-	["discharge", "Discharge", "Neural Storm", 0, "⚡", "Chain lightning between enemies."],
+	["discharge", "Discharge", "Neural Storm", 0, "⚡", "Lightning chains between enemies, hitting harder each jump."],
 	["overload", "Overload", "Neural Storm", 1, "↗", "Move, fire and reload faster."],
 	["storm_pulse", "Storm Pulse", "Neural Storm", 2, "↯", "Stun enemies in an electric field."],
 	["acid_spit", "Acid Spit", "Toxic Mutation", 0, "●", "Leave a corrosive acid pool."],
@@ -39,7 +39,7 @@ const ACTIVE := [
 	["epidemic", "Epidemic", "Toxic Mutation", 2, "☣", "Spread infection to nearby enemies."],
 	["predator_dash", "Predator Dash", "Predator Form", 0, "➤", "Damage enemies in your path."],
 	["bone_blades", "Bone Blades", "Predator Form", 1, "✣", "Deal heavy damage at close range."],
-	["berserk", "Berserk", "Predator Form", 2, "★", "Kills boost speed, damage and defense."]
+	["berserk", "Berserk", "Predator Form", 2, "★", "Kills extend Berserk: more speed, damage and defense."]
 ]
 
 const HYBRID_PARENTS := {
@@ -49,6 +49,16 @@ const HYBRID_PARENTS := {
 	"retaliation": ["pain_block", "reflex_arc"],
 	"hyperactive": ["reflex_arc", "battle_metabolism"]
 }
+
+
+# Seconds before an active circle can be cast again; each one has its own rhythm.
+const COOLDOWNS := {
+	"blood_burst": 10.0, "parasite": 10.0, "living_harvest": 18.0,
+	"discharge": 10.0, "overload": 18.0, "storm_pulse": 18.0,
+	"acid_spit": 8.0, "spore_cocoon": 8.0, "epidemic": 14.0,
+	"predator_dash": 6.0, "bone_blades": 16.0, "berserk": 22.0
+}
+const DEFAULT_COOLDOWN := 10.0
 
 
 # Hybrids are derived bonuses from the last circles of adjacent full branches.
@@ -80,6 +90,10 @@ static func find(skill_id: String) -> Array:
 		for row in all():
 			_by_id[str(row[0])] = row
 	return _by_id.get(skill_id, [])
+
+
+static func cooldown(skill_id: String) -> float:
+	return float(COOLDOWNS.get(skill_id, DEFAULT_COOLDOWN))
 
 
 static func point_budget(mutation: float) -> int:
