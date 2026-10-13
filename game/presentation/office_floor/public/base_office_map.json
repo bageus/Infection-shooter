@@ -68174,42 +68174,6 @@
 				"owner": ""
 			},
 			"blood_normal": [
-				0.70502108335495,
-				0.633966088294983,
-				0.317855924367905
-			],
-			"blood_surface": "object",
-			"blood_texture": "drops_06",
-			"darkness": 0.0,
-			"desk_id": "",
-			"flicker_mode": 0,
-			"flicker_step": 0.2,
-			"light_angle": 48.0,
-			"light_energy": 0.0,
-			"object_id": "",
-			"permanent_darkness": false,
-			"rotation_x": 0.0,
-			"rotation_y": 0.0,
-			"rotation_z": 0.0,
-			"scale_x": 1.0,
-			"scale_y": 1.0,
-			"scale_z": 1.0,
-			"scene": "res://game/presentation/office_floor/public/props/blood_decal.tscn",
-			"spawn_x": -35.609691619873,
-			"spawn_y": 1.27282667160034,
-			"spawn_z": 23.3150730133057,
-			"x": -35.609691619873,
-			"y": 1.27282667160034,
-			"z": 23.3150730133057,
-			"zone": -1
-		},
-		{
-			"attachment": "",
-			"blood_attachment": {
-				"mesh": "",
-				"owner": ""
-			},
-			"blood_normal": [
 				0.0,
 				1.0,
 				0.0
@@ -68489,78 +68453,6 @@
 			"x": -37.4853324890137,
 			"y": 0.0135000003501773,
 			"z": 26.0491104125977,
-			"zone": -1
-		},
-		{
-			"attachment": "",
-			"blood_attachment": {
-				"mesh": "",
-				"owner": ""
-			},
-			"blood_normal": [
-				0.0,
-				1.0,
-				0.0
-			],
-			"blood_surface": "object",
-			"blood_texture": "smear_07",
-			"darkness": 0.0,
-			"desk_id": "",
-			"flicker_mode": 0,
-			"flicker_step": 0.2,
-			"light_angle": 48.0,
-			"light_energy": 0.0,
-			"object_id": "",
-			"permanent_darkness": false,
-			"rotation_x": 0.0,
-			"rotation_y": 284.999969482422,
-			"rotation_z": 0.0,
-			"scale_x": 0.999999940395355,
-			"scale_y": 1.0,
-			"scale_z": 0.999999940395355,
-			"scene": "res://game/presentation/office_floor/public/props/blood_decal.tscn",
-			"spawn_x": -33.5226669311523,
-			"spawn_y": -0.00000095367431640625,
-			"spawn_z": 25.6141872406006,
-			"x": -33.5226669311523,
-			"y": -0.00000095367431640625,
-			"z": 25.6141872406006,
-			"zone": -1
-		},
-		{
-			"attachment": "",
-			"blood_attachment": {
-				"mesh": "",
-				"owner": ""
-			},
-			"blood_normal": [
-				0.0,
-				1.0,
-				0.0
-			],
-			"blood_surface": "object",
-			"blood_texture": "smear_07",
-			"darkness": 0.0,
-			"desk_id": "",
-			"flicker_mode": 0,
-			"flicker_step": 0.2,
-			"light_angle": 48.0,
-			"light_energy": 0.0,
-			"object_id": "",
-			"permanent_darkness": false,
-			"rotation_x": 0.0,
-			"rotation_y": 284.999969482422,
-			"rotation_z": 0.0,
-			"scale_x": 0.999999940395355,
-			"scale_y": 1.0,
-			"scale_z": 0.999999940395355,
-			"scene": "res://game/presentation/office_floor/public/props/blood_decal.tscn",
-			"spawn_x": -33.171443939209,
-			"spawn_y": -0.00000095367431640625,
-			"spawn_z": 24.6808166503906,
-			"x": -33.171443939209,
-			"y": -0.00000095367431640625,
-			"z": 24.6808166503906,
 			"zone": -1
 		},
 		{
@@ -69389,42 +69281,6 @@
 			"x": -37.097484588623,
 			"y": 0.0135000003501773,
 			"z": 22.7244548797607,
-			"zone": -1
-		},
-		{
-			"attachment": "",
-			"blood_attachment": {
-				"mesh": "",
-				"owner": ""
-			},
-			"blood_normal": [
-				-0.678032755851746,
-				0.728483021259308,
-				-0.0978990197181702
-			],
-			"blood_surface": "object",
-			"blood_texture": "pool_03",
-			"darkness": 0.0,
-			"desk_id": "",
-			"flicker_mode": 0,
-			"flicker_step": 0.2,
-			"light_angle": 48.0,
-			"light_energy": 0.0,
-			"object_id": "",
-			"permanent_darkness": false,
-			"rotation_x": 0.0,
-			"rotation_y": 254.999969482422,
-			"rotation_z": 0.0,
-			"scale_x": 1.0,
-			"scale_y": 1.0,
-			"scale_z": 1.0,
-			"scene": "res://game/presentation/office_floor/public/props/blood_decal.tscn",
-			"spawn_x": -35.7245101928711,
-			"spawn_y": 1.28505277633667,
-			"spawn_z": 23.1283683776855,
-			"x": -35.7245101928711,
-			"y": 1.28505277633667,
-			"z": 23.1283683776855,
 			"zone": -1
 		},
 		{
@@ -106930,42 +106786,6 @@
 			"x": -37.500057220459,
 			"y": 0.966468691825867,
 			"z": 26.3997230529785,
-			"zone": -1
-		},
-		{
-			"attachment": "",
-			"blood_attachment": {
-				"mesh": "@MeshInstance3D@44552",
-				"owner": "object_1743224082"
-			},
-			"blood_normal": [
-				0.160223260521889,
-				0.620420277118683,
-				-0.767728626728058
-			],
-			"blood_surface": "object",
-			"blood_texture": "drops_06",
-			"darkness": 0.0,
-			"desk_id": "",
-			"flicker_mode": 0,
-			"flicker_step": 0.2,
-			"light_angle": 48.0,
-			"light_energy": 0.0,
-			"object_id": "",
-			"permanent_darkness": false,
-			"rotation_x": 0.0,
-			"rotation_y": 0.0,
-			"rotation_z": 0.0,
-			"scale_x": 1.0,
-			"scale_y": 1.0,
-			"scale_z": 1.0,
-			"scene": "res://game/presentation/office_floor/public/props/blood_decal.tscn",
-			"spawn_x": -37.5353736877441,
-			"spawn_y": 1.40111768245697,
-			"spawn_z": 26.4227619171143,
-			"x": -37.5353736877441,
-			"y": 1.40111768245697,
-			"z": 26.4227619171143,
 			"zone": -1
 		},
 		{

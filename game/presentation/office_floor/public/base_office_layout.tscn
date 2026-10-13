@@ -29,18 +29,14 @@
 [ext_resource type="PackedScene" path="res://game/presentation/office_floor/public/structural/glass_partition_half.tscn" id="27_kao6t"]
 [ext_resource type="PackedScene" path="res://game/presentation/office_floor/public/structural/column.tscn" id="28_t2ps6"]
 [ext_resource type="PackedScene" path="res://game/features/infected/public/infected_revenant.tscn" id="29_41rug"]
-[ext_resource type="Script" path="res://game/features/infected/infected_capsule.gd" id="30_l585w"]
 [ext_resource type="PackedScene" path="res://game/features/pickups/public/medkit_pickup.tscn" id="31_uj1op"]
-[ext_resource type="Script" path="res://game/features/pickups/pickup_item.gd" id="32_c6pun"]
 [ext_resource type="PackedScene" path="res://game/presentation/office_floor/public/props/blood_decal.tscn" id="32_f7vw0"]
 [ext_resource type="Script" path="res://game/presentation/office_floor/blood_decal_prop.gd" id="33_se0rm"]
 [ext_resource type="PackedScene" path="res://game/features/pickups/public/antidote_pickup.tscn" id="33_yfotv"]
 [ext_resource type="PackedScene" path="res://game/features/pickups/public/ammo_shotgun_pickup.tscn" id="36_gccn8"]
 [ext_resource type="PackedScene" path="res://game/features/infected/public/decor/part_hunger_head.tscn" id="37_nt3vp"]
-[ext_resource type="Script" path="res://game/features/infected/infected_body_part_decor.gd" id="38_fbhie"]
 [ext_resource type="PackedScene" path="res://models/objects/characters/enemy/game/Hunger_rig.tscn" id="39_c7wfx"]
 [ext_resource type="PackedScene" path="res://game/features/infected/public/decor/corpse_hunger.tscn" id="40_h0rje"]
-[ext_resource type="Script" path="res://game/features/infected/infected_corpse_decor.gd" id="41_yqqxo"]
 [ext_resource type="PackedScene" path="res://game/features/infected/public/decor/part_hunger_arm.tscn" id="42_ftlgq"]
 [ext_resource type="PackedScene" path="res://game/features/infected/public/decor/corpse_hunger_mutilated.tscn" id="43_37p4t"]
 
@@ -24765,61 +24761,51 @@ metadata/world_bound = true
 [node name="Pickup" type="Area3D" parent="." unique_id=617970928 groups=["occlusion_items"] instance=ExtResource("31_uj1op")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 25.25, 0.015500044, 28)
 collision_layer = 0
-script = ExtResource("32_c6pun")
 metadata/world_bound = true
 
 [node name="@Area3D@53776" type="Area3D" parent="." unique_id=114562438 groups=["occlusion_items"] instance=ExtResource("31_uj1op")]
 transform = Transform3D(0.8660251, 0, -0.5000006, 0, 1, 0, 0.5000006, 0, 0.8660251, 23.5, 0.015500044, 27.25)
 collision_layer = 0
-script = ExtResource("32_c6pun")
 metadata/world_bound = true
 
 [node name="@Area3D@53777" type="Area3D" parent="." unique_id=1354243852 groups=["occlusion_items"] instance=ExtResource("31_uj1op")]
 transform = Transform3D(0.8660251, 0, -0.5000006, 0, 1, 0, 0.5000006, 0, 0.8660251, 27, 0.015500044, 29.25)
 collision_layer = 0
-script = ExtResource("32_c6pun")
 metadata/world_bound = true
 
 [node name="@Area3D@53778" type="Area3D" parent="." unique_id=7772618 groups=["occlusion_items"] instance=ExtResource("31_uj1op")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 28, 0.015500044, 29.25)
 collision_layer = 0
-script = ExtResource("32_c6pun")
 metadata/world_bound = true
 
 [node name="@Area3D@53779" type="Area3D" parent="." unique_id=1836707928 groups=["occlusion_items"] instance=ExtResource("31_uj1op")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 39, 0.015500044, 29.25)
 collision_layer = 0
-script = ExtResource("32_c6pun")
 metadata/world_bound = true
 
 [node name="@Area3D@53780" type="Area3D" parent="." unique_id=806080972 groups=["occlusion_items"] instance=ExtResource("31_uj1op")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 39.25, 0.015500044, 17.25)
 collision_layer = 0
-script = ExtResource("32_c6pun")
 metadata/world_bound = true
 
 [node name="@Area3D@53781" type="Area3D" parent="." unique_id=663719541 groups=["occlusion_items"] instance=ExtResource("31_uj1op")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 39.5, 0.015500044, 7)
 collision_layer = 0
-script = ExtResource("32_c6pun")
 metadata/world_bound = true
 
 [node name="@Area3D@53782" type="Area3D" parent="." unique_id=292203855 groups=["occlusion_items"] instance=ExtResource("31_uj1op")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 37.75, 0.015500044, -0.5)
 collision_layer = 0
-script = ExtResource("32_c6pun")
 metadata/world_bound = true
 
 [node name="@Area3D@53783" type="Area3D" parent="." unique_id=2009027603 groups=["occlusion_items"] instance=ExtResource("31_uj1op")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 37.75, 0.015500044, -13.5)
 collision_layer = 0
-script = ExtResource("32_c6pun")
 metadata/world_bound = true
 
 [node name="@Area3D@53784" type="Area3D" parent="." unique_id=530629188 instance=ExtResource("33_yfotv")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 37.75, 0.015500062, -13.153866)
 collision_layer = 0
-script = ExtResource("32_c6pun")
 pickup_type = 4
 amount = 1
 metadata/world_bound = true
@@ -24827,7 +24813,6 @@ metadata/world_bound = true
 [node name="@Area3D@53785" type="Area3D" parent="." unique_id=1207231919 instance=ExtResource("33_yfotv")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 26.75, 0.015500062, -12.5)
 collision_layer = 0
-script = ExtResource("32_c6pun")
 pickup_type = 4
 amount = 1
 metadata/world_bound = true
@@ -24835,7 +24820,6 @@ metadata/world_bound = true
 [node name="@Area3D@53786" type="Area3D" parent="." unique_id=1216446662 instance=ExtResource("33_yfotv")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 21.25, 0.015500062, -19)
 collision_layer = 0
-script = ExtResource("32_c6pun")
 pickup_type = 4
 amount = 1
 metadata/world_bound = true
@@ -24843,7 +24827,6 @@ metadata/world_bound = true
 [node name="@Area3D@53787" type="Area3D" parent="." unique_id=1087410895 instance=ExtResource("33_yfotv")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 20.25, 0.015500062, -29.25)
 collision_layer = 0
-script = ExtResource("32_c6pun")
 pickup_type = 4
 amount = 1
 metadata/world_bound = true
@@ -24851,7 +24834,6 @@ metadata/world_bound = true
 [node name="@Area3D@53788" type="Area3D" parent="." unique_id=1708854557 instance=ExtResource("33_yfotv")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 7, 0.015500062, -27.25)
 collision_layer = 0
-script = ExtResource("32_c6pun")
 pickup_type = 4
 amount = 1
 metadata/world_bound = true
@@ -24859,19 +24841,16 @@ metadata/world_bound = true
 [node name="@Area3D@53789" type="Area3D" parent="." unique_id=918421767 groups=["occlusion_items"] instance=ExtResource("31_uj1op")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 14.5, 0.015500044, -27.05884)
 collision_layer = 0
-script = ExtResource("32_c6pun")
 metadata/world_bound = true
 
 [node name="@Area3D@53790" type="Area3D" parent="." unique_id=533237363 groups=["occlusion_items"] instance=ExtResource("31_uj1op")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 1.25, 0.015500044, -19.75)
 collision_layer = 0
-script = ExtResource("32_c6pun")
 metadata/world_bound = true
 
 [node name="@Area3D@53791" type="Area3D" parent="." unique_id=948304271 instance=ExtResource("33_yfotv")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -3.5, 0.015500062, -18.75)
 collision_layer = 0
-script = ExtResource("32_c6pun")
 pickup_type = 4
 amount = 1
 metadata/world_bound = true
@@ -24879,7 +24858,6 @@ metadata/world_bound = true
 [node name="@Area3D@53792" type="Area3D" parent="." unique_id=1810235322 instance=ExtResource("33_yfotv")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -14.150384, 0.015500062, -24.948753)
 collision_layer = 0
-script = ExtResource("32_c6pun")
 pickup_type = 4
 amount = 1
 metadata/world_bound = true
@@ -24887,7 +24865,6 @@ metadata/world_bound = true
 [node name="@Area3D@53793" type="Area3D" parent="." unique_id=1274546481 instance=ExtResource("33_yfotv")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -22.75, 0.015500062, -29)
 collision_layer = 0
-script = ExtResource("32_c6pun")
 pickup_type = 4
 amount = 1
 metadata/world_bound = true
@@ -24895,19 +24872,16 @@ metadata/world_bound = true
 [node name="@Area3D@53794" type="Area3D" parent="." unique_id=1981310075 groups=["occlusion_items"] instance=ExtResource("31_uj1op")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -39, 0.015500044, -28.25)
 collision_layer = 0
-script = ExtResource("32_c6pun")
 metadata/world_bound = true
 
 [node name="@Area3D@53795" type="Area3D" parent="." unique_id=1232358690 groups=["occlusion_items"] instance=ExtResource("31_uj1op")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -38.5, 0.015500044, -16.75)
 collision_layer = 0
-script = ExtResource("32_c6pun")
 metadata/world_bound = true
 
 [node name="@Area3D@53796" type="Area3D" parent="." unique_id=2028476773 instance=ExtResource("33_yfotv")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -33.75, 0.015500062, -16.5)
 collision_layer = 0
-script = ExtResource("32_c6pun")
 pickup_type = 4
 amount = 1
 metadata/world_bound = true
@@ -24915,7 +24889,6 @@ metadata/world_bound = true
 [node name="@Area3D@53797" type="Area3D" parent="." unique_id=207809685 instance=ExtResource("33_yfotv")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -39.25, 0.015500062, -14)
 collision_layer = 0
-script = ExtResource("32_c6pun")
 pickup_type = 4
 amount = 1
 metadata/world_bound = true
@@ -24923,7 +24896,6 @@ metadata/world_bound = true
 [node name="@Area3D@53798" type="Area3D" parent="." unique_id=575498573 instance=ExtResource("33_yfotv")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -11.5, 0.015500062, 0)
 collision_layer = 0
-script = ExtResource("32_c6pun")
 pickup_type = 4
 amount = 1
 metadata/world_bound = true
@@ -25100,16 +25072,6 @@ metadata/blood_effect = true
 metadata/world_bound = true
 metadata/planning_wall_mount = false
 
-[node name="@Node3D@53816" type="Node3D" parent="." unique_id=1039650878 instance=ExtResource("32_f7vw0")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -35.60969, 1.2728267, 23.315073)
-script = ExtResource("33_se0rm")
-texture_name = "drops_06"
-surface = "object"
-surface_normal = Vector3(0.7050211, 0.6339661, 0.31785592)
-metadata/blood_effect = true
-metadata/world_bound = true
-metadata/planning_wall_mount = false
-
 [node name="@Node3D@53817" type="Node3D" parent="." unique_id=1391977463 instance=ExtResource("32_f7vw0")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -34.132683, 0.0135, 26.371216)
 script = ExtResource("33_se0rm")
@@ -25170,24 +25132,6 @@ metadata/planning_wall_mount = false
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -37.485332, 0.0135, 26.04911)
 script = ExtResource("33_se0rm")
 texture_name = "smear_09"
-metadata/blood_effect = true
-metadata/world_bound = true
-metadata/planning_wall_mount = false
-
-[node name="@Node3D@53825" type="Node3D" parent="." unique_id=942358955 instance=ExtResource("32_f7vw0")]
-transform = Transform3D(0.2588185, 0, -0.9659259, 0, 1, 0, 0.9659259, 0, 0.2588185, -33.522667, -9.536743e-07, 25.614187)
-script = ExtResource("33_se0rm")
-texture_name = "smear_07"
-surface = "object"
-metadata/blood_effect = true
-metadata/world_bound = true
-metadata/planning_wall_mount = false
-
-[node name="@Node3D@53826" type="Node3D" parent="." unique_id=116294863 instance=ExtResource("32_f7vw0")]
-transform = Transform3D(0.2588185, 0, -0.9659259, 0, 1, 0, 0.9659259, 0, 0.2588185, -33.171444, -9.536743e-07, 24.680817)
-script = ExtResource("33_se0rm")
-texture_name = "smear_07"
-surface = "object"
 metadata/blood_effect = true
 metadata/world_bound = true
 metadata/planning_wall_mount = false
@@ -25372,16 +25316,6 @@ metadata/planning_wall_mount = false
 transform = Transform3D(-0.25881943, 0, -0.9659257, 0, 1, 0, 0.9659257, 0, -0.25881943, -37.097485, 0.0135, 22.724455)
 script = ExtResource("33_se0rm")
 texture_name = "pool_03"
-metadata/blood_effect = true
-metadata/world_bound = true
-metadata/planning_wall_mount = false
-
-[node name="@Node3D@53850" type="Node3D" parent="." unique_id=474527124 instance=ExtResource("32_f7vw0")]
-transform = Transform3D(-0.25881943, 0, -0.9659257, 0, 1, 0, 0.9659257, 0, -0.25881943, -35.72451, 1.2850528, 23.128368)
-script = ExtResource("33_se0rm")
-texture_name = "pool_03"
-surface = "object"
-surface_normal = Vector3(-0.67803276, 0.728483, -0.09789902)
 metadata/blood_effect = true
 metadata/world_bound = true
 metadata/planning_wall_mount = false
@@ -26918,7 +26852,6 @@ collision_layer = 2
 collision_mask = 3
 floor_stop_on_slope = false
 safe_margin = 0.02
-script = ExtResource("30_l585w")
 max_health = 75.0
 move_speed = 4.6
 attack_range = 1.25
@@ -26934,7 +26867,6 @@ collision_layer = 2
 collision_mask = 3
 floor_stop_on_slope = false
 safe_margin = 0.02
-script = ExtResource("30_l585w")
 max_health = 75.0
 move_speed = 4.6
 attack_range = 1.25
@@ -26950,7 +26882,6 @@ collision_layer = 2
 collision_mask = 3
 floor_stop_on_slope = false
 safe_margin = 0.02
-script = ExtResource("30_l585w")
 max_health = 75.0
 move_speed = 4.6
 attack_range = 1.25
@@ -26966,7 +26897,6 @@ collision_layer = 2
 collision_mask = 3
 floor_stop_on_slope = false
 safe_margin = 0.02
-script = ExtResource("30_l585w")
 max_health = 75.0
 move_speed = 4.6
 attack_range = 1.25
@@ -39858,7 +39788,6 @@ metadata/planning_attachment = ""
 [node name="@Area3D@55303" type="Area3D" parent="." unique_id=1744419586 groups=["occlusion_items"] instance=ExtResource("36_gccn8")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -39.5, 0.015500069, 26.5)
 collision_layer = 0
-script = ExtResource("32_c6pun")
 pickup_type = 3
 amount = 12
 metadata/world_bound = true
@@ -39868,7 +39797,6 @@ metadata/planning_attachment = ""
 
 [node name="PartHungerHead" type="RigidBody3D" parent="." unique_id=1852545964 instance=ExtResource("37_nt3vp")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -35.75, 1.1698809, 23.5)
-script = ExtResource("38_fbhie")
 pose_seed = 1140022119
 visual_scene = ExtResource("39_c7wfx")
 part = &"head"
@@ -39879,7 +39807,6 @@ metadata/planning_attachment = ""
 
 [node name="CorpseHunger" type="Node3D" parent="." unique_id=532439387 instance=ExtResource("40_h0rje")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -35.75, 0.9684373, 23.25)
-script = ExtResource("41_yqqxo")
 pose_seed = 1955487428
 pose_variant = "back"
 pose_facing = 1.0644073464102073
@@ -39894,7 +39821,6 @@ metadata/planning_attachment = ""
 
 [node name="@Node3D@55304" type="Node3D" parent="." unique_id=2024048879 instance=ExtResource("40_h0rje")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -39.685814, 0.015499934, 27)
-script = ExtResource("41_yqqxo")
 pose_seed = 1155740627
 pose_variant = "seated_side"
 pose_facing = 1.570796446004179
@@ -39909,7 +39835,6 @@ metadata/planning_attachment = ""
 
 [node name="PartHungerArm" type="RigidBody3D" parent="." unique_id=830386517 instance=ExtResource("42_ftlgq")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -37.5, 1.3942962, 26.5)
-script = ExtResource("38_fbhie")
 pose_seed = 1795460990
 visual_scene = ExtResource("39_c7wfx")
 metadata/world_bound = true
@@ -39919,7 +39844,6 @@ metadata/planning_attachment = ""
 
 [node name="@RigidBody3D@55305" type="RigidBody3D" parent="." unique_id=1773786503 instance=ExtResource("42_ftlgq")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -39.52177, 0.43522778, 27.277273)
-script = ExtResource("38_fbhie")
 pose_seed = 131997412
 visual_scene = ExtResource("39_c7wfx")
 metadata/world_bound = true
@@ -39929,7 +39853,6 @@ metadata/planning_attachment = ""
 
 [node name="CorpseHungerMutilated" type="Node3D" parent="." unique_id=1427680833 instance=ExtResource("43_37p4t")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -33.916336, 0.0155, 26.75)
-script = ExtResource("41_yqqxo")
 pose_seed = 568249108
 pose_variant = "seated"
 pose_facing = -1.5707962075856212
@@ -40124,21 +40047,6 @@ texture_name = "drops_06"
 surface = "object"
 attachment_owner = "object_1741525110"
 attachment_mesh = "TableDestructible_Office_Desk_4_Alt"
-metadata/blood_effect = true
-metadata/world_bound = true
-metadata/planning_object_id = ""
-metadata/planning_wall_mount = false
-metadata/planning_desk_id = ""
-metadata/planning_attachment = ""
-
-[node name="@Node3D@55319" type="Node3D" parent="." unique_id=55613034 instance=ExtResource("32_f7vw0")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -37.535374, 1.4011177, 26.422762)
-script = ExtResource("33_se0rm")
-texture_name = "drops_06"
-surface = "object"
-surface_normal = Vector3(0.16022326, 0.6204203, -0.7677286)
-attachment_owner = "object_1743224082"
-attachment_mesh = "@MeshInstance3D@44552"
 metadata/blood_effect = true
 metadata/world_bound = true
 metadata/planning_object_id = ""

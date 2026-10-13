@@ -21,6 +21,8 @@ func _run() -> void:
 	var controls: Node = planner.get("controls")
 	var storage: RefCounted = planner.get("storage")
 	var history: RefCounted = planner.get("edit_history")
+	# The authored map may already hold this model, so count only the displays this test adds.
+	var authored_count: int = (storage.call("_collect_layout_data")["objects"] as Array).filter(func(record: Dictionary) -> bool: return record["scene"] == MODEL).size()
 	var prop := planner.call("_instantiate_asset", MODEL) as Node3D
 	var config := {"power": "on", "content": "dynamic", "seed": 41}
 	prop.call("configure_display", config)
@@ -45,7 +47,8 @@ func _run() -> void:
 	var data: Dictionary = storage.call("_collect_layout_data")
 	_check(data["version"] == 8, "DTO is versioned")
 	var records: Array = data["objects"].filter(func(record: Dictionary) -> bool: return record["scene"] == MODEL)
-	_check(records.size() == 2 and records[0]["display"] == config and records[1]["display"] == config, "Delete/undo and DTO preserve both displays")
+	var configured: Array = records.filter(func(record: Dictionary) -> bool: return record.get("display") == config)
+	_check(records.size() == authored_count + 2 and configured.size() == 2, "Delete/undo and DTO preserve both displays")
 	objects.call("_apply_layout_data", data)
 	await process_frame
 	var restored: Dictionary = storage.call("_collect_layout_data")
