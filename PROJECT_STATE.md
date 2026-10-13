@@ -3,7 +3,7 @@ state_version: 1
 status: IMPLEMENTATION
 current_phase: 1
 current_milestone: P1_LOGIC
-active_task_id: T003
+active_task_id: T004
 last_completed_task_id: DISC-001
 build_status: T002_HEADLESS_VALIDATED_VISUAL_PENDING
 updated: 2026-10-11

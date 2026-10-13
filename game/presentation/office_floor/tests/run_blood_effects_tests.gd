@@ -103,6 +103,7 @@ func _run() -> void:
 	await _test_hit_throttle_and_expiry()
 	await _test_decal_growth(floor_hit)
 	await _test_proxy_projection()
+	await _test_side_splatter()
 	stage.queue_free()
 	print("Blood effects tests: %d failure(s)." % failures)
 	quit(failures)
@@ -111,14 +112,50 @@ func _run() -> void:
 func _test_hit_throttle_and_expiry() -> void:
 	var budget := effects.get("_budget") as Node3D
 	budget.set("lifetime", 0.2)
+	effects.call("splatter_hit", Vector3(0, 1, 0), Vector3.FORWARD, "UZI", excluded, 500)
+	await physics_frame
+	await physics_frame
+	var single := _stats()["marks"] as int
+	effects.call("clear_marks")
 	for i in range(12):
 		effects.call("splatter_hit", Vector3(0, 1, 0), Vector3.FORWARD, "UZI", excluded, 501)
 	await physics_frame
 	await physics_frame
-	_expect(_stats()["marks"] == 1, "Automatic hits in one interval produce a single surface splatter.")
+	_expect(single >= 1 and _stats()["marks"] == single, "Automatic hits in one interval produce a single burst of splatters.")
 	await create_timer(0.5).timeout
 	_expect(_stats()["marks"] == 0, "Expired marks finish fading and release their budget.")
 	budget.set("lifetime", 30.0)
+
+
+func _test_side_splatter() -> void:
+	# Shot goes straight back (+Z), so only the side rays can reach these columns.
+	effects.call("clear_marks")
+	(effects.get("_budget") as Node3D).set("max_marks", 20)
+	var right := _surface(Vector3(0.8, 1.5, 0), Vector3(0.2, 3, 2))
+	var left := _surface(Vector3(-0.8, 1.5, 0), Vector3(0.2, 3, 2))
+	query.call("watch_environment", stage)
+	await physics_frame
+	await physics_frame
+	effects.call("splatter_hit", Vector3(0, 1, 0), Vector3.BACK, "UZI", excluded, 601)
+	await physics_frame
+	await physics_frame
+	var marks := _marks()
+	var on_right := false
+	var on_left := false
+	for mark in marks:
+		var x := (mark as Node3D).global_position.x
+		on_right = on_right or (x > 0.5 and x < 0.9)
+		on_left = on_left or (x < -0.5 and x > -0.9)
+	_expect(on_right and on_left, "Blood sprays onto the walls and columns beside a hit.")
+	effects.call("clear_marks")
+	effects.call("splatter_hit", Vector3(0, 1, 0), Vector3.ZERO, "UZI", excluded, 602)
+	await physics_frame
+	await physics_frame
+	_expect(_stats()["marks"] == 1, "A hit without a direction does not fan out sideways.")
+	effects.call("clear_marks")
+	right.queue_free()
+	left.queue_free()
+	await physics_frame
 
 
 func _test_basis_and_variants() -> void:
