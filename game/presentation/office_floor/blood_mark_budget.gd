@@ -3,6 +3,7 @@ extends Node3D
 const MARK := preload("res://game/presentation/office_floor/blood_mark_3d.gd")
 const SURFACES := preload("res://game/presentation/office_floor/blood_surface_query.gd")
 const FIFO := preload("res://game/presentation/office_floor/blood_mark_fifo.gd")
+const BAKE := preload("res://game/presentation/office_floor/blood_floor_bake.gd")
 
 var max_marks := 128
 var per_surface_limit := 0
@@ -30,6 +31,7 @@ var _dormant: Array[Dictionary] = []
 var _camera_point := Vector3.ZERO
 var _has_camera := false
 var _timer: Timer
+var _floor_bake: Node3D
 
 
 func _ready() -> void:
@@ -41,6 +43,10 @@ func _ready() -> void:
 	_timer.process_callback = Timer.TIMER_PROCESS_PHYSICS
 	_timer.timeout.connect(_maintenance)
 	add_child(_timer)
+	if settings.get("floor_bake", false):
+		_floor_bake = BAKE.new() as Node3D
+		_floor_bake.set("settings", settings)
+		add_child(_floor_bake)
 
 
 func submit(definition: Dictionary, surface: Dictionary) -> void:
@@ -137,10 +143,22 @@ func _read_camera() -> void:
 # Frees a far mark but keeps what is needed to draw it again later.
 func _unload(id: int) -> void:
 	var record: Dictionary = _records[id]
+	if _bake_floor(record):
+		_remove(id)
+		return
 	_dormant.append({"definition": record["definition"], "surface": record["surface"], "position": record["position"]})
 	if _dormant.size() > dormant_limit:
 		_dormant.pop_front()
 	_remove(id)
+
+
+# Floor marks become permanent stains in the bake layer instead of being discarded.
+func _bake_floor(record: Dictionary) -> bool:
+	var mark := (record["mark"] as WeakRef).get_ref() as Node3D
+	if _floor_bake == null or mark == null or not mark.is_inside_tree() or mark.global_basis.y.dot(Vector3.UP) <= 0.9:
+		return false
+	var definition: Dictionary = record["definition"]
+	return _floor_bake.call("stamp", definition["texture"], definition["tint"], definition["footprint"], record["position"], mark.global_basis)
 
 
 func _reload_near_dormant() -> void:
@@ -179,6 +197,7 @@ func _retire(id: int) -> void:
 	if mark == null:
 		_remove(id)
 		return
+	_bake_floor(_records[id])
 	_records[id]["fading"] = true
 	var state: Dictionary = _surfaces[_records[id]["key"]]
 	state["fading"] += 1
@@ -214,10 +233,12 @@ func clear_marks() -> void:
 	_deaths.clear()
 	_death_ids.clear()
 	_dormant.clear()
+	if _floor_bake != null:
+		_floor_bake.call("clear")
 	for id in _records.keys():
 		_remove(id)
 	_sleep_if_empty()
 
 
 func statistics() -> Dictionary:
-	return {"marks": _records.size(), "pending": _pending.size(), "pending_pools": _deaths.size(), "dormant": _dormant.size()}
+	return {"marks": _records.size(), "pending": _pending.size(), "pending_pools": _deaths.size(), "dormant": _dormant.size(), "baked": _floor_bake.call("statistics") if _floor_bake != null else {}}
