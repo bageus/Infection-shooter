@@ -21,6 +21,9 @@ const WEAPON_SOUNDS := {
 const SPIN_HOLD := 0.12
 # Time the barrels keep turning at full speed after the trigger is released.
 const SPIN_COAST := 0.35
+# While the minigun fires the whine drops this far so each shot stays on top.
+const FIRE_DUCK_DB := 10.0
+const FIRE_DUCK_TIME := 0.25
 @export var direct_reserve_feed := false
 @export var casing_size_multiplier := 1.0
 @export var camera_distance_bonus := 0.0
@@ -65,6 +68,8 @@ var _spin := 0.0
 var _spin_hold := 0.0
 var _spin_coast := 0.0
 var _spin_sound: AudioStreamPlayer3D
+var _fire_duck := 0.0
+var _duck_db := 0.0
 
 
 func _ready() -> void:
@@ -94,7 +99,11 @@ func _process(delta: float) -> void:
 	if _spin_sound != null:
 		# Pitch and level fall together as the barrels slow down after release.
 		_spin_sound.pitch_scale = lerpf(0.6, 1.0, _spin)
-		_spin_sound.volume_db = lerpf(-60.0, -12.0, _spin)
+		# Ducks smoothly under the shots while firing and comes back after them.
+		_fire_duck = maxf(0.0, _fire_duck - delta)
+		var duck_target := FIRE_DUCK_DB if _fire_duck > 0.0 else 0.0
+		_duck_db = move_toward(_duck_db, duck_target, delta * FIRE_DUCK_DB / 0.1)
+		_spin_sound.volume_db = lerpf(-60.0, -12.0, _spin) - _duck_db
 		if _spin > 0.001 and not _spin_sound.playing:
 			_spin_sound.play()
 		elif _spin <= 0.001 and _spin_sound.playing:
@@ -181,6 +190,8 @@ func try_fire_at(target_point: Vector3) -> bool:
 	_last_shot_time = now
 	_burst_shots += 1
 	_cooldown_remaining = 1.0 / maxf(shots_per_second, 0.01)
+	if spin_up_time > 0.0:
+		_fire_duck = FIRE_DUCK_TIME
 	if casing_scene != null and ejection_port != null:
 		var casing_pool := get_parent().get_node_or_null("SpentCasings")
 		if casing_pool != null:
