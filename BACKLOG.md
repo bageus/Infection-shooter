@@ -11,7 +11,7 @@ updated: 2026-09-18
 
 | ID | Phase | Outcome | Status |
 |---|---:|---|---|
-| T002 | 1 | Minimal player, camera, weapons, infected enemy, and source | ACTIVE / IN_PROGRESS |
+| T004 | 1 | Blood sprays onto walls and objects beside a hit | ACTIVE / IN_PROGRESS |
 
 ## Planned
 
