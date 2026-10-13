@@ -5,6 +5,8 @@ const LAYOUT_LOADER := preload("res://game/bootstrap/app/planning_layout_loader.
 const DOOR_OPTIONS := preload("res://game/bootstrap/app/planning_door_options.gd")
 
 const SAVE_PATH = "user://planned_layout.json"
+# Farthest a pushed loose prop may be and still be moved back instead of rebuilt.
+const LOOSE_RETURN_RADIUS := 2.0
 const MAPS_DIR = "user://maps"
 const LAYOUT_DIR = "res://game/presentation/office_floor/public/"
 const AUTHORED_SCENE_PATH = LAYOUT_DIR + "base_office_layout.tscn"
@@ -172,6 +174,45 @@ static func _take_match(candidates: Array, home: Vector3, yaw: float) -> Node3D:
 	return null
 
 
+# Loose rigid props of one scene are interchangeable when they share the same per-object
+# identity (desk, object id, attachment, zone) and carry no lamp or blood settings.
+static func _take_loose(candidates: Array, home: Vector3, record: Dictionary) -> Node3D:
+	var best := -1
+	var best_distance := LOOSE_RETURN_RADIUS
+	for i in candidates.size():
+		var node: Node3D = candidates[i]
+		if not node is RigidBody3D or not _same_identity(node, record):
+			continue
+		var distance := node.position.distance_to(home)
+		if distance <= best_distance:
+			best = i
+			best_distance = distance
+	if best < 0:
+		return null
+	var picked: Node3D = candidates[best]
+	candidates.remove_at(best)
+	return picked
+
+
+static func _same_identity(node: Node3D, record: Dictionary) -> bool:
+	for method in ["get_fixture_config", "get_blood_config", "get_authored_energy"]:
+		if node.has_method(method):
+			return false
+	return str(node.get_meta("planning_object_id", "")) == str(record.get("object_id", "")) \
+		and str(node.get_meta("planning_desk_id", "")) == str(record.get("desk_id", "")) \
+		and str(node.get_meta("planning_attachment", "")) == str(record.get("attachment", "")) \
+		and int(node.get_meta("planning_zone", -1)) == int(record.get("zone", -1))
+
+
+func _put_back(node: Node3D, record: Dictionary, kept: Dictionary) -> void:
+	kept[node] = true
+	node.position = Vector3(float(record.get("x", 0.0)), float(record.get("y", 0.0)), float(record.get("z", 0.0)))
+	node.rotation_degrees = Vector3(float(record.get("rotation_x", 0)), float(record.get("rotation_y", 0)), float(record.get("rotation_z", 0)))
+	if node is RigidBody3D:
+		(node as RigidBody3D).linear_velocity = Vector3.ZERO
+		(node as RigidBody3D).angular_velocity = Vector3.ZERO
+
+
 ## Puts the world back to the authored map when gameplay changed it: killed
 ## enemies and taken pickups return, pushed props go back. The player stays.
 func restore_authored() -> bool:
@@ -188,19 +229,26 @@ func restore_authored() -> bool:
 	var spawn: Transform3D = objects.player_spawn_transform
 	var pending := _reusable_nodes()
 	var missing: Array = []
+	var unmatched: Array = []
 	var kept := {}
 	for record in records:
 		var home := Vector3(float(record.get("x", 0.0)), float(record.get("y", 0.0)), float(record.get("z", 0.0)))
 		var node := _take_match(pending.get(str(record.get("scene", "")), []), home, float(record.get("rotation_y", 0.0)))
 		if node == null:
+			unmatched.append(record)
+			continue
+		_put_back(node, record, kept)
+	# Loose props that physics pushed or dropped far from home are interchangeable with each
+	# other, so they go back instead of being rebuilt.
+	for record in unmatched:
+		var home := Vector3(float(record.get("x", 0.0)), float(record.get("y", 0.0)), float(record.get("z", 0.0)))
+		var node := _take_loose(pending.get(str(record.get("scene", "")), []), home, record)
+		if node == null:
 			missing.append(record)
 			continue
-		kept[node] = true
-		node.position = Vector3(float(record.get("x", 0.0)), float(record.get("y", 0.0)), float(record.get("z", 0.0)))
-		node.rotation_degrees = Vector3(float(record.get("rotation_x", 0)), float(record.get("rotation_y", 0)), float(record.get("rotation_z", 0)))
-		if node is RigidBody3D:
-			(node as RigidBody3D).linear_velocity = Vector3.ZERO
-			(node as RigidBody3D).angular_velocity = Vector3.ZERO
+		_put_back(node, record, kept)
+		if node.has_method("configure_display") and record.get("display") is Dictionary:
+			node.call("configure_display", record["display"])
 	objects.keep_on_clear = kept
 	if missing.is_empty():
 		objects.clear_layout(false, true)

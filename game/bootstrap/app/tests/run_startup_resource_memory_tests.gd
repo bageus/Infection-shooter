@@ -8,7 +8,9 @@ var _had_save := false
 var _save := PackedByteArray()
 const SAVE := "user://planned_layout.json"
 const BASE := "res://game/presentation/office_floor/public/base_office_map.json"
-const ALLOCATOR_LIMIT := 896 * 1024 * 1024
+# Restart keeps the old mission for rollback, so the peak holds two copies of the map. The map
+# grew from 1998 to 4696 objects (peak 842 -> 1236 MiB), so the budget moved with it.
+const ALLOCATOR_LIMIT := 1344 * 1024 * 1024
 
 func _initialize() -> void:
 	root.size = Vector2i(320, 180)
@@ -53,7 +55,7 @@ func _run() -> void:
 	print("Full map peak video MiB: ", float(peak_video) / 1048576.0)
 	if DisplayServer.get_name() == "headless" and peak_memory > ALLOCATOR_LIMIT:
 		failures += 1
-		push_error("Startup resources exceeded the 896 MiB allocator budget")
+		push_error("Startup resources exceeded the 1344 MiB allocator budget")
 	_restore_save()
 	print("Full map startup/restart failures: ", failures)
 	quit(failures)
