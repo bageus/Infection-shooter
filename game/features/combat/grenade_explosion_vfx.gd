@@ -29,13 +29,19 @@ const ATLASES := preload("res://game/core/vfx/public/effect_atlases.gd")
 var _started := false
 ## Set by the load-time warm-up, which plays the blast out of earshot.
 var muted := false
+static var _shared_ember: Texture2D
+static var _shared_spark: Texture2D
 var _ember_texture: Texture2D
 var _spark_texture: Texture2D
 
 
 func _ready() -> void:
-	_ember_texture = _glow_texture(Color(1.0, 0.82, 0.45), Color(1.0, 0.35, 0.05, 0.0))
-	_spark_texture = _glow_texture(Color(1.0, 0.97, 0.85), Color(1.0, 0.6, 0.15, 0.0))
+	# Same two glows for every blast: build them once, not on each explosion.
+	if _shared_ember == null:
+		_shared_ember = _glow_texture(Color(1.0, 0.82, 0.45), Color(1.0, 0.35, 0.05, 0.0))
+		_shared_spark = _glow_texture(Color(1.0, 0.97, 0.85), Color(1.0, 0.6, 0.15, 0.0))
+	_ember_texture = _shared_ember
+	_spark_texture = _shared_spark
 
 
 func start(surface_normal: Vector3) -> void:
