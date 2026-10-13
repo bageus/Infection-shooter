@@ -6,7 +6,14 @@ const FIFO := preload("res://game/presentation/office_floor/blood_mark_fifo.gd")
 
 var max_marks := 128
 var per_surface_limit := 0
-var lifetime := 90.0
+## 0 keeps a mark until the budget needs its slot.
+var lifetime := 0.0
+## Marks farther than unload_distance from the camera leave the scene tree and
+## wait as data in _dormant; they come back once the camera is within load_distance.
+var unload_distance := 30.0
+var load_distance := 22.0
+var dormant_limit := 400
+const RELOADS_PER_TICK := 4
 var fade_seconds := 1.2
 var settings: Dictionary = {}
 var container: Node3D
@@ -19,6 +26,9 @@ var _death_ids: Dictionary = {}
 var _surfaces: Dictionary = {}
 var _active := FIFO.new()
 var _fading := 0
+var _dormant: Array[Dictionary] = []
+var _camera_point := Vector3.ZERO
+var _has_camera := false
 var _timer: Timer
 
 
@@ -58,7 +68,7 @@ func schedule_pool(death_id: int, definition: Dictionary, surface: Dictionary, d
 		_wake()
 
 
-func _admit(definition: Dictionary, surface: Dictionary) -> bool:
+func _admit(definition: Dictionary, surface: Dictionary, evict: bool = true) -> bool:
 	var hit := SURFACES.resolve(surface)
 	if hit.is_empty():
 		return true
@@ -66,11 +76,11 @@ func _admit(definition: Dictionary, surface: Dictionary) -> bool:
 	var key := body.get_instance_id()
 	var state: Dictionary = _surfaces[key] if _surfaces.has(key) else {"count": 0, "fading": 0, "active": FIFO.new()}
 	if per_surface_limit > 0 and state["count"] >= per_surface_limit:
-		if state["active"].first >= 0 and state["fading"] == 0:
+		if evict and state["active"].first >= 0 and state["fading"] == 0:
 			_retire(state["active"].first)
 		return false
 	if _records.size() >= maxi(max_marks, 1):
-		if _active.first >= 0 and _fading < mini(8, _pending.size() + 1):
+		if evict and _active.first >= 0 and _fading < mini(8, _pending.size() + 1):
 			_retire(_active.first)
 		return false
 	var mark := MARK.new() as Node3D
@@ -83,7 +93,8 @@ func _admit(definition: Dictionary, surface: Dictionary) -> bool:
 		mark.free()
 		return true
 	_next_id += 1
-	_records[_next_id] = {"mark": weakref(mark), "key": key, "expires": _clock + lifetime, "fading": false}
+	var expires := _clock + lifetime if lifetime > 0.0 else INF
+	_records[_next_id] = {"mark": weakref(mark), "key": key, "expires": expires, "fading": false, "definition": definition, "surface": surface, "position": hit["position"]}
 	state["count"] += 1
 	state["active"].append(_next_id)
 	_surfaces[key] = state
@@ -94,6 +105,7 @@ func _admit(definition: Dictionary, surface: Dictionary) -> bool:
 
 func _maintenance() -> void:
 	_clock += 0.1
+	_read_camera()
 	for request in _deaths.duplicate():
 		if request["due"] <= _clock:
 			submit(request["definition"], request["surface"])
@@ -106,10 +118,43 @@ func _maintenance() -> void:
 			_remove(id)
 		elif _records[id]["expires"] <= _clock:
 			_retire(id)
+		elif _has_camera and not _records[id]["fading"] and _camera_point.distance_to(_records[id]["position"]) > unload_distance:
+			_unload(id)
 	for request in _pending.duplicate():
 		if request["until"] < _clock or _admit(request["definition"], request["surface"]):
 			_pending.erase(request)
+	_reload_near_dormant()
 	_sleep_if_empty()
+
+
+func _read_camera() -> void:
+	var camera := get_viewport().get_camera_3d() if is_inside_tree() else null
+	_has_camera = camera != null
+	if _has_camera:
+		_camera_point = camera.global_position
+
+
+# Frees a far mark but keeps what is needed to draw it again later.
+func _unload(id: int) -> void:
+	var record: Dictionary = _records[id]
+	_dormant.append({"definition": record["definition"], "surface": record["surface"], "position": record["position"]})
+	if _dormant.size() > dormant_limit:
+		_dormant.pop_front()
+	_remove(id)
+
+
+func _reload_near_dormant() -> void:
+	if not _has_camera or _dormant.is_empty():
+		return
+	var reloaded := 0
+	for entry in _dormant.duplicate():
+		if reloaded >= RELOADS_PER_TICK:
+			break
+		if _camera_point.distance_to(entry["position"]) > load_distance:
+			continue
+		if _admit(entry["definition"], entry["surface"], false):
+			_dormant.erase(entry)
+			reloaded += 1
 
 
 func _wake() -> void:
@@ -118,7 +163,7 @@ func _wake() -> void:
 
 
 func _sleep_if_empty() -> void:
-	if _timer != null and _records.is_empty() and _pending.is_empty() and _deaths.is_empty():
+	if _timer != null and _records.is_empty() and _pending.is_empty() and _deaths.is_empty() and _dormant.is_empty():
 		_timer.stop()
 
 
@@ -168,10 +213,11 @@ func clear_marks() -> void:
 	_pending.clear()
 	_deaths.clear()
 	_death_ids.clear()
+	_dormant.clear()
 	for id in _records.keys():
 		_remove(id)
 	_sleep_if_empty()
 
 
 func statistics() -> Dictionary:
-	return {"marks": _records.size(), "pending": _pending.size(), "pending_pools": _deaths.size()}
+	return {"marks": _records.size(), "pending": _pending.size(), "pending_pools": _deaths.size(), "dormant": _dormant.size()}

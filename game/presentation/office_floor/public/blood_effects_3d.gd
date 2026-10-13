@@ -5,7 +5,8 @@ const SURFACES := preload("res://game/presentation/office_floor/blood_surface_qu
 const BUDGET := preload("res://game/presentation/office_floor/blood_mark_budget.gd")
 
 @export_range(1, 320) var max_marks := 220
-@export_range(1.0, 300.0) var mark_lifetime := 90.0
+## 0 keeps marks until the budget needs their slot; far marks are unloaded and restored.
+@export_range(0.0, 300.0) var mark_lifetime := 0.0
 @export_range(0.1, 5.0) var fade_seconds := 1.2
 @export var splatter_size := Vector2(0.3, 0.95)
 @export var stain_size := Vector2(0.16, 0.50)
