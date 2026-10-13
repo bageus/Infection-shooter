@@ -19,6 +19,7 @@ func _run() -> void:
 	root.size = Vector2i(320, 180)
 	_model_bounds()
 	_door_rules()
+	_columns_and_overlaps()
 	_blocked_fronts()
 	_signs()
 	_mount_heights()
@@ -54,7 +55,8 @@ func _model_bounds() -> void:
 		root.add_child(node)
 		var back := INF
 		for mesh: MeshInstance3D in node.find_children("*", "MeshInstance3D", true, false):
-			back = minf(back, (mesh.global_transform * mesh.get_aabb()).position.z)
+			var bounds: AABB = mesh.global_transform * mesh.get_aabb()
+			back = minf(back, -bounds.end.x if path == PLACER.EXTINGUISHER else bounds.position.z)
 		_check(is_equal_approx(-back, PLACER.BACK[path]) or absf(-back - PLACER.BACK[path]) < 0.002, "Back plane of %s is %.3f (found %.3f)" % [path.get_file(), PLACER.BACK[path], -back])
 		node.free()
 
@@ -64,12 +66,12 @@ func _door_rules() -> void:
 	var plan := FIXTURES.plan(layout, [])
 	var records: Array = plan.records
 	_check(_count(records, "switch") == 6, "Wall door and glass door get three switch points each, the elevator none (%d)" % _count(records, "switch"))
-	_check(_count(records, "alarm") == 8 and _count(records, "call_point") == 8, "Each of those doors gets four alarm points, each with a call point")
+	_check(_count(records, "alarm") == 2 and _count(records, "call_point") == 2, "Each of those doors gets one alarm point with a call point under it")
 	_check(_count(records, "extinguisher") == 1, "The column gets one extinguisher (%d)" % _count(records, "extinguisher"))
 	var hung := _corridor([{"scene": PLACER.EXTINGUISHER, "x": -7.0, "y": 1.5, "z": 0.9, "rotation_y": 0.0}])
 	_check(_count(FIXTURES.plan(hung, []).records, "extinguisher") == 0, "A column that already has an extinguisher gets no second one")
 	for record: Dictionary in records:
-		var wanted := {"switch": 0.75, "alarm": 2.5, "call_point": 1.0, "extinguisher": 1.5}[record.auto_fixture] as float
+		var wanted := {"switch": 1.25, "alarm": 2.5, "call_point": 1.0, "extinguisher": 1.5}[record.auto_fixture] as float
 		_check(is_equal_approx(float(record.y), wanted), "%s hangs at %.2f m" % [record.auto_fixture, wanted])
 	_check(_mounted_on_walls(layout, records), "Every fixture sits on a wall or column face")
 	var again: Array = FIXTURES.plan(layout, []).records
@@ -91,8 +93,10 @@ func _mounted_on_walls(layout: Array, records: Array) -> bool:
 	var model := GEOMETRY.new()
 	model.load_records(layout)
 	for record: Dictionary in records:
-		var normal := Vector2(sin(deg_to_rad(float(record.rotation_y))), cos(deg_to_rad(float(record.rotation_y))))
-		var back := Vector2(float(record.x), float(record.z)) - normal * float(PLACER.BACK[record.scene])
+		var turn := PLACER.EXTINGUISHER_TURN if record.scene == PLACER.EXTINGUISHER else 0.0
+		var yaw := deg_to_rad(float(record.rotation_y) - turn)
+		var normal := Vector2(sin(yaw), cos(yaw))
+		var back := Vector2(float(record.x), float(record.z)) - normal * (float(PLACER.BACK[record.scene]) + PLACER.GAP)
 		var found := false
 		for face: Dictionary in model.faces:
 			var along: float = (back - face.o).dot(face.t)
@@ -104,15 +108,33 @@ func _mounted_on_walls(layout: Array, records: Array) -> bool:
 	return true
 
 
+func _columns_and_overlaps() -> void:
+	var layout := [_wall("column", 0.0, 0.0, 0.0), _wall("wall_door", 6.0, 0.0), _wall("wall_straight", 4.0, 0.0), _wall("wall_straight", 8.0, 0.0)]
+	var plan := FIXTURES.plan(layout, [])
+	var on_column: Array = plan.records.filter(func(r: Dictionary) -> bool: return r.auto_fixture == "switch" and Vector2(float(r.x), float(r.z)).length() < 1.0)
+	_check(on_column.is_empty(), "No light switch is placed on a column")
+	var hung: Array = plan.records.filter(func(r: Dictionary) -> bool: return r.auto_fixture == "extinguisher")
+	_check(hung.size() == 1, "The column still gets its extinguisher")
+	var face := Vector2(float(hung[0].x), float(hung[0].z))
+	_check(absf(maxf(absf(face.x), absf(face.y)) - (0.512 + PLACER.GAP + PLACER.BACK[PLACER.EXTINGUISHER])) < 0.001, "The extinguisher stands %.0f mm off the column body" % (PLACER.GAP * 1000.0))
+	# A wall clock already hanging on every face leaves no room: nothing overlaps it.
+	var clocks: Array = []
+	for angle in [0.0, 90.0, 180.0, 270.0]:
+		var direction := Vector3(sin(deg_to_rad(angle)), 0.0, cos(deg_to_rad(angle)))
+		clocks.append(AABB(direction * 0.55 + Vector3(-0.25, 1.8, -0.25), Vector3(0.5, 0.5, 0.5)))
+	var blocked := FIXTURES.plan(layout, clocks)
+	_check(blocked.records.filter(func(r: Dictionary) -> bool: return r.auto_fixture == "extinguisher").is_empty(), "An extinguisher is not hung over a wall clock")
+
+
 func _blocked_fronts() -> void:
 	var layout := _corridor()
-	var desk := AABB(Vector3(-8.0, 0.0, 0.1), Vector3(18.0, 0.8, 0.9)) # a long desk against the +z side
+	var desk := AABB(Vector3(-8.0, 0.0, 0.1), Vector3(18.0, 1.6, 0.9)) # a long desk against the +z side
 	var plan := FIXTURES.plan(layout, [desk])
 	for record: Dictionary in plan.records:
 		if record.auto_fixture == "switch":
 			_check(float(record.z) < 0.0, "No switch is placed behind a desk")
 	_check(plan.shortfall.switch == 0, "The other side still takes the switches")
-	var boxed := FIXTURES.plan(layout, [desk, AABB(Vector3(-8.0, 0.0, -1.0), Vector3(18.0, 0.8, 0.9))])
+	var boxed := FIXTURES.plan(layout, [desk, AABB(Vector3(-8.0, 0.0, -1.0), Vector3(18.0, 1.6, 0.9))])
 	_check(boxed.records.filter(func(r: Dictionary) -> bool: return r.auto_fixture == "switch").is_empty() and boxed.shortfall.switch == 3, "With both fronts blocked nothing is placed and the shortfall is reported")
 
 
@@ -133,7 +155,7 @@ func _mount_heights() -> void:
 	layout.append({"scene": "res://models/objects/enviroments/02/02_wall_urinal_improved.glb", "x": -3.0, "y": 0.3, "z": 0.1, "rotation_y": 0.0})
 	layout.append({"scene": "res://models/objects/enviroments/05/05_wall_hand_dryer_improved.glb", "x": 3.0, "y": 1.5, "z": 0.1, "rotation_y": 0.0})
 	var fixes: Array = FIXTURES.plan(layout, []).sign_fixes
-	_check(fixes.size() == 2 and is_equal_approx(float(fixes[0].y), 0.75) and is_equal_approx(float(fixes[1].y), 1.25), "Urinals go to 0.75 m and hand dryers to 1.25 m")
+	_check(fixes.size() == 2 and is_equal_approx(float(fixes[0].y), 0.25) and is_equal_approx(float(fixes[1].y), 1.25), "Urinals go to 0.25 m and hand dryers to 1.25 m")
 
 
 func _levels() -> void:
@@ -145,8 +167,8 @@ func _levels() -> void:
 		layout.append(copy)
 	layout.append({"scene": SIGN, "x": 6.0, "y": -1.0, "z": 0.1, "rotation_y": 0.0})
 	var plan := FIXTURES.plan(layout, [])
-	_check(_count(plan.records, "switch") == 6 and _count(plan.records, "alarm") == 8, "Each level gets its own count")
-	_check(plan.records.filter(func(r: Dictionary) -> bool: return is_equal_approx(float(r.y), -3.0 + 0.75) or is_equal_approx(float(r.y), 0.75) or is_equal_approx(float(r.y), -3.0 + 1.0) or is_equal_approx(float(r.y), 1.0) or is_equal_approx(float(r.y), -0.5) or is_equal_approx(float(r.y), 1.5) or is_equal_approx(float(r.y), -1.5) or is_equal_approx(float(r.y), 2.5)).size() == plan.records.size(), "Lower-level fixtures are measured from the lower floor")
+	_check(_count(plan.records, "switch") == 6 and _count(plan.records, "alarm") == 2, "Each level gets its own count")
+	_check(plan.records.filter(func(r: Dictionary) -> bool: return is_equal_approx(float(r.y), -3.0 + 1.25) or is_equal_approx(float(r.y), 1.25) or is_equal_approx(float(r.y), -3.0 + 1.0) or is_equal_approx(float(r.y), 1.0) or is_equal_approx(float(r.y), -0.5) or is_equal_approx(float(r.y), 1.5) or is_equal_approx(float(r.y), -1.5) or is_equal_approx(float(r.y), 2.5)).size() == plan.records.size(), "Lower-level fixtures are measured from the lower floor")
 	_check(plan.sign_fixes.size() == 1 and is_equal_approx(float(plan.sign_fixes[0].y), -3.0 + 1.75), "A sign on the lower level hangs 1.75 m above that floor")
 
 
@@ -157,7 +179,7 @@ func _base_map() -> void:
 		return file.begins_with("wall_door") or file == "wall_emergency_door.tscn" or file == "sliding_glass_door.tscn").size()
 	var plan := FIXTURES.plan(data.objects, [])
 	_check(_count(plan.records, "switch") + plan.shortfall.switch == doors * 3, "Base map: three switch points per door (%d doors incl. glass)" % doors)
-	_check(_count(plan.records, "alarm") + plan.shortfall.alarm == doors * 4 and _count(plan.records, "call_point") == _count(plan.records, "alarm"), "Base map: four alarm points per door, one call point under each")
+	_check(_count(plan.records, "alarm") + plan.shortfall.alarm == doors * 1 and _count(plan.records, "call_point") == _count(plan.records, "alarm"), "Base map: one alarm point per door, one call point under each")
 	_check(plan.shortfall.switch == 0 and plan.shortfall.alarm == 0, "Base map has room for every point")
 	_check(_mounted_on_walls(data.objects, plan.records), "Base map: every fixture sits on a wall or column face")
 	var seen := {}
@@ -196,7 +218,7 @@ func _planner() -> void:
 	var text: String = storage.call("enforce_wall_fixtures")
 	await process_frame
 	var auto: Array = objects.placed.filter(func(n: Node3D) -> bool: return is_instance_valid(n) and n.has_meta("planning_auto_fixture"))
-	_check(auto.size() == 3 + 8 + 1, "Save adds 3 switches, 4 alarms, 4 call points and a column extinguisher (%d)" % auto.size())
+	_check(auto.size() == 3 + 1 + 1 + 1, "Save adds 3 switches, 1 alarm, 1 call point and a column extinguisher (%d)" % auto.size())
 	_check(text.contains("signs adjusted 1"), "Save reports the corrected sign: " + text)
 	var wall_sign: Node3D = objects.placed.filter(func(n: Node3D) -> bool: return str(n.get_meta("planning_scene_path", "")) == SIGN)[0]
 	_check(is_equal_approx(wall_sign.position.y, 1.75), "The sign was moved to 1.75 m")
