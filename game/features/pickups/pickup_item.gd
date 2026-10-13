@@ -1,12 +1,16 @@
 extends Area3D
 
-enum PickupType { MEDKIT, AMMO_PISTOL, AMMO_UZI, AMMO_SHOTGUN, ANTIDOTE, DNA }
+enum PickupType { MEDKIT, AMMO_PISTOL, AMMO_UZI, AMMO_SHOTGUN, ANTIDOTE, DNA, AMMO_WEAPONS }
 
 ## Single size for every supply, placed in planning or dropped by infected.
 const VISUAL_SCALE := 0.5
+## Bounding volume of the regular ammo box (pistol, UZI, shotgun) at VISUAL_SCALE, in m³.
+const SUPPLY_BOX_VOLUME := 0.0501
 
 @export var pickup_type: PickupType = PickupType.MEDKIT
 @export var amount: int = 20
+## AMMO_WEAPONS only: the first listed weapon that takes the ammo receives it.
+@export var weapon_names: PackedStringArray = PackedStringArray()
 @export_flags_3d_physics var floor_mask := 129
 @export_range(0.001, 0.05) var floor_clearance := 0.018
 var _consumed := false
@@ -18,6 +22,8 @@ func _ready() -> void:
 	var visual := get_node_or_null("Visual") as Node3D
 	if visual != null:
 		visual.scale *= VISUAL_SCALE
+		if pickup_type == PickupType.AMMO_WEAPONS:
+			visual.scale *= _supply_box_fit(visual)
 	body_entered.connect(_on_body_entered)
 
 
@@ -73,6 +79,21 @@ func _physics_process(_delta: float) -> void:
 	queue_free()
 
 
+# Larger weapon ammo models shrink uniformly to the regular box's volume, keeping their shape.
+func _supply_box_fit(visual: Node3D) -> float:
+	var bounds := AABB()
+	var found := false
+	for child in visual.find_children("*", "MeshInstance3D", true, false):
+		var mesh := child as MeshInstance3D
+		if mesh.mesh == null:
+			continue
+		var local := visual.global_transform.affine_inverse() * (mesh.global_transform * mesh.get_aabb())
+		bounds = bounds.merge(local) if found else local
+		found = true
+	var volume := bounds.get_volume() * visual.scale.x * visual.scale.y * visual.scale.z
+	return pow(SUPPLY_BOX_VOLUME / volume, 1.0 / 3.0) if found and volume > 0.0 else 1.0
+
+
 func _visual_bottom_offset() -> float:
 	var lowest := INF
 	for child in find_children("*", "MeshInstance3D", true, false):
@@ -110,6 +131,12 @@ func _on_body_entered(body: Node) -> void:
 			if runtime != null and runtime.has_method("add_control_ampule"):
 				runtime.call("add_control_ampule")
 				accepted = true
+		PickupType.AMMO_WEAPONS:
+			if body.has_method("add_ammo_for_weapon"):
+				for weapon_name in weapon_names:
+					if int(body.call("add_ammo_for_weapon", weapon_name, amount)) > 0:
+						accepted = true
+						break
 	if accepted:
 		_consumed = true
 		_play_pickup_sound(body)

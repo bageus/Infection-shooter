@@ -158,7 +158,9 @@ func _environment_scene_for(file_name: String) -> String:
 	var pickups = {
 		"12_ammo_pistols.glb": "res://game/features/pickups/public/ammo_pistol_pickup.tscn", "12_ammo_shotgun.glb": "res://game/features/pickups/public/ammo_shotgun_pickup.tscn",
 		"12_ammo_uzi.glb": "res://game/features/pickups/public/ammo_uzi_pickup.tscn", "12_antidote.glb": "res://game/features/pickups/public/antidote_pickup.tscn",
-		"12_medkit.glb": "res://game/features/pickups/public/medkit_pickup.tscn"
+		"12_medkit.glb": "res://game/features/pickups/public/medkit_pickup.tscn",
+		"12_ammo_automate.glb": "res://game/features/pickups/public/ammo_automate_pickup.tscn", "12_ammo_sniper.glb": "res://game/features/pickups/public/ammo_sniper_pickup.tscn",
+		"12_ammo_minigun.glb": "res://game/features/pickups/public/ammo_minigun_pickup.tscn"
 	}
 	if pickups.has(file_name):
 		return str(pickups[file_name])
