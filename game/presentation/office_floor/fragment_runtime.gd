@@ -2,6 +2,13 @@ extends Node
 ## Effects-root-local FIFO and bounded storage of reusable generic box fragments.
 const MAX_FRAGMENTS := 40
 const MAX_POOLED := 40
+const SETTLED := preload("res://game/presentation/office_floor/settled_debris.gd")
+# A piece left to rest folds into the settled batch after this long at rest,
+# or after SETTLE_FAR_SECONDS once the player has walked away from it.
+const SETTLE_CHECK_SECONDS := 0.5
+const SETTLE_NEAR_SECONDS := 10.0
+const SETTLE_FAR_SECONDS := 5.0
+const SETTLE_FAR_DISTANCE := 8.0
 const FRAGMENT_PATH := "res://game/presentation/office_floor/environment_fragment.gd"
 var active: Dictionary = {}
 var _fifo: Array[Dictionary] = []
@@ -10,6 +17,22 @@ var _pool: Array[RigidBody3D] = []
 var created_chunks := 0
 var reused_chunks := 0
 var _allocated: Array[WeakRef] = []
+var _settled: Node3D
+var _settle_clock := 0.0
+
+
+func _ready() -> void:
+	_settled = SETTLED.new()
+	_settled.name = "SettledPieces"
+	add_child(_settled)
+
+
+func _process(delta: float) -> void:
+	_settle_clock += delta
+	if _settle_clock < SETTLE_CHECK_SECONDS:
+		return
+	_settle_clock = 0.0
+	settle_resting(SETTLE_CHECK_SECONDS)
 
 
 func register(body: RigidBody3D) -> void:
@@ -79,6 +102,7 @@ func acquire(size: Vector3, tint: Color) -> RigidBody3D:
 	body.linear_velocity = Vector3.ZERO
 	body.angular_velocity = Vector3.ZERO
 	body.scale = Vector3.ONE
+	body.set("rest_time", 0.0)
 	body.visible = true
 	body.process_mode = Node.PROCESS_MODE_INHERIT
 	var shape := body.get_node("Shape") as CollisionShape3D
@@ -122,6 +146,44 @@ func recycle(body: RigidBody3D) -> void:
 		_pool.append(body)
 	else:
 		body.queue_free()
+
+
+# Adds `step` seconds to every resting piece and folds the ones that have rested
+# long enough into the settled batch. Pieces are recycled as if they expired.
+func settle_resting(step: float) -> void:
+	var player := get_tree().get_first_node_in_group("player") as Node3D
+	for id in active.keys():
+		var body := active[id].get_ref() as RigidBody3D
+		if body == null or body.is_queued_for_deletion() or body.has_meta("debris_fading"):
+			continue
+		if not body.sleeping:
+			body.set("rest_time", 0.0)
+			continue
+		body.set("rest_time", float(body.get("rest_time")) + step)
+		if not _rested_enough(body, player):
+			continue
+		if not _fold_into_batch(body):
+			return
+
+
+func _rested_enough(body: RigidBody3D, player: Node3D) -> bool:
+	var rest: float = body.get("rest_time")
+	if rest >= SETTLE_NEAR_SECONDS:
+		return true
+	var far := player == null or body.global_position.distance_to(player.global_position) > SETTLE_FAR_DISTANCE
+	return far and rest >= SETTLE_FAR_SECONDS
+
+
+func _fold_into_batch(body: RigidBody3D) -> bool:
+	var visual := body.get_node("Visual") as MeshInstance3D
+	var size := (visual.mesh as BoxMesh).size
+	var piece_basis := visual.global_basis * Basis.from_scale(size)
+	var tint := (visual.material_override as StandardMaterial3D).albedo_color
+	if not _settled.call("add", Transform3D(piece_basis, visual.global_position), size, tint):
+		return false
+	body.call("retire_from_budget")
+	recycle(body)
+	return true
 
 
 func _exit_tree() -> void:
