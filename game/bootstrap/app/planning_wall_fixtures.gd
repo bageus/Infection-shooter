@@ -1,7 +1,7 @@
 extends RefCounted
 ## Planner save pass: wall signs hang 1.75 m above their floor, urinals 0.25 m,
-## hand dryers 1.25 m; light switches, fire alarm sounders and call points are
-## placed automatically.
+## hand dryers 1.25 m; light switches (1.25 m), fire alarm sounders (2.5 m) and call
+## points (1.5 m) are placed automatically when the planner palette asks for them.
 
 const GEOMETRY := preload("res://game/bootstrap/app/wall_fixture_geometry.gd")
 const PLACER := preload("res://game/bootstrap/app/wall_fixture_placer.gd")
@@ -25,9 +25,10 @@ static func mount_height(scene: String) -> float:
 	return float(MOUNT_HEIGHTS.get(scene.get_file().get_basename(), -1.0))
 
 
-## entries: {scene, x, y, z, rotation_y} of every placed object; blockers: world AABBs.
+## entries: {scene, x, y, z, rotation_y} of every placed object; blockers: world AABBs;
+## groups: {switches, fire} chosen in the palette (both on when omitted).
 ## Returns the corrected sign heights and the records of the automatic fixtures.
-static func plan(entries: Array, blockers: Array) -> Dictionary:
+static func plan(entries: Array, blockers: Array, groups: Dictionary = {}) -> Dictionary:
 	var geometry := GEOMETRY.new()
 	geometry.load_records(entries)
 	var sign_fixes: Array = []
@@ -41,16 +42,28 @@ static func plan(entries: Array, blockers: Array) -> Dictionary:
 			sign_fixes.append({"index": index, "y": floor_y + height})
 	for box: AABB in blockers:
 		geometry.add_blocker(box)
-	var placer := PLACER.new(geometry)
+	var placer := PLACER.new(geometry, groups)
 	var records := placer.run()
 	return {"sign_fixes": sign_fixes, "records": records, "shortfall": placer.shortfall}
 
 
+## Automatic fixture kinds that the pass regenerates for the chosen groups.
+## Extinguishers are always regenerated; a group that is off leaves its fixtures alone.
+static func regenerated_kinds(groups: Dictionary) -> Array[String]:
+	var kinds: Array[String] = ["extinguisher"]
+	if bool(groups.get("switches", true)):
+		kinds.append("switch")
+	if bool(groups.get("fire", true)):
+		kinds.append_array(["alarm", "call_point"])
+	return kinds
+
+
 ## Applies the pass to the live planner: corrects sign heights, replaces the
-## previous automatic fixtures with fresh ones.
-static func apply(objects: Node, loader: RefCounted) -> Dictionary:
+## previous automatic fixtures of the chosen groups with fresh ones.
+static func apply(objects: Node, loader: RefCounted, groups: Dictionary = {}) -> Dictionary:
+	var kinds := regenerated_kinds(groups)
 	for node in objects.placed.duplicate():
-		if is_instance_valid(node) and node.has_meta(META):
+		if is_instance_valid(node) and node.has_meta(META) and str(node.get_meta(META)) in kinds:
 			objects.placed.erase(node)
 			node.queue_free()
 	var entries: Array = []
@@ -69,7 +82,7 @@ static func apply(objects: Node, loader: RefCounted) -> Dictionary:
 		var box := _blocker_box(node, scene)
 		if box.size != Vector3.ZERO:
 			blockers.append(box)
-	var result := plan(entries, blockers)
+	var result := plan(entries, blockers, groups)
 	for fix: Dictionary in result.sign_fixes:
 		nodes[fix.index].position.y = fix.y
 	var added: int = loader.append(result.records) if not result.records.is_empty() else 0

@@ -104,6 +104,10 @@ func _has_stats(target: Node3D) -> bool:
 	return target != null and target.has_method("configure_stats")
 
 
+func applies_to(target: Node3D) -> bool:
+	return _has_loot(target) or _has_stats(target)
+
+
 func update() -> void:
 	var target := _target()
 	var loot := _has_loot(target)

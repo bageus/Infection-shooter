@@ -568,6 +568,7 @@ func _die() -> void:
 	_ragdoll = DEATH_RAGDOLL.start(self, _parts, _animation, Vector3(velocity.x, 0.0, velocity.z), _death_push if fresh else Vector3.ZERO, size)
 	if _ragdoll == null:
 		_play_death_clip(fall, landing)
+	death_cloud.set("heals_visitors", is_instance_valid(_target) and _target.has_method("get_infection_skill") and bool(_target.call("get_infection_skill", "devourer")))
 	death_cloud.call("activate")
 
 
@@ -592,9 +593,8 @@ func _sink_corpse_after(death_length: float) -> void:
 
 func _hide_corpse() -> void:
 	body_visual.hide()
-	if _parts != null:
-		_parts.remove_corpse_hitboxes()
+	CORPSE_BUDGET.hidden(self, _parts)
 
 
 func _on_death_cloud_depleted() -> void:
-	queue_free()
+	CORPSE_BUDGET.cloud_gone(self, body_visual.visible)

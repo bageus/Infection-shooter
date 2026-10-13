@@ -24,6 +24,8 @@ func setup(camera: Camera3D) -> void:
 		mesh.material_override = material
 		mesh.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
 		mesh.position = Vector3(0.0, 0.0, -DISTANCE)
+		# Planner picking must not count these (they hang off the camera, up to 12 m from the player).
+		mesh.set_meta("planning_bounds_excluded", true)
 		add_child(mesh)
 		shader_count += 1
 

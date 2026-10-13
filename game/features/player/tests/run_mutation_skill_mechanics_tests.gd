@@ -61,10 +61,19 @@ func _run() -> void:
 	_retaliation(effects, runtime)
 	_second_heart(effects, runtime, host)
 	await _acid_on_floor(effects, host)
-	host.queue_free()
+	_discharge_chain(effects, runtime)
+	_claw_kill_adrenaline(effects, runtime)
+	_retire(host)
 	await process_frame
 	print("Mutation skill mechanics tests: %d failures" % failures)
 	quit(failures)
+
+
+# Freed enemies leave the group at once so later tests never meet them.
+func _retire(node: Node) -> void:
+	node.remove_from_group("infected")
+	node.remove_from_group("infected_alive")
+	node.queue_free()
 
 
 func _enemy(at: Vector3) -> Enemy:
@@ -87,14 +96,14 @@ func _dash(effects: Node, runtime: Runtime) -> void:
 	effects.player.global_position = Vector3(0, 0, -3.0)
 	effects.call("_process", 0.1)
 	effects.call("_process", 0.1)
-	_check(is_equal_approx(ahead.damage_taken, 30.0), "Predator Dash hits an enemy on its path exactly once")
+	_check(is_equal_approx(ahead.damage_taken, 20.0), "Predator Dash hits an enemy on its path exactly once")
 	effects.call("_process", 0.3)
 	effects.player.global_position = Vector3(0, 0, -4.5)
 	effects.call("_process", 0.1)
-	_check(is_equal_approx(ahead.damage_taken, 30.0), "The strike window ends with the dash")
+	_check(is_equal_approx(ahead.damage_taken, 20.0), "The strike window ends with the dash")
 	effects.player.global_position = Vector3.ZERO
-	behind.queue_free()
-	ahead.queue_free()
+	_retire(behind)
+	_retire(ahead)
 	runtime.skills.erase("predator_dash")
 
 
@@ -115,7 +124,7 @@ func _retaliation(effects: Node, runtime: Runtime) -> void:
 		effects.call("on_player_hit", 15.0)
 		effects.call("_process", 1.6)
 	_check(near.stunned == 0.0, "Spread-out damage does not trigger Retaliation")
-	near.queue_free()
+	_retire(near)
 	runtime.skills.erase("retaliation")
 
 
@@ -135,6 +144,38 @@ func _second_heart(effects: Node, runtime: Runtime, host: Host) -> void:
 	_check(is_equal_approx(host.health, healed), "Second Heart regeneration stops after five seconds")
 	_check(not bool(effects.call("survive_lethal")), "Second Heart keeps its cooldown")
 	runtime.skills.erase("second_heart")
+
+
+func _discharge_chain(effects: Node, runtime: Runtime) -> void:
+	var first := _enemy(Vector3(0, 0, 1.0))
+	var second := _enemy(Vector3(0, 0, 4.0))
+	var third := _enemy(Vector3(0, 0, 7.0))
+	runtime.skills["discharge"] = true
+	effects.call("_cast", "discharge")
+	_check(is_equal_approx(first.damage_taken, 10.0), "Discharge's first jump deals 10 damage")
+	_check(is_equal_approx(second.damage_taken, 20.0), "Discharge chains to the nearest unhit enemy with +10 per jump")
+	_check(is_equal_approx(third.damage_taken, 30.0), "Discharge keeps chaining while targets stay in range")
+	_retire(first)
+	_retire(second)
+	_retire(third)
+	runtime.skills.erase("discharge")
+
+
+func _claw_kill_adrenaline(effects: Node, runtime: Runtime) -> void:
+	var victim := _enemy(Vector3(1.0, 0, 0))
+	runtime.skills["claws"] = true
+	runtime.skills["adrenaline"] = true
+	victim.set("health", 10.0)
+	# The claw pulse fires on the first frame; the mock reports the death the way the enemy does.
+	effects.call("_process", 0.0)
+	if float(victim.get("health")) <= 0.0:
+		effects.call("on_enemy_killed", victim)
+	_check(is_equal_approx(float(effects.call("movement_multiplier")), 1.5), "Claws kills start Adrenaline's speed boost")
+	effects.call("_process", 4.1)
+	_check(is_equal_approx(float(effects.call("movement_multiplier")), 1.0), "Adrenaline expires after four seconds")
+	_retire(victim)
+	runtime.skills.erase("claws")
+	runtime.skills.erase("adrenaline")
 
 
 # Acid Spit always lands on the floor: an aim on a wall face comes back to

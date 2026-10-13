@@ -142,7 +142,7 @@ func cast_skill(skill_id: String) -> bool:
 		return false
 	skill_cast.emit(skill_id)
 	if has_skill("neurostim"):
-		tree.cooldowns[skill_id] = float(tree.cooldowns[skill_id]) * 0.8
+		tree.cooldowns[skill_id] = float(tree.cooldowns[skill_id]) * 0.75
 	_cooldown_totals[skill_id] = float(tree.cooldowns[skill_id])
 	tree_changed.emit()
 	return true

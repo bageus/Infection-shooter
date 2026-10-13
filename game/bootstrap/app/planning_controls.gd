@@ -11,6 +11,7 @@ var door_options: Node
 const FIXTURE_CONTROLS := preload("res://game/bootstrap/app/planning_light_fixtures.gd")
 var fixtures = FIXTURE_CONTROLS.new()
 var light_view = preload("res://game/bootstrap/app/planning_light_view.gd").new()
+var fixture_toggles = preload("res://game/bootstrap/app/planning_fixture_toggles.gd").new()
 var light_default_editor = preload("res://game/bootstrap/app/planning_light_defaults.gd").new()
 
 const LIGHT_DEFAULT_HEIGHT = 2.5
@@ -93,6 +94,7 @@ func setup_controls() -> void:
 	door_options.call("setup", session, objects)
 	fixtures.setup(self)
 	light_view.setup(self)
+	fixture_toggles.setup(self)
 	light_default_editor.setup(self)
 	var box: Node = session.ui.get_node("Panel/VBox")
 	for control_name in ["LightInfo", "LightLevel", "LightAngleInfo", "LightAngle"]:
@@ -241,6 +243,24 @@ func _open_desk_setup() -> void:
 func _toggle_help() -> void:
 	var overlay = help.get_parent().get_parent() as Control
 	overlay.visible = not overlay.visible
+
+
+## Which settings panel edits this object ("" when it has none): the same panel serves the
+## palette preview and an installed object, so a click on an installed one can open it.
+func settings_kind(node: Node3D) -> String:
+	if node == null:
+		return ""
+	if light_default_editor.is_lamp(node):
+		return "lamp"
+	if door_options.lockable_controller(node) != null:
+		return "door"
+	if display_options.applies_to(node):
+		return "display"
+	if node.has_method("configure_stats"):
+		return "enemy"
+	if loot_options.applies_to(node):
+		return "loot"
+	return ""
 
 
 func _update_light_ui() -> void:

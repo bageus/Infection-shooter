@@ -16,9 +16,9 @@ const EXTINGUISHER_BANDS := [Vector2(1.45, 2.15)]
 const EXTINGUISHER_TURN := 90.0
 const SWITCH_HEIGHT := 1.25
 const ALARM_HEIGHT := 2.5
-const CALL_POINT_HEIGHT := 1.0
+const CALL_POINT_HEIGHT := 1.5
 const SWITCH_BANDS := [Vector2(1.10, 1.40)]
-const ALARM_BANDS := [Vector2(2.35, 2.65), Vector2(0.85, 1.15)]
+const ALARM_BANDS := [Vector2(2.35, 2.65), Vector2(1.35, 1.65)]
 const SWITCHES_PER_DOOR := 3
 const ALARMS_PER_DOOR := 1
 const PITCH := 0.09
@@ -26,28 +26,33 @@ const HALF_SWITCH := 0.043
 const SPREAD_STEP := 0.5
 
 var geometry: RefCounted
+# Which automatic groups the planner asked for: light switches, fire alarms with call points.
+var enabled := {"switches": true, "fire": true}
 var records: Array = []
 var shortfall := {"switch": 0, "alarm": 0}
 var _switches: Dictionary = {} # level -> Array[Vector2]
 
 
-func _init(model: RefCounted) -> void:
+func _init(model: RefCounted, groups: Dictionary = {}) -> void:
 	geometry = model
+	enabled = {"switches": bool(groups.get("switches", true)), "fire": bool(groups.get("fire", true))}
 
 
 func run() -> Array:
 	for level in geometry.levels():
 		var doors := _doors_of(level)
 		_extinguishers(level)
-		var hand: Array[Dictionary] = geometry.manual_of("switch", level)
-		_switches[level] = hand.map(func(item: Dictionary) -> Vector2: return item.at)
-		var left := 0
-		for index in doors.size():
-			left += _switches_for_door(doors[index], index, _take_manual(doors[index], hand))
 		var glass := _glass_count(level)
-		_spread_switches(level, maxi(0, left + glass * SWITCHES_PER_DOOR - hand.size()))
-		var alarms: Array[Dictionary] = geometry.manual_of("alarm", level)
-		_spread_alarms(level, maxi(0, (doors.size() + glass) * ALARMS_PER_DOOR - alarms.size()), alarms)
+		if enabled.switches:
+			var hand: Array[Dictionary] = geometry.manual_of("switch", level)
+			_switches[level] = hand.map(func(item: Dictionary) -> Vector2: return item.at)
+			var left := 0
+			for index in doors.size():
+				left += _switches_for_door(doors[index], index, _take_manual(doors[index], hand))
+			_spread_switches(level, maxi(0, left + glass * SWITCHES_PER_DOOR - hand.size()))
+		if enabled.fire:
+			var alarms: Array[Dictionary] = geometry.manual_of("alarm", level)
+			_spread_alarms(level, maxi(0, (doors.size() + glass) * ALARMS_PER_DOOR - alarms.size()), alarms)
 	return records
 
 

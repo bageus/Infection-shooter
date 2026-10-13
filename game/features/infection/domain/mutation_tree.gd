@@ -142,5 +142,5 @@ func cast(skill_id: String, mutation: float, stability: float = 30.0) -> bool:
 	var row := CATALOG.find(skill_id)
 	if row not in CATALOG.ACTIVE:
 		return false
-	cooldowns[skill_id] = 10.0
+	cooldowns[skill_id] = CATALOG.cooldown(skill_id)
 	return true

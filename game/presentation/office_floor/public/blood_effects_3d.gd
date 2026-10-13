@@ -3,6 +3,8 @@ extends Node3D
 const LIBRARY := preload("res://game/presentation/office_floor/blood_texture_library.gd")
 const SURFACES := preload("res://game/presentation/office_floor/blood_surface_query.gd")
 const BUDGET := preload("res://game/presentation/office_floor/blood_mark_budget.gd")
+# Radians around the shot's flat direction: two near-forward rays and two sideways rays.
+const SIDE_SPLATTER_ANGLES := [-1.3, -0.6, 0.6, 1.3]
 
 @export_range(1, 320) var max_marks := 220
 ## 0 keeps marks until the budget needs their slot; far marks are unloaded and restored.
@@ -180,6 +182,20 @@ func _emit_splatter_hit(point: Vector3, direction: Vector3, weapon: String, excl
 		surface = _surfaces.call("find_floor", point, excluded)
 	for mark in range(splatters_per_hit):
 		_submit("splatter", surface, direction, splatter_size, true, weapon == "SHOTGUN")
+	_emit_side_splatters(point, direction, excluded)
+
+
+# A few flat rays fan out from the hit so walls and columns beside the enemy get blood too.
+func _emit_side_splatters(point: Vector3, direction: Vector3, excluded: Array[RID]) -> void:
+	var flat := Vector3(direction.x, 0.0, direction.z)
+	if flat.length_squared() < 0.0001:
+		return
+	flat = flat.normalized()
+	for angle in SIDE_SPLATTER_ANGLES:
+		var side := flat.rotated(Vector3.UP, angle)
+		var surface: Dictionary = _surfaces.call("find_behind", point, side, excluded)
+		if not surface.is_empty():
+			_submit("splatter", surface, side, splatter_size, true)
 
 
 func _emit_severed_burst(point: Vector3, direction: Vector3, excluded: Array[RID]) -> void:
