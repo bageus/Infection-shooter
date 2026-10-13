@@ -50,16 +50,30 @@ func _target() -> Node3D:
 	return objects.selected if objects.selected != null else objects.preview
 
 
+func applies_to(target: Node3D) -> bool:
+	return target != null and target.has_method("has_display") and target.call("has_display")
+
+
+func _is_lamp(target: Node3D) -> bool:
+	return target.has_method("is_desk_lamp") and target.call("is_desk_lamp")
+
+
 func update() -> void:
 	var target := _target()
-	var applicable: bool = target != null and target.has_method("has_display") and target.call("has_display")
+	var applicable := applies_to(target)
 	panel.visible = applicable
 	if not applicable:
 		return
 	_updating = true
 	var config: Dictionary = target.call("get_display_config")
-	title.text = "ДИСПЛЕЙ" if objects.selected != null else "ДИСПЛЕЙ | размещение"
-	power.select(["on", "off", "auto"].find(str(config["power"])))
+	var lamp := _is_lamp(target)
+	var suffix := "" if objects.selected != null else " | размещение"
+	title.text = ("НАСТОЛЬНАЯ ЛАМПА" if lamp else "ДИСПЛЕЙ") + suffix
+	# A lamp is simply on or off; screens also have the random "auto" state and content.
+	power.set_item_disabled(2, lamp)
+	power.select(1 if str(config["power"]) == "off" else (0 if lamp else ["on", "off", "auto"].find(str(config["power"]))))
+	content.get_parent().visible = not lamp
+	reroll.visible = not lamp
 	content.select(1 if str(config["content"]) == "dynamic" else 0)
 	content.disabled = "wall_TV" in str(target.get("model_path"))
 	content.tooltip_text = "На телевизорах всегда динамическая заставка" if content.disabled else ""

@@ -245,6 +245,24 @@ func _toggle_help() -> void:
 	overlay.visible = not overlay.visible
 
 
+## Which settings panel edits this object ("" when it has none): the same panel serves the
+## palette preview and an installed object, so a click on an installed one can open it.
+func settings_kind(node: Node3D) -> String:
+	if node == null:
+		return ""
+	if light_default_editor.is_lamp(node):
+		return "lamp"
+	if door_options.lockable_controller(node) != null:
+		return "door"
+	if display_options.applies_to(node):
+		return "display"
+	if node.has_method("configure_stats"):
+		return "enemy"
+	if loot_options.applies_to(node):
+		return "loot"
+	return ""
+
+
 func _update_light_ui() -> void:
 	if display_options != null:
 		display_options.call("update")

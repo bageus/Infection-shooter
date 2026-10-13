@@ -50,7 +50,7 @@ func _click_world(screen_pos: Vector2) -> void:
 			_select(existing)
 		return
 	if not selected_path.is_empty() or selected_kind == "player":
-		# A lamp or door that is already installed is picked, not covered by another one.
+		# An installed object with the same kind of settings as the palette item is picked, not covered by another.
 		var installed := _installed_same_kind_at(screen_pos)
 		if installed != null:
 			_reset_selection()
@@ -65,13 +65,11 @@ func _click_world(screen_pos: Vector2) -> void:
 
 
 func _installed_same_kind_at(screen_pos: Vector2) -> Node3D:
-	if selected_kind == "light":
-		return geometry.lamp_at(screen_pos)
-	if controls.door_options.lockable_controller(preview) != null:
-		var existing: Node3D = geometry._planned_object_at(screen_pos)
-		if controls.door_options.lockable_controller(existing) != null:
-			return existing
-	return null
+	var kind: String = controls.settings_kind(preview)
+	if kind.is_empty():
+		return null
+	var existing: Node3D = geometry.lamp_at(screen_pos) if kind == "lamp" else geometry._planned_object_at(screen_pos)
+	return existing if controls.settings_kind(existing) == kind else null
 
 
 func _select(node: Node3D) -> void:

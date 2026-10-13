@@ -137,7 +137,7 @@ func enter() -> void:
 	Input.mouse_mode = Input.MOUSE_MODE_VISIBLE
 	camera_anchor = camera.global_position
 	camera_height = clampf(camera.global_position.y, CAMERA_MIN_HEIGHT, CAMERA_MAX_HEIGHT)
-	controls.help.text = "PLANNING CONTROLS\n\nWASD  Move view\nALT + LMB drag  Rotate view (look up or down)\nWheel  Raise / lower camera, including below floor\nLMB  Select / Place (clicking an installed lamp selects it and opens its settings)\nCtrl + LMB  Select any installed object while a palette item is active\nLMB drag  Move selected\nRMB  Cancel current tool\nDelete  Delete selected\nQ / E  Rotate -/+15°\nR  Rotate +90°\n+ / -  Uniform scale\nX / Z  X size +/-\nC / V  Z size +/-\nArrow keys  Move selected on plane\nPgUp / PgDn  Move object up/down\n[ / ]  Light brightness\n, / .  Light cone angle\nESC  Exit planner"
+	controls.help.text = "PLANNING CONTROLS\n\nWASD  Move view\nALT + LMB drag  Rotate view (look up or down)\nWheel  Raise / lower camera, including below floor\nLMB  Select / Place (clicking an installed object of the same kind as the palette item selects it and opens its settings)\nCtrl + LMB  Select any installed object while a palette item is active\nLMB drag  Move selected\nRMB  Cancel current tool\nDelete  Delete selected\nQ / E  Rotate -/+15°\nR  Rotate +90°\n+ / -  Uniform scale\nX / Z  X size +/-\nC / V  Z size +/-\nArrow keys  Move selected on plane\nPgUp / PgDn  Move object up/down\n[ / ]  Light brightness\n, / .  Light cone angle\nESC  Exit planner"
 	controls.status.text = "Map restored to its saved layout — choose an object" if restored else "Choose an object"
 
 
