@@ -282,6 +282,7 @@ jobs:
           game/presentation/office_floor/tests/run_fragment_pool_tests.gd
           game/presentation/office_floor/tests/run_settled_debris_tests.gd
           game/presentation/office_floor/tests/run_blood_dormant_tests.gd
+          game/presentation/office_floor/tests/run_blood_floor_bake_tests.gd
           game/presentation/office_floor/tests/run_divider_collision_tests.gd
           game/features/infected/tests/run_late_spawn_debris_tests.gd
           game/features/infected/tests/run_blood_events_tests.gd
@@ -302,6 +303,7 @@ jobs:
           game/bootstrap/app/tests/run_wall_grid_tests.gd
           game/bootstrap/app/tests/run_map_file_tests.gd
           game/bootstrap/app/tests/run_ammo_box_tests.gd
+          game/bootstrap/app/tests/run_placed_ammo_pickup_tests.gd
           EOF
           tools/run_runtime_suites.sh /tmp/runtime-suites.txt /tmp/runtime-suites 3
 

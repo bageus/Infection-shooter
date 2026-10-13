@@ -155,6 +155,11 @@ func _environment_scene_for(file_name: String) -> String:
 		return str(structural[file_name])
 	if file_name == "07_table.glb":
 		return "res://game/presentation/office_floor/public/props/07_table.tscn"
+	return _pickup_scene_for(file_name)
+
+
+# Supplies stay collectable pickups however their model path was saved.
+func _pickup_scene_for(file_name: String) -> String:
 	var pickups = {
 		"12_ammo_pistols.glb": "res://game/features/pickups/public/ammo_pistol_pickup.tscn", "12_ammo_shotgun.glb": "res://game/features/pickups/public/ammo_shotgun_pickup.tscn",
 		"12_ammo_uzi.glb": "res://game/features/pickups/public/ammo_uzi_pickup.tscn", "12_antidote.glb": "res://game/features/pickups/public/antidote_pickup.tscn",
@@ -162,9 +167,7 @@ func _environment_scene_for(file_name: String) -> String:
 		"12_ammo_automate.glb": "res://game/features/pickups/public/ammo_automate_pickup.tscn", "12_ammo_sniper.glb": "res://game/features/pickups/public/ammo_sniper_pickup.tscn",
 		"12_ammo_minigun.glb": "res://game/features/pickups/public/ammo_minigun_pickup.tscn"
 	}
-	if pickups.has(file_name):
-		return str(pickups[file_name])
-	return ""
+	return str(pickups.get(file_name, ""))
 
 
 
@@ -182,6 +185,10 @@ func _instantiate_asset(asset_path: String) -> Node3D:
 func _create_asset(asset_path: String) -> Node3D:
 	if asset_path == ENVIRONMENT_ROOT + "/01/01_stairs_2.glb":
 		asset_path = ENVIRONMENT_ROOT + "/01/01_stairs.glb"
+	if asset_path.begins_with(ENVIRONMENT_ROOT + "/") and asset_path.ends_with(".glb"):
+		var pickup_scene := _pickup_scene_for(asset_path.get_file())
+		if not pickup_scene.is_empty():
+			asset_path = pickup_scene
 	if asset_path.begins_with(ENVIRONMENT_ROOT + "/") and asset_path.ends_with(".glb"):
 		if asset_path.get_file().begins_with("09_") and WORKSTATIONS.VARIANTS["paper"].has(asset_path.get_file().get_basename()):
 			var paper = PAPER_PROP_SCENE.instantiate() as Node3D
@@ -212,6 +219,10 @@ func _migrate_scene_path(old_path: String) -> String:
 	# Group 01 packs were briefly uploaded under models/. Keep those saved maps
 	# loadable after restoring the runtime paths used by structural scenes.
 	var group_one := ENVIRONMENT_ROOT + "/01/"
+	if old_path.begins_with(ENVIRONMENT_ROOT + "/") and old_path.ends_with(".glb"):
+		var pickup_scene := _pickup_scene_for(old_path.get_file())
+		if not pickup_scene.is_empty():
+			return pickup_scene
 	if old_path.begins_with(group_one) and old_path.ends_with(".glb"):
 		var filename := old_path.get_file().replace("01_glass_wall_full_breakable(1).glb", "01_glass_wall_full_breakable.glb").replace("01_stairs_2.glb", "01_stairs.glb")
 		var canonical := group_one + filename

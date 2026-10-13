@@ -29,6 +29,8 @@ const BUDGET := preload("res://game/presentation/office_floor/blood_mark_budget.
 @export_range(128, 1024) var texture_max_dimension := 512
 @export_range(0.8, 1.5) var blood_brightness := 1.18
 @export var preload_textures := true
+## Floor marks leaving the budget become permanent stains baked into a few small tiles.
+@export var floor_bake_enabled := true
 
 var _library := LIBRARY.new()
 var _surfaces: Node3D
@@ -66,7 +68,8 @@ func _ready() -> void:
 	_budget.set("settings", {
 		"decal": _decal, "depth": projection_depth, "quad_offset": quad_surface_offset,
 		"visual_mask": receiver_visual_mask, "distance_fade": distance_fade,
-		"fade_begin": fade_begin, "fade_length": fade_length, "growth_seconds": 2.0
+		"fade_begin": fade_begin, "fade_length": fade_length, "growth_seconds": 2.0,
+		"floor_bake": floor_bake_enabled
 	})
 	add_child(_budget)
 

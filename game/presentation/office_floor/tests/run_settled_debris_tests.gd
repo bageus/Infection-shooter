@@ -41,6 +41,16 @@ func _settling() -> void:
 	_expect(runtime.get("active").is_empty(), "Folded pieces leave the active budget")
 	_expect(pieces.all(func(piece: RigidBody3D) -> bool: return not piece.visible and not piece.is_inside_tree()), "Folded pieces return to the pool")
 	_expect(batch.multimesh.get_instance_color(0).g < 0.1, "Folded piece keeps its tint (red chunk)")
+	var model_piece := RigidBody3D.new()
+	model_piece.set_script(load("res://game/presentation/office_floor/environment_fragment.gd"))
+	var model_mesh := MeshInstance3D.new()
+	model_mesh.mesh = SphereMesh.new()
+	model_piece.add_child(model_mesh)
+	world.add_child(model_piece)
+	await process_frame
+	model_piece.sleeping = true
+	runtime.call("settle_resting", 20.0)
+	_expect(is_instance_valid(model_piece) and model_piece.is_inside_tree(), "Model-mesh pieces are left alone instead of folding")
 	var settled: Node3D = runtime.get_node("SettledPieces")
 	for index in 252:
 		settled.call("add", Transform3D.IDENTITY, Vector3.ONE * 0.1, Color.WHITE)
