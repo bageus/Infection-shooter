@@ -25,6 +25,7 @@ var stage_index := -1
 var kickable := false
 var _kick_cooldown := 0.0
 var _age := 0.0
+var rest_time := 0.0
 var _piece_health := 55.0
 var pool_owner: Node
 var _runtime: Node
@@ -33,6 +34,7 @@ var _expiry: Tween
 
 func _ready() -> void:
 	_age = 0.0
+	rest_time = 0.0
 	_kick_cooldown = 0.0
 	_piece_health = 55.0
 	collision_layer = HIT_LAYER
