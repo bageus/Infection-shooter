@@ -288,10 +288,12 @@ static func _signature(data: Dictionary) -> String:
 	return "\n".join(rows)
 
 
-## Level checks that run on every save: group 13 signs at 1.75 m, automatic
-## light switches and fire alarm points on walls and columns.
+## Level checks that run on every save: group 13 signs at 1.75 m and, for the groups
+## switched on in the palette, automatic light switches and fire alarm points.
 func enforce_wall_fixtures() -> String:
-	var report: Dictionary = WALL_FIXTURES.apply(objects, LAYOUT_LOADER.new(objects))
+	var toggles: Variant = controls.get("fixture_toggles") if controls != null else null
+	var groups: Dictionary = toggles.options() if toggles != null and toggles.switches != null else {"switches": false, "fire": false}
+	var report: Dictionary = WALL_FIXTURES.apply(objects, LAYOUT_LOADER.new(objects), groups)
 	var text := " | signs adjusted %d, wall fixtures %d" % [int(report["signs"]), int(report["fixtures"])]
 	var missing: int = int(report["shortfall"]["switch"]) + int(report["shortfall"]["alarm"])
 	return text + ("" if missing == 0 else ", %d without free wall space" % missing)
