@@ -9,6 +9,8 @@ const END_MARGIN := 0.04
 const CLEAR_DEPTH := 0.5
 const CELL := 2.0
 const LEVEL_HEIGHT := 3.0
+# Fixtures placed by hand that count toward the per-door totals.
+const MANUAL := {"13_wall_light_switch.glb": "switch", "13_wall_emergency_alarm.glb": "alarm"}
 # Pieces that carry fixtures. half = (half length, half thickness) in piece axes.
 const SOLID := {
 	"wall_straight": {"half": Vector2(1.0, 0.095)},
@@ -37,6 +39,7 @@ var doors: Array[Dictionary] = []
 var glass_doors: Array[Dictionary] = [] # count toward the totals but carry no fixtures of their own
 var blockers: Array[AABB] = []
 var extinguishers: Array[Vector3] = [] # (x, height, z) of every extinguisher already in the layout
+var manual: Array[Dictionary] = [] # switches and alarms placed by hand: {kind, at, y}
 var _piece_grid := {}
 var _blocker_grid := {}
 var _all_pieces: Array[Dictionary] = []
@@ -57,6 +60,9 @@ func load_records(records: Array) -> void:
 		var scene := str(record.get("scene", ""))
 		if scene.get_file() == "09_fire_extinguisher.glb" and not bool(record.get("auto", false)):
 			extinguishers.append(Vector3(float(record.get("x", 0.0)), float(record.get("y", 0.0)), float(record.get("z", 0.0))))
+		var kind: String = MANUAL.get(scene.get_file(), "")
+		if not kind.is_empty() and str(record.get("auto_fixture", "")).is_empty():
+			manual.append({"kind": kind, "at": Vector2(float(record.get("x", 0.0)), float(record.get("z", 0.0))), "y": float(record.get("y", 0.0))})
 		if not scene.begins_with(STRUCTURAL):
 			continue
 		var file := scene.get_file().get_basename()
@@ -153,6 +159,15 @@ func column_has_extinguisher(column: Dictionary) -> bool:
 		if absf(local.dot(column.t)) <= column.half.x + 0.5 and absf(local.dot(column.n)) <= column.half.y + 0.5 and spot.y > column.base + 0.6 and spot.y < column.base + 2.4:
 			return true
 	return false
+
+
+## Hand-placed fixtures of a kind on a level; their level comes from the walls around them.
+func manual_of(kind: String, level: int) -> Array[Dictionary]:
+	var out: Array[Dictionary] = []
+	for item: Dictionary in manual:
+		if item.kind == kind and level_of(floor_at(item.at, item.y)) == level:
+			out.append(item)
+	return out
 
 
 func faces_of_level(level: int) -> Array[Dictionary]:

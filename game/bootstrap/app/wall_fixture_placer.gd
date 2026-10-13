@@ -39,13 +39,15 @@ func run() -> Array:
 	for level in geometry.levels():
 		var doors := _doors_of(level)
 		_extinguishers(level)
-		_switches[level] = []
+		var hand: Array[Dictionary] = geometry.manual_of("switch", level)
+		_switches[level] = hand.map(func(item: Dictionary) -> Vector2: return item.at)
 		var left := 0
 		for index in doors.size():
-			left += _switches_for_door(doors[index], index)
+			left += _switches_for_door(doors[index], index, _take_manual(doors[index], hand))
 		var glass := _glass_count(level)
-		_spread_switches(level, left + glass * SWITCHES_PER_DOOR)
-		_spread_alarms(level, (doors.size() + glass) * ALARMS_PER_DOOR)
+		_spread_switches(level, maxi(0, left + glass * SWITCHES_PER_DOOR - hand.size()))
+		var alarms: Array[Dictionary] = geometry.manual_of("alarm", level)
+		_spread_alarms(level, maxi(0, (doors.size() + glass) * ALARMS_PER_DOOR - alarms.size()), alarms)
 	return records
 
 
@@ -78,10 +80,30 @@ func _doors_of(level: int) -> Array:
 	return out
 
 
+## Hand-placed switches beside the door (either side; the key side only for a fire door)
+## count toward its three; they are removed from `hand` so no other door counts them too.
+func _take_manual(door: Dictionary, hand: Array[Dictionary]) -> int:
+	var taken := 0
+	for item in hand.duplicate():
+		if taken >= SWITCHES_PER_DOOR:
+			break
+		var local: Vector2 = item.at - door.c
+		var side := signf(local.dot(door.n))
+		if absf(absf(local.dot(door.n)) - door.half.y) > 0.2 or absf(local.dot(door.t)) > 3.2 or (door.fire and side > 0.0):
+			continue
+		hand.erase(item)
+		taken += 1
+	return taken
+
+
 ## Places the three points of one door; returns how many could not be placed.
-func _switches_for_door(door: Dictionary, index: int) -> int:
+func _switches_for_door(door: Dictionary, index: int, credit: int = 0) -> int:
 	var sides: Array = [-1.0] if door.fire else ([1.0, -1.0] if index % 2 == 0 else [-1.0, 1.0])
 	var wanted := [SWITCHES_PER_DOOR] if door.fire else [2, 1]
+	for slot in range(wanted.size() - 1, -1, -1):
+		var used := mini(credit, wanted[slot])
+		wanted[slot] -= used
+		credit -= used
 	var missing := 0
 	for slot in wanted.size():
 		var order: Array = [sides[slot]] if door.fire else [sides[slot], sides[1 - slot]]
@@ -151,8 +173,9 @@ func _spread_switches(level: int, count: int) -> void:
 	shortfall.switch += count - picks.size()
 
 
-func _spread_alarms(level: int, count: int) -> void:
-	var picks := _spread(level, count, 0.08, ALARM_BANDS, [], true)
+func _spread_alarms(level: int, count: int, hand: Array[Dictionary]) -> void:
+	var seeds: Array = hand.map(func(item: Dictionary) -> Vector2: return item.at)
+	var picks := _spread(level, count, 0.08, ALARM_BANDS, seeds, true)
 	for pick: Dictionary in picks:
 		_put(ALARM, pick.face, pick.along, ALARM_HEIGHT, "alarm")
 		_put(CALL_POINT, pick.face, pick.along, CALL_POINT_HEIGHT, "call_point")

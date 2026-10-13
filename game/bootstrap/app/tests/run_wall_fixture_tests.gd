@@ -87,6 +87,27 @@ func _door_rules() -> void:
 	_check(fire_switches.size() == 3, "Fire door gets three switch points (%d)" % fire_switches.size())
 	for record: Dictionary in fire_switches:
 		_check(float(record.x) < 0.0 and absf(float(record.rotation_y) + 90.0) < 0.01, "Fire door switch is on the key side facing away from the wall")
+	_hand_placed()
+
+
+## Switches and alarms already placed by hand count toward the per-door totals.
+func _hand_placed() -> void:
+	var switch := "res://models/objects/enviroments/13/13_wall_light_switch.glb"
+	var alarm := "res://models/objects/enviroments/13/13_wall_emergency_alarm.glb"
+	var base := _corridor()
+	_check(_count(FIXTURES.plan(base, []).records, "switch") == 3, "Reference: one door gets three switches")
+	var hand := base + [{"scene": switch, "x": 2.0, "y": 1.25, "z": 0.16, "rotation_y": 0.0},
+		{"scene": switch, "x": 2.1, "y": 1.25, "z": 0.16, "rotation_y": 0.0}]
+	var records: Array = FIXTURES.plan(hand, []).records
+	_check(_count(records, "switch") == 1, "Two switches hung by hand beside the door leave one to place (%d)" % _count(records, "switch"))
+	_check(_count(FIXTURES.plan(hand + [{"scene": switch, "x": 0.0, "y": 1.25, "z": -0.16, "rotation_y": 180.0}], []).records, "switch") == 0,
+		"Three hand-placed switches at the door leave none to place")
+	var alarmed := base + [{"scene": alarm, "x": -3.0, "y": 2.5, "z": 0.16, "rotation_y": 0.0}]
+	records = FIXTURES.plan(alarmed, []).records
+	_check(_count(records, "alarm") == 0 and _count(records, "call_point") == 0, "A hand-placed alarm covers the door's one alarm point")
+	var marked := hand.duplicate()
+	marked[marked.size() - 1] = marked[marked.size() - 1].merged({"auto_fixture": "switch"})
+	_check(_count(FIXTURES.plan(marked, []).records, "switch") == 2, "An automatic switch is not counted as hand-placed")
 
 
 func _mounted_on_walls(layout: Array, records: Array) -> bool:

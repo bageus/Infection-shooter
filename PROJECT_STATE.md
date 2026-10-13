@@ -449,3 +449,5 @@ Perimeter and interior wall collision is scene-authored. The latest correction t
 
 
 10.10.2026 (P1, проверка CI 08f50fc): все 74 runtime assertions и общий native batch Compatibility/Forward+ PASS, но run_menu_tests завершился с одной DummyMesh RID leak. Это воспроизведено локально на четвёртом повторе; проверки ERROR не ослаблены. Menu fixture теперь явно удаляется и завершает queued frees до quit. Повторный полный локальный runtime 74/74 PASS; окончательный статус исправления фиксируется в PR #86. T002 IN_PROGRESS; API/DTO/ресурсы/архитектурные исключения прежние. Следующее точное действие: проверить CI исправленного menu teardown, затем ручная приёмка Windows/Web.
+
+13.10.2026 (планировщик, запрос владельца): вручную поставленные выключатели и оповещатели засчитываются в норму на дверь (три выключателя на дверь, один оповещатель на дверь), автоматически добавляется только недостающее. Проверки: run_wall_fixture_tests (_hand_placed), run_planning_mode_tests, run_wall_grid_tests. Public API/DTO/owners прежние, исключений нет.
