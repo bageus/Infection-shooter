@@ -1,0 +1,61 @@
+extends SceneTree
+const DEBRIS := preload("res://game/presentation/office_floor/debris_lifecycle.gd")
+const RUNTIME_STEP := 0.5
+var failures := 0
+
+
+class Host extends Node3D:
+	var effects_root: Node3D
+
+
+func _initialize() -> void:
+	call_deferred("_run")
+
+
+func _run() -> void:
+	await _settling()
+	print("Settled debris tests: %d failures" % failures)
+	quit(0 if failures == 0 else 1)
+
+
+func _settling() -> void:
+	var world := Node3D.new()
+	root.add_child(world)
+	var host := Host.new()
+	host.effects_root = world
+	world.add_child(host)
+	DEBRIS.spawn_chunks(host, AABB(Vector3.ZERO, Vector3.ONE), Color.RED, 4, Vector3.UP, Vector3.ZERO)
+	await process_frame
+	var runtime := world.get_node("FragmentRuntime")
+	var batch := runtime.get_node("SettledPieces/SettledPieces") as MultiMeshInstance3D
+	var pieces: Array[RigidBody3D] = []
+	for child in world.get_children():
+		if child is RigidBody3D:
+			child.sleeping = true
+			pieces.append(child)
+	# No player is in this scene, so the far threshold (5 s) applies.
+	runtime.call("settle_resting", 4.0)
+	_expect(batch.multimesh.visible_instance_count == 0, "Pieces are not folded before they have rested long enough")
+	runtime.call("settle_resting", 1.5)
+	_expect(batch.multimesh.visible_instance_count == 4, "Resting pieces fold into the batch")
+	_expect(runtime.get("active").is_empty(), "Folded pieces leave the active budget")
+	_expect(pieces.all(func(piece: RigidBody3D) -> bool: return not piece.visible and not piece.is_inside_tree()), "Folded pieces return to the pool")
+	_expect(batch.multimesh.get_instance_color(0).g < 0.1, "Folded piece keeps its tint (red chunk)")
+	var settled: Node3D = runtime.get_node("SettledPieces")
+	for index in 252:
+		settled.call("add", Transform3D.IDENTITY, Vector3.ONE * 0.1, Color.WHITE)
+	_expect(settled.call("count") == 256, "Batch fills up to its capacity")
+	_expect(not settled.call("add", Transform3D.IDENTITY, Vector3.ONE * 0.1, Color.WHITE), "Batch refuses pieces when full")
+	_expect(settled.get_child_count() == 2 and settled.collision_layer == 4, "Settled batch is hittable on the debris layer")
+	var before: int = settled.call("count")
+	settled.call("take_projectile_hit", 10.0, Vector3.ZERO, Vector3.UP, Vector3.FORWARD, "AK")
+	_expect(settled.call("count") == before - 1, "A hit knocks one settled piece out of the batch")
+	_expect(batch.multimesh.visible_instance_count == before - 1, "The batch draws one piece fewer after a hit")
+	settled.call("take_projectile_hit", 10.0, Vector3(50, 50, 50), Vector3.UP, Vector3.FORWARD, "AK")
+	_expect(settled.call("count") == before - 1, "A hit far from every piece removes nothing")
+
+
+func _expect(condition: bool, message: String) -> void:
+	if not condition:
+		failures += 1
+		printerr("FAIL: " + message)

@@ -1,11 +1,13 @@
 ---
 task_version: 1
-task_id: T002
+task_id: T003
 status: IN_PROGRESS
 phase: 1
 owner: AI
-updated: 2026-10-11
+updated: 2026-10-13
 ---
+
+13.10.2026 (T002 закрыта как DONE: ящики с патронами слиты в main, тред завершён; T003 заведена по запросу владельца «Постоянные следы и обломки»). T003, вариант 4: осевшие обломки (покой 10 с рядом с игроком или 5 с, когда игрок дальше 8 м) сворачиваются в один MultiMesh на эффекты (settled_debris.gd, до 256 штук, без коллизии и попаданий), тело возвращается в пул. Изменены fragment_runtime.gd (settle_resting, _process 0.5 с), environment_fragment.gd (rest_time). Тест run_settled_debris_tests.gd добавлен в mission_runtime CI. run_fragment_pool_tests зелёный; run_debris_tests падает на 3 проверках и на main без изменений (проверено stash). Варианты 2 (выгрузка марок по расстоянию) и 3 (запекание в текстуру) ещё не начаты. Следующий шаг: вариант 2.
 
 12.10.2026 (патроны, запрос владельца): ящики с патронами для АК/M4 (12_ammo_automate), снайперской винтовки (12_ammo_sniper) и миниган (12_ammo_minigun) планировщик ставит как подбираемые pickup вместо декоративных моделей (новые ammo_automate/sniper/minigun_pickup.tscn, тип AMMO_WEAPONS с списком оружия в pickup_item.gd). Крупные модели масштабируются единым объёмом обычного ящика (SUPPLY_BOX_VOLUME, пистолет/UZI/дробовик) через _supply_box_fit; пистолет, UZI, дробовик и аптечки не менялись. Количество на подбор: автомат 30, снайпер 8, миниган 100 (начальные числа, не баланс). Проверка: run_ammo_box_tests.gd (добавлен в mission_runtime CI), run_planner_loot/planner_extension/map_file/pickup_floor/occlusion зелёные, validate_project.py зелёный; скриншот размеров /mnt/project-files/ammo_box_review/ammo_boxes_sizes.png. Исключений нет.
 
