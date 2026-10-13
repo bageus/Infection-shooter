@@ -89,6 +89,7 @@ func _door_rules() -> void:
 		_check(float(record.x) < 0.0 and absf(float(record.rotation_y) + 90.0) < 0.01, "Fire door switch is on the key side facing away from the wall")
 	_hand_placed()
 	_groups()
+	_door_casing()
 
 
 ## Switches and alarms already placed by hand count toward the per-door totals.
@@ -122,6 +123,24 @@ func _groups() -> void:
 	_check(_count(only_fire, "switch") == 0 and _count(only_fire, "alarm") == _count(both, "alarm") and _count(only_fire, "call_point") == _count(both, "call_point"), "Fire only: no switches")
 	_check(_count(none, "switch") + _count(none, "alarm") + _count(none, "call_point") == 0 and _count(none, "extinguisher") == 1, "Both off: no switches or alarms, the column extinguisher stays")
 	_check(FIXTURES.regenerated_kinds({"switches": false, "fire": false}) == ["extinguisher"] and "call_point" in FIXTURES.regenerated_kinds({"fire": true}), "A group that is off is not regenerated")
+
+
+## Fixtures never touch the casing around a door opening (it reaches 0.85 m from the door centre).
+func _door_casing() -> void:
+	var layout := _corridor([_wall("wall_emergency_door", 12.0, 0.0), _wall("wall_straight", 10.0, 0.0), _wall("wall_straight", 14.0, 0.0)])
+	var records: Array = FIXTURES.plan(layout, []).records
+	var near := 0
+	for record: Dictionary in records:
+		if record.auto_fixture == "extinguisher":
+			continue
+		var half := 0.08 if record.auto_fixture in ["alarm", "call_point"] else 0.043
+		for door_x in [1.0, 12.0]:
+			var along := absf(float(record.x) - door_x)
+			if along < 1.2:
+				near += 1
+				_check(along - half >= 0.85 + 0.03, "%s at %.2f m from the door centre clears the casing" % [record.auto_fixture, along])
+	_check(_count(records, "switch") == 6 and near >= 2, "Both doors still get their three switches (%d)" % _count(records, "switch"))
+	_check(GEOMETRY.OPENING >= 0.85, "The door opening reaches the outer edge of the casing")
 
 
 func _mounted_on_walls(layout: Array, records: Array) -> bool:
