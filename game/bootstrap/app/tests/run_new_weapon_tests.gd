@@ -154,6 +154,21 @@ func _test_minigun(actor: CharacterBody3D, effects: Node3D, crosshair: Node) -> 
 	gun.call("_process", 0.3)
 	_check(gun.get("_spin") < 1.0 and gun.get("_spin") > 0.0, "Barrels slow down once the coast ends")
 	_check(gun.call("add_reserve_ammo", 999) == 400, "Ammo pickup is capped to the belt capacity")
+	# Firing ducks the whine under the shots; it returns to full level after firing stops.
+	var spin_sound := gun.get("_spin_sound") as AudioStreamPlayer3D
+	for frame in 5:
+		gun.set("_spin_hold", 0.12)
+		gun.set("_spin", 1.0)
+		gun.call("_process", 0.1)
+	var idle_db := spin_sound.volume_db
+	_check(actor.call("_fire_weapon", gun), "Minigun fires for the whine duck check")
+	gun.call("_process", 0.1)
+	_check(spin_sound.volume_db <= idle_db - 9.0, "Minigun whine drops about 10 dB while firing")
+	for frame in 5:
+		gun.set("_spin_hold", 0.12)
+		gun.set("_spin", 1.0)
+		gun.call("_process", 0.1)
+	_check(is_equal_approx(spin_sound.volume_db, idle_db), "Minigun whine returns to full level after firing")
 	_check(actor.call("select_weapon_slot", 1), "Normal weapon switch remains usable")
 	await process_frame
 	await process_frame
