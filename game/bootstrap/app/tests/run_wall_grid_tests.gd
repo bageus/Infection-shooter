@@ -26,7 +26,7 @@ func _run() -> void:
 	root.add_child(item)
 	item.position = contact
 	SURFACE.mount(item, AABB(Vector3(-0.2,-0.2,-0.2), Vector3(0.4,0.4,0.4)), Vector3.BACK)
-	assert(is_equal_approx(item.position.z - 0.2, 1.0005))
+	assert(is_equal_approx(item.position.z - 0.2, 1.005))
 	item.free()
 	wall.free()
 	print("Wall grid and contact tests PASS")

@@ -5,15 +5,19 @@ extends SceneTree
 ##   xvfb-run -a godot --path . --rendering-method gl_compatibility \
 ##     --script res://tools/capture_wall_fixtures.gd -- <out_dir>
 ##
-## Writes <out_dir>/wall_fixtures_{door,fire_door,overview}_{before,after}.png.
+## Writes <out_dir>/wall_fixtures_<view>_after.png, plus _before for the BEFORE views.
 
 const MAIN := preload("res://game/bootstrap/app/main.tscn")
 const VIEWS := {
-	"door": [Vector3(-5.6, 3.3, -0.6), Vector3(-8.0, 1.0, -3.0)],
-	"door_back": [Vector3(-10.4, 3.3, -5.4), Vector3(-8.0, 1.0, -3.0)],
-	"fire_door": [Vector3(-0.6, 3.3, 1.2), Vector3(2.0, 1.0, -1.1)],
+	"column_a": [Vector3(12.3, 2.4, 12.3), Vector3(10.1, 1.5, 10.1)],
+	"column_b": [Vector3(32.2, 2.4, 2.2), Vector3(30.0, 1.5, 0.0)],
+	"door_front": [Vector3(5.6, 2.0, 6.6), Vector3(8.0, 1.2, 5.0)],
+	"door_back": [Vector3(10.4, 2.0, 6.6), Vector3(8.0, 1.2, 5.0)],
+	"urinals": [Vector3(3.5, 1.6, 9.2), Vector3(3.5, 0.6, 11.7)],
+	"hand_dryers": [Vector3(-6.0, 1.8, -10.6), Vector3(-6.0, 1.3, -8.2)],
 	"overview": [Vector3(-2.0, 9.0, 8.0), Vector3(-6.0, 1.0, 0.0)]
 }
+const BEFORE := ["urinals", "hand_dryers", "overview"]
 var _out_dir := "/tmp/wall_fixtures"
 var _planner: Node
 var _camera: Camera3D
@@ -27,7 +31,7 @@ func _initialize() -> void:
 
 
 func _capture() -> void:
-	root.size = Vector2i(1024, 576)
+	root.size = Vector2i(900, 506)
 	DirAccess.make_dir_recursive_absolute(_out_dir)
 	var game := MAIN.instantiate()
 	root.add_child(game)
@@ -38,7 +42,7 @@ func _capture() -> void:
 	_planner.call("enter")
 	(_planner.get("ui") as Control).hide()
 	_camera = _planner.get("camera")
-	for name: String in VIEWS:
+	for name: String in BEFORE:
 		await _shot(name, "before")
 	var storage: Object = _planner.get("storage")
 	print("Save pass: ", storage.call("enforce_wall_fixtures"))
