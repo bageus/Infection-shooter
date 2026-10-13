@@ -9,6 +9,15 @@ list=$1
 work=$2
 jobs=${3:-4}
 
+# A runner that is killed mid-run leaves no suite annotations, so report how the script ended.
+report_exit() {
+	local status=$?
+	if [ "$status" != 0 ]; then
+		echo "::error title=Runner ended::exit $status after ${SECONDS}s, $(awk '/MemAvailable/{print int($2/1024)}' /proc/meminfo) MiB available"
+	fi
+}
+trap report_exit EXIT
+
 rm -rf "$work"
 mkdir -p "$work/data"
 
