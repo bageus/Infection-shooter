@@ -6,6 +6,7 @@ extends SceneTree
 const HUNGER := preload("res://game/features/infected/public/infected_hunger.tscn")
 const GUARD := preload("res://game/features/infected/corpse_guard.gd")
 const CORPSE := preload("res://game/features/infected/public/decor/corpse_hunger.tscn")
+const CORPSE_BUDGET := preload("res://game/features/infected/public/corpse_budget.gd")
 
 class FakeTarget:
 	extends Node3D
@@ -31,6 +32,7 @@ func _run() -> void:
 	await _test_wall_stops_body()
 	await _test_body_rests_on_table()
 	await _test_corpse_sinks_and_hides()
+	await _test_kept_corpse_stays_visible()
 	await _test_planner_corpse_survives_overlap()
 	await _test_stretched_ragdoll_is_recovered()
 	print("Ragdoll death tests: %d failures" % failures)
@@ -115,6 +117,19 @@ func _test_body_rests_on_table() -> void:
 	_expect(chest.y > 0.6 or _bone(enemy, "Hips").y > 0.6, "The body is caught by the table, not under it (head %.2f, hips %.2f)." % [chest.y, _bone(enemy, "Hips").y])
 	enemy.queue_free()
 	table.queue_free()
+	await process_frame
+
+
+func _test_kept_corpse_stays_visible() -> void:
+	CORPSE_BUDGET.keep = true
+	var enemy := await _spawn(Vector3(52, 1, 0))
+	enemy.set("death_linger_seconds", 0.3)
+	enemy.call("take_projectile_damage", 1000.0, enemy.global_position, Vector3(0, 0, 1), "PISTOL")
+	await create_timer(3.0).timeout
+	_expect((enemy.get("body_visual") as Node3D).visible, "With keep_corpses the body stays visible after its linger.")
+	_expect(CORPSE_BUDGET.count() >= 1, "With keep_corpses the body is counted by the budget.")
+	CORPSE_BUDGET.keep = false
+	enemy.queue_free()
 	await process_frame
 
 

@@ -14,6 +14,7 @@ const AUDIO := preload("res://game/features/infected/infected_audio.gd")
 const DEATH_FALL := preload("res://game/features/infected/death_fall.gd")
 const DEATH_OBSTACLE := preload("res://game/features/infected/death_obstacle.gd")
 const DEATH_RAGDOLL := preload("res://game/features/infected/death_ragdoll.gd")
+const CORPSE_BUDGET := preload("res://game/features/infected/public/corpse_budget.gd")
 const STATUS_FX := preload("res://game/features/infected/infected_status_fx.gd")
 const KILLING_PUSH_MSEC := 300
 
@@ -586,8 +587,7 @@ func _play_death_clip(fall: Dictionary, landing: Vector3) -> void:
 func _sink_corpse_after(death_length: float) -> void:
 	var tween := create_tween()
 	tween.tween_interval(death_length + death_linger_seconds)
-	tween.tween_property(body_visual, "position:y", body_visual.position.y - death_sink_depth, 0.7).set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_IN)
-	tween.tween_callback(_hide_corpse)
+	CORPSE_BUDGET.clip_tail(tween, self, _parts, body_visual, death_sink_depth, _hide_corpse)
 
 
 func _hide_corpse() -> void:
