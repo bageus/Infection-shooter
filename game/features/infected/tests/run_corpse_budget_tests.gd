@@ -15,6 +15,7 @@ func _run() -> void:
 	_test_keeps_up_to_limit()
 	_test_evicts_oldest_first()
 	_test_freed_bodies_leave_budget()
+	_test_retained_body_survives_cloud_end()
 	print("Corpse budget tests: %d failures" % failures)
 	quit(1 if failures > 0 else 0)
 
@@ -58,6 +59,19 @@ func _test_freed_bodies_leave_budget() -> void:
 	BUDGET.retain(second, null, _evict_callable(second))
 	_check(BUDGET.count() == 1 and evicted.is_empty(), "Adding after a free does not evict anything")
 	BUDGET._corpses.clear()
+
+
+func _test_retained_body_survives_cloud_end() -> void:
+	BUDGET.keep = true
+	var body := _body(200)
+	BUDGET.cloud_gone(body, true)
+	_check(is_instance_valid(body), "A shown body survives its death cloud ending while kept")
+	BUDGET.hidden(body, null)
+	_check(is_instance_valid(body), "Hiding a body whose cloud has ended frees it on the next frame only")
+	BUDGET.keep = false
+	var gone := _body(201)
+	BUDGET.cloud_gone(gone, true)
+	_check(not is_instance_valid(gone) or gone.is_queued_for_deletion(), "Without keep the cloud ending frees the body")
 
 
 func _check(condition: bool, label: String) -> void:

@@ -592,9 +592,8 @@ func _sink_corpse_after(death_length: float) -> void:
 
 func _hide_corpse() -> void:
 	body_visual.hide()
-	if _parts != null:
-		_parts.remove_corpse_hitboxes()
+	CORPSE_BUDGET.hidden(self, _parts)
 
 
 func _on_death_cloud_depleted() -> void:
-	queue_free()
+	CORPSE_BUDGET.cloud_gone(self, body_visual.visible)
