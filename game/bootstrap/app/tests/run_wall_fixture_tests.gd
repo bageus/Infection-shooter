@@ -71,7 +71,7 @@ func _door_rules() -> void:
 	var hung := _corridor([{"scene": PLACER.EXTINGUISHER, "x": -7.0, "y": 1.5, "z": 0.9, "rotation_y": 0.0}])
 	_check(_count(FIXTURES.plan(hung, []).records, "extinguisher") == 0, "A column that already has an extinguisher gets no second one")
 	for record: Dictionary in records:
-		var wanted := {"switch": 1.25, "alarm": 2.5, "call_point": 1.0, "extinguisher": 1.5}[record.auto_fixture] as float
+		var wanted := {"switch": 1.25, "alarm": 2.5, "call_point": 1.5, "extinguisher": 1.5}[record.auto_fixture] as float
 		_check(is_equal_approx(float(record.y), wanted), "%s hangs at %.2f m" % [record.auto_fixture, wanted])
 	_check(_mounted_on_walls(layout, records), "Every fixture sits on a wall or column face")
 	var again: Array = FIXTURES.plan(layout, []).records
@@ -88,6 +88,7 @@ func _door_rules() -> void:
 	for record: Dictionary in fire_switches:
 		_check(float(record.x) < 0.0 and absf(float(record.rotation_y) + 90.0) < 0.01, "Fire door switch is on the key side facing away from the wall")
 	_hand_placed()
+	_groups()
 
 
 ## Switches and alarms already placed by hand count toward the per-door totals.
@@ -108,6 +109,19 @@ func _hand_placed() -> void:
 	var marked := hand.duplicate()
 	marked[marked.size() - 1] = marked[marked.size() - 1].merged({"auto_fixture": "switch"})
 	_check(_count(FIXTURES.plan(marked, []).records, "switch") == 2, "An automatic switch is not counted as hand-placed")
+
+
+## The palette chooses which automatic groups the pass places.
+func _groups() -> void:
+	var layout := _corridor()
+	var both: Array = FIXTURES.plan(layout, []).records
+	var only_switches: Array = FIXTURES.plan(layout, [], {"switches": true, "fire": false}).records
+	var only_fire: Array = FIXTURES.plan(layout, [], {"switches": false, "fire": true}).records
+	var none: Array = FIXTURES.plan(layout, [], {"switches": false, "fire": false}).records
+	_check(_count(only_switches, "switch") == _count(both, "switch") and _count(only_switches, "alarm") + _count(only_switches, "call_point") == 0, "Switches only: no alarm points")
+	_check(_count(only_fire, "switch") == 0 and _count(only_fire, "alarm") == _count(both, "alarm") and _count(only_fire, "call_point") == _count(both, "call_point"), "Fire only: no switches")
+	_check(_count(none, "switch") + _count(none, "alarm") + _count(none, "call_point") == 0 and _count(none, "extinguisher") == 1, "Both off: no switches or alarms, the column extinguisher stays")
+	_check(FIXTURES.regenerated_kinds({"switches": false, "fire": false}) == ["extinguisher"] and "call_point" in FIXTURES.regenerated_kinds({"fire": true}), "A group that is off is not regenerated")
 
 
 func _mounted_on_walls(layout: Array, records: Array) -> bool:
@@ -236,11 +250,19 @@ func _planner() -> void:
 	records.append({"scene": STRUCT + "column.tscn", "x": -8.0, "y": 0.0, "z": 20.0})
 	var report: Dictionary = objects.call("_apply_layout_data", {"version": 8, "objects": records})
 	_check(int(report.get("loaded", 0)) == 7, "Planner test layout loads")
+	var toggles: Variant = planner.controls.fixture_toggles
+	_check(not toggles.switches.button_pressed and not toggles.fire.button_pressed, "Both palette toggles start off")
+	var first_text: String = storage.call("enforce_wall_fixtures")
+	await process_frame
+	var only_column: Array = objects.placed.filter(func(n: Node3D) -> bool: return is_instance_valid(n) and n.has_meta("planning_auto_fixture"))
+	_check(only_column.size() == 1, "With both toggles off a save places only the column extinguisher (%d)" % only_column.size())
+	toggles.switches.button_pressed = true
+	toggles.fire.button_pressed = true
 	var text: String = storage.call("enforce_wall_fixtures")
 	await process_frame
 	var auto: Array = objects.placed.filter(func(n: Node3D) -> bool: return is_instance_valid(n) and n.has_meta("planning_auto_fixture"))
 	_check(auto.size() == 3 + 1 + 1 + 1, "Save adds 3 switches, 1 alarm, 1 call point and a column extinguisher (%d)" % auto.size())
-	_check(text.contains("signs adjusted 1"), "Save reports the corrected sign: " + text)
+	_check(first_text.contains("signs adjusted 1") and text.contains("wall fixtures 6"), "Save reports the corrected sign and the placed fixtures: %s / %s" % [first_text, text])
 	var wall_sign: Node3D = objects.placed.filter(func(n: Node3D) -> bool: return str(n.get_meta("planning_scene_path", "")) == SIGN)[0]
 	_check(is_equal_approx(wall_sign.position.y, 1.75), "The sign was moved to 1.75 m")
 	var first_records: Array = storage.call("_collect_layout_data").objects.filter(func(r: Dictionary) -> bool: return r.has("auto_fixture"))
@@ -259,6 +281,12 @@ func _planner() -> void:
 	_check(saved.size() == auto.size(), "The automatic fixtures are written to the map with their marker")
 	var reload: Dictionary = objects.call("_apply_layout_data", {"version": 8, "objects": storage.call("_collect_layout_data").objects})
 	_check(objects.placed.filter(func(n: Node3D) -> bool: return is_instance_valid(n) and n.has_meta("planning_auto_fixture")).size() == auto.size(), "The marker survives reloading the map")
+	toggles.fire.button_pressed = false
+	toggles.switches.button_pressed = false
+	storage.call("enforce_wall_fixtures")
+	await process_frame
+	var kept: Array = objects.placed.filter(func(n: Node3D) -> bool: return is_instance_valid(n) and not n.is_queued_for_deletion() and n.has_meta("planning_auto_fixture"))
+	_check(kept.size() == auto.size(), "Turning the toggles off leaves the fixtures already placed (%d of %d)" % [kept.size(), auto.size()])
 	stage.queue_free()
 	await process_frame
 
