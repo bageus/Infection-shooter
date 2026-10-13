@@ -4,7 +4,9 @@ extends RefCounted
 ## (x, z); heights are measured from the floor of the piece's own level.
 
 const STRUCTURAL := "res://game/presentation/office_floor/public/structural/"
-const OPENING := 0.78 # door leaf plus gap: nothing is mounted closer to the centre
+# Nothing is mounted closer to a door's centre than the outer edge of its casing
+# (the trim spans 0.75..0.85 m either side, measured on the door models).
+const OPENING := 0.85
 const END_MARGIN := 0.04
 const CLEAR_DEPTH := 0.5
 const CELL := 2.0
