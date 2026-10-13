@@ -3,7 +3,7 @@ extends Node3D
 const ART := preload("res://game/features/combat/public/launcher_visual.gd")
 const BADGE := preload("res://game/core/world_badge/public/world_badge.gd")
 const ACTION := "pickup_weapon"
-const BEACON := preload("res://game/bootstrap/app/pickup_beacon.gd")
+const BEACON := preload("res://game/features/pickups/public/pickup_beacon.gd")
 
 @export_range(0, 7) var weapon_index := 3
 var _base_position := Vector3.ZERO

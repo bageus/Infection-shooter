@@ -17,7 +17,7 @@ var _time := 0.0
 
 ## `glow_radius` is the glow half-size in metres; `arrow_height` <= 0 omits the arrow.
 static func make(color: Color, glow_radius: float, arrow_height: float, glow_energy := 1.0) -> Node3D:
-	var beacon := (load("res://game/bootstrap/app/pickup_beacon.gd") as GDScript).new() as Node3D
+	var beacon := (load("res://game/features/pickups/public/pickup_beacon.gd") as GDScript).new() as Node3D
 	beacon.call("_build", color, glow_radius, arrow_height, glow_energy)
 	return beacon
 

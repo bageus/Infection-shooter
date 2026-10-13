@@ -2,6 +2,13 @@ extends Area3D
 
 enum PickupType { MEDKIT, AMMO_PISTOL, AMMO_UZI, AMMO_SHOTGUN, ANTIDOTE, DNA, AMMO_WEAPONS }
 
+const BEACON := preload("res://game/features/pickups/public/pickup_beacon.gd")
+## Every DNA pickup, wherever it comes from (planner, infected drop, scene), gets this marker.
+const DNA_BEACON_COLOR := Color(0.3, 1.0, 0.2)
+const DNA_BEACON_GLOW := 0.45
+const DNA_BEACON_ARROW_HEIGHT := 0.55
+const DNA_BEACON_ENERGY := 0.9
+
 ## Single size for every supply, placed in planning or dropped by infected.
 const VISUAL_SCALE := 0.5
 ## Bounding volume of the regular ammo box (pistol, UZI, shotgun) at VISUAL_SCALE, in m³.
@@ -24,6 +31,8 @@ func _ready() -> void:
 		visual.scale *= VISUAL_SCALE
 		if pickup_type == PickupType.AMMO_WEAPONS:
 			visual.scale *= _supply_box_fit(visual)
+	if pickup_type == PickupType.DNA:
+		add_child(BEACON.make(DNA_BEACON_COLOR, DNA_BEACON_GLOW, DNA_BEACON_ARROW_HEIGHT, DNA_BEACON_ENERGY))
 	body_entered.connect(_on_body_entered)
 
 
@@ -98,7 +107,8 @@ func _visual_bottom_offset() -> float:
 	var lowest := INF
 	for child in find_children("*", "MeshInstance3D", true, false):
 		var visual := child as MeshInstance3D
-		if visual.mesh == null or not visual.is_visible_in_tree():
+		# The marker's glow and arrow float above or around the item and must not lift it off the floor.
+		if visual.mesh == null or not visual.is_visible_in_tree() or bool(visual.get_meta("planning_bounds_excluded", false)):
 			continue
 		var bounds := visual.get_aabb()
 		for corner in range(8):

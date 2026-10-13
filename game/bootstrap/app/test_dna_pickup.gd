@@ -1,6 +1,6 @@
 extends Area3D
 
-const BEACON := preload("res://game/bootstrap/app/pickup_beacon.gd")
+const BEACON := preload("res://game/features/pickups/public/pickup_beacon.gd")
 
 @export_range(0.1, 10.0) var respawn_seconds := 2.0
 var _player: Node3D
