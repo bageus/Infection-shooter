@@ -3,12 +3,13 @@ extends RefCounted
 const SHADOWS := preload("res://game/bootstrap/app/menu/shadow_quality.gd")
 const BINDINGS := preload("res://game/bootstrap/app/menu/control_bindings.gd")
 const UI_TRANSLATIONS := preload("res://game/core/localization/public/ui_translations.gd")
+const CORPSE_BUDGET := preload("res://game/features/infected/public/corpse_budget.gd")
 var bindings := BINDINGS.new()
 
 const FILE := "user://interface_settings.cfg"
 const DEFAULTS := {"language": "ru", "brightness": 1.0, "text_scale": 1.0,
 	"volume": 0.4, "effects_volume": 1.0, "music_volume": 1.0, "sound": true, "occlusion_mode": 0, "test_mutagen": false, "infinite_antidotes": false, "lighting": true, "electronic_particles": true, "skill_effects": 0,
-	"shadows": true, "shadow_quality": 2, "mesh_lod": true}
+	"shadows": true, "shadow_quality": 2, "mesh_lod": true, "keep_corpses": true}
 var values: Dictionary = DEFAULTS.duplicate()
 
 
@@ -87,6 +88,7 @@ func apply_to_game(tree: SceneTree) -> void:
 	if tree != null:
 		# 0 turns automatic mesh LOD off; 1 is the engine default. No shader recompile.
 		tree.root.mesh_lod_threshold = 1.0 if values.mesh_lod else 0.0
+	CORPSE_BUDGET.keep = bool(values.keep_corpses)
 	var occlusion := scene.get_node_or_null("OcclusionEffects") if scene != null else null
 	if occlusion != null:
 		occlusion.call("set_mode", int(values.occlusion_mode))

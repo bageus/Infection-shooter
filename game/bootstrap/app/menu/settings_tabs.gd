@@ -152,6 +152,12 @@ func _video() -> void:
 	mesh_lod.button_pressed = dialog.view.preferences.values.mesh_lod
 	mesh_lod.toggled.connect(func(value: bool) -> void: dialog.call("_change", "mesh_lod", value))
 	dialog.get("layout").add_child(mesh_lod)
+	var keep_corpses := CheckButton.new()
+	keep_corpses.name = "KeepCorpses"
+	keep_corpses.text = dialog.view.text("keepCorpses")
+	keep_corpses.button_pressed = dialog.view.preferences.values.keep_corpses
+	keep_corpses.toggled.connect(func(value: bool) -> void: dialog.call("_change", "keep_corpses", value))
+	dialog.get("layout").add_child(keep_corpses)
 	var particles := CheckButton.new()
 	particles.name = "ElectronicParticles"
 	particles.text = dialog.view.text("electronicParticles")
