@@ -5,33 +5,23 @@ var failures := 0
 var stage: Node3D
 
 class Route:
-	extends RefCounted
-	func direction(actor: Node3D, goal: Node3D, _radius: float) -> Vector3:
+	extends "res://game/features/infected/chase_route.gd"
+	func direction(actor: Node3D, goal: Node3D, _radius: float, _far := false) -> Vector3:
 		var offset := goal.global_position - actor.global_position
 		offset.y = 0.0
 		return offset.normalized()
 
 class Actor:
-	extends CharacterBody3D
-	var _target: Node3D
-	var sleep_distance := 32.0
-	var _lod_frame_offset := 0
-	var collision_shape: CollisionShape3D
-	var move_speed := 4.0
-	var _mobility := 1.0
-	var _route := Route.new()
-	var _blast_stun_remaining := 0.0
-	var _push_velocity := Vector3.ZERO
-	var push_decay := 10.0
-	var _face_direction := Vector3.ZERO
-	var _intended_motion := Vector3.ZERO
+	extends "res://game/features/infected/infected_capsule.gd"
 	var senses := PERCEPTION.new()
+	func _ready() -> void:
+		_route = Route.new()
 	func _physics_process(delta: float) -> void:
 		senses.step_unaware(self, delta)
 	func _turn_toward_face_direction(_delta: float) -> void:
 		pass
-	func _apply_gravity(_delta: float) -> void:
-		pass
+	func _apply_gravity(delta: float) -> void:
+		super(delta)
 	func _push_chair_contacts() -> void:
 		pass
 
@@ -43,6 +33,7 @@ func _initialize() -> void:
 func _spawn(offset: int) -> Actor:
 	var actor := Actor.new()
 	actor._lod_frame_offset = offset
+	actor.move_speed = 4.0
 	actor.collision_layer = 0
 	actor.collision_mask = 1
 	actor.collision_shape = CollisionShape3D.new()
@@ -50,7 +41,14 @@ func _spawn(offset: int) -> Actor:
 	capsule.radius = 0.3
 	capsule.height = 1.8
 	actor.collision_shape.shape = capsule
+	actor.collision_shape.name = "CollisionShape3D"
 	actor.add_child(actor.collision_shape)
+	var visual := Node3D.new()
+	visual.name = "Body"
+	actor.add_child(visual)
+	var cloud := Area3D.new()
+	cloud.name = "DeathCloud"
+	actor.add_child(cloud)
 	stage.add_child(actor)
 	actor.position = Vector3(offset * 8.0, 1.0, 0.0)
 	actor._target = Node3D.new()
@@ -67,9 +65,29 @@ func _spawn(offset: int) -> Actor:
 func _run() -> void:
 	stage = Node3D.new()
 	root.add_child(stage)
+	var floor_body := StaticBody3D.new()
+	var floor_shape := CollisionShape3D.new()
+	var box := BoxShape3D.new()
+	box.size = Vector3(220, 1, 100)
+	floor_shape.shape = box
+	floor_shape.position.y = -0.5
+	floor_body.add_child(floor_shape)
+	stage.add_child(floor_body)
 	var actors: Array[Actor] = []
 	for offset in 12:
 		actors.append(_spawn(offset))
+	# Settle and warm every phase before measuring a complete 60-frame window.
+	for actor in actors:
+		actor.senses.wander_enabled = false
+	for _i in 30:
+		await physics_frame
+	await process_frame
+	for actor in actors:
+		actor.senses.wander_enabled = true
+		actor.senses._home = actor.position
+		actor.senses._state_time = 0.0
+		actor.senses._wandering = true
+		actor.senses._wander = actor.position + Vector3.RIGHT * 2.0
 	for _i in 60:
 		await physics_frame
 	await process_frame
