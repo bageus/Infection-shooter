@@ -35,13 +35,13 @@ const ENEMY_SCENES := [
 ]
 var actor_catalog = [
 	{"name":"Player Spawn","path":"","kind":"player"},
+	{"name":"Spawn Hole (wave)","path":"res://game/features/spawning/public/spawn_point.tscn","kind":"spawn_point"},
 	{"name":"Hunger","path":ENEMY_SCENES[2],"kind":"enemy"},
 	{"name":"Revenant","path":ENEMY_SCENES[3],"kind":"enemy"},
 	{"name":"Brute","path":ENEMY_SCENES[4],"kind":"enemy"},
 	{"name":"Titan","path":ENEMY_SCENES[5],"kind":"enemy"},
 	{"name":"Colossus","path":ENEMY_SCENES[6],"kind":"enemy"},
-	{"name":"Horde","path":ENEMY_SCENES[7],"kind":"enemy"},
-	{"name":"Spawn Hole (wave)","path":"res://game/features/spawning/public/spawn_point.tscn","kind":"spawn_point"}
+	{"name":"Horde","path":ENEMY_SCENES[7],"kind":"enemy"}
 ]
 
 var item_catalog = [

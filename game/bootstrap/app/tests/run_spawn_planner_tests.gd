@@ -81,6 +81,11 @@ func _edit_and_link() -> void:
 	options._changed()
 	var edited: Dictionary = hole.call("get_spawn_config")
 	_check(edited["count"] == 12 and edited["interval"] == 2.5 and edited["trigger"] == "all", "panel edits reach the hole")
+	# A real click on a guard keeps the wave panel open (clearing the preview must not hide it).
+	objects._reset_selection()
+	objects._click_world(planner.camera.unproject_position(guards[0].global_position + Vector3(0, 1, 0)))
+	_check(objects.selected == guards[0], "clicking a guard selects it")
+	_check(options.panel.visible and options.enemy_box.visible, "the wave list stays open after a click on a guard")
 	# Link both guards to the hole.
 	for guard in guards:
 		objects._select(guard)

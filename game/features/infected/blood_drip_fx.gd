@@ -5,6 +5,9 @@ extends RefCounted
 
 const GROUP := "infected_blood_fx"
 const MAX_ACTIVE := 24
+# Blood surfaces carry this layer (see blood_surface_query.gd); droplets fall no further than it.
+const FLOOR_MASK := 128
+const GRAVITY := 9.8
 
 static var _droplet: SphereMesh
 static var _material: StandardMaterial3D
@@ -15,12 +18,15 @@ static func bleed(parent: Node3D, offset: Vector3, direction: Vector3, seconds: 
 	var particles := _make(parent, roundi(lerpf(18.0, 46.0, clampf(strength, 0.0, 1.0))), 0.9, false)
 	if particles == null:
 		return null
+	# Drops follow the wound. In world space they would be left behind as the moving body flies.
+	particles.local_coords = true
 	particles.position = offset
 	var process := particles.process_material as ParticleProcessMaterial
 	process.direction = direction.normalized() if direction.length_squared() > 0.0001 else Vector3.DOWN
 	process.spread = 28.0
 	process.initial_velocity_min = 0.6 * strength
 	process.initial_velocity_max = 2.4 * strength
+	_stop_at_floor(particles, process)
 	particles.emitting = true
 	var tree := parent.get_tree()
 	var ref: WeakRef = weakref(particles)
@@ -46,6 +52,7 @@ static func spray(parent: Node3D, world_position: Vector3, direction: Vector3, a
 	process.spread = 38.0
 	process.initial_velocity_min = 1.5 * force
 	process.initial_velocity_max = 4.5 * force
+	_stop_at_floor(particles, process)
 	particles.emitting = true
 	var ref: WeakRef = weakref(particles)
 	parent.get_tree().create_timer(particles.lifetime + 0.3).timeout.connect(func() -> void:
@@ -55,6 +62,21 @@ static func spray(parent: Node3D, world_position: Vector3, direction: Vector3, a
 
 
 static var _active := 0
+
+
+# Droplets have no collision, so a burst may only live as long as it takes to
+# fall back to the floor under its origin. Otherwise they sink through the floor
+# and read as a long streak far from the body.
+static func _stop_at_floor(particles: GPUParticles3D, process: ParticleProcessMaterial) -> void:
+	var from := particles.global_position
+	var query := PhysicsRayQueryParameters3D.create(from, from + Vector3.DOWN * 4.0, FLOOR_MASK)
+	var hit := particles.get_world_3d().direct_space_state.intersect_ray(query)
+	if hit.is_empty():
+		return
+	var height := from.y - (hit["position"] as Vector3).y
+	var rise := maxf(0.0, process.direction.normalized().y) * process.initial_velocity_max
+	var fall := (rise + sqrt(rise * rise + 2.0 * GRAVITY * height)) / GRAVITY
+	particles.lifetime = maxf(0.05, minf(particles.lifetime, fall))
 
 
 static func _make(parent: Node3D, amount: int, lifetime: float, one_shot: bool) -> GPUParticles3D:

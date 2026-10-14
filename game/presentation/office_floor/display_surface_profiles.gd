@@ -6,11 +6,15 @@ const MODELS: Array[String] = [
 	"05_laptop_destructible.glb", "05_laptop2_destructible.glb",
 	"05_wall_TV_destructible.glb", "05_wall_TV_frameless_destructible.glb"]
 const DATA_PATH := "res://game/presentation/office_floor/display_surfaces.json"
+# Parsed once and shared: every display used to parse its own copy of the file.
+static var _shared: Dictionary = {}
 var profiles: Dictionary
 
 
 func _init() -> void:
-	profiles = (JSON.parse_string(FileAccess.get_file_as_string(DATA_PATH)) as Dictionary)["profiles"]
+	if _shared.is_empty():
+		_shared = (JSON.parse_string(FileAccess.get_file_as_string(DATA_PATH)) as Dictionary)["profiles"]
+	profiles = _shared
 
 
 func contains(path: String) -> bool:
