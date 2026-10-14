@@ -97,7 +97,7 @@
       "pace": "beyond charge_distance (+1.5 m hysteresis once inside) the infected walks at walk_speed_factor; inside it sprints 2.4-4.2 s, then walks 1.1-2.2 s, repeating; within 3.5 m it always charges; speed eases at 1.4 (up) / 1.0 (down) move speeds per second; charge_distance 0 always charges (ADR-0040)"
     },
     "perception_v1": {
-      "watch_target": "watch_target(target: Node3D) -> void; the infected stays unaware (stands at its post) until it sees or hears the player; sight 18 m, 130 degree cone, 3.5 m all-round, blocked by walls but not glass",
+      "watch_target": "watch_target(target: Node3D) -> void; the infected stays unaware (stands at its post, strolling 1-3 m in random directions) until it sees or hears the player; sight 18 m, 130 degree cone, 3.5 m all-round, blocked by walls but not glass",
       "set_target": "set_target(target: Node3D) -> void; forces the chase with no need to see or hear the player (spawners, summons)",
       "hear_noise": "hear_noise(position: Vector3, radius: float) -> void; called on group infected_alive by weapons; unaware infected within radius walk to the point, search 3.5 s and walk home if the player is not seen",
       "hear_alert": "hear_alert(position: Vector3, radius: float) -> void; sent by an infected that spots the player (16 m); neighbours start the chase",
