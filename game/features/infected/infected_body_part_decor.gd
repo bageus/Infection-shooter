@@ -47,15 +47,12 @@ func _build() -> void:
 	add_child(parts)
 	if parts.setup(self, holder, 1.0) and parts.parts.has(part):
 		var info: Dictionary = parts.parts[part]
+		var cut: Vector3 = info.segments[0].start
+		# Bake the cut into the mask first, so the copies below carry it.
+		parts.add_rest_wound(cut, float(info.segments[0].radius) * 1.25)
 		var materials: Array = []
 		for material: ShaderMaterial in parts._entries[0].materials:
-			var copy := material.duplicate() as ShaderMaterial
-			var wounds := PackedVector4Array()
-			wounds.resize(BODY_PARTS.MAX_WOUNDS)
-			var cut: Vector3 = info.segments[0].start
-			wounds[0] = Vector4(cut.x, cut.y, cut.z, float(info.segments[0].radius) * 1.25)
-			copy.set_shader_parameter("wounds", wounds)
-			materials.append(copy)
+			materials.append(material.duplicate() as ShaderMaterial)
 		var built := MESH.build_piece(parts._entries[0].data, info.bones, parts.skeleton, materials)
 		if not built.is_empty():
 			_assemble(built, parts._world(info.bones[0], info.segments[0].start), float(info.segments[0].radius) * visual_scale)

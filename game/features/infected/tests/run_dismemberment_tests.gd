@@ -105,12 +105,11 @@ func _test_arm_shot_off(stage: Node3D) -> void:
 	_expect(parts.pick_part(enemy.global_position + Vector3(0, 0.2, -0.6), Vector3(0, 0, 1)) == &"torso", "A shot through the belly picks the torso.")
 	var before := _pieces(stage).size()
 	await _shoot(enemy, &"arm_l", 12.0, 1)
-	var wounds: PackedVector4Array = (parts._entries[0].materials[0] as ShaderMaterial).get_shader_parameter("wounds")
 	var painted := false
-	for w in wounds:
-		if w.w > 0.0:
+	for surface_mask: Dictionary in parts._entries[0].get("masks", []):
+		if (surface_mask.image as Image).get_data().has(255):
 			painted = true
-	_expect(painted, "A hit paints a wound on the skin.")
+	_expect(painted, "A hit bakes a wound into the skin's blood mask.")
 	await _shoot(enemy, &"arm_l", 12.0, 6)
 	_expect(parts.is_severed(&"arm_l"), "Enough damage shoots the arm off.")
 	_expect(not bool(enemy.get("_dead")), "Losing an arm does not kill.")
