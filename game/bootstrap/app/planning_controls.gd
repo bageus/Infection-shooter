@@ -8,6 +8,8 @@ const LOOT_OPTIONS := preload("res://game/bootstrap/app/planning_loot_options.gd
 const DOOR_OPTIONS := preload("res://game/bootstrap/app/planning_door_options.gd")
 var loot_options: Node
 var door_options: Node
+const SPAWN_OPTIONS := preload("res://game/bootstrap/app/planning_spawn_options.gd")
+var spawn_options: Node
 const FIXTURE_CONTROLS := preload("res://game/bootstrap/app/planning_light_fixtures.gd")
 var fixtures = FIXTURE_CONTROLS.new()
 var light_view = preload("res://game/bootstrap/app/planning_light_view.gd").new()
@@ -92,6 +94,9 @@ func setup_controls() -> void:
 	door_options = DOOR_OPTIONS.new()
 	add_child(door_options)
 	door_options.call("setup", session, objects)
+	spawn_options = SPAWN_OPTIONS.new()
+	add_child(spawn_options)
+	spawn_options.call("setup", session, objects)
 	fixtures.setup(self)
 	light_view.setup(self)
 	fixture_toggles.setup(self)
@@ -180,6 +185,7 @@ func _configure_new_asset(node: Node3D, entry: Dictionary) -> void:
 	DECOR_POSES.configure_new(node, objects.preview)
 	display_options.call("configure_new", node)
 	loot_options.call("configure_new", node)
+	spawn_options.call("configure_new", node)
 	fixtures.configure_new_asset(node, entry)
 	if str(entry.get("kind", "")) != "blood" or not node.has_method("configure_blood"):
 		return
@@ -256,6 +262,8 @@ func settings_kind(node: Node3D) -> String:
 		return "door"
 	if display_options.applies_to(node):
 		return "display"
+	if node.has_method("configure_spawn"):
+		return "spawn"
 	if node.has_method("configure_stats"):
 		return "enemy"
 	if loot_options.applies_to(node):
@@ -270,6 +278,8 @@ func _update_light_ui() -> void:
 		loot_options.call("update")
 	if door_options != null:
 		door_options.call("update")
+	if spawn_options != null:
+		spawn_options.call("update")
 	var target = objects.selected
 	if target == null and objects.preview != null and objects._selected_kind() == "light":
 		target = objects.preview
@@ -318,6 +328,8 @@ func _rebuild_palette() -> void:
 	palette.clear()
 	for entry: Dictionary in catalog.active_catalog:
 		palette.add_item(str(entry.get("name", "")))
+	if spawn_options != null:
+		spawn_options.call("update")
 
 
 func _show_structure_catalog() -> void:
@@ -393,6 +405,8 @@ func _apply_special_default_height(node: Node3D, kind: String) -> void:
 		_apply_new_light_defaults(node)
 	elif kind == "darkness" or kind == "exploration_darkness":
 		node.global_position.y = DARKNESS_DEFAULT_HEIGHT
+	elif kind == "spawn_point":
+		node.global_position.y = 0.0
 
 
 func _apply_new_light_defaults(node: Node3D) -> void:

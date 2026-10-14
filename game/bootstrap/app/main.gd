@@ -18,6 +18,7 @@ const BLAST_FEEDBACK := preload("res://game/bootstrap/app/blast_feedback.gd")
 const DEBUG_OVERLAY := preload("res://game/bootstrap/app/runtime_debug_overlay.gd")
 const OCCLUSION := preload("res://game/bootstrap/app/occlusion_effects.gd")
 const MISSION_LAYOUT := preload("res://game/bootstrap/app/mission_layout.gd")
+const WAVE_DIRECTOR := preload("res://game/features/spawning/public/wave_director.gd")
 
 @onready var player: Node3D = $Gameplay/Player
 @onready var enemies: Node3D = $Gameplay/Enemies
@@ -39,6 +40,7 @@ var _ended := false
 var _pause_open := false
 var planning_mode: Node
 var world_activation: Node
+var wave_director: Node
 var planning_lighting: Node
 var mutation_tree_ui: CanvasLayer
 var mission_layout: Node3D
@@ -77,6 +79,10 @@ func _ready() -> void:
 	world_activation.name = "WorldActivation"
 	add_child(world_activation)
 	world_activation.setup([planning_root, $Structure])
+	wave_director = WAVE_DIRECTOR.new()
+	wave_director.name = "WaveDirector"
+	add_child(wave_director)
+	wave_director.call("configure", enemies, player)
 	planning_lighting = $PlanningLighting
 	planning_lighting.setup($WorldEnvironment, $PlanningUI/Panel/VBox/LightingPreview, $PlanningUI/Panel/VBox/LocalLights)
 	mission_layout = MISSION_LAYOUT.new()

@@ -167,6 +167,8 @@ func _place(entry: Dictionary) -> void:
 	if node.has_method("configure_fixture"):
 		node.call("configure_fixture", str(record.get("fixture_shape", "point")), bool(record.get("fixture_visible_in_game", false)))
 		node.call("set_planning_visual", session.active)
+	if node.has_method("configure_spawn"):
+		node.call("set_planning_visual", session.active)
 	if node.has_method("set_authored_energy"):
 		node.set("energy_multiplier", float(record.get("energy_multiplier", 0.65)))
 		node.call("set_authored_energy", float(record.get("light_energy", node.call("get_authored_energy"))))

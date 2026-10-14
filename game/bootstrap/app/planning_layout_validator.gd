@@ -24,7 +24,7 @@ static func error(data: Dictionary) -> String:
 		for field: String in ["scale_x", "scale_y", "scale_z"]:
 			if record.has(field) and is_zero_approx(float(record[field])):
 				return "object %d has zero scale" % index
-		for field: String in ["display", "decor_pose", "blood_attachment", "loot", "enemy_stats"]:
+		for field: String in ["display", "decor_pose", "blood_attachment", "loot", "enemy_stats", "spawn_point"]:
 			if record.has(field) and not record[field] is Dictionary:
 				return "object %d has an invalid %s" % [index, field]
 		for field: String in ["display", "decor_pose"]:
@@ -32,6 +32,8 @@ static func error(data: Dictionary) -> String:
 			for number: String in ["seed", "facing"]:
 				if config.has(number) and not _number(config[number]):
 					return "object %d has an invalid %s.%s" % [index, field, number]
+		if record.has("spawn_triggers") and not record["spawn_triggers"] is Array:
+			return "object %d has an invalid spawn_triggers" % index
 		if record.has("door_lock") and not DOOR_OPTIONS.is_valid_state(record["door_lock"]):
 			return "object %d has an invalid door_lock" % index
 		for field: String in ["light_color", "blood_normal"]:

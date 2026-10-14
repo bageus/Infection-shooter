@@ -19,6 +19,7 @@
     "presentation.prototype_hud",
     "features.player",
     "features.infected",
+    "features.spawning",
     "features.infection_source",
     "features.pickups",
     "features.combat",

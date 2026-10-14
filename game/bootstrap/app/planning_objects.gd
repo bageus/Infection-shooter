@@ -181,7 +181,7 @@ func _rebuild_preview() -> void:
 	controls._configure_new_asset(preview, selected_entry)
 	preview.process_mode = Node.PROCESS_MODE_DISABLED
 	session.host.add_child(preview)
-	if _selected_kind() == "light" and preview.has_method("set_planning_visual"):
+	if _selected_kind() in ["light", "spawn_point"] and preview.has_method("set_planning_visual"):
 		preview.call_deferred("set_planning_visual", true)
 	geometry._set_preview_collision(preview, true)
 	controls._apply_special_default_height(preview, _selected_kind())
@@ -200,6 +200,8 @@ func _clear_preview() -> void:
 		controls.loot_options.hide()
 	if controls.door_options != null:
 		controls.door_options.hide()
+	if controls.spawn_options != null:
+		controls.spawn_options.hide()
 	controls.fixtures.selected_panel.hide()
 	controls.light_info.hide()
 	controls.light_level.hide()
@@ -291,7 +293,7 @@ func _place_selected(screen_pos: Vector2) -> void:
 			object.set_meta("planning_attachment", desk_id)
 			placed.append(object)
 		workstation_transforms[desk_id] = node.global_transform
-	if kind == "light" and node.has_method("set_planning_visual"):
+	if kind in ["light", "spawn_point"] and node.has_method("set_planning_visual"):
 		node.call("set_planning_visual", true)
 	_select(null)
 	_rebuild_preview()
