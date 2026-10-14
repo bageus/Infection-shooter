@@ -22,6 +22,8 @@ func _run() -> void:
 	var hit_viewport := app.get_node_or_null("HitEffectWarmup") as SubViewport
 	var hit_effects := hit_viewport.get_node_or_null("HitEffects") if hit_viewport != null else null
 	_check(hit_effects != null and hit_effects.get("effect_count") >= 8, "Hit effects (sparks, smoke, paper, dust, sheets, water) play once in a hidden viewport")
+	_check(hit_effects != null and hit_effects.get_node_or_null("ExtinguisherHitFx/Nozzle/Jet") != null and (hit_effects.get_node("ExtinguisherHitFx/Nozzle/Jet") as GPUParticles3D).emitting, "The extinguisher powder jet plays in the hidden viewport")
+	_check(hit_effects != null and hit_effects.get_children().any(func(n: Node) -> bool: return n.get_script() != null and str(n.get_script().resource_path).ends_with("extinguisher_burst.gd")), "The extinguisher rupture burst plays silently in the hidden viewport")
 	var blast := hit_effects.get_node_or_null("GrenadeExplosionVfx") if hit_effects != null else null
 	_check(blast != null and blast.get("muted") == true and blast.get_node("ImpactLight") != null, "A silent grenade blast (particles, smoke, light) plays in the hidden viewport")
 	for i in 8:
