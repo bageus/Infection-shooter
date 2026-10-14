@@ -1,8 +1,8 @@
 extends Node
 ## Destructible body parts of an infected or a corpse decoration (ADR-0017).
 ##
-## Owns per-part durability, bullet wounds painted on the skin (rest-space
-## wound shader), severing (bone collapse, stump, falling piece, bleeding) and
+## Owns per-part durability, bullet wounds baked into the skin's blood mask
+## (body_blood_bake.gd), severing (bone collapse, stump, falling piece, bleeding) and
 ## the bullet-only hit volumes that keep a corpse shootable. Gameplay effects
 ## of a lost part (death, slower walk, one-armed attacks) belong to the owner.
 
@@ -13,7 +13,7 @@ const MODIFIER := preload("res://game/features/infected/dismember_modifier.gd")
 const SEVERED := preload("res://game/features/infected/severed_part.gd")
 const HITBOX := preload("res://game/features/infected/body_part_hitbox.gd")
 const FX := preload("res://game/features/infected/blood_drip_fx.gd")
-const MAX_WOUNDS := 16
+const BLOOD_BAKE := preload("res://game/features/infected/body_blood_bake.gd")
 const TORSO := &"torso"
 const HUMANOID_PARTS := {
 	&"head": {"bones": ["Head"], "share": 0.6},
@@ -32,8 +32,6 @@ var world_scale := 1.0
 var parts: Dictionary = {}
 var _entries: Array = []
 var _data: Dictionary = {}
-var _wounds := PackedVector4Array()
-var _wound_cursor := 0
 var _modifier: SkeletonModifier3D
 var _hitboxes: Dictionary = {}
 var _cap_material: StandardMaterial3D
@@ -72,7 +70,6 @@ func setup(body_owner: Node3D, visual_root: Node3D, strength: float) -> bool:
 	if _entries.is_empty():
 		return false
 	_data = _entries[0].data
-	_wounds.resize(MAX_WOUNDS)
 	_build_parts(strength)
 	_modifier = MODIFIER.new()
 	_modifier.name = "Dismember"
@@ -203,18 +200,28 @@ func wound(part: StringName, hit_position: Vector3, direction: Vector3, world_ra
 	add_rest_wound(_to_rest(chosen.bone, entry), world_radius / maxf(world_scale, 0.01))
 
 
+# Bakes a wound into every surface's blood mask. Masks are created on the first
+# wound, so unhurt bodies keep no texture memory.
 func add_rest_wound(rest_position: Vector3, rest_radius: float) -> void:
 	if not enabled:
 		return
-	_wounds[_wound_cursor] = Vector4(rest_position.x, rest_position.y, rest_position.z, rest_radius)
-	_wound_cursor = (_wound_cursor + 1) % MAX_WOUNDS
-	_push_wounds()
-
-
-func _push_wounds() -> void:
 	for entry: Dictionary in _entries:
-		for material: ShaderMaterial in entry.materials:
-			material.set_shader_parameter("wounds", _wounds)
+		if not entry.has("masks"):
+			_create_masks(entry)
+		for surface in entry.masks.size():
+			var mask: Dictionary = entry.masks[surface]
+			if BLOOD_BAKE.paint(mask.image, entry.data.surfaces[surface], rest_position, rest_radius):
+				(mask.texture as ImageTexture).update(mask.image)
+
+
+func _create_masks(entry: Dictionary) -> void:
+	entry.masks = []
+	for material: ShaderMaterial in entry.materials:
+		var image := BLOOD_BAKE.create_mask()
+		var texture := ImageTexture.create_from_image(image)
+		material.set_shader_parameter("blood_mask", texture)
+		material.set_shader_parameter("use_blood_mask", true)
+		entry.masks.append({"image": image, "texture": texture})
 
 
 # Returns true when this damage severs the part.
@@ -236,11 +243,12 @@ func sever(part: StringName, direction: Vector3, spawn_piece := true) -> RigidBo
 	var root: int = info.bones[0]
 	var root_segment: Dictionary = info.segments[0]
 	var joint_world := _world(root, root_segment.start)
+	# Bake the cut first, so a piece copies the material with its stump already marked.
+	add_rest_wound(root_segment.start, float(root_segment.radius) * 1.35)
 	var piece: RigidBody3D = null
 	if spawn_piece:
 		piece = _spawn_piece(part, info, joint_world, direction)
 	_modifier.severed.append(root)
-	add_rest_wound(root_segment.start, float(root_segment.radius) * 1.35)
 	_add_stump(root, joint_world, float(root_segment.radius), spawn_piece)
 	_remove_hitboxes(part)
 	part_severed.emit(part, piece)
@@ -251,12 +259,7 @@ func _spawn_piece(part: StringName, info: Dictionary, joint_world: Vector3, dire
 	var entry: Dictionary = _entries[0]
 	var materials: Array = []
 	for material: ShaderMaterial in entry.materials:
-		var copy := material.duplicate() as ShaderMaterial
-		var piece_wounds := _wounds.duplicate()
-		var root_segment: Dictionary = info.segments[0]
-		piece_wounds[_wound_cursor] = Vector4(root_segment.start.x, root_segment.start.y, root_segment.start.z, float(root_segment.radius) * 1.25)
-		copy.set_shader_parameter("wounds", piece_wounds)
-		materials.append(copy)
+		materials.append(material.duplicate() as ShaderMaterial)
 	var built := MESH.build_piece(entry.data, info.bones, skeleton, materials)
 	if built.is_empty():
 		return null
