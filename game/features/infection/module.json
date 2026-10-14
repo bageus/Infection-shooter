@@ -9,10 +9,19 @@
     "Critical mutation threshold",
     "Control-loss and risk-window timers",
     "Control-loss escalation stage",
-    "Terminal control-loss defeat state"
+    "Terminal control-loss defeat state",
+    "Highest mutation reached and retained point budget",
+    "Per-level control ampule collection and exit compensation history"
   ],
   "public_api": [
     "public/infection_runtime.gd"
   ],
-  "dependencies": []
+  "dependencies": [],
+  "runtime_contracts": {
+    "progression_v1": {
+      "antidote_preview": "antidote_preview() -> Dictionary {version:1, can_use, before, after, forgotten:Array[String], dormant:Array[String], points_after, emergency}; pure preview of the same tree reconcile rules",
+      "begin_control_level": "begin_control_level(id:String) -> void; stable authored mission id",
+      "complete_control_level": "complete_control_level(id:String) -> int; compensate at most one missed ampule per completed level, reject mismatched/repeated ids"
+    }
+  }
 }

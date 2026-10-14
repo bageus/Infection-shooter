@@ -2,6 +2,7 @@ extends RefCounted
 
 # Builds the hover-card content for one mutation-tree circle from runtime state.
 
+const TEXT := preload("res://game/bootstrap/app/mutation_text.gd")
 const CARD := preload("res://game/bootstrap/app/mutation_skill_card.gd")
 const STYLE := preload("res://game/bootstrap/app/menu/menu_style.gd")
 const LIT := Color(0.3, 0.95, 0.1)
@@ -13,37 +14,37 @@ static func describe(runtime: Node, row: Array, skills: Array) -> Dictionary:
 	var enabled: bool = runtime.call("has_skill", str(row[0]))
 	var available: bool = runtime.call("can_upgrade_skill", str(row[0]))
 	var rank := int(row[3])
-	var info := {"title": str(row[1]), "body": str(row[5]), "rows": [], "status_color": STYLE.MUTED}
+	var info := {"title": TEXT.skill_name(str(row[0])), "body": TEXT.description(str(row[0])), "rows": [], "status_color": STYLE.MUTED}
 	if rank == 3:
-		info["kind"] = "Hybrid bonus  ·  " + str(row[2])
-		info["body"] = "%s\nAutomatic bonus: learn all three circles in both linked passive branches." % row[5]
+		info["kind"] = TEXT.t("mutationHybridBonus") + " · " + TEXT.branch(str(row[2]))
+		info["body"] = TEXT.description(str(row[0])) + "\n" + TEXT.t("mutationHybridHint")
 		for branch in str(row[2]).split(" + "):
 			var last := _branch_row(skills, branch, false, 2)
 			var complete := not last.is_empty() and bool(runtime.call("skill_learned", str(last[0])))
-			info["rows"].append(["%s branch" % branch, "complete" if complete else "incomplete", complete])
-		info["status"] = "Active" if enabled else "Inactive"
+			info["rows"].append([TEXT.branch(branch), TEXT.t("mutationComplete") if complete else TEXT.t("mutationIncomplete"), complete])
+		info["status"] = TEXT.t("mutationEnabled") if enabled else TEXT.t("mutationInactive")
 		info["status_color"] = LIT if enabled else STYLE.MUTED
 		return info
 	var active_group := skills.find(row) < 12
-	info["kind"] = "%s skill  ·  %s  ·  Stage %d" % ["Active" if active_group else "Passive", row[2], requirements["stage"]]
+	info["kind"] = TEXT.t("mutationSkillKind") % [TEXT.t("mutationActiveSkill") if active_group else TEXT.t("mutationPassiveSkill"), TEXT.branch(str(row[2])), requirements["stage"]]
 	var mutation := float(runtime.call("get_mutation"))
 	var stability := float(runtime.call("get_critical_threshold"))
-	info["rows"].append(["Mutation", "%d%% / %d%%" % [roundi(mutation), roundi(requirements["mutation"])], mutation >= float(requirements["mutation"])])
-	info["rows"].append(["Stability", "%d%% / %d%%" % [roundi(stability), roundi(requirements["stability"])], bool(requirements["branch_open"])])
+	info["rows"].append([TEXT.t("mutationAmount"), "%d%% / %d%%" % [roundi(mutation), roundi(requirements["mutation"])], mutation >= float(requirements["mutation"])])
+	info["rows"].append([TEXT.t("mutationControlThreshold"), "%d%% / %d%%" % [roundi(stability), roundi(requirements["stability"])], bool(requirements["branch_open"])])
 	if rank > 0:
 		var previous := _branch_row(skills, str(row[2]), active_group, rank - 1)
 		if not previous.is_empty():
-			info["rows"].append(["Previous: " + str(previous[1]), "learned" if runtime.call("skill_learned", str(previous[0])) else "missing", runtime.call("skill_learned", str(previous[0]))])
+			info["rows"].append([TEXT.t("mutationPrevious") + TEXT.skill_name(str(previous[0])), TEXT.t("mutationLearned") if runtime.call("skill_learned", str(previous[0])) else TEXT.t("mutationMissing"), runtime.call("skill_learned", str(previous[0]))])
 	if learned:
-		info["status"] = ("Learned" if enabled else "Learned  ·  dormant until requirements return") + ("  ·  locked" if runtime.call("skill_locked", str(row[0])) else "")
+		info["status"] = (TEXT.t("mutationLearned") if enabled else TEXT.t("mutationDormantHint")) + (" · " + TEXT.t("mutationLocked") if runtime.call("skill_locked", str(row[0])) else "")
 		info["status_color"] = LIT if enabled else Color("d9a441")
 	elif available:
-		info["status"] = "Click to learn"
+		info["status"] = TEXT.t("mutationClickLearn")
 		info["status_color"] = LIT
 	else:
 		var points: int = runtime.call("mutation_points")
-		info["rows"].append(["Mutation points", str(points), points > 0])
-		info["status"] = "Branch locked  ·  raise stability" if not requirements["branch_open"] else "Not available yet"
+		info["rows"].append([TEXT.t("mutationPoints"), str(points), points > 0])
+		info["status"] = TEXT.t("mutationBranchLockedHint") if not requirements["branch_open"] else TEXT.t("mutationUnavailable")
 		info["status_color"] = CARD.BAD
 	return info
 
