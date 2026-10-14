@@ -42,7 +42,7 @@ var _wander := Vector3.ZERO
 var _wandering := false
 var _wander_wait := 1.0
 var _idle_elapsed := 0.0
-var _idle_body := IDLE_BODY.new()
+var _idle_body: IDLE_BODY
 
 
 func watch() -> void:
@@ -93,6 +93,8 @@ func alert() -> bool:
 
 # One physics step while not chasing: look, listen, walk to a noise or back home.
 func step_unaware(actor: ACTOR, delta: float) -> void:
+	if _idle_body == null:
+		_idle_body = IDLE_BODY.new()
 	var target: Node3D = actor._target
 	_idle_elapsed += delta
 	if _check_sight(actor, target, delta):
