@@ -24,6 +24,8 @@ enum State { CRAWL, BRACE, RAM, RECOVER, SUMMON }
 @export var summon_interval := 12.0
 @export var summon_range := 24.0
 @export var summon_count := 3
+## Summons stop at this many living infected, the same cap the spawn waves obey.
+@export var summon_alive_cap := 90
 @export var summon_spawn_radius := 3.6
 
 var state: State = State.CRAWL
@@ -152,11 +154,13 @@ func _release_summon() -> void:
 	var scene := _summon_scene_for_health()
 	if scene == null:
 		return
-	# No alive-count gate: every cooldown may add another full wave.
-	for index in summon_count:
+	var count := mini(summon_count, summon_alive_cap - get_tree().get_node_count_in_group(&"infected_alive"))
+	if count <= 0:
+		return
+	for index in count:
 		var enemy := scene.instantiate() as CharacterBody3D
 		var shape := (enemy.get_node("CollisionShape3D") as CollisionShape3D).shape as CapsuleShape3D
-		var spot := _spawn_point(index, summon_count, shape.radius, shape.height * 0.5)
+		var spot := _spawn_point(index, count, shape.radius, shape.height * 0.5)
 		if spot == Vector3.INF:
 			enemy.free()
 			continue

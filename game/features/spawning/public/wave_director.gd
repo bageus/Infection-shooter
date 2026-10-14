@@ -12,6 +12,8 @@ const POINT_GROUP := &"enemy_spawn_points"
 const ALIVE_GROUP := &"infected_alive"
 const WAVE_STEP := 0.1
 const TRIGGER_POLL := 0.25
+## Infected instantiated per physics frame; a big batch is spread over several frames.
+const SPAWNS_PER_FRAME := 3
 
 var max_alive := WAVE_QUEUE.MAX_ALIVE
 
@@ -24,6 +26,7 @@ var _linked := {}
 var _spawned := {}
 var _scenes := {}
 var _spawn_index := {}
+var _backlog: Array[String] = []
 var _wave_clock := 0.0
 var _poll_clock := 0.0
 
@@ -68,6 +71,7 @@ func disarm() -> void:
 	_scenes.clear()
 	_spawn_index.clear()
 	_queue.clear()
+	_backlog.clear()
 	_armed = false
 	_wave_clock = 0.0
 	_poll_clock = 0.0
@@ -78,7 +82,7 @@ func is_armed() -> bool:
 
 
 func pending_total() -> int:
-	return _queue.total_pending()
+	return _queue.total_pending() + _backlog.size()
 
 
 func has_fired(point_id: String) -> bool:
@@ -100,6 +104,7 @@ func _physics_process(delta: float) -> void:
 	if _wave_clock >= WAVE_STEP:
 		advance(_wave_clock)
 		_wave_clock = 0.0
+	_drain_backlog()
 
 
 ## Starts the wave of every point whose linked infected have died.
@@ -121,9 +126,17 @@ func advance(delta: float) -> void:
 	var own := {}
 	for id: String in _spawned:
 		_spawned[id] = _spawned[id].filter(func(enemy: Variant) -> bool: return is_instance_valid(enemy) and not bool(enemy.call("is_dead")))
-		own[id] = _spawned[id].size()
-	for order in _queue.step(delta, alive_count(), max_alive, own):
-		_spawn(str(order["id"]), int(order["count"]))
+		own[id] = _spawned[id].size() + _backlog.count(id)
+	# Infected still waiting in the backlog already hold their slots under the cap.
+	for order in _queue.step(delta, alive_count() + _backlog.size(), max_alive, own):
+		for step in int(order["count"]):
+			_backlog.append(str(order["id"]))
+
+
+func _drain_backlog() -> void:
+	var budget := mini(SPAWNS_PER_FRAME, _backlog.size())
+	for step in budget:
+		_spawn(_backlog.pop_front(), 1)
 
 
 func _spawn(point_id: String, count: int) -> void:
