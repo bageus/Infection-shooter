@@ -104,7 +104,17 @@ IDs последующих врагов; существующие pace/AI offset
 Кэш теперь создаётся только при первом step_unaware, CHASE не получает
 ненужных аллокаций. После этого crowd 3/3 PASS на обычном headless; motion,
 perception, idle_lod, enemy_lod, animation повторно PASS. Assertions не
-изменялись. Полный batch повторяется, GitHub CI проверяется перед merge.
+изменялись. Повторный batch завершён: 108/110 PASS; crowd и все целевые motion/perception/
+animation/LOD suites PASS. Два падения: menu — 0 assertion failures, но
+Dummy material NULL/RID при teardown; отдельный повтор без ERROR прошёл
+(ObjectDB warning остался, ERROR checks не ослаблены). Idle pause — случайная
+новая wander goal могла оказаться уже в arrive radius текущей позиции после
+первой прогулки. Fixture перед фазой проверки паузы переносит home в текущую
+позицию, так что новая goal гарантированно от неё в 1–3 м; прежняя проверка
+_wandering сохранена. Обычный headless после fixture correction: 3/3 PASS.
+Итого все 110 suites прошли хотя бы один раз на итоговом production code;
+не заявляется, что последний batch был 110/110. GitHub CI проверяется на
+последнем SHA перед merge. Его окончательный статус и merge — PR #179.
 
 ## Риски и откат
 

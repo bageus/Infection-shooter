@@ -95,6 +95,8 @@ func _run() -> void:
 		var traveled := actor.position.distance_to(actor.senses._home)
 		_check(traveled > 1.2 and traveled < 1.7, "Idle LOD offset %d walks at 1.4 m/s (%f m)" % [actor._lod_frame_offset, traveled])
 		_check(actor.senses._state_time > 0.8 and actor.senses._state_time < 1.3, "Idle LOD clocks advance simulation time")
+		# Test pause expiry, not an immediate arrival at a randomly nearby goal.
+		actor.senses._home = actor.position
 		actor._mobility = 0.0
 		actor.senses._wandering = false
 		actor.senses._wander_wait = 1.0
