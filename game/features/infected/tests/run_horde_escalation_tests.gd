@@ -8,8 +8,11 @@ var failures := 0
 
 class Target:
 	extends Node3D
-	func take_damage(_amount: float, _kind := "physical") -> void:
-		pass
+	var damage_taken := 0.0
+	var hits := 0
+	func take_damage(amount: float, _kind := "physical") -> void:
+		damage_taken += amount
+		hits += 1
 
 
 func _initialize() -> void:
@@ -60,6 +63,7 @@ func _run() -> void:
 		for child in previous:
 			_check(not child.is_dead(), "Earlier summons stay alive")
 		previous.append_array(wave)
+	_test_ram_damage(horde, target)
 	await _test_blocked_spawn(stage, horde, previous.size())
 	horde.health = 0.0
 	horde._release_summon()
@@ -72,6 +76,23 @@ func _run() -> void:
 	await process_frame
 	print("Horde escalation tests: %d failure(s)." % failures)
 	quit(failures)
+
+
+func _test_ram_damage(horde: CharacterBody3D, target: Target) -> void:
+	horde._summon_cooldown = 1000.0
+	horde.health = 150.0
+	target.position = horde.position + Vector3.FORWARD
+	var before := target.damage_taken
+	for _i in 60:
+		horde._try_attack()
+	_check(target.damage_taken == before, "Horde has no repeated melee swipe; unused interval is not its actual DPS")
+	horde._enter(2) # RAM
+	horde._ram_struck = false
+	for _i in 60:
+		horde._tick_ram(1.0 / 60.0, Vector3.FORWARD)
+	_check(target.damage_taken - before == 14.0 and target.hits == 1, "A whole ram deals one14-damage hit, not damage every tick")
+	_check(horde.attack_interval == 1.0, "Inherited attack interval matches the owner-approved value")
+	_check(horde.ram_cooldown + horde.ram_recover_seconds + horde.ram_brace_seconds >= 1.0, "Real ram cycle stays below the approved14 DPS ceiling")
 
 
 func _test_blocked_spawn(stage: Node3D, horde: CharacterBody3D, before: int) -> void:
