@@ -40,7 +40,8 @@ var actor_catalog = [
 	{"name":"Brute","path":ENEMY_SCENES[4],"kind":"enemy"},
 	{"name":"Titan","path":ENEMY_SCENES[5],"kind":"enemy"},
 	{"name":"Colossus","path":ENEMY_SCENES[6],"kind":"enemy"},
-	{"name":"Horde","path":ENEMY_SCENES[7],"kind":"enemy"}
+	{"name":"Horde","path":ENEMY_SCENES[7],"kind":"enemy"},
+	{"name":"Spawn Hole (wave)","path":"res://game/features/spawning/public/spawn_point.tscn","kind":"spawn_point"}
 ]
 
 var item_catalog = [

@@ -1,6 +1,7 @@
 extends RefCounted
 const BLOOD_PLACEMENT := preload("res://game/bootstrap/app/planning_blood_placement.gd")
 
+const WAVE_DIRECTOR := preload("res://game/features/spawning/public/wave_director.gd")
 const LIMIT := 32
 
 var planner: Variant
@@ -15,7 +16,8 @@ func record_transform(node: Node3D) -> void:
 		"fixture": node.call("get_fixture_config") if node.has_method("get_fixture_config") else {},
 		"light_color": node.call("get_authored_color") if node.has_method("get_authored_color") else null,
 		"light_energy": node.get_meta("planning_light_energy", -1.0), "light_angle": node.get_meta("planning_light_angle", -1.0),
-		"loot": _loot_of(node), "enemy_stats": node.call("get_enemy_stats") if node.has_method("configure_stats") else {}})
+		"loot": _loot_of(node), "enemy_stats": node.call("get_enemy_stats") if node.has_method("configure_stats") else {},
+		"spawn": _spawn_of(node), "spawn_triggers": node.get_meta(WAVE_DIRECTOR.TRIGGER_META, [])})
 
 
 func record_player_spawn() -> void:
@@ -91,6 +93,7 @@ func undo() -> void:
 						spot.spot_angle = float(action["light_angle"])
 						node.set_meta("planning_light_angle", spot.spot_angle)
 				_apply_loot(node, action.get("loot", {}), action.get("enemy_stats", {}))
+				_apply_spawn(node, action.get("spawn", {}), action.get("spawn_triggers", []))
 				planner._sync_workstations()
 				if planner.selected == node:
 					planner._select(node)
@@ -125,7 +128,22 @@ func _capture(node: Node3D) -> Dictionary:
 		"light_angle": float(node.get_meta("planning_light_angle", -1.0)),
 		"flicker_mode": int(node.get_meta("planning_flicker_mode", 0)), "flicker_step": float(node.get_meta("planning_flicker_step", 0.2)),
 		"blood": node.call("get_blood_config") if node.has_method("get_blood_config") else {},
-		"loot": _loot_of(node), "enemy_stats": node.call("get_enemy_stats") if node.has_method("configure_stats") else {}}
+		"loot": _loot_of(node), "enemy_stats": node.call("get_enemy_stats") if node.has_method("configure_stats") else {},
+		"spawn": _spawn_of(node), "spawn_triggers": node.get_meta(WAVE_DIRECTOR.TRIGGER_META, [])}
+
+
+func _spawn_of(node: Node3D) -> Dictionary:
+	return node.call("get_spawn_config") if node.has_method("get_spawn_config") else {}
+
+
+## Spawn point settings and the waves an infected starts come back with an undo.
+func _apply_spawn(node: Node3D, spawn: Dictionary, triggers: Array) -> void:
+	if node.has_method("configure_spawn") and not spawn.is_empty():
+		node.call("configure_spawn", spawn)
+	if triggers.is_empty():
+		node.remove_meta(WAVE_DIRECTOR.TRIGGER_META)
+	else:
+		node.set_meta(WAVE_DIRECTOR.TRIGGER_META, triggers)
 
 
 ## Authored loot is kept only where it was set, so old objects stay untouched.
@@ -199,6 +217,7 @@ func _restore(record: Dictionary, offset: Vector3, new_desk: bool) -> Node3D:
 	if node.has_method("configure_flicker"):
 		node.call("configure_flicker", int(record["flicker_mode"]), float(record["flicker_step"]))
 	_apply_loot(node, record.get("loot", {}), record.get("enemy_stats", {}))
+	_apply_spawn(node, record.get("spawn", {}), record.get("spawn_triggers", []))
 	if node.has_method("set_target") and str(record["kind"]) == "enemy":
 		node.call("set_target", planner.main_player)
 	planner.placed.append(node)
