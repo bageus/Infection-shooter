@@ -381,7 +381,7 @@ func _desired_velocity_from_offset(offset: Vector3) -> Vector3:
 	var radius := .35
 	if collision_shape != null and collision_shape.shape is CapsuleShape3D:
 		radius = (collision_shape.shape as CapsuleShape3D).radius * global_basis.x.length()
-	var route_direction: Vector3 = _route.direction(self, _target, radius)
+	var route_direction: Vector3 = _route.direction(self, _target, radius, _sleeping_far)
 	if distance <= attack_range and _route.direct_clear():
 		_try_attack()
 		return Vector3.ZERO

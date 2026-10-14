@@ -38,6 +38,7 @@ func _run() -> void:
 	_check(from.distance_to(target.position) < 1.0, "Route reaches the target side of the wall")
 	await _shared_budget(stage, actor, target)
 	await _priority_and_age(stage, actor, target)
+	await _crowd_probe_cap(stage, actor, target)
 	wall.queue_free()
 	await physics_frame
 	await process_frame
@@ -134,4 +135,29 @@ func _priority_and_age(stage: Node3D, actor: CharacterBody3D, target: Node3D) ->
 	budget.cancel(far_route)
 	budget.cancel(near_route)
 	nearby.queue_free()
+	budget.queue_free()
+
+
+func _crowd_probe_cap(stage: Node3D, actor: CharacterBody3D, target: Node3D) -> void:
+	var budget := BUDGET.new()
+	stage.add_child(budget)
+	budget.set_physics_process(false)
+	await physics_frame
+	var probed := 0
+	var routes: Array[RefCounted] = []
+	for index in 40:
+		var route := ROUTE.new()
+		route.configure_budget(budget)
+		routes.append(route)
+		route.direction(actor, target, .35)
+		# A route that ran its direct check scheduled the next one 6 frames ahead.
+		if int(route.get("_next_probe")) > Engine.get_physics_frames():
+			probed += 1
+	_check(probed == ROUTE.DIRECT_PROBES_PER_FRAME, "A crowd shares a fixed number of direct checks per frame (%d)" % probed)
+	var queued := budget.pending_count()
+	routes[0].release()
+	_check(budget.pending_count() <= queued and routes[0].path.is_empty() and routes[0].direct_clear(), "Releasing a route drops its search and path")
+	for route in routes:
+		route.release()
+	_check(budget.pending_count() == 0, "Released routes leave nothing queued")
 	budget.queue_free()

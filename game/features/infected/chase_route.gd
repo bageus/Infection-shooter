@@ -2,6 +2,15 @@ extends RefCounted
 ## Bounded local A*: paths use actual physics clearance and never disable walls.
 const HEAP := preload("res://game/features/infected/route_priority_queue.gd")
 const CELL := .8
+## Mission-wide cap on clearance sweeps made by moving enemies per physics frame, so a crowd
+## cannot push one step past the frame budget. Searches have their own budget node.
+const DIRECT_PROBES_PER_FRAME := 10
+const PATH_PROBES_PER_FRAME := 16
+## A direct check this overdue runs regardless of the cap, so no enemy starves.
+const MAX_PROBE_DELAY := 12
+static var _probe_frame := -1
+static var _direct_used := 0
+static var _path_used := 0
 const MAX_EXPANSIONS := 192
 const SEARCH_RADIUS := 18
 const DIRECTIONS: Array[Vector2i] = [Vector2i(1, 0), Vector2i(-1, 0), Vector2i(0, 1), Vector2i(0, -1),
@@ -9,6 +18,7 @@ const DIRECTIONS: Array[Vector2i] = [Vector2i(1, 0), Vector2i(-1, 0), Vector2i(0
 var path: Array[Vector3] = []
 var _next_search := 0
 var _next_probe := 0
+var _denied_since := -1
 var _direct := true
 var _goal := Vector3.INF
 var _radius := .35
@@ -30,7 +40,15 @@ func configure_budget(budget: Node) -> void:
 	_budget = budget
 
 
-func direction(actor: CharacterBody3D, target: Node3D, radius: float) -> Vector3:
+## A far enemy is out of sight and ticks rarely: it heads straight for the target and plans
+## around walls (physics sweeps, A*) only once it is inside the enemy's sleep distance.
+func direction(actor: CharacterBody3D, target: Node3D, radius: float, far: bool = false) -> Vector3:
+	if far:
+		if not path.is_empty() or _next_probe != 0:
+			release()
+		var offset := target.global_position - actor.global_position
+		offset.y = 0.0
+		return offset.normalized()
 	var frame := Engine.get_physics_frames()
 	_clearance_cache.clear()
 	_space = actor.get_world_3d().direct_space_state
@@ -43,7 +61,7 @@ func direction(actor: CharacterBody3D, target: Node3D, radius: float) -> Vector3
 	var from := actor.global_position
 	var to := target.global_position
 	to.y = _height
-	if frame >= _next_probe:
+	if frame >= _next_probe and _take_direct_probe(frame):
 		_next_probe = frame + 6
 		_direct = clear_segment(from, to)
 	if _direct:
@@ -62,13 +80,57 @@ func direction(actor: CharacterBody3D, target: Node3D, radius: float) -> Vector3
 		return Vector3.ZERO
 	# Skip intermediate cells only when the actor's whole width fits.
 	var shortcuts := 0
-	while path.size() > 1 and shortcuts < 4 and clear_segment(from, path[1]):
+	while path.size() > 1 and shortcuts < 4 and _take_path_probe(frame) and clear_segment(from, path[1]):
 		shortcuts += 1
 		path.pop_front()
-	if not clear_segment(from, path[0]):
+	# Over the cap the next waypoint is trusted; the capsule still stops at walls.
+	if _take_path_probe(frame) and not clear_segment(from, path[0]):
 		_next_search = 0
 		return Vector3.ZERO
 	return (path[0] - from).normalized()
+
+
+func _roll_probe_frame(frame: int) -> void:
+	if frame != _probe_frame:
+		_probe_frame = frame
+		_direct_used = 0
+		_path_used = 0
+
+
+func _take_direct_probe(frame: int) -> bool:
+	if not is_instance_valid(_budget):
+		return true
+	_roll_probe_frame(frame)
+	if _direct_used >= DIRECT_PROBES_PER_FRAME:
+		if _denied_since < 0:
+			_denied_since = frame
+		if frame - _denied_since < MAX_PROBE_DELAY:
+			return false
+	_denied_since = -1
+	_direct_used += 1
+	return true
+
+
+func _take_path_probe(frame: int) -> bool:
+	if not is_instance_valid(_budget):
+		return true
+	_roll_probe_frame(frame)
+	if _path_used >= PATH_PROBES_PER_FRAME:
+		return false
+	_path_used += 1
+	return true
+
+
+## Drops the queued search and the stored path of an actor that no longer steers around walls.
+func release() -> void:
+	if is_instance_valid(_budget):
+		_budget.call("cancel", self)
+	path.clear()
+	_search_state.clear()
+	_direct = true
+	_next_probe = 0
+	_denied_since = -1
+	_next_search = 0
 
 
 func search_requested(actor: CharacterBody3D, target: Node3D) -> bool:
