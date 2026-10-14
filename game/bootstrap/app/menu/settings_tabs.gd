@@ -102,6 +102,13 @@ func _general() -> void:
 	antidotes.button_pressed = dialog.view.preferences.values.infinite_antidotes
 	antidotes.toggled.connect(func(value: bool) -> void: dialog.call("_change", "infinite_antidotes", value))
 	dialog.get("layout").add_child(antidotes)
+	var dodge := OptionButton.new()
+	dodge.name = "DodgeAnimation"
+	dodge.add_item(dialog.view.text("dodgeAnimationRoll"))
+	dodge.add_item(dialog.view.text("dodgeAnimationStrafe"))
+	dodge.selected = dialog.view.preferences.values.dodge_animation
+	dodge.item_selected.connect(func(index: int) -> void: dialog.call("_change", "dodge_animation", index))
+	dialog.call("_row", "dodgeAnimation", dodge)
 	notices.set_notice(0, dialog.view.text("testMutagenHint"))
 
 
