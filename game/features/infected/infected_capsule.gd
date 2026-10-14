@@ -29,8 +29,8 @@ const MAX_WINDUP_SECONDS := 0.35
 # Public v1 presentation facts: no effect ownership or renderer dependency.
 signal projectile_blood(position: Vector3, direction: Vector3, weapon: String, excluded: Array[RID], source_id: int)
 signal blood_wounded(position: Vector3, excluded: Array[RID])
-signal wounded_moved(previous: Vector3, current: Vector3, excluded: Array[RID])
-signal body_dragged(previous: Vector3, current: Vector3, excluded: Array[RID])
+@warning_ignore("unused_signal") signal wounded_moved(previous: Vector3, current: Vector3, excluded: Array[RID])
+@warning_ignore("unused_signal") signal body_dragged(previous: Vector3, current: Vector3, excluded: Array[RID])
 signal blood_death(position: Vector3, excluded: Array[RID], death_id: int)
 # Public v1 presentation fact (ADR-0017): a body part was shot off here.
 signal limb_severed(position: Vector3, direction: Vector3, excluded: Array[RID])
@@ -196,15 +196,15 @@ func watch_target(target: Node3D) -> void:
 func is_alerted() -> bool: return _senses.is_chasing()
 
 
-# Gunshot or blast at `position`: unaware infected within `radius` come to look.
-func hear_noise(position: Vector3, radius: float) -> void:
+# Gunshot or blast at `at`: unaware infected within `radius` come to look.
+func hear_noise(at: Vector3, radius: float) -> void:
 	if not _dead:
-		_senses.hear(self, position, minf(radius, hearing_range))
+		_senses.hear(self, at, minf(radius, hearing_range))
 
 
 # A neighbour spotted the player and cried out.
-func hear_alert(position: Vector3, radius: float) -> void:
-	if not _dead and position.distance_to(global_position) <= radius:
+func hear_alert(at: Vector3, radius: float) -> void:
+	if not _dead and at.distance_to(global_position) <= radius:
 		_senses.alert()
 
 

@@ -203,8 +203,6 @@ func _clear_preview() -> void:
 		controls.loot_options.hide()
 	if controls.door_options != null:
 		controls.door_options.hide()
-	if controls.spawn_options != null:
-		controls.spawn_options.hide()
 	controls.fixtures.selected_panel.hide()
 	controls.light_info.hide()
 	controls.light_level.hide()
@@ -213,6 +211,8 @@ func _clear_preview() -> void:
 	if preview != null and is_instance_valid(preview):
 		preview.queue_free()
 	preview = null
+	if controls.spawn_options != null:
+		controls.spawn_options.update()
 
 
 func _update_preview(screen_pos: Vector2) -> void:

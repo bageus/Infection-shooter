@@ -105,7 +105,7 @@ func _process(delta: float) -> void:
 		_fire_duck = maxf(0.0, _fire_duck - delta)
 		var duck_target := FIRE_DUCK_DB if _fire_duck > 0.0 else 0.0
 		_duck_db = move_toward(_duck_db, duck_target, delta * FIRE_DUCK_DB / 0.1)
-		_spin_sound.volume_db = lerpf(-60.0, -12.0, _spin) - _duck_db
+		_spin_sound.volume_db = lerpf(-60.0, -24.0, _spin) - _duck_db
 		if _spin > 0.001 and not _spin_sound.playing:
 			_spin_sound.play()
 		elif _spin <= 0.001 and _spin_sound.playing:
