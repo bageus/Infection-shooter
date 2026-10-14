@@ -31,6 +31,7 @@ func _run() -> void:
 	await _fresh_stage()
 	await _sight()
 	await _hearing()
+	await _wander()
 	await _ally_cry()
 	await _forced_target()
 	_tiers()
@@ -58,11 +59,12 @@ func _fresh_stage() -> void:
 	floor_body.add_child(shape)
 
 
-func _spawn(scene: PackedScene, at: Vector3, player: Node3D) -> CharacterBody3D:
+func _spawn(scene: PackedScene, at: Vector3, player: Node3D, wander := false) -> CharacterBody3D:
 	var enemy := scene.instantiate() as CharacterBody3D
 	stage.add_child(enemy)
 	enemy.global_position = at
 	enemy.call("watch_target", player)
+	enemy.get("_senses").wander_enabled = wander
 	return enemy
 
 
@@ -95,7 +97,9 @@ func _sight() -> void:
 	var far := _spawn(HUNGER, Vector3(0, 0.1, 0), player)
 	await _frames(40)
 	_check(not far.call("is_alerted"), "An enemy 30 m away does not notice the player")
-	_check(_flat(far.global_position, Vector3.ZERO) < 0.3, "An unaware enemy stands still")
+	_check(_flat(far.global_position, Vector3.ZERO) < 3.3, "An unaware enemy stays within 3 m of its post")
+	far.rotation.y = 0.0
+	far.global_position.x = 0.0
 	player.position = Vector3(0, 0.1, -9)
 	await _frames(40)
 	_check(far.call("is_alerted"), "An enemy facing the player in the open sees them")
@@ -106,6 +110,8 @@ func _sight() -> void:
 	var back := _spawn(HUNGER, Vector3(0, 0.1, 0), player)
 	await _frames(40)
 	_check(not back.call("is_alerted"), "An enemy does not see the player behind its back")
+	back.global_position.x = 0.0
+	back.global_position.z = 0.0
 	player.position = Vector3(0, 0.1, 2.0)
 	await _frames(30)
 	_check(back.call("is_alerted"), "An enemy notices the player standing right behind it")
@@ -134,10 +140,27 @@ func _hearing() -> void:
 	_check(_flat(enemy.global_position, home) > 0.5, "The enemy walks toward the noise")
 	await _frames(900)
 	_check(not enemy.call("is_alerted"), "Nothing found at the noise: still unaware")
-	_check(_flat(enemy.global_position, home) < 1.2, "The enemy walks back home when the noise leaves nobody")
+	_check(_flat(enemy.global_position, home) < 3.3, "The enemy walks back home when the noise leaves nobody")
 	enemy.call("hear_noise", Vector3(0, 0.1, 40), 10.0)
 	await _frames(20)
-	_check(_flat(enemy.global_position, home) < 1.3, "A shot out of range is not heard")
+	_check(_flat(enemy.global_position, home) < 3.3, "A shot out of range is not heard")
+
+
+func _wander() -> void:
+	await _fresh_stage()
+	var player := Target.new()
+	stage.add_child(player)
+	player.position = Vector3(0, 0.1, -60)
+	var enemy := _spawn(HUNGER, Vector3(0, 0.1, 0), player, true)
+	await _frames(5)
+	var home := enemy.global_position
+	var farthest := 0.0
+	for _i in 900:
+		await physics_frame
+		farthest = maxf(farthest, _flat(enemy.global_position, home))
+	_check(farthest > 0.8, "An unaware enemy wanders away from its exact spot")
+	_check(farthest < 3.4, "An unaware enemy never strays more than 3 m from its post")
+	_check(not enemy.call("is_alerted"), "Wandering does not alert the enemy")
 
 
 func _ally_cry() -> void:

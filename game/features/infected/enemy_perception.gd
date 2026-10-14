@@ -13,10 +13,15 @@ const INVESTIGATE_TIMEOUT := 14.0
 const ARRIVE_DISTANCE := 1.4
 const HOME_ARRIVE_DISTANCE := 0.8
 const WALK_FACTOR := 0.6
+const WANDER_FACTOR := 0.35
+const WANDER_MIN := 1.0
+const WANDER_MAX := 3.0
+const WANDER_TIMEOUT := 6.0
 const GLASS_GROUP := "infected_breakable_glass"
 
 var state := State.CHASE
 var forced := false
+var wander_enabled := true
 var sight_range := 18.0
 var close_notice_range := 3.5
 var fov_cos := cos(deg_to_rad(65.0))
@@ -29,6 +34,9 @@ var _noise := Vector3.ZERO
 var _state_time := 0.0
 var _sight_wait := 0.0
 var _lure: Node3D
+var _wander := Vector3.ZERO
+var _wandering := false
+var _wander_wait := 1.0
 
 
 func watch() -> void:
@@ -112,6 +120,8 @@ func tick(actor: CharacterBody3D, delta: float, target: Node3D, route, radius: f
 			state = State.CHASE
 			return Vector3.ZERO
 	match state:
+		State.UNAWARE:
+			return _idle_wander(actor, delta, route, radius, speed)
 		State.INVESTIGATE:
 			return _walk(actor, route, _noise, radius, speed * WALK_FACTOR, ARRIVE_DISTANCE, State.SEARCH)
 		State.SEARCH:
@@ -124,6 +134,27 @@ func tick(actor: CharacterBody3D, delta: float, target: Node3D, route, radius: f
 				actor.rotation.y = _home_yaw
 			return back
 	return Vector3.ZERO
+
+
+# At its post an unaware infected strolls 1-3 m from home in a random direction, pausing between steps.
+func _idle_wander(actor: CharacterBody3D, delta: float, route, radius: float, speed: float) -> Vector3:
+	if not wander_enabled:
+		return Vector3.ZERO
+	if not _wandering:
+		_wander_wait -= delta
+		if _wander_wait <= 0.0:
+			var angle := randf() * TAU
+			_wander = _home + Vector3(cos(angle), 0.0, sin(angle)) * randf_range(WANDER_MIN, WANDER_MAX)
+			_wandering = true
+			_state_time = 0.0
+		return Vector3.ZERO
+	var flat := _wander - actor.global_position
+	flat.y = 0.0
+	if flat.length() <= 0.4 or _state_time > WANDER_TIMEOUT:
+		_wandering = false
+		_wander_wait = randf_range(1.5, 4.0)
+		return Vector3.ZERO
+	return _walk(actor, route, _wander, radius, speed * WANDER_FACTOR, 0.4, State.UNAWARE)
 
 
 func _walk(actor: CharacterBody3D, route, goal: Vector3, radius: float, speed: float, arrive: float, next: State) -> Vector3:
@@ -146,6 +177,7 @@ func _walk(actor: CharacterBody3D, route, goal: Vector3, radius: float, speed: f
 func _enter(next: State) -> void:
 	state = next
 	_state_time = 0.0
+	_wandering = false
 
 
 func can_see(actor: Node3D, target: Node3D) -> bool:
