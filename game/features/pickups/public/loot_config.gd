@@ -5,10 +5,10 @@ extends RefCounted
 const MODES: Array[String] = ["empty", "manual", "auto"]
 const WEAPON_PREFIX := "weapon_"
 const WEAPON_NAMES: Array[String] = ["Pistol", "Uzi", "Shotgun", "Launcher", "AK", "M4", "Sniper", "Minigun"]
-const SUPPLIES: Array[String] = ["ammo_pistol", "ammo_uzi", "ammo_shotgun", "medkit", "antidote", "dna"]
+const SUPPLIES: Array[String] = ["ammo_pistol", "ammo_uzi", "ammo_shotgun", "ammo_automate", "ammo_sniper", "ammo_minigun", "medkit", "antidote", "dna"]
 const MAX_COUNT := 9
 ## Antidote and DNA are rarer than other supplies in auto loot.
-const AUTO_WEIGHTS := {"ammo_pistol": 1.0, "ammo_uzi": 1.0, "ammo_shotgun": 1.0, "medkit": 1.0, "antidote": 0.35, "dna": 0.2}
+const AUTO_WEIGHTS := {"ammo_pistol": 0.75, "ammo_uzi": 0.60, "ammo_shotgun": 0.60, "ammo_automate": 0.60, "ammo_sniper": 0.15, "ammo_minigun": 0.30, "medkit": 1.0, "antidote": 0.35, "dna": 0.2}
 const STAT_MIN := 50.0
 const STAT_MAX := 200.0
 
@@ -55,17 +55,22 @@ static func manual_list(config: Dictionary) -> Array[String]:
 static func auto_list(size_hint: String) -> Array[String]:
 	var list: Array[String] = []
 	var count := randi_range(2, 4) if size_hint == "large" else randi_range(1, 2)
-	var total := 0.0
-	for weight: float in AUTO_WEIGHTS.values():
-		total += weight
 	for _i in count:
-		var roll := randf() * total
-		for id: String in AUTO_WEIGHTS:
-			roll -= float(AUTO_WEIGHTS[id])
-			if roll <= 0.0:
-				list.append(id)
-				break
+		list.append(weighted_item(randf(), AUTO_WEIGHTS))
 	return list
+
+
+## A unit-interval roll, shared by enemy and crate loot; keeps the ammo budget fixed.
+static func weighted_item(unit_roll: float, weights: Dictionary) -> String:
+	var total := 0.0
+	for weight: float in weights.values():
+		total += maxf(0.0, weight)
+	var roll := clampf(unit_roll, 0.0, 0.999999) * total
+	for id: String in weights:
+		roll -= maxf(0.0, float(weights[id]))
+		if roll < 0.0:
+			return id
+	return ""
 
 
 static func sanitize_stats(raw: Variant) -> Dictionary:
