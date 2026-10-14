@@ -25,7 +25,8 @@ var wander_enabled := true
 var sight_range := 18.0
 var close_notice_range := 3.5
 var fov_cos := cos(deg_to_rad(65.0))
-var alert_radius := 16.0
+var hearing := preload("res://game/features/infected/hearing_profile.gd").new()
+var _alert_announced := false
 
 var _home := Vector3.ZERO
 var _home_yaw := 0.0
@@ -43,10 +44,12 @@ func watch() -> void:
 	forced = false
 	state = State.UNAWARE
 	_home_ready = false
+	_alert_announced = false
 
 
 func force_chase() -> void:
 	forced = true
+	_alert_announced = true
 	state = State.CHASE
 
 
@@ -65,13 +68,26 @@ func noise_position() -> Vector3:
 func hear(actor: Node3D, position: Vector3, radius: float) -> void:
 	if state == State.CHASE:
 		return
-	var offset := position - actor.global_position
-	if offset.length() > radius:
+	if not hearing.reaches(actor, position, radius):
 		return
-	if state != State.INVESTIGATE or position.distance_to(_noise) > 2.0:
+	if state != State.INVESTIGATE or position.distance_to(_noise) > hearing.investigate_refresh_distance:
 		_state_time = 0.0
 	_noise = position
 	state = State.INVESTIGATE
+
+
+func hear_ally(actor: Node3D, position: Vector3, radius: float) -> void:
+	if state != State.CHASE and hearing.reaches(actor, position + Vector3.UP * hearing.ear_height, radius):
+		alert()
+		_alert_announced = true
+
+
+func notice_player(actor: Node3D, audio: Node) -> void:
+	var newly_alerted := alert()
+	if newly_alerted or not _alert_announced:
+		_alert_announced = true
+		audio.call("alert_shout")
+		actor.get_tree().call_group(ALERT_GROUP, "hear_alert", actor.global_position, hearing.alert_radius)
 
 
 func alert() -> bool:

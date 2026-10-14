@@ -8,6 +8,7 @@ script = ExtResource("script")
 bullet_scene = ExtResource("bullet")
 casing_scene = ExtResource("casing")
 weapon_name = "M4"
+shot_noise_radius = 28.0
 fire_mode = "auto"
 shots_per_second = 11.0
 magazine_size = 36

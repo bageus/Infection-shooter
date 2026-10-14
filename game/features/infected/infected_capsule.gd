@@ -52,7 +52,8 @@ var _intended_motion := Vector3.ZERO
 ## 0 never attacks props, 1 smashes small props and partitions, 2 anything destructible.
 @export_range(0, 2) var breaker_tier := 0
 @export var sight_range := 18.0
-@export var hearing_range := 26.0
+@export var hearing_range := 50.0
+@export var hearing_profile := preload("res://game/features/infected/hearing_profile.gd").new()
 @export var obstacle_attack_interval: float = 0.45
 @export var full_simulation_distance: float = 14.0
 @export var sleep_distance: float = 32.0
@@ -140,6 +141,7 @@ func _ready() -> void:
 	_authoring.apply_saved_stats()
 	_breaker.tier = breaker_tier
 	_senses.sight_range = sight_range
+	_senses.hearing = hearing_profile
 	health = max_health
 	_blood.reset(global_position)
 	_ai_tick_offset = get_instance_id() % 4
@@ -205,14 +207,12 @@ func hear_noise(at: Vector3, radius: float) -> void:
 
 # A neighbour spotted the player and cried out.
 func hear_alert(at: Vector3, radius: float) -> void:
-	if not _dead and at.distance_to(global_position) <= radius:
-		_senses.alert()
+	if not _dead:
+		_senses.hear_ally(self, at, radius)
 
 
 func _notice_player() -> void:
-	if _senses.alert():
-		audio.alert_shout()
-		get_tree().call_group(PERCEPTION.ALERT_GROUP, "hear_alert", global_position, _senses.alert_radius)
+	_senses.notice_player(self, audio)
 
 
 func apply_player_push(direction: Vector3, strength: float) -> void:
