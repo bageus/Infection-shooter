@@ -21,8 +21,11 @@ var _game_lighting := true
 const MAX_LIGHTS := 28
 const MAX_SHADOW_LIGHTS := 6
 const REFRESH_SECONDS := 0.15
+## Squared-distance weight for a lamp that already has shadows (0.7 m per 1 m).
+const SHADOW_KEEP_BIAS := 0.49
 var shadows_allowed := true
 var _refresh_left := 0.0
+var _shadow_owners := {}
 
 
 func setup(environment_node: WorldEnvironment, selector: OptionButton = null, local_toggle: CheckButton = null) -> void:
@@ -90,10 +93,15 @@ func refresh_light_budget() -> void:
 		if lamp is Node3D and lamp.is_inside_tree() and lamp.has_method("set_budget_lit"):
 			var offset: Vector3 = (lamp as Node3D).global_position - focus
 			offset.y = 0.0
-			ranked.append({"node": lamp, "distance": offset.length_squared()})
-	ranked.sort_custom(func(a: Dictionary, b: Dictionary) -> bool: return a.distance < b.distance)
+			var distance := offset.length_squared()
+			# A lamp that already casts shadows keeps them unless a rival is clearly
+			# nearer, so the shadow set does not flip while the camera moves.
+			var keeps_shadow := _shadow_owners.has(lamp.get_instance_id())
+			ranked.append({"node": lamp, "distance": distance, "rank": distance * SHADOW_KEEP_BIAS if keeps_shadow else distance})
+	ranked.sort_custom(func(a: Dictionary, b: Dictionary) -> bool: return a.rank < b.rank)
 	var used := 0
 	var shadowed := 0
+	var owners := {}
 	for entry in ranked:
 		var lamp: Node = entry.node
 		var cost: int = lamp.call("get_light_cost")
@@ -103,7 +111,9 @@ func refresh_light_budget() -> void:
 			used += cost
 		if shadow:
 			shadowed += cost
+			owners[lamp.get_instance_id()] = true
 		lamp.call("set_budget_lit", lit, shadow)
+	_shadow_owners = owners
 
 
 func set_local_lights_enabled(enabled: bool) -> void:

@@ -18,6 +18,7 @@ func _run() -> void:
 	_trigger_rules()
 	_queue_rules()
 	await _director()
+	await _burst_spread()
 	print("Wave tests: %d failures" % failures)
 	quit(failures)
 
@@ -204,5 +205,34 @@ func _cap() -> void:
 		enemy.call("take_damage", 9999.0)
 	await _frames(60)
 	_check(director.alive_count() == 12 and director.pending_total() == 44, "deaths free slots and the queue refills them (%d pending)" % director.pending_total())
+	stage.queue_free()
+	await process_frame
+
+
+func _burst_spread() -> void:
+	var world := _stage()
+	var stage: Node3D = world["stage"]
+	var enemies: Node3D = world["enemies"]
+	var player: Node3D = world["player"]
+	var point := POINT.instantiate() as Node3D
+	point.set_meta("planning_object_id", "spawn_burst")
+	stage.add_child(point)
+	point.call("configure_spawn", {"enemy": "hunger", "count": 10, "interval": 5.0, "rule": "burst", "batch": 10, "trigger": "any"})
+	point.position = Vector3(-10, 0, -8)
+	var trigger := _enemy(enemies, Vector3(0, 1, 4), ["spawn_burst"])
+	var director := DIRECTOR.new()
+	stage.add_child(director)
+	director.configure(enemies, player)
+	director.arm()
+	trigger.call("take_damage", 9999.0)
+	var most := 0
+	var previous := 0
+	for step in 40:
+		await physics_frame
+		var now := _spawned(enemies).size()
+		most = maxi(most, now - previous)
+		previous = now
+	_check(previous == 10, "a burst of 10 still arrives in full (%d)" % previous)
+	_check(most <= DIRECTOR.SPAWNS_PER_FRAME, "no more than %d infected appear in one frame (%d)" % [DIRECTOR.SPAWNS_PER_FRAME, most])
 	stage.queue_free()
 	await process_frame
