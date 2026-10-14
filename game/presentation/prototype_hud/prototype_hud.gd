@@ -26,6 +26,8 @@ const DNA_BLINK_STEP := 0.12
 @onready var mutation_bar: ProgressBar = $HealthPanel/MutationBar
 @onready var mutation_value: Label = $HealthPanel/MutationValue
 @onready var critical_marker: ColorRect = $HealthPanel/CriticalMarker
+@onready var armor_bar: ProgressBar = $HealthPanel/ArmorBar
+@onready var armor_value: Label = $HealthPanel/ArmorValue
 @onready var antidote_count: Label = $AntidotePanel/AntidoteCount
 @onready var weapon_name: Label = $WeaponPanel/WeaponName
 @onready var magazine: Label = $WeaponPanel/Magazine
@@ -227,7 +229,7 @@ func _update_vitals() -> void:
 	var mutation: float = infection.call("get_mutation")
 	var critical: float = infection.call("get_critical_threshold")
 	var has_key: bool = player.has_emergency_key()
-	var snapshot: Array = [player.health, player.max_health, mutation, critical, player.antidotes, player.infinite_antidotes, has_key]
+	var snapshot: Array = [player.health, player.max_health, player.armor, player.max_armor, mutation, critical, player.antidotes, player.infinite_antidotes, has_key]
 	if snapshot == _vital_snapshot:
 		return
 	var previous_health: float = float(_vital_snapshot[0]) if not _vital_snapshot.is_empty() else float(player.health)
@@ -237,11 +239,24 @@ func _update_vitals() -> void:
 	hp_bar.max_value = player.max_health
 	hp_bar.value = player.health
 	hp_value.text = "%d / %d" % [roundi(player.health), roundi(player.max_health)]
+	_update_armor(float(player.armor), float(player.max_armor))
 	mutation_bar.value = mutation
 	mutation_value.text = "%d / 100" % roundi(mutation)
 	critical_marker.position.x = mutation_bar.position.x - 1.0 + mutation_bar.size.x * clampf(critical / 100.0, 0.0, 1.0)
 	antidote_count.text = "∞" if player.infinite_antidotes else str(player.antidotes)
 	_update_key_cell(has_key)
+
+
+# Armor is a thin strip stacked on the top edge of the health bar, shown only while armor is held.
+func _update_armor(armor: float, max_armor: float) -> void:
+	var has_armor := armor > 0.0
+	armor_bar.visible = has_armor
+	armor_value.visible = has_armor
+	if not has_armor:
+		return
+	armor_bar.max_value = max_armor
+	armor_bar.value = armor
+	armor_value.text = "%s %d" % [tr("hudArmor"), roundi(armor)]
 
 
 # A green pulse on the health bar marks a noticeable heal (medkit, kill heal).
