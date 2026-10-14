@@ -61,6 +61,11 @@ func _run() -> void:
 		_check(objects.placed.size() == count, "Clicking the installed %s places nothing" % item[0])
 		_check(_panel_visible(str(item[2])), "The %s settings panel is open" % item[0])
 		_edit_and_check(str(item[0]), node)
+		# Nothing armed in the palette: a plain click selects it and its panel must stay open.
+		objects._reset_selection()
+		_click(at)
+		_check(objects.selected == node, "Plain click selects the installed %s" % item[0])
+		_check(_panel_visible(str(item[2])), "The %s settings panel stays open after a plain click" % item[0])
 	# Persistence: save, reload, the edits are still there.
 	var data: Dictionary = JSON.parse_string(JSON.stringify(planner.storage._collect_layout_data()))
 	objects._reset_selection()
