@@ -76,6 +76,8 @@ func _break_prop(hit_position: Vector3) -> void:
 	if break_effect == "glass" and get_parent() != null:
 		SFX.play(get_parent().get_parent() if get_parent().get_parent() != null else get_parent(), &"glass_break", hit_position)
 
+	if break_effect == "debris":
+		SFX.play(effects_root if is_instance_valid(effects_root) else get_parent(), &"break_wood", hit_position)
 	var owner_root := get_parent()
 	var visual := owner_root.get_node_or_null("Visual") as Node3D
 	if visual != null:

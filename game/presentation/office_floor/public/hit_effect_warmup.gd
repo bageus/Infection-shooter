@@ -11,7 +11,8 @@ const WATER := preload("res://game/presentation/office_floor/water_spray_view.gd
 const EXTINGUISHER_FX := preload("res://game/presentation/office_floor/extinguisher_hit_fx.tscn")
 const EXTINGUISHER_BURST := preload("res://game/presentation/office_floor/extinguisher_burst.tscn")
 const SFX_EVENTS: Array[StringName] = [&"extinguisher_spray", &"extinguisher_burst", &"canister_drop", &"hit_metal", &"hit_wood", &"hit_paper",
-		&"hit_electronics", &"hit_glass", &"glass_break", &"fall_wood", &"fall_metal", &"fall_light", &"fall_tech", &"fall_debris"]
+		&"hit_electronics", &"hit_glass", &"glass_break", &"fall_wood", &"fall_metal", &"fall_light", &"fall_tech", &"fall_debris", &"break_wood", &"break_furniture", &"break_cardboard", &"break_metal",
+		&"break_electronics", &"break_lamp", &"weapon_switch"]
 const SFX := preload("res://game/core/audio/public/sound_events.gd")
 const FLIPBOOK := preload("res://game/core/vfx/public/sprite_flipbook.gd")
 const ATLASES := preload("res://game/core/vfx/public/effect_atlases.gd")

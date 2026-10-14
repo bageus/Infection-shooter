@@ -304,3 +304,19 @@ assets/audio/ui/*.tres: original procedural synthesis for this project, dedicate
 | minigun_spin | *synthesised* by tools/build_weapon_sounds.py | looping steady whine with ticks, played while the barrels turn |
 | key_pickup | *synthesised* by tools/build_weapon_sounds.py | three inharmonic brass partials struck in turn |
 | dna_pickup | *synthesised* by tools/build_weapon_sounds.py | rising warm glide with vibrato and a soft pop |
+
+## Destruction and handling cues (2026-10-14)
+
+Reproducible with `python tools/build_destruction_sounds.py`. Derived from the existing processed recordings above; their original attribution and licences apply to these layered derivatives (including CC-BY-SA where a Red Eclipse recording is present). Mono Vorbis, faded cuts, slight varispeed, high-pass and peak matching.
+
+| Event | Existing source events |
+|---|---|
+| break_wood | hit_wood, fall_wood |
+| break_furniture | hit_wood, hit_metal, fall_wood, fall_debris |
+| break_cardboard | hit_paper, fall_light |
+| break_metal | hit_metal, fall_metal, fall_debris |
+| break_electronics | hit_electronics, hit_metal, glass_break, fall_tech |
+| break_lamp | hit_glass, glass_break, hit_electronics, fall_metal |
+| weapon_switch | weapon_pickup, dry_fire (short handling cut) |
+
+mutation_open/mutation_close: original CC0-1.0 procedural synthesis with tools/build_ui_sounds.py; close is the exact reverse of open, by 16-bit sample.
