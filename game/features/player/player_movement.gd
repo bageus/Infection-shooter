@@ -183,6 +183,8 @@ func _select_weapon(index:int)->void:
 	weapon_stance.select_weapon(_slot_weapons[index])
 	for i in weapons.size(): weapons[i].visible=i==_slot_weapons[index]
 	weapon_mount.call("select_weapon", get_current_weapon())
+	if audio != null and old != get_current_weapon():
+		audio.play(&"weapon_switch")
 
 
 func _fire_weapon(weapon: Node3D) -> bool:

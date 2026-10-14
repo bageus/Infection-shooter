@@ -2,6 +2,7 @@ extends RigidBody3D
 ## Scene boundary for prop physics, hit commands and authored display configuration.
 const BUDGET_LIGHT := preload("res://game/presentation/office_floor/budget_omni_light.gd")
 const GEOMETRY := preload("res://game/presentation/office_floor/environment_prop_geometry.gd")
+const BREAK_SOUND := preload("res://game/presentation/office_floor/prop_break_sound.gd")
 const BREAKUP := preload("res://game/presentation/office_floor/environment_prop_breakup.gd")
 var _geometry := GEOMETRY.new()
 const IMPACT_SOUND := preload("res://game/presentation/office_floor/impact_sound_watcher.gd")
@@ -303,6 +304,8 @@ func take_projectile_hit(damage: float, hit_position: Vector3, _normal: Vector3,
 			if is_instance_valid(_display):
 				_display.call("disable")
 			SPARKS.short_circuit(self, hit_position, _normal)
+			if is_desk_lamp():
+				BREAK_SOUND.play(self, effects_root, model_path, "tech", hit_position)
 	if model_path.get_file() == "02_water_cooler_bottle.glb":
 		var bottle := BOTTLE_BURST.find_bottle(_shape_meshes)
 		if bottle >= 0 and damage > 0.0:
@@ -324,8 +327,10 @@ func take_projectile_hit(damage: float, hit_position: Vector3, _normal: Vector3,
 			_reaction.shudder(direction)
 		PROP_DAMAGE.HitAction.CHIP_FACADE:
 			if BREAKUP.chip_facade(self, _geometry, hit_position, direction):
+				BREAK_SOUND.play(self, effects_root, model_path, get_projectile_material(), hit_position)
 				_rebuild_shapes()
 		PROP_DAMAGE.HitAction.DETACH:
+			BREAK_SOUND.play(self, effects_root, model_path, get_projectile_material(), hit_position)
 			_detach(direction)
 	return false
 
@@ -414,7 +419,9 @@ func _apply_damage(hit_position: Vector3, direction: Vector3) -> void:
 		DAMAGE.reveal_meshes(variant)
 		variant.show()
 		_rebuild_shapes()
+		BREAK_SOUND.play(self, effects_root, model_path, get_projectile_material(), hit_position)
 	elif transition == PROP_DAMAGE.Transition.BREAK:
+		BREAK_SOUND.play(self, effects_root, model_path, get_projectile_material(), hit_position)
 		if "server_rack" in model_path.get_file() or _is_facade_damage():
 			if _intact != null:
 				_intact.hide()
@@ -448,7 +455,11 @@ func _rebuild_shapes() -> void:
 
 
 func hit_environment_fragment(fragment: RigidBody3D, hit_position: Vector3, direction: Vector3) -> void:
+	if fragment.is_queued_for_deletion():
+		return
 	BREAKUP.hit_fragment(self, _geometry, fragment, hit_position, direction)
+	if fragment.is_queued_for_deletion():
+		BREAK_SOUND.play(self, effects_root, model_path, get_projectile_material(), hit_position)
 
 
 func _shatter_glass(hit_position: Vector3, direction: Vector3) -> void:

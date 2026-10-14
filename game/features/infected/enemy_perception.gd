@@ -84,22 +84,28 @@ func alert() -> bool:
 # One physics step while not chasing: look, listen, walk to a noise or back home.
 func step_unaware(actor: CharacterBody3D, delta: float) -> void:
 	var target: Node3D = actor.get("_target")
-	var far := actor.global_position.distance_squared_to(target.global_position) > pow(float(actor.get("sleep_distance")), 2.0)
-	if far and state == State.UNAWARE and Engine.get_physics_frames() % 12 != int(actor.get("_lod_frame_offset")):
+	var far_idle := state == State.UNAWARE and actor.global_position.distance_squared_to(target.global_position) > pow(float(actor.get("sleep_distance")), 2.0)
+	if far_idle and Engine.get_physics_frames() % 12 != int(actor.get("_lod_frame_offset")):
 		return
+	# Distant idle enemies simulate one collision-checked step every 12 frames.
+	# Both their clocks and their movement must cover all skipped physics frames.
+	var step := delta * 12.0 if far_idle else delta
 	var radius := .35
 	var shape: CollisionShape3D = actor.get("collision_shape")
 	if shape != null and shape.shape is CapsuleShape3D:
 		radius = (shape.shape as CapsuleShape3D).radius * actor.global_basis.x.length()
 	var speed := float(actor.get("move_speed")) * float(actor.get("_mobility"))
-	var wish := tick(actor, delta, target, actor.get("_route"), radius, speed)
+	var wish := tick(actor, step, target, actor.get("_route"), radius, speed)
 	if float(actor.get("_blast_stun_remaining")) > 0.0:
 		wish = Vector3.ZERO
-	actor.call("_turn_toward_face_direction", delta)
+	actor.call("_turn_toward_face_direction", step)
 	var push: Vector3 = actor.get("_push_velocity")
 	actor.velocity.x = wish.x + push.x
 	actor.velocity.z = wish.z + push.z
-	actor.set("_push_velocity", push.move_toward(Vector3.ZERO, float(actor.get("push_decay")) * delta))
+	actor.set("_push_velocity", push.move_toward(Vector3.ZERO, float(actor.get("push_decay")) * step))
+	if far_idle:
+		actor.move_and_collide(Vector3(actor.velocity.x, 0.0, actor.velocity.z) * step)
+		return
 	actor.call("_apply_gravity", delta)
 	actor.set("_intended_motion", Vector3(actor.velocity.x, 0.0, actor.velocity.z))
 	actor.move_and_slide()
