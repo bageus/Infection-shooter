@@ -14,6 +14,8 @@ var _radius := 3.0
 var _elapsed := 0.0
 var _cloud_lifetime := 3.6
 
+## Hidden warm-up runs play the burst without its sound.
+var muted := false
 var effects_root: Node3D
 var impact_pool: Node
 
@@ -53,7 +55,8 @@ func start(radius: float, cloud_lifetime: float, burst_count: int) -> void:
 	_cloud.emitting = true
 	_ring.visible = true
 	_flash.light_energy = 5.0
-	SFX.play(get_parent() if get_parent() != null else self, &"extinguisher_burst", global_position)
+	if not muted:
+		SFX.play(get_parent() if get_parent() != null else self, &"extinguisher_burst", global_position)
 	# Rupture cloud: the sheet's burst frames (6-11) swell out of the canister.
 	var frames: Vector2i = ATLASES.EXTINGUISHER_SPRAY["burst_frames"]
 	FLIPBOOK.spawn(self, ATLASES.EXTINGUISHER_SPRAY, global_position + Vector3.UP * radius * 0.38, radius * 0.95, {
