@@ -470,7 +470,8 @@ func _cast(skill_id: String) -> void:
 			acid_pools.append({"position": puddle, "remaining": ACID_TIME})
 			vfx.acid_pool(puddle, ACID_POOL_RADIUS, ACID_TIME)
 		"spore_cocoon":
-			var location: Vector3 = player.get("_aim_point")
+			# The cocoon always sits on the floor, even when the aim is on a wall or a desk.
+			var location := acid_floor_point(player.get("_aim_point"))
 			vfx.spore_cocoon(location, SPORE_RADIUS, SPORE_DELAY)
 			_skill_effect(skill_id, SPORE_DELAY)
 			get_tree().create_timer(SPORE_DELAY).timeout.connect(_spore_burst.bind(location))
