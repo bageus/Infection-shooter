@@ -59,9 +59,10 @@ func _click_world(screen_pos: Vector2) -> void:
 		_place_selected(screen_pos)
 		return
 	var hit_node = geometry._planned_object_at(screen_pos)
-	_select(hit_node)
+	# Drop the palette preview first: clearing it hides every settings panel, including the one _select opens.
 	if hit_node != null:
 		_clear_preview()
+	_select(hit_node)
 
 
 func _installed_same_kind_at(screen_pos: Vector2) -> Node3D:
@@ -82,6 +83,8 @@ func _select(node: Node3D) -> void:
 	if selected != null and selected.has_method("get_fixture_config"):
 		var panel := session.ui.get_node("Panel") as ScrollContainer
 		panel.ensure_control_visible.call_deferred(controls.light_defaults)
+	if selected != null and controls.display_options.panel.visible:
+		(session.ui.get_node("Panel") as ScrollContainer).ensure_control_visible.call_deferred(controls.display_options.panel)
 	if selected != null and controls.loot_options.panel.visible:
 		(session.ui.get_node("Panel") as ScrollContainer).ensure_control_visible.call_deferred(controls.loot_options.panel)
 	if selected != null and controls.door_options.panel.visible:
