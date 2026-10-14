@@ -30,6 +30,7 @@ func _run() -> void:
 	_check(tabs.get_tab_title(0) == "Основные" and tabs.get_tab_title(3) == "Аудио", "Tabs have translated names")
 	_check(tabs.get_child(0).find_child("Language", true, false) != null, "Language belongs to General")
 	_check(tabs.get_child(2).find_child("Occlusion", true, false) != null, "Occlusion belongs to Video")
+	_dodge_checks(tabs)
 	var lighting := tabs.get_child(2).find_child("Lighting", true, false) as CheckButton
 	_check(lighting != null and lighting.button_pressed, "Lighting belongs to Video and defaults on")
 	lighting.set_pressed(false)
@@ -153,6 +154,16 @@ func _shadow_checks(tabs: TabContainer, dialog: Control) -> void:
 	current_scene = previous_scene
 	stage.queue_free()
 	quality.value = 2.0
+
+
+func _dodge_checks(tabs: TabContainer) -> void:
+	var dodge := tabs.get_child(0).find_child("DodgeAnimation", true, false) as OptionButton
+	_check(dodge != null and dodge.item_count == 2 and dodge.selected == 0, "Dodge animation (roll / strafe jump) sits in General and defaults to the roll")
+	dodge.item_selected.emit(1)
+	var dodge_prefs := PREFS.new()
+	dodge_prefs.load_settings()
+	_check(dodge_prefs.values.dodge_animation == 1, "Dodge animation choice survives settings reload")
+	dodge.item_selected.emit(0)
 
 
 func _check(condition: bool, message: String) -> void:

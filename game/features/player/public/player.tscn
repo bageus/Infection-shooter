@@ -1,6 +1,7 @@
-[gd_scene load_steps=17 format=3]
+[gd_scene load_steps=18 format=3]
 [ext_resource type="Script" path="res://game/features/character_animation/public/character_animation_driver.gd" id="anim_driver"]
 [ext_resource type="Script" path="res://game/features/player/player_movement.gd" id="1"]
+[ext_resource type="AnimationLibrary" path="res://models/objects/characters/player_legs/player_leg_clips.res" id="leg_clips"]
 [ext_resource type="Script" path="res://game/features/player/player_weapon_mount.gd" id="mount"]
 [ext_resource type="PackedScene" path="res://models/objects/characters/soldier_animated.glb" id="character_model"]
 [ext_resource type="PackedScene" path="res://game/features/combat/public/pistol.tscn" id="2"]
@@ -53,6 +54,7 @@ fov=50.0
 [node name="AnimationDriver" type="Node" parent="."]
 script = ExtResource("anim_driver")
 procedural_gait = true
+leg_clips = ExtResource("leg_clips")
 
 [node name="WeaponMount" type="Node" parent="."]
 script = ExtResource("mount")

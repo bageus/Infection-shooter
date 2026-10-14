@@ -332,4 +332,5 @@ WeakRef и generation identity, чтобы повторное использов
 Fade снимает collision mask/layer, freeze и callbacks до анимации.
 Public API, layout DTO v8, balance, dependency edges и policy прежние.
 
+ADR-0044: features.character_animation владеет отретаргеченными клипами таза и ног игрока (SkeletonModifier3D leg_clip_motion, play_dodge, leg_clips) вместо процедурной походки игрока; features.player вызывает play_dodge при перекате, меню хранит dodge_animation. Новых зависимостей и изменений DTO нет.
 ADR-0040: features.character_animation владеет аддитивной реакцией корпуса на попадание (SkeletonModifier3D hit_reaction: позвоночник, грудь, запаздывающая голова; бёдра и ноги не трогаются) и выпрямлением колена в процедурной походке; notify_hit аддитивно принимает точку, направление и силу. features.infected владеет темпом погони chase_pace (рывки бега и шаг между ними, ускорение без скачков). Новых зависимостей, глобального состояния и изменений DTO нет.

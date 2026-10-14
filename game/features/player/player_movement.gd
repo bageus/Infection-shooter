@@ -30,9 +30,12 @@ const HEAL_FEEDBACK := preload("res://game/features/player/player_heal_feedback.
 var _intended_motion := Vector3.ZERO
 @export var ground_acceleration: float = 18.0
 @export var ground_deceleration: float = 13.0
-@export var roll_speed: float = 13.0
-@export var roll_duration: float = 0.24
+## The dodge plays a hips-and-legs animation (ADR-0044), so it lasts long
+## enough to read: about the same distance as before (~3.1 m) at a slower pace.
+@export var roll_speed: float = 5.7
+@export var roll_duration: float = 0.55
 @export var roll_cooldown: float = 0.65
+const MUTATION_DASH_SPEED := 13.0
 @export var roll_push_strength: float = 8.5
 @export var roll_push_radius: float = 1.25
 @export var camera_rotation_speed: float = 95.0
@@ -62,6 +65,7 @@ var antidotes: int
 var infinite_antidotes: bool = false
 var current_weapon_index: int = 0
 var _roll_direction := Vector3.ZERO
+var _roll_pace := 0.0
 var _roll_remaining: float = 0.0
 var _roll_cooldown_remaining: float = 0.0
 var _aim_point := Vector3.ZERO
@@ -328,11 +332,15 @@ func add_antidote(amount:int=1)->bool:
 	antidotes=mini(max_antidotes,antidotes+maxi(amount,0))
 	return true
 func absorb_mutagen(delta_seconds:float)->float:return infection_runtime.call("absorb_mutagen",delta_seconds)
+## Settings: which animation the dodge plays, 0 = dive roll, 1 = strafe jump.
+func set_dodge_animation_style(style: int) -> void:
+	$AnimationDriver.set("dodge_style", clampi(style, 0, 1))
 func mutation_dash() -> void:
 	_roll_direction = -aim_pivot.global_basis.z
 	_roll_direction.y = 0.0
 	_roll_direction = _roll_direction.normalized()
 	_roll_remaining = 0.4
+	_roll_pace = MUTATION_DASH_SPEED
 func mutation_enemy_killed(enemy: Node3D) -> void:
 	mutation_effects.call("on_enemy_killed", enemy)
 func get_mutation()->float:return infection_runtime.call("get_mutation")
@@ -401,10 +409,11 @@ func _end_blast_stun() -> void:
 func _update_move(delta:float)->void:
 	var d:=_move_direction()
 	if _roll_remaining>0.0:
-		_roll_remaining=maxf(0.0,_roll_remaining-delta);velocity.x=_roll_direction.x*roll_speed;velocity.z=_roll_direction.z*roll_speed
+		_roll_remaining=maxf(0.0,_roll_remaining-delta);velocity.x=_roll_direction.x*_roll_pace;velocity.z=_roll_direction.z*_roll_pace
 	elif not bool(infection_runtime.call("is_control_lost")) and Input.is_action_just_pressed("roll") and d.length_squared()>0.0001 and _roll_cooldown_remaining<=0.0:
-		_roll_direction=d.normalized();_roll_remaining=roll_duration;_roll_cooldown_remaining=roll_cooldown
+		_roll_direction=d.normalized();_roll_remaining=roll_duration;_roll_pace=roll_speed;_roll_cooldown_remaining=roll_cooldown
 		mutation_effects.call("on_roll")
+		$AnimationDriver.call("play_dodge", _roll_direction, roll_duration)
 	else:
 		var target:=d*(sprint_speed if Input.is_action_pressed("sprint") and not bool(infection_runtime.call("is_control_lost")) else move_speed) * float(mutation_effects.call("movement_multiplier"))
 		var accel:=ground_acceleration if d.length_squared()>0.0001 else ground_deceleration

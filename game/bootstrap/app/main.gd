@@ -144,6 +144,11 @@ func set_procedural_skill_effects(enabled: bool) -> void:
 		effects.get("vfx").set("procedural", enabled)
 
 
+## Settings: dodge animation, 0 = dive roll, 1 = strafe jump.
+func set_dodge_animation_style(style: int) -> void:
+	player.call("set_dodge_animation_style", style)
+
+
 func _unhandled_key_input(event: InputEvent) -> void:
 	if event is InputEventKey and event.pressed and not event.echo and event.keycode == KEY_ESCAPE:
 		if mutation_tree_ui != null and bool(mutation_tree_ui.call("is_tree_open")):

@@ -13,6 +13,9 @@ signal footstep(side: int, speed: float)
 const POSE := preload("res://game/features/character_animation/procedural_pose.gd")
 const GAIT := preload("res://game/features/character_animation/procedural_gait.gd")
 const HIT_REACTION := preload("res://game/features/character_animation/hit_reaction.gd")
+const LEG_MOTION := preload("res://game/features/character_animation/leg_clip_motion.gd")
+const DODGE_ROLL := 0
+const DODGE_STRAFE := 1
 const STATE_ATTACK := &"attack"
 const STATE_DEATH := &"death"
 # Directional deaths (ADR-0034) fall back to the plain death clip.
@@ -47,6 +50,10 @@ const FLINCH_SECONDS := 0.16
 ## Rebuild the legs with a speed-synchronised gait over the playing clip
 ## (for authored upper-body clips whose leg motion limps or slides).
 @export var procedural_gait := false
+## Retargeted hips-and-legs clips (run in eight directions, dodge roll and
+## strafe jumps, ADR-0044); they replace the procedural gait and leave the arms
+## and the weapon hold to the upper-body clips.
+@export var leg_clips: AnimationLibrary
 ## Playback speed is scaled by speed / reference while moving; 0 disables it.
 @export var walk_reference_speed := 0.0
 @export var run_reference_speed := 0.0
@@ -63,6 +70,9 @@ const FLINCH_SECONDS := 0.16
 var character: CharacterBody3D
 var animation_player: AnimationPlayer
 var gait: SkeletonModifier3D
+var legs: SkeletonModifier3D
+## Which dodge clips play_dodge uses: DODGE_ROLL (dive roll) or DODGE_STRAFE (strafe jump).
+var dodge_style := DODGE_ROLL
 var hit_reaction: SkeletonModifier3D
 var _current := ""
 var _animations: Dictionary = {}
@@ -123,6 +133,29 @@ func play_one_shot(state: StringName) -> float:
 	return length
 
 
+# Public animation_events_v1 addition (ADR-0044): plays the dodge clip for
+# `duration` seconds toward a world-space direction, relative to the body.
+# Returns false without leg clips. The roll turns the whole body along the
+# dodge; the strafe jump keeps facing forward and jumps to the nearer side.
+func play_dodge(world_direction: Vector3, duration: float) -> bool:
+	if legs == null or _dead:
+		return false
+	var skeleton := legs.get_skeleton()
+	var local := skeleton.global_basis.inverse() * Vector3(world_direction.x, 0.0, world_direction.z)
+	if local.length_squared() < 0.0001:
+		return false
+	var heading := atan2(local.x, local.z)
+	if dodge_style == DODGE_STRAFE:
+		var side := PI * 0.5 if heading >= 0.0 else -PI * 0.5
+		return bool(legs.call("start_dodge", "Dodge_Strafe_Left" if side > 0.0 else "Dodge_Strafe_Right", duration, heading - side))
+	return bool(legs.call("start_dodge", "Dodge_Roll", duration, heading))
+
+
+# Public animation_events_v1 addition (ADR-0044): true while a dodge clip plays.
+func is_dodging() -> bool:
+	return legs != null and bool(legs.call("is_dodging"))
+
+
 # Public animation_events_v1: hit reaction. Skeletal models twist and rock the
 # torso away from where the shot landed (hit_reaction_v1, ADR-0040); without a
 # point and direction it rocks back. Models without a spine flinch as a whole.
@@ -145,6 +178,8 @@ func set_active(active: bool) -> void:
 		animation_player.active = active
 	if hit_reaction != null:
 		hit_reaction.active = active
+	if legs != null:
+		legs.active = active
 
 
 func _ready() -> void:
@@ -163,7 +198,9 @@ func _ready() -> void:
 		_configure_looping_clips()
 		_target = model as Node3D
 		_pose.feet = Vector3(0.0, _feet_height(model), 0.0)
-		if procedural_gait:
+		if leg_clips != null:
+			_attach_legs(model)
+		elif procedural_gait:
 			_attach_gait(model)
 		_attach_hit_reaction(model)
 		_play_locomotion(&"idle", 0.0)
@@ -393,6 +430,18 @@ func _attach_gait(model: Node) -> void:
 	gait.character = character
 	gait.connect("stepped", func(side: int, speed: float) -> void: footstep.emit(side, speed))
 	(skeletons[0] as Node).add_child(gait)
+
+
+func _attach_legs(model: Node) -> void:
+	var skeletons := model.find_children("*", "Skeleton3D", true, false)
+	if skeletons.is_empty():
+		return
+	legs = LEG_MOTION.new()
+	legs.name = "LegClips"
+	legs.character = character
+	legs.clips = leg_clips
+	legs.connect("stepped", func(side: int, speed: float) -> void: footstep.emit(side, speed))
+	(skeletons[0] as Node).add_child(legs)
 
 
 func _attach_hit_reaction(model: Node) -> void:
