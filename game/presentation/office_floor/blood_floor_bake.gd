@@ -29,12 +29,12 @@ func _ready() -> void:
 
 
 ## Queues a stain; the pixels are written on a later tick.
-func stamp(texture: Texture2D, tint: Color, footprint: Vector2, position: Vector3, mark_basis: Basis) -> bool:
+func stamp(texture: Texture2D, tint: Color, footprint: Vector2, at: Vector3, mark_basis: Basis) -> bool:
 	if texture == null or footprint.x <= 0.0 or footprint.y <= 0.0:
 		return false
 	if _queue.size() >= MAX_QUEUE:
 		_queue.pop_front()
-	_queue.append({"texture": texture, "tint": tint, "footprint": footprint, "position": position, "basis": mark_basis.orthonormalized()})
+	_queue.append({"texture": texture, "tint": tint, "footprint": footprint, "position": at, "basis": mark_basis.orthonormalized()})
 	if _timer != null and _timer.is_stopped():
 		_timer.start()
 	return true
@@ -56,12 +56,12 @@ func _apply(request: Dictionary) -> void:
 	var source := _stamp.source_image(request["texture"])
 	if source == null:
 		return
-	var position: Vector3 = request["position"]
-	for cell in STAMP.cells_touched(position, request["basis"], request["footprint"]):
-		var tile := _tile_for(cell, position.y)
+	var at: Vector3 = request["position"]
+	for cell in STAMP.cells_touched(at, request["basis"], request["footprint"]):
+		var tile := _tile_for(cell, at.y)
 		if tile.is_empty():
 			continue
-		STAMP.blit(tile["image"], cell, source, position, request["basis"], request["footprint"], request["tint"])
+		STAMP.blit(tile["image"], cell, source, at, request["basis"], request["footprint"], request["tint"])
 		tile["dirty"] = true
 
 
