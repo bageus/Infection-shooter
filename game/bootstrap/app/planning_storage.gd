@@ -3,6 +3,7 @@ const MAP_FILE := preload("res://game/bootstrap/app/planning_map_file.gd")
 const WALL_FIXTURES := preload("res://game/bootstrap/app/planning_wall_fixtures.gd")
 const LAYOUT_LOADER := preload("res://game/bootstrap/app/planning_layout_loader.gd")
 const DOOR_OPTIONS := preload("res://game/bootstrap/app/planning_door_options.gd")
+const WAVE_DIRECTOR := preload("res://game/features/spawning/public/wave_director.gd")
 
 const SAVE_PATH = "user://planned_layout.json"
 # Farthest a pushed loose prop may be and still be moved back instead of rebuilt.
@@ -121,6 +122,10 @@ func _collect_layout_data() -> Dictionary:
 			records[-1]["door_lock"] = str(door.call("get_lock_state"))
 		if node.has_method("get_enemy_stats") and node.has_meta(&"planning_enemy_stats"):
 			records[-1]["enemy_stats"] = node.call("get_enemy_stats")
+		if node.has_method("get_spawn_config"):
+			records[-1]["spawn_point"] = node.call("get_spawn_config")
+		if node.has_meta(WAVE_DIRECTOR.TRIGGER_META):
+			records[-1]["spawn_triggers"] = node.get_meta(WAVE_DIRECTOR.TRIGGER_META)
 		if node.has_method("get_fixture_config"):
 			var fixture: Dictionary = node.call("get_fixture_config")
 			records[-1]["fixture_shape"] = str(fixture["shape"])
@@ -439,6 +444,10 @@ func _save_authored_scene(target: String = AUTHORED_SCENE_PATH) -> Error:
 			copy_door.call("configure_lock_state", door.call("get_lock_state"))
 		if node.has_method("get_enemy_stats") and node.has_meta(&"planning_enemy_stats"):
 			copy.call("configure_stats", node.call("get_enemy_stats"))
+		if node.has_method("get_spawn_config"):
+			copy.call("configure_spawn", node.call("get_spawn_config"))
+		if node.has_meta(WAVE_DIRECTOR.TRIGGER_META):
+			copy.set_meta(WAVE_DIRECTOR.TRIGGER_META, node.get_meta(WAVE_DIRECTOR.TRIGGER_META))
 		if node.has_method("get_fixture_config"):
 			var fixture: Dictionary = node.call("get_fixture_config")
 			copy.call("configure_fixture", str(fixture["shape"]), bool(fixture["visible_in_game"]))

@@ -111,6 +111,10 @@ func enter() -> void:
 	controls.help.get_parent().get_parent().hide()
 	controls.help_button.show()
 	objects.workstation_transforms.clear()
+	var wave_director := host.get_node_or_null("WaveDirector")
+	if wave_director != null:
+		# The fight is over: waves spawned so far leave the map being edited.
+		wave_director.call("disarm")
 	var planning_lighting := host.get_node_or_null("PlanningLighting")
 	if planning_lighting != null:
 		planning_lighting.call("set_planning_mode", true)
@@ -126,6 +130,7 @@ func enter() -> void:
 	if world_activation != null:
 		world_activation.call("rebuild")
 	_set_light_markers_visible(true)
+	_set_spawn_markers_visible(true)
 	for node in hud_nodes:
 		if node != null:
 			node.hide()
@@ -167,10 +172,14 @@ func exit() -> void:
 		mutation_hud.show()
 	objects._clear_preview()
 	_set_light_markers_visible(false)
+	_set_spawn_markers_visible(false)
 	geometry._hide_planning_grid()
 	objects._select(null)
 	ui.hide()
 	preload("res://game/bootstrap/app/planning_physics.gd").resume(objects.placed)
+	var director := host.get_node_or_null("WaveDirector")
+	if director != null:
+		director.call("arm")
 	get_tree().paused = false
 
 
@@ -208,6 +217,8 @@ func _input(event: InputEvent) -> void:
 			get_viewport().set_input_as_handled()
 		return
 	if event is InputEventMouse and controls.planning_toolbar.get_global_rect().has_point(event.position):
+		return
+	if event is InputEventMouse and controls.spawn_options.contains_point(event.position):
 		return
 	if event is InputEventMouse and (ui.get_node("Panel") as Control).get_global_rect().has_point(event.position):
 		# _input precedes GUI dispatch: let the palette receive this event.
@@ -308,6 +319,12 @@ func _zoom_camera(amount: float) -> void:
 	var p := camera.global_position
 	p.y = camera_height
 	camera.global_position = p
+
+
+func _set_spawn_markers_visible(value: bool) -> void:
+	for point in get_tree().get_nodes_in_group("enemy_spawn_points"):
+		if point.has_method("set_planning_visual"):
+			point.call("set_planning_visual", value)
 
 
 func _set_light_markers_visible(value: bool) -> void:
