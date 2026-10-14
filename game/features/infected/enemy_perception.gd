@@ -160,7 +160,10 @@ func _idle_wander(actor: CharacterBody3D, delta: float, route, radius: float, sp
 		_wandering = false
 		_wander_wait = randf_range(1.5, 4.0)
 		return Vector3.ZERO
-	return _walk(actor, route, _wander, radius, speed * WANDER_FACTOR, 0.4, State.UNAWARE)
+	# A batched distant step can cover 12 physics ticks; stop at the goal
+	# instead of overshooting it and leaving the authored wander radius.
+	var walk_speed := minf(speed * WANDER_FACTOR, flat.length() / delta) if delta > 0.0 else 0.0
+	return _walk(actor, route, _wander, radius, walk_speed, 0.4, State.UNAWARE)
 
 
 func _walk(actor: CharacterBody3D, route, goal: Vector3, radius: float, speed: float, arrive: float, next: State) -> Vector3:
