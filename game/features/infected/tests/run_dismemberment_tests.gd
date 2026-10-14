@@ -5,6 +5,7 @@ extends SceneTree
 
 const ZOMBIE := preload("res://game/features/infected/public/infected_capsule.tscn")
 const HUNGER := preload("res://game/features/infected/public/infected_hunger.tscn")
+const FX := preload("res://game/features/infected/blood_drip_fx.gd")
 const TITAN := preload("res://game/features/infected/public/infected_titan.tscn")
 const COLOSSUS := preload("res://game/features/infected/public/infected_colossus.tscn")
 const HORDE := preload("res://game/features/infected/public/infected_horde.tscn")
@@ -36,6 +37,7 @@ func _run() -> void:
 	await _test_durability_scales_with_size(stage)
 	await _test_corpse_stays_shootable(stage)
 	await _test_blast_tears_limbs(stage)
+	await _test_droplets_stop_at_floor(stage)
 	await _test_horde_size_and_tentacles(stage)
 	await _test_decorations(stage)
 	stage.queue_free()
@@ -135,6 +137,8 @@ func _test_arm_shot_off(stage: Node3D) -> void:
 		_expect(piece.global_position.y < 0.5, "The severed arm falls to the floor (y=%.2f)." % piece.global_position.y)
 		_expect(bled[0], "The fallen arm leaves blood where it lands.")
 		_expect(piece.collision_layer == 4, "Severed parts stay shootable but never block characters.")
+		var drips := piece.find_children("BloodDrops", "GPUParticles3D", false, false)
+		_expect(not drips.is_empty() and (drips[0] as GPUParticles3D).local_coords, "Bleeding drops follow the stump, not the world, so a flying limb leaves no streak.")
 		piece.queue_free()
 	enemy.queue_free()
 	await process_frame
@@ -219,6 +223,28 @@ func _test_corpse_stays_shootable(stage: Node3D) -> void:
 	await process_frame
 	for piece in _pieces(stage):
 		piece.queue_free()
+
+
+# Droplets have no collision: a burst near the floor must not outlive its fall to it.
+func _test_droplets_stop_at_floor(stage: Node3D) -> void:
+	var floor_body := StaticBody3D.new()
+	floor_body.collision_layer = 128
+	var shape := CollisionShape3D.new()
+	var box := BoxShape3D.new()
+	box.size = Vector3(20, 1, 20)
+	shape.shape = box
+	floor_body.add_child(shape)
+	floor_body.position = Vector3(20, -0.5, 0)
+	stage.add_child(floor_body)
+	await physics_frame
+	await physics_frame
+	FX.spray(stage, Vector3(20, 0.3, 0), Vector3.DOWN, 10, 0.8)
+	var spray := stage.get_child(stage.get_child_count() - 1) as GPUParticles3D
+	_expect(spray != null, "A spray near a floor produces droplets.")
+	if spray != null:
+		_expect(spray.lifetime <= sqrt(2.0 * 0.3 / 9.8) + 0.001, "Droplets fall no further than the floor under them (lifetime %.3f)." % spray.lifetime)
+	floor_body.queue_free()
+	await process_frame
 
 
 func _test_blast_tears_limbs(stage: Node3D) -> void:
