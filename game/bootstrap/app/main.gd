@@ -107,8 +107,8 @@ func _ready() -> void:
 	hit_warmup.setup(self)
 	GRENADE_EXPLOSION.warm_up(hit_warmup, Vector3(0.0, 0.0, -2.0))
 	for enemy in enemies.get_children():
-		if enemy.has_method("set_target"):
-			enemy.call("set_target", player)
+		if enemy.has_method("watch_target"):
+			enemy.call("watch_target", player)
 
 
 func refresh_control_labels() -> void:

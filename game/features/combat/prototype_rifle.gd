@@ -4,6 +4,8 @@ const AIM_GEOMETRY := preload("res://game/features/combat/weapon_aim_geometry.gd
 const MUZZLE_FLASH := preload("res://game/features/combat/muzzle_flash.tscn")
 const ART_SETUP := preload("res://game/features/combat/weapon_art_setup.gd")
 const SFX := preload("res://game/core/audio/public/sound_events.gd")
+# How far a gunshot carries to unaware infected, in metres.
+const SHOT_NOISE_RADIUS := 26.0
 const SPIN_LOOP := "res://assets/audio/sfx/minigun_spin/minigun_spin_1.ogg"
 # Sound events per weapon (ADR-0018): [fire, reload, casing].
 const WEAPON_SOUNDS := {
@@ -197,6 +199,7 @@ func try_fire_at(target_point: Vector3) -> bool:
 		if casing_pool != null:
 			casing_pool.call("spawn_casing", casing_scene, ejection_port.global_transform, casing_radius, shooter, sound_event(2), casing_size_multiplier)
 	SFX.play(self, sound_event(0), muzzle.global_position)
+	get_tree().call_group("infected_alive", "hear_noise", muzzle.global_position, SHOT_NOISE_RADIUS)
 	return true
 
 

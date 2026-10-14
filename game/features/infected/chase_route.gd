@@ -61,7 +61,8 @@ func direction(actor: CharacterBody3D, target: Node3D, radius: float, far: bool 
 	var from := actor.global_position
 	var to := target.global_position
 	to.y = _height
-	if frame >= _next_probe and _take_direct_probe(frame):
+	# Close to the target the direct-line answer must be fresh, so a swing is never held back.
+	if (frame >= _next_probe or from.distance_squared_to(to) < 9.0) and _take_direct_probe(frame):
 		_next_probe = frame + 6
 		_direct = clear_segment(from, to)
 	if _direct:

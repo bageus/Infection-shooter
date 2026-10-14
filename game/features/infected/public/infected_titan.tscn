@@ -23,6 +23,7 @@ max_health = 260.0
 move_speed = 3.3
 push_strength = 2.6
 attack_range = 1.6
+breaker_tier = 2
 attack_damage = 38.0
 limb_loss_kills = false
 attack_interval = 1.3

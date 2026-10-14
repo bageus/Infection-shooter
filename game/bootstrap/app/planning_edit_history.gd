@@ -218,8 +218,8 @@ func _restore(record: Dictionary, offset: Vector3, new_desk: bool) -> Node3D:
 		node.call("configure_flicker", int(record["flicker_mode"]), float(record["flicker_step"]))
 	_apply_loot(node, record.get("loot", {}), record.get("enemy_stats", {}))
 	_apply_spawn(node, record.get("spawn", {}), record.get("spawn_triggers", []))
-	if node.has_method("set_target") and str(record["kind"]) == "enemy":
-		node.call("set_target", planner.main_player)
+	if node.has_method("watch_target") and str(record["kind"]) == "enemy":
+		node.call("watch_target", planner.main_player)
 	planner.placed.append(node)
 	BLOOD_PLACEMENT.restore_attachments([planner.root])
 	return node
