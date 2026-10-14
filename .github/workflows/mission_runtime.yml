@@ -255,6 +255,7 @@ jobs:
           game/features/player/tests/run_skill_sound_tests.gd
           game/features/infected/tests/run_chase_route_tests.gd
           game/presentation/prototype_hud/tests/run_weapon_icon_tests.gd
+          game/presentation/prototype_hud/tests/run_armor_hud_tests.gd
           game/presentation/office_floor/tests/run_blood_effects_tests.gd
           game/features/infected/tests/run_enemy_lod_tests.gd
           game/bootstrap/app/tests/run_new_weapon_tests.gd
