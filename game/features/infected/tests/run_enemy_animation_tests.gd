@@ -76,7 +76,7 @@ func _run() -> void:
 
 func _add_floor(stage: Node3D) -> void:
 	var floor_body := StaticBody3D.new()
-	floor_body.collision_layer = 2
+	floor_body.collision_layer = 3 # world (1) plus the layer the old tests used (2)
 	var shape := CollisionShape3D.new()
 	var box := BoxShape3D.new()
 	box.size = Vector3(200, 1, 200)

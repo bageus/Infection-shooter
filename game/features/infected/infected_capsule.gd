@@ -5,6 +5,7 @@ const CHASE_ROUTE := preload("res://game/features/infected/chase_route.gd")
 const CHASE_PACE := preload("res://game/features/infected/chase_pace.gd")
 const PERCEPTION := preload("res://game/features/infected/enemy_perception.gd")
 const BREAKER := preload("res://game/features/infected/obstacle_breaker.gd")
+const CROWD := preload("res://game/features/infected/crowd_separation.gd")
 var _route := CHASE_ROUTE.new()
 var _pace := CHASE_PACE.new()
 var _senses := PERCEPTION.new()
@@ -400,8 +401,9 @@ func _physics_process(delta: float) -> void:
 	var desired := Vector3.ZERO if _blast_stun_remaining > 0.0 else _cached_desired
 	if not _sleeping_far:
 		_turn_toward_face_direction(delta)
-	velocity.x = desired.x + _push_velocity.x
-	velocity.z = desired.z + _push_velocity.z
+	var spread := CROWD.spread(self, collision_shape)
+	velocity.x = desired.x + _push_velocity.x + spread.x
+	velocity.z = desired.z + _push_velocity.z + spread.z
 	_push_velocity = _push_velocity.move_toward(Vector3.ZERO, push_decay * delta)
 
 	if _sleeping_far:
@@ -426,9 +428,7 @@ func _desired_velocity_from_offset(offset: Vector3) -> Vector3:
 		_face_direction = offset / distance
 	if distance <= 0.0001:
 		return Vector3.ZERO
-	var radius := .35
-	if collision_shape != null and collision_shape.shape is CapsuleShape3D:
-		radius = (collision_shape.shape as CapsuleShape3D).radius * global_basis.x.length()
+	var radius := CROWD.body_radius(collision_shape, global_basis.x.length())
 	var route_direction: Vector3 = _route.direction(self, _target, radius, _sleeping_far)
 	if _breaker.breaching and not _route.direct_clear():
 		route_direction = offset / distance
