@@ -15,6 +15,8 @@ signal blast_stun_ended()
 ## Health actually restored (after caps and skill bonuses); source is
 ## &"medkit" for medkit pickups and empty for other healing.
 signal healed(amount: float, source: StringName)
+signal antidote_confirmation_requested(preview: Dictionary)
+var _antidote_action := preload("res://game/features/player/player_antidote.gd").new()
 
 const CONTROL_LOSS := preload("res://game/features/player/mutation_control_loss.gd")
 const MUTATION_EFFECTS := preload("res://game/features/player/mutation_skill_effects.gd")
@@ -123,6 +125,8 @@ func _physics_process(delta: float) -> void:
 	_mutation_control.tick(delta, control_lost)
 	if control_lost:
 		_roll_remaining = 0.0
+		if Input.is_action_just_pressed("antidote"):
+			use_antidote()
 	if not _mutation_menu_open and not control_lost:
 		_handle_actions()
 	_update_camera(delta)
@@ -316,13 +320,17 @@ func heal(amount:float, source: StringName = &"")->float:
 	if gained > 0.0:
 		healed.emit(gained, source)
 	return gained
-func use_antidote()->bool:
-	if antidotes<=0 and not infinite_antidotes:return false
-	var used:bool=infection_runtime.call("use_antidote")
-	if used:
-		if not infinite_antidotes:antidotes-=1
-		_play_sound(&"antidote_use")
-	return used
+func use_antidote() -> bool:
+	return _antidote_action.request(self)
+
+
+func confirm_antidote() -> bool:
+	return _antidote_action.confirm(self)
+
+
+func cancel_antidote() -> void:
+	_antidote_action.cancel()
+
 func add_ammo_to_current_weapon(amount:int)->int:return get_current_weapon().call("add_reserve_ammo",amount)
 func add_ammo_for_weapon(weapon_name:String,amount:int)->int:
 	for weapon in weapons:

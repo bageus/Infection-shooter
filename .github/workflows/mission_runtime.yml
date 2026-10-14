@@ -240,6 +240,7 @@ jobs:
           game/features/character_animation/tests/run_gait_tests.gd
           game/features/character_animation/tests/run_leg_clips_tests.gd
           game/bootstrap/app/tests/run_mutation_feedback_tests.gd
+          game/bootstrap/app/tests/run_progression_ui_tests.gd
           game/features/player/tests/run_skill_vfx_tests.gd
           game/presentation/office_floor/tests/run_debris_tests.gd
           game/features/infected/tests/run_dismemberment_tests.gd

@@ -24,11 +24,13 @@ func _run() -> void:
 	_test_loss_does_not_escalate_on_timer()
 	_test_antidote_resets_escalation()
 	_test_antidote_resets_after_second_loss()
-	_test_antidote_is_blocked_during_control_loss()
+	_test_emergency_antidote_during_control_loss()
 	_test_exact_threshold_and_immediate_crossing()
 	_test_below_threshold_has_no_delayed_loss()
 	_test_mutagen_pauses_during_control_loss()
 	_test_progression_budget_and_stages()
+	_test_retained_budget_and_preview()
+	_test_control_ampule_compensation()
 	_test_path_feedback_without_spare_points()
 	_test_retired_wraparound_hybrid()
 	_test_runtime_cast_control_guard()
@@ -42,6 +44,44 @@ func _run() -> void:
 	else:
 		push_error("T001 infection domain tests failed: %d failure(s)." % failures)
 	quit(failures)
+
+
+func _test_retained_budget_and_preview() -> void:
+	var runtime := Runtime.new()
+	runtime._domain.mutation = 30.0
+	_expect(runtime.upgrade_skill("muscle_memory"), "Fixture learns a real skill")
+	var learned_before: Dictionary = runtime.tree.learned.duplicate()
+	var preview := runtime.antidote_preview()
+	_expect(runtime.tree.learned == learned_before and runtime.get_mutation() == 30.0, "Preview leaves live mutation/skills unchanged")
+	_expect(preview.forgotten == ["muscle_memory"] and preview.after == 20.0 and preview.points_after == 2, "Preview shows exact forgotten skill and refunded retained budget")
+	_expect(runtime.use_antidote(), "Runtime applies confirmed or emergency use")
+	_expect(runtime.mutation_points() == preview.points_after and not runtime.skill_learned("muscle_memory"), "Actual result equals preview")
+	for _i in 5:
+		runtime.absorb_mutagen(2.0)
+		runtime.use_antidote()
+	_expect(runtime.mutation_points() == 2, "Repeated antidote cycles cannot farm new budget")
+	runtime.tree.observe_mutation(100.0)
+	_expect(runtime.mutation_points() == 16, "Budget caps at16 and survives low mutation")
+	runtime.free()
+
+
+func _test_control_ampule_compensation() -> void:
+	var runtime := Runtime.new()
+	runtime.begin_control_level("floor_a")
+	_expect(runtime.complete_control_level("other") == 0, "A mismatched level id cannot grant an ampule")
+	_expect(runtime.complete_control_level("floor_a") == 1 and runtime.get_critical_threshold() == 35.0, "Exit compensates one missed ampule")
+	_expect(runtime.complete_control_level("floor_a") == 0 and runtime.get_critical_threshold() == 35.0, "Repeated exit cannot duplicate compensation")
+	runtime.begin_control_level("floor_b")
+	runtime.add_control_ampule()
+	_expect(runtime.complete_control_level("floor_b") == 0 and runtime.get_critical_threshold() == 40.0, "Collected ampule suppresses compensation")
+	runtime.begin_control_level("floor_c")
+	_expect(runtime.complete_control_level("floor_c") == 1 and runtime.get_critical_threshold() == 45.0, "A new missed level is tracked independently")
+	for level in range(20):
+		var id := "floor_%d" % level
+		runtime.begin_control_level(id)
+		runtime.complete_control_level(id)
+	_expect(runtime.get_critical_threshold() == 95.0, "Compensation respects the95 stability cap")
+	runtime.free()
 
 
 func _test_skill_tree_lock_and_reactivation() -> void:
@@ -318,12 +358,12 @@ func _test_antidote_resets_after_second_loss() -> void:
 	_expect(not domain.defeated, "Antidote prevents the third-contact defeat.")
 
 
-func _test_antidote_is_blocked_during_control_loss() -> void:
+func _test_emergency_antidote_during_control_loss() -> void:
 	var domain = _reach_first_control_loss()
 	var mutation_before: float = domain.mutation
-	_expect(not domain.use_antidote(), "Antidote cannot be used during active control loss.")
-	_expect_float(domain.mutation, mutation_before, "Blocked antidote does not change mutation.")
-	_expect(domain.active_control_loss_stage == 1, "Blocked antidote does not alter control-loss stage.")
+	_expect(domain.use_antidote(), "Owner-approved emergency antidote works during control loss.")
+	_expect_float(domain.mutation, mutation_before - 10.0, "Emergency antidote keeps the ten-point reduction.")
+	_expect(not domain.is_control_lost() and domain.active_control_loss_stage == 0 and domain.next_control_loss_stage == 1, "Emergency antidote returns control and resets escalation.")
 
 
 func _test_below_threshold_has_no_delayed_loss() -> void:

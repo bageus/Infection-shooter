@@ -19,6 +19,8 @@ signal skill_effect_started(skill_id: String, duration: float)
 ## Fact: a DNA ampule was collected; the control threshold rose to `critical_threshold`.
 signal control_ampule_collected(critical_threshold: float)
 
+const CONTROL_PROGRESS := preload("res://game/features/infection/domain/control_progress.gd")
+var control_progress := CONTROL_PROGRESS.new()
 var _domain = InfectionDomain.new()
 var tree = MUTATION_TREE.new()
 var _was_control_lost: bool = false
@@ -49,6 +51,7 @@ func absorb_mutagen(delta_seconds: float) -> float:
 
 func use_antidote() -> bool:
 	var previous_mutation: float = _domain.mutation
+	tree.observe_mutation(previous_mutation)
 	var used: bool = _domain.use_antidote()
 	_emit_state_changes(previous_mutation)
 	return used
@@ -57,10 +60,27 @@ func use_antidote() -> bool:
 func add_control_ampule() -> float:
 	var previous_mutation: float = _domain.mutation
 	var previous_stability: float = _domain.critical_threshold
+	control_progress.record_collection()
 	var threshold: float = _domain.add_control_ampule()
 	_emit_state_changes(previous_mutation, not is_equal_approx(previous_stability, threshold))
 	control_ampule_collected.emit(threshold)
 	return threshold
+
+
+# Public progression_v1; level identity belongs to the authored mission.
+func begin_control_level(id: String) -> void:
+	control_progress.begin_level(id)
+
+
+func complete_control_level(id: String) -> int:
+	var recovered := control_progress.complete_level(id)
+	for _i in recovered:
+		add_control_ampule()
+	return recovered
+
+
+func antidote_preview() -> Dictionary:
+	return CONTROL_PROGRESS.antidote_preview(_domain, tree)
 
 
 func get_mutation() -> float:
@@ -221,6 +241,7 @@ func is_escalated() -> bool:
 
 
 func _emit_state_changes(previous_mutation: float, stability_changed: bool = false) -> void:
+	tree.observe_mutation(maxf(previous_mutation, _domain.mutation))
 	if stability_changed or not is_equal_approx(previous_mutation, _domain.mutation):
 		if tree.reconcile(_domain.mutation):
 			tree_changed.emit()
