@@ -37,7 +37,7 @@ func _run() -> void:
 	hud.call("_update_vitals")
 	_expect(armor_bar.visible and armor_value.visible, "Armor strip appears while armor is held.")
 	_expect(is_equal_approx(armor_bar.value, 40.0) and is_equal_approx(armor_bar.max_value, float(player.get("max_armor"))), "Armor strip shows armor against its maximum.")
-	_expect(armor_value.text == "БРОНЯ 40", "Armor value is labelled in the current language.")
+	_expect(armor_value.text == "40", "Armor value shows the number without a caption.")
 	_expect(is_equal_approx(health_bar.value, float(player.get("health"))), "Health bar is unaffected by armor.")
 
 	player.set("armor", 0.0)

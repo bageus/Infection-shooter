@@ -256,7 +256,7 @@ func _update_armor(armor: float, max_armor: float) -> void:
 		return
 	armor_bar.max_value = max_armor
 	armor_bar.value = armor
-	armor_value.text = "%s %d" % [tr("hudArmor"), roundi(armor)]
+	armor_value.text = str(roundi(armor))
 
 
 # A green pulse on the health bar marks a noticeable heal (medkit, kill heal).
