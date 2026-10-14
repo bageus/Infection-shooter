@@ -19,12 +19,16 @@
       "set_active": "set_active(active: bool) -> void; pauses animation for distant characters",
       "one_shot_finished": "signal one_shot_finished(state: StringName)",
       "play_dodge": "play_dodge(world_direction: Vector3, duration: float) -> bool; plays the roll (whole hips clip, body turns along the dodge) or the strafe jump (dodge_style 0/1) over duration; false without leg_clips (ADR-0044)",
-      "is_dodging": "is_dodging() -> bool"
+      "is_dodging": "is_dodging() -> bool",
+      "play_named_one_shot": "play_named_one_shot(clip: StringName, blend := 0.12, speed := 1.0) -> float; plays a clip by name once, emits one_shot_finished(clip), returns its duration (ADR-0045)",
+      "play_overlay": "play_overlay(clip: StringName) -> bool; plays a clip on the upper body only, over the running legs (ADR-0045)",
+      "clip_meta": "clip_meta(clip, key, default) -> Variant; clip_length(clip) -> float (ADR-0045)"
     },
     "animation_assets_v1": {
       "animation_library": "@export AnimationLibrary; optional clip set replacing the model's own clips (ADR-0016)",
       "procedural_gait": "@export bool; speed-synchronised leg gait layered over authored clips, presentation only (ADR-0016); knees bend in the plane the foot points along (ADR-0040)",
       "run_exit_ratio": "@export float = 0.85; a running character keeps the run clip down to this share of run_speed_threshold (ADR-0040)",
+      "extra_clips": "@export AnimationLibrary; clips merged into the model's default library; metadata ref_speed (cycle pace, m/s) and strike_time (attack impact, s) are honoured (ADR-0045)",
       "leg_clips": "@export AnimationLibrary; retargeted hips-and-legs clips (run in eight directions, Dodge_Roll, Dodge_Strafe_Left/Right) replacing the procedural gait; arms, shoulders and weapon hold stay authored (ADR-0044)"
     }
   }

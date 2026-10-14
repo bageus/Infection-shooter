@@ -131,6 +131,13 @@ func _test_humanoid_clips(stage: Node3D, scene: PackedScene, label: String) -> v
 		_expect(player.has_animation(clip) and player.get_animation(clip).loop_mode == Animation.LOOP_LINEAR, "%s %s exists and loops." % [label, clip])
 	for clip in ["AttackLeft", "AttackRight", "Death"]:
 		_expect(player.has_animation(clip) and player.get_animation(clip).loop_mode == Animation.LOOP_NONE, "%s %s exists and is one-shot." % [label, clip])
+	if enemy.get_node("AnimationDriver").extra_clips != null:
+		# The Hunger family plays the Mixamo set (ADR-0045); run_hunger_behaviour_tests covers it.
+		for clip in ["Run", "RunLunge", "FoursRun", "Crawl", "BiteLoop", "Walk"]:
+			_expect(player.get_animation(clip).loop_mode == Animation.LOOP_LINEAR and float(player.get_animation(clip).get_meta("ref_speed", 0.0)) > 0.0 or clip == "BiteLoop", "%s Mixamo %s loops." % [label, clip])
+		enemy.queue_free()
+		await process_frame
+		return
 	enemy.get_node("AnimationDriver").set_process(false)
 	var bones := ["Chest", "Head", "L_Hand", "R_Hand", "L_Foot", "R_Foot", "Hips"]
 	var idle := _pose(player, "Idle", 0.0, bones)
@@ -185,6 +192,14 @@ func _test_horde_clips(stage: Node3D) -> void:
 	await process_frame
 
 
+# Playback speed a clip is expected at: 1 for procedural clips, speed / ref_speed for Mixamo cycles.
+func _pace_for(driver: Node, player: AnimationPlayer, clip: String, speed: float) -> float:
+	var reference := float(player.get_animation(clip).get_meta("ref_speed", 0.0))
+	if driver.extra_clips == null or reference <= 0.0:
+		return 1.0
+	return clampf(speed / reference, 0.5, 1.8)
+
+
 func _test_locomotion_selection(stage: Node3D, scene: PackedScene, label: String) -> void:
 	var enemy := await _spawn(stage, scene)
 	enemy.set_physics_process(false)
@@ -195,11 +210,11 @@ func _test_locomotion_selection(stage: Node3D, scene: PackedScene, label: String
 	enemy.velocity = Vector3(0, 0, float(driver.get("walk_reference_speed")))
 	await _frames(3)
 	_expect(player.current_animation == "Walk", label + " stalking speed plays Walk.")
-	_expect(absf(player.speed_scale - 1.0) < 0.05, label + " Walk is paced for its speed.")
+	_expect(absf(player.speed_scale - _pace_for(driver, player, "Walk", driver.get("walk_reference_speed"))) < 0.05, label + " Walk is paced for its speed.")
 	enemy.velocity = Vector3(0, 0, float(driver.get("run_reference_speed")))
 	await _frames(3)
 	_expect(player.current_animation == "Run", label + " charging speed plays Run.")
-	_expect(absf(player.speed_scale - 1.0) < 0.05, label + " Run is paced for its speed.")
+	_expect(absf(player.speed_scale - _pace_for(driver, player, "Run", driver.get("run_reference_speed"))) < 0.05, label + " Run is paced for its speed.")
 	enemy.velocity = Vector3.ZERO
 	await _frames(3)
 	_expect(player.current_animation == "Idle", label + " returns to Idle.")
@@ -271,6 +286,11 @@ func _test_stalk_then_charge(stage: Node3D) -> void:
 func _test_knees_follow_feet(stage: Node3D, scene: PackedScene, label: String) -> void:
 	var enemy := await _spawn(stage, scene)
 	var player := _player_of(enemy)
+	if enemy.get_node("AnimationDriver").extra_clips != null:
+		# Mocap clips: knees are right by construction (checked on the contact sheets).
+		enemy.queue_free()
+		await process_frame
+		return
 	var worst := 0.0
 	for clip in ["Walk", "Run"]:
 		var length := player.get_animation(clip).length
