@@ -1,5 +1,6 @@
 extends Node3D
 
+const SFX := preload("res://game/core/audio/public/sound_events.gd")
 const PIECE_SCRIPT = preload("res://game/presentation/office_floor/table_piece.gd")
 const ASSEMBLY_SCRIPT = preload("res://game/presentation/office_floor/table_assembly.gd")
 const EFFECTS_SCRIPT = preload("res://game/features/combat/public/impact_effects.gd")
@@ -114,6 +115,7 @@ func _switch_to_modular() -> void:
 	if _started or _intact == null:
 		return
 	_started = true
+	SFX.play(get_parent(), &"break_wood", global_position)
 	_intact.hide()
 	_modular.show()
 	var intact_body := get_node("IntactBody") as StaticBody3D
@@ -123,6 +125,7 @@ func _switch_to_modular() -> void:
 
 
 func _transition_piece(part_id: String, body: RigidBody3D, hit_position: Vector3, direction: Vector3) -> void:
+	SFX.play(get_parent(), &"break_wood", hit_position)
 	var original: MeshInstance3D = _parts[part_id]
 	var original_transform := _current_mesh_transform(original, body)
 	if body == _assembly:

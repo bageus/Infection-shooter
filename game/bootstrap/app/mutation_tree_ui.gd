@@ -213,6 +213,7 @@ func _set_open(value: bool) -> void:
 	else:
 		get_tree().paused = _previous_pause
 	window.visible = value
+	_play_ui_sound(&"mutation_open" if value else &"mutation_close")
 	card.dismiss()
 	skill_bar.visible = not value
 	if runtime != null and runtime.get_parent() != null:

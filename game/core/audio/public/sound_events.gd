@@ -63,6 +63,13 @@ const EVENTS := {
 	&"hit_electronics": [3, -3.0, 32.0, 3.5, 0.06, 4],
 	&"hit_wall": [5, -4.0, 36.0, 3.5, 0.08, 4],
 	&"hit_glass": [4, -3.0, 36.0, 3.5, 0.06, 4],
+	&"break_wood": [3, 0.0, 48.0, 5.0, 0.06, 3],
+	&"break_furniture": [3, 0.0, 48.0, 5.0, 0.06, 3],
+	&"break_cardboard": [3, -2.0, 32.0, 3.5, 0.06, 3],
+	&"break_metal": [3, 0.0, 48.0, 5.0, 0.06, 3],
+	&"break_electronics": [3, 0.0, 48.0, 5.0, 0.06, 3],
+	&"break_lamp": [2, -1.0, 40.0, 4.0, 0.06, 3],
+	&"weapon_switch": [2, -4.0, 18.0, 2.5, 0.06, 3],
 	&"glass_break": [4, 1.0, 60.0, 7.0, 0.05, 3],
 	&"flesh_hit": [6, -2.0, 34.0, 4.0, 0.08, 5],
 	&"dismember": [2, 1.0, 50.0, 6.0, 0.06, 3],
@@ -192,6 +199,8 @@ static func play(parent: Node, event: StringName, position := Vector3.INF, volum
 const UI_GROUP := &"ui_sfx_voice"
 const UI_MAX_VOICES := 8
 const UI_EVENTS := {
+	&"mutation_open": [preload("res://assets/audio/ui/mutation_open.tres"), -6.0],
+	&"mutation_close": [preload("res://assets/audio/ui/mutation_close.tres"), -6.0],
 	&"menu_hover": [preload("res://assets/audio/ui/menu_hover.tres"), -8.0],
 	&"mutation_hover": [preload("res://assets/audio/ui/mutation_hover.tres"), -9.0],
 	&"mutation_click": [preload("res://assets/audio/ui/mutation_click.tres"), -6.0],

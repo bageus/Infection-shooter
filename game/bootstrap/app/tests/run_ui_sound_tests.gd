@@ -72,6 +72,9 @@ func _test_mutation_tree() -> void:
 	ui.configure(runtime)
 	ui.open_tree()
 	_check(paused, "Mutation tree pauses gameplay")
+	_check(_count(ui, &"mutation_open") == 1, "Opening the tree plays its cue during pause")
+	ui.open_tree()
+	_check(_count(ui, &"mutation_open") == 1, "Opening an already open tree is silent")
 	var skill := _tree_button(ui.content, "skill_id", "acid_spit")
 	_check(skill != null and not skill.disabled, "A real mutation skill is available")
 	if skill != null:
@@ -126,6 +129,16 @@ func _test_mutation_tree() -> void:
 	_check(reversed, "Unlock is the exact reversed PCM lock cue")
 	ui.close_tree()
 	_check(not ui.card.visible, "Closing the tree hides the detail card")
+	_check(_count(ui, &"mutation_close") == 1, "Closing the tree plays its reverse cue")
+	ui.close_tree()
+	_check(_count(ui, &"mutation_close") == 1, "Closing an already closed tree is silent")
+	var opening: AudioStreamWAV = SFX.UI_EVENTS[&"mutation_open"][0]
+	var closing: AudioStreamWAV = SFX.UI_EVENTS[&"mutation_close"][0]
+	var reverse_open := opening.data.size() == closing.data.size()
+	for index in range(0, opening.data.size(), 2):
+		var other := opening.data.size() - 2 - index
+		reverse_open = reverse_open and opening.data[index] == closing.data[other] and opening.data[index + 1] == closing.data[other + 1]
+	_check(reverse_open, "Closing is the exact reversed opening PCM")
 	ui.queue_free()
 	host.queue_free()
 	await process_frame

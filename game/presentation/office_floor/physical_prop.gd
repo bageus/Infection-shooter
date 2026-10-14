@@ -1,4 +1,5 @@
 extends RigidBody3D
+const BREAK_SOUND := preload("res://game/presentation/office_floor/prop_break_sound.gd")
 const IMPACT_SOUND := preload("res://game/presentation/office_floor/impact_sound_watcher.gd")
 
 const BALANCE = preload("res://game/features/combat/public/projectile_balance.gd")
@@ -118,10 +119,11 @@ func _integrate_forces(state: PhysicsDirectBodyState3D) -> void:
 
 
 func _break_physical_prop(hit_position: Vector3, direction: Vector3) -> void:
+	if is_queued_for_deletion():
+		return
+	BREAK_SOUND.play(self, effects_root, String(name) + " " + String(get_parent().name), get_projectile_material(), hit_position)
 	if not is_instance_valid(effects_root):
 		queue_free()
-		return
-	if is_queued_for_deletion():
 		return
 	if _damage_category() == "tech":
 		SPARKS.spawn(self, hit_position, true)
