@@ -7,7 +7,7 @@ static func event_for(model_path: String, material: String) -> StringName:
 	var model := model_path.get_file().to_lower()
 	if "lamp" in model:
 		return &"break_lamp"
-	for appliance in ["microwave", "kettle", "teapot", "coffee_machine", "coffee_vending", "water_cooler", "refrigerator"]:
+	for appliance in ["microwave", "kettle", "kittle", "teapot", "coffee_machine", "coffee_vending", "water_cooler", "refrigerator"]:
 		if appliance in model:
 			return &"break_electronics"
 	if material == "tech":

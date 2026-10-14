@@ -22,6 +22,7 @@ func _run() -> void:
 	await _environment("res://models/objects/enviroments/07/07_table_longest.glb", &"break_furniture")
 	await _environment("res://models/objects/enviroments/04/04_cardboard_box_closed.glb", &"break_cardboard")
 	await _environment("res://models/objects/enviroments/02/02_microwave_destructible.glb", &"break_electronics")
+	await _environment("res://models/objects/enviroments/02/02_kittle_destructible.glb", &"break_electronics")
 	await _lamp()
 	await _physical_crate()
 	await _weapon()
