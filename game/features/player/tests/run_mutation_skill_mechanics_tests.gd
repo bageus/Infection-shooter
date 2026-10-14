@@ -7,6 +7,7 @@ class Host extends CharacterBody3D:
 	var max_health := 100.0
 	var health := 100.0
 	var _roll_direction := Vector3.ZERO
+	var _aim_point := Vector3.ZERO
 
 	func heal(amount: float) -> float:
 		var gained := minf(amount, max_health - health)
@@ -42,6 +43,9 @@ class Enemy extends Node3D:
 	func apply_blast_stun(duration: float, intensity: float) -> void:
 		stunned = duration * intensity
 
+	func apply_mutation_poison(_duration: float, _dps: float) -> void:
+		pass
+
 
 func _initialize() -> void:
 	call_deferred("_run")
@@ -60,7 +64,7 @@ func _run() -> void:
 	_dash(effects, runtime)
 	_retaliation(effects, runtime)
 	_second_heart(effects, runtime, host)
-	await _acid_on_floor(effects, host)
+	await _acid_on_floor(effects, host, runtime)
 	_discharge_chain(effects, runtime)
 	_claw_kill_adrenaline(effects, runtime)
 	_retire(host)
@@ -180,7 +184,7 @@ func _claw_kill_adrenaline(effects: Node, runtime: Runtime) -> void:
 
 # Acid Spit always lands on the floor: an aim on a wall face comes back to
 # the floor short of the wall, an aim on a desk top drops to the floor.
-func _acid_on_floor(effects: Node, host: Host) -> void:
+func _acid_on_floor(effects: Node, host: Host, runtime: Runtime) -> void:
 	var scenery := Node3D.new()
 	root.add_child(scenery)
 	_box(scenery, Vector3(0, -0.5, 0), Vector3(20, 1, 20))
@@ -196,6 +200,15 @@ func _acid_on_floor(effects: Node, host: Host) -> void:
 	_check(absf(on_desk.y) < 0.05 and absf(on_desk.x + 3.0) < 0.05, "Acid aimed at a desk top lands on the floor below it.")
 	var on_floor: Vector3 = effects.call("acid_floor_point", Vector3(1.5, 0.0, -2.0))
 	_check(on_floor.distance_to(Vector3(1.5, 0.0, -2.0)) < 0.05, "Acid aimed at open floor lands where aimed.")
+	# Spore Cocoon uses the same floor point: aimed at the wall face (1.4 m up),
+	# the burst lands on the floor short of the wall and still reaches an enemy there.
+	var near_floor := _enemy(Vector3(1.0, 0.0, 0.3))
+	host._aim_point = Vector3(4.0, 1.4, 0.3)
+	runtime.skills["spore_cocoon"] = true
+	runtime.skill_cast.emit("spore_cocoon")
+	await create_timer(EFFECTS.SPORE_DELAY + 0.3).timeout
+	_check(is_equal_approx(near_floor.damage_taken, EFFECTS.SPORE_DAMAGE), "Spore Cocoon aimed at a wall bursts on the floor in front of it (damage %.1f)." % near_floor.damage_taken)
+	_retire(near_floor)
 	scenery.queue_free()
 
 
