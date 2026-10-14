@@ -55,7 +55,26 @@ func _run() -> void:
 	await physics_frame
 	await physics_frame
 	_check(CROWD.spread(lone, lone.get("collision_shape")).is_zero_approx(), "a lone infected is not pushed")
+	await _moving_coincident_pair(stage)
 	stage.queue_free()
 	await process_frame
 	print("Crowd separation tests: %d failures" % failures)
 	quit(failures)
+
+
+func _moving_coincident_pair(stage: Node3D) -> void:
+	var first := CharacterBody3D.new()
+	var second := CharacterBody3D.new()
+	stage.add_child(first)
+	stage.add_child(second)
+	first.position = Vector3(30, 1, 20)
+	second.position = first.position
+	CROWD.spread(first, null)
+	CROWD.spread(second, null)
+	await physics_frame
+	first.position.x += 0.1
+	second.position.x += 0.1
+	var first_push := CROWD.spread(first, null)
+	var second_push := CROWD.spread(second, null)
+	_check(first_push.length() > 0.1, "Moving coincident bodies receive separation")
+	_check(first_push.dot(second_push) < 0.0, "A moving coincident pair receives opposite pushes from one frame snapshot")
