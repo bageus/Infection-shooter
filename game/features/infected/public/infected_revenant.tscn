@@ -22,6 +22,7 @@ script = ExtResource("2_enemy")
 max_health = 75.0
 move_speed = 4.6
 attack_range = 1.25
+breaker_tier = 1
 attack_damage = 16.0
 attack_interval = 1.0
 

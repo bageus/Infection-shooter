@@ -126,8 +126,8 @@ func _register_editable_children(parent: Node) -> void:
 
 func _activate_all_enemies() -> void:
 	for child in session.enemies_root.get_children():
-		if child.has_method("set_target"):
-			child.call("set_target", session.main_player)
+		if child.has_method("watch_target"):
+			child.call("watch_target", session.main_player)
 
 
 func _register_actor_objects() -> void:
@@ -272,8 +272,8 @@ func _place_selected(screen_pos: Vector2) -> void:
 	if kind == "enemy":
 		node.global_position.y = _enemy_spawn_height(node)
 		node.set_meta("planning_actor_kind", "enemy")
-		if node.has_method("set_target"):
-			node.call("set_target", session.main_player)
+		if node.has_method("watch_target"):
+			node.call("watch_target", session.main_player)
 	node.rotation_degrees.y = rotation_y
 	geometry._apply_wall_mount(node)
 	controls.DECOR_POSES.place(node)

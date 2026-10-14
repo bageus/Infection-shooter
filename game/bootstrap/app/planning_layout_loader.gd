@@ -191,8 +191,8 @@ func _place(entry: Dictionary) -> void:
 		node.set_meta("planning_actor_kind", "enemy")
 		node.set_meta("planning_spawn_transform", node.transform)
 		node.global_position.y = float(record.get("y", 1.0))
-		if node.has_method("set_target"):
-			node.call("set_target", session.main_player)
+		if node.has_method("watch_target"):
+			node.call("watch_target", session.main_player)
 	objects.placed.append(node)
 
 

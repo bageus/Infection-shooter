@@ -3,8 +3,12 @@ extends CharacterBody3D
 const ALIVE_GROUP := "infected_alive"
 const CHASE_ROUTE := preload("res://game/features/infected/chase_route.gd")
 const CHASE_PACE := preload("res://game/features/infected/chase_pace.gd")
+const PERCEPTION := preload("res://game/features/infected/enemy_perception.gd")
+const BREAKER := preload("res://game/features/infected/obstacle_breaker.gd")
 var _route := CHASE_ROUTE.new()
 var _pace := CHASE_PACE.new()
+var _senses := PERCEPTION.new()
+var _breaker := BREAKER.new()
 
 const AUTHORING := preload("res://game/features/infected/infected_authoring.gd")
 const BODY_PARTS := preload("res://game/features/infected/body_parts.gd")
@@ -13,10 +17,14 @@ const BLAST_DISMEMBER_DAMAGE := 60.0
 const AUDIO := preload("res://game/features/infected/infected_audio.gd")
 const DEATH_FALL := preload("res://game/features/infected/death_fall.gd")
 const DEATH_OBSTACLE := preload("res://game/features/infected/death_obstacle.gd")
+const DEATH_CLIP := preload("res://game/features/infected/death_clip.gd")
+const BLOOD_TRAIL := preload("res://game/features/infected/blood_trail.gd")
 const DEATH_RAGDOLL := preload("res://game/features/infected/death_ragdoll.gd")
 const CORPSE_BUDGET := preload("res://game/features/infected/public/corpse_budget.gd")
 const STATUS_FX := preload("res://game/features/infected/infected_status_fx.gd")
 const KILLING_PUSH_MSEC := 300
+# Longest wind-up before a swing lands, so long clips never delay the first hit.
+const MAX_WINDUP_SECONDS := 0.35
 
 # Public v1 presentation facts: no effect ownership or renderer dependency.
 signal projectile_blood(position: Vector3, direction: Vector3, weapon: String, excluded: Array[RID], source_id: int)
@@ -40,6 +48,10 @@ signal limb_severed(position: Vector3, direction: Vector3, excluded: Array[RID])
 @export var push_strength: float = 1.0
 var _intended_motion := Vector3.ZERO
 @export var obstacle_damage: float = 34.0
+## 0 never attacks props, 1 smashes small props and partitions, 2 anything destructible.
+@export_range(0, 2) var breaker_tier := 0
+@export var sight_range := 18.0
+@export var hearing_range := 26.0
 @export var obstacle_attack_interval: float = 0.45
 @export var full_simulation_distance: float = 14.0
 @export var sleep_distance: float = 32.0
@@ -83,9 +95,7 @@ var _sleeping_far := false
 var _blast_stun_remaining := 0.0
 var mutation_poison_remaining := 0.0
 var _mutation_poison_damage := 0.0
-var _blood_last_position := Vector3.ZERO
-var _blood_segment_start := Vector3.ZERO
-var _blood_distance := 0.0
+var _blood := BLOOD_TRAIL.new()
 var _pending_hit := -1.0
 var _face_direction := Vector3.ZERO
 var _parts: Node
@@ -127,9 +137,10 @@ func configure_chase_budget(budget: Node) -> void:
 
 func _ready() -> void:
 	_authoring.apply_saved_stats()
+	_breaker.tier = breaker_tier
+	_senses.sight_range = sight_range
 	health = max_health
-	_blood_last_position = global_position
-	_blood_segment_start = global_position
+	_blood.reset(global_position)
 	_ai_tick_offset = get_instance_id() % 4
 	_pace = CHASE_PACE.new(get_instance_id())
 	_lod_frame_offset = get_instance_id() % 12
@@ -169,13 +180,42 @@ func _setup_body_parts() -> void:
 		parts.queue_free()
 
 
+# Forces the chase: the infected knows where the player is (spawners, summons).
 func set_target(target: Node3D) -> void:
 	_target = target
+	_senses.force_chase()
+
+
+# The infected stays unaware until it sees or hears the player.
+func watch_target(target: Node3D) -> void:
+	_target = target
+	_senses.sight_range = sight_range
+	_senses.watch()
+
+
+func is_alerted() -> bool: return _senses.is_chasing()
+
+
+# Gunshot or blast at `position`: unaware infected within `radius` come to look.
+func hear_noise(position: Vector3, radius: float) -> void:
+	if not _dead:
+		_senses.hear(self, position, minf(radius, hearing_range))
+
+
+# A neighbour spotted the player and cried out.
+func hear_alert(position: Vector3, radius: float) -> void:
+	if not _dead and position.distance_to(global_position) <= radius:
+		_senses.alert()
+
+
+func _notice_player() -> void:
+	if _senses.alert():
+		audio.alert_shout()
+		get_tree().call_group(PERCEPTION.ALERT_GROUP, "hear_alert", global_position, _senses.alert_radius)
 
 
 func apply_player_push(direction: Vector3, strength: float) -> void:
-	if _dead or strength <= 0.0:
-		return
+	if _dead or strength <= 0.0: return
 	_push_velocity += direction.normalized() * strength
 	if _push_velocity.length() > max_push_speed:
 		_push_velocity = _push_velocity.normalized() * max_push_speed
@@ -241,6 +281,8 @@ func _apply_damage(amount: float, blast: bool) -> void:
 			return
 	var first_wound := is_equal_approx(health, max_health)
 	health = maxf(0.0, health - amount)
+	if amount >= 1.0 and _target != null and not _senses.is_chasing():
+		_notice_player()
 	if first_wound:
 		blood_wounded.emit(global_position, _blood_exclusions())
 	# Damage over time arrives in tiny per-frame bits; only real hits flinch.
@@ -323,6 +365,11 @@ func _physics_process(delta: float) -> void:
 		return
 	if _target == null or not is_instance_valid(_target):
 		return
+	if not _senses.is_chasing():
+		_senses.step_unaware(self, delta)
+		if not _senses.is_chasing():
+			return
+		_notice_player()
 	_tick_pending_hit(delta)
 
 	var target_offset := _target.global_position - global_position
@@ -368,6 +415,7 @@ func _physics_process(delta: float) -> void:
 	move_and_slide()
 	audio.tick(delta, distance_sq <= charge_distance * charge_distance, distance_sq < 24.0 * 24.0)
 	_push_chair_contacts()
+	_breaker.track_progress(self, delta, not _route.direct_clear())
 	if near or physics_frame % 4 == _ai_tick_offset:
 		_try_break_blocking_props()
 
@@ -382,6 +430,8 @@ func _desired_velocity_from_offset(offset: Vector3) -> Vector3:
 	if collision_shape != null and collision_shape.shape is CapsuleShape3D:
 		radius = (collision_shape.shape as CapsuleShape3D).radius * global_basis.x.length()
 	var route_direction: Vector3 = _route.direction(self, _target, radius)
+	if _breaker.breaching and not _route.direct_clear():
+		route_direction = offset / distance
 	if distance <= attack_range and _route.direct_clear():
 		_try_attack()
 		return Vector3.ZERO
@@ -411,8 +461,6 @@ func _turn_toward_face_direction(delta: float) -> void:
 	rotation.y = lerp_angle(rotation.y, target_yaw, 1.0 - exp(-turn_speed * delta))
 
 
-
-
 # Sliding zeroes the velocity into an item, so pushes use the intended motion.
 func _push_chair_contacts() -> void:
 	var pushed := {}
@@ -423,23 +471,11 @@ func _push_chair_contacts() -> void:
 			collider.call("push_from_character", global_position, _intended_motion, push_strength)
 
 
+# Smashes the prop in the way when this class is strong enough for it.
 func _try_break_blocking_props() -> void:
-	if _obstacle_cooldown > 0.0:
-		return
-	for i in get_slide_collision_count():
-		var collision := get_slide_collision(i)
-		var collider := collision.get_collider()
-		if collider != null and collider.is_in_group("infected_breakable_glass") and collider.has_method("take_melee_hit"):
-			collider.call(
-				"take_melee_hit",
-				obstacle_damage,
-				collision.get_position(),
-				-global_transform.basis.z
-			)
-			_obstacle_cooldown = obstacle_attack_interval
-			return
-
-
+	if _obstacle_cooldown <= 0.0 and _blast_stun_remaining <= 0.0 and _breaker.smash(self, _target):
+		_obstacle_cooldown = obstacle_attack_interval
+		_play_animation(_attack_state())
 
 
 func _apply_gravity(delta: float) -> void:
@@ -458,7 +494,7 @@ func _try_attack() -> void:
 	if duration <= 0.0:
 		_deliver_attack()
 		return
-	_pending_hit = duration * attack_hit_fraction
+	_pending_hit = minf(duration * attack_hit_fraction, MAX_WINDUP_SECONDS)
 
 
 func _tick_pending_hit(delta: float) -> void:
@@ -509,23 +545,7 @@ func _blood_exclusions() -> Array[RID]:
 
 
 func _track_blood_motion() -> void:
-	var current := global_position
-	var travelled := current.distance_to(_blood_last_position)
-	_blood_last_position = current
-	if travelled > 3.0 or (not _dead and health >= max_health):
-		_blood_segment_start = current
-		_blood_distance = 0.0
-		return
-	_blood_distance += travelled
-	var spacing := 0.35 if _dead else blood_drop_distance
-	if _blood_distance < spacing:
-		return
-	if _dead:
-		body_dragged.emit(_blood_segment_start, current, _blood_exclusions())
-	else:
-		wounded_moved.emit(_blood_segment_start, current, _blood_exclusions())
-	_blood_distance = 0.0
-	_blood_segment_start = current
+	_blood.track(self, _dead, health >= max_health, blood_drop_distance, _blood_exclusions())
 
 
 # Blood dripping from torn-off limbs leaves marks under the stump.
@@ -552,8 +572,7 @@ func _die() -> void:
 	var fall := DEATH_FALL.resolve(Vector3(velocity.x, 0.0, velocity.z), _death_push if fresh else Vector3.ZERO, -global_basis.z, size)
 	fall = DEATH_OBSTACLE.adjust(self, _parts, fall, size)
 	var landing: Vector3 = DEATH_FALL.landing(self, fall["slide"], 0.35 * size)
-	_blood_segment_start = global_position
-	_blood_distance = 0.0
+	_blood.reset(global_position)
 	blood_death.emit(global_position + landing, _blood_exclusions(), get_instance_id())
 	if is_instance_valid(_target) and _target.has_method("mutation_enemy_killed"):
 		_target.call("mutation_enemy_killed", self)
@@ -567,28 +586,9 @@ func _die() -> void:
 		_parts.enable_corpse_hitboxes()
 	_ragdoll = DEATH_RAGDOLL.start(self, _parts, _animation, Vector3(velocity.x, 0.0, velocity.z), _death_push if fresh else Vector3.ZERO, size)
 	if _ragdoll == null:
-		_play_death_clip(fall, landing)
+		_fall_watch = DEATH_CLIP.play(self, _parts, _animation, fall, landing)
 	death_cloud.set("heals_visitors", is_instance_valid(_target) and _target.has_method("get_infection_skill") and bool(_target.call("get_infection_skill", "devourer")))
 	death_cloud.call("activate")
-
-
-func _play_death_clip(fall: Dictionary, landing: Vector3) -> void:
-	DEATH_FALL.throw(self, float(fall["turn"]), landing)
-	var death_length := _play_animation(fall["state"])
-	_fall_watch = DEATH_OBSTACLE.new()
-	if not _fall_watch.call("start", self, _parts, _animation, fall, death_length):
-		_fall_watch = null
-	if death_length > 0.0:
-		_sink_corpse_after(death_length)
-	else:
-		body_visual.visible = false
-
-
-# The corpse stays visible while the death animation plays, then sinks away.
-func _sink_corpse_after(death_length: float) -> void:
-	var tween := create_tween()
-	tween.tween_interval(death_length + death_linger_seconds)
-	CORPSE_BUDGET.clip_tail(tween, self, _parts, body_visual, death_sink_depth, _hide_corpse)
 
 
 func _hide_corpse() -> void:

@@ -75,6 +75,12 @@ func _call_out() -> void:
 	_growl_wait = maxf(_growl_wait, 2.5)
 
 
+# The cry that pulls neighbours in when this infected first spots the player.
+func alert_shout() -> void:
+	spotted = true
+	_call_out()
+
+
 func growl(volume_offset := 0.0) -> void:
 	SFX.play(body, growl_sound, Vector3.INF, volume_offset, voice_pitch)
 
