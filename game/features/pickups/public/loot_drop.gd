@@ -3,14 +3,7 @@ extends RefCounted
 
 const CONFIG := preload("res://game/features/pickups/public/loot_config.gd")
 const DROP_TABLE := preload("res://game/features/pickups/public/drop_table.gd")
-const SCENES := {
-	"ammo_pistol": preload("res://game/features/pickups/public/ammo_pistol_pickup.tscn"),
-	"ammo_uzi": preload("res://game/features/pickups/public/ammo_uzi_pickup.tscn"),
-	"ammo_shotgun": preload("res://game/features/pickups/public/ammo_shotgun_pickup.tscn"),
-	"medkit": preload("res://game/features/pickups/public/medkit_pickup.tscn"),
-	"antidote": preload("res://game/features/pickups/public/antidote_pickup.tscn"),
-	"dna": preload("res://game/features/pickups/public/dna_pickup.tscn"),
-}
+const SCENES := DROP_TABLE.SCENES
 
 
 ## Crate contents on destruction. `empty` drops nothing, `auto` rolls by crate size.

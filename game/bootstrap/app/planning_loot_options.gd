@@ -5,6 +5,7 @@ extends Node
 const CONFIG := preload("res://game/features/pickups/public/loot_config.gd")
 const MODE_LABELS := ["Пусто", "Вручную", "Авто"]
 const ITEM_LABELS := {
+	"ammo_automate": "Патроны АК/M4", "ammo_sniper": "Патроны снайпер", "ammo_minigun": "Патроны миниган",
 	"ammo_pistol": "Патроны пистолет", "ammo_uzi": "Патроны UZI", "ammo_shotgun": "Патроны дробовик",
 	"medkit": "Аптечка", "antidote": "Антидот", "dna": "ДНК",
 }
