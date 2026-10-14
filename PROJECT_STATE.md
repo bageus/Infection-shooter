@@ -7,6 +7,9 @@ active_task_id: T004
 last_completed_task_id: DISC-001
 build_status: T002_HEADLESS_VALIDATED_VISUAL_PENDING
 updated: 2026-10-11
+15.10.2026, аудит 1/4 (подтверждено владельцем): непрозрачные стены полностью блокируют выстрел и клич, проход пропускает; радиусы 18/22/30/32/28/50/40/35 м (pistol/uzi/shotgun/AK/M4/sniper/minigun/launcher), клич16 м; максимум4 шума/с на оружие. Владельцы combat — импульс оружия, infected — слышимость/состояние. hearing_profile — immutable Resource, notice_player перенесён из root в perception, root ≤600 строк; новых зависимостей и форматов сохранений нет. Следом задачи2,3,4 отдельными PR; перекат отложен, мутации B одобрены. Проверки задачи1: Godot4.7.2 editor import exit0 без ошибок; enemy_perception, weapon_noise (24→4), idle_lod, sound_hook, new_weapon — 0 failures; source_size, architecture, project, scene_resources PASS. Root600 строк, исключений нет. Следующее действие: CI PR задачи1; затем задача2.
+
+
 ---
 
 14.10.2026 (кокон спор на полу, запрос владельца): Споровый кокон падает на пол в точке, где пол под прицелом (acid_floor_point, как у Кислотного плевка), а не на стену или стол, где проходит луч прицела. Урон взрыва считается от той же точки. Регресс-проверка в run_mutation_skill_mechanics_tests.gd (падает без фикса). Скриншоты до/после: /mnt/project-files/spore_cocoon_review/ (tools/capture_spore_cocoon.gd). Звук кокона по-прежнему стартует в точке прицела (player_audio.gd), это отдельная задача при необходимости. Исключений нет.

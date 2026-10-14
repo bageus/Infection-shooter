@@ -14,6 +14,7 @@ script = ExtResource("1")
 bullet_scene = ExtResource("2")
 casing_scene = ExtResource("casing_model")
 weapon_name="UZI"
+shot_noise_radius = 22.0
 fire_mode="auto"
 shots_per_second=12.0
 magazine_size=36

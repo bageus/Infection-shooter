@@ -261,6 +261,7 @@ jobs:
           game/features/infected/tests/run_chase_route_tests.gd
           game/features/infected/tests/run_crowd_separation_tests.gd
           game/features/infected/tests/run_enemy_perception_tests.gd
+          game/features/combat/tests/run_weapon_noise_tests.gd
           game/features/infected/tests/run_enemy_idle_lod_tests.gd
           game/presentation/prototype_hud/tests/run_weapon_icon_tests.gd
           game/presentation/prototype_hud/tests/run_armor_hud_tests.gd
