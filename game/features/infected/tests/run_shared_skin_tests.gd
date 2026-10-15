@@ -12,6 +12,13 @@ const SCENES := [
 	preload("res://game/features/infected/public/infected_titan.tscn"),
 	preload("res://game/features/infected/public/mutant_level2.tscn"),
 ]
+# This fixture measures skin state, not playback lifetime on the audio thread.
+class SilentAudio extends "res://game/features/infected/infected_audio.gd":
+	func severed(_position: Vector3) -> void:
+		pass
+	func died() -> void:
+		pass
+
 var failures := 0
 
 func _initialize() -> void:
@@ -40,6 +47,10 @@ func _bodies(stage: Node3D, scene: PackedScene) -> void:
 	stage.add_child(b)
 	a.set_physics_process(false)
 	b.set_physics_process(false)
+	for actor in [a, b]:
+		actor.audio.free()
+		actor.audio = SilentAudio.new()
+		actor.add_child(actor.audio)
 	var parts_a: Node = a._parts
 	var parts_b: Node = b._parts
 	_expect(parts_a != null and parts_b != null, scene.resource_path + " has body parts")

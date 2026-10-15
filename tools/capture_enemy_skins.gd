@@ -10,6 +10,13 @@ const SCENES := {
 	"mutant_level2": preload("res://game/features/infected/public/mutant_level2.tscn"),
 }
 const RAGDOLL := preload("res://game/features/infected/death_ragdoll.gd")
+# Keep pixel captures independent of asynchronous OGG playback teardown.
+class SilentAudio extends "res://game/features/infected/infected_audio.gd":
+	func severed(_position: Vector3) -> void:
+		pass
+	func died() -> void:
+		pass
+
 var output := "user://skin_review"
 
 func _initialize() -> void:
@@ -42,6 +49,9 @@ func _actor(label: String, scene: PackedScene) -> void:
 	var actor := scene.instantiate() as CharacterBody3D
 	stage.add_child(actor)
 	actor.set_physics_process(false)
+	actor.audio.free()
+	actor.audio = SilentAudio.new()
+	actor.add_child(actor.audio)
 	var visual: Node3D = actor.body_visual
 	visual.process_mode = Node.PROCESS_MODE_DISABLED
 	var bounds := AABB()
