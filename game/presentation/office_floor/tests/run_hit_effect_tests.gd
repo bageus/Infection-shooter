@@ -5,6 +5,8 @@ extends SceneTree
 
 const PROP_SCENE := preload("res://game/presentation/office_floor/public/props/environment_prop.tscn")
 const ATLASES := preload("res://game/core/vfx/public/effect_atlases.gd")
+const SPARKS := preload("res://game/presentation/office_floor/electric_sparks.gd")
+const FLIPBOOK := preload("res://game/core/vfx/public/sprite_flipbook.gd")
 const MODELS := "res://models/objects/enviroments/"
 
 var failures := 0
@@ -58,7 +60,7 @@ func _test_short_circuit() -> void:
 	if ATLASES.available(ATLASES.ELECTRIC_SPARK):
 		var bursts := prop.find_children("Flipbook*", "", false, false)
 		_expect(not bursts.is_empty() and (bursts[0] as Node3D).global_position.distance_to(point) < 0.3, "The spark sheet plays next to the hit.")
-		await create_timer(1.0).timeout
+		await _finish_spark_frames()
 		_expect(prop.find_children("Flipbook*", "", false, false).is_empty(), "Sparking stops after a moment.")
 	await create_timer(0.2).timeout
 	prop.call("take_projectile_hit", 1.0, point, Vector3.BACK, Vector3.FORWARD, "PISTOL")
@@ -132,3 +134,17 @@ func _expect(condition: bool, message: String) -> void:
 	if not condition:
 		failures += 1
 		push_error(message)
+
+
+func _finish_spark_frames() -> void:
+	# The final repeat can start at 0.75 s and last 0.24 / 0.9 s (> 1 s).
+	# Flipbooks cap each animation delta during hitches, so a wall-clock
+	# timer alone cannot prove playback finished on a busy CI machine.
+	await create_timer(SPARKS.BURST_DELAY_MAX).timeout
+	var animation_time := 0.0
+	var duration := FLIPBOOK.length_of(ATLASES.ELECTRIC_SPARK) / SPARKS.BURST_SPEED_MIN
+	while animation_time < duration:
+		await process_frame
+		animation_time += minf(root.get_process_delta_time(), 1.0 / 30.0)
+	await process_frame
+	await process_frame # Flush queue_free after the last sprite process tick.

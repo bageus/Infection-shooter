@@ -86,8 +86,8 @@ func _test_mutation_tree() -> void:
 		var card_text := ""
 		for label: Label in ui.card.find_children("*", "Label", true, false):
 			card_text += label.text + "\n"
-		_check(card_text.contains("ACID SPIT") and card_text.contains("Leave a corrosive acid pool."), "Detail card shows the skill name and description")
-		_check(card_text.contains("CLICK TO LEARN") and card_text.contains("Mutation"), "Detail card shows status and requirements")
+		_check(card_text.contains(str(TranslationServer.translate(&"mutationSkill_acid_spit_name")).to_upper()) and card_text.contains(str(TranslationServer.translate(&"mutationSkill_acid_spit_description"))), "Detail card shows the skill name and description")
+		_check(card_text.contains(str(TranslationServer.translate(&"mutationClickLearn")).to_upper()) and card_text.contains(str(TranslationServer.translate(&"mutationAmount"))), "Detail card shows status and requirements")
 		_check(ui.window.get_global_rect().encloses(ui.card.get_global_rect()), "Detail card stays on screen")
 		skill.mouse_exited.emit()
 		_check(not ui.card.visible, "Leaving the circle hides the detail card")

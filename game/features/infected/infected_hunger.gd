@@ -28,6 +28,7 @@ const HIT_FLINCH_STRENGTH := 0.75
 const HIT_COOLDOWN := 1.6
 const SIGHT_CHECK := 0.2
 
+@export var rest_behaviours := true # in-place turns, idle flavour and feeding when unaware
 var posture := Posture.STAND
 var _busy := 0.0
 var _distance := INF
@@ -164,7 +165,7 @@ func _on_aggro() -> void:
 	if not cries:
 		return
 	audio.alert_shout()
-	get_tree().call_group(PERCEPTION.ALERT_GROUP, "hear_alert", global_position, _senses.alert_radius)
+	get_tree().call_group(PERCEPTION.ALERT_GROUP, "hear_alert", global_position, _senses.hearing.alert_radius)
 	if not from_corpse and posture != Posture.CRAWL:
 		_start_busy(SCREAM)
 
@@ -219,6 +220,9 @@ func _unaware_tick(delta: float) -> void:
 		return
 	if _busy > 0.0 or _feeding:
 		_hold_still(delta)
+		return
+	if not rest_behaviours:
+		super._unaware_tick(delta)
 		return
 	var yaw_before := rotation.y
 	var standing := Vector2(velocity.x, velocity.z).length() < 0.3

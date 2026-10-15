@@ -83,12 +83,14 @@ func add_control_ampule() -> float:
 
 
 func use_antidote() -> bool:
-	if defeated or is_control_lost():
+	if defeated:
 		return false
 	if mutation <= MUTATION_MIN:
 		return false
 
 	next_control_loss_stage = 1
+	control_loss_remaining = 0.0
+	active_control_loss_stage = 0
 	mutation = maxf(MUTATION_MIN, mutation - ANTIDOTE_REDUCTION)
 	_after_mutation_changed()
 	return true

@@ -2,6 +2,9 @@ extends RefCounted
 
 const FLIPBOOK := preload("res://game/core/vfx/public/sprite_flipbook.gd")
 const ATLASES := preload("res://game/core/vfx/public/effect_atlases.gd")
+const BURST_DELAY_MAX := 0.75
+const BURST_SPEED_MIN := 0.9
+
 const SFX := preload("res://game/core/audio/public/sound_events.gd")
 
 # First hit on a device: the six-frame spark sheet bursts at the hit point and
@@ -18,7 +21,7 @@ static func short_circuit(host: Node3D, location: Vector3, normal: Vector3 = Vec
 	var device: WeakRef = weakref(host)
 	for i in randi_range(2, 3):
 		var offset := Vector3(randf_range(-0.12, 0.12), randf_range(-0.08, 0.12), randf_range(-0.12, 0.12))
-		tree.create_timer(randf_range(0.12, 0.75)).timeout.connect(func() -> void:
+		tree.create_timer(randf_range(0.12, BURST_DELAY_MAX)).timeout.connect(func() -> void:
 			var live := device.get_ref() as Node3D
 			if live != null and live.is_inside_tree():
 				_burst(live, location + outward * 0.1 + offset, randf_range(0.42, 0.6)))
@@ -26,7 +29,7 @@ static func short_circuit(host: Node3D, location: Vector3, normal: Vector3 = Vec
 
 static func _burst(host: Node3D, location: Vector3, size: float) -> void:
 	FLIPBOOK.spawn(host, ATLASES.ELECTRIC_SPARK, location, size, {
-		"additive": 1.0, "brightness": 2.4, "spin": randf() * TAU, "speed": randf_range(0.9, 1.15),
+		"additive": 1.0, "brightness": 2.4, "spin": randf() * TAU, "speed": randf_range(BURST_SPEED_MIN, 1.15),
 	})
 
 

@@ -32,6 +32,7 @@ func _run() -> void:
 	controls = planner.get("controls")
 	catalog = planner.get("catalog")
 	_config()
+	await _weapon_ammo(player)
 	_items_palette()
 	await _crate_panel_and_drop()
 	await _enemy_stats_and_drop()
@@ -53,6 +54,38 @@ func _config() -> void:
 	_check(CONFIG.sanitize_stats(null) == {"health": 100.0, "damage": 100.0}, "Stats default to 100")
 	for size in ["small", "large"]:
 		_check(not CONFIG.auto_list(size).is_empty(), "Auto loot is never empty: " + size)
+
+
+func _weapon_ammo(player: Node3D) -> void:
+	var drops := preload("res://game/features/pickups/public/loot_drop.gd")
+	var expected := {"ammo_automate": [4, 30], "ammo_sniper": [6, 8], "ammo_minigun": [7, 100]}
+	for id: String in expected:
+		var config := CONFIG.sanitize({"mode":"manual", "items":{id:1}})
+		_check(config["items"].get(id) == 1, "Manual ammo survives sanitization: " + id)
+		var weapon: Node = player.get("weapons")[expected[id][0]]
+		weapon.set("_reserve_ammo", 0)
+		var item := (drops.SCENES[id] as PackedScene).instantiate()
+		stage.add_child(item)
+		item.call("_on_body_entered", player)
+		_check(weapon.get("_reserve_ammo") == expected[id][1], "Pickup feeds correct weapon: " + id)
+		_check(item.is_queued_for_deletion(), "Accepted ammo is consumed")
+		await process_frame
+	# A shared box feeds M4 when AK is already full, and stays when both are full.
+	var ak: Node = player.get("weapons")[4]
+	var m4: Node = player.get("weapons")[5]
+	ak.set("_reserve_ammo", ak.get("max_reserve_ammo"))
+	m4.set("_reserve_ammo", 0)
+	var shared := (drops.SCENES["ammo_automate"] as PackedScene).instantiate()
+	stage.add_child(shared)
+	shared.call("_on_body_entered", player)
+	_check(m4.get("_reserve_ammo") == 30, "Shared box falls back from full AK to M4")
+	await process_frame
+	m4.set("_reserve_ammo", m4.get("max_reserve_ammo"))
+	shared = (drops.SCENES["ammo_automate"] as PackedScene).instantiate()
+	stage.add_child(shared)
+	shared.call("_on_body_entered", player)
+	_check(not shared.is_queued_for_deletion(), "Full reserves leave ammo on the floor")
+	shared.queue_free()
 
 
 func _items_palette() -> void:
