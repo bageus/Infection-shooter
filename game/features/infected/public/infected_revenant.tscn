@@ -10,15 +10,15 @@ radius = 0.45
 height = 1.85
 
 [node name="InfectedRevenant" type="CharacterBody3D" groups=["infected"]]
-step_sound = &"step_light"
-growl_sound = &"growl_revenant"
-voice_pitch = 1.0
-step_pitch = 1.0
 collision_layer = 2
 collision_mask = 1
 safe_margin = 0.02
 floor_stop_on_slope = false
 script = ExtResource("2_enemy")
+step_sound = &"step_light"
+growl_sound = &"growl_revenant"
+voice_pitch = 1.0
+step_pitch = 1.0
 max_health = 75.0
 move_speed = 4.6
 attack_range = 1.25

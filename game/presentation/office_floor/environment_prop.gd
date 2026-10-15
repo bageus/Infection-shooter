@@ -1,5 +1,6 @@
 extends RigidBody3D
 ## Scene boundary for prop physics, hit commands and authored display configuration.
+const SERVER_AUDIO := preload("res://game/presentation/office_floor/server_ambience.gd")
 const BUDGET_LIGHT := preload("res://game/presentation/office_floor/budget_omni_light.gd")
 const GEOMETRY := preload("res://game/presentation/office_floor/environment_prop_geometry.gd")
 const BREAK_SOUND := preload("res://game/presentation/office_floor/prop_break_sound.gd")
@@ -184,6 +185,7 @@ func _ready() -> void:
 		return # Carpet lies on the level floor and must not create a raised obstacle.
 	var volume := _geometry.add_shapes(self, visual)
 	_setup_display()
+	SERVER_AUDIO.attach(self, model_path)
 	SURFACE_DECOR.apply(visual, model_path, _display, display_seed)
 	if model_path.get_file() == "06_conference_chair.glb" and global_position.y < 0.25:
 		var lowest := INF
@@ -423,6 +425,7 @@ func _apply_damage(hit_position: Vector3, direction: Vector3) -> void:
 		_rebuild_shapes()
 		BREAK_SOUND.play(self, effects_root, model_path, get_projectile_material(), hit_position)
 	elif transition == PROP_DAMAGE.Transition.BREAK:
+		SERVER_AUDIO.silence(self)
 		BREAK_SOUND.play(self, effects_root, model_path, get_projectile_material(), hit_position)
 		if "server_rack" in model_path.get_file() or _is_facade_damage():
 			if _intact != null:

@@ -1,0 +1,76 @@
+{
+  "hunger_idle": {
+    "files": [
+      "res://assets/audio/sfx/hunger_idle/hunger_idle_1.ogg"
+    ],
+    "sources": [
+      "the_cry_of_a_person_3"
+    ]
+  },
+  "hunger_voice": {
+    "files": [
+      "res://assets/audio/sfx/hunger_voice/hunger_voice_1.ogg"
+    ],
+    "sources": [
+      "the_scream_of_an_inf_1"
+    ]
+  },
+  "hunger_fours_voice": {
+    "files": [
+      "res://assets/audio/sfx/hunger_fours_voice/hunger_fours_voice_1.ogg"
+    ],
+    "sources": [
+      "the_scream_of_an_inf_4"
+    ]
+  },
+  "hunger_alert": {
+    "files": [
+      "res://assets/audio/sfx/hunger_alert/hunger_alert_1.ogg"
+    ],
+    "sources": [
+      "sounds_of_zombies_ta_2"
+    ]
+  },
+  "hunger_attack": {
+    "files": [
+      "res://assets/audio/sfx/hunger_attack/hunger_attack_1.ogg",
+      "res://assets/audio/sfx/hunger_attack/hunger_attack_2.ogg"
+    ],
+    "sources": [
+      "the_scream_of_an_inf_2",
+      "sounds_of_zombies_ta_3"
+    ]
+  },
+  "hunger_agony": {
+    "files": [
+      "res://assets/audio/sfx/hunger_agony/hunger_agony_1.ogg"
+    ],
+    "sources": [
+      "the_scream_of_an_inf_22"
+    ]
+  },
+  "hunger_feeding": {
+    "files": [
+      "res://assets/audio/sfx/hunger_feeding/hunger_feeding_1.ogg"
+    ],
+    "sources": [
+      "zombie_damage_sounds_4"
+    ]
+  },
+  "revenant_voice": {
+    "files": [
+      "res://assets/audio/sfx/revenant_voice/revenant_voice_1.ogg"
+    ],
+    "sources": [
+      "the_scream_of_an_inf_3"
+    ]
+  },
+  "revenant_attack": {
+    "files": [
+      "res://assets/audio/sfx/revenant_attack/revenant_attack_1.ogg"
+    ],
+    "sources": [
+      "sounds_of_zombies_ta_4"
+    ]
+  }
+}

@@ -1,0 +1,189 @@
+[
+  {
+    "source": "assets/audio/music/main menu.wav",
+    "output": "assets/audio/music/main_menu.ogg",
+    "source_seconds": 60.0,
+    "trim_end_seconds": 0.0,
+    "overlap_seconds": 0.08,
+    "output_seconds": 59.92,
+    "channels": 2,
+    "loop": true,
+    "seam_step": 0.0035718658594653396
+  },
+  {
+    "source": "assets/audio/music/menu from game.wav",
+    "output": "assets/audio/music/menu_from_game.ogg",
+    "source_seconds": 60.0,
+    "trim_end_seconds": 1.0,
+    "overlap_seconds": 0.08,
+    "output_seconds": 58.92,
+    "channels": 2,
+    "loop": true,
+    "seam_step": 0.004132579807545441
+  },
+  {
+    "source": "assets/audio/music/Server_Oper.wav",
+    "output": "assets/audio/music/server_oper.ogg",
+    "source_seconds": 120.0,
+    "trim_end_seconds": 0.0,
+    "overlap_seconds": 0.08,
+    "output_seconds": 119.92,
+    "channels": 2,
+    "loop": true,
+    "seam_step": 0.0003662109375
+  },
+  {
+    "source": "assets/audio/music/Seamless_Loop.wav",
+    "output": "assets/audio/music/seamless_loop.ogg",
+    "source_seconds": 120.0,
+    "trim_end_seconds": 0.0,
+    "overlap_seconds": 0.08,
+    "output_seconds": 119.92,
+    "channels": 2,
+    "loop": true,
+    "seam_step": 0.004155490097768867
+  },
+  {
+    "source": "assets/audio/music/Tower_Hunt.wav",
+    "output": "assets/audio/music/tower_hunt.ogg",
+    "source_seconds": 120.0,
+    "trim_end_seconds": 0.0,
+    "overlap_seconds": 0.08,
+    "output_seconds": 119.92,
+    "channels": 2,
+    "loop": true,
+    "seam_step": 0.06880340299611615
+  },
+  {
+    "source": "assets/audio/music/music_cinematic_boom.wav",
+    "output": "assets/audio/music/music_cinematic_boom.ogg",
+    "source_seconds": 6.08,
+    "trim_end_seconds": 0.0,
+    "overlap_seconds": 0.0,
+    "output_seconds": 6.08,
+    "channels": 2,
+    "loop": false,
+    "seam_step": null
+  },
+  {
+    "source": "assets/audio/sfx/coller_server/sound_of_server_oper.wav",
+    "output": "assets/audio/sfx/coller_server/sound_of_server_oper.ogg",
+    "source_seconds": 3.0,
+    "trim_end_seconds": 0.3,
+    "overlap_seconds": 0.08,
+    "output_seconds": 2.62,
+    "channels": 1,
+    "loop": true,
+    "seam_step": 0.00418198069637157
+  },
+  {
+    "source": "assets/audio/sfx/zombie_misc/sounds_of_zombies_ta_2.wav",
+    "output": "assets/audio/sfx/zombie_misc/sounds_of_zombies_ta_2.ogg",
+    "source_seconds": 2.0,
+    "trim_end_seconds": 0.0,
+    "overlap_seconds": 0.0,
+    "output_seconds": 2.0,
+    "channels": 1,
+    "loop": false,
+    "seam_step": null
+  },
+  {
+    "source": "assets/audio/sfx/zombie_misc/sounds_of_zombies_ta_3.wav",
+    "output": "assets/audio/sfx/zombie_misc/sounds_of_zombies_ta_3.ogg",
+    "source_seconds": 2.0,
+    "trim_end_seconds": 0.0,
+    "overlap_seconds": 0.0,
+    "output_seconds": 2.0,
+    "channels": 1,
+    "loop": false,
+    "seam_step": null
+  },
+  {
+    "source": "assets/audio/sfx/zombie_misc/sounds_of_zombies_ta_4.wav",
+    "output": "assets/audio/sfx/zombie_misc/sounds_of_zombies_ta_4.ogg",
+    "source_seconds": 2.0,
+    "trim_end_seconds": 0.0,
+    "overlap_seconds": 0.0,
+    "output_seconds": 2.0,
+    "channels": 1,
+    "loop": false,
+    "seam_step": null
+  },
+  {
+    "source": "assets/audio/sfx/zombie_misc/the_cry_of_a_person_3.wav",
+    "output": "assets/audio/sfx/zombie_misc/the_cry_of_a_person_3.ogg",
+    "source_seconds": 1.0,
+    "trim_end_seconds": 0.0,
+    "overlap_seconds": 0.0,
+    "output_seconds": 1.0,
+    "channels": 1,
+    "loop": false,
+    "seam_step": null
+  },
+  {
+    "source": "assets/audio/sfx/zombie_misc/the_scream_of_an_inf_1.wav",
+    "output": "assets/audio/sfx/zombie_misc/the_scream_of_an_inf_1.ogg",
+    "source_seconds": 2.0,
+    "trim_end_seconds": 0.0,
+    "overlap_seconds": 0.0,
+    "output_seconds": 2.0,
+    "channels": 1,
+    "loop": false,
+    "seam_step": null
+  },
+  {
+    "source": "assets/audio/sfx/zombie_misc/the_scream_of_an_inf_2.wav",
+    "output": "assets/audio/sfx/zombie_misc/the_scream_of_an_inf_2.ogg",
+    "source_seconds": 1.0,
+    "trim_end_seconds": 0.0,
+    "overlap_seconds": 0.0,
+    "output_seconds": 1.0,
+    "channels": 1,
+    "loop": false,
+    "seam_step": null
+  },
+  {
+    "source": "assets/audio/sfx/zombie_misc/the_scream_of_an_inf_22.wav",
+    "output": "assets/audio/sfx/zombie_misc/the_scream_of_an_inf_22.ogg",
+    "source_seconds": 2.0,
+    "trim_end_seconds": 0.0,
+    "overlap_seconds": 0.0,
+    "output_seconds": 2.0,
+    "channels": 1,
+    "loop": false,
+    "seam_step": null
+  },
+  {
+    "source": "assets/audio/sfx/zombie_misc/the_scream_of_an_inf_3.wav",
+    "output": "assets/audio/sfx/zombie_misc/the_scream_of_an_inf_3.ogg",
+    "source_seconds": 2.0,
+    "trim_end_seconds": 0.0,
+    "overlap_seconds": 0.0,
+    "output_seconds": 2.0,
+    "channels": 1,
+    "loop": false,
+    "seam_step": null
+  },
+  {
+    "source": "assets/audio/sfx/zombie_misc/the_scream_of_an_inf_4.wav",
+    "output": "assets/audio/sfx/zombie_misc/the_scream_of_an_inf_4.ogg",
+    "source_seconds": 1.0,
+    "trim_end_seconds": 0.0,
+    "overlap_seconds": 0.0,
+    "output_seconds": 1.0,
+    "channels": 1,
+    "loop": false,
+    "seam_step": null
+  },
+  {
+    "source": "assets/audio/sfx/zombie_misc/zombie_damage_sounds_4.wav",
+    "output": "assets/audio/sfx/zombie_misc/zombie_damage_sounds_4.ogg",
+    "source_seconds": 2.0,
+    "trim_end_seconds": 0.0,
+    "overlap_seconds": 0.0,
+    "output_seconds": 2.0,
+    "channels": 1,
+    "loop": false,
+    "seam_step": null
+  }
+]

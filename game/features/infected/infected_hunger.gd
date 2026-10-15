@@ -200,6 +200,8 @@ func _collapse() -> void:
 	posture = Posture.CRAWL
 	_mobility = minf(_mobility, CRAWL_MOBILITY)
 	_feeding = false
+	audio.feeding_tick(0.0, false)
+	audio.stop_voice()
 	_turn_time = -1.0
 	_pending_hit = -1.0
 	_start_busy(&"FoursToCrawl" if from_low else &"CollapseToCrawl")
@@ -326,9 +328,10 @@ func _rest_behaviour(delta: float) -> void:
 func _idle_flavor(scream: bool) -> void:
 	if scream:
 		_start_busy(SCREAM)
-		audio.scream(-6.0)
+		audio.idle_scream()
 	else:
-		_start_busy(&"Agonize")
+		if _start_busy(&"Agonize") > 0.0:
+			audio.agony()
 
 
 func _find_corpse() -> Node3D:
@@ -362,6 +365,7 @@ func _begin_feeding() -> void:
 
 
 func _feed(delta: float) -> void:
+	audio.feeding_tick(delta, _busy <= 0.0)
 	_feed_left -= delta
 	var gone := not is_instance_valid(_corpse) or not (_corpse.get("body_visual") as Node3D).visible
 	if _busy <= 0.0 and (_feed_left <= 0.0 or gone or _senses.state != PERCEPTION.State.SEARCH):
@@ -369,6 +373,8 @@ func _feed(delta: float) -> void:
 
 
 func _end_feeding(stand_up: bool) -> void:
+	audio.feeding_tick(0.0, false)
+	audio.stop_voice()
 	_feeding = false
 	_corpse = null
 	if stand_up:

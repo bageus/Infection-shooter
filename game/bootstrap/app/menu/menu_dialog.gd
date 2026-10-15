@@ -133,6 +133,7 @@ func consume_binding_input(event: InputEvent) -> bool:
 
 func _slider(label_key: String, setting_key: String, minimum: float, maximum: float, step_size: float) -> void:
 	var slider := HSlider.new()
+	slider.name = setting_key.to_pascal_case()
 	slider.custom_minimum_size.x = 160
 	slider.min_value = minimum
 	slider.max_value = maximum
