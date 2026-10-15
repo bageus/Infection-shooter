@@ -61,12 +61,13 @@ func setup(body_owner: Node3D, visual_root: Node3D, strength: float) -> bool:
 		var data := MESH.prepare(mesh_instance, skeleton)
 		if data.is_empty():
 			continue
-		var materials: Array = []
-		for surface in mesh_instance.mesh.get_surface_count():
-			var material := MESH.wound_material(originals[surface] if surface < originals.size() else null)
-			mesh_instance.set_surface_override_material(surface, material)
-			materials.append(material)
-		_entries.append({"instance": mesh_instance, "data": data, "materials": materials})
+		var pool: RefCounted = MESH.skin_pool(data, originals)
+		var lease: RefCounted = pool.acquire()
+		var materials: Array = lease.page.materials
+		for surface in materials.size():
+			mesh_instance.set_surface_override_material(surface, materials[surface])
+		lease.bind(mesh_instance)
+		_entries.append({"instance": mesh_instance, "data": data, "materials": materials, "pool": pool, "lease": lease})
 	if _entries.is_empty():
 		return false
 	_data = _entries[0].data
@@ -220,17 +221,29 @@ func add_rest_wound(rest_position: Vector3, rest_radius: float) -> void:
 		for surface in entry.masks.size():
 			var mask: Dictionary = entry.masks[surface]
 			if BLOOD_BAKE.paint(mask.image, entry.data.surfaces[surface], rest_position, rest_radius):
-				(mask.texture as ImageTexture).update(mask.image)
+				entry.lease.page.textures[surface].update_layer(mask.image, entry.lease.layer)
 
 
 func _create_masks(entry: Dictionary) -> void:
 	entry.masks = []
-	for material: ShaderMaterial in entry.materials:
+	var images: Array = []
+	for surface in entry.materials.size():
 		var image := BLOOD_BAKE.create_mask()
-		var texture := ImageTexture.create_from_image(image)
-		material.set_shader_parameter("blood_mask", texture)
-		material.set_shader_parameter("use_blood_mask", true)
-		entry.masks.append({"image": image, "texture": texture})
+		images.append(image)
+		entry.masks.append({"image": image})
+	entry.lease.upload(images)
+	entry.lease.bind(entry.instance, true)
+
+
+# A piece owns a frozen copy of the cut/blood, never the source body's layer.
+func piece_skin(entry: Dictionary) -> RefCounted:
+	var lease: RefCounted = entry.pool.acquire()
+	var images: Array = []
+	for mask: Dictionary in entry.get("masks", []):
+		images.append((mask.image as Image).duplicate())
+	if not images.is_empty():
+		lease.upload(images)
+	return lease
 
 
 # Returns true when this damage severs the part.
@@ -266,10 +279,8 @@ func sever(part: StringName, direction: Vector3, spawn_piece := true) -> RigidBo
 
 func _spawn_piece(part: StringName, info: Dictionary, joint_world: Vector3, direction: Vector3) -> RigidBody3D:
 	var entry: Dictionary = _entries[0]
-	var materials: Array = []
-	for material: ShaderMaterial in entry.materials:
-		materials.append(material.duplicate() as ShaderMaterial)
-	var built := MESH.build_piece(entry.data, info.bones, skeleton, materials)
+	var lease := piece_skin(entry)
+	var built := MESH.build_piece(entry.data, info.bones, skeleton, lease.page.materials)
 	if built.is_empty():
 		return null
 	var piece := SEVERED.new()
@@ -277,6 +288,7 @@ func _spawn_piece(part: StringName, info: Dictionary, joint_world: Vector3, dire
 	piece.part_name = part
 	var visual := MeshInstance3D.new()
 	visual.mesh = built.mesh
+	lease.bind(visual, entry.has("masks"))
 	piece.add_child(visual)
 	var shape := CollisionShape3D.new()
 	var hull := ConvexPolygonShape3D.new()

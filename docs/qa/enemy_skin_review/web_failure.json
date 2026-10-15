@@ -1,0 +1,24 @@
+{
+  "probe": {
+    "array_layers": 128,
+    "draw_calls": 260,
+    "errors": [
+      "clean neighbor"
+    ],
+    "instances": 129,
+    "renderer": "WebKit WebGL",
+    "slots": [
+      0,
+      1
+    ],
+    "surfaces": 258
+  },
+  "webgl2": {
+    "maxArrayLayers": 2048,
+    "maxVertexUniformVectors": 4096,
+    "maxFragmentUniformVectors": 4096
+  },
+  "consoleErrors": [
+    "ERROR: clean neighbor"
+  ]
+}

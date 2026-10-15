@@ -48,3 +48,15 @@ https://github.com/godotengine/godot/issues/120661; совпадение при�
 Проверить loading/restart и память с длинной серией переходов на native Windows/Web.
 Движок/зависимости не менять в этом инкременте. Подробности
 в docs/qa/map_loading_and_mission_startup.md.
+
+
+## PR #191: Web instance uniforms и corpse capture (15.10.2026)
+
+- BLOCKER T004/общие материалы: Godot4.7.2 Web теряет instance uniform values
+  на129 объектах, pixel clean neighbor FAIL. Upstream112674/fix124336 (4.8).
+  PR191 не объединять без повторного зелёного Web CI. Владелец выбирает
+  engine update либо Web fallback; исключение Web-sharing не согласовано.
+  Доказательства: docs/qa/audit_2026-10-14_enemy_skin_appendix.md.
+- DEFERRED: Jolt ERROR на non-uniform scale corpse bullet hitboxes при death
+  clip fallback. Native capture убирает hitboxes только в стенде; игровую
+  причину исправлять отдельно с corpse/ragdoll collision regression.
