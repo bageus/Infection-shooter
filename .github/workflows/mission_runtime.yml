@@ -34,7 +34,7 @@ jobs:
           set -o pipefail
           mkdir -p /tmp/skin-review
           timeout 600 godot --headless --path . --editor --quit 2>&1 | tee /tmp/skin-review/import.log
-          timeout 120 xvfb-run -a godot --path . --audio-driver Dummy --rendering-method gl_compatibility --script game/features/infected/tests/run_shared_skin_tests.gd 2>&1 | tee /tmp/skin-review/layers.log
+          timeout 120 xvfb-run -a godot --verbose --path . --audio-driver Dummy --rendering-method gl_compatibility --script game/features/infected/tests/run_shared_skin_tests.gd 2>&1 | tee /tmp/skin-review/layers.log
           if grep -E 'SHADER ERROR|SCRIPT ERROR|^ERROR:' /tmp/skin-review/*.log; then exit 1; fi
       - name: Compare base and candidate pixels and draw calls
         run: |
@@ -51,6 +51,14 @@ jobs:
             timeout 180 xvfb-run -a godot --path "$project" --fixed-fps 60 --audio-driver Dummy --rendering-method gl_compatibility --script tools/bench_enemy_materials.gd -- --wounded 2>&1 | tee "/tmp/skin-review/$revision-bench.log"
           done
           if grep -E 'SHADER ERROR|SCRIPT ERROR|^ERROR:' /tmp/skin-review/*.log; then exit 1; fi
+      - name: WebGL2 skin layers and page boundary
+        run: |
+          set -o pipefail
+          python3 tools/build_web_skin_probe.py /tmp/web-skin
+          timeout 60 godot --headless --path /tmp/web-skin --editor --quit 2>&1 | tee /tmp/skin-review/web-import.log
+          timeout 60 godot --headless --path /tmp/web-skin --export-release Web build/index.html 2>&1 | tee /tmp/skin-review/web-export.log
+          timeout 120 node tools/run_web_skin_probe.mjs /tmp/web-skin/build /tmp/skin-review/web 2>&1 | tee /tmp/skin-review/web-browser.log
+          if grep -E 'SHADER ERROR|SCRIPT ERROR|^ERROR:' /tmp/skin-review/web-*.log; then exit 1; fi
       - uses: actions/upload-artifact@v4
         if: always()
         with:

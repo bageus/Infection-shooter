@@ -24,7 +24,12 @@ func _run() -> void:
 		await _bodies(stage, scene)
 	_page_boundary()
 	stage.queue_free()
-	await process_frame
+	# Drain renderer readbacks and deferred resource destruction before shutdown.
+	for frame in 3:
+		await process_frame
+	if DisplayServer.get_name() != "headless":
+		await RenderingServer.frame_post_draw
+		await process_frame
 	print("Shared skin tests: %d failures" % failures)
 	quit(failures)
 
