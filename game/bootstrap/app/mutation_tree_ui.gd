@@ -176,7 +176,9 @@ func _input(event: InputEvent) -> void:
 		return
 	if is_tree_open() and event.is_action_pressed("antidote") and not event.is_echo():
 		var player := runtime.get_parent()
-		if player != null and player.has_method("use_antidote") and bool(player.call("use_antidote")):
+		var used: bool = player != null and player.has_method("use_antidote") and bool(player.call("use_antidote"))
+		# A pending confirmation also consumes the key: the dialog owns it now.
+		if used or (is_instance_valid(antidote_confirmation) and antidote_confirmation.call("is_open")):
 			get_viewport().set_input_as_handled()
 		return
 	if is_tree_open() and event is InputEventKey and event.pressed and not event.echo and event.keycode == KEY_ESCAPE:
