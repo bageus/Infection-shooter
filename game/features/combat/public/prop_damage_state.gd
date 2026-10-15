@@ -1,7 +1,7 @@
 extends RefCounted
 ## Runtime damage rules for one prop. No scenes, rendering or physics dependencies.
 const BALANCE := preload("res://game/features/combat/public/projectile_balance.gd")
-enum HitAction { NONE, SHUDDER, SCATTER, TRANSITION, CHIP_FACADE, DETACH, PUSH }
+enum HitAction { NONE, SHUDDER, SCATTER, TRANSITION, CHIP_FACADE, DETACH, PUSH, COLLAPSE }
 enum Transition { NONE, VARIANT, BREAK }
 var category := "large"
 var health := 0.0
@@ -9,6 +9,7 @@ var broken := false
 var variant_index := -1
 var transition_pending := false
 var full_break := false
+var collapses := false # Cardboard: no staged pieces, so it bursts apart whole.
 var short_circuited := false
 var paper_torn := false
 var extinguisher_triggered := false
@@ -22,6 +23,7 @@ func configure(model_name: String, variant_count: int, has_fragments: bool) -> v
 	category = "tech" if group == "05" else ("small" if group in ["09", "11", "12"] else "large")
 	_variant_count = variant_count
 	_has_fragments = has_fragments
+	collapses = not has_fragments and model_name.to_lower().contains("cardboard")
 	health = _stage_health()
 
 
@@ -37,6 +39,13 @@ func hit(amount: float, weapon: String, book_stack: bool, wall_mounted: bool, an
 			full_break = weapon == "GRENADE" and _has_fragments
 			transition_pending = true
 			return HitAction.TRANSITION
+		if amount > 0.0 and weapon != "PISTOL":
+			return HitAction.SHUDDER
+	elif not broken and collapses:
+		health -= BALANCE.object_damage(amount, weapon, category)
+		if health <= 0.0:
+			broken = true
+			return HitAction.COLLAPSE
 		if amount > 0.0 and weapon != "PISTOL":
 			return HitAction.SHUDDER
 	elif broken and facade:
