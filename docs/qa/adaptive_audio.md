@@ -115,3 +115,26 @@ production поведение не менялось. Этот14-й набор т
 Следующее точное действие: опубликовать PR на базе main c10f774, дождаться
 зелёного GitHub CI и слить по прямому поручению владельца; затем прослушать в игре. T004 остаётся IN_PROGRESS для
 общей задачи; этот аудиоинкремент готов к ревью.
+
+## CI follow-up: мгновенное завершение музыки
+
+Run38738989668: Architecture и все6 native jobs PASS, полный runtime завершил
+игровые assertions без ошибок, но3 suites (world_surface, planner_persistence,
+placed_ammo_pickup) оставляли4 audio objects/2 resources при немедленном выходе.
+Verbose минимального probe на2кадра подтвердил конкретные остатки:
+AudioStreamPlaybackOggVorbis, OggPacketSequencePlayback и их OGG/packet resources.
+Явный stop/очистка stream в _exit_tree сам по себе не устранял headless race.
+
+Исправление соответствует прежнему core.audio/SFX: headless не запускает
+декодер. Музыкальные состояния/fade/delay сохраняются, окончание boom идёт по
+локальному паузируемому Timer той же длительности. Меню хранит active независимо
+от аудиоустройства; реальные desktop/Web players продолжают играть OGG. На выходе
+музыка останавливает tween/timer/players и снимает stream refs.
+
+Новый run_music_shutdown_tests повторяет мгновенное освобождение и quit через
+один кадр; baseline даёт4 objects/2 resources, fixed — без audio leaks/ERROR.
+Все3 упавших CI suites, shutdown, adaptive_audio и server_audio локально PASS
+с прежними assertions и строгой проверкой ERROR. Существующее63 ObjectDB warning
+в больших main fixtures остаётся и не скрывается. Native adaptive_audio и
+server_audio дополнительно включены в оба renderer jobs; их teardown ждёт100мс
+освобождения микшером, а checks по SCRIPT ERROR/ERROR не изменены.

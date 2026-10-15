@@ -17,6 +17,8 @@ var _players: Array[AudioStreamPlayer] = []
 var _current := 0
 var _fade: Tween
 var _sting: AudioStreamPlayer
+var _silent := DisplayServer.get_name() == "headless"
+var _boom_timer: Timer
 
 
 func _ready() -> void:
@@ -36,6 +38,11 @@ func _ready() -> void:
 	_sting.volume_linear = LEVEL
 	add_child(_sting)
 	_sting.finished.connect(_after_boom)
+	_boom_timer = Timer.new()
+	_boom_timer.one_shot = true
+	_boom_timer.wait_time = BOOM.get_length()
+	_boom_timer.timeout.connect(_after_boom)
+	add_child(_boom_timer)
 	_start_calm()
 
 
@@ -59,6 +66,7 @@ func update_aggression(count: int, delta: float) -> void:
 		if state != &"combat":
 			state = &"combat"
 			_sting.stop()
+			_boom_timer.stop()
 			_crossfade(COMBAT)
 		return
 	if state != &"combat":
@@ -76,7 +84,9 @@ func _crossfade(stream: AudioStream) -> void:
 	next.stop()
 	next.stream = stream
 	next.volume_linear = 0.0
-	next.play()
+	# Match SFX: headless has no audio device and never starts a decoder.
+	if not _silent:
+		next.play()
 	_fade = create_tween().set_parallel(true)
 	_fade.tween_property(old, "volume_linear", 0.0, FADE_SECONDS)
 	_fade.tween_property(next, "volume_linear", LEVEL, FADE_SECONDS)
@@ -98,10 +108,14 @@ func _play_boom() -> void:
 	for player in _players:
 		player.stop()
 	state = &"boom"
-	_sting.play()
+	if _silent:
+		_boom_timer.start()
+	else:
+		_sting.play()
 
 
 func _after_boom() -> void:
+	_boom_timer.stop()
 	if state == &"boom":
 		_start_calm()
 
@@ -116,3 +130,14 @@ func _start_calm() -> void:
 func _cancel_fade() -> void:
 	if _fade != null and _fade.is_valid():
 		_fade.kill()
+
+
+func _exit_tree() -> void:
+	_cancel_fade()
+	_boom_timer.stop()
+	for player in _players:
+		player.stop()
+		player.stream = null
+	if is_instance_valid(_sting):
+		_sting.stop()
+		_sting.stream = null

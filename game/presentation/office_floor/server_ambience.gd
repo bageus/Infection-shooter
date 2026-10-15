@@ -19,7 +19,8 @@ static func attach(prop: Node3D, model: String) -> void:
 	fan.attenuation_model = AudioStreamPlayer3D.ATTENUATION_INVERSE_DISTANCE
 	fan.doppler_tracking = AudioStreamPlayer3D.DOPPLER_TRACKING_DISABLED
 	prop.add_child(fan)
-	fan.play(randf() * FAN.get_length())
+	if DisplayServer.get_name() != "headless":
+		fan.play(randf() * FAN.get_length())
 
 
 static func silence(prop: Node) -> void:

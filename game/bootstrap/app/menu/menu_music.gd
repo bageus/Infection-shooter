@@ -6,6 +6,7 @@ const PAUSE := preload("res://assets/audio/music/menu_from_game.ogg")
 var screen: Control
 var _delay: Timer
 var _kind := ""
+var active := false
 
 
 func setup(owner_screen: Control) -> void:
@@ -28,11 +29,13 @@ func sync() -> void:
 		_delay.stop()
 		stop()
 		_kind = ""
+		active = false
 		return
 	var kind := str(screen.get("screen_kind"))
 	if kind == _kind:
 		return
 	_kind = kind
+	active = false
 	stop()
 	_delay.stop()
 	stream = MAIN if kind == "main" else PAUSE
@@ -44,4 +47,13 @@ func sync() -> void:
 
 func _start() -> void:
 	if is_instance_valid(screen) and screen.is_visible_in_tree():
-		play()
+		active = true
+		if DisplayServer.get_name() != "headless":
+			play()
+
+
+func _exit_tree() -> void:
+	active = false
+	_delay.stop()
+	stop()
+	stream = null

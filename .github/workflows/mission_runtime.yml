@@ -80,6 +80,13 @@ jobs:
           set -o pipefail
           timeout 180 xvfb-run -a godot --verbose --path . --audio-driver Dummy --rendering-method ${{ matrix.renderer }} --script game/bootstrap/app/tests/run_new_weapon_tests.gd 2>&1 | tee /tmp/weapon.log
           if grep -E 'SHADER ERROR|SCRIPT ERROR|^ERROR:' /tmp/weapon.log; then exit 1; fi
+      - name: Native music and positional audio lifecycle
+        run: |
+          set -o pipefail
+          for suite in game/bootstrap/app/tests/run_adaptive_audio_tests.gd game/presentation/office_floor/tests/run_server_audio_tests.gd; do
+            timeout 120 xvfb-run -a godot --path . --audio-driver Dummy --rendering-method ${{ matrix.renderer }} --script "$suite" 2>&1 | tee /tmp/audio-native.log
+            if grep -E 'SCRIPT ERROR|^ERROR:' /tmp/audio-native.log; then exit 1; fi
+          done
       - uses: actions/upload-artifact@v4
         if: always()
         with:
@@ -343,6 +350,7 @@ jobs:
           game/features/player/tests/run_mutation_weapon_stats_tests.gd
           game/features/player/tests/run_mutation_skill_mechanics_tests.gd
           game/features/infection/tests/run_tests.gd
+          game/bootstrap/app/tests/run_music_shutdown_tests.gd
           game/bootstrap/app/tests/run_adaptive_audio_tests.gd
           game/features/infected/tests/run_enemy_voice_tests.gd
           game/presentation/office_floor/tests/run_server_audio_tests.gd

@@ -58,7 +58,7 @@ func _mission() -> void:
 	music.update_aggression(0, 0.6)
 	_check(music.state == &"ending", "Sustained quiet starts a gradual ending")
 	music._fade.custom_step(2.1)
-	_check(music.state == &"boom" and music._sting.playing, "Boom follows the fade")
+	_check(music.state == &"boom" and (music._silent or music._sting.playing), "Boom follows the fade")
 	music._sting.stop()
 	music._sting.finished.emit()
 	_check(music.state == &"calm", "Calm resumes only after boom completes")
@@ -72,14 +72,21 @@ func _mission() -> void:
 	music.update_aggression(4, .25)
 	_check(music.state == &"combat" and not music._sting.playing, "New combat also interrupts the boom")
 	paused = true
-	_check(music._players[music._current].stream_paused, "Gameplay track suspends during menu pause")
+	_check(music._silent or music._players[music._current].stream_paused, "Gameplay track suspends during menu pause")
 	var volume := music._players[music._current].volume_linear
 	await create_timer(.15, true).timeout
 	_check(is_equal_approx(volume, music._players[music._current].volume_linear), "Mission fades suspend during pause")
 	paused = false
+	if music._silent:
+		music.update_aggression(0, 3.1)
+		music._fade.custom_step(2.1)
+		music._boom_timer.start(.02)
+		await create_timer(.05).timeout
+		_check(music.state == &"calm", "Silent headless boom still finishes on its owned clock")
 	scene.queue_free()
 	await process_frame
 	await process_frame
+	await create_timer(.1).timeout # Let a native audio mixer release stopped streams.
 
 
 func _menu() -> void:
@@ -98,19 +105,19 @@ func _menu() -> void:
 	var menu: Control = front.get_node("Menu")
 	var track: AudioStreamPlayer = menu.get("_music")
 	_check_menu_controls(menu)
-	_check(not track.playing, "Main music does not start on the first frame")
+	_check(not bool(track.get("active")), "Main music does not start on the first frame")
 	await create_timer(.3).timeout
-	_check(not track.playing, "Main music still waits after 0.3 seconds")
+	_check(not bool(track.get("active")), "Main music still waits after 0.3 seconds")
 	await create_timer(.8).timeout
-	_check(track.playing and track.stream.loop, "Main music starts after one second and loops")
+	_check(bool(track.get("active")) and track.stream.loop and (DisplayServer.get_name() == "headless" or track.playing), "Main music starts after one second and loops")
 	var position := track.get_playback_position()
 	menu.refresh()
-	_check(track.playing and track.get_playback_position() >= position, "Rebuilding settings does not restart music")
+	_check(bool(track.get("active")) and track.get_playback_position() >= position, "Rebuilding settings does not restart music")
 	menu.show_screen("pause")
-	_check(track.playing and track.stream.get_length() < 59.0, "Pause selects the trimmed loop immediately")
+	_check(bool(track.get("active")) and track.stream.get_length() < 59.0, "Pause selects the trimmed loop immediately")
 	paused = true
 	await process_frame
-	_check(track.playing and not track.stream_paused, "Menu music continues during gameplay pause")
+	_check(bool(track.get("active")) and not track.stream_paused, "Menu music continues during gameplay pause")
 	prefs.values.music_volume = 0.0
 	prefs.values.menu_music_volume = .35
 	prefs.apply_to_game(self)
@@ -124,15 +131,16 @@ func _menu() -> void:
 	reloaded.load_settings()
 	_check(not reloaded.values.menu_music and AudioServer.is_bus_mute(bus), "Menu switch persists and mutes the menu bus")
 	menu.hide()
-	_check(not track.playing, "Closing a menu stops its track")
+	_check(not bool(track.get("active")) and not track.playing, "Closing a menu stops its track")
 	menu.show_screen("main")
 	menu.hide()
 	await create_timer(1.1, true).timeout
-	_check(not track.playing, "Leaving before the main delay cannot start a stale track")
+	_check(not bool(track.get("active")) and not track.playing, "Leaving before the main delay cannot start a stale track")
 	paused = false
 	front.queue_free()
 	await process_frame
 	await process_frame
+	await create_timer(.1).timeout
 	if had:
 		FileAccess.open(PREFS.FILE, FileAccess.WRITE).store_buffer(saved)
 	else:
