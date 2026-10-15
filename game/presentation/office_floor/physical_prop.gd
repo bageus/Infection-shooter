@@ -1,5 +1,6 @@
 extends RigidBody3D
 const BREAK_SOUND := preload("res://game/presentation/office_floor/prop_break_sound.gd")
+const REST := preload("res://game/presentation/office_floor/prop_rest.gd")
 const IMPACT_SOUND := preload("res://game/presentation/office_floor/impact_sound_watcher.gd")
 
 const BALANCE = preload("res://game/features/combat/public/projectile_balance.gd")
@@ -68,11 +69,13 @@ func _ready() -> void:
 	collision_mask = 3
 	can_sleep = true
 	IMPACT_SOUND.watch(self)
+	REST.watch(self)
 
 func push_from_character(character_position: Vector3, movement: Vector3, strength: float = 1.0) -> void:
 	CONTACT.push(self, weight_kg, character_position, movement, strength)
 
 func take_projectile_hit(damage: float, hit_position: Vector3, _hit_normal: Vector3, direction: Vector3, weapon_name: String) -> bool:
+	REST.wake(self)
 	if "extinguisher" in (name + get_parent().name).to_lower():
 		if not _extinguisher_triggered:
 			_extinguisher_triggered = true
@@ -105,6 +108,7 @@ func _rupture_extinguisher(hit_position: Vector3) -> void:
 
 
 func take_melee_hit(damage: float, hit_position: Vector3, direction: Vector3) -> void:
+	REST.wake(self)
 	sleeping = false
 	apply_impulse(direction.normalized() * character_push_impulse, hit_position - global_position)
 	_health -= maxf(damage, 0.0)

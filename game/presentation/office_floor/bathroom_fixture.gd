@@ -17,6 +17,7 @@ func take_projectile_hit(_hit_damage: float, hit_position: Vector3, _normal: Vec
 	if _fixture_broken:
 		return true
 	_fixture_broken = true
+	REST.wake_supported(self)
 	var outlet := _water_outlet(hit_position)
 	var dryer := "hand_dryer" in model_path.get_file()
 	if dryer:

@@ -5,6 +5,7 @@ extends RefCounted
 ## Grenades push through their own blast. Pure rules plus one apply().
 
 ## Momentum of one hit in kg*m/s (one pellet for the shotgun).
+const REST := preload("res://game/presentation/office_floor/prop_rest.gd")
 const WEAPON_PUSH := {"PISTOL": 5.5, "UZI": 4.0, "RIFLE": 9.0, "SHOTGUN": 1.5}
 const DEFAULT_PUSH := 5.5
 ## Speed a single hit can give at most, however light the item.
@@ -22,6 +23,7 @@ static func speed(weapon: String, weight_kg: float) -> float:
 
 ## Shoves body along the shot; the hit point off the centre turns it too.
 static func apply(body: RigidBody3D, weight_kg: float, weapon: String, direction: Vector3, hit_position: Vector3) -> void:
+	REST.wake(body)
 	if body.freeze or weapon.to_upper() == "GRENADE" or direction.is_zero_approx():
 		return
 	var push := direction.normalized()

@@ -5,6 +5,7 @@ const GEOMETRY := preload("res://game/presentation/office_floor/environment_prop
 const BREAK_SOUND := preload("res://game/presentation/office_floor/prop_break_sound.gd")
 const BREAKUP := preload("res://game/presentation/office_floor/environment_prop_breakup.gd")
 var _geometry := GEOMETRY.new()
+const REST := preload("res://game/presentation/office_floor/prop_rest.gd")
 const IMPACT_SOUND := preload("res://game/presentation/office_floor/impact_sound_watcher.gd")
 
 const CARPET_SHADOW := preload("res://game/presentation/office_floor/carpet_shadow.gd")
@@ -213,6 +214,9 @@ func _ready() -> void:
 		_add_desk_lamp_light()
 	if not freeze or wall_mounted:
 		IMPACT_SOUND.watch(self)
+	REST.watch(self)
+	_geometry.shadows.configure(self, _visual, _shape_meshes, model_path)
+	set_notify_transform(true)
 
 
 # The desk lamp lights its own surroundings from under the shade.
@@ -247,6 +251,7 @@ func _add_contact_shadow(wall_mounted: bool) -> void:
 
 
 func take_projectile_hit_at_shape(damage: float, hit_position: Vector3, normal: Vector3, direction: Vector3, weapon: String, shape_index: int) -> bool:
+	REST.wake(self)
 	if shape_index >= 0:
 		var owner_id := shape_find_owner(shape_index)
 		var collision := shape_owner_get_owner(owner_id) as CollisionShape3D
@@ -287,6 +292,7 @@ func get_projectile_material(shape_index: int = -1) -> String:
 
 
 func take_projectile_hit(damage: float, hit_position: Vector3, _normal: Vector3, direction: Vector3, weapon: String) -> bool:
+	REST.wake(self)
 	if "fire_extinguisher" in model_path.get_file():
 		BULLET_PUSH.apply(self, weight_kg, weapon, direction, hit_position)
 		_trigger_extinguisher(hit_position, direction)
@@ -401,6 +407,7 @@ func take_melee_hit(damage: float, hit_position: Vector3, direction: Vector3) ->
 
 
 func _apply_damage(hit_position: Vector3, direction: Vector3) -> void:
+	REST.wake_supported(self)
 	if _broken:
 		return
 	_reaction.cancel()
@@ -450,6 +457,7 @@ func _is_facade_damage() -> bool:
 
 
 func _rebuild_shapes() -> void:
+	REST.wake_supported(self)
 	_reaction.cancel()
 	_geometry.rebuild(self)
 
@@ -497,3 +505,8 @@ func snap_display_edges(neighbors: Array[Dictionary]) -> void:
 	var source := get_display_edges()
 	if not source.is_empty():
 		global_position += preload("res://game/presentation/office_floor/display_edge_snap.gd").position(source, neighbors)
+
+
+func _notification(what: int) -> void:
+	if what == NOTIFICATION_TRANSFORM_CHANGED and is_inside_tree():
+		_geometry.shadows.update(self)

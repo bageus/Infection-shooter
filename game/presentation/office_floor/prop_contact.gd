@@ -2,6 +2,7 @@ extends RefCounted
 ## Applies prop_weight_v1 to a physical item touched by a character: a body
 ## push while walking into it, or a kick when the feet brush a light item.
 
+const REST := preload("res://game/presentation/office_floor/prop_rest.gd")
 const WEIGHT := preload("res://game/presentation/office_floor/prop_weight.gd")
 const KICKABLE_LAYER := 4
 # Floor/walls/props (1-2) and other kicked items (3) carry kickable items.
@@ -11,7 +12,7 @@ const KICK_COOLDOWN_MS := 350
 
 static func push(body: RigidBody3D, weight: float, character_position: Vector3, movement: Vector3, strength: float) -> bool:
 	movement.y = 0.0
-	if body.freeze or movement.length_squared() < 0.01:
+	if (body.freeze and not bool(body.get_meta(REST.FROZEN, false))) or movement.length_squared() < 0.01:
 		return false
 	var direction := movement.normalized()
 	var offset := body.global_position - character_position
@@ -24,6 +25,7 @@ static func push(body: RigidBody3D, weight: float, character_position: Vector3, 
 	var gain := WEIGHT.push_velocity_change(weight, strength, movement.length(), body.linear_velocity.dot(direction), delta)
 	if gain <= 0.0:
 		return false
+	REST.wake(body)
 	body.sleeping = false
 	body.apply_central_impulse(direction * gain * body.mass)
 	return true
@@ -61,6 +63,7 @@ static func kick(body: RigidBody3D, weight: float, character: Node) -> bool:
 	var strength := float(actor.get("push_strength")) if actor.get("push_strength") != null else 1.0
 	var speed := WEIGHT.kick_speed(weight, strength, walk.length())
 	body.set_meta(&"kick_ready_ms", now + KICK_COOLDOWN_MS)
+	REST.wake(body)
 	body.sleeping = false
 	body.apply_central_impulse((direction + Vector3.UP * 0.28) * speed * body.mass)
 	body.apply_torque_impulse(Vector3.UP.cross(direction) * speed * body.mass * 0.08)

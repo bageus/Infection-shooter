@@ -1,4 +1,5 @@
 extends StaticBody3D
+const REST := preload("res://game/presentation/office_floor/prop_rest.gd")
 const SFX := preload("res://game/core/audio/public/sound_events.gd")
 
 const BALANCE = preload("res://game/features/combat/public/projectile_balance.gd")
@@ -72,6 +73,7 @@ func _break_prop(hit_position: Vector3) -> void:
 	if _broken:
 		return
 	_broken = true
+	REST.wake_supported(self)
 	_clear_blood_decals()
 	if break_effect == "glass" and get_parent() != null:
 		SFX.play(get_parent().get_parent() if get_parent().get_parent() != null else get_parent(), &"glass_break", hit_position)
