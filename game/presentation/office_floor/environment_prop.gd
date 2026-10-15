@@ -262,7 +262,9 @@ func take_projectile_hit_at_shape(damage: float, hit_position: Vector3, normal: 
 		var owner_id := shape_find_owner(shape_index)
 		var collision := shape_owner_get_owner(owner_id) as CollisionShape3D
 		var mesh_index := _shapes.find(collision)
-		if mesh_index >= 0 and mesh_index < _shape_meshes.size() and is_instance_valid(_shape_meshes[mesh_index]) and GEOMETRY.is_glass_mesh(_shape_meshes[mesh_index]):
+		# Electronics keep their glass screen: shattering it disabled the only collision
+		# shape, so a shot monitor fell through its desk and skipped the short circuit.
+		if _damage.category != "tech" and mesh_index >= 0 and mesh_index < _shape_meshes.size() and is_instance_valid(_shape_meshes[mesh_index]) and GEOMETRY.is_glass_mesh(_shape_meshes[mesh_index]):
 			call_deferred("_shatter_glass", hit_position, direction)
 			if weapon != "GRENADE":
 				return false
@@ -287,7 +289,9 @@ func get_projectile_material(shape_index: int = -1) -> String:
 	if shape_index >= 0:
 		var shape_owner := shape_owner_get_owner(shape_find_owner(shape_index)) as CollisionShape3D
 		var mesh_index := _shapes.find(shape_owner)
-		if mesh_index >= 0 and mesh_index < _shape_meshes.size() and is_instance_valid(_shape_meshes[mesh_index]) and GEOMETRY.is_glass_mesh(_shape_meshes[mesh_index]):
+		# Electronics keep their glass screen: shattering it disabled the only collision
+		# shape, so a shot monitor fell through its desk and skipped the short circuit.
+		if _damage.category != "tech" and mesh_index >= 0 and mesh_index < _shape_meshes.size() and is_instance_valid(_shape_meshes[mesh_index]) and GEOMETRY.is_glass_mesh(_shape_meshes[mesh_index]):
 			return "glass"
 	var group := model_path.get_file().substr(0, 2)
 	if group == "01": return "concrete"
