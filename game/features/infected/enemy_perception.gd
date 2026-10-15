@@ -4,6 +4,10 @@ extends RefCounted
 ## it looks around (SEARCH) and then walks back (RETURN). Seeing the player, being
 ## shot or hearing an ally's cry starts CHASE; a forced chase never ends.
 
+const ACTOR := preload("res://game/features/infected/infected_capsule.gd")
+const IDLE_BODY := preload("res://game/features/infected/enemy_idle_body.gd")
+const ROUTE := preload("res://game/features/infected/chase_route.gd")
+
 enum State { UNAWARE, INVESTIGATE, SEARCH, RETURN, CHASE }
 
 const ALERT_GROUP := "infected_alive"
@@ -33,21 +37,24 @@ var _home_yaw := 0.0
 var _home_ready := false
 var _noise := Vector3.ZERO
 var _state_time := 0.0
-var _sight_wait := 0.0
+var _sight_wait := randf_range(0.0, SIGHT_CHECK_SECONDS)
 var _lure: Node3D
 var _wander := Vector3.ZERO
 var _wandering := false
 var _wander_wait := 1.0
+var _idle_elapsed := 0.0
+var _idle_body: IDLE_BODY
 
 
 func watch() -> void:
 	forced = false
 	state = State.UNAWARE
 	_home_ready = false
-	_alert_announced = false
+	_idle_elapsed = 0.0
 
 
 func force_chase() -> void:
+	_idle_elapsed = 0.0
 	forced = true
 	_alert_announced = true
 	state = State.CHASE
@@ -73,6 +80,7 @@ func hear(actor: Node3D, position: Vector3, radius: float) -> void:
 	if state != State.INVESTIGATE or position.distance_to(_noise) > hearing.investigate_refresh_distance:
 		_state_time = 0.0
 	_noise = position
+	_idle_elapsed = 0.0
 	state = State.INVESTIGATE
 
 
@@ -93,54 +101,102 @@ func notice_player(actor: Node3D, audio: Node) -> void:
 func alert() -> bool:
 	if state == State.CHASE:
 		return false
+	_idle_elapsed = 0.0
 	state = State.CHASE
 	return true
 
 
 # One physics step while not chasing: look, listen, walk to a noise or back home.
-func step_unaware(actor: CharacterBody3D, delta: float) -> void:
-	var target: Node3D = actor.get("_target")
-	var far_idle := state == State.UNAWARE and actor.global_position.distance_squared_to(target.global_position) > pow(float(actor.get("sleep_distance")), 2.0)
-	if far_idle and Engine.get_physics_frames() % 12 != int(actor.get("_lod_frame_offset")):
+func step_unaware(actor: ACTOR, delta: float) -> void:
+	if _idle_body == null:
+		_idle_body = IDLE_BODY.new()
+	var target: Node3D = actor._target
+	_idle_elapsed += delta
+	if _check_sight(actor, target, delta):
+		_idle_elapsed = 0.0
 		return
-	# Distant idle enemies simulate one collision-checked step every 12 frames.
-	# Both their clocks and their movement must cover all skipped physics frames.
-	var step := delta * 12.0 if far_idle else delta
-	var radius := .35
-	var shape: CollisionShape3D = actor.get("collision_shape")
-	if shape != null and shape.shape is CapsuleShape3D:
-		radius = (shape.shape as CapsuleShape3D).radius * actor.global_basis.x.length()
-	var speed := float(actor.get("move_speed")) * float(actor.get("_mobility"))
-	var wish := tick(actor, step, target, actor.get("_route"), radius, speed)
-	if float(actor.get("_blast_stun_remaining")) > 0.0:
+	var distance_sq := actor.global_position.distance_squared_to(target.global_position)
+	var push: Vector3 = actor._push_velocity
+	var disturbed := not push.is_zero_approx() or actor._blast_stun_remaining > 0.0
+	var supported := actor.is_on_floor()
+	var support_checked := supported and (distance_sq >= actor.full_simulation_distance * actor.full_simulation_distance or actor.velocity.is_zero_approx())
+	if support_checked:
+		supported = _idle_body.supported(actor)
+	var divisor := 1
+	if state == State.UNAWARE and supported and not disturbed:
+		if distance_sq > actor.sleep_distance * actor.sleep_distance:
+			divisor = 12
+		elif distance_sq >= actor.full_simulation_distance * actor.full_simulation_distance:
+			divisor = 3
+	if Engine.get_physics_frames() % divisor != actor._lod_frame_offset % divisor:
+		actor._turn_toward_face_direction(delta)
+		actor._apply_gravity(delta)
+		return
+	var step := _idle_elapsed
+	_idle_elapsed = 0.0
+	var radius := _idle_body.radius(actor.collision_shape, actor.global_basis.x.length())
+	var speed := actor.move_speed * actor._mobility
+	var wish := tick(actor, step, target, actor._route, radius, speed, false)
+	if actor._blast_stun_remaining > 0.0:
 		wish = Vector3.ZERO
-	actor.call("_turn_toward_face_direction", step)
-	var push: Vector3 = actor.get("_push_velocity")
+	actor._turn_toward_face_direction(delta)
 	actor.velocity.x = wish.x + push.x
 	actor.velocity.z = wish.z + push.z
-	actor.set("_push_velocity", push.move_toward(Vector3.ZERO, float(actor.get("push_decay")) * step))
-	if far_idle:
-		actor.move_and_collide(Vector3(actor.velocity.x, 0.0, actor.velocity.z) * step)
+	actor._push_velocity = push.move_toward(Vector3.ZERO, actor.push_decay * delta)
+	actor._apply_gravity(delta)
+	actor._intended_motion = Vector3(actor.velocity.x, 0.0, actor.velocity.z)
+	# UNAWARE has no crowd steering in the existing behavior (spread is zero).
+	if wish.is_zero_approx() and not disturbed and supported and (support_checked or _idle_body.supported(actor)):
 		return
-	actor.call("_apply_gravity", delta)
-	actor.set("_intended_motion", Vector3(actor.velocity.x, 0.0, actor.velocity.z))
+	if divisor > 1:
+		var motion := Vector3(actor.velocity.x, 0.0, actor.velocity.z) * step
+		if _wandering:
+			var remaining := _wander - actor.global_position
+			remaining.y = 0.0
+			motion = motion.limit_length(remaining.length())
+		_collide(actor, motion)
+	else:
+		_slide(actor)
+
+
+func _slide(actor: ACTOR) -> void:
 	actor.move_and_slide()
-	actor.call("_push_chair_contacts")
+	actor._push_chair_contacts()
 
 
-# Desired horizontal velocity while not chasing; may switch to CHASE.
-func tick(actor: CharacterBody3D, delta: float, target: Node3D, route, radius: float, speed: float) -> Vector3:
-	if not _home_ready:
-		_home = actor.global_position
-		_home_yaw = actor.rotation.y
-		_home_ready = true
-	_state_time += delta
+# Collision-checked LOD travel retains tangential motion and prop pushes.
+func _collide(actor: ACTOR, motion: Vector3) -> void:
+	for i in 2:
+		var hit := actor.move_and_collide(motion)
+		if hit == null:
+			return
+		var collider := hit.get_collider()
+		if collider != null and collider.has_method("push_from_character"):
+			collider.call("push_from_character", actor.global_position, actor._intended_motion, actor.push_strength)
+		motion = hit.get_remainder().slide(hit.get_normal())
+		if motion.is_zero_approx():
+			return
+
+
+func _check_sight(actor: CharacterBody3D, target: Node3D, delta: float) -> bool:
 	_sight_wait -= delta
 	if _sight_wait <= 0.0:
 		_sight_wait = SIGHT_CHECK_SECONDS + float(actor.get_instance_id() % 7) * 0.01
 		if can_see(actor, target):
 			state = State.CHASE
-			return Vector3.ZERO
+			return true
+	return false
+
+
+# Desired horizontal velocity while not chasing; may switch to CHASE.
+func tick(actor: CharacterBody3D, delta: float, target: Node3D, route: ROUTE, radius: float, speed: float, check_sight := true) -> Vector3:
+	if not _home_ready:
+		_home = actor.global_position
+		_home_yaw = actor.rotation.y
+		_home_ready = true
+	_state_time += delta
+	if check_sight and _check_sight(actor, target, delta):
+		return Vector3.ZERO
 	match state:
 		State.UNAWARE:
 			return _idle_wander(actor, delta, route, radius, speed)
@@ -159,7 +215,7 @@ func tick(actor: CharacterBody3D, delta: float, target: Node3D, route, radius: f
 
 
 # At its post an unaware infected strolls 1-3 m from home in a random direction, pausing between steps.
-func _idle_wander(actor: CharacterBody3D, delta: float, route, radius: float, speed: float) -> Vector3:
+func _idle_wander(actor: CharacterBody3D, delta: float, route: ROUTE, radius: float, speed: float) -> Vector3:
 	if not wander_enabled:
 		return Vector3.ZERO
 	if not _wandering:
@@ -182,7 +238,7 @@ func _idle_wander(actor: CharacterBody3D, delta: float, route, radius: float, sp
 	return _walk(actor, route, _wander, radius, walk_speed, 0.4, State.UNAWARE)
 
 
-func _walk(actor: CharacterBody3D, route, goal: Vector3, radius: float, speed: float, arrive: float, next: State) -> Vector3:
+func _walk(actor: CharacterBody3D, route: ROUTE, goal: Vector3, radius: float, speed: float, arrive: float, next: State) -> Vector3:
 	var flat := goal - actor.global_position
 	flat.y = 0.0
 	if flat.length() <= arrive or _state_time > INVESTIGATE_TIMEOUT:
@@ -195,7 +251,7 @@ func _walk(actor: CharacterBody3D, route, goal: Vector3, radius: float, speed: f
 	_lure.global_position = goal
 	var dir: Vector3 = route.direction(actor, _lure, radius)
 	if not dir.is_zero_approx():
-		actor.set("_face_direction", dir)
+		(actor as ACTOR)._face_direction = dir
 	return dir * speed
 
 
