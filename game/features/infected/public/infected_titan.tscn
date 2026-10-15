@@ -45,3 +45,4 @@ script = ExtResource("1_driver")
 run_speed_threshold = 2.31
 walk_reference_speed = 1.32
 run_reference_speed = 3.3
+locomotion_speed_multiplier = 1.2

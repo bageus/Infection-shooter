@@ -26,8 +26,8 @@ const WEAPON_STANCE := preload("res://game/features/player/player_weapon_stance.
 const ANIMATION_SELECTION := preload("res://game/features/player/player_animation_selection.gd")
 const PLAYER_AUDIO := preload("res://game/features/player/player_audio.gd")
 const HEAL_FEEDBACK := preload("res://game/features/player/player_heal_feedback.gd")
-@export var move_speed: float = 6.0
-@export var sprint_speed: float = 9.0
+@export var move_speed: float = 5.4
+@export var sprint_speed: float = 8.1
 ## Body strength for pushing items (prop_weight_v1); 1.0 moves up to 22 kg.
 @export var push_strength: float = 1.0
 var _intended_motion := Vector3.ZERO
@@ -38,6 +38,9 @@ var _intended_motion := Vector3.ZERO
 @export var roll_speed: float = 5.7
 @export var roll_duration: float = 0.55
 @export var roll_cooldown: float = 0.65
+## Seconds from the start of a dodge roll during which no damage lands.
+@export var roll_iframes: float = 0.35
+var _iframes_remaining: float = 0.0
 const MUTATION_DASH_SPEED := 13.0
 @export var roll_push_strength: float = 8.5
 @export var roll_push_radius: float = 1.25
@@ -122,10 +125,12 @@ func _physics_process(delta: float) -> void:
 		elif is_instance_valid(_stun_ringing):
 			_stun_ringing.volume_db = -19.0 + 6.0 * _stun_intensity + linear_to_db(clampf(_stun_remaining / 0.8, 0.0001, 1.0))
 	_roll_cooldown_remaining=maxf(0.0,_roll_cooldown_remaining-delta)
+	_iframes_remaining=maxf(0.0,_iframes_remaining-delta)
 	var control_lost: bool = infection_runtime.call("is_control_lost")
 	_mutation_control.tick(delta, control_lost)
 	if control_lost:
 		_roll_remaining = 0.0
+		_iframes_remaining = 0.0
 		if Input.is_action_just_pressed("antidote"):
 			use_antidote()
 	if not _mutation_menu_open and not control_lost:
@@ -292,7 +297,7 @@ func take_blast_damage(amount: float, origin: Vector3) -> void:
 
 
 func _apply_damage(amount: float, damage_type: String, point: Vector3, direction: Vector3, weapon: String) -> void:
-	if amount <= 0.0 or health <= 0.0:
+	if amount <= 0.0 or health <= 0.0 or _iframes_remaining > 0.0:
 		return
 	var remaining: float = mutation_effects.call("on_player_hit", maxf(amount, 0.0), damage_type)
 	var absorbed:=minf(armor,remaining)
@@ -422,7 +427,7 @@ func _update_move(delta:float)->void:
 	if _roll_remaining>0.0:
 		_roll_remaining=maxf(0.0,_roll_remaining-delta);velocity.x=_roll_direction.x*_roll_pace;velocity.z=_roll_direction.z*_roll_pace
 	elif not bool(infection_runtime.call("is_control_lost")) and Input.is_action_just_pressed("roll") and d.length_squared()>0.0001 and _roll_cooldown_remaining<=0.0:
-		_roll_direction=d.normalized();_roll_remaining=roll_duration;_roll_pace=roll_speed;_roll_cooldown_remaining=roll_cooldown
+		_roll_direction=d.normalized();_roll_remaining=roll_duration;_roll_pace=roll_speed;_roll_cooldown_remaining=roll_cooldown;_iframes_remaining=roll_iframes
 		mutation_effects.call("on_roll")
 		$AnimationDriver.call("play_dodge", _roll_direction, roll_duration)
 	else:

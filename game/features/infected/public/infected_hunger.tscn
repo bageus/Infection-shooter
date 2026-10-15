@@ -46,3 +46,4 @@ extra_clips = ExtResource("5_mixamo")
 run_speed_threshold = 3.78
 walk_reference_speed = 2.16
 run_reference_speed = 5.4
+locomotion_speed_multiplier = 1.2

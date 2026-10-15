@@ -195,9 +195,10 @@ func _test_horde_clips(stage: Node3D) -> void:
 # Playback speed a clip is expected at: 1 for procedural clips, speed / ref_speed for Mixamo cycles.
 func _pace_for(driver: Node, player: AnimationPlayer, clip: String, speed: float) -> float:
 	var reference := float(player.get_animation(clip).get_meta("ref_speed", 0.0))
+	var multiplier := float(driver.get("locomotion_speed_multiplier"))
 	if driver.extra_clips == null or reference <= 0.0:
-		return 1.0
-	return clampf(speed / reference, 0.5, 1.8)
+		return multiplier
+	return clampf(speed / reference, 0.5, 1.8) * multiplier
 
 
 func _test_locomotion_selection(stage: Node3D, scene: PackedScene, label: String) -> void:
