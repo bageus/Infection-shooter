@@ -79,6 +79,8 @@ x=1.0 solid_wall_x=0.6 wall_hits=0 first5=[1, 1, 1, 1, 1] deleted=false
 
 ## A03. Мебель делает стену прозрачной для проверки взрыва
 
+**Повторная проверка:** исправление и регрессии описаны в [QA blast shelter](../qa/blast_shelter.md). Исходное воспроизведение ниже сохранено как история аудита.
+
 **Код:** [grenade_explosion.gd:15–39](https://github.com/bageus/Infection-shooter/blob/0e154b73/game/features/combat/public/grenade_explosion.gd#L15-L39).
 
 `is_sheltered()` пропускает неподходящие препятствия максимум за шесть лучей. После исчерпания попыток возвращает `false` — «укрытия нет», хотя до цели ещё может оставаться непроверенная стена.
