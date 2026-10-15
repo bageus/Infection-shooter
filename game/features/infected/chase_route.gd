@@ -70,7 +70,8 @@ func direction(actor: CharacterBody3D, target: Node3D, radius: float, far: bool 
 			_budget.call("cancel", self)
 		path.clear()
 		return (to - from).normalized()
-	if frame >= _next_search or _goal.distance_squared_to(to) > 2.0:
+	# A completed search owns the retry clock, including stale/blocked paths.
+	if frame >= _next_search:
 		if is_instance_valid(_budget):
 			_budget.call("request", self, actor, target)
 		else:
@@ -86,7 +87,7 @@ func direction(actor: CharacterBody3D, target: Node3D, radius: float, far: bool 
 		path.pop_front()
 	# Over the cap the next waypoint is trusted; the capsule still stops at walls.
 	if _take_path_probe(frame) and not clear_segment(from, path[0]):
-		_next_search = 0
+		# Stop at the obstacle, but retain the normal retry cooldown.
 		return Vector3.ZERO
 	return (path[0] - from).normalized()
 
