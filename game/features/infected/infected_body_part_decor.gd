@@ -52,7 +52,7 @@ func _build() -> void:
 		parts.add_rest_wound(cut, float(info.segments[0].radius) * 1.25)
 		var entry: Dictionary = parts._entries[0]
 		var lease: RefCounted = parts.piece_skin(entry)
-		var built := MESH.build_piece(entry.data, info.bones, parts.skeleton, lease.page.materials)
+		var built := MESH.build_piece(entry.data, info.bones, parts.skeleton, lease.materials)
 		built["skin_lease"] = lease
 		if not built.is_empty():
 			_assemble(built, parts._world(info.bones[0], info.segments[0].start), float(info.segments[0].radius) * visual_scale)
