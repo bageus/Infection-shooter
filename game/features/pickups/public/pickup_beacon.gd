@@ -66,6 +66,18 @@ func _build(color: Color, glow_radius: float, arrow_height: float, glow_energy: 
 		_add(shaft, _arrow).position.y = 0.33
 
 
+func _ready() -> void:
+	# Bobbing and pulsing only matter while the beacon can be seen. Headless runs
+	# have no screen, so they keep animating.
+	if DisplayServer.get_name() == "headless":
+		return
+	var notifier := VisibleOnScreenNotifier3D.new()
+	notifier.aabb = AABB(Vector3(-1.5, -0.5, -1.5), Vector3(3.0, 3.5, 3.0))
+	add_child(notifier)
+	notifier.screen_entered.connect(set_process.bind(true))
+	notifier.screen_exited.connect(set_process.bind(false))
+
+
 func _add(mesh: Mesh, parent: Node3D = self) -> MeshInstance3D:
 	var node := MeshInstance3D.new()
 	node.mesh = mesh
