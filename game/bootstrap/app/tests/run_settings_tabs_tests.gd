@@ -40,6 +40,7 @@ func _run() -> void:
 	lighting.set_pressed(true)
 	await _shadow_checks(tabs, dialog)
 	_check(tabs.get_child(3).find_child("SoundToggle", true, false) != null, "Sound belongs to Audio")
+	_slider_checks(tabs)
 	_check_notice_badge(dialog, tabs)
 	dialog.settings.notices._show(1)
 	await process_frame
@@ -189,3 +190,23 @@ func _check_notice_badge(dialog: Control, tabs: TabContainer) -> void:
 	_check(page_margin.get_theme_constant("margin_top") >= 24, "Tab contents keep a clear gap below the tabs")
 	var page_style := tabs.get_theme_stylebox("panel") as StyleBoxFlat
 	_check(page_style != null and page_style.bg_color.a == 0.0, "Tab pages share the dialog background")
+
+
+# A dragged slider changes the live value at once but writes the file only when released.
+func _slider_checks(tabs: TabContainer) -> void:
+	var sliders := tabs.get_child(3).find_children("*", "HSlider", true, false)
+	_check(not sliders.is_empty(), "Audio page has volume sliders")
+	if sliders.is_empty():
+		return
+	var slider := sliders[sliders.size() - 1] as HSlider
+	var before := PREFS.new()
+	before.load_settings()
+	slider.drag_started.emit()
+	slider.value = 0.15
+	var during := PREFS.new()
+	during.load_settings()
+	_check(is_equal_approx(during.values.music_volume, before.values.music_volume), "Dragging a slider does not write the settings file")
+	slider.drag_ended.emit(true)
+	var after := PREFS.new()
+	after.load_settings()
+	_check(is_equal_approx(after.values.music_volume, 0.15), "Releasing the slider saves the new value once")
