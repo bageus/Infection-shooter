@@ -50,10 +50,10 @@ func _build() -> void:
 		var cut: Vector3 = info.segments[0].start
 		# Bake the cut into the mask first, so the copies below carry it.
 		parts.add_rest_wound(cut, float(info.segments[0].radius) * 1.25)
-		var materials: Array = []
-		for material: ShaderMaterial in parts._entries[0].materials:
-			materials.append(material.duplicate() as ShaderMaterial)
-		var built := MESH.build_piece(parts._entries[0].data, info.bones, parts.skeleton, materials)
+		var entry: Dictionary = parts._entries[0]
+		var lease: RefCounted = parts.piece_skin(entry)
+		var built := MESH.build_piece(entry.data, info.bones, parts.skeleton, lease.page.materials)
+		built["skin_lease"] = lease
 		if not built.is_empty():
 			_assemble(built, parts._world(info.bones[0], info.segments[0].start), float(info.segments[0].radius) * visual_scale)
 	parts.free()
@@ -71,6 +71,7 @@ func _assemble(built: Dictionary, cut_world: Vector3, cap_radius: float) -> void
 		lie = Basis.from_euler(Vector3(rng.randf_range(-PI, PI), rng.randf_range(-PI, PI), rng.randf_range(-PI, PI))) * lie
 	var visual := MeshInstance3D.new()
 	visual.mesh = built.mesh
+	built.skin_lease.bind(visual, true)
 	visual.basis = lie
 	add_child(visual)
 	var shape := CollisionShape3D.new()

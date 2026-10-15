@@ -1,6 +1,8 @@
 extends RefCounted
-## Retains derived body geometry, never actor state. Live actors keep their data
-## when an entry is evicted. Shared materials/textures are outside this budget.
+## Retains derived body geometry and skin presentation pages, never combat state.
+## Live actors/pieces hold leases; pages retain no actors and release blood arrays
+## with their last lease. Eviction preserves live data. Only geometry is budgeted;
+## shared materials/textures are outside this byte budget.
 const MAX_ENTRIES := 16
 const MAX_BYTES := 64 * 1024 * 1024
 var _entries: Dictionary = {}

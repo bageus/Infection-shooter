@@ -237,6 +237,9 @@ func _feeding() -> void:
 	await create_timer(1.2).timeout
 	await _frames(2)
 	_check(_player_of(eater).current_animation == "BiteLoop", "Then it gnaws on all fours (%s)." % _player_of(eater).current_animation)
+	# Keep the target in charge range: far LOD may re-evaluate the temporary
+	# all-fours posture on any of the next three frames, depending on ObjectID.
+	target.position = eater.global_position + Vector3(0, 0, -8)
 	eater.call("hear_alert", eater.global_position, 50.0)
 	await _frames(3)
 	_check(not bool(eater.call("is_feeding")), "A cry from a neighbour interrupts the meal.")
