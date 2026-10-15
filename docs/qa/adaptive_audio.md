@@ -148,3 +148,28 @@ Main затем продвинулся до66284af (PR191: skin materials). Он
 новые rendering/Web checks, skin code и артефакты не изменены аудиоветкой.
 Конфликты журналов объединены без удаления решений/блокеров, Hunger fixture
 сохраняет относительную цель8м из main, feral=true и bounded frame waits.
+
+## PR192: совместимость с новой авторской картой (0980389e)
+
+Сохранены все5425 узлов, их transforms и base_office_map.json. У публичных
+instances удалены190 строк повторных ссылок/override на приватные скрипты
+player/pickups/infected; скрипты наследуются из существующих public scenes
+(включая правильный Hunger subtype). В3 UID удалены stash conflict markers,
+сохранены канонические UID предыдущего head42fe5149.
+
+Три новых door GLB приведены к существующему group01 atlas: embedded PNG
+byte-identical общим картам, повторные texture bindings объединены, Blender
+suffixes материалов нормализованы, недостающие tangent attributes вычислены
+по неизменным positions/normals/UV. Все исходные accessors, узлы, stages и
+геометрия проверены на точное равенство с0980389e; ничего не перемещалось.
+Все9 экспортных PNG с imports сохранены в sources/door_export_textures
+под существующим .gdignore (никакие исходные изображения не удалены).
+
+Локально: validate_project, все17 resource/atlas/report команд architecture.yml,
+Godot4.7.2 editor import без ERROR, 11 focused suites PASS: adaptive_audio,
+music_shutdown, server_audio, enemy_voice, infected_voice, group01_asset,
+layout_bake, mission_loading, world_surface, planner_persistence,
+placed_ammo_pickup. Прежняя WebGL2 ошибка clean neighbor воспроизведена
+на main66284af (run38764883024) и audio head42fe5149; skin code/checks
+не менялись. Следующий шаг — CI нового head, затем merge по прямому
+поручению владельца с явным указанием унаследованного Web blocker.
