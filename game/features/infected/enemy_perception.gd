@@ -169,7 +169,7 @@ func _slide(actor: ACTOR) -> void:
 
 # Collision-checked LOD travel retains tangential motion and prop pushes.
 func _collide(actor: ACTOR, motion: Vector3) -> void:
-	var pushed: Object
+	var pushed: Object = null
 	for i in 2:
 		var hit := actor.move_and_collide(motion)
 		if hit == null:

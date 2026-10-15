@@ -170,7 +170,7 @@ func _on_aggro() -> void:
 		_start_busy(SCREAM)
 
 
-func _behaviour_tick(delta: float, target_offset: Vector3) -> void:
+func _behaviour_tick(_delta: float, target_offset: Vector3) -> void:
 	_distance = target_offset.length()
 	if _busy > 0.0:
 		_cached_desired = Vector3.ZERO
