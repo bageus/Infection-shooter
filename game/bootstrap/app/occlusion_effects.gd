@@ -113,6 +113,19 @@ func _process(_delta: float) -> void:
 		_update_hole()
 
 
+## Installs every queued wall material now, so the first gameplay frames do not pay for them one dozen at a time.
+func flush_wall_queue(tree: SceneTree, batch: int = 64) -> void:
+	if not runtime_enabled or mode != 1:
+		return
+	if _dirty:
+		_rebuild()
+	else:
+		_apply_pending_roots()
+	while not walls.pending.is_empty():
+		walls.install_pending(batch)
+		await tree.process_frame
+
+
 func _rebuild() -> void:
 	rebuild_count += 1
 	_clear()
