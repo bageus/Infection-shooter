@@ -120,7 +120,7 @@ grenade_explosion, падающего соседа, раннее пробужд�
 0.4м — консервативный кандидат между мелкими книгами/бутылками/настольными
 предметами и более заметными предметами. Переход0.4→0.45 затрагивает ещё282
 предмета ради только34840 дополнительных треугольников. Порог выбран по
-этой инвентаризации и требует просмотра кадров CI; GPU-выигрыш заранее
+этой инвентаризации и проверен на кадрах CI; GPU-выигрыш по этим числам
 не приписывается.
 
 Итог полного layout:28768→23918 теневых mesh instances (**−16.9%**),
@@ -153,10 +153,31 @@ xvfb-run -a godot --path . --audio-driver Dummy --rendering-method gl_compatibil
 xvfb-run -a godot --path . --audio-driver Dummy --rendering-method gl_compatibility --script tools/capture_prop_shadow_budget.gd -- --output=/tmp/prop-review/after
 ```
 
-Артефакт CI: `prop-optimization-review`. Итог ручного просмотра before/after,
-числа узкого software-render стенда и ссылки на зелёный CI фиксируются в
-описании PR перед слиянием. Они не являются замером рендера всей карты или
-гарантией ускорения на видеокарте владельца.
+Проверен исправленный стенд на commit `2b161babf4a4f10f74836b26589505897122080d`,
+[CI run38722217794](https://github.com/bageus/Infection-shooter/actions/runs/38722217794),
+artifact `prop-optimization-review`11966887628. Ранние кадры с неверным
+размещением относительно pivot моделей исключены из визуальной приёмки.
+
+| Compatibility, llvmpipe LLVM20.1.2 | Before | After |
+|---|---:|---:|
+| Wall mean239 кадров, мс |50.7863|50.2022|
+| Wall p95, мс |52.766|51.553|
+
+Это один прогон узкого software-render стенда. Драйвер сообщил, что изменить
+VSync mode невозможно; frame pacing и нагрузка общего CI CPU влияют на числа.
+Разница mean−1.15% не доказывает ускорения GPU/полной карты или стабильные60 FPS.
+Точные записи и предупреждение сохранены в `prop_shadow_render_measurements.json`.
+
+Ручной просмотр всех четырёх кадров: стол, ножки и стул сохраняют тени;
+книги, кружки и бутылки теряют только свои мелкие падающие тени.
+Геометрия, материалы, расположение и освещение совпадают, видимых провалов
+на репрезентативном стенде не найдено. Это не визуальная приёмка всей карты
+на Windows/Web.
+
+| Кадр | До | После |
+|---|---|---|
+| Общий план |[before](prop_shadow_review/before_overview.png)|[after](prop_shadow_review/after_overview.png)|
+| Крупный план |[before](prop_shadow_review/before_detail.png)|[after](prop_shadow_review/after_detail.png)|
 
 ## Проверки и границы
 
@@ -165,6 +186,21 @@ xvfb-run -a godot --path . --audio-driver Dummy --rendering-method gl_compatibil
   исключена; enlargement/shrinking planner; lazy group; authored OFF.
 - Suite включён в mission_runtime.yml, а также выполняется в новом native job.
 - Все15 целевых headless suites про props/destruction/impact/debris/лампы PASS.
+- Дополнительный полный локальный повтор списка Runtime regressions из
+  mission_runtime.yml:116/116 PASS, штатный tools/run_runtime_suites.sh,
+  три параллельных процесса и отдельный user:// на suite.
+  hit_effect_tests и prop_shadow_tests также PASS в этом полном повторе.
+- Первый полный CI attempt на том же SHA:115/116 headless suites PASS;
+  только hunger_behaviour_tests упал на «It leaps up on all fours».
+  Все24 последующих native suites в Compatibility/Forward+ PASS, как и
+  остальные renderer jobs. Изолированный локальный повтор hunger suite без
+  изменения кода дал PASS→FAIL→PASS на том же assertion.
+  Контроль с восстановленными исходными EnvironmentProp/geometry из2ced90d9:
+  PASS→PASS→PASS→FAIL→PASS с тем же assertion. После контроля рабочие файлы
+  возвращены побайтно (git diff к HEAD пуст). Флейк существовал до оптимизации
+  теней. Ожидания/production врагов не изменены. Повтор полного CI на том же
+  SHA завершился PASS:116/116 headless suites и24/24 финальных native suites;
+  все отдельные renderer jobs и Architecture validation также PASS.
 - validate_source_size, validate_architecture, validate_project,
   validate_scene_resources и Godot4.7.2 headless editor import PASS.
 - infected_capsule.gd не изменён: в исходном main599 строк (лимит600). DTO карты v8,
@@ -174,5 +210,14 @@ xvfb-run -a godot --path . --audio-driver Dummy --rendering-method gl_compatibil
   geometry owner; новая обязанность изолирована в prop_shadow_policy58 строк.
   Искусственный split root ради мягкого порога300 не нужен.
 
-Точное следующее действие: проверить кадры нового renderer job и полный CI,
-слить только принятую часть; затем измерить реальную офисную сцену на Windows/Web.
+Принятая часть объединена в [PR #188](https://github.com/bageus/Infection-shooter/pull/188)
+после зелёного CI на точном head `2b161babf4a4f10f74836b26589505897122080d`.
+Merge commit: `ab15471cf13b8ce30738618a1945cda1f3c366e0`.
+[Architecture validation](https://github.com/bageus/Infection-shooter/actions/runs/38722217788)
+и [Mission runtime regressions](https://github.com/bageus/Infection-shooter/actions/runs/38722217794)
+PASS. Этот docs-only follow-up сохраняет проверенные PNG и точные записи
+рендера рядом с приложением, независимо от семидневного срока CI artifact.
+
+Часть1 остаётся НЕ ВЫПОЛНЕННОЙ; отвергнутый physics-код не слит.
+Точное следующее действие: профилировать реальную офисную сцену с90 врагами
+на целевом Windows/Web оборудовании; стабильные60 FPS пока не доказаны.

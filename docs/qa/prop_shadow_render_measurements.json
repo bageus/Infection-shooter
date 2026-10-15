@@ -1,0 +1,27 @@
+{
+  "before": {
+    "adapter": "llvmpipe (LLVM 20.1.2, 256 bits)",
+    "baseline": true,
+    "output": "/tmp/prop-review/before",
+    "render_frames": 239,
+    "renderer": "gl_compatibility",
+    "wall_mean_ms": 50.786280334728,
+    "wall_p95_ms": 52.766
+  },
+  "after": {
+    "adapter": "llvmpipe (LLVM 20.1.2, 256 bits)",
+    "baseline": false,
+    "output": "/tmp/prop-review/after",
+    "render_frames": 239,
+    "renderer": "gl_compatibility",
+    "wall_mean_ms": 50.2021966527197,
+    "wall_p95_ms": 51.553
+  },
+  "commit": "2b161babf4a4f10f74836b26589505897122080d",
+  "workflow_run": 38722217794,
+  "artifact_id": 11966887628,
+  "artifact_digest": "sha256:db78aeac284bcda9c27e3b5dac604cd29440ce3b3890d55c82df6ba77bddcd79",
+  "warmup_frames": 30,
+  "driver_warning": "Could not set V-Sync mode, as changing V-Sync mode is not supported by the graphics driver.",
+  "interpretation": "Single software-render comparison with frame pacing; not evidence of full-map GPU/FPS improvement."
+}
