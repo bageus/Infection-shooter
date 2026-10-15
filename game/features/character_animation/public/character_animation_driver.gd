@@ -67,6 +67,12 @@ const FLINCH_SECONDS := 0.16
 @export var run_reference_speed := 0.0
 ## Scales locomotion cycle playback on top of the speed-matched rate (1.2 = 20 % faster).
 @export var locomotion_speed_multiplier := 1.0
+## Player leg cycles only; upper-body playback and dodge duration remain authored.
+@export var leg_playback_multiplier := 1.0:
+	set(value):
+		leg_playback_multiplier = clampf(value, 0.5, 2.0) if is_finite(value) else 1.0
+		if legs != null:
+			legs.set("playback_multiplier", leg_playback_multiplier)
 ## Visual pivot animated procedurally when the model has no AnimationPlayer.
 @export var procedural_target_path: NodePath = NodePath("Body/Visual")
 @export var procedural_bob_height := 0.06
@@ -522,6 +528,7 @@ func _attach_legs(model: Node) -> void:
 	legs.name = "LegClips"
 	legs.character = character
 	legs.clips = leg_clips
+	legs.set("playback_multiplier", leg_playback_multiplier)
 	legs.connect("stepped", func(side: int, speed: float) -> void: footstep.emit(side, speed))
 	(skeletons[0] as Node).add_child(legs)
 

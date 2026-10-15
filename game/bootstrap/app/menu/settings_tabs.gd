@@ -109,7 +109,9 @@ func _general() -> void:
 	dodge.selected = dialog.view.preferences.values.dodge_animation
 	dodge.item_selected.connect(func(index: int) -> void: dialog.call("_change", "dodge_animation", index))
 	dialog.call("_row", "dodgeAnimation", dodge)
-	notices.set_notice(0, dialog.view.text("testMutagenHint"))
+	dialog.call("_slider", "walkSpeed", "walk_speed_multiplier", 0.5, 1.5, 0.05, "%.2f×")
+	dialog.call("_slider", "walkAnimationSpeed", "walk_animation_multiplier", 0.5, 2.0, 0.05, "%.2f×")
+	notices.set_notice(0, dialog.view.text("testMutagenHint") + "\n\n" + dialog.view.text("walkTuningHint"))
 
 
 func _video() -> void:

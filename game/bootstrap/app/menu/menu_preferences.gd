@@ -8,6 +8,7 @@ var bindings := BINDINGS.new()
 
 const FILE := "user://interface_settings.cfg"
 const DEFAULTS := {"language": "ru", "brightness": 1.0, "text_scale": 1.0,
+	"walk_speed_multiplier": 1.0, "walk_animation_multiplier": 1.0,
 	"volume": 0.4, "effects_volume": 1.0, "music_volume": 1.0, "menu_music": true, "menu_music_volume": 1.0, "sound": true, "occlusion_mode": 0, "test_mutagen": false, "infinite_antidotes": false, "lighting": true, "electronic_particles": true, "skill_effects": 0, "dodge_animation": 0,
 	"sunlight": true, "shadows": true, "shadow_quality": 2, "mesh_lod": true, "keep_corpses": true}
 var values: Dictionary = DEFAULTS.duplicate()
@@ -27,6 +28,8 @@ func load_settings() -> void:
 	values.occlusion_mode = clampi(values.occlusion_mode, 0, 1)
 	values.skill_effects = clampi(values.skill_effects, 0, 1)
 	values.dodge_animation = clampi(values.dodge_animation, 0, 1)
+	values.walk_speed_multiplier = clampf(values.walk_speed_multiplier, 0.5, 1.5) if is_finite(values.walk_speed_multiplier) else 1.0
+	values.walk_animation_multiplier = clampf(values.walk_animation_multiplier, 0.5, 2.0) if is_finite(values.walk_animation_multiplier) else 1.0
 	values.shadow_quality = clampi(values.shadow_quality, 0, SHADOWS.level_count() - 1)
 	values.volume = clampf(values.volume, 0.0, 1.0)
 	values.effects_volume = clampf(values.effects_volume, 0.0, 1.0)
@@ -84,6 +87,8 @@ func apply_to_game(tree: SceneTree) -> void:
 		scene.call("set_procedural_skill_effects", int(values.skill_effects) == 1)
 	if scene != null and scene.has_method("set_dodge_animation_style"):
 		scene.call("set_dodge_animation_style", int(values.dodge_animation))
+	if scene != null and scene.has_method("set_walk_tuning"):
+		scene.call("set_walk_tuning", float(values.walk_speed_multiplier), float(values.walk_animation_multiplier))
 	if scene != null and scene.has_method("set_electronic_particles_enabled"):
 		scene.call("set_electronic_particles_enabled", bool(values.electronic_particles))
 	var lighting := scene.get_node_or_null("PlanningLighting") if scene != null else null

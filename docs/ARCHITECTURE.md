@@ -4,6 +4,11 @@ ADR-0049: bootstrap.app хранит optional interface_v1.sunlight (default tru
 Существующий GlobalOverheadLight видим при lighting && sunlight. Локальные
 лампы, Environment и их бюджеты прежние; новых owners, API или зависимостей нет.
 
+ADR-0050: bootstrap хранит коэффициенты ходьбы/анимации interface_v1, передаёт
+их публичному player.set_walk_tuning. Player владеет множителем move_speed;
+character_animation — отдельным leg_playback_multiplier и фазой ног. Новых
+зависимостей/owners нет; спринт/уклонение и верх тела сохраняют прежние clocks.
+
 ## Target
 
 This template targets **Godot 4.x with GDScript**. It uses a modular monolith so a large game remains understandable without introducing unnecessary frameworks.

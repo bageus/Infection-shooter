@@ -37,6 +37,8 @@ func _run() -> void:
 	dialog.call("_language_changed", 1)
 	dialog.call("_scale_changed", 2)
 	dialog.call("_change", "sunlight", false)
+	dialog.call("_change", "walk_speed_multiplier", 1.25)
+	dialog.call("_change", "walk_animation_multiplier", 1.5)
 	await process_frame
 	_check(menu.call("text", "new") == "New operation", "English menu applies immediately")
 	var saved = PREFS.new()
@@ -57,6 +59,7 @@ func _run() -> void:
 	var app: Node = current_scene
 	_check(app.scene_file_path == "res://game/bootstrap/app/main.tscn", "deployment loads combat scene")
 	_check(not app.get_node("GlobalOverheadLight").visible and app.get("planning_lighting").get("local_lights_enabled"), "Deployment applies saved sunlight-off while keeping game lamps enabled")
+	_check_walk_preferences(app, "deployment")
 	_test_gameplay_font(app)
 	_test_settings_reach_game(app)
 	await _test_pause_and_planner(app)
@@ -148,6 +151,7 @@ func _test_results_and_return(app: Node) -> void:
 	app = current_scene
 	_check(not paused and not app.get("_ended"), "restart restores active combat")
 	_check(not app.get_node("GlobalOverheadLight").visible and app.get("planning_lighting").get("local_lights_enabled"), "Restart preserves sunlight-off independently of game lamps")
+	_check_walk_preferences(app, "restart")
 	app.call("_open_pause_menu")
 	var pause: Control = app.get("pause_menu")
 	pause.call("activate", "main")
@@ -179,6 +183,19 @@ func _test_settings_reach_game(app: Node) -> void:
 	sunlight_prefs.values.sunlight = false
 	_check(sunlight_prefs.save_settings() == OK, "Sunlight-off is saved before the real restart")
 	sunlight_prefs.apply_to_game(app.get_tree())
+	var walk_prefs := PREFS.new()
+	walk_prefs.load_settings()
+	walk_prefs.values.walk_speed_multiplier = 1.25
+	walk_prefs.values.walk_animation_multiplier = 1.5
+	_check(walk_prefs.save_settings() == OK, "Walk tuning is saved before a real restart")
+	walk_prefs.apply_to_game(app.get_tree())
+
+
+func _check_walk_preferences(app: Node, context: String) -> void:
+	var player: Node = app.get("player")
+	var driver := player.get_node("AnimationDriver")
+	_check(player.get("_walk_speed_multiplier") == 1.25, "Saved walking speed reaches actual player: " + context)
+	_check(driver.get("leg_playback_multiplier") == 1.5 and driver.get("legs").get("playback_multiplier") == 1.5, "Saved animation pace reaches actual leg clock: " + context)
 
 
 func _restore_settings() -> void:

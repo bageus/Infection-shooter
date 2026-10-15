@@ -30,7 +30,7 @@ func _run() -> void:
 	_check(tabs.get_tab_title(0) == "Основные" and tabs.get_tab_title(3) == "Аудио", "Tabs have translated names")
 	_check(tabs.get_child(0).find_child("Language", true, false) != null, "Language belongs to General")
 	_check(tabs.get_child(2).find_child("Occlusion", true, false) != null, "Occlusion belongs to Video")
-	_dodge_checks(tabs)
+	_general_checks(tabs)
 	var lighting := tabs.get_child(2).find_child("Lighting", true, false) as CheckButton
 	_check(lighting != null and lighting.button_pressed, "Lighting belongs to Video and defaults on")
 	lighting.set_pressed(false)
@@ -85,7 +85,7 @@ func _run() -> void:
 	_check(dialog.find_children("*", "PopupPanel", true, false).size() == 1, "Language rebuild frees the previous notice popup")
 	_check(dialog.settings.tabs.current_tab == 1 and dialog.settings.tabs.get_tab_title(1) == "Controls", "Language change preserves active tab")
 	dialog.call("_defaults")
-	_check(menu.preferences.bindings.values.move_up.code == KEY_W and menu.preferences.values.sunlight, "Reset restores authored controls and sunlight")
+	_check(menu.preferences.bindings.values.move_up.code == KEY_W and menu.preferences.values.sunlight and menu.preferences.values.walk_speed_multiplier == 1.0 and menu.preferences.values.walk_animation_multiplier == 1.0, "Reset restores controls, sunlight and both walk multipliers")
 	menu.close_dialog()
 	menu.activate("about")
 	await process_frame
@@ -184,6 +184,36 @@ func _shadow_checks(tabs: TabContainer, dialog: Control) -> void:
 	current_scene = previous_scene
 	stage.queue_free()
 	quality.value = 2.0
+
+
+func _general_checks(tabs: TabContainer) -> void:
+	_dodge_checks(tabs)
+	_walk_checks(tabs)
+
+
+func _walk_checks(tabs: TabContainer) -> void:
+	for key in ["walk_speed_multiplier", "walk_animation_multiplier"]:
+		var slider := tabs.get_child(0).find_child(key.to_pascal_case(), true, false) as HSlider
+		_check(slider != null, "Walk tuning slider belongs to General: " + key)
+		if slider == null:
+			continue
+		var label := tabs.get_child(0).find_child(slider.name + "Value", true, false) as Label
+		_check(slider.value == 1.0 and slider.min_value == 0.5 and slider.step == 0.05, "Walk tuning defaults and steps are usable")
+		_check(slider.max_value == (1.5 if key == "walk_speed_multiplier" else 2.0), "Walk tuning maximum matches the runtime range")
+		_check(label != null and label.text == "1.00×", "Multiplier value is displayed beside the slider")
+		var before := PREFS.new()
+		before.load_settings()
+		slider.drag_started.emit()
+		slider.value = 1.25
+		var during := PREFS.new()
+		during.load_settings()
+		_check(during.values[key] == before.values[key], "Dragging walk tuning avoids settings writes")
+		_check(label.text == "1.25×", "Displayed multiplier follows live changes")
+		slider.drag_ended.emit(true)
+		var saved := PREFS.new()
+		saved.load_settings()
+		_check(saved.values[key] == 1.25, "Walk tuning survives config reload")
+		slider.value = 1.0
 
 
 func _dodge_checks(tabs: TabContainer) -> void:

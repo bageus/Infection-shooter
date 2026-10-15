@@ -131,7 +131,7 @@ func consume_binding_input(event: InputEvent) -> bool:
 	return settings != null and settings.controls.consume(event)
 
 
-func _slider(label_key: String, setting_key: String, minimum: float, maximum: float, step_size: float) -> void:
+func _slider(label_key: String, setting_key: String, minimum: float, maximum: float, step_size: float, value_format: String = "") -> void:
 	var slider := HSlider.new()
 	slider.name = setting_key.to_pascal_case()
 	slider.custom_minimum_size.x = 160
@@ -151,7 +151,17 @@ func _slider(label_key: String, setting_key: String, minimum: float, maximum: fl
 		view.preferences.apply_to_game(view.get_tree())
 		if not dragging[0]:
 			_commit())
-	_row(label_key, slider)
+	if value_format.is_empty():
+		_row(label_key, slider)
+	else:
+		var box := HBoxContainer.new()
+		box.add_child(slider)
+		var value_label := STYLE.label(value_format % slider.value, 13)
+		value_label.name = slider.name + "Value"
+		value_label.custom_minimum_size.x = 62
+		box.add_child(value_label)
+		slider.value_changed.connect(func(value: float) -> void: value_label.text = value_format % value)
+		_row(label_key, box)
 
 
 func _row(key: String, widget: Control) -> void:
