@@ -6,7 +6,7 @@ current_milestone: P1_LOGIC
 active_task_id: T004
 last_completed_task_id: DISC-001
 build_status: T002_HEADLESS_VALIDATED_VISUAL_PENDING
-updated: 2026-10-15
+updated: 2026-10-16
 15.10.2026, аудит 1/4 (подтверждено владельцем): непрозрачные стены полностью блокируют выстрел и клич, проход пропускает; радиусы 18/22/30/32/28/50/40/35 м (pistol/uzi/shotgun/AK/M4/sniper/minigun/launcher), клич16 м; максимум4 шума/с на оружие. Владельцы combat — импульс оружия, infected — слышимость/состояние. hearing_profile — immutable Resource, notice_player перенесён из root в perception, root ≤600 строк; новых зависимостей и форматов сохранений нет. Следом задачи2,3,4 отдельными PR; перекат отложен, мутации B одобрены. Проверки задачи1: Godot4.7.2 editor import exit0 без ошибок; enemy_perception, weapon_noise (24→4), idle_lod, sound_hook, new_weapon — 0 failures; source_size, architecture, project, scene_resources PASS. Root600 строк, исключений нет. Дополнение CI: исправлена зависимость crowd separation от порядка ObjectID: обе позиции берутся из одного прошлого кадра, совпавшая пара получает противоположные направления. Новый moving-pair regression падает на старом коде и проходит на новом. Также ограничена длина batched LOD wander шага оставшимся расстоянием до цели: исправлено случайное перескакивание радиуса в perception suite; добавлен deterministic regression без ослабления порогов. Полный локальный набор: 108/110 PASS до фикса; crowd после фикса PASS. Единственное оставшееся локальное падение — listing user://desk_setups: DirAccess возвращает файлы корня проекта вместо каталога, подтверждено изолированным probe; production template code не менялся. Новых API/DTO/зависимостей нет. Следующее действие: повторный CI PR задачи1.
 
 
@@ -544,22 +544,9 @@ Perimeter and interior wall collision is scene-authored. The latest correction t
 15.10.2026 (A01 — публикация): создан PR #204 https://github.com/bageus/Infection-shooter/pull/204, head807c72a7. Проверенное локальное и опубликованное дерево совпадают (f17faae7). CI запущен: Architecture validation in_progress, Mission runtime regressions queued на момент проверки. Merge не выполнен. Локальные9 suites и gates PASS, аудит доступен в docs/audits/infection_shooter_audit_2026-10-15.md. Следующее точное действие — проверить итоговый CI PR204 и вручную осмотреть сохранённые позы в игровом рендере; затем продолжить A02 отдельным запросом. T004 IN_PROGRESS.
 
 
-## 16.10.2026 — отдельное отключение солнца (прямой запрос владельца)
+15.10.2026 (аудит A02, прямой запрос владельца): следующий инкремент T004 — устранить перенос пули через непроверенный остаток физического шага после пяти пробитий. Режим IMPLEMENTATION, фаза1/P1_LOGIC, READY gates PASS. База — PR204/headcefeade8; отдельный stacked PR должен содержать только A02. Владелец полёта/энергии/урона features.combat. Ожидаемые файлы: prototype_bullet.gd, новый regression suite, mission_runtime CI, docs/qa/projectile_step_budget.md и статус аудита. Решение: сохранять конец/дистанцию незавершённого шага и исключённые RID, продолжать максимум пять ray queries за тик; не добавлять новую дистанцию до завершения остатка. Убрать непроверенный отступ0.04 после пробития: исключение RID позволяет начать точно в проверенной точке. Public API/сцены/ресурсы/DTO/владение/зависимости прежние; архитектурного изменения нет. Риски: повторный урон/энергия, неверный range/delta при продолжении, muzzle-origin и близкая стена. Следующее точное действие — зафиксировать воспроизведение A02 и реализовать ограниченное продолжение шага.
 
-- Выполнено: Video → «Солнце» / Sunlight, optional interface_v1.sunlight=true.
-  Видимость GlobalOverheadLight = lighting && sunlight. Выключение полностью
-  убирает вклад источника и его теней, не выключая игровые лампы при lighting=true.
-  Фоновая подсветка Environment и authored-параметры источника сохранены.
-- Совместимость: старые конфиги/default/reset оставляют солнце включённым;
-  неверный тип игнорируется. Настройка действует сразу, при запуске и рестарте.
-- Владельцы и зависимости прежние: bootstrap.app. ADR-0049; новых публичных API,
-  layout/save DTO, источников, текстур, кадровых обработчиков и исключений нет.
-- Проверено локально Godot 4.7.2: editor import exit 0 без SCRIPT ERROR/ERROR;
-  settings_tabs, global_lighting, lighting и menu integration — 0 failures.
-  Menu integration проверяет настоящий загрузчик и повторный запуск с sunlight=false.
-  validate_project, validate_scene_resources и git diff --check — PASS.
-- Ограничения: native/Web визуальная проверка и FPS не измерялись. Main-based
-  lighting/menu suites сообщают 60 ObjectDB instances при выходе; та же величина
-  в неизменённой lighting suite, ошибок выполнения нет.
-- Следующее действие: проверить CI PR ветки codex/independent-sun-toggle;
-  владельцу — Настройки → Видео: «Освещение» вкл., «Солнце» выкл.
+
+15.10.2026 (A02 — реализация и проверка): prototype_bullet сохраняет непроверенный остаток шага, исходные finish/distance, исключённые RID и энергию. После пяти попаданий остаётся в последней проверенной точке и продолжает в следующем кадре; дальность учитывается один раз. Убран пропускавший близкие стены отступ0.04. Новая регрессия: прежний production46 ошибок, исправленный0; 5/6/10 панелей, три скорости/шага, стена2см, range1.25, смена delta, энергия/урон, muzzle-origin/inside и shooter exclusion. Все8 целевых suites exit0 без ERROR; project/spec/workflow/scene393/resource paths/editor/diff PASS. Source-size120 предупреждений (новое _physics_process52 строки reviewed как единый поток; файл199 строк); hard violations нет. Известное ObjectDB60 при завершении planner fixture остаётся A05. QA docs/qa/projectile_step_budget.md, статус аудита и ADR0002 обновлены. Веткаcodex/projectile-step-budget основана на PR204/cefeade8, целеваяcodex/retained-ragdoll-budget; PR должен содержать только A02. Public API/DTO/сцены/ресурсы/зависимости и владельцы прежние, исключений нет. Плотная цепочка требует дополнительных физических кадров; GPU/Windows/Web не проверялись. Следующее точное действие — проверить CI опубликованной ветки и переключить base на main после слияния PR204; merge не поручен. T004 IN_PROGRESS.
+
+16.10.2026 (CI PR206, прямой запрос владельца): подтверждена внешняя причина — HTTP503 Godot objectstorage. PR207 падал на install до gameplay; PR206 прошёл native/runtime suites, но Web template HEAD получил503. Общий CI downloader теперь использует официальный GitHub release4.7.2 с проверкой pinned SHA256, ограниченными retries и fallback на прежнее официальное зеркало; все8 Linux install paths в mission_runtime/impact_geometry обновлены. Web RangedArchive делает bounded retries/fallback на HEAD/GET, проверяет точный Content-Range/длину и отвергает full-response до чтения TPZ. Шесть детерминированных сетевых tests PASS, shell fallback/outage/corrupt/fail-closed PASS; реальный Linux ZIP SHA совпал с официальным release. Условия/assertions игровых тестов прежние, gameplay/API/DTO/зависимости/владельцы не менялись. Подробности docs/qa/ci_godot_download.md. Следующее точное действие — проверить CI обоих новых heads; merge не поручен. T004 IN_PROGRESS.

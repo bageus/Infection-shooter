@@ -4,19 +4,26 @@ No game assets, SDK or third-party Python dependency is needed. Fetch only the
 single-thread Web release template from Godot's published template archive.
 """
 import io
+import http.client
 import pathlib
 import shutil
 import sys
+import time
+import urllib.error
 import urllib.request
 import zipfile
 
-URL = "https://godot-releases.nbg1.your-objectstorage.com/4.7.2-stable/Godot_v4.7.2-stable_export_templates.tpz"
+ASSET = "Godot_v4.7.2-stable_export_templates.tpz"
+URLS = (
+    f"https://github.com/godotengine/godot-builds/releases/download/4.7.2-stable/{ASSET}",
+    f"https://godot-releases.nbg1.your-objectstorage.com/4.7.2-stable/{ASSET}",
+)
 
 
 class RangedArchive(io.RawIOBase):
     def __init__(self):
-        with urllib.request.urlopen(urllib.request.Request(URL, method="HEAD"), timeout=60) as response:
-            self.size = int(response.headers["Content-Length"])
+        headers, _ = self._request("HEAD")
+        self.size = int(headers["Content-Length"])
         self.position = 0
 
     def seekable(self):
@@ -32,16 +39,43 @@ class RangedArchive(io.RawIOBase):
     def read(self, count=-1):
         if count < 0:
             count = self.size - self.position
-        if count == 0:
+        count = min(count, self.size - self.position)
+        if count <= 0:
             return b""
         end = min(self.size, self.position + count) - 1
-        request = urllib.request.Request(URL, headers={"Range": f"bytes={self.position}-{end}"})
-        with urllib.request.urlopen(request, timeout=120) as response:
-            if response.status != 206:
-                raise RuntimeError("Template host must honor byte ranges")
-            data = response.read()
+        _, data = self._request("GET", self.position, end)
         self.position += len(data)
         return data
+
+
+    def _request(self, method, start=None, end=None):
+        last_error = None
+        for url in URLS:
+            for attempt in range(3):
+                headers = {} if method == "HEAD" else {"Range": f"bytes={start}-{end}"}
+                try:
+                    request = urllib.request.Request(url, method=method, headers=headers)
+                    with urllib.request.urlopen(request, timeout=30) as response:
+                        if method == "HEAD":
+                            if int(response.headers.get("Content-Length", "0")) <= 0:
+                                raise ValueError("Template archive size is missing")
+                            return response.headers, b""
+                        # Reject a host ignoring Range before reading a full TPZ.
+                        wanted = f"bytes {start}-{end}/{self.size}"
+                        if response.status != 206 or response.headers.get("Content-Range") != wanted:
+                            raise ValueError("Template host did not honor the exact byte range")
+                        data = response.read()
+                        if len(data) != end - start + 1:
+                            raise OSError("Incomplete template range response")
+                        return response.headers, data
+                except (urllib.error.URLError, OSError, ValueError, http.client.HTTPException) as error:
+                    last_error = error
+                    print(f"Godot template download attempt {attempt + 1} failed: {error}", file=sys.stderr)
+                    if isinstance(error, ValueError) or (isinstance(error, urllib.error.HTTPError) and error.code not in (408, 429, 500, 502, 503, 504)):
+                        break
+                    if attempt < 2:
+                        time.sleep(attempt + 1)
+        raise RuntimeError("Both official Godot template sources failed") from last_error
 
 
 def build(destination):

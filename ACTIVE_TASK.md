@@ -4,7 +4,7 @@ task_id: T004
 status: IN_PROGRESS
 phase: 1
 owner: AI
-updated: 2026-10-15
+updated: 2026-10-16
 ---
 
 15.10.2026 (жёсткий фриз на первом выстреле по огнетушителю, запрос владельца): причина не в частицах, а в физике. Настенный предмет висел замороженным как статическое тело, а при выстреле Jolt переводил его в динамическое с перестановкой в широкой фазе: около 80 мс подряд на реальной карте. Теперь настенные предметы замораживаются в режиме KINEMATIC (environment_prop.gd), переход в динамику бесплатный (первый кадр после выстрела 44 → 15 мс, tools/measure_map_first_hit.gd на полной миссии). Это же ускоряет срыв телевизоров, часов, зеркал и картин со стены. Тест run_hit_effect_tests дополнен. Public API не менялся, исключений нет.
@@ -570,22 +570,9 @@ T002 remains the only active task. After CI, visually verify seams and collision
 15.10.2026 (A01 — публикация): создан PR #204 https://github.com/bageus/Infection-shooter/pull/204, head807c72a7. Проверенное локальное и опубликованное дерево совпадают (f17faae7). CI запущен: Architecture validation in_progress, Mission runtime regressions queued на момент проверки. Merge не выполнен. Локальные9 suites и gates PASS, аудит доступен в docs/audits/infection_shooter_audit_2026-10-15.md. Следующее точное действие — проверить итоговый CI PR204 и вручную осмотреть сохранённые позы в игровом рендере; затем продолжить A02 отдельным запросом. T004 IN_PROGRESS.
 
 
-## 16.10.2026 — отдельное отключение солнца (прямой запрос владельца)
+15.10.2026 (аудит A02, прямой запрос владельца): следующий инкремент T004 — устранить перенос пули через непроверенный остаток физического шага после пяти пробитий. Режим IMPLEMENTATION, фаза1/P1_LOGIC, READY gates PASS. База — PR204/headcefeade8; отдельный stacked PR должен содержать только A02. Владелец полёта/энергии/урона features.combat. Ожидаемые файлы: prototype_bullet.gd, новый regression suite, mission_runtime CI, docs/qa/projectile_step_budget.md и статус аудита. Решение: сохранять конец/дистанцию незавершённого шага и исключённые RID, продолжать максимум пять ray queries за тик; не добавлять новую дистанцию до завершения остатка. Убрать непроверенный отступ0.04 после пробития: исключение RID позволяет начать точно в проверенной точке. Public API/сцены/ресурсы/DTO/владение/зависимости прежние; архитектурного изменения нет. Риски: повторный урон/энергия, неверный range/delta при продолжении, muzzle-origin и близкая стена. Следующее точное действие — зафиксировать воспроизведение A02 и реализовать ограниченное продолжение шага.
 
-- Выполнено: Video → «Солнце» / Sunlight, optional interface_v1.sunlight=true.
-  Видимость GlobalOverheadLight = lighting && sunlight. Выключение полностью
-  убирает вклад источника и его теней, не выключая игровые лампы при lighting=true.
-  Фоновая подсветка Environment и authored-параметры источника сохранены.
-- Совместимость: старые конфиги/default/reset оставляют солнце включённым;
-  неверный тип игнорируется. Настройка действует сразу, при запуске и рестарте.
-- Владельцы и зависимости прежние: bootstrap.app. ADR-0049; новых публичных API,
-  layout/save DTO, источников, текстур, кадровых обработчиков и исключений нет.
-- Проверено локально Godot 4.7.2: editor import exit 0 без SCRIPT ERROR/ERROR;
-  settings_tabs, global_lighting, lighting и menu integration — 0 failures.
-  Menu integration проверяет настоящий загрузчик и повторный запуск с sunlight=false.
-  validate_project, validate_scene_resources и git diff --check — PASS.
-- Ограничения: native/Web визуальная проверка и FPS не измерялись. Main-based
-  lighting/menu suites сообщают 60 ObjectDB instances при выходе; та же величина
-  в неизменённой lighting suite, ошибок выполнения нет.
-- Следующее действие: проверить CI PR ветки codex/independent-sun-toggle;
-  владельцу — Настройки → Видео: «Освещение» вкл., «Солнце» выкл.
+
+15.10.2026 (A02 — реализация и проверка): prototype_bullet сохраняет непроверенный остаток шага, исходные finish/distance, исключённые RID и энергию. После пяти попаданий остаётся в последней проверенной точке и продолжает в следующем кадре; дальность учитывается один раз. Убран пропускавший близкие стены отступ0.04. Новая регрессия: прежний production46 ошибок, исправленный0; 5/6/10 панелей, три скорости/шага, стена2см, range1.25, смена delta, энергия/урон, muzzle-origin/inside и shooter exclusion. Все8 целевых suites exit0 без ERROR; project/spec/workflow/scene393/resource paths/editor/diff PASS. Source-size120 предупреждений (новое _physics_process52 строки reviewed как единый поток; файл199 строк); hard violations нет. Известное ObjectDB60 при завершении planner fixture остаётся A05. QA docs/qa/projectile_step_budget.md, статус аудита и ADR0002 обновлены. Веткаcodex/projectile-step-budget основана на PR204/cefeade8, целеваяcodex/retained-ragdoll-budget; PR должен содержать только A02. Public API/DTO/сцены/ресурсы/зависимости и владельцы прежние, исключений нет. Плотная цепочка требует дополнительных физических кадров; GPU/Windows/Web не проверялись. Следующее точное действие — проверить CI опубликованной ветки и переключить base на main после слияния PR204; merge не поручен. T004 IN_PROGRESS.
+
+16.10.2026 (CI PR206, прямой запрос владельца): подтверждена внешняя причина — HTTP503 Godot objectstorage. PR207 падал на install до gameplay; PR206 прошёл native/runtime suites, но Web template HEAD получил503. Общий CI downloader теперь использует официальный GitHub release4.7.2 с проверкой pinned SHA256, ограниченными retries и fallback на прежнее официальное зеркало; все8 Linux install paths в mission_runtime/impact_geometry обновлены. Web RangedArchive делает bounded retries/fallback на HEAD/GET, проверяет точный Content-Range/длину и отвергает full-response до чтения TPZ. Шесть детерминированных сетевых tests PASS, shell fallback/outage/corrupt/fail-closed PASS; реальный Linux ZIP SHA совпал с официальным release. Условия/assertions игровых тестов прежние, gameplay/API/DTO/зависимости/владельцы не менялись. Подробности docs/qa/ci_godot_download.md. Следующее точное действие — проверить CI обоих новых heads; merge не поручен. T004 IN_PROGRESS.

@@ -6,6 +6,8 @@ const IMPACT_SOUNDS := {
 	"glass": &"hit_glass", "flesh": &"flesh_hit", "concrete": &"hit_wall", "solid": &"hit_wall",
 }
 
+const MAX_HITS_PER_TICK := 5
+
 const PROJECTILE_VISUAL := preload("res://game/features/combat/projectile_visual.gd")
 const BALANCE = preload("res://game/features/combat/public/projectile_balance.gd")
 
@@ -22,6 +24,11 @@ var _collision_origin := Vector3.ZERO
 var _first_step := true
 var _initial_energy := 24.0
 var _remaining_energy := 24.0
+# A crowded segment can span several ticks; never skip its untested remainder.
+var _pending_step := false
+var _step_finish := Vector3.ZERO
+var _step_distance := 0.0
+var _step_excluded: Array[RID] = []
 
 var effects_root: Node3D
 var impact_pool: Node
@@ -61,24 +68,25 @@ func _physics_process(delta: float) -> void:
 		queue_free()
 		return
 
-	var step := minf(_speed * delta, _range - _travelled)
-	var finish := global_position + _direction * step
-	var excluded: Array[RID] = []
-	if _shooter != null:
-		excluded.append(_shooter.get_rid())
+	if not _pending_step:
+		_step_distance = minf(_speed * delta, _range - _travelled)
+		_step_finish = global_position + _direction * _step_distance
+		_step_excluded.clear()
+		if is_instance_valid(_shooter):
+			_step_excluded.append(_shooter.get_rid())
 
 	var from_barrel := _first_step
 	var remaining_start := _collision_origin if _first_step else global_position
 	_first_step = false
-	var remaining_finish := finish
-	for pass_index in 5:
-		var query := PhysicsRayQueryParameters3D.create(remaining_start, remaining_finish, 7)
-		query.exclude = excluded
+	for pass_index in MAX_HITS_PER_TICK:
+		var query := PhysicsRayQueryParameters3D.create(remaining_start, _step_finish, 7)
+		query.exclude = _step_excluded
 		query.hit_from_inside = from_barrel and pass_index == 0
 		var hit := get_world_3d().direct_space_state.intersect_ray(query)
 		if hit.is_empty():
-			global_position = finish
-			_travelled += step
+			global_position = _step_finish
+			_travelled += _step_distance
+			_pending_step = false
 			return
 
 		var hit_position: Vector3 = hit.get("position")
@@ -98,11 +106,13 @@ func _physics_process(delta: float) -> void:
 			return
 
 		if collider is CollisionObject3D:
-			excluded.append((collider as CollisionObject3D).get_rid())
-		remaining_start = hit_position + _direction * 0.04
+			_step_excluded.append((collider as CollisionObject3D).get_rid())
+		remaining_start = hit_position
 
-	global_position = finish
-	_travelled += step
+	# Only the checked prefix is safe. Keep its exclusions and original endpoint
+	# until the remaining segment is resolved, even if the next delta differs.
+	global_position = remaining_start
+	_pending_step = true
 
 
 func _handle_hit(collider: Object, hit_position: Vector3, normal: Vector3, shape_index: int = -1) -> bool:
