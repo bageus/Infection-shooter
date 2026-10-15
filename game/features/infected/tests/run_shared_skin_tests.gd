@@ -30,6 +30,7 @@ func _run() -> void:
 	for scene: PackedScene in SCENES:
 		await _bodies(stage, scene)
 	_page_boundary()
+	_per_body_fallback()
 	stage.queue_free()
 	# Drain renderer readbacks and deferred resource destruction before shutdown.
 	for frame in 3:
@@ -65,11 +66,11 @@ func _bodies(stage: Node3D, scene: PackedScene) -> void:
 	var vertex: Vector3 = ea.data.surfaces[0].vertices[0]
 	parts_a.add_rest_wound(vertex, 0.25)
 	_expect(not eb.has("masks"), "Wounding A does not create CPU masks on B")
-	_expect(float(eb.instance.get_instance_shader_parameter(&"blood_layer")) == -1.0, "B keeps its clean instance selector")
+	_expect(eb.lease.selector(eb.instance) == -1.0, "B keeps its clean instance selector")
 	_expect(ea.materials == eb.materials, "Wounding keeps the same shared materials")
 	a.status_fx.poisoned(1.0)
 	a.status_fx._process(0.8)
-	_expect(float(ea.instance.get_instance_shader_parameter(&"blood_layer")) == ea.lease.layer, "Poison fade does not overwrite the wound selector")
+	_expect(ea.lease.selector(ea.instance) == ea.lease.layer, "Poison fade does not overwrite the wound selector")
 	_expect(eb.instance.material_overlay == null, "Poison remains local to A")
 	a.status_fx.clear()
 	var a_bytes: PackedByteArray = ea.masks[0].image.get_data()
@@ -125,6 +126,26 @@ func _page_boundary() -> void:
 	_expect(float(mesh.get_instance_shader_parameter(&"blood_layer")) == -1.0, "Reused clean layer never shows old blood")
 	mesh.free()
 	leases.clear()
+
+# Web fallback (no instance uniforms): private one-layer pages, selector in material.
+func _per_body_fallback() -> void:
+	var pool := SKINS.new([StandardMaterial3D.new(), StandardMaterial3D.new()], true)
+	var a: RefCounted = pool.acquire()
+	var b: RefCounted = pool.acquire()
+	_expect(a.page != b.page and a.materials[0] != b.materials[0], "Web bodies own separate materials")
+	_expect(a.materials[0].shader == b.materials[0].shader and not a.materials[0].shader.code.contains("instance uniform"), "Web shader has no instance uniforms")
+	var mesh := MeshInstance3D.new()
+	a.bind(mesh)
+	b.bind(mesh)
+	_expect(a.selector(mesh) == -1.0 and b.selector(mesh) == -1.0, "Web clean selector")
+	var red := BAKE.create_mask()
+	red.fill(Color(1, 0, 0))
+	a.upload([red, BAKE.create_mask()])
+	a.bind(mesh, true)
+	_expect(a.selector(mesh) == float(a.layer) and b.selector(mesh) == -1.0, "Web wound selector is per body")
+	_expect(a.page.textures[0].get_layers() == 1 and b.page.textures.is_empty(), "Web bodies own one-layer arrays")
+	_expect(mesh.get_instance_shader_parameter(&"blood_layer") == null, "Web never sets the instance uniform")
+	mesh.free()
 
 func _expect(ok: bool, message: String) -> void:
 	if not ok:
