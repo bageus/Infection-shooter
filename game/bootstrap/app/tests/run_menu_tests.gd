@@ -36,6 +36,7 @@ func _run() -> void:
 	var dialog: Control = menu.get("modal")
 	dialog.call("_language_changed", 1)
 	dialog.call("_scale_changed", 2)
+	dialog.call("_change", "sunlight", false)
 	await process_frame
 	_check(menu.call("text", "new") == "New operation", "English menu applies immediately")
 	var saved = PREFS.new()
@@ -55,6 +56,7 @@ func _run() -> void:
 	_check(current_scene != frontend, "deployment completes within the loading timeout")
 	var app: Node = current_scene
 	_check(app.scene_file_path == "res://game/bootstrap/app/main.tscn", "deployment loads combat scene")
+	_check(not app.get_node("GlobalOverheadLight").visible and app.get("planning_lighting").get("local_lights_enabled"), "Deployment applies saved sunlight-off while keeping game lamps enabled")
 	_test_gameplay_font(app)
 	_test_settings_reach_game(app)
 	await _test_pause_and_planner(app)
@@ -145,6 +147,7 @@ func _test_results_and_return(app: Node) -> void:
 	_check(current_scene != null and current_scene.get_instance_id() != app_id, "restart completes within the loading timeout")
 	app = current_scene
 	_check(not paused and not app.get("_ended"), "restart restores active combat")
+	_check(not app.get_node("GlobalOverheadLight").visible and app.get("planning_lighting").get("local_lights_enabled"), "Restart preserves sunlight-off independently of game lamps")
 	app.call("_open_pause_menu")
 	var pause: Control = app.get("pause_menu")
 	pause.call("activate", "main")
@@ -171,6 +174,11 @@ func _test_settings_reach_game(app: Node) -> void:
 	prefs.reset()
 	prefs.apply_to_game(app.get_tree())
 	_check(not AudioServer.is_bus_mute(master) and absf(AudioServer.get_bus_volume_db(master)) < 0.01, "default settings keep the authored mix")
+	var sunlight_prefs := PREFS.new()
+	sunlight_prefs.load_settings()
+	sunlight_prefs.values.sunlight = false
+	_check(sunlight_prefs.save_settings() == OK, "Sunlight-off is saved before the real restart")
+	sunlight_prefs.apply_to_game(app.get_tree())
 
 
 func _restore_settings() -> void:

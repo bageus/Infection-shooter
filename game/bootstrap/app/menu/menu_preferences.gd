@@ -9,7 +9,7 @@ var bindings := BINDINGS.new()
 const FILE := "user://interface_settings.cfg"
 const DEFAULTS := {"language": "ru", "brightness": 1.0, "text_scale": 1.0,
 	"volume": 0.4, "effects_volume": 1.0, "music_volume": 1.0, "menu_music": true, "menu_music_volume": 1.0, "sound": true, "occlusion_mode": 0, "test_mutagen": false, "infinite_antidotes": false, "lighting": true, "electronic_particles": true, "skill_effects": 0, "dodge_animation": 0,
-	"shadows": true, "shadow_quality": 2, "mesh_lod": true, "keep_corpses": true}
+	"sunlight": true, "shadows": true, "shadow_quality": 2, "mesh_lod": true, "keep_corpses": true}
 var values: Dictionary = DEFAULTS.duplicate()
 
 
@@ -91,7 +91,8 @@ func apply_to_game(tree: SceneTree) -> void:
 		lighting.call("set_local_lights_enabled", bool(values.lighting))
 	var overhead := scene.get_node_or_null("GlobalOverheadLight") as DirectionalLight3D if scene != null else null
 	if overhead != null:
-		overhead.visible = bool(values.lighting)
+		# Hiding the source removes its light and shadows without changing shader variants.
+		overhead.visible = bool(values.lighting) and bool(values.sunlight)
 	SHADOWS.apply(tree, bool(values.shadows), int(values.shadow_quality))
 	if tree != null:
 		# 0 turns automatic mesh LOD off; 1 is the engine default. No shader recompile.
