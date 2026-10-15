@@ -156,7 +156,8 @@ func _handle_hit(collider: Object, hit_position: Vector3, normal: Vector3, shape
 func _play_impact(collider: Object, hit_position: Vector3, shape_index: int) -> void:
 	if not is_instance_valid(effects_root) or collider.has_method("take_projectile_damage"):
 		return
-	var event: StringName = IMPACT_SOUNDS.get(_hit_material(collider, shape_index), &"hit_wall")
+	var sound_material := str(collider.call("get_impact_sound_material", shape_index)) if collider.has_method("get_impact_sound_material") else _hit_material(collider, shape_index)
+	var event: StringName = IMPACT_SOUNDS.get(sound_material, &"hit_wall")
 	SFX.play(effects_root, event, hit_position, -4.0 if _weapon_name == "SHOTGUN" else 0.0)
 
 
