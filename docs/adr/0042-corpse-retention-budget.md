@@ -64,3 +64,10 @@
 
 ## Approval
 Одобрено владельцем проекта в треде 13.10.2026 («ADR оформляй»); выбор варианта 1+2 с переключателем подтверждён 13.10.2026.
+
+
+## Implementation correction — 2026-10-15 (audit A01)
+
+The owner requested the first audit fix. Releasing a ragdoll slot while leaving its simulator enabled did not enforce ADR-0041's eight-simulator budget. The retained pose is now transferred from physical-bone transforms (including body offsets and authored scale) into Skeleton3D bone poses, and the simulator is stopped before its slot is released. The visible-body budget remains sixty. Timed sink-and-hide also releases the slot when simulation stops, rather than waiting for cloud/owner teardown. Tree exit remains an idempotent fallback. The existing registry, ownership, public contracts and dependencies are unchanged; no architecture exception is introduced.
+
+The earlier descriptions of retained sleeping physical bones and their unmeasured cost describe the original implementation. They no longer apply to retained ragdolls after this correction. Remaining skeleton/node costs and GPU performance with sixty bodies still require profiling. Validation and regression evidence: `docs/qa/ragdoll_budget.md`.

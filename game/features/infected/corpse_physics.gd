@@ -97,6 +97,25 @@ func set_enabled(enabled: bool) -> void:
 		simulator.active = false
 
 
+## Transfer the simulated pose into the skeleton before releasing its slot.
+## Stopping alone restores the pre-death animation pose. Body offsets include
+## the authored skin scale, so preserve the full transform rather than rotation.
+func freeze_pose() -> void:
+	if not is_instance_valid(simulator) or not is_instance_valid(skeleton):
+		return
+	var poses: Dictionary = {}
+	var to_skeleton := skeleton.global_transform.affine_inverse()
+	for bone: PhysicalBone3D in simulator.get_children():
+		if not bone.is_queued_for_deletion():
+			poses[bone.get_bone_id()] = to_skeleton * bone.global_transform * bone.body_offset.affine_inverse()
+	set_enabled(false)
+	# Skeleton parents precede their children; global -> local conversion must
+	# use the retained parent pose, not the old animation pose.
+	for index in skeleton.get_bone_count():
+		if poses.has(index):
+			skeleton.set_bone_global_pose(index, poses[index])
+
+
 ## Gives every bone the same start velocity; the upper body leads a little so a
 ## standing body topples instead of sliding on its feet. Call after set_enabled.
 func launch(velocity: Vector3) -> void:

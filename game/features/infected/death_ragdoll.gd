@@ -50,6 +50,7 @@ static func release_after(owner: Node, physics: RefCounted, linger: float, gone:
 	if not is_instance_valid(owner):
 		return
 	if CORPSE_BUDGET.keep:
+		physics.call("freeze_pose")
 		_released(physics.get_instance_id())
 		var evict := func() -> void:
 			if is_instance_valid(owner):
@@ -61,5 +62,6 @@ static func release_after(owner: Node, physics: RefCounted, linger: float, gone:
 	await owner.get_tree().create_timer(SINK_SECONDS).timeout
 	if is_instance_valid(owner):
 		physics.call("set_enabled", false)
+		_released(physics.get_instance_id())
 		gone.call()
 

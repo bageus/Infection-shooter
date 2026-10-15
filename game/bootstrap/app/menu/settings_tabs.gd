@@ -141,6 +141,13 @@ func _video() -> void:
 	lighting.button_pressed = dialog.view.preferences.values.lighting
 	lighting.toggled.connect(func(value: bool) -> void: dialog.call("_change", "lighting", value))
 	dialog.get("layout").add_child(lighting)
+	var sunlight := CheckButton.new()
+	sunlight.name = "Sunlight"
+	sunlight.text = dialog.view.text("sunlight")
+	sunlight.tooltip_text = dialog.view.text("sunlightHint")
+	sunlight.button_pressed = dialog.view.preferences.values.sunlight
+	sunlight.toggled.connect(func(value: bool) -> void: dialog.call("_change", "sunlight", value))
+	dialog.get("layout").add_child(sunlight)
 	var shadows := CheckButton.new()
 	shadows.name = "Shadows"
 	shadows.text = dialog.view.text("shadows")

@@ -99,13 +99,18 @@ func _copy_surface(source: BaseMaterial3D) -> ShaderMaterial:
 	return material
 
 
-func update_hole(center: Vector2, size: Vector2, radius: float, depth: float) -> void:
-	# Bound initial GPU resource/compilation work when a real map has many walls.
-	for _i in mini(SURFACES_PER_FRAME, pending.size()):
+## Installs up to `count` queued wall surfaces; the loader drains the whole queue under its overlay.
+func install_pending(count: int) -> void:
+	for _i in mini(count, pending.size()):
 		var mesh := pending.pop_front().get_ref() as MeshInstance3D
 		if mesh != null and mesh.is_inside_tree() and queued.has(mesh.get_instance_id()):
 			queued.erase(mesh.get_instance_id())
 			_install(mesh)
+
+
+func update_hole(center: Vector2, size: Vector2, radius: float, depth: float) -> void:
+	# Bound initial GPU resource/compilation work when a real map has many walls.
+	install_pending(SURFACES_PER_FRAME)
 	for id in records.keys():
 		if records[id].mesh.get_ref() == null:
 			records.erase(id)

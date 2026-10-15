@@ -38,6 +38,7 @@ func _run() -> void:
 	light_prefs.load_settings()
 	_check(not light_prefs.values.lighting, "Lighting toggle survives settings reload")
 	lighting.set_pressed(true)
+	_sunlight_checks(tabs, dialog)
 	await _shadow_checks(tabs, dialog)
 	_check(tabs.get_child(3).find_child("SoundToggle", true, false) != null, "Sound belongs to Audio")
 	_slider_checks(tabs)
@@ -84,7 +85,7 @@ func _run() -> void:
 	_check(dialog.find_children("*", "PopupPanel", true, false).size() == 1, "Language rebuild frees the previous notice popup")
 	_check(dialog.settings.tabs.current_tab == 1 and dialog.settings.tabs.get_tab_title(1) == "Controls", "Language change preserves active tab")
 	dialog.call("_defaults")
-	_check(menu.preferences.bindings.values.move_up.code == KEY_W, "Reset restores authored controls")
+	_check(menu.preferences.bindings.values.move_up.code == KEY_W and menu.preferences.values.sunlight, "Reset restores authored controls and sunlight")
 	menu.close_dialog()
 	menu.activate("about")
 	await process_frame
@@ -108,6 +109,34 @@ func _run() -> void:
 	quit(failures)
 
 const SHADOWS_OFF_DISTANCE := 0.5
+
+
+func _sunlight_checks(tabs: TabContainer, dialog: Control) -> void:
+	var sunlight := tabs.get_child(2).find_child("Sunlight", true, false) as CheckButton
+	_check(sunlight != null, "Sunlight toggle belongs to Video")
+	if sunlight == null:
+		return
+	_check(sunlight.button_pressed and sunlight.text == "Солнце" and not sunlight.tooltip_text.is_empty(), "Sunlight defaults on and has a translated explanation")
+	sunlight.set_pressed(false)
+	var saved := PREFS.new()
+	saved.load_settings()
+	_check(not saved.values.sunlight and saved.values.lighting, "Sunlight off persists independently of local lighting")
+	var config := ConfigFile.new()
+	_check(config.load(PREFS.FILE) == OK, "Settings file is readable")
+	config.erase_section_key("interface_v1", "sunlight")
+	config.set_value("interface_v1", "lighting", false)
+	_check(config.save(PREFS.FILE) == OK, "Legacy settings fixture is saved")
+	var legacy := PREFS.new()
+	legacy.load_settings()
+	_check(legacy.values.sunlight and not legacy.values.lighting, "Legacy settings default sunlight on without enabling old lighting-off preference")
+	config.set_value("interface_v1", "sunlight", "false")
+	config.save(PREFS.FILE)
+	var malformed := PREFS.new()
+	malformed.load_settings()
+	_check(malformed.values.sunlight, "Malformed sunlight value retains typed default")
+	_check(dialog.view.preferences.save_settings() == OK, "Live settings replace the fixture")
+	sunlight.set_pressed(true)
+	_check(dialog.view.preferences.values.sunlight, "Sunlight can be re-enabled")
 
 
 func _shadow_checks(tabs: TabContainer, dialog: Control) -> void:
