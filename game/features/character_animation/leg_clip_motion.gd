@@ -29,6 +29,7 @@ var travel_angle := 0.0 # radians, 0 forward, + toward the body's left
 ## Playback speed follows speed / the clip's planted-foot speed within these bounds.
 var min_time_scale := 0.5
 var max_time_scale := 1.7
+var playback_multiplier := 1.0
 
 var _hips := -1
 var _spine := -1
@@ -94,7 +95,7 @@ func _apply_run(skeleton: Skeleton3D, delta: float) -> void:
 	var from_data := _clip(RING[first])
 	var to_data := _clip(RING[(first + 1) % 8])
 	var reference := lerpf(from_data.ref_speed, to_data.ref_speed, mix)
-	var time_scale := clampf(speed / maxf(reference, 0.1), min_time_scale, max_time_scale)
+	var time_scale := clampf(speed / maxf(reference, 0.1), min_time_scale, max_time_scale) * playback_multiplier
 	var previous := phase
 	var cycle := lerpf(from_data.length, to_data.length, mix)
 	phase = fposmod(phase + delta * time_scale / cycle, 1.0)

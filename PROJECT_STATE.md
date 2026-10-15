@@ -563,3 +563,33 @@ Perimeter and interior wall collision is scene-authored. The latest correction t
   в неизменённой lighting suite, ошибок выполнения нет.
 - Следующее действие: проверить CI PR ветки codex/independent-sun-toggle;
   владельцу — Настройки → Видео: «Освещение» вкл., «Солнце» выкл.
+
+
+## 16.10.2026 — подбор ходьбы и анимации (прямой запрос владельца)
+
+- General/«Основные»: два независимых ползунка — скорость ходьбы 0.50..1.50×
+  и темп анимации ног 0.50..2.00×, шаг 0.05; рядом живое числовое значение.
+  1.00× воспроизводит исходную настройку. Во время drag применяется значение,
+  при отпускании оно сохраняется; поддержаны клавиатура, RU/EN, reset и old config.
+- Bootstrap передаёт optional interface_v1.walk_speed_multiplier и
+  walk_animation_multiplier в player.set_walk_tuning. Player меняет только
+  обычный move_speed через отдельный множитель, не накапливая повторные apply.
+  CharacterAnimationDriver/LegClips меняет фазу ног, не upper-body/attack/dodge
+  clocks. Темп ног действует и при спринте; скорость спринта и уклонения прежняя.
+- ADR-0050 и manifests описывают аддитивные контракты. Владельцы и зависимости
+  прежние; layout/save форматы, клипы, policy прежние, исключений нет. Новых
+  кадровых callbacks, эффектов, источников света или текстур нет.
+- Godot 4.7.2 локально: editor import exit 0 без SCRIPT ERROR/ERROR;
+  walk_tuning, settings_tabs, leg_clips, roll_iframes, menu integration — 0 failures.
+  Проверены реальная скорость, независимость параметров, actual start/restart,
+  clock ног/уклонения, safe config, настройка до attachment и повторные apply.
+  Новый walk_tuning suite добавлен в mission_runtime CI.
+  validate_project, validate_scene_resources, git diff --check — PASS.
+- Ограничения: визуальный подбор коэффициентов и FPS на Windows/Web не измерялись;
+  menu integration сохраняет прежнее предупреждение 60 ObjectDB при выходе.
+- Следующее действие: CI PR ветки codex/player-walk-tuning; владельцу подобрать
+  пару коэффициентов в Настройки → Основные и сообщить подходящие значения.
+
+16.10.2026: владелец явно разрешил публикацию подготовленного кода, тестов и
+документации в bageus/Infection-shooter отдельной веткой и PR. Блокер разрешения
+снят. Следующее действие — проверить CI и подобрать параметры в игре.

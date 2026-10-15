@@ -27,6 +27,7 @@ const ANIMATION_SELECTION := preload("res://game/features/player/player_animatio
 const PLAYER_AUDIO := preload("res://game/features/player/player_audio.gd")
 const HEAL_FEEDBACK := preload("res://game/features/player/player_heal_feedback.gd")
 @export var move_speed: float = 5.4
+var _walk_speed_multiplier := 1.0
 @export var sprint_speed: float = 8.1
 ## Body strength for pushing items (prop_weight_v1); 1.0 moves up to 22 kg.
 @export var push_strength: float = 1.0
@@ -353,6 +354,10 @@ func absorb_mutagen(delta_seconds:float)->float:return infection_runtime.call("a
 ## Settings: which animation the dodge plays, 0 = dive roll, 1 = strafe jump.
 func set_dodge_animation_style(style: int) -> void:
 	$AnimationDriver.set("dodge_style", clampi(style, 0, 1))
+## Settings multiply authored walk speed; applying them repeatedly never compounds it.
+func set_walk_tuning(speed_multiplier: float, animation_multiplier: float) -> void:
+	_walk_speed_multiplier = clampf(speed_multiplier, 0.5, 1.5) if is_finite(speed_multiplier) else 1.0
+	$AnimationDriver.set("leg_playback_multiplier", animation_multiplier)
 func mutation_dash() -> void:
 	_roll_direction = -aim_pivot.global_basis.z
 	_roll_direction.y = 0.0
@@ -433,7 +438,8 @@ func _update_move(delta:float)->void:
 		mutation_effects.call("on_roll")
 		$AnimationDriver.call("play_dodge", _roll_direction, roll_duration)
 	else:
-		var target:=d*(sprint_speed if Input.is_action_pressed("sprint") and not bool(infection_runtime.call("is_control_lost")) else move_speed) * float(mutation_effects.call("movement_multiplier"))
+		var walk_speed := move_speed * _walk_speed_multiplier
+		var target:=d*(sprint_speed if Input.is_action_pressed("sprint") and not bool(infection_runtime.call("is_control_lost")) else walk_speed) * float(mutation_effects.call("movement_multiplier"))
 		var accel:=ground_acceleration if d.length_squared()>0.0001 else ground_deceleration
 		velocity.x=move_toward(velocity.x,target.x,accel*delta);velocity.z=move_toward(velocity.z,target.z,accel*delta)
 	velocity.y=0.0 if is_on_floor() else velocity.y-gravity_acceleration*delta
