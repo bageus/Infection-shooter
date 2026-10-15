@@ -4,8 +4,12 @@ task_id: T004
 status: IN_PROGRESS
 phase: 1
 owner: AI
-updated: 2026-10-15
+updated: 2026-10-16
 ---
+
+16.10.2026 (CI PR206/207, прямой запрос владельца): подтверждена внешняя причина — HTTP503 Godot objectstorage. PR207 падал на install до gameplay; PR206 прошёл native/runtime suites, но Web template HEAD получил503. Общий CI downloader теперь использует официальный GitHub release4.7.2 с проверкой pinned SHA256, ограниченными retries и fallback на прежнее официальное зеркало; все8 Linux install paths в mission_runtime/impact_geometry обновлены. Web RangedArchive делает bounded retries/fallback на HEAD/GET, проверяет точный Content-Range/длину и отвергает full-response до чтения TPZ. Шесть детерминированных сетевых tests PASS, shell fallback/outage/corrupt/fail-closed PASS; реальный Linux ZIP SHA совпал с официальным release. Условия/assertions игровых тестов прежние, gameplay/API/DTO/зависимости/владельцы не менялись. Подробности docs/qa/ci_godot_download.md. Следующее точное действие — проверить CI обоих новых heads; merge не поручен. T004 IN_PROGRESS.
+
+
 
 15.10.2026 (A03 — QA и передача): is_sheltered исключает неподходящие RID до свободного луча/стены, переиспользуя query; правило6 удалено без замены другим пределом. Новый physical suite baseline21 ошибок → fixed0; 0/6/10/64 тел, обе стороны, frozen/dynamic, damageable и own hitboxes, mount clearance, настоящая public door/frame и реальный damage dispatch. Все8 целевых suites exit0 без ERROR; spec/workflow/project/scene393/resources/editor/diff PASS,119 прежних source-size warnings. В blast_feedback сохраняется известное ObjectDB60 (A05). Цена поиска доN+1 лучей; FPS/GPU/Windows/Web не измерены. Public API/DTO/сцены/ресурсы/зависимости/владельцы прежние, исключений нет. QA docs/qa/blast_shelter.md, статус A03 в аудите обновлён. PR205 оказался слитым в feature-ветку уже после PR204, поэтому A02 отсутствует в mainfcfc5837; создан PR206 с неизменённым проверенным head032d52ae прямо в main. A03 — отдельная веткаcodex/blast-wall-shelter в main. Следующее точное действие — проверить CI A03 и PR206; merge не поручен. T004 IN_PROGRESS.
 
