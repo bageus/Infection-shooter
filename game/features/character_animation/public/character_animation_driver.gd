@@ -65,6 +65,8 @@ const FLINCH_SECONDS := 0.16
 ## Playback speed is scaled by speed / reference while moving; 0 disables it.
 @export var walk_reference_speed := 0.0
 @export var run_reference_speed := 0.0
+## Scales locomotion cycle playback on top of the speed-matched rate (1.2 = 20 % faster).
+@export var locomotion_speed_multiplier := 1.0
 ## Visual pivot animated procedurally when the model has no AnimationPlayer.
 @export var procedural_target_path: NodePath = NodePath("Body/Visual")
 @export var procedural_bob_height := 0.06
@@ -360,7 +362,7 @@ func _play_selected_clip(speed: float = 0.0) -> bool:
 		_play_clip(String(requested))
 		# Cycles that name the ground speed they are paced for follow the actual speed.
 		var reference := float(animation_player.get_animation(requested).get_meta("ref_speed", 0.0))
-		var wanted := clampf(speed / reference, 0.5, 1.8) if reference > 0.0 and speed > 0.15 else 1.0
+		var wanted := (clampf(speed / reference, 0.5, 1.8) if reference > 0.0 and speed > 0.15 else 1.0) * locomotion_speed_multiplier
 		if not is_equal_approx(animation_player.speed_scale, wanted):
 			animation_player.speed_scale = wanted
 		return true
@@ -379,7 +381,7 @@ func _play_locomotion(state: StringName, speed: float) -> void:
 	var reference := run_reference_speed if state == &"run" else walk_reference_speed
 	var wanted := 1.0
 	if state != &"idle" and reference > 0.0:
-		wanted = clampf(speed / reference, 0.5, 1.6)
+		wanted = clampf(speed / reference, 0.5, 1.6) * locomotion_speed_multiplier
 	if not is_equal_approx(animation_player.speed_scale, wanted):
 		animation_player.speed_scale = wanted
 
