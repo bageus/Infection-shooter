@@ -11,8 +11,9 @@ uniform sampler2D normal_texture : hint_normal, filter_linear_mipmap, repeat_ena
 uniform bool use_normal_texture = false;
 uniform float roughness_value : hint_range(0.0, 1.0) = 0.85;
 uniform float metallic_value : hint_range(0.0, 1.0) = 0.0;
-uniform sampler2D blood_mask : filter_linear, repeat_disable;
-uniform bool use_blood_mask = false;
+uniform sampler2DArray blood_masks : filter_linear, repeat_disable;
+// Slot 0 belongs to the poison overlay (fade); all skin surfaces use slot 1.
+instance uniform float blood_layer : instance_index(1) = -1.0;
 uniform vec3 blood_color : source_color = vec3(0.32, 0.015, 0.012);
 uniform vec3 wound_core_color : source_color = vec3(0.09, 0.0, 0.0);
 varying vec3 rest_position;
@@ -45,8 +46,8 @@ void fragment() {
 	float blood = 0.0;
 	float core = 0.0;
 	float grain = value_noise(rest_position * 38.0) * 0.6 + value_noise(rest_position * 95.0) * 0.4;
-	if (use_blood_mask) {
-		vec2 mask = texture(blood_mask, UV).rg;
+	if (blood_layer >= 0.0) {
+		vec2 mask = texture(blood_masks, vec3(UV, blood_layer)).rg;
 		// Grain makes the baked edge ragged instead of a clean circle.
 		blood = smoothstep(0.3, 0.7, mask.r + (grain - 0.5) * 0.35);
 		core = mask.g;

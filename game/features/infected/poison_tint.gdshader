@@ -5,7 +5,7 @@ render_mode blend_mix, unshaded, depth_draw_never, cull_back, shadows_disabled;
 
 uniform vec4 tint : source_color = vec4(0.3, 0.8, 0.12, 1.0);
 uniform float strength : hint_range(0.0, 1.0) = 0.24;
-instance uniform float fade = 1.0;
+instance uniform float fade : instance_index(0) = 1.0;
 
 void fragment() {
 	float rim = pow(1.0 - clamp(dot(NORMAL, VIEW), 0.0, 1.0), 2.0);

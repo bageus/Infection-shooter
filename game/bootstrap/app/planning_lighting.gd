@@ -23,6 +23,10 @@ const MAX_SHADOW_LIGHTS := 6
 const REFRESH_SECONDS := 0.15
 ## Squared-distance weight for a lamp that already has shadows (0.7 m per 1 m).
 const SHADOW_KEEP_BIAS := 0.49
+## A lamp whose light sphere lies fully outside the view lights nothing visible:
+## it neither spends the light budget nor casts shadows. The margin keeps lamps
+## that are about to enter the view from popping in.
+const VIEW_MARGIN := 2.0
 var shadows_allowed := true
 var _refresh_left := 0.0
 var _shadow_owners := {}
@@ -87,10 +91,15 @@ func refresh_light_budget() -> void:
 	if tree == null or not local_lights_enabled:
 		return
 	var focus := get_light_focus()
+	var camera := get_viewport().get_camera_3d() if get_viewport() != null else null
+	var frustum: Array = camera.get_frustum() if camera != null else []
 	var lamps: Array[Node] = tree.get_nodes_in_group("budget_lights")
 	var ranked: Array[Dictionary] = []
 	for lamp in lamps:
 		if lamp is Node3D and lamp.is_inside_tree() and lamp.has_method("set_budget_lit"):
+			if not frustum.is_empty() and not sphere_in_view(frustum, (lamp as Node3D).global_position, _light_radius(lamp) + VIEW_MARGIN):
+				lamp.call("set_budget_lit", false, false)
+				continue
 			var offset: Vector3 = (lamp as Node3D).global_position - focus
 			offset.y = 0.0
 			var distance := offset.length_squared()
@@ -114,6 +123,18 @@ func refresh_light_budget() -> void:
 			owners[lamp.get_instance_id()] = true
 		lamp.call("set_budget_lit", lit, shadow)
 	_shadow_owners = owners
+
+
+func _light_radius(lamp: Node) -> float:
+	return float(lamp.call("get_light_radius")) if lamp.has_method("get_light_radius") else INF
+
+
+## True when a sphere touches the volume bounded by the camera frustum planes.
+static func sphere_in_view(frustum: Array, center: Vector3, radius: float) -> bool:
+	for plane in frustum:
+		if plane.distance_to(center) > radius:
+			return false
+	return true
 
 
 func set_local_lights_enabled(enabled: bool) -> void:

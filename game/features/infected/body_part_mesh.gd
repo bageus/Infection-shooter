@@ -6,7 +6,7 @@ extends RefCounted
 ## as CUSTOM0 for the wound shader, measures limb thickness and builds static
 ## meshes of a severed part in its current pose.
 
-const WOUND_SHADER := preload("res://game/features/infected/body_wound.gdshader")
+const SKINS := preload("res://game/features/infected/body_skin_materials.gd")
 const TOPOLOGY := preload("res://game/features/infected/body_part_topology.gd")
 const CACHE := preload("res://game/features/infected/body_mesh_cache.gd")
 
@@ -175,22 +175,18 @@ static func ray_segment_distance(origin: Vector3, direction: Vector3, a: Vector3
 	return best
 
 
-# Wound material for one surface, copying the look of the original material.
+# Skin pages live beside their derived geometry, within the existing bounded cache.
+static func skin_pool(data: Dictionary, originals: Array) -> RefCounted:
+	if not data.has("skin_pools"):
+		data.skin_pools = {}
+	var key := SKINS.signature(originals)
+	if not data.skin_pools.has(key):
+		data.skin_pools[key] = SKINS.new(originals)
+	return data.skin_pools[key]
+
+
 static func wound_material(original: Material) -> ShaderMaterial:
-	var material := ShaderMaterial.new()
-	material.shader = WOUND_SHADER
-	if original is BaseMaterial3D:
-		var base := original as BaseMaterial3D
-		material.set_shader_parameter("albedo_color", base.albedo_color)
-		material.set_shader_parameter("roughness_value", base.roughness)
-		material.set_shader_parameter("metallic_value", base.metallic)
-		if base.albedo_texture != null:
-			material.set_shader_parameter("albedo_texture", base.albedo_texture)
-			material.set_shader_parameter("use_albedo_texture", true)
-		if base.normal_enabled and base.normal_texture != null:
-			material.set_shader_parameter("normal_texture", base.normal_texture)
-			material.set_shader_parameter("use_normal_texture", true)
-	return material
+	return SKINS.create_material(original)
 
 
 # Static mesh of the vertices that mostly follow `chain`, skinned into the
