@@ -17,11 +17,11 @@ static func is_sheltered(world: World3D, from: Vector3, body: Node3D) -> bool:
 	var excluded: Array[RID] = []
 	if body is CollisionObject3D:
 		excluded.append((body as CollisionObject3D).get_rid())
-	for _attempt in 6:
-		var query := PhysicsRayQueryParameters3D.create(from, target, 1, excluded)
-		var hit := world.direct_space_state.intersect_ray(query)
-		if hit.is_empty():
-			return false
+	var query := PhysicsRayQueryParameters3D.create(from, target, 1, excluded)
+	var hit := world.direct_space_state.intersect_ray(query)
+	# Each pass excludes a distinct non-wall body. Only an empty ray proves
+	# the remaining path clear; an arbitrary attempt limit can hide a wall.
+	while not hit.is_empty():
 		var collider := hit.get("collider") as CollisionObject3D
 		if collider == null:
 			return false
@@ -34,6 +34,8 @@ static func is_sheltered(world: World3D, from: Vector3, body: Node3D) -> bool:
 		if collider is StaticBody3D and not own_part and not collider.has_method("take_projectile_hit"):
 			return true
 		excluded.append(collider.get_rid())
+		query.exclude = excluded
+		hit = world.direct_space_state.intersect_ray(query)
 	return false
 
 
