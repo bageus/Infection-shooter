@@ -13,7 +13,7 @@ const EXTINGUISHER_BURST := preload("res://game/presentation/office_floor/exting
 const SFX_EVENTS: Array[StringName] = [&"extinguisher_spray", &"extinguisher_burst", &"extinguisher_fall", &"hit_metal", &"hit_wood", &"hit_paper",
 		&"hit_electronics", &"hit_glass", &"glass_break", &"fall_wood", &"fall_metal", &"fall_light", &"fall_tech", &"fall_debris", &"break_wood", &"break_furniture", &"break_cardboard", &"break_metal",
 		&"break_electronics", &"break_lamp", &"weapon_switch"]
-const SFX := preload("res://game/core/audio/public/sound_events.gd")
+const AUDIO_WARMUP := preload("res://game/presentation/office_floor/audio_warmup.gd")
 const FLIPBOOK := preload("res://game/core/vfx/public/sprite_flipbook.gd")
 const ATLASES := preload("res://game/core/vfx/public/effect_atlases.gd")
 const FRAMES := 4
@@ -55,6 +55,10 @@ func setup(parent: Node) -> void:
 	droplet.scale = Vector3.ONE * 0.05
 	add_child(droplet)
 	effect_count = get_child_count()
+	var audio := AUDIO_WARMUP.new()
+	# Keep streams on the mission, beyond the four-frame visual viewport.
+	parent.add_child(audio)
+	audio.start(SFX_EVENTS)
 
 
 # The first shot at an extinguisher streams its powder jet and mist, and the
@@ -72,8 +76,6 @@ func _warm_extinguisher(point: Vector3) -> void:
 	add_child(burst)
 	burst.position = point
 	burst.call("start", 1.0, 1.0, 24)
-	for event in SFX_EVENTS:
-		SFX.preload_event(event)
 
 
 func _process(_delta: float) -> void:

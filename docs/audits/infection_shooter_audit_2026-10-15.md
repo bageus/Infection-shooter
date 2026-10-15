@@ -1,6 +1,6 @@
 # Аудит Infection Shooter — 15 октября 2026
 
-> Состояние отчёта: исходный аудит срезов ниже. Исправления A01 и A02 и их повторные проверки описаны в [QA ragdoll budget](../qa/ragdoll_budget.md) и [QA projectile step budget](../qa/projectile_step_budget.md); остальные находки остаются отдельными задачами.
+> Состояние отчёта: ниже сохранены исходные доказательства аудита. Проверенные исправления A01–A05: [ragdoll](../qa/ragdoll_budget.md), [projectile](../qa/projectile_step_budget.md), [blast shelter](../qa/blast_shelter.md), [atomic desk template](../qa/atomic_desk_template.md), [audio warmup](../qa/audio_warmup_lifetime.md). Следующая отдельная задача — A06.
 
 ## Основной вывод
 
@@ -118,6 +118,8 @@ status=Template applied to this desk. Save the map to keep it.
 **Приёмка:** повреждённые типы zones/items, отсутствующие обязательные поля и модели, нулевые размеры зон; прежние объекты, позиции и зоны должны остаться. Отдельно проверить валидный пустой шаблон, чтобы не запретить намеренную очистку стола.
 
 ## A05. Фоновые запросы аудиопрогрева не завершаются
+
+**Статус 16.10.2026:** исправлено в ветке `codex/audio-preload-completion` на main d91b33d2. Mission-local владелец удерживает60 streams и завершает requests, включая teardown; исходный warmup60 предупреждений →0. Проверки и ограничения: [QA A05](../qa/audio_warmup_lifetime.md). Ниже сохранено исходное доказательство.
 
 **Код:** [sound_events.gd:146–150](https://github.com/bageus/Infection-shooter/blob/0e154b73/game/core/audio/public/sound_events.gd#L146-L150), [hit_effect_warmup.gd:65–76](https://github.com/bageus/Infection-shooter/blob/0e154b73/game/presentation/office_floor/public/hit_effect_warmup.gd#L65-L76).
 

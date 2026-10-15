@@ -154,11 +154,14 @@ static func has_event(event: StringName) -> bool:
 # Plays `event` under `parent`; at `position` when given, else on the parent.
 # Starts loading every variant of `event` in the background, so its first play
 # finds the streams cached instead of reading the files on the shot frame.
+# The warmup caller must collect threaded results and retain them for its lifetime.
 static func preload_event(event: StringName) -> void:
 	if not EVENTS.has(event):
 		return
 	for variant in range(1, int(EVENTS[event][VARIANTS]) + 1):
-		ResourceLoader.load_threaded_request(ROOT + "%s/%s_%d.ogg" % [event, event, variant])
+		var path := ROOT + "%s/%s_%d.ogg" % [event, event, variant]
+		if not ResourceLoader.has_cached(path) and ResourceLoader.load_threaded_get_status(path) == ResourceLoader.THREAD_LOAD_INVALID_RESOURCE:
+			ResourceLoader.load_threaded_request(path)
 
 
 static var _voices := 0
