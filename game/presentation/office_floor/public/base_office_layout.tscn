@@ -2,7 +2,6 @@
 
 [ext_resource type="PackedScene" path="res://game/presentation/office_floor/public/structural/window_double.tscn" id="1_h0rje"]
 [ext_resource type="PackedScene" path="res://game/features/player/public/player.tscn" id="1_lw7rm"]
-[ext_resource type="Script" path="res://game/features/player/player_movement.gd" id="2_rhgew"]
 [ext_resource type="Script" path="res://game/presentation/office_floor/mesh_collision_builder.gd" id="2_yqqxo"]
 [ext_resource type="PackedScene" path="res://game/presentation/office_floor/public/structural/wall_emergency_door.tscn" id="3_ftlgq"]
 [ext_resource type="PackedScene" path="res://game/presentation/office_floor/public/structural/staircase.tscn" id="4_37p4t"]
@@ -29,7 +28,6 @@
 [ext_resource type="PackedScene" path="res://game/presentation/office_floor/public/structural/glass_partition_half.tscn" id="27_d8prb"]
 [ext_resource type="PackedScene" path="res://game/presentation/office_floor/public/structural/column.tscn" id="28_aigs8"]
 [ext_resource type="PackedScene" path="res://game/features/pickups/public/medkit_pickup.tscn" id="29_4fqxv"]
-[ext_resource type="Script" path="res://game/features/pickups/pickup_item.gd" id="30_2dd0b"]
 [ext_resource type="PackedScene" path="res://game/features/pickups/public/antidote_pickup.tscn" id="31_3u1dg"]
 [ext_resource type="PackedScene" path="res://game/features/pickups/public/ammo_sniper_pickup.tscn" id="32_hnvgk"]
 [ext_resource type="PackedScene" path="res://game/features/pickups/public/ammo_minigun_pickup.tscn" id="33_rwwpq"]
@@ -38,14 +36,11 @@
 [ext_resource type="Script" path="res://game/presentation/office_floor/blood_decal_prop.gd" id="36_d4vwy"]
 [ext_resource type="PackedScene" path="res://game/features/pickups/public/ammo_shotgun_pickup.tscn" id="37_0bg4t"]
 [ext_resource type="PackedScene" path="res://game/features/infected/public/decor/part_hunger_head.tscn" id="38_8blqf"]
-[ext_resource type="Script" path="res://game/features/infected/infected_body_part_decor.gd" id="39_lhhfe"]
 [ext_resource type="PackedScene" path="res://models/objects/characters/enemy/game/Hunger_rig.tscn" id="40_k4e71"]
 [ext_resource type="PackedScene" path="res://game/features/infected/public/decor/part_hunger_arm.tscn" id="41_pmrdi"]
 [ext_resource type="PackedScene" path="res://game/features/pickups/public/dna_pickup.tscn" id="42_g3ohu"]
 [ext_resource type="PackedScene" path="res://game/features/infected/public/infected_revenant.tscn" id="43_t32wi"]
-[ext_resource type="Script" path="res://game/features/infected/infected_capsule.gd" id="44_obuaf"]
 [ext_resource type="PackedScene" path="res://game/features/infected/public/decor/corpse_hunger.tscn" id="45_3hcwf"]
-[ext_resource type="Script" path="res://game/features/infected/infected_corpse_decor.gd" id="46_dufcn"]
 [ext_resource type="PackedScene" path="res://game/features/infected/public/decor/corpse_hunger_mutilated.tscn" id="47_uuisu"]
 [ext_resource type="PackedScene" path="res://game/presentation/office_floor/public/props/planner_light.tscn" id="48_h0rje"]
 [ext_resource type="Script" path="res://game/presentation/office_floor/planner_light.gd" id="49_yqqxo"]
@@ -65,7 +60,6 @@
 [node name="Player" type="CharacterBody3D" parent="." unique_id=826678355 groups=["player"] instance=ExtResource("1_lw7rm")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 4.25, 1, -1)
 collision_mask = 3
-script = ExtResource("2_rhgew")
 metadata/world_bound = true
 
 [node name="WindowDouble" type="Node3D" parent="." unique_id=720448464 groups=["camera_occluder"] instance=ExtResource("1_h0rje")]
@@ -24090,7 +24084,6 @@ metadata/planning_attachment = ""
 [node name="Pickup" type="Area3D" parent="." unique_id=2053313889 groups=["occlusion_items"] instance=ExtResource("29_4fqxv")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 25.25, 0.015500044, 28)
 collision_layer = 0
-script = ExtResource("30_2dd0b")
 weapon_names = PackedStringArray()
 metadata/world_bound = true
 metadata/planning_object_id = ""
@@ -24100,7 +24093,6 @@ metadata/planning_attachment = ""
 [node name="@Area3D@94605" type="Area3D" parent="." unique_id=42863721 groups=["occlusion_items"] instance=ExtResource("29_4fqxv")]
 transform = Transform3D(0.86602414, 0, -0.50000226, 0, 1, 0, 0.50000226, 0, 0.86602414, 23.5, 0.015500044, 27.25)
 collision_layer = 0
-script = ExtResource("30_2dd0b")
 weapon_names = PackedStringArray()
 metadata/world_bound = true
 metadata/planning_object_id = ""
@@ -24110,7 +24102,6 @@ metadata/planning_attachment = ""
 [node name="@Area3D@94606" type="Area3D" parent="." unique_id=966420500 groups=["occlusion_items"] instance=ExtResource("29_4fqxv")]
 transform = Transform3D(0.86602414, 0, -0.50000226, 0, 1, 0, 0.50000226, 0, 0.86602414, 27, 0.015500044, 29.25)
 collision_layer = 0
-script = ExtResource("30_2dd0b")
 weapon_names = PackedStringArray()
 metadata/world_bound = true
 metadata/planning_object_id = ""
@@ -24120,7 +24111,6 @@ metadata/planning_attachment = ""
 [node name="@Area3D@94607" type="Area3D" parent="." unique_id=778066515 groups=["occlusion_items"] instance=ExtResource("29_4fqxv")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 28, 0.015500044, 29.25)
 collision_layer = 0
-script = ExtResource("30_2dd0b")
 weapon_names = PackedStringArray()
 metadata/world_bound = true
 metadata/planning_object_id = ""
@@ -24130,7 +24120,6 @@ metadata/planning_attachment = ""
 [node name="@Area3D@94608" type="Area3D" parent="." unique_id=1794124473 groups=["occlusion_items"] instance=ExtResource("29_4fqxv")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 39, 0.015500044, 29.25)
 collision_layer = 0
-script = ExtResource("30_2dd0b")
 weapon_names = PackedStringArray()
 metadata/world_bound = true
 metadata/planning_object_id = ""
@@ -24140,7 +24129,6 @@ metadata/planning_attachment = ""
 [node name="@Area3D@94609" type="Area3D" parent="." unique_id=769253512 groups=["occlusion_items"] instance=ExtResource("29_4fqxv")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 39.25, 0.015500044, 17.25)
 collision_layer = 0
-script = ExtResource("30_2dd0b")
 weapon_names = PackedStringArray()
 metadata/world_bound = true
 metadata/planning_object_id = ""
@@ -24150,7 +24138,6 @@ metadata/planning_attachment = ""
 [node name="@Area3D@94610" type="Area3D" parent="." unique_id=1343215066 groups=["occlusion_items"] instance=ExtResource("29_4fqxv")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 39.5, 0.015500044, 7)
 collision_layer = 0
-script = ExtResource("30_2dd0b")
 weapon_names = PackedStringArray()
 metadata/world_bound = true
 metadata/planning_object_id = ""
@@ -24160,7 +24147,6 @@ metadata/planning_attachment = ""
 [node name="@Area3D@94611" type="Area3D" parent="." unique_id=1677856988 groups=["occlusion_items"] instance=ExtResource("29_4fqxv")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 37.75, 0.015500044, -0.5)
 collision_layer = 0
-script = ExtResource("30_2dd0b")
 weapon_names = PackedStringArray()
 metadata/world_bound = true
 metadata/planning_object_id = ""
@@ -24170,7 +24156,6 @@ metadata/planning_attachment = ""
 [node name="@Area3D@94612" type="Area3D" parent="." unique_id=407177980 groups=["occlusion_items"] instance=ExtResource("29_4fqxv")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 37.75, 0.015500044, -13.5)
 collision_layer = 0
-script = ExtResource("30_2dd0b")
 weapon_names = PackedStringArray()
 metadata/world_bound = true
 metadata/planning_object_id = ""
@@ -24180,7 +24165,6 @@ metadata/planning_attachment = ""
 [node name="@Area3D@94613" type="Area3D" parent="." unique_id=1438658608 instance=ExtResource("31_3u1dg")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 37.75, 0.015500062, -13.153866)
 collision_layer = 0
-script = ExtResource("30_2dd0b")
 pickup_type = 4
 amount = 1
 weapon_names = PackedStringArray()
@@ -24192,7 +24176,6 @@ metadata/planning_attachment = ""
 [node name="@Area3D@94614" type="Area3D" parent="." unique_id=9835023 instance=ExtResource("31_3u1dg")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 26.75, 0.015500062, -12.5)
 collision_layer = 0
-script = ExtResource("30_2dd0b")
 pickup_type = 4
 amount = 1
 weapon_names = PackedStringArray()
@@ -24204,7 +24187,6 @@ metadata/planning_attachment = ""
 [node name="@Area3D@94615" type="Area3D" parent="." unique_id=1757672569 instance=ExtResource("31_3u1dg")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 21.25, 0.015500062, -19)
 collision_layer = 0
-script = ExtResource("30_2dd0b")
 pickup_type = 4
 amount = 1
 weapon_names = PackedStringArray()
@@ -24216,7 +24198,6 @@ metadata/planning_attachment = ""
 [node name="@Area3D@94616" type="Area3D" parent="." unique_id=1649539996 instance=ExtResource("31_3u1dg")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 20.25, 0.015500062, -29.25)
 collision_layer = 0
-script = ExtResource("30_2dd0b")
 pickup_type = 4
 amount = 1
 weapon_names = PackedStringArray()
@@ -24228,7 +24209,6 @@ metadata/planning_attachment = ""
 [node name="@Area3D@94617" type="Area3D" parent="." unique_id=933515913 instance=ExtResource("31_3u1dg")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 7, 0.015500062, -27.25)
 collision_layer = 0
-script = ExtResource("30_2dd0b")
 pickup_type = 4
 amount = 1
 weapon_names = PackedStringArray()
@@ -24240,7 +24220,6 @@ metadata/planning_attachment = ""
 [node name="@Area3D@94618" type="Area3D" parent="." unique_id=1033479474 groups=["occlusion_items"] instance=ExtResource("29_4fqxv")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 14.5, 0.015500044, -27.05884)
 collision_layer = 0
-script = ExtResource("30_2dd0b")
 weapon_names = PackedStringArray()
 metadata/world_bound = true
 metadata/planning_object_id = ""
@@ -24250,7 +24229,6 @@ metadata/planning_attachment = ""
 [node name="@Area3D@94619" type="Area3D" parent="." unique_id=1787414127 groups=["occlusion_items"] instance=ExtResource("29_4fqxv")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 1.25, 0.015500044, -19.75)
 collision_layer = 0
-script = ExtResource("30_2dd0b")
 weapon_names = PackedStringArray()
 metadata/world_bound = true
 metadata/planning_object_id = ""
@@ -24260,7 +24238,6 @@ metadata/planning_attachment = ""
 [node name="@Area3D@94620" type="Area3D" parent="." unique_id=1699460278 instance=ExtResource("31_3u1dg")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -3.5, 0.015500062, -18.75)
 collision_layer = 0
-script = ExtResource("30_2dd0b")
 pickup_type = 4
 amount = 1
 weapon_names = PackedStringArray()
@@ -24272,7 +24249,6 @@ metadata/planning_attachment = ""
 [node name="@Area3D@94621" type="Area3D" parent="." unique_id=1437116398 instance=ExtResource("31_3u1dg")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -14.150384, 0.015500062, -24.948753)
 collision_layer = 0
-script = ExtResource("30_2dd0b")
 pickup_type = 4
 amount = 1
 weapon_names = PackedStringArray()
@@ -24284,7 +24260,6 @@ metadata/planning_attachment = ""
 [node name="@Area3D@94622" type="Area3D" parent="." unique_id=137216505 instance=ExtResource("31_3u1dg")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -22.75, 0.015500062, -29)
 collision_layer = 0
-script = ExtResource("30_2dd0b")
 pickup_type = 4
 amount = 1
 weapon_names = PackedStringArray()
@@ -24296,7 +24271,6 @@ metadata/planning_attachment = ""
 [node name="@Area3D@94623" type="Area3D" parent="." unique_id=2127269560 groups=["occlusion_items"] instance=ExtResource("29_4fqxv")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -39, 0.015500044, -28.25)
 collision_layer = 0
-script = ExtResource("30_2dd0b")
 weapon_names = PackedStringArray()
 metadata/world_bound = true
 metadata/planning_object_id = ""
@@ -24306,7 +24280,6 @@ metadata/planning_attachment = ""
 [node name="@Area3D@94624" type="Area3D" parent="." unique_id=1907553341 groups=["occlusion_items"] instance=ExtResource("29_4fqxv")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -38.5, 0.015500044, -16.75)
 collision_layer = 0
-script = ExtResource("30_2dd0b")
 weapon_names = PackedStringArray()
 metadata/world_bound = true
 metadata/planning_object_id = ""
@@ -24316,7 +24289,6 @@ metadata/planning_attachment = ""
 [node name="@Area3D@94625" type="Area3D" parent="." unique_id=159028153 instance=ExtResource("31_3u1dg")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -33.75, 0.015500062, -16.5)
 collision_layer = 0
-script = ExtResource("30_2dd0b")
 pickup_type = 4
 amount = 1
 weapon_names = PackedStringArray()
@@ -24328,7 +24300,6 @@ metadata/planning_attachment = ""
 [node name="@Area3D@94626" type="Area3D" parent="." unique_id=119739341 instance=ExtResource("31_3u1dg")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -39.25, 0.015500062, -14)
 collision_layer = 0
-script = ExtResource("30_2dd0b")
 pickup_type = 4
 amount = 1
 weapon_names = PackedStringArray()
@@ -24340,7 +24311,6 @@ metadata/planning_attachment = ""
 [node name="@Area3D@94627" type="Area3D" parent="." unique_id=1981957158 instance=ExtResource("31_3u1dg")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -11.5, 0.015500062, 0)
 collision_layer = 0
-script = ExtResource("30_2dd0b")
 pickup_type = 4
 amount = 1
 weapon_names = PackedStringArray()
@@ -24352,7 +24322,6 @@ metadata/planning_attachment = ""
 [node name="@Area3D@94628" type="Area3D" parent="." unique_id=2078248124 groups=["occlusion_items"] instance=ExtResource("32_hnvgk")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -11.5, 0.015500102, -3.75)
 collision_layer = 0
-script = ExtResource("30_2dd0b")
 pickup_type = 6
 amount = 8
 weapon_names = PackedStringArray("SNIPER RIFLE")
@@ -24364,7 +24333,6 @@ metadata/planning_attachment = ""
 [node name="@Area3D@94629" type="Area3D" parent="." unique_id=385324799 groups=["occlusion_items"] instance=ExtResource("33_rwwpq")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -12, 0.015500125, -11.25)
 collision_layer = 0
-script = ExtResource("30_2dd0b")
 pickup_type = 6
 amount = 100
 weapon_names = PackedStringArray("MINIGUN")
@@ -24376,7 +24344,6 @@ metadata/planning_attachment = ""
 [node name="@Area3D@94630" type="Area3D" parent="." unique_id=1010032667 groups=["occlusion_items"] instance=ExtResource("33_rwwpq")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -19.75, 0.015500125, 24.25)
 collision_layer = 0
-script = ExtResource("30_2dd0b")
 pickup_type = 6
 amount = 100
 weapon_names = PackedStringArray("MINIGUN")
@@ -24388,7 +24355,6 @@ metadata/planning_attachment = ""
 [node name="@Area3D@94631" type="Area3D" parent="." unique_id=969265071 groups=["occlusion_items"] instance=ExtResource("34_uoftr")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -28, 0.015500102, 29.25)
 collision_layer = 0
-script = ExtResource("30_2dd0b")
 pickup_type = 6
 amount = 30
 weapon_names = PackedStringArray("AK", "M4")
@@ -35421,7 +35387,6 @@ metadata/planning_attachment = ""
 [node name="@Area3D@95732" type="Area3D" parent="." unique_id=511123372 groups=["occlusion_items"] instance=ExtResource("34_uoftr")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -37.75, 0.015500102, 29.25)
 collision_layer = 0
-script = ExtResource("30_2dd0b")
 pickup_type = 6
 amount = 30
 weapon_names = PackedStringArray("AK", "M4")
@@ -35433,7 +35398,6 @@ metadata/planning_attachment = ""
 [node name="@Area3D@95733" type="Area3D" parent="." unique_id=228347653 groups=["occlusion_items"] instance=ExtResource("37_0bg4t")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -39.5, 0.015500069, 26.5)
 collision_layer = 0
-script = ExtResource("30_2dd0b")
 pickup_type = 3
 amount = 12
 weapon_names = PackedStringArray()
@@ -35444,7 +35408,6 @@ metadata/planning_attachment = ""
 
 [node name="PartHungerHead" type="RigidBody3D" parent="." unique_id=1282282838 instance=ExtResource("38_8blqf")]
 transform = Transform3D(0.99999994, 0, 0, 0, 1, 0, 0, 0, 0.99999994, -35.75, 1.1698809, 23.5)
-script = ExtResource("39_lhhfe")
 pose_seed = 1140022119
 visual_scene = ExtResource("40_k4e71")
 part = &"head"
@@ -35455,7 +35418,6 @@ metadata/planning_attachment = ""
 
 [node name="PartHungerArm" type="RigidBody3D" parent="." unique_id=46501662 instance=ExtResource("41_pmrdi")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -37.5, 1.3942962, 26.5)
-script = ExtResource("39_lhhfe")
 pose_seed = 1795460990
 visual_scene = ExtResource("40_k4e71")
 metadata/world_bound = true
@@ -35465,7 +35427,6 @@ metadata/planning_attachment = ""
 
 [node name="@RigidBody3D@95734" type="RigidBody3D" parent="." unique_id=1336922962 instance=ExtResource("41_pmrdi")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -39.52177, 0.43522778, 27.277273)
-script = ExtResource("39_lhhfe")
 pose_seed = 131997412
 visual_scene = ExtResource("40_k4e71")
 metadata/world_bound = true
@@ -35961,7 +35922,6 @@ metadata/planning_attachment = ""
 [node name="@Area3D@95781" type="Area3D" parent="." unique_id=1664079826 groups=["occlusion_items"] instance=ExtResource("29_4fqxv")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -14.25, 0.015500044, -18)
 collision_layer = 0
-script = ExtResource("30_2dd0b")
 weapon_names = PackedStringArray()
 metadata/world_bound = true
 metadata/planning_object_id = ""
@@ -36824,7 +36784,6 @@ metadata/planning_attachment = ""
 [node name="@Area3D@95876" type="Area3D" parent="." unique_id=544939351 groups=["occlusion_items"] instance=ExtResource("37_0bg4t")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -13.75, 0.015500069, -16.75)
 collision_layer = 0
-script = ExtResource("30_2dd0b")
 pickup_type = 3
 amount = 12
 weapon_names = PackedStringArray()
@@ -36836,7 +36795,6 @@ metadata/planning_attachment = ""
 [node name="@Area3D@95877" type="Area3D" parent="." unique_id=1687409932 instance=ExtResource("31_3u1dg")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -13.5, 0.015500062, -15.5)
 collision_layer = 0
-script = ExtResource("30_2dd0b")
 pickup_type = 4
 amount = 1
 weapon_names = PackedStringArray()
@@ -36848,7 +36806,6 @@ metadata/planning_attachment = ""
 [node name="@Area3D@95878" type="Area3D" parent="." unique_id=1127951886 groups=["occlusion_items"] instance=ExtResource("42_g3ohu")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -12, 0.0055000004, -14.25)
 collision_layer = 0
-script = ExtResource("30_2dd0b")
 pickup_type = 5
 amount = 1
 weapon_names = PackedStringArray()
@@ -36860,7 +36817,6 @@ metadata/planning_attachment = ""
 [node name="@Area3D@95879" type="Area3D" parent="." unique_id=1622459982 groups=["occlusion_items"] instance=ExtResource("42_g3ohu")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -12, 0.0055000004, -14.081755)
 collision_layer = 0
-script = ExtResource("30_2dd0b")
 pickup_type = 5
 amount = 1
 weapon_names = PackedStringArray()
@@ -36872,7 +36828,6 @@ metadata/planning_attachment = ""
 [node name="@Area3D@95880" type="Area3D" parent="." unique_id=941341026 groups=["occlusion_items"] instance=ExtResource("42_g3ohu")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -14, 0.0055000004, -13.75)
 collision_layer = 0
-script = ExtResource("30_2dd0b")
 pickup_type = 5
 amount = 1
 weapon_names = PackedStringArray()
@@ -37438,7 +37393,6 @@ collision_layer = 2
 collision_mask = 3
 floor_stop_on_slope = false
 safe_margin = 0.02
-script = ExtResource("44_obuaf")
 max_health = 75.0
 move_speed = 4.6
 attack_range = 1.25
@@ -37454,7 +37408,6 @@ collision_layer = 2
 collision_mask = 3
 floor_stop_on_slope = false
 safe_margin = 0.02
-script = ExtResource("44_obuaf")
 max_health = 75.0
 move_speed = 4.6
 attack_range = 1.25
@@ -37470,7 +37423,6 @@ collision_layer = 2
 collision_mask = 3
 floor_stop_on_slope = false
 safe_margin = 0.02
-script = ExtResource("44_obuaf")
 max_health = 75.0
 move_speed = 4.6
 attack_range = 1.25
@@ -37486,7 +37438,6 @@ collision_layer = 2
 collision_mask = 3
 floor_stop_on_slope = false
 safe_margin = 0.02
-script = ExtResource("44_obuaf")
 max_health = 75.0
 move_speed = 4.6
 attack_range = 1.25
@@ -37498,7 +37449,6 @@ metadata/planning_attachment = ""
 
 [node name="CorpseHunger" type="Node3D" parent="." unique_id=165034835 instance=ExtResource("45_3hcwf")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -35.75, 0.9684373, 23.25)
-script = ExtResource("46_dufcn")
 pose_seed = 1955487428
 pose_variant = "back"
 pose_facing = 1.06440734641021
@@ -37513,7 +37463,6 @@ metadata/planning_attachment = ""
 
 [node name="@Node3D@95952" type="Node3D" parent="." unique_id=1169697472 instance=ExtResource("45_3hcwf")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -39.685814, 0.015499934, 27)
-script = ExtResource("46_dufcn")
 pose_seed = 1155740627
 pose_variant = "seated_side"
 pose_facing = 1.57079644600418
@@ -37528,7 +37477,6 @@ metadata/planning_attachment = ""
 
 [node name="CorpseHungerMutilated" type="Node3D" parent="." unique_id=943087577 instance=ExtResource("47_uuisu")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -33.916336, 0.0155, 26.75)
-script = ExtResource("46_dufcn")
 pose_seed = 568249108
 pose_variant = "seated"
 pose_facing = -1.57079620758562
@@ -37849,7 +37797,6 @@ metadata/planning_attachment = ""
 [node name="@Area3D@95974" type="Area3D" parent="." unique_id=911149350 groups=["occlusion_items"] instance=ExtResource("32_hnvgk")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -32.25, 0.01550005, -14.5)
 collision_layer = 0
-script = ExtResource("30_2dd0b")
 pickup_type = 6
 amount = 8
 weapon_names = PackedStringArray("SNIPER RIFLE")
@@ -37858,7 +37805,6 @@ metadata/world_bound = true
 [node name="@Area3D@95975" type="Area3D" parent="." unique_id=602089239 groups=["occlusion_items"] instance=ExtResource("33_rwwpq")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -30.25, 0.015500052, -14.5)
 collision_layer = 0
-script = ExtResource("30_2dd0b")
 pickup_type = 6
 amount = 100
 weapon_names = PackedStringArray("MINIGUN")
@@ -47119,7 +47065,6 @@ metadata/planning_zone = 10
 
 [node name="PartHungerLeg" type="RigidBody3D" parent="." unique_id=686345984 instance=ExtResource("50_t2ps6")]
 transform = Transform3D(-4.371139e-08, 0, 1, 0, 1, 0, -1, 0, -4.371139e-08, -33.25, 0.4658948, 25.25)
-script = ExtResource("39_lhhfe")
 pose_seed = 1305918465
 visual_scene = ExtResource("40_k4e71")
 part = &"leg_l"
@@ -47355,7 +47300,6 @@ metadata/planning_wall_mount = false
 
 [node name="@Node3D@96935" type="Node3D" parent="." unique_id=1871363803 instance=ExtResource("45_3hcwf")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -27.25, 0.9083749, 25.75)
-script = ExtResource("46_dufcn")
 pose_seed = 622337904
 pose_variant = "back"
 pose_facing = -2.670592653589793
@@ -47367,7 +47311,6 @@ metadata/world_bound = true
 
 [node name="@Node3D@96936" type="Node3D" parent="." unique_id=1663099615 instance=ExtResource("45_3hcwf")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -27.25, 1.2744423, 25.75)
-script = ExtResource("46_dufcn")
 pose_seed = 456725989
 pose_variant = "stomach"
 pose_facing = -0.9885926535897931
@@ -47379,7 +47322,6 @@ metadata/world_bound = true
 
 [node name="@Node3D@96937" type="Node3D" parent="." unique_id=271281393 instance=ExtResource("45_3hcwf")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -26.75, 0.0155, 24)
-script = ExtResource("46_dufcn")
 pose_seed = 1249995009
 pose_variant = "stomach"
 pose_facing = 1.5834073464102065
@@ -47391,7 +47333,6 @@ metadata/world_bound = true
 
 [node name="@Node3D@96938" type="Node3D" parent="." unique_id=2147153005 instance=ExtResource("47_uuisu")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -29.020853, 0.0155, 28.75)
-script = ExtResource("46_dufcn")
 pose_seed = 1367915677
 pose_variant = "seated_side"
 pose_facing = 1.570796446004172
@@ -47403,7 +47344,6 @@ metadata/world_bound = true
 
 [node name="@Node3D@96939" type="Node3D" parent="." unique_id=1781979186 instance=ExtResource("47_uuisu")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -16.15293, 0.0155, 24.774145)
-script = ExtResource("46_dufcn")
 pose_seed = 1146291329
 pose_variant = "seated_side"
 pose_facing = 1.5707976380971953
@@ -47415,7 +47355,6 @@ metadata/world_bound = true
 
 [node name="@Node3D@96940" type="Node3D" parent="." unique_id=1791857815 instance=ExtResource("47_uuisu")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -8.75, 0.6175004, 27)
-script = ExtResource("46_dufcn")
 pose_seed = 213238899
 pose_variant = "right_side"
 pose_facing = -2.979592653589793
@@ -47427,7 +47366,6 @@ metadata/world_bound = true
 
 [node name="@Node3D@96941" type="Node3D" parent="." unique_id=1301158527 instance=ExtResource("47_uuisu")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -5.25, 0.0155, 21.999372)
-script = ExtResource("46_dufcn")
 pose_seed = 915649822
 pose_variant = "seated"
 visual_scene = ExtResource("40_k4e71")
@@ -47438,7 +47376,6 @@ metadata/world_bound = true
 
 [node name="@RigidBody3D@96942" type="RigidBody3D" parent="." unique_id=1580105884 instance=ExtResource("38_8blqf")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -5.04777, 0.15875812, 21.45917)
-script = ExtResource("39_lhhfe")
 pose_seed = 1633819717
 visual_scene = ExtResource("40_k4e71")
 part = &"head"
@@ -47446,14 +47383,12 @@ metadata/world_bound = true
 
 [node name="@RigidBody3D@96943" type="RigidBody3D" parent="." unique_id=142791009 instance=ExtResource("41_pmrdi")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -3.544983, 0.34892154, 24.42016)
-script = ExtResource("39_lhhfe")
 pose_seed = 2010818603
 visual_scene = ExtResource("40_k4e71")
 metadata/world_bound = true
 
 [node name="@Node3D@96944" type="Node3D" parent="." unique_id=488590185 instance=ExtResource("45_3hcwf")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 1.75, 0.0155, 20.25)
-script = ExtResource("46_dufcn")
 pose_seed = 137241190
 pose_variant = "left_side"
 pose_facing = -1.5205926535897931
@@ -47465,7 +47400,6 @@ metadata/world_bound = true
 
 [node name="@Node3D@96945" type="Node3D" parent="." unique_id=896434012 instance=ExtResource("47_uuisu")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 13.25, 0.0155, 27.5)
-script = ExtResource("46_dufcn")
 pose_seed = 1705589574
 pose_variant = "left_side"
 pose_facing = -3.030592653589793
@@ -47477,7 +47411,6 @@ metadata/world_bound = true
 
 [node name="@Node3D@96946" type="Node3D" parent="." unique_id=2032759910 instance=ExtResource("47_uuisu")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 13.5, 0.0155, 18.25)
-script = ExtResource("46_dufcn")
 pose_seed = 186224783
 pose_variant = "right_side"
 pose_facing = -0.19559265358979294
@@ -47489,21 +47422,18 @@ metadata/world_bound = true
 
 [node name="@RigidBody3D@96947" type="RigidBody3D" parent="." unique_id=1898781937 instance=ExtResource("41_pmrdi")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 14, 0.8345116, 19.5)
-script = ExtResource("39_lhhfe")
 pose_seed = 1180492328
 visual_scene = ExtResource("40_k4e71")
 metadata/world_bound = true
 
 [node name="@RigidBody3D@96948" type="RigidBody3D" parent="." unique_id=166407243 instance=ExtResource("41_pmrdi")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 10.876089, 0.35254753, 20.25)
-script = ExtResource("39_lhhfe")
 pose_seed = 1651035492
 visual_scene = ExtResource("40_k4e71")
 metadata/world_bound = true
 
 [node name="CorpseRevenantMutilated" type="Node3D" parent="." unique_id=259253433 instance=ExtResource("51_41rug")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 18.5, 0.0155, 11.75)
-script = ExtResource("46_dufcn")
 pose_seed = 790356342
 pose_variant = "left_side"
 pose_facing = 2.0644073464102073
@@ -47515,7 +47445,6 @@ metadata/world_bound = true
 
 [node name="@Node3D@96949" type="Node3D" parent="." unique_id=1379845553 instance=ExtResource("47_uuisu")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 15.75, 0.8730427, 9.75)
-script = ExtResource("46_dufcn")
 pose_seed = 1400010084
 pose_variant = "back"
 pose_facing = -2.532592653589793
@@ -47527,7 +47456,6 @@ metadata/world_bound = true
 
 [node name="@Node3D@96950" type="Node3D" parent="." unique_id=594838192 instance=ExtResource("47_uuisu")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 23.75, 0.0155, 8.25)
-script = ExtResource("46_dufcn")
 pose_seed = 1196409930
 pose_variant = "left_side"
 pose_facing = -2.071592653589793
@@ -47539,7 +47467,6 @@ metadata/world_bound = true
 
 [node name="@Node3D@96951" type="Node3D" parent="." unique_id=1952518101 instance=ExtResource("47_uuisu")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 21.5, 0.0155, 6.25)
-script = ExtResource("46_dufcn")
 pose_seed = 9209622
 pose_variant = "left_side"
 pose_facing = 1.885407346410207
@@ -47551,7 +47478,6 @@ metadata/world_bound = true
 
 [node name="@Node3D@96952" type="Node3D" parent="." unique_id=1042433636 instance=ExtResource("47_uuisu")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 23.25, 0.0155, 2.5)
-script = ExtResource("46_dufcn")
 pose_seed = 418873004
 pose_variant = "back"
 pose_facing = 1.1014073464102072
@@ -47563,7 +47489,6 @@ metadata/world_bound = true
 
 [node name="@Node3D@96953" type="Node3D" parent="." unique_id=1236408911 instance=ExtResource("47_uuisu")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 19.75, 0.015500008, -0.7259869)
-script = ExtResource("46_dufcn")
 pose_seed = 159573607
 pose_variant = "seated_side"
 pose_facing = 3.141592653589793
@@ -47575,7 +47500,6 @@ metadata/world_bound = true
 
 [node name="@RigidBody3D@96954" type="RigidBody3D" parent="." unique_id=1401069156 instance=ExtResource("38_8blqf")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 19.846321, 0.14367916, -1.2541634)
-script = ExtResource("39_lhhfe")
 pose_seed = 1996539477
 visual_scene = ExtResource("40_k4e71")
 part = &"head"
@@ -47583,7 +47507,6 @@ metadata/world_bound = true
 
 [node name="@RigidBody3D@96955" type="RigidBody3D" parent="." unique_id=1516956982 instance=ExtResource("38_8blqf")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 22.216867, 0.21478356, 2.11345)
-script = ExtResource("39_lhhfe")
 pose_seed = 707426314
 visual_scene = ExtResource("40_k4e71")
 part = &"head"
@@ -47591,7 +47514,6 @@ metadata/world_bound = true
 
 [node name="@RigidBody3D@96956" type="RigidBody3D" parent="." unique_id=1890996847 instance=ExtResource("38_8blqf")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 19.75, 0.18211915, 8.5)
-script = ExtResource("39_lhhfe")
 pose_seed = 420801547
 visual_scene = ExtResource("40_k4e71")
 part = &"head"
@@ -47599,7 +47521,6 @@ metadata/world_bound = true
 
 [node name="@RigidBody3D@96957" type="RigidBody3D" parent="." unique_id=6483404 instance=ExtResource("38_8blqf")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 25.25, 0.18971445, 7.25)
-script = ExtResource("39_lhhfe")
 pose_seed = 1828715401
 visual_scene = ExtResource("40_k4e71")
 part = &"head"
@@ -47607,7 +47528,6 @@ metadata/world_bound = true
 
 [node name="@RigidBody3D@96958" type="RigidBody3D" parent="." unique_id=1155325193 instance=ExtResource("38_8blqf")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 20.25166, 0.19940685, 17.045885)
-script = ExtResource("39_lhhfe")
 pose_seed = 788012247
 visual_scene = ExtResource("40_k4e71")
 part = &"head"
@@ -47615,49 +47535,42 @@ metadata/world_bound = true
 
 [node name="@RigidBody3D@96959" type="RigidBody3D" parent="." unique_id=1360391672 instance=ExtResource("41_pmrdi")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 19.25, 0.48559284, 12.25)
-script = ExtResource("39_lhhfe")
 pose_seed = 408533915
 visual_scene = ExtResource("40_k4e71")
 metadata/world_bound = true
 
 [node name="@RigidBody3D@96960" type="RigidBody3D" parent="." unique_id=1348366967 instance=ExtResource("41_pmrdi")]
 transform = Transform3D(0.49999997, 0, 0.86602545, 0, 1, 0, -0.86602545, 0, 0.49999997, 21, 0.31639665, 10)
-script = ExtResource("39_lhhfe")
 pose_seed = 925164424
 visual_scene = ExtResource("40_k4e71")
 metadata/world_bound = true
 
 [node name="@RigidBody3D@96961" type="RigidBody3D" parent="." unique_id=1227954076 instance=ExtResource("41_pmrdi")]
 transform = Transform3D(0.49999997, 0, 0.86602545, 0, 1, 0, -0.86602545, 0, 0.49999997, 22, 0.44962984, 6.25)
-script = ExtResource("39_lhhfe")
 pose_seed = 1575143017
 visual_scene = ExtResource("40_k4e71")
 metadata/world_bound = true
 
 [node name="@RigidBody3D@96962" type="RigidBody3D" parent="." unique_id=1406454764 instance=ExtResource("41_pmrdi")]
 transform = Transform3D(0.49999997, 0, 0.86602545, 0, 1, 0, -0.86602545, 0, 0.49999997, 22.5, 0.41724217, 2.75)
-script = ExtResource("39_lhhfe")
 pose_seed = 2022488678
 visual_scene = ExtResource("40_k4e71")
 metadata/world_bound = true
 
 [node name="@RigidBody3D@96963" type="RigidBody3D" parent="." unique_id=1212542792 instance=ExtResource("41_pmrdi")]
 transform = Transform3D(0.49999997, 0, 0.86602545, 0, 1, 0, -0.86602545, 0, 0.49999997, 21.25, 0.48364753, -0.75)
-script = ExtResource("39_lhhfe")
 pose_seed = 621839375
 visual_scene = ExtResource("40_k4e71")
 metadata/world_bound = true
 
 [node name="PartRevenantArm" type="RigidBody3D" parent="." unique_id=1788872135 instance=ExtResource("53_lw7rm")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 30.722305, 0.37092054, -10.300493)
-script = ExtResource("39_lhhfe")
 pose_seed = 1607256345
 visual_scene = ExtResource("52_l585w")
 metadata/world_bound = true
 
 [node name="PartRevenantHead" type="RigidBody3D" parent="." unique_id=862110106 instance=ExtResource("54_rhgew")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 31.5, 0.19575219, -9.75)
-script = ExtResource("39_lhhfe")
 pose_seed = 868570525
 visual_scene = ExtResource("52_l585w")
 part = &"head"
@@ -47665,7 +47578,6 @@ metadata/world_bound = true
 
 [node name="PartRevenantLeg" type="RigidBody3D" parent="." unique_id=1997682425 instance=ExtResource("55_50y8m")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 32, 0.30849347, -11)
-script = ExtResource("39_lhhfe")
 pose_seed = 11887458
 visual_scene = ExtResource("52_l585w")
 part = &"leg_l"
@@ -47673,7 +47585,6 @@ metadata/world_bound = true
 
 [node name="@RigidBody3D@96964" type="RigidBody3D" parent="." unique_id=219293425 instance=ExtResource("55_50y8m")]
 transform = Transform3D(1.1924881e-08, 0, -1, 0, 1, 0, 1, 0, 1.1924881e-08, 32.321754, 0.66639775, -9.939897)
-script = ExtResource("39_lhhfe")
 pose_seed = 1743378452
 visual_scene = ExtResource("52_l585w")
 part = &"leg_l"
@@ -49415,7 +49326,6 @@ metadata/planning_wall_mount = false
 
 [node name="PartBruteLeg" type="RigidBody3D" parent="." unique_id=680669388 instance=ExtResource("56_qj577")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 8.25, 0.3823701, 8.25)
-script = ExtResource("39_lhhfe")
 pose_seed = 1602120811
 visual_scene = ExtResource("57_7d06f")
 visual_scale = 1.1
@@ -49424,7 +49334,6 @@ metadata/world_bound = true
 
 [node name="@Node3D@97150" type="Node3D" parent="." unique_id=1751181370 instance=ExtResource("47_uuisu")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 9.75, 0.0155, 8.25)
-script = ExtResource("46_dufcn")
 pose_seed = 1687229339
 pose_variant = "seated_side"
 pose_facing = -1.570796446004172
@@ -49436,7 +49345,6 @@ metadata/world_bound = true
 
 [node name="@RigidBody3D@97151" type="RigidBody3D" parent="." unique_id=2103555618 instance=ExtResource("38_8blqf")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 7.75, 1.1434909, 11.25)
-script = ExtResource("39_lhhfe")
 pose_seed = 75141543
 visual_scene = ExtResource("40_k4e71")
 part = &"head"
@@ -50101,7 +50009,6 @@ metadata/planning_wall_mount = false
 
 [node name="@Node3D@97214" type="Node3D" parent="." unique_id=1254572918 instance=ExtResource("47_uuisu")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -8.260062, 0.0155, -4.4684315)
-script = ExtResource("46_dufcn")
 pose_seed = 2135646307
 pose_variant = "seated_side"
 pose_facing = -3.1415925343805178
@@ -50113,7 +50020,6 @@ metadata/world_bound = true
 
 [node name="@Node3D@97215" type="Node3D" parent="." unique_id=1439957318 instance=ExtResource("47_uuisu")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -7.9718795, 0.0155, -4.615619)
-script = ExtResource("46_dufcn")
 pose_seed = 1832071626
 pose_variant = "left_side"
 pose_facing = 2.231407346410207
@@ -50125,7 +50031,6 @@ metadata/world_bound = true
 
 [node name="@RigidBody3D@97216" type="RigidBody3D" parent="." unique_id=2100455481 instance=ExtResource("38_8blqf")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -7.1220307, 0.66091853, -5.105856)
-script = ExtResource("39_lhhfe")
 pose_seed = 263329340
 visual_scene = ExtResource("40_k4e71")
 part = &"head"
@@ -50133,7 +50038,6 @@ metadata/world_bound = true
 
 [node name="@RigidBody3D@97217" type="RigidBody3D" parent="." unique_id=1836909209 instance=ExtResource("38_8blqf")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -6.8619585, 0.67412215, -5.088191)
-script = ExtResource("39_lhhfe")
 pose_seed = 1257068253
 visual_scene = ExtResource("40_k4e71")
 part = &"head"
@@ -50141,7 +50045,6 @@ metadata/world_bound = true
 
 [node name="@RigidBody3D@97218" type="RigidBody3D" parent="." unique_id=2069065189 instance=ExtResource("38_8blqf")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -6.2731867, 0.5745521, -4.160534)
-script = ExtResource("39_lhhfe")
 pose_seed = 1982445870
 visual_scene = ExtResource("40_k4e71")
 part = &"head"
@@ -50149,7 +50052,6 @@ metadata/world_bound = true
 
 [node name="@RigidBody3D@97219" type="RigidBody3D" parent="." unique_id=341819544 instance=ExtResource("38_8blqf")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -6.2305746, 0.5193116, -4.492327)
-script = ExtResource("39_lhhfe")
 pose_seed = 795616920
 visual_scene = ExtResource("40_k4e71")
 part = &"head"
@@ -50157,28 +50059,24 @@ metadata/world_bound = true
 
 [node name="@RigidBody3D@97220" type="RigidBody3D" parent="." unique_id=2121134460 instance=ExtResource("41_pmrdi")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -6.7421923, 0.7272199, -4.9856725)
-script = ExtResource("39_lhhfe")
 pose_seed = 20897088
 visual_scene = ExtResource("40_k4e71")
 metadata/world_bound = true
 
 [node name="@RigidBody3D@97221" type="RigidBody3D" parent="." unique_id=1750690229 instance=ExtResource("41_pmrdi")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -6.4449596, 0.40938163, -4.4587235)
-script = ExtResource("39_lhhfe")
 pose_seed = 1843036267
 visual_scene = ExtResource("40_k4e71")
 metadata/world_bound = true
 
 [node name="@RigidBody3D@97222" type="RigidBody3D" parent="." unique_id=1648127278 instance=ExtResource("41_pmrdi")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -6.499355, 0.2372042, -4.504741)
-script = ExtResource("39_lhhfe")
 pose_seed = 937393990
 visual_scene = ExtResource("40_k4e71")
 metadata/world_bound = true
 
 [node name="CorpseRevenant" type="Node3D" parent="." unique_id=997017915 instance=ExtResource("60_50y8m")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -12, 0.0155, -6)
-script = ExtResource("46_dufcn")
 pose_seed = 1029898855
 pose_variant = "right_side"
 pose_facing = -1.0805926535897932
@@ -50205,7 +50103,6 @@ collision_layer = 2
 collision_mask = 3
 floor_stop_on_slope = false
 safe_margin = 0.02
-script = ExtResource("44_obuaf")
 max_health = 45.0
 move_speed = 5.4
 attack_damage = 12.0
@@ -50218,7 +50115,6 @@ collision_layer = 2
 collision_mask = 3
 floor_stop_on_slope = false
 safe_margin = 0.02
-script = ExtResource("44_obuaf")
 max_health = 45.0
 move_speed = 5.4
 attack_damage = 12.0
@@ -50231,7 +50127,6 @@ collision_layer = 2
 collision_mask = 3
 floor_stop_on_slope = false
 safe_margin = 0.02
-script = ExtResource("44_obuaf")
 max_health = 45.0
 move_speed = 5.4
 attack_damage = 12.0
@@ -50244,7 +50139,6 @@ collision_layer = 2
 collision_mask = 3
 floor_stop_on_slope = false
 safe_margin = 0.02
-script = ExtResource("44_obuaf")
 max_health = 45.0
 move_speed = 5.4
 attack_damage = 12.0
@@ -50257,7 +50151,6 @@ collision_layer = 2
 collision_mask = 3
 floor_stop_on_slope = false
 safe_margin = 0.02
-script = ExtResource("44_obuaf")
 max_health = 45.0
 move_speed = 5.4
 attack_damage = 12.0
@@ -50270,7 +50163,6 @@ collision_layer = 2
 collision_mask = 3
 floor_stop_on_slope = false
 safe_margin = 0.02
-script = ExtResource("44_obuaf")
 max_health = 45.0
 move_speed = 5.4
 attack_damage = 12.0
@@ -50283,7 +50175,6 @@ collision_layer = 2
 collision_mask = 3
 floor_stop_on_slope = false
 safe_margin = 0.02
-script = ExtResource("44_obuaf")
 max_health = 45.0
 move_speed = 5.4
 attack_damage = 12.0
@@ -50296,7 +50187,6 @@ collision_layer = 2
 collision_mask = 3
 floor_stop_on_slope = false
 safe_margin = 0.02
-script = ExtResource("44_obuaf")
 max_health = 45.0
 move_speed = 5.4
 attack_damage = 12.0
@@ -50309,7 +50199,6 @@ collision_layer = 2
 collision_mask = 3
 floor_stop_on_slope = false
 safe_margin = 0.02
-script = ExtResource("44_obuaf")
 max_health = 45.0
 move_speed = 5.4
 attack_damage = 12.0
@@ -50322,7 +50211,6 @@ collision_layer = 2
 collision_mask = 3
 floor_stop_on_slope = false
 safe_margin = 0.02
-script = ExtResource("44_obuaf")
 max_health = 45.0
 move_speed = 5.4
 attack_damage = 12.0
@@ -50335,7 +50223,6 @@ collision_layer = 2
 collision_mask = 3
 floor_stop_on_slope = false
 safe_margin = 0.02
-script = ExtResource("44_obuaf")
 max_health = 45.0
 move_speed = 5.4
 attack_damage = 12.0
@@ -50348,7 +50235,6 @@ collision_layer = 2
 collision_mask = 3
 floor_stop_on_slope = false
 safe_margin = 0.02
-script = ExtResource("44_obuaf")
 max_health = 45.0
 move_speed = 5.4
 attack_damage = 12.0
@@ -50361,7 +50247,6 @@ collision_layer = 2
 collision_mask = 3
 floor_stop_on_slope = false
 safe_margin = 0.02
-script = ExtResource("44_obuaf")
 max_health = 45.0
 move_speed = 5.4
 attack_damage = 12.0
@@ -50374,7 +50259,6 @@ collision_layer = 2
 collision_mask = 3
 floor_stop_on_slope = false
 safe_margin = 0.02
-script = ExtResource("44_obuaf")
 max_health = 45.0
 move_speed = 5.4
 attack_damage = 12.0
@@ -50387,7 +50271,6 @@ collision_layer = 2
 collision_mask = 3
 floor_stop_on_slope = false
 safe_margin = 0.02
-script = ExtResource("44_obuaf")
 max_health = 45.0
 move_speed = 5.4
 attack_damage = 12.0
@@ -50400,7 +50283,6 @@ collision_layer = 2
 collision_mask = 3
 floor_stop_on_slope = false
 safe_margin = 0.02
-script = ExtResource("44_obuaf")
 max_health = 45.0
 move_speed = 5.4
 attack_damage = 12.0
@@ -50413,7 +50295,6 @@ collision_layer = 2
 collision_mask = 3
 floor_stop_on_slope = false
 safe_margin = 0.02
-script = ExtResource("44_obuaf")
 max_health = 45.0
 move_speed = 5.4
 attack_damage = 12.0
@@ -50426,7 +50307,6 @@ collision_layer = 2
 collision_mask = 3
 floor_stop_on_slope = false
 safe_margin = 0.02
-script = ExtResource("44_obuaf")
 max_health = 45.0
 move_speed = 5.4
 attack_damage = 12.0
@@ -50439,7 +50319,6 @@ collision_layer = 2
 collision_mask = 3
 floor_stop_on_slope = false
 safe_margin = 0.02
-script = ExtResource("44_obuaf")
 max_health = 45.0
 move_speed = 5.4
 attack_damage = 12.0
@@ -50452,7 +50331,6 @@ collision_layer = 2
 collision_mask = 3
 floor_stop_on_slope = false
 safe_margin = 0.02
-script = ExtResource("44_obuaf")
 max_health = 45.0
 move_speed = 5.4
 attack_damage = 12.0
@@ -50465,7 +50343,6 @@ collision_layer = 2
 collision_mask = 3
 floor_stop_on_slope = false
 safe_margin = 0.02
-script = ExtResource("44_obuaf")
 max_health = 45.0
 move_speed = 5.4
 attack_damage = 12.0
@@ -50478,7 +50355,6 @@ collision_layer = 2
 collision_mask = 3
 floor_stop_on_slope = false
 safe_margin = 0.02
-script = ExtResource("44_obuaf")
 max_health = 45.0
 move_speed = 5.4
 attack_damage = 12.0
@@ -50491,7 +50367,6 @@ collision_layer = 2
 collision_mask = 3
 floor_stop_on_slope = false
 safe_margin = 0.02
-script = ExtResource("44_obuaf")
 max_health = 45.0
 move_speed = 5.4
 attack_damage = 12.0
@@ -50504,7 +50379,6 @@ collision_layer = 2
 collision_mask = 3
 floor_stop_on_slope = false
 safe_margin = 0.02
-script = ExtResource("44_obuaf")
 max_health = 45.0
 move_speed = 5.4
 attack_damage = 12.0
@@ -50517,7 +50391,6 @@ collision_layer = 2
 collision_mask = 3
 floor_stop_on_slope = false
 safe_margin = 0.02
-script = ExtResource("44_obuaf")
 max_health = 45.0
 move_speed = 5.4
 attack_damage = 12.0
@@ -50530,7 +50403,6 @@ collision_layer = 2
 collision_mask = 3
 floor_stop_on_slope = false
 safe_margin = 0.02
-script = ExtResource("44_obuaf")
 max_health = 45.0
 move_speed = 5.4
 attack_damage = 12.0
@@ -50543,7 +50415,6 @@ collision_layer = 2
 collision_mask = 3
 floor_stop_on_slope = false
 safe_margin = 0.02
-script = ExtResource("44_obuaf")
 max_health = 45.0
 move_speed = 5.4
 attack_damage = 12.0
@@ -50556,7 +50427,6 @@ collision_layer = 2
 collision_mask = 3
 floor_stop_on_slope = false
 safe_margin = 0.02
-script = ExtResource("44_obuaf")
 max_health = 45.0
 move_speed = 5.4
 attack_damage = 12.0
@@ -50569,7 +50439,6 @@ collision_layer = 2
 collision_mask = 3
 floor_stop_on_slope = false
 safe_margin = 0.02
-script = ExtResource("44_obuaf")
 max_health = 45.0
 move_speed = 5.4
 attack_damage = 12.0
@@ -50582,7 +50451,6 @@ collision_layer = 2
 collision_mask = 3
 floor_stop_on_slope = false
 safe_margin = 0.02
-script = ExtResource("44_obuaf")
 max_health = 45.0
 move_speed = 5.4
 attack_damage = 12.0
@@ -50595,7 +50463,6 @@ collision_layer = 2
 collision_mask = 3
 floor_stop_on_slope = false
 safe_margin = 0.02
-script = ExtResource("44_obuaf")
 max_health = 45.0
 move_speed = 5.4
 attack_damage = 12.0
@@ -50608,7 +50475,6 @@ collision_layer = 2
 collision_mask = 3
 floor_stop_on_slope = false
 safe_margin = 0.02
-script = ExtResource("44_obuaf")
 max_health = 45.0
 move_speed = 5.4
 attack_damage = 12.0
@@ -50621,7 +50487,6 @@ collision_layer = 2
 collision_mask = 3
 floor_stop_on_slope = false
 safe_margin = 0.02
-script = ExtResource("44_obuaf")
 max_health = 45.0
 move_speed = 5.4
 attack_damage = 12.0
@@ -50634,7 +50499,6 @@ collision_layer = 2
 collision_mask = 3
 floor_stop_on_slope = false
 safe_margin = 0.02
-script = ExtResource("44_obuaf")
 max_health = 45.0
 move_speed = 5.4
 attack_damage = 12.0
@@ -50647,7 +50511,6 @@ collision_layer = 2
 collision_mask = 3
 floor_stop_on_slope = false
 safe_margin = 0.02
-script = ExtResource("44_obuaf")
 max_health = 45.0
 move_speed = 5.4
 attack_damage = 12.0
@@ -50660,7 +50523,6 @@ collision_layer = 2
 collision_mask = 3
 floor_stop_on_slope = false
 safe_margin = 0.02
-script = ExtResource("44_obuaf")
 max_health = 45.0
 move_speed = 5.4
 attack_damage = 12.0
@@ -50673,7 +50535,6 @@ collision_layer = 2
 collision_mask = 3
 floor_stop_on_slope = false
 safe_margin = 0.02
-script = ExtResource("44_obuaf")
 max_health = 45.0
 move_speed = 5.4
 attack_damage = 12.0
@@ -50686,7 +50547,6 @@ collision_layer = 2
 collision_mask = 3
 floor_stop_on_slope = false
 safe_margin = 0.02
-script = ExtResource("44_obuaf")
 max_health = 45.0
 move_speed = 5.4
 attack_damage = 12.0
@@ -50699,7 +50559,6 @@ collision_layer = 2
 collision_mask = 3
 floor_stop_on_slope = false
 safe_margin = 0.02
-script = ExtResource("44_obuaf")
 max_health = 45.0
 move_speed = 5.4
 attack_damage = 12.0
@@ -50712,7 +50571,6 @@ collision_layer = 2
 collision_mask = 3
 floor_stop_on_slope = false
 safe_margin = 0.02
-script = ExtResource("44_obuaf")
 max_health = 45.0
 move_speed = 5.4
 attack_damage = 12.0
@@ -50725,7 +50583,6 @@ collision_layer = 2
 collision_mask = 3
 floor_stop_on_slope = false
 safe_margin = 0.02
-script = ExtResource("44_obuaf")
 max_health = 45.0
 move_speed = 5.4
 attack_damage = 12.0
@@ -50971,7 +50828,6 @@ collision_layer = 2
 collision_mask = 3
 floor_stop_on_slope = false
 safe_margin = 0.02
-script = ExtResource("44_obuaf")
 max_health = 45.0
 move_speed = 5.4
 attack_damage = 12.0
@@ -50984,7 +50840,6 @@ collision_layer = 2
 collision_mask = 3
 floor_stop_on_slope = false
 safe_margin = 0.02
-script = ExtResource("44_obuaf")
 max_health = 45.0
 move_speed = 5.4
 attack_damage = 12.0
@@ -50997,7 +50852,6 @@ collision_layer = 2
 collision_mask = 3
 floor_stop_on_slope = false
 safe_margin = 0.02
-script = ExtResource("44_obuaf")
 max_health = 45.0
 move_speed = 5.4
 attack_damage = 12.0
@@ -51010,7 +50864,6 @@ collision_layer = 2
 collision_mask = 3
 floor_stop_on_slope = false
 safe_margin = 0.02
-script = ExtResource("44_obuaf")
 max_health = 45.0
 move_speed = 5.4
 attack_damage = 12.0
@@ -51023,7 +50876,6 @@ collision_layer = 2
 collision_mask = 3
 floor_stop_on_slope = false
 safe_margin = 0.02
-script = ExtResource("44_obuaf")
 max_health = 45.0
 move_speed = 5.4
 attack_damage = 12.0
@@ -51036,7 +50888,6 @@ collision_layer = 2
 collision_mask = 3
 floor_stop_on_slope = false
 safe_margin = 0.02
-script = ExtResource("44_obuaf")
 max_health = 45.0
 move_speed = 5.4
 attack_damage = 12.0
@@ -51049,7 +50900,6 @@ collision_layer = 2
 collision_mask = 3
 floor_stop_on_slope = false
 safe_margin = 0.02
-script = ExtResource("44_obuaf")
 max_health = 45.0
 move_speed = 5.4
 attack_damage = 12.0
@@ -51062,7 +50912,6 @@ collision_layer = 2
 collision_mask = 3
 floor_stop_on_slope = false
 safe_margin = 0.02
-script = ExtResource("44_obuaf")
 max_health = 45.0
 move_speed = 5.4
 attack_damage = 12.0
@@ -51075,7 +50924,6 @@ collision_layer = 2
 collision_mask = 3
 floor_stop_on_slope = false
 safe_margin = 0.02
-script = ExtResource("44_obuaf")
 max_health = 45.0
 move_speed = 5.4
 attack_damage = 12.0
@@ -51088,7 +50936,6 @@ collision_layer = 2
 collision_mask = 3
 floor_stop_on_slope = false
 safe_margin = 0.02
-script = ExtResource("44_obuaf")
 max_health = 45.0
 move_speed = 5.4
 attack_damage = 12.0
@@ -51101,7 +50948,6 @@ collision_layer = 2
 collision_mask = 3
 floor_stop_on_slope = false
 safe_margin = 0.02
-script = ExtResource("44_obuaf")
 max_health = 45.0
 move_speed = 5.4
 attack_damage = 12.0
@@ -51114,7 +50960,6 @@ collision_layer = 2
 collision_mask = 3
 floor_stop_on_slope = false
 safe_margin = 0.02
-script = ExtResource("44_obuaf")
 max_health = 45.0
 move_speed = 5.4
 attack_damage = 12.0
@@ -51127,7 +50972,6 @@ collision_layer = 2
 collision_mask = 3
 floor_stop_on_slope = false
 safe_margin = 0.02
-script = ExtResource("44_obuaf")
 max_health = 45.0
 move_speed = 5.4
 attack_damage = 12.0
@@ -51140,7 +50984,6 @@ collision_layer = 2
 collision_mask = 3
 floor_stop_on_slope = false
 safe_margin = 0.02
-script = ExtResource("44_obuaf")
 max_health = 45.0
 move_speed = 5.4
 attack_damage = 12.0
@@ -51153,7 +50996,6 @@ collision_layer = 2
 collision_mask = 3
 floor_stop_on_slope = false
 safe_margin = 0.02
-script = ExtResource("44_obuaf")
 max_health = 45.0
 move_speed = 5.4
 attack_damage = 12.0
@@ -51166,7 +51008,6 @@ collision_layer = 2
 collision_mask = 3
 floor_stop_on_slope = false
 safe_margin = 0.02
-script = ExtResource("44_obuaf")
 max_health = 45.0
 move_speed = 5.4
 attack_damage = 12.0
@@ -51179,7 +51020,6 @@ collision_layer = 2
 collision_mask = 3
 floor_stop_on_slope = false
 safe_margin = 0.02
-script = ExtResource("44_obuaf")
 max_health = 45.0
 move_speed = 5.4
 attack_damage = 12.0
@@ -51192,7 +51032,6 @@ collision_layer = 2
 collision_mask = 3
 floor_stop_on_slope = false
 safe_margin = 0.02
-script = ExtResource("44_obuaf")
 max_health = 45.0
 move_speed = 5.4
 attack_damage = 12.0
@@ -51205,7 +51044,6 @@ collision_layer = 2
 collision_mask = 3
 floor_stop_on_slope = false
 safe_margin = 0.02
-script = ExtResource("44_obuaf")
 max_health = 45.0
 move_speed = 5.4
 attack_damage = 12.0
@@ -51218,7 +51056,6 @@ collision_layer = 2
 collision_mask = 3
 floor_stop_on_slope = false
 safe_margin = 0.02
-script = ExtResource("44_obuaf")
 max_health = 45.0
 move_speed = 5.4
 attack_damage = 12.0
@@ -51231,7 +51068,6 @@ collision_layer = 2
 collision_mask = 3
 floor_stop_on_slope = false
 safe_margin = 0.02
-script = ExtResource("44_obuaf")
 max_health = 45.0
 move_speed = 5.4
 attack_damage = 12.0
@@ -51244,7 +51080,6 @@ collision_layer = 2
 collision_mask = 3
 floor_stop_on_slope = false
 safe_margin = 0.02
-script = ExtResource("44_obuaf")
 max_health = 45.0
 move_speed = 5.4
 attack_damage = 12.0
@@ -51257,7 +51092,6 @@ collision_layer = 2
 collision_mask = 3
 floor_stop_on_slope = false
 safe_margin = 0.02
-script = ExtResource("44_obuaf")
 max_health = 45.0
 move_speed = 5.4
 attack_damage = 12.0
@@ -51270,7 +51104,6 @@ collision_layer = 2
 collision_mask = 3
 floor_stop_on_slope = false
 safe_margin = 0.02
-script = ExtResource("44_obuaf")
 max_health = 45.0
 move_speed = 5.4
 attack_damage = 12.0
@@ -51283,7 +51116,6 @@ collision_layer = 2
 collision_mask = 3
 floor_stop_on_slope = false
 safe_margin = 0.02
-script = ExtResource("44_obuaf")
 max_health = 45.0
 move_speed = 5.4
 attack_damage = 12.0
@@ -51296,7 +51128,6 @@ collision_layer = 2
 collision_mask = 3
 floor_stop_on_slope = false
 safe_margin = 0.02
-script = ExtResource("44_obuaf")
 max_health = 45.0
 move_speed = 5.4
 attack_damage = 12.0
@@ -51309,7 +51140,6 @@ collision_layer = 2
 collision_mask = 3
 floor_stop_on_slope = false
 safe_margin = 0.02
-script = ExtResource("44_obuaf")
 max_health = 45.0
 move_speed = 5.4
 attack_damage = 12.0
@@ -51322,7 +51152,6 @@ collision_layer = 2
 collision_mask = 3
 floor_stop_on_slope = false
 safe_margin = 0.02
-script = ExtResource("44_obuaf")
 max_health = 45.0
 move_speed = 5.4
 attack_damage = 12.0
@@ -51335,7 +51164,6 @@ collision_layer = 2
 collision_mask = 3
 floor_stop_on_slope = false
 safe_margin = 0.02
-script = ExtResource("44_obuaf")
 max_health = 45.0
 move_speed = 5.4
 attack_damage = 12.0
@@ -51348,7 +51176,6 @@ collision_layer = 2
 collision_mask = 3
 floor_stop_on_slope = false
 safe_margin = 0.02
-script = ExtResource("44_obuaf")
 max_health = 45.0
 move_speed = 5.4
 attack_damage = 12.0
@@ -51361,7 +51188,6 @@ collision_layer = 2
 collision_mask = 3
 floor_stop_on_slope = false
 safe_margin = 0.02
-script = ExtResource("44_obuaf")
 max_health = 45.0
 move_speed = 5.4
 attack_damage = 12.0
@@ -51374,7 +51200,6 @@ collision_layer = 2
 collision_mask = 3
 floor_stop_on_slope = false
 safe_margin = 0.02
-script = ExtResource("44_obuaf")
 max_health = 45.0
 move_speed = 5.4
 attack_damage = 12.0
@@ -51387,7 +51212,6 @@ collision_layer = 2
 collision_mask = 3
 floor_stop_on_slope = false
 safe_margin = 0.02
-script = ExtResource("44_obuaf")
 max_health = 45.0
 move_speed = 5.4
 attack_damage = 12.0
@@ -51400,7 +51224,6 @@ collision_layer = 2
 collision_mask = 3
 floor_stop_on_slope = false
 safe_margin = 0.02
-script = ExtResource("44_obuaf")
 max_health = 45.0
 move_speed = 5.4
 attack_damage = 12.0
@@ -51413,7 +51236,6 @@ collision_layer = 2
 collision_mask = 3
 floor_stop_on_slope = false
 safe_margin = 0.02
-script = ExtResource("44_obuaf")
 max_health = 45.0
 move_speed = 5.4
 attack_damage = 12.0
@@ -51426,7 +51248,6 @@ collision_layer = 2
 collision_mask = 3
 floor_stop_on_slope = false
 safe_margin = 0.02
-script = ExtResource("44_obuaf")
 max_health = 45.0
 move_speed = 5.4
 attack_damage = 12.0
@@ -51439,7 +51260,6 @@ collision_layer = 2
 collision_mask = 3
 floor_stop_on_slope = false
 safe_margin = 0.02
-script = ExtResource("44_obuaf")
 max_health = 75.0
 move_speed = 4.6
 attack_range = 1.25
@@ -51452,7 +51272,6 @@ collision_layer = 2
 collision_mask = 3
 floor_stop_on_slope = false
 safe_margin = 0.02
-script = ExtResource("44_obuaf")
 max_health = 75.0
 move_speed = 4.6
 attack_range = 1.25
@@ -51465,7 +51284,6 @@ collision_layer = 2
 collision_mask = 3
 floor_stop_on_slope = false
 safe_margin = 0.02
-script = ExtResource("44_obuaf")
 max_health = 45.0
 move_speed = 5.4
 attack_damage = 12.0
@@ -51478,7 +51296,6 @@ collision_layer = 2
 collision_mask = 3
 floor_stop_on_slope = false
 safe_margin = 0.02
-script = ExtResource("44_obuaf")
 max_health = 45.0
 move_speed = 5.4
 attack_damage = 12.0
@@ -51491,7 +51308,6 @@ collision_layer = 2
 collision_mask = 3
 floor_stop_on_slope = false
 safe_margin = 0.02
-script = ExtResource("44_obuaf")
 max_health = 45.0
 move_speed = 5.4
 attack_damage = 12.0
@@ -51504,7 +51320,6 @@ collision_layer = 2
 collision_mask = 3
 floor_stop_on_slope = false
 safe_margin = 0.02
-script = ExtResource("44_obuaf")
 max_health = 45.0
 move_speed = 5.4
 attack_damage = 12.0
@@ -51517,7 +51332,6 @@ collision_layer = 2
 collision_mask = 3
 floor_stop_on_slope = false
 safe_margin = 0.02
-script = ExtResource("44_obuaf")
 max_health = 45.0
 move_speed = 5.4
 attack_damage = 12.0
@@ -51530,7 +51344,6 @@ collision_layer = 2
 collision_mask = 3
 floor_stop_on_slope = false
 safe_margin = 0.02
-script = ExtResource("44_obuaf")
 max_health = 45.0
 move_speed = 5.4
 attack_damage = 12.0
@@ -51543,7 +51356,6 @@ collision_layer = 2
 collision_mask = 3
 floor_stop_on_slope = false
 safe_margin = 0.02
-script = ExtResource("44_obuaf")
 max_health = 45.0
 move_speed = 5.4
 attack_damage = 12.0
@@ -51556,7 +51368,6 @@ collision_layer = 2
 collision_mask = 3
 floor_stop_on_slope = false
 safe_margin = 0.02
-script = ExtResource("44_obuaf")
 max_health = 45.0
 move_speed = 5.4
 attack_damage = 12.0
@@ -51569,7 +51380,6 @@ collision_layer = 2
 collision_mask = 3
 floor_stop_on_slope = false
 safe_margin = 0.02
-script = ExtResource("44_obuaf")
 max_health = 45.0
 move_speed = 5.4
 attack_damage = 12.0

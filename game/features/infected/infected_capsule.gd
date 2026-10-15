@@ -366,6 +366,7 @@ func _physics_process(delta: float) -> void:
 		return
 	if _target == null or not is_instance_valid(_target):
 		return
+	audio.tick(delta, _pace.charging, global_position.distance_squared_to(_target.global_position) < 576.0)
 	if not _senses.is_chasing():
 		_unaware_tick(delta)
 		if not _senses.is_chasing():
@@ -415,7 +416,6 @@ func _physics_process(delta: float) -> void:
 	_apply_gravity(delta)
 	_intended_motion = Vector3(velocity.x, 0.0, velocity.z)
 	move_and_slide()
-	audio.tick(delta, distance_sq <= charge_distance * charge_distance, distance_sq < 24.0 * 24.0)
 	_push_chair_contacts()
 	_breaker.track_progress(self, delta, not _route.direct_clear())
 	if near or physics_frame % 4 == _ai_tick_offset:

@@ -12,15 +12,15 @@ radius = 0.45
 height = 1.85
 
 [node name="InfectedHunger" type="CharacterBody3D" groups=["infected"]]
-step_sound = &"step_light"
-growl_sound = &"growl_hunger"
-voice_pitch = 1.0
-step_pitch = 1.05
 collision_layer = 2
 collision_mask = 1
 safe_margin = 0.02
 floor_stop_on_slope = false
 script = ExtResource("2_enemy")
+step_sound = &"step_light"
+growl_sound = &"growl_hunger"
+voice_pitch = 1.0
+step_pitch = 1.05
 max_health = 45.0
 move_speed = 5.4
 attack_range = 1.2

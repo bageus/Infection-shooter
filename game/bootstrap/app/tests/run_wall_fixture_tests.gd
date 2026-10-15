@@ -232,7 +232,10 @@ func _base_map() -> void:
 		var file := str(r.scene).get_file()
 		return file.begins_with("wall_door") or file == "wall_emergency_door.tscn" or file == "sliding_glass_door.tscn").size()
 	var plan := FIXTURES.plan(data.objects, [])
-	_check(_count(plan.records, "switch") + plan.shortfall.switch == doors * 3, "Base map: three switch points per door (%d doors incl. glass)" % doors)
+	# Hand-placed switches satisfy part of the quota; generated ones are rebuilt.
+	var manual_switches: int = data.objects.filter(func(r: Dictionary) -> bool:
+		return str(r.scene) == PLACER.SWITCH and str(r.get("auto_fixture", "")).is_empty()).size()
+	_check(_count(plan.records, "switch") + plan.shortfall.switch + manual_switches == doors * 3, "Base map: three switch points per door (%d doors incl. glass)" % doors)
 	_check(_count(plan.records, "alarm") + plan.shortfall.alarm == doors * 1 and _count(plan.records, "call_point") == _count(plan.records, "alarm"), "Base map: one alarm point per door, one call point under each")
 	_check(plan.shortfall.switch == 0 and plan.shortfall.alarm == 0, "Base map has room for every point")
 	_check(_mounted_on_walls(data.objects, plan.records), "Base map: every fixture sits on a wall or column face")

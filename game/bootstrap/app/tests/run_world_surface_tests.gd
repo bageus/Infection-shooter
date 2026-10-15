@@ -119,6 +119,8 @@ func _streaming(stage: Node3D) -> void:
 
 func _planner_blood() -> void:
 	var stage := MAIN.instantiate()
+	# Roundtrip only the fixture marks and props, independent of authored decor.
+	stage.set("defer_layout_loading", true)
 	root.add_child(stage)
 	current_scene = stage
 	await process_frame

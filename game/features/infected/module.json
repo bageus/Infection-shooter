@@ -11,7 +11,8 @@
     "Colossus slam cooldown and ground wave",
     "Horde ram and summon state",
     "Body part durability, severed parts, skin wounds and corpse hit volumes",
-    "Mission-local priority queue and time/expansion budget for infected route searches"
+    "Mission-local priority queue and time/expansion budget for infected route searches",
+    "Species/action voice selection, cooldowns and chewing/agonizing sound timing"
   ],
   "public_api": [
     "public/infected_capsule.tscn",

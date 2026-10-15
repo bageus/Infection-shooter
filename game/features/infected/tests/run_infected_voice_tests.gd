@@ -23,6 +23,10 @@ func _run() -> void:
 	var second := _infected(stage, &"growl_brute")
 	_expect(first.scream_sound == &"scream_zombie" and second.scream_sound == &"roar_heavy", "Heavy infected call out with a roar.")
 	AUDIO._last_call_out_ms = -100000
+	first.body.set("alerted", false)
+	first.tick(0.016, false, true)
+	_expect(_count(first.body, &"scream_zombie") == 0 and not first.spotted, "Unaware infected never announce the player just because it is nearby.")
+	first.body.set("alerted", true)
 	first.tick(0.016, false, false)
 	_expect(_count(first.body, &"scream_zombie") == 0 and not first.spotted, "No call-out before the player is near.")
 	first.tick(0.016, false, true)

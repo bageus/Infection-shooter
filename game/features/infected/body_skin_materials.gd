@@ -5,7 +5,13 @@ extends RefCounted
 const BAKE := preload("res://game/features/infected/body_blood_bake.gd")
 const SHADER := preload("res://game/features/infected/body_wound.gdshader")
 const PAGE_LAYERS := 128
+const INSTANCE_SELECTOR := "instance uniform float blood_layer : instance_index(1) = -1.0;"
+const MATERIAL_SELECTOR := "uniform float blood_layer = -1.0;"
+## WebGL2 fallback (godotengine/godot#112674, instance-uniform UBO bug in 4.7.2):
+## every body owns a one-layer page, so blood_layer is a plain material parameter.
+static var _material_shader: Shader
 var _originals: Array
+var _per_body: bool
 var _pages: Array[Page] = []
 var _blank: Texture2DArray
 
@@ -16,19 +22,22 @@ class Page extends RefCounted:
 	var active := 0
 	var blank: Texture2DArray
 
-	func _init(skins: Array, empty: Texture2DArray) -> void:
+	var layer_count := PAGE_LAYERS
+
+	func _init(skins: Array, empty: Texture2DArray, layers := PAGE_LAYERS) -> void:
 		materials = skins
 		blank = empty
+		layer_count = layers
 		for material: ShaderMaterial in materials:
 			material.set_shader_parameter("blood_masks", blank)
-		for i in range(PAGE_LAYERS - 1, -1, -1):
+		for i in range(layer_count - 1, -1, -1):
 			available.append(i)
 
 	func upload(images: Array, layer: int) -> void:
 		if textures.is_empty():
 			var blank := BAKE.create_mask()
 			var layers: Array[Image] = []
-			for i in PAGE_LAYERS:
+			for i in layer_count:
 				layers.append(blank)
 			for material: ShaderMaterial in materials:
 				var texture := Texture2DArray.new()
@@ -58,21 +67,49 @@ class Lease extends RefCounted:
 		if what == NOTIFICATION_PREDELETE:
 			page.release(layer)
 
+	var per_body := false
+
+	## Materials a mesh surface must use: shared per page natively, private per body on Web.
+	var materials: Array:
+		get:
+			return page.materials
+
 	func bind(instance: MeshInstance3D, bloody := false) -> void:
 		instance.set_meta("body_skin_lease", self)
-		instance.set_instance_shader_parameter(&"blood_layer", float(layer) if bloody else -1.0)
+		var selector := float(layer) if bloody else -1.0
+		if per_body:
+			for material: ShaderMaterial in page.materials:
+				material.set_shader_parameter(&"blood_layer", selector)
+		else:
+			instance.set_instance_shader_parameter(&"blood_layer", selector)
+
+	## Current wound selector (-1 = clean) for this lease's body, whichever path stores it.
+	func selector(instance: MeshInstance3D) -> float:
+		if per_body:
+			return float(page.materials[0].get_shader_parameter(&"blood_layer"))
+		return float(instance.get_instance_shader_parameter(&"blood_layer"))
 
 	func upload(images: Array) -> void:
 		page.upload(images, layer)
 
-func _init(originals: Array) -> void:
+func _init(originals: Array, per_body := OS.has_feature("web")) -> void:
 	_originals = originals.duplicate()
+	_per_body = per_body
 	# Supply a valid sampler even for clean bodies (required by Forward+).
 	_blank = Texture2DArray.new()
 	var empty: Array[Image] = [Image.create(1, 1, false, Image.FORMAT_RG8)]
 	_blank.create_from_images(empty)
 
 func acquire() -> Lease:
+	if _per_body:
+		var own: Array = []
+		for original: Material in _originals:
+			own.append(create_material(original, material_shader()))
+		var solo := Page.new(own, _blank, 1)
+		solo.active = 1
+		var lease := Lease.new(solo, solo.available.pop_back())
+		lease.per_body = true
+		return lease
 	for page in _pages:
 		if not page.available.is_empty():
 			page.active += 1
@@ -97,9 +134,17 @@ static func signature(originals: Array) -> Array:
 			values.append(null)
 	return values
 
-static func create_material(original: Material) -> ShaderMaterial:
+## Same source as body_wound.gdshader with blood_layer as a plain uniform.
+static func material_shader() -> Shader:
+	if _material_shader == null:
+		assert(SHADER.code.contains(INSTANCE_SELECTOR), "blood_layer declaration changed")
+		_material_shader = Shader.new()
+		_material_shader.code = SHADER.code.replace(INSTANCE_SELECTOR, MATERIAL_SELECTOR)
+	return _material_shader
+
+static func create_material(original: Material, shader: Shader = SHADER) -> ShaderMaterial:
 	var material := ShaderMaterial.new()
-	material.shader = SHADER
+	material.shader = shader
 	if original is BaseMaterial3D:
 		var base := original as BaseMaterial3D
 		material.set_shader_parameter("albedo_color", base.albedo_color)

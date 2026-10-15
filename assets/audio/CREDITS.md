@@ -320,3 +320,14 @@ Reproducible with `python tools/build_destruction_sounds.py`. Derived from the e
 | weapon_switch | weapon_pickup, dry_fire (short handling cut) |
 
 mutation_open/mutation_close: original CC0-1.0 procedural synthesis with tools/build_ui_sounds.py; close is the exact reverse of open, by 16-bit sample.
+
+## Owner-supplied music, server fans and enemy voices (2026-10-15)
+
+The repository owner supplied the 17 WAV recordings in `music/`,
+`sfx/coller_server/` and `sfx/zombie_misc/` and requested their use in the game.
+Original filenames and WAV bytes are preserved. No external recording was added.
+`tools/build_added_audio.py` converts them to Vorbis and copies the ten voice
+recordings into nine action groups; this does not create new performances.
+`added_audio_processing.json` records source/output paths, trims and loop overlap.
+The existing CC0 attribution of other synthesized/source recordings does not
+assign a new license to these owner-supplied recordings.

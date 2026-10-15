@@ -283,7 +283,9 @@
     "mutationBranchClosed": "Закрыто",
     "mutationEnabled": "Активен",
     "mutationActiveSkill": "Активный навык",
-    "mutationPassiveSkill": "Пассивный навык"
+    "mutationPassiveSkill": "Пассивный навык",
+    "menuMusic": "Музыка в меню",
+    "menuMusicVolume": "Громкость музыки в меню"
   },
   "en": {
     "demo": "INTERACTIVE UI DEMO",
@@ -569,6 +571,8 @@
     "mutationBranchClosed": "Locked",
     "mutationEnabled": "Active",
     "mutationActiveSkill": "Active skill",
-    "mutationPassiveSkill": "Passive skill"
+    "mutationPassiveSkill": "Passive skill",
+    "menuMusic": "Menu music",
+    "menuMusicVolume": "Menu music volume"
   }
 }

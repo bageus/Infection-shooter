@@ -63,7 +63,7 @@ func setup(body_owner: Node3D, visual_root: Node3D, strength: float) -> bool:
 			continue
 		var pool: RefCounted = MESH.skin_pool(data, originals)
 		var lease: RefCounted = pool.acquire()
-		var materials: Array = lease.page.materials
+		var materials: Array = lease.materials
 		for surface in materials.size():
 			mesh_instance.set_surface_override_material(surface, materials[surface])
 		lease.bind(mesh_instance)
@@ -280,7 +280,7 @@ func sever(part: StringName, direction: Vector3, spawn_piece := true) -> RigidBo
 func _spawn_piece(part: StringName, info: Dictionary, joint_world: Vector3, direction: Vector3) -> RigidBody3D:
 	var entry: Dictionary = _entries[0]
 	var lease := piece_skin(entry)
-	var built := MESH.build_piece(entry.data, info.bones, skeleton, lease.page.materials)
+	var built := MESH.build_piece(entry.data, info.bones, skeleton, lease.materials)
 	if built.is_empty():
 		return null
 	var piece := SEVERED.new()

@@ -30,7 +30,7 @@ func _ready() -> void:
 		instance.position = Vector3(i % 13, -floori(i / 13.0), 0)
 		var lease: RefCounted = pool.acquire()
 		for surface in 2:
-			instance.set_surface_override_material(surface, lease.page.materials[surface])
+			instance.set_surface_override_material(surface, lease.materials[surface])
 		lease.bind(instance)
 		add_child(instance)
 		instances.append(instance)
@@ -57,10 +57,11 @@ func _ready() -> void:
 			_check(absf(right.r - right.g) < 0.06, "clean right surface " + str(i))
 		var clean := _sample(image, camera, instances[1].position + Vector3(-0.2, 0, 0))
 		_check(absf(clean.r - clean.g) < 0.06, "clean neighbor")
-	_check(instances[0].get_active_material(0) == instances[127].get_active_material(0), "same page material")
+	var per_body := OS.has_feature("web")
+	_check((instances[0].get_active_material(0) == instances[127].get_active_material(0)) != per_body, "page material sharing matches the renderer path")
 	_check(instances[0].get_active_material(0) != instances[128].get_active_material(0), "overflow page material")
 	_check(float(instances[2].get_instance_shader_parameter(&"fade")) == 0.25, "poison fade")
-	_check(float(instances[2].get_instance_shader_parameter(&"blood_layer")) == -1.0, "poison blood independence")
+	_check((instances[2].get_meta("body_skin_lease") as RefCounted).selector(instances[2]) == -1.0, "poison blood independence")
 	var result := {"errors": errors, "instances": 129, "surfaces": 258, "slots": [0, 1], "array_layers": 128, "renderer": RenderingServer.get_video_adapter_name(), "draw_calls": RenderingServer.get_rendering_info(RenderingServer.RENDERING_INFO_TOTAL_DRAW_CALLS_IN_FRAME)}
 	print("WEB_SKIN_PROBE ", JSON.stringify(result))
 	if OS.has_feature("web"):

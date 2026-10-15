@@ -241,9 +241,10 @@ func _feeding() -> void:
 		await physics_frame
 		waited += 1
 	_check(_player_of(eater).current_animation == "BiteLoop", "Then it gnaws on all fours (%s)." % _player_of(eater).current_animation)
-	# Keep the target in charge range: far LOD may re-evaluate the temporary
-	# all-fours posture on any of the next three frames, depending on ObjectID.
+	# Keep the target in charge range relative to the current eater position.
+	# A feral fixture stays on all fours when the chase phase re-evaluates it.
 	target.position = eater.global_position + Vector3(0, 0, -8)
+	eater.set("_feral", true)
 	eater.call("hear_alert", eater.global_position, 50.0)
 	# The meal ends on the frame the chase starts; read the posture on that frame,
 	# since the chase pace may stand it up again a tick later.
