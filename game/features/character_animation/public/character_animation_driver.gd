@@ -14,6 +14,7 @@ const POSE := preload("res://game/features/character_animation/procedural_pose.g
 const GAIT := preload("res://game/features/character_animation/procedural_gait.gd")
 const HIT_REACTION := preload("res://game/features/character_animation/hit_reaction.gd")
 const LEG_MOTION := preload("res://game/features/character_animation/leg_clip_motion.gd")
+const OVERLAY := preload("res://game/features/character_animation/clip_overlay.gd")
 const DODGE_ROLL := 0
 const DODGE_STRAFE := 1
 const STATE_ATTACK := &"attack"
@@ -36,7 +37,11 @@ const ONE_SHOT_TOKENS := {
 	&"death_back": ["deathback", "death", "dead"],
 	&"slam": ["slam"],
 	&"summon": ["summon"],
+	&"attack_crawl": ["crawlattack"],
 }
+# A strike lands this many seconds into a clip that names its strike_time.
+const STRIKE_WINDUP := 0.35
+const MAX_ATTACK_SPEED := 2.2
 const FLINCH_SECONDS := 0.16
 
 @export var character_path: NodePath = NodePath("..")
@@ -54,6 +59,9 @@ const FLINCH_SECONDS := 0.16
 ## strafe jumps, ADR-0044); they replace the procedural gait and leave the arms
 ## and the weapon hold to the upper-body clips.
 @export var leg_clips: AnimationLibrary
+## Clips merged into the model's own default library (same names win), so a
+## rebuilt model keeps authored extras such as the Mixamo set (ADR-0045).
+@export var extra_clips: AnimationLibrary
 ## Playback speed is scaled by speed / reference while moving; 0 disables it.
 @export var walk_reference_speed := 0.0
 @export var run_reference_speed := 0.0
@@ -74,6 +82,7 @@ var legs: SkeletonModifier3D
 ## Which dodge clips play_dodge uses: DODGE_ROLL (dive roll) or DODGE_STRAFE (strafe jump).
 var dodge_style := DODGE_ROLL
 var hit_reaction: SkeletonModifier3D
+var overlay: SkeletonModifier3D
 var _current := ""
 var _animations: Dictionary = {}
 var _locomotion: Dictionary = {}
@@ -118,9 +127,11 @@ func play_one_shot(state: StringName) -> float:
 		if clip.is_empty():
 			return 0.0
 		_current = clip
-		animation_player.speed_scale = 1.0
+		var animation := animation_player.get_animation(clip)
+		var scale := _strike_speed(animation)
+		animation_player.speed_scale = scale
 		animation_player.play(clip, 0.08)
-		length = animation_player.get_animation(clip).length
+		length = animation.length / scale
 	elif _target != null:
 		length = procedural_death_seconds if state in DEATH_STATES else procedural_attack_seconds
 	else:
@@ -131,6 +142,56 @@ func play_one_shot(state: StringName) -> float:
 	_dead = state in DEATH_STATES
 	_pose.death_forward = state == &"death_forward"
 	return length
+
+
+# Public animation_events_v1 addition (ADR-0045): plays a clip by name once and
+# emits one_shot_finished(name) when done; the character keeps its place. Returns
+# the duration in seconds, 0.0 when the clip does not exist or the character is dead.
+func play_named_one_shot(clip_name: StringName, blend: float = 0.12, speed: float = 1.0) -> float:
+	if _dead or animation_player == null or not animation_player.has_animation(clip_name):
+		return 0.0
+	var animation := animation_player.get_animation(clip_name)
+	_current = String(clip_name)
+	animation_player.speed_scale = speed
+	animation_player.play(clip_name, blend)
+	_one_shot = clip_name
+	_one_shot_elapsed = 0.0
+	_one_shot_length = animation.length / speed
+	return _one_shot_length
+
+
+# Public animation_events_v1 addition (ADR-0045): flinches the upper body with a
+# clip (the legs keep their motion). False without that clip.
+func play_overlay(clip_name: StringName) -> bool:
+	if _dead or animation_player == null or not animation_player.has_animation(clip_name):
+		return false
+	if overlay == null:
+		var skeletons := animation_player.get_parent().find_children("*", "Skeleton3D", true, false)
+		if skeletons.is_empty():
+			return false
+		overlay = OVERLAY.new()
+		overlay.name = "ClipOverlay"
+		(skeletons[0] as Node).add_child(overlay)
+	overlay.call("play", animation_player.get_animation(clip_name))
+	return true
+
+
+# Public animation_events_v1 addition (ADR-0045): length of a clip, 0.0 if unknown.
+func clip_length(clip_name: StringName) -> float:
+	return animation_player.get_animation(clip_name).length if animation_player != null and animation_player.has_animation(clip_name) else 0.0
+
+
+# Public animation_events_v1 addition (ADR-0045): a clip's metadata (turn_yaw, yaw_curve, strike_time).
+func clip_meta(clip_name: StringName, key: StringName, default: Variant = null) -> Variant:
+	if animation_player == null or not animation_player.has_animation(clip_name):
+		return default
+	return animation_player.get_animation(clip_name).get_meta(key, default)
+
+
+# Plays faster when the clip's strike lands later than the wind-up allows.
+func _strike_speed(animation: Animation) -> float:
+	var strike := float(animation.get_meta("strike_time", 0.0))
+	return clampf(strike / STRIKE_WINDUP, 1.0, MAX_ATTACK_SPEED) if strike > 0.0 else 1.0
 
 
 # Public animation_events_v1 addition (ADR-0044): plays the dodge clip for
@@ -254,7 +315,7 @@ func _process_skeletal(speed: float) -> void:
 	_apply_flinch_overlay()
 	if not _one_shot.is_empty() or _dead:
 		return
-	if _play_selected_clip():
+	if _play_selected_clip(speed):
 		return
 	var run_floor := run_speed_threshold * (run_exit_ratio if _current == _locomotion.get(&"run", "") else 1.0)
 	if speed > run_floor or (speed > 0.15 and _locomotion.get(&"walk", "").is_empty()):
@@ -291,12 +352,17 @@ func _apply_flinch_overlay() -> void:
 		_overlay_applied = false
 
 
-func _play_selected_clip() -> bool:
+func _play_selected_clip(speed: float = 0.0) -> bool:
 	if not _clip_selector.is_valid():
 		return false
 	var requested := StringName(_clip_selector.call())
 	if animation_player.has_animation(requested):
 		_play_clip(String(requested))
+		# Cycles that name the ground speed they are paced for follow the actual speed.
+		var reference := float(animation_player.get_animation(requested).get_meta("ref_speed", 0.0))
+		var wanted := clampf(speed / reference, 0.5, 1.8) if reference > 0.0 and speed > 0.15 else 1.0
+		if not is_equal_approx(animation_player.speed_scale, wanted):
+			animation_player.speed_scale = wanted
 		return true
 	if not requested.is_empty() and not _missing_clips.has(requested):
 		_missing_clips[requested] = true
@@ -355,13 +421,27 @@ func _pick_one_shot_clip(state: StringName) -> String:
 	if state == STATE_ATTACK:
 		var sides: Array[String] = []
 		for token in ["attackleft", "attackright"]:
-			var side := _find_clip([token])
+			var side := _pick_variant(token)
 			if not side.is_empty():
 				sides.append(side)
 		if not sides.is_empty():
 			_attack_side = not _attack_side
 			return sides[int(_attack_side) % sides.size()]
+	if state in [&"attack_left", &"attack_right"]:
+		var variant := _pick_variant(String(ONE_SHOT_TOKENS[state][0]))
+		if not variant.is_empty():
+			return variant
 	return _find_clip(ONE_SHOT_TOKENS[state])
+
+
+# A random clip named token or token + digits (AttackLeft, AttackLeft2).
+func _pick_variant(token: String) -> String:
+	var found: Array[String] = []
+	for normalized: String in _animations:
+		var squashed := normalized.replace("_", "")
+		if squashed.begins_with(token) and squashed.substr(token.length()).is_valid_int() or squashed == token:
+			found.append(_animations[normalized])
+	return found[randi() % found.size()] if not found.is_empty() else ""
 
 
 # Exact normalized match first, then the shortest clip containing the token.
@@ -458,11 +538,19 @@ func _attach_hit_reaction(model: Node) -> void:
 
 
 func _apply_animation_library() -> void:
-	if animation_library == null:
+	if animation_library != null:
+		for library_name in animation_player.get_animation_library_list():
+			animation_player.remove_animation_library(library_name)
+		animation_player.add_animation_library(&"", animation_library)
+	if extra_clips == null or not animation_player.has_animation_library(&""):
 		return
-	for library_name in animation_player.get_animation_library_list():
-		animation_player.remove_animation_library(library_name)
-	animation_player.add_animation_library(&"", animation_library)
+	var merged := animation_player.get_animation_library(&"").duplicate(false) as AnimationLibrary
+	for clip_name in extra_clips.get_animation_list():
+		if merged.has_animation(clip_name):
+			merged.remove_animation(clip_name)
+		merged.add_animation(clip_name, extra_clips.get_animation(clip_name))
+	animation_player.remove_animation_library(&"")
+	animation_player.add_animation_library(&"", merged)
 
 
 func _feet_height(node: Node) -> float:

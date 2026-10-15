@@ -158,6 +158,7 @@ func _run() -> void:
 	stage.add_child(target)
 	var enemy := HUNGER.instantiate()
 	enemy.position.y = 0.1
+	enemy.rest_behaviours = false
 	stage.add_child(enemy)
 	var senses := Senses.new()
 	enemy._senses = senses

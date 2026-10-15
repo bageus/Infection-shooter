@@ -288,7 +288,7 @@ func _apply_damage(amount: float, blast: bool) -> void:
 		blood_wounded.emit(global_position, _blood_exclusions())
 	# Damage over time arrives in tiny per-frame bits; only real hits flinch.
 	if health > 0.0 and _animation != null and amount >= 1.0:
-		_animation.call("notify_hit", _reaction_point, _reaction_direction, clampf(amount / (max_health * 0.2), 0.6, 1.3))
+		_react_to_hit(clampf(amount / (max_health * 0.2), 0.6, 1.3))
 	_reaction_direction = Vector3.ZERO
 	if health <= 0.0:
 		_die()
@@ -367,7 +367,7 @@ func _physics_process(delta: float) -> void:
 	if _target == null or not is_instance_valid(_target):
 		return
 	if not _senses.is_chasing():
-		_senses.step_unaware(self, delta)
+		_unaware_tick(delta)
 		if not _senses.is_chasing():
 			return
 		_notice_player()
@@ -420,6 +420,14 @@ func _physics_process(delta: float) -> void:
 	_breaker.track_progress(self, delta, not _route.direct_clear())
 	if near or physics_frame % 4 == _ai_tick_offset:
 		_try_break_blocking_props()
+
+
+# Hook for specialised enemies: one step of looking, listening and strolling.
+func _unaware_tick(delta: float) -> void: _senses.step_unaware(self, delta)
+
+
+# Hook for specialised enemies: how a hit that leaves the enemy alive shows.
+func _react_to_hit(strength: float) -> void: _animation.call("notify_hit", _reaction_point, _reaction_direction, strength)
 
 
 func _desired_velocity_from_offset(offset: Vector3) -> Vector3:
@@ -522,15 +530,7 @@ func _deliver_attack() -> void:
 
 # Swing with whichever arm is still attached.
 func _attack_state() -> StringName:
-	if _parts == null:
-		return &"attack"
-	var left: bool = not _parts.is_severed(&"arm_l")
-	var right: bool = not _parts.is_severed(&"arm_r")
-	if left and not right:
-		return &"attack_left"
-	if right and not left:
-		return &"attack_right"
-	return &"attack"
+	return &"attack" if _parts == null else _parts.attack_state()
 
 
 func _play_animation(state: StringName) -> float:
@@ -539,13 +539,12 @@ func _play_animation(state: StringName) -> float:
 	return float(_animation.call("play_one_shot", state))
 
 
+func _track_blood_motion() -> void: _blood.track(self, _dead, health >= max_health, blood_drop_distance, _blood_exclusions())
+
+
 func _blood_exclusions() -> Array[RID]:
 	var excluded: Array[RID] = [get_rid()]
 	return excluded
-
-
-func _track_blood_motion() -> void:
-	_blood.track(self, _dead, health >= max_health, blood_drop_distance, _blood_exclusions())
 
 
 # Blood dripping from torn-off limbs leaves marks under the stump.

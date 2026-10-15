@@ -32,7 +32,7 @@ func _run() -> void:
 	_add_floor(stage)
 	await _test_arm_shot_off(stage)
 	await _test_headshot_kills(stage)
-	await _test_small_enemy_dies_from_leg(stage)
+	await _test_small_enemy_crawls_on_one_leg(stage)
 	await _test_large_enemy_limps_and_fights_one_armed(stage)
 	await _test_durability_scales_with_size(stage)
 	await _test_corpse_stays_shootable(stage)
@@ -152,11 +152,15 @@ func _test_headshot_kills(stage: Node3D) -> void:
 	await process_frame
 
 
-func _test_small_enemy_dies_from_leg(stage: Node3D) -> void:
+func _test_small_enemy_crawls_on_one_leg(stage: Node3D) -> void:
 	var enemy := await _spawn(stage, ZOMBIE, Vector3(8, 1.0, 0))
 	await _shoot(enemy, &"leg_r", 12.0, 6)
 	_expect(enemy.get("_parts").is_severed(&"leg_r"), "The zombie's leg can be shot off.")
-	_expect(bool(enemy.get("_dead")), "A small infected dies from losing a leg.")
+	# The Hunger family drags itself on with one leg (ADR-0045) and dies without any.
+	_expect(not bool(enemy.get("_dead")), "A small infected survives losing one leg and crawls.")
+	_expect(is_equal_approx(float(enemy.get("_mobility")), 0.28), "A one-legged infected crawls slowly.")
+	await _shoot(enemy, &"leg_l", 12.0, 6)
+	_expect(bool(enemy.get("_dead")), "A small infected dies from losing both legs.")
 	enemy.queue_free()
 	await process_frame
 

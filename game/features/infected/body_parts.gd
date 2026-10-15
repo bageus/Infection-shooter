@@ -125,6 +125,15 @@ func is_severed(part: StringName) -> bool:
 	return parts.has(part) and bool(parts[part].severed)
 
 
+# The attack state of an enemy that swings with whichever arm is still attached.
+func attack_state() -> StringName:
+	var left := not is_severed(&"arm_l")
+	var right := not is_severed(&"arm_r")
+	if left and not right:
+		return &"attack_left"
+	return &"attack_right" if right and not left else &"attack"
+
+
 func remaining(prefix: String) -> int:
 	var count := 0
 	for part: StringName in parts:
