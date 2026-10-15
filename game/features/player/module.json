@@ -23,6 +23,9 @@
     "core.vfx"
   ],
   "runtime_contracts": {
+    "walk_tuning_v1": {
+      "set_walk_tuning": "set_walk_tuning(speed_multiplier: float, animation_multiplier: float) -> void; walk 0.5..1.5 times authored move_speed; leg cycle 0.5..2.0, defaults 1.0; sprint/dodge speeds and mutation multipliers unchanged"
+    },
     "mission_wiring_v1": {
       "configure_world": "configure_world(container: Node3D, impacts: Node) -> void",
       "configure_weapon_drop": "configure_weapon_drop(command: Callable) -> void; command(index, world_position) -> bool"

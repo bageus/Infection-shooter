@@ -25,6 +25,7 @@
       "clip_meta": "clip_meta(clip, key, default) -> Variant; clip_length(clip) -> float (ADR-0045)"
     },
     "animation_assets_v1": {
+      "leg_playback_multiplier": "@export float = 1.0, finite and clamped 0.5..2.0; scales only leg_clips locomotion after speed matching, live and before attachment; upper-body, one-shot and dodge clocks unchanged (ADR-0050)",
       "animation_library": "@export AnimationLibrary; optional clip set replacing the model's own clips (ADR-0016)",
       "procedural_gait": "@export bool; speed-synchronised leg gait layered over authored clips, presentation only (ADR-0016); knees bend in the plane the foot points along (ADR-0040)",
       "run_exit_ratio": "@export float = 0.85; a running character keeps the run clip down to this share of run_speed_threshold (ADR-0040)",

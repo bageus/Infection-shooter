@@ -158,6 +158,10 @@ func set_dodge_animation_style(style: int) -> void:
 	player.call("set_dodge_animation_style", style)
 
 
+func set_walk_tuning(speed_multiplier: float, animation_multiplier: float) -> void:
+	player.call("set_walk_tuning", speed_multiplier, animation_multiplier)
+
+
 func _unhandled_key_input(event: InputEvent) -> void:
 	if is_instance_valid(antidote_confirmation) and antidote_confirmation.call("is_open"):
 		return
