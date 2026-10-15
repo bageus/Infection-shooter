@@ -309,6 +309,7 @@ jobs:
           game/bootstrap/app/tests/run_enemy_loot_tests.gd
           game/bootstrap/app/tests/run_planning_mode_tests.gd
           game/bootstrap/app/tests/run_placement_templates_weapons_tests.gd
+          game/bootstrap/app/tests/run_desk_template_atomic_tests.gd
           game/bootstrap/app/tests/run_planner_light_view_tests.gd
           game/bootstrap/app/tests/run_planner_object_settings_tests.gd
           game/bootstrap/app/tests/run_spawn_planner_tests.gd

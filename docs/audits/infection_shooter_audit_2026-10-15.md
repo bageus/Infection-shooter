@@ -97,6 +97,8 @@ wall_only_sheltered=true same_wall_with_6_props_sheltered=false
 
 ## A04. Некорректный шаблон стола разрушительно применяется
 
+**Повторная проверка:** исправление с предварительной проверкой и подготовкой композиции описано в [QA atomic desk template](../qa/atomic_desk_template.md). Исходное воспроизведение ниже сохранено.
+
 **Код:** [desk_setup_template_files.gd:59–70](https://github.com/bageus/Infection-shooter/blob/0e154b73/game/bootstrap/app/desk_setup_template_files.gd#L59-L70), [desk_setup_template_actions.gd:47–111](https://github.com/bageus/Infection-shooter/blob/0e154b73/game/bootstrap/app/desk_setup_template_actions.gd#L47-L111).
 
 Загрузчик проверяет только верхние `version` и `desk`. `load_selected()` сначала удаляет текущие attachments и очищает зоны, затем начинает разбирать новый шаблон. Вложенная структура не проверена до удаления.

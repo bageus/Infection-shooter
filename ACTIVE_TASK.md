@@ -7,6 +7,14 @@ owner: AI
 updated: 2026-10-16
 ---
 
+16.10.2026 (A04 — реализация и QA): template_schema проверяет вложенный v1 payload/числа/размеры/модельные пути; FILES валидирует save/load до замены файла. load_selected сначала готовит все новые узлы в process-disabled контейнере, проверяет существующими zone/geometry правилами, затем единым синхронным commit меняет attachments/zones/front/placed. При отказе прежняя композиция и метаданные сохранены, подготовленные узлы освобождены; valid empty разрешён и очищает только выбранный стол. Legacy optional v1 defaults сохранены. Новый suite40 malformed payloads + поздний factory/geometry/category/surface/overflow/required отказ, valid/legacy/floor/empty и byte-preserving save; прежние два production scripts дают286 assertion failures, исправленные0. Все8 целевых suites и3 Python workstation tests PASS; последний atomic/UI repeat и gates/editor проверены.7 прежних main-based suites сохраняют ObjectDB60 (A05), новый suite чист. Docs/qa/atomic_desk_template.md, статус аудита и ADR0003 обновлены. Public API/JSON version1/DTO/сцены/ресурсы/зависимости и владельцы прежние, исключений нет. Следующее точное действие — проверить CI веткиcodex/atomic-desk-template и визуальную приёмку Windows/Web; merge не поручен. T004 IN_PROGRESS.
+
+
+
+16.10.2026 (аудит A04, прямой запрос владельца): инкремент T004, IMPLEMENTATION/READY, фаза1/P1_LOGIC; база main24e1f84c включает A02/A03 и настройку солнца PR209. Владелец шаблонов/placed instances bootstrap.app. Ожидаемые файлы: standalone desk_setup_template_schema.gd без зависимости на WORKSTATIONS (иначе цикл FILES→RULES→WORKSTATIONS→FILES), template_files.gd для проверки save/load, template_actions.gd для подготовки перед commit, tests/CI, QA/аудит/ADR0003. План: проверить весь v1 payload (типы, конечные числа, размеры, индексы, canonical model paths), подготовить новые узлы в временном process-disabled контейнере и проверить существующими geometry/zone rules, затем заменить attachments/zones одним синхронным commit. При ошибке освободить только подготовленные узлы, сохранить прежнюю композицию и сообщить отказ. Valid empty template разрешён; legacy optional поля v1 сохраняют defaults. Сигнатуры/public API/DTO/schema version/scenes/resources/владельцы/зависимости прежние; архитектурных исключений нет. Риски: поздний отказ instantiate, геометрия/тип зоны, масштаб/поворот стола, callbacks при временном add_child. Spec/workflow READY PASS. Следующее точное действие — реализовать предварительную проверку/подготовку и воспроизвести сохранность старых объектов регрессией.
+
+
+
 16.10.2026 (CI PR206/207, прямой запрос владельца): подтверждена внешняя причина — HTTP503 Godot objectstorage. PR207 падал на install до gameplay; PR206 прошёл native/runtime suites, но Web template HEAD получил503. Общий CI downloader теперь использует официальный GitHub release4.7.2 с проверкой pinned SHA256, ограниченными retries и fallback на прежнее официальное зеркало; все8 Linux install paths в mission_runtime/impact_geometry обновлены. Web RangedArchive делает bounded retries/fallback на HEAD/GET, проверяет точный Content-Range/длину и отвергает full-response до чтения TPZ. Шесть детерминированных сетевых tests PASS, shell fallback/outage/corrupt/fail-closed PASS; реальный Linux ZIP SHA совпал с официальным release. Условия/assertions игровых тестов прежние, gameplay/API/DTO/зависимости/владельцы не менялись. Подробности docs/qa/ci_godot_download.md. Следующее точное действие — проверить CI обоих новых heads; merge не поручен. T004 IN_PROGRESS.
 
 
@@ -590,31 +598,7 @@ T002 remains the only active task. After CI, visually verify seams and collision
 16.10.2026 (CI PR206, прямой запрос владельца): подтверждена внешняя причина — HTTP503 Godot objectstorage. PR207 падал на install до gameplay; PR206 прошёл native/runtime suites, но Web template HEAD получил503. Общий CI downloader теперь использует официальный GitHub release4.7.2 с проверкой pinned SHA256, ограниченными retries и fallback на прежнее официальное зеркало; все8 Linux install paths в mission_runtime/impact_geometry обновлены. Web RangedArchive делает bounded retries/fallback на HEAD/GET, проверяет точный Content-Range/длину и отвергает full-response до чтения TPZ. Шесть детерминированных сетевых tests PASS, shell fallback/outage/corrupt/fail-closed PASS; реальный Linux ZIP SHA совпал с официальным release. Условия/assertions игровых тестов прежние, gameplay/API/DTO/зависимости/владельцы не менялись. Подробности docs/qa/ci_godot_download.md. Следующее точное действие — проверить CI обоих новых heads; merge не поручен. T004 IN_PROGRESS.
 
 
-## 16.10.2026 — подбор ходьбы и анимации (прямой запрос владельца)
+16.10.2026 (A04 — обновление базы): перед публикацией принята новая карта владельца из main2744036c, все её узлы/transforms, JSON и project.godot сохранены. Все8 целевых suites повторены на этой базе и PASS; placement suite дополнен реальными H/U divider desks без ослабления прежних assertions.
 
-- General/«Основные»: два независимых ползунка — скорость ходьбы 0.50..1.50×
-  и темп анимации ног 0.50..2.00×, шаг 0.05; рядом живое числовое значение.
-  1.00× воспроизводит исходную настройку. Во время drag применяется значение,
-  при отпускании оно сохраняется; поддержаны клавиатура, RU/EN, reset и old config.
-- Bootstrap передаёт optional interface_v1.walk_speed_multiplier и
-  walk_animation_multiplier в player.set_walk_tuning. Player меняет только
-  обычный move_speed через отдельный множитель, не накапливая повторные apply.
-  CharacterAnimationDriver/LegClips меняет фазу ног, не upper-body/attack/dodge
-  clocks. Темп ног действует и при спринте; скорость спринта и уклонения прежняя.
-- ADR-0050 и manifests описывают аддитивные контракты. Владельцы и зависимости
-  прежние; layout/save форматы, клипы, policy прежние, исключений нет. Новых
-  кадровых callbacks, эффектов, источников света или текстур нет.
-- Godot 4.7.2 локально: editor import exit 0 без SCRIPT ERROR/ERROR;
-  walk_tuning, settings_tabs, leg_clips, roll_iframes, menu integration — 0 failures.
-  Проверены реальная скорость, независимость параметров, actual start/restart,
-  clock ног/уклонения, safe config, настройка до attachment и повторные apply.
-  Новый walk_tuning suite добавлен в mission_runtime CI.
-  validate_project, validate_scene_resources, git diff --check — PASS.
-- Ограничения: визуальный подбор коэффициентов и FPS на Windows/Web не измерялись;
-  menu integration сохраняет прежнее предупреждение 60 ObjectDB при выходе.
-- Следующее действие: CI PR ветки codex/player-walk-tuning; владельцу подобрать
-  пару коэффициентов в Настройки → Основные и сообщить подходящие значения.
 
-16.10.2026: владелец явно разрешил публикацию подготовленного кода, тестов и
-документации в bageus/Infection-shooter отдельной веткой и PR. Блокер разрешения
-снят. Следующее действие — проверить CI и подобрать параметры в игре.
+16.10.2026 (A04 — финальный gate новой карты): на базе2744036c обнаружены3 приватных script references, добавленных сериализацией карты. Проверены18 публичных PackedScene: во всех наследуется тот же скрипт, что в92 overrides (38 pickup/31 parts/23 corpse). Удалены только92 избыточных script assignments и3 неиспользуемых ext_resource; прочие строки/узлы/transforms/exports сохранены, JSON/project.godot прежние. Затем project/architecture/editor/scene392 PASS. Дополнительный full-map startup/restart и повторный UI H/U PASS; всего9 разных suites,3 Python tests, atomic40 payloads0 failures. Source-size120 прежних warnings, исключений нет. Следующее точное действие — опубликовать проверенное дерево A04 в PR и проверить CI; merge не поручен.

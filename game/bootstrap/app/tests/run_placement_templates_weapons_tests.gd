@@ -75,7 +75,7 @@ func _preview_self_hit(planner: Node) -> void:
 func _templates(planner: Node) -> void:
 	var name_part := "regression_" + str(Time.get_ticks_usec())
 	var setup: Node = planner.get("desk_setup")
-	for path in [TABLE, SHELF]:
+	for path in [TABLE, SHELF, "res://models/objects/enviroments/08/08_divider_full_H_desk.glb", "res://models/objects/enviroments/08/08_divider_full_U_desk.glb"]:
 		var desk := planner.call("_instantiate_asset", path) as Node3D
 		(planner.get("root") as Node).add_child(desk)
 		desk.set_meta("planning_scene_path", path)

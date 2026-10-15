@@ -4,7 +4,6 @@ const TEMPLATE_FILES := preload("res://game/bootstrap/app/desk_setup_template_fi
 const WORKSTATIONS := preload("res://game/bootstrap/app/workstation_templates.gd")
 const ZONE_RULES := preload("res://game/bootstrap/app/desk_setup_zone_rules.gd")
 const GEOMETRY := preload("res://game/bootstrap/app/desk_setup_zone_geometry.gd")
-const MODEL_ROOT := "res://models/objects/enviroments/"
 
 
 static func save(mode: Variant) -> void:
@@ -53,44 +52,64 @@ static func load_selected(mode: Variant) -> void:
 	if data.is_empty():
 		mode._notify_failure("Template does not match this desk.")
 		return
+	var prepared := _prepare(mode, data)
+	if prepared.is_empty():
+		mode._notify_failure("Template could not be applied. The current desk setup was kept.")
+		return
+	# No awaits: the old setup survives until every replacement has passed.
+	var attachment_id: String = mode._desk_id()
 	for object in mode._attachments():
 		mode.planner.placed.erase(object)
 		object.queue_free()
-	mode.zones.clear()
-	for value in data.get("zones", []):
-		if value is Dictionary:
-			mode.zones.append(ZONE_RULES.normalize(value, mode.zones.size()))
+	mode.zones.assign(prepared.zones)
 	mode.front = int(data.get("front", 0))
 	mode.front_button.text = "Front: opposite side" if mode.front else "Front: seated side"
 	mode.zone_index = 0 if not mode.zones.is_empty() else -1
-	mode._refresh_zones()
-	var skipped := 0
-	for entry_value in data.get("items", []):
-		if not entry_value is Dictionary:
-			continue
-		var entry: Dictionary = entry_value
-		var asset_path := str(entry.get("path", ""))
-		if not asset_path.begins_with(MODEL_ROOT) or not ResourceLoader.exists(asset_path):
-			skipped += 1
-			continue
-		var object: Node3D = mode.planner._instantiate_asset(asset_path) as Node3D
-		if object == null:
-			skipped += 1
-			continue
-		mode.planner.root.add_child(object)
-		object.global_position = mode.desk.to_global(Vector3(float(entry.get("x", 0)), float(entry.get("y", 0)), float(entry.get("z", 0))))
-		object.rotation.y = mode.desk.rotation.y + float(entry.get("yaw", 0))
-		var slot := GEOMETRY.matching_zone(mode.desk, mode.zones, object, int(entry.get("zone", -1)))
-		if slot < 0:
-			object.queue_free()
-			skipped += 1
-			continue
-		object.set_meta("planning_scene_path", asset_path)
-		object.set_meta("planning_attachment", mode._desk_id())
-		object.set_meta("planning_zone", slot)
+	for object: Node3D in prepared.items:
+		object.reparent(mode.planner.root, true)
+		object.set_meta("planning_attachment", attachment_id)
 		mode.planner.placed.append(object)
-	if skipped > 0:
-		mode._notify_failure("Template applied, but %d items could not fit their saved zones." % skipped)
-	else:
-		mode.status.text = "Template applied to this desk. Save the map to keep it."
+	(prepared.stage as Node).free()
+	mode._refresh_zones()
 	mode._refresh_zone_items()
+	mode.status.text = "Template applied to this desk. Save the map to keep it."
+
+
+## Geometry needs in-tree visible meshes. This container lives only during this
+## synchronous call, with processing disabled; no partial setup reaches a frame.
+static func _prepare(mode: Variant, data: Dictionary) -> Dictionary:
+	var zones: Array[Dictionary] = []
+	for value: Dictionary in data.zones:
+		var zone := ZONE_RULES.normalize(value.duplicate(true), zones.size())
+		zone["slot"] = zones.size()
+		if not ZONE_RULES._inside_surface(Vector2(float(zone.x), float(zone.z)), zone, mode.stations):
+			return {}
+		zones.append(zone)
+	var stage := Node3D.new()
+	stage.process_mode = Node.PROCESS_MODE_DISABLED
+	mode.planner.root.add_child(stage)
+	var items: Array[Node3D] = []
+	for entry: Dictionary in data.items:
+		var position: Vector3 = mode.desk.to_global(Vector3(float(entry.x), float(entry.y), float(entry.z)))
+		if not position.is_finite():
+			stage.free()
+			return {}
+		var object: Node3D = mode.planner._instantiate_asset(str(entry.path)) as Node3D
+		if object == null:
+			stage.free()
+			return {}
+		stage.add_child(object)
+		object.global_position = position
+		object.rotation.y = mode.desk.rotation.y + float(entry.get("yaw", 0))
+		var slot := GEOMETRY.matching_zone(mode.desk, zones, object, int(entry.get("zone", -1)))
+		if slot < 0 or (data.zones[slot].has("category") and ZONE_RULES.category_for(str(entry.path).get_file().get_basename()) != str(zones[slot].category)):
+			stage.free()
+			return {}
+		object.set_meta("planning_scene_path", str(entry.path))
+		object.set_meta("planning_zone", slot)
+		items.append(object)
+	for zone in zones:
+		if bool(zone.required) and ZONE_RULES.items_in_zone(mode.desk, zone, items).is_empty():
+			stage.free()
+			return {}
+	return {"zones": zones, "items": items, "stage": stage}

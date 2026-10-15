@@ -1,6 +1,7 @@
 extends RefCounted
 
 # Versioned user templates; the level layout continues to own placed instances.
+const SCHEMA := preload("res://game/bootstrap/app/desk_setup_template_schema.gd")
 const ROOT := "user://desk_setups"
 
 
@@ -16,7 +17,7 @@ static func safe_name(value: String) -> String:
 
 static func save(desk_type: String, name_part: String, payload: Dictionary) -> bool:
 	var safe := safe_name(name_part)
-	if safe.is_empty():
+	if safe.is_empty() or not desk_type.is_valid_identifier() or not SCHEMA.valid(payload, desk_type):
 		return false
 	if desk_type.is_empty() or DirAccess.make_dir_recursive_absolute(ProjectSettings.globalize_path(ROOT)) != OK:
 		return false
@@ -37,7 +38,7 @@ static func save(desk_type: String, name_part: String, payload: Dictionary) -> b
 		return false
 	var decoded: Variant = JSON.parse_string(check.get_as_text())
 	check.close()
-	if not decoded is Dictionary or decoded.get("version") != 1 or decoded.get("desk") != desk_type:
+	if not SCHEMA.valid(decoded, desk_type):
 		DirAccess.remove_absolute(temporary)
 		return false
 	return DirAccess.rename_absolute(temporary, path) == OK
@@ -57,12 +58,13 @@ static func list_for(desk_type: String) -> Array[Dictionary]:
 
 
 static func load(path: String, desk_type: String) -> Dictionary:
-	if not path.begins_with(ROOT + "/" + desk_type + "_") or not path.ends_with(".json"):
+	if not desk_type.is_valid_identifier() or path.get_base_dir() != ROOT or not path.begins_with(ROOT + "/" + desk_type + "_") or not path.ends_with(".json"):
 		return {}
 	var file := FileAccess.open(path, FileAccess.READ)
 	if file == null:
 		return {}
 	var data: Variant = JSON.parse_string(file.get_as_text())
-	if data is Dictionary and data.get("version") == 1 and data.get("desk") == desk_type:
+	file.close()
+	if SCHEMA.valid(data, desk_type):
 		return data
 	return {}
