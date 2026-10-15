@@ -234,15 +234,24 @@ func _feeding() -> void:
 	eater.call("_rest_behaviour", 0.016)
 	_check(bool(eater.call("is_feeding")), "Next to a corpse the hunter starts to feed.")
 	_check(_player_of(eater).current_animation == "BiteDown", "It goes down with the first half of the biting clip.")
-	await create_timer(1.2).timeout
-	await _frames(2)
+	# BiteDown hands over to BiteLoop after its own length; wait for it by frames
+	# (bounded) so a slow runner does not turn the clip length into a race.
+	var waited := 0
+	while _player_of(eater).current_animation != "BiteLoop" and waited < 600:
+		await physics_frame
+		waited += 1
 	_check(_player_of(eater).current_animation == "BiteLoop", "Then it gnaws on all fours (%s)." % _player_of(eater).current_animation)
 	# Keep the chase within charge range: at 40 m the next far LOD step
-	# correctly walks upright, making this three-frame assertion phase-dependent.
+	# correctly walks upright, making a later posture assertion phase-dependent.
 	target.position = Vector3(0, 0.1, -8)
 	eater.set("_feral", true)
 	eater.call("hear_alert", eater.global_position, 50.0)
-	await _frames(3)
+	# The meal ends on the frame the chase starts; read the posture on that frame,
+	# since the chase pace may stand it up again a tick later.
+	var frames_waited := 0
+	while bool(eater.call("is_feeding")) and frames_waited < 30:
+		await physics_frame
+		frames_waited += 1
 	_check(not bool(eater.call("is_feeding")), "A cry from a neighbour interrupts the meal.")
 	_check(eater.get("posture") == 1, "It leaps up on all fours.")
 	eater.queue_free()

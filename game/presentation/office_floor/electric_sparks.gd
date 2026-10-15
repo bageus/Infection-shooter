@@ -61,27 +61,43 @@ static func spawn(host: Node3D, location: Vector3, heavy: bool = false) -> void:
 	particles.lifetime = 0.38
 	particles.one_shot = true
 	particles.explosiveness = 1.0
-	var process := ParticleProcessMaterial.new()
-	process.emission_shape = ParticleProcessMaterial.EMISSION_SHAPE_SPHERE
-	process.emission_sphere_radius = 0.08
-	process.direction = Vector3.UP
-	process.spread = 110.0
-	process.initial_velocity_min = 1.2
-	process.initial_velocity_max = 4.0 if heavy else 2.7
-	process.gravity = Vector3(0, -7, 0)
-	particles.process_material = process
-	var dot := SphereMesh.new()
-	dot.radius = 0.015
-	dot.height = 0.03
-	var glow := StandardMaterial3D.new()
-	glow.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
-	glow.albedo_color = Color(1, 0.73, 0.15)
-	glow.emission_enabled = true
-	glow.emission = Color(1, 0.48, 0.06)
-	glow.emission_energy_multiplier = 5.0
-	dot.material = glow
-	particles.draw_pass_1 = dot
+	particles.process_material = _spark_process(heavy)
+	particles.draw_pass_1 = _spark_dot()
 	container.add_child(particles)
 	particles.global_position = location
 	particles.emitting = true
 	host.get_tree().create_timer(1.2).timeout.connect(particles.queue_free)
+
+
+# Shared by every burst: the resources never change, so a hit allocates none.
+static var _spark_processes := {}
+static var _spark_mesh: SphereMesh
+
+
+static func _spark_process(heavy: bool) -> ParticleProcessMaterial:
+	if not _spark_processes.has(heavy):
+		var process := ParticleProcessMaterial.new()
+		process.emission_shape = ParticleProcessMaterial.EMISSION_SHAPE_SPHERE
+		process.emission_sphere_radius = 0.08
+		process.direction = Vector3.UP
+		process.spread = 110.0
+		process.initial_velocity_min = 1.2
+		process.initial_velocity_max = 4.0 if heavy else 2.7
+		process.gravity = Vector3(0, -7, 0)
+		_spark_processes[heavy] = process
+	return _spark_processes[heavy]
+
+
+static func _spark_dot() -> SphereMesh:
+	if _spark_mesh == null:
+		_spark_mesh = SphereMesh.new()
+		_spark_mesh.radius = 0.015
+		_spark_mesh.height = 0.03
+		var glow := StandardMaterial3D.new()
+		glow.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
+		glow.albedo_color = Color(1, 0.73, 0.15)
+		glow.emission_enabled = true
+		glow.emission = Color(1, 0.48, 0.06)
+		glow.emission_energy_multiplier = 5.0
+		_spark_mesh.material = glow
+	return _spark_mesh

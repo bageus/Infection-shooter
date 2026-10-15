@@ -64,8 +64,22 @@ func _run() -> void:
 	_check(not restarted.get("planning_lighting").get("local_lights_enabled"), "Scene restart restores local-off default")
 	restarted.free()
 	await process_frame
+	_test_view_gate()
 	print("Global lighting tests: %d failures" % _failures)
 	quit(0 if _failures == 0 else 1)
+
+
+func _test_view_gate() -> void:
+	var camera := Camera3D.new()
+	root.add_child(camera)
+	camera.global_position = Vector3(0, 10, 0)
+	camera.look_at(Vector3.ZERO, Vector3.FORWARD)
+	var frustum: Array = camera.get_frustum()
+	var gate := load("res://game/bootstrap/app/planning_lighting.gd")
+	_check(gate.sphere_in_view(frustum, Vector3.ZERO, 0.5), "A lamp under the camera is in view")
+	_check(not gate.sphere_in_view(frustum, Vector3(300, 0, 0), 12.0), "A lamp far to the side is out of view")
+	_check(gate.sphere_in_view(frustum, Vector3(300, 0, 0), 400.0), "A big light sphere reaching the view counts")
+	camera.free()
 
 
 # Only the lamps nearest to the camera focus are lit (light budget), so test

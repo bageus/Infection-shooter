@@ -51,6 +51,7 @@ func watch() -> void:
 	state = State.UNAWARE
 	_home_ready = false
 	_idle_elapsed = 0.0
+	_alert_announced = false
 
 
 func force_chase() -> void:

@@ -138,3 +138,8 @@ AudioStreamPlaybackOggVorbis, OggPacketSequencePlayback и их OGG/packet resou
 в больших main fixtures остаётся и не скрывается. Native adaptive_audio и
 server_audio дополнительно включены в оба renderer jobs; их teardown ждёт100мс
 освобождения микшером, а checks по SCRIPT ERROR/ERROR не изменены.
+
+База при публикации исправления обновлена до main1bf979e (#193/#194).
+Сохранены все обновления main; конфликт разрешён только объединением журналов
+ACTIVE_TASK. В Hunger fixture остаются frame-based ожидания из main и условия
+charge/feral из аудиоветki. Проверки/лимиты не ослаблены.
