@@ -29,7 +29,7 @@ func _show(preview: Dictionary) -> void:
 	dialog.get_cancel_button().text = TEXT.t("antidoteCancel")
 	dialog.dialog_text = TEXT.t("antidotePreview") % [roundi(preview.before), roundi(preview.after),
 		_names(preview.forgotten), _names(preview.dormant), preview.points_after]
-	dialog.popup_centered(Vector2i(mini(640, get_viewport().get_visible_rect().size.x - 32), 300))
+	dialog.popup_centered(Vector2i(mini(640, int(get_viewport().get_visible_rect().size.x) - 32), 300))
 
 
 func _names(ids: Array) -> String:

@@ -94,10 +94,10 @@ func _apply_run(skeleton: Skeleton3D, delta: float) -> void:
 	var from_data := _clip(RING[first])
 	var to_data := _clip(RING[(first + 1) % 8])
 	var reference := lerpf(from_data.ref_speed, to_data.ref_speed, mix)
-	var scale := clampf(speed / maxf(reference, 0.1), min_time_scale, max_time_scale)
+	var time_scale := clampf(speed / maxf(reference, 0.1), min_time_scale, max_time_scale)
 	var previous := phase
 	var cycle := lerpf(from_data.length, to_data.length, mix)
-	phase = fposmod(phase + delta * scale / cycle, 1.0)
+	phase = fposmod(phase + delta * time_scale / cycle, 1.0)
 	var near_data: Dictionary = from_data if mix < 0.5 else to_data
 	if weight > 0.5:
 		for side in 2:
@@ -218,8 +218,8 @@ func _sample_position(data: Dictionary, u: float, loop := true) -> Vector3:
 func _frame_pair(count: int, u: float, loop: bool) -> Vector3:
 	if count == 0:
 		return Vector3(-1, 0, 0)
-	var position := u * float(count) if loop else u * float(count - 1)
-	var index := int(floor(position))
+	var offset := u * float(count) if loop else u * float(count - 1)
+	var index := int(floor(offset))
 	var next := index + 1
 	if loop:
 		index = posmod(index, count)
@@ -227,7 +227,7 @@ func _frame_pair(count: int, u: float, loop: bool) -> Vector3:
 	else:
 		index = clampi(index, 0, count - 1)
 		next = clampi(next, 0, count - 1)
-	return Vector3(index, next, position - floorf(position))
+	return Vector3(index, next, offset - floorf(offset))
 
 
 static func _crossed(before: float, after: float, mark: float) -> bool:
