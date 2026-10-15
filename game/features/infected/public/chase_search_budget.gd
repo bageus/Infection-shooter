@@ -1,5 +1,8 @@
 extends Node
 ## Mission-owned priority queue; bounded incremental search work per physics tick.
+## Keep incremental work through normal chase motion; invalidate only large displacement.
+const RESTART_ACTOR_DISTANCE_SQUARED := 3.0 * 3.0
+const RESTART_TARGET_DISTANCE_SQUARED := 6.0 * 6.0
 const HEAP := preload("res://game/features/infected/route_priority_queue.gd")
 @export var searches_per_frame := 2
 @export var time_budget_usec := 2000
@@ -69,7 +72,7 @@ func _service(deadline: int) -> void:
 		if route != null:
 			route.call("cancel_search")
 		return
-	if entry.started and (actor.global_position.distance_squared_to(entry.origin) > .64 or target.global_position.distance_squared_to(entry.goal) > 2.0):
+	if entry.started and (actor.global_position.distance_squared_to(entry.origin) > RESTART_ACTOR_DISTANCE_SQUARED or target.global_position.distance_squared_to(entry.goal) > RESTART_TARGET_DISTANCE_SQUARED):
 		entry.started = false
 	if not entry.started:
 		entry.origin = actor.global_position

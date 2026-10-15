@@ -261,6 +261,7 @@ jobs:
           game/features/infection_source/tests/run_mutagen_cloud_tests.gd
           game/features/player/tests/run_skill_sound_tests.gd
           game/features/infected/tests/run_chase_route_tests.gd
+          game/features/infected/tests/run_chase_search_motion_tests.gd
           game/features/infected/tests/run_crowd_separation_tests.gd
           game/features/infected/tests/run_enemy_perception_tests.gd
           game/features/combat/tests/run_weapon_noise_tests.gd
