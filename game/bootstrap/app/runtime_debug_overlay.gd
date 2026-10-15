@@ -43,11 +43,13 @@ func _process(delta: float) -> void:
 func refresh() -> void:
 	if not is_instance_valid(infection) or not is_instance_valid(occlusion):
 		return
-	label.text = "F3 DEBUG | FPS %d | process %.1f ms | physics %.1f ms\nMutation %.1f / threshold %.1f | control lost %s | paused %s\nOcclusion %d | walls %d | material variants %d | queued %d | rebuilds %d" % [
+	label.text = "F3 DEBUG | FPS %d | process %.1f ms | physics %.1f ms\nMutation %.1f / threshold %.1f | control lost %s | paused %s\nOcclusion %d | walls %d | material variants %d | queued %d | rebuilds %d\nRender: draw calls %d | objects %d | primitives %dk | video %d MiB" % [
 		Engine.get_frames_per_second(), Performance.get_monitor(Performance.TIME_PROCESS) * 1000.0,
 		Performance.get_monitor(Performance.TIME_PHYSICS_PROCESS) * 1000.0,
 		infection.call("get_mutation"), infection.call("get_critical_threshold"), infection.call("is_control_lost"), get_tree().paused,
-		occlusion.mode, occlusion.walls.records.size(), occlusion.walls.active_materials.size(), occlusion.walls.pending.size(), occlusion.rebuild_count]
+		occlusion.mode, occlusion.walls.records.size(), occlusion.walls.active_materials.size(), occlusion.walls.pending.size(), occlusion.rebuild_count,
+		Performance.get_monitor(Performance.RENDER_TOTAL_DRAW_CALLS_IN_FRAME), Performance.get_monitor(Performance.RENDER_TOTAL_OBJECTS_IN_FRAME),
+		Performance.get_monitor(Performance.RENDER_TOTAL_PRIMITIVES_IN_FRAME) / 1000.0, Performance.get_monitor(Performance.RENDER_VIDEO_MEM_USED) / 1048576.0]
 
 
 func _control_loss_changed(active: bool) -> void:
