@@ -15,6 +15,7 @@ signal blast_stun_ended()
 ## Health actually restored (after caps and skill bonuses); source is
 ## &"medkit" for medkit pickups and empty for other healing.
 signal healed(amount: float, source: StringName)
+@warning_ignore("unused_signal")
 signal antidote_confirmation_requested(preview: Dictionary)
 var _antidote_action := preload("res://game/features/player/player_antidote.gd").new()
 

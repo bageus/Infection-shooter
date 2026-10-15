@@ -59,7 +59,7 @@ static func spread(who: Node3D, shape_node: CollisionShape3D) -> Vector3:
 	var width_sq := width * width
 	var previous_cell := Vector2i(floori(previous_position.x / CELL), floori(previous_position.z / CELL))
 	for index in 9:
-		var key := Vector2i(previous_cell.x + index % 3 - 1, previous_cell.y + index / 3 - 1)
+		var key := Vector2i(previous_cell.x + index % 3 - 1, previous_cell.y + floori(index / 3.0) - 1)
 		var neighbours: Variant = _previous.get(key)
 		if neighbours != null:
 			var ids: PackedInt64Array = _previous_ids[key]
