@@ -331,3 +331,13 @@ recordings into nine action groups; this does not create new performances.
 `added_audio_processing.json` records source/output paths, trims and loop overlap.
 The existing CC0 attribution of other synthesized/source recordings does not
 assign a new license to these owner-supplied recordings.
+
+
+## Обновление записей владельца — 15.10.2026
+
+30 новых исходников предоставлены владельцем в Git 0e154b73. Точное
+соответствие исходных имён и игровых OGG, SHA256 и параметры обработки —
+`audio_refresh_processing.json`. Дополнительные варианты не синтезированы.
+`roar_heavy_4` сохранён без перекодирования как `colossus_voice_1`.
+Прежние сведения об источниках остаются историей; обновление не назначает
+новым авторским записям лицензии старых заменённых звуков.

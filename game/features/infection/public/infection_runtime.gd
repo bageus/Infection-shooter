@@ -12,6 +12,8 @@ signal ability_changed(choice: int)
 signal tree_changed
 signal skill_available
 signal skill_cast(skill_id: String)
+## Fact: an owned active skill's running cooldown reached zero.
+signal skill_cooldown_finished(skill_id: String)
 ## Fact: a passive skill's effect just fired (duration 0 for instant effects).
 signal passive_triggered(skill_id: String, duration: float)
 ## Fact: an active skill's lasting effect started or was extended.
@@ -36,7 +38,7 @@ var _effect_totals: Dictionary = {}
 func _physics_process(delta: float) -> void:
 	var previous_mutation: float = _domain.mutation
 	_domain.tick(delta)
-	tree.tick(delta)
+	reduce_skill_cooldowns(delta)
 	for skill_id in _effects.keys():
 		_effects[skill_id] = maxf(0.0, float(_effects[skill_id]) - delta)
 	_emit_state_changes(previous_mutation)
@@ -134,8 +136,9 @@ func _upgrade_candidates() -> Dictionary:
 
 
 func reduce_skill_cooldowns(seconds: float) -> void:
-	for skill_id in tree.cooldowns.keys():
-		tree.cooldowns[skill_id] = maxf(0.0, float(tree.cooldowns[skill_id]) - seconds)
+	for skill_id: String in tree.tick(seconds):
+		if has_skill(skill_id) and not _domain.defeated:
+			skill_cooldown_finished.emit(skill_id)
 
 
 func upgrade_skill(skill_id: String) -> bool:

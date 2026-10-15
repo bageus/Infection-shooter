@@ -59,6 +59,12 @@ func configure_skills(runtime: Node) -> void:
 		runtime.connect("skill_cast", _on_skill_cast)
 	if runtime.has_signal("passive_triggered"):
 		runtime.connect("passive_triggered", _on_passive)
+	if runtime.has_signal("skill_cooldown_finished"):
+		runtime.connect("skill_cooldown_finished", _on_skill_cooldown_finished)
+
+
+func _on_skill_cooldown_finished(_skill_id: String) -> void:
+	play(&"skill_cooldown_done")
 
 
 func _on_skill_cast(skill_id: String) -> void:

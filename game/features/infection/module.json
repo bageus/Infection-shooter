@@ -22,6 +22,9 @@
       "antidote_preview": "antidote_preview() -> Dictionary {version:1, can_use, before, after, forgotten:Array[String], dormant:Array[String], points_after, emergency}; pure preview of the same tree reconcile rules",
       "begin_control_level": "begin_control_level(id:String) -> void; stable authored mission id",
       "complete_control_level": "complete_control_level(id:String) -> int; compensate at most one missed ampule per completed level, reject mismatched/repeated ids"
+    },
+    "skill_feedback_v1": {
+      "skill_cooldown_finished": "signal skill_cooldown_finished(skill_id: String); owned active skill cooldown transitions from positive to zero, including reduction; never emitted for an unlearned/inactive skill or defeated runtime"
     }
   }
 }

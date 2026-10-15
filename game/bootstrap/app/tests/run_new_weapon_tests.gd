@@ -76,6 +76,7 @@ func _test_rifles(actor: CharacterBody3D, effects: Node3D, crosshair: Node) -> v
 		var before: int = gun.call("get_magazine_ammo")
 		_check(actor.call("_fire_weapon", gun), "New rifle emits a real projectile")
 		_check(gun.call("get_magazine_ammo") == before - 1, "Shot consumes exactly one round")
+		_check_reload_audio(gun, index)
 		_check(not actor.call("_fire_weapon", gun), "Cooldown prevents duplicate shot")
 		if index == 6:
 			_check(not gun.call("wants_continuous_fire") and gun.magazine_size == 4, "Sniper is semi-auto with four-round magazine")
@@ -115,6 +116,15 @@ func _test_rifles(actor: CharacterBody3D, effects: Node3D, crosshair: Node) -> v
 				_check(bullet.get("_weapon_name") == gun.weapon_name, "Projectile carries the actual weapon identity")
 				bullet.queue_free()
 		await process_frame
+
+func _check_reload_audio(gun: Node3D, index: int) -> void:
+	var expected: StringName = {4: &"ak_reload", 5: &"m4_reload", 6: &"sniper_reload"}[index]
+	gun.call("start_reload")
+	var voice := gun.get("_reload_sound") as AudioStreamPlayer3D
+	_check(voice != null and voice.is_in_group("sfx_" + str(expected)), "Each rifle plays its owner-supplied reload")
+	gun.call("cancel_reload")
+	_check(voice != null and voice.is_queued_for_deletion(), "Cancelling the reload stops the replacement recording")
+
 
 func _test_minigun(actor: CharacterBody3D, effects: Node3D, crosshair: Node) -> void:
 	_check(actor.call("pickup_weapon", 7), "Minigun pickup equips complete kit")
