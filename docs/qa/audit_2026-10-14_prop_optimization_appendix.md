@@ -167,7 +167,7 @@ xvfb-run -a godot --path . --audio-driver Dummy --rendering-method gl_compatibil
 - Все15 целевых headless suites про props/destruction/impact/debris/лампы PASS.
 - validate_source_size, validate_architecture, validate_project,
   validate_scene_resources и Godot4.7.2 headless editor import PASS.
-- infected_capsule.gd не изменён и содержит ровно600 строк. DTO карты v8,
+- infected_capsule.gd не изменён: в исходном main599 строк (лимит600). DTO карты v8,
   public API, сцены, зависимости, владельцы состояния и Autoload прежние.
   Архитектурных исключений нет.
 - EnvironmentProp506 строк: root делегирует геометрию/политику существующему

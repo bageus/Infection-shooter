@@ -105,8 +105,10 @@ func _prop(model: String, point: Vector3) -> RigidBody3D:
 	prop.freeze = true
 	if baseline:
 		SHADOWS.restore(prop.get_node("Visual"))
-	prop.position = point
-	prop.position.y += point.y - _bounds(prop).position.y
+	var bounds := _bounds(prop)
+	# Model pivots differ: point is the requested footprint centre and bottom height.
+	prop.global_position += Vector3(point.x - bounds.get_center().x, point.y - bounds.position.y, point.z - bounds.get_center().z)
+	prop.force_update_transform()
 	print(model, " bounds=", _bounds(prop).size)
 	return prop
 
