@@ -218,5 +218,32 @@ func _test_lighting_preferences(app: Node, controller: Node, overhead: Direction
 	preferences.apply_to_game(self)
 	_check(overhead.visible and controller.get("local_lights_enabled"), "Settings re-enable global and local light sources")
 	_check(late.get_node("Light").visible, "Late lamps follow the persisted setting without changing authored power")
+	var energy := overhead.light_energy
+	var color := overhead.light_color
+	for lamps_enabled in [false, true]:
+		for sun_enabled in [false, true]:
+			preferences.values.lighting = lamps_enabled
+			preferences.values.sunlight = sun_enabled
+			preferences.apply_to_game(self)
+			_check(overhead.visible == (lamps_enabled and sun_enabled), "Master and sun switches compose without reviving a disabled sun")
+			_check(controller.get("local_lights_enabled") == lamps_enabled, "Sunlight never changes local-light permission")
+			_check(late.get_node("Light").visible == lamps_enabled, "Existing lamp follows only the master lighting switch")
+	preferences.values.sunlight = false
+	preferences.apply_to_game(self)
+	var planner: Node = app.get("planning_mode")
+	planner.call("enter")
+	controller.call("set_game_lighting", false)
+	planner.call("exit")
+	preferences.values.shadows = false
+	preferences.apply_to_game(self)
+	preferences.values.shadows = true
+	preferences.apply_to_game(self)
+	_check(not overhead.visible, "Planner transitions and shadow changes keep sunlight disabled")
+	_check(is_equal_approx(overhead.light_energy, energy) and overhead.light_color == color and overhead.shadow_enabled, "Sun toggle preserves authored source parameters")
+	preferences.values.sunlight = true
+	preferences.apply_to_game(self)
+	_check(overhead.visible, "Sunlight returns without recreating its source")
+	if is_instance_valid(late):
+		late.free()
 	controller.call("set_local_lights_enabled", false)
 	current_scene = null

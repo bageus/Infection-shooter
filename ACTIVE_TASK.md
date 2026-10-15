@@ -568,3 +568,24 @@ T002 remains the only active task. After CI, visually verify seams and collision
 
 
 15.10.2026 (A01 — публикация): создан PR #204 https://github.com/bageus/Infection-shooter/pull/204, head807c72a7. Проверенное локальное и опубликованное дерево совпадают (f17faae7). CI запущен: Architecture validation in_progress, Mission runtime regressions queued на момент проверки. Merge не выполнен. Локальные9 suites и gates PASS, аудит доступен в docs/audits/infection_shooter_audit_2026-10-15.md. Следующее точное действие — проверить итоговый CI PR204 и вручную осмотреть сохранённые позы в игровом рендере; затем продолжить A02 отдельным запросом. T004 IN_PROGRESS.
+
+
+## 16.10.2026 — отдельное отключение солнца (прямой запрос владельца)
+
+- Выполнено: Video → «Солнце» / Sunlight, optional interface_v1.sunlight=true.
+  Видимость GlobalOverheadLight = lighting && sunlight. Выключение полностью
+  убирает вклад источника и его теней, не выключая игровые лампы при lighting=true.
+  Фоновая подсветка Environment и authored-параметры источника сохранены.
+- Совместимость: старые конфиги/default/reset оставляют солнце включённым;
+  неверный тип игнорируется. Настройка действует сразу, при запуске и рестарте.
+- Владельцы и зависимости прежние: bootstrap.app. ADR-0049; новых публичных API,
+  layout/save DTO, источников, текстур, кадровых обработчиков и исключений нет.
+- Проверено локально Godot 4.7.2: editor import exit 0 без SCRIPT ERROR/ERROR;
+  settings_tabs, global_lighting, lighting и menu integration — 0 failures.
+  Menu integration проверяет настоящий загрузчик и повторный запуск с sunlight=false.
+  validate_project, validate_scene_resources и git diff --check — PASS.
+- Ограничения: native/Web визуальная проверка и FPS не измерялись. Main-based
+  lighting/menu suites сообщают 60 ObjectDB instances при выходе; та же величина
+  в неизменённой lighting suite, ошибок выполнения нет.
+- Следующее действие: проверить CI PR ветки codex/independent-sun-toggle;
+  владельцу — Настройки → Видео: «Освещение» вкл., «Солнце» выкл.
