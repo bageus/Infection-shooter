@@ -75,7 +75,10 @@ func _test_extinguisher() -> void:
 	var setup := await _spawn(MODELS + "09/09_fire_extinguisher.glb", Vector3(-4, 0, 0))
 	var prop: RigidBody3D = setup[0]
 	var effects: Node3D = setup[1]
+	_expect(prop.freeze and prop.freeze_mode == RigidBody3D.FREEZE_MODE_KINEMATIC, "A wall-mounted extinguisher hangs kinematic, so the shot that frees it costs no static-to-dynamic switch.")
 	prop.call("take_projectile_hit", 10.0, prop.global_position + Vector3(0, 0.3, 0), Vector3.BACK, Vector3.FORWARD, "PISTOL")
+	await physics_frame
+	_expect(not prop.freeze, "The shot frees the extinguisher.")
 	_expect(await _heard(&"extinguisher_spray", 0.5), "A shot extinguisher hisses as it sprays.")
 	await create_timer(0.3).timeout
 	var jet := prop.find_children("Flipbook*", "", true, false)
