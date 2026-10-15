@@ -138,9 +138,14 @@ func toggle_lock(skill_id: String) -> bool:
 	return true
 
 
-func tick(delta: float) -> void:
+func tick(delta: float) -> Array[String]:
+	var finished: Array[String] = []
 	for skill_id in cooldowns.keys():
+		var previous := float(cooldowns[skill_id])
 		cooldowns[skill_id] = maxf(0.0, float(cooldowns[skill_id]) - delta)
+		if previous > 0.0 and float(cooldowns[skill_id]) <= 0.0:
+			finished.append(str(skill_id))
+	return finished
 
 
 func cast(skill_id: String, mutation: float, stability: float = 30.0) -> bool:

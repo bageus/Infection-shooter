@@ -1,44 +1,54 @@
 {
   "hunger_idle": {
     "files": [
-      "res://assets/audio/sfx/hunger_idle/hunger_idle_1.ogg"
+      "res://assets/audio/sfx/hunger_idle/hunger_idle_1.ogg",
+      "res://assets/audio/sfx/hunger_idle/hunger_idle_2.ogg"
     ],
     "sources": [
-      "the_cry_of_a_person_3"
+      "the_cry_of_a_person_3",
+      "hunger_idle_2"
     ]
   },
   "hunger_voice": {
     "files": [
-      "res://assets/audio/sfx/hunger_voice/hunger_voice_1.ogg"
+      "res://assets/audio/sfx/hunger_voice/hunger_voice_1.ogg",
+      "res://assets/audio/sfx/hunger_voice/hunger_voice_2.ogg"
     ],
     "sources": [
-      "the_scream_of_an_inf_1"
+      "the_scream_of_an_inf_1",
+      "hunger_voice_2"
     ]
   },
   "hunger_fours_voice": {
     "files": [
-      "res://assets/audio/sfx/hunger_fours_voice/hunger_fours_voice_1.ogg"
+      "res://assets/audio/sfx/hunger_fours_voice/hunger_fours_voice_1.ogg",
+      "res://assets/audio/sfx/hunger_fours_voice/hunger_fours_voice_2.ogg"
     ],
     "sources": [
-      "the_scream_of_an_inf_4"
+      "the_scream_of_an_inf_4",
+      "hunger_fours_voice_2"
     ]
   },
   "hunger_alert": {
     "files": [
-      "res://assets/audio/sfx/hunger_alert/hunger_alert_1.ogg"
+      "res://assets/audio/sfx/hunger_alert/hunger_alert_1.ogg",
+      "res://assets/audio/sfx/hunger_alert/hunger_alert_2.ogg"
     ],
     "sources": [
-      "sounds_of_zombies_ta_2"
+      "sounds_of_zombies_ta_2",
+      "hunger_alert_2"
     ]
   },
   "hunger_attack": {
     "files": [
       "res://assets/audio/sfx/hunger_attack/hunger_attack_1.ogg",
-      "res://assets/audio/sfx/hunger_attack/hunger_attack_2.ogg"
+      "res://assets/audio/sfx/hunger_attack/hunger_attack_2.ogg",
+      "res://assets/audio/sfx/hunger_attack/hunger_attack_3.ogg"
     ],
     "sources": [
       "the_scream_of_an_inf_2",
-      "sounds_of_zombies_ta_3"
+      "sounds_of_zombies_ta_3",
+      "hunger_attack_3"
     ]
   },
   "hunger_agony": {
@@ -59,18 +69,112 @@
   },
   "revenant_voice": {
     "files": [
-      "res://assets/audio/sfx/revenant_voice/revenant_voice_1.ogg"
+      "res://assets/audio/sfx/revenant_voice/revenant_voice_1.ogg",
+      "res://assets/audio/sfx/revenant_voice/revenant_voice_2.ogg",
+      "res://assets/audio/sfx/revenant_voice/revenant_voice_3.ogg"
     ],
     "sources": [
-      "the_scream_of_an_inf_3"
+      "the_scream_of_an_inf_3",
+      "revenant_voice_2",
+      "revenant_voice_3"
     ]
   },
   "revenant_attack": {
     "files": [
-      "res://assets/audio/sfx/revenant_attack/revenant_attack_1.ogg"
+      "res://assets/audio/sfx/revenant_attack/revenant_attack_1.ogg",
+      "res://assets/audio/sfx/revenant_attack/revenant_attack_2.ogg",
+      "res://assets/audio/sfx/revenant_attack/revenant_attack_3.ogg"
     ],
     "sources": [
-      "sounds_of_zombies_ta_4"
+      "sounds_of_zombies_ta_4",
+      "revenant_attack_2",
+      "revenant_attack_3"
+    ]
+  },
+  "heavy_death": {
+    "files": [
+      "res://assets/audio/sfx/heavy_death/heavy_death_1.ogg"
+    ],
+    "sources": [
+      "colossus&titan_death_1"
+    ]
+  },
+  "colossus_attack": {
+    "files": [
+      "res://assets/audio/sfx/colossus_attack/colossus_attack_1.ogg"
+    ],
+    "sources": [
+      "colossus_attack_1"
+    ]
+  },
+  "colossus_idle": {
+    "files": [
+      "res://assets/audio/sfx/colossus_idle/colossus_idle_1.ogg"
+    ],
+    "sources": [
+      "colossus_idle_1"
+    ]
+  },
+  "horde_idle": {
+    "files": [
+      "res://assets/audio/sfx/horde_idle/horde_idle_1.ogg",
+      "res://assets/audio/sfx/horde_idle/horde_idle_2.ogg"
+    ],
+    "sources": [
+      "horde_idle_1",
+      "horde_idle_2"
+    ]
+  },
+  "hunger_death": {
+    "files": [
+      "res://assets/audio/sfx/hunger_death/hunger_death_1.ogg"
+    ],
+    "sources": [
+      "hunger_death_1"
+    ]
+  },
+  "revenant_death": {
+    "files": [
+      "res://assets/audio/sfx/revenant_death/revenant_death_1.ogg"
+    ],
+    "sources": [
+      "revenant_death_1"
+    ]
+  },
+  "revenant_idle": {
+    "files": [
+      "res://assets/audio/sfx/revenant_idle/revenant_idle_1.ogg",
+      "res://assets/audio/sfx/revenant_idle/revenant_idle_2.ogg"
+    ],
+    "sources": [
+      "revenant_idle_1",
+      "revenant_idle_2"
+    ]
+  },
+  "titan_attack": {
+    "files": [
+      "res://assets/audio/sfx/titan_attack/titan_attack_1.ogg"
+    ],
+    "sources": [
+      "titan_attack_1"
+    ]
+  },
+  "colossus_voice": {
+    "files": [
+      "res://assets/audio/sfx/colossus_voice/colossus_voice_1.ogg"
+    ],
+    "sources": [
+      "roar_heavy_4"
+    ]
+  },
+  "titan_idle": {
+    "files": [
+      "res://assets/audio/sfx/titan_idle/titan_idle_1.ogg",
+      "res://assets/audio/sfx/titan_idle/titan_idle_2.ogg"
+    ],
+    "sources": [
+      "titan_idle_1",
+      "titan_idle_2"
     ]
   }
 }

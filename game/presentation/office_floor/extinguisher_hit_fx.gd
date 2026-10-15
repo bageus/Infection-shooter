@@ -154,7 +154,7 @@ func _check_landing() -> void:
 	var axis := (_body.global_basis * _long_axis).normalized()
 	if absf(axis.y) < 0.45:
 		_landed = true
-		SFX.play(effects_root if is_instance_valid(effects_root) else _body, &"canister_drop", _body.global_position)
+		SFX.play(effects_root if is_instance_valid(effects_root) else _body, &"extinguisher_fall", _body.global_position)
 
 
 func _stop_spray_sound() -> void:

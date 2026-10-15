@@ -171,7 +171,7 @@ func _test_infected() -> void:
 	parts.sever(&"arm_l", Vector3.RIGHT)
 	_expect(_voices(&"dismember") >= 1, "Shooting off a limb sounds gory.")
 	enemy.call("_apply_damage", 1000.0, false)
-	_expect(_voices(&"enemy_death") >= 1, "Death is voiced.")
+	_expect(_voices(&"hunger_death") >= 1, "The Hunger fixture uses its species death recording.")
 	_expect(await _heard(&"body_part_fall", 2.5), "The severed arm thuds when it lands.")
 	enemy.queue_free()
 	target.queue_free()
