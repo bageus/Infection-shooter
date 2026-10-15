@@ -59,9 +59,9 @@
 | A5 обломки сталкиваются с поздними врагами | Закрыто группой `contactless_debris` | — |
 | A6 счётчик ENEMIES | Закрыто: группа `infected_alive` (`infected_capsule.gd:3`) | — |
 | B2 атласы крови | Сделано: атласы 1536 px (пул 2048×1024), нарезка ячеек офлайн (`tools/build_blood_atlases.gd`, `cells.json`), полные листы в `source/` под `.gdignore`. Импорт `Image` | Проверить пик RAM: `_load_image` дублирует Image на CPU; в PROJECT_STATE указано «VRAM Compressed», по `.import` это не так |
-| B3 атлас трещин стекла | Частично: `size_limit=2048`, но `compress/mode=0` (Lossless) | Перевести на VRAM compression после сравнения вида (A08) |
+| B3 атлас трещин стекла | Закрыто 15.10.2026: `compress/mode=2`, `high_quality=true` (BC7 на десктопе). Видимые пиксели PSNR 31 дБ, альфа 42 дБ, на кадре трещины неотличимы | Проверить вид на целевом устройстве |
 | B4 прогрев шейдеров | Сделано: `shader_warmup.gd`, `mission_material_warmup.gd`, тест `run_shader_warmup_tests.gd` | Проверить, что покрыты шейдеры PR #67/#68/#91 (мутаген, тени мебели, трупы, пол) |
-| B5 Lossless-текстуры | Частично: 62 `.import` с `compress/mode=0` (44 в `models/`, 18 в `assets/`) | Просмотреть 3D-кандидатов: `fx_skills` (11 атласов), электроника, оружие, столы, враги Revenant/Brute |
+| B5 Lossless-текстуры | Разобрано 15.10.2026: Lossless остались 48 `.import` (UI, логотипы дисплеев, иконки, скриншоты docs, PNG из `models/` ссылками GLB). `fx_skills` и враги уже `mode=2`. Из прямых загрузок сжаты столы (BC7, PSNR 49–53 дБ) и стекло | Папки группы 01 (9 PNG 2048²) и `electronics_*` (3 PNG) нигде не загружаются из кода или сцен: кандидаты на удаление (решение владельца) |
 | B6 CI-проверка путей | Закрыто | — |
 | B7 перебор групп | Частично: `get_nodes_in_group("infected_alive")` в `prototype_hud.gd:85`, `player_movement.gd:433`, `mutation_skill_effects.gd:433`; отдельного реестра нет | Профилировать при 50+ врагах (E02), реестр только если подтвердится |
 | B8 мёртвый код | `fps_counter.gd` удалён. `office_floor/destructible_prop.gd` и сцены `public/props/` остаются без ссылок | Удалить после проверки в редакторе |

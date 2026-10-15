@@ -3,20 +3,21 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://wrcsip23gxfq"
-path="res://.godot/imported/Glass_Cracks_Atlas_4x2.png-6d35b725d31fe8e6b04da61477817264.ctex"
+path.bptc="res://.godot/imported/Glass_Cracks_Atlas_4x2.png-6d35b725d31fe8e6b04da61477817264.bptc.ctex"
 metadata={
-"vram_texture": false
+"imported_formats": ["s3tc_bptc"],
+"vram_texture": true
 }
 
 [deps]
 
 source_file="res://models/objects/textures/glass_decals/Glass_Cracks_Atlas_4x2.png"
-dest_files=["res://.godot/imported/Glass_Cracks_Atlas_4x2.png-6d35b725d31fe8e6b04da61477817264.ctex"]
+dest_files=["res://.godot/imported/Glass_Cracks_Atlas_4x2.png-6d35b725d31fe8e6b04da61477817264.bptc.ctex"]
 
 [params]
 
-compress/mode=0
-compress/high_quality=false
+compress/mode=2
+compress/high_quality=true
 compress/lossy_quality=0.7
 compress/uastc_level=0
 compress/rdo_quality_loss=0.0
