@@ -47,12 +47,13 @@ menu_music и menu_music_volume; старые файлы читаются с def
 
 ## Выполненные проверки
 
-Godot4.7.2.stable.official.ed1daf0bf, headless, каждый из13 наборов exit0 и без
+Godot4.7.2.stable.official.ed1daf0bf, headless, каждый из14 наборов exit0 и без
 SCRIPT ERROR/ERROR:
 
 | Набор | Результат |
 |---|---|
 | run_adaptive_audio_tests | PASS: пороги3/4, подсчёт агрессии, fade/boom, повторный бой, пауза, delay, menu lifecycle, реальные controls, старые preferences, mute independence |
+| run_infected_voice_tests | PASS: прежние one-callout assertions и новая проверка отсутствия крика у unaware |
 | run_enemy_voice_tests | PASS: существование событий, случайность и пропуски, фактические Hunger/Revenant, агония, жевание, прекращение, alert при прерывании еды, освобождение |
 | run_server_audio_tests | PASS: все3 настоящих модели, loop/trim/параметры затухания, фактическое разрушение, отсутствие шума на обычном prop |
 | run_sound_event_tests | PASS |
@@ -96,6 +97,12 @@ main обычный запуск PASS, а при принудительной с
 baseline воспроизводит1failure «It leaps up on all fours». В fixture цель перед
 криком переносится на8м, feral=true: это условия для устойчивого бега на четвереньках.
 Проверки/пороги не ослаблены; production AI не менялся ради теста.
+
+Дополнение при публикации: прежняя voice_test_body не имела public is_alerted,
+который теперь читает audio.tick. Заглушка дополнена этим методом и управляемым
+флагом, исходные assertions run_infected_voice_tests сохранены; дополнительно
+проверено, что nearby unaware не вызывает call-out. Исправление только тестовое,
+production поведение не менялось. Этот14-й набор также проходит локально.
 
 ## Осталось
 

@@ -5,3 +5,9 @@ var step_sound: StringName = &"step_heavy"
 var growl_sound: StringName = &"growl_brute"
 var voice_pitch := 1.0
 var step_pitch := 1.0
+
+var alerted := true
+
+
+func is_alerted() -> bool:
+	return alerted
