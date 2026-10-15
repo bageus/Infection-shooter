@@ -212,6 +212,7 @@ jobs:
           game/bootstrap/app/tests/run_occlusion_tests.gd
           game/bootstrap/app/tests/run_global_lighting_tests.gd
           game/bootstrap/app/tests/run_planner_loot_tests.gd
+          game/bootstrap/app/tests/run_enemy_loot_tests.gd
           game/bootstrap/app/tests/run_planning_mode_tests.gd
           game/bootstrap/app/tests/run_placement_templates_weapons_tests.gd
           game/bootstrap/app/tests/run_planner_light_view_tests.gd
@@ -240,6 +241,7 @@ jobs:
           game/features/character_animation/tests/run_gait_tests.gd
           game/features/character_animation/tests/run_leg_clips_tests.gd
           game/bootstrap/app/tests/run_mutation_feedback_tests.gd
+          game/bootstrap/app/tests/run_progression_ui_tests.gd
           game/features/player/tests/run_skill_vfx_tests.gd
           game/presentation/office_floor/tests/run_debris_tests.gd
           game/features/infected/tests/run_dismemberment_tests.gd
@@ -262,7 +264,9 @@ jobs:
           game/features/infected/tests/run_chase_route_tests.gd
           game/features/infected/tests/run_crowd_separation_tests.gd
           game/features/infected/tests/run_enemy_perception_tests.gd
+          game/features/combat/tests/run_weapon_noise_tests.gd
           game/features/infected/tests/run_enemy_idle_lod_tests.gd
+          game/features/infected/tests/run_unaware_motion_tests.gd
           game/presentation/prototype_hud/tests/run_weapon_icon_tests.gd
           game/presentation/prototype_hud/tests/run_armor_hud_tests.gd
           game/presentation/office_floor/tests/run_blood_effects_tests.gd

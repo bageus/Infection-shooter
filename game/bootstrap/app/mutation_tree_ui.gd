@@ -1,5 +1,6 @@
 extends CanvasLayer
 
+const TEXT := preload("res://game/bootstrap/app/mutation_text.gd")
 const SFX := preload("res://game/core/audio/public/sound_events.gd")
 const TREE_CANVAS := preload("res://game/bootstrap/app/mutation_tree_canvas.gd")
 const SKILL_CARD := preload("res://game/bootstrap/app/mutation_skill_card.gd")
@@ -11,6 +12,7 @@ const LIT := Color(0.3, 0.95, 0.1)
 const CIRCLE := 66.0
 const CIRCLE_ICON := 42
 
+var antidote_confirmation: Node
 var runtime: Node
 var window: Control
 var panel: PanelContainer
@@ -82,6 +84,12 @@ func configure(infection: Node) -> void:
 	_refresh()
 
 
+func _notification(what: int) -> void:
+	if what == NOTIFICATION_TRANSLATION_CHANGED and is_instance_valid(window):
+		TEXT.refresh(window)
+		_refresh()
+
+
 func _build_header() -> HBoxContainer:
 	var header := HBoxContainer.new()
 	header.add_theme_constant_override("separation", 28)
@@ -89,17 +97,18 @@ func _build_header() -> HBoxContainer:
 	titles.add_theme_constant_override("separation", 0)
 	titles.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	header.add_child(titles)
-	var caption := STYLE.label("SKILL TREE", 11)
+	var caption := TEXT.label("mutationTreeCaption", 11)
 	caption.add_theme_color_override("font_color", STYLE.MUTED)
 	titles.add_child(caption)
-	titles.add_child(STYLE.label("MUTATIONS", 34, true))
-	mutation_value = _stat(header, "MUTATION")
-	points_label = _stat(header, "POINTS")
-	stability_value = _stat(header, "STABILITY")
+	titles.add_child(TEXT.label("mutationTitle", 34, true))
+	mutation_value = _stat(header, "mutationAmount")
+	points_label = _stat(header, "mutationPoints")
+	stability_value = _stat(header, "mutationControlThreshold")
 	# Menu theme look without STYLE.button's focus-follows-hover, which would
 	# let Space close the tree while the player is reading it.
 	var close := Button.new()
-	close.text = "CLOSE  [ESC]"
+	close.text = TEXT.t("mutationClose")
+	close.set_meta("translation_key", "mutationClose")
 	close.custom_minimum_size.y = 48
 	close.focus_mode = Control.FOCUS_NONE
 	close.pressed.connect(close_tree)
@@ -114,7 +123,7 @@ func _stat(header: HBoxContainer, caption: String) -> Label:
 	block.add_theme_constant_override("separation", 0)
 	block.size_flags_vertical = Control.SIZE_SHRINK_CENTER
 	header.add_child(block)
-	var name_label := STYLE.label(caption, 10)
+	var name_label := TEXT.label(caption, 10)
 	name_label.add_theme_color_override("font_color", STYLE.MUTED)
 	block.add_child(name_label)
 	var value := STYLE.label("", 22, true)
@@ -124,7 +133,7 @@ func _stat(header: HBoxContainer, caption: String) -> Label:
 
 func _build_footer() -> HBoxContainer:
 	var footer := HBoxContainer.new()
-	hint_label = STYLE.label("━━   Click a circle to unlock a skill. Lock a learned skill to keep it when mutation drops.", 11)
+	hint_label = TEXT.label("mutationTreeHint", 11)
 	hint_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	hint_label.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	hint_label.add_theme_color_override("font_color", STYLE.MUTED)
@@ -163,6 +172,8 @@ func _on_mutation_changed(amount: float, _limit: float) -> void:
 
 
 func _input(event: InputEvent) -> void:
+	if is_instance_valid(antidote_confirmation) and antidote_confirmation.call("is_open"):
+		return
 	if is_tree_open() and event.is_action_pressed("antidote") and not event.is_echo():
 		var player := runtime.get_parent()
 		if player != null and player.has_method("use_antidote") and bool(player.call("use_antidote")):
@@ -174,6 +185,8 @@ func _input(event: InputEvent) -> void:
 
 
 func _unhandled_input(event: InputEvent) -> void:
+	if is_instance_valid(antidote_confirmation) and antidote_confirmation.call("is_open"):
+		return
 	if not visible:
 		return
 	if (event is InputEventKey and event.pressed and not event.echo) or (event is InputEventMouseButton and event.pressed):
@@ -293,10 +306,10 @@ func _refresh() -> void:
 
 func _add_branch_label(canvas: Control, branch_index: int, requirements: Dictionary) -> void:
 	var opened := bool(requirements["branch_open"])
-	var label := STYLE.label(str(TREE_CANVAS.BRANCHES[branch_index]).to_upper(), 14, true)
+	var label := STYLE.label(TEXT.branch(str(TREE_CANVAS.BRANCHES[branch_index])).to_upper(), 14, true)
 	label.modulate.a = 1.0 if opened else 0.4
 	var area: Rect2 = canvas.call("label_rect", branch_index)
-	var gate := STYLE.label("S%d · STABILITY %d%%%s" % [requirements["stage"], roundi(requirements["stability"]), " · LOCKED" if not opened else ""], 10)
+	var gate := STYLE.label(TEXT.t("mutationStageGate") % [requirements["stage"], roundi(requirements["stability"]), " · " + TEXT.t("mutationBranchClosed") if not opened else ""], 10)
 	gate.add_theme_color_override("font_color", STYLE.MUTED if opened else Color("8a6a62"))
 	for line: Label in [label, gate]:
 		line.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
@@ -407,9 +420,9 @@ func _add_lock(canvas: Control, row: Array, center: Vector2) -> void:
 	lock.set_meta("lock_skill_id", skill_id)
 	lock.set_meta("skill_id", lock_id)
 	lock.set_meta("card_info", {
-		"kind": "Skill lock", "title": str(row[1]),
-		"body": "Locked: kept when mutation drops." if locked else "Lock skill against mutation loss. A locked skill stays learned when mutation drops.",
-		"status": "Click to unlock" if locked else "Click to lock", "status_color": STYLE.MUTED})
+		"kind": TEXT.t("mutationSkillLock"), "title": TEXT.skill_name(skill_id),
+		"body": TEXT.t("mutationLockKept") if locked else TEXT.t("mutationLockHint"),
+		"status": TEXT.t("mutationClickUnlock") if locked else TEXT.t("mutationClickLock"), "status_color": STYLE.MUTED})
 	lock.mouse_entered.connect(_skill_hover.bind(lock))
 	lock.mouse_entered.connect(_show_card.bind(lock))
 	lock.mouse_exited.connect(card.dismiss.bind(lock_id))
@@ -444,14 +457,14 @@ func _equipped() -> Array[String]:
 
 
 func _add_section_labels(canvas: Control) -> void:
-	for entry in [["ACTIVE", 185.0], ["PASSIVE", 490.0], ["HYBRID", 664.0]]:
+	for entry in [["mutationActive", 185.0], ["mutationPassive", 490.0], ["mutationHybrid", 664.0]]:
 		var marker := ColorRect.new()
 		marker.color = SKILL_CARD.ACCENT
 		marker.position = Vector2(4, float(entry[1]) + 7.0)
 		marker.size = Vector2(14, 3)
 		marker.mouse_filter = Control.MOUSE_FILTER_IGNORE
 		canvas.add_child(marker)
-		var label := STYLE.label(str(entry[0]), 12)
+		var label := TEXT.label(str(entry[0]), 12)
 		label.position = Vector2(24, float(entry[1]))
 		label.add_theme_color_override("font_color", STYLE.MUTED)
 		canvas.add_child(label)

@@ -1,4 +1,5 @@
 extends Control
+const TEXT := preload("res://game/bootstrap/app/mutation_text.gd")
 
 # Combat HUD strip for mutation skills: a key badge that opens the tree, one
 # icon circle per active skill (blue sweep while its effect lasts, dark sweep
@@ -142,7 +143,7 @@ func configure(infection: Node, open_tree: Callable) -> void:
 	_strip.add_child(accent)
 	open_badge = Button.new()
 	open_badge.focus_mode = Control.FOCUS_NONE
-	open_badge.tooltip_text = "Mutation tree"
+	open_badge.tooltip_text = TEXT.t("mutationTreeCaption")
 	open_badge.add_theme_font_override("font", BODY)
 	open_badge.add_theme_font_size_override("font_size", 13)
 	var outline := StyleBoxFlat.new()
@@ -177,6 +178,7 @@ func configure(infection: Node, open_tree: Callable) -> void:
 ## Rebuilds the circles; `bindings[i]` is the key label for skills[i] ("" for none).
 func rebuild(skills: Array[String], bindings: Array[String], open_binding: String) -> void:
 	open_badge.text = open_binding
+	open_badge.tooltip_text = TEXT.t("mutationTreeCaption")
 	if skills == _skills and bindings == _bindings and not circles.is_empty():
 		_layout()
 		return
@@ -321,10 +323,7 @@ func feed_skills() -> Array[String]:
 
 
 func _skill_name(skill_id: String) -> String:
-	for row in runtime.call("skill_catalog"):
-		if str(row[0]) == skill_id:
-			return str(row[1])
-	return skill_id
+	return TEXT.skill_name(skill_id)
 
 
 class FeedIcon extends Control:

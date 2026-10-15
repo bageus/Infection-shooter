@@ -81,7 +81,7 @@ func _test_drops_spread(stage: Node3D) -> void:
 	for i in drops.size():
 		var drop := drops[i] as Node3D
 		_expect(drop.global_position.x < 1.0, "Drops stay on the kill's side of the wall.")
-		_expect(is_equal_approx((drop.get_node("Visual") as Node3D).scale.x, PICKUP.VISUAL_SCALE), "Drops use the shared item size.")
+		_expect(_matches_placed_size(drop), "Dropped items match the same scene placed directly, including fitted weapon ammo boxes.")
 		for j in range(i + 1, drops.size()):
 			var other := drops[j] as Node3D
 			var gap := Vector2(drop.global_position.x - other.global_position.x, drop.global_position.z - other.global_position.z).length()
@@ -95,6 +95,14 @@ func _test_drops_spread(stage: Node3D) -> void:
 		drop.queue_free()
 	table.queue_free()
 	wall.queue_free()
+
+
+func _matches_placed_size(drop: Node3D) -> bool:
+	var placed := (load(drop.scene_file_path) as PackedScene).instantiate() as Node3D
+	drop.get_parent().add_child(placed)
+	var same := (placed.get_node("Visual") as Node3D).scale.is_equal_approx((drop.get_node("Visual") as Node3D).scale)
+	placed.queue_free()
+	return same
 
 
 # Every DNA gets the rising arrow, whichever way it reaches the level.

@@ -52,6 +52,7 @@
       "configure": "configure(model_name, variant_count, has_fragments) -> void; initialize one runtime state",
       "hit": "hit(amount, weapon, book_stack, wall_mounted, anchored, facade) -> HitAction; scene-free existing balance",
       "complete_transition": "complete_transition() -> Transition; returns VARIANT, BREAK or NONE; presentation applies geometry"
-    }
+    },
+    "acoustics_v1": "Owner-approved 15.10.2026: opaque walls block shots and ally cries; weapon scenes export shot_noise_radius/shot_noise_interval (0.25s); hearing_profile configures rays/ear height/alert radius, hearing_range caps at 50m. Existing command signatures unchanged."
   }
 }
