@@ -57,33 +57,30 @@ func _run() -> void:
 	var backup := FileAccess.open(SAVE + ".bak", FileAccess.WRITE)
 	backup.store_string(JSON.stringify({"version": 8, "objects": records}))
 	backup.close()
-	var rollback_body := StaticBody3D.new()
-	rollback_body.collision_layer = 512
-	rollback_body.collision_mask = 129
-	stage.add_child(rollback_body)
-	var camera := root.get_camera_3d()
 	_write('{"objects":null}')
 	stage.call("_on_restart_pressed")
-	_expect(rollback_body.collision_layer == 0 and rollback_body.collision_mask == 0, "Restart suspends old physics participation while retaining rollback")
-	var failure: Node = stage.find_children("*", "CanvasLayer", true, false).filter(func(node: Node) -> bool: return node.get_script() != null and node.get_script().resource_path.ends_with("mission_loader.gd"))[0]
+	var failure: Node = root.find_children("*", "CanvasLayer", true, false).filter(func(node: Node) -> bool: return node.get_script() != null and not node.is_queued_for_deletion() and node.get_script().resource_path.ends_with("mission_loader.gd"))[0]
 	await _wait(func() -> bool: return (failure.get("back") as Button).visible)
-	_expect(current_scene == stage and root.get_camera_3d() == camera, "Failed restart preserves the previous mission and camera")
-	_expect(stage.visible, "Failed restart restores the previous mission visuals")
-	_expect(rollback_body.collision_layer == 512 and rollback_body.collision_mask == 129, "Failed restart restores exact gameplay/query collision bits")
+	_expect(not is_instance_valid(stage), "Restart releases the previous mission before loading the next one")
+	_expect(current_scene == null and failure.get_parent() == root, "Failed restart keeps only the loader error screen")
 	failure.call("_close_error")
-	await process_frame
+	await _wait(func() -> bool: return current_scene != null and current_scene.scene_file_path.ends_with("front_end.tscn"))
+	_expect(not paused, "Failed restart returns to the menu unpaused")
 	_write(JSON.stringify({"version": 8, "objects": records}))
-	var before := stage
+	current_scene.call("_action", "start")
+	await _wait(func() -> bool: return current_scene != null and current_scene.scene_file_path == "res://game/bootstrap/app/main.tscn")
+	stage = current_scene
+	await process_frame
+	var before_id := stage.get_instance_id()
 	stage.call("_on_restart_pressed")
 	stage.call("_on_restart_pressed")
-	_expect(current_scene == before and paused, "Restart also retains and pauses the previous mission while loading")
-	_expect(not before.visible, "Restart suspends old floor rendering behind the loading overlay")
-	_expect(rollback_body.collision_layer == 0 and rollback_body.collision_mask == 0, "Successful retry suspends restored old collisions again")
-	await _wait(func() -> bool: return current_scene != before)
-	_expect(current_scene != before and not paused, "Restart completes via the same asynchronous pipeline")
+	await process_frame
+	_expect(paused, "Restart pauses gameplay while loading")
+	await _wait(func() -> bool: return current_scene != null and current_scene.get_instance_id() != before_id)
+	_expect(current_scene.get_instance_id() != before_id and not paused, "Restart completes via the same asynchronous pipeline")
 	_expect(Input.mouse_mode == Input.MOUSE_MODE_VISIBLE, "Restart leaves the aiming cursor free")
 	await process_frame
-	_expect(not is_instance_valid(before), "Successful restart releases the previous mission")
+	_expect(not is_instance_valid(instance_from_id(before_id)), "Successful restart releases the previous mission")
 	current_scene.queue_free()
 	await process_frame
 	# Corrupt JSON must not block a deliberate backup start, or rewrite evidence.
