@@ -3,9 +3,10 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://cg4lxh6i15i3"
-path="res://.godot/imported/01_wall_emergency_door_group01_orm.png-bc0c4441e3d2c2915d26d694ea355ad2.ctex"
+path.s3tc="res://.godot/imported/01_wall_emergency_door_group01_orm.png-bc0c4441e3d2c2915d26d694ea355ad2.s3tc.ctex"
 metadata={
-"vram_texture": false
+"imported_formats": ["s3tc_bptc"],
+"vram_texture": true
 }
 generator_parameters={
 "md5": "293aaf1dc23194682730bd236a2d3119"
@@ -14,11 +15,11 @@ generator_parameters={
 [deps]
 
 source_file="res://models/objects/enviroments/01/01_wall_emergency_door_group01_orm.png"
-dest_files=["res://.godot/imported/01_wall_emergency_door_group01_orm.png-bc0c4441e3d2c2915d26d694ea355ad2.ctex"]
+dest_files=["res://.godot/imported/01_wall_emergency_door_group01_orm.png-bc0c4441e3d2c2915d26d694ea355ad2.s3tc.ctex"]
 
 [params]
 
-compress/mode=0
+compress/mode=2
 compress/high_quality=false
 compress/lossy_quality=0.7
 compress/uastc_level=0
@@ -39,5 +40,5 @@ process/premult_alpha=false
 process/normal_map_invert_y=false
 process/hdr_as_srgb=false
 process/hdr_clamp_exposure=false
-process/size_limit=0
+process/size_limit=1024
 detect_3d/compress_to=0
