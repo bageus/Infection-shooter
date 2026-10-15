@@ -9,7 +9,8 @@ on:
 permissions:
   contents: read
 concurrency:
-  group: ${{ github.workflow }}-${{ github.event_name == 'pull_request' && github.head_ref || github.sha }}
+  # New namespace lets cancellable runs start while legacy always() jobs drain.
+  group: ${{ github.workflow }}-cancellable-${{ github.event_name == 'pull_request' && github.head_ref || github.sha }}
   cancel-in-progress: true
 # Avoid llvmpipe oversubscription on shared CI CPUs; both real renderers remain enabled.
 env:
@@ -410,13 +411,13 @@ jobs:
           tools/run_runtime_suites.sh /tmp/runtime-suites.txt /tmp/runtime-suites 3
 
       - name: Main scene
-        if: always()
+        if: ${{ !cancelled() }}
         run: |
           set -o pipefail
           timeout 120 godot --headless --path . res://game/bootstrap/app/main.tscn --quit-after 180 2>&1 | tee /tmp/main.log
           if grep -E 'SCRIPT ERROR|^ERROR:' /tmp/main.log; then exit 1; fi
       - name: Capture menu screens
-        if: always()
+        if: ${{ !cancelled() }}
         run: |
           sudo apt-get update -qq
           sudo apt-get install -y -qq xvfb libgl1-mesa-dri mesa-vulkan-drivers libvulkan1
@@ -427,7 +428,7 @@ jobs:
           DISPLAY_CAPTURE_DIR: /tmp/menu_previews
           POSE_CAPTURE_DIR: /tmp/menu_previews
           RUNTIME_PROFILE_DIR: /tmp/menu_previews
-        if: always()
+        if: ${{ !cancelled() }}
         shell: bash
         run: |
           failed=0
