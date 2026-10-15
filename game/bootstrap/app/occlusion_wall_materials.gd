@@ -7,7 +7,8 @@ var records: Dictionary = {}
 var pending: Array[WeakRef] = []
 var queued: Dictionary = {}
 var surface_cache: Dictionary = {}
-var shader_cache: Dictionary = {}
+## Cull variants are built once per process: a new Shader resource would be compiled again on its first draw.
+static var _cull_variants: Dictionary = {}
 var active_materials: Array[ShaderMaterial] = []
 const SURFACES_PER_FRAME := 12
 
@@ -58,18 +59,26 @@ func remove_root(root: Node) -> void:
 			records.erase(id)
 
 
+static func shader_for_cull(cull_mode: int) -> Shader:
+	if cull_mode == BaseMaterial3D.CULL_BACK:
+		return SHADER
+	if not _cull_variants.has(cull_mode):
+		var variant := Shader.new()
+		variant.code = SHADER.code.replace("shader_type spatial;", "shader_type spatial;\nrender_mode " + ("cull_disabled" if cull_mode == BaseMaterial3D.CULL_DISABLED else "cull_front") + ";")
+		_cull_variants[cull_mode] = variant
+	return _cull_variants[cull_mode]
+
+
+## The shaders the occlusion pass can install, so the warm-up compiles the very same resources.
+static func runtime_shaders() -> Array[Shader]:
+	return [SHADER, shader_for_cull(BaseMaterial3D.CULL_DISABLED), shader_for_cull(BaseMaterial3D.CULL_FRONT)]
+
+
 func _copy_surface(source: BaseMaterial3D) -> ShaderMaterial:
 	if surface_cache.has(source):
 		return surface_cache[source]
 	var material := ShaderMaterial.new()
-	var shader := SHADER
-	if source.cull_mode != BaseMaterial3D.CULL_BACK:
-		if not shader_cache.has(source.cull_mode):
-			var variant := Shader.new()
-			variant.code = SHADER.code.replace("shader_type spatial;", "shader_type spatial;\nrender_mode " + ("cull_disabled" if source.cull_mode == BaseMaterial3D.CULL_DISABLED else "cull_front") + ";")
-			shader_cache[source.cull_mode] = variant
-		shader = shader_cache[source.cull_mode]
-	material.shader = shader
+	material.shader = shader_for_cull(source.cull_mode)
 	for pair in [["base_color", source.albedo_color], ["base_texture", source.albedo_texture],
 		["use_texture", source.albedo_texture != null], ["roughness_value", source.roughness],
 		["metallic_value", source.metallic], ["specular_value", source.metallic_specular],
@@ -114,7 +123,6 @@ func clear() -> void:
 	pending.clear()
 	queued.clear()
 	surface_cache.clear()
-	shader_cache.clear()
 	active_materials.clear()
 
 

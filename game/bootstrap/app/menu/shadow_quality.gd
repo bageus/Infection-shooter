@@ -18,6 +18,9 @@ const LEVELS: Array[Dictionary] = [
 ]
 
 
+static var _applied_atlas := -1
+
+
 static func level_count() -> int:
 	return LEVELS.size()
 
@@ -25,10 +28,14 @@ static func level_count() -> int:
 ## Applies the on/off switch and the quality level to the running game.
 static func apply(tree: SceneTree, enabled: bool, level: int) -> void:
 	var preset := LEVELS[clampi(level, 0, LEVELS.size() - 1)]
-	RenderingServer.directional_shadow_atlas_set_size(int(preset.atlas), true)
+	# Resizing an atlas reallocates it, and this runs on every settings change, so only do it when the size differs.
+	if _applied_atlas != int(preset.atlas):
+		_applied_atlas = int(preset.atlas)
+		RenderingServer.directional_shadow_atlas_set_size(_applied_atlas, true)
 	if tree == null:
 		return
-	tree.root.positional_shadow_atlas_size = int(preset.atlas)
+	if tree.root.positional_shadow_atlas_size != int(preset.atlas):
+		tree.root.positional_shadow_atlas_size = int(preset.atlas)
 	var scene := tree.current_scene
 	if scene == null:
 		return

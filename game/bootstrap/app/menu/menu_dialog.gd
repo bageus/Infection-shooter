@@ -138,7 +138,18 @@ func _slider(label_key: String, setting_key: String, minimum: float, maximum: fl
 	slider.max_value = maximum
 	slider.step = step_size
 	slider.value = view.preferences.values[setting_key]
-	slider.value_changed.connect(func(value: float) -> void: _change(setting_key, value))
+	# While the handle is dragged only the live effect (volume, brightness) follows; the file is
+	# written and the menu rebuilt once on release. Keyboard steps have no drag and commit at once.
+	var dragging := [false]
+	slider.drag_started.connect(func() -> void: dragging[0] = true)
+	slider.drag_ended.connect(func(_changed: bool) -> void:
+		dragging[0] = false
+		_commit())
+	slider.value_changed.connect(func(value: float) -> void:
+		view.preferences.values[setting_key] = value
+		view.preferences.apply_to_game(view.get_tree())
+		if not dragging[0]:
+			_commit())
 	_row(label_key, slider)
 
 
@@ -156,6 +167,11 @@ func _row(key: String, widget: Control) -> void:
 
 func _change(key: String, value: Variant) -> void:
 	view.preferences.values[key] = value
+	_commit()
+
+
+## Saves the settings, applies them and redraws the screen.
+func _commit() -> void:
 	if view.preferences.save_settings() != OK:
 		settings.notices.set_notice(settings_tab, view.text("storeUnavailable"))
 	view.preferences.apply_to_game(view.get_tree())
