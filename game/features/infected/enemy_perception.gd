@@ -154,7 +154,10 @@ func step_unaware(actor: ACTOR, delta: float) -> void:
 			var remaining := _wander - actor.global_position
 			remaining.y = 0.0
 			motion = motion.limit_length(remaining.length())
-		_collide(actor, motion)
+		if divisor == 12:
+			actor.move_and_collide(motion)
+		else:
+			_collide(actor, motion)
 	else:
 		_slide(actor)
 
@@ -166,12 +169,14 @@ func _slide(actor: ACTOR) -> void:
 
 # Collision-checked LOD travel retains tangential motion and prop pushes.
 func _collide(actor: ACTOR, motion: Vector3) -> void:
+	var pushed: Object
 	for i in 2:
 		var hit := actor.move_and_collide(motion)
 		if hit == null:
 			return
 		var collider := hit.get_collider()
-		if collider != null and collider.has_method("push_from_character"):
+		if collider != null and collider != pushed and collider.has_method("push_from_character"):
+			pushed = collider
 			collider.call("push_from_character", actor.global_position, actor._intended_motion, actor.push_strength)
 		motion = hit.get_remainder().slide(hit.get_normal())
 		if motion.is_zero_approx():

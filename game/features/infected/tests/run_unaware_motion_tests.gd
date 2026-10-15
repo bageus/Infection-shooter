@@ -16,6 +16,19 @@ class Senses:
 		batches += 1
 		super(actor, motion)
 
+class StraightRoute:
+	extends PERCEPTION.ROUTE
+	func direction(actor: CharacterBody3D, goal: Node3D, _radius: float, _far := false) -> Vector3:
+		var offset := goal.global_position - actor.global_position
+		offset.y = 0.0
+		return offset.normalized()
+
+class Prop:
+	extends StaticBody3D
+	var pushes := 0
+	func push_from_character(_at: Vector3, _motion: Vector3, _strength: float) -> void:
+		pushes += 1
+
 func _initialize() -> void:
 	call_deferred("_run")
 
@@ -73,6 +86,55 @@ func _lod_checks(enemy: PERCEPTION.ACTOR, target: Node3D, senses: Senses) -> voi
 	enemy.collision_shape.shape = original
 
 
+func _corner_contact(enemy: PERCEPTION.ACTOR, senses: Senses) -> void:
+	enemy.set_physics_process(false)
+	var start := enemy.position
+	var prop := Prop.new()
+	prop.position = Vector3(start.x, 0, start.z)
+	for side in 2:
+		var shape := CollisionShape3D.new()
+		var box := BoxShape3D.new()
+		box.size = Vector3(0.2, 3, 4) if side == 0 else Vector3(4, 3, 0.2)
+		shape.shape = box
+		shape.position = Vector3(1.2, 1.5, 0) if side == 0 else Vector3(0, 1.5, 1.6)
+		prop.add_child(shape)
+	stage.add_child(prop)
+	await _frames(2)
+	enemy._intended_motion = Vector3(1, 0, 1)
+	senses._collide(enemy, Vector3(2, 0, 2))
+	var travel := enemy.position - start
+	_check(travel.z > travel.x + 0.2, "Batched collision retains tangential travel to the second corner face")
+	_check(prop.pushes == 1, "Two contacts with one prop push it exactly once")
+	_far_contact(enemy, senses, prop, start)
+	prop.queue_free()
+	enemy.position = start
+	await _frames(2)
+	enemy.set_physics_process(true)
+
+
+func _far_contact(enemy: PERCEPTION.ACTOR, senses: Senses, prop: Prop, start: Vector3) -> void:
+	var saved_route := enemy._route
+	var saved_speed := enemy.move_speed
+	enemy.position = start
+	enemy._target.position = start + Vector3(0, 0, 60)
+	enemy._route = StraightRoute.new()
+	enemy.move_speed = 8.0
+	enemy._lod_frame_offset = Engine.get_physics_frames() % 12
+	senses.wander_enabled = true
+	senses._wandering = true
+	senses._state_time = 0.0
+	senses._wander = start + Vector3(2, 0, 2)
+	senses._idle_elapsed = 0.8 - 1.0 / 60.0
+	prop.pushes = 0
+	senses.step_unaware(enemy, 1.0 / 60.0)
+	var travel := enemy.position - start
+	_check(absf(travel.x - travel.z) < 0.03, "Far idle retains its original single collision step without sliding")
+	_check(prop.pushes == 0, "Far idle does not introduce prop pushes")
+	enemy._route = saved_route
+	enemy.move_speed = saved_speed
+	senses.wander_enabled = false
+
+
 func _run() -> void:
 	seed(42)
 	var bins := {}
@@ -117,6 +179,7 @@ func _run() -> void:
 	_check(senses.slides > 0, "Blast stun bypasses the idle shortcut immediately")
 	await _frames(70)
 	await _lod_checks(enemy, target, senses)
+	await _corner_contact(enemy, senses)
 	# Loss of support must work despite the stale CharacterBody floor flag.
 	senses.slides = 0
 	floor_body.queue_free()
