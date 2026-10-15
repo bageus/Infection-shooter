@@ -12,6 +12,7 @@ func _initialize() -> void:
 
 func _run() -> void:
 	_profiles()
+	await _species_hooks()
 	var stage := Node3D.new()
 	root.add_child(stage)
 	var hunger := HUNGER.instantiate() as CharacterBody3D
@@ -27,7 +28,7 @@ func _run() -> void:
 	audio.call("stop_voice")
 	await process_frame
 	hunger.call("_idle_flavor", true)
-	_check(_event(audio) in ["hunger_voice", "scream_zombie"] and not hunger.call("is_alerted"), "Idle scream is not an aggression transition")
+	_check(_event(audio) in ["hunger_voice"] and not hunger.call("is_alerted"), "Idle scream is not an aggression transition")
 	audio.call("stop_voice")
 	await process_frame
 	audio.call("feeding_tick", .1, false)
@@ -44,7 +45,7 @@ func _run() -> void:
 	await process_frame
 	hunger.set("_feeding", true)
 	hunger.call("_on_aggro")
-	_check(not hunger.call("is_feeding") and _event(audio) in ["hunger_alert", "scream_zombie"], "Interrupting a meal does not cut off the new alert shout")
+	_check(not hunger.call("is_feeding") and _event(audio) in ["hunger_alert"], "Interrupting a meal does not cut off the new alert shout")
 	audio.call("stop_voice")
 	await process_frame
 	hunger.set("posture", 1)
@@ -64,6 +65,40 @@ func _run() -> void:
 	_check(SFX._voices == 0, "Enemy vocal lifetimes end with the actors")
 	print("Enemy voice tests: %d failures" % failures)
 	quit(failures)
+
+
+func _species_hooks() -> void:
+	var script := preload("res://game/features/infected/infected_audio.gd")
+	var fixture := preload("res://game/features/infected/tests/voice_test_body.gd")
+	var expected := {
+		&"growl_hunger": [&"hunger_idle", &"hunger_death", &"hunger_attack"],
+		&"growl_revenant": [&"revenant_idle", &"revenant_death", &"revenant_attack"],
+		&"growl_colossus": [&"colossus_idle", &"heavy_death", &"colossus_attack"],
+		&"growl_titan": [&"titan_idle", &"heavy_death", &"titan_attack"],
+		&"growl_horde": [&"horde_idle", &"enemy_death", &"growl_horde"],
+	}
+	for species: StringName in expected:
+		var body := fixture.new()
+		body.growl_sound = species
+		root.add_child(body)
+		var audio := script.new()
+		body.add_child(audio)
+		audio.setup(body, 1.0)
+		seed(42)
+		for i in 30:
+			audio._growl_wait = 0.0
+			body.alerted = false
+			audio.tick(.01, false, true)
+			if not _event(audio).is_empty(): break
+		_check(_event(audio) == str(expected[species][0]), "Unaware species uses its idle: " + str(species))
+		audio.died()
+		_check(body.get_children().any(func(n: Node) -> bool: return n.is_in_group("sfx_"+str(expected[species][1]))), "Species death is wired: " + str(species))
+		_check(_event(audio).is_empty(), "Death interrupts idle speech")
+		body.queue_free()
+		await process_frame
+		_check(expected[species][2] in PROFILE.PROFILES[species][&"attack"][1], "Species attack is wired")
+	_check(not SFX.has_event(&"scream_zombie") and not SFX.has_event(&"roar_heavy"), "Deleted shared vocal events cannot be selected")
+	_check(&"colossus_voice" in PROFILE.PROFILES[&"growl_colossus"][&"voice"][1], "Fourth roar is ordinary Colossus speech")
 
 
 func _profiles() -> void:

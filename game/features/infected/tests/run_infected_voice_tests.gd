@@ -16,28 +16,29 @@ func _initialize() -> void:
 func _run() -> void:
 	for growl: StringName in SFX.EVENTS:
 		if String(growl).begins_with("growl_"):
-			_expect(SFX.EVENTS.has(AUDIO.SCREAMS.get(growl, &"scream_zombie")), "Growl family has a call-out: " + String(growl))
+			_expect(SFX.EVENTS.has(growl), "Growl family has a call-out: " + String(growl))
 	var stage := Node3D.new()
 	root.add_child(stage)
 	var first := _infected(stage, &"growl_zombie")
 	var second := _infected(stage, &"growl_brute")
-	_expect(first.scream_sound == &"scream_zombie" and second.scream_sound == &"roar_heavy", "Heavy infected call out with a roar.")
+	_expect(first.scream_sound == &"growl_zombie" and second.scream_sound == &"growl_brute", "Call-outs use the species voice after removing shared screams.")
 	AUDIO._last_call_out_ms = -100000
 	first.body.set("alerted", false)
 	first.tick(0.016, false, true)
-	_expect(_count(first.body, &"scream_zombie") == 0 and not first.spotted, "Unaware infected never announce the player just because it is nearby.")
+	_expect(_count(first.body, &"growl_zombie") == 0 and not first.spotted, "Unaware infected never announce the player just because it is nearby.")
 	first.body.set("alerted", true)
 	first.tick(0.016, false, false)
-	_expect(_count(first.body, &"scream_zombie") == 0 and not first.spotted, "No call-out before the player is near.")
+	_expect(_count(first.body, &"growl_zombie") == 0 and not first.spotted, "No call-out before the player is near.")
 	first.tick(0.016, false, true)
-	_expect(_count(first.body, &"scream_zombie") == 1 and first.spotted, "The first sighting calls out once.")
+	_expect(_count(first.body, &"growl_zombie") == 1 and first.spotted, "The first sighting calls out once.")
 	second.tick(0.016, true, true)
-	_expect(_count(second.body, &"roar_heavy") == 0 and second.spotted, "A group spotting together gives one call-out.")
+	_expect(_count(second.body, &"growl_brute") == 0 and second.spotted, "A group spotting together gives one call-out.")
+	var call_out_time := AUDIO._last_call_out_ms
 	first._growl_wait = 0.0
 	for i in 30:
 		first.tick(0.016, i % 2 == 0, true)
 		first._growl_wait = 0.0
-	_expect(_count(first.body, &"scream_zombie") == 1, "After the call-out only growls follow.")
+	_expect(AUDIO._last_call_out_ms == call_out_time, "Hunting does not trigger another call-out.")
 	_expect(_count(first.body, &"growl_zombie") >= 1, "Hunting growls continue.")
 	stage.queue_free()
 	await process_frame

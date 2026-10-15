@@ -56,10 +56,42 @@ func _run() -> void:
 	_expect(_voices(player, &"skill_retaliation") == 1, "Retaliation's shock is heard.")
 	runtime.emit_signal("passive_triggered", "regeneration", 0.0)
 	_expect(_voices(player, &"skill_second_heart") == 0, "Quiet passives stay silent.")
+	await _cooldown_feedback(player, runtime)
 	stage.queue_free()
 	await process_frame
 	print("Skill sound tests: %d failure(s)." % failures)
 	quit(failures)
+
+
+func _cooldown_feedback(player: Node, runtime: Node) -> void:
+	runtime.set_physics_process(false)
+	var tree: RefCounted = runtime.get("tree")
+	var domain: RefCounted = runtime.get("_domain")
+	domain.set("mutation", 40.0)
+	domain.set("critical_threshold", 45.0)
+	tree.get("learned")["blood_burst"] = true
+	runtime.call("_physics_process", .01)
+	_expect(_voices(player, &"skill_cooldown_done") == 0, "Initially ready skills stay silent")
+	_expect(runtime.call("cast_skill", "blood_burst"), "A learned skill starts its real cooldown")
+	runtime.call("_physics_process", 1.0)
+	_expect(_voices(player, &"skill_cooldown_done") == 0, "A running cooldown stays silent")
+	runtime.call("_physics_process", 30.0)
+	_expect(_voices(player, &"skill_cooldown_done") == 1, "Natural cooldown completion is heard once")
+	runtime.call("_physics_process", .1)
+	_expect(_voices(player, &"skill_cooldown_done") == 1, "Ready state does not repeat every frame")
+	for child in player.get_children():
+		if child.is_in_group(&"sfx_skill_cooldown_done"): child.queue_free()
+	await process_frame
+	_expect(runtime.call("cast_skill", "blood_burst"), "A ready skill can be cast again")
+	runtime.call("reduce_skill_cooldowns", 100.0)
+	_expect(_voices(player, &"skill_cooldown_done") == 1, "Accelerated completion uses the same cue")
+	runtime.call("reduce_skill_cooldowns", 100.0)
+	_expect(_voices(player, &"skill_cooldown_done") == 1, "Reduction never re-announces a ready skill")
+	tree.get("cooldowns")["parasite"] = .1
+	runtime.call("reduce_skill_cooldowns", 1.0)
+	_expect(_voices(player, &"skill_cooldown_done") == 1, "Unlearned skill expiration stays silent")
+	runtime.emit_signal("passive_triggered", "second_heart", 3.0)
+	_expect(_voices(player, &"skill_second_heart") == 1, "Lethal-hit survival plays Done_alive")
 
 
 func _voices(parent: Node, event: StringName) -> int:

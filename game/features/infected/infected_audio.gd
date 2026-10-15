@@ -7,21 +7,13 @@ extends Node
 const VOICE_PROFILE := preload("res://game/features/infected/enemy_voice_profile.gd")
 const SFX := preload("res://game/core/audio/public/sound_events.gd")
 
-## The call-out when an infected first spots the player: a rasping scream,
-## a roar for the heavy ones. Growls and wheezes take over afterwards.
-const SCREAMS := {
-	&"growl_brute": &"roar_heavy",
-	&"growl_titan": &"roar_heavy",
-	&"growl_colossus": &"roar_heavy",
-	&"growl_horde": &"roar_heavy",
-}
 ## One call-out speaks for a group that spots the player together: others
 ## within this window count as having heard it and stay with growls.
 const CALL_OUT_WINDOW_MS := 2500
 static var _last_call_out_ms := -100000
 
 var body: CharacterBody3D
-var scream_sound: StringName = &"scream_zombie"
+var scream_sound: StringName = &"growl_zombie"
 var spotted := false
 var step_sound: StringName = &"step_light"
 var growl_sound: StringName = &"growl_zombie"
@@ -43,7 +35,7 @@ func setup(owner_body: CharacterBody3D, size: float) -> void:
 	voice_pitch = float(owner_body.get("voice_pitch"))
 	step_pitch = float(owner_body.get("step_pitch"))
 	step_length = 0.85 * size
-	scream_sound = SCREAMS.get(growl_sound, &"scream_zombie")
+	scream_sound = growl_sound
 	_last_position = owner_body.global_position
 	_growl_wait = randf_range(1.0, 4.0)
 
@@ -132,7 +124,8 @@ func severed(position: Vector3) -> void:
 
 func died() -> void:
 	stop_voice()
-	SFX.play(body, &"enemy_death", Vector3.INF, 0.0, voice_pitch)
+	var event := VOICE_PROFILE.event_for(growl_sound, &"death")
+	SFX.play(body, &"enemy_death" if event.is_empty() else event, Vector3.INF, 0.0, voice_pitch)
 
 
 func play(event: StringName, volume_offset := 0.0) -> void:
