@@ -8,6 +8,7 @@ var warmed_materials := 0
 const PHYSICS := preload("res://game/bootstrap/app/planning_physics.gd")
 const PREFERENCES := preload("res://game/bootstrap/app/menu/menu_preferences.gd")
 const MAIN_PATH := "res://game/bootstrap/app/main.tscn"
+const FRONT_END_PATH := "res://game/bootstrap/app/menu/front_end.tscn"
 var scene_path := MAIN_PATH
 var label: Label
 var progress: ProgressBar
@@ -21,6 +22,7 @@ var _previous_collisions: Array[Dictionary] = []
 var _previous_camera: Camera3D
 var _previous_pause := false
 var _previous_mouse := Input.MOUSE_MODE_VISIBLE
+var _released_previous := false
 var _ru := false
 var _recovery_path := ""
 var _recovery_requested := false
@@ -69,15 +71,30 @@ func start() -> void:
 		RenderingServer.get_current_rendering_method(), float(OS.get_static_memory_usage()) / 1048576.0])
 	var tree := get_tree()
 	var previous := tree.current_scene
-	if previous is Node3D:
+	if previous is Node3D and previous.scene_file_path == MAIN_PATH:
+		# A restart must not hold two missions at once: that doubles peak memory and
+		# makes allocations fail on small machines. The mission is gone if loading fails.
+		_released_previous = true
+		_previous_mouse = Input.mouse_mode
+		_previous_pause = tree.paused
+		tree.paused = true
+		Input.mouse_mode = Input.MOUSE_MODE_VISIBLE
+		reparent(tree.root)
+		tree.current_scene = null
+		previous.queue_free()
+		await tree.process_frame
+		await tree.process_frame
+		previous = null
+	elif previous is Node3D:
 		_previous_scene = previous
 		_previous_visible = previous.visible
 		# Retain rollback state, but do not render the old floor behind the overlay.
 		previous.hide()
 		_suspend_previous_collisions(previous)
-	_previous_camera = get_viewport().get_camera_3d()
-	_previous_pause = tree.paused
-	_previous_mouse = Input.mouse_mode
+	if not _released_previous:
+		_previous_camera = get_viewport().get_camera_3d()
+		_previous_pause = tree.paused
+		_previous_mouse = Input.mouse_mode
 	tree.paused = true
 	Input.mouse_mode = Input.MOUSE_MODE_VISIBLE
 	# Render the overlay before any foreground instantiation.
@@ -184,6 +201,8 @@ func _fail(reason: String) -> void:
 	get_tree().paused = _previous_pause
 	Input.mouse_mode = Input.MOUSE_MODE_VISIBLE
 	label.text = ("Ошибка загрузки: " if _ru else "Loading failed: ") + reason
+	if reason.to_lower().contains("cannot load") or reason.contains("Не удалось загрузить"):
+		label.text += "\n" + ("Возможно, не хватает оперативной памяти: закройте другие программы и повторите." if _ru else "The computer may be out of memory: close other programs and try again.")
 	progress.hide()
 	back.show()
 	back.grab_focus()
@@ -192,6 +211,9 @@ func _fail(reason: String) -> void:
 func _close_error() -> void:
 	Input.mouse_mode = _previous_mouse
 	completed.emit(false)
+	if _released_previous:
+		get_tree().paused = _previous_pause
+		get_tree().change_scene_to_file(FRONT_END_PATH)
 	queue_free()
 
 
