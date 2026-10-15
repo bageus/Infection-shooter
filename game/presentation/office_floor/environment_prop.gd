@@ -213,6 +213,8 @@ func _ready() -> void:
 		_add_desk_lamp_light()
 	if not freeze or wall_mounted:
 		IMPACT_SOUND.watch(self)
+	_geometry.shadows.configure(self, _visual, _shape_meshes, model_path)
+	set_notify_transform(true)
 
 
 # The desk lamp lights its own surroundings from under the shade.
@@ -497,3 +499,8 @@ func snap_display_edges(neighbors: Array[Dictionary]) -> void:
 	var source := get_display_edges()
 	if not source.is_empty():
 		global_position += preload("res://game/presentation/office_floor/display_edge_snap.gd").position(source, neighbors)
+
+
+func _notification(what: int) -> void:
+	if what == NOTIFICATION_TRANSFORM_CHANGED and is_inside_tree():
+		_geometry.shadows.update(self)

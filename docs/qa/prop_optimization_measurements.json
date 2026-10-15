@@ -1,0 +1,1730 @@
+{
+  "base_commit": "2ced90d9600197503a08c15546b9def3b9df17c9",
+  "engine": "Godot 4.7.2 / Jolt / fixed-fps 60",
+  "primary_samples": "furniture-paired-baseline-* and furniture-paired-shadow-*",
+  "rejected_physics_commit": "b101f87de6c0bd6d9a296685734c181908e4bb6b",
+  "samples": {
+    "furniture-paired-baseline-2": {
+      "records": [
+        {
+          "bodies": 4032,
+          "environment_props": 4029,
+          "inventory": true,
+          "setup_ms": 6671.671,
+          "shadow_meshes": 28768,
+          "shadow_triangles": 9779878,
+          "threshold_candidates": {
+            "0.2": [
+              875,
+              1233,
+              290464
+            ],
+            "0.3": [
+              1567,
+              3548,
+              470520
+            ],
+            "0.4": [
+              2021,
+              4850,
+              533487
+            ],
+            "0.45": [
+              2303,
+              5944,
+              568327
+            ],
+            "0.5": [
+              2337,
+              6050,
+              585521
+            ]
+          },
+          "visible_meshes": 29413
+        },
+        {
+          "active_end": 209,
+          "active_kickable_end": 117,
+          "active_non_kickable_models": {
+            "03_file_cabinet_small_shelf_fancy.glb": 1,
+            "03_file_cabinet_small_with_shelfs.glb": 1,
+            "03_file_cabinet_smaller.glb": 3,
+            "04_cardboard_boxes.glb": 1,
+            "05_PC_destructible.glb": 4,
+            "05_lamp.glb": 7,
+            "05_monitor2_destructible.glb": 7,
+            "05_monitor_destructible.glb": 20,
+            "05_monitor_wide_destructible.glb": 1,
+            "06_office_chair.glb": 16,
+            "08_divider_black_low.glb": 7,
+            "08_office_desk_2.glb": 14,
+            "08_office_desk_4_coner.glb": 4,
+            "09_casehand_1.glb": 4,
+            "<null>": 2
+          },
+          "active_start": 387,
+          "enemies": 0,
+          "frozen_end": 773,
+          "frozen_start": 773,
+          "ticks": 239,
+          "wall_mean_ms": 5.07276987447699,
+          "wall_p95_ms": 7.92,
+          "warmup": 240
+        }
+      ],
+      "errors": 0
+    },
+    "furniture-conservative-1": {
+      "records": [
+        {
+          "bodies": 4032,
+          "environment_props": 4029,
+          "inventory": true,
+          "setup_ms": 6634.879,
+          "shadow_meshes": 23918,
+          "shadow_triangles": 9246391,
+          "threshold_candidates": {
+            "0.2": [
+              875,
+              1233,
+              0
+            ],
+            "0.3": [
+              1567,
+              3548,
+              0
+            ],
+            "0.4": [
+              2014,
+              4870,
+              0
+            ],
+            "0.45": [
+              2296,
+              6040,
+              34840
+            ],
+            "0.5": [
+              2337,
+              6210,
+              52034
+            ]
+          },
+          "visible_meshes": 29413
+        },
+        {
+          "active_end": 353,
+          "active_kickable_end": 205,
+          "active_non_kickable_models": {
+            "03_file_cabinet_largest.glb": 2,
+            "03_file_cabinet_small_shelf_fancy.glb": 1,
+            "03_file_cabinet_small_with_shelfs.glb": 1,
+            "03_file_cabinet_smaller.glb": 3,
+            "04_cardboard_boxes.glb": 4,
+            "05_PC_destructible.glb": 4,
+            "05_lamp.glb": 17,
+            "05_monitor2_destructible.glb": 10,
+            "05_monitor_destructible.glb": 32,
+            "05_monitor_wide_destructible.glb": 1,
+            "06_office_chair.glb": 24,
+            "08_divider_black_high.glb": 1,
+            "08_divider_black_low.glb": 7,
+            "08_divider_black_low_half.glb": 5,
+            "08_office_desk_2.glb": 26,
+            "08_office_desk_4_coner.glb": 4,
+            "09_casehand_1.glb": 4,
+            "<null>": 2
+          },
+          "active_start": 386,
+          "enemies": 0,
+          "frozen_end": 1072,
+          "frozen_start": 1071,
+          "ticks": 239,
+          "wall_mean_ms": 4.96316736401674,
+          "wall_p95_ms": 7.352,
+          "warmup": 240
+        }
+      ],
+      "errors": 0
+    },
+    "furniture-clean-events-1": {
+      "records": [
+        {
+          "bodies": 4032,
+          "environment_props": 4029,
+          "inventory": true,
+          "setup_ms": 7464.688,
+          "shadow_meshes": 23918,
+          "shadow_triangles": 9246391,
+          "threshold_candidates": {
+            "0.2": [
+              875,
+              1233,
+              0
+            ],
+            "0.3": [
+              1567,
+              3548,
+              0
+            ],
+            "0.4": [
+              2014,
+              4870,
+              0
+            ],
+            "0.45": [
+              2296,
+              6040,
+              34840
+            ],
+            "0.5": [
+              2337,
+              6210,
+              52034
+            ]
+          },
+          "visible_meshes": 29413
+        },
+        {
+          "active_end": 372,
+          "active_kickable_end": 208,
+          "active_non_kickable_models": {
+            "02_dishwasher_dented.glb": 1,
+            "02_frige_dented.glb": 2,
+            "02_vending_automat_1_dented.glb": 1,
+            "02_washing_machine_dented.glb": 1,
+            "03_file_cabinet_largest.glb": 2,
+            "03_file_cabinet_small_shelf_fancy.glb": 1,
+            "03_file_cabinet_small_with_shelfs.glb": 10,
+            "03_file_cabinet_smaller.glb": 3,
+            "04_cardboard_boxes.glb": 4,
+            "05_PC_destructible.glb": 4,
+            "05_lamp.glb": 17,
+            "05_monitor2_destructible.glb": 10,
+            "05_monitor_destructible.glb": 32,
+            "05_monitor_wide_destructible.glb": 1,
+            "06_office_chair.glb": 24,
+            "08_divider_black_high.glb": 1,
+            "08_divider_black_low.glb": 7,
+            "08_divider_black_low_half.glb": 5,
+            "08_office_desk_2.glb": 26,
+            "08_office_desk_4_coner.glb": 4,
+            "09_casehand_1.glb": 4,
+            "11_plant_small.glb": 2,
+            "<null>": 2
+          },
+          "active_start": 594,
+          "enemies": 0,
+          "frozen_end": 1071,
+          "frozen_start": 1071,
+          "ticks": 239,
+          "wall_mean_ms": 7.73362343096234,
+          "wall_p95_ms": 12.459,
+          "warmup": 240
+        }
+      ],
+      "errors": 0
+    },
+    "furniture-paired-shadow-crowd": {
+      "records": [
+        {
+          "bodies": 4032,
+          "environment_props": 4029,
+          "inventory": true,
+          "setup_ms": 6828.176,
+          "shadow_meshes": 23918,
+          "shadow_triangles": 9246391,
+          "threshold_candidates": {
+            "0.2": [
+              875,
+              0,
+              0
+            ],
+            "0.3": [
+              1567,
+              0,
+              0
+            ],
+            "0.4": [
+              2021,
+              0,
+              0
+            ],
+            "0.45": [
+              2303,
+              1094,
+              34840
+            ],
+            "0.5": [
+              2337,
+              1200,
+              52034
+            ]
+          },
+          "visible_meshes": 29413
+        },
+        {
+          "active_end": 282,
+          "active_kickable_end": 155,
+          "active_non_kickable_models": {
+            "02_coffee_machine_destructible.glb": 1,
+            "03_file_cabinet_small_shelf_fancy.glb": 1,
+            "03_file_cabinet_small_with_shelfs.glb": 1,
+            "03_file_cabinet_smaller.glb": 3,
+            "04_cardboard_archive_box.glb": 1,
+            "04_cardboard_boxes.glb": 2,
+            "05_PC_destructible.glb": 4,
+            "05_lamp.glb": 7,
+            "05_monitor2_destructible.glb": 7,
+            "05_monitor_destructible.glb": 20,
+            "05_monitor_wide_destructible.glb": 1,
+            "06_office_chair.glb": 16,
+            "06_simple_chair.glb": 22,
+            "07_table_longest.glb": 2,
+            "07_table_square_tall.glb": 6,
+            "08_divider_black_low.glb": 7,
+            "08_office_desk_2.glb": 14,
+            "08_office_desk_4_coner.glb": 4,
+            "09_case_with_money_close.glb": 1,
+            "09_casehand_1.glb": 4,
+            "12_ammo_sniper.glb": 1,
+            "<null>": 2
+          },
+          "active_start": 435,
+          "enemies": 90,
+          "frozen_end": 773,
+          "frozen_start": 773,
+          "ticks": 239,
+          "wall_mean_ms": 26.2826610878661,
+          "wall_p95_ms": 33.91,
+          "warmup": 240
+        }
+      ],
+      "errors": 0
+    },
+    "furniture-paired-shadow-3": {
+      "records": [
+        {
+          "bodies": 4032,
+          "environment_props": 4029,
+          "inventory": true,
+          "setup_ms": 6816.652,
+          "shadow_meshes": 23918,
+          "shadow_triangles": 9246391,
+          "threshold_candidates": {
+            "0.2": [
+              875,
+              0,
+              0
+            ],
+            "0.3": [
+              1567,
+              0,
+              0
+            ],
+            "0.4": [
+              2021,
+              0,
+              0
+            ],
+            "0.45": [
+              2303,
+              1094,
+              34840
+            ],
+            "0.5": [
+              2337,
+              1200,
+              52034
+            ]
+          },
+          "visible_meshes": 29413
+        },
+        {
+          "active_end": 209,
+          "active_kickable_end": 117,
+          "active_non_kickable_models": {
+            "03_file_cabinet_small_shelf_fancy.glb": 1,
+            "03_file_cabinet_small_with_shelfs.glb": 1,
+            "03_file_cabinet_smaller.glb": 3,
+            "04_cardboard_boxes.glb": 1,
+            "05_PC_destructible.glb": 4,
+            "05_lamp.glb": 7,
+            "05_monitor2_destructible.glb": 7,
+            "05_monitor_destructible.glb": 20,
+            "05_monitor_wide_destructible.glb": 1,
+            "06_office_chair.glb": 16,
+            "08_divider_black_low.glb": 7,
+            "08_office_desk_2.glb": 14,
+            "08_office_desk_4_coner.glb": 4,
+            "09_casehand_1.glb": 4,
+            "<null>": 2
+          },
+          "active_start": 387,
+          "enemies": 0,
+          "frozen_end": 773,
+          "frozen_start": 773,
+          "ticks": 239,
+          "wall_mean_ms": 5.3588410041841,
+          "wall_p95_ms": 9.089,
+          "warmup": 240
+        }
+      ],
+      "errors": 0
+    },
+    "furniture-paired-shadow-2": {
+      "records": [
+        {
+          "bodies": 4032,
+          "environment_props": 4029,
+          "inventory": true,
+          "setup_ms": 6926.055,
+          "shadow_meshes": 23918,
+          "shadow_triangles": 9246391,
+          "threshold_candidates": {
+            "0.2": [
+              875,
+              0,
+              0
+            ],
+            "0.3": [
+              1567,
+              0,
+              0
+            ],
+            "0.4": [
+              2021,
+              0,
+              0
+            ],
+            "0.45": [
+              2303,
+              1094,
+              34840
+            ],
+            "0.5": [
+              2337,
+              1200,
+              52034
+            ]
+          },
+          "visible_meshes": 29413
+        },
+        {
+          "active_end": 209,
+          "active_kickable_end": 117,
+          "active_non_kickable_models": {
+            "03_file_cabinet_small_shelf_fancy.glb": 1,
+            "03_file_cabinet_small_with_shelfs.glb": 1,
+            "03_file_cabinet_smaller.glb": 3,
+            "04_cardboard_boxes.glb": 1,
+            "05_PC_destructible.glb": 4,
+            "05_lamp.glb": 7,
+            "05_monitor2_destructible.glb": 7,
+            "05_monitor_destructible.glb": 20,
+            "05_monitor_wide_destructible.glb": 1,
+            "06_office_chair.glb": 16,
+            "08_divider_black_low.glb": 7,
+            "08_office_desk_2.glb": 14,
+            "08_office_desk_4_coner.glb": 4,
+            "09_casehand_1.glb": 4,
+            "<null>": 2
+          },
+          "active_start": 387,
+          "enemies": 0,
+          "frozen_end": 773,
+          "frozen_start": 773,
+          "ticks": 239,
+          "wall_mean_ms": 4.79315062761506,
+          "wall_p95_ms": 7.745,
+          "warmup": 240
+        }
+      ],
+      "errors": 0
+    },
+    "furniture-paired-baseline-long": {
+      "records": [
+        {
+          "bodies": 4032,
+          "environment_props": 4029,
+          "inventory": true,
+          "setup_ms": 6809.954,
+          "shadow_meshes": 28768,
+          "shadow_triangles": 9779878,
+          "threshold_candidates": {
+            "0.2": [
+              875,
+              1233,
+              290464
+            ],
+            "0.3": [
+              1567,
+              3548,
+              470520
+            ],
+            "0.4": [
+              2021,
+              4850,
+              533487
+            ],
+            "0.45": [
+              2303,
+              5944,
+              568327
+            ],
+            "0.5": [
+              2337,
+              6050,
+              585521
+            ]
+          },
+          "visible_meshes": 29413
+        },
+        {
+          "active_end": 18,
+          "active_kickable_end": 9,
+          "active_non_kickable_models": {
+            "03_file_cabinet_small_with_shelfs.glb": 1,
+            "03_file_cabinet_smaller.glb": 1,
+            "05_PC_destructible.glb": 1,
+            "05_monitor_destructible.glb": 2,
+            "06_office_chair.glb": 1,
+            "08_office_desk_4_coner.glb": 1,
+            "09_casehand_1.glb": 1,
+            "<null>": 1
+          },
+          "active_start": 18,
+          "enemies": 0,
+          "frozen_end": 773,
+          "frozen_start": 773,
+          "ticks": 239,
+          "wall_mean_ms": 2.1471589958159,
+          "wall_p95_ms": 3.629,
+          "warmup": 1200
+        }
+      ],
+      "errors": 0
+    },
+    "furniture-paired-baseline-crowd": {
+      "records": [
+        {
+          "bodies": 4032,
+          "environment_props": 4029,
+          "inventory": true,
+          "setup_ms": 6882.702,
+          "shadow_meshes": 28768,
+          "shadow_triangles": 9779878,
+          "threshold_candidates": {
+            "0.2": [
+              875,
+              1233,
+              290464
+            ],
+            "0.3": [
+              1567,
+              3548,
+              470520
+            ],
+            "0.4": [
+              2021,
+              4850,
+              533487
+            ],
+            "0.45": [
+              2303,
+              5944,
+              568327
+            ],
+            "0.5": [
+              2337,
+              6050,
+              585521
+            ]
+          },
+          "visible_meshes": 29413
+        },
+        {
+          "active_end": 282,
+          "active_kickable_end": 154,
+          "active_non_kickable_models": {
+            "02_coffee_machine_destructible.glb": 1,
+            "03_file_cabinet_small_shelf_fancy.glb": 1,
+            "03_file_cabinet_small_with_shelfs.glb": 1,
+            "03_file_cabinet_smaller.glb": 3,
+            "04_cardboard_archive_box.glb": 1,
+            "04_cardboard_boxes.glb": 2,
+            "05_PC_destructible.glb": 4,
+            "05_lamp.glb": 7,
+            "05_monitor2_destructible.glb": 7,
+            "05_monitor_destructible.glb": 20,
+            "05_monitor_wide_destructible.glb": 1,
+            "06_office_chair.glb": 16,
+            "06_simple_chair.glb": 24,
+            "07_table_longest.glb": 2,
+            "07_table_square_tall.glb": 6,
+            "08_divider_black_low.glb": 7,
+            "08_office_desk_2.glb": 14,
+            "08_office_desk_4_coner.glb": 4,
+            "09_case_with_money_close.glb": 1,
+            "09_casehand_1.glb": 4,
+            "<null>": 2
+          },
+          "active_start": 437,
+          "enemies": 90,
+          "frozen_end": 773,
+          "frozen_start": 773,
+          "ticks": 239,
+          "wall_mean_ms": 25.4445690376569,
+          "wall_p95_ms": 30.659,
+          "warmup": 240
+        }
+      ],
+      "errors": 0
+    },
+    "furniture-paired-baseline-1": {
+      "records": [
+        {
+          "bodies": 4032,
+          "environment_props": 4029,
+          "inventory": true,
+          "setup_ms": 7283.068,
+          "shadow_meshes": 28768,
+          "shadow_triangles": 9779878,
+          "threshold_candidates": {
+            "0.2": [
+              875,
+              1233,
+              290464
+            ],
+            "0.3": [
+              1567,
+              3548,
+              470520
+            ],
+            "0.4": [
+              2021,
+              4850,
+              533487
+            ],
+            "0.45": [
+              2303,
+              5944,
+              568327
+            ],
+            "0.5": [
+              2337,
+              6050,
+              585521
+            ]
+          },
+          "visible_meshes": 29413
+        },
+        {
+          "active_end": 209,
+          "active_kickable_end": 117,
+          "active_non_kickable_models": {
+            "03_file_cabinet_small_shelf_fancy.glb": 1,
+            "03_file_cabinet_small_with_shelfs.glb": 1,
+            "03_file_cabinet_smaller.glb": 3,
+            "04_cardboard_boxes.glb": 1,
+            "05_PC_destructible.glb": 4,
+            "05_lamp.glb": 7,
+            "05_monitor2_destructible.glb": 7,
+            "05_monitor_destructible.glb": 20,
+            "05_monitor_wide_destructible.glb": 1,
+            "06_office_chair.glb": 16,
+            "08_divider_black_low.glb": 7,
+            "08_office_desk_2.glb": 14,
+            "08_office_desk_4_coner.glb": 4,
+            "09_casehand_1.glb": 4,
+            "<null>": 2
+          },
+          "active_start": 387,
+          "enemies": 0,
+          "frozen_end": 773,
+          "frozen_start": 773,
+          "ticks": 239,
+          "wall_mean_ms": 4.38231380753138,
+          "wall_p95_ms": 6.776,
+          "warmup": 240
+        }
+      ],
+      "errors": 0
+    },
+    "furniture-baseline-1": {
+      "records": [
+        {
+          "bodies": 4032,
+          "environment_props": 4029,
+          "inventory": true,
+          "setup_ms": 6870.139,
+          "shadow_meshes": 28768,
+          "shadow_triangles": 9779878,
+          "threshold_candidates": {
+            "0.2": [
+              875,
+              1233,
+              290464
+            ],
+            "0.3": [
+              1567,
+              3548,
+              470520
+            ],
+            "0.4": [
+              2014,
+              4870,
+              530498
+            ],
+            "0.45": [
+              2296,
+              6040,
+              565338
+            ],
+            "0.5": [
+              2337,
+              6210,
+              585521
+            ]
+          },
+          "visible_meshes": 29413
+        },
+        {
+          "active_end": 3238,
+          "active_start": 3238,
+          "enemies": 0,
+          "frozen_end": 773,
+          "frozen_start": 773,
+          "ticks": 239,
+          "wall_mean_ms": 36.3989748953975,
+          "wall_p95_ms": 44.351,
+          "warmup": 240
+        }
+      ],
+      "errors": 0
+    },
+    "furniture-unstacked-predict-1": {
+      "records": [
+        {
+          "bodies": 4032,
+          "environment_props": 4029,
+          "inventory": true,
+          "setup_ms": 6775.622,
+          "shadow_meshes": 23918,
+          "shadow_triangles": 9246391,
+          "threshold_candidates": {
+            "0.2": [
+              875,
+              1233,
+              0
+            ],
+            "0.3": [
+              1567,
+              3548,
+              0
+            ],
+            "0.4": [
+              2014,
+              4870,
+              0
+            ],
+            "0.45": [
+              2296,
+              6040,
+              34840
+            ],
+            "0.5": [
+              2337,
+              6210,
+              52034
+            ]
+          },
+          "visible_meshes": 29413
+        },
+        {
+          "active_end": 353,
+          "active_kickable_end": 205,
+          "active_non_kickable_models": {
+            "03_file_cabinet_largest.glb": 2,
+            "03_file_cabinet_small_shelf_fancy.glb": 1,
+            "03_file_cabinet_small_with_shelfs.glb": 1,
+            "03_file_cabinet_smaller.glb": 3,
+            "04_cardboard_boxes.glb": 4,
+            "05_PC_destructible.glb": 4,
+            "05_lamp.glb": 17,
+            "05_monitor2_destructible.glb": 10,
+            "05_monitor_destructible.glb": 32,
+            "05_monitor_wide_destructible.glb": 1,
+            "06_office_chair.glb": 24,
+            "08_divider_black_high.glb": 1,
+            "08_divider_black_low.glb": 7,
+            "08_divider_black_low_half.glb": 5,
+            "08_office_desk_2.glb": 26,
+            "08_office_desk_4_coner.glb": 4,
+            "09_casehand_1.glb": 4,
+            "<null>": 2
+          },
+          "active_start": 386,
+          "enemies": 0,
+          "frozen_end": 1071,
+          "frozen_start": 1071,
+          "ticks": 239,
+          "wall_mean_ms": 5.28164435146444,
+          "wall_p95_ms": 8.109,
+          "warmup": 240
+        }
+      ],
+      "errors": 2
+    },
+    "furniture-paired-baseline-3": {
+      "records": [
+        {
+          "bodies": 4032,
+          "environment_props": 4029,
+          "inventory": true,
+          "setup_ms": 6772.32,
+          "shadow_meshes": 28768,
+          "shadow_triangles": 9779878,
+          "threshold_candidates": {
+            "0.2": [
+              875,
+              1233,
+              290464
+            ],
+            "0.3": [
+              1567,
+              3548,
+              470520
+            ],
+            "0.4": [
+              2021,
+              4850,
+              533487
+            ],
+            "0.45": [
+              2303,
+              5944,
+              568327
+            ],
+            "0.5": [
+              2337,
+              6050,
+              585521
+            ]
+          },
+          "visible_meshes": 29413
+        },
+        {
+          "active_end": 209,
+          "active_kickable_end": 117,
+          "active_non_kickable_models": {
+            "03_file_cabinet_small_shelf_fancy.glb": 1,
+            "03_file_cabinet_small_with_shelfs.glb": 1,
+            "03_file_cabinet_smaller.glb": 3,
+            "04_cardboard_boxes.glb": 1,
+            "05_PC_destructible.glb": 4,
+            "05_lamp.glb": 7,
+            "05_monitor2_destructible.glb": 7,
+            "05_monitor_destructible.glb": 20,
+            "05_monitor_wide_destructible.glb": 1,
+            "06_office_chair.glb": 16,
+            "08_divider_black_low.glb": 7,
+            "08_office_desk_2.glb": 14,
+            "08_office_desk_4_coner.glb": 4,
+            "09_casehand_1.glb": 4,
+            "<null>": 2
+          },
+          "active_start": 387,
+          "enemies": 0,
+          "frozen_end": 773,
+          "frozen_start": 773,
+          "ticks": 239,
+          "wall_mean_ms": 6.36460669456067,
+          "wall_p95_ms": 10.575,
+          "warmup": 240
+        }
+      ],
+      "errors": 0
+    },
+    "furniture-rest2-1": {
+      "records": [
+        {
+          "bodies": 4032,
+          "environment_props": 4029,
+          "inventory": true,
+          "setup_ms": 6820.615,
+          "shadow_meshes": 28768,
+          "shadow_triangles": 9779878,
+          "threshold_candidates": {
+            "0.2": [
+              875,
+              1233,
+              290464
+            ],
+            "0.3": [
+              1567,
+              3548,
+              470520
+            ],
+            "0.4": [
+              2014,
+              4870,
+              530498
+            ],
+            "0.45": [
+              2296,
+              6040,
+              565338
+            ],
+            "0.5": [
+              2337,
+              6210,
+              585521
+            ]
+          },
+          "visible_meshes": 29413
+        },
+        {
+          "active_end": 350,
+          "active_start": 384,
+          "enemies": 0,
+          "frozen_end": 1986,
+          "frozen_start": 1981,
+          "ticks": 239,
+          "wall_mean_ms": 5.46405857740586,
+          "wall_p95_ms": 9.123,
+          "warmup": 240
+        }
+      ],
+      "errors": 0
+    },
+    "furniture-floor-baseline-3": {
+      "records": [
+        {
+          "bodies": 4032,
+          "environment_props": 4029,
+          "inventory": true,
+          "setup_ms": 6829.731,
+          "shadow_meshes": 28768,
+          "shadow_triangles": 9779878,
+          "threshold_candidates": {
+            "0.2": [
+              875,
+              1233,
+              290464
+            ],
+            "0.3": [
+              1567,
+              3548,
+              470520
+            ],
+            "0.4": [
+              2014,
+              4870,
+              530498
+            ],
+            "0.45": [
+              2296,
+              6040,
+              565338
+            ],
+            "0.5": [
+              2337,
+              6210,
+              585521
+            ]
+          },
+          "visible_meshes": 29413
+        },
+        {
+          "active_end": 209,
+          "active_start": 387,
+          "enemies": 0,
+          "frozen_end": 773,
+          "frozen_start": 773,
+          "ticks": 239,
+          "wall_mean_ms": 4.88879079497908,
+          "wall_p95_ms": 7.462,
+          "warmup": 240
+        }
+      ],
+      "errors": 0
+    },
+    "furniture-floor-baseline-1": {
+      "records": [
+        {
+          "bodies": 4032,
+          "environment_props": 4029,
+          "inventory": true,
+          "setup_ms": 7040.019,
+          "shadow_meshes": 28768,
+          "shadow_triangles": 9779878,
+          "threshold_candidates": {
+            "0.2": [
+              875,
+              1233,
+              290464
+            ],
+            "0.3": [
+              1567,
+              3548,
+              470520
+            ],
+            "0.4": [
+              2014,
+              4870,
+              530498
+            ],
+            "0.45": [
+              2296,
+              6040,
+              565338
+            ],
+            "0.5": [
+              2337,
+              6210,
+              585521
+            ]
+          },
+          "visible_meshes": 29413
+        },
+        {
+          "active_end": 209,
+          "active_start": 387,
+          "enemies": 0,
+          "frozen_end": 773,
+          "frozen_start": 773,
+          "ticks": 239,
+          "wall_mean_ms": 4.99768619246862,
+          "wall_p95_ms": 7.599,
+          "warmup": 240
+        }
+      ],
+      "errors": 0
+    },
+    "furniture-guard-1": {
+      "records": [
+        {
+          "bodies": 4032,
+          "environment_props": 4029,
+          "inventory": true,
+          "setup_ms": 7779.457,
+          "shadow_meshes": 23918,
+          "shadow_triangles": 9246391,
+          "threshold_candidates": {
+            "0.2": [
+              875,
+              1233,
+              0
+            ],
+            "0.3": [
+              1567,
+              3548,
+              0
+            ],
+            "0.4": [
+              2014,
+              4870,
+              0
+            ],
+            "0.45": [
+              2296,
+              6040,
+              34840
+            ],
+            "0.5": [
+              2337,
+              6210,
+              52034
+            ]
+          },
+          "visible_meshes": 29413
+        },
+        {
+          "active_end": 372,
+          "active_kickable_end": 208,
+          "active_non_kickable_models": {
+            "02_dishwasher_dented.glb": 1,
+            "02_frige_dented.glb": 2,
+            "02_vending_automat_1_dented.glb": 1,
+            "02_washing_machine_dented.glb": 1,
+            "03_file_cabinet_largest.glb": 2,
+            "03_file_cabinet_small_shelf_fancy.glb": 1,
+            "03_file_cabinet_small_with_shelfs.glb": 10,
+            "03_file_cabinet_smaller.glb": 3,
+            "04_cardboard_boxes.glb": 4,
+            "05_PC_destructible.glb": 4,
+            "05_lamp.glb": 17,
+            "05_monitor2_destructible.glb": 10,
+            "05_monitor_destructible.glb": 32,
+            "05_monitor_wide_destructible.glb": 1,
+            "06_office_chair.glb": 24,
+            "08_divider_black_high.glb": 1,
+            "08_divider_black_low.glb": 7,
+            "08_divider_black_low_half.glb": 5,
+            "08_office_desk_2.glb": 26,
+            "08_office_desk_4_coner.glb": 4,
+            "09_casehand_1.glb": 4,
+            "11_plant_small.glb": 2,
+            "<null>": 2
+          },
+          "active_start": 594,
+          "enemies": 0,
+          "frozen_end": 1071,
+          "frozen_start": 1071,
+          "ticks": 239,
+          "wall_mean_ms": 8.30755230125523,
+          "wall_p95_ms": 12.984,
+          "warmup": 240
+        }
+      ],
+      "errors": 0
+    },
+    "furniture-combined-longwarmup": {
+      "records": [
+        {
+          "bodies": 4032,
+          "environment_props": 4029,
+          "inventory": true,
+          "setup_ms": 6773.393,
+          "shadow_meshes": 23918,
+          "shadow_triangles": 9246391,
+          "threshold_candidates": {
+            "0.2": [
+              875,
+              1233,
+              0
+            ],
+            "0.3": [
+              1567,
+              3548,
+              0
+            ],
+            "0.4": [
+              2014,
+              4870,
+              0
+            ],
+            "0.45": [
+              2296,
+              6040,
+              34840
+            ],
+            "0.5": [
+              2337,
+              6210,
+              52034
+            ]
+          },
+          "visible_meshes": 29413
+        },
+        {
+          "active_end": 46,
+          "active_kickable_end": 24,
+          "active_start": 49,
+          "enemies": 0,
+          "frozen_end": 2109,
+          "frozen_start": 2106,
+          "ticks": 239,
+          "wall_mean_ms": 2.54353138075314,
+          "wall_p95_ms": 4.634,
+          "warmup": 1200
+        }
+      ],
+      "errors": 0
+    },
+    "furniture-rest-probe": {
+      "records": [
+        {
+          "bodies": 4032,
+          "environment_props": 4029,
+          "inventory": true,
+          "setup_ms": 6527.415,
+          "shadow_meshes": 28768,
+          "shadow_triangles": 9779878,
+          "threshold_candidates": {
+            "0.2": [
+              875,
+              1233,
+              290464
+            ],
+            "0.3": [
+              1567,
+              3548,
+              470520
+            ],
+            "0.4": [
+              2014,
+              4870,
+              530498
+            ],
+            "0.45": [
+              2296,
+              6040,
+              565338
+            ],
+            "0.5": [
+              2337,
+              6210,
+              585521
+            ]
+          },
+          "visible_meshes": 29413
+        },
+        {
+          "active_end": 211,
+          "active_start": 386,
+          "enemies": 0,
+          "frozen_end": 2038,
+          "frozen_start": 1980,
+          "ticks": 239,
+          "wall_mean_ms": 5.89166108786611,
+          "wall_p95_ms": 9.013,
+          "warmup": 240
+        }
+      ],
+      "errors": 0
+    },
+    "furniture-paired-shadow-1": {
+      "records": [
+        {
+          "bodies": 4032,
+          "environment_props": 4029,
+          "inventory": true,
+          "setup_ms": 6662.588,
+          "shadow_meshes": 23918,
+          "shadow_triangles": 9246391,
+          "threshold_candidates": {
+            "0.2": [
+              875,
+              0,
+              0
+            ],
+            "0.3": [
+              1567,
+              0,
+              0
+            ],
+            "0.4": [
+              2021,
+              0,
+              0
+            ],
+            "0.45": [
+              2303,
+              1094,
+              34840
+            ],
+            "0.5": [
+              2337,
+              1200,
+              52034
+            ]
+          },
+          "visible_meshes": 29413
+        },
+        {
+          "active_end": 209,
+          "active_kickable_end": 117,
+          "active_non_kickable_models": {
+            "03_file_cabinet_small_shelf_fancy.glb": 1,
+            "03_file_cabinet_small_with_shelfs.glb": 1,
+            "03_file_cabinet_smaller.glb": 3,
+            "04_cardboard_boxes.glb": 1,
+            "05_PC_destructible.glb": 4,
+            "05_lamp.glb": 7,
+            "05_monitor2_destructible.glb": 7,
+            "05_monitor_destructible.glb": 20,
+            "05_monitor_wide_destructible.glb": 1,
+            "06_office_chair.glb": 16,
+            "08_divider_black_low.glb": 7,
+            "08_office_desk_2.glb": 14,
+            "08_office_desk_4_coner.glb": 4,
+            "09_casehand_1.glb": 4,
+            "<null>": 2
+          },
+          "active_start": 387,
+          "enemies": 0,
+          "frozen_end": 773,
+          "frozen_start": 773,
+          "ticks": 239,
+          "wall_mean_ms": 4.3826820083682,
+          "wall_p95_ms": 6.563,
+          "warmup": 240
+        }
+      ],
+      "errors": 0
+    },
+    "furniture-rest-1": {
+      "records": [
+        {
+          "bodies": 4032,
+          "environment_props": 4029,
+          "inventory": true,
+          "setup_ms": 6670.906,
+          "shadow_meshes": 28768,
+          "shadow_triangles": 9779878,
+          "threshold_candidates": {
+            "0.2": [
+              875,
+              1233,
+              290464
+            ],
+            "0.3": [
+              1567,
+              3548,
+              470520
+            ],
+            "0.4": [
+              2014,
+              4870,
+              530498
+            ],
+            "0.45": [
+              2296,
+              6040,
+              565338
+            ],
+            "0.5": [
+              2337,
+              6210,
+              585521
+            ]
+          },
+          "visible_meshes": 29413
+        },
+        {
+          "active_end": 208,
+          "active_start": 386,
+          "enemies": 0,
+          "frozen_end": 2041,
+          "frozen_start": 1980,
+          "ticks": 239,
+          "wall_mean_ms": 6.10325941422594,
+          "wall_p95_ms": 9.106,
+          "warmup": 240
+        }
+      ],
+      "errors": 0
+    },
+    "furniture-paired-shadow-long": {
+      "records": [
+        {
+          "bodies": 4032,
+          "environment_props": 4029,
+          "inventory": true,
+          "setup_ms": 6771.131,
+          "shadow_meshes": 23918,
+          "shadow_triangles": 9246391,
+          "threshold_candidates": {
+            "0.2": [
+              875,
+              0,
+              0
+            ],
+            "0.3": [
+              1567,
+              0,
+              0
+            ],
+            "0.4": [
+              2021,
+              0,
+              0
+            ],
+            "0.45": [
+              2303,
+              1094,
+              34840
+            ],
+            "0.5": [
+              2337,
+              1200,
+              52034
+            ]
+          },
+          "visible_meshes": 29413
+        },
+        {
+          "active_end": 18,
+          "active_kickable_end": 9,
+          "active_non_kickable_models": {
+            "03_file_cabinet_small_with_shelfs.glb": 1,
+            "03_file_cabinet_smaller.glb": 1,
+            "05_PC_destructible.glb": 1,
+            "05_monitor_destructible.glb": 2,
+            "06_office_chair.glb": 1,
+            "08_office_desk_4_coner.glb": 1,
+            "09_casehand_1.glb": 1,
+            "<null>": 1
+          },
+          "active_start": 18,
+          "enemies": 0,
+          "frozen_end": 773,
+          "frozen_start": 773,
+          "ticks": 239,
+          "wall_mean_ms": 2.2004309623431,
+          "wall_p95_ms": 3.932,
+          "warmup": 1200
+        }
+      ],
+      "errors": 0
+    },
+    "furniture-unstacked-1": {
+      "records": [
+        {
+          "bodies": 4032,
+          "environment_props": 4029,
+          "inventory": true,
+          "setup_ms": 6625.336,
+          "shadow_meshes": 23918,
+          "shadow_triangles": 9246391,
+          "threshold_candidates": {
+            "0.2": [
+              875,
+              1233,
+              0
+            ],
+            "0.3": [
+              1567,
+              3548,
+              0
+            ],
+            "0.4": [
+              2014,
+              4870,
+              0
+            ],
+            "0.45": [
+              2296,
+              6040,
+              34840
+            ],
+            "0.5": [
+              2337,
+              6210,
+              52034
+            ]
+          },
+          "visible_meshes": 29413
+        },
+        {
+          "active_end": 353,
+          "active_kickable_end": 205,
+          "active_non_kickable_models": {
+            "03_file_cabinet_largest.glb": 2,
+            "03_file_cabinet_small_shelf_fancy.glb": 1,
+            "03_file_cabinet_small_with_shelfs.glb": 1,
+            "03_file_cabinet_smaller.glb": 3,
+            "04_cardboard_boxes.glb": 4,
+            "05_PC_destructible.glb": 4,
+            "05_lamp.glb": 17,
+            "05_monitor2_destructible.glb": 10,
+            "05_monitor_destructible.glb": 32,
+            "05_monitor_wide_destructible.glb": 1,
+            "06_office_chair.glb": 24,
+            "08_divider_black_high.glb": 1,
+            "08_divider_black_low.glb": 7,
+            "08_divider_black_low_half.glb": 5,
+            "08_office_desk_2.glb": 26,
+            "08_office_desk_4_coner.glb": 4,
+            "09_casehand_1.glb": 4,
+            "<null>": 2
+          },
+          "active_start": 386,
+          "enemies": 0,
+          "frozen_end": 1072,
+          "frozen_start": 1071,
+          "ticks": 239,
+          "wall_mean_ms": 5.08849372384937,
+          "wall_p95_ms": 7.7,
+          "warmup": 240
+        }
+      ],
+      "errors": 2
+    },
+    "furniture-supports-only-1": {
+      "records": [
+        {
+          "bodies": 4032,
+          "environment_props": 4029,
+          "inventory": true,
+          "setup_ms": 7197.795,
+          "shadow_meshes": 23918,
+          "shadow_triangles": 9246391,
+          "threshold_candidates": {
+            "0.2": [
+              875,
+              1233,
+              0
+            ],
+            "0.3": [
+              1567,
+              3548,
+              0
+            ],
+            "0.4": [
+              2014,
+              4870,
+              0
+            ],
+            "0.45": [
+              2296,
+              6040,
+              34840
+            ],
+            "0.5": [
+              2337,
+              6210,
+              52034
+            ]
+          },
+          "visible_meshes": 29413
+        },
+        {
+          "active_end": 350,
+          "active_kickable_end": 205,
+          "active_non_kickable_models": {
+            "03_file_cabinet_largest.glb": 2,
+            "03_file_cabinet_small_shelf_fancy.glb": 1,
+            "03_file_cabinet_small_with_shelfs.glb": 1,
+            "03_file_cabinet_smaller.glb": 3,
+            "04_cardboard_boxes.glb": 1,
+            "05_PC_destructible.glb": 4,
+            "05_lamp.glb": 17,
+            "05_monitor2_destructible.glb": 10,
+            "05_monitor_destructible.glb": 32,
+            "05_monitor_wide_destructible.glb": 1,
+            "06_office_chair.glb": 24,
+            "08_divider_black_high.glb": 1,
+            "08_divider_black_low.glb": 7,
+            "08_divider_black_low_half.glb": 5,
+            "08_office_desk_2.glb": 26,
+            "08_office_desk_4_coner.glb": 4,
+            "09_casehand_1.glb": 4,
+            "<null>": 2
+          },
+          "active_start": 384,
+          "enemies": 0,
+          "frozen_end": 1986,
+          "frozen_start": 1981,
+          "ticks": 239,
+          "wall_mean_ms": 6.3217489539749,
+          "wall_p95_ms": 10.372,
+          "warmup": 240
+        }
+      ],
+      "errors": 0
+    },
+    "furniture-slab-1": {
+      "records": [
+        {
+          "bodies": 4032,
+          "environment_props": 4029,
+          "inventory": true,
+          "setup_ms": 7304.118,
+          "shadow_meshes": 23918,
+          "shadow_triangles": 9246391,
+          "threshold_candidates": {
+            "0.2": [
+              875,
+              1233,
+              0
+            ],
+            "0.3": [
+              1567,
+              3548,
+              0
+            ],
+            "0.4": [
+              2014,
+              4870,
+              0
+            ],
+            "0.45": [
+              2296,
+              6040,
+              34840
+            ],
+            "0.5": [
+              2337,
+              6210,
+              52034
+            ]
+          },
+          "visible_meshes": 29413
+        },
+        {
+          "active_end": 350,
+          "active_kickable_end": 205,
+          "active_start": 383,
+          "enemies": 0,
+          "frozen_end": 1986,
+          "frozen_start": 1982,
+          "ticks": 239,
+          "wall_mean_ms": 6.49470711297071,
+          "wall_p95_ms": 10.322,
+          "warmup": 240
+        }
+      ],
+      "errors": 0
+    },
+    "furniture-combined-probe": {
+      "records": [
+        {
+          "bodies": 4032,
+          "environment_props": 4029,
+          "inventory": true,
+          "setup_ms": 7657.091,
+          "shadow_meshes": 23918,
+          "shadow_triangles": 9246391,
+          "threshold_candidates": {
+            "0.2": [
+              875,
+              1233,
+              0
+            ],
+            "0.3": [
+              1567,
+              3548,
+              0
+            ],
+            "0.4": [
+              2014,
+              4870,
+              0
+            ],
+            "0.45": [
+              2296,
+              6040,
+              34840
+            ],
+            "0.5": [
+              2337,
+              6210,
+              52034
+            ]
+          },
+          "visible_meshes": 29413
+        },
+        {
+          "active_end": 350,
+          "active_kickable_end": 205,
+          "active_start": 384,
+          "enemies": 0,
+          "frozen_end": 1986,
+          "frozen_start": 1981,
+          "ticks": 239,
+          "wall_mean_ms": 6.04491631799163,
+          "wall_p95_ms": 10.254,
+          "warmup": 240
+        }
+      ],
+      "errors": 0
+    },
+    "furniture-floor-baseline-2": {
+      "records": [
+        {
+          "bodies": 4032,
+          "environment_props": 4029,
+          "inventory": true,
+          "setup_ms": 6633.952,
+          "shadow_meshes": 28768,
+          "shadow_triangles": 9779878,
+          "threshold_candidates": {
+            "0.2": [
+              875,
+              1233,
+              290464
+            ],
+            "0.3": [
+              1567,
+              3548,
+              470520
+            ],
+            "0.4": [
+              2014,
+              4870,
+              530498
+            ],
+            "0.45": [
+              2296,
+              6040,
+              565338
+            ],
+            "0.5": [
+              2337,
+              6210,
+              585521
+            ]
+          },
+          "visible_meshes": 29413
+        },
+        {
+          "active_end": 209,
+          "active_start": 387,
+          "enemies": 0,
+          "frozen_end": 773,
+          "frozen_start": 773,
+          "ticks": 239,
+          "wall_mean_ms": 4.49656066945607,
+          "wall_p95_ms": 6.853,
+          "warmup": 240
+        }
+      ],
+      "errors": 0
+    },
+    "furniture-crowd-baseline": {
+      "records": [
+        {
+          "bodies": 4032,
+          "environment_props": 4029,
+          "inventory": true,
+          "setup_ms": 6718.476,
+          "shadow_meshes": 28768,
+          "shadow_triangles": 9779878,
+          "threshold_candidates": {
+            "0.2": [
+              875,
+              1233,
+              290464
+            ],
+            "0.3": [
+              1567,
+              3548,
+              470520
+            ],
+            "0.4": [
+              2014,
+              4870,
+              530498
+            ],
+            "0.45": [
+              2296,
+              6040,
+              565338
+            ],
+            "0.5": [
+              2337,
+              6210,
+              585521
+            ]
+          },
+          "visible_meshes": 29413
+        },
+        {
+          "active_end": 280,
+          "active_start": 437,
+          "enemies": 90,
+          "frozen_end": 773,
+          "frozen_start": 773,
+          "ticks": 239,
+          "wall_mean_ms": 25.2510125523013,
+          "wall_p95_ms": 29.014,
+          "warmup": 240
+        }
+      ],
+      "errors": 0
+    }
+  }
+}

@@ -2,6 +2,8 @@ extends RefCounted
 ## Owns the imported prop geometry, ordered damage groups and their collision shapes.
 ## The scene root supplies the body; no gameplay durability or effects live here.
 
+const SHADOWS := preload("res://game/presentation/office_floor/prop_shadow_policy.gd")
+var shadows := SHADOWS.new()
 const SHELF_COLLISION := preload("res://game/presentation/office_floor/shelf_collision_geometry.gd")
 var shelf_collision := false
 const DAMAGE := preload("res://game/presentation/office_floor/environment_damage.gd")
@@ -175,4 +177,5 @@ func ensure_group(group: Node3D) -> bool:
 	source.free()
 	group.remove_meta(&"lazy_stage_path")
 	_stage_resources.append(packed)
+	shadows.apply_loaded_group(group)
 	return true
