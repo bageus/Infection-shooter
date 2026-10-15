@@ -1,0 +1,188 @@
+[
+  {
+    "revision": "before",
+    "run": 1,
+    "snapshots": [
+      {
+        "actors": 90,
+        "spawn_memory_delta_bytes": 29303424,
+        "spawn_ms": 231.199,
+        "state": "clean",
+        "static_memory_bytes": 128081138,
+        "surfaces": 90,
+        "unique_materials": 90
+      },
+      {
+        "actors": 90,
+        "spawn_memory_delta_bytes": 35443740,
+        "spawn_ms": 231.199,
+        "state": "wounded",
+        "static_memory_bytes": 134221454,
+        "surfaces": 90,
+        "unique_materials": 90
+      }
+    ],
+    "tick": {
+      "draw_calls": [],
+      "draw_calls_measured": false,
+      "mean_ms": 0.225330543933055,
+      "p95_ms": 0.35,
+      "ticks": 239
+    }
+  },
+  {
+    "revision": "before",
+    "run": 2,
+    "snapshots": [
+      {
+        "actors": 90,
+        "spawn_memory_delta_bytes": 29303424,
+        "spawn_ms": 252.393,
+        "state": "clean",
+        "static_memory_bytes": 128081138,
+        "surfaces": 90,
+        "unique_materials": 90
+      },
+      {
+        "actors": 90,
+        "spawn_memory_delta_bytes": 35443740,
+        "spawn_ms": 252.393,
+        "state": "wounded",
+        "static_memory_bytes": 134221454,
+        "surfaces": 90,
+        "unique_materials": 90
+      }
+    ],
+    "tick": {
+      "draw_calls": [],
+      "draw_calls_measured": false,
+      "mean_ms": 0.332907949790795,
+      "p95_ms": 0.429,
+      "ticks": 239
+    }
+  },
+  {
+    "revision": "before",
+    "run": 3,
+    "snapshots": [
+      {
+        "actors": 90,
+        "spawn_memory_delta_bytes": 29303424,
+        "spawn_ms": 245.951,
+        "state": "clean",
+        "static_memory_bytes": 128081138,
+        "surfaces": 90,
+        "unique_materials": 90
+      },
+      {
+        "actors": 90,
+        "spawn_memory_delta_bytes": 35443740,
+        "spawn_ms": 245.951,
+        "state": "wounded",
+        "static_memory_bytes": 134221454,
+        "surfaces": 90,
+        "unique_materials": 90
+      }
+    ],
+    "tick": {
+      "draw_calls": [],
+      "draw_calls_measured": false,
+      "mean_ms": 0.213723849372385,
+      "p95_ms": 0.326,
+      "ticks": 239
+    }
+  },
+  {
+    "revision": "after",
+    "run": 1,
+    "snapshots": [
+      {
+        "actors": 90,
+        "spawn_memory_delta_bytes": 29348836,
+        "spawn_ms": 474.788,
+        "state": "clean",
+        "static_memory_bytes": 128240580,
+        "surfaces": 90,
+        "unique_materials": 1
+      },
+      {
+        "actors": 90,
+        "spawn_memory_delta_bytes": 32411528,
+        "spawn_ms": 474.788,
+        "state": "wounded",
+        "static_memory_bytes": 131303272,
+        "surfaces": 90,
+        "unique_materials": 1
+      }
+    ],
+    "tick": {
+      "draw_calls": [],
+      "draw_calls_measured": false,
+      "mean_ms": 0.212355648535565,
+      "p95_ms": 0.296,
+      "ticks": 239
+    }
+  },
+  {
+    "revision": "after",
+    "run": 2,
+    "snapshots": [
+      {
+        "actors": 90,
+        "spawn_memory_delta_bytes": 29348836,
+        "spawn_ms": 265.555,
+        "state": "clean",
+        "static_memory_bytes": 128240580,
+        "surfaces": 90,
+        "unique_materials": 1
+      },
+      {
+        "actors": 90,
+        "spawn_memory_delta_bytes": 32411528,
+        "spawn_ms": 265.555,
+        "state": "wounded",
+        "static_memory_bytes": 131303272,
+        "surfaces": 90,
+        "unique_materials": 1
+      }
+    ],
+    "tick": {
+      "draw_calls": [],
+      "draw_calls_measured": false,
+      "mean_ms": 0.219912133891213,
+      "p95_ms": 0.341,
+      "ticks": 239
+    }
+  },
+  {
+    "revision": "after",
+    "run": 3,
+    "snapshots": [
+      {
+        "actors": 90,
+        "spawn_memory_delta_bytes": 29348836,
+        "spawn_ms": 271.929,
+        "state": "clean",
+        "static_memory_bytes": 128240580,
+        "surfaces": 90,
+        "unique_materials": 1
+      },
+      {
+        "actors": 90,
+        "spawn_memory_delta_bytes": 32411528,
+        "spawn_ms": 271.929,
+        "state": "wounded",
+        "static_memory_bytes": 131303272,
+        "surfaces": 90,
+        "unique_materials": 1
+      }
+    ],
+    "tick": {
+      "draw_calls": [],
+      "draw_calls_measured": false,
+      "mean_ms": 0.214694560669456,
+      "p95_ms": 0.297,
+      "ticks": 239
+    }
+  }
+]

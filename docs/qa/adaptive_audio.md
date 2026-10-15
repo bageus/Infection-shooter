@@ -143,3 +143,8 @@ server_audio дополнительно включены в оба renderer jobs
 Сохранены все обновления main; конфликт разрешён только объединением журналов
 ACTIVE_TASK. В Hunger fixture остаются frame-based ожидания из main и условия
 charge/feral из аудиоветki. Проверки/лимиты не ослаблены.
+
+Main затем продвинулся до66284af (PR191: skin materials). Он включён целиком;
+новые rendering/Web checks, skin code и артефакты не изменены аудиоветкой.
+Конфликты журналов объединены без удаления решений/блокеров, Hunger fixture
+сохраняет относительную цель8м из main, feral=true и bounded frame waits.
