@@ -1,5 +1,9 @@
 # Godot game architecture
 
+ADR-0049: bootstrap.app хранит optional interface_v1.sunlight (default true).
+Существующий GlobalOverheadLight видим при lighting && sunlight. Локальные
+лампы, Environment и их бюджеты прежние; новых owners, API или зависимостей нет.
+
 ## Target
 
 This template targets **Godot 4.x with GDScript**. It uses a modular monolith so a large game remains understandable without introducing unnecessary frameworks.
