@@ -198,7 +198,10 @@ func _slider_checks(tabs: TabContainer) -> void:
 	_check(not sliders.is_empty(), "Audio page has volume sliders")
 	if sliders.is_empty():
 		return
-	var slider := sliders[sliders.size() - 1] as HSlider
+	var slider := tabs.get_child(3).find_child("MusicVolume", true, false) as HSlider
+	_check(slider != null, "Gameplay music slider is found by its setting key")
+	if slider == null:
+		return
 	var before := PREFS.new()
 	before.load_settings()
 	slider.drag_started.emit()

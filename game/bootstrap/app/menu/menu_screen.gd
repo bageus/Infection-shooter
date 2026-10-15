@@ -24,6 +24,7 @@ var footer: Label
 var keyboard: Label
 var reason_key := ""
 var _click_player: AudioStreamPlayer
+var _music: AudioStreamPlayer
 
 
 func _ready() -> void:
@@ -66,6 +67,9 @@ func _ready() -> void:
 	resized.connect(_layout)
 	visibility_changed.connect(_focus_first)
 	refresh()
+	_music = preload("res://game/bootstrap/app/menu/menu_music.gd").new()
+	add_child(_music)
+	_music.call("setup", self)
 
 
 func text(key: String) -> String:
@@ -78,6 +82,8 @@ func show_screen(kind: String, reason: String = "") -> void:
 	preferences.load_settings()
 	refresh()
 	show()
+	if _music != null:
+		_music.call("sync")
 	_focus_first()
 
 

@@ -237,6 +237,10 @@ func _feeding() -> void:
 	await create_timer(1.2).timeout
 	await _frames(2)
 	_check(_player_of(eater).current_animation == "BiteLoop", "Then it gnaws on all fours (%s)." % _player_of(eater).current_animation)
+	# Keep the chase within charge range: at 40 m the next far LOD step
+	# correctly walks upright, making this three-frame assertion phase-dependent.
+	target.position = Vector3(0, 0.1, -8)
+	eater.set("_feral", true)
 	eater.call("hear_alert", eater.global_position, 50.0)
 	await _frames(3)
 	_check(not bool(eater.call("is_feeding")), "A cry from a neighbour interrupts the meal.")

@@ -9,7 +9,8 @@
     "Authored display power/content/seed, derived screen surfaces, runtime power, glow and contiguous television walls",
     "Item weight catalogue and character push/kick rules",
     "Environment prop visual stages and physical reactions; durability rules owned by features.combat",
-    "Mission-local decorative neighboring skyline geometry and facade material"
+    "Mission-local decorative neighboring skyline geometry and facade material",
+    "Positional server fan ambience and its lifetime"
   ],
   "public_api": [
     "public/base_office_layout.tscn",

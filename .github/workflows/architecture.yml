@@ -49,3 +49,4 @@ jobs:
           python tools/test_destruction_mesh_audit.py
           python tools/test_workstation_templates.py
           python tools/test_architecture_scene_access.py
+          python tools/update_enemy_audio_report.py --check

@@ -120,6 +120,16 @@ const EVENTS := {
 	&"skill_berserk": [2, 1.0, 60.0, 8.0, 0.03, 1],
 	&"skill_second_heart": [1, 0.0, 30.0, 5.0, 0.0, 1],
 	&"skill_retaliation": [2, 0.0, 46.0, 6.0, 0.05, 1],
+	# Owner-supplied voices: real recordings only, no synthesized variations.
+	&"hunger_idle": [1, -1.0, 30.0, 3.0, 0.02, 3],
+	&"hunger_voice": [1, -1.0, 30.0, 3.0, 0.02, 3],
+	&"hunger_fours_voice": [1, -1.0, 30.0, 3.0, 0.02, 3],
+	&"hunger_alert": [1, -1.0, 30.0, 3.0, 0.02, 3],
+	&"hunger_attack": [2, -1.0, 30.0, 3.0, 0.02, 3],
+	&"hunger_agony": [1, -1.0, 30.0, 3.0, 0.02, 3],
+	&"hunger_feeding": [1, 4.0, 30.0, 3.0, 0.02, 3],
+	&"revenant_voice": [1, -1.0, 30.0, 3.0, 0.02, 3],
+	&"revenant_attack": [1, -1.0, 30.0, 3.0, 0.02, 3],
 	# Call-out when an infected first spots the player (roar for heavy ones).
 	&"scream_zombie": [5, 0.0, 60.0, 6.5, 0.07, 2],
 	&"roar_heavy": [4, 2.0, 70.0, 8.0, 0.05, 2],

@@ -216,6 +216,13 @@ func _audio() -> void:
 	dialog.call("_slider", "volume", "volume", 0, 1, .05)
 	dialog.call("_slider", "effectsVolume", "effects_volume", 0, 1, .05)
 	dialog.call("_slider", "musicVolume", "music_volume", 0, 1, .05)
+	dialog.call("_slider", "menuMusicVolume", "menu_music_volume", 0, 1, .05)
+	var music := CheckButton.new()
+	music.name = "MenuMusicToggle"
+	music.text = dialog.view.text("menuMusic")
+	music.button_pressed = dialog.view.preferences.values.menu_music
+	music.toggled.connect(func(value: bool) -> void: dialog.call("_change", "menu_music", value))
+	dialog.get("layout").add_child(music)
 	var sound := CheckButton.new()
 	sound.name = "SoundToggle"
 	sound.text = dialog.view.text("sound")

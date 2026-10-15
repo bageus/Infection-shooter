@@ -343,6 +343,9 @@ jobs:
           game/features/player/tests/run_mutation_weapon_stats_tests.gd
           game/features/player/tests/run_mutation_skill_mechanics_tests.gd
           game/features/infection/tests/run_tests.gd
+          game/bootstrap/app/tests/run_adaptive_audio_tests.gd
+          game/features/infected/tests/run_enemy_voice_tests.gd
+          game/presentation/office_floor/tests/run_server_audio_tests.gd
           game/core/audio/tests/run_sound_event_tests.gd
           game/bootstrap/app/tests/run_skill_bar_tests.gd
           game/presentation/office_floor/tests/run_city_backdrop_tests.gd
