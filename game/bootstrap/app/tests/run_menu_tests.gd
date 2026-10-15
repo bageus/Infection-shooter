@@ -137,11 +137,12 @@ func _test_results_and_return(app: Node) -> void:
 	_check(infection.call("get_critical_threshold") == minf(95.0, before + 5.0), "Repeated completion cannot grant another ampule")
 	_check(result.get("screen_kind") == "complete", "floor goal uses success artwork")
 	_check(result.call("text", "samples") == "Floor", "success describes current floor instead of campaign extraction")
+	var app_id := app.get_instance_id()
 	result.call("dispatch", "restart")
 	var deadline := Time.get_ticks_msec() + 90000
-	while current_scene == app and Time.get_ticks_msec() < deadline:
+	while (current_scene == null or current_scene.get_instance_id() == app_id) and Time.get_ticks_msec() < deadline:
 		await process_frame
-	_check(current_scene != app, "restart completes within the loading timeout")
+	_check(current_scene != null and current_scene.get_instance_id() != app_id, "restart completes within the loading timeout")
 	app = current_scene
 	_check(not paused and not app.get("_ended"), "restart restores active combat")
 	app.call("_open_pause_menu")
