@@ -138,6 +138,14 @@ func start() -> void:
 	storage.snapshot_authored()
 	# Keep physics paused and cover the first real material draws with the overlay.
 	pending.show()
+	var occlusion := pending.get_node_or_null("OcclusionEffects")
+	if occlusion != null:
+		# Wall see-through materials are swapped in lazily; install them before the warm-up so it covers them.
+		# The saved mode is applied here, not after the overlay drops, or the queue would only fill during play.
+		var saved := PREFERENCES.new()
+		saved.load_settings()
+		occlusion.call("set_mode", int(saved.values.occlusion_mode))
+		await occlusion.flush_wall_queue(tree)
 	var warmup := MATERIAL_WARMUP.new()
 	await warmup.prepare(pending, pending.get_viewport().get_camera_3d(), tree, _set_progress)
 	warmed_materials = warmup.material_count

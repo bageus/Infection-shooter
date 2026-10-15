@@ -49,6 +49,11 @@ func _run() -> void:
 	await _settle()
 	_check(effects.subjects.size() == 3, "Objects outside the injected world are ignored")
 	outsider.queue_free()
+	effects.set_mode(1)
+	await effects.flush_wall_queue(self)
+	_check(effects.walls.pending.is_empty() and effects.walls.records.size() == 1, "Loader flush installs every queued wall material at once")
+	effects.set_mode(0)
+	await _settle()
 	for cycle in 5:
 		effects.set_mode(1)
 		await _settle()
