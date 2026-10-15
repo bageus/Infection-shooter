@@ -116,6 +116,11 @@ func get_light_cost() -> int:
 	return 1 + _sub_lights.size()
 
 
+## Distance at which the authored cone stops lighting anything.
+func get_light_radius() -> float:
+	return light.spot_range if light != null else 0.0
+
+
 func set_budget_lit(lit: bool, shadow: bool) -> void:
 	if lit == _budget_lit and shadow == _budget_shadow:
 		return

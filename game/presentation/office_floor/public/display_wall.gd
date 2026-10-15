@@ -17,11 +17,14 @@ var dirty := false
 var _layout_wait := 0.0
 var _layout := LAYOUT.new()
 var _lighting_wait := 0.0
+# Displays that are neither in the frustum nor near the camera are not re-drawn.
+var _in_view := {}
 var shadows_allowed := true
 const MAX_GLOW_LIGHTS := 16
 const MAX_SHADOW_LIGHTS := 4
 const GLOW_DISTANCE := 24.0
 const SHADOW_DISTANCE := 16.0
+const ALWAYS_TICK_DISTANCE := 8.0
 
 
 func register_display(display: Node3D) -> void:
@@ -39,6 +42,7 @@ func set_shadows_allowed(allowed: bool) -> void:
 
 func unregister_display(display: Node3D) -> void:
 	displays.erase(display)
+	_in_view.erase(display)
 	_animated.erase(display)
 	request_layout()
 	_lighting_wait = 0.0
@@ -68,7 +72,8 @@ func _process(delta: float) -> void:
 		delay = minf(delay, content.frame_delay(i, elapsed))
 	_next_frame_time = elapsed + delay
 	for display in _animated:
-		display.call("tick", elapsed, _frames)
+		if _in_view.get(display, true):
+			display.call("tick", elapsed, _frames)
 
 
 # Called locally by a display whenever its powered/content state changes.
@@ -90,6 +95,7 @@ func _refresh_lights() -> void:
 	for display in displays:
 		if not is_instance_valid(display):
 			continue
+		_update_view(display, camera)
 		for screen: Dictionary in display.get("screens"):
 			var light := screen.light as SpotLight3D
 			var powered := bool(display.get("powered")) and display.is_visible_in_tree()
@@ -116,3 +122,11 @@ func _refresh_lights() -> void:
 			light.visible = setting.visible
 		if light.shadow_enabled != bool(setting.shadows):
 			light.shadow_enabled = setting.shadows
+
+
+func _update_view(display: Node3D, camera: Camera3D) -> void:
+	var seen := camera == null or camera.is_position_in_frustum(display.global_position) \
+		or camera.global_position.distance_to(display.global_position) <= ALWAYS_TICK_DISTANCE
+	if seen and not _in_view.get(display, true):
+		_next_frame_time = 0.0
+	_in_view[display] = seen

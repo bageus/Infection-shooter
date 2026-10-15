@@ -85,6 +85,13 @@ func _actor(label: String, scene: PackedScene) -> void:
 	visual.process_mode = Node.PROCESS_MODE_INHERIT
 	actor.health = 0.0
 	actor.call("_die")
+	# Skin comparison needs the corpse pose, not bullet-only physics shapes on
+	# animated bones (death clips use non-uniform scale unsupported by Jolt).
+	for attachments: Array in parts._hitboxes.values():
+		for attachment: Node in attachments:
+			attachment.free()
+	parts._hitboxes.clear()
+	actor.death_cloud.hide()
 	RAGDOLL._active = 0
 	actor.set_physics_process(false)
 	await create_timer(1.8).timeout

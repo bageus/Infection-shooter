@@ -8,8 +8,8 @@ var _had_save := false
 var _save := PackedByteArray()
 const SAVE := "user://planned_layout.json"
 const BASE := "res://game/presentation/office_floor/public/base_office_map.json"
-# Restart keeps the old mission for rollback, so the peak holds two copies of the map. The map
-# grew from 1998 to 4696 objects (peak 842 -> 1236 MiB), so the budget moved with it.
+# The budget dates from when a restart held two copies of the map (4696 objects: peak 1236 MiB);
+# a restart now frees the old mission first, so the real peak is well below it.
 const ALLOCATOR_LIMIT := 1344 * 1024 * 1024
 
 func _initialize() -> void:
@@ -28,18 +28,20 @@ func _run() -> void:
 	current_scene = menu
 	var started := Time.get_ticks_msec()
 	menu.call("_action", "start")
-	await _wait(menu)
-	if current_scene == menu:
+	var menu_id := menu.get_instance_id()
+	await _wait(menu_id)
+	if _still(menu_id):
 		_restore_save()
 		quit(1)
 		return
 	print("Full map startup msec: ", Time.get_ticks_msec() - started)
 	_check()
 	var stage := current_scene
+	var stage_id := stage.get_instance_id()
 	started = Time.get_ticks_msec()
 	stage.call("_on_restart_pressed")
-	await _wait(stage)
-	if current_scene == stage:
+	await _wait(stage_id)
+	if _still(stage_id):
 		_restore_save()
 		quit(1)
 		return
@@ -60,9 +62,13 @@ func _run() -> void:
 	print("Full map startup/restart failures: ", failures)
 	quit(failures)
 
-func _wait(previous: Node) -> void:
+# The restarted mission is freed before the next one loads, so compare instance ids.
+func _still(previous_id: int) -> bool:
+	return current_scene == null or current_scene.get_instance_id() == previous_id
+
+func _wait(previous_id: int) -> void:
 	var deadline := Time.get_ticks_msec() + 120000
-	while current_scene == previous and Time.get_ticks_msec() < deadline:
+	while _still(previous_id) and Time.get_ticks_msec() < deadline:
 		peak_memory = maxi(peak_memory, OS.get_static_memory_usage())
 		peak_video = maxi(peak_video, int(Performance.get_monitor(Performance.RENDER_VIDEO_MEM_USED)))
 		if OS.get_name() == "Linux":
@@ -74,7 +80,7 @@ func _wait(previous: Node) -> void:
 						peak_rss = maxi(peak_rss, int(line.trim_prefix("VmRSS:").strip_edges().get_slice(" ", 0)) * 1024)
 						break
 		await process_frame
-	if current_scene == previous:
+	if _still(previous_id):
 		failures += 1
 		push_error("Full map timed out")
 

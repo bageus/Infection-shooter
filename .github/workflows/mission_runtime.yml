@@ -53,6 +53,7 @@ jobs:
           done
           if grep -E 'SHADER ERROR|SCRIPT ERROR|^ERROR:' /tmp/skin-review/*.log; then exit 1; fi
       - name: WebGL2 skin layers and page boundary
+        if: ${{ !cancelled() }}
         run: |
           set -o pipefail
           python3 tools/build_web_skin_probe.py /tmp/web-skin
