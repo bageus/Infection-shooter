@@ -107,6 +107,7 @@
     "chase_budget_v1": {
       "configure_chase_budget": "configure_chase_budget(budget: Node) -> void; bootstrap injects one mission-owned search queue",
       "searches_per_frame": "Maximum completed local A* searches per physics frame; default 2; incremental slices share a 2000 usec soft budget and 64 expansions per tick, each search remains bounded to 192 expansions"
-    }
+    },
+    "acoustics_v1": "Owner-approved 15.10.2026: opaque walls block shots and ally cries; weapon scenes export shot_noise_radius/shot_noise_interval (0.25s); hearing_profile configures rays/ear height/alert radius, hearing_range caps at 50m. Existing command signatures unchanged."
   }
 }

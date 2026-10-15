@@ -106,6 +106,7 @@ func _run() -> void:
 	for actor in actors:
 		_check(actor.senses._wandering, "One-second idle pause expires for every LOD offset")
 		_check(not actor.senses.is_chasing(), "Distant wandering does not alert the actor")
+	_batched_arrival(actors[1])
 	await _wall_collision(actors[0])
 	stage.queue_free()
 	await process_frame
@@ -140,3 +141,12 @@ func _check(condition: bool, message: String) -> void:
 	if not condition:
 		failures += 1
 		push_error(message)
+
+
+func _batched_arrival(actor: Actor) -> void:
+	actor.senses._wandering = true
+	actor.senses._state_time = 0.0
+	actor.senses._wander = actor.position + Vector3.RIGHT * 0.5
+	var step := 0.8 # 12 distant ticks at the perception suite's 4x time scale.
+	var velocity := actor.senses._idle_wander(actor, step, actor._route, 0.3, 5.4)
+	_check(velocity.length() * step <= 0.501, "A batched distant step cannot overshoot the wander destination")

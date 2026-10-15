@@ -31,6 +31,7 @@ func _run() -> void:
 	await _fresh_stage()
 	await _sight()
 	await _hearing()
+	await _blocked_hearing()
 	await _wander()
 	await _ally_cry()
 	await _forced_target()
@@ -146,6 +147,27 @@ func _hearing() -> void:
 	_check(_flat(enemy.global_position, home) < 3.3, "A shot out of range is not heard")
 
 
+func _blocked_hearing() -> void:
+	await _fresh_stage()
+	var player := Target.new()
+	stage.add_child(player)
+	player.position = Vector3(0, 0.1, -60)
+	var enemy := _spawn(HUNGER, Vector3(0, 0.1, 0), player)
+	enemy.set_physics_process(false)
+	var wall := _wall(Vector3(0, 1.5, -4), Vector3(8, 3, 0.4))
+	await _frames(2)
+	enemy.call("hear_noise", Vector3(0, 1.5, -8), 18.0)
+	_check(enemy.get("_senses").is_unaware(), "A shot behind a wall does not start investigation")
+	enemy.call("hear_alert", Vector3(0, 0.1, -8), 16.0)
+	_check(not enemy.call("is_alerted"), "An ally behind a wall does not alert the enemy")
+	wall.queue_free()
+	await _frames(2)
+	enemy.call("hear_noise", Vector3(0, 1.5, -8), 18.0)
+	_check(enemy.get("_senses").state == enemy.get("_senses").State.INVESTIGATE, "An open doorway lets the shot through")
+	enemy.call("hear_alert", Vector3(0, 0.1, -8), 16.0)
+	_check(enemy.call("is_alerted"), "An open doorway lets the ally cry through")
+
+
 func _wander() -> void:
 	await _fresh_stage()
 	var player := Target.new()
@@ -170,10 +192,14 @@ func _ally_cry() -> void:
 	player.position = Vector3(0, 0.1, -9)
 	var seer := _spawn(HUNGER, Vector3(0, 0.1, 0), player)
 	var friend := _spawn(HUNGER, Vector3(6, 0.1, 6), player)
+	friend.rotation.y = PI
+	var open_friend := _spawn(HUNGER, Vector3(0, 0.1, 6), player)
+	open_friend.rotation.y = PI
 	_wall(Vector3(3, 1.5, 3), Vector3(0.4, 3, 6))
 	await _frames(45)
 	_check(seer.call("is_alerted"), "The enemy that sees the player is alerted")
-	_check(friend.call("is_alerted"), "Its nearby neighbour joins the chase after the cry")
+	_check(open_friend.call("is_alerted"), "An ally in the open hears the cry")
+	_check(not friend.call("is_alerted"), "A wall blocks the ally cry")
 	var far_friend := _spawn(HUNGER, Vector3(40, 0.1, 40), player)
 	await _frames(10)
 	_check(not far_friend.call("is_alerted"), "A distant enemy does not hear the cry")

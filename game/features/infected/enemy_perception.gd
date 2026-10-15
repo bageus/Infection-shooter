@@ -29,7 +29,8 @@ var wander_enabled := true
 var sight_range := 18.0
 var close_notice_range := 3.5
 var fov_cos := cos(deg_to_rad(65.0))
-var alert_radius := 16.0
+var hearing := preload("res://game/features/infected/hearing_profile.gd").new()
+var _alert_announced := false
 
 var _home := Vector3.ZERO
 var _home_yaw := 0.0
@@ -55,6 +56,7 @@ func watch() -> void:
 func force_chase() -> void:
 	_idle_elapsed = 0.0
 	forced = true
+	_alert_announced = true
 	state = State.CHASE
 
 
@@ -73,14 +75,27 @@ func noise_position() -> Vector3:
 func hear(actor: Node3D, position: Vector3, radius: float) -> void:
 	if state == State.CHASE:
 		return
-	var offset := position - actor.global_position
-	if offset.length() > radius:
+	if not hearing.reaches(actor, position, radius):
 		return
-	if state != State.INVESTIGATE or position.distance_to(_noise) > 2.0:
+	if state != State.INVESTIGATE or position.distance_to(_noise) > hearing.investigate_refresh_distance:
 		_state_time = 0.0
 	_noise = position
 	_idle_elapsed = 0.0
 	state = State.INVESTIGATE
+
+
+func hear_ally(actor: Node3D, position: Vector3, radius: float) -> void:
+	if state != State.CHASE and hearing.reaches(actor, position + Vector3.UP * hearing.ear_height, radius):
+		alert()
+		_alert_announced = true
+
+
+func notice_player(actor: Node3D, audio: Node) -> void:
+	var newly_alerted := alert()
+	if newly_alerted or not _alert_announced:
+		_alert_announced = true
+		audio.call("alert_shout")
+		actor.get_tree().call_group(ALERT_GROUP, "hear_alert", actor.global_position, hearing.alert_radius)
 
 
 func alert() -> bool:
@@ -217,7 +232,10 @@ func _idle_wander(actor: CharacterBody3D, delta: float, route: ROUTE, radius: fl
 		_wandering = false
 		_wander_wait = randf_range(1.5, 4.0)
 		return Vector3.ZERO
-	return _walk(actor, route, _wander, radius, speed * WANDER_FACTOR, 0.4, State.UNAWARE)
+	# A batched distant step can cover 12 physics ticks; stop at the goal
+	# instead of overshooting it and leaving the authored wander radius.
+	var walk_speed := minf(speed * WANDER_FACTOR, flat.length() / delta) if delta > 0.0 else 0.0
+	return _walk(actor, route, _wander, radius, walk_speed, 0.4, State.UNAWARE)
 
 
 func _walk(actor: CharacterBody3D, route: ROUTE, goal: Vector3, radius: float, speed: float, arrive: float, next: State) -> Vector3:

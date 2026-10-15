@@ -15,6 +15,7 @@ bullet_scene = ExtResource("2")
 casing_scene = ExtResource("casing_model")
 casing_radius = 0.016
 weapon_name="SHOTGUN"
+shot_noise_radius = 30.0
 shots_per_second=1.1
 magazine_size=6
 starting_reserve_ammo=36

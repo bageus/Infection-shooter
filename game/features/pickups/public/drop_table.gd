@@ -1,10 +1,17 @@
 extends Node
 
-const MEDKIT := preload("res://game/features/pickups/public/medkit_pickup.tscn")
-const PISTOL := preload("res://game/features/pickups/public/ammo_pistol_pickup.tscn")
-const UZI := preload("res://game/features/pickups/public/ammo_uzi_pickup.tscn")
-const SHOTGUN := preload("res://game/features/pickups/public/ammo_shotgun_pickup.tscn")
-const ANTIDOTE := preload("res://game/features/pickups/public/antidote_pickup.tscn")
+const CONFIG := preload("res://game/features/pickups/public/loot_config.gd")
+const SCENES := {
+	"medkit": preload("res://game/features/pickups/public/medkit_pickup.tscn"),
+	"ammo_pistol": preload("res://game/features/pickups/public/ammo_pistol_pickup.tscn"),
+	"ammo_uzi": preload("res://game/features/pickups/public/ammo_uzi_pickup.tscn"),
+	"ammo_shotgun": preload("res://game/features/pickups/public/ammo_shotgun_pickup.tscn"),
+	"ammo_automate": preload("res://game/features/pickups/public/ammo_automate_pickup.tscn"),
+	"ammo_sniper": preload("res://game/features/pickups/public/ammo_sniper_pickup.tscn"),
+	"ammo_minigun": preload("res://game/features/pickups/public/ammo_minigun_pickup.tscn"),
+	"antidote": preload("res://game/features/pickups/public/antidote_pickup.tscn"),
+	"dna": preload("res://game/features/pickups/public/dna_pickup.tscn"),
+}
 
 const DROP_LIFETIME := 75.0
 const MAX_DROPS := 40
@@ -24,14 +31,10 @@ const WALL_MASK := 129
 func drop_for_enemy(world: Node, at: Vector3) -> void:
 	if randf() > any_drop_chance:
 		return
-	var common := [MEDKIT, PISTOL, UZI, SHOTGUN]
-	var scene: PackedScene
-	# Common items have equal weight; antidote is 0.35 of one common item's weight.
-	var roll := randf() * (4.0 + antidote_weight)
-	if roll >= 4.0:
-		scene = ANTIDOTE
-	else:
-		scene = common[mini(int(floor(roll)), 3)]
+	var weights := CONFIG.AUTO_WEIGHTS.duplicate()
+	weights.erase("dna")
+	weights["antidote"] = antidote_weight
+	var scene: PackedScene = SCENES[CONFIG.weighted_item(randf(), weights)]
 	var spot := free_spot(world, at)
 	var item := scene.instantiate()
 	world.add_child(item)
@@ -40,12 +43,10 @@ func drop_for_enemy(world: Node, at: Vector3) -> void:
 	# Drops do not pile up forever: they fade after a while, oldest first.
 	item.call("expire_after", DROP_LIFETIME)
 	item.add_to_group(DROP_GROUP)
-	var drops := world.get_tree().get_nodes_in_group(DROP_GROUP)
-	if drops.size() > MAX_DROPS:
-		for old in drops:
-			if not old.has_meta(&"persistent_loot"):
-				old.queue_free()
-				break
+	var drops := world.get_tree().get_nodes_in_group(DROP_GROUP).filter(
+		func(drop: Node) -> bool: return not drop.is_queued_for_deletion() and not drop.has_meta(&"persistent_loot"))
+	while drops.size() > MAX_DROPS:
+		(drops.pop_front() as Node).queue_free()
 
 
 ## The kill point, or the nearest spot around it that no other drop covers

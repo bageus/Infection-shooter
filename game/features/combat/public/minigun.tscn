@@ -8,6 +8,7 @@ script = ExtResource("script")
 bullet_scene = ExtResource("bullet")
 casing_scene = ExtResource("casing")
 weapon_name = "MINIGUN"
+shot_noise_radius = 40.0
 fire_mode = "auto"
 shots_per_second = 24.0
 spin_up_time = 0.9
