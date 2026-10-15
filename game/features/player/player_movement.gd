@@ -90,7 +90,9 @@ var _drop_weapon_command: Callable
 
 func _ready() -> void:
 	floor_snap_length = 0.45
-	_camera_distance=camera.position.length()
+	# A freshly loaded map starts with the camera at its closest allowed distance, snapped without a zoom-in.
+	_camera_distance=camera_min_distance
+	camera.position=camera.position.normalized()*_camera_distance
 	health=max_health
 	armor=max_armor
 	antidotes=starting_antidotes

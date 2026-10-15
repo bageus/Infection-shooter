@@ -33,6 +33,7 @@ func _run() -> void:
 	await process_frame
 	await process_frame
 	_check(actor.get("weapons").size() == 8, "Eight stable weapon definitions are wired")
+	_check(absf(actor.get("camera").position.length() - float(actor.get("camera_min_distance"))) < .01, "Loaded map starts with the camera at its closest distance")
 	_test_pickup_models()
 	await _test_rifles(actor, effects, crosshair)
 	await _test_minigun(actor, effects, crosshair)
