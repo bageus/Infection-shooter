@@ -60,3 +60,20 @@ https://github.com/godotengine/godot/issues/120661; совпадение при�
 - DEFERRED: Jolt ERROR на non-uniform scale corpse bullet hitboxes при death
   clip fallback. Native capture убирает hitboxes только в стенде; игровую
   причину исправлять отдельно с corpse/ragdoll collision regression.
+
+
+## PR #198 follow-ups: белые серверы и монитор на столе (15.10.2026)
+
+- BUG серверы: 03_server_rack*.glb при включённом свечении рендерятся полностью белыми.
+  Воспроизведено headless xvfb (gl_compatibility): материал Group03Emission,
+  emission_energy 2.5 при emission_texture (group03_emission.png, в среднем тёмный).
+  Со свечением выключено стойка чёрная с деталями; при energy 0.3 серая. Причина
+  в связке emission-текстуры и энергии, не в albedo. Не исправлено: нужен разбор
+  группы 03 (tools/build_group03_atlas.py) или понижение emission для стоек.
+  Скрин до: /tmp/claude-0/-home-claude-infection-shooter/e2eb0ce6-afbf-5459-b58c-fbcf7a112618/scratchpad/server_rack_before.png
+- BUG монитор на столе: в headless-проверке монитор на замороженном столе
+  08_office_desk_2 стоит на высоте столешницы, искры при попадании пистолетом
+  появляются, после выстрела не проваливается. Не воспроизведено. Подозрение:
+  динамический (незамороженный) стол падает сквозь пол в тестовом стенде, это
+  может быть артефакт стенда (слой/маска пола), а не игры. Нужна проверка
+  реальной карты и коллизии столов.

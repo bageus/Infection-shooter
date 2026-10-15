@@ -169,6 +169,9 @@ func _ready() -> void:
 		set_meta("planning_wall_mount", true)
 		if "/enviroments/13/" in model_path:
 			add_to_group(&"wall_signs")
+		# A logo mounted on a wood partition falls when the partition breaks, and stays on the floor.
+		if "vectrion" in model_path.to_lower():
+			add_to_group(&"partition_signs")
 	if not _geometry.load_visual(self, model_path):
 		return
 	var visual := _visual
@@ -290,6 +293,13 @@ func get_projectile_material(shape_index: int = -1) -> String:
 	return "wood"
 
 
+# The impact sound follows the authored wood; bullet cost stays with get_projectile_material.
+func get_impact_sound_material(shape_index: int = -1) -> String:
+	if "01_wood_slat_partition" in model_path:
+		return "wood"
+	return get_projectile_material(shape_index)
+
+
 func take_projectile_hit(damage: float, hit_position: Vector3, _normal: Vector3, direction: Vector3, weapon: String) -> bool:
 	if "fire_extinguisher" in model_path.get_file():
 		BULLET_PUSH.apply(self, weight_kg, weapon, direction, hit_position)
@@ -307,6 +317,7 @@ func take_projectile_hit(damage: float, hit_position: Vector3, _normal: Vector3,
 		else:
 			if is_instance_valid(_display):
 				_display.call("disable")
+				_show_power_off_stage()
 			SPARKS.short_circuit(self, hit_position, _normal)
 			if is_desk_lamp():
 				BREAK_SOUND.play(self, effects_root, model_path, "tech", hit_position)
@@ -336,7 +347,38 @@ func take_projectile_hit(damage: float, hit_position: Vector3, _normal: Vector3,
 		PROP_DAMAGE.HitAction.DETACH:
 			BREAK_SOUND.play(self, effects_root, model_path, get_projectile_material(), hit_position)
 			_detach(direction)
+		PROP_DAMAGE.HitAction.COLLAPSE:
+			_collapse_box(hit_position, direction)
 	return false
+
+
+# A cardboard box has no staged pieces: its panels fly apart at the moment it breaks.
+func _collapse_box(hit_position: Vector3, direction: Vector3) -> void:
+	BREAK_SOUND.play(self, effects_root, model_path, get_projectile_material(), hit_position)
+	var index := 0
+	for child in _visual.find_children("*", "MeshInstance3D", true, false):
+		var mesh := child as MeshInstance3D
+		if mesh != null and mesh.mesh != null and mesh.is_visible_in_tree():
+			DAMAGE.spawn_piece(self, mesh, self, 0, index, direction, hit_position)
+			index += 1
+	_visual.hide()
+	for shape in _shapes:
+		shape.set_deferred("disabled", true)
+	collision_layer = 0
+	freeze = true
+
+
+# The monitor or laptop shows its Power_Off stage as soon as it short-circuits.
+func _show_power_off_stage() -> void:
+	for variant in _variants:
+		if variant.name != "Power_Off" or not _geometry.ensure_group(variant):
+			continue
+		if _intact != null:
+			_intact.hide()
+		DAMAGE.reveal_meshes(variant)
+		variant.show()
+		_rebuild_shapes()
+		return
 
 
 func _detach(direction: Vector3) -> void:
@@ -350,7 +392,7 @@ func _detach(direction: Vector3) -> void:
 
 ## A wall sign mounted on a glass pane drops with it when the pane breaks.
 func fall_off_with_glass() -> void:
-	if not is_in_group(&"wall_signs") or not freeze or _damage.broken:
+	if not (is_in_group(&"wall_signs") or is_in_group(&"partition_signs")) or not freeze or _damage.broken:
 		return
 	_damage.broken = true
 	_detach(Vector3.DOWN)
@@ -427,6 +469,8 @@ func _apply_damage(hit_position: Vector3, direction: Vector3) -> void:
 	elif transition == PROP_DAMAGE.Transition.BREAK:
 		SERVER_AUDIO.silence(self)
 		BREAK_SOUND.play(self, effects_root, model_path, get_projectile_material(), hit_position)
+		if "01_wood_slat_partition" in model_path:
+			_drop_partition_signs()
 		if "server_rack" in model_path.get_file() or _is_facade_damage():
 			if _intact != null:
 				_intact.hide()
@@ -448,6 +492,20 @@ func _apply_damage(hit_position: Vector3, direction: Vector3) -> void:
 		collision_layer = 0
 		freeze = true
 		BREAKUP.spawn_stage(self, _geometry, 0, "", hit_position, direction, _damage.full_break)
+
+
+# Logos fixed to the partition's area lose their mount together with it.
+func _drop_partition_signs() -> void:
+	var area := AABB()
+	for mesh in _shape_meshes:
+		if is_instance_valid(mesh):
+			var bounds: AABB = mesh.global_transform * mesh.get_aabb()
+			area = bounds if area.size == Vector3.ZERO else area.merge(bounds)
+	area = area.grow(0.5)
+	for sign_node in get_tree().get_nodes_in_group(&"partition_signs"):
+		var logo := sign_node as Node3D
+		if logo != null and logo != self and is_instance_valid(logo) and area.has_point(logo.global_position):
+			logo.call("fall_off_with_glass")
 
 
 func _is_facade_damage() -> bool:
