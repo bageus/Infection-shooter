@@ -152,3 +152,80 @@ Web export-pack PASS (это упаковка ресурсов, не запус�
 native pixels/draw calls, полный CI и merge только после зелёного результата.
 
 15.10.2026 (общие материалы — разрешение публикации): владелец явно разрешил отправку ветки codex/shared-enemy-materials в bageus/Infection-shooter, создание PR и merge после зелёного CI. Предыдущий approval BLOCKER снят. У shell git нет credentials; публикация выполняется через подключённый GitHub. Новый main c10f7749 включён без конфликтов, новые аудиоассеты и project.godot сохранены. Следующее точное действие — публикация PR и native/full CI.
+
+
+## Реальный native/Web прогон PR #191 — итог и BLOCKER
+
+Проверена candidate `244a377249d87039df90e03f06e4813a00a08b15` поверх
+main `1bf979ea5aff7e720e3a899736655e9fcdcc32d1`. Предыдущие сообщения
+«PR/CI нет» выше — история, разрешение публикации уже получено.
+[CI run 38763158873](https://github.com/bageus/Infection-shooter/actions/runs/38763158873),
+[полный артефакт](https://github.com/bageus/Infection-shooter/actions/runs/38763158873/artifacts/11987340554)
+(срок хранения 14 дней). Постоянная сводка и результаты:
+[comparison.jpg](enemy_skin_review/comparison.jpg),
+[render_results.json](enemy_skin_review/render_results.json),
+[Web failure pixels](enemy_skin_review/web_failure.png),
+[Web result](enemy_skin_review/web_failure.json).
+
+### Native результат
+
+Godot 4.7.2, OpenGL Compatibility, Mesa llvmpipe LLVM20.1.2. 7 типов ×
+4 состояния × до/после: 56 PNG 640×360. Визуально просмотрены все 28 пар.
+26 пар совпадают пиксельно. Разница только в двух severed: Brute 77 пикселей
+(max delta4/255), Horde105 (max delta3/255), локальные области частиц крови.
+Все clean, wounded и corpse совпадают. Для читаемости corpse облако скрыто
+в обоих стендах; bullet-only hitboxes удалены только в capture, чтобы Jolt
+не выдавал ERROR на non-uniform scale из death animation. Игровые коллизии
+и проверки corpse/ragdoll не менялись. Native GPU-layer isolation PASS.
+
+90 Hunger, 90 поверхностей, 239 тиков, fixed-fps60, тот же стенд:
+
+| Метрика | До | После |
+|---|---:|---:|
+| Уникальные materials, clean и wounded | 90 | 1 |
+| Draw calls, каждый измеренный кадр | 90 | 90 |
+| Spawn, ms | 250.570 | 252.320 |
+| Actor callbacks mean, ms | 0.411167 | 0.419054 |
+| p95, ms | 0.450 | 0.455 |
+| Static allocator clean, bytes | 113197414 | 113292424 |
+| Static allocator wounded, bytes | 116349922 | 116355132 |
+
+Это подтверждает sharing материалов, но не улучшение draw calls/FPS.
+GPU tradeoff 4MiB на активированную поверхность страницы остаётся.
+Все raw draw samples, allocator snapshots и пиксельные bbox сохранены в JSON.
+
+### WebGL2 — воспроизводимый блокер, merge запрещён до решения
+
+Экспорт release реально запущен в Chrome/WebGL2 через SwiftShader,
+производственные pool/оба шейдера, 129 объектов/258 поверхностей, страницы
+128+1 и slots0/1. Компиляция и export проходят, но pixel assertion
+`clean neighbor` падает: множество чистых объектов читают blood layer0.
+`web_failure.png` показывает перенос крови. Проверку не удаляли/не ослабляли.
+Draw calls260 в синтетическом Web-стенде; это не benchmark90 врагов.
+Лимиты этого адаптера: array layers2048, vertex/fragment uniform vectors4096.
+Одного подсчёта «2 из16 slots» недостаточно: движок резервирует16 vec4
+(256 bytes) на каждый объект, использующий instance uniforms.
+
+Это соответствует известной проблеме Godot4.7.2 Compatibility/Web:
+[upstream issue112674](https://github.com/godotengine/godot/issues/112674).
+[upstream fix124336](https://github.com/godotengine/godot/pull/124336),
+объединённый 13.10.2026 в ветку4.8, переносит общий буфер параметров из UBO
+в texture. В 4.7.2 размер UBO ограничивает не только слоты одного объекта,
+но и общее число объектов с instance parameters. Увеличение размера
+страницы blood_masks это не исправляет. Не заявляем проверку проекта на4.8.
+
+Проверенные варианты следующего решения владельца:
+1. Обновить движок/шаблоны до версии с upstream fix, затем повторить полный
+   native/Web CI и тесты игры. Это сохраняет общие материалы и instance uniforms.
+2. Сохранить4.7.2 и согласовать Web fallback с отдельными материалами на тело
+   (native sharing остаётся); сначала реализовать и проверить его. Это отступление
+   от требования общих материалов в Web, не выполнено без решения владельца.
+
+PR #191 остаётся открытым и не объединён. Архитектурных исключений, новых
+зависимостей и изменений engine version не внесено. API/сцены/карта/save/network
+прежние, infected_capsule599 строк без изменений. После merge main повторно
+прошли импорт, 4 validators и21 разных local suite (14 infected focused,
+6 дополнительных blood, status_fx). Изолированный topology PASS. CI architecture,
+impact geometry/integration, props, effects, weapon/planner обоих рендеров PASS;
+полный runtime на момент записи ещё выполняется. Даже его успех не снимает
+Web blocker. Следующее точное действие — решение владельца о движке или fallback.
