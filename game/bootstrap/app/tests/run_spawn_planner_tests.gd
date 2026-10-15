@@ -29,6 +29,9 @@ func _check(condition: bool, message: String) -> void:
 
 func _run() -> void:
 	stage = MAIN.instantiate() as Node3D
+	# Exercise the wave editor on an empty floor; authored furniture must not
+	# occlude the guard click or block the spawn hole at these test coordinates.
+	stage.set("defer_layout_loading", true)
 	root.add_child(stage)
 	current_scene = stage
 	await process_frame

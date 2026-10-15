@@ -22,12 +22,14 @@ func _initialize() -> void:
 	call_deferred("_run")
 
 
-# Screen points that are clear of the authored scene objects.
+# Fixed test placements on the empty fixture floor.
 const SPOTS := [Vector2(470, 230), Vector2(660, 230), Vector2(470, 460), Vector2(660, 460), Vector2(1040, 460), Vector2(960, 560), Vector2(850, 460)]
 
 
 func _run() -> void:
 	var stage := MAIN.instantiate()
+	# Authored furniture must not cover the settings targets at fixed pixels.
+	stage.set("defer_layout_loading", true)
 	root.add_child(stage)
 	current_scene = stage
 	await process_frame

@@ -173,3 +173,16 @@ placed_ammo_pickup. Прежняя WebGL2 ошибка clean neighbor воспр
 на main66284af (run38764883024) и audio head42fe5149; skin code/checks
 не менялись. Следующий шаг — CI нового head, затем merge по прямому
 поручению владельца с явным указанием унаследованного Web blocker.
+
+## PR192: runtime fixtures после расширения карты
+
+Полный локальный прогон121 suites с отдельными абсолютными XDG_DATA_HOME
+завершился:118 PASS,3 failures world_surface/planner_object_settings/
+wall_fixture. Spawn planner также воспроизведён отдельно: клики и wave
+были заблокированы новой мебелью. Исправлены только4 тестовых fixtures:
+spawn/settings/world_surface используют существующий defer_layout_loading
+и собственные размещаемые объекты, все прежние assertions сохранены.
+Wall fixture по-прежнему требует3 выключателя на дверь, включая2 новых
+ручных; ранее учитывал только генерируемые. Каждый из4 исправленных
+suites отдельно PASS; validate_project/diff-check PASS. Production, карта,
+лимиты, ERROR gates и workflow не менялись. Следующий шаг — CI и merge.
