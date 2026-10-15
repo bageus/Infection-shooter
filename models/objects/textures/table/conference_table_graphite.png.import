@@ -3,20 +3,21 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://ws3x5re5rj43"
-path="res://.godot/imported/conference_table_graphite.png-4660521bb3ac511bf75d0e45461652fb.ctex"
+path.bptc="res://.godot/imported/conference_table_graphite.png-4660521bb3ac511bf75d0e45461652fb.bptc.ctex"
 metadata={
-"vram_texture": false
+"imported_formats": ["s3tc_bptc"],
+"vram_texture": true
 }
 
 [deps]
 
 source_file="res://models/objects/textures/table/conference_table_graphite.png"
-dest_files=["res://.godot/imported/conference_table_graphite.png-4660521bb3ac511bf75d0e45461652fb.ctex"]
+dest_files=["res://.godot/imported/conference_table_graphite.png-4660521bb3ac511bf75d0e45461652fb.bptc.ctex"]
 
 [params]
 
-compress/mode=0
-compress/high_quality=false
+compress/mode=2
+compress/high_quality=true
 compress/lossy_quality=0.7
 compress/uastc_level=0
 compress/rdo_quality_loss=0.0

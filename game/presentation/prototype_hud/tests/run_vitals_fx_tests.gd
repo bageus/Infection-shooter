@@ -37,7 +37,8 @@ func _run() -> void:
 		fx.update(0.1, 0.0, 30.0, false, 100.0, 100.0)
 	_check(not fx.get_child(0).visible and not (fx.get("_breathing") as AudioStreamPlayer).playing, "Everything stops after recovery")
 	fx.free()
-	await process_frame
+	# The audio server drops its stream playbacks a little after the players are freed.
+	await create_timer(0.3).timeout
 	print("vitals fx tests: %s" % ("PASS" if failures == 0 else "FAIL"))
 	quit(failures)
 

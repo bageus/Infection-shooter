@@ -50,7 +50,6 @@ func direction(actor: CharacterBody3D, target: Node3D, radius: float, far: bool 
 		offset.y = 0.0
 		return offset.normalized()
 	var frame := Engine.get_physics_frames()
-	_clearance_cache.clear()
 	_space = actor.get_world_3d().direct_space_state
 	_excluded = [actor.get_rid()]
 	if target is CollisionObject3D:
@@ -153,7 +152,6 @@ func begin_search(actor: CharacterBody3D, target: Node3D) -> void:
 	var from := actor.global_position
 	var to := target.global_position
 	to.y = _height
-	_clearance_cache.clear()
 	_direct = clear_segment(from, to)
 	_search_state.clear()
 	if _direct:
@@ -174,7 +172,6 @@ func cancel_search() -> void:
 
 
 func step_search(deadline_usec: int, max_expansions: int = 4) -> bool:
-	_clearance_cache.clear() # Physics obstacles may move between slices/frames.
 	probes_last_slice = 0
 	expansions_last_slice = 0
 	if _search_state.is_empty():
@@ -239,6 +236,7 @@ func _finish_search(state: Dictionary) -> bool:
 
 func clear_segment(from: Vector3, to: Vector3) -> bool:
 	var frame := Engine.get_physics_frames()
+	# Obstacles only move in the physics step, so answers hold for the whole frame.
 	if frame != _cache_frame:
 		_cache_frame = frame
 		_clearance_cache.clear()
