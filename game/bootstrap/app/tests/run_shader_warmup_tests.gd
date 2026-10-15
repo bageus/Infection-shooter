@@ -32,6 +32,13 @@ func _run() -> void:
 		await process_frame
 	_check(app.get_node_or_null("HitEffectWarmup") == null, "Hidden hit-effect viewport is freed after a few frames")
 	_check(camera.get_node_or_null("ShaderWarmup") == null, "Warm-up quads are freed after a few frames")
+	var audio := app.get_node_or_null("AudioWarmup")
+	_check(audio != null, "Audio owner outlives the visual viewport")
+	var deadline := Time.get_ticks_msec() + 10000
+	while audio != null and not audio.get("_pending").is_empty() and Time.get_ticks_msec() < deadline:
+		await process_frame
+	_check(audio != null and audio.get("_pending").is_empty(), "Mission audio requests finish")
+	_check(audio != null and audio.get("_streams").size() == 60, "All 60 prop streams remain retained until mission exit")
 	app.queue_free()
 	await process_frame
 	print("Shader warmup tests: %d failure(s)." % failures)
