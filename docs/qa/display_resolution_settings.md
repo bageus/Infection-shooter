@@ -1,0 +1,58 @@
+# Разрешение и режим окна
+
+Инкремент T004/Phase1/P1_LOGIC по прямому запросу владельца.
+Owner bootstrap.app: private display catalog (presets/filter/fallback), display
+adapter (native window + resize-driven render scale) и Video controls.
+Preferences добавляет optional interface_v1.window_mode (0 windowed/1 fullscreen)
+и resolution (строка). Legacy defaults: windowed1280x720, как до изменения.
+Auto выбирает размер монитора; окно ограничено рабочей областью с учётом декораций.
+720p/900p остаются для integrated GPU; 16:10/ultrawide/QHD/4K доступны по размеру
+монитора. Fullscreen сохраняет native aspect, ограничивает3D выбранным budget;
+UI остаётся native. Отдельный новый ползунок render scale не вводится.
+
+Область: bootstrap menu_preferences/menu_dialog/settings_tabs, private helpers,
+RU/EN translations, tests/CI, ADR/docs. Карты/gameplay saves/public API/module
+edges/owners прежние; изменены только optional local interface preferences.
+Menu dialog reviewed: platform calls вынесены в adapter, controls — в отдельную
+presentation class; dialog только commits preferences. Все новые helpers<100строк.
+
+## Проверки
+
+READY spec/workflow и финальный validate_project PASS (466files/125advisory),
+CI coverage164/164 (156runtime+8special), scene_resources392refs/diff PASS.
+Первый editor import прервался из-за потери exec-server; после восстановления
+полный final editor import exit0 и новый display suite PASS. Все6 целевых suites:
+display_settings/settings_tabs/menu/walk_tuning/bullet_smoke/shooting_camera PASS.
+Final import/runtime logs без SCRIPT ERROR/ERROR/ObjectDB/RID warnings.
+Menu проверяет настоящий start/restart с сохранёнными mode1/resolution1600x900.
+Новый suite включён также в существующий native weapon-rendering job (оба renderer),
+с Xvfb1920x1080 и проверкой реального DisplayServer mode/placement/resize/3Dscale;
+результат native CI пока ожидается.
+
+Новый suite: размеры/aspect/без oversampling, 720p/900p, negative monitor origin,
+уменьшившийся экран, invalid/legacy/types/roundtrip/reset; реальные Video controls,
+RU/EN и сохранение; lifecycle одного adapter, renderer scale и canvas invariants.
+Run_menu_tests проверяет сохранённые mode/resolution на реальном start/restart.
+
+Native fullscreen здесь не запускался; CI добавлен. Pixels/FPS/Windows/Web не проверены.
+Следующее действие: получить native CI results и проверить
+переключение на обычном display backend. Нужна визуальная приёмка 720p/900p на
+integrated GPU и native/ultrawide; выигрыш FPS не заявляется.
+
+## Исправление native CI — 17.10.2026
+
+Run38964065452: runtime/6 остальных jobs PASS, оба weapon-rendering jobs падают
+только на fullscreen monitor size и восстановлении Window.size. Xvfb сам по себе
+не обрабатывает EWMH fullscreen ClientMessage; в test fixture добавлен Openbox
+с ожиданием _NET_SUPPORTING_WM_CHECK и cleanup EXIT. Это только CI dependency.
+Native adapter меняет mode/size/position через injected Window вместо прямой
+записи DisplayServer: viewport cache и size_changed обновляются вместе с окном.
+Тест не пропускается: прежние точные assertions сохранены, добавлены diagnostic
+размеры Window/DisplayServer/monitor и bounded ожидание двух стабильных кадров
+(до2с) вместо фиксированных0,2/0,25с. Code commit868e9cd: CI38974870617 native display suite0failures в обоих renderer,
+оба weapon-rendering jobs PASS (jobs117221764325/117221764171). Локально повторены
+display/settings_tabs/menu3/3 PASS, editor exit0, project/spec/workflow/architecture/
+source-size/CI164refs/scene392refs/diff/bash syntax PASS, final runtime/import без
+ERROR/SCRIPT ERROR/ObjectDB/RID. Остальные jobs полного CI ещё выполняются.
+Windows/Web/FPS не проверены. Это test fixture + синхронизация viewport, без
+нового gameplay API, форматов, сцен, module edges или архитектурных исключений.

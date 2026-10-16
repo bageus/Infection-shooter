@@ -115,6 +115,7 @@ func _general() -> void:
 
 
 func _video() -> void:
+	preload("res://game/bootstrap/app/menu/display_options.gd").build(dialog)
 	dialog.call("_slider", "brightness", "brightness", .8, 1.4, .05)
 	var scale := OptionButton.new()
 	scale.name = "TextScale"
@@ -187,7 +188,6 @@ func _video() -> void:
 	smoke.button_pressed = dialog.view.preferences.values.bullet_impact_smoke
 	smoke.toggled.connect(func(value: bool) -> void: dialog.call("_change", "bullet_impact_smoke", value))
 	dialog.get("layout").add_child(smoke)
-	dialog.call("_button", "fullscreen", dialog._fullscreen)
 
 
 func _shadow_quality() -> void:

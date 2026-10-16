@@ -37,6 +37,8 @@ func _run() -> void:
 	dialog.call("_language_changed", 1)
 	dialog.call("_scale_changed", 2)
 	dialog.call("_change", "sunlight", false)
+	dialog.call("_change", "window_mode", 1)
+	dialog.call("_change", "resolution", "1600x900")
 	dialog.call("_change", "bullet_impact_smoke", false)
 	dialog.call("_change", "walk_speed_multiplier", 1.25)
 	dialog.call("_change", "walk_animation_multiplier", 1.5)
@@ -187,6 +189,8 @@ func _test_settings_reach_game(app: Node) -> void:
 	sunlight_prefs.apply_to_game(app.get_tree())
 	var walk_prefs := PREFS.new()
 	walk_prefs.load_settings()
+	walk_prefs.values.window_mode = 1
+	walk_prefs.values.resolution = "1600x900"
 	walk_prefs.values.walk_speed_multiplier = 1.25
 	walk_prefs.values.walk_animation_multiplier = 1.5
 	_check(walk_prefs.save_settings() == OK, "Walk tuning is saved before a real restart")
@@ -194,6 +198,8 @@ func _test_settings_reach_game(app: Node) -> void:
 
 
 func _check_walk_preferences(app: Node, context: String) -> void:
+	var display := app.get_tree().root.get_node("DisplaySettings")
+	_check(display.get("_mode") == 1 and display.get("_resolution") == "1600x900", "Saved display choices reach real mission: " + context)
 	_check(not app.get("impact_pool").get("bullet_smoke_enabled"), "Saved smoke-off reaches mission pool: " + context)
 	var player: Node = app.get("player")
 	var driver := player.get_node("AnimationDriver")

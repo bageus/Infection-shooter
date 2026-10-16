@@ -1,5 +1,6 @@
 extends RefCounted
 
+const DISPLAY := preload("res://game/bootstrap/app/menu/display_settings.gd")
 const SHADOWS := preload("res://game/bootstrap/app/menu/shadow_quality.gd")
 const BINDINGS := preload("res://game/bootstrap/app/menu/control_bindings.gd")
 const UI_TRANSLATIONS := preload("res://game/core/localization/public/ui_translations.gd")
@@ -7,7 +8,7 @@ const CORPSE_BUDGET := preload("res://game/features/infected/public/corpse_budge
 var bindings := BINDINGS.new()
 
 const FILE := "user://interface_settings.cfg"
-const DEFAULTS := {"language": "ru", "brightness": 1.0, "text_scale": 1.0,
+const DEFAULTS := {"window_mode": 0, "resolution": "1280x720", "language": "ru", "brightness": 1.0, "text_scale": 1.0,
 	"walk_speed_multiplier": 1.0, "walk_animation_multiplier": 1.0,
 	"volume": 0.4, "effects_volume": 1.0, "music_volume": 1.0, "menu_music": true, "menu_music_volume": 1.0, "sound": true, "occlusion_mode": 0, "test_mutagen": false, "infinite_antidotes": false, "lighting": true, "electronic_particles": true, "skill_effects": 0, "dodge_animation": 0,
 	"bullet_impact_smoke": true, "sunlight": true, "shadows": true, "shadow_quality": 2, "mesh_lod": true, "keep_corpses": true}
@@ -23,6 +24,9 @@ func load_settings() -> void:
 		var value: Variant = config.get_value("interface_v1", key, DEFAULTS[key])
 		if typeof(value) == typeof(DEFAULTS[key]):
 			values[key] = value
+	values.window_mode = clampi(values.window_mode, 0, 1)
+	if values.resolution != "auto" and DISPLAY.CATALOG.parse(values.resolution) == Vector2i.ZERO:
+		values.resolution = DISPLAY.CATALOG.DEFAULT
 	values.language = "en" if values.language == "en" else "ru"
 	values.brightness = clampf(values.brightness, 0.8, 1.4)
 	values.occlusion_mode = clampi(values.occlusion_mode, 0, 1)
@@ -55,7 +59,9 @@ func reset() -> void:
 ## Applies the settings to the running game, not just the menu: master
 ## volume (the default 0.4 keeps the authored mix at 0 dB, up to +6 dB),
 ## sound on/off and the 3D scene brightness.
-func apply_to_game(tree: SceneTree) -> void:
+func apply_to_game(tree: SceneTree, display_user_action: bool = false) -> void:
+	if tree != null:
+		DISPLAY.apply_to(tree.root, values, display_user_action)
 	bindings.apply()
 	UI_TRANSLATIONS.apply_language(str(values.language))
 	var master := AudioServer.get_bus_index(&"Master")
