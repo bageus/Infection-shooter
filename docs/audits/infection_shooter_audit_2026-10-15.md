@@ -1,6 +1,6 @@
 # Аудит Infection Shooter — 15 октября 2026
 
-> Состояние отчёта: ниже сохранены исходные доказательства аудита. Проверенные исправления A01–A08 и O01–O03: [ragdoll](../qa/ragdoll_budget.md), [projectile](../qa/projectile_step_budget.md), [blast shelter](../qa/blast_shelter.md), [atomic desk template](../qa/atomic_desk_template.md), [audio warmup](../qa/audio_warmup_lifetime.md), [radar](../qa/radar_live_enemies.md), [legacy pickups](../qa/legacy_pickup_refusal.md), [audio generators](../qa/audio_generator_safety.md), [stairs](../qa/stair_opening_refresh.md), [named maps](../qa/named_map_loading.md), [light budgets](../qa/light_budget_cache.md). Следующая отдельная задача — O04.
+> Состояние отчёта: ниже сохранены исходные доказательства аудита. Проверенные исправления A01–A08 и O01–O03: [ragdoll](../qa/ragdoll_budget.md), [projectile](../qa/projectile_step_budget.md), [blast shelter](../qa/blast_shelter.md), [atomic desk template](../qa/atomic_desk_template.md), [audio warmup](../qa/audio_warmup_lifetime.md), [radar](../qa/radar_live_enemies.md), [legacy pickups](../qa/legacy_pickup_refusal.md), [audio generators](../qa/audio_generator_safety.md), [stairs](../qa/stair_opening_refresh.md), [named maps](../qa/named_map_loading.md), [light budgets](../qa/light_budget_cache.md). O04 измерен без изменения production: [CPU blood bake](../qa/body_blood_profile.md). Следующая отдельная задача — Q01 (полнота CI); кандидаты D01/D02 требуют отдельного разбора совместимости и истории решений.
 
 ## Основной вывод
 
@@ -39,7 +39,7 @@ P1 — исправить в ближайших отдельных PR; P2 — с
 | O02 | P2 | Загрузка именованной карты в планировщике остаётся синхронной и держит две композиции | Подтверждено порядком prepare → clear → place; отдельный пик не измерен |
 | Q01 | P2 | Пять существующих тестовых наборов не перечислены в CI | Проверены полные пути и имена во всех workflows |
 | O03 | P3 | Бюджеты ламп/экранов пересчитываются при неподвижной камере | Исправлено16.10; CPU callback в покое −83,7%/−59,8% на изолированном стенде; [QA](../qa/light_budget_cache.md) |
-| O04 | P3 | CPU-запекание крови сканирует треугольники и немедленно загружает изменённые маски | Подтверждено кодом; актуальный bottleneck не доказан |
+| O04 | P3 | CPU-запекание крови сканирует треугольники и немедленно загружает изменённые маски | Измерено16.10:90 тел, p95 серии shotgun58,568мс/minigun9,666мс headless; это подсистема ран, не профиль миссии; [QA](../qa/body_blood_profile.md) |
 | D01 | P3 | Неиспользуемые в основном игровом маршруте файлы и старые дубли | Кандидаты с оговорками о public API, тестах и совместимости |
 | D02 | P3 | Документы состояния слишком велики и противоречиво отражают актуальность | Объёмы файлов и сравнение записей с текущим кодом |
 
@@ -218,6 +218,8 @@ status=Template applied to this desk. Save the map to keep it.
 Кэшировать решение до изменения камеры/состава/питания света; учитывать уже имеющийся запас frustum и гистерезис. Мерцание и таймеры конкретной лампы оставить независимыми. Сначала сравнить CPU-профиль, затем проверять визуально движение камеры и отсутствие вспышек теней.
 
 ### O04. Измерить цену CPU-запекания крови при массовых попаданиях
+
+**Измерено16.10.2026:** воспроизводимый стенд90 реальных тел,18 headless случаев и отдельный программный OpenGL. Full/stages дают одинаковые RG8 байты; production и вид крови прежние. Медиана p95 активной серии из3 headless повторов: shotgun58,568мс/8 попаданий, minigun9,666мс/1. Внешняя рана всё ещё стоит около2,6мс CPU на Hunger; повторная не вызывает новых uploads. Это основание отдельно исследовать индекс треугольников, а не доказательство FPS-выигрыша или главного bottleneck полной миссии. [Методика, пределы и сырые данные](../qa/body_blood_profile.md). Исходная находка сохранена ниже.
 
 [body_parts.gd:212–235](https://github.com/bageus/Infection-shooter/blob/0e154b73/game/features/infected/body_parts.gd#L212-L235), [body_blood_bake.gd:21–84](https://github.com/bageus/Infection-shooter/blob/0e154b73/game/features/infected/body_blood_bake.gd#L21-L84).
 
