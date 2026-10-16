@@ -153,3 +153,4 @@ game/bootstrap/app/tests/run_legacy_cabinet_paths_tests.gd
 game/features/player/tests/run_shot_recoil_tests.gd
 game/features/infected/tests/run_hit_drag_tests.gd
 game/bootstrap/app/tests/run_bullet_smoke_tests.gd
+game/bootstrap/app/tests/run_display_settings_tests.gd

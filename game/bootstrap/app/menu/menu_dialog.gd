@@ -178,14 +178,14 @@ func _row(key: String, widget: Control) -> void:
 
 func _change(key: String, value: Variant) -> void:
 	view.preferences.values[key] = value
-	_commit()
+	_commit(key in ["window_mode", "resolution"])
 
 
 ## Saves the settings, applies them and redraws the screen.
-func _commit() -> void:
+func _commit(display_user_action: bool = false) -> void:
+	view.preferences.apply_to_game(view.get_tree(), display_user_action)
 	if view.preferences.save_settings() != OK:
 		settings.notices.set_notice(settings_tab, view.text("storeUnavailable"))
-	view.preferences.apply_to_game(view.get_tree())
 	view.refresh()
 
 
@@ -216,11 +216,6 @@ func _rebuild() -> void:
 		child.queue_free()
 	_build()
 	call_deferred("_focus_first")
-
-
-func _fullscreen() -> void:
-	var fullscreen := DisplayServer.window_get_mode() == DisplayServer.WINDOW_MODE_FULLSCREEN
-	DisplayServer.window_set_mode(DisplayServer.WINDOW_MODE_WINDOWED if fullscreen else DisplayServer.WINDOW_MODE_FULLSCREEN)
 
 
 func _focus_first() -> void:
