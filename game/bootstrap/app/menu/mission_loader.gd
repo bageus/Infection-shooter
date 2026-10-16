@@ -5,6 +5,10 @@ const RESOURCE_PREPARATION := preload("res://game/bootstrap/app/scene_resource_p
 const LAYOUT := preload("res://game/bootstrap/app/planning_layout_loader.gd")
 const MATERIAL_WARMUP := preload("res://game/bootstrap/app/mission_material_warmup.gd")
 var warmed_materials := 0
+## Props need ~160 physics ticks to fall asleep; a slow machine gets a wall-clock cap instead.
+const SETTLE_MAX_TICKS := 240
+const SETTLE_MAX_MSEC := 10000
+const SETTLE_AWAKE_LIMIT := 600
 const PHYSICS := preload("res://game/bootstrap/app/planning_physics.gd")
 const PREFERENCES := preload("res://game/bootstrap/app/menu/menu_preferences.gd")
 const MAIN_PATH := "res://game/bootstrap/app/main.tscn"
@@ -143,6 +147,7 @@ func start() -> void:
 	await warmup.prepare(pending, pending.get_viewport().get_camera_3d(), tree, _set_progress)
 	warmed_materials = warmup.material_count
 	PHYSICS.resume(planner.get("objects").get("placed"))
+	await _settle_props(tree)
 	_set_progress(1.0, "ready")
 	await tree.process_frame
 	tree.current_scene = pending
@@ -282,3 +287,21 @@ func _install_occlusion_walls(tree: SceneTree) -> void:
 	saved.load_settings()
 	occlusion.call("set_mode", int(saved.values.occlusion_mode))
 	await occlusion.flush_wall_queue(tree)
+
+
+## Props start awake and every one costs a physics tick until it sleeps, which showed as ~1 FPS right after
+## the overlay dropped. Step only the physics server (nodes stay paused) until most props are asleep.
+func _settle_props(tree: SceneTree) -> void:
+	var bodies: Array[Node] = pending.find_children("*", "RigidBody3D", true, false)
+	var started := Time.get_ticks_msec()
+	var first_tick := Engine.get_physics_frames()
+	PhysicsServer3D.set_active(true)
+	while Time.get_ticks_msec() - started < SETTLE_MAX_MSEC and Engine.get_physics_frames() - first_tick < SETTLE_MAX_TICKS:
+		await tree.process_frame
+		var awake := 0
+		for body: Node in bodies:
+			if is_instance_valid(body) and not (body as RigidBody3D).freeze and not (body as RigidBody3D).sleeping:
+				awake += 1
+		if awake <= SETTLE_AWAKE_LIMIT:
+			break
+	PhysicsServer3D.set_active(not tree.paused)
