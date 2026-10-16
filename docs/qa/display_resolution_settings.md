@@ -49,4 +49,10 @@ Native adapter меняет mode/size/position через injected Window вме
 записи DisplayServer: viewport cache и size_changed обновляются вместе с окном.
 Тест не пропускается: прежние точные assertions сохранены, добавлены diagnostic
 размеры Window/DisplayServer/monitor и bounded ожидание двух стабильных кадров
-(до2с) вместо фиксированных0,2/0,25с. Полный результат исправления пока проверяется.
+(до2с) вместо фиксированных0,2/0,25с. Code commit868e9cd: CI38974870617 native display suite0failures в обоих renderer,
+оба weapon-rendering jobs PASS (jobs117221764325/117221764171). Локально повторены
+display/settings_tabs/menu3/3 PASS, editor exit0, project/spec/workflow/architecture/
+source-size/CI164refs/scene392refs/diff/bash syntax PASS, final runtime/import без
+ERROR/SCRIPT ERROR/ObjectDB/RID. Остальные jobs полного CI ещё выполняются.
+Windows/Web/FPS не проверены. Это test fixture + синхронизация viewport, без
+нового gameplay API, форматов, сцен, module edges или архитектурных исключений.
