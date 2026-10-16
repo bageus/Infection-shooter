@@ -104,7 +104,19 @@ func _sheltered(body: Node3D) -> bool:
 		excluded.append((source as CollisionObject3D).get_rid())
 	query.exclude = excluded
 	var hit := get_world_3d().direct_space_state.intersect_ray(query)
-	return not hit.is_empty() and hit.get("collider") is StaticBody3D
+	# Furniture is not cover, but it must not hide the wall further along the ray.
+	# Exclude whole bodies without moving the origin past any unchecked geometry.
+	while not hit.is_empty():
+		var collider := hit.get("collider") as CollisionObject3D
+		if collider == null:
+			return false
+		var own_part := body.is_ancestor_of(collider) or (is_instance_valid(source) and source.is_ancestor_of(collider))
+		if collider is StaticBody3D and not own_part:
+			return true
+		excluded.append(collider.get_rid())
+		query.exclude = excluded
+		hit = get_world_3d().direct_space_state.intersect_ray(query)
+	return false
 
 
 func _strike(collider: Node3D, shape_index: int, offset: Vector3) -> void:
