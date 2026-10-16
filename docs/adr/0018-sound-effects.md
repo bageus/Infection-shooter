@@ -66,3 +66,14 @@ ResourceLoader threaded requests; при teardown завершает остав�
 ссылки. Повторные запросы дедуплицируются без глобального cache. Публичные
 сигнатуры/owners/зависимости прежние; новых контрактов или исключений нет.
 Проверки: [QA audio warmup](../qa/audio_warmup_lifetime.md).
+
+## Уточнение 16.10.2026 — A08 (offline tools)
+
+Повторная генерация использует private manifest точных generated outputs/SHA
+по каждому tool. Авторские события из receipts/groups и retired scream_zombie/
+roar_heavy не принадлежат генераторам. --dry-run проверяет план без кодирования;
+выходы готовятся в temp, изменённый вне generator файл блокирует замену.
+Credits меняются только в marker sections с сохранением прежней атрибуции.
+Старый WAV importer явно исторический и закрыт для текущего refresh receipt.
+Runtime owners, API, DTO и зависимости игры прежние; исключений нет.
+Инструкции и evidence: [QA generators](../qa/audio_generator_safety.md).

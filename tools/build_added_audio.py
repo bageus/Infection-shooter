@@ -1,5 +1,11 @@
 #!/usr/bin/env python3
-"""Reproduce owner-supplied WAV -> Vorbis assets; never delete or edit originals."""
+"""Historical 2026-10-15 WAV import; do not run against the refreshed project.
+
+Requires --historical-import and a pre-refresh checkout with original WAVs.
+Current OGG/voice groups must never be replaced by this old group catalogue.
+convert/import_settings remain available to the historical refresh importer.
+"""
+import argparse
 import hashlib
 import json
 from pathlib import Path
@@ -79,7 +85,12 @@ def convert(source, destination, loop=False, trim=0., mono=False):
     import_settings(destination, loop)
     return {'source': str(source.relative_to(ROOT)), 'output': str(destination.relative_to(ROOT)), 'source_seconds': source_frames / RATE, 'trim_end_seconds': trim, 'overlap_seconds': overlap/RATE, 'output_seconds': len(samples)/RATE, 'channels': channels, 'loop':loop, 'seam_step': float(np.max(np.abs(samples[0]-samples[-1]))) if loop else None}
 
-def main():
+def main(argv=None):
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument("--historical-import", action="store_true")
+    args = parser.parse_args(argv)
+    if not args.historical_import or (ROOT / "assets/audio/audio_refresh_processing.json").exists():
+        parser.error("Historical importer disabled: use a pre-refresh checkout with original WAVs; current OGG and voice groups are protected")
     music = ROOT / 'assets/audio/music'
     records=[]
     for name, target, trim in [('main menu','main_menu',0.),('menu from game','menu_from_game',1.),('Server_Oper','server_oper',0.),('Seamless_Loop','seamless_loop',0.),('Tower_Hunt','tower_hunt',0.),('music_cinematic_boom','music_cinematic_boom',0.)]:

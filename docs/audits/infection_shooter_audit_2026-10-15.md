@@ -1,6 +1,6 @@
 # Аудит Infection Shooter — 15 октября 2026
 
-> Состояние отчёта: ниже сохранены исходные доказательства аудита. Проверенные исправления A01–A07: [ragdoll](../qa/ragdoll_budget.md), [projectile](../qa/projectile_step_budget.md), [blast shelter](../qa/blast_shelter.md), [atomic desk template](../qa/atomic_desk_template.md), [audio warmup](../qa/audio_warmup_lifetime.md), [radar](../qa/radar_live_enemies.md), [legacy pickups](../qa/legacy_pickup_refusal.md). Следующая отдельная задача — A08.
+> Состояние отчёта: ниже сохранены исходные доказательства аудита. Проверенные исправления A01–A08: [ragdoll](../qa/ragdoll_budget.md), [projectile](../qa/projectile_step_budget.md), [blast shelter](../qa/blast_shelter.md), [atomic desk template](../qa/atomic_desk_template.md), [audio warmup](../qa/audio_warmup_lifetime.md), [radar](../qa/radar_live_enemies.md), [legacy pickups](../qa/legacy_pickup_refusal.md), [audio generators](../qa/audio_generator_safety.md). Следующая отдельная задача — O01.
 
 ## Основной вывод
 
@@ -162,6 +162,8 @@ status=Template applied to this desk. Save the map to keep it.
 **Исправление:** привести эти сцены к одному поведению с pickup_item либо сначала мигрировать потребителей и только затем выводить старые сцены из public API. Удалять их по одному статическому поиску нельзя.
 
 ## A08. Старый генератор звуков может удалить новый авторский контент
+
+**Статус 16.10.2026:** исправлено в ветке `codex/protect-authored-audio` на main12d2570. Точный manifest253 generated outputs/SHA, protected/retired events, dry-run, staging и conflict checks; credits обновляются по marker sections. Старый WAV importer закрыт для текущего refresh.18 safety tests и реальные temp-encode M4/destruction PASS; текущие аудио/credits не менялись. [QA A08](../qa/audio_generator_safety.md). Ниже сохранено исходное доказательство.
 
 **Код:** [build_sounds.py:829–882](https://github.com/bageus/Infection-shooter/blob/0e154b73/tools/build_sounds.py#L829-L882), [build_weapon_sounds.py:206–230](https://github.com/bageus/Infection-shooter/blob/0e154b73/tools/build_weapon_sounds.py#L206-L230).
 

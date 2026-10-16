@@ -26,8 +26,8 @@ jobs:
         with:
           python-version: "3.12"
 
-      - name: Install atlas validation dependencies
-        run: python -m pip install numpy==2.3.5 Pillow==12.3.0
+      - name: Install validation dependencies
+        run: python -m pip install numpy==2.3.5 scipy==1.17.0 Pillow==12.3.0
 
       - name: Validate project gates
         run: python tools/validate_project.py
@@ -50,3 +50,7 @@ jobs:
           python tools/test_workstation_templates.py
           python tools/test_architecture_scene_access.py
           python tools/update_enemy_audio_report.py --check
+          python tools/test_audio_generation.py
+          python tools/build_sounds.py --dry-run
+          python tools/build_weapon_sounds.py --dry-run
+          python tools/build_destruction_sounds.py --dry-run
