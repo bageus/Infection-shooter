@@ -1,6 +1,6 @@
 # Аудит Infection Shooter — 15 октября 2026
 
-> Состояние отчёта: ниже сохранены исходные доказательства аудита. Проверенные исправления A01–A05: [ragdoll](../qa/ragdoll_budget.md), [projectile](../qa/projectile_step_budget.md), [blast shelter](../qa/blast_shelter.md), [atomic desk template](../qa/atomic_desk_template.md), [audio warmup](../qa/audio_warmup_lifetime.md). Следующая отдельная задача — A06.
+> Состояние отчёта: ниже сохранены исходные доказательства аудита. Проверенные исправления A01–A06: [ragdoll](../qa/ragdoll_budget.md), [projectile](../qa/projectile_step_budget.md), [blast shelter](../qa/blast_shelter.md), [atomic desk template](../qa/atomic_desk_template.md), [audio warmup](../qa/audio_warmup_lifetime.md), [radar](../qa/radar_live_enemies.md). Следующая отдельная задача — A07.
 
 ## Основной вывод
 
@@ -134,6 +134,8 @@ status=Template applied to this desk. Save the map to keep it.
 Это объясняет группу предупреждений аудиопрогрева; **не доказано**, что все оставшиеся предупреждения проекта имеют эту же причину. Например, lamp_lighting отдельно сообщил о двух экземплярах.
 
 ## A06. Радар показывает трупы и скрытые узлы как живых врагов
+
+**Статус 16.10.2026:** исправлено в ветке `codex/radar-live-enemies` на main3d4a9ab7. Радар использует существующее alive membership, visibility и queued deletion; внекамерные живые цели остаются. A/B настоящего Compatibility render:7 failures→0; lifecycle настоящего Hunger PASS. [QA A06](../qa/radar_live_enemies.md). Ниже сохранено исходное доказательство.
 
 **Код:** [radar.gd:55–68](https://github.com/bageus/Infection-shooter/blob/0e154b73/game/presentation/prototype_hud/radar.gd#L55-L68).
 

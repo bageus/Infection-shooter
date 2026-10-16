@@ -63,9 +63,20 @@ func _draw() -> void:
 	var right := Vector2(6, 7) * scale_factor
 	draw_colored_polygon(PackedVector2Array([center + heading, center + left, center + right]), PALETTE.INK)
 
+	_draw_enemies(center, radius, scale_factor)
+
+
+func _draw_enemies(center: Vector2, radius: float, scale_factor: float) -> void:
 	for enemy in enemies.get_children():
-		if enemy is Node3D:
+		if _is_radar_target(enemy):
 			_draw_blip(center, radius, enemy.global_position, PALETTE.WARNING, 3.5 * scale_factor)
+
+
+func _is_radar_target(enemy: Node) -> bool:
+	# Infected owns alive membership, removing it before retained corpse effects.
+	# Scene visibility is intentional hiding; being outside the camera is not.
+	return enemy is Node3D and enemy.is_in_group(&"infected_alive") \
+		and not enemy.is_queued_for_deletion() and enemy.is_visible_in_tree()
 
 
 func _draw_blip(center: Vector2, radius: float, world_position: Vector3, color: Color, blip_radius: float) -> void:

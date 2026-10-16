@@ -400,6 +400,7 @@ jobs:
           game/presentation/office_floor/tests/run_contact_shadow_tests.gd
           game/presentation/office_floor/tests/run_blood_decor_tests.gd
           game/presentation/prototype_hud/tests/run_radar_tests.gd
+          game/bootstrap/app/tests/run_radar_lifecycle_tests.gd
           game/presentation/prototype_hud/tests/run_vitals_fx_tests.gd
           game/presentation/office_floor/tests/run_fragment_pool_tests.gd
           game/presentation/office_floor/tests/run_settled_debris_tests.gd
