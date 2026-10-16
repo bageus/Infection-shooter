@@ -1,5 +1,9 @@
 # D01 — потребители и безопасная очистка
 
+Обновление16.10: четыре cabinet mappings из baseline ниже восстановлены отдельным
+инкрементом [D01_LEGACY_PROP_PATHS](legacy_cabinet_paths.md). Старые результаты
+здесь и в JSON остаются историческими; legacy scenes/scripts сохраняются.
+
 База main `e4af46b075ec38b4eca29f7098c114a342f0267d` после PR228,
 Godot 4.7.2, Linux headless. Это проверка кандидатов аудита, а не разрешение
 удалять любой файл без ссылки из main. [Машинные результаты](cleanup_candidate_inventory.json).
