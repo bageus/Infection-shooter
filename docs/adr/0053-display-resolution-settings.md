@@ -49,3 +49,11 @@ architecture policy прежние. Revert возвращает старую к�
 small screens/offset monitor, fallback/malformed/legacy/save/reset, UI language,
 3Dscale и неизменность canvas/UI, lifecycle/повторный apply, реальный start/restart.
 Native fullscreen/renderer pixels и FPS требуют доступного display backend.
+
+## Native CI follow-up — 17.10.2026
+
+Adapter записывает mode/size/position через injected Window, чтобы состояние
+Viewport не зависело от повторного OS ConfigureNotify после DisplayServer write.
+Native CI использует Xvfb+Openbox (EWMH manager), дожидается ready и завершает
+его вместе с suite. Assertions fullscreen/restore сохранены; OS и scene размеры
+должны совпасть два кадра в пределах2с. Public API/DTO/owners/edges прежние.

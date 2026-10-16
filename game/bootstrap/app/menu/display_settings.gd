@@ -45,11 +45,11 @@ func _apply_native(user_action: bool) -> void:
 	# Browsers own canvas/window size and require a gesture for fullscreen.
 	if OS.has_feature("web"):
 		if user_action:
-			DisplayServer.window_set_mode(DisplayServer.WINDOW_MODE_FULLSCREEN if _mode == 1 else DisplayServer.WINDOW_MODE_WINDOWED)
+			_window.mode = Window.MODE_FULLSCREEN if _mode == 1 else Window.MODE_WINDOWED
 		return
-	var native_mode := DisplayServer.WINDOW_MODE_FULLSCREEN if _mode == 1 else DisplayServer.WINDOW_MODE_WINDOWED
-	if DisplayServer.window_get_mode() != native_mode:
-		DisplayServer.window_set_mode(native_mode)
+	var native_mode := Window.MODE_FULLSCREEN if _mode == 1 else Window.MODE_WINDOWED
+	if _window.mode != native_mode:
+		_window.mode = native_mode
 	if _mode == 0:
 		_place_window.call_deferred()
 
@@ -62,8 +62,9 @@ func _place_window() -> void:
 	var usable := DisplayServer.screen_get_usable_rect(screen)
 	var wanted := _wanted if _wanted != Vector2i.ZERO else screen_size()
 	var rect := CATALOG.fit_window(wanted, usable)
-	DisplayServer.window_set_size(rect.size)
-	DisplayServer.window_set_position(rect.position)
+	# Window updates the scene viewport even when the OS coalesces resize events.
+	_window.size = rect.size
+	_window.position = rect.position
 
 
 func _update_render_scale() -> void:

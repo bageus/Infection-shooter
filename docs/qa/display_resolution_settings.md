@@ -38,3 +38,15 @@ Native fullscreen здесь не запускался; CI добавлен. Pix
 Следующее действие: получить native CI results и проверить
 переключение на обычном display backend. Нужна визуальная приёмка 720p/900p на
 integrated GPU и native/ultrawide; выигрыш FPS не заявляется.
+
+## Исправление native CI — 17.10.2026
+
+Run38964065452: runtime/6 остальных jobs PASS, оба weapon-rendering jobs падают
+только на fullscreen monitor size и восстановлении Window.size. Xvfb сам по себе
+не обрабатывает EWMH fullscreen ClientMessage; в test fixture добавлен Openbox
+с ожиданием _NET_SUPPORTING_WM_CHECK и cleanup EXIT. Это только CI dependency.
+Native adapter меняет mode/size/position через injected Window вместо прямой
+записи DisplayServer: viewport cache и size_changed обновляются вместе с окном.
+Тест не пропускается: прежние точные assertions сохранены, добавлены diagnostic
+размеры Window/DisplayServer/monitor и bounded ожидание двух стабильных кадров
+(до2с) вместо фиксированных0,2/0,25с. Полный результат исправления пока проверяется.

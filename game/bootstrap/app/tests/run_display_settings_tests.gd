@@ -125,7 +125,7 @@ func _adapter() -> void:
 func _native_window() -> void:
 	var values := {"window_mode": 0, "resolution": "1280x720"}
 	DISPLAY.apply_to(root, values, true)
-	await create_timer(0.2).timeout
+	await _settle_native(DisplayServer.WINDOW_MODE_WINDOWED, CATALOG.fit_window(Vector2i(1280, 720), DisplayServer.screen_get_usable_rect()).size)
 	_check(DisplayServer.window_get_mode() == DisplayServer.WINDOW_MODE_WINDOWED, "Native display starts in windowed mode")
 	var work := DisplayServer.screen_get_usable_rect(DisplayServer.window_get_current_screen())
 	var rect := Rect2i(DisplayServer.window_get_position(), DisplayServer.window_get_size())
@@ -138,16 +138,30 @@ func _native_window() -> void:
 	_check(DisplayServer.window_get_position() == position and DisplayServer.window_get_size() == size, "Repeated preference apply preserves native position and size")
 	values.window_mode = 1
 	DISPLAY.apply_to(root, values, true)
-	await create_timer(0.25).timeout
+	await _settle_native(DisplayServer.WINDOW_MODE_FULLSCREEN, DISPLAY.screen_size())
 	_check(DisplayServer.window_get_mode() == DisplayServer.WINDOW_MODE_FULLSCREEN, "Native display enters fullscreen")
-	_check(root.size == DISPLAY.screen_size(), "Fullscreen uses the actual monitor size")
+	_check(root.size == DISPLAY.screen_size(), "Fullscreen uses the actual monitor size: root=%s native=%s screen=%s" % [root.size, DisplayServer.window_get_size(), DISPLAY.screen_size()])
 	_check(absf(root.scaling_3d_scale - CATALOG.render_scale(Vector2i(1280, 720), root.size)) < 0.00001, "Native fullscreen retains the chosen 720p 3D budget")
 	values.window_mode = 0
 	values.resolution = "1600x900"
 	DISPLAY.apply_to(root, values, true)
-	await create_timer(0.25).timeout
+	await _settle_native(DisplayServer.WINDOW_MODE_WINDOWED, CATALOG.fit_window(Vector2i(1600, 900), work).size)
 	_check(DisplayServer.window_get_mode() == DisplayServer.WINDOW_MODE_WINDOWED and root.scaling_3d_scale == 1.0, "Returning to windowed restores normal rendering")
-	_check(root.size == CATALOG.fit_window(Vector2i(1600, 900), work).size, "Returning from fullscreen applies the saved window dimensions")
+	_check(root.size == CATALOG.fit_window(Vector2i(1600, 900), work).size, "Returning from fullscreen applies the saved window dimensions: root=%s native=%s expected=%s" % [root.size, DisplayServer.window_get_size(), CATALOG.fit_window(Vector2i(1600, 900), work).size])
+
+
+# Require both OS and scene viewport to agree, then observe two stable frames.
+func _settle_native(mode: int, size: Vector2i) -> void:
+	var deadline := Time.get_ticks_msec() + 2000
+	var stable := 0
+	while Time.get_ticks_msec() < deadline:
+		await process_frame
+		if DisplayServer.window_get_mode() == mode and root.size == size and DisplayServer.window_get_size() == size:
+			stable += 1
+			if stable >= 2:
+				return
+		else:
+			stable = 0
 
 
 func _ui() -> void:
