@@ -309,6 +309,7 @@ func _setup_blood_effects() -> void:
 	blood_effects = BLOOD_EFFECTS.instantiate() as Node3D
 	add_child(blood_effects)
 	blood_effects.call("configure_world", mission_objects, impact_pool)
+	impact_pool.connect("penetration_blood", Callable(blood_effects, "splatter_exit"))
 	var blood_surfaces: Array[Node] = [$Structure, $Floor, $FloorBody, planning_root]
 	blood_effects.call("configure_environment", blood_surfaces)
 	enemies.child_entered_tree.connect(_bind_enemy_blood)
@@ -326,6 +327,9 @@ func _bind_enemy_blood(enemy: Node) -> void:
 		"wounded_moved": "drops_trail", "body_dragged": "smear_drag", "blood_death": "death_pool",
 		"limb_severed": "severed_burst"
 	}
+	if enemy.has_signal("blood_pool_ready"):
+		bindings.erase("blood_death")
+		bindings["blood_pool_ready"] = "death_pool"
 	for event in bindings:
 		if not enemy.has_signal(event):
 			continue

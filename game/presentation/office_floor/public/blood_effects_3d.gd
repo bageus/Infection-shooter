@@ -2,6 +2,7 @@ extends Node3D
 
 const LIBRARY := preload("res://game/presentation/office_floor/blood_texture_library.gd")
 const SURFACES := preload("res://game/presentation/office_floor/blood_surface_query.gd")
+const EXIT_SPLATTER := preload("res://game/presentation/office_floor/blood_exit_splatter.gd")
 const BUDGET := preload("res://game/presentation/office_floor/blood_mark_budget.gd")
 # Radians around the shot's flat direction: two near-forward rays and two sideways rays.
 const SIDE_SPLATTER_ANGLES := [-1.3, -0.6, 0.6, 1.3]
@@ -14,10 +15,10 @@ const SIDE_SPLATTER_ANGLES := [-1.3, -0.6, 0.6, 1.3]
 @export var stain_size := Vector2(0.16, 0.50)
 @export var drops_size := Vector2(0.25, 0.80)
 @export var smear_size := Vector2(0.35, 1.20)
-@export var pool_size := Vector2(0.65, 1.50)
+@export var pool_size := Vector2(1.5, 2.2)
 @export var drop_spacing := Vector2(0.4, 0.5)
 @export_range(1, 8) var splatters_per_hit := 5
-@export var pool_delay := Vector2(0.3, 0.8)
+@export var pool_delay := Vector2(0.05, 0.15)
 @export var pool_growth := Vector2(1.0, 3.0)
 @export_range(0.03, 0.15) var projection_depth := 0.08
 @export_range(0.001, 0.03) var quad_surface_offset := 0.018
@@ -124,6 +125,14 @@ func movement_spacing() -> float:
 
 func splatter_hit(point: Vector3, direction: Vector3, weapon: String, excluded: Array[RID], source_id: int) -> void:
 	_queue_effect("_emit_splatter_hit", [point, direction, weapon, excluded, source_id])
+
+
+func splatter_exit(point: Vector3, direction: Vector3, energy: float, excluded: Array[RID]) -> void:
+	_queue_effect("_emit_splatter_exit", [point, direction, energy, excluded])
+
+
+func _emit_splatter_exit(point: Vector3, direction: Vector3, energy: float, excluded: Array[RID]) -> void:
+	EXIT_SPLATTER.emit(self, _surfaces, point, direction, energy, excluded)
 
 
 # Public v1 addition (ADR-0017): a burst of blood where a limb came off.

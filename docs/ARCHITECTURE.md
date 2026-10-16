@@ -345,3 +345,11 @@ ADR-0044: features.character_animation владеет отретаргеченн
 ADR-0040: features.character_animation владеет аддитивной реакцией корпуса на попадание (SkeletonModifier3D hit_reaction: позвоночник, грудь, запаздывающая голова; бёдра и ноги не трогаются) и выпрямлением колена в процедурной походке; notify_hit аддитивно принимает точку, направление и силу. features.infected владеет темпом погони chase_pace (рывки бега и шаг между ними, ускорение без скачков). Новых зависимостей, глобального состояния и изменений DTO нет.
 
 ADR-0048: bootstrap owns scene-local menu/mission music and derived aggression intensity; office_floor owns native positional fan loops; infected owns species/action voice profiles. Existing public perception query and sound_events_v1 are reused. interface_v1 adds optional menu_music/menu_music_volume; defaults preserve older settings. No new dependency edge, Autoload or policy exception.
+
+ADR-0051: combat impact_effects сообщает typed optional penetration_blood после
+подтверждённого flesh exit; bootstrap связывает с office_floor splatter_exit.
+Office-floor владеет прежней bounded проекцией и движущимися anchors. Infected
+private corpse_blood_pool ограниченно наблюдает torso и сообщает blood_pool_ready;
+немедленный blood_death совместим, bootstrap выбирает один pool event. Owners,
+dependency edges, сцены/DTO прежние; additive факты описаны в manifests,
+глобального состояния и архитектурных исключений нет.
