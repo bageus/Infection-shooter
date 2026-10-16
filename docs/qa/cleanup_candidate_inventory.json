@@ -1,0 +1,235 @@
+{
+  "baseline": "e4af46b075ec38b4eca29f7098c114a342f0267d",
+  "godot": "4.7.2-stable",
+  "legacy_probe": "PlanningCatalog._build_environment_catalogs/_migrate_scene_path/_create_asset; PackedScene.instantiate before add_child/_ready",
+  "legacy_props": [
+    {
+      "legacy_instantiates": true,
+      "legacy_scene": "game/presentation/office_floor/public/props/03_drawer_cabinet.tscn",
+      "migrated_instantiates": false,
+      "migration": "",
+      "scripts": [
+        "game/presentation/office_floor/mesh_collision_builder.gd",
+        "game/presentation/office_floor/physical_prop.gd"
+      ]
+    },
+    {
+      "legacy_instantiates": true,
+      "legacy_scene": "game/presentation/office_floor/public/props/03_drawer_cabinet_mobile.tscn",
+      "migrated_instantiates": false,
+      "migration": "",
+      "scripts": [
+        "game/presentation/office_floor/mesh_collision_builder.gd",
+        "game/presentation/office_floor/physical_prop.gd"
+      ]
+    },
+    {
+      "legacy_instantiates": true,
+      "legacy_scene": "game/presentation/office_floor/public/props/03_file_cabinet_tall.tscn",
+      "migrated_instantiates": false,
+      "migration": "",
+      "scripts": [
+        "game/presentation/office_floor/mesh_collision_builder.gd",
+        "game/presentation/office_floor/physical_prop.gd"
+      ]
+    },
+    {
+      "legacy_instantiates": true,
+      "legacy_scene": "game/presentation/office_floor/public/props/03_locker_tall.tscn",
+      "migrated_instantiates": false,
+      "migration": "",
+      "scripts": [
+        "game/presentation/office_floor/mesh_collision_builder.gd",
+        "game/presentation/office_floor/physical_prop.gd"
+      ]
+    },
+    {
+      "legacy_instantiates": true,
+      "legacy_scene": "game/presentation/office_floor/public/props/06_office_chair.tscn",
+      "migrated_instantiates": true,
+      "migration": "models/objects/enviroments/06/06_office_chair.glb",
+      "scripts": [
+        "game/presentation/office_floor/mesh_collision_builder.gd",
+        "game/presentation/office_floor/pushable_chair.gd"
+      ]
+    },
+    {
+      "legacy_instantiates": true,
+      "legacy_scene": "game/presentation/office_floor/public/props/06_office_chair_2.tscn",
+      "migrated_instantiates": true,
+      "migration": "models/objects/enviroments/06/06_office_chair_2.glb",
+      "scripts": [
+        "game/presentation/office_floor/mesh_collision_builder.gd",
+        "game/presentation/office_floor/pushable_chair.gd"
+      ]
+    },
+    {
+      "legacy_instantiates": true,
+      "legacy_scene": "game/presentation/office_floor/public/props/06_office_chair_2_fell.tscn",
+      "migrated_instantiates": true,
+      "migration": "models/objects/enviroments/06/06_office_chair_2_fell.glb",
+      "scripts": [
+        "game/presentation/office_floor/mesh_collision_builder.gd",
+        "game/presentation/office_floor/pushable_chair.gd"
+      ]
+    },
+    {
+      "legacy_instantiates": true,
+      "legacy_scene": "game/presentation/office_floor/public/props/06_simple_chair.tscn",
+      "migrated_instantiates": true,
+      "migration": "models/objects/enviroments/06/06_simple_chair.glb",
+      "scripts": [
+        "game/presentation/office_floor/mesh_collision_builder.gd",
+        "game/presentation/office_floor/pushable_chair.gd"
+      ]
+    },
+    {
+      "legacy_instantiates": true,
+      "legacy_scene": "game/presentation/office_floor/public/props/06_simple_chair_fell.tscn",
+      "migrated_instantiates": true,
+      "migration": "models/objects/enviroments/06/06_simple_chair_fell.glb",
+      "scripts": [
+        "game/presentation/office_floor/mesh_collision_builder.gd",
+        "game/presentation/office_floor/pushable_chair.gd"
+      ]
+    },
+    {
+      "legacy_instantiates": true,
+      "legacy_scene": "game/presentation/office_floor/public/props/07_table_longest.tscn",
+      "migrated_instantiates": true,
+      "migration": "models/objects/enviroments/07/07_table_longest.glb",
+      "scripts": [
+        "game/presentation/office_floor/mesh_collision_builder.gd",
+        "game/presentation/office_floor/physical_table.gd"
+      ]
+    },
+    {
+      "legacy_instantiates": true,
+      "legacy_scene": "game/presentation/office_floor/public/props/08_office_desk_2.tscn",
+      "migrated_instantiates": true,
+      "migration": "models/objects/enviroments/08/08_office_desk_2.glb",
+      "scripts": [
+        "game/presentation/office_floor/mesh_collision_builder.gd",
+        "game/presentation/office_floor/physical_prop.gd"
+      ]
+    },
+    {
+      "legacy_instantiates": true,
+      "legacy_scene": "game/presentation/office_floor/public/props/11_plant_large.tscn",
+      "migrated_instantiates": true,
+      "migration": "models/objects/enviroments/11/11_plant_large.glb",
+      "scripts": [
+        "game/presentation/office_floor/mesh_collision_builder.gd",
+        "game/presentation/office_floor/physical_prop.gd"
+      ]
+    },
+    {
+      "legacy_instantiates": true,
+      "legacy_scene": "game/presentation/office_floor/public/props/11_plant_medium.tscn",
+      "migrated_instantiates": true,
+      "migration": "models/objects/enviroments/11/11_plant_medium.glb",
+      "scripts": [
+        "game/presentation/office_floor/mesh_collision_builder.gd",
+        "game/presentation/office_floor/physical_prop.gd"
+      ]
+    },
+    {
+      "legacy_instantiates": true,
+      "legacy_scene": "game/presentation/office_floor/public/props/11_plant_small.tscn",
+      "migrated_instantiates": true,
+      "migration": "models/objects/enviroments/11/11_plant_small.glb",
+      "scripts": [
+        "game/presentation/office_floor/mesh_collision_builder.gd",
+        "game/presentation/office_floor/physical_prop.gd"
+      ]
+    }
+  ],
+  "fixture": {
+    "original": "game/bootstrap/app/test_dna_pickup.gd",
+    "current": "game/bootstrap/app/tests/fixtures/test_dna_pickup.gd",
+    "sha256_unchanged": "c458aa0656a17b2e86cd9218ef4624d8dca0654c35553faf68c2ff7f467d1ef3",
+    "uid_unchanged": "uid://ckertdsya4jja",
+    "consumers": [
+      "game/bootstrap/app/tests/run_mutation_feedback_tests.gd",
+      "tools/capture_pickup_beacons.gd"
+    ]
+  },
+  "pck": {
+    "windows": {
+      "baseline_platform": "Windows Desktop",
+      "before_files": 2842,
+      "after_files": 2840,
+      "removed": [
+        "game/bootstrap/app/test_dna_pickup.gd.remap",
+        "game/bootstrap/app/test_dna_pickup.gdc"
+      ],
+      "added": [],
+      "before_pck_bytes": 332427176,
+      "after_pck_bytes": 332422612,
+      "retained_compat_resources": [
+        "game/presentation/office_floor/public/props/03_drawer_cabinet.tscn",
+        "game/presentation/office_floor/public/props/03_drawer_cabinet_mobile.tscn",
+        "game/presentation/office_floor/public/props/03_file_cabinet_tall.tscn",
+        "game/presentation/office_floor/public/props/03_locker_tall.tscn",
+        "game/presentation/office_floor/public/props/06_office_chair.tscn",
+        "game/presentation/office_floor/public/props/06_office_chair_2.tscn",
+        "game/presentation/office_floor/public/props/06_office_chair_2_fell.tscn",
+        "game/presentation/office_floor/public/props/06_simple_chair.tscn",
+        "game/presentation/office_floor/public/props/06_simple_chair_fell.tscn",
+        "game/presentation/office_floor/public/props/07_table_longest.tscn",
+        "game/presentation/office_floor/public/props/08_office_desk_2.tscn",
+        "game/presentation/office_floor/public/props/11_plant_large.tscn",
+        "game/presentation/office_floor/public/props/11_plant_medium.tscn",
+        "game/presentation/office_floor/public/props/11_plant_small.tscn",
+        "game/presentation/office_floor/physical_prop.gd",
+        "game/presentation/office_floor/physical_table.gd",
+        "game/presentation/office_floor/pushable_chair.gd",
+        "game/presentation/office_floor/scaled_destructible.gd",
+        "game/features/pickups/public/medkit_closed_pickup.tscn",
+        "game/features/pickups/public/med_case_green_pickup.tscn",
+        "game/features/pickups/public/ammo_red_pickup.tscn",
+        "game/features/pickups/public/ammo_orange_pickup.tscn",
+        "game/presentation/prototype_hud/public/fog_overlay.gd"
+      ],
+      "concrete_runtime_references_checked": 697
+    },
+    "web": {
+      "baseline_platform": "Windows Desktop",
+      "before_files": 2842,
+      "after_files": 2840,
+      "removed": [
+        "game/bootstrap/app/test_dna_pickup.gd.remap",
+        "game/bootstrap/app/test_dna_pickup.gdc"
+      ],
+      "added": [],
+      "before_pck_bytes": 332427176,
+      "after_pck_bytes": 332422612,
+      "retained_compat_resources": [
+        "game/presentation/office_floor/public/props/03_drawer_cabinet.tscn",
+        "game/presentation/office_floor/public/props/03_drawer_cabinet_mobile.tscn",
+        "game/presentation/office_floor/public/props/03_file_cabinet_tall.tscn",
+        "game/presentation/office_floor/public/props/03_locker_tall.tscn",
+        "game/presentation/office_floor/public/props/06_office_chair.tscn",
+        "game/presentation/office_floor/public/props/06_office_chair_2.tscn",
+        "game/presentation/office_floor/public/props/06_office_chair_2_fell.tscn",
+        "game/presentation/office_floor/public/props/06_simple_chair.tscn",
+        "game/presentation/office_floor/public/props/06_simple_chair_fell.tscn",
+        "game/presentation/office_floor/public/props/07_table_longest.tscn",
+        "game/presentation/office_floor/public/props/08_office_desk_2.tscn",
+        "game/presentation/office_floor/public/props/11_plant_large.tscn",
+        "game/presentation/office_floor/public/props/11_plant_medium.tscn",
+        "game/presentation/office_floor/public/props/11_plant_small.tscn",
+        "game/presentation/office_floor/physical_prop.gd",
+        "game/presentation/office_floor/physical_table.gd",
+        "game/presentation/office_floor/pushable_chair.gd",
+        "game/presentation/office_floor/scaled_destructible.gd",
+        "game/features/pickups/public/medkit_closed_pickup.tscn",
+        "game/features/pickups/public/med_case_green_pickup.tscn",
+        "game/features/pickups/public/ammo_red_pickup.tscn",
+        "game/features/pickups/public/ammo_orange_pickup.tscn",
+        "game/presentation/prototype_hud/public/fog_overlay.gd"
+      ],
+      "concrete_runtime_references_checked": 697
+    }
+  }
+}

@@ -2,7 +2,7 @@ extends SceneTree
 
 const CANVAS := preload("res://game/bootstrap/app/mutation_tree_canvas.gd")
 const PICKUP_ART := preload("res://game/features/combat/public/launcher_visual.gd")
-const DNA := preload("res://game/bootstrap/app/test_dna_pickup.gd")
+const DNA := preload("res://game/bootstrap/app/tests/fixtures/test_dna_pickup.gd")
 const SKILL_ICONS := preload("res://game/bootstrap/app/mutation_skill_icons.gd")
 const INFECTION := preload("res://game/features/infection/public/infection_runtime.gd")
 

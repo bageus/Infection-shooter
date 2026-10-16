@@ -1,6 +1,6 @@
 # Аудит Infection Shooter — 15 октября 2026
 
-> Состояние отчёта: ниже сохранены исходные доказательства аудита. Проверенные исправления A01–A08 и O01–O03: [ragdoll](../qa/ragdoll_budget.md), [projectile](../qa/projectile_step_budget.md), [blast shelter](../qa/blast_shelter.md), [atomic desk template](../qa/atomic_desk_template.md), [audio warmup](../qa/audio_warmup_lifetime.md), [radar](../qa/radar_live_enemies.md), [legacy pickups](../qa/legacy_pickup_refusal.md), [audio generators](../qa/audio_generator_safety.md), [stairs](../qa/stair_opening_refresh.md), [named maps](../qa/named_map_loading.md), [light budgets](../qa/light_budget_cache.md). O04 измерен без изменения production: [CPU blood bake](../qa/body_blood_profile.md). Q01 закрыт: [полнота CI](../qa/ci_suite_coverage.md). Следующий отдельный разбор — D01 (кандидаты на очистку); D02 и архитектурное замечание Q02 остаются открытыми.
+> Состояние отчёта: ниже сохранены исходные доказательства аудита. Проверенные исправления A01–A08 и O01–O03: [ragdoll](../qa/ragdoll_budget.md), [projectile](../qa/projectile_step_budget.md), [blast shelter](../qa/blast_shelter.md), [atomic desk template](../qa/atomic_desk_template.md), [audio warmup](../qa/audio_warmup_lifetime.md), [radar](../qa/radar_live_enemies.md), [legacy pickups](../qa/legacy_pickup_refusal.md), [audio generators](../qa/audio_generator_safety.md), [stairs](../qa/stair_opening_refresh.md), [named maps](../qa/named_map_loading.md), [light budgets](../qa/light_budget_cache.md). O04 измерен без изменения production: [CPU blood bake](../qa/body_blood_profile.md). Q01 закрыт: [полнота CI](../qa/ci_suite_coverage.md). D01: [кандидаты проверены, test DNA перенесён](../qa/cleanup_candidates.md); удаление legacy отложено до исправления4 миграций. Следующий отдельный шаг — D01_LEGACY_PROP_PATHS; D02/Q02 остаются открытыми.
 
 ## Основной вывод
 
@@ -40,7 +40,7 @@ P1 — исправить в ближайших отдельных PR; P2 — с
 | Q01 | P2 | Пять существующих тестовых наборов не перечислены в CI | Исправлено16.10:157/157 зарегистрированы (149 headless +8 отдельных jobs),11 отрицательных/положительных regressions PASS; [QA](../qa/ci_suite_coverage.md) |
 | O03 | P3 | Бюджеты ламп/экранов пересчитываются при неподвижной камере | Исправлено16.10; CPU callback в покое −83,7%/−59,8% на изолированном стенде; [QA](../qa/light_budget_cache.md) |
 | O04 | P3 | CPU-запекание крови сканирует треугольники и немедленно загружает изменённые маски | Измерено16.10:90 тел, p95 серии shotgun58,568мс/minigun9,666мс headless; это подсистема ран, не профиль миссии; [QA](../qa/body_blood_profile.md) |
-| D01 | P3 | Неиспользуемые в основном игровом маршруте файлы и старые дубли | Кандидаты с оговорками о public API, тестах и совместимости |
+| D01 | P3 | Неиспользуемые в основном игровом маршруте файлы и старые дубли | Проверено16.10: test DNA вынесен из игрового PCK,14 props сохранены,4 migration gaps зафиксированы; [QA](../qa/cleanup_candidates.md) |
 | D02 | P3 | Документы состояния слишком велики и противоречиво отражают актуальность | Объёмы файлов и сравнение записей с текущим кодом |
 
 ## A01. Ограничение ragdoll обходится при сохранении трупов
@@ -230,6 +230,8 @@ status=Template applied to this desk. Save the map to keep it.
 ## Ненужный и дублирующийся код
 
 ### D01. Что можно рассматривать для очистки
+
+**Проверено16.10.2026:** test_dna_pickup перенесён в bootstrap/tests/fixtures вместе с прежним UID, обновлены2 потребителя; код побайтно прежний. Windows PCK до/после2842→2840 файлов, −4564байта; Web после имеет тот же набор. Удалены из пакета только2 entries тестового DNA,14 legacy props/4 scripts/4 старых pickups/fog_overlay сохранены. Реальный catalog probe:14 старых сцен instantiate,10 migration targets instantiate,4 cabinet paths возвращают пустую строку — см. BACKLOG D01_LEGACY_PROP_PATHS. Поэтому массовое удаление не выполнено. Семь suites PASS; [таблица совместимости, JSON и пределы](../qa/cleanup_candidates.md). Исходные кандидаты ниже сохранены как история.
 
 | Файл / семейство | Что обнаружено | Рекомендация |
 |---|---|---|

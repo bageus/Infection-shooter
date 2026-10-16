@@ -77,3 +77,17 @@ https://github.com/godotengine/godot/issues/120661; совпадение при�
   динамический (незамороженный) стол падает сквозь пол в тестовом стенде, это
   может быть артефакт стенда (слой/маска пола), а не игры. Нужна проверка
   реальной карты и коллизии столов.
+
+
+## D01 — совместимость перед дальнейшей очисткой (16.10.2026)
+
+DEFERRED / следующий отдельный инкремент T004: D01_LEGACY_PROP_PATHS. На main e4af46b
+PlanningCatalog._migrate_scene_path возвращает пустой путь для публичных
+03_drawer_cabinet/03_drawer_cabinet_mobile/03_file_cabinet_tall/03_locker_tall.tscn,
+хотя PackedScene загружается. Loader._stage добавляет их в missing; смешанная карта
+может загрузиться без этих объектов, карта только из них отклоняется как no loadable
+objects. До удаления legacy scripts/scenes нужны явный alias/fallback без подмены
+модели на похожую по имени и load-save-load regression с transforms/metadata.
+14 props и4 старых pickup scenes сохранены; публичный fog_overlay также сохранён.
+Инвентаризация/ограничения: docs/qa/cleanup_candidates.md и JSON рядом. Это не
+новая активная задача и не разрешение менять public API; T004 остаётся единственной.
