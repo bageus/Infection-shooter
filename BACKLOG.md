@@ -81,7 +81,10 @@ https://github.com/godotengine/godot/issues/120661; совпадение при�
 
 ## D01 — совместимость перед дальнейшей очисткой (16.10.2026)
 
-DEFERRED / следующий отдельный инкремент T004: D01_LEGACY_PROP_PATHS. На main e4af46b
+IMPLEMENTED / инкремент T004: D01_LEGACY_PROP_PATHS (16.10.2026).
+Четыре identity mappings восстановлены; sync/async load-save-load regression
+добавлен в CI, исходное описание проблемы ниже сохранено как история.
+QA: docs/qa/legacy_cabinet_paths.md; следующая основная задача аудита D02. На main e4af46b
 PlanningCatalog._migrate_scene_path возвращает пустой путь для публичных
 03_drawer_cabinet/03_drawer_cabinet_mobile/03_file_cabinet_tall/03_locker_tall.tscn,
 хотя PackedScene загружается. Loader._stage добавляет их в missing; смешанная карта
