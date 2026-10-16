@@ -1,6 +1,6 @@
 # Аудит Infection Shooter — 15 октября 2026
 
-> Состояние отчёта: ниже сохранены исходные доказательства аудита. Проверенные исправления A01–A08: [ragdoll](../qa/ragdoll_budget.md), [projectile](../qa/projectile_step_budget.md), [blast shelter](../qa/blast_shelter.md), [atomic desk template](../qa/atomic_desk_template.md), [audio warmup](../qa/audio_warmup_lifetime.md), [radar](../qa/radar_live_enemies.md), [legacy pickups](../qa/legacy_pickup_refusal.md), [audio generators](../qa/audio_generator_safety.md). Следующая отдельная задача — O01.
+> Состояние отчёта: ниже сохранены исходные доказательства аудита. Проверенные исправления A01–A08 и O01: [ragdoll](../qa/ragdoll_budget.md), [projectile](../qa/projectile_step_budget.md), [blast shelter](../qa/blast_shelter.md), [atomic desk template](../qa/atomic_desk_template.md), [audio warmup](../qa/audio_warmup_lifetime.md), [radar](../qa/radar_live_enemies.md), [legacy pickups](../qa/legacy_pickup_refusal.md), [audio generators](../qa/audio_generator_safety.md), [stairs](../qa/stair_opening_refresh.md). Следующая отдельная задача — O02.
 
 ## Основной вывод
 
@@ -178,6 +178,8 @@ status=Template applied to this desk. Save the map to keep it.
 ## Резервы производительности
 
 ### O01. Убрать постоянный полный поиск лестниц
+
+**Статус 16.10.2026:** исправлено в ветке `codex/stair-opening-refresh` на main12d2570. Один discovery, weak registry и cache opening inputs; без лестниц polling выключен. Прежний production6 regression failures→0, реальные planner load/edit/undo/reload PASS. Стенд5424 объектов:542400→0 повторных чтений путей за100 проверок. [QA O01](../qa/stair_opening_refresh.md) и [метрики](../qa/stair_refresh_metrics.json). Ниже сохранено исходное измерение.
 
 [mission_layout.gd:22–73](https://github.com/bageus/Infection-shooter/blob/0e154b73/game/bootstrap/app/mission_layout.gd#L22-L73) каждые 0,35 с обходит детей PlanningObjects, читает пути, а у лестниц ещё вычисляет геометрию отверстий. В бою лестницы обычно не редактируются.
 

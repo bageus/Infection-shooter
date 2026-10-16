@@ -1,0 +1,60 @@
+{
+  "date": "2026-10-16",
+  "engine": "Godot 4.7.2 stable",
+  "mode": "Linux headless",
+  "baseline_commit": "12d2570ff43fdb0bd2ffae418c2b7349abf53a56",
+  "candidate_layout_blob": "51216e427de2186810fe24a6953303073d490f68",
+  "warmups_per_run": 5,
+  "notes": [
+    "5424 Node3D furniture, no stairs or furniture meshes; fixture population and initial discovery excluded from timing.",
+    "Each process measures 100 direct _refresh_stairs calls; production polling without stairs is disabled.",
+    "Bounds checks remain for known stairs every 0.35s; unchanged inputs reuse opening geometry.",
+    "These are function timings and property-read counts, not whole-frame/GPU/FPS measurements."
+  ],
+  "baseline": [
+    {
+      "furniture_path_reads": 542400,
+      "mean_usec": 3443.89,
+      "objects": 5424,
+      "p95_usec": 3810,
+      "runs": 100
+    },
+    {
+      "furniture_path_reads": 542400,
+      "mean_usec": 3547.08,
+      "objects": 5424,
+      "p95_usec": 5366,
+      "runs": 100
+    },
+    {
+      "furniture_path_reads": 542400,
+      "mean_usec": 3441.36,
+      "objects": 5424,
+      "p95_usec": 4336,
+      "runs": 100
+    }
+  ],
+  "candidate": [
+    {
+      "furniture_path_reads": 0,
+      "mean_usec": 0.74,
+      "objects": 5424,
+      "p95_usec": 1,
+      "runs": 100
+    },
+    {
+      "furniture_path_reads": 0,
+      "mean_usec": 0.79,
+      "objects": 5424,
+      "p95_usec": 1,
+      "runs": 100
+    },
+    {
+      "furniture_path_reads": 0,
+      "mean_usec": 0.76,
+      "objects": 5424,
+      "p95_usec": 1,
+      "runs": 100
+    }
+  ]
+}
