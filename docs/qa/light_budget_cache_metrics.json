@@ -1,0 +1,246 @@
+{
+  "date": "2026-10-16",
+  "base_commit": "7cb8560173f82e2d7c812899804ea8ed4ae6fa08",
+  "godot": "4.7.2.stable.official.ed1daf0bf",
+  "fixture": "362 synthetic lamps (costs1/2/4),180 synthetic displays with real SpotLight3D; production controllers; five warmup callbacks excluded",
+  "protocol": "Three interleaved sequential original/cached process pairs.200 stationary callbacks then200 camera-moving callbacks. No parallel Godot. CPU callback microseconds, not FPS/frame time. Headless/Dummy; configured renderer does not establish real GL.",
+  "baseline": "Unmodified two controllers from base main; all other fixture/test code identical",
+  "trace": {
+    "steps": 36,
+    "identical_lit_visible_shadow": true,
+    "original_idle_failures": 8,
+    "candidate_failures": 0
+  },
+  "median_of_run_mean_usec": {
+    "stationary": {
+      "lamps": {
+        "original": 1460.465,
+        "cached": 238.78
+      },
+      "screens": {
+        "original": 464.47,
+        "cached": 186.905
+      }
+    },
+    "moving": {
+      "lamps": {
+        "original": 1420.395,
+        "cached": 1354.825
+      },
+      "screens": {
+        "original": 477.155,
+        "cached": 457.67
+      }
+    }
+  },
+  "runs": {
+    "original": [
+      {
+        "allocator_end_bytes": 62349733,
+        "allocator_fixture_bytes": 62318205,
+        "allocator_warm_bytes": 62335017,
+        "configured_renderer": "gl_compatibility",
+        "display_server": "headless",
+        "iterations": 200,
+        "lamps": 362,
+        "moving": {
+          "lamps": {
+            "max_usec": 8536,
+            "mean_usec": 1417.595,
+            "p95_usec": 1684
+          },
+          "screens": {
+            "max_usec": 714,
+            "mean_usec": 451.45,
+            "p95_usec": 646
+          }
+        },
+        "screens": 180,
+        "stationary": {
+          "lamps": {
+            "max_usec": 8837,
+            "mean_usec": 1460.465,
+            "p95_usec": 1812
+          },
+          "screens": {
+            "max_usec": 1854,
+            "mean_usec": 455.98,
+            "p95_usec": 617
+          }
+        }
+      },
+      {
+        "allocator_end_bytes": 62349733,
+        "allocator_fixture_bytes": 62318205,
+        "allocator_warm_bytes": 62335017,
+        "configured_renderer": "gl_compatibility",
+        "display_server": "headless",
+        "iterations": 200,
+        "lamps": 362,
+        "moving": {
+          "lamps": {
+            "max_usec": 2246,
+            "mean_usec": 1420.395,
+            "p95_usec": 2204
+          },
+          "screens": {
+            "max_usec": 917,
+            "mean_usec": 477.155,
+            "p95_usec": 710
+          }
+        },
+        "screens": 180,
+        "stationary": {
+          "lamps": {
+            "max_usec": 2237,
+            "mean_usec": 1498.69,
+            "p95_usec": 2194
+          },
+          "screens": {
+            "max_usec": 994,
+            "mean_usec": 507.555,
+            "p95_usec": 769
+          }
+        }
+      },
+      {
+        "allocator_end_bytes": 62349733,
+        "allocator_fixture_bytes": 62318205,
+        "allocator_warm_bytes": 62335017,
+        "configured_renderer": "gl_compatibility",
+        "display_server": "headless",
+        "iterations": 200,
+        "lamps": 362,
+        "moving": {
+          "lamps": {
+            "max_usec": 2294,
+            "mean_usec": 1509.075,
+            "p95_usec": 2182
+          },
+          "screens": {
+            "max_usec": 972,
+            "mean_usec": 505.4,
+            "p95_usec": 733
+          }
+        },
+        "screens": 180,
+        "stationary": {
+          "lamps": {
+            "max_usec": 2665,
+            "mean_usec": 1322.115,
+            "p95_usec": 1617
+          },
+          "screens": {
+            "max_usec": 2531,
+            "mean_usec": 464.47,
+            "p95_usec": 657
+          }
+        }
+      }
+    ],
+    "cached": [
+      {
+        "allocator_end_bytes": 62527535,
+        "allocator_fixture_bytes": 62375755,
+        "allocator_warm_bytes": 62512819,
+        "configured_renderer": "gl_compatibility",
+        "display_server": "headless",
+        "iterations": 200,
+        "lamps": 362,
+        "moving": {
+          "lamps": {
+            "max_usec": 2082,
+            "mean_usec": 1316.31,
+            "p95_usec": 1487
+          },
+          "screens": {
+            "max_usec": 1016,
+            "mean_usec": 446.325,
+            "p95_usec": 553
+          }
+        },
+        "screens": 180,
+        "stationary": {
+          "lamps": {
+            "max_usec": 511,
+            "mean_usec": 221.55,
+            "p95_usec": 245
+          },
+          "screens": {
+            "max_usec": 477,
+            "mean_usec": 178.17,
+            "p95_usec": 217
+          }
+        }
+      },
+      {
+        "allocator_end_bytes": 62527535,
+        "allocator_fixture_bytes": 62375755,
+        "allocator_warm_bytes": 62512819,
+        "configured_renderer": "gl_compatibility",
+        "display_server": "headless",
+        "iterations": 200,
+        "lamps": 362,
+        "moving": {
+          "lamps": {
+            "max_usec": 2971,
+            "mean_usec": 1354.825,
+            "p95_usec": 1775
+          },
+          "screens": {
+            "max_usec": 1198,
+            "mean_usec": 457.67,
+            "p95_usec": 635
+          }
+        },
+        "screens": 180,
+        "stationary": {
+          "lamps": {
+            "max_usec": 1401,
+            "mean_usec": 261.685,
+            "p95_usec": 392
+          },
+          "screens": {
+            "max_usec": 777,
+            "mean_usec": 210.995,
+            "p95_usec": 309
+          }
+        }
+      },
+      {
+        "allocator_end_bytes": 62527535,
+        "allocator_fixture_bytes": 62375755,
+        "allocator_warm_bytes": 62512819,
+        "configured_renderer": "gl_compatibility",
+        "display_server": "headless",
+        "iterations": 200,
+        "lamps": 362,
+        "moving": {
+          "lamps": {
+            "max_usec": 5270,
+            "mean_usec": 1388.225,
+            "p95_usec": 1628
+          },
+          "screens": {
+            "max_usec": 2354,
+            "mean_usec": 470.64,
+            "p95_usec": 613
+          }
+        },
+        "screens": 180,
+        "stationary": {
+          "lamps": {
+            "max_usec": 467,
+            "mean_usec": 238.78,
+            "p95_usec": 305
+          },
+          "screens": {
+            "max_usec": 365,
+            "mean_usec": 186.905,
+            "p95_usec": 234
+          }
+        }
+      }
+    ]
+  }
+}

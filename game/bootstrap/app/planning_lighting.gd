@@ -30,6 +30,14 @@ const VIEW_MARGIN := 2.0
 var shadows_allowed := true
 var _refresh_left := 0.0
 var _shadow_owners := {}
+var _cached_lamps: Array[Node] = []
+var _positions := PackedVector3Array()
+var _radii: Array[float] = []
+var _costs := PackedInt32Array()
+var _cached_view: Array = []
+var _cached_shadows := false
+var _budget_valid := false
+var _settling := false
 
 
 func setup(environment_node: WorldEnvironment, selector: OptionButton = null, local_toggle: CheckButton = null) -> void:
@@ -64,7 +72,53 @@ func _process(delta: float) -> void:
 	_refresh_left -= delta
 	if _refresh_left <= 0.0:
 		_refresh_left = REFRESH_SECONDS
-		refresh_light_budget()
+		var view := _view_state(get_viewport().get_camera_3d()) if local_lights_enabled else []
+		if local_lights_enabled and view != _cached_view:
+			_cached_view = view
+			# During camera motion ranking already runs; capture once after it stops.
+			refresh_light_budget(false)
+		elif _budget_changed():
+			refresh_light_budget()
+
+
+## Poll only budget inputs; avoid ranking, frustum construction and lamp writes at rest.
+func _budget_changed() -> bool:
+	if not local_lights_enabled:
+		return false
+	if not _budget_valid or _settling or shadows_allowed != _cached_shadows:
+		return true
+	var lamps := get_tree().get_nodes_in_group("budget_lights")
+	if lamps != _cached_lamps:
+		return true
+	for index in lamps.size():
+		var lamp := lamps[index]
+		if not lamp is Node3D or not lamp.has_method("set_budget_lit"):
+			if _costs[index] != -1:
+				return true
+			continue
+		if (lamp as Node3D).global_position != _positions[index] \
+			or _light_radius(lamp) != _radii[index] or int(lamp.call("get_light_cost")) != _costs[index]:
+			return true
+	return false
+
+
+func _remember_inputs(lamps: Array[Node]) -> void:
+	_cached_lamps = lamps
+	_positions.resize(lamps.size())
+	_radii.resize(lamps.size())
+	_costs.resize(lamps.size())
+	for index in lamps.size():
+		var lamp := lamps[index]
+		_costs[index] = -1
+		if lamp is Node3D and lamp.has_method("set_budget_lit"):
+			_positions[index] = (lamp as Node3D).global_position
+			_radii[index] = _light_radius(lamp)
+			_costs[index] = int(lamp.call("get_light_cost"))
+
+
+func _view_state(camera: Camera3D) -> Array:
+	return [] if camera == null else [camera.get_instance_id(), camera.global_transform,
+		camera.get_camera_transform(), camera.get_camera_projection()]
 
 
 func set_shadows_allowed(allowed: bool) -> void:
@@ -86,7 +140,7 @@ func get_light_focus() -> Vector3:
 
 ## Lights the lamps nearest to the camera focus first until the budget is spent;
 ## the nearest few also cast shadows so light does not pass through walls and columns.
-func refresh_light_budget() -> void:
+func refresh_light_budget(capture_inputs: bool = true) -> void:
 	var tree := get_tree()
 	if tree == null or not local_lights_enabled:
 		return
@@ -122,7 +176,13 @@ func refresh_light_budget() -> void:
 			shadowed += cost
 			owners[lamp.get_instance_id()] = true
 		lamp.call("set_budget_lit", lit, shadow)
+	_settling = _shadow_owners != owners
 	_shadow_owners = owners
+	_cached_shadows = shadows_allowed
+	_budget_valid = capture_inputs
+	if capture_inputs:
+		_cached_view = _view_state(camera)
+		_remember_inputs(lamps)
 
 
 func _light_radius(lamp: Node) -> float:

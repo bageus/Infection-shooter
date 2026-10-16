@@ -17,6 +17,11 @@ var dirty := false
 var _layout_wait := 0.0
 var _layout := LAYOUT.new()
 var _lighting_wait := 0.0
+var _lighting_dirty := true
+var _cached_view: Array = []
+var _cached_shadows := false
+var _cached_displays: Array[Node3D] = []
+var _light_inputs := {}
 # Displays that are neither in the frustum nor near the camera are not re-drawn.
 var _in_view := {}
 var shadows_allowed := true
@@ -33,19 +38,23 @@ func register_display(display: Node3D) -> void:
 	update_animation(display)
 	request_layout()
 	_lighting_wait = 0.0
+	_lighting_dirty = true
 
 
 func set_shadows_allowed(allowed: bool) -> void:
 	shadows_allowed = allowed
 	_lighting_wait = 0.0
+	_lighting_dirty = true
 
 
 func unregister_display(display: Node3D) -> void:
 	displays.erase(display)
 	_in_view.erase(display)
+	_light_inputs.erase(display)
 	_animated.erase(display)
 	request_layout()
 	_lighting_wait = 0.0
+	_lighting_dirty = true
 
 
 func request_layout() -> void:
@@ -57,7 +66,12 @@ func _process(delta: float) -> void:
 	_lighting_wait -= delta
 	if _lighting_wait <= 0.0:
 		_lighting_wait = .2
-		_refresh_lights()
+		var view := _view_state(get_viewport().get_camera_3d())
+		if view != _cached_view:
+			_cached_view = view
+			_refresh_lights(false)
+		elif _lighting_changed():
+			_refresh_lights()
 	_layout_wait -= delta
 	if dirty and _layout_wait <= 0.0:
 		_layout_wait = .15
@@ -79,6 +93,7 @@ func _process(delta: float) -> void:
 # Called locally by a display whenever its powered/content state changes.
 func update_animation(display: Node3D) -> void:
 	_lighting_wait = 0.0
+	_lighting_dirty = true
 	_animated.erase(display)
 	if display.get("powered"):
 		for screen: Dictionary in display.get("screens"):
@@ -88,7 +103,59 @@ func update_animation(display: Node3D) -> void:
 	_next_frame_time = 0.0
 
 
-func _refresh_lights() -> void:
+func _lighting_changed() -> bool:
+	if _lighting_dirty or shadows_allowed != _cached_shadows or displays != _cached_displays:
+		return true
+	for display in displays:
+		if not is_instance_valid(display):
+			if _light_inputs.has(display):
+				return true
+			continue
+		if not _light_inputs.has(display):
+			return true
+		var saved: Array = _light_inputs[display]
+		if display.global_transform != saved[0] or display.is_visible_in_tree() != saved[1] \
+			or bool(display.get("powered")) != saved[2]:
+			return true
+		var screens: Array = display.get("screens")
+		if screens.size() != saved[3].size():
+			return true
+		for index in screens.size():
+			var light: SpotLight3D = screens[index].light
+			if light != saved[3][index] or light.global_position != saved[4][index]:
+				return true
+	return false
+
+
+func _view_state(camera: Camera3D) -> Array:
+	return [] if camera == null else [camera.get_instance_id(), camera.global_transform,
+		camera.get_camera_transform(), camera.get_camera_projection()]
+
+
+func _remember_inputs() -> void:
+	_cached_displays = displays.duplicate()
+	var current := {}
+	for display in displays:
+		if not is_instance_valid(display):
+			continue
+		if not _light_inputs.has(display):
+			_light_inputs[display] = [Transform3D.IDENTITY, false, false, [], PackedVector3Array()]
+		var saved: Array = _light_inputs[display]
+		saved[0] = display.global_transform
+		saved[1] = display.is_visible_in_tree()
+		saved[2] = bool(display.get("powered"))
+		var screens: Array = display.get("screens")
+		saved[3].resize(screens.size())
+		saved[4].resize(screens.size())
+		for index in screens.size():
+			var light: SpotLight3D = screens[index].light
+			saved[3][index] = light
+			saved[4][index] = light.global_position
+		current[display] = saved
+	_light_inputs = current
+
+
+func _refresh_lights(capture_inputs: bool = true) -> void:
 	var camera := get_viewport().get_camera_3d()
 	var settings: Array[Dictionary] = []
 	var candidates: Array[Dictionary] = []
@@ -122,6 +189,12 @@ func _refresh_lights() -> void:
 			light.visible = setting.visible
 		if light.shadow_enabled != bool(setting.shadows):
 			light.shadow_enabled = setting.shadows
+
+	_cached_shadows = shadows_allowed
+	_lighting_dirty = not capture_inputs
+	if capture_inputs:
+		_cached_view = _view_state(camera)
+		_remember_inputs()
 
 
 func _update_view(display: Node3D, camera: Camera3D) -> void:

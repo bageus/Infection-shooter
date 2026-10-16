@@ -1,6 +1,6 @@
 # Аудит Infection Shooter — 15 октября 2026
 
-> Состояние отчёта: ниже сохранены исходные доказательства аудита. Проверенные исправления A01–A08 и O01–O02: [ragdoll](../qa/ragdoll_budget.md), [projectile](../qa/projectile_step_budget.md), [blast shelter](../qa/blast_shelter.md), [atomic desk template](../qa/atomic_desk_template.md), [audio warmup](../qa/audio_warmup_lifetime.md), [radar](../qa/radar_live_enemies.md), [legacy pickups](../qa/legacy_pickup_refusal.md), [audio generators](../qa/audio_generator_safety.md), [stairs](../qa/stair_opening_refresh.md), [named maps](../qa/named_map_loading.md). Следующая отдельная задача — O03.
+> Состояние отчёта: ниже сохранены исходные доказательства аудита. Проверенные исправления A01–A08 и O01–O03: [ragdoll](../qa/ragdoll_budget.md), [projectile](../qa/projectile_step_budget.md), [blast shelter](../qa/blast_shelter.md), [atomic desk template](../qa/atomic_desk_template.md), [audio warmup](../qa/audio_warmup_lifetime.md), [radar](../qa/radar_live_enemies.md), [legacy pickups](../qa/legacy_pickup_refusal.md), [audio generators](../qa/audio_generator_safety.md), [stairs](../qa/stair_opening_refresh.md), [named maps](../qa/named_map_loading.md), [light budgets](../qa/light_budget_cache.md). Следующая отдельная задача — O04.
 
 ## Основной вывод
 
@@ -38,7 +38,7 @@ P1 — исправить в ближайших отдельных PR; P2 — с
 | O01 | P2 | Поиск лестниц сканирует тысячи неизменившихся объектов каждые 0,35 с | Синтетический замер: mean 2,679 мс, p95 3,869 мс |
 | O02 | P2 | Загрузка именованной карты в планировщике остаётся синхронной и держит две композиции | Подтверждено порядком prepare → clear → place; отдельный пик не измерен |
 | Q01 | P2 | Пять существующих тестовых наборов не перечислены в CI | Проверены полные пути и имена во всех workflows |
-| O03 | P3 | Бюджеты ламп/экранов пересчитываются при неподвижной камере | Подтверждено кодом; стоимость не измерена |
+| O03 | P3 | Бюджеты ламп/экранов пересчитываются при неподвижной камере | Исправлено16.10; CPU callback в покое −83,7%/−59,8% на изолированном стенде; [QA](../qa/light_budget_cache.md) |
 | O04 | P3 | CPU-запекание крови сканирует треугольники и немедленно загружает изменённые маски | Подтверждено кодом; актуальный bottleneck не доказан |
 | D01 | P3 | Неиспользуемые в основном игровом маршруте файлы и старые дубли | Кандидаты с оговорками о public API, тестах и совместимости |
 | D02 | P3 | Документы состояния слишком велики и противоречиво отражают актуальность | Объёмы файлов и сравнение записей с текущим кодом |
@@ -208,6 +208,8 @@ status=Template applied to this desk. Save the map to keep it.
 Пик именно этой операции в аудите не измерен. Не переносить на неё автоматически измерение startup/restart.
 
 ### O03. Пересчитывать свет по изменениям, сохранив мерцание
+
+**Исправлено16.10.2026:** прежний polling проверяет входы, а rank/frustum/settings обновляются при изменении. Сохранены budgets, margin, shadow bias, animation/flicker clocks.36-step replay даёт одинаковые light/shadow decisions; новая idle регрессия8→0. Три interleaved CPU пары362lamps/180screens: callbacks в покое −83,7%/−59,8%; это не замер FPS/native shadow flicker. [QA](../qa/light_budget_cache.md), [сырые измерения](../qa/light_budget_cache_metrics.json). Исходная находка сохранена ниже.
 
 [planning_lighting.gd:63–130](https://github.com/bageus/Infection-shooter/blob/0e154b73/game/bootstrap/app/planning_lighting.gd#L63-L130), [display_wall.gd:55–130](https://github.com/bageus/Infection-shooter/blob/0e154b73/game/presentation/office_floor/public/display_wall.gd#L55-L130).
 
