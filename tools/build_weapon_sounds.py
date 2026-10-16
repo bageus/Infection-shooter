@@ -1,14 +1,17 @@
 #!/usr/bin/env python3
-"""Build per-weapon fire variants, the minigun spin loop and pickup sounds.
+"""Build owned weapon fire variants and the generated DNA cue.
 
-  python tools/build_weapon_sounds.py [--only event,event]
+  python tools/build_weapon_sounds.py [--only event,event] [--dry-run]
 
 AK, M4, sniper and minigun get their own events, derived from the rifle and
 assault-rifle recordings already in assets/audio/sfx (their licences carry over,
-see assets/audio/CREDITS.md). The minigun spin-up is synthesised. Every output
+see assets/audio/CREDITS.md). Owner-supplied minigun spin and key recordings are protected. Every output
 is level matched to its source and written as Ogg Vorbis (needs numpy, scipy, ffmpeg).
 """
 from __future__ import annotations
+
+import argparse
+from audio_generation import AudioBuild, MANIFEST
 
 import subprocess
 import sys
@@ -204,33 +207,39 @@ EVENTS = {
 
 
 def main(argv: list[str]) -> int:
-    only = None
-    if "--only" in argv:
-        only = set(argv[argv.index("--only") + 1].split(","))
-    for event, (source, transform) in SOURCED.items():
-        if only and event not in only:
-            continue
-        clips = variants_of(source, transform)
-        for index, clip in enumerate(clips, start=1):
-            write_ogg(SFX / event / f"{event}_{index}.ogg", clip)
-        print(f"{event}: {len(clips)} variants from {source}")
-    for event, (_, make) in EVENTS.items():
-        if only and event not in only:
-            continue
-        for variant in (1, 2, 3):
-            write_ogg(SFX / event / f"{event}_{variant}.ogg", make())
-        print(f"{event}: 3 variants (synthesised)")
-    if not only or "minigun_spin" in only:
-        write_ogg(SFX / "minigun_spin" / "minigun_spin_1.ogg", minigun_spin_loop())
-        print("minigun_spin: 1 looping variant (synthesised)")
-    for event, make in (("key_pickup", key_pickup), ("dna_pickup", dna_pickup)):
-        if only and event not in only:
-            continue
-        for variant in (1, 2):
-            write_ogg(SFX / event / f"{event}_{variant}.ogg", make(variant))
-        print(f"{event}: 2 variants (synthesised)")
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument("--only", help="Comma-separated generator-owned events")
+    parser.add_argument("--dry-run", action="store_true")
+    args = parser.parse_args(argv)
+    build = AudioBuild(SFX, "build_weapon_sounds", None if args.only is None else set(args.only.split(",")), MANIFEST)
+    build.describe()
+    if args.dry_run:
+        return 0
+    credits = {}
+    with tempfile.TemporaryDirectory(prefix="weapon_audio_build_") as temporary:
+        stage = Path(temporary)
+        for event in sorted(build.events):
+            if event in SOURCED:
+                source, transform = SOURCED[event]
+                clips = variants_of(source, transform)
+                attribution = f"Derived from {source}; source licences and attribution are retained above."
+            elif event in EVENTS:
+                clips = [EVENTS[event][1]() for _ in range(3)]
+                attribution = "Original procedural synthesis; existing project attribution/licensing is retained above."
+            elif event == "dna_pickup":
+                clips = [dna_pickup(i) for i in (1, 2)]
+                attribution = "Original procedural synthesis; existing project attribution/licensing is retained above."
+            else:
+                raise ValueError("No current weapon recipe: " + event)
+            for index, clip in enumerate(clips, start=1):
+                write_ogg(stage / event / f"{event}_{index}.ogg", clip)
+            credits[event] = f"## Generated {event} (tools/build_weapon_sounds.py)\n\n{attribution}"
+        build.publish(stage, credits)
     return 0
 
 
 if __name__ == "__main__":
-    sys.exit(main(sys.argv[1:]))
+    try:
+        sys.exit(main(sys.argv[1:]))
+    except ValueError as error:
+        sys.exit(str(error))

@@ -4,6 +4,10 @@
 Uses the same numpy/scipy/ffmpeg toolchain as build_weapon_sounds.py.
 Source attribution and inherited licences are in assets/audio/CREDITS.md.
 """
+import argparse
+import sys
+import tempfile
+from audio_generation import AudioBuild, MANIFEST
 from pathlib import Path
 import subprocess
 import numpy as np
@@ -30,7 +34,7 @@ def decode(event, variant):
     return np.frombuffer(raw, dtype=np.float32).astype(np.float64)
 
 
-def build(event, variant):
+def build(event, variant, output_root=None):
     length = .32 if event == 'weapon_switch' else 1.35
     output = np.zeros(round(RATE * length))
     for source, delay, gain in RECIPES[event]:
@@ -52,14 +56,36 @@ def build(event, variant):
     if event == 'weapon_switch':
         output *= .5
     output[-round(RATE * .06):] *= np.linspace(1, 0, round(RATE * .06))
-    directory = ROOT / event
-    directory.mkdir(exist_ok=True)
+    directory = (ROOT if output_root is None else output_root) / event
+    directory.mkdir(parents=True, exist_ok=True)
     subprocess.run(['ffmpeg', '-v', 'error', '-y', '-f', 'f32le', '-ar', str(RATE), '-ac', '1',
                     '-i', '-', '-c:a', 'libvorbis', '-q:a', '5', str(directory / f'{event}_{variant+1}.ogg')],
                    input=output.astype(np.float32).tobytes(), check=True)
 
 
+def main(argv=None):
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument("--only")
+    parser.add_argument("--dry-run", action="store_true")
+    args = parser.parse_args(argv)
+    plan = AudioBuild(ROOT, "build_destruction_sounds", None if args.only is None else set(args.only.split(",")), MANIFEST)
+    plan.describe()
+    if args.dry_run:
+        return 0
+    credits = {}
+    with tempfile.TemporaryDirectory(prefix="destruction_audio_build_") as temporary:
+        stage = Path(temporary)
+        for event in sorted(plan.events):
+            for variant in range(2 if event in ["break_lamp", "weapon_switch"] else 3):
+                build(event, variant, stage)
+            sources = ", ".join(source for source, _, _ in RECIPES[event])
+            credits[event] = f"## Generated {event} (tools/build_destruction_sounds.py)\n\nDerived from {sources}; source licences and attribution retained above."
+        plan.publish(stage, credits)
+    return 0
+
+
 if __name__ == '__main__':
-    for event in RECIPES:
-        for variant in range(2 if event in ['break_lamp', 'weapon_switch'] else 3):
-            build(event, variant)
+    try:
+        sys.exit(main())
+    except ValueError as error:
+        sys.exit(str(error))
