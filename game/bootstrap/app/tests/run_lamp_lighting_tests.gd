@@ -112,7 +112,9 @@ func _test_budget() -> void:
 func _test_desk_lamp() -> void:
 	var controller := LIGHTING.new()
 	root.add_child(controller)
-	controller.setup(WorldEnvironment.new())
+	var environment := WorldEnvironment.new()
+	controller.add_child(environment)
+	controller.setup(environment)
 	controller.local_lights_enabled = true
 	var prop := PROP.instantiate() as RigidBody3D
 	prop.set("model_path", "res://models/objects/enviroments/05/05_lamp.glb")
@@ -133,7 +135,9 @@ func _test_desk_lamp() -> void:
 func _test_elevator() -> void:
 	var controller := LIGHTING.new()
 	root.add_child(controller)
-	controller.setup(WorldEnvironment.new())
+	var environment := WorldEnvironment.new()
+	controller.add_child(environment)
+	controller.setup(environment)
 	controller.local_lights_enabled = true
 	var door := ELEVATOR.instantiate() as Node3D
 	root.add_child(door)

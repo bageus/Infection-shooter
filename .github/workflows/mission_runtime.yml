@@ -355,6 +355,7 @@ jobs:
           game/features/infected/tests/run_body_blood_bake_tests.gd
           game/features/infected/tests/run_corpse_physics_tests.gd
           game/bootstrap/app/tests/run_lamp_lighting_tests.gd
+          game/bootstrap/app/tests/run_light_budget_cache_tests.gd
           game/presentation/office_floor/tests/run_hit_effect_tests.gd
           game/presentation/office_floor/tests/run_glass_crack_tests.gd
           game/features/combat/tests/run_grenade_vfx_tests.gd
