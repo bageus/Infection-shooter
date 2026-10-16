@@ -12,6 +12,7 @@ const TEXTURES := {
 	"SHOTGUN": "res://models/objects/textures/ammo/ammo_shutgun.png",
 	"GRENADE LAUNCHER": "res://models/objects/textures/ammo/ammo_granade.png"
 }
+const STREAK_SHADER := preload("res://game/features/combat/projectile_streak.gdshader")
 static var _textures: Dictionary = {}
 var _direction := Vector3.RIGHT
 
@@ -28,6 +29,13 @@ func configure(weapon: String, direction: Vector3) -> void:
 	core.scale.x = 1.5
 	core.position.x = float(meshes[2]) * 0.12
 	add_child(core)
+	if meshes[3] != null:
+		var streak := MeshInstance3D.new()
+		streak.name = "BulletStreak"
+		streak.mesh = meshes[3]
+		streak.position.x = -float(meshes[2]) * 0.42
+		streak.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+		add_child(streak)
 	_align()
 
 
@@ -67,7 +75,14 @@ static func _meshes_for(weapon: String) -> Array:
 	metal.metallic = 0.65
 	metal.roughness = 0.28
 	sphere.material = metal
-	_meshes[weapon] = [quad, sphere, length]
+	var streak: QuadMesh = null
+	if weapon != "GRENADE LAUNCHER":
+		streak = QuadMesh.new()
+		streak.size = Vector2(length * 2.0, length * 0.55)
+		var glow := ShaderMaterial.new()
+		glow.shader = STREAK_SHADER
+		streak.material = glow
+	_meshes[weapon] = [quad, sphere, length, streak]
 	return _meshes[weapon]
 
 

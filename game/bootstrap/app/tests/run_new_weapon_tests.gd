@@ -184,7 +184,9 @@ func _test_minigun(actor: CharacterBody3D, effects: Node3D, crosshair: Node) -> 
 	await process_frame
 	await process_frame
 	_check(not pose.backpack.visible, "Backpack is hidden when minigun is holstered")
-	actor.call("_update_camera", 2.0)
+	# Let the sustained-fire envelope recover, then verify the original zoom.
+	for frame in 240:
+		actor.call("_update_camera", 1.0 / 60.0)
 	_check(absf(actor.get("camera").position.length() - float(actor.get("_camera_distance"))) < .01, "Switching to original weapon restores the base camera distance")
 
 

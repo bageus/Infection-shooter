@@ -65,6 +65,7 @@ var audio: Node
 var weapon_stance := WEAPON_STANCE.new()
 var _animation_selection := ANIMATION_SELECTION.new()
 var _scope_raise := SCOPE_RAISE.new()
+var _shooting_camera := preload("res://game/features/player/shooting_camera_state.gd").new()
 var health: float
 var armor: float
 var antidotes: int
@@ -206,6 +207,8 @@ func _fire_weapon(weapon: Node3D) -> bool:
 	weapon_mount.call("sync_weapon", weapon)
 	var fired := bool(weapon.call("try_fire_at", _aim_point))
 	weapon_stance.finish_fire_attempt(fired, previous)
+	if fired:
+		_shooting_camera.shot(String(weapon.call("get_weapon_name")))
 	return fired
 
 
@@ -372,6 +375,7 @@ func get_infection_skill(skill_id: String) -> bool:
 func _update_camera(delta: float) -> void:
 	var bonus: Variant = get_current_weapon().get("camera_distance_bonus")
 	var view_distance := _camera_distance + (float(bonus) if bonus != null else 0.0)
+	view_distance *= 1.0 + _shooting_camera.tick(delta)
 	if absf(camera.position.length() - view_distance) > 0.001:
 		camera.position = camera.position.normalized() * lerpf(camera.position.length(), view_distance, 1.0 - exp(-8.0 * delta))
 	var turn := Input.get_axis("camera_left", "camera_right")
