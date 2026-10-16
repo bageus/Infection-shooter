@@ -1,0 +1,932 @@
+{
+  "revision": "a19bdf68c3bbc485fb1ad7811386785d603bb2af",
+  "godot": "4.7.2.stable.official.ed1daf0bf",
+  "native": true,
+  "description": "Confirmed body wounds only: fixed mixed crowd, no AI/projectile/health/physics simulation. Native GPU update CPU submission is not GPU execution time.",
+  "weapon_protocols": [
+    {
+      "name": "SHOTGUN",
+      "source": "game/features/combat/public/shotgun.tscn",
+      "rate": 1.1,
+      "pellets": 8
+    },
+    {
+      "name": "MINIGUN",
+      "source": "game/features/combat/public/minigun.tscn",
+      "rate": 24.0,
+      "pellets": 1
+    }
+  ],
+  "runs": [
+    {
+      "allocator_bytes": 119428035,
+      "cold_counters": {
+        "instrumented": false
+      },
+      "cold_per_hit": {
+        "max_usec": 8530,
+        "mean_usec": 5380.36666666667,
+        "p95_usec": 7919,
+        "samples": 90,
+        "total_usec": 484233
+      },
+      "configured_renderer": "gl_compatibility",
+      "display_server": "X11",
+      "godot": "4.7.2-stable (official)",
+      "idle_process_frame_interval": {
+        "max_usec": 66292,
+        "mean_usec": 51857.6166666667,
+        "p95_usec": 63338,
+        "samples": 60,
+        "total_usec": 3111457
+      },
+      "masks": {
+        "cpu_image_bytes": 2949120,
+        "masks": 90,
+        "nominal_page_payload_bytes": 25165824,
+        "pages": 6,
+        "sha256": "912d5e386f2bcb8d99e6189c3a0d0f789dfb1d4c1706bd30830d727466332e86"
+      },
+      "outside_counters": {
+        "instrumented": false
+      },
+      "outside_per_hit": {
+        "max_usec": 3336,
+        "mean_usec": 2718.16666666667,
+        "p95_usec": 3336,
+        "samples": 12,
+        "total_usec": 32618
+      },
+      "protocol": {
+        "actors": "90",
+        "capture": true,
+        "frames": "180",
+        "mode": "full",
+        "pellets": "8",
+        "rate": "1.1",
+        "weapon": "SHOTGUN"
+      },
+      "render_draw_calls": 90,
+      "render_primitives": 304914,
+      "repeated_counters": {
+        "instrumented": false
+      },
+      "repeated_per_hit": {
+        "max_usec": 6721,
+        "mean_usec": 4803.33333333333,
+        "p95_usec": 6721,
+        "samples": 12,
+        "total_usec": 57640
+      },
+      "series": {
+        "active_batch": {
+          "max_usec": 56428,
+          "mean_usec": 46623.25,
+          "p95_usec": 56428,
+          "samples": 4,
+          "total_usec": 186493
+        },
+        "active_batches_over_16_667_ms": 4,
+        "bursts": 4,
+        "hits": 32,
+        "observed_process_frame_interval": {
+          "max_usec": 108808,
+          "mean_usec": 47969.2166666667,
+          "p95_usec": 55765,
+          "samples": 180,
+          "total_usec": 8634459
+        },
+        "per_hit": {
+          "max_usec": 7603,
+          "mean_usec": 5820.625,
+          "p95_usec": 7484,
+          "samples": 32,
+          "total_usec": 186260
+        }
+      },
+      "series_counters": {
+        "instrumented": false
+      },
+      "setup_usec": 461742,
+      "topology": [
+        {
+          "bodies": 54,
+          "scene": "res://game/features/infected/public/infected_hunger.tscn",
+          "surfaces": 1,
+          "triangles": 6740,
+          "world_scale": 1.0
+        },
+        {
+          "bodies": 18,
+          "scene": "res://game/features/infected/public/infected_revenant.tscn",
+          "surfaces": 1,
+          "triangles": 8918,
+          "world_scale": 1.0
+        },
+        {
+          "bodies": 6,
+          "scene": "res://game/features/infected/public/infected_brute.tscn",
+          "surfaces": 1,
+          "triangles": 5778,
+          "world_scale": 1.10000002384186
+        },
+        {
+          "bodies": 6,
+          "scene": "res://game/features/infected/public/infected_titan.tscn",
+          "surfaces": 1,
+          "triangles": 8078,
+          "world_scale": 1.35000002384186
+        },
+        {
+          "bodies": 3,
+          "scene": "res://game/features/infected/public/infected_colossus.tscn",
+          "surfaces": 1,
+          "triangles": 8256,
+          "world_scale": 1.54999995231628
+        },
+        {
+          "bodies": 3,
+          "scene": "res://game/features/infected/public/infected_horde.tscn",
+          "surfaces": 1,
+          "triangles": 8622,
+          "world_scale": 2.21000003814697
+        }
+      ],
+      "video_memory_monitor_bytes": 91250563,
+      "iteration": 0
+    },
+    {
+      "allocator_bytes": 119429603,
+      "cold_counters": {
+        "blank_updates": 90,
+        "init_usec": 12976,
+        "near_triangles": 0,
+        "paint_updates": 90,
+        "paint_usec": 443454,
+        "triangles_scanned": 0,
+        "update_layer_cpu_usec": 1300
+      },
+      "cold_per_hit": {
+        "max_usec": 7766,
+        "mean_usec": 5090.57777777778,
+        "p95_usec": 7233,
+        "samples": 90,
+        "total_usec": 458152
+      },
+      "configured_renderer": "gl_compatibility",
+      "display_server": "X11",
+      "godot": "4.7.2-stable (official)",
+      "idle_process_frame_interval": {
+        "max_usec": 67567,
+        "mean_usec": 51678.6333333333,
+        "p95_usec": 58298,
+        "samples": 60,
+        "total_usec": 3100718
+      },
+      "masks": {
+        "cpu_image_bytes": 2949120,
+        "masks": 90,
+        "nominal_page_payload_bytes": 25165824,
+        "pages": 6,
+        "sha256": "912d5e386f2bcb8d99e6189c3a0d0f789dfb1d4c1706bd30830d727466332e86"
+      },
+      "outside_counters": {
+        "blank_updates": 0,
+        "init_usec": 0,
+        "near_triangles": 0,
+        "paint_updates": 0,
+        "paint_usec": 33103,
+        "triangles_scanned": 0,
+        "update_layer_cpu_usec": 0
+      },
+      "outside_per_hit": {
+        "max_usec": 4794,
+        "mean_usec": 2764.58333333333,
+        "p95_usec": 4794,
+        "samples": 12,
+        "total_usec": 33175
+      },
+      "protocol": {
+        "actors": "90",
+        "capture": true,
+        "frames": "180",
+        "mode": "stages",
+        "pellets": "8",
+        "rate": "1.1",
+        "weapon": "SHOTGUN"
+      },
+      "render_draw_calls": 90,
+      "render_primitives": 304914,
+      "repeated_counters": {
+        "blank_updates": 0,
+        "init_usec": 0,
+        "near_triangles": 0,
+        "paint_updates": 0,
+        "paint_usec": 53903,
+        "triangles_scanned": 0,
+        "update_layer_cpu_usec": 0
+      },
+      "repeated_per_hit": {
+        "max_usec": 5505,
+        "mean_usec": 4501.0,
+        "p95_usec": 5505,
+        "samples": 12,
+        "total_usec": 54012
+      },
+      "series": {
+        "active_batch": {
+          "max_usec": 59267,
+          "mean_usec": 48094.75,
+          "p95_usec": 59267,
+          "samples": 4,
+          "total_usec": 192379
+        },
+        "active_batches_over_16_667_ms": 4,
+        "bursts": 4,
+        "hits": 32,
+        "observed_process_frame_interval": {
+          "max_usec": 105323,
+          "mean_usec": 46689.8277777778,
+          "p95_usec": 53535,
+          "samples": 180,
+          "total_usec": 8404169
+        },
+        "per_hit": {
+          "max_usec": 8049,
+          "mean_usec": 6006.53125,
+          "p95_usec": 7693,
+          "samples": 32,
+          "total_usec": 192209
+        }
+      },
+      "series_counters": {
+        "blank_updates": 0,
+        "init_usec": 0,
+        "near_triangles": 0,
+        "paint_updates": 32,
+        "paint_usec": 191037,
+        "triangles_scanned": 0,
+        "update_layer_cpu_usec": 848
+      },
+      "setup_usec": 430999,
+      "topology": [
+        {
+          "bodies": 54,
+          "scene": "res://game/features/infected/public/infected_hunger.tscn",
+          "surfaces": 1,
+          "triangles": 6740,
+          "world_scale": 1.0
+        },
+        {
+          "bodies": 18,
+          "scene": "res://game/features/infected/public/infected_revenant.tscn",
+          "surfaces": 1,
+          "triangles": 8918,
+          "world_scale": 1.0
+        },
+        {
+          "bodies": 6,
+          "scene": "res://game/features/infected/public/infected_brute.tscn",
+          "surfaces": 1,
+          "triangles": 5778,
+          "world_scale": 1.10000002384186
+        },
+        {
+          "bodies": 6,
+          "scene": "res://game/features/infected/public/infected_titan.tscn",
+          "surfaces": 1,
+          "triangles": 8078,
+          "world_scale": 1.35000002384186
+        },
+        {
+          "bodies": 3,
+          "scene": "res://game/features/infected/public/infected_colossus.tscn",
+          "surfaces": 1,
+          "triangles": 8256,
+          "world_scale": 1.54999995231628
+        },
+        {
+          "bodies": 3,
+          "scene": "res://game/features/infected/public/infected_horde.tscn",
+          "surfaces": 1,
+          "triangles": 8622,
+          "world_scale": 2.21000003814697
+        }
+      ],
+      "video_memory_monitor_bytes": 91250563,
+      "iteration": 0
+    },
+    {
+      "allocator_bytes": 116376547,
+      "cold_counters": {
+        "blank_updates": 0,
+        "init_usec": 0,
+        "near_triangles": 0,
+        "paint_updates": 0,
+        "paint_usec": 0,
+        "triangles_scanned": 0,
+        "update_layer_cpu_usec": 0
+      },
+      "cold_per_hit": {
+        "samples": 0
+      },
+      "configured_renderer": "gl_compatibility",
+      "display_server": "X11",
+      "godot": "4.7.2-stable (official)",
+      "idle_process_frame_interval": {
+        "max_usec": 63724,
+        "mean_usec": 51309.4666666667,
+        "p95_usec": 59960,
+        "samples": 60,
+        "total_usec": 3078568
+      },
+      "masks": {
+        "cpu_image_bytes": 0,
+        "masks": 0,
+        "nominal_page_payload_bytes": 0,
+        "pages": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "outside_counters": {
+        "blank_updates": 0,
+        "init_usec": 0,
+        "near_triangles": 0,
+        "paint_updates": 0,
+        "paint_usec": 0,
+        "triangles_scanned": 80880,
+        "update_layer_cpu_usec": 0
+      },
+      "outside_per_hit": {
+        "max_usec": 2471,
+        "mean_usec": 2342.16666666667,
+        "p95_usec": 2471,
+        "samples": 12,
+        "total_usec": 28106
+      },
+      "protocol": {
+        "actors": "90",
+        "capture": false,
+        "frames": "180",
+        "mode": "scan",
+        "pellets": "8",
+        "rate": "1.1",
+        "weapon": "SHOTGUN"
+      },
+      "render_draw_calls": 90,
+      "render_primitives": 304914,
+      "repeated_counters": {
+        "blank_updates": 0,
+        "init_usec": 0,
+        "near_triangles": 3504,
+        "paint_updates": 0,
+        "paint_usec": 0,
+        "triangles_scanned": 80880,
+        "update_layer_cpu_usec": 0
+      },
+      "repeated_per_hit": {
+        "max_usec": 2441,
+        "mean_usec": 2181.33333333333,
+        "p95_usec": 2441,
+        "samples": 12,
+        "total_usec": 26176
+      },
+      "series": {
+        "active_batch": {
+          "max_usec": 25123,
+          "mean_usec": 20870.75,
+          "p95_usec": 25123,
+          "samples": 4,
+          "total_usec": 83483
+        },
+        "active_batches_over_16_667_ms": 4,
+        "bursts": 4,
+        "hits": 32,
+        "observed_process_frame_interval": {
+          "max_usec": 70078,
+          "mean_usec": 44679.5,
+          "p95_usec": 50442,
+          "samples": 180,
+          "total_usec": 8042310
+        },
+        "per_hit": {
+          "max_usec": 3437,
+          "mean_usec": 2605.21875,
+          "p95_usec": 3284,
+          "samples": 32,
+          "total_usec": 83367
+        }
+      },
+      "series_counters": {
+        "blank_updates": 0,
+        "init_usec": 0,
+        "near_triangles": 19646,
+        "paint_updates": 0,
+        "paint_usec": 0,
+        "triangles_scanned": 243994,
+        "update_layer_cpu_usec": 0
+      },
+      "setup_usec": 437614,
+      "topology": [
+        {
+          "bodies": 54,
+          "scene": "res://game/features/infected/public/infected_hunger.tscn",
+          "surfaces": 1,
+          "triangles": 6740,
+          "world_scale": 1.0
+        },
+        {
+          "bodies": 18,
+          "scene": "res://game/features/infected/public/infected_revenant.tscn",
+          "surfaces": 1,
+          "triangles": 8918,
+          "world_scale": 1.0
+        },
+        {
+          "bodies": 6,
+          "scene": "res://game/features/infected/public/infected_brute.tscn",
+          "surfaces": 1,
+          "triangles": 5778,
+          "world_scale": 1.10000002384186
+        },
+        {
+          "bodies": 6,
+          "scene": "res://game/features/infected/public/infected_titan.tscn",
+          "surfaces": 1,
+          "triangles": 8078,
+          "world_scale": 1.35000002384186
+        },
+        {
+          "bodies": 3,
+          "scene": "res://game/features/infected/public/infected_colossus.tscn",
+          "surfaces": 1,
+          "triangles": 8256,
+          "world_scale": 1.54999995231628
+        },
+        {
+          "bodies": 3,
+          "scene": "res://game/features/infected/public/infected_horde.tscn",
+          "surfaces": 1,
+          "triangles": 8622,
+          "world_scale": 2.21000003814697
+        }
+      ],
+      "video_memory_monitor_bytes": 66084739,
+      "iteration": 0
+    },
+    {
+      "allocator_bytes": 119428043,
+      "cold_counters": {
+        "instrumented": false
+      },
+      "cold_per_hit": {
+        "max_usec": 9197,
+        "mean_usec": 5837.41111111111,
+        "p95_usec": 8721,
+        "samples": 90,
+        "total_usec": 525367
+      },
+      "configured_renderer": "gl_compatibility",
+      "display_server": "X11",
+      "godot": "4.7.2-stable (official)",
+      "idle_process_frame_interval": {
+        "max_usec": 58975,
+        "mean_usec": 50413.4,
+        "p95_usec": 56719,
+        "samples": 60,
+        "total_usec": 3024804
+      },
+      "masks": {
+        "cpu_image_bytes": 2949120,
+        "masks": 90,
+        "nominal_page_payload_bytes": 25165824,
+        "pages": 6,
+        "sha256": "d6317e0010204f546ebc73ae89cc417c20f418b5b408333a74ade4709a5902d7"
+      },
+      "outside_counters": {
+        "instrumented": false
+      },
+      "outside_per_hit": {
+        "max_usec": 3106,
+        "mean_usec": 2522.83333333333,
+        "p95_usec": 3106,
+        "samples": 12,
+        "total_usec": 30274
+      },
+      "protocol": {
+        "actors": "90",
+        "capture": true,
+        "frames": "180",
+        "mode": "full",
+        "pellets": "1",
+        "rate": "24.0",
+        "weapon": "MINIGUN"
+      },
+      "render_draw_calls": 90,
+      "render_primitives": 304914,
+      "repeated_counters": {
+        "instrumented": false
+      },
+      "repeated_per_hit": {
+        "max_usec": 5089,
+        "mean_usec": 4192.41666666667,
+        "p95_usec": 5089,
+        "samples": 12,
+        "total_usec": 50309
+      },
+      "series": {
+        "active_batch": {
+          "max_usec": 12404,
+          "mean_usec": 6987.15277777778,
+          "p95_usec": 9961,
+          "samples": 72,
+          "total_usec": 503075
+        },
+        "active_batches_over_16_667_ms": 0,
+        "bursts": 72,
+        "hits": 72,
+        "observed_process_frame_interval": {
+          "max_usec": 69644,
+          "mean_usec": 49326.9611111111,
+          "p95_usec": 58618,
+          "samples": 180,
+          "total_usec": 8878853
+        },
+        "per_hit": {
+          "max_usec": 12395,
+          "mean_usec": 6978.26388888889,
+          "p95_usec": 9951,
+          "samples": 72,
+          "total_usec": 502435
+        }
+      },
+      "series_counters": {
+        "instrumented": false
+      },
+      "setup_usec": 430356,
+      "topology": [
+        {
+          "bodies": 54,
+          "scene": "res://game/features/infected/public/infected_hunger.tscn",
+          "surfaces": 1,
+          "triangles": 6740,
+          "world_scale": 1.0
+        },
+        {
+          "bodies": 18,
+          "scene": "res://game/features/infected/public/infected_revenant.tscn",
+          "surfaces": 1,
+          "triangles": 8918,
+          "world_scale": 1.0
+        },
+        {
+          "bodies": 6,
+          "scene": "res://game/features/infected/public/infected_brute.tscn",
+          "surfaces": 1,
+          "triangles": 5778,
+          "world_scale": 1.10000002384186
+        },
+        {
+          "bodies": 6,
+          "scene": "res://game/features/infected/public/infected_titan.tscn",
+          "surfaces": 1,
+          "triangles": 8078,
+          "world_scale": 1.35000002384186
+        },
+        {
+          "bodies": 3,
+          "scene": "res://game/features/infected/public/infected_colossus.tscn",
+          "surfaces": 1,
+          "triangles": 8256,
+          "world_scale": 1.54999995231628
+        },
+        {
+          "bodies": 3,
+          "scene": "res://game/features/infected/public/infected_horde.tscn",
+          "surfaces": 1,
+          "triangles": 8622,
+          "world_scale": 2.21000003814697
+        }
+      ],
+      "video_memory_monitor_bytes": 91250563,
+      "iteration": 0
+    },
+    {
+      "allocator_bytes": 119429611,
+      "cold_counters": {
+        "blank_updates": 90,
+        "init_usec": 12818,
+        "near_triangles": 0,
+        "paint_updates": 90,
+        "paint_usec": 513768,
+        "triangles_scanned": 0,
+        "update_layer_cpu_usec": 1600
+      },
+      "cold_per_hit": {
+        "max_usec": 9237,
+        "mean_usec": 5873.72222222222,
+        "p95_usec": 8418,
+        "samples": 90,
+        "total_usec": 528635
+      },
+      "configured_renderer": "gl_compatibility",
+      "display_server": "X11",
+      "godot": "4.7.2-stable (official)",
+      "idle_process_frame_interval": {
+        "max_usec": 70340,
+        "mean_usec": 51591.45,
+        "p95_usec": 61237,
+        "samples": 60,
+        "total_usec": 3095487
+      },
+      "masks": {
+        "cpu_image_bytes": 2949120,
+        "masks": 90,
+        "nominal_page_payload_bytes": 25165824,
+        "pages": 6,
+        "sha256": "d6317e0010204f546ebc73ae89cc417c20f418b5b408333a74ade4709a5902d7"
+      },
+      "outside_counters": {
+        "blank_updates": 0,
+        "init_usec": 0,
+        "near_triangles": 0,
+        "paint_updates": 0,
+        "paint_usec": 33296,
+        "triangles_scanned": 0,
+        "update_layer_cpu_usec": 0
+      },
+      "outside_per_hit": {
+        "max_usec": 3094,
+        "mean_usec": 2780.5,
+        "p95_usec": 3094,
+        "samples": 12,
+        "total_usec": 33366
+      },
+      "protocol": {
+        "actors": "90",
+        "capture": true,
+        "frames": "180",
+        "mode": "stages",
+        "pellets": "1",
+        "rate": "24.0",
+        "weapon": "MINIGUN"
+      },
+      "render_draw_calls": 90,
+      "render_primitives": 304914,
+      "repeated_counters": {
+        "blank_updates": 0,
+        "init_usec": 0,
+        "near_triangles": 0,
+        "paint_updates": 0,
+        "paint_usec": 65142,
+        "triangles_scanned": 0,
+        "update_layer_cpu_usec": 0
+      },
+      "repeated_per_hit": {
+        "max_usec": 17667,
+        "mean_usec": 5438.83333333333,
+        "p95_usec": 17667,
+        "samples": 12,
+        "total_usec": 65266
+      },
+      "series": {
+        "active_batch": {
+          "max_usec": 10266,
+          "mean_usec": 6679.79166666667,
+          "p95_usec": 9650,
+          "samples": 72,
+          "total_usec": 480945
+        },
+        "active_batches_over_16_667_ms": 0,
+        "bursts": 72,
+        "hits": 72,
+        "observed_process_frame_interval": {
+          "max_usec": 70827,
+          "mean_usec": 49351.6333333333,
+          "p95_usec": 58011,
+          "samples": 180,
+          "total_usec": 8883294
+        },
+        "per_hit": {
+          "max_usec": 10223,
+          "mean_usec": 6670.72222222222,
+          "p95_usec": 9642,
+          "samples": 72,
+          "total_usec": 480292
+        }
+      },
+      "series_counters": {
+        "blank_updates": 0,
+        "init_usec": 0,
+        "near_triangles": 0,
+        "paint_updates": 72,
+        "paint_usec": 474892,
+        "triangles_scanned": 0,
+        "update_layer_cpu_usec": 4098
+      },
+      "setup_usec": 443827,
+      "topology": [
+        {
+          "bodies": 54,
+          "scene": "res://game/features/infected/public/infected_hunger.tscn",
+          "surfaces": 1,
+          "triangles": 6740,
+          "world_scale": 1.0
+        },
+        {
+          "bodies": 18,
+          "scene": "res://game/features/infected/public/infected_revenant.tscn",
+          "surfaces": 1,
+          "triangles": 8918,
+          "world_scale": 1.0
+        },
+        {
+          "bodies": 6,
+          "scene": "res://game/features/infected/public/infected_brute.tscn",
+          "surfaces": 1,
+          "triangles": 5778,
+          "world_scale": 1.10000002384186
+        },
+        {
+          "bodies": 6,
+          "scene": "res://game/features/infected/public/infected_titan.tscn",
+          "surfaces": 1,
+          "triangles": 8078,
+          "world_scale": 1.35000002384186
+        },
+        {
+          "bodies": 3,
+          "scene": "res://game/features/infected/public/infected_colossus.tscn",
+          "surfaces": 1,
+          "triangles": 8256,
+          "world_scale": 1.54999995231628
+        },
+        {
+          "bodies": 3,
+          "scene": "res://game/features/infected/public/infected_horde.tscn",
+          "surfaces": 1,
+          "triangles": 8622,
+          "world_scale": 2.21000003814697
+        }
+      ],
+      "video_memory_monitor_bytes": 91250563,
+      "iteration": 0
+    },
+    {
+      "allocator_bytes": 116375471,
+      "cold_counters": {
+        "blank_updates": 0,
+        "init_usec": 0,
+        "near_triangles": 0,
+        "paint_updates": 0,
+        "paint_usec": 0,
+        "triangles_scanned": 0,
+        "update_layer_cpu_usec": 0
+      },
+      "cold_per_hit": {
+        "samples": 0
+      },
+      "configured_renderer": "gl_compatibility",
+      "display_server": "X11",
+      "godot": "4.7.2-stable (official)",
+      "idle_process_frame_interval": {
+        "max_usec": 70549,
+        "mean_usec": 50648.7,
+        "p95_usec": 56636,
+        "samples": 60,
+        "total_usec": 3038922
+      },
+      "masks": {
+        "cpu_image_bytes": 0,
+        "masks": 0,
+        "nominal_page_payload_bytes": 0,
+        "pages": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "outside_counters": {
+        "blank_updates": 0,
+        "init_usec": 0,
+        "near_triangles": 0,
+        "paint_updates": 0,
+        "paint_usec": 0,
+        "triangles_scanned": 80880,
+        "update_layer_cpu_usec": 0
+      },
+      "outside_per_hit": {
+        "max_usec": 2589,
+        "mean_usec": 2442.25,
+        "p95_usec": 2589,
+        "samples": 12,
+        "total_usec": 29307
+      },
+      "protocol": {
+        "actors": "90",
+        "capture": false,
+        "frames": "180",
+        "mode": "scan",
+        "pellets": "1",
+        "rate": "24.0",
+        "weapon": "MINIGUN"
+      },
+      "render_draw_calls": 90,
+      "render_primitives": 304914,
+      "repeated_counters": {
+        "blank_updates": 0,
+        "init_usec": 0,
+        "near_triangles": 3768,
+        "paint_updates": 0,
+        "paint_usec": 0,
+        "triangles_scanned": 80880,
+        "update_layer_cpu_usec": 0
+      },
+      "repeated_per_hit": {
+        "max_usec": 2600,
+        "mean_usec": 2242.08333333333,
+        "p95_usec": 2600,
+        "samples": 12,
+        "total_usec": 26905
+      },
+      "series": {
+        "active_batch": {
+          "max_usec": 5044,
+          "mean_usec": 2809.41666666667,
+          "p95_usec": 3484,
+          "samples": 72,
+          "total_usec": 202278
+        },
+        "active_batches_over_16_667_ms": 0,
+        "bursts": 72,
+        "hits": 72,
+        "observed_process_frame_interval": {
+          "max_usec": 80687,
+          "mean_usec": 48016.5222222222,
+          "p95_usec": 56506,
+          "samples": 180,
+          "total_usec": 8642974
+        },
+        "per_hit": {
+          "max_usec": 5037,
+          "mean_usec": 2802.97222222222,
+          "p95_usec": 3479,
+          "samples": 72,
+          "total_usec": 201814
+        }
+      },
+      "series_counters": {
+        "blank_updates": 0,
+        "init_usec": 0,
+        "near_triangles": 55537,
+        "paint_updates": 0,
+        "paint_usec": 0,
+        "triangles_scanned": 524992,
+        "update_layer_cpu_usec": 0
+      },
+      "setup_usec": 418650,
+      "topology": [
+        {
+          "bodies": 54,
+          "scene": "res://game/features/infected/public/infected_hunger.tscn",
+          "surfaces": 1,
+          "triangles": 6740,
+          "world_scale": 1.0
+        },
+        {
+          "bodies": 18,
+          "scene": "res://game/features/infected/public/infected_revenant.tscn",
+          "surfaces": 1,
+          "triangles": 8918,
+          "world_scale": 1.0
+        },
+        {
+          "bodies": 6,
+          "scene": "res://game/features/infected/public/infected_brute.tscn",
+          "surfaces": 1,
+          "triangles": 5778,
+          "world_scale": 1.10000002384186
+        },
+        {
+          "bodies": 6,
+          "scene": "res://game/features/infected/public/infected_titan.tscn",
+          "surfaces": 1,
+          "triangles": 8078,
+          "world_scale": 1.35000002384186
+        },
+        {
+          "bodies": 3,
+          "scene": "res://game/features/infected/public/infected_colossus.tscn",
+          "surfaces": 1,
+          "triangles": 8256,
+          "world_scale": 1.54999995231628
+        },
+        {
+          "bodies": 3,
+          "scene": "res://game/features/infected/public/infected_horde.tscn",
+          "surfaces": 1,
+          "triangles": 8622,
+          "world_scale": 2.21000003814697
+        }
+      ],
+      "video_memory_monitor_bytes": 66084739,
+      "iteration": 0
+    }
+  ]
+}
