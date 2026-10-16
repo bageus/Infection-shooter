@@ -93,3 +93,17 @@ HUD дополнительно исключает явно скрытые в д�
 узлы. Offscreen живые цели сохраняются, геометрия/edge clamp/20Гц прежние.
 Новых публичных контрактов, зависимостей, owners или исключений нет.
 Регрессии и ограничения: [QA radar](../qa/radar_live_enemies.md).
+
+## Issue223 — реакция двух шкал,16.10.2026
+
+Владелец подтвердил integer count, белый след и временный scale95/105% для
+здоровья И мутации. HUD сохраняет snapshot targets и немедленный fill, private
+vital_bar_feedback_state владеет только display counter/trail/pulse. Два
+локальных Control adapters продолжают advance после snapshot guard, пока
+анимация активна; idle завершается без дополнительных redraw. Overlay — sibling
+ProgressBar, поэтому heal/alarm modulate не окрашивает белый сегмент. Пульс
+умножается на прежний control-loss height1,6, marker следует scaled threshold,
+DNA self-modulate alpha сохраняется. Initial/max range синхронизируются без
+ложного урона; повторные изменения retarget без списка Tween/событий.
+Public API/сцены/ресурсы/DTO/owners/dependencies прежние. Нового архитектурного
+исключения нет. См. `docs/qa/issue223_vital_bar_feedback.md`.

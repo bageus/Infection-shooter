@@ -5,6 +5,7 @@ const PALETTE := preload("res://game/presentation/prototype_hud/hud_palette.gd")
 const ICON_TINT := preload("res://game/presentation/prototype_hud/icon_tint.gdshader")
 const TITLE_FONT := preload("res://assets/interface/fonts/title.ttf")
 const MUTATION_ALARM := preload("res://game/presentation/prototype_hud/mutation_alarm_pulse.gd")
+const BAR_FEEDBACK := preload("res://game/presentation/prototype_hud/vital_bar_feedback.gd")
 const VITALS_FX := preload("res://game/presentation/prototype_hud/vitals_screen_fx.gd")
 const MUTATION_VEIL := preload("res://game/presentation/prototype_hud/mutation_veil.gd")
 const SFX := preload("res://game/core/audio/public/sound_events.gd")
@@ -59,6 +60,8 @@ var _weapon_icons: Array[Texture2D] = []
 var _slot_weapon_indices := [-1, -1, -1]
 var _vital_snapshot: Array = []
 var _hp_flash: Tween
+var _health_feedback: Control
+var _mutation_feedback: Control
 var _weapon_snapshot: Array = []
 
 var _has_key := false
@@ -79,6 +82,10 @@ func _ready() -> void:
 	hp_bar.max_value = player.max_health
 	mutation_bar.max_value = 100.0
 	_mutation_alarm = MUTATION_ALARM.new(mutation_bar)
+	_health_feedback = BAR_FEEDBACK.new()
+	_health_feedback.configure(hp_bar, hp_value)
+	_mutation_feedback = BAR_FEEDBACK.new()
+	_mutation_feedback.configure(mutation_bar, mutation_value, critical_marker)
 	_vitals_fx = VITALS_FX.new()
 	_vitals_fx.name = "VitalsScreenFx"
 	add_child(_vitals_fx)
@@ -167,6 +174,8 @@ func _process(delta: float) -> void:
 	_mutation_alarm.update(delta, _control_notice.visible)
 	_vitals_fx.update(delta, float(infection.call("get_mutation")), float(infection.call("get_critical_threshold")), _control_notice.visible, float(player.health), float(player.max_health))
 	_update_vitals()
+	_health_feedback.advance(delta)
+	_mutation_feedback.advance(delta, MUTATION_ALARM.LOST_SCALE if _control_notice.visible else Vector2.ONE)
 	_update_weapon()
 	_antidote_hint_remaining = maxf(0.0, _antidote_hint_remaining - delta)
 	_update_key_buttons()
@@ -236,13 +245,10 @@ func _update_vitals() -> void:
 	_vital_snapshot = snapshot
 	if player.health - previous_health >= 3.0:
 		_flash_health_bar()
-	hp_bar.max_value = player.max_health
-	hp_bar.value = player.health
-	hp_value.text = "%d / %d" % [roundi(player.health), roundi(player.max_health)]
+	_health_feedback.set_value(float(player.health), float(player.max_health))
 	_update_armor(float(player.armor), float(player.max_armor))
-	mutation_bar.value = mutation
-	mutation_value.text = "%d / 100" % roundi(mutation)
-	critical_marker.position.x = mutation_bar.position.x - 1.0 + mutation_bar.size.x * clampf(critical / 100.0, 0.0, 1.0)
+	_mutation_feedback.set_value(mutation, 100.0)
+	_mutation_feedback.set_marker_fraction(critical / 100.0)
 	antidote_count.text = "∞" if player.infinite_antidotes else str(player.antidotes)
 	_update_key_cell(has_key)
 
