@@ -1,6 +1,6 @@
 # Аудит Infection Shooter — 15 октября 2026
 
-> Состояние отчёта: ниже сохранены исходные доказательства аудита. Проверенные исправления A01–A06: [ragdoll](../qa/ragdoll_budget.md), [projectile](../qa/projectile_step_budget.md), [blast shelter](../qa/blast_shelter.md), [atomic desk template](../qa/atomic_desk_template.md), [audio warmup](../qa/audio_warmup_lifetime.md), [radar](../qa/radar_live_enemies.md). Следующая отдельная задача — A07.
+> Состояние отчёта: ниже сохранены исходные доказательства аудита. Проверенные исправления A01–A07: [ragdoll](../qa/ragdoll_budget.md), [projectile](../qa/projectile_step_budget.md), [blast shelter](../qa/blast_shelter.md), [atomic desk template](../qa/atomic_desk_template.md), [audio warmup](../qa/audio_warmup_lifetime.md), [radar](../qa/radar_live_enemies.md), [legacy pickups](../qa/legacy_pickup_refusal.md). Следующая отдельная задача — A08.
 
 ## Основной вывод
 
@@ -148,6 +148,8 @@ status=Template applied to this desk. Save the map to keep it.
 **Приёмка:** живой враг, убитый сохранённый враг, скрытый/вытесненный труп, оторванная часть и удаляемый узел. Живой враг даёт одну метку, остальные — ноль.
 
 ## A07. Устаревшие pickup расходуются при полном здоровье или боезапасе
+
+**Статус 16.10.2026:** исправлено в ветке `codex/legacy-pickup-refusal` на main9449609f. Результат collector проверяется до sound/free; при отказе предмет остаётся доступным, ранний guard сохраняет защиту от двойной выдачи. Те же regression fixtures:38 failures→0, включая настоящего Player. [QA A07](../qa/legacy_pickup_refusal.md). Ниже сохранено исходное доказательство.
 
 **Код:** [health_pickup.gd:11–19](https://github.com/bageus/Infection-shooter/blob/0e154b73/game/features/pickups/health_pickup.gd#L11-L19), [ammo_pickup.gd:11–16](https://github.com/bageus/Infection-shooter/blob/0e154b73/game/features/pickups/ammo_pickup.gd#L11-L16).
 

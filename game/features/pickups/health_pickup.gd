@@ -11,8 +11,12 @@ func _ready() -> void:
 func _on_body_entered(body: Node) -> void:
 	if _consumed or body == null or not body.has_method("heal"):
 		return
+	# Keep the latch during collector signals to prevent a second award.
 	_consumed = true
-	body.call("heal", heal_amount, &"medkit")
+	var accepted := float(body.call("heal", heal_amount, &"medkit")) > 0.0
+	if not accepted:
+		_consumed = false
+		return
 	if body.has_method("play_item_sound"):
 		body.call("play_item_sound", &"medkit_pickup")
 		body.call("play_item_sound", &"medkit_use")
