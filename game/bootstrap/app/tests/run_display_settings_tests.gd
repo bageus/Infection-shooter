@@ -162,6 +162,7 @@ func _settle_native(mode: int, size: Vector2i) -> void:
 				return
 		else:
 			stable = 0
+	_check(false, "Native window timed out: mode=%s root=%s native=%s expected_mode=%s expected_size=%s" % [DisplayServer.window_get_mode(), root.size, DisplayServer.window_get_size(), mode, size])
 
 
 func _ui() -> void:
