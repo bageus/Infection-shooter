@@ -37,6 +37,7 @@ func _run() -> void:
 	dialog.call("_language_changed", 1)
 	dialog.call("_scale_changed", 2)
 	dialog.call("_change", "sunlight", false)
+	dialog.call("_change", "bullet_impact_smoke", false)
 	dialog.call("_change", "walk_speed_multiplier", 1.25)
 	dialog.call("_change", "walk_animation_multiplier", 1.5)
 	await process_frame
@@ -181,6 +182,7 @@ func _test_settings_reach_game(app: Node) -> void:
 	var sunlight_prefs := PREFS.new()
 	sunlight_prefs.load_settings()
 	sunlight_prefs.values.sunlight = false
+	sunlight_prefs.values.bullet_impact_smoke = false
 	_check(sunlight_prefs.save_settings() == OK, "Sunlight-off is saved before the real restart")
 	sunlight_prefs.apply_to_game(app.get_tree())
 	var walk_prefs := PREFS.new()
@@ -192,6 +194,7 @@ func _test_settings_reach_game(app: Node) -> void:
 
 
 func _check_walk_preferences(app: Node, context: String) -> void:
+	_check(not app.get("impact_pool").get("bullet_smoke_enabled"), "Saved smoke-off reaches mission pool: " + context)
 	var player: Node = app.get("player")
 	var driver := player.get_node("AnimationDriver")
 	_check(player.get("_walk_speed_multiplier") == 1.25, "Saved walking speed reaches actual player: " + context)

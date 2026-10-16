@@ -180,6 +180,13 @@ func _video() -> void:
 	particles.button_pressed = dialog.view.preferences.values.electronic_particles
 	particles.toggled.connect(func(value: bool) -> void: dialog.call("_change", "electronic_particles", value))
 	dialog.get("layout").add_child(particles)
+	var smoke := CheckButton.new()
+	smoke.name = "BulletImpactSmoke"
+	smoke.text = dialog.view.text("bulletImpactSmoke")
+	smoke.tooltip_text = dialog.view.text("bulletImpactSmokeHint")
+	smoke.button_pressed = dialog.view.preferences.values.bullet_impact_smoke
+	smoke.toggled.connect(func(value: bool) -> void: dialog.call("_change", "bullet_impact_smoke", value))
+	dialog.get("layout").add_child(smoke)
 	dialog.call("_button", "fullscreen", dialog._fullscreen)
 
 

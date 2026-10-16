@@ -289,7 +289,7 @@ func _apply_damage(amount: float, blast: bool) -> void:
 		blood_wounded.emit(global_position, _blood_exclusions())
 	# Damage over time arrives in tiny per-frame bits; only real hits flinch.
 	if health > 0.0 and _animation != null and amount >= 1.0:
-		_react_to_hit(clampf(amount / (max_health * 0.2), 0.6, 1.3))
+		_react_to_hit(_pace.hit(amount, max_health))
 	_reaction_direction = Vector3.ZERO
 	if health <= 0.0:
 		_die()
@@ -354,6 +354,7 @@ func apply_mutation_poison(duration: float, damage_per_second: float, parasite: 
 
 
 func _physics_process(delta: float) -> void:
+	_pace.recover_hit(delta)
 	_track_blood_motion()
 	_mark_stump_drips()
 	_blast_stun_remaining = maxf(0.0, _blast_stun_remaining - delta)
@@ -400,7 +401,7 @@ func _physics_process(delta: float) -> void:
 		_cached_desired = _desired_velocity_from_offset(target_offset)
 
 	_behaviour_tick(step, target_offset)
-	var desired := Vector3.ZERO if _blast_stun_remaining > 0.0 else _cached_desired
+	var desired := Vector3.ZERO if _blast_stun_remaining > 0.0 else _cached_desired * (1.0 - _pace.hit_penalty)
 	if not _sleeping_far:
 		_turn_toward_face_direction(delta)
 	var spread := CROWD.spread(self, collision_shape)

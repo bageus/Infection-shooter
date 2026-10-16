@@ -56,6 +56,10 @@
     "acoustics_v1": "Owner-approved 15.10.2026: opaque walls block shots and ally cries; weapon scenes export shot_noise_radius/shot_noise_interval (0.25s); hearing_profile configures rays/ear height/alert radius, hearing_range caps at 50m. Existing command signatures unchanged.",
     "penetration_blood_v1": {
       "penetration_blood": "signal penetration_blood(position: Vector3, direction: Vector3, energy: float, excluded: Array[RID]); optional visual fact on impact_effects after a confirmed flesh exit has been reached; energy is remaining projectile energy"
+    },
+    "bullet_smoke_v1": {
+      "bullet_smoke_enabled": "bool = true; disabling removes live bullet dust immediately; no effect on marks or other FX",
+      "spawn_bullet_smoke": "spawn_bullet_smoke(point: Vector3, normal: Vector3) -> void; call only after confirmed bullet mark projection; mission-local 16 emitter / 2 per physics frame cap"
     }
   }
 }

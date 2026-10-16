@@ -142,6 +142,9 @@ func _try_attack() -> void:
 
 
 func _react_to_hit(strength: float) -> void:
+	if not _reaction_direction.is_zero_approx():
+		super._react_to_hit(strength)
+		return
 	var flinch := posture == Posture.STAND and not _feeding and _busy <= 0.0 and not _aggro_pending and not _spring_only
 	if flinch and strength >= HIT_FLINCH_STRENGTH and _hit_cooldown <= 0.0 and _animation != null:
 		if bool(_animation.call("play_overlay", &"HitReaction")):

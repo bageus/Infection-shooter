@@ -229,3 +229,5 @@ func _spawn_impact_decal(collider: Object, hit_position: Vector3, normal: Vector
 	for mark in marks:
 		impact_pool.call("register_mark", mark)
 		get_tree().create_timer(24.0).timeout.connect(mark.queue_free)
+	if not marks.is_empty():
+		impact_pool.call("spawn_bullet_smoke", hit_position, normal)
