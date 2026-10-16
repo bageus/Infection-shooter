@@ -49,6 +49,7 @@ jobs:
           python tools/test_destruction_mesh_audit.py
           python tools/test_workstation_templates.py
           python tools/test_architecture_scene_access.py
+          python tools/test_ci_suite_coverage.py
           python tools/update_enemy_audio_report.py --check
           python tools/test_audio_generation.py
           python tools/build_sounds.py --dry-run

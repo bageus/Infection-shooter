@@ -1,6 +1,6 @@
 # Аудит Infection Shooter — 15 октября 2026
 
-> Состояние отчёта: ниже сохранены исходные доказательства аудита. Проверенные исправления A01–A08 и O01–O03: [ragdoll](../qa/ragdoll_budget.md), [projectile](../qa/projectile_step_budget.md), [blast shelter](../qa/blast_shelter.md), [atomic desk template](../qa/atomic_desk_template.md), [audio warmup](../qa/audio_warmup_lifetime.md), [radar](../qa/radar_live_enemies.md), [legacy pickups](../qa/legacy_pickup_refusal.md), [audio generators](../qa/audio_generator_safety.md), [stairs](../qa/stair_opening_refresh.md), [named maps](../qa/named_map_loading.md), [light budgets](../qa/light_budget_cache.md). O04 измерен без изменения production: [CPU blood bake](../qa/body_blood_profile.md). Следующая отдельная задача — Q01 (полнота CI); кандидаты D01/D02 требуют отдельного разбора совместимости и истории решений.
+> Состояние отчёта: ниже сохранены исходные доказательства аудита. Проверенные исправления A01–A08 и O01–O03: [ragdoll](../qa/ragdoll_budget.md), [projectile](../qa/projectile_step_budget.md), [blast shelter](../qa/blast_shelter.md), [atomic desk template](../qa/atomic_desk_template.md), [audio warmup](../qa/audio_warmup_lifetime.md), [radar](../qa/radar_live_enemies.md), [legacy pickups](../qa/legacy_pickup_refusal.md), [audio generators](../qa/audio_generator_safety.md), [stairs](../qa/stair_opening_refresh.md), [named maps](../qa/named_map_loading.md), [light budgets](../qa/light_budget_cache.md). O04 измерен без изменения production: [CPU blood bake](../qa/body_blood_profile.md). Q01 закрыт: [полнота CI](../qa/ci_suite_coverage.md). Следующий отдельный разбор — D01 (кандидаты на очистку); D02 и архитектурное замечание Q02 остаются открытыми.
 
 ## Основной вывод
 
@@ -37,7 +37,7 @@ P1 — исправить в ближайших отдельных PR; P2 — с
 | A08 | P2 | Полная генерация старых звуков удаляет авторские записи и перезаписывает credits | Изолированная проба настоящего main() в temp-каталоге |
 | O01 | P2 | Поиск лестниц сканирует тысячи неизменившихся объектов каждые 0,35 с | Синтетический замер: mean 2,679 мс, p95 3,869 мс |
 | O02 | P2 | Загрузка именованной карты в планировщике остаётся синхронной и держит две композиции | Подтверждено порядком prepare → clear → place; отдельный пик не измерен |
-| Q01 | P2 | Пять существующих тестовых наборов не перечислены в CI | Проверены полные пути и имена во всех workflows |
+| Q01 | P2 | Пять существующих тестовых наборов не перечислены в CI | Исправлено16.10:157/157 зарегистрированы (149 headless +8 отдельных jobs),11 отрицательных/положительных regressions PASS; [QA](../qa/ci_suite_coverage.md) |
 | O03 | P3 | Бюджеты ламп/экранов пересчитываются при неподвижной камере | Исправлено16.10; CPU callback в покое −83,7%/−59,8% на изолированном стенде; [QA](../qa/light_budget_cache.md) |
 | O04 | P3 | CPU-запекание крови сканирует треугольники и немедленно загружает изменённые маски | Измерено16.10:90 тел, p95 серии shotgun58,568мс/minigun9,666мс headless; это подсистема ран, не профиль миссии; [QA](../qa/body_blood_profile.md) |
 | D01 | P3 | Неиспользуемые в основном игровом маршруте файлы и старые дубли | Кандидаты с оговорками о public API, тестах и совместимости |
@@ -259,6 +259,8 @@ PROJECT_STATE назван компактным состоянием, но фа�
 Валидатор размера выдаёт **119 предупреждений**, включая 26 production-файлов длиннее мягкого порога 300 строк; жёсткие лимиты проходят. Приоритет для дальнейшего разделения — orchestration планировщика, сохранения, mutation_skill_effects. Делить по ответственности и владельцу состояния, а не механически по числу строк. Уже выполненные декомпозиции EnvironmentProp/геометрии и пути откатывать не требуется.
 
 ## Q01. Дыры в запуске тестов CI
+
+**Исправлено16.10.2026:** на main2a531767 corpse_budget уже запускался; добавлены оставшиеся4. Прежние145 headless entries перенесены без изменения порядка в .github/runtime_suites.txt; теперь149. Ещё8 suites имеют явный job/mode/reason в .github/suite_jobs.json. validate_ci_suites входит в validate_project и проверяет157/157 run_*.gd, stale/duplicate paths, collisions логов/user dirs и действительный invocation в указанном job. Comments/trigger filters не считаются исполнением.11 Python regressions и5 исходных Q01 suites PASS. Door-select прежде падал2 assertions из-за пересечения тестового луча с текущей авторской картой; только fixture камера/дверь перенесены в пустую область, assertions/production прежние. Native/Web jobs,120s timeout, ERROR checks, user:// isolation сохранены. [Методика и ограничения](../qa/ci_suite_coverage.md). Исходная находка сохранена ниже.
 
 Следующие существующие run-наборы не найдены ни по полному пути, ни по имени во всех `.github/workflows/*.yml`:
 

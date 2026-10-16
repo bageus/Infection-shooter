@@ -17,6 +17,9 @@ func _run() -> void:
 	await process_frame
 	var planner: Node = stage.get("planning_mode")
 	planner.enter()
+	# The authored map can fill every nearby pick ray. Keep this input regression
+	# independent of furniture layout while using the real camera and door geometry.
+	planner.camera.global_position += Vector3(1000, 1000, 1000)
 	var objects: Node = planner.objects
 	var door := (load(DOOR_PATH) as PackedScene).instantiate() as Node3D
 	planner.root.add_child(door)
