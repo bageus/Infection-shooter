@@ -4,14 +4,23 @@ const KEY := preload("res://game/bootstrap/app/mission_key.gd")
 const WEAPON := preload("res://game/bootstrap/app/weapon_pickup.gd")
 const FLOOR_BOUNDS := Rect2(-40, -30, 80, 60)
 const CUT_STEP := 0.5
+const STAIR_REFRESH_SECONDS := 0.35
 
 var _stage: Node3D
+var _objects: Node
+var _stairs: Dictionary[int, Dictionary] = {}
 var _openings: Array[Rect2] = []
 var _scan_remaining := 0.0
 
 
 func setup(stage: Node3D, _player: Node3D, _infection: Node) -> void:
 	_stage = stage
+	_objects = stage.get_node("PlanningObjects")
+	_objects.child_entered_tree.connect(_on_planning_child_entered)
+	_objects.child_exiting_tree.connect(_on_planning_child_exiting)
+	# One initial discovery; subsequent furniture changes never rescan the map.
+	for node in _objects.get_children():
+		_register_stair(weakref(node))
 	_refresh_stairs()
 	var key := KEY.new()
 	key.name = "EmergencyKey"
@@ -22,7 +31,7 @@ func setup(stage: Node3D, _player: Node3D, _infection: Node) -> void:
 func _process(delta: float) -> void:
 	_scan_remaining -= delta
 	if _scan_remaining <= 0.0:
-		_scan_remaining = 0.35
+		_scan_remaining = STAIR_REFRESH_SECONDS
 		_refresh_stairs()
 
 
@@ -47,29 +56,81 @@ func goal_reached(location: Vector3) -> bool:
 	return false
 
 
+func _on_planning_child_entered(node: Node) -> void:
+	# Placement/loader assign planning_scene_path after add_child/_ready.
+	if node is Node3D:
+		_register_stair.call_deferred(weakref(node))
+
+
+func _register_stair(reference: WeakRef) -> void:
+	var node := reference.get_ref() as Node3D
+	if node == null or node.is_queued_for_deletion() or node.get_parent() != _objects:
+		return
+	var asset_path := str(node.get_meta("planning_scene_path", ""))
+	if asset_path.is_empty():
+		asset_path = str(node.get("model_path"))
+	if asset_path.get_file() not in ["01_stairs.glb", "01_stairs_2.glb"]:
+		return
+	var id := node.get_instance_id()
+	if not _stairs.has(id):
+		_stairs[id] = {"reference": reference}
+		_scan_remaining = 0.0
+		set_process(true)
+
+
+func _on_planning_child_exiting(node: Node) -> void:
+	if _stairs.erase(node.get_instance_id()):
+		_scan_remaining = 0.0
+		set_process(true) # Also clear the final opening when the last stair leaves.
+
+
+func _tracked_stairs() -> Array[Node3D]:
+	var stairs: Array[Node3D] = []
+	for id: int in _stairs.keys():
+		var stair := (_stairs[id].reference as WeakRef).get_ref() as Node3D
+		if stair == null or stair.is_queued_for_deletion() or stair.get_parent() != _objects:
+			_stairs.erase(id)
+		else:
+			stairs.append(stair)
+	# Keep the old get_children() order, including explicit move_child edits.
+	stairs.sort_custom(func(a: Node3D, b: Node3D) -> bool: return a.get_index() < b.get_index())
+	return stairs
+
+
+func _cached_openings(stair: Node3D) -> Array[Rect2]:
+	var entry: Dictionary = _stairs[stair.get_instance_id()]
+	var bounds := _visual_bounds(stair)
+	var pose := stair.global_transform
+	if not entry.has("pose") or pose != entry.pose or bounds != entry.bounds:
+		entry.pose = pose
+		entry.bounds = bounds
+		var openings: Array[Rect2] = []
+		# An upstairs flight needs the unbroken ground floor beneath it.
+		if bounds.size.length_squared() >= 0.01 and bounds.position.y <= -0.4 and bounds.end.y >= -0.05:
+			openings = _stair_openings(stair, bounds)
+		entry.openings = openings
+	return entry.openings
+
+
 func _refresh_stairs() -> void:
-	if _stage == null:
+	if not is_instance_valid(_stage):
 		return
 	var next_openings: Array[Rect2] = []
-	for node in _stage.get_node("PlanningObjects").get_children():
-		if not node is Node3D:
-			continue
-		var stair := node as Node3D
-		var asset_path := str(stair.get_meta("planning_scene_path", ""))
-		if asset_path.is_empty():
-			asset_path = str(stair.get("model_path"))
-		if asset_path.get_file() not in ["01_stairs.glb", "01_stairs_2.glb"]:
-			continue
-		var bounds := _visual_bounds(stair)
-		# An upstairs flight needs the unbroken ground floor beneath it.
-		if bounds.size.length_squared() < 0.01 or bounds.position.y > -0.4 or bounds.end.y < -0.05:
-			continue
-		next_openings.append_array(_stair_openings(stair, bounds))
+	for stair in _tracked_stairs():
+		next_openings.append_array(_cached_openings(stair))
+	set_process(not _stairs.is_empty())
 	if next_openings == _openings:
 		return
 	_openings = next_openings
 	_stage.get_node("Floor").call("set_stair_openings", _openings)
 	_update_floor_collision(_stage.get_node("FloorBody") as StaticBody3D)
+
+
+func _exit_tree() -> void:
+	if is_instance_valid(_objects):
+		_objects.child_entered_tree.disconnect(_on_planning_child_entered)
+		_objects.child_exiting_tree.disconnect(_on_planning_child_exiting)
+	_stairs.clear()
 
 
 func _visual_bounds(stair: Node3D) -> AABB:
