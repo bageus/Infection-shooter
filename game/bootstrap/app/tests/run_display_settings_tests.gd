@@ -130,7 +130,7 @@ func _ui() -> void:
 	menu.activate("settings")
 	await process_frame
 	var dialog: Control = menu.modal
-	var page := dialog.settings.tabs.get_child(2)
+	var page: Node = dialog.settings.tabs.get_child(2)
 	var mode := page.find_child("WindowMode", true, false) as OptionButton
 	var resolution := page.find_child("Resolution", true, false) as OptionButton
 	_check(mode != null and resolution != null, "Both display controls belong to Video")
