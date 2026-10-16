@@ -148,3 +148,6 @@ game/bootstrap/app/tests/run_planner_door_select_tests.gd
 game/bootstrap/app/tests/run_ui_translation_tests.gd
 game/presentation/prototype_hud/tests/run_mutation_veil_tests.gd
 game/bootstrap/app/tests/run_legacy_cabinet_paths_tests.gd
+game/features/player/tests/run_shot_recoil_tests.gd
+game/features/infected/tests/run_hit_drag_tests.gd
+game/bootstrap/app/tests/run_bullet_smoke_tests.gd

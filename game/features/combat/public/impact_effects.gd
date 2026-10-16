@@ -100,3 +100,21 @@ func project_surface(collider: Node3D, projector: Transform3D, footprint: Vector
 		anchor.add_child(mark)
 		result.append(mark)
 	return result
+
+
+## Optional bullet-only dust, independent of marks, blood and electronic sparks.
+var bullet_smoke_enabled := true:
+	set(value):
+		bullet_smoke_enabled = value
+		if not value and is_instance_valid(_bullet_smoke):
+			_bullet_smoke.clear()
+var _bullet_smoke: Node3D
+
+
+func spawn_bullet_smoke(point: Vector3, normal: Vector3) -> void:
+	if not bullet_smoke_enabled:
+		return
+	if not is_instance_valid(_bullet_smoke):
+		_bullet_smoke = preload("res://game/features/combat/bullet_impact_smoke.gd").new()
+		add_child(_bullet_smoke)
+	_bullet_smoke.puff(point, normal)

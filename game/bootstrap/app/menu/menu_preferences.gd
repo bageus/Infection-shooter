@@ -10,7 +10,7 @@ const FILE := "user://interface_settings.cfg"
 const DEFAULTS := {"language": "ru", "brightness": 1.0, "text_scale": 1.0,
 	"walk_speed_multiplier": 1.0, "walk_animation_multiplier": 1.0,
 	"volume": 0.4, "effects_volume": 1.0, "music_volume": 1.0, "menu_music": true, "menu_music_volume": 1.0, "sound": true, "occlusion_mode": 0, "test_mutagen": false, "infinite_antidotes": false, "lighting": true, "electronic_particles": true, "skill_effects": 0, "dodge_animation": 0,
-	"sunlight": true, "shadows": true, "shadow_quality": 2, "mesh_lod": true, "keep_corpses": true}
+	"bullet_impact_smoke": true, "sunlight": true, "shadows": true, "shadow_quality": 2, "mesh_lod": true, "keep_corpses": true}
 var values: Dictionary = DEFAULTS.duplicate()
 
 
@@ -91,6 +91,9 @@ func apply_to_game(tree: SceneTree) -> void:
 		scene.call("set_walk_tuning", float(values.walk_speed_multiplier), float(values.walk_animation_multiplier))
 	if scene != null and scene.has_method("set_electronic_particles_enabled"):
 		scene.call("set_electronic_particles_enabled", bool(values.electronic_particles))
+	var impacts := scene.get_node_or_null("ImpactEffects") if scene != null else null
+	if impacts != null:
+		impacts.set("bullet_smoke_enabled", bool(values.bullet_impact_smoke))
 	var lighting := scene.get_node_or_null("PlanningLighting") if scene != null else null
 	if lighting != null:
 		lighting.call("set_local_lights_enabled", bool(values.lighting))

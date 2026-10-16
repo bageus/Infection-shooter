@@ -270,7 +270,7 @@ func _flinch() -> void:
 	await create_timer(0.1).timeout
 	enemy.call("take_projectile_damage", 16.0, Vector3(0, 1.4, -0.4), Vector3(0, 0, 1), "PISTOL")
 	var driver := enemy.get_node("AnimationDriver")
-	_check(driver.overlay != null and bool(driver.overlay.call("is_playing")), "A solid hit plays the hit clip on the upper body.")
+	_check(driver.hit_reaction != null and driver.hit_reaction.get("_velocity").length() > 0.0, "A directional bullet hit drives the torso spring while legs keep moving.")
 	enemy.queue_free()
 	await process_frame
 

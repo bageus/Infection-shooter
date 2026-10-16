@@ -65,6 +65,7 @@ var audio: Node
 var weapon_stance := WEAPON_STANCE.new()
 var _animation_selection := ANIMATION_SELECTION.new()
 var _scope_raise := SCOPE_RAISE.new()
+var _shot_recoil := preload("res://game/features/player/shot_recoil.gd").new()
 var _shooting_camera := preload("res://game/features/player/shooting_camera_state.gd").new()
 var health: float
 var armor: float
@@ -209,6 +210,7 @@ func _fire_weapon(weapon: Node3D) -> bool:
 	weapon_stance.finish_fire_attempt(fired, previous)
 	if fired:
 		_shooting_camera.shot(String(weapon.call("get_weapon_name")))
+		_shot_recoil.shot(String(weapon.call("get_weapon_name")), -weapon.get_node("Muzzle").global_basis.z)
 	return fired
 
 
@@ -449,6 +451,9 @@ func _update_move(delta:float)->void:
 	velocity.y=0.0 if is_on_floor() else velocity.y-gravity_acceleration*delta
 	_intended_motion=Vector3(velocity.x,0.0,velocity.z)
 	move_and_slide()
+	var recoil_motion := _shot_recoil.step(delta)
+	if not recoil_motion.is_zero_approx():
+		move_and_collide(recoil_motion)
 	if is_wounded() and _blood_motion_start.distance_to(global_position) >= blood_drop_distance:
 		if _blood_motion_start.distance_to(global_position) < 3.0:
 			var excluded: Array[RID] = [get_rid()]

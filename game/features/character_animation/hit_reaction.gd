@@ -21,7 +21,7 @@ var stiffness := 150.0
 var damping := 13.0
 ## Angular speed (rad/s) given by a full-strength shot at the torso's edge.
 var kick := 24.0
-var max_angle := deg_to_rad(30.0)
+var max_angle := deg_to_rad(14.0)
 ## How fast the head catches up with the torso (1/s).
 var head_follow := 9.0
 
@@ -64,7 +64,7 @@ func push(world_point: Vector3, world_direction: Vector3, strength: float) -> vo
 	# Hits below the spine still rock the torso a little, never pitch it forward.
 	lever.y = maxf(lever.y, _torso_length * 0.25)
 	var torque := (lever / _torso_length).limit_length(1.2).cross(direction)
-	_velocity += torque * kick * clampf(strength, 0.0, 1.5)
+	_velocity = (_velocity + torque * kick * clampf(strength, 0.0, 1.5)).limit_length(kick * 1.5)
 
 
 func is_settled() -> bool:

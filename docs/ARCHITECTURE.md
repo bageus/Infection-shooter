@@ -353,3 +353,7 @@ private corpse_blood_pool ограниченно наблюдает torso и с�
 немедленный blood_death совместим, bootstrap выбирает один pool event. Owners,
 dependency edges, сцены/DTO прежние; additive факты описаны в manifests,
 глобального состояния и архитектурных исключений нет.
+
+ADR-0052: player/infected private recoil и hit drag сохраняют owners/edges; combat
+impact_effects bullet_smoke_v1 предоставляет bounded optional dust у подтверждённых
+bullet marks, bootstrap применяет optional interface_v1.bullet_impact_smoke=true.

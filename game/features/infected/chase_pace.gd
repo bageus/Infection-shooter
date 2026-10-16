@@ -60,3 +60,17 @@ func _start(charge: bool) -> void:
 	charging = charge
 	var span := charge_seconds if charge else recover_seconds
 	_timer = _rng.randf_range(span.x, span.y)
+
+
+## Non-stacking hit drag; a burst cannot stop the chase or extend a stun.
+var hit_penalty := 0.0
+
+
+func hit(amount: float, max_health: float) -> float:
+	var strength := clampf(amount / maxf(max_health * 0.2, 1.0), 0.12, 1.1)
+	hit_penalty = maxf(hit_penalty, strength * 0.14)
+	return strength
+
+
+func recover_hit(delta: float) -> void:
+	hit_penalty = move_toward(hit_penalty, 0.0, maxf(delta, 0.0) * 0.95)

@@ -85,7 +85,7 @@ func _run() -> void:
 	_check(dialog.find_children("*", "PopupPanel", true, false).size() == 1, "Language rebuild frees the previous notice popup")
 	_check(dialog.settings.tabs.current_tab == 1 and dialog.settings.tabs.get_tab_title(1) == "Controls", "Language change preserves active tab")
 	dialog.call("_defaults")
-	_check(menu.preferences.bindings.values.move_up.code == KEY_W and menu.preferences.values.sunlight and menu.preferences.values.walk_speed_multiplier == 1.0 and menu.preferences.values.walk_animation_multiplier == 1.0, "Reset restores controls, sunlight and both walk multipliers")
+	_check(menu.preferences.bindings.values.move_up.code == KEY_W and menu.preferences.values.bullet_impact_smoke and menu.preferences.values.sunlight and menu.preferences.values.walk_speed_multiplier == 1.0 and menu.preferences.values.walk_animation_multiplier == 1.0, "Reset restores controls, sunlight and both walk multipliers")
 	menu.close_dialog()
 	menu.activate("about")
 	await process_frame
@@ -112,6 +112,7 @@ const SHADOWS_OFF_DISTANCE := 0.5
 
 
 func _sunlight_checks(tabs: TabContainer, dialog: Control) -> void:
+	_smoke_checks(tabs)
 	var sunlight := tabs.get_child(2).find_child("Sunlight", true, false) as CheckButton
 	_check(sunlight != null, "Sunlight toggle belongs to Video")
 	if sunlight == null:
@@ -272,3 +273,16 @@ func _slider_checks(tabs: TabContainer) -> void:
 	var after := PREFS.new()
 	after.load_settings()
 	_check(is_equal_approx(after.values.music_volume, 0.15), "Releasing the slider saves the new value once")
+
+
+func _smoke_checks(tabs: TabContainer) -> void:
+	var smoke := tabs.get_child(2).find_child("BulletImpactSmoke", true, false) as CheckButton
+	_check(smoke != null and smoke.button_pressed and smoke.text == "Дым от попаданий пуль", "Translated smoke toggle defaults on in Video")
+	if smoke == null:
+		return
+	_check(not smoke.tooltip_text.is_empty(), "Smoke toggle explains its effect")
+	smoke.set_pressed(false)
+	var saved := PREFS.new()
+	saved.load_settings()
+	_check(not saved.values.bullet_impact_smoke and saved.values.electronic_particles, "Smoke off persists independently of electronic sparks")
+	smoke.set_pressed(true)
