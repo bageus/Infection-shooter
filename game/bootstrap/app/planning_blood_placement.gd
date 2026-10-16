@@ -78,17 +78,55 @@ static func restore_attachments(roots: Array) -> void:
 		if node.has_meta("planning_object_id"):
 			owners[str(node.get_meta("planning_object_id"))] = node
 	for node in all:
-		if not node.has_method("get_blood_attachment"):
-			continue
-		var config: Dictionary = node.call("get_blood_attachment")
-		if str(config.get("owner", "")).is_empty():
-			continue
-		var owner: Node = owners.get(str(config.get("owner", "")))
-		if owner == null:
-			continue
-		var anchor := owner.find_child(str(config["mesh"]), true, false) as Node3D
-		if anchor != null:
-			node.call("attach_blood", anchor, str(config["owner"]))
+		_restore_attachment(node, owners)
+
+
+## Same preorder owner resolution as restore_attachments without one long tree scan.
+static func restore_attachments_async(roots: Array, tree: SceneTree, alive: Callable) -> bool:
+	var pending: Array[Node] = []
+	for index in range(roots.size() - 1, -1, -1):
+		pending.append(roots[index])
+	var owners := {}
+	var marks: Array[Node] = []
+	var visited := 0
+	var started := Time.get_ticks_msec()
+	while not pending.is_empty():
+		var node: Node = pending.pop_back()
+		if node.has_meta("planning_object_id"):
+			owners[str(node.get_meta("planning_object_id"))] = node
+		if node.has_method("get_blood_attachment"):
+			marks.append(node)
+		var children := node.get_children()
+		for index in range(children.size() - 1, -1, -1):
+			pending.append(children[index])
+		visited += 1
+		if visited % 256 == 0 or Time.get_ticks_msec() - started >= 4:
+			await tree.process_frame
+			if not alive.call():
+				return false
+			started = Time.get_ticks_msec()
+	for index in marks.size():
+		_restore_attachment(marks[index], owners)
+		if index % 16 == 15 or Time.get_ticks_msec() - started >= 4:
+			await tree.process_frame
+			if not alive.call():
+				return false
+			started = Time.get_ticks_msec()
+	return true
+
+
+static func _restore_attachment(node: Node, owners: Dictionary) -> void:
+	if not node.has_method("get_blood_attachment"):
+		return
+	var config: Dictionary = node.call("get_blood_attachment")
+	if str(config.get("owner", "")).is_empty():
+		return
+	var owner: Node = owners.get(str(config.get("owner", "")))
+	if owner == null:
+		return
+	var anchor := owner.find_child(str(config["mesh"]), true, false) as Node3D
+	if anchor != null:
+		node.call("attach_blood", anchor, str(config["owner"]))
 
 
 static func _collect(node: Node, out: Array[Node]) -> void:

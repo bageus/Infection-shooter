@@ -1,0 +1,85 @@
+{
+  "base_commit": "c6fa0d0a1a2a9ccece2122ae97dab9a56692846b",
+  "date": "2026-10-16",
+  "godot": "4.7.2.stable.official.ed1daf0bf",
+  "environment": "Linux, headless/Dummy; physics paused; no other Godot run during the measured pair",
+  "fixture": "Real Main, shipped map loaded twice; initial composition and five warmup frames excluded; warm filesystem cache",
+  "baseline": "Original synchronous named-load read/apply/snapshot body, with the same unchanged DTO projection",
+  "candidate": "Staged named load; attachment traversal 256 nodes or soft 4 ms; objects 16 or soft 4 ms",
+  "sampling": "Allocator/RSS at factory/bind boundaries and process_frame; one paired trial; sync has only one frame interval; not FPS, GPU or an absolute memory peak",
+  "runs": [
+    {
+      "allocator_baseline_mib": 951.484411239624,
+      "allocator_sampled_peak_mib": 1049.61800193787,
+      "elapsed_ms": 11534.909,
+      "frame_max_ms": 11809.737,
+      "frame_mean_ms": 11809.737,
+      "frame_p95_ms": 11809.737,
+      "frame_samples": 1,
+      "records": 5363,
+      "route": "sync",
+      "rss_sampled_peak_mib": 1234.98828125,
+      "slow_frames": [
+        {
+          "ms": 11809.737,
+          "phase_after": "completion"
+        }
+      ],
+      "video_mib": 0.0,
+      "phase_allocator_mib": {}
+    },
+    {
+      "allocator_baseline_mib": 951.47553062439,
+      "allocator_sampled_peak_mib": 1050.37329673767,
+      "elapsed_ms": 27263.932,
+      "frame_max_ms": 417.489,
+      "frame_mean_ms": 8.67073500476038,
+      "frame_p95_ms": 12.057,
+      "frame_samples": 3151,
+      "records": 5363,
+      "route": "staged",
+      "rss_sampled_peak_mib": 1237.30859375,
+      "slow_frames": [
+        {
+          "ms": 417.489,
+          "phase_after": "Loading resources\u2026"
+        },
+        {
+          "ms": 289.1,
+          "phase_after": "Releasing previous map\u2026"
+        },
+        {
+          "ms": 118.844,
+          "phase_after": "Releasing previous map\u2026"
+        },
+        {
+          "ms": 182.509,
+          "phase_after": "Restoring attachments\u2026"
+        },
+        {
+          "ms": 164.675,
+          "phase_after": "Restoring attachments\u2026"
+        },
+        {
+          "ms": 196.959,
+          "phase_after": "Restoring attachments\u2026"
+        },
+        {
+          "ms": 187.636,
+          "phase_after": "Restoring attachments\u2026"
+        }
+      ],
+      "video_mib": 0.0,
+      "phase_allocator_mib": {
+        "read": 951.528,
+        "resources": 974.753,
+        "prepare": 976.74,
+        "free": 1050.373,
+        "objects": 711.238,
+        "attachments": 965.015,
+        "snapshot": 978.468,
+        "ready": 973.162
+      }
+    }
+  ]
+}

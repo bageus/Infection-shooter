@@ -45,20 +45,17 @@ func prepare(data: Dictionary) -> Dictionary:
 	return _check_plan(data, prepared)
 
 
-func prepare_async(data: Dictionary, tree: SceneTree, progress: Callable) -> Dictionary:
+func prepare_async(data: Dictionary, tree: SceneTree, progress: Callable, alive: Callable = Callable()) -> Dictionary:
 	_resources.clear()
 	timings = {"instantiate_usec": 0, "ready_usec": 0}
 	var problem := VALIDATOR.error(data)
 	if not problem.is_empty():
 		return {"error": problem}
-	var paths: Array[String] = []
-	for record: Dictionary in data.objects:
-		var path: String = catalog._migrate_scene_path(record.scene)
-		if not path.is_empty() and path != PLAYER and ResourceLoader.exists(path) and not paths.has(path):
-			paths.append(path)
+	var paths := _resource_paths(data)
 	var resource_error := await _load_resources(paths, tree, progress)
-	if not resource_error.is_empty():
-		return {"error": resource_error}
+	if not resource_error.is_empty() or not _alive(alive):
+		_discard(_empty_plan())
+		return {"error": resource_error if not resource_error.is_empty() else "loading cancelled"}
 	var prepared := _empty_plan()
 	var started := Time.get_ticks_msec()
 	for index in data.objects.size():
@@ -68,8 +65,20 @@ func prepare_async(data: Dictionary, tree: SceneTree, progress: Callable) -> Dic
 		if index % 16 == 15 or Time.get_ticks_msec() - started >= 4:
 			progress.call(0.5 + 0.1 * float(index + 1) / data.objects.size(), "prepare")
 			await tree.process_frame
+			if not _alive(alive):
+				_discard(prepared)
+				return {"error": "loading cancelled"}
 			started = Time.get_ticks_msec()
 	return _check_plan(data, prepared)
+
+
+func _resource_paths(data: Dictionary) -> Array[String]:
+	var paths: Array[String] = []
+	for record: Dictionary in data.objects:
+		var path: String = catalog._migrate_scene_path(record.scene)
+		if not path.is_empty() and path != PLAYER and ResourceLoader.exists(path) and not paths.has(path):
+			paths.append(path)
+	return paths
 
 
 func _load_resources(paths: Array[String], tree: SceneTree, progress: Callable) -> String:
@@ -78,7 +87,10 @@ func _load_resources(paths: Array[String], tree: SceneTree, progress: Callable) 
 	return problem
 
 
-func commit_async(prepared: Dictionary, tree: SceneTree, progress: Callable) -> Dictionary:
+func commit_async(prepared: Dictionary, tree: SceneTree, progress: Callable, alive: Callable = Callable(), staged_finish: bool = false) -> Dictionary:
+	if not _alive(alive):
+		_discard(prepared)
+		return {"error": "loading cancelled"}
 	_begin(prepared)
 	var started := Time.get_ticks_msec()
 	for index in prepared.entries.size():
@@ -86,8 +98,45 @@ func commit_async(prepared: Dictionary, tree: SceneTree, progress: Callable) -> 
 		if index % 16 == 15 or Time.get_ticks_msec() - started >= 4:
 			progress.call(0.6 + 0.35 * float(index + 1) / prepared.entries.size(), "objects")
 			await tree.process_frame
+			if not _alive(alive):
+				_discard(prepared)
+				return {"error": "loading cancelled"}
 			started = Time.get_ticks_msec()
+	if staged_finish:
+		progress.call(0.95, "attachments")
+		if not await BLOOD_PLACEMENT.restore_attachments_async([session.root], tree, alive):
+			_discard(prepared)
+			return {"error": "loading cancelled"}
+		return _report(prepared)
 	return _finish(prepared)
+
+
+## Named maps clear only after preparation succeeds; keep the existing retained nodes.
+func clear_async(tree: SceneTree, progress: Callable, alive: Callable) -> bool:
+	objects.workstation_transforms.clear()
+	objects.selected = null
+	var retained: Array[Node3D] = []
+	var old: Array = objects.placed.duplicate()
+	var started := Time.get_ticks_msec()
+	for index in old.size():
+		if is_instance_valid(old[index]):
+			var node: Node3D = old[index]
+			if bool(node.get_meta("planning_existing", false)) or objects.keep_on_clear.has(node):
+				retained.append(node)
+			else:
+				node.free()
+		if index % 16 == 15 or Time.get_ticks_msec() - started >= 4:
+			progress.call(0.6, "free")
+			await tree.process_frame
+			if not _alive(alive):
+				return false
+			started = Time.get_ticks_msec()
+	objects.placed = retained
+	return true
+
+
+static func _alive(check: Callable) -> bool:
+	return not check.is_valid() or bool(check.call())
 
 
 func _empty_plan() -> Dictionary:
@@ -120,7 +169,8 @@ func _check_plan(data: Dictionary, prepared: Dictionary) -> Dictionary:
 
 func _discard(prepared: Dictionary) -> void:
 	for entry: Dictionary in prepared.entries:
-		(entry.node as Node).free()
+		if is_instance_valid(entry.node):
+			(entry.node as Node).free()
 	_resources.clear()
 	resource_queue.resources.clear()
 
@@ -213,6 +263,10 @@ func append(records: Array) -> int:
 
 func _finish(prepared: Dictionary) -> Dictionary:
 	BLOOD_PLACEMENT.restore_attachments([session.root])
+	return _report(prepared)
+
+
+func _report(prepared: Dictionary) -> Dictionary:
 	objects._update_status()
 	if controls != null:
 		controls.call("_update_history_buttons")
