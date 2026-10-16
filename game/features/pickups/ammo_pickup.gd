@@ -11,6 +11,10 @@ func _ready() -> void:
 func _on_body_entered(body: Node) -> void:
 	if _consumed or body == null or not body.has_method("add_ammo_to_current_weapon"):
 		return
+	# Keep the latch during collector signals to prevent a second award.
 	_consumed = true
-	body.call("add_ammo_to_current_weapon", ammo_amount)
+	var accepted := int(body.call("add_ammo_to_current_weapon", ammo_amount)) > 0
+	if not accepted:
+		_consumed = false
+		return
 	queue_free()
