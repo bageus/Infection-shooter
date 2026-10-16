@@ -1,0 +1,50 @@
+{
+  "game/bootstrap/app/tests/run_group04_asset_tests.gd": {
+    "workflow": ".github/workflows/mission_runtime.yml",
+    "job": "runtime",
+    "mode": "headless",
+    "reason": "Отдельный шаг Group 04 atlas and destruction."
+  },
+  "game/bootstrap/app/tests/run_model_texture_tests.gd": {
+    "workflow": ".github/workflows/mission_runtime.yml",
+    "job": "runtime",
+    "mode": "headless",
+    "reason": "Отдельный шаг Imported model textures с тайм-аутом180с."
+  },
+  "game/presentation/office_floor/tests/run_display_tests.gd": {
+    "workflow": ".github/workflows/mission_runtime.yml",
+    "job": "runtime",
+    "mode": "headless",
+    "reason": "Отдельный шаг Updated electronic displays."
+  },
+  "game/core/vfx/tests/run_stamp_cache_tests.gd": {
+    "workflow": ".github/workflows/impact_geometry.yml",
+    "job": "geometry",
+    "mode": "isolated",
+    "reason": "Изолированный минимальный проект без импорта игровых ресурсов."
+  },
+  "game/features/infected/tests/run_body_topology_tests.gd": {
+    "workflow": ".github/workflows/impact_geometry.yml",
+    "job": "geometry",
+    "mode": "isolated",
+    "reason": "Изолированный проект с body_piece_baseline; также integration job."
+  },
+  "game/presentation/office_floor/tests/run_blood_fifo_tests.gd": {
+    "workflow": ".github/workflows/impact_geometry.yml",
+    "job": "geometry",
+    "mode": "isolated",
+    "reason": "Изолированный проект для чистой FIFO структуры."
+  },
+  "game/presentation/office_floor/tests/run_door_runtime_tests.gd": {
+    "workflow": ".github/workflows/impact_geometry.yml",
+    "job": "integration",
+    "mode": "headless",
+    "reason": "Целевой integration job по impact/door/blood paths; сохраняет существующий path filter."
+  },
+  "game/presentation/office_floor/tests/run_display_shadow_profile.gd": {
+    "workflow": ".github/workflows/mission_runtime.yml",
+    "job": "runtime",
+    "mode": "native",
+    "reason": "Профиль настоящих теней в Compatibility/Forward+; headless не проверяет пиксели."
+  }
+}
