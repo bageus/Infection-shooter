@@ -1,7 +1,8 @@
 # O01 — обновление лестничных проёмов без обхода мебели
 
 Дата: 16.10.2026. Исходная A/B база `12d2570`; перед публикацией принята main `014c546`
-после A08. Godot4.7.2, Linux headless. Изменения A08 не затрагивают game-код.
+после A08, затем main `242616e` после PR217/218 (стрельба/камера и shelter
+Colossus). Godot4.7.2, Linux headless. Код лестничной геометрии в этих PR не менялся.
 
 ## Изменение
 
@@ -90,6 +91,10 @@ production прошли без ERROR/WARNING/ObjectDB/RID. Причина оди
 не установлена, его связь с этим изменением не доказана. Остальные7 наборов
 чистые с первого запуска. Peak allocator935.43MiB, RSS1207.30MiB на повторном
 candidate startup; video0, не GPU-измерение.
+
+После принятия main242616e дополнительно повторены stair_refresh, stair_planner,
+shooting_camera, new_weapon и colossus_shelter:5 suites PASS, без warnings/errors.
+Все чужие изменения сохранены.
 
 Project/spec/workflow/architecture/scene/resources/diff gates и editor import
 PASS;121 прежних source-size warnings, новых превышений нет.
