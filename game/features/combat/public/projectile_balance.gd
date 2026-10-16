@@ -36,6 +36,7 @@ static func projectile_energy(weapon: String) -> float:
 
 static func material_cost(material: String) -> float:
 	match material:
+		"flesh": return 32.0
 		"glass": return 8.0
 		"light": return 12.0
 		"tech": return 17.0

@@ -326,6 +326,8 @@ jobs:
           game/features/infected/tests/run_ragdoll_death_tests.gd
           game/features/infected/tests/run_ragdoll_budget_tests.gd
           game/features/combat/tests/run_projectile_step_budget_tests.gd
+          game/features/combat/tests/run_penetration_exit_tests.gd
+          game/bootstrap/app/tests/run_body_penetration_tests.gd
           game/features/infected/tests/run_corpse_budget_tests.gd
           game/bootstrap/app/tests/run_layout_bake_tests.gd
           game/bootstrap/app/tests/run_shader_warmup_tests.gd
