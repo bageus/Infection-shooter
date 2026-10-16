@@ -7,6 +7,8 @@ const IMPACT_SOUNDS := {
 }
 
 const MAX_HITS_PER_TICK := 5
+const EXIT := preload("res://game/features/combat/penetration_exit.gd")
+const EXIT_BURST := preload("res://game/features/combat/penetration_burst.gd")
 
 const PROJECTILE_VISUAL := preload("res://game/features/combat/projectile_visual.gd")
 const BALANCE = preload("res://game/features/combat/public/projectile_balance.gd")
@@ -29,6 +31,7 @@ var _pending_step := false
 var _step_finish := Vector3.ZERO
 var _step_distance := 0.0
 var _step_excluded: Array[RID] = []
+var _pending_exits: Array[Dictionary] = []
 
 var effects_root: Node3D
 var impact_pool: Node
@@ -71,19 +74,22 @@ func _physics_process(delta: float) -> void:
 	if not _pending_step:
 		_step_distance = minf(_speed * delta, _range - _travelled)
 		_step_finish = global_position + _direction * _step_distance
-		_step_excluded.clear()
-		if is_instance_valid(_shooter):
+		# Straight flight never damages the same penetrated body twice.
+		if is_instance_valid(_shooter) and not _step_excluded.has(_shooter.get_rid()):
 			_step_excluded.append(_shooter.get_rid())
 
 	var from_barrel := _first_step
 	var remaining_start := _collision_origin if _first_step else global_position
 	_first_step = false
-	for pass_index in MAX_HITS_PER_TICK:
+	# Reserve a second ray for exit geometry before callbacks alter the body.
+	var stride := 2 if is_instance_valid(effects_root) else 1
+	for pass_index in range(0, MAX_HITS_PER_TICK - stride + 1, stride):
 		var query := PhysicsRayQueryParameters3D.create(remaining_start, _step_finish, 7)
 		query.exclude = _step_excluded
 		query.hit_from_inside = from_barrel and pass_index == 0
 		var hit := get_world_3d().direct_space_state.intersect_ray(query)
 		if hit.is_empty():
+			_flush_exits(_step_finish)
 			global_position = _step_finish
 			_travelled += _step_distance
 			_pending_step = false
@@ -95,24 +101,47 @@ func _physics_process(delta: float) -> void:
 			normal = -_direction
 		var collider: Object = hit.get("collider")
 		var shape_index := int(hit.get("shape", -1))
-		var stops_bullet := _handle_hit(collider, hit_position, normal, shape_index)
+		var collider_rid: RID = collider.get_rid() if collider is CollisionObject3D else RID()
 		var material := _hit_material(collider, shape_index)
-		_remaining_energy -= BALANCE.material_cost(material)
+		var energy_after := _remaining_energy - BALANCE.material_cost(material)
+		var exit_surface: Dictionary = {}
+		if energy_after >= 8.0 and is_instance_valid(effects_root):
+			exit_surface = EXIT.surface(collider, shape_index, hit_position, _direction, _step_excluded)
+		var stops_bullet := _handle_hit(collider, hit_position, normal, shape_index)
+		_remaining_energy = energy_after
 		if _remaining_energy < 8.0:
 			stops_bullet = true
 		if stops_bullet:
+			_flush_exits(hit_position)
 			global_position = hit_position
 			queue_free()
 			return
 
-		if collider is CollisionObject3D:
-			_step_excluded.append((collider as CollisionObject3D).get_rid())
+		if collider_rid.is_valid():
+			_step_excluded.append(collider_rid)
+		if not exit_surface.is_empty():
+			exit_surface["material"] = material
+			exit_surface["energy"] = _remaining_energy
+			exit_surface["excluded"] = _step_excluded.duplicate()
+			_pending_exits.append(exit_surface)
 		remaining_start = hit_position
 
 	# Only the checked prefix is safe. Keep its exclusions and original endpoint
 	# until the remaining segment is resolved, even if the next delta differs.
+	_flush_exits(remaining_start)
 	global_position = remaining_start
 	_pending_step = true
+
+
+func _flush_exits(checked_position: Vector3) -> void:
+	for index in range(_pending_exits.size() - 1, -1, -1):
+		var entry := _pending_exits[index]
+		if (checked_position - (entry.position as Vector3)).dot(_direction) < -0.0001:
+			continue
+		EXIT_BURST.spawn(effects_root, entry.position, _direction, entry.material, entry.energy)
+		if entry.material == "flesh" and is_instance_valid(impact_pool):
+			impact_pool.emit_signal("penetration_blood", entry.position, _direction, entry.energy, entry.excluded)
+		_pending_exits.remove_at(index)
 
 
 func _handle_hit(collider: Object, hit_position: Vector3, normal: Vector3, shape_index: int = -1) -> bool:
@@ -142,11 +171,12 @@ func _handle_hit(collider: Object, hit_position: Vector3, normal: Vector3, shape
 		))
 
 	if collider.has_method("take_damage"):
+		var penetrable_body: bool = collider is Node and collider.is_in_group("infected_alive")
 		if collider.has_method("take_projectile_damage"):
 			collider.call("take_projectile_damage", hit_damage, hit_position, _direction, _weapon_name)
 		else:
 			collider.call("take_damage", hit_damage)
-		return true
+		return not penetrable_body
 
 	var parent := (collider as Node).get_parent() if collider is Node else null
 	if parent != null and parent.has_method("take_projectile_hit"):
@@ -172,6 +202,8 @@ func _play_impact(collider: Object, hit_position: Vector3, shape_index: int) -> 
 
 
 func _hit_material(collider: Object, shape_index: int) -> String:
+	if collider is Node and collider.is_in_group("infected_alive"):
+		return "flesh"
 	if collider != null and collider.has_method("get_projectile_material"):
 		return str(collider.call("get_projectile_material", shape_index))
 	return "solid"

@@ -33,6 +33,7 @@ signal blood_wounded(position: Vector3, excluded: Array[RID])
 @warning_ignore("unused_signal") signal wounded_moved(previous: Vector3, current: Vector3, excluded: Array[RID])
 @warning_ignore("unused_signal") signal body_dragged(previous: Vector3, current: Vector3, excluded: Array[RID])
 signal blood_death(position: Vector3, excluded: Array[RID], death_id: int)
+signal blood_pool_ready(position: Vector3, excluded: Array[RID], death_id: int)
 # Public v1 presentation fact (ADR-0017): a body part was shot off here.
 signal limb_severed(position: Vector3, direction: Vector3, excluded: Array[RID])
 
@@ -542,9 +543,7 @@ func _play_animation(state: StringName) -> float:
 func _track_blood_motion() -> void: _blood.track(self, _dead, health >= max_health, blood_drop_distance, _blood_exclusions())
 
 
-func _blood_exclusions() -> Array[RID]:
-	var excluded: Array[RID] = [get_rid()]
-	return excluded
+func _blood_exclusions() -> Array[RID]: return [get_rid()]
 
 
 # Blood dripping from torn-off limbs leaves marks under the stump.
@@ -586,6 +585,7 @@ func _die() -> void:
 	_ragdoll = DEATH_RAGDOLL.start(self, _parts, _animation, Vector3(velocity.x, 0.0, velocity.z), _death_push if fresh else Vector3.ZERO, size)
 	if _ragdoll == null:
 		_fall_watch = DEATH_CLIP.play(self, _parts, _animation, fall, landing)
+	preload("res://game/features/infected/corpse_blood_pool.gd").start(self, _parts, global_position + landing)
 	death_cloud.set("heals_visitors", is_instance_valid(_target) and _target.has_method("get_infection_skill") and bool(_target.call("get_infection_skill", "devourer")))
 	death_cloud.call("activate")
 

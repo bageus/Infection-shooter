@@ -39,11 +39,11 @@ func find_floor(point: Vector3, excluded: Array[RID]) -> Dictionary:
 	return _cast(point + Vector3.UP * 0.3, point + Vector3.DOWN * floor_reach, excluded, true)
 
 
-func find_behind(point: Vector3, direction: Vector3, excluded: Array[RID]) -> Dictionary:
+func find_behind(point: Vector3, direction: Vector3, excluded: Array[RID], reach: float = -1.0) -> Dictionary:
 	if direction.length_squared() < 0.0001:
 		return {}
 	var axis := direction.normalized()
-	return _cast(point + axis * 0.035, point + axis * wall_reach, excluded, false)
+	return _cast(point + axis * 0.035, point + axis * (wall_reach if reach < 0.0 else minf(reach, wall_reach)), excluded, false)
 
 
 func _cast(start: Vector3, finish: Vector3, excluded: Array[RID], floor_only: bool) -> Dictionary:
