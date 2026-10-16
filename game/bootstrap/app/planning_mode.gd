@@ -147,6 +147,8 @@ func enter() -> void:
 
 
 func exit() -> void:
+	if storage.map_loading:
+		return
 	controls.light_view.set_enabled(false)
 	if desk_setup.active:
 		desk_setup.close()
@@ -184,7 +186,7 @@ func exit() -> void:
 
 
 func _process(delta: float) -> void:
-	if not active:
+	if storage.map_loading or not active:
 		return
 	objects._sync_workstations()
 	if desk_setup.active:
@@ -210,6 +212,9 @@ func _process(delta: float) -> void:
 
 
 func _input(event: InputEvent) -> void:
+	if storage.map_loading:
+		get_viewport().set_input_as_handled()
+		return
 	if not active:
 		return
 	if desk_setup.active:

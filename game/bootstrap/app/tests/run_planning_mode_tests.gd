@@ -126,6 +126,14 @@ func _exercise_maps(planner: Node) -> void:
 	editor.call("clear_layout", false)
 	await process_frame
 	storage.call("load_named_map", name)
+	planner.call("exit")
+	_check(planner.get("active") and paused, "Exit is blocked during named map loading")
+	var event := InputEventKey.new()
+	event.keycode = KEY_DELETE
+	event.pressed = true
+	planner.call("_input", event)
+	while storage.get("map_loading"):
+		await process_frame
 	var restored: Dictionary = storage.call("_collect_layout_data")
 	_check(LAYOUT_ASSERTIONS.equivalent(restored, snapshot), "Named map round trip preserves all object records")
 	if not LAYOUT_ASSERTIONS.equivalent(restored, snapshot):

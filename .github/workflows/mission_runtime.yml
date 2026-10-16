@@ -399,6 +399,7 @@ jobs:
           game/presentation/office_floor/tests/run_blast_break_tests.gd
           game/features/combat/tests/run_cursor_aim_tests.gd
           game/bootstrap/app/tests/run_layout_loading_tests.gd
+          game/bootstrap/app/tests/run_named_map_loading_tests.gd
           game/features/infected/tests/run_horde_escalation_tests.gd
           game/bootstrap/app/tests/run_ui_sound_tests.gd
           game/presentation/office_floor/tests/run_destruction_fixes_tests.gd

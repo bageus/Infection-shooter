@@ -1,6 +1,6 @@
 # Аудит Infection Shooter — 15 октября 2026
 
-> Состояние отчёта: ниже сохранены исходные доказательства аудита. Проверенные исправления A01–A08 и O01: [ragdoll](../qa/ragdoll_budget.md), [projectile](../qa/projectile_step_budget.md), [blast shelter](../qa/blast_shelter.md), [atomic desk template](../qa/atomic_desk_template.md), [audio warmup](../qa/audio_warmup_lifetime.md), [radar](../qa/radar_live_enemies.md), [legacy pickups](../qa/legacy_pickup_refusal.md), [audio generators](../qa/audio_generator_safety.md), [stairs](../qa/stair_opening_refresh.md). Следующая отдельная задача — O02.
+> Состояние отчёта: ниже сохранены исходные доказательства аудита. Проверенные исправления A01–A08 и O01–O02: [ragdoll](../qa/ragdoll_budget.md), [projectile](../qa/projectile_step_budget.md), [blast shelter](../qa/blast_shelter.md), [atomic desk template](../qa/atomic_desk_template.md), [audio warmup](../qa/audio_warmup_lifetime.md), [radar](../qa/radar_live_enemies.md), [legacy pickups](../qa/legacy_pickup_refusal.md), [audio generators](../qa/audio_generator_safety.md), [stairs](../qa/stair_opening_refresh.md), [named maps](../qa/named_map_loading.md). Следующая отдельная задача — O03.
 
 ## Основной вывод
 
@@ -196,6 +196,8 @@ status=Template applied to this desk. Save the map to keep it.
 **Предложение:** отдельный список лестниц и dirty-флаг после загрузки, добавления/удаления, переноса/поворота/масштаба лестницы. Перестраивать отверстия при изменении, а не искать их среди всей мебели. Приёмка — те же отверстия/коллизии/выход после изменения лестницы, отсутствие полных обходов в неизменившейся игре.
 
 ### O02. Распространить поэтапную загрузку на именованные карты планировщика
+
+**Исправлено 16.10.2026:** named LOAD использует async resources/prepare, staged free/commit, поэтапные blood attachment pass и authored snapshot. UI/Save/reload/exit закрыты до завершения; ошибка подготовки сохраняет прежнюю карту. Публичные API/DTO/ассеты прежние, снижение пика RAM не заявлено. Проверки и отдельное измерение named load5363: [QA](../qa/named_map_loading.md), [метрики](../qa/named_map_loading_metrics.json). Исходная находка сохранена ниже.
 
 [planning_storage.gd:337–349](https://github.com/bageus/Infection-shooter/blob/0e154b73/game/bootstrap/app/planning_storage.gd#L337-L349), [planning_layout_loader.gd:25–45](https://github.com/bageus/Infection-shooter/blob/0e154b73/game/bootstrap/app/planning_layout_loader.gd#L25-L45).
 
