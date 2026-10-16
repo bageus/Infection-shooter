@@ -133,6 +133,11 @@ jobs:
           set -o pipefail
           timeout 180 xvfb-run -a godot --verbose --path . --audio-driver Dummy --rendering-method ${{ matrix.renderer }} --script game/bootstrap/app/tests/run_new_weapon_tests.gd 2>&1 | tee /tmp/weapon.log
           if grep -E 'SHADER ERROR|SCRIPT ERROR|^ERROR:' /tmp/weapon.log; then exit 1; fi
+      - name: Native display resolution and window modes
+        run: |
+          set -o pipefail
+          timeout 120 xvfb-run -a -s "-screen 0 1920x1080x24" godot --path . --audio-driver Dummy --rendering-method ${{ matrix.renderer }} --script game/bootstrap/app/tests/run_display_settings_tests.gd 2>&1 | tee /tmp/display-native.log
+          if grep -E 'SCRIPT ERROR|^ERROR:' /tmp/display-native.log; then exit 1; fi
       - name: Native music and positional audio lifecycle
         run: |
           set -o pipefail
@@ -148,6 +153,7 @@ jobs:
           path: |
             /tmp/weapon-previews/*
             /tmp/weapon.log
+            /tmp/display-native.log
             /tmp/import.log
   effects-smoke:
     runs-on: ubuntu-latest

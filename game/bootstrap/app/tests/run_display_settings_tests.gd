@@ -21,7 +21,10 @@ func _run() -> void:
 	var saved := FileAccess.get_file_as_bytes(PREFS.FILE) if had else PackedByteArray()
 	_catalog()
 	_preferences()
-	await _adapter()
+	if DisplayServer.get_name() == "headless":
+		await _adapter()
+	else:
+		await _native_window()
 	await _ui()
 	if had:
 		var file := FileAccess.open(PREFS.FILE, FileAccess.WRITE)
@@ -117,6 +120,34 @@ func _adapter() -> void:
 	_check(window.scaling_3d_scale == 1.0, "Auto renders at native viewport size")
 	window.queue_free()
 	await process_frame
+
+
+func _native_window() -> void:
+	var values := {"window_mode": 0, "resolution": "1280x720"}
+	DISPLAY.apply_to(root, values, true)
+	await create_timer(0.2).timeout
+	_check(DisplayServer.window_get_mode() == DisplayServer.WINDOW_MODE_WINDOWED, "Native display starts in windowed mode")
+	var work := DisplayServer.screen_get_usable_rect(DisplayServer.window_get_current_screen())
+	var rect := Rect2i(DisplayServer.window_get_position(), DisplayServer.window_get_size())
+	_check(work.encloses(rect), "Native window fits the usable desktop")
+	var position := DisplayServer.window_get_position()
+	var size := DisplayServer.window_get_size()
+	for i in 5:
+		DISPLAY.apply_to(root, values)
+	await process_frame
+	_check(DisplayServer.window_get_position() == position and DisplayServer.window_get_size() == size, "Repeated preference apply preserves native position and size")
+	values.window_mode = 1
+	DISPLAY.apply_to(root, values, true)
+	await create_timer(0.25).timeout
+	_check(DisplayServer.window_get_mode() == DisplayServer.WINDOW_MODE_FULLSCREEN, "Native display enters fullscreen")
+	_check(root.size == DISPLAY.screen_size(), "Fullscreen uses the actual monitor size")
+	_check(absf(root.scaling_3d_scale - CATALOG.render_scale(Vector2i(1280, 720), root.size)) < 0.00001, "Native fullscreen retains the chosen 720p 3D budget")
+	values.window_mode = 0
+	values.resolution = "1600x900"
+	DISPLAY.apply_to(root, values, true)
+	await create_timer(0.25).timeout
+	_check(DisplayServer.window_get_mode() == DisplayServer.WINDOW_MODE_WINDOWED and root.scaling_3d_scale == 1.0, "Returning to windowed restores normal rendering")
+	_check(root.size == CATALOG.fit_window(Vector2i(1600, 900), work).size, "Returning from fullscreen applies the saved window dimensions")
 
 
 func _ui() -> void:

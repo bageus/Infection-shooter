@@ -18,18 +18,23 @@ presentation class; dialog только commits preferences. Все новые h
 
 ## Проверки
 
-READY spec/workflow gates PASS до кода. Первый локальный validate_project PASS
-(до добавления нового suite и последних изменений adapter). Во время импорта Godot
-exec-server потерял соединение; финальные local import/runtime не заявляются PASS.
-Исходники сохранены через GitHub, новый run_display_settings_tests зарегистрирован
-в canonical runtime manifest. Итоговую проверку выполняет CI.
+READY spec/workflow и финальный validate_project PASS (466files/125advisory),
+CI coverage164/164 (156runtime+8special), scene_resources392refs/diff PASS.
+Первый editor import прервался из-за потери exec-server; после восстановления
+полный final editor import exit0 и новый display suite PASS. Все6 целевых suites:
+display_settings/settings_tabs/menu/walk_tuning/bullet_smoke/shooting_camera PASS.
+Final import/runtime logs без SCRIPT ERROR/ERROR/ObjectDB/RID warnings.
+Menu проверяет настоящий start/restart с сохранёнными mode1/resolution1600x900.
+Новый suite включён также в существующий native weapon-rendering job (оба renderer),
+с Xvfb1920x1080 и проверкой реального DisplayServer mode/placement/resize/3Dscale;
+результат native CI пока ожидается.
 
 Новый suite: размеры/aspect/без oversampling, 720p/900p, negative monitor origin,
 уменьшившийся экран, invalid/legacy/types/roundtrip/reset; реальные Video controls,
 RU/EN и сохранение; lifecycle одного adapter, renderer scale и canvas invariants.
 Run_menu_tests проверяет сохранённые mode/resolution на реальном start/restart.
 
-Native fullscreen/Compatibility pixels/FPS/Windows/Web здесь не проверены.
-Следующее действие: получить CI results, исправить найденные ошибки и проверить
+Native fullscreen здесь не запускался; CI добавлен. Pixels/FPS/Windows/Web не проверены.
+Следующее действие: получить native CI results и проверить
 переключение на обычном display backend. Нужна визуальная приёмка 720p/900p на
 integrated GPU и native/ultrawide; выигрыш FPS не заявляется.
