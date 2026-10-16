@@ -363,6 +363,7 @@ jobs:
           game/features/infected/tests/run_hit_reaction_tests.gd
           game/features/infected/tests/run_hunger_behaviour_tests.gd
           game/features/infection_source/tests/run_mutagen_cloud_tests.gd
+          game/features/infection_source/tests/run_cloud_wall_shelter_tests.gd
           game/features/player/tests/run_skill_sound_tests.gd
           game/features/infected/tests/run_chase_route_tests.gd
           game/features/infected/tests/run_chase_search_motion_tests.gd
