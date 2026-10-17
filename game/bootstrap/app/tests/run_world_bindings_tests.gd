@@ -30,6 +30,7 @@ func _initialize() -> void:
 
 func _run() -> void:
 	_exercise_particle_binding()
+	_exercise_glass_binding()
 	var decoy := Node3D.new()
 	root.add_child(decoy)
 	current_scene = decoy # The actual mission must never discover this unrelated root.
@@ -103,6 +104,21 @@ func _exercise_particle_binding() -> void:
 	bindings.set_electronic_particles_enabled(true)
 	_check(bindings.get("_particle_targets").size() == 1 and nested.enabled, "Freed targets are pruned without losing live targets")
 	branch.free()
+
+
+func _exercise_glass_binding() -> void:
+	var floor_view := Node3D.new()
+	var bindings := BINDINGS.new(null, null, null, Callable())
+	bindings.debris_floor = floor_view
+	var scene := load("res://game/presentation/office_floor/public/structural/glass_wall_full.tscn").instantiate() as Node3D
+	bindings.bind_scene(scene)
+	_check(scene.get_node("GlassBody").get("_debris_floor") == floor_view, "Bootstrap reaches the pane through the structural public root")
+	var prop := load("res://game/presentation/office_floor/public/props/environment_prop.tscn").instantiate() as Node3D
+	bindings.bind_scene(prop)
+	_check(prop.get("glass_debris_floor") == floor_view, "New props receive the same glass floor collaborator")
+	scene.free()
+	prop.free()
+	floor_view.free()
 
 
 func _exercise_factory(stage: Node, player: Node3D, container: Node3D, pool: Node) -> void:

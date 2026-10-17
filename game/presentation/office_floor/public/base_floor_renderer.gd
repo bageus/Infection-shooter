@@ -4,6 +4,8 @@ const TILE_SCENE := preload("res://game/presentation/office_floor/public/structu
 const TILE_MATERIAL := preload("res://game/presentation/office_floor/floor_tile_material.tres")
 const MATERIAL_VARIANTS := 2
 const SECTION_TILES := 4
+const GLASS_BAKE := preload("res://game/presentation/office_floor/glass_floor_bake.gd")
+const GLASS_SCATTER := preload("res://game/presentation/office_floor/glass_floor_scatter.gd")
 
 @export var floor_size := Vector2(80.0, 60.0)
 @export var tile_step := 2.0
@@ -12,11 +14,23 @@ var openings: Array[Rect2] = []
 var _batches: Dictionary = {}
 var _tile_mesh: Mesh
 var _materials: Array[ShaderMaterial] = []
+var _sections: Dictionary = {}
+var _glass := GLASS_BAKE.new(_set_glass_texture)
 
 func _ready() -> void:
 	_build_tiles()
+	_glass.prepare()
+	set_process(false)
+
+
+func _process(_delta: float) -> void:
+	set_process(_glass.step())
 
 func _build_tiles() -> void:
+	clear_glass_debris()
+	_glass.origin = -floor_size * 0.5
+	_sections.clear()
+	_glass.valid_cells.clear()
 	if _materials.is_empty():
 		_build_materials()
 	for child in get_children():
@@ -85,6 +99,11 @@ func _flush_batches() -> void:
 		section.multimesh = instances
 		section.material_override = _materials[key.z]
 		add_child(section)
+		var cell := Vector2i(key.x, key.y)
+		if not _sections.has(cell):
+			_sections[cell] = []
+		_sections[cell].append({"node": section, "material": _materials[key.z]})
+		_glass.valid_cells[cell] = true
 	_batches.clear()
 
 
@@ -102,3 +121,40 @@ func set_stair_openings(areas: Array[Rect2]) -> void:
 		return
 	openings = areas.duplicate()
 	_build_tiles()
+
+
+func scatter_glass_debris(panes: Array[MeshInstance3D], direction: Vector3) -> void:
+	GLASS_SCATTER.scatter(self, panes, direction)
+
+
+func stamp_glass_debris(at: Vector2, frame: int, size: float, turns: int = 0) -> bool:
+	if not at.is_finite() or not Rect2(-floor_size * 0.5, floor_size).has_point(at):
+		return false
+	for opening in openings:
+		if opening.has_point(at):
+			return false
+	var accepted := _glass.stamp(at, frame, size, turns)
+	if accepted:
+		set_process(true)
+	return accepted
+
+
+func clear_glass_debris() -> void:
+	_glass.clear()
+	set_process(false)
+
+
+func _set_glass_texture(cell: Vector2i, texture: Texture2D) -> void:
+	for entry: Dictionary in _sections.get(cell, []):
+		var section := entry.node as MultiMeshInstance3D
+		if not is_instance_valid(section):
+			continue
+		if texture == null:
+			section.material_override = entry.material
+			continue
+		var material := (entry.material as ShaderMaterial).duplicate(false) as ShaderMaterial
+		material.set_shader_parameter("glass_debris", texture)
+		material.set_shader_parameter("glass_enabled", true)
+		material.set_shader_parameter("glass_origin", _glass.origin + Vector2(cell) * GLASS_BAKE.METERS)
+		material.set_shader_parameter("glass_world_to_floor", global_transform.affine_inverse())
+		section.material_override = material

@@ -12,6 +12,7 @@ var _electronic_particles := true
 var _displays: Node
 var _visual_budget: Node
 var _chase_budget: Node
+var debris_floor: Node3D
 
 
 func _init(container: Node3D, impacts: Node, player: Node3D, drop_weapon: Callable, displays: Node = null, camera: Node3D = null) -> void:
@@ -36,6 +37,8 @@ func bind_scene(node: Node) -> void:
 
 
 func _bind_collaborators(node: Node) -> void:
+	if node.has_method("configure_glass_debris"):
+		node.call("configure_glass_debris", debris_floor)
 	if node.has_method("configure_visual_preparation") and is_instance_valid(_visual_budget) and is_instance_valid(_visual_budget.camera):
 		node.call("configure_visual_preparation", _visual_budget)
 	if node.has_method("configure_chase_budget"):

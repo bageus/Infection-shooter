@@ -364,6 +364,7 @@ func _setup_world_bindings() -> void:
 	display_wall.name = "DisplayWall"
 	add_child(display_wall)
 	world_bindings = WORLD_BINDINGS.new(mission_objects, impact_pool, player, drop_weapon_pickup, display_wall, player.get("camera") as Camera3D)
+	world_bindings.set("debris_floor", $Floor)
 	world_bindings.call("bind_scene", player)
 	for branch in [$Structure, planning_root, enemies]:
 		world_bindings.call("bind_scene", branch)
