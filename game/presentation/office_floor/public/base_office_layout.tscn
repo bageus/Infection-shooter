@@ -27,7 +27,6 @@
 [ext_resource type="PackedScene" path="res://game/presentation/office_floor/public/structural/glass_partition_half.tscn" id="25_hnvgk"]
 [ext_resource type="PackedScene" path="res://game/presentation/office_floor/public/structural/column.tscn" id="26_rwwpq"]
 [ext_resource type="PackedScene" path="res://game/features/pickups/public/medkit_pickup.tscn" id="27_uoftr"]
-[ext_resource type="Script" path="res://game/features/pickups/pickup_item.gd" id="28_wa67n"]
 [ext_resource type="PackedScene" path="res://game/features/pickups/public/antidote_pickup.tscn" id="29_d4vwy"]
 [ext_resource type="PackedScene" path="res://game/features/pickups/public/ammo_sniper_pickup.tscn" id="30_0bg4t"]
 [ext_resource type="PackedScene" path="res://game/features/pickups/public/ammo_minigun_pickup.tscn" id="31_8blqf"]
@@ -36,7 +35,6 @@
 [ext_resource type="Script" path="res://game/presentation/office_floor/blood_decal_prop.gd" id="34_pmrdi"]
 [ext_resource type="PackedScene" path="res://game/features/pickups/public/ammo_shotgun_pickup.tscn" id="35_g3ohu"]
 [ext_resource type="PackedScene" path="res://game/features/infected/public/decor/part_hunger_head.tscn" id="36_t32wi"]
-[ext_resource type="Script" path="res://game/features/infected/infected_body_part_decor.gd" id="37_obuaf"]
 [ext_resource type="PackedScene" path="res://models/objects/characters/enemy/game/Hunger_rig.tscn" id="38_3hcwf"]
 [ext_resource type="PackedScene" path="res://game/features/infected/public/decor/part_hunger_arm.tscn" id="39_dufcn"]
 [ext_resource type="PackedScene" path="res://game/presentation/office_floor/public/props/planner_light.tscn" id="40_uuisu"]
@@ -52,7 +50,6 @@
 [ext_resource type="Script" path="res://game/presentation/office_floor/darkness_zone.gd" id="50_uayww"]
 [ext_resource type="PackedScene" path="res://game/features/pickups/public/dna_pickup.tscn" id="51_q7twr"]
 [ext_resource type="PackedScene" path="res://game/features/infected/public/decor/corpse_hunger.tscn" id="52_rpsdt"]
-[ext_resource type="Script" path="res://game/features/infected/infected_corpse_decor.gd" id="53_5jsic"]
 [ext_resource type="PackedScene" path="res://game/features/infected/public/decor/corpse_hunger_mutilated.tscn" id="54_t7msb"]
 [ext_resource type="PackedScene" path="res://game/features/infected/public/decor/corpse_revenant_mutilated.tscn" id="55_yrdml"]
 [ext_resource type="PackedScene" path="res://game/features/infected/public/decor/corpse_revenant.tscn" id="56_uehp0"]
@@ -23939,7 +23936,6 @@ metadata/planning_attachment = ""
 [node name="Pickup" type="Area3D" parent="." unique_id=799683053 groups=["occlusion_items"] instance=ExtResource("27_uoftr")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 25.25, 0.015500044, 28)
 collision_layer = 0
-script = ExtResource("28_wa67n")
 weapon_names = PackedStringArray()
 metadata/world_bound = true
 metadata/planning_object_id = ""
@@ -23949,7 +23945,6 @@ metadata/planning_attachment = ""
 [node name="@Area3D@17790" type="Area3D" parent="." unique_id=1878194767 groups=["occlusion_items"] instance=ExtResource("27_uoftr")]
 transform = Transform3D(0.86602414, 0, -0.50000226, 0, 1, 0, 0.50000226, 0, 0.86602414, 23.5, 0.015500044, 27.25)
 collision_layer = 0
-script = ExtResource("28_wa67n")
 weapon_names = PackedStringArray()
 metadata/world_bound = true
 metadata/planning_object_id = ""
@@ -23959,7 +23954,6 @@ metadata/planning_attachment = ""
 [node name="@Area3D@17791" type="Area3D" parent="." unique_id=1496583305 groups=["occlusion_items"] instance=ExtResource("27_uoftr")]
 transform = Transform3D(0.86602414, 0, -0.50000226, 0, 1, 0, 0.50000226, 0, 0.86602414, 27, 0.015500044, 29.25)
 collision_layer = 0
-script = ExtResource("28_wa67n")
 weapon_names = PackedStringArray()
 metadata/world_bound = true
 metadata/planning_object_id = ""
@@ -23969,7 +23963,6 @@ metadata/planning_attachment = ""
 [node name="@Area3D@17792" type="Area3D" parent="." unique_id=1384560618 groups=["occlusion_items"] instance=ExtResource("27_uoftr")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 28, 0.015500044, 29.25)
 collision_layer = 0
-script = ExtResource("28_wa67n")
 weapon_names = PackedStringArray()
 metadata/world_bound = true
 metadata/planning_object_id = ""
@@ -23979,7 +23972,6 @@ metadata/planning_attachment = ""
 [node name="@Area3D@17793" type="Area3D" parent="." unique_id=556474414 groups=["occlusion_items"] instance=ExtResource("27_uoftr")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 39, 0.015500044, 29.25)
 collision_layer = 0
-script = ExtResource("28_wa67n")
 weapon_names = PackedStringArray()
 metadata/world_bound = true
 metadata/planning_object_id = ""
@@ -23989,7 +23981,6 @@ metadata/planning_attachment = ""
 [node name="@Area3D@17794" type="Area3D" parent="." unique_id=1446955058 groups=["occlusion_items"] instance=ExtResource("27_uoftr")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 39.25, 0.015500044, 17.25)
 collision_layer = 0
-script = ExtResource("28_wa67n")
 weapon_names = PackedStringArray()
 metadata/world_bound = true
 metadata/planning_object_id = ""
@@ -23999,7 +23990,6 @@ metadata/planning_attachment = ""
 [node name="@Area3D@17795" type="Area3D" parent="." unique_id=780473564 groups=["occlusion_items"] instance=ExtResource("27_uoftr")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 39.5, 0.015500044, 7)
 collision_layer = 0
-script = ExtResource("28_wa67n")
 weapon_names = PackedStringArray()
 metadata/world_bound = true
 metadata/planning_object_id = ""
@@ -24009,7 +23999,6 @@ metadata/planning_attachment = ""
 [node name="@Area3D@17796" type="Area3D" parent="." unique_id=1198914312 groups=["occlusion_items"] instance=ExtResource("27_uoftr")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 37.75, 0.015500044, -0.5)
 collision_layer = 0
-script = ExtResource("28_wa67n")
 weapon_names = PackedStringArray()
 metadata/world_bound = true
 metadata/planning_object_id = ""
@@ -24019,7 +24008,6 @@ metadata/planning_attachment = ""
 [node name="@Area3D@17797" type="Area3D" parent="." unique_id=740912906 groups=["occlusion_items"] instance=ExtResource("27_uoftr")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 37.75, 0.015500044, -13.5)
 collision_layer = 0
-script = ExtResource("28_wa67n")
 weapon_names = PackedStringArray()
 metadata/world_bound = true
 metadata/planning_object_id = ""
@@ -24029,7 +24017,6 @@ metadata/planning_attachment = ""
 [node name="@Area3D@17798" type="Area3D" parent="." unique_id=279422762 instance=ExtResource("29_d4vwy")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 37.75, 0.015500062, -13.153866)
 collision_layer = 0
-script = ExtResource("28_wa67n")
 pickup_type = 4
 amount = 1
 weapon_names = PackedStringArray()
@@ -24041,7 +24028,6 @@ metadata/planning_attachment = ""
 [node name="@Area3D@17799" type="Area3D" parent="." unique_id=264230317 instance=ExtResource("29_d4vwy")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 26.75, 0.015500062, -12.5)
 collision_layer = 0
-script = ExtResource("28_wa67n")
 pickup_type = 4
 amount = 1
 weapon_names = PackedStringArray()
@@ -24053,7 +24039,6 @@ metadata/planning_attachment = ""
 [node name="@Area3D@17800" type="Area3D" parent="." unique_id=2132975416 instance=ExtResource("29_d4vwy")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 21.25, 0.015500062, -19)
 collision_layer = 0
-script = ExtResource("28_wa67n")
 pickup_type = 4
 amount = 1
 weapon_names = PackedStringArray()
@@ -24065,7 +24050,6 @@ metadata/planning_attachment = ""
 [node name="@Area3D@17801" type="Area3D" parent="." unique_id=635695842 instance=ExtResource("29_d4vwy")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 20.25, 0.015500062, -29.25)
 collision_layer = 0
-script = ExtResource("28_wa67n")
 pickup_type = 4
 amount = 1
 weapon_names = PackedStringArray()
@@ -24077,7 +24061,6 @@ metadata/planning_attachment = ""
 [node name="@Area3D@17802" type="Area3D" parent="." unique_id=1092227386 instance=ExtResource("29_d4vwy")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 7, 0.015500062, -27.25)
 collision_layer = 0
-script = ExtResource("28_wa67n")
 pickup_type = 4
 amount = 1
 weapon_names = PackedStringArray()
@@ -24089,7 +24072,6 @@ metadata/planning_attachment = ""
 [node name="@Area3D@17803" type="Area3D" parent="." unique_id=420072203 groups=["occlusion_items"] instance=ExtResource("27_uoftr")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 14.5, 0.015500044, -27.05884)
 collision_layer = 0
-script = ExtResource("28_wa67n")
 weapon_names = PackedStringArray()
 metadata/world_bound = true
 metadata/planning_object_id = ""
@@ -24099,7 +24081,6 @@ metadata/planning_attachment = ""
 [node name="@Area3D@17804" type="Area3D" parent="." unique_id=645281742 groups=["occlusion_items"] instance=ExtResource("27_uoftr")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 1.25, 0.015500044, -19.75)
 collision_layer = 0
-script = ExtResource("28_wa67n")
 weapon_names = PackedStringArray()
 metadata/world_bound = true
 metadata/planning_object_id = ""
@@ -24109,7 +24090,6 @@ metadata/planning_attachment = ""
 [node name="@Area3D@17805" type="Area3D" parent="." unique_id=1382985539 instance=ExtResource("29_d4vwy")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -3.5, 0.015500062, -18.75)
 collision_layer = 0
-script = ExtResource("28_wa67n")
 pickup_type = 4
 amount = 1
 weapon_names = PackedStringArray()
@@ -24121,7 +24101,6 @@ metadata/planning_attachment = ""
 [node name="@Area3D@17806" type="Area3D" parent="." unique_id=380234167 instance=ExtResource("29_d4vwy")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -14.150384, 0.015500062, -24.948753)
 collision_layer = 0
-script = ExtResource("28_wa67n")
 pickup_type = 4
 amount = 1
 weapon_names = PackedStringArray()
@@ -24133,7 +24112,6 @@ metadata/planning_attachment = ""
 [node name="@Area3D@17807" type="Area3D" parent="." unique_id=165013927 instance=ExtResource("29_d4vwy")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -22.75, 0.015500062, -29)
 collision_layer = 0
-script = ExtResource("28_wa67n")
 pickup_type = 4
 amount = 1
 weapon_names = PackedStringArray()
@@ -24145,7 +24123,6 @@ metadata/planning_attachment = ""
 [node name="@Area3D@17808" type="Area3D" parent="." unique_id=479183571 groups=["occlusion_items"] instance=ExtResource("27_uoftr")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -39, 0.015500044, -28.25)
 collision_layer = 0
-script = ExtResource("28_wa67n")
 weapon_names = PackedStringArray()
 metadata/world_bound = true
 metadata/planning_object_id = ""
@@ -24155,7 +24132,6 @@ metadata/planning_attachment = ""
 [node name="@Area3D@17809" type="Area3D" parent="." unique_id=1613182051 groups=["occlusion_items"] instance=ExtResource("27_uoftr")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -38.5, 0.015500044, -16.75)
 collision_layer = 0
-script = ExtResource("28_wa67n")
 weapon_names = PackedStringArray()
 metadata/world_bound = true
 metadata/planning_object_id = ""
@@ -24165,7 +24141,6 @@ metadata/planning_attachment = ""
 [node name="@Area3D@17810" type="Area3D" parent="." unique_id=1643563492 instance=ExtResource("29_d4vwy")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -33.75, 0.015500062, -16.5)
 collision_layer = 0
-script = ExtResource("28_wa67n")
 pickup_type = 4
 amount = 1
 weapon_names = PackedStringArray()
@@ -24177,7 +24152,6 @@ metadata/planning_attachment = ""
 [node name="@Area3D@17811" type="Area3D" parent="." unique_id=361376208 instance=ExtResource("29_d4vwy")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -39.25, 0.015500062, -14)
 collision_layer = 0
-script = ExtResource("28_wa67n")
 pickup_type = 4
 amount = 1
 weapon_names = PackedStringArray()
@@ -24189,7 +24163,6 @@ metadata/planning_attachment = ""
 [node name="@Area3D@17812" type="Area3D" parent="." unique_id=785660519 instance=ExtResource("29_d4vwy")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -11.5, 0.015500062, 0)
 collision_layer = 0
-script = ExtResource("28_wa67n")
 pickup_type = 4
 amount = 1
 weapon_names = PackedStringArray()
@@ -24201,7 +24174,6 @@ metadata/planning_attachment = ""
 [node name="@Area3D@17813" type="Area3D" parent="." unique_id=1251713860 groups=["occlusion_items"] instance=ExtResource("30_0bg4t")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -11.5, 0.015500102, -3.75)
 collision_layer = 0
-script = ExtResource("28_wa67n")
 pickup_type = 6
 amount = 8
 weapon_names = PackedStringArray("SNIPER RIFLE")
@@ -24213,7 +24185,6 @@ metadata/planning_attachment = ""
 [node name="@Area3D@17814" type="Area3D" parent="." unique_id=1635939343 groups=["occlusion_items"] instance=ExtResource("31_8blqf")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -12, 0.015500125, -11.25)
 collision_layer = 0
-script = ExtResource("28_wa67n")
 pickup_type = 6
 amount = 100
 weapon_names = PackedStringArray("MINIGUN")
@@ -24225,7 +24196,6 @@ metadata/planning_attachment = ""
 [node name="@Area3D@17815" type="Area3D" parent="." unique_id=393053713 groups=["occlusion_items"] instance=ExtResource("31_8blqf")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -19.75, 0.015500125, 24.25)
 collision_layer = 0
-script = ExtResource("28_wa67n")
 pickup_type = 6
 amount = 100
 weapon_names = PackedStringArray("MINIGUN")
@@ -24237,7 +24207,6 @@ metadata/planning_attachment = ""
 [node name="@Area3D@17816" type="Area3D" parent="." unique_id=1707357866 groups=["occlusion_items"] instance=ExtResource("32_lhhfe")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -28, 0.015500102, 29.25)
 collision_layer = 0
-script = ExtResource("28_wa67n")
 pickup_type = 6
 amount = 30
 weapon_names = PackedStringArray("AK", "M4")
@@ -35182,7 +35151,6 @@ metadata/planning_attachment = ""
 [node name="@Area3D@18909" type="Area3D" parent="." unique_id=117135331 groups=["occlusion_items"] instance=ExtResource("32_lhhfe")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -37.75, 0.015500102, 29.25)
 collision_layer = 0
-script = ExtResource("28_wa67n")
 pickup_type = 6
 amount = 30
 weapon_names = PackedStringArray("AK", "M4")
@@ -35194,7 +35162,6 @@ metadata/planning_attachment = ""
 [node name="@Area3D@18910" type="Area3D" parent="." unique_id=1773701715 groups=["occlusion_items"] instance=ExtResource("35_g3ohu")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -39.5, 0.015500069, 26.5)
 collision_layer = 0
-script = ExtResource("28_wa67n")
 pickup_type = 3
 amount = 12
 weapon_names = PackedStringArray()
@@ -35205,7 +35172,6 @@ metadata/planning_attachment = ""
 
 [node name="PartHungerHead" type="RigidBody3D" parent="." unique_id=353676867 instance=ExtResource("36_t32wi")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -35.75, 1.1698809, 23.5)
-script = ExtResource("37_obuaf")
 pose_seed = 1140022119
 visual_scene = ExtResource("38_3hcwf")
 part = &"head"
@@ -35216,7 +35182,6 @@ metadata/planning_attachment = ""
 
 [node name="PartHungerArm" type="RigidBody3D" parent="." unique_id=25167531 instance=ExtResource("39_dufcn")]
 transform = Transform3D(1, 0, 0, 0, 0.99999994, 0, 0, 0, 1, -37.5, 1.3942962, 26.5)
-script = ExtResource("37_obuaf")
 pose_seed = 1795460990
 visual_scene = ExtResource("38_3hcwf")
 metadata/world_bound = true
@@ -35226,7 +35191,6 @@ metadata/planning_attachment = ""
 
 [node name="@RigidBody3D@18911" type="RigidBody3D" parent="." unique_id=181788459 instance=ExtResource("39_dufcn")]
 transform = Transform3D(0.99999994, 0, 0, 0, 1, 0, 0, 0, 1, -39.52177, 0.43522778, 27.277273)
-script = ExtResource("37_obuaf")
 pose_seed = 131997412
 visual_scene = ExtResource("38_3hcwf")
 metadata/world_bound = true
@@ -35722,7 +35686,6 @@ metadata/planning_attachment = ""
 [node name="@Area3D@18958" type="Area3D" parent="." unique_id=2099853217 groups=["occlusion_items"] instance=ExtResource("27_uoftr")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -14.25, 0.015500044, -18)
 collision_layer = 0
-script = ExtResource("28_wa67n")
 weapon_names = PackedStringArray()
 metadata/world_bound = true
 metadata/planning_object_id = ""
@@ -37264,7 +37227,6 @@ metadata/planning_attachment = ""
 [node name="@Area3D@19121" type="Area3D" parent="." unique_id=337875729 groups=["occlusion_items"] instance=ExtResource("31_8blqf")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -30.25, 0.015500052, -14.5)
 collision_layer = 0
-script = ExtResource("28_wa67n")
 pickup_type = 6
 amount = 100
 weapon_names = PackedStringArray("MINIGUN")
@@ -48752,7 +48714,6 @@ metadata/planning_zone = 10
 
 [node name="PartHungerLeg" type="RigidBody3D" parent="." unique_id=1203624126 instance=ExtResource("42_tdh4h")]
 transform = Transform3D(-4.3711385e-08, 0, 0.9999999, 0, 0.99999994, 0, -0.99999994, 0, -4.3711385e-08, -33.25, 0.4658948, 25.25)
-script = ExtResource("37_obuaf")
 pose_seed = 1305918465
 visual_scene = ExtResource("38_3hcwf")
 part = &"leg_l"
@@ -48945,7 +48906,6 @@ metadata/planning_attachment = ""
 
 [node name="@RigidBody3D@20072" type="RigidBody3D" parent="." unique_id=815677111 instance=ExtResource("36_t32wi")]
 transform = Transform3D(0.99999994, 0, 0, 0, 1, 0, 0, 0, 1, -5.04777, 0.15875812, 21.45917)
-script = ExtResource("37_obuaf")
 pose_seed = 1633819717
 visual_scene = ExtResource("38_3hcwf")
 part = &"head"
@@ -48956,7 +48916,6 @@ metadata/planning_attachment = ""
 
 [node name="@RigidBody3D@20073" type="RigidBody3D" parent="." unique_id=1064593353 instance=ExtResource("39_dufcn")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 0.99999994, -3.544983, 0.34892154, 24.42016)
-script = ExtResource("37_obuaf")
 pose_seed = 2010818603
 visual_scene = ExtResource("38_3hcwf")
 metadata/world_bound = true
@@ -48966,7 +48925,6 @@ metadata/planning_attachment = ""
 
 [node name="@RigidBody3D@20074" type="RigidBody3D" parent="." unique_id=110788844 instance=ExtResource("39_dufcn")]
 transform = Transform3D(0.99999994, 0, 0, 0, 0.99999994, 0, 0, 0, 0.9999999, 14, 0.8345116, 19.5)
-script = ExtResource("37_obuaf")
 pose_seed = 1180492328
 visual_scene = ExtResource("38_3hcwf")
 metadata/world_bound = true
@@ -48976,7 +48934,6 @@ metadata/planning_attachment = ""
 
 [node name="@RigidBody3D@20075" type="RigidBody3D" parent="." unique_id=1758805467 instance=ExtResource("39_dufcn")]
 transform = Transform3D(1, 0, 0, 0, 0.99999994, 0, 0, 0, 1, 10.876089, 0.35254753, 20.25)
-script = ExtResource("37_obuaf")
 pose_seed = 1651035492
 visual_scene = ExtResource("38_3hcwf")
 metadata/world_bound = true
@@ -48986,7 +48943,6 @@ metadata/planning_attachment = ""
 
 [node name="@RigidBody3D@20076" type="RigidBody3D" parent="." unique_id=183041292 instance=ExtResource("36_t32wi")]
 transform = Transform3D(1, 0, 0, 0, 0.99999994, 0, 0, 0, 1, 19.846321, 0.14367916, -1.2541634)
-script = ExtResource("37_obuaf")
 pose_seed = 1996539477
 visual_scene = ExtResource("38_3hcwf")
 part = &"head"
@@ -48997,7 +48953,6 @@ metadata/planning_attachment = ""
 
 [node name="@RigidBody3D@20077" type="RigidBody3D" parent="." unique_id=239367311 instance=ExtResource("36_t32wi")]
 transform = Transform3D(0.99999994, 0, 0, 0, 1, 0, 0, 0, 1, 22.216867, 0.21478356, 2.11345)
-script = ExtResource("37_obuaf")
 pose_seed = 707426314
 visual_scene = ExtResource("38_3hcwf")
 part = &"head"
@@ -49008,7 +48963,6 @@ metadata/planning_attachment = ""
 
 [node name="@RigidBody3D@20078" type="RigidBody3D" parent="." unique_id=1515728499 instance=ExtResource("36_t32wi")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 19.75, 0.18211915, 8.5)
-script = ExtResource("37_obuaf")
 pose_seed = 420801547
 visual_scene = ExtResource("38_3hcwf")
 part = &"head"
@@ -49019,7 +48973,6 @@ metadata/planning_attachment = ""
 
 [node name="@RigidBody3D@20079" type="RigidBody3D" parent="." unique_id=63810047 instance=ExtResource("36_t32wi")]
 transform = Transform3D(1, 0, 0, 0, 0.99999994, 0, 0, 0, 0.99999994, 25.25, 0.18971445, 7.25)
-script = ExtResource("37_obuaf")
 pose_seed = 1828715401
 visual_scene = ExtResource("38_3hcwf")
 part = &"head"
@@ -49030,7 +48983,6 @@ metadata/planning_attachment = ""
 
 [node name="@RigidBody3D@20080" type="RigidBody3D" parent="." unique_id=1725744164 instance=ExtResource("36_t32wi")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 20.25166, 0.19940685, 17.045885)
-script = ExtResource("37_obuaf")
 pose_seed = 788012247
 visual_scene = ExtResource("38_3hcwf")
 part = &"head"
@@ -49041,7 +48993,6 @@ metadata/planning_attachment = ""
 
 [node name="@RigidBody3D@20081" type="RigidBody3D" parent="." unique_id=392764404 instance=ExtResource("39_dufcn")]
 transform = Transform3D(1, 0, 0, 0, 0.99999994, 0, 0, 0, 1, 19.25, 0.48559284, 12.25)
-script = ExtResource("37_obuaf")
 pose_seed = 408533915
 visual_scene = ExtResource("38_3hcwf")
 metadata/world_bound = true
@@ -49051,7 +49002,6 @@ metadata/planning_attachment = ""
 
 [node name="@RigidBody3D@20082" type="RigidBody3D" parent="." unique_id=324438174 instance=ExtResource("39_dufcn")]
 transform = Transform3D(0.49999997, 0, 0.86602545, 0, 1, 0, -0.86602545, 0, 0.49999997, 21, 0.31639665, 10)
-script = ExtResource("37_obuaf")
 pose_seed = 925164424
 visual_scene = ExtResource("38_3hcwf")
 metadata/world_bound = true
@@ -49061,7 +49011,6 @@ metadata/planning_attachment = ""
 
 [node name="@RigidBody3D@20083" type="RigidBody3D" parent="." unique_id=56726036 instance=ExtResource("39_dufcn")]
 transform = Transform3D(0.5, 0, 0.86602545, 0, 1.0000001, 0, -0.86602557, 0, 0.49999997, 22, 0.44962984, 6.25)
-script = ExtResource("37_obuaf")
 pose_seed = 1575143017
 visual_scene = ExtResource("38_3hcwf")
 metadata/world_bound = true
@@ -49071,7 +49020,6 @@ metadata/planning_attachment = ""
 
 [node name="@RigidBody3D@20084" type="RigidBody3D" parent="." unique_id=881948681 instance=ExtResource("39_dufcn")]
 transform = Transform3D(0.49999997, 0, 0.8660254, 0, 1, 0, -0.86602545, 0, 0.49999994, 22.5, 0.41724217, 2.75)
-script = ExtResource("37_obuaf")
 pose_seed = 2022488678
 visual_scene = ExtResource("38_3hcwf")
 metadata/world_bound = true
@@ -49081,7 +49029,6 @@ metadata/planning_attachment = ""
 
 [node name="@RigidBody3D@20085" type="RigidBody3D" parent="." unique_id=1993252153 instance=ExtResource("39_dufcn")]
 transform = Transform3D(0.49999997, 0, 0.86602545, 0, 1, 0, -0.86602545, 0, 0.49999997, 21.25, 0.48364753, -0.75)
-script = ExtResource("37_obuaf")
 pose_seed = 621839375
 visual_scene = ExtResource("38_3hcwf")
 metadata/world_bound = true
@@ -49091,7 +49038,6 @@ metadata/planning_attachment = ""
 
 [node name="PartRevenantArm" type="RigidBody3D" parent="." unique_id=151299778 instance=ExtResource("43_k6hf2")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 30.722305, 0.37092054, -10.300493)
-script = ExtResource("37_obuaf")
 pose_seed = 1607256345
 visual_scene = ExtResource("44_3e3tw")
 metadata/world_bound = true
@@ -49101,7 +49047,6 @@ metadata/planning_attachment = ""
 
 [node name="PartRevenantHead" type="RigidBody3D" parent="." unique_id=1400430294 instance=ExtResource("45_5f0gg")]
 transform = Transform3D(1, 0, 0, 0, 0.99999994, 0, 0, 0, 1, 31.5, 0.19575219, -9.75)
-script = ExtResource("37_obuaf")
 pose_seed = 868570525
 visual_scene = ExtResource("44_3e3tw")
 part = &"head"
@@ -49112,7 +49057,6 @@ metadata/planning_attachment = ""
 
 [node name="PartRevenantLeg" type="RigidBody3D" parent="." unique_id=785954320 instance=ExtResource("46_vq60j")]
 transform = Transform3D(0.99999994, 0, 0, 0, 1, 0, 0, 0, 1, 32, 0.30849347, -11)
-script = ExtResource("37_obuaf")
 pose_seed = 11887458
 visual_scene = ExtResource("44_3e3tw")
 part = &"leg_l"
@@ -49123,7 +49067,6 @@ metadata/planning_attachment = ""
 
 [node name="@RigidBody3D@20086" type="RigidBody3D" parent="." unique_id=1225824065 instance=ExtResource("46_vq60j")]
 transform = Transform3D(1.1924881e-08, 0, -1.0000001, 0, 1, 0, 1, 0, 1.1924882e-08, 32.321754, 0.66639775, -9.939897)
-script = ExtResource("37_obuaf")
 pose_seed = 1743378452
 visual_scene = ExtResource("44_3e3tw")
 part = &"leg_l"
@@ -51409,7 +51352,6 @@ metadata/planning_attachment = ""
 
 [node name="PartBruteLeg" type="RigidBody3D" parent="." unique_id=473796876 instance=ExtResource("47_as50e")]
 transform = Transform3D(0.99999994, 0, 0, 0, 1, 0, 0, 0, 1, 8.25, 0.3823701, 8.25)
-script = ExtResource("37_obuaf")
 pose_seed = 1602120811
 visual_scene = ExtResource("48_eqyu4")
 visual_scale = 1.1
@@ -51421,7 +51363,6 @@ metadata/planning_attachment = ""
 
 [node name="@RigidBody3D@20271" type="RigidBody3D" parent="." unique_id=38817852 instance=ExtResource("36_t32wi")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 0.99999994, 7.75, 1.1434909, 11.25)
-script = ExtResource("37_obuaf")
 pose_seed = 75141543
 visual_scene = ExtResource("38_3hcwf")
 part = &"head"
@@ -52230,7 +52171,6 @@ metadata/planning_attachment = ""
 
 [node name="@RigidBody3D@20331" type="RigidBody3D" parent="." unique_id=1586891763 instance=ExtResource("36_t32wi")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 0.99999994, -6.8619585, 0.67412215, -5.088191)
-script = ExtResource("37_obuaf")
 pose_seed = 263329340
 visual_scene = ExtResource("38_3hcwf")
 part = &"head"
@@ -52241,7 +52181,6 @@ metadata/planning_attachment = ""
 
 [node name="@RigidBody3D@20332" type="RigidBody3D" parent="." unique_id=2013536736 instance=ExtResource("36_t32wi")]
 transform = Transform3D(0.9999999, 0, 0, 0, 0.9999999, 0, 0, 0, 0.99999994, -7.1220307, 0.66091853, -5.105856)
-script = ExtResource("37_obuaf")
 pose_seed = 1257068253
 visual_scene = ExtResource("38_3hcwf")
 part = &"head"
@@ -52252,7 +52191,6 @@ metadata/planning_attachment = ""
 
 [node name="@RigidBody3D@20333" type="RigidBody3D" parent="." unique_id=55137652 instance=ExtResource("36_t32wi")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -6.2731867, 0.5745521, -4.160534)
-script = ExtResource("37_obuaf")
 pose_seed = 1982445870
 visual_scene = ExtResource("38_3hcwf")
 part = &"head"
@@ -52263,7 +52201,6 @@ metadata/planning_attachment = ""
 
 [node name="@RigidBody3D@20334" type="RigidBody3D" parent="." unique_id=941667787 instance=ExtResource("36_t32wi")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -6.2305746, 0.5193116, -4.492327)
-script = ExtResource("37_obuaf")
 pose_seed = 795616920
 visual_scene = ExtResource("38_3hcwf")
 part = &"head"
@@ -52274,7 +52211,6 @@ metadata/planning_attachment = ""
 
 [node name="@RigidBody3D@20335" type="RigidBody3D" parent="." unique_id=1726705111 instance=ExtResource("39_dufcn")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -6.7421923, 0.7272199, -4.9856725)
-script = ExtResource("37_obuaf")
 pose_seed = 20897088
 visual_scene = ExtResource("38_3hcwf")
 metadata/world_bound = true
@@ -52284,7 +52220,6 @@ metadata/planning_attachment = ""
 
 [node name="@RigidBody3D@20336" type="RigidBody3D" parent="." unique_id=26306552 instance=ExtResource("39_dufcn")]
 transform = Transform3D(0.99999994, 0, 0, 0, 1, 0, 0, 0, 1, -6.4449596, 0.40938163, -4.4587235)
-script = ExtResource("37_obuaf")
 pose_seed = 1843036267
 visual_scene = ExtResource("38_3hcwf")
 metadata/world_bound = true
@@ -52294,7 +52229,6 @@ metadata/planning_attachment = ""
 
 [node name="@RigidBody3D@20337" type="RigidBody3D" parent="." unique_id=912122086 instance=ExtResource("39_dufcn")]
 transform = Transform3D(1, 0, 0, 0, 0.99999994, 0, 0, 0, 0.99999994, -6.499355, 0.2372042, -4.504741)
-script = ExtResource("37_obuaf")
 pose_seed = 937393990
 visual_scene = ExtResource("38_3hcwf")
 metadata/world_bound = true
@@ -54195,7 +54129,6 @@ metadata/planning_zone = 1
 [node name="@Area3D@20536" type="Area3D" parent="." unique_id=1257084351 groups=["occlusion_items"] instance=ExtResource("30_0bg4t")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -32.25, 0.01550005, -14.5)
 collision_layer = 0
-script = ExtResource("28_wa67n")
 pickup_type = 6
 amount = 8
 weapon_names = PackedStringArray("SNIPER RIFLE")
@@ -54218,7 +54151,6 @@ metadata/planning_zone = 1
 [node name="@Area3D@20538" type="Area3D" parent="." unique_id=295756631 groups=["occlusion_items"] instance=ExtResource("35_g3ohu")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -13.75, 0.015500069, -16.75)
 collision_layer = 0
-script = ExtResource("28_wa67n")
 pickup_type = 3
 amount = 12
 weapon_names = PackedStringArray()
@@ -54230,7 +54162,6 @@ metadata/planning_attachment = ""
 [node name="@Area3D@20539" type="Area3D" parent="." unique_id=250658443 instance=ExtResource("29_d4vwy")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -13.5, 0.015500062, -15.5)
 collision_layer = 0
-script = ExtResource("28_wa67n")
 pickup_type = 4
 amount = 1
 weapon_names = PackedStringArray()
@@ -54242,7 +54173,6 @@ metadata/planning_attachment = ""
 [node name="@Area3D@20540" type="Area3D" parent="." unique_id=129856616 groups=["occlusion_items"] instance=ExtResource("51_q7twr")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -12, 0.0055000004, -14.25)
 collision_layer = 0
-script = ExtResource("28_wa67n")
 pickup_type = 5
 amount = 1
 weapon_names = PackedStringArray()
@@ -54254,7 +54184,6 @@ metadata/planning_attachment = ""
 [node name="@Area3D@20541" type="Area3D" parent="." unique_id=1618613582 groups=["occlusion_items"] instance=ExtResource("51_q7twr")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -12, 0.0055000004, -14.081755)
 collision_layer = 0
-script = ExtResource("28_wa67n")
 pickup_type = 5
 amount = 1
 weapon_names = PackedStringArray()
@@ -54266,7 +54195,6 @@ metadata/planning_attachment = ""
 [node name="@Area3D@20542" type="Area3D" parent="." unique_id=575558235 groups=["occlusion_items"] instance=ExtResource("51_q7twr")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -14, 0.0055000004, -13.75)
 collision_layer = 0
-script = ExtResource("28_wa67n")
 pickup_type = 5
 amount = 1
 weapon_names = PackedStringArray()
@@ -54277,7 +54205,6 @@ metadata/planning_attachment = ""
 
 [node name="CorpseHunger" type="Node3D" parent="." unique_id=2041525642 instance=ExtResource("52_rpsdt")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -35.75, 0.9684373, 23.25)
-script = ExtResource("53_5jsic")
 pose_seed = 1955487428
 pose_variant = "back"
 pose_facing = 1.06440734641021
@@ -54292,7 +54219,6 @@ metadata/planning_attachment = ""
 
 [node name="@Node3D@20543" type="Node3D" parent="." unique_id=47366039 instance=ExtResource("52_rpsdt")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -39.685814, 0.015499934, 27)
-script = ExtResource("53_5jsic")
 pose_seed = 1155740627
 pose_variant = "seated_side"
 pose_facing = 1.57079644600418
@@ -54307,7 +54233,6 @@ metadata/planning_attachment = ""
 
 [node name="CorpseHungerMutilated" type="Node3D" parent="." unique_id=676197372 instance=ExtResource("54_t7msb")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -33.916336, 0.0155, 26.75)
-script = ExtResource("53_5jsic")
 pose_seed = 568249108
 pose_variant = "seated"
 pose_facing = -1.57079620758562
@@ -54745,7 +54670,6 @@ metadata/planning_attachment = ""
 
 [node name="@Node3D@20573" type="Node3D" parent="." unique_id=755907055 instance=ExtResource("52_rpsdt")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -27.25, 0.9083749, 25.75)
-script = ExtResource("53_5jsic")
 pose_seed = 622337904
 pose_variant = "back"
 pose_facing = -2.67059265358979
@@ -54760,7 +54684,6 @@ metadata/planning_attachment = ""
 
 [node name="@Node3D@20574" type="Node3D" parent="." unique_id=1977929150 instance=ExtResource("52_rpsdt")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -27.25, 1.2744423, 25.75)
-script = ExtResource("53_5jsic")
 pose_seed = 456725989
 pose_variant = "stomach"
 pose_facing = -0.988592653589793
@@ -54775,7 +54698,6 @@ metadata/planning_attachment = ""
 
 [node name="@Node3D@20575" type="Node3D" parent="." unique_id=64613986 instance=ExtResource("52_rpsdt")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -26.75, 0.0155, 24)
-script = ExtResource("53_5jsic")
 pose_seed = 1249995009
 pose_variant = "stomach"
 pose_facing = 1.58340734641021
@@ -54790,7 +54712,6 @@ metadata/planning_attachment = ""
 
 [node name="@Node3D@20576" type="Node3D" parent="." unique_id=302141758 instance=ExtResource("54_t7msb")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -29.020853, 0.0155, 28.75)
-script = ExtResource("53_5jsic")
 pose_seed = 1367915677
 pose_variant = "seated_side"
 pose_facing = 1.57079644600417
@@ -54805,7 +54726,6 @@ metadata/planning_attachment = ""
 
 [node name="@Node3D@20577" type="Node3D" parent="." unique_id=781702645 instance=ExtResource("54_t7msb")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -16.15293, 0.0155, 24.774145)
-script = ExtResource("53_5jsic")
 pose_seed = 1146291329
 pose_variant = "seated_side"
 pose_facing = 1.5707976380972
@@ -54820,7 +54740,6 @@ metadata/planning_attachment = ""
 
 [node name="@Node3D@20578" type="Node3D" parent="." unique_id=1525974836 instance=ExtResource("54_t7msb")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -8.75, 0.6175004, 27)
-script = ExtResource("53_5jsic")
 pose_seed = 213238899
 pose_variant = "right_side"
 pose_facing = -2.97959265358979
@@ -54835,7 +54754,6 @@ metadata/planning_attachment = ""
 
 [node name="@Node3D@20579" type="Node3D" parent="." unique_id=1070532951 instance=ExtResource("54_t7msb")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -5.25, 0.0155, 21.999372)
-script = ExtResource("53_5jsic")
 pose_seed = 915649822
 pose_variant = "seated"
 visual_scene = ExtResource("38_3hcwf")
@@ -54849,7 +54767,6 @@ metadata/planning_attachment = ""
 
 [node name="@Node3D@20580" type="Node3D" parent="." unique_id=1555533856 instance=ExtResource("52_rpsdt")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 1.75, 0.0155, 20.25)
-script = ExtResource("53_5jsic")
 pose_seed = 137241190
 pose_variant = "left_side"
 pose_facing = -1.52059265358979
@@ -54864,7 +54781,6 @@ metadata/planning_attachment = ""
 
 [node name="@Node3D@20581" type="Node3D" parent="." unique_id=1901920691 instance=ExtResource("54_t7msb")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 13.25, 0.0155, 27.5)
-script = ExtResource("53_5jsic")
 pose_seed = 1705589574
 pose_variant = "left_side"
 pose_facing = -3.03059265358979
@@ -54879,7 +54795,6 @@ metadata/planning_attachment = ""
 
 [node name="@Node3D@20582" type="Node3D" parent="." unique_id=1395748468 instance=ExtResource("54_t7msb")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 13.5, 0.0155, 18.25)
-script = ExtResource("53_5jsic")
 pose_seed = 186224783
 pose_variant = "right_side"
 pose_facing = -0.195592653589793
@@ -54894,7 +54809,6 @@ metadata/planning_attachment = ""
 
 [node name="CorpseRevenantMutilated" type="Node3D" parent="." unique_id=893767061 instance=ExtResource("55_yrdml")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 18.5, 0.0155, 11.75)
-script = ExtResource("53_5jsic")
 pose_seed = 790356342
 pose_variant = "left_side"
 pose_facing = 2.06440734641021
@@ -54909,7 +54823,6 @@ metadata/planning_attachment = ""
 
 [node name="@Node3D@20583" type="Node3D" parent="." unique_id=658980227 instance=ExtResource("54_t7msb")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 15.75, 0.8730427, 9.75)
-script = ExtResource("53_5jsic")
 pose_seed = 1400010084
 pose_variant = "back"
 pose_facing = -2.53259265358979
@@ -54924,7 +54837,6 @@ metadata/planning_attachment = ""
 
 [node name="@Node3D@20584" type="Node3D" parent="." unique_id=1401737756 instance=ExtResource("54_t7msb")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 23.75, 0.0155, 8.25)
-script = ExtResource("53_5jsic")
 pose_seed = 1196409930
 pose_variant = "left_side"
 pose_facing = -2.07159265358979
@@ -54939,7 +54851,6 @@ metadata/planning_attachment = ""
 
 [node name="@Node3D@20585" type="Node3D" parent="." unique_id=1332993460 instance=ExtResource("54_t7msb")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 21.5, 0.0155, 6.25)
-script = ExtResource("53_5jsic")
 pose_seed = 9209622
 pose_variant = "left_side"
 pose_facing = 1.88540734641021
@@ -54954,7 +54865,6 @@ metadata/planning_attachment = ""
 
 [node name="@Node3D@20586" type="Node3D" parent="." unique_id=460851431 instance=ExtResource("54_t7msb")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 23.25, 0.0155, 2.5)
-script = ExtResource("53_5jsic")
 pose_seed = 418873004
 pose_variant = "back"
 pose_facing = 1.10140734641021
@@ -54969,7 +54879,6 @@ metadata/planning_attachment = ""
 
 [node name="@Node3D@20587" type="Node3D" parent="." unique_id=607639840 instance=ExtResource("54_t7msb")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 19.75, 0.015500008, -0.7259869)
-script = ExtResource("53_5jsic")
 pose_seed = 159573607
 pose_variant = "seated_side"
 pose_facing = 3.14159265358979
@@ -54998,7 +54907,6 @@ metadata/planning_attachment = ""
 
 [node name="@Node3D@20589" type="Node3D" parent="." unique_id=686403852 instance=ExtResource("54_t7msb")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 9.75, 0.0155, 8.25)
-script = ExtResource("53_5jsic")
 pose_seed = 1687229339
 pose_variant = "seated_side"
 pose_facing = -1.57079644600417
@@ -55058,7 +54966,6 @@ metadata/planning_attachment = ""
 
 [node name="@Node3D@20593" type="Node3D" parent="." unique_id=1601991622 instance=ExtResource("54_t7msb")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -8.260062, 0.0155, -4.4684315)
-script = ExtResource("53_5jsic")
 pose_seed = 2135646307
 pose_variant = "seated_side"
 pose_facing = -3.14159253438052
@@ -55073,7 +54980,6 @@ metadata/planning_attachment = ""
 
 [node name="@Node3D@20594" type="Node3D" parent="." unique_id=1687004934 instance=ExtResource("54_t7msb")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -7.9718795, 0.0155, -4.615619)
-script = ExtResource("53_5jsic")
 pose_seed = 1832071626
 pose_variant = "left_side"
 pose_facing = 2.23140734641021
@@ -55088,7 +54994,6 @@ metadata/planning_attachment = ""
 
 [node name="CorpseRevenant" type="Node3D" parent="." unique_id=690438276 instance=ExtResource("56_uehp0")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -12, 0.0155, -6)
-script = ExtResource("53_5jsic")
 pose_seed = 1029898855
 pose_variant = "right_side"
 pose_facing = -1.08059265358979

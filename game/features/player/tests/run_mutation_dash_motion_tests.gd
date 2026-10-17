@@ -86,3 +86,11 @@ func _test_effect_recovery(player: CharacterBody3D) -> void:
 	runtime.call("_emit_state_changes", 10.0)
 	runtime.call("reduce_skill_cooldowns", 5.0)
 	_expect(runtime.call("can_cast_skill", "active_claws"), "Full reactivation cooldown restores readiness without an extra stale aura duration")
+
+	runtime.call("upgrade_skill", "active_claws_2")
+	runtime.call("upgrade_skill", "berserk")
+	runtime.call("toggle_skill_lock", "berserk")
+	_expect(runtime.call("cast_skill", "berserk") and effects.call("movement_multiplier") == 1.5, "Real Berserk applies the existing speed benefit")
+	runtime.get("_domain").mutation = 10.0
+	runtime.call("_emit_state_changes", 94.0)
+	_expect(effects.call("movement_multiplier") == 1.0 and not effects.call("active_buff", "berserk"), "Dormancy also clears the Berserk benefit, not only its HUD timer")

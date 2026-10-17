@@ -143,6 +143,9 @@ func _scented(enemy: Node3D, amount: float) -> float:
 
 func _refresh_stats() -> void:
 	_active_effects.cancel_unavailable()
+	if active_buff("berserk") and not enabled("berserk"):
+		buffs["berserk"] = 0.0
+		vfx.buff_ended("berserk")
 	var next_max := 125.0 if enabled("hypertrophy") else 100.0
 	player.set("max_health", next_max)
 	player.set("health", minf(float(player.get("health")), next_max))

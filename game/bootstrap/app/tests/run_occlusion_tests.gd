@@ -161,20 +161,20 @@ func _render_checks() -> void:
 	var colored := root.get_texture().get_image()
 	var center := camera.unproject_position(Vector3(0, 0.8, 0))
 	_capture(colored, "silhouettes")
-	var pixel := colored.get_pixelv(Vector2i(center))
+	var pixel := _screen_pixel(colored, center)
 	_check(pixel.b > pixel.r + 0.2, "hidden hero pixels are cyan")
-	var enemy := colored.get_pixelv(Vector2i(camera.unproject_position(Vector3(-2, 0.8, 0))))
+	var enemy := _screen_pixel(colored, camera.unproject_position(Vector3(-2, 0.8, 0)))
 	_check(enemy.r > enemy.g + 0.2, "hidden enemy pixels are red")
-	var item := colored.get_pixelv(Vector2i(camera.unproject_position(Vector3(2, 0.8, 0))))
+	var item := _screen_pixel(colored, camera.unproject_position(Vector3(2, 0.8, 0)))
 	_check(item.r > item.b + 0.2 and item.g > item.b + 0.2, "hidden item pixels are amber")
 	effects.set_mode(1)
 	await _settle()
 	await RenderingServer.frame_post_draw
 	var hole := root.get_texture().get_image()
 	_capture(hole, "hole")
-	var exposed := hole.get_pixelv(Vector2i(center))
+	var exposed := _screen_pixel(hole, center)
 	_check(exposed.g > exposed.r + 0.15, "hole reveals authored green hero")
-	var outside := hole.get_pixelv(Vector2i(camera.unproject_position(Vector3(-3, 0.8, 3))))
+	var outside := _screen_pixel(hole, camera.unproject_position(Vector3(-3, 0.8, 3)))
 	_check(absf(outside.r - outside.g) < 0.05, "wall outside radius remains opaque")
 	wall.position.x = 20.0
 	effects.set_mode(0)
@@ -185,7 +185,7 @@ func _render_checks() -> void:
 		subject.set_revealed(true)
 	await process_frame
 	await RenderingServer.frame_post_draw
-	var visible := root.get_texture().get_image().get_pixelv(Vector2i(center))
+	var visible := _screen_pixel(root.get_texture().get_image(), center)
 	_check(visible.g > visible.b + 0.15, "visible hero retains authored color")
 	effects.set_physics_process(true)
 	wall.position.x = 0.0
@@ -278,3 +278,10 @@ func _capture(image: Image, label: String) -> void:
 		return
 	DirAccess.make_dir_recursive_absolute(directory)
 	image.save_png(directory.path_join("occlusion_" + RenderingServer.get_current_rendering_method() + "_" + label + ".png"))
+
+
+func _screen_pixel(image: Image, screen: Vector2) -> Color:
+	# Camera coordinates use the logical viewport; captures use window pixels.
+	# canvas_items can stretch these to different sizes (including on CI).
+	var pixel := screen * Vector2(image.get_size()) / root.get_visible_rect().size
+	return image.get_pixelv(Vector2i(pixel))

@@ -55,6 +55,7 @@ func _run() -> void:
 
 func _test_bindings() -> void:
 	var controls := BINDINGS.new()
+	controls.load_config(ConfigFile.new())
 	_expect(controls.values.camera_left.code == KEY_Z and controls.values.camera_right.code == KEY_X and controls.values.skill_1.code == KEY_Q and controls.values.skill_2.code == KEY_E, "Default camera Z/X and skills Q/E")
 	_expect(not controls.values.has("skill_3") and not controls.values.has("skill_4"), "Obsolete slots are absent from settings")
 	var config := ConfigFile.new()

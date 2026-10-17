@@ -1,5 +1,6 @@
 extends RefCounted
 ## Bounded authored scene cloning; shared resources remain immutable.
+const SCENE_SCRIPTS := preload("res://game/bootstrap/app/planning_scene_scripts.gd")
 const DOOR_OPTIONS := preload("res://game/bootstrap/app/planning_door_options.gd")
 const WAVE_DIRECTOR := preload("res://game/features/spawning/public/wave_director.gd")
 var catalog: Variant
@@ -37,6 +38,8 @@ func _write(scene_root: Node3D, target: String) -> Error:
 	var problem := packed.pack(scene_root)
 	if problem == OK:
 		problem = ResourceSaver.save(packed, target)
+		if problem == OK:
+			problem = SCENE_SCRIPTS.canonicalize(target)
 	scene_root.free()
 	return problem
 

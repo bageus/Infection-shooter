@@ -109,7 +109,7 @@ func _migrate_original_defaults(requested: Dictionary, config: ConfigFile) -> vo
 	var old := {"camera_left": KEY_Q, "camera_right": KEY_E, "skill_1": KEY_4, "skill_2": KEY_5}
 	var unchanged := true
 	for action in old:
-		var entry: Variant = config.get_value("controls_v1", action, null)
+		var entry: Variant = config.get_value("controls_v1", action, {})
 		unchanged = unchanged and entry is Dictionary and entry.get("kind") == "key" and entry.get("code") == old[action]
 	if unchanged:
 		for other in requested:
