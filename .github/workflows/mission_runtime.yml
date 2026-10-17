@@ -315,6 +315,18 @@ jobs:
           python tools/validate_ci_suites.py
           tools/run_runtime_suites.sh .github/runtime_suites.txt /tmp/runtime-suites 3
 
+      # Publish before expensive rendered captures, so headless failures are
+      # diagnosable while the rest of this job is still running.
+      - name: Upload runtime regression logs
+        if: ${{ !cancelled() }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: runtime-regressions-${{ github.run_attempt }}
+          retention-days: 7
+          path: |
+            /tmp/runtime-suites/*.log
+            /tmp/runtime-suites/timings.txt
+            /tmp/runtime-suites/failed.txt
       - name: Main scene
         if: ${{ !cancelled() }}
         run: |
