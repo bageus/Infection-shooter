@@ -14,7 +14,7 @@ func update(objects: Node, geometry: RefCounted, camera: Camera3D = null) -> voi
 		_check(objects.selected, geometry, true)
 	for index in mini(PER_FRAME, nodes.size()):
 		_cursor %= nodes.size()
-		var node: Node3D = nodes[_cursor]
+		var node: Variant = nodes[_cursor]
 		_cursor += 1
 		if is_instance_valid(node) and (camera == null or camera.is_position_in_frustum(node.global_position)):
 			_check(node, geometry)
@@ -25,7 +25,7 @@ func update(objects: Node, geometry: RefCounted, camera: Camera3D = null) -> voi
 
 func _prune(camera: Camera3D, selected: Node3D) -> void:
 	for node: Variant in _marks.keys():
-		var marker: MeshInstance3D = _marks[node]
+		var marker: Variant = _marks[node]
 		if not is_instance_valid(node) or not is_instance_valid(marker):
 			_marks.erase(node)
 		elif node != selected and camera != null and not camera.is_position_in_frustum(marker.global_position):
@@ -34,7 +34,7 @@ func _prune(camera: Camera3D, selected: Node3D) -> void:
 
 
 func clear() -> void:
-	for marker: MeshInstance3D in _marks.values():
+	for marker: Variant in _marks.values():
 		if is_instance_valid(marker):
 			marker.free()
 	_marks.clear()

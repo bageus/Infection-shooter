@@ -4,8 +4,14 @@ task_id: T004
 status: IN_PROGRESS
 phase: 1
 owner: AI
-updated: 2026-10-17
+updated: 2026-10-18
 ---
+
+18.10.2026 (Save Layout/template editing, реализация и QA): ветка codex/fix-planner-save-template-editing, база c05e8e3b. Baseline probe воспроизвёл freed-instance ровно planning_stability:28. Variant guard до типизации исправляет prune/clear/placed; regression удаляет marker и body со stale placed-ссылкой. Private edit_state сохраняет weak session zones/front, потребляет transient placement snapshot, восстанавливает legacy категории/опорные поверхности, различая одинаковую высоту H-desk и сохраняя пустые surfaces. Attachment-only Shift pick/drag; служебная тень не влияет на footprint/bounds, камера центрируется по surfaces. Root592 строки reviewed, helper по ответственности; API/DTO/сцены/owners/dependencies/policy прежние, исключений нет. Godot4.7.2 editor import0 без SCRIPT ERROR/ERROR; planning_settle, placement/templates/weapons (стол/полка/H/U + legacy same-height/empty surface), atomic40 invalid payloads, полный planning_mode save/load/exit — PASS. Project/spec/workflow/architecture/source-size/173CI registrations,3 Python workstation tests,392 scene refs/diff PASS. QA docs/qa/planner_save_template_editing.md. CI PR и ручной Windows/Web ещё не подтверждены. T004 IN_PROGRESS, merge не поручен. Следующее точное действие: создать PR и проверить его CI, затем ручной Shift drag → Save template/Save Layout → выход.
+
+
+18.10.2026 (прямой запрос владельца): T004 — исправить Save Layout → выход (freed instance в planning_stability) и редактирование установленных предметов шаблонов столов/полок/desk; отдельная ветка и PR, merge не поручен. Bootstrap сохраняет владельца состояния. Scope: stability, desk setup mode/private helper, visuals/footprint, workstation placement, существующие regression suites. Root desk_setup_mode599 строк: восстановление зон и выбор attachments выделяются в private helper; root не превысит600. Public API/DTO/сцены/зависимости/политики прежние. Проверить stale marker после free, reopen/drag/load/save шаблонов и project gates.
+
 
 17.10.2026 (PR246 CI причина подтверждена): полный job log7035e48: единственный failed suite — run_planning_mode_tests.gd, exit124/121с (runtime step570с, остальные164 без failures). Полный локальный тот же head All165 PASS; planning_mode118с, отдельный стресс с4 workers115с. Для этого конкретного полного authored map save/restore (5000+объектов) runner получает180с; остальные164 сохраняют120с. Assert/fixture/physics ticks/suite coverage не меняются, контрактов и gameplay изменений нет. Ранняя публикация diagnostics уже aa909a0, новый CI будет отменён следующим synchronize по concurrency. Root cause — слишком тесный execution budget существующего интеграционного теста на текущей большой карте, не assertion failure. Следующий шаг — проверить180с runner на том же полном тесте и полный CI окончательного head.
 

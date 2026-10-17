@@ -77,7 +77,12 @@ func show_top_view(camera: Camera3D) -> void:
 func _update_camera(camera: Camera3D) -> void:
 	if desk == null:
 		return
-	var target := desk.to_global(Vector3(0, surface_height * 0.5, 0))
+	var center := Vector2.ZERO
+	for station: Dictionary in stations:
+		center += Vector2(float(station.get("x", 0.0)), float(station.get("z", 0.0)))
+	if not stations.is_empty():
+		center /= stations.size()
+	var target := desk.to_global(Vector3(center.x, surface_height * 0.5, center.y))
 	if top_view:
 		camera.global_position = target + Vector3.UP * orbit_distance
 		camera.look_at(target, -desk.global_basis.z.normalized())
@@ -208,7 +213,9 @@ func _visible_footprint() -> Rect2:
 		return area
 	for descendant in desk.find_children("*", "MeshInstance3D", true, false):
 		var mesh := descendant as MeshInstance3D
-		if mesh.mesh == null or not mesh.is_visible_in_tree() or absf(mesh.global_basis.determinant()) < 0.000000000001:
+		if bool(mesh.get_meta("planning_bounds_excluded", false)) or mesh.has_meta("planning_selection_highlight"):
+			continue
+		if mesh.mesh == null or not mesh.is_visible_in_tree() or mesh.cast_shadow == GeometryInstance3D.SHADOW_CASTING_SETTING_SHADOWS_ONLY or absf(mesh.global_basis.determinant()) < 0.000000000001:
 			continue
 		var local := (desk.global_transform.affine_inverse() * mesh.global_transform) * mesh.get_aabb()
 		var region := Rect2(Vector2(local.position.x, local.position.z), Vector2(local.size.x, local.size.z))

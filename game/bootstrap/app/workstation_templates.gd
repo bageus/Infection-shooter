@@ -62,6 +62,8 @@ static func from_saved_template(desk: Node3D, path: String, parent: Node3D, make
 	var template: Dictionary = templates[randi_range(0, templates.size() - 1)]
 	var data: Dictionary = TEMPLATE_FILES.load(str(template["path"]), desk_name(path))
 	var zones: Array = data.get("zones", [])
+	if not data.is_empty():
+		desk.set_meta("planning_template_edit", {"zones": zones.duplicate(true), "front": int(data.get("front", 0))})
 	for value in data.get("items", []):
 		if not value is Dictionary:
 			continue
@@ -236,7 +238,9 @@ static func _bounds(node: Node3D) -> AABB:
 		var current: Node = stack.pop_back()
 		if current is MeshInstance3D:
 			var mesh := current as MeshInstance3D
-			if mesh.mesh != null and mesh.is_visible_in_tree() and absf(mesh.global_basis.determinant()) > 0.000000000001:
+			if bool(mesh.get_meta("planning_bounds_excluded", false)) or mesh.has_meta("planning_selection_highlight"):
+				continue
+			if mesh.mesh != null and mesh.is_visible_in_tree() and mesh.cast_shadow != GeometryInstance3D.SHADOW_CASTING_SETTING_SHADOWS_ONLY and absf(mesh.global_basis.determinant()) > 0.000000000001:
 				var box := mesh.global_transform * mesh.get_aabb()
 				result = result.merge(box) if found else box
 				found = true

@@ -81,6 +81,7 @@ func _run() -> void:
 	_check(clone.get("_physics") == null and corpse.get("_physics") == null, "Prepared corpse releases simulator and loads without one")
 	await _round_trip(stage, corpse, part)
 	await _repeat_pose(stage, corpse, label)
+	_freed_warnings(stage)
 	_warning_budget(stage)
 	_anchor_replacement(stage)
 	await _low_fps(stage, label)
@@ -239,3 +240,25 @@ func _check(value: bool, message: String) -> void:
 	if not value:
 		failures += 1
 		push_error(message)
+
+
+func _freed_warnings(stage: Node3D) -> void:
+	var warning := STABILITY.new()
+	var objects := WarningObjects.new()
+	stage.add_child(objects)
+	var body := RigidBody3D.new()
+	stage.add_child(body)
+	body.position.y = 5
+	objects.placed.append(body)
+	warning.update(objects, Geometry.new())
+	_check(warning.get("_marks").size() == 1, "Unsettled body creates warning")
+	# Warning lifetime may end before the next owner update.
+	body.get_node("PlanningStabilityWarning").free()
+	warning.update(objects, Geometry.new())
+	_check(warning.get("_marks").size() == 1, "Freed warning is replaced")
+	body.free()
+	warning.update(objects, Geometry.new())
+	objects.placed.clear()
+	_check(warning.get("_marks").is_empty(), "Deleted body is pruned without assigning freed marker")
+	warning.clear()
+	objects.free()
