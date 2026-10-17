@@ -34,6 +34,14 @@ func _run() -> void:
 	runtime.upgrade_skill("predator_dash")
 	_expect(ui.skill_bar.circles[0].skill_id == "predator_dash", "HUD follows alternative final upgrade automatically")
 	_expect(not runtime.can_upgrade_skill("power_strike_3"), "Unchosen final cannot be purchased through UI")
+	runtime.upgrade_skill("blood_burst_2")
+	runtime.upgrade_skill("blood_burst_3")
+	var final_lock: Button
+	var alternative: Button
+	for button in ui.content.find_children("*", "Button", true, false):
+		if button.get_meta("lock_skill_id", "") == "blood_burst_3": final_lock = button
+		if button.get_meta("skill_id", "") == "blood_infection": alternative = button
+	_expect(final_lock != null and alternative != null and not final_lock.get_rect().intersects(alternative.get_rect()), "Final rank lock does not overlap the alternative choice")
 	runtime.toggle_skill_lock("predator_dash")
 	runtime._domain.mutation = 10.0
 	runtime.call("_emit_state_changes", 94.0)
@@ -54,6 +62,10 @@ func _test_bindings() -> void:
 		config.set_value("controls_v1", pair[0], {"kind": "key", "code": pair[1]})
 	controls.load_config(config)
 	_expect(controls.values.skill_1.code == KEY_Q and controls.values.camera_left.code == KEY_Z, "Saved original defaults migrate to the new scheme")
+	config.set_value("controls_v1", "melee", {"kind": "key", "code": KEY_Z})
+	controls.load_config(config)
+	_expect(controls.values.melee.code == KEY_Z and controls.values.camera_left.code == KEY_Q, "A custom key conflicting with new defaults survives migration")
+	config.set_value("controls_v1", "melee", {"kind": "key", "code": KEY_C})
 	config.set_value("controls_v1", "camera_left", {"kind": "key", "code": KEY_H})
 	config.set_value("controls_v1", "camera_right", {"kind": "key", "code": KEY_J})
 	controls.load_config(config)

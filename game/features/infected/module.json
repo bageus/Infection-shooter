@@ -13,7 +13,8 @@
     "Body part durability, severed parts, skin wounds and corpse hit volumes",
     "Mission-local priority queue and time/expansion budget for infected route searches",
     "Species/action voice selection, cooldowns and chewing/agonizing sound timing",
-    "Mission-local queue of deferred enemy rig preparation"
+    "Mission-local queue of deferred enemy rig preparation",
+    "Mutation poison, lethal infection cause and collision-limited skill displacement"
   ],
   "public_api": [
     "public/infected_capsule.tscn",

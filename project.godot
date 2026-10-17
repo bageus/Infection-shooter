@@ -16,7 +16,7 @@ config/features=PackedStringArray("4.7", "GL Compatibility")
 
 [audio]
 
-buses/default_bus_layout="uid://jpy38riq1ys6"
+buses/default_bus_layout="res://default_bus_layout.tres"
 
 [display]
 

@@ -19,7 +19,7 @@ static func describe(runtime: Node, row: Array, skills: Array) -> Dictionary:
 		info["kind"] = TEXT.t("mutationHybridBonus") + " · " + TEXT.branch(str(row[2]))
 		info["body"] = TEXT.description(str(row[0])) + "\n" + TEXT.t("mutationHybridHint")
 		for branch in str(row[2]).split(" + "):
-			var last := _branch_row(skills, branch, false, 2)
+			var last := _branch_row(runtime, skills, branch, false, 2)
 			var complete := not last.is_empty() and bool(runtime.call("skill_learned", str(last[0])))
 			info["rows"].append([TEXT.branch(branch), TEXT.t("mutationComplete") if complete else TEXT.t("mutationIncomplete"), complete])
 		info["status"] = TEXT.t("mutationEnabled") if enabled else TEXT.t("mutationInactive")
@@ -34,7 +34,7 @@ static func describe(runtime: Node, row: Array, skills: Array) -> Dictionary:
 	info["rows"].append([TEXT.t("mutationAmount"), "%d%% / %d%%" % [roundi(mutation), roundi(requirements["mutation"])], mutation >= float(requirements["mutation"])])
 	info["rows"].append([TEXT.t("mutationControlThreshold"), "%d%% / %d%%" % [roundi(stability), roundi(requirements["stability"])], bool(requirements["branch_open"])])
 	if rank > 0:
-		var previous := _branch_row(skills, str(row[2]), active_group, rank - 1)
+		var previous := _branch_row(runtime, skills, str(row[2]), active_group, rank - 1)
 		if not previous.is_empty():
 			info["rows"].append([TEXT.t("mutationPrevious") + TEXT.skill_name(str(previous[0])), TEXT.t("mutationLearned") if runtime.call("skill_learned", str(previous[0])) else TEXT.t("mutationMissing"), runtime.call("skill_learned", str(previous[0]))])
 	if learned:
@@ -51,8 +51,8 @@ static func describe(runtime: Node, row: Array, skills: Array) -> Dictionary:
 	return info
 
 
-static func _branch_row(skills: Array, branch: String, active_group: bool, rank: int) -> Array:
+static func _branch_row(runtime: Node, skills: Array, branch: String, active_group: bool, rank: int) -> Array:
 	for row in skills:
-		if str(row[2]) == branch and int(row[3]) == rank and (skills.find(row) < 16) == active_group:
+		if str(row[2]) == branch and int(row[3]) == rank and bool(runtime.call("skill_requirements", str(row[0])).get("active", false)) == active_group:
 			return row
 	return []

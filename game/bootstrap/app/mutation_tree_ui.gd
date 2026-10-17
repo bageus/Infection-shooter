@@ -411,7 +411,8 @@ func _add_lock(canvas: Control, row: Array, center: Vector2) -> void:
 	var locked: bool = runtime.call("skill_locked", skill_id)
 	var lock := Button.new()
 	lock.text = "L" if locked else "+"
-	lock.position = center + Vector2(CIRCLE * 0.5 + 8.0, -12)
+	var active_final := int(row[3]) == 2 and bool(runtime.call("skill_requirements", skill_id).get("active", false))
+	lock.position = center + (Vector2(-12, CIRCLE * 0.5 + 8.0) if active_final else Vector2(CIRCLE * 0.5 + 8.0, -12))
 	lock.custom_minimum_size = Vector2(24, 24)
 	lock.size = Vector2(24, 24)
 	lock.focus_mode = Control.FOCUS_NONE

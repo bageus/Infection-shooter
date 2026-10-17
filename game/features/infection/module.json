@@ -11,7 +11,8 @@
     "Control-loss escalation stage",
     "Terminal control-loss defeat state",
     "Highest mutation reached and retained point budget",
-    "Per-level control ampule collection and exit compensation history"
+    "Per-level control ampule collection and exit compensation history",
+    "Two active skill assignments and effect-to-recovery timing"
   ],
   "public_api": [
     "public/infection_runtime.gd"

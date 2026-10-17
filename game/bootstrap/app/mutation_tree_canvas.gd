@@ -47,7 +47,7 @@ func branch_origin(index: int) -> Vector2:
 func skill_position(branch_index: int, rank: int, alternative: bool = false) -> Vector2:
 	var origin := branch_origin(branch_index)
 	var step := 34.0 if branch_index >= 8 else 64.0
-	return Vector2(origin.x + rank * step + (72.0 if alternative else 0.0), 290.0 - rank * 85.0 if branch_index < 4 else 450.0 + rank * 85.0)
+	return Vector2(origin.x + rank * step + (72.0 if alternative else 0.0), 320.0 - rank * 85.0 if branch_index < 4 else 450.0 + rank * 85.0)
 
 
 # Branch titles are centred over the branch's own circles and never wider

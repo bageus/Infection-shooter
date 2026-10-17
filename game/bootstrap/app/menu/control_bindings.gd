@@ -112,5 +112,10 @@ func _migrate_original_defaults(requested: Dictionary, config: ConfigFile) -> vo
 		var entry: Variant = config.get_value("controls_v1", action, null)
 		unchanged = unchanged and entry is Dictionary and entry.get("kind") == "key" and entry.get("code") == old[action]
 	if unchanged:
+		for other in requested:
+			if other not in old:
+				for action in old:
+					if requested[other] == values[action]:
+						return # A custom key has priority over automatic migration.
 		for action in old:
 			requested[action] = values[action]

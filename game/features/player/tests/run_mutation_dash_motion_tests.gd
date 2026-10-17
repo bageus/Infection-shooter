@@ -40,6 +40,7 @@ func _run() -> void:
 		player.call("_update_move", 1.0 / 60.0)
 		await physics_frame
 	_expect(absf(player.position.z - stopped) < 0.01 and player.collision_mask == mask, "Blocked dash stays stopped until expiry then restores collision")
+	_test_effect_recovery(player)
 	stage.queue_free()
 	await process_frame
 	await process_frame
@@ -61,3 +62,27 @@ func _expect(ok: bool, message: String) -> void:
 	if not ok:
 		failures += 1
 		push_error(message)
+
+
+func _test_effect_recovery(player: CharacterBody3D) -> void:
+	var runtime: Node = player.get("infection_runtime")
+	var effects: Node = player.get("mutation_effects")
+	runtime.get("_domain").mutation = 94.0
+	runtime.get("_domain").critical_threshold = 95.0
+	runtime.call("upgrade_skill", "active_claws")
+	runtime.call("toggle_skill_lock", "active_claws")
+	_expect(runtime.call("cast_skill", "active_claws"), "Real player can cast the auto-equipped Claws")
+	_expect(runtime.call("skill_effect_remaining", "active_claws") == 2.5 and runtime.call("skill_cooldown_remaining", "active_claws") == 0.0, "Real effect reports its duration before recovery")
+	for frame in 2:
+		effects.call("_process", 1.25)
+		runtime.call("_physics_process", 1.25)
+	_expect(effects.get("_active_effects").running.is_empty() and runtime.call("skill_cooldown_remaining", "active_claws") == 5.0, "Recovery begins when actual Claws damage window ends")
+	runtime.call("reduce_skill_cooldowns", 5.0)
+	runtime.call("cast_skill", "active_claws")
+	runtime.get("_domain").mutation = 10.0
+	runtime.call("_emit_state_changes", 94.0)
+	_expect(effects.get("_active_effects").running.is_empty() and runtime.call("skill_effect_remaining", "active_claws") == 0.0, "Dormancy cancels the active aura instead of leaving a latent effect timer")
+	runtime.get("_domain").mutation = 94.0
+	runtime.call("_emit_state_changes", 10.0)
+	runtime.call("reduce_skill_cooldowns", 5.0)
+	_expect(runtime.call("can_cast_skill", "active_claws"), "Full reactivation cooldown restores readiness without an extra stale aura duration")
