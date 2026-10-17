@@ -156,6 +156,12 @@ func configure_world(container: Node3D, impacts: Node) -> void:
 			child.call("configure_world", container, impacts)
 
 
+func configure_glass_debris(floor_view: Node3D) -> void:
+	for child in get_children():
+		if child.has_method("configure_glass_debris"):
+			child.call("configure_glass_debris", floor_view)
+
+
 func configure_player(actor: Node3D) -> void:
 	for child in get_children():
 		if child.has_method("configure_player"):

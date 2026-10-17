@@ -123,6 +123,11 @@ var _reaction := HIT_REACTION.new()
 var effects_root: Node3D
 var _drop_weapon: Callable
 var impact_pool: Node
+var glass_debris_floor: Node3D
+
+
+func configure_glass_debris(floor_view: Node3D) -> void:
+	glass_debris_floor = floor_view
 
 
 # Public scene wiring v1; owned by the mission composition.

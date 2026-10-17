@@ -17,12 +17,18 @@ uniform float clearcoat_amount : hint_range(0.0, 1.0) = 0.35;
 uniform float wear_amount : hint_range(0.0, 1.0) = 1.0;
 uniform sampler2D surface_noise : hint_default_white, filter_linear_mipmap, repeat_enable;
 uniform sampler2D detail_noise : hint_default_white, filter_linear_mipmap, repeat_enable;
+uniform bool glass_enabled = false;
+uniform sampler2D glass_debris : source_color, filter_linear, repeat_disable;
+uniform vec2 glass_origin = vec2(0.0);
+uniform mat4 glass_world_to_floor;
 
 // Position inside the full 2 m tile (+-1), so stair subtiles keep the seams
 // of the tile they were cut from. INSTANCE_CUSTOM = (offset.xy, scale, 0);
 // plain meshes report zero and are treated as whole tiles.
 varying vec2 tile_pos;
 varying vec2 world_xz;
+varying vec2 glass_uv;
+varying float floor_top;
 
 float tile_hash(vec2 cell) {
 	vec2 p = fract(cell * vec2(0.1031, 0.1030));
@@ -34,6 +40,8 @@ void vertex() {
 	float tile_scale = INSTANCE_CUSTOM.z > 0.0 ? INSTANCE_CUSTOM.z : 1.0;
 	tile_pos = VERTEX.xz * tile_scale + INSTANCE_CUSTOM.xy;
 	world_xz = (MODEL_MATRIX * vec4(VERTEX, 1.0)).xz;
+	glass_uv = ((glass_world_to_floor * MODEL_MATRIX * vec4(VERTEX, 1.0)).xz - glass_origin) / 8.0;
+	floor_top = step(0.5, NORMAL.y);
 }
 
 void fragment() {
@@ -72,4 +80,12 @@ void fragment() {
 	SPECULAR = specular_amount * (1.0 - grout);
 	CLEARCOAT = clearcoat_amount * (1.0 - wear * 0.7) * (1.0 - max(grout, bevel * 0.5));
 	CLEARCOAT_ROUGHNESS = mix(0.45, 0.7, wear);
+	if (glass_enabled) {
+		vec4 debris = texture(glass_debris, glass_uv);
+		float coverage = debris.a * floor_top;
+		ALBEDO = mix(ALBEDO, debris.rgb, coverage);
+		ROUGHNESS = mix(ROUGHNESS, 0.15, coverage);
+		SPECULAR = mix(SPECULAR, 0.8, coverage);
+		CLEARCOAT = mix(CLEARCOAT, 0.55, coverage);
+	}
 }

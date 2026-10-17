@@ -374,3 +374,10 @@ ADR-0056: infection владеет четырьмя активными ветк�
 описаны в manifest. Player применяет эффекты; infected владеет перемещением
 в метрах и DOT-only смертью заражения. Bootstrap рисует выбор и мигрирует
 старые default controls в Q/E + камера Z/X. Owners/edges/Autoload прежние.
+
+ADR-0057: office_floor владеет transient стеклянными россыпями базового пола:
+bounded CPU Image blits → ImageTexture по существующим 8м MultiMesh-секциям,
+без новых физических/рисующих объектов. Bootstrap внедряет optional
+configure_glass_debris через public structural roots/props и очищает слой при
+clear_layout. Additive glass_floor_debris_v1 описан в manifest; owners, edges,
+DTO v8, баланс и policy прежние. Крупные физические осколки сохранены.

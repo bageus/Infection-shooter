@@ -10,7 +10,8 @@
     "Item weight catalogue and character push/kick rules",
     "Environment prop visual stages and physical reactions; durability rules owned by features.combat",
     "Mission-local decorative neighboring skyline geometry and facade material",
-    "Positional server fan ambience and its lifetime"
+    "Positional server fan ambience and its lifetime",
+    "Mission-local bounded glass debris floor textures, stamp queue and density"
   ],
   "public_api": [
     "public/base_office_layout.tscn",
@@ -106,6 +107,11 @@
     "blood_exit_v1": {
       "splatter_exit": "splatter_exit(point: Vector3, direction: Vector3, energy: float, excluded: Array[RID]) -> void; optional queued surface projection for a confirmed projectile exit; bounded three-ray fan and floor fallback"
     },
-    "prepared_placement_v1": "Public environment_prop accepts optional planning_settled_transform metadata before ready; skips legacy conference-chair grounding for prepared maps/bakes. Collision/damage/mass ownership unchanged (ADR0055)."
+    "prepared_placement_v1": "Public environment_prop accepts optional planning_settled_transform metadata before ready; skips legacy conference-chair grounding for prepared maps/bakes. Collision/damage/mass ownership unchanged (ADR0055).",
+    "glass_floor_debris_v1": {
+      "configure_glass_debris": "configure_glass_debris(floor_view: Node3D) -> void on glass_partition and environment_prop; bootstrap injects the existing public base_floor_renderer",
+      "floor": "scatter_glass_debris(panes: Array[MeshInstance3D], direction: Vector3), stamp_glass_debris(at: Vector2, frame: int, size: float, turns: int = 0) -> bool; positions are floor-local XZ; clear_glass_debris() clears transient pixels",
+      "budgets": "8m/512px sections, 16 section images/textures, 64 queued stamps, two native blits and one texture upload per active frame; four stamps per 1m cell; least-recently-written eviction. Base floor mesh clips holes; no added physics or nodes. Existing large shards are unchanged."
+    }
   }
 }

@@ -30,6 +30,11 @@ var _sway_time := 0.0
 
 var effects_root: Node3D
 var impact_pool: Node
+var _debris_floor: Node3D
+
+
+func configure_glass_debris(floor_view: Node3D) -> void:
+	_debris_floor = floor_view
 
 
 # Public scene wiring v1; owned by the mission composition.
@@ -193,6 +198,12 @@ func _break_glass(hit_position: Vector3, direction: Vector3 = Vector3.ZERO) -> v
 	collision_layer = 0
 	collision_mask = 0
 	# Only GlassBody is disabled; the surrounding frame keeps its own collision.
+	if is_instance_valid(_debris_floor):
+		var panes: Array[MeshInstance3D] = []
+		for glass in _glass_nodes:
+			if is_instance_valid(glass) and glass is MeshInstance3D:
+				panes.append(glass as MeshInstance3D)
+		_debris_floor.call("scatter_glass_debris", panes, direction)
 	_spawn_fragments(hit_position, direction)
 
 

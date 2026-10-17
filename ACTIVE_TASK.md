@@ -4,8 +4,20 @@ task_id: T004
 status: IN_PROGRESS
 phase: 1
 owner: AI
-updated: 2026-10-17
+updated: 2026-10-18
 ---
+
+18.10.2026 (публикация разрешена): владелец явно разрешил создать PR в текущей беседе. Готовые изменения и результаты проверок публикуются в feat/glass-floor-debris для review; merge не поручен. Git CLI не имеет учётных данных для push, используется подключённый GitHub connector. Следующее действие — создать PR и проверить запуск CI.
+
+
+18.10.2026 (передача результата): код и проверки завершены, local implementation commit8e8126f, ветка feat/glass-floor-debris. Автоматическая approval review отклонила git push: реализация поручена, но явного разрешения на внешнюю публикацию нет. Ветка не опубликована, PR/remote CI не созданы; обход отклонения не выполнялся. Патч glass-floor-debris.patch подготовлен из diff к c05e8e3. Следующее точное действие — получить явное разрешение владельца на push ветки и создание PR, затем проверить CI; merge не поручен.
+
+
+18.10.2026 (glass-floor — проверено): Godot4.7.2 editor import exit0 без SCRIPT ERROR/ERROR/ObjectDB/RID. Новый glass_floor_debris и existing glass_crack/floor_batch/destruction_fixes/office_breakage/world_bindings/planning_mode — PASS. Последний planning save/restore полного authored map завершился PASS, очистка карты совместима. Native glass_floor_debris и floor_batch в Compatibility/OpenGL и настоящем Forward+/Vulkan (Mesa llvmpipe) — PASS, реальные before/after pixels просмотрены. Burst64: Compatibility median0.545мс/peak1.547мс за шаг, Forward+ median0.887мс/peak5.545мс; это software QA, не FPS Iris Xe. Project/spec/workflow/architecture/source-size/CI174registrations/392scene refs/diff PASS. New fixture51lines reviewed: одна последовательная проверка pixel/budget invariants. Additive glass_floor_debris_v1/ADR0057, owners/edges/DTO/policy прежние; исключений нет. Web и аппаратная Iris Xe приёмка остаются; 16section LRU/32МиБ CPU+GPU/ограничение покрытия base floor описаны в docs/qa/glass_floor_debris.md. Следующее точное действие — открыть PR, проверить CI и провести визуальную приёмку на Iris Xe; merge не поручен.
+
+
+18.10.2026 (glass-floor prototype — прямой запрос владельца): только стекло, атлас 4x4 из main c05e8e3. Phase1/P1_LOGIC/T004 IN_PROGRESS, READY gates PASS. Office-floor владеет transient glass pixels: private glass_floor_bake/scatter, base_floor_renderer и floor shader; glass_partition/environment_prop передают фактические panes через внедрённый floor. Bootstrap world_bindings/main передают collaborator, clear_layout очищает следы. Существующие крупные физические осколки сохранены; новое мелкое стекло не создаёт тел/коллизий/узлов. Публичный additive glass_floor_debris_v1 документирован в manifest/ADR0057, DTO/maps/owners/edges/policy прежние. Review decomposition: main383, glass_partition347, environment_prop564, planning_objects>300 — только малые adapters; очередь, pixels и placement вынесены по ответственности в private helpers, исключений нет. Риски: memory, atlas alpha, section seams, holes, native/Web rendering и Iris Xe FPS. Проверки и следующий шаг — targeted/headless/native QA, затем PR без merge.
+
 
 17.10.2026 (PR246 CI причина подтверждена): полный job log7035e48: единственный failed suite — run_planning_mode_tests.gd, exit124/121с (runtime step570с, остальные164 без failures). Полный локальный тот же head All165 PASS; planning_mode118с, отдельный стресс с4 workers115с. Для этого конкретного полного authored map save/restore (5000+объектов) runner получает180с; остальные164 сохраняют120с. Assert/fixture/physics ticks/suite coverage не меняются, контрактов и gameplay изменений нет. Ранняя публикация diagnostics уже aa909a0, новый CI будет отменён следующим synchronize по concurrency. Root cause — слишком тесный execution budget существующего интеграционного теста на текущей большой карте, не assertion failure. Следующий шаг — проверить180с runner на том же полном тесте и полный CI окончательного head.
 

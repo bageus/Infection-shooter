@@ -60,6 +60,7 @@ static func shatter_glass(body: RigidBody3D, geometry: GEOMETRY, hit_position: V
 	SFX.play(body, &"glass_break", hit_position)
 	var glass_bounds := AABB()
 	var found := false
+	var panes: Array[MeshInstance3D] = []
 	for i in geometry.meshes.size():
 		var mesh := geometry.meshes[i]
 		if not is_instance_valid(mesh) or not GEOMETRY.is_glass_mesh(mesh):
@@ -67,11 +68,15 @@ static func shatter_glass(body: RigidBody3D, geometry: GEOMETRY, hit_position: V
 		var bounds: AABB = mesh.global_transform * mesh.get_aabb()
 		glass_bounds = bounds if not found else glass_bounds.merge(bounds)
 		found = true
+		panes.append(mesh)
 		if "glass" in mesh.name.to_lower() or "mirror" in mesh.name.to_lower() or mesh.mesh.get_surface_count() == 1:
 			mesh.hide()
 			geometry.shapes[i].set_deferred("disabled", true)
 	if not found:
 		return
+	var floor_view := body.get("glass_debris_floor") as Node3D
+	if is_instance_valid(floor_view):
+		floor_view.call("scatter_glass_debris", panes, direction)
 	var shards: Node3D = DAMAGE.find_named(geometry.visual, "Glass_Shards")
 	if shards != null:
 		# Vending machines keep their shard group below a hidden damage variant.

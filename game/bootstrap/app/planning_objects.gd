@@ -443,6 +443,10 @@ func _apply_layout_data(data: Dictionary) -> Dictionary:
 
 
 func clear_layout(update_status: bool = true, immediate: bool = false) -> void:
+	if is_instance_valid(session) and is_instance_valid(session.host):
+		var floor_view := session.host.get_node_or_null("Floor") as Node3D
+		if floor_view != null and floor_view.has_method("clear_glass_debris"):
+			floor_view.call("clear_glass_debris")
 	workstation_transforms.clear()
 	var retained: Array[Node3D] = []
 	for node in placed:
