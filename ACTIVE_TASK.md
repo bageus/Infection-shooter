@@ -7,6 +7,9 @@ owner: AI
 updated: 2026-10-18
 ---
 
+18.10.2026 (PR270): https://github.com/bageus/Infection-shooter/pull/270 создан в feat/glass-scatter-variation, база main699b156. В PR только private scatter, existing tests и QA/журналы; 120 seeded profiles и native three-pane lineup проверены, local gates PASS. Конфликтов с main нет; CI ещё не подтверждён. Следующее точное действие — проверить CI PR270 и вручную сравнить три соседних разбитых стекла на Iris Xe/Web; merge не поручен.
+
+
 18.10.2026 (разброс стекла — завершено): private scatter теперь даёт независимые asymmetrical near/middle/far profiles, максимум12 штампов, дальность1.17–3.3м у редкой крошки; случайные хвосты слева/справа/оба/без хвостов, кластер и масштаб у рамы. 120 seeded pattern regressions, glass_floor_debris headless, glass_crack и destruction_fixes — PASS. Native full glass_floor_debris+three-pane lineup — PASS в Compatibility/OpenGL и настоящем Forward+/Vulkan Mesa llvmpipe; изображение трёх одинаковых рам просмотрено. Editor import exit0 без SCRIPT ERROR/ERROR; project/spec/workflow/architecture/source-size/CI174registrations/392scene refs/diff PASS. Existing test fixtures51lines reviewed: последовательные pixel/budget и scene-break assertions; production file91lines. Public contracts/DTO/shader/atlas/owners/edges/бюджеты прежние, исключений нет. QA docs/qa/glass_floor_debris.md. Следующее действие — follow-up PR и проверка CI; merge не поручен. Iris Xe/Web аппаратная приёмка остаётся.
 
 
