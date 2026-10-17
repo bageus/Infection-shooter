@@ -40,3 +40,20 @@ Files above 300 lines retain existing composition roles: planner storage/objects
 ## Validation
 
 See DISPLAY_QA.md and WORLD_SURFACE_QA.md for executed checks and target-device acceptance.
+
+## Уточнение реализации — issues234/235, 17.10.2026
+
+По прямому запросу владельца moving door leaf явно регистрирует свой collider
+и mesh через существующий impact_surface_v1. Bootstrap восстанавливает старую
+unbound/frame blood по близкой реальной поверхности, затем сохраняет прежние
+optional owner/mesh; другой существующий saved owner не заменяется. Floor blood
+и layout v8 прежние. Новый runtime контракт не вводится.
+
+Office-floor освобождает все wall-mounted props при разрушении деревянной
+перегородки через прежний fall_off_with_glass: классификация WallMountModels,
+module-local group и private contact geometry в координатах опоры. Physics/damage
+owners прежние; потеря крепления не ломает intact TV/шкаф/сантехнику.
+Декомпозиция door587/prop564/main383 reviewed как scene composition; контакт
+крепления выделен в отдельную private ответственность. Исключений нет.
+Проверки/ограничения: docs/qa/door_blood_and_wall_support.md.
+Откатить этот инкремент целиком; форматы и существующие сцены совместимы.

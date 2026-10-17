@@ -104,7 +104,8 @@ func commit_async(prepared: Dictionary, tree: SceneTree, progress: Callable, ali
 			started = Time.get_ticks_msec()
 	if staged_finish:
 		progress.call(0.95, "attachments")
-		if not await BLOOD_PLACEMENT.restore_attachments_async([session.root], tree, alive):
+		var host: Node = session.get("host")
+		if not await BLOOD_PLACEMENT.restore_attachments_async([session.root], tree, alive, host.get("impact_pool") if host != null else null):
 			_discard(prepared)
 			return {"error": "loading cancelled"}
 		return _report(prepared)
@@ -262,7 +263,8 @@ func append(records: Array) -> int:
 
 
 func _finish(prepared: Dictionary) -> Dictionary:
-	BLOOD_PLACEMENT.restore_attachments([session.root])
+	var host: Node = session.get("host")
+	BLOOD_PLACEMENT.restore_attachments([session.root], host.get("impact_pool") if host != null else null)
 	return _report(prepared)
 
 
