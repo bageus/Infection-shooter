@@ -203,7 +203,11 @@ func _place(entry: Dictionary) -> void:
 	var ready_started := Time.get_ticks_usec()
 	target_parent.add_child(node)
 	timings.ready_usec += Time.get_ticks_usec() - ready_started
-	if scene_path.get_file() == "06_conference_chair.glb":
+	if record.has("settled_physics"):
+		node.set_meta("planning_settled_transform", node.transform)
+		if node is RigidBody3D and not node.freeze:
+			node.sleeping = true
+	if not record.has("settled_physics") and scene_path.get_file() == "06_conference_chair.glb":
 		objects._ground_conference_chair(node)
 	geometry._restore_floor_surface(node, scene_path)
 	node.set_meta("planning_scene_path", scene_path)

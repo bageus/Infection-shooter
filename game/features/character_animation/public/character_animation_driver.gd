@@ -1,15 +1,12 @@
 extends Node
 ## Shared character animation playback (ADR-0001, ADR-0014, ADR-0015).
-##
-## Skeletal models use their AnimationPlayer clips; models without clips use a
-## small procedural pose backend on a visual pivot. Presentation only: the
-## driver never changes gameplay state and never searches for other modules.
 
 # Public animation_events_v1: emitted when an attack/death one-shot ends.
 signal one_shot_finished(state: StringName)
 # Public animation_events_v1 addition (ADR-0018): a procedural-gait foot landed.
 signal footstep(side: int, speed: float)
 
+const MODEL_PROBE := preload("res://game/features/character_animation/animation_model_probe.gd")
 const POSE := preload("res://game/features/character_animation/procedural_pose.gd")
 const GAIT := preload("res://game/features/character_animation/procedural_gait.gd")
 const HIT_REACTION := preload("res://game/features/character_animation/hit_reaction.gd")
@@ -83,6 +80,9 @@ const FLINCH_SECONDS := 0.16
 @export var procedural_attack_lunge := 0.28
 @export var procedural_death_seconds := 1.2
 
+var _active_requested := true
+var defer_setup := false
+var _prepared := false
 var character: CharacterBody3D
 var animation_player: AnimationPlayer
 var gait: SkeletonModifier3D
@@ -125,6 +125,7 @@ func configure_clip_selector(selector: Callable) -> void:
 # special (slam, summon). Returns the duration in seconds, or 0.0 when nothing
 # could be played. Death is final.
 func play_one_shot(state: StringName) -> float:
+	prepare_visual()
 	if _dead or not ONE_SHOT_TOKENS.has(state):
 		return 0.0
 	if animation_player == null and state in [&"slam", &"summon"]:
@@ -242,16 +243,30 @@ func notify_hit(world_point: Vector3 = Vector3.ZERO, world_direction: Vector3 = 
 
 # Public animation_events_v1: pause animation work for far or hidden characters.
 func set_active(active: bool) -> void:
-	set_process(active)
+	_active_requested = active
+	set_process(active and _prepared)
 	if animation_player != null:
 		animation_player.active = active
 	if hit_reaction != null:
 		hit_reaction.active = active
 	if legs != null:
 		legs.active = active
+	if gait != null:
+		gait.active = active
 
 
 func _ready() -> void:
+	if not defer_setup:
+		prepare_visual()
+	else:
+		set_process(false)
+
+
+func prepare_visual() -> void:
+	if _prepared:
+		return
+	_prepared = true
+	set_process(_active_requested)
 	character = get_parent() as CharacterBody3D
 	if character == null:
 		character = get_node_or_null(character_path) as CharacterBody3D
@@ -260,18 +275,20 @@ func _ready() -> void:
 		model = character.get_node_or_null(model_path)
 	if model == null:
 		return
-	animation_player = _find_animation_player(model)
+	animation_player = MODEL_PROBE.find_animation_player(model)
 	if animation_player != null:
+		animation_player.active = _active_requested
 		_apply_animation_library()
 		_index_animations()
 		_configure_looping_clips()
 		_target = model as Node3D
-		_pose.feet = Vector3(0.0, _feet_height(model), 0.0)
+		_pose.feet = Vector3(0.0, MODEL_PROBE.feet_height(model), 0.0)
 		if leg_clips != null:
 			_attach_legs(model)
 		elif procedural_gait:
 			_attach_gait(model)
 		_attach_hit_reaction(model)
+		set_active(_active_requested)
 		_play_locomotion(&"idle", 0.0)
 		return
 	_target = character.get_node_or_null(procedural_target_path) as Node3D
@@ -280,7 +297,7 @@ func _ready() -> void:
 	if _target == null:
 		return
 	_rest = _target.transform
-	_pose.feet = Vector3(0.0, _feet_height(_target), 0.0)
+	_pose.feet = Vector3(0.0, MODEL_PROBE.feet_height(_target), 0.0)
 	_pose.bob_height = procedural_bob_height
 	_pose.sway_degrees = procedural_sway_degrees
 	_pose.lean_degrees = procedural_lean_degrees
@@ -560,28 +577,3 @@ func _apply_animation_library() -> void:
 		merged.add_animation(clip_name, extra_clips.get_animation(clip_name))
 	animation_player.remove_animation_library(&"")
 	animation_player.add_animation_library(&"", merged)
-
-
-func _feet_height(node: Node) -> float:
-	var lowest := INF
-	var meshes: Array[Node] = node.find_children("*", "MeshInstance3D", true, false)
-	if node is MeshInstance3D:
-		meshes.append(node)
-	for mesh_node in meshes:
-		var mesh_instance := mesh_node as MeshInstance3D
-		if mesh_instance.mesh != null:
-			var offset := 0.0 if mesh_instance == node else mesh_instance.position.y
-			lowest = minf(lowest, mesh_instance.get_aabb().position.y + offset)
-	return 0.0 if lowest == INF else lowest
-
-
-func _find_animation_player(node: Node) -> AnimationPlayer:
-	if node == null:
-		return null
-	if node is AnimationPlayer:
-		return node as AnimationPlayer
-	for child in node.get_children():
-		var found := _find_animation_player(child)
-		if found != null:
-			return found
-	return null

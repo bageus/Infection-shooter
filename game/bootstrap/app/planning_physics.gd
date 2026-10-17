@@ -7,5 +7,5 @@ static func resume(nodes: Array) -> void:
 		if node.has_method("set_runtime_physics"):
 			node.call("set_runtime_physics", true)
 		if node is RigidBody3D and not node.freeze:
-			node.sleeping = false
+			node.sleeping = node.has_meta("planning_settled_transform") and node.get_meta("planning_settled_transform") == node.transform
 		resume(node.get_children())

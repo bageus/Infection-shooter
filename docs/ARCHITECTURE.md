@@ -361,3 +361,10 @@ bullet marks, bootstrap применяет optional interface_v1.bullet_impact_s
 ADR-0053: bootstrap private display_catalog/display_settings/display_options владеют
 расчётом/adapter/UI optional interface_v1.window_mode и resolution; root-window
 size_changed обновляет только3Dscale, owners/edges/gameplay DTO прежние.
+
+ADR-0055: bootstrap owns prepared authored map snapshots and progressive planner
+settling, optional DTO v8 settled_physics_v1. Infected owns optional local corpse
+bone poses and mission-local camera-prioritised visual_preparation_budget_v1.
+Character animation exposes opt-in deferred setup; existing set_active intent is
+retained. Legacy maps/scenes remain compatible; owners and dependency edges stay
+unchanged, no Autoload or policy exceptions.

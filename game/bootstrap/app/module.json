@@ -28,5 +28,8 @@
     "features.infection",
     "core.world_badge",
     "core.localization"
-  ]
+  ],
+  "runtime_contracts": {
+    "planned_physics_v1": "DTO v8 optional settled_physics={version:1}; transform-scoped sleep state. Corpse decor_pose.physics_v1 validated before replacement. Legacy v1-v8 compatible, ADR0055."
+  }
 }

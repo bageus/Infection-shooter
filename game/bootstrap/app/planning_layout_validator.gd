@@ -1,5 +1,6 @@
 extends RefCounted
 ## Validate saved map structure before touching the live world.
+const PHYSICS_FORMAT := preload("res://game/bootstrap/app/planning_physics_format.gd")
 const NUMBERS := ["x", "y", "z", "rotation_x", "rotation_y", "rotation_z", "scale_x", "scale_y", "scale_z", "zone", "light_energy", "light_angle", "energy_multiplier", "flicker_mode", "flicker_step", "darkness", "spawn_x", "spawn_y", "spawn_z"]
 const DOOR_OPTIONS := preload("res://game/bootstrap/app/planning_door_options.gd")
 
@@ -16,6 +17,8 @@ static func error(data: Dictionary) -> String:
 		if not value is Dictionary:
 			return "object %d must be a dictionary" % index
 		var record: Dictionary = value
+		if not PHYSICS_FORMAT.valid(record):
+			return "object %d has invalid physics data" % index
 		if not record.get("scene") is String or not str(record.scene).begins_with("res://"):
 			return "object %d has an invalid scene path" % index
 		for field: String in NUMBERS:

@@ -14,24 +14,26 @@ var _failures := 0
 
 
 # Saving over an existing map asks for a second press; text fields keep keys.
-func _test_map_overwrite(storage: Variant, planner: Node) -> void:
+func _test_map_overwrite(storage: Variant, planner: Node) -> Dictionary:
 	var name_edit := storage.get("map_name_edit") as LineEdit
 	name_edit.text = "overwrite_check"
 	var path: String = storage.call("_map_path", "overwrite_check")
 	DirAccess.remove_absolute(path)
-	storage.call("save_named_map")
+	await storage.call("save_named_map")
 	_check(FileAccess.file_exists(path), "A new map saves on the first press")
 	var _first := FileAccess.get_modified_time(path)
-	storage.call("save_named_map")
+	await storage.call("save_named_map")
 	var status := str((planner.get("controls").get("status") as Label).text)
 	_check(status.contains("EXISTS"), "Saving over an existing map warns first (%s)" % status)
-	storage.call("save_named_map")
+	await storage.call("save_named_map")
 	_check(str((planner.get("controls").get("status") as Label).text).begins_with("MAP SAVED"), "A second press overwrites the map")
+	var saved: Variant = JSON.parse_string(FileAccess.get_file_as_string(path)) if FileAccess.file_exists(path) else {}
 	DirAccess.remove_absolute(path)
 	name_edit.grab_focus()
 	_check(bool(planner.call("_text_field_has_focus")), "Typing in a planner text field keeps its keys")
 	name_edit.release_focus()
 	await process_frame
+	return saved if saved is Dictionary else {}
 
 
 func _initialize() -> void:
@@ -70,14 +72,18 @@ func _run() -> void:
 	await process_frame
 
 	stage.call("_on_planning_pressed")
-	await _test_map_overwrite(storage, planner)
+	var restored: Dictionary = storage.call("_collect_layout_data")
+	var restored_tables: Array = restored.objects.filter(func(r: Dictionary) -> bool: return r.scene == TABLE_PATH)
+	_check(restored_tables.size() == 1 and absf(float(restored_tables[0].x) - 6.0) < 0.05, "A shoved prop returns to its authored place before preparation")
+	var persisted: Dictionary = await _test_map_overwrite(storage, planner)
 	var data: Dictionary = storage.call("_collect_layout_data")
 	var players := (data["objects"] as Array).filter(func(r: Dictionary) -> bool: return r["scene"] == PLAYER_PATH)
 	_check(players.size() == 1 and Vector3(players[0]["x"], players[0]["y"], players[0]["z"]).distance_to(spawn) < 0.01, "The player is saved once, at its spawn point")
 	var enemies := (data["objects"] as Array).filter(func(r: Dictionary) -> bool: return r["scene"] == ENEMY_PATH)
 	_check(enemies.size() == 1, "An enemy killed in the fight is still part of the map")
 	var tables := (data["objects"] as Array).filter(func(r: Dictionary) -> bool: return r["scene"] == TABLE_PATH)
-	_check(tables.size() == 1 and absf(float(tables[0]["x"]) - 6.0) < 0.05, "A shoved prop is back at its authored place")
+	var saved_tables: Array = persisted.get("objects", []).filter(func(r: Dictionary) -> bool: return r.scene == TABLE_PATH)
+	_check(tables.size() == 1 and saved_tables.size() == 1 and absf(float(tables[0].x) - float(saved_tables[0].x)) < 0.0001, "Preparation keeps the exact position persisted by Save Map")
 	_check(player.global_position.distance_to(Vector3(20, 1, 20)) < 0.5, "Opening the planner does not teleport the player")
 
 	var report: Dictionary = objects.call("_apply_layout_data", {"version": 6, "objects": [

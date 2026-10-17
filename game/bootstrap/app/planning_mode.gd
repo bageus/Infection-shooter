@@ -1,4 +1,6 @@
 extends Node
+const STABILITY := preload("res://game/bootstrap/app/planning_stability.gd")
+var _stability := STABILITY.new()
 
 const OBJECTS := preload("res://game/bootstrap/app/planning_objects.gd")
 const GEOMETRY := preload("res://game/bootstrap/app/planning_geometry.gd")
@@ -149,6 +151,7 @@ func enter() -> void:
 func exit() -> void:
 	if storage.map_loading:
 		return
+	_stability.clear()
 	controls.light_view.set_enabled(false)
 	if desk_setup.active:
 		desk_setup.close()
@@ -188,6 +191,7 @@ func exit() -> void:
 func _process(delta: float) -> void:
 	if storage.map_loading or not active:
 		return
+	_stability.update(objects, geometry)
 	objects._sync_workstations()
 	if desk_setup.active:
 		return

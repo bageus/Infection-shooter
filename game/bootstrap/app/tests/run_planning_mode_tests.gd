@@ -118,7 +118,7 @@ func _exercise_maps(planner: Node) -> void:
 	_check(light_records.size() == 1 and light_records[0].get("light_energy", 0.0) > 0.0, "Layout captures edited light")
 	var name := "codex_planning_regression_%d" % Time.get_ticks_usec()
 	(storage.get("map_name_edit") as LineEdit).text = name
-	storage.call("save_named_map")
+	await storage.call("save_named_map")
 	# Saving adds the automatic wall fixtures, so compare against the state the save left.
 	snapshot = storage.call("_collect_layout_data")
 	var path: String = storage.call("_map_path", name)

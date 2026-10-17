@@ -3,6 +3,10 @@ extends Node3D
 ## (ADR-0017). Its limbs and head can still be shot off in play; variants
 ## start with parts already missing.
 
+const PHYSICS_POSE := preload("res://game/features/infected/decor_physics_pose.gd")
+@export var physics_pose: Dictionary = {}
+var _settling := false
+
 const POSES := preload("res://game/features/infected/decor_pose.gd")
 @export var pose_seed := 0
 @export var pose_variant := "legacy"
@@ -58,19 +62,25 @@ func _ready() -> void:
 	for part_name in severed_parts:
 		parts.sever(StringName(part_name), Vector3.ZERO, false)
 	parts.enable_corpse_hitboxes()
+	_restore_physics_pose()
 
 
 func get_decor_pose() -> Dictionary:
-	return {"seed": pose_seed, "pose": pose_variant, "facing": pose_facing}
+	var result := {"seed": pose_seed, "pose": pose_variant, "facing": pose_facing}
+	if not physics_pose.is_empty():
+		result["physics_v1"] = physics_pose.duplicate(true)
+	return result
 
 
 func configure_decor_pose(config: Dictionary) -> void:
+	physics_pose = config.get("physics_v1", {}).duplicate(true)
 	pose_seed = maxi(0, int(config.get("seed", 1)))
 	pose_variant = str(config.get("pose", "auto"))
 	pose_facing = float(config.get("facing", float(posmod(pose_seed, 6283)) / 1000.0 - PI))
 	if is_node_ready() and parts != null:
 		var body := get_node("Body") as Node3D
 		_apply_pose(body, body.get_child(0) as Node3D)
+		_restore_physics_pose()
 
 
 func _apply_pose(body: Node3D, visual: Node3D) -> void:
@@ -99,8 +109,35 @@ func _notification(what: int) -> void:
 
 
 func set_runtime_physics(enabled: bool) -> void:
+	if enabled and not _settling and not physics_pose.is_empty():
+		return
 	if enabled and _physics == null and parts != null:
 		_physics = preload("res://game/features/infected/corpse_physics.gd").new()
 		_physics.call("setup", parts)
 	if _physics != null:
 		_physics.call("set_enabled", enabled)
+
+
+func _restore_physics_pose() -> void:
+	if physics_pose.is_empty() or parts == null:
+		return
+	PHYSICS_POSE.restore(get_node("Body"), parts.skeleton, physics_pose)
+	_posed_bounds = POSES.bounds(parts, self)
+
+
+func prepare_planner_physics() -> void:
+	_settling = true
+	set_runtime_physics(true)
+	if _physics != null and _physics.get("_guard") != null:
+		_physics.get("_guard").process_mode = Node.PROCESS_MODE_ALWAYS
+		_physics.get("_guard").busy_limit_seconds = 2.0
+
+
+func finalize_planner_physics() -> void:
+	if _physics != null:
+		_physics.call("freeze_pose")
+		physics_pose = PHYSICS_POSE.capture(get_node("Body"), parts.skeleton)
+		_posed_bounds = POSES.bounds(parts, self)
+		_physics.call("dispose")
+		_physics = null
+	_settling = false

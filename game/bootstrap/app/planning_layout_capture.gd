@@ -45,6 +45,8 @@ static func collect(objects: Node, nodes: Array, include_player: bool = true) ->
 			"spawn_y": (node.get_meta("planning_spawn_transform") as Transform3D).origin.y if node.has_meta("planning_spawn_transform") else node.position.y,
 			"spawn_z": (node.get_meta("planning_spawn_transform") as Transform3D).origin.z if node.has_meta("planning_spawn_transform") else node.position.z
 		})
+		if node.has_meta("planning_settled_transform") and node.get_meta("planning_settled_transform") == node.transform:
+			records[-1]["settled_physics"] = {"version": 1}
 		if node.has_meta("planning_auto_fixture"):
 			records[-1]["auto_fixture"] = str(node.get_meta("planning_auto_fixture"))
 		if node.has_method("get_decor_pose"):
