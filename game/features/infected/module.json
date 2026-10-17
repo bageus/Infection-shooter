@@ -122,6 +122,10 @@
     "visual_preparation_v1": {
       "configure_visual_preparation": "configure_visual_preparation(budget:Node) -> void; optional mission-local queue before ready; absent queue preserves immediate setup",
       "budget": "public/visual_preparation_budget.gd; injected camera, track(actor), <=1 animation/body-parts phase/frame within40m, <=64 weak references scanned/frame. Damage and required attack timing prepare synchronously."
+    },
+    "mutation_status_v2": {
+      "apply_skill_push": "apply_skill_push(direction:Vector3,distance:float) -> void; actual metres, stops at collision, cancels attack windup",
+      "apply_skill_infection": "apply_skill_infection(duration:float,damage_per_second:float) -> void; poison lethal damage only explodes40 within4m once, no propagated infection"
     }
   }
 }

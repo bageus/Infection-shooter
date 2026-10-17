@@ -7,6 +7,7 @@ const SKILL_CARD := preload("res://game/bootstrap/app/mutation_skill_card.gd")
 const SKILL_INFO := preload("res://game/bootstrap/app/mutation_skill_info.gd")
 const STYLE := preload("res://game/bootstrap/app/menu/menu_style.gd")
 const SKILL_ICONS := preload("res://game/bootstrap/app/mutation_skill_icons.gd")
+const LOADOUT := preload("res://game/bootstrap/app/mutation_loadout_ui.gd")
 const SKILL_BAR := preload("res://game/bootstrap/app/mutation_skill_bar.gd")
 const LIT := Color(0.3, 0.95, 0.1)
 const CIRCLE := 66.0
@@ -197,7 +198,7 @@ func _unhandled_input(event: InputEvent) -> void:
 			get_viewport().set_input_as_handled()
 		else:
 			var skills: Array[String] = _equipped()
-			for index in range(4):
+			for index in range(2):
 				if event.is_action_pressed("skill_" + str(index + 1)):
 					if index < skills.size():
 						runtime.call("cast_skill", skills[index])
@@ -271,7 +272,7 @@ func _refresh() -> void:
 	var opened: Array[bool] = []
 	for branch_index in TREE_CANVAS.BRANCHES.size():
 		for row in skills:
-			if int(row[3]) == 0 and str(row[2]) == TREE_CANVAS.BRANCHES[branch_index] and (skills.find(row) < 12) == (branch_index < 4):
+			if int(row[3]) == 0 and str(row[2]) == TREE_CANVAS.BRANCHES[branch_index] and bool(runtime.call("skill_requirements", str(row[0])).get("active", false)) == (branch_index < 4):
 				var requirement: Dictionary = runtime.call("skill_requirements", str(row[0]))
 				thresholds.append(float(requirement["mutation"]))
 				opened.append(bool(requirement["branch_open"]))
@@ -284,11 +285,11 @@ func _refresh() -> void:
 		var furthest := -1
 		var requirements: Dictionary = {}
 		for row in skills:
-			if int(row[3]) == 3 or str(row[2]) != branch or (skills.find(row) < 12) != group_is_active:
+			if int(row[3]) == 3 or str(row[2]) != branch or bool(runtime.call("skill_requirements", str(row[0])).get("active", false)) != group_is_active:
 				continue
 			requirements = runtime.call("skill_requirements", str(row[0]))
 			var rank := int(row[3])
-			_add_skill(canvas, row, canvas.call("skill_position", branch_index, rank), skills)
+			_add_skill(canvas, row, canvas.call("skill_position", branch_index, rank, bool(requirements.get("alternative", false))), skills)
 			if bool(requirements["path_reached"]):
 				furthest = maxi(furthest, rank)
 		_add_branch_label(canvas, branch_index, requirements)
@@ -301,6 +302,14 @@ func _refresh() -> void:
 		_add_skill(canvas, row, canvas.call("hybrid_position", hybrid_index), skills)
 		hybrids.append(bool(runtime.call("has_skill", str(row[0]))))
 		hybrid_index += 1
+	var choices: Array[bool] = []
+	for id in ["blood_infection", "storm_pulse", "predator_dash", "berserk"]:
+		choices.append(bool(runtime.call("skill_learned", id)))
+	canvas.set("alternatives", choices)
+	var loadout := LOADOUT.new()
+	canvas.add_child(loadout)
+	var bindings: Array[String] = [_binding_label("skill_1"), _binding_label("skill_2")]
+	loadout.configure(runtime, bindings)
 	canvas.call("set_progress", progress, hybrids)
 	_fill_hotbar()
 	_restore_card()
@@ -328,7 +337,7 @@ func _fill_hotbar() -> void:
 	var active_skills := _equipped()
 	var keys: Array[String] = []
 	for index in active_skills.size():
-		keys.append(_binding_label("skill_%d" % (index + 1)) if index < 4 else "")
+		keys.append(_binding_label("skill_%d" % (index + 1)) if index < 2 else "")
 	skill_bar.rebuild(active_skills, keys, _binding_label("mutation_tree"))
 
 
@@ -451,11 +460,7 @@ func _restore_card() -> void:
 
 
 func _equipped() -> Array[String]:
-	var result: Array[String] = []
-	for row in runtime.call("skill_catalog").slice(0, 12):
-		if runtime.call("has_skill", str(row[0])):
-			result.append(str(row[0]))
-	return result
+	return runtime.call("equipped_skills")
 
 
 func _add_section_labels(canvas: Control) -> void:

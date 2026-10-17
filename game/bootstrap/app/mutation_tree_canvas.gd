@@ -1,7 +1,7 @@
 extends Control
 
 const BRANCHES := [
-	"Biomass", "Neural Storm", "Toxic Mutation", "Predator Form",
+	"Biomass", "Neural Storm", "Might", "Predator Form",
 	"Arsenal", "Predator", "Biomass", "Adaptation", "Neural System", "Metabolism"
 ]
 const DESIGN_SIZE := Vector2(1200, 800)
@@ -10,6 +10,7 @@ const HYBRID_PARENTS := [[4, 5], [5, 6], [6, 7], [7, 8], [8, 9]]
 const LIT := Color(0.3, 0.95, 0.1, 1.0)
 const LABEL_MAX_WIDTH := 170.0
 const LABEL_GAP := 8.0
+var alternatives: Array[bool] = []
 var progress: Array[int] = []
 var hybrids: Array[bool] = []
 var thresholds: Array[float] = []
@@ -43,10 +44,10 @@ func branch_origin(index: int) -> Vector2:
 	return Vector2(1060.0 if index == 9 else _threshold_x(thresholds[index]), TRUNK_Y)
 
 
-func skill_position(branch_index: int, rank: int) -> Vector2:
+func skill_position(branch_index: int, rank: int, alternative: bool = false) -> Vector2:
 	var origin := branch_origin(branch_index)
 	var step := 34.0 if branch_index >= 8 else 64.0
-	return Vector2(origin.x + rank * step, 290.0 - rank * 85.0 if branch_index < 4 else 450.0 + rank * 85.0)
+	return Vector2(origin.x + rank * step + (72.0 if alternative else 0.0), 290.0 - rank * 85.0 if branch_index < 4 else 450.0 + rank * 85.0)
 
 
 # Branch titles are centred over the branch's own circles and never wider
@@ -59,7 +60,7 @@ func label_rect(index: int) -> Rect2:
 		if other != index:
 			width = minf(width, absf(_branch_center_x(other) - center) - LABEL_GAP)
 	var x := clampf(center - width * 0.5, 0.0, DESIGN_SIZE.x - width)
-	return Rect2(x, 42.0 if index < 4 else 730.0, width, 0.0)
+	return Rect2(x, 64.0 if index < 4 else 730.0, width, 0.0)
 
 
 func _branch_center_x(index: int) -> float:
@@ -91,10 +92,17 @@ func _draw() -> void:
 		var start := branch_origin(index)
 		for rank in range(3):
 			var end := skill_position(index, rank)
+			var selected_alternative := index < alternatives.size() and alternatives[index]
 			draw_line(start, end, shade, 6.0, true)
-			if opened and index < progress.size() and progress[index] >= rank:
-				draw_line(start, end, LIT, 4.0, true)
+			if opened and index < progress.size() and progress[index] >= rank and not (index < 4 and rank == 2 and selected_alternative):
+				draw_line(start, end, LIT, 3.0, true)
+			if index < 4 and rank == 2:
+				var alternate := skill_position(index, rank, true)
+				draw_line(start, alternate, shade, 6.0, true)
+				if opened and selected_alternative and index < progress.size() and progress[index] >= rank:
+					draw_line(start, alternate, LIT, 3.0, true)
 			start = end
+
 	for index in HYBRID_PARENTS.size():
 		var shade := LIT if index < hybrids.size() and hybrids[index] else Color(0.39, 0.4, 0.38, 0.35)
 		for parent in HYBRID_PARENTS[index]:

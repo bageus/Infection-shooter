@@ -26,6 +26,9 @@ class Runtime extends Node:
 	signal mutation_changed(amount: float, threshold: float)
 	var skills: Dictionary = {}
 
+	func skill_requirements(_id: String) -> Dictionary:
+		return {"level": 1}
+
 	func has_skill(skill_id: String) -> bool:
 		return skills.has(skill_id)
 
@@ -42,6 +45,9 @@ class Enemy extends Node3D:
 
 	func apply_blast_stun(duration: float, intensity: float) -> void:
 		stunned = duration * intensity
+
+	func apply_skill_push(_direction: Vector3, _distance: float) -> void:
+		pass
 
 	func apply_mutation_poison(_duration: float, _dps: float) -> void:
 		pass
@@ -100,11 +106,11 @@ func _dash(effects: Node, runtime: Runtime) -> void:
 	effects.player.global_position = Vector3(0, 0, -3.0)
 	effects.call("_process", 0.1)
 	effects.call("_process", 0.1)
-	_check(is_equal_approx(ahead.damage_taken, 20.0), "Predator Dash hits an enemy on its path exactly once")
+	_check(is_equal_approx(ahead.damage_taken, 50.0), "Predator Dash hits an enemy on its path exactly once")
 	effects.call("_process", 0.3)
 	effects.player.global_position = Vector3(0, 0, -4.5)
 	effects.call("_process", 0.1)
-	_check(is_equal_approx(ahead.damage_taken, 20.0), "The strike window ends with the dash")
+	_check(is_equal_approx(ahead.damage_taken, 50.0), "The strike window ends with the dash")
 	effects.player.global_position = Vector3.ZERO
 	_retire(behind)
 	_retire(ahead)
@@ -156,9 +162,9 @@ func _discharge_chain(effects: Node, runtime: Runtime) -> void:
 	var third := _enemy(Vector3(0, 0, 7.0))
 	runtime.skills["discharge"] = true
 	effects.call("_cast", "discharge")
-	_check(is_equal_approx(first.damage_taken, 10.0), "Discharge's first jump deals 10 damage")
-	_check(is_equal_approx(second.damage_taken, 20.0), "Discharge chains to the nearest unhit enemy with +10 per jump")
-	_check(is_equal_approx(third.damage_taken, 30.0), "Discharge keeps chaining while targets stay in range")
+	_check(is_equal_approx(first.damage_taken, 30.0), "Nearest pair receives repeated fixed-damage links")
+	_check(is_equal_approx(second.damage_taken, 30.0), "Second target alternates with the first")
+	_check(is_equal_approx(third.damage_taken, 0.0), "Nearest eligible neighbour wins each link")
 	_retire(first)
 	_retire(second)
 	_retire(third)
@@ -207,7 +213,7 @@ func _acid_on_floor(effects: Node, host: Host, runtime: Runtime) -> void:
 	runtime.skills["spore_cocoon"] = true
 	runtime.skill_cast.emit("spore_cocoon")
 	await create_timer(EFFECTS.SPORE_DELAY + 0.3).timeout
-	_check(is_equal_approx(near_floor.damage_taken, EFFECTS.SPORE_DAMAGE), "Spore Cocoon aimed at a wall bursts on the floor in front of it (damage %.1f)." % near_floor.damage_taken)
+	_check(is_zero_approx(near_floor.damage_taken), "Retired Spore Cocoon no longer applies active damage")
 	_retire(near_floor)
 	scenery.queue_free()
 

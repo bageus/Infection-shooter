@@ -56,6 +56,7 @@
       "antidote_confirmation_requested": "signal antidote_confirmation_requested(preview:Dictionary); ordinary use with skill loss/dormancy requests paused bootstrap presentation",
       "confirm_antidote": "confirm_antidote() -> bool; revalidates pending preview and current stock, consumes once",
       "cancel_antidote": "cancel_antidote() -> void; discards pending use"
-    }
+    },
+    "mutation_dash_v2": "mutation_dash() retains0.4s window, travels6m at15m/s, passes infected collision while pushing sideways, stops at scenery until window ends"
   }
 }

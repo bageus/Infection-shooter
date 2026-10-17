@@ -2,6 +2,7 @@ extends Node
 
 const InfectionDomain = preload("res://game/features/infection/domain/infection_domain.gd")
 const MUTATION_TREE := preload("res://game/features/infection/domain/mutation_tree.gd")
+const ACTIVE_STATE := preload("res://game/features/infection/domain/active_skill_state.gd")
 const CATALOG := preload("res://game/features/infection/domain/mutation_catalog.gd")
 
 signal mutation_changed(current: float, critical_threshold: float)
@@ -30,17 +31,13 @@ var _was_defeated: bool = false
 var _was_choice_pending: bool = false
 var _last_active_ability: int = 0
 var _available_skills: Dictionary = {}
-var _cooldown_totals: Dictionary = {}
-var _effects: Dictionary = {}
-var _effect_totals: Dictionary = {}
+var active_state := ACTIVE_STATE.new()
 
 
 func _physics_process(delta: float) -> void:
 	var previous_mutation: float = _domain.mutation
 	_domain.tick(delta)
-	reduce_skill_cooldowns(delta)
-	for skill_id in _effects.keys():
-		_effects[skill_id] = maxf(0.0, float(_effects[skill_id]) - delta)
+	_tick_skills(delta, true)
 	_emit_state_changes(previous_mutation)
 
 
@@ -99,7 +96,8 @@ func skill_requirements(skill_id: String) -> Dictionary:
 	if row.is_empty():
 		return {}
 	return {
-		"version": 2, "path_reached": tree.path_reached(skill_id, _domain.mutation, _domain.critical_threshold), "stage": CATALOG.stage(row) + 1,
+		"active": CATALOG.is_active_skill(skill_id), "level": CATALOG.level(skill_id), "alternative": CATALOG.alternative(skill_id), "cooldown": CATALOG.cooldown(skill_id),
+		"version": 3, "path_reached": tree.path_reached(skill_id, _domain.mutation, _domain.critical_threshold), "stage": CATALOG.stage(row) + 1,
 		"mutation": CATALOG.threshold(row), "stability": CATALOG.required_stability(row),
 		"branch_open": _domain.critical_threshold >= CATALOG.required_stability(row)
 	}
@@ -135,15 +133,49 @@ func _upgrade_candidates() -> Dictionary:
 	return candidates
 
 
+func _cooldown_factor() -> float:
+	return 0.75 if has_skill("neurostim") else 1.0
+
+
 func reduce_skill_cooldowns(seconds: float) -> void:
-	for skill_id: String in tree.tick(seconds):
-		if has_skill(skill_id) and not _domain.defeated:
-			skill_cooldown_finished.emit(skill_id)
+	_tick_skills(seconds, false)
+
+
+func _tick_skills(seconds: float, advance_effects: bool) -> void:
+	for id in active_state.tick(seconds, tree, get_mutation(), get_critical_threshold(), _cooldown_factor(), advance_effects):
+		if not _domain.defeated and id in active_state.slots:
+			skill_cooldown_finished.emit(id)
+
+
+func equipped_skills() -> Array[String]:
+	return active_state.slots.duplicate()
+
+
+func assign_skill(slot: int, skill_id: String) -> bool:
+	if not active_state.assign(slot, skill_id, tree, get_mutation(), get_critical_threshold()):
+		return false
+	tree_changed.emit()
+	return true
+
+
+func assignable_skills() -> Array[String]:
+	var result: Array[String] = []
+	for row in CATALOG.ACTIVE:
+		var id := str(row[0])
+		if not has_skill(id):
+			continue
+		var newer := false
+		for other in CATALOG.ACTIVE:
+			newer = newer or (other[2] == row[2] and int(other[3]) > int(row[3]) and tree.learned.has(str(other[0])))
+		if not newer:
+			result.append(id)
+	return result
 
 
 func upgrade_skill(skill_id: String) -> bool:
 	if not tree.upgrade(skill_id, _domain.mutation, _domain.critical_threshold):
 		return false
+	active_state.learned(skill_id, tree, get_mutation(), get_critical_threshold())
 	_available_skills = _upgrade_candidates()
 	tree_changed.emit()
 	return true
@@ -153,20 +185,20 @@ func toggle_skill_lock(skill_id: String) -> bool:
 	if not tree.toggle_lock(skill_id):
 		return false
 	tree.reconcile(_domain.mutation)
+	active_state.reconcile(tree, get_mutation(), get_critical_threshold(), _cooldown_factor())
 	_available_skills = _upgrade_candidates()
 	tree_changed.emit()
 	return true
 
 
 func cast_skill(skill_id: String) -> bool:
-	if _domain.is_control_lost() or _domain.defeated:
+	if not can_cast_skill(skill_id):
 		return false
-	if not tree.cast(skill_id, _domain.mutation, _domain.critical_threshold):
-		return false
+	# Reserve first; the synchronous host effect may report a lasting duration.
+	active_state.start_recovery(skill_id, tree, _cooldown_factor())
 	skill_cast.emit(skill_id)
-	if has_skill("neurostim"):
-		tree.cooldowns[skill_id] = float(tree.cooldowns[skill_id]) * 0.75
-	_cooldown_totals[skill_id] = float(tree.cooldowns[skill_id])
+	if skill_effect_remaining(skill_id) > 0.0:
+		tree.cooldowns[skill_id] = 0.0
 	tree_changed.emit()
 	return true
 
@@ -177,32 +209,29 @@ func skill_cooldown_remaining(skill_id: String) -> float:
 
 ## 1.0 right after casting, falling to 0.0 when the skill is ready again.
 func skill_cooldown_ratio(skill_id: String) -> float:
-	var total := float(_cooldown_totals.get(skill_id, 0.0))
+	var total := float(active_state.totals.get(skill_id, 0.0))
 	return clampf(skill_cooldown_remaining(skill_id) / total, 0.0, 1.0) if total > 0.0 else 0.0
 
 
 func can_cast_skill(skill_id: String) -> bool:
-	return not _domain.is_control_lost() and not _domain.defeated and CATALOG.find(skill_id) in CATALOG.ACTIVE \
-		and has_skill(skill_id) and skill_cooldown_remaining(skill_id) <= 0.0
+	return not _domain.is_control_lost() and not _domain.defeated and active_state.can_cast(skill_id, tree, get_mutation(), get_critical_threshold())
 
 
 func report_skill_effect(skill_id: String, duration: float) -> void:
-	if duration <= 0.0 or CATALOG.find(skill_id) not in CATALOG.ACTIVE:
+	if duration <= 0.0 or not CATALOG.is_active_skill(skill_id):
 		return
-	# An extension of a running effect keeps the larger total so the sweep never jumps past full.
-	var running := skill_effect_remaining(skill_id) > 0.0
-	_effect_totals[skill_id] = maxf(duration, float(_effect_totals.get(skill_id, 0.0))) if running else duration
-	_effects[skill_id] = duration
+	active_state.report_effect(skill_id, duration)
+	tree.cooldowns[skill_id] = 0.0
 	skill_effect_started.emit(skill_id, duration)
 
 
 func skill_effect_remaining(skill_id: String) -> float:
-	return float(_effects.get(skill_id, 0.0))
+	return float(active_state.effects.get(skill_id, 0.0))
 
 
 ## 1.0 when a lasting effect starts, falling to 0.0 when it ends.
 func skill_effect_ratio(skill_id: String) -> float:
-	var total := float(_effect_totals.get(skill_id, 0.0))
+	var total := float(active_state.effect_totals.get(skill_id, 0.0))
 	return clampf(skill_effect_remaining(skill_id) / total, 0.0, 1.0) if total > 0.0 else 0.0
 
 
@@ -246,7 +275,9 @@ func is_escalated() -> bool:
 func _emit_state_changes(previous_mutation: float, stability_changed: bool = false) -> void:
 	tree.observe_mutation(maxf(previous_mutation, _domain.mutation))
 	if stability_changed or not is_equal_approx(previous_mutation, _domain.mutation):
-		if tree.reconcile(_domain.mutation):
+		var tree_updated: bool = tree.reconcile(_domain.mutation)
+		var slots_updated := active_state.reconcile(tree, get_mutation(), get_critical_threshold(), _cooldown_factor())
+		if tree_updated or slots_updated:
 			tree_changed.emit()
 		mutation_changed.emit(_domain.mutation, _domain.critical_threshold)
 		if stability_changed or CATALOG.point_budget(previous_mutation) != CATALOG.point_budget(_domain.mutation):

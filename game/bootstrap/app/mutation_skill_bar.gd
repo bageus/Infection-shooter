@@ -190,7 +190,7 @@ func rebuild(skills: Array[String], bindings: Array[String], open_binding: Strin
 	circles.clear()
 	for index in skills.size():
 		var circle := SkillCircle.new(skills[index], bindings[index], SKILL_ICONS.for_skill(skills[index]), BODY)
-		circle.tooltip_text = _skill_name(skills[index])
+		circle.tooltip_text = TEXT.t("mutationEmptySlot") if skills[index].is_empty() else _skill_name(skills[index])
 		var skill_id := skills[index]
 		circle.gui_input.connect(func(event: InputEvent) -> void:
 			if event is InputEventMouseButton and event.pressed and event.button_index == MOUSE_BUTTON_LEFT:

@@ -6,8 +6,7 @@ extends SceneTree
 const PLAYER := preload("res://game/features/player/public/player.tscn")
 const SFX := preload("res://game/core/audio/public/sound_events.gd")
 ## The twelve active skills of the mutation tree (mutation_catalog.gd ACTIVE).
-const ACTIVE := ["blood_burst", "parasite", "living_harvest", "discharge", "overload", "storm_pulse",
-	"acid_spit", "spore_cocoon", "epidemic", "predator_dash", "bone_blades", "berserk"]
+const ACTIVE := ["blood_burst", "blood_burst_2", "blood_burst_3", "blood_infection", "discharge", "discharge_2", "discharge_3", "storm_pulse", "power_strike", "power_strike_2", "power_strike_3", "predator_dash", "active_claws", "active_claws_2", "active_claws_3", "berserk"]
 const PLAYER_AUDIO := preload("res://game/features/player/player_audio.gd")
 
 var failures := 0
@@ -41,17 +40,8 @@ func _run() -> void:
 
 	runtime.emit_signal("skill_cast", "storm_pulse")
 	_expect(_voices(player, &"skill_storm_pulse") == 1 and _voices(player, &"skill_storm_field") == 1, "Storm Pulse casts and its field follows the player.")
-	runtime.emit_signal("skill_cast", "acid_spit")
-	_expect(_voices(player, &"skill_acid_spit") == 1, "Acid Spit is heard from the player.")
-	var sizzle := _first(world, &"acid_sizzle")
-	_expect(sizzle != null and sizzle.global_position.is_equal_approx(Vector3(6, 0, -3)), "The acid pool sizzles where it landed.")
-	runtime.emit_signal("skill_cast", "spore_cocoon")
-	var pod := _first(world, &"skill_spore_cocoon")
-	_expect(pod != null and pod.global_position.is_equal_approx(Vector3(6, 0, -3)), "The spore pod lands at the aim point.")
-	player.set("_aim_point", Vector3(-4, 0, 0))
-	await create_timer(PLAYER_AUDIO.SPORE_DELAY + 0.2).timeout
-	var burst := _first(world, &"spore_burst")
-	_expect(burst != null and burst.global_position.is_equal_approx(Vector3(6, 0, -3)), "Spores burst at the pod after the delay, not at the new aim.")
+	runtime.emit_signal("skill_cast", "power_strike_2")
+	_expect(_voices(player, &"skill_bone_blades") == 1, "An upgraded power strike has its cast sound")
 	runtime.emit_signal("passive_triggered", "retaliation", 0.0)
 	_expect(_voices(player, &"skill_retaliation") == 1, "Retaliation's shock is heard.")
 	runtime.emit_signal("passive_triggered", "regeneration", 0.0)
@@ -70,6 +60,7 @@ func _cooldown_feedback(player: Node, runtime: Node) -> void:
 	domain.set("mutation", 40.0)
 	domain.set("critical_threshold", 45.0)
 	tree.get("learned")["blood_burst"] = true
+	runtime.call("assign_skill", 0, "blood_burst")
 	runtime.call("_physics_process", .01)
 	_expect(_voices(player, &"skill_cooldown_done") == 0, "Initially ready skills stay silent")
 	_expect(runtime.call("cast_skill", "blood_burst"), "A learned skill starts its real cooldown")

@@ -82,13 +82,13 @@ func is_active(skill_id: String, mutation: float, stability: float = 30.0) -> bo
 
 
 func can_upgrade(skill_id: String, mutation: float, stability: float = 30.0) -> bool:
-	return not CATALOG.HYBRID_PARENTS.has(skill_id) and not learned.has(skill_id) and points(mutation) > 0 and path_reached(skill_id, mutation, stability)
+	return not CATALOG.HYBRID_PARENTS.has(skill_id) and not learned.has(skill_id) and not _other_final_learned(skill_id) and points(mutation) > 0 and path_reached(skill_id, mutation, stability)
 
 
 # Eligibility for drawing the path is independent of unspent points.
 func path_reached(skill_id: String, mutation: float, stability: float = 30.0) -> bool:
 	var row := CATALOG.find(skill_id)
-	if row.is_empty() or mutation < CATALOG.threshold(row) or stability < CATALOG.required_stability(row):
+	if row.is_empty() or _other_final_learned(skill_id) or mutation < CATALOG.threshold(row) or stability < CATALOG.required_stability(row):
 		return false
 	var rank := int(row[3])
 	if rank > 0 and rank < 3 and not _has_previous(row, _branch_rows(row)):
@@ -156,3 +156,12 @@ func cast(skill_id: String, mutation: float, stability: float = 30.0) -> bool:
 		return false
 	cooldowns[skill_id] = CATALOG.cooldown(skill_id)
 	return true
+
+
+func _other_final_learned(skill_id: String) -> bool:
+	if CATALOG.level(skill_id) != 3:
+		return false
+	for row in CATALOG.ACTIVE:
+		if str(row[0]) != skill_id and int(row[3]) == 2 and row[2] == CATALOG.family(skill_id) and learned.has(str(row[0])):
+			return true
+	return false

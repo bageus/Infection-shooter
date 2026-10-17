@@ -75,40 +75,40 @@ func _test_mutation_tree() -> void:
 	_check(_count(ui, &"mutation_open") == 1, "Opening the tree plays its cue during pause")
 	ui.open_tree()
 	_check(_count(ui, &"mutation_open") == 1, "Opening an already open tree is silent")
-	var skill := _tree_button(ui.content, "skill_id", "acid_spit")
+	var skill := _tree_button(ui.content, "skill_id", "power_strike")
 	_check(skill != null and not skill.disabled, "A real mutation skill is available")
 	if skill != null:
 		_check(skill.tooltip_text.is_empty(), "Skill circle has no plain engine tooltip")
 		_check(skill.icon != null and skill.text.is_empty(), "Skill circle shows its atlas icon")
 		skill.mouse_entered.emit()
 		_check(_count(ui, &"mutation_hover") == 1 and _count(ui, &"menu_hover") == 0, "Skill hover uses a distinct cue")
-		_check(ui.card.visible and ui.card.anchor_id == "acid_spit", "Skill hover opens the detail card")
+		_check(ui.card.visible and ui.card.anchor_id == "power_strike", "Skill hover opens the detail card")
 		var card_text := ""
 		for label: Label in ui.card.find_children("*", "Label", true, false):
 			card_text += label.text + "\n"
-		_check(card_text.contains(str(TranslationServer.translate(&"mutationSkill_acid_spit_name")).to_upper()) and card_text.contains(str(TranslationServer.translate(&"mutationSkill_acid_spit_description"))), "Detail card shows the skill name and description")
+		_check(card_text.contains(str(TranslationServer.translate(&"mutationSkill_power_strike_name")).to_upper()) and card_text.contains(str(TranslationServer.translate(&"mutationSkill_power_strike_description"))), "Detail card shows the skill name and description")
 		_check(card_text.contains(str(TranslationServer.translate(&"mutationClickLearn")).to_upper()) and card_text.contains(str(TranslationServer.translate(&"mutationAmount"))), "Detail card shows status and requirements")
 		_check(ui.window.get_global_rect().encloses(ui.card.get_global_rect()), "Detail card stays on screen")
 		skill.mouse_exited.emit()
 		_check(not ui.card.visible, "Leaving the circle hides the detail card")
 		skill.mouse_entered.emit()
 		skill.pressed.emit()
-		_check(runtime.skill_learned("acid_spit"), "Click still buys the skill")
+		_check(runtime.skill_learned("power_strike"), "Click still buys the skill")
 		_check(_count(ui, &"mutation_click") == 1, "Click cue survives synchronous UI rebuild")
 		await process_frame
-		_check(ui.card.visible and ui.card.anchor_id == "acid_spit", "Detail card follows the rebuilt circle after buying")
-	var lock := _tree_button(ui.content, "lock_skill_id", "acid_spit")
+		_check(ui.card.visible and ui.card.anchor_id == "power_strike", "Detail card follows the rebuilt circle after buying")
+	var lock := _tree_button(ui.content, "lock_skill_id", "power_strike")
 	_check(lock != null, "Learned skill has a lock")
 	if lock != null:
 		lock.pressed.emit()
-		_check(runtime.skill_locked("acid_spit") and _count(ui, &"mutation_lock") == 1, "Lock transition plays its own cue")
-	var unlock := _tree_button(ui.content, "lock_skill_id", "acid_spit")
+		_check(runtime.skill_locked("power_strike") and _count(ui, &"mutation_lock") == 1, "Lock transition plays its own cue")
+	var unlock := _tree_button(ui.content, "lock_skill_id", "power_strike")
 	if unlock != null:
 		unlock.pressed.emit()
-		_check(not runtime.skill_locked("acid_spit") and _count(ui, &"mutation_unlock") == 1, "Unlock transition plays the reverse cue")
+		_check(not runtime.skill_locked("power_strike") and _count(ui, &"mutation_unlock") == 1, "Unlock transition plays the reverse cue")
 	else:
 		_check(false, "Locked skill exposes an unlock control")
-	var disabled := _tree_button(ui.content, "skill_id", "acid_spit")
+	var disabled := _tree_button(ui.content, "skill_id", "power_strike")
 	if disabled != null:
 		var before := _count(ui, &"mutation_hover")
 		disabled.mouse_entered.emit()

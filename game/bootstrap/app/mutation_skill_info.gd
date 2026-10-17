@@ -25,8 +25,10 @@ static func describe(runtime: Node, row: Array, skills: Array) -> Dictionary:
 		info["status"] = TEXT.t("mutationEnabled") if enabled else TEXT.t("mutationInactive")
 		info["status_color"] = LIT if enabled else STYLE.MUTED
 		return info
-	var active_group := skills.find(row) < 12
+	var active_group := bool(requirements.get("active", false))
 	info["kind"] = TEXT.t("mutationSkillKind") % [TEXT.t("mutationActiveSkill") if active_group else TEXT.t("mutationPassiveSkill"), TEXT.branch(str(row[2])), requirements["stage"]]
+	if active_group:
+		info["rows"].append([TEXT.t("mutationRecovery"), "%ds" % int(requirements.get("cooldown", 5)), true])
 	var mutation := float(runtime.call("get_mutation"))
 	var stability := float(runtime.call("get_critical_threshold"))
 	info["rows"].append([TEXT.t("mutationAmount"), "%d%% / %d%%" % [roundi(mutation), roundi(requirements["mutation"])], mutation >= float(requirements["mutation"])])
@@ -51,6 +53,6 @@ static func describe(runtime: Node, row: Array, skills: Array) -> Dictionary:
 
 static func _branch_row(skills: Array, branch: String, active_group: bool, rank: int) -> Array:
 	for row in skills:
-		if str(row[2]) == branch and int(row[3]) == rank and (skills.find(row) < 12) == active_group:
+		if str(row[2]) == branch and int(row[3]) == rank and (skills.find(row) < 16) == active_group:
 			return row
 	return []

@@ -75,6 +75,7 @@ var infinite_antidotes: bool = false
 var current_weapon_index: int = 0
 var _roll_direction := Vector3.ZERO
 var _roll_pace := 0.0
+var _mutation_dash_motion := preload("res://game/features/player/mutation_dash_motion.gd").new()
 var _roll_remaining: float = 0.0
 var _roll_cooldown_remaining: float = 0.0
 var _aim_point := Vector3.ZERO
@@ -364,11 +365,7 @@ func set_walk_tuning(speed_multiplier: float, animation_multiplier: float) -> vo
 	_walk_speed_multiplier = clampf(speed_multiplier, 0.5, 1.5) if is_finite(speed_multiplier) else 1.0
 	$AnimationDriver.set("leg_playback_multiplier", animation_multiplier)
 func mutation_dash() -> void:
-	_roll_direction = -aim_pivot.global_basis.z
-	_roll_direction.y = 0.0
-	_roll_direction = _roll_direction.normalized()
-	_roll_remaining = 0.4
-	_roll_pace = MUTATION_DASH_SPEED
+	_mutation_dash_motion.begin(self)
 func mutation_enemy_killed(enemy: Node3D) -> void:
 	mutation_effects.call("on_enemy_killed", enemy)
 func get_mutation()->float:return infection_runtime.call("get_mutation")
@@ -436,6 +433,7 @@ func _end_blast_stun() -> void:
 
 
 func _update_move(delta:float)->void:
+	_mutation_dash_motion.before_move(self, delta)
 	var d:=_move_direction()
 	if _roll_remaining>0.0:
 		_roll_remaining=maxf(0.0,_roll_remaining-delta);velocity.x=_roll_direction.x*_roll_pace;velocity.z=_roll_direction.z*_roll_pace
@@ -451,6 +449,7 @@ func _update_move(delta:float)->void:
 	velocity.y=0.0 if is_on_floor() else velocity.y-gravity_acceleration*delta
 	_intended_motion=Vector3(velocity.x,0.0,velocity.z)
 	move_and_slide()
+	_mutation_dash_motion.after_move(self)
 	var recoil_motion := _shot_recoil.step(delta)
 	if not recoil_motion.is_zero_approx():
 		move_and_collide(recoil_motion)
@@ -462,7 +461,7 @@ func _update_move(delta:float)->void:
 	elif not is_wounded():
 		_blood_motion_start = global_position
 	_push_chair_contacts()
-	if _roll_remaining>0.0: _push_roll_contacts()
+	if _roll_remaining>0.0 and not _mutation_dash_motion.active: _push_roll_contacts()
 # Sliding zeroes the velocity into an item, so pushes use the intended motion.
 func _push_chair_contacts()->void:
 	var pushed:={}
