@@ -2,21 +2,20 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://db3ngakkf4a7x"
-path.s3tc="res://.godot/imported/Isometric golden stun star animation atlas.png-53df0f3481cb04c565106a5cbe61475b.s3tc.ctex"
+uid="uid://dfccaka2e0l17"
+path="res://.godot/imported/Torn upholstery debris sprite atlas.png-a3162d8eba336a20dbf7c735fac81b14.ctex"
 metadata={
-"imported_formats": ["s3tc_bptc"],
-"vram_texture": true
+"vram_texture": false
 }
 
 [deps]
 
-source_file="res://models/objects/textures/fx_skills/Isometric golden stun star animation atlas.png"
-dest_files=["res://.godot/imported/Isometric golden stun star animation atlas.png-53df0f3481cb04c565106a5cbe61475b.s3tc.ctex"]
+source_file="res://models/objects/textures/upholstery/Torn upholstery debris sprite atlas.png"
+dest_files=["res://.godot/imported/Torn upholstery debris sprite atlas.png-a3162d8eba336a20dbf7c735fac81b14.ctex"]
 
 [params]
 
-compress/mode=2
+compress/mode=0
 compress/high_quality=false
 compress/lossy_quality=0.7
 compress/uastc_level=0

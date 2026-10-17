@@ -2,21 +2,20 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://bjjtcb40wi3n0"
-path.s3tc="res://.godot/imported/Four emerald acid puddles.png-3a94e168aefa4f9cbd1d639cfeb46aa8.s3tc.ctex"
+uid="uid://b5460yughn188"
+path="res://.godot/imported/Crumpled and charred office paper atlas.png-f01ad8295b00c141b9d50d39b3c07a7a.ctex"
 metadata={
-"imported_formats": ["s3tc_bptc"],
-"vram_texture": true
+"vram_texture": false
 }
 
 [deps]
 
-source_file="res://models/objects/textures/fx_skills/Four emerald acid puddles.png"
-dest_files=["res://.godot/imported/Four emerald acid puddles.png-3a94e168aefa4f9cbd1d639cfeb46aa8.s3tc.ctex"]
+source_file="res://models/objects/textures/paper/Crumpled and charred office paper atlas.png"
+dest_files=["res://.godot/imported/Crumpled and charred office paper atlas.png-f01ad8295b00c141b9d50d39b3c07a7a.ctex"]
 
 [params]
 
-compress/mode=2
+compress/mode=0
 compress/high_quality=false
 compress/lossy_quality=0.7
 compress/uastc_level=0

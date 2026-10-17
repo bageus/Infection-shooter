@@ -2,21 +2,20 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://dse7yid7antpn"
-path.s3tc="res://.godot/imported/Oblique isometric spike burst atlas.png-19a8ca748863e6c760f4458aec331df9.s3tc.ctex"
+uid="uid://b431mcfmpbtwp"
+path="res://.godot/imported/Red extinguisher debris texture atlas.png-158368a52676eefa95bda777f849334e.ctex"
 metadata={
-"imported_formats": ["s3tc_bptc"],
-"vram_texture": true
+"vram_texture": false
 }
 
 [deps]
 
-source_file="res://models/objects/textures/fx_skills/Oblique isometric spike burst atlas.png"
-dest_files=["res://.godot/imported/Oblique isometric spike burst atlas.png-19a8ca748863e6c760f4458aec331df9.s3tc.ctex"]
+source_file="res://models/objects/textures/fire_extinguisher_layers/Red extinguisher debris texture atlas.png"
+dest_files=["res://.godot/imported/Red extinguisher debris texture atlas.png-158368a52676eefa95bda777f849334e.ctex"]
 
 [params]
 
-compress/mode=2
+compress/mode=0
 compress/high_quality=false
 compress/lossy_quality=0.7
 compress/uastc_level=0

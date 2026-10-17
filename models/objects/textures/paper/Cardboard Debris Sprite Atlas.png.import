@@ -2,21 +2,20 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://unkw8kmjmwd6"
-path.s3tc="res://.godot/imported/Eight-frame isometric mutant claw slash atlas.png-7fd76e9f449f30252105768b1753c336.s3tc.ctex"
+uid="uid://h83khpfox253"
+path="res://.godot/imported/Cardboard Debris Sprite Atlas.png-3564b697be4019acdafbb30767244902.ctex"
 metadata={
-"imported_formats": ["s3tc_bptc"],
-"vram_texture": true
+"vram_texture": false
 }
 
 [deps]
 
-source_file="res://models/objects/textures/fx_skills/Eight-frame isometric mutant claw slash atlas.png"
-dest_files=["res://.godot/imported/Eight-frame isometric mutant claw slash atlas.png-7fd76e9f449f30252105768b1753c336.s3tc.ctex"]
+source_file="res://models/objects/textures/paper/Cardboard Debris Sprite Atlas.png"
+dest_files=["res://.godot/imported/Cardboard Debris Sprite Atlas.png-3564b697be4019acdafbb30767244902.ctex"]
 
 [params]
 
-compress/mode=2
+compress/mode=0
 compress/high_quality=false
 compress/lossy_quality=0.7
 compress/uastc_level=0

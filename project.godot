@@ -14,10 +14,6 @@ config/name="Template Game"
 run/main_scene="res://game/bootstrap/app/menu/front_end.tscn"
 config/features=PackedStringArray("4.7", "GL Compatibility")
 
-[audio]
-
-buses/default_bus_layout="res://default_bus_layout.tres"
-
 [display]
 
 window/size/viewport_width=1270
