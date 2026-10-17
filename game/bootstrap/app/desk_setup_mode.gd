@@ -8,6 +8,7 @@ const TEMPLATE_ACTIONS := preload("res://game/bootstrap/app/desk_setup_template_
 const ZONE_FORM := preload("res://game/bootstrap/app/desk_setup_zone_form.gd")
 const ZONE_ACTIONS := preload("res://game/bootstrap/app/desk_setup_zone_actions.gd")
 const NOTICE := preload("res://game/bootstrap/app/desk_setup_notice.gd")
+var edit_state := preload("res://game/bootstrap/app/desk_setup_edit_state.gd").new()
 const MODEL_ROOT := "res://models/objects/enviroments/"
 
 var planner: Node
@@ -213,7 +214,9 @@ func open(target: Node3D) -> void:
 	if zones.is_empty():
 		zones.append({"name": "Work surface 1", "required": false, "category": "Other", "angle": 0.0, "x": 0.0, "z": 0.0, "width": 1.5, "depth": 0.85, "height": 0.89, "floor": false})
 	front = 0
-	zone_index = 0
+	edit_state.restore(self)
+	zone_index = 0 if not zones.is_empty() else -1
+	front_button.text = "Front: opposite side" if front else "Front: seated side"
 	scroll.show()
 	planner.ui.get_node("Panel").hide()
 	planner.planning_toolbar.hide()
@@ -230,6 +233,7 @@ func open(target: Node3D) -> void:
 func close() -> void:
 	if not active:
 		return
+	edit_state.remember(self)
 	active = false
 	placing_zone = false
 	chair_positioning = false
@@ -303,6 +307,7 @@ func _editing_text() -> bool:
 
 func _click_world(screen: Vector2, pick_item: bool) -> void:
 	dragged = null
+	dragging_zone = false
 	if chair_positioning:
 		_place_chair_at(screen)
 		return
@@ -310,7 +315,7 @@ func _click_world(screen: Vector2, pick_item: bool) -> void:
 		_add_zone_at(screen)
 		return
 	if pick_item and not model_list.has_meta("placing"):
-		var hit := planner._planned_object_at(screen) as Node3D
+		var hit: Node3D = edit_state.pick(self, screen)
 		if hit != null and str(hit.get_meta("planning_attachment", "")) == _desk_id():
 			dragged = hit
 			var slot := int(hit.get_meta("planning_zone", -1))
@@ -358,19 +363,7 @@ func _rotate_zone(amount: float) -> void:
 	zone_form.call("turn_by", amount)
 
 func _drag_item(screen: Vector2) -> void:
-	var local := _local_at(screen, zones[zone_index])
-	if not local.is_finite() or not _point_in_zone(zone_index, screen):
-		return
-	var previous := dragged.global_position
-	dragged.global_position = desk.to_global(Vector3(local.x, desk.to_local(previous).y, local.z))
-	var type_matches := ZONE_RULES.category_for(str(dragged.get_meta("planning_scene_path", "")).get_file().get_basename()) == str(zones[zone_index]["category"])
-	if not type_matches or not ZONE_RULES.fits_zone(desk, zones[zone_index], dragged):
-		dragged.global_position = previous
-	else:
-		var previous_slot := int(dragged.get_meta("planning_zone", -1))
-		dragged.set_meta("planning_zone", zone_index)
-		if previous_slot != zone_index:
-			_refresh_zone_items()
+	edit_state.drag(self, screen)
 
 func _orbit(relative: Vector2) -> void:
 	markers.call("rotate_view", planner.camera, relative)
