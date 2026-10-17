@@ -74,6 +74,7 @@ func _run() -> void:
 	_check(box.sleeping and part.sleeping, "Prepared props resume asleep")
 	_check(clone.get("_physics") == null and corpse.get("_physics") == null, "Prepared corpse releases simulator and loads without one")
 	await _round_trip(stage, corpse, part)
+	await _repeat_pose(stage, corpse, label)
 	var position_before := box.position
 	paused = false
 	for frame in 30:
@@ -119,7 +120,40 @@ func _round_trip(stage: Node3D, corpse: Node3D, part: RigidBody3D) -> void:
 			_check(node.get("_physics") == null and node.transform.is_equal_approx(corpse.transform), "Loaded corpse keeps pose without physics")
 	DirAccess.remove_absolute(path)
 	DirAccess.remove_absolute(path + ".bak")
+	await _baked_pose(stage, objects.catalog, corpse, part, controls.status)
 	await process_frame
+
+
+func _baked_pose(stage: Node3D, catalog: RefCounted, corpse: Node3D, part: Node3D, status: Label) -> void:
+	var path := "user://issue237_pose_bake.tscn"
+	var bake := preload("res://game/bootstrap/app/planning_scene_bake.gd").new(catalog)
+	_check(await bake.save_async([corpse, part], path, stage, status) == OK, "Prepared scene bakes in frame slices")
+	var scene := ResourceLoader.load(path, "", ResourceLoader.CACHE_MODE_IGNORE) as PackedScene
+	var baked := scene.instantiate() as Node3D
+	stage.add_child(baked)
+	var loaded := baked.get_child(0) as Node3D
+	PHYSICS.resume([loaded])
+	_check(loaded.get("_physics") == null, "Baked corpse loads without simulator")
+	var source: Skeleton3D = corpse.get("parts").get("skeleton")
+	var target: Skeleton3D = loaded.get("parts").get("skeleton")
+	for index in source.get_bone_count():
+		_check(source.get_bone_pose(index).is_equal_approx(target.get_bone_pose(index)), "Baked bone pose restores: " + source.get_bone_name(index))
+	baked.free()
+	DirAccess.remove_absolute(path)
+
+
+func _repeat_pose(stage: Node3D, corpse: Node3D, status: Label) -> void:
+	var snapshot: Dictionary = corpse.call("get_decor_pose")
+	await SETTLE.new().run(stage, [corpse], status)
+	var unchanged := SETTLE.new()
+	await unchanged.run(stage, [corpse], status)
+	_check(unchanged.ticks == 0, "Unchanged prepared layer skips physics")
+	_check(corpse.get("_physics") == null, "Preparation releases physical bones")
+	corpse.position.y += 0.3
+	var moved := SETTLE.new()
+	_check(await moved.run(stage, [corpse], status), "Edited corpse prepares again with a fresh simulator")
+	_check(corpse.get("_physics") == null, "Repeated preparation releases simulator")
+	_check(corpse.call("get_decor_pose") != snapshot, "Edited corpse retains its new physical pose")
 
 func _check(value: bool, message: String) -> void:
 	if not value:

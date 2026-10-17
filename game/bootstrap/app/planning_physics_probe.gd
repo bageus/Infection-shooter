@@ -37,7 +37,7 @@ static func may_move(body: RigidBody3D) -> bool:
 	var result := PhysicsTestMotionResult3D.new()
 	if not PhysicsServer3D.body_test_motion(body.get_rid(), params, result):
 		return true
-	var prepared := body.has_meta("planning_settled_transform") and body.get_meta("planning_settled_transform") == body.transform
+	var prepared: bool = body.has_meta("planning_settled_transform") and body.get_meta("planning_settled_transform") == body.transform
 	if body.sleeping and prepared:
 		for index in result.get_collision_count():
 			if result.get_collision_normal(index).dot(Vector3.UP) > 0.1:
