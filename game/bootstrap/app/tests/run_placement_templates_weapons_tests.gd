@@ -8,12 +8,21 @@ const TABLE := "res://models/objects/enviroments/07/07_table_square.glb"
 const SHELF := "res://models/objects/enviroments/03/03_bookshelf.glb"
 var failures := 0
 
+class LegacyMode extends Node:
+	var desk: Node3D
+	var zones: Array[Dictionary] = []
+	var stations: Array = []
+	var items: Array[Node3D] = []
+	func _attachments() -> Array[Node3D]:
+		return items
+
 
 func _initialize() -> void:
 	call_deferred("_run")
 
 
 func _run() -> void:
+	_legacy_surfaces()
 	var stage := MAIN.instantiate()
 	root.add_child(stage)
 	current_scene = stage
@@ -82,14 +91,28 @@ func _templates(planner: Node) -> void:
 		desk.set_meta("planning_desk_id", "regression_desk")
 		desk.global_position = Vector3(28, 0, 22)
 		desk.rotation.y = .7
+		if path == TABLE:
+			var overlay := MeshInstance3D.new()
+			overlay.mesh = BoxMesh.new()
+			overlay.mesh.size = Vector3(80, .001, 80)
+			overlay.set_meta("planning_bounds_excluded", true)
+			desk.add_child(overlay)
 		setup.call("open", desk)
 		(setup.get("template_name") as LineEdit).text = name_part
 		var zones: Array = setup.get("zones")
+		if path == TABLE:
+			var actual: AABB = planner.get("geometry")._combined_aabb(desk)
+			_check(Vector2(zones[0].x, zones[0].z).distance_to(Vector2(actual.get_center().x, actual.get_center().z)) < .01, "Service overlays do not shift the table zones")
 		zones[0]["name"] = "Полка / стол"
 		zones[0]["required"] = false
 		zones[0]["category"] = "Mouse"
 		setup.call("_place_model", "05_computer_mouse", Vector3(float(zones[0].x), float(zones[0].height), float(zones[0].z)))
 		_check((setup.call("_attachments") as Array).size() == 1, "Table/shelf item is attached")
+		setup.call("close")
+		setup.call("open", desk)
+		zones = setup.get("zones")
+		_check(zones[0].category == "Mouse", "Reopening preserves the existing item's zone category")
+		await _drag_existing(planner, setup, path)
 		var expected: Array = zones.duplicate(true)
 		setup.call("_save")
 		var key: String = planner.get("catalog").WORKSTATIONS.desk_name(path)
@@ -109,6 +132,12 @@ func _templates(planner: Node) -> void:
 			_check((setup.get("zones") as Array)[0].name == "Replacement", "UI reload restores saved zone")
 			_check((setup.call("_attachments") as Array).size() == 1, "UI reload restores saved item")
 			_check(FILES.load(saved_path, "wrong_model").is_empty(), "Model types remain isolated")
+			await _spawned_template(planner, setup, path, FILES.load(saved_path, key))
+			setup.call("close")
+			setup.set("edit_state", preload("res://game/bootstrap/app/desk_setup_edit_state.gd").new())
+			setup.call("open", desk)
+			_check((setup.get("zones") as Array)[0].category == "Mouse", "Legacy map derives a typed zone: " + path)
+			await _drag_existing(planner, setup, path)
 			DirAccess.remove_absolute(saved_path)
 		if path == TABLE:
 			var camera := planner.get("camera") as Camera3D
@@ -123,6 +152,49 @@ func _templates(planner: Node) -> void:
 			item.free()
 		setup.call("close")
 		desk.free()
+
+
+func _spawned_template(planner: Node, setup: Node, path: String, saved: Dictionary) -> void:
+	var desk := planner.call("_instantiate_asset", path) as Node3D
+	(planner.get("root") as Node).add_child(desk)
+	desk.set_meta("planning_scene_path", path)
+	desk.set_meta("planning_desk_id", "spawned_template")
+	desk.global_position = Vector3(30, 0, 24)
+	var workstations := preload("res://game/bootstrap/app/workstation_templates.gd")
+	var items := workstations.from_saved_template(desk, path, planner.get("root"), Callable(planner, "_instantiate_asset"))
+	for item in items:
+		item.set_meta("planning_attachment", "spawned_template")
+		(planner.get("objects").placed as Array).append(item)
+	var previous: Node3D = setup.get("desk")
+	setup.call("open", desk)
+	_check((setup.get("zones") as Array)[0].name == saved.zones[0].name, "Placement retains exact saved template zones: " + path)
+	_check(not desk.has_meta("planning_template_edit"), "Transient placement snapshot is consumed")
+	await _drag_existing(planner, setup, path)
+	setup.call("close")
+	for item in items:
+		(planner.get("objects").placed as Array).erase(item)
+		item.free()
+	desk.free()
+	setup.call("open", previous)
+
+
+func _drag_existing(planner: Node, setup: Node, path: String) -> void:
+	await process_frame
+	var attached: Array = setup.call("_attachments")
+	_check(not attached.is_empty(), "Template retains editable attachments: " + path)
+	if attached.is_empty():
+		return
+	var item: Node3D = attached[0]
+	var camera := planner.get("camera") as Camera3D
+	var bounds: AABB = planner.get("geometry")._combined_aabb(item)
+	var screen := camera.unproject_position(item.to_global(bounds.get_center()))
+	_check(camera.get_viewport().get_visible_rect().has_point(screen), "Template camera includes its editable surface: " + path)
+	setup.call("_click_world", screen, true)
+	_check(setup.get("dragged") == item, "Shift click picks a visible attachment: " + path)
+	var before := item.global_position
+	var target := before + (setup.get("desk") as Node3D).global_basis.x * 0.05
+	setup.call("_drag_item", camera.unproject_position(target))
+	_check(item.global_position.distance_to(before) > 0.02, "Existing item moves after reopening: " + path)
 
 
 func _weapons(planner: Node) -> void:
@@ -172,3 +244,30 @@ func _check(value: bool, message: String) -> void:
 	if not value:
 		failures += 1
 		push_error(message)
+
+
+func _legacy_surfaces() -> void:
+	var mode := LegacyMode.new()
+	root.add_child(mode)
+	mode.desk = Node3D.new()
+	mode.add_child(mode.desk)
+	mode.desk.position = Vector3(3, 0, 4)
+	mode.desk.rotation.y = .7
+	for z in [-1.0, 1.0, 3.0]:
+		mode.stations.append({"x": 0.0, "z": z, "usable_width": 1.0, "usable_depth": .8})
+		mode.zones.append({"x": 0.0, "z": z, "height": .904, "floor": false, "category": "Other", "width": .65, "depth": .35})
+	for z in [-1.0, 1.0]:
+		var item := MeshInstance3D.new()
+		item.mesh = BoxMesh.new()
+		item.mesh.size = Vector3(.1, .05, .1)
+		mode.add_child(item)
+		item.global_position = mode.desk.to_global(Vector3(0, .929, z))
+		item.set_meta("planning_scene_path", "res://models/objects/enviroments/05/05_computer_mouse.glb")
+		mode.items.append(item)
+	preload("res://game/bootstrap/app/desk_setup_edit_state.gd").new().restore(mode)
+	_check(mode.zones.size() == 3, "Legacy restoration keeps the empty workstation surface")
+	for item in mode.items:
+		var zone: Dictionary = mode.zones[int(item.get_meta("planning_zone"))]
+		_check(is_equal_approx(zone.height, .904), "Legacy station without grid_height keeps its profile height")
+		_check(absf(float(zone.z) - mode.desk.to_local(item.global_position).z) < .001, "Equal-height workstations keep separate typed zones")
+	mode.free()
