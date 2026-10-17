@@ -34,6 +34,7 @@ static func may_move(body: RigidBody3D) -> bool:
 	params.motion = Vector3.DOWN * 0.06
 	params.margin = 0.001
 	params.recovery_as_collision = true
+	params.max_collisions = 32
 	var result := PhysicsTestMotionResult3D.new()
 	if not PhysicsServer3D.body_test_motion(body.get_rid(), params, result):
 		return true
@@ -64,7 +65,7 @@ static func may_move(body: RigidBody3D) -> bool:
 	return false
 
 
-static func supported(samples: Array) -> bool:
+static func supported(samples: Array, explain: bool = false) -> bool:
 	var bone_support := {}
 	for sample: Node3D in samples:
 		if not is_instance_valid(sample):
@@ -80,15 +81,19 @@ static func supported(samples: Array) -> bool:
 		params.motion = Vector3.DOWN * 0.04
 		params.margin = 0.001
 		params.recovery_as_collision = true
+		params.max_collisions = 32
 		var result := PhysicsTestMotionResult3D.new()
 		if not PhysicsServer3D.body_test_motion(sample.get_rid(), params, result):
+			if explain: print("Planner missing support: ", sample.name, " ", sample.get_meta("planning_scene_path", ""), " ", sample.global_position)
 			return false
 		var support := false
 		for index in result.get_collision_count():
 			support = support or result.get_collision_normal(index).dot(Vector3.UP) > 0.7
 		# Recovery can exceed requested travel because of Jolt convex margins.
 		if not support or result.get_travel().y < -0.08:
+			if explain: print("Planner weak support: ", sample.name, " ", sample.get_meta("planning_scene_path", ""), " travel=", result.get_travel(), " contacts=", result.get_collision_count())
 			return false
+	if explain and bone_support.values().has(false): print("Planner corpse without ground contact: ", bone_support)
 	return not bone_support.values().has(false)
 
 
@@ -110,8 +115,17 @@ static func _bone_supported(bone: PhysicalBone3D) -> bool:
 		if not child is CollisionShape3D or child.shape == null or child.disabled:
 			continue
 		var bounds: AABB = child.global_transform * child.shape.get_debug_mesh().get_aabb()
-		var from: Vector3 = child.global_position + Vector3.UP * 0.01
+		var from := Vector3(child.global_position.x, bounds.end.y + 0.01, child.global_position.z)
 		var to := Vector3(from.x, bounds.position.y - 0.12, from.z)
 		if not bone.get_world_3d().direct_space_state.intersect_ray(PhysicsRayQueryParameters3D.create(from, to, 1)).is_empty():
 			return true
 	return false
+
+
+static func articulated(samples: Array) -> bool:
+	if samples.is_empty():
+		return false
+	for sample: Node in samples:
+		if not is_instance_valid(sample) or not sample is PhysicalBone3D:
+			return false
+	return true

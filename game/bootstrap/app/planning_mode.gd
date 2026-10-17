@@ -191,7 +191,7 @@ func exit() -> void:
 func _process(delta: float) -> void:
 	if storage.map_loading or not active:
 		return
-	_stability.update(objects, geometry)
+	_stability.update(objects, geometry, camera)
 	objects._sync_workstations()
 	if desk_setup.active:
 		return

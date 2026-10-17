@@ -1,5 +1,6 @@
 extends RefCounted
 const SCENE_BAKE := preload("res://game/bootstrap/app/planning_scene_bake.gd")
+const PHYSICS := preload("res://game/bootstrap/app/planning_physics.gd")
 const SETTLE := preload("res://game/bootstrap/app/planning_settle.gd")
 const CAPTURE := preload("res://game/bootstrap/app/planning_layout_capture.gd")
 const MAP_LOAD := preload("res://game/bootstrap/app/planning_map_load.gd")
@@ -254,7 +255,9 @@ static func _signature(data: Dictionary) -> String:
 func enforce_wall_fixtures() -> String:
 	var toggles: Variant = controls.get("fixture_toggles") if controls != null else null
 	var groups: Dictionary = toggles.options() if toggles != null and toggles.switches != null else {"switches": false, "fire": false}
+	var stamps := PHYSICS.capture_anchors(objects.placed)
 	var report: Dictionary = WALL_FIXTURES.apply(objects, LAYOUT_LOADER.new(objects), groups)
+	PHYSICS.restore_anchors(objects.placed, stamps)
 	var text := " | signs adjusted %d, wall fixtures %d" % [int(report["signs"]), int(report["fixtures"])]
 	var missing: int = int(report["shortfall"]["switch"]) + int(report["shortfall"]["alarm"])
 	return text + ("" if missing == 0 else ", %d without free wall space" % missing)

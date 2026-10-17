@@ -24,5 +24,7 @@ static func parts(actor: Node) -> void:
 
 
 static func ensure(actor: Node) -> void:
+	if actor._parts != null or actor.has_meta("visual_parts_prepared"):
+		return
 	animation(actor)
 	parts(actor)

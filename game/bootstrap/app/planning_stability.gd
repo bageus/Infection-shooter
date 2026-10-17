@@ -1,23 +1,35 @@
 extends RefCounted
 ## Conservative red warnings with a bounded round-robin query budget.
 const PER_FRAME := 8
+const MAX_MARKERS := 128
 var _cursor := 0
 var _marks := {}
 var _material: StandardMaterial3D
 
 
-func update(objects: Node, geometry: RefCounted) -> void:
+func update(objects: Node, geometry: RefCounted, camera: Camera3D = null) -> void:
 	var nodes: Array = objects.placed
+	_prune(camera, objects.selected)
 	if is_instance_valid(objects.selected):
-		_check(objects.selected, geometry)
+		_check(objects.selected, geometry, true)
 	for index in mini(PER_FRAME, nodes.size()):
 		_cursor %= nodes.size()
 		var node: Node3D = nodes[_cursor]
 		_cursor += 1
-		if is_instance_valid(node):
+		if is_instance_valid(node) and (camera == null or camera.is_position_in_frustum(node.global_position)):
 			_check(node, geometry)
 	for node: Variant in _marks.keys():
 		if not is_instance_valid(node):
+			_marks.erase(node)
+
+
+func _prune(camera: Camera3D, selected: Node3D) -> void:
+	for node: Variant in _marks.keys():
+		var marker: MeshInstance3D = _marks[node]
+		if not is_instance_valid(node) or not is_instance_valid(marker):
+			_marks.erase(node)
+		elif node != selected and camera != null and not camera.is_position_in_frustum(marker.global_position):
+			marker.free()
 			_marks.erase(node)
 
 
@@ -28,7 +40,7 @@ func clear() -> void:
 	_marks.clear()
 
 
-func _check(node: Node3D, geometry: RefCounted) -> void:
+func _check(node: Node3D, geometry: RefCounted, priority: bool = false) -> void:
 	if not may_move(node, AABB(Vector3.ZERO, Vector3.ONE)):
 		if _marks.has(node):
 			if is_instance_valid(_marks[node]):
@@ -37,6 +49,12 @@ func _check(node: Node3D, geometry: RefCounted) -> void:
 		return
 	var bounds: AABB = geometry.call("_combined_aabb", node, true)
 	if not _marks.has(node):
+		if _marks.size() >= MAX_MARKERS:
+			if not priority:
+				return
+			var oldest: Node3D = _marks.keys()[0]
+			_marks[oldest].free()
+			_marks.erase(oldest)
 		var marker := MeshInstance3D.new()
 		marker.name = "PlanningStabilityWarning"
 		marker.set_meta("planning_bounds_excluded", true)

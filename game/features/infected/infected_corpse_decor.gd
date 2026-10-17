@@ -128,6 +128,8 @@ func _restore_physics_pose() -> void:
 func prepare_planner_physics() -> void:
 	_settling = true
 	set_runtime_physics(true)
+	if _physics != null:
+		_physics.call("launch", Vector3.ZERO)
 	if _physics != null and _physics.get("_guard") != null:
 		_physics.get("_guard").process_mode = Node.PROCESS_MODE_ALWAYS
 		_physics.get("_guard").busy_limit_seconds = 2.0

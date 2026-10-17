@@ -200,6 +200,8 @@ func _place(entry: Dictionary) -> void:
 	node.position = Vector3(float(record.get("x",0.0)),float(record.get("y",0.0)),float(record.get("z",0.0)))
 	node.rotation_degrees = Vector3(float(record.get("rotation_x", 0)), float(record.get("rotation_y", 0)), float(record.get("rotation_z", 0)))
 	node.scale = Vector3(float(record.get("scale_x",1.0)),float(record.get("scale_y",1.0)),float(record.get("scale_z",1.0)))
+	if record.has("settled_physics"):
+		node.set_meta("planning_settled_transform", node.transform)
 	var ready_started := Time.get_ticks_usec()
 	target_parent.add_child(node)
 	timings.ready_usec += Time.get_ticks_usec() - ready_started

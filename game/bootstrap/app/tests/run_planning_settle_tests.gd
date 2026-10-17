@@ -15,6 +15,12 @@ class Controls extends Node:
 class Geometry extends RefCounted:
 	func _restore_floor_surface(_node: Node3D, _path: String) -> void:
 		pass
+	func _combined_aabb(_node: Node3D, _ignore_selection: bool) -> AABB:
+		return AABB(Vector3.ONE * -0.5, Vector3.ONE)
+
+class WarningObjects extends Node:
+	var placed: Array[Node3D] = []
+	var selected: Node3D
 
 func _initialize() -> void:
 	call_deferred("_run")
@@ -43,7 +49,7 @@ func _run() -> void:
 	part.position = Vector3(-4, 0, 0)
 	stage.add_child(part)
 	var mutilated := (load("res://game/features/infected/public/decor/corpse_hunger_mutilated.tscn") as PackedScene).instantiate() as Node3D
-	mutilated.position = Vector3(5, 1, 5)
+	mutilated.position = Vector3(5, 0, 5)
 	stage.add_child(mutilated)
 	await physics_frame
 	_check(STABILITY.may_move(box, AABB(Vector3.ONE * -0.5, Vector3.ONE)), "Floating body is red")
@@ -75,6 +81,9 @@ func _run() -> void:
 	_check(clone.get("_physics") == null and corpse.get("_physics") == null, "Prepared corpse releases simulator and loads without one")
 	await _round_trip(stage, corpse, part)
 	await _repeat_pose(stage, corpse, label)
+	_warning_budget(stage)
+	_anchor_replacement(stage)
+	await _low_fps(stage, label)
 	var position_before := box.position
 	paused = false
 	for frame in 30:
@@ -121,6 +130,10 @@ func _round_trip(stage: Node3D, corpse: Node3D, part: RigidBody3D) -> void:
 	DirAccess.remove_absolute(path)
 	DirAccess.remove_absolute(path + ".bak")
 	await _baked_pose(stage, objects.catalog, corpse, part, controls.status)
+	var chair_y := -0.00001
+	var chair_report: Dictionary = objects._apply_layout_data({"version": 8, "objects": [{"scene": "res://models/objects/enviroments/06/06_conference_chair.glb", "x": 10, "y": chair_y, "settled_physics": {"version": 1}}]})
+	_check(chair_report.get("loaded") == 1, "Prepared conference chair loads")
+	_check(absf(objects.placed[0].position.y - chair_y) < 0.000001, "Ready preserves prepared chair height instead of adding 2.5 cm")
 	await process_frame
 
 
@@ -154,6 +167,73 @@ func _repeat_pose(stage: Node3D, corpse: Node3D, status: Label) -> void:
 	_check(await moved.run(stage, [corpse], status), "Edited corpse prepares again with a fresh simulator")
 	_check(corpse.get("_physics") == null, "Repeated preparation releases simulator")
 	_check(corpse.call("get_decor_pose") != snapshot, "Edited corpse retains its new physical pose")
+
+
+func _warning_budget(stage: Node3D) -> void:
+	var objects := WarningObjects.new()
+	stage.add_child(objects)
+	for index in 200:
+		var body := RigidBody3D.new()
+		body.position = Vector3(index * 2, 4, 10)
+		objects.add_child(body)
+		objects.placed.append(body)
+	var warning := STABILITY.new()
+	for frame in 40:
+		warning.update(objects, Geometry.new())
+	_check(warning.get("_marks").size() <= STABILITY.MAX_MARKERS, "Warnings have a bounded render budget")
+	objects.selected = objects.placed[-1]
+	warning.update(objects, Geometry.new())
+	_check(warning.get("_marks").has(objects.selected), "Selection has priority when warning budget is full")
+	var camera := Camera3D.new()
+	stage.add_child(camera)
+	warning.update(objects, Geometry.new(), camera)
+	_check(warning.get("_marks").size() == 1, "Off-camera warning meshes are released")
+	warning.clear()
+	_check(warning.get("_marks").is_empty(), "Exiting clears warning visuals")
+	objects.free()
+	camera.free()
+
+
+func _anchor_replacement(stage: Node3D) -> void:
+	var old := RigidBody3D.new()
+	old.freeze = true
+	old.set_meta("planning_auto_fixture", "extinguisher")
+	old.set_meta("planning_scene_path", "res://fixture.tscn")
+	old.set_meta("planning_settled_transform", old.transform)
+	old.set_meta("planning_settled_count", 7)
+	stage.add_child(old)
+	var stamps := PHYSICS.capture_anchors([old])
+	old.free()
+	var replacement := RigidBody3D.new()
+	replacement.freeze = true
+	replacement.set_meta("planning_auto_fixture", "extinguisher")
+	replacement.set_meta("planning_scene_path", "res://fixture.tscn")
+	stage.add_child(replacement)
+	PHYSICS.restore_anchors([replacement], stamps)
+	_check(replacement.has_meta("planning_settled_transform"), "Identical regenerated fixture retains preparation")
+	_check(replacement.get_meta("planning_settled_count", -1) == 7, "Fixture retains prepared layer count")
+	replacement.position.x += 1
+	_check(PHYSICS.capture_anchors([replacement]).is_empty(), "Moved fixture invalidates preparation")
+	replacement.free()
+
+
+func _low_fps(stage: Node3D, status: Label) -> void:
+	var body := RigidBody3D.new()
+	body.position = Vector3(-10, 1.5, 0)
+	var shape := CollisionShape3D.new()
+	shape.shape = BoxShape3D.new()
+	body.add_child(shape)
+	stage.add_child(body)
+	var previous_limit := Engine.max_fps
+	Engine.max_fps = 12
+	var first := Engine.get_physics_frames()
+	var job := SETTLE.new()
+	var result := await job.run(stage, [body], status)
+	var advanced := Engine.get_physics_frames() - first
+	Engine.max_fps = previous_limit
+	_check(result, "Low-FPS preparation completes")
+	_check(job.ticks >= advanced - 12, "Budgets count physical ticks, including multiple ticks per rendered frame")
+	body.free()
 
 func _check(value: bool, message: String) -> void:
 	if not value:

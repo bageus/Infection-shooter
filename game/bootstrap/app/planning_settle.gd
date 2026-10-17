@@ -115,12 +115,14 @@ func _step(session: Node, samples: Array, status: Label) -> bool:
 		if not _alive(session):
 			PhysicsServer3D.set_active(not tree.paused)
 			return false
-		if frame == Engine.get_physics_frames():
+		var current_frame := Engine.get_physics_frames()
+		var advanced := current_frame - frame
+		if advanced <= 0:
 			continue
-		frame = Engine.get_physics_frames()
-		step_ticks += 1
-		ticks += 1
-		quiet = quiet + 1 if _quiet(samples, previous) else 0
+		frame = current_frame
+		step_ticks += advanced
+		ticks += advanced
+		quiet = mini(quiet + advanced, QUIET_TICKS) if _quiet(samples, previous) else 0
 		status.text = "%s | stable %d / %d" % [message, quiet, QUIET_TICKS]
 		if quiet >= QUIET_TICKS and step_ticks >= 30 and PROBE.supported(samples):
 			break
@@ -129,8 +131,15 @@ func _step(session: Node, samples: Array, status: Label) -> bool:
 			contact_guards += 1
 			quiet = QUIET_TICKS
 			break
+		# As with retained gameplay ragdolls, supported articulated bodies have a
+		# finite settling window: joints can keep rotating without translational energy.
+		if step_ticks >= 180 and PROBE.articulated(samples) and PROBE.supported(samples):
+			contact_guards += 1
+			quiet = QUIET_TICKS
+			break
 	PhysicsServer3D.set_active(not tree.paused)
-	return quiet >= QUIET_TICKS and PROBE.supported(samples)
+	var supported := PROBE.supported(samples, true)
+	return quiet >= QUIET_TICKS and supported
 
 
 func _restore_bodies(tree: SceneTree) -> void:
