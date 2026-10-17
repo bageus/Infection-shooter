@@ -28,6 +28,7 @@ var _quiet := 0.0
 var _strikes := 0
 var _since_check := 0
 var frozen := false
+var busy_limit_seconds := float(BUSY_LIMIT_SECONDS)
 
 
 func setup(volumes: Array[PhysicalBone3D], skeleton: Skeleton3D) -> void:
@@ -80,7 +81,7 @@ func _physics_process(delta: float) -> void:
 	else:
 		_quiet = 0.0
 		_busy += step
-		if _busy > BUSY_LIMIT_SECONDS:
+		if _busy > busy_limit_seconds:
 			freeze()
 			return
 	_snapshot_age += step

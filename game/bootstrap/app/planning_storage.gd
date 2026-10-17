@@ -1,4 +1,7 @@
 extends RefCounted
+const SCENE_BAKE := preload("res://game/bootstrap/app/planning_scene_bake.gd")
+const PHYSICS := preload("res://game/bootstrap/app/planning_physics.gd")
+const SETTLE := preload("res://game/bootstrap/app/planning_settle.gd")
 const CAPTURE := preload("res://game/bootstrap/app/planning_layout_capture.gd")
 const MAP_LOAD := preload("res://game/bootstrap/app/planning_map_load.gd")
 const MAP_FILE := preload("res://game/bootstrap/app/planning_map_file.gd")
@@ -252,7 +255,9 @@ static func _signature(data: Dictionary) -> String:
 func enforce_wall_fixtures() -> String:
 	var toggles: Variant = controls.get("fixture_toggles") if controls != null else null
 	var groups: Dictionary = toggles.options() if toggles != null and toggles.switches != null else {"switches": false, "fire": false}
+	var stamps := PHYSICS.capture_anchors(objects.placed)
 	var report: Dictionary = WALL_FIXTURES.apply(objects, LAYOUT_LOADER.new(objects), groups)
+	PHYSICS.restore_anchors(objects.placed, stamps)
 	var text := " | signs adjusted %d, wall fixtures %d" % [int(report["signs"]), int(report["fixtures"])]
 	var missing: int = int(report["shortfall"]["switch"]) + int(report["shortfall"]["alarm"])
 	return text + ("" if missing == 0 else ", %d without free wall space" % missing)
@@ -273,12 +278,19 @@ func save_named_map() -> void:
 		return
 	_overwrite_pending = ""
 	var fixtures := enforce_wall_fixtures()
-	var result := MAP_FILE.write(path, _collect_layout_data())
+	if not await _prepare_save():
+		return
+	var data: Dictionary = await _capture_save()
+	if data.is_empty():
+		return
+	var result := MAP_FILE.write(path, data)
 	if result.has("error"):
+		map_loading = false
 		controls.status.text = "MAP SAVE ERROR | " + str(result.error)
 		return
 	map_name_edit.text = safe_name
 	_refresh_map_list(safe_name)
+	map_loading = false
 	controls.status.text = "MAP SAVED | " + safe_name + fixtures
 
 
@@ -360,10 +372,15 @@ func save_layout() -> void:
 	if map_loading:
 		return
 	var fixtures := enforce_wall_fixtures()
-	var data = _collect_layout_data()
+	if not await _prepare_save():
+		return
+	var data: Dictionary = await _capture_save()
+	if data.is_empty():
+		return
 	var records: Array = data.get("objects", [])
 	var result := MAP_FILE.write(SAVE_PATH, data)
 	if result.has("error"):
+		map_loading = false
 		controls.status.text = "SAVE ERROR | " + str(result.error)
 		return
 	authored_layout = data
@@ -372,87 +389,23 @@ func save_layout() -> void:
 	if OS.has_feature("editor"):
 		var shipped := MAP_FILE.write(DEFAULT_MAP_PATH, data)
 		if shipped.has("error"):
+			map_loading = false
 			controls.status.text = "SAVED | shipped map error: " + str(shipped.error)
 			return
-		var scene_error = _save_authored_scene()
+		var scene_error: Error = await SCENE_BAKE.new(catalog).save_async(objects.placed.duplicate(), AUTHORED_SCENE_PATH, session, controls.status)
+		if not is_instance_valid(session) or not session.is_inside_tree():
+			map_loading = false
+			return
 		if scene_error != OK:
+			map_loading = false
 			controls.status.text = "SAVED | %d objects | scene bake error %d" % [records.size(), scene_error]
 			return
+	map_loading = false
 	controls.status.text = "SAVED | %d objects%s" % [records.size(), fixtures]
 
 
 func _save_authored_scene(target: String = AUTHORED_SCENE_PATH) -> Error:
-	var scene_root = Node3D.new()
-	scene_root.name = "BaseOfficeLayout"
-	for node in objects.placed:
-		if not is_instance_valid(node):
-			continue
-		var scene_path = str(node.get_meta("planning_scene_path", ""))
-		if scene_path.is_empty():
-			continue
-		var copy = catalog._instantiate_asset(scene_path)
-		if copy == null:
-			continue
-		if node.has_method("get_decor_pose"):
-			copy.call("configure_decor_pose", node.call("get_decor_pose"))
-		scene_root.add_child(copy)
-		copy.owner = scene_root
-		copy.transform = node.transform
-		if node.has_meta("planning_object_id"):
-			copy.set_meta("planning_object_id", node.get_meta("planning_object_id"))
-		if node.has_method("has_display") and node.call("has_display"):
-			copy.call("configure_display", node.call("get_display_config"))
-		if node.has_method("get_loot_config") and node.has_meta(&"planning_loot"):
-			copy.call("configure_loot", node.call("get_loot_config"))
-		var door := DOOR_OPTIONS.lockable_controller(node)
-		var copy_door := DOOR_OPTIONS.lockable_controller(copy)
-		if door != null and copy_door != null:
-			copy_door.call("configure_lock_state", door.call("get_lock_state"))
-		if node.has_method("get_enemy_stats") and node.has_meta(&"planning_enemy_stats"):
-			copy.call("configure_stats", node.call("get_enemy_stats"))
-		if node.has_method("get_spawn_config"):
-			copy.call("configure_spawn", node.call("get_spawn_config"))
-		if node.has_meta(WAVE_DIRECTOR.TRIGGER_META):
-			copy.set_meta(WAVE_DIRECTOR.TRIGGER_META, node.get_meta(WAVE_DIRECTOR.TRIGGER_META))
-		if node.has_method("get_fixture_config"):
-			var fixture: Dictionary = node.call("get_fixture_config")
-			copy.call("configure_fixture", str(fixture["shape"]), bool(fixture["visible_in_game"]))
-		if node.has_method("get_blood_config"):
-			var blood: Dictionary = node.call("get_blood_config")
-			copy.call("configure_blood", str(blood["texture"]), str(blood["surface"]))
-			copy.call("configure_blood_normal", node.get("surface_normal"))
-			copy.call("configure_blood_attachment", node.call("get_blood_attachment"))
-		if node.has_meta("planning_desk_id"):
-			copy.set_meta("planning_desk_id", node.get_meta("planning_desk_id"))
-		if node.has_meta("planning_attachment"):
-			copy.set_meta("planning_attachment", node.get_meta("planning_attachment"))
-		if node.has_meta("planning_zone"):
-			copy.set_meta("planning_zone", node.get_meta("planning_zone"))
-		if copy.has_method("configure_flicker"):
-			copy.set("energy_multiplier", node.get("energy_multiplier"))
-			copy.call("set_authored_color", node.call("get_authored_color"))
-			copy.set_meta("planning_light_energy", node.get_meta("planning_light_energy", 3.0))
-			copy.set_meta("planning_light_angle", node.get_meta("planning_light_angle", 48.0))
-			copy.set_meta("planning_flicker_mode", node.get_meta("planning_flicker_mode", 0))
-			copy.set_meta("planning_flicker_step", node.get_meta("planning_flicker_step", 0.2))
-		# An instanced scene restores its own children on load; owning them
-		# here too saved a second copy of every wall and pane on each bake.
-		if copy.scene_file_path.is_empty() and not scene_path.begins_with(catalog.ENVIRONMENT_ROOT + "/"):
-			_assign_owner_recursive(copy, scene_root)
-	var packed_layout = PackedScene.new()
-	var pack_error = packed_layout.pack(scene_root)
-	if pack_error != OK:
-		scene_root.free()
-		return pack_error
-	var save_error = ResourceSaver.save(packed_layout, target)
-	scene_root.free()
-	return save_error
-
-
-func _assign_owner_recursive(node: Node, scene_owner: Node) -> void:
-	for child in node.get_children():
-		child.owner = scene_owner
-		_assign_owner_recursive(child, scene_owner)
+	return SCENE_BAKE.new(catalog).save(objects.placed, target)
 
 
 func load_layout() -> void:
@@ -465,3 +418,31 @@ func load_layout() -> void:
 			push_warning("Planned layout: %d missing object(s) skipped: %s" % [int(report["skipped"]), ", ".join(report.get("missing", []))])
 	snapshot_authored()
 
+
+
+func _prepare_save() -> bool:
+	if not session.active:
+		return true
+	map_loading = true
+	var settled: bool = await SETTLE.new().run(session, objects.placed.duplicate(), controls.status)
+	if not is_instance_valid(session) or not session.is_inside_tree():
+		map_loading = false
+		return false
+	# Physics already moved desk attachments; reset the editing baseline.
+	objects.workstation_transforms.clear()
+	if not settled:
+		map_loading = false
+		controls.status.text = "NOT SAVED | Physics still moving: check red objects and retry"
+	return settled
+
+
+func _capture_save() -> Dictionary:
+	if not session.active:
+		return _collect_layout_data()
+	var progress := func(_amount: float, _phase: String) -> void: controls.status.text = "CAPTURING PREPARED MAP"
+	var alive := func() -> bool: return is_instance_valid(session) and session.is_inside_tree()
+	var result: Dictionary = await CAPTURE.collect_async(objects, session.get_tree(), progress, alive)
+	if result.has("error"):
+		map_loading = false
+		return {}
+	return result.data

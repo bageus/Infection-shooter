@@ -196,7 +196,7 @@ func _ready() -> void:
 	_setup_display()
 	SERVER_AUDIO.attach(self, model_path)
 	SURFACE_DECOR.apply(visual, model_path, _display, display_seed)
-	if model_path.get_file() == "06_conference_chair.glb" and global_position.y < 0.25:
+	if model_path.get_file() == "06_conference_chair.glb" and global_position.y < 0.25 and not has_meta("planning_settled_transform"):
 		var lowest := INF
 		for mesh in _shape_meshes:
 			var bounds: AABB = mesh.global_transform * mesh.get_aabb()

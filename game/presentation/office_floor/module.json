@@ -105,6 +105,7 @@
     },
     "blood_exit_v1": {
       "splatter_exit": "splatter_exit(point: Vector3, direction: Vector3, energy: float, excluded: Array[RID]) -> void; optional queued surface projection for a confirmed projectile exit; bounded three-ray fan and floor fallback"
-    }
+    },
+    "prepared_placement_v1": "Public environment_prop accepts optional planning_settled_transform metadata before ready; skips legacy conference-chair grounding for prepared maps/bakes. Collision/damage/mass ownership unchanged (ADR0055)."
   }
 }

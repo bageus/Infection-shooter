@@ -1,4 +1,5 @@
 extends RefCounted
+const VISUAL_BUDGET := preload("res://game/features/infected/public/visual_preparation_budget.gd")
 const CHASE_BUDGET := preload("res://game/features/infected/public/chase_search_budget.gd")
 
 # Mission composition only: explicit collaborators, no global context or lookup API.
@@ -9,10 +10,11 @@ var _drop_weapon: Callable
 var _particle_targets: Dictionary = {}
 var _electronic_particles := true
 var _displays: Node
+var _visual_budget: Node
 var _chase_budget: Node
 
 
-func _init(container: Node3D, impacts: Node, player: Node3D, drop_weapon: Callable, displays: Node = null) -> void:
+func _init(container: Node3D, impacts: Node, player: Node3D, drop_weapon: Callable, displays: Node = null, camera: Node3D = null) -> void:
 	_container = container
 	_impacts = impacts
 	_player = player
@@ -22,6 +24,10 @@ func _init(container: Node3D, impacts: Node, player: Node3D, drop_weapon: Callab
 		_chase_budget = CHASE_BUDGET.new()
 		_chase_budget.name = "ChaseSearchBudget"
 		_container.add_child(_chase_budget)
+		_visual_budget = VISUAL_BUDGET.new()
+		_visual_budget.name = "VisualPreparationBudget"
+		_visual_budget.camera = camera
+		_container.add_child(_visual_budget)
 
 
 func bind_scene(node: Node) -> void:
@@ -30,6 +36,8 @@ func bind_scene(node: Node) -> void:
 
 
 func _bind_collaborators(node: Node) -> void:
+	if node.has_method("configure_visual_preparation") and is_instance_valid(_visual_budget) and is_instance_valid(_visual_budget.camera):
+		node.call("configure_visual_preparation", _visual_budget)
 	if node.has_method("configure_chase_budget"):
 		node.call("configure_chase_budget", _chase_budget)
 	if node.has_method("configure_displays"):

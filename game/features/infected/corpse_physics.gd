@@ -3,11 +3,13 @@ extends RefCounted
 var simulator: PhysicalBoneSimulator3D
 var skeleton: Skeleton3D
 var _bones: Dictionary = {}
+var _parts: Node
 var _guard: Node
 const GUARD := preload("res://game/features/infected/corpse_guard.gd")
 
 
 func setup(parts: Node) -> void:
+	_parts = parts
 	skeleton = parts.get("skeleton") as Skeleton3D
 	if skeleton == null:
 		return
@@ -175,3 +177,17 @@ func _refresh_guard() -> void:
 		if not bone.is_queued_for_deletion():
 			alive.append(bone)
 	_guard.setup(alive, skeleton)
+
+
+func dispose() -> void:
+	set_enabled(false)
+	if is_instance_valid(_parts) and _parts.is_connected("part_severed", _severed):
+		_parts.disconnect("part_severed", _severed)
+	if is_instance_valid(_guard):
+		_guard.free()
+	if is_instance_valid(simulator):
+		simulator.free()
+	_bones.clear()
+	_parts = null
+	simulator = null
+	skeleton = null

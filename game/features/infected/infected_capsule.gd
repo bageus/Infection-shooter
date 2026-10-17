@@ -1,5 +1,4 @@
 extends CharacterBody3D
-# Living infected only; the "infected" group keeps corpses until they vanish.
 const ALIVE_GROUP := "infected_alive"
 const CHASE_ROUTE := preload("res://game/features/infected/chase_route.gd")
 const CHASE_PACE := preload("res://game/features/infected/chase_pace.gd")
@@ -101,6 +100,7 @@ var _mutation_poison_damage := 0.0
 var _blood := BLOOD_TRAIL.new()
 var _pending_hit := -1.0
 var _face_direction := Vector3.ZERO
+var _visual_budget: Node
 var _parts: Node
 var audio: AUDIO
 var status_fx: STATUS_FX
@@ -149,7 +149,8 @@ func _ready() -> void:
 	_pace = CHASE_PACE.new(get_instance_id())
 	_lod_frame_offset = get_instance_id() % 12
 	death_cloud.depleted.connect(_on_death_cloud_depleted)
-	_setup_body_parts()
+	if not is_instance_valid(_visual_budget):
+		_setup_body_parts()
 	audio = AUDIO.new()
 	audio.name = "Audio"
 	add_child(audio)
@@ -173,15 +174,13 @@ func _head_height() -> float:
 
 
 func _setup_body_parts() -> void:
-	var parts := BODY_PARTS.new()
-	parts.name = "BodyParts"
-	add_child(parts)
-	var size := body_visual.scale.x if body_visual != null else 1.0
-	if parts.setup(self, body_visual, max_health * dismember_strength_scale * size):
-		_parts = parts
-		parts.part_severed.connect(_on_part_severed)
-	else:
-		parts.queue_free()
+	preload("res://game/features/infected/infected_visual_preparation.gd").ensure(self)
+
+
+func configure_visual_preparation(budget: Node) -> void:
+	_visual_budget = budget
+	if is_instance_valid(budget):
+		budget.call("track", self)
 
 
 # Forces the chase: the infected knows where the player is (spawners, summons).
@@ -190,7 +189,6 @@ func set_target(target: Node3D) -> void:
 	_senses.force_chase()
 
 
-# The infected stays unaware until it sees or hears the player.
 func watch_target(target: Node3D) -> void:
 	_target = target
 	_senses.sight_range = sight_range
@@ -231,6 +229,7 @@ func take_projectile_damage(
 ) -> void:
 	if _dead or amount <= 0.0:
 		return
+	_setup_body_parts()
 	_last_hit_position = hit_position
 	_last_hit_direction = direction
 	_reaction_point = hit_position
@@ -277,6 +276,7 @@ func take_damage(amount: float) -> void:
 func _apply_damage(amount: float, blast: bool) -> void:
 	if amount <= 0.0 or _dead:
 		return
+	_setup_body_parts()
 	if blast and _parts != null:
 		_blast_limbs(amount)
 		if _dead:
