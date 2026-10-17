@@ -28,18 +28,22 @@ const PASSIVE := [
 ]
 
 const ACTIVE := [
-	["blood_burst", "Blood Burst", "Biomass", 0, "✹", "Damage and knock back nearby enemies."],
-	["parasite", "Parasite", "Biomass", 1, "✿", "Infect a target; its death spreads infection."],
-	["living_harvest", "Living Harvest", "Biomass", 2, "♥", "Kills restore health and armor."],
-	["discharge", "Discharge", "Neural Storm", 0, "⚡", "Lightning chains between enemies, hitting harder each jump."],
-	["overload", "Overload", "Neural Storm", 1, "↗", "Move, fire and reload faster."],
-	["storm_pulse", "Storm Pulse", "Neural Storm", 2, "↯", "Stun enemies in an electric field."],
-	["acid_spit", "Acid Spit", "Toxic Mutation", 0, "●", "Leave a corrosive acid pool."],
-	["spore_cocoon", "Spore Cocoon", "Toxic Mutation", 1, "◌", "Release a delayed poisonous explosion."],
-	["epidemic", "Epidemic", "Toxic Mutation", 2, "☣", "Spread infection to nearby enemies."],
-	["predator_dash", "Predator Dash", "Predator Form", 0, "➤", "Damage enemies in your path."],
-	["bone_blades", "Bone Blades", "Predator Form", 1, "✣", "Deal heavy damage at close range."],
-	["berserk", "Berserk", "Predator Form", 2, "★", "Kills extend Berserk: more speed, damage and defense."]
+	["blood_burst", "Blood Burst", "Biomass", 0, "✹", ""],
+	["blood_burst_2", "Blood Burst 2", "Biomass", 1, "✹", ""],
+	["blood_burst_3", "Blood Burst 3", "Biomass", 2, "✹", ""],
+	["blood_infection", "Infectious Burst", "Biomass", 2, "✹", ""],
+	["discharge", "Discharge", "Neural Storm", 0, "⚡", ""],
+	["discharge_2", "Discharge 2", "Neural Storm", 1, "⚡", ""],
+	["discharge_3", "Discharge 3", "Neural Storm", 2, "⚡", ""],
+	["storm_pulse", "Storm Pulse", "Neural Storm", 2, "⚡", ""],
+	["power_strike", "Power Strike", "Might", 0, "➤", ""],
+	["power_strike_2", "Power Strike 2", "Might", 1, "➤", ""],
+	["power_strike_3", "Power Strike 3", "Might", 2, "➤", ""],
+	["predator_dash", "Dash", "Might", 2, "➤", ""],
+	["active_claws", "Claws", "Predator Form", 0, "✣", ""],
+	["active_claws_2", "Claws 2", "Predator Form", 1, "✣", ""],
+	["active_claws_3", "Claws 3", "Predator Form", 2, "✣", ""],
+	["berserk", "Berserk", "Predator Form", 2, "✣", ""]
 ]
 
 const HYBRID_PARENTS := {
@@ -51,15 +55,24 @@ const HYBRID_PARENTS := {
 }
 
 
-# Seconds before an active circle can be cast again; each one has its own rhythm.
-const COOLDOWNS := {
-	"blood_burst": 10.0, "parasite": 10.0, "living_harvest": 18.0,
-	"discharge": 10.0, "overload": 18.0, "storm_pulse": 18.0,
-	"acid_spit": 8.0, "spore_cocoon": 8.0, "epidemic": 14.0,
-	"predator_dash": 6.0, "bone_blades": 16.0, "berserk": 22.0
-}
-const DEFAULT_COOLDOWN := 10.0
+# Rank determines recovery after the effect finishes.
+const DEFAULT_COOLDOWN := 5.0
+const ACTIVE_BRANCHES := ["Biomass", "Neural Storm", "Might", "Predator Form"]
+const ALTERNATIVES := ["blood_infection", "storm_pulse", "predator_dash", "berserk"]
 
+static func is_active_skill(skill_id: String) -> bool:
+	return find(skill_id) in ACTIVE
+
+static func family(skill_id: String) -> String:
+	var row := find(skill_id)
+	return str(row[2]) if row in ACTIVE else ""
+
+static func level(skill_id: String) -> int:
+	var row := find(skill_id)
+	return int(row[3]) + 1 if row in ACTIVE else 0
+
+static func alternative(skill_id: String) -> bool:
+	return skill_id in ALTERNATIVES
 
 # Hybrids are derived bonuses from the last circles of adjacent full branches.
 const PASSIVE_STAGES := {
@@ -67,7 +80,7 @@ const PASSIVE_STAGES := {
 	"Adaptation": 3, "Neural System": 4, "Metabolism": 4
 }
 const ACTIVE_STAGES := {
-	"Toxic Mutation": 0, "Biomass": 1, "Predator Form": 2, "Neural Storm": 3
+	"Might": 0, "Biomass": 1, "Predator Form": 2, "Neural Storm": 3
 }
 const FIRST_POINT := 25.0
 const POINT_STEP := 5.0
@@ -93,7 +106,8 @@ static func find(skill_id: String) -> Array:
 
 
 static func cooldown(skill_id: String) -> float:
-	return float(COOLDOWNS.get(skill_id, DEFAULT_COOLDOWN))
+	var rank := level(skill_id)
+	return [5.0, 6.0, 8.0][rank - 1] if rank > 0 else DEFAULT_COOLDOWN
 
 
 static func point_budget(mutation: float) -> int:

@@ -1,7 +1,7 @@
 extends RefCounted
 ## Versioned keyboard/mouse preferences owned by bootstrap, never by gameplay.
-const ACTIONS: Array[String] = ["move_up", "move_down", "move_left", "move_right", "sprint", "roll", "fire", "reload", "melee", "antidote", "pickup_weapon", "weapon_1", "weapon_2", "weapon_3", "weapon_4", "camera_left", "camera_right", "mutation_tree", "skill_1", "skill_2", "skill_3", "skill_4"]
-const KEYS: Array[int] = [KEY_W, KEY_S, KEY_A, KEY_D, KEY_SHIFT, KEY_SPACE, 0, KEY_R, KEY_C, KEY_F, KEY_G, KEY_1, KEY_2, KEY_3, KEY_V, KEY_Q, KEY_E, KEY_M, KEY_4, KEY_5, KEY_6, KEY_7]
+const ACTIONS: Array[String] = ["move_up", "move_down", "move_left", "move_right", "sprint", "roll", "fire", "reload", "melee", "antidote", "pickup_weapon", "weapon_1", "weapon_2", "weapon_3", "weapon_4", "camera_left", "camera_right", "mutation_tree", "skill_1", "skill_2"]
+const KEYS: Array[int] = [KEY_W, KEY_S, KEY_A, KEY_D, KEY_SHIFT, KEY_SPACE, 0, KEY_R, KEY_C, KEY_F, KEY_G, KEY_1, KEY_2, KEY_3, KEY_V, KEY_Z, KEY_X, KEY_M, KEY_Q, KEY_E]
 var values: Dictionary = {}
 
 
@@ -22,6 +22,7 @@ func load_config(config: ConfigFile) -> void:
 	for action in ACTIONS:
 		var candidate: Variant = config.get_value("controls_v1", action, values[action])
 		requested[action] = candidate if valid(candidate) else values[action]
+	_migrate_original_defaults(requested, config)
 	var seen: Dictionary = {}
 	for action in ACTIONS:
 		var signature := str(requested[action]["kind"]) + ":" + str(requested[action]["code"])
@@ -32,11 +33,18 @@ func load_config(config: ConfigFile) -> void:
 
 
 func save_config(config: ConfigFile) -> void:
+	config.set_value("controls_v1", "active_layout_version", 2)
+	for obsolete in ["skill_3", "skill_4"]:
+		if config.has_section_key("controls_v1", obsolete):
+			config.erase_section_key("controls_v1", obsolete)
 	for action in ACTIONS:
 		config.set_value("controls_v1", action, values[action])
 
 
 func apply() -> void:
+	for obsolete in ["skill_3", "skill_4"]:
+		if InputMap.has_action(obsolete):
+			InputMap.erase_action(obsolete)
 	for action in ACTIONS:
 		if not InputMap.has_action(action):
 			InputMap.add_action(action)
@@ -92,3 +100,22 @@ func label(action: String, language: String) -> String:
 	if entry["kind"] == "mouse":
 		return (["ЛКМ", "ПКМ", "СКМ"] if language == "ru" else ["LMB", "RMB", "MMB"])[int(entry["code"]) - 1]
 	return OS.get_keycode_string(int(entry["code"]))
+
+
+# Migrate only the old default quartet; preserve explicit custom layouts.
+func _migrate_original_defaults(requested: Dictionary, config: ConfigFile) -> void:
+	if int(config.get_value("controls_v1", "active_layout_version", 1)) >= 2:
+		return
+	var old := {"camera_left": KEY_Q, "camera_right": KEY_E, "skill_1": KEY_4, "skill_2": KEY_5}
+	var unchanged := true
+	for action in old:
+		var entry: Variant = config.get_value("controls_v1", action, {})
+		unchanged = unchanged and entry is Dictionary and entry.get("kind") == "key" and entry.get("code") == old[action]
+	if unchanged:
+		for other in requested:
+			if other not in old:
+				for action in old:
+					if requested[other] == values[action]:
+						return # A custom key has priority over automatic migration.
+		for action in old:
+			requested[action] = values[action]

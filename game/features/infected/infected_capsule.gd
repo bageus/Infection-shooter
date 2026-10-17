@@ -97,6 +97,7 @@ var _sleeping_far := false
 var _blast_stun_remaining := 0.0
 var mutation_poison_remaining := 0.0
 var _mutation_poison_damage := 0.0
+var _mutation_status := preload("res://game/features/infected/mutation_status.gd").new()
 var _blood := BLOOD_TRAIL.new()
 var _pending_hit := -1.0
 var _face_direction := Vector3.ZERO
@@ -339,18 +340,18 @@ func on_corpse_part_hit(_part: StringName, _damage: float, hit_position: Vector3
 
 
 func apply_blast_stun(duration: float, intensity: float) -> void:
-	_blast_stun_remaining = maxf(_blast_stun_remaining, duration * maxf(intensity, 0.25))
-	if not _dead and status_fx != null:
-		status_fx.stunned(_blast_stun_remaining)
+	_mutation_status.stun(self, duration, intensity)
 
 
 func apply_mutation_poison(duration: float, damage_per_second: float, parasite: bool = false) -> void:
-	mutation_poison_remaining = maxf(mutation_poison_remaining, duration)
-	_mutation_poison_damage = maxf(_mutation_poison_damage, damage_per_second)
-	if not _dead and status_fx != null:
-		status_fx.poisoned(mutation_poison_remaining)
-	if parasite:
-		set_meta("mutation_parasite", true)
+	_mutation_status.poison(self, duration, damage_per_second, parasite)
+
+func apply_skill_infection(duration: float, damage_per_second: float) -> void:
+	_mutation_status.infectious = true
+	_mutation_status.poison(self, duration, damage_per_second, false)
+
+func apply_skill_push(direction: Vector3, distance: float) -> void:
+	_mutation_status.push(self, direction, distance)
 
 
 func _physics_process(delta: float) -> void:
@@ -358,9 +359,8 @@ func _physics_process(delta: float) -> void:
 	_track_blood_motion()
 	_mark_stump_drips()
 	_blast_stun_remaining = maxf(0.0, _blast_stun_remaining - delta)
-	if mutation_poison_remaining > 0.0:
-		mutation_poison_remaining = maxf(0.0, mutation_poison_remaining - delta)
-		take_damage(_mutation_poison_damage * delta)
+	if _mutation_status.step(self, delta):
+		return
 	if _dead:
 		velocity = Vector3.ZERO
 		if _fall_watch != null and not _fall_watch.call("step", delta):

@@ -25,8 +25,8 @@ func _run() -> void:
 	await process_frame
 	_expect(not bar.has_skills() and bar.get_child(0).visible and bar.open_badge.is_visible_in_tree(), "Tree badge stays visible before any active skill is learned.")
 	runtime.absorb_mutagen(6.0)
-	_expect(runtime.upgrade_skill("acid_spit"), "Fixture learns an active skill.")
-	var skills: Array[String] = ["acid_spit"]
+	_expect(runtime.upgrade_skill("power_strike"), "Fixture learns an active skill.")
+	var skills: Array[String] = ["power_strike"]
 	var keys: Array[String] = ["1"]
 	bar.rebuild(skills, keys, "M")
 	await process_frame
@@ -37,31 +37,31 @@ func _run() -> void:
 	_expect(opened == 1, "Badge opens the mutation tree.")
 	var circle = bar.circles[0]
 	_expect(circle.castable and is_zero_approx(circle.ratio), "Ready skill is highlighted with no cooldown sweep.")
-	_expect(runtime.cast_skill("acid_spit"), "Skill casts.")
+	_expect(runtime.cast_skill("power_strike"), "Skill casts.")
 	bar.call("_update_circles", 0.0)
 	_expect(not circle.castable and is_equal_approx(circle.ratio, 1.0), "Fresh cast fills the cooldown sweep.")
-	runtime.report_skill_effect("acid_spit", 6.0)
+	runtime.report_skill_effect("power_strike", 6.0)
 	bar.call("_update_circles", 0.0)
 	_expect(is_equal_approx(circle.effect_ratio, 1.0) and is_equal_approx(circle.effect_left, 6.0), "A lasting effect shows its full remaining time.")
 	runtime.call("_physics_process", 3.0)
 	bar.call("_update_circles", 0.0)
 	_expect(is_equal_approx(circle.effect_ratio, 0.5) and is_equal_approx(circle.effect_left, 3.0), "Effect sweep drains with its remaining seconds.")
-	runtime.report_skill_effect("acid_spit", 5.0)
-	_expect(is_equal_approx(runtime.skill_effect_ratio("acid_spit"), 5.0 / 6.0), "Extending a running effect never overfills the sweep.")
+	runtime.report_skill_effect("power_strike", 5.0)
+	_expect(is_equal_approx(runtime.skill_effect_ratio("power_strike"), 5.0 / 6.0), "Extending a running effect never overfills the sweep.")
 	runtime.call("_physics_process", 5.0)
 	bar.call("_update_circles", 0.0)
 	_expect(is_zero_approx(circle.effect_left), "Effect sweep clears when the effect ends.")
 	runtime.report_skill_effect("muscle_memory", 4.0)
 	_expect(is_zero_approx(runtime.skill_effect_remaining("muscle_memory")), "Only active skills carry effect timers.")
 	bar.call("_update_circles", 0.0)
-	_expect(is_zero_approx(circle.ratio) and circle.castable, "Acid Spit has an eight-second cooldown, so the sweep is empty after eight seconds.")
+	_expect(is_equal_approx(circle.ratio, 1.0) and not circle.castable, "Recovery starts at full only after the lasting effect ends.")
 	runtime.call("_physics_process", 5.5)
 	bar.call("_update_circles", 0.0)
 	_expect(circle.castable and is_zero_approx(circle.ratio), "Skill is highlighted again once recharged.")
 	var many: Array[String] = []
 	var many_keys: Array[String] = []
 	for index in 12:
-		many.append("acid_spit")
+		many.append("power_strike")
 		many_keys.append("")
 	bar.rebuild(many, many_keys, "RMB")
 	await process_frame

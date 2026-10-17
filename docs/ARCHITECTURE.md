@@ -368,3 +368,9 @@ bone poses and mission-local camera-prioritised visual_preparation_budget_v1.
 Character animation exposes opt-in deferred setup; existing set_active intent is
 retained. Legacy maps/scenes remain compatible; owners and dependency edges stay
 unchanged, no Autoload or policy exceptions.
+
+ADR-0056: infection владеет четырьмя активными ветками, двумя назначениями и
+последовательностью effect→cooldown5/6/8с. Requirements DTOv3 и loadout commands
+описаны в manifest. Player применяет эффекты; infected владеет перемещением
+в метрах и DOT-only смертью заражения. Bootstrap рисует выбор и мигрирует
+старые default controls в Q/E + камера Z/X. Owners/edges/Autoload прежние.

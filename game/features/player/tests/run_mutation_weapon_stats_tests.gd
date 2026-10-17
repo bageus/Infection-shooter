@@ -19,6 +19,9 @@ class Runtime extends Node:
 	signal mutation_changed(amount: float, threshold: float)
 	var skills: Dictionary = {}
 
+	func skill_requirements(_id: String) -> Dictionary:
+		return {"level": 3}
+
 	func has_skill(skill_id: String) -> bool:
 		return skills.has(skill_id)
 
@@ -69,13 +72,13 @@ func _run() -> void:
 	initial = weapon.writes
 	runtime.mutation_changed.emit(40.0, 45.0)
 	_check(weapon.writes == initial, "Mutation changes with identical modifiers do not rewrite weapons")
-	runtime.skill_cast.emit("overload")
+	runtime.skill_cast.emit("berserk")
 	effects.call("_process", 0.0)
-	_check(is_equal_approx(weapon.reload_time, 2.0 * 0.7 / 1.3) and is_equal_approx(weapon.shots_per_second, 5.2), "Starting Overload applies its reload/fire modifiers")
+	_check(is_equal_approx(weapon.reload_time, 1.4) and is_equal_approx(weapon.bullet_damage, 30.0), "Starting Berserk applies its damage modifier without changing reload")
 	initial = weapon.writes
 	effects.call("_process", 1.0)
 	_check(weapon.writes == initial, "Active buff countdown does not rewrite unchanged stats")
-	effects.call("_process", 5.1)
+	effects.call("_process", 6.1)
 	_check(is_equal_approx(weapon.reload_time, 1.4) and is_equal_approx(weapon.shots_per_second, 4.0), "Buff expiry restores the passive-adjusted baseline")
 	runtime.skills.erase("muscle_memory")
 	runtime.tree_changed.emit()

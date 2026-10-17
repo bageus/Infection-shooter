@@ -10,16 +10,20 @@ const LISTENER_HEIGHT := 1.3
 ## skill -> [cast event, lasting event or &"", lasting event follows the player]
 const SKILL_SOUNDS := {
 	"blood_burst": [&"skill_blood_burst", &"", true],
-	"parasite": [&"skill_parasite", &"", true],
-	"living_harvest": [&"skill_living_harvest", &"", true],
+	"blood_burst_2": [&"skill_blood_burst", &"", true],
+	"blood_burst_3": [&"skill_blood_burst", &"", true],
+	"blood_infection": [&"skill_parasite", &"", true],
+	"discharge_2": [&"skill_discharge", &"", true],
+	"discharge_3": [&"skill_discharge", &"", true],
+	"power_strike": [&"skill_bone_blades", &"", true],
+	"power_strike_2": [&"skill_bone_blades", &"", true],
+	"power_strike_3": [&"skill_bone_blades", &"", true],
+	"active_claws": [&"skill_bone_blades", &"", true],
+	"active_claws_2": [&"skill_bone_blades", &"", true],
+	"active_claws_3": [&"skill_bone_blades", &"", true],
 	"discharge": [&"skill_discharge", &"", true],
-	"overload": [&"skill_overload", &"", true],
 	"storm_pulse": [&"skill_storm_pulse", &"skill_storm_field", true],
-	"acid_spit": [&"skill_acid_spit", &"acid_sizzle", false],
-	"spore_cocoon": [&"skill_spore_cocoon", &"", false],
-	"epidemic": [&"skill_epidemic", &"", true],
 	"predator_dash": [&"skill_predator_dash", &"", true],
-	"bone_blades": [&"skill_bone_blades", &"bone_blades_whirl", true],
 	"berserk": [&"skill_berserk", &"", true],
 }
 ## Passives that fire at one clear moment.

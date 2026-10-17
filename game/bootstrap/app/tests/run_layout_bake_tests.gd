@@ -22,11 +22,19 @@ func _run() -> void:
 	planner.root.add_child(wall)
 	wall.set_meta("planning_scene_path", GLASS_WALL)
 	objects.placed.append(wall)
+	for asset in ["res://game/features/infected/public/decor/part_hunger_arm.tscn", "res://game/features/infected/public/decor/corpse_hunger.tscn", "res://game/features/pickups/public/ammo_pistol_pickup.tscn"]:
+		var decor := planner.call("_instantiate_asset", asset) as Node3D
+		planner.root.add_child(decor)
+		decor.set_meta("planning_scene_path", asset)
+		objects.placed.push_front(decor)
 	var fresh := (load(GLASS_WALL) as PackedScene).instantiate()
 	var expected := _count(fresh)
 	fresh.free()
 	for bake in 2:
 		_check(planner.storage._save_authored_scene(TARGET) == OK, "The layout bakes")
+		var serialized := FileAccess.get_file_as_string(TARGET)
+		for private_script in ["infected/infected_body_part_decor.gd", "infected/infected_corpse_decor.gd", "pickups/pickup_item.gd"]:
+			_check(not serialized.contains(private_script), "Bake retains public scene instances without private script overrides: " + private_script)
 		var baked := (ResourceLoader.load(TARGET, "", ResourceLoader.CACHE_MODE_IGNORE) as PackedScene).instantiate()
 		var copy := baked.get_child(baked.get_child_count() - 1)
 		_check(_count(copy) == expected, "Bake %d keeps one copy of the glass wall (%d nodes, expected %d)" % [bake + 1, _count(copy), expected])

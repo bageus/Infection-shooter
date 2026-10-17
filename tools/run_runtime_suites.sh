@@ -23,13 +23,20 @@ mkdir -p "$work/data"
 
 run_one() {
 	local suite=$1 work=$2
-	local name log data start status elapsed errors
+	local name log data start status elapsed errors limit
 	name=$(basename "$suite" .gd)
 	log="$work/$name.log"
 	data="$work/data/$name"
 	mkdir -p "$data"
+	# This suite saves and restores the entire authored map (5,000+ objects).
+	# Measured at 115-118 s locally and timed out at 121 s on shared CI.
+	# Keep its real map/physics assertions and allow normal runner variation.
+	limit=120
+	if [ "$suite" = "game/bootstrap/app/tests/run_planning_mode_tests.gd" ]; then
+		limit=180
+	fi
 	start=$(date +%s)
-	XDG_DATA_HOME="$data" timeout 120 godot --headless --path . --script "$suite" > "$log" 2>&1
+	XDG_DATA_HOME="$data" timeout "$limit" godot --headless --path . --script "$suite" > "$log" 2>&1
 	status=$?
 	elapsed=$(( $(date +%s) - start ))
 	echo "$elapsed $suite" >> "$work/timings.txt"

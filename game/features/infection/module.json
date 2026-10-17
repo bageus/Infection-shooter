@@ -11,7 +11,8 @@
     "Control-loss escalation stage",
     "Terminal control-loss defeat state",
     "Highest mutation reached and retained point budget",
-    "Per-level control ampule collection and exit compensation history"
+    "Per-level control ampule collection and exit compensation history",
+    "Two active skill assignments and effect-to-recovery timing"
   ],
   "public_api": [
     "public/infection_runtime.gd"
@@ -25,6 +26,11 @@
     },
     "skill_feedback_v1": {
       "skill_cooldown_finished": "signal skill_cooldown_finished(skill_id: String); owned active skill cooldown transitions from positive to zero, including reduction; never emitted for an unlearned/inactive skill or defeated runtime"
+    },
+    "active_skills_v2": {
+      "requirements": "skill_requirements(id) -> DTOv3 adds active,level,alternative,cooldown; four branches with mutually exclusive rank3 options",
+      "loadout": "equipped_skills() -> Array[String] of exactly2 IDs; assign_skill(slot,id) -> bool; assignable_skills() -> Array[String] highest owned available level per family; first purchases auto-fill, upgrades replace same family, forgotten clears, dormant locked persists",
+      "timing": "base cooldown5/6/8 after effect ends, independent per skill; passive reductions retained; availability recovery starts full cooldown; skill_cooldown_finished reports readiness once"
     }
   }
 }

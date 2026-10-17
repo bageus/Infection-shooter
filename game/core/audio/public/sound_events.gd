@@ -159,7 +159,7 @@ static func preload_event(event: StringName) -> void:
 	if not EVENTS.has(event):
 		return
 	for variant in range(1, int(EVENTS[event][VARIANTS]) + 1):
-		var path := ROOT + "%s/%s_%d.ogg" % [event, event, variant]
+		var path := _event_path(event, variant)
 		if not ResourceLoader.has_cached(path) and ResourceLoader.load_threaded_get_status(path) == ResourceLoader.THREAD_LOAD_INVALID_RESOURCE:
 			ResourceLoader.load_threaded_request(path)
 
@@ -177,7 +177,7 @@ static func play(parent: Node, event: StringName, position := Vector3.INF, volum
 	# Running counts instead of scanning groups for every footstep and clink.
 	if int(_per_event.get(event, 0)) >= int(spec[MAX_SAME]) or _voices >= MAX_VOICES:
 		return null
-	var path := ROOT + "%s/%s_%d.ogg" % [event, event, randi_range(1, int(spec[VARIANTS]))]
+	var path := _event_path(event, randi_range(1, int(spec[VARIANTS])))
 	var stream := load(path) as AudioStream
 	if stream == null:
 		return null
@@ -260,3 +260,9 @@ static func play_ui(parent: Node, event: StringName) -> AudioStreamPlayer:
 	else:
 		player.play()
 	return player
+
+
+static func _event_path(event: StringName, variant: int) -> String:
+	if event == &"skill_cooldown_done":
+		return "res://assets/audio/sfx/skill_ready/taking_skill.wav"
+	return ROOT + "%s/%s_%d.ogg" % [event, event, variant]

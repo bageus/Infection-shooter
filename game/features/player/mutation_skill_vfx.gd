@@ -369,3 +369,37 @@ func _set_aura(enabled: bool) -> void:
 		_aura = ShaderMaterial.new()
 		_aura.shader = AURA_SHADER
 	_skin.next_pass = _aura if enabled else null
+
+
+func active_aura(id: String, radius: float, duration: float) -> void:
+	var color := STORM_RANGE if id == "storm_pulse" else BLOOD_RANGE
+	var dome := RANGE_DOME.spawn(player, player.global_position, radius, color, duration)
+	_domes[id] = weakref(dome)
+	if id == "storm_pulse":
+		var field := PROCEDURAL.storm_field(player, player.global_position, radius)
+		if field != null:
+			_loops[id] = weakref(field)
+
+
+func power_strike(center: Vector3, direction: Vector3) -> void:
+	var fx := MeshInstance3D.new()
+	fx.name = "PowerStrikeArea"
+	fx.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+	var surface := ImmediateMesh.new()
+	var tint := StandardMaterial3D.new()
+	tint.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
+	tint.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
+	tint.cull_mode = BaseMaterial3D.CULL_DISABLED
+	tint.albedo_color = Color(0.9, 0.65, 0.4, 0.28)
+	surface.surface_begin(Mesh.PRIMITIVE_TRIANGLES)
+	for point in [Vector3(-0.5, 0, 0), Vector3(0.5, 0, 0), Vector3(1.5, 0, -3), Vector3(-0.5, 0, 0), Vector3(1.5, 0, -3), Vector3(-1.5, 0, -3)]:
+		surface.surface_add_vertex(point)
+	surface.surface_end()
+	fx.mesh = surface
+	fx.material_override = tint
+	_world().add_child(fx)
+	fx.global_position = center + Vector3.UP * 0.05
+	fx.global_basis = Basis.looking_at(direction, Vector3.UP)
+	var fade := fx.create_tween()
+	fade.tween_property(tint, "albedo_color:a", 0.0, 0.35)
+	fade.tween_callback(fx.queue_free)

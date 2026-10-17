@@ -106,14 +106,22 @@ func _expect(value: bool, message: String) -> void:
 
 func _check_skill_icons() -> void:
 	var infection := INFECTION.new()
-	var regions: Array[Rect2] = []
+	var regions: Dictionary = {}
 	for row in infection.skill_catalog():
 		var icon := SKILL_ICONS.for_skill(str(row[0])) as AtlasTexture
 		_expect(icon != null, "Skill %s has an atlas icon." % row[0])
 		if icon != null:
-			_expect(not regions.has(icon.region), "Skill %s has its own atlas cell." % row[0])
+			var id := str(row[0])
+			var requirements := infection.skill_requirements(id)
+			# Levels are now upgrades of one skill, rather than independent spells.
+			var identity := str(row[2]) if requirements.active and not requirements.alternative else id
+			if id == "claws" or id.begins_with("active_claws"):
+				identity = "claws"
+			_expect(not regions.has(icon.region) or regions[icon.region] == identity, "Only levels of the same skill (and the two Claws forms) share a glyph: " + id)
 			_expect(Rect2(Vector2.ZERO, icon.atlas.get_size()).encloses(icon.region), "Skill %s icon lies inside the atlas." % row[0])
-			regions.append(icon.region)
+			regions[icon.region] = identity
+	_expect((SKILL_ICONS.for_skill("blood_burst") as AtlasTexture).region == (SKILL_ICONS.for_skill("blood_burst_3") as AtlasTexture).region, "Improved Blood Burst retains its family glyph")
+	_expect((SKILL_ICONS.for_skill("blood_infection") as AtlasTexture).region != (SKILL_ICONS.for_skill("blood_burst_3") as AtlasTexture).region, "Alternative final has its own distinct glyph")
 	var cell := SKILL_ICONS.ATLAS.get_size() / SKILL_ICONS.GRID
 	_expect(Rect2(Vector2.ZERO, cell).encloses((SKILL_ICONS.for_skill("muscle_memory") as AtlasTexture).region), "Atlas cell 1 is Muscle Memory.")
 	_expect(Rect2(cell * 5, cell).encloses((SKILL_ICONS.for_skill("berserk") as AtlasTexture).region), "Atlas cell 36 is Berserk.")

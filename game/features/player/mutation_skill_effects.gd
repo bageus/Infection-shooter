@@ -3,6 +3,7 @@ extends Node
 # Host-side effects. The infection runtime owns selection and cooldown state.
 const SKILL_VFX := preload("res://game/features/player/mutation_skill_vfx.gd")
 const VFX_BUFFS := ["storm_pulse", "bone_blades", "berserk"]
+var _active_effects := preload("res://game/features/player/active_mutation_effects.gd").new(self)
 var player: CharacterBody3D
 var runtime: Node
 var weapons: Array[Node3D] = []
@@ -62,7 +63,7 @@ const BLOOD_BURST_RADIUS := 2.4
 const BLOOD_BURST_DAMAGE := 20.0
 ## Claws: a pulse around the body every few seconds.
 const CLAW_INTERVAL := 3.0
-const CLAW_RADIUS := 2.0
+const CLAW_RADIUS := 1.5
 const CLAW_DAMAGE := 25.0
 const CLAW_KILL_WINDOW := 0.5
 ## Reactive Evolution: damage of one type builds a block for a while.
@@ -141,6 +142,10 @@ func _scented(enemy: Node3D, amount: float) -> float:
 
 
 func _refresh_stats() -> void:
+	_active_effects.cancel_unavailable()
+	if active_buff("berserk") and not enabled("berserk"):
+		buffs["berserk"] = 0.0
+		vfx.buff_ended("berserk")
 	var next_max := 125.0 if enabled("hypertrophy") else 100.0
 	player.set("max_health", next_max)
 	player.set("health", minf(float(player.get("health")), next_max))
@@ -188,7 +193,7 @@ func _process(delta: float) -> void:
 	if active_buff("predator_dash"):
 		_dash_strike()
 	_claw_tick(delta)
-	_blade_and_storm_tick(delta)
+	_active_effects.tick(delta)
 	for i in range(acid_pools.size() - 1, -1, -1):
 		var pool := acid_pools[i]
 		pool["remaining"] = float(pool["remaining"]) - delta
@@ -292,12 +297,8 @@ func on_enemy_killed(enemy: Node3D) -> void:
 		_passive_buff("devourer_armor", DEVOURER_ARMOR_TIME)
 		_passive("devourer")
 	if active_buff("berserk"): _start_buff("berserk", minf(12.0, float(buffs["berserk"]) + 1.0))
-	if enemy.has_meta("mutation_parasite"):
-		for other in _enemies_near(enemy.global_position, PARASITE_EXPLOSION_RADIUS):
-			if other != enemy: other.call("take_damage", PARASITE_EXPLOSION)
-	if enabled("epidemic") and float(enemy.get("mutation_poison_remaining")) > 0.0:
-		for neighbor in _enemies_near(enemy.global_position, 4.0):
-			neighbor.call("apply_mutation_poison", 4.0, 5.0)
+	if enemy.has_meta("mutation_infection_death"):
+		vfx.spike_burst(enemy.global_position, 4.0)
 	if enabled("recycling") and randf() < 0.35:
 		player.call("add_ammo_to_current_weapon", 5)
 		_passive("recycling")
@@ -447,87 +448,11 @@ func _harvest_tick(delta: float) -> void:
 
 
 func _cast(skill_id: String) -> void:
-	match skill_id:
-		"blood_burst":
-			vfx.spike_burst(player.global_position, BLOOD_BURST_RADIUS)
-			for enemy in _enemies_near(player.global_position, BLOOD_BURST_RADIUS):
-				enemy.call("take_damage", BLOOD_BURST_DAMAGE)
-				enemy.call("apply_player_push", (enemy.global_position - player.global_position).normalized(), 5.0)
-		"parasite":
-			var targets := _enemies_near(player.global_position, 12.0, true)
-			if not targets.is_empty():
-				targets[0].call("apply_mutation_poison", 60.0, PARASITE_DPS, true)
-				_skill_effect(skill_id, 60.0)
-		"living_harvest", "overload", "storm_pulse", "bone_blades":
-			var durations := {"living_harvest": 5.0, "overload": 5.0, "storm_pulse": 6.0, "bone_blades": 4.0}
-			_start_buff(skill_id, float(durations[skill_id]))
-		"berserk":
-			_start_buff("berserk", 6.0)
-		"discharge":
-			_discharge()
-		"acid_spit":
-			var puddle := acid_floor_point(player.get("_aim_point"))
-			acid_pools.append({"position": puddle, "remaining": ACID_TIME})
-			vfx.acid_pool(puddle, ACID_POOL_RADIUS, ACID_TIME)
-		"spore_cocoon":
-			# The cocoon always sits on the floor, even when the aim is on a wall or a desk.
-			var location := acid_floor_point(player.get("_aim_point"))
-			vfx.spore_cocoon(location, SPORE_RADIUS, SPORE_DELAY)
-			_skill_effect(skill_id, SPORE_DELAY)
-			get_tree().create_timer(SPORE_DELAY).timeout.connect(_spore_burst.bind(location))
-		"epidemic":
-			for enemy in _enemies_near(player.global_position, 15.0):
-				if float(enemy.get("mutation_poison_remaining")) > 0.0:
-					for neighbor in _enemies_near(enemy.global_position, 3.5): neighbor.call("apply_mutation_poison", 3.0, 4.0)
-		"predator_dash":
-			player.call("mutation_dash")
-			vfx.dash_trail(0.4)
-			_dash_struck.clear()
-			buffs["predator_dash"] = DASH_STRIKE_TIME
-			_dash_strike()
+	_active_effects.cast(skill_id)
 
 
-# Chain lightning: each jump hits the nearest unhit enemy and deals more damage.
-func _discharge() -> void:
-	var first := _enemies_near(player.global_position, DISCHARGE_RANGE, true)
-	if first.is_empty():
-		return
-	var chain: Array[Vector3] = [player.global_position]
-	var hit: Dictionary = {}
-	var target: Node3D = first[0]
-	for jump in DISCHARGE_JUMPS:
-		hit[target.get_instance_id()] = true
-		chain.append(target.global_position)
-		target.call("take_damage", DISCHARGE_STEP_DAMAGE * float(jump + 1))
-		target.call("apply_blast_stun", 1.0, 0.8)
-		var origin := target.global_position
-		var next: Node3D = null
-		var best := DISCHARGE_CHAIN_RANGE * DISCHARGE_CHAIN_RANGE
-		for candidate in _enemies_near(origin, DISCHARGE_CHAIN_RANGE):
-			if hit.has(candidate.get_instance_id()):
-				continue
-			var distance := candidate.global_position.distance_squared_to(origin)
-			if distance < best:
-				best = distance
-				next = candidate
-		if next == null:
-			break
-		target = next
-	vfx.chain_lightning(chain)
-
-
-# Hits enemies along the dash path instead of a ring around the start point.
 func _dash_strike() -> void:
-	var heading: Vector3 = player.get("_roll_direction")
-	for enemy in _enemies_near(player.global_position, DASH_REACH + 0.6):
-		var offset := enemy.global_position - player.global_position
-		offset.y = 0.0
-		if _dash_struck.has(enemy.get_instance_id()) or offset.length() - _body_radius(enemy) > DASH_REACH:
-			continue
-		if heading.length_squared() > 0.0 and offset.length() > 0.3 and offset.normalized().dot(heading) < -0.2:
-			continue
-		_dash_struck[enemy.get_instance_id()] = true
-		enemy.call("take_damage", DASH_DAMAGE)
+	_active_effects._dash()
 
 
 ## Where an Acid Spit aimed at `aim` lands: always on the floor the player
