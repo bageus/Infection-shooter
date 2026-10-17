@@ -7,6 +7,12 @@ owner: AI
 updated: 2026-10-18
 ---
 
+18.10.2026 (разброс стекла — завершено): private scatter теперь даёт независимые asymmetrical near/middle/far profiles, максимум12 штампов, дальность1.17–3.3м у редкой крошки; случайные хвосты слева/справа/оба/без хвостов, кластер и масштаб у рамы. 120 seeded pattern regressions, glass_floor_debris headless, glass_crack и destruction_fixes — PASS. Native full glass_floor_debris+three-pane lineup — PASS в Compatibility/OpenGL и настоящем Forward+/Vulkan Mesa llvmpipe; изображение трёх одинаковых рам просмотрено. Editor import exit0 без SCRIPT ERROR/ERROR; project/spec/workflow/architecture/source-size/CI174registrations/392scene refs/diff PASS. Existing test fixtures51lines reviewed: последовательные pixel/budget и scene-break assertions; production file91lines. Public contracts/DTO/shader/atlas/owners/edges/бюджеты прежние, исключений нет. QA docs/qa/glass_floor_debris.md. Следующее действие — follow-up PR и проверка CI; merge не поручен. Iris Xe/Web аппаратная приёмка остаётся.
+
+
+18.10.2026 (расширение россыпи по визуальной обратной связи): PR269 уже merged, база699b156. Владелец просит больший/дальний, разреженный вдали и несимметричный разброс, разные footprint соседних стёкол и независимый выход за левый/правый край. T004/Phase1/P1_LOGIC, READY gates PASS. Только private office_floor glass_floor_scatter и existing glass_floor_debris tests/QA. У каждого pane независимые seed/profile, near/middle/far, дальность до3.3м, редкие меньшие sparse-frame chips вдали, случайные левый/правый/оба/ни одного хвоста. Прежние MAX12 marks/64 queue/16 textures/2blit+1upload/idle остановка, atlas, public API, shader, save DTO, owners/edges/policy без изменений. 120 seeded profiles проверяют falloff, asymmetry, reach variance, четыре вида хвостов и старые bake limits; native fixture — три соседние одинаковые рамы. Следующее действие — native pixels, regressions и gates, затем follow-up PR; merge не поручен.
+
+
 18.10.2026 (PR269): https://github.com/bageus/Infection-shooter/pull/269 создан по явному разрешению владельца. Ветка согласована с main de29407: конфликтовали только добавленные записи ACTIVE_TASK/PROJECT_STATE, записи обеих задач сохранены; исходники объединены без конфликтов. Проверки запускаются на итоговом merge head; merge PR в main не выполняется. Следующее действие — проверить CI PR269 и аппаратную Iris Xe/Web приёмку.
 
 

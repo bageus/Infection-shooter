@@ -2,6 +2,7 @@ extends SceneTree
 ## Real atlas pixels, bounded baking, section materials and actual breakable scenes.
 const FLOOR := preload("res://game/presentation/office_floor/public/base_floor_renderer.gd")
 const BAKE := preload("res://game/presentation/office_floor/glass_floor_bake.gd")
+const SCATTER := preload("res://game/presentation/office_floor/glass_floor_scatter.gd")
 const SCENES := ["glass_wall_full", "glass_partition_half", "glass_partition_blinds", "sliding_glass_door"]
 var failures := 0
 var stage: Node3D
@@ -13,6 +14,7 @@ func _init() -> void:
 
 
 func _run() -> void:
+	_test_scatter_patterns()
 	_test_pixels_and_budgets()
 	stage = Node3D.new()
 	root.add_child(stage)
@@ -27,6 +29,53 @@ func _run() -> void:
 	await process_frame
 	print("Glass floor debris tests: %d failures" % failures)
 	quit(0 if failures == 0 else 1)
+
+
+func _test_scatter_patterns() -> void:
+	var rng := RandomNumberGenerator.new()
+	var modes: Dictionary = {}
+	var reaches: Dictionary = {}
+	var near_count := 0
+	var far_count := 0
+	var near_area := 0.0
+	var far_area := 0.0
+	var asymmetric := 0
+	for sample in 120:
+		rng.seed = sample + 1
+		var pattern := SCATTER.build_pattern(2.4, rng)
+		_check(pattern.size() <= 12, "Wider scatter keeps the original stamp budget")
+		var left := false
+		var right := false
+		var positive := 0.0
+		var negative := 0.0
+		for mark: Dictionary in pattern:
+			var offset: Vector2 = mark.offset
+			left = left or offset.x < -1.22
+			right = right or offset.x > 1.22
+			positive = maxf(positive, offset.y)
+			negative = maxf(negative, -offset.y)
+			_check(offset.is_finite() and absf(offset.y) <= 3.3 and absf(offset.x) <= 2.6, "Scatter stays within a bounded floor footprint")
+			_check(float(mark.size) >= 0.25 and float(mark.size) <= 1.5, "Every patch fits the unchanged bake limits")
+			if absf(offset.y) < 0.6:
+				near_count += 1
+				near_area += float(mark.size) * float(mark.size)
+			elif absf(offset.y) > 1.15:
+				far_count += 1
+				far_area += float(mark.size) * float(mark.size)
+				_check(int(mark.frame) < 4, "Distant fragments use sparse atlas cells")
+		modes[Vector2i(int(left), int(right))] = true
+		reaches[roundi(maxf(positive, negative) * 100)] = true
+		if absf(positive - negative) > 0.4:
+			asymmetric += 1
+	_check(modes.size() == 4, "Repeated panes can spill left, right, both ways, or neither")
+	_check(reaches.size() > 40, "Neighbouring panes do not share a fixed reach")
+	_check(asymmetric > 60, "Most footprints have different reach on opposite sides")
+	_check(near_count > far_count * 2 and far_count > 0, "Farther from the pane there are fewer patches")
+	_check(far_area / far_count < near_area / near_count * 0.4, "Distant patches are smaller as well as fewer")
+	rng.seed = 71
+	var first := SCATTER.build_pattern(2.4, rng)
+	rng.seed = 71
+	_check(first == SCATTER.build_pattern(2.4, rng), "A seeded footprint is reproducible for QA")
 
 
 func _test_pixels_and_budgets() -> void:
@@ -192,8 +241,42 @@ func _test_render() -> void:
 		clean.save_png(args[0].path_join("glass_floor_before.png"))
 		dirty.save_png(args[0].path_join("glass_floor_after.png"))
 	floor_view.call("clear_glass_debris")
+	await _render_scatter_lineup(camera, args)
 	camera.queue_free()
 	light.queue_free()
+
+
+func _render_scatter_lineup(camera: Camera3D, args: PackedStringArray) -> void:
+	camera.size = 9.0
+	var panes: Array[MeshInstance3D] = []
+	var frames: Array[MeshInstance3D] = []
+	seed(26971)
+	for index in 3:
+		var pane := MeshInstance3D.new()
+		var box := BoxMesh.new()
+		box.size = Vector3(2.4, 2.5, 0.02)
+		pane.mesh = box
+		stage.add_child(pane)
+		pane.position = Vector3((index - 1) * 3.6, 1.25, 0)
+		pane.hide()
+		panes.append(pane)
+		floor_view.call("scatter_glass_debris", [pane] as Array[MeshInstance3D], Vector3.FORWARD)
+		var frame := MeshInstance3D.new()
+		var rail := BoxMesh.new()
+		rail.size = Vector3(2.4, 0.04, 0.06)
+		frame.mesh = rail
+		stage.add_child(frame)
+		frame.position = Vector3(pane.position.x, 0.04, 0)
+		frames.append(frame)
+	for step in 36:
+		await process_frame
+	await RenderingServer.frame_post_draw
+	_check(not floor_view.is_processing(), "Three adjacent wider footprints drain the bounded bake queue")
+	if not args.is_empty():
+		root.get_texture().get_image().save_png(args[0].path_join("glass_scatter_three_panes.png"))
+	floor_view.call("clear_glass_debris")
+	for node in panes + frames:
+		node.queue_free()
 
 
 func _opaque(image: Image) -> int:
