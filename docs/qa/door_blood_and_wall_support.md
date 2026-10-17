@@ -12,7 +12,8 @@
   после _ready; лифтовые створки используют тот же путь.
 - Bootstrap при восстановлении wall/object blood коротким локальным ray
   уточняет фактическую поверхность. Пятна без attachment и с ошибочной рамой
-  получают leaf anchor; правильный сохранённый owner не заменяется соседним.
+  получают runtime leaf anchor; правильный сохранённый owner не заменяется соседним.
+  Исходные attachment owner/mesh и object_id при восстановлении не переписываются.
   Нет близкой поверхности — прежняя привязка сохраняется. Floor blood не меняется.
   Синхронная загрузка, async startup и undo получают существующий impacts adapter.
   Пустые object_id не трактуются как owner старых непривязанных пятен.
@@ -54,8 +55,8 @@ back-plane placement по actual geometry, сохранение опоры по�
 Office-floor владеет прежними физикой/визуалом, combat — проекцией, bootstrap —
 композицией и восстановлением. Public signatures, module dependencies, scenes,
 resources, DTO v8, health/destruction balance прежние; миграции и исключений нет.
-Существующие optional attachment owner/mesh заполняются при исправлении старой
-привязки. Door/prop roots>300 строк reviewed: scene composition/physics adapters;
+Новые placements сохраняют существующие optional attachment owner/mesh; legacy
+recovery меняет только производный runtime anchor, сохраняя authored поля побайтно. Door/prop roots>300 строк reviewed: scene composition/physics adapters;
 геометрия контакта вынесена в private helper, root prop уменьшается575→564 строки,
 door569→587, main383 не растёт. Новые private helpers<300 строк.
 
@@ -74,3 +75,21 @@ wiring, wall fixtures, gameplay/planner repairs, door locks/selection, exit bloo
 Editor import exit0 без ошибок; validate_project (включая READY gates,
 architecture/source size/166 CI suites), validate_scene_resources392 refs,
 git diff --check PASS. Native выполнения проверяются отдельно CI.
+
+## Исправление CI round trip
+
+Первый CI выявил две ошибки сохранения/загрузки: planning_mode и display_planner.
+Recovery повторно вычислял mesh и записывал его в authored blood_attachment:
+в реальной карте генерируемое имя менялось @MeshInstance3D@5919→@17545.
+При загрузке восстанавливается производный anchor, затем через существующий
+configure_blood_attachment возвращаются исходные поля. Recovery не назначает
+новый object_id пустому owner. Новые placements по-прежнему сохраняют attachment.
+Оба прежних строгих full-map equality assertions сохранены. Новый door suite
+дополнительно сравнивает исходные configs до/после sync/async recovery и проверяет
+фактический runtime anchor вместе с движением каждого пятна.
+
+После исправления четыре целевых suites display_planner/planning_mode/
+door_blood_attachment/named_map_loading PASS (39/54/5/2с на этом прогоне).
+Editor import и все project/scene/diff gates повторно PASS. CI финальной
+исправленной ревизии проверяется отдельно; переход к следующему if !cancelled
+шагу не считается признаком успеха предыдущего шага.

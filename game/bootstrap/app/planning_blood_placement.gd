@@ -122,6 +122,8 @@ static func _restore_attachment(node: Node, owners: Dictionary, impacts: Node) -
 	var owner_id := str(config.get("owner", ""))
 	var owner: Node = owners.get(owner_id) if not owner_id.is_empty() else null
 	if (owner != null or str(config.get("owner", "")).is_empty()) and _recover_surface(node, owner, impacts):
+		# Recovery is derived runtime state, never an implicit edit of the map.
+		node.call("configure_blood_attachment", config)
 		return
 	if str(config.get("owner", "")).is_empty():
 		return
@@ -152,9 +154,7 @@ static func _recover_surface(node: Node3D, saved_owner: Node, impacts: Node) -> 
 		owner = owner.get_parent()
 	if owner == null or (saved_owner != null and owner != saved_owner):
 		return false
-	if str(owner.get_meta("planning_object_id", "")).is_empty():
-		owner.set_meta("planning_object_id", "object_%d" % Time.get_ticks_usec())
-	node.call("attach_blood", anchor, str(owner.get_meta("planning_object_id")))
+	node.call("attach_blood", anchor, str(owner.get_meta("planning_object_id", "")))
 	return true
 
 

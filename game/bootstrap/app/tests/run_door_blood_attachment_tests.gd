@@ -99,6 +99,7 @@ func _place(door: Node3D, leaf: MeshInstance3D, center: Vector3, normal: Vector3
 
 func _restore(placed: Node3D, leaf: MeshInstance3D) -> Array[Node3D]:
 	var marks: Array[Node3D] = []
+	var configs: Array[Dictionary] = []
 	# Current saved attachment, old unbound blood, and a stale frame attachment.
 	for kind in ["saved", "unbound", "frame"]:
 		var mark := _blood()
@@ -109,10 +110,14 @@ func _restore(placed: Node3D, leaf: MeshInstance3D) -> Array[Node3D]:
 		elif kind == "frame":
 			mark.call("configure_blood_attachment", {"owner": "door", "mesh": "Visual"})
 		marks.append(mark)
+		configs.append(mark.call("get_blood_attachment"))
 	PLACEMENT.restore_attachments([stage], impacts)
-	for mark in marks:
-		_expect(mark.call("get_blood_attachment")["mesh"] == str(leaf.name), "Saved/legacy mark restores the actual leaf")
+	for i in marks.size():
+		_expect(marks[i].get("_anchor").get_ref() == leaf, "Saved/legacy mark restores the actual runtime leaf")
+		_expect(marks[i].call("get_blood_attachment") == configs[i], "Runtime recovery preserves every authored attachment field")
 	await PLACEMENT.restore_attachments_async([stage], self, func() -> bool: return true, impacts)
+	for i in marks.size():
+		_expect(marks[i].get("_anchor").get_ref() == leaf and marks[i].call("get_blood_attachment") == configs[i], "Async recovery preserves the same runtime anchor and authored fields")
 	return marks
 
 func _runtime(door: Node3D, leaf: MeshInstance3D, center: Vector3, normal: Vector3, decal: bool) -> Node3D:

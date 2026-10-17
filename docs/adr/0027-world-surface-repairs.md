@@ -45,8 +45,9 @@ See DISPLAY_QA.md and WORLD_SURFACE_QA.md for executed checks and target-device 
 
 По прямому запросу владельца moving door leaf явно регистрирует свой collider
 и mesh через существующий impact_surface_v1. Bootstrap восстанавливает старую
-unbound/frame blood по близкой реальной поверхности, затем сохраняет прежние
-optional owner/mesh; другой существующий saved owner не заменяется. Floor blood
+unbound/frame blood по близкой реальной поверхности, в производный runtime anchor; authored
+optional owner/mesh и object_id сохраняются без изменений при загрузке, другой
+существующий saved owner не заменяется. Floor blood
 и layout v8 прежние. Новый runtime контракт не вводится.
 
 Office-floor освобождает все wall-mounted props при разрушении деревянной
