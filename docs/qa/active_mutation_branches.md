@@ -79,6 +79,14 @@ canvas_items stretch. Sampler учитывает отношение image/visibl
 пороги цвета, геометрия и lifecycle assertions прежние. Повторный CI
 обоих renderers проверяет исправление.
 
+Headless CI7035e48:164 suites без failures, planning_mode exit124/121с.
+Текущий полный локальный runner: All165 suites passed,0 SCRIPT ERROR/ERROR;
+planning_mode118с, отдельный параллельный стресс с4 worker threads115с.
+Только этому полному save/restore тесту дан execution budget180с;
+остальные suites120с. Все assertions, полная карта и physics ticks сохранены.
+Журналы runtime публикуются отдельным artifact сразу после headless step,
+до долгих rendered captures; имя включает run_attempt.
+
 ## Ручная приёмка
 
 На Windows/Web/Iris Xe проверить RU/EN дерево и две ячейки, Q/E и Z/X,
