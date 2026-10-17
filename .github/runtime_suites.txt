@@ -154,3 +154,5 @@ game/features/player/tests/run_shot_recoil_tests.gd
 game/features/infected/tests/run_hit_drag_tests.gd
 game/bootstrap/app/tests/run_bullet_smoke_tests.gd
 game/bootstrap/app/tests/run_display_settings_tests.gd
+game/bootstrap/app/tests/run_door_blood_attachment_tests.gd
+game/presentation/office_floor/tests/run_wall_mount_support_tests.gd

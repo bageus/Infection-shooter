@@ -221,7 +221,8 @@ func _restore(record: Dictionary, offset: Vector3, new_desk: bool) -> Node3D:
 	if node.has_method("watch_target") and str(record["kind"]) == "enemy":
 		node.call("watch_target", planner.main_player)
 	planner.placed.append(node)
-	BLOOD_PLACEMENT.restore_attachments([planner.root])
+	var host: Node = planner.get("host")
+	BLOOD_PLACEMENT.restore_attachments([planner.root], host.get("impact_pool") if host != null else null)
 	return node
 
 

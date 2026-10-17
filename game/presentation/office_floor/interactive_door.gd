@@ -43,6 +43,8 @@ const BUDGET_LIGHT := preload("res://game/presentation/office_floor/budget_omni_
 const PRESENCE := preload("res://game/presentation/office_floor/door_presence.gd")
 var _presence: Area3D
 var _elevator_neighbors: Array[WeakRef] = []
+var _impact_pool: Node
+var _leaf_surfaces: Dictionary = {}
 var _pose_ready := false
 var _locked_cue_armed := true
 const SFX := preload("res://game/core/audio/public/sound_events.gd")
@@ -54,6 +56,20 @@ const LOCK_ICON_HEIGHT := 1.1
 const LOCK_ICON_SCALE := 0.8
 # Beyond this distance the next approach plays the locked cue again.
 const LOCKED_CUE_REARM_DISTANCE := 0.5
+
+
+# Moving leaf colliders and their render receivers share the existing surface contract.
+func configure_world(_container: Node3D, impacts: Node) -> void:
+	_impact_pool = impacts
+	if is_instance_valid(impacts):
+		for body: Node3D in _leaf_surfaces:
+			impacts.call("register_surface", body, _leaf_surfaces[body])
+
+
+func _register_leaf(body: Node3D, visual: Node3D) -> void:
+	_leaf_surfaces[body] = visual
+	if is_instance_valid(_impact_pool):
+		_impact_pool.call("register_surface", body, visual)
 
 
 # Public structural scene wiring v1.
@@ -322,6 +338,7 @@ func _add_swing_leaf_collision(part: Node3D) -> void:
 		var body := StaticBody3D.new()
 		body.name = "MovingDoorBody"
 		part.add_child(body)
+		_register_leaf(body, leaf)
 		var collision := CollisionShape3D.new()
 		var box := BoxShape3D.new()
 		var bounds := leaf.get_aabb()
@@ -373,6 +390,7 @@ func _add_elevator_leaf_collision(part: Node3D) -> void:
 	var body := StaticBody3D.new()
 	body.name = "MovingLeafBody"
 	part.add_child(body)
+	_register_leaf(body, mesh)
 	var collision := CollisionShape3D.new()
 	var box := BoxShape3D.new()
 	var bounds := mesh.get_aabb()

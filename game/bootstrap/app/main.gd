@@ -367,7 +367,7 @@ func _setup_world_bindings() -> void:
 	world_bindings.call("bind_scene", player)
 	for branch in [$Structure, planning_root, enemies]:
 		world_bindings.call("bind_scene", branch)
-	BLOOD_PLACEMENT.restore_attachments([$Structure, planning_root])
+	BLOOD_PLACEMENT.restore_attachments([$Structure, planning_root], impact_pool)
 
 
 func bind_world_object(node: Node) -> void:

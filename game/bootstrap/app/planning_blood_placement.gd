@@ -69,7 +69,7 @@ static func apply_probe(placing: Node3D, preview: Node3D) -> void:
 	placing.call("attach_blood", anchor, str(owner.get_meta("planning_object_id")))
 
 
-static func restore_attachments(roots: Array) -> void:
+static func restore_attachments(roots: Array, impacts: Node = null) -> void:
 	var all: Array[Node] = []
 	for branch: Node in roots:
 		_collect(branch, all)
@@ -78,11 +78,11 @@ static func restore_attachments(roots: Array) -> void:
 		if node.has_meta("planning_object_id"):
 			owners[str(node.get_meta("planning_object_id"))] = node
 	for node in all:
-		_restore_attachment(node, owners)
+		_restore_attachment(node, owners, impacts)
 
 
 ## Same preorder owner resolution as restore_attachments without one long tree scan.
-static func restore_attachments_async(roots: Array, tree: SceneTree, alive: Callable) -> bool:
+static func restore_attachments_async(roots: Array, tree: SceneTree, alive: Callable, impacts: Node = null) -> bool:
 	var pending: Array[Node] = []
 	for index in range(roots.size() - 1, -1, -1):
 		pending.append(roots[index])
@@ -106,7 +106,7 @@ static func restore_attachments_async(roots: Array, tree: SceneTree, alive: Call
 				return false
 			started = Time.get_ticks_msec()
 	for index in marks.size():
-		_restore_attachment(marks[index], owners)
+		_restore_attachment(marks[index], owners, impacts)
 		if index % 16 == 15 or Time.get_ticks_msec() - started >= 4:
 			await tree.process_frame
 			if not alive.call():
@@ -115,18 +115,47 @@ static func restore_attachments_async(roots: Array, tree: SceneTree, alive: Call
 	return true
 
 
-static func _restore_attachment(node: Node, owners: Dictionary) -> void:
+static func _restore_attachment(node: Node, owners: Dictionary, impacts: Node) -> void:
 	if not node.has_method("get_blood_attachment"):
 		return
 	var config: Dictionary = node.call("get_blood_attachment")
+	var owner_id := str(config.get("owner", ""))
+	var owner: Node = owners.get(owner_id) if not owner_id.is_empty() else null
+	if (owner != null or str(config.get("owner", "")).is_empty()) and _recover_surface(node, owner, impacts):
+		# Recovery is derived runtime state, never an implicit edit of the map.
+		node.call("configure_blood_attachment", config)
+		return
 	if str(config.get("owner", "")).is_empty():
 		return
-	var owner: Node = owners.get(str(config.get("owner", "")))
 	if owner == null:
 		return
 	var anchor := owner.find_child(str(config["mesh"]), true, false) as Node3D
 	if anchor != null:
 		node.call("attach_blood", anchor, str(config["owner"]))
+
+
+## Old placements could have no attachment or name the frame instead of the leaf.
+## Recover only a nearby actual surface, and never replace a different saved owner.
+static func _recover_surface(node: Node3D, saved_owner: Node, impacts: Node) -> bool:
+	if impacts == null or str(node.call("get_blood_config").get("surface", "floor")) == "floor":
+		return false
+	var values: Array = node.call("get_blood_config").get("normal", [0.0, 0.0, 1.0])
+	var normal := (node.global_basis * Vector3(values[0], values[1], values[2])).normalized()
+	var ray := PhysicsRayQueryParameters3D.create(node.global_position + normal * .12, node.global_position - normal * .16, 7)
+	var hit := node.get_world_3d().direct_space_state.intersect_ray(ray)
+	if hit.is_empty():
+		return false
+	var surface: Dictionary = impacts.call("resolve_surface", hit["collider"], hit["position"], -normal)
+	if surface.is_empty() or node.global_position.distance_to(surface["position"]) > .16:
+		return false
+	var anchor: Node3D = surface["anchor"]
+	var owner: Node = anchor
+	while owner != null and not owner.has_meta("planning_scene_path") and not owner.has_meta("planning_object_id"):
+		owner = owner.get_parent()
+	if owner == null or (saved_owner != null and owner != saved_owner):
+		return false
+	node.call("attach_blood", anchor, str(owner.get_meta("planning_object_id", "")))
+	return true
 
 
 static func _collect(node: Node, out: Array[Node]) -> void:
