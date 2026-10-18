@@ -45,6 +45,8 @@ func set_floor_hints_enabled(enabled: bool) -> void:
 
 # Goal for the floor chevrons: the emergency key until it is taken, then the nearest exit opening.
 func floor_hint_target() -> Vector3:
+	if not is_instance_valid(_player):
+		return Vector3.INF
 	if is_instance_valid(_key) and not (_player.has_method("has_emergency_key") and bool(_player.call("has_emergency_key"))):
 		return _key.global_position
 	var from := Vector2(_player.global_position.x, _player.global_position.z)
