@@ -53,6 +53,7 @@ func _run() -> void:
 	await process_frame
 	var restored: Dictionary = storage.call("_collect_layout_data")
 	_check(LAYOUT_ASSERTIONS.equivalent(restored, data), "Display layout round trip preserves every field")
+	await _check_legacy_chair(objects, storage)
 	objects.call("_apply_layout_data", {"version": 6, "objects": [{"scene": MODEL, "x": 0, "y": 0, "z": 0}]})
 	await process_frame
 	var legacy: Dictionary = storage.call("_collect_layout_data")
@@ -65,6 +66,25 @@ func _run() -> void:
 	await process_frame
 	print("Display planner tests: %d failures" % failures)
 	quit(0 if failures == 0 else 1)
+
+
+func _check_legacy_chair(objects: Node, storage: RefCounted) -> void:
+	var chair_path := "res://models/objects/enviroments/06/06_conference_chair.glb"
+	var record := {"scene": chair_path, "x": 2.0, "y": -0.0000047, "z": 3.0,
+		"rotation_y": 137.0, "scale_x": 0.8, "scale_y": 0.8, "scale_z": 0.8}
+	objects.call("_apply_layout_data", {"version": 6, "objects": [record]})
+	await process_frame
+	var chairs: Array = (objects.get("placed") as Array).filter(func(node: Node3D) -> bool:
+		return node.get_meta("planning_scene_path", "") == chair_path)
+	_check(chairs.size() == 1, "Legacy map restores its chair")
+	if chairs.is_empty():
+		return
+	_check(chairs[0].position.is_equal_approx(Vector3(2.0, -0.0000047, 3.0)), "Legacy chair keeps its authored height")
+	_check(not chairs[0].has_meta("planning_settled_transform"), "Unsettled chair does not acquire prepared physics")
+	var data: Dictionary = storage.call("_collect_layout_data")
+	objects.call("_apply_layout_data", data)
+	await process_frame
+	_check(LAYOUT_ASSERTIONS.equivalent(storage.call("_collect_layout_data"), data), "Repeated chair load preserves every field")
 
 
 func _check(condition: bool, message: String) -> void:
