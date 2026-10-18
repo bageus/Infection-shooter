@@ -10,7 +10,7 @@ func _initialize() -> void:
 
 func _run() -> void:
 	_test_count_and_retarget()
-	_test_trail_and_pulse()
+	_test_trail()
 	_test_continuous_and_range()
 	await _test_view()
 	await process_frame
@@ -52,7 +52,7 @@ func _test_count_and_retarget() -> void:
 	_check(state.displayed == 79 and not state.active(), "Rapid alternating changes settle on the latest value")
 
 
-func _test_trail_and_pulse() -> void:
+func _test_trail() -> void:
 	for direction in [-1, 1]:
 		var state := STATE.new()
 		state.set_value(50, 100)
@@ -61,11 +61,9 @@ func _test_trail_and_pulse() -> void:
 		state.advance(0.1)
 		_check(state.trail == 50 and state.white_alpha == 1, "White interval has a short hold")
 		state.advance(0.04)
-		_check(is_equal_approx(state.pulse_scale, 1.0 + direction * 0.05), "Pulse peaks at exactly 95 or 105 percent")
 		for i in 80:
 			state.advance(0.02)
-			_check(state.pulse_scale >= 0.95 - 0.00001 and state.pulse_scale <= 1.05 + 0.00001, "Pulse never stacks beyond five percent")
-		_check(state.white_alpha == 0 and state.trail == state.target and state.pulse_scale == 1, "White fades and scale returns exactly to baseline")
+		_check(state.white_alpha == 0 and state.trail == state.target, "White fades back to the current value")
 	var reverse := STATE.new()
 	reverse.set_value(100, 100)
 	reverse.set_value(60, 100)
@@ -81,7 +79,7 @@ func _test_continuous_and_range() -> void:
 		state.advance(1.0 / 60)
 	_check(state.target - state.trail < 1, "Continuous mutation has a bounded trailing band instead of an ever-growing white fill")
 	state.set_value(75, 150)
-	_check(state.displayed == 75 and state.white_alpha == 0 and state.pulse_scale == 1, "Changing maximum health re-syncs without phantom damage")
+	_check(state.displayed == 75 and state.white_alpha == 0, "Changing maximum health re-syncs without phantom damage")
 	state.set_value(999, 150)
 	_check(state.target == 150, "Values are clamped to the actual range")
 	state.set_value(-10, 150)
@@ -127,9 +125,9 @@ func _test_view() -> void:
 	else:
 		print("White pixel assertion deferred to rendered Compatibility/Forward+ CI")
 	view.advance(0.14, Vector2(1, 1.6))
-	_check(bar.scale.is_equal_approx(Vector2(0.95, 1.52)), "Pulse composes with the existing control-loss bar height")
+	_check(bar.scale.is_equal_approx(Vector2(1.0, 1.6)) and label.scale == Vector2.ONE, "Bar size only follows the control-loss base scale, with no growth or shrink on change")
 	var centre := bar.position + bar.size * 0.5
-	_check(is_equal_approx(marker.position.x + marker.size.x * 0.5, centre.x + bar.size.x * 0.2 * bar.scale.x), "Critical marker follows the pulsed bar's actual threshold position")
+	_check(is_equal_approx(marker.position.x + marker.size.x * 0.5, centre.x + bar.size.x * 0.2 * bar.scale.x), "Critical marker follows the bar's actual threshold position")
 	bar.self_modulate.a = 0.2
 	view.advance(0)
 	_check(is_equal_approx(float(view.get("_blink_alpha")), 0.2), "DNA ampule blink is preserved on the white trail")
