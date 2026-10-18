@@ -8,6 +8,8 @@ var display_options: Node
 const LOOT_OPTIONS := preload("res://game/bootstrap/app/planning_loot_options.gd")
 const DOOR_OPTIONS := preload("res://game/bootstrap/app/planning_door_options.gd")
 var loot_options: Node
+const FRUIT_OPTIONS := preload("res://game/bootstrap/app/planning_fruit_options.gd")
+var fruit_options: Node
 var door_options: Node
 const SPAWN_OPTIONS := preload("res://game/bootstrap/app/planning_spawn_options.gd")
 var spawn_options: Node
@@ -92,6 +94,9 @@ func setup_controls() -> void:
 	loot_options = LOOT_OPTIONS.new()
 	add_child(loot_options)
 	loot_options.call("setup", session, objects)
+	fruit_options = FRUIT_OPTIONS.new()
+	add_child(fruit_options)
+	fruit_options.call("setup", session, objects)
 	door_options = DOOR_OPTIONS.new()
 	add_child(door_options)
 	door_options.call("setup", session, objects)
@@ -189,6 +194,7 @@ func _configure_new_asset(node: Node3D, entry: Dictionary) -> void:
 	DECOR_POSES.configure_new(node, objects.preview)
 	display_options.call("configure_new", node)
 	loot_options.call("configure_new", node)
+	fruit_options.call("configure_new", node)
 	spawn_options.call("configure_new", node)
 	fixtures.configure_new_asset(node, entry)
 	if str(entry.get("kind", "")) != "blood" or not node.has_method("configure_blood"):
@@ -266,6 +272,8 @@ func settings_kind(node: Node3D) -> String:
 		return "door"
 	if display_options.applies_to(node):
 		return "display"
+	if fruit_options.applies_to(node):
+		return "fruit"
 	if node.has_method("configure_spawn"):
 		return "spawn"
 	if node.has_method("configure_stats"):
@@ -280,6 +288,8 @@ func _update_light_ui() -> void:
 		display_options.call("update")
 	if loot_options != null:
 		loot_options.call("update")
+	if fruit_options != null:
+		fruit_options.call("update")
 	if door_options != null:
 		door_options.call("update")
 	if spawn_options != null:

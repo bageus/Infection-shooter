@@ -17,6 +17,7 @@ func record_transform(node: Node3D) -> void:
 		"light_color": node.call("get_authored_color") if node.has_method("get_authored_color") else null,
 		"light_energy": node.get_meta("planning_light_energy", -1.0), "light_angle": node.get_meta("planning_light_angle", -1.0),
 		"loot": _loot_of(node), "enemy_stats": node.call("get_enemy_stats") if node.has_method("configure_stats") else {},
+		"fruit": _fruit_of(node),
 		"spawn": _spawn_of(node), "spawn_triggers": node.get_meta(WAVE_DIRECTOR.TRIGGER_META, [])})
 
 
@@ -93,6 +94,7 @@ func undo() -> void:
 						spot.spot_angle = float(action["light_angle"])
 						node.set_meta("planning_light_angle", spot.spot_angle)
 				_apply_loot(node, action.get("loot", {}), action.get("enemy_stats", {}))
+				_apply_fruit(node, action.get("fruit", {}))
 				_apply_spawn(node, action.get("spawn", {}), action.get("spawn_triggers", []))
 				planner._sync_workstations()
 				if planner.selected == node:
@@ -129,7 +131,17 @@ func _capture(node: Node3D) -> Dictionary:
 		"flicker_mode": int(node.get_meta("planning_flicker_mode", 0)), "flicker_step": float(node.get_meta("planning_flicker_step", 0.2)),
 		"blood": node.call("get_blood_config") if node.has_method("get_blood_config") else {},
 		"loot": _loot_of(node), "enemy_stats": node.call("get_enemy_stats") if node.has_method("configure_stats") else {},
+		"fruit": _fruit_of(node),
 		"spawn": _spawn_of(node), "spawn_triggers": node.get_meta(WAVE_DIRECTOR.TRIGGER_META, [])}
+
+
+func _fruit_of(node: Node3D) -> Dictionary:
+	return node.call("get_fruit_config") if node.has_method("has_fruit") and node.call("has_fruit") else {}
+
+
+func _apply_fruit(node: Node3D, fruit: Dictionary) -> void:
+	if node.has_method("configure_fruit") and not fruit.is_empty():
+		node.call("configure_fruit", fruit)
 
 
 func _spawn_of(node: Node3D) -> Dictionary:
@@ -217,6 +229,7 @@ func _restore(record: Dictionary, offset: Vector3, new_desk: bool) -> Node3D:
 	if node.has_method("configure_flicker"):
 		node.call("configure_flicker", int(record["flicker_mode"]), float(record["flicker_step"]))
 	_apply_loot(node, record.get("loot", {}), record.get("enemy_stats", {}))
+	_apply_fruit(node, record.get("fruit", {}))
 	_apply_spawn(node, record.get("spawn", {}), record.get("spawn_triggers", []))
 	if node.has_method("watch_target") and str(record["kind"]) == "enemy":
 		node.call("watch_target", planner.main_player)

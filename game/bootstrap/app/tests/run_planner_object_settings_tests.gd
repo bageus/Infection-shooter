@@ -11,6 +11,7 @@ const CASES := [
 	["desk lamp", "05_lamp.glb", "display"],
 	["crate", "04_crate_small_broken.glb", "loot"],
 	["enemy", "infected_hunger.tscn", "enemy"],
+	["plate", "09_fruit_plate_2.glb", "fruit"],
 ]
 var failures := 0
 var planner: Node
@@ -23,7 +24,7 @@ func _initialize() -> void:
 
 
 # Fixed test placements on the empty fixture floor.
-const SPOTS := [Vector2(470, 230), Vector2(660, 230), Vector2(470, 460), Vector2(660, 460), Vector2(1040, 460), Vector2(960, 560), Vector2(850, 460)]
+const SPOTS := [Vector2(470, 230), Vector2(660, 230), Vector2(470, 460), Vector2(660, 460), Vector2(1040, 460), Vector2(960, 560), Vector2(850, 460), Vector2(1040, 300)]
 
 
 func _run() -> void:
@@ -140,6 +141,7 @@ func _panel_visible(kind: String) -> bool:
 		"door": return controls.door_options.panel.visible
 		"display": return controls.display_options.panel.visible
 		"enemy", "loot": return controls.loot_options.panel.visible
+		"fruit": return controls.fruit_options.panel.visible
 	return false
 
 
@@ -166,6 +168,10 @@ func _edit_and_check(label: String, node: Node3D) -> void:
 			controls.loot_options.mode.select(2)
 			controls.loot_options.mode.item_selected.emit(2)
 			_check(node.get_loot_config()["mode"] == "auto", "Crate loot applies live")
+		"plate":
+			controls.fruit_options.enabled.button_pressed = true
+			controls.fruit_options.count.value = 4
+			_check(node.get_fruit_config()["enabled"] and node.get_fruit_config()["count"] == 4, "Plate fruit applies live")
 		"enemy":
 			controls.loot_options.health.value = 155.0
 			_check(is_equal_approx(float(node.get_enemy_stats()["health"]), 155.0), "Enemy health applies live")
@@ -192,7 +198,9 @@ func _check_persisted() -> void:
 				found["crate"] = node.get_loot_config()["mode"] == "auto" or found.get("crate", false)
 			"enemy":
 				found["enemy"] = is_equal_approx(float(node.get_enemy_stats()["health"]), 155.0) or found.get("enemy", false)
-	for key: String in ["lamp", "door", "desk lamp", "screen", "crate", "enemy"]:
+			"fruit":
+				found["plate"] = (node.get_fruit_config()["enabled"] and node.get_fruit_config()["count"] == 4) or found.get("plate", false)
+	for key: String in ["lamp", "door", "desk lamp", "screen", "crate", "enemy", "plate"]:
 		_check(bool(found.get(key, false)), "Edited %s settings survive save and reload" % key)
 
 
