@@ -90,6 +90,7 @@ func _general() -> void:
 	language.selected = 1 if dialog.view.preferences.values.language == "en" else 0
 	language.item_selected.connect(dialog._language_changed)
 	dialog.call("_row", "language", language)
+	_enemy_modes()
 	var cloud := CheckButton.new()
 	cloud.name = "TestMutagen"
 	cloud.text = dialog.view.text("testMutagen")
@@ -112,6 +113,17 @@ func _general() -> void:
 	dialog.call("_slider", "walkSpeed", "walk_speed_multiplier", 0.5, 1.5, 0.05, "%.2f×")
 	dialog.call("_slider", "walkAnimationSpeed", "walk_animation_multiplier", 0.5, 2.0, 0.05, "%.2f×")
 	notices.set_notice(0, dialog.view.text("testMutagenHint") + "\n\n" + dialog.view.text("walkTuningHint"))
+
+
+func _enemy_modes() -> void:
+	for entry in [["EnemiesIgnorePlayer", "enemiesIgnorePlayer", "enemies_ignore_player"], ["EnemiesNoDamage", "enemiesNoDamage", "enemies_no_damage"]]:
+		var toggle := CheckButton.new()
+		toggle.name = entry[0]
+		toggle.text = dialog.view.text(entry[1])
+		toggle.tooltip_text = dialog.view.text(entry[1] + "Hint")
+		toggle.button_pressed = bool(dialog.view.preferences.values[entry[2]])
+		toggle.toggled.connect(func(value: bool) -> void: dialog.call("_change", entry[2], value))
+		dialog.get("layout").add_child(toggle)
 
 
 func _video() -> void:
@@ -138,6 +150,13 @@ func _video() -> void:
 	skill_effects.selected = dialog.view.preferences.values.skill_effects
 	skill_effects.item_selected.connect(func(index: int) -> void: dialog.call("_change", "skill_effects", index))
 	dialog.call("_row", "skillEffects", skill_effects)
+	var blood_style := OptionButton.new()
+	blood_style.name = "BloodStyle"
+	blood_style.add_item(dialog.view.text("bloodStyleAssets"))
+	blood_style.add_item(dialog.view.text("bloodStyleProcedural"))
+	blood_style.selected = dialog.view.preferences.values.blood_style
+	blood_style.item_selected.connect(func(index: int) -> void: dialog.call("_change", "blood_style", index))
+	dialog.call("_row", "bloodStyle", blood_style)
 	var lighting := CheckButton.new()
 	lighting.name = "Lighting"
 	lighting.text = dialog.view.text("lighting")

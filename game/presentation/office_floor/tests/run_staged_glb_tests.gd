@@ -81,7 +81,16 @@ func _test_reception(stage: Node3D) -> void:
 	var setup := await _spawn(stage, RECEPTION, Vector3(-8, 0, 0))
 	var prop: RigidBody3D = setup[0]
 	var effects: Node3D = setup[1]
+	_expect(prop.freeze, "The reception core is anchored before damage.")
+	var placement := prop.global_transform
+	prop.call("push_from_character", prop.global_position + Vector3.BACK, Vector3.FORWARD, 100.0)
+	prop.call("take_projectile_hit", 1.0, prop.global_position + Vector3.UP * 0.5, Vector3.UP, Vector3.RIGHT, "UZI")
+	prop.apply_central_impulse(Vector3(1200, 300, -400))
+	for tick in 12:
+		await physics_frame
+	_expect(prop.global_transform.is_equal_approx(placement), "Characters, bullets and external blast impulses cannot move the reception.")
 	await _break(prop)
+	_expect(prop.freeze and prop.global_transform.is_equal_approx(placement), "Facade destruction keeps the reception core anchored.")
 	var facade := prop.get_node("Visual").get_node_or_null("DamageReady") as Node3D
 	_expect(facade != null and facade.visible and facade.scale == Vector3.ONE, "The reception counter keeps its core and shows the chip-ready facade.")
 	var chip: MeshInstance3D
@@ -95,6 +104,7 @@ func _test_reception(stage: Node3D) -> void:
 		prop.call("take_projectile_hit", 20.0, point, Vector3.UP, Vector3.FORWARD, "PISTOL")
 		await process_frame
 		_expect(not chip.visible and _find_fragment(effects, "Fragment_Facade_Chip") != null, "A shot facade chip breaks off.")
+	_expect(prop.freeze and prop.global_transform.is_equal_approx(placement), "Chipping the facade preserves the anchored core.")
 	await _clear(prop, effects)
 
 

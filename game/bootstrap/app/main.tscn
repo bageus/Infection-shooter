@@ -387,39 +387,60 @@ text = "Select an object"
 clip_text = true
 text_overrun_behavior = 3
 
-[node name="MapManager" type="VBoxContainer" parent="PlanningUI/Panel/VBox" unique_id=390232533]
+[node name="RightPanel" type="ScrollContainer" parent="PlanningUI"]
+z_index = 10
+layout_mode = 1
+anchors_preset = 11
+anchor_left = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = -336.0
+offset_top = 52.0
+offset_right = -8.0
+offset_bottom = -8.0
+grow_horizontal = 0
+grow_vertical = 2
+horizontal_scroll_mode = 0
+
+[node name="VBox" type="VBoxContainer" parent="PlanningUI/RightPanel"]
+custom_minimum_size = Vector2(310, 0)
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_constants/separation = 5
+
+[node name="MapManager" type="VBoxContainer" parent="PlanningUI/RightPanel/VBox" unique_id=390232533]
 layout_mode = 2
 theme_override_constants/separation = 6
 
-[node name="Title" type="Label" parent="PlanningUI/Panel/VBox/MapManager" unique_id=516061365]
+[node name="Title" type="Label" parent="PlanningUI/RightPanel/VBox/MapManager" unique_id=516061365]
 layout_mode = 2
 text = "MAPS"
 horizontal_alignment = 1
 
-[node name="Name" type="LineEdit" parent="PlanningUI/Panel/VBox/MapManager" unique_id=16376107]
+[node name="Name" type="LineEdit" parent="PlanningUI/RightPanel/VBox/MapManager" unique_id=16376107]
 layout_mode = 2
 text = "default"
 placeholder_text = "Map name"
 
-[node name="Maps" type="OptionButton" parent="PlanningUI/Panel/VBox/MapManager" unique_id=878350764]
+[node name="Maps" type="OptionButton" parent="PlanningUI/RightPanel/VBox/MapManager" unique_id=878350764]
 layout_mode = 2
 tooltip_text = "Saved maps"
 
-[node name="Buttons" type="HBoxContainer" parent="PlanningUI/Panel/VBox/MapManager" unique_id=138712479]
+[node name="Buttons" type="HBoxContainer" parent="PlanningUI/RightPanel/VBox/MapManager" unique_id=138712479]
 layout_mode = 2
 theme_override_constants/separation = 6
 
-[node name="SaveMap" type="Button" parent="PlanningUI/Panel/VBox/MapManager/Buttons" unique_id=1683453220]
+[node name="SaveMap" type="Button" parent="PlanningUI/RightPanel/VBox/MapManager/Buttons" unique_id=1683453220]
 layout_mode = 2
 size_flags_horizontal = 3
 text = "SAVE MAP"
 
-[node name="LoadMap" type="Button" parent="PlanningUI/Panel/VBox/MapManager/Buttons" unique_id=2119823752]
+[node name="LoadMap" type="Button" parent="PlanningUI/RightPanel/VBox/MapManager/Buttons" unique_id=2119823752]
 layout_mode = 2
 size_flags_horizontal = 3
 text = "LOAD MAP"
 
-[node name="Save" type="Button" parent="PlanningUI/Panel/VBox" unique_id=1267612715]
+[node name="Save" type="Button" parent="PlanningUI/RightPanel/VBox" unique_id=1267612715]
 custom_minimum_size = Vector2(0, 32)
 layout_mode = 2
 text = "SAVE LAYOUT"
@@ -440,9 +461,9 @@ layout_mode = 1
 anchors_preset = 1
 anchor_left = 1.0
 anchor_right = 1.0
-offset_left = -285.0
+offset_left = -620.0
 offset_top = 24.0
-offset_right = -24.0
+offset_right = -344.0
 offset_bottom = 390.0
 grow_horizontal = 0
 mouse_filter = 2

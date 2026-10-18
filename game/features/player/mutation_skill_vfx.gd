@@ -34,7 +34,11 @@ const OVERLAY_FADE_SPEED := 3.0
 var player: Node3D
 var effects_root: Node3D
 ## true: self-made procedural effects instead of the sprite sheets.
-var procedural := false
+var _requested_procedural := false
+var _missing_skill_sheets := false
+var procedural: bool:
+	get: return _requested_procedural or _missing_skill_sheets
+	set(value): _requested_procedural = value
 var _loops := {}
 var _domes := {}
 var _skin: ShaderMaterial
@@ -50,6 +54,8 @@ var _shield_ready := 0.0
 func setup(host: Node3D) -> void:
 	name = "SkillVfx"
 	player = host
+	for atlas: Dictionary in [ATLASES.SPIKE_BURST, ATLASES.ELECTRIC_PULSE, ATLASES.CHAIN_LIGHTNING, ATLASES.ACID_PUDDLES, ATLASES.SPORE_COCOON, ATLASES.ENERGY_SHIELD, ATLASES.HEARTBEAT, ATLASES.ELECTRIC_FIELD, ATLASES.BLADE_ORBIT]:
+		_missing_skill_sheets = _missing_skill_sheets or not ATLASES.available(atlas)
 	_build_skin()
 	_build_eyes()
 	set_process(false)

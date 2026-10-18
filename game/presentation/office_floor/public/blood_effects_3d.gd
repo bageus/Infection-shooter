@@ -26,8 +26,9 @@ const SIDE_SPLATTER_ANGLES := [-1.3, -0.6, 0.6, 1.3]
 @export_flags_3d_physics var surface_collision_mask := 128
 @export_flags_3d_render var receiver_visual_mask := 128
 @export var distance_fade := true
-@export var fade_begin := 24.0
-@export var fade_length := 12.0
+## Camera zoom reaches 24 m, so marks at the edge of the view must not fade yet.
+@export var fade_begin := 40.0
+@export var fade_length := 20.0
 @export_range(1, 6) var mobile_per_surface_limit := 6
 @export_range(128, 1024) var texture_max_dimension := 512
 @export_range(0.8, 1.5) var blood_brightness := 1.18
@@ -36,6 +37,7 @@ const SIDE_SPLATTER_ANGLES := [-1.3, -0.6, 0.6, 1.3]
 @export var floor_bake_enabled := true
 
 var _library := LIBRARY.new()
+var _procedural_blood := false
 var _surfaces: Node3D
 var _budget: Node3D
 var _decal := false
@@ -56,7 +58,7 @@ func _ready() -> void:
 	_diagnostics = {"version": 1, "engine": Engine.get_version_info().get("string", "unknown"), "renderer": method, "api_valid": _verify_engine_api()}
 	_decal = method in ["forward_plus", "mobile"]
 	if preload_textures:
-		_library.load_assets(texture_max_dimension, blood_brightness)
+		_library.load_assets(texture_max_dimension, blood_brightness, _procedural_blood)
 	_surfaces = SURFACES.new() as Node3D
 	_surfaces.set("collision_mask", surface_collision_mask)
 	_surfaces.set("visual_mask", receiver_visual_mask)
@@ -117,6 +119,16 @@ func configure_world(_container: Node3D, impacts: Node) -> void:
 	if _budget != null:
 		var settings: Dictionary = _budget.get("settings")
 		settings["projection_pool"] = weakref(impacts) if impacts != null else null
+
+
+# Settings: own procedural blood frames instead of the atlas textures. Marks
+# already on screen keep their texture; new marks use the chosen set.
+func set_procedural_blood(enabled: bool) -> void:
+	if enabled == _procedural_blood:
+		return
+	_procedural_blood = enabled
+	_library = LIBRARY.new()
+	_library.load_assets(texture_max_dimension, blood_brightness, enabled)
 
 
 func movement_spacing() -> float:

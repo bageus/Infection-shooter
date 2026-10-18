@@ -188,12 +188,13 @@ func _ready() -> void:
 	_reaction.setup(self, visual)
 	_geometry.prepare_stages(model_path)
 	_damage.configure(model_path.get_file(), _variants.size(), not _stages.is_empty())
-	# Architectural pieces and carpets stay anchored; all other groups are movable.
+	# Architectural pieces, carpets and the reception core stay anchored.
 	# A wall item that a shot tears loose (extinguisher, TV, clock) switches to dynamic mid-game.
 	# From a static body that costs Jolt ~80 ms (broadphase re-insert); from a kinematic one it is free.
 	if wall_mounted:
 		freeze_mode = RigidBody3D.FREEZE_MODE_KINEMATIC
-	freeze = wall_mounted or model_path.begins_with("res://models/objects/enviroments/01/")
+	freeze = (wall_mounted or model_path.begins_with("res://models/objects/enviroments/01/")
+		or model_path.get_file() == "07_reception_counter_two_heights_2.glb")
 	if freeze and "01_floor_" in model_path:
 		var shadow := CARPET_SHADOW.new()
 		shadow.name = "CarpetShadow"
@@ -326,6 +327,8 @@ func take_projectile_hit(damage: float, hit_position: Vector3, _normal: Vector3,
 	if PAPER.is_paper(model_path) and not BOOK_STACK.contains(model_path):
 		_tear_paper(hit_position, direction)
 		return false
+	if damage > 0.0 and is_instance_valid(glass_debris_floor) and has_display():
+		glass_debris_floor.call("bake_display_hit", self, hit_position, _normal)
 	if _damage.category == "tech":
 		if damage > 0.0 and model_path.get_file() == "05_lamp.glb":
 			_put_out_lamp()

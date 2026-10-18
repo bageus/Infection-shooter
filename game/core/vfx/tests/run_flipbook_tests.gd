@@ -67,7 +67,7 @@ func _run() -> void:
 	await create_timer(0.3).timeout
 	_expect(not is_instance_valid(looping), "stop() fades a looping flipbook out.")
 	await _check_cycle_and_ground(stage)
-	_check_skill_sheets()
+	_check_skill_sheets(stage)
 	stage.queue_free()
 	await process_frame
 	print("Flipbook tests: %d failure(s)." % failures)
@@ -97,9 +97,11 @@ func _check_cycle_and_ground(stage: Node3D) -> void:
 	_expect(not is_instance_valid(ring), "stop() ends a cycling flipbook.")
 
 
-func _check_skill_sheets() -> void:
+func _check_skill_sheets(stage: Node3D) -> void:
 	for atlas: Dictionary in [ATLASES.ELECTRIC_FIELD, ATLASES.CLAW_SLASH, ATLASES.ELECTRIC_PULSE, ATLASES.SPIKE_BURST, ATLASES.ENERGY_SHIELD, ATLASES.CHAIN_LIGHTNING, ATLASES.SPORE_COCOON, ATLASES.BLADE_ORBIT, ATLASES.STUN_STARS, ATLASES.ACID_PUDDLES, ATLASES.HEARTBEAT]:
-		_expect(ATLASES.available(atlas), "Skill sheet is in the project: " + str(atlas["path"]))
+		if not ATLASES.available(atlas):
+			_expect(FLIPBOOK.spawn(stage, atlas, Vector3.ZERO, 1.0) == null, "Retired optional skill sheets fail safely; gameplay uses procedural effects.")
+			continue
 		var texture := load(str(atlas["path"])) as Texture2D
 		var cell := Vector2(texture.get_width() / float(atlas["columns"]), texture.get_height() / float(atlas["rows"]))
 		_expect(absf(cell.x / cell.y - float(atlas.get("cell_aspect", 1.0))) < 0.05, "Skill sheet grid matches its cells: " + str(atlas["path"]))

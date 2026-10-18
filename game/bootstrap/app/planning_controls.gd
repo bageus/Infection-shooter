@@ -1,5 +1,6 @@
 extends Node
 
+const SURFACE_OPTIONS := preload("res://game/bootstrap/app/planning_surface_decal_options.gd")
 const DECOR_POSES := preload("res://game/bootstrap/app/planning_decor_poses.gd")
 const COLOR_POPUP := preload("res://game/bootstrap/app/planner_color_popup.gd")
 const DISPLAY_OPTIONS := preload("res://game/bootstrap/app/planning_display_options.gd")
@@ -106,6 +107,9 @@ func setup_controls() -> void:
 		box.move_child(box.get_node(control_name), palette.get_index())
 	_build_gore_controls()
 	_build_planning_toolbar()
+	var surface_options := SURFACE_OPTIONS.new()
+	add_child(surface_options)
+	surface_options.setup(session)
 
 
 # Gore and Blood palettes (ADR-0017): dead infected, loose body parts and

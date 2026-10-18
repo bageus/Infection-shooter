@@ -21,8 +21,9 @@ func _run() -> void:
 	_expect(not fx.is_processing(), "The status node is idle while nothing shows.")
 	enemy.call("apply_blast_stun", 0.4, 1.0)
 	_expect(fx.call("is_showing_stun"), "A stunned infected gets circling stars.")
-	var stars := enemy.find_child("Flipbook", false, false) as Node3D
+	var stars := enemy.find_child("StunStars", false, false) as Node3D
 	_expect(stars != null and stars.global_position.y > enemy.global_position.y + 1.0, "The stars circle above the head.")
+	_expect(stars != null and stars.get_child_count() == 3, "Stun has three procedural stars without an atlas.")
 	enemy.call("apply_mutation_poison", 0.5, 0.0)
 	_expect(fx.call("is_showing_poison"), "A poisoned infected takes a green tint.")
 	var tinted := 0

@@ -19,6 +19,10 @@ uniform sampler2D surface_noise : hint_default_white, filter_linear_mipmap, repe
 uniform sampler2D detail_noise : hint_default_white, filter_linear_mipmap, repeat_enable;
 uniform bool glass_enabled = false;
 uniform sampler2D glass_debris : source_color, filter_linear, repeat_disable;
+uniform bool has_floor_damage = false;
+uniform bool has_floor_scuff = false;
+uniform sampler2D floor_damage : source_color, filter_linear, repeat_disable;
+uniform sampler2D floor_scuff : source_color, filter_linear, repeat_disable;
 uniform sampler2D debris_roughness : filter_linear, repeat_disable;
 uniform vec2 glass_origin = vec2(0.0);
 uniform mat4 glass_world_to_floor;
@@ -82,6 +86,12 @@ void fragment() {
 	CLEARCOAT = clearcoat_amount * (1.0 - wear * 0.7) * (1.0 - max(grout, bevel * 0.5));
 	CLEARCOAT_ROUGHNESS = mix(0.45, 0.7, wear);
 	if (glass_enabled) {
+		vec4 damage = has_floor_damage ? texture(floor_damage, glass_uv) : vec4(0.0);
+		vec4 scuff = has_floor_scuff ? texture(floor_scuff, glass_uv) : vec4(0.0);
+		ALBEDO = mix(ALBEDO, damage.rgb, damage.a * floor_top);
+		ROUGHNESS = mix(ROUGHNESS, 0.94, damage.a * floor_top);
+		ALBEDO = mix(ALBEDO, scuff.rgb, scuff.a * floor_top);
+		ROUGHNESS = mix(ROUGHNESS, 0.88, scuff.a * floor_top);
 		vec4 debris = texture(glass_debris, glass_uv);
 		float coverage = debris.a * floor_top;
 		ALBEDO = mix(ALBEDO, debris.rgb, coverage);
