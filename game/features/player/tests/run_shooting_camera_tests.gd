@@ -30,26 +30,29 @@ func _test_envelope() -> void:
 	var heavy := STATE.new()
 	light.shot("PISTOL")
 	heavy.shot("SNIPER RIFLE")
-	_check(is_equal_approx(light.offset, 0.005), "First light shot targets 0.5 percent")
+	_check(is_equal_approx(light.offset, 0.01), "First light shot targets 1 percent")
 	_check(heavy.offset > light.offset, "Powerful weapons have a larger first impulse")
 	for weapon in STATE.IMPULSES:
 		var state := STATE.new()
 		var previous := 0.0
 		for i in 100:
 			state.shot(weapon)
-			_check(state.offset >= previous and state.offset <= 0.03, "Repeated shots accumulate with a hard three percent cap")
+			_check(state.offset >= previous and state.offset <= STATE.MAX_OFFSET, "Repeated shots accumulate with a hard six percent cap")
 			previous = state.offset
 			state.tick(0.04)
-		state.tick(0.25)
-		_check(is_equal_approx(state.offset, 0.03), "Short gaps do not cause zoom pumping")
+		_check(is_equal_approx(state.offset, STATE.MAX_OFFSET), "Sustained fire reaches the cap without recovering in between")
 		state.tick(3.0)
 		_check(is_zero_approx(state.offset), "Stopped firing returns exactly to baseline")
+	var quick := STATE.new()
+	quick.shot("SNIPER RIFLE")
+	quick.tick(0.3)
+	_check(quick.offset < 0.01, "A single sniper pull-back snaps back within a third of a second")
 	var coarse := STATE.new()
 	var fine := STATE.new()
 	coarse.shot("SHOTGUN")
 	fine.shot("SHOTGUN")
-	coarse.tick(0.8)
-	for i in 80:
+	coarse.tick(0.1)
+	for i in 10:
 		fine.tick(0.01)
 	_check(is_equal_approx(coarse.offset, fine.offset), "Hold expiry and recovery are independent of frame rate")
 
@@ -86,8 +89,8 @@ func _test_player() -> void:
 			for i in 60:
 				state.shot("PISTOL")
 				player._update_camera(1.0 / 60.0)
-				_check(player.camera.position.length() <= baseline * 1.03 + 0.00001, "Camera stays inside 3 percent of manual zoom plus weapon bonus")
-			_check(player.camera.position.length() > baseline * 1.029, "Smoothed camera reaches the readable maximum")
+				_check(player.camera.position.length() <= baseline * (1.0 + STATE.MAX_OFFSET) + 0.00001, "Camera stays inside the shot cap of manual zoom plus weapon bonus")
+			_check(player.camera.position.length() > baseline * (1.0 + STATE.MAX_OFFSET - 0.001), "Smoothed camera reaches the readable maximum")
 			for i in 360:
 				player._update_camera(1.0 / 60.0)
 			_check(absf(player.camera.position.length() - baseline) < 0.002, "Camera recovers while preserving selected weapon bonus")
