@@ -5,6 +5,9 @@ const SFX := preload("res://game/core/audio/public/sound_events.gd")
 const MAX_CASINGS := 40
 const LIFETIME_MSEC := 60000
 const CASING_SCALE := 3.0
+# Resting casings keep a solver-driven spin (~2 rad/s) that never sleeps the body,
+# so a casing that has landed and nearly stopped is frozen in place.
+const SETTLE_LINEAR_SPEED := 0.15
 
 var _casings: Array[RigidBody3D] = []
 var _born_at: Array[int] = []
@@ -36,6 +39,8 @@ func spawn_casing(model: PackedScene, eject_transform: Transform3D, radius: floa
 	body.collision_mask = 1
 	body.mass = 0.012
 	body.continuous_cd = true
+	body.contact_monitor = true
+	body.max_contacts_reported = 1
 	body.linear_damp = 0.4
 	body.angular_damp = 1.1
 	if _surface == null:
@@ -97,6 +102,13 @@ func _process(delta: float) -> void:
 		_cleanup()
 
 
+func _freeze_if_settled(body: RigidBody3D) -> void:
+	if body.freeze or body.linear_velocity.length() >= SETTLE_LINEAR_SPEED or body.get_colliding_bodies().is_empty():
+		return
+	body.angular_velocity = Vector3.ZERO
+	body.freeze = true
+
+
 func _cleanup() -> void:
 	var now := Time.get_ticks_msec()
 	for index in range(_casings.size() - 1, -1, -1):
@@ -107,6 +119,8 @@ func _cleanup() -> void:
 			_casings[index].queue_free()
 			_casings.remove_at(index)
 			_born_at.remove_at(index)
+		else:
+			_freeze_if_settled(_casings[index])
 	while _casings.size() > MAX_CASINGS:
 		var oldest: RigidBody3D = _casings.pop_front()
 		_born_at.pop_front()
