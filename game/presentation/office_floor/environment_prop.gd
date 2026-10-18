@@ -203,8 +203,10 @@ func _ready() -> void:
 	# From a static body that costs Jolt ~80 ms (broadphase re-insert); from a kinematic one it is free.
 	if wall_mounted:
 		freeze_mode = RigidBody3D.FREEZE_MODE_KINEMATIC
+	# Server racks weigh 120-260 kg and stay in place, also after a shot breaks them open.
 	freeze = (wall_mounted or model_path.begins_with("res://models/objects/enviroments/01/")
-		or model_path.get_file() == "07_reception_counter_two_heights_2.glb")
+		or model_path.get_file() == "07_reception_counter_two_heights_2.glb"
+		or "server_rack" in model_path.get_file())
 	if freeze and "01_floor_" in model_path:
 		var shadow := CARPET_SHADOW.new()
 		shadow.name = "CarpetShadow"
