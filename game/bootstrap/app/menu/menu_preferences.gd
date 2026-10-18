@@ -12,7 +12,7 @@ const DEFAULTS := {"window_mode": 0, "resolution": "1280x720", "language": "ru",
 	"enemies_ignore_player": false, "enemies_no_damage": false,
 	"walk_speed_multiplier": 1.0, "walk_animation_multiplier": 1.0,
 	"volume": 0.4, "effects_volume": 1.0, "music_volume": 1.0, "menu_music": true, "menu_music_volume": 1.0, "sound": true, "occlusion_mode": 0, "test_mutagen": false, "infinite_antidotes": false, "lighting": true, "game_lights_only": false, "electronic_particles": true, "blood_style": 0, "dodge_animation": 0,
-	"bullet_impact_smoke": true, "sunlight": true, "shadows": true, "shadow_quality": 2, "mesh_lod": true, "keep_corpses": true}
+	"bullet_impact_smoke": true, "sunlight": true, "shadows": true, "shadow_quality": 2, "mesh_lod": true, "keep_corpses": true, "floor_hints": true}
 var values: Dictionary = DEFAULTS.duplicate()
 
 
@@ -92,6 +92,8 @@ func apply_to_game(tree: SceneTree, display_user_action: bool = false) -> void:
 		scene.call("set_test_mutagen_enabled", bool(values.test_mutagen))
 	if scene != null and scene.has_method("set_infinite_antidotes_enabled"):
 		scene.call("set_infinite_antidotes_enabled", bool(values.infinite_antidotes))
+	if scene != null and scene.has_method("set_floor_hints_enabled"):
+		scene.call("set_floor_hints_enabled", bool(values.floor_hints))
 	if scene != null and scene.has_method("set_procedural_blood"):
 		scene.call("set_procedural_blood", int(values.blood_style) == 1)
 	if scene != null and scene.has_method("set_dodge_animation_style"):

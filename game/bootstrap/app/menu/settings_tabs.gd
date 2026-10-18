@@ -110,6 +110,13 @@ func _general() -> void:
 	antidotes.button_pressed = dialog.view.preferences.values.infinite_antidotes
 	antidotes.toggled.connect(func(value: bool) -> void: dialog.call("_change", "infinite_antidotes", value))
 	dialog.get("layout").add_child(antidotes)
+	var floor_hints := CheckButton.new()
+	floor_hints.name = "FloorHints"
+	floor_hints.text = dialog.view.text("floorHints")
+	floor_hints.tooltip_text = dialog.view.text("floorHintsHint")
+	floor_hints.button_pressed = dialog.view.preferences.values.floor_hints
+	floor_hints.toggled.connect(func(value: bool) -> void: dialog.call("_change", "floor_hints", value))
+	dialog.get("layout").add_child(floor_hints)
 	var dodge := OptionButton.new()
 	dodge.name = "DodgeAnimation"
 	dodge.add_item(dialog.view.text("dodgeAnimationRoll"))
