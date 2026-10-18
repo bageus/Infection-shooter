@@ -46,5 +46,17 @@
     "job": "runtime",
     "mode": "native",
     "reason": "Профиль настоящих теней в Compatibility/Forward+; headless не проверяет пиксели."
+  },
+  "game/presentation/office_floor/tests/run_baked_surface_decal_tests.gd": {
+    "workflow": ".github/workflows/mission_runtime.yml",
+    "job": "runtime",
+    "mode": "native",
+    "reason": "Цикл рендера декалей в Compatibility/Forward+ внутри runtime job."
+  },
+  "game/bootstrap/app/tests/run_surface_decal_options_tests.gd": {
+    "workflow": ".github/workflows/mission_runtime.yml",
+    "job": "runtime",
+    "mode": "native",
+    "reason": "Параметры декалей в цикле рендера runtime job."
   }
 }

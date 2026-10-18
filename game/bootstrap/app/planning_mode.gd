@@ -88,9 +88,9 @@ func setup(app_owner: Node3D, planning_root: Node3D, planning_ui: Control, load_
 	for group_name in ["01","02","03","04","05","06","07","08","09","10","11","12","13"]:
 		var button := ui.get_node("Panel/VBox/GroupTabs/G" + group_name) as Button
 		button.pressed.connect(controls._show_structure_group.bind(group_name))
-	ui.get_node("Panel/VBox/MapManager/Buttons/SaveMap").pressed.connect(storage.save_named_map)
-	ui.get_node("Panel/VBox/MapManager/Buttons/LoadMap").pressed.connect(storage.load_selected_map)
-	ui.get_node("Panel/VBox/Save").pressed.connect(storage.save_layout)
+	ui.get_node("RightPanel/VBox/MapManager/Buttons/SaveMap").pressed.connect(storage.save_named_map)
+	ui.get_node("RightPanel/VBox/MapManager/Buttons/LoadMap").pressed.connect(storage.load_selected_map)
+	ui.get_node("RightPanel/VBox/Save").pressed.connect(storage.save_layout)
 	ui.get_node("Panel/VBox/Clear").pressed.connect(objects.clear_layout)
 	ui.get_node("Panel/VBox/Close").pressed.connect(exit)
 	ui.hide()

@@ -60,6 +60,10 @@
     "bullet_smoke_v1": {
       "bullet_smoke_enabled": "bool = true; disabling removes live bullet dust immediately; no effect on marks or other FX",
       "spawn_bullet_smoke": "spawn_bullet_smoke(point: Vector3, normal: Vector3) -> void; call only after confirmed bullet mark projection; mission-local 16 emitter / 2 per physics frame cap"
+    },
+    "baked_surface_v1": {
+      "callbacks": "Optional surface_hit Callable(collider, point, normal, weapon, anchor)->bool and surface_step Callable(point, normal), injected by bootstrap, no concrete presentation dependency.",
+      "commands": "bake_surface_hit forwards confirmed bullet/blast impact; false preserves legacy standalone projected-mark fallback. request_surface_step(CharacterBody3D) reports support geometry after at most2 ground rays/physics frame, using existing configure_world injection."
     }
   }
 }

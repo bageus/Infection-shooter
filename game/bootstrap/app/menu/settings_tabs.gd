@@ -97,6 +97,7 @@ func _general() -> void:
 	scale.selected = [1.0, 1.15, 1.3].find(dialog.view.preferences.values.text_scale)
 	scale.item_selected.connect(dialog._scale_changed)
 	dialog.call("_row", "scale", scale)
+	_enemy_modes()
 	var cloud := CheckButton.new()
 	cloud.name = "TestMutagen"
 	cloud.text = dialog.view.text("testMutagen")
@@ -121,6 +122,17 @@ func _general() -> void:
 	notices.set_notice(0, dialog.view.text("testMutagenHint") + "\n\n" + dialog.view.text("walkTuningHint"))
 
 
+func _enemy_modes() -> void:
+	for entry in [["EnemiesIgnorePlayer", "enemiesIgnorePlayer", "enemies_ignore_player"], ["EnemiesNoDamage", "enemiesNoDamage", "enemies_no_damage"]]:
+		var toggle := CheckButton.new()
+		toggle.name = entry[0]
+		toggle.text = dialog.view.text(entry[1])
+		toggle.tooltip_text = dialog.view.text(entry[1] + "Hint")
+		toggle.button_pressed = bool(dialog.view.preferences.values[entry[2]])
+		toggle.toggled.connect(func(value: bool) -> void: dialog.call("_change", entry[2], value))
+		dialog.get("layout").add_child(toggle)
+
+
 func _video() -> void:
 	preload("res://game/bootstrap/app/menu/display_options.gd").build(dialog)
 	dialog.call("_slider", "brightness", "brightness", .8, 1.4, .05)
@@ -131,6 +143,13 @@ func _video() -> void:
 	occlusion.selected = dialog.view.preferences.values.occlusion_mode
 	occlusion.item_selected.connect(func(index: int) -> void: dialog.call("_change", "occlusion_mode", index))
 	dialog.call("_row", "occlusion", occlusion)
+	var blood_style := OptionButton.new()
+	blood_style.name = "BloodStyle"
+	blood_style.add_item(dialog.view.text("bloodStyleAssets"))
+	blood_style.add_item(dialog.view.text("bloodStyleProcedural"))
+	blood_style.selected = dialog.view.preferences.values.blood_style
+	blood_style.item_selected.connect(func(index: int) -> void: dialog.call("_change", "blood_style", index))
+	dialog.call("_row", "bloodStyle", blood_style)
 	var lighting := CheckButton.new()
 	lighting.name = "Lighting"
 	lighting.text = dialog.view.text("lighting")

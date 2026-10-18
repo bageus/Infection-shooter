@@ -84,16 +84,18 @@ func _ready() -> void:
 		_authored_muzzle = ART_SETUP.configure(self, model, weapon_name in ["SHOTGUN", "GRENADE LAUNCHER", "AK", "M4", "SNIPER RIFLE", "MINIGUN"])
 		if weapon_name == "MINIGUN":
 			_barrel_cluster = model.find_child("BarrelCluster", true, false) as Node3D
-	if spin_up_time > 0.0:
+	if spin_up_time > 0.0 and ResourceLoader.exists(SPIN_LOOP):
 		# The whine loops while the barrels turn and fades with them.
+		# A missing or unreadable file only silences the whine; the weapon still works.
 		var loop := load(SPIN_LOOP) as AudioStreamOggVorbis
-		loop.loop = true
-		_spin_sound = AudioStreamPlayer3D.new()
-		_spin_sound.stream = loop
-		_spin_sound.unit_size = 8.0
-		_spin_sound.max_distance = 60.0
-		_spin_sound.volume_db = -60.0
-		add_child(_spin_sound)
+		if loop != null:
+			loop.loop = true
+			_spin_sound = AudioStreamPlayer3D.new()
+			_spin_sound.stream = loop
+			_spin_sound.unit_size = 8.0
+			_spin_sound.max_distance = 60.0
+			_spin_sound.volume_db = -60.0
+			add_child(_spin_sound)
 func _process(delta: float) -> void:
 	_noise_wait = maxf(0.0, _noise_wait - delta)
 	_spin_hold = maxf(0.0, _spin_hold - delta)

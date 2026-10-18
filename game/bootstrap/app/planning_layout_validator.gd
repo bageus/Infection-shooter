@@ -1,11 +1,14 @@
 extends RefCounted
 ## Validate saved map structure before touching the live world.
+const SURFACE_CONFIG := preload("res://game/presentation/office_floor/public/surface_decal_config.gd")
 const PHYSICS_FORMAT := preload("res://game/bootstrap/app/planning_physics_format.gd")
 const NUMBERS := ["x", "y", "z", "rotation_x", "rotation_y", "rotation_z", "scale_x", "scale_y", "scale_z", "zone", "light_energy", "light_angle", "energy_multiplier", "flicker_mode", "flicker_step", "darkness", "spawn_x", "spawn_y", "spawn_z"]
 const DOOR_OPTIONS := preload("res://game/bootstrap/app/planning_door_options.gd")
 
 
 static func error(data: Dictionary) -> String:
+	if data.has("surface_decals_v1") and not SURFACE_CONFIG.valid(data.surface_decals_v1):
+		return "invalid surface_decals_v1"
 	if not data.get("objects") is Array:
 		return "objects must be an array"
 	if data.has("version"):

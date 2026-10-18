@@ -7,6 +7,9 @@ owner: AI
 updated: 2026-10-18
 ---
 
+18.10.2026 (конструктор уровней — прямой запрос владельца): правый HUD планировщика (карты, SAVE LAYOUT, цепочка карт, два входа на карту: нет/потолок/пол, переход через загрузку карты), additive level_chain_v1 в user://level_chain.json, карты/DTO не менялись. Тесты run_level_chain/planning_mode/named_map_loading/planner_persistence/layout_loading PASS, project gates PASS. Следующее действие — ручная проверка перехода по лестнице на Windows/Web.
+
+
 18.10.2026 (материалы мусора — проверено): headless material_floor_debris, glass_floor_debris, office_breakage, staged_glb, glass_crack, blast_break, debris, electronics_hit, destruction_fixes, prop_weight — PASS. Полная world_bindings сцена обнаружила typed-empty Array на nonscreen tech: исправлено явными return, regression добавлен; окончательный world_bindings PASS без SCRIPT ERROR. Реальные legacy/staged tables, monitor/TV, book/binder/cardboard/armchair/extinguisher hooks проверены. Native material+glass suites PASS в Compatibility/OpenGL и настоящем Forward+/Vulkan llvmpipe, screenshot всех7материалов просмотрен; native audio cleanup fixture ждёт release playback перед exit. Editor import0 без ошибок/утечек; project/spec/workflow/architecture/source-size/CI175 registrations/383 scene refs/diff PASS. environment_prop580/staged_table419 reviewed как adapters, helpers разделены по source/recipe/history/placement, исключений нет. ADR0058/manifest floor_debris_v2 и QA обновлены; save/maps/owners/edges не менялись. Публикация ветки и PR явно поручена, merge не поручен. Следующее точное действие — проверить CI PR feat/material-debris-floor и провести ручную Iris Xe/Web приёмку; hardware FPS не подтверждён.
 
 

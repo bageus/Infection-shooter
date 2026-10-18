@@ -186,14 +186,11 @@ func configure_visual_preparation(budget: Node) -> void:
 
 # Forces the chase: the infected knows where the player is (spawners, summons).
 func set_target(target: Node3D) -> void:
-	_target = target
-	_senses.force_chase()
+	_senses.assign_target(self, target, true)
 
 
 func watch_target(target: Node3D) -> void:
-	_target = target
-	_senses.sight_range = sight_range
-	_senses.watch()
+	_senses.assign_target(self, target, false)
 
 
 func is_alerted() -> bool: return _senses.is_chasing()
@@ -368,6 +365,7 @@ func _physics_process(delta: float) -> void:
 		return
 	if _target == null or not is_instance_valid(_target):
 		return
+	_senses.refresh_modes(self)
 	audio.tick(delta, _pace.charging, global_position.distance_squared_to(_target.global_position) < 576.0)
 	if not _senses.is_chasing():
 		_unaware_tick(delta)
@@ -526,7 +524,7 @@ func _deliver_attack() -> void:
 	offset.y = 0.0
 	if offset.length() > attack_range * attack_reach_tolerance:
 		return
-	_target.call("take_damage", attack_damage * _attack_scale)
+	PERCEPTION.RULES.damage(_target, attack_damage * _attack_scale)
 	audio.attack_landed(_attack_scale < 1.0)
 
 
