@@ -93,6 +93,8 @@ func _blood(player: Node3D) -> void:
 	await physics_frame
 	await physics_frame
 	player.set("armor", 0.0)
+	# Splatter jitter and angles are random; a fixed seed keeps the wall check stable on every renderer.
+	seed(7)
 	player.call("take_projectile_damage", 10.0, player.global_position, Vector3.FORWARD, "PISTOL")
 	await physics_frame
 	await physics_frame
