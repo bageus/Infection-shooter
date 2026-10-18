@@ -19,6 +19,8 @@ const TRIM_SHRINKS := 4
 # BUILT_CELL slots; cells.json holds each frame's used size in its slot.
 const BUILT_CELL := 512
 const CELLS_FILE := "cells.json"
+# Own blood ("procedural" setting): frames drawn in code, one square cell each.
+const PROCEDURAL_CELL := 96
 var entries: Dictionary = {}
 var recent: Dictionary = {}
 
@@ -33,14 +35,18 @@ static func frame_count(category: String) -> int:
 	return grid.x * grid.y
 
 
-func load_assets(max_dimension: int = 512, brightness: float = 1.18) -> void:
+func load_assets(max_dimension: int = 512, brightness: float = 1.18, procedural: bool = false) -> void:
 	if not entries.is_empty():
 		return
-	var key := "%d|%.3f" % [max_dimension, brightness]
+	var key := "%d|%.3f|%s" % [max_dimension, brightness, procedural]
 	if _shared.has(key):
 		entries = _shared[key]
 		return
 	_shared[key] = entries
+	if procedural:
+		for category in CATEGORIES:
+			entries[category] = _procedural_entries(category)
+		return
 	var cells := _built_cells()
 	for category in CATEGORIES:
 		entries[category] = []
@@ -71,6 +77,34 @@ func load_assets(max_dimension: int = 512, brightness: float = 1.18) -> void:
 			image.adjust_bcs(brightness, 1.0, 1.0)
 			image.generate_mipmaps()
 			entries[category].append({"texture": ImageTexture.create_from_image(image), "aspect": float(used.size.x) / used.size.y, "variant": index + 1})
+
+
+# Each frame is a seeded cluster of soft blobs with a ragged edge, so a frame
+# looks the same on every run and no atlas is decoded.
+static func _procedural_entries(category: String) -> Array:
+	var result: Array = []
+	for index in frame_count(category):
+		var rng := RandomNumberGenerator.new()
+		rng.seed = hash("%s|%d" % [category, index])
+		var noise := FastNoiseLite.new()
+		noise.seed = rng.randi()
+		noise.frequency = 0.9
+		var blobs: Array[Vector3] = []
+		var spread := 0.38 if category == "drops" else 0.2
+		for _blob in rng.randi_range(3, 6):
+			blobs.append(Vector3(rng.randf_range(-spread, spread), rng.randf_range(-spread, spread), rng.randf_range(0.1, 0.28)))
+		var image := Image.create_empty(PROCEDURAL_CELL, PROCEDURAL_CELL, false, Image.FORMAT_RGBA8)
+		for y in PROCEDURAL_CELL:
+			for x in PROCEDURAL_CELL:
+				var point := Vector2(x, y) / PROCEDURAL_CELL * 2.0 - Vector2.ONE
+				var wobble := noise.get_noise_2d(x, y) * 0.08
+				var alpha := 0.0
+				for blob in blobs:
+					var distance := point.distance_to(Vector2(blob.x, blob.y)) + wobble
+					alpha = maxf(alpha, 1.0 - smoothstep(blob.z * 0.6, blob.z, distance))
+				image.set_pixel(x, y, Color(0.42, 0.01, 0.02, alpha))
+		result.append({"texture": ImageTexture.create_from_image(image), "aspect": 1.0, "variant": index + 1})
+	return result
 
 
 static func _built_cells() -> Dictionary:

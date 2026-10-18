@@ -138,6 +138,13 @@ func _video() -> void:
 	skill_effects.selected = dialog.view.preferences.values.skill_effects
 	skill_effects.item_selected.connect(func(index: int) -> void: dialog.call("_change", "skill_effects", index))
 	dialog.call("_row", "skillEffects", skill_effects)
+	var blood_style := OptionButton.new()
+	blood_style.name = "BloodStyle"
+	blood_style.add_item(dialog.view.text("bloodStyleAssets"))
+	blood_style.add_item(dialog.view.text("bloodStyleProcedural"))
+	blood_style.selected = dialog.view.preferences.values.blood_style
+	blood_style.item_selected.connect(func(index: int) -> void: dialog.call("_change", "blood_style", index))
+	dialog.call("_row", "bloodStyle", blood_style)
 	var lighting := CheckButton.new()
 	lighting.name = "Lighting"
 	lighting.text = dialog.view.text("lighting")
