@@ -87,3 +87,12 @@ Editor import exit0; validate_project (175CI registrations),383 scene resource
 references,956 import files,4 Python workstation tests и git diff --check PASS.
 Новый CI запускается публикацией repair commit; ручная Windows/Web приёмка
 остаётся непроведённой.
+
+
+CI f5d2511, run39137646389:166/167 runtime suites PASS, включая все5
+исходных падений. Единственный оставшийся runtime_debug ожидал переключения
+на удалённые sprite sheets. Проверка исправлена: legacy preference0 сохраняется
+на диске, при этом доступные procedural effects продолжают работать. Полный
+runtime_debug локально PASS; project gate, editor import и diff PASS.
+Production code в follow-up не меняется. Все7 rendering jobs, architecture и
+обе impact geometry jobs этого запуска PASS. Следующий шаг — новый полный CI.

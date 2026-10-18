@@ -12,6 +12,10 @@ updated: 2026-10-18
 
 ---
 
+18.10.2026 (PR274 CI follow-up): f5d2511 новый run39137646389:166/167 runtime PASS; единственное падение runtime_debug — устаревшее ожидание возврата к удалённым sprite sheets. Все7 rendering jobs и обе impact geometry jobs PASS; architecture PASS. Тест настроек теперь проверяет сохранение legacy preference0 на диске и эффективный procedural fallback, без возврата удалённых PNG. Полный runtime_debug локально PASS (0failures), project gate/175registrations/editor import/diff PASS. Production code после f5d2511 не менялся. QA обновлён. Публикация follow-up в тот же PR274 поручена; T004 IN_PROGRESS. Следующее точное действие — проверить новый полный CI; merge не поручен.
+
+
+
 18.10.2026 (PR274 CI repair — проверено): устранены все5 причин CI run39110370218: повторное поднятие saved conference chairs на0.025м, optional session.host, отсутствующие skill atlases/acid geometry, flipbook retired assets и stun stars. Удалённые PNG не восстановлены; существующий procedural skill renderer включается при отсутствии листов, звёзды создаются private geometry helper. Godot4.7.2 runner:9/9 PASS без SCRIPT ERROR/ERROR — display_planner (включая legacy v6/repeated chair load), named_map_loading, skill_vfx, status_fx, flipbook, planning_settle, placement/templates/weapons, staged_glb, полный planning_mode save/load/exit. Финальный skill_vfx отдельно PASS после уточнения нормали PlaneMesh; editor import exit0, project/spec/workflow/architecture/source-size/175CI registrations,383scene refs,956imports,4Python workstation и diff PASS. QA docs/qa/reception_templates_anchor.md. PlayerVFX411/planning_objects474 reviewed: существующие adapters, helper звёзд отдельный; API/DTO/scenes/owners/edges/policy прежние, исключений нет. Ручная Windows/Web приёмка не выполнена. Исправление публикуется в ту же ветку PR274 по поручению владельца. T004 IN_PROGRESS; следующее точное действие — проверить новый CI PR274; merge не поручен.
 
 
