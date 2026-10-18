@@ -4,6 +4,7 @@ const SFX := preload("res://game/core/audio/public/sound_events.gd")
 const FLOOR_DEBRIS := preload("res://game/presentation/office_floor/prop_floor_debris.gd")
 var _floor_debris := FLOOR_DEBRIS.new()
 const PIECE_SCRIPT = preload("res://game/presentation/office_floor/table_piece.gd")
+const BAKED_SCRIPT = preload("res://game/presentation/office_floor/table_baked_pieces.gd")
 const ASSEMBLY_SCRIPT = preload("res://game/presentation/office_floor/table_assembly.gd")
 const EFFECTS_SCRIPT = preload("res://game/features/combat/public/impact_effects.gd")
 const BALANCE = preload("res://game/features/combat/public/projectile_balance.gd")
@@ -28,6 +29,7 @@ var _active: Dictionary = {}
 var _started := false
 var _effects: Node3D
 var _retained: Array[RigidBody3D] = []
+var _baked: Node3D
 var _assembly: RigidBody3D
 var _part_shapes: Dictionary = {}
 var _rest_transforms: Dictionary = {}
@@ -308,14 +310,33 @@ func _settle_piece(body: RigidBody3D) -> void:
 	for index in range(_retained.size() - 1, -1, -1):
 		if not is_instance_valid(_retained[index]) or _retained[index].is_queued_for_deletion():
 			_retained.remove_at(index)
-	# Settled pieces stay on the floor. A piece that can still break keeps its hit layer; the smallest pieces rest for good.
+	# Settled pieces stay on the floor. A piece that can still break keeps its body and hit layer; the smallest bake into a static batch.
+	if bool(body.get("last_stage")):
+		_bake_piece(body)
+		return
 	body.freeze = false
-	body.collision_layer = 0 if bool(body.get("last_stage")) else 1
+	body.collision_layer = 1
 	body.collision_mask = 2
 	body.set_meta("kickable", _retained.size() % 2 == 0)
 	_retained.append(body)
 	if _effects != null:
 		_effects.call("register_retained", body)
+
+
+func _bake_piece(body: RigidBody3D) -> void:
+	var visual: MeshInstance3D
+	for child in body.get_children():
+		if child is MeshInstance3D and (child as MeshInstance3D).mesh is not QuadMesh:
+			visual = child as MeshInstance3D
+			break
+	if visual != null:
+		if _baked == null:
+			_baked = BAKED_SCRIPT.new()
+			_baked.name = "BakedPieces"
+			get_parent().add_child(_baked)
+		_baked.call("bake", visual)
+	_active.erase(body.get("piece_id"))
+	body.queue_free()
 
 
 func _add_fracture_marks(body: RigidBody3D, mesh: MeshInstance3D, hit_position: Vector3) -> void:
