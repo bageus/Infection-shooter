@@ -28,7 +28,6 @@ var _active: Dictionary = {}
 var _started := false
 var _effects: Node3D
 var _retained: Array[RigidBody3D] = []
-var _retention_target := 2
 var _assembly: RigidBody3D
 var _part_shapes: Dictionary = {}
 var _rest_transforms: Dictionary = {}
@@ -64,7 +63,6 @@ func get_projectile_material(_shape_index: int = -1) -> String:
 
 func _ready() -> void:
 	_effects = _locate_effects()
-	_retention_target = randi_range(1, 3)
 	var visual := get_node("Visual")
 	_intact = _find(visual, "Intact")
 	_modular = _find(visual, "Modular")
@@ -310,10 +308,7 @@ func _settle_piece(body: RigidBody3D) -> void:
 	for index in range(_retained.size() - 1, -1, -1):
 		if not is_instance_valid(_retained[index]) or _retained[index].is_queued_for_deletion():
 			_retained.remove_at(index)
-	if _retained.size() >= _retention_target:
-		DEBRIS.fade_free(body)
-		return
-	# Retained pieces touch only the floor collision layer, never the player.
+	# Settled pieces stay on the floor. Retained pieces touch only the floor collision layer, never the player.
 	body.freeze = false
 	body.collision_layer = 0
 	body.collision_mask = 2
@@ -321,12 +316,6 @@ func _settle_piece(body: RigidBody3D) -> void:
 	_retained.append(body)
 	if _effects != null:
 		_effects.call("register_retained", body)
-	var body_ref: WeakRef = weakref(body)
-	get_tree().create_timer(35.0).timeout.connect(func() -> void:
-		var live_body: RigidBody3D = body_ref.get_ref() as RigidBody3D
-		if live_body != null:
-			DEBRIS.fade_free(live_body)
-	)
 
 
 func _add_fracture_marks(body: RigidBody3D, mesh: MeshInstance3D, hit_position: Vector3) -> void:
