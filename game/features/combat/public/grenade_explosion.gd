@@ -9,6 +9,9 @@ const MARK_LIFETIME := 25.0
 const SCORCH_SIZE_MIN := 2.55
 const SCORCH_SIZE_MAX := 4.05
 const EXPLOSION_V1 := preload("res://game/features/combat/grenade_explosion_v1.tscn")
+const DANGER_ZONE := preload("res://game/features/combat/public/floor_danger_zone.gd")
+const ZONE_DELAY := 0.35
+const ZONE_LIFETIME := 2.2
 
 
 ## True when a static wall stands between a blast centre and the body.
@@ -56,6 +59,7 @@ static func explode(projectile: Node3D, location: Vector3, normal: Vector3, cont
 	scene.add_child(effect)
 	effect.global_position = location
 	effect.call("start", normal)
+	DANGER_ZONE.spawn(scene, projectile.get_world_3d(), location, RADIUS, ZONE_DELAY, ZONE_LIFETIME)
 	var query := PhysicsShapeQueryParameters3D.new()
 	var sphere := SphereShape3D.new()
 	sphere.radius = RADIUS

@@ -5,6 +5,8 @@ const SFX := preload("res://game/core/audio/public/sound_events.gd")
 const FLIPBOOK := preload("res://game/core/vfx/public/sprite_flipbook.gd")
 const ATLASES := preload("res://game/core/vfx/public/effect_atlases.gd")
 const POWDER_SHADER := preload("res://game/core/vfx/public/smoke_puff.gdshader")
+const DANGER_ZONE := preload("res://game/features/combat/public/floor_danger_zone.gd")
+const LANDING_ZONE_DELAY := 0.2
 
 signal ruptured(location: Vector3)
 
@@ -155,6 +157,9 @@ func _check_landing() -> void:
 	if absf(axis.y) < 0.45:
 		_landed = true
 		SFX.play(effects_root if is_instance_valid(effects_root) else _body, &"extinguisher_fall", _body.global_position)
+		# The powder cloud bursts at rupture with the cloud radius; mark that floor area until then.
+		if is_instance_valid(effects_root):
+			DANGER_ZONE.spawn(effects_root, _body.get_world_3d(), _body.global_position, cloud_radius, LANDING_ZONE_DELAY, rupture_delay - _elapsed)
 
 
 func _stop_spray_sound() -> void:

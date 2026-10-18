@@ -57,6 +57,7 @@ game/bootstrap/app/tests/run_light_budget_cache_tests.gd
 game/presentation/office_floor/tests/run_hit_effect_tests.gd
 game/presentation/office_floor/tests/run_glass_crack_tests.gd
 game/features/combat/tests/run_grenade_vfx_tests.gd
+game/features/combat/tests/run_floor_danger_zone_tests.gd
 game/bootstrap/app/tests/run_blast_shelter_tests.gd
 game/bootstrap/app/tests/run_colossus_shelter_tests.gd
 game/presentation/office_floor/tests/run_sound_hook_tests.gd
