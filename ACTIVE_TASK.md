@@ -7,6 +7,15 @@ owner: AI
 updated: 2026-10-18
 ---
 
+18.10.2026 (#251, публикация разрешена): владелец явно поручил создать ветку и PR. Готовая реализация и локальные PASS проверки публикуются в feat/251-reception-templates-anchor для review против main; область кода прежняя. Следующее точное действие — проверить CI созданного PR и ручной Windows/Web сценарий двух столешниц; merge не поручен.
+
+
+18.10.2026 (#251 — реализовано и проверено): ветка feat/251-reception-templates-anchor, база main a6b6a4c. reception_2 имеет отдельный template key/profile с реальными поверхностями0.78/1.10м и доступом через обычную кнопку Planning. Сохранение/перезапись/применение, placement из saved template, повторное открытие, Shift drag двух предметов на разных высотах, соответствие geometry bottom и freeze после resume — PASS. Корпус закреплён по model_path; физические сколы фасада сохраняются. Baseline Python1failure и staged4failures подтверждены; итоговые4 Python, staged GLB, wall_mount25models, placement/templates/weapons и полный planning_mode save/load/exit — PASS. Project/spec/workflow/architecture/source-size/174CIregistrations/383scene refs/diff PASS, editor Godot4.7.2 exit0 без SCRIPT ERROR/ERROR. environment_prop570строк reviewed: только прежняя конфигурация физического тела, root не расширяет ответственность. API/DTO/сцены/owners/edges/policy прежние, исключений нет. QA docs/qa/reception_templates_anchor.md. Ручной Windows/Web не выполнен; «не сдвигать» реализовано для игры, расстановка в Planning разрешена. Публикация/merge не поручены. T004 IN_PROGRESS. Следующее точное действие — review готового локального коммита; при поручении публикации создать PR для issue251 и проверить CI.
+
+
+18.10.2026 (#251, прямой запрос владельца): T004/Phase1/P1_LOGIC, IMPLEMENTATION. Добавить шаблоны 07_reception_counter_two_heights_2 и неподвижный игровой корпус при сохранённом редактировании в Planning. Scope: bootstrap workstation catalog/отдельный profile reception_2 (геометрия отличается от старого ресепшена; реальные столешницы0.78/1.10м), office_floor environment_prop freeze и существующие staged/placement/Python tests. Root environment_prop569 строк reviewed: точечно используется существующая конфигурация физического тела, нового owner/helper не требуется. Public API/DTO/зависимости/сцены/policy прежние. Риск — закрепление должно пережить разрушение/сколы и выход из Planning; old reception templates изолированы отдельным key. Публикация/merge не запрошены. Следующее действие — реализовать и проверить save/load/drag на обеих столешницах, физическую неподвижность и gates.
+
+
 18.10.2026 (PR270): https://github.com/bageus/Infection-shooter/pull/270 создан в feat/glass-scatter-variation, база main699b156. В PR только private scatter, existing tests и QA/журналы; 120 seeded profiles и native three-pane lineup проверены, local gates PASS. Конфликтов с main нет; CI ещё не подтверждён. Следующее точное действие — проверить CI PR270 и вручную сравнить три соседних разбитых стекла на Iris Xe/Web; merge не поручен.
 
 

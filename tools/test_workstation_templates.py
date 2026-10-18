@@ -47,6 +47,13 @@ class WorkstationTemplatesTest(unittest.TestCase):
             entries = json.loads((DATA / "setups" / f"{name}.json").read_text())["items"]
             self.assertEqual([entry["model"] for entry in entries], roles)
 
+    def test_reception_two_heights_has_its_own_template_profile(self):
+        key = DESK_CATALOG.get("07_reception_counter_two_heights_2")
+        self.assertIsNotNone(key, "The installed reception must expose template editing")
+        self.assertNotEqual(key, DESK_CATALOG["07_reception_counter_two_heights"])
+        profile = json.loads((DATA / "desks" / f"{key}.json").read_text())
+        self.assertEqual([station["grid_height"] for station in profile["stations"]], [0.78, 1.1])
+
     def test_every_named_model_exists(self):
         names = set(re.findall(r'"(\d\d_[A-Za-z0-9_]+)"', SCRIPT))
         for folder in (DATA / "desks", DATA / "setups"):
