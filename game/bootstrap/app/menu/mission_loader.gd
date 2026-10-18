@@ -31,6 +31,7 @@ var _ru := false
 var _recovery_path := ""
 var _level_name := ""
 var _arrival := {}
+var _carry := {}
 var _recovery_requested := false
 var _choices: VBoxContainer
 var _column: VBoxContainer
@@ -70,10 +71,11 @@ func _ready() -> void:
 
 
 ## Loads one saved map of the level chain; `arrival` ({x, z}) moves the player to that entry point.
-func start_map(path: String, level_name: String, arrival: Dictionary) -> void:
+func start_map(path: String, level_name: String, arrival: Dictionary, carry: Dictionary = {}) -> void:
 	_recovery_path = path
 	_level_name = level_name
 	_arrival = arrival
+	_carry = carry
 	start()
 
 
@@ -184,6 +186,8 @@ func _log_begin() -> void:
 ## Chain travel: the player appears at the entry point that leads back to the previous map.
 func _enter_level(planner: Node) -> void:
 	pending.set("current_level", _level_name)
+	if not _carry.is_empty():
+		pending.call("apply_carry", _carry)
 	if _arrival.has("x"):
 		(planner.get("main_player") as Node3D).position = Vector3(float(_arrival.x), 1.0, float(_arrival.z))
 

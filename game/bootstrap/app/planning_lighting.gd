@@ -29,6 +29,12 @@ const SHADOW_KEEP_BIAS := 0.49
 ## it neither spends the light budget nor casts shadows. The margin keeps lamps
 ## that are about to enter the view from popping in.
 const VIEW_MARGIN := 2.0
+## Lamps in view but past the budget get a flat additive pool on the floor instead.
+## shortcut: fixed pool radius and strength, not the cone's real floor footprint; tune if pools look wrong.
+const POOL_RADIUS := 2.5
+const POOL_STRENGTH := 0.5
+const POOL_HEIGHT := 0.03
+var _pool: MultiMeshInstance3D
 var shadows_allowed := true
 var _refresh_left := 0.0
 var _shadow_owners := {}
@@ -145,6 +151,8 @@ func get_light_focus() -> Vector3:
 func refresh_light_budget(capture_inputs: bool = true) -> void:
 	var tree := get_tree()
 	if tree == null or not local_lights_enabled:
+		if _pool != null:
+			_pool.visible = false
 		return
 	var focus := get_light_focus()
 	var camera := get_viewport().get_camera_3d() if get_viewport() != null else null
@@ -167,6 +175,7 @@ func refresh_light_budget(capture_inputs: bool = true) -> void:
 	var used := 0
 	var shadowed := 0
 	var owners := {}
+	var unlit: Array[Node] = []
 	for entry in ranked:
 		var lamp: Node = entry.node
 		var cost: int = lamp.call("get_light_cost")
@@ -174,6 +183,8 @@ func refresh_light_budget(capture_inputs: bool = true) -> void:
 		var shadow := lit and shadows_allowed and shadowed + cost <= MAX_SHADOW_LIGHTS
 		if lit:
 			used += cost
+		else:
+			unlit.append(lamp)
 		if shadow:
 			shadowed += cost
 			owners[lamp.get_instance_id()] = true
@@ -185,6 +196,46 @@ func refresh_light_budget(capture_inputs: bool = true) -> void:
 	if capture_inputs:
 		_cached_view = _view_state(camera)
 		_remember_inputs(lamps)
+	_update_pools(unlit)
+
+
+## Draws one flat light pool per in-view lamp that the budget left dark.
+func _update_pools(unlit: Array[Node]) -> void:
+	if _pool == null:
+		var gradient := Gradient.new()
+		gradient.set_color(0, Color.WHITE)
+		gradient.set_color(1, Color(1.0, 1.0, 1.0, 0.0))
+		var texture := GradientTexture2D.new()
+		texture.gradient = gradient
+		texture.fill = GradientTexture2D.FILL_RADIAL
+		texture.fill_from = Vector2(0.5, 0.5)
+		texture.fill_to = Vector2(1.0, 0.5)
+		var material := StandardMaterial3D.new()
+		material.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
+		material.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
+		material.blend_mode = BaseMaterial3D.BLEND_MODE_ADD
+		material.cull_mode = BaseMaterial3D.CULL_DISABLED
+		material.albedo_texture = texture
+		material.vertex_color_use_as_albedo = true
+		var quad := QuadMesh.new()
+		quad.size = Vector2.ONE * POOL_RADIUS * 2.0
+		var multimesh := MultiMesh.new()
+		multimesh.transform_format = MultiMesh.TRANSFORM_3D
+		multimesh.use_colors = true
+		multimesh.mesh = quad
+		_pool = MultiMeshInstance3D.new()
+		_pool.multimesh = multimesh
+		_pool.material_override = material
+		add_child(_pool)
+	var floor_turn := Basis(Vector3.RIGHT, -PI * 0.5)
+	_pool.multimesh.instance_count = unlit.size()
+	for index in unlit.size():
+		var lamp := unlit[index] as Node3D
+		var at := lamp.global_position
+		_pool.multimesh.set_instance_transform(index, Transform3D(floor_turn, Vector3(at.x, POOL_HEIGHT, at.z)))
+		var color: Color = lamp.get("light_color")
+		_pool.multimesh.set_instance_color(index, color * POOL_STRENGTH)
+	_pool.visible = local_lights_enabled
 
 
 func _light_radius(lamp: Node) -> float:
