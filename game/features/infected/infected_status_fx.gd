@@ -3,8 +3,7 @@ extends Node
 ## while it is stunned, and the body takes a green tint while it is poisoned.
 ## The owner reports the status; this node runs only while one is showing.
 
-const FLIPBOOK := preload("res://game/core/vfx/public/sprite_flipbook.gd")
-const ATLASES := preload("res://game/core/vfx/public/effect_atlases.gd")
+const STARS := preload("res://game/features/infected/stun_stars.gd")
 const POISON_SHADER := preload("res://game/features/infected/poison_tint.gdshader")
 const STAR_SIZE := 0.85
 const TINT_FADE := 0.4
@@ -16,7 +15,7 @@ var _visual: Node3D
 var _head_height := 1.8
 var _stun_left := 0.0
 var _poison_left := 0.0
-var _stars: MeshInstance3D
+var _stars: Node3D
 var _meshes: Array[MeshInstance3D] = []
 
 
@@ -31,7 +30,10 @@ func setup(body: Node3D, visual: Node3D, head_height: float) -> void:
 func stunned(seconds: float) -> void:
 	_stun_left = maxf(_stun_left, seconds)
 	if not is_instance_valid(_stars) and _stun_left > 0.05:
-		_stars = FLIPBOOK.spawn(_body, ATLASES.STUN_STARS, _body.global_position + Vector3.UP * _head_height, STAR_SIZE * _visual_scale(), {"cycle": true, "additive": 0.3})
+		_stars = STARS.new()
+		_body.add_child(_stars)
+		_stars.position = Vector3.UP * _head_height
+		_stars.scale = Vector3.ONE * STAR_SIZE * _visual_scale()
 	set_process(true)
 
 

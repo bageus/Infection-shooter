@@ -138,4 +138,8 @@ func _check_skill_effects(prefs: RefCounted, hero: Node) -> void:
 	_check(skill_vfx.get("procedural"), "The settings switch skill effects to the procedural set")
 	prefs.values.skill_effects = 0
 	prefs.apply_to_game(self)
-	_check(not skill_vfx.get("procedural"), "The settings switch skill effects back to the sprite sheets")
+	prefs.save_settings()
+	var restored := PREFS.new()
+	restored.load_settings()
+	_check(restored.values.skill_effects == 0, "The legacy sheet preference is preserved on disk")
+	_check(skill_vfx.get("procedural"), "Removed skill sheets keep procedural effects visible after applying the legacy preference")

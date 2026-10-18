@@ -9,6 +9,7 @@ var bindings := BINDINGS.new()
 
 const FILE := "user://interface_settings.cfg"
 const DEFAULTS := {"window_mode": 0, "resolution": "1280x720", "language": "ru", "brightness": 1.0, "text_scale": 1.0,
+	"enemies_ignore_player": false, "enemies_no_damage": false,
 	"walk_speed_multiplier": 1.0, "walk_animation_multiplier": 1.0,
 	"volume": 0.4, "effects_volume": 1.0, "music_volume": 1.0, "menu_music": true, "menu_music_volume": 1.0, "sound": true, "occlusion_mode": 0, "test_mutagen": false, "infinite_antidotes": false, "lighting": true, "electronic_particles": true, "skill_effects": 0, "dodge_animation": 0,
 	"bullet_impact_smoke": true, "sunlight": true, "shadows": true, "shadow_quality": 2, "mesh_lod": true, "keep_corpses": true}
@@ -85,6 +86,8 @@ func apply_to_game(tree: SceneTree, display_user_action: bool = false) -> void:
 	if world != null and world.environment != null:
 		world.environment.adjustment_enabled = true
 		world.environment.adjustment_brightness = float(values.brightness)
+	if scene != null and scene.has_method("set_enemy_gameplay_modes"):
+		scene.call("set_enemy_gameplay_modes", bool(values.enemies_ignore_player), bool(values.enemies_no_damage))
 	if scene != null and scene.has_method("set_test_mutagen_enabled"):
 		scene.call("set_test_mutagen_enabled", bool(values.test_mutagen))
 	if scene != null and scene.has_method("set_infinite_antidotes_enabled"):

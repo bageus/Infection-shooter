@@ -50,6 +50,9 @@ func tick(delta: float, charging: bool, near_target: bool) -> void:
 		_walked += moved.length()
 		if _walked >= step_length:
 			_walked = 0.0
+			var impacts := body.get("impact_pool") as Node
+			if is_instance_valid(impacts) and impacts.has_method("request_surface_step"):
+				impacts.call("request_surface_step", body)
 			SFX.play(body, step_sound, body.global_position, 1.5 if charging else -2.0, step_pitch)
 	var alerted := bool(body.call("is_alerted"))
 	# Hunger times its shout in _on_aggro, after interrupting corpse feeding.

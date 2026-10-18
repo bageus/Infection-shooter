@@ -1,6 +1,7 @@
 extends RefCounted
 ## Shared mission-local debris pixels; the original glass entry point stays compatible.
 const ATLASES := preload("res://game/presentation/office_floor/debris_atlases.gd")
+const PIXEL_OPS := preload("res://game/presentation/office_floor/decal_pixels.gd")
 const ATLAS := preload("res://models/objects/textures/glass_decals/4x4 glass debris texture atlas.png")
 const METERS := 8.0
 const PIXELS := 512
@@ -29,12 +30,12 @@ func prepare() -> void:
 	_sources = _atlases.sources.get("glass", [] as Array[Image])
 
 
-func stamp(at: Vector2, frame: int, size: float, turns: int = 0, kind: String = "glass") -> bool:
-	if not at.is_finite() or not is_finite(size) or size < 0.25 or size > 1.5 or frame < 0 or frame >= ATLASES.frame_count(kind):
+func stamp(at: Vector2, frame: int, size: float, turns: int = 0, kind: String = "glass", opacity: float = 1.0) -> bool:
+	if not is_finite(opacity) or opacity <= 0.0 or not at.is_finite() or not is_finite(size) or size < 0.25 or size > 1.5 or frame < 0 or frame >= ATLASES.frame_count(kind):
 		return false
 	if queue.size() >= MAX_QUEUE:
 		return false
-	queue.append({"at": at, "frame": frame, "size": size, "turns": posmod(turns, 4), "kind": kind})
+	queue.append({"at": at, "frame": frame, "size": size, "turns": posmod(turns, 4), "kind": kind, "opacity": clampf(opacity, 0, 1)})
 	return true
 
 
@@ -53,13 +54,19 @@ func step() -> bool:
 		var tile: Dictionary = tiles[cell]
 		if not tile.dirty:
 			continue
+		var rebound: bool = tile.texture == null
 		if tile.texture == null:
 			tile.texture = ImageTexture.create_from_image(tile.image)
 			tile.surface_texture = ImageTexture.create_from_image(tile.surface_image)
-			_changed.call(cell, tile.texture)
 		else:
 			(tile.texture as ImageTexture).update(tile.image)
 			(tile.surface_texture as ImageTexture).update(tile.surface_image)
+		for layer: Dictionary in tile.layers.values():
+			if layer.texture == null:
+				layer.texture = ImageTexture.create_from_image(layer.image)
+				rebound = true
+			else: (layer.texture as ImageTexture).update(layer.image)
+		if rebound: _changed.call(cell, tile.texture)
 		tile.dirty = false
 		uploads += 1
 		break
@@ -72,16 +79,16 @@ func _apply(request: Dictionary) -> void:
 		return
 	var at: Vector2 = request.at
 	var center := cell_at(at)
-	var density_cell := Vector2i(floori(at.x), floori(at.y))
+	var layer_id := 0 if request.kind in ["floor_damage", "bullet"] else (1 if request.kind == "floor_scuff" else 2)
+	var density_cell: Variant = Vector2i(floori(at.x), floori(at.y)) if layer_id == 2 else Vector3i(floori(at.x), floori(at.y), layer_id)
 	if tiles.has(center) and int(tiles[center].density.get(density_cell, 0)) >= MAX_DENSITY:
 		return
-	var source := (frames[request.frame] as Image).duplicate() as Image
-	for turn in int(request.turns):
-		source.rotate_90(CLOCKWISE)
-	var side := roundi(float(request.size) * PIXELS / METERS)
+	var source := PIXEL_OPS.source(frames[request.frame], request.opacity, request.turns, request.kind == "bullet" and request.frame >= 5)
+	var resolution := PIXELS if layer_id == 2 else PIXELS / 2
+	var side := roundi(float(request.size) * resolution / METERS)
 	source.resize(side, side, Image.INTERPOLATE_BILINEAR)
 	var surface := Image.create(side, side, false, Image.FORMAT_R8)
-	surface.fill(Color(float(ATLASES.ROUGHNESS[request.kind]), 0, 0))
+	surface.fill(Color(float(ATLASES.ROUGHNESS.get(request.kind, 0.9)), 0, 0))
 	var low := at - Vector2.ONE * float(request.size) * 0.5
 	var first := cell_at(low)
 	var last := cell_at(low + Vector2.ONE * float(request.size))
@@ -91,11 +98,18 @@ func _apply(request: Dictionary) -> void:
 			if not valid_cells.is_empty() and not valid_cells.has(cell):
 				continue
 			var tile := _tile(cell)
-			var offset := Vector2i((((low - origin) / METERS - Vector2(cell)) * PIXELS).floor())
+			var offset := Vector2i((((low - origin) / METERS - Vector2(cell)) * resolution).floor())
 			# Native clipping also handles marks crossing a section boundary.
-			(tile.image as Image).blend_rect(source, Rect2i(Vector2i.ZERO, source.get_size()), offset)
-			# Material of the last visible fragment; transparent holes never overwrite it.
-			(tile.surface_image as Image).blit_rect_mask(surface, source, Rect2i(Vector2i.ZERO, source.get_size()), offset)
+			var target: Image = tile.image
+			if layer_id < 2:
+				if not tile.layers.has(layer_id):
+					var image := Image.create(resolution, resolution, false, Image.FORMAT_RGBA8)
+					image.fill(Color.TRANSPARENT)
+					tile.layers[layer_id] = {"image": image, "texture": null}
+				target = tile.layers[layer_id].image
+			target.blend_rect(source, Rect2i(Vector2i.ZERO, source.get_size()), offset)
+			if layer_id == 2:
+				(tile.surface_image as Image).blit_rect_mask(surface, source, Rect2i(Vector2i.ZERO, source.get_size()), offset)
 			tile.dirty = true
 	if tiles.has(center):
 		var density: Dictionary = tiles[center].density
@@ -118,7 +132,7 @@ func _tile(cell: Vector2i) -> Dictionary:
 	var surface := Image.create(PIXELS, PIXELS, false, Image.FORMAT_R8)
 	surface.fill(Color(0.6, 0, 0))
 	var tile := {"image": image, "texture": null, "surface_image": surface,
-		"surface_texture": null, "dirty": false, "density": {}}
+		"surface_texture": null, "layers": {}, "dirty": false, "density": {}}
 	tiles[cell] = tile
 	return tile
 

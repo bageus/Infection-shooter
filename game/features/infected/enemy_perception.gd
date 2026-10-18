@@ -4,6 +4,7 @@ extends RefCounted
 ## it looks around (SEARCH) and then walks back (RETURN). Seeing the player, being
 ## shot or hearing an ally's cry starts CHASE; a forced chase never ends.
 
+const RULES := preload("res://game/features/infected/enemy_interaction_rules.gd")
 const ACTOR := preload("res://game/features/infected/infected_capsule.gd")
 const IDLE_BODY := preload("res://game/features/infected/enemy_idle_body.gd")
 const ROUTE := preload("res://game/features/infected/chase_route.gd")
@@ -31,6 +32,9 @@ var close_notice_range := 3.5
 var fov_cos := cos(deg_to_rad(65.0))
 var hearing := preload("res://game/features/infected/hearing_profile.gd").new()
 var _alert_announced := false
+var _interaction_target: Node3D
+var _forced_assignment := false
+var _ignoring := false
 
 var _home := Vector3.ZERO
 var _home_yaw := 0.0
@@ -46,6 +50,30 @@ var _idle_elapsed := 0.0
 var _idle_body: IDLE_BODY
 
 
+func assign_target(actor: ACTOR, target: Node3D, forced_target: bool) -> void:
+	actor._target = target
+	_interaction_target = target
+	_forced_assignment = forced_target
+	sight_range = actor.sight_range
+	if forced_target:
+		force_chase()
+	else:
+		watch()
+
+
+func refresh_modes(actor: ACTOR) -> void:
+	var ignore := RULES.ignores(actor._target)
+	if ignore and not _ignoring:
+		_ignoring = true
+		watch()
+		actor._pending_hit = -1.0
+		actor._cached_desired = Vector3.ZERO
+	elif not ignore and _ignoring:
+		_ignoring = false
+		if _forced_assignment:
+			force_chase()
+
+
 func watch() -> void:
 	forced = false
 	state = State.UNAWARE
@@ -55,6 +83,8 @@ func watch() -> void:
 
 
 func force_chase() -> void:
+	if RULES.ignores(_interaction_target):
+		return
 	_idle_elapsed = 0.0
 	forced = true
 	_alert_announced = true
@@ -62,7 +92,7 @@ func force_chase() -> void:
 
 
 func is_chasing() -> bool:
-	return state == State.CHASE
+	return state == State.CHASE and not RULES.ignores(_interaction_target)
 
 
 func is_unaware() -> bool:
@@ -74,6 +104,8 @@ func noise_position() -> Vector3:
 
 
 func hear(actor: Node3D, position: Vector3, radius: float) -> void:
+	if RULES.ignores(_interaction_target):
+		return
 	if state == State.CHASE:
 		return
 	if not hearing.reaches(actor, position, radius):
@@ -86,12 +118,16 @@ func hear(actor: Node3D, position: Vector3, radius: float) -> void:
 
 
 func hear_ally(actor: Node3D, position: Vector3, radius: float) -> void:
+	if RULES.ignores(_interaction_target):
+		return
 	if state != State.CHASE and hearing.reaches(actor, position + Vector3.UP * hearing.ear_height, radius):
 		alert()
 		_alert_announced = true
 
 
 func notice_player(actor: Node3D, audio: Node) -> void:
+	if RULES.ignores(_interaction_target):
+		return
 	var newly_alerted := alert()
 	if newly_alerted or not _alert_announced:
 		_alert_announced = true
@@ -100,7 +136,7 @@ func notice_player(actor: Node3D, audio: Node) -> void:
 
 
 func alert() -> bool:
-	if state == State.CHASE:
+	if RULES.ignores(_interaction_target) or state == State.CHASE:
 		return false
 	_idle_elapsed = 0.0
 	state = State.CHASE
@@ -268,7 +304,7 @@ func _enter(next: State) -> void:
 
 
 func can_see(actor: Node3D, target: Node3D) -> bool:
-	if target == null or not is_instance_valid(target):
+	if target == null or not is_instance_valid(target) or RULES.ignores(target):
 		return false
 	var to := target.global_position - actor.global_position
 	to.y = 0.0
