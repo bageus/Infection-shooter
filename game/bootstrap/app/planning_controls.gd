@@ -130,7 +130,7 @@ func _build_gore_controls() -> void:
 	var items := Button.new()
 	items.name = "Items"
 	items.text = "Items"
-	items.tooltip_text = "Key, DNA, ammo, medkits, antidote"
+	items.tooltip_text = "Key, DNA, ammo, medkits, antidote, armor"
 	items.pressed.connect(_show_item_catalog)
 	var palette_box: Node = session.ui.get_node("Panel/VBox")
 	palette_box.add_child(items)
