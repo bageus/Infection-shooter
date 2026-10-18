@@ -1,6 +1,8 @@
 extends Node3D
 
 const SFX := preload("res://game/core/audio/public/sound_events.gd")
+const FLOOR_DEBRIS := preload("res://game/presentation/office_floor/prop_floor_debris.gd")
+var _floor_debris := FLOOR_DEBRIS.new()
 const PIECE_SCRIPT = preload("res://game/presentation/office_floor/table_piece.gd")
 const ASSEMBLY_SCRIPT = preload("res://game/presentation/office_floor/table_assembly.gd")
 const EFFECTS_SCRIPT = preload("res://game/features/combat/public/impact_effects.gd")
@@ -35,10 +37,15 @@ var _intact_health := 155.0
 var _part_health: Dictionary = {}
 
 
+func configure_glass_debris(floor_view: Node3D) -> void:
+	_floor_debris.floor_view = floor_view
+
+
 func take_projectile_hit(damage: float, hit_point: Vector3, _normal: Vector3, direction: Vector3, weapon: String) -> bool:
 	if not _started:
 		_intact_health -= BALANCE.object_damage(damage, weapon, "large")
 		if _intact_health <= 0.0:
+			_floor_debris.emit(self, "07_table", "break", hit_point, direction)
 			_switch_to_modular()
 			if weapon == "GRENADE":
 				hit_piece("Top", hit_point, direction, damage, weapon)
@@ -125,6 +132,7 @@ func _switch_to_modular() -> void:
 
 
 func _transition_piece(part_id: String, body: RigidBody3D, hit_position: Vector3, direction: Vector3) -> void:
+	_floor_debris.emit(self, "07_table", "part_" + part_id, hit_position, direction)
 	SFX.play(get_parent(), &"break_wood", hit_position)
 	var original: MeshInstance3D = _parts[part_id]
 	var original_transform := _current_mesh_transform(original, body)

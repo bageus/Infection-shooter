@@ -3,6 +3,8 @@ const BREAK_SOUND := preload("res://game/presentation/office_floor/prop_break_so
 const IMPACT_SOUND := preload("res://game/presentation/office_floor/impact_sound_watcher.gd")
 
 const BALANCE = preload("res://game/features/combat/public/projectile_balance.gd")
+const FLOOR_DEBRIS := preload("res://game/presentation/office_floor/prop_floor_debris.gd")
+var _floor_debris := FLOOR_DEBRIS.new()
 var repeated_electronic_particles := true
 
 
@@ -41,6 +43,10 @@ var impact_pool: Node
 func configure_world(container: Node3D, impacts: Node) -> void:
 	effects_root = container
 	impact_pool = impacts
+
+
+func configure_glass_debris(floor_view: Node3D) -> void:
+	_floor_debris.floor_view = floor_view
 
 
 func _damage_category() -> String:
@@ -100,6 +106,7 @@ func take_projectile_hit(damage: float, hit_position: Vector3, _hit_normal: Vect
 func _rupture_extinguisher(hit_position: Vector3) -> void:
 	if is_queued_for_deletion():
 		return
+	_floor_debris.emit(self, String(get_parent().name), "rupture", hit_position, Vector3.UP)
 	BLAST.detonate(self, hit_position)
 	queue_free()
 
@@ -121,6 +128,7 @@ func _integrate_forces(state: PhysicsDirectBodyState3D) -> void:
 func _break_physical_prop(hit_position: Vector3, direction: Vector3) -> void:
 	if is_queued_for_deletion():
 		return
+	_floor_debris.emit(self, String(get_parent().name) + " " + String(name), "break", hit_position, direction)
 	BREAK_SOUND.play(self, effects_root, String(name) + " " + String(get_parent().name), get_projectile_material(), hit_position)
 	if not is_instance_valid(effects_root):
 		queue_free()

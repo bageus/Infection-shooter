@@ -2,6 +2,19 @@ extends StaticBody3D
 
 const BALANCE = preload("res://game/features/combat/public/projectile_balance.gd")
 const DAMAGE = preload("res://game/presentation/office_floor/environment_damage.gd")
+const FLOOR_DEBRIS := preload("res://game/presentation/office_floor/prop_floor_debris.gd")
+var _floor_debris := FLOOR_DEBRIS.new()
+var effects_root: Node3D
+var impact_pool: Node
+
+
+func configure_world(container: Node3D, impacts: Node) -> void:
+	effects_root = container
+	impact_pool = impacts
+
+
+func configure_glass_debris(floor_view: Node3D) -> void:
+	_floor_debris.floor_view = floor_view
 
 @export var health_per_cubic_meter := 65.0
 @export var minimum_health := 135.0
@@ -60,6 +73,7 @@ func _break(hit_position: Vector3, direction: Vector3, blast: bool = false) -> v
 	if _broken:
 		return
 	_broken = true
+	_floor_debris.emit(self, String(get_parent().name), "break", hit_position, direction)
 	var root := get_parent()
 	if root != null:
 		if bool(root.get_meta("planning_wall_mount", false)):
