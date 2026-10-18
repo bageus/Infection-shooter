@@ -23,6 +23,8 @@ var batch_row: HBoxContainer
 var batch_label: Label
 var batch_spin: SpinBox
 var trigger_option: OptionButton
+var health_spin: SpinBox
+var damage_spin: SpinBox
 var link_note: Label
 var link_list: VBoxContainer
 var links: MeshInstance3D
@@ -73,6 +75,8 @@ func setup(context: Variant, planner_objects: Variant) -> void:
 	batch_spin = _spin(1, SPAWN_CONFIG.BATCH_MAX, 1)
 	batch_row.add_child(batch_spin)
 	trigger_option = _option_row(point_box, "Запуск", SPAWN_CONFIG.TRIGGER_LABELS)
+	health_spin = _spin_row(point_box, "Живучесть, %", SPAWN_CONFIG.STAT_MIN, SPAWN_CONFIG.STAT_MAX, 5.0)
+	damage_spin = _spin_row(point_box, "Урон, %", SPAWN_CONFIG.STAT_MIN, SPAWN_CONFIG.STAT_MAX, 5.0)
 	link_note = Label.new()
 	link_note.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	link_note.custom_minimum_size.x = 300
@@ -206,6 +210,8 @@ func _load_point(point: Node3D) -> void:
 	batch_row.visible = rule != "stream"
 	batch_label.text = "Размер пачки" if rule == "burst" else "Держать рядом, не более"
 	trigger_option.select(maxi(SPAWN_CONFIG.TRIGGERS.find(str(config["trigger"])), 0))
+	health_spin.set_value_no_signal(float(config["health"]))
+	damage_spin.set_value_no_signal(float(config["damage"]))
 	if objects.selected == null:
 		link_note.text = "После размещения выберите врага и отметьте эту точку."
 		return
@@ -269,6 +275,7 @@ func _read_config() -> Dictionary:
 		"enemy": SPAWN_CONFIG.ENEMIES[enemy_option.selected], "count": int(count_spin.value),
 		"interval": interval_spin.value, "rule": SPAWN_CONFIG.RULES[rule_option.selected],
 		"batch": int(batch_spin.value), "trigger": SPAWN_CONFIG.TRIGGERS[trigger_option.selected],
+		"health": health_spin.value, "damage": damage_spin.value,
 	}
 
 
