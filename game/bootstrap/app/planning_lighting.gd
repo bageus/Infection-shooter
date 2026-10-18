@@ -231,7 +231,8 @@ func _update_pools(unlit: Array[Node]) -> void:
 		var lamp := unlit[index] as Node3D
 		var at := lamp.global_position
 		_pool.multimesh.set_instance_transform(index, Transform3D(floor_turn, Vector3(at.x, POOL_HEIGHT, at.z)))
-		var color: Color = lamp.get("light_color")
+		# Lamps without a light color (test stubs, plain budget nodes) get a white pool.
+		var color: Color = lamp.get("light_color") if lamp.get("light_color") is Color else Color.WHITE
 		_pool.multimesh.set_instance_color(index, color * POOL_STRENGTH)
 	_pool.visible = local_lights_enabled
 
