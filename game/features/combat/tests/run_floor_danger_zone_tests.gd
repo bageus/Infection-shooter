@@ -1,0 +1,54 @@
+extends SceneTree
+## Runtime checks for the floor warning under a blast: it lies flat on the floor
+## under the impact, appears only after its delay and removes itself when done.
+
+const ZONE := preload("res://game/features/combat/public/floor_danger_zone.gd")
+
+var failures := 0
+
+
+func _init() -> void:
+	call_deferred("_run")
+
+
+func _run() -> void:
+	var stage := Node3D.new()
+	root.add_child(stage)
+	var floor_body := StaticBody3D.new()
+	var floor_shape := CollisionShape3D.new()
+	var slab := BoxShape3D.new()
+	slab.size = Vector3(20, 0.2, 20)
+	floor_shape.shape = slab
+	floor_body.add_child(floor_shape)
+	floor_body.position = Vector3(0, -0.1, 0)
+	stage.add_child(floor_body)
+	await physics_frame
+	await physics_frame
+
+	ZONE.spawn(stage, root.get_world_3d(), Vector3(2.0, 1.2, 0.0), 3.0, 0.3, 1.6)
+	var zone := stage.get_child(stage.get_child_count() - 1) as Node3D
+	var meshes := zone.get_children().filter(func(child: Node) -> bool: return child is MeshInstance3D)
+	_expect(meshes.size() == 2, "The zone is a disc and a ring")
+	_expect(absf(zone.global_position.y - ZONE.LIFT) < 0.01 and absf(zone.global_position.x - 2.0) < 0.01, "The zone lies on the floor under the impact (%s)" % zone.global_position)
+	var ring := meshes[1] as MeshInstance3D
+	var disc := meshes[0] as MeshInstance3D
+	_expect(absf((disc.mesh as CylinderMesh).top_radius - 3.0) < 0.001, "The disc has the blast radius")
+	_expect(ring.get_aabb().size.y < 0.2 and ring.get_aabb().size.x > 5.5, "The ring is flat and spans the blast radius")
+
+	await create_timer(0.1).timeout
+	_expect(is_instance_valid(zone) and disc.transparency > 0.99, "The zone stays hidden before its delay")
+	await create_timer(0.8).timeout
+	_expect(is_instance_valid(zone) and disc.transparency < 0.01 and ring.transparency < 0.01, "The zone is fully visible after the delay")
+	await create_timer(1.0).timeout
+	_expect(not is_instance_valid(zone), "The zone removes itself when its lifetime ends")
+
+	stage.queue_free()
+	await process_frame
+	print("Floor danger zone tests: %d failure(s)." % failures)
+	quit(failures)
+
+
+func _expect(condition: bool, message: String) -> void:
+	if not condition:
+		failures += 1
+		push_error(message)
