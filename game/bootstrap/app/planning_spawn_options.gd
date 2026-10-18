@@ -37,8 +37,9 @@ func setup(context: Variant, planner_objects: Variant) -> void:
 	panel = PanelContainer.new()
 	panel.name = "SpawnWaves"
 	panel.set_anchors_preset(Control.PRESET_TOP_RIGHT)
-	panel.offset_left = -330.0
-	panel.offset_right = -10.0
+	# Sits left of the planner's RightPanel (starts at x = -336) so the map HUD stays visible.
+	panel.offset_left = -664.0
+	panel.offset_right = -344.0
 	panel.offset_top = 56.0
 	panel.mouse_filter = Control.MOUSE_FILTER_STOP
 	var style := StyleBoxFlat.new()
