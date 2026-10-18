@@ -41,3 +41,13 @@ resource paths/export pack/diff PASS. Receipt8 и исторические30 к�
 подтверждены hashes/decode; WAV/.wav.import/PCM ресурсов не осталось.
 Конфликты с main разрешены с сохранением обеих функций: хруст стекла и
 процедурные следы шагов. Ручная/аппаратная приёмка не выполнена.
+
+## Исправление CI baseline
+
+Старый pinned d7245e7 использует UI PCM .tres. Его код нельзя запускать с
+assets текущего кандидата: эти ресурсы намеренно удалены после конвертации.
+Workflow архивирует game и assets одного baseline commit; shared models/addons/
+.godot остаются прежними. Старый случай воспроизвёл8 preload ошибок, новый
+успешно компилирует оба настоящих skin probe (--headless --check-only).
+Old PCM существует только во временном эталоне CI; production OGG-only guard
+сохранён. Реальное native сравнение проверяется новым CI.
