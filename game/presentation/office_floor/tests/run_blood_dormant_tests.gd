@@ -51,12 +51,24 @@ func _run() -> void:
 	await create_timer(0.5).timeout
 	_expect(budget.call("statistics")["marks"] == 1, "A stain near the camera is drawn")
 	camera.position = Vector3(0, 1.5, 20)
+	camera.look_at(Vector3(0, 0, 40))
 	await create_timer(0.5).timeout
-	_expect(budget.call("statistics")["marks"] == 0 and budget.call("statistics")["dormant"] == 1, "A far stain leaves the scene and stays as data")
+	_expect(budget.call("statistics")["marks"] == 0 and budget.call("statistics")["dormant"] == 1, "A far stain behind the camera leaves the scene and stays as data")
+	camera.look_at(Vector3(0, 0, -1))
+	await create_timer(0.5).timeout
+	_expect(budget.call("statistics")["marks"] == 1 and budget.call("statistics")["dormant"] == 0, "A far stain inside the view is drawn again")
 	camera.position = Vector3(0, 1.5, 0)
+	camera.look_at(Vector3(0, 0, -1))
 	await create_timer(0.5).timeout
-	_expect(budget.call("statistics")["marks"] == 1 and budget.call("statistics")["dormant"] == 0, "Returning to the stain draws it again")
+	_expect(budget.call("statistics")["marks"] == 1 and budget.call("statistics")["dormant"] == 0, "Returning to the stain keeps it drawn")
 	budget.call("clear_marks")
+	var procedural := LIBRARY.new()
+	procedural.call("load_assets", 512, 1.18, true)
+	var generated: Dictionary = procedural.get("entries")
+	var complete := true
+	for category in LIBRARY.CATEGORIES:
+		complete = complete and (generated[category] as Array).size() == LIBRARY.frame_count(category)
+	_expect(complete, "Procedural blood has every frame of each category")
 	print("Dormant blood tests: %d failures" % failures)
 	quit(0 if failures == 0 else 1)
 

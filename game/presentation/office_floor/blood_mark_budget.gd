@@ -10,7 +10,8 @@ var per_surface_limit := 0
 ## 0 keeps a mark until the budget needs its slot.
 var lifetime := 0.0
 ## Marks farther than unload_distance from the camera leave the scene tree and
-## wait as data in _dormant; they come back once the camera is within load_distance.
+## wait as data in _dormant, unless they are inside the camera frustum; they come
+## back once the camera is within load_distance or the mark is on screen again.
 var unload_distance := 30.0
 var load_distance := 22.0
 var dormant_limit := 400
@@ -29,6 +30,7 @@ var _active := FIFO.new()
 var _fading := 0
 var _dormant: Array[Dictionary] = []
 var _camera_point := Vector3.ZERO
+var _camera: Camera3D
 var _has_camera := false
 var _timer: Timer
 var _floor_bake: Node3D
@@ -124,7 +126,7 @@ func _maintenance() -> void:
 			_remove(id)
 		elif _records[id]["expires"] <= _clock:
 			_retire(id)
-		elif _has_camera and not _records[id]["fading"] and _camera_point.distance_to(_records[id]["position"]) > unload_distance:
+		elif _has_camera and not _records[id]["fading"] and _camera_point.distance_to(_records[id]["position"]) > unload_distance and not _on_screen(_records[id]["position"]):
 			_unload(id)
 	for request in _pending.duplicate():
 		if request["until"] < _clock or _admit(request["definition"], request["surface"]):
@@ -134,10 +136,15 @@ func _maintenance() -> void:
 
 
 func _read_camera() -> void:
-	var camera := get_viewport().get_camera_3d() if is_inside_tree() else null
-	_has_camera = camera != null
+	_camera = get_viewport().get_camera_3d() if is_inside_tree() else null
+	_has_camera = _camera != null
 	if _has_camera:
-		_camera_point = camera.global_position
+		_camera_point = _camera.global_position
+
+
+# Whole visible area counts: a mark the camera sees stays drawn at any distance.
+func _on_screen(point: Vector3) -> bool:
+	return _camera != null and _camera.is_position_in_frustum(point)
 
 
 # Frees a far mark but keeps what is needed to draw it again later.
@@ -168,7 +175,7 @@ func _reload_near_dormant() -> void:
 	for entry in _dormant.duplicate():
 		if reloaded >= RELOADS_PER_TICK:
 			break
-		if _camera_point.distance_to(entry["position"]) > load_distance:
+		if _camera_point.distance_to(entry["position"]) > load_distance and not _on_screen(entry["position"]):
 			continue
 		if _admit(entry["definition"], entry["surface"], false):
 			_dormant.erase(entry)

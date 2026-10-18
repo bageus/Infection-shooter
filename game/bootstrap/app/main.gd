@@ -164,6 +164,12 @@ func set_procedural_skill_effects(enabled: bool) -> void:
 		effects.get("vfx").set("procedural", enabled)
 
 
+## Settings: own procedural blood instead of the blood decal atlases.
+func set_procedural_blood(enabled: bool) -> void:
+	if blood_effects != null:
+		blood_effects.call("set_procedural_blood", enabled)
+
+
 ## Settings: dodge animation, 0 = dive roll, 1 = strafe jump.
 func set_dodge_animation_style(style: int) -> void:
 	player.call("set_dodge_animation_style", style)
