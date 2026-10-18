@@ -93,8 +93,21 @@ static func shatter_glass(body: RigidBody3D, geometry: GEOMETRY, hit_position: V
 			DAMAGE.spawn_piece(body, meshes[index], body, geometry.stages.size(), index, direction, hit_position)
 		for hidden in hidden_parents:
 			hidden.scale = Vector3.ZERO
+	elif _nothing_visible(geometry):
+		# A drinking glass is only its pane: with the pane hidden nothing stands, so the pane itself breaks.
+		for index in panes.size():
+			DAMAGE.spawn_piece(body, panes[index], body, geometry.stages.size(), index, direction, hit_position, true)
+		body.collision_layer = 0
+		body.freeze = true
 	else:
 		_spawn_fallback_glass(body, geometry, glass_bounds, hit_position, direction)
+
+
+static func _nothing_visible(geometry: GEOMETRY) -> bool:
+	for mesh in geometry.meshes:
+		if is_instance_valid(mesh) and mesh.is_visible_in_tree():
+			return false
+	return true
 
 
 static func _spawn_fallback_glass(body: RigidBody3D, geometry: GEOMETRY, bounds: AABB, hit_position: Vector3, direction: Vector3) -> void:
