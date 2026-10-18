@@ -21,6 +21,7 @@ const BLAST_FEEDBACK := preload("res://game/bootstrap/app/blast_feedback.gd")
 const DEBUG_OVERLAY := preload("res://game/bootstrap/app/runtime_debug_overlay.gd")
 const OCCLUSION := preload("res://game/bootstrap/app/occlusion_effects.gd")
 const MISSION_LAYOUT := preload("res://game/bootstrap/app/mission_layout.gd")
+const LEVEL_ENTRIES := preload("res://game/bootstrap/app/level_entry_runtime.gd")
 const WAVE_DIRECTOR := preload("res://game/features/spawning/public/wave_director.gd")
 
 @onready var player: Node3D = $Gameplay/Player
@@ -38,6 +39,8 @@ var mission_objects: Node3D
 var impact_pool: Node3D
 
 var defer_layout_loading := false
+## Name of the saved map being played; the level chain uses it to find its neighbours.
+var current_level := ""
 var _mission_loading := false
 var _ended := false
 var _pause_open := false
@@ -98,6 +101,10 @@ func _ready() -> void:
 	mission_layout.name = "MissionLayout"
 	gameplay.add_child(mission_layout)
 	mission_layout.call("setup", self, player, infection_runtime)
+	var entries := LEVEL_ENTRIES.new()
+	entries.name = "LevelEntries"
+	add_child(entries)
+	entries.setup(self, player, planning_mode)
 	var occlusion := OCCLUSION.new()
 	occlusion.name = "OcclusionEffects"
 	add_child(occlusion)
@@ -303,6 +310,17 @@ func _on_restart_pressed() -> void:
 	add_child(loader)
 	loader.completed.connect(func(_success: bool) -> void: _mission_loading = false)
 	loader.start()
+
+
+## Level chain: reload the scene with another saved map, arriving at `arrival` ({x, z} or {}).
+func travel_to_level(map_name: String, arrival: Dictionary) -> void:
+	if _mission_loading or _ended:
+		return
+	_mission_loading = true
+	var loader := preload("res://game/bootstrap/app/menu/mission_loader.gd").new()
+	add_child(loader)
+	loader.completed.connect(func(_success: bool) -> void: _mission_loading = false)
+	loader.start_map(planning_mode.storage._map_path(map_name), map_name, arrival)
 
 
 func _setup_blood_effects() -> void:
