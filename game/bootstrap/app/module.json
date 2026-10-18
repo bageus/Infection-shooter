@@ -30,6 +30,7 @@
     "core.localization"
   ],
   "runtime_contracts": {
-    "planned_physics_v1": "DTO v8 optional settled_physics={version:1}; transform-scoped sleep state. Corpse decor_pose.physics_v1 validated before replacement. Legacy v1-v8 compatible, ADR0055."
+    "planned_physics_v1": "DTO v8 optional settled_physics={version:1}; transform-scoped sleep state. Corpse decor_pose.physics_v1 validated before replacement. Legacy v1-v8 compatible, ADR0055.",
+    "enemy_gameplay_modes_v1": "Bootstrap-owned transient metadata on injected target: {ignore_player:bool,no_damage:bool}; missing=false. Infected reads at sensing/attack time, applies live and to late spawns; ADR0059. No dependency edge or map DTO change."
   }
 }
