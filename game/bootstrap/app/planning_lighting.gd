@@ -14,6 +14,8 @@ var world_environment: WorldEnvironment
 var _saved_energy := 0.0
 var _saved_source := Environment.AMBIENT_SOURCE_DISABLED
 var _saved_color := Color.WHITE
+var _saved_reflected := Environment.REFLECTION_SOURCE_DISABLED
+var _game_lights_only := false
 var _planning := false
 var _game_lighting := true
 # Compatibility renders only a fixed number of lights per frame and silently drops
@@ -232,16 +234,31 @@ func set_game_lighting(enabled: bool) -> void:
 		_apply_preview()
 
 
+func set_game_lights_only(enabled: bool) -> void:
+	_game_lights_only = enabled
+	_apply_preview()
+
+
 func _capture_ambient() -> void:
+	if _game_lights_only:
+		return
 	var environment := world_environment.environment
 	_saved_source = environment.ambient_light_source
 	_saved_color = environment.ambient_light_color
 	_saved_energy = environment.ambient_light_energy
+	_saved_reflected = environment.reflected_light_source
 
 
 func _apply_preview() -> void:
+	if not is_instance_valid(world_environment) or world_environment.environment == null:
+		return
 	_restore_ambient()
-	if _planning and not _game_lighting:
+	if _game_lights_only:
+		var environment := world_environment.environment
+		environment.ambient_light_source = Environment.AMBIENT_SOURCE_DISABLED
+		environment.ambient_light_energy = 0.0
+		environment.reflected_light_source = Environment.REFLECTION_SOURCE_DISABLED
+	elif _planning and not _game_lighting:
 		var environment := world_environment.environment
 		environment.ambient_light_source = Environment.AMBIENT_SOURCE_COLOR
 		environment.ambient_light_color = Color(0.62, 0.68, 0.78, 1.0)
@@ -255,6 +272,7 @@ func _restore_ambient() -> void:
 	environment.ambient_light_source = _saved_source
 	environment.ambient_light_color = _saved_color
 	environment.ambient_light_energy = _saved_energy
+	environment.reflected_light_source = _saved_reflected
 
 
 func _exit_tree() -> void:

@@ -2,7 +2,7 @@ extends SceneTree
 ## Renders the mutation skill effects from the game camera for visual review.
 ##
 ##   xvfb-run -a godot --path . --rendering-method gl_compatibility \
-##     --script res://tools/capture_skill_vfx.gd -- <out_dir> [procedural]
+##     --script res://tools/capture_skill_vfx.gd -- <out_dir>
 ##
 ## Writes one <out_dir>/<shot>.png per effect (player in the middle, a few
 ## infected around), plus close-ups of the body overlays.
@@ -13,7 +13,6 @@ const SIZE := Vector2i(640, 480)
 const GAME_EYE := Vector3(10, 12, 10) * 0.45
 
 var _out_dir := "/tmp/skill_vfx"
-var _procedural := false
 var _stage: Node3D
 var _player: CharacterBody3D
 var _vfx: Node
@@ -25,7 +24,6 @@ func _initialize() -> void:
 	var args := OS.get_cmdline_user_args()
 	if not args.is_empty():
 		_out_dir = args[0]
-	_procedural = args.size() > 1 and args[1] == "procedural"
 	call_deferred("_capture")
 
 
@@ -35,7 +33,6 @@ func _capture() -> void:
 	await _wait(0.6)
 	_vfx = _player.get("mutation_effects").get("vfx")
 	_vfx.call("configure_world", _stage)
-	_vfx.set("procedural", _procedural)
 	var center := _player.global_position
 
 	_vfx.call("buff_started", "storm_pulse")

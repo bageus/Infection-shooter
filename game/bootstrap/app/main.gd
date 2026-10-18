@@ -146,13 +146,6 @@ func set_infinite_antidotes_enabled(enabled: bool) -> void:
 	player.set("infinite_antidotes", enabled)
 
 
-## Settings: self-made procedural skill effects instead of the sprite sheets.
-func set_procedural_skill_effects(enabled: bool) -> void:
-	var effects: Node = player.get("mutation_effects")
-	if effects != null and effects.get("vfx") != null:
-		effects.get("vfx").set("procedural", enabled)
-
-
 ## Settings: dodge animation, 0 = dive roll, 1 = strafe jump.
 func set_dodge_animation_style(style: int) -> void:
 	player.call("set_dodge_animation_style", style)

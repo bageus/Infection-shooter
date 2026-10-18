@@ -10,7 +10,7 @@ var bindings := BINDINGS.new()
 const FILE := "user://interface_settings.cfg"
 const DEFAULTS := {"window_mode": 0, "resolution": "1280x720", "language": "ru", "brightness": 1.0, "text_scale": 1.0,
 	"walk_speed_multiplier": 1.0, "walk_animation_multiplier": 1.0,
-	"volume": 0.4, "effects_volume": 1.0, "music_volume": 1.0, "menu_music": true, "menu_music_volume": 1.0, "sound": true, "occlusion_mode": 0, "test_mutagen": false, "infinite_antidotes": false, "lighting": true, "electronic_particles": true, "skill_effects": 0, "dodge_animation": 0,
+	"volume": 0.4, "effects_volume": 1.0, "music_volume": 1.0, "menu_music": true, "menu_music_volume": 1.0, "sound": true, "occlusion_mode": 0, "test_mutagen": false, "infinite_antidotes": false, "lighting": true, "game_lights_only": false, "electronic_particles": true, "dodge_animation": 0,
 	"bullet_impact_smoke": true, "sunlight": true, "shadows": true, "shadow_quality": 2, "mesh_lod": true, "keep_corpses": true}
 var values: Dictionary = DEFAULTS.duplicate()
 
@@ -30,7 +30,6 @@ func load_settings() -> void:
 	values.language = "en" if values.language == "en" else "ru"
 	values.brightness = clampf(values.brightness, 0.8, 1.4)
 	values.occlusion_mode = clampi(values.occlusion_mode, 0, 1)
-	values.skill_effects = clampi(values.skill_effects, 0, 1)
 	values.dodge_animation = clampi(values.dodge_animation, 0, 1)
 	values.walk_speed_multiplier = clampf(values.walk_speed_multiplier, 0.5, 1.5) if is_finite(values.walk_speed_multiplier) else 1.0
 	values.walk_animation_multiplier = clampf(values.walk_animation_multiplier, 0.5, 2.0) if is_finite(values.walk_animation_multiplier) else 1.0
@@ -89,8 +88,6 @@ func apply_to_game(tree: SceneTree, display_user_action: bool = false) -> void:
 		scene.call("set_test_mutagen_enabled", bool(values.test_mutagen))
 	if scene != null and scene.has_method("set_infinite_antidotes_enabled"):
 		scene.call("set_infinite_antidotes_enabled", bool(values.infinite_antidotes))
-	if scene != null and scene.has_method("set_procedural_skill_effects"):
-		scene.call("set_procedural_skill_effects", int(values.skill_effects) == 1)
 	if scene != null and scene.has_method("set_dodge_animation_style"):
 		scene.call("set_dodge_animation_style", int(values.dodge_animation))
 	if scene != null and scene.has_method("set_walk_tuning"):
@@ -103,10 +100,11 @@ func apply_to_game(tree: SceneTree, display_user_action: bool = false) -> void:
 	var lighting := scene.get_node_or_null("PlanningLighting") if scene != null else null
 	if lighting != null:
 		lighting.call("set_local_lights_enabled", bool(values.lighting))
+		lighting.call("set_game_lights_only", bool(values.game_lights_only))
 	var overhead := scene.get_node_or_null("GlobalOverheadLight") as DirectionalLight3D if scene != null else null
 	if overhead != null:
 		# Hiding the source removes its light and shadows without changing shader variants.
-		overhead.visible = bool(values.lighting) and bool(values.sunlight)
+		overhead.visible = bool(values.lighting) and bool(values.sunlight) and not bool(values.game_lights_only)
 	SHADOWS.apply(tree, bool(values.shadows), int(values.shadow_quality))
 	if tree != null:
 		# 0 turns automatic mesh LOD off; 1 is the engine default. No shader recompile.

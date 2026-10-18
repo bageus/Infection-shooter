@@ -90,6 +90,13 @@ func _general() -> void:
 	language.selected = 1 if dialog.view.preferences.values.language == "en" else 0
 	language.item_selected.connect(dialog._language_changed)
 	dialog.call("_row", "language", language)
+	var scale := OptionButton.new()
+	scale.name = "TextScale"
+	for percent in [100, 115, 130]:
+		scale.add_item(str(percent) + "%")
+	scale.selected = [1.0, 1.15, 1.3].find(dialog.view.preferences.values.text_scale)
+	scale.item_selected.connect(dialog._scale_changed)
+	dialog.call("_row", "scale", scale)
 	var cloud := CheckButton.new()
 	cloud.name = "TestMutagen"
 	cloud.text = dialog.view.text("testMutagen")
@@ -117,13 +124,6 @@ func _general() -> void:
 func _video() -> void:
 	preload("res://game/bootstrap/app/menu/display_options.gd").build(dialog)
 	dialog.call("_slider", "brightness", "brightness", .8, 1.4, .05)
-	var scale := OptionButton.new()
-	scale.name = "TextScale"
-	for percent in [100, 115, 130]:
-		scale.add_item(str(percent) + "%")
-	scale.selected = [1.0, 1.15, 1.3].find(dialog.view.preferences.values.text_scale)
-	scale.item_selected.connect(dialog._scale_changed)
-	dialog.call("_row", "scale", scale)
 	var occlusion := OptionButton.new()
 	occlusion.name = "Occlusion"
 	occlusion.add_item(dialog.view.text("occlusionSilhouettes"))
@@ -131,19 +131,19 @@ func _video() -> void:
 	occlusion.selected = dialog.view.preferences.values.occlusion_mode
 	occlusion.item_selected.connect(func(index: int) -> void: dialog.call("_change", "occlusion_mode", index))
 	dialog.call("_row", "occlusion", occlusion)
-	var skill_effects := OptionButton.new()
-	skill_effects.name = "SkillEffects"
-	skill_effects.add_item(dialog.view.text("skillEffectsSheets"))
-	skill_effects.add_item(dialog.view.text("skillEffectsProcedural"))
-	skill_effects.selected = dialog.view.preferences.values.skill_effects
-	skill_effects.item_selected.connect(func(index: int) -> void: dialog.call("_change", "skill_effects", index))
-	dialog.call("_row", "skillEffects", skill_effects)
 	var lighting := CheckButton.new()
 	lighting.name = "Lighting"
 	lighting.text = dialog.view.text("lighting")
 	lighting.button_pressed = dialog.view.preferences.values.lighting
 	lighting.toggled.connect(func(value: bool) -> void: dialog.call("_change", "lighting", value))
 	dialog.get("layout").add_child(lighting)
+	var game_only := CheckButton.new()
+	game_only.name = "GameLightsOnly"
+	game_only.text = dialog.view.text("gameLightsOnly")
+	game_only.tooltip_text = dialog.view.text("gameLightsOnlyHint")
+	game_only.button_pressed = dialog.view.preferences.values.game_lights_only
+	game_only.toggled.connect(func(value: bool) -> void: dialog.call("_change", "game_lights_only", value))
+	dialog.get("layout").add_child(game_only)
 	var sunlight := CheckButton.new()
 	sunlight.name = "Sunlight"
 	sunlight.text = dialog.view.text("sunlight")

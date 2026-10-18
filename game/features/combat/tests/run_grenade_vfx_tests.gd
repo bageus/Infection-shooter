@@ -1,10 +1,8 @@
 extends SceneTree
-## Runtime checks for the grenade launcher explosion: the 12-frame sheet (or
-## the layered fallback), procedural smoke and the lingering smoke column.
+## Runtime checks for the procedural grenade launcher fire, flash, smoke
+## and the lingering smoke column, without any imported sprite sheet.
 
 const EXPLOSION := preload("res://game/features/combat/grenade_explosion_v1.tscn")
-const ATLASES := preload("res://game/core/vfx/public/effect_atlases.gd")
-const FLIPBOOK := preload("res://game/core/vfx/public/sprite_flipbook.gd")
 const SMOKE_SHADER := preload("res://game/core/vfx/public/smoke_puff.gdshader")
 
 const DAMAGE := preload("res://game/features/combat/public/grenade_explosion.gd")
@@ -28,21 +26,10 @@ func _run() -> void:
 	blast.global_position = Vector3(0, 0.5, 0)
 	blast.call("start", Vector3.UP)
 	await process_frame
-	var sheet := blast.find_children("Flipbook*", "", false, false)
-	_expect(sheet.size() == 1, "The explosion plays the 12-frame sheet.")
-	_expect(blast.get_node_or_null("Flash") == null, "The sheet replaces the old layered sprites.")
-	if sheet.size() == 1:
-		# Frame count is not elapsed time on an uncapped software renderer.
-		# Use the same first-use hitch cap as the live flipbook, then let the
-		# final process callbacks apply that time before reading the uniform.
-		var elapsed := 0.0
-		while elapsed < 0.08:
-			await process_frame
-			elapsed += minf(root.get_process_delta_time(), 1.0 / 30.0)
-		await process_frame
-		_expect(float((sheet[0] as GeometryInstance3D).get_instance_shader_parameter(&"frame_position")) >= 2.0, "The flash frames go by quickly.")
-	var spans: Array = ATLASES.GRENADE_EXPLOSION["durations"]
-	_expect(float(spans[0]) * 4.0 <= float(spans[spans.size() - 1]), "Flash frames play fast and the closing smoke frames slowly.")
+	_expect(blast.find_children("Flipbook*", "", false, false).is_empty(), "Explosion uses only procedural particles, without a sheet.")
+	var embers := blast.get_node("FireEmbers") as GPUParticles3D
+	_expect(embers.draw_pass_1 != null and embers.process_material != null, "Procedural fire has geometry and motion.")
+	_expect(blast.get_node("ImpactLight").light_energy > 0.0, "Explosion keeps its gameplay flash.")
 	var wisps := blast.get_node("SmokeWisps") as GPUParticles3D
 	_expect(((wisps.draw_pass_1 as PrimitiveMesh).material as ShaderMaterial).shader == SMOKE_SHADER, "Smoke puffs use the procedural smoke shader.")
 	await create_timer(0.5).timeout
