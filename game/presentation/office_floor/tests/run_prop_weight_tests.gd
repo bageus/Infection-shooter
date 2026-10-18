@@ -15,6 +15,7 @@ const SMALL_BOX := MODELS + "04/04_cardboard_boxes_1.glb"
 const CHAIR := MODELS + "06/06_simple_chair.glb"
 const TRASH_BIN := MODELS + "09/09_trash_bin.glb"
 const LONG_TABLE := MODELS + "07/07_table_longest.glb"
+const RACK := MODELS + "03/03_server_rack.glb"
 
 # Mirrors the player/infected contact loop: pushes use the intended motion.
 class Walker:
@@ -47,6 +48,7 @@ func _run() -> void:
 	await _test_heavy_blocks()
 	await _test_kicks()
 	await _test_shots_move_items()
+	await _test_server_rack_stays_put()
 	print("Prop weight tests: %d failure(s)." % failures)
 	quit(failures)
 
@@ -202,6 +204,24 @@ func _test_shots_move_items() -> void:
 	_expect(moved[1] > 0.05, "Pistol shots move a trash bin (%.2f m)." % moved[1])
 	_expect(first_push[1] > first_push[0] and first_push[0] > first_push[2] * 10.0, "A hit gives a lighter prop more speed (bin %.2f, chair %.2f, table %.2f m/s)." % [first_push[1], first_push[0], first_push[2]])
 	_expect(moved[2] < 0.1, "A long table barely creeps (%.2f m)." % moved[2])
+	stage.queue_free()
+	await process_frame
+
+
+## Server racks (issue 303) are too heavy to move: they stay frozen, so shots
+## and walking pushes leave them where they stand, before and after damage.
+func _test_server_rack_stays_put() -> void:
+	var stage := _stage()
+	var rack := _prop(stage, RACK, Vector3(0, 0.05, 0))
+	for frame in 40:
+		await physics_frame
+	var start := rack.global_position
+	for shot in 3:
+		rack.call("take_projectile_hit", 6.0, rack.global_position + Vector3(0, 0.4, 0), Vector3.UP, Vector3(1, 0, 0), "RIFLE")
+		await create_timer(0.15).timeout
+	await create_timer(0.8).timeout
+	_expect(rack.freeze, "A server rack is frozen in place.")
+	_expect(rack.global_position.distance_to(start) < 0.01, "Rifle shots do not move a server rack (%.3f m)." % rack.global_position.distance_to(start))
 	stage.queue_free()
 	await process_frame
 
