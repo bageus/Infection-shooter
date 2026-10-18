@@ -255,14 +255,13 @@ func _update_vitals() -> void:
 
 # Armor is a thin strip stacked on the top edge of the health bar, shown only while armor is held.
 func _update_armor(armor: float, max_armor: float) -> void:
-	var has_armor := armor > 0.0
-	armor_bar.visible = has_armor
-	armor_value.visible = has_armor
-	if not has_armor:
-		return
+	# The bar always mirrors the player's armor: the scene's default value would otherwise stick at 100 while hidden.
 	armor_bar.max_value = max_armor
 	armor_bar.value = armor
 	armor_value.text = str(roundi(armor))
+	var has_armor := armor > 0.0
+	armor_bar.visible = has_armor
+	armor_value.visible = has_armor
 
 
 # A green pulse on the health bar marks a noticeable heal (medkit, kill heal).
