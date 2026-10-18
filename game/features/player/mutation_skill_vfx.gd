@@ -1,20 +1,12 @@
 extends Node
-## Presentation of mutation skills on and around the player: the supplied
-## fx_skills sheets for casts and buffs (or the self-made procedural set,
-## picked in the settings), the Predator Dash speed trail, and
+## Procedural mutation skill presentation: casts and buffs, the Predator Dash
+## speed trail, and
 ## the body overlay for Bone Armor, Hardened Tissue and Berserk (aura and red
 ## mask eyes). Gameplay stays in mutation_skill_effects.gd, which reports here.
 
-const FLIPBOOK := preload("res://game/core/vfx/public/sprite_flipbook.gd")
-const ATLASES := preload("res://game/core/vfx/public/effect_atlases.gd")
 const DASH_TRAIL := preload("res://game/features/player/dash_trail.gd")
 const RANGE_DOME := preload("res://game/features/player/range_dome.gd")
 const PROCEDURAL := preload("res://game/features/player/skill_fx/procedural_skill_fx.gd")
-## The drawn spikes reach past the burst, so they play at this share of it.
-const SPIKE_VISUAL_SHARE := 0.55
-## Spore Cocoon sheet: half the old size, played twice as fast.
-const SPORE_VISUAL_SHARE := 0.375
-const SPORE_SPEED := 2.0
 ## Range dome colours per skill area.
 const BLOOD_RANGE := Color(0.85, 0.08, 0.1)
 const STORM_RANGE := Color(0.25, 0.65, 1.0)
@@ -27,18 +19,11 @@ const EYES_SHADER := preload("res://game/features/player/berserk_eyes.gdshader")
 # Eye glows in front of the head bone, in metres: forward, up, half spacing.
 const EYE_OFFSET := Vector3(0.12, 0.03, 0.045)
 const EYE_SIZE := 0.13
-const GROUND_LIFT := 0.05
 const SHIELD_COOLDOWN := 0.6
 const OVERLAY_FADE_SPEED := 3.0
 
 var player: Node3D
 var effects_root: Node3D
-## true: self-made procedural effects instead of the sprite sheets.
-var _requested_procedural := false
-var _missing_skill_sheets := false
-var procedural: bool:
-	get: return _requested_procedural or _missing_skill_sheets
-	set(value): _requested_procedural = value
 var _loops := {}
 var _domes := {}
 var _skin: ShaderMaterial
@@ -54,8 +39,6 @@ var _shield_ready := 0.0
 func setup(host: Node3D) -> void:
 	name = "SkillVfx"
 	player = host
-	for atlas: Dictionary in [ATLASES.SPIKE_BURST, ATLASES.ELECTRIC_PULSE, ATLASES.CHAIN_LIGHTNING, ATLASES.ACID_PUDDLES, ATLASES.SPORE_COCOON, ATLASES.ENERGY_SHIELD, ATLASES.HEARTBEAT, ATLASES.ELECTRIC_FIELD, ATLASES.BLADE_ORBIT]:
-		_missing_skill_sheets = _missing_skill_sheets or not ATLASES.available(atlas)
 	_build_skin()
 	_build_eyes()
 	set_process(false)
@@ -70,77 +53,27 @@ func configure_world(container: Node3D) -> void:
 ## Blood Burst: spikes thrown out around the player.
 func spike_burst(center: Vector3, radius: float) -> void:
 	RANGE_DOME.spawn(_world(), center, radius, BLOOD_RANGE, 0.6)
-	if procedural:
-		PROCEDURAL.spike_burst(_world(), center, radius)
-		return
-	_ground(ATLASES.SPIKE_BURST, center, radius * SPIKE_VISUAL_SHARE, {"additive": 0.15})
-
+	PROCEDURAL.spike_burst(_world(), center, radius)
 
 ## Retaliation: a stunning electric ring.
 func electric_pulse(center: Vector3, radius: float) -> void:
 	RANGE_DOME.spawn(_world(), center, radius, STORM_RANGE, 0.5)
-	if procedural:
-		PROCEDURAL.electric_pulse(_world(), center, radius)
-		return
-	_ground(ATLASES.ELECTRIC_PULSE, center, radius, {"additive": 1.0, "brightness": 1.3})
-
+	PROCEDURAL.electric_pulse(_world(), center, radius)
 
 ## Discharge: one lightning link from each point to the next.
 func chain_lightning(points: Array[Vector3]) -> void:
-	if procedural:
-		PROCEDURAL.chain_lightning(_world(), points)
-		return
-	var atlas := ATLASES.CHAIN_LIGHTNING
-	for i in points.size() - 1:
-		var from := points[i] + Vector3.UP * 1.0
-		var to := points[i + 1] + Vector3.UP * 1.0
-		var length := from.distance_to(to)
-		if length < 0.2:
-			continue
-		FLIPBOOK.spawn(_world(), atlas, from, length / float(atlas["reach"]), {
-			"additive": 1.0, "brightness": 1.2, "axis": to - from,
-			"atlas_angle": float(atlas["jet_angle"]), "speed": 1.0 + i * 0.15,
-		})
-
+	PROCEDURAL.chain_lightning(_world(), points)
 
 ## Acid Spit: a pool of acid lying for `seconds`.
 func acid_pool(center: Vector3, radius: float, seconds: float) -> Node3D:
-	if procedural:
-		RANGE_DOME.spawn(_world(), center, radius, ACID_RANGE, seconds)
-		return PROCEDURAL.acid_pool(_world(), center, radius, seconds)
-	var atlas := ATLASES.ACID_PUDDLES
-	var pool := FLIPBOOK.spawn(_world(), atlas, center + Vector3.UP * GROUND_LIFT, ATLASES.size_for_radius(atlas, radius), {
-		"flat": true, "frame": randi() % int(atlas["frames"]), "lifetime": seconds, "fade_out": 0.8, "opacity": 0.9,
-	})
 	RANGE_DOME.spawn(_world(), center, radius, ACID_RANGE, seconds)
-	return pool
-
+	return PROCEDURAL.acid_pool(_world(), center, radius, seconds)
 
 ## Spore Cocoon: the cocoon swells for `fuse` seconds, then bursts.
 func spore_cocoon(center: Vector3, radius: float, fuse: float) -> void:
 	# The dome marks where the spores will land for the fuse and the burst.
 	RANGE_DOME.spawn(_world(), center, radius, SPORE_RANGE, fuse + 0.5)
-	if procedural:
-		PROCEDURAL.spore_cocoon(_world(), center, radius, fuse)
-		return
-	# The sheet plays at SPORE_SPEED and starts late so its burst still lands
-	# on the fuse; until then only the dome shows.
-	var delay := maxf(fuse - fuse / SPORE_SPEED, 0.0)
-	if delay <= 0.0:
-		_play_cocoon(center, radius, fuse)
-	else:
-		get_tree().create_timer(delay, false).timeout.connect(_play_cocoon.bind(center, radius, fuse))
-
-
-func _play_cocoon(center: Vector3, radius: float, fuse: float) -> void:
-	var atlas := ATLASES.SPORE_COCOON
-	var swell := 0.0
-	var spans: Array = atlas["durations"]
-	for i in int(atlas["fuse_frames"]):
-		swell += float(spans[i])
-	FLIPBOOK.spawn(_world(), atlas, center, ATLASES.size_for_radius(atlas, radius * SPORE_VISUAL_SHARE), {
-		"billboard": true, "speed": swell * SPORE_SPEED / maxf(fuse, 0.1), "fade_out": 0.3,
-	})
+	PROCEDURAL.spore_cocoon(_world(), center, radius, fuse)
 
 
 ## Claws: a slash on the struck enemy.
@@ -148,13 +81,7 @@ func claw_slash(enemy: Node3D) -> void:
 	if not is_instance_valid(enemy):
 		return
 	var height := 1.1 * (enemy.get_node("Body") as Node3D).scale.y if enemy.has_node("Body") else 1.1
-	if procedural:
-		PROCEDURAL.claw_slash(_world(), enemy.global_position + Vector3.UP * height)
-		return
-	FLIPBOOK.spawn(_world(), ATLASES.CLAW_SLASH, enemy.global_position + Vector3.UP * height, 2.0, {
-		"additive": 0.6, "brightness": 1.2, "spin": randf_range(-0.5, 0.5),
-	})
-
+	PROCEDURAL.claw_slash(_world(), enemy.global_position + Vector3.UP * height)
 
 ## Temporary armor gained or soaking a hit: the shield dome flashes once.
 func energy_shield() -> void:
@@ -162,24 +89,11 @@ func energy_shield() -> void:
 	if now < _shield_ready:
 		return
 	_shield_ready = now + SHIELD_COOLDOWN
-	if procedural:
-		PROCEDURAL.energy_shield(player, player.global_position)
-		return
-	var atlas := ATLASES.ENERGY_SHIELD
-	FLIPBOOK.spawn(player, atlas, player.global_position + Vector3.UP * 0.02, ATLASES.size_for_radius(atlas, 0.95), {
-		"additive": 0.7, "fade_out": 0.25, "opacity": 0.8,
-	})
-
+	PROCEDURAL.energy_shield(player, player.global_position)
 
 ## Second Heart: a beating heart above the player for a while.
 func heartbeat(seconds: float = 2.4) -> void:
-	if procedural:
-		PROCEDURAL.heartbeat(player, player.global_position + Vector3.UP * 2.5, seconds)
-		return
-	var heart := FLIPBOOK.spawn(player, ATLASES.HEARTBEAT, player.global_position + Vector3.UP * 2.5, 1.0, {"cycle": true})
-	if heart != null:
-		get_tree().create_timer(seconds, false).timeout.connect(_stop.bind(weakref(heart), 0.35))
-
+	PROCEDURAL.heartbeat(player, player.global_position + Vector3.UP * 2.5, seconds)
 
 ## Predator Dash: speed streaks behind the body for the dash.
 func dash_trail(seconds: float) -> void:
@@ -191,9 +105,9 @@ func dash_trail(seconds: float) -> void:
 func buff_started(skill_id: String) -> void:
 	match skill_id:
 		"storm_pulse":
-			_loop(skill_id, ATLASES.ELECTRIC_FIELD, 4.0, {"additive": 1.0, "opacity": 0.85}, STORM_RANGE)
+			_loop(skill_id, 4.0, STORM_RANGE)
 		"bone_blades":
-			_loop(skill_id, ATLASES.BLADE_ORBIT, 1.7, {"additive": 0.35}, BLADE_RANGE)
+			_loop(skill_id, 1.7, BLADE_RANGE)
 		"berserk":
 			_targets["eyes"] = 1.0
 			_set_aura(true)
@@ -267,25 +181,10 @@ func _world() -> Node:
 	return effects_root if is_instance_valid(effects_root) else player.get_parent()
 
 
-func _ground(atlas: Dictionary, center: Vector3, radius: float, options: Dictionary) -> MeshInstance3D:
-	var settings := options.duplicate()
-	settings["ground"] = true
-	return FLIPBOOK.spawn(_world(), atlas, center + Vector3.UP * GROUND_LIFT, ATLASES.size_for_radius(atlas, radius), settings)
-
-
-# A looping sheet that rides on the player, with its range dome, until the
-# buff ends.
-func _loop(skill_id: String, atlas: Dictionary, radius: float, options: Dictionary, range_tint: Color) -> void:
+func _loop(skill_id: String, radius: float, range_tint: Color) -> void:
 	if has_loop(skill_id):
 		return
-	var node: Node3D
-	if procedural:
-		node = PROCEDURAL.storm_field(player, player.global_position, radius) if skill_id == "storm_pulse" else PROCEDURAL.blade_orbit(player, player.global_position, radius)
-	else:
-		var settings := options.duplicate()
-		settings["ground"] = true
-		settings["cycle"] = true
-		node = FLIPBOOK.spawn(player, atlas, player.global_position + Vector3.UP * GROUND_LIFT, ATLASES.size_for_radius(atlas, radius), settings)
+	var node := PROCEDURAL.storm_field(player, player.global_position, radius) if skill_id == "storm_pulse" else PROCEDURAL.blade_orbit(player, player.global_position, radius)
 	if node != null:
 		_loops[skill_id] = weakref(node)
 	var dome: MeshInstance3D = null if has_range_dome(skill_id) else RANGE_DOME.spawn(player, player.global_position, radius, range_tint)

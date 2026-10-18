@@ -15,7 +15,7 @@ var _visual: Node3D
 var _head_height := 1.8
 var _stun_left := 0.0
 var _poison_left := 0.0
-var _stars: Node3D
+var _stars: MeshInstance3D
 var _meshes: Array[MeshInstance3D] = []
 
 
@@ -30,10 +30,7 @@ func setup(body: Node3D, visual: Node3D, head_height: float) -> void:
 func stunned(seconds: float) -> void:
 	_stun_left = maxf(_stun_left, seconds)
 	if not is_instance_valid(_stars) and _stun_left > 0.05:
-		_stars = STARS.new()
-		_body.add_child(_stars)
-		_stars.position = Vector3.UP * _head_height
-		_stars.scale = Vector3.ONE * STAR_SIZE * _visual_scale()
+		_stars = STARS.spawn(_body, _head_height, STAR_SIZE * _visual_scale())
 	set_process(true)
 
 

@@ -6,7 +6,7 @@ const FLIPBOOK := preload("res://game/core/vfx/public/sprite_flipbook.gd")
 const ATLASES := preload("res://game/core/vfx/public/effect_atlases.gd")
 # Any texture serves as a 4x3 test sheet.
 const TEST_SHEET := {
-	"path": "res://models/objects/textures/grenade_explosion_layers/Twelve-frame fiery explosion flipbook atlas.png",
+	"path": "res://models/objects/textures/fire_extinguisher_layers/Fire extinguisher powder burst atlas.png",
 	"columns": 4, "rows": 3, "frames": 12,
 	"durations": [0.02, 0.02, 0.02, 0.02, 0.03, 0.03, 0.04, 0.05, 0.06, 0.08, 0.1, 0.13],
 }
@@ -25,7 +25,7 @@ func _run() -> void:
 	_expect(is_equal_approx(FLIPBOOK.frame_at(TEST_SHEET, 0.03), 1.5), "Frame position carries the crossfade fraction.")
 	_expect(FLIPBOOK.frame_at(TEST_SHEET, 10.0) < 0.0, "Playback ends after the last frame.")
 	_expect(is_equal_approx(FLIPBOOK.length_of(TEST_SHEET), 0.6), "Sheet length is the sum of frame times.")
-	for atlas in [ATLASES.GRENADE_EXPLOSION, ATLASES.ELECTRIC_SPARK, ATLASES.EXTINGUISHER_SPRAY]:
+	for atlas in [ATLASES.ELECTRIC_SPARK, ATLASES.EXTINGUISHER_SPRAY]:
 		var spans: Array = atlas["durations"]
 		_expect(spans.size() == int(atlas["frames"]), "Every frame has a time: " + str(atlas["path"]))
 		_expect(float(spans[0]) <= float(spans[spans.size() - 1]), "Opening frames play no slower than the closing ones.")
@@ -44,7 +44,7 @@ func _run() -> void:
 	_expect(is_instance_valid(scrap) and scrap.global_position.x > 0.1, "A moving sprite travels with its velocity.")
 	await create_timer(0.4).timeout
 	_expect(not is_instance_valid(scrap), "A fixed-frame sprite frees itself after its lifetime.")
-	for atlas in [ATLASES.GRENADE_EXPLOSION, ATLASES.ELECTRIC_SPARK, ATLASES.TORN_PAPER, ATLASES.EXTINGUISHER_SPRAY]:
+	for atlas in [ATLASES.ELECTRIC_SPARK, ATLASES.TORN_PAPER, ATLASES.EXTINGUISHER_SPRAY]:
 		_expect(ATLASES.available(atlas), "Supplied sheet is in the project: " + str(atlas["path"]))
 		var texture := load(str(atlas["path"])) as Texture2D
 		var cell := Vector2(texture.get_width() / float(atlas["columns"]), texture.get_height() / float(atlas["rows"]))
@@ -67,7 +67,6 @@ func _run() -> void:
 	await create_timer(0.3).timeout
 	_expect(not is_instance_valid(looping), "stop() fades a looping flipbook out.")
 	await _check_cycle_and_ground(stage)
-	_check_skill_sheets(stage)
 	stage.queue_free()
 	await process_frame
 	print("Flipbook tests: %d failure(s)." % failures)
@@ -95,19 +94,6 @@ func _check_cycle_and_ground(stage: Node3D) -> void:
 	ring.call("stop", 0.05)
 	await create_timer(0.2).timeout
 	_expect(not is_instance_valid(ring), "stop() ends a cycling flipbook.")
-
-
-func _check_skill_sheets(stage: Node3D) -> void:
-	for atlas: Dictionary in [ATLASES.ELECTRIC_FIELD, ATLASES.CLAW_SLASH, ATLASES.ELECTRIC_PULSE, ATLASES.SPIKE_BURST, ATLASES.ENERGY_SHIELD, ATLASES.CHAIN_LIGHTNING, ATLASES.SPORE_COCOON, ATLASES.BLADE_ORBIT, ATLASES.STUN_STARS, ATLASES.ACID_PUDDLES, ATLASES.HEARTBEAT]:
-		if not ATLASES.available(atlas):
-			_expect(FLIPBOOK.spawn(stage, atlas, Vector3.ZERO, 1.0) == null, "Retired optional skill sheets fail safely; gameplay uses procedural effects.")
-			continue
-		var texture := load(str(atlas["path"])) as Texture2D
-		var cell := Vector2(texture.get_width() / float(atlas["columns"]), texture.get_height() / float(atlas["rows"]))
-		_expect(absf(cell.x / cell.y - float(atlas.get("cell_aspect", 1.0))) < 0.05, "Skill sheet grid matches its cells: " + str(atlas["path"]))
-		var spans: Array = atlas["durations"]
-		_expect(spans.is_empty() or spans.size() == int(atlas["frames"]), "Every skill frame has a time: " + str(atlas["path"]))
-	_expect(is_equal_approx(ATLASES.size_for_radius(ATLASES.ELECTRIC_FIELD, 4.0), 8.0 / float(ATLASES.ELECTRIC_FIELD["extent"])), "A ring of radius R plays at 2R / extent.")
 
 
 func _expect(condition: bool, message: String) -> void:

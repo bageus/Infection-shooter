@@ -188,6 +188,7 @@ func _shadow_checks(tabs: TabContainer, dialog: Control) -> void:
 
 
 func _general_checks(tabs: TabContainer) -> void:
+	_check_presentation_options(tabs)
 	_enemy_modes_checks(tabs)
 	_dodge_checks(tabs)
 	_walk_checks(tabs)
@@ -289,6 +290,22 @@ func _smoke_checks(tabs: TabContainer) -> void:
 	smoke.set_pressed(true)
 
 
+func _check_presentation_options(tabs: TabContainer) -> void:
+	_check(tabs.get_child(0).find_child("TextScale", true, false) != null, "Text scale belongs to General")
+	_check(tabs.get_child(2).find_child("TextScale", true, false) == null, "Text scale is absent from Video")
+	_check(tabs.find_child("SkillEffects", true, false) == null, "Obsolete sprite choice is removed")
+	var only := tabs.get_child(2).find_child("GameLightsOnly", true, false) as CheckButton
+	_check(only != null and not only.button_pressed, "Game-only lighting belongs to Video and preserves the legacy default")
+	var prefs := PREFS.new()
+	prefs.load_settings()
+	var previous: bool = prefs.values.game_lights_only
+	prefs.values.game_lights_only = true
+	prefs.save_settings()
+	var reloaded := PREFS.new()
+	reloaded.load_settings()
+	_check(reloaded.values.game_lights_only, "Game-only lighting survives settings reload")
+	prefs.values.game_lights_only = previous
+	prefs.save_settings()
 func _enemy_modes_checks(tabs: TabContainer) -> void:
 	for entry in [["EnemiesIgnorePlayer", "enemies_ignore_player"], ["EnemiesNoDamage", "enemies_no_damage"]]:
 		var toggle := tabs.get_child(0).find_child(entry[0], true, false) as CheckButton

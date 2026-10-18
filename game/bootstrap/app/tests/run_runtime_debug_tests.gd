@@ -81,7 +81,6 @@ func _run() -> void:
 	prefs.values.infinite_antidotes = false
 	prefs.apply_to_game(self)
 	_check(not hero.call("use_antidote"), "Turning infinite antidotes off restores the normal stock")
-	_check_skill_effects(prefs, hero)
 	runtime.call("absorb_mutagen", 6.2)
 	_check(runtime.call("is_control_lost"), "Legitimate mutation control loss is preserved")
 	runtime.call("add_control_ampule")
@@ -129,17 +128,3 @@ func _blocker(app: Node3D, effects: Node, start: Vector3) -> MeshInstance3D:
 	blocker.global_position = effects.camera.global_position.lerp(start + Vector3.UP * .8, .5)
 	blocker.global_basis = effects.camera.global_basis
 	return mesh
-
-
-func _check_skill_effects(prefs: RefCounted, hero: Node) -> void:
-	var skill_vfx: Node = hero.get("mutation_effects").get("vfx")
-	prefs.values.skill_effects = 1
-	prefs.apply_to_game(self)
-	_check(skill_vfx.get("procedural"), "The settings switch skill effects to the procedural set")
-	prefs.values.skill_effects = 0
-	prefs.apply_to_game(self)
-	prefs.save_settings()
-	var restored := PREFS.new()
-	restored.load_settings()
-	_check(restored.values.skill_effects == 0, "The legacy sheet preference is preserved on disk")
-	_check(skill_vfx.get("procedural"), "Removed skill sheets keep procedural effects visible after applying the legacy preference")

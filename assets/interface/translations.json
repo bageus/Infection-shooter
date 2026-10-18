@@ -151,9 +151,6 @@
     "bulletImpactSmoke": "Дым от попаданий пуль",
     "bulletImpactSmokeHint": "Небольшие клубы дыма и пыли у следов пуль на поверхностях.",
     "electronicParticles": "Искры при повторных попаданиях в электронику",
-    "skillEffects": "Эффекты навыков",
-    "skillEffectsSheets": "Спрайтовые (ассеты)",
-    "skillEffectsProcedural": "Процедурные (свои)",
     "bloodStyle": "Кровь",
     "bloodStyleAssets": "Декали (ассеты)",
     "bloodStyleProcedural": "Процедурная (своя)",
@@ -334,7 +331,9 @@
     "mutationBranch_Might": "Мощь",
     "mutationEmptySlot": "Выбрать навык",
     "mutationClearSlot": "Освободить ячейку",
-    "mutationRecovery": "Восстановление после эффекта"
+    "mutationRecovery": "Восстановление после эффекта",
+    "gameLightsOnly": "Только игровое освещение",
+    "gameLightsOnlyHint": "Оставляет свет ламп, экранов и игровых эффектов. Отключает общий свет, фоновую подсветку и отражения неба."
   },
   "en": {
     "demo": "INTERACTIVE UI DEMO",
@@ -488,9 +487,6 @@
     "bulletImpactSmoke": "Bullet impact smoke",
     "bulletImpactSmokeHint": "Small smoke and dust puffs at bullet marks on surfaces.",
     "electronicParticles": "Sparks on repeated hits to electronics",
-    "skillEffects": "Skill effects",
-    "skillEffectsSheets": "Sprite sheets (assets)",
-    "skillEffectsProcedural": "Procedural (own)",
     "bloodStyle": "Blood",
     "bloodStyleAssets": "Decals (assets)",
     "bloodStyleProcedural": "Procedural (own)",
@@ -671,6 +667,8 @@
     "mutationBranch_Might": "Might",
     "mutationEmptySlot": "Choose a skill",
     "mutationClearSlot": "Clear slot",
-    "mutationRecovery": "Recovery after effect"
+    "mutationRecovery": "Recovery after effect",
+    "gameLightsOnly": "Game lights only",
+    "gameLightsOnlyHint": "Keeps lamps, displays and gameplay effects. Disables global light, ambient fill and sky reflections."
   }
 }

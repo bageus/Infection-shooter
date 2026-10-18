@@ -2,7 +2,7 @@ extends SceneTree
 ## Skill presentation on the real player scene: buff loops start and stop
 ## with their buffs, passives attach the body overlay, Berserk lights the
 ## aura and the mask eyes, and one-shot effects clean themselves up, for
-## both the sprite-sheet and the procedural effect sets.
+## the procedural effect set.
 
 const PLAYER := preload("res://game/features/player/public/player.tscn")
 const DASH_TRAIL := preload("res://game/features/player/dash_trail.gd")
@@ -54,49 +54,6 @@ func _run() -> void:
 	_expect(not vfx.call("aura_visible") and not vfx.call("eyes_visible"), "Aura and eyes fade when Berserk ends.")
 
 	_expect(is_equal_approx(SKILL_EFFECTS.BLOOD_BURST_RADIUS, 2.4), "Blood Burst reaches 2.4 m (40% less than 4 m).")
-	var before := stage.get_child_count()
-	vfx.call("spike_burst", Vector3.ZERO, 2.4)
-	vfx.call("electric_pulse", Vector3.ZERO, 3.0)
-	var chain: Array[Vector3] = [Vector3.ZERO, Vector3(3, 0, 0), Vector3(3, 0, 3)]
-	vfx.call("chain_lightning", chain)
-	var pool: Node3D = vfx.call("acid_pool", Vector3(2, 0, 0), 1.7, 0.3)
-	_expect(pool != null, "Acid Spit leaves a pool.")
-	if pool != null:
-		var surface := pool if pool is MeshInstance3D else pool.get_child(0) as MeshInstance3D
-		_expect(surface != null, "The acid pool owns visible geometry.")
-		if surface != null:
-			var ground_flag: Variant = surface.get_instance_shader_parameter(&"ground")
-			_expect(ground_flag == null or float(ground_flag) < 0.5, "The acid pool is a fixed floor texture.")
-			var normal := surface.global_basis.y if surface.mesh is PlaneMesh else surface.global_basis.z
-			_expect(normal.normalized().dot(Vector3.UP) > 0.99, "The acid pool lies flat on the floor.")
-			var heading := surface.global_basis.y
-			player.get_node("CameraRig").rotate_y(1.2)
-			await process_frame
-			_expect(surface.global_basis.y.is_equal_approx(heading), "The acid pool does not turn with the camera.")
-	vfx.call("spore_cocoon", Vector3(-2, 0, 0), 3.0, 0.2)
-	# 5 sheets (two chain links; the cocoon sheet starts later, so its burst
-	# still lands on the fuse) plus range domes for the four area casts.
-	_expect(stage.get_child_count() == before + 9, "Cast effects appear in the world (%d)." % (stage.get_child_count() - before))
-	var domes: Array[Node] = stage.get_children().filter(func(node: Node) -> bool: return node.get_script() == RANGE_DOME)
-	_expect(domes.size() == 4, "Each area cast shows its range dome (%d)." % domes.size())
-	var burst_dome: MeshInstance3D = null
-	for dome in domes:
-		if (dome as Node3D).global_position.distance_to(Vector3.ZERO) < 0.1 and is_equal_approx((dome as Node3D).scale.x, 2.4):
-			burst_dome = dome
-	_expect(burst_dome != null, "The Blood Burst dome covers its 2.4 m radius.")
-	if burst_dome != null:
-		var top := burst_dome.get_aabb().end.y * burst_dome.scale.y
-		_expect(top > 0.3 and top <= 0.91, "The range dome stays low over the floor (%.2f m)." % top)
-	vfx.call("energy_shield")
-	vfx.call("energy_shield")
-	vfx.call("heartbeat", 0.2)
-	var trail := DASH_TRAIL.start(stage, player, 0.15)
-	_expect(trail != null, "Predator Dash leaves a trail.")
-	var dash := player.create_tween()
-	dash.tween_property(player, "global_position", Vector3(0, 0, -2), 0.15)
-	await create_timer(2.0).timeout
-	_expect(stage.get_child_count() == before, "One-shot effects free themselves.")
-	_expect(not is_instance_valid(trail), "The dash trail fades and frees itself.")
 	await _check_procedural(stage, player, effects, vfx)
 	stage.queue_free()
 	await process_frame
@@ -104,9 +61,8 @@ func _run() -> void:
 	quit(failures)
 
 
-# The self-made set behind the settings switch: same hooks, own nodes.
+# The sole procedural backend: hooks, geometry and bounded node lifetimes.
 func _check_procedural(stage: Node3D, player: Node3D, effects: Node, vfx: Node) -> void:
-	vfx.set("procedural", true)
 	effects.call("_start_buff", "storm_pulse", 0.3)
 	effects.call("_start_buff", "bone_blades", 0.3)
 	_expect(vfx.call("has_loop", "storm_pulse") and vfx.call("has_loop", "bone_blades"), "Procedural buff loops start with their buffs.")
@@ -118,7 +74,8 @@ func _check_procedural(stage: Node3D, player: Node3D, effects: Node, vfx: Node) 
 	vfx.call("electric_pulse", Vector3.ZERO, 3.0)
 	var chain: Array[Vector3] = [Vector3.ZERO, Vector3(3, 0, 0), Vector3(3, 0, 3)]
 	vfx.call("chain_lightning", chain)
-	vfx.call("acid_pool", Vector3(2, 0, 0), 1.7, 0.3)
+	var pool: Node3D = vfx.call("acid_pool", Vector3(2, 0, 0), 1.7, 0.3)
+	_expect(pool != null, "Procedural acid pool exists.")
 	vfx.call("spore_cocoon", Vector3(-2, 0, 0), 3.0, 0.2)
 	# One node per cast plus range domes for the four area casts.
 	_expect(stage.get_child_count() == before + 9, "Procedural casts appear in the world (%d)." % (stage.get_child_count() - before))
@@ -126,12 +83,13 @@ func _check_procedural(stage: Node3D, player: Node3D, effects: Node, vfx: Node) 
 	vfx.call("energy_shield")
 	vfx.call("heartbeat", 0.2)
 	_expect(player.get_child_count() == player_before + 2, "Procedural shield and heart ride on the player.")
+	var trail := DASH_TRAIL.start(stage, player, 0.15)
+	_expect(trail != null, "Predator Dash leaves a procedural trail.")
 	for frame in 20:
 		await process_frame
 	await create_timer(1.6).timeout
 	_expect(stage.get_child_count() == before, "Procedural casts free themselves.")
 	_expect(player.get_child_count() == player_before, "Procedural shield and heart free themselves.")
-	vfx.set("procedural", false)
 
 
 func _expect(condition: bool, message: String) -> void:

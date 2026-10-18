@@ -163,13 +163,6 @@ func set_floor_hints_enabled(enabled: bool) -> void:
 		mission_layout.call("set_floor_hints_enabled", enabled)
 
 
-## Settings: self-made procedural skill effects instead of the sprite sheets.
-func set_procedural_skill_effects(enabled: bool) -> void:
-	var effects: Node = player.get("mutation_effects")
-	if effects != null and effects.get("vfx") != null:
-		effects.get("vfx").set("procedural", enabled)
-
-
 ## Settings: own procedural blood instead of the blood decal atlases.
 func set_procedural_blood(enabled: bool) -> void:
 	if blood_effects != null:

@@ -1,6 +1,6 @@
 extends RefCounted
 ## Self-made (procedural) skill effects: meshes and shaders instead of the
-## supplied sprite sheets, chosen in the settings for comparison. Each cast
+## retired sprite sheets. Each cast
 ## returns a skill_fx_node that animates itself and frees itself; the buff
 ## loops (storm field, blade orbit) run until stop().
 

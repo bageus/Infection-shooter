@@ -57,7 +57,7 @@ func _run() -> void:
 	await _test_locomotion_selection(stage, HUNGER, "Hunger")
 	await _test_one_shots(stage)
 	await _test_skinned_rig(stage)
-	await _test_stalk_then_charge(stage)
+	await _test_continuous_chase(stage)
 	for path: String in HUMANOIDS.slice(2):
 		await _test_knees_follow_feet(stage, load(path) as PackedScene, path.get_file())
 	await _test_attack_lands_on_hit_frame(stage)
@@ -262,7 +262,7 @@ func _test_skinned_rig(stage: Node3D) -> void:
 	await process_frame
 
 
-func _test_stalk_then_charge(stage: Node3D) -> void:
+func _test_continuous_chase(stage: Node3D) -> void:
 	var enemy := await _spawn(stage, HUNGER)
 	var target := FakeTarget.new()
 	stage.add_child(target)
@@ -271,9 +271,9 @@ func _test_stalk_then_charge(stage: Node3D) -> void:
 	await _physics(10)
 	var move_speed := float(enemy.get("move_speed"))
 	var far_speed := Vector2(enemy.velocity.x, enemy.velocity.z).length()
-	_expect(absf(far_speed - move_speed * float(enemy.get("walk_speed_factor"))) < 0.05, "A distant enemy stalks at walking speed (%.2f)." % far_speed)
+	_expect(absf(far_speed - move_speed) < 0.05, "A distant alerted enemy runs at full speed (%.2f)." % far_speed)
 	target.global_position = enemy.global_position + Vector3(0, 0, -6)
-	# The charge eases up from walking pace (chase_pace.gd).
+	# Approaching keeps the same running speed (chase_pace.gd).
 	await _physics(45)
 	var near_speed := Vector2(enemy.velocity.x, enemy.velocity.z).length()
 	_expect(absf(near_speed - move_speed) < 0.05, "A close enemy charges at full speed (%.2f)." % near_speed)
