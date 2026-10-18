@@ -18,11 +18,14 @@ func _run() -> void:
 	floor_view = FLOOR.new()
 	stage.add_child(floor_view)
 	_test_pixels()
-	await _test_receivers()
-	await _test_glass()
-	await _test_displays()
-	_test_steps()
-	if DisplayServer.get_name() != "headless": await _test_render()
+	if DisplayServer.get_name() == "headless":
+		await _test_receivers()
+		await _test_glass()
+		await _test_displays()
+		_test_steps()
+	else:
+		# Real-model hooks run headlessly above; native QA isolates the new shader.
+		await _test_render()
 	floor_view.call("clear_glass_debris")
 	for voice in stage.find_children("*", "AudioStreamPlayer3D", true, false): (voice as AudioStreamPlayer3D).stop()
 	stage.queue_free()
@@ -111,9 +114,11 @@ func _test_glass() -> void:
 	_check(corners == 4 and glass.call("crack_count") == 1, "First impact adds four rotated corners and one factual crack")
 	while baker.step(): pass
 	_check(pane.material_overlay != null, "Glass uses a baked texture")
+	baker.clear() # Simulate bounded receiver eviction while the pane stays alive.
 	var before := glass.get_child_count()
 	glass.call("take_projectile_hit", 30.0, point, normal, -normal, "PISTOL")
 	_check(glass.get_child_count() == before, "Another glass hit adds no decal node")
+	_check(baker.queue.filter(func(request: Dictionary) -> bool: return request.kind == "glass_fracture" and request.frame == 13).size() == 4, "Recreated receiver restores its corner fissures")
 	glass.call("take_projectile_hit", 100.0, point, normal, -normal, "GRENADE")
 	while baker.step(): pass
 	_check(glass.call("crack_count") == 0 and pane.material_overlay == null, "Shatter clears every glass mark")
@@ -185,6 +190,9 @@ func _test_render() -> void:
 		for x in range(0, dirty.get_width(), 2):
 			if not dirty.get_pixel(x, y).is_equal_approx(clean.get_pixel(x, y)): changed += 1
 	_check(changed > 100, "Native shaders draw actual baked surface pixels")
+	_check(_region_changes(clean, dirty, camera.unproject_position(Vector3(-1.4, 1.1, 0.11)), 55) > 20, "Wall damage is visible on its own receiver")
+	_check(_region_changes(clean, dirty, camera.unproject_position(Vector3(1.4, 1.1, 0.11)), 55) > 6, "Glass impact is visible on its own receiver")
+	_check(_region_changes(clean, dirty, camera.unproject_position(Vector3(0, 0, 2)), 55) > 20, "Floor layers are visible on the base floor")
 	_check(not floor_view.is_processing(), "Both queues return to idle")
 	var args := OS.get_cmdline_user_args()
 	if not args.is_empty():
@@ -194,6 +202,13 @@ func _test_render() -> void:
 	glass.queue_free()
 	camera.queue_free()
 	light.queue_free()
+
+func _region_changes(clean: Image, dirty: Image, center: Vector2, radius: int) -> int:
+	var count := 0
+	for y in range(maxi(0, int(center.y) - radius), mini(dirty.get_height(), int(center.y) + radius)):
+		for x in range(maxi(0, int(center.x) - radius), mini(dirty.get_width(), int(center.x) + radius)):
+			if not dirty.get_pixel(x, y).is_equal_approx(clean.get_pixel(x, y)): count += 1
+	return count
 
 func _box(at: Vector3) -> MeshInstance3D:
 	var node := MeshInstance3D.new()

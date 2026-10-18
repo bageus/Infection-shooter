@@ -39,14 +39,14 @@ static func powerful(weapon: String) -> bool:
 	return weapon in ["SHOTGUN", "SNIPER", "AK", "AK_RIFLE", "M4", "M4_RIFLE", "MINIGUN", "GRENADE", "LAUNCHER"]
 
 func glass_hit(anchor: MeshInstance3D, point: Vector3, normal: Vector3) -> bool:
+	var id := anchor.get_instance_id()
+	var pending := receivers.queue.any(func(request: Dictionary) -> bool: return request.anchor.get_ref() == anchor)
+	if _corners.has(id) and not receivers.pages.has(id) and not pending: _corners.erase(id)
 	var ok := _stamp(anchor, point, normal, "glass_impact", randi_range(0, 7), 0.48, 0, true)
 	_stamp(anchor, point + anchor.global_basis.x.normalized() * randf_range(-0.2, 0.2), normal,
 		"glass_fracture", [0, 1, 2, 12][randi_range(0, 3)], randf_range(0.4, 0.75), randi_range(0, 3), true)
 	if randf() < 0.25:
 		_stamp(anchor, point, normal, "glass_fracture", [3, 4, 5, 6, 7, 8, 9, 10, 11, 14, 15].pick_random(), 0.28, randi_range(0, 3), true)
-	var id := anchor.get_instance_id()
-	var pending := receivers.queue.any(func(request: Dictionary) -> bool: return request.anchor.get_ref() == anchor)
-	if _corners.has(id) and not receivers.pages.has(id) and not pending: _corners.erase(id)
 	if not _corners.has(id) or _corners[id].get_ref() != anchor:
 		_corners[id] = weakref(anchor)
 		var bounds := anchor.get_aabb()
