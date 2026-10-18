@@ -54,6 +54,9 @@ func play(event: StringName, volume_offset_db := 0.0) -> void:
 func _on_footstep(_side: int, speed: float) -> void:
 	if not is_instance_valid(_player) or not (_player as CharacterBody3D).is_on_floor():
 		return
+	var impacts := _player.get("impact_pool") as Node
+	if is_instance_valid(impacts) and impacts.has_method("request_surface_step"):
+		impacts.call("request_surface_step", _player)
 	# Sprinting lands harder than walking.
 	SFX.play(_player, &"step_player", _player.global_position, lerpf(-3.0, 2.0, clampf((speed - 3.0) / 6.0, 0.0, 1.0)))
 

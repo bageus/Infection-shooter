@@ -222,6 +222,9 @@ func _spawn_impact_decal(collider: Object, hit_position: Vector3, normal: Vector
 		surface = {"position": hit_position, "normal": normal, "anchor": collider}
 	hit_position = surface["position"]
 	normal = surface["normal"]
+	if collider is Node3D and impact_pool.has_method("bake_surface_hit") and impact_pool.call("bake_surface_hit", collider, hit_position, normal, _weapon_name, surface.get("anchor") as MeshInstance3D):
+		impact_pool.call("spawn_bullet_smoke", hit_position, normal)
+		return
 	var up := Vector3.FORWARD if absf(normal.y) > .9 else Vector3.UP
 	var projector := Transform3D(Basis.looking_at(-normal, up), hit_position)
 	var material := SURFACE_ATLASES.material(SURFACE_ATLASES.BULLET, randi_range(0, 4))

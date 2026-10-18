@@ -151,6 +151,9 @@ static func _scorch(scene: Node3D, hit_position: Vector3, normal: Vector3, pool:
 		return
 	if collider.has_method("get_projectile_material") and collider.call("get_projectile_material", -1) == "glass":
 		return
+	if pool.has_method("bake_surface_hit"):
+		var surface: Dictionary = pool.call("resolve_surface", collider, hit_position, -normal)
+		if pool.call("bake_surface_hit", collider, hit_position, normal, "GRENADE", surface.get("anchor") as MeshInstance3D): return
 	var up := Vector3.FORWARD if absf(normal.y) > .9 else Vector3.UP
 	var basis := Basis.looking_at(-normal, up).rotated(normal, randf() * TAU)
 	var projector := Transform3D(basis, hit_position)

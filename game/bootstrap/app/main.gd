@@ -364,6 +364,9 @@ func _setup_world_bindings() -> void:
 		impact_pool.set_script(IMPACT_POOL)
 		add_child(impact_pool)
 	impact_pool.call("register_surface", $FloorBody, $Floor)
+	$Floor.call("configure_surface_decals", planning_root.get_meta("surface_decals_v1", {}))
+	impact_pool.set("surface_hit", Callable($Floor, "bake_surface_hit"))
+	impact_pool.set("surface_step", Callable($Floor, "bake_step"))
 	var display_wall := DISPLAY_WALL.new()
 	display_wall.name = "DisplayWall"
 	add_child(display_wall)

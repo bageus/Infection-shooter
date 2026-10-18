@@ -118,3 +118,26 @@ func spawn_bullet_smoke(point: Vector3, normal: Vector3) -> void:
 		_bullet_smoke = preload("res://game/features/combat/bullet_impact_smoke.gd").new()
 		add_child(_bullet_smoke)
 	_bullet_smoke.puff(point, normal)
+
+
+## Optional presentation callbacks, explicitly injected by bootstrap.
+var surface_hit: Callable
+var surface_step: Callable
+var _step_frame := -1
+var _step_rays := 0
+
+func bake_surface_hit(collider: Node3D, point: Vector3, normal: Vector3, weapon: String, anchor: MeshInstance3D = null) -> bool:
+	return bool(surface_hit.call(collider, point, normal, weapon, anchor)) if surface_hit.is_valid() else false
+
+func request_surface_step(body: CharacterBody3D) -> void:
+	if not surface_step.is_valid() or not body.is_on_floor(): return
+	var frame := Engine.get_physics_frames()
+	if frame != _step_frame:
+		_step_frame = frame
+		_step_rays = 0
+	if _step_rays >= 2: return
+	_step_rays += 1
+	var ray := PhysicsRayQueryParameters3D.create(body.global_position + Vector3.UP * 0.1, body.global_position + Vector3.DOWN * 2.0, 1)
+	ray.exclude = [body.get_rid()]
+	var hit := body.get_world_3d().direct_space_state.intersect_ray(ray)
+	if not hit.is_empty(): surface_step.call(hit.position, hit.normal)

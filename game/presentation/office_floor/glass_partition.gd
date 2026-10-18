@@ -18,6 +18,7 @@ const CRACKS = preload("res://game/presentation/office_floor/glass_crack_marks.g
 
 var _health := 0.0
 var _broken := false
+var _crack_count := 0
 var _cracks_needed := 0
 var _crack_marks: Array[Node3D] = []
 var _glass_nodes: Array[Node3D] = []
@@ -94,7 +95,7 @@ func take_projectile_hit(_damage: float, hit_position: Vector3, hit_normal: Vect
 		return false
 	# Bullets crack the pane first; a blast or the hit after the last crack
 	# shatters it.
-	if _weapon_name != "GRENADE" and _crack_marks.size() < _cracks_needed:
+	if _weapon_name != "GRENADE" and _crack_count < _cracks_needed:
 		_add_crack(hit_position, hit_normal)
 		return false
 	_break_glass(hit_position, _direction)
@@ -102,6 +103,7 @@ func take_projectile_hit(_damage: float, hit_position: Vector3, hit_normal: Vect
 
 
 func _add_crack(hit_position: Vector3, hit_normal: Vector3) -> void:
+	_crack_count += 1
 	var size := _glass_mark_size(hit_position)
 	var mark: Node3D = CRACKS.spawn(self, hit_position, hit_normal, size if size >= 0.12 else 0.4)
 	if mark != null:
@@ -110,7 +112,7 @@ func _add_crack(hit_position: Vector3, hit_normal: Vector3) -> void:
 
 ## Cracks shown on the pane (0 once it has shattered).
 func crack_count() -> int:
-	return _crack_marks.size()
+	return _crack_count
 
 
 func _glass_mark_size(point: Vector3) -> float:
@@ -177,6 +179,7 @@ func _break_glass(hit_position: Vector3, direction: Vector3 = Vector3.ZERO) -> v
 		if is_instance_valid(mark):
 			mark.queue_free()
 	_crack_marks.clear()
+	_crack_count = 0
 	# Also discard old/externally registered marks owned by this pane.
 	for child in get_children():
 		if child.has_meta("surface_mark"):
