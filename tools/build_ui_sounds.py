@@ -1,7 +1,9 @@
 #!/usr/bin/env python3
-"""Rebuild original CC0 interface cues as text Godot WAV resources (stdlib only)."""
+"""Rebuild original CC0 interface cues as OGG/Vorbis (requires ffmpeg)."""
 import math
 import random
+import struct
+import subprocess
 from pathlib import Path
 
 RATE = 22050
@@ -25,10 +27,15 @@ def save(name, samples):
     for sample in samples:
         value = round(sample / peak * 8191)
         data.extend([value & 255, (value >> 8) & 255])
-    text = '[gd_resource type="AudioStreamWAV" format=3]\n\n[resource]\n'
-    text += 'format = 1\nmix_rate = 22050\nstereo = false\n'
-    text += 'data = PackedByteArray(' + ', '.join(map(str, data)) + ')\n'
-    (OUT / (name + '.tres')).write_text(text)
+    encode(OUT / (name + '.ogg'), bytes(data))
+
+
+def encode(path, data, loop=False):
+    subprocess.run(['ffmpeg', '-v', 'error', '-y', '-f', 's16le', '-ar', str(RATE),
+                    '-ac', '1', '-i', '-', '-c:a', 'libvorbis', '-q:a', '5', str(path)],
+                   input=data, check=True)
+    from build_added_audio import import_settings
+    import_settings(path, loop)
 
 
 def main():
@@ -47,6 +54,14 @@ def main():
     # Locked door: two handle rattles, then the latch thunking into the frame.
     rattle = cue(0.045, 1500, 1150, 0.5) + [0.0] * 500 + cue(0.04, 1500, 1100, 0.5)
     save('door_locked', rattle + [0.0] * 300 + cue(0.16, 150, 95, 0.35))
+    click = [int(math.sin(math.tau * (270 * (i / RATE) - 625 * (i / RATE)**2))
+                 * math.exp(-(i / RATE) * 60) * 16000) for i in range(2205)]
+    encode(OUT / 'menu_click.ogg', struct.pack('<' + 'h' * len(click), *click))
+    ringing = [round((0.75 * math.sin(i * math.tau * 2800 / RATE)
+                      + 0.25 * math.sin(i * math.tau * 3200 / RATE)) * 2200)
+               for i in range(11025)]
+    encode(OUT.parent / 'vitals/blast_ringing.ogg',
+           struct.pack('<' + 'h' * len(ringing), *ringing), loop=True)
 
 
 if __name__ == '__main__':

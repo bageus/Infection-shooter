@@ -351,11 +351,11 @@ func _spawn_fragments(hit_position: Vector3, direction: Vector3 = Vector3.ZERO) 
 		source.mesh = box
 		get_parent().add_child(source)
 		source.global_position = hit_position + Vector3(randf_range(-0.35, 0.35), randf_range(-0.35, 0.35), 0)
-		DAMAGE.spawn_piece(self, source, null, 0, index, Vector3.UP, hit_position)
+		DAMAGE.spawn_piece(self, source, null, 0, index, Vector3.UP, hit_position, false, true)
 		source.queue_free()
 
 
 # Turns one shard of the pane into a falling piece at the shard's own place.
 func _drop_shard(shard: MeshInstance3D, index: int, direction: Vector3, hit_position: Vector3, burst: bool) -> void:
-	DAMAGE.spawn_piece(self, shard, null, 0, index, direction, hit_position, burst)
+	DAMAGE.spawn_piece(self, shard, null, 0, index, direction, hit_position, burst, true)
 	shard.hide()

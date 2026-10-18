@@ -15,16 +15,17 @@ func _init() -> void:
 
 
 func _run() -> void:
+	_test_ogg_only("res://assets/audio")
 	var stage := Node3D.new()
 	root.add_child(stage)
 	var missing := []
 	for event: StringName in SFX.EVENTS:
 		var spec: Array = SFX.EVENTS[event]
 		for index in range(1, int(spec[SFX.VARIANTS]) + 1):
-			var path := SFX.ROOT + "%s/%s_%d.ogg" % [event, event, index]
+			var path := SFX._event_path(event, index)
 			var stream := load(path) as AudioStream if ResourceLoader.exists(path) else null
 			var longest := 6.5 if event in LASTING else 3.6
-			if stream == null or stream.get_length() < 0.03 or stream.get_length() > longest:
+			if not stream is AudioStreamOggVorbis or stream.get_length() < 0.03 or stream.get_length() > longest:
 				missing.append(path)
 	_expect(missing.is_empty(), "Every sound event has its processed variants: %s" % [missing])
 	_expect(SFX.EVENTS.size() >= 60, "The catalogue covers weapons, impacts, enemies, doors and items.")
@@ -39,6 +40,7 @@ func _run() -> void:
 		if SFX.play(stage, &"elevator_open") != null:
 			played += 1
 	_expect(played == 1, "Per-event voice limits stop pile-ups (%d)." % played)
+	_expect(SFX.has_event(&"player_roll") and ResourceLoader.exists(SFX._event_path(&"player_roll", 1)), "Roll uses the supplied OGG recording")
 	_test_ui(stage)
 	stage.queue_free()
 	await process_frame
@@ -49,8 +51,8 @@ func _run() -> void:
 
 func _test_ui(stage: Node) -> void:
 	for event: StringName in SFX.UI_EVENTS:
-		var stream: AudioStreamWAV = SFX.UI_EVENTS[event][0]
-		_expect(stream.get_length() > 0.03 and stream.get_length() < 0.5 and not stream.data.is_empty(), "UI cue contains short PCM: " + String(event))
+		var stream: AudioStreamOggVorbis = SFX.UI_EVENTS[event][0]
+		_expect(stream.get_length() > 0.03 and stream.get_length() < 0.5 and stream.packet_sequence != null, "UI cue contains short Vorbis: " + String(event))
 		_expect(SFX.has_event(event), "Interface cue is discoverable: " + String(event))
 	_expect(SFX.play_ui(stage, &"missing") == null, "Unknown UI events are ignored")
 	_expect(SFX.play_ui(null, &"menu_hover") == null, "UI playback rejects missing owners")
@@ -70,3 +72,13 @@ func _expect(condition: bool, message: String) -> void:
 	if not condition:
 		failures += 1
 		push_error(message)
+
+
+func _test_ogg_only(directory: String) -> void:
+	for file in DirAccess.get_files_at(directory):
+		_expect(not file.to_lower().ends_with(".wav") and not file.to_lower().ends_with(".wav.import"), "Audio source/import is OGG-only: " + directory + "/" + file)
+		if file.ends_with(".tres"):
+			var text := FileAccess.get_file_as_string(directory.path_join(file))
+			_expect(not "AudioStreamWAV" in text, "No embedded PCM audio remains: " + file)
+	for child in DirAccess.get_directories_at(directory):
+		_test_ogg_only(directory.path_join(child))

@@ -120,7 +120,6 @@ game/presentation/office_floor/tests/run_blood_dormant_tests.gd
 game/presentation/office_floor/tests/run_blood_floor_bake_tests.gd
 game/presentation/office_floor/tests/run_divider_collision_tests.gd
 game/presentation/office_floor/tests/run_electronics_hit_tests.gd
-game/presentation/office_floor/tests/run_plate_fruit_tests.gd
 game/features/infected/tests/run_late_spawn_debris_tests.gd
 game/features/infected/tests/run_blood_events_tests.gd
 game/features/pickups/tests/run_pickup_floor_tests.gd
@@ -167,6 +166,8 @@ game/features/player/tests/run_mutation_dash_motion_tests.gd
 game/bootstrap/app/tests/run_active_loadout_ui_tests.gd
 game/presentation/office_floor/tests/run_glass_floor_debris_tests.gd
 game/presentation/office_floor/tests/run_material_floor_debris_tests.gd
+game/bootstrap/app/tests/run_glass_footstep_tests.gd
+game/presentation/office_floor/tests/run_plate_fruit_tests.gd
 game/bootstrap/app/tests/run_level_chain_tests.gd
 game/bootstrap/app/tests/run_level_carry_tests.gd
 game/bootstrap/app/tests/run_armor_pickup_tests.gd

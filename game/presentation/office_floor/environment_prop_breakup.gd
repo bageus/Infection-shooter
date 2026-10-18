@@ -90,7 +90,7 @@ static func shatter_glass(body: RigidBody3D, geometry: GEOMETRY, hit_position: V
 			ancestor = ancestor.get_parent() as Node3D
 		var meshes: Array[MeshInstance3D] = DAMAGE.reveal_meshes(shards)
 		for index in mini(meshes.size(), 12):
-			DAMAGE.spawn_piece(body, meshes[index], body, geometry.stages.size(), index, direction, hit_position)
+			DAMAGE.spawn_piece(body, meshes[index], body, geometry.stages.size(), index, direction, hit_position, false, true)
 		for hidden in hidden_parents:
 			hidden.scale = Vector3.ZERO
 	else:
@@ -109,5 +109,5 @@ static func _spawn_fallback_glass(body: RigidBody3D, geometry: GEOMETRY, bounds:
 		part.mesh = box
 		geometry.visual.add_child(part)
 		part.global_position = bounds.position + Vector3(randf() * bounds.size.x, randf() * bounds.size.y, randf() * bounds.size.z)
-		DAMAGE.spawn_piece(body, part, null, geometry.stages.size(), i, direction, hit_position)
+		DAMAGE.spawn_piece(body, part, null, geometry.stages.size(), i, direction, hit_position, false, true)
 		part.queue_free()

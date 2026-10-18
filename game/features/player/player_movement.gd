@@ -61,6 +61,7 @@ const MUTATION_DASH_SPEED := 13.0
 @onready var weapons: Array[Node3D] = [$AimPivot/Pistol,$AimPivot/Uzi,$AimPivot/Shotgun,$AimPivot/GrenadeLauncher,$AimPivot/AkRifle,$AimPivot/M4Rifle,$AimPivot/SniperRifle,$AimPivot/Minigun]
 @onready var infection_runtime: Node = $InfectionRuntime
 @onready var weapon_mount: Node = $WeaponMount
+var _footstep_surface: Callable
 var audio: Node
 var weapon_stance := WEAPON_STANCE.new()
 var _animation_selection := ANIMATION_SELECTION.new()
@@ -117,6 +118,7 @@ func _ready() -> void:
 	add_child(audio)
 	audio.configure(self, camera_rig, $AnimationDriver)
 	audio.configure_skills(infection_runtime)
+	audio.set("glass_surface_query", _footstep_surface)
 	var heal_feedback := HEAL_FEEDBACK.new()
 	heal_feedback.name = "HealFeedback"
 	add_child(heal_feedback)
@@ -246,6 +248,12 @@ func configure_world(container: Node3D, impacts: Node) -> void:
 	$AimPivot/SpentCasings.call("configure_world", container, impacts)
 	if is_instance_valid(mutation_effects):
 		mutation_effects.call("configure_world", container)
+
+
+func configure_footstep_surface(query: Callable) -> void:
+	_footstep_surface = query
+	if is_instance_valid(audio):
+		audio.set("glass_surface_query", query)
 
 
 func configure_weapon_drop(command: Callable) -> void:
@@ -427,18 +435,7 @@ func apply_blast_stun(duration: float, intensity: float) -> void:
 		_stun_ringing.name = "BlastRinging"
 		_stun_ringing.bus = &"SFX"
 		add_child(_stun_ringing)
-		var tone := AudioStreamWAV.new()
-		tone.mix_rate = 22050
-		tone.format = AudioStreamWAV.FORMAT_16_BITS
-		tone.loop_mode = AudioStreamWAV.LOOP_FORWARD
-		tone.loop_begin = 0
-		tone.loop_end = 11025
-		var samples := PackedByteArray()
-		samples.resize(22050)
-		for i in 11025:
-			samples.encode_s16(i * 2, roundi((0.75 * sin(float(i) * TAU * 2800.0 / 22050.0) + 0.25 * sin(float(i) * TAU * 3200.0 / 22050.0)) * 2200.0))
-		tone.data = samples
-		_stun_ringing.stream = tone
+		_stun_ringing.stream = preload("res://assets/audio/vitals/blast_ringing.ogg")
 	_stun_ringing.volume_db = -19.0 + 6.0 * _stun_intensity
 	_stun_ringing.play()
 	blast_stun_started.emit(_stun_remaining, _stun_intensity)
@@ -472,6 +469,7 @@ func _update_move(delta:float)->void:
 	elif not bool(infection_runtime.call("is_control_lost")) and Input.is_action_just_pressed("roll") and d.length_squared()>0.0001 and _roll_cooldown_remaining<=0.0:
 		_roll_direction=d.normalized();_roll_remaining=roll_duration;_roll_pace=roll_speed;_roll_cooldown_remaining=roll_cooldown;_iframes_remaining=roll_iframes
 		mutation_effects.call("on_roll")
+		_play_sound(&"player_roll")
 		$AnimationDriver.call("play_dodge", _roll_direction, roll_duration)
 	else:
 		var walk_speed := move_speed * _walk_speed_multiplier

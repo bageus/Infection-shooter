@@ -269,19 +269,8 @@ func play_click() -> void:
 		_click_player.play()
 
 
-func _click_stream() -> AudioStreamWAV:
-	var data := PackedByteArray()
-	for index in 2205:
-		var time := float(index) / 22050.0
-		var sample := int(sin(TAU * (270.0 * time - 625.0 * time * time)) * exp(-time * 60) * 16000)
-		data.append(sample & 255)
-		data.append((sample >> 8) & 255)
-	var stream := AudioStreamWAV.new()
-	stream.format = AudioStreamWAV.FORMAT_16_BITS
-	stream.mix_rate = 22050
-	stream.data = data
-	return stream
-
+func _click_stream() -> AudioStreamOggVorbis:
+	return preload("res://assets/audio/ui/menu_click.ogg")
 
 func play_hover(control: Control) -> void:
 	if not is_visible_in_tree() or (control is BaseButton and control.disabled):

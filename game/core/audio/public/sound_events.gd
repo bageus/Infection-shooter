@@ -52,6 +52,8 @@ const EVENTS := {
 	&"antidote_use": [1, -1.0, 20.0, 3.0, 0.03, 1],
 	&"key_pickup": [1, 0.0, 20.0, 3.0, 0.03, 1],
 	&"dna_pickup": [2, -1.0, 20.0, 3.0, 0.04, 2],
+	&"player_roll": [1, -3.0, 20.0, 2.5, 0.02, 1],
+	&"step_glass": [4, -6.0, 18.0, 2.2, 0.04, 2],
 	&"step_player": [10, -10.0, 18.0, 2.2, 0.06, 2],
 	&"step_light": [6, -11.0, 22.0, 2.4, 0.08, 6],
 	&"step_heavy": [4, -7.0, 34.0, 4.0, 0.06, 4],
@@ -156,9 +158,10 @@ static func has_event(event: StringName) -> bool:
 # finds the streams cached instead of reading the files on the shot frame.
 # The warmup caller must collect threaded results and retain them for its lifetime.
 static func preload_event(event: StringName) -> void:
-	if not EVENTS.has(event):
+	var spec: Array = EVENTS.get(event, [])
+	if spec.is_empty():
 		return
-	for variant in range(1, int(EVENTS[event][VARIANTS]) + 1):
+	for variant in range(1, int(spec[VARIANTS]) + 1):
 		var path := _event_path(event, variant)
 		if not ResourceLoader.has_cached(path) and ResourceLoader.load_threaded_get_status(path) == ResourceLoader.THREAD_LOAD_INVALID_RESOURCE:
 			ResourceLoader.load_threaded_request(path)
@@ -169,9 +172,11 @@ static var _per_event: Dictionary = {}
 
 
 static func play(parent: Node, event: StringName, position := Vector3.INF, volume_offset_db := 0.0, pitch := 1.0) -> AudioStreamPlayer3D:
-	if parent == null or not parent.is_inside_tree() or not EVENTS.has(event):
+	if parent == null or not parent.is_inside_tree():
 		return null
-	var spec: Array = EVENTS[event]
+	var spec: Array = EVENTS.get(event, [])
+	if spec.is_empty():
+		return null
 	var tree := parent.get_tree()
 	var group := StringName("sfx_" + String(event))
 	# Running counts instead of scanning groups for every footstep and clink.
@@ -223,14 +228,14 @@ static func play(parent: Node, event: StringName, position := Vector3.INF, volum
 const UI_GROUP := &"ui_sfx_voice"
 const UI_MAX_VOICES := 8
 const UI_EVENTS := {
-	&"mutation_open": [preload("res://assets/audio/ui/mutation_open.tres"), -6.0],
-	&"mutation_close": [preload("res://assets/audio/ui/mutation_close.tres"), -6.0],
-	&"menu_hover": [preload("res://assets/audio/ui/menu_hover.tres"), -8.0],
-	&"mutation_hover": [preload("res://assets/audio/ui/mutation_hover.tres"), -9.0],
-	&"mutation_click": [preload("res://assets/audio/ui/mutation_click.tres"), -6.0],
-	&"mutation_lock": [preload("res://assets/audio/ui/mutation_lock.tres"), -7.0],
-	&"mutation_unlock": [preload("res://assets/audio/ui/mutation_unlock.tres"), -7.0],
-	&"door_locked": [preload("res://assets/audio/ui/door_locked.tres"), -5.0],
+	&"mutation_open": [preload("res://assets/audio/ui/mutation_open.ogg"), -6.0],
+	&"mutation_close": [preload("res://assets/audio/ui/mutation_close.ogg"), -6.0],
+	&"menu_hover": [preload("res://assets/audio/ui/menu_hover.ogg"), -8.0],
+	&"mutation_hover": [preload("res://assets/audio/ui/mutation_hover.ogg"), -9.0],
+	&"mutation_click": [preload("res://assets/audio/ui/mutation_click.ogg"), -6.0],
+	&"mutation_lock": [preload("res://assets/audio/ui/mutation_lock.ogg"), -7.0],
+	&"mutation_unlock": [preload("res://assets/audio/ui/mutation_unlock.ogg"), -7.0],
+	&"door_locked": [preload("res://assets/audio/ui/door_locked.ogg"), -5.0],
 }
 
 
@@ -264,5 +269,5 @@ static func play_ui(parent: Node, event: StringName) -> AudioStreamPlayer:
 
 static func _event_path(event: StringName, variant: int) -> String:
 	if event == &"skill_cooldown_done":
-		return "res://assets/audio/sfx/skill_ready/taking_skill.wav"
+		return "res://assets/audio/sfx/skill_ready/taking_skill.ogg"
 	return ROOT + "%s/%s_%d.ogg" % [event, event, variant]
