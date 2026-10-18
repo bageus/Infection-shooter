@@ -30,7 +30,7 @@
     "core.localization"
   ],
   "runtime_contracts": {
-    "planned_physics_v1": "DTO v8 optional settled_physics={version:1}; transform-scoped sleep state. Corpse decor_pose.physics_v1 validated before replacement. Legacy v1-v8 compatible, ADR0055.",
-    "surface_decals_v1": "Optional map-v8 surface_decals_v1={kind:{opacity:0..1,size:0.25..2}} validated before replacement; absent defaults. Planner popup edits new marks with preview. JSON, authored restore signature and scene-root metadata preserve settings. Bootstrap injects floor callbacks into combat; runtime pixels transient."
+    "level_chain_v1": "user://level_chain.json {version:1, maps:[{name, entries:[{type none|ceiling|floor, x, z, placed} x2]}]}; map order is the chain, slot 0 leads to the previous map, slot 1 to the next. Map files and layout DTO unchanged.",
+    "planned_physics_v1": "DTO v8 optional settled_physics={version:1}; transform-scoped sleep state. Corpse decor_pose.physics_v1 validated before replacement. Legacy v1-v8 compatible, ADR0055."
   }
 }

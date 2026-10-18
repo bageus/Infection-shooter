@@ -48,8 +48,8 @@ func configure(context: Dictionary) -> void:
 
 
 func setup_widgets() -> void:
-	map_name_edit = session.ui.get_node("Panel/VBox/MapManager/Name")
-	map_select = session.ui.get_node("Panel/VBox/MapManager/Maps")
+	map_name_edit = session.ui.get_node("RightPanel/VBox/MapManager/Name")
+	map_select = session.ui.get_node("RightPanel/VBox/MapManager/Maps")
 
 
 func _ensure_maps_dir() -> void:
@@ -291,6 +291,7 @@ func save_named_map() -> void:
 		controls.status.text = "MAP SAVE ERROR | " + str(result.error)
 		return
 	map_name_edit.text = safe_name
+	_remember_level(safe_name)
 	_refresh_map_list(safe_name)
 	map_loading = false
 	controls.status.text = "MAP SAVED | " + safe_name + fixtures
@@ -323,7 +324,15 @@ func load_named_map(map_name: String) -> void:
 		controls.status.text = "MAP LOAD ERROR | %s: %s" % [map_name, report["error"]]
 		return
 	map_name_edit.text = map_name
+	_remember_level(_safe_map_name(map_name))
 	controls.status.text = "MAP LOADED | %s%s (press SAVE LAYOUT to start with it)" % [map_name, _skipped_text(report)]
+
+
+## The level chain finds its neighbours by the name of the map being played.
+func _remember_level(level_name: String) -> void:
+	var host: Variant = session.get("host")
+	if host is Node:
+		host.set("current_level", level_name)
 
 
 func _refresh_map_list(select_name: String = "") -> void:
