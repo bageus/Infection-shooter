@@ -1,6 +1,10 @@
 extends RefCounted
 const PATTERN := preload("res://game/presentation/office_floor/glass_floor_scatter.gd")
 const ATLASES := preload("res://game/presentation/office_floor/debris_atlases.gd")
+const SMALL_KINDS := ["wood", "paper", "plastic"]
+const SMALL_SCALE := 0.5 # Wood, paper and plastic read as chips, not sheets.
+const CHIP_SCALE := 0.6 # Each main piece gets one smaller companion chip.
+const CHIP_SPREAD := 0.22
 
 
 static func scatter(floor_view: Node3D, center: Vector3, footprint: Vector2, recipe: Array[String], direction: Vector3, excluded: Array[RID]) -> void:
@@ -36,4 +40,8 @@ static func scatter(floor_view: Node3D, center: Vector3, footprint: Vector2, rec
 		var kind: String = materials[index]
 		var frame := ATLASES.choose_frame(kind, absf(offset.y) > 1.15, rng)
 		var size: float = minf(mark.size, 0.5) if kind == "extinguisher" else float(mark.size)
+		if kind in SMALL_KINDS:
+			size *= SMALL_SCALE
+			var chip := planar + Vector2(rng.randf_range(-1.0, 1.0), rng.randf_range(-1.0, 1.0)) * CHIP_SPREAD
+			floor_view.call("stamp_material_debris", chip, kind, ATLASES.choose_frame(kind, true, rng), size * CHIP_SCALE, rng.randi_range(0, 3))
 		floor_view.call("stamp_material_debris", planar, kind, frame, size, mark.turns)
