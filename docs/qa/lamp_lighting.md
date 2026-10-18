@@ -11,6 +11,7 @@ Owner request: lamps sometimes do not light; narrow and rectangular lamps shine 
 - **Elevator indicator.** `interactive_door.gd` only handled `StandardMaterial3D`, but the model uses `ORMMaterial3D`, so the lens never glowed. It now accepts any `BaseMaterial3D`, lights only the smallest (lens) surface, and adds an omni light in front of the housing while the doors are open.
 - **Desk lamp.** `05_lamp.glb` props carry a warm omni light (range 2.8 m, no shadow).
 - Omni lights of props use `budget_omni_light.gd` and join the same budget (group `budget_lights`).
+- **Lamps in view past the budget (#236).** Lamps inside the camera view that the budget leaves dark get a flat additive floor pool (one `MultiMeshInstance3D`, no light node). Measured at the start camera: 238 lamps in view, light cost 603, against a budget of 28, so most in-view lamps still have no real light.
 
 ## Notes
 
