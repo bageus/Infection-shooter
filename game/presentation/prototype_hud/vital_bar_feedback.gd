@@ -1,5 +1,5 @@
 extends Control
-## White sibling overlay and a composed pulse for one locally injected HUD bar.
+## White sibling overlay for one locally injected HUD bar; its size follows only the given base scale.
 const STATE := preload("res://game/presentation/prototype_hud/vital_bar_feedback_state.gd")
 var state := STATE.new()
 var _bar: ProgressBar
@@ -45,11 +45,11 @@ func advance(delta: float, base_scale: Vector2 = Vector2.ONE) -> void:
 	position = _bar.position
 	size = _bar.size
 	pivot_offset = size * 0.5
-	scale = base_scale * state.pulse_scale
+	scale = base_scale
 	_bar.pivot_offset = pivot_offset
 	_bar.scale = scale
 	_label.pivot_offset = _label.size * 0.5
-	_label.scale = Vector2.ONE * state.pulse_scale
+	_label.scale = Vector2.ONE
 	if _marker != null:
 		_marker.pivot_offset = _marker.size * 0.5
 		_marker.scale = scale
