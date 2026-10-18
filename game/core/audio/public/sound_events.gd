@@ -31,7 +31,7 @@ const EVENTS := {
 	&"ak_fire": [3, 0.5, 85.0, 10.0, 0.04, 4],
 	&"m4_fire": [3, 0.0, 80.0, 9.0, 0.04, 5],
 	&"sniper_fire": [3, 8.0, 150.0, 14.0, 0.02, 2],
-	&"minigun_fire": [3, 13.0, 90.0, 10.0, 0.05, 5],
+	&"minigun_fire": [3, -3.0, 90.0, 10.0, 0.05, 5],
 	&"dry_fire": [2, -6.0, 15.0, 2.5, 0.05, 2],
 	&"grenade_explode": [2, 3.0, 120.0, 14.0, 0.05, 3],
 	&"extinguisher_burst": [1, 1.0, 80.0, 10.0, 0.05, 2],
@@ -52,6 +52,7 @@ const EVENTS := {
 	&"antidote_use": [1, -1.0, 20.0, 3.0, 0.03, 1],
 	&"key_pickup": [1, 0.0, 20.0, 3.0, 0.03, 1],
 	&"dna_pickup": [2, -1.0, 20.0, 3.0, 0.04, 2],
+	&"player_roll": [1, -3.0, 20.0, 2.5, 0.02, 1],
 	&"step_glass": [4, -6.0, 18.0, 2.2, 0.04, 2],
 	&"step_player": [10, -10.0, 18.0, 2.2, 0.06, 2],
 	&"step_light": [6, -11.0, 22.0, 2.4, 0.08, 6],
@@ -148,20 +149,8 @@ const EVENTS := {
 }
 
 
-# The named owner recording may arrive after this change. Never substitute it.
-const OPTIONAL_EVENTS := {&"player_roll": [1, -3.0, 20.0, 2.5, 0.02, 1]}
-
-
-static func _spec(event: StringName) -> Array:
-	if EVENTS.has(event):
-		return EVENTS[event]
-	if OPTIONAL_EVENTS.has(event) and ResourceLoader.exists(_event_path(event, 1)):
-		return OPTIONAL_EVENTS[event]
-	return []
-
-
 static func has_event(event: StringName) -> bool:
-	return not _spec(event).is_empty() or UI_EVENTS.has(event)
+	return EVENTS.has(event) or UI_EVENTS.has(event)
 
 
 # Plays `event` under `parent`; at `position` when given, else on the parent.
@@ -169,7 +158,7 @@ static func has_event(event: StringName) -> bool:
 # finds the streams cached instead of reading the files on the shot frame.
 # The warmup caller must collect threaded results and retain them for its lifetime.
 static func preload_event(event: StringName) -> void:
-	var spec := _spec(event)
+	var spec: Array = EVENTS.get(event, [])
 	if spec.is_empty():
 		return
 	for variant in range(1, int(spec[VARIANTS]) + 1):
@@ -185,7 +174,7 @@ static var _per_event: Dictionary = {}
 static func play(parent: Node, event: StringName, position := Vector3.INF, volume_offset_db := 0.0, pitch := 1.0) -> AudioStreamPlayer3D:
 	if parent == null or not parent.is_inside_tree():
 		return null
-	var spec := _spec(event)
+	var spec: Array = EVENTS.get(event, [])
 	if spec.is_empty():
 		return null
 	var tree := parent.get_tree()

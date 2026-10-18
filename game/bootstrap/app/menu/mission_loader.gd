@@ -29,6 +29,9 @@ var _previous_mouse := Input.MOUSE_MODE_VISIBLE
 var _released_previous := false
 var _ru := false
 var _recovery_path := ""
+var _level_name := ""
+var _arrival := {}
+var _carry := {}
 var _recovery_requested := false
 var _choices: VBoxContainer
 var _column: VBoxContainer
@@ -67,12 +70,20 @@ func _ready() -> void:
 	column.add_child(back)
 
 
+## Loads one saved map of the level chain; `arrival` ({x, z}) moves the player to that entry point.
+func start_map(path: String, level_name: String, arrival: Dictionary, carry: Dictionary = {}) -> void:
+	_recovery_path = path
+	_level_name = level_name
+	_arrival = arrival
+	_carry = carry
+	start()
+
+
 func start() -> void:
 	if _started:
 		return
 	_started = true
-	print("Mission begin: texture profile 1K; renderer %s; allocator %.1f MiB" % [
-		RenderingServer.get_current_rendering_method(), float(OS.get_static_memory_usage()) / 1048576.0])
+	_log_begin()
 	var tree := get_tree()
 	var previous := tree.current_scene
 	if previous is Node3D and previous.scene_file_path == MAIN_PATH:
@@ -140,6 +151,7 @@ func start() -> void:
 	if int(report.skipped) > 0:
 		push_warning("Planned layout: %d missing object(s) skipped: %s" % [report.skipped, ", ".join(report.missing)])
 	storage.snapshot_authored()
+	_enter_level(planner)
 	# Keep physics paused and cover the first real material draws with the overlay.
 	pending.show()
 	await _install_occlusion_walls(tree)
@@ -164,6 +176,20 @@ func start() -> void:
 	if is_instance_valid(previous):
 		previous.queue_free()
 	queue_free()
+
+
+func _log_begin() -> void:
+	print("Mission begin: texture profile 1K; renderer %s; allocator %.1f MiB" % [
+		RenderingServer.get_current_rendering_method(), float(OS.get_static_memory_usage()) / 1048576.0])
+
+
+## Chain travel: the player appears at the entry point that leads back to the previous map.
+func _enter_level(planner: Node) -> void:
+	pending.set("current_level", _level_name)
+	if not _carry.is_empty():
+		pending.call("apply_carry", _carry)
+	if _arrival.has("x"):
+		(planner.get("main_player") as Node3D).position = Vector3(float(_arrival.x), 1.0, float(_arrival.z))
 
 
 func _request_scene(tree: SceneTree) -> PackedScene:

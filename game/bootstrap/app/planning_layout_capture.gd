@@ -1,5 +1,6 @@
 extends RefCounted
 ## One DTO projection for synchronous persistence and staged named-map snapshots.
+const SURFACE_SETTINGS := preload("res://game/bootstrap/app/planning_surface_decals.gd")
 const DOOR_OPTIONS := preload("res://game/bootstrap/app/planning_door_options.gd")
 const WAVE_DIRECTOR := preload("res://game/features/spawning/public/wave_director.gd")
 
@@ -55,6 +56,8 @@ static func collect(objects: Node, nodes: Array, include_player: bool = true) ->
 			records[-1]["display"] = node.call("get_display_config")
 		if node.has_method("get_loot_config") and node.has_meta(&"planning_loot"):
 			records[-1]["loot"] = node.call("get_loot_config")
+		if node.has_method("has_fruit") and node.call("has_fruit") and bool(node.call("get_fruit_config")["enabled"]):
+			records[-1]["fruit"] = node.call("get_fruit_config")
 		var door := DOOR_OPTIONS.lockable_controller(node)
 		if door != null:
 			records[-1]["door_lock"] = str(door.call("get_lock_state"))
@@ -78,7 +81,10 @@ static func collect(objects: Node, nodes: Array, include_player: bool = true) ->
 			records[-1]["energy_multiplier"] = float(node.get("energy_multiplier"))
 			var color: Color = node.call("get_authored_color")
 			records[-1]["light_color"] = [color.r, color.g, color.b]
-	return {"version": 8, "objects": records}
+	var data := {"version": 8, "objects": records}
+	var settings := SURFACE_SETTINGS.capture(objects.session)
+	if not settings.is_empty(): data["surface_decals_v1"] = settings
+	return data
 
 
 

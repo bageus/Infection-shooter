@@ -19,6 +19,7 @@ class Lamp extends Node3D:
 	var shadow := false
 	var writes := 0
 	var local_enabled := false
+	var light_color := Color.WHITE
 	func _enter_tree() -> void:
 		add_to_group("budget_lights")
 	func get_light_cost() -> int:

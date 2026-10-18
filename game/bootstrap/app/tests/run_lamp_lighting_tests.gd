@@ -16,6 +16,7 @@ func _initialize() -> void:
 func _run() -> void:
 	_test_fixture_lights()
 	_test_budget()
+	_test_pools()
 	await _test_desk_lamp()
 	await _test_elevator()
 	print("Lamp lighting tests: %d failure(s)." % _failures)
@@ -103,6 +104,35 @@ func _test_budget() -> void:
 	for lamp in lamps:
 		for light in _lights_of(lamp):
 			_check(not light.shadow_enabled, "Shadow setting off disables lamp shadows")
+	for lamp in lamps:
+		lamp.free()
+	camera.free()
+	controller.free()
+
+
+func _test_pools() -> void:
+	var controller := LIGHTING.new()
+	root.add_child(controller)
+	controller.local_lights_enabled = true
+	var camera := Camera3D.new()
+	root.add_child(camera)
+	camera.position = Vector3(0, 10, 0)
+	camera.rotation_degrees = Vector3(-90, 0, 0)
+	camera.current = true
+	var lamps: Array[Node3D] = []
+	for index in range(30):
+		lamps.append(_lamp("point", Vector3(index * 0.05, 3.0, 0.0)))
+	controller.refresh_light_budget()
+	var pools := controller.get("_pool") as MultiMeshInstance3D
+	var dark := 0
+	for lamp in lamps:
+		if not lamp.call("get_budget_lit"):
+			dark += 1
+	_check(dark > 0, "Lamps past the budget are dark (%d)" % dark)
+	_check(pools.multimesh.instance_count == dark, "Each dark lamp in view gets a pool (%d)" % pools.multimesh.instance_count)
+	_check(pools.visible, "Pools show with local lighting")
+	controller.set_local_lights_enabled(false)
+	_check(not pools.visible, "Pools hide with local lighting off")
 	for lamp in lamps:
 		lamp.free()
 	camera.free()

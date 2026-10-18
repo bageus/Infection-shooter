@@ -7,6 +7,8 @@ const BREAK_SOUND := preload("res://game/presentation/office_floor/prop_break_so
 const BREAKUP := preload("res://game/presentation/office_floor/environment_prop_breakup.gd")
 const FLOOR_DEBRIS := preload("res://game/presentation/office_floor/prop_floor_debris.gd")
 var _floor_debris := FLOOR_DEBRIS.new()
+const PLATE_FRUIT := preload("res://game/presentation/office_floor/plate_fruit.gd")
+var _fruit := PLATE_FRUIT.new()
 var _geometry := GEOMETRY.new()
 const IMPACT_SOUND := preload("res://game/presentation/office_floor/impact_sound_watcher.gd")
 
@@ -156,6 +158,14 @@ func get_loot_config() -> Dictionary:
 	return LOOT_CONFIG.sanitize((get_meta(&"planning_loot") if has_meta(&"planning_loot") else null), "empty")
 
 
+## Plates can carry baked random fruit (plate_fruit_v1), set by the planner.
+func has_fruit() -> bool: return PLATE_FRUIT.applies(model_path)
+func get_fruit_config() -> Dictionary: return _fruit.config.duplicate()
+func configure_fruit(raw: Dictionary) -> void:
+	if has_fruit():
+		_fruit.configure(self, _geometry, raw)
+
+
 func configure_loot_drop(drop_weapon: Callable) -> void:
 	_drop_weapon = drop_weapon
 
@@ -188,18 +198,20 @@ func _ready() -> void:
 	_reaction.setup(self, visual)
 	_geometry.prepare_stages(model_path)
 	_damage.configure(model_path.get_file(), _variants.size(), not _stages.is_empty())
-	# Architectural pieces and carpets stay anchored; all other groups are movable.
+	# Architectural pieces, carpets and the reception core stay anchored.
 	# A wall item that a shot tears loose (extinguisher, TV, clock) switches to dynamic mid-game.
 	# From a static body that costs Jolt ~80 ms (broadphase re-insert); from a kinematic one it is free.
 	if wall_mounted:
 		freeze_mode = RigidBody3D.FREEZE_MODE_KINEMATIC
-	freeze = wall_mounted or model_path.begins_with("res://models/objects/enviroments/01/")
+	freeze = (wall_mounted or model_path.begins_with("res://models/objects/enviroments/01/")
+		or model_path.get_file() == "07_reception_counter_two_heights_2.glb")
 	if freeze and "01_floor_" in model_path:
 		var shadow := CARPET_SHADOW.new()
 		shadow.name = "CarpetShadow"
 		add_child(shadow)
 		shadow.configure(visual)
 		return # Carpet lies on the level floor and must not create a raised obstacle.
+	_fruit.build(visual, model_path)
 	var volume := _geometry.add_shapes(self, visual)
 	_setup_display()
 	SERVER_AUDIO.attach(self, model_path)
@@ -326,6 +338,10 @@ func take_projectile_hit(damage: float, hit_position: Vector3, _normal: Vector3,
 	if PAPER.is_paper(model_path) and not BOOK_STACK.contains(model_path):
 		_tear_paper(hit_position, direction)
 		return false
+	if damage > 0.0 and _fruit.hit(self, _geometry, _damage, hit_position, direction):
+		return false
+	if damage > 0.0 and is_instance_valid(glass_debris_floor) and has_display():
+		glass_debris_floor.call("bake_display_hit", self, hit_position, _normal)
 	if _damage.category == "tech":
 		if damage > 0.0 and model_path.get_file() == "05_lamp.glb":
 			_put_out_lamp()

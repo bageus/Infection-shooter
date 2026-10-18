@@ -3,8 +3,6 @@ const SFX := preload("res://game/core/audio/public/sound_events.gd")
 
 const PARTICLE_SHADER := preload("res://game/features/combat/grenade_explosion_particle.gdshader")
 const SMOKE_SHADER := preload("res://game/core/vfx/public/smoke_puff.gdshader")
-const FLIPBOOK := preload("res://game/core/vfx/public/sprite_flipbook.gd")
-const ATLASES := preload("res://game/core/vfx/public/effect_atlases.gd")
 
 @export_range(0.5, 12.0, 0.1) var effect_radius := 7.8
 @export_range(0.5, 4.0, 0.1) var effect_duration := 2.0
@@ -14,8 +12,6 @@ const ATLASES := preload("res://game/core/vfx/public/effect_atlases.gd")
 @export_range(1, 20, 1) var debris_count := 7
 @export_range(0.1, 12.0, 0.1) var flash_brightness := 4.8
 @export_range(0.1, 2.0, 0.05) var smoke_size := 0.85
-## Size of the 12-frame explosion sheet relative to effect_radius.
-@export_range(0.1, 2.0, 0.05) var atlas_size := 0.78
 ## Lingering smoke that keeps rolling upwards after the blast.
 @export_range(0, 60, 1) var lingering_smoke_count := 26
 @export_range(0.5, 8.0, 0.1) var lingering_smoke_seconds := 3.4
@@ -51,7 +47,6 @@ func start(surface_normal: Vector3) -> void:
 	var outward := surface_normal.normalized() if surface_normal.length_squared() > 0.01 else Vector3.UP
 	var speed := effect_duration / 2.0
 	var size_scale := effect_radius / 2.6
-	_play_sheet(outward)
 	_embers.position = outward * 0.15 * size_scale
 	_wisps.position = outward * 0.12 * size_scale
 	_spark_debris.position = outward * 0.12
@@ -80,14 +75,6 @@ func start(surface_normal: Vector3) -> void:
 	if not muted:
 		SFX.play(get_parent() if get_parent() != null else self, &"grenade_explode", global_position)
 	get_tree().create_timer(maxf(effect_duration, 0.3 * speed + lingering_smoke_seconds + 0.8) + 0.2).timeout.connect(queue_free)
-
-
-# The supplied 12-frame explosion: flash frames fast, closing smoke frames slow.
-func _play_sheet(outward: Vector3) -> Node3D:
-	# The sheet's base (ground ring) sits on the impact point; smoke rises from it.
-	return FLIPBOOK.spawn(self, ATLASES.GRENADE_EXPLOSION, global_position + outward * 0.12 + Vector3.UP * 0.05,
-		effect_radius * atlas_size, {"brightness": 1.35, "grow": 1.15,
-		"speed": 2.0 / effect_duration, "fade_out": 0.35})
 
 
 # Soft radial glow used by ember and spark particles.

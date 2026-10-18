@@ -72,6 +72,7 @@ static func spread(who: Node3D, shape_node: CollisionShape3D) -> Vector3:
 				var length_sq := away.length_squared()
 				if length_sq >= width_sq:
 					continue
+				var share := 1.0
 				if length_sq < 0.000001:
 					# Exactly stacked: pick a stable direction so the pair can split.
 					var angle := float(mini(self_id, ids[slot]) % 628) * 0.01
@@ -79,6 +80,9 @@ static func spread(who: Node3D, shape_node: CollisionShape3D) -> Vector3:
 					if self_id > ids[slot]:
 						away = -away
 					length_sq = 0.000001
+				else:
+					# A pair closer than one frame's push would swap places every frame and never part.
+					share = Engine.physics_ticks_per_second * sqrt(length_sq) / (2.0 * PUSH_SPEED)
 				var length := sqrt(length_sq)
-				push += away / length * (1.0 - length / width)
+				push += away / length * minf(share, 1.0 - length / width)
 	return push.limit_length(1.0) * PUSH_SPEED

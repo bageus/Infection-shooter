@@ -291,7 +291,7 @@ the licence of their source (CC0 / CC-BY).
 
 ## Interface cues (2026-10-05)
 
-assets/audio/ui/*.tres: original procedural synthesis for this project, dedicated to CC0-1.0. Generated reproducibly by tools/build_ui_sounds.py using Python standard library only; no source recordings. Menu hover, mutation hover/click, lock and its reversed unlock cue.
+assets/audio/ui/*.ogg: original procedural synthesis for this project, dedicated to CC0-1.0. Generated reproducibly by tools/build_ui_sounds.py using the original Python synthesis and ffmpeg Vorbis encoding; no source recordings. Menu hover, mutation hover/click, lock and its reversed unlock cue.
 
 ## Weapon variants (tools/build_weapon_sounds.py)
 
@@ -341,3 +341,12 @@ assign a new license to these owner-supplied recordings.
 `roar_heavy_4` сохранён без перекодирования как `colossus_voice_1`.
 Прежние сведения об источниках остаются историей; обновление не назначает
 новым авторским записям лицензии старых заменённых звуков.
+
+
+<!-- BEGIN GENERATED AUDIO build_weapon_sounds:minigun_fire -->
+## Generated minigun_fire (tools/build_weapon_sounds.py)
+
+Original procedural synthesis; existing project attribution/licensing is retained above.
+<!-- END GENERATED AUDIO build_weapon_sounds:minigun_fire -->
+
+Glass crunch recordings the_crunch_of_glass__1–4 and roll recording The_heavy_character_1 are supplied by the project owner. Source hashes and verified Vorbis conversion are recorded in glass_audio_processing.json; source WAVs removed as requested. Newly supplied blinds recordings are converted to OGG without changing their usage.

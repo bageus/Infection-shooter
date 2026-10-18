@@ -64,6 +64,45 @@
       "seam_step": null,
       "source_sha256": "c655e80b7cf409720552a3f8ed954725cd52e15799dc29e54da53a98ba93f309",
       "output_sha256": "7a156daee3e727dfc46d4710b66b55d79036784ef64064d7152d0829e60ca17b"
+    },
+    {
+      "source": "assets/audio/sfx/blinds/the_blinds_hit_each_1.wav",
+      "output": "assets/audio/sfx/blinds/the_blinds_hit_each_1.ogg",
+      "source_seconds": 1.0,
+      "trim_end_seconds": 0.0,
+      "overlap_seconds": 0.0,
+      "output_seconds": 1.0,
+      "channels": 1,
+      "loop": false,
+      "seam_step": null,
+      "source_sha256": "8b12fe2f0e521af66a573835a167f5fedaa0ab4ac29e2b5b9b8f18dbd19f0c41",
+      "output_sha256": "604af87486e1ea7cf32e5edf026d3a8f1c98418a37e9d4092a40d06aa5fa12fe"
+    },
+    {
+      "source": "assets/audio/sfx/blinds/the_blinds_hit_each_2.wav",
+      "output": "assets/audio/sfx/blinds/the_blinds_hit_each_2.ogg",
+      "source_seconds": 1.0,
+      "trim_end_seconds": 0.0,
+      "overlap_seconds": 0.0,
+      "output_seconds": 1.0,
+      "channels": 1,
+      "loop": false,
+      "seam_step": null,
+      "source_sha256": "73433bf09828abf14788c671eaaed4561b67e7e0dd4989835839958b292f7bf8",
+      "output_sha256": "b2215ab492bb543da7da89e15d24a905f696df30d3210f60d2fffd138cfee30a"
+    },
+    {
+      "source": "assets/audio/sfx/char_roll/The_heavy_character_1.wav",
+      "output": "assets/audio/sfx/player_roll/player_roll_1.ogg",
+      "source_seconds": 1.0,
+      "trim_end_seconds": 0.0,
+      "overlap_seconds": 0.0,
+      "output_seconds": 1.0,
+      "channels": 1,
+      "loop": false,
+      "seam_step": null,
+      "source_sha256": "e081380089cc81829a837e08dd68bfed565c8dcfbfd4488b46277a88f40fe6b9",
+      "output_sha256": "cccb56d21f1fc4a7d82078cd65465dc6990101bef8d272e3d2fc03cf01964cb8"
     }
   ]
 }

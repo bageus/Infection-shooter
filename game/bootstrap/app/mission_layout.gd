@@ -2,6 +2,7 @@ extends Node3D
 
 const KEY := preload("res://game/bootstrap/app/mission_key.gd")
 const WEAPON := preload("res://game/bootstrap/app/weapon_pickup.gd")
+const FLOOR_HINT := preload("res://game/bootstrap/app/floor_hint_guide.gd")
 const FLOOR_BOUNDS := Rect2(-40, -30, 80, 60)
 const CUT_STEP := 0.5
 const STAIR_REFRESH_SECONDS := 0.35
@@ -11,10 +12,14 @@ var _objects: Node
 var _stairs: Dictionary[int, Dictionary] = {}
 var _openings: Array[Rect2] = []
 var _scan_remaining := 0.0
+var _player: Node3D
+var _key: Node3D
+var _hints: Node3D
 
 
-func setup(stage: Node3D, _player: Node3D, _infection: Node) -> void:
+func setup(stage: Node3D, player: Node3D, _infection: Node) -> void:
 	_stage = stage
+	_player = player
 	_objects = stage.get_node("PlanningObjects")
 	_objects.child_entered_tree.connect(_on_planning_child_entered)
 	_objects.child_exiting_tree.connect(_on_planning_child_exiting)
@@ -26,6 +31,34 @@ func setup(stage: Node3D, _player: Node3D, _infection: Node) -> void:
 	key.name = "EmergencyKey"
 	add_child(key)
 	key.global_position = Vector3(20, 0.25, 15)
+	_key = key
+	_hints = FLOOR_HINT.new()
+	_hints.name = "FloorHints"
+	_hints.player = player
+	_hints.target_source = floor_hint_target
+	add_child(_hints)
+
+
+func set_floor_hints_enabled(enabled: bool) -> void:
+	_hints.call("set_hints_enabled", enabled)
+
+
+# Goal for the floor chevrons: the emergency key until it is taken, then the nearest exit opening.
+func floor_hint_target() -> Vector3:
+	if not is_instance_valid(_player):
+		return Vector3.INF
+	if is_instance_valid(_key) and not (_player.has_method("has_emergency_key") and bool(_player.call("has_emergency_key"))):
+		return _key.global_position
+	var from := Vector2(_player.global_position.x, _player.global_position.z)
+	var best := Vector3.INF
+	var best_distance := INF
+	for opening in _openings:
+		var center := opening.get_center()
+		var distance := center.distance_squared_to(from)
+		if distance < best_distance:
+			best_distance = distance
+			best = Vector3(center.x, 0.0, center.y)
+	return best
 
 
 func _process(delta: float) -> void:

@@ -70,6 +70,8 @@ var _shot_recoil := preload("res://game/features/player/shot_recoil.gd").new()
 var _shooting_camera := preload("res://game/features/player/shooting_camera_state.gd").new()
 var health: float
 var armor: float
+## A plate was picked up on this map or an earlier one of the chain; arriving on a new map refills armor then.
+var _armor_found := false
 var antidotes: int
 ## Settings toggle: antidote syringes are not spent while it is on.
 var infinite_antidotes: bool = false
@@ -102,7 +104,7 @@ func _ready() -> void:
 	_camera_distance=camera_min_distance
 	camera.position=camera.position.normalized()*_camera_distance
 	health=max_health
-	armor=max_armor
+	armor=0.0
 	antidotes=starting_antidotes
 	_animation_selection.configure(self, aim_pivot, weapon_stance)
 	$AnimationDriver.call("configure_clip_selector", _animation_selection.select_clip)
@@ -279,6 +281,36 @@ func pickup_weapon(index: int) -> bool:
 	_select_weapon(current_weapon_index)
 	_play_sound(&"weapon_pickup")
 	return true
+
+## Armor plate plus weapon slots carried to the next map of a level chain or a respawn
+## (health, ammo and key start fresh; armor refills only once a plate has been found).
+func export_loadout() -> Dictionary:
+	return {"slots": _slot_weapons.duplicate(), "armor_found": _armor_found}
+
+
+func import_loadout(loadout: Dictionary) -> void:
+	if bool(loadout.get("armor_found", false)):
+		_armor_found = true
+		armor = max_armor
+	var slots: Variant = loadout.get("slots")
+	if not slots is Array or slots.size() != _slot_weapons.size():
+		return
+	var seen: Array[int] = []
+	for raw in slots:
+		var index := int(raw)
+		if index < 0 or index >= weapons.size() or seen.has(index):
+			return
+		seen.append(index)
+	_slot_weapons = seen
+	_select_weapon(0)
+
+
+## Armor plate collected: the armor bar fills to its maximum.
+func pickup_armor() -> void:
+	armor = max_armor
+	_armor_found = true
+	_play_sound(&"medkit_pickup")
+
 
 func acquire_emergency_key() -> void:
 	_emergency_key = true

@@ -45,7 +45,7 @@ func setup(parent: Node) -> void:
 	BLAST.smoke(self, point)
 	PAPER.tear(self, point, direction)
 	DEBRIS.dust_puff(self, point, 1.0)
-	for atlas: Dictionary in [ATLASES.ELECTRIC_SPARK, ATLASES.TORN_PAPER, ATLASES.EXTINGUISHER_SPRAY, ATLASES.GRENADE_EXPLOSION]:
+	for atlas: Dictionary in [ATLASES.ELECTRIC_SPARK, ATLASES.TORN_PAPER, ATLASES.EXTINGUISHER_SPRAY]:
 		if ATLASES.available(atlas):
 			FLIPBOOK.spawn(self, atlas, point, 0.5, {})
 	_warm_extinguisher(point)

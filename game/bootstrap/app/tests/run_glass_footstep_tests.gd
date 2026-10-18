@@ -9,10 +9,6 @@ var stage: Node3D
 var floor_view: Node3D
 var player: CharacterBody3D
 
-class AudioProbe extends Node:
-	var events: Array[StringName] = []
-	func play(event: StringName) -> void:
-		events.append(event)
 
 
 func _init() -> void:
@@ -153,10 +149,6 @@ func _test_shards() -> void:
 
 func _test_roll() -> void:
 	_clear_voices()
-	var audio: Node = player.get("audio")
-	var probe := AudioProbe.new()
-	stage.add_child(probe)
-	player.set("audio", probe)
 	player.set("_roll_cooldown_remaining", 0.0)
 	Input.action_press("move_right")
 	Input.action_press("roll")
@@ -165,9 +157,10 @@ func _test_roll() -> void:
 	player.call("_update_move", 0.016)
 	Input.action_release("roll")
 	Input.action_release("move_right")
-	_check(probe.events.count(&"player_roll") == 1, "Accepted roll requests its sound exactly once")
-	player.set("audio", audio)
-	probe.queue_free()
+	var voices := _voices(&"player_roll")
+	_check(voices.size() == 1, "Accepted roll plays its owner recording exactly once")
+	_check(not voices.is_empty() and voices[0].stream is AudioStreamOggVorbis and voices[0].stream.resource_path.ends_with("player_roll/player_roll_1.ogg"), "Roll uses the supplied converted recording")
+	_clear_voices()
 	player.position = Vector3(6, 0.9, 2)
 	player.velocity = Vector3.DOWN
 	player.move_and_slide()

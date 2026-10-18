@@ -6,7 +6,7 @@
     "Prototype infected health",
     "Prototype infected attack cooldown",
     "Prototype infected death state",
-    "Infected stalk/charge pace",
+    "Infected continuous chase running pace",
     "Hunger posture (stand, all fours, crawl), idle flavour, corpse feeding and the aggro scream",
     "Colossus slam cooldown and ground wave",
     "Horde ram and summon state",
@@ -127,6 +127,7 @@
     "mutation_status_v2": {
       "apply_skill_push": "apply_skill_push(direction:Vector3,distance:float) -> void; actual metres, stops at collision, cancels attack windup",
       "apply_skill_infection": "apply_skill_infection(duration:float,damage_per_second:float) -> void; poison lethal damage only explodes40 within4m once, no propagated infection"
-    }
+    },
+    "enemy_gameplay_modes_v1": "Bootstrap-owned transient metadata on injected target: {ignore_player:bool,no_damage:bool}; missing=false. Infected reads at sensing/attack time, applies live and to late spawns; ADR0059. No dependency edge or map DTO change."
   }
 }

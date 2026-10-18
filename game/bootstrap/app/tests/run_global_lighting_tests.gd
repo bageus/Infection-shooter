@@ -243,7 +243,38 @@ func _test_lighting_preferences(app: Node, controller: Node, overhead: Direction
 	preferences.values.sunlight = true
 	preferences.apply_to_game(self)
 	_check(overhead.visible, "Sunlight returns without recreating its source")
+	_test_only_game_lights(app, controller, preferences, overhead, late)
 	if is_instance_valid(late):
 		late.free()
 	controller.call("set_local_lights_enabled", false)
 	current_scene = null
+
+
+func _test_only_game_lights(app: Node, controller: Node, prefs: RefCounted, overhead: DirectionalLight3D, lamp: Node) -> void:
+	var environment: Environment = app.get_node("WorldEnvironment").environment
+	var saved := [environment.ambient_light_source, environment.ambient_light_energy, environment.reflected_light_source]
+	prefs.values.game_lights_only = true
+	prefs.apply_to_game(self)
+	_check(not overhead.visible and controller.get("local_lights_enabled"), "Game-only keeps local-light permission and disables global fill")
+	_check(lamp.get_node("Light").visible, "Authored gameplay lamp remains visible")
+	_check(environment.ambient_light_source == Environment.AMBIENT_SOURCE_DISABLED and environment.ambient_light_energy == 0.0, "Game-only removes ambient fill")
+	_check(environment.reflected_light_source == Environment.REFLECTION_SOURCE_DISABLED, "Game-only removes sky reflection fill")
+	for cycle in 3:
+		controller.call("set_planning_mode", true)
+		controller.call("set_game_lighting", false)
+		_check(environment.ambient_light_energy == 0.0, "Editor preview cannot add fill in game-only mode")
+		controller.call("set_game_lighting", true)
+		controller.call("set_planning_mode", false)
+	for lamps_enabled in [false, true]:
+		for sun_enabled in [false, true]:
+			prefs.values.lighting = lamps_enabled
+			prefs.values.sunlight = sun_enabled
+			prefs.apply_to_game(self)
+			_check(not overhead.visible, "Game-only overrides both sun switch states")
+			_check(lamp.get_node("Light").visible == lamps_enabled, "Game-only preserves master permission for gameplay lamps")
+	prefs.values.lighting = true
+	prefs.values.sunlight = true
+	prefs.values.game_lights_only = false
+	prefs.apply_to_game(self)
+	_check(overhead.visible, "Leaving game-only restores the permitted sun")
+	_check([environment.ambient_light_source, environment.ambient_light_energy, environment.reflected_light_source] == saved, "Leaving game-only restores authored environment after planner cycles")

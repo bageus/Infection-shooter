@@ -1,8 +1,9 @@
 # Проверка шагов по стеклу и OGG
 
-База main892c25a, Godot4.7.2, Phase1/T004. Отсутствует The_heavy_character_1:
-реализован ровно один запрос player_roll при принятом перекате и optional
-canonical OGG entry. Для завершения нужен сам файл записи; звук не подменён.
+База main6fa115b, Godot4.7.2, Phase1/T004. В main добавлен настоящий
+The_heavy_character_1: конвертирован в player_roll_1.ogg, подключён обычным
+событием и проверяется на реальном движении игрока. Два новых blinds WAV
+также конвертированы; все восемь конвертаций имеют hashes/decode receipt.
 
 ## Проверки
 
@@ -25,16 +26,18 @@ canonical OGG entry. Для завершения нужен сам файл за
 Разбить окно, монитор/телевизор; пройти и пробежать по крупному стеклу и
 россыпи, затем выйти на чистый пол. После clear/map reload хруст пропадает.
 Бумага/дерево не должны давать хруст. Перекат не вызывает walking cues.
-После поступления записи переката запустить converter, убедиться в одном
-player_roll OGG на принятие roll, отсутствии звука при cooldown/idle.
+Убедиться в одном player_roll OGG на принятие roll, отсутствии звука при
+cooldown/idle. Звук должен соответствовать The_heavy_character_1.
 Прослушивание, Iris Xe/Web FPS и ручная Windows приёмка здесь не выполнены.
 
 ## Автоматический результат
 
-Чистый editor import Godot4.7.2 без ошибок. Все17 перечисленных targeted suites
-прошли; sound_event повторён после добавления OGG-only CI guard. 18 Python
-тестов audio_generation PASS. Project/spec/workflow/architecture/source-size,
-CI176 registrations,383 scene references, resource paths, export pack и diff PASS.
-Все5 новых конвертаций и30 исторических подтверждены hashes/decode; исходники
-отсутствуют в git tree и отдельной чистой worktree. Корреляция reverse cues
-после выравнивания Vorbis padding >0.999. Ручная/аппаратная приёмка не выполнена.
+На объединении с main6fa115b: clean editor import Godot4.7.2 без ошибок.
+Все19 targeted suites PASS: прежние17 плюс baked_surface_decal и
+surface_decal_options. Roll regression проигрывает настоящий player_roll_1.ogg
+ровно один раз при принятии переката. 18 Python audio_generation tests PASS.
+Project/spec/workflow/architecture/source-size/CI184 registrations/384 scene refs,
+resource paths/export pack/diff PASS. Receipt8 и исторические30 конвертаций
+подтверждены hashes/decode; WAV/.wav.import/PCM ресурсов не осталось.
+Конфликты с main разрешены с сохранением обеих функций: хруст стекла и
+процедурные следы шагов. Ручная/аппаратная приёмка не выполнена.

@@ -188,6 +188,8 @@ func _shadow_checks(tabs: TabContainer, dialog: Control) -> void:
 
 
 func _general_checks(tabs: TabContainer) -> void:
+	_check_presentation_options(tabs)
+	_enemy_modes_checks(tabs)
 	_dodge_checks(tabs)
 	_walk_checks(tabs)
 
@@ -286,3 +288,54 @@ func _smoke_checks(tabs: TabContainer) -> void:
 	saved.load_settings()
 	_check(not saved.values.bullet_impact_smoke and saved.values.electronic_particles, "Smoke off persists independently of electronic sparks")
 	smoke.set_pressed(true)
+
+
+func _check_presentation_options(tabs: TabContainer) -> void:
+	_check(tabs.get_child(0).find_child("TextScale", true, false) != null, "Text scale belongs to General")
+	_check(tabs.get_child(2).find_child("TextScale", true, false) == null, "Text scale is absent from Video")
+	_check(tabs.find_child("SkillEffects", true, false) == null, "Obsolete sprite choice is removed")
+	var only := tabs.get_child(2).find_child("GameLightsOnly", true, false) as CheckButton
+	_check(only != null and not only.button_pressed, "Game-only lighting belongs to Video and preserves the legacy default")
+	var prefs := PREFS.new()
+	prefs.load_settings()
+	var previous: bool = prefs.values.game_lights_only
+	prefs.values.game_lights_only = true
+	prefs.save_settings()
+	var reloaded := PREFS.new()
+	reloaded.load_settings()
+	_check(reloaded.values.game_lights_only, "Game-only lighting survives settings reload")
+	prefs.values.game_lights_only = previous
+	prefs.save_settings()
+func _enemy_modes_checks(tabs: TabContainer) -> void:
+	for entry in [["EnemiesIgnorePlayer", "enemies_ignore_player"], ["EnemiesNoDamage", "enemies_no_damage"]]:
+		var toggle := tabs.get_child(0).find_child(entry[0], true, false) as CheckButton
+		_check(toggle != null, "Enemy mode belongs to General")
+		if toggle == null:
+			continue
+		_check(not toggle.button_pressed and not toggle.tooltip_text.is_empty(), "Enemy mode defaults off with explanation")
+		toggle.set_pressed(true)
+		var saved := PREFS.new()
+		saved.load_settings()
+		_check(bool(saved.values[entry[1]]), "Enemy mode survives settings reload")
+		toggle.set_pressed(false)
+	var defaults := PREFS.new()
+	defaults.values.enemies_ignore_player = true
+	defaults.values.enemies_no_damage = true
+	defaults.reset()
+	_check(not defaults.values.enemies_ignore_player and not defaults.values.enemies_no_damage, "Reset restores ordinary enemy rules")
+	var before := FileAccess.get_file_as_bytes(PREFS.FILE)
+	var malformed := ConfigFile.new()
+	malformed.set_value("interface_v1", "enemies_ignore_player", "yes")
+	malformed.set_value("interface_v1", "enemies_no_damage", 1)
+	malformed.save(PREFS.FILE)
+	var legacy := PREFS.new()
+	legacy.load_settings()
+	_check(not legacy.values.enemies_ignore_player and not legacy.values.enemies_no_damage, "Malformed or missing preference flags preserve ordinary gameplay")
+	FileAccess.open(PREFS.FILE, FileAccess.WRITE).store_buffer(before)
+	var mission := load("res://game/bootstrap/app/main.gd").new() as Node3D
+	var target := Node3D.new()
+	mission.set("player", target)
+	mission.call("set_enemy_gameplay_modes", true, false)
+	_check(target.get_meta("enemy_gameplay_modes_v1").ignore_player, "Mission settings command injects policy into its player")
+	target.free()
+	mission.free()

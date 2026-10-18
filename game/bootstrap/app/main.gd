@@ -21,6 +21,7 @@ const BLAST_FEEDBACK := preload("res://game/bootstrap/app/blast_feedback.gd")
 const DEBUG_OVERLAY := preload("res://game/bootstrap/app/runtime_debug_overlay.gd")
 const OCCLUSION := preload("res://game/bootstrap/app/occlusion_effects.gd")
 const MISSION_LAYOUT := preload("res://game/bootstrap/app/mission_layout.gd")
+const LEVEL_ENTRIES := preload("res://game/bootstrap/app/level_entry_runtime.gd")
 const WAVE_DIRECTOR := preload("res://game/features/spawning/public/wave_director.gd")
 
 @onready var player: Node3D = $Gameplay/Player
@@ -38,6 +39,8 @@ var mission_objects: Node3D
 var impact_pool: Node3D
 
 var defer_layout_loading := false
+## Name of the saved map being played; the level chain uses it to find its neighbours.
+var current_level := ""
 var _mission_loading := false
 var _ended := false
 var _pause_open := false
@@ -98,6 +101,10 @@ func _ready() -> void:
 	mission_layout.name = "MissionLayout"
 	gameplay.add_child(mission_layout)
 	mission_layout.call("setup", self, player, infection_runtime)
+	var entries := LEVEL_ENTRIES.new()
+	entries.name = "LevelEntries"
+	add_child(entries)
+	entries.setup(self, player, planning_mode)
 	var occlusion := OCCLUSION.new()
 	occlusion.name = "OcclusionEffects"
 	add_child(occlusion)
@@ -125,6 +132,10 @@ func refresh_control_labels() -> void:
 		mutation_tree_ui.call("_refresh")
 
 
+func set_enemy_gameplay_modes(ignore_player: bool, no_damage: bool) -> void:
+	player.set_meta("enemy_gameplay_modes_v1", {"ignore_player": ignore_player, "no_damage": no_damage})
+
+
 func set_test_mutagen_enabled(enabled: bool) -> void:
 	var existing := gameplay.get_node_or_null("PermanentTestMutagen")
 	if existing != null:
@@ -146,11 +157,16 @@ func set_infinite_antidotes_enabled(enabled: bool) -> void:
 	player.set("infinite_antidotes", enabled)
 
 
-## Settings: self-made procedural skill effects instead of the sprite sheets.
-func set_procedural_skill_effects(enabled: bool) -> void:
-	var effects: Node = player.get("mutation_effects")
-	if effects != null and effects.get("vfx") != null:
-		effects.get("vfx").set("procedural", enabled)
+## Settings: floor chevrons that point toward the emergency key and the exit.
+func set_floor_hints_enabled(enabled: bool) -> void:
+	if is_instance_valid(mission_layout):
+		mission_layout.call("set_floor_hints_enabled", enabled)
+
+
+## Settings: own procedural blood instead of the blood decal atlases.
+func set_procedural_blood(enabled: bool) -> void:
+	if blood_effects != null:
+		blood_effects.call("set_procedural_blood", enabled)
 
 
 ## Settings: dodge animation, 0 = dive roll, 1 = strafe jump.
@@ -298,11 +314,32 @@ func _on_menu_action(action: String) -> void:
 func _on_restart_pressed() -> void:
 	if _mission_loading:
 		return
+	if has_node("LevelEntries") and $LevelEntries.chain.index_of(current_level) >= 0:
+		travel_to_level(current_level, {})
+		return
 	_mission_loading = true
 	var loader := preload("res://game/bootstrap/app/menu/mission_loader.gd").new()
 	add_child(loader)
 	loader.completed.connect(func(_success: bool) -> void: _mission_loading = false)
 	loader.start()
+
+
+## What travels between maps (weapons, control threshold); applied by the loader to the new mission.
+func apply_carry(carry: Dictionary) -> void:
+	player.call("import_loadout", carry.get("loadout", {}))
+	infection_runtime.call("restore_critical_threshold", float(carry.get("threshold", 0.0)))
+
+
+## Level chain: reload the scene with another saved map, arriving at `arrival` ({x, z} or {}).
+func travel_to_level(map_name: String, arrival: Dictionary) -> void:
+	if _mission_loading:
+		return
+	_mission_loading = true
+	var loader := preload("res://game/bootstrap/app/menu/mission_loader.gd").new()
+	add_child(loader)
+	loader.completed.connect(func(_success: bool) -> void: _mission_loading = false)
+	var carry := {"loadout": player.call("export_loadout"), "threshold": infection_runtime.call("get_critical_threshold")}
+	loader.start_map(planning_mode.storage._map_path(map_name), map_name, arrival, carry)
 
 
 func _setup_blood_effects() -> void:
@@ -360,6 +397,9 @@ func _setup_world_bindings() -> void:
 		impact_pool.set_script(IMPACT_POOL)
 		add_child(impact_pool)
 	impact_pool.call("register_surface", $FloorBody, $Floor)
+	$Floor.call("configure_surface_decals", planning_root.get_meta("surface_decals_v1", {}))
+	impact_pool.set("surface_hit", Callable($Floor, "bake_surface_hit"))
+	impact_pool.set("surface_step", Callable($Floor, "bake_step"))
 	var display_wall := DISPLAY_WALL.new()
 	display_wall.name = "DisplayWall"
 	add_child(display_wall)

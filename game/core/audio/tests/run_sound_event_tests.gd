@@ -40,7 +40,7 @@ func _run() -> void:
 		if SFX.play(stage, &"elevator_open") != null:
 			played += 1
 	_expect(played == 1, "Per-event voice limits stop pile-ups (%d)." % played)
-	_expect(not SFX.has_event(&"player_roll") or ResourceLoader.exists(SFX._event_path(&"player_roll", 1)), "Optional roll is available only with the actual recording")
+	_expect(SFX.has_event(&"player_roll") and ResourceLoader.exists(SFX._event_path(&"player_roll", 1)), "Roll uses the supplied OGG recording")
 	_test_ui(stage)
 	stage.queue_free()
 	await process_frame

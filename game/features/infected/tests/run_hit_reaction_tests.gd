@@ -1,9 +1,8 @@
 extends SceneTree
-## Runtime checks for the upper-body hit reaction and the charge/walk pace
+## Runtime checks for the upper-body hit reaction and continuous chase pace
 ## (ADR-0040): a shot to one side of the torso swings that shoulder back while
 ## hips and legs keep the clip, the body is never moved as a whole, the torso
-## settles again; charges come in bursts with walks between them, the final
-## approach is always a charge and pace changes are eased.
+## settles again; a chase runs continuously at any distance.
 
 const HUNGER := preload("res://game/features/infected/public/infected_hunger.tscn")
 const PACE := preload("res://game/features/infected/chase_pace.gd")
@@ -17,8 +16,8 @@ func _init() -> void:
 
 
 func _run() -> void:
-	_test_pace_bursts()
-	_test_pace_lunge_and_easing()
+	_test_continuous_chase()
+	_test_run_start_and_speed()
 	var stage := Node3D.new()
 	root.add_child(stage)
 	await _test_torso_twists_toward_hit_side(stage, 1.0)
@@ -30,52 +29,21 @@ func _run() -> void:
 	quit(1 if failures > 0 else 0)
 
 
-func _test_pace_bursts() -> void:
+func _test_continuous_chase() -> void:
 	var pace := PACE.new(7)
-	var dt := 1.0 / 60.0
-	var speeds: Array[float] = []
-	for i in 600:
-		speeds.append(pace.tick(dt, 20.0, 9.0, 5.0, 0.4))
-	_expect(absf(speeds.max() - 2.0) < 0.001, "Out of charge range the pace is a steady walk.")
-	var charge_frames := 0
-	var walk_frames := 0
-	var switches := 0
-	var was_charging := false
-	for i in 1200:
-		pace.tick(dt, 6.0, 9.0, 5.0, 0.4)
-		if pace.charging != was_charging:
-			switches += 1
-			was_charging = pace.charging
-		if pace.speed > 4.99:
-			charge_frames += 1
-		elif pace.speed < 2.01:
-			walk_frames += 1
-	_expect(switches >= 4, "In charge range the infected alternates sprints and walks (%d switches in 20 s)." % switches)
-	_expect(charge_frames > 300 and walk_frames > 100, "It spends time both sprinting and walking (%d / %d frames)." % [charge_frames, walk_frames])
-	pace.tick(dt, 9.8, 9.0, 5.0, 0.4)
-	_expect(pace.get("_in_range"), "Just beyond the charge edge the infected still counts as in range.")
-	var always := PACE.new(1)
-	_expect(is_equal_approx(always.tick(dt, 30.0, 0.0, 5.0, 0.4), 5.0), "charge_distance 0 always charges.")
+	for distance in [30.0, 9.8, 6.0, 2.5]:
+		for i in 1200:
+			var speed := pace.tick(1.0 / 60.0, distance, 9.0, 5.0, 0.4)
+			if not is_equal_approx(speed, 5.0) or not pace.charging:
+				_expect(false, "Chase stays at running speed at every distance without recovery walks.")
+				return
+	_expect(is_equal_approx(pace.tick(0.1, 30.0, 0.0, 5.0, 0.4), 5.0), "Legacy zero charge range still runs.")
 
 
-func _test_pace_lunge_and_easing() -> void:
+func _test_run_start_and_speed() -> void:
 	var pace := PACE.new(3)
-	var dt := 1.0 / 60.0
-	var lunge_walk := false
-	var biggest_step := 0.0
-	var previous := pace.tick(dt, 6.0, 9.0, 5.0, 0.4)
-	for i in 1200:
-		var speed := pace.tick(dt, 2.5, 9.0, 5.0, 0.4)
-		if i > 60 and speed < 4.99:
-			lunge_walk = true
-		biggest_step = maxf(biggest_step, absf(speed - previous))
-		previous = speed
-	_expect(not lunge_walk, "Close to the prey the infected never drops to a walk.")
-	for i in 1200:
-		var speed := pace.tick(dt, 6.0, 9.0, 5.0, 0.4)
-		biggest_step = maxf(biggest_step, absf(speed - previous))
-		previous = speed
-	_expect(biggest_step <= 5.0 * 1.4 * dt + 0.001, "Walk and run blend through eased speed changes (largest step %.3f m/s)." % biggest_step)
+	_expect(is_equal_approx(pace.tick(1.0 / 60.0, 20.0, 9.0, 5.0, 0.4), 5.0), "Detection starts running immediately.")
+	_expect(is_equal_approx(pace.tick(0.1, 2.5, 9.0, 3.0, 0.4), 3.0), "Pace respects a changed base movement speed.")
 
 
 # side 1.0 shoots the infected's right flank, -1.0 its left.

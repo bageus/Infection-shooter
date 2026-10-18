@@ -1,0 +1,131 @@
+{
+  "base": "892c25a0f40688a64a92bd1d38f0f5d2a394d41c",
+  "godot": "4.7.2",
+  "mode": "headless",
+  "suites": [
+    {
+      "suite": "run_status_fx_tests.gd",
+      "result": "PASS",
+      "summary": "Status fx tests: 0 failure(s)."
+    },
+    {
+      "suite": "run_hit_reaction_tests.gd",
+      "result": "PASS",
+      "summary": "Hit reaction tests: 0 failure(s)."
+    },
+    {
+      "suite": "run_enemy_voice_tests.gd",
+      "result": "PASS",
+      "summary": "Enemy voice tests: 0 failures"
+    },
+    {
+      "suite": "run_infected_voice_tests.gd",
+      "result": "PASS",
+      "summary": "Infected voice tests: 0 failure(s)."
+    },
+    {
+      "suite": "run_flipbook_tests.gd",
+      "result": "PASS",
+      "summary": "Flipbook tests: 0 failure(s)."
+    },
+    {
+      "suite": "run_grenade_vfx_tests.gd",
+      "result": "PASS",
+      "summary": "Grenade VFX tests: 0 failure(s)."
+    },
+    {
+      "suite": "run_skill_vfx_tests.gd",
+      "result": "PASS",
+      "summary": "Skill vfx tests: 0 failure(s)."
+    },
+    {
+      "suite": "run_settings_tabs_tests.gd",
+      "result": "PASS",
+      "summary": "Settings tabs tests: 0 failures"
+    },
+    {
+      "suite": "run_global_lighting_tests.gd",
+      "result": "PASS",
+      "summary": "Global lighting tests: 0 failures"
+    },
+    {
+      "suite": "run_enemy_animation_tests.gd",
+      "result": "PASS",
+      "summary": "Enemy animation tests: 0 failure(s)."
+    },
+    {
+      "suite": "run_hunger_behaviour_tests.gd",
+      "result": "PASS",
+      "summary": "Hunger behaviour tests: 0 failures"
+    },
+    {
+      "suite": "run_hit_drag_tests.gd",
+      "result": "PASS",
+      "summary": "Hit drag tests: 0 failures"
+    },
+    {
+      "suite": "run_enemy_perception_tests.gd",
+      "result": "PASS",
+      "summary": "Enemy perception tests: 0 failures"
+    },
+    {
+      "suite": "run_enemy_idle_lod_tests.gd",
+      "result": "PASS",
+      "summary": "Enemy idle LOD tests: 0 failures"
+    },
+    {
+      "suite": "run_active_mutation_effects_tests.gd",
+      "result": "PASS",
+      "summary": "Active mutation effects tests: 0 failures"
+    },
+    {
+      "suite": "run_runtime_debug_tests.gd",
+      "result": "PASS",
+      "summary": "Runtime debug tests: 0 failures"
+    },
+    {
+      "suite": "run_mutagen_cloud_tests.gd",
+      "result": "PASS",
+      "summary": "Mutagen cloud tests: 0 failure(s)."
+    },
+    {
+      "suite": "run_sound_event_tests.gd",
+      "result": "PASS",
+      "summary": "Sound event tests: 0 failure(s)."
+    },
+    {
+      "suite": "run_crowd_separation_tests.gd",
+      "result": "PASS",
+      "summary": "Crowd separation tests: 0 failures"
+    },
+    {
+      "suite": "run_enemy_lod_tests.gd",
+      "result": "PASS",
+      "summary": "Enemy LOD tests: 17 imported levels, 0 failures"
+    },
+    {
+      "suite": "run_unaware_motion_tests.gd",
+      "result": "PASS",
+      "summary": "Unaware motion tests: 0 failures"
+    },
+    {
+      "suite": "run_menu_tests.gd",
+      "result": "PASS",
+      "summary": "Menu integration tests: 0 failures"
+    },
+    {
+      "suite": "run_lighting_tests.gd",
+      "result": "PASS",
+      "summary": "Lighting tests: 0 failures"
+    },
+    {
+      "suite": "run_light_budget_cache_tests.gd",
+      "result": "PASS",
+      "summary": "Light budget cache tests: 0 failures"
+    }
+  ],
+  "audio_generation_unit_tests": 18,
+  "native_render_verified": false,
+  "deleted_png_count": 6,
+  "deleted_png_bytes": 12604060
+}

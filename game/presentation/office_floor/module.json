@@ -11,7 +11,8 @@
     "Environment prop visual stages and physical reactions; durability rules owned by features.combat",
     "Mission-local decorative neighboring skyline geometry and facade material",
     "Positional server fan ambience and its lifetime",
-    "Mission-local bounded mixed-material floor debris textures, source cache, stamp queue and density"
+    "Mission-local bounded mixed-material floor debris textures, source cache, stamp queue and density",
+    "Mission-local bounded baked glass/wall/column receiver textures and independent floor damage/scuff layers"
   ],
   "public_api": [
     "public/base_office_layout.tscn",
@@ -45,7 +46,8 @@
     "public/props/blood_decal.tscn",
     "public/display_wall.gd",
     "public/hit_effect_warmup.gd",
-    "public/city_backdrop.tscn"
+    "public/city_backdrop.tscn",
+    "public/surface_decal_config.gd"
   ],
   "dependencies": [
     "features.player",
@@ -89,6 +91,11 @@
     "damage_particles_v1": {
       "configure_damage_particles": "configure_damage_particles(enabled: bool) -> void; repeated electronics sparks only"
     },
+    "plate_fruit_v1": {
+      "has_fruit": "has_fruit() -> bool; true for the flat fruit plate model only",
+      "configure_fruit": "configure_fruit(config: Dictionary {enabled: bool, count: 1..5, seed: int}) -> void; one baked body, seeded random layout, rebuilt live",
+      "get_fruit_config": "get_fruit_config() -> Dictionary; saved as the optional `fruit` map record only while enabled; a shot plate breaks or flips and its fruit scatters as loose pieces"
+    },
     "display_placement_v1": {
       "get_display_edges": "get_display_edges() -> Dictionary {frame: Transform3D, size: Vector2}; empty when not a frameless TV",
       "snap_display_edges": "snap_display_edges(neighbors: Array[Dictionary]) -> void; .18m, coplanar edges only"
@@ -111,7 +118,7 @@
     "glass_floor_debris_v1": {
       "configure_glass_debris": "configure_glass_debris(floor_view: Node3D) -> void on glass_partition and environment_prop; bootstrap injects the existing public base_floor_renderer",
       "floor": "scatter_glass_debris(panes: Array[MeshInstance3D], direction: Vector3), stamp_glass_debris(at: Vector2, frame: int, size: float, turns: int = 0) -> bool; positions are floor-local XZ; clear_glass_debris() clears transient pixels",
-      "budgets": "8m/512px sections; sixteen shared RGBA8+R8 image/texture pairs; 64 queued stamps; two stamps and one section upload (color + roughness) per active frame; four stamps per 1m cell; least-recently-written eviction; about 40 MiB CPU+GPU section storage. No added physics or debris nodes."
+      "budgets": "8m/512px sections; sixteen shared RGBA8+R8 image/texture pairs; 64 queued stamps; two stamps and one section upload (color + roughness) per active frame; four stamps per 1m cell; least-recently-written eviction; about40MiB debris plus up to16MiB lazy lower layers CPU+GPU. No added physics or debris nodes."
     },
     "floor_debris_v2": {
       "configure": "Existing configure_glass_debris(floor_view: Node3D) injection also configures material debris on environment_prop, paper_prop, staged_table, physical_prop/table and scaled_destructible roots; local scene roots forward it.",
@@ -119,6 +126,13 @@
       "stamp": "stamp_material_debris(at: Vector2, kind: String, frame: int, size: float, turns: int = 0) -> bool; floor-local XZ, kind glass|paper|wood|cardboard|plastic|fabric|extinguisher; old stamp_glass_debris remains compatible.",
       "lifetime": "All kinds share glass_floor_debris_v1 budgets and clear_glass_debris; transient, not persisted. Per prop at most four distinct actual destruction facts; rare table red addition once; extinguisher only on rupture.",
       "surface": "Compact R8 roughness accompanies RGBA8 atlas pixels; last visible fragment determines roughness at overlaps. Shared original resources stay immutable."
+    },
+    "surface_decals_v1": {
+      "config": "configure_surface_decals(Dictionary), get_surface_decals()->Dictionary, get_decal_preview(kind)->Texture2D; public/surface_decal_config.gd normalized/valid. Seven kinds glass|wall_damage|wall_scuff|floor_damage|floor_scuff|debris|bullet; opacity0..1,size0.25..2 affect new stamps.",
+      "hits": "bake_surface_hit(collider, world_point, world_normal, weapon, anchor: MeshInstance3D = null)->bool; bake_glass_hit(pane, point, normal)->bool; bake_display_hit(prop, point, normal); bake_step(point, normal). Confirmed geometry only; health ownership unchanged.",
+      "floor": "stamp_floor_surface(localXZ, kind, frame, size, turns=0)->bool. Independent damage256px/scuff256px/debris512px+R8 layers; fixed order damage->scuff->debris; shared16sections/queue64/two stamps+one section upload per active frame. Up to56MiB CPU+GPU floor page storage.",
+      "receivers": "Two384x256 RGBA textures per receiver, six128px faces, max12 receivers/18MiB CPU+GPU; queue32/two stamps+one receiver upload per active frame, density6 per face-grid cell. One overlay pass per receiver, no per-hit nodes; weak ownership, visibility cleanup, LRU releases override, foreign overlays preserved.",
+      "lifetime": "clear_glass_debris clears every transient floor layer and receiver; idle processing stops. Bootstrap persists only authored settings in optional map-v8 surface_decals_v1 / baked scene metadata; runtime marks are not serialized."
     },
     "footstep_surface_v1": {
       "has_glass_at": "has_glass_at(world_position: Vector3) -> bool; bounded read-only query of visible floor glass and marked physical shards"

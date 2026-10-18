@@ -59,6 +59,9 @@ func _on_footstep(_side: int, speed: float) -> void:
 	if float(_player.get("_roll_remaining")) > 0.0:
 		return
 	var event: StringName = &"step_glass" if glass_surface_query.is_valid() and bool(glass_surface_query.call(_foot_position())) else &"step_player"
+	var impacts := _player.get("impact_pool") as Node
+	if is_instance_valid(impacts) and impacts.has_method("request_surface_step"):
+		impacts.call("request_surface_step", _player)
 	# Sprinting lands harder than walking.
 	SFX.play(_player, event, _player.global_position, lerpf(-3.0, 2.0, clampf((speed - 3.0) / 6.0, 0.0, 1.0)))
 
