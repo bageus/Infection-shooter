@@ -4,6 +4,7 @@ const SFX := preload("res://game/core/audio/public/sound_events.gd")
 const FLOOR_DEBRIS := preload("res://game/presentation/office_floor/prop_floor_debris.gd")
 var _floor_debris := FLOOR_DEBRIS.new()
 const PIECE_SCRIPT = preload("res://game/presentation/office_floor/table_piece.gd")
+const BAKED_SCRIPT = preload("res://game/presentation/office_floor/table_baked_pieces.gd")
 const ASSEMBLY_SCRIPT = preload("res://game/presentation/office_floor/table_assembly.gd")
 const EFFECTS_SCRIPT = preload("res://game/features/combat/public/impact_effects.gd")
 const BALANCE = preload("res://game/features/combat/public/projectile_balance.gd")
@@ -28,7 +29,7 @@ var _active: Dictionary = {}
 var _started := false
 var _effects: Node3D
 var _retained: Array[RigidBody3D] = []
-var _retention_target := 2
+var _baked: Node3D
 var _assembly: RigidBody3D
 var _part_shapes: Dictionary = {}
 var _rest_transforms: Dictionary = {}
@@ -64,7 +65,6 @@ func get_projectile_material(_shape_index: int = -1) -> String:
 
 func _ready() -> void:
 	_effects = _locate_effects()
-	_retention_target = randi_range(1, 3)
 	var visual := get_node("Visual")
 	_intact = _find(visual, "Intact")
 	_modular = _find(visual, "Modular")
@@ -103,7 +103,7 @@ func _part_at(hit_point: Vector3) -> String:
 
 
 func hit_piece(part_id: String, hit_position: Vector3, direction: Vector3, damage: float = 0.0, weapon: String = "") -> void:
-	if not _active.has(part_id):
+	if not _active.has(part_id) or not is_instance_valid(_active[part_id]):
 		return
 	if not _started:
 		return
@@ -310,23 +310,33 @@ func _settle_piece(body: RigidBody3D) -> void:
 	for index in range(_retained.size() - 1, -1, -1):
 		if not is_instance_valid(_retained[index]) or _retained[index].is_queued_for_deletion():
 			_retained.remove_at(index)
-	if _retained.size() >= _retention_target:
-		DEBRIS.fade_free(body)
+	# Settled pieces stay on the floor. A piece that can still break keeps its body and hit layer; the smallest bake into a static batch.
+	if bool(body.get("last_stage")):
+		_bake_piece(body)
 		return
-	# Retained pieces touch only the floor collision layer, never the player.
 	body.freeze = false
-	body.collision_layer = 0
+	body.collision_layer = 1
 	body.collision_mask = 2
 	body.set_meta("kickable", _retained.size() % 2 == 0)
 	_retained.append(body)
 	if _effects != null:
 		_effects.call("register_retained", body)
-	var body_ref: WeakRef = weakref(body)
-	get_tree().create_timer(35.0).timeout.connect(func() -> void:
-		var live_body: RigidBody3D = body_ref.get_ref() as RigidBody3D
-		if live_body != null:
-			DEBRIS.fade_free(live_body)
-	)
+
+
+func _bake_piece(body: RigidBody3D) -> void:
+	var visual: MeshInstance3D
+	for child in body.get_children():
+		if child is MeshInstance3D and (child as MeshInstance3D).mesh is not QuadMesh:
+			visual = child as MeshInstance3D
+			break
+	if visual != null:
+		if _baked == null:
+			_baked = BAKED_SCRIPT.new()
+			_baked.name = "BakedPieces"
+			get_parent().add_child(_baked)
+		_baked.call("bake", visual)
+	_active.erase(body.get("piece_id"))
+	body.queue_free()
 
 
 func _add_fracture_marks(body: RigidBody3D, mesh: MeshInstance3D, hit_position: Vector3) -> void:
