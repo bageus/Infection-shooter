@@ -91,6 +91,11 @@
     "damage_particles_v1": {
       "configure_damage_particles": "configure_damage_particles(enabled: bool) -> void; repeated electronics sparks only"
     },
+    "plate_fruit_v1": {
+      "has_fruit": "has_fruit() -> bool; true for the flat fruit plate model only",
+      "configure_fruit": "configure_fruit(config: Dictionary {enabled: bool, count: 1..5, seed: int}) -> void; one baked body, seeded random layout, rebuilt live",
+      "get_fruit_config": "get_fruit_config() -> Dictionary; saved as the optional `fruit` map record only while enabled; a shot plate breaks or flips and its fruit scatters as loose pieces"
+    },
     "display_placement_v1": {
       "get_display_edges": "get_display_edges() -> Dictionary {frame: Transform3D, size: Vector2}; empty when not a frameless TV",
       "snap_display_edges": "snap_display_edges(neighbors: Array[Dictionary]) -> void; .18m, coplanar edges only"
