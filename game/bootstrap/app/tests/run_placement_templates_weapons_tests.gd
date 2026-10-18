@@ -5,6 +5,7 @@ const FILES := preload("res://game/bootstrap/app/desk_setup_template_files.gd")
 const VISUALS := preload("res://game/bootstrap/app/desk_setup_visuals.gd")
 const PROP := preload("res://game/presentation/office_floor/public/props/environment_prop.tscn")
 const TABLE := "res://models/objects/enviroments/07/07_table_square.glb"
+const RECEPTION := "res://models/objects/enviroments/07/07_reception_counter_two_heights_2.glb"
 const SHELF := "res://models/objects/enviroments/03/03_bookshelf.glb"
 var failures := 0
 
@@ -84,7 +85,7 @@ func _preview_self_hit(planner: Node) -> void:
 func _templates(planner: Node) -> void:
 	var name_part := "regression_" + str(Time.get_ticks_usec())
 	var setup: Node = planner.get("desk_setup")
-	for path in [TABLE, SHELF, "res://models/objects/enviroments/08/08_divider_full_H_desk.glb", "res://models/objects/enviroments/08/08_divider_full_U_desk.glb"]:
+	for path in [TABLE, SHELF, RECEPTION, "res://models/objects/enviroments/08/08_divider_full_H_desk.glb", "res://models/objects/enviroments/08/08_divider_full_U_desk.glb"]:
 		var desk := planner.call("_instantiate_asset", path) as Node3D
 		(planner.get("root") as Node).add_child(desk)
 		desk.set_meta("planning_scene_path", path)
@@ -97,7 +98,14 @@ func _templates(planner: Node) -> void:
 			overlay.mesh.size = Vector3(80, .001, 80)
 			overlay.set_meta("planning_bounds_excluded", true)
 			desk.add_child(overlay)
-		setup.call("open", desk)
+		if path == RECEPTION:
+			planner.call("_select", desk)
+			var controls: Node = planner.get("controls")
+			_check(controls.get("desk_setup_button").visible, "Installed reception exposes the template button")
+			controls.call("_open_desk_setup")
+			_check(bool(setup.get("active")), "Reception template editor opens through the normal planner action")
+		else:
+			setup.call("open", desk)
 		(setup.get("template_name") as LineEdit).text = name_part
 		var zones: Array = setup.get("zones")
 		if path == TABLE:
@@ -139,6 +147,8 @@ func _templates(planner: Node) -> void:
 			_check((setup.get("zones") as Array)[0].category == "Mouse", "Legacy map derives a typed zone: " + path)
 			await _drag_existing(planner, setup, path)
 			DirAccess.remove_absolute(saved_path)
+		if path == RECEPTION:
+			await _reception_surfaces(planner, setup)
 		if path == TABLE:
 			var camera := planner.get("camera") as Camera3D
 			(setup.get("markers") as Node).call("show_top_view", camera)
@@ -178,13 +188,13 @@ func _spawned_template(planner: Node, setup: Node, path: String, saved: Dictiona
 	setup.call("open", previous)
 
 
-func _drag_existing(planner: Node, setup: Node, path: String) -> void:
+func _drag_existing(planner: Node, setup: Node, path: String, target_item: Node3D = null) -> void:
 	await process_frame
 	var attached: Array = setup.call("_attachments")
 	_check(not attached.is_empty(), "Template retains editable attachments: " + path)
 	if attached.is_empty():
 		return
-	var item: Node3D = attached[0]
+	var item: Node3D = target_item if target_item != null else attached[0]
 	var camera := planner.get("camera") as Camera3D
 	var bounds: AABB = planner.get("geometry")._combined_aabb(item)
 	var screen := camera.unproject_position(item.to_global(bounds.get_center()))
@@ -271,3 +281,42 @@ func _legacy_surfaces() -> void:
 		_check(is_equal_approx(zone.height, .904), "Legacy station without grid_height keeps its profile height")
 		_check(absf(float(zone.z) - mode.desk.to_local(item.global_position).z) < .001, "Equal-height workstations keep separate typed zones")
 	mode.free()
+
+
+func _reception_surfaces(planner: Node, setup: Node) -> void:
+	var desk := setup.get("desk") as RigidBody3D
+	_check(desk.freeze, "The planner keeps reception runtime physics anchored")
+	var zones: Array = setup.get("zones")
+	var upper_slot := -1
+	for index in zones.size():
+		if is_equal_approx(float(zones[index].height), 1.1):
+			upper_slot = index
+	_check(upper_slot >= 0, "Reception exposes its upper countertop as a separate editable surface")
+	if upper_slot < 0:
+		return
+	setup.set("zone_index", upper_slot)
+	zones[upper_slot].category = "Mouse"
+	var zone: Dictionary = zones[upper_slot]
+	setup.call("_place_model", "05_computer_mouse", Vector3(zone.x, zone.height, zone.z))
+	var attachments: Array = setup.call("_attachments")
+	_check(attachments.size() == 2, "Both reception countertops hold editable items")
+	for item: Node3D in attachments:
+		var slot := int(item.get_meta("planning_zone"))
+		var bounds: AABB = planner.get("catalog").WORKSTATIONS._bounds(item)
+		var expected_y: float = desk.to_global(Vector3.UP * float(zones[slot].height)).y
+		_check(absf(bounds.position.y - expected_y) < .03, "Reception items rest on the actual authored countertop")
+		await _drag_existing(planner, setup, RECEPTION, item)
+	setup.call("_save")
+	var name_part: String = setup.get("template_name").text
+	var matching := FILES.list_for("reception_2").filter(func(item: Dictionary) -> bool: return item.name == name_part)
+	_check(matching.size() == 1, "Two-height reception template is saved")
+	if matching.size() == 1:
+		var saved_path: String = matching[0].path
+		var saved := FILES.load(saved_path, "reception_2")
+		_check(saved.get("items", []).size() == 2, "Reception template preserves both countertop items")
+		setup.call("_load")
+		_check((setup.call("_attachments") as Array).size() == 2, "Both reception items survive template application")
+		DirAccess.remove_absolute(saved_path)
+		DirAccess.remove_absolute(saved_path + ".bak")
+	preload("res://game/bootstrap/app/planning_physics.gd").resume([desk])
+	_check(desk.freeze, "Leaving Planning does not release the reception anchor")

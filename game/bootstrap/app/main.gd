@@ -125,6 +125,10 @@ func refresh_control_labels() -> void:
 		mutation_tree_ui.call("_refresh")
 
 
+func set_enemy_gameplay_modes(ignore_player: bool, no_damage: bool) -> void:
+	player.set_meta("enemy_gameplay_modes_v1", {"ignore_player": ignore_player, "no_damage": no_damage})
+
+
 func set_test_mutagen_enabled(enabled: bool) -> void:
 	var existing := gameplay.get_node_or_null("PermanentTestMutagen")
 	if existing != null:
