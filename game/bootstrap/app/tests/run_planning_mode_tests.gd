@@ -58,7 +58,9 @@ func _exercise_edits(planner: Node) -> void:
 	controls.call("_open_desk_setup")
 	var desk_setup: Node = planner.get("desk_setup")
 	_check(desk_setup.get("active"), "Existing desk tools open after decomposition")
+	_check(not (planner.get("ui") as Node).get_node("RightPanel").visible, "Template mode hides the level constructor")
 	desk_setup.call("close")
+	_check((planner.get("ui") as Node).get_node("RightPanel").visible, "Closing template mode restores the level constructor")
 	var light := planner.call("_instantiate_asset", LIGHT_PATH) as Node3D
 	(planner.get("root") as Node3D).add_child(light)
 	light.set_meta("planning_scene_path", LIGHT_PATH)
