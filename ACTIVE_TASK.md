@@ -7,6 +7,14 @@ owner: AI
 updated: 2026-10-18
 ---
 
+18.10.2026 (PR274 CI repair — проверено): устранены все5 причин CI run39110370218: повторное поднятие saved conference chairs на0.025м, optional session.host, отсутствующие skill atlases/acid geometry, flipbook retired assets и stun stars. Удалённые PNG не восстановлены; существующий procedural skill renderer включается при отсутствии листов, звёзды создаются private geometry helper. Godot4.7.2 runner:9/9 PASS без SCRIPT ERROR/ERROR — display_planner (включая legacy v6/repeated chair load), named_map_loading, skill_vfx, status_fx, flipbook, planning_settle, placement/templates/weapons, staged_glb, полный planning_mode save/load/exit. Финальный skill_vfx отдельно PASS после уточнения нормали PlaneMesh; editor import exit0, project/spec/workflow/architecture/source-size/175CI registrations,383scene refs,956imports,4Python workstation и diff PASS. QA docs/qa/reception_templates_anchor.md. PlayerVFX411/planning_objects474 reviewed: существующие adapters, helper звёзд отдельный; API/DTO/scenes/owners/edges/policy прежние, исключений нет. Ручная Windows/Web приёмка не выполнена. Исправление публикуется в ту же ветку PR274 по поручению владельца. T004 IN_PROGRESS; следующее точное действие — проверить новый CI PR274; merge не поручен.
+
+
+
+18.10.2026 (PR274 CI repair, прямой запрос владельца): run39110370218/runtime117625025157:5 failed suites — display_planner roundtrip, skill_vfx missing visual, flipbook retired skill atlas, status_fx missing stun stars, named_map_loading missing optional session.host. Scope T004/Phase1: bootstrap clear/layout roundtrip и private skill/status presentation/tests; удалённые владельцем PNG не восстанавливать. Player VFX405 и planner objects473 reviewed: только существующие adapters, procedural stars отдельный private helper. Владельцы/API/DTO/edges/policy прежние. Следующее действие — исправить5 причин, целевые regressions/gates и обновить тот же PR274.
+
+
+
 18.10.2026 (#251 / PR274): https://github.com/bageus/Infection-shooter/pull/274 создан, ветка feat/251-reception-templates-anchor. Согласование с main21e90b6: сохранены записи обеих задач в журналах; исходники объединены без конфликтов. Тесты реализации перечислены в QA, согласование проверяется project gate и staged regression. Следующее точное действие — проверить CI этого PR и ручной Windows/Web сценарий; merge не поручен.
 
 

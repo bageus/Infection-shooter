@@ -44,3 +44,46 @@ callback, дополнительного helper для одной строки �
 
 Ручная Windows/Web приёмка мышью не выполнена. Публикация ветки и PR явно
 поручена владельцем; следующий шаг — проверить CI PR и ручной сценарий.
+
+
+## PR274: исправление CI (18.10.2026)
+
+В run39110370218 / runtime job117625025157 падали пять наборов.
+
+- display_planner: conference chair повторно поднимался на0.025м во время
+  загрузки. Loader подавляет spawn-time grounding существующей меткой только
+  на время ready; для неподготовленных кресел метка сразу снимается. Координаты,
+  rotation/scale и optional settled_physics остаются прежними. Добавлена
+  регрессия старой v6 карты с малой отрицательной Y и повторной загрузкой;
+  полное сравнение полей authored map сохранено без ослабления точности.
+- named_map_loading: clear_layout обращался к отсутствующему session.host в
+  минимальном окружении. Optional host читается через get; поддержаны Node и
+  Dictionary sessions, очистка стеклянного мусора в полной миссии сохраняется.
+- skill_vfx: отсутствующие атласы оставляли навыки без графики. Setup один раз
+  проверяет доступность и включает существующие procedural effects при их
+  отсутствии, включая старое сохранённое значение настройки false. Проверки
+  видимости, количества, времени жизни и range domes сохранены; acid pool test
+  учитывает реальную нормаль PlaneMesh или QuadMesh и поворот камеры.
+- flipbook: тест требовал удалённые владельцем PNG. Вместо этого проверяется
+  безопасный null для отсутствующего optional atlas; проверки существующих
+  ресурсов, циклов, кадров, fade и ground geometry сохранены.
+- status_fx: звёзды оглушения зависели от удалённого PNG. Новый private
+  infected/stun_stars строит три золотые звезды из геометрии, вращает их над
+  головой и плавно удаляет. Проверены наличие геометрии, окончание статуса,
+  poison overlay и очистка на смерти.
+
+Удалённые ассеты не восстановлены. Новых public API, DTO, сцен, dependency
+edges, owners, Autoload или architecture exceptions нет. Player VFX411 и
+planning_objects474 reviewed: сохранены существующие adapters; визуальный
+helper звёзд имеет отдельную ответственность. Публикация — в ту же ветку PR274.
+
+
+Повторная проверка на Godot4.7.2 после восстановления временной среды:
+9/9 suites PASS без SCRIPT ERROR/ERROR: display_planner, named_map_loading,
+skill_vfx, status_fx, flipbook, planning_settle, placement/templates/weapons,
+staged_glb и полный planning_mode save/load/exit. Последний завершился за81с.
+Skill_vfx отдельно повторён после проверки направления нормали PlaneMesh — PASS.
+Editor import exit0; validate_project (175CI registrations),383 scene resource
+references,956 import files,4 Python workstation tests и git diff --check PASS.
+Новый CI запускается публикацией repair commit; ручная Windows/Web приёмка
+остаётся непроведённой.
