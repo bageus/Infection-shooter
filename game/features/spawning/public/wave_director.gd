@@ -148,6 +148,9 @@ func _spawn(point_id: String, count: int) -> void:
 		var index: int = _spawn_index.get(point_id, 0)
 		_spawn_index[point_id] = index + 1
 		var enemy := packed.instantiate() as Node3D
+		var config: Dictionary = point.call("get_spawn_config")
+		if enemy.has_method("configure_stats"):
+			enemy.call("configure_stats", {"health": config["health"], "damage": config["damage"]})
 		var ground: Vector3 = point.call("spawn_position", index)
 		var yaw := 0.0
 		if is_instance_valid(_player):

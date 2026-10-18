@@ -36,6 +36,9 @@ func _config() -> void:
 	_check(clean["interval"] == CONFIG.INTERVAL_MIN and clean["batch"] == 5, "interval floor and default batch")
 	_check(clean["rule"] == "burst" and clean["trigger"] == "all", "valid rule and trigger are kept")
 	_check(CONFIG.sanitize("junk") == CONFIG.defaults(), "non-dictionary gives defaults")
+	var stats := CONFIG.sanitize({"health": 999, "damage": 10})
+	_check(stats["health"] == CONFIG.STAT_MAX and stats["damage"] == CONFIG.STAT_MIN, "health and damage are clamped to 50-200%")
+	_check(CONFIG.sanitize({"enemy": "hunger"})["health"] == 100.0, "health and damage default to 100%")
 	for id in CONFIG.ENEMIES:
 		_check(ResourceLoader.exists(CONFIG.scene_path(id)), "enemy scene exists: " + id)
 
@@ -119,7 +122,7 @@ func _director() -> void:
 	var point := POINT.instantiate() as Node3D
 	point.set_meta("planning_object_id", "spawn_test")
 	stage.add_child(point)
-	point.call("configure_spawn", {"enemy": "hunger", "count": 6, "interval": 0.1, "rule": "stream"})
+	point.call("configure_spawn", {"enemy": "hunger", "count": 6, "interval": 0.1, "rule": "stream", "health": 150, "damage": 50})
 	point.position = Vector3(-6, 0, 0)
 	var guards: Array[Node3D] = []
 	for index in 3:
@@ -152,6 +155,7 @@ func _director() -> void:
 		var origin: Vector3 = enemy.get_meta(&"spawn_origin")
 		spots[Vector2i(roundi(origin.x * 4.0), roundi(origin.z * 4.0))] = true
 	_check(spots.size() >= 4, "spawned infected do not stack on one spot")
+	_check(spawned.all(func(enemy: Node3D) -> bool: return enemy.call("get_enemy_stats") == {"health": 150.0, "damage": 50.0}), "spawned infected get the hole's health and damage")
 	director.disarm()
 	await process_frame
 	await process_frame
