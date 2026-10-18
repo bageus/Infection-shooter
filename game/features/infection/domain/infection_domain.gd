@@ -74,6 +74,10 @@ func set_priority_ability(choice: int) -> bool:
 	return true
 
 
+func restore_critical_threshold(value: float) -> void:
+	critical_threshold = clampf(value, BASE_CRITICAL_THRESHOLD, MAX_CRITICAL_THRESHOLD)
+
+
 func add_control_ampule() -> float:
 	critical_threshold = minf(
 		critical_threshold + CONTROL_AMPULE_BONUS,

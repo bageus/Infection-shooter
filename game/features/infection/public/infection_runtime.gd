@@ -66,6 +66,13 @@ func add_control_ampule() -> float:
 	return threshold
 
 
+## Carries the control threshold over to the next map of a level chain or a respawn.
+func restore_critical_threshold(value: float) -> void:
+	var previous: float = _domain.critical_threshold
+	_domain.restore_critical_threshold(value)
+	_emit_state_changes(_domain.mutation, not is_equal_approx(previous, _domain.critical_threshold))
+
+
 # Public progression_v1; level identity belongs to the authored mission.
 func begin_control_level(id: String) -> void:
 	control_progress.begin_level(id)
