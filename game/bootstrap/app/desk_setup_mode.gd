@@ -219,6 +219,7 @@ func open(target: Node3D) -> void:
 	front_button.text = "Front: opposite side" if front else "Front: seated side"
 	scroll.show()
 	planner.ui.get_node("Panel").hide()
+	planner.ui.get_node("RightPanel").hide()
 	planner.planning_toolbar.hide()
 	planner.help.get_parent().get_parent().hide()
 	planner.help_button.hide()
@@ -244,6 +245,7 @@ func close() -> void:
 	notice_panel.call("dismiss")
 	help_panel.hide()
 	planner.ui.get_node("Panel").show()
+	planner.ui.get_node("RightPanel").show()
 	planner.planning_toolbar.show()
 	planner.help_button.show()
 	markers.hide()

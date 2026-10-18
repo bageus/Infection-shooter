@@ -1,12 +1,12 @@
 extends RefCounted
 ## Player-local shot envelope. Distance smoothing stays with the camera owner.
-const MAX_OFFSET := 0.03
-const HOLD_SECONDS := 0.3
-const RECOVERY_PER_SECOND := 0.012
+const MAX_OFFSET := 0.06
+const HOLD_SECONDS := 0.05
+const RECOVERY_PER_SECOND := 0.25
 const IMPULSES := {
-	"PISTOL": 0.005, "UZI": 0.005, "RIFLE": 0.0075,
-	"AK": 0.0075, "M4": 0.0065, "SHOTGUN": 0.012,
-	"SNIPER RIFLE": 0.015, "MINIGUN": 0.008, "GRENADE LAUNCHER": 0.018
+	"PISTOL": 0.01, "UZI": 0.01, "RIFLE": 0.015,
+	"AK": 0.015, "M4": 0.013, "SHOTGUN": 0.024,
+	"SNIPER RIFLE": 0.03, "MINIGUN": 0.016, "GRENADE LAUNCHER": 0.036
 }
 var offset := 0.0
 var _hold := 0.0
