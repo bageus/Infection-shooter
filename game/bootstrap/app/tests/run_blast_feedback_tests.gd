@@ -49,14 +49,18 @@ func _test_lifecycle() -> void:
 	_check(feedback.overlay.visible and is_equal_approx(feedback.peak, 0.8), "accepted stun drives visual strength")
 	_check(feedback.layer == -1 and feedback.overlay.mouse_filter == Control.MOUSE_FILTER_IGNORE, "feedback precedes HUD and does not intercept input")
 	var ringing := player.get("_stun_ringing") as AudioStreamPlayer
-	_check(ringing != null and ringing.playing and ringing.stream is AudioStreamWAV, "tinnitus starts")
-	var tone := ringing.stream as AudioStreamWAV
-	_check(tone.loop_end == 11025 and tone.data.size() == 22050, "tone loops continuously")
+	_check(ringing != null and ringing.playing and ringing.stream is AudioStreamOggVorbis, "tinnitus starts")
+	var tone := ringing.stream as AudioStreamOggVorbis
+	_check(tone.loop and is_equal_approx(tone.get_length(), 0.5), "Vorbis tinnitus loops continuously")
+	var playback := tone.instantiate_playback()
+	playback.start()
+	var samples := playback.mix_audio(1.0, roundi(AudioServer.get_mix_rate() * 0.5))
 	var crossings := 0
-	for sample in range(1, 11025):
-		if tone.data.decode_s16(sample * 2) >= 0 and tone.data.decode_s16((sample - 1) * 2) < 0:
+	for sample in range(1, samples.size()):
+		if samples[sample].x >= 0 and samples[sample - 1].x < 0:
 			crossings += 1
-	_check(crossings > 1000 and crossings < 1800, "tinnitus is a high-pitched tone")
+	playback.stop()
+	_check(crossings > 1000 and crossings < 1800, "tinnitus remains a high-pitched tone")
 	feedback.set_process(false)
 	feedback.call("_process", 3.5)
 	_check(float(feedback.material.get_shader_parameter("strength")) < 0.8, "last second fades")

@@ -18,6 +18,7 @@
     "public/shotgun.tscn",
     "public/grenade_launcher.tscn",
     "public/grenade_explosion.gd",
+    "public/floor_danger_zone.gd",
     "public/launcher_visual.gd",
     "public/prototype_bullet.tscn",
     "public/impact_effects.gd",

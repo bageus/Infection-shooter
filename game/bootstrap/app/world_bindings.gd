@@ -37,6 +37,9 @@ func bind_scene(node: Node) -> void:
 
 
 func _bind_collaborators(node: Node) -> void:
+	if node.has_method("configure_footstep_surface"):
+		var query := Callable(debris_floor, "has_glass_at") if is_instance_valid(debris_floor) else Callable()
+		node.call("configure_footstep_surface", query)
 	if node.has_method("configure_glass_debris"):
 		node.call("configure_glass_debris", debris_floor)
 	if node.has_method("configure_visual_preparation") and is_instance_valid(_visual_budget) and is_instance_valid(_visual_budget.camera):

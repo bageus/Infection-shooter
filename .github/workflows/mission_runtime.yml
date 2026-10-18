@@ -44,8 +44,9 @@ jobs:
           set -o pipefail
           mkdir -p /tmp/skin-base/tools
           git fetch origin d7245e79226662ce3ac4e0e2f761db585b855a2e --depth=1
-          git archive d7245e79226662ce3ac4e0e2f761db585b855a2e game project.godot default_bus_layout.tres | tar -x -C /tmp/skin-base
-          for item in models assets addons .godot; do ln -s "$PWD/$item" "/tmp/skin-base/$item"; done
+          # Baseline code must use its own assets, including resources retired by the candidate.
+          git archive d7245e79226662ce3ac4e0e2f761db585b855a2e game assets project.godot default_bus_layout.tres | tar -x -C /tmp/skin-base
+          for item in models addons .godot; do ln -s "$PWD/$item" "/tmp/skin-base/$item"; done
           cp tools/capture_enemy_skins.gd tools/bench_enemy_materials.gd /tmp/skin-base/tools/
           for revision in before after; do
             project="$PWD"

@@ -133,6 +133,9 @@
       "floor": "stamp_floor_surface(localXZ, kind, frame, size, turns=0)->bool. Independent damage256px/scuff256px/debris512px+R8 layers; fixed order damage->scuff->debris; shared16sections/queue64/two stamps+one section upload per active frame. Up to56MiB CPU+GPU floor page storage.",
       "receivers": "Two384x256 RGBA textures per receiver, six128px faces, max12 receivers/18MiB CPU+GPU; queue32/two stamps+one receiver upload per active frame, density6 per face-grid cell. One overlay pass per receiver, no per-hit nodes; weak ownership, visibility cleanup, LRU releases override, foreign overlays preserved.",
       "lifetime": "clear_glass_debris clears every transient floor layer and receiver; idle processing stops. Bootstrap persists only authored settings in optional map-v8 surface_decals_v1 / baked scene metadata; runtime marks are not serialized."
+    },
+    "footstep_surface_v1": {
+      "has_glass_at": "has_glass_at(world_position: Vector3) -> bool; bounded read-only query of visible floor glass and marked physical shards"
     }
   }
 }

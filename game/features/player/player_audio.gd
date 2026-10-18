@@ -31,6 +31,7 @@ const PASSIVE_SOUNDS := {"second_heart": &"skill_second_heart", "retaliation": &
 ## Matches the spore release delay in mutation_skill_effects.gd.
 const SPORE_DELAY := 2.0
 
+var glass_surface_query: Callable
 var _player: Node3D
 var listener: AudioListener3D
 
@@ -54,11 +55,21 @@ func play(event: StringName, volume_offset_db := 0.0) -> void:
 func _on_footstep(_side: int, speed: float) -> void:
 	if not is_instance_valid(_player) or not (_player as CharacterBody3D).is_on_floor():
 		return
+	# A dodge is a separate sound, never a walking contact.
+	if float(_player.get("_roll_remaining")) > 0.0:
+		return
+	var event: StringName = &"step_glass" if glass_surface_query.is_valid() and bool(glass_surface_query.call(_foot_position())) else &"step_player"
 	var impacts := _player.get("impact_pool") as Node
 	if is_instance_valid(impacts) and impacts.has_method("request_surface_step"):
 		impacts.call("request_surface_step", _player)
 	# Sprinting lands harder than walking.
-	SFX.play(_player, &"step_player", _player.global_position, lerpf(-3.0, 2.0, clampf((speed - 3.0) / 6.0, 0.0, 1.0)))
+	SFX.play(_player, event, _player.global_position, lerpf(-3.0, 2.0, clampf((speed - 3.0) / 6.0, 0.0, 1.0)))
+
+
+func _foot_position() -> Vector3:
+	var collision := _player.get_node("CollisionShape3D") as CollisionShape3D
+	var capsule := collision.shape as CapsuleShape3D
+	return collision.global_transform * Vector3(0.0, -capsule.height * 0.5, 0.0)
 
 
 func configure_skills(runtime: Node) -> void:

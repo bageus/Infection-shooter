@@ -17,7 +17,7 @@
   ],
   "runtime_contracts": {
     "spawn_wave_v1": {
-      "configure_spawn": "configure_spawn(config: Dictionary) -> void; spawn_config.gd keys enemy, count, interval, rule, batch, trigger; get_spawn_config() returns the repaired config",
+      "configure_spawn": "configure_spawn(config: Dictionary) -> void; spawn_config.gd keys enemy, count, interval, rule, batch, trigger, health, damage (percents 50-200 applied to each spawned infected via configure_stats); get_spawn_config() returns the repaired config",
       "trigger_meta": "wave_director.TRIGGER_META (spawn_triggers) on a placed infected lists the spawn point ids (planning_object_id) its death can start; each point fires once",
       "cap": "wave_director.max_alive (90) bounds living infected on the level; queued waves wait for a free slot and take turns",
       "spawned": "spawned infected are ordinary scenes added to the enemies root with set_target(player); meta spawned_by holds the point id"

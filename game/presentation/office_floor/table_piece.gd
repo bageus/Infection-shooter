@@ -1,11 +1,8 @@
 extends RigidBody3D
 
-const DEBRIS := preload("res://game/presentation/office_floor/debris_lifecycle.gd")
-
 var table: Node3D
 var piece_id: String
 var last_stage := false
-var _small_hits := 0
 var _kick_cooldown := 0.0
 
 
@@ -27,10 +24,6 @@ func _physics_process(delta: float) -> void:
 
 func take_projectile_hit(damage: float, hit_position: Vector3, _normal: Vector3, direction: Vector3, weapon: String) -> bool:
 	if last_stage:
-		_small_hits += 1
-		if _small_hits >= 3:
-			DEBRIS.fade_free(self, DEBRIS.FAST_FADE_SECONDS)
-			return true
 		sleeping = false
 		apply_impulse(direction.normalized() * 0.9, hit_position - global_position)
 	elif is_instance_valid(table):

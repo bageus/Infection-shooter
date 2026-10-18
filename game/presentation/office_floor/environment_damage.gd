@@ -30,7 +30,7 @@ static func _collect(node: Node, meshes: Array[MeshInstance3D]) -> void:
 		_collect(child, meshes)
 
 
-static func spawn_piece(host: Node3D, mesh: MeshInstance3D, owner: Node3D, stage: int, index: int, direction: Vector3, hit_point: Vector3, blast: bool = false) -> RigidBody3D:
+static func spawn_piece(host: Node3D, mesh: MeshInstance3D, owner: Node3D, stage: int, index: int, direction: Vector3, hit_point: Vector3, blast: bool = false, glass: bool = false) -> RigidBody3D:
 	if not is_instance_valid(host.get("effects_root")):
 		return null
 	var bounds: AABB = mesh.global_transform * mesh.get_aabb()
@@ -39,6 +39,8 @@ static func spawn_piece(host: Node3D, mesh: MeshInstance3D, owner: Node3D, stage
 	var fragment := RigidBody3D.new()
 	fragment.set_script(FRAGMENT_SCRIPT)
 	fragment.name = "Fragment_" + mesh.name
+	if glass:
+		fragment.set_meta(&"glass_debris", true)
 	fragment.set("source", weakref(owner) if owner != null else null)
 	fragment.set("piece_name", mesh.name)
 	fragment.set("stage_index", stage)

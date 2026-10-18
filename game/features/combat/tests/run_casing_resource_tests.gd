@@ -62,7 +62,10 @@ func _check_landed_casing_freezes() -> void:
 	service.configure_world(stage, null)
 	service.spawn_casing(MODEL, Transform3D(Basis.IDENTITY, Vector3(0, 1, 0)), .01, null, &"")
 	var body: RigidBody3D = service.get("_casings")[0]
-	for frame in 240:
+	# A rolling casing can take several seconds to slow under the threshold, so wait for the freeze with a bound.
+	for frame in 1200:
+		if body.freeze:
+			break
 		await physics_frame
 	_check(body.freeze, "A casing that has landed and stopped freezes in place")
 	_check(body.global_position.y < .05, "A frozen casing rests on the floor")

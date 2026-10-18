@@ -29,9 +29,10 @@ func hit(collider: Node3D, point: Vector3, normal: Vector3, weapon: String, anch
 	var label := (str(collider.name) + " " + str(anchor.name) + " " + str(collider.get_parent().name if collider.get_parent() else "")).to_lower()
 	var wall := absf(normal.y) < 0.6 and ("wall" in label or "column" in label) and "wood" not in label
 	_stamp(anchor, point, normal, "bullet", frame, size)
-	if wall and powerful(weapon) and randf() < 0.18:
+	# Heavy hits (shots and blasts) always chip the plaster; light rounds only sometimes.
+	if wall and randf() < (1.0 if powerful(weapon) else 0.35):
 		_stamp(anchor, point, normal, "wall_damage", randi_range(0, 15), randf_range(0.35, 0.85))
-	elif wall and randf() < 0.12:
+	if wall and randf() < 0.12:
 		_stamp(anchor, point, normal, "wall_scuff", randi_range(0, 15), randf_range(0.25, 0.6))
 	return true
 

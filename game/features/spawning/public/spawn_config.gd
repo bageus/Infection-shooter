@@ -1,6 +1,7 @@
 extends RefCounted
 ## Authored wave of one spawn point: plain data, no scenes or physics.
-## {"enemy": id, "count": int, "interval": float, "rule": id, "batch": int, "trigger": id}
+## {"enemy": id, "count": int, "interval": float, "rule": id, "batch": int, "trigger": id,
+##  "health": float, "damage": float}  (health and damage are percents of the enemy's base values)
 
 ## Enemy kinds a point can spawn, in palette order.
 const ENEMIES: Array[String] = ["hunger", "revenant", "brute", "titan", "colossus", "horde"]
@@ -24,10 +25,12 @@ const COUNT_MAX := 200
 const BATCH_MAX := 30
 const INTERVAL_MIN := 0.1
 const INTERVAL_MAX := 60.0
+const STAT_MIN := 50.0
+const STAT_MAX := 200.0
 
 
 static func defaults() -> Dictionary:
-	return {"enemy": "hunger", "count": 20, "interval": 1.0, "rule": "stream", "batch": 5, "trigger": "any"}
+	return {"enemy": "hunger", "count": 20, "interval": 1.0, "rule": "stream", "batch": 5, "trigger": "any", "health": 100.0, "damage": 100.0}
 
 
 ## Always returns a usable config; unknown ids and out-of-range numbers are repaired.
@@ -46,6 +49,9 @@ static func sanitize(raw: Variant) -> Dictionary:
 		config["batch"] = clampi(int(source["batch"]), 1, BATCH_MAX)
 	if _number(source.get("interval")):
 		config["interval"] = clampf(float(source["interval"]), INTERVAL_MIN, INTERVAL_MAX)
+	for key: String in ["health", "damage"]:
+		if _number(source.get(key)):
+			config[key] = clampf(float(source[key]), STAT_MIN, STAT_MAX)
 	return config
 
 
