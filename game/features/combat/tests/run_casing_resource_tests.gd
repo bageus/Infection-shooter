@@ -42,8 +42,32 @@ func _run() -> void:
 	stage.queue_free()
 	await process_frame
 	await process_frame
+	await _check_landed_casing_freezes()
 	print("Casing resource tests: %d failures" % failures)
 	quit(0 if failures == 0 else 1)
+
+func _check_landed_casing_freezes() -> void:
+	var stage := Node3D.new()
+	root.add_child(stage)
+	var floor_body := StaticBody3D.new()
+	var floor_shape := CollisionShape3D.new()
+	var box := BoxShape3D.new()
+	box.size = Vector3(10, 1, 10)
+	floor_shape.shape = box
+	floor_body.add_child(floor_shape)
+	floor_body.position = Vector3(0, -0.5, 0)
+	stage.add_child(floor_body)
+	var service := CASINGS.new()
+	stage.add_child(service)
+	service.configure_world(stage, null)
+	service.spawn_casing(MODEL, Transform3D(Basis.IDENTITY, Vector3(0, 1, 0)), .01, null, &"")
+	var body: RigidBody3D = service.get("_casings")[0]
+	for frame in 240:
+		await physics_frame
+	_check(body.freeze, "A casing that has landed and stopped freezes in place")
+	_check(body.global_position.y < .05, "A frozen casing rests on the floor")
+	stage.queue_free()
+	await process_frame
 
 func _check(condition: bool, message: String) -> void:
 	if not condition:
