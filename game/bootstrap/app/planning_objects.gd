@@ -87,6 +87,8 @@ func _select(node: Node3D) -> void:
 		(session.ui.get_node("Panel") as ScrollContainer).ensure_control_visible.call_deferred(controls.display_options.panel)
 	if selected != null and controls.loot_options.panel.visible:
 		(session.ui.get_node("Panel") as ScrollContainer).ensure_control_visible.call_deferred(controls.loot_options.panel)
+	if selected != null and controls.fruit_options.panel.visible:
+		(session.ui.get_node("Panel") as ScrollContainer).ensure_control_visible.call_deferred(controls.fruit_options.panel)
 	if selected != null and controls.door_options.panel.visible:
 		(session.ui.get_node("Panel") as ScrollContainer).ensure_control_visible.call_deferred(controls.door_options.panel)
 	_update_status()
@@ -201,6 +203,8 @@ func _clear_preview() -> void:
 		controls.display_options.hide()
 	if controls.loot_options != null:
 		controls.loot_options.hide()
+	if controls.fruit_options != null:
+		controls.fruit_options.hide()
 	if controls.door_options != null:
 		controls.door_options.hide()
 	controls.fixtures.selected_panel.hide()

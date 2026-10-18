@@ -56,6 +56,8 @@ static func collect(objects: Node, nodes: Array, include_player: bool = true) ->
 			records[-1]["display"] = node.call("get_display_config")
 		if node.has_method("get_loot_config") and node.has_meta(&"planning_loot"):
 			records[-1]["loot"] = node.call("get_loot_config")
+		if node.has_method("has_fruit") and node.call("has_fruit") and bool(node.call("get_fruit_config")["enabled"]):
+			records[-1]["fruit"] = node.call("get_fruit_config")
 		var door := DOOR_OPTIONS.lockable_controller(node)
 		if door != null:
 			records[-1]["door_lock"] = str(door.call("get_lock_state"))
