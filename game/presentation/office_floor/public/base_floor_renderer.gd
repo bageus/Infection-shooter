@@ -4,6 +4,7 @@ const TILE_SCENE := preload("res://game/presentation/office_floor/public/structu
 const TILE_MATERIAL := preload("res://game/presentation/office_floor/floor_tile_material.tres")
 const MATERIAL_VARIANTS := 2
 const SECTION_TILES := 4
+const GLASS_SURFACE := preload("res://game/presentation/office_floor/glass_footstep_surface.gd")
 const GLASS_BAKE := preload("res://game/presentation/office_floor/glass_floor_bake.gd")
 const GLASS_SCATTER := preload("res://game/presentation/office_floor/glass_floor_scatter.gd")
 const MATERIAL_SCATTER := preload("res://game/presentation/office_floor/material_floor_scatter.gd")
@@ -146,6 +147,10 @@ func stamp_material_debris(at: Vector2, kind: String, frame: int, size: float, t
 	if accepted:
 		set_process(true)
 	return accepted
+
+
+func has_glass_at(world_position: Vector3) -> bool:
+	return GLASS_SURFACE.has_glass_at(self, _glass, world_position)
 
 
 func clear_glass_debris() -> void:

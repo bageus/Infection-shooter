@@ -381,3 +381,5 @@ bounded CPU Image blits → ImageTexture по существующим 8м Multi
 configure_glass_debris через public structural roots/props и очищает слой при
 clear_layout. Additive glass_floor_debris_v1 описан в manifest; owners, edges,
 DTO v8, баланс и policy прежние. Крупные физические осколки сохранены.
+
+ADR-0059: office_floor предоставляет bounded read-only glass footstep query, bootstrap внедряет Callable в player; footsteps используют подошву capsule и animation contacts, roll отдельный one-shot. Core.audio/vorbis сохраняет catalogue/budgets. Владельцы, edges, карты/DTO и policy прежние; отсутствующая owner roll запись остаётся pending.

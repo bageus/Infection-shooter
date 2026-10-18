@@ -1,0 +1,69 @@
+{
+  "records": [
+    {
+      "source": "assets/audio/sfx/crunch_glass/the_crunch_of_glass__1.wav",
+      "output": "assets/audio/sfx/step_glass/step_glass_1.ogg",
+      "source_seconds": 1.0,
+      "trim_end_seconds": 0.0,
+      "overlap_seconds": 0.0,
+      "output_seconds": 1.0,
+      "channels": 1,
+      "loop": false,
+      "seam_step": null,
+      "source_sha256": "4cd28a65f9cd27a5c948b68260c54ee400ada0cd82fd965e52d87e815d098f2a",
+      "output_sha256": "fe954d7109e5d19b504528fb5c7d4b817fba54792110070b3a4964a47931648a"
+    },
+    {
+      "source": "assets/audio/sfx/crunch_glass/the_crunch_of_glass__2.wav",
+      "output": "assets/audio/sfx/step_glass/step_glass_2.ogg",
+      "source_seconds": 1.0,
+      "trim_end_seconds": 0.0,
+      "overlap_seconds": 0.0,
+      "output_seconds": 1.0,
+      "channels": 1,
+      "loop": false,
+      "seam_step": null,
+      "source_sha256": "7484b64178849b57a970f57d25a5516d3a33e1627316ba29e8568476de6a7ce1",
+      "output_sha256": "11bd32153ce99d28a0aac5a809b59d79f2735647118663a635a2c614dadd0b37"
+    },
+    {
+      "source": "assets/audio/sfx/crunch_glass/the_crunch_of_glass__3.wav",
+      "output": "assets/audio/sfx/step_glass/step_glass_3.ogg",
+      "source_seconds": 1.0,
+      "trim_end_seconds": 0.0,
+      "overlap_seconds": 0.0,
+      "output_seconds": 1.0,
+      "channels": 1,
+      "loop": false,
+      "seam_step": null,
+      "source_sha256": "59c88f75cfe530b6b04e6725abfdedfc4e30dbfc047038d23a31f520a8339062",
+      "output_sha256": "fb9a4374929430070703e73a7a3b152020a036aa5e1b11dc98b7e55764a96926"
+    },
+    {
+      "source": "assets/audio/sfx/crunch_glass/the_crunch_of_glass__4.wav",
+      "output": "assets/audio/sfx/step_glass/step_glass_4.ogg",
+      "source_seconds": 1.0,
+      "trim_end_seconds": 0.0,
+      "overlap_seconds": 0.0,
+      "output_seconds": 1.0,
+      "channels": 1,
+      "loop": false,
+      "seam_step": null,
+      "source_sha256": "46065fd273dd9dedaadd36e0149c2cbf2a5b29fa100f549d59cf53513851619e",
+      "output_sha256": "d354136391991a49002da1c603fb9abfa821e809c84172f209668afde9930742"
+    },
+    {
+      "source": "assets/audio/sfx/skill_ready/taking_skill.wav",
+      "output": "assets/audio/sfx/skill_ready/taking_skill.ogg",
+      "source_seconds": 1.0,
+      "trim_end_seconds": 0.0,
+      "overlap_seconds": 0.0,
+      "output_seconds": 1.0,
+      "channels": 1,
+      "loop": false,
+      "seam_step": null,
+      "source_sha256": "c655e80b7cf409720552a3f8ed954725cd52e15799dc29e54da53a98ba93f309",
+      "output_sha256": "7a156daee3e727dfc46d4710b66b55d79036784ef64064d7152d0829e60ca17b"
+    }
+  ]
+}

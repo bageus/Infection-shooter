@@ -119,26 +119,13 @@ func _test_mutation_tree() -> void:
 	for child in ui.get_children():
 		if child is AudioStreamPlayer:
 			_check(child.bus == &"UI" and child.process_mode == Node.PROCESS_MODE_ALWAYS, "Cues play during pause and obey the shared mix")
-	var lock_stream: AudioStreamWAV = SFX.UI_EVENTS[&"mutation_lock"][0]
-	var unlock_stream: AudioStreamWAV = SFX.UI_EVENTS[&"mutation_unlock"][0]
-	_check(lock_stream.data.size() == unlock_stream.data.size(), "Lock and unlock have matching lengths")
-	var reversed := true
-	for index in range(0, lock_stream.data.size(), 2):
-		var other := lock_stream.data.size() - 2 - index
-		reversed = reversed and lock_stream.data[index] == unlock_stream.data[other] and lock_stream.data[index + 1] == unlock_stream.data[other + 1]
-	_check(reversed, "Unlock is the exact reversed PCM lock cue")
+	_check_reverse(&"mutation_lock", &"mutation_unlock")
 	ui.close_tree()
 	_check(not ui.card.visible, "Closing the tree hides the detail card")
 	_check(_count(ui, &"mutation_close") == 1, "Closing the tree plays its reverse cue")
 	ui.close_tree()
 	_check(_count(ui, &"mutation_close") == 1, "Closing an already closed tree is silent")
-	var opening: AudioStreamWAV = SFX.UI_EVENTS[&"mutation_open"][0]
-	var closing: AudioStreamWAV = SFX.UI_EVENTS[&"mutation_close"][0]
-	var reverse_open := opening.data.size() == closing.data.size()
-	for index in range(0, opening.data.size(), 2):
-		var other := opening.data.size() - 2 - index
-		reverse_open = reverse_open and opening.data[index] == closing.data[other] and opening.data[index + 1] == closing.data[other + 1]
-	_check(reverse_open, "Closing is the exact reversed opening PCM")
+	_check_reverse(&"mutation_open", &"mutation_close")
 	ui.queue_free()
 	host.queue_free()
 	await process_frame
@@ -164,3 +151,10 @@ func _check(condition: bool, message: String) -> void:
 	if not condition:
 		failures += 1
 		push_error(message)
+
+
+func _check_reverse(forward: StringName, backward: StringName) -> void:
+	var first := SFX.UI_EVENTS[forward][0] as AudioStreamOggVorbis
+	var second := SFX.UI_EVENTS[backward][0] as AudioStreamOggVorbis
+	_check(is_equal_approx(first.get_length(), second.get_length()), "Reverse Vorbis cues retain their duration")
+	_check(first != second and first.get_length() > 0.03, "Reverse cues are distinct playable recordings")

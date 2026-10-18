@@ -119,6 +119,9 @@
       "stamp": "stamp_material_debris(at: Vector2, kind: String, frame: int, size: float, turns: int = 0) -> bool; floor-local XZ, kind glass|paper|wood|cardboard|plastic|fabric|extinguisher; old stamp_glass_debris remains compatible.",
       "lifetime": "All kinds share glass_floor_debris_v1 budgets and clear_glass_debris; transient, not persisted. Per prop at most four distinct actual destruction facts; rare table red addition once; extinguisher only on rupture.",
       "surface": "Compact R8 roughness accompanies RGBA8 atlas pixels; last visible fragment determines roughness at overlaps. Shared original resources stay immutable."
+    },
+    "footstep_surface_v1": {
+      "has_glass_at": "has_glass_at(world_position: Vector3) -> bool; bounded read-only query of visible floor glass and marked physical shards"
     }
   }
 }
