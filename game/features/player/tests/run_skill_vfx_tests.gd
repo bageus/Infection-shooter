@@ -59,16 +59,20 @@ func _run() -> void:
 	vfx.call("electric_pulse", Vector3.ZERO, 3.0)
 	var chain: Array[Vector3] = [Vector3.ZERO, Vector3(3, 0, 0), Vector3(3, 0, 3)]
 	vfx.call("chain_lightning", chain)
-	var pool: MeshInstance3D = vfx.call("acid_pool", Vector3(2, 0, 0), 1.7, 0.3)
+	var pool: Node3D = vfx.call("acid_pool", Vector3(2, 0, 0), 1.7, 0.3)
 	_expect(pool != null, "Acid Spit leaves a pool.")
 	if pool != null:
-		var ground_flag: Variant = pool.get_instance_shader_parameter(&"ground")
-		_expect(ground_flag == null or float(ground_flag) < 0.5, "The acid pool is a fixed floor texture, not a camera-facing ground sprite.")
-		_expect(pool.global_basis.z.normalized().dot(Vector3.UP) > 0.99, "The acid pool lies flat on the floor.")
-		var heading := pool.global_basis.y
-		player.get_node("CameraRig").rotate_y(1.2)
-		await process_frame
-		_expect(pool.global_basis.y.is_equal_approx(heading), "The acid pool does not turn with the camera.")
+		var surface := pool if pool is MeshInstance3D else pool.get_child(0) as MeshInstance3D
+		_expect(surface != null, "The acid pool owns visible geometry.")
+		if surface != null:
+			var ground_flag: Variant = surface.get_instance_shader_parameter(&"ground")
+			_expect(ground_flag == null or float(ground_flag) < 0.5, "The acid pool is a fixed floor texture.")
+			var normal := surface.global_basis.y if surface.mesh is PlaneMesh else surface.global_basis.z
+			_expect(normal.normalized().dot(Vector3.UP) > 0.99, "The acid pool lies flat on the floor.")
+			var heading := surface.global_basis.y
+			player.get_node("CameraRig").rotate_y(1.2)
+			await process_frame
+			_expect(surface.global_basis.y.is_equal_approx(heading), "The acid pool does not turn with the camera.")
 	vfx.call("spore_cocoon", Vector3(-2, 0, 0), 3.0, 0.2)
 	# 5 sheets (two chain links; the cocoon sheet starts later, so its burst
 	# still lands on the fuse) plus range domes for the four area casts.

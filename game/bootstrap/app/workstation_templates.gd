@@ -12,6 +12,7 @@ const DESKS := {
 	"08_divider_full_U_desk": "divider_u",
 	"08_office_desk_4_coner": "corner_desk",
 	"07_reception_counter_two_heights": "reception",
+	"07_reception_counter_two_heights_2": "reception_2",
 	"07_table_circular": "table_circular",
 	"07_coffee_table": "coffee_table",
 	"07_round_dining_table": "round_dining_table",

@@ -188,12 +188,13 @@ func _ready() -> void:
 	_reaction.setup(self, visual)
 	_geometry.prepare_stages(model_path)
 	_damage.configure(model_path.get_file(), _variants.size(), not _stages.is_empty())
-	# Architectural pieces and carpets stay anchored; all other groups are movable.
+	# Architectural pieces, carpets and the reception core stay anchored.
 	# A wall item that a shot tears loose (extinguisher, TV, clock) switches to dynamic mid-game.
 	# From a static body that costs Jolt ~80 ms (broadphase re-insert); from a kinematic one it is free.
 	if wall_mounted:
 		freeze_mode = RigidBody3D.FREEZE_MODE_KINEMATIC
-	freeze = wall_mounted or model_path.begins_with("res://models/objects/enviroments/01/")
+	freeze = (wall_mounted or model_path.begins_with("res://models/objects/enviroments/01/")
+		or model_path.get_file() == "07_reception_counter_two_heights_2.glb")
 	if freeze and "01_floor_" in model_path:
 		var shadow := CARPET_SHADOW.new()
 		shadow.name = "CarpetShadow"
