@@ -164,3 +164,4 @@ game/features/infected/tests/run_mutation_status_tests.gd
 game/features/player/tests/run_mutation_dash_motion_tests.gd
 game/bootstrap/app/tests/run_active_loadout_ui_tests.gd
 game/presentation/office_floor/tests/run_glass_floor_debris_tests.gd
+game/presentation/office_floor/tests/run_material_floor_debris_tests.gd

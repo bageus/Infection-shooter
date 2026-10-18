@@ -10,6 +10,8 @@ const PAPER_WORDS := ["paper", "notepad", "office_file", "document", "envelope",
 
 static func is_paper(model_path: String) -> bool:
 	var file := model_path.get_file().to_lower()
+	if file.begins_with("09_book") or "file_binder" in file:
+		return true
 	for word in PAPER_WORDS:
 		if word in file:
 			return true

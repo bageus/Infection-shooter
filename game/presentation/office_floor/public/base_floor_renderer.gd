@@ -6,6 +6,7 @@ const MATERIAL_VARIANTS := 2
 const SECTION_TILES := 4
 const GLASS_BAKE := preload("res://game/presentation/office_floor/glass_floor_bake.gd")
 const GLASS_SCATTER := preload("res://game/presentation/office_floor/glass_floor_scatter.gd")
+const MATERIAL_SCATTER := preload("res://game/presentation/office_floor/material_floor_scatter.gd")
 
 @export var floor_size := Vector2(80.0, 60.0)
 @export var tile_step := 2.0
@@ -128,12 +129,20 @@ func scatter_glass_debris(panes: Array[MeshInstance3D], direction: Vector3) -> v
 
 
 func stamp_glass_debris(at: Vector2, frame: int, size: float, turns: int = 0) -> bool:
+	return stamp_material_debris(at, "glass", frame, size, turns)
+
+
+func scatter_prop_debris(at: Vector3, footprint: Vector2, recipe: Array[String], direction: Vector3, excluded: Array[RID] = []) -> void:
+	MATERIAL_SCATTER.scatter(self, at, footprint, recipe, direction, excluded)
+
+
+func stamp_material_debris(at: Vector2, kind: String, frame: int, size: float, turns: int = 0) -> bool:
 	if not at.is_finite() or not Rect2(-floor_size * 0.5, floor_size).has_point(at):
 		return false
 	for opening in openings:
 		if opening.has_point(at):
 			return false
-	var accepted := _glass.stamp(at, frame, size, turns)
+	var accepted := _glass.stamp(at, frame, size, turns, kind)
 	if accepted:
 		set_process(true)
 	return accepted
@@ -154,6 +163,7 @@ func _set_glass_texture(cell: Vector2i, texture: Texture2D) -> void:
 			continue
 		var material := (entry.material as ShaderMaterial).duplicate(false) as ShaderMaterial
 		material.set_shader_parameter("glass_debris", texture)
+		material.set_shader_parameter("debris_roughness", _glass.tiles[cell].surface_texture)
 		material.set_shader_parameter("glass_enabled", true)
 		material.set_shader_parameter("glass_origin", _glass.origin + Vector2(cell) * GLASS_BAKE.METERS)
 		material.set_shader_parameter("glass_world_to_floor", global_transform.affine_inverse())
