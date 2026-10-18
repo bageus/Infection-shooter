@@ -92,7 +92,7 @@ func _tick_ram(delta: float, target_offset: Vector3) -> void:
 	if not _ram_struck and target_offset.length() <= ram_hit_radius:
 		_ram_struck = true
 		if is_instance_valid(_target) and _target.has_method("take_damage"):
-			_target.call("take_damage", attack_damage)
+			PERCEPTION.RULES.damage(_target, attack_damage)
 			audio.call("play", &"horde_ram_hit")
 		_enter(State.RECOVER)
 		return
