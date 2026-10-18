@@ -1,5 +1,6 @@
 extends RefCounted
 ## Prepare a complete map before replacing it; optionally commit between frames.
+const SURFACE_SETTINGS := preload("res://game/bootstrap/app/planning_surface_decals.gd")
 const RESOURCE_QUEUE := preload("res://game/bootstrap/app/scene_resource_queue.gd")
 const VALIDATOR := preload("res://game/bootstrap/app/planning_layout_validator.gd")
 const LAYOUT_PROPERTIES := preload("res://game/bootstrap/app/planning_layout_properties.gd")
@@ -162,6 +163,7 @@ func _stage(record: Dictionary, prepared: Dictionary) -> bool:
 
 
 func _check_plan(data: Dictionary, prepared: Dictionary) -> Dictionary:
+	prepared["surface_decals_v1"] = data.get("surface_decals_v1", {}).duplicate(true)
 	if not data.objects.is_empty() and prepared.entries.is_empty() and prepared.player.is_empty():
 		_discard(prepared)
 		return {"error": "map has no loadable objects"}
@@ -178,6 +180,7 @@ func _discard(prepared: Dictionary) -> void:
 
 func _begin(prepared: Dictionary) -> void:
 	objects.clear_layout(false, true)
+	SURFACE_SETTINGS.restore(session, prepared.get("surface_decals_v1", {}))
 	session.edit_history.stack.clear()
 	if not prepared.player.is_empty():
 		var latest: Dictionary = prepared.player

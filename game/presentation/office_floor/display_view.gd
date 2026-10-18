@@ -75,8 +75,7 @@ func _has_animation() -> bool:
 
 func disable() -> void:
 	damaged = true
-	configure(config)
-	hide()
+	configure(config) # Keep the dark receiver visible for baked glass damage.
 
 
 func tick(seconds: float, frames: Array[Vector4]) -> void:

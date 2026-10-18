@@ -4,6 +4,10 @@ const ATLAS := preload("res://game/core/vfx/public/surface_atlases.gd")
 
 
 static func spawn(pane: StaticBody3D, point: Vector3, normal: Vector3, max_size: float = 0.65) -> MeshInstance3D:
+	var floor_view := pane.get("_debris_floor") as Node3D
+	if is_instance_valid(floor_view):
+		floor_view.call("bake_glass_hit", pane, point, normal)
+		return null # Overflow drops visuals rather than allocating per-hit geometry.
 	var mark := MeshInstance3D.new()
 	mark.set_meta("surface_mark", true)
 	var variant := randi_range(0, 7)

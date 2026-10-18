@@ -326,6 +326,8 @@ func take_projectile_hit(damage: float, hit_position: Vector3, _normal: Vector3,
 	if PAPER.is_paper(model_path) and not BOOK_STACK.contains(model_path):
 		_tear_paper(hit_position, direction)
 		return false
+	if damage > 0.0 and is_instance_valid(glass_debris_floor) and has_display():
+		glass_debris_floor.call("bake_display_hit", self, hit_position, _normal)
 	if _damage.category == "tech":
 		if damage > 0.0 and model_path.get_file() == "05_lamp.glb":
 			_put_out_lamp()

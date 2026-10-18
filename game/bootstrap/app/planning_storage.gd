@@ -1,4 +1,5 @@
 extends RefCounted
+const SURFACE_SETTINGS := preload("res://game/bootstrap/app/planning_surface_decals.gd")
 const SCENE_BAKE := preload("res://game/bootstrap/app/planning_scene_bake.gd")
 const PHYSICS := preload("res://game/bootstrap/app/planning_physics.gd")
 const SETTLE := preload("res://game/bootstrap/app/planning_settle.gd")
@@ -217,6 +218,7 @@ func restore_authored() -> bool:
 	else:
 		objects._apply_layout_data({"version": authored_layout.get("version", 7), "objects": missing})
 	objects.keep_on_clear = {}
+	SURFACE_SETTINGS.restore(session, authored_layout.get("surface_decals_v1", {}))
 	_remember_marks()
 	objects.player_spawn_defined = keep_spawn
 	objects.player_spawn_transform = spawn
@@ -247,7 +249,7 @@ static func _signature(data: Dictionary) -> String:
 		rows.append("%s|%s|%s|%s|%s" % [row.get("scene", ""), snappedf(float(row.get("x", 0.0)), 0.05),
 			snappedf(float(row.get("y", 0.0)), 0.05), snappedf(float(row.get("z", 0.0)), 0.05), snappedf(float(row.get("rotation_y", 0.0)), 2.0)])
 	rows.sort()
-	return "\n".join(rows)
+	return "\n".join(rows) + "|surface_decals_v1:" + JSON.stringify(SURFACE_SETTINGS.CONFIG.normalized(data.get("surface_decals_v1", {})))
 
 
 ## Level checks that run on every save: group 13 signs at 1.75 m and, for the groups
@@ -392,7 +394,7 @@ func save_layout() -> void:
 			map_loading = false
 			controls.status.text = "SAVED | shipped map error: " + str(shipped.error)
 			return
-		var scene_error: Error = await SCENE_BAKE.new(catalog).save_async(objects.placed.duplicate(), AUTHORED_SCENE_PATH, session, controls.status)
+		var scene_error: Error = await _scene_bake().save_async(objects.placed.duplicate(), AUTHORED_SCENE_PATH, session, controls.status)
 		if not is_instance_valid(session) or not session.is_inside_tree():
 			map_loading = false
 			return
@@ -405,7 +407,8 @@ func save_layout() -> void:
 
 
 func _save_authored_scene(target: String = AUTHORED_SCENE_PATH) -> Error:
-	return SCENE_BAKE.new(catalog).save(objects.placed, target)
+	var bake := _scene_bake()
+	return bake.save(objects.placed, target)
 
 
 func load_layout() -> void:
@@ -446,3 +449,8 @@ func _capture_save() -> Dictionary:
 		map_loading = false
 		return {}
 	return result.data
+
+func _scene_bake() -> RefCounted:
+	var bake := SCENE_BAKE.new(catalog)
+	bake.surface_settings = SURFACE_SETTINGS.capture(session)
+	return bake

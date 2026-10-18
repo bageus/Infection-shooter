@@ -30,6 +30,7 @@
     "core.localization"
   ],
   "runtime_contracts": {
-    "planned_physics_v1": "DTO v8 optional settled_physics={version:1}; transform-scoped sleep state. Corpse decor_pose.physics_v1 validated before replacement. Legacy v1-v8 compatible, ADR0055."
+    "planned_physics_v1": "DTO v8 optional settled_physics={version:1}; transform-scoped sleep state. Corpse decor_pose.physics_v1 validated before replacement. Legacy v1-v8 compatible, ADR0055.",
+    "surface_decals_v1": "Optional map-v8 surface_decals_v1={kind:{opacity:0..1,size:0.25..2}} validated before replacement; absent defaults. Planner popup edits new marks with preview. JSON, authored restore signature and scene-root metadata preserve settings. Bootstrap injects floor callbacks into combat; runtime pixels transient."
   }
 }

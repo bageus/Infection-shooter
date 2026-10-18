@@ -4,6 +4,7 @@ const SCENE_SCRIPTS := preload("res://game/bootstrap/app/planning_scene_scripts.
 const DOOR_OPTIONS := preload("res://game/bootstrap/app/planning_door_options.gd")
 const WAVE_DIRECTOR := preload("res://game/features/spawning/public/wave_director.gd")
 var catalog: Variant
+var surface_settings: Dictionary = {}
 
 func _init(asset_catalog: Variant) -> void:
 	catalog = asset_catalog
@@ -34,6 +35,7 @@ func save_async(nodes: Array, target: String, session: Node, status: Label) -> E
 	return _write(scene_root, target)
 
 func _write(scene_root: Node3D, target: String) -> Error:
+	if not surface_settings.is_empty(): scene_root.set_meta("surface_decals_v1", surface_settings)
 	var packed := PackedScene.new()
 	var problem := packed.pack(scene_root)
 	if problem == OK:
