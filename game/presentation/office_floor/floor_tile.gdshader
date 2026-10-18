@@ -19,6 +19,7 @@ uniform sampler2D surface_noise : hint_default_white, filter_linear_mipmap, repe
 uniform sampler2D detail_noise : hint_default_white, filter_linear_mipmap, repeat_enable;
 uniform bool glass_enabled = false;
 uniform sampler2D glass_debris : source_color, filter_linear, repeat_disable;
+uniform sampler2D debris_roughness : filter_linear, repeat_disable;
 uniform vec2 glass_origin = vec2(0.0);
 uniform mat4 glass_world_to_floor;
 
@@ -84,8 +85,10 @@ void fragment() {
 		vec4 debris = texture(glass_debris, glass_uv);
 		float coverage = debris.a * floor_top;
 		ALBEDO = mix(ALBEDO, debris.rgb, coverage);
-		ROUGHNESS = mix(ROUGHNESS, 0.15, coverage);
-		SPECULAR = mix(SPECULAR, 0.8, coverage);
-		CLEARCOAT = mix(CLEARCOAT, 0.55, coverage);
+		float surface_roughness = texture(debris_roughness, glass_uv).r;
+		float shine = 1.0 - smoothstep(0.3, 0.7, surface_roughness);
+		ROUGHNESS = mix(ROUGHNESS, surface_roughness, coverage);
+		SPECULAR = mix(SPECULAR, mix(0.25, 0.8, shine), coverage);
+		CLEARCOAT = mix(CLEARCOAT, 0.55 * shine, coverage);
 	}
 }
