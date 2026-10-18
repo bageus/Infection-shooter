@@ -315,6 +315,9 @@ func _on_menu_action(action: String) -> void:
 func _on_restart_pressed() -> void:
 	if _mission_loading:
 		return
+	if has_node("LevelEntries") and $LevelEntries.chain.index_of(current_level) >= 0:
+		travel_to_level(current_level, {})
+		return
 	_mission_loading = true
 	var loader := preload("res://game/bootstrap/app/menu/mission_loader.gd").new()
 	add_child(loader)
@@ -322,15 +325,22 @@ func _on_restart_pressed() -> void:
 	loader.start()
 
 
+## What travels between maps (weapons, control threshold); applied by the loader to the new mission.
+func apply_carry(carry: Dictionary) -> void:
+	player.call("import_loadout", carry.get("loadout", {}))
+	infection_runtime.call("restore_critical_threshold", float(carry.get("threshold", 0.0)))
+
+
 ## Level chain: reload the scene with another saved map, arriving at `arrival` ({x, z} or {}).
 func travel_to_level(map_name: String, arrival: Dictionary) -> void:
-	if _mission_loading or _ended:
+	if _mission_loading:
 		return
 	_mission_loading = true
 	var loader := preload("res://game/bootstrap/app/menu/mission_loader.gd").new()
 	add_child(loader)
 	loader.completed.connect(func(_success: bool) -> void: _mission_loading = false)
-	loader.start_map(planning_mode.storage._map_path(map_name), map_name, arrival)
+	var carry := {"loadout": player.call("export_loadout"), "threshold": infection_runtime.call("get_critical_threshold")}
+	loader.start_map(planning_mode.storage._map_path(map_name), map_name, arrival, carry)
 
 
 func _setup_blood_effects() -> void:

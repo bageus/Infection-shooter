@@ -272,6 +272,25 @@ func pickup_weapon(index: int) -> bool:
 	_play_sound(&"weapon_pickup")
 	return true
 
+## Weapon slots carried to the next map of a level chain or a respawn (health, ammo and key start fresh).
+func export_loadout() -> Dictionary:
+	return {"slots": _slot_weapons.duplicate()}
+
+
+func import_loadout(loadout: Dictionary) -> void:
+	var slots: Variant = loadout.get("slots")
+	if not slots is Array or slots.size() != _slot_weapons.size():
+		return
+	var seen: Array[int] = []
+	for raw in slots:
+		var index := int(raw)
+		if index < 0 or index >= weapons.size() or seen.has(index):
+			return
+		seen.append(index)
+	_slot_weapons = seen
+	_select_weapon(0)
+
+
 func acquire_emergency_key() -> void:
 	_emergency_key = true
 	_play_sound(&"key_pickup")
