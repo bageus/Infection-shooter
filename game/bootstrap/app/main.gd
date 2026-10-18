@@ -157,6 +157,12 @@ func set_infinite_antidotes_enabled(enabled: bool) -> void:
 	player.set("infinite_antidotes", enabled)
 
 
+## Settings: floor chevrons that point toward the emergency key and the exit.
+func set_floor_hints_enabled(enabled: bool) -> void:
+	if is_instance_valid(mission_layout):
+		mission_layout.call("set_floor_hints_enabled", enabled)
+
+
 ## Settings: self-made procedural skill effects instead of the sprite sheets.
 func set_procedural_skill_effects(enabled: bool) -> void:
 	var effects: Node = player.get("mutation_effects")
