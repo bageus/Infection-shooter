@@ -101,7 +101,7 @@ func _part_at(hit_point: Vector3) -> String:
 
 
 func hit_piece(part_id: String, hit_position: Vector3, direction: Vector3, damage: float = 0.0, weapon: String = "") -> void:
-	if not _active.has(part_id):
+	if not _active.has(part_id) or not is_instance_valid(_active[part_id]):
 		return
 	if not _started:
 		return
@@ -308,9 +308,9 @@ func _settle_piece(body: RigidBody3D) -> void:
 	for index in range(_retained.size() - 1, -1, -1):
 		if not is_instance_valid(_retained[index]) or _retained[index].is_queued_for_deletion():
 			_retained.remove_at(index)
-	# Settled pieces stay on the floor. Retained pieces touch only the floor collision layer, never the player.
+	# Settled pieces stay on the floor. A piece that can still break keeps its hit layer; the smallest pieces rest for good.
 	body.freeze = false
-	body.collision_layer = 0
+	body.collision_layer = 0 if bool(body.get("last_stage")) else 1
 	body.collision_mask = 2
 	body.set_meta("kickable", _retained.size() % 2 == 0)
 	_retained.append(body)
