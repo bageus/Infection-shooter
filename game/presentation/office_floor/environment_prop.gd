@@ -5,6 +5,8 @@ const BUDGET_LIGHT := preload("res://game/presentation/office_floor/budget_omni_
 const GEOMETRY := preload("res://game/presentation/office_floor/environment_prop_geometry.gd")
 const BREAK_SOUND := preload("res://game/presentation/office_floor/prop_break_sound.gd")
 const BREAKUP := preload("res://game/presentation/office_floor/environment_prop_breakup.gd")
+const FLOOR_DEBRIS := preload("res://game/presentation/office_floor/prop_floor_debris.gd")
+var _floor_debris := FLOOR_DEBRIS.new()
 var _geometry := GEOMETRY.new()
 const IMPACT_SOUND := preload("res://game/presentation/office_floor/impact_sound_watcher.gd")
 
@@ -128,6 +130,7 @@ var glass_debris_floor: Node3D
 
 func configure_glass_debris(floor_view: Node3D) -> void:
 	glass_debris_floor = floor_view
+	_floor_debris.floor_view = floor_view
 
 
 # Public scene wiring v1; owned by the mission composition.
@@ -321,7 +324,7 @@ func take_projectile_hit(damage: float, hit_position: Vector3, _normal: Vector3,
 		BULLET_PUSH.apply(self, weight_kg, weapon, direction, hit_position)
 		_trigger_extinguisher(hit_position, direction)
 		return false
-	if PAPER.is_paper(model_path):
+	if PAPER.is_paper(model_path) and not BOOK_STACK.contains(model_path):
 		_tear_paper(hit_position, direction)
 		return false
 	if _damage.category == "tech":
@@ -331,6 +334,8 @@ func take_projectile_hit(damage: float, hit_position: Vector3, _normal: Vector3,
 			if repeated_electronic_particles:
 				SPARKS.spawn(self, hit_position)
 		else:
+			if damage > 0.0:
+				_floor_debris.emit(self, model_path, "screen", hit_position, direction)
 			if is_instance_valid(_display):
 				_display.call("disable")
 				_show_power_off_stage()
@@ -350,6 +355,7 @@ func take_projectile_hit(damage: float, hit_position: Vector3, _normal: Vector3,
 		bool(get_meta("planning_wall_mount", false)), freeze, _is_facade_damage())
 	match action:
 		PROP_DAMAGE.HitAction.SCATTER:
+			_floor_debris.emit(self, model_path, "books", hit_position, direction)
 			BOOK_STACK.scatter(self, _visual, hit_position, direction)
 			queue_free()
 		PROP_DAMAGE.HitAction.TRANSITION:
@@ -370,6 +376,7 @@ func take_projectile_hit(damage: float, hit_position: Vector3, _normal: Vector3,
 
 # A cardboard box has no staged pieces: its panels fly apart at the moment it breaks.
 func _collapse_box(hit_position: Vector3, direction: Vector3) -> void:
+	_floor_debris.emit(self, model_path, "break", hit_position, direction)
 	BREAK_SOUND.play(self, effects_root, model_path, get_projectile_material(), hit_position)
 	var index := 0
 	for child in _visual.find_children("*", "MeshInstance3D", true, false):
@@ -434,6 +441,7 @@ func _put_out_lamp() -> void:
 func _tear_paper(hit_position: Vector3, direction: Vector3) -> void:
 	if not _damage.tear_paper():
 		return
+	_floor_debris.emit(self, model_path, "paper", hit_position, direction)
 	PAPER.tear(self, hit_position, direction)
 	collision_layer = 0
 	if _visual != null:
@@ -451,6 +459,7 @@ func _trigger_extinguisher(hit_position: Vector3, direction: Vector3) -> void:
 
 
 func _on_extinguisher_ruptured(location: Vector3) -> void:
+	_floor_debris.emit(self, model_path, "rupture", location, Vector3.UP)
 	BLAST.detonate(self, location, 5.0, false)
 	_visual.hide()
 	collision_layer = 0
@@ -481,9 +490,11 @@ func _apply_damage(hit_position: Vector3, direction: Vector3) -> void:
 			return
 		DAMAGE.reveal_meshes(variant)
 		variant.show()
+		_floor_debris.emit(self, model_path, "stage_%d" % _damage.variant_index, hit_position, direction)
 		_rebuild_shapes()
 		BREAK_SOUND.play(self, effects_root, model_path, get_projectile_material(), hit_position)
 	elif transition == PROP_DAMAGE.Transition.BREAK:
+		_floor_debris.emit(self, model_path, "break", hit_position, direction)
 		SERVER_AUDIO.silence(self)
 		BREAK_SOUND.play(self, effects_root, model_path, get_projectile_material(), hit_position)
 		if "01_wood_slat_partition" in model_path:

@@ -1,5 +1,6 @@
 extends RefCounted
-## Mission-local glass pixels. Native image blits, no per-shard nodes or callbacks.
+## Shared mission-local debris pixels; the original glass entry point stays compatible.
+const ATLASES := preload("res://game/presentation/office_floor/debris_atlases.gd")
 const ATLAS := preload("res://models/objects/textures/glass_decals/4x4 glass debris texture atlas.png")
 const METERS := 8.0
 const PIXELS := 512
@@ -14,6 +15,7 @@ var queue: Array[Dictionary] = []
 var _sources: Array[Image] = []
 var _changed: Callable
 var uploads := 0
+var _atlases := ATLASES.new()
 
 
 func _init(changed: Callable) -> void:
@@ -23,28 +25,16 @@ func _init(changed: Callable) -> void:
 func prepare() -> void:
 	if not _sources.is_empty():
 		return
-	var image := ATLAS.get_image()
-	if image == null or image.is_empty():
-		return
-	if image.is_compressed() and image.decompress() != OK:
-		return
-	image.convert(Image.FORMAT_RGBA8)
-	# Fractional boundaries are intentional: the authored atlas is 1254 square.
-	for index in 16:
-		var row := floori(float(index) / 4.0)
-		var low := Vector2i(floori((index % 4) * image.get_width() / 4.0), floori(row * image.get_height() / 4.0))
-		var high := Vector2i(floori((index % 4 + 1) * image.get_width() / 4.0), floori((row + 1) * image.get_height() / 4.0))
-		var source := image.get_region(Rect2i(low, high - low))
-		source.resize(96, 96, Image.INTERPOLATE_LANCZOS)
-		_sources.append(source)
+	_atlases.prepare()
+	_sources = _atlases.sources.get("glass", [] as Array[Image])
 
 
-func stamp(at: Vector2, frame: int, size: float, turns: int = 0) -> bool:
-	if not at.is_finite() or not is_finite(size) or size < 0.25 or size > 1.5 or frame < 0 or frame >= 16:
+func stamp(at: Vector2, frame: int, size: float, turns: int = 0, kind: String = "glass") -> bool:
+	if not at.is_finite() or not is_finite(size) or size < 0.25 or size > 1.5 or frame < 0 or frame >= ATLASES.frame_count(kind):
 		return false
 	if queue.size() >= MAX_QUEUE:
 		return false
-	queue.append({"at": at, "frame": frame, "size": size, "turns": posmod(turns, 4)})
+	queue.append({"at": at, "frame": frame, "size": size, "turns": posmod(turns, 4), "kind": kind})
 	return true
 
 
@@ -58,16 +48,18 @@ func step() -> bool:
 		if queue.is_empty():
 			break
 		_apply(queue.pop_front())
-	# Coalesce all writes; upload at most one 1 MiB section per frame.
+	# Coalesce all writes; upload one section (RGBA8 color + compact R8 surface).
 	for cell: Vector2i in tiles:
 		var tile: Dictionary = tiles[cell]
 		if not tile.dirty:
 			continue
 		if tile.texture == null:
 			tile.texture = ImageTexture.create_from_image(tile.image)
+			tile.surface_texture = ImageTexture.create_from_image(tile.surface_image)
 			_changed.call(cell, tile.texture)
 		else:
 			(tile.texture as ImageTexture).update(tile.image)
+			(tile.surface_texture as ImageTexture).update(tile.surface_image)
 		tile.dirty = false
 		uploads += 1
 		break
@@ -75,18 +67,21 @@ func step() -> bool:
 
 
 func _apply(request: Dictionary) -> void:
-	if _sources.size() != 16:
+	var frames: Array = _atlases.sources.get(request.kind, [])
+	if int(request.frame) >= frames.size():
 		return
 	var at: Vector2 = request.at
 	var center := cell_at(at)
 	var density_cell := Vector2i(floori(at.x), floori(at.y))
 	if tiles.has(center) and int(tiles[center].density.get(density_cell, 0)) >= MAX_DENSITY:
 		return
-	var source := _sources[request.frame].duplicate() as Image
+	var source := (frames[request.frame] as Image).duplicate() as Image
 	for turn in int(request.turns):
 		source.rotate_90(CLOCKWISE)
 	var side := roundi(float(request.size) * PIXELS / METERS)
 	source.resize(side, side, Image.INTERPOLATE_BILINEAR)
+	var surface := Image.create(side, side, false, Image.FORMAT_R8)
+	surface.fill(Color(float(ATLASES.ROUGHNESS[request.kind]), 0, 0))
 	var low := at - Vector2.ONE * float(request.size) * 0.5
 	var first := cell_at(low)
 	var last := cell_at(low + Vector2.ONE * float(request.size))
@@ -99,6 +94,8 @@ func _apply(request: Dictionary) -> void:
 			var offset := Vector2i((((low - origin) / METERS - Vector2(cell)) * PIXELS).floor())
 			# Native clipping also handles marks crossing a section boundary.
 			(tile.image as Image).blend_rect(source, Rect2i(Vector2i.ZERO, source.get_size()), offset)
+			# Material of the last visible fragment; transparent holes never overwrite it.
+			(tile.surface_image as Image).blit_rect_mask(surface, source, Rect2i(Vector2i.ZERO, source.get_size()), offset)
 			tile.dirty = true
 	if tiles.has(center):
 		var density: Dictionary = tiles[center].density
@@ -118,7 +115,10 @@ func _tile(cell: Vector2i) -> Dictionary:
 		tiles.erase(oldest)
 	var image := Image.create(PIXELS, PIXELS, false, Image.FORMAT_RGBA8)
 	image.fill(Color.TRANSPARENT)
-	var tile := {"image": image, "texture": null, "dirty": false, "density": {}}
+	var surface := Image.create(PIXELS, PIXELS, false, Image.FORMAT_R8)
+	surface.fill(Color(0.6, 0, 0))
+	var tile := {"image": image, "texture": null, "surface_image": surface,
+		"surface_texture": null, "dirty": false, "density": {}}
 	tiles[cell] = tile
 	return tile
 

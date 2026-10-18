@@ -46,6 +46,7 @@ func _break_leg(leg_id: String, local_hit: Vector3, direction: Vector3) -> void:
 	if _broken_legs.size() >= max_broken_legs:
 		return
 	_broken_legs[leg_id] = true
+	_floor_debris.emit(self, String(get_parent().name), "leg_" + leg_id, to_global(local_hit), direction)
 	sleeping = false
 	var away := Vector3(local_hit.x, 0.0, local_hit.z)
 	if away.length_squared() < 0.001:

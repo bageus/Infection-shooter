@@ -11,7 +11,7 @@
     "Environment prop visual stages and physical reactions; durability rules owned by features.combat",
     "Mission-local decorative neighboring skyline geometry and facade material",
     "Positional server fan ambience and its lifetime",
-    "Mission-local bounded glass debris floor textures, stamp queue and density"
+    "Mission-local bounded mixed-material floor debris textures, source cache, stamp queue and density"
   ],
   "public_api": [
     "public/base_office_layout.tscn",
@@ -111,7 +111,14 @@
     "glass_floor_debris_v1": {
       "configure_glass_debris": "configure_glass_debris(floor_view: Node3D) -> void on glass_partition and environment_prop; bootstrap injects the existing public base_floor_renderer",
       "floor": "scatter_glass_debris(panes: Array[MeshInstance3D], direction: Vector3), stamp_glass_debris(at: Vector2, frame: int, size: float, turns: int = 0) -> bool; positions are floor-local XZ; clear_glass_debris() clears transient pixels",
-      "budgets": "8m/512px sections, 16 section images/textures, 64 queued stamps, two native blits and one texture upload per active frame; four stamps per 1m cell; least-recently-written eviction. Base floor mesh clips holes; no added physics or nodes. Existing large shards are unchanged."
+      "budgets": "8m/512px sections; sixteen shared RGBA8+R8 image/texture pairs; 64 queued stamps; two stamps and one section upload (color + roughness) per active frame; four stamps per 1m cell; least-recently-written eviction; about 40 MiB CPU+GPU section storage. No added physics or debris nodes."
+    },
+    "floor_debris_v2": {
+      "configure": "Existing configure_glass_debris(floor_view: Node3D) injection also configures material debris on environment_prop, paper_prop, staged_table, physical_prop/table and scaled_destructible roots; local scene roots forward it.",
+      "scatter": "scatter_prop_debris(at: Vector3, footprint: Vector2, recipe: Array[String], direction: Vector3, excluded: Array[RID] = []) -> void; at and footprint are floor-local XZ, direction world-space; at most twelve stamps per event; rays exclude the source collision.",
+      "stamp": "stamp_material_debris(at: Vector2, kind: String, frame: int, size: float, turns: int = 0) -> bool; floor-local XZ, kind glass|paper|wood|cardboard|plastic|fabric|extinguisher; old stamp_glass_debris remains compatible.",
+      "lifetime": "All kinds share glass_floor_debris_v1 budgets and clear_glass_debris; transient, not persisted. Per prop at most four distinct actual destruction facts; rare table red addition once; extinguisher only on rupture.",
+      "surface": "Compact R8 roughness accompanies RGBA8 atlas pixels; last visible fragment determines roughness at overlaps. Shared original resources stay immutable."
     }
   }
 }
