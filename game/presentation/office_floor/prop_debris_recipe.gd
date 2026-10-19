@@ -9,6 +9,8 @@ static func is_screen(model: String) -> bool:
 
 static func for_model(model: String, event: String) -> Array[String]:
 	var label := model.to_lower()
+	if event == "shatter":
+		return _shattered(label)
 	if event == "screen":
 		if is_screen(label):
 			return _mix(["plastic", "glass", "paper"], [5, 5, 2])
@@ -42,6 +44,15 @@ static func for_model(model: String, event: String) -> Array[String]:
 	if has_any(label, ["05_", "plastic", "keyboard", "printer", "computer", "phone", "trash_bin", "pencil_holder", "water_cooler", "coffee_machine", "microwave", "kittle", "vending", "arcade"]):
 		return _mix(["plastic", "paper", "wood", "fabric"], [8, 2, 1, 1])
 	return []
+
+
+## Fragile items: paintings leave paper, cardboard and wood; fruit leaves plastic; plates and glassware leave glass and plastic.
+static func _shattered(label: String) -> Array[String]:
+	if "painting" in label:
+		return _mix(["paper", "cardboard", "wood"], [4, 3, 3])
+	if label.begins_with("09_fruit_") and "plate" not in label:
+		return _mix(["plastic"], [3])
+	return _mix(["glass", "plastic"], [6, 3])
 
 
 static func has_any(label: String, tokens: Array) -> bool:
