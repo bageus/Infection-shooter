@@ -23,6 +23,9 @@ const EYE_SIZE := 0.13
 const SHIELD_COOLDOWN := 0.6
 const OVERLAY_FADE_SPEED := 3.0
 const STRIKE_LENGTH := 2.6
+const STRIKE_BACK := 0.8
+const STRIKE_SHARDS := 6
+const STRIKE_COLOR := Color(1.0, 0.4, 0.14)
 
 var player: Node3D
 var effects_root: Node3D
@@ -291,31 +294,82 @@ func active_aura(id: String, radius: float, duration: float) -> void:
 			_loops[id] = weakref(field)
 
 
-## Power Strike: an orange-red fist of soft blobs that lunges forward and
-## fades where the blow lands. No outline, so it reads as a mass, not a shape.
+## Power Strike: an orange-red fist starts behind the player, speeds forward,
+## shatters on arrival and lights the floor it reached. Local -Z is forward.
 func power_strike(center: Vector3, direction: Vector3) -> void:
+	var fx := Node3D.new()
+	fx.name = "PowerStrikeFx"
+	_world().add_child(fx)
+	fx.global_position = center + Vector3.UP * 0.05
+	fx.look_at(center + direction, Vector3.UP)
+	var floor_zone := ImmediateMesh.new()
+	floor_zone.surface_begin(Mesh.PRIMITIVE_TRIANGLES)
+	for point in [Vector3(-0.5, 0.03, 0.2), Vector3(0.5, 0.03, 0.2), Vector3(1.5, 0.03, -STRIKE_LENGTH), Vector3(-0.5, 0.03, 0.2), Vector3(1.5, 0.03, -STRIKE_LENGTH), Vector3(-1.5, 0.03, -STRIKE_LENGTH)]:
+		floor_zone.surface_add_vertex(point)
+	floor_zone.surface_end()
+	var zone := _strike_part(floor_zone, _strike_material(0.5))
+	fx.add_child(zone)
 	var fist := Node3D.new()
-	fist.name = "PowerStrikeFist"
-	_world().add_child(fist)
-	fist.global_position = center + Vector3.UP * 0.9
-	fist.look_at(fist.global_position + direction, Vector3.UP)
-	var glow := StandardMaterial3D.new()
-	glow.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
-	glow.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
-	glow.albedo_color = Color(1.0, 0.4, 0.14, 0.6)
-	# Offset in metres from the centre of the fist, then blob radius.
-	for blob in [[Vector3.ZERO, 0.4], [Vector3(0.25, 0.1, -0.3), 0.3], [Vector3(-0.25, -0.1, -0.25), 0.32], [Vector3(0.1, -0.2, -0.5), 0.26], [Vector3(-0.1, 0.2, -0.6), 0.24]]:
+	fist.position = Vector3(0, 0.9, STRIKE_BACK)
+	fx.add_child(fist)
+	var glow := _strike_material(0.6)
+	# Offset in metres from the fist, then blob radius. Trail blobs sit behind.
+	for blob in [[Vector3.ZERO, 0.4], [Vector3(0.25, 0.1, -0.3), 0.3], [Vector3(-0.25, -0.1, -0.25), 0.32], [Vector3(0.1, -0.2, -0.5), 0.26], [Vector3(-0.1, 0.2, -0.6), 0.24], [Vector3(0, 0, 0.5), 0.26], [Vector3(0, 0, 0.9), 0.18]]:
 		var mesh := SphereMesh.new()
 		mesh.radius = blob[1]
 		mesh.height = blob[1] * 2.0
-		var part := MeshInstance3D.new()
-		part.mesh = mesh
-		part.material_override = glow
-		part.position = blob[0]
-		part.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
-		fist.add_child(part)
-	var tween := fist.create_tween()
-	tween.tween_property(fist, "position", Vector3(0, 0, -STRIKE_LENGTH), 0.16).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_OUT)
-	tween.parallel().tween_property(fist, "scale", Vector3.ONE * 1.35, 0.16)
-	tween.tween_property(glow, "albedo_color:a", 0.0, 0.22)
-	tween.tween_callback(fist.queue_free)
+		fist.add_child(_strike_part(mesh, glow, blob[0]))
+	var lunge := fx.create_tween()
+	lunge.tween_property(fist, "position", Vector3(0, 0.9, -STRIKE_LENGTH - STRIKE_BACK), 0.2).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_IN)
+	lunge.tween_property(glow, "albedo_color:a", 0.0, 0.08)
+	lunge.tween_callback(fist.queue_free)
+	lunge.tween_callback(_strike_shatter.bind(fx))
+	var floor_fade := fx.create_tween()
+	floor_fade.tween_interval(0.2)
+	floor_fade.tween_property(zone.material_override, "albedo_color:a", 0.0, 0.6)
+	var cleanup := fx.create_tween()
+	cleanup.tween_interval(1.0)
+	cleanup.tween_callback(fx.queue_free)
+
+
+func _strike_shatter(fx: Node3D) -> void:
+	for i in STRIKE_SHARDS:
+		var mesh := BoxMesh.new()
+		mesh.size = Vector3.ONE * randf_range(0.08, 0.14)
+		var material := _strike_material(0.9)
+		var shard := _strike_part(mesh, material, Vector3(0, 0.9, -STRIKE_LENGTH))
+		fx.add_child(shard)
+		var landing := Vector3(randf_range(-0.7, 0.7), 0.05, -STRIKE_LENGTH + randf_range(-0.6, 0.3))
+		var tween := shard.create_tween()
+		tween.tween_property(shard, "position", landing, 0.3).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_IN)
+		tween.tween_property(material, "albedo_color:a", 0.0, 0.2)
+		tween.tween_callback(shard.queue_free)
+	for i in 3:
+		var mesh := SphereMesh.new()
+		mesh.radius = 0.22
+		mesh.height = 0.44
+		var material := _strike_material(0.35, Color(1.0, 0.55, 0.25))
+		var puff := _strike_part(mesh, material, Vector3(randf_range(-0.4, 0.4), 0.3, -STRIKE_LENGTH + randf_range(-0.3, 0.1)))
+		fx.add_child(puff)
+		var tween := puff.create_tween()
+		tween.tween_property(puff, "scale", Vector3.ONE * 2.5, 0.35)
+		tween.parallel().tween_property(material, "albedo_color:a", 0.0, 0.35)
+		tween.tween_callback(puff.queue_free)
+
+
+func _strike_part(mesh: Mesh, material: StandardMaterial3D, at: Vector3 = Vector3.ZERO) -> MeshInstance3D:
+	var part := MeshInstance3D.new()
+	part.mesh = mesh
+	part.material_override = material
+	part.position = at
+	part.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+	return part
+
+
+func _strike_material(alpha: float, color: Color = STRIKE_COLOR) -> StandardMaterial3D:
+	var material := StandardMaterial3D.new()
+	material.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
+	material.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
+	material.cull_mode = BaseMaterial3D.CULL_DISABLED
+	material.albedo_color = Color(color, alpha)
+	return material
