@@ -5,6 +5,7 @@ extends Node
 ## mask eyes). Gameplay stays in mutation_skill_effects.gd, which reports here.
 
 const DASH_TRAIL := preload("res://game/features/player/dash_trail.gd")
+const DASH_ZONE := preload("res://game/features/player/dash_floor_zone.gd")
 const RANGE_DOME := preload("res://game/features/player/range_dome.gd")
 const PROCEDURAL := preload("res://game/features/player/skill_fx/procedural_skill_fx.gd")
 ## Range dome colours per skill area.
@@ -96,9 +97,12 @@ func energy_shield() -> void:
 func heartbeat(seconds: float = 2.4) -> void:
 	PROCEDURAL.heartbeat(player, player.global_position + Vector3.UP * 2.5, seconds)
 
-## Predator Dash: speed streaks behind the body for the dash.
+## Predator Dash: speed streaks behind the body and the strike lane on the floor.
 func dash_trail(seconds: float) -> void:
 	DASH_TRAIL.start(_world(), player, seconds)
+	var heading: Variant = player.get("_roll_direction")
+	if heading is Vector3 and _world() is Node3D:
+		DASH_ZONE.spawn(_world(), player.get_world_3d(), player.global_position, heading, seconds)
 
 
 # --- Buffs -------------------------------------------------------------------

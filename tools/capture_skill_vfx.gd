@@ -34,6 +34,10 @@ func _capture() -> void:
 	_vfx = _player.get("mutation_effects").get("vfx")
 	_vfx.call("configure_world", _stage)
 	var center := _player.global_position
+	if OS.get_cmdline_user_args().has("dash"):
+		await _dash_shots(center)
+		quit(0)
+		return
 
 	_vfx.call("buff_started", "storm_pulse")
 	await _shot("storm_pulse_field", 0.5)
@@ -87,13 +91,21 @@ func _capture() -> void:
 	_vfx.call("set_passives", false, false)
 	await _wait(0.6)
 
-	_camera.look_at_from_position(center + Vector3(4, 5, 1), center + Vector3(0, 0.8, -2.6), Vector3.UP)
-	_player.get_node("AimPivot").global_rotation = Vector3.ZERO
+	await _dash_shots(center)
+	quit(0)
+
+
+## Predator Dash from the game camera: the floor zone at the cast, then mid-dash.
+func _dash_shots(center: Vector3) -> void:
+	_camera.look_at_from_position(center + Vector3(4.5, 6.0, 3.5), center + Vector3(0, 0, -2.6), Vector3.UP)
+	_player.global_position = center
+	_player.set("_roll_direction", Vector3.FORWARD)
 	_vfx.call("dash_trail", 0.4)
 	var dash := _player.create_tween()
 	dash.tween_property(_player, "global_position", center + Vector3(0, 0, -5.2), 0.4)
-	await _shot("predator_dash_trail", 0.3)
-	quit(0)
+	await _shot("predator_dash_start", 0.0)
+	await _shot("predator_dash_trail", 0.2)
+	await _shot("predator_dash_end", 0.2)
 
 
 func _build_stage() -> void:
