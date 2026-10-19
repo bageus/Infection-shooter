@@ -23,12 +23,11 @@ var _game_lighting := true
 const MAX_LIGHTS := 28
 const MAX_SHADOW_LIGHTS := 6
 const REFRESH_SECONDS := 0.15
-## Squared-distance weight for a lamp that already has shadows (0.7 m per 1 m).
-const SHADOW_KEEP_BIAS := 0.49
-## A lamp whose light sphere lies fully outside the view lights nothing visible:
-## it neither spends the light budget nor casts shadows. The margin keeps lamps
-## that are about to enter the view from popping in.
-const VIEW_MARGIN := 2.0
+## A lamp is lit while its light sphere (grown by a margin) touches the view, so a lamp
+## switches on before it appears: ENTER_MARGIN covers a fast camera turn over one refresh,
+## the larger LEAVE_MARGIN keeps a lit lamp on until it is clearly gone (hysteresis).
+const ENTER_MARGIN := 6.0
+const LEAVE_MARGIN := 9.0
 ## Lamps in view but past the budget get a flat additive pool on the floor instead.
 ## shortcut: fixed pool radius and strength, not the cone's real floor footprint; tune if pools look wrong.
 const POOL_RADIUS := 2.5
@@ -38,6 +37,9 @@ var _pool: MultiMeshInstance3D
 var shadows_allowed := true
 var _refresh_left := 0.0
 var _shadow_owners := {}
+## Lamps lit-eligible last refresh (margin included), and those whose light touches the view itself.
+var _near_view := {}
+var _in_view := {}
 var _cached_lamps: Array[Node] = []
 var _positions := PackedVector3Array()
 var _radii: Array[float] = []
@@ -159,18 +161,28 @@ func refresh_light_budget(capture_inputs: bool = true) -> void:
 	var frustum: Array = camera.get_frustum() if camera != null else []
 	var lamps: Array[Node] = tree.get_nodes_in_group("budget_lights")
 	var ranked: Array[Dictionary] = []
+	var near_view := {}
+	var in_view := {}
 	for lamp in lamps:
 		if lamp is Node3D and lamp.is_inside_tree() and lamp.has_method("set_budget_lit"):
-			if not frustum.is_empty() and not sphere_in_view(frustum, (lamp as Node3D).global_position, _light_radius(lamp) + VIEW_MARGIN):
+			var id := lamp.get_instance_id()
+			var at := (lamp as Node3D).global_position
+			var reach := _light_radius(lamp)
+			var margin := LEAVE_MARGIN if _near_view.has(id) else ENTER_MARGIN
+			if not frustum.is_empty() and not sphere_in_view(frustum, at, reach + margin):
 				lamp.call("set_budget_lit", false, false)
 				continue
-			var offset: Vector3 = (lamp as Node3D).global_position - focus
+			near_view[id] = true
+			var seen := frustum.is_empty() or sphere_in_view(frustum, at, reach)
+			if seen:
+				in_view[id] = true
+			var offset: Vector3 = at - focus
 			offset.y = 0.0
-			var distance := offset.length_squared()
-			# A lamp that already casts shadows keeps them unless a rival is clearly
-			# nearer, so the shadow set does not flip while the camera moves.
-			var keeps_shadow := _shadow_owners.has(lamp.get_instance_id())
-			ranked.append({"node": lamp, "distance": distance, "rank": distance * SHADOW_KEEP_BIAS if keeps_shadow else distance})
+			# Lamps on screen come first; the focus distance only orders them past the budget.
+			# A shadowed lamp that stays on screen keeps its slot so its look never changes.
+			var keeps_shadow := seen and _shadow_owners.has(id)
+			ranked.append({"node": lamp, "seen": seen, "keeps": keeps_shadow,
+				"rank": -1.0 if keeps_shadow else offset.length_squared() + (0.0 if seen else 1.0e9)})
 	ranked.sort_custom(func(a: Dictionary, b: Dictionary) -> bool: return a.rank < b.rank)
 	var used := 0
 	var shadowed := 0
@@ -180,15 +192,19 @@ func refresh_light_budget(capture_inputs: bool = true) -> void:
 		var lamp: Node = entry.node
 		var cost: int = lamp.call("get_light_cost")
 		var lit := used + cost <= MAX_LIGHTS
-		var shadow := lit and shadows_allowed and shadowed + cost <= MAX_SHADOW_LIGHTS
+		# Shadows are handed out only to lamps that were off screen at the last refresh.
+		var shadow: bool = lit and shadows_allowed and shadowed + cost <= MAX_SHADOW_LIGHTS \
+			and (entry.keeps or _in_view.is_empty() or not _in_view.has(lamp.get_instance_id()))
 		if lit:
 			used += cost
-		else:
+		elif entry.seen:
 			unlit.append(lamp)
 		if shadow:
 			shadowed += cost
 			owners[lamp.get_instance_id()] = true
 		lamp.call("set_budget_lit", lit, shadow)
+	_near_view = near_view
+	_in_view = in_view
 	_settling = _shadow_owners != owners
 	_shadow_owners = owners
 	_cached_shadows = shadows_allowed

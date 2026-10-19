@@ -122,6 +122,7 @@ game/presentation/office_floor/tests/run_settled_debris_tests.gd
 game/presentation/office_floor/tests/run_table_bake_tests.gd
 game/presentation/office_floor/tests/run_fragment_bake_tests.gd
 game/presentation/office_floor/tests/run_blood_dormant_tests.gd
+game/presentation/office_floor/tests/run_blood_level_tests.gd
 game/presentation/office_floor/tests/run_blood_floor_bake_tests.gd
 game/presentation/office_floor/tests/run_divider_collision_tests.gd
 game/presentation/office_floor/tests/run_electronics_hit_tests.gd

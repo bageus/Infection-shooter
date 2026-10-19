@@ -6,13 +6,14 @@ const BINDINGS := preload("res://game/bootstrap/app/menu/control_bindings.gd")
 const UI_TRANSLATIONS := preload("res://game/core/localization/public/ui_translations.gd")
 const CORPSE_BUDGET := preload("res://game/features/infected/public/corpse_budget.gd")
 const ENEMY_DIFFICULTY := preload("res://game/features/infected/public/enemy_difficulty.gd")
+const BLOOD_LEVEL := preload("res://game/core/vfx/public/blood_level.gd")
 var bindings := BINDINGS.new()
 
 const FILE := "user://interface_settings.cfg"
 const DEFAULTS := {"window_mode": 0, "resolution": "1280x720", "language": "ru", "brightness": 1.0, "text_scale": 1.0,
 	"enemies_ignore_player": false, "enemies_no_damage": false, "enemy_difficulty": 1,
 	"walk_speed_multiplier": 1.0, "walk_animation_multiplier": 1.0,
-	"volume": 0.4, "effects_volume": 1.0, "music_volume": 1.0, "menu_music": true, "menu_music_volume": 1.0, "sound": true, "occlusion_mode": 0, "test_mutagen": false, "infinite_antidotes": false, "lighting": true, "game_lights_only": false, "electronic_particles": true, "blood_style": 0, "dodge_animation": 0,
+	"volume": 0.4, "effects_volume": 1.0, "music_volume": 1.0, "menu_music": true, "menu_music_volume": 1.0, "sound": true, "occlusion_mode": 0, "test_mutagen": false, "infinite_antidotes": false, "lighting": true, "game_lights_only": false, "electronic_particles": true, "blood_style": 0, "blood_level": 2, "dodge_animation": 0,
 	"bullet_impact_smoke": true, "sunlight": true, "shadows": true, "shadow_quality": 2, "mesh_lod": true, "keep_corpses": true, "floor_hints": true}
 var values: Dictionary = DEFAULTS.duplicate()
 
@@ -34,6 +35,7 @@ func load_settings() -> void:
 	values.occlusion_mode = clampi(values.occlusion_mode, 0, 1)
 	values.enemy_difficulty = clampi(values.enemy_difficulty, ENEMY_DIFFICULTY.LOW, ENEMY_DIFFICULTY.HIGH)
 	values.blood_style = clampi(values.blood_style, 0, 1)
+	values.blood_level = clampi(values.blood_level, 0, BLOOD_LEVEL.COUNT - 1)
 	values.dodge_animation = clampi(values.dodge_animation, 0, 1)
 	values.walk_speed_multiplier = clampf(values.walk_speed_multiplier, 0.5, 1.5) if is_finite(values.walk_speed_multiplier) else 1.0
 	values.walk_animation_multiplier = clampf(values.walk_animation_multiplier, 0.5, 2.0) if is_finite(values.walk_animation_multiplier) else 1.0
@@ -96,8 +98,8 @@ func apply_to_game(tree: SceneTree, display_user_action: bool = false) -> void:
 		scene.call("set_infinite_antidotes_enabled", bool(values.infinite_antidotes))
 	if scene != null and scene.has_method("set_floor_hints_enabled"):
 		scene.call("set_floor_hints_enabled", bool(values.floor_hints))
-	if scene != null and scene.has_method("set_procedural_blood"):
-		scene.call("set_procedural_blood", int(values.blood_style) == 1)
+	if scene != null and scene.has_method("set_blood_level"):
+		scene.call("set_blood_level", int(values.blood_level), int(values.blood_style) == 1)
 	if scene != null and scene.has_method("set_dodge_animation_style"):
 		scene.call("set_dodge_animation_style", int(values.dodge_animation))
 	if scene != null and scene.has_method("set_walk_tuning"):

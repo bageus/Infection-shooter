@@ -160,10 +160,10 @@ func set_floor_hints_enabled(enabled: bool) -> void:
 		mission_layout.call("set_floor_hints_enabled", enabled)
 
 
-## Settings: own procedural blood instead of the blood decal atlases.
-func set_procedural_blood(enabled: bool) -> void:
+## Settings: blood level 0..3 (green at 0, amount, flight distance) and own procedural blood instead of the decal atlases.
+func set_blood_level(level: int, procedural_style: bool) -> void:
 	if blood_effects != null:
-		blood_effects.call("set_procedural_blood", enabled)
+		blood_effects.call("set_blood_level", level, procedural_style)
 
 
 ## Settings: dodge animation, 0 = dive roll, 1 = strafe jump.

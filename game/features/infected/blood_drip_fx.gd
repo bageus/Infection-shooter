@@ -8,6 +8,7 @@ const MAX_ACTIVE := 24
 # Blood surfaces carry this layer (see blood_surface_query.gd); droplets fall no further than it.
 const FLOOR_MASK := 128
 const GRAVITY := 9.8
+const BLOOD_LEVEL := preload("res://game/core/vfx/public/blood_level.gd")
 
 static var _droplet: SphereMesh
 static var _material: StandardMaterial3D
@@ -24,8 +25,8 @@ static func bleed(parent: Node3D, offset: Vector3, direction: Vector3, seconds: 
 	var process := particles.process_material as ParticleProcessMaterial
 	process.direction = direction.normalized() if direction.length_squared() > 0.0001 else Vector3.DOWN
 	process.spread = 28.0
-	process.initial_velocity_min = 0.6 * strength
-	process.initial_velocity_max = 2.4 * strength
+	process.initial_velocity_min = BLOOD_LEVEL.scale_speed(0.6 * strength)
+	process.initial_velocity_max = BLOOD_LEVEL.scale_speed(2.4 * strength)
 	_stop_at_floor(particles, process)
 	particles.emitting = true
 	var tree := parent.get_tree()
@@ -50,8 +51,8 @@ static func spray(parent: Node3D, world_position: Vector3, direction: Vector3, a
 	var process := particles.process_material as ParticleProcessMaterial
 	process.direction = direction.normalized() if direction.length_squared() > 0.0001 else Vector3.UP
 	process.spread = 38.0
-	process.initial_velocity_min = 1.5 * force
-	process.initial_velocity_max = 4.5 * force
+	process.initial_velocity_min = BLOOD_LEVEL.scale_speed(1.5 * force)
+	process.initial_velocity_max = BLOOD_LEVEL.scale_speed(4.5 * force)
 	_stop_at_floor(particles, process)
 	particles.emitting = true
 	var ref: WeakRef = weakref(particles)
@@ -87,7 +88,6 @@ static func _make(parent: Node3D, amount: int, lifetime: float, one_shot: bool) 
 		return null
 	if _droplet == null:
 		_material = StandardMaterial3D.new()
-		_material.albedo_color = Color(0.36, 0.01, 0.01)
 		_material.roughness = 0.2
 		_material.metallic_specular = 0.7
 		_droplet = SphereMesh.new()
@@ -96,6 +96,8 @@ static func _make(parent: Node3D, amount: int, lifetime: float, one_shot: bool) 
 		_droplet.radial_segments = 6
 		_droplet.rings = 3
 		_droplet.material = _material
+	# Read per burst so a changed blood level applies to the next drops.
+	_material.albedo_color = BLOOD_LEVEL.color()
 	var particles := GPUParticles3D.new()
 	particles.name = "BloodDrops"
 	particles.add_to_group(GROUP)
@@ -111,7 +113,7 @@ static func _make(parent: Node3D, amount: int, lifetime: float, one_shot: bool) 
 		if not counted[0]:
 			counted[0] = true
 			_active += 1)
-	particles.amount = maxi(1, amount)
+	particles.amount = BLOOD_LEVEL.scale_amount(amount)
 	particles.lifetime = lifetime
 	particles.one_shot = one_shot
 	particles.explosiveness = 0.85 if one_shot else 0.0

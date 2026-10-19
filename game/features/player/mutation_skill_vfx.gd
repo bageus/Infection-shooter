@@ -21,6 +21,7 @@ const EYE_OFFSET := Vector3(0.12, 0.03, 0.045)
 const EYE_SIZE := 0.13
 const SHIELD_COOLDOWN := 0.6
 const OVERLAY_FADE_SPEED := 3.0
+const STRIKE_LENGTH := 2.6
 
 var player: Node3D
 var effects_root: Node3D
@@ -286,25 +287,31 @@ func active_aura(id: String, radius: float, duration: float) -> void:
 			_loops[id] = weakref(field)
 
 
+## Power Strike: an orange-red fist of soft blobs that lunges forward and
+## fades where the blow lands. No outline, so it reads as a mass, not a shape.
 func power_strike(center: Vector3, direction: Vector3) -> void:
-	var fx := MeshInstance3D.new()
-	fx.name = "PowerStrikeArea"
-	fx.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
-	var surface := ImmediateMesh.new()
-	var tint := StandardMaterial3D.new()
-	tint.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
-	tint.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
-	tint.cull_mode = BaseMaterial3D.CULL_DISABLED
-	tint.albedo_color = Color(0.9, 0.65, 0.4, 0.28)
-	surface.surface_begin(Mesh.PRIMITIVE_TRIANGLES)
-	for point in [Vector3(-0.5, 0, 0), Vector3(0.5, 0, 0), Vector3(1.5, 0, -3), Vector3(-0.5, 0, 0), Vector3(1.5, 0, -3), Vector3(-1.5, 0, -3)]:
-		surface.surface_add_vertex(point)
-	surface.surface_end()
-	fx.mesh = surface
-	fx.material_override = tint
-	_world().add_child(fx)
-	fx.global_position = center + Vector3.UP * 0.05
-	fx.global_basis = Basis.looking_at(direction, Vector3.UP)
-	var fade := fx.create_tween()
-	fade.tween_property(tint, "albedo_color:a", 0.0, 0.35)
-	fade.tween_callback(fx.queue_free)
+	var fist := Node3D.new()
+	fist.name = "PowerStrikeFist"
+	_world().add_child(fist)
+	fist.global_position = center + Vector3.UP * 0.9
+	fist.look_at(fist.global_position + direction, Vector3.UP)
+	var glow := StandardMaterial3D.new()
+	glow.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
+	glow.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
+	glow.albedo_color = Color(1.0, 0.4, 0.14, 0.6)
+	# Offset in metres from the centre of the fist, then blob radius.
+	for blob in [[Vector3.ZERO, 0.4], [Vector3(0.25, 0.1, -0.3), 0.3], [Vector3(-0.25, -0.1, -0.25), 0.32], [Vector3(0.1, -0.2, -0.5), 0.26], [Vector3(-0.1, 0.2, -0.6), 0.24]]:
+		var mesh := SphereMesh.new()
+		mesh.radius = blob[1]
+		mesh.height = blob[1] * 2.0
+		var part := MeshInstance3D.new()
+		part.mesh = mesh
+		part.material_override = glow
+		part.position = blob[0]
+		part.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+		fist.add_child(part)
+	var tween := fist.create_tween()
+	tween.tween_property(fist, "position", Vector3(0, 0, -STRIKE_LENGTH), 0.16).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_OUT)
+	tween.parallel().tween_property(fist, "scale", Vector3.ONE * 1.35, 0.16)
+	tween.tween_property(glow, "albedo_color:a", 0.0, 0.22)
+	tween.tween_callback(fist.queue_free)

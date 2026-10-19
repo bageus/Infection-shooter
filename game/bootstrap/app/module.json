@@ -27,7 +27,8 @@
     "core.audio",
     "features.infection",
     "core.world_badge",
-    "core.localization"
+    "core.localization",
+    "core.vfx"
   ],
   "runtime_contracts": {
     "level_chain_v1": "user://level_chain.json {version:1, maps:[{name, entries:[{type none|ceiling|floor, x, z, placed} x2]}]}; map order is the chain, slot 0 leads to the previous map, slot 1 to the next. Map files and layout DTO unchanged.",
