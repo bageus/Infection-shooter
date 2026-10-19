@@ -109,6 +109,7 @@ game/features/infected/tests/run_horde_escalation_tests.gd
 game/bootstrap/app/tests/run_ui_sound_tests.gd
 game/presentation/office_floor/tests/run_destruction_fixes_tests.gd
 game/presentation/office_floor/tests/run_glass_cup_break_tests.gd
+game/presentation/office_floor/tests/run_fragile_prop_tests.gd
 game/presentation/office_floor/tests/run_office_breakage_tests.gd
 game/bootstrap/app/tests/run_planner_contact_tests.gd
 game/bootstrap/app/tests/run_p2_optimization_tests.gd

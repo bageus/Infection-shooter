@@ -1,6 +1,6 @@
 extends SceneTree
 ## Fruit on a plate: seeded random layout, one baked body, config sanitising, and a shot plate
-## that either breaks or flips while its fruit scatters as loose pieces.
+## that breaks on its first hit while its fruit scatters as loose pieces.
 const PROP_SCENE := preload("res://game/presentation/office_floor/public/props/environment_prop.tscn")
 const PLATE_FRUIT := preload("res://game/presentation/office_floor/plate_fruit.gd")
 const PLATE := "res://models/objects/enviroments/09/09_fruit_plate_2.glb"
@@ -29,12 +29,8 @@ func _run() -> void:
 	stage.add_child(floor_body)
 	floor_body.position.y = -0.1
 	await _check_baked_layout()
-	var outcomes := {"broke": 0, "flipped": 0}
-	for round_index in 12:
-		var result := await _shoot_plate(round_index)
-		outcomes[result] += 1
-	_check(outcomes["broke"] > 0 and outcomes["flipped"] > 0, "Both outcomes happen over 12 shots: %s." % str(outcomes))
-	print("Outcomes: ", outcomes)
+	for round_index in 5:
+		await _shoot_plate(round_index)
 	await _check_plain_plate()
 	stage.queue_free()
 	await process_frame
@@ -94,7 +90,7 @@ func _check_baked_layout() -> void:
 		await process_frame
 
 
-func _shoot_plate(round_index: int) -> String:
+func _shoot_plate(round_index: int) -> void:
 	var prop := _make_plate({"enabled": true, "count": 1 + round_index % 5, "seed": 500 + round_index}, Vector3(0, 0.02, 0))
 	for i in 20:
 		await physics_frame
@@ -104,16 +100,12 @@ func _shoot_plate(round_index: int) -> String:
 		await physics_frame
 	var count := 1 + round_index % 5
 	_check(effects.get_child_count() - pieces_before >= count, "Round %d: the %d fruit scatter as loose pieces (%d)." % [round_index, count, effects.get_child_count() - pieces_before])
-	_check(_fruit_meshes(prop) == 0 or not prop.visible or not (prop.get_node("Visual") as Node3D).visible, "Round %d: no fruit stays on the plate." % round_index)
-	var broke := not (prop.get_node("Visual") as Node3D).visible
-	var result := "broke" if broke else "flipped"
-	if not broke:
-		_check(not prop.freeze, "A flipped plate moves.")
+	_check(not (prop.get_node("Visual") as Node3D).visible, "Round %d: the plate breaks on its first hit." % round_index)
+	_check(prop.collision_layer == 0, "Round %d: a broken plate stops blocking." % round_index)
 	for piece in effects.get_children():
 		piece.queue_free()
 	prop.queue_free()
 	await process_frame
-	return result
 
 
 func _check_plain_plate() -> void:
@@ -123,7 +115,8 @@ func _check_plain_plate() -> void:
 	_check(_fruit_meshes(prop) == 0, "A default plate has no fruit.")
 	var before := effects.get_child_count()
 	prop.call("take_projectile_hit", 19.0, prop.global_position, Vector3.UP, Vector3.FORWARD, "PISTOL")
-	_check(effects.get_child_count() == before, "A plain plate behaves as before.")
+	_check(effects.get_child_count() > before, "A plain plate breaks into pieces on a pistol hit.")
+	_check(not (prop.get_node("Visual") as Node3D).visible, "A plain plate no longer stands whole.")
 	prop.queue_free()
 
 
