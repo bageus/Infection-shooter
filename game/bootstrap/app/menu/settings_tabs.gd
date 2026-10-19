@@ -192,6 +192,13 @@ func _video() -> void:
 	blood_style.item_selected.connect(func(index: int) -> void: dialog.call("_change", "blood_style", index))
 	dialog.call("_row", "bloodStyle", blood_style)
 	_blood_level()
+	var effects_quality := OptionButton.new()
+	effects_quality.name = "EffectsQuality"
+	for key in ["effectsQuality0", "effectsQuality1", "effectsQuality2"]:
+		effects_quality.add_item(dialog.view.text(key))
+	effects_quality.selected = dialog.view.preferences.values.effects_quality
+	effects_quality.item_selected.connect(func(index: int) -> void: dialog.call("_change", "effects_quality", index))
+	dialog.call("_row", "effectsQuality", effects_quality)
 	var lighting := CheckButton.new()
 	lighting.name = "Lighting"
 	lighting.text = dialog.view.text("lighting")
