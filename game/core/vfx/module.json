@@ -12,7 +12,8 @@
     "public/smoke_puff.gdshader",
     "public/surface_atlases.gd",
     "public/surface_stamp.gd",
-    "public/surface_stamp_cache.gd"
+    "public/surface_stamp_cache.gd",
+    "public/blood_level.gd"
   ],
   "dependencies": [],
   "runtime_contracts": {
@@ -30,6 +31,7 @@
       "material": "material(texture: Texture2D, cell: int) -> ShaderMaterial; immutable BULLET/GLASS textures, row-major 4x2, bullet 0..4, scorch 5..7, glass 0..7; per-mark material"
     },
     "surface_stamp_v1": "build(receiver: MeshInstance3D, projector: Transform3D, size: Vector2, depth: float, skip_glass = false) -> ArrayMesh; immutable receiver, clipped real triangles, continuous projector UV, null if no receiving faces",
+    "blood_level_v1": "BloodLevel (static): set_level(value: int) clamps to 0..COUNT-1 (0 green, 1 low, 2 medium, 3 maximum); color() -> Color for droplets and procedural decals; scale_amount(amount: int) -> int; scale_speed(speed: float) -> float. Set from Video settings only.",
     "surface_stamp_cache_v1": "Owned RefCounted instance: build(receiver, projector, size, depth, skip_glass = false) -> ArrayMesh; same geometry as surface_stamp_v1; bounded 128 immutable Mesh snapshots/indices; Mesh.changed invalidation; destroying owner disconnects observers. Caller owns cache and output."
   }
 }

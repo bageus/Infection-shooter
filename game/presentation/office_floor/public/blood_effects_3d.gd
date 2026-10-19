@@ -4,6 +4,7 @@ const LIBRARY := preload("res://game/presentation/office_floor/blood_texture_lib
 const SURFACES := preload("res://game/presentation/office_floor/blood_surface_query.gd")
 const EXIT_SPLATTER := preload("res://game/presentation/office_floor/blood_exit_splatter.gd")
 const BUDGET := preload("res://game/presentation/office_floor/blood_mark_budget.gd")
+const BLOOD_LEVEL := preload("res://game/core/vfx/public/blood_level.gd")
 # Radians around the shot's flat direction: two near-forward rays and two sideways rays.
 const SIDE_SPLATTER_ANGLES := [-1.3, -0.6, 0.6, 1.3]
 
@@ -38,6 +39,7 @@ const SIDE_SPLATTER_ANGLES := [-1.3, -0.6, 0.6, 1.3]
 
 var _library := LIBRARY.new()
 var _procedural_blood := false
+var _procedural_color := LIBRARY.DEFAULT_PROCEDURAL_COLOR
 var _surfaces: Node3D
 var _budget: Node3D
 var _decal := false
@@ -58,7 +60,7 @@ func _ready() -> void:
 	_diagnostics = {"version": 1, "engine": Engine.get_version_info().get("string", "unknown"), "renderer": method, "api_valid": _verify_engine_api()}
 	_decal = method in ["forward_plus", "mobile"]
 	if preload_textures:
-		_library.load_assets(texture_max_dimension, blood_brightness, _procedural_blood)
+		_library.load_assets(texture_max_dimension, blood_brightness, _procedural_blood, _procedural_color)
 	_surfaces = SURFACES.new() as Node3D
 	_surfaces.set("collision_mask", surface_collision_mask)
 	_surfaces.set("visual_mask", receiver_visual_mask)
@@ -124,11 +126,19 @@ func configure_world(_container: Node3D, impacts: Node) -> void:
 # Settings: own procedural blood frames instead of the atlas textures. Marks
 # already on screen keep their texture; new marks use the chosen set.
 func set_procedural_blood(enabled: bool) -> void:
-	if enabled == _procedural_blood:
+	var color := BLOOD_LEVEL.color()
+	if enabled == _procedural_blood and color == _procedural_color:
 		return
 	_procedural_blood = enabled
+	_procedural_color = color
 	_library = LIBRARY.new()
-	_library.load_assets(texture_max_dimension, blood_brightness, enabled)
+	_library.load_assets(texture_max_dimension, blood_brightness, enabled, color)
+
+
+# Settings: blood level 0 is green procedural blood; the others follow the style setting.
+func set_blood_level(level: int, procedural_style: bool) -> void:
+	BLOOD_LEVEL.set_level(level)
+	set_procedural_blood(procedural_style or BLOOD_LEVEL.is_green())
 
 
 func movement_spacing() -> float:
@@ -201,7 +211,7 @@ func _emit_splatter_hit(point: Vector3, direction: Vector3, weapon: String, excl
 	var surface: Dictionary = _surfaces.call("find_behind", point, direction, excluded)
 	if surface.is_empty():
 		surface = _surfaces.call("find_floor", point, excluded)
-	for mark in range(splatters_per_hit):
+	for mark in range(BLOOD_LEVEL.scale_amount(splatters_per_hit)):
 		_submit("splatter", surface, direction, splatter_size, true, weapon == "SHOTGUN")
 	_emit_side_splatters(point, direction, excluded)
 

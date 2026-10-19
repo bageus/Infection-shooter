@@ -21,6 +21,7 @@ const BUILT_CELL := 512
 const CELLS_FILE := "cells.json"
 # Own blood ("procedural" setting): frames drawn in code, one square cell each.
 const PROCEDURAL_CELL := 96
+const DEFAULT_PROCEDURAL_COLOR := Color(0.42, 0.01, 0.02)
 var entries: Dictionary = {}
 var recent: Dictionary = {}
 
@@ -35,17 +36,17 @@ static func frame_count(category: String) -> int:
 	return grid.x * grid.y
 
 
-func load_assets(max_dimension: int = 512, brightness: float = 1.18, procedural: bool = false) -> void:
+func load_assets(max_dimension: int = 512, brightness: float = 1.18, procedural: bool = false, color: Color = DEFAULT_PROCEDURAL_COLOR) -> void:
 	if not entries.is_empty():
 		return
-	var key := "%d|%.3f|%s" % [max_dimension, brightness, procedural]
+	var key := "%d|%.3f|%s|%s" % [max_dimension, brightness, procedural, color.to_html()]
 	if _shared.has(key):
 		entries = _shared[key]
 		return
 	_shared[key] = entries
 	if procedural:
 		for category in CATEGORIES:
-			entries[category] = _procedural_entries(category)
+			entries[category] = _procedural_entries(category, color)
 		return
 	var cells := _built_cells()
 	for category in CATEGORIES:
@@ -81,7 +82,7 @@ func load_assets(max_dimension: int = 512, brightness: float = 1.18, procedural:
 
 # Each frame is a seeded cluster of soft blobs with a ragged edge, so a frame
 # looks the same on every run and no atlas is decoded.
-static func _procedural_entries(category: String) -> Array:
+static func _procedural_entries(category: String, color: Color) -> Array:
 	var result: Array = []
 	for index in frame_count(category):
 		var rng := RandomNumberGenerator.new()
@@ -102,7 +103,7 @@ static func _procedural_entries(category: String) -> Array:
 				for blob in blobs:
 					var distance := point.distance_to(Vector2(blob.x, blob.y)) + wobble
 					alpha = maxf(alpha, 1.0 - smoothstep(blob.z * 0.6, blob.z, distance))
-				image.set_pixel(x, y, Color(0.42, 0.01, 0.02, alpha))
+				image.set_pixel(x, y, Color(color.r, color.g, color.b, alpha))
 		result.append({"texture": ImageTexture.create_from_image(image), "aspect": 1.0, "variant": index + 1})
 	return result
 
