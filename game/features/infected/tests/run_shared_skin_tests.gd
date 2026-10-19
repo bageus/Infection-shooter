@@ -61,17 +61,20 @@ func _bodies(stage: Node3D, scene: PackedScene) -> void:
 		return
 	var ea: Dictionary = parts_a._entries[0]
 	var eb: Dictionary = parts_b._entries[0]
-	_expect(ea.materials == eb.materials, "Same type/surfaces share materials")
-	_expect(ea.lease.layer != eb.lease.layer, "Same page has independent actor layers")
+	var skin_a: Array = ea.materials.duplicate()
+	_expect(ea.materials != eb.materials and ea.lease.page != eb.lease.page, "Every body owns its skin materials and page")
+	_expect(ea.materials[0].shader == eb.materials[0].shader and not ea.materials[0].shader.code.contains("instance uniform"), "Bodies share one shader without instance uniforms")
 	var vertex: Vector3 = ea.data.surfaces[0].vertices[0]
 	parts_a.add_rest_wound(vertex, 0.25)
 	_expect(not eb.has("masks"), "Wounding A does not create CPU masks on B")
 	_expect(eb.lease.selector(eb.instance) == -1.0, "B keeps its clean instance selector")
-	_expect(ea.materials == eb.materials, "Wounding keeps the same shared materials")
+	_expect(ea.materials == skin_a, "Wounding keeps A's own materials")
 	a.status_fx.poisoned(1.0)
 	a.status_fx._process(0.8)
 	_expect(ea.lease.selector(ea.instance) == ea.lease.layer, "Poison fade does not overwrite the wound selector")
 	_expect(eb.instance.material_overlay == null, "Poison remains local to A")
+	var tint: ShaderMaterial = ea.instance.material_overlay as ShaderMaterial
+	_expect(tint != null and not tint.shader.code.contains("instance uniform"), "Poison tint takes no instance-uniform slot")
 	a.status_fx.clear()
 	var a_bytes: PackedByteArray = ea.masks[0].image.get_data()
 	_expect(a_bytes.has(255), "A has a visible baked wound")
@@ -81,15 +84,15 @@ func _bodies(stage: Node3D, scene: PackedScene) -> void:
 	if DisplayServer.get_name() != "headless":
 		await RenderingServer.frame_post_draw
 		_expect(ea.lease.page.textures[0].get_layer_data(ea.lease.layer).get_data() == a_bytes, "A GPU layer matches baked pixels")
-		_expect(ea.lease.page.textures[0].get_layer_data(eb.lease.layer).get_data() == eb.masks[0].image.get_data(), "B GPU layer is independent")
+		_expect(eb.lease.page.textures[0].get_layer_data(eb.lease.layer).get_data() == eb.masks[0].image.get_data(), "B GPU layer is independent")
 	var piece: RigidBody3D = parts_a.sever(parts_a.severable_parts()[0], Vector3.RIGHT)
 	_expect(piece != null, "A cut creates a piece")
 	if piece != null:
 		var meshes := piece.find_children("*", "MeshInstance3D", false, false)
 		var visual := meshes[0] as MeshInstance3D
 		var lease: RefCounted = visual.get_meta("body_skin_lease")
-		_expect(lease.layer != ea.lease.layer, "Piece owns a frozen layer")
-		_expect(visual.mesh.surface_get_material(0) == ea.materials[0], "Piece shares the skin material")
+		_expect(lease.page != ea.lease.page, "Piece owns a frozen page")
+		_expect(visual.mesh.surface_get_material(0) == lease.materials[0] and lease.materials[0] != ea.materials[0], "Piece has its own skin material")
 		if DisplayServer.get_name() != "headless":
 			await RenderingServer.frame_post_draw
 			var snapshot: PackedByteArray = lease.page.textures[0].get_layer_data(lease.layer).get_data()
@@ -105,7 +108,7 @@ func _bodies(stage: Node3D, scene: PackedScene) -> void:
 	await process_frame
 
 func _page_boundary() -> void:
-	var pool := SKINS.new([StandardMaterial3D.new(), StandardMaterial3D.new()])
+	var pool := SKINS.new([StandardMaterial3D.new(), StandardMaterial3D.new()], false)
 	var leases: Array = []
 	for i in SKINS.PAGE_LAYERS + 1:
 		leases.append(pool.acquire())
