@@ -27,6 +27,7 @@ func _run() -> void:
 	_check(TranslationServer.get_locale() == "ru", "Russian setting sets the ru locale")
 	_check(tr("controlLost") == "КОНТРОЛЬ ПОТЕРЯН — МУТАЦИЯ ВЗЯЛА ВЕРХ", "Russian HUD string resolves through tr()")
 	_check(tr("objectiveFireExit") == "Двигайся к пожарному выходу!", "Russian objective resolves through tr()")
+	_check(tr("objectiveFindKey") == "Найди ключ от пожарного выхода", "Russian key objective resolves through tr()")
 	_check(tr("hudSelectWeapon") % 2 == "Выбрать оружие [2]", "Russian tooltip format resolves through tr()")
 
 	print("UI translation tests: %d failure(s)" % failures)

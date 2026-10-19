@@ -6,6 +6,7 @@ const FLOOR_HINT := preload("res://game/bootstrap/app/floor_hint_guide.gd")
 const FLOOR_BOUNDS := Rect2(-40, -30, 80, 60)
 const CUT_STEP := 0.5
 const STAIR_REFRESH_SECONDS := 0.35
+const KEY_REVEAL_SECONDS := 600.0
 
 var _stage: Node3D
 var _objects: Node
@@ -15,6 +16,8 @@ var _scan_remaining := 0.0
 var _player: Node3D
 var _key: Node3D
 var _hints: Node3D
+var _elapsed := 0.0
+var _key_revealed := false
 
 
 func setup(stage: Node3D, player: Node3D, _infection: Node) -> void:
@@ -43,11 +46,11 @@ func set_floor_hints_enabled(enabled: bool) -> void:
 	_hints.call("set_hints_enabled", enabled)
 
 
-# Goal for the floor chevrons: the emergency key until it is taken, then the nearest exit opening.
+# Goal for the floor chevrons: the nearest exit opening, except that the emergency key is the goal once revealed and not yet taken.
 func floor_hint_target() -> Vector3:
 	if not is_instance_valid(_player):
 		return Vector3.INF
-	if is_instance_valid(_key) and not (_player.has_method("has_emergency_key") and bool(_player.call("has_emergency_key"))):
+	if _key_revealed and is_instance_valid(_key) and not (_player.has_method("has_emergency_key") and bool(_player.call("has_emergency_key"))):
 		return _key.global_position
 	var from := Vector2(_player.global_position.x, _player.global_position.z)
 	var best := Vector3.INF
@@ -62,6 +65,11 @@ func floor_hint_target() -> Vector3:
 
 
 func _process(delta: float) -> void:
+	_elapsed += delta
+	if not _key_revealed and _elapsed >= KEY_REVEAL_SECONDS:
+		_key_revealed = true
+		if is_instance_valid(_key):
+			_key.call("reveal_arrow")
 	_scan_remaining -= delta
 	if _scan_remaining <= 0.0:
 		_scan_remaining = STAIR_REFRESH_SECONDS

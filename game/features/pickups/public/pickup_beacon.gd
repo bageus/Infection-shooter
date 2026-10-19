@@ -97,6 +97,12 @@ func _process(delta: float) -> void:
 		_arrow_material.albedo_color.a = lerpf(ARROW_MIN_ALPHA, 1.0, 0.5 + 0.5 * sin(_time * TAU / ARROW_BLINK_PERIOD))
 
 
+## Shows or hides the blinking arrow; a beacon built without one ignores the call.
+func set_arrow_visible(shown: bool) -> void:
+	if _arrow != null:
+		_arrow.visible = shown
+
+
 static func _glow_gradient() -> GradientTexture2D:
 	if _glow_texture == null:
 		var gradient := Gradient.new()
