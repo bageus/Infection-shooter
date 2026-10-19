@@ -29,7 +29,6 @@ static func antidote_preview(domain, tree) -> Dictionary:
 	var projected := TREE.new()
 	projected.learned = tree.learned.duplicate()
 	projected.locked = tree.locked.duplicate()
-	projected.peak_mutation = maxf(tree.peak_mutation, domain.mutation)
 	projected.reconcile(after)
 	var forgotten: Array[String] = []
 	var dormant: Array[String] = []

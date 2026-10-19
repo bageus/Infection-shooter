@@ -30,6 +30,7 @@ func _run() -> void:
 	_test_mutagen_pauses_during_control_loss()
 	_test_progression_budget_and_stages()
 	_test_retained_budget_and_preview()
+	_test_pinned_skill_refreshes_tree_on_antidote()
 	_test_control_ampule_compensation()
 	_test_path_feedback_without_spare_points()
 	_test_retired_wraparound_hybrid()
@@ -46,6 +47,21 @@ func _run() -> void:
 	quit(failures)
 
 
+func _test_pinned_skill_refreshes_tree_on_antidote() -> void:
+	# A pinned skill stays learned below its threshold, so the progress bar must still refresh.
+	var runtime := Runtime.new()
+	var refreshes := [0]
+	runtime.tree_changed.connect(func() -> void: refreshes[0] += 1)
+	runtime._domain.mutation = 30.0
+	_expect(runtime.upgrade_skill("muscle_memory"), "Pinned fixture learns a real skill")
+	runtime.toggle_skill_lock("muscle_memory")
+	var before: int = refreshes[0]
+	_expect(runtime.use_antidote(), "Antidote applies to a pinned skill")
+	_expect(runtime.skill_learned("muscle_memory") and not runtime.skill_requirements("muscle_memory")["path_reached"], "Pinned skill stays learned but its path is no longer reached")
+	_expect(refreshes[0] > before, "Antidote that drops mutation below a pinned skill's threshold refreshes the tree")
+	runtime.free()
+
+
 func _test_retained_budget_and_preview() -> void:
 	var runtime := Runtime.new()
 	runtime._domain.mutation = 30.0
@@ -53,15 +69,15 @@ func _test_retained_budget_and_preview() -> void:
 	var learned_before: Dictionary = runtime.tree.learned.duplicate()
 	var preview := runtime.antidote_preview()
 	_expect(runtime.tree.learned == learned_before and runtime.get_mutation() == 30.0, "Preview leaves live mutation/skills unchanged")
-	_expect(preview.forgotten == ["muscle_memory"] and preview.after == 20.0 and preview.points_after == 2, "Preview shows exact forgotten skill and refunded retained budget")
+	_expect(preview.forgotten == ["muscle_memory"] and preview.after == 20.0 and preview.points_after == 0, "Preview shows exact forgotten skill and the budget at the new mutation")
 	_expect(runtime.use_antidote(), "Runtime applies confirmed or emergency use")
 	_expect(runtime.mutation_points() == preview.points_after and not runtime.skill_learned("muscle_memory"), "Actual result equals preview")
 	for _i in 5:
 		runtime.absorb_mutagen(2.0)
 		runtime.use_antidote()
-	_expect(runtime.mutation_points() == 2, "Repeated antidote cycles cannot farm new budget")
-	runtime.tree.observe_mutation(100.0)
-	_expect(runtime.mutation_points() == 16, "Budget caps at16 and survives low mutation")
+	_expect(runtime.mutation_points() == 0, "Repeated antidote cycles cannot farm new budget: points follow the current mutation")
+	runtime._domain.mutation = 100.0
+	_expect(runtime.mutation_points() == 16, "Budget caps at 16 at full mutation")
 	runtime.free()
 
 
