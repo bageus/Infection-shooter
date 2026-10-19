@@ -32,6 +32,10 @@ class Visual extends RefCounted:
 	func dash_trail(_t: float) -> void: pass
 	func buff_ended(_id: String) -> void: pass
 
+class Breakable extends StaticBody3D:
+	var hits := 0
+	func take_melee_hit(_damage: float, _at: Vector3, _direction: Vector3) -> void: hits += 1
+
 class Bridge extends Node:
 	var player := Actor.new()
 	var runtime := RUNTIME.new()
@@ -72,10 +76,21 @@ func _victim(bridge: Bridge, at: Vector3) -> Victim:
 	bridge.enemies.append(enemy)
 	return enemy
 
+func _breakable(bridge: Bridge, at: Vector3) -> Breakable:
+	var body := Breakable.new()
+	var shape := CollisionShape3D.new()
+	var box := BoxShape3D.new()
+	box.size = Vector3(1, 2, 0.2)
+	shape.shape = box
+	body.add_child(shape)
+	bridge.add_child(body)
+	body.position = at
+	return body
+
 func _run() -> void:
 	_test_blood()
 	_test_lightning()
-	_test_strike()
+	await _test_strike()
 	_test_auras()
 	_test_dash()
 	print("Active mutation effects tests: %d failures" % failures)
@@ -118,8 +133,13 @@ func _test_strike() -> void:
 		var near_side := _victim(b, Vector3(1, 0, -0.1))
 		var distant := _victim(b, Vector3(0, 0, -3.01))
 		var wide_end := _victim(b, Vector3(1.4, 0, -2.9))
+		var glass := _breakable(b, Vector3(0, 1, -1.5))
+		var rear_glass := _breakable(b, Vector3(0, 1, 0.8))
+		var far_glass := _breakable(b, Vector3(0, 1, -3.5))
+		await physics_frame
 		ACTIVE.new(b).cast("power_strike" + ("_%d" % level if level > 1 else ""))
 		_expect(hit.total == float(20 + 10 * level) and wide_end.total == hit.total, "Power strike widens to3m and applies ranked damage")
+		_expect(glass.hits == 1 and rear_glass.hits == 0 and far_glass.hits == 0, "Power strike breaks one object in reach, not behind or beyond")
 		_expect(behind.total == 0.0 and near_side.total == 0.0 and distant.total == 0.0, "Power strike rejects rear, wide near-body and out-of-reach targets")
 		_expect(hit.push == (4.0 if level == 1 else 5.0) and hit.stun == (1.5 if level == 3 else 0.0), "Power strike exact push/stun")
 		b.free()
