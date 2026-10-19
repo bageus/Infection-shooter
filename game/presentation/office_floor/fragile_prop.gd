@@ -20,10 +20,13 @@ static func is_glassware(model_path: String) -> bool:
 
 
 ## Every visible piece flies apart, the body stops blocking, and its material decals are scattered.
-static func shatter(body: RigidBody3D, visual: Node3D, shapes: Array, damage: PROP_DAMAGE, floor_debris: FLOOR_DEBRIS, point: Vector3, direction: Vector3) -> void:
-	if not damage.shatter():
-		return
+## Returns true when the hit belongs to a fragile item, even if it was already broken.
+static func shatter(body: RigidBody3D, visual: Node3D, shapes: Array, damage: PROP_DAMAGE, floor_debris: FLOOR_DEBRIS, point: Vector3, direction: Vector3) -> bool:
 	var model_path: String = body.get("model_path")
+	if not applies(model_path):
+		return false
+	if not damage.shatter():
+		return true
 	var effects: Node3D = body.get("effects_root")
 	var glass := is_glassware(model_path)
 	floor_debris.emit(body, model_path, "shatter", point, direction)
@@ -42,3 +45,4 @@ static func shatter(body: RigidBody3D, visual: Node3D, shapes: Array, damage: PR
 		shape.set_deferred("disabled", true)
 	body.collision_layer = 0
 	body.freeze = true
+	return true

@@ -164,10 +164,7 @@ func get_loot_config() -> Dictionary:
 ## Plates can carry baked random fruit (plate_fruit_v1), set by the planner.
 func has_fruit() -> bool: return PLATE_FRUIT.applies(model_path)
 func get_fruit_config() -> Dictionary: return _fruit.config.duplicate()
-func configure_fruit(raw: Dictionary) -> void:
-	if has_fruit():
-		_fruit.configure(self, _geometry, raw)
-
+func configure_fruit(raw: Dictionary) -> void: _fruit.configure(self, _geometry, raw)
 
 func configure_loot_drop(drop_weapon: Callable) -> void:
 	_drop_weapon = drop_weapon
@@ -345,8 +342,7 @@ func take_projectile_hit(damage: float, hit_position: Vector3, _normal: Vector3,
 	if PAPER.is_paper(model_path) and not BOOK_STACK.contains(model_path):
 		_tear_paper(hit_position, direction)
 		return false
-	if damage > 0.0 and FRAGILE.applies(model_path):
-		FRAGILE.shatter(self, _visual, _shapes, _damage, _floor_debris, hit_position, direction)
+	if damage > 0.0 and FRAGILE.shatter(self, _visual, _shapes, _damage, _floor_debris, hit_position, direction):
 		return false
 	if damage > 0.0 and is_instance_valid(glass_debris_floor) and has_display():
 		glass_debris_floor.call("bake_display_hit", self, hit_position, _normal)

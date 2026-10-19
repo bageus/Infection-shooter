@@ -50,6 +50,8 @@ static func layout(count: int, seed_value: int) -> Array[Dictionary]:
 
 
 func configure(body: RigidBody3D, geometry: GEOMETRY, raw: Variant) -> void:
+	if not applies(str(body.get("model_path"))):
+		return
 	config = sanitize(raw)
 	if config["enabled"] and int(config["seed"]) == 0:
 		config["seed"] = randi_range(1, 2147483646)
