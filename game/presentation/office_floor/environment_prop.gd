@@ -248,6 +248,8 @@ func _ready() -> void:
 		IMPACT_SOUND.watch(self)
 	_geometry.shadows.configure(self, _visual, _shape_meshes, model_path)
 	set_notify_transform(true)
+	if wall_mounted:
+		preload("res://game/presentation/office_floor/wall_mount_clearance.gd").surface.call_deferred(self)
 
 
 # The desk lamp lights its own surroundings from under the shade.
