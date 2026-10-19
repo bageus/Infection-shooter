@@ -121,13 +121,14 @@ func _test_fragment_ignores_characters(stage: Node3D) -> void:
 
 
 func _test_expire_bakes_and_frees(stage: Node3D) -> void:
-	var piece := _fragment(stage, Vector3(5, 0.5, 5))
+	var piece := _fragment(stage, Vector3(5, 0.2, 5))
 	await physics_frame
+	piece.sleeping = true
 	var baked: Node = stage.get_node("FragmentRuntime").get("_baked")
 	var before: int = baked.call("count")
 	piece.call("expire")
 	await process_frame
-	_expect(baked.call("count") == before + 1, "An expired model fragment bakes into the floor.")
+	_expect(baked.call("count") == before + 1, "An expired model fragment resting on the floor bakes into it.")
 	_expect(not is_instance_valid(piece) or piece.is_queued_for_deletion(), "A baked fragment frees its body.")
 	await process_frame
 

@@ -28,6 +28,7 @@ func _run() -> void:
 	_check(hit_effects != null and hit_effects.get_children().any(func(n: Node) -> bool: return n.get_script() != null and str(n.get_script().resource_path).ends_with("extinguisher_burst.gd")), "The extinguisher rupture burst plays silently in the hidden viewport")
 	var blast := hit_effects.get_node_or_null("GrenadeExplosionVfx") if hit_effects != null else null
 	_check(blast != null and blast.get("muted") == true and blast.get_node("ImpactLight") != null, "A silent grenade blast (particles, smoke, light) plays in the hidden viewport")
+	_check(hit_effects != null and hit_effects.get_children().any(func(n: Node) -> bool: return n.get_child_count() == 2 and n.get_child(0) is MeshInstance3D and (n.get_child(0) as MeshInstance3D).mesh is CylinderMesh), "The floor danger zone (grenade and extinguisher warning ring) plays in the hidden viewport")
 	for i in 8:
 		await process_frame
 	_check(app.get_node_or_null("HitEffectWarmup") == null, "Hidden hit-effect viewport is freed after a few frames")

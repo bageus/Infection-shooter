@@ -20,7 +20,7 @@ static func spawn(parent: Node3D, world: World3D, point: Vector3, radius: float,
 	for mesh in meshes:
 		zone.add_child(mesh)
 	parent.add_child(zone)
-	zone.global_position = _floor_point(world, point) + Vector3.UP * LIFT
+	zone.global_position = floor_point(world, point) + Vector3.UP * LIFT
 	_set_strength(0.0, meshes)
 	var tween := zone.create_tween()
 	tween.tween_interval(delay)
@@ -31,7 +31,7 @@ static func spawn(parent: Node3D, world: World3D, point: Vector3, radius: float,
 
 
 ## The lowest surface under the impact: desk tops and props are passed through, so the zone lies on the floor.
-static func _floor_point(world: World3D, point: Vector3) -> Vector3:
+static func floor_point(world: World3D, point: Vector3) -> Vector3:
 	var exclude: Array[RID] = []
 	var floor_at := point
 	for _attempt in MAX_SURFACES:
