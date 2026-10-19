@@ -45,12 +45,13 @@ func _build(color: Color, glow_radius: float, arrow_height: float, glow_energy: 
 		_arrow_material = StandardMaterial3D.new()
 		_arrow_material.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
 		_arrow_material.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
+		_arrow_material.blend_mode = BaseMaterial3D.BLEND_MODE_ADD
 		_arrow_material.albedo_color = color
 		var head := CylinderMesh.new()
 		head.top_radius = 0.0
 		head.bottom_radius = 0.24
 		head.height = 0.36
-		head.radial_segments = 4
+		head.radial_segments = 12
 		head.rings = 1
 		head.material = _arrow_material
 		var head_node := _add(head, _arrow)
@@ -60,7 +61,7 @@ func _build(color: Color, glow_radius: float, arrow_height: float, glow_energy: 
 		shaft.top_radius = 0.08
 		shaft.bottom_radius = 0.08
 		shaft.height = 0.3
-		shaft.radial_segments = 4
+		shaft.radial_segments = 12
 		shaft.rings = 1
 		shaft.material = _arrow_material
 		_add(shaft, _arrow).position.y = 0.33

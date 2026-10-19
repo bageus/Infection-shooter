@@ -10,7 +10,7 @@ const BOB_AMPLITUDE := 0.22
 const BOB_SPEED := 2.4
 const BOB_PHASE := 0.7
 const ARM_LENGTH := 0.42
-const ARM_WIDTH := 0.14
+const ARM_WIDTH := 0.1
 const FLOOR_Y := 0.04
 const END_CLEARANCE := 0.6
 const COLOR := Color(0.35, 0.95, 0.8)
@@ -23,18 +23,18 @@ var _elapsed := 0.0
 
 
 func _ready() -> void:
-	var material := StandardMaterial3D.new()
-	material.albedo_color = COLOR
-	material.emission_enabled = true
-	material.emission = COLOR
-	material.emission_energy_multiplier = 1.2
-	material.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
-	material.cull_mode = BaseMaterial3D.CULL_DISABLED
 	var mesh := _chevron_mesh()
-	mesh.surface_set_material(0, material)
 	for index in CHEVRON_COUNT:
+		# Each chevron fades on its own, so a bright wave runs along the trail.
+		var material := StandardMaterial3D.new()
+		material.albedo_color = COLOR
+		material.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
+		material.blend_mode = BaseMaterial3D.BLEND_MODE_ADD
+		material.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
+		material.cull_mode = BaseMaterial3D.CULL_DISABLED
 		var chevron := MeshInstance3D.new()
 		chevron.mesh = mesh
+		chevron.material_override = material
 		chevron.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
 		add_child(chevron)
 		_chevrons.append(chevron)
@@ -68,6 +68,8 @@ func _process(delta: float) -> void:
 		var spot := from + direction * (distance + bob)
 		chevron.global_position = Vector3(spot.x, FLOOR_Y, spot.z)
 		chevron.rotation = Vector3(0.0, yaw, 0.0)
+		var wave := 0.5 + 0.5 * sin(_elapsed * BOB_SPEED - index * BOB_PHASE)
+		(chevron.material_override as StandardMaterial3D).albedo_color.a = lerpf(0.25, 1.0, wave)
 
 
 # Two thin arms meeting at a tip, lying flat on the floor and pointing down -Z.
