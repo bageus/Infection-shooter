@@ -111,7 +111,7 @@ func _test_tree_geometry() -> void:
 			var nearest := Geometry2D.get_closest_point_to_segment(circle[1], stem[1], stem[2])
 			_expect(nearest.distance_to(circle[1]) >= 41.0, "Circle does not sit on branch %d's stem" % stem[0])
 	var slope := rad_to_deg(atan2(TREE_CANVAS.RANK_STEP.y, TREE_CANVAS.RANK_STEP.x))
-	_expect(slope <= 40.0, "Branch stems lean at most 40 degrees")
+	_expect(slope >= 60.0 and slope < 90.0, "Branch stems are steep: between 60 and 90 degrees, never vertical")
 	for hybrid in 5:
 		var parents: Array = TREE_CANVAS.HYBRID_PARENTS[hybrid]
 		var left: Rect2 = canvas.label_rect(parents[0])
