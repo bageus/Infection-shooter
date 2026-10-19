@@ -30,6 +30,7 @@ func _run() -> void:
 	_test_mutagen_pauses_during_control_loss()
 	_test_progression_budget_and_stages()
 	_test_retained_budget_and_preview()
+	_test_pinned_skill_refreshes_tree_on_antidote()
 	_test_control_ampule_compensation()
 	_test_path_feedback_without_spare_points()
 	_test_retired_wraparound_hybrid()
@@ -44,6 +45,21 @@ func _run() -> void:
 	else:
 		push_error("T001 infection domain tests failed: %d failure(s)." % failures)
 	quit(failures)
+
+
+func _test_pinned_skill_refreshes_tree_on_antidote() -> void:
+	# A pinned skill stays learned below its threshold, so the progress bar must still refresh.
+	var runtime := Runtime.new()
+	var refreshes := [0]
+	runtime.tree_changed.connect(func() -> void: refreshes[0] += 1)
+	runtime._domain.mutation = 30.0
+	_expect(runtime.upgrade_skill("muscle_memory"), "Pinned fixture learns a real skill")
+	runtime.toggle_skill_lock("muscle_memory")
+	var before: int = refreshes[0]
+	_expect(runtime.use_antidote(), "Antidote applies to a pinned skill")
+	_expect(runtime.skill_learned("muscle_memory") and not runtime.skill_requirements("muscle_memory")["path_reached"], "Pinned skill stays learned but its path is no longer reached")
+	_expect(refreshes[0] > before, "Antidote that drops mutation below a pinned skill's threshold refreshes the tree")
+	runtime.free()
 
 
 func _test_retained_budget_and_preview() -> void:
