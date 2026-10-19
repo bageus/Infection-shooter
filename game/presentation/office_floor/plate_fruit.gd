@@ -1,11 +1,9 @@
 extends RefCounted
-## Fruit baked onto a plate prop (plate_fruit_v1): one body, random seeded layout, scatters when shot.
+## Fruit baked onto a plate prop (plate_fruit_v1): one body and a random seeded layout.
+## The plate breaks on its first hit and the fruit flies apart with it (environment_prop.gd).
 ## Authored config {"enabled": bool, "count": 1..5, "seed": int}; a plate without fruit stays as before.
 
-const DAMAGE := preload("res://game/presentation/office_floor/environment_damage.gd")
 const GEOMETRY := preload("res://game/presentation/office_floor/environment_prop_geometry.gd")
-const PROP_DAMAGE := preload("res://game/features/combat/public/prop_damage_state.gd")
-const SFX := preload("res://game/core/audio/public/sound_events.gd")
 const MODEL_DIR := "res://models/objects/enviroments/09/"
 ## Only the flat round plate carries fruit; the platter model already has its own.
 const PLATES: Array[String] = ["09_fruit_plate_2.glb"]
@@ -17,7 +15,6 @@ const DISH_HEIGHT := 0.015
 const NODE_NAME := "Fruit"
 
 var config := {"enabled": false, "count": 3, "seed": 0}
-var _spent := false
 
 
 static func applies(model_path: String) -> bool:
@@ -65,7 +62,7 @@ func build(visual: Node3D, model_path: String) -> void:
 	var old := visual.get_node_or_null(NODE_NAME)
 	if old != null:
 		old.free()
-	if not config["enabled"] or _spent or not applies(model_path):
+	if not config["enabled"] or not applies(model_path):
 		return
 	var holder := Node3D.new()
 	holder.name = NODE_NAME
@@ -79,40 +76,3 @@ func build(visual: Node3D, model_path: String) -> void:
 		pivot.rotation.y = float(item["yaw"])
 		pivot.add_child(packed.instantiate())
 		holder.add_child(pivot)
-
-
-## A shot plate with fruit either breaks (everything flies apart) or flips; the fruit always scatters.
-## Returns true when this hit was consumed.
-func hit(body: RigidBody3D, geometry: GEOMETRY, damage_state: PROP_DAMAGE, point: Vector3, direction: Vector3) -> bool:
-	if _spent or not config["enabled"] or geometry.visual == null or damage_state.broken:
-		return false
-	var holder := geometry.visual.get_node_or_null(NODE_NAME) as Node3D
-	if holder == null:
-		return false
-	_spent = true
-	var breaks := randf() < 0.5
-	var index := 0
-	for child in geometry.visual.find_children("*", "MeshInstance3D", true, false):
-		var mesh := child as MeshInstance3D
-		if mesh.mesh != null and mesh.is_visible_in_tree() and (breaks or holder.is_ancestor_of(mesh)):
-			DAMAGE.spawn_piece(body, mesh, null, 0, index, direction, point, true)
-			index += 1
-	if breaks:
-		damage_state.broken = true
-		var world: Variant = body.get("effects_root")
-		SFX.play(world if is_instance_valid(world) else body.get_parent(), &"glass_break", point)
-		geometry.visual.hide()
-		for shape: CollisionShape3D in geometry.shapes:
-			shape.set_deferred("disabled", true)
-		body.collision_layer = 0
-		body.freeze = true
-		return true
-	holder.hide()
-	holder.queue_free()
-	geometry.rebuild(body)
-	var side := direction.cross(Vector3.UP)
-	body.freeze = false
-	body.sleeping = false
-	body.apply_central_impulse((Vector3.UP * 1.6 + direction.normalized() * 0.6) * body.mass)
-	body.apply_torque_impulse(side.normalized() * body.mass * 0.2 if side.length() > 0.01 else Vector3.RIGHT * body.mass * 0.2)
-	return true
