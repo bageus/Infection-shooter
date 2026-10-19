@@ -38,6 +38,9 @@
     "mission_wiring_v1": {
       "configure_world": "configure_world(container: Node3D, impacts: Node) -> void"
     },
+    "floor_debris_casing_v1": {
+      "configure_floor_debris": "configure_floor_debris(floor_view: Node3D) -> void; landed casings call floor.stamp_casing_debris(Vector2) and remove their body when accepted"
+    },
     "grenade_explosion_v2": "explode(projectile, location, normal, contact, container: Node3D, impacts: Node) -> void",
     "impact_surface_v1": {
       "resolve_surface": "resolve_surface(collider: Node, point: Vector3, direction: Vector3) -> Dictionary {position, normal, anchor: MeshInstance3D}, empty when no visible triangle is hit",

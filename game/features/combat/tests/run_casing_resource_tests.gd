@@ -43,6 +43,7 @@ func _run() -> void:
 	await process_frame
 	await process_frame
 	await _check_landed_casing_freezes()
+	await _check_landed_casing_bakes_onto_floor()
 	print("Casing resource tests: %d failures" % failures)
 	quit(0 if failures == 0 else 1)
 
@@ -69,6 +70,38 @@ func _check_landed_casing_freezes() -> void:
 		await physics_frame
 	_check(body.freeze, "A casing that has landed and stopped freezes in place")
 	_check(body.global_position.y < .05, "A frozen casing rests on the floor")
+	stage.queue_free()
+	await process_frame
+
+func _check_landed_casing_bakes_onto_floor() -> void:
+	var stage := Node3D.new()
+	root.add_child(stage)
+	var floor_body := StaticBody3D.new()
+	var floor_shape := CollisionShape3D.new()
+	var box := BoxShape3D.new()
+	box.size = Vector3(10, 1, 10)
+	floor_shape.shape = box
+	floor_body.add_child(floor_shape)
+	floor_body.position = Vector3(0, -0.5, 0)
+	stage.add_child(floor_body)
+	var stub := GDScript.new()
+	stub.source_code = "extends Node3D\nvar stamps := []\nfunc stamp_casing_debris(at: Vector2) -> bool:\n\tstamps.append(at)\n\treturn true\n"
+	stub.reload()
+	var floor_view: Node3D = stub.new()
+	stage.add_child(floor_view)
+	var service := CASINGS.new()
+	stage.add_child(service)
+	service.configure_world(stage, null)
+	service.configure_floor_debris(floor_view)
+	service.spawn_casing(MODEL, Transform3D(Basis.IDENTITY, Vector3(0, 1, 0)), .01, null, &"")
+	var body: RigidBody3D = service.get("_casings")[0]
+	for frame in 1200:
+		if (service.get("_casings") as Array).is_empty():
+			break
+		await physics_frame
+	_check((service.get("_casings") as Array).is_empty(), "A landed casing leaves the live casing list once baked")
+	_check(not is_instance_valid(body) or body.is_queued_for_deletion(), "A baked casing removes its physical body")
+	_check((floor_view.get("stamps") as Array).size() == 1, "A baked casing stamps the floor exactly once")
 	stage.queue_free()
 	await process_frame
 

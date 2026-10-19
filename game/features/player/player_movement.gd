@@ -237,6 +237,11 @@ func select_weapon_slot(index: int) -> bool:
 	return true
 
 
+# Public scene wiring v1 for the office floor; forwards to the spent casing pool.
+func configure_floor_debris(floor_view: Node3D) -> void:
+	$AimPivot/SpentCasings.call("configure_floor_debris", floor_view)
+
+
 # Public scene wiring v1; owned by the mission composition.
 func configure_world(container: Node3D, impacts: Node) -> void:
 	effects_root = container
