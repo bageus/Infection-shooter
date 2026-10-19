@@ -3,6 +3,7 @@ extends RefCounted
 
 const LOOT_DROP := preload("res://game/features/pickups/public/loot_drop.gd")
 const LOOT_CONFIG := preload("res://game/features/pickups/public/loot_config.gd")
+const ENEMY_DIFFICULTY := preload("res://game/features/infected/public/enemy_difficulty.gd")
 var drop_weapon: Callable
 var _owner: Node
 var _base := {}
@@ -31,16 +32,21 @@ func set_stats(config: Dictionary) -> void:
 	var values := LOOT_CONFIG.sanitize_stats(config)
 	_owner.set_meta(&"planning_enemy_stats", values)
 	var ratio: float = _owner.health / _owner.max_health if _owner.max_health > 0.0 else 1.0
-	_owner.max_health = float(_base["health"]) * float(values["health"]) / 100.0
+	_owner.max_health = float(_base["health"]) * ENEMY_DIFFICULTY.percent(float(values["health"])) / 100.0
 	_owner.health = _owner.max_health * ratio
-	_owner.attack_damage = float(_base["damage"]) * float(values["damage"]) / 100.0
-	_owner.obstacle_damage = float(_base["obstacle"]) * float(values["damage"]) / 100.0
+	_owner.attack_damage = float(_base["damage"]) * damage_percent() / 100.0
+	_owner.obstacle_damage = float(_base["obstacle"]) * damage_percent() / 100.0
+
+
+## Damage percent this infected deals after difficulty, for attacks scaled outside the stats.
+func damage_percent() -> float:
+	return ENEMY_DIFFICULTY.percent(float(stats()["damage"]))
 
 
 ## Applies stats stored on the node (map load, baked scene) once it is ready.
 func apply_saved_stats() -> void:
-	if _owner.has_meta(&"planning_enemy_stats"):
-		set_stats(_owner.get_meta(&"planning_enemy_stats"))
+	if _owner.has_meta(&"planning_enemy_stats") or ENEMY_DIFFICULTY.level != ENEMY_DIFFICULTY.NORMAL:
+		set_stats(stats())
 
 
 func release(world: Node, at: Vector3) -> void:
