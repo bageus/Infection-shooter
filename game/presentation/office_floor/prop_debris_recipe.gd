@@ -33,7 +33,9 @@ static func for_model(model: String, event: String) -> Array[String]:
 		return _mix(["wood", "paper", "plastic", "fabric", "extinguisher"], [6, 3, 1, 1, 1])
 	if has_any(label, ["partition", "divider", "board_stand"]):
 		return _mix(["wood", "paper", "fabric", "plastic"], [5, 3, 3, 1])
-	if has_any(label, ["file_cabinet", "drawer_cabinet", "locker"]):
+	if has_any(label, ["file_cabinet", "drawer_cabinet"]):
+		return _mix(["wood", "paper", "plastic"], [6, 3, 1])
+	if has_any(label, ["locker"]):
 		return _mix(["paper", "plastic", "wood"], [8, 3, 1])
 	if has_any(label, ["wood", "simple_chair", "shelf", "capboard", "cupboard"]):
 		return _mix(["wood", "paper", "plastic"], [8, 3, 1])
