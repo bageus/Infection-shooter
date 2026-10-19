@@ -60,7 +60,12 @@ const FIRE_DUCK_RECOVER := 0.2
 var _cooldown_remaining: float = 0.0
 var _reload_remaining: float = 0.0
 var _magazine_ammo: int
-var _reserve_ammo: int
+## Reserve ammo for one ammo type; weapons that share a type hold the same object.
+class AmmoReserve extends RefCounted:
+	var amount := 0
+	var capacity := 0
+
+var _reserve: AmmoReserve = AmmoReserve.new()
 var _reloading: bool = false
 var _burst_shots: int = 0
 var _last_shot_time: float = -100.0
@@ -81,7 +86,8 @@ var _duck_db := 0.0
 
 func _ready() -> void:
 	_magazine_ammo = magazine_size
-	_reserve_ammo = starting_reserve_ammo
+	_reserve.amount = starting_reserve_ammo
+	_reserve.capacity = max_reserve_ammo
 	var model := get_node_or_null("Body") as Node3D
 	if model != null:
 		_authored_muzzle = ART_SETUP.configure(self, model, weapon_name in ["SHOTGUN", "GRENADE LAUNCHER", "AK", "M4", "SNIPER RIFLE", "MINIGUN"])
@@ -129,17 +135,17 @@ func _process(delta: float) -> void:
 	_reload_remaining -= delta
 	if _reload_remaining > 0.0: return
 	if shotgun_shell_reload:
-		if _reserve_ammo > 0 and _magazine_ammo < magazine_size:
+		if _reserve.amount > 0 and _magazine_ammo < magazine_size:
 			_magazine_ammo += 1
-			_reserve_ammo -= 1
+			_reserve.amount -= 1
 			_reload_remaining = reload_time
-			if _reserve_ammo > 0 and _magazine_ammo < magazine_size:
+			if _reserve.amount > 0 and _magazine_ammo < magazine_size:
 				_play_reload_sound()
 		else: _reloading = false
 	else:
-		var loaded := mini(magazine_size - _magazine_ammo, _reserve_ammo)
+		var loaded := mini(magazine_size - _magazine_ammo, _reserve.amount)
 		_magazine_ammo += loaded
-		_reserve_ammo -= loaded
+		_reserve.amount -= loaded
 		_reloading = false
 func wants_continuous_fire() -> bool: return fire_mode == "auto"
 func try_fire() -> bool:
@@ -166,7 +172,7 @@ func try_fire_at(target_point: Vector3) -> bool:
 		_spin_hold = SPIN_HOLD
 		if _spin < 1.0: return false
 	if _cooldown_remaining > 0.0 or _reloading or bullet_scene == null or not is_instance_valid(effects_root): return false
-	if (_reserve_ammo if direct_reserve_feed else _magazine_ammo) <= 0:
+	if (_reserve.amount if direct_reserve_feed else _magazine_ammo) <= 0:
 		_dry_fire()
 		# The click of an empty gun starts a reload when there is ammo to load.
 		start_reload()
@@ -194,7 +200,7 @@ func try_fire_at(target_point: Vector3) -> bool:
 			bullet.call("_handle_hit", obstruction["collider"], obstruction["position"], obstruction["normal"], int(obstruction.get("shape", -1)))
 			bullet.queue_free()
 	if direct_reserve_feed:
-		_reserve_ammo -= 1
+		_reserve.amount -= 1
 	else:
 		_magazine_ammo -= 1
 	_show_muzzle_flash()
@@ -240,7 +246,7 @@ func _show_muzzle_flash() -> void:
 
 
 func start_reload() -> void:
-	if direct_reserve_feed or _reloading or _reserve_ammo <= 0 or _magazine_ammo >= magazine_size: return
+	if direct_reserve_feed or _reloading or _reserve.amount <= 0 or _magazine_ammo >= magazine_size: return
 	_reloading = true
 	_reload_remaining = reload_time
 	_play_reload_sound()
@@ -249,13 +255,16 @@ func cancel_reload() -> void:
 	if is_instance_valid(_reload_sound):
 		_reload_sound.queue_free()
 func get_weapon_name() -> String: return weapon_name
-func get_magazine_ammo() -> int: return _reserve_ammo if direct_reserve_feed else _magazine_ammo
-func get_reserve_ammo() -> int: return 0 if direct_reserve_feed else _reserve_ammo
+func get_magazine_ammo() -> int: return _reserve.amount if direct_reserve_feed else _magazine_ammo
+func get_reserve_ammo() -> int: return 0 if direct_reserve_feed else _reserve.amount
 func is_reloading() -> bool: return _reloading
+## Draws this weapon's reserve from `other`, so both weapons spend and refill one pool.
+func share_reserve_with(other: Node) -> void:
+	_reserve = other.get("_reserve")
 func add_reserve_ammo(amount: int) -> int:
-	var previous := _reserve_ammo
-	_reserve_ammo = mini(max_reserve_ammo, _reserve_ammo + maxi(amount, 0))
-	return _reserve_ammo - previous
+	var previous := _reserve.amount
+	_reserve.amount = mini(_reserve.capacity, _reserve.amount + maxi(amount, 0))
+	return _reserve.amount - previous
 func add_magazine_ammo(amount: int) -> int:
 	if direct_reserve_feed:
 		return add_reserve_ammo(amount)

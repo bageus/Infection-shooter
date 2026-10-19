@@ -7,6 +7,8 @@ owner: AI
 updated: 2026-10-18
 ---
 
+19.10.2026 (патроны АК и M4 — общий запас, прямой запрос владельца Vadim, выбор «Общий запас»): АК и M4 используют один резерв патронов: `prototype_rifle.gd` держит резерв в объекте `AmmoReserve`, `share_reserve_with` связывает M4 с АК в `player_movement.gd` (запас и предел берутся у АК: 120/300, стартовые 144/360 у M4 больше не применяются). Подбор ящика 12_ammo_automate пополняет общий запас. GAME_SPEC строки 445 и 463 обновлены. Проверка: run_ammo_box_tests (новый тест общего резерва) 0 failures, run_new_weapon_tests 0 failures, run_planner_loot_tests 0 failures, validate_game_spec/workflow/project PASS. Native и визуальная проверка не запускались.
+
 19.10.2026 (рамка антидота — прямой запрос владельца): после потери контроля полупрозрачная рамка стягивается с краёв экрана на ячейку шприца с антидотом, держится около 2.5 с и медленно гаснет. N-я потеря проигрывает рамку N раз подряд; после третьей потери подсказок нет, без антидотов не показывается. Private antidote_hint_frame.gd, HUD только считает потери и передаёт ячейку; gameplay/API не менялись. Тесты run_antidote_hint_tests PASS, существующие HUD/control-loss suites PASS, validators PASS. Скриншоты кадров tools/capture_antidote_hint.gd. Следующее действие — PR, CI и слияние по правилу проекта.
 
 19.10.2026 (наклон игровой камеры — прямой запрос владельца): наклон player camera зафиксирован -37.3° в player.tscn и camera_adjustment PITCH; Alt+ЛКМ меняет только поворот, сохранённый pitch игнорируется. Тесты run_shooting_camera_tests и run_gameplay_camera_tuning_tests PASS на Godot4.7.2 headless, import exit0. Планировщик не менялся. Следующее действие — gates, PR и слияние по правилу проекта.

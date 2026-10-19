@@ -38,6 +38,7 @@ func _run() -> void:
 	_test_weapon_names_match_weapon_scenes()
 	_test_automate_box_feeds_ak_or_m4()
 	_test_sniper_and_minigun_boxes_feed_their_weapon()
+	_test_ak_and_m4_share_one_reserve()
 	_test_full_weapon_refuses_box()
 	print("Ammo box tests: %d failure(s)." % failures)
 	quit(failures)
@@ -84,6 +85,20 @@ func _test_sniper_and_minigun_boxes_feed_their_weapon() -> void:
 	minigun.emit_signal("body_entered", collector)
 	_expect(collector.received == ["SNIPER RIFLE:8", "MINIGUN:100"], "Sniper and minigun boxes reach their weapons.")
 	collector.queue_free()
+
+
+func _test_ak_and_m4_share_one_reserve() -> void:
+	var ak := (WEAPON_SCENES["AK"] as PackedScene).instantiate() as Node3D
+	var m4 := (WEAPON_SCENES["M4"] as PackedScene).instantiate() as Node3D
+	root.add_child(ak)
+	root.add_child(m4)
+	m4.call("share_reserve_with", ak)
+	var before := int(ak.call("get_reserve_ammo"))
+	m4.call("add_reserve_ammo", 30)
+	_expect(int(ak.call("get_reserve_ammo")) == before + 30, "An M4 pickup refills the AK reserve.")
+	_expect(m4.call("get_reserve_ammo") == ak.call("get_reserve_ammo"), "AK and M4 report one reserve.")
+	ak.queue_free()
+	m4.queue_free()
 
 
 func _test_full_weapon_refuses_box() -> void:
