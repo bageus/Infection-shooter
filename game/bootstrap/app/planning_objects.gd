@@ -1,5 +1,6 @@
 extends Node
 const BLOOD_PLACEMENT := preload("res://game/bootstrap/app/planning_blood_placement.gd")
+const TILT := preload("res://game/bootstrap/app/planning_tilt.gd")
 
 
 var player_spawn_defined = false
@@ -10,6 +11,8 @@ var selected_entry: Dictionary = {}
 var preview: Node3D
 var selected: Node3D
 var rotation_y = 0.0
+# Palette preview lay pose below its yaw (see planning_tilt.gd).
+var pose := Basis.IDENTITY
 var last_mouse_world = Vector3.ZERO
 var placed: Array[Node3D] = []
 # Nodes clear_layout leaves alone once (planner restore reuses untouched ones).
@@ -35,6 +38,7 @@ func _on_palette_selected(index: int) -> void:
 	selected_kind = str(entry.get("kind", ""))
 	selected_entry = entry
 	rotation_y = 0.0
+	pose = Basis.IDENTITY
 	_select(null)
 	_rebuild_preview()
 	if selected_kind == "light":
@@ -100,6 +104,7 @@ func _reset_selection() -> void:
 	selected_kind = ""
 	selected_entry = {}
 	rotation_y = 0.0
+	pose = Basis.IDENTITY
 	_clear_preview()
 	_select(null)
 	controls.palette.deselect_all()
@@ -227,10 +232,10 @@ func _update_preview(screen_pos: Vector2) -> void:
 		preview.hide()
 		return
 	preview.show()
-	preview.rotation_degrees.y = rotation_y
+	TILT.write(preview, deg_to_rad(rotation_y), pose)
 	preview.global_position = geometry._snap_position_for(preview, world)
 	controls._apply_special_default_height(preview, _selected_kind())
-	preview.rotation_degrees.y = rotation_y
+	_orient(preview, world.y)
 	geometry._apply_wall_mount(preview)
 	controls.DECOR_POSES.place(preview)
 	BLOOD_PLACEMENT.preview_projection(preview)
@@ -275,7 +280,7 @@ func _place_selected(screen_pos: Vector2) -> void:
 		controls.status.text = "Aim at a wall to place this wall-mounted object."
 		node.queue_free()
 		return
-	node.rotation_degrees.y = rotation_y
+	TILT.write(node, deg_to_rad(rotation_y), pose)
 	node.global_position = geometry._snap_position_for(node, world)
 	controls._apply_special_default_height(node, kind)
 	if kind == "enemy":
@@ -283,7 +288,7 @@ func _place_selected(screen_pos: Vector2) -> void:
 		node.set_meta("planning_actor_kind", "enemy")
 		if node.has_method("watch_target"):
 			node.call("watch_target", session.main_player)
-	node.rotation_degrees.y = rotation_y
+	_orient(node, world.y)
 	geometry._apply_wall_mount(node)
 	controls.DECOR_POSES.place(node)
 	BLOOD_PLACEMENT.apply_probe(node, preview)
@@ -359,10 +364,34 @@ func _sync_workstations() -> void:
 func _rotate_selected(amount: float) -> void:
 	if selected != null:
 		session.edit_history.call("record_transform", selected)
-		selected.rotation_degrees.y = fmod(selected.rotation_degrees.y + amount + 360.0, 360.0)
+		selected.global_rotate(Vector3.UP, deg_to_rad(amount))
 	elif preview != null:
 		rotation_y = fmod(rotation_y + amount + 360.0, 360.0)
-		preview.rotation_degrees.y = rotation_y
+		TILT.write(preview, deg_to_rad(rotation_y), pose)
+	_update_status()
+
+
+## Apply yaw and the palette pose; a laid object is grounded on the surface it is aimed at.
+func _orient(node: Node3D, surface_y: float) -> void:
+	TILT.write(node, deg_to_rad(rotation_y), pose)
+	if not pose.is_equal_approx(Basis.IDENTITY):
+		TILT.ground(node, geometry._combined_aabb(node), surface_y)
+
+
+## Lay the object on its side (along_x: about X, else Z), keeping its lowest point on the surface it rests on.
+func tilt_object(node: Node3D, along_x: bool) -> void:
+	var bottom := TILT.bottom_y(node, geometry._combined_aabb(node))
+	TILT.turn(node, along_x)
+	TILT.ground(node, geometry._combined_aabb(node), bottom)
+
+
+func _tilt_selected(along_x: bool) -> void:
+	if selected != null:
+		session.edit_history.call("record_transform", selected)
+		tilt_object(selected, along_x)
+	elif preview != null:
+		tilt_object(preview, along_x)
+		pose = TILT.pose_of(preview)
 	_update_status()
 
 

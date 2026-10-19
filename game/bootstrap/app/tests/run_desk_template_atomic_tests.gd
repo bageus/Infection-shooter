@@ -89,6 +89,7 @@ func _run() -> void:
 	await _test_valid_replacement(true)
 	await _test_valid_replacement(false, true)
 	await _test_empty_replacement()
+	await _test_tilt_round_trip()
 	_test_save_preserves_valid_file()
 	DirAccess.remove_absolute(PATH)
 	print("Desk template atomic tests: %d failures (%d invalid payloads)" % [failures, bad.size()])
@@ -237,6 +238,27 @@ func _test_empty_replacement() -> void:
 	ACTIONS.load_selected(mode)
 	_expect(mode.failures.is_empty() and original.is_queued_for_deletion(), "Empty template intentionally clears this desk.")
 	_expect(mode.zones.is_empty() and mode.zone_index == -1 and mode.planner.placed == [unrelated], "Intentional clearing preserves unrelated objects.")
+	await _clear()
+
+
+## A laid item keeps its tilt and yaw through save, file load and preparation.
+func _test_tilt_round_trip() -> void:
+	_start()
+	var data := _payload()
+	data.items[0].merge({"tilt_x": 1.2, "tilt_z": -0.6}, true)
+	_expect(SCHEMA.valid(data, "office_desk_2"), "Tilt angles are valid template item data.")
+	var bad := _payload()
+	bad.items[0].tilt_z = "bad"
+	_expect(not SCHEMA.valid(bad, "office_desk_2"), "Non-numeric tilt is refused.")
+	_expect(FILES.save("office_desk_2", "atomic_regression", data), "Tilted template is written.")
+	var saved := FILES.load(PATH, "office_desk_2")
+	_expect(not saved.is_empty() and is_equal_approx(float(saved.items[0].tilt_x), 1.2) and is_equal_approx(float(saved.items[0].tilt_z), -0.6), "Saved tilt is read back from the template file.")
+	var prepared := ACTIONS._prepare(mode, saved)
+	_expect(not prepared.is_empty(), "Tilted template is prepared for placement.")
+	if not prepared.is_empty():
+		var object: Node3D = prepared.items[0]
+		_expect(is_equal_approx(object.rotation.x, 1.2) and is_equal_approx(object.rotation.z, -0.6), "Loaded template restores the saved lay.")
+		_expect(is_equal_approx(object.rotation.y, mode.desk.rotation.y + .4), "Loaded lay keeps the saved yaw relative to the desk.")
 	await _clear()
 
 

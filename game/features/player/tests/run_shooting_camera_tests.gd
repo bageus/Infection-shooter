@@ -106,7 +106,7 @@ func _test_adjustment() -> void:
 	player.set_physics_process(false)
 	player.set_camera_adjustment({"yaw": 125.5, "pitch": -61.25, "distance": 15.0})
 	var view: Dictionary = player.get_camera_adjustment()
-	_check(absf(view.yaw - 125.5) < 0.001 and absf(view.pitch + 61.25) < 0.001, "Camera angles round-trip in degrees")
+	_check(absf(view.yaw - 125.5) < 0.001 and absf(view.pitch + 37.3) < 0.001, "Camera yaw round-trips in degrees and pitch stays fixed at -37.3")
 	_check(is_equal_approx(view.distance, 15.0), "Manual distance round-trips")
 	_check(player.camera.position.normalized().dot(player.camera.basis.z) > 0.9999, "Orbit keeps the player at its focus")
 	player._update_camera(0.016)
@@ -119,6 +119,6 @@ func _test_adjustment() -> void:
 	_check(player.get_camera_adjustment() == view, "Incomplete preferences preserve defaults")
 	player.set_camera_adjustment({"yaw": 720.0, "pitch": 1000.0, "distance": 999.0})
 	view = player.get_camera_adjustment()
-	_check(is_zero_approx(view.yaw) and absf(view.pitch - 80.0) < 0.001 and view.distance == player.camera_max_distance, "Preferences clamp to safe bounds")
+	_check(is_zero_approx(view.yaw) and absf(view.pitch + 37.3) < 0.001 and view.distance == player.camera_max_distance, "Preferences clamp yaw and distance; pitch stays fixed")
 	player.queue_free()
 	await process_frame

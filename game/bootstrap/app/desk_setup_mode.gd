@@ -272,6 +272,9 @@ func handle_input(event: InputEvent) -> bool:
 			dragged = null
 			_refresh_zone_items()
 			return true
+		if event.keycode in [KEY_T, KEY_Y] and dragged != null:
+			planner.objects.tilt_object(dragged, event.keycode == KEY_T)
+			return true
 		if zone_index >= 0 and event.keycode in [KEY_LEFT, KEY_RIGHT, KEY_UP, KEY_DOWN]:
 			var direction := Vector2.ZERO
 			if event.keycode == KEY_LEFT: direction.x = -0.1

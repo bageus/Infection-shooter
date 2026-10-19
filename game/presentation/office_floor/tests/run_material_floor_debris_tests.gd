@@ -91,6 +91,8 @@ func _test_recipes() -> void:
 	for model: String in cases:
 		var recipe := RECIPES.for_model(model, "break")
 		_check(cases[model] in recipe and recipe.size() <= 12, "%s has bounded material mix" % model)
+	var cabinet := RECIPES.for_model("03_file_cabinet_largest", "break")
+	_check(cabinet.count("wood") > cabinet.count("paper"), "Wooden file cabinets break into mostly wood, then paper")
 	_check(RECIPES.for_model("metal_safe", "break").is_empty(), "Unknown metal does not invent wood")
 	_check(RECIPES.for_model("09_fire_extinguisher", "break").is_empty(), "Extinguisher needs an actual rupture")
 	_check(RECIPES.for_model("09_fire_extinguisher", "rupture").count("extinguisher") == 3, "Rupture adds few red pieces")

@@ -3,6 +3,7 @@ const SFX := preload("res://game/core/audio/public/sound_events.gd")
 
 const DAMAGE = preload("res://game/presentation/office_floor/environment_damage.gd")
 const CRACKS = preload("res://game/presentation/office_floor/glass_crack_marks.gd")
+const FRESNEL = preload("res://game/presentation/office_floor/glass_fresnel_material.gd")
 
 @export var max_health := 28.0
 @export var hide_with_glass: PackedStringArray = PackedStringArray()
@@ -50,6 +51,7 @@ func configure_player(actor: Node3D) -> void:
 func _ready() -> void:
 	_health = max_health
 	_cracks_needed = randi_range(cracks_before_break.x, cracks_before_break.y)
+	FRESNEL.apply(get_parent().get_node_or_null("Visual"))
 	_collect_glass(get_parent().get_node_or_null("Visual"))
 	if blinds_pass_through:
 		_collect_blinds(get_parent().get_node_or_null("Visual"))
