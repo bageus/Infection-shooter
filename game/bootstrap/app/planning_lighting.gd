@@ -21,7 +21,11 @@ var _game_lighting := true
 # Compatibility renders only a fixed number of lights per frame and silently drops
 # the rest, so only the lamps nearest to the camera are lit (and shadowed).
 const MAX_LIGHTS := 28
-const MAX_SHADOW_LIGHTS := 6
+## Every lit lamp casts a shadow, but only walls cast it (shadow_caster_mask), so the pass stays
+## cheap and the light stops at walls without touching the lamp angle.
+const MAX_SHADOW_LIGHTS := MAX_LIGHTS
+## Visual layer carrying wall meshes for lamp shadows; must match planner_light.WALL_CASTER_LAYER.
+const WALL_CASTER_LAYER := 1 << 19
 const REFRESH_SECONDS := 0.15
 ## A lamp is lit while its light sphere (grown by a margin) touches the view, so a lamp
 ## switches on before it appears: ENTER_MARGIN covers a fast camera turn over one refresh,
@@ -33,11 +37,6 @@ const LEAVE_MARGIN := 9.0
 const POOL_RADIUS := 2.5
 const POOL_STRENGTH := 0.5
 const POOL_HEIGHT := 0.03
-## A lamp without a shadow cannot be stopped by a wall, so its cone is narrowed (and its pool shrunk)
-## to the nearest wall around it. Probed once per lamp position, at wall height.
-const WALL_PROBE_HEIGHT := 1.4
-const WALL_PROBE_REACH := 4.0
-var _wall_gaps := {}
 var _pool: MultiMeshInstance3D
 var shadows_allowed := true
 var _refresh_left := 0.0
@@ -184,10 +183,7 @@ func refresh_light_budget(capture_inputs: bool = true) -> void:
 			var offset: Vector3 = at - focus
 			offset.y = 0.0
 			# Lamps on screen come first; the focus distance only orders them past the budget.
-			# A shadowed lamp that stays on screen keeps its slot so its look never changes.
-			var keeps_shadow := seen and _shadow_owners.has(id)
-			ranked.append({"node": lamp, "seen": seen, "keeps": keeps_shadow,
-				"rank": -1.0 if keeps_shadow else offset.length_squared() + (0.0 if seen else 1.0e9)})
+			ranked.append({"node": lamp, "seen": seen, "rank": offset.length_squared() + (0.0 if seen else 1.0e9)})
 	ranked.sort_custom(func(a: Dictionary, b: Dictionary) -> bool: return a.rank < b.rank)
 	var used := 0
 	var shadowed := 0
@@ -197,9 +193,7 @@ func refresh_light_budget(capture_inputs: bool = true) -> void:
 		var lamp: Node = entry.node
 		var cost: int = lamp.call("get_light_cost")
 		var lit := used + cost <= MAX_LIGHTS
-		# Shadows are handed out only to lamps that were off screen at the last refresh.
-		var shadow: bool = lit and shadows_allowed and shadowed + cost <= MAX_SHADOW_LIGHTS \
-			and (entry.keeps or _in_view.is_empty() or not _in_view.has(lamp.get_instance_id()))
+		var shadow: bool = lit and shadows_allowed and shadowed + cost <= MAX_SHADOW_LIGHTS
 		if lit:
 			used += cost
 		elif entry.seen:
@@ -208,8 +202,6 @@ func refresh_light_budget(capture_inputs: bool = true) -> void:
 			shadowed += cost
 			owners[lamp.get_instance_id()] = true
 		lamp.call("set_budget_lit", lit, shadow)
-		if lit and lamp.has_method("set_wall_gap"):
-			lamp.call("set_wall_gap", INF if shadow else _wall_gap(lamp as Node3D))
 	_near_view = near_view
 	_in_view = in_view
 	_settling = _shadow_owners != owners
@@ -255,37 +247,10 @@ func _update_pools(unlit: Array[Node]) -> void:
 	for index in unlit.size():
 		var lamp := unlit[index] as Node3D
 		var at := lamp.global_position
-		var fit := clampf(_wall_gap(lamp) / POOL_RADIUS, 0.3, 1.0)
-		_pool.multimesh.set_instance_transform(index, Transform3D(floor_turn.scaled(Vector3.ONE * fit), Vector3(at.x, POOL_HEIGHT, at.z)))
+		_pool.multimesh.set_instance_transform(index, Transform3D(floor_turn, Vector3(at.x, POOL_HEIGHT, at.z)))
 		var color: Color = lamp.get("light_color")
 		_pool.multimesh.set_instance_color(index, color * POOL_STRENGTH)
 	_pool.visible = local_lights_enabled
-
-
-## Distance from a lamp to the nearest wall within reach (INF when none); glass lets light through.
-func _wall_gap(lamp: Node3D) -> float:
-	var at := lamp.global_position
-	var cached: Array = _wall_gaps.get(lamp.get_instance_id(), [])
-	if not cached.is_empty() and cached[0] == at:
-		return cached[1]
-	var gap := INF
-	var world := get_viewport().world_3d if get_viewport() != null else null
-	if world != null:
-		var from := Vector3(at.x, WALL_PROBE_HEIGHT, at.z)
-		for step in 8:
-			var direction := Vector3.RIGHT.rotated(Vector3.UP, step * TAU / 8.0)
-			var query := PhysicsRayQueryParameters3D.create(from, from + direction * WALL_PROBE_REACH)
-			for _hit in 3:
-				var hit := world.direct_space_state.intersect_ray(query)
-				if hit.is_empty():
-					break
-				var body := hit.collider as Node
-				if body.get_parent().is_in_group("camera_occluder") and not body.is_in_group("infected_breakable_glass"):
-					gap = minf(gap, from.distance_to(hit.position))
-					break
-				query.exclude.append(hit.rid)
-	_wall_gaps[lamp.get_instance_id()] = [at, gap]
-	return gap
 
 
 func _light_radius(lamp: Node) -> float:
@@ -307,6 +272,8 @@ func set_local_lights_enabled(enabled: bool) -> void:
 func _apply_local_lights() -> void:
 	for lamp: Node in get_tree().get_nodes_in_group("budget_lights"):
 		_on_node_added(lamp)
+	for wall: Node in get_tree().get_nodes_in_group("camera_occluder"):
+		_on_node_added(wall)
 	refresh_light_budget()
 
 
@@ -314,6 +281,24 @@ func _on_node_added(node: Node) -> void:
 	# Late map loads and planner duplicates obey the same application setting.
 	if node.is_in_group("budget_lights") and node.has_method("set_local_lighting_enabled"):
 		node.call("set_local_lighting_enabled", local_lights_enabled)
+	# Meshes are instanced under the wall after it enters the tree, so tag them a frame later.
+	if node.is_in_group("camera_occluder") and node is Node3D:
+		_tag_wall_casters.call_deferred(node)
+
+
+## Solid walls and columns cast lamp shadows; glass and anything breakable lets light through.
+func _tag_wall_casters(wall) -> void:
+	# Untyped: a wall freed before this deferred call must fail the validity check, not argument conversion.
+	if not is_instance_valid(wall) or _has_glass(wall):
+		return
+	for mesh in wall.find_children("*", "MeshInstance3D", true, false):
+		(mesh as MeshInstance3D).layers |= WALL_CASTER_LAYER
+		# A one-sided wall must still shadow a lamp standing behind its back face.
+		(mesh as MeshInstance3D).cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_DOUBLE_SIDED
+
+
+func _has_glass(node: Node) -> bool:
+	return node.is_in_group("infected_breakable_glass") or node.get_children().any(_has_glass)
 
 
 func set_planning_mode(enabled: bool) -> void:
