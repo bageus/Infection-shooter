@@ -16,8 +16,8 @@ const HIT_LAYER := 4
 const WORLD_MASK := 3
 const MAX_FRAGMENTS := 40
 const KICK_COOLDOWN := 0.8
-# Highest resting height (centre of the piece) that still counts as lying on the floor.
-const BAKE_MAX_HEIGHT := 0.3
+# Highest lowest point of a resting piece that still counts as lying on the floor.
+const BAKE_MAX_HEIGHT := 0.15
 
 static var _surface: PhysicsMaterial
 
@@ -25,7 +25,7 @@ var source: WeakRef
 var piece_name := ""
 var stage_index := -1
 var kickable := false
-# A piece with a next stage keeps its body until it fades, so a hit can break it further meanwhile.
+# A piece with a next stage keeps its body while it rests, so a later hit can break it further.
 var breakable := false
 var _kick_cooldown := 0.0
 var _age := 0.0
@@ -92,22 +92,40 @@ func _physics_process(delta: float) -> void:
 
 
 func expire() -> void:
-	_leave_floor(DEBRIS.FADE_SECONDS)
+	_leave_floor(DEBRIS.FADE_SECONDS, false)
 
 
+# The debris budget is full: even a breakable piece has to go.
 func expire_fast() -> void:
-	_leave_floor(DEBRIS.FAST_FADE_SECONDS)
+	_leave_floor(DEBRIS.FAST_FADE_SECONDS, true)
 
 
-# A final model piece that lies on the floor bakes into it. A piece still moving, lodged in a frame or
-# propped on something would bake (or stay) in mid-air forever, so every other piece shrinks away.
-func _leave_floor(seconds: float) -> void:
+# A resting piece with a next stage stays until the budget needs it, so a later hit can break it further;
+# a resting final model piece bakes into the floor. A piece still moving, lodged in a frame or propped up
+# would stay in mid-air forever, so every other piece shrinks away.
+func _leave_floor(seconds: float, budget_full: bool) -> void:
 	if DEBRIS.is_fading(self):
 		return
-	if not breakable and pool_owner == null and is_instance_valid(_runtime) and sleeping and global_position.y < BAKE_MAX_HEIGHT:
+	if not _lies_on_floor():
+		DEBRIS.fade_free(self, seconds)
+	elif breakable:
+		if budget_full:
+			DEBRIS.fade_free(self, seconds)
+	elif pool_owner == null and is_instance_valid(_runtime):
 		_runtime.call("bake", self)
 	else:
 		DEBRIS.fade_free(self, seconds)
+
+
+# Asleep with the lowest point of its model at floor level.
+func _lies_on_floor() -> bool:
+	if not sleeping:
+		return false
+	for child in get_children():
+		if child is MeshInstance3D and (child as MeshInstance3D).mesh != null:
+			var box: AABB = (child as MeshInstance3D).global_transform * (child as MeshInstance3D).get_aabb()
+			return box.position.y < BAKE_MAX_HEIGHT
+	return global_position.y < BAKE_MAX_HEIGHT
 
 
 # Pieces are contactless for characters: pairs with them would otherwise exist
