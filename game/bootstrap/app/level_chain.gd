@@ -20,14 +20,14 @@ static func empty_entry() -> Dictionary:
 
 
 static func _clean_entry(raw: Variant) -> Dictionary:
-	var entry := empty_entry()
+	var clean := empty_entry()
 	if raw is Dictionary:
 		var kind := str(raw.get("type", "none"))
-		entry["type"] = kind if kind in TYPES else "none"
-		entry["x"] = float(raw.get("x", 0.0))
-		entry["z"] = float(raw.get("z", 0.0))
-		entry["placed"] = bool(raw.get("placed", false))
-	return entry
+		clean["type"] = kind if kind in TYPES else "none"
+		clean["x"] = float(raw.get("x", 0.0))
+		clean["z"] = float(raw.get("z", 0.0))
+		clean["placed"] = bool(raw.get("placed", false))
+	return clean
 
 
 func names() -> Array[String]:

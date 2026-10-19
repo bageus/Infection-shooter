@@ -32,7 +32,7 @@ signal blood_wounded(position: Vector3, excluded: Array[RID])
 @warning_ignore("unused_signal") signal wounded_moved(previous: Vector3, current: Vector3, excluded: Array[RID])
 @warning_ignore("unused_signal") signal body_dragged(previous: Vector3, current: Vector3, excluded: Array[RID])
 signal blood_death(position: Vector3, excluded: Array[RID], death_id: int)
-signal blood_pool_ready(position: Vector3, excluded: Array[RID], death_id: int)
+@warning_ignore("unused_signal") signal blood_pool_ready(position: Vector3, excluded: Array[RID], death_id: int)
 # Public v1 presentation fact (ADR-0017): a body part was shot off here.
 signal limb_severed(position: Vector3, direction: Vector3, excluded: Array[RID])
 
@@ -96,7 +96,7 @@ var _lod_frame_offset: int = 0
 var _sleeping_far := false
 var _blast_stun_remaining := 0.0
 var mutation_poison_remaining := 0.0
-var _mutation_poison_damage := 0.0
+@warning_ignore("unused_private_class_variable") var _mutation_poison_damage := 0.0 # Read and written by mutation_status.gd.
 var _mutation_status := preload("res://game/features/infected/mutation_status.gd").new()
 var _blood := BLOOD_TRAIL.new()
 var _pending_hit := -1.0

@@ -26,8 +26,8 @@ static func start(body: CollisionObject3D, parts: Node, fallback: Vector3) -> vo
 	var skeleton := parts.get("skeleton") as Skeleton3D if parts != null else null
 	if skeleton != null:
 		watcher._skeleton = weakref(skeleton)
-		for name in ["Hips", "Chest"]:
-			var index := skeleton.find_bone(name)
+		for bone_name in ["Hips", "Chest"]:
+			var index := skeleton.find_bone(bone_name)
 			if index >= 0:
 				watcher._bones.append(index)
 	body.add_child(watcher)

@@ -1,6 +1,6 @@
 extends Node3D
 
-signal penetration_blood(position: Vector3, direction: Vector3, energy: float, excluded: Array[RID])
+@warning_ignore("unused_signal") signal penetration_blood(position: Vector3, direction: Vector3, energy: float, excluded: Array[RID])
 
 # One scene-local budget for bullet and wood marks, and another for settled debris.
 const PROJECTION := preload("res://game/features/combat/impact_projection.gd")

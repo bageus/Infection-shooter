@@ -37,13 +37,13 @@ func _process(_delta: float) -> void:
 	var distance := PREPARE_DISTANCE * PREPARE_DISTANCE
 	for scan in mini(SCAN_LIMIT, _pending.size()):
 		_cursor %= _pending.size()
-		var actor: Node3D = _pending[_cursor].actor.get_ref()
-		if not is_instance_valid(actor) or actor.has_meta("visual_parts_prepared"):
+		var candidate: Node3D = _pending[_cursor].actor.get_ref()
+		if not is_instance_valid(candidate) or candidate.has_meta("visual_parts_prepared"):
 			_known.erase(_pending[_cursor].id)
 			_pending.remove_at(_cursor)
 			return
-		var offset := Vector2(actor.global_position.x - camera.global_position.x, actor.global_position.z - camera.global_position.z) if actor.is_inside_tree() else Vector2.INF
-		if actor.is_node_ready() and offset.length_squared() <= distance:
+		var offset := Vector2(candidate.global_position.x - camera.global_position.x, candidate.global_position.z - camera.global_position.z) if candidate.is_inside_tree() else Vector2.INF
+		if candidate.is_node_ready() and offset.length_squared() <= distance:
 			distance = offset.length_squared()
 			best = _cursor
 		_cursor += 1

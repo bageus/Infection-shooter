@@ -85,11 +85,12 @@ func _apply(request: Dictionary) -> void:
 	var at: Vector2 = request.at
 	var center := cell_at(at)
 	var layer_id := 0 if request.kind in ["floor_damage", "bullet"] else (1 if request.kind == "floor_scuff" else 2)
-	var density_cell: Variant = Vector2i(floori(at.x), floori(at.y)) if layer_id == 2 else Vector3i(floori(at.x), floori(at.y), layer_id)
+	var density_cell: Variant = Vector2i(floori(at.x), floori(at.y))
+	if layer_id != 2: density_cell = Vector3i(floori(at.x), floori(at.y), layer_id)
 	if tiles.has(center) and int(tiles[center].density.get(density_cell, 0)) >= MAX_DENSITY:
 		return
 	var source := PIXEL_OPS.source(frames[request.frame], request.opacity, request.turns, request.kind == "bullet" and request.frame >= 5)
-	var resolution := PIXELS if layer_id == 2 else PIXELS / 2
+	var resolution := PIXELS if layer_id == 2 else roundi(PIXELS * 0.5)
 	var side := roundi(float(request.size) * resolution / METERS)
 	source.resize(side, side, Image.INTERPOLATE_BILINEAR)
 	var surface := Image.create(side, side, false, Image.FORMAT_R8)
