@@ -50,7 +50,6 @@ func absorb_mutagen(delta_seconds: float) -> float:
 
 func use_antidote() -> bool:
 	var previous_mutation: float = _domain.mutation
-	tree.observe_mutation(previous_mutation)
 	var used: bool = _domain.use_antidote()
 	_emit_state_changes(previous_mutation)
 	return used
@@ -280,7 +279,6 @@ func is_escalated() -> bool:
 
 
 func _emit_state_changes(previous_mutation: float, stability_changed: bool = false) -> void:
-	tree.observe_mutation(maxf(previous_mutation, _domain.mutation))
 	if stability_changed or not is_equal_approx(previous_mutation, _domain.mutation):
 		var tree_updated: bool = tree.reconcile(_domain.mutation)
 		var slots_updated := active_state.reconcile(tree, get_mutation(), get_critical_threshold(), _cooldown_factor())

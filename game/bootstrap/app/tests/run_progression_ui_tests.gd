@@ -25,7 +25,7 @@ func _run() -> void:
 	# Ordinary use that forgets a skill applies at once, without a prompt or pause.
 	_check(actor.call("use_antidote") and not paused, "Ordinary skill loss applies without a confirmation")
 	_check(actor.get("antidotes") == stock - 1 and runtime.call("get_mutation") == 20.0, "Ordinary use spends exactly one dose")
-	_check(runtime.call("mutation_points") == 2 and not runtime.call("skill_learned", "muscle_memory"), "Forgotten skill point is refunded into retained budget")
+	_check(runtime.call("mutation_points") == 0 and not runtime.call("skill_learned", "muscle_memory"), "Forgotten skill point leaves with the budget at the new mutation")
 	# Emergency use with an active loss is immediate as well.
 	runtime.get("_domain").mutation = 30.1
 	runtime.get("_domain").control_loss_remaining = 2.0

@@ -2,14 +2,12 @@ extends RefCounted
 
 const CATALOG := preload("res://game/features/infection/domain/mutation_catalog.gd")
 
-var peak_mutation := 0.0
 var learned: Dictionary = {}
 var locked: Dictionary = {}
 var cooldowns: Dictionary = {}
 
 
 func reconcile(mutation: float) -> bool:
-	observe_mutation(mutation)
 	var changed := false
 	var protected: Dictionary = {}
 	# Old purchased hybrids become derived bonuses and refund their point.
@@ -60,16 +58,12 @@ func reconcile(mutation: float) -> bool:
 	return changed
 
 
-func observe_mutation(mutation: float) -> void:
-	peak_mutation = maxf(peak_mutation, clampf(mutation, 0.0, 100.0))
-
-
 func points(mutation: float) -> int:
 	var spent := 0
 	for skill_id in learned:
 		if not CATALOG.HYBRID_PARENTS.has(str(skill_id)):
 			spent += 1
-	return maxi(0, CATALOG.point_budget(maxf(peak_mutation, mutation)) - spent)
+	return maxi(0, CATALOG.point_budget(mutation) - spent)
 
 
 func is_active(skill_id: String, mutation: float, stability: float = 30.0) -> bool:
@@ -123,7 +117,6 @@ func _has_previous(row: Array, rows: Array) -> bool:
 func upgrade(skill_id: String, mutation: float, stability: float = 30.0) -> bool:
 	if not can_upgrade(skill_id, mutation, stability):
 		return false
-	observe_mutation(mutation)
 	learned[skill_id] = true
 	return true
 
