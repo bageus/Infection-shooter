@@ -10,9 +10,11 @@ const TRUNK_Y := 370.0
 const COLUMNS := [1, 3, 0, 2, 0, 1, 2, 3, 4, 5]
 const COLUMN_X0 := 120.0
 const COLUMN_PITCH := 160.0
+# Active columns are wider so a mirrored alternative fits between neighbours.
+const ACTIVE_X0 := 40.0
+const ACTIVE_PITCH := 292.0
 # One circle per rank: 110 px across and 85 px up or down, about 38 degrees from the trunk.
 const RANK_STEP := Vector2(110.0, 85.0)
-const ALT_OFFSET := 76.0
 const HYBRID_PARENTS := [[4, 5], [5, 6], [6, 7], [7, 8], [8, 9]]
 const LIT := Color(0.3, 0.95, 0.1, 1.0)
 const LABEL_MAX_WIDTH := 170.0
@@ -44,13 +46,21 @@ func set_mutation(amount: float) -> void:
 
 func branch_origin(index: int) -> Vector2:
 	# Every branch owns one column of equal width, so neighbouring branches never share circles.
+	if index < 4:
+		return Vector2(ACTIVE_X0 + COLUMNS[index] * ACTIVE_PITCH, TRUNK_Y)
 	return Vector2(COLUMN_X0 + COLUMNS[index] * COLUMN_PITCH, TRUNK_Y)
+
+
+func _row_y(branch_index: int, rank: int) -> float:
+	return TRUNK_Y - 50.0 - RANK_STEP.y * rank if branch_index < 4 else TRUNK_Y + 80.0 + RANK_STEP.y * rank
 
 
 func skill_position(branch_index: int, rank: int, alternative: bool = false) -> Vector2:
 	var origin := branch_origin(branch_index)
-	var y := TRUNK_Y - 50.0 - RANK_STEP.y * rank if branch_index < 4 else TRUNK_Y + 80.0 + RANK_STEP.y * rank
-	return Vector2(origin.x + rank * RANK_STEP.x + (ALT_OFFSET if alternative else 0.0), y)
+	if alternative:
+		# Mirrors the main stem across the level-2 node, so both level-3 stems have equal length.
+		return Vector2(origin.x, _row_y(branch_index, rank))
+	return Vector2(origin.x + rank * RANK_STEP.x, _row_y(branch_index, rank))
 
 
 # Branch titles are centred over the branch's own circles and never wider

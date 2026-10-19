@@ -34,7 +34,7 @@ func _run() -> void:
 	initial[0] = true
 	initial[5] = true
 	canvas.configure_progression(values, 0.0, initial)
-	_expect(canvas.trunk_available_x() == canvas.branch_origin(5).x, "Opening the next branches exposes their entire connector at once.")
+	_expect(canvas.trunk_available_x() == canvas.branch_origin(0).x, "Opening the next branches exposes their entire connector at once.")
 	canvas.configure_progression(values, 95.0, opened)
 	_expect(canvas.branch_origin(8) != canvas.branch_origin(9), "Late passive roots are distinct.")
 	_expect(CANVAS.HYBRID_PARENTS.size() == 5, "Only adjacent passive branches have hybrids.")

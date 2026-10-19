@@ -93,8 +93,10 @@ func _test_tree_geometry() -> void:
 			start = end
 		if branch < 4:
 			var alternate: Vector2 = canvas.skill_position(branch, 2, true)
+			var level_two: Vector2 = canvas.skill_position(branch, 1)
 			circles.append([branch, alternate])
-			stems.append([branch, start, alternate])
+			stems.append([branch, level_two, alternate])
+			_expect(absf(level_two.distance_to(alternate) - level_two.distance_to(canvas.skill_position(branch, 2))) < 0.5, "Active branch %d has two level-3 stems of equal length" % branch)
 	for hybrid in 5:
 		circles.append([-1, canvas.hybrid_position(hybrid)])
 	for a in circles.size():
