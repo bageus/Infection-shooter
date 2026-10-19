@@ -47,7 +47,7 @@ script=ExtResource("5")
 [node name="CameraRig" type="Node3D" parent="."]
 [node name="Camera3D" type="Camera3D" parent="CameraRig"]
 position=Vector3(10,12,10)
-rotation_degrees=Vector3(-42,45,0)
+rotation_degrees=Vector3(-37.3,45,0)
 current=true
 fov=50.0
 
