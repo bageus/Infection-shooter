@@ -20,6 +20,8 @@ var _damage := PROP_DAMAGE.new()
 const WEIGHT = preload("res://game/presentation/office_floor/prop_weight.gd")
 const CONTACT = preload("res://game/presentation/office_floor/prop_contact.gd")
 const BULLET_PUSH = preload("res://game/presentation/office_floor/bullet_push.gd")
+# Visible base floor top (tile_y .001 + half its .025 thickness); the physics floor top matches it.
+const FLOOR_TOP := 0.0135
 var repeated_electronic_particles := true
 
 
@@ -223,8 +225,8 @@ func _ready() -> void:
 		for mesh in _shape_meshes:
 			var bounds: AABB = mesh.global_transform * mesh.get_aabb()
 			lowest = minf(lowest, bounds.position.y)
-		if lowest < 0.025:
-			global_position.y += 0.025 - lowest
+		if lowest < FLOOR_TOP:
+			global_position.y += FLOOR_TOP - lowest
 	mass = clampf(volume * 18.0, 0.12, 55.0)
 	if "fire_extinguisher" in model_path.get_file():
 		mass = 1.8
