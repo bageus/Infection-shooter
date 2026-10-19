@@ -22,6 +22,14 @@ func _run() -> void:
 	floor_body.add_child(floor_shape)
 	floor_body.position = Vector3(0, -0.1, 0)
 	stage.add_child(floor_body)
+	var desk := StaticBody3D.new()
+	var desk_shape := CollisionShape3D.new()
+	var top := BoxShape3D.new()
+	top.size = Vector3(2, 0.8, 2)
+	desk_shape.shape = top
+	desk.add_child(desk_shape)
+	desk.position = Vector3(2.0, 0.4, 0.0)
+	stage.add_child(desk)
 	await physics_frame
 	await physics_frame
 
@@ -29,7 +37,7 @@ func _run() -> void:
 	var zone := stage.get_child(stage.get_child_count() - 1) as Node3D
 	var meshes := zone.get_children().filter(func(child: Node) -> bool: return child is MeshInstance3D)
 	_expect(meshes.size() == 2, "The zone is a disc and a ring")
-	_expect(absf(zone.global_position.y - ZONE.LIFT) < 0.01 and absf(zone.global_position.x - 2.0) < 0.01, "The zone lies on the floor under the impact (%s)" % zone.global_position)
+	_expect(absf(zone.global_position.y - ZONE.LIFT) < 0.01 and absf(zone.global_position.x - 2.0) < 0.01, "The zone lies on the floor, not on a desk under the impact (%s)" % zone.global_position)
 	var ring := meshes[1] as MeshInstance3D
 	var disc := meshes[0] as MeshInstance3D
 	_expect(absf((disc.mesh as CylinderMesh).top_radius - 3.0) < 0.001, "The disc has the blast radius")

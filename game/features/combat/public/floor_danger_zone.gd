@@ -5,6 +5,7 @@ extends RefCounted
 
 const FADE := 0.25
 const FLOOR_MASK := 7
+const MAX_SURFACES := 8
 const LIFT := 0.03
 const RING_WIDTH := 0.08
 const FILL_COLOR := Color(1.0, 0.32, 0.22, 0.16)
@@ -29,10 +30,18 @@ static func spawn(parent: Node3D, world: World3D, point: Vector3, radius: float,
 	tween.tween_callback(zone.queue_free)
 
 
+## The lowest surface under the impact: desk tops and props are passed through, so the zone lies on the floor.
 static func _floor_point(world: World3D, point: Vector3) -> Vector3:
-	var query := PhysicsRayQueryParameters3D.create(point + Vector3.UP * 0.4, point + Vector3.DOWN * 8.0, FLOOR_MASK)
-	var hit := world.direct_space_state.intersect_ray(query)
-	return hit.get("position", point) as Vector3
+	var exclude: Array[RID] = []
+	var floor_at := point
+	for _attempt in MAX_SURFACES:
+		var query := PhysicsRayQueryParameters3D.create(point + Vector3.UP * 0.4, point + Vector3.DOWN * 8.0, FLOOR_MASK, exclude)
+		var hit := world.direct_space_state.intersect_ray(query)
+		if hit.is_empty():
+			break
+		floor_at = hit.position as Vector3
+		exclude.append(hit.rid as RID)
+	return floor_at
 
 
 static func _set_strength(strength: float, meshes: Array[MeshInstance3D]) -> void:
