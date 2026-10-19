@@ -5,6 +5,7 @@ const PIXEL_OPS := preload("res://game/presentation/office_floor/decal_pixels.gd
 const ATLAS := preload("res://models/objects/textures/glass_decals/4x4 glass debris texture atlas.png")
 const METERS := 8.0
 const PIXELS := 512
+const ARCHIVE_PIXELS := 128
 const MAX_TILES := 16
 const MAX_QUEUE := 64
 const MAX_DENSITY := 4
@@ -12,6 +13,10 @@ const STAMPS_PER_STEP := 2
 var origin := Vector2.ZERO
 var valid_cells: Dictionary = {}
 var tiles: Dictionary = {}
+# Evicted tiles keep their CPU pixels so decals survive the GPU cap. Bound: one entry per cell ever
+# decalled (<= ~80 cells on the 80x60 m floor). Archived copies are low-res (16 px/m): 128^2 RGBA8 + R8
+# per cell is ~80 KB, so 80 cells is ~6-7 MB worst case; restore upscales bilinear (blurrier decals).
+var _archive: Dictionary = {}
 var queue: Array[Dictionary] = []
 var _sources: Array[Image] = []
 var _changed: Callable
@@ -126,7 +131,27 @@ func _tile(cell: Vector2i) -> Dictionary:
 	if tiles.size() >= MAX_TILES:
 		var oldest: Vector2i = tiles.keys()[0]
 		_changed.call(oldest, null)
+		var evicted: Dictionary = tiles[oldest]
+		evicted.texture = null
+		evicted.surface_texture = null
+		evicted.dirty = true
+		for layer: Dictionary in evicted.layers.values():
+			layer.texture = null
+			layer.full_size = (layer.image as Image).get_size()
+			layer.image = _resized(layer.image, layer.full_size / 4)
+		evicted.image = _resized(evicted.image, Vector2i.ONE * ARCHIVE_PIXELS)
+		evicted.surface_image = _resized(evicted.surface_image, Vector2i.ONE * ARCHIVE_PIXELS)
+		_archive[oldest] = evicted
 		tiles.erase(oldest)
+	if _archive.has(cell):
+		var restored: Dictionary = _archive[cell]
+		restored.image = _resized(restored.image, Vector2i.ONE * PIXELS)
+		restored.surface_image = _resized(restored.surface_image, Vector2i.ONE * PIXELS)
+		for layer: Dictionary in restored.layers.values():
+			layer.image = _resized(layer.image, layer.full_size)
+		tiles[cell] = restored
+		_archive.erase(cell)
+		return restored
 	var image := Image.create(PIXELS, PIXELS, false, Image.FORMAT_RGBA8)
 	image.fill(Color.TRANSPARENT)
 	var surface := Image.create(PIXELS, PIXELS, false, Image.FORMAT_R8)
@@ -135,6 +160,12 @@ func _tile(cell: Vector2i) -> Dictionary:
 		"surface_texture": null, "layers": {}, "dirty": false, "density": {}}
 	tiles[cell] = tile
 	return tile
+
+
+func _resized(source: Image, size: Vector2i) -> Image:
+	var copy := source.duplicate() as Image
+	copy.resize(maxi(size.x, 1), maxi(size.y, 1), Image.INTERPOLATE_BILINEAR)
+	return copy
 
 
 func _has_dirty() -> bool:
@@ -148,4 +179,5 @@ func clear() -> void:
 	for cell: Vector2i in tiles:
 		_changed.call(cell, null)
 	tiles.clear()
+	_archive.clear()
 	queue.clear()
