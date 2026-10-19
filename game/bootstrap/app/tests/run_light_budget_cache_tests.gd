@@ -165,7 +165,7 @@ func _lamp_changes() -> void:
 	for lamp in lamps:
 		cost += lamp.cost if lamp.lit else 0
 		shadows += lamp.cost if lamp.shadow else 0
-	_expect(cost <= 28 and shadows <= 6, "Changed fixture costs respect both budgets")
+	_expect(cost <= 28 and shadows <= 28, "Changed fixture costs respect both budgets")
 	controller.set_shadows_allowed(false)
 	_step("lamp shadows off")
 	_expect(not lamps.any(func(lamp: Node3D) -> bool: return lamp.shadow), "Shadow permission changes immediately")

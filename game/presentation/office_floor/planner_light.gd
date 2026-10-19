@@ -33,6 +33,8 @@ var _runtime_active := true
 var _budget_lit := true
 var _budget_shadow := false
 # Brightness share the budget has granted so far: a lamp fades in and out instead of jumping.
+## Visual layer of the wall meshes; lamp shadows are cast by these only.
+const WALL_CASTER_LAYER := 1 << 19
 const BUDGET_FADE_SECONDS := 0.25
 var _budget_fade := 0.0
 var _sub_lights: Array[SpotLight3D] = []
@@ -49,6 +51,7 @@ func _ready() -> void:
 	if marker != null:
 		marker.visible = false
 	if light != null:
+		light.shadow_caster_mask = WALL_CASTER_LAYER
 		if not has_meta("planning_light_color"):
 			# Old authored scenes keep their original per-instance color.
 			light_color = light.light_color
@@ -131,27 +134,6 @@ func get_light_cost() -> int:
 ## Distance at which the authored cone stops lighting anything.
 func get_light_radius() -> float:
 	return light.spot_range if light != null else 0.0
-
-
-## Narrows the cone so it ends at a wall `gap` metres away (INF restores it). Used for lamps without a shadow.
-## shortcut: assumes the floor is at y = 0 and clamps at MIN_CLIP_ANGLE, so a lamp hugging a wall still leaks a little.
-const MIN_CLIP_ANGLE := 15.0
-var _authored_angle := -1.0
-
-
-func set_wall_gap(gap: float) -> void:
-	if light == null or (_authored_angle < 0.0 and is_inf(gap)):
-		return
-	if _authored_angle < 0.0:
-		_authored_angle = light.spot_angle
-	var angle := _authored_angle
-	if not is_inf(gap):
-		angle = minf(_authored_angle, maxf(rad_to_deg(atan(gap / maxf(global_position.y, 0.5))), MIN_CLIP_ANGLE))
-	if is_inf(gap):
-		_authored_angle = -1.0
-	if not is_equal_approx(angle, light.spot_angle):
-		light.spot_angle = angle
-		sync_sub_lights()
 
 
 func set_budget_lit(lit: bool, shadow: bool) -> void:

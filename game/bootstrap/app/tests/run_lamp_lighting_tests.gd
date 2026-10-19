@@ -19,7 +19,7 @@ func _run() -> void:
 	_test_pools()
 	_test_budget_fade()
 	await _test_view_rule()
-	await _test_wall_clip()
+	await _test_wall_shadows()
 	await _test_desk_lamp()
 	await _test_elevator()
 	print("Lamp lighting tests: %d failure(s)." % _failures)
@@ -173,37 +173,42 @@ func _test_view_rule() -> void:
 		node.free()
 
 
-func _test_wall_clip() -> void:
+func _test_wall_shadows() -> void:
 	var controller := LIGHTING.new()
 	root.add_child(controller)
-	controller.shadows_allowed = false
 	var camera := Camera3D.new()
 	root.add_child(camera)
 	camera.current = true
 	camera.look_at_from_position(Vector3(0, 10, 0.5), Vector3.ZERO)
 	var wall := Node3D.new()
 	wall.add_to_group("camera_occluder")
-	var body := StaticBody3D.new()
-	var shape := CollisionShape3D.new()
-	var box := BoxShape3D.new()
-	box.size = Vector3(0.3, 4.0, 10.0)
-	shape.shape = box
-	body.add_child(shape)
-	wall.add_child(body)
+	var mesh := MeshInstance3D.new()
+	mesh.mesh = BoxMesh.new()
+	wall.add_child(mesh)
+	var glass := Node3D.new()
+	glass.add_to_group("camera_occluder")
+	var pane := MeshInstance3D.new()
+	var pane_body := Node3D.new()
+	pane_body.add_to_group("infected_breakable_glass")
+	glass.add_child(pane_body)
+	glass.add_child(pane)
 	root.add_child(wall)
-	wall.position = Vector3(2, 2, 0)
-	var lamp := _lamp("point", Vector3(0, 3, 0))
-	var open_lamp := _lamp("point", Vector3(-20, 3, 0))
-	var authored := _lights_of(lamp)[0].spot_angle
-	await physics_frame
-	await physics_frame
+	root.add_child(glass)
+	var lamps: Array[Node3D] = []
+	for index in 12:
+		lamps.append(_lamp("point", Vector3(index * 0.5, 3.0, 0.0)))
+	var angle := _lights_of(lamps[0])[0].spot_angle
 	controller.local_lights_enabled = true
+	await process_frame
 	controller.refresh_light_budget()
-	var light := _lights_of(lamp)[0]
-	_check(lamp.get_budget_lit() and light.spot_angle < authored, "An unshadowed lamp beside a wall gets a narrower cone")
-	_check(tan(deg_to_rad(light.spot_angle)) * 3.0 <= 1.9, "Its light stops short of the wall (floor reach %.2f m)" % (tan(deg_to_rad(light.spot_angle)) * 3.0))
-	_check(_lights_of(open_lamp)[0].spot_angle == authored, "A lamp with no wall around keeps its cone")
-	for node: Node in [controller, camera, wall, lamp, open_lamp]:
+	for lamp in lamps:
+		lamp._process(1.0)
+		var light := _lights_of(lamp)[0]
+		_check(lamp.get_budget_lit() and light.shadow_enabled, "Every lit lamp casts a shadow")
+		_check(light.shadow_caster_mask == lamp.WALL_CASTER_LAYER and light.spot_angle == angle, "Lamp shadows come from walls only and keep the editor angle")
+	_check(mesh.layers & LIGHTING.WALL_CASTER_LAYER != 0, "A solid wall mesh casts lamp shadows")
+	_check(pane.layers & LIGHTING.WALL_CASTER_LAYER == 0, "Glass does not cast lamp shadows")
+	for node: Node in [controller, camera, wall, glass] + lamps:
 		node.free()
 
 
