@@ -3,6 +3,7 @@ extends Node
 const MAX_FRAGMENTS := 40
 const MAX_POOLED := 40
 const SETTLED := preload("res://game/presentation/office_floor/settled_debris.gd")
+const BAKED := preload("res://game/presentation/office_floor/table_baked_pieces.gd")
 # A piece left to rest folds into the settled batch after this long at rest,
 # or after SETTLE_FAR_SECONDS once the player has walked away from it.
 const SETTLE_CHECK_SECONDS := 0.5
@@ -18,6 +19,7 @@ var created_chunks := 0
 var reused_chunks := 0
 var _allocated: Array[WeakRef] = []
 var _settled: Node3D
+var _baked: Node3D
 var _settle_clock := 0.0
 
 
@@ -25,6 +27,9 @@ func _ready() -> void:
 	_settled = SETTLED.new()
 	_settled.name = "SettledPieces"
 	add_child(_settled)
+	_baked = BAKED.new()
+	_baked.name = "BakedPieces"
+	add_child(_baked)
 
 
 func _process(delta: float) -> void:
@@ -45,6 +50,16 @@ func register(body: RigidBody3D) -> void:
 		if oldest != null:
 			oldest.call("expire_fast")
 	_compact()
+
+
+# Draws the piece's model at its current pose in the baked batch and frees its body.
+func bake(body: RigidBody3D) -> void:
+	for child in body.get_children():
+		if child is MeshInstance3D:
+			_baked.call("bake", child)
+			break
+	body.call("retire_from_budget")
+	body.queue_free()
 
 
 func unregister(body: RigidBody3D) -> void:
