@@ -7,6 +7,8 @@ owner: AI
 updated: 2026-10-18
 ---
 
+19.10.2026 (рамка антидота — прямой запрос владельца): после потери контроля полупрозрачная рамка стягивается с краёв экрана на ячейку шприца с антидотом, держится около 2.5 с и медленно гаснет. N-я потеря проигрывает рамку N раз подряд; после третьей потери подсказок нет, без антидотов не показывается. Private antidote_hint_frame.gd, HUD только считает потери и передаёт ячейку; gameplay/API не менялись. Тесты run_antidote_hint_tests PASS, существующие HUD/control-loss suites PASS, validators PASS. Скриншоты кадров tools/capture_antidote_hint.gd. Следующее действие — PR, CI и слияние по правилу проекта.
+
 19.10.2026 (наклон игровой камеры — прямой запрос владельца): наклон player camera зафиксирован -37.3° в player.tscn и camera_adjustment PITCH; Alt+ЛКМ меняет только поворот, сохранённый pitch игнорируется. Тесты run_shooting_camera_tests и run_gameplay_camera_tuning_tests PASS на Godot4.7.2 headless, import exit0. Планировщик не менялся. Следующее действие — gates, PR и слияние по правилу проекта.
 
 

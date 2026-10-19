@@ -10,11 +10,13 @@ const VITALS_FX := preload("res://game/presentation/prototype_hud/vitals_screen_
 const MUTATION_VEIL := preload("res://game/presentation/prototype_hud/mutation_veil.gd")
 const SFX := preload("res://game/core/audio/public/sound_events.gd")
 const UI_TRANSLATIONS := preload("res://game/core/localization/public/ui_translations.gd")
+const ANTIDOTE_HINT := preload("res://game/presentation/prototype_hud/antidote_hint_frame.gd")
 const CONTROL_NOTICE_TOP := 60.0
 const ANTIDOTE_FLASH_SECONDS := 1.0
 const ANTIDOTE_FLASH_BLINK := 0.25
 const DNA_BLINK_COUNT := 3
 const DNA_BLINK_STEP := 0.12
+const CONTROL_LOSS_HINTS := 3
 # Semantic cells: rifle, pistol, uzi, shotgun, syringe, launcher, key.
 @export var weapon_icon_cells := PackedInt32Array([1, 2, 3, 5])
 @export var antidote_icon_cell := 4
@@ -29,6 +31,7 @@ const DNA_BLINK_STEP := 0.12
 @onready var critical_marker: ColorRect = $HealthPanel/CriticalMarker
 @onready var armor_bar: ProgressBar = $HealthPanel/ArmorBar
 @onready var armor_value: Label = $HealthPanel/ArmorValue
+@onready var antidote_panel: Panel = $AntidotePanel
 @onready var antidote_count: Label = $AntidotePanel/AntidoteCount
 @onready var weapon_name: Label = $WeaponPanel/WeaponName
 @onready var magazine: Label = $WeaponPanel/Magazine
@@ -73,6 +76,8 @@ var _scale_blink: Tween
 var _veil: ColorRect
 var _antidote_flash_remaining := 0.0
 var _was_control_lost := false
+var _control_losses := 0
+var _antidote_hint: Control
 
 
 func _ready() -> void:
@@ -105,6 +110,9 @@ func _ready() -> void:
 	_control_notice.visible = false
 	add_child(_control_notice)
 	_build_objective()
+	_antidote_hint = ANTIDOTE_HINT.new()
+	_antidote_hint.name = "AntidoteHint"
+	add_child(_antidote_hint)
 	_apply_texts()
 	infection.connect("control_ampule_collected", _on_control_ampule_collected)
 
@@ -169,6 +177,8 @@ func _process(delta: float) -> void:
 	if TranslationServer.get_locale() != _texts_locale:
 		_apply_texts()
 	_control_notice.visible = bool(infection.call("is_control_lost"))
+	if _control_notice.visible and not _was_control_lost:
+		_on_control_lost()
 	if _was_control_lost and not _control_notice.visible:
 		_start_antidote_flash()
 	_was_control_lost = _control_notice.visible
@@ -411,9 +421,21 @@ func _update_key_buttons() -> void:
 	_set_key_state(antidote_key, using_antidote, blocked or (player.antidotes <= 0 and not player.infinite_antidotes))
 
 
+# The Nth loss of the run plays the antidote frame N times; later losses get no hint.
+func _on_control_lost() -> void:
+	_control_losses += 1
+	if _control_losses > CONTROL_LOSS_HINTS or not _has_antidote():
+		return
+	_antidote_hint.call("play", antidote_panel.get_global_rect(), _control_losses)
+
+
+func _has_antidote() -> bool:
+	return player.antidotes > 0 or player.infinite_antidotes
+
+
 # Control returned: a usable antidote blinks for a second with a soft cue.
 func _start_antidote_flash() -> void:
-	if player.antidotes <= 0 and not player.infinite_antidotes:
+	if not _has_antidote():
 		return
 	_antidote_flash_remaining = ANTIDOTE_FLASH_SECONDS
 	SFX.play_ui(self, &"mutation_hover")
