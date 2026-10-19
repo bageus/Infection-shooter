@@ -44,14 +44,17 @@ func _run() -> void:
 	var forever := _spawn(stage, Vector3(20, 0, 0), 14.0)
 	forever.set("permanent", true)
 	forever.call("activate")
-	_expect(float((forever.get_node("Visual") as GeometryInstance3D).get_instance_shader_parameter(&"looping")) > 0.5, "A permanent cloud loops its puffs.")
+	_expect(float(((forever.get_node("Visual") as GeometryInstance3D).material_override as ShaderMaterial).get_shader_parameter(&"looping")) > 0.5, "A permanent cloud loops its puffs.")
+	for layer in ["Visual", "GroundHaze"]:
+		var shader := ((forever.get_node(layer) as GeometryInstance3D).material_override as ShaderMaterial).shader
+		_expect(not shader.code.contains("instance uniform"), "Cloud %s takes no instance-uniform slot (256-object renderer limit)." % layer)
 	_check_refused_mutagen_stays(stage)
 	var depleted := [false]
 	first.connect("depleted", func() -> void: depleted[0] = true)
 	await create_timer(1.0).timeout
-	var progress := float((first.get_node("Visual") as GeometryInstance3D).get_instance_shader_parameter(&"progress"))
+	var progress := float(((first.get_node("Visual") as GeometryInstance3D).material_override as ShaderMaterial).get_shader_parameter(&"progress"))
 	_expect(progress > 0.2 and progress < 0.6, "Cloud age drives the shader (%.2f)." % progress)
-	_expect(is_equal_approx(progress, float(haze.get_instance_shader_parameter(&"progress"))), "Haze ages with the cloud.")
+	_expect(is_equal_approx(progress, float((haze.material_override as ShaderMaterial).get_shader_parameter(&"progress"))), "Haze ages with the cloud.")
 	await create_timer(1.0).timeout
 	_expect(not (first.get_node("Spores") as GPUParticles3D).emitting, "Spores stop as the cloud thins out.")
 	await create_timer(1.3).timeout

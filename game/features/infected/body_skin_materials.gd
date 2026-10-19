@@ -7,8 +7,11 @@ const SHADER := preload("res://game/features/infected/body_wound.gdshader")
 const PAGE_LAYERS := 128
 const INSTANCE_SELECTOR := "instance uniform float blood_layer : instance_index(1) = -1.0;"
 const MATERIAL_SELECTOR := "uniform float blood_layer = -1.0;"
-## WebGL2 fallback (godotengine/godot#112674, instance-uniform UBO bug in 4.7.2):
-## every body owns a one-layer page, so blood_layer is a plain material parameter.
+## Every body owns a one-layer page, so blood_layer is a plain material parameter.
+## An instance uniform reserves 16 of the renderer's 4096 uniform slots per mesh,
+## so at most 256 meshes could use one at a time (and it is broken on WebGL2,
+## godotengine/godot#112674). The shared 128-layer pages below are kept for tests
+## and pass per_body = false to use the instance-uniform shader.
 static var _material_shader: Shader
 var _originals: Array
 var _per_body: bool
@@ -92,7 +95,7 @@ class Lease extends RefCounted:
 	func upload(images: Array) -> void:
 		page.upload(images, layer)
 
-func _init(originals: Array, per_body := OS.has_feature("web")) -> void:
+func _init(originals: Array, per_body := true) -> void:
 	_originals = originals.duplicate()
 	_per_body = per_body
 	# Supply a valid sampler even for clean bodies (required by Forward+).

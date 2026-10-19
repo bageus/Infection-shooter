@@ -158,7 +158,7 @@ func _cloud_height(stage: Node3D) -> void:
 	await physics_frame
 	cloud.call("activate")
 	var visual := cloud.get_node("Visual") as GeometryInstance3D
-	var center: Vector3 = visual.get_instance_shader_parameter("cloud_center")
+	var center: Vector3 = (visual.material_override as ShaderMaterial).get_shader_parameter("cloud_center")
 	_check(absf(center.y) < .01, "Cloud height uses the floor below the enemy pivot")
 	var shape := cloud.get_node("CollisionShape3D") as CollisionShape3D
 	_check(absf(shape.global_position.y - 1.25) < .01 and is_equal_approx((shape.shape as CylinderShape3D).height, 1.5), "Absorption volume spans 0.5 to 2 metres")
