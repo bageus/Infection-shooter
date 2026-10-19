@@ -12,6 +12,8 @@ const QUALITY := preload("res://game/core/vfx/public/effects_quality.gd")
 const HEAL := preload("res://game/features/player/player_heal_feedback.gd")
 const DOME := preload("res://game/features/player/range_dome.gd")
 const DASH_ZONE := preload("res://game/features/player/dash_floor_zone.gd")
+const GRENADE := preload("res://game/features/combat/grenade_explosion_v1.tscn")
+const EXTINGUISHER := preload("res://game/presentation/office_floor/extinguisher_burst.tscn")
 const CLOUD := preload("res://game/features/infection_source/public/mutagen_cloud.tscn")
 const EYE := Vector3(10, 12, 10) * 0.45
 const TARGETS := [Vector3(1.6, 0, 1.2), Vector3(3.4, 0, -0.6), Vector3(1.0, 0, -3.0)]
@@ -58,6 +60,7 @@ func _ready() -> void:
 		"Споровый кокон": _cocoon, "Когти": _claws, "Щит": _shield, "Сердце": _heart,
 		"Берсерк": _rage, "Зона на полу": _zone, "Лечение": _medkit,
 		"Антидот": _antidote, "Мутаген": _mutagen,
+		"Граната": _grenade, "Огнетушитель": _extinguisher,
 	}
 	_build_ui()
 
@@ -124,6 +127,23 @@ func _mutagen() -> void:
 	add_child(_cloud)
 	_cloud.position = Vector3(0, 0, -2.5)
 	_cloud.call("activate")
+
+
+func _grenade() -> void:
+	var blast := GRENADE.instantiate() as Node3D
+	add_child(blast)
+	blast.position = Vector3(0, 0, -2.5)
+	blast.call("start", Vector3.UP)
+	get_tree().create_timer(6.0).timeout.connect(blast.queue_free)
+
+
+func _extinguisher() -> void:
+	var burst := EXTINGUISHER.instantiate() as Node3D
+	burst.call("configure_world", self, null)
+	add_child(burst)
+	burst.position = Vector3(0, 0.8, -2.5)
+	burst.call("start", 3.0, 3.6, 110)
+	get_tree().create_timer(6.0).timeout.connect(burst.queue_free)
 
 
 func _discharge() -> void:
