@@ -87,6 +87,9 @@ func _ready() -> void:
 	add_child(planning_mode)
 	planning_mode.process_mode = Node.PROCESS_MODE_ALWAYS
 	planning_mode.setup(self, planning_root, planning_ui, not defer_layout_loading)
+	var camera_tuning := preload("res://game/bootstrap/app/gameplay_camera_tuning.gd").new()
+	add_child(camera_tuning)
+	camera_tuning.setup(player)
 	world_activation = WorldActivation.new()
 	world_activation.name = "WorldActivation"
 	add_child(world_activation)

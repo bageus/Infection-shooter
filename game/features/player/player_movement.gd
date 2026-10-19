@@ -83,6 +83,7 @@ var _roll_remaining: float = 0.0
 var _roll_cooldown_remaining: float = 0.0
 var _aim_point := Vector3.ZERO
 var _camera_distance := 0.0
+var _view_adjustment := preload("res://game/features/player/camera_adjustment.gd").new()
 var _stun_remaining := 0.0
 var _stun_intensity := 0.0
 var _stun_rotation := 0
@@ -153,13 +154,16 @@ func _physics_process(delta: float) -> void:
 	weapon_mount.call("aim_at", _aim_point)
 	_update_move(delta)
 	var w:=get_current_weapon()
-	var fire_pressed := w != null and not _mutation_menu_open and _roll_remaining <= 0.0 and (control_lost or (Input.is_action_pressed("fire") if bool(w.call("wants_continuous_fire")) else Input.is_action_just_pressed("fire")))
+	var fire_pressed := w != null and not Input.is_key_pressed(KEY_ALT) and not _mutation_menu_open and _roll_remaining <= 0.0 and (control_lost or (Input.is_action_pressed("fire") if bool(w.call("wants_continuous_fire")) else Input.is_action_just_pressed("fire")))
 	if w != null and _scope_raise.step(delta, _scope_magnification(w) > 1.0, fire_pressed and not control_lost):
 		_fire_weapon(w)
 	elif fire_pressed and control_lost:
 		_fire_weapon(w)
 func _unhandled_input(event: InputEvent) -> void:
 	if get_tree().paused:
+		return
+	if _view_adjustment.handle_input(self, event):
+		get_viewport().set_input_as_handled()
 		return
 	if event is InputEventMouseMotion:
 		weapon_stance.record_mouse_motion(event.relative)
@@ -576,3 +580,11 @@ func get_weapon_view() -> Dictionary:
 func _scope_magnification(weapon: Node3D) -> float:
 	var magnification: Variant = weapon.get("scope_magnification") if weapon != null else null
 	return float(magnification) if magnification != null else 0.0
+
+
+func get_camera_adjustment() -> Dictionary:
+	return _view_adjustment.snapshot(self)
+
+
+func set_camera_adjustment(values: Dictionary) -> void:
+	_view_adjustment.restore(self, values)
