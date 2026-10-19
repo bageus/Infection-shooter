@@ -63,10 +63,12 @@ func spike_burst(center: Vector3, radius: float) -> void:
 func electric_pulse(center: Vector3, radius: float) -> void:
 	RANGE_DOME.spawn(_world(), center, radius, STORM_RANGE, 0.5)
 	PROCEDURAL.electric_pulse(_world(), center, radius)
+	_kick(0.04)
 
 ## Discharge: one lightning link from each point to the next.
 func chain_lightning(points: Array[Vector3]) -> void:
 	PROCEDURAL.chain_lightning(_world(), points)
+	_kick(0.02)
 
 ## Acid Spit: a pool of acid lying for `seconds`.
 func acid_pool(center: Vector3, radius: float, seconds: float) -> Node3D:
