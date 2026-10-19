@@ -6,6 +6,7 @@ extends SceneTree
 
 const PLAYER := preload("res://game/features/player/public/player.tscn")
 const DASH_TRAIL := preload("res://game/features/player/dash_trail.gd")
+const DASH_ZONE := preload("res://game/features/player/dash_floor_zone.gd")
 const RANGE_DOME := preload("res://game/features/player/range_dome.gd")
 const SKILL_EFFECTS := preload("res://game/features/player/mutation_skill_effects.gd")
 
@@ -85,6 +86,9 @@ func _check_procedural(stage: Node3D, player: Node3D, effects: Node, vfx: Node) 
 	_expect(player.get_child_count() == player_before + 2, "Procedural shield and heart ride on the player.")
 	var trail := DASH_TRAIL.start(stage, player, 0.15)
 	_expect(trail != null, "Predator Dash leaves a procedural trail.")
+	var zone := DASH_ZONE.spawn(stage, stage.get_world_3d(), Vector3.ZERO, Vector3.FORWARD, 0.15)
+	_expect(zone != null and zone.mesh.get_surface_count() == 1, "Predator Dash marks its strike lane on the floor.")
+	_expect(DASH_ZONE.spawn(stage, stage.get_world_3d(), Vector3.ZERO, Vector3.ZERO, 0.15) == null, "A dash with no heading marks nothing.")
 	for frame in 20:
 		await process_frame
 	await create_timer(1.6).timeout
