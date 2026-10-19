@@ -17,10 +17,9 @@ const MAX_POINTS := 24
 const POINT_SPACING := 0.12
 const POINT_LIFE := 0.45
 
-const HEAD := Color(0.95, 0.97, 1.0)
-const TAIL := Color(0.85, 0.25, 0.2)
+const STREAK_SHADER := preload("res://game/features/player/skill_fx/fx_dash_streak.gdshader")
 
-static var _material: StandardMaterial3D
+static var _material: ShaderMaterial
 
 var _target: Node3D
 var _record_left := 0.0
@@ -46,13 +45,8 @@ func _begin(target: Node3D, seconds: float) -> void:
 	mesh = _immediate
 	cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
 	if _material == null:
-		_material = StandardMaterial3D.new()
-		_material.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
-		_material.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
-		_material.blend_mode = BaseMaterial3D.BLEND_MODE_ADD
-		_material.vertex_color_use_as_albedo = true
-		_material.cull_mode = BaseMaterial3D.CULL_DISABLED
-		_material.no_depth_test = false
+		_material = ShaderMaterial.new()
+		_material.shader = STREAK_SHADER
 	material_override = _material
 	top_level = true
 	global_transform = Transform3D.IDENTITY
@@ -110,7 +104,7 @@ func _draw() -> void:
 		var level: Vector3 = LEVELS[index]
 		var offset := side * level.x + Vector3.UP * level.y
 		for i in _points.size() - 1:
-			_segment(_points[i] + offset, _points[i + 1] + offset, _fade(i), _fade(i + 1), eye, level.z, LEVEL_ALPHA[index])
+			_segment(_points[i] + offset, _points[i + 1] + offset, _fade(i), _fade(i + 1), eye, level.z, LEVEL_ALPHA[index], i, index)
 	_immediate.surface_end()
 
 
@@ -120,23 +114,23 @@ func _fade(index: int) -> float:
 
 
 ## A ribbon of three vertex rows: solid along the centre line, transparent at
-## both edges, so the streak is soft instead of a hard bar.
-func _segment(a: Vector3, b: Vector3, fade_a: float, fade_b: float, eye: Vector3, half_width: float, strength: float) -> void:
+## both edges, so the streak is soft instead of a hard bar. The colour only
+## carries the strength; the streak shader paints and tears it.
+func _segment(a: Vector3, b: Vector3, fade_a: float, fade_b: float, eye: Vector3, half_width: float, strength: float, step: int, streak: int) -> void:
 	var along := b - a
 	if along.length_squared() < 0.000001:
 		return
 	var across := along.cross(eye - a).normalized() * half_width
-	var color_a := TAIL.lerp(HEAD, fade_a)
-	var color_b := TAIL.lerp(HEAD, fade_b)
-	color_a.a = strength * fade_a
-	color_b.a = strength * fade_b
-	var clear_a := Color(color_a, 0.0)
-	var clear_b := Color(color_b, 0.0)
 	var width_a := fade_a * 0.5 + 0.5
 	var width_b := fade_b * 0.5 + 0.5
+	var u_a := step * POINT_SPACING
+	var u_b := (step + 1) * POINT_SPACING
 	for half in [-1.0, 1.0]:
 		var points := [a, a + across * half * width_a, b + across * half * width_b, b]
-		var colors := [color_a, clear_a, clear_b, color_b]
+		var uvs := [Vector2(u_a, 0.0), Vector2(u_a, 1.0), Vector2(u_b, 1.0), Vector2(u_b, 0.0)]
+		var alphas := [strength * fade_a, 0.0, 0.0, strength * fade_b]
 		for index in [0, 1, 2, 0, 2, 3]:
-			_immediate.surface_set_color(colors[index])
+			_immediate.surface_set_color(Color(1.0, 1.0, 1.0, alphas[index]))
+			_immediate.surface_set_uv(uvs[index])
+			_immediate.surface_set_uv2(Vector2(streak, 0.0))
 			_immediate.surface_add_vertex(points[index])
