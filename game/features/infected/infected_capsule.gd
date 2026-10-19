@@ -133,6 +133,7 @@ func configure_loot(config: Dictionary) -> void: _authoring.set_loot(config)
 func get_loot_config() -> Dictionary: return _authoring.loot()
 func configure_stats(config: Dictionary) -> void: _authoring.set_stats(config)
 func get_enemy_stats() -> Dictionary: return _authoring.stats()
+func get_damage_percent() -> float: return _authoring.damage_percent()
 
 
 func configure_chase_budget(budget: Node) -> void:

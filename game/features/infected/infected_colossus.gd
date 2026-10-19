@@ -55,7 +55,7 @@ func _release_slam() -> void:
 	parent.add_child(wave)
 	var feet := global_position + Vector3(0.0, -_half_height(), 0.0) - global_transform.basis.z * 0.9
 	audio.call("play", &"colossus_slam")
-	wave.configure(feet, slam_radius, slam_wave_speed, slam_player_damage * float(get_enemy_stats()["damage"]) / 100.0, slam_object_damage, self, Color(0.6, 0.46, 0.34, 0.8))
+	wave.configure(feet, slam_radius, slam_wave_speed, slam_player_damage * get_damage_percent() / 100.0, slam_object_damage, self, Color(0.6, 0.46, 0.34, 0.8))
 
 
 # The swipe is not used while the slam animation owns the body.

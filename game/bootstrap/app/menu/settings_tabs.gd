@@ -4,6 +4,7 @@ var notices := NOTICES.new()
 const SHADOWS := preload("res://game/bootstrap/app/menu/shadow_quality.gd")
 const SETTLE_SECONDS := 0.35
 const EDITOR := preload("res://game/bootstrap/app/menu/control_binding_editor.gd")
+const STYLE := preload("res://game/bootstrap/app/menu/menu_style.gd")
 var dialog: Control
 var tabs: TabContainer
 var controls: RefCounted
@@ -98,6 +99,7 @@ func _general() -> void:
 	scale.item_selected.connect(dialog._scale_changed)
 	dialog.call("_row", "scale", scale)
 	_enemy_modes()
+	_enemy_difficulty()
 	var cloud := CheckButton.new()
 	cloud.name = "TestMutagen"
 	cloud.text = dialog.view.text("testMutagen")
@@ -138,6 +140,37 @@ func _enemy_modes() -> void:
 		toggle.button_pressed = bool(dialog.view.preferences.values[entry[2]])
 		toggle.toggled.connect(func(value: bool) -> void: dialog.call("_change", entry[2], value))
 		dialog.get("layout").add_child(toggle)
+
+
+## Three steps; the label names the step, and the file is written once on release like the walk sliders.
+func _enemy_difficulty() -> void:
+	var names := ["enemyDifficultyLow", "enemyDifficultyNormal", "enemyDifficultyHigh"]
+	var slider := HSlider.new()
+	slider.name = "EnemyDifficulty"
+	slider.custom_minimum_size.x = 160
+	slider.min_value = 0
+	slider.max_value = 2
+	slider.step = 1
+	slider.value = dialog.view.preferences.values.enemy_difficulty
+	slider.tooltip_text = dialog.view.text("enemyDifficultyHint")
+	var value_label := STYLE.label(dialog.view.text(names[int(slider.value)]), 13)
+	value_label.name = slider.name + "Value"
+	value_label.custom_minimum_size.x = 92
+	var box := HBoxContainer.new()
+	box.add_child(slider)
+	box.add_child(value_label)
+	var dragging := [false]
+	slider.drag_started.connect(func() -> void: dragging[0] = true)
+	slider.drag_ended.connect(func(_changed: bool) -> void:
+		dragging[0] = false
+		dialog.call("_commit"))
+	slider.value_changed.connect(func(value: float) -> void:
+		value_label.text = dialog.view.text(names[int(value)])
+		dialog.view.preferences.values.enemy_difficulty = int(value)
+		dialog.view.preferences.apply_to_game(dialog.view.get_tree())
+		if not dragging[0]:
+			dialog.call("_commit"))
+	dialog.call("_row", "enemyDifficulty", box)
 
 
 func _video() -> void:
