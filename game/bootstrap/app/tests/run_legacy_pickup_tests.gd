@@ -137,7 +137,7 @@ func _test_real_player() -> void:
 		if index < 2:
 			player.set("health", float(player.get("max_health")) - .25)
 		else:
-			weapon.set("_reserve_ammo", int(weapon.get("max_reserve_ammo")) - 2)
+			weapon.get("_reserve").amount = int(weapon.get("max_reserve_ammo")) - 2
 		item.body_entered.emit(player)
 		_check(item.is_queued_for_deletion(), "Real player accepts same object after capacity changes")
 		_check(player.get("health") == player.get("max_health"), "Real health stays capped")

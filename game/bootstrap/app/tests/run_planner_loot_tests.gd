@@ -63,24 +63,23 @@ func _weapon_ammo(player: Node3D) -> void:
 		var config := CONFIG.sanitize({"mode":"manual", "items":{id:1}})
 		_check(config["items"].get(id) == 1, "Manual ammo survives sanitization: " + id)
 		var weapon: Node = player.get("weapons")[expected[id][0]]
-		weapon.set("_reserve_ammo", 0)
+		weapon.get("_reserve").amount = 0
 		var item := (drops.SCENES[id] as PackedScene).instantiate()
 		stage.add_child(item)
 		item.call("_on_body_entered", player)
-		_check(weapon.get("_reserve_ammo") == expected[id][1], "Pickup feeds correct weapon: " + id)
+		_check(weapon.get("_reserve").amount == expected[id][1], "Pickup feeds correct weapon: " + id)
 		_check(item.is_queued_for_deletion(), "Accepted ammo is consumed")
 		await process_frame
-	# A shared box feeds M4 when AK is already full, and stays when both are full.
+	# AK and M4 share one reserve: a box refills it, and a full reserve leaves the box on the floor.
 	var ak: Node = player.get("weapons")[4]
 	var m4: Node = player.get("weapons")[5]
-	ak.set("_reserve_ammo", ak.get("max_reserve_ammo"))
-	m4.set("_reserve_ammo", 0)
+	ak.get("_reserve").amount = 0
 	var shared := (drops.SCENES["ammo_automate"] as PackedScene).instantiate()
 	stage.add_child(shared)
 	shared.call("_on_body_entered", player)
-	_check(m4.get("_reserve_ammo") == 30, "Shared box falls back from full AK to M4")
+	_check(m4.call("get_reserve_ammo") == 30, "Shared box refills the M4 from the shared AK reserve")
 	await process_frame
-	m4.set("_reserve_ammo", m4.get("max_reserve_ammo"))
+	ak.get("_reserve").amount = ak.get("_reserve").capacity
 	shared = (drops.SCENES["ammo_automate"] as PackedScene).instantiate()
 	stage.add_child(shared)
 	shared.call("_on_body_entered", player)
