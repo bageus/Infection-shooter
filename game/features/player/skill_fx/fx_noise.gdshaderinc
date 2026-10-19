@@ -62,3 +62,11 @@ vec4 fx_premul(vec3 color, float cover, float glow) {
 	cover = clamp(cover, 0.0, 1.0);
 	return vec4(color * cover, cover * (1.0 - glow));
 }
+
+// Fire colour by heat: dark ember -> red-orange -> amber -> white-hot.
+vec3 fx_fire_ramp(float h) {
+	h = clamp(h, 0.0, 1.0);
+	vec3 c = mix(vec3(0.25, 0.02, 0.0), vec3(1.0, 0.25, 0.03), smoothstep(0.0, 0.35, h));
+	c = mix(c, vec3(1.0, 0.65, 0.15), smoothstep(0.3, 0.65, h));
+	return mix(c, vec3(1.0, 0.97, 0.85), smoothstep(0.65, 0.95, h));
+}

@@ -38,6 +38,10 @@ func _capture() -> void:
 		await _dash_shots(center)
 		quit(0)
 		return
+	if OS.get_cmdline_user_args().has("strike"):
+		await _strike_shots(center)
+		quit(0)
+		return
 
 	_vfx.call("buff_started", "storm_pulse")
 	await _shot("storm_pulse_field", 0.5)
@@ -106,6 +110,17 @@ func _dash_shots(center: Vector3) -> void:
 	await _shot("predator_dash_start", 0.0)
 	await _shot("predator_dash_trail", 0.2)
 	await _shot("predator_dash_end", 0.2)
+
+
+## Power Strike from the game camera: gathering, mid-lunge, the burst, the afterglow.
+func _strike_shots(center: Vector3) -> void:
+	_camera.look_at_from_position(center + Vector3(4.5, 6.0, 3.5), center + Vector3(0, 0, -2.0), Vector3.UP)
+	_player.global_position = center
+	_vfx.call("power_strike", center, Vector3.FORWARD)
+	await _shot("power_strike_gather", 0.08)
+	await _shot("power_strike_lunge", 0.14)
+	await _shot("power_strike_burst", 0.1)
+	await _shot("power_strike_afterglow", 0.25)
 
 
 func _build_stage() -> void:
