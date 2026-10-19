@@ -60,7 +60,7 @@ directional_shadow_mode = 1
 directional_shadow_split_1 = 0.35
 directional_shadow_blend_splits = true
 directional_shadow_fade_start = 0.9
-directional_shadow_max_distance = 64.0
+directional_shadow_max_distance = 80.0
 
 [node name="PlanningLighting" type="Node" parent="." unique_id=1786001174]
 process_mode = 3

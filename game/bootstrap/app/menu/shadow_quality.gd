@@ -13,8 +13,8 @@ const OFF_DISTANCE := 0.5
 const LEVELS: Array[Dictionary] = [
 	{"atlas": 1024, "distance": 32.0},
 	{"atlas": 2048, "distance": 48.0},
-	{"atlas": 2048, "distance": 64.0},
-	{"atlas": 4096, "distance": 64.0},
+	{"atlas": 2048, "distance": 80.0},
+	{"atlas": 4096, "distance": 80.0},
 ]
 
 

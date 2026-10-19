@@ -24,7 +24,7 @@ func _initialize() -> void:
 
 
 # Fixed test placements on the empty fixture floor.
-const SPOTS := [Vector2(470, 230), Vector2(660, 230), Vector2(470, 460), Vector2(660, 460), Vector2(1040, 460), Vector2(960, 560), Vector2(850, 460), Vector2(1040, 300)]
+const SPOTS := [Vector2(470, 230), Vector2(660, 230), Vector2(470, 460), Vector2(470, 560), Vector2(1040, 460), Vector2(960, 560), Vector2(850, 460), Vector2(1040, 300)]
 
 
 func _run() -> void:

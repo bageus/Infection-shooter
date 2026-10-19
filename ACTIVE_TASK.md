@@ -7,6 +7,9 @@ owner: AI
 updated: 2026-10-18
 ---
 
+19.10.2026 (наклон игровой камеры — прямой запрос владельца): наклон player camera зафиксирован -37.3° в player.tscn и camera_adjustment PITCH; Alt+ЛКМ меняет только поворот, сохранённый pitch игнорируется. Тесты run_shooting_camera_tests и run_gameplay_camera_tuning_tests PASS на Godot4.7.2 headless, import exit0. Планировщик не менялся. Следующее действие — gates, PR и слияние по правилу проекта.
+
+
 18.10.2026 (PR311 CI repair — проверено): локально воспроизведены те же8 missing .tres preload ошибок на pinned d7245e7 game + candidate assets. После архивации baseline assets оба реальных probe capture_enemy_skins и bench_enemy_materials успешно компилируются --headless --check-only, без SCRIPT ERROR/ERROR. Workflow меняет только источник baseline assets; old PCM находится исключительно во временном baseline, production остаётся OGG-only. Project/spec/workflow/architecture/source-size/CI coverage, test_ci_suite_coverage, media receipt8 и diff PASS. Native сравнение будет повторено на GitHub runner с Xvfb; render assertions и baseline SHA не изменены. Следующее точное действие — опубликовать fix PR311 и проверить enemy-skin-rendering нового head, затем оставшиеся CI jobs.
 
 

@@ -50,14 +50,14 @@ func _run() -> void:
 	player._unhandled_input(motion)
 	var dragged: Dictionary = player.get_camera_adjustment()
 	check(absf(dragged.yaw - before_drag.yaw + rad_to_deg(0.08)) < 0.001, "Alt+LMB uses planner horizontal sensitivity")
-	check(absf(dragged.pitch - before_drag.pitch - rad_to_deg(0.04)) < 0.001, "Alt+LMB uses planner vertical sensitivity")
+	check(absf(dragged.pitch + 37.3) < 0.001 and absf(dragged.pitch - before_drag.pitch) < 0.001, "Alt+LMB cannot change the fixed pitch")
 	button.pressed = false
 	Input.parse_input_event(button.duplicate())
 	Input.flush_buffered_events()
 	player.set_camera_adjustment(before_drag)
 	tuning._process(0.0)
 	check(tuning.readout.visible and tuning._dirty, "Alt shows parameters and tracks camera changes")
-	check(tuning.readout.text.contains("33.25") and tuning.readout.text.contains("57.50"), "Readout exposes reproducible angles")
+	check(tuning.readout.text.contains("33.25") and tuning.readout.text.contains("-37.30"), "Readout exposes reproducible angles")
 	paused = true
 	tuning._process(0.0)
 	check(not tuning.readout.visible and not tuning._dirty, "Paused game hides overlay and flushes pending setting")
@@ -73,7 +73,7 @@ func _run() -> void:
 	tuning.setup(player)
 	tuning.set_process(false)
 	var restored: Dictionary = player.get_camera_adjustment()
-	check(absf(restored.yaw - wanted.yaw) < 0.001 and absf(restored.pitch - wanted.pitch) < 0.001 and restored.distance == wanted.distance, "New mission restores saved view")
+	check(absf(restored.yaw - wanted.yaw) < 0.001 and absf(restored.pitch + 37.3) < 0.001 and restored.distance == wanted.distance, "New mission restores saved yaw and distance with fixed pitch")
 	tuning.free()
 	player.queue_free()
 	await process_frame

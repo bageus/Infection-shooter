@@ -168,7 +168,7 @@ func _shadow_checks(tabs: TabContainer, dialog: Control) -> void:
 	shadow_prefs.values.shadows = true
 	shadow_prefs.values.shadow_quality = 2
 	shadow_prefs.apply_to_game(self)
-	_check(sun.shadow_enabled and sun.directional_shadow_max_distance == 64.0 and sun.directional_shadow_mode == DirectionalLight3D.SHADOW_PARALLEL_2_SPLITS, "High quality restores the authored shadow setup")
+	_check(sun.shadow_enabled and sun.directional_shadow_max_distance == 80.0 and sun.directional_shadow_mode == DirectionalLight3D.SHADOW_PARALLEL_2_SPLITS, "High quality restores the authored shadow setup")
 	shadow_prefs.values.shadow_quality = 0
 	shadow_prefs.apply_to_game(self)
 	_check(sun.directional_shadow_max_distance == 32.0 and sun.directional_shadow_mode == DirectionalLight3D.SHADOW_PARALLEL_2_SPLITS, "Low quality shortens range and keeps the split mode")
