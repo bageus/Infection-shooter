@@ -86,6 +86,11 @@ func _test_partition_sound() -> void:
 		furniture.set("model_path", MODELS + model)
 		_expect(furniture.call("get_impact_sound_material", -1) == "wood", "%s rings like wood on impact." % model.get_file())
 		furniture.free()
+	for model in ["03/03_file_cabinet_small_shelf_fancy.glb", "03/03_file_cabinet_large_shelf_fancy.glb"]:
+		var mixed := PROP_SCENE.instantiate() as RigidBody3D
+		mixed.set("model_path", MODELS + model)
+		_expect(mixed.call("get_impact_sound_material", -1) in ["wood", "metal"], "%s rings like metal or wood on impact." % model.get_file())
+		mixed.free()
 	var locker := PROP_SCENE.instantiate() as RigidBody3D
 	locker.set("model_path", MODELS + "03/03_locker_tall_dented.glb")
 	_expect(locker.call("get_impact_sound_material", -1) == "metal", "Metal lockers still ring like metal on impact.")
