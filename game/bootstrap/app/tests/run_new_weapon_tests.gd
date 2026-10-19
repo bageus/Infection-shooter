@@ -153,7 +153,7 @@ func _test_minigun(actor: CharacterBody3D, effects: Node3D, crosshair: Node) -> 
 				bullet.queue_free()
 		if shot % 20 == 0:
 			await process_frame
-	_check(gun.call("get_magazine_ammo") == 0 and gun.get("_reserve_ammo") == 0, "400 shots consume the entire direct reserve")
+	_check(gun.call("get_magazine_ammo") == 0 and gun.get("_reserve").amount == 0, "400 shots consume the entire direct reserve")
 	gun.set("_cooldown_remaining", 0.0)
 	_check(not actor.call("_fire_weapon", gun) and not gun.call("is_reloading"), "Empty belt cannot shoot or auto-reload")
 	# After release the barrels keep full speed for a moment, then slow down.

@@ -108,6 +108,8 @@ func _ready() -> void:
 	_animation_selection.configure(self, aim_pivot, weapon_stance)
 	$AnimationDriver.call("configure_clip_selector", _animation_selection.select_clip)
 	_select_weapon(0)
+	# AK and M4 take the same ammo type, so they spend and refill one reserve.
+	weapons[5].call("share_reserve_with", weapons[4])
 	mutation_effects = MUTATION_EFFECTS.new()
 	add_child(mutation_effects)
 	mutation_effects.call("configure", self, infection_runtime, weapons)

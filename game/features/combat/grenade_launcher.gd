@@ -43,7 +43,7 @@ func try_fire_at(target_point: Vector3) -> bool:
 
 
 func start_reload() -> void:
-	if _reloading or _magazine_ammo >= magazine_size or _reserve_ammo <= 0:
+	if _reloading or _magazine_ammo >= magazine_size or _reserve.amount <= 0:
 		return
 	var casings := ART.casing_model()
 	var pool := get_parent().get_node_or_null("SpentCasings")
