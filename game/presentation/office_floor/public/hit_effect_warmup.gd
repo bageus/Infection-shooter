@@ -16,6 +16,7 @@ const SFX_EVENTS: Array[StringName] = [&"extinguisher_spray", &"extinguisher_bur
 const AUDIO_WARMUP := preload("res://game/presentation/office_floor/audio_warmup.gd")
 const FLIPBOOK := preload("res://game/core/vfx/public/sprite_flipbook.gd")
 const ATLASES := preload("res://game/core/vfx/public/effect_atlases.gd")
+const DANGER_ZONE := preload("res://game/features/combat/public/floor_danger_zone.gd")
 const FRAMES := 4
 const DISTANCE := 2.0
 
@@ -49,6 +50,9 @@ func setup(parent: Node) -> void:
 		if ATLASES.available(atlas):
 			FLIPBOOK.spawn(self, atlas, point, 0.5, {})
 	_warm_extinguisher(point)
+	# Floor warning ring for grenades and the toppled extinguisher: its fade-alpha
+	# material compiles on first fade-in, i.e. just before the blast. Below the camera, so the discs face it.
+	DANGER_ZONE.spawn(self, _viewport.world_3d, point + Vector3.DOWN * 0.6, 0.5, 0.0, 1.0)
 	var droplet := MeshInstance3D.new()
 	droplet.mesh = WATER._droplet_mesh()
 	droplet.position = point
