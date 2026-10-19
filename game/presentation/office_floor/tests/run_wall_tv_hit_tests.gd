@@ -1,10 +1,6 @@
 extends SceneTree
-## A wall TV buried in the thick collision of a wall or column is slid out so bullets reach it.
-const PROP := preload("res://game/presentation/office_floor/public/props/environment_prop.tscn")
-const SUPPORTS := [
-	"res://game/presentation/office_floor/public/structural/wall_straight.tscn",
-	"res://game/presentation/office_floor/public/structural/column.tscn",
-]
+## Every authored wall TV must be reachable by a bullet from its front, not buried in a wall or column.
+const LAYOUT := "res://game/presentation/office_floor/public/base_office_layout.tscn"
 var failures := 0
 
 
@@ -13,43 +9,35 @@ func _initialize() -> void:
 
 
 func _run() -> void:
-	for support_path: String in SUPPORTS:
-		for model in ["05_wall_TV_frameless_destructible.glb", "05_wall_TV_destructible.glb"]:
-			await _case(support_path, "res://models/objects/enviroments/05/" + model)
-	print("Wall TV hit tests: %d failures" % failures)
+	var scene := (load(LAYOUT) as PackedScene).instantiate() as Node3D
+	root.add_child(scene)
+	for i in 10:
+		await physics_frame
+	var space := scene.get_world_3d().direct_space_state
+	var tvs: Array[Node] = []
+	_find(scene, tvs)
+	if tvs.size() < 60:
+		failures += 1
+		push_error("Expected the authored wall TVs, found %d" % tvs.size())
+	for tv: Node3D in tvs:
+		var front := tv.global_basis.z.normalized()
+		var query := PhysicsRayQueryParameters3D.create(tv.global_position + front * 1.0, tv.global_position, 7)
+		var hit := space.intersect_ray(query)
+		if hit.is_empty() or hit.collider != tv:
+			failures += 1
+			push_error("Bullet does not reach the wall TV at %s" % tv.global_position)
+	if not tvs.is_empty():
+		var tv := tvs[0] as Node3D
+		tv.call("take_projectile_hit", 80.0, tv.global_position, tv.global_basis.z, -tv.global_basis.z, "UZI")
+		if tv.get("_damage").health >= 65.0:
+			failures += 1
+			push_error("A shot wall TV takes no damage")
+	print("Wall TV hit tests: %d TVs, %d failures" % [tvs.size(), failures])
 	quit(1 if failures else 0)
 
 
-func _case(support_path: String, model: String) -> void:
-	var stage := Node3D.new()
-	root.add_child(stage)
-	var support := (load(support_path) as PackedScene).instantiate() as Node3D
-	support.rotation_degrees.y = 90.0 if "wall" in support_path else 0.0
-	stage.add_child(support)
-	await physics_frame
-	var space := stage.get_world_3d().direct_space_state
-	var face := space.intersect_ray(PhysicsRayQueryParameters3D.create(Vector3(-5, 1.0, 0), Vector3(5, 1.0, 0), 7))
-	if face.is_empty():
-		failures += 1
-		push_error("Support has no collision: " + support_path)
-		stage.queue_free()
-		return
-	var tv := PROP.instantiate() as Node3D
-	tv.set("model_path", model)
-	tv.rotation_degrees.y = -90.0 # Facing -X, like the authored wall TVs.
-	tv.position = Vector3(face.position.x + 0.03, 1.0, face.position.z)
-	stage.add_child(tv)
-	for i in 6:
-		await physics_frame
-	var shot := space.intersect_ray(PhysicsRayQueryParameters3D.create(Vector3(-5, 1.0, face.position.z), Vector3(5, 1.0, face.position.z), 7))
-	var label := support_path.get_file() + " / " + model.get_file()
-	if shot.is_empty() or shot.collider != tv:
-		failures += 1
-		push_error("Bullet does not reach the buried TV: " + label)
-	else:
-		tv.call("take_projectile_hit", 80.0, shot.position, shot.normal, Vector3.RIGHT, "UZI")
-		if tv.get("_damage").health >= 65.0:
-			failures += 1
-			push_error("Shot TV takes no damage: " + label)
-	stage.queue_free()
-	await process_frame
+func _find(node: Node, out: Array[Node]) -> void:
+	if "wall_TV" in str(node.get("model_path")):
+		out.append(node)
+	for child in node.get_children():
+		_find(child, out)
