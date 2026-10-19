@@ -52,7 +52,8 @@ func setup(parent: Node) -> void:
 	_warm_extinguisher(point)
 	# Floor warning ring for grenades and the toppled extinguisher: its fade-alpha
 	# material compiles on first fade-in, i.e. just before the blast. Below the camera, so the discs face it.
-	DANGER_ZONE.spawn(self, _viewport.world_3d, point + Vector3.DOWN * 0.6, 0.5, 0.0, 1.0)
+	if get_world_3d() != null:
+		DANGER_ZONE.spawn(self, get_world_3d(), point + Vector3.DOWN * 0.6, 0.5, 0.0, 1.0)
 	var droplet := MeshInstance3D.new()
 	droplet.mesh = WATER._droplet_mesh()
 	droplet.position = point
