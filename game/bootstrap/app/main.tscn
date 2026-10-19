@@ -73,7 +73,7 @@ script = ExtResource("base_floor_renderer")
 collision_layer = 3
 
 [node name="CollisionShape3D" type="CollisionShape3D" parent="FloorBody" unique_id=872202857]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.1, 0)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.0865, 0)
 shape = SubResource("floor_shape")
 
 [node name="Structure" type="Node3D" parent="." unique_id=1779365985]
