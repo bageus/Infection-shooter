@@ -1,5 +1,6 @@
 extends SceneTree
 const LAYOUT_ASSERTIONS := preload("res://game/bootstrap/app/tests/layout_assertions.gd")
+const TILT := preload("res://game/bootstrap/app/planning_tilt.gd")
 
 const MAIN := preload("res://game/bootstrap/app/main.tscn")
 const LIGHT_PATH := "res://game/presentation/office_floor/public/props/planner_light.tscn"
@@ -26,6 +27,7 @@ func _run() -> void:
 	planner.call("_zoom_camera", 2.5)
 	_check(camera.global_position.y > before.y, "Planning camera responds to wheel command")
 	await _exercise_edits(planner)
+	_exercise_tilt(planner)
 	await _exercise_gore_palette(planner)
 	await _exercise_maps(planner)
 	planner.call("exit")
@@ -71,6 +73,34 @@ func _exercise_edits(planner: Node) -> void:
 	var spot := light.find_child("Light", true, false) as SpotLight3D
 	_check(spot != null and light.has_meta("planning_light_energy"), "Selected light updates persisted settings")
 	await process_frame
+
+
+# T / Y lay an object on its side in quarter turns and keep its lowest point on the same surface.
+func _exercise_tilt(planner: Node) -> void:
+	var editor: Node = planner.get("objects")
+	var table := planner.call("_instantiate_asset", TABLE_PATH) as Node3D
+	(planner.get("root") as Node3D).add_child(table)
+	table.set_meta("planning_scene_path", TABLE_PATH)
+	table.rotation_degrees.y = 30.0
+	var geometry: Variant = editor.get("geometry")
+	TILT.ground(table, geometry._combined_aabb(table), 0.0)
+	var bottom := TILT.bottom_y(table, geometry._combined_aabb(table))
+	editor.call("tilt_object", table, true)
+	_check(table.basis.is_equal_approx(_upright_basis(90.0, 30.0, 0.0)), "Lay turns about X and keeps yaw")
+	_check(absf(TILT.bottom_y(table, geometry._combined_aabb(table)) - bottom) < 0.01, "Laid object keeps its lowest point on the surface")
+	editor.call("tilt_object", table, false)
+	_check(table.basis.is_equal_approx(_upright_basis(90.0, 30.0, 90.0)), "Lay turns about Z independently")
+	for turn in 3:
+		editor.call("tilt_object", table, false)
+	_check(table.basis.is_equal_approx(_upright_basis(90.0, 30.0, 0.0)), "Four quarter turns about Z return to the start")
+	for turn in 3:
+		editor.call("tilt_object", table, true)
+	_check(table.basis.is_equal_approx(_upright_basis(0.0, 30.0, 0.0)), "Four quarter turns about X return the object upright")
+	table.queue_free()
+
+
+func _upright_basis(x: float, y: float, z: float) -> Basis:
+	return Basis.from_euler(Vector3(deg_to_rad(x), deg_to_rad(y), deg_to_rad(z)))
 
 
 # Gore and Blood palettes (ADR-0017); the placed objects then go through the
