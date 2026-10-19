@@ -7,13 +7,14 @@ const UI_TRANSLATIONS := preload("res://game/core/localization/public/ui_transla
 const CORPSE_BUDGET := preload("res://game/features/infected/public/corpse_budget.gd")
 const ENEMY_DIFFICULTY := preload("res://game/features/infected/public/enemy_difficulty.gd")
 const BLOOD_LEVEL := preload("res://game/core/vfx/public/blood_level.gd")
+const EFFECTS_QUALITY := preload("res://game/core/vfx/public/effects_quality.gd")
 var bindings := BINDINGS.new()
 
 const FILE := "user://interface_settings.cfg"
 const DEFAULTS := {"window_mode": 0, "resolution": "1280x720", "language": "ru", "brightness": 1.0, "text_scale": 1.0,
 	"enemies_ignore_player": false, "enemies_no_damage": false, "enemy_difficulty": 1,
 	"walk_speed_multiplier": 1.0, "walk_animation_multiplier": 1.0,
-	"volume": 0.4, "effects_volume": 1.0, "music_volume": 1.0, "menu_music": true, "menu_music_volume": 1.0, "sound": true, "occlusion_mode": 0, "test_mutagen": false, "infinite_antidotes": false, "lighting": true, "game_lights_only": false, "electronic_particles": true, "blood_style": 0, "blood_level": 2, "dodge_animation": 0,
+	"volume": 0.4, "effects_volume": 1.0, "music_volume": 1.0, "menu_music": true, "menu_music_volume": 1.0, "sound": true, "occlusion_mode": 0, "test_mutagen": false, "infinite_antidotes": false, "lighting": true, "game_lights_only": false, "electronic_particles": true, "blood_style": 0, "blood_level": 2, "effects_quality": 2, "dodge_animation": 0,
 	"bullet_impact_smoke": true, "sunlight": true, "shadows": true, "shadow_quality": 2, "mesh_lod": true, "keep_corpses": true, "floor_hints": true}
 var values: Dictionary = DEFAULTS.duplicate()
 
@@ -36,6 +37,7 @@ func load_settings() -> void:
 	values.enemy_difficulty = clampi(values.enemy_difficulty, ENEMY_DIFFICULTY.LOW, ENEMY_DIFFICULTY.HIGH)
 	values.blood_style = clampi(values.blood_style, 0, 1)
 	values.blood_level = clampi(values.blood_level, 0, BLOOD_LEVEL.COUNT - 1)
+	values.effects_quality = clampi(values.effects_quality, 0, EFFECTS_QUALITY.COUNT - 1)
 	values.dodge_animation = clampi(values.dodge_animation, 0, 1)
 	values.walk_speed_multiplier = clampf(values.walk_speed_multiplier, 0.5, 1.5) if is_finite(values.walk_speed_multiplier) else 1.0
 	values.walk_animation_multiplier = clampf(values.walk_animation_multiplier, 0.5, 2.0) if is_finite(values.walk_animation_multiplier) else 1.0
@@ -83,6 +85,7 @@ func apply_to_game(tree: SceneTree, display_user_action: bool = false) -> void:
 	if menu_bus >= 0:
 		AudioServer.set_bus_volume_db(menu_bus, linear_to_db(maxf(float(values.menu_music_volume), 0.0001)))
 		AudioServer.set_bus_mute(menu_bus, not bool(values.menu_music) or float(values.menu_music_volume) <= 0.0)
+	EFFECTS_QUALITY.set_level(int(values.effects_quality))
 	var scene := tree.current_scene if tree != null else null
 	if scene != null and scene.has_method("refresh_control_labels"):
 		scene.call("refresh_control_labels")
