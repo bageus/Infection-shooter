@@ -166,6 +166,7 @@ game/bootstrap/app/tests/run_bullet_smoke_tests.gd
 game/bootstrap/app/tests/run_display_settings_tests.gd
 game/bootstrap/app/tests/run_door_blood_attachment_tests.gd
 game/presentation/office_floor/tests/run_wall_mount_support_tests.gd
+game/presentation/office_floor/tests/run_wall_tv_hit_tests.gd
 game/bootstrap/app/tests/run_planning_settle_tests.gd
 game/features/infected/tests/run_visual_preparation_tests.gd
 game/features/infection/tests/run_active_skill_state_tests.gd
