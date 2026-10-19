@@ -42,6 +42,8 @@ func _bind_collaborators(node: Node) -> void:
 		node.call("configure_footstep_surface", query)
 	if node.has_method("configure_glass_debris"):
 		node.call("configure_glass_debris", debris_floor)
+	if node.has_method("configure_floor_debris") and is_instance_valid(debris_floor):
+		node.call("configure_floor_debris", debris_floor)
 	if node.has_method("configure_visual_preparation") and is_instance_valid(_visual_budget) and is_instance_valid(_visual_budget.camera):
 		node.call("configure_visual_preparation", _visual_budget)
 	if node.has_method("configure_chase_budget"):

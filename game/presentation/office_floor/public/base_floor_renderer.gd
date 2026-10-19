@@ -10,6 +10,9 @@ const GLASS_SCATTER := preload("res://game/presentation/office_floor/glass_floor
 const SURFACE_EVENTS := preload("res://game/presentation/office_floor/surface_decal_events.gd")
 const SURFACE_SETTINGS := preload("res://game/presentation/office_floor/public/surface_decal_config.gd")
 const MATERIAL_SCATTER := preload("res://game/presentation/office_floor/material_floor_scatter.gd")
+const ATLASES := preload("res://game/presentation/office_floor/debris_atlases.gd")
+const CASING_SIZE := 0.06 # Spent brass reads as a small plastic chip, about the casing's width.
+const CASING_MIN_SIZE := 0.04
 
 @export var floor_size := Vector2(80.0, 60.0)
 @export var tile_step := 2.0
@@ -145,17 +148,23 @@ func scatter_prop_debris(at: Vector3, footprint: Vector2, recipe: Array[String],
 	MATERIAL_SCATTER.scatter(self, at, footprint, recipe, direction, excluded)
 
 
-func stamp_material_debris(at: Vector2, kind: String, frame: int, size: float, turns: int = 0) -> bool:
+func stamp_material_debris(at: Vector2, kind: String, frame: int, size: float, turns: int = 0, min_size: float = 0.25) -> bool:
 	if not at.is_finite() or not Rect2(-floor_size * 0.5, floor_size).has_point(at):
 		return false
 	for opening in openings:
 		if opening.has_point(at):
 			return false
 	var config: Dictionary = _surface_events.settings.debris
-	var accepted := _glass.stamp(at, frame, clampf(size * float(config.size), 0.25, 1.5), turns, kind, config.opacity)
+	var accepted := _glass.stamp(at, frame, clampf(size * float(config.size), min_size, 1.5), turns, kind, config.opacity)
 	if accepted:
 		set_process(true)
 	return accepted
+
+
+# Landed spent casings (floor-local XZ) become small chips; the caller removes the body once accepted.
+func stamp_casing_debris(at: Vector2) -> bool:
+	var rng := RandomNumberGenerator.new()
+	return stamp_material_debris(at, "plastic", ATLASES.choose_frame("plastic", true, rng), CASING_SIZE, rng.randi_range(0, 3), CASING_MIN_SIZE)
 
 
 func has_glass_at(world_position: Vector3) -> bool:
