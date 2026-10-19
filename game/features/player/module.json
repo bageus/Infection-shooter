@@ -52,11 +52,6 @@
       "healed": "signal healed(amount: float, source: StringName); emitted only when health actually increased"
     },
     "weapon_view_v1": "get_weapon_view() -> Dictionary {camera: Camera3D, target: Vector3, magnification: float}; transient read-only view, never persisted",
-    "antidote_confirmation_v1": {
-      "antidote_confirmation_requested": "signal antidote_confirmation_requested(preview:Dictionary); ordinary use with skill loss/dormancy requests paused bootstrap presentation",
-      "confirm_antidote": "confirm_antidote() -> bool; revalidates pending preview and current stock, consumes once",
-      "cancel_antidote": "cancel_antidote() -> void; discards pending use"
-    },
     "mutation_dash_v2": "mutation_dash() retains0.4s window, travels6m at15m/s, passes infected collision while pushing sideways, stops at scenery until window ends",
     "footstep_surface_v1": {
       "configure_footstep_surface": "configure_footstep_surface(query: Callable) -> void; injected optional query(world_position: Vector3) -> bool, true means glass; evaluated only on grounded animation contacts"

@@ -13,7 +13,6 @@ const LIT := Color(0.3, 0.95, 0.1)
 const CIRCLE := 66.0
 const CIRCLE_ICON := 42
 
-var antidote_confirmation: Node
 var runtime: Node
 var window: Control
 var panel: PanelContainer
@@ -173,13 +172,10 @@ func _on_mutation_changed(amount: float, _limit: float) -> void:
 
 
 func _input(event: InputEvent) -> void:
-	if is_instance_valid(antidote_confirmation) and antidote_confirmation.call("is_open"):
-		return
 	if is_tree_open() and event.is_action_pressed("antidote") and not event.is_echo():
 		var player := runtime.get_parent()
 		var used: bool = player != null and player.has_method("use_antidote") and bool(player.call("use_antidote"))
-		# A pending confirmation also consumes the key: the dialog owns it now.
-		if used or (is_instance_valid(antidote_confirmation) and antidote_confirmation.call("is_open")):
+		if used:
 			get_viewport().set_input_as_handled()
 		return
 	if is_tree_open() and event is InputEventKey and event.pressed and not event.echo and event.keycode == KEY_ESCAPE:
@@ -188,8 +184,6 @@ func _input(event: InputEvent) -> void:
 
 
 func _unhandled_input(event: InputEvent) -> void:
-	if is_instance_valid(antidote_confirmation) and antidote_confirmation.call("is_open"):
-		return
 	if not visible:
 		return
 	if (event is InputEventKey and event.pressed and not event.echo) or (event is InputEventMouseButton and event.pressed):

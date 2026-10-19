@@ -15,8 +15,6 @@ signal blast_stun_ended()
 ## Health actually restored (after caps and skill bonuses); source is
 ## &"medkit" for medkit pickups and empty for other healing.
 signal healed(amount: float, source: StringName)
-@warning_ignore("unused_signal")
-signal antidote_confirmation_requested(preview: Dictionary)
 var _antidote_action := preload("res://game/features/player/player_antidote.gd").new()
 
 const CONTROL_LOSS := preload("res://game/features/player/mutation_control_loss.gd")
@@ -377,14 +375,6 @@ func heal(amount:float, source: StringName = &"")->float:
 	return gained
 func use_antidote() -> bool:
 	return _antidote_action.request(self)
-
-
-func confirm_antidote() -> bool:
-	return _antidote_action.confirm(self)
-
-
-func cancel_antidote() -> void:
-	_antidote_action.cancel()
 
 func add_ammo_to_current_weapon(amount:int)->int:return get_current_weapon().call("add_reserve_ammo",amount)
 func add_ammo_for_weapon(weapon_name:String,amount:int)->int:

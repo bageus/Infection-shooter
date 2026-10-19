@@ -10,7 +10,7 @@ Status: accepted; Date: 2026-10-15; Owner: bageus.
 
 ## Владельцы и контракты
 
-MutationTree владеет peak_mutation. Runtime обновляет его при изменении мутации, включая значение до антидота. ControlProgress владеет локальной историей уровня и строит чистый antidote_preview DTOv1 через копию learned/locked и тот же reconcile, без дублирования правил потерь в UI. PlayerAntidote владеет pending request и проверяет неизменность превью/наличие дозы перед исполнением; доза расходуется ровно один раз. Публичные сигнал antidote_confirmation_requested, confirm_antidote/cancel_antidote описаны features.player/module.json; preview/begin/complete — features.infection/module.json. Новых dependency edges или глобального состояния нет.
+MutationTree владеет peak_mutation. Runtime обновляет его при изменении мутации, включая значение до антидота. ControlProgress владеет локальной историей уровня и строит чистый antidote_preview DTOv1 через копию learned/locked и тот же reconcile, без дублирования правил потерь в UI. PlayerAntidote проверяет наличие дозы и применяет антидот; доза расходуется ровно один раз. С 19.10.2026 (issue #300) подтверждения и связанного сигнала нет, описание в features.player/module.json удалено; preview/begin/complete — features.infection/module.json. Новых dependency edges или глобального состояния нет.
 
 CanvasLayer подтверждения принадлежит bootstrap и работает во время паузы, отмена/подтверждение возвращают предыдущую паузу, в том числе поверх дерева. Подписи, названия веток, все35 имён/описаний навыков, карточки и hotbar берутся из assets/interface/translations.json для ru/en; переключение языка обновляет уже созданное дерево. Метка Control threshold / Порог контроля.
 
