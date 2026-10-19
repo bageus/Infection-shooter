@@ -68,7 +68,7 @@ static func explode(projectile: Node3D, location: Vector3, normal: Vector3, cont
 	query.collision_mask = 7
 	var power := 1.0 if projectile.get("damage_multiplier") == null else float(projectile.get("damage_multiplier"))
 	var hit_ids := {}
-	for hit in _blast_hits(projectile.get_world_3d().direct_space_state, query):
+	for hit in blast_hits(projectile.get_world_3d().direct_space_state, query):
 		var collider: Object = hit.get("collider")
 		if collider == null or hit_ids.has(collider.get_instance_id()):
 			continue
@@ -111,7 +111,7 @@ static func explode(projectile: Node3D, location: Vector3, normal: Vector3, cont
 
 ## Every body in the blast sphere. Floors and walls own many shapes and would
 ## fill a single query, so each pass excludes the bodies already found.
-static func _blast_hits(space: PhysicsDirectSpaceState3D, query: PhysicsShapeQueryParameters3D) -> Array[Dictionary]:
+static func blast_hits(space: PhysicsDirectSpaceState3D, query: PhysicsShapeQueryParameters3D) -> Array[Dictionary]:
 	var found: Array[Dictionary] = []
 	var excluded: Array[RID] = []
 	for _pass in MAX_QUERY_PASSES:
