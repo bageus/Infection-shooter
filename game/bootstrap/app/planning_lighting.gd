@@ -36,6 +36,8 @@ const POOL_STRENGTH := 0.5
 const POOL_HEIGHT := 0.03
 var _pool: MultiMeshInstance3D
 var shadows_allowed := true
+## A lamp whose line to the camera focus crosses a wall is not lit at all (no shadow cost).
+var wall_culling := true
 var _refresh_left := 0.0
 var _shadow_owners := {}
 var _cached_lamps: Array[Node] = []
@@ -164,6 +166,9 @@ func refresh_light_budget(capture_inputs: bool = true) -> void:
 			if not frustum.is_empty() and not sphere_in_view(frustum, (lamp as Node3D).global_position, _light_radius(lamp) + VIEW_MARGIN):
 				lamp.call("set_budget_lit", false, false)
 				continue
+			if wall_culling and _wall_between((lamp as Node3D).global_position, focus):
+				lamp.call("set_budget_lit", false, false)
+				continue
 			var offset: Vector3 = (lamp as Node3D).global_position - focus
 			offset.y = 0.0
 			var distance := offset.length_squared()
@@ -236,6 +241,24 @@ func _update_pools(unlit: Array[Node]) -> void:
 		var color: Color = lamp.get("light_color")
 		_pool.multimesh.set_instance_color(index, color * POOL_STRENGTH)
 	_pool.visible = local_lights_enabled
+
+
+## Ray from the lamp to the focus; glass is see-through, everything else in "camera_occluder" is a wall.
+## shortcut: only the focus point is tested, so a room in view but away from it stays dark; upgrade to per-room shadows.
+func _wall_between(from: Vector3, to: Vector3) -> bool:
+	var world := get_viewport().world_3d if get_viewport() != null else null
+	if world == null:
+		return false
+	var query := PhysicsRayQueryParameters3D.create(from, to + Vector3.UP * 0.5)
+	for _hit in 4:
+		var hit := world.direct_space_state.intersect_ray(query)
+		if hit.is_empty():
+			return false
+		var body := hit.collider as Node
+		if body.get_parent().is_in_group("camera_occluder") and not body.is_in_group("infected_breakable_glass"):
+			return true
+		query.exclude.append(hit.rid)
+	return false
 
 
 func _light_radius(lamp: Node) -> float:

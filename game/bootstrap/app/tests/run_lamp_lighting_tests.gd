@@ -18,6 +18,7 @@ func _run() -> void:
 	_test_budget()
 	_test_pools()
 	_test_budget_fade()
+	await _test_wall_culling()
 	await _test_desk_lamp()
 	await _test_elevator()
 	print("Lamp lighting tests: %d failure(s)." % _failures)
@@ -129,6 +130,35 @@ func _test_budget_fade() -> void:
 	lamp._process(1.0)
 	_check(is_equal_approx(light.light_energy, full) and light.shadow_enabled, "Fade-in ends at full energy with shadows")
 	lamp.free()
+
+
+func _test_wall_culling() -> void:
+	var controller := LIGHTING.new()
+	root.add_child(controller)
+	var camera := Camera3D.new()
+	root.add_child(camera)
+	camera.current = true
+	camera.look_at_from_position(Vector3(0, 10, 0.5), Vector3.ZERO)
+	var wall := Node3D.new()
+	wall.add_to_group("camera_occluder")
+	var body := StaticBody3D.new()
+	var shape := CollisionShape3D.new()
+	shape.shape = BoxShape3D.new()
+	(shape.shape as BoxShape3D).size = Vector3(0.3, 4.0, 10.0)
+	body.add_child(shape)
+	wall.add_child(body)
+	root.add_child(wall)
+	wall.position = Vector3(2, 2, 0)
+	var near := _lamp("point", Vector3(1, 2.5, 0))
+	var behind := _lamp("point", Vector3(3, 2.5, 0))
+	await physics_frame
+	await physics_frame
+	controller.local_lights_enabled = true
+	controller.refresh_light_budget()
+	_check(near.get_budget_lit(), "A lamp with a clear line to the focus is lit")
+	_check(not behind.get_budget_lit(), "A lamp behind a wall is not lit")
+	for node: Node in [controller, camera, wall, near, behind]:
+		node.free()
 
 
 func _test_pools() -> void:
