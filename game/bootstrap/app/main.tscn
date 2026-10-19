@@ -62,6 +62,12 @@ directional_shadow_blend_splits = true
 directional_shadow_fade_start = 0.9
 directional_shadow_max_distance = 64.0
 
+[node name="GlassReflectionProbe" type="ReflectionProbe" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 3, 0)
+update_mode = 0
+intensity = 0.6
+size = Vector3(80, 8, 60)
+
 [node name="PlanningLighting" type="Node" parent="." unique_id=1786001174]
 process_mode = 3
 script = ExtResource("planning_lighting")
