@@ -18,7 +18,7 @@ func _run() -> void:
 	_test_budget()
 	_test_pools()
 	_test_budget_fade()
-	await _test_wall_culling()
+	await _test_view_rule()
 	await _test_desk_lamp()
 	await _test_elevator()
 	print("Lamp lighting tests: %d failure(s)." % _failures)
@@ -132,32 +132,43 @@ func _test_budget_fade() -> void:
 	lamp.free()
 
 
-func _test_wall_culling() -> void:
+func _test_view_rule() -> void:
 	var controller := LIGHTING.new()
 	root.add_child(controller)
+	controller.local_lights_enabled = true
 	var camera := Camera3D.new()
 	root.add_child(camera)
 	camera.current = true
 	camera.look_at_from_position(Vector3(0, 10, 0.5), Vector3.ZERO)
-	var wall := Node3D.new()
-	wall.add_to_group("camera_occluder")
-	var body := StaticBody3D.new()
-	var shape := CollisionShape3D.new()
-	shape.shape = BoxShape3D.new()
-	(shape.shape as BoxShape3D).size = Vector3(0.3, 4.0, 10.0)
-	body.add_child(shape)
-	wall.add_child(body)
-	root.add_child(wall)
-	wall.position = Vector3(2, 2, 0)
-	var near := _lamp("point", Vector3(1, 2.5, 0))
-	var behind := _lamp("point", Vector3(3, 2.5, 0))
-	await physics_frame
-	await physics_frame
-	controller.local_lights_enabled = true
+	var seen := _lamp("point", Vector3(0, 3, 0))
+	var light := _lights_of(seen)[0]
 	controller.refresh_light_budget()
-	_check(near.get_budget_lit(), "A lamp with a clear line to the focus is lit")
-	_check(not behind.get_budget_lit(), "A lamp behind a wall is not lit")
-	for node: Node in [controller, camera, wall, near, behind]:
+	seen._process(1.0)
+	var energy := light.light_energy
+	var shadow := light.shadow_enabled
+	# The player (and so the camera focus) moves: an on-screen lamp keeps its brightness and shadow state.
+	for step in 4:
+		camera.look_at_from_position(Vector3(step * 1.5, 10, 0.5), Vector3(step * 1.5, 0, 0))
+		controller.refresh_light_budget()
+		seen._process(1.0)
+		_check(light.light_energy == energy and light.shadow_enabled == shadow, "An on-screen lamp keeps constant brightness while the focus moves")
+	# A lamp just outside the view is lit before the camera turns to it; a far one stays off.
+	camera.look_at_from_position(Vector3(0, 10, 0.5), Vector3.ZERO)
+	var edge := _lamp("point", Vector3(0, 3, 0))
+	var far := _lamp("point", Vector3(0, 3, 0))
+	var side := camera.global_basis.x
+	for i in 200:
+		edge.global_position = side * i
+		if not LIGHTING.sphere_in_view(camera.get_frustum(), edge.global_position, edge.call("get_light_radius")):
+			break
+	var gap: float = edge.global_position.length()
+	_check(gap > 0.0, "Setup: the edge lamp left the view")
+	far.global_position = side * (gap + LIGHTING.LEAVE_MARGIN + 5.0)
+	edge.global_position = side * gap + side * 1.0
+	controller.refresh_light_budget()
+	_check(edge.get_budget_lit(), "A lamp just outside the view is already lit")
+	_check(not far.get_budget_lit(), "A lamp far outside the view stays off")
+	for node: Node in [controller, camera, seen, edge, far]:
 		node.free()
 
 
