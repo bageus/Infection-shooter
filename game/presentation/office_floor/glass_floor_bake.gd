@@ -12,6 +12,9 @@ const STAMPS_PER_STEP := 2
 var origin := Vector2.ZERO
 var valid_cells: Dictionary = {}
 var tiles: Dictionary = {}
+# Evicted tiles keep their CPU pixels so decals survive the GPU cap. Bound: one entry per cell ever
+# decalled (<= ~80 cells on the 80x60 m floor, ~1.6 MB each = RGBA8 512^2 + R8 512^2 + layers).
+var _archive: Dictionary = {}
 var queue: Array[Dictionary] = []
 var _sources: Array[Image] = []
 var _changed: Callable
@@ -126,7 +129,18 @@ func _tile(cell: Vector2i) -> Dictionary:
 	if tiles.size() >= MAX_TILES:
 		var oldest: Vector2i = tiles.keys()[0]
 		_changed.call(oldest, null)
+		var evicted: Dictionary = tiles[oldest]
+		evicted.texture = null
+		evicted.surface_texture = null
+		evicted.dirty = true
+		for layer: Dictionary in evicted.layers.values():
+			layer.texture = null
+		_archive[oldest] = evicted
 		tiles.erase(oldest)
+	if _archive.has(cell):
+		tiles[cell] = _archive[cell]
+		_archive.erase(cell)
+		return tiles[cell]
 	var image := Image.create(PIXELS, PIXELS, false, Image.FORMAT_RGBA8)
 	image.fill(Color.TRANSPARENT)
 	var surface := Image.create(PIXELS, PIXELS, false, Image.FORMAT_R8)
@@ -148,4 +162,5 @@ func clear() -> void:
 	for cell: Vector2i in tiles:
 		_changed.call(cell, null)
 	tiles.clear()
+	_archive.clear()
 	queue.clear()

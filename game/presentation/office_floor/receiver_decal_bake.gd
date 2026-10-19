@@ -6,6 +6,9 @@ const FACE := 128
 const MAX_RECEIVERS := 12
 const MAX_QUEUE := 32
 var pages: Dictionary = {}
+# Released pages keep their CPU layers (id -> {anchor, layers, density}) so decals return with the page.
+# Bound: 2 x 384x256 RGBA8 (~0.8 MB) per anchor ever decalled; freed anchors are pruned on each release.
+var _archive: Dictionary = {}
 var queue: Array[Dictionary] = []
 var uploads := 0
 var sources: RefCounted
@@ -83,14 +86,19 @@ func _page(anchor: MeshInstance3D, glass: bool) -> Dictionary:
 	material.set_shader_parameter("glass", glass)
 	anchor.material_overlay = material
 	var layers: Array[Dictionary] = []
+	var saved: Dictionary = _archive.get(anchor.get_instance_id(), {})
+	_archive.erase(anchor.get_instance_id())
 	for index in 2:
+		if not saved.is_empty():
+			layers.append({"image": saved.layers[index], "texture": null})
+			continue
 		var image := Image.create(FACE * 3, FACE * 2, false, Image.FORMAT_RGBA8)
 		image.fill(Color.TRANSPARENT)
 		layers.append({"image": image, "texture": null})
 	var callback := func() -> void:
 		if not anchor.is_visible_in_tree(): _release(anchor.get_instance_id())
 	anchor.visibility_changed.connect(callback)
-	return {"anchor": weakref(anchor), "material": material, "layers": layers, "dirty": true, "density": {}, "callback": callback}
+	return {"anchor": weakref(anchor), "material": material, "layers": layers, "dirty": true, "density": saved.get("density", {}), "callback": callback}
 
 func _release(id: int) -> void:
 	if not pages.has(id): return
@@ -99,10 +107,14 @@ func _release(id: int) -> void:
 	if is_instance_valid(anchor):
 		if anchor.material_overlay == page.material: anchor.material_overlay = null
 		if anchor.visibility_changed.is_connected(page.callback): anchor.visibility_changed.disconnect(page.callback)
+	for key: int in _archive.keys():
+		if not is_instance_valid(_archive[key].anchor.get_ref()): _archive.erase(key)
+	if is_instance_valid(anchor): _archive[id] = {"anchor": page.anchor, "layers": [page.layers[0].image, page.layers[1].image], "density": page.density}
 	pages.erase(id)
 
 func clear() -> void:
 	for id: int in pages.keys(): _release(id)
+	_archive.clear()
 	queue.clear()
 
 func _dirty() -> bool:

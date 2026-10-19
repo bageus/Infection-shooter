@@ -20,6 +20,7 @@ func _run() -> void:
 	_test_pixels()
 	if DisplayServer.get_name() == "headless":
 		await _test_receivers()
+		await _test_persistence()
 		await _test_glass()
 		await _test_displays()
 		_test_steps()
@@ -91,6 +92,32 @@ func _test_receivers() -> void:
 	_check(_alpha(baker.pages[last.get_instance_id()].layers[1].image) > 0, "Wall scuff layer visible")
 	last.hide()
 	_check(last.material_overlay == null, "Hidden/destroyed receiver clears immediately")
+	baker.clear()
+	for anchor in anchors: anchor.queue_free()
+	await process_frame
+
+func _test_persistence() -> void:
+	var bake: RefCounted = load("res://game/presentation/office_floor/glass_floor_bake.gd").new(func(_cell: Vector2i, _texture: Texture2D) -> void: pass)
+	bake.stamp(Vector2(4, 4), 0, 0.5, 0, "bullet")
+	while bake.step(): pass
+	for index in bake.MAX_TILES + 2:
+		bake.stamp(Vector2(12 + index * 8, 4), 0, 0.5, 0, "bullet")
+		while bake.step(): pass
+	_check(not bake.tiles.has(Vector2i.ZERO), "Floor cell evicted from the GPU set")
+	bake.stamp(Vector2(4, 4), 0, 0.25, 0, "bullet")
+	while bake.step(): pass
+	_check(_alpha(bake.tiles[Vector2i.ZERO].layers[0].image.get_region(Rect2i(96, 96, 64, 64))) > 0 and bake.tiles[Vector2i.ZERO].texture != null, "Evicted floor decal pixels restored")
+	var baker: RefCounted = BAKE.new()
+	baker.sources = floor_view.get("_surface_events").receivers.sources
+	var anchors: Array[MeshInstance3D] = []
+	for index in BAKE.MAX_RECEIVERS + 3:
+		anchors.append(_box(Vector3(index * 2, 1, 0)))
+		baker.stamp(anchors[-1], anchors[-1].position, Vector3.BACK, "wall_damage", 0, 0.6, 0.5)
+		while baker.step(): pass
+	_check(not baker.pages.has(anchors[0].get_instance_id()), "Wall page evicted from the GPU set")
+	baker.stamp(anchors[0], anchors[0].position, Vector3.BACK, "wall_scuff", 0, 0.3, 0.5)
+	while baker.step(): pass
+	_check(_alpha(baker.pages[anchors[0].get_instance_id()].layers[0].image) > 0, "Evicted wall decal layer restored")
 	baker.clear()
 	for anchor in anchors: anchor.queue_free()
 	await process_frame
