@@ -340,7 +340,8 @@ func _idle_flavor(scream: bool) -> void:
 func _find_corpse() -> Node3D:
 	var best: Node3D
 	var best_distance := CORPSE_RANGE * CORPSE_RANGE
-	for node in get_tree().get_nodes_in_group("infected"):
+	# Planner-baked corpses (infected_corpse_decor) join their own group, not "infected".
+	for node in get_tree().get_nodes_in_group("infected") + get_tree().get_nodes_in_group("infected_corpse"):
 		var other := node as Node3D
 		if other == null or other == self or other.is_in_group(ALIVE_GROUP) or not other.has_method("is_dead") or not bool(other.call("is_dead")):
 			continue

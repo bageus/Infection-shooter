@@ -3,6 +3,7 @@ extends SceneTree
 ## corpse feeding, the hit flinch and the mirrored left-hand attacks.
 
 const HUNGER := preload("res://game/features/infected/public/infected_hunger.tscn")
+const BAKED_CORPSE := preload("res://game/features/infected/public/decor/corpse_zombie.tscn")
 const CLIPS := preload("res://models/objects/characters/enemy/game/Hunger_mixamo.res")
 const EXPECTED_CLIPS := [
 	"Idle", "Walk", "Run", "RunLunge", "FoursRun", "FoursIdle", "Crawl", "CrawlIdle", "Scream", "Agonize",
@@ -33,6 +34,7 @@ func _run() -> void:
 	await _idle_scream_is_harmless()
 	await _turn_in_place()
 	await _feeding()
+	await _baked_corpse_feeding()
 	await _flinch()
 	await _postures()
 	await _crawl_attack()
@@ -256,6 +258,31 @@ func _feeding() -> void:
 	_check(eater.get("posture") == 1, "It leaps up on all fours.")
 	eater.queue_free()
 	victim.queue_free()
+	await process_frame
+
+
+# A planner-baked corpse is a decor node, not a killed infected: it still lies
+# on the floor and must be found and gnawed.
+func _baked_corpse_feeding() -> void:
+	await _fresh_stage()
+	var target := Target.new()
+	stage.add_child(target)
+	target.position = Vector3(0, 0.1, -40)
+	var baked := BAKED_CORPSE.instantiate() as Node3D
+	stage.add_child(baked)
+	baked.global_position = Vector3(1.5, 0.1, 0)
+	await _frames(2)
+	var eater := _spawn(Vector3(-1.0, 0.1, 0), target)
+	eater.get("_senses").wander_enabled = false
+	await _frames(3)
+	_check(eater.call("_find_corpse") == baked, "A hunter finds a baked corpse next to it.")
+	eater.set("_corpse", baked)
+	eater.get("_senses").hear(eater, baked.global_position, 9.0)
+	eater.get("_senses").state = 2 # SEARCH: it has reached the body
+	eater.call("_rest_behaviour", 0.016)
+	_check(bool(eater.call("is_feeding")), "Next to a baked corpse the hunter gnaws it.")
+	eater.queue_free()
+	baked.queue_free()
 	await process_frame
 
 
