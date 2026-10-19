@@ -292,6 +292,8 @@ func _tag_wall_casters(wall: Node) -> void:
 		return
 	for mesh in wall.find_children("*", "MeshInstance3D", true, false):
 		(mesh as MeshInstance3D).layers |= WALL_CASTER_LAYER
+		# A one-sided wall must still shadow a lamp standing behind its back face.
+		(mesh as MeshInstance3D).cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_DOUBLE_SIDED
 
 
 func _has_glass(node: Node) -> bool:

@@ -207,7 +207,8 @@ func _test_wall_shadows() -> void:
 		_check(lamp.get_budget_lit() and light.shadow_enabled, "Every lit lamp casts a shadow")
 		_check(light.shadow_caster_mask == lamp.WALL_CASTER_LAYER and light.spot_angle == angle, "Lamp shadows come from walls only and keep the editor angle")
 	_check(mesh.layers & LIGHTING.WALL_CASTER_LAYER != 0, "A solid wall mesh casts lamp shadows")
-	_check(pane.layers & LIGHTING.WALL_CASTER_LAYER == 0, "Glass does not cast lamp shadows")
+	_check(mesh.cast_shadow == GeometryInstance3D.SHADOW_CASTING_SETTING_DOUBLE_SIDED, "A wall casts its shadow from both sides")
+	_check(pane.layers & LIGHTING.WALL_CASTER_LAYER == 0 and pane.cast_shadow == GeometryInstance3D.SHADOW_CASTING_SETTING_ON, "Glass is left alone")
 	for node: Node in [controller, camera, wall, glass] + lamps:
 		node.free()
 
