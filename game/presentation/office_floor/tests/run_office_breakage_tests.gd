@@ -81,6 +81,15 @@ func _test_partition_sound() -> void:
 	_expect(partition.call("get_projectile_material", -1) == "concrete", "Wood slat partitions keep their bullet cost as concrete.")
 	_expect(partition.call("get_impact_sound_material", -1) == "wood", "Wood slat partitions ring like wood on impact.")
 	partition.free()
+	for model in ["03/03_bookshelf.glb", "03/03_book_case_small.glb", "03/03_book_case_with_back.glb", "03/03_file_cabinet_largest.glb", "03/03_file_cabinet_smaller.glb"]:
+		var furniture := PROP_SCENE.instantiate() as RigidBody3D
+		furniture.set("model_path", MODELS + model)
+		_expect(furniture.call("get_impact_sound_material", -1) == "wood", "%s rings like wood on impact." % model.get_file())
+		furniture.free()
+	var locker := PROP_SCENE.instantiate() as RigidBody3D
+	locker.set("model_path", MODELS + "03/03_locker_tall_dented.glb")
+	_expect(locker.call("get_impact_sound_material", -1) == "metal", "Metal lockers still ring like metal on impact.")
+	locker.free()
 
 
 func _spawn(stage: Node3D, path: String, position: Vector3) -> Array:

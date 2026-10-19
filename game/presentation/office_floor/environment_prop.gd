@@ -327,8 +327,10 @@ func get_projectile_material(shape_index: int = -1) -> String:
 
 # The impact sound follows the authored wood; bullet cost stays with get_projectile_material.
 func get_impact_sound_material(shape_index: int = -1) -> String:
-	if "01_wood_slat_partition" in model_path:
-		return "wood"
+	# Group 03 is mostly metal, but its shelves and cabinets are wood.
+	for model in ["01_wood_slat_partition", "03_book_case", "03_bookshelf", "03_file_cabinet", "03_drawer_cabinet"]:
+		if model in model_path:
+			return "wood"
 	return get_projectile_material(shape_index)
 
 
