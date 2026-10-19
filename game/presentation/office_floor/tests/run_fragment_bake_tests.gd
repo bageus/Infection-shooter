@@ -19,12 +19,18 @@ func _run() -> void:
 	var keep := _make_fragment(effects, Vector3(1, 0.2, 0), true)
 	await process_frame
 	await process_frame
+	final.set("sleeping", true)
+	var airborne := _make_fragment(effects, Vector3(2, 1.5, 0), false)
+	airborne.set("sleeping", true)
+	await process_frame
 	final.call("expire")
 	keep.call("expire")
+	airborne.call("expire")
 	await process_frame
 	_expect(baked.call("count") == 1, "A final fragment bakes into the floor batch")
 	_expect(not is_instance_valid(final) or final.is_queued_for_deletion(), "A baked fragment frees its body")
-	_expect(is_instance_valid(keep) and not keep.is_queued_for_deletion(), "A breakable fragment stays where it landed")
+	_expect(baked.call("count") == 1, "A breakable or airborne fragment never bakes")
+	_expect(keep.has_meta("debris_fading") and airborne.has_meta("debris_fading"), "A breakable or airborne fragment shrinks away")
 	print("Fragment bake tests: %d failures" % failures)
 	quit(0 if failures == 0 else 1)
 

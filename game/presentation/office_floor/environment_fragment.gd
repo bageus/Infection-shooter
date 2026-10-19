@@ -16,6 +16,8 @@ const HIT_LAYER := 4
 const WORLD_MASK := 3
 const MAX_FRAGMENTS := 40
 const KICK_COOLDOWN := 0.8
+# Highest resting height (centre of the piece) that still counts as lying on the floor.
+const BAKE_MAX_HEIGHT := 0.3
 
 static var _surface: PhysicsMaterial
 
@@ -23,7 +25,7 @@ var source: WeakRef
 var piece_name := ""
 var stage_index := -1
 var kickable := false
-# A piece with a next stage keeps its body so a later hit can break it further.
+# A piece with a next stage keeps its body until it fades, so a hit can break it further meanwhile.
 var breakable := false
 var _kick_cooldown := 0.0
 var _age := 0.0
@@ -97,11 +99,12 @@ func expire_fast() -> void:
 	_leave_floor(DEBRIS.FAST_FADE_SECONDS)
 
 
-# Model pieces that can no longer break bake into the floor; breakable and pooled box pieces keep their own path.
+# A final model piece that lies on the floor bakes into it. A piece still moving, lodged in a frame or
+# propped on something would bake (or stay) in mid-air forever, so every other piece shrinks away.
 func _leave_floor(seconds: float) -> void:
-	if breakable or DEBRIS.is_fading(self):
+	if DEBRIS.is_fading(self):
 		return
-	if pool_owner == null and is_instance_valid(_runtime):
+	if not breakable and pool_owner == null and is_instance_valid(_runtime) and sleeping and global_position.y < BAKE_MAX_HEIGHT:
 		_runtime.call("bake", self)
 	else:
 		DEBRIS.fade_free(self, seconds)
