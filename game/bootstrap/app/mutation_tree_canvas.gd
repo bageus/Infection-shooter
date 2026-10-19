@@ -6,6 +6,13 @@ const BRANCHES := [
 ]
 const DESIGN_SIZE := Vector2(1200, 800)
 const TRUNK_Y := 370.0
+# Visual column per branch index, left to right: active Might, Biomass, Predator Form, Neural Storm; then passive.
+const COLUMNS := [1, 3, 0, 2, 0, 1, 2, 3, 4, 5]
+const COLUMN_X0 := 120.0
+const COLUMN_PITCH := 180.0
+# One circle per rank: 36 px across and 85 px up or down, about 67 degrees from the trunk.
+# 36 is the least that keeps a mirrored alternative (two circles 72 px apart) clear of its main circle.
+const RANK_STEP := Vector2(36.0, 85.0)
 const HYBRID_PARENTS := [[4, 5], [5, 6], [6, 7], [7, 8], [8, 9]]
 const LIT := Color(0.3, 0.95, 0.1, 1.0)
 const LABEL_MAX_WIDTH := 170.0
@@ -35,19 +42,21 @@ func set_mutation(amount: float) -> void:
 	queue_redraw()
 
 
-func _threshold_x(value: float) -> float:
-	return 130.0 + clampf((value - 25.0) / 75.0, 0.0, 1.0) * 960.0
-
-
 func branch_origin(index: int) -> Vector2:
-	# Equal unlock requirements do not require a shared visual junction.
-	return Vector2(1060.0 if index == 9 else _threshold_x(thresholds[index]), TRUNK_Y)
+	# Every branch owns one column of equal width, so neighbouring branches never share circles.
+	return Vector2(COLUMN_X0 + COLUMNS[index] * COLUMN_PITCH, TRUNK_Y)
+
+
+func _row_y(branch_index: int, rank: int) -> float:
+	return TRUNK_Y - 50.0 - RANK_STEP.y * rank if branch_index < 4 else TRUNK_Y + 80.0 + RANK_STEP.y * rank
 
 
 func skill_position(branch_index: int, rank: int, alternative: bool = false) -> Vector2:
 	var origin := branch_origin(branch_index)
-	var step := 34.0 if branch_index >= 8 else 64.0
-	return Vector2(origin.x + rank * step + (72.0 if alternative else 0.0), 320.0 - rank * 85.0 if branch_index < 4 else 450.0 + rank * 85.0)
+	if alternative:
+		# Mirrors the main stem across the level-2 node, so both level-3 stems have equal length.
+		return Vector2(origin.x, _row_y(branch_index, rank))
+	return Vector2(origin.x + rank * RANK_STEP.x, _row_y(branch_index, rank))
 
 
 # Branch titles are centred over the branch's own circles and never wider
@@ -67,9 +76,11 @@ func _branch_center_x(index: int) -> float:
 	return (skill_position(index, 0).x + skill_position(index, 2).x) * 0.5
 
 
+# Hybrids sit between the two titles they combine, so they read as belonging to neither.
 func hybrid_position(index: int) -> Vector2:
 	var parents: Array = HYBRID_PARENTS[index]
-	return (skill_position(parents[0], 2) + skill_position(parents[1], 2)) * 0.5 + Vector2(0, 56)
+	var x := (_branch_center_x(parents[0]) + _branch_center_x(parents[1])) * 0.5
+	return Vector2(x, skill_position(parents[0], 2).y + 72.0)
 
 
 func set_progress(new_progress: Array[int], new_hybrids: Array[bool]) -> void:

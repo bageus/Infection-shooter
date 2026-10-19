@@ -34,7 +34,7 @@ func _run() -> void:
 	initial[0] = true
 	initial[5] = true
 	canvas.configure_progression(values, 0.0, initial)
-	_expect(canvas.trunk_available_x() == canvas.branch_origin(5).x, "Opening the next branches exposes their entire connector at once.")
+	_expect(canvas.trunk_available_x() == canvas.branch_origin(0).x, "Opening the next branches exposes their entire connector at once.")
 	canvas.configure_progression(values, 95.0, opened)
 	_expect(canvas.branch_origin(8) != canvas.branch_origin(9), "Late passive roots are distinct.")
 	_expect(CANVAS.HYBRID_PARENTS.size() == 5, "Only adjacent passive branches have hybrids.")
@@ -46,7 +46,7 @@ func _run() -> void:
 	for index in range(5):
 		var parents: Array = CANVAS.HYBRID_PARENTS[index]
 		var position := canvas.hybrid_position(index)
-		_expect(position.x > canvas.skill_position(parents[0], 2).x and position.x < canvas.skill_position(parents[1], 2).x, "Hybrid lies between its adjacent parents.")
+		_expect(position.x > canvas.label_rect(parents[0]).get_center().x and position.x < canvas.label_rect(parents[1]).get_center().x, "Hybrid lies between the titles of its adjacent parents.")
 	canvas.free()
 	var stage := Node3D.new()
 	root.add_child(stage)

@@ -51,6 +51,15 @@ static func describe(runtime: Node, row: Array, skills: Array) -> Dictionary:
 	return info
 
 
+## Card content for a skill id, for places that name a skill without its tree circle.
+static func for_skill(runtime: Node, skill_id: String) -> Dictionary:
+	var skills: Array = runtime.call("skill_catalog")
+	for row in skills:
+		if str(row[0]) == skill_id:
+			return describe(runtime, row, skills)
+	return {}
+
+
 static func _branch_row(runtime: Node, skills: Array, branch: String, active_group: bool, rank: int) -> Array:
 	for row in skills:
 		if str(row[2]) == branch and int(row[3]) == rank and bool(runtime.call("skill_requirements", str(row[0])).get("active", false)) == active_group:
