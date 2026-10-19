@@ -38,10 +38,10 @@ class Page extends RefCounted:
 
 	func upload(images: Array, layer: int) -> void:
 		if textures.is_empty():
-			var blank := BAKE.create_mask()
+			var mask := BAKE.create_mask()
 			var layers: Array[Image] = []
 			for i in layer_count:
-				layers.append(blank)
+				layers.append(mask)
 			for material: ShaderMaterial in materials:
 				var texture := Texture2DArray.new()
 				texture.create_from_images(layers)
@@ -79,12 +79,12 @@ class Lease extends RefCounted:
 
 	func bind(instance: MeshInstance3D, bloody := false) -> void:
 		instance.set_meta("body_skin_lease", self)
-		var selector := float(layer) if bloody else -1.0
+		var wound := float(layer) if bloody else -1.0
 		if per_body:
 			for material: ShaderMaterial in page.materials:
-				material.set_shader_parameter(&"blood_layer", selector)
+				material.set_shader_parameter(&"blood_layer", wound)
 		else:
-			instance.set_instance_shader_parameter(&"blood_layer", selector)
+			instance.set_instance_shader_parameter(&"blood_layer", wound)
 
 	## Current wound selector (-1 = clean) for this lease's body, whichever path stores it.
 	func selector(instance: MeshInstance3D) -> float:

@@ -118,6 +118,11 @@ func _test_persistence() -> void:
 	baker.stamp(anchors[0], anchors[0].position, Vector3.BACK, "wall_scuff", 0, 0.3, 0.5)
 	while baker.step(): pass
 	_check(_alpha(baker.pages[anchors[0].get_instance_id()].layers[0].image) > 0, "Evicted wall decal layer restored")
+	for index in BAKE.MAX_ARCHIVE + BAKE.MAX_RECEIVERS:
+		anchors.append(_box(Vector3(index * 2, 3, 0)))
+		baker.stamp(anchors[-1], anchors[-1].position, Vector3.BACK, "wall_damage", 0, 0.6, 0.5)
+		while baker.step(): pass
+	_check(baker.get("_archive").size() == BAKE.MAX_ARCHIVE, "Released wall archive stays bounded")
 	baker.clear()
 	for anchor in anchors: anchor.queue_free()
 	await process_frame

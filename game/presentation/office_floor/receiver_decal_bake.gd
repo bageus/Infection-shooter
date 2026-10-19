@@ -5,9 +5,10 @@ const PIXELS := preload("res://game/presentation/office_floor/decal_pixels.gd")
 const FACE := 128
 const MAX_RECEIVERS := 12
 const MAX_QUEUE := 32
+const MAX_ARCHIVE := 24
 var pages: Dictionary = {}
 # Released pages keep their CPU layers (id -> {anchor, layers, density}) so decals return with the page.
-# Bound: stored at half size, 2 x 192x128 RGBA8 (~0.2 MB) per anchor ever decalled, upscaled bilinear on restore; freed anchors are pruned on each release.
+# Bound: at most MAX_ARCHIVE anchors, oldest release dropped first; stored at half size (2 x 192x128 RGBA8, ~0.2 MB each), upscaled bilinear on restore.
 var _archive: Dictionary = {}
 var queue: Array[Dictionary] = []
 var uploads := 0
@@ -61,7 +62,7 @@ func _apply(request: Dictionary) -> void:
 	var offset := Vector2i(Vector2(mapping.uv) * (FACE - 1) - Vector2(image.get_size()) * Vector2(request.center))
 	var region := Rect2i(Vector2i.ZERO, image.get_size()).intersection(Rect2i(-offset, Vector2i.ONE * FACE))
 	var layer: Dictionary = page.layers[1 if "scuff" in str(request.kind) else 0]
-	var origin := Vector2i(int(mapping.face) % 3, int(mapping.face) / 3) * FACE
+	var origin := Vector2i(int(mapping.face) % 3, floori(mapping.face / 3.0)) * FACE
 	(layer.image as Image).blend_rect(image, region, origin + offset + region.position)
 	page.density[key] = int(page.density.get(key, 0)) + 1
 	page.dirty = true
@@ -109,7 +110,9 @@ func _release(id: int) -> void:
 		if anchor.visibility_changed.is_connected(page.callback): anchor.visibility_changed.disconnect(page.callback)
 	for key: int in _archive.keys():
 		if not is_instance_valid(_archive[key].anchor.get_ref()): _archive.erase(key)
-	if is_instance_valid(anchor): _archive[id] = {"anchor": page.anchor, "layers": [_resized(page.layers[0].image, 2), _resized(page.layers[1].image, 2)], "density": page.density}
+	if is_instance_valid(anchor):
+		_archive[id] = {"anchor": page.anchor, "layers": [_resized(page.layers[0].image, 2), _resized(page.layers[1].image, 2)], "density": page.density}
+		while _archive.size() > MAX_ARCHIVE: _archive.erase(_archive.keys()[0])
 	pages.erase(id)
 
 # factor 2 halves, 0.5 doubles.

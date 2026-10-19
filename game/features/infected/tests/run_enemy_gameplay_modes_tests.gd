@@ -47,8 +47,9 @@ func _ignore(stage: Node3D, target: Target, scene: PackedScene) -> void:
 	enemy.hear_noise(target.global_position, 50.0)
 	enemy.hear_alert(target.global_position, 50.0)
 	var start := enemy.position
-	for frame in 240: # Wandering can start later than 90 frames; the window must allow for it.
+	for frame in 600: # Wandering can start late on slow runners; stop as soon as the enemy moves.
 		await physics_frame
+		if Vector2(enemy.position.x - start.x, enemy.position.z - start.z).length() > .05: break
 	_check(not enemy.is_alerted(), "Sight/hits/noise/alerts/forced spawn stay ignored: " + scene.resource_path)
 	_check(float(enemy.get("health")) < health_before, "Player can still damage an ignoring enemy")
 	_check(Vector2(enemy.position.x - start.x, enemy.position.z - start.z).length() > .05, "Ignoring enemies still wander: " + scene.resource_path)

@@ -59,7 +59,7 @@ static func fit_window(wanted: Vector2i, usable: Rect2i) -> Rect2i:
 	var room := (usable.size - Vector2i(32, 64)).max(Vector2i(320, 200))
 	var scale := minf(1.0, minf(float(room.x) / wanted.x, float(room.y) / wanted.y))
 	var size := Vector2i(Vector2(wanted) * scale)
-	return Rect2i(usable.position + (usable.size - size) / 2, size)
+	return Rect2i(usable.position + Vector2i(Vector2(usable.size - size) / 2.0), size)
 
 
 static func render_scale(wanted: Vector2i, actual: Vector2i) -> float:
