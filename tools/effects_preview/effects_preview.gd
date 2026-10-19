@@ -9,6 +9,10 @@ const VFX := preload("res://game/features/player/mutation_skill_vfx.gd")
 const CAMERA_STATE := preload("res://game/features/player/shooting_camera_state.gd")
 const HIT_STOP := preload("res://game/features/player/skill_fx/hit_stop.gd")
 const QUALITY := preload("res://game/core/vfx/public/effects_quality.gd")
+const HEAL := preload("res://game/features/player/player_heal_feedback.gd")
+const DOME := preload("res://game/features/player/range_dome.gd")
+const DASH_ZONE := preload("res://game/features/player/dash_floor_zone.gd")
+const CLOUD := preload("res://game/features/infection_source/public/mutagen_cloud.tscn")
 const EYE := Vector3(10, 12, 10) * 0.45
 const TARGETS := [Vector3(1.6, 0, 1.2), Vector3(3.4, 0, -0.6), Vector3(1.0, 0, -3.0)]
 
@@ -16,7 +20,11 @@ class Stand extends Node3D:
 	## What the skill effects ask of the player.
 	var _roll_direction := Vector3.FORWARD
 	var camera_state := CAMERA_STATE.new()
+	signal healed(amount: float, source: StringName)
 	func camera_kick(amount: float) -> void: camera_state.kick(amount)
+
+class Runtime extends Node:
+	signal control_ampule_collected(threshold: float)
 
 var _player: Stand
 var _vfx: Node
@@ -24,6 +32,10 @@ var _camera: Camera3D
 var _enemies: Array[Node3D] = []
 var _casts := {}
 var _last := ""
+var _heal: Node3D
+var _runtime: Runtime
+var _berserk := false
+var _cloud: Node3D
 var _loop: CheckButton
 var _timer := 0.0
 
@@ -34,10 +46,18 @@ func _ready() -> void:
 	_player.add_child(_vfx)
 	_vfx.setup(_player)
 	_vfx.configure_world(self)
+	_runtime = Runtime.new()
+	_runtime.name = "InfectionRuntime"
+	_player.add_child(_runtime)
+	_heal = HEAL.new()
+	_player.add_child(_heal)
+	_heal.configure(_player)
 	_casts = {
 		"Рывок": _dash, "Мощный удар": _strike, "Кровавый выброс": _blood,
 		"Ретализация": _pulse, "Разряд": _discharge, "Кислотный плевок": _acid,
 		"Споровый кокон": _cocoon, "Когти": _claws, "Щит": _shield, "Сердце": _heart,
+		"Берсерк": _rage, "Зона на полу": _zone, "Лечение": _medkit,
+		"Антидот": _antidote, "Мутаген": _mutagen,
 	}
 	_build_ui()
 
@@ -79,6 +99,33 @@ func _shield() -> void: _vfx.energy_shield()
 func _heart() -> void: _vfx.heartbeat()
 
 
+func _rage() -> void:
+	_berserk = not _berserk
+	if _berserk:
+		_vfx.buff_started("berserk")
+	else:
+		_vfx.buff_ended("berserk")
+
+
+func _zone() -> void:
+	DOME.spawn(self, Vector3.ZERO, 3.0, Color(0.85, 0.08, 0.1), 1.6)
+	DASH_ZONE.spawn(self, get_world_3d(), Vector3.ZERO, Vector3.FORWARD, 1.6)
+
+
+func _medkit() -> void: _player.healed.emit(25.0, &"medkit")
+func _antidote() -> void: _runtime.control_ampule_collected.emit(100.0)
+
+
+func _mutagen() -> void:
+	if is_instance_valid(_cloud):
+		_cloud.queue_free()
+	_cloud = CLOUD.instantiate()
+	_cloud.set("lifetime_seconds", 6.0)
+	add_child(_cloud)
+	_cloud.position = Vector3(0, 0, -2.5)
+	_cloud.call("activate")
+
+
 func _discharge() -> void:
 	var points: Array[Vector3] = [Vector3.ZERO]
 	for enemy in _enemies:
@@ -107,7 +154,10 @@ func _build_stage() -> void:
 	add_child(environment)
 	_player = Stand.new()
 	_player.name = "Player"
-	_player.add_child(_capsule(Color(0.2, 0.35, 0.6)))
+	var body := Node3D.new()
+	body.name = "Body"
+	body.add_child(_capsule(Color(0.2, 0.35, 0.6), true))
+	_player.add_child(body)
 	add_child(_player)
 	for point: Vector3 in TARGETS:
 		var enemy := Node3D.new()
@@ -121,13 +171,16 @@ func _build_stage() -> void:
 	_camera.make_current()
 
 
-func _capsule(color: Color) -> MeshInstance3D:
+func _capsule(color: Color, textured := false) -> MeshInstance3D:
 	var body := MeshInstance3D.new()
 	var mesh := CapsuleMesh.new()
 	mesh.radius = 0.3
 	mesh.height = 1.7
 	var material := StandardMaterial3D.new()
 	material.albedo_color = color
+	if textured:
+		# The skin overlay (berserk aura) reads the albedo texture.
+		material.albedo_texture = NoiseTexture2D.new()
 	mesh.material = material
 	body.mesh = mesh
 	body.position.y = 0.85
