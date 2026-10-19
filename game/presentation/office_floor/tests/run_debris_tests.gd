@@ -23,7 +23,7 @@ func _run() -> void:
 	await _test_fragment_layers(stage)
 	await _test_fragment_blocked_by_wall(stage)
 	await _test_fragment_ignores_characters(stage)
-	await _test_expire_fades_and_frees(stage)
+	await _test_expire_bakes_and_frees(stage)
 	await _test_budget(stage)
 	await _test_physical_prop_break(stage)
 	await _test_environment_prop(stage)
@@ -120,14 +120,15 @@ func _test_fragment_ignores_characters(stage: Node3D) -> void:
 	await process_frame
 
 
-func _test_expire_fades_and_frees(stage: Node3D) -> void:
+func _test_expire_bakes_and_frees(stage: Node3D) -> void:
 	var piece := _fragment(stage, Vector3(5, 0.5, 5))
 	await physics_frame
+	var baked: Node = stage.get_node("FragmentRuntime").get("_baked")
+	var before: int = baked.call("count")
 	piece.call("expire")
-	_expect(piece.collision_layer == 0, "A fading fragment can no longer be hit.")
-	_expect(DEBRIS.is_fading(piece), "A fading fragment is flagged.")
-	await create_timer(DEBRIS.FADE_SECONDS + 0.3).timeout
-	_expect(not is_instance_valid(piece) or piece.is_queued_for_deletion(), "An expired fragment is freed after shrinking.")
+	await process_frame
+	_expect(baked.call("count") == before + 1, "An expired model fragment bakes into the floor.")
+	_expect(not is_instance_valid(piece) or piece.is_queued_for_deletion(), "A baked fragment frees its body.")
 	await process_frame
 
 

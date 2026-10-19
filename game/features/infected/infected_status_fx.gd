@@ -8,8 +8,6 @@ const POISON_SHADER := preload("res://game/features/infected/poison_tint.gdshade
 const STAR_SIZE := 0.85
 const TINT_FADE := 0.4
 
-static var _poison_material: ShaderMaterial
-
 var _body: Node3D
 var _visual: Node3D
 var _head_height := 1.8
@@ -17,6 +15,9 @@ var _stun_left := 0.0
 var _poison_left := 0.0
 var _stars: MeshInstance3D
 var _meshes: Array[MeshInstance3D] = []
+# One material per poisoned body: an instance uniform would take 16 of the
+# renderer's 4096 uniform slots (256 objects) for every tinted mesh.
+var _poison_material: ShaderMaterial
 
 
 func setup(body: Node3D, visual: Node3D, head_height: float) -> void:
@@ -68,9 +69,7 @@ func _process(delta: float) -> void:
 	if _poison_left > 0.0:
 		_poison_left = maxf(0.0, _poison_left - delta)
 		var fade := clampf(_poison_left / TINT_FADE, 0.0, 1.0)
-		for mesh in _meshes:
-			if is_instance_valid(mesh):
-				mesh.set_instance_shader_parameter(&"fade", fade)
+		_poison_material.set_shader_parameter(&"fade", fade)
 		if _poison_left == 0.0:
 			_set_tint(false)
 	if _stun_left == 0.0 and _poison_left == 0.0:
@@ -92,14 +91,12 @@ func _set_tint(enabled: bool) -> void:
 		return
 	if _visual == null:
 		return
-	if _poison_material == null:
-		_poison_material = ShaderMaterial.new()
-		_poison_material.shader = POISON_SHADER
+	_poison_material = ShaderMaterial.new()
+	_poison_material.shader = POISON_SHADER
 	for node in _visual.find_children("*", "MeshInstance3D", true, false):
 		var mesh := node as MeshInstance3D
 		if mesh.visible:
 			mesh.material_overlay = _poison_material
-			mesh.set_instance_shader_parameter(&"fade", 1.0)
 			_meshes.append(mesh)
 
 

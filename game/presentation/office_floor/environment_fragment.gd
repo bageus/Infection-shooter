@@ -23,6 +23,8 @@ var source: WeakRef
 var piece_name := ""
 var stage_index := -1
 var kickable := false
+# A piece with a next stage keeps its body so a later hit can break it further.
+var breakable := false
 var _kick_cooldown := 0.0
 var _age := 0.0
 var rest_time := 0.0
@@ -88,11 +90,21 @@ func _physics_process(delta: float) -> void:
 
 
 func expire() -> void:
-	DEBRIS.fade_free(self)
+	_leave_floor(DEBRIS.FADE_SECONDS)
 
 
 func expire_fast() -> void:
-	DEBRIS.fade_free(self, DEBRIS.FAST_FADE_SECONDS)
+	_leave_floor(DEBRIS.FAST_FADE_SECONDS)
+
+
+# Model pieces that can no longer break bake into the floor; breakable and pooled box pieces keep their own path.
+func _leave_floor(seconds: float) -> void:
+	if breakable or DEBRIS.is_fading(self):
+		return
+	if pool_owner == null and is_instance_valid(_runtime):
+		_runtime.call("bake", self)
+	else:
+		DEBRIS.fade_free(self, seconds)
 
 
 # Pieces are contactless for characters: pairs with them would otherwise exist

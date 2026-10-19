@@ -1,7 +1,6 @@
 extends SceneTree
 const PLAYER := preload("res://game/features/player/public/player.tscn")
 const TREE_UI := preload("res://game/bootstrap/app/mutation_tree_ui.gd")
-const CONFIRM := preload("res://game/bootstrap/app/antidote_confirmation.gd")
 const TEXT := preload("res://game/bootstrap/app/mutation_text.gd")
 const LOCALIZATION := preload("res://game/core/localization/public/ui_translations.gd")
 var failures := 0
@@ -22,41 +21,21 @@ func _run() -> void:
 	runtime.set_physics_process(false)
 	runtime.get("_domain").mutation = 30.0
 	_check(runtime.call("upgrade_skill", "muscle_memory"), "Fixture learns a real skill")
-	var ui := CONFIRM.new()
-	root.add_child(ui)
-	ui.configure(actor)
 	var stock: int = actor.get("antidotes")
-	_check(not actor.call("use_antidote") and ui.is_open() and paused, "Ordinary skill loss opens a paused confirmation")
-	_check(ui.dialog.dialog_text.contains("Muscle Memory") and ui.dialog.dialog_text.contains("30%") and ui.dialog.dialog_text.contains("20%"), "Preview names the lost skill and mutation change")
-	_check(actor.get("antidotes") == stock and runtime.call("get_mutation") == 30.0, "Preview spends nothing")
-	ui.call("_cancel")
-	_check(not paused and actor.get("antidotes") == stock and runtime.call("skill_learned", "muscle_memory"), "Cancel preserves stock, skill and prior pause")
-	paused = true
-	actor.call("use_antidote")
-	ui.call("_cancel")
-	_check(paused, "Cancel preserves an already paused tree/menu context")
-	paused = false
-	actor.call("use_antidote")
-	ui.call("_confirm")
-	_check(not paused and actor.get("antidotes") == stock - 1 and runtime.call("get_mutation") == 20.0, "Confirm spends exactly one dose")
-	_check(runtime.call("mutation_points") == 2 and not runtime.call("skill_learned", "muscle_memory"), "Spent skill point is refunded into retained budget")
-	_check(not actor.call("confirm_antidote") and actor.get("antidotes") == stock - 1, "Confirmation cannot be replayed")
-	# Stale confirmation rejects a changed skill/mutation state.
-	runtime.get("_domain").mutation = 30.0
-	runtime.call("upgrade_skill", "muscle_memory")
-	actor.call("use_antidote")
-	runtime.get("_domain").mutation = 29.0
-	ui.call("_confirm")
-	_check(actor.get("antidotes") == stock - 1 and runtime.call("get_mutation") == 29.0, "Changed state invalidates pending preview")
-	# Emergency use with an active loss bypasses ordinary confirmation.
+	# Ordinary use that forgets a skill applies at once, without a prompt or pause.
+	_check(actor.call("use_antidote") and not paused, "Ordinary skill loss applies without a confirmation")
+	_check(actor.get("antidotes") == stock - 1 and runtime.call("get_mutation") == 20.0, "Ordinary use spends exactly one dose")
+	_check(runtime.call("mutation_points") == 2 and not runtime.call("skill_learned", "muscle_memory"), "Forgotten skill point is refunded into retained budget")
+	# Emergency use with an active loss is immediate as well.
 	runtime.get("_domain").mutation = 30.1
 	runtime.get("_domain").control_loss_remaining = 2.0
 	runtime.get("_domain").active_control_loss_stage = 1
-	_check(actor.call("use_antidote") and not ui.is_open(), "Emergency antidote is immediate")
+	_check(actor.call("use_antidote"), "Emergency antidote is immediate")
 	_check(not runtime.call("is_control_lost") and actor.get("antidotes") == stock - 2, "Emergency returns control and consumes one dose")
-	_check(not actor.call("use_antidote") and not ui.is_open(), "No stock cannot request or spend an antidote")
-	await _localization(runtime, ui)
-	ui.queue_free()
+	actor.set("antidotes", 0)
+	_check(not actor.call("use_antidote"), "No stock cannot spend an antidote")
+	await _localization(runtime)
+	actor.queue_free()
 	actor.queue_free()
 	await process_frame
 	await process_frame
@@ -64,7 +43,7 @@ func _run() -> void:
 	quit(failures)
 
 
-func _localization(runtime: Node, confirmation: Node) -> void:
+func _localization(runtime: Node) -> void:
 	var table: Dictionary = JSON.parse_string(FileAccess.get_file_as_string("res://assets/interface/translations.json"))
 	for key: String in table.en:
 		if key.begins_with("mutation") or key.begins_with("antidote") or key == "ampuleRecovered":
@@ -76,20 +55,7 @@ func _localization(runtime: Node, confirmation: Node) -> void:
 	var tree := TREE_UI.new()
 	root.add_child(tree)
 	tree.configure(runtime)
-	tree.set("antidote_confirmation", confirmation)
 	tree.open_tree()
-	var actor: Node = runtime.get_parent()
-	actor.set("antidotes", 1)
-	runtime.get("_domain").mutation = 30.0
-	runtime.call("upgrade_skill", "muscle_memory")
-	actor.call("use_antidote")
-	var escape := InputEventKey.new()
-	escape.pressed = true
-	escape.keycode = KEY_ESCAPE
-	tree.call("_input", escape)
-	_check(tree.is_tree_open() and confirmation.call("is_open") and paused, "Escape cannot close the underlying tree or unpause an open confirmation")
-	confirmation.call("_cancel")
-	_check(paused and tree.is_tree_open(), "Cancel returns to the existing paused tree")
 	_check(_texts(tree).contains("Control threshold"), "English tree names the control threshold")
 	LOCALIZATION.apply_language("ru")
 	await process_frame

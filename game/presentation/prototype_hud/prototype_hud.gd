@@ -113,7 +113,7 @@ func _ready() -> void:
 func _apply_texts() -> void:
 	_texts_locale = TranslationServer.get_locale()
 	(_control_notice.get_child(0) as Label).text = tr("controlLost")
-	(_objective.get_child(0) as Label).text = tr("objectiveFireExit")
+	_set_objective_text()
 	health_caption.text = tr("hudHealth")
 	mutation_caption.text = tr("hudMutation")
 	key_caption.text = tr("hudKey")
@@ -125,12 +125,15 @@ func _apply_texts() -> void:
 	_weapon_snapshot = []
 
 
-# Current goal shown once the emergency key is in hand, styled like the HUD frames.
+# Current goal, styled like the HUD frames: find the key first, then head for the fire exit.
 func _build_objective() -> void:
 	_objective = _make_banner("", PALETTE.INK)
 	_objective.name = "Objective"
-	_objective.visible = false
 	add_child(_objective)
+
+
+func _set_objective_text() -> void:
+	(_objective.get_child(0) as Label).text = tr("objectiveFireExit" if _has_key else "objectiveFindKey")
 
 
 # Top-centre banner in the shared HUD frame; objective and control-loss notices use the same look.
@@ -280,7 +283,7 @@ func _update_key_cell(has_key: bool) -> void:
 		return
 	_has_key = has_key
 	key_panel.visible = has_key
-	_objective.visible = has_key
+	_set_objective_text()
 	if has_key and is_inside_tree():
 		# Brief flash so the newly filled cell is noticed in combat.
 		key_panel.modulate = Color(1.8, 1.6, 1.1)

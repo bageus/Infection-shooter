@@ -56,12 +56,15 @@ func activate() -> void:
 	_haze.material_override = _cloud_material(walls, false)
 	(_haze.material_override as ShaderMaterial).set_shader_parameter("opacity", .18)
 	(_haze.material_override as ShaderMaterial).set_shader_parameter("flow_speed", .2)
+	# Plain material parameters: each cloud owns its materials, and an instance
+	# uniform would take 16 of the renderer's 4096 slots (256 objects) per layer.
 	for layer in [_visual, _haze]:
-		layer.set_instance_shader_parameter("phase", phase)
-		layer.set_instance_shader_parameter("progress", 0.0)
-		layer.set_instance_shader_parameter("looping", 1.0 if permanent else 0.0)
-		layer.set_instance_shader_parameter("cycle_seconds", maxf(lifetime_seconds, 1.0))
-		layer.set_instance_shader_parameter("cloud_center", global_position + Vector3.UP * _floor_offset)
+		var material := layer.material_override as ShaderMaterial
+		material.set_shader_parameter("phase", phase)
+		material.set_shader_parameter("progress", 0.0)
+		material.set_shader_parameter("looping", 1.0 if permanent else 0.0)
+		material.set_shader_parameter("cycle_seconds", maxf(lifetime_seconds, 1.0))
+		material.set_shader_parameter("cloud_center", global_position + Vector3.UP * _floor_offset)
 	_spores.emitting = false
 	monitoring = true
 	visible = true
@@ -156,8 +159,8 @@ func _find_absorbing_body() -> Node:
 
 
 func _set_progress(value: float) -> void:
-	_visual.set_instance_shader_parameter("progress", value)
-	_haze.set_instance_shader_parameter("progress", value)
+	(_visual.material_override as ShaderMaterial).set_shader_parameter("progress", value)
+	(_haze.material_override as ShaderMaterial).set_shader_parameter("progress", value)
 	if not permanent and value > 0.55:
 		_spores.emitting = false
 

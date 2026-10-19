@@ -35,6 +35,7 @@ static func spawn_stage(body: RigidBody3D, geometry: GEOMETRY, stage_index: int,
 			break
 		var fragment: RigidBody3D = DAMAGE.spawn_piece(body, mesh, body, stage_index, spawned, direction, hit_position, blast)
 		if fragment != null:
+			fragment.set("breakable", stage_index + 1 < geometry.stages.size())
 			spawned += 1
 	return spawned > 0
 

@@ -8,6 +8,7 @@ var _base_y := 0.0
 var _elapsed := 0.0
 var _runtime_active := false
 var _art: Node3D
+var _beacon: Node3D
 
 
 func _ready() -> void:
@@ -37,9 +38,15 @@ func _ready() -> void:
 	_add_bar(Vector3(0.2, -0.065, 0), Vector3(0.06, 0.13, 0.05), golden)
 	_add_bar(Vector3(0.3, -0.05, 0), Vector3(0.06, 0.1, 0.05), golden)
 	_art.scale = Vector3.ONE * 1.2
-	# The beacon keeps its orientation while the key spins.
-	var beacon := BEACON.make(GOLD, 0.7, 1.15, 0.9)
-	add_child(beacon)
+	# The beacon keeps its orientation while the key spins; its arrow waits for reveal_arrow().
+	_beacon = BEACON.make(GOLD, 0.7, 1.15, 0.9)
+	_beacon.call("set_arrow_visible", false)
+	add_child(_beacon)
+
+
+# The mission calls this once the player has searched for a while; the arrow then blinks above the key.
+func reveal_arrow() -> void:
+	_beacon.call("set_arrow_visible", true)
 
 
 func _add_mesh(mesh: Mesh, offset: Vector3, rotated := Vector3.ZERO) -> void:

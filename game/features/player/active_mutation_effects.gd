@@ -1,5 +1,11 @@
 extends RefCounted
 ## Applies the four active mutation families; progression stays in infection.
+const STRIKE_REACH := 3.0
+const STRIKE_PUSH_SPEED := 6.0
+# Same world, prop and enemy layers as the grenade blast.
+const STRIKE_OBJECT_MASK := 7
+const STRIKE_OBJECT_QUERY_LIMIT := 32
+
 var host: Node
 var running: Dictionary = {}
 var _claw_visual := 0.0
@@ -126,7 +132,37 @@ func _strike(level: int) -> void:
 		if level == 3:
 			enemy.call("apply_blast_stun", 1.5, 1.0)
 		enemy.call("take_damage", float(20 + level * 10))
+	_strike_objects(forward, float(20 + level * 10))
 	host.vfx.power_strike(host.player.global_position, forward)
+
+
+# Glass, partitions and furniture in front of the player: same reach as the
+# blow. A box is used instead of the enemy cone, so it is slightly wider near
+# the player.
+func _strike_objects(forward: Vector3, damage: float) -> void:
+	var player: CharacterBody3D = host.player
+	var box := BoxShape3D.new()
+	box.size = Vector3(3.0, 2.0, STRIKE_REACH)
+	var query := PhysicsShapeQueryParameters3D.new()
+	query.shape = box
+	query.transform = Transform3D(Basis.looking_at(forward), player.global_position + forward * STRIKE_REACH * 0.5 + Vector3.UP * 0.9)
+	query.collision_mask = STRIKE_OBJECT_MASK
+	query.exclude = [player.get_rid()]
+	var hit_ids := {}
+	for hit in player.get_world_3d().direct_space_state.intersect_shape(query, STRIKE_OBJECT_QUERY_LIMIT):
+		var body := hit.get("collider") as Node3D
+		if body == null or hit_ids.has(body.get_instance_id()) or not _strikeable(body):
+			continue
+		hit_ids[body.get_instance_id()] = true
+		if body is RigidBody3D and not (body as RigidBody3D).freeze:
+			body.call("push_from_character", player.global_position, forward * STRIKE_PUSH_SPEED, 1.0)
+		body.call("take_melee_hit", damage, body.global_position, forward)
+
+
+static func _strikeable(body: Node3D) -> bool:
+	if body is CharacterBody3D or not body.has_method("take_melee_hit"):
+		return false
+	return not (body.is_in_group("infected") or body.is_in_group("player") or body.is_in_group("contactless_debris"))
 
 
 func _dash() -> void:

@@ -32,6 +32,9 @@ var _runtime_active := true
 # only the lamps nearest to the camera lit and tells each one whether it may cast shadows.
 var _budget_lit := true
 var _budget_shadow := false
+# Brightness share the budget has granted so far: a lamp fades in and out instead of jumping.
+const BUDGET_FADE_SECONDS := 0.25
+var _budget_fade := 0.0
 var _sub_lights: Array[SpotLight3D] = []
 
 func _enter_tree() -> void:
@@ -70,26 +73,35 @@ func configure_flicker(mode: int, step_seconds: float) -> void:
 
 
 func _process(delta: float) -> void:
-	if light == null or not _is_active():
+	if light == null or not _is_on():
 		return
+	_budget_fade = move_toward(_budget_fade, _budget_target(), delta / BUDGET_FADE_SECONDS)
 	if flicker_mode == 0:
 		_flicker_factor = 1.0
-		_apply_energy()
-		return
-	_elapsed += delta
-	if _elapsed >= flicker_step:
-		_elapsed = fmod(_elapsed, flicker_step)
-		match flicker_mode:
-			1:
-				_target_factor = _rng.randf_range(0.12, 1.0)
-			2:
-				_target_factor = _rng.randf_range(0.3, 1.0)
-			3:
-				_target_factor = 0.0 if _rng.randf() < 0.16 else 1.0
-				if _target_factor == 0.0:
-					_flicker_factor = 0.0
-	_flicker_factor = lerpf(_flicker_factor, _target_factor, minf(delta * (24.0 if flicker_mode == 1 else 4.0), 1.0))
+	else:
+		_elapsed += delta
+		if _elapsed >= flicker_step:
+			_elapsed = fmod(_elapsed, flicker_step)
+			match flicker_mode:
+				1:
+					_target_factor = _rng.randf_range(0.12, 1.0)
+				2:
+					_target_factor = _rng.randf_range(0.3, 1.0)
+				3:
+					_target_factor = 0.0 if _rng.randf() < 0.16 else 1.0
+					if _target_factor == 0.0:
+						_flicker_factor = 0.0
+		_flicker_factor = lerpf(_flicker_factor, _target_factor, minf(delta * (24.0 if flicker_mode == 1 else 4.0), 1.0))
 	_apply_energy()
+	set_process(_needs_process())
+
+
+func _budget_target() -> float:
+	return 1.0 if _is_active() else 0.0
+
+
+func _needs_process() -> bool:
+	return _is_on() and (flicker_mode != 0 or _budget_fade != _budget_target())
 
 func set_local_lighting_enabled(enabled: bool) -> void:
 	_local_lighting_enabled = enabled
@@ -126,7 +138,7 @@ func set_budget_lit(lit: bool, shadow: bool) -> void:
 		return
 	_budget_lit = lit
 	_budget_shadow = shadow
-	_sync_activation()
+	_sync_activation(true)
 
 
 func get_budget_lit() -> bool:
@@ -137,7 +149,9 @@ func get_budget_lit() -> bool:
 func sync_sub_lights() -> void:
 	if light == null:
 		return
-	light.shadow_enabled = _budget_shadow and light.visible
+	# Shadows switch on only once the lamp is fully lit, so a fading lamp never pops a shadow.
+	var shadowed := _budget_shadow and light.visible and _budget_fade >= 1.0
+	light.shadow_enabled = shadowed
 	for extra in _sub_lights:
 		extra.spot_angle = light.spot_angle
 		extra.spot_range = light.spot_range
@@ -145,15 +159,17 @@ func sync_sub_lights() -> void:
 		extra.spot_attenuation = light.spot_attenuation
 		extra.light_color = light.light_color
 		extra.visible = light.visible
-		extra.shadow_enabled = _budget_shadow and light.visible
+		extra.shadow_enabled = shadowed
 
 
-func _sync_activation() -> void:
+## Only a budget change fades; switching lighting on or off applies at once.
+func _sync_activation(fade_budget := false) -> void:
 	visible = true
 	_sync_fixture_visibility()
-	set_process(_is_active() and flicker_mode != 0)
+	if not fade_budget or not _is_on():
+		_budget_fade = _budget_target()
+	set_process(_needs_process())
 	if light != null:
-		light.visible = _is_active()
 		_apply_energy()
 
 
@@ -181,7 +197,8 @@ func _apply_energy() -> void:
 		var split := _sub_lights.size() + 1
 		# A long fixture shares its output between its lights, slightly brighter in total.
 		var share := 1.0 if split == 1 else 0.7 / float(split)
-		light.light_energy = get_authored_energy() * energy_multiplier * _flicker_factor * share if _is_active() else 0.0
+		light.light_energy = get_authored_energy() * energy_multiplier * _flicker_factor * share * _budget_fade if _is_on() else 0.0
+		light.visible = _is_on() and _budget_fade > 0.0
 		for extra in _sub_lights:
 			extra.light_energy = light.light_energy
 		sync_sub_lights()

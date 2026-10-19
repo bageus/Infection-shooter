@@ -4,6 +4,7 @@ extends Node3D
 ## start with parts already missing.
 
 const PHYSICS_POSE := preload("res://game/features/infected/decor_physics_pose.gd")
+const CORPSE_GROUP := &"infected_corpse"
 @export var physics_pose: Dictionary = {}
 var _settling := false
 
@@ -25,6 +26,8 @@ const BODY_PARTS := preload("res://game/features/infected/body_parts.gd")
 @export var durability := 60.0
 
 var parts: Node
+## Set with the body: the hunger's corpse search reads it, like a killed infected's.
+var body_visual: Node3D
 var _physics: RefCounted
 
 
@@ -36,6 +39,8 @@ func _ready() -> void:
 	body.scale = Vector3.ONE * visual_scale
 	body.position.y = feet_offset * visual_scale
 	add_child(body)
+	body_visual = body
+	add_to_group(CORPSE_GROUP)
 	var visual := visual_scene.instantiate() as Node3D
 	body.add_child(visual)
 	var players := visual.find_children("*", "AnimationPlayer", true, false)
@@ -95,6 +100,10 @@ func _apply_pose(body: Node3D, visual: Node3D) -> void:
 
 func get_planner_bounds() -> AABB:
 	return _posed_bounds
+
+
+func is_dead() -> bool:
+	return true
 
 
 func _notification(what: int) -> void:

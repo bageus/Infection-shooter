@@ -11,12 +11,12 @@ uniform float flow_speed : hint_range(0.0, 2.0) = 0.35;
 // Ground haze: the quad lies flat on the floor instead of facing the camera.
 uniform bool ground = false;
 
-instance uniform float progress = 0.0;
-instance uniform float phase = 0.0;
+uniform float progress = 0.0;
+uniform float phase = 0.0;
 // 1 = permanent cloud: every puff loops on its own offset, never all at once.
-instance uniform float looping = 0.0;
-instance uniform float cycle_seconds = 14.0;
-instance uniform vec3 cloud_center = vec3(0.0);
+uniform float looping = 0.0;
+uniform float cycle_seconds = 14.0;
+uniform vec3 cloud_center = vec3(0.0);
 
 varying vec3 v_world_position;
 varying float v_life;

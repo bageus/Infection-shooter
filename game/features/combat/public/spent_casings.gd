@@ -8,6 +8,9 @@ const CASING_SCALE := 3.0
 # Resting casings keep a solver-driven spin (~2 rad/s) that never sleeps the body,
 # so a casing that has landed and nearly stopped is frozen in place.
 const SETTLE_LINEAR_SPEED := 0.15
+# A casing keeps its clink timers alive until its last bounce; baking earlier would silence them.
+const BAKE_MIN_AGE_MSEC := 600
+const BAKE_MAX_HEIGHT := 0.1
 
 var _casings: Array[RigidBody3D] = []
 var _born_at: Array[int] = []
@@ -17,6 +20,7 @@ var _shapes: Dictionary = {}
 
 var effects_root: Node3D
 var impact_pool: Node
+var _floor: Node3D
 
 
 func _ready() -> void:
@@ -27,6 +31,11 @@ func _ready() -> void:
 func configure_world(container: Node3D, impacts: Node) -> void:
 	effects_root = container
 	impact_pool = impacts
+
+
+# Public v1 for the office floor: landed casings are baked into it and their bodies removed.
+func configure_floor_debris(floor_view: Node3D) -> void:
+	_floor = floor_view
 
 
 # Public v1 + sound_event (ADR-0018): the casing clinks when it lands.
@@ -102,11 +111,27 @@ func _process(delta: float) -> void:
 		_cleanup()
 
 
-func _freeze_if_settled(body: RigidBody3D) -> void:
+func _settle(index: int) -> void:
+	var body := _casings[index]
 	if body.freeze or body.linear_velocity.length() >= SETTLE_LINEAR_SPEED or body.get_colliding_bodies().is_empty():
+		return
+	if _bake_onto_floor(body, index):
+		_casings.remove_at(index)
+		_born_at.remove_at(index)
+		body.queue_free()
 		return
 	body.angular_velocity = Vector3.ZERO
 	body.freeze = true
+
+
+# Falls back to a frozen body when no floor is wired, the casing is on furniture, or the floor bake is full.
+func _bake_onto_floor(body: RigidBody3D, index: int) -> bool:
+	if not is_instance_valid(_floor) or Time.get_ticks_msec() - _born_at[index] < BAKE_MIN_AGE_MSEC:
+		return false
+	var local := _floor.to_local(body.global_position)
+	if local.y > BAKE_MAX_HEIGHT:
+		return false
+	return bool(_floor.call("stamp_casing_debris", Vector2(local.x, local.z)))
 
 
 func _cleanup() -> void:
@@ -120,7 +145,7 @@ func _cleanup() -> void:
 			_casings.remove_at(index)
 			_born_at.remove_at(index)
 		else:
-			_freeze_if_settled(_casings[index])
+			_settle(index)
 	while _casings.size() > MAX_CASINGS:
 		var oldest: RigidBody3D = _casings.pop_front()
 		_born_at.pop_front()

@@ -174,7 +174,7 @@ func _test_minigun(actor: CharacterBody3D, effects: Node3D, crosshair: Node) -> 
 	var idle_db := spin_sound.volume_db
 	_check(actor.call("_fire_weapon", gun), "Minigun fires for the whine duck check")
 	gun.call("_process", 0.1)
-	_check(spin_sound.volume_db <= idle_db - 9.0, "Minigun whine drops about 10 dB while firing")
+	_check(spin_sound.volume_db <= idle_db - 50.0, "Minigun whine is silenced while firing")
 	for frame in 5:
 		gun.set("_spin_hold", 0.12)
 		gun.set("_spin", 1.0)

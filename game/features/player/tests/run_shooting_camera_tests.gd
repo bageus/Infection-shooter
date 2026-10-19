@@ -12,6 +12,7 @@ func _initialize() -> void:
 func _run() -> void:
 	_test_envelope()
 	await _test_player()
+	await _test_adjustment()
 	await process_frame
 	await process_frame
 	await create_timer(0.2).timeout
@@ -96,4 +97,28 @@ func _test_player() -> void:
 			_check(absf(player.camera.position.length() - baseline) < 0.002, "Camera recovers while preserving selected weapon bonus")
 	player.queue_free()
 	effects.queue_free()
+	await process_frame
+
+
+func _test_adjustment() -> void:
+	var player = PLAYER.instantiate()
+	root.add_child(player)
+	player.set_physics_process(false)
+	player.set_camera_adjustment({"yaw": 125.5, "pitch": -61.25, "distance": 15.0})
+	var view: Dictionary = player.get_camera_adjustment()
+	_check(absf(view.yaw - 125.5) < 0.001 and absf(view.pitch + 61.25) < 0.001, "Camera angles round-trip in degrees")
+	_check(is_equal_approx(view.distance, 15.0), "Manual distance round-trips")
+	_check(player.camera.position.normalized().dot(player.camera.basis.z) > 0.9999, "Orbit keeps the player at its focus")
+	player._update_camera(0.016)
+	var updated: Dictionary = player.get_camera_adjustment()
+	_check(absf(updated.yaw - view.yaw) < 0.001 and absf(updated.pitch - view.pitch) < 0.001, "Normal camera update preserves selected angles")
+	view = updated
+	player.set_camera_adjustment({"yaw": NAN, "pitch": -10.0, "distance": 20.0})
+	_check(player.get_camera_adjustment() == view, "Non-finite preferences cannot alter camera")
+	player.set_camera_adjustment({"yaw": 12.0})
+	_check(player.get_camera_adjustment() == view, "Incomplete preferences preserve defaults")
+	player.set_camera_adjustment({"yaw": 720.0, "pitch": 1000.0, "distance": 999.0})
+	view = player.get_camera_adjustment()
+	_check(is_zero_approx(view.yaw) and absf(view.pitch - 80.0) < 0.001 and view.distance == player.camera_max_distance, "Preferences clamp to safe bounds")
+	player.queue_free()
 	await process_frame

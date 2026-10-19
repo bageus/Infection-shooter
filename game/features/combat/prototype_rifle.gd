@@ -25,9 +25,12 @@ const WEAPON_SOUNDS := {
 const SPIN_HOLD := 0.12
 # Time the barrels keep turning at full speed after the trigger is released.
 const SPIN_COAST := 0.35
-# While the minigun fires the whine drops this far so each shot stays on top.
-const FIRE_DUCK_DB := 10.0
+# While the minigun fires the whine is silenced so only the shots are heard.
+const FIRE_DUCK_DB := 60.0
 const FIRE_DUCK_TIME := 0.25
+# The whine cuts out almost at once and fades back in after the shots stop.
+const FIRE_DUCK_CUT := 0.05
+const FIRE_DUCK_RECOVER := 0.2
 @export var direct_reserve_feed := false
 @export var casing_size_multiplier := 1.0
 @export var camera_distance_bonus := 0.0
@@ -106,10 +109,11 @@ func _process(delta: float) -> void:
 	if _spin_sound != null:
 		# Pitch and level fall together as the barrels slow down after release.
 		_spin_sound.pitch_scale = lerpf(0.6, 1.0, _spin)
-		# Ducks smoothly under the shots while firing and comes back after them.
+		# Silent while firing; fades back in after the shots.
 		_fire_duck = maxf(0.0, _fire_duck - delta)
 		var duck_target := FIRE_DUCK_DB if _fire_duck > 0.0 else 0.0
-		_duck_db = move_toward(_duck_db, duck_target, delta * FIRE_DUCK_DB / 0.1)
+		var fade_time := FIRE_DUCK_CUT if duck_target > _duck_db else FIRE_DUCK_RECOVER
+		_duck_db = move_toward(_duck_db, duck_target, delta * FIRE_DUCK_DB / fade_time)
 		_spin_sound.volume_db = lerpf(-60.0, -24.0, _spin) - _duck_db
 		if _spin > 0.001 and not _spin_sound.playing:
 			_spin_sound.play()
