@@ -7,7 +7,7 @@ const MAX_RECEIVERS := 12
 const MAX_QUEUE := 32
 var pages: Dictionary = {}
 # Released pages keep their CPU layers (id -> {anchor, layers, density}) so decals return with the page.
-# Bound: 2 x 384x256 RGBA8 (~0.8 MB) per anchor ever decalled; freed anchors are pruned on each release.
+# Bound: stored at half size, 2 x 192x128 RGBA8 (~0.2 MB) per anchor ever decalled, upscaled bilinear on restore; freed anchors are pruned on each release.
 var _archive: Dictionary = {}
 var queue: Array[Dictionary] = []
 var uploads := 0
@@ -90,7 +90,7 @@ func _page(anchor: MeshInstance3D, glass: bool) -> Dictionary:
 	_archive.erase(anchor.get_instance_id())
 	for index in 2:
 		if not saved.is_empty():
-			layers.append({"image": saved.layers[index], "texture": null})
+			layers.append({"image": _resized(saved.layers[index], 0.5), "texture": null})
 			continue
 		var image := Image.create(FACE * 3, FACE * 2, false, Image.FORMAT_RGBA8)
 		image.fill(Color.TRANSPARENT)
@@ -109,8 +109,14 @@ func _release(id: int) -> void:
 		if anchor.visibility_changed.is_connected(page.callback): anchor.visibility_changed.disconnect(page.callback)
 	for key: int in _archive.keys():
 		if not is_instance_valid(_archive[key].anchor.get_ref()): _archive.erase(key)
-	if is_instance_valid(anchor): _archive[id] = {"anchor": page.anchor, "layers": [page.layers[0].image, page.layers[1].image], "density": page.density}
+	if is_instance_valid(anchor): _archive[id] = {"anchor": page.anchor, "layers": [_resized(page.layers[0].image, 2), _resized(page.layers[1].image, 2)], "density": page.density}
 	pages.erase(id)
+
+# factor 2 halves, 0.5 doubles.
+func _resized(source: Image, factor: float) -> Image:
+	var copy := source.duplicate() as Image
+	copy.resize(roundi(copy.get_width() / factor), roundi(copy.get_height() / factor), Image.INTERPOLATE_BILINEAR)
+	return copy
 
 func clear() -> void:
 	for id: int in pages.keys(): _release(id)
