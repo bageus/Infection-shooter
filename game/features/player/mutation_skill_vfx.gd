@@ -300,10 +300,10 @@ func power_strike(center: Vector3, direction: Vector3) -> void:
 	fx.look_at(center + direction, Vector3.UP)
 	var floor_zone := ImmediateMesh.new()
 	floor_zone.surface_begin(Mesh.PRIMITIVE_TRIANGLES)
-	for point in [Vector3(-0.5, 0, 0.2), Vector3(0.5, 0, 0.2), Vector3(1.5, 0, -STRIKE_LENGTH), Vector3(-0.5, 0, 0.2), Vector3(1.5, 0, -STRIKE_LENGTH), Vector3(-1.5, 0, -STRIKE_LENGTH)]:
+	for point in [Vector3(-0.5, 0.03, 0.2), Vector3(0.5, 0.03, 0.2), Vector3(1.5, 0.03, -STRIKE_LENGTH), Vector3(-0.5, 0.03, 0.2), Vector3(1.5, 0.03, -STRIKE_LENGTH), Vector3(-1.5, 0.03, -STRIKE_LENGTH)]:
 		floor_zone.surface_add_vertex(point)
 	floor_zone.surface_end()
-	var zone := _strike_part(floor_zone, _strike_material(0.28))
+	var zone := _strike_part(floor_zone, _strike_material(0.5))
 	fx.add_child(zone)
 	var fist := Node3D.new()
 	fist.position = Vector3(0, 0.9, STRIKE_BACK)
@@ -322,7 +322,7 @@ func power_strike(center: Vector3, direction: Vector3) -> void:
 	lunge.tween_callback(_strike_shatter.bind(fx))
 	var floor_fade := fx.create_tween()
 	floor_fade.tween_interval(0.2)
-	floor_fade.tween_property(zone.material_override, "albedo_color:a", 0.0, 0.45)
+	floor_fade.tween_property(zone.material_override, "albedo_color:a", 0.0, 0.6)
 	var cleanup := fx.create_tween()
 	cleanup.tween_interval(1.0)
 	cleanup.tween_callback(fx.queue_free)
