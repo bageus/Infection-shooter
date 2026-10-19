@@ -33,8 +33,7 @@ const LEAVE_MARGIN := 9.0
 const POOL_RADIUS := 2.5
 const POOL_STRENGTH := 0.5
 const POOL_HEIGHT := 0.03
-## A lamp without a shadow cannot be stopped by a wall, so its cone is narrowed (and its pool shrunk)
-## to the nearest wall around it. Probed once per lamp position, at wall height.
+## A lamp without a shadow cannot be stopped by a wall, so its reach is cut to the nearest wall around it. Probed once per lamp position, at wall height.
 const WALL_PROBE_HEIGHT := 1.4
 const WALL_PROBE_REACH := 4.0
 var _wall_gaps := {}
@@ -255,8 +254,7 @@ func _update_pools(unlit: Array[Node]) -> void:
 	for index in unlit.size():
 		var lamp := unlit[index] as Node3D
 		var at := lamp.global_position
-		var fit := clampf(_wall_gap(lamp) / POOL_RADIUS, 0.3, 1.0)
-		_pool.multimesh.set_instance_transform(index, Transform3D(floor_turn.scaled(Vector3.ONE * fit), Vector3(at.x, POOL_HEIGHT, at.z)))
+		_pool.multimesh.set_instance_transform(index, Transform3D(floor_turn, Vector3(at.x, POOL_HEIGHT, at.z)))
 		var color: Color = lamp.get("light_color")
 		_pool.multimesh.set_instance_color(index, color * POOL_STRENGTH)
 	_pool.visible = local_lights_enabled

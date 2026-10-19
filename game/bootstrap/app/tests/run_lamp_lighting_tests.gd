@@ -19,7 +19,7 @@ func _run() -> void:
 	_test_pools()
 	_test_budget_fade()
 	await _test_view_rule()
-	await _test_wall_clip()
+	await _test_wall_block()
 	await _test_desk_lamp()
 	await _test_elevator()
 	print("Lamp lighting tests: %d failure(s)." % _failures)
@@ -173,7 +173,7 @@ func _test_view_rule() -> void:
 		node.free()
 
 
-func _test_wall_clip() -> void:
+func _test_wall_block() -> void:
 	var controller := LIGHTING.new()
 	root.add_child(controller)
 	controller.shadows_allowed = false
@@ -194,15 +194,19 @@ func _test_wall_clip() -> void:
 	wall.position = Vector3(2, 2, 0)
 	var lamp := _lamp("point", Vector3(0, 3, 0))
 	var open_lamp := _lamp("point", Vector3(-20, 3, 0))
-	var authored := _lights_of(lamp)[0].spot_angle
+	var light := _lights_of(lamp)[0]
+	var angle := light.spot_angle
+	var reach := light.spot_range
 	await physics_frame
 	await physics_frame
 	controller.local_lights_enabled = true
 	controller.refresh_light_budget()
-	var light := _lights_of(lamp)[0]
-	_check(lamp.get_budget_lit() and light.spot_angle < authored, "An unshadowed lamp beside a wall gets a narrower cone")
-	_check(tan(deg_to_rad(light.spot_angle)) * 3.0 <= 1.9, "Its light stops short of the wall (floor reach %.2f m)" % (tan(deg_to_rad(light.spot_angle)) * 3.0))
-	_check(_lights_of(open_lamp)[0].spot_angle == authored, "A lamp with no wall around keeps its cone")
+	_check(lamp.get_budget_lit(), "Setup: the lamp is lit")
+	_check(light.spot_angle == angle and _lights_of(open_lamp)[0].spot_angle == angle, "The wall logic leaves the editor angle unchanged")
+	# The lamp is 3 m up and the wall face 1.85 m aside: the floor point behind the wall is out of reach.
+	var behind := Vector3(2.6, 0, 0)
+	_check(light.global_position.distance_to(behind) > light.spot_range, "Light does not reach a floor point across the wall (reach %.2f m)" % light.spot_range)
+	_check(_lights_of(open_lamp)[0].spot_range == reach and lamp.call("get_light_radius") == reach, "A lamp with no wall keeps its reach")
 	for node: Node in [controller, camera, wall, lamp, open_lamp]:
 		node.free()
 

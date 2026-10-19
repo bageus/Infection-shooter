@@ -130,27 +130,24 @@ func get_light_cost() -> int:
 
 ## Distance at which the authored cone stops lighting anything.
 func get_light_radius() -> float:
-	return light.spot_range if light != null else 0.0
+	return (_authored_range if _authored_range > 0.0 else light.spot_range) if light != null else 0.0
 
 
-## Narrows the cone so it ends at a wall `gap` metres away (INF restores it). Used for lamps without a shadow.
-## shortcut: assumes the floor is at y = 0 and clamps at MIN_CLIP_ANGLE, so a lamp hugging a wall still leaks a little.
-const MIN_CLIP_ANGLE := 15.0
-var _authored_angle := -1.0
+## Shortens the light's reach so it ends at a wall `gap` metres away (INF restores it). Used for lamps
+## without a shadow; the editor-set cone angle is never touched.
+## shortcut: assumes the floor is at y = 0 and keeps at least MIN_WALL_GAP, so a lamp hugging a wall still leaks a little.
+const MIN_WALL_GAP := 0.8
+var _authored_range := -1.0
 
 
 func set_wall_gap(gap: float) -> void:
-	if light == null or (_authored_angle < 0.0 and is_inf(gap)):
+	if light == null or (_authored_range < 0.0 and is_inf(gap)):
 		return
-	if _authored_angle < 0.0:
-		_authored_angle = light.spot_angle
-	var angle := _authored_angle
-	if not is_inf(gap):
-		angle = minf(_authored_angle, maxf(rad_to_deg(atan(gap / maxf(global_position.y, 0.5))), MIN_CLIP_ANGLE))
-	if is_inf(gap):
-		_authored_angle = -1.0
-	if not is_equal_approx(angle, light.spot_angle):
-		light.spot_angle = angle
+	var authored := _authored_range if _authored_range > 0.0 else light.spot_range
+	var reach := authored if is_inf(gap) else minf(authored, Vector2(maxf(gap, MIN_WALL_GAP), global_position.y).length())
+	_authored_range = -1.0 if is_inf(gap) else authored
+	if not is_equal_approx(reach, light.spot_range):
+		light.spot_range = reach
 		sync_sub_lights()
 
 
