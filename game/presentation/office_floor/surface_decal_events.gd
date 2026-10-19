@@ -24,20 +24,32 @@ func hit(collider: Node3D, point: Vector3, normal: Vector3, weapon: String, anch
 		_floor_stamp(Vector2(local.x, local.z), "bullet", frame, size)
 		if powerful(weapon) and randf() < 0.22:
 			_floor_stamp(Vector2(local.x, local.z), "floor_damage", randi_range(0, 15), randf_range(0.35, 0.8))
+		if weapon == "GRENADE":
+			_floor_stamp(Vector2(local.x, local.z), "floor_scuff", randi_range(0, 15), randf_range(0.35, 0.7))
 		return true
 	if not is_instance_valid(anchor): return false
-	var label := (str(collider.name) + " " + str(anchor.name) + " " + str(collider.get_parent().name if collider.get_parent() else "")).to_lower()
-	var wall := absf(normal.y) < 0.6 and ("wall" in label or "column" in label) and "wood" not in label
+	var parent_name := str(collider.get_parent().name) if collider.get_parent() else ""
+	var label := (str(collider.name) + " " + str(anchor.name) + " " + parent_name).to_lower()
+	var wall := absf(normal.y) < 0.6 and (_is_architecture(collider) or "wall" in label or "column" in label) and "wood" not in label
 	_stamp(anchor, point, normal, "bullet", frame, size)
 	# Heavy hits (shots and blasts) always chip the plaster; light rounds only sometimes.
 	if wall and randf() < (1.0 if powerful(weapon) else 0.35):
 		_stamp(anchor, point, normal, "wall_damage", randi_range(0, 15), randf_range(0.35, 0.85))
-	if wall and randf() < 0.12:
+	if wall and (weapon == "GRENADE" or randf() < 0.12):
 		_stamp(anchor, point, normal, "wall_scuff", randi_range(0, 15), randf_range(0.25, 0.6))
 	return true
 
 static func powerful(weapon: String) -> bool:
 	return weapon in ["SHOTGUN", "SNIPER", "AK", "AK_RIFLE", "M4", "M4_RIFLE", "MINIGUN", "GRENADE", "LAUNCHER"]
+
+# Architecture (walls, columns, windows, doors) sits under a camera_occluder root, whatever it is named.
+static func _is_architecture(collider: Node) -> bool:
+	var node := collider
+	while node != null:
+		if node.is_in_group("camera_occluder"):
+			return true
+		node = node.get_parent()
+	return false
 
 func glass_hit(anchor: MeshInstance3D, point: Vector3, normal: Vector3) -> bool:
 	var id := anchor.get_instance_id()
@@ -52,7 +64,7 @@ func glass_hit(anchor: MeshInstance3D, point: Vector3, normal: Vector3) -> bool:
 		_corners[id] = weakref(anchor)
 		var bounds := anchor.get_aabb()
 		var mapping := RECEIVERS.face_mapping(bounds, anchor.to_local(point), anchor.global_basis.transposed() * normal, true)
-		var axis := int(mapping.face) / 2
+		var axis := int(mapping.face) >> 1
 		var pair: Vector2i = [Vector2i(2, 1), Vector2i(0, 2), Vector2i(0, 1)][axis]
 		for index in 4:
 			var corner := bounds.get_center()

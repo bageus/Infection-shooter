@@ -6,6 +6,7 @@ const FLIPBOOK := preload("res://game/core/vfx/public/sprite_flipbook.gd")
 const ATLASES := preload("res://game/core/vfx/public/effect_atlases.gd")
 const POWDER_SHADER := preload("res://game/core/vfx/public/smoke_puff.gdshader")
 const DANGER_ZONE := preload("res://game/features/combat/public/floor_danger_zone.gd")
+const BLAST_MARKS := preload("res://game/features/combat/public/grenade_explosion.gd")
 const LANDING_ZONE_DELAY := 0.2
 
 signal ruptured(location: Vector3)
@@ -211,6 +212,8 @@ func _rupture() -> void:
 	world.add_child(burst)
 	burst.global_position = location
 	burst.call("start", cloud_radius, cloud_lifetime, burst_count)
+	# shortcut: the rupture reuses the grenade blast marks (plaster, scuffs, scorch) and skips the extinguisher powder texture baked into the floor, which needs its own decal kind.
+	BLAST_MARKS.scorch_surroundings(get_world_3d(), world, location, impact_pool)
 	reparent(world, true)
 	get_tree().create_timer(maxf(jet_lifetime, mist_lifetime) + 0.4).timeout.connect(queue_free)
 	ruptured.emit(location)

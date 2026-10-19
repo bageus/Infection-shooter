@@ -101,10 +101,14 @@ static func explode(projectile: Node3D, location: Vector3, normal: Vector3, cont
 			collider.call("apply_blast_stun", 3.0 + 2.0 * factor, factor)
 	if contact != null and (not contact.has_method("take_projectile_hit") or contact.has_method("get_projectile_material") and str(contact.call("get_projectile_material")) in ["concrete", "metal"]):
 		_scorch(scene, location, normal, impacts, contact as Node3D)
-	# Surrounding structural surfaces also receive small radial black marks.
+	scorch_surroundings(projectile.get_world_3d(), scene, location, impacts)
+
+
+## Radial blast marks on the structure around a point; grenades and extinguisher bursts share it.
+static func scorch_surroundings(world: World3D, scene: Node3D, location: Vector3, impacts: Node) -> void:
 	for direction in [Vector3.DOWN, Vector3.LEFT, Vector3.RIGHT, Vector3.FORWARD, Vector3.BACK]:
 		var trace := PhysicsRayQueryParameters3D.create(location + direction * 0.08, location + direction * 2.7, 7)
-		var surface := projectile.get_world_3d().direct_space_state.intersect_ray(trace)
+		var surface := world.direct_space_state.intersect_ray(trace)
 		if not surface.is_empty() and not surface["collider"].has_method("take_projectile_hit"):
 			_scorch(scene, surface["position"], surface["normal"], impacts, surface["collider"] as Node3D)
 
