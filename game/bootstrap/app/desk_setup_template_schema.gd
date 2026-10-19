@@ -57,6 +57,9 @@ static func _item(item: Variant, zone_count: int) -> bool:
 			return false
 	if item.has("yaw") and not _number(item.yaw):
 		return false
+	for key in ["tilt_x", "tilt_z"]:
+		if item.has(key) and not _number(item[key]):
+			return false
 	# v1 templates without a zone hint still resolve by placement geometry.
 	if item.has("zone") and (not _integer(item.zone) or item.zone < -1 or item.zone >= zone_count):
 		return false

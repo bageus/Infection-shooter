@@ -24,7 +24,7 @@ static func save(mode: Variant) -> void:
 			mode._notify_failure("Object has the wrong type for its zone: " + object.name)
 			return
 		var local: Vector3 = mode.desk.to_local(object.global_position)
-		items.append({"path": str(object.get_meta("planning_scene_path", "")), "zone": slot, "x": local.x, "y": local.y, "z": local.z, "yaw": object.rotation.y - mode.desk.rotation.y})
+		items.append({"path": str(object.get_meta("planning_scene_path", "")), "zone": slot, "x": local.x, "y": local.y, "z": local.z, "yaw": object.rotation.y - mode.desk.rotation.y, "tilt_x": object.rotation.x, "tilt_z": object.rotation.z})
 	var desk_type := WORKSTATIONS.desk_name(mode._desk_path())
 	if desk_type.is_empty():
 		mode._notify_failure("This desk model has no template profile: " + mode._desk_path().get_file())
@@ -100,7 +100,7 @@ static func _prepare(mode: Variant, data: Dictionary) -> Dictionary:
 			return {}
 		stage.add_child(object)
 		object.global_position = position
-		object.rotation.y = mode.desk.rotation.y + float(entry.get("yaw", 0))
+		object.rotation = Vector3(float(entry.get("tilt_x", 0.0)), mode.desk.rotation.y + float(entry.get("yaw", 0)), float(entry.get("tilt_z", 0.0)))
 		var slot := GEOMETRY.matching_zone(mode.desk, zones, object, int(entry.get("zone", -1)))
 		if slot < 0 or (data.zones[slot].has("category") and ZONE_RULES.category_for(str(entry.path).get_file().get_basename()) != str(zones[slot].category)):
 			stage.free()
