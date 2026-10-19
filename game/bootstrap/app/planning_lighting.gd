@@ -287,7 +287,8 @@ func _on_node_added(node: Node) -> void:
 
 
 ## Solid walls and columns cast lamp shadows; glass and anything breakable lets light through.
-func _tag_wall_casters(wall: Node) -> void:
+func _tag_wall_casters(wall) -> void:
+	# Untyped: a wall freed before this deferred call must fail the validity check, not argument conversion.
 	if not is_instance_valid(wall) or _has_glass(wall):
 		return
 	for mesh in wall.find_children("*", "MeshInstance3D", true, false):
