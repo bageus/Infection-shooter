@@ -9,9 +9,7 @@ const FALL_DEATH_Y: float = -4.0
 const PlanningMode = preload("res://game/bootstrap/app/planning_mode.gd")
 const WorldActivation = preload("res://game/bootstrap/app/world_activation.gd")
 const TEST_CLOUD := preload("res://game/features/infection_source/public/mutagen_cloud.tscn")
-const ANTIDOTE_CONFIRMATION := preload("res://game/bootstrap/app/antidote_confirmation.gd")
 @export var progression_level_id := "prototype_floor"
-var antidote_confirmation: CanvasLayer
 const MUTATION_UI := preload("res://game/bootstrap/app/mutation_tree_ui.gd")
 const BLOOD_EFFECTS := preload("res://game/presentation/office_floor/public/blood_effects_3d.tscn")
 const SHADER_WARMUP := preload("res://game/bootstrap/app/shader_warmup.gd")
@@ -76,10 +74,6 @@ func _ready() -> void:
 	add_child(mutation_tree_ui)
 	infection_runtime.call("begin_control_level", progression_level_id)
 	mutation_tree_ui.call("configure", infection_runtime)
-	antidote_confirmation = ANTIDOTE_CONFIRMATION.new()
-	add_child(antidote_confirmation)
-	antidote_confirmation.call("configure", player)
-	mutation_tree_ui.set("antidote_confirmation", antidote_confirmation)
 	$MutationChoice/Panel/VBox/Choices/FastHands.pressed.connect(_choose_fast_hands)
 	$MutationChoice/Panel/VBox/Choices/LegMutation.pressed.connect(_choose_leg_mutation)
 	$MutationChoice/Panel/VBox/Choices/EnhancedAmmo.pressed.connect(_choose_enhanced_ammo)
@@ -179,8 +173,6 @@ func set_walk_tuning(speed_multiplier: float, animation_multiplier: float) -> vo
 
 
 func _unhandled_key_input(event: InputEvent) -> void:
-	if is_instance_valid(antidote_confirmation) and antidote_confirmation.call("is_open"):
-		return
 	if event is InputEventKey and event.pressed and not event.echo and event.keycode == KEY_ESCAPE:
 		if mutation_tree_ui != null and bool(mutation_tree_ui.call("is_tree_open")):
 			mutation_tree_ui.call("close_tree")
