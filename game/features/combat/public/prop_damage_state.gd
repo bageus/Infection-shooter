@@ -103,6 +103,14 @@ func break_glass() -> bool:
 	return true
 
 
+## Fragile items break whole on their first hit, whatever the weapon.
+func shatter() -> bool:
+	if broken:
+		return false
+	broken = true
+	return true
+
+
 func _stage_health() -> float:
 	match category:
 		"tech": return 65.0

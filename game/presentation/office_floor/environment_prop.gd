@@ -9,6 +9,7 @@ const FLOOR_DEBRIS := preload("res://game/presentation/office_floor/prop_floor_d
 var _floor_debris := FLOOR_DEBRIS.new()
 const PLATE_FRUIT := preload("res://game/presentation/office_floor/plate_fruit.gd")
 var _fruit := PLATE_FRUIT.new()
+const FRAGILE := preload("res://game/presentation/office_floor/fragile_prop.gd")
 var _geometry := GEOMETRY.new()
 const IMPACT_SOUND := preload("res://game/presentation/office_floor/impact_sound_watcher.gd")
 
@@ -163,10 +164,7 @@ func get_loot_config() -> Dictionary:
 ## Plates can carry baked random fruit (plate_fruit_v1), set by the planner.
 func has_fruit() -> bool: return PLATE_FRUIT.applies(model_path)
 func get_fruit_config() -> Dictionary: return _fruit.config.duplicate()
-func configure_fruit(raw: Dictionary) -> void:
-	if has_fruit():
-		_fruit.configure(self, _geometry, raw)
-
+func configure_fruit(raw: Dictionary) -> void: _fruit.configure(self, _geometry, raw)
 
 func configure_loot_drop(drop_weapon: Callable) -> void:
 	_drop_weapon = drop_weapon
@@ -290,7 +288,7 @@ func take_projectile_hit_at_shape(damage: float, hit_position: Vector3, normal: 
 		var mesh_index := _shapes.find(collision)
 		# Electronics keep their glass screen: shattering it disabled the only collision
 		# shape, so a shot monitor fell through its desk and skipped the short circuit.
-		if _damage.category != "tech" and mesh_index >= 0 and mesh_index < _shape_meshes.size() and is_instance_valid(_shape_meshes[mesh_index]) and GEOMETRY.is_glass_mesh(_shape_meshes[mesh_index]):
+		if _damage.category != "tech" and not FRAGILE.applies(model_path) and mesh_index >= 0 and mesh_index < _shape_meshes.size() and is_instance_valid(_shape_meshes[mesh_index]) and GEOMETRY.is_glass_mesh(_shape_meshes[mesh_index]):
 			call_deferred("_shatter_glass", hit_position, direction)
 			if weapon != "GRENADE":
 				return false
@@ -344,7 +342,7 @@ func take_projectile_hit(damage: float, hit_position: Vector3, _normal: Vector3,
 	if PAPER.is_paper(model_path) and not BOOK_STACK.contains(model_path):
 		_tear_paper(hit_position, direction)
 		return false
-	if damage > 0.0 and _fruit.hit(self, _geometry, _damage, hit_position, direction):
+	if damage > 0.0 and FRAGILE.shatter(self, _visual, _shapes, _damage, _floor_debris, hit_position, direction):
 		return false
 	if damage > 0.0 and is_instance_valid(glass_debris_floor) and has_display():
 		glass_debris_floor.call("bake_display_hit", self, hit_position, _normal)
