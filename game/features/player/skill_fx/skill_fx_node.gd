@@ -11,6 +11,11 @@ var step: Callable
 var _age := 0.0
 
 
+## Jumps ahead in the effect's timeline (shader warm-up shows a late stage at once).
+func skip(seconds: float) -> void:
+	_age += seconds
+
+
 ## Fades the effect out over `seconds` and frees it.
 func stop(seconds: float = 0.3) -> void:
 	fade_out = maxf(seconds, 0.01)

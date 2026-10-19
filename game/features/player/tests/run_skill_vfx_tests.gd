@@ -6,6 +6,7 @@ extends SceneTree
 
 const PLAYER := preload("res://game/features/player/public/player.tscn")
 const DASH_TRAIL := preload("res://game/features/player/dash_trail.gd")
+const HIT_STOP := preload("res://game/features/player/skill_fx/hit_stop.gd")
 const DASH_ZONE := preload("res://game/features/player/dash_floor_zone.gd")
 const RANGE_DOME := preload("res://game/features/player/range_dome.gd")
 const SKILL_EFFECTS := preload("res://game/features/player/mutation_skill_effects.gd")
@@ -89,6 +90,15 @@ func _check_procedural(stage: Node3D, player: Node3D, effects: Node, vfx: Node) 
 	var zone := DASH_ZONE.spawn(stage, stage.get_world_3d(), Vector3.ZERO, Vector3.FORWARD, 0.15)
 	_expect(zone != null and zone.mesh.get_surface_count() == 1, "Predator Dash marks its strike lane on the floor.")
 	_expect(DASH_ZONE.spawn(stage, stage.get_world_3d(), Vector3.ZERO, Vector3.ZERO, 0.15) == null, "A dash with no heading marks nothing.")
+	var warm := Node3D.new()
+	stage.add_child(warm)
+	vfx.call("warm_up", warm)
+	_expect(warm.get_child_count() >= 4, "Dash and strike warm-up play in the hidden viewport.")
+	warm.queue_free()
+	HIT_STOP.pulse(self, 0.05)
+	_expect(is_equal_approx(Engine.time_scale, HIT_STOP.SLOW_SCALE), "A heavy hit slows time for a moment.")
+	await create_timer(0.2).timeout
+	_expect(is_equal_approx(Engine.time_scale, 1.0), "The slow-down ends by itself.")
 	for frame in 20:
 		await process_frame
 	await create_timer(1.6).timeout

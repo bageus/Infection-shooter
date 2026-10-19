@@ -7,6 +7,7 @@ extends Node
 const DASH_TRAIL := preload("res://game/features/player/dash_trail.gd")
 const DASH_ZONE := preload("res://game/features/player/dash_floor_zone.gd")
 const RANGE_DOME := preload("res://game/features/player/range_dome.gd")
+const HIT_STOP := preload("res://game/features/player/skill_fx/hit_stop.gd")
 const STRIKE := preload("res://game/features/player/skill_fx/strike_fx.gd")
 const PROCEDURAL := preload("res://game/features/player/skill_fx/procedural_skill_fx.gd")
 ## Range dome colours per skill area.
@@ -56,15 +57,18 @@ func configure_world(container: Node3D) -> void:
 func spike_burst(center: Vector3, radius: float) -> void:
 	RANGE_DOME.spawn(_world(), center, radius, BLOOD_RANGE, 0.6)
 	PROCEDURAL.spike_burst(_world(), center, radius)
+	_kick(0.03)
 
 ## Retaliation: a stunning electric ring.
 func electric_pulse(center: Vector3, radius: float) -> void:
 	RANGE_DOME.spawn(_world(), center, radius, STORM_RANGE, 0.5)
 	PROCEDURAL.electric_pulse(_world(), center, radius)
+	_kick(0.04)
 
 ## Discharge: one lightning link from each point to the next.
 func chain_lightning(points: Array[Vector3]) -> void:
 	PROCEDURAL.chain_lightning(_world(), points)
+	_kick(0.02)
 
 ## Acid Spit: a pool of acid lying for `seconds`.
 func acid_pool(center: Vector3, radius: float, seconds: float) -> Node3D:
@@ -99,6 +103,7 @@ func heartbeat(seconds: float = 2.4) -> void:
 
 ## Predator Dash: speed streaks behind the body and the strike lane on the floor.
 func dash_trail(seconds: float) -> void:
+	_kick(0.05)
 	DASH_TRAIL.start(_world(), player, seconds)
 	var heading: Variant = player.get("_roll_direction")
 	if heading is Vector3 and _world() is Node3D:
@@ -181,6 +186,27 @@ func _process(delta: float) -> void:
 
 
 # --- Helpers -----------------------------------------------------------------
+
+## Plays the dash and strike once in the hidden warm-up viewport (see main.gd)
+## so their shaders compile at mission load, not on the first cast.
+func warm_up(parent: Node3D) -> void:
+	var point := Vector3(0.0, -0.6, -2.0)
+	STRIKE.play(parent, point, Vector3.FORWARD)
+	var burst: Node3D = STRIKE.play(parent, point, Vector3.FORWARD)
+	if burst != null:
+		burst.call("skip", 0.35)
+	DASH_ZONE.spawn(parent, parent.get_world_3d(), point, Vector3.RIGHT, 0.2)
+	var runner := Node3D.new()
+	parent.add_child(runner)
+	runner.global_position = point
+	DASH_TRAIL.start(parent, runner, 0.2)
+	runner.create_tween().tween_property(runner, "global_position", point + Vector3.RIGHT * 0.6, 0.1)
+
+
+func _kick(amount: float) -> void:
+	if player.has_method("camera_kick"):
+		player.call("camera_kick", amount)
+
 
 func _world() -> Node:
 	return effects_root if is_instance_valid(effects_root) else player.get_parent()
@@ -294,3 +320,10 @@ func active_aura(id: String, radius: float, duration: float) -> void:
 ## Power Strike: a white-hot fist lunges forward and bursts at its reach.
 func power_strike(center: Vector3, direction: Vector3) -> void:
 	STRIKE.play(_world(), center, direction)
+	_kick(0.06)
+
+
+## Power Strike landed on something: a split-second slow-down.
+func heavy_hit() -> void:
+	if player.is_inside_tree():
+		HIT_STOP.pulse(player.get_tree())

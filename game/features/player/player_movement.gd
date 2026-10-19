@@ -159,6 +159,15 @@ func _physics_process(delta: float) -> void:
 		_fire_weapon(w)
 	elif fire_pressed and control_lost:
 		_fire_weapon(w)
+## Skill presentation asks for a short camera pull (see shooting_camera_state).
+func camera_kick(amount: float) -> void:
+	_shooting_camera.kick(amount)
+
+
+func warm_up_skill_fx(parent: Node3D) -> void:
+	mutation_effects.get("vfx").call("warm_up", parent)
+
+
 func _unhandled_input(event: InputEvent) -> void:
 	if get_tree().paused:
 		return
