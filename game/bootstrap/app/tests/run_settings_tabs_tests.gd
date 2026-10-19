@@ -1,5 +1,6 @@
 extends SceneTree
 const FRONT := preload("res://game/bootstrap/app/menu/front_end.tscn")
+const EFFECTS_QUALITY := preload("res://game/core/vfx/public/effects_quality.gd")
 const PREFS := preload("res://game/bootstrap/app/menu/menu_preferences.gd")
 var failures := 0
 
@@ -188,6 +189,7 @@ func _shadow_checks(tabs: TabContainer, dialog: Control) -> void:
 
 
 func _general_checks(tabs: TabContainer) -> void:
+	_quality_checks(tabs)
 	_check_presentation_options(tabs)
 	_enemy_modes_checks(tabs)
 	_dodge_checks(tabs)
@@ -227,6 +229,18 @@ func _dodge_checks(tabs: TabContainer) -> void:
 	dodge_prefs.load_settings()
 	_check(dodge_prefs.values.dodge_animation == 1, "Dodge animation choice survives settings reload")
 	dodge.item_selected.emit(0)
+
+
+func _quality_checks(tabs: TabContainer) -> void:
+	var quality := tabs.get_child(2).find_child("EffectsQuality", true, false) as OptionButton
+	_check(quality != null and quality.item_count == 3 and quality.selected == 2, "Effects quality belongs to Video: low, medium, high, default high")
+	quality.select(0)
+	quality.item_selected.emit(0)
+	var quality_prefs := PREFS.new()
+	quality_prefs.load_settings()
+	_check(quality_prefs.values.effects_quality == 0 and EFFECTS_QUALITY.level == 0, "Effects quality survives reload and reaches the effects")
+	quality.select(2)
+	quality.item_selected.emit(2)
 
 
 func _check(condition: bool, message: String) -> void:
