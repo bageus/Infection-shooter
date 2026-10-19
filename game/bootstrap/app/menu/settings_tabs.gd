@@ -2,6 +2,7 @@ extends RefCounted
 const NOTICES := preload("res://game/bootstrap/app/menu/settings_notices.gd")
 var notices := NOTICES.new()
 const SHADOWS := preload("res://game/bootstrap/app/menu/shadow_quality.gd")
+const BLOOD_LEVEL := preload("res://game/core/vfx/public/blood_level.gd")
 const SETTLE_SECONDS := 0.35
 const EDITOR := preload("res://game/bootstrap/app/menu/control_binding_editor.gd")
 var dialog: Control
@@ -157,6 +158,7 @@ func _video() -> void:
 	blood_style.selected = dialog.view.preferences.values.blood_style
 	blood_style.item_selected.connect(func(index: int) -> void: dialog.call("_change", "blood_style", index))
 	dialog.call("_row", "bloodStyle", blood_style)
+	_blood_level()
 	var lighting := CheckButton.new()
 	lighting.name = "Lighting"
 	lighting.text = dialog.view.text("lighting")
@@ -252,6 +254,37 @@ func _set_shadow_quality_enabled(slider: HSlider, name_label: Label, enabled: bo
 	slider.editable = enabled
 	slider.modulate.a = 1.0 if enabled else .4
 	name_label.modulate.a = 1.0 if enabled else .4
+
+
+## Blood level 0..3 (green, few, medium, maximum). Like shadow quality, the
+## change is applied once the slider stops moving.
+func _blood_level() -> void:
+	var name_label := Label.new()
+	name_label.name = "BloodLevelName"
+	name_label.custom_minimum_size.x = 90
+	name_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
+	var slider := HSlider.new()
+	slider.name = "BloodLevel"
+	slider.custom_minimum_size.x = 160
+	slider.min_value = 0
+	slider.max_value = BLOOD_LEVEL.COUNT - 1
+	slider.step = 1
+	slider.tick_count = BLOOD_LEVEL.COUNT
+	slider.value = dialog.view.preferences.values.blood_level
+	name_label.text = dialog.view.text("bloodLevel" + str(int(slider.value)))
+	var settle := Timer.new()
+	settle.one_shot = true
+	settle.wait_time = SETTLE_SECONDS
+	slider.add_child(settle)
+	settle.timeout.connect(func() -> void: dialog.call("_change", "blood_level", int(slider.value)))
+	slider.value_changed.connect(func(value: float) -> void:
+		name_label.text = dialog.view.text("bloodLevel" + str(int(value)))
+		dialog.view.preferences.values.blood_level = int(value)
+		settle.start())
+	var box := HBoxContainer.new()
+	box.add_child(slider)
+	box.add_child(name_label)
+	dialog.call("_row", "bloodLevel", box)
 
 
 func _audio() -> void:
