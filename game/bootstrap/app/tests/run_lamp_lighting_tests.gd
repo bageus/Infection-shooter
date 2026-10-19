@@ -17,6 +17,7 @@ func _run() -> void:
 	_test_fixture_lights()
 	_test_budget()
 	_test_pools()
+	_test_budget_fade()
 	await _test_desk_lamp()
 	await _test_elevator()
 	print("Lamp lighting tests: %d failure(s)." % _failures)
@@ -108,6 +109,26 @@ func _test_budget() -> void:
 		lamp.free()
 	camera.free()
 	controller.free()
+
+
+func _test_budget_fade() -> void:
+	var lamp := _lamp("point")
+	var light := _lights_of(lamp)[0]
+	var full := light.light_energy
+	_check(full > 0.0, "Lamp starts fully lit")
+	lamp.call("set_budget_lit", false, false)
+	_check(light.visible and light.light_energy == full and lamp.is_processing(), "A lamp leaving the budget keeps shining while it fades out")
+	lamp._process(0.1)
+	_check(light.light_energy > 0.0 and light.light_energy < full, "Fade-out is gradual")
+	lamp._process(1.0)
+	_check(not light.visible and is_zero_approx(light.light_energy) and not lamp.is_processing(), "Fade-out ends dark and stops processing")
+	lamp.call("set_budget_lit", true, true)
+	_check(not light.shadow_enabled, "A fading-in lamp casts no shadow yet")
+	lamp._process(0.1)
+	_check(light.visible and light.light_energy > 0.0 and light.light_energy < full, "Fade-in is gradual")
+	lamp._process(1.0)
+	_check(is_equal_approx(light.light_energy, full) and light.shadow_enabled, "Fade-in ends at full energy with shadows")
+	lamp.free()
 
 
 func _test_pools() -> void:
