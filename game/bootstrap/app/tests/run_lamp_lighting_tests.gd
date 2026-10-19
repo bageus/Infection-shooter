@@ -19,6 +19,7 @@ func _run() -> void:
 	_test_pools()
 	_test_budget_fade()
 	await _test_view_rule()
+	await _test_wall_clip()
 	await _test_desk_lamp()
 	await _test_elevator()
 	print("Lamp lighting tests: %d failure(s)." % _failures)
@@ -169,6 +170,40 @@ func _test_view_rule() -> void:
 	_check(edge.get_budget_lit(), "A lamp just outside the view is already lit")
 	_check(not far.get_budget_lit(), "A lamp far outside the view stays off")
 	for node: Node in [controller, camera, seen, edge, far]:
+		node.free()
+
+
+func _test_wall_clip() -> void:
+	var controller := LIGHTING.new()
+	root.add_child(controller)
+	controller.shadows_allowed = false
+	var camera := Camera3D.new()
+	root.add_child(camera)
+	camera.current = true
+	camera.look_at_from_position(Vector3(0, 10, 0.5), Vector3.ZERO)
+	var wall := Node3D.new()
+	wall.add_to_group("camera_occluder")
+	var body := StaticBody3D.new()
+	var shape := CollisionShape3D.new()
+	var box := BoxShape3D.new()
+	box.size = Vector3(0.3, 4.0, 10.0)
+	shape.shape = box
+	body.add_child(shape)
+	wall.add_child(body)
+	root.add_child(wall)
+	wall.position = Vector3(2, 2, 0)
+	var lamp := _lamp("point", Vector3(0, 3, 0))
+	var open_lamp := _lamp("point", Vector3(-20, 3, 0))
+	var authored := _lights_of(lamp)[0].spot_angle
+	await physics_frame
+	await physics_frame
+	controller.local_lights_enabled = true
+	controller.refresh_light_budget()
+	var light := _lights_of(lamp)[0]
+	_check(lamp.get_budget_lit() and light.spot_angle < authored, "An unshadowed lamp beside a wall gets a narrower cone")
+	_check(tan(deg_to_rad(light.spot_angle)) * 3.0 <= 1.9, "Its light stops short of the wall (floor reach %.2f m)" % (tan(deg_to_rad(light.spot_angle)) * 3.0))
+	_check(_lights_of(open_lamp)[0].spot_angle == authored, "A lamp with no wall around keeps its cone")
+	for node: Node in [controller, camera, wall, lamp, open_lamp]:
 		node.free()
 
 

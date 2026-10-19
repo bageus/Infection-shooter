@@ -33,6 +33,11 @@ const LEAVE_MARGIN := 9.0
 const POOL_RADIUS := 2.5
 const POOL_STRENGTH := 0.5
 const POOL_HEIGHT := 0.03
+## A lamp without a shadow cannot be stopped by a wall, so its cone is narrowed (and its pool shrunk)
+## to the nearest wall around it. Probed once per lamp position, at wall height.
+const WALL_PROBE_HEIGHT := 1.4
+const WALL_PROBE_REACH := 4.0
+var _wall_gaps := {}
 var _pool: MultiMeshInstance3D
 var shadows_allowed := true
 var _refresh_left := 0.0
@@ -203,6 +208,8 @@ func refresh_light_budget(capture_inputs: bool = true) -> void:
 			shadowed += cost
 			owners[lamp.get_instance_id()] = true
 		lamp.call("set_budget_lit", lit, shadow)
+		if lit and lamp.has_method("set_wall_gap"):
+			lamp.call("set_wall_gap", INF if shadow else _wall_gap(lamp as Node3D))
 	_near_view = near_view
 	_in_view = in_view
 	_settling = _shadow_owners != owners
@@ -248,10 +255,37 @@ func _update_pools(unlit: Array[Node]) -> void:
 	for index in unlit.size():
 		var lamp := unlit[index] as Node3D
 		var at := lamp.global_position
-		_pool.multimesh.set_instance_transform(index, Transform3D(floor_turn, Vector3(at.x, POOL_HEIGHT, at.z)))
+		var fit := clampf(_wall_gap(lamp) / POOL_RADIUS, 0.3, 1.0)
+		_pool.multimesh.set_instance_transform(index, Transform3D(floor_turn.scaled(Vector3.ONE * fit), Vector3(at.x, POOL_HEIGHT, at.z)))
 		var color: Color = lamp.get("light_color")
 		_pool.multimesh.set_instance_color(index, color * POOL_STRENGTH)
 	_pool.visible = local_lights_enabled
+
+
+## Distance from a lamp to the nearest wall within reach (INF when none); glass lets light through.
+func _wall_gap(lamp: Node3D) -> float:
+	var at := lamp.global_position
+	var cached: Array = _wall_gaps.get(lamp.get_instance_id(), [])
+	if not cached.is_empty() and cached[0] == at:
+		return cached[1]
+	var gap := INF
+	var world := get_viewport().world_3d if get_viewport() != null else null
+	if world != null:
+		var from := Vector3(at.x, WALL_PROBE_HEIGHT, at.z)
+		for step in 8:
+			var direction := Vector3.RIGHT.rotated(Vector3.UP, step * TAU / 8.0)
+			var query := PhysicsRayQueryParameters3D.create(from, from + direction * WALL_PROBE_REACH)
+			for _hit in 3:
+				var hit := world.direct_space_state.intersect_ray(query)
+				if hit.is_empty():
+					break
+				var body := hit.collider as Node
+				if body.get_parent().is_in_group("camera_occluder") and not body.is_in_group("infected_breakable_glass"):
+					gap = minf(gap, from.distance_to(hit.position))
+					break
+				query.exclude.append(hit.rid)
+	_wall_gaps[lamp.get_instance_id()] = [at, gap]
+	return gap
 
 
 func _light_radius(lamp: Node) -> float:
