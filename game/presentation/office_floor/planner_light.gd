@@ -133,6 +133,27 @@ func get_light_radius() -> float:
 	return light.spot_range if light != null else 0.0
 
 
+## Narrows the cone so it ends at a wall `gap` metres away (INF restores it). Used for lamps without a shadow.
+## shortcut: assumes the floor is at y = 0 and clamps at MIN_CLIP_ANGLE, so a lamp hugging a wall still leaks a little.
+const MIN_CLIP_ANGLE := 15.0
+var _authored_angle := -1.0
+
+
+func set_wall_gap(gap: float) -> void:
+	if light == null or (_authored_angle < 0.0 and is_inf(gap)):
+		return
+	if _authored_angle < 0.0:
+		_authored_angle = light.spot_angle
+	var angle := _authored_angle
+	if not is_inf(gap):
+		angle = minf(_authored_angle, maxf(rad_to_deg(atan(gap / maxf(global_position.y, 0.5))), MIN_CLIP_ANGLE))
+	if is_inf(gap):
+		_authored_angle = -1.0
+	if not is_equal_approx(angle, light.spot_angle):
+		light.spot_angle = angle
+		sync_sub_lights()
+
+
 func set_budget_lit(lit: bool, shadow: bool) -> void:
 	if lit == _budget_lit and shadow == _budget_shadow:
 		return
