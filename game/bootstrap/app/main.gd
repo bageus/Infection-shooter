@@ -119,6 +119,8 @@ func _ready() -> void:
 	var hit_warmup := HIT_EFFECT_WARMUP.new()
 	hit_warmup.setup(self)
 	GRENADE_EXPLOSION.warm_up(hit_warmup, Vector3(0.0, 0.0, -2.0))
+	if player.has_method("warm_up_skill_fx"):
+		player.call("warm_up_skill_fx", hit_warmup)
 	for enemy in enemies.get_children():
 		if enemy.has_method("watch_target"):
 			enemy.call("watch_target", player)

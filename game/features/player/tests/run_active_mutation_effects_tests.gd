@@ -27,6 +27,7 @@ class Visual extends RefCounted:
 	func spike_burst(_p: Vector3, _r: float) -> void: pass
 	func chain_lightning(_p: Array[Vector3]) -> void: pass
 	func power_strike(_p: Vector3, _d: Vector3) -> void: pass
+	func heavy_hit() -> void: pass
 	func active_aura(_id: String, _r: float, _t: float) -> void: pass
 	func claw_slash(_enemy: Node3D) -> void: pass
 	func dash_trail(_t: float) -> void: pass

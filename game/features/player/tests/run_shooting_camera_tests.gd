@@ -27,6 +27,9 @@ func _check(ok: bool, message: String) -> void:
 
 
 func _test_envelope() -> void:
+	var punched := STATE.new()
+	punched.kick(1.0)
+	_check(is_equal_approx(punched.offset, STATE.MAX_KICK) and punched.tick(0.1) <= STATE.MAX_KICK, "A skill kick is capped and settles back")
 	var light := STATE.new()
 	var heavy := STATE.new()
 	light.shot("PISTOL")

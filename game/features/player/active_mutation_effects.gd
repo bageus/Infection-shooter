@@ -123,6 +123,7 @@ func _strike(level: int) -> void:
 	forward.y = 0.0
 	forward = forward.normalized()
 	var right := forward.cross(Vector3.UP)
+	var struck := false
 	for enemy in host._enemies_near(host.player.global_position, 4.0):
 		var offset: Vector3 = enemy.global_position - host.player.global_position
 		var depth := offset.dot(forward)
@@ -132,6 +133,9 @@ func _strike(level: int) -> void:
 		if level == 3:
 			enemy.call("apply_blast_stun", 1.5, 1.0)
 		enemy.call("take_damage", float(20 + level * 10))
+		struck = true
+	if struck:
+		host.vfx.heavy_hit()
 	_strike_objects(forward, float(20 + level * 10))
 	host.vfx.power_strike(host.player.global_position, forward)
 

@@ -1,6 +1,7 @@
 extends RefCounted
 ## Player-local shot envelope. Distance smoothing stays with the camera owner.
 const MAX_OFFSET := 0.06
+const MAX_KICK := 0.1
 const HOLD_SECONDS := 0.05
 const RECOVERY_PER_SECOND := 0.25
 const IMPULSES := {
@@ -14,6 +15,12 @@ var _hold := 0.0
 
 func shot(weapon: String) -> void:
 	offset = minf(MAX_OFFSET, offset + float(IMPULSES.get(weapon, 0.005)))
+	_hold = HOLD_SECONDS
+
+
+## A skill impact: pulls the camera out a little, then it settles back.
+func kick(amount: float) -> void:
+	offset = minf(MAX_KICK, offset + amount)
 	_hold = HOLD_SECONDS
 
 
