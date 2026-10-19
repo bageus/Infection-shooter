@@ -303,7 +303,7 @@ func _refresh() -> void:
 	var loadout := LOADOUT.new()
 	canvas.add_child(loadout)
 	var bindings: Array[String] = [_binding_label("skill_1"), _binding_label("skill_2")]
-	loadout.configure(runtime, bindings)
+	loadout.configure(runtime, bindings, _present_card, card.dismiss)
 	canvas.call("set_progress", progress, hybrids)
 	_fill_hotbar()
 	_restore_card()
@@ -437,10 +437,16 @@ func _add_lock(canvas: Control, row: Array, center: Vector2) -> void:
 
 
 func _show_card(button: Control) -> void:
-	if not is_tree_open() or not button.is_inside_tree():
+	if not button.is_inside_tree():
 		return
 	var info: Dictionary = button.get_meta("card_info", {})
-	card.present(str(button.get_meta("skill_id")), info, button.get_global_rect(), window.get_global_rect().grow(-12))
+	_present_card(str(button.get_meta("skill_id")), info, button.get_global_rect())
+
+
+func _present_card(id: String, info: Dictionary, target: Rect2) -> void:
+	if not is_tree_open():
+		return
+	card.present(id, info, target, window.get_global_rect().grow(-12))
 
 
 func _restore_card() -> void:

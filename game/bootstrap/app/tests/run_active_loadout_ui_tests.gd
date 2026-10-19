@@ -1,6 +1,7 @@
 extends SceneTree
 const RUNTIME := preload("res://game/features/infection/public/infection_runtime.gd")
 const UI := preload("res://game/bootstrap/app/mutation_tree_ui.gd")
+const TREE_CANVAS := preload("res://game/bootstrap/app/mutation_tree_canvas.gd")
 const BINDINGS := preload("res://game/bootstrap/app/menu/control_bindings.gd")
 const TEXT := preload("res://game/bootstrap/app/mutation_text.gd")
 var failures := 0
@@ -47,6 +48,7 @@ func _run() -> void:
 	runtime.call("_emit_state_changes", 94.0)
 	_expect(ui.skill_bar.circles[0].skill_id == "predator_dash" and not ui.skill_bar.circles[0].castable, "Dormant locked slot/icon stays visible and inactive")
 	_test_bindings()
+	_test_tree_geometry()
 	ui.queue_free()
 	runtime.queue_free()
 	await process_frame
@@ -76,6 +78,45 @@ func _test_bindings() -> void:
 	_expect(controls.values.camera_left.code == KEY_H, "Custom layout survives save/load under version2")
 	controls.apply()
 	_expect(not InputMap.has_action("skill_3") and not InputMap.has_action("skill_4"), "Obsolete inputs are removed at apply")
+
+## Circles never touch one another, and no circle sits on a neighbouring branch's stem.
+func _test_tree_geometry() -> void:
+	var canvas := TREE_CANVAS.new()
+	var circles: Array = []
+	var stems: Array = []
+	for branch in TREE_CANVAS.BRANCHES.size():
+		var start: Vector2 = canvas.branch_origin(branch)
+		for rank in 3:
+			var end: Vector2 = canvas.skill_position(branch, rank)
+			circles.append([branch, end])
+			stems.append([branch, start, end])
+			start = end
+		if branch < 4:
+			var alternate: Vector2 = canvas.skill_position(branch, 2, true)
+			circles.append([branch, alternate])
+			stems.append([branch, start, alternate])
+	for hybrid in 5:
+		circles.append([-1, canvas.hybrid_position(hybrid)])
+	for a in circles.size():
+		var centre: Vector2 = circles[a][1]
+		_expect(centre.x >= 33.0 and centre.x <= 1167.0 and centre.y >= 33.0 and centre.y <= 767.0, "Circle %d stays inside the tree" % a)
+		for b in range(a + 1, circles.size()):
+			_expect(centre.distance_to(circles[b][1]) >= 72.0, "Circles %d and %d do not touch" % [a, b])
+	for circle in circles:
+		for stem in stems:
+			if stem[0] == circle[0]:
+				continue
+			var nearest := Geometry2D.get_closest_point_to_segment(circle[1], stem[1], stem[2])
+			_expect(nearest.distance_to(circle[1]) >= 41.0, "Circle does not sit on branch %d's stem" % stem[0])
+	var slope := rad_to_deg(atan2(TREE_CANVAS.RANK_STEP.y, TREE_CANVAS.RANK_STEP.x))
+	_expect(slope <= 40.0, "Branch stems lean at most 40 degrees")
+	for hybrid in 5:
+		var parents: Array = TREE_CANVAS.HYBRID_PARENTS[hybrid]
+		var left: Rect2 = canvas.label_rect(parents[0])
+		var right: Rect2 = canvas.label_rect(parents[1])
+		var x: float = canvas.hybrid_position(hybrid).x
+		_expect(x > left.get_center().x and x < right.get_center().x, "Hybrid %d sits between its two branch titles" % hybrid)
+	canvas.free()
 
 func _expect(ok: bool, message: String) -> void:
 	if not ok:
