@@ -9,7 +9,13 @@ const BIOMASS := preload("res://game/presentation/office_floor/biomass_atlas.gd"
 const BIOMASS_MESH := preload("res://game/presentation/office_floor/biomass_mesh.gd")
 const BIOMASS_FIT := preload("res://game/presentation/office_floor/biomass_fit.gd")
 const IMPACT_AUDIO := preload("res://game/presentation/office_floor/biomass_impact_audio.gd")
+const BIOMASS_CLIP := preload("res://game/presentation/office_floor/biomass_clip.gd")
 const FLOOR_OFFSET := 0.002
+## Floor height when nothing is found below a settling piece (planner floor).
+const SETTLE_FLOOR := 0.0135
+const SETTLE_SECONDS := 0.4
+## Relief left on settled mass: it is pressed into the floor, not a heap.
+const BAKED_DEPTH := 0.25
 
 ## Texture id "<category>_<variant>", e.g. "splatter_03".
 @export var texture_name := "splatter_01"
@@ -29,6 +35,8 @@ var _projection_dirty := true
 var _projection_transform := Transform3D()
 var _last_anchor_transform := Transform3D()
 var _impact_audio := IMPACT_AUDIO.new()
+var _anchor_seen := false
+var _clip_stamp: Array = []
 
 
 func configure_blood_normal(normal: Vector3) -> void:
@@ -55,6 +63,7 @@ func attach_blood(anchor: Node3D, owner_id: String) -> void:
 	attachment_mesh = str(anchor.name)
 	_anchor_transform = anchor.global_transform.affine_inverse() * global_transform
 	_last_anchor_transform = anchor.global_transform
+	_anchor_seen = false
 	process_mode = Node.PROCESS_MODE_ALWAYS
 	set_process(true)
 	configure_projection(anchor)
@@ -77,6 +86,11 @@ func configure_projection(anchor: Node3D) -> void:
 
 func _process(_delta: float) -> void:
 	var anchor := _anchor.get_ref() as Node3D if _anchor != null else null
+	if anchor != null and anchor.visible:
+		_anchor_seen = true
+	if _biomass_orphaned(anchor):
+		_settle(_is_glass(anchor))
+		return
 	if anchor == null:
 		if _visual != null:
 			_visual.hide()
@@ -194,6 +208,7 @@ static func texture_ids() -> PackedStringArray:
 
 func _project_surface() -> void:
 	if BIOMASS.is_biomass_id(texture_name):
+		_clip_biomass()
 		return
 	if not _projection_dirty and global_transform.is_equal_approx(_projection_transform) and _visual.mesh is ArrayMesh and not _receivers_changed():
 		return
@@ -295,3 +310,59 @@ func biomass_hide() -> void:
 	_biomass_hidden = true
 	if _visual != null:
 		_visual.visible = false
+
+
+# Fits the patch to the face it lies on: clipped at the edges, wrapped round
+# convex ones. Recomputed only when the patch or its receiver moved.
+func _clip_biomass() -> void:
+	if _visual == null or not _visual.is_inside_tree():
+		return
+	var anchor := _projection_anchor.get_ref() as Node3D if _projection_anchor != null else null
+	var stamp := [_visual.global_transform, anchor.global_transform if anchor != null else Transform3D(), anchor]
+	if not _clip_stamp.is_empty() and stamp[0].is_equal_approx(_clip_stamp[0]) and stamp[1].is_equal_approx(_clip_stamp[1]) and stamp[2] == _clip_stamp[2]:
+		return
+	_clip_stamp = stamp
+	BIOMASS_CLIP.apply(_visual, BIOMASS_CLIP.compute(_visual.global_transform, anchor, get_world_3d().direct_space_state) if anchor != null else {})
+
+
+# The receiver was destroyed (freed, or its mesh hidden like broken glass).
+# The planner keeps its own rules, so nothing settles while it is open.
+func _biomass_orphaned(anchor: Node3D) -> bool:
+	if not BIOMASS.is_biomass_id(texture_name) or _visual == null or Engine.get_meta("planning_active", false):
+		return false
+	return anchor == null or anchor.is_queued_for_deletion() or (_anchor_seen and not anchor.visible)
+
+
+func _is_glass(anchor: Node3D) -> bool:
+	var node := anchor
+	while node != null and node != get_parent():
+		if "glass" in str(node.name).to_lower():
+			return true
+		node = node.get_parent()
+	return false
+
+
+# Mass whose receiver is gone drops to the floor, lies flat there and fuses
+# with other floor biomass. Broken glass leaves it as a loose heap; any other
+# object presses it into the floor (shallow relief, shared with fusion).
+func _settle(glass: bool) -> void:
+	var start := global_transform
+	_anchor = null
+	configure_blood_attachment({})
+	_projection_anchor = null
+	_impact_audio.unregister()
+	set_process(false)
+	var ray := PhysicsRayQueryParameters3D.create(start.origin, start.origin + Vector3.DOWN * 30.0, 7)
+	var hit := get_world_3d().direct_space_state.intersect_ray(ray)
+	var floor_y: float = hit["position"].y if not hit.is_empty() and hit["normal"].y > .75 else SETTLE_FLOOR
+	var yaw := float(absi(hash(start.origin)) % 628) / 100.0
+	var end := Transform3D(Basis(Vector3.UP, yaw).scaled(Vector3.ONE * maxf(start.basis.x.length(), 0.001)), Vector3(start.origin.x, floor_y, start.origin.z))
+	configure_blood(texture_name, "floor")
+	set_meta("biomass_settled", "fallen" if glass else "baked")
+	var flat := 1.0 if glass else BAKED_DEPTH
+	var fall := func(amount: float) -> void:
+		global_transform = start.interpolate_with(end, amount)
+		if _visual != null:
+			_visual.set_instance_shader_parameter("depth_scale", lerpf(1.0, flat, amount))
+	fall.call(0.0)
+	create_tween().set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_IN).tween_method(fall, 0.0, 1.0, SETTLE_SECONDS)
