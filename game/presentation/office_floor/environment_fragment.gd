@@ -18,6 +18,10 @@ const MAX_FRAGMENTS := 40
 const KICK_COOLDOWN := 0.8
 # Highest lowest point of a resting piece that still counts as lying on the floor.
 const BAKE_MAX_HEIGHT := 0.15
+# Top of the base floor (see FLOOR_TOP in environment_prop.gd). Nothing in the level lies lower.
+const FLOOR_TOP := 0.0135
+# A piece may overlap the floor by this much before it is lifted back; the solver needs a little slack.
+const FLOOR_SLACK := 0.004
 
 static var _surface: PhysicsMaterial
 
@@ -34,6 +38,7 @@ var _piece_health := 55.0
 var pool_owner: Node
 var _runtime: Node
 var _expiry: Tween
+var _half_extents := Vector3.ZERO
 
 
 func _ready() -> void:
@@ -41,6 +46,7 @@ func _ready() -> void:
 	rest_time = 0.0
 	_kick_cooldown = 0.0
 	_piece_health = 55.0
+	_half_extents = Vector3.ZERO
 	collision_layer = HIT_LAYER
 	collision_mask = WORLD_MASK
 	if _surface == null:
@@ -65,6 +71,29 @@ func _ready() -> void:
 	_expiry.tween_interval(32.0 if kickable else 14.0)
 	_expiry.tween_callback(expire)
 	call_deferred("_register_budget")
+
+
+# A thin panel landing fast on its edge can be pushed a few centimetres into the floor before the
+# solver pushes it out again, so its wall is seen cutting through the tiles. The lowest point of its
+# box is kept at the floor surface: the piece is lifted and stops falling.
+func _integrate_forces(state: PhysicsDirectBodyState3D) -> void:
+	if _half_extents == Vector3.ZERO:
+		for child in get_children():
+			if child is CollisionShape3D and (child as CollisionShape3D).shape is BoxShape3D:
+				_half_extents = ((child as CollisionShape3D).shape as BoxShape3D).size * 0.5
+				break
+		if _half_extents == Vector3.ZERO:
+			return
+	var transform := state.transform
+	var basis := transform.basis
+	var depth := absf(basis.x.y) * _half_extents.x + absf(basis.y.y) * _half_extents.y + absf(basis.z.y) * _half_extents.z
+	var deficit := FLOOR_TOP - FLOOR_SLACK - (transform.origin.y - depth)
+	if deficit <= 0.0:
+		return
+	transform.origin.y += deficit
+	state.transform = transform
+	if state.linear_velocity.y < 0.0:
+		state.linear_velocity.y = 0.0
 
 
 func _register_budget() -> void:
