@@ -57,12 +57,12 @@ func direction(actor: CharacterBody3D, target: Node3D, radius: float, far: bool 
 	_radius = maxf(radius, .15)
 	_shape.radius = _radius
 	_height = actor.global_position.y
-	var from := actor.global_position
+	var from := _probe_origin(actor)
 	var to := target.global_position
 	to.y = _height
 	# Close to the target the direct-line answer must be fresh, so a swing is never held back.
-	# Beyond 10 m walls are not probed: head straight, plan around them once inside that range.
-	if from.distance_squared_to(to) > 100.0:
+	# Beyond 10 m walls are not probed until the capsule actually touches one (or a path is active).
+	if from.distance_squared_to(to) > 100.0 and path.is_empty() and not actor.is_on_wall():
 		_direct = true
 	elif (frame >= _next_probe or from.distance_squared_to(to) < 9.0) and _take_direct_probe(frame):
 		_next_probe = frame + 6
@@ -92,6 +92,11 @@ func direction(actor: CharacterBody3D, target: Node3D, radius: float, far: bool 
 		# Stop at the obstacle, but retain the normal retry cooldown.
 		return Vector3.ZERO
 	return (path[0] - from).normalized()
+
+
+## A capsule touching a wall makes sweeps from its centre report clear; back off the wall a little.
+func _probe_origin(actor: CharacterBody3D) -> Vector3:
+	return actor.global_position + (actor.get_wall_normal() * .1 if actor.is_on_wall() else Vector3.ZERO)
 
 
 func _roll_probe_frame(frame: int) -> void:
@@ -152,10 +157,10 @@ func begin_search(actor: CharacterBody3D, target: Node3D) -> void:
 	if target is CollisionObject3D:
 		_excluded.append((target as CollisionObject3D).get_rid())
 	_height = actor.global_position.y
-	var from := actor.global_position
+	var from := _probe_origin(actor)
 	var to := target.global_position
 	to.y = _height
-	_direct = from.distance_squared_to(to) > 100.0 or clear_segment(from, to)
+	_direct = (from.distance_squared_to(to) > 100.0 and not actor.is_on_wall()) or clear_segment(from, to)
 	_search_state.clear()
 	if _direct:
 		path.clear()
