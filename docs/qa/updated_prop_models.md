@@ -49,3 +49,17 @@ candidate exit0/0failures. Headless main.tscn запускается, 15 кад�
 validate_project (spec/workflow/architecture/size/CI197suites), scene384refs,
 diff-check PASS. Бинарные GLB и авторская карта не изменялись.
 Native/Web визуальная приёмка, FPS и проигрывание звуков здесь не заявляются.
+
+
+## PR381: исправление CI20.10.2026
+
+В run39351670784 runtime упал только общий destruction_wiring: он требовал
+_broken и обломки от02_water_cooler_destructible, вопреки новому fixed whole
+контракту. На прежнем suite локально воспроизведены ровно2failures. Теперь
+точный plain cooler проходит отдельные позитивные проверки послеAK иGRENADE:
+целостность, freeze/transform, collision layer и enabled shapes, visible Intact,
+отсутствие fragments. Resource/stage wiring остаётся общим и обязательным;
+ни один каталоговый объект не пропускается, остальные assertions прежние.
+Новый audit230моделей/101staged —0failures; updated_prop_models —0failures.
+Godot4.7.2 import exit0 безERROR/SCRIPT ERROR. Production код/модели/публичные
+контракты/карты/DTO/owners/edges/policy не менялись. Следующий шаг — CI PR381.

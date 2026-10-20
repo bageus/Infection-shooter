@@ -57,7 +57,10 @@ func _audit(catalog: RefCounted, path: String) -> void:
 				_check(bool(geometry.call("ensure_group", group)), "Damage resource resolves: " + path + "/" + str(group.name))
 				_check(not group.find_children("*", "MeshInstance3D", true, false).is_empty(), "Damage stage contains mesh: " + path + "/" + str(group.name))
 				group.hide()
-			if not groups.is_empty():
+			if path.get_file() == "02_water_cooler_destructible.glb":
+				await _audit_fixed_cooler(prop, effects)
+				row["checked"] = "fixed whole cooler"
+			elif not groups.is_empty():
 				prop.call("take_projectile_hit", 10000.0, prop.global_position + Vector3(0, .5, 0), Vector3.BACK, Vector3.FORWARD, "AK")
 				await process_frame
 				# Variants absorb their own stage first; hit through all authored variants.
@@ -92,6 +95,28 @@ func _audit(catalog: RefCounted, path: String) -> void:
 		prop.queue_free()
 	effects.queue_free()
 	await process_frame
+
+func _audit_fixed_cooler(prop: Node3D, effects: Node3D) -> void:
+	# This authored LargeParts stage is a whole body, not permission to shatter it.
+	var body := prop as RigidBody3D
+	_check(body != null, "Fixed cooler uses its physical catalog wrapper")
+	if body == null:
+		return
+	var original := body.transform
+	var layer := body.collision_layer
+	for weapon in ["AK", "GRENADE"]:
+		body.call("take_projectile_hit", 10000.0, body.global_position, Vector3.BACK, Vector3.FORWARD, weapon)
+		await process_frame
+		_check(not bool(body.get("_broken")), "Fixed cooler stays whole after " + weapon)
+		_check(body.freeze and body.transform.is_equal_approx(original), "Fixed cooler stays anchored after " + weapon)
+		_check(layer != 0 and body.collision_layer == layer, "Fixed cooler keeps its collision layer after " + weapon)
+		var shapes: Array = body.get("_shapes")
+		_check(not shapes.is_empty(), "Fixed cooler retains collision shapes after " + weapon)
+		for shape: CollisionShape3D in shapes:
+			_check(not shape.disabled, "Fixed cooler collision stays enabled after " + weapon)
+		var intact := _find(body, "Intact")
+		_check(intact != null and intact.is_visible_in_tree(), "Fixed cooler intact geometry stays visible after " + weapon)
+		_check(effects.get_child_count() == 0, "Fixed cooler emits no replacement body fragments after " + weapon)
 
 func _check(condition: bool, message: String) -> void:
 	if not condition:
