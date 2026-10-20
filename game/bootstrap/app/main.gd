@@ -41,6 +41,8 @@ var defer_layout_loading := false
 var current_level := ""
 var _mission_loading := false
 var _ended := false
+var completion_music: Node
+var _music_handed_off := false
 var _pause_open := false
 var planning_mode: Node
 var world_activation: Node
@@ -268,10 +270,17 @@ func _choose_enhanced_ammo() -> void:
 
 
 func _end_run(reason: String) -> void:
+	if _ended:
+		return
 	_ended = true
 	var kind := "complete" if reason == "MISSION COMPLETE" else "failed"
 	var reason_key: String = {"MUTATION OVERTOOK YOU": "failedMutation",
 		"YOU FELL OUTSIDE THE FLOOR": "failedFall", "YOU DIED": "failedHealth"}.get(reason, "")
+	if kind == "complete":
+		$MissionMusic.call("finish_mission")
+		completion_music = preload("res://game/bootstrap/app/completion_music.gd").new()
+		get_tree().root.add_child(completion_music)
+		game_over.get("_music").set("completion_music", completion_music)
 	game_over.call("show_screen", kind, reason_key)
 	game_over.move_to_front()
 	Input.mouse_mode = Input.MOUSE_MODE_VISIBLE
@@ -301,11 +310,17 @@ func _on_menu_action(action: String) -> void:
 			_on_resume_pressed()
 		"planning":
 			_on_planning_pressed()
+		"continue":
+			_on_continue_pressed()
 		"restart", "start":
 			_on_restart_pressed()
 		"main", "quit":
 			get_tree().paused = false
-			get_tree().change_scene_to_file("res://game/bootstrap/app/menu/front_end.tscn")
+			if is_instance_valid(completion_music):
+				_music_handed_off = true
+				preload("res://game/bootstrap/app/menu/music_navigation.gd").show_main(get_tree(), self, completion_music)
+			else:
+				get_tree().change_scene_to_file("res://game/bootstrap/app/menu/front_end.tscn")
 
 
 func _on_restart_pressed() -> void:
@@ -317,6 +332,8 @@ func _on_restart_pressed() -> void:
 	_mission_loading = true
 	var loader := preload("res://game/bootstrap/app/menu/mission_loader.gd").new()
 	add_child(loader)
+	loader.set("completion_music", completion_music)
+	_music_handed_off = is_instance_valid(completion_music)
 	loader.completed.connect(func(_success: bool) -> void: _mission_loading = false)
 	loader.start()
 
@@ -334,6 +351,8 @@ func travel_to_level(map_name: String, arrival: Dictionary) -> void:
 	_mission_loading = true
 	var loader := preload("res://game/bootstrap/app/menu/mission_loader.gd").new()
 	add_child(loader)
+	loader.set("completion_music", completion_music)
+	_music_handed_off = is_instance_valid(completion_music)
 	loader.completed.connect(func(_success: bool) -> void: _mission_loading = false)
 	var carry := {"loadout": player.call("export_loadout"), "threshold": infection_runtime.call("get_critical_threshold")}
 	loader.start_map(planning_mode.storage._map_path(map_name), map_name, arrival, carry)
@@ -356,6 +375,10 @@ func _bind_enemy_blood(enemy: Node) -> void:
 	bind_world_object(enemy)
 	if blood_effects == null or not enemy.has_signal("projectile_blood"):
 		return
+	if enemy != player:
+		var music_callback := Callable($MissionMusic, "notify_monster_hit")
+		if not enemy.is_connected("projectile_blood", music_callback):
+			enemy.connect("projectile_blood", music_callback)
 	var bindings := {
 		"projectile_blood": "splatter_hit", "blood_wounded": "small_stain",
 		"wounded_moved": "drops_trail", "body_dragged": "smear_drag", "blood_death": "death_pool",
@@ -419,3 +442,19 @@ func bind_world_object(node: Node) -> void:
 func set_electronic_particles_enabled(enabled: bool) -> void:
 	if world_bindings != null:
 		world_bindings.call("set_electronic_particles_enabled", enabled)
+
+
+func _on_continue_pressed() -> void:
+	if has_node("LevelEntries"):
+		var chain: RefCounted = $LevelEntries.chain
+		var index: int = chain.index_of(current_level)
+		if not str(chain.neighbour(index, 1)).is_empty():
+			$LevelEntries.travel(index, 1)
+			return
+	# A standalone prototype has no next authored map; retain its restart route.
+	_on_restart_pressed()
+
+
+func _exit_tree() -> void:
+	if is_instance_valid(completion_music) and not _music_handed_off:
+		completion_music.call("dispose")

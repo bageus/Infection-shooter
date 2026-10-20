@@ -5,6 +5,7 @@ const RESOURCE_PREPARATION := preload("res://game/bootstrap/app/scene_resource_p
 const LAYOUT := preload("res://game/bootstrap/app/planning_layout_loader.gd")
 const MATERIAL_WARMUP := preload("res://game/bootstrap/app/mission_material_warmup.gd")
 var warmed_materials := 0
+var completion_music: Node
 ## Props need ~160 physics ticks to fall asleep; a slow machine gets a wall-clock cap instead.
 const SETTLE_MAX_TICKS := 240
 const SETTLE_MAX_MSEC := 10000
@@ -83,6 +84,8 @@ func start() -> void:
 	if _started:
 		return
 	_started = true
+	if is_instance_valid(completion_music):
+		completion_music.call("to_loading")
 	_log_begin()
 	var tree := get_tree()
 	var previous := tree.current_scene
@@ -167,6 +170,9 @@ func start() -> void:
 	var preferences := PREFERENCES.new()
 	preferences.load_settings()
 	preferences.apply_to_game(tree)
+	if is_instance_valid(completion_music):
+		completion_music.call("release_to_mission")
+		completion_music = null
 	tree.paused = false
 	Input.mouse_mode = Input.MOUSE_MODE_VISIBLE
 	pending = null
@@ -243,9 +249,9 @@ func _fail(reason: String) -> void:
 func _close_error() -> void:
 	Input.mouse_mode = _previous_mouse
 	completed.emit(false)
-	if _released_previous:
-		get_tree().paused = _previous_pause
-		get_tree().change_scene_to_file(FRONT_END_PATH)
+	if _released_previous or is_instance_valid(completion_music):
+		preload("res://game/bootstrap/app/menu/music_navigation.gd").show_main(get_tree(), get_tree().current_scene, completion_music)
+		completion_music = null
 	queue_free()
 
 
@@ -271,6 +277,9 @@ func _restore_previous_visual() -> void:
 
 
 func _exit_tree() -> void:
+	if is_instance_valid(completion_music):
+		completion_music.call("dispose")
+		completion_music = null
 	_restore_previous_visual()
 	if is_instance_valid(pending):
 		pending.queue_free()

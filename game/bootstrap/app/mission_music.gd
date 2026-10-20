@@ -1,52 +1,31 @@
 extends Node
-## Mission-local music presentation. Reads the public perception query at 4 Hz.
-## Brief changes near the threshold do not repeatedly trigger the ending sting.
-
-const CALM := [preload("res://assets/audio/music/server_oper.ogg"), preload("res://assets/audio/music/seamless_loop.ogg")]
-const COMBAT := preload("res://assets/audio/music/tower_hunt.ogg")
-const BOOM := preload("res://assets/audio/music/music_cinematic_boom.ogg")
-const FADE_SECONDS := 2.0
+## Music selection observes confirmed monster hits and public aggression only.
+const CALM := preload("res://assets/audio/music/server_oper_active.ogg")
+const THREAT := preload("res://assets/audio/music/tower_threat.ogg")
+const HUNT := preload("res://assets/audio/music/tower_hunt.ogg")
+const MIX := preload("res://game/bootstrap/app/music_crossfade.gd")
 const RELEASE_SECONDS := 3.0
-const LEVEL := 0.32
 var state := &"calm"
 var aggression := 0
-var _calm_index := -1
 var _quiet_time := 0.0
+var _recent_hit := 0.0
 var _poll_time := 0.0
-var _players: Array[AudioStreamPlayer] = []
-var _current := 0
-var _fade: Tween
-var _sting: AudioStreamPlayer
-var _silent := DisplayServer.get_name() == "headless"
-var _boom_timer: Timer
+var _battle := false
+var _suspended := false
+var mixer: MIX
 
 
 func _ready() -> void:
 	name = "MissionMusic"
 	process_mode = Node.PROCESS_MODE_PAUSABLE
-	for i in 2:
-		var player := AudioStreamPlayer.new()
-		player.name = "Track" + str(i)
-		player.bus = &"Music"
-		player.volume_linear = 0.0
-		add_child(player)
-		_players.append(player)
-	_sting = AudioStreamPlayer.new()
-	_sting.name = "CombatEnding"
-	_sting.bus = &"Music"
-	_sting.stream = BOOM
-	_sting.volume_linear = LEVEL
-	add_child(_sting)
-	_sting.finished.connect(_after_boom)
-	_boom_timer = Timer.new()
-	_boom_timer.one_shot = true
-	_boom_timer.wait_time = BOOM.get_length()
-	_boom_timer.timeout.connect(_after_boom)
-	add_child(_boom_timer)
-	_start_calm()
+	mixer = MIX.new()
+	add_child(mixer)
+	mixer.fade_to(CALM)
 
 
 func _process(delta: float) -> void:
+	if _suspended:
+		return
 	_poll_time += delta
 	if _poll_time < 0.25:
 		return
@@ -59,85 +38,59 @@ func _process(delta: float) -> void:
 	update_aggression(count, elapsed)
 
 
+func notify_monster_hit(_position: Vector3 = Vector3.ZERO, _direction: Vector3 = Vector3.ZERO, _weapon: String = "", _excluded: Array[RID] = [], _source_id: int = 0) -> void:
+	if _suspended:
+		return
+	_recent_hit = RELEASE_SECONDS
+	_quiet_time = 0.0
+	_battle = true
+	if state == &"calm":
+		_select(&"hunt" if aggression > 10 else &"threat")
+
+
 func update_aggression(count: int, delta: float) -> void:
-	aggression = count
-	if count > 3:
+	aggression = maxi(count, 0)
+	if _suspended:
+		return
+	_recent_hit = maxf(0.0, _recent_hit - maxf(delta, 0.0))
+	if aggression > 10:
+		_battle = true
 		_quiet_time = 0.0
-		if state != &"combat":
-			state = &"combat"
-			_sting.stop()
-			_boom_timer.stop()
-			_crossfade(COMBAT)
+		_select(&"hunt")
 		return
-	if state != &"combat":
+	if not _battle:
 		return
-	_quiet_time += delta
+	if state == &"hunt" and aggression < 10:
+		_select(&"threat")
+	if aggression > 0 or _recent_hit > 0.0:
+		_quiet_time = 0.0
+		if state == &"hunt" and aggression < 10:
+			_select(&"threat")
+		return
+	_quiet_time += maxf(delta, 0.0)
 	if _quiet_time >= RELEASE_SECONDS:
-		_end_combat()
+		_battle = false
+		_select(&"calm")
 
 
-func _crossfade(stream: AudioStream) -> void:
-	_cancel_fade()
-	var old := _players[_current]
-	_current = 1 - _current
-	var next := _players[_current]
-	next.stop()
-	next.stream = stream
-	next.volume_linear = 0.0
-	# Match SFX: headless has no audio device and never starts a decoder.
-	if not _silent:
-		next.play()
-	_fade = create_tween().set_parallel(true)
-	_fade.tween_property(old, "volume_linear", 0.0, FADE_SECONDS)
-	_fade.tween_property(next, "volume_linear", LEVEL, FADE_SECONDS)
-	_fade.chain().tween_callback(old.stop)
-
-
-func _end_combat() -> void:
-	state = &"ending"
-	_cancel_fade()
-	_fade = create_tween().set_parallel(true)
-	for player in _players:
-		_fade.tween_property(player, "volume_linear", 0.0, FADE_SECONDS)
-	_fade.chain().tween_callback(_play_boom)
-
-
-func _play_boom() -> void:
-	if state != &"ending":
+func _select(next: StringName) -> void:
+	if state == next:
 		return
-	for player in _players:
-		player.stop()
-	state = &"boom"
-	if _silent:
-		_boom_timer.start()
+	var previous := state
+	state = next
+	if state == &"calm":
+		mixer.fade_to(CALM)
+	elif state == &"hunt":
+		mixer.fade_to(HUNT)
 	else:
-		_sting.play()
+		# Downgrading an ongoing hunt enters the repeating body, never the intro.
+		mixer.fade_to(THREAT, 30.08 if previous == &"hunt" else 0.0)
 
 
-func _after_boom() -> void:
-	_boom_timer.stop()
-	if state == &"boom":
-		_start_calm()
-
-
-func _start_calm() -> void:
-	state = &"calm"
-	# Random first track; thereafter alternate, so the return is not repetitive.
-	_calm_index = randi_range(0, 1) if _calm_index < 0 else 1 - _calm_index
-	_crossfade(CALM[_calm_index])
-
-
-func _cancel_fade() -> void:
-	if _fade != null and _fade.is_valid():
-		_fade.kill()
-
-
-func _exit_tree() -> void:
-	_cancel_fade()
-	_boom_timer.stop()
-	for player in _players:
-		player.stop()
-		player.stream = null
-	if is_instance_valid(_sting):
-		_sting.stop()
-		_sting.stream = null
+func finish_mission() -> void:
+	_suspended = true
+	state = &"complete"
+	set_process(false)
+	# The completion screen pauses gameplay, but its outgoing music still fades.
+	process_mode = Node.PROCESS_MODE_ALWAYS
+	mixer.fade_to(null)
