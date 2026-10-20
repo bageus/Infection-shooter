@@ -15,7 +15,7 @@ const DEFAULTS := {"window_mode": 0, "resolution": "1280x720", "language": "ru",
 	"enemies_ignore_player": false, "enemies_no_damage": false, "enemy_difficulty": 1,
 	"walk_speed_multiplier": 1.0, "walk_animation_multiplier": 1.0,
 	"volume": 0.4, "effects_volume": 1.0, "music_volume": 1.0, "menu_music": true, "menu_music_volume": 1.0, "sound": true, "occlusion_mode": 0, "test_mutagen": false, "infinite_antidotes": false, "lighting": true, "game_lights_only": false, "electronic_particles": true, "blood_style": 0, "blood_level": 2, "effects_quality": 2, "dodge_animation": 0,
-	"bullet_impact_smoke": true, "sunlight": true, "shadows": true, "shadow_quality": 2, "mesh_lod": true, "keep_corpses": true, "floor_hints": true}
+	"bullet_impact_smoke": true, "sunlight": true, "shadows": true, "shadow_quality": 1, "mesh_lod": true, "keep_corpses": true, "floor_hints": true}
 var values: Dictionary = DEFAULTS.duplicate()
 
 
