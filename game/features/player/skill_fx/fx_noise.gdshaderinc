@@ -70,3 +70,11 @@ vec3 fx_fire_ramp(float h) {
 	c = mix(c, vec3(1.0, 0.65, 0.15), smoothstep(0.3, 0.65, h));
 	return mix(c, vec3(1.0, 0.97, 0.85), smoothstep(0.65, 0.95, h));
 }
+
+// Blood colour by heat: near-black clot -> dark red -> bright arterial red -> pale wet highlight.
+vec3 fx_blood_ramp(float h) {
+	h = clamp(h, 0.0, 1.0);
+	vec3 c = mix(vec3(0.12, 0.0, 0.01), vec3(0.55, 0.02, 0.04), smoothstep(0.0, 0.4, h));
+	c = mix(c, vec3(0.95, 0.08, 0.1), smoothstep(0.35, 0.75, h));
+	return mix(c, vec3(1.0, 0.62, 0.6), smoothstep(0.8, 1.0, h));
+}
