@@ -1,0 +1,44 @@
+{
+  "version": 1,
+  "records": [
+    {
+      "source": "assets/audio/music/tower_hold_1.wav",
+      "output": "assets/audio/music/tower_hold.ogg",
+      "source_sha256": "b549a5fff6aad8151e9ec6edc25d6ae7f11ab53bcc48b2feda40170f1386376d",
+      "output_sha256": "09425ce7d26c9ef6c252714ba08c461a4e30ef83f09f660065a281488116b002",
+      "source_seconds": 60.0,
+      "output_seconds": 56.0,
+      "channels": 2,
+      "sample_rate": 48000,
+      "loop": false,
+      "loop_offset": 0.0,
+      "overlap_seconds": 0
+    },
+    {
+      "source": "assets/audio/music/tower_threat_1.wav",
+      "output": "assets/audio/music/tower_threat.ogg",
+      "source_sha256": "a3ed426a781fee53f6c5f994851f39b0292a46df50c00a79dae28e5b80ba292c",
+      "output_sha256": "b2bb599bbafef778cd23ba981fdc7e62f1c33c08c537d8f498e38725d156c0c1",
+      "source_seconds": 120.0,
+      "output_seconds": 120.0,
+      "channels": 2,
+      "sample_rate": 48000,
+      "loop": true,
+      "loop_offset": 30.08,
+      "overlap_seconds": 0.08
+    },
+    {
+      "source": "assets/audio/music/server_oper.ogg",
+      "output": "assets/audio/music/server_oper_active.ogg",
+      "source_sha256": "db74ef3e6d413ec6e4aa81b0063bbfc9a1e3007bbca0af063c74d3da5618e694",
+      "output_sha256": "ebea89549e3bcdc2cbd3d223b172efeb030ee7fe8574a57193119705d2b24061",
+      "source_seconds": 119.92,
+      "output_seconds": 89.92,
+      "channels": 2,
+      "sample_rate": 48000,
+      "loop": true,
+      "loop_offset": 0.08,
+      "overlap_seconds": 0.08
+    }
+  ]
+}
