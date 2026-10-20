@@ -12,7 +12,7 @@
     "Temporary blast screen blur, oscillating ghost images and glitch envelope",
     "Versioned local keyboard/mouse bindings and read-only runtime diagnostics",
     "One-time shader warm-up quads at mission start",
-    "Scene-local menu/mission music playback, crossfades and derived combat music intensity"
+    "Scene-local mission/menu music and explicitly transferred application-owned completion playback, crossfades and derived combat intensity"
   ],
   "public_api": [],
   "dependencies": [
