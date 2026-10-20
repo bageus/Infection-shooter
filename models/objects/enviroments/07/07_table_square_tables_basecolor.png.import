@@ -3,10 +3,9 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://cfrr4m3v0njx6"
-path.s3tc="res://.godot/imported/07_table_square_tables_basecolor.png-9cc77f825a7cf096876f75f38bfc5dfd.s3tc.ctex"
+path="res://.godot/imported/07_table_square_tables_basecolor.png-9cc77f825a7cf096876f75f38bfc5dfd.ctex"
 metadata={
-"imported_formats": ["s3tc_bptc"],
-"vram_texture": true
+"vram_texture": false
 }
 generator_parameters={
 "md5": "314cc52775349737bd2d3cac0f3f0316"
@@ -15,11 +14,11 @@ generator_parameters={
 [deps]
 
 source_file="res://models/objects/enviroments/07/07_table_square_tables_basecolor.png"
-dest_files=["res://.godot/imported/07_table_square_tables_basecolor.png-9cc77f825a7cf096876f75f38bfc5dfd.s3tc.ctex"]
+dest_files=["res://.godot/imported/07_table_square_tables_basecolor.png-9cc77f825a7cf096876f75f38bfc5dfd.ctex"]
 
 [params]
 
-compress/mode=2
+compress/mode=4
 compress/high_quality=false
 compress/lossy_quality=0.7
 compress/uastc_level=0
@@ -41,4 +40,4 @@ process/normal_map_invert_y=false
 process/hdr_as_srgb=false
 process/hdr_clamp_exposure=false
 process/size_limit=1024
-detect_3d/compress_to=2
+detect_3d/compress_to=0
