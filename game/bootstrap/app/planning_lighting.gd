@@ -220,6 +220,8 @@ func _update_pools(unlit: Array[Node]) -> void:
 		var gradient := Gradient.new()
 		gradient.set_color(0, Color.WHITE)
 		gradient.set_color(1, Color(1.0, 1.0, 1.0, 0.0))
+		# A quadratic-like fall-off reaches zero gently, so the pool leaves no rim next to a lit lamp.
+		gradient.add_point(0.5, Color(1.0, 1.0, 1.0, 0.25))
 		var texture := GradientTexture2D.new()
 		texture.gradient = gradient
 		texture.fill = GradientTexture2D.FILL_RADIAL
