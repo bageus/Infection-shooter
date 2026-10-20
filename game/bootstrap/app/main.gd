@@ -270,13 +270,11 @@ func _choose_enhanced_ammo() -> void:
 
 
 func _end_run(reason: String) -> void:
-	if _ended:
-		return
 	_ended = true
 	var kind := "complete" if reason == "MISSION COMPLETE" else "failed"
 	var reason_key: String = {"MUTATION OVERTOOK YOU": "failedMutation",
 		"YOU FELL OUTSIDE THE FLOOR": "failedFall", "YOU DIED": "failedHealth"}.get(reason, "")
-	if kind == "complete":
+	if kind == "complete" and not is_instance_valid(completion_music):
 		$MissionMusic.call("finish_mission")
 		completion_music = preload("res://game/bootstrap/app/completion_music.gd").new()
 		get_tree().root.add_child(completion_music)

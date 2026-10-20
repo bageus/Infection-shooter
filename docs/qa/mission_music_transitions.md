@@ -1,0 +1,21 @@
+# Музыка миссии: Hold / Threat / Hunt
+
+Прямой запрос владельца20.10.2026. Hold уточнён до56секунд. T004/Phase1/P1_LOGIC.
+
+## Записи
+
+Actions Prepare mission music успешно выполнил readiness gates, conversion/decode/hash checks. tower_hold_1.wav60с → tower_hold.ogg56с; tower_threat_1.wav120с → tower_threat.ogg120с сloop_offset30.08с. Первые30с — вступление,31-я секунда начинается в30.0;80мс головы петли уже сведены с её хвостом. server_oper.ogg119.92с → server_oper_active.ogg89.92с: первые20/последние10с удалены, offset0.08с. Все записи stereo48kHz/Vorbisq5, пик ограничен0.89. Receipt assets/audio/mission_music_processing.json. WAV удалены после проверки, исходный server_oper.ogg сохранён. Seamless исключён только из runtime playlist.
+
+## Переходы
+
+MissionMusic наблюдает подтверждённый projectile_blood заражённых и публичный is_alerted, не здоровье/AI. До попадания спокойная музыка; больше10агрессоров включаетHunt независимо от попадания. При <10Hunt затухает вThreat, ровно10 сохраняет прежний режим. После3с без активного боя музыка возвращается к активной частиServer Oper. ПовторThreat в том же бою послеHunt начинает тело, не вступление.
+
+MusicCrossfade удерживает не более3голосов, интерполирует мощность из текущих gains за4с, не перезапускает уже играющий нужный голос. Петли дополнительно перекрываются на4с сloop_offset, что сглаживает не только цифровой стык, но и музыкальный хвост. Скрытый headless не запускает декодеры, но сохраняет clocks/state. Пауза замораживает музыку миссии.
+
+CompletionMusic создаётся bootstrap root при успехе и явно передаётся по ссылке front_end/loader. Сам проигрыватель не переподвешивается, курсор не сбрасывается. Долгое меню/загрузка повторяютHold с4с overlap; при выходе вmain завершается текущая56с запись, затем main_menu плавно включается. На готовности следующей миссии Hold затухает за4с вместе с началомcalm. Ошибка загрузки передаёт голос вmain, отмена освобождает его. ШинаMenuMusic сохраняет настройки меню. Continue выбирает следующую карту цепочки; для standalone-прототипа без следующей карты остаётся существующий restart route.
+
+Bootstrap остаётся владельцем; нет Autoload, service lookup, новых module dependencies или gameplay/public/save DTO. main.gd>300 reviewed: только композиция, музыкальная логика вынесена в private helpers. loader>300 reviewed: активация pending выделена отдельно от загрузки; функции <=100.
+
+## Проверки
+
+Readiness gates и offline conversion Actions: PASS. Следующий этап — project gates, Godot import, run_adaptive_audio_tests (headless/native), shutdown, loading, menu, level carry/chain и общий CI. Итоговые статусы добавляются после выполнения. Native playback через Dummy проверяет lifecycle, субъективная громкость/музыкальность склеек требует прослушивания владельцем.
