@@ -19,3 +19,8 @@ Bootstrap остаётся владельцем; нет Autoload, service lookup
 ## Проверки
 
 Readiness gates и offline conversion Actions: PASS. Следующий этап — project gates, Godot import, run_adaptive_audio_tests (headless/native), shutdown, loading, menu, level carry/chain и общий CI. Итоговые статусы добавляются после выполнения. Native playback через Dummy проверяет lifecycle, субъективная громкость/музыкальность склеек требует прослушивания владельцем.
+
+
+## Итог проверки кодовой версии d927be352c82917a694ee98e0d303df7b700fb0c
+
+Actions39482802949 полностью SUCCESS: decode/SHA/duration receipt, validate_project, Godot4.7.2 import, run_adaptive_audio_tests/headless и native(gl_compatibility/Dummy), music_shutdown, mission_loading, menu integration, level_carry и level_chain —0failures. Assertions включают точный gain continuity, Threat body-loop overlap, тот же playback instance при смене сцены, долгую загрузку/ошибку и очистку Hold на готовности уровня. Architecture39482803153 SUCCESS. Эти результаты относятся к неизменяемому коду/тестам указанного commit; следующий commit содержит только документацию. Общий runtime/rendering CI выполняется отдельно. Субъективная оценка громкости/музыкальности переходов остаётся ручной приёмкой.
