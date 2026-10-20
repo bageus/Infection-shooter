@@ -174,7 +174,7 @@ func _show_gore_catalog() -> void:
 
 
 func _show_blood_catalog() -> void:
-	_enter_simple_catalog(catalog.blood_catalog(), "BLOOD | choose surface and size, then place")
+	_enter_simple_catalog(catalog.blood_catalog(), "BLOOD and BIOMASS | choose surface and size, then place; touching biomass fuses into one mass")
 	blood_options.show()
 
 
