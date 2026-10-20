@@ -154,6 +154,7 @@ func _build_content() -> void:
 			_add_button("restart", "restart")
 			_add_button("toMain", "main")
 		"complete":
+			_add_button("continue", "continue")
 			_add_button("toMain", "main")
 			_add_button("new", "restart")
 	var note := STYLE.label(text(_note_key()), roundi(11 * factor))
