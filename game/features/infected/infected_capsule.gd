@@ -415,10 +415,16 @@ func _physics_process(delta: float) -> void:
 		return
 
 	_apply_gravity(delta)
+	# Mid-range enemies slide fully every 2nd tick; in between they take one
+	# collision-checked step with gravity, so floor contact is refreshed often.
+	var slide_step := delta if near else delta * 2.0
+	if not near and physics_frame % 2 != _ai_tick_offset % 2:
+		move_and_collide(velocity * delta)
+		return
 	_intended_motion = Vector3(velocity.x, 0.0, velocity.z)
 	move_and_slide()
 	_push_chair_contacts()
-	_breaker.track_progress(self, delta, not _route.direct_clear())
+	_breaker.track_progress(self, slide_step, not _route.direct_clear())
 	if near or physics_frame % 4 == _ai_tick_offset:
 		_try_break_blocking_props()
 
