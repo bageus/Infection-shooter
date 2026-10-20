@@ -20,7 +20,7 @@ from build_web_skin_probe import RangedArchive
 
 ROOT = pathlib.Path(__file__).resolve().parents[1]
 START = "tools/effects_preview/effects_preview.tscn"
-REFERENCE = re.compile(r'res://([^"\'\s)]+?\.(?:gdshaderinc|gdshader|gd|tscn|tres|png|ogg))(?![A-Za-z])')
+REFERENCE = re.compile(r'res://([^"\'\s)]+?\.[A-Za-z0-9]+)(?![A-Za-z0-9])')
 
 
 def closure():
@@ -32,7 +32,7 @@ def closure():
         seen.add(path)
         source = ROOT / path
         if source.suffix in (".gd", ".gdshader", ".gdshaderinc", ".tscn", ".tres"):
-            pending.extend(REFERENCE.findall(source.read_text(encoding="utf-8")))
+            pending.extend(p for p in REFERENCE.findall(source.read_text(encoding="utf-8")) if (ROOT / p).is_file())
     return sorted(seen)
 
 
