@@ -85,6 +85,22 @@ func _check_procedural(stage: Node3D, player: Node3D, effects: Node, vfx: Node) 
 	vfx.call("energy_shield")
 	vfx.call("heartbeat", 0.2)
 	_expect(player.get_child_count() == player_before + 2, "Procedural shield and heart ride on the player.")
+	var beats := player.find_children("Sfx_skill_heartbeat", "AudioStreamPlayer3D", true, false)
+	_expect(beats.size() == 1, "Heart animation starts one heartbeat voice")
+	var beat := beats[0] as AudioStreamPlayer3D if not beats.is_empty() else null
+	if beat != null:
+		_expect(beat.stream is AudioStreamOggVorbis and beat.stream.resource_path.ends_with("heartbeat/very_loud_a_strong_b_1.ogg"), "Heart animation uses the supplied Vorbis recording")
+		_expect(not (beat.stream as AudioStreamOggVorbis).loop, "Heartbeat recording plays once per animation")
+		var before_move := beat.global_position
+		player.position.x += 1.0
+		_expect(beat.global_position.is_equal_approx(before_move + Vector3.RIGHT), "Heartbeat travels with the heart and player")
+		player.position.x -= 1.0
+	paused = true
+	await create_timer(0.3).timeout
+	_expect(is_instance_valid(beat), "Paused heart retains its sound voice")
+	paused = false
+	await create_timer(0.35).timeout
+	_expect(not is_instance_valid(beat), "Heartbeat voice ends with the short animation, before its two-second recording ends")
 	var trail := DASH_TRAIL.start(stage, player, 0.15)
 	_expect(trail != null, "Predator Dash leaves a procedural trail.")
 	var zone := DASH_ZONE.spawn(stage, stage.get_world_3d(), Vector3.ZERO, Vector3.FORWARD, 0.15)

@@ -10,6 +10,7 @@ const RANGE_DOME := preload("res://game/features/player/range_dome.gd")
 const HIT_STOP := preload("res://game/features/player/skill_fx/hit_stop.gd")
 const STRIKE := preload("res://game/features/player/skill_fx/strike_fx.gd")
 const PROCEDURAL := preload("res://game/features/player/skill_fx/procedural_skill_fx.gd")
+const SFX := preload("res://game/core/audio/public/sound_events.gd")
 ## Range dome colours per skill area.
 const BLOOD_RANGE := Color(0.85, 0.08, 0.1)
 const STORM_RANGE := Color(0.25, 0.65, 1.0)
@@ -99,7 +100,9 @@ func energy_shield() -> void:
 
 ## Second Heart: a beating heart above the player for a while.
 func heartbeat(seconds: float = 2.4) -> void:
-	PROCEDURAL.heartbeat(player, player.global_position + Vector3.UP * 2.5, seconds)
+	var heart := PROCEDURAL.heartbeat(player, player.global_position + Vector3.UP * 2.5, seconds)
+	if heart != null:
+		SFX.play(heart, &"skill_heartbeat")
 
 ## Predator Dash: speed streaks behind the body and the strike lane on the floor.
 func dash_trail(seconds: float) -> void:

@@ -81,6 +81,11 @@ func _blood(player: Node3D) -> void:
 	(support.get_child(0) as CollisionShape3D).shape.size = Vector3(20, .2, 20)
 	(support.get_child(1) as MeshInstance3D).mesh.size = Vector3(20, .2, 20)
 	var effects: Node3D = stage.get("blood_effects")
+	# This fixture is far outside the office camera. Test blood placement,
+	# without the unrelated camera-distance maintenance unloading its marks.
+	var budget: Node3D = effects.get("_budget")
+	var unload_distance: float = budget.get("unload_distance")
+	budget.set("unload_distance", INF)
 	_check(player.is_connected("projectile_blood", Callable(effects, "splatter_hit")), "Bootstrap binds player to common blood renderer")
 	effects.call("clear_marks")
 	player.call("take_damage", 5.0)
@@ -95,7 +100,6 @@ func _blood(player: Node3D) -> void:
 	player.set("armor", 0.0)
 	# Splat angle and jitter are random, and the quad path drops a splat that does not fit the wall,
 	# so a single hit can miss; allow a few hits before the wall check.
-	var budget: Node3D = effects.get("_budget")
 	var container: Node3D = budget.get("container")
 	for attempt in range(3):
 		player.call("take_projectile_damage", 10.0, player.global_position, Vector3.FORWARD, "PISTOL")
@@ -137,6 +141,7 @@ func _blood(player: Node3D) -> void:
 	paused = false
 	player.set("health", player.get("max_health"))
 	effects.call("clear_marks")
+	budget.set("unload_distance", unload_distance)
 	player.global_position = original
 	support.queue_free()
 	wall.queue_free()
