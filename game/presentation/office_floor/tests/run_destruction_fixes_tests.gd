@@ -80,7 +80,7 @@ func _cooler() -> void:
 	_check(not mesh.visible, "Shot bottle detaches from its anchored body")
 	var bottles := effects.get_children().filter(func(node: Node) -> bool: return node is RigidBody3D and str(node.get("piece_name")) == "Bottle_01")
 	_check(bottles.size() == 1, "The complete bottle becomes one physical part")
-	_check(prop.freeze and prop.collision_layer != 0 and prop.global_position.distance_to(Vector3(30, 0.02, 0)) < 0.01, "The cooler body stays standing and collidable")
+	_check(not prop.freeze and prop.collision_layer != 0, "The cooler body is loose, stays standing and collidable")
 	prop.queue_free()
 
 

@@ -72,7 +72,7 @@ func _cleanup(prop: Node) -> void:
 func _retained(model: String, targeted: bool) -> void:
 	var prop := _prop(model)
 	if model == COOLER:
-		_check(prop.freeze, "Cooler body is anchored")
+		_check(not prop.freeze, "Cooler body is loose, so shots can push it")
 	prop.freeze = true # Isolate the damage/shape contract from free-fall in this fixture.
 	var meshes: Array = prop.get("_shape_meshes")
 	_check(meshes.size() == 2, model + ": separate body and attachment collision")
@@ -112,11 +112,10 @@ func _retained(model: String, targeted: bool) -> void:
 
 func _empty_cooler() -> void:
 	var prop := _prop(EMPTY_COOLER)
-	var original := prop.transform
 	for i in 5:
 		prop.call("take_projectile_hit", 1000.0, prop.position, Vector3.BACK, Vector3.FORWARD, "GRENADE")
 	await _ticks()
-	_check(prop.freeze and prop.transform.is_equal_approx(original) and not prop.get("_broken"), "Empty cooler remains whole and fixed")
+	_check(not prop.freeze and not prop.get("_broken"), "Empty cooler remains whole and loose")
 	_check(_pieces().is_empty() and prop.collision_layer != 0, "Empty cooler does not generate a body fragment")
 	await _cleanup(prop)
 
