@@ -1,7 +1,7 @@
 extends RefCounted
 const SURFACE_ATLASES := preload("res://game/core/vfx/public/surface_atlases.gd")
 
-const RADIUS := 5.5
+const RADIUS := 4.0
 const OBJECT_DAMAGE := 380.0 # Full-strength hit on a prop; scaled by distance falloff and power.
 const CREATURE_DAMAGE := 155.0
 const MOUNT_CLEARANCE := 0.35
