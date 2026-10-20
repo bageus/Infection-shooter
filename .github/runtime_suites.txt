@@ -186,3 +186,4 @@ game/features/infected/tests/run_enemy_gameplay_modes_tests.gd
 game/presentation/office_floor/tests/run_baked_surface_decal_tests.gd
 game/bootstrap/app/tests/run_floor_hint_tests.gd
 game/bootstrap/app/tests/run_gameplay_camera_tuning_tests.gd
+game/bootstrap/app/tests/run_updated_prop_models_tests.gd

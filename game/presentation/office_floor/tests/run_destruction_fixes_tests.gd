@@ -1,5 +1,5 @@
 extends SceneTree
-## Open glass door shards, cooler bottle burst, and blood marks on panes.
+## Open glass door shards, detached cooler bottle, and blood marks on panes.
 
 const PROP := preload("res://game/presentation/office_floor/public/props/environment_prop.tscn")
 const DOOR := preload("res://game/presentation/office_floor/public/structural/sliding_glass_door.tscn")
@@ -77,9 +77,10 @@ func _cooler() -> void:
 	var position := mesh.global_transform * mesh.get_aabb().get_center()
 	prop.call("take_projectile_hit_at_shape", 28.0, position, Vector3.BACK, Vector3.FORWARD, "AK", bottle)
 	await physics_frame
-	_check(not mesh.visible, "Shot bottle bursts instead of dropping off")
-	_check(effects.get_node_or_null("BottleSplash") != null and effects.get_node_or_null("WaterPuddle") != null, "Burst bottle splashes and leaves a puddle")
-	_check(not bool(prop.get("_broken")) and prop.get_child_count() > 0 and prop.global_position.distance_to(Vector3(30, 0.02, 0)) < 0.3, "The cooler body stays standing")
+	_check(not mesh.visible, "Shot bottle detaches from its anchored body")
+	var bottles := effects.get_children().filter(func(node: Node) -> bool: return node is RigidBody3D and str(node.get("piece_name")) == "Bottle_01")
+	_check(bottles.size() == 1, "The complete bottle becomes one physical part")
+	_check(prop.freeze and prop.collision_layer != 0 and prop.global_position.distance_to(Vector3(30, 0.02, 0)) < 0.01, "The cooler body stays standing and collidable")
 	prop.queue_free()
 
 
