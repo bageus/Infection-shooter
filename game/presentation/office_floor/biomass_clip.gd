@@ -11,6 +11,11 @@ const FLOOR_REACH := 0.15
 const FLOOR_SPAN := 2.0
 ## Longest run (metres) a wrapped edge may follow a neighbouring wall.
 const MAX_RUN := 6.0
+## Inner corners: how far in from an edge the probe starts, how far in front
+## of the face it runs, and the slack past the edge.
+const INSET := 0.3
+const PROBE_LIFT := 0.03
+const PROBE_SLACK := 0.05
 const AXES: Array[Vector3] = [Vector3.RIGHT, Vector3.UP, Vector3.BACK]
 
 
@@ -44,6 +49,12 @@ static func compute(frame: Transform3D, anchor: Node3D, space: PhysicsDirectSpac
 	var center := to_patch * box.get_center()
 	var dirs: Array[Vector2] = [u, -u, v, -v]
 	var halves := [half.x, half.x, half.y, half.y]
+	# Rectangle in its own (u, v) frame: low and high bound per axis.
+	var lo := [-half.x, -half.y]
+	var hi := [half.x, half.y]
+	var origin_in_rect := Vector2.ZERO - Vector2(center.x, center.y)
+	var here := [origin_in_rect.dot(u), origin_in_rect.dot(v)]
+	var scale := maxf(frame.basis.z.length(), 0.001)
 	var limit := Vector4()
 	for side in 4:
 		var t: Vector2 = dirs[side]
@@ -52,8 +63,39 @@ static func compute(frame: Transform3D, anchor: Node3D, space: PhysicsDirectSpac
 		if outward.y < -0.9 and edge.y < FLOOR_REACH:
 			limit[side] = -FLOOR_SPAN
 			continue
-		limit[side] = maxf(thickness, _run(space, frame, edge, outward) / maxf(frame.basis.z.length(), 0.001))
-	return {"a": Vector4(center.x, center.y, u.x, u.y), "b": Vector4(half.x, half.y, 0.0, 0.0), "limit": limit}
+		# A perpendicular wall or box standing in front of this edge: fold onto it.
+		var axis := side / 2
+		var sg := 1.0 if side % 2 == 0 else -1.0
+		var inset := minf(INSET / scale, halves[side] * 0.5)
+		var probe: Array = [clampf(here[0], lo[0] * 0.9, hi[0] * 0.9), clampf(here[1], lo[1] * 0.9, hi[1] * 0.9)]
+		probe[axis] = sg * (halves[side] - inset)
+		var start := frame * Vector3(center.x + u.x * probe[0] - u.y * probe[1], center.y + u.y * probe[0] + u.x * probe[1], 0.0) + frame.basis.z.normalized() * PROBE_LIFT
+		var reach := inset * scale + PROBE_SLACK
+		var met := _meet(space, start, outward, reach)
+		if met >= 0.0:
+			var at: float = probe[axis] + sg * met / scale
+			if sg > 0.0:
+				hi[axis] = minf(hi[axis], at)
+			else:
+				lo[axis] = maxf(lo[axis], at)
+			limit[side] = -FLOOR_SPAN
+			continue
+		limit[side] = maxf(thickness, _run(space, frame, edge, outward) / scale)
+	# Trimmed bounds back to centre and half sizes.
+	var mid := Vector2((lo[0] + hi[0]) * 0.5, (lo[1] + hi[1]) * 0.5)
+	var shifted := Vector2(center.x, center.y) + u * mid.x + Vector2(-u.y, u.x) * mid.y
+	return {"a": Vector4(shifted.x, shifted.y, u.x, u.y), "b": Vector4((hi[0] - lo[0]) * 0.5, (hi[1] - lo[1]) * 0.5, 0.0, 0.0), "limit": limit}
+
+
+# Distance along dir to a surface that stands across it (a perpendicular wall,
+# a box side), or -1.0 when the way is free.
+static func _meet(space: PhysicsDirectSpaceState3D, start: Vector3, dir: Vector3, reach: float) -> float:
+	if space == null:
+		return -1.0
+	var hit := space.intersect_ray(PhysicsRayQueryParameters3D.create(start, start + dir * reach, 7))
+	if hit.is_empty() or absf((hit["normal"] as Vector3).dot(dir)) < 0.7:
+		return -1.0
+	return (hit["position"] - start).dot(dir)
 
 
 # How deep solid geometry continues just inside the edge, behind the patch.
@@ -63,7 +105,7 @@ static func _run(space: PhysicsDirectSpaceState3D, frame: Transform3D, edge: Vec
 	var normal := frame.basis.z.normalized()
 	var start := edge - outward * 0.02 + normal * 0.01
 	var hit := space.intersect_ray(PhysicsRayQueryParameters3D.create(start - normal * MAX_RUN, start, 7))
-	return clampf((start - hit["position"]).dot(normal), 0.0, MAX_RUN) if not hit.is_empty() else 0.0
+	return clampf((start - hit["position"]).dot(normal) - 0.01, 0.0, MAX_RUN) if not hit.is_empty() else 0.0
 
 
 static func apply(visual: MeshInstance3D, fit: Dictionary) -> void:
