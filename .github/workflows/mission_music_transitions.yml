@@ -1,0 +1,57 @@
+name: Mission music transitions
+on:
+  pull_request:
+    paths:
+      - 'game/bootstrap/app/**'
+      - 'tools/process_mission_music.py'
+      - 'assets/audio/music/**'
+      - '.github/workflows/mission_music_transitions.yml'
+permissions:
+  contents: read
+jobs:
+  music:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Install audio and Godot
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq ffmpeg xvfb libgl1-mesa-dri
+          python -m pip install numpy==2.3.5
+          bash tools/ci_download_godot.sh
+          unzip -q /tmp/godot.zip -d /tmp/godot
+          chmod +x /tmp/godot/Godot*
+          sudo ln -s /tmp/godot/Godot* /usr/local/bin/godot
+      - name: Verify audio conversion and project gates
+        run: |
+          python tools/process_mission_music.py --check
+          python tools/validate_project.py
+      - name: Import
+        run: |
+          set -o pipefail
+          godot --headless --path . --editor --quit 2>&1 | tee /tmp/music-import.log
+          if grep -E 'SCRIPT ERROR|^ERROR:' /tmp/music-import.log; then exit 1; fi
+      - name: Headless transitions and loading regressions
+        run: |
+          set -o pipefail
+          for suite in run_adaptive_audio_tests run_music_shutdown_tests run_mission_loading_tests run_menu_tests run_level_carry_tests run_level_chain_tests; do
+            timeout 180 godot --headless --path . --script game/bootstrap/app/tests/${suite}.gd 2>&1 | tee /tmp/${suite}.log
+            if grep -E 'SCRIPT ERROR|^ERROR:' /tmp/${suite}.log; then exit 1; fi
+          done
+      - name: Native audio lifecycle
+        run: |
+          set -o pipefail
+          timeout 180 xvfb-run -a godot --path . --audio-driver Dummy --rendering-method gl_compatibility --script game/bootstrap/app/tests/run_adaptive_audio_tests.gd 2>&1 | tee /tmp/music-native.log
+          if grep -E 'SCRIPT ERROR|^ERROR:' /tmp/music-native.log; then exit 1; fi
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: mission-music-transitions
+          path: |
+            /tmp/music-import.log
+            /tmp/music-native.log
+            /tmp/run_*tests.log
