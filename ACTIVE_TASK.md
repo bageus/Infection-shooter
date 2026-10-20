@@ -845,3 +845,9 @@ T002 remains the only active task. After CI, visually verify seams and collision
 
 
 20.10.2026 — музыкальные переходы проверены через GitHub Actions: кодd927be3, workflow39482802949 SUCCESS целиком (conversion/decode/SHA, project gates, import4.7.2, adaptive audio headless/native Dummy, shutdown, loading, menu, level carry/chain0failures). Architecture39482803153 SUCCESS. Все запрошенные музыкальные маршруты реализованы, исходные2WAV удалены после проверки, receipt содержит56/120/89.92с и loop offsets. Финальный commit только документационный; общие runtime/rendering проверки ещё идут. Следующее действие: review PR390, общий CI и ручное прослушивание переходов. T004/Phase1 остаётся активным; слияние не запрошено.
+
+
+20.10.2026 — T004, исправление двойного бита Server Oper по запросу владельца. READY/IMPLEMENTATION, Phase1/P1_LOGIC. Причина: runtime повторно сводил готовые OGG петли перекрытием4с, одновременно играли два ритма. План/результат: удалить автоматический self-crossfade из private bootstrap music_crossfade; готовые calm/threat/hunt используют native loop/loop_offset одного голоса. Переходы разных треков и явно запрошенные повторы Hold сохранены. Regression проверяет отсутствие второго голоса в хвосте, native wrap и прежние переходы. Public API/DTO/сцены/ассеты/owners/dependencies прежние, архитектурных исключений нет. Следующее действие: gates/import/audio suites, затем PR и CI.
+
+
+20.10.2026 — loop fix проверен: validate_project (spec/workflow/architecture/source-size/CI coverage) PASS, conversion receipt/decode/SHA PASS, чистый Godot4.7.2 import без ERROR, adaptive_audio и music_shutdown0failures, diff-check PASS. Native wrap проверит существующий Actions job; локального display/Xvfb нет, субъективное прослушивание не выполнено. Следующее действие: review PR исправления петли и native CI; T004 IN_PROGRESS, merge не поручен.
