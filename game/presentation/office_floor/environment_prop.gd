@@ -324,9 +324,8 @@ func get_projectile_material(shape_index: int = -1) -> String:
 	return "wood"
 
 
-# Group 03 is mostly metal, but shelves and cabinets ring like wood; shelf-fronted cabinets mix both. Bullet cost stays with get_projectile_material.
+# Group 03 is mostly metal, but shelves and cabinets ring like wood. Bullet cost stays with get_projectile_material.
 func get_impact_sound_material(shape_index: int = -1) -> String:
-	if "03_file_cabinet" in model_path and "shelf_fancy" in model_path: return "wood" if randf() < 0.5 else "metal"
 	for model in ["01_wood_slat_partition", "03_book_case", "03_bookshelf", "03_file_cabinet", "03_drawer_cabinet"]:
 		if model in model_path: return "wood"
 	return get_projectile_material(shape_index)
