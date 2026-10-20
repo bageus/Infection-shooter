@@ -84,7 +84,64 @@ func _capture() -> void:
 		piece.set("_clip_stamp", [])
 		piece.call("_clip_biomass")
 	await _shot("edges_after.png")
+	await _inner_corner_and_crate(stage, paint, camera)
 	quit()
+
+
+# Inner wall corner and a crate: edges_inner_*.png, edges_crate_*.png.
+func _inner_corner_and_crate(stage: Node3D, paint: Material, camera: Camera3D) -> void:
+	var base := Vector3(30, 0, 0)
+	var wall := _box(stage, Vector3(6.2, 2.4, 0.2), base + Vector3(0.1, 1.2, 0), paint)
+	_solid(stage, Vector3(0.2, 2.4, 3), base + Vector3(3.1, 1.2, 1.5), paint)
+	var crate := _box(stage, Vector3(1.0, 0.8, 0.6), base + Vector3(-9, 1.0, 3), paint)
+	_solid(stage, Vector3(1.0, 0.8, 0.6), base + Vector3(-9, 1.0, 3), null)
+	var floor_mesh := MeshInstance3D.new()
+	floor_mesh.mesh = PlaneMesh.new()
+	(floor_mesh.mesh as PlaneMesh).size = Vector2(30, 30)
+	floor_mesh.mesh.surface_set_material(0, paint)
+	floor_mesh.position = base
+	stage.add_child(floor_mesh)
+	await physics_frame
+	await physics_frame
+	var pieces: Array[Node3D] = []
+	for spec in [["biomass_02", base + Vector3(2.9, 1.2, 0.1), wall], ["biomass_05", base + Vector3(-9.35, 1.0, 3.3), crate], ["biomass_03", base + Vector3(-9.0, 1.35, 3.3), crate]]:
+		var piece := DECAL.instantiate() as Node3D
+		piece.call("configure_blood", spec[0], "wall")
+		stage.add_child(piece)
+		piece.position = spec[1]
+		piece.scale = Vector3.ONE * (1.1 if spec[2] == wall else 0.7)
+		piece.call("attach_blood", spec[2], "wall")
+		pieces.append(piece)
+	for view in [["inner", base + Vector3(0.0, 1.8, 3.2), base + Vector3(2.9, 1.2, 0.8)], ["crate", base + Vector3(-6.8, 2.0, 5.5), base + Vector3(-9.0, 1.0, 3.0)]]:
+		camera.position = view[1]
+		camera.look_at(view[2])
+		for i in 40:
+			await process_frame
+		for piece in pieces:
+			piece.set("_clip_stamp", [])
+			piece.call("_clip_biomass")
+		for i in 5:
+			await process_frame
+		for piece in pieces:
+			CLIP.apply(piece.get("_visual"), {})
+			piece.set_process(false)
+		await _shot("edges_%s_before.png" % view[0])
+		for piece in pieces:
+			piece.set("_clip_stamp", [])
+			piece.call("_clip_biomass")
+		await _shot("edges_%s_after.png" % view[0])
+
+
+func _solid(stage: Node3D, size: Vector3, at: Vector3, material: Material) -> void:
+	var body := StaticBody3D.new()
+	var collision := CollisionShape3D.new()
+	collision.shape = BoxShape3D.new()
+	(collision.shape as BoxShape3D).size = size
+	body.add_child(collision)
+	stage.add_child(body)
+	body.position = at
+	if material != null:
+		_box(stage, size, at, material)
 
 
 func _box(stage: Node3D, size: Vector3, at: Vector3, material: Material) -> MeshInstance3D:

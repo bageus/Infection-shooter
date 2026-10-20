@@ -19,6 +19,8 @@ func _run() -> void:
 	await _check_pieces()
 	await _check_impact_audio()
 	await _check_edges()
+	await _check_inner_corner()
+	await _check_object_faces()
 	await _check_settling()
 	print("biomass tests: %d failures" % failures)
 	quit(1 if failures > 0 else 0)
@@ -291,6 +293,57 @@ func _check_edges() -> void:
 	var tilted := _wall_piece(stage, slanted, Vector3(0, 2, -4.9))
 	await process_frame
 	_expect((tilted.get_node("BloodQuad") as MeshInstance3D).get_instance_shader_parameter("clip_b") == Vector4(), "A patch off its receiver's face is not clipped.")
+	stage.queue_free()
+	await process_frame
+
+
+func _solid(stage: Node3D, size: Vector3, at: Vector3) -> void:
+	var body := StaticBody3D.new()
+	var shape := CollisionShape3D.new()
+	shape.shape = BoxShape3D.new()
+	(shape.shape as BoxShape3D).size = size
+	body.add_child(shape)
+	stage.add_child(body)
+	body.position = at
+
+
+func _check_inner_corner() -> void:
+	var stage := Node3D.new()
+	root.add_child(stage)
+	# Wall A (x -3..3.2) ends in wall B (x 3..3.2, standing out in front of A).
+	var wall := _wall(stage, Vector3(6.2, 4, 0.2), Vector3(0.1, 2, 0))
+	_solid(stage, Vector3(0.2, 4, 3), Vector3(3.1, 2, 1.5))
+	await physics_frame
+	await physics_frame
+	var piece := _wall_piece(stage, wall, Vector3(2.8, 2, 0.1))
+	await process_frame
+	var visual := piece.get_node("BloodQuad") as MeshInstance3D
+	var half: Vector4 = visual.get_instance_shader_parameter("clip_b")
+	var area: Vector4 = visual.get_instance_shader_parameter("clip_a")
+	var limit: Vector4 = visual.get_instance_shader_parameter("clip_limit")
+	_expect(limit.x < 0.0 and limit.x >= -4.0, "At an inner corner the mass folds onto the other wall (limit %s)." % limit)
+	var corner := visual.to_global(Vector3(area.x + half.x, area.y, 0)).x
+	_expect(absf(corner - 3.0) < 0.01, "The fold starts on the corner line, the face of the other wall (x=%.3f)." % corner)
+	_expect(limit.y > 0.0, "The open end of the wall still wraps as a convex edge (limit %s)." % limit)
+	stage.queue_free()
+	await process_frame
+
+
+func _check_object_faces() -> void:
+	var stage := Node3D.new()
+	root.add_child(stage)
+	# A crate on a shelf, 1 x 0.8 x 0.6, free on every side.
+	var crate := _wall(stage, Vector3(1.0, 0.8, 0.6), Vector3(0, 1.4, 0), "Crate")
+	_solid(stage, Vector3(1.0, 0.8, 0.6), Vector3(0, 1.4, 0))
+	await physics_frame
+	await physics_frame
+	var piece := _wall_piece(stage, crate, Vector3(0.4, 1.4, 0.3), "crate_a")
+	await process_frame
+	var visual := piece.get_node("BloodQuad") as MeshInstance3D
+	var half: Vector4 = visual.get_instance_shader_parameter("clip_b")
+	var limit: Vector4 = visual.get_instance_shader_parameter("clip_limit")
+	_expect(is_equal_approx(half.x, 0.5) and is_equal_approx(half.y, 0.4), "A patch on a crate is fitted to the crate's face (%s)." % half)
+	_expect(absf(limit.x - 0.6) < 0.01 and absf(limit.z - 0.6) < 0.01 and absf(limit.w - 0.6) < 0.01, "It wraps onto the adjacent faces up to the crate's depth (limits %s)." % limit)
 	stage.queue_free()
 	await process_frame
 
