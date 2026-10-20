@@ -165,6 +165,10 @@ func start() -> void:
 	await _settle_props(tree)
 	_set_progress(1.0, "ready")
 	await tree.process_frame
+	_activate_pending(tree, previous)
+
+
+func _activate_pending(tree: SceneTree, previous: Node) -> void:
 	tree.current_scene = pending
 	pending.show()
 	var preferences := PREFERENCES.new()

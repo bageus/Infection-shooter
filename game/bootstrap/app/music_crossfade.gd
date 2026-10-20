@@ -75,3 +75,17 @@ func stop_all() -> void:
 
 func _exit_tree() -> void:
 	stop_all()
+
+
+func _process(delta: float) -> void:
+	for voice in _voices:
+		var position: float = float(voice.get_meta(&"elapsed", float(voice.get_meta(&"start_offset", 0.0)))) + delta
+		voice.set_meta(&"elapsed", position)
+	if current == null or not current.stream is AudioStreamOggVorbis:
+		return
+	var stream := current.stream as AudioStreamOggVorbis
+	if not stream.loop:
+		return
+	var position := float(current.get_meta(&"elapsed", 0.0)) if _silent else current.get_playback_position()
+	if position >= stream.get_length() - FADE_SECONDS:
+		fade_to(stream, stream.loop_offset, true)
