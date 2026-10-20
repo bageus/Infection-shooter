@@ -4,8 +4,15 @@ const ATLASES := preload("res://game/presentation/office_floor/debris_atlases.gd
 const PIXEL_OPS := preload("res://game/presentation/office_floor/decal_pixels.gd")
 const ATLAS := preload("res://models/objects/textures/glass_decals/4x4 glass debris texture atlas.png")
 const METERS := 8.0
-const PIXELS := 512
-const ARCHIVE_PIXELS := 128
+# 80 px/m (was 64): a 0.25 m flake is 20 px wide instead of 16 before it is magnified on screen.
+const PIXELS := 640
+# Relief (normal xy + height) is smooth, so 32 px/m is enough; floor damage/scuff layers stay 32 px/m.
+const RELIEF_PIXELS := 256
+const LAYER_PIXELS := 256
+# Evicted tiles are kept as lossless PNG (sparse decals shrink to a few KB); only an image whose PNG
+# exceeds ARCHIVE_PNG_LIMIT falls back to a Lanczos-shrunk copy of ARCHIVE_FALLBACK px.
+const ARCHIVE_PNG_LIMIT := 98304
+const ARCHIVE_FALLBACK := 192
 const MAX_TILES := 16
 const MAX_QUEUE := 64
 const MAX_DENSITY := 4
@@ -14,8 +21,9 @@ var origin := Vector2.ZERO
 var valid_cells: Dictionary = {}
 var tiles: Dictionary = {}
 # Evicted tiles keep their CPU pixels so decals survive the GPU cap. Bound: one entry per cell ever
-# decalled (<= ~80 cells on the 80x60 m floor). Archived copies are low-res (16 px/m): 128^2 RGBA8 + R8
-# per cell is ~80 KB, so 80 cells is ~6-7 MB worst case; restore upscales bilinear (blurrier decals).
+# decalled (<= ~80 cells on the 80x60 m floor). Each image is stored lossless as PNG when it is <= 96 KB
+# (typical: a few KB to tens of KB), otherwise as a shrunk copy (<= 192^2 RGBA8 = 147 KB), so restoring
+# does not stack bilinear blur on every evict/restore round trip.
 var _archive: Dictionary = {}
 var queue: Array[Dictionary] = []
 var _sources: Array[Image] = []
@@ -63,9 +71,11 @@ func step() -> bool:
 		if tile.texture == null:
 			tile.texture = ImageTexture.create_from_image(tile.image)
 			tile.surface_texture = ImageTexture.create_from_image(tile.surface_image)
+			tile.relief_texture = ImageTexture.create_from_image(tile.relief_image)
 		else:
 			(tile.texture as ImageTexture).update(tile.image)
 			(tile.surface_texture as ImageTexture).update(tile.surface_image)
+			(tile.relief_texture as ImageTexture).update(tile.relief_image)
 		for layer: Dictionary in tile.layers.values():
 			if layer.texture == null:
 				layer.texture = ImageTexture.create_from_image(layer.image)
@@ -90,11 +100,19 @@ func _apply(request: Dictionary) -> void:
 	if tiles.has(center) and int(tiles[center].density.get(density_cell, 0)) >= MAX_DENSITY:
 		return
 	var source := PIXEL_OPS.source(frames[request.frame], request.opacity, request.turns, request.kind == "bullet" and request.frame >= 5)
-	var resolution := PIXELS if layer_id == 2 else roundi(PIXELS * 0.5)
+	var resolution := PIXELS if layer_id == 2 else LAYER_PIXELS
 	var side := roundi(float(request.size) * resolution / METERS)
-	source.resize(side, side, Image.INTERPOLATE_BILINEAR)
-	var surface := Image.create(side, side, false, Image.FORMAT_R8)
-	surface.fill(Color(float(ATLASES.ROUGHNESS.get(request.kind, 0.9)), 0, 0))
+	# Lanczos is scale-aware; Godot's bilinear only reads 2x2 texels and aliases when shrinking.
+	source.resize(side, side, Image.INTERPOLATE_LANCZOS)
+	var surface: Image
+	var relief: Image
+	var relief_side := 0
+	if layer_id == 2:
+		surface = Image.create(side, side, false, Image.FORMAT_R8)
+		surface.fill(Color(float(ATLASES.ROUGHNESS.get(request.kind, 0.9)), 0, 0))
+		relief_side = maxi(roundi(float(request.size) * RELIEF_PIXELS / METERS), 2)
+		relief = _atlases.relief(frames[request.frame], request.kind, int(request.frame), int(request.turns))
+		relief.resize(relief_side, relief_side, Image.INTERPOLATE_LANCZOS)
 	var low := at - Vector2.ONE * float(request.size) * 0.5
 	var first := cell_at(low)
 	var last := cell_at(low + Vector2.ONE * float(request.size))
@@ -116,6 +134,8 @@ func _apply(request: Dictionary) -> void:
 			target.blend_rect(source, Rect2i(Vector2i.ZERO, source.get_size()), offset)
 			if layer_id == 2:
 				(tile.surface_image as Image).blit_rect_mask(surface, source, Rect2i(Vector2i.ZERO, source.get_size()), offset)
+				var relief_offset := Vector2i((((low - origin) / METERS - Vector2(cell)) * RELIEF_PIXELS).floor())
+				(tile.relief_image as Image).blend_rect(relief, Rect2i(Vector2i.ZERO, relief.get_size()), relief_offset)
 			tile.dirty = true
 	if tiles.has(center):
 		var density: Dictionary = tiles[center].density
@@ -135,21 +155,23 @@ func _tile(cell: Vector2i) -> Dictionary:
 		var evicted: Dictionary = tiles[oldest]
 		evicted.texture = null
 		evicted.surface_texture = null
+		evicted.relief_texture = null
 		evicted.dirty = true
 		for layer: Dictionary in evicted.layers.values():
 			layer.texture = null
-			layer.full_size = (layer.image as Image).get_size()
-			layer.image = _resized(layer.image, layer.full_size / 4)
-		evicted.image = _resized(evicted.image, Vector2i.ONE * ARCHIVE_PIXELS)
-		evicted.surface_image = _resized(evicted.surface_image, Vector2i.ONE * ARCHIVE_PIXELS)
+			layer.image = _pack(layer.image, LAYER_PIXELS / 2)
+		evicted.image = _pack(evicted.image, ARCHIVE_FALLBACK)
+		evicted.surface_image = _pack(evicted.surface_image, ARCHIVE_FALLBACK)
+		evicted.relief_image = _pack(evicted.relief_image, RELIEF_PIXELS / 2)
 		_archive[oldest] = evicted
 		tiles.erase(oldest)
 	if _archive.has(cell):
 		var restored: Dictionary = _archive[cell]
-		restored.image = _resized(restored.image, Vector2i.ONE * PIXELS)
-		restored.surface_image = _resized(restored.surface_image, Vector2i.ONE * PIXELS)
+		restored.image = _unpack(restored.image, Image.FORMAT_RGBA8, PIXELS)
+		restored.surface_image = _unpack(restored.surface_image, Image.FORMAT_R8, PIXELS)
+		restored.relief_image = _unpack(restored.relief_image, Image.FORMAT_RGBA8, RELIEF_PIXELS)
 		for layer: Dictionary in restored.layers.values():
-			layer.image = _resized(layer.image, layer.full_size)
+			layer.image = _unpack(layer.image, Image.FORMAT_RGBA8, LAYER_PIXELS)
 		tiles[cell] = restored
 		_archive.erase(cell)
 		return restored
@@ -157,16 +179,35 @@ func _tile(cell: Vector2i) -> Dictionary:
 	image.fill(Color.TRANSPARENT)
 	var surface := Image.create(PIXELS, PIXELS, false, Image.FORMAT_R8)
 	surface.fill(Color(0.6, 0, 0))
+	var relief := Image.create(RELIEF_PIXELS, RELIEF_PIXELS, false, Image.FORMAT_RGBA8)
+	relief.fill(Color(0.5, 0.5, 0.0, 0.0)) # Flat normal, zero height.
 	var tile := {"image": image, "texture": null, "surface_image": surface,
-		"surface_texture": null, "layers": {}, "dirty": false, "density": {}}
+		"surface_texture": null, "relief_image": relief, "relief_texture": null,
+		"layers": {}, "dirty": false, "density": {}}
 	tiles[cell] = tile
 	return tile
 
 
-func _resized(source: Image, size: Vector2i) -> Image:
+func _pack(source: Image, fallback: int) -> Variant:
+	var bytes := source.save_png_to_buffer()
+	if bytes.size() <= ARCHIVE_PNG_LIMIT:
+		return bytes
 	var copy := source.duplicate() as Image
-	copy.resize(maxi(size.x, 1), maxi(size.y, 1), Image.INTERPOLATE_BILINEAR)
+	copy.resize(fallback, fallback, Image.INTERPOLATE_LANCZOS)
 	return copy
+
+
+func _unpack(stored: Variant, format: Image.Format, side: int) -> Image:
+	var image := Image.new()
+	if stored is PackedByteArray:
+		image.load_png_from_buffer(stored)
+	else:
+		image = stored as Image
+		if image.get_width() != side:
+			image.resize(side, side, Image.INTERPOLATE_BILINEAR)
+	if image.get_format() != format:
+		image.convert(format)
+	return image
 
 
 func _has_dirty() -> bool:
