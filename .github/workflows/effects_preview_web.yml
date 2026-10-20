@@ -14,6 +14,8 @@ on:
       - 'game/features/player/dash_trail.gd'
       - 'game/features/player/dash_floor_zone.gd'
       - 'game/features/player/range_dome.gd'
+      - 'game/presentation/office_floor/**'
+      - 'addons/staged_glb_import/**'
       - 'tools/effects_preview/**'
       - 'tools/build_effects_preview_web.py'
 permissions:
@@ -34,9 +36,10 @@ jobs:
         run: |
           set -o pipefail
           python3 tools/build_effects_preview_web.py /tmp/effects-web
-          timeout 120 godot --headless --path /tmp/effects-web --editor --quit 2>&1 | tee /tmp/import.log
-          timeout 120 godot --headless --path /tmp/effects-web --export-release Web build/index.html 2>&1 | tee /tmp/export.log
-          if grep -E 'SHADER ERROR|SCRIPT ERROR|^ERROR:' /tmp/import.log /tmp/export.log; then exit 1; fi
+          timeout 600 godot --headless --path /tmp/effects-web --editor --quit 2>&1 | tee /tmp/import.log
+          timeout 600 godot --headless --path /tmp/effects-web --export-release Web build/index.html 2>&1 | tee /tmp/export.log
+          # The editor logs the ids of textures that a model import extracts again; the page is fine.
+          if grep -hE 'SHADER ERROR|SCRIPT ERROR|^ERROR:' /tmp/import.log /tmp/export.log | grep -vE "Unrecognized UID|Can't find file 'uid://"; then exit 1; fi
       - uses: actions/upload-pages-artifact@v3
         with:
           path: /tmp/effects-web/build

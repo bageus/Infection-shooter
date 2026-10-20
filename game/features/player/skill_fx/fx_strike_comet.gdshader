@@ -1,5 +1,5 @@
 shader_type spatial;
-// Power Strike fist: one quad that turns around its forward axis towards the
+// Power Strike fist (blood): one quad that turns around its forward axis towards the
 // camera. A white-hot head, a noisy fire tail that dissolves and narrows
 // away from it. UV.y 0 is the front.
 render_mode blend_premul_alpha, unshaded, cull_disabled, depth_draw_never, shadows_disabled;
@@ -31,7 +31,7 @@ void fragment() {
 	float ball = exp(-(x * x * 2.2 + (t - 0.1) * (t - 0.1) * 45.0));
 	float cover = clamp(body * mask + ball, 0.0, 1.0) * smoothstep(0.0, 0.05, t) * alpha;
 	float heat = lead * 1.3 * (1.0 - abs(x) / width * 0.6) + ball;
-	vec4 outc = fx_premul(fx_fire_ramp(heat) * brightness, cover, 1.0);
+	vec4 outc = fx_premul(fx_blood_ramp(min(heat, 0.88)) * brightness, cover, 0.45);
 	ALBEDO = outc.rgb;
 	ALPHA = outc.a;
 }

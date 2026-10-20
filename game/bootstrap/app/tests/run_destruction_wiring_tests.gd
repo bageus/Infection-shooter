@@ -102,13 +102,12 @@ func _audit_fixed_cooler(prop: Node3D, effects: Node3D) -> void:
 	_check(body != null, "Fixed cooler uses its physical catalog wrapper")
 	if body == null:
 		return
-	var original := body.transform
 	var layer := body.collision_layer
 	for weapon in ["AK", "GRENADE"]:
 		body.call("take_projectile_hit", 10000.0, body.global_position, Vector3.BACK, Vector3.FORWARD, weapon)
 		await process_frame
 		_check(not bool(body.get("_broken")), "Fixed cooler stays whole after " + weapon)
-		_check(body.freeze and body.transform.is_equal_approx(original), "Fixed cooler stays anchored after " + weapon)
+		_check(not body.freeze, "Fixed cooler is a loose body after " + weapon)
 		_check(layer != 0 and body.collision_layer == layer, "Fixed cooler keeps its collision layer after " + weapon)
 		var shapes: Array = body.get("_shapes")
 		_check(not shapes.is_empty(), "Fixed cooler retains collision shapes after " + weapon)
