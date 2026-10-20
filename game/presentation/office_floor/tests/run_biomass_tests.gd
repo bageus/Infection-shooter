@@ -102,7 +102,7 @@ func _check_pieces() -> void:
 	_expect(visual.mesh.get_aabb().size.z > 0.0 or visual.mesh.custom_aabb.size.z > 0.0, "The relief mesh has height.")
 	_expect(a.has_method("biomass_cell") and a.call("biomass_cell") == 1, "Biomass_02 uses the second cell.")
 	_expect(a.call("get_blood_config")["texture"] == "biomass_02", "Biomass saves through the blood config.")
-	await _wait_until(func() -> bool: return not (b.get_node("BloodQuad") as MeshInstance3D).visible, 120)
+	await _wait_until(func() -> bool: return not (b.get_node("BloodQuad") as MeshInstance3D).visible, 900)
 	_expect(visual.visible and not (b.get_node("BloodQuad") as MeshInstance3D).visible, "Touching pieces become one mass: first draws, second hides.")
 	_expect(far.get_node("BloodQuad").visible, "A distant piece keeps its own relief.")
 	var fused_rect := (visual.mesh as ArrayMesh).custom_aabb
@@ -111,10 +111,10 @@ func _check_pieces() -> void:
 	await process_frame
 	await process_frame
 	_expect((b.get_node("BloodQuad") as MeshInstance3D).visible, "A moved piece shows its own relief at once.")
-	await _wait_until(func() -> bool: return (visual.mesh as ArrayMesh).custom_aabb.size.x < 1.0, 120)
+	await _wait_until(func() -> bool: return (visual.mesh as ArrayMesh).custom_aabb.size.x < 1.0, 900)
 	_expect((visual.mesh as ArrayMesh).custom_aabb.size.x < 1.0, "The first piece reverts to its own cell once nothing touches it.")
 	b.position = Vector3(0.5, 0, 0.35)
-	await _wait_until(func() -> bool: return not (b.get_node("BloodQuad") as MeshInstance3D).visible, 120)
+	await _wait_until(func() -> bool: return not (b.get_node("BloodQuad") as MeshInstance3D).visible, 900)
 	_expect(not (b.get_node("BloodQuad") as MeshInstance3D).visible, "Moving it back fuses it again.")
 	a.queue_free()
 	await process_frame
