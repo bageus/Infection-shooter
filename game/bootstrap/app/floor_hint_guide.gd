@@ -9,11 +9,10 @@ const SPACING := 2.2
 const BOB_AMPLITUDE := 0.22
 const BOB_SPEED := 2.4
 const BOB_PHASE := 0.7
-const ARM_LENGTH := 0.42
-const ARM_WIDTH := 0.1
+const ARROW_SIZE := 1.5
+const ARROW_SHADER := preload("res://game/bootstrap/app/floor_hint_arrow.gdshader")
 const FLOOR_Y := 0.04
 const END_CLEARANCE := 0.6
-const COLOR := Color(0.35, 0.95, 0.8)
 
 var player: Node3D
 # Returns the goal's floor position, or Vector3.INF when there is none.
@@ -23,19 +22,17 @@ var _elapsed := 0.0
 
 
 func _ready() -> void:
-	var mesh := _chevron_mesh()
+	var plane := PlaneMesh.new()
+	plane.size = Vector2.ONE * ARROW_SIZE
+	var material := ShaderMaterial.new()
+	material.shader = ARROW_SHADER
 	for index in CHEVRON_COUNT:
-		# Each chevron fades on its own, so a bright wave runs along the trail.
-		var material := StandardMaterial3D.new()
-		material.albedo_color = COLOR
-		material.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
-		material.blend_mode = BaseMaterial3D.BLEND_MODE_ADD
-		material.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
-		material.cull_mode = BaseMaterial3D.CULL_DISABLED
+		# One shared material; each arrow's own light and wear come from instance uniforms.
 		var chevron := MeshInstance3D.new()
-		chevron.mesh = mesh
+		chevron.mesh = plane
 		chevron.material_override = material
 		chevron.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+		chevron.set_instance_shader_parameter(&"seed", float(index) * 1.7)
 		add_child(chevron)
 		_chevrons.append(chevron)
 
@@ -69,24 +66,4 @@ func _process(delta: float) -> void:
 		chevron.global_position = Vector3(spot.x, FLOOR_Y, spot.z)
 		chevron.rotation = Vector3(0.0, yaw, 0.0)
 		var wave := 0.5 + 0.5 * sin(_elapsed * BOB_SPEED - index * BOB_PHASE)
-		(chevron.material_override as StandardMaterial3D).albedo_color.a = lerpf(0.25, 1.0, wave)
-
-
-# Two thin arms meeting at a tip, lying flat on the floor and pointing down -Z.
-func _chevron_mesh() -> ArrayMesh:
-	var tip := Vector3(0.0, 0.0, -ARM_LENGTH)
-	var arms := [
-		[tip, Vector3(-ARM_LENGTH, 0.0, ARM_LENGTH * 0.4)],
-		[tip, Vector3(ARM_LENGTH, 0.0, ARM_LENGTH * 0.4)],
-	]
-	var surface := SurfaceTool.new()
-	surface.begin(Mesh.PRIMITIVE_TRIANGLES)
-	for arm: Array in arms:
-		var start: Vector3 = arm[0]
-		var end: Vector3 = arm[1]
-		var side := (end - start).cross(Vector3.UP).normalized() * ARM_WIDTH
-		var quad := [start, end, end + side, start + side]
-		for index in [0, 1, 2, 0, 2, 3]:
-			surface.add_vertex(quad[index])
-	surface.generate_normals()
-	return surface.commit()
+		chevron.set_instance_shader_parameter(&"glow", lerpf(0.2, 1.0, wave))

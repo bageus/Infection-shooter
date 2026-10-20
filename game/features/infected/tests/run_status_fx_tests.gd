@@ -1,5 +1,5 @@
 extends SceneTree
-## Stun stars over a stunned infected and the green tint of a poisoned one:
+## Stun halo over a stunned infected and the green tint of a poisoned one:
 ## both appear with the status, end with it, and leave the corpse on death.
 
 const HUNGER := preload("res://game/features/infected/public/infected_hunger.tscn")
@@ -20,10 +20,10 @@ func _run() -> void:
 	_expect(not fx.call("is_showing_stun") and not fx.call("is_showing_poison"), "A healthy infected shows nothing.")
 	_expect(not fx.is_processing(), "The status node is idle while nothing shows.")
 	enemy.call("apply_blast_stun", 0.4, 1.0)
-	_expect(fx.call("is_showing_stun"), "A stunned infected gets circling stars.")
+	_expect(fx.call("is_showing_stun"), "A stunned infected gets the circling halo.")
 	var stars := enemy.find_child("StunStars", false, false) as MeshInstance3D
-	_expect(stars != null and stars.global_position.y > enemy.global_position.y + 1.0, "The stars circle above the head.")
-	_expect(stars != null and stars.mesh.surface_get_array_len(0) == 90, "The stun indicator uses one procedural mesh for three stars.")
+	_expect(stars != null and stars.global_position.y > enemy.global_position.y + 1.0, "The halo circles above the head.")
+	_expect(stars != null and stars.mesh.material is ShaderMaterial, "The stun indicator is one shaded quad.")
 	enemy.call("apply_mutation_poison", 0.5, 0.0)
 	_expect(fx.call("is_showing_poison"), "A poisoned infected takes a green tint.")
 	var tinted := 0
@@ -32,7 +32,7 @@ func _run() -> void:
 			tinted += 1
 	_expect(tinted > 0, "The tint lies over the body meshes.")
 	await create_timer(0.8).timeout
-	_expect(not fx.call("is_showing_stun"), "The stars go when the stun ends.")
+	_expect(not fx.call("is_showing_stun"), "The halo goes when the stun ends.")
 	_expect(not fx.call("is_showing_poison"), "The tint goes when the poison ends.")
 	for mesh in enemy.find_children("*", "MeshInstance3D", true, false):
 		if (mesh as MeshInstance3D).material_overlay != null:
