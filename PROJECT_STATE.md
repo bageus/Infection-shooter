@@ -811,3 +811,8 @@ Perimeter and interior wall collision is scene-authored. The latest correction t
 
 
 20.10.2026 — результат звука настенной биомассы: штатная проверенная конверсия Thudding_impact_of_b в mono48kHz Vorbisq5/2s, WAV удалён. Private receiver-local WeakRef helper проверяет alpha текущего standalone/fused visual при существующем surface hit; hit_biomass играет в точке попадания, без изменения физики/урона/DTO/API/dependencies. PASS: readiness/project gates/import4.7.2,11conversion receipts,18audio-tool tests, biomass (реальный bullet dispatch и lifecycle), sound_event/blood_decor/biomass_catalog suites0failures,979import sidecars, scene resources/diff-check. Native прослушивание не выполнялось. Evidence docs/qa/biomass_impact_audio.md. Следующее действие: PR и CI; main не изменять до слияния.
+
+
+## 20.10.2026 — музыка завершения, Threat/Hunt и бесшовные переходы (T004)
+
+Прямой запрос владельца: Hold56секунд (уточнено), продолжение записи через загрузку и до конца в главном меню; Threat вступление30с один раз, далее loop с31-й секунды; Server Oper без первых20/последних10с тишины; Seamless временно исключён; Hunt при >10агрессорах, возвратThreat при <10. Ровно10 сохраняет режим. Bootstrap сохраняет владельца музыки, completion voice передаётся явными ссылками через loader/front-end без Autoload/поиска сервиса. Исполнитель локальных команд недоступен; конверсия/readiness gates и тесты выполняются GitHub Actions. Пока добавлены только offline importer и подготовка ассетов; игровая реализация следует после readiness gates.
