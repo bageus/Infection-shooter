@@ -11,6 +11,7 @@ const PLATE_FRUIT := preload("res://game/presentation/office_floor/plate_fruit.g
 var _fruit := PLATE_FRUIT.new()
 const FRAGILE := preload("res://game/presentation/office_floor/fragile_prop.gd")
 var _geometry := GEOMETRY.new()
+var _retained := preload("res://game/presentation/office_floor/retained_prop_body.gd").new()
 const IMPACT_SOUND := preload("res://game/presentation/office_floor/impact_sound_watcher.gd")
 
 const CARPET_SHADOW := preload("res://game/presentation/office_floor/carpet_shadow.gd")
@@ -196,6 +197,7 @@ func _ready() -> void:
 	var visual := _visual
 	_reaction.setup(self, visual)
 	_geometry.prepare_stages(model_path)
+	_retained.configure(_geometry, model_path)
 	_damage.configure(model_path.get_file(), _variants.size(), not _stages.is_empty())
 	# Architectural pieces, carpets and the reception core stay anchored.
 	# A wall item that a shot tears loose (extinguisher, TV, clock) switches to dynamic mid-game.
@@ -205,7 +207,7 @@ func _ready() -> void:
 	# Server racks weigh 120-260 kg and stay in place, also after a shot breaks them open.
 	freeze = (wall_mounted or model_path.begins_with("res://models/objects/enviroments/01/")
 		or model_path.get_file() == "07_reception_counter_two_heights_2.glb"
-		or "server_rack" in model_path.get_file())
+		or "server_rack" in model_path.get_file() or _retained.anchored(model_path))
 	if freeze and "01_floor_" in model_path:
 		var shadow := CARPET_SHADOW.new()
 		shadow.name = "CarpetShadow"
@@ -285,23 +287,15 @@ func take_projectile_hit_at_shape(damage: float, hit_position: Vector3, normal: 
 		var owner_id := shape_find_owner(shape_index)
 		var collision := shape_owner_get_owner(owner_id) as CollisionShape3D
 		var mesh_index := _shapes.find(collision)
+		if _retained.hit_shape(self, _geometry, mesh_index, damage, hit_position, direction):
+			return false
 		# Electronics keep their glass screen: shattering it disabled the only collision
 		# shape, so a shot monitor fell through its desk and skipped the short circuit.
-		if _damage.category != "tech" and not FRAGILE.applies(model_path) and mesh_index >= 0 and mesh_index < _shape_meshes.size() and is_instance_valid(_shape_meshes[mesh_index]) and GEOMETRY.is_glass_mesh(_shape_meshes[mesh_index]):
+		if not _retained.enabled and _damage.category != "tech" and not FRAGILE.applies(model_path) and mesh_index >= 0 and mesh_index < _shape_meshes.size() and is_instance_valid(_shape_meshes[mesh_index]) and GEOMETRY.is_glass_mesh(_shape_meshes[mesh_index]):
 			call_deferred("_shatter_glass", hit_position, direction)
 			if weapon != "GRENADE":
 				return false
-		if _is_cooler_bottle_shape(mesh_index) and damage > 0.0 and weapon != "GRENADE":
-			_burst_bottle(mesh_index, hit_position, direction)
-			return false
 	return take_projectile_hit(damage, hit_position, normal, direction, weapon)
-
-
-# Only the bottle bursts; the cooler body behind it stays standing.
-func _is_cooler_bottle_shape(mesh_index: int) -> bool:
-	if not model_path.get_file().begins_with("02_water_cooler_bottle_attached"):
-		return false
-	return mesh_index >= 0 and mesh_index < _shape_meshes.size() and BOTTLE_BURST.find_bottle([_shape_meshes[mesh_index]]) == 0
 
 
 func _burst_bottle(mesh_index: int, hit_position: Vector3, direction: Vector3) -> void:
@@ -332,6 +326,8 @@ func get_impact_sound_material(shape_index: int = -1) -> String:
 
 
 func take_projectile_hit(damage: float, hit_position: Vector3, _normal: Vector3, direction: Vector3, weapon: String) -> bool:
+	if _retained.protects():
+		return false
 	if "fire_extinguisher" in model_path.get_file():
 		BULLET_PUSH.apply(self, weight_kg, weapon, direction, hit_position)
 		_trigger_extinguisher(hit_position, direction)
@@ -510,6 +506,8 @@ func _apply_damage(hit_position: Vector3, direction: Vector3) -> void:
 		_rebuild_shapes()
 		BREAK_SOUND.play(self, effects_root, model_path, get_projectile_material(), hit_position)
 	elif transition == PROP_DAMAGE.Transition.BREAK:
+		if _retained.detach(self, _geometry, hit_position, direction):
+			return
 		_floor_debris.emit(self, model_path, "break", hit_position, direction)
 		SERVER_AUDIO.silence(self)
 		BREAK_SOUND.play(self, effects_root, model_path, get_projectile_material(), hit_position)
@@ -526,10 +524,6 @@ func _apply_damage(hit_position: Vector3, direction: Vector3) -> void:
 			return
 		_release_loot()
 		_reaction.break_dust(_shape_meshes)
-		if model_path.get_file().begins_with("02_water_cooler_bottle_attached"):
-			var intact_bottle := BOTTLE_BURST.find_bottle(_shape_meshes)
-			if intact_bottle >= 0:
-				_burst_bottle(intact_bottle, hit_position, direction)
 		_visual.hide()
 		for shape in _shapes:
 			shape.set_deferred("disabled", true)
