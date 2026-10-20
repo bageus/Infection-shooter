@@ -251,6 +251,14 @@ func _build_stage() -> void:
 	plane.material = material
 	floor_mesh.mesh = plane
 	add_child(floor_mesh)
+	# A solid floor: water drops and decals need something to land on.
+	var ground := StaticBody3D.new()
+	var slab := CollisionShape3D.new()
+	slab.shape = BoxShape3D.new()
+	(slab.shape as BoxShape3D).size = Vector3(40, 0.2, 40)
+	slab.position.y = -0.1
+	ground.add_child(slab)
+	add_child(ground)
 	var sun := DirectionalLight3D.new()
 	sun.rotation_degrees = Vector3(-55, 30, 0)
 	add_child(sun)
