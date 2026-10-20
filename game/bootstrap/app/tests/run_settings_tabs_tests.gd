@@ -145,10 +145,10 @@ func _shadow_checks(tabs: TabContainer, dialog: Control) -> void:
 	var shadows := tabs.get_child(2).find_child("Shadows", true, false) as CheckButton
 	var quality := tabs.get_child(2).find_child("ShadowQuality", true, false) as HSlider
 	_check(shadows != null and shadows.button_pressed, "Shadows toggle belongs to Video and defaults on")
-	_check(quality != null and quality.value == 2.0 and quality.max_value == 3.0 and quality.step == 1.0, "Shadow quality slider has 4 levels and defaults to High")
+	_check(quality != null and quality.value == 1.0 and quality.max_value == 3.0 and quality.step == 1.0, "Shadow quality slider has 4 levels and defaults to Medium")
 	quality.value = 0.0
 	await create_timer(0.6).timeout
-	_check(PREFS.new().values.shadow_quality == 2, "Fresh preferences keep the default quality")
+	_check(PREFS.new().values.shadow_quality == 1, "Fresh preferences keep the default quality")
 	var shadow_prefs := PREFS.new()
 	shadow_prefs.load_settings()
 	_check(int(shadow_prefs.values.shadow_quality) == 0, "Shadow quality survives settings reload")

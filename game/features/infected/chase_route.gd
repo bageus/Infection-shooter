@@ -61,7 +61,10 @@ func direction(actor: CharacterBody3D, target: Node3D, radius: float, far: bool 
 	var to := target.global_position
 	to.y = _height
 	# Close to the target the direct-line answer must be fresh, so a swing is never held back.
-	if (frame >= _next_probe or from.distance_squared_to(to) < 9.0) and _take_direct_probe(frame):
+	# Beyond 10 m walls are not probed: head straight, plan around them once inside that range.
+	if from.distance_squared_to(to) > 100.0:
+		_direct = true
+	elif (frame >= _next_probe or from.distance_squared_to(to) < 9.0) and _take_direct_probe(frame):
 		_next_probe = frame + 6
 		_direct = clear_segment(from, to)
 	if _direct:
@@ -152,7 +155,7 @@ func begin_search(actor: CharacterBody3D, target: Node3D) -> void:
 	var from := actor.global_position
 	var to := target.global_position
 	to.y = _height
-	_direct = clear_segment(from, to)
+	_direct = from.distance_squared_to(to) > 100.0 or clear_segment(from, to)
 	_search_state.clear()
 	if _direct:
 		path.clear()
