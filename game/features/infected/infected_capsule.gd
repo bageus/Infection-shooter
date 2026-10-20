@@ -9,7 +9,6 @@ var _route := CHASE_ROUTE.new()
 var _pace := CHASE_PACE.new()
 var _senses := PERCEPTION.new()
 var _breaker := BREAKER.new()
-
 const AUTHORING := preload("res://game/features/infected/infected_authoring.gd")
 const BODY_PARTS := preload("res://game/features/infected/body_parts.gd")
 const BLOOD_FX := preload("res://game/features/infected/blood_drip_fx.gd")
@@ -407,7 +406,6 @@ func _physics_process(delta: float) -> void:
 	velocity.x = desired.x + _push_velocity.x + spread.x
 	velocity.z = desired.z + _push_velocity.z + spread.z
 	_push_velocity = _push_velocity.move_toward(Vector3.ZERO, push_decay * delta)
-
 	if _sleeping_far:
 		# Far enemies take one cheap collision-checked step (no sliding or
 		# gravity), so they still stop at walls and closed doors.
@@ -415,10 +413,13 @@ func _physics_process(delta: float) -> void:
 		return
 
 	_apply_gravity(delta)
+	if not near and physics_frame % 2 != _ai_tick_offset % 2:
+		move_and_collide(velocity * delta)
+		return
 	_intended_motion = Vector3(velocity.x, 0.0, velocity.z)
 	move_and_slide()
 	_push_chair_contacts()
-	_breaker.track_progress(self, delta, not _route.direct_clear())
+	_breaker.track_progress(self, delta if near else delta * 2.0, not _route.direct_clear())
 	if near or physics_frame % 4 == _ai_tick_offset:
 		_try_break_blocking_props()
 
