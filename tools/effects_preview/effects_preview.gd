@@ -21,6 +21,7 @@ const SPARKS := preload("res://game/presentation/office_floor/electric_sparks.gd
 const WATER := preload("res://game/presentation/office_floor/water_spray.gd")
 const STATUS := preload("res://game/features/infected/infected_status_fx.gd")
 const VITALS := preload("res://game/presentation/prototype_hud/vitals_screen_fx.gd")
+const FLOOR_HINT := preload("res://game/bootstrap/app/floor_hint_guide.gd")
 const CLOUD := preload("res://game/features/infection_source/public/mutagen_cloud.tscn")
 const EYE := Vector3(10, 12, 10) * 0.45
 const TARGETS := [Vector3(1.6, 0, 1.2), Vector3(3.4, 0, -0.6), Vector3(1.0, 0, -3.0)]
@@ -43,6 +44,7 @@ var _casts := {}
 var _last := ""
 ## Effects the game spawns into the mission world look for this container.
 var effects_root: Node3D
+var _hint: Node3D
 var _vitals: Control
 var _screen := {"health": 100.0, "mutation": 0.0}
 var _screen_left := 0.0
@@ -77,7 +79,7 @@ func _ready() -> void:
 		"Граната": _grenade, "Огнетушитель": _extinguisher,
 		"Вспышка выстрела": _muzzle, "Пуля в стену": _bullet, "Брызги крови": _blood_spray,
 		"Искры": _sparks, "Брызги воды": _water, "Оглушение": _stun, "Отравление": _poison,
-		"Экран: мало здоровья": _low_health, "Экран: мутаген": _mutagen_screen,
+		"Стрелки на полу": _arrows, "Экран: мало здоровья": _low_health, "Экран: мутаген": _mutagen_screen,
 	}
 	_build_ui()
 
@@ -209,6 +211,16 @@ func _status() -> Node:
 		_enemies[0].add_child(node)
 		node.call("setup", _enemies[0], _enemies[0], 1.8)
 	return node
+
+
+func _arrows() -> void:
+	if is_instance_valid(_hint):
+		_hint.queue_free()
+		return
+	_hint = FLOOR_HINT.new()
+	_hint.player = _player
+	_hint.target_source = func() -> Vector3: return Vector3(0, 0, -12)
+	add_child(_hint)
 
 
 func _low_health() -> void:
