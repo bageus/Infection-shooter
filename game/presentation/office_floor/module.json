@@ -43,6 +43,7 @@
     "public/structural/glass_partition_blinds.tscn",
     "public/structural/sliding_glass_door.tscn",
     "public/blood_effects_3d.tscn",
+    "public/biomass_footstep_surface.gd",
     "public/props/blood_decal.tscn",
     "public/display_wall.gd",
     "public/hit_effect_warmup.gd",

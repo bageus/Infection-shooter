@@ -32,6 +32,7 @@ const PASSIVE_SOUNDS := {"second_heart": &"skill_second_heart", "retaliation": &
 const SPORE_DELAY := 2.0
 
 var glass_surface_query: Callable
+var biomass_surface_query: Callable
 var _player: Node3D
 var listener: AudioListener3D
 
@@ -58,7 +59,12 @@ func _on_footstep(_side: int, speed: float) -> void:
 	# A dodge is a separate sound, never a walking contact.
 	if float(_player.get("_roll_remaining")) > 0.0:
 		return
-	var event: StringName = &"step_glass" if glass_surface_query.is_valid() and bool(glass_surface_query.call(_foot_position())) else &"step_player"
+	var foot := _foot_position()
+	var event: StringName = &"step_player"
+	if glass_surface_query.is_valid() and bool(glass_surface_query.call(foot)):
+		event = &"step_glass"
+	elif biomass_surface_query.is_valid() and bool(biomass_surface_query.call(foot)):
+		event = &"step_biomass"
 	var impacts := _player.get("impact_pool") as Node
 	if is_instance_valid(impacts) and impacts.has_method("request_surface_step"):
 		impacts.call("request_surface_step", _player)
