@@ -40,8 +40,14 @@ func _run() -> void:
 
 	runtime.emit_signal("skill_cast", "storm_pulse")
 	_expect(_voices(player, &"skill_storm_pulse") == 1 and _voices(player, &"skill_storm_field") == 1, "Storm Pulse casts and its field follows the player.")
-	runtime.emit_signal("skill_cast", "power_strike_2")
-	_expect(_voices(player, &"skill_bone_blades") == 1, "An upgraded power strike has its cast sound")
+	for id in ["power_strike", "power_strike_2", "power_strike_3"]:
+		runtime.emit_signal("skill_cast", id)
+		var strike := _first(player, &"skill_power_strike") as AudioStreamPlayer3D
+		_expect(strike != null and strike.stream.resource_path.ends_with("power_blow/a_powerful_destructi_1.ogg"), "Power strike uses the owner recording: " + id)
+		_expect(_voices(player, &"skill_bone_blades") == 0, "Power strike does not reuse the claws sound")
+		if strike != null:
+			strike.queue_free()
+		await process_frame
 	runtime.emit_signal("passive_triggered", "retaliation", 0.0)
 	_expect(_voices(player, &"skill_retaliation") == 1, "Retaliation's shock is heard.")
 	runtime.emit_signal("passive_triggered", "regeneration", 0.0)
@@ -83,6 +89,7 @@ func _cooldown_feedback(player: Node, runtime: Node) -> void:
 	_expect(_voices(player, &"skill_cooldown_done") == 1, "Unlearned skill expiration stays silent")
 	runtime.emit_signal("passive_triggered", "second_heart", 3.0)
 	_expect(_voices(player, &"skill_second_heart") == 1, "Lethal-hit survival plays Done_alive")
+	_expect(player.find_children("Sfx_skill_heartbeat", "AudioStreamPlayer3D", true, false).is_empty(), "Heartbeat belongs to the visual animation, not the passive buff timer")
 
 
 func _voices(parent: Node, event: StringName) -> int:
