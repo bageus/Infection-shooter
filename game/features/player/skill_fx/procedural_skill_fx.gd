@@ -283,7 +283,7 @@ static func heartbeat(parent: Node, point: Vector3, seconds: float) -> Node3D:
 		return null
 	fx.fade_in = 0.15
 	fx.fade_out = 0.35
-	var heart := _billboard(fx, _material("heart", HEART_SHADER, {}), 1.0)
+	var heart := _billboard(fx, _material("heart", HEART_SHADER, {}), 1.5)
 	fx.step = func(age: float, fade: float) -> void:
 		heart.set_instance_shader_parameter(&"clock", age)
 		heart.set_instance_shader_parameter(&"alpha", fade)

@@ -22,6 +22,7 @@ const WATER := preload("res://game/presentation/office_floor/water_spray.gd")
 const STATUS := preload("res://game/features/infected/infected_status_fx.gd")
 const VITALS := preload("res://game/presentation/prototype_hud/vitals_screen_fx.gd")
 const FLOOR_HINT := preload("res://game/bootstrap/app/floor_hint_guide.gd")
+const DANGER_ZONE := preload("res://game/features/combat/public/floor_danger_zone.gd")
 const CLOUD := preload("res://game/features/infection_source/public/mutagen_cloud.tscn")
 const EYE := Vector3(10, 12, 10) * 0.45
 const TARGETS := [Vector3(1.6, 0, 1.2), Vector3(3.4, 0, -0.6), Vector3(1.0, 0, -3.0)]
@@ -157,6 +158,7 @@ func _grenade() -> void:
 	add_child(blast)
 	blast.position = Vector3(0, 0, -2.5)
 	blast.call("start", Vector3.UP)
+	DANGER_ZONE.spawn(self, get_world_3d(), blast.position, 3.0, 0.0, 3.0)
 	get_tree().create_timer(6.0).timeout.connect(blast.queue_free)
 
 
@@ -249,6 +251,14 @@ func _build_stage() -> void:
 	plane.material = material
 	floor_mesh.mesh = plane
 	add_child(floor_mesh)
+	# A solid floor: water drops and decals need something to land on.
+	var ground := StaticBody3D.new()
+	var slab := CollisionShape3D.new()
+	slab.shape = BoxShape3D.new()
+	(slab.shape as BoxShape3D).size = Vector3(40, 0.2, 40)
+	slab.position.y = -0.1
+	ground.add_child(slab)
+	add_child(ground)
 	var sun := DirectionalLight3D.new()
 	sun.rotation_degrees = Vector3(-55, 30, 0)
 	add_child(sun)
