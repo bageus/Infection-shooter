@@ -350,3 +350,8 @@ Original procedural synthesis; existing project attribution/licensing is retaine
 <!-- END GENERATED AUDIO build_weapon_sounds:minigun_fire -->
 
 Glass crunch recordings the_crunch_of_glass__1–4 and roll recording The_heavy_character_1 are supplied by the project owner. Source hashes and verified Vorbis conversion are recorded in glass_audio_processing.json; source WAVs removed as requested. Newly supplied blinds recordings are converted to OGG without changing their usage.
+
+
+## Авторские звуки навыков — 20.10.2026
+
+Владелец предоставил a_powerful_destructi_1 (мощный удар) и very_loud_a_strong_b_1 (анимация сердца Second Heart) в Git741fbc80. Преобразованы в моно OGG Vorbis48кГц/q5, без обрезки длительности и синтеза вариантов; WAV удалены по запросу после декодирования и проверки. Источники, SHA256 и параметры — glass_audio_processing.json. Прежние лицензии сторонних записей этим файлам не назначаются.
