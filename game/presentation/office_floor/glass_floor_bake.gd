@@ -14,6 +14,7 @@ const LAYER_PIXELS := 256
 const ARCHIVE_PNG_LIMIT := 98304
 const ARCHIVE_FALLBACK := 192
 const MAX_TILES := 16
+const MIN_SIZE := 0.08 # Real flakes are small; 0.08 m is 6 px at 80 px/m.
 const MAX_QUEUE := 64
 const MAX_DENSITY := 4
 const STAMPS_PER_STEP := 2
@@ -44,7 +45,7 @@ func prepare() -> void:
 
 
 func stamp(at: Vector2, frame: int, size: float, turns: int = 0, kind: String = "glass", opacity: float = 1.0) -> bool:
-	if not is_finite(opacity) or opacity <= 0.0 or not at.is_finite() or not is_finite(size) or size < 0.25 or size > 1.5 or frame < 0 or frame >= ATLASES.frame_count(kind):
+	if not is_finite(opacity) or opacity <= 0.0 or not at.is_finite() or not is_finite(size) or size < MIN_SIZE or size > 1.5 or frame < 0 or frame >= ATLASES.frame_count(kind):
 		return false
 	if queue.size() >= MAX_QUEUE:
 		return false

@@ -148,7 +148,7 @@ func scatter_prop_debris(at: Vector3, footprint: Vector2, recipe: Array[String],
 	MATERIAL_SCATTER.scatter(self, at, footprint, recipe, direction, excluded)
 
 
-func stamp_material_debris(at: Vector2, kind: String, frame: int, size: float, turns: int = 0, min_size: float = 0.25) -> bool:
+func stamp_material_debris(at: Vector2, kind: String, frame: int, size: float, turns: int = 0, min_size: float = 0.1) -> bool:
 	if not at.is_finite() or not Rect2(-floor_size * 0.5, floor_size).has_point(at):
 		return false
 	for opening in openings:

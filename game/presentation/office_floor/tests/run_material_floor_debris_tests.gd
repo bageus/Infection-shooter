@@ -48,13 +48,14 @@ func _test_relief_and_sharpness() -> void:
 	bake.prepare()
 	var cache: RefCounted = bake.get("_atlases")
 	for kind: String in ["wood", "fabric", "plastic", "paper", "cardboard", "glass", "extinguisher"]:
-		var source: Image = cache.get("sources")[kind][0]
+		var source: Image = cache.get("sources")[kind][5]
 		_check(source.get_width() == ATLASES.SOURCE_SIZE, "%s keeps %d px source cells" % [kind, ATLASES.SOURCE_SIZE])
 		bake.clear()
-		bake.stamp(Vector2(4, 4), 0, 0.25, 0, kind)
+		var flake := 0.5 if kind == "glass" else 0.15 # Glass frames are thin shards.
+		bake.stamp(Vector2(4, 4), 5, flake, 0, kind)
 		bake.step()
 		var tile: Dictionary = bake.tiles[Vector2i.ZERO]
-		var side := roundi(0.25 * BAKE.PIXELS / BAKE.METERS)
+		var side := roundi(flake * BAKE.PIXELS / BAKE.METERS)
 		var covered := 0
 		var tilted := 0
 		var relief: Image = tile.relief_image
