@@ -13,6 +13,7 @@ const COCOON_SHADER := preload("res://game/features/player/skill_fx/fx_cocoon.gd
 const SHIELD_SHADER := preload("res://game/features/player/skill_fx/fx_shield.gdshader")
 const HEART_SHADER := preload("res://game/features/player/skill_fx/fx_heart.gdshader")
 const TRAIL_SHADER := preload("res://game/features/player/skill_fx/fx_blade_trail.gdshader")
+const SPIKE_SHADER := preload("res://game/features/player/skill_fx/fx_spike.gdshader")
 const PUFF_SHADER := preload("res://game/features/player/skill_fx/fx_puff.gdshader")
 
 const SPIKE_LIFE := 0.7
@@ -469,19 +470,8 @@ static func _puff_material(kind: String) -> ShaderMaterial:
 	return _material("puff_" + kind, PUFF_SHADER, params)
 
 
-static func _spike_material() -> StandardMaterial3D:
-	if not _materials.has("spike"):
-		var material := StandardMaterial3D.new()
-		material.albedo_color = Color(0.42, 0.05, 0.06)
-		material.roughness = 0.28
-		material.metallic = 0.15
-		material.emission_enabled = true
-		material.emission = Color(0.55, 0.02, 0.03)
-		material.emission_energy_multiplier = 0.5
-		material.rim_enabled = true
-		material.rim = 0.6
-		_materials["spike"] = material
-	return _materials["spike"]
+static func _spike_material() -> ShaderMaterial:
+	return _material("spike", SPIKE_SHADER, {})
 
 
 static func _blade_material() -> StandardMaterial3D:
