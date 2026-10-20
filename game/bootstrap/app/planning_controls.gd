@@ -122,7 +122,7 @@ func setup_controls() -> void:
 func _build_gore_controls() -> void:
 	var tabs: Node = session.ui.get_node_or_null("Panel/VBox/Tabs")
 	if tabs != null:
-		for entry in [["Gore", _show_gore_catalog], ["Blood", _show_blood_catalog]]:
+		for entry in [["Gore", _show_gore_catalog], ["Blood", _show_blood_catalog], ["Biomass", _show_biomass_catalog]]:
 			var button := Button.new()
 			button.name = str(entry[0])
 			button.text = str(entry[0])
@@ -175,6 +175,11 @@ func _show_gore_catalog() -> void:
 
 func _show_blood_catalog() -> void:
 	_enter_simple_catalog(catalog.blood_catalog(), "BLOOD | choose surface and size, then place")
+	blood_options.show()
+
+
+func _show_biomass_catalog() -> void:
+	_enter_simple_catalog(catalog.biomass_catalog(), "BIOMASS | choose surface and size, touching patches fuse into one mass")
 	blood_options.show()
 
 
