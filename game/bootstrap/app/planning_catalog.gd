@@ -113,6 +113,7 @@ func blood_catalog() -> Array:
 		for variant in range(1, int(BLOOD_VARIANTS[category]) + 1):
 			var texture_id := "%s_%02d" % [category, variant]
 			entries.append({"name": "Blood " + texture_id.replace("_", " "), "path": BLOOD_DECAL_SCENE, "kind": "blood", "blood_texture": texture_id})
+	entries.append_array(biomass_catalog())
 	return entries
 
 
