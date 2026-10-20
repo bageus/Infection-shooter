@@ -14,7 +14,7 @@ var _part := ""
 
 static func anchored(model_path: String) -> bool:
 	var file := model_path.get_file()
-	return file.begins_with("02_water_cooler_destructible") or file.begins_with("02_water_cooler_bottle_attached") or file == "02_frige_dented.glb"
+	return file == "02_frige_dented.glb"
 
 
 func configure(geometry: RefCounted, model_path: String) -> void:

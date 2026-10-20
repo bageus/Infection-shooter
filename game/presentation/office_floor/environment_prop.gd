@@ -288,6 +288,7 @@ func take_projectile_hit_at_shape(damage: float, hit_position: Vector3, normal: 
 		var collision := shape_owner_get_owner(owner_id) as CollisionShape3D
 		var mesh_index := _shapes.find(collision)
 		if _retained.hit_shape(self, _geometry, mesh_index, damage, hit_position, direction):
+			_push_cooler(hit_position, direction, weapon)
 			return false
 		# Electronics keep their glass screen: shattering it disabled the only collision
 		# shape, so a shot monitor fell through its desk and skipped the short circuit.
@@ -319,6 +320,12 @@ func get_projectile_material(shape_index: int = -1) -> String:
 
 
 # Group 03 is mostly metal, but shelves and cabinets ring like wood. Bullet cost stays with get_projectile_material.
+## Coolers are loose now: a shot shoves them whether the bottle is still on or not.
+func _push_cooler(hit_position: Vector3, direction: Vector3, weapon: String) -> void:
+	if "02_water_cooler" in model_path:
+		BULLET_PUSH.apply(self, weight_kg, weapon, direction, hit_position)
+
+
 func get_impact_sound_material(shape_index: int = -1) -> String:
 	for model in ["01_wood_slat_partition", "03_book_case", "03_bookshelf", "03_file_cabinet", "03_drawer_cabinet"]:
 		if model in model_path: return "wood"
@@ -327,6 +334,7 @@ func get_impact_sound_material(shape_index: int = -1) -> String:
 
 func take_projectile_hit(damage: float, hit_position: Vector3, _normal: Vector3, direction: Vector3, weapon: String) -> bool:
 	if _retained.protects():
+		_push_cooler(hit_position, direction, weapon)
 		return false
 	if "fire_extinguisher" in model_path.get_file():
 		BULLET_PUSH.apply(self, weight_kg, weapon, direction, hit_position)
