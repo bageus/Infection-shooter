@@ -54,6 +54,7 @@ const EVENTS := {
 	&"dna_pickup": [2, -1.0, 20.0, 3.0, 0.04, 2],
 	&"player_roll": [1, -3.0, 20.0, 2.5, 0.02, 1],
 	&"step_glass": [4, -6.0, 18.0, 2.2, 0.04, 2],
+	&"step_biomass": [4, -7.0, 20.0, 2.4, 0.05, 2],
 	&"step_player": [10, -10.0, 18.0, 2.2, 0.06, 2],
 	&"step_light": [6, -11.0, 22.0, 2.4, 0.08, 6],
 	&"step_heavy": [4, -7.0, 34.0, 4.0, 0.06, 4],
@@ -273,6 +274,8 @@ static func play_ui(parent: Node, event: StringName) -> AudioStreamPlayer:
 static func _event_path(event: StringName, variant: int) -> String:
 	if event == &"hit_biomass":
 		return "res://assets/audio/sfx/biomass/Thudding_impact_of_b.ogg"
+	if event == &"step_biomass":
+		return "res://assets/audio/sfx/biomass/step_biomass_%d.ogg" % variant
 	if event == &"skill_cooldown_done":
 		return "res://assets/audio/sfx/skill_ready/taking_skill.ogg"
 	if event == &"skill_power_strike":

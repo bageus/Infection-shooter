@@ -1,6 +1,7 @@
 extends RefCounted
 const VISUAL_BUDGET := preload("res://game/features/infected/public/visual_preparation_budget.gd")
 const CHASE_BUDGET := preload("res://game/features/infected/public/chase_search_budget.gd")
+const BIOMASS_STEP := preload("res://game/presentation/office_floor/public/biomass_footstep_surface.gd")
 
 # Mission composition only: explicit collaborators, no global context or lookup API.
 var _container: Node3D
@@ -39,7 +40,8 @@ func bind_scene(node: Node) -> void:
 func _bind_collaborators(node: Node) -> void:
 	if node.has_method("configure_footstep_surface"):
 		var query := Callable(debris_floor, "has_glass_at") if is_instance_valid(debris_floor) else Callable()
-		node.call("configure_footstep_surface", query)
+		var container := _container
+		node.call("configure_footstep_surface", query, func(point: Vector3) -> bool: return BIOMASS_STEP.has_biomass_at(container, point))
 	if node.has_method("configure_glass_debris"):
 		node.call("configure_glass_debris", debris_floor)
 	if node.has_method("configure_floor_debris") and is_instance_valid(debris_floor):

@@ -42,8 +42,8 @@ static func grid(rect: Rect2, material: Material, lift: float) -> ArrayMesh:
 	var mesh := ArrayMesh.new()
 	mesh.add_surface_from_arrays(Mesh.PRIMITIVE_TRIANGLES, arrays)
 	mesh.surface_set_material(0, material)
-	# The shader lifts vertices after the AABB is computed.
-	mesh.custom_aabb = AABB(Vector3(rect.position.x, rect.position.y, -0.01), Vector3(rect.size.x, rect.size.y, lift + 0.02))
+	# The shader lifts vertices after the AABB is computed; wrapped edges reach well below the plane.
+	mesh.custom_aabb = AABB(Vector3(rect.position.x, rect.position.y, -0.6), Vector3(rect.size.x, rect.size.y, lift + 1.2))
 	return mesh
 
 

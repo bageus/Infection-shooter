@@ -105,6 +105,7 @@ func setup(app_owner: Node3D, planning_root: Node3D, planning_ui: Control, load_
 
 func enter() -> void:
 	active = true
+	Engine.set_meta("planning_active", true)
 	_set_occlusion_enabled(false)
 	# The planner edits the authored map, not what the fight left of it.
 	var restored: bool = storage.restore_authored()
@@ -157,6 +158,7 @@ func exit() -> void:
 		desk_setup.close()
 	storage.snapshot_authored()
 	active = false
+	Engine.set_meta("planning_active", false)
 	_set_occlusion_enabled(true)
 	controls.help.get_parent().get_parent().hide()
 	controls.help_button.hide()
