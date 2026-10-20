@@ -8,6 +8,7 @@ const LIBRARY := preload("res://game/presentation/office_floor/blood_texture_lib
 const BIOMASS := preload("res://game/presentation/office_floor/biomass_atlas.gd")
 const BIOMASS_MESH := preload("res://game/presentation/office_floor/biomass_mesh.gd")
 const BIOMASS_FIT := preload("res://game/presentation/office_floor/biomass_fit.gd")
+const IMPACT_AUDIO := preload("res://game/presentation/office_floor/biomass_impact_audio.gd")
 const FLOOR_OFFSET := 0.002
 
 ## Texture id "<category>_<variant>", e.g. "splatter_03".
@@ -27,6 +28,7 @@ var _receivers: Array[Dictionary] = []
 var _projection_dirty := true
 var _projection_transform := Transform3D()
 var _last_anchor_transform := Transform3D()
+var _impact_audio := IMPACT_AUDIO.new()
 
 
 func configure_blood_normal(normal: Vector3) -> void:
@@ -63,6 +65,7 @@ func configure_world(_container: Node3D, impacts: Node) -> void:
 
 
 func configure_projection(anchor: Node3D) -> void:
+	_impact_audio.bind(anchor, self)
 	var previous: Node3D = _projection_anchor.get_ref() if _projection_anchor != null else null
 	_projection_dirty = _projection_dirty or previous != anchor
 	_projection_anchor = weakref(anchor) if anchor != null else null
@@ -103,6 +106,10 @@ func _init() -> void:
 func _ready() -> void:
 	_rebuild()
 	set_process(_anchor != null)
+
+
+func _exit_tree() -> void:
+	_impact_audio.unregister()
 
 
 # Public planner_decor_v1 (ADR-0017).

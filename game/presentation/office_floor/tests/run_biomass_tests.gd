@@ -17,6 +17,7 @@ func _run() -> void:
 	_check_atlas()
 	_check_fusion()
 	await _check_pieces()
+	await _check_impact_audio()
 	print("biomass tests: %d failures" % failures)
 	quit(1 if failures > 0 else 0)
 
@@ -141,3 +142,79 @@ func _expect(condition: bool, message: String) -> void:
 	else:
 		failures += 1
 		print("FAIL: ", message)
+
+
+func _check_impact_audio() -> void:
+	var stage := Node3D.new()
+	root.add_child(stage)
+	var floor_view := preload("res://game/presentation/office_floor/public/base_floor_renderer.gd").new()
+	stage.add_child(floor_view)
+	var pool := preload("res://game/features/combat/public/impact_effects.gd").new()
+	stage.add_child(pool)
+	pool.surface_hit = Callable(floor_view, "bake_surface_hit")
+	var wall := StaticBody3D.new()
+	stage.add_child(wall)
+	var mesh := MeshInstance3D.new()
+	mesh.mesh = BoxMesh.new()
+	mesh.mesh.size = Vector3(6, 4, 0.2)
+	wall.add_child(mesh)
+	pool.register_surface(wall, mesh)
+	var piece := DECAL.instantiate() as Node3D
+	piece.call("configure_blood", "biomass_01", "wall")
+	stage.add_child(piece)
+	piece.position.z = 0.1
+	piece.call("configure_projection", mesh)
+	piece.get_node("BiomassFit").set_process(false)
+	var bullet := preload("res://game/features/combat/public/prototype_bullet.tscn").instantiate()
+	stage.add_child(bullet)
+	bullet.call("configure_world", stage, pool)
+	bullet.call("setup_projectile", Vector3.FORWARD, null, 26, 36, 34, "PISTOL", Vector3(0, 0, 2))
+	bullet.set_physics_process(false)
+	var pixels := ATLAS.albedo_bytes()
+	var opaque := Vector2.ZERO
+	var empty := Vector2.ZERO
+	var origin := ATLAS.cell_origin(0)
+	for y in range(0, ATLAS.CELL.y, 10):
+		for x in range(0, ATLAS.CELL.x, 10):
+			var at := origin + Vector2i(x, y)
+			var alpha := pixels[(at.y * ATLAS.ATLAS.x + at.x) * 4 + 3]
+			var uv := Vector2(x + 0.5, y + 0.5) / Vector2(ATLAS.CELL)
+			if alpha > 220: opaque = uv
+			if alpha < 10: empty = uv
+	var visual := piece.get("_visual") as MeshInstance3D
+	var hit := visual.to_global(Vector3((opaque.x - 0.5) * ATLAS.FOOTPRINT.x, 0.5 - opaque.y, 0))
+	bullet.call("_handle_hit", wall, hit, Vector3.BACK)
+	var voices := floor_view.find_children("Sfx_hit_biomass", "AudioStreamPlayer3D", true, false)
+	_expect(voices.size() == 1, "Real bullet dispatch plays biomass impact on an opaque wall patch")
+	if not voices.is_empty():
+		var voice := voices[0] as AudioStreamPlayer3D
+		_expect(voice.stream is AudioStreamOggVorbis and voice.stream.resource_path.ends_with("biomass/Thudding_impact_of_b.ogg"), "Biomass uses the owner Vorbis recording")
+		_expect(voice.global_position.distance_to(hit) < 0.03, "Biomass impact sounds at the actual hit")
+	for voice in voices: voice.free()
+	var hole := visual.to_global(Vector3((empty.x - 0.5) * ATLAS.FOOTPRINT.x, 0.5 - empty.y, 0))
+	bullet.call("_handle_hit", wall, hole, Vector3.BACK)
+	bullet.call("_handle_hit", wall, Vector3(2, 0, 0.1), Vector3.BACK)
+	_expect(floor_view.find_children("Sfx_hit_biomass", "AudioStreamPlayer3D", true, false).is_empty(), "Transparent pixels and bare wall stay free of biomass sounds")
+	piece.position.x += 1.5
+	bullet.call("_handle_hit", wall, hit, Vector3.BACK)
+	_expect(floor_view.find_children("Sfx_hit_biomass", "AudioStreamPlayer3D", true, false).is_empty(), "Moving a patch moves its audible coverage immediately")
+	var fused_image := Image.create(4, 4, false, Image.FORMAT_RGBA8)
+	fused_image.fill(Color.TRANSPARENT)
+	for y in 4:
+		for x in 2: fused_image.set_pixel(x, y, Color.RED)
+	var fused_material := preload("res://game/presentation/office_floor/biomass_mesh.gd").material(ImageTexture.create_from_image(fused_image), ATLAS.relief_texture(), Rect2(0, 0, 1, 1))
+	var fused_mesh := preload("res://game/presentation/office_floor/biomass_mesh.gd").grid(Rect2(-1, -0.5, 2, 1), fused_material, 0.05)
+	piece.call("biomass_show_fused", fused_mesh)
+	var fused_hit := visual.to_global(Vector3(-0.8, 0, 0))
+	bullet.call("_handle_hit", wall, fused_hit, Vector3.BACK)
+	voices = floor_view.find_children("Sfx_hit_biomass", "AudioStreamPlayer3D", true, false)
+	_expect(voices.size() == 1, "A fused bridge outside the original cell uses its current silhouette")
+	for voice in voices: voice.free()
+	bullet.call("_handle_hit", wall, visual.to_global(Vector3(0.8, 0, 0)), Vector3.BACK)
+	piece.call("biomass_hide")
+	bullet.call("_handle_hit", wall, fused_hit, Vector3.BACK)
+	_expect(floor_view.find_children("Sfx_hit_biomass", "AudioStreamPlayer3D", true, false).is_empty(), "Fused transparent pixels and hidden members do not sound")
+	piece.free()
+	_expect(not mesh.has_meta(&"biomass_impact_audio"), "Deleting a patch unregisters the receiver")
+	stage.queue_free()
+	await process_frame

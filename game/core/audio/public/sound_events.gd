@@ -73,6 +73,7 @@ const EVENTS := {
 	&"weapon_switch": [2, -4.0, 18.0, 2.5, 0.06, 3],
 	&"glass_break": [4, 1.0, 60.0, 7.0, 0.05, 3],
 	&"flesh_hit": [6, -2.0, 34.0, 4.0, 0.08, 5],
+	&"hit_biomass": [1, -2.0, 34.0, 4.0, 0.02, 4],
 	&"dismember": [2, 1.0, 50.0, 6.0, 0.06, 3],
 	&"body_part_fall": [2, -3.0, 24.0, 3.0, 0.08, 4],
 	&"growl_zombie": [5, -2.0, 34.0, 4.0, 0.06, 3],
@@ -270,6 +271,8 @@ static func play_ui(parent: Node, event: StringName) -> AudioStreamPlayer:
 
 
 static func _event_path(event: StringName, variant: int) -> String:
+	if event == &"hit_biomass":
+		return "res://assets/audio/sfx/biomass/Thudding_impact_of_b.ogg"
 	if event == &"skill_cooldown_done":
 		return "res://assets/audio/sfx/skill_ready/taking_skill.ogg"
 	if event == &"skill_power_strike":
