@@ -36,17 +36,15 @@ func _run() -> void:
 	ZONE.spawn(stage, root.get_world_3d(), Vector3(2.0, 1.2, 0.0), 3.0, 0.3, 1.6)
 	var zone := stage.get_child(stage.get_child_count() - 1) as Node3D
 	var meshes := zone.get_children().filter(func(child: Node) -> bool: return child is MeshInstance3D)
-	_expect(meshes.size() == 2, "The zone is a disc and a ring")
+	_expect(meshes.size() == 1, "The zone is one shaded surface")
 	_expect(absf(zone.global_position.y - ZONE.LIFT) < 0.01 and absf(zone.global_position.x - 2.0) < 0.01, "The zone lies on the floor, not on a desk under the impact (%s)" % zone.global_position)
-	var ring := meshes[1] as MeshInstance3D
-	var disc := meshes[0] as MeshInstance3D
-	_expect(absf((disc.mesh as CylinderMesh).top_radius - 3.0) < 0.001, "The disc has the blast radius")
-	_expect(ring.get_aabb().size.y < 0.2 and ring.get_aabb().size.x > 5.5, "The ring is flat and spans the blast radius")
+	var surface := meshes[0] as MeshInstance3D
+	_expect(surface.get_aabb().size.y < 0.2 and absf(surface.get_aabb().size.x - 6.0) < 0.01, "The surface is flat and spans the blast radius")
 
 	await create_timer(0.1).timeout
-	_expect(is_instance_valid(zone) and disc.transparency > 0.99, "The zone stays hidden before its delay")
+	_expect(is_instance_valid(zone) and _fade(surface) < 0.01, "The zone stays hidden before its delay")
 	await create_timer(0.8).timeout
-	_expect(is_instance_valid(zone) and disc.transparency < 0.01 and ring.transparency < 0.01, "The zone is fully visible after the delay")
+	_expect(is_instance_valid(zone) and _fade(surface) > 0.99, "The zone is fully visible after the delay")
 	await create_timer(1.0).timeout
 	_expect(not is_instance_valid(zone), "The zone removes itself when its lifetime ends")
 
@@ -54,6 +52,10 @@ func _run() -> void:
 	await process_frame
 	print("Floor danger zone tests: %d failure(s)." % failures)
 	quit(failures)
+
+
+func _fade(surface: MeshInstance3D) -> float:
+	return float(surface.get_instance_shader_parameter(&"fade"))
 
 
 func _expect(condition: bool, message: String) -> void:

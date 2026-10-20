@@ -7,18 +7,17 @@ const FADE := 0.25
 const FLOOR_MASK := 7
 const MAX_SURFACES := 8
 const LIFT := 0.03
-const RING_WIDTH := 0.08
-const FILL_COLOR := Color(1.0, 0.32, 0.22, 0.16)
-const RING_COLOR := Color(1.0, 0.35, 0.25, 0.85)
+const SHADER := preload("res://game/features/combat/floor_danger_zone.gdshader")
+
+static var _material: ShaderMaterial
 
 
 ## Puts the zone on the floor under `point` and runs its fade. `lifetime` counts
 ## from spawn to removal, fades included. Callers pass a valid `parent`.
 static func spawn(parent: Node3D, world: World3D, point: Vector3, radius: float, delay: float, lifetime: float) -> void:
 	var zone := Node3D.new()
-	var meshes: Array[MeshInstance3D] = [_disc(radius), _ring(radius)]
-	for mesh in meshes:
-		zone.add_child(mesh)
+	var meshes: Array[MeshInstance3D] = [_surface(radius)]
+	zone.add_child(meshes[0])
 	parent.add_child(zone)
 	zone.global_position = floor_point(world, point) + Vector3.UP * LIFT
 	_set_strength(0.0, meshes)
@@ -46,34 +45,18 @@ static func floor_point(world: World3D, point: Vector3) -> Vector3:
 
 static func _set_strength(strength: float, meshes: Array[MeshInstance3D]) -> void:
 	for mesh in meshes:
-		mesh.transparency = 1.0 - strength
+		mesh.set_instance_shader_parameter(&"fade", strength)
 
 
-static func _disc(radius: float) -> MeshInstance3D:
-	var shape := CylinderMesh.new()
-	shape.top_radius = radius
-	shape.bottom_radius = radius
-	shape.height = 0.01
-	return _instance(shape, FILL_COLOR)
-
-
-static func _ring(radius: float) -> MeshInstance3D:
-	var shape := TorusMesh.new()
-	shape.inner_radius = radius - RING_WIDTH
-	shape.outer_radius = radius
-	shape.rings = 48
-	shape.ring_segments = 8
-	return _instance(shape, RING_COLOR)
-
-
-static func _instance(shape: Mesh, color: Color) -> MeshInstance3D:
+# One quad carries the whole zone; the shader draws the thin ring, the fill and the waves.
+static func _surface(radius: float) -> MeshInstance3D:
+	if _material == null:
+		_material = ShaderMaterial.new()
+		_material.shader = SHADER
+	var plane := PlaneMesh.new()
+	plane.size = Vector2.ONE * radius * 2.0
 	var instance := MeshInstance3D.new()
-	instance.mesh = shape
+	instance.mesh = plane
 	instance.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
-	var material := StandardMaterial3D.new()
-	material.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
-	material.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
-	material.cull_mode = BaseMaterial3D.CULL_DISABLED
-	material.albedo_color = color
-	instance.material_override = material
+	instance.material_override = _material
 	return instance

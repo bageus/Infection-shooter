@@ -10,14 +10,22 @@ instance uniform float fade = 1.0;
 uniform float height = 0.3;
 
 varying float level;
+varying float across;
 
 void vertex() {
 	level = clamp(VERTEX.y / height, 0.0, 1.0);
+	across = length(VERTEX.xz);
 }
 
 void fragment() {
 	float rim = pow(1.0 - clamp(abs(dot(NORMAL, VIEW)), 0.0, 1.0), 2.5);
-	float edge = 1.0 - smoothstep(0.0, 0.12, level);
-	ALBEDO = mix(tint.rgb, vec3(1.0), edge * 0.35);
-	ALPHA = clamp((0.07 + rim * 0.3 + edge * 0.45) * fade, 0.0, 1.0);
+	// A thin bright line where the dome meets the floor, a soft glow above it.
+	float edge = 1.0 - smoothstep(0.0, 0.035, level);
+	float glow = 1.0 - smoothstep(0.0, 0.2, level);
+	// Waves running out from the centre over the dome.
+	float phase = fract(across * 1.5 - TIME * 0.5);
+	float wave = smoothstep(0.0, 0.1, phase) * (1.0 - smoothstep(0.1, 0.45, phase));
+	wave *= smoothstep(0.05, 0.3, across) * (1.0 - smoothstep(0.75, 1.0, across)) * 0.16;
+	ALBEDO = mix(tint.rgb, vec3(1.0), edge * 0.5);
+	ALPHA = clamp((0.05 + rim * 0.25 + glow * 0.12 + wave + edge * 0.7) * fade, 0.0, 1.0);
 }
