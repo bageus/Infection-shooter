@@ -1,0 +1,226 @@
+extends Node
+## Automatic fitting of planner biomass (ADR-0061). Every biomass decal owns one
+## of these. Pieces that share a surface and touch each other are grouped; the
+## first piece of a group draws the whole group as one fused mass and the others
+## hide, so adjacent pieces read as a single body. Fusion runs on a worker
+## thread, and a piece that moves shows its own relief until it settles.
+
+const ATLAS := preload("res://game/presentation/office_floor/biomass_atlas.gd")
+const FUSION := preload("res://game/presentation/office_floor/biomass_fusion.gd")
+const MESH := preload("res://game/presentation/office_floor/biomass_mesh.gd")
+
+## Seconds a piece must rest before the group is refitted.
+const SETTLE := 0.35
+## Pieces closer than this (metres, in the surface plane) count as touching.
+const JOIN_GAP := 0.12
+const PLANE_TOLERANCE := 0.04
+const NORMAL_DOT := 0.97
+const TARGET_PPU := 450.0
+
+var piece: Node3D
+var shown_signature := 0
+var _last_transform := Transform3D()
+var _wait := 0.05
+var _members: Array[WeakRef] = []
+var _task := -1
+var _job: Dictionary = {}
+var _queued: Dictionary = {}
+
+
+func _ready() -> void:
+	piece = get_parent() as Node3D
+	_last_transform = piece.global_transform
+
+
+func _process(delta: float) -> void:
+	if piece == null or not piece.is_inside_tree():
+		return
+	var current := piece.global_transform
+	if not current.is_equal_approx(_last_transform):
+		_last_transform = current
+		_wait = SETTLE
+		show_own_relief()
+	if _wait >= 0.0:
+		_wait -= delta
+		if _wait < 0.0:
+			_fit_neighbours()
+	_collect_job()
+
+
+func _exit_tree() -> void:
+	_release_members()
+	if _task >= 0:
+		WorkerThreadPool.wait_for_task_completion(_task)
+		_task = -1
+
+
+# Restores the piece's own cell and wakes anything it hid.
+func show_own_relief() -> void:
+	shown_signature = 0
+	_queued = {}
+	_release_members()
+	piece.call("biomass_show_cell")
+
+
+func release() -> void:
+	_wait = 0.05
+	shown_signature = 0
+	piece.call("biomass_show_cell")
+
+
+func _release_members() -> void:
+	for reference in _members:
+		var other := reference.get_ref() as Node
+		if other != null and is_instance_valid(other) and other != piece and other.has_node("BiomassFit"):
+			other.get_node("BiomassFit").call("release")
+	_members.clear()
+
+
+func _fit_neighbours() -> void:
+	var parent := piece.get_parent()
+	if parent == null:
+		return
+	var frame := Engine.get_process_frames()
+	if int(parent.get_meta("biomass_fit_frame", -1)) == frame:
+		return
+	parent.set_meta("biomass_fit_frame", frame)
+	var pieces: Array[Node3D] = []
+	for child in parent.get_children():
+		if child.has_meta("biomass_piece") and (child as Node3D).is_inside_tree() and not bool(child.call("biomass_excluded")):
+			pieces.append(child as Node3D)
+	for group in _groups(pieces):
+		_fit_group(group)
+
+
+# Pieces on one surface that touch, as arrays in scene order.
+func _groups(pieces: Array[Node3D]) -> Array:
+	var parents := range(pieces.size())
+	for i in pieces.size():
+		for j in range(i + 1, pieces.size()):
+			if _touching(pieces[i], pieces[j]):
+				var root_i: int = _root(parents, i)
+				var root_j: int = _root(parents, j)
+				if root_i != root_j:
+					parents[maxi(root_i, root_j)] = mini(root_i, root_j)
+	var by_root := {}
+	for index in pieces.size():
+		var root_index := _root(parents, index)
+		if not by_root.has(root_index):
+			by_root[root_index] = []
+		by_root[root_index].append(pieces[index])
+	return by_root.values()
+
+
+func _root(parents: Array, index: int) -> int:
+	while parents[index] != index:
+		index = parents[index]
+	return index
+
+
+func _touching(a: Node3D, b: Node3D) -> bool:
+	var frame_a: Transform3D = a.call("biomass_frame")
+	var frame_b: Transform3D = b.call("biomass_frame")
+	if a.call("get_blood_attachment") != b.call("get_blood_attachment"):
+		return false
+	var normal := frame_a.basis.z.normalized()
+	if normal.dot(frame_b.basis.z.normalized()) < NORMAL_DOT:
+		return false
+	if absf(normal.dot(frame_b.origin - frame_a.origin)) > PLANE_TOLERANCE:
+		return false
+	var scale_a := maxf(frame_a.basis.x.length(), 0.001)
+	var other := _plane_transform(frame_a.affine_inverse() * frame_b)
+	var polygon_a := _footprint(Transform2D.IDENTITY)
+	var polygon_b := Geometry2D.offset_polygon(_footprint(other), JOIN_GAP / scale_a)
+	if polygon_b.is_empty():
+		return false
+	return not Geometry2D.intersect_polygons(polygon_a, polygon_b[0]).is_empty()
+
+
+static func _footprint(xform: Transform2D) -> PackedVector2Array:
+	var half := ATLAS.FOOTPRINT * 0.5
+	return PackedVector2Array([xform * Vector2(-half.x, -half.y), xform * Vector2(half.x, -half.y), xform * Vector2(half.x, half.y), xform * Vector2(-half.x, half.y)])
+
+
+static func _plane_transform(local: Transform3D) -> Transform2D:
+	return Transform2D(Vector2(local.basis.x.x, local.basis.x.y), Vector2(local.basis.y.x, local.basis.y.y), Vector2(local.origin.x, local.origin.y))
+
+
+func _fit_group(group: Array) -> void:
+	var leader: Node3D = group[0]
+	var leader_fit: Node = leader.get_node("BiomassFit")
+	if group.size() == 1:
+		if int(leader_fit.shown_signature) != 0:
+			leader_fit.show_own_relief()
+		return
+	var leader_frame: Transform3D = leader.call("biomass_frame")
+	var inverse := leader_frame.affine_inverse()
+	var members: Array = []
+	var signature: Array = []
+	var others: Array[WeakRef] = []
+	for piece_node: Node3D in group:
+		var xform := _plane_transform(inverse * (piece_node.call("biomass_frame") as Transform3D))
+		var cell: int = piece_node.call("biomass_cell")
+		members.append({"cell": cell, "xform": xform})
+		signature.append([cell, snappedf(xform.x.x, 0.001), snappedf(xform.x.y, 0.001), snappedf(xform.y.x, 0.001), snappedf(xform.y.y, 0.001), snappedf(xform.origin.x, 0.001), snappedf(xform.origin.y, 0.001)])
+		if piece_node != leader:
+			others.append(weakref(piece_node))
+			var fit: Node = piece_node.get_node("BiomassFit")
+			if int(fit.shown_signature) != 0 or not fit._members.is_empty():
+				fit.show_own_relief()
+	var key := hash(signature)
+	leader_fit.call("adopt", others, members, key)
+
+
+# Called on the group's first piece with the pieces it speaks for.
+func adopt(others: Array[WeakRef], members: Array, key: int) -> void:
+	var fresh: Array[WeakRef] = []
+	for reference in _members:
+		var old := reference.get_ref() as Node
+		var kept := false
+		for candidate in others:
+			if candidate.get_ref() == old:
+				kept = true
+		if not kept and old != null and old.has_node("BiomassFit"):
+			old.get_node("BiomassFit").call("release")
+	fresh.append_array(others)
+	_members = fresh
+	if key == shown_signature or key == int(_job.get("key", 0)) or key == int(_queued.get("key", 0)):
+		return
+	var job := {"members": members, "key": key}
+	if _task >= 0:
+		_queued = job
+	else:
+		_start(job)
+
+
+func _start(job: Dictionary) -> void:
+	_job = job
+	var members: Array = job["members"]
+	var albedo := ATLAS.albedo_bytes()
+	var relief := ATLAS.relief_bytes()
+	var output := _job
+	_task = WorkerThreadPool.add_task(func() -> void: output["result"] = FUSION.fuse(members, albedo, relief, TARGET_PPU))
+
+
+func _collect_job() -> void:
+	if _task < 0 or not WorkerThreadPool.is_task_completed(_task):
+		return
+	WorkerThreadPool.wait_for_task_completion(_task)
+	_task = -1
+	var finished := _job
+	_job = {}
+	if not _queued.is_empty():
+		var next := _queued
+		_queued = {}
+		_start(next)
+	var result: Dictionary = finished.get("result", {})
+	if result.is_empty() or not is_instance_valid(piece):
+		return
+	if _members.is_empty():
+		return
+	shown_signature = int(finished["key"])
+	piece.call("biomass_show_fused", MESH.fused_patch(result))
+	for reference in _members:
+		var other := reference.get_ref() as Node3D
+		if other != null and is_instance_valid(other):
+			other.call("biomass_hide")

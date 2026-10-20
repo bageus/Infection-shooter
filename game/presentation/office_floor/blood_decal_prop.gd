@@ -5,6 +5,9 @@ extends Node3D
 ## every renderer and is selectable in the planner like other objects.
 
 const LIBRARY := preload("res://game/presentation/office_floor/blood_texture_library.gd")
+const BIOMASS := preload("res://game/presentation/office_floor/biomass_atlas.gd")
+const BIOMASS_MESH := preload("res://game/presentation/office_floor/biomass_mesh.gd")
+const BIOMASS_FIT := preload("res://game/presentation/office_floor/biomass_fit.gd")
 const FLOOR_OFFSET := 0.002
 
 ## Texture id "<category>_<variant>", e.g. "splatter_03".
@@ -83,11 +86,14 @@ func _process(_delta: float) -> void:
 	_last_anchor_transform = anchor.global_transform
 	_project_surface()
 	if _visual != null:
-		_visual.visible = anchor.is_visible_in_tree()
+		_visual.visible = anchor.is_visible_in_tree() and not _biomass_hidden
 
 
 static var _library: RefCounted
 var _visual: MeshInstance3D
+var _fit: Node
+var _fused := false
+var _biomass_hidden := false
 
 
 func _init() -> void:
@@ -119,6 +125,13 @@ func _rebuild() -> void:
 	set_meta("planning_free_place", true)
 	if _visual != null:
 		_visual.queue_free()
+	if BIOMASS.is_biomass_id(texture_name):
+		_rebuild_biomass()
+		return
+	remove_meta("biomass_piece")
+	if _fit != null:
+		_fit.queue_free()
+		_fit = null
 	var entry := texture_entry(texture_name)
 	_visual = MeshInstance3D.new()
 	_visual.name = "BloodQuad"
@@ -173,6 +186,8 @@ static func texture_ids() -> PackedStringArray:
 
 
 func _project_surface() -> void:
+	if BIOMASS.is_biomass_id(texture_name):
+		return
 	if not _projection_dirty and global_transform.is_equal_approx(_projection_transform) and _visual.mesh is ArrayMesh and not _receivers_changed():
 		return
 	_projection_dirty = false
@@ -214,3 +229,62 @@ func _receivers_changed() -> bool:
 		if not source.global_transform.is_equal_approx(receiver["transform"]):
 			return true
 	return false
+
+
+# Volumetric biomass (ADR-0061): a relief patch that rises off the surface and
+# fuses with touching biomass pieces through its BiomassFit child.
+func _rebuild_biomass() -> void:
+	set_meta("biomass_piece", true)
+	_footprint = BIOMASS.FOOTPRINT
+	_visual = MeshInstance3D.new()
+	_visual.name = "BloodQuad"
+	_visual.set_meta("surface_mark", true)
+	_visual.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+	_visual.mesh = BIOMASS_MESH.cell_patch(BIOMASS.cell_of(texture_name))
+	_fused = false
+	_apply_surface()
+	add_child(_visual)
+	if _fit == null:
+		_fit = BIOMASS_FIT.new()
+		_fit.name = "BiomassFit"
+		add_child(_fit)
+	else:
+		_fit.call("show_own_relief")
+
+
+func biomass_cell() -> int:
+	return BIOMASS.cell_of(texture_name)
+
+
+# World transform of the patch's own plane (x right, y up, z out of the surface).
+func biomass_frame() -> Transform3D:
+	return _visual.global_transform
+
+
+func biomass_excluded() -> bool:
+	return _visual == null or not is_visible_in_tree()
+
+
+func biomass_show_cell() -> void:
+	if _visual == null:
+		return
+	if _fused:
+		_visual.mesh = BIOMASS_MESH.cell_patch(biomass_cell())
+		_fused = false
+	_biomass_hidden = false
+	_visual.visible = true
+
+
+func biomass_show_fused(mesh: Mesh) -> void:
+	if _visual == null:
+		return
+	_visual.mesh = mesh
+	_biomass_hidden = false
+	_visual.visible = true
+	_fused = true
+
+
+func biomass_hide() -> void:
+	_biomass_hidden = true
+	if _visual != null:
+		_visual.visible = false

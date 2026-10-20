@@ -10,6 +10,8 @@ const BLOOD_DECAL_SCENE := "res://game/presentation/office_floor/public/props/bl
 # Texture ids of the in-game blood set ("<category>_<variant>"), see planner_decor_v1.
 const BLOOD_CATEGORIES := ["splatter", "stain", "smear", "pool", "drops"]
 # Frames per category in the blood atlases (blood_texture_library.gd).
+# Relief cells in the biomass atlas (biomass_atlas.gd).
+const BIOMASS_VARIANTS := 6
 const BLOOD_VARIANTS := {"splatter": 9, "stain": 9, "smear": 9, "pool": 8, "drops": 9}
 
 var bind_asset: Callable
@@ -111,6 +113,17 @@ func blood_catalog() -> Array:
 		for variant in range(1, int(BLOOD_VARIANTS[category]) + 1):
 			var texture_id := "%s_%02d" % [category, variant]
 			entries.append({"name": "Blood " + texture_id.replace("_", " "), "path": BLOOD_DECAL_SCENE, "kind": "blood", "blood_texture": texture_id})
+	entries.append_array(biomass_catalog())
+	return entries
+
+
+# Volumetric biomass patches (ADR-0061). They are blood decals with a relief, so
+# they share the blood options, the saved record and the surface probes.
+func biomass_catalog() -> Array:
+	var entries: Array = []
+	for variant in range(1, BIOMASS_VARIANTS + 1):
+		var texture_id := "biomass_%02d" % variant
+		entries.append({"name": "Biomass %02d" % variant, "path": BLOOD_DECAL_SCENE, "kind": "blood", "blood_texture": texture_id})
 	return entries
 
 

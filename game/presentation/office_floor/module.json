@@ -88,6 +88,11 @@
       "attachment": "attach_blood(anchor, stable_owner_id), configure_blood_attachment({owner, mesh}), get_blood_attachment(); follows mesh, hides on destruction; restored by bootstrap using stable object id",
       "configure_projection": "configure_projection(anchor: Node3D) -> void; clipped multi-receiver blood in every renderer, optional mission-wiring collaborator"
     },
+    "biomass_decor_v1": {
+      "texture": "configure_blood(\"biomass_01\"..\"biomass_06\", surface) makes a volumetric relief patch; saved, undone and probed like any blood decal",
+      "fitting": "Touching biomass siblings on one surface fuse into a single mass drawn by the first piece; fusion runs on a worker thread, moving pieces show their own relief until they settle 0.35 s",
+      "internals": "biomass_atlas/fusion/fit/mesh and biomass_surface.gdshader are private"
+    },
     "damage_particles_v1": {
       "configure_damage_particles": "configure_damage_particles(enabled: bool) -> void; repeated electronics sparks only"
     },
