@@ -59,9 +59,27 @@ static func spike_burst(parent: Node, center: Vector3, radius: float) -> Node3D:
 		pivot.scale = Vector3.ONE * 0.001
 		spikes.append(pivot)
 		timing.append(Vector2(distance / radius * 0.07, length))
-	var drops := _droplets(fx, 14, radius * 1.4, Color(0.45, 0.02, 0.04), Color(0.5, 0.0, 0.02))
+	var drops := _droplets(fx, 30, radius * 1.6, Color(0.45, 0.02, 0.04), Color(0.5, 0.0, 0.02))
+	var flash := _billboard(fx, _puff_material("flash"), 0.01)
+	flash.position.y = 0.5
+	var mist: Array[MeshInstance3D] = []
+	for i in 6:
+		var puff := _billboard(fx, _puff_material("blood_mist"), 0.01)
+		var angle := TAU * i / 6.0 + randf_range(-0.3, 0.3)
+		puff.position = Vector3(cos(angle), 0.0, sin(angle)) * radius * randf_range(0.3, 0.7) + Vector3.UP * randf_range(0.3, 0.7)
+		puff.set_meta(&"y", puff.position.y)
+		puff.set_instance_shader_parameter(&"seed", randf() * 10.0)
+		mist.append(puff)
 	fx.step = func(age: float, fade: float) -> void:
 		var progress := age / SPIKE_LIFE
+		var pop := clampf(age / 0.12, 0.0, 1.0)
+		flash.scale = Vector3.ONE * radius * 0.9 * (0.3 + pop)
+		flash.set_instance_shader_parameter(&"progress", minf(age / 0.2, 1.0) * 0.6)
+		flash.visible = age < 0.2
+		for puff in mist:
+			puff.scale = Vector3.ONE * radius * 0.55 * (1.0 - pow(1.0 - minf(progress * 1.4, 1.0), 2.0))
+			puff.position.y = float(puff.get_meta(&"y")) + 0.4 * age
+			puff.set_instance_shader_parameter(&"progress", progress)
 		stain.set_instance_shader_parameter(&"progress", progress)
 		shock.set_instance_shader_parameter(&"progress", minf(progress * 1.5, 1.0))
 		for i in spikes.size():
@@ -117,15 +135,21 @@ static func chain_lightning(parent: Node, points: Array[Vector3]) -> Node3D:
 		return null
 	var bolts := RIBBONS.new(fx, _ribbon_material("lightning"))
 	var sparks: Array[MeshInstance3D] = []
+	var scorches: Array[MeshInstance3D] = []
 	for i in range(1, points.size()):
-		var spark := _billboard(fx, _puff_material("spark"), 0.9)
+		var spark := _billboard(fx, _puff_material("spark"), 1.4)
 		spark.global_position = points[i] + Vector3.UP * 1.0
 		sparks.append(spark)
+		var scorch := _plane(fx, 0.9, _ring_material("electric"))
+		scorch.global_position = points[i] + Vector3.UP * 0.03
+		scorches.append(scorch)
 	var state := {"next": 0.0}
 	fx.step = func(age: float, fade: float) -> void:
 		var progress := age / 0.42
 		for spark in sparks:
 			spark.set_instance_shader_parameter(&"progress", progress)
+		for scorch in scorches:
+			scorch.set_instance_shader_parameter(&"progress", progress)
 		if age < state["next"]:
 			return
 		state["next"] = age + 0.045
@@ -136,6 +160,10 @@ static func chain_lightning(parent: Node, points: Array[Vector3]) -> Node3D:
 			var to := points[i + 1] + Vector3.UP * 1.0
 			bolts.add_bolt(from, to, 0.16, 0.28, flicker)
 			bolts.add_bolt(from, to, 0.06, 0.45, flicker * 0.6)
+			# A short fork leaves the main arc at a random point.
+			var split := from.lerp(to, randf_range(0.25, 0.75))
+			var fork := split + Vector3(randf_range(-1.0, 1.0), randf_range(-0.5, 0.5), randf_range(-1.0, 1.0)).normalized() * 0.9
+			bolts.add_bolt(split, fork, 0.07, 0.4, flicker * 0.7)
 		bolts.commit()
 	return fx
 
@@ -435,6 +463,8 @@ static func _puff_material(kind: String) -> ShaderMaterial:
 	var params: Dictionary = {
 		"spores": {"color": Color(0.5, 0.8, 0.22), "glow": 0.2},
 		"spark": {"color": Color(0.55, 0.85, 1.0), "glow": 1.0},
+		"flash": {"color": Color(1.0, 0.55, 0.4), "glow": 1.0},
+		"blood_mist": {"color": Color(0.5, 0.03, 0.05), "glow": 0.1},
 	}[kind]
 	return _material("puff_" + kind, PUFF_SHADER, params)
 
