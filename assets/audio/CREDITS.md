@@ -358,3 +358,8 @@ Glass crunch recordings the_crunch_of_glass__1–4 and roll recording The_heavy_
 
 
 20.10.2026: Thudding_impact_of_b предоставлен владельцем в Git188b0b1 для попаданий в настенную биомассу. Проверенный mono48кГц Vorbisq5, длительность2с сохранена; WAV удалён по запросу. SHA256 и параметры в glass_audio_processing.json. Лицензии сторонних записей этому файлу не назначаются.
+
+
+## Авторская музыка Hold / Threat — 20.10.2026
+
+Владелец добавил tower_hold_1.wav и tower_threat_1.wav и запросил конверсию в stereo48kHz Vorbisq5 с удалением проверенных WAV. Hold обрезан до56с, Threat сохраняет30с вступления с повтором тела. server_oper_active.ogg — производная существующего server_oper.ogg без20/10с тишины. SHA256, точные длительности и loop offsets — mission_music_processing.json; источники доступны в parent PR. Старые лицензии сторонних SFX новым авторским записям не назначаются.
