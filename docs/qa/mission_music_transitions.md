@@ -27,3 +27,6 @@ Actions39482802949 полностью SUCCESS: decode/SHA/duration receipt, vali
 
 
 20.10.2026 — loop fix проверен: validate_project (spec/workflow/architecture/source-size/CI coverage) PASS, conversion receipt/decode/SHA PASS, чистый Godot4.7.2 import без ERROR, adaptive_audio и music_shutdown0failures, diff-check PASS. Native wrap проверит существующий Actions job; локального display/Xvfb нет, субъективное прослушивание не выполнено. Следующее действие: review PR исправления петли и native CI; T004 IN_PROGRESS, merge не поручен.
+
+
+21.10.2026 — PR400 CI repair (T004/IMPLEMENTATION, Phase1/P1_LOGIC): Architecture39492262408 и runtime39492262389 падают на одном resource-path gate: после конверсии остались tower_hold_1.wav.import и tower_threat_1.wav.import без WAV. Музыкальный workflow39492262387, включая native wrap, SUCCESS; все7 rendering jobs SUCCESS. Удалены только2 устаревших sidecar, process_mission_music --check теперь отклоняет оставшийся sidecar удалённого WAV (воспроизведён FAIL до удаления и PASS после). PASS: readiness/project gates,384scene refs,resource paths,export audit,18audio-tool tests,conversion/decode/SHA. Runtime/gameplay/OGG/API/DTO/owners/dependencies прежние, архитектурных исключений нет. Следующее действие: опубликовать исправление в ту же ветку PR400 и проверить новый CI; merge не поручен.

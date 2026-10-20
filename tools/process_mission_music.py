@@ -90,6 +90,8 @@ def check():
         assert abs(len(decode(target))/RATE-row["output_seconds"]) < .01
         if row["source"].endswith(".wav"):
             assert not (ROOT / row["source"]).exists()
+            sidecar = ROOT / (row["source"] + ".import")
+            assert not sidecar.exists(), f"Stale WAV import sidecar: {sidecar}"
     assert not list(MUSIC.glob("*.wav"))
     print(json.dumps(data, indent=2))
     print("Mission music conversions verified.")
