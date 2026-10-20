@@ -14,6 +14,13 @@ const DOME := preload("res://game/features/player/range_dome.gd")
 const DASH_ZONE := preload("res://game/features/player/dash_floor_zone.gd")
 const GRENADE := preload("res://game/features/combat/grenade_explosion_v1.tscn")
 const EXTINGUISHER := preload("res://game/presentation/office_floor/extinguisher_burst.tscn")
+const MUZZLE := preload("res://game/features/combat/muzzle_flash.tscn")
+const BULLET_SMOKE := preload("res://game/features/combat/bullet_impact_smoke.gd")
+const BLOOD_DRIP := preload("res://game/features/infected/blood_drip_fx.gd")
+const SPARKS := preload("res://game/presentation/office_floor/electric_sparks.gd")
+const WATER := preload("res://game/presentation/office_floor/water_spray.gd")
+const STATUS := preload("res://game/features/infected/infected_status_fx.gd")
+const VITALS := preload("res://game/presentation/prototype_hud/vitals_screen_fx.gd")
 const CLOUD := preload("res://game/features/infection_source/public/mutagen_cloud.tscn")
 const EYE := Vector3(10, 12, 10) * 0.45
 const TARGETS := [Vector3(1.6, 0, 1.2), Vector3(3.4, 0, -0.6), Vector3(1.0, 0, -3.0)]
@@ -34,6 +41,12 @@ var _camera: Camera3D
 var _enemies: Array[Node3D] = []
 var _casts := {}
 var _last := ""
+## Effects the game spawns into the mission world look for this container.
+var effects_root: Node3D
+var _vitals: Control
+var _screen := {"health": 100.0, "mutation": 0.0}
+var _screen_left := 0.0
+var _smoke: Node3D
 var _heal: Node3D
 var _runtime: Runtime
 var _berserk := false
@@ -43,6 +56,7 @@ var _timer := 0.0
 
 
 func _ready() -> void:
+	effects_root = self
 	_build_stage()
 	_vfx = VFX.new()
 	_player.add_child(_vfx)
@@ -61,11 +75,18 @@ func _ready() -> void:
 		"Берсерк": _rage, "Зона на полу": _zone, "Лечение": _medkit,
 		"Антидот": _antidote, "Мутаген": _mutagen,
 		"Граната": _grenade, "Огнетушитель": _extinguisher,
+		"Вспышка выстрела": _muzzle, "Пуля в стену": _bullet, "Брызги крови": _blood_spray,
+		"Искры": _sparks, "Брызги воды": _water, "Оглушение": _stun, "Отравление": _poison,
+		"Экран: мало здоровья": _low_health, "Экран: мутаген": _mutagen_screen,
 	}
 	_build_ui()
 
 
 func _process(delta: float) -> void:
+	_screen_left -= delta
+	if _screen_left <= 0.0:
+		_screen = {"health": 100.0, "mutation": 0.0}
+	_vitals.call("update", delta, _screen["mutation"], 100.0, false, _screen["health"], 100.0)
 	var zoom := _player.camera_state.tick(delta)
 	_camera.position = EYE.normalized() * EYE.length() * (1.0 + zoom) + Vector3(0, 0.6, 0)
 	_camera.look_at(Vector3(0, 0.6, 0), Vector3.UP)
@@ -146,6 +167,60 @@ func _extinguisher() -> void:
 	get_tree().create_timer(6.0).timeout.connect(burst.queue_free)
 
 
+func _muzzle() -> void:
+	var nozzle := Node3D.new()
+	add_child(nozzle)
+	nozzle.position = Vector3(0, 1.2, -0.4)
+	var flash := MUZZLE.instantiate()
+	nozzle.add_child(flash)
+	get_tree().create_timer(1.0).timeout.connect(nozzle.queue_free)
+
+
+func _bullet() -> void:
+	if _smoke == null:
+		_smoke = BULLET_SMOKE.new()
+		add_child(_smoke)
+	for enemy in _enemies:
+		_smoke.call("puff", enemy.global_position + Vector3(0, 1.1, 0), Vector3(-1, 0.3, 0.5))
+
+
+func _blood_spray() -> void:
+	var point := _enemies[0].global_position + Vector3(0, 1.1, 0)
+	BLOOD_DRIP.spray(self, point, Vector3(-1, 0.2, 0.3), 40, 4.0)
+	BLOOD_DRIP.bleed(_enemies[0], Vector3(0, 1.1, 0), Vector3.DOWN, 1.5, 0.8)
+
+
+func _sparks() -> void:
+	SPARKS.short_circuit(self, Vector3(2, 1.0, 0), Vector3.UP)
+	SPARKS.spawn(self, Vector3(-2, 1.0, 0), true)
+
+
+func _water() -> void: WATER.spawn(self, Vector3(0, 2.2, -2.5))
+
+
+func _stun() -> void: _status().stunned(3.0)
+func _poison() -> void: _status().poisoned(3.0)
+
+
+func _status() -> Node:
+	var node := _enemies[0].get_node_or_null("StatusFx")
+	if node == null:
+		node = STATUS.new()
+		_enemies[0].add_child(node)
+		node.call("setup", _enemies[0], _enemies[0], 1.8)
+	return node
+
+
+func _low_health() -> void:
+	_screen = {"health": 12.0, "mutation": 0.0}
+	_screen_left = 3.5
+
+
+func _mutagen_screen() -> void:
+	_screen = {"health": 100.0, "mutation": 95.0}
+	_screen_left = 3.5
+
+
 func _discharge() -> void:
 	var points: Array[Vector3] = [Vector3.ZERO]
 	for enemy in _enemies:
@@ -210,9 +285,17 @@ func _capsule(color: Color, textured := false) -> MeshInstance3D:
 func _build_ui() -> void:
 	var layer := CanvasLayer.new()
 	add_child(layer)
+	_vitals = VITALS.new()
+	layer.add_child(_vitals)
+	var scroll := ScrollContainer.new()
+	scroll.set_anchors_and_offsets_preset(Control.PRESET_LEFT_WIDE)
+	scroll.offset_left = 12.0
+	scroll.offset_top = 12.0
+	scroll.offset_bottom = -12.0
+	scroll.offset_right = 210.0
+	layer.add_child(scroll)
 	var panel := VBoxContainer.new()
-	panel.position = Vector2(12, 12)
-	layer.add_child(panel)
+	scroll.add_child(panel)
 	var quality := OptionButton.new()
 	for item in ["Качество: низкое", "Качество: среднее", "Качество: высокое"]:
 		quality.add_item(item)
