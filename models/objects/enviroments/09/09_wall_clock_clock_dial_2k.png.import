@@ -3,10 +3,9 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://dpcda383vnuyy"
-path.s3tc="res://.godot/imported/09_wall_clock_clock_dial_2k.png-79ba445542902b38275f8884f78863ff.s3tc.ctex"
+path="res://.godot/imported/09_wall_clock_clock_dial_2k.png-79ba445542902b38275f8884f78863ff.ctex"
 metadata={
-"imported_formats": ["s3tc_bptc"],
-"vram_texture": true
+"vram_texture": false
 }
 generator_parameters={
 "md5": "5ac489b5542900b51fdd3924f9ca10f3"
@@ -15,11 +14,11 @@ generator_parameters={
 [deps]
 
 source_file="res://models/objects/enviroments/09/09_wall_clock_clock_dial_2k.png"
-dest_files=["res://.godot/imported/09_wall_clock_clock_dial_2k.png-79ba445542902b38275f8884f78863ff.s3tc.ctex"]
+dest_files=["res://.godot/imported/09_wall_clock_clock_dial_2k.png-79ba445542902b38275f8884f78863ff.ctex"]
 
 [params]
 
-compress/mode=2
+compress/mode=4
 compress/high_quality=false
 compress/lossy_quality=0.7
 compress/uastc_level=0
@@ -41,4 +40,4 @@ process/normal_map_invert_y=false
 process/hdr_as_srgb=false
 process/hdr_clamp_exposure=false
 process/size_limit=1024
-detect_3d/compress_to=2
+detect_3d/compress_to=0
