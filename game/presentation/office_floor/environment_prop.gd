@@ -472,7 +472,7 @@ func _trigger_extinguisher(hit_position: Vector3, direction: Vector3) -> void:
 
 func _on_extinguisher_ruptured(location: Vector3) -> void:
 	_floor_debris.emit(self, model_path, "rupture", location, Vector3.UP)
-	BLAST.detonate(self, location, 5.0, false)
+	BLAST.detonate(self, location, BLAST.EXTINGUISHER_RADIUS, false)
 	_visual.hide()
 	collision_layer = 0
 	queue_free()

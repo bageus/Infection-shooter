@@ -1,7 +1,9 @@
 extends RefCounted
 const SURFACE_ATLASES := preload("res://game/core/vfx/public/surface_atlases.gd")
 
-const RADIUS := 5.5
+const RADIUS := 4.0
+const OBJECT_DAMAGE := 380.0 # Full-strength hit on a prop; scaled by distance falloff and power.
+const CREATURE_DAMAGE := 155.0
 const MOUNT_CLEARANCE := 0.35
 const QUERY_BATCH := 64
 const MAX_QUERY_PASSES := 24
@@ -79,29 +81,42 @@ static func explode(projectile: Node3D, location: Vector3, normal: Vector3, cont
 		# Walls shelter whoever stands behind them.
 		if collider != contact and is_sheltered(projectile.get_world_3d(), location + normal * 0.25, body):
 			continue
-		var distance := _distance_to_shape(collider, int(hit.get("shape", -1)), location, body.global_position)
+		var distance := distance_to_shape(collider, int(hit.get("shape", -1)), location, body.global_position)
 		var factor := pow(1.0 - clampf(distance / RADIUS, 0.0, 1.0), 1.15) * power
 		var direction := (body.global_position - location).normalized()
 		if direction.length_squared() < 0.01:
 			direction = Vector3.UP
-		if collider.has_method("take_projectile_hit_at_shape"):
-			collider.call("take_projectile_hit_at_shape", 380.0 * factor, location, -direction, direction, "GRENADE", int(hit.get("shape", -1)))
-		elif collider.has_method("take_projectile_hit"):
-			collider.call("take_projectile_hit", 380.0 * factor, location, -direction, direction, "GRENADE")
-		elif collider.has_method("take_blast_damage"):
-			# Infected: tears limbs away from the blast centre.
-			collider.call("take_blast_damage", 155.0 * factor, location)
-		elif collider.has_method("apply_blast_stun"):
-			collider.call("take_damage", 155.0 * factor, "fire") # the player: elemental (Hardened Tissue)
-		elif collider.has_method("take_damage"):
-			collider.call("take_damage", 155.0 * factor)
-		if collider is RigidBody3D and not (collider as RigidBody3D).freeze:
-			(collider as RigidBody3D).apply_central_impulse(direction * (2.0 + 5.0 * factor))
+		if not hit_object(collider, int(hit.get("shape", -1)), location, direction, factor):
+			if collider.has_method("take_blast_damage"):
+				# Infected: tears limbs away from the blast centre.
+				collider.call("take_blast_damage", CREATURE_DAMAGE * factor, location)
+			elif collider.has_method("apply_blast_stun"):
+				collider.call("take_damage", CREATURE_DAMAGE * factor, "fire") # the player: elemental (Hardened Tissue)
+			elif collider.has_method("take_damage"):
+				collider.call("take_damage", CREATURE_DAMAGE * factor)
+		push_body(collider, direction, factor)
 		if collider.has_method("apply_blast_stun") and float(collider.get("health")) > 0.0:
 			collider.call("apply_blast_stun", 3.0 + 2.0 * factor, factor)
 	if contact != null and (not contact.has_method("take_projectile_hit") or contact.has_method("get_projectile_material") and str(contact.call("get_projectile_material")) in ["concrete", "metal"]):
 		_scorch(scene, location, normal, impacts, contact as Node3D)
 	scorch_surroundings(projectile.get_world_3d(), scene, location, impacts)
+
+
+## The one way a blast hurts a destructible object, for grenades and the extinguisher alike, so
+## it always goes through the prop's own break staging. False when the body takes no object hit.
+static func hit_object(collider: Object, shape: int, location: Vector3, direction: Vector3, factor: float) -> bool:
+	if collider.has_method("take_projectile_hit_at_shape"):
+		collider.call("take_projectile_hit_at_shape", OBJECT_DAMAGE * factor, location, -direction, direction, "GRENADE", shape)
+		return true
+	if collider.has_method("take_projectile_hit"):
+		collider.call("take_projectile_hit", OBJECT_DAMAGE * factor, location, -direction, direction, "GRENADE")
+		return true
+	return false
+
+
+static func push_body(collider: Object, direction: Vector3, factor: float) -> void:
+	if collider is RigidBody3D and not (collider as RigidBody3D).freeze:
+		(collider as RigidBody3D).apply_central_impulse(direction * (2.0 + 5.0 * factor))
 
 
 ## Radial blast marks on the structure around a point; grenades and extinguisher bursts share it.
@@ -140,7 +155,7 @@ static func _receives_blast(body: Node3D) -> bool:
 	return false
 
 
-static func _distance_to_shape(collider: Object, shape_index: int, location: Vector3, fallback: Vector3) -> float:
+static func distance_to_shape(collider: Object, shape_index: int, location: Vector3, fallback: Vector3) -> float:
 	if collider is CollisionObject3D and shape_index >= 0:
 		var physics_body := collider as CollisionObject3D
 		var owner := physics_body.shape_owner_get_owner(physics_body.shape_find_owner(shape_index)) as CollisionShape3D
