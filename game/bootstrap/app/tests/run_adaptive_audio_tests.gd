@@ -17,6 +17,7 @@ func _initialize() -> void:
 
 func _run() -> void:
 	await _mission()
+	await _completion_handoff()
 	await _menu()
 	print("Adaptive audio tests: %d failures" % failures)
 	quit(failures)
@@ -28,65 +29,126 @@ func _mission() -> void:
 	var music := MUSIC.new()
 	scene.add_child(music)
 	music.set_process(false)
-	_check(music.state == &"calm", "Mission starts calm")
-	for stream in MUSIC.CALM + [MUSIC.COMBAT]:
-		_check(stream.loop and stream.get_length() > 100, "Gameplay music has a long loop")
-	_check(not MUSIC.BOOM.loop, "Ending boom is a one-shot")
-	music.update_aggression(3, 10.0)
-	_check(music.state == &"calm", "Three alerted enemies do not start battle music")
-	# The actual poll ignores unaware enemies, rather than counting population.
+	_check(music.state == &"calm", "Mission starts in active Server Oper")
+	_check(MUSIC.CALM.loop and MUSIC.CALM.get_length() > 30, "Calm active region loops")
+	_check(MUSIC.THREAT.loop and is_equal_approx(MUSIC.THREAT.loop_offset, 30.08), "Threat intro is skipped on subsequent loop cycles")
+	_check(MUSIC.HUNT.loop, "Hunt retains its processed loop")
+	music.update_aggression(10, 10.0)
+	_check(music.state == &"calm", "Ten aggressors without a player hit do not start Threat")
+	music.notify_monster_hit()
+	_check(music.state == &"threat", "A confirmed monster hit starts Threat")
+	_check(float(music.mixer.current.get_meta(&"start_offset")) == 0.0, "The first Threat starts with its full intro")
+	music.mixer._fade.custom_step(4.1)
+	_check(music.mixer.current.stream == MUSIC.THREAT, "Threat is the selected recording")
 	var enemies: Array[Enemy] = []
-	for i in 9:
+	for i in 12:
 		var enemy := Enemy.new()
 		scene.add_child(enemy)
 		enemy.add_to_group(&"infected_alive")
-		enemy.alerted = i < 3
+		enemy.alerted = i < 10
 		enemies.append(enemy)
 	music._process(0.3)
-	_check(music.aggression == 3 and music.state == &"calm", "Population is not aggression")
-	enemies[3].alerted = true
+	_check(music.aggression == 10 and music.state == &"threat", "Only actual aggressors count")
+	enemies[10].alerted = true
 	music._process(0.3)
-	_check(music.aggression == 4 and music.state == &"combat", "Fourth aggressor fades in Tower Hunt")
-	music._fade.custom_step(2.1)
-	_check(music._players[music._current].stream == MUSIC.COMBAT, "Combat selects the correct track")
-	_check(music._players[1-music._current].volume_linear < 0.001, "Outgoing calm is silent")
-	music.update_aggression(2, 2.0)
-	_check(music.state == &"combat", "Brief threshold dip retains battle music")
-	music.update_aggression(4, 0.1)
-	music.update_aggression(0, 2.5)
-	_check(music.state == &"combat", "Renewed aggression resets the quiet deadline")
-	music.update_aggression(0, 0.6)
-	_check(music.state == &"ending", "Sustained quiet starts a gradual ending")
-	music._fade.custom_step(2.1)
-	_check(music.state == &"boom" and (music._silent or music._sting.playing), "Boom follows the fade")
-	music._sting.stop()
-	music._sting.finished.emit()
-	_check(music.state == &"calm", "Calm resumes only after boom completes")
-	music.update_aggression(4, .25)
-	music.update_aggression(0, 3.1)
-	music.update_aggression(4, .25)
-	music._fade.custom_step(3.0)
-	_check(music.state == &"combat" and not music._sting.playing, "New combat cancels an unfinished ending")
-	music.update_aggression(0, 3.1)
-	music._fade.custom_step(3.0)
-	music.update_aggression(4, .25)
-	_check(music.state == &"combat" and not music._sting.playing, "New combat also interrupts the boom")
+	_check(music.state == &"hunt", "Eleven simultaneous aggressors start Hunt")
+	music.mixer._fade.custom_step(4.1)
+	music.update_aggression(10, 0.25)
+	_check(music.state == &"hunt", "Exactly ten retains Hunt without threshold chatter")
+	music.update_aggression(9, 0.25)
+	_check(music.state == &"threat", "Below ten crossfades back to Threat")
+	_check(is_equal_approx(float(music.mixer.current.get_meta(&"start_offset")), 30.08), "Ongoing combat does not replay the Threat intro")
+	music.mixer._fade.custom_step(4.1)
+	music.update_aggression(0, 2.0)
+	_check(music.state == &"threat", "Brief quiet does not cut combat")
+	music.update_aggression(0, 1.1)
+	_check(music.state == &"calm", "Sustained quiet returns to active Server Oper")
+	# Reverse a transition mid-fade; the current gain must be continuous.
+	music.mixer._fade.custom_step(1.0)
+	var outgoing: AudioStreamPlayer = music.mixer.current
+	var old_gain: float = outgoing.volume_linear
+	music.notify_monster_hit()
+	_check(is_equal_approx(outgoing.volume_linear, old_gain), "Interrupting a fade preserves the exact outgoing gain")
+	_check(is_finite(old_gain) and music.state == &"threat", "Renewed combat interrupts the outgoing fade safely")
+	_check(music.mixer._voices.size() <= 3, "Rapid state changes retain a bounded decoder budget")
+	music.mixer._fade.custom_step(4.1)
+	if music.mixer._silent:
+		var loop_voice: AudioStreamPlayer = music.mixer.current
+		loop_voice.set_meta(&"elapsed", MUSIC.THREAT.get_length() - 1.0)
+		music.mixer._process(0.0)
+		_check(music.mixer.current != loop_voice and is_equal_approx(float(music.mixer.current.get_meta(&"start_offset")), 30.08), "Loop overlap starts only the Threat body before its tail ends")
+		music.mixer._fade.custom_step(4.1)
 	paused = true
-	_check(music._silent or music._players[music._current].stream_paused, "Gameplay track suspends during menu pause")
-	var volume := music._players[music._current].volume_linear
+	var volume: float = music.mixer.current.volume_linear
 	await create_timer(.15, true).timeout
-	_check(is_equal_approx(volume, music._players[music._current].volume_linear), "Mission fades suspend during pause")
+	_check(is_equal_approx(volume, music.mixer.current.volume_linear), "Gameplay fades pause with gameplay")
 	paused = false
-	if music._silent:
-		music.update_aggression(0, 3.1)
-		music._fade.custom_step(2.1)
-		music._boom_timer.start(.02)
-		await create_timer(.05).timeout
-		_check(music.state == &"calm", "Silent headless boom still finishes on its owned clock")
+	music.finish_mission()
+	music.update_aggression(20, 10.0)
+	_check(music.state == &"complete", "Completion suppresses further combat music selection")
+	music.mixer._fade.custom_step(4.1)
 	scene.queue_free()
 	await process_frame
 	await process_frame
-	await create_timer(.1).timeout # Let a native audio mixer release stopped streams.
+	await create_timer(.1).timeout
+
+
+func _completion_handoff() -> void:
+	var hold := preload("res://game/bootstrap/app/completion_music.gd").new()
+	root.add_child(hold)
+	hold.set_process(false)
+	_check(absf(hold.HOLD.get_length() - 56.0) < .01, "Completion recording is exactly 56 seconds")
+	var voice: AudioStreamPlayer = hold.mixer.current
+	var voice_id := voice.get_instance_id()
+	var old := Node3D.new()
+	root.add_child(old)
+	current_scene = old
+	hold.age = 12.0
+	preload("res://game/bootstrap/app/menu/music_navigation.gd").show_main(self, old, hold)
+	await process_frame
+	var front := current_scene
+	var menu: Control = front.get_node("Menu")
+	var track: AudioStreamPlayer = menu.get("_music")
+	_check(hold.mixer.current.get_instance_id() == voice_id and is_equal_approx(hold.age, 12.0), "Changing to main keeps the same playback instance and cursor")
+	_check(not bool(track.get("active")), "Main menu music waits for the completion recording")
+	hold._process(44.1)
+	await process_frame
+	_check(bool(track.get("active")) and track.stream == preload("res://assets/audio/music/main_menu.ogg"), "Main music starts only after Hold finishes")
+	_check(is_finite(track.volume_linear), "Completion-to-main fade never interpolates infinite decibels")
+	front.queue_free()
+	await process_frame
+	await process_frame
+	# The loader retains this exact root-owned voice while the previous scene is freed.
+	var loading_hold := preload("res://game/bootstrap/app/completion_music.gd").new()
+	root.add_child(loading_hold)
+	loading_hold.set_process(false)
+	loading_hold.to_loading()
+	loading_hold._process(53.0)
+	_check(loading_hold.mode == &"loading" and loading_hold.age < 52.0, "Long loading overlaps another Hold cycle without silence")
+	var loader := preload("res://game/bootstrap/app/menu/mission_loader.gd").new()
+	root.add_child(loader)
+	loader.completion_music = loading_hold
+	loader.set("_released_previous", true)
+	current_scene = null
+	loader.call("_close_error")
+	await process_frame
+	_check(is_instance_valid(loading_hold) and loading_hold.mode == &"main", "Loading failure hands the live voice to main instead of orphaning it")
+	current_scene.queue_free()
+	loading_hold.dispose()
+	current_scene = null
+	await process_frame
+	await process_frame
+	var released := preload("res://game/bootstrap/app/completion_music.gd").new()
+	root.add_child(released)
+	released.set_process(false)
+	released.to_loading()
+	released.release_to_mission()
+	_check(released.mode == &"closing", "A ready mission fades out the carried recording")
+	released.mixer._fade.custom_step(4.1)
+	released._process(4.1)
+	await process_frame
+	_check(not is_instance_valid(released), "No completion voice survives successful mission activation")
+	await create_timer(.1).timeout
 
 
 func _menu() -> void:
