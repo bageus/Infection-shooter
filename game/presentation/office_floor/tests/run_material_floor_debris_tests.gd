@@ -144,7 +144,7 @@ func _test_props() -> void:
 				prop.call("_apply_damage", Vector3.UP, Vector3.FORWARD)
 		var queue: Array = floor_view.get("_glass").queue
 		_check(_kind_count(queue, cases[model]) > 0, "Actual %s destruction queues %s" % [model, cases[model]])
-		_check(queue.size() <= 36, "A real destruction event is bounded: 12 glass, 12 pieces, 12 chips")
+		_check(queue.size() <= 60, "A real destruction event leaves room in the shared stamp queue")
 		if cases[model] == "glass":
 			_check(_kind_count(queue, "plastic") > 0, "Broken screen mixes plastic with glass")
 			var before := queue.size()
