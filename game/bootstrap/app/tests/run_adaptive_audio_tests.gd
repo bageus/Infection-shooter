@@ -65,11 +65,19 @@ func _mission() -> void:
 	_check(music.state == &"calm", "Sustained quiet returns to active Server Oper")
 	# Reverse a transition mid-fade; the current gain must be continuous.
 	music.mixer._fade.custom_step(1.0)
-	var old_gain: float = music.mixer.current.volume_linear
+	var outgoing: AudioStreamPlayer = music.mixer.current
+	var old_gain: float = outgoing.volume_linear
 	music.notify_monster_hit()
+	_check(is_equal_approx(outgoing.volume_linear, old_gain), "Interrupting a fade preserves the exact outgoing gain")
 	_check(is_finite(old_gain) and music.state == &"threat", "Renewed combat interrupts the outgoing fade safely")
 	_check(music.mixer._voices.size() <= 3, "Rapid state changes retain a bounded decoder budget")
 	music.mixer._fade.custom_step(4.1)
+	if music.mixer._silent:
+		var loop_voice: AudioStreamPlayer = music.mixer.current
+		loop_voice.set_meta(&"elapsed", MUSIC.THREAT.get_length() - 1.0)
+		music.mixer._process(0.0)
+		_check(music.mixer.current != loop_voice and is_equal_approx(float(music.mixer.current.get_meta(&"start_offset")), 30.08), "Loop overlap starts only the Threat body before its tail ends")
+		music.mixer._fade.custom_step(4.1)
 	paused = true
 	var volume: float = music.mixer.current.volume_linear
 	await create_timer(.15, true).timeout
@@ -130,6 +138,16 @@ func _completion_handoff() -> void:
 	current_scene = null
 	await process_frame
 	await process_frame
+	var released := preload("res://game/bootstrap/app/completion_music.gd").new()
+	root.add_child(released)
+	released.set_process(false)
+	released.to_loading()
+	released.release_to_mission()
+	_check(released.mode == &"closing", "A ready mission fades out the carried recording")
+	released.mixer._fade.custom_step(4.1)
+	released._process(4.1)
+	await process_frame
+	_check(not is_instance_valid(released), "No completion voice survives successful mission activation")
 	await create_timer(.1).timeout
 
 
