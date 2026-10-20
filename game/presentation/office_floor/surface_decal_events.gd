@@ -3,6 +3,7 @@ extends RefCounted
 const GLASS_ATLAS := preload("res://game/core/vfx/public/surface_atlases.gd")
 const RECEIVERS := preload("res://game/presentation/office_floor/receiver_decal_bake.gd")
 const SETTINGS := preload("res://game/presentation/office_floor/public/surface_decal_config.gd")
+const BIOMASS_AUDIO := preload("res://game/presentation/office_floor/biomass_impact_audio.gd")
 var receivers := RECEIVERS.new()
 var floor_view: Node3D
 var settings: Dictionary = SETTINGS.normalized({})
@@ -16,6 +17,7 @@ func configure(host: Node3D, sources: RefCounted) -> void:
 
 func hit(collider: Node3D, point: Vector3, normal: Vector3, weapon: String, anchor: MeshInstance3D = null) -> bool:
 	if not point.is_finite() or not normal.is_finite(): return false
+	if weapon != "GRENADE": BIOMASS_AUDIO.play(anchor, point, normal, floor_view)
 	var local := floor_view.to_local(point)
 	var floor_normal := floor_view.global_basis.transposed() * normal
 	var frame := randi_range(5, 7) if weapon == "GRENADE" else randi_range(0, 4)

@@ -803,3 +803,11 @@ Perimeter and interior wall collision is scene-authored. The latest correction t
 
 
 20.10.2026 — исправление CI383/384 по прямому запросу владельца:391stash-конфликтов карты разрешены в пользу Updated upstream,4431objects, согласованы prepared transforms; исходный Stashed changes доступен в Git47c8a19d. Точные extracted PNG и import profiles table/clock ограничены1024px, source GLB неизменны. Изолированный тест крови временно отключает distance unloading, устраняя гонку с maintenance. PASS: project gates,292models texture audit0failures, gameplay_planner_repairs forward_plus headless0failures, occlusion headless0failures/без ресурсов на выходе. Native pixel checks ожидают CI. Evidence docs/qa/pr383_pr384_ci_repairs.md. Следующее действие: обновить обе PR-ветки и проверить Actions.
+
+
+## 20.10.2026 — звук попадания в настенную биомассу (T004)
+
+Запрос владельца: Thudding_impact_of_b преобразовать в OGG, удалить проверенный оригинал и озвучить попадания в биомассу на стенах. Основа188b0b1. План: core.audio событие и verified receipt; office_floor private helper со слабыми регистрациями на уже внедрённом projection anchor, проверка alpha текущего обычного/слитого mesh при существующем surface_decal_events.hit. Без новых коллизий, изменения damage/баланса, DTO/API/owners/dependencies. Регрессии: реальный bullet→impact_pool→surface hit, прозрачные области, соседняя стена, перемещение/удаление, fused mesh, OGG-only, biomass/decor и project gates.
+
+
+20.10.2026 — результат звука настенной биомассы: штатная проверенная конверсия Thudding_impact_of_b в mono48kHz Vorbisq5/2s, WAV удалён. Private receiver-local WeakRef helper проверяет alpha текущего standalone/fused visual при существующем surface hit; hit_biomass играет в точке попадания, без изменения физики/урона/DTO/API/dependencies. PASS: readiness/project gates/import4.7.2,11conversion receipts,18audio-tool tests, biomass (реальный bullet dispatch и lifecycle), sound_event/blood_decor/biomass_catalog suites0failures,979import sidecars, scene resources/diff-check. Native прослушивание не выполнялось. Evidence docs/qa/biomass_impact_audio.md. Следующее действие: PR и CI; main не изменять до слияния.
