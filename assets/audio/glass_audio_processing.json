@@ -103,6 +103,32 @@
       "seam_step": null,
       "source_sha256": "e081380089cc81829a837e08dd68bfed565c8dcfbfd4488b46277a88f40fe6b9",
       "output_sha256": "cccb56d21f1fc4a7d82078cd65465dc6990101bef8d272e3d2fc03cf01964cb8"
+    },
+    {
+      "source": "assets/audio/sfx/heartbeat/very_loud_a_strong_b_1.wav",
+      "output": "assets/audio/sfx/heartbeat/very_loud_a_strong_b_1.ogg",
+      "source_seconds": 2.0,
+      "trim_end_seconds": 0.0,
+      "overlap_seconds": 0.0,
+      "output_seconds": 2.0,
+      "channels": 1,
+      "loop": false,
+      "seam_step": null,
+      "source_sha256": "1dd7a71217eb465380b2d4c12c76f853d6d69c6df3b1b40e38477d1defc332e7",
+      "output_sha256": "8bbfeefa534b0b93e30ea71bde588f25c12fdf3faef7606850eaf25c29055a78"
+    },
+    {
+      "source": "assets/audio/sfx/power_blow/a_powerful_destructi_1.wav",
+      "output": "assets/audio/sfx/power_blow/a_powerful_destructi_1.ogg",
+      "source_seconds": 2.0,
+      "trim_end_seconds": 0.0,
+      "overlap_seconds": 0.0,
+      "output_seconds": 2.0,
+      "channels": 1,
+      "loop": false,
+      "seam_step": null,
+      "source_sha256": "c528ec549e3953ec3e3429d23343ce4e24aa29a39dd0ec39e5099318da0c5000",
+      "output_sha256": "d5825abfe6094ce5fe4eeeb5692cf42f623807b7dba950529d681d761165bdf4"
     }
   ]
 }

@@ -117,6 +117,8 @@ const EVENTS := {
 	&"skill_epidemic": [2, -1.0, 40.0, 5.0, 0.04, 1],
 	&"skill_predator_dash": [2, 0.0, 34.0, 5.0, 0.05, 2],
 	&"skill_bone_blades": [2, 0.0, 34.0, 5.0, 0.04, 1],
+	&"skill_power_strike": [1, 0.0, 50.0, 7.0, 0.0, 1],
+	&"skill_heartbeat": [1, -3.0, 20.0, 3.0, 0.0, 1],
 	&"bone_blades_whirl": [2, 2.0, 24.0, 3.5, 0.02, 1],
 	&"skill_berserk": [2, 1.0, 60.0, 8.0, 0.03, 1],
 	&"skill_second_heart": [1, 0.0, 30.0, 5.0, 0.0, 1],
@@ -270,4 +272,8 @@ static func play_ui(parent: Node, event: StringName) -> AudioStreamPlayer:
 static func _event_path(event: StringName, variant: int) -> String:
 	if event == &"skill_cooldown_done":
 		return "res://assets/audio/sfx/skill_ready/taking_skill.ogg"
+	if event == &"skill_power_strike":
+		return "res://assets/audio/sfx/power_blow/a_powerful_destructi_1.ogg"
+	if event == &"skill_heartbeat":
+		return "res://assets/audio/sfx/heartbeat/very_loud_a_strong_b_1.ogg"
 	return ROOT + "%s/%s_%d.ogg" % [event, event, variant]
