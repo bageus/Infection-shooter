@@ -14,6 +14,14 @@ const GROUP := "fallen_environment_fragment"
 const CONTACTLESS_GROUP := "contactless_debris"
 const HIT_LAYER := 4
 const WORLD_MASK := 3
+# Large pieces (a tabletop, its pedestal, a leg) also collide with each other on this extra layer,
+# so a fallen top rests on its pedestal instead of passing through it. Characters never use it.
+const PIECE_LAYER := 16
+const PIECE_MIN_EDGE := 0.3
+# A piece at least this tall and this many times taller than wide falls over instead of standing.
+const TOPPLE_MIN_HEIGHT := 0.5
+const TOPPLE_SLENDERNESS := 1.8
+const TOPPLE_SPEED := 7.0
 const MAX_FRAGMENTS := 40
 const KICK_COOLDOWN := 0.8
 # Highest lowest point of a resting piece that still counts as lying on the floor.
@@ -65,6 +73,27 @@ func _ready() -> void:
 	_expiry.tween_interval(32.0 if kickable else 14.0)
 	_expiry.tween_callback(expire)
 	call_deferred("_register_budget")
+
+
+## Large non-glass pieces keep their volume against each other.
+func enable_piece_contacts() -> void:
+	collision_layer |= PIECE_LAYER
+	collision_mask |= PIECE_LAYER
+
+
+## A tall slender piece left standing (a pedestal, a leg) is pushed over, away from the hit.
+func topple_from(size: Vector3, hit_position: Vector3, direction: Vector3) -> void:
+	var width := maxf(size.x, size.z)
+	if size.y < TOPPLE_MIN_HEIGHT or size.y < width * TOPPLE_SLENDERNESS:
+		return
+	var away := global_position - hit_position
+	away.y = 0.0
+	if away.length_squared() < 0.0004:
+		away = Vector3(direction.x, 0.0, direction.z)
+	if away.length_squared() < 0.0004:
+		away = Vector3.RIGHT
+	sleeping = false
+	apply_impulse(away.normalized() * mass * TOPPLE_SPEED, Vector3.UP * size.y * 0.4)
 
 
 func _register_budget() -> void:
