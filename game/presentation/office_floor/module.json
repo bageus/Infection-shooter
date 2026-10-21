@@ -11,7 +11,7 @@
     "Environment prop visual stages and physical reactions; durability rules owned by features.combat",
     "Mission-local decorative neighboring skyline geometry and facade material",
     "Positional server fan ambience and its lifetime",
-    "Mission-local bounded mixed-material floor debris textures, source cache, stamp queue and density",
+    "Mission-local bounded mixed-material floor debris textures (colour, roughness, CPU-derived normal/height relief), source cache, stamp queue and density",
     "Mission-local bounded baked glass/wall/column receiver textures and independent floor damage/scuff layers"
   ],
   "public_api": [

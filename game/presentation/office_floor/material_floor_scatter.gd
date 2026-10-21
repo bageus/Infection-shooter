@@ -9,6 +9,9 @@ const SPECK_KINDS := ["wood", "paper", "plastic", "fabric"]
 const SPECKS_PER_PIECE := 2 # Wood, fabric and plastic leave many flakes around the spot, not only a few sheets.
 const MAX_SPECKS := 12 # Shared stamp queue budget per event.
 const SPECK_SIZE := 0.3
+# Real chips, scraps and flakes are about half the size the atlas cells suggest: one shared factor
+# (1/1.75) for every material stamped here, applied before the floor's own size setting.
+const DEBRIS_SCALE := 0.57
 
 
 static func scatter(floor_view: Node3D, center: Vector3, footprint: Vector2, recipe: Array[String], direction: Vector3, excluded: Array[RID]) -> void:
@@ -43,8 +46,8 @@ static func scatter(floor_view: Node3D, center: Vector3, footprint: Vector2, rec
 		if kind in SMALL_KINDS:
 			size *= SMALL_SCALE
 			var chip := planar + Vector2(rng.randf_range(-1.0, 1.0), rng.randf_range(-1.0, 1.0)) * CHIP_SPREAD
-			floor_view.call("stamp_material_debris", chip, kind, ATLASES.choose_frame(kind, true, rng), size * CHIP_SCALE, rng.randi_range(0, 3))
-		floor_view.call("stamp_material_debris", planar, kind, frame, size, mark.turns)
+			floor_view.call("stamp_material_debris", chip, kind, ATLASES.choose_frame(kind, true, rng), size * CHIP_SCALE * DEBRIS_SCALE, rng.randi_range(0, 3))
+		floor_view.call("stamp_material_debris", planar, kind, frame, size * DEBRIS_SCALE, mark.turns)
 	var specks := 0
 	for kind in recipe:
 		if kind not in SPECK_KINDS:
@@ -57,7 +60,7 @@ static func scatter(floor_view: Node3D, center: Vector3, footprint: Vector2, rec
 			planar += Vector2(push.x, push.z).limit_length(1.0) * 0.12
 			if not _reaches(floor_view, center, planar, excluded):
 				continue
-			floor_view.call("stamp_material_debris", planar, kind, ATLASES.choose_frame(kind, true, rng), SPECK_SIZE * rng.randf_range(0.8, 1.2), rng.randi_range(0, 3))
+			floor_view.call("stamp_material_debris", planar, kind, ATLASES.choose_frame(kind, true, rng), SPECK_SIZE * DEBRIS_SCALE * rng.randf_range(0.8, 1.2), rng.randi_range(0, 3))
 
 
 # False when a solid body sits between the floor point and the target, so the mark stays on open floor.

@@ -148,7 +148,7 @@ func scatter_prop_debris(at: Vector3, footprint: Vector2, recipe: Array[String],
 	MATERIAL_SCATTER.scatter(self, at, footprint, recipe, direction, excluded)
 
 
-func stamp_material_debris(at: Vector2, kind: String, frame: int, size: float, turns: int = 0, min_size: float = 0.25) -> bool:
+func stamp_material_debris(at: Vector2, kind: String, frame: int, size: float, turns: int = 0, min_size: float = 0.1) -> bool:
 	if not at.is_finite() or not Rect2(-floor_size * 0.5, floor_size).has_point(at):
 		return false
 	for opening in openings:
@@ -192,6 +192,7 @@ func _set_glass_texture(cell: Vector2i, texture: Texture2D) -> void:
 		material.set_shader_parameter("has_floor_scuff", _glass.tiles[cell].layers.has(1))
 		material.set_shader_parameter("glass_debris", texture)
 		material.set_shader_parameter("debris_roughness", _glass.tiles[cell].surface_texture)
+		material.set_shader_parameter("debris_relief", _glass.tiles[cell].relief_texture)
 		material.set_shader_parameter("glass_enabled", true)
 		material.set_shader_parameter("glass_origin", _glass.origin + Vector2(cell) * GLASS_BAKE.METERS)
 		material.set_shader_parameter("glass_world_to_floor", global_transform.affine_inverse())
