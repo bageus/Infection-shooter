@@ -12,6 +12,27 @@ class Subject extends RefCounted:
 		pass
 
 
+class MeshLoader extends ResourceFormatLoader:
+	var loaded_on_main_thread := false
+	func _get_recognized_extensions() -> PackedStringArray:
+		return PackedStringArray(["ridprobe"])
+	func _handles_type(type: StringName) -> bool:
+		return type == &"PackedScene"
+	func _get_resource_type(_path: String) -> String:
+		return "PackedScene"
+	func _load(_path: String, _original: String, _sub_threads: bool, _cache_mode: int) -> Variant:
+		loaded_on_main_thread = Thread.is_main_thread()
+		var scene := PackedScene.new()
+		var mesh := MeshInstance3D.new()
+		# Do not deliberately provoke the engine race on the failing baseline.
+		if loaded_on_main_thread:
+			mesh.mesh = QuadMesh.new()
+			mesh.mesh.get_rid()
+		scene.pack(mesh)
+		mesh.free()
+		return scene
+
+
 func _initialize() -> void:
 	call_deferred("_run")
 
@@ -19,6 +40,7 @@ func _initialize() -> void:
 func _run() -> void:
 	await _occlusion()
 	await _resources()
+	await _dummy_mesh_loading()
 	print("P2 optimization tests: %d failures" % failures)
 	quit(0 if failures == 0 else 1)
 
@@ -108,6 +130,24 @@ func _resources() -> void:
 	_expect(result.is_empty() and queue.resources.size() == 1, "A queue can recover after failure and deduplicates paths")
 	result = await queue.load_all([], self, func(_value: float, _phase: String) -> void: pass)
 	_expect(result.is_empty() and queue.resources.is_empty(), "A repeated empty load releases retained resources")
+
+
+func _dummy_mesh_loading() -> void:
+	if DisplayServer.get_name() != "headless":
+		return
+	var path := "user://scene_queue.ridprobe"
+	var file := FileAccess.open(path, FileAccess.WRITE)
+	file.close()
+	var loader := MeshLoader.new()
+	ResourceLoader.add_resource_format_loader(loader, true)
+	var queue := QUEUE.new()
+	var paths: Array[String] = [path]
+	var result := await queue.load_all(paths, self, func(_value: float, _phase: String) -> void: pass)
+	_expect(result.is_empty() and queue.resources.size() == 1, "Dummy queue retains a mesh-bearing scene")
+	_expect(loader.loaded_on_main_thread, "Dummy mesh creation must not race effects on the main thread")
+	queue.resources.clear()
+	ResourceLoader.remove_resource_format_loader(loader)
+	DirAccess.remove_absolute(path)
 
 
 func _expect(value: bool, message: String) -> void:
