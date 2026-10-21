@@ -40,6 +40,7 @@ func _run() -> void:
 		player.call("_update_move", 1.0 / 60.0)
 		await physics_frame
 	_expect(absf(player.position.z - stopped) < 0.01 and player.collision_mask == mask, "Blocked dash stays stopped until expiry then restores collision")
+	_test_shoves_loose_objects(player, stage)
 	_test_effect_recovery(player)
 	stage.queue_free()
 	await process_frame
@@ -57,6 +58,43 @@ func _box(parent: Node3D, at: Vector3, dimensions: Vector3) -> StaticBody3D:
 	parent.add_child(box)
 	box.position = at
 	return box
+
+func _test_shoves_loose_objects(player: CharacterBody3D, stage: Node3D) -> void:
+	player.position = Vector3(8, 0.1, 0)
+	player.velocity = Vector3.ZERO
+	var prop := _rigid(stage, 1, Vector3(8, 0.5, -2), Vector3(0.6, 0.6, 0.6))
+	var piece := _rigid(stage, 4, Vector3(8.3, 0.3, -1.2), Vector3(0.2, 0.2, 0.2))
+	piece.add_to_group("contactless_debris")
+	var prop_start := prop.position
+	var piece_start := piece.position
+	await physics_frame
+	player.call("mutation_dash")
+	for frame in 26:
+		player.call("_update_move", 1.0 / 60.0)
+		await physics_frame
+	_expect(player.position.z < -5.5, "Dash is not stopped by a loose prop on its path (z=%.2f)" % player.position.z)
+	_expect(prop.position.distance_to(prop_start) > 0.2, "Dash shoves a loose prop aside (moved %.2f m)" % prop.position.distance_to(prop_start))
+	_expect(piece.position.distance_to(piece_start) > 0.2, "Dash shoves a debris piece in its path (moved %.2f m)" % piece.position.distance_to(piece_start))
+	player.position = Vector3(0, 0.1, 0)
+	prop.queue_free()
+	piece.queue_free()
+	await physics_frame
+
+
+func _rigid(parent: Node3D, layer: int, at: Vector3, dimensions: Vector3) -> RigidBody3D:
+	var body := RigidBody3D.new()
+	body.collision_layer = layer
+	body.collision_mask = 3
+	body.mass = 5.0
+	var shape := CollisionShape3D.new()
+	var hull := BoxShape3D.new()
+	hull.size = dimensions
+	shape.shape = hull
+	body.add_child(shape)
+	parent.add_child(body)
+	body.position = at
+	return body
+
 
 func _expect(ok: bool, message: String) -> void:
 	if not ok:
