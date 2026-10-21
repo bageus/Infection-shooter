@@ -56,14 +56,14 @@ func _run() -> void:
 	budget.call("clear_marks")
 
 	# (c) the live tile count never exceeds the cap.
-	for index in 30:
+	for index in 70:
 		bake.call("stamp", texture, Color.WHITE, Vector2(0.6, 0.3), Vector3(index * 4.0 + 1.0, 0, 1.0), Basis.IDENTITY)
 	var peak := 0
-	for step in 40:
+	for step in 80:
 		await create_timer(0.1).timeout
 		peak = maxi(peak, bake.call("statistics")["live"])
-		_expect(_count(bake, "Decal") <= 17, "Decal nodes stay near the cap")
-	_expect(peak == 16 and bake.call("statistics")["live"] == 16 and bake.call("statistics")["tiles"] == 30, "Live tiles are capped at 16 with the rest kept as data")
+		_expect(_count(bake, "Decal") <= 65, "Decal nodes stay near the cap")
+	_expect(peak == 64 and bake.call("statistics")["live"] == 64 and bake.call("statistics")["tiles"] == 64, "Live tiles are capped at 64 with the rest dropped")
 
 	# (d) clear_marks removes tiles and decals.
 	budget.call("clear_marks")
