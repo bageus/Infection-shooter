@@ -505,7 +505,7 @@ func _update_move(delta:float)->void:
 	elif not is_wounded():
 		_blood_motion_start = global_position
 	_push_chair_contacts()
-	if _roll_remaining>0.0 and not _mutation_dash_motion.active: _push_roll_contacts()
+	if _roll_remaining>0.0: _push_roll_contacts()
 # Sliding zeroes the velocity into an item, so pushes use the intended motion.
 func _push_chair_contacts()->void:
 	var pushed:={}
