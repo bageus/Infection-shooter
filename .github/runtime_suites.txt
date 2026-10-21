@@ -104,6 +104,7 @@ game/features/infected/tests/run_status_fx_tests.gd
 game/features/combat/tests/run_impact_geometry_index_tests.gd
 game/bootstrap/app/tests/run_group03_atlas_tests.gd
 game/presentation/office_floor/tests/run_blast_break_tests.gd
+game/presentation/office_floor/tests/run_blast_debris_survival_tests.gd
 game/presentation/office_floor/tests/run_extinguisher_blast_tests.gd
 game/features/combat/tests/run_cursor_aim_tests.gd
 game/bootstrap/app/tests/run_layout_loading_tests.gd
@@ -193,3 +194,4 @@ game/presentation/office_floor/tests/run_baked_surface_decal_tests.gd
 game/bootstrap/app/tests/run_floor_hint_tests.gd
 game/bootstrap/app/tests/run_gameplay_camera_tuning_tests.gd
 game/bootstrap/app/tests/run_updated_prop_models_tests.gd
+game/presentation/office_floor/tests/run_debris_floor_tests.gd

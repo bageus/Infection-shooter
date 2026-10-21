@@ -8,41 +8,25 @@ extends VBoxContainer
 const PROP := preload("res://game/presentation/office_floor/public/props/environment_prop.tscn")
 const FLOOR := preload("res://game/presentation/office_floor/public/base_floor_renderer.gd")
 const SPOT := Vector3(14.0, 0.0, 0.0)
-const MODELS := {
-	"Стул простой": "res://models/objects/enviroments/06/06_simple_chair.glb",
-	"Офисное кресло": "res://models/objects/enviroments/06/06_office_chair.glb",
-	"Конференц-кресло": "res://models/objects/enviroments/06/06_conference_chair.glb",
-	"Рабочий стол": "res://models/objects/enviroments/08/08_office_desk_2.glb",
-	"Стол с перегородкой": "res://models/objects/enviroments/08/08_divider_full_H_desk.glb",
-	"Квадратный стол": "res://models/objects/enviroments/07/07_table_square.glb",
-	"Круглый стол": "res://models/objects/enviroments/07/07_round_dining_table.glb",
-	"Журнальный столик": "res://models/objects/enviroments/07/07_coffee_table.glb",
-	"Деревянная перегородка": "res://models/objects/enviroments/01/01_wood_slat_partition_destructible.glb",
-	"Шкаф для папок": "res://models/objects/enviroments/03/03_file_cabinet_largest.glb",
-	"Книжный шкаф": "res://models/objects/enviroments/03/03_book_case.glb",
-	"Металлический шкафчик": "res://models/objects/enviroments/03/03_locker_tall_dented.glb",
-	"Серверная стойка": "res://models/objects/enviroments/03/03_server_rack.glb",
-	"Монитор": "res://models/objects/enviroments/05/05_monitor_destructible.glb",
-	"Ноутбук": "res://models/objects/enviroments/05/05_laptop_close_destructible.glb",
-	"Системный блок": "res://models/objects/enviroments/05/05_PC_destructible.glb",
-	"Принтер": "res://models/objects/enviroments/05/05_printer_destructible.glb",
-	"Телевизор на стене": "res://models/objects/enviroments/05/05_wall_TV_frameless_destructible.glb",
-	"Кулер для воды": "res://models/objects/enviroments/02/02_water_cooler_destructible.glb",
-	"Кофемашина": "res://models/objects/enviroments/02/02_coffee_machine_destructible.glb",
-	"Торговый автомат": "res://models/objects/enviroments/02/02_vending_automat_1_dented.glb",
-	"Холодильник": "res://models/objects/enviroments/02/02_frige_dented.glb",
-	"Картонные коробки": "res://models/objects/enviroments/04/04_cardboard_boxes.glb",
-	"Деревянный ящик": "res://models/objects/enviroments/04/04_crate_large_broken.glb",
-	"Диван": "res://models/objects/enviroments/10/10_couch_red_destructible.glb",
-	"Растение": "res://models/objects/enviroments/11/11_plant_large.glb",
+const LIST := "res://tools/effects_preview/destructible_models.json"
+## Model groups as the planner palette names them: tab text and what is inside.
+const GROUPS := {
+	"01": "Конструкции", "02": "Кухня и санузел", "03": "Хранение", "04": "Коробки и ящики", "05": "Техника",
+	"06": "Стулья", "07": "Столы", "08": "Офисная мебель", "09": "Мелочи", "10": "Диваны", "11": "Растения",
 }
+const PANEL_WIDTH := 250.0
 
 var _host: Node3D
 var _focus: Callable
 var _spot: Node3D
 var _floor: Node3D
 var _prop: Node3D
-var _picker: OptionButton
+var _models := {}
+var _group := ""
+var _paths: Array[String] = []
+var _list: ItemList
+var _group_title: Label
+var _chosen := ""
 var _slider: HSlider
 var _label: Label
 var _blast: CheckButton
@@ -53,18 +37,29 @@ var _build := 0
 func setup(host: Node3D, focus: Callable) -> void:
 	_host = host
 	_focus = focus
-	_picker = OptionButton.new()
-	for title: String in MODELS:
-		_picker.add_item(title)
-	_picker.item_selected.connect(func(_index: int) -> void: _show(0))
-	add_child(_picker)
-	_label = Label.new()
-	_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-	_label.custom_minimum_size.x = 250
+	_models = JSON.parse_string(FileAccess.get_file_as_string(LIST))
+	var tabs := GridContainer.new()
+	tabs.columns = 6
+	add_child(tabs)
+	for group: String in _models:
+		var tab := Button.new()
+		tab.text = group
+		tab.tooltip_text = GROUPS.get(group, group)
+		tab.pressed.connect(_open_group.bind(group))
+		tabs.add_child(tab)
+	_group_title = _text()
+	add_child(_group_title)
+	_list = ItemList.new()
+	_list.custom_minimum_size = Vector2(PANEL_WIDTH, 230.0)
+	_list.item_selected.connect(func(index: int) -> void:
+		_chosen = _paths[index]
+		_show(0))
+	add_child(_list)
+	_label = _text()
 	add_child(_label)
 	_slider = HSlider.new()
 	_slider.step = 1.0
-	_slider.custom_minimum_size.x = 250
+	_slider.custom_minimum_size.x = PANEL_WIDTH
 	_slider.value_changed.connect(func(value: float) -> void: _show(int(value)))
 	add_child(_slider)
 	_blast = CheckButton.new()
@@ -76,6 +71,26 @@ func setup(host: Node3D, focus: Callable) -> void:
 	clear.pressed.connect(_clear_floor)
 	add_child(clear)
 	visibility_changed.connect(_on_visibility)
+	_open_group(_models.keys()[0])
+	_list.select(0)
+	_chosen = _paths[0]
+
+
+func _text() -> Label:
+	var label := Label.new()
+	label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	label.custom_minimum_size.x = PANEL_WIDTH
+	return label
+
+
+func _open_group(group: String) -> void:
+	_group = group
+	_group_title.text = "%s: %s" % [group, GROUPS.get(group, "")]
+	_list.clear()
+	_paths.clear()
+	for entry: Dictionary in _models[group]:
+		_list.add_item(str(entry["name"]))
+		_paths.append(str(entry["path"]))
 
 
 func _on_visibility() -> void:
@@ -108,7 +123,7 @@ func _show(stage: int) -> void:
 	_floor.set("floor_size", Vector2(12.0, 12.0))
 	_spot.add_child(_floor)
 	_prop = PROP.instantiate()
-	_prop.set("model_path", MODELS[_picker.get_item_text(_picker.selected)])
+	_prop.set("model_path", _chosen)
 	_spot.add_child(_prop)
 	_prop.call("configure_world", _spot, Node.new())
 	_prop.call("configure_glass_debris", _floor)
@@ -126,7 +141,8 @@ func _show(stage: int) -> void:
 	var shown := int(_slider.value)
 	_label.text = "Стадия %d из %d\n%s" % [shown, steps.size(), "Целый" if shown == 0 else steps[shown - 1][0]]
 	var bounds := _bounds(_prop)
-	_focus.call(SPOT + Vector3(0.0, bounds.size.y * 0.4, 0.0), maxf(bounds.size.length(), 1.2) * 1.5)
+	var size := maxf(bounds.size.length(), 1.5)
+	_focus.call(SPOT + Vector3(0.0, bounds.size.y * 0.35, 0.0), clampf(size * 2.2, 4.0, 18.0))
 	var hit_at := SPOT + Vector3(0.0, bounds.size.y * 0.5, 0.0)
 	var direction := Vector3(0.3, 0.0, -1.0).normalized()
 	for step in shown:

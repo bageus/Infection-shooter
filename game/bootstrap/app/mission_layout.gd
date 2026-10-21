@@ -4,6 +4,7 @@ const KEY := preload("res://game/bootstrap/app/mission_key.gd")
 const WEAPON := preload("res://game/bootstrap/app/weapon_pickup.gd")
 const FLOOR_HINT := preload("res://game/bootstrap/app/floor_hint_guide.gd")
 const FLOOR_BOUNDS := Rect2(-40, -30, 80, 60)
+const FLOOR_TOP := 0.0135 # Visible base floor top; physics floor pieces must match it (see main.tscn FloorBody)
 const CUT_STEP := 0.5
 const STAIR_REFRESH_SECONDS := 0.35
 const KEY_REVEAL_SECONDS := 600.0
@@ -258,5 +259,5 @@ func _update_floor_collision(body: StaticBody3D) -> void:
 		var box := BoxShape3D.new()
 		box.size = Vector3(region.size.x, 0.2, region.size.y)
 		collision.shape = box
-		collision.position = Vector3(region.get_center().x, -0.1, region.get_center().y)
+		collision.position = Vector3(region.get_center().x, FLOOR_TOP - 0.1, region.get_center().y)
 		body.add_child(collision)

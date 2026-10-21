@@ -2,9 +2,9 @@ extends SceneTree
 ## Renders a desk, a chair and a partition hit by a grenade blast on the shared floor.
 ##
 ##   xvfb-run -a godot --path . --rendering-method gl_compatibility \
-##     --script res://tools/capture_destruction_decals.gd -- <out_dir> <suffix>
+##     --script res://tools/capture_destruction_decals.gd -- <out_dir> <suffix> [close|gameplay]
 ##
-## Writes decals_<suffix>.png. Run once before and once after a change to compare.
+## Writes decals_<mode>_<suffix>.png (close: orthogonal top view; gameplay: 14 m isometric, fov 50). Run once before and once after a change to compare.
 
 const FLOOR := preload("res://game/presentation/office_floor/public/base_floor_renderer.gd")
 const PROP := preload("res://game/presentation/office_floor/public/props/environment_prop.tscn")
@@ -15,6 +15,7 @@ const MODELS := [
 ]
 var _out_dir := "/tmp/destruction_review"
 var _suffix := "after"
+var _mode := "close"
 
 
 func _initialize() -> void:
@@ -23,6 +24,8 @@ func _initialize() -> void:
 		_out_dir = args[0]
 	if args.size() > 1:
 		_suffix = args[1]
+	if args.size() > 2:
+		_mode = args[2]
 	call_deferred("_capture")
 
 
@@ -34,10 +37,15 @@ func _capture() -> void:
 	var effects := Node3D.new()
 	stage.add_child(effects)
 	var camera := Camera3D.new()
-	camera.projection = Camera3D.PROJECTION_ORTHOGONAL
-	camera.size = 4.0
 	stage.add_child(camera)
-	camera.look_at_from_position(Vector3(0, 9, 0.01), Vector3.ZERO)
+	if _mode == "gameplay":
+		camera.fov = 50.0
+		camera.position = Vector3(0, 0, 14).rotated(Vector3.RIGHT, deg_to_rad(-37.3)).rotated(Vector3.UP, deg_to_rad(45))
+		camera.rotation_degrees = Vector3(-37.3, 45, 0)
+	else:
+		camera.projection = Camera3D.PROJECTION_ORTHOGONAL
+		camera.size = 4.0
+		camera.look_at_from_position(Vector3(0, 9, 0.01), Vector3.ZERO)
 	camera.current = true
 	var light := DirectionalLight3D.new()
 	stage.add_child(light)
@@ -62,5 +70,5 @@ func _capture() -> void:
 		await process_frame
 	await RenderingServer.frame_post_draw
 	DirAccess.make_dir_recursive_absolute(_out_dir)
-	root.get_texture().get_image().save_png(_out_dir.path_join("decals_%s.png" % _suffix))
+	root.get_texture().get_image().save_png(_out_dir.path_join("decals_%s_%s.png" % [_mode, _suffix]))
 	quit(0)

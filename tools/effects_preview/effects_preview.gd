@@ -319,7 +319,8 @@ func _build_ui() -> void:
 	scroll.offset_left = 12.0
 	scroll.offset_top = 12.0
 	scroll.offset_bottom = -12.0
-	scroll.offset_right = 270.0
+	scroll.offset_right = 290.0
+	scroll.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
 	layer.add_child(scroll)
 	var panel := VBoxContainer.new()
 	scroll.add_child(panel)
@@ -361,6 +362,9 @@ func _build_ui() -> void:
 		for node: Node in skill_nodes:
 			node.visible = index == 0
 		destruction.visible = index == 1
+		_player.visible = index == 0
+		for enemy in _enemies:
+			enemy.visible = index == 0
 		if index == 0:
 			_look_at(Vector3(0, 0.6, 0), 0.0))
 
@@ -369,3 +373,5 @@ func _build_ui() -> void:
 func _look_at(point: Vector3, distance: float) -> void:
 	_focus = point
 	_distance = distance
+	# The tab panel covers the left of the window: shift the view so the object sits in the clear part.
+	_camera.h_offset = -distance * 0.12 if distance > 0.0 else 0.0
