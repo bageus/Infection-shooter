@@ -189,6 +189,9 @@ func _update_posture() -> void:
 	elif posture == Posture.FOURS:
 		if _distance < FOURS_STAND_DISTANCE or not (_pace.charging or wounded):
 			posture = Posture.STAND
+			# Gets up on the move: the rise clip plays while the chase goes on.
+			if _animation != null and not _feeding:
+				_animation.call("play_named_one_shot", &"RiseFromFours", 0.12, 1.0)
 
 
 func _part_lost(part: StringName) -> void:
