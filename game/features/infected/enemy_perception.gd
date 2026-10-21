@@ -8,6 +8,7 @@ const RULES := preload("res://game/features/infected/enemy_interaction_rules.gd"
 const ACTOR := preload("res://game/features/infected/infected_capsule.gd")
 const IDLE_BODY := preload("res://game/features/infected/enemy_idle_body.gd")
 const ROUTE := preload("res://game/features/infected/chase_route.gd")
+const TUNING := preload("res://game/features/infected/public/enemy_tuning.gd")
 
 enum State { UNAWARE, INVESTIGATE, SEARCH, RETURN, CHASE }
 
@@ -172,7 +173,7 @@ func step_unaware(actor: ACTOR, delta: float) -> void:
 	var step := _idle_elapsed
 	_idle_elapsed = 0.0
 	var radius := _idle_body.radius(actor.collision_shape, actor.global_basis.x.length())
-	var speed := actor.move_speed * actor._mobility
+	var speed := actor.move_speed * actor._mobility * TUNING.move_multiplier
 	var wish := tick(actor, step, target, actor._route, radius, speed, false)
 	if actor._blast_stun_remaining > 0.0:
 		wish = Vector3.ZERO
