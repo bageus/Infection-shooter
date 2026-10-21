@@ -42,7 +42,7 @@ func _chunks() -> void:
 	# Reused IDs must not match old FIFO tombstones and evict newer fragments.
 	DEBRIS.spawn_chunks(host, AABB(Vector3.ZERO, Vector3.ONE), Color.BLUE, 500, Vector3.UP, Vector3.ZERO)
 	await process_frame
-	_expect(runtime.active.size() <= 40 and runtime.created_chunks <= 80, "Burst bounds active and fading generic allocations")
+	_expect(runtime.active.size() <= runtime.BURST_FRAGMENTS and runtime.created_chunks <= 80, "Burst bounds active and fading generic allocations")
 	var other := Node3D.new()
 	root.add_child(other)
 	_expect(DEBRIS.runtime_for(other) != runtime, "Effects containers own independent pools")

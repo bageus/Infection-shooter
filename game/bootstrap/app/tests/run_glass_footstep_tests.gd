@@ -69,7 +69,7 @@ func _test_pixels() -> Vector3:
 	for y in image.get_height():
 		for x in image.get_width():
 			if image.get_pixel(x, y).a > 0.5:
-				var at: Vector2 = bake.get("origin") + Vector2(cell) * 8.0 + (Vector2(x, y) + Vector2.ONE * 0.5) / 64.0
+				var at: Vector2 = bake.get("origin") + Vector2(cell) * 8.0 + (Vector2(x, y) + Vector2.ONE * 0.5) / float(image.get_width()) * 8.0
 				contact = Vector3(at.x, 0, at.y)
 				break
 		if contact != Vector3.ZERO:

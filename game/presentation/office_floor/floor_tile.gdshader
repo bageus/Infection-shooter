@@ -24,6 +24,9 @@ uniform bool has_floor_scuff = false;
 uniform sampler2D floor_damage : source_color, filter_linear, repeat_disable;
 uniform sampler2D floor_scuff : source_color, filter_linear, repeat_disable;
 uniform sampler2D debris_roughness : filter_linear, repeat_disable;
+// Baked relief: R/G = normal x/z (0.5 neutral), A = height. Same UV as glass_debris, lower resolution.
+uniform sampler2D debris_relief : filter_linear, repeat_disable;
+uniform float relief_strength : hint_range(0.0, 2.0) = 1.0;
 uniform vec2 glass_origin = vec2(0.0);
 uniform mat4 glass_world_to_floor;
 
@@ -100,5 +103,12 @@ void fragment() {
 		ROUGHNESS = mix(ROUGHNESS, surface_roughness, coverage);
 		SPECULAR = mix(SPECULAR, mix(0.25, 0.8, shine), coverage);
 		CLEARCOAT = mix(CLEARCOAT, 0.55 * shine, coverage);
+		if (coverage > 0.01) {
+			vec4 relief = texture(debris_relief, glass_uv);
+			vec3 bumped = normalize(vec3((relief.r * 2.0 - 1.0) * relief_strength, 1.0, (relief.g * 2.0 - 1.0) * relief_strength));
+			NORMAL = normalize(mix(NORMAL, normalize((VIEW_MATRIX * vec4(bumped, 0.0)).xyz), coverage));
+			// Debris reads as raised: faint contact darkening in the low parts of a flake.
+			ALBEDO *= mix(1.0, 0.8 + 0.2 * relief.a, coverage);
+		}
 	}
 }

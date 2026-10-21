@@ -38,6 +38,9 @@ const WALL_CASTER_LAYER := 1 << 19
 const BUDGET_FADE_SECONDS := 0.25
 var _budget_fade := 0.0
 var _sub_lights: Array[SpotLight3D] = []
+var _authored_range := 12.0
+# Reach of the cone on the floor, slightly widened: the light fades out by the cone's rim.
+const RIM_FADE_MARGIN := 1.05
 
 func _enter_tree() -> void:
 	add_to_group("planner_lights")
@@ -51,6 +54,7 @@ func _ready() -> void:
 	if marker != null:
 		marker.visible = false
 	if light != null:
+		_authored_range = light.spot_range
 		light.shadow_caster_mask = WALL_CASTER_LAYER
 		if not has_meta("planning_light_color"):
 			# Old authored scenes keep their original per-instance color.
@@ -154,6 +158,12 @@ func sync_sub_lights() -> void:
 		return
 	# Shadows switch on only once the lamp is fully lit, so a fading lamp never pops a shadow.
 	var shadowed := _budget_shadow and light.visible and _budget_fade >= 1.0
+	# Distance fall-off reaches zero at the floor under the cone's rim, so a pool has no hard edge
+	# and overlapping pools show no seam.
+	var height := global_position.y
+	if height > 0.1:
+		var rim_reach := height / cos(deg_to_rad(clampf(light.spot_angle, 1.0, 80.0))) * RIM_FADE_MARGIN
+		light.spot_range = clampf(rim_reach, 1.0, _authored_range)
 	light.shadow_enabled = shadowed
 	for extra in _sub_lights:
 		extra.spot_angle = light.spot_angle

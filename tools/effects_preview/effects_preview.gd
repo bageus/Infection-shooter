@@ -24,6 +24,7 @@ const VITALS := preload("res://game/presentation/prototype_hud/vitals_screen_fx.
 const FLOOR_HINT := preload("res://game/bootstrap/app/floor_hint_guide.gd")
 const DANGER_ZONE := preload("res://game/features/combat/public/floor_danger_zone.gd")
 const CLOUD := preload("res://game/features/infection_source/public/mutagen_cloud.tscn")
+const DESTRUCTION := preload("res://tools/effects_preview/destruction_tab.gd")
 const EYE := Vector3(10, 12, 10) * 0.45
 const TARGETS := [Vector3(1.6, 0, 1.2), Vector3(3.4, 0, -0.6), Vector3(1.0, 0, -3.0)]
 
@@ -56,6 +57,9 @@ var _berserk := false
 var _cloud: Node3D
 var _loop: CheckButton
 var _timer := 0.0
+## Where the camera looks and from how far; the destruction tab moves it to the object.
+var _focus := Vector3(0, 0.6, 0)
+var _distance := 0.0
 
 
 func _ready() -> void:
@@ -91,8 +95,9 @@ func _process(delta: float) -> void:
 		_screen = {"health": 100.0, "mutation": 0.0}
 	_vitals.call("update", delta, _screen["mutation"], 100.0, false, _screen["health"], 100.0)
 	var zoom := _player.camera_state.tick(delta)
-	_camera.position = EYE.normalized() * EYE.length() * (1.0 + zoom) + Vector3(0, 0.6, 0)
-	_camera.look_at(Vector3(0, 0.6, 0), Vector3.UP)
+	var reach := _distance if _distance > 0.0 else EYE.length()
+	_camera.position = EYE.normalized() * reach * (1.0 + zoom) + _focus
+	_camera.look_at(_focus, Vector3.UP)
 	if _loop.button_pressed and _last != "":
 		_timer -= delta / maxf(Engine.time_scale, 0.01)
 		if _timer <= 0.0:
@@ -314,7 +319,8 @@ func _build_ui() -> void:
 	scroll.offset_left = 12.0
 	scroll.offset_top = 12.0
 	scroll.offset_bottom = -12.0
-	scroll.offset_right = 210.0
+	scroll.offset_right = 290.0
+	scroll.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
 	layer.add_child(scroll)
 	var panel := VBoxContainer.new()
 	scroll.add_child(panel)
@@ -324,6 +330,10 @@ func _build_ui() -> void:
 	quality.selected = QUALITY.level
 	quality.item_selected.connect(func(index: int) -> void: QUALITY.set_level(index))
 	panel.add_child(quality)
+	var tabs := OptionButton.new()
+	tabs.add_item("Вкладка: эффекты")
+	tabs.add_item("Вкладка: разрушение объектов")
+	panel.add_child(tabs)
 	for name: String in _casts:
 		var button := Button.new()
 		button.text = name
@@ -343,3 +353,25 @@ func _build_ui() -> void:
 	label.text = "Скорость времени"
 	panel.add_child(label)
 	panel.add_child(slow)
+	var skill_nodes := panel.get_children().filter(func(node: Node) -> bool: return node != tabs)
+	var destruction := DESTRUCTION.new()
+	destruction.visible = false
+	panel.add_child(destruction)
+	destruction.setup(self, _look_at)
+	tabs.item_selected.connect(func(index: int) -> void:
+		for node: Node in skill_nodes:
+			node.visible = index == 0
+		destruction.visible = index == 1
+		_player.visible = index == 0
+		for enemy in _enemies:
+			enemy.visible = index == 0
+		if index == 0:
+			_look_at(Vector3(0, 0.6, 0), 0.0))
+
+
+## Aims the camera at `point` from `distance` metres (0 is the default skills view).
+func _look_at(point: Vector3, distance: float) -> void:
+	_focus = point
+	_distance = distance
+	# The tab panel covers the left of the window: shift the view so the object sits in the clear part.
+	_camera.h_offset = -distance * 0.12 if distance > 0.0 else 0.0

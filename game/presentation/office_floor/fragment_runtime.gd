@@ -2,6 +2,10 @@ extends Node
 ## Effects-root-local FIFO and bounded storage of reusable generic box fragments.
 const MAX_FRAGMENTS := 40
 const MAX_POOLED := 40
+# A fresh piece outlives the budget for this long, up to BURST_FRAGMENTS live pieces, so one blast
+# never shrinks the debris of the object it just broke while it is still flying.
+const MIN_VISIBLE_MSEC := 6000
+const BURST_FRAGMENTS := 120
 const SETTLED := preload("res://game/presentation/office_floor/settled_debris.gd")
 const BAKED := preload("res://game/presentation/office_floor/table_baked_pieces.gd")
 # A piece left to rest folds into the settled batch after this long at rest,
@@ -37,6 +41,7 @@ func _process(delta: float) -> void:
 	if _settle_clock < SETTLE_CHECK_SECONDS:
 		return
 	_settle_clock = 0.0
+	_trim_budget()
 	settle_resting(SETTLE_CHECK_SECONDS)
 
 
@@ -44,12 +49,17 @@ func register(body: RigidBody3D) -> void:
 	var id := body.get_instance_id()
 	var reference: WeakRef = weakref(body)
 	active[id] = reference
-	_fifo.append({"id": id, "reference": reference})
-	while active.size() > MAX_FRAGMENTS:
-		var oldest := _pop_oldest()
-		if oldest != null:
-			oldest.call("expire_fast")
+	_fifo.append({"id": id, "reference": reference, "time": Time.get_ticks_msec()})
+	_trim_budget()
 	_compact()
+
+
+func _trim_budget() -> void:
+	while active.size() > MAX_FRAGMENTS:
+		var oldest := _pop_oldest(active.size() <= BURST_FRAGMENTS)
+		if oldest == null:
+			break
+		oldest.call("expire_fast")
 
 
 # Draws the piece's model at its current pose in the baked batch and frees its body.
@@ -69,10 +79,12 @@ func unregister(body: RigidBody3D) -> void:
 		_head = 0
 
 
-func _pop_oldest() -> RigidBody3D:
+func _pop_oldest(spare_fresh: bool = false) -> RigidBody3D:
 	while _head < _fifo.size():
 		var record := _fifo[_head]
 		var id: int = record.id
+		if spare_fresh and active.has(id) and Time.get_ticks_msec() - int(record.get("time", 0)) < MIN_VISIBLE_MSEC:
+			return null
 		_head += 1
 		if not active.has(id) or active[id] != record.reference:
 			continue

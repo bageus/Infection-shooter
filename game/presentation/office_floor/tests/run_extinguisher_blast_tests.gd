@@ -39,6 +39,26 @@ func _run() -> void:
 	prop.global_position = Vector3(2.0, 0.05, 0.0)
 	prop.call("configure_world", effects, null)
 
+	var far := PROP.instantiate() as RigidBody3D
+	far.set("model_path", DESK)
+	stage.add_child(far)
+	far.global_position = Vector3(BLAST.EXTINGUISHER_RADIUS + 3.5, 0.05, 0.0)
+	far.call("configure_world", effects, null)
+
+	var behind := PROP.instantiate() as RigidBody3D
+	behind.set("model_path", DESK)
+	stage.add_child(behind)
+	behind.global_position = Vector3(0.0, 0.05, 2.6)
+	behind.call("configure_world", effects, null)
+	var wall := StaticBody3D.new()
+	var wall_shape := CollisionShape3D.new()
+	var wall_box := BoxShape3D.new()
+	wall_box.size = Vector3(4.0, 3.0, 0.2)
+	wall_shape.shape = wall_box
+	wall.add_child(wall_shape)
+	stage.add_child(wall)
+	wall.global_position = Vector3(0.0, 1.5, 1.6)
+
 	var enemy := Enemy.new()
 	enemy.add_to_group("infected")
 	stage.add_child(enemy)
@@ -57,6 +77,9 @@ func _run() -> void:
 		await physics_frame
 
 	_check(not is_instance_valid(prop) or bool(prop.get("_broken")), "The extinguisher blast breaks a nearby desk")
+	_check(is_instance_valid(prop) and not prop.is_queued_for_deletion() and effects.get_child_count() > 0, "The broken desk leaves debris instead of vanishing")
+	_check(is_instance_valid(far) and not bool(far.get("_broken")), "A desk outside the blast radius is untouched")
+	_check(is_instance_valid(behind) and not bool(behind.get("_broken")), "A wall shelters a desk from the blast")
 	_check(enemy.damage > 0.0, "The extinguisher blast damages an enemy in range")
 	_check(part.hits == 0, "An enemy's body part is not hit a second time")
 	stage.queue_free()

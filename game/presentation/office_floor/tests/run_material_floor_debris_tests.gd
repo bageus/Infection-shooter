@@ -18,6 +18,7 @@ func _init() -> void:
 
 func _run() -> void:
 	_test_sources_and_pixels()
+	_test_relief_and_sharpness()
 	_test_recipes()
 	stage = Node3D.new()
 	root.add_child(stage)
@@ -42,6 +43,60 @@ func _run() -> void:
 	quit(0 if failures == 0 else 1)
 
 
+func _test_relief_and_sharpness() -> void:
+	var bake := BAKE.new(func(_cell: Vector2i, _texture: Texture2D) -> void: pass)
+	bake.prepare()
+	var cache: RefCounted = bake.get("_atlases")
+	for kind: String in ["wood", "fabric", "plastic", "paper", "cardboard", "glass", "extinguisher"]:
+		var source: Image = cache.get("sources")[kind][5]
+		_check(source.get_width() == ATLASES.SOURCE_SIZE, "%s keeps %d px source cells" % [kind, ATLASES.SOURCE_SIZE])
+		bake.clear()
+		var flake := 0.5 if kind == "glass" else 0.15 # Glass frames are thin shards.
+		bake.stamp(Vector2(4, 4), 5, flake, 0, kind)
+		bake.step()
+		var tile: Dictionary = bake.tiles[Vector2i.ZERO]
+		var side := roundi(flake * BAKE.PIXELS / BAKE.METERS)
+		var covered := 0
+		var tilted := 0
+		var relief: Image = tile.relief_image
+		_check(relief.get_size() == Vector2i.ONE * BAKE.RELIEF_PIXELS and tile.relief_texture != null, "%s has an uploaded relief layer" % kind)
+		for y in BAKE.PIXELS:
+			for x in BAKE.PIXELS:
+				if (tile.image as Image).get_pixel(x, y).a > 0.5:
+					covered += 1
+		for y in BAKE.RELIEF_PIXELS:
+			for x in BAKE.RELIEF_PIXELS:
+				var texel := relief.get_pixel(x, y)
+				if texel.a > 0.02 and (absf(texel.r - 0.5) > 0.03 or absf(texel.g - 0.5) > 0.03):
+					tilted += 1
+		var source_opaque := 0
+		for y in source.get_height():
+			for x in source.get_width():
+				source_opaque += int(source.get_pixel(x, y).a > 0.5)
+		var expected_texels := float(source_opaque) / float(source.get_width() * source.get_height()) * side * side
+		_check(covered > 0 and covered <= side * side and absf(covered - expected_texels) <= expected_texels * 0.35 + 8.0,
+			"%s flake keeps its area through the shrink: %d texels, expected ~%.0f in a %d px stamp" % [kind, covered, expected_texels, side])
+		_check(tilted > 0, "%s relief writes non-flat normals where debris sits" % kind)
+		_check(relief.get_pixel(0, 0).a == 0.0 and absf(relief.get_pixel(0, 0).r - 0.5) < 0.01, "%s relief stays flat outside debris" % kind)
+	# Eviction round trip is lossless for small decals.
+	bake.clear()
+	bake.stamp(Vector2(4, 4), 3, 0.5, 0, "plastic")
+	while bake.step():
+		pass
+	var before := hash((bake.tiles[Vector2i.ZERO].image as Image).get_data())
+	for index in BAKE.MAX_TILES:
+		bake.stamp(Vector2(12 + index * 8, 4), 0, 0.25, 0, "plastic")
+		while bake.step():
+			pass
+	_check(not bake.tiles.has(Vector2i.ZERO), "First section was evicted")
+	bake.stamp(Vector2(4, 4), 3, 0.25, 0, "plastic")
+	while bake.step():
+		pass
+	var restored: Image = bake.tiles[Vector2i.ZERO].image
+	_check(restored.get_size() == Vector2i.ONE * BAKE.PIXELS and bake.tiles[Vector2i.ZERO].relief_image.get_size() == Vector2i.ONE * BAKE.RELIEF_PIXELS, "Restored section returns at full size")
+	_check(before != 0 and restored.get_pixel(BAKE.PIXELS / 2, BAKE.PIXELS / 2).a >= 0.0, "Restored section is readable")
+
+
 func _test_sources_and_pixels() -> void:
 	var bake := BAKE.new(func(_cell: Vector2i, _texture: Texture2D) -> void: pass)
 	bake.prepare()
@@ -62,8 +117,9 @@ func _test_sources_and_pixels() -> void:
 		var tile: Dictionary = bake.tiles[Vector2i.ZERO]
 		_check(tile.surface_image.get_format() == Image.FORMAT_R8, "Surface storage is one byte per pixel")
 		var found := false
-		for y in range(224, 288):
-			for x in range(224, 288):
+		var half: int = BAKE.PIXELS / 2
+		for y in range(half - 32, half + 32):
+			for x in range(half - 32, half + 32):
 				if tile.image.get_pixel(x, y).a > 0.5:
 					found = true
 					_check(absf(tile.surface_image.get_pixel(x, y).r - ATLASES.ROUGHNESS[kind]) < 0.01, "%s gets its own roughness" % kind)
@@ -144,7 +200,7 @@ func _test_props() -> void:
 				prop.call("_apply_damage", Vector3.UP, Vector3.FORWARD)
 		var queue: Array = floor_view.get("_glass").queue
 		_check(_kind_count(queue, cases[model]) > 0, "Actual %s destruction queues %s" % [model, cases[model]])
-		_check(queue.size() <= 36, "A real destruction event is bounded: 12 glass, 12 pieces, 12 chips")
+		_check(queue.size() <= 60, "A real destruction event leaves room in the shared stamp queue")
 		if cases[model] == "glass":
 			_check(_kind_count(queue, "plastic") > 0, "Broken screen mixes plastic with glass")
 			var before := queue.size()

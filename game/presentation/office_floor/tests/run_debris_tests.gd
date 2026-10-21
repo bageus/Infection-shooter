@@ -134,19 +134,29 @@ func _test_expire_bakes_and_frees(stage: Node3D) -> void:
 
 
 func _test_budget(stage: Node3D) -> void:
+	var runtime_class := preload("res://game/presentation/office_floor/fragment_runtime.gd")
 	for i in 55:
 		@warning_ignore("integer_division")
 		_fragment(stage, Vector3(8 + (i % 8) * 0.5, 0.5 + i * 0.01, -8 + (i / 8) * 0.5))
 	await physics_frame
-	var live := 0
-	for piece in get_nodes_in_group(FRAGMENT.GROUP):
-		if not DEBRIS.is_fading(piece):
-			live += 1
-	_expect(live <= FRAGMENT.MAX_FRAGMENTS, "Live debris stays within the budget (%d)." % live)
+	_expect(_live_pieces() == 55, "A burst of fresh pieces over the budget is not shrunk away (%d live)." % _live_pieces())
+	for i in runtime_class.BURST_FRAGMENTS:
+		@warning_ignore("integer_division")
+		_fragment(stage, Vector3(8 + (i % 8) * 0.5, 0.5 + i * 0.01, -12 + (i / 8) * 0.5))
+	await physics_frame
+	_expect(_live_pieces() <= runtime_class.BURST_FRAGMENTS, "Live debris stays within the burst cap (%d)." % _live_pieces())
 	await create_timer(DEBRIS.FAST_FADE_SECONDS + 0.3).timeout
 	for piece in get_nodes_in_group(FRAGMENT.GROUP):
 		piece.queue_free()
 	await process_frame
+
+
+func _live_pieces() -> int:
+	var live := 0
+	for piece in get_nodes_in_group(FRAGMENT.GROUP):
+		if not DEBRIS.is_fading(piece):
+			live += 1
+	return live
 
 
 func _test_physical_prop_break(stage: Node3D) -> void:

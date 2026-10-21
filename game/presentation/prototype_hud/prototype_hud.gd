@@ -262,7 +262,7 @@ func _update_vitals() -> void:
 	_update_armor(float(player.armor), float(player.max_armor))
 	_mutation_feedback.set_value(mutation, 100.0)
 	_mutation_feedback.set_marker_fraction(critical / 100.0)
-	antidote_count.text = "∞" if player.infinite_antidotes else str(player.antidotes)
+	antidote_count.text = "∞" if player.infinite_antidotes else ("MAX" if player.antidotes >= player.max_antidotes else str(player.antidotes))
 	_update_key_cell(has_key)
 
 

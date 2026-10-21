@@ -1,13 +1,15 @@
 extends RefCounted
 ## Power Strike presentation: the fist gathers behind the player, lunges as a
-## white-hot comet with a torn fire tail, and bursts at the end of its reach
-## with a flash, a shock ring, flying sparks and smoke. A scorched wedge shows
-## the struck area on the floor. Local -Z is forward.
+## comet with a torn blood tail, and bursts at the end of its reach with a
+## splash, a shock ring, flying droplets and a red mist. A wedge from the feet
+## shows the struck area on the floor: a hairline flashes along it, then the
+## area unfolds to both sides. Local -Z is forward.
 
 const NODE := preload("res://game/features/player/skill_fx/skill_fx_node.gd")
 const COMET_SHADER := preload("res://game/features/player/skill_fx/fx_strike_comet.gdshader")
 const LANE_SHADER := preload("res://game/features/player/skill_fx/fx_strike_lane.gdshader")
 const RING_SHADER := preload("res://game/features/player/skill_fx/fx_ground_ring.gdshader")
+const DANGER := preload("res://game/features/combat/public/floor_danger_zone.gd")
 const PUFF_SHADER := preload("res://game/features/player/skill_fx/fx_puff.gdshader")
 
 const REACH := 2.6
@@ -30,18 +32,18 @@ static func play(parent: Node, center: Vector3, direction: Vector3) -> Node3D:
 	fx.name = "PowerStrikeFx"
 	fx.life = LIFE
 	parent.add_child(fx)
-	fx.global_position = center + Vector3.UP * 0.05
+	fx.global_position = DANGER.floor_point(parent.get_world_3d(), center) + Vector3.UP * 0.03
 	fx.look_at(center + direction, Vector3.UP)
 	var lane := _lane(fx)
 	var fist := _quad(fx, _material("comet", COMET_SHADER, {}))
 	fist.position = Vector3(0.0, HEIGHT, BACK)
-	var flash := _quad(fx, _material("flash", PUFF_SHADER, {"color": Color(1.0, 0.72, 0.32), "glow": 1.0}))
+	var flash := _quad(fx, _material("flash", PUFF_SHADER, {"color": Color(0.85, 0.05, 0.07), "glow": 0.35}))
 	flash.position = Vector3(0.0, HEIGHT, -REACH)
 	flash.visible = false
-	var ring := _plane(fx, _material("ring", RING_SHADER, {"color": Color(1.0, 0.35, 0.1), "core_color": Color(1.0, 0.85, 0.6), "glow": 1.0, "width": 0.06, "fill": 0.25, "brightness": 1.6, "jagged": 0.4}))
-	ring.position = Vector3(0.0, 0.04, -REACH)
+	var ring := _plane(fx, _material("ring", RING_SHADER, {"color": Color(0.7, 0.02, 0.05), "core_color": Color(1.0, 0.45, 0.45), "glow": 0.3, "width": 0.06, "fill": 0.25, "brightness": 1.3, "jagged": 0.4}))
+	ring.position = Vector3(0.0, 0.01, -REACH)
 	ring.visible = false
-	var smoke_material := _material("smoke", PUFF_SHADER, {"color": Color(0.32, 0.2, 0.14), "glow": 0.0})
+	var smoke_material := _material("smoke", PUFF_SHADER, {"color": Color(0.4, 0.03, 0.05), "glow": 0.0})
 	var smoke: Array[MeshInstance3D] = []
 	for i in SMOKE:
 		var puff := _quad(fx, smoke_material)
@@ -49,7 +51,7 @@ static func play(parent: Node, center: Vector3, direction: Vector3) -> Node3D:
 		puff.set_instance_shader_parameter(&"seed", randf() * 10.0)
 		puff.visible = false
 		smoke.append(puff)
-	var spark_material := _material("spark", PUFF_SHADER, {"color": Color(1.0, 0.6, 0.2), "glow": 1.0})
+	var spark_material := _material("spark", PUFF_SHADER, {"color": Color(0.6, 0.02, 0.04), "glow": 0.0})
 	var sparks: Array[Dictionary] = []
 	for i in SPARKS:
 		var spark := _quad(fx, spark_material)
@@ -62,7 +64,8 @@ static func play(parent: Node, center: Vector3, direction: Vector3) -> Node3D:
 
 
 static func _step(age: float, _fade: float, lane: MeshInstance3D, fist: MeshInstance3D, flash: MeshInstance3D, ring: MeshInstance3D, smoke: Array[MeshInstance3D], sparks: Array[Dictionary]) -> void:
-	lane.set_instance_shader_parameter(&"alpha", clampf(1.0 - (age - 0.2) / 0.7, 0.0, 1.0) if age > 0.2 else 1.0)
+	lane.set_instance_shader_parameter(&"alpha", clampf(1.0 - (age - 0.3) / 0.65, 0.0, 1.0) if age > 0.3 else clampf(age / 0.04, 0.0, 1.0))
+	lane.set_instance_shader_parameter(&"open", lerpf(0.03, 1.0, smoothstep(0.05, 0.25, age)))
 	var arrival := GATHER + LUNGE
 	if age < arrival:
 		var travel := clampf((age - GATHER) / LUNGE, 0.0, 1.0)
@@ -108,7 +111,7 @@ static func _lane(fx: Node3D) -> MeshInstance3D:
 		var along := float(row) / rows
 		var half_width := lerpf(0.5, 1.5, along)
 		for column: Array in columns:
-			vertices.append(Vector3(float(column[0]) * half_width, 0.03, lerpf(0.2, -REACH, along)))
+			vertices.append(Vector3(float(column[0]) * half_width, 0.0, lerpf(0.0, -REACH, along)))
 			colors.append(Color(float(column[1]), 1.0 - along * along, 0.0, 1.0))
 			uvs.append(Vector2(float(column[0]), along * (REACH + 0.2)))
 	for row in rows:
@@ -125,7 +128,7 @@ static func _lane(fx: Node3D) -> MeshInstance3D:
 	mesh.add_surface_from_arrays(Mesh.PRIMITIVE_TRIANGLES, arrays)
 	var lane := MeshInstance3D.new()
 	lane.mesh = mesh
-	lane.material_override = _material("lane", LANE_SHADER, {"tint": Vector3(1.0, 0.45, 0.12), "flow": -2.6, "opacity": 0.5})
+	lane.material_override = _material("lane", LANE_SHADER, {"tint": Vector3(0.6, 0.02, 0.05), "core": Vector3(1.0, 0.35, 0.35), "flow": -2.6, "opacity": 0.95})
 	lane.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
 	fx.add_child(lane)
 	return lane

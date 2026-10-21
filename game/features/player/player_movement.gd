@@ -51,7 +51,7 @@ const MUTATION_DASH_SPEED := 13.0
 @export var max_health: float = 100.0
 @export var max_armor: float = 100.0
 @export var starting_antidotes: int = 2
-@export var max_antidotes: int = 3
+@export var max_antidotes: int = 5
 @onready var camera_rig: Node3D = $CameraRig
 @onready var camera: Camera3D = $CameraRig/Camera3D
 @onready var aim_pivot: Node3D = $AimPivot
@@ -60,6 +60,7 @@ const MUTATION_DASH_SPEED := 13.0
 @onready var infection_runtime: Node = $InfectionRuntime
 @onready var weapon_mount: Node = $WeaponMount
 var _footstep_surface: Callable
+var _biomass_footstep_surface: Callable
 var audio: Node
 var weapon_stance := WEAPON_STANCE.new()
 var _animation_selection := ANIMATION_SELECTION.new()
@@ -120,6 +121,7 @@ func _ready() -> void:
 	audio.configure(self, camera_rig, $AnimationDriver)
 	audio.configure_skills(infection_runtime)
 	audio.set("glass_surface_query", _footstep_surface)
+	audio.set("biomass_surface_query", _biomass_footstep_surface)
 	var heal_feedback := HEAL_FEEDBACK.new()
 	heal_feedback.name = "HealFeedback"
 	add_child(heal_feedback)
@@ -268,10 +270,12 @@ func configure_world(container: Node3D, impacts: Node) -> void:
 		mutation_effects.call("configure_world", container)
 
 
-func configure_footstep_surface(query: Callable) -> void:
+func configure_footstep_surface(query: Callable, biomass_query := Callable()) -> void:
 	_footstep_surface = query
+	_biomass_footstep_surface = biomass_query
 	if is_instance_valid(audio):
 		audio.set("glass_surface_query", query)
+		audio.set("biomass_surface_query", biomass_query)
 
 
 func configure_weapon_drop(command: Callable) -> void:

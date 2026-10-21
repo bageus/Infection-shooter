@@ -70,7 +70,7 @@ func load_all(initial: Array[String], tree: SceneTree, progress: Callable) -> St
 			next = paths.size()
 		reported = maxf(reported, minf(0.99, float(completed) / maxi(paths.size(), 1)))
 		progress.call(0.15 + 0.35 * reported, "resources")
-		if not pending.is_empty() or next < paths.size():
+		if not _background_loading or not pending.is_empty() or next < paths.size():
 			await tree.process_frame
 	if not problem.is_empty():
 		resources.clear()

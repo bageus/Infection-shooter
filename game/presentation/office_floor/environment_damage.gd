@@ -3,6 +3,10 @@ extends RefCounted
 const FRAGMENT_SCRIPT = preload("res://game/presentation/office_floor/environment_fragment.gd")
 
 
+# Pieces thinner than this (m) get continuous collision detection.
+const THIN_PIECE := 0.1
+
+
 static func find_named(node: Node, wanted: String) -> Node3D:
 	if node is Node3D and (node.name.to_lower() == wanted.to_lower() or node.name.to_lower().begins_with(wanted.to_lower() + ".")):
 		return node as Node3D
@@ -51,6 +55,9 @@ static func spawn_piece(host: Node3D, mesh: MeshInstance3D, owner: Node3D, stage
 	box.size = Vector3(maxf(bounds.size.x, 0.02), maxf(bounds.size.y, 0.02), maxf(bounds.size.z, 0.02))
 	shape.shape = box
 	fragment.add_child(shape)
+	# A thin panel thrown at a few m/s moves further per physics step than it is thick and would
+	# sink into the floor before the contact is resolved; sweep it so it stops on the surface.
+	fragment.continuous_cd = minf(box.size.x, minf(box.size.y, box.size.z)) < THIN_PIECE
 	var copy := MeshInstance3D.new()
 	copy.mesh = mesh.mesh
 	copy.material_override = mesh.material_override

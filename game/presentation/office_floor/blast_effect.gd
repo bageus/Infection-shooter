@@ -2,8 +2,16 @@ extends RefCounted
 const SPARKS := preload("res://game/presentation/office_floor/electric_sparks.gd")
 const GRENADE := preload("res://game/features/combat/public/grenade_explosion.gd")
 
+# Extinguisher strength lives here; prop damage and falloff come from the grenade blast path.
+# The radius matches the powder cloud (extinguisher_hit_fx cloud_radius) and is well under a grenade's 5.5 m.
+const EXTINGUISHER_RADIUS := 3.0
+const CREATURE_DAMAGE := 14.0
+const STUN_BASE := 3.0
+const STUN_FALLOFF := 2.0
+const SHELTER_LIFT := 0.25
+
 # Shared point-blank blast response for extinguisher and future explosions.
-static func detonate(host: Node3D, location: Vector3, radius: float = 5.0, show_visuals: bool = true) -> void:
+static func detonate(host: Node3D, location: Vector3, radius: float = EXTINGUISHER_RADIUS, show_visuals: bool = true) -> void:
 	if show_visuals:
 		smoke(host, location)
 		SPARKS.spawn(host, location, true)
@@ -16,13 +24,13 @@ static func detonate(host: Node3D, location: Vector3, radius: float = 5.0, show_
 				continue
 			var force := 1.0 - distance / radius
 			if victim.has_method("take_damage"):
-				victim.call("take_damage", 14.0 * force)
+				victim.call("take_damage", CREATURE_DAMAGE * force)
 			if victim.has_method("apply_blast_stun"):
-				victim.call("apply_blast_stun", 3.0 + 2.0 * force, force)
+				victim.call("apply_blast_stun", STUN_BASE + STUN_FALLOFF * force, force)
 	_damage_objects(host, location, radius)
 
 
-# Furniture and glass in the blast take the same grenade hit, so glass breaks.
+# Props and glass take the grenade hit (shelter, shape, falloff, push) so they break in stages.
 static func _damage_objects(host: Node3D, location: Vector3, radius: float) -> void:
 	var query := PhysicsShapeQueryParameters3D.new()
 	var sphere := SphereShape3D.new()
@@ -30,19 +38,25 @@ static func _damage_objects(host: Node3D, location: Vector3, radius: float) -> v
 	query.shape = sphere
 	query.transform.origin = location
 	query.collision_mask = 7
+	var world := host.get_world_3d()
 	var hit_ids := {}
-	for hit in GRENADE.blast_hits(host.get_world_3d().direct_space_state, query):
+	for hit in GRENADE.blast_hits(world.direct_space_state, query):
 		var body := hit.get("collider") as Node3D
 		if body == null or body == host or hit_ids.has(body.get_instance_id()):
 			continue
 		hit_ids[body.get_instance_id()] = true
-		if not body.has_method("take_projectile_hit") or _is_creature(body):
+		if not body.has_method("take_projectile_hit") and not body.has_method("take_projectile_hit_at_shape") or _is_creature(body):
 			continue
-		var distance := body.global_position.distance_to(location)
+		if GRENADE.is_sheltered(world, location + Vector3.UP * SHELTER_LIFT, body):
+			continue
+		var shape := int(hit.get("shape", -1))
+		var distance := GRENADE.distance_to_shape(body, shape, location, body.global_position)
+		var factor := pow(1.0 - clampf(distance / radius, 0.0, 1.0), 1.15)
 		var direction := (body.global_position - location).normalized()
 		if direction.length_squared() < 0.01:
 			direction = Vector3.UP
-		body.call("take_projectile_hit", 380.0 * (1.0 - distance / radius), location, -direction, direction, "GRENADE")
+		GRENADE.hit_object(body, shape, location, direction, factor)
+		GRENADE.push_body(body, direction, factor)
 
 
 # Enemies and the player are hit through their own damage path above.

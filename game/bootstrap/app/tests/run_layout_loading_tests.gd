@@ -24,6 +24,9 @@ func _initialize() -> void:
 
 
 func _run() -> void:
+	var migration := CATALOG.new()
+	for old_path in ["res://models/objects/enviroments/06/06_office_chair_2_fell.glb", "res://game/presentation/office_floor/public/props/06_office_chair_2_fell.tscn"]:
+		_expect(migration._migrate_scene_path(old_path) == "res://models/objects/enviroments/06/06_office_chair_2.glb", "Retired chair records retain a current replacement")
 	var world := Node3D.new()
 	root.add_child(world)
 	var player := Node3D.new()

@@ -45,9 +45,13 @@ static func play(anchor: MeshInstance3D, point: Vector3, normal: Vector3, parent
 			return
 
 
-func covers(point: Vector3, normal: Vector3) -> bool:
+func watch(piece: Node3D) -> void:
+	_piece = weakref(piece)
+
+
+func covers(point: Vector3, normal: Vector3, surface := "wall") -> bool:
 	var piece := _piece.get_ref() as Node3D if _piece != null else null
-	if piece == null or not piece.is_inside_tree() or piece.is_queued_for_deletion() or str(piece.get("surface")) != "wall":
+	if piece == null or not piece.is_inside_tree() or piece.is_queued_for_deletion() or str(piece.get("surface")) != surface:
 		return false
 	if not ATLAS.is_biomass_id(str(piece.get("texture_name"))):
 		return false
