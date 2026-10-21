@@ -14,9 +14,9 @@ const PUFF_SHADER := preload("res://game/features/player/skill_fx/fx_puff.gdshad
 
 const REACH := 2.6
 const BACK := 0.8
-const GATHER := 0.1
-const LUNGE := 0.18
-const LIFE := 1.0
+const GATHER := 0.12
+const LUNGE := 0.24
+const LIFE := 1.2
 const SPARKS := 10
 const SMOKE := 3
 const HEIGHT := 0.9
@@ -33,7 +33,9 @@ static func play(parent: Node, center: Vector3, direction: Vector3) -> Node3D:
 	fx.life = LIFE
 	parent.add_child(fx)
 	fx.global_position = DANGER.floor_point(parent.get_world_3d(), center) + Vector3.UP * 0.03
-	fx.look_at(center + direction, Vector3.UP)
+	# Aim from the floor, not the body origin (at body height): a target at the
+	# player's height would tilt the whole strike up into the air.
+	fx.look_at(fx.global_position + direction, Vector3.UP)
 	var lane := _lane(fx)
 	var fist := _quad(fx, _material("comet", COMET_SHADER, {}))
 	fist.position = Vector3(0.0, HEIGHT, BACK)
@@ -58,7 +60,8 @@ static func play(parent: Node, center: Vector3, direction: Vector3) -> Node3D:
 		spark.visible = false
 		var angle := randf() * TAU
 		var speed := randf_range(2.0, 5.0)
-		sparks.append({"node": spark, "velocity": Vector3(cos(angle) * speed, randf_range(1.5, 4.0), sin(angle) * speed * 0.6 - 2.0)})
+		# Splatter bounces off the wall: sideways and back towards the player, never past the reach.
+		sparks.append({"node": spark, "velocity": Vector3(cos(angle) * speed, randf_range(1.5, 4.0), absf(sin(angle)) * speed * 0.5 + 0.5)})
 	fx.step = _step.bind(lane, fist, flash, ring, smoke, sparks)
 	return fx
 
@@ -69,7 +72,8 @@ static func _step(age: float, _fade: float, lane: MeshInstance3D, fist: MeshInst
 	var arrival := GATHER + LUNGE
 	if age < arrival:
 		var travel := clampf((age - GATHER) / LUNGE, 0.0, 1.0)
-		fist.position.z = lerpf(BACK, -REACH, travel * travel)
+		# Decelerates into the end of the reach, like a fist meeting a wall.
+		fist.position.z = lerpf(BACK, -REACH, 1.0 - (1.0 - travel) * (1.0 - travel))
 		var gather := clampf(age / GATHER, 0.0, 1.0)
 		fist.set_instance_shader_parameter(&"size", Vector2(lerpf(0.25, 0.5, gather), lerpf(0.5, 1.0, gather) + travel * 1.8))
 		fist.set_instance_shader_parameter(&"alpha", gather)

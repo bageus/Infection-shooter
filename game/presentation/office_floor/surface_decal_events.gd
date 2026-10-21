@@ -30,6 +30,8 @@ func hit(collider: Node3D, point: Vector3, normal: Vector3, weapon: String, anch
 			_floor_stamp(Vector2(local.x, local.z), "floor_scuff", randi_range(0, 15), randf_range(0.35, 0.7))
 		return true
 	if not is_instance_valid(anchor): return false
+	# Window frames are glass-only: a hit there never gets plaster or a bullet hole.
+	if _is_window_frame(collider): return glass_hit(anchor, point, normal)
 	var parent_name := str(collider.get_parent().name) if collider.get_parent() else ""
 	var label := (str(collider.name) + " " + str(anchor.name) + " " + parent_name).to_lower()
 	var wall := absf(normal.y) < 0.6 and (_is_architecture(collider) or "wall" in label or "column" in label) and "wood" not in label
@@ -50,6 +52,14 @@ static func _is_architecture(collider: Node) -> bool:
 	while node != null:
 		if node.is_in_group("camera_occluder"):
 			return true
+		node = node.get_parent()
+	return false
+
+# Exterior window models (window_double.tscn) keep their frame under the same root, so walk up to it.
+static func _is_window_frame(collider: Node) -> bool:
+	var node := collider
+	while node != null:
+		if node.scene_file_path.get_file() == "window_double.tscn": return true
 		node = node.get_parent()
 	return false
 

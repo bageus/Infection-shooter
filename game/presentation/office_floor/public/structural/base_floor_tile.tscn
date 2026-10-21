@@ -4,7 +4,7 @@
 
 [sub_resource type="BoxMesh" id="TileMesh"]
 material = ExtResource("tile_material")
-size = Vector3(1.998, 0.025, 1.998)
+size = Vector3(2.0, 0.025, 2.0)
 
 [node name="BaseFloorTile" type="MeshInstance3D"]
 mesh = SubResource("TileMesh")

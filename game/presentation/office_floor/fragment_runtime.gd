@@ -14,6 +14,7 @@ const SETTLE_CHECK_SECONDS := 0.5
 const SETTLE_NEAR_SECONDS := 10.0
 const SETTLE_FAR_SECONDS := 5.0
 const SETTLE_FAR_DISTANCE := 8.0
+const FLOOR_TOP := 0.0135
 const FRAGMENT_PATH := "res://game/presentation/office_floor/environment_fragment.gd"
 var active: Dictionary = {}
 var _fifo: Array[Dictionary] = []
@@ -62,11 +63,17 @@ func _trim_budget() -> void:
 		oldest.call("expire_fast")
 
 
-# Draws the piece's model at its current pose in the baked batch and frees its body.
+# Draws the piece's model in the baked batch and frees its body. A piece that is not lying on the
+# floor (flying, lodged in a frame, propped up) is dropped straight down onto the floor first.
 func bake(body: RigidBody3D) -> void:
 	for child in body.get_children():
 		if child is MeshInstance3D:
-			_baked.call("bake", child)
+			var visual := child as MeshInstance3D
+			var drop := 0.0
+			if visual.mesh != null:
+				var box: AABB = visual.global_transform * visual.get_aabb()
+				drop = maxf(box.position.y - FLOOR_TOP, 0.0)
+			_baked.call("bake", visual, drop)
 			break
 	body.call("retire_from_budget")
 	body.queue_free()

@@ -31,12 +31,20 @@ func _run() -> void:
 	airborne.call("expire")
 	squeezed.call("expire_fast")
 	await process_frame
-	_expect(baked.call("count") == 1, "A final fragment bakes into the floor batch")
 	_expect(not is_instance_valid(final) or final.is_queued_for_deletion(), "A baked fragment frees its body")
-	_expect(baked.call("count") == 1, "A breakable, airborne or budget-expired fragment never bakes")
+	_expect(baked.call("count") == 3, "Final, airborne and budget-expired fragments all bake; none just vanishes")
 	_expect(not keep.has_meta("debris_fading"), "A resting breakable fragment stays when its timer ends")
-	_expect(airborne.has_meta("debris_fading"), "An airborne fragment shrinks away")
-	_expect(squeezed.has_meta("debris_fading"), "A breakable fragment shrinks away when the budget is full")
+	_expect(not is_instance_valid(airborne) or not airborne.has_meta("debris_fading"), "An airborne fragment is baked, not shrunk away")
+	_expect(not is_instance_valid(squeezed) or not squeezed.has_meta("debris_fading"), "A breakable fragment is baked when the budget is full")
+	var multi := baked.get_child(0) as MultiMeshInstance3D
+	var lowest := INF
+	for index in multi.multimesh.visible_instance_count:
+		lowest = minf(lowest, multi.multimesh.get_instance_transform(index).origin.y)
+	_expect(lowest > -0.2, "A baked airborne fragment lands on the floor, not in mid-air")
+	var top := 0.0
+	for index in multi.multimesh.visible_instance_count:
+		top = maxf(top, multi.multimesh.get_instance_transform(index).origin.y)
+	_expect(top < 0.6, "A baked airborne fragment is dropped from its flight height")
 	print("Fragment bake tests: %d failures" % failures)
 	quit(0 if failures == 0 else 1)
 

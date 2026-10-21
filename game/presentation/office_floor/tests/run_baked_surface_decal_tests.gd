@@ -20,10 +20,12 @@ func _run() -> void:
 	_test_pixels()
 	if DisplayServer.get_name() == "headless":
 		await _test_receivers()
+		_test_fresh_receivers()
 		await _test_persistence()
 		await _test_glass()
 		await _test_displays()
 		_test_steps()
+		_test_window_frames()
 	else:
 		# Real-model hooks run headlessly above; native QA isolates the new shader.
 		await _test_render()
@@ -71,6 +73,17 @@ func _test_pixels() -> void:
 	_check(_alpha(bake.tiles[cell].layers[0].image) > 0 and _alpha(bake.tiles[cell].layers[1].image) > 0, "Damage and scuff pixels visible")
 	_check(floor_view.get_child_count() == nodes, "Floor adds no per-mark nodes")
 	floor_view.call("clear_glass_debris")
+
+func _test_fresh_receivers() -> void:
+	# A receiver overlay must sample real decal textures from its first frame; an unset sampler reads white.
+	var baker: RefCounted = floor_view.get("_surface_events").receivers
+	var anchors: Array[MeshInstance3D] = [_box(Vector3(-40, 1, 0)), _box(Vector3(-40, 1, 3))]
+	for anchor in anchors: baker.stamp(anchor, anchor.position, Vector3.BACK, "wall_damage", 3, 0.6, 0.5)
+	baker.step()
+	for anchor in anchors:
+		var material := anchor.material_overlay as ShaderMaterial
+		_check(material != null and material.get_shader_parameter("damage") != null and material.get_shader_parameter("scuffs") != null, "New receiver overlay is textured before the next upload")
+	while baker.step(): pass
 
 func _test_receivers() -> void:
 	var baker: RefCounted = floor_view.get("_surface_events").receivers
@@ -189,6 +202,18 @@ func _test_steps() -> void:
 	floor_view.call("clear_glass_debris")
 	for index in 100: events.step_at(Vector3(1, 3, 1), Vector3.UP)
 	_check(floor_view.get("_glass").queue.is_empty(), "Raised support never stains floor underneath")
+
+func _test_window_frames() -> void:
+	var window := load("res://game/presentation/office_floor/public/structural/window_double.tscn").instantiate() as Node3D
+	stage.add_child(window)
+	var frame := window.find_children("*", "StaticBody3D", true, false)
+	_check(not frame.is_empty(), "Window model has collision bodies")
+	for body: Node in frame:
+		_check(EVENTS._is_window_frame(body), "Window collider %s is a window frame" % body.name)
+	var wall := _box(Vector3(5, 1, 0))
+	_check(not EVENTS._is_window_frame(wall), "Plain wall is not a window frame")
+	wall.queue_free()
+	window.queue_free()
 
 func _test_render() -> void:
 	var camera := Camera3D.new()

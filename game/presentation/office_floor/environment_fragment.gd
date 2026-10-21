@@ -176,18 +176,15 @@ func expire_fast() -> void:
 	_leave_floor(DEBRIS.FAST_FADE_SECONDS, true)
 
 
-# A resting piece with a next stage stays until the budget needs it, so a later hit can break it further;
-# a resting final model piece bakes into the floor. A piece still moving, lodged in a frame or propped up
-# would stay in mid-air forever, so every other piece shrinks away.
+# A resting piece with a next stage stays until the budget needs it, so a later hit can break it further.
+# Every other model piece bakes into the floor; one still moving, lodged in a frame or propped up is
+# dropped onto the floor under it first, so no piece of a destroyed object just vanishes.
 func _leave_floor(seconds: float, budget_full: bool) -> void:
 	if DEBRIS.is_fading(self):
 		return
-	if not _lies_on_floor():
-		DEBRIS.fade_free(self, seconds)
-	elif breakable:
-		if budget_full:
-			DEBRIS.fade_free(self, seconds)
-	elif pool_owner == null and is_instance_valid(_runtime):
+	if breakable and not budget_full and _lies_on_floor():
+		return
+	if pool_owner == null and is_instance_valid(_runtime):
 		_runtime.call("bake", self)
 	else:
 		DEBRIS.fade_free(self, seconds)
