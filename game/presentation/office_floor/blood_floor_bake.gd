@@ -1,21 +1,24 @@
 extends Node3D
 ## Permanent floor stains. Floor marks leaving the budget are blitted into small CPU
 ## tiles (128x128 RGBA8 covering 4x4 m, 64 KB each). At most MAX_LIVE tiles are shown,
-## one Decal each, and at most one GPU texture upload happens per 0.1 s physics tick.
-## Tiles beyond MAX_LIVE (or MAX_TILES) are kept as images only, then dropped farthest-first.
+## one Decal or quad each, and at most one GPU texture upload happens per 0.1 s physics tick.
+## Tiles in the camera view are shown first, then nearest first; tiles beyond MAX_LIVE
+## (or MAX_TILES) are kept as images only, then dropped out-of-view and farthest first.
 
 const STAMP := preload("res://game/presentation/office_floor/blood_floor_stamp.gd")
-const MAX_LIVE := 16
+const MAX_LIVE := 64
 const MAX_TILES := 64
 const MAX_QUEUE := 64
 const STAMPS_PER_TICK := 2
 const SWAP_MARGIN := 4.0
+const OUT_OF_VIEW := 1000.0
 
 var settings: Dictionary = {}
 var _stamp := STAMP.new()
 var _tiles: Dictionary = {}
 var _queue: Array[Dictionary] = []
 var _timer: Timer
+var _camera: Camera3D
 var _camera_point := Vector3.ZERO
 var _has_camera := false
 
@@ -70,7 +73,7 @@ func _tile_for(cell: Vector2i, height: float) -> Dictionary:
 		return _tiles[cell]
 	if _tiles.size() >= MAX_TILES:
 		var farthest := _farthest(_tiles.keys())
-		if _distance(farthest) <= _distance(cell):
+		if _rank(farthest) <= _rank(cell):
 			return {}
 		_drop(farthest)
 	var image := Image.create(STAMP.TILE_PIXELS, STAMP.TILE_PIXELS, false, Image.FORMAT_RGBA8)
@@ -96,7 +99,7 @@ func _gpu_step() -> void:
 		var live := _live_cells()
 		if live.size() >= MAX_LIVE:
 			var worst := _farthest(live)
-			if _distance(worst) - _distance(cell) < SWAP_MARGIN:
+			if _rank(worst) - _rank(cell) < SWAP_MARGIN:
 				return
 			_hide(worst)
 		_show(cell, tile)
@@ -109,11 +112,11 @@ func _gpu_step() -> void:
 func _pending_gpu() -> Variant:
 	var best: Variant = null
 	var live_count := _live_cells().size()
-	var worst_live := _distance(_farthest(_live_cells())) if live_count > 0 else INF
+	var worst_live := _rank(_farthest(_live_cells())) if live_count > 0 else INF
 	for cell in _tiles:
 		var tile: Dictionary = _tiles[cell]
-		var wanted: bool = tile["dirty"] if tile["visual"] != null else (live_count < MAX_LIVE or worst_live - _distance(cell) >= SWAP_MARGIN) and _has_pixels(tile)
-		if wanted and (best == null or _distance(cell) < _distance(best)):
+		var wanted: bool = tile["dirty"] if tile["visual"] != null else (live_count < MAX_LIVE or worst_live - _rank(cell) >= SWAP_MARGIN) and _has_pixels(tile)
+		if wanted and (best == null or _rank(cell) < _rank(best)):
 			best = cell
 	return best
 
@@ -181,23 +184,25 @@ func _live_cells() -> Array:
 func _farthest(cells: Array) -> Vector2i:
 	var result: Vector2i = cells[0]
 	for cell in cells:
-		if _distance(cell) > _distance(result):
+		if _rank(cell) > _rank(result):
 			result = cell
 	return result
 
 
-func _distance(cell: Vector2i) -> float:
+# Smaller rank is shown first: tiles in the camera view, nearest first, then the rest.
+func _rank(cell: Vector2i) -> float:
 	if not _has_camera:
 		return 0.0
-	var center := Vector2((cell.x + 0.5) * STAMP.TILE_METERS, (cell.y + 0.5) * STAMP.TILE_METERS)
-	return Vector2(_camera_point.x, _camera_point.z).distance_to(center)
+	var center := Vector3((cell.x + 0.5) * STAMP.TILE_METERS, 0.0, (cell.y + 0.5) * STAMP.TILE_METERS)
+	var distance := Vector2(_camera_point.x, _camera_point.z).distance_to(Vector2(center.x, center.z))
+	return distance if _camera.is_position_in_frustum(center) else OUT_OF_VIEW + distance
 
 
 func _read_camera() -> void:
-	var camera := get_viewport().get_camera_3d() if is_inside_tree() else null
-	_has_camera = camera != null
+	_camera = get_viewport().get_camera_3d() if is_inside_tree() else null
+	_has_camera = _camera != null
 	if _has_camera:
-		_camera_point = camera.global_position
+		_camera_point = _camera.global_position
 
 
 func tile_image(cell: Vector2i) -> Image:

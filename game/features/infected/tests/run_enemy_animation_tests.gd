@@ -56,6 +56,8 @@ func _run() -> void:
 	await _test_locomotion_selection(stage, ZOMBIE, "Zombie")
 	await _test_locomotion_selection(stage, HUNGER, "Hunger")
 	await _test_one_shots(stage)
+	for path: String in HUMANOIDS:
+		await _test_attack_keeps_legs_moving(stage, load(path) as PackedScene, path.get_file())
 	await _test_skinned_rig(stage)
 	await _test_continuous_chase(stage)
 	for path: String in HUMANOIDS.slice(2):
@@ -244,6 +246,38 @@ func _test_one_shots(stage: Node3D) -> void:
 	enemy.velocity = Vector3(0, 0, 4.5)
 	await create_timer(death + 0.2).timeout
 	_expect(player.assigned_animation == "Death", "Locomotion never overrides a finished death pose.")
+	enemy.queue_free()
+	await process_frame
+
+
+# An attack while moving keeps the legs on the run/walk cycle; standing still it does not.
+func _test_attack_keeps_legs_moving(stage: Node3D, scene: PackedScene, label: String) -> void:
+	var enemy := await _spawn(stage, scene)
+	var driver := enemy.get_node("AnimationDriver")
+	var skeleton := enemy.find_children("*", "Skeleton3D", true, false)[0] as Skeleton3D
+	var thigh := skeleton.find_bone("L_Thigh")
+	var length := float(driver.call("play_one_shot", &"attack"))
+	_expect(length > 0.0, "%s attacks." % label)
+	var angles := {}
+	for case in ["still", "moving"]:
+		driver.call("play_one_shot", &"attack")
+		var seen: Array[Quaternion] = []
+		for i in 12:
+			enemy.velocity = Vector3(0, 0, 0.0 if case == "still" else 4.5)
+			await process_frame
+			seen.append(skeleton.get_bone_pose_rotation(thigh))
+		angles[case] = seen
+		await create_timer(length + 0.3).timeout
+	var overlay = driver.get("leg_overlay")
+	_expect(overlay != null, "%s gets a leg overlay once it attacks on the move." % label)
+	var differs := 0
+	for i in 12:
+		if not (angles["still"][i] as Quaternion).is_equal_approx(angles["moving"][i]):
+			differs += 1
+	_expect(differs >= 6, "%s legs follow the run cycle during a moving attack." % label)
+	enemy.velocity = Vector3.ZERO
+	await create_timer(0.3).timeout
+	_expect(overlay == null or not bool(overlay.call("is_following")), "%s legs are released after the attack." % label)
 	enemy.queue_free()
 	await process_frame
 
