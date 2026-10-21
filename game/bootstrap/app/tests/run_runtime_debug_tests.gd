@@ -11,6 +11,7 @@ func _run() -> void:
 	# sine sweep; software rendering of the full mission is ~0.7 s per frame).
 	# This suite checks state/material lifecycle, not pixel resolution.
 	root.size = Vector2i(320, 180)
+	root.msaa_3d = Viewport.MSAA_DISABLED
 	var had := FileAccess.file_exists(PREFS.FILE)
 	var saved := FileAccess.get_file_as_bytes(PREFS.FILE) if had else PackedByteArray()
 	var prefs := PREFS.new()

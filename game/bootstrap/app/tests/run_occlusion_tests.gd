@@ -17,6 +17,8 @@ func _initialize() -> void:
 
 
 func _run() -> void:
+	# The pixel assertions sample single pixels; forward_plus CI fails them with the authored 2x MSAA.
+	root.msaa_3d = Viewport.MSAA_DISABLED
 	_make_fixture()
 	await _settle()
 	_check(effects.call("_blocked", hero), "wall occludes hero")
