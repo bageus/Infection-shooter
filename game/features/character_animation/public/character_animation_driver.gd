@@ -12,6 +12,7 @@ const GAIT := preload("res://game/features/character_animation/procedural_gait.g
 const HIT_REACTION := preload("res://game/features/character_animation/hit_reaction.gd")
 const LEG_MOTION := preload("res://game/features/character_animation/leg_clip_motion.gd")
 const OVERLAY := preload("res://game/features/character_animation/clip_overlay.gd")
+const LEG_OVERLAY := preload("res://game/features/character_animation/leg_overlay.gd")
 const DODGE_ROLL := 0
 const DODGE_STRAFE := 1
 const STATE_ATTACK := &"attack"
@@ -40,6 +41,7 @@ const ONE_SHOT_TOKENS := {
 const STRIKE_WINDUP := 0.35
 const MAX_ATTACK_SPEED := 2.2
 const FLINCH_SECONDS := 0.16
+const MOVING_ATTACKS := [&"attack", &"attack_left", &"attack_right"]
 
 @export var character_path: NodePath = NodePath("..")
 @export var model_path: NodePath = NodePath("Body")
@@ -91,6 +93,7 @@ var legs: SkeletonModifier3D
 var dodge_style := DODGE_ROLL
 var hit_reaction: SkeletonModifier3D
 var overlay: SkeletonModifier3D
+var leg_overlay: SkeletonModifier3D
 var _current := ""
 var _animations: Dictionary = {}
 var _locomotion: Dictionary = {}
@@ -338,6 +341,7 @@ func _advance_one_shot(delta: float) -> void:
 
 func _process_skeletal(speed: float) -> void:
 	_apply_flinch_overlay()
+	_update_attack_legs(speed)
 	if not _one_shot.is_empty() or _dead:
 		return
 	if _play_selected_clip(speed):
@@ -395,16 +399,31 @@ func _play_selected_clip(speed: float = 0.0) -> bool:
 	return false
 
 
+# A moving attacker keeps its legs on the run/walk cycle; the attack clip owns the rest.
+func _update_attack_legs(speed: float) -> void:
+	var state := &"run" if speed > run_speed_threshold or _locomotion.get(&"walk", "").is_empty() else &"walk"
+	var clip: String = _locomotion.get(state, "")
+	if _one_shot in MOVING_ATTACKS and not _dead and speed > 0.15 and leg_clips == null and not clip.is_empty():
+		if leg_overlay == null:
+			leg_overlay = LEG_OVERLAY.attach(animation_player.get_parent())
+		if leg_overlay != null:
+			leg_overlay.call("follow", animation_player.get_animation(clip), _locomotion_scale(state, speed))
+	elif leg_overlay != null:
+		leg_overlay.call("release")
+
+
+func _locomotion_scale(state: StringName, speed: float) -> float:
+	var reference := run_reference_speed if state == &"run" else walk_reference_speed
+	return clampf(speed / reference, 0.5, 1.6) * locomotion_speed_multiplier if state != &"idle" and reference > 0.0 else 1.0
+
+
 func _play_locomotion(state: StringName, speed: float) -> void:
 	var clip: String = _locomotion.get(state, "")
 	if clip.is_empty():
 		_hold_rest_pose()
 		return
 	_play_clip(clip)
-	var reference := run_reference_speed if state == &"run" else walk_reference_speed
-	var wanted := 1.0
-	if state != &"idle" and reference > 0.0:
-		wanted = clampf(speed / reference, 0.5, 1.6) * locomotion_speed_multiplier
+	var wanted := _locomotion_scale(state, speed)
 	if not is_equal_approx(animation_player.speed_scale, wanted):
 		animation_player.speed_scale = wanted
 
