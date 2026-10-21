@@ -1,6 +1,7 @@
 extends SceneTree
 ## Real sources, shared bounded pixels and destruction hooks for authored props.
 const FLOOR := preload("res://game/presentation/office_floor/public/base_floor_renderer.gd")
+const QUALITY := preload("res://game/core/vfx/public/destruction_quality.gd")
 const BAKE := preload("res://game/presentation/office_floor/glass_floor_bake.gd")
 const ATLASES := preload("res://game/presentation/office_floor/debris_atlases.gd")
 const RECIPES := preload("res://game/presentation/office_floor/prop_debris_recipe.gd")
@@ -125,10 +126,10 @@ func _test_sources_and_pixels() -> void:
 					_check(absf(tile.surface_image.get_pixel(x, y).r - ATLASES.ROUGHNESS[kind]) < 0.01, "%s gets its own roughness" % kind)
 		_check(found, "%s leaves real visible pixels" % kind)
 	bake.clear()
-	for index in BAKE.MAX_QUEUE + 36:
+	for index in QUALITY.queue_max() + 36:
 		var kind: String = expected.keys()[index % expected.size()]
 		bake.stamp(Vector2(index * 8 + 4, 4), 0, 1.0, 0, kind)
-	_check(bake.queue.size() == BAKE.MAX_QUEUE, "All kinds share one queue budget")
+	_check(bake.queue.size() == QUALITY.queue_max(), "All kinds share one queue budget")
 	while bake.step():
 		pass
 	_check(bake.tiles.size() == BAKE.MAX_TILES, "All kinds share sixteen sections, not sixteen each")

@@ -3,6 +3,7 @@ extends SceneTree
 ## contactless characters, lifecycle (fade, budget), inherited motion, prop
 ## shudder and full breakage of environment props and physical props.
 
+const QUALITY := preload("res://game/core/vfx/public/destruction_quality.gd")
 const FRAGMENT := preload("res://game/presentation/office_floor/environment_fragment.gd")
 const DEBRIS := preload("res://game/presentation/office_floor/debris_lifecycle.gd")
 const PROP_SCENE := preload("res://game/presentation/office_floor/public/props/environment_prop.tscn")
@@ -17,6 +18,7 @@ func _init() -> void:
 
 
 func _run() -> void:
+	QUALITY.set_level(QUALITY.LOW) # These budgets are the Low-quality ones.
 	var stage := Node3D.new()
 	root.add_child(stage)
 	_add_floor(stage)
@@ -140,11 +142,11 @@ func _test_budget(stage: Node3D) -> void:
 		_fragment(stage, Vector3(8 + (i % 8) * 0.5, 0.5 + i * 0.01, -8 + (i / 8) * 0.5))
 	await physics_frame
 	_expect(_live_pieces() == 55, "A burst of fresh pieces over the budget is not shrunk away (%d live)." % _live_pieces())
-	for i in runtime_class.BURST_FRAGMENTS:
+	for i in QUALITY.piece_burst():
 		@warning_ignore("integer_division")
 		_fragment(stage, Vector3(8 + (i % 8) * 0.5, 0.5 + i * 0.01, -12 + (i / 8) * 0.5))
 	await physics_frame
-	_expect(_live_pieces() <= runtime_class.BURST_FRAGMENTS, "Live debris stays within the burst cap (%d)." % _live_pieces())
+	_expect(_live_pieces() <= QUALITY.piece_burst(), "Live debris stays within the burst cap (%d)." % _live_pieces())
 	await create_timer(DEBRIS.FAST_FADE_SECONDS + 0.3).timeout
 	for piece in get_nodes_in_group(FRAGMENT.GROUP):
 		piece.queue_free()

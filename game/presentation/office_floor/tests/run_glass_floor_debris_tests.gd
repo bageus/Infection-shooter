@@ -1,6 +1,7 @@
 extends SceneTree
 ## Real atlas pixels, bounded baking, section materials and actual breakable scenes.
 const FLOOR := preload("res://game/presentation/office_floor/public/base_floor_renderer.gd")
+const QUALITY := preload("res://game/core/vfx/public/destruction_quality.gd")
 const BAKE := preload("res://game/presentation/office_floor/glass_floor_bake.gd")
 const SCATTER := preload("res://game/presentation/office_floor/glass_floor_scatter.gd")
 const SCENES := ["glass_wall_full", "glass_partition_half", "glass_partition_blinds", "sliding_glass_door"]
@@ -101,9 +102,9 @@ func _test_pixels_and_budgets() -> void:
 	bake.step()
 	_check(bake.uploads - previous <= 1, "No more than one texture upload per step")
 	bake.clear()
-	for index in 200:
+	for index in QUALITY.queue_max() + 72:
 		bake.stamp(Vector2(index * 8 + 4, 4), index % 16, 1.0)
-	_check(bake.queue.size() == BAKE.MAX_QUEUE, "A mass break cannot grow the queue indefinitely")
+	_check(bake.queue.size() == QUALITY.queue_max(), "A mass break cannot grow the queue indefinitely")
 	var timings: Array[int] = []
 	var pending := true
 	while pending:
@@ -118,11 +119,11 @@ func _test_pixels_and_budgets() -> void:
 	bake.step()
 	_check(previous == bake.uploads, "An idle bake performs no uploads")
 	bake.clear()
-	for index in 12:
+	for index in QUALITY.density_cap() + 8:
 		bake.stamp(Vector2(4, 4), 1, 1.0)
 	while bake.step():
 		pass
-	_check(bake.tiles[Vector2i.ZERO].density[Vector2i(4, 4)] == BAKE.MAX_DENSITY, "Repeated hits cannot build an opaque pile forever")
+	_check(bake.tiles[Vector2i.ZERO].density[Vector2i(4, 4)] == QUALITY.density_cap(), "Repeated hits cannot build an opaque pile forever")
 	_check(not bake.stamp(Vector2(NAN, 0), 0, 1.0), "Invalid coordinates are rejected")
 	_check(not bake.stamp(Vector2.ZERO, 16, 1.0) and not bake.stamp(Vector2.ZERO, 0, INF), "Invalid frames and sizes are rejected")
 	bake.clear()

@@ -1,6 +1,7 @@
 extends RefCounted
 ## Shared mission-local debris pixels; the original glass entry point stays compatible.
 const ATLASES := preload("res://game/presentation/office_floor/debris_atlases.gd")
+const QUALITY := preload("res://game/core/vfx/public/destruction_quality.gd")
 const PIXEL_OPS := preload("res://game/presentation/office_floor/decal_pixels.gd")
 const ATLAS := preload("res://models/objects/textures/glass_decals/4x4 glass debris texture atlas.png")
 const METERS := 8.0
@@ -15,9 +16,6 @@ const ARCHIVE_PNG_LIMIT := 98304
 const ARCHIVE_FALLBACK := 192
 const MAX_TILES := 16
 const MIN_SIZE := 0.08 # Real flakes are small; 0.08 m is 6 px at 80 px/m.
-const MAX_QUEUE := 128
-const MAX_DENSITY := 4
-const STAMPS_PER_STEP := 2
 var origin := Vector2.ZERO
 var valid_cells: Dictionary = {}
 var tiles: Dictionary = {}
@@ -47,7 +45,7 @@ func prepare() -> void:
 func stamp(at: Vector2, frame: int, size: float, turns: int = 0, kind: String = "glass", opacity: float = 1.0) -> bool:
 	if not is_finite(opacity) or opacity <= 0.0 or not at.is_finite() or not is_finite(size) or size < MIN_SIZE or size > 1.5 or frame < 0 or frame >= ATLASES.frame_count(kind):
 		return false
-	if queue.size() >= MAX_QUEUE:
+	if queue.size() >= QUALITY.queue_max():
 		return false
 	queue.append({"at": at, "frame": frame, "size": size, "turns": posmod(turns, 4), "kind": kind, "opacity": clampf(opacity, 0, 1)})
 	return true
@@ -59,10 +57,11 @@ func cell_at(at: Vector2) -> Vector2i:
 
 func step() -> bool:
 	prepare()
-	for index in STAMPS_PER_STEP:
-		if queue.is_empty():
-			break
+	var started := Time.get_ticks_usec()
+	var applied := 0
+	while not queue.is_empty() and (applied < QUALITY.stamps_per_step() or Time.get_ticks_usec() - started < QUALITY.stamp_budget_usec()):
 		_apply(queue.pop_front())
+		applied += 1
 	# Coalesce all writes; upload one section (RGBA8 color + compact R8 surface).
 	for cell: Vector2i in tiles:
 		var tile: Dictionary = tiles[cell]
@@ -98,7 +97,7 @@ func _apply(request: Dictionary) -> void:
 	var layer_id := 0 if request.kind in ["floor_damage", "bullet"] else (1 if request.kind == "floor_scuff" else 2)
 	var density_cell: Variant = Vector2i(floori(at.x), floori(at.y))
 	if layer_id != 2: density_cell = Vector3i(floori(at.x), floori(at.y), layer_id)
-	if tiles.has(center) and int(tiles[center].density.get(density_cell, 0)) >= MAX_DENSITY:
+	if tiles.has(center) and int(tiles[center].density.get(density_cell, 0)) >= QUALITY.density_cap():
 		return
 	var source := PIXEL_OPS.source(frames[request.frame], request.opacity, request.turns, request.kind == "bullet" and request.frame >= 5)
 	var resolution := PIXELS if layer_id == 2 else LAYER_PIXELS
