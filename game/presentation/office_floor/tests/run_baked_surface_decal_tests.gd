@@ -25,6 +25,7 @@ func _run() -> void:
 		await _test_glass()
 		await _test_displays()
 		_test_steps()
+		_test_window_frames()
 	else:
 		# Real-model hooks run headlessly above; native QA isolates the new shader.
 		await _test_render()
@@ -201,6 +202,18 @@ func _test_steps() -> void:
 	floor_view.call("clear_glass_debris")
 	for index in 100: events.step_at(Vector3(1, 3, 1), Vector3.UP)
 	_check(floor_view.get("_glass").queue.is_empty(), "Raised support never stains floor underneath")
+
+func _test_window_frames() -> void:
+	var window := load("res://game/presentation/office_floor/public/structural/window_double.tscn").instantiate() as Node3D
+	stage.add_child(window)
+	var frame := window.find_children("*", "StaticBody3D", true, false)
+	_check(not frame.is_empty(), "Window model has collision bodies")
+	for body: Node in frame:
+		_check(EVENTS._is_window_frame(body), "Window collider %s is a window frame" % body.name)
+	var wall := _box(Vector3(5, 1, 0))
+	_check(not EVENTS._is_window_frame(wall), "Plain wall is not a window frame")
+	wall.queue_free()
+	window.queue_free()
 
 func _test_render() -> void:
 	var camera := Camera3D.new()
