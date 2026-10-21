@@ -28,6 +28,9 @@ const MAX_PIECE_SPEED := 6.0
 const TOPPLE_RETRIES := 3
 const TOPPLE_RETRY_DELAY := 0.7
 const KICK_COOLDOWN := 0.8
+const UNSTICK_RETRIES := 4
+# A resting piece taller than this (m) standing on its edge is pushed over.
+const STANDING_HEIGHT := 0.4
 # A piece that is allowed to stay loose looks again after this long.
 const LOOSE_RECHECK_SECONDS := 4.0
 # Highest lowest point of a resting piece that still counts as lying on the floor.
@@ -48,6 +51,7 @@ var breakable := false
 var _kick_cooldown := 0.0
 var _age := 0.0
 var rest_time := 0.0
+var _unstick_tries := 0
 var _piece_health := 55.0
 var pool_owner: Node
 var _runtime: Node
@@ -59,6 +63,7 @@ var _capped := false
 func _ready() -> void:
 	_age = 0.0
 	rest_time = 0.0
+	_unstick_tries = 0
 	_kick_cooldown = 0.0
 	_piece_health = 55.0
 	_half_extents = Vector3.ZERO
@@ -195,6 +200,29 @@ func _leave_floor(seconds: float, budget_full: bool) -> void:
 		_runtime.call("bake", self)
 	else:
 		DEBRIS.fade_free(self, seconds)
+
+
+# A resting piece that stands on its edge (a cabinet side, a tabletop) or hangs propped on others is
+# pushed over along its thin axis so it falls flat. False once it lies down or the retries are spent.
+func unstick() -> bool:
+	if not sleeping or _unstick_tries >= UNSTICK_RETRIES or _half_extents == Vector3.ZERO:
+		return false
+	var thin := 0
+	for axis in 3:
+		if _half_extents[axis] < _half_extents[thin]:
+			thin = axis
+	var thin_axis := global_basis[thin]
+	var height := _half_extents.dot(Vector3(absf(global_basis.x.y), absf(global_basis.y.y), absf(global_basis.z.y))) * 2.0
+	var on_edge := absf(thin_axis.y) < 0.6 and height > STANDING_HEIGHT
+	if not on_edge and _lies_on_floor():
+		return false
+	_unstick_tries += 1
+	var away := Vector3(thin_axis.x, 0.0, thin_axis.z)
+	if away.length_squared() < 0.0004:
+		away = Vector3.RIGHT
+	sleeping = false
+	apply_impulse(away.normalized() * mass * TOPPLE_SPEED * (1.0 + _unstick_tries), Vector3.UP * height * 0.4)
+	return true
 
 
 # High keeps every model piece until the budget needs it; Medium keeps the ones near the player.

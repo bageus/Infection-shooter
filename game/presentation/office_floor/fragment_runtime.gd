@@ -204,7 +204,11 @@ func settle_resting(step: float) -> void:
 	var player := get_tree().get_first_node_in_group("player") as Node3D
 	for id in active.keys():
 		var body := active[id].get_ref() as RigidBody3D
-		if body == null or body.is_queued_for_deletion() or body.has_meta("debris_fading") or not _is_box_chunk(body):
+		if body == null or body.is_queued_for_deletion() or body.has_meta("debris_fading"):
+			continue
+		if not _is_box_chunk(body):
+			if body.sleeping and body.has_method("unstick"):
+				body.call("unstick")
 			continue
 		if not body.sleeping:
 			body.set("rest_time", 0.0)

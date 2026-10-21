@@ -20,6 +20,7 @@ func _run() -> void:
 	_test_scatter_volume()
 	await _test_loose_pieces()
 	await _test_wake_baked()
+	await _test_standing_panel()
 	QUALITY.set_level(QUALITY.DEFAULT)
 	print("Destruction quality tests: %d failures" % failures)
 	quit(0 if failures == 0 else 1)
@@ -162,6 +163,46 @@ func _test_wake_baked() -> void:
 			_expect(not body.is_queued_for_deletion(), "A shot only pushes a woken piece")
 		effects.queue_free()
 		await process_frame
+
+
+# A big panel left standing on its edge (a cabinet side) falls flat instead of hanging there.
+func _test_standing_panel() -> void:
+	QUALITY.set_level(QUALITY.MEDIUM)
+	var effects := Node3D.new()
+	root.add_child(effects)
+	var ground := StaticBody3D.new()
+	ground.collision_layer = 2
+	var ground_shape := CollisionShape3D.new()
+	var slab := BoxShape3D.new()
+	slab.size = Vector3(20, 0.2, 20)
+	ground_shape.shape = slab
+	ground.add_child(ground_shape)
+	ground.position.y = -0.1 + FRAGMENT.FLOOR_TOP
+	effects.add_child(ground)
+	var runtime := RUNTIME.new()
+	runtime.name = "FragmentRuntime"
+	effects.add_child(runtime)
+	var panel := RigidBody3D.new()
+	panel.set_script(FRAGMENT)
+	var shape := CollisionShape3D.new()
+	var box := BoxShape3D.new()
+	box.size = Vector3(0.05, 1.0, 0.8)
+	shape.shape = box
+	panel.add_child(shape)
+	var mesh := MeshInstance3D.new()
+	var visual := BoxMesh.new()
+	visual.size = box.size
+	mesh.mesh = visual
+	panel.add_child(mesh)
+	effects.add_child(panel)
+	panel.global_position = Vector3(0, 0.52, 0)
+	await create_timer(0.6).timeout
+	panel.sleeping = true
+	await create_timer(1.6).timeout
+	var lying := panel.is_queued_for_deletion() or absf(panel.global_basis.x.y) > 0.8
+	_expect(lying or runtime.get("_baked").count() > 0, "A panel standing on its edge is pushed over instead of freezing upright")
+	effects.queue_free()
+	await process_frame
 
 
 func _expect(ok: bool, message: String) -> void:
