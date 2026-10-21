@@ -7,7 +7,7 @@ const CHIP_SCALE := 0.6 # Each main piece gets one smaller companion chip.
 const CHIP_SPREAD := 0.22
 const SPECK_KINDS := ["wood", "paper", "plastic", "fabric"]
 const SPECKS_PER_PIECE := 2 # Wood, fabric and plastic leave many flakes around the spot, not only a few sheets.
-const MAX_SPECKS := 12 # Shared stamp queue budget per event.
+const MAX_SPECKS := 32 # Shared stamp queue budget per event.
 const SPECK_SIZE := 0.3
 # Real chips, scraps and flakes are about half the size the atlas cells suggest: one shared factor
 # (1/1.75) for every material stamped here, applied before the floor's own size setting.
@@ -49,14 +49,16 @@ static func scatter(floor_view: Node3D, center: Vector3, footprint: Vector2, rec
 			floor_view.call("stamp_material_debris", chip, kind, ATLASES.choose_frame(kind, true, rng), size * CHIP_SCALE * DEBRIS_SCALE, rng.randi_range(0, 3))
 		floor_view.call("stamp_material_debris", planar, kind, frame, size * DEBRIS_SCALE, mark.turns)
 	var specks := 0
-	for kind in recipe:
+	var flakes := recipe.duplicate()
+	flakes.shuffle() # Otherwise the first kinds in the recipe use up the whole budget.
+	for kind in flakes:
 		if kind not in SPECK_KINDS:
 			continue
 		for _speck in SPECKS_PER_PIECE:
 			if specks >= MAX_SPECKS:
 				return
 			specks += 1
-			var planar := Vector2(center.x, center.z) + Vector2(rng.randf_range(-0.5, 0.5) * footprint.x, rng.randf_range(-0.5, 0.5) * footprint.y) * 0.9
+			var planar := Vector2(center.x, center.z) + Vector2(rng.randf_range(-0.5, 0.5) * (footprint.x + 1.0), rng.randf_range(-0.5, 0.5) * (footprint.y + 1.0))
 			planar += Vector2(push.x, push.z).limit_length(1.0) * 0.12
 			if not _reaches(floor_view, center, planar, excluded):
 				continue

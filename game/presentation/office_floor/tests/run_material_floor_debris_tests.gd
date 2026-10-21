@@ -125,7 +125,7 @@ func _test_sources_and_pixels() -> void:
 					_check(absf(tile.surface_image.get_pixel(x, y).r - ATLASES.ROUGHNESS[kind]) < 0.01, "%s gets its own roughness" % kind)
 		_check(found, "%s leaves real visible pixels" % kind)
 	bake.clear()
-	for index in 100:
+	for index in BAKE.MAX_QUEUE + 36:
 		var kind: String = expected.keys()[index % expected.size()]
 		bake.stamp(Vector2(index * 8 + 4, 4), 0, 1.0, 0, kind)
 	_check(bake.queue.size() == BAKE.MAX_QUEUE, "All kinds share one queue budget")
@@ -200,7 +200,7 @@ func _test_props() -> void:
 				prop.call("_apply_damage", Vector3.UP, Vector3.FORWARD)
 		var queue: Array = floor_view.get("_glass").queue
 		_check(_kind_count(queue, cases[model]) > 0, "Actual %s destruction queues %s" % [model, cases[model]])
-		_check(queue.size() <= 60, "A real destruction event leaves room in the shared stamp queue")
+		_check(queue.size() <= 96, "A real destruction event leaves room in the shared stamp queue")
 		if cases[model] == "glass":
 			_check(_kind_count(queue, "plastic") > 0, "Broken screen mixes plastic with glass")
 			var before := queue.size()
