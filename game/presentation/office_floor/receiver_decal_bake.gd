@@ -33,8 +33,7 @@ func step() -> bool:
 			continue
 		if not page.dirty: continue
 		for layer: Dictionary in page.layers:
-			if layer.texture == null: layer.texture = ImageTexture.create_from_image(layer.image)
-			else: (layer.texture as ImageTexture).update(layer.image)
+			(layer.texture as ImageTexture).update(layer.image)
 		page.material.set_shader_parameter("damage", page.layers[0].texture)
 		page.material.set_shader_parameter("scuffs", page.layers[1].texture)
 		page.dirty = false
@@ -90,12 +89,16 @@ func _page(anchor: MeshInstance3D, glass: bool) -> Dictionary:
 	var saved: Dictionary = _archive.get(anchor.get_instance_id(), {})
 	_archive.erase(anchor.get_instance_id())
 	for index in 2:
+		var image: Image
 		if not saved.is_empty():
-			layers.append({"image": _resized(saved.layers[index], 0.5), "texture": null})
-			continue
-		var image := Image.create(FACE * 3, FACE * 2, false, Image.FORMAT_RGBA8)
-		image.fill(Color.TRANSPARENT)
-		layers.append({"image": image, "texture": null})
+			image = _resized(saved.layers[index], 0.5)
+		else:
+			image = Image.create(FACE * 3, FACE * 2, false, Image.FORMAT_RGBA8)
+			image.fill(Color.TRANSPARENT)
+		# Bind the texture now: an unset sampler2D reads as white, which flashed the whole receiver until its upload.
+		layers.append({"image": image, "texture": ImageTexture.create_from_image(image)})
+	material.set_shader_parameter("damage", layers[0].texture)
+	material.set_shader_parameter("scuffs", layers[1].texture)
 	var callback := func() -> void:
 		if not anchor.is_visible_in_tree(): _release(anchor.get_instance_id())
 	anchor.visibility_changed.connect(callback)

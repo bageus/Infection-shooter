@@ -20,6 +20,7 @@ func _run() -> void:
 	_test_pixels()
 	if DisplayServer.get_name() == "headless":
 		await _test_receivers()
+		_test_fresh_receivers()
 		await _test_persistence()
 		await _test_glass()
 		await _test_displays()
@@ -71,6 +72,17 @@ func _test_pixels() -> void:
 	_check(_alpha(bake.tiles[cell].layers[0].image) > 0 and _alpha(bake.tiles[cell].layers[1].image) > 0, "Damage and scuff pixels visible")
 	_check(floor_view.get_child_count() == nodes, "Floor adds no per-mark nodes")
 	floor_view.call("clear_glass_debris")
+
+func _test_fresh_receivers() -> void:
+	# A receiver overlay must sample real decal textures from its first frame; an unset sampler reads white.
+	var baker: RefCounted = floor_view.get("_surface_events").receivers
+	var anchors: Array[MeshInstance3D] = [_box(Vector3(-40, 1, 0)), _box(Vector3(-40, 1, 3))]
+	for anchor in anchors: baker.stamp(anchor, anchor.position, Vector3.BACK, "wall_damage", 3, 0.6, 0.5)
+	baker.step()
+	for anchor in anchors:
+		var material := anchor.material_overlay as ShaderMaterial
+		_check(material != null and material.get_shader_parameter("damage") != null and material.get_shader_parameter("scuffs") != null, "New receiver overlay is textured before the next upload")
+	while baker.step(): pass
 
 func _test_receivers() -> void:
 	var baker: RefCounted = floor_view.get("_surface_events").receivers
