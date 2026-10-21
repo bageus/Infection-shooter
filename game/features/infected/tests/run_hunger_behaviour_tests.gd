@@ -318,6 +318,7 @@ func _postures() -> void:
 	enemy.set("_distance", 3.0)
 	enemy.call("_update_posture")
 	_check(enemy.get("posture") == 0, "It stands up as it closes in.")
+	_check(_player_of(enemy).current_animation == "RiseFromFours" and not bool(enemy.call("is_busy")), "Closing in from all fours plays the rise clip without stopping the chase.")
 	enemy.set("posture", 1)
 	enemy.call("_try_attack")
 	_check(enemy.get("posture") == 0 and bool(enemy.call("is_busy")), "On all fours it has to stand up before it can swing.")
