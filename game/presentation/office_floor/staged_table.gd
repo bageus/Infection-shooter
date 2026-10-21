@@ -17,8 +17,11 @@ const WOOD_MARKS := [
 
 @export var fragment_impulse := 1.8
 @export var fragment_lifetime := 24.0
-@export var one_leg_tilt_impulse := 1.2
-@export var two_leg_tilt_impulse := 3.2
+@export var one_leg_tilt_impulse := 3.0
+@export var two_leg_tilt_impulse := 4.0
+# Pieces of a lost leg may not prop the table up where the leg stood; after this the table clears them.
+const SAG_SHIFT := 0.45
+const LEG_PIECE_CLEAR_TIME := 1.2
 
 var _intact: Node3D
 var _modular: Node3D
@@ -203,8 +206,11 @@ func _on_leg_lost(part_id: String, _hit_position: Vector3) -> void:
 		var corner: Vector3 = (_part_shapes[part_id] as CollisionShape3D).position
 		tilt = _assembly.global_basis * Vector3(corner.x, 0.0, corner.z)
 	tilt = tilt.normalized()
+	# The weight shifts to the side that lost its support, so the table does fall that way and does not balance on the rest.
+	_assembly.center_of_mass_mode = RigidBody3D.CENTER_OF_MASS_MODE_CUSTOM
+	_assembly.center_of_mass = Vector3(0.0, 0.5, 0.0) + _assembly.global_basis.inverse() * tilt * SAG_SHIFT
 	var strength := one_leg_tilt_impulse if _broken_legs.size() == 1 else two_leg_tilt_impulse
-	_assembly.angular_damp = 3.0 if _broken_legs.size() == 1 else 0.15
+	_assembly.angular_damp = 0.8 if _broken_legs.size() == 1 else 0.6
 	_assembly.freeze = false
 	_assembly.sleeping = false
 	_assembly.apply_torque_impulse(Vector3.UP.cross(tilt) * strength)
@@ -285,11 +291,24 @@ func _spawn_piece(part_id: String, source_name: String, source_current: Transfor
 	copy.transform = Transform3D(Basis.IDENTITY, -center)
 	copy.show()
 	_active[part_id] = body
+	if source_name in LEG_IDS and _assembly != null:
+		_clear_from_assembly(body)
 	_add_fracture_marks(body, mesh, hit_position)
 	var offset := body.global_position - hit_position
 	var away := (direction.normalized() + offset.normalized() * 0.5 + Vector3.UP * 0.5).normalized()
 	body.apply_impulse(away * fragment_impulse, (hit_position - body.global_position).limit_length(0.3))
 	_schedule_settle(body, fragment_lifetime if final_stage else fragment_lifetime * 2.0)
+
+
+# The pieces of a broken leg fall out from under the table instead of holding it up where the leg stood.
+func _clear_from_assembly(piece: RigidBody3D) -> void:
+	var table_body := _assembly
+	piece.add_collision_exception_with(table_body)
+	get_tree().create_timer(LEG_PIECE_CLEAR_TIME).timeout.connect(
+		func() -> void:
+			if is_instance_valid(piece) and is_instance_valid(table_body):
+				piece.remove_collision_exception_with(table_body)
+	)
 
 
 func _schedule_settle(body: RigidBody3D, duration: float) -> void:
@@ -316,7 +335,7 @@ func _settle_piece(body: RigidBody3D) -> void:
 		return
 	body.freeze = false
 	body.collision_layer = 1
-	body.collision_mask = 2
+	body.collision_mask = 3 # Retained pieces still collide with each other and with the tables.
 	body.set_meta("kickable", _retained.size() % 2 == 0)
 	_retained.append(body)
 	if _effects != null:
