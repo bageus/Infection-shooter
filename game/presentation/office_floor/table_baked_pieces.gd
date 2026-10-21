@@ -10,8 +10,8 @@ var _chunks: Dictionary = {}
 var _total := 0
 
 
-# Bakes the visual of `source` at its current world transform.
-func bake(source: MeshInstance3D) -> void:
+# Bakes the visual of `source` at its current world transform, moved down by `drop` metres.
+func bake(source: MeshInstance3D, drop: float = 0.0) -> void:
 	if source.mesh == null:
 		return
 	var key := source.mesh.get_instance_id()
@@ -21,7 +21,7 @@ func bake(source: MeshInstance3D) -> void:
 		_chunks[key] = list
 	var multimesh: MultiMesh = (list.back() as MultiMeshInstance3D).multimesh
 	var index := multimesh.visible_instance_count
-	multimesh.set_instance_transform(index, global_transform.affine_inverse() * source.global_transform)
+	multimesh.set_instance_transform(index, global_transform.affine_inverse() * Transform3D(source.global_basis, source.global_position - Vector3(0.0, drop, 0.0)))
 	multimesh.visible_instance_count = index + 1
 	_total += 1
 
