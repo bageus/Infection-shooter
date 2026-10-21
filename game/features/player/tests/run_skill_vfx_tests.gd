@@ -10,6 +10,7 @@ const HIT_STOP := preload("res://game/features/player/skill_fx/hit_stop.gd")
 const DASH_ZONE := preload("res://game/features/player/dash_floor_zone.gd")
 const RANGE_DOME := preload("res://game/features/player/range_dome.gd")
 const SKILL_EFFECTS := preload("res://game/features/player/mutation_skill_effects.gd")
+const STRIKE := preload("res://game/features/player/skill_fx/strike_fx.gd")
 
 var failures := 0
 
@@ -106,6 +107,9 @@ func _check_procedural(stage: Node3D, player: Node3D, effects: Node, vfx: Node) 
 	var zone := DASH_ZONE.spawn(stage, stage.get_world_3d(), Vector3.ZERO, Vector3.FORWARD, 0.15)
 	_expect(zone != null and zone.mesh.get_surface_count() == 1, "Predator Dash marks its strike lane on the floor.")
 	_expect(DASH_ZONE.spawn(stage, stage.get_world_3d(), Vector3.ZERO, Vector3.ZERO, 0.15) == null, "A dash with no heading marks nothing.")
+	# The centre is at body height, the strike must still lie flat and point where the player faces.
+	var strike := STRIKE.play(stage, Vector3(0.0, 0.9, 0.0), Vector3(1.0, 0.0, 0.0))
+	_expect(strike != null and absf(strike.global_basis.z.y) < 0.001 and absf(strike.global_basis.z.x + 1.0) < 0.001, "Power Strike lies flat and points along its heading.")
 	var warm := Node3D.new()
 	stage.add_child(warm)
 	vfx.call("warm_up", warm)
