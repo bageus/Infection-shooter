@@ -9,6 +9,7 @@ const IMPACT_SOUND := preload("res://game/presentation/office_floor/impact_sound
 
 const BALANCE = preload("res://game/features/combat/public/projectile_balance.gd")
 const DEBRIS = preload("res://game/presentation/office_floor/debris_lifecycle.gd")
+const QUALITY = preload("res://game/core/vfx/public/destruction_quality.gd")
 const GROUP := "fallen_environment_fragment"
 # Infected spawned after this piece skip contact with it as well.
 const CONTACTLESS_GROUP := "contactless_debris"
@@ -26,8 +27,9 @@ const TOPPLE_SPEED := 4.0
 const MAX_PIECE_SPEED := 6.0
 const TOPPLE_RETRIES := 3
 const TOPPLE_RETRY_DELAY := 0.7
-const MAX_FRAGMENTS := 40
 const KICK_COOLDOWN := 0.8
+# A piece that is allowed to stay loose looks again after this long.
+const LOOSE_RECHECK_SECONDS := 4.0
 # Highest lowest point of a resting piece that still counts as lying on the floor.
 const BAKE_MAX_HEIGHT := 0.15
 # Top of the base floor (see FLOOR_TOP in environment_prop.gd). Nothing in the level lies lower.
@@ -184,10 +186,28 @@ func _leave_floor(seconds: float, budget_full: bool) -> void:
 		return
 	if breakable and not budget_full and _lies_on_floor():
 		return
+	if not budget_full and _stays_loose():
+		_expiry = create_tween()
+		_expiry.tween_interval(LOOSE_RECHECK_SECONDS)
+		_expiry.tween_callback(expire)
+		return
 	if pool_owner == null and is_instance_valid(_runtime):
 		_runtime.call("bake", self)
 	else:
 		DEBRIS.fade_free(self, seconds)
+
+
+# High keeps every model piece until the budget needs it; Medium keeps the ones near the player.
+func _stays_loose() -> bool:
+	if pool_owner != null:
+		return false
+	if QUALITY.pieces_persist():
+		return true
+	var near := QUALITY.keep_near()
+	if near <= 0.0 or not is_inside_tree():
+		return false
+	var player := get_tree().get_first_node_in_group("player") as Node3D
+	return player != null and global_position.distance_to(player.global_position) <= near
 
 
 # Asleep with the lowest point of its model at floor level.

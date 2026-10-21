@@ -2,6 +2,7 @@ extends RefCounted
 const NOTICES := preload("res://game/bootstrap/app/menu/settings_notices.gd")
 var notices := NOTICES.new()
 const SHADOWS := preload("res://game/bootstrap/app/menu/shadow_quality.gd")
+const DESTRUCTION_QUALITY := preload("res://game/core/vfx/public/destruction_quality.gd")
 const BLOOD_LEVEL := preload("res://game/core/vfx/public/blood_level.gd")
 const SETTLE_SECONDS := 0.35
 const EDITOR := preload("res://game/bootstrap/app/menu/control_binding_editor.gd")
@@ -192,6 +193,7 @@ func _video() -> void:
 	blood_style.item_selected.connect(func(index: int) -> void: dialog.call("_change", "blood_style", index))
 	dialog.call("_row", "bloodStyle", blood_style)
 	_blood_level()
+	_destruction_quality()
 	var effects_quality := OptionButton.new()
 	effects_quality.name = "EffectsQuality"
 	for key in ["effectsQuality0", "effectsQuality1", "effectsQuality2"]:
@@ -325,6 +327,38 @@ func _blood_level() -> void:
 	box.add_child(slider)
 	box.add_child(name_label)
 	dialog.call("_row", "bloodLevel", box)
+
+
+## Destruction quality 0..2 (low, medium, high): how many floor decals a break leaves and how long
+## its pieces stay loose. Like blood level, it applies once the slider stops moving.
+func _destruction_quality() -> void:
+	var name_label := Label.new()
+	name_label.name = "DestructionQualityName"
+	name_label.custom_minimum_size.x = 90
+	name_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
+	var slider := HSlider.new()
+	slider.name = "DestructionQuality"
+	slider.custom_minimum_size.x = 160
+	slider.min_value = 0
+	slider.max_value = DESTRUCTION_QUALITY.COUNT - 1
+	slider.step = 1
+	slider.tick_count = DESTRUCTION_QUALITY.COUNT
+	slider.value = dialog.view.preferences.values.destruction_quality
+	slider.tooltip_text = dialog.view.text("destructionQualityHint")
+	name_label.text = dialog.view.text("destructionQuality" + str(int(slider.value)))
+	var settle := Timer.new()
+	settle.one_shot = true
+	settle.wait_time = SETTLE_SECONDS
+	slider.add_child(settle)
+	settle.timeout.connect(func() -> void: dialog.call("_change", "destruction_quality", int(slider.value)))
+	slider.value_changed.connect(func(value: float) -> void:
+		name_label.text = dialog.view.text("destructionQuality" + str(int(value)))
+		dialog.view.preferences.values.destruction_quality = int(value)
+		settle.start())
+	var box := HBoxContainer.new()
+	box.add_child(slider)
+	box.add_child(name_label)
+	dialog.call("_row", "destructionQuality", box)
 
 
 func _audio() -> void:

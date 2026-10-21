@@ -78,6 +78,36 @@ static func spawn_piece(host: Node3D, mesh: MeshInstance3D, owner: Node3D, stage
 	return fragment
 
 
+# A baked piece becomes a body again at the transform it was baked with; it falls to rest and, like
+# any other piece, may be pushed or shot. It belongs to no object, so a hit only moves it.
+static func spawn_loose(effects: Node3D, mesh: Mesh, material: Material, shadow: int, world: Transform3D) -> RigidBody3D:
+	var bounds: AABB = world * mesh.get_aabb()
+	if bounds.size.length_squared() < 0.000001:
+		return null
+	var fragment := RigidBody3D.new()
+	fragment.set_script(FRAGMENT_SCRIPT)
+	fragment.name = "Fragment_Woken"
+	fragment.set("piece_name", "Woken")
+	fragment.set("stage_index", 99)
+	fragment.set("kickable", true)
+	fragment.mass = clampf(bounds.size.length() * 0.3, 0.1, 3.0)
+	var shape := CollisionShape3D.new()
+	var box := BoxShape3D.new()
+	box.size = Vector3(maxf(bounds.size.x, 0.02), maxf(bounds.size.y, 0.02), maxf(bounds.size.z, 0.02))
+	shape.shape = box
+	fragment.add_child(shape)
+	fragment.continuous_cd = minf(box.size.x, minf(box.size.y, box.size.z)) < THIN_PIECE
+	var copy := MeshInstance3D.new()
+	copy.mesh = mesh
+	copy.material_override = material
+	copy.cast_shadow = shadow as GeometryInstance3D.ShadowCastingSetting
+	fragment.add_child(copy)
+	effects.add_child(fragment)
+	fragment.global_position = bounds.get_center()
+	copy.global_transform = world
+	return fragment
+
+
 # Pieces of a moving or tipping object keep its motion instead of starting from rest,
 # plus a little tumble so they do not slide flat across the floor.
 static func _inherit_motion(host: Node3D, fragment: RigidBody3D) -> void:

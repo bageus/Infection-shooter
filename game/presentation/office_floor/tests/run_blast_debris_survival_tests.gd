@@ -3,6 +3,7 @@ extends SceneTree
 ## the fragment budget may not shrink fresh pieces of the objects the blast just broke.
 
 const PROP := preload("res://game/presentation/office_floor/public/props/environment_prop.tscn")
+const QUALITY := preload("res://game/core/vfx/public/destruction_quality.gd")
 const BLAST := preload("res://game/presentation/office_floor/blast_effect.gd")
 const DEBRIS := preload("res://game/presentation/office_floor/debris_lifecycle.gd")
 const FRAGMENT := preload("res://game/presentation/office_floor/environment_fragment.gd")
@@ -20,6 +21,7 @@ func _init() -> void:
 
 
 func _run() -> void:
+	QUALITY.set_level(QUALITY.LOW) # These budgets are the Low-quality ones.
 	var stage := Node3D.new()
 	root.add_child(stage)
 	var floor_body := StaticBody3D.new()
@@ -50,7 +52,7 @@ func _run() -> void:
 	var live := 0
 	for piece in get_nodes_in_group(FRAGMENT.GROUP):
 		live += int(not DEBRIS.is_fading(piece))
-	_check(spawned > FRAGMENT.MAX_FRAGMENTS, "A cluster blast makes more pieces than the idle budget (%d)" % spawned)
+	_check(spawned > QUALITY.piece_budget(), "A cluster blast makes more pieces than the idle budget (%d)" % spawned)
 	_check(live == spawned, "Every fresh blast piece is still visible (%d of %d)" % [live, spawned])
 	stage.queue_free()
 	await process_frame

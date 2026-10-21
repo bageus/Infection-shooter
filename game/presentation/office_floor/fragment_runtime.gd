@@ -1,13 +1,13 @@
 extends Node
 ## Effects-root-local FIFO and bounded storage of reusable generic box fragments.
-const MAX_FRAGMENTS := 40
 const MAX_POOLED := 40
-# A fresh piece outlives the budget for this long, up to BURST_FRAGMENTS live pieces, so one blast
+# A fresh piece outlives the budget for this long, up to the quality level's burst of live pieces, so one blast
 # never shrinks the debris of the object it just broke while it is still flying.
 const MIN_VISIBLE_MSEC := 6000
-const BURST_FRAGMENTS := 120
 const SETTLED := preload("res://game/presentation/office_floor/settled_debris.gd")
 const BAKED := preload("res://game/presentation/office_floor/table_baked_pieces.gd")
+const DAMAGE_PATH := "res://game/presentation/office_floor/environment_damage.gd" # loaded lazily: it preloads the fragment, which preloads this file
+const QUALITY := preload("res://game/core/vfx/public/destruction_quality.gd")
 # A piece left to rest folds into the settled batch after this long at rest,
 # or after SETTLE_FAR_SECONDS once the player has walked away from it.
 const SETTLE_CHECK_SECONDS := 0.5
@@ -44,6 +44,7 @@ func _process(delta: float) -> void:
 	_settle_clock = 0.0
 	_trim_budget()
 	settle_resting(SETTLE_CHECK_SECONDS)
+	_wake_baked()
 
 
 func register(body: RigidBody3D) -> void:
@@ -56,11 +57,26 @@ func register(body: RigidBody3D) -> void:
 
 
 func _trim_budget() -> void:
-	while active.size() > MAX_FRAGMENTS:
-		var oldest := _pop_oldest(active.size() <= BURST_FRAGMENTS)
+	while active.size() > QUALITY.piece_budget():
+		var oldest := _pop_oldest(active.size() <= QUALITY.piece_burst())
 		if oldest == null:
 			break
 		oldest.call("expire_fast")
+
+
+# Medium quality: baked pieces next to the player become loose bodies again (they can be pushed and
+# shot). Only while the piece budget has room, so waking never makes the budget bake them right back.
+func _wake_baked() -> void:
+	var radius := QUALITY.wake_near()
+	if radius <= 0.0 or _baked.count() == 0 or active.size() >= QUALITY.piece_budget() * 3 / 4:
+		return
+	var player := get_tree().get_first_node_in_group("player") as Node3D
+	var effects := get_parent() as Node3D
+	if player == null or effects == null:
+		return
+	var damage: GDScript = load(DAMAGE_PATH)
+	for record in _baked.call("release_near", player.global_position, radius, QUALITY.WAKE_PER_CHECK):
+		damage.spawn_loose(effects, record.mesh, record.material, record.shadow, record.transform)
 
 
 # Draws the piece's model in the baked batch and frees its body. A piece that is not lying on the
@@ -123,7 +139,7 @@ func acquire(size: Vector3, tint: Color) -> RigidBody3D:
 	else:
 		_allocated = _allocated.filter(func(reference: WeakRef) -> bool: return reference.get_ref() != null)
 		# Bound simultaneous active + fading allocations during a destruction burst.
-		if _allocated.size() >= MAX_FRAGMENTS + MAX_POOLED:
+		if _allocated.size() >= QUALITY.piece_budget() + MAX_POOLED:
 			return null
 		body = _make_chunk()
 		_allocated.append(weakref(body))
