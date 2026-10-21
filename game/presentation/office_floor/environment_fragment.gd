@@ -21,7 +21,11 @@ const PIECE_MIN_EDGE := 0.3
 # A piece at least this tall and this many times taller than wide falls over instead of standing.
 const TOPPLE_MIN_HEIGHT := 0.5
 const TOPPLE_SLENDERNESS := 1.8
-const TOPPLE_SPEED := 7.0
+const TOPPLE_SPEED := 4.0
+# Pieces that start touching (a top resting on a leg) are pushed apart; this caps how fast they may leave.
+const MAX_PIECE_SPEED := 6.0
+const TOPPLE_RETRIES := 3
+const TOPPLE_RETRY_DELAY := 0.7
 const MAX_FRAGMENTS := 40
 const KICK_COOLDOWN := 0.8
 # Highest lowest point of a resting piece that still counts as lying on the floor.
@@ -42,6 +46,7 @@ var _piece_health := 55.0
 var pool_owner: Node
 var _runtime: Node
 var _expiry: Tween
+var _capped := false
 
 
 func _ready() -> void:
@@ -79,6 +84,12 @@ func _ready() -> void:
 func enable_piece_contacts() -> void:
 	collision_layer |= PIECE_LAYER
 	collision_mask |= PIECE_LAYER
+	_capped = true
+
+
+func _integrate_forces(state: PhysicsDirectBodyState3D) -> void:
+	if _capped and state.linear_velocity.length() > MAX_PIECE_SPEED:
+		state.linear_velocity = state.linear_velocity.limit_length(MAX_PIECE_SPEED)
 
 
 ## A tall slender piece left standing (a pedestal, a leg) is pushed over, away from the hit.
@@ -92,8 +103,18 @@ func topple_from(size: Vector3, hit_position: Vector3, direction: Vector3) -> vo
 		away = Vector3(direction.x, 0.0, direction.z)
 	if away.length_squared() < 0.0004:
 		away = Vector3.RIGHT
+	_push_over(away.normalized(), size.y, 1.0, TOPPLE_RETRIES)
+
+
+# A piece pinned under a heavy top can survive the first push, so it is pushed again, harder, while it still stands.
+func _push_over(away: Vector3, height: float, scale: float, retries: int) -> void:
 	sleeping = false
-	apply_impulse(away.normalized() * mass * TOPPLE_SPEED, Vector3.UP * size.y * 0.4)
+	apply_impulse(away * mass * TOPPLE_SPEED * scale, Vector3.UP * height * 0.4)
+	if retries <= 0 or not is_inside_tree():
+		return
+	await get_tree().create_timer(TOPPLE_RETRY_DELAY).timeout
+	if is_inside_tree() and not is_queued_for_deletion() and global_basis.y.angle_to(Vector3.UP) < deg_to_rad(30.0):
+		_push_over(away, height, scale * 1.3, retries - 1)
 
 
 func _register_budget() -> void:

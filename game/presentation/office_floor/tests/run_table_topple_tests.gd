@@ -71,6 +71,7 @@ func _environment_table(model: String) -> void:
 		if maxf(size.x, maxf(size.y, size.z)) >= 0.3:
 			_expect(piece.collision_mask & 16 != 0 and piece.collision_layer & 16 != 0, "%s: large piece %s collides with other pieces" % [model, piece.name])
 		worst = maxf(worst, _deepest_overlap(piece))
+		_expect(piece.global_position.y > 0.0 and piece.global_position.length() < 10.0, "%s: piece %s stays on the floor, not flung away (at %s)" % [model, piece.name, piece.global_position])
 	_expect(upright == 0, "%s: %d of %d tall slender pieces (legs, pedestal) are still standing" % [model, upright, tall])
 	_expect(worst <= MAX_OVERLAP, "%s: pieces overlap by %.2f m (they pass through each other)" % [model, worst])
 	stage.queue_free()
