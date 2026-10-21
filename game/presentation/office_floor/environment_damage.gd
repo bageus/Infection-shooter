@@ -72,6 +72,9 @@ static func spawn_piece(host: Node3D, mesh: MeshInstance3D, owner: Node3D, stage
 	var impulse := (away.normalized() * 0.75 + direction.normalized() * 0.25 + Vector3.UP * 0.35).normalized() * fragment.mass * randf_range(1.5, 3.0) if blast else direction.normalized() * randf_range(0.15, 0.7) + Vector3.UP * 0.3
 	fragment.apply_impulse(impulse, (hit_point - fragment.global_position).limit_length(0.3))
 	_inherit_motion(host, fragment)
+	if not glass and maxf(bounds.size.x, maxf(bounds.size.y, bounds.size.z)) >= FRAGMENT_SCRIPT.PIECE_MIN_EDGE:
+		fragment.enable_piece_contacts()
+		fragment.topple_from(bounds.size, hit_point, direction)
 	return fragment
 
 

@@ -195,3 +195,4 @@ game/bootstrap/app/tests/run_floor_hint_tests.gd
 game/bootstrap/app/tests/run_gameplay_camera_tuning_tests.gd
 game/bootstrap/app/tests/run_updated_prop_models_tests.gd
 game/presentation/office_floor/tests/run_debris_floor_tests.gd
+game/presentation/office_floor/tests/run_table_topple_tests.gd
