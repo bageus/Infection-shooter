@@ -83,6 +83,12 @@ func _check_fusion() -> void:
 			if absf(a.get_pixel(x + offset.x, y + offset.y).a - b.get_pixel(x, y).a) > 0.3:
 				mismatch += 1
 	_expect(mismatch < 400, "A piece fused with itself keeps its silhouette (%d differing samples)." % mismatch)
+	# A degenerate transform must give "nothing to draw", not a failed huge allocation.
+	var broken := Transform2D(Vector2(NAN, 0.0), Vector2(0.0, 1.0), Vector2.ZERO)
+	_expect(FUSION.fuse([{"cell": 1, "xform": broken}], albedo, relief, 300.0).is_empty(), "A NaN transform fuses to nothing.")
+	var stretched := Transform2D(Vector2(1e30, 0.0), Vector2(0.0, 1.0), Vector2.ZERO)
+	var huge: Dictionary = FUSION.fuse([{"cell": 1, "xform": stretched}], albedo, relief, 300.0)
+	_expect(huge.is_empty() or (huge["albedo"] as Image).get_width() <= 897, "An extreme transform keeps the buffers bounded.")
 
 
 func _stage_piece(stage: Node3D, texture: String, position: Vector3, yaw := 0.0) -> Node3D:

@@ -12,7 +12,7 @@ var detached := false
 var _part := ""
 
 
-static func anchored(model_path: String) -> bool:
+func anchored(model_path: String) -> bool:
 	var file := model_path.get_file()
 	return file == "02_frige_dented.glb"
 

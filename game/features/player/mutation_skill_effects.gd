@@ -42,7 +42,6 @@ var _claw_timer := 0.0
 ## Enemies the Claws pulse is about to kill, by instance id, with the time.
 var _claw_kills: Dictionary = {}
 var _recent_hits: Array[Vector2] = []
-var _dash_struck: Dictionary = {}
 var _adapt_damage: Dictionary = {}
 var _regenerating := false
 
