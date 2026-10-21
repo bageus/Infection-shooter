@@ -1,35 +1,46 @@
-[gd_resource type="ShaderMaterial" load_steps=6 format=3]
+[gd_resource type="ShaderMaterial" format=3 uid="uid://rsny4v4xrw8b"]
 
-[ext_resource type="Shader" path="res://game/presentation/office_floor/floor_tile.gdshader" id="1_shader"]
+[ext_resource type="Shader" uid="uid://c4h34gwea8t6" path="res://game/presentation/office_floor/floor_tile.gdshader" id="1_shader"]
+
+[sub_resource type="FastNoiseLite" id="DetailNoise"]
+seed = 4127
+frequency = 0.02
+fractal_octaves = 3
+
+[sub_resource type="NoiseTexture2D" id="DetailTexture"]
+noise = SubResource("DetailNoise")
+seamless = true
 
 [sub_resource type="FastNoiseLite" id="SurfaceNoise"]
 seed = 7319
-noise_type = 1
 frequency = 0.035
 fractal_octaves = 3
 
 [sub_resource type="NoiseTexture2D" id="SurfaceTexture"]
 width = 256
 height = 256
-seamless = true
-generate_mipmaps = true
 noise = SubResource("SurfaceNoise")
-
-[sub_resource type="FastNoiseLite" id="DetailNoise"]
-seed = 4127
-noise_type = 1
-frequency = 0.02
-fractal_octaves = 3
-
-[sub_resource type="NoiseTexture2D" id="DetailTexture"]
-width = 512
-height = 512
 seamless = true
-generate_mipmaps = true
-noise = SubResource("DetailNoise")
 
 [resource]
 render_priority = 0
 shader = ExtResource("1_shader")
+shader_parameter/base_color = Color(0.4, 0.42, 0.44, 1)
+shader_parameter/tint = 1.0
+shader_parameter/grout_color = Color(0.17, 0.175, 0.18, 1)
+shader_parameter/grout_width = 0.011
+shader_parameter/bevel_width = 0.035
+shader_parameter/roughness_polished = 0.32
+shader_parameter/roughness_worn = 0.62
+shader_parameter/roughness_offset = 0.0
+shader_parameter/specular_amount = 0.5
+shader_parameter/clearcoat_amount = 0.35
+shader_parameter/wear_amount = 1.0
 shader_parameter/surface_noise = SubResource("SurfaceTexture")
 shader_parameter/detail_noise = SubResource("DetailTexture")
+shader_parameter/glass_enabled = false
+shader_parameter/has_floor_damage = false
+shader_parameter/has_floor_scuff = false
+shader_parameter/relief_strength = 1.0
+shader_parameter/glass_origin = Vector2(0, 0)
+shader_parameter/glass_world_to_floor = Projection(1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1)
