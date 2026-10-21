@@ -259,10 +259,6 @@
 			"path": "res://models/objects/enviroments/06/06_office_chair_2.glb"
 		},
 		{
-			"name": "office chair 2 fell",
-			"path": "res://models/objects/enviroments/06/06_office_chair_2_fell.glb"
-		},
-		{
 			"name": "simple chair",
 			"path": "res://models/objects/enviroments/06/06_simple_chair.glb"
 		},

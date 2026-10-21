@@ -249,6 +249,8 @@ func _migrate_scene_path(old_path: String) -> String:
 				return _environment_scene_for(filename)
 			return canonical
 	var replacements = {
+		"res://models/objects/enviroments/06/06_office_chair_2_fell.glb": "res://models/objects/enviroments/06/06_office_chair_2.glb",
+		"res://game/presentation/office_floor/public/props/06_office_chair_2_fell.tscn": "res://models/objects/enviroments/06/06_office_chair_2.glb",
 		"res://models/objects/enviroments/05/09_phone_a_base.glb": "res://models/objects/enviroments/05/05_desk_phone.glb",
 		"res://models/objects/enviroments/05/09_phone_a_base_hang.glb": "res://models/objects/enviroments/05/05_desk_phone.glb",
 		"res://models/objects/enviroments/05/09_phone_b.glb": "res://models/objects/enviroments/05/05_desk_phone.glb",

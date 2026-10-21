@@ -85,3 +85,9 @@ https://github.com/godotengine/godot/issues/120661 описывает похож
 версии движка и зависимостей не входит в этот инкремент.
 
 Откат: revert коммита; форматы и пути исходных карт не менялись.
+
+
+21.10.2026 — PR400, оставшееся runtime падение: run_startup_resource_memory_tests завершался exit0, но лог содержал Dummy RID ошибки при втором старте (sprite_flipbook/electric_sparks и environment_prop_geometry). Один worker в scene_resource_queue всё ещё создавал меши одновременно с main-thread callbacks. Headless payload loading переведён на основной поток с уступкой кадра между запросами; native Compatibility/Forward+ сохраняют background pipeline2. Владение/публичные API/сцены/DTO/ассеты и лимит памяти прежние, архитектурных исключений нет. Новая регрессия ResourceFormatLoader с mesh-bearing PackedScene проверяет поток реального load: baseline1failure, fix0failures; общий p2 suite PASS. Чистый Godot4.7.2 import, mission_loading и полный startup/restart4431 объектов (3222 furniture) PASS без ERROR; allocator peak1015.6MiB <1344MiB. Readiness/project gates PASS. Повтор полного старта окончательной версии и CI следуют; merge не поручен. Следующее действие: обновить PR400 и проверить runtime CI.
+
+
+21.10.2026 — дополнительная проверка layout_loading выявила нарушение async-контракта после Dummy fix: один синхронный payload мог завершить prepare без уступки кадра. Headless queue теперь уступает кадр и после последнего запроса. Существующий layout_loading regression снова PASS; native ветка не меняется. Следующий шаг — оставшиеся загрузочные suites и итоговый CI.

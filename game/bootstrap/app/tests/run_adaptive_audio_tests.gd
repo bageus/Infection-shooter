@@ -16,11 +16,37 @@ func _initialize() -> void:
 
 
 func _run() -> void:
+	await _native_loops()
 	await _mission()
 	await _completion_handoff()
 	await _menu()
 	print("Adaptive audio tests: %d failures" % failures)
 	quit(failures)
+
+
+func _native_loops() -> void:
+	var mixer := preload("res://game/bootstrap/app/music_crossfade.gd").new()
+	root.add_child(mixer)
+	for stream in [MUSIC.CALM, MUSIC.THREAT, MUSIC.HUNT]:
+		mixer.fade_to(stream, stream.get_length() - 4.2)
+		mixer._fade.custom_step(4.1)
+		await process_frame
+		var voice: AudioStreamPlayer = mixer.current
+		# Cross the former four-second overlap boundary, then the native seam.
+		await create_timer(.4).timeout
+		_check(mixer.current == voice and mixer._voices.size() == 1,
+			"A loop tail never introduces a second rhythmic voice")
+		if not mixer._silent:
+			voice.seek(stream.get_length() - .1)
+			await create_timer(.5).timeout
+			_check(voice.playing and voice.get_playback_position() < stream.loop_offset + 1.0,
+				"Native playback wraps to the processed loop body")
+			_check(mixer.current == voice and mixer._voices.size() == 1,
+				"Native wrap retains exactly one playback instance")
+		mixer.stop_all()
+		await process_frame
+	mixer.queue_free()
+	await process_frame
 
 
 func _mission() -> void:
@@ -72,12 +98,6 @@ func _mission() -> void:
 	_check(is_finite(old_gain) and music.state == &"threat", "Renewed combat interrupts the outgoing fade safely")
 	_check(music.mixer._voices.size() <= 3, "Rapid state changes retain a bounded decoder budget")
 	music.mixer._fade.custom_step(4.1)
-	if music.mixer._silent:
-		var loop_voice: AudioStreamPlayer = music.mixer.current
-		loop_voice.set_meta(&"elapsed", MUSIC.THREAT.get_length() - 1.0)
-		music.mixer._process(0.0)
-		_check(music.mixer.current != loop_voice and is_equal_approx(float(music.mixer.current.get_meta(&"start_offset")), 30.08), "Loop overlap starts only the Threat body before its tail ends")
-		music.mixer._fade.custom_step(4.1)
 	paused = true
 	var volume: float = music.mixer.current.volume_linear
 	await create_timer(.15, true).timeout

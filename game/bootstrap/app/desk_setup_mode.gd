@@ -82,7 +82,7 @@ func configure(owner_planner: Node, planning_ui: Control) -> void:
 	var chair_row := HBoxContainer.new()
 	box.add_child(chair_row)
 	chair_model = OptionButton.new()
-	for model in ["06_office_chair", "06_office_chair_2", "06_office_chair_2_fell"]:
+	for model in ["06_office_chair", "06_office_chair_2"]:
 		chair_model.add_item(model)
 	chair_model.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	chair_row.add_child(chair_model)
