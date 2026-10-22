@@ -12,6 +12,7 @@ const EXIT_BURST := preload("res://game/features/combat/penetration_burst.gd")
 
 const PROJECTILE_VISUAL := preload("res://game/features/combat/projectile_visual.gd")
 const BALANCE = preload("res://game/features/combat/public/projectile_balance.gd")
+const TRACE := preload("res://game/features/combat/public/explosion_trace.gd")
 
 const SURFACE_ATLASES := preload("res://game/core/vfx/public/surface_atlases.gd")
 
@@ -147,6 +148,15 @@ func _flush_exits(checked_position: Vector3) -> void:
 func _handle_hit(collider: Object, hit_position: Vector3, normal: Vector3, shape_index: int = -1) -> bool:
 	if collider == null:
 		return true
+	if not TRACE.enabled() or collider.has_method("take_projectile_damage"):
+		return _dispatch_hit(collider, hit_position, normal, shape_index)
+	TRACE.begin("bullet_hit %s (%s)" % [collider.get("model_path") if collider.get("model_path") != null else collider.get_class(), _weapon_name])
+	var result := _dispatch_hit(collider, hit_position, normal, shape_index)
+	TRACE.mark("hit handled (decal, sound, prop reaction)")
+	return result
+
+
+func _dispatch_hit(collider: Object, hit_position: Vector3, normal: Vector3, shape_index: int) -> bool:
 	# Bullet holes belong on surfaces, not on the infected or their limbs.
 	if not collider.has_method("take_projectile_damage") and _hit_material(collider, shape_index) not in ["flesh", "glass"]:
 		_spawn_impact_decal(collider, hit_position, normal)

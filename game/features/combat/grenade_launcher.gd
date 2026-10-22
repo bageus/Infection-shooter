@@ -22,6 +22,7 @@ func try_fire_at(target_point: Vector3) -> bool:
 	if _magazine_ammo <= 0:
 		_dry_fire()
 		return false
+	TRACE.begin("fire grenade_launcher")
 	aim_at(target_point)
 	var projectile := PROJECTILE.new()
 	projectile.configure_world(effects_root, impact_pool)
@@ -35,9 +36,11 @@ func try_fire_at(target_point: Vector3) -> bool:
 		projectile.set_physics_process(false)
 		projectile.set("_exploded", true)
 		projectile.call_deferred("_explode_at", obstruction["position"], obstruction["normal"], obstruction["collider"])
+	TRACE.mark("projectile spawned")
 	_magazine_ammo -= 1
 	_show_muzzle_flash()
 	SFX.play(self, sound_event(0), muzzle.global_position)
+	TRACE.mark("muzzle flash and fire sound")
 	_cooldown_remaining = 1.0 / shots_per_second
 	return true
 
