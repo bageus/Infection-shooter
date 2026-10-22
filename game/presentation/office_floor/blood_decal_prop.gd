@@ -165,6 +165,8 @@ func _rebuild() -> void:
 	var material := StandardMaterial3D.new()
 	_surface_material = material
 	material.albedo_texture = entry.get("texture")
+	material.normal_enabled = entry.has("normal")
+	material.normal_texture = entry.get("normal")
 	material.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
 	material.roughness = 0.35
 	material.cull_mode = BaseMaterial3D.CULL_DISABLED

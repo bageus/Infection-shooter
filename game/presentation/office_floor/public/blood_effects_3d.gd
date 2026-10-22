@@ -301,7 +301,7 @@ func _definition(category: String, surface: Dictionary, direction: Vector3, size
 		footprint = _surfaces.call("fit_quad", surface, mark_basis, footprint)
 		if footprint == Vector2.ZERO:
 			return {}
-	return {"texture": entry["texture"], "footprint": footprint, "basis": mark_basis, "local_basis": (hit["collider"] as Node3D).global_basis.inverse() * mark_basis, "tint": Color(1.0, randf_range(0.90, 1.0), randf_range(0.90, 1.0), randf_range(0.96, 1.0))}
+	return {"texture": entry["texture"], "normal": entry.get("normal"), "footprint": footprint, "basis": mark_basis, "local_basis": (hit["collider"] as Node3D).global_basis.inverse() * mark_basis, "tint": Color(1.0, randf_range(0.90, 1.0), randf_range(0.90, 1.0), randf_range(0.96, 1.0))}
 
 
 func clear_marks() -> void:

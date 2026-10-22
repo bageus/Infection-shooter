@@ -19,6 +19,9 @@ const TRIM_SHRINKS := 4
 # BUILT_CELL slots; cells.json holds each frame's used size in its slot.
 const BUILT_CELL := 512
 const CELLS_FILE := "cells.json"
+# tools/build_blood_normals.py writes a normal atlas next to each built atlas,
+# with half-size slots (256 px) that keep the same top-left placement.
+const NORMAL_CELL := 256
 # Own blood ("procedural" setting): frames drawn in code, one square cell each.
 const PROCEDURAL_CELL := 96
 const DEFAULT_PROCEDURAL_COLOR := Color(0.42, 0.01, 0.02)
@@ -55,6 +58,7 @@ func load_assets(max_dimension: int = 512, brightness: float = 1.18, procedural:
 		var atlas := _load_image(path)
 		if atlas == null:
 			continue
+		var normals := _load_image(path.replace("_atlas_", "_normal_atlas_"))
 		var grid: Vector2i = ATLASES[category]["grid"]
 		@warning_ignore("integer_division")
 		var cell := Vector2i(atlas.get_width() / grid.x, atlas.get_height() / grid.y)
@@ -77,7 +81,10 @@ func load_assets(max_dimension: int = 512, brightness: float = 1.18, procedural:
 				image.resize(maxi(1, roundi(image.get_width() * factor)), maxi(1, roundi(image.get_height() * factor)), Image.INTERPOLATE_LANCZOS)
 			image.adjust_bcs(brightness, 1.0, 1.0)
 			image.generate_mipmaps()
-			entries[category].append({"texture": ImageTexture.create_from_image(image), "aspect": float(used.size.x) / used.size.y, "variant": index + 1})
+			var entry := {"texture": ImageTexture.create_from_image(image), "aspect": float(used.size.x) / used.size.y, "variant": index + 1}
+			if normals != null and built.size() == grid.x * grid.y:
+				entry["normal"] = _normal_texture(normals, grid, index, used.size)
+			entries[category].append(entry)
 
 
 # Each frame is a seeded cluster of soft blobs with a ragged edge, so a frame
@@ -112,6 +119,17 @@ static func _built_cells() -> Dictionary:
 	var path := ROOT.path_join(CELLS_FILE)
 	var json := load(path) as JSON if ResourceLoader.exists(path) else null
 	return json.data if json != null and json.data is Dictionary else {}
+
+
+# Normal map of one frame, cut from its normal atlas slot at the albedo's used size
+# scaled to NORMAL_CELL, so the normal lines up with the albedo over the same quad.
+static func _normal_texture(normals: Image, grid: Vector2i, index: int, used_size: Vector2i) -> ImageTexture:
+	var ratio := float(NORMAL_CELL) / BUILT_CELL
+	var slot := Vector2i(index % grid.x, index / grid.x) * NORMAL_CELL
+	var size := Vector2i(ceili(used_size.x * ratio), ceili(used_size.y * ratio))
+	var image := normals.get_region(Rect2i(slot, size))
+	image.generate_mipmaps()
+	return ImageTexture.create_from_image(image)
 
 
 func _load_image(path: String) -> Image:
