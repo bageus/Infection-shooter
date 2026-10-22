@@ -76,7 +76,7 @@ func _capture() -> void:
 	for i in 5:
 		await process_frame
 	for piece in pieces:
-		CLIP.apply(piece.get("_visual"), {})
+		CLIP.style(piece.get("_visual"), {}, Vector4(), 1.0)
 		piece.set_process(false)
 	await _shot("edges_before.png")
 	# The cached stamp would skip the refit.
@@ -123,7 +123,7 @@ func _inner_corner_and_crate(stage: Node3D, paint: Material, camera: Camera3D) -
 		for i in 5:
 			await process_frame
 		for piece in pieces:
-			CLIP.apply(piece.get("_visual"), {})
+			CLIP.style(piece.get("_visual"), {}, Vector4(), 1.0)
 			piece.set_process(false)
 		await _shot("edges_%s_before.png" % view[0])
 		for piece in pieces:

@@ -16,6 +16,12 @@ const MAX_RUN := 6.0
 const INSET := 0.3
 const PROBE_LIFT := 0.03
 const PROBE_SLACK := 0.05
+## Floor mass climbing walls: how high above the floor the probes run, how many
+## directions, and the step and depth of the stretch probes along a wall.
+const WALL_PROBE_HEIGHT := 0.3
+const WALL_RAYS := 24
+const WALL_STRIDE := 0.25
+const WALL_BACK := 0.2
 const AXES: Array[Vector3] = [Vector3.RIGHT, Vector3.UP, Vector3.BACK]
 
 
@@ -108,7 +114,127 @@ static func _run(space: PhysicsDirectSpaceState3D, frame: Transform3D, edge: Vec
 	return clampf((start - hit["position"]).dot(normal) - 0.01, 0.0, MAX_RUN) if not hit.is_empty() else 0.0
 
 
-static func apply(visual: MeshInstance3D, fit: Dictionary) -> void:
-	visual.set_instance_shader_parameter("clip_a", fit.get("a", Vector4()))
-	visual.set_instance_shader_parameter("clip_b", fit.get("b", Vector4()))
-	visual.set_instance_shader_parameter("clip_limit", fit.get("limit", Vector4()))
+## Floor mass: the walls (up to two) that stand in the patch's footprint and the
+## mass climbs, as shader values {p0, r0, p1, r1} in patch units. rect is the
+## patch (or fused group) in local units. A wall only counts along the stretch
+## where it really stands, so a table end or a column does not bend the whole
+## patch.
+static func compute_floor(frame: Transform3D, rect: Rect2, space: PhysicsDirectSpaceState3D) -> Dictionary:
+	if space == null:
+		return {}
+	var scale := maxf(frame.basis.x.length(), 0.001)
+	var up := frame.basis.z.normalized()
+	if up.y < 0.9:
+		return {}
+	var centre_local := rect.get_center()
+	var origin := frame * Vector3(centre_local.x, centre_local.y, 0.0) + up * WALL_PROBE_HEIGHT
+	var radius := rect.size.length() * 0.5 * scale + PROBE_SLACK
+	var seen: Array[Dictionary] = []
+	for step in WALL_RAYS:
+		var angle := TAU * float(step) / WALL_RAYS
+		var direction := Vector3(cos(angle), 0.0, sin(angle))
+		var hit := space.intersect_ray(PhysicsRayQueryParameters3D.create(origin, origin + direction * radius, 7))
+		if hit.is_empty() or absf((hit["normal"] as Vector3).y) > 0.35 or hit["collider"] is CharacterBody3D:
+			continue
+		var flat := Vector2((hit["normal"] as Vector3).x, (hit["normal"] as Vector3).z)
+		if flat.is_zero_approx():
+			continue
+		seen.append({"n": -flat.normalized(), "at": Vector2((hit["position"] as Vector3).x, (hit["position"] as Vector3).z), "range": origin.distance_to(hit["position"])})
+	seen.sort_custom(func(a: Dictionary, b: Dictionary) -> bool: return a["range"] < b["range"])
+	var result := {}
+	var chosen: Array[Dictionary] = []
+	for candidate in seen:
+		var distinct := true
+		for taken in chosen:
+			distinct = distinct and (candidate["n"] as Vector2).dot(taken["n"]) < 0.9
+		if distinct and chosen.size() < 2:
+			chosen.append(candidate)
+	for index in chosen.size():
+		var wall := _wall_plane(frame, scale, origin.y, chosen[index], radius, space)
+		if not wall.is_empty():
+			result["p%d" % index] = wall["p"]
+			result["r%d" % index] = wall["r"]
+	return result
+
+
+# One wall as a plane in patch units plus the stretch of it that is solid.
+static func _wall_plane(frame: Transform3D, scale: float, height: float, wall: Dictionary, radius: float, space: PhysicsDirectSpaceState3D) -> Dictionary:
+	var n: Vector2 = wall["n"]
+	var at: Vector2 = wall["at"]
+	var origin := Vector2(frame.origin.x, frame.origin.z)
+	var x := Vector2(frame.basis.x.x, frame.basis.x.z)
+	var y := Vector2(frame.basis.y.x, frame.basis.y.z)
+	var normal_local := Vector2(n.dot(x), n.dot(y)) / scale
+	if normal_local.length() < 0.5:
+		return {}
+	var tangent := Vector2(-n.y, n.x)
+	var span := [0.0, 0.0]
+	for side in 2:
+		var direction := -1.0 if side == 0 else 1.0
+		for step in range(1, ceili(radius / WALL_STRIDE) + 1):
+			var point := at + tangent * (direction * step * WALL_STRIDE) - n * WALL_BACK
+			var from := Vector3(point.x, height, point.y)
+			var hit := space.intersect_ray(PhysicsRayQueryParameters3D.create(from, from + Vector3(n.x, 0.0, n.y) * (WALL_BACK + 0.06), 7))
+			if hit.is_empty() or hit["collider"] is CharacterBody3D:
+				break
+			var flat := Vector2((hit["normal"] as Vector3).x, (hit["normal"] as Vector3).z)
+			if absf((hit["normal"] as Vector3).y) > 0.35 or flat.dot(-n) < 0.8 * flat.length():
+				break
+			span[side] = direction * step * WALL_STRIDE
+	var centre := tangent.dot(at - origin)
+	var low: float = centre + span[0] - WALL_STRIDE * 0.5
+	var high: float = centre + span[1] + WALL_STRIDE * 0.5
+	# The shader measures along (-n.y, n.x) of the patch frame, which mirrors when the frame does.
+	var tangent_local := Vector2(tangent.dot(x), tangent.dot(y)) / scale
+	if tangent_local.dot(Vector2(-normal_local.y, normal_local.x)) < 0.0:
+		var swapped := -low
+		low = -high
+		high = swapped
+	var offset := n.dot(at - origin) / scale
+	return {"p": Vector4(normal_local.x, normal_local.y, offset, FLOOR_SPAN), "r": Vector4(low / scale, high / scale, 0.0, 0.0)}
+
+
+## The level's floor rectangle as world_clip (min x, min z, max x, max z).
+static func world_clip(bounds: Rect2) -> Vector4:
+	return Vector4(bounds.position.x, bounds.position.y, bounds.end.x, bounds.end.y) if bounds.has_area() else Vector4()
+
+
+## Gives the visual its own copy of the patch material carrying this piece's
+## clip (fit from compute / compute_floor), level bounds and flattening, or the
+## shared one again when nothing is set. Per-piece uniforms instead of instance
+## uniforms: the global instance buffer holds 4096 slots on some hardware.
+static func style(visual: MeshInstance3D, fit: Dictionary, world: Vector4, depth_scale: float) -> void:
+	var base: ShaderMaterial = null
+	if visual.mesh != null and visual.mesh.get_surface_count() > 0:
+		base = visual.mesh.surface_get_material(0) as ShaderMaterial
+	if base == null:
+		return
+	var plain := fit.is_empty() and world == Vector4() and is_equal_approx(depth_scale, 1.0)
+	if plain:
+		visual.material_override = null
+		return
+	var own := visual.material_override as ShaderMaterial
+	if own == null or own.get_meta(&"biomass_base", null) != base:
+		own = base.duplicate() as ShaderMaterial
+		own.set_meta(&"biomass_base", base)
+		visual.material_override = own
+	own.set_shader_parameter("clip_a", fit.get("a", Vector4()))
+	own.set_shader_parameter("clip_b", fit.get("b", Vector4()))
+	own.set_shader_parameter("clip_limit", fit.get("limit", Vector4()))
+	own.set_shader_parameter("world_clip", world)
+	own.set_shader_parameter("wall_p0", fit.get("p0", Vector4()))
+	own.set_shader_parameter("wall_r0", fit.get("r0", Vector4()))
+	own.set_shader_parameter("wall_p1", fit.get("p1", Vector4()))
+	own.set_shader_parameter("wall_r1", fit.get("r1", Vector4()))
+	own.set_shader_parameter("depth_scale", depth_scale)
+	own.set_shader_parameter("support_texture", fit.get("support"))
+	own.set_shader_parameter("support_rect", fit.get("support_rect", Vector4()))
+
+
+## Current value of a clip uniform of the visual (default when unset).
+static func value(visual: MeshInstance3D, name: String) -> Variant:
+	var own := visual.material_override as ShaderMaterial
+	var found: Variant = own.get_shader_parameter(name) if own != null else null
+	if found == null and name != "support_texture":
+		return 1.0 if name == "depth_scale" else Vector4()
+	return found

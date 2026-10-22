@@ -16,6 +16,10 @@ const JOIN_GAP := 0.12
 const PLANE_TOLERANCE := 0.04
 const NORMAL_DOT := 0.97
 const TARGET_PPU := 450.0
+## Longest side (metres) of the box round one fused group, and the cell size
+## of the lookup grid used to find neighbours.
+const MAX_SPAN := 3.5
+const CELL := 2.0
 
 var piece: Node3D
 var shown_signature := 0
@@ -92,16 +96,50 @@ func _fit_neighbours() -> void:
 		_fit_group(group)
 
 
-# Pieces on one surface that touch, as arrays in scene order.
+# Pieces on one surface that touch, as arrays in scene order. A group never
+# grows past MAX_SPAN, so a long generated vein splits into masses that each
+# keep a sharp image instead of one blurred map for the whole level.
 func _groups(pieces: Array[Node3D]) -> Array:
+	var infos: Array[Dictionary] = []
+	var cells := {}
+	var widest := 0.0
+	for index in pieces.size():
+		var piece_node := pieces[index]
+		var frame: Transform3D = piece_node.call("biomass_frame")
+		var reach := ATLAS.FOOTPRINT.length() * 0.5 * maxf(frame.basis.x.length(), 0.001) + JOIN_GAP
+		widest = maxf(widest, reach)
+		infos.append({"frame": frame, "attachment": piece_node.call("get_blood_attachment"), "reach": reach})
+		var key := Vector2i(floori(frame.origin.x / CELL), floori(frame.origin.z / CELL))
+		if not cells.has(key):
+			cells[key] = []
+		cells[key].append(index)
 	var parents := range(pieces.size())
+	var boxes: Array[AABB] = []
+	for info in infos:
+		var origin: Vector3 = (info["frame"] as Transform3D).origin
+		var span := Vector3.ONE * float(info["reach"])
+		boxes.append(AABB(origin - span, span * 2.0))
 	for i in pieces.size():
-		for j in range(i + 1, pieces.size()):
-			if _touching(pieces[i], pieces[j]):
-				var root_i: int = _root(parents, i)
-				var root_j: int = _root(parents, j)
-				if root_i != root_j:
-					parents[maxi(root_i, root_j)] = mini(root_i, root_j)
+		var origin_i: Vector3 = (infos[i]["frame"] as Transform3D).origin
+		var near := ceili((float(infos[i]["reach"]) + widest) / CELL)
+		var home := Vector2i(floori(origin_i.x / CELL), floori(origin_i.z / CELL))
+		var candidates: Array[int] = []
+		for dx in range(-near, near + 1):
+			for dz in range(-near, near + 1):
+				for j: int in cells.get(home + Vector2i(dx, dz), []):
+					if j > i:
+						candidates.append(j)
+		candidates.sort()
+		for j in candidates:
+			var root_i: int = _root(parents, i)
+			var root_j: int = _root(parents, j)
+			if root_i == root_j or not _touching(infos[i], infos[j]):
+				continue
+			var merged := boxes[root_i].merge(boxes[root_j])
+			if maxf(merged.size.x, maxf(merged.size.y, merged.size.z)) > MAX_SPAN:
+				continue
+			parents[maxi(root_i, root_j)] = mini(root_i, root_j)
+			boxes[mini(root_i, root_j)] = merged
 	var by_root := {}
 	for index in pieces.size():
 		var root_index := _root(parents, index)
@@ -117,15 +155,17 @@ func _root(parents: Array, index: int) -> int:
 	return index
 
 
-func _touching(a: Node3D, b: Node3D) -> bool:
-	var frame_a: Transform3D = a.call("biomass_frame")
-	var frame_b: Transform3D = b.call("biomass_frame")
-	if a.call("get_blood_attachment") != b.call("get_blood_attachment"):
+func _touching(a: Dictionary, b: Dictionary) -> bool:
+	var frame_a: Transform3D = a["frame"]
+	var frame_b: Transform3D = b["frame"]
+	if a["attachment"] != b["attachment"]:
 		return false
 	var normal := frame_a.basis.z.normalized()
 	if normal.dot(frame_b.basis.z.normalized()) < NORMAL_DOT:
 		return false
 	if absf(normal.dot(frame_b.origin - frame_a.origin)) > PLANE_TOLERANCE:
+		return false
+	if frame_a.origin.distance_to(frame_b.origin) > float(a["reach"]) + float(b["reach"]):
 		return false
 	var scale_a := maxf(frame_a.basis.x.length(), 0.001)
 	var other := _plane_transform(frame_a.affine_inverse() * frame_b)

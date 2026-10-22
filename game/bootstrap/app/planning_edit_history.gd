@@ -30,6 +30,14 @@ func record_added(node: Node3D) -> void:
 	_record({"kind": "added", "node": weakref(node)})
 
 
+## Several nodes placed at once (the procedural biomass); one undo removes them all.
+func record_added_group(nodes: Array[Node3D]) -> void:
+	var refs: Array[WeakRef] = []
+	for node in nodes:
+		refs.append(weakref(node))
+	_record({"kind": "added_group", "nodes": refs})
+
+
 func record_deleted(node: Node3D) -> void:
 	var records: Array[Dictionary] = [_capture(node)]
 	var desk_id := str(node.get_meta("planning_desk_id", ""))
@@ -68,6 +76,13 @@ func undo() -> void:
 			var node := (action["node"] as WeakRef).get_ref() as Node3D
 			if is_instance_valid(node):
 				planner._delete_node(node)
+		"added_group":
+			for reference: WeakRef in action["nodes"]:
+				var node := reference.get_ref() as Node3D
+				if is_instance_valid(node):
+					planner.placed.erase(node)
+					node.queue_free()
+			planner._update_status()
 		"deleted":
 			for record in action["records"]:
 				_restore(record, Vector3.ZERO, false)
