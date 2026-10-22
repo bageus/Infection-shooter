@@ -106,6 +106,7 @@ game/features/combat/tests/run_impact_geometry_index_tests.gd
 game/bootstrap/app/tests/run_group03_atlas_tests.gd
 game/presentation/office_floor/tests/run_blast_break_tests.gd
 game/presentation/office_floor/tests/run_blast_debris_survival_tests.gd
+game/presentation/office_floor/tests/run_standing_panel_tests.gd
 game/presentation/office_floor/tests/run_extinguisher_blast_tests.gd
 game/features/combat/tests/run_cursor_aim_tests.gd
 game/bootstrap/app/tests/run_layout_loading_tests.gd
