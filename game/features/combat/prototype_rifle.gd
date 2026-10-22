@@ -1,5 +1,6 @@
 extends Node3D
 const BARREL_GUARD := preload("res://game/features/combat/weapon_barrel_guard.gd")
+const TRACE := preload("res://game/features/combat/public/explosion_trace.gd")
 const AIM_GEOMETRY := preload("res://game/features/combat/weapon_aim_geometry.gd")
 const MUZZLE_FLASH := preload("res://game/features/combat/muzzle_flash.tscn")
 const ART_SETUP := preload("res://game/features/combat/weapon_art_setup.gd")
@@ -188,6 +189,7 @@ func try_fire_at(target_point: Vector3) -> bool:
 	aim_at(target_point)
 	var base_direction := -muzzle.global_basis.z.normalized()
 	var obstruction := BARREL_GUARD.obstruction(self, muzzle, shooter)
+	TRACE.begin("fire %s" % weapon_name)
 	for pellet in pellets_per_shot:
 		var bullet := bullet_scene.instantiate()
 		bullet.call("configure_world", effects_root, impact_pool)
@@ -199,11 +201,13 @@ func try_fire_at(target_point: Vector3) -> bool:
 		if not obstruction.is_empty():
 			bullet.call("_handle_hit", obstruction["collider"], obstruction["position"], obstruction["normal"], int(obstruction.get("shape", -1)))
 			bullet.queue_free()
+	TRACE.mark("bullets spawned")
 	if direct_reserve_feed:
 		_reserve.amount -= 1
 	else:
 		_magazine_ammo -= 1
 	_show_muzzle_flash()
+	TRACE.mark("muzzle flash shown")
 	_last_shot_time = now
 	_burst_shots += 1
 	_cooldown_remaining = 1.0 / maxf(shots_per_second, 0.01)

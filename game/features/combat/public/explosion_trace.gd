@@ -25,6 +25,11 @@ static func enabled() -> bool:
 	return _enabled == 1
 
 
+## Creates the frame monitor at game start, so slow frames before the first traced event are logged too.
+static func start() -> void:
+	_trace()
+
+
 ## Starts a traced event; later marks and slow frames are reported relative to it.
 static func begin(event: String) -> void:
 	var trace := _trace()
