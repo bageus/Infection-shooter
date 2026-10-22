@@ -44,9 +44,12 @@ static func fuse(members: Array, albedo_data: PackedByteArray, relief_data: Pack
 		bounds.append(box)
 		rect = box if index == 0 else rect.merge(box)
 	rect = rect.grow(MARGIN)
+	# A degenerate transform (NaN or infinity) would size the buffers from garbage and fail the allocation.
+	if not (is_finite(rect.size.x) and is_finite(rect.size.y)) or not (is_finite(rect.position.x) and is_finite(rect.position.y)) or not is_finite(target_ppu) or target_ppu <= 0.0:
+		return {}
 	var ppu := minf(target_ppu, MAX_SIDE / maxf(rect.size.x, rect.size.y))
-	var width := maxi(ceili(rect.size.x * ppu), 8)
-	var height := maxi(ceili(rect.size.y * ppu), 8)
+	var width := clampi(ceili(rect.size.x * ppu), 8, int(MAX_SIDE) + 1)
+	var height := clampi(ceili(rect.size.y * ppu), 8, int(MAX_SIDE) + 1)
 	rect.size = Vector2(width, height) / ppu
 	var count := width * height
 	var heights := PackedFloat32Array()
@@ -269,6 +272,6 @@ static func _finish(rect: Rect2, ppu: float, width: int, height: int, heights: P
 static func _blur(image: Image) -> Image:
 	var width := image.get_width()
 	var height := image.get_height()
-	image.resize(maxi(width / BLUR_DIVISOR, 2), maxi(height / BLUR_DIVISOR, 2), Image.INTERPOLATE_TRILINEAR)
+	image.resize(maxi(floori(float(width) / BLUR_DIVISOR), 2), maxi(floori(float(height) / BLUR_DIVISOR), 2), Image.INTERPOLATE_TRILINEAR)
 	image.resize(width, height, Image.INTERPOLATE_BILINEAR)
 	return image
