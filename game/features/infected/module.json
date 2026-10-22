@@ -19,6 +19,7 @@
   "public_api": [
     "public/infected_capsule.tscn",
     "public/corpse_budget.gd",
+    "public/enemy_tuning.gd",
     "public/mutant_level2.tscn",
     "public/infected_hunger.tscn",
     "public/infected_revenant.tscn",

@@ -399,7 +399,7 @@ func _physics_process(delta: float) -> void:
 		_cached_desired = _desired_velocity_from_offset(target_offset)
 
 	_behaviour_tick(step, target_offset)
-	var desired := Vector3.ZERO if _blast_stun_remaining > 0.0 else _cached_desired * (1.0 - _pace.hit_penalty)
+	var desired := Vector3.ZERO if _blast_stun_remaining > 0.0 else _cached_desired * (1.0 - _pace.hit_penalty) * _authoring.movement_scale()
 	if not _sleeping_far:
 		_turn_toward_face_direction(delta)
 	var spread := CROWD.spread(self, collision_shape)
