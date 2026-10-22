@@ -1,6 +1,7 @@
 extends Node3D
 
 const BLOOD_PLACEMENT := preload("res://game/bootstrap/app/planning_blood_placement.gd")
+const EXPLOSION_TRACE := preload("res://game/features/combat/public/explosion_trace.gd")
 const DISPLAY_WALL := preload("res://game/presentation/office_floor/public/display_wall.gd")
 const WORLD_BINDINGS := preload("res://game/bootstrap/app/world_bindings.gd")
 const IMPACT_POOL := preload("res://game/features/combat/public/impact_effects.gd")
@@ -118,6 +119,7 @@ func _ready() -> void:
 	feedback.configure(player)
 	_setup_blood_effects()
 	SHADER_WARMUP.new().setup(player.get("camera") as Camera3D)
+	EXPLOSION_TRACE.start()
 	var hit_warmup := HIT_EFFECT_WARMUP.new()
 	hit_warmup.setup(self)
 	GRENADE_EXPLOSION.warm_up(hit_warmup, Vector3(0.0, 0.0, -2.0))

@@ -8374,13 +8374,13 @@ metadata/planning_desk_id = ""
 metadata/planning_attachment = ""
 
 [node name="@RigidBody3D@30605" type="RigidBody3D" parent="." unique_id=1948398609 instance=ExtResource("18_6gfkn")]
-transform = Transform3D(9.536743e-07, 0, -1, 0, 1, 0, 1, 0, 9.536743e-07, -10.12049, 1.0032232, -5.9499435)
+transform = Transform3D(9.536743e-07, 0, -1, 0, 1, 0, 1, 0, 9.536743e-07, -10.175, 1.0032232, -5.9499435)
 
 model_path = "res://models/objects/enviroments/05/05_wall_TV_frameless_destructible.glb"
 display_content = "dynamic"
 display_seed = 1329076730
 metadata/world_bound = true
-metadata/planning_settled_transform = Transform3D(9.536743e-07, 0, -1, 0, 1, 0, 1, 0, 9.536743e-07, -10.12049, 1.0032232, -5.9499435)
+metadata/planning_settled_transform = Transform3D(9.536743e-07, 0, -1, 0, 1, 0, 1, 0, 9.536743e-07, -10.175, 1.0032232, -5.9499435)
 metadata/planning_object_id = ""
 metadata/planning_desk_id = ""
 metadata/planning_attachment = ""
@@ -15602,105 +15602,105 @@ metadata/planning_attachment = "11423402371"
 metadata/planning_zone = 5
 
 [node name="@RigidBody3D@31289" type="RigidBody3D" parent="." unique_id=1545278765 instance=ExtResource("18_6gfkn")]
-transform = Transform3D(9.536743e-07, 0, -1, 0, 1, 0, 1, 0, 9.536743e-07, -10.12049, 1.0032232, -4.901323)
+transform = Transform3D(9.536743e-07, 0, -1, 0, 1, 0, 1, 0, 9.536743e-07, -10.175, 1.0032232, -4.901323)
 
 model_path = "res://models/objects/enviroments/05/05_wall_TV_frameless_destructible.glb"
 display_power = "on"
 display_content = "dynamic"
 display_seed = 1329076730
 metadata/world_bound = true
-metadata/planning_settled_transform = Transform3D(9.536743e-07, 0, -1, 0, 1, 0, 1, 0, 9.536743e-07, -10.12049, 1.0032232, -4.901323)
+metadata/planning_settled_transform = Transform3D(9.536743e-07, 0, -1, 0, 1, 0, 1, 0, 9.536743e-07, -10.175, 1.0032232, -4.901323)
 metadata/planning_object_id = ""
 metadata/planning_desk_id = ""
 metadata/planning_attachment = ""
 
 [node name="@RigidBody3D@31290" type="RigidBody3D" parent="." unique_id=723057144 instance=ExtResource("18_6gfkn")]
-transform = Transform3D(9.536743e-07, 0, -1, 0, 1, 0, 1, 0, 9.536743e-07, -10.12049, 1.0032232, -3.8527021)
+transform = Transform3D(9.536743e-07, 0, -1, 0, 1, 0, 1, 0, 9.536743e-07, -10.175, 1.0032232, -3.8527021)
 
 model_path = "res://models/objects/enviroments/05/05_wall_TV_frameless_destructible.glb"
 display_power = "on"
 display_content = "dynamic"
 display_seed = 1329076730
 metadata/world_bound = true
-metadata/planning_settled_transform = Transform3D(9.536743e-07, 0, -1, 0, 1, 0, 1, 0, 9.536743e-07, -10.12049, 1.0032232, -3.8527021)
+metadata/planning_settled_transform = Transform3D(9.536743e-07, 0, -1, 0, 1, 0, 1, 0, 9.536743e-07, -10.175, 1.0032232, -3.8527021)
 metadata/planning_object_id = ""
 metadata/planning_desk_id = ""
 metadata/planning_attachment = ""
 
 [node name="@RigidBody3D@31291" type="RigidBody3D" parent="." unique_id=677895153 instance=ExtResource("18_6gfkn")]
-transform = Transform3D(9.536743e-07, 0, -1, 0, 1, 0, 1, 0, 9.536743e-07, -10.120489, 1.5608537, -3.8544362)
+transform = Transform3D(9.536743e-07, 0, -1, 0, 1, 0, 1, 0, 9.536743e-07, -10.175, 1.5608537, -3.8544362)
 
 model_path = "res://models/objects/enviroments/05/05_wall_TV_frameless_destructible.glb"
 display_power = "on"
 display_content = "dynamic"
 display_seed = 1329076730
 metadata/world_bound = true
-metadata/planning_settled_transform = Transform3D(9.536743e-07, 0, -1, 0, 1, 0, 1, 0, 9.536743e-07, -10.120489, 1.5608537, -3.8544362)
+metadata/planning_settled_transform = Transform3D(9.536743e-07, 0, -1, 0, 1, 0, 1, 0, 9.536743e-07, -10.175, 1.5608537, -3.8544362)
 metadata/planning_object_id = ""
 metadata/planning_desk_id = ""
 metadata/planning_attachment = ""
 
 [node name="@RigidBody3D@31292" type="RigidBody3D" parent="." unique_id=311919256 instance=ExtResource("18_6gfkn")]
-transform = Transform3D(9.536743e-07, 0, -1, 0, 1, 0, 1, 0, 9.536743e-07, -10.120489, 1.5608537, -4.903057)
+transform = Transform3D(9.536743e-07, 0, -1, 0, 1, 0, 1, 0, 9.536743e-07, -10.175, 1.5608537, -4.903057)
 
 model_path = "res://models/objects/enviroments/05/05_wall_TV_frameless_destructible.glb"
 display_power = "on"
 display_content = "dynamic"
 display_seed = 1329076730
 metadata/world_bound = true
-metadata/planning_settled_transform = Transform3D(9.536743e-07, 0, -1, 0, 1, 0, 1, 0, 9.536743e-07, -10.120489, 1.5608537, -4.903057)
+metadata/planning_settled_transform = Transform3D(9.536743e-07, 0, -1, 0, 1, 0, 1, 0, 9.536743e-07, -10.175, 1.5608537, -4.903057)
 metadata/planning_object_id = ""
 metadata/planning_desk_id = ""
 metadata/planning_attachment = ""
 
 [node name="@RigidBody3D@31293" type="RigidBody3D" parent="." unique_id=1908650051 instance=ExtResource("18_6gfkn")]
-transform = Transform3D(9.536743e-07, 0, -1, 0, 1, 0, 1, 0, 9.536743e-07, -10.120489, 1.5608537, -5.9516783)
+transform = Transform3D(9.536743e-07, 0, -1, 0, 1, 0, 1, 0, 9.536743e-07, -10.175, 1.5608537, -5.9516783)
 
 model_path = "res://models/objects/enviroments/05/05_wall_TV_frameless_destructible.glb"
 display_power = "on"
 display_content = "dynamic"
 display_seed = 1329076730
 metadata/world_bound = true
-metadata/planning_settled_transform = Transform3D(9.536743e-07, 0, -1, 0, 1, 0, 1, 0, 9.536743e-07, -10.120489, 1.5608537, -5.9516783)
+metadata/planning_settled_transform = Transform3D(9.536743e-07, 0, -1, 0, 1, 0, 1, 0, 9.536743e-07, -10.175, 1.5608537, -5.9516783)
 metadata/planning_object_id = ""
 metadata/planning_desk_id = ""
 metadata/planning_attachment = ""
 
 [node name="@RigidBody3D@31294" type="RigidBody3D" parent="." unique_id=556315379 instance=ExtResource("18_6gfkn")]
-transform = Transform3D(9.536743e-07, 0, -1, 0, 1, 0, 1, 0, 9.536743e-07, -10.12049, 2.118484, -5.954831)
+transform = Transform3D(9.536743e-07, 0, -1, 0, 1, 0, 1, 0, 9.536743e-07, -10.175, 2.118484, -5.954831)
 
 model_path = "res://models/objects/enviroments/05/05_wall_TV_frameless_destructible.glb"
 display_power = "on"
 display_content = "dynamic"
 display_seed = 1329076730
 metadata/world_bound = true
-metadata/planning_settled_transform = Transform3D(9.536743e-07, 0, -1, 0, 1, 0, 1, 0, 9.536743e-07, -10.12049, 2.118484, -5.954831)
+metadata/planning_settled_transform = Transform3D(9.536743e-07, 0, -1, 0, 1, 0, 1, 0, 9.536743e-07, -10.175, 2.118484, -5.954831)
 metadata/planning_object_id = ""
 metadata/planning_desk_id = ""
 metadata/planning_attachment = ""
 
 [node name="@RigidBody3D@31295" type="RigidBody3D" parent="." unique_id=1567592604 instance=ExtResource("18_6gfkn")]
-transform = Transform3D(9.536743e-07, 0, -1, 0, 1, 0, 1, 0, 9.536743e-07, -10.12049, 2.118484, -4.90621)
+transform = Transform3D(9.536743e-07, 0, -1, 0, 1, 0, 1, 0, 9.536743e-07, -10.175, 2.118484, -4.90621)
 
 model_path = "res://models/objects/enviroments/05/05_wall_TV_frameless_destructible.glb"
 display_power = "on"
 display_content = "dynamic"
 display_seed = 1329076730
 metadata/world_bound = true
-metadata/planning_settled_transform = Transform3D(9.536743e-07, 0, -1, 0, 1, 0, 1, 0, 9.536743e-07, -10.12049, 2.118484, -4.90621)
+metadata/planning_settled_transform = Transform3D(9.536743e-07, 0, -1, 0, 1, 0, 1, 0, 9.536743e-07, -10.175, 2.118484, -4.90621)
 metadata/planning_object_id = ""
 metadata/planning_desk_id = ""
 metadata/planning_attachment = ""
 
 [node name="@RigidBody3D@31296" type="RigidBody3D" parent="." unique_id=614035487 instance=ExtResource("18_6gfkn")]
-transform = Transform3D(9.536743e-07, 0, -1, 0, 1, 0, 1, 0, 9.536743e-07, -10.12049, 2.118484, -3.8575888)
+transform = Transform3D(9.536743e-07, 0, -1, 0, 1, 0, 1, 0, 9.536743e-07, -10.175, 2.118484, -3.8575888)
 
 model_path = "res://models/objects/enviroments/05/05_wall_TV_frameless_destructible.glb"
 display_power = "on"
 display_content = "dynamic"
 display_seed = 1329076730
 metadata/world_bound = true
-metadata/planning_settled_transform = Transform3D(9.536743e-07, 0, -1, 0, 1, 0, 1, 0, 9.536743e-07, -10.12049, 2.118484, -3.8575888)
+metadata/planning_settled_transform = Transform3D(9.536743e-07, 0, -1, 0, 1, 0, 1, 0, 9.536743e-07, -10.175, 2.118484, -3.8575888)
 metadata/planning_object_id = ""
 metadata/planning_desk_id = ""
 metadata/planning_attachment = ""
