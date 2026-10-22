@@ -11,6 +11,7 @@ const POSE := preload("res://game/features/character_animation/procedural_pose.g
 const GAIT := preload("res://game/features/character_animation/procedural_gait.gd")
 const HIT_REACTION := preload("res://game/features/character_animation/hit_reaction.gd")
 const LEG_MOTION := preload("res://game/features/character_animation/leg_clip_motion.gd")
+const CLIP_LOOKUP := preload("res://game/features/character_animation/clip_lookup.gd")
 const OVERLAY := preload("res://game/features/character_animation/clip_overlay.gd")
 const LEG_OVERLAY := preload("res://game/features/character_animation/leg_overlay.gd")
 const DODGE_ROLL := 0
@@ -112,6 +113,7 @@ var _dead := false
 var _flinch_elapsed := -1.0
 var _overlay_applied := false
 var _attack_side := false
+var _transition_legs := ""
 
 
 # Public animation_selection_v1: optional presentation-only selector.
@@ -149,9 +151,12 @@ func play_one_shot(state: StringName) -> float:
 	else:
 		return 0.0
 	_one_shot = state
+	_transition_legs = ""
 	_one_shot_elapsed = 0.0
 	_one_shot_length = length
 	_dead = state in DEATH_STATES
+	if _dead and leg_overlay != null:
+		leg_overlay.call("stop")
 	_pose.death_forward = state == &"death_forward"
 	return length
 
@@ -159,7 +164,9 @@ func play_one_shot(state: StringName) -> float:
 # Public animation_events_v1 addition (ADR-0045): plays a clip by name once and
 # emits one_shot_finished(name) when done; the character keeps its place. Returns
 # the duration in seconds, 0.0 when the clip does not exist or the character is dead.
-func play_named_one_shot(clip_name: StringName, blend: float = 0.12, speed: float = 1.0) -> float:
+# With `leg_clip`, a moving character keeps that locomotion clip on its legs while
+# the clip plays (posture changes on the run, ADR-0045).
+func play_named_one_shot(clip_name: StringName, blend: float = 0.12, speed: float = 1.0, leg_clip: StringName = &"") -> float:
 	if _dead or animation_player == null or not animation_player.has_animation(clip_name):
 		return 0.0
 	var animation := animation_player.get_animation(clip_name)
@@ -167,6 +174,7 @@ func play_named_one_shot(clip_name: StringName, blend: float = 0.12, speed: floa
 	animation_player.speed_scale = speed
 	animation_player.play(clip_name, blend)
 	_one_shot = clip_name
+	_transition_legs = String(leg_clip) if animation_player.has_animation(leg_clip) else ""
 	_one_shot_elapsed = 0.0
 	_one_shot_length = animation.length / speed
 	return _one_shot_length
@@ -252,6 +260,11 @@ func set_active(active: bool) -> void:
 		animation_player.active = active
 	if hit_reaction != null:
 		hit_reaction.active = active
+	# A paused (ragdolled or far) character must not keep stepping or flinching.
+	if overlay != null:
+		overlay.active = active
+	if leg_overlay != null:
+		leg_overlay.active = active
 	if legs != null:
 		legs.active = active
 	if gait != null:
@@ -334,6 +347,7 @@ func _advance_one_shot(delta: float) -> void:
 		return
 	var finished := _one_shot
 	_one_shot = &""
+	_transition_legs = ""
 	if finished not in DEATH_STATES:
 		_current = ""
 	one_shot_finished.emit(finished)
@@ -399,17 +413,16 @@ func _play_selected_clip(speed: float = 0.0) -> bool:
 	return false
 
 
-# A moving attacker keeps its legs on the run/walk cycle; the attack clip owns the rest.
+# A moving attacker (or one changing posture on the run) keeps its legs on a
+# locomotion cycle; the one-shot clip owns the rest.
 func _update_attack_legs(speed: float) -> void:
 	var state := &"run" if speed > run_speed_threshold or _locomotion.get(&"walk", "").is_empty() else &"walk"
-	var clip: String = _locomotion.get(state, "")
-	if _one_shot in MOVING_ATTACKS and not _dead and speed > 0.15 and leg_clips == null and not clip.is_empty():
-		if leg_overlay == null:
-			leg_overlay = LEG_OVERLAY.attach(animation_player.get_parent())
-		if leg_overlay != null:
-			leg_overlay.call("follow", animation_player.get_animation(clip), _locomotion_scale(state, speed))
-	elif leg_overlay != null:
-		leg_overlay.call("release")
+	var clip: String = _transition_legs if not _transition_legs.is_empty() else _locomotion.get(state, "")
+	var wanted := (_one_shot in MOVING_ATTACKS or not _transition_legs.is_empty()) and not _dead and leg_clips == null and not clip.is_empty()
+	if leg_overlay == null and wanted and speed > 0.15:
+		leg_overlay = LEG_OVERLAY.attach(animation_player.get_parent())
+	if leg_overlay != null:
+		leg_overlay.call("drive", animation_player.get_animation(clip) if wanted else null, _locomotion_scale(state if _transition_legs.is_empty() else &"run", speed), speed > 0.15)
 
 
 func _locomotion_scale(state: StringName, speed: float) -> float:
@@ -458,60 +471,24 @@ func _index_animations() -> void:
 		var normalized := str(animation_name).to_lower().replace(" ", "_").replace("-", "_")
 		_animations[normalized] = str(animation_name)
 	for state: StringName in LOCOMOTION_TOKENS:
-		_locomotion[state] = _find_clip(LOCOMOTION_TOKENS[state])
+		_locomotion[state] = CLIP_LOOKUP.find(_animations, NON_LOOPING_TOKENS, LOCOMOTION_TOKENS[state])
 
 
 func _pick_one_shot_clip(state: StringName) -> String:
 	if state == STATE_ATTACK:
 		var sides: Array[String] = []
 		for token in ["attackleft", "attackright"]:
-			var side := _pick_variant(token)
+			var side := CLIP_LOOKUP.variant(_animations, token)
 			if not side.is_empty():
 				sides.append(side)
 		if not sides.is_empty():
 			_attack_side = not _attack_side
 			return sides[int(_attack_side) % sides.size()]
 	if state in [&"attack_left", &"attack_right"]:
-		var variant := _pick_variant(String(ONE_SHOT_TOKENS[state][0]))
+		var variant := CLIP_LOOKUP.variant(_animations, String(ONE_SHOT_TOKENS[state][0]))
 		if not variant.is_empty():
 			return variant
-	return _find_clip(ONE_SHOT_TOKENS[state])
-
-
-# A random clip named token or token + digits (AttackLeft, AttackLeft2).
-func _pick_variant(token: String) -> String:
-	var found: Array[String] = []
-	for normalized: String in _animations:
-		var squashed := normalized.replace("_", "")
-		if squashed.begins_with(token) and squashed.substr(token.length()).is_valid_int() or squashed == token:
-			found.append(_animations[normalized])
-	return found[randi() % found.size()] if not found.is_empty() else ""
-
-
-# Exact normalized match first, then the shortest clip containing the token.
-func _find_clip(tokens: Array) -> String:
-	for token: String in tokens:
-		for normalized: String in _animations:
-			var squashed := normalized.replace("_", "")
-			if squashed == token and not _is_excluded(normalized, token):
-				return _animations[normalized]
-		var best := ""
-		var best_length := 9999
-		for normalized: String in _animations:
-			var squashed := normalized.replace("_", "")
-			if token in squashed and not _is_excluded(normalized, token) and normalized.length() < best_length:
-				best = _animations[normalized]
-				best_length = normalized.length()
-		if not best.is_empty():
-			return best
-	return ""
-
-
-func _is_excluded(normalized: String, token: String) -> bool:
-	for blocked in NON_LOOPING_TOKENS:
-		if blocked in normalized and blocked not in token:
-			return true
-	return false
+	return CLIP_LOOKUP.find(_animations, NON_LOOPING_TOKENS, ONE_SHOT_TOKENS[state])
 
 
 func _configure_looping_clips() -> void:
