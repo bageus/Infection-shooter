@@ -339,7 +339,8 @@ jobs:
         run: |
           sudo apt-get update -qq
           sudo apt-get install -y -qq xvfb libgl1-mesa-dri mesa-vulkan-drivers libvulkan1
-          timeout 180 xvfb-run -a godot --path . --audio-driver Dummy --rendering-method gl_compatibility --script game/bootstrap/app/tests/capture_menu_screens.gd
+          # 300 s: the capture loads the whole gameplay scene on the software renderer. It took 173 s on a green run and 200 s with apt on a red one, so 180 s killed it.
+          timeout 300 xvfb-run -a godot --path . --audio-driver Dummy --rendering-method gl_compatibility --script game/bootstrap/app/tests/capture_menu_screens.gd
       - name: Occlusion and blast pixels in both renderers
         env:
           OCCLUSION_CAPTURE_DIR: /tmp/menu_previews
