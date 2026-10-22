@@ -33,7 +33,7 @@ const REFRESH_SECONDS := 0.15
 const ENTER_MARGIN := 6.0
 const LEAVE_MARGIN := 9.0
 ## Lamps in view but past the budget get a flat additive pool on the floor instead.
-## shortcut: fixed pool radius and strength, not the cone's real floor footprint; tune if pools look wrong.
+## The pool matches the lamp's floor footprint (radius) and brightness (strength); the constants are fallbacks.
 const POOL_RADIUS := 2.5
 const POOL_STRENGTH := 0.5
 const POOL_HEIGHT := 0.03
@@ -235,7 +235,7 @@ func _update_pools(unlit: Array[Node]) -> void:
 		material.albedo_texture = texture
 		material.vertex_color_use_as_albedo = true
 		var quad := QuadMesh.new()
-		quad.size = Vector2.ONE * POOL_RADIUS * 2.0
+		quad.size = Vector2.ONE * 2.0
 		var multimesh := MultiMesh.new()
 		multimesh.transform_format = MultiMesh.TRANSFORM_3D
 		multimesh.use_colors = true
@@ -249,9 +249,11 @@ func _update_pools(unlit: Array[Node]) -> void:
 	for index in unlit.size():
 		var lamp := unlit[index] as Node3D
 		var at := lamp.global_position
-		_pool.multimesh.set_instance_transform(index, Transform3D(floor_turn, Vector3(at.x, POOL_HEIGHT, at.z)))
+		var footprint: Vector2 = lamp.call("get_pool_footprint") if lamp.has_method("get_pool_footprint") \
+			else Vector2(POOL_RADIUS, POOL_STRENGTH)
+		_pool.multimesh.set_instance_transform(index, Transform3D(floor_turn.scaled(Vector3.ONE * footprint.x), Vector3(at.x, POOL_HEIGHT, at.z)))
 		var color: Color = lamp.get("light_color")
-		_pool.multimesh.set_instance_color(index, color * POOL_STRENGTH)
+		_pool.multimesh.set_instance_color(index, color * footprint.y)
 	_pool.visible = local_lights_enabled
 
 

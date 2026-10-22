@@ -140,6 +140,15 @@ func get_light_radius() -> float:
 	return light.spot_range if light != null else 0.0
 
 
+## Floor footprint (x: radius, y: strength) of the flat pool that stands in for this lamp when the light budget is spent.
+func get_pool_footprint() -> Vector2:
+	if light == null:
+		return Vector2(2.5, 0.5)
+	var radius := maxf(global_position.y, 1.0) * tan(deg_to_rad(clampf(light.spot_angle, 5.0, 80.0))) * RIM_FADE_MARGIN
+	var strength := 0.5 * clampf(get_authored_energy() * energy_multiplier / 2.0, 0.3, 1.5)
+	return Vector2(clampf(radius, 1.0, 8.0), strength)
+
+
 func set_budget_lit(lit: bool, shadow: bool) -> void:
 	if lit == _budget_lit and shadow == _budget_shadow:
 		return
