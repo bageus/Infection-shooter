@@ -1,4 +1,5 @@
 extends SceneTree
+const DESTRUCTION_QUALITY := preload("res://game/core/vfx/public/destruction_quality.gd")
 const FRONT := preload("res://game/bootstrap/app/menu/front_end.tscn")
 const EFFECTS_QUALITY := preload("res://game/core/vfx/public/effects_quality.gd")
 const PREFS := preload("res://game/bootstrap/app/menu/menu_preferences.gd")
@@ -142,6 +143,7 @@ func _sunlight_checks(tabs: TabContainer, dialog: Control) -> void:
 
 
 func _shadow_checks(tabs: TabContainer, dialog: Control) -> void:
+	await _destruction_checks(tabs)
 	var shadows := tabs.get_child(2).find_child("Shadows", true, false) as CheckButton
 	var quality := tabs.get_child(2).find_child("ShadowQuality", true, false) as HSlider
 	_check(shadows != null and shadows.button_pressed, "Shadows toggle belongs to Video and defaults on")
@@ -229,6 +231,21 @@ func _dodge_checks(tabs: TabContainer) -> void:
 	dodge_prefs.load_settings()
 	_check(dodge_prefs.values.dodge_animation == 1, "Dodge animation choice survives settings reload")
 	dodge.item_selected.emit(0)
+
+
+func _destruction_checks(tabs: TabContainer) -> void:
+	var slider := tabs.get_child(2).find_child("DestructionQuality", true, false) as HSlider
+	_check(slider != null and slider.min_value == 0.0 and slider.max_value == 2.0 and slider.step == 1.0 and slider.value == 1.0, "Destruction quality slider in Video has 3 levels and defaults to Medium")
+	slider.value = 2.0
+	await create_timer(0.6).timeout
+	var prefs := PREFS.new()
+	prefs.load_settings()
+	_check(int(prefs.values.destruction_quality) == 2, "Destruction quality survives settings reload")
+	_check(int(PREFS.new().values.destruction_quality) == DESTRUCTION_QUALITY.MEDIUM, "Fresh preferences use Medium destruction")
+	prefs.apply_to_game(self)
+	_check(DESTRUCTION_QUALITY.level == DESTRUCTION_QUALITY.HIGH, "Destruction quality reaches the destruction systems")
+	slider.value = 1.0
+	await create_timer(0.6).timeout
 
 
 func _quality_checks(tabs: TabContainer) -> void:

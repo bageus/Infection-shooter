@@ -4,6 +4,7 @@ extends RefCounted
 const LOOT_DROP := preload("res://game/features/pickups/public/loot_drop.gd")
 const LOOT_CONFIG := preload("res://game/features/pickups/public/loot_config.gd")
 const ENEMY_DIFFICULTY := preload("res://game/features/infected/public/enemy_difficulty.gd")
+const ENEMY_TUNING := preload("res://game/features/infected/public/enemy_tuning.gd")
 var drop_weapon: Callable
 var _owner: Node
 var _base := {}
@@ -43,8 +44,14 @@ func damage_percent() -> float:
 	return ENEMY_DIFFICULTY.percent(float(stats()["damage"]))
 
 
+## Movement speed multiplier from the enemy speed setting, applied to every chase and stroll step.
+func movement_scale() -> float:
+	return ENEMY_TUNING.move_multiplier
+
+
 ## Applies stats stored on the node (map load, baked scene) once it is ready.
 func apply_saved_stats() -> void:
+	ENEMY_TUNING.drive_locomotion(_owner.get_node_or_null("AnimationDriver"))
 	if _owner.has_meta(&"planning_enemy_stats") or ENEMY_DIFFICULTY.level != ENEMY_DIFFICULTY.NORMAL:
 		set_stats(stats())
 

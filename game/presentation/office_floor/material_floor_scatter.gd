@@ -1,6 +1,7 @@
 extends RefCounted
 const PATTERN := preload("res://game/presentation/office_floor/glass_floor_scatter.gd")
 const ATLASES := preload("res://game/presentation/office_floor/debris_atlases.gd")
+const QUALITY := preload("res://game/core/vfx/public/destruction_quality.gd")
 const SMALL_KINDS := ["wood", "paper", "plastic"]
 const SMALL_SCALE := 0.5 # Wood, paper and plastic read as chips, not sheets.
 const CHIP_SCALE := 0.6 # Each main piece gets one smaller companion chip.
@@ -14,7 +15,13 @@ const SPECK_SIZE := 0.3
 const DEBRIS_SCALE := 0.57
 
 
+# Higher destruction quality lays the whole pattern down again with fresh randomness.
 static func scatter(floor_view: Node3D, center: Vector3, footprint: Vector2, recipe: Array[String], direction: Vector3, excluded: Array[RID]) -> void:
+	for _pass in QUALITY.scatter_passes():
+		_scatter_once(floor_view, center, footprint, recipe, direction, excluded)
+
+
+static func _scatter_once(floor_view: Node3D, center: Vector3, footprint: Vector2, recipe: Array[String], direction: Vector3, excluded: Array[RID]) -> void:
 	if not center.is_finite() or not footprint.is_finite() or recipe.is_empty():
 		return
 	var rng := RandomNumberGenerator.new()
@@ -49,13 +56,14 @@ static func scatter(floor_view: Node3D, center: Vector3, footprint: Vector2, rec
 			floor_view.call("stamp_material_debris", chip, kind, ATLASES.choose_frame(kind, true, rng), size * CHIP_SCALE * DEBRIS_SCALE, rng.randi_range(0, 3))
 		floor_view.call("stamp_material_debris", planar, kind, frame, size * DEBRIS_SCALE, mark.turns)
 	var specks := 0
+	var max_specks := roundi(MAX_SPECKS * QUALITY.speck_scale())
 	var flakes := recipe.duplicate()
 	flakes.shuffle() # Otherwise the first kinds in the recipe use up the whole budget.
 	for kind in flakes:
 		if kind not in SPECK_KINDS:
 			continue
-		for _speck in SPECKS_PER_PIECE:
-			if specks >= MAX_SPECKS:
+		for _speck in roundi(SPECKS_PER_PIECE * QUALITY.speck_scale()):
+			if specks >= max_specks:
 				return
 			specks += 1
 			var planar := Vector2(center.x, center.z) + Vector2(rng.randf_range(-0.5, 0.5) * (footprint.x + 1.0), rng.randf_range(-0.5, 0.5) * (footprint.y + 1.0))

@@ -64,7 +64,7 @@ static func compute(frame: Transform3D, anchor: Node3D, space: PhysicsDirectSpac
 			limit[side] = -FLOOR_SPAN
 			continue
 		# A perpendicular wall or box standing in front of this edge: fold onto it.
-		var axis := side / 2
+		var axis := side >> 1
 		var sg := 1.0 if side % 2 == 0 else -1.0
 		var inset := minf(INSET / scale, halves[side] * 0.5)
 		var probe: Array = [clampf(here[0], lo[0] * 0.9, hi[0] * 0.9), clampf(here[1], lo[1] * 0.9, hi[1] * 0.9)]
