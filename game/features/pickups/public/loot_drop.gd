@@ -16,7 +16,7 @@ static func release_crate(world: Node, at: Vector3, config: Dictionary, size_hin
 
 
 ## Infected death. Without a config the classic random drop applies.
-static func release_enemy(world: Node, at: Vector3, raw_config: Variant, drop_weapon: Callable) -> void:
+static func release_enemy(world: Node, at: Vector3, raw_config: Variant, drop_weapon: Callable, ammo_multiplier: float = 1.0) -> void:
 	var config := CONFIG.sanitize(raw_config, "auto")
 	match str(config["mode"]):
 		"manual":
@@ -24,7 +24,7 @@ static func release_enemy(world: Node, at: Vector3, raw_config: Variant, drop_we
 		"auto":
 			var table := DROP_TABLE.new()
 			world.add_child(table)
-			table.call("drop_for_enemy", world, at)
+			table.call("drop_for_enemy", world, at, ammo_multiplier)
 			table.queue_free()
 
 

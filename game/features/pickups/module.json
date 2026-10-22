@@ -19,6 +19,7 @@
     "occlusion_visual_v1": {
       "occlusion_items": "Public health/ammo scene roots carry occlusion_items; render classification only."
     },
-    "ammo_loot_v1": "Owner-approved 2026-10-15: ammo_automate/sniper/minigun ids accepted by loot_config and loot_drop, use existing 30/8/100 scenes; all enemy types share weights; chance .65, one item/kill, live temporary drop cap40. Existing map v8 shape unchanged; ids additive."
+    "ammo_loot_v1": "Owner-approved 2026-10-15: ammo_automate/sniper/minigun ids accepted by loot_config and loot_drop, use existing 30/8/100 scenes; all enemy types share weights; chance .65, one item/kill, live temporary drop cap40. Existing map v8 shape unchanged; ids additive.",
+    "mutation_loot_v1": "release_enemy(..., ammo_multiplier:float=1.0), drop_for_enemy(..., ammo_multiplier:float=1.0); auto enemy ammo probabilities multiply relatively, non-ammo probabilities unchanged, manual/empty unchanged."
   }
 }

@@ -28,7 +28,10 @@ static func describe(runtime: Node, row: Array, skills: Array) -> Dictionary:
 	var active_group := bool(requirements.get("active", false))
 	info["kind"] = TEXT.t("mutationSkillKind") % [TEXT.t("mutationActiveSkill") if active_group else TEXT.t("mutationPassiveSkill"), TEXT.branch(str(row[2])), requirements["stage"]]
 	if active_group:
-		info["rows"].append([TEXT.t("mutationRecovery"), "%ds" % int(requirements.get("cooldown", 5)), true])
+		var recovery := str(snappedf(float(requirements.get("cooldown", 5)), 0.1))
+		if TranslationServer.get_locale().begins_with("ru"):
+			recovery = recovery.replace(".", ",")
+		info["rows"].append([TEXT.t("mutationRecovery"), recovery + "s", true])
 	var mutation := float(runtime.call("get_mutation"))
 	var stability := float(runtime.call("get_critical_threshold"))
 	info["rows"].append([TEXT.t("mutationAmount"), "%d%% / %d%%" % [roundi(mutation), roundi(requirements["mutation"])], mutation >= float(requirements["mutation"])])

@@ -1,5 +1,8 @@
 extends CharacterBody3D
 
+const MUTATION_BALANCE := preload("res://game/features/infection/public/mutation_balance.gd")
+const CONSUMABLES := preload("res://game/features/player/player_consumables.gd")
+
 signal projectile_blood(position: Vector3, direction: Vector3, weapon: String, excluded: Array[RID], source_id: int)
 signal blood_wounded(position: Vector3, excluded: Array[RID])
 signal wounded_moved(previous: Vector3, current: Vector3, excluded: Array[RID])
@@ -377,7 +380,7 @@ func _apply_damage(amount: float, damage_type: String, point: Vector3, direction
 	_wound += minf(remaining, health)
 	health=maxf(0.0,health-remaining)
 	if health <= 0.0 and mutation_effects.call("survive_lethal"):
-		health = 1.0
+		health = MUTATION_BALANCE.value("second_heart", "health")
 	if remaining > 0.0:
 		var excluded: Array[RID] = [get_rid()]
 		projectile_blood.emit(point, direction, weapon, excluded, get_instance_id())
@@ -388,29 +391,20 @@ func _apply_damage(amount: float, damage_type: String, point: Vector3, direction
 func is_wounded() -> bool:
 	return minf(_wound, max_health - health) > 0.01
 func heal(amount:float, source: StringName = &"")->float:
-	var previous:=health
-	if mutation_effects.call("enabled", "assimilation"):
-		amount *= 1.25
-	health=minf(max_health,health+maxf(amount,0.0))
-	var gained:=health-previous
-	_wound = maxf(0.0, _wound - gained)
-	if gained > 0.0:
-		healed.emit(gained, source)
-	return gained
+	return CONSUMABLES.heal(self, amount, source)
 func use_antidote() -> bool:
 	return _antidote_action.request(self)
 
-func add_ammo_to_current_weapon(amount:int)->int:return get_current_weapon().call("add_reserve_ammo",amount)
+func add_ammo_to_current_weapon(amount:int)->int:return CONSUMABLES.add_ammo_for_weapon(self, str(get_current_weapon().call("get_weapon_name")), amount)
 func add_ammo_for_weapon(weapon_name:String,amount:int)->int:
-	for weapon in weapons:
-		if weapon.call("get_weapon_name")==weapon_name:
-			return int(weapon.call("add_reserve_ammo",amount))
-	return 0
+	return CONSUMABLES.add_ammo_for_weapon(self, weapon_name, amount)
 func add_antidote(amount:int=1)->bool:
 	if antidotes>=max_antidotes:return false
 	antidotes=mini(max_antidotes,antidotes+maxi(amount,0))
 	return true
-func absorb_mutagen(delta_seconds:float)->float:return infection_runtime.call("absorb_mutagen",delta_seconds)
+func absorb_mutagen(delta_seconds:float)->float:
+	mutation_effects.hybrids.cloud(delta_seconds)
+	return infection_runtime.call("absorb_mutagen",delta_seconds)
 ## Settings: which animation the dodge plays, 0 = dive roll, 1 = strafe jump.
 func set_dodge_animation_style(style: int) -> void:
 	$AnimationDriver.set("dodge_style", clampi(style, 0, 1))

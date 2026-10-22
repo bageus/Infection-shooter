@@ -105,8 +105,8 @@ func _kill_and_roll_buffs(effects: Node, runtime: Runtime, weapon: Weapon) -> vo
 	runtime.skills["reflex_arc"] = true
 	effects.call("on_roll")
 	effects.call("_process", 0.0)
-	_check(is_equal_approx(weapon.shots_per_second, 5.0), "Roll buff changes fire rate")
-	effects.call("_process", 3.1)
+	_check(is_equal_approx(weapon.shots_per_second, 5.2), "Roll buff changes fire rate")
+	effects.call("_process", 5.1)
 	_check(is_equal_approx(weapon.shots_per_second, 4.0), "Roll buff expiry restores fire rate")
 	victim.queue_free()
 

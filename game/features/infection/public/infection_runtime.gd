@@ -1,4 +1,5 @@
 extends Node
+const MUTATION_BALANCE := preload("res://game/features/infection/public/mutation_balance.gd")
 
 const InfectionDomain = preload("res://game/features/infection/domain/infection_domain.gd")
 const MUTATION_TREE := preload("res://game/features/infection/domain/mutation_tree.gd")
@@ -50,7 +51,7 @@ func absorb_mutagen(delta_seconds: float) -> float:
 
 func use_antidote() -> bool:
 	var previous_mutation: float = _domain.mutation
-	var used: bool = _domain.use_antidote()
+	var used: bool = _domain.use_antidote(1.0 + MUTATION_BALANCE.value("assimilation", "percent") / 100.0 if has_skill("assimilation") else 1.0)
 	_emit_state_changes(previous_mutation)
 	return used
 
@@ -102,7 +103,7 @@ func skill_requirements(skill_id: String) -> Dictionary:
 	if row.is_empty():
 		return {}
 	return {
-		"active": CATALOG.is_active_skill(skill_id), "level": CATALOG.level(skill_id), "alternative": CATALOG.alternative(skill_id), "cooldown": CATALOG.cooldown(skill_id),
+		"active": CATALOG.is_active_skill(skill_id), "level": CATALOG.level(skill_id), "alternative": CATALOG.alternative(skill_id), "cooldown": CATALOG.cooldown(skill_id) * _cooldown_factor(),
 		"version": 3, "path_reached": tree.path_reached(skill_id, _domain.mutation, _domain.critical_threshold), "stage": CATALOG.stage(row) + 1,
 		"mutation": CATALOG.threshold(row), "stability": CATALOG.required_stability(row),
 		"branch_open": _domain.critical_threshold >= CATALOG.required_stability(row)
@@ -140,7 +141,7 @@ func _upgrade_candidates() -> Dictionary:
 
 
 func _cooldown_factor() -> float:
-	return 0.75 if has_skill("neurostim") else 1.0
+	return 1.0 - MUTATION_BALANCE.value("neurostim", "percent") / 100.0 if has_skill("neurostim") else 1.0
 
 
 func reduce_skill_cooldowns(seconds: float) -> void:

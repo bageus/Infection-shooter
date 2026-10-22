@@ -1,4 +1,5 @@
 extends RefCounted
+const B := preload("res://game/features/infection/public/mutation_balance.gd")
 ## Mutation poison and collision-limited displacement in metres.
 var destination := Vector3.ZERO
 var moving := false
@@ -38,8 +39,8 @@ func step(host: CharacterBody3D, delta: float) -> bool:
 		host.take_damage(damage)
 		if fatal and host._dead:
 			for enemy in host.get_tree().get_nodes_in_group("infected_alive"):
-				if enemy is Node3D and enemy.global_position.distance_squared_to(host.global_position) <= 16.0:
-					enemy.take_damage(40.0)
+				if enemy is Node3D and enemy.global_position.distance_squared_to(host.global_position) <= pow(B.value("blood_infection", "explosion_radius"), 2.0):
+					enemy.take_damage(B.value("blood_infection", "explosion"))
 		if host.mutation_poison_remaining <= 0.0:
 			host._mutation_poison_damage = 0.0
 			infectious = false
@@ -58,3 +59,9 @@ func stun(host: CharacterBody3D, duration: float, intensity: float) -> void:
 	host._blast_stun_remaining = maxf(host._blast_stun_remaining, duration * maxf(intensity, 0.25))
 	if not host._dead and host.status_fx != null:
 		host.status_fx.stunned(host._blast_stun_remaining)
+
+
+func scented_damage(target: Node, wounded: bool, amount: float) -> float:
+	if wounded and is_instance_valid(target) and target.has_method("get_infection_skill") and bool(target.call("get_infection_skill", "blood_scent")):
+		return amount * (1.0 + B.value("blood_scent", "percent") / 100.0)
+	return amount

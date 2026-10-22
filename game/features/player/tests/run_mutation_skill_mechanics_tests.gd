@@ -125,7 +125,7 @@ func _retaliation(effects: Node, runtime: Runtime) -> void:
 		effects.call("_process", 0.5)
 	_check(near.stunned == 0.0, "Retaliation waits for a burst of damage")
 	effects.call("on_player_hit", 15.0)
-	_check(near.stunned > 0.0, "Several light hits within three seconds release the pulse")
+	_check(near.stunned == 4.0, "Several light hits release a four-second stun")
 	near.stunned = 0.0
 	effects.call("on_player_hit", 15.0)
 	_check(near.stunned == 0.0, "The pulse resets the damage window")
@@ -134,6 +134,12 @@ func _retaliation(effects: Node, runtime: Runtime) -> void:
 		effects.call("on_player_hit", 15.0)
 		effects.call("_process", 1.6)
 	_check(near.stunned == 0.0, "Spread-out damage does not trigger Retaliation")
+	effects.call("_process", 15.0)
+	effects.call("on_player_hit", 50.0)
+	_check(near.stunned == 4.0, "Retaliation rearms after fifteen seconds")
+	near.stunned = 0.0
+	effects.call("on_player_hit", 50.0)
+	_check(near.stunned == 0.0, "Damage cannot bypass Retaliation recovery")
 	_retire(near)
 	runtime.skills.erase("retaliation")
 
