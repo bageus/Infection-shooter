@@ -51,7 +51,7 @@ func absorb_mutagen(delta_seconds: float) -> float:
 
 func use_antidote() -> bool:
 	var previous_mutation: float = _domain.mutation
-	var used: bool = _domain.use_antidote(1.0 + MUTATION_BALANCE.value("assimilation", "percent") / 100.0 if has_skill("assimilation") else 1.0)
+	var used: bool = _domain.use_antidote(_antidote_effectiveness())
 	_emit_state_changes(previous_mutation)
 	return used
 
@@ -86,7 +86,11 @@ func complete_control_level(id: String) -> int:
 
 
 func antidote_preview() -> Dictionary:
-	return CONTROL_PROGRESS.antidote_preview(_domain, tree)
+	return CONTROL_PROGRESS.antidote_preview(_domain, tree, _antidote_effectiveness())
+
+
+func _antidote_effectiveness() -> float:
+	return 1.0 + MUTATION_BALANCE.value("assimilation", "percent") / 100.0 if has_skill("assimilation") else 1.0
 
 
 func get_mutation() -> float:

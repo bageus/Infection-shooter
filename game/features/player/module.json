@@ -57,6 +57,7 @@
       "configure_footstep_surface": "configure_footstep_surface(query: Callable) -> void; injected optional query(world_position: Vector3) -> bool, true means glass; evaluated only on grounded animation contacts"
     },
     "camera_adjustment_v1": "get_camera_adjustment() -> Dictionary {yaw, pitch, distance}, degrees/metres; set_camera_adjustment(values: Dictionary) -> void, validated finite orbit; Alt+LMB suppresses fire.",
-    "mutation_passives_v1": "Issue7: private hybrid clocks/reserve, cloud healing via absorb_mutagen, consumable-only Assimilation; no save fields."
+    "mutation_passives_v1": "Issue7: private hybrid clocks/reserve, cloud healing via absorb_mutagen, consumable-only Assimilation; no save fields.",
+    "mutation_cloud_presence_v1": "on_mutagen_cloud(delta_seconds:float) -> void; player-owned Devourer effect, independent of mutagen absorption; cloud deduplicates presence per body/physics frame."
   }
 }

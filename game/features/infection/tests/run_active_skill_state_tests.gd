@@ -132,7 +132,15 @@ func _test_assimilation_antidote() -> void:
 	r.tree.learned["recycling"] = true
 	r.tree.learned["assimilation"] = true
 	_expect(r.has_skill("assimilation"), "Assimilation fixture is active")
+	var preview: Dictionary = r.antidote_preview()
+	_expect(preview.after == 79.0, "Assimilation preview accounts for fifteen mutation")
+	_expect(r.get_mutation() == 94.0 and r.tree.learned.has("assimilation"), "Preview never changes mutation or learned skills")
 	_expect(r.use_antidote(), "Assimilation permits normal antidote use")
+	_expect(r.get_mutation() == preview.after and r.mutation_points() == preview.points_after, "Application matches the preview mutation and point budget")
+	for id in preview.forgotten:
+		_expect(not r.tree.learned.has(id), "Preview correctly predicts forgotten skill: " + str(id))
+	for id in preview.dormant:
+		_expect(not r.has_skill(id), "Preview correctly predicts dormant skill: " + str(id))
 	_expect(is_equal_approx(r.get_mutation(), 79.0), "An active Assimilation antidote removes fifteen mutation")
 	_expect(not r.has_skill("assimilation"), "Antidote still deactivates passives below their thresholds")
 	r.free()

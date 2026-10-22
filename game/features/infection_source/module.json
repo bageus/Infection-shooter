@@ -10,5 +10,8 @@
     "public/infection_source.tscn",
     "public/mutagen_cloud.tscn"
   ],
-  "dependencies": []
+  "dependencies": [],
+  "runtime_contracts": {
+    "mutation_cloud_presence_v1": "Active clouds deliver optional on_mutagen_cloud(delta_seconds) to unobstructed absorb_mutagen visitors once per physics frame, including permanent/spent/refused sources. Presence metadata is transient on each visitor; mutagen budget/dedup remains separate. Legacy heals_visitors receivers without the callback use capped once/frame healing."
+  }
 }

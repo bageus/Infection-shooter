@@ -401,3 +401,10 @@ private hybrid clocks/absorption and consumable application; combat retains ammo
 ownership with an instant reserve-only refill command. Optional enemy-loot ammo
 multipliers preserve legacy callers. No state-owner, save or network changes;
 no policy exceptions. See module manifests for additive runtime contracts.
+
+
+ADR-0062 CI correction: cloud presence is a separate optional visitor callback,
+deduplicated per physics frame and delivered through the existing wall check.
+Player applies Devourer independently of absorbed mutation; spent clouds retain
+presence monitoring. Antidote preview/use share the same pure domain result and
+current effectiveness. State ownership/dependency graph/save formats unchanged.

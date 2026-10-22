@@ -86,3 +86,27 @@ of the sixth hybrid and full gameplay balance are outside headless verification.
 Owner's accepted decisions in issue #7 and explicit request: «теперь реализуй в
 коде, создай ветку и PR». Additive commands/data contracts implement that scope;
 no architectural policy exception is introduced.
+
+
+## CI and integration correction (22.10.2026)
+
+The first runtime CI failed only run_ui_sound_tests: the card renders numeric
+localization templates, but the old assertion searched for the literal template.
+Keep the real displayed-card assertion and require rendered numbers/no braces.
+The active-loadout geometry test now includes all six hybrid nodes and uses the
+actual canvas height for its existing margins/circle spacing assertions.
+
+The cloud delivers optional player.on_mutagen_cloud(delta_seconds) once per
+visitor/physics frame, independently of mutagen gain and its budget. Player alone
+applies Devourer; absorb_mutagen no longer heals. Keep presence monitoring until
+cloud dissipation so spent ordinary clouds, permanent sources and refused
+absorption still work. Existing wall checks apply before delivering presence;
+legacy heals_visitors mocks/receivers retain once/frame fallback. No dependency
+edge, serialized data or scene changes are needed; both manifests document the
+additive callback. This corrects the already approved Devourer behavior, not a
+new balance rule.
+
+Antidote preview and use derive the same current skill effectiveness and call
+the same domain antidote_result rule. Preview remains pure and reconciles its
+copied tree at the effective mutation value, so forgotten/dormant skills and
+points match application.

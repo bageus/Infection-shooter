@@ -86,6 +86,10 @@ func add_control_ampule() -> float:
 	return critical_threshold
 
 
+func antidote_result(effectiveness: float = 1.0) -> float:
+	return maxf(MUTATION_MIN, mutation - ANTIDOTE_REDUCTION * effectiveness)
+
+
 func use_antidote(effectiveness: float = 1.0) -> bool:
 	if defeated:
 		return false
@@ -95,7 +99,7 @@ func use_antidote(effectiveness: float = 1.0) -> bool:
 	next_control_loss_stage = 1
 	control_loss_remaining = 0.0
 	active_control_loss_stage = 0
-	mutation = maxf(MUTATION_MIN, mutation - ANTIDOTE_REDUCTION * effectiveness)
+	mutation = antidote_result(effectiveness)
 	_after_mutation_changed()
 	return true
 

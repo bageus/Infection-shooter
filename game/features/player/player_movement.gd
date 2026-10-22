@@ -402,9 +402,9 @@ func add_antidote(amount:int=1)->bool:
 	if antidotes>=max_antidotes:return false
 	antidotes=mini(max_antidotes,antidotes+maxi(amount,0))
 	return true
-func absorb_mutagen(delta_seconds:float)->float:
+func absorb_mutagen(delta_seconds:float)->float:return infection_runtime.call("absorb_mutagen",delta_seconds)
+func on_mutagen_cloud(delta_seconds: float) -> void:
 	mutation_effects.hybrids.cloud(delta_seconds)
-	return infection_runtime.call("absorb_mutagen",delta_seconds)
 ## Settings: which animation the dodge plays, 0 = dive roll, 1 = strafe jump.
 func set_dodge_animation_style(style: int) -> void:
 	$AnimationDriver.set("dodge_style", clampi(style, 0, 1))
