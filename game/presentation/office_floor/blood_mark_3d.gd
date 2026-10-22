@@ -26,6 +26,7 @@ func configure(hit: Dictionary, definition: Dictionary, settings: Dictionary) ->
 	if settings["decal"]:
 		_decal = Decal.new()
 		_decal.texture_albedo = definition["texture"]
+		_decal.texture_normal = definition.get("normal")
 		_decal.texture_emission = null
 		_decal.modulate = definition["tint"]
 		_decal.upper_fade = 0.0
@@ -42,6 +43,8 @@ func configure(hit: Dictionary, definition: Dictionary, settings: Dictionary) ->
 		visual.layers = 1
 		_material = StandardMaterial3D.new()
 		_material.albedo_texture = definition["texture"]
+		_material.normal_enabled = definition.get("normal") != null
+		_material.normal_texture = definition.get("normal")
 		_material.albedo_color = definition["tint"]
 		_material.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
 		_material.billboard_mode = BaseMaterial3D.BILLBOARD_DISABLED

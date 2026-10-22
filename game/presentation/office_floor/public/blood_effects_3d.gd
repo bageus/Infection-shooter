@@ -83,8 +83,8 @@ func _ready() -> void:
 
 func _verify_engine_api() -> bool:
 	var required := {
-		"Decal": ["texture_albedo", "texture_emission", "size", "cull_mask", "normal_fade", "modulate", "distance_fade_enabled", "distance_fade_begin", "distance_fade_length"],
-		"StandardMaterial3D": ["albedo_texture", "albedo_color", "transparency", "billboard_mode", "emission_enabled", "distance_fade_mode", "distance_fade_min_distance", "distance_fade_max_distance"],
+		"Decal": ["texture_albedo", "texture_normal", "texture_emission", "size", "cull_mask", "normal_fade", "modulate", "distance_fade_enabled", "distance_fade_begin", "distance_fade_length"],
+		"StandardMaterial3D": ["albedo_texture", "albedo_color", "normal_enabled", "normal_texture", "transparency", "billboard_mode", "emission_enabled", "distance_fade_mode", "distance_fade_min_distance", "distance_fade_max_distance"],
 		"RemoteTransform3D": ["remote_path", "update_scale"],
 		"PhysicsRayQueryParameters3D": ["collision_mask", "exclude"]
 	}
@@ -301,7 +301,7 @@ func _definition(category: String, surface: Dictionary, direction: Vector3, size
 		footprint = _surfaces.call("fit_quad", surface, mark_basis, footprint)
 		if footprint == Vector2.ZERO:
 			return {}
-	return {"texture": entry["texture"], "footprint": footprint, "basis": mark_basis, "local_basis": (hit["collider"] as Node3D).global_basis.inverse() * mark_basis, "tint": Color(1.0, randf_range(0.90, 1.0), randf_range(0.90, 1.0), randf_range(0.96, 1.0))}
+	return {"texture": entry["texture"], "normal": entry.get("normal"), "footprint": footprint, "basis": mark_basis, "local_basis": (hit["collider"] as Node3D).global_basis.inverse() * mark_basis, "tint": Color(1.0, randf_range(0.90, 1.0), randf_range(0.90, 1.0), randf_range(0.96, 1.0))}
 
 
 func clear_marks() -> void:

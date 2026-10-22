@@ -11,6 +11,23 @@ const ATLASES := {
 	"pool": {"file": "pool/pool_atlas_4x2.png", "grid": Vector2i(4, 2)},
 	"drops": {"file": "drops/drops_atlas_3x3.png", "grid": Vector2i(3, 3)},
 }
+# Tangent normals (OpenGL, +Y up, Godot's convention) on the same grid as the
+# colour atlases, at another size. Their background is not flat, so each mark's
+# bounds come from its height map, which is black outside the mark.
+const NORMAL_FILES := {
+	"splatter": "splatter/Nine-splash blood normal map atlas-2.png",
+	"stain": "stain/Blood stain atlas normal map-2.png",
+	"smear": "smear/Tangent-space blood smear normal atlas-2.png",
+	"pool": "pool/Blood puddle atlas tangent normal map-2.png",
+	"drops": "drops/drops_atlas_normal_opengl.png",
+}
+const HEIGHT_FILES := {
+	"splatter": "splatter/Technical grayscale 3×3 splash height map-1.png",
+	"stain": "stain/Grayscale blood stain height atlas-1.png",
+	"smear": "smear/Grayscale nine-smear height map atlas-1.png",
+	"pool": "pool/Grayscale Blood Pool Height Map-1.png",
+	"drops": "drops/drops_atlas_height_preview.png",
+}
 # The atlases carry faint alpha noise around each mark; cells are trimmed to
 # pixels above this alpha after box-averaging, so noise does not widen them.
 const TRIM_ALPHA := 6.0 / 255.0
@@ -59,6 +76,8 @@ func load_assets(max_dimension: int = 512, brightness: float = 1.18, procedural:
 		@warning_ignore("integer_division")
 		var cell := Vector2i(atlas.get_width() / grid.x, atlas.get_height() / grid.y)
 		var built: Array = cells.get(category, [])
+		var normal_atlas := _load_image(ROOT.path_join(NORMAL_FILES[category]))
+		var height_atlas := _load_image(ROOT.path_join(HEIGHT_FILES[category]))
 		for index in grid.x * grid.y:
 			@warning_ignore("integer_division")
 			var origin := Vector2i(index % grid.x, index / grid.x) * cell
@@ -77,7 +96,34 @@ func load_assets(max_dimension: int = 512, brightness: float = 1.18, procedural:
 				image.resize(maxi(1, roundi(image.get_width() * factor)), maxi(1, roundi(image.get_height() * factor)), Image.INTERPOLATE_LANCZOS)
 			image.adjust_bcs(brightness, 1.0, 1.0)
 			image.generate_mipmaps()
-			entries[category].append({"texture": ImageTexture.create_from_image(image), "aspect": float(used.size.x) / used.size.y, "variant": index + 1})
+			var normal := _normal_texture(normal_atlas, height_atlas, grid, index, image.get_size())
+			entries[category].append({"texture": ImageTexture.create_from_image(image), "normal": normal, "aspect": float(used.size.x) / used.size.y, "variant": index + 1})
+
+
+# Normal of one frame, cut where its height map shows the mark and resized to
+# the colour texture so both sample the same footprint.
+static func _normal_texture(normal_atlas: Image, height_atlas: Image, grid: Vector2i, index: int, size: Vector2i) -> ImageTexture:
+	if normal_atlas == null or height_atlas == null:
+		return null
+	var height_cell := _cell_rect(height_atlas, grid, index)
+	var mark := _visible_rect(height_atlas.get_region(height_cell), true)
+	if not mark.has_area():
+		return null
+	var normal_cell := _cell_rect(normal_atlas, grid, index)
+	var ratio := Vector2(normal_cell.size) / Vector2(height_cell.size)
+	var region := Rect2i(normal_cell.position + Vector2i((Vector2(mark.position) * ratio).round()), Vector2i((Vector2(mark.size) * ratio).round()))
+	var image := normal_atlas.get_region(region)
+	if image.get_size() != size:
+		image.resize(size.x, size.y, Image.INTERPOLATE_LANCZOS)
+	image.generate_mipmaps()
+	return ImageTexture.create_from_image(image)
+
+
+static func _cell_rect(atlas: Image, grid: Vector2i, index: int) -> Rect2i:
+	@warning_ignore("integer_division")
+	var cell := Vector2i(atlas.get_width() / grid.x, atlas.get_height() / grid.y)
+	@warning_ignore("integer_division")
+	return Rect2i(Vector2i(index % grid.x, index / grid.x) * cell, cell)
 
 
 # Each frame is a seeded cluster of soft blobs with a ragged edge, so a frame
@@ -139,7 +185,7 @@ func _load_image(path: String) -> Image:
 # Visible rectangle of one cell, found on a box-averaged copy so isolated
 # near-transparent pixels are ignored; two coarse pixels of margin keep the
 # outermost droplets.
-static func _visible_rect(image: Image) -> Rect2i:
+static func _visible_rect(image: Image, by_red: bool = false) -> Rect2i:
 	var coarse := image.duplicate() as Image
 	var scale := 1
 	for i in TRIM_SHRINKS:
@@ -151,7 +197,8 @@ static func _visible_rect(image: Image) -> Rect2i:
 	var high := Vector2i(-1, -1)
 	for y in coarse.get_height():
 		for x in coarse.get_width():
-			if coarse.get_pixel(x, y).a > TRIM_ALPHA:
+			var pixel := coarse.get_pixel(x, y)
+			if (pixel.r if by_red else pixel.a) > TRIM_ALPHA:
 				low = Vector2i(mini(low.x, x), mini(low.y, y))
 				high = Vector2i(maxi(high.x, x), maxi(high.y, y))
 	if high.x < 0:
