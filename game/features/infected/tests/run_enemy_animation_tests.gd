@@ -58,6 +58,8 @@ func _run() -> void:
 	await _test_one_shots(stage)
 	for path: String in HUMANOIDS:
 		await _test_attack_keeps_legs_moving(stage, load(path) as PackedScene, path.get_file())
+	await _test_dead_legs_stop(stage)
+	await _test_hunger_transition_legs(stage)
 	await _test_skinned_rig(stage)
 	await _test_continuous_chase(stage)
 	for path: String in HUMANOIDS.slice(2):
@@ -278,6 +280,44 @@ func _test_attack_keeps_legs_moving(stage: Node3D, scene: PackedScene, label: St
 	enemy.velocity = Vector3.ZERO
 	await create_timer(0.3).timeout
 	_expect(overlay == null or not bool(overlay.call("is_following")), "%s legs are released after the attack." % label)
+	enemy.queue_free()
+	await process_frame
+
+
+# A killed enemy must not keep stepping, whether it plays a death clip or is paused for a ragdoll.
+func _test_dead_legs_stop(stage: Node3D) -> void:
+	for ragdoll in [false, true]:
+		var enemy := await _spawn(stage, HUNGER)
+		var driver := enemy.get_node("AnimationDriver")
+		driver.call("play_one_shot", &"attack")
+		enemy.velocity = Vector3(0, 0, 4.5)
+		await _frames(8)
+		var overlay = driver.get("leg_overlay")
+		_expect(overlay != null and bool(overlay.call("is_following")), "Dead-legs setup: legs follow a moving attack.")
+		if ragdoll:
+			driver.call("set_active", false)
+			_expect(not bool(overlay.get("active")), "A paused character's leg overlay is paused too.")
+		else:
+			driver.call("play_one_shot", &"death")
+			_expect(not bool(overlay.call("is_following")), "A death clip drops the leg overlay at once.")
+		enemy.queue_free()
+		await process_frame
+
+
+# Hunger changing posture on the run keeps its legs on the run cycle.
+func _test_hunger_transition_legs(stage: Node3D) -> void:
+	var enemy := await _spawn(stage, HUNGER)
+	var driver := enemy.get_node("AnimationDriver")
+	var length := float(driver.call("play_named_one_shot", &"DropToFours", 0.12, 1.0, &"FoursRun"))
+	_expect(length > 0.0, "Hunger has a drop-to-fours transition.")
+	enemy.velocity = Vector3(0, 0, 5.0)
+	await _frames(8)
+	var overlay = driver.get("leg_overlay")
+	_expect(overlay != null and bool(overlay.call("is_following")), "Hunger's legs keep running through the drop to all fours.")
+	await create_timer(length + 0.5).timeout
+	enemy.velocity = Vector3.ZERO
+	await create_timer(0.4).timeout
+	_expect(not bool(overlay.call("is_following")), "Hunger's legs are released after the transition.")
 	enemy.queue_free()
 	await process_frame
 

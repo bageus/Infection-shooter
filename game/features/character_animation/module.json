@@ -20,9 +20,9 @@
       "one_shot_finished": "signal one_shot_finished(state: StringName)",
       "play_dodge": "play_dodge(world_direction: Vector3, duration: float) -> bool; plays the roll (whole hips clip, body turns along the dodge) or the strafe jump (dodge_style 0/1) over duration; false without leg_clips (ADR-0044)",
       "is_dodging": "is_dodging() -> bool",
-      "play_named_one_shot": "play_named_one_shot(clip: StringName, blend := 0.12, speed := 1.0) -> float; plays a clip by name once, emits one_shot_finished(clip), returns its duration (ADR-0045)",
+      "play_named_one_shot": "play_named_one_shot(clip: StringName, blend := 0.12, speed := 1.0, leg_clip := \"\") -> float; plays a clip by name once, emits one_shot_finished(clip), returns its duration; with leg_clip a moving character keeps that locomotion clip on its legs meanwhile (ADR-0045)",
       "play_overlay": "play_overlay(clip: StringName) -> bool; plays a clip on the upper body only, over the running legs (ADR-0045)",
-      "attack_legs": "an attack/attack_left/attack_right one-shot played while the character moves loops the run or walk clip on the leg bones only (leg_overlay.gd), the attack clip keeps the rest; released when the attack ends or the body stops; not used with leg_clips",
+      "attack_legs": "an attack/attack_left/attack_right one-shot played while the character moves loops the run or walk clip on the leg bones only (leg_overlay.gd), the attack clip keeps the rest; released when the attack ends or the body stops (held 0.25 s across speed dips, dropped at once on death or set_active(false)); not used with leg_clips",
       "clip_meta": "clip_meta(clip, key, default) -> Variant; clip_length(clip) -> float (ADR-0045)",
       "prepare_visual": "prepare_visual() -> void; idempotent rig/clip preparation; optional defer_setup=true before ready postpones it; set_active requests are preserved"
     },
