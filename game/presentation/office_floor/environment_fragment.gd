@@ -26,6 +26,11 @@ const TOPPLE_SPEED := 4.0
 # Pieces that start touching (a top resting on a leg) are pushed apart; this caps how fast they may leave.
 const MAX_PIECE_SPEED := 6.0
 const TOPPLE_RETRIES := 3
+# A thin standing panel (a divider wall) at most this fraction as thick as it is tall is knocked flat.
+const PANEL_THINNESS := 0.3
+# A resting piece found standing on its edge is nudged over at this speed, a little harder each retry.
+const UNSTICK_SPEED := 3.0
+const UNSTICK_GROWTH := 0.25
 const TOPPLE_RETRY_DELAY := 0.7
 const KICK_COOLDOWN := 0.8
 const UNSTICK_RETRIES := 4
@@ -103,10 +108,17 @@ func enable_piece_contacts() -> void:
 ## A tall slender piece left standing (a pedestal, a leg) is pushed over, away from the hit.
 func topple_from(size: Vector3, hit_position: Vector3, direction: Vector3) -> void:
 	var width := maxf(size.x, size.z)
-	if size.y < TOPPLE_MIN_HEIGHT or size.y < width * TOPPLE_SLENDERNESS:
+	if size.y < TOPPLE_MIN_HEIGHT:
 		return
 	var away := global_position - hit_position
 	away.y = 0.0
+	if size.y < width * TOPPLE_SLENDERNESS:
+		# Not a slender post: only a thin panel falls, along its thin axis, or it would stand through the blast.
+		var thin_on_x := size.x < size.z
+		if minf(size.x, size.z) > size.y * PANEL_THINNESS:
+			return
+		var side := signf(away.x if thin_on_x else away.z)
+		away = (Vector3.RIGHT if thin_on_x else Vector3.BACK) * (side if side != 0.0 else 1.0)
 	if away.length_squared() < 0.0004:
 		away = Vector3(direction.x, 0.0, direction.z)
 	if away.length_squared() < 0.0004:
@@ -213,15 +225,16 @@ func unstick() -> bool:
 			thin = axis
 	var thin_axis := global_basis[thin]
 	var height := _half_extents.dot(Vector3(absf(global_basis.x.y), absf(global_basis.y.y), absf(global_basis.z.y))) * 2.0
-	var on_edge := absf(thin_axis.y) < 0.6 and height > STANDING_HEIGHT
-	if not on_edge and _lies_on_floor():
+	# Only a piece standing on its edge is pushed over. One merely lying on other debris stays put: waking it
+	# sent the whole resting pile flying again.
+	if absf(thin_axis.y) >= 0.6 or height <= STANDING_HEIGHT:
 		return false
 	_unstick_tries += 1
 	var away := Vector3(thin_axis.x, 0.0, thin_axis.z)
 	if away.length_squared() < 0.0004:
 		away = Vector3.RIGHT
 	sleeping = false
-	apply_impulse(away.normalized() * mass * TOPPLE_SPEED * (1.0 + _unstick_tries), Vector3.UP * height * 0.4)
+	apply_impulse(away.normalized() * mass * UNSTICK_SPEED * (1.0 + UNSTICK_GROWTH * _unstick_tries), Vector3.UP * height * 0.4)
 	return true
 
 
