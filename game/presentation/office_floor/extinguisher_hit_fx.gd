@@ -7,6 +7,7 @@ const ATLASES := preload("res://game/core/vfx/public/effect_atlases.gd")
 const POWDER_SHADER := preload("res://game/core/vfx/public/smoke_puff.gdshader")
 const DANGER_ZONE := preload("res://game/features/combat/public/floor_danger_zone.gd")
 const BLAST_MARKS := preload("res://game/features/combat/public/grenade_explosion.gd")
+const TRACE := preload("res://game/features/combat/public/explosion_trace.gd")
 const LANDING_ZONE_DELAY := 0.2
 
 signal ruptured(location: Vector3)
@@ -82,6 +83,7 @@ func start(hit_point: Vector3, bullet_direction: Vector3) -> void:
 	if _active or _body == null:
 		return
 	_active = true
+	TRACE.begin("extinguisher_start")
 	_elapsed = 0.0
 	_anchor = _body.global_position
 	_body.freeze = false
@@ -112,7 +114,9 @@ func start(hit_point: Vector3, bullet_direction: Vector3) -> void:
 	_mist.amount_ratio = 0.35 if sheet else 1.0
 	_landed = false
 	_spray_sound = SFX.play(_nozzle, &"extinguisher_spray")
+	TRACE.mark("spray sound started")
 	_start_jet_sheet()
+	TRACE.mark("jet sheet started (end of start)")
 	set_physics_process(true)
 
 
@@ -207,16 +211,21 @@ func _rupture() -> void:
 		# No effects container: still blow up so the host extinguisher is freed.
 		ruptured.emit(location)
 		return
+	TRACE.begin("extinguisher_rupture")
 	var burst := BURST.instantiate() as Node3D
 	burst.call("configure_world", effects_root, impact_pool)
 	world.add_child(burst)
 	burst.global_position = location
+	TRACE.mark("burst instantiated")
 	burst.call("start", cloud_radius, cloud_lifetime, burst_count)
+	TRACE.mark("burst started (particles, fragments, sound)")
 	# shortcut: the rupture reuses the grenade blast marks (plaster, scuffs, scorch) and skips the extinguisher powder texture baked into the floor, which needs its own decal kind.
 	BLAST_MARKS.scorch_surroundings(get_world_3d(), world, location, impact_pool)
+	TRACE.mark("scorch done")
 	reparent(world, true)
 	get_tree().create_timer(maxf(jet_lifetime, mist_lifetime) + 0.4).timeout.connect(queue_free)
 	ruptured.emit(location)
+	TRACE.mark("ruptured handlers done (floor debris, blast damage, prop break)")
 
 
 func _configure_emitter(emitter: GPUParticles3D, amount: int, lifetime: float,

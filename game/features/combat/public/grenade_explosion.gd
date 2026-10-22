@@ -1,5 +1,6 @@
 extends RefCounted
 const SURFACE_ATLASES := preload("res://game/core/vfx/public/surface_atlases.gd")
+const TRACE := preload("res://game/features/combat/public/explosion_trace.gd")
 
 const RADIUS := 4.0
 const OBJECT_DAMAGE := 380.0 # Full-strength hit on a prop; scaled by distance falloff and power.
@@ -57,11 +58,15 @@ static func warm_up(parent: Node3D, point: Vector3) -> void:
 static func explode(projectile: Node3D, location: Vector3, normal: Vector3, contact: Object, scene: Node3D, impacts: Node) -> void:
 	if not is_instance_valid(scene):
 		return
+	TRACE.begin("grenade_explode")
 	var effect := EXPLOSION_V1.instantiate() as Node3D
 	scene.add_child(effect)
 	effect.global_position = location
+	TRACE.mark("effect instantiated")
 	effect.call("start", normal)
+	TRACE.mark("effect started (particles, light, sound)")
 	DANGER_ZONE.spawn(scene, projectile.get_world_3d(), location, RADIUS, ZONE_DELAY, ZONE_LIFETIME)
+	TRACE.mark("danger zone spawned")
 	var query := PhysicsShapeQueryParameters3D.new()
 	var sphere := SphereShape3D.new()
 	sphere.radius = RADIUS
@@ -97,9 +102,11 @@ static func explode(projectile: Node3D, location: Vector3, normal: Vector3, cont
 		push_body(collider, direction, factor)
 		if collider.has_method("apply_blast_stun") and float(collider.get("health")) > 0.0:
 			collider.call("apply_blast_stun", 3.0 + 2.0 * factor, factor)
+	TRACE.mark("%d bodies in blast processed" % hit_ids.size())
 	if contact != null and (not contact.has_method("take_projectile_hit") or contact.has_method("get_projectile_material") and str(contact.call("get_projectile_material")) in ["concrete", "metal"]):
 		_scorch(scene, location, normal, impacts, contact as Node3D)
 	scorch_surroundings(projectile.get_world_3d(), scene, location, impacts)
+	TRACE.mark("scorch done (end of explode)")
 
 
 ## The one way a blast hurts a destructible object, for grenades and the extinguisher alike, so
