@@ -308,16 +308,20 @@ func pickup_weapon(index: int) -> bool:
 	_play_sound(&"weapon_pickup")
 	return true
 
-## Armor plate plus weapon slots carried to the next map of a level chain or a respawn
-## (health, ammo and key start fresh; armor refills only once a plate has been found).
+## Armor plate, weapon slots and each weapon's reserve carried to the next map of a level chain
+## (health and key start fresh; armor refills only once a plate has been found).
 func export_loadout() -> Dictionary:
-	return {"slots": _slot_weapons.duplicate(), "armor_found": _armor_found}
+	return {"slots": _slot_weapons.duplicate(), "armor_found": _armor_found, "ammo": weapons.map(func(gun: Node) -> int: return int(gun.call("carried_ammo")))}
 
 
 func import_loadout(loadout: Dictionary) -> void:
 	if bool(loadout.get("armor_found", false)):
 		_armor_found = true
 		armor = max_armor
+	var ammo: Variant = loadout.get("ammo")
+	if ammo is Array and ammo.size() == weapons.size():
+		for index in weapons.size():
+			weapons[index].call("restore_carried_ammo", int(ammo[index]))
 	var slots: Variant = loadout.get("slots")
 	if not slots is Array or slots.size() != _slot_weapons.size():
 		return

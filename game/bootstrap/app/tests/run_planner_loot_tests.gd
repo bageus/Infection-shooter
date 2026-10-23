@@ -58,7 +58,7 @@ func _config() -> void:
 
 func _weapon_ammo(player: Node3D) -> void:
 	var drops := preload("res://game/features/pickups/public/loot_drop.gd")
-	var expected := {"ammo_automate": [4, 30], "ammo_sniper": [6, 8], "ammo_minigun": [7, 100]}
+	var expected := {"ammo_automate": [4, 30], "ammo_sniper": [6, 8], "ammo_minigun": [7, 100], "ammo_grenade": [3, 12]}
 	for id: String in expected:
 		var config := CONFIG.sanitize({"mode":"manual", "items":{id:1}})
 		_check(config["items"].get(id) == 1, "Manual ammo survives sanitization: " + id)
