@@ -342,6 +342,7 @@ func _on_restart_pressed() -> void:
 func apply_carry(carry: Dictionary) -> void:
 	player.call("import_loadout", carry.get("loadout", {}))
 	infection_runtime.call("restore_critical_threshold", float(carry.get("threshold", 0.0)))
+	infection_runtime.call("restore_control_progress", carry.get("control", {}))
 
 
 ## Level chain: reload the scene with another saved map, arriving at `arrival` ({x, z} or {}).
@@ -354,7 +355,7 @@ func travel_to_level(map_name: String, arrival: Dictionary) -> void:
 	loader.set("completion_music", completion_music)
 	_music_handed_off = is_instance_valid(completion_music)
 	loader.completed.connect(func(_success: bool) -> void: _mission_loading = false)
-	var carry := {"loadout": player.call("export_loadout"), "threshold": infection_runtime.call("get_critical_threshold")}
+	var carry := {"loadout": player.call("export_loadout"), "threshold": infection_runtime.call("get_critical_threshold"), "control": infection_runtime.call("export_control_progress")}
 	loader.start_map(planning_mode.storage._map_path(map_name), map_name, arrival, carry)
 
 

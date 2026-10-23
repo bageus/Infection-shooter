@@ -66,6 +66,21 @@ func add_control_ampule() -> float:
 	return threshold
 
 
+## Which levels already gave their ampule, carried to the next map of a level chain.
+## The level's DNA pickup: one ampule per level, a revisit only consumes the pickup.
+func collect_level_dna() -> void:
+	if not control_progress.collected_here():
+		add_control_ampule()
+
+
+func export_control_progress() -> Dictionary:
+	return control_progress.carry()
+
+
+func restore_control_progress(data: Dictionary) -> void:
+	control_progress.restore(data)
+
+
 ## Carries the control threshold over to the next map of a level chain or a respawn.
 func restore_critical_threshold(value: float) -> void:
 	var previous: float = _domain.critical_threshold
