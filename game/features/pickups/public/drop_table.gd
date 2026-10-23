@@ -9,6 +9,7 @@ const SCENES := {
 	"ammo_automate": preload("res://game/features/pickups/public/ammo_automate_pickup.tscn"),
 	"ammo_sniper": preload("res://game/features/pickups/public/ammo_sniper_pickup.tscn"),
 	"ammo_minigun": preload("res://game/features/pickups/public/ammo_minigun_pickup.tscn"),
+	"ammo_grenade": preload("res://game/features/pickups/public/ammo_grenade_pickup.tscn"),
 	"antidote": preload("res://game/features/pickups/public/antidote_pickup.tscn"),
 	"dna": preload("res://game/features/pickups/public/dna_pickup.tscn"),
 }

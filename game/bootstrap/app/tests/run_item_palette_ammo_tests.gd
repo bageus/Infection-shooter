@@ -1,5 +1,5 @@
 extends SceneTree
-## The planner's Items palette offers all six ammo boxes, and each one places as a collectable pickup.
+## The planner's Items palette offers all seven ammo boxes, and each one places as a collectable pickup.
 const MAIN := preload("res://game/bootstrap/app/main.tscn")
 const PICKUP_SCRIPT_NAME := "pickup_item.gd"
 const PICKUP_DIR := "res://game/features/pickups/public/"
@@ -10,6 +10,7 @@ const BOX_SCENES := [
 	"ammo_automate_pickup.tscn",
 	"ammo_sniper_pickup.tscn",
 	"ammo_minigun_pickup.tscn",
+	"ammo_grenade_pickup.tscn",
 ]
 var failures := 0
 

@@ -12,6 +12,7 @@ const BOXES := {
 	"12_ammo_automate.glb": ["AK", "M4"],
 	"12_ammo_minigun.glb": ["MINIGUN"],
 	"12_ammo_sniper.glb": ["SNIPER RIFLE"],
+	"12_ammo_grenade_launcher.glb": ["GRENADE LAUNCHER"],
 }
 var failures := 0
 var stage: Node3D
