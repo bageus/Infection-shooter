@@ -33,6 +33,8 @@ func set_revealed(value: bool) -> void:
 			var material := ShaderMaterial.new()
 			material.shader = SHADER
 			material.set_shader_parameter("tint", color)
+			# Above darkness covers (priority 10), so the hero is not dimmed by them.
+			material.render_priority = 20
 			copy.material_override = material
 			source.add_child(copy)
 			var skeleton := source.get_node_or_null(source.skeleton)
