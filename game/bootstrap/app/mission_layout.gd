@@ -47,13 +47,18 @@ func set_floor_hints_enabled(enabled: bool) -> void:
 	_hints.call("set_hints_enabled", enabled)
 
 
-# Goal for the floor chevrons: the nearest exit opening, except that the emergency key is the goal once revealed and not yet taken.
+# Goal for the floor chevrons: the emergency key once revealed and not yet taken, then the door it opens,
+# otherwise the nearest exit opening.
 func floor_hint_target() -> Vector3:
 	if not is_instance_valid(_player):
 		return Vector3.INF
-	if _key_revealed and is_instance_valid(_key) and not (_player.has_method("has_emergency_key") and bool(_player.call("has_emergency_key"))):
-		return _key.global_position
 	var from := Vector2(_player.global_position.x, _player.global_position.z)
+	if _player.has_method("has_emergency_key") and bool(_player.call("has_emergency_key")):
+		var door := _key_door_target(from)
+		if door.is_finite():
+			return door
+	elif _key_revealed and is_instance_valid(_key):
+		return _key.global_position
 	var best := Vector3.INF
 	var best_distance := INF
 	for opening in _openings:
@@ -62,6 +67,22 @@ func floor_hint_target() -> Vector3:
 		if distance < best_distance:
 			best_distance = distance
 			best = Vector3(center.x, 0.0, center.y)
+	return best
+
+
+# The nearest door that the emergency key opens; sealed doors never open, so they are not goals.
+func _key_door_target(from: Vector2) -> Vector3:
+	var best := Vector3.INF
+	var best_distance := INF
+	for node in get_tree().get_nodes_in_group("interactive_doors"):
+		var door := node as Node3D
+		if door == null or not bool(door.get("requires_emergency_key")) or bool(door.get("permanently_locked")):
+			continue
+		var position := Vector2(door.global_position.x, door.global_position.z)
+		var distance := position.distance_squared_to(from)
+		if distance < best_distance:
+			best_distance = distance
+			best = door.global_position
 	return best
 
 

@@ -186,12 +186,17 @@ func _update_posture() -> void:
 	if posture == Posture.STAND:
 		if (_pace.charging or wounded) and _distance > FOURS_START_DISTANCE and (_feral or wounded):
 			posture = Posture.FOURS
+			# Drops on the move: the legs keep running through the transition.
+			_play_transition(&"DropToFours", &"FoursRun")
 	elif posture == Posture.FOURS:
 		if _distance < FOURS_STAND_DISTANCE or not (_pace.charging or wounded):
 			posture = Posture.STAND
-			# Gets up on the move: the rise clip plays while the chase goes on.
-			if _animation != null and not _feeding:
-				_animation.call("play_named_one_shot", &"RiseFromFours", 0.12, 1.0)
+			_play_transition(&"RiseFromFours", &"Run")
+
+
+func _play_transition(clip: StringName, legs: StringName) -> void:
+	if _animation != null and not _feeding and not _dead:
+		_animation.call("play_named_one_shot", clip, 0.12, 1.0, legs)
 
 
 func _part_lost(part: StringName) -> void:

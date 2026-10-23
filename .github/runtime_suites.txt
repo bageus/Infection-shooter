@@ -136,6 +136,7 @@ game/presentation/office_floor/tests/run_fragment_bake_tests.gd
 game/presentation/office_floor/tests/run_u_desk_tests.gd
 game/presentation/office_floor/tests/run_blood_dormant_tests.gd
 game/presentation/office_floor/tests/run_blood_level_tests.gd
+game/presentation/office_floor/tests/run_blood_normal_tests.gd
 game/presentation/office_floor/tests/run_blood_floor_bake_tests.gd
 game/presentation/office_floor/tests/run_divider_collision_tests.gd
 game/presentation/office_floor/tests/run_electronics_hit_tests.gd
@@ -155,6 +156,7 @@ game/presentation/office_floor/tests/run_server_audio_tests.gd
 game/core/audio/tests/run_sound_event_tests.gd
 game/bootstrap/app/tests/run_skill_bar_tests.gd
 game/presentation/office_floor/tests/run_city_backdrop_tests.gd
+game/presentation/office_floor/tests/run_exterior_facade_tests.gd
 game/features/infected/tests/run_infected_voice_tests.gd
 game/features/infected/tests/run_body_mesh_cache_tests.gd
 game/features/combat/tests/run_prop_damage_state_tests.gd
@@ -195,6 +197,7 @@ game/bootstrap/app/tests/run_surface_decal_options_tests.gd
 game/features/infected/tests/run_enemy_gameplay_modes_tests.gd
 game/presentation/office_floor/tests/run_baked_surface_decal_tests.gd
 game/bootstrap/app/tests/run_floor_hint_tests.gd
+game/bootstrap/app/tests/run_key_door_hint_tests.gd
 game/bootstrap/app/tests/run_gameplay_camera_tuning_tests.gd
 game/bootstrap/app/tests/run_updated_prop_models_tests.gd
 game/presentation/office_floor/tests/run_debris_floor_tests.gd

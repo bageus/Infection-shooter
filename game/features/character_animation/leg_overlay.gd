@@ -6,6 +6,10 @@ extends SkeletonModifier3D
 const LEG_BONES := ["L_Thigh", "L_Shin", "L_Foot", "L_Toe", "R_Thigh", "R_Shin", "R_Foot", "R_Toe"]
 
 var fade_seconds := 0.12
+## Keeps stepping this long after the speed dips to zero for a tick.
+var hold_seconds := 0.25
+
+var _hold := 0.0
 
 var _animation: Animation
 var _time := 0.0
@@ -42,9 +46,24 @@ func follow(animation: Animation, time_scale: float) -> void:
 	_wanted = 1.0
 
 
+## Follows `animation` while the character moves (or moved within hold_seconds); null releases.
+func drive(animation: Animation, time_scale: float, moving: bool) -> void:
+	_hold = hold_seconds if moving else maxf(0.0, _hold - get_process_delta_time())
+	if animation != null and _hold > 0.0:
+		follow(animation, time_scale)
+	else:
+		release()
+
+
 ## Fades the legs back to whatever the main clip plays.
 func release() -> void:
 	_wanted = 0.0
+
+
+## Drops the legs back to the main clip at once (the body is dead or ragdolled).
+func stop() -> void:
+	_wanted = 0.0
+	_weight = 0.0
 
 
 func is_following() -> bool:

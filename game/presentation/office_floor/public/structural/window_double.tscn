@@ -1,9 +1,10 @@
-[gd_scene load_steps=5 format=3]
+[gd_scene load_steps=6 format=3]
 
 [ext_resource type="PackedScene" path="res://models/objects/enviroments/01/01_window_double.glb" id="1_model"]
 [ext_resource type="Script" path="res://game/presentation/office_floor/mesh_collision_builder.gd" id="2_collision"]
 [ext_resource type="Script" path="res://game/presentation/office_floor/glass_partition.gd" id="3_glass"]
 [ext_resource type="Script" path="res://game/presentation/office_floor/glass_collision_builder.gd" id="4_glass_collision"]
+[ext_resource type="Script" path="res://game/presentation/office_floor/exterior_facade.gd" id="5_facade"]
 
 [node name="WindowDouble" type="Node3D" groups=["camera_occluder"]]
 script = ExtResource("2_collision")
@@ -15,6 +16,9 @@ script = ExtResource("4_glass_collision")
 solid_window_collision = true
 
 [node name="Visual" parent="." instance=ExtResource("1_model")]
+
+[node name="ExteriorFacade" type="Node3D" parent="."]
+script = ExtResource("5_facade")
 
 [node name="Body" type="StaticBody3D" parent="."]
 
