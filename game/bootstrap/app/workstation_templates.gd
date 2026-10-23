@@ -20,7 +20,6 @@ const DESKS := {
 	"07_table_square_tall": "table_square_tall",
 	"07_coffee_table2": "coffee_table2",
 	"07_table_longest": "table_longest",
-	"07_table_square": "table_square",
 	"03_bookshelf": "bookshelf",
 	"03_book_case": "book_case",
 	"03_book_case_small": "book_case_small",
@@ -33,7 +32,7 @@ const DESKS := {
 }
 const SETUPS := ["laptop", "laptop_monitor", "desktop", "dual_laptop", "dual_desktop"]
 const VARIANTS := {
-	"laptop": ["05_laptop2_destructible", "05_laptop_destructible", "05_laptop_close_destructible"],
+	"laptop": ["05_laptop2_destructible", "05_laptop_close_destructible"],
 	"monitor": ["05_monitor2_destructible", "05_monitor_wide_destructible", "05_monitor_destructible"],
 	"tower": ["05_PC_destructible", "05_minipc", "05_computer_tower_destructible"],
 	"lamp": ["05_lamp"],

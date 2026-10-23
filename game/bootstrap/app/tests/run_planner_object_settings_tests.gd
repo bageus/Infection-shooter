@@ -7,7 +7,7 @@ const CASES := [
 	["lamp", "planner_light.tscn", "lamp"],
 	["door", "wall_door.tscn", "door"],
 	["monitor", "05_monitor_destructible.glb", "display"],
-	["laptop", "05_laptop_destructible.glb", "display"],
+	["laptop", "05_laptop2_destructible.glb", "display"],
 	["desk lamp", "05_lamp.glb", "display"],
 	["crate", "04_crate_small_broken.glb", "loot"],
 	["enemy", "infected_hunger.tscn", "enemy"],

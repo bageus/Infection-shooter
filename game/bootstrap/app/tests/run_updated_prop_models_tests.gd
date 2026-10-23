@@ -9,7 +9,6 @@ const FRIDGE := "res://models/objects/enviroments/02/02_frige_dented.glb"
 const WALL_BOARD := "res://models/objects/enviroments/09/09_white_board_stand.glb"
 const FLOOR_BOARD := "res://models/objects/enviroments/09/09_board_stand_white.glb"
 const CASE_OPEN := "res://models/objects/enviroments/09/09_case_with_money_open.glb"
-const CASE_CLOSED := "res://models/objects/enviroments/09/09_case_with_money_close.glb"
 var failures := 0
 var stage: Node3D
 var effects: Node3D
@@ -29,7 +28,7 @@ func _run() -> void:
 		await _retained(model, true)
 		await _retained(model, false)
 	await _empty_cooler()
-	for model in [CASE_OPEN, CASE_CLOSED, FLOOR_BOARD]:
+	for model in [CASE_OPEN, FLOOR_BOARD]:
 		await _two_parts(model)
 	await _fixed_fridge()
 	await _wall_board()

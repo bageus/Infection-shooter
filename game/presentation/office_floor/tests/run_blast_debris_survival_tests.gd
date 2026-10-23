@@ -8,7 +8,7 @@ const BLAST := preload("res://game/presentation/office_floor/blast_effect.gd")
 const DEBRIS := preload("res://game/presentation/office_floor/debris_lifecycle.gd")
 const FRAGMENT := preload("res://game/presentation/office_floor/environment_fragment.gd")
 const MODELS := "res://models/objects/enviroments/"
-const CLUSTER := ["07/07_table_circular", "01/01_wood_slat_partition_destructible", "08/08_divider_full_H_desk", "08/08_divider_full_U_desk", "07/07_table_circular", "05/05_printer_destructible", "08/08_office_desk_2", "05/05_printer_destructible"]
+const CLUSTER := ["07/07_table_circular", "01/01_wood_slat_partition_destructible", "08/08_divider_full_H_desk", "08/08_divider_full_U_desk", "07/07_table_circular", "05/05_computer_tower_destructible", "08/08_office_desk_2", "05/05_computer_tower_destructible"]
 const BLAST_RADIUS := 5.5
 const OBSERVE_SECONDS := 1.0
 

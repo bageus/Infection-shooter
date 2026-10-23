@@ -27,11 +27,6 @@
       "model": "small",
       "x": 0.68,
       "z": 0.29
-    },
-    {
-      "model": "05_printer_destructible",
-      "x": 0.82,
-      "z": 1.58
     }
   ],
   "chair": {

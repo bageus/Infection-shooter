@@ -209,10 +209,6 @@
 			"path": "res://models/objects/enviroments/05/05_laptop_close_destructible.glb"
 		},
 		{
-			"name": "laptop destructible",
-			"path": "res://models/objects/enviroments/05/05_laptop_destructible.glb"
-		},
-		{
 			"name": "monitor2 destructible",
 			"path": "res://models/objects/enviroments/05/05_monitor2_destructible.glb"
 		},
@@ -231,10 +227,6 @@
 		{
 			"name": "monitor wide destructible",
 			"path": "res://models/objects/enviroments/05/05_monitor_wide_destructible.glb"
-		},
-		{
-			"name": "printer destructible",
-			"path": "res://models/objects/enviroments/05/05_printer_destructible.glb"
 		},
 		{
 			"name": "wall TV destructible",
@@ -295,10 +287,6 @@
 		{
 			"name": "table longest",
 			"path": "res://models/objects/enviroments/07/07_table_longest.glb"
-		},
-		{
-			"name": "table square",
-			"path": "res://models/objects/enviroments/07/07_table_square.glb"
 		},
 		{
 			"name": "table square tall",
@@ -363,10 +351,6 @@
 		{
 			"name": "books alt 2",
 			"path": "res://models/objects/enviroments/09/09_books_alt_2.glb"
-		},
-		{
-			"name": "case with money close",
-			"path": "res://models/objects/enviroments/09/09_case_with_money_close.glb"
 		},
 		{
 			"name": "case with money open",

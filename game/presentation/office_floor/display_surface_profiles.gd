@@ -3,7 +3,7 @@ extends RefCounted
 const MODELS: Array[String] = [
 	"05_monitor_destructible.glb", "05_monitor_wide_destructible.glb", "05_monitor2_destructible.glb",
 	"05_monitor3_server_destructible.glb", "05_monitor4_server_destructible.glb",
-	"05_laptop_destructible.glb", "05_laptop2_destructible.glb",
+	"05_laptop2_destructible.glb",
 	"05_wall_TV_destructible.glb", "05_wall_TV_frameless_destructible.glb"]
 const DATA_PATH := "res://game/presentation/office_floor/display_surfaces.json"
 # Parsed once and shared: every display used to parse its own copy of the file.
