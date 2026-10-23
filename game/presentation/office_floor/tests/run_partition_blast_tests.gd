@@ -6,7 +6,9 @@ const PROP := preload("res://game/presentation/office_floor/public/props/environ
 const BLAST := preload("res://game/presentation/office_floor/blast_effect.gd")
 const FRAGMENT := preload("res://game/presentation/office_floor/environment_fragment.gd")
 const MODEL := "res://models/objects/enviroments/01/01_wood_slat_partition_destructible.glb"
-const OBSERVE_SECONDS := 5.0
+# Physics frames, not wall time: a slow CI runner simulates fewer steps per second but the same steps per frame.
+const SETTLE_FRAMES := 900
+const CHECK_EVERY := 60
 # A slat standing or leaning higher than this above the floor after the settle time is "hanging".
 const MAX_REST_TOP := 0.45
 
@@ -18,6 +20,7 @@ func _init() -> void:
 
 
 func _run() -> void:
+	seed(7) # Impulses and tumble use randf; a fixed seed makes every run identical.
 	var stage := Node3D.new()
 	root.add_child(stage)
 	var floor_body := StaticBody3D.new()
@@ -42,18 +45,25 @@ func _run() -> void:
 	var host := Node3D.new()
 	stage.add_child(host)
 	BLAST.detonate(host, Vector3(0, 0.4, 1.0), 5.5, false)
-	await create_timer(OBSERVE_SECONDS).timeout
 	var pieces := get_nodes_in_group(FRAGMENT.GROUP)
 	var hanging := 0
 	var highest := 0.0
-	for piece in pieces:
-		var body := piece as RigidBody3D
-		var top := _top(body)
-		highest = maxf(highest, top)
-		hanging += int(top > MAX_REST_TOP)
+	for frame in SETTLE_FRAMES:
+		await physics_frame
+		if frame % CHECK_EVERY != CHECK_EVERY - 1:
+			continue
+		pieces = get_nodes_in_group(FRAGMENT.GROUP)
+		hanging = 0
+		highest = 0.0
+		for piece in pieces:
+			var top := _top(piece as RigidBody3D)
+			highest = maxf(highest, top)
+			hanging += int(top > MAX_REST_TOP)
+		if hanging == 0 and pieces.size() > 5:
+			break
 	print("pieces=%d hanging=%d highest_top=%.2f" % [pieces.size(), hanging, highest])
 	_check(pieces.size() > 5, "The partition broke into pieces")
-	_check(hanging == 0, "No slat hangs above %.2f m after %.0f s (%d hanging)" % [MAX_REST_TOP, OBSERVE_SECONDS, hanging])
+	_check(hanging == 0, "No slat hangs above %.2f m after %d physics frames (%d hanging)" % [MAX_REST_TOP, SETTLE_FRAMES, hanging])
 	stage.queue_free()
 	await process_frame
 	print("Partition blast tests: %d failure(s)." % failures)
