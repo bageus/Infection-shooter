@@ -1,6 +1,7 @@
 extends SceneTree
 const GEOMETRY := preload("res://game/features/combat/impact_surface_geometry.gd")
 const RECEIVERS := preload("res://game/features/combat/impact_receiver_cache.gd")
+const INDEX := preload("res://game/features/combat/impact_triangle_index.gd")
 var failures := 0
 var stage: Node3D
 
@@ -13,6 +14,7 @@ func _run() -> void:
 	stage = Node3D.new()
 	root.add_child(stage)
 	_equivalence_and_work()
+	_large_mesh_build()
 	_receiver_lifecycle()
 	_resource_lifecycle()
 	stage.queue_free()
@@ -47,6 +49,33 @@ func _equivalence_and_work() -> void:
 	_check(tested > 0 and tested <= 32, "Local ray tests <=32 triangles instead of all 8192")
 	print("Impact triangle work: %d / 8192 exact triangle tests" % tested)
 	body.free()
+
+
+# A 35k-triangle prop (the fire extinguisher) once froze the first shot for seconds while its index built.
+func _large_mesh_build() -> void:
+	var sphere := SphereMesh.new()
+	sphere.radial_segments = 190
+	sphere.rings = 95
+	var faces := sphere.get_faces()
+	var started := Time.get_ticks_usec()
+	var index := INDEX.new(faces)
+	var seconds := (Time.get_ticks_usec() - started) / 1000000.0
+	print("Impact index build: %d triangles in %.0f ms" % [faces.size() / 3, seconds * 1000.0])
+	_check(faces.size() / 3 > 30000 and seconds < 1.5, "A 30k+ triangle mesh indexes in under 1.5 s")
+	var rng := RandomNumberGenerator.new()
+	rng.seed = 7
+	var missed := 0
+	for sample in 150:
+		var direction := Vector3(rng.randf_range(-1, 1), rng.randf_range(-1, 1), rng.randf_range(-1, 1)).normalized()
+		var from := direction * 1.5
+		var to := -direction * 1.5 + Vector3(rng.randf_range(-.4, .4), rng.randf_range(-.4, .4), rng.randf_range(-.4, .4))
+		var found := {}
+		for id in index.candidates(from, to):
+			found[id] = true
+		for i in range(0, faces.size() - 2, 3):
+			if Geometry3D.segment_intersects_triangle(from, to, faces[i], faces[i + 1], faces[i + 2]) != null and not found.has(i):
+				missed += 1
+	_check(missed == 0, "Every triangle a segment crosses is among the candidates (%d missed)" % missed)
 
 
 func _brute(mesh: MeshInstance3D, point: Vector3, direction: Vector3) -> Dictionary:
