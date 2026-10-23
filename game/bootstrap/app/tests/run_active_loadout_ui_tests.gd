@@ -97,11 +97,11 @@ func _test_tree_geometry() -> void:
 			circles.append([branch, alternate])
 			stems.append([branch, level_two, alternate])
 			_expect(absf(level_two.distance_to(alternate) - level_two.distance_to(canvas.skill_position(branch, 2))) < 0.5, "Active branch %d has two level-3 stems of equal length" % branch)
-	for hybrid in 5:
+	for hybrid in TREE_CANVAS.HYBRID_PARENTS.size():
 		circles.append([-1, canvas.hybrid_position(hybrid)])
 	for a in circles.size():
 		var centre: Vector2 = circles[a][1]
-		_expect(centre.x >= 33.0 and centre.x <= 1167.0 and centre.y >= 33.0 and centre.y <= 767.0, "Circle %d stays inside the tree" % a)
+		_expect(centre.x >= 33.0 and centre.x <= 1167.0 and centre.y >= 33.0 and centre.y <= TREE_CANVAS.DESIGN_SIZE.y - 33.0, "Circle %d stays inside the tree" % a)
 		for b in range(a + 1, circles.size()):
 			_expect(centre.distance_to(circles[b][1]) >= 72.0, "Circles %d and %d do not touch" % [a, b])
 	for circle in circles:
@@ -112,8 +112,11 @@ func _test_tree_geometry() -> void:
 			_expect(nearest.distance_to(circle[1]) >= 41.0, "Circle does not sit on branch %d's stem" % stem[0])
 	var slope := rad_to_deg(atan2(TREE_CANVAS.RANK_STEP.y, TREE_CANVAS.RANK_STEP.x))
 	_expect(slope >= 60.0 and slope < 90.0, "Branch stems are steep: between 60 and 90 degrees, never vertical")
-	for hybrid in 5:
+	for hybrid in TREE_CANVAS.HYBRID_PARENTS.size():
 		var parents: Array = TREE_CANVAS.HYBRID_PARENTS[hybrid]
+		if hybrid == 5:
+			_expect(canvas.hybrid_position(hybrid).y > 780.0, "Wraparound hybrid uses a separate bottom lane")
+			continue
 		var left: Rect2 = canvas.label_rect(parents[0])
 		var right: Rect2 = canvas.label_rect(parents[1])
 		var x: float = canvas.hybrid_position(hybrid).x

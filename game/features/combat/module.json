@@ -68,6 +68,7 @@
     "baked_surface_v1": {
       "callbacks": "Optional surface_hit Callable(collider, point, normal, weapon, anchor)->bool and surface_step Callable(point, normal), injected by bootstrap, no concrete presentation dependency.",
       "commands": "bake_surface_hit forwards confirmed bullet/blast impact; false preserves legacy standalone projected-mark fallback. request_surface_step(CharacterBody3D) reports support geometry after at most2 ground rays/physics frame, using existing configure_world injection."
-    }
+    },
+    "mutation_ammo_v1": "refill_magazine_from_reserve() -> int; instant reload spends only available reserve, cancels reload, belt-fed returns0; add_magazine_ammo remains explicit creation for Organic Ammo."
   }
 }

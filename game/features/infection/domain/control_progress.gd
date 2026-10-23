@@ -23,9 +23,9 @@ func complete_level(id: String) -> int:
 	return 0 if collected else 1
 
 
-static func antidote_preview(domain, tree) -> Dictionary:
+static func antidote_preview(domain, tree, effectiveness: float = 1.0) -> Dictionary:
 	var can_use: bool = not domain.defeated and domain.mutation > domain.MUTATION_MIN
-	var after := maxf(0.0, domain.mutation - domain.ANTIDOTE_REDUCTION) if can_use else float(domain.mutation)
+	var after: float = domain.antidote_result(effectiveness) if can_use else float(domain.mutation)
 	var projected := TREE.new()
 	projected.learned = tree.learned.duplicate()
 	projected.locked = tree.locked.duplicate()

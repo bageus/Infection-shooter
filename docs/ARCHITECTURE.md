@@ -391,3 +391,20 @@ procedural backend; skill/grenade atlas constants и их PNG удалены п�
 запросу владельца, остальные flipbook функции сохранены. Infected владеет
 непрерывным темпом chase и геометрическим stun indicator; hit drag прежний.
 Owners/edges/Autoload/map DTO прежние, архитектурных исключений нет.
+
+
+## Issue #7 skill tuning (ADR-0062, 22.10.2026)
+
+Infection exposes immutable mutation_balance values shared by effects and RU/EN
+cards. Infected declares a read-only dependency on that public API. Player owns
+private hybrid clocks/absorption and consumable application; combat retains ammo
+ownership with an instant reserve-only refill command. Optional enemy-loot ammo
+multipliers preserve legacy callers. No state-owner, save or network changes;
+no policy exceptions. See module manifests for additive runtime contracts.
+
+
+ADR-0062 CI correction: cloud presence is a separate optional visitor callback,
+deduplicated per physics frame and delivered through the existing wall check.
+Player applies Devourer independently of absorbed mutation; spent clouds retain
+presence monitoring. Antidote preview/use share the same pure domain result and
+current effectiveness. State ownership/dependency graph/save formats unchanged.

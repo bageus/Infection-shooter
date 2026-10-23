@@ -5,7 +5,7 @@ extends RefCounted
 
 const ATLAS := preload("res://assets/interface/icon/Clean white 6×6 icon atlas-1.png")
 const GRID := 6
-# Cell 23 (organic ammo) has no skill yet.
+# Cell 23 completes the passive hybrid ring.
 const CELLS := {
 	"muscle_memory": 0, "stabilizers": 1, "combat_reflex": 2,
 	"claws": 3, "blood_scent": 4, "adrenaline": 5,
@@ -14,7 +14,7 @@ const CELLS := {
 	"synapses": 12, "neurostim": 13, "reflex_arc": 14,
 	"recycling": 15, "assimilation": 16, "battle_metabolism": 17,
 	"killer_instinct": 18, "devourer": 19, "reactive_evolution": 20,
-	"retaliation": 21, "hyperactive": 22,
+	"retaliation": 21, "hyperactive": 22, "organic_ammo": 23,
 	"blood_burst_2": 24, "blood_burst_3": 24, "blood_infection": 25,
 	"discharge_2": 27, "discharge_3": 27, "power_strike": 34, "power_strike_2": 34, "power_strike_3": 34,
 	"active_claws": 3, "active_claws_2": 3, "active_claws_3": 3,

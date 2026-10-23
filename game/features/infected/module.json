@@ -73,7 +73,8 @@
     "features.character_animation",
     "features.pickups",
     "core.audio",
-    "core.vfx"
+    "core.vfx",
+    "features.infection"
   ],
   "runtime_contracts": {
     "mission_wiring_v1": {

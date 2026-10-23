@@ -269,6 +269,15 @@ func add_reserve_ammo(amount: int) -> int:
 	var previous := _reserve.amount
 	_reserve.amount = mini(_reserve.capacity, _reserve.amount + maxi(amount, 0))
 	return _reserve.amount - previous
+## Instant reload for Killer Instinct; never creates ammunition.
+func refill_magazine_from_reserve() -> int:
+	if direct_reserve_feed:
+		return 0
+	var loaded := mini(magazine_size - _magazine_ammo, _reserve.amount)
+	_magazine_ammo += loaded
+	_reserve.amount -= loaded
+	cancel_reload()
+	return loaded
 func add_magazine_ammo(amount: int) -> int:
 	if direct_reserve_feed:
 		return add_reserve_ammo(amount)

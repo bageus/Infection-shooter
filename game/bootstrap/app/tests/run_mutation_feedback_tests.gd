@@ -37,7 +37,7 @@ func _run() -> void:
 	_expect(canvas.trunk_available_x() == canvas.branch_origin(0).x, "Opening the next branches exposes their entire connector at once.")
 	canvas.configure_progression(values, 95.0, opened)
 	_expect(canvas.branch_origin(8) != canvas.branch_origin(9), "Late passive roots are distinct.")
-	_expect(CANVAS.HYBRID_PARENTS.size() == 5, "Only adjacent passive branches have hybrids.")
+	_expect(CANVAS.HYBRID_PARENTS.size() == 6, "The passive ring has six hybrids.")
 	for branch in range(10):
 		for rank in range(3):
 			var position := canvas.skill_position(branch, rank)
@@ -47,6 +47,8 @@ func _run() -> void:
 		var parents: Array = CANVAS.HYBRID_PARENTS[index]
 		var position := canvas.hybrid_position(index)
 		_expect(position.x > canvas.label_rect(parents[0]).get_center().x and position.x < canvas.label_rect(parents[1]).get_center().x, "Hybrid lies between the titles of its adjacent parents.")
+	var organic := canvas.hybrid_position(5)
+	_expect(organic.y + 22.0 < CANVAS.DESIGN_SIZE.y and organic.y > 780.0, "Organic Ammo has a separate visible bottom lane")
 	canvas.free()
 	var stage := Node3D.new()
 	root.add_child(stage)

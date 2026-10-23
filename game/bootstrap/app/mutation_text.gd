@@ -1,4 +1,5 @@
 extends RefCounted
+const BALANCE := preload("res://game/features/infection/public/mutation_balance.gd")
 const LOCALIZATION := preload("res://game/core/localization/public/ui_translations.gd")
 
 
@@ -12,7 +13,12 @@ static func skill_name(id: String) -> String:
 
 
 static func description(id: String) -> String:
-	return t("mutationSkill_" + id + "_description")
+	var text := t("mutationSkill_" + id + "_description")
+	if id.begins_with("discharge"):
+		text += "\n" + t("mutationLightningHint")
+	elif id.begins_with("power_strike"):
+		text += "\n" + t("mutationStrikeHint")
+	return text.format(BALANCE.text_values(id, TranslationServer.get_locale()))
 
 
 static func branch(id: String) -> String:

@@ -1,4 +1,5 @@
 extends RefCounted
+const B := preload("res://game/features/infection/public/mutation_balance.gd")
 ## Applies the four active mutation families; progression stays in infection.
 const STRIKE_REACH := 3.0
 const STRIKE_PUSH_SPEED := 6.0
@@ -31,14 +32,14 @@ func cast(id: String) -> void:
 		host.vfx.dash_trail(0.4)
 		_start(id, 0.4)
 	elif id == "berserk":
-		host._start_buff(id, 6.0)
+		host._start_buff(id, B.value(id, "duration"))
 	elif id == "storm_pulse":
-		_start(id, 6.0)
-		host.vfx.active_aura(id, 4.0, 6.0)
+		_start(id, B.value(id, "duration"))
+		host.vfx.active_aura(id, B.value(id, "radius"), B.value(id, "duration"))
 	elif id.begins_with("active_claws"):
-		var duration: float = [2.5, 3.5, 4.5][level - 1]
+		var duration: float = B.value(id, "duration")
 		_start(id, duration)
-		host.vfx.active_aura(id, float(level + 2), duration)
+		host.vfx.active_aura(id, B.value(id, "radius"), duration)
 
 
 func _start(id: String, duration: float) -> void:
@@ -53,20 +54,19 @@ func tick(delta: float) -> void:
 		var elapsed := minf(delta, float(effect.left))
 		effect.left = maxf(0.0, float(effect.left) - delta)
 		if id.begins_with("active_claws"):
-			var level := int((host.runtime.call("skill_requirements", id) as Dictionary).get("level", 1))
-			for enemy in host._enemies_near(host.player.global_position, float(level + 2)):
+			for enemy in host._enemies_near(host.player.global_position, B.value(id, "radius")):
 				if _claw_visual <= 0.0:
 					host.vfx.claw_slash(enemy)
-				enemy.call("take_damage", float(40 + level * 10) * elapsed)
+				enemy.call("take_damage", B.value(id, "damage") * elapsed)
 		elif id == "storm_pulse":
 			# Integrate damage continuously: exactly 40/s, independent of FPS.
-			for enemy in host._enemies_near(host.player.global_position, 4.0):
-				enemy.call("take_damage", 40.0 * elapsed)
+			for enemy in host._enemies_near(host.player.global_position, B.value(id, "radius")):
+				enemy.call("take_damage", B.value(id, "damage") * elapsed)
 				if float(effect.elapsed) <= 0.0:
-					enemy.call("apply_blast_stun", 2.0, 1.0)
+					enemy.call("apply_blast_stun", B.value("storm_pulse", "stun"), 1.0)
 			effect.elapsed = float(effect.elapsed) - elapsed
 			if float(effect.elapsed) <= 0.0:
-				effect.elapsed += 1.0
+				effect.elapsed += B.value("storm_pulse", "interval")
 		elif id == "predator_dash":
 			_dash()
 		if float(effect.left) <= 0.0:
@@ -78,38 +78,39 @@ func tick(delta: float) -> void:
 
 func _blood(id: String, level: int) -> void:
 	var infected := id == "blood_infection"
-	var damage: float = 30.0 if infected else [20.0, 30.0, 50.0][level - 1]
-	host.vfx.spike_burst(host.player.global_position, 2.4)
-	for enemy in host._enemies_near(host.player.global_position, 2.4):
+	var damage: float = B.value(id, "damage")
+	host.vfx.spike_burst(host.player.global_position, B.value(id, "radius"))
+	for enemy in host._enemies_near(host.player.global_position, B.value(id, "radius")):
 		var offset: Vector3 = enemy.global_position - host.player.global_position
 		if level > 1:
 			# Final distance is measured from the edge of the burst, not its centre.
-			_push(enemy, offset, maxf(0.0, 2.4 - Vector2(offset.x, offset.z).length()) + (4.0 if level == 3 and not infected else 3.0))
+			_push(enemy, offset, maxf(0.0, B.value(id, "radius") - Vector2(offset.x, offset.z).length()) + B.value(id, "push"))
 		if level == 3 and not infected:
-			enemy.call("apply_blast_stun", 1.0, 1.0)
+			enemy.call("apply_blast_stun", B.value(id, "stun"), 1.0)
 		if infected:
-			enemy.call("apply_skill_infection", 3.0, 10.0)
+			enemy.call("apply_skill_infection", B.value(id, "duration"), B.value(id, "dps"))
 		enemy.call("take_damage", damage)
 	if infected:
-		host._skill_effect(id, 3.0)
+		host._skill_effect(id, B.value(id, "duration"))
 
 
 func _discharge(level: int) -> void:
-	var targets: Array = host._enemies_near(host.player.global_position, 8.0, true)
+	var id := "discharge" + ("_" + str(level) if level > 1 else "")
+	var targets: Array = host._enemies_near(host.player.global_position, B.value(id, "range"), true)
 	if targets.is_empty():
 		return
 	var current: Node3D = targets[0]
 	var points: Array[Vector3] = [host.player.global_position]
-	for hit in [6, 8, 10][level - 1]:
+	for hit in int(B.value(id, "hits")):
 		if not is_instance_valid(current) or float(current.get("health")) <= 0.0:
 			break
 		var origin := current.global_position
 		points.append(origin)
 		if level == 3:
-			current.call("apply_blast_stun", 1.2, 1.0)
-		current.call("take_damage", float(level * 10))
+			current.call("apply_blast_stun", B.value(id, "stun"), 1.0)
+		current.call("take_damage", B.value(id, "damage"))
 		var next: Node3D
-		for candidate in host._enemies_near(origin, 3.0, true):
+		for candidate in host._enemies_near(origin, B.value(id, "chain"), true):
 			if candidate != current:
 				next = candidate
 				break
@@ -119,6 +120,7 @@ func _discharge(level: int) -> void:
 
 
 func _strike(level: int) -> void:
+	var id := "power_strike" + ("_" + str(level) if level > 1 else "")
 	var forward := -(host.player.get_node("AimPivot") as Node3D).global_basis.z
 	forward.y = 0.0
 	forward = forward.normalized()
@@ -127,16 +129,16 @@ func _strike(level: int) -> void:
 	for enemy in host._enemies_near(host.player.global_position, 4.0):
 		var offset: Vector3 = enemy.global_position - host.player.global_position
 		var depth := offset.dot(forward)
-		if depth < 0.0 or depth > 3.0 or absf(offset.dot(right)) > (1.0 + depth * 2.0 / 3.0) * 0.5:
+		if depth < 0.0 or depth > B.value(id, "reach") or absf(offset.dot(right)) > (B.value(id, "width_start") + depth * (B.value(id, "width_end") - B.value(id, "width_start")) / B.value(id, "reach")) * 0.5:
 			continue
-		_push(enemy, forward, 4.0 if level == 1 else 5.0)
+		_push(enemy, forward, B.value(id, "push"))
 		if level == 3:
-			enemy.call("apply_blast_stun", 1.5, 1.0)
-		enemy.call("take_damage", float(20 + level * 10))
+			enemy.call("apply_blast_stun", B.value(id, "stun"), 1.0)
+		enemy.call("take_damage", B.value(id, "damage"))
 		struck = true
 	if struck:
 		host.vfx.heavy_hit()
-	_strike_objects(forward, float(20 + level * 10))
+	_strike_objects(forward, B.value(id, "damage"))
 	host.vfx.power_strike(host.player.global_position, forward)
 
 
@@ -178,8 +180,8 @@ func _dash() -> void:
 			continue
 		_dash_struck[id] = true
 		var side: float = (enemy.global_position - host.player.global_position).dot(right)
-		_push(enemy, right if side >= 0.0 else -right, 2.0)
-		enemy.call("take_damage", 50.0)
+		_push(enemy, right if side >= 0.0 else -right, B.value("predator_dash", "push"))
+		enemy.call("take_damage", B.value("predator_dash", "damage"))
 
 
 func _push(enemy: Node3D, direction: Vector3, distance: float) -> void:

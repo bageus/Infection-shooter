@@ -28,13 +28,14 @@ const WALL_MASK := 129
 # Antidote is deliberately less common than health/ammo.
 @export_range(0.0, 1.0) var antidote_weight := 0.35
 
-func drop_for_enemy(world: Node, at: Vector3) -> void:
-	if randf() > any_drop_chance:
-		return
+func drop_for_enemy(world: Node, at: Vector3, ammo_multiplier: float = 1.0) -> void:
 	var weights := CONFIG.AUTO_WEIGHTS.duplicate()
 	weights.erase("dna")
 	weights["antidote"] = antidote_weight
-	var scene: PackedScene = SCENES[CONFIG.weighted_item(randf(), weights)]
+	var item_id := roll_item(randf(), weights, any_drop_chance, ammo_multiplier)
+	if item_id.is_empty():
+		return
+	var scene: PackedScene = SCENES[item_id]
 	var spot := free_spot(world, at)
 	var item := scene.instantiate()
 	world.add_child(item)
@@ -94,3 +95,18 @@ static func _reachable(space: PhysicsDirectSpaceState3D, from: Vector3, to: Vect
 		skipped.append(hit["rid"])
 		query.exclude = skipped
 	return false
+
+
+static func roll_item(roll: float, weights: Dictionary, chance: float, ammo_multiplier: float = 1.0) -> String:
+	var total := 0.0
+	for weight in weights.values():
+		total += float(weight)
+	var cursor := 0.0
+	for id: String in weights:
+		var probability := chance * float(weights[id]) / total
+		if id.begins_with("ammo_"):
+			probability *= ammo_multiplier
+		cursor += probability
+		if roll < cursor:
+			return id
+	return ""

@@ -7,6 +7,7 @@ owner: AI
 updated: 2026-10-18
 ---
 
+22.10.2026 (issue #7 — прямое поручение владельца: реализация, ветка и PR): внедрены итоговые18 пассивных/6 гибридных/16 активных карточек RU/EN с общей immutable mutation_balance; исправлены утверждённые значения и триггеры, добавлен organic_ammo и нижняя замыкающая связь дерева. Инстинкт убийцы расходует только резерв, Пожиратель держит отдельное поглощение50/5с, Гиперактивность стартует с первого убийства и имеет10с восстановления после паузы>1с, Переработка меняет реальный ammo-drop, Ассимиляция усиливает расходники без усиления пассивного лечения. Player consumables/hybrid clocks вынесены в private helpers; infected wounded bonus — в существующий mutation_status. ADR-0062 и manifests фиксируют additive public tuning/ammo/loot contracts и read-only edge infected→infection. Форматы save/network/scenes и owners прежние, исключений policy нет. Проверено: Godot4.7.2 headless import без ошибок;22 связанных suites PASS; validate_project (spec/workflow/architecture/source-size/CI coverage) PASS; git diff --check PASS. Не проверялось: ручная нативная оценка нового соединителя и полный баланс в бою. Следующее действие — опубликовать ветку feat/issue-7-skill-descriptions-and-effects, открыть PR в main и дождаться CI; фазу/статус T004 не менять.
 
 22.10.2026 (внешние окна до земли — прямой запрос владельца Vadim): внешнее окно стояло на y=0 над пустотой, городская земля в фоне на y=-65.4. В `window_double.tscn` добавлен узел `ExteriorFacade` (`exterior_facade.gd`): от нижней грани рамы процедурно строится фасад до земли, по ширине и толщине рамы, без коллизии и теней. Проверено: run_exterior_facade_tests (новый), run_glass_floor_debris_tests, run_baked_surface_decal_tests, run_city_backdrop_tests 0 failures, validate_project PASS. Не проверялось: визуально в игре на нативном GPU.
 
@@ -882,3 +883,18 @@ T002 remains the only active task. After CI, visually verify seams and collision
 
 
 21.10.2026 — дополнительная проверка layout_loading выявила нарушение async-контракта после Dummy fix: один синхронный payload мог завершить prepare без уступки кадра. Headless queue теперь уступает кадр и после последнего запроса. Существующий layout_loading regression снова PASS; native ветка не меняется. Следующий шаг — оставшиеся загрузочные suites и итоговый CI.
+
+
+22.10.2026 — исправление CI PR#427 (прямой запрос владельца). В исходном
+runtime job120049991933 упал только run_ui_sound_tests: сравнение готового
+описания с сырым шаблоном локализации. Проверка теперь требует реальные числа
+и отсутствие подстановок; геометрия проверяет6 гибридов. Дополнительно закрыты
+пропуски интеграции B01/B06 аудита#250: один player-owned путь лечения2HP/с от
+присутствия облака, дедупликация/стены/исчерпанные и постоянные источники;
+предпросмотр и применение антидота используют единый расчёт эффективности.
+Документированы optional on_mutagen_cloud и ADR0062; сохранения/сцены/owners и
+policy exceptions не менялись. Проверено:27 затронутых suites PASS (2 процесса),
+headless editor import exit0, validate_project и diff check PASS. Полный локальный
+параллельный202-suite запуск остановлен после ресурсных тайм-аутов загрузки,
+успешным не считается. Следующее действие — обновить существующую ветку PR#427
+и проверить полный GitHub CI на новом head; T004/Phase1 не завершать.

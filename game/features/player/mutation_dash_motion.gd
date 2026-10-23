@@ -1,6 +1,7 @@
 extends RefCounted
 ## Six-metre dash: scenery stops it, while loose objects, debris and enemies on its path are shoved aside.
 ## Shove momentum matches a rifle hit (bullet_push.gd); a light item is capped at its top speed.
+const B := preload("res://game/features/infection/public/mutation_balance.gd")
 const SHOVE_MOMENTUM := 9.0
 const SHOVE_MAX_SPEED := 3.2
 ## Debris pieces live on the hit layer 4 and the piece layer 16 (environment_fragment.gd).
@@ -18,7 +19,7 @@ func begin(player: CharacterBody3D) -> void:
 	if active:
 		return
 	active = true
-	remaining = 6.0
+	remaining = B.value("predator_dash", "distance")
 	_mask = player.collision_mask
 	_shoved.clear()
 	player.collision_mask &= ~2

@@ -16,7 +16,7 @@ signal depleted
 ## Gas puffs per cloud (random in range) and how far they spread from the centre.
 @export var puff_count_range := Vector2i(3, 4)
 @export var cloud_radius := 1.35
-## Devourer: visitors inside the cloud are healed while it lasts.
+## Legacy visitor fallback; players own Devourer via on_mutagen_cloud().
 @export var heals_visitors := false
 const HEAL_PER_SECOND := 2.0
 
@@ -98,6 +98,7 @@ func _physics_process(delta: float) -> void:
 	if not _active:
 		return
 	if permanent:
+		_heal_visitors(delta)
 		_cycle_elapsed = fposmod(_cycle_elapsed + delta, maxf(lifetime_seconds, 0.001))
 		_set_progress(_cycle_elapsed / maxf(lifetime_seconds, 0.001))
 		var visitor := _find_absorbing_body()
@@ -111,8 +112,7 @@ func _physics_process(delta: float) -> void:
 		_finish()
 		return
 
-	if heals_visitors:
-		_heal_visitors(delta)
+	_heal_visitors(delta)
 	if _absorption_remaining <= 0.0:
 		# The mutagen is spent, but the visual cloud finishes dissipating naturally.
 		return
@@ -134,13 +134,25 @@ func _feed(body: Node, step: float) -> void:
 	if gained is float and float(gained) <= 0.0:
 		return
 	_absorption_remaining -= step
-	if _absorption_remaining <= 0.0 and not heals_visitors:
-		monitoring = false
+	# Keep detecting presence until dissipation: a visitor may have Devourer
+	# even when this cloud was created before that skill became active.
 
 
+# Cloud presence is delivered once per body/physics frame, even when mutagen
+# is spent or refused. The player decides whether Devourer is currently active.
 func _heal_visitors(delta: float) -> void:
+	var frame := Engine.get_physics_frames()
 	for body in get_overlapping_bodies():
-		if body != null and body.has_method("absorb_mutagen") and WALL_FIELD.clear_to(self, body):
+		if body == null or not body.has_method("absorb_mutagen"):
+			continue
+		if not body.has_method("on_mutagen_cloud") and not heals_visitors:
+			continue
+		if int(body.get_meta(&"mutagen_presence_frame", -1)) == frame or not WALL_FIELD.clear_to(self, body):
+			continue
+		body.set_meta(&"mutagen_presence_frame", frame)
+		if body.has_method("on_mutagen_cloud"):
+			body.call("on_mutagen_cloud", delta)
+		elif body.has_method("heal"):
 			body.call("heal", HEAL_PER_SECOND * delta)
 
 

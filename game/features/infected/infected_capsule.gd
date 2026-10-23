@@ -241,9 +241,7 @@ func take_projectile_damage(
 	projectile_blood.emit(hit_position, direction, weapon_name, _blood_exclusions(), get_instance_id())
 	BLOOD_FX.spray(get_parent() as Node3D, hit_position, direction, 16, 1.0)
 	audio.hit(hit_position)
-	if is_instance_valid(_target) and _target.has_method("get_infection_skill"):
-		if bool(_target.call("get_infection_skill", "blood_scent")) and health < max_health * 0.7:
-			amount *= 1.22
+	amount = _mutation_status.scented_damage(_target, health < max_health, amount)
 	var severed := _parts != null and bool(_parts.damage_part(part, amount))
 	_apply_damage(amount, false)
 	# A killing shot also tears off a part that was already badly damaged.

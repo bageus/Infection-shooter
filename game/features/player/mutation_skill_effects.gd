@@ -1,6 +1,9 @@
 extends Node
 
 # Host-side effects. The infection runtime owns selection and cooldown state.
+const B := preload("res://game/features/infection/public/mutation_balance.gd")
+var hybrids := preload("res://game/features/player/passive_hybrid_effects.gd").new(self)
+var retaliation_cooldown := 0.0
 const SKILL_VFX := preload("res://game/features/player/mutation_skill_vfx.gd")
 const VFX_BUFFS := ["storm_pulse", "bone_blades", "berserk"]
 var _active_effects := preload("res://game/features/player/active_mutation_effects.gd").new(self)
@@ -11,8 +14,6 @@ var baselines: Array[Dictionary] = []
 var buffs: Dictionary = {}
 var last_hit_time := -100.0
 var heart_cooldown := 0.0
-var kill_streak := 0
-var kill_timer := 0.0
 var battle_stacks := 0
 var _alive_cache: Array = []
 var _alive_frame := -1
@@ -24,8 +25,6 @@ const WEAPON_BUFFS := ["overload", "combat_reflex", "battle_metabolism", "killer
 var _weapons_dirty := false
 var _weapon_factors := Vector4.ZERO
 var melee_cooldown := 0.0
-var _melee_victim: WeakRef
-var _melee_time := -100.0
 var acid_pools: Array[Dictionary] = []
 ## Acid Spit pool radius: 3.4 m across.
 const ACID_POOL_RADIUS := 1.7
@@ -45,14 +44,14 @@ var _recent_hits: Array[Vector2] = []
 var _adapt_damage: Dictionary = {}
 var _regenerating := false
 
-## Retaliation answers a burst of damage, not one heavy blow.
-const RETALIATION_WINDOW := 3.0
-const RETALIATION_DAMAGE := 50.0
-const RETALIATION_STUN_RADIUS := 6.0
+## Retaliation collects damage inside a rolling three-second window.
+const RETALIATION_WINDOW: float = B.VALUES["retaliation"]["window"]
+const RETALIATION_DAMAGE: float = B.VALUES["retaliation"]["damage"]
+const RETALIATION_STUN_RADIUS: float = B.VALUES["retaliation"]["radius"]
 ## Second Heart's emergency regeneration after a survived lethal hit.
-const SECOND_HEART_HEAL := 10.0
-const SECOND_HEART_DURATION := 5.0
-const REGENERATION_DELAY := 4.0
+const SECOND_HEART_HEAL: float = B.VALUES["second_heart"]["heal"]
+const SECOND_HEART_DURATION: float = B.VALUES["second_heart"]["duration"]
+const REGENERATION_DELAY: float = B.VALUES["regeneration"]["delay"]
 ## Predator Dash strikes everything it passes, once per dash.
 const DASH_STRIKE_TIME := 0.45
 const DASH_REACH := 1.6
@@ -61,13 +60,13 @@ const DASH_DAMAGE := 20.0
 const BLOOD_BURST_RADIUS := 2.4
 const BLOOD_BURST_DAMAGE := 20.0
 ## Claws: a pulse around the body every few seconds.
-const CLAW_INTERVAL := 3.0
-const CLAW_RADIUS := 1.5
-const CLAW_DAMAGE := 25.0
+const CLAW_INTERVAL: float = B.VALUES["claws"]["interval"]
+const CLAW_RADIUS: float = B.VALUES["claws"]["radius"]
+const CLAW_DAMAGE: float = B.VALUES["claws"]["damage"]
 const CLAW_KILL_WINDOW := 0.5
 ## Reactive Evolution: damage of one type builds a block for a while.
-const ADAPT_THRESHOLD := 50.0
-const ADAPT_DURATION := 15.0
+const ADAPT_THRESHOLD: float = B.VALUES["reactive_evolution"]["damage"]
+const ADAPT_DURATION: float = B.VALUES["reactive_evolution"]["duration"]
 ## Bone Blades: 40 damage per second in a short radius.
 const BLADE_TICK := 0.2
 const BLADE_DAMAGE := 8.0
@@ -91,9 +90,6 @@ const DISCHARGE_STEP_DAMAGE := 10.0
 ## Living Harvest: healing per second for its duration; overflow becomes armour.
 const HARVEST_HEAL_PER_SECOND := 5.0
 const ARMOR_CAP := 35.0
-## Devourer: full health on a kill grants a short armour block.
-const DEVOURER_ARMOR := 50.0
-const DEVOURER_ARMOR_TIME := 5.0
 
 var effects_root: Node3D
 var vfx: SKILL_VFX
@@ -135,17 +131,25 @@ func _spore_burst(location: Vector3) -> void:
 
 # Blood Scent: wounded enemies take extra damage from melee as well as bullets.
 func _scented(enemy: Node3D, amount: float) -> float:
-	if enabled("blood_scent") and float(enemy.get("health")) < float(enemy.get("max_health")) * 0.7:
-		return amount * 1.22
+	if enabled("blood_scent") and float(enemy.get("health")) < float(enemy.get("max_health")):
+		return amount * (1.0 + B.value("blood_scent", "percent") / 100.0)
 	return amount
 
 
 func _refresh_stats() -> void:
 	_active_effects.cancel_unavailable()
+	for id in ["combat_reflex", "battle_metabolism", "adrenaline", "killer_instinct", "reflex_arc", "second_heart"]:
+		if not enabled(id):
+			buffs[id] = 0.0
+			if id == "battle_metabolism":
+				battle_stacks = 0
+	if not enabled("reactive_evolution"):
+		buffs["adapted_physical"] = 0.0
+		_adapt_damage.clear()
 	if active_buff("berserk") and not enabled("berserk"):
 		buffs["berserk"] = 0.0
 		vfx.buff_ended("berserk")
-	var next_max := 125.0 if enabled("hypertrophy") else 100.0
+	var next_max := 100.0 * (1.0 + B.value("hypertrophy", "percent") / 100.0) if enabled("hypertrophy") else 100.0
 	player.set("max_health", next_max)
 	player.set("health", minf(float(player.get("health")), next_max))
 	vfx.set_passives(enabled("bone_armor"), enabled("hardened"))
@@ -158,11 +162,12 @@ func enabled(skill_id: String) -> bool:
 
 func _process(delta: float) -> void:
 	_clock += delta
+	retaliation_cooldown = maxf(0.0, retaliation_cooldown - delta)
+	hybrids.tick(delta)
 	heart_cooldown = maxf(0.0, heart_cooldown - delta)
 	melee_cooldown = maxf(0.0, melee_cooldown - delta)
-	kill_timer = maxf(0.0, kill_timer - delta)
-	if kill_timer == 0.0:
-		kill_streak = 0
+	if active_buff("second_heart"):
+		player.call("heal", SECOND_HEART_HEAL * minf(delta, float(buffs["second_heart"])))
 	for key in buffs.keys():
 		var previous := float(buffs[key])
 		buffs[key] = maxf(0.0, previous - delta)
@@ -171,24 +176,17 @@ func _process(delta: float) -> void:
 				_weapons_dirty = true
 			if key == "battle_metabolism":
 				battle_stacks = 0
-			if key == "devourer_armor":
-				buffs["temporary_armor"] = 0.0
 			if key in VFX_BUFFS:
 				vfx.buff_ended(key)
-	var regenerating := enabled("regeneration") and _clock - last_hit_time > REGENERATION_DELAY
+	var regenerating := enabled("regeneration") and _clock - last_hit_time >= REGENERATION_DELAY
 	if regenerating:
-		player.call("heal", 1.4 * delta)
+		player.call("heal", B.value("regeneration", "heal") * minf(delta, maxf(0.0, _clock - last_hit_time - REGENERATION_DELAY)))
 	regenerating = regenerating and float(player.get("health")) < float(player.get("max_health"))
 	if regenerating and not _regenerating:
 		_passive("regeneration")
 	_regenerating = regenerating
-	if active_buff("second_heart"):
-		player.call("heal", SECOND_HEART_HEAL * delta)
 	if active_buff("living_harvest"):
 		_harvest_tick(delta)
-	# Hyperactive: a kill every second for five seconds doubles ability recovery.
-	if enabled("hyperactive") and kill_streak >= 5 and kill_timer > 0.0:
-		runtime.call("reduce_skill_cooldowns", delta)
 	if active_buff("predator_dash"):
 		_dash_strike()
 	_claw_tick(delta)
@@ -211,6 +209,7 @@ func active_buff(skill_id: String) -> bool:
 
 func on_player_hit(amount: float, damage_type: String = "physical") -> float:
 	last_hit_time = _clock
+	amount = hybrids.absorb(amount)
 	var reserve := float(buffs.get("temporary_armor", 0.0))
 	var absorbed := minf(amount, reserve)
 	buffs["temporary_armor"] = reserve - absorbed
@@ -220,23 +219,23 @@ func on_player_hit(amount: float, damage_type: String = "physical") -> float:
 	var reduction := 0.0
 	if damage_type == "physical":
 		if enabled("bone_armor"):
-			reduction += 0.20
+			reduction += 1.0 - 1.0 / B.value("bone_armor", "divisor")
 			_passive("bone_armor")
 		if enabled("hardened"):
-			reduction += 0.17
+			reduction += B.value("hardened", "physical") / 100.0
 			_passive("hardened")
 	elif damage_type in ["acid", "fire", "electric"] and enabled("hardened"):
-		reduction += 0.25
+		reduction += B.value("hardened", "elemental") / 100.0
 		_passive("hardened")
-	if enabled("pain_block") and float(player.get("health")) < float(player.get("max_health")) * 0.25:
-		reduction += 0.35
+	if enabled("pain_block") and float(player.get("health")) < float(player.get("max_health")) * B.value("pain_block", "threshold") / 100.0:
+		reduction += B.value("pain_block", "percent") / 100.0
 		_passive("pain_block")
 	if active_buff("berserk"):
-		reduction += 0.33
-	if enabled("reactive_evolution"):
+		reduction += B.value("berserk", "reduction") / 100.0
+	if enabled("reactive_evolution") and damage_type == "physical":
 		var key := "adapted_" + damage_type
 		if active_buff(key):
-			reduction += 0.30
+			reduction += B.value("reactive_evolution", "percent") / 100.0
 			_passive("reactive_evolution")
 		else:
 			var gathered := float(_adapt_damage.get(damage_type, 0.0)) + amount
@@ -244,11 +243,12 @@ func on_player_hit(amount: float, damage_type: String = "physical") -> float:
 			if gathered >= ADAPT_THRESHOLD:
 				_start_buff(key, ADAPT_DURATION)
 				_adapt_damage[damage_type] = 0.0
-	if enabled("retaliation") and _retaliation_due(amount):
+	if enabled("retaliation") and retaliation_cooldown <= 0.0 and _retaliation_due(amount):
 		_passive("retaliation")
+		retaliation_cooldown = B.value("retaliation", "cooldown")
 		vfx.electric_pulse(player.global_position, RETALIATION_STUN_RADIUS)
 		for enemy in _enemies_near(player.global_position, RETALIATION_STUN_RADIUS):
-			enemy.call("apply_blast_stun", 3.0, 1.0)
+			enemy.call("apply_blast_stun", B.value("retaliation", "stun"), 1.0)
 	return amount * (1.0 - minf(0.75, reduction))
 
 
@@ -269,7 +269,7 @@ func _retaliation_due(amount: float) -> bool:
 func survive_lethal() -> bool:
 	if not enabled("second_heart") or heart_cooldown > 0.0:
 		return false
-	heart_cooldown = 60.0
+	heart_cooldown = B.value("second_heart", "cooldown")
 	last_hit_time = -100.0
 	vfx.heartbeat()
 	_passive_buff("second_heart", SECOND_HEART_DURATION)
@@ -280,42 +280,30 @@ func on_enemy_killed(enemy: Node3D) -> void:
 	var id := enemy.get_instance_id()
 	var claw_kill := _claw_kills.has(id) and _clock - float(_claw_kills[id]) <= CLAW_KILL_WINDOW
 	_claw_kills.erase(id)
-	# Predator skills reward kills made with a melee strike, as described.
-	var melee_kill: bool = _melee_victim != null and _melee_victim.get_ref() == enemy and Time.get_ticks_msec() / 1000.0 - _melee_time < 0.5
-	kill_streak = kill_streak + 1 if kill_timer > 0.0 else 1
-	kill_timer = 1.0
-	if enabled("combat_reflex"): _passive_buff("combat_reflex", 3.0)
+	hybrids.on_kill()
+	if enabled("combat_reflex"): _passive_buff("combat_reflex", B.value("combat_reflex", "duration"))
 	if enabled("battle_metabolism"): _battle_kill()
 	if claw_kill and enabled("adrenaline"):
-		_passive_buff("adrenaline", 4.0)
-	if melee_kill and enabled("killer_instinct"):
-		(player.call("get_current_weapon") as Node3D).call("add_magazine_ammo", 9999)
-		_passive_buff("killer_instinct", 2.0)
-	if enabled("devourer") and float(player.get("health")) >= float(player.get("max_health")):
-		buffs["temporary_armor"] = maxf(float(buffs.get("temporary_armor", 0.0)), DEVOURER_ARMOR)
-		_passive_buff("devourer_armor", DEVOURER_ARMOR_TIME)
-		_passive("devourer")
-	if active_buff("berserk"): _start_buff("berserk", minf(12.0, float(buffs["berserk"]) + 1.0))
+		_passive_buff("adrenaline", B.value("adrenaline", "duration"))
+	if active_buff("berserk"): _start_buff("berserk", minf(B.value("berserk", "maximum"), float(buffs["berserk"]) + B.value("berserk", "extension")))
 	if enemy.has_meta("mutation_infection_death"):
 		vfx.spike_burst(enemy.global_position, 4.0)
-	if enabled("recycling") and randf() < 0.35:
-		player.call("add_ammo_to_current_weapon", 5)
-		_passive("recycling")
+
 
 
 func movement_multiplier() -> float:
 	var speed := 1.0
-	if enabled("synapses"): speed += 0.15
-	if active_buff("adrenaline"): speed += 0.5
-	if enabled("hyperactive") and kill_streak >= 5 and kill_timer > 0.0: speed += 0.2
+	if enabled("synapses"): speed += B.value("synapses", "percent") / 100.0
+	if active_buff("adrenaline"): speed += B.value("adrenaline", "percent") / 100.0
+	if hybrids.hyperactive(): speed += B.value("hyperactive", "percent") / 100.0
 	if active_buff("overload"): speed += 0.3
-	if active_buff("berserk"): speed += 0.5
+	if active_buff("berserk"): speed += B.value("berserk", "percent") / 100.0
 	return speed
 
 
 func on_roll() -> void:
 	if enabled("reflex_arc"):
-		_passive_buff("reflex_arc", 3.0)
+		_passive_buff("reflex_arc", B.value("reflex_arc", "duration"))
 
 
 func melee() -> bool:
@@ -328,8 +316,6 @@ func melee() -> bool:
 		offset.y = 0.0
 		if offset.length() - _body_radius(enemy) > MELEE_REACH or offset.normalized().dot(forward) <= 0.0:
 			continue
-		_melee_victim = weakref(enemy)
-		_melee_time = Time.get_ticks_msec() / 1000.0
 		enemy.call("take_damage", _scented(enemy, 17.0))
 		return true
 	return false
@@ -371,23 +357,23 @@ func _start_buff(skill_id: String, duration: float) -> void:
 # Battle Metabolism: each kill inside the window adds a stack and extends it.
 func _battle_kill() -> void:
 	if active_buff("battle_metabolism"):
-		battle_stacks = mini(3, battle_stacks + 1)
-		_passive_buff("battle_metabolism", float(buffs["battle_metabolism"]) + 3.0)
+		battle_stacks = mini(int(B.value("battle_metabolism", "maximum") / B.value("battle_metabolism", "percent")), battle_stacks + 1)
+		_passive_buff("battle_metabolism", float(buffs["battle_metabolism"]) + B.value("battle_metabolism", "duration"))
 	else:
 		battle_stacks = 1
-		_passive_buff("battle_metabolism", 3.0)
+		_passive_buff("battle_metabolism", B.value("battle_metabolism", "duration"))
 
 
 func _update_weapons() -> void:
 	_weapons_dirty = false
-	var reload_factor := (0.7 if enabled("muscle_memory") else 1.0) * (1.0 / 1.3 if active_buff("overload") else 1.0)
-	var spread_factor := 0.7 if enabled("stabilizers") else 1.0
-	var attack_speed := (1.3 if active_buff("combat_reflex") else 1.0) * (1.3 if active_buff("overload") else 1.0)
+	var reload_factor := (1.0 - B.value("muscle_memory", "percent") / 100.0 if enabled("muscle_memory") else 1.0) * (1.0 / 1.3 if active_buff("overload") else 1.0)
+	var spread_factor := 1.0 - B.value("stabilizers", "percent") / 100.0 if enabled("stabilizers") else 1.0
+	var attack_speed := (1.0 + B.value("combat_reflex", "percent") / 100.0 if active_buff("combat_reflex") else 1.0) * (1.3 if active_buff("overload") else 1.0)
 	if enabled("reflex_arc") and active_buff("reflex_arc"):
-		attack_speed *= 1.25
-	var damage := 1.0 + 0.05 * float(battle_stacks)
-	if active_buff("killer_instinct"): damage *= 2.0
-	if active_buff("berserk"): damage *= 1.5
+		attack_speed *= 1.0 + B.value("reflex_arc", "percent") / 100.0
+	var damage := 1.0 + B.value("battle_metabolism", "percent") / 100.0 * float(battle_stacks)
+	if active_buff("killer_instinct"): damage *= B.value("killer_instinct", "multiplier")
+	if active_buff("berserk"): damage *= 1.0 + B.value("berserk", "percent") / 100.0
 	var factors := Vector4(reload_factor, spread_factor, attack_speed, damage)
 	if factors.is_equal_approx(_weapon_factors):
 		return

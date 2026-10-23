@@ -15,7 +15,8 @@
     "Two active skill assignments and effect-to-recovery timing"
   ],
   "public_api": [
-    "public/infection_runtime.gd"
+    "public/infection_runtime.gd",
+    "public/mutation_balance.gd"
   ],
   "dependencies": [],
   "runtime_contracts": {
@@ -31,6 +32,7 @@
       "requirements": "skill_requirements(id) -> DTOv3 adds active,level,alternative,cooldown; four branches with mutually exclusive rank3 options",
       "loadout": "equipped_skills() -> Array[String] of exactly2 IDs; assign_skill(slot,id) -> bool; assignable_skills() -> Array[String] highest owned available level per family; first purchases auto-fill, upgrades replace same family, forgotten clears, dormant locked persists",
       "timing": "base cooldown5/6/8 after effect ends, independent per skill; passive reductions retained; availability recovery starts full cooldown; skill_cooldown_finished reports readiness once"
-    }
+    },
+    "mutation_balance_v1": "public/mutation_balance.gd immutable VALUES, value(id,key), text_values(id,locale); shared skill tuning; skill_requirements.cooldown includes Neurostimulation reduction; antidote effectiveness derived from active Assimilation."
   }
 }

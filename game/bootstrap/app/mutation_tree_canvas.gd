@@ -4,7 +4,7 @@ const BRANCHES := [
 	"Biomass", "Neural Storm", "Might", "Predator Form",
 	"Arsenal", "Predator", "Biomass", "Adaptation", "Neural System", "Metabolism"
 ]
-const DESIGN_SIZE := Vector2(1200, 800)
+const DESIGN_SIZE := Vector2(1200, 860)
 const TRUNK_Y := 370.0
 # Visual column per branch index, left to right: active Might, Biomass, Predator Form, Neural Storm; then passive.
 const COLUMNS := [1, 3, 0, 2, 0, 1, 2, 3, 4, 5]
@@ -13,7 +13,7 @@ const COLUMN_PITCH := 180.0
 # One circle per rank: 36 px across and 85 px up or down, about 67 degrees from the trunk.
 # 36 is the least that keeps a mirrored alternative (two circles 72 px apart) clear of its main circle.
 const RANK_STEP := Vector2(36.0, 85.0)
-const HYBRID_PARENTS := [[4, 5], [5, 6], [6, 7], [7, 8], [8, 9]]
+const HYBRID_PARENTS := [[4, 5], [5, 6], [6, 7], [7, 8], [8, 9], [9, 4]]
 const LIT := Color(0.3, 0.95, 0.1, 1.0)
 const LABEL_MAX_WIDTH := 170.0
 const LABEL_GAP := 8.0
@@ -79,6 +79,8 @@ func _branch_center_x(index: int) -> float:
 # Hybrids sit between the two titles they combine, so they read as belonging to neither.
 func hybrid_position(index: int) -> Vector2:
 	var parents: Array = HYBRID_PARENTS[index]
+	if index == 5:
+		return Vector2(DESIGN_SIZE.x * 0.5, 820.0)
 	var x := (_branch_center_x(parents[0]) + _branch_center_x(parents[1])) * 0.5
 	return Vector2(x, skill_position(parents[0], 2).y + 72.0)
 
@@ -117,7 +119,15 @@ func _draw() -> void:
 	for index in HYBRID_PARENTS.size():
 		var shade := LIT if index < hybrids.size() and hybrids[index] else Color(0.39, 0.4, 0.38, 0.35)
 		for parent in HYBRID_PARENTS[index]:
-			_dotted(skill_position(parent, 2), hybrid_position(index), shade)
+			var start := skill_position(parent, 2)
+			var finish := hybrid_position(index)
+			if index == 5:
+				var side := 44.0 if parent == 4 else 1156.0
+				_dotted(start, Vector2(side, start.y), shade)
+				_dotted(Vector2(side, start.y), Vector2(side, finish.y), shade)
+				_dotted(Vector2(side, finish.y), finish, shade)
+			else:
+				_dotted(start, finish, shade)
 
 
 func _dotted(start: Vector2, finish: Vector2, shade: Color) -> void:

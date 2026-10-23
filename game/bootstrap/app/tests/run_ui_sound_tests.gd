@@ -86,7 +86,8 @@ func _test_mutation_tree() -> void:
 		var card_text := ""
 		for label: Label in ui.card.find_children("*", "Label", true, false):
 			card_text += label.text + "\n"
-		_check(card_text.contains(str(TranslationServer.translate(&"mutationSkill_power_strike_name")).to_upper()) and card_text.contains(str(TranslationServer.translate(&"mutationSkill_power_strike_description"))), "Detail card shows the skill name and description")
+		_check(card_text.contains(str(TranslationServer.translate(&"mutationSkill_power_strike_name")).to_upper()) and card_text.contains(str(TranslationServer.translate(&"mutationSkill_power_strike_description")).format({"damage":30, "reach":3, "push":4})), "Detail card shows the skill name and rendered numeric description")
+		_check(not card_text.contains("{"), "Detail card never exposes localization placeholders")
 		_check(card_text.contains(str(TranslationServer.translate(&"mutationClickLearn")).to_upper()) and card_text.contains(str(TranslationServer.translate(&"mutationAmount"))), "Detail card shows status and requirements")
 		_check(ui.window.get_global_rect().encloses(ui.card.get_global_rect()), "Detail card stays on screen")
 		skill.mouse_exited.emit()

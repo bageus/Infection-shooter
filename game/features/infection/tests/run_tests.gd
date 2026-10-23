@@ -33,7 +33,7 @@ func _run() -> void:
 	_test_pinned_skill_refreshes_tree_on_antidote()
 	_test_control_ampule_compensation()
 	_test_path_feedback_without_spare_points()
-	_test_retired_wraparound_hybrid()
+	_test_organic_ammo_hybrid()
 	_test_runtime_cast_control_guard()
 	_test_hybrid_stage_gates()
 	_test_ampule_notification_and_antidote()
@@ -438,11 +438,11 @@ func _test_path_feedback_without_spare_points() -> void:
 	_expect(tree.path_reached("claws", 40.0, 45.0), "The next stage fills through its first reachable skill.")
 
 
-func _test_retired_wraparound_hybrid() -> void:
+func _test_organic_ammo_hybrid() -> void:
 	var tree := MutationTree.new()
 	tree.learned["organic_ammo"] = true
 	tree.locked["organic_ammo"] = true
-	_expect(Catalog.find("organic_ammo").is_empty(), "No skill links the first and last passive branches.")
+	_expect(not Catalog.find("organic_ammo").is_empty(), "Organic Ammo closes the passive hybrid ring.")
 	tree.reconcile(100.0)
 	_expect(not tree.learned.has("organic_ammo") and not tree.locked.has("organic_ammo"), "Retired locked progress is cleaned safely.")
 
