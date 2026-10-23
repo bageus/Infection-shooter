@@ -21,4 +21,5 @@ script = ExtResource("5_glass_collision")
 [node name="GlassBody" type="StaticBody3D" parent="." groups=["infected_breakable_glass"]]
 script = ExtResource("3_glass")
 hide_with_glass = PackedStringArray("lower_panel")
+span_frame = true
 preserve_open_frame = true

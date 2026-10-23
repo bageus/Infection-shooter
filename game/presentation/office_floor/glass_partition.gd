@@ -9,6 +9,8 @@ const FRESNEL = preload("res://game/presentation/office_floor/glass_fresnel_mate
 @export var hide_with_glass: PackedStringArray = PackedStringArray()
 @export var blinds_pass_through := false
 @export var preserve_open_frame := false
+## Stretch the panes to the full frame width, so neighbouring partitions meet without a gap.
+@export var span_frame := false
 @export var unbreakable := false
 ## Cracked hits a pane takes (random in range) before the next one shatters it.
 @export var cracks_before_break := Vector2i(2, 4)
@@ -52,6 +54,8 @@ func _ready() -> void:
 	_health = max_health
 	_cracks_needed = randi_range(cracks_before_break.x, cracks_before_break.y)
 	FRESNEL.apply(get_parent().get_node_or_null("Visual"))
+	if span_frame:
+		_span_frame(get_parent().get_node_or_null("Visual"))
 	_collect_glass(get_parent().get_node_or_null("Visual"))
 	if blinds_pass_through:
 		_collect_blinds(get_parent().get_node_or_null("Visual"))
@@ -149,6 +153,29 @@ func take_melee_hit(damage: float, hit_position: Vector3, _direction: Vector3) -
 	_health -= maxf(damage, 0.0)
 	if _health <= 0.0:
 		_break_glass(hit_position, _direction)
+
+
+## The authored panes stop short of the frame posts, which leaves a gap where
+## two partitions meet. Stretch them to the frame's width along the model's X axis.
+func _span_frame(visual: Node3D) -> void:
+	if visual == null:
+		return
+	var frame := visual.find_child("frame*", true, false) as MeshInstance3D
+	if frame == null or frame.mesh == null:
+		return
+	var span := _visual_width(visual, frame)
+	for node in visual.find_children("*", "MeshInstance3D", true, false):
+		var pane := node as MeshInstance3D
+		var name_lower := pane.name.to_lower()
+		if pane.name.begins_with("GlassShard") or not ("glass" in name_lower or "blinds" in name_lower):
+			continue
+		var width := _visual_width(visual, pane)
+		if width > 0.0 and width < span:
+			pane.transform = pane.transform.scaled_local(Vector3(span / width, 1.0, 1.0))
+
+
+func _visual_width(visual: Node3D, node: MeshInstance3D) -> float:
+	return ((visual.global_transform.affine_inverse() * node.global_transform) * node.get_aabb()).size.x
 
 
 func _collect_glass(node: Node) -> void:
