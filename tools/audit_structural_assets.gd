@@ -64,7 +64,7 @@ func _audit_scene(path: String) -> Dictionary:
 	var max_v: Vector3 = bounds["max"]
 	var size := max_v - min_v
 	var target_span := float(TARGET_SPANS.get(root.name, 0.0))
-	var span_error := 0.0 if target_span <= 0.0 else min(abs(size.x - target_span), abs(size.z - target_span))
+	var span_error: float = 0.0 if target_span <= 0.0 else min(abs(size.x - target_span), abs(size.z - target_span))
 	var grid_x := _grid_error(size.x)
 	var grid_z := _grid_error(size.z)
 	var status := "OK"
