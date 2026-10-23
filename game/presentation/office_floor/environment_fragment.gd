@@ -224,6 +224,16 @@ func _leave_floor(seconds: float, budget_full: bool) -> void:
 		return
 	if breakable and not budget_full and _lies_on_floor():
 		return
+	if pool_owner == null and _is_standing_big():
+		# A big piece still standing or propped must not be frozen into the floor as a fake frame: it
+		# stays a body until it lies flat (and can be broken again). Only a full budget removes it.
+		if budget_full:
+			DEBRIS.fade_free(self, seconds)
+			return
+		_expiry = create_tween()
+		_expiry.tween_interval(LOOSE_RECHECK_SECONDS)
+		_expiry.tween_callback(expire)
+		return
 	if not budget_full and _stays_loose():
 		_expiry = create_tween()
 		_expiry.tween_interval(LOOSE_RECHECK_SECONDS)
@@ -270,6 +280,21 @@ func _stays_loose() -> bool:
 		return false
 	var player := get_tree().get_first_node_in_group("player") as Node3D
 	return player != null and global_position.distance_to(player.global_position) <= near
+
+
+# A piece with a long edge that rises more than STANDING_HEIGHT above its lowest point (a divider
+# panel, a slat leaning on the debris) is standing, not lying on the floor.
+func _is_standing_big() -> bool:
+	for child in get_children():
+		if child is CollisionShape3D and (child as CollisionShape3D).shape is BoxShape3D:
+			var size := ((child as CollisionShape3D).shape as BoxShape3D).size
+			if maxf(size.x, maxf(size.y, size.z)) < PIECE_MIN_EDGE:
+				return false
+			var half := size * 0.5
+			var b := global_basis
+			var height := (absf(b.x.y) * half.x + absf(b.y.y) * half.y + absf(b.z.y) * half.z) * 2.0
+			return height > STANDING_HEIGHT or global_position.y - height * 0.5 > BAKE_MAX_HEIGHT
+	return false
 
 
 # Asleep with the lowest point of its model at floor level.

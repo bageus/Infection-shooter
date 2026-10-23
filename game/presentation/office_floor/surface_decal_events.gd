@@ -1,6 +1,7 @@
 extends RefCounted
 ## Confirmed presentation facts; this helper never changes health or collision.
 const GLASS_ATLAS := preload("res://game/core/vfx/public/surface_atlases.gd")
+const STAMP := preload("res://game/core/vfx/public/surface_stamp.gd")
 const RECEIVERS := preload("res://game/presentation/office_floor/receiver_decal_bake.gd")
 const SETTINGS := preload("res://game/presentation/office_floor/public/surface_decal_config.gd")
 const BIOMASS_AUDIO := preload("res://game/presentation/office_floor/biomass_impact_audio.gd")
@@ -32,6 +33,8 @@ func hit(collider: Node3D, point: Vector3, normal: Vector3, weapon: String, anch
 	if not is_instance_valid(anchor): return false
 	# Window frames are glass-only: a hit there never gets plaster or a bullet hole.
 	if _is_window_frame(collider): return glass_hit(anchor, point, normal)
+	# A wall's glass insert can be hit through its solid collider: the ray still lands on the glass mesh, so it gets cracks only.
+	if _is_architecture(collider) and STAMP.is_glass(anchor): return glass_hit(anchor, point, normal)
 	var parent_name := str(collider.get_parent().name) if collider.get_parent() else ""
 	var label := (str(collider.name) + " " + str(anchor.name) + " " + parent_name).to_lower()
 	var wall := absf(normal.y) < 0.6 and (_is_architecture(collider) or "wall" in label or "column" in label) and "wood" not in label

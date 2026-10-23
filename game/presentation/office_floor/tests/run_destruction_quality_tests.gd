@@ -21,6 +21,7 @@ func _run() -> void:
 	await _test_loose_pieces()
 	await _test_wake_baked()
 	await _test_standing_panel()
+	await _test_standing_not_baked()
 	QUALITY.set_level(QUALITY.DEFAULT)
 	print("Destruction quality tests: %d failures" % failures)
 	quit(0 if failures == 0 else 1)
@@ -203,6 +204,48 @@ func _test_standing_panel() -> void:
 	_expect(lying or runtime.get("_baked").count() > 0, "A panel standing on its edge is pushed over instead of freezing upright")
 	effects.queue_free()
 	await process_frame
+
+
+# A big piece still standing when its time is up (a divider panel after a blast) must not be baked into
+# the floor as a fake frame; a big piece lying flat is baked, and a full budget removes a standing one.
+func _test_standing_not_baked() -> void:
+	QUALITY.set_level(QUALITY.LOW)
+	var effects := Node3D.new()
+	root.add_child(effects)
+	var runtime := RUNTIME.new()
+	runtime.name = "FragmentRuntime"
+	effects.add_child(runtime)
+	var standing := _frozen_panel(effects, Basis.IDENTITY, Vector3(0, 0.52, 0))
+	var lying := _frozen_panel(effects, Basis(Vector3.BACK, PI / 2.0), Vector3(3, 0.03, 0))
+	var leaning := _frozen_panel(effects, Basis(Vector3.BACK, deg_to_rad(40.0)), Vector3(6, 0.5, 0))
+	await process_frame
+	standing.expire()
+	leaning.expire_fast()
+	_expect(runtime.get("_baked").count() == 0, "A standing or leaning big piece is not baked")
+	_expect(is_instance_valid(standing) and not standing.is_queued_for_deletion() and not standing.has_meta("debris_fading"), "An unforced standing piece stays a loose body")
+	lying.expire()
+	_expect(runtime.get("_baked").count() == 1, "A big piece lying flat is baked")
+	effects.queue_free()
+	await process_frame
+
+
+func _frozen_panel(parent: Node3D, orientation: Basis, at: Vector3) -> RigidBody3D:
+	var panel := RigidBody3D.new()
+	panel.set_script(FRAGMENT)
+	var shape := CollisionShape3D.new()
+	var box := BoxShape3D.new()
+	box.size = Vector3(0.05, 1.0, 0.8)
+	shape.shape = box
+	panel.add_child(shape)
+	var mesh := MeshInstance3D.new()
+	var visual := BoxMesh.new()
+	visual.size = box.size
+	mesh.mesh = visual
+	panel.add_child(mesh)
+	parent.add_child(panel)
+	panel.freeze = true
+	panel.global_transform = Transform3D(orientation, at)
+	return panel
 
 
 func _expect(ok: bool, message: String) -> void:
