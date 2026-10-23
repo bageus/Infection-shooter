@@ -131,6 +131,10 @@ func _step(session: Node, samples: Array, status: Label) -> bool:
 			contact_guards += 1
 			quiet = QUIET_TICKS
 			break
+		# At rest without upward support (wedged against a wall or prop): nothing
+		# moves any more, and waiting for support that cannot come never ends.
+		if quiet >= QUIET_TICKS and step_ticks >= 120:
+			break
 		# As with retained gameplay ragdolls, supported articulated bodies have a
 		# finite settling window: joints can keep rotating without translational energy.
 		if step_ticks >= 180 and PROBE.articulated(samples) and PROBE.supported(samples):
@@ -138,8 +142,7 @@ func _step(session: Node, samples: Array, status: Label) -> bool:
 			quiet = QUIET_TICKS
 			break
 	PhysicsServer3D.set_active(not tree.paused)
-	var supported := PROBE.supported(samples, true)
-	return quiet >= QUIET_TICKS and supported
+	return quiet >= QUIET_TICKS
 
 
 func _restore_bodies(tree: SceneTree) -> void:
@@ -232,9 +235,11 @@ static func _quiet(samples: Array, previous: Dictionary) -> bool:
 		if not is_instance_valid(sample):
 			continue
 		if sample is RigidBody3D:
-			if sample.sleeping:
-				continue
-			quiet = quiet and sample.linear_velocity.length_squared() < 0.01 and sample.angular_velocity.length_squared() < 0.02
+			# Rigid props rest by their velocities. Jolt's penetration recovery can
+			# nudge a wedged prop a few centimetres in one tick, which is not motion.
+			quiet = quiet and (sample.sleeping or (sample.linear_velocity.length_squared() < 0.01 and sample.angular_velocity.length_squared() < 0.02))
+			previous[sample] = sample.global_transform
+			continue
 		var before: Transform3D = previous.get(sample, sample.global_transform)
 		var moved := before.origin.distance_squared_to(sample.global_position)
 		var turned := before.basis.orthonormalized().get_rotation_quaternion().normalized().angle_to(sample.global_basis.orthonormalized().get_rotation_quaternion().normalized())
