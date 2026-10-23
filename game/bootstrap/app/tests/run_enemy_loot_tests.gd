@@ -9,7 +9,7 @@ func _initialize() -> void:
 
 
 func _run() -> void:
-	var expected := {"ammo_pistol":0.75, "ammo_uzi":0.60, "ammo_shotgun":0.60, "ammo_automate":0.60, "ammo_sniper":0.15, "ammo_minigun":0.30, "ammo_grenade":0.15, "medkit":1.0, "antidote":0.35}
+	var expected := {"ammo_pistol":0.75, "ammo_uzi":0.60, "ammo_shotgun":0.60, "ammo_automate":0.60, "ammo_sniper":0.15, "ammo_minigun":0.20, "ammo_grenade":0.15, "medkit":1.0, "antidote":0.35}
 	var weights := CONFIG.AUTO_WEIGHTS.duplicate()
 	weights.erase("dna")
 	_check(weights == expected, "Enemy weights match owner-approved distribution")
@@ -18,7 +18,7 @@ func _run() -> void:
 		var id := CONFIG.weighted_item((float(i) + 0.5) / 10000.0, weights)
 		counts[id] = int(counts.get(id, 0)) + 1
 	for id: String in expected:
-		_check(absf(float(counts.get(id, 0)) / 10000.0 - expected[id] / 4.5) < 0.001, "Correct probability and reachable category: " + id)
+		_check(absf(float(counts.get(id, 0)) / 10000.0 - expected[id] / 4.4) < 0.001, "Correct probability and reachable category: " + id)
 		_check(TABLE.SCENES.has(id), "Each weighted id has an existing pickup scene: " + id)
 	var stage := Node3D.new()
 	root.add_child(stage)

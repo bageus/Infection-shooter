@@ -73,10 +73,32 @@ func _run() -> void:
 	await _acid_on_floor(effects, host, runtime)
 	_discharge_chain(effects, runtime)
 	_claw_kill_adrenaline(effects, runtime)
+	await _walls_stop_skills(effects, host)
 	_retire(host)
 	await process_frame
 	print("Mutation skill mechanics tests: %d failures" % failures)
 	quit(failures)
+
+
+# A static wall hides enemies behind it from area skills; open ground still counts.
+func _walls_stop_skills(effects: Node, host: Node3D) -> void:
+	var wall := StaticBody3D.new()
+	var shape := CollisionShape3D.new()
+	shape.shape = BoxShape3D.new()
+	(shape.shape as BoxShape3D).size = Vector3(0.2, 2.0, 4.0)
+	wall.add_child(shape)
+	root.add_child(wall)
+	wall.global_position = Vector3(1.0, 1.0, 0.0)
+	host.global_position = Vector3.ZERO
+	var behind := _enemy(Vector3(2.0, 0.0, 0.0))
+	var open := _enemy(Vector3(0.0, 0.0, -2.0))
+	await physics_frame
+	var near: Array = effects._enemies_near(host.global_position, 4.0)
+	_check(near.has(open), "An enemy on open ground is in skill reach.")
+	_check(not near.has(behind), "A wall hides an enemy from area skills.")
+	_retire(behind)
+	_retire(open)
+	wall.queue_free()
 
 
 # Freed enemies leave the group at once so later tests never meet them.

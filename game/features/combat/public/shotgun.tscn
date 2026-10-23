@@ -18,6 +18,7 @@ weapon_name="SHOTGUN"
 shot_noise_radius = 30.0
 shots_per_second=1.1
 magazine_size=6
+max_reserve_ammo=90
 starting_reserve_ammo=36
 reload_time=0.48
 spread_degrees=8.5

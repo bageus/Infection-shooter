@@ -499,8 +499,29 @@ func _enemies_near(center: Vector3, radius: float, nearest_first: bool = false) 
 	var result: Array[Node3D] = []
 	var reach := radius * radius
 	for node in _alive_enemies():
-		if is_instance_valid(node) and node is Node3D and node.global_position.distance_squared_to(center) <= reach and float(node.get("health")) > 0.0:
+		if is_instance_valid(node) and node is Node3D and node.global_position.distance_squared_to(center) <= reach and float(node.get("health")) > 0.0 and _unwalled(center, node):
 			result.append(node as Node3D)
 	if nearest_first:
 		result.sort_custom(func(a: Node3D, b: Node3D) -> bool: return a.global_position.distance_squared_to(center) < b.global_position.distance_squared_to(center))
 	return result
+
+
+## Skills stop at static walls as shots do; furniture and bodies do not block them.
+func _unwalled(center: Vector3, enemy: Node3D) -> bool:
+	var origin := center + Vector3.UP * 0.8
+	var target := enemy.global_position + Vector3.UP * 0.8
+	var excluded: Array[RID] = [player.get_rid()]
+	if enemy is CollisionObject3D:
+		excluded.append((enemy as CollisionObject3D).get_rid())
+	var space := player.get_world_3d().direct_space_state
+	for _attempt in 16:
+		var hit := space.intersect_ray(PhysicsRayQueryParameters3D.create(origin, target, 1, excluded))
+		if hit.is_empty():
+			return true
+		var collider := hit["collider"] as CollisionObject3D
+		if collider == null:
+			return true
+		if collider is StaticBody3D:
+			return false
+		excluded.append(collider.get_rid())
+	return true

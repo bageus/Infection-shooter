@@ -8,7 +8,7 @@ const WEAPON_NAMES: Array[String] = ["Pistol", "Uzi", "Shotgun", "Launcher", "AK
 const SUPPLIES: Array[String] = ["ammo_pistol", "ammo_uzi", "ammo_shotgun", "ammo_automate", "ammo_sniper", "ammo_minigun", "ammo_grenade", "medkit", "antidote", "dna"]
 const MAX_COUNT := 9
 ## Antidote and DNA are rarer than other supplies in auto loot. Grenade rounds are as rare as sniper rounds.
-const AUTO_WEIGHTS := {"ammo_pistol": 0.75, "ammo_uzi": 0.60, "ammo_shotgun": 0.60, "ammo_automate": 0.60, "ammo_sniper": 0.15, "ammo_minigun": 0.30, "ammo_grenade": 0.15, "medkit": 1.0, "antidote": 0.35, "dna": 0.2}
+const AUTO_WEIGHTS := {"ammo_pistol": 0.75, "ammo_uzi": 0.60, "ammo_shotgun": 0.60, "ammo_automate": 0.60, "ammo_sniper": 0.15, "ammo_minigun": 0.20, "ammo_grenade": 0.15, "medkit": 1.0, "antidote": 0.35, "dna": 0.2}
 const STAT_MIN := 50.0
 const STAT_MAX := 200.0
 
