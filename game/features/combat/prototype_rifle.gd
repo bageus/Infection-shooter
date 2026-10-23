@@ -261,6 +261,9 @@ func cancel_reload() -> void:
 func get_weapon_name() -> String: return weapon_name
 func get_magazine_ammo() -> int: return _reserve.amount if direct_reserve_feed else _magazine_ammo
 func get_reserve_ammo() -> int: return 0 if direct_reserve_feed else _reserve.amount
+## Reserve that travels to the next map; belt-fed weapons still carry theirs.
+func carried_ammo() -> int: return _reserve.amount
+func restore_carried_ammo(amount: int) -> void: _reserve.amount = clampi(amount, 0, _reserve.capacity)
 func is_reloading() -> bool: return _reloading
 ## Draws this weapon's reserve from `other`, so both weapons spend and refill one pool.
 func share_reserve_with(other: Node) -> void:

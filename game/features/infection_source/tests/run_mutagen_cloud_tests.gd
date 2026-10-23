@@ -49,6 +49,7 @@ func _run() -> void:
 		var shader := ((forever.get_node(layer) as GeometryInstance3D).material_override as ShaderMaterial).shader
 		_expect(not shader.code.contains("instance uniform"), "Cloud %s takes no instance-uniform slot (256-object renderer limit)." % layer)
 	_check_refused_mutagen_stays(stage)
+	await _check_overlapping_clouds_heal_once(stage)
 	var depleted := [false]
 	first.connect("depleted", func() -> void: depleted[0] = true)
 	await create_timer(1.0).timeout
@@ -88,6 +89,44 @@ func _check_refused_mutagen_stays(stage: Node3D) -> void:
 	_expect(is_equal_approx(float(cloud.get("_absorption_remaining")), full - 0.5), "Absorbed mutagen is spent from the cloud.")
 	body.queue_free()
 	cloud.queue_free()
+
+
+class Visitor extends CharacterBody3D:
+	var heal_calls := 0
+
+	func _ready() -> void:
+		var shape := CollisionShape3D.new()
+		shape.shape = SphereShape3D.new()
+		add_child(shape)
+
+	func absorb_mutagen(_seconds: float) -> float:
+		return 0.0
+
+	func on_mutagen_cloud(_delta: float) -> void:
+		heal_calls += 1
+
+
+# Two clouds over one body still deliver one Devourer heal per physics frame.
+func _check_overlapping_clouds_heal_once(stage: Node3D) -> void:
+	var at := Vector3(40, 0, 0)
+	var first := _spawn(stage, at, 14.0)
+	var second := _spawn(stage, at, 14.0)
+	first.set("heals_visitors", true)
+	second.set("heals_visitors", true)
+	first.call("activate")
+	second.call("activate")
+	var body := Visitor.new()
+	stage.add_child(body)
+	body.global_position = at + Vector3.UP * 0.5
+	var frames := 0
+	for _frame in 30:
+		await physics_frame
+		frames += 1
+	_expect(body.heal_calls > 0, "A body inside overlapping clouds is healed.")
+	_expect(body.heal_calls <= frames, "Overlapping clouds heal a body at most once per frame (%d of %d)." % [body.heal_calls, frames])
+	body.queue_free()
+	first.queue_free()
+	second.queue_free()
 
 
 func _spawn(stage: Node3D, at: Vector3, lifetime: float) -> Area3D:

@@ -5,11 +5,13 @@ const PISTOL_BOX := preload("res://game/features/pickups/public/ammo_pistol_pick
 const AUTOMATE_BOX := preload("res://game/features/pickups/public/ammo_automate_pickup.tscn")
 const SNIPER_BOX := preload("res://game/features/pickups/public/ammo_sniper_pickup.tscn")
 const MINIGUN_BOX := preload("res://game/features/pickups/public/ammo_minigun_pickup.tscn")
+const GRENADE_BOX := preload("res://game/features/pickups/public/ammo_grenade_pickup.tscn")
 const WEAPON_SCENES := {
 	"AK": preload("res://game/features/combat/public/ak_rifle.tscn"),
 	"M4": preload("res://game/features/combat/public/m4_rifle.tscn"),
 	"SNIPER RIFLE": preload("res://game/features/combat/public/sniper_rifle.tscn"),
 	"MINIGUN": preload("res://game/features/combat/public/minigun.tscn"),
+	"GRENADE LAUNCHER": preload("res://game/features/combat/public/grenade_launcher.tscn"),
 }
 var failures := 0
 
@@ -38,6 +40,7 @@ func _run() -> void:
 	_test_weapon_names_match_weapon_scenes()
 	_test_automate_box_feeds_ak_or_m4()
 	_test_sniper_and_minigun_boxes_feed_their_weapon()
+	_test_grenade_box_feeds_launcher()
 	_test_ak_and_m4_share_one_reserve()
 	_test_full_weapon_refuses_box()
 	print("Ammo box tests: %d failure(s)." % failures)
@@ -48,7 +51,7 @@ func _test_visual_size_matches_supply_boxes() -> void:
 	var reference := _spawn(PISTOL_BOX)
 	var reference_size := _visual_size(reference)
 	var reference_volume := reference_size.x * reference_size.y * reference_size.z
-	for scene: PackedScene in [AUTOMATE_BOX, SNIPER_BOX, MINIGUN_BOX]:
+	for scene: PackedScene in [AUTOMATE_BOX, SNIPER_BOX, MINIGUN_BOX, GRENADE_BOX]:
 		var box := _spawn(scene)
 		var size := _visual_size(box)
 		print("Ammo box %s size %s (pistol box %s)" % [box.name, size, reference_size])
@@ -84,6 +87,17 @@ func _test_sniper_and_minigun_boxes_feed_their_weapon() -> void:
 	sniper.emit_signal("body_entered", collector)
 	minigun.emit_signal("body_entered", collector)
 	_expect(collector.received == ["SNIPER RIFLE:8", "MINIGUN:100"], "Sniper and minigun boxes reach their weapons.")
+	collector.queue_free()
+
+
+func _test_grenade_box_feeds_launcher() -> void:
+	var box := _spawn(GRENADE_BOX)
+	var collector := Collector.new()
+	collector.accepts = ["GRENADE LAUNCHER"]
+	root.add_child(collector)
+	box.emit_signal("body_entered", collector)
+	_expect(collector.received == ["GRENADE LAUNCHER:12"], "Grenade box gives 12 rounds to the launcher.")
+	_expect(not is_instance_valid(box) or box.is_queued_for_deletion(), "Grenade box is collected by the launcher.")
 	collector.queue_free()
 
 

@@ -8,6 +8,7 @@ const BOXES := [
 	"res://game/features/pickups/public/ammo_automate_pickup.tscn",
 	"res://game/features/pickups/public/ammo_sniper_pickup.tscn",
 	"res://game/features/pickups/public/ammo_minigun_pickup.tscn",
+	"res://game/features/pickups/public/ammo_grenade_pickup.tscn",
 ]
 var _out := ""
 

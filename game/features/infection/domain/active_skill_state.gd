@@ -13,6 +13,9 @@ func assign(index: int, id: String, tree, mutation: float, stability: float) -> 
 		return false
 	if not id.is_empty() and (not CATALOG.is_active_skill(id) or not tree.is_active(id, mutation, stability)):
 		return false
+	# A running effect keeps its skill in the slot until it ends; swapping or clearing would keep it alive in a new slot.
+	if slots[index] != id and float(effects.get(slots[index], 0.0)) > 0.0:
+		return false
 	for other in slots.size():
 		if other != index and not id.is_empty() and CATALOG.family(slots[other]) == CATALOG.family(id):
 			return false

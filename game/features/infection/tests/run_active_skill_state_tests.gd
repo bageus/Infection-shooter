@@ -14,6 +14,7 @@ func _run() -> void:
 	_test_dormant()
 	_test_finals()
 	_test_assimilation_antidote()
+	_test_running_effect_keeps_slot()
 	print("Active skill state tests: %d failures" % failures)
 	quit(failures)
 
@@ -25,6 +26,16 @@ func _runtime() -> Node:
 	runtime.set_physics_process(false)
 	root.add_child(runtime)
 	return runtime
+
+
+## A skill whose effect still runs cannot be swapped out or cleared, so its effect cannot move to another slot.
+func _test_running_effect_keeps_slot() -> void:
+	var r := _runtime()
+	_expect(r.upgrade_skill("blood_burst") and r.upgrade_skill("discharge"), "Two skills are equipped for the slot test")
+	r.active_state.effects["discharge"] = 5.0
+	_expect(not r.assign_skill(1, ""), "A running effect keeps its slot from being cleared.")
+	r.active_state.effects.erase("discharge")
+	_expect(r.assign_skill(1, ""), "A finished effect frees its slot.")
 
 
 func _test_loadout() -> void:

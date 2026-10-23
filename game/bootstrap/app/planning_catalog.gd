@@ -55,6 +55,7 @@ var item_catalog = [
 	{"name":"Патроны: автомат","path":"res://game/features/pickups/public/ammo_automate_pickup.tscn","kind":"item"},
 	{"name":"Патроны: снайперка","path":"res://game/features/pickups/public/ammo_sniper_pickup.tscn","kind":"item"},
 	{"name":"Патроны: миниган","path":"res://game/features/pickups/public/ammo_minigun_pickup.tscn","kind":"item"},
+	{"name":"Патроны: гранатомёт","path":"res://game/features/pickups/public/ammo_grenade_pickup.tscn","kind":"item"},
 	{"name":"Аптечка","path":"res://game/features/pickups/public/medkit_pickup.tscn","kind":"item"},
 	{"name":"Антидот","path":"res://game/features/pickups/public/antidote_pickup.tscn","kind":"item"},
 	{"name":"Броня","path":"res://game/bootstrap/app/armor_pickups/armor.tscn","kind":"item"}
@@ -183,7 +184,8 @@ func _pickup_scene_for(file_name: String) -> String:
 		"12_ammo_uzi.glb": "res://game/features/pickups/public/ammo_uzi_pickup.tscn", "12_antidote.glb": "res://game/features/pickups/public/antidote_pickup.tscn",
 		"12_medkit.glb": "res://game/features/pickups/public/medkit_pickup.tscn",
 		"12_ammo_automate.glb": "res://game/features/pickups/public/ammo_automate_pickup.tscn", "12_ammo_sniper.glb": "res://game/features/pickups/public/ammo_sniper_pickup.tscn",
-		"12_ammo_minigun.glb": "res://game/features/pickups/public/ammo_minigun_pickup.tscn"
+		"12_ammo_minigun.glb": "res://game/features/pickups/public/ammo_minigun_pickup.tscn",
+		"12_ammo_grenade_launcher.glb": "res://game/features/pickups/public/ammo_grenade_pickup.tscn"
 	}
 	return str(pickups.get(file_name, ""))
 
