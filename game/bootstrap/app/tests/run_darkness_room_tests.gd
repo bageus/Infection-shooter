@@ -15,6 +15,10 @@ func _init() -> void:
 	call_deferred("_run")
 
 
+func _portals(zone: Node3D) -> int:
+	return int((zone.overlay.mesh.material as ShaderMaterial).get_shader_parameter("portal_count"))
+
+
 func _zone(x: float, room: int) -> Node3D:
 	var zone := ZONE.instantiate() as Node3D
 	zone.set("permanent", false)
@@ -36,21 +40,25 @@ func _run() -> void:
 	var first := _zone(0.0, 3)
 	var second := _zone(4.0, 3)
 	var other := _zone(20.0, 4)
-	await process_frame
-	await process_frame
+	await create_timer(0.6).timeout
 	_expect(first.overlay.visible and second.overlay.visible and other.overlay.visible, "Closed rooms are dark")
+	_expect(_portals(first) == 0, "A closed door gives no view")
 	door.open = true
-	await process_frame
-	_expect(not first.overlay.visible and not second.overlay.visible, "An open door lights every part of its room")
-	_expect(other.overlay.visible, "Another room stays dark")
+	await create_timer(0.6).timeout
+	_expect(first.overlay.visible and second.overlay.visible, "An open door keeps the fog up")
+	_expect(_portals(first) == 1 and _portals(second) == 0, "Only the room part by the door gets the opening")
 	door.open = false
-	await process_frame
-	_expect(first.overlay.visible and second.overlay.visible, "Closing the door darkens the room again")
+	await create_timer(0.6).timeout
+	_expect(_portals(first) == 0, "Closing the door removes the opening")
 	player.position = Vector3(4.5, 0.0, 0.5)
-	await process_frame
-	_expect(not first.overlay.visible and not second.overlay.visible, "Standing in one part lights the whole room")
+	await create_timer(0.6).timeout
+	_expect(not first.overlay.visible and not second.overlay.visible, "Standing in one part lifts the fog of the whole room")
+	_expect(other.overlay.visible, "Another room stays dark")
+	player.position = Vector3(-3.0, 0.0, 0.5)
+	await create_timer(0.6).timeout
+	_expect(first.overlay.visible, "Leaving the room brings the fog back")
 	player.position = Vector3(50.0, 0.0, 50.0)
-	await process_frame
+	await create_timer(0.6).timeout
 	_expect(first.blocks_view(Vector3(0.0, 8.0, 6.0), Vector3(0.0, 0.5, 0.0)), "Dark cover blocks the camera ray to the hero")
 	_expect(not first.blocks_view(Vector3(0.0, 8.0, 6.0), Vector3(30.0, 0.5, 0.0)), "A ray outside the cover is not blocked")
 	var bad := {"objects": [{"scene": "res://x.tscn", "room_id": "a"}]}

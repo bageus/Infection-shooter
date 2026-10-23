@@ -6,17 +6,24 @@ extends Node3D
 @export var reveal_distance := 2.2
 @export var door_link_radius := 4.0
 @export var require_door_open := true
-## Exploration zones sharing a room_id (> 0) are one room: it opens while a door of the room
-## is open or the player is inside, and goes dark again when the door closes.
+## Exploration zones sharing a room_id (> 0) are one room under solid fog: it lifts while the
+## player is inside, and otherwise shows only what the camera sees through open doors and glass.
 @export var room_id := 0
 
 const SHADER := preload("res://game/presentation/office_floor/darkness_zone.gdshader")
 const DOOR_REACH := 1.5
+const PORTALS := preload("res://game/presentation/office_floor/darkness_portals.gd")
+const FADE_SPEED := 5.0
+const PORTAL_REFRESH := 0.25
 
 @onready var overlay: MeshInstance3D = $Overlay
 var _revealed := false
 var _player: Node3D
 var _linked_doors: Array[Node3D] = []
+var _fade := 1.0
+var _portal_timer := 0.0
+# Glass panes stay see-through after they break, so they are remembered once found.
+var _glass_portals: Dictionary = {}
 
 func _ready() -> void:
 	add_to_group("darkness_zone")
@@ -26,12 +33,20 @@ func _ready() -> void:
 	overlay.visible = true
 	call_deferred("_find_linked_doors")
 
-func _process(_delta: float) -> void:
+func _process(delta: float) -> void:
 	if room_id > 0 and not permanent:
 		if _player == null:
 			_player = get_tree().get_first_node_in_group("player") as Node3D
-		overlay.visible = not _room_open()
+		_fade = move_toward(_fade, 0.0 if _player_inside() else 1.0, FADE_SPEED * delta)
+		overlay.visible = _fade > 0.01
 		set_meta("explored", not overlay.visible)
+		_portal_timer -= delta
+		if overlay.visible and _portal_timer <= 0.0:
+			_portal_timer = PORTAL_REFRESH
+			_push_portals()
+		var material := overlay.mesh.material as ShaderMaterial if overlay.mesh != null else null
+		if material != null:
+			material.set_shader_parameter("darkness", _fade)
 		return
 	if permanent or _revealed or _player == null:
 		return
@@ -77,17 +92,51 @@ func _edge_distance(point: Vector3) -> float:
 	return Vector2(nearest.x - point.x, nearest.z - point.z).length()
 
 
-## The whole room is lit while its player stands in any part or any of its doors is open.
-func _room_open() -> bool:
+## The cover lifts while the player stands in any part of the room.
+func _player_inside() -> bool:
+	if _player == null:
+		return false
 	for zone in get_tree().get_nodes_in_group("darkness_zone"):
-		if zone.get("room_id") != room_id or zone.get("permanent"):
-			continue
-		if _player != null and zone.call("_edge_distance", _player.global_position) <= 0.01:
+		if zone.get("room_id") == room_id and not zone.get("permanent") and zone.call("_edge_distance", _player.global_position) <= 0.3:
 			return true
-		for door in zone.get("_linked_doors"):
-			if is_instance_valid(door) and door.has_method("is_open_for_exploration") and bool(door.call("is_open_for_exploration")):
-				return true
 	return false
+
+
+## Fog is solid; the camera still sees in through open doors and glass, wherever they meet this room.
+func _push_portals() -> void:
+	var material := overlay.mesh.material as ShaderMaterial if overlay.mesh != null else null
+	if material == null:
+		return
+	for body in get_tree().get_nodes_in_group("infected_breakable_glass"):
+		for shape in body.find_children("*", "CollisionShape3D", true, false):
+			if not _glass_portals.has(shape.get_instance_id()) and _edge_distance(shape.global_position) <= PORTALS.GLASS_REACH:
+				var pane: Dictionary = PORTALS.pane(shape, global_position)
+				if not pane.is_empty():
+					_glass_portals[shape.get_instance_id()] = pane
+	var portals: Array = _glass_portals.values()
+	for door in _linked_doors:
+		if is_instance_valid(door) and door.has_method("is_open_for_exploration") and bool(door.call("is_open_for_exploration")):
+			portals.append(PORTALS.door(door, global_position))
+	portals = portals.slice(0, PORTALS.MAX_PORTALS)
+	var centres := PackedVector3Array()
+	var normals := PackedVector3Array()
+	var us := PackedVector3Array()
+	var vs := PackedVector3Array()
+	for portal: Dictionary in portals:
+		centres.append(portal.centre)
+		normals.append(portal.normal)
+		us.append(portal.u)
+		vs.append(portal.v)
+	for _i in range(portals.size(), PORTALS.MAX_PORTALS):
+		centres.append(Vector3.ZERO)
+		normals.append(Vector3.ZERO)
+		us.append(Vector3.ZERO)
+		vs.append(Vector3.ZERO)
+	material.set_shader_parameter("portal_count", portals.size())
+	material.set_shader_parameter("portal_centre", centres)
+	material.set_shader_parameter("portal_normal", normals)
+	material.set_shader_parameter("portal_u", us)
+	material.set_shader_parameter("portal_v", vs)
 
 
 ## True when the cover is up and the segment from `from` to `to` passes through it.
