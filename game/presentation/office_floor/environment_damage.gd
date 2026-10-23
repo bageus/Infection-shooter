@@ -5,6 +5,9 @@ const FRAGMENT_SCRIPT = preload("res://game/presentation/office_floor/environmen
 
 # Pieces thinner than this (m) get continuous collision detection.
 const THIN_PIECE := 0.1
+# A piece whose two smaller dimensions are both under this (a slat, a rail) does not collide with other pieces.
+const STICK_THICKNESS := 0.15
+const STICK_MIN_LENGTH := 1.5
 
 
 static func find_named(node: Node, wanted: String) -> Node3D:
@@ -73,7 +76,14 @@ static func spawn_piece(host: Node3D, mesh: MeshInstance3D, owner: Node3D, stage
 	fragment.apply_impulse(impulse, (hit_point - fragment.global_position).limit_length(0.3))
 	_inherit_motion(host, fragment)
 	if not glass and maxf(bounds.size.x, maxf(bounds.size.y, bounds.size.z)) >= FRAGMENT_SCRIPT.PIECE_MIN_EDGE:
-		fragment.enable_piece_contacts()
+		# Slats and rails (thin in two dimensions) skip piece contacts: dozens of long sticks would
+		# otherwise wedge on each other and hang at an angle instead of lying on the floor.
+		var sorted := [bounds.size.x, bounds.size.y, bounds.size.z]
+		sorted.sort()
+		if sorted[1] > STICK_THICKNESS or sorted[2] <= STICK_MIN_LENGTH:
+			fragment.enable_piece_contacts()
+		else:
+			fragment.lie_down = true
 		fragment.topple_from(bounds.size, hit_point, direction)
 	return fragment
 
