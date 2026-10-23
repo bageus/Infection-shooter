@@ -155,6 +155,7 @@ game/presentation/office_floor/tests/run_server_audio_tests.gd
 game/core/audio/tests/run_sound_event_tests.gd
 game/bootstrap/app/tests/run_skill_bar_tests.gd
 game/presentation/office_floor/tests/run_city_backdrop_tests.gd
+game/presentation/office_floor/tests/run_exterior_facade_tests.gd
 game/features/infected/tests/run_infected_voice_tests.gd
 game/features/infected/tests/run_body_mesh_cache_tests.gd
 game/features/combat/tests/run_prop_damage_state_tests.gd
