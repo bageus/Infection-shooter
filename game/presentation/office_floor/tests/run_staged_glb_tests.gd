@@ -51,7 +51,7 @@ func _test_cabinet(stage: Node3D) -> void:
 	var setup := await _spawn(stage, CABINET, Vector3(0, 0, 0))
 	var prop: RigidBody3D = setup[0]
 	var effects: Node3D = setup[1]
-	await _break(prop)
+	await _break(prop, "AK")
 	_expect(bool(prop.get("_broken")), "Staged cabinet breaks under heavy damage.")
 	var part := _find_fragment(effects, "Fragment_Component_")
 	_expect(part != null, "Breaking spawns the cabinet's large parts.")
@@ -60,6 +60,13 @@ func _test_cabinet(stage: Node3D) -> void:
 		prop.call("hit_environment_fragment", part, part.global_position, Vector3.FORWARD)
 		await process_frame
 		_expect(_find_fragment(effects, "Fragment_" + name_part + "_Fragment_") != null, "A shot large part splits into its own small fragments.")
+	await _clear(prop, effects)
+	setup = await _spawn(stage, CABINET, Vector3(0, 0, 0))
+	prop = setup[0]
+	effects = setup[1]
+	await _break(prop)
+	await create_timer(0.5).timeout
+	_expect(_find_fragment(effects, "Fragment_Component_1_Left_Fragment_") != null, "A grenade splits the cabinet carcass into small fragments.")
 	await _clear(prop, effects)
 
 
@@ -188,11 +195,11 @@ func _spawn(stage: Node3D, path: String, position: Vector3) -> Array:
 	return [prop, effects]
 
 
-func _break(prop: RigidBody3D) -> void:
+func _break(prop: RigidBody3D, weapon: String = "GRENADE") -> void:
 	for i in 80:
 		if not is_instance_valid(prop) or bool(prop.get("_broken")):
 			break
-		prop.call("take_projectile_hit", 400.0, prop.global_position + Vector3(0, 0.5, 0), Vector3.UP, Vector3.FORWARD, "GRENADE")
+		prop.call("take_projectile_hit", 400.0, prop.global_position + Vector3(0, 0.5, 0), Vector3.UP, Vector3.FORWARD, weapon)
 		await create_timer(0.1).timeout
 	await process_frame
 
