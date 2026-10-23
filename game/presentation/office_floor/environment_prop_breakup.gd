@@ -7,6 +7,10 @@ const GEOMETRY := preload("res://game/presentation/office_floor/environment_prop
 const SFX := preload("res://game/core/audio/public/sound_events.gd")
 
 
+# A cabinet piece with an edge at least this long (m) is split further when a blast breaks it.
+const BLAST_SPLIT_EDGE := 0.3
+
+
 static func chip_facade(body: RigidBody3D, geometry: GEOMETRY, hit_position: Vector3, direction: Vector3) -> bool:
 	var nearest: MeshInstance3D
 	var nearest_distance := 0.8
@@ -33,11 +37,22 @@ static func spawn_stage(body: RigidBody3D, geometry: GEOMETRY, stage_index: int,
 			continue
 		if spawned >= 32:
 			break
+		# A blast does not leave a cabinet's carcass or drawer panels lying as a box frame: each goes straight to its small fragments.
+		if blast and _is_blast_split(body, mesh) and spawn_stage(body, geometry, stage_index + 1, mesh.name, hit_position, direction, true):
+			spawned += 1
+			continue
 		var fragment: RigidBody3D = DAMAGE.spawn_piece(body, mesh, body, stage_index, spawned, direction, hit_position, blast)
 		if fragment != null:
 			fragment.set("breakable", stage_index + 1 < geometry.stages.size())
 			spawned += 1
 	return spawned > 0
+
+
+static func _is_blast_split(body: Node3D, mesh: MeshInstance3D) -> bool:
+	if "cabinet" not in str(body.get("model_path")).get_file():
+		return false
+	var size := (mesh.global_transform * mesh.get_aabb()).size
+	return maxf(size.x, maxf(size.y, size.z)) >= BLAST_SPLIT_EDGE
 
 
 static func hit_fragment(body: RigidBody3D, geometry: GEOMETRY, fragment: RigidBody3D, hit_position: Vector3, direction: Vector3) -> void:
