@@ -77,8 +77,8 @@ func undo() -> void:
 			if is_instance_valid(node):
 				planner._delete_node(node)
 		"added_group":
-			for reference: WeakRef in action["nodes"]:
-				var node := reference.get_ref() as Node3D
+			for node_ref: WeakRef in action["nodes"]:
+				var node := node_ref.get_ref() as Node3D
 				if is_instance_valid(node):
 					planner.placed.erase(node)
 					node.queue_free()

@@ -78,8 +78,8 @@ func _key_door_target(from: Vector2) -> Vector3:
 		var door := node as Node3D
 		if door == null or not bool(door.get("requires_emergency_key")) or bool(door.get("permanently_locked")):
 			continue
-		var position := Vector2(door.global_position.x, door.global_position.z)
-		var distance := position.distance_squared_to(from)
+		var flat := Vector2(door.global_position.x, door.global_position.z)
+		var distance := flat.distance_squared_to(from)
 		if distance < best_distance:
 			best_distance = distance
 			best = door.global_position

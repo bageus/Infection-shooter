@@ -17,6 +17,7 @@ signal blast_stun_started(duration: float, intensity: float)
 signal blast_stun_ended()
 ## Health actually restored (after caps and skill bonuses); source is
 ## &"medkit" for medkit pickups and empty for other healing.
+@warning_ignore("unused_signal")
 signal healed(amount: float, source: StringName)
 var _antidote_action := preload("res://game/features/player/player_antidote.gd").new()
 

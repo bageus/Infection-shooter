@@ -236,5 +236,7 @@ static func value(visual: MeshInstance3D, name: String) -> Variant:
 	var own := visual.material_override as ShaderMaterial
 	var found: Variant = own.get_shader_parameter(name) if own != null else null
 	if found == null and name != "support_texture":
-		return 1.0 if name == "depth_scale" else Vector4()
+		if name == "depth_scale":
+			return 1.0
+		return Vector4()
 	return found

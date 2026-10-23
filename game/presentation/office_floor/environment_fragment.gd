@@ -127,14 +127,14 @@ func topple_from(size: Vector3, hit_position: Vector3, direction: Vector3) -> vo
 
 
 # A piece pinned under a heavy top can survive the first push, so it is pushed again, harder, while it still stands.
-func _push_over(away: Vector3, height: float, scale: float, retries: int) -> void:
+func _push_over(away: Vector3, height: float, strength: float, retries: int) -> void:
 	sleeping = false
-	apply_impulse(away * mass * TOPPLE_SPEED * scale, Vector3.UP * height * 0.4)
+	apply_impulse(away * mass * TOPPLE_SPEED * strength, Vector3.UP * height * 0.4)
 	if retries <= 0 or not is_inside_tree():
 		return
 	await get_tree().create_timer(TOPPLE_RETRY_DELAY).timeout
 	if is_inside_tree() and not is_queued_for_deletion() and global_basis.y.angle_to(Vector3.UP) < deg_to_rad(30.0):
-		_push_over(away, height, scale * 1.3, retries - 1)
+		_push_over(away, height, strength * 1.3, retries - 1)
 
 
 # A thin panel landing fast on its edge can be pushed a few centimetres into the floor before the
@@ -150,14 +150,14 @@ func _integrate_forces(state: PhysicsDirectBodyState3D) -> void:
 				break
 		if _half_extents == Vector3.ZERO:
 			return
-	var transform := state.transform
-	var basis := transform.basis
-	var depth := absf(basis.x.y) * _half_extents.x + absf(basis.y.y) * _half_extents.y + absf(basis.z.y) * _half_extents.z
-	var deficit := FLOOR_TOP - FLOOR_SLACK - (transform.origin.y - depth)
+	var pose := state.transform
+	var pose_basis := pose.basis
+	var depth := absf(pose_basis.x.y) * _half_extents.x + absf(pose_basis.y.y) * _half_extents.y + absf(pose_basis.z.y) * _half_extents.z
+	var deficit := FLOOR_TOP - FLOOR_SLACK - (pose.origin.y - depth)
 	if deficit <= 0.0:
 		return
-	transform.origin.y += deficit
-	state.transform = transform
+	pose.origin.y += deficit
+	state.transform = pose
 	if state.linear_velocity.y < 0.0:
 		state.linear_velocity.y = 0.0
 

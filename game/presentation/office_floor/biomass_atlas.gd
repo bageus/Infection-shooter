@@ -37,7 +37,9 @@ static func cell_of(texture_id: String) -> int:
 
 ## Pixel of the cell's top-left corner inside the atlas.
 static func cell_origin(cell: int) -> Vector2i:
-	return Vector2i((cell % COLUMNS) * TILE.x + PAD, (cell / COLUMNS) * TILE.y + PAD)
+	@warning_ignore("integer_division")
+	var row := cell / COLUMNS
+	return Vector2i((cell % COLUMNS) * TILE.x + PAD, row * TILE.y + PAD)
 
 
 ## Cell interior as a rectangle in 0..1 atlas UV space.

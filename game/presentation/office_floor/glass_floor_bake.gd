@@ -159,9 +159,11 @@ func _tile(cell: Vector2i) -> Dictionary:
 		evicted.dirty = true
 		for layer: Dictionary in evicted.layers.values():
 			layer.texture = null
+			@warning_ignore("integer_division")
 			layer.image = _pack(layer.image, LAYER_PIXELS / 2)
 		evicted.image = _pack(evicted.image, ARCHIVE_FALLBACK)
 		evicted.surface_image = _pack(evicted.surface_image, ARCHIVE_FALLBACK)
+		@warning_ignore("integer_division")
 		evicted.relief_image = _pack(evicted.relief_image, RELIEF_PIXELS / 2)
 		_archive[oldest] = evicted
 		tiles.erase(oldest)

@@ -68,7 +68,9 @@ func _trim_budget() -> void:
 # shot). Only while the piece budget has room, so waking never makes the budget bake them right back.
 func _wake_baked() -> void:
 	var radius := QUALITY.wake_near()
-	if radius <= 0.0 or _baked.count() == 0 or active.size() >= QUALITY.piece_budget() * 3 / 4:
+	@warning_ignore("integer_division")
+	var budget_share := QUALITY.piece_budget() * 3 / 4
+	if radius <= 0.0 or _baked.count() == 0 or active.size() >= budget_share:
 		return
 	var player := get_tree().get_first_node_in_group("player") as Node3D
 	var effects := get_parent() as Node3D
