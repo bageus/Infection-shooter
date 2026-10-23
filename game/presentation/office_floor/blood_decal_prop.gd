@@ -19,9 +19,16 @@ const SETTLE_SECONDS := 0.4
 const FLOOR_RECHECK_STEP := 1500
 const FLOOR_RECHECK_SPAN := 15000
 ## Mass on an object looks again at what stands behind it this often (a pane breaks, a prop falls apart).
-const SUPPORT_RECHECK_STEP := 800
+const SUPPORT_RECHECK_STEP := 3000
 ## Relief left on settled mass: it is pressed into the floor, not a heap.
 const BAKED_DEPTH := 0.25
+## Fits that are not caused by a move (first fit, periodic re-read) are spread out:
+## each costs hundreds of rays, and all pieces of a level share one birth time.
+const FITS_PER_FRAME := 1
+## Periodic re-reads (nothing moved) only run on every Nth frame.
+const RECHECK_FRAME_GAP := 6
+static var _fit_frame := -1
+static var _fit_count := 0
 
 ## Texture id "<category>_<variant>", e.g. "splatter_03".
 @export var texture_name := "splatter_01"
@@ -362,8 +369,17 @@ func _clip_biomass() -> void:
 	var now := Time.get_ticks_msec()
 	var recheck := (floor_mass and now - _born_msec < FLOOR_RECHECK_SPAN and now - _last_fit_msec > FLOOR_RECHECK_STEP) or (anchor != null and now - _last_fit_msec > SUPPORT_RECHECK_STEP + int(absi(get_instance_id()) % 400))
 	var stamp := [_visual.global_transform, anchor.global_transform if anchor != null else Transform3D(), anchor, _visual.mesh]
-	if not recheck and not _clip_stamp.is_empty() and stamp[0].is_equal_approx(_clip_stamp[0]) and stamp[1].is_equal_approx(_clip_stamp[1]) and stamp[2] == _clip_stamp[2] and stamp[3] == _clip_stamp[3]:
+	var unchanged: bool = not _clip_stamp.is_empty() and stamp[0].is_equal_approx(_clip_stamp[0]) and stamp[1].is_equal_approx(_clip_stamp[1]) and stamp[2] == _clip_stamp[2] and stamp[3] == _clip_stamp[3]
+	if unchanged and not recheck:
 		return
+	if unchanged or _clip_stamp.is_empty():
+		var frame := Engine.get_process_frames()
+		if frame != _fit_frame:
+			_fit_frame = frame
+			_fit_count = 0
+		if _fit_count >= FITS_PER_FRAME or (unchanged and frame % RECHECK_FRAME_GAP != 0):
+			return
+		_fit_count += 1
 	_clip_stamp = stamp
 	_last_fit_msec = now
 	var space := get_world_3d().direct_space_state
