@@ -19,8 +19,7 @@ jobs:
           python-version: '3.12'
       - name: Install audio and Godot
         run: |
-          sudo apt-get update -qq
-          sudo apt-get install -y -qq ffmpeg xvfb libgl1-mesa-dri
+          bash tools/ci_apt_install.sh ffmpeg xvfb libgl1-mesa-dri
           python -m pip install numpy==2.3.5
           bash tools/ci_download_godot.sh
           unzip -q /tmp/godot.zip -d /tmp/godot
