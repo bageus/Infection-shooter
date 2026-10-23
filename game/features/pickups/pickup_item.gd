@@ -138,8 +138,8 @@ func _on_body_entered(body: Node) -> void:
 				accepted = bool(body.call("add_antidote", amount))
 		PickupType.DNA:
 			var runtime: Object = body.get("infection_runtime")
-			if runtime != null and runtime.has_method("add_control_ampule"):
-				runtime.call("add_control_ampule")
+			if runtime != null and runtime.has_method("collect_level_dna"):
+				runtime.call("collect_level_dna")
 				accepted = true
 		PickupType.AMMO_WEAPONS:
 			if body.has_method("add_ammo_for_weapon"):

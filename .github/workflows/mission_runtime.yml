@@ -30,8 +30,7 @@ jobs:
           unzip -q /tmp/godot.zip -d /tmp/godot
           chmod +x /tmp/godot/Godot*
           sudo ln -s /tmp/godot/Godot* /usr/local/bin/godot
-          sudo apt-get update -qq
-          sudo apt-get install -y -qq xvfb libgl1-mesa-dri mesa-vulkan-drivers libvulkan1
+          bash tools/ci_apt_install.sh xvfb libgl1-mesa-dri mesa-vulkan-drivers libvulkan1
       - name: Import and native layer isolation
         run: |
           set -o pipefail
@@ -81,8 +80,7 @@ jobs:
           unzip -q /tmp/godot.zip -d /tmp/godot
           chmod +x /tmp/godot/Godot*
           sudo ln -s /tmp/godot/Godot* /usr/local/bin/godot
-          sudo apt-get update -qq
-          sudo apt-get install -y -qq xvfb libgl1-mesa-dri mesa-vulkan-drivers libvulkan1
+          bash tools/ci_apt_install.sh xvfb libgl1-mesa-dri mesa-vulkan-drivers libvulkan1
       - name: Import
         run: |
           set -o pipefail
@@ -119,16 +117,7 @@ jobs:
           unzip -q /tmp/godot.zip -d /tmp/godot
           chmod +x /tmp/godot/Godot*
           sudo ln -s /tmp/godot/Godot* /usr/local/bin/godot
-          # apt stalls on some shared runners, so skip it when the runner image already has everything.
-          if ! command -v xvfb-run >/dev/null || ! command -v openbox >/dev/null || ! command -v xprop >/dev/null ||
-            [ ! -d /usr/lib/x86_64-linux-gnu/dri ] || ! ldconfig -p | grep -q libvulkan.so.1; then
-            apt_opts="-o Acquire::Retries=2 -o Acquire::http::Timeout=20 -o Acquire::https::Timeout=20 -o DPkg::Lock::Timeout=60"
-            for attempt in 1 2 3; do
-              sudo timeout -k 10 90 apt-get $apt_opts update -qq && sudo timeout -k 10 150 apt-get $apt_opts install -y -qq xvfb openbox x11-utils libgl1-mesa-dri mesa-vulkan-drivers libvulkan1 && break
-              [ "$attempt" = 3 ] && exit 1
-              sleep 10
-            done
-          fi
+          bash tools/ci_apt_install.sh xvfb openbox x11-utils libgl1-mesa-dri mesa-vulkan-drivers libvulkan1
       - name: Import
         run: |
           set -o pipefail
@@ -182,8 +171,7 @@ jobs:
           unzip -q /tmp/godot.zip -d /tmp/godot
           chmod +x /tmp/godot/Godot*
           sudo ln -s /tmp/godot/Godot* /usr/local/bin/godot
-          sudo apt-get update -qq
-          sudo apt-get install -y -qq xvfb libgl1-mesa-dri mesa-vulkan-drivers libvulkan1
+          bash tools/ci_apt_install.sh xvfb libgl1-mesa-dri mesa-vulkan-drivers libvulkan1
       - name: Import
         run: |
           set -o pipefail
@@ -230,8 +218,7 @@ jobs:
           unzip -q /tmp/godot.zip -d /tmp/godot
           chmod +x /tmp/godot/Godot*
           sudo ln -s /tmp/godot/Godot* /usr/local/bin/godot
-          sudo apt-get update -qq
-          sudo apt-get install -y -qq xvfb libgl1-mesa-dri mesa-vulkan-drivers libvulkan1
+          bash tools/ci_apt_install.sh xvfb libgl1-mesa-dri mesa-vulkan-drivers libvulkan1
       - name: Import
         run: |
           set -o pipefail
@@ -345,8 +332,7 @@ jobs:
       - name: Capture menu screens
         if: ${{ !cancelled() }}
         run: |
-          sudo apt-get update -qq
-          sudo apt-get install -y -qq xvfb libgl1-mesa-dri mesa-vulkan-drivers libvulkan1
+          bash tools/ci_apt_install.sh xvfb libgl1-mesa-dri mesa-vulkan-drivers libvulkan1
           # 300 s: the capture loads the whole gameplay scene on the software renderer. It took 173 s on a green run and 200 s with apt on a red one, so 180 s killed it.
           timeout 300 xvfb-run -a godot --path . --audio-driver Dummy --rendering-method gl_compatibility --script game/bootstrap/app/tests/capture_menu_screens.gd
       - name: Occlusion and blast pixels in both renderers
