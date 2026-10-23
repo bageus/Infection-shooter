@@ -2,25 +2,37 @@ extends RefCounted
 ## Tracks per-level ampules and previews antidote without changing live state.
 const TREE := preload("res://game/features/infection/domain/mutation_tree.gd")
 var level_id := ""
-var collected := false
+# Each level holds one control ampule; the set survives the trip to other maps of the chain.
+var collected_levels: Dictionary = {}
 var completed: Dictionary = {}
 
 
 func begin_level(id: String) -> void:
-	if id != level_id:
-		level_id = id
-		collected = false
+	level_id = id
 
 
 func record_collection() -> void:
-	collected = true
+	collected_levels[level_id] = true
+
+
+func collected_here() -> bool:
+	return collected_levels.has(level_id)
 
 
 func complete_level(id: String) -> int:
 	if id.is_empty() or id != level_id or completed.has(id):
 		return 0
 	completed[id] = true
-	return 0 if collected else 1
+	return 0 if collected_here() else 1
+
+
+func carry() -> Dictionary:
+	return {"collected": collected_levels.duplicate(), "completed": completed.duplicate()}
+
+
+func restore(data: Dictionary) -> void:
+	collected_levels = (data.get("collected", {}) as Dictionary).duplicate()
+	completed = (data.get("completed", {}) as Dictionary).duplicate()
 
 
 static func antidote_preview(domain, tree, effectiveness: float = 1.0) -> Dictionary:

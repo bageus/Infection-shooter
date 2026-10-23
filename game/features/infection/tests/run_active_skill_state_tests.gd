@@ -15,6 +15,7 @@ func _run() -> void:
 	_test_finals()
 	_test_assimilation_antidote()
 	_test_running_effect_keeps_slot()
+	_test_dna_once_per_level()
 	print("Active skill state tests: %d failures" % failures)
 	quit(failures)
 
@@ -36,6 +37,23 @@ func _test_running_effect_keeps_slot() -> void:
 	_expect(not r.assign_skill(1, ""), "A running effect keeps its slot from being cleared.")
 	r.active_state.effects.erase("discharge")
 	_expect(r.assign_skill(1, ""), "A finished effect frees its slot.")
+
+
+## One DNA ampule per level, and the record survives the trip to another map and back.
+func _test_dna_once_per_level() -> void:
+	var first := _runtime()
+	first.begin_control_level("floor_a")
+	first.collect_level_dna()
+	var gained: float = first.get_critical_threshold()
+	first.collect_level_dna()
+	_expect(is_equal_approx(first.get_critical_threshold(), gained), "A second DNA on the same level gives nothing.")
+	var next := _runtime()
+	next.restore_control_progress(first.export_control_progress())
+	next.begin_control_level("floor_b")
+	next.begin_control_level("floor_a")
+	var before: float = next.get_critical_threshold()
+	next.collect_level_dna()
+	_expect(is_equal_approx(next.get_critical_threshold(), before), "A revisit after the carry gives no second ampule.")
 
 
 func _test_loadout() -> void:
