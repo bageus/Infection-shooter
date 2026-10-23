@@ -45,6 +45,11 @@ const FLOOR_TOP := 0.0135
 # A piece may overlap the floor by this much before it is lifted back; the solver needs a little slack.
 const FLOOR_SLACK := 0.004
 
+# A long stick (a slat, a rail) is steadily turned toward the floor while it stands or leans, so it
+# cannot balance on its end or wedge into the debris: the broken object must not look standing.
+const LIE_TORQUE := 14.0
+const LIE_MIN_SLOPE := 0.12
+
 static var _surface: PhysicsMaterial
 
 var source: WeakRef
@@ -63,6 +68,7 @@ var _runtime: Node
 var _expiry: Tween
 var _half_extents := Vector3.ZERO
 var _capped := false
+var lie_down := false
 
 
 func _ready() -> void:
@@ -152,6 +158,8 @@ func _integrate_forces(state: PhysicsDirectBodyState3D) -> void:
 			return
 	var transform := state.transform
 	var basis := transform.basis
+	if lie_down:
+		_lean_to_floor(state, basis)
 	var depth := absf(basis.x.y) * _half_extents.x + absf(basis.y.y) * _half_extents.y + absf(basis.z.y) * _half_extents.z
 	var deficit := FLOOR_TOP - FLOOR_SLACK - (transform.origin.y - depth)
 	if deficit <= 0.0:
@@ -160,6 +168,19 @@ func _integrate_forces(state: PhysicsDirectBodyState3D) -> void:
 	state.transform = transform
 	if state.linear_velocity.y < 0.0:
 		state.linear_velocity.y = 0.0
+
+
+func _lean_to_floor(state: PhysicsDirectBodyState3D, basis: Basis) -> void:
+	var axis := basis.x
+	if _half_extents.y >= _half_extents.x and _half_extents.y >= _half_extents.z:
+		axis = basis.y
+	elif _half_extents.z >= _half_extents.x:
+		axis = basis.z
+	if absf(axis.y) < LIE_MIN_SLOPE:
+		return
+	var flat := Vector3(axis.x, 0.0, axis.z)
+	flat = flat.normalized() if flat.length_squared() > 0.0001 else Vector3.RIGHT
+	state.apply_torque(axis.cross(flat) * mass * LIE_TORQUE)
 
 
 func _register_budget() -> void:
