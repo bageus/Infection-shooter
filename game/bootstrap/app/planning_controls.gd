@@ -12,7 +12,9 @@ const FRUIT_OPTIONS := preload("res://game/bootstrap/app/planning_fruit_options.
 var fruit_options: Node
 var door_options: Node
 const SPAWN_OPTIONS := preload("res://game/bootstrap/app/planning_spawn_options.gd")
+const BIOMASS_OPTIONS := preload("res://game/bootstrap/app/planning_biomass_options.gd")
 var spawn_options: Node
+var biomass_options: Node
 const FIXTURE_CONTROLS := preload("res://game/bootstrap/app/planning_light_fixtures.gd")
 var fixtures = FIXTURE_CONTROLS.new()
 var light_view = preload("res://game/bootstrap/app/planning_light_view.gd").new()
@@ -167,6 +169,9 @@ func _build_gore_controls() -> void:
 	var box: Node = session.ui.get_node("Panel/VBox")
 	box.add_child(blood_options)
 	box.move_child(blood_options, palette.get_index())
+	biomass_options = BIOMASS_OPTIONS.new()
+	add_child(biomass_options)
+	biomass_options.call("setup", session, blood_options)
 
 
 func _show_gore_catalog() -> void:

@@ -9,12 +9,16 @@ const DEPTH := 0.05
 const CELLS_PER_UNIT := 48.0
 const MAX_CELLS := 160
 const MIN_CELLS := 6
+## A fused group is larger than one piece; its grid is coarser so a whole
+## generated vein stays cheap (the relief itself is rendered per pixel).
+const FUSED_CELLS_PER_UNIT := 30.0
+const FUSED_MAX_CELLS := 120
 
 
 ## rect: the patch in local units. UV runs 0..1 over the rect, v downward.
-static func grid(rect: Rect2, material: Material, lift: float) -> ArrayMesh:
-	var columns := clampi(ceili(rect.size.x * CELLS_PER_UNIT), MIN_CELLS, MAX_CELLS)
-	var rows := clampi(ceili(rect.size.y * CELLS_PER_UNIT), MIN_CELLS, MAX_CELLS)
+static func grid(rect: Rect2, material: Material, lift: float, density: float = CELLS_PER_UNIT, limit: int = MAX_CELLS) -> ArrayMesh:
+	var columns := clampi(ceili(rect.size.x * density), MIN_CELLS, limit)
+	var rows := clampi(ceili(rect.size.y * density), MIN_CELLS, limit)
 	var vertices := PackedVector3Array()
 	var normals := PackedVector3Array()
 	var uvs := PackedVector2Array()
@@ -76,4 +80,4 @@ static func _build_cell(cell: int) -> ArrayMesh:
 ## A fused patch built from fusion images over rect (local units).
 static func fused_patch(fused: Dictionary) -> ArrayMesh:
 	var patch_material := material(ImageTexture.create_from_image(fused["albedo"]), ImageTexture.create_from_image(fused["relief"]), Rect2(0, 0, 1, 1))
-	return grid(fused["rect"], patch_material, DEPTH)
+	return grid(fused["rect"], patch_material, DEPTH, FUSED_CELLS_PER_UNIT, FUSED_MAX_CELLS)

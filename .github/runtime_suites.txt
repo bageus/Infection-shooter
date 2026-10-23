@@ -125,6 +125,8 @@ game/presentation/office_floor/tests/run_contact_shadow_tests.gd
 game/presentation/office_floor/tests/run_biomass_tests.gd
 game/bootstrap/app/tests/run_biomass_catalog_tests.gd
 game/bootstrap/app/tests/run_biomass_footstep_tests.gd
+game/bootstrap/app/tests/run_biomass_generator_tests.gd
+game/bootstrap/app/tests/run_biomass_planner_tests.gd
 game/presentation/office_floor/tests/run_blood_decor_tests.gd
 game/presentation/prototype_hud/tests/run_radar_tests.gd
 game/bootstrap/app/tests/run_radar_lifecycle_tests.gd

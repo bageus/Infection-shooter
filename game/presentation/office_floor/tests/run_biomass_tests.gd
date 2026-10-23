@@ -4,6 +4,7 @@ extends SceneTree
 
 const ATLAS := preload("res://game/presentation/office_floor/biomass_atlas.gd")
 const FUSION := preload("res://game/presentation/office_floor/biomass_fusion.gd")
+const CLIP := preload("res://game/presentation/office_floor/biomass_clip.gd")
 const DECAL := preload("res://game/presentation/office_floor/public/props/blood_decal.tscn")
 
 var failures := 0
@@ -22,6 +23,9 @@ func _run() -> void:
 	await _check_inner_corner()
 	await _check_object_faces()
 	await _check_settling()
+	await _check_hidden_group()
+	await _check_floor_fit()
+	await _check_support()
 	print("biomass tests: %d failures" % failures)
 	quit(1 if failures > 0 else 0)
 
@@ -257,9 +261,9 @@ func _check_edges() -> void:
 	var piece := _wall_piece(stage, wall, Vector3(0, 3.8, 0.1))
 	await process_frame
 	var visual := piece.get_node("BloodQuad") as MeshInstance3D
-	var half: Vector4 = visual.get_instance_shader_parameter("clip_b")
-	var area: Vector4 = visual.get_instance_shader_parameter("clip_a")
-	var limit: Vector4 = visual.get_instance_shader_parameter("clip_limit")
+	var half: Vector4 = CLIP.value(visual, "clip_b")
+	var area: Vector4 = CLIP.value(visual, "clip_a")
+	var limit: Vector4 = CLIP.value(visual, "clip_limit")
 	_expect(is_equal_approx(half.x, 3.0) and is_equal_approx(half.y, 2.0), "A wall patch is fitted to the real wall face (%s)." % half)
 	var top_edge: Vector3 = visual.to_global(Vector3(0, area.y + half.y, 0))
 	_expect(absf(top_edge.y - 4.0) < 0.01, "The clip's upper edge is the wall top, not the patch (y=%.2f)." % top_edge.y)
@@ -270,14 +274,14 @@ func _check_edges() -> void:
 	piece.position.y = 1.0
 	await process_frame
 	await process_frame
-	var lowered: Vector4 = visual.get_instance_shader_parameter("clip_a")
+	var lowered: Vector4 = CLIP.value(visual, "clip_a")
 	_expect(absf(visual.to_global(Vector3(0, lowered.y + half.y, 0)).y - 4.0) < 0.01, "The fit follows a moved patch.")
 	# Outer corner: mass on the wall wraps its end face, where the next wall continues.
 	piece.position = Vector3(2.9, 1.0, 0.1)
 	await process_frame
 	await process_frame
-	var corner_limit: Vector4 = visual.get_instance_shader_parameter("clip_limit")
-	var corner_area: Vector4 = visual.get_instance_shader_parameter("clip_a")
+	var corner_limit: Vector4 = CLIP.value(visual, "clip_limit")
+	var corner_area: Vector4 = CLIP.value(visual, "clip_a")
 	var right_edge := visual.to_global(Vector3(corner_area.x + half.x, 0, 0))
 	_expect(absf(right_edge.x - 3.0) < 0.01 and is_equal_approx(corner_limit.x, 0.2), "At a wall corner the mass continues round the end onto the next face (edge x=%.2f)." % right_edge.x)
 	# A second wall behind the end continues the end face: the mass follows it.
@@ -292,13 +296,13 @@ func _check_edges() -> void:
 	await physics_frame
 	piece.set("_clip_stamp", [])
 	piece.call("_clip_biomass")
-	var run: Vector4 = visual.get_instance_shader_parameter("clip_limit")
+	var run: Vector4 = CLIP.value(visual, "clip_limit")
 	_expect(run.x > 4.0, "Round an outer corner the mass runs on along the neighbouring wall (%.2f)." % run.x)
 	var slanted := _wall(stage, Vector3(6, 4, 0.2), Vector3(0, 2, -5))
 	slanted.rotation.y = 1.0
 	var tilted := _wall_piece(stage, slanted, Vector3(0, 2, -4.9))
 	await process_frame
-	_expect((tilted.get_node("BloodQuad") as MeshInstance3D).get_instance_shader_parameter("clip_b") == Vector4(), "A patch off its receiver's face is not clipped.")
+	_expect(CLIP.value(tilted.get_node("BloodQuad") as MeshInstance3D, "clip_b") == Vector4(), "A patch off its receiver's face is not clipped.")
 	stage.queue_free()
 	await process_frame
 
@@ -324,9 +328,9 @@ func _check_inner_corner() -> void:
 	var piece := _wall_piece(stage, wall, Vector3(2.8, 2, 0.1))
 	await process_frame
 	var visual := piece.get_node("BloodQuad") as MeshInstance3D
-	var half: Vector4 = visual.get_instance_shader_parameter("clip_b")
-	var area: Vector4 = visual.get_instance_shader_parameter("clip_a")
-	var limit: Vector4 = visual.get_instance_shader_parameter("clip_limit")
+	var half: Vector4 = CLIP.value(visual, "clip_b")
+	var area: Vector4 = CLIP.value(visual, "clip_a")
+	var limit: Vector4 = CLIP.value(visual, "clip_limit")
 	_expect(limit.x < 0.0 and limit.x >= -4.0, "At an inner corner the mass folds onto the other wall (limit %s)." % limit)
 	var corner := visual.to_global(Vector3(area.x + half.x, area.y, 0)).x
 	_expect(absf(corner - 3.0) < 0.01, "The fold starts on the corner line, the face of the other wall (x=%.3f)." % corner)
@@ -346,8 +350,8 @@ func _check_object_faces() -> void:
 	var piece := _wall_piece(stage, crate, Vector3(0.4, 1.4, 0.3), "crate_a")
 	await process_frame
 	var visual := piece.get_node("BloodQuad") as MeshInstance3D
-	var half: Vector4 = visual.get_instance_shader_parameter("clip_b")
-	var limit: Vector4 = visual.get_instance_shader_parameter("clip_limit")
+	var half: Vector4 = CLIP.value(visual, "clip_b")
+	var limit: Vector4 = CLIP.value(visual, "clip_limit")
 	_expect(is_equal_approx(half.x, 0.5) and is_equal_approx(half.y, 0.4), "A patch on a crate is fitted to the crate's face (%s)." % half)
 	_expect(absf(limit.x - 0.6) < 0.01 and absf(limit.z - 0.6) < 0.01 and absf(limit.w - 0.6) < 0.01, "It wraps onto the adjacent faces up to the crate's depth (limits %s)." % limit)
 	stage.queue_free()
@@ -366,8 +370,8 @@ func _check_settling() -> void:
 	var visual := piece.get("_visual") as MeshInstance3D
 	_expect(piece.get_blood_config()["surface"] == "floor" and piece.get_blood_attachment()["owner"] == "", "A patch whose object was destroyed is no longer on the wall.")
 	_expect(absf(piece.global_position.y - 0.0135) < 0.001 and piece.global_basis.y.dot(Vector3.UP) > 0.99, "It settles onto the floor, lying flat (y=%.3f)." % piece.global_position.y)
-	_expect(piece.get_meta("biomass_settled") == "baked" and is_equal_approx(float(visual.get_instance_shader_parameter("depth_scale")), 0.25), "It is pressed into the floor as shallow relief.")
-	_expect(visual.get_instance_shader_parameter("clip_b") == Vector4(), "Settled mass carries no wall clip.")
+	_expect(piece.get_meta("biomass_settled") == "baked" and is_equal_approx(float(CLIP.value(visual, "depth_scale")), 0.25), "It is pressed into the floor as shallow relief.")
+	_expect(CLIP.value(visual, "clip_b") == Vector4(), "Settled mass carries no wall clip.")
 	piece.get_node("BiomassFit").set_process(true)
 	var friend := DECAL.instantiate() as Node3D
 	friend.call("configure_blood", "biomass_03", "floor")
@@ -383,7 +387,7 @@ func _check_settling() -> void:
 	pane.visible = false
 	await _wait_until(func() -> bool: return drop.has_meta("biomass_settled") and absf(drop.global_position.y - 0.0135) < 0.001, 600)
 	_expect(drop.get_meta("biomass_settled", "") == "fallen" and absf(drop.global_position.y - 0.0135) < 0.001, "A patch on broken glass falls to the floor.")
-	_expect(is_equal_approx(float(drop.get("_visual").get_instance_shader_parameter("depth_scale")), 1.0), "Fallen glass mass is not baked flat.")
+	_expect(is_equal_approx(float(CLIP.value(drop.get("_visual") as MeshInstance3D, "depth_scale")), 1.0), "Fallen glass mass is not baked flat.")
 	Engine.set_meta("planning_active", true)
 	var held_wall := _wall(stage, Vector3(2, 2, 0.2), Vector3(0, 1, -8))
 	var held := _wall_piece(stage, held_wall, Vector3(0, 1, -7.9))
@@ -394,5 +398,91 @@ func _check_settling() -> void:
 	await process_frame
 	_expect(not held.has_meta("biomass_settled") and held.get_blood_config()["surface"] == "wall", "Nothing settles while the planner is open.")
 	Engine.set_meta("planning_active", false)
+	stage.queue_free()
+	await process_frame
+
+
+# The object is broken up by hiding the group that holds its mesh (props hide
+# their intact model, not the mesh): the mass must still come down.
+func _check_hidden_group() -> void:
+	var stage := Node3D.new()
+	root.add_child(stage)
+	var group := Node3D.new()
+	stage.add_child(group)
+	var wall := _wall(group, Vector3(6, 4, 0.2), Vector3(0, 2, 0))
+	var piece := _wall_piece(stage, wall, Vector3(0.5, 2.5, 0.1))
+	await process_frame
+	await process_frame
+	group.visible = false
+	await _wait_until(func() -> bool: return piece.has_meta("biomass_settled") and absf(piece.global_position.y - 0.0135) < 0.001, 600)
+	_expect(piece.has_meta("biomass_settled") and piece.get_blood_config()["surface"] == "floor", "Mass settles when the group holding its mesh is hidden, not only the mesh.")
+	stage.queue_free()
+	await process_frame
+
+
+func _floor_piece(stage: Node3D, floor_view: Node3D, at: Vector3) -> Node3D:
+	var piece := DECAL.instantiate() as Node3D
+	piece.call("configure_blood", "biomass_01", "floor")
+	stage.add_child(piece)
+	piece.call("configure_floor_debris", floor_view)
+	piece.position = at
+	piece.scale = Vector3.ONE
+	return piece
+
+
+# Floor mass keeps inside the level and climbs the walls beside it.
+func _check_floor_fit() -> void:
+	var stage := Node3D.new()
+	root.add_child(stage)
+	var source := GDScript.new()
+	source.source_code = "extends Node3D\nvar floor_size := Vector2(10.0, 8.0)\n"
+	source.reload()
+	var floor_view := Node3D.new()
+	floor_view.set_script(source)
+	stage.add_child(floor_view)
+	_solid(stage, Vector3(0.2, 3.0, 6.0), Vector3(1.0, 1.5, 0.0))
+	await physics_frame
+	await physics_frame
+	var beside := _floor_piece(stage, floor_view, Vector3(0.5, 0.0135, 0.0))
+	var corner := _floor_piece(stage, floor_view, Vector3(4.8, 0.0135, 3.8))
+	await process_frame
+	await process_frame
+	var near_visual := beside.get("_visual") as MeshInstance3D
+	var wall := CLIP.value(near_visual, "wall_p0") as Vector4
+	_expect(wall.w > 0.0 and absf(Vector2(wall.x, wall.y).length() - 1.0) < 0.01, "Floor mass beside a wall finds it and climbs it (%s)." % wall)
+	var reach := CLIP.value(near_visual, "wall_r0") as Vector4
+	_expect(reach.y > reach.x and reach.x < 0.0 and reach.y > 0.0, "The wall counts along the stretch that stands there (%s)." % reach)
+	_expect(CLIP.value(near_visual, "world_clip") == Vector4(-5.0, -4.0, 5.0, 4.0), "Floor mass is bounded by the level edge.")
+	var far_visual := corner.get("_visual") as MeshInstance3D
+	_expect(CLIP.value(far_visual, "wall_p0") == Vector4(), "A patch in the open has no wall to climb.")
+	_expect(CLIP.value(far_visual, "world_clip") == Vector4(-5.0, -4.0, 5.0, 4.0), "A patch at the level's corner is bounded too.")
+	var shader: Shader = load("res://game/presentation/office_floor/biomass_surface.gdshader")
+	_expect(not shader.code.contains("instance uniform"), "The biomass shader uses no instance uniforms (a small global buffer on some hardware).")
+	stage.queue_free()
+	await process_frame
+
+
+# A frame whose box spans the whole opening, with collision only on the lower
+# half: mass over the empty half must be cut, not left hanging.
+func _check_support() -> void:
+	var stage := Node3D.new()
+	root.add_child(stage)
+	var frame := _wall(stage, Vector3(4, 4, 0.2), Vector3(0, 2, 0), "Frame")
+	_solid(stage, Vector3(4, 2, 0.2), Vector3(0, 1, 0))
+	await physics_frame
+	await physics_frame
+	var piece := _wall_piece(stage, frame, Vector3(0, 2.0, 0.1), "frame_a")
+	await process_frame
+	await process_frame
+	var visual := piece.get("_visual") as MeshInstance3D
+	var texture := CLIP.value(visual, "support_texture") as Texture2D
+	_expect(texture != null and (CLIP.value(visual, "support_rect") as Vector4).z > 0.0, "A patch on a receiver with collision gets a support mask.")
+	if texture != null:
+		var image := texture.get_image()
+		_expect(image.get_pixel(6, 2).r > 0.5 and image.get_pixel(6, 15).r < 0.5, "Mass over solid is kept and over empty space is cut.")
+	var bare := _wall_piece(stage, _wall(stage, Vector3(4, 4, 0.2), Vector3(0, 2, -6)), Vector3(0, 2.0, -5.9), "bare_a")
+	await process_frame
+	await process_frame
+	_expect(CLIP.value(bare.get("_visual") as MeshInstance3D, "support_texture") == null, "A receiver without collision gets no mask (the patch stays whole).")
 	stage.queue_free()
 	await process_frame

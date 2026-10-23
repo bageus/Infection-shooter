@@ -18,11 +18,30 @@ uniform vec3 tint : source_color = vec3(1.0);
 // (x <= 0 means no clip), clip_limit = per side (+u, -u, +v, -v): > 0 wraps
 // round a convex edge up to that depth, < 0 folds onto a concave floor/wall
 // up to that span, 0 only clips. depth_scale flattens settled (baked) mass.
-instance uniform vec4 clip_a = vec4(0.0);
-instance uniform vec4 clip_b = vec4(0.0);
-instance uniform vec4 clip_limit = vec4(0.0);
-instance uniform float depth_scale = 1.0;
+// These are plain uniforms on a per-piece copy of the material: instance
+// uniforms cost one slot of a small global buffer per piece and ran out.
+uniform vec4 clip_a = vec4(0.0);
+uniform vec4 clip_b = vec4(0.0);
+uniform vec4 clip_limit = vec4(0.0);
+uniform float depth_scale = 1.0;
+// Mass on the floor: world_clip = (min x, min z, max x, max z) of the level (max <= min
+// means unbounded), wall_p* = a wall the mass climbs, in patch units: (unit
+// normal into the wall xy, plane offset, climb span; span 0 = none), wall_r* =
+// the stretch of the wall along its tangent (-n.y, n.x) that really is wall.
+uniform vec4 world_clip = vec4(0.0);
+uniform vec4 wall_p0 = vec4(0.0);
+uniform vec4 wall_r0 = vec4(0.0);
+uniform vec4 wall_p1 = vec4(0.0);
+uniform vec4 wall_r1 = vec4(0.0);
+// What stands behind the mass (biomass_support.gd): a coarse mask over
+// support_rect = (x, y, width, height) in patch units; width 0 = no mask.
+// Unsupported mass is cut, except where it wraps an edge (fold).
+uniform sampler2D support_texture : hint_default_white, filter_linear, repeat_disable;
+uniform vec4 support_rect = vec4(0.0);
 varying float excess;
+varying float outside;
+varying vec2 support_uv;
+varying float masked;
 varying float corner;
 varying vec3 fold;
 
@@ -65,11 +84,38 @@ void vertex() {
 			fold = vec3(t, c);
 		}
 	}
+	vec4 walls[2] = vec4[](wall_p0, wall_p1);
+	vec4 ranges[2] = vec4[](wall_r0, wall_r1);
+	for (int i = 0; i < 2; i++) {
+		vec4 w = walls[i];
+		if (w.w <= 0.0) {
+			continue;
+		}
+		vec2 n = w.xy;
+		float along = dot(p.xy, vec2(-n.y, n.x));
+		float into = dot(p.xy, n) - w.z;
+		if (into > 0.0 && along >= ranges[i].x && along <= ranges[i].y) {
+			excess = max(excess, into - w.w);
+			p.xy -= n * (into + h);
+			p.z = VERTEX.z + into;
+			fold = vec3(n, -1.0);
+		}
+	}
+	support_uv = (VERTEX.xy - support_rect.xy) / max(support_rect.zw, vec2(0.0001));
+	masked = (support_rect.z > 0.0 && abs(fold.z) < 0.5) ? 1.0 : 0.0;
+	outside = -1.0;
+	if (world_clip.z > world_clip.x) {
+		vec3 world = (MODEL_MATRIX * vec4(p, 1.0)).xyz;
+		outside = max(max(world_clip.x - world.x, world.x - world_clip.z), max(world_clip.y - world.z, world.z - world_clip.w));
+	}
 	VERTEX = p;
 }
 
 void fragment() {
-	if (excess > 0.0 || corner > 0.0) {
+	if (excess > 0.0 || corner > 0.0 || outside > 0.0) {
+		discard;
+	}
+	if (masked > 0.99 && texture(support_texture, clamp(support_uv, vec2(0.0), vec2(1.0))).r < 0.5) {
 		discard;
 	}
 	vec2 atlas_uv = uv_rect.xy + UV * uv_rect.zw;
