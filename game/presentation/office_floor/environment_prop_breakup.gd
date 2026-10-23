@@ -7,6 +7,11 @@ const GEOMETRY := preload("res://game/presentation/office_floor/environment_prop
 const SFX := preload("res://game/core/audio/public/sound_events.gd")
 
 
+# A cabinet piece with an edge at least this long (m) is split further when a blast breaks it.
+const BLAST_SPLIT_EDGE := 0.3
+const BLAST_SPLIT_DELAY := 0.15
+
+
 static func chip_facade(body: RigidBody3D, geometry: GEOMETRY, hit_position: Vector3, direction: Vector3) -> bool:
 	var nearest: MeshInstance3D
 	var nearest_distance := 0.8
@@ -37,7 +42,27 @@ static func spawn_stage(body: RigidBody3D, geometry: GEOMETRY, stage_index: int,
 		if fragment != null:
 			fragment.set("breakable", stage_index + 1 < geometry.stages.size())
 			spawned += 1
+			if blast and _is_blast_split(body, mesh):
+				_split_later(body, geometry, fragment, hit_position, direction)
 	return spawned > 0
+
+
+static func _is_blast_split(body: Node3D, mesh: MeshInstance3D) -> bool:
+	if "cabinet" not in str(body.get("model_path")).get_file():
+		return false
+	var size := (mesh.global_transform * mesh.get_aabb()).size
+	return maxf(size.x, maxf(size.y, size.z)) >= BLAST_SPLIT_EDGE
+
+
+# Later, not now, so the next stage loads after the blast frame and the first transition stays cheap.
+static func _split_later(body: RigidBody3D, geometry: GEOMETRY, fragment: RigidBody3D, hit_position: Vector3, direction: Vector3) -> void:
+	var body_ref: WeakRef = weakref(body)
+	var fragment_ref: WeakRef = weakref(fragment)
+	body.get_tree().create_timer(BLAST_SPLIT_DELAY).timeout.connect(func() -> void:
+		var live_body: RigidBody3D = body_ref.get_ref() as RigidBody3D
+		var live_fragment: RigidBody3D = fragment_ref.get_ref() as RigidBody3D
+		if live_body != null and live_fragment != null and not live_fragment.is_queued_for_deletion():
+			hit_fragment(live_body, geometry, live_fragment, hit_position, direction))
 
 
 static func hit_fragment(body: RigidBody3D, geometry: GEOMETRY, fragment: RigidBody3D, hit_position: Vector3, direction: Vector3) -> void:

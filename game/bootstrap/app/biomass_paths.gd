@@ -203,6 +203,7 @@ class _Heap:
 		_items.append(item)
 		var child := _items.size() - 1
 		while child > 0:
+			@warning_ignore("integer_division")
 			var parent := (child - 1) / 2
 			if _keys[parent] <= _keys[child]:
 				break
