@@ -119,9 +119,10 @@ jobs:
           unzip -q /tmp/godot.zip -d /tmp/godot
           chmod +x /tmp/godot/Godot*
           sudo ln -s /tmp/godot/Godot* /usr/local/bin/godot
-          # apt has hung on shared runners; bound each attempt so the 15-minute job limit is not the only stop.
+          # apt stalls on slow mirrors and lock waits; apt's own HTTP and lock timeouts make a stall fail fast so the retries can run.
+          apt_opts="-o Acquire::Retries=2 -o Acquire::http::Timeout=20 -o Acquire::https::Timeout=20 -o DPkg::Lock::Timeout=60"
           for attempt in 1 2 3; do
-            sudo timeout 90 apt-get update -qq && sudo timeout 150 apt-get install -y -qq xvfb openbox x11-utils libgl1-mesa-dri mesa-vulkan-drivers libvulkan1 && break
+            sudo timeout 90 apt-get $apt_opts update -qq && sudo timeout 150 apt-get $apt_opts install -y -qq xvfb openbox x11-utils libgl1-mesa-dri mesa-vulkan-drivers libvulkan1 && break
             [ "$attempt" = 3 ] && exit 1
             sleep 10
           done
