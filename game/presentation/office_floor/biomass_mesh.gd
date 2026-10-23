@@ -16,7 +16,7 @@ const FUSED_MAX_CELLS := 120
 
 
 ## rect: the patch in local units. UV runs 0..1 over the rect, v downward.
-static func grid(rect: Rect2, material: Material, lift: float, density: float = CELLS_PER_UNIT, limit: int = MAX_CELLS) -> ArrayMesh:
+static func grid(rect: Rect2, surface_material: Material, lift: float, density: float = CELLS_PER_UNIT, limit: int = MAX_CELLS) -> ArrayMesh:
 	var columns := clampi(ceili(rect.size.x * density), MIN_CELLS, limit)
 	var rows := clampi(ceili(rect.size.y * density), MIN_CELLS, limit)
 	var vertices := PackedVector3Array()
@@ -45,7 +45,7 @@ static func grid(rect: Rect2, material: Material, lift: float, density: float = 
 	arrays[Mesh.ARRAY_INDEX] = indices
 	var mesh := ArrayMesh.new()
 	mesh.add_surface_from_arrays(Mesh.PRIMITIVE_TRIANGLES, arrays)
-	mesh.surface_set_material(0, material)
+	mesh.surface_set_material(0, surface_material)
 	# The shader lifts vertices after the AABB is computed; wrapped edges reach well below the plane.
 	mesh.custom_aabb = AABB(Vector3(rect.position.x, rect.position.y, -0.6), Vector3(rect.size.x, rect.size.y, lift + 1.2))
 	return mesh
