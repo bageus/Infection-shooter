@@ -21,8 +21,7 @@ const SOLID := {
 	"wall_door_3": {"half": Vector2(1.0, 0.1375), "door": true},
 	"wall_door_3_without": {"half": Vector2(1.0, 0.1375), "door": true},
 	"wall_emergency_door": {"half": Vector2(1.0, 0.1375), "door": true, "fire": true},
-	"column": {"half": Vector2(0.6, 0.6), "box": true, "face": 0.512}, # body, inside its plinth and cap
-	"column_2": {"half": Vector2(0.6, 0.6), "box": true}
+	"column": {"half": Vector2(0.6, 0.6), "box": true, "face": 0.512} # body, inside its plinth and cap
 }
 # Pieces that only block the space in front of a wall (glass, windows, elevator).
 const OTHER := {

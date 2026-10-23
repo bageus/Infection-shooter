@@ -152,7 +152,7 @@ func _test_stickers() -> void:
 
 
 func _test_untouched_models() -> void:
-	for path in [MODELS + "05/05_laptop_destructible.glb", MODELS + "09/09_paper_A4_heavily_crumpled.glb", MODELS + "07/07_table_square.glb"]:
+	for path in [MODELS + "05/05_laptop2_destructible.glb", MODELS + "09/09_paper_A4_heavily_crumpled.glb", MODELS + "07/07_table_square_tall.glb"]:
 		var prop := _spawn(path, 5 if "laptop" in path else 0)
 		var visual := prop.get_node("Visual") as Node3D
 		var added := visual.find_children("Sticker*", "", false, false).size() + visual.find_children("DocumentPrint", "", false, false).size()
