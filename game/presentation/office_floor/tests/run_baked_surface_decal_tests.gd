@@ -26,6 +26,7 @@ func _run() -> void:
 		await _test_displays()
 		_test_steps()
 		_test_window_frames()
+		_test_wall_glass_insert()
 	else:
 		# Real-model hooks run headlessly above; native QA isolates the new shader.
 		await _test_render()
@@ -214,6 +215,47 @@ func _test_window_frames() -> void:
 	_check(not EVENTS._is_window_frame(wall), "Plain wall is not a window frame")
 	wall.queue_free()
 	window.queue_free()
+
+func _test_wall_glass_insert() -> void:
+	# A wall's glass insert hit through its solid collider gets glass cracks only; the solid wall still gets plaster.
+	var events: RefCounted = floor_view.get("_surface_events")
+	var baker: RefCounted = events.receivers
+	baker.clear()
+	var wall := Node3D.new()
+	wall.add_to_group("camera_occluder")
+	wall.position = Vector3(-60, 1, 0)
+	stage.add_child(wall)
+	var body := StaticBody3D.new()
+	body.name = "Body"
+	wall.add_child(body)
+	var glass := _panel("Glass", Vector3(0, 0.5, 0))
+	var solid := _panel("Wall", Vector3(0, -0.5, 0))
+	wall.add_child(glass)
+	wall.add_child(solid)
+	var normal := Vector3.BACK
+	events.hit(body, glass.global_position, normal, "SHOTGUN", glass)
+	var glass_kinds := _kinds(baker, glass)
+	_check(glass_kinds.has("glass_impact") and glass_kinds.has("glass_fracture"), "Wall glass insert takes glass cracks")
+	_check(not (glass_kinds.has("bullet") or glass_kinds.has("wall_damage") or glass_kinds.has("wall_scuff")), "Wall glass insert takes no plaster")
+	events.hit(body, solid.global_position, normal, "SHOTGUN", solid)
+	_check(_kinds(baker, solid).has("wall_damage"), "Solid wall keeps plaster chips")
+	baker.clear()
+	wall.queue_free()
+
+func _panel(panel_name: String, at: Vector3) -> MeshInstance3D:
+	var node := MeshInstance3D.new()
+	node.name = panel_name
+	var mesh := BoxMesh.new()
+	mesh.size = Vector3(1.8, 1, 0.2)
+	node.mesh = mesh
+	node.position = at
+	return node
+
+func _kinds(baker: RefCounted, anchor: MeshInstance3D) -> Array:
+	var kinds := []
+	for request: Dictionary in baker.queue:
+		if request.anchor.get_ref() == anchor: kinds.append(request.kind)
+	return kinds
 
 func _test_render() -> void:
 	var camera := Camera3D.new()
