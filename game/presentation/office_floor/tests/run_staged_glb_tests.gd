@@ -65,6 +65,7 @@ func _test_cabinet(stage: Node3D) -> void:
 	prop = setup[0]
 	effects = setup[1]
 	await _break(prop)
+	await create_timer(0.5).timeout
 	_expect(_find_fragment(effects, "Fragment_Component_1_Left_Fragment_") != null, "A grenade splits the cabinet carcass into small fragments.")
 	await _clear(prop, effects)
 
