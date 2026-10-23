@@ -15,7 +15,7 @@ func _run() -> void:
 	var catalog := CATALOG.new()
 	catalog.call("_build_environment_catalogs")
 	var entries: Array = catalog.group_catalogs["01"]
-	_check(entries.size() == 25, "Group 01 exposes 24 production assets and the test column once")
+	_check(entries.size() == 24, "Group 01 exposes 24 production assets")
 	var palette_paths := {}
 	for entry: Dictionary in entries:
 		_check(not palette_paths.has(entry.path), "Palette entry is unique: " + str(entry.path))
@@ -31,16 +31,11 @@ func _run() -> void:
 		if packed == null:
 			continue
 		var model := packed.instantiate() as Node3D
-		if filename == "01_column_2.glb":
-			_check_test_column(model)
-		else:
-			_check_model(model, filename)
+		_check_model(model, filename)
 		model.free()
 		var migrated := ROOT_PATH + filename
-		if filename == "01_column_2.glb":
-			migrated = catalog.call("_environment_scene_for", filename)
 		_check(catalog.call("_migrate_scene_path", ROOT_PATH + "models/" + filename) == migrated, "Nested saved path migrates: " + filename)
-	_check(count == 25, "Runtime folder contains 25 models")
+	_check(count == 24, "Runtime folder contains 24 models")
 	_check(catalog.call("_migrate_scene_path", ROOT_PATH + "models/01_glass_wall_full_breakable(1).glb") == ROOT_PATH + "01_glass_wall_full_breakable.glb", "Glass wall upload name migrates")
 	_check(catalog.call("_environment_scene_for", "01_glass_wall_full_breakable.glb").ends_with("glass_wall_full.tscn"), "Glass wall uses its destructible structural scene")
 	_check_legacy_stairs(catalog)
@@ -91,14 +86,6 @@ func _check(condition: bool, message: String) -> void:
 	if not condition:
 		failures += 1
 		push_error(message)
-
-
-func _check_test_column(model: Node3D) -> void:
-	for mesh: MeshInstance3D in model.find_children("*", "MeshInstance3D", true, false):
-		var material := mesh.get_active_material(0) as BaseMaterial3D
-		_check(material != null, "Test column retains its material")
-		if material != null:
-			_check(material.albedo_texture == null and material.normal_texture == null, "Test column uses a smooth solid finish without maps")
 
 
 func _check_legacy_stairs(catalog: RefCounted) -> void:
