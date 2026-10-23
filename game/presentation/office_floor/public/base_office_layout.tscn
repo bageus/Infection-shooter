@@ -8398,7 +8398,7 @@ metadata/planning_attachment = ""
 [node name="@RigidBody3D@30607" type="RigidBody3D" parent="." unique_id=2091254339 instance=ExtResource("18_6gfkn")]
 transform = Transform3D(1, -2.762646e-06, 8.949764e-06, 2.7626477e-06, 1, -1.7216828e-07, -8.9497635e-06, 1.7219301e-07, 1, -14.655774, 0.8586417, -8.059779)
 
-model_path = "res://models/objects/enviroments/09/09_case_with_money_close.glb"
+model_path = "res://models/objects/enviroments/09/09_case_with_money_open.glb"
 metadata/world_bound = true
 metadata/planning_settled_transform = Transform3D(1, -2.762646e-06, 8.949764e-06, 2.7626477e-06, 1, -1.7216828e-07, -8.9497635e-06, 1.7219301e-07, 1, -14.655774, 0.8586417, -8.059779)
 metadata/planning_object_id = ""
@@ -24131,7 +24131,7 @@ metadata/planning_attachment = ""
 [node name="@RigidBody3D@32071" type="RigidBody3D" parent="." unique_id=429090589 instance=ExtResource("18_6gfkn")]
 transform = Transform3D(-0.25881752, 0, 0.9659261, 0, 1, 0, -0.9659261, 0, -0.25881752, -12.25, 0.5281991, 24.5)
 
-model_path = "res://models/objects/enviroments/05/05_laptop_destructible.glb"
+model_path = "res://models/objects/enviroments/05/05_laptop2_destructible.glb"
 display_seed = 859312682
 metadata/world_bound = true
 metadata/planning_settled_transform = Transform3D(-0.25881752, 0, 0.9659261, 0, 1, 0, -0.9659261, 0, -0.25881752, -12.25, 0.5281991, 24.5)
@@ -24142,7 +24142,7 @@ metadata/planning_attachment = ""
 [node name="@RigidBody3D@32072" type="RigidBody3D" parent="." unique_id=1193631364 instance=ExtResource("18_6gfkn")]
 transform = Transform3D(-0.86602515, 0, 0.5000002, 0, 1, 0, -0.5000002, 0, -0.86602515, 15, 0.5281991, 20.25)
 
-model_path = "res://models/objects/enviroments/05/05_laptop_destructible.glb"
+model_path = "res://models/objects/enviroments/05/05_laptop2_destructible.glb"
 display_seed = 1287998938
 metadata/world_bound = true
 metadata/planning_settled_transform = Transform3D(-0.86602515, 0, 0.5000002, 0, 1, 0, -0.5000002, 0, -0.86602515, 15, 0.5281991, 20.25)

@@ -14,7 +14,7 @@ const MATERIAL_MODELS := [
 	[ROOT + "06/06_conference_chair.glb", Vector3(-1.2, 0, 0), -0.4],
 	[ROOT + "06/06_simple_chair.glb", Vector3(0, 0, 0), 0.2],
 	[ROOT + "01/01_column.glb", Vector3(2.0, 0, -0.5), 0.0],
-	[ROOT + "01/01_column_2.glb", Vector3(3.4, 0, -0.5), 0.0],
+	[ROOT + "01/01_column.glb", Vector3(3.4, 0, -0.5), 0.0],
 	[ROOT + "09/09_book_big.glb", Vector3(-1.0, 0.02, 1.4), 0.3],
 	[ROOT + "09/09_book_fat.glb", Vector3(-0.6, 0.02, 1.4), 0.1],
 	[ROOT + "09/09_book_folder.glb", Vector3(-0.2, 0.02, 1.4), 0.5],

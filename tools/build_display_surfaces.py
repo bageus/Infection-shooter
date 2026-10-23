@@ -16,7 +16,6 @@ PROFILES = {
     '05_monitor2_destructible': ('Power_Off', 1, (0, 0, 1)),
     '05_monitor3_server_destructible': ('Power_Off', 1, (0, 0, 1)),
     '05_monitor4_server_destructible': ('Power_Off', 1, (0, 0, 1)),
-    '05_laptop_destructible': ('Intact', 4, (1, .233, 0)),
     '05_laptop2_destructible': ('Power_Off', 1, (0, .282, 1)),
     '05_wall_TV_destructible': ('TV_Intact', 1, (0, 1, 0)),
     '05_wall_TV_frameless_destructible': ('TV_Intact', 1, (0, 1, 0)),
@@ -88,7 +87,7 @@ def extract(name, profile):
                                  cross(sub(triangle[1], triangle[0]), sub(triangle[2], triangle[0])))) / 2
             # The detailed laptop's exported screen normals are reversed.
             alignment = dot(normals[ids[0]], front)
-            if area > .001 and (alignment > .98 or (name == '05_laptop_destructible' and alignment < -.98)):
+            if area > .001 and alignment > .98:
                 candidates.append((area, triangle))
         if not candidates:
             continue

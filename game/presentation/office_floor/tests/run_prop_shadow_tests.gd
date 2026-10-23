@@ -13,7 +13,7 @@ func _run() -> void:
 	var small := _prop(stage, "09/09_book_small.glb")
 	var bottle := _prop(stage, "09/09_plastic_water_bottle_blue_500ml.glb")
 	var large := _prop(stage, "06/06_simple_chair.glb")
-	var wall := _prop(stage, "01/01_column_2.glb")
+	var wall := _prop(stage, "01/01_column.glb")
 	await process_frame
 	_check(_all_off(small), "Small book meshes do not cast shadows")
 	_check(_all_off(bottle), "Small bottle meshes do not cast shadows")

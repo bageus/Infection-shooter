@@ -23057,7 +23057,7 @@
 			"scale_x": 1.0,
 			"scale_y": 1.0,
 			"scale_z": 1.0,
-			"scene": "res://models/objects/enviroments/09/09_case_with_money_close.glb",
+			"scene": "res://models/objects/enviroments/09/09_case_with_money_open.glb",
 			"settled_physics": {
 				"version": 1
 			},
@@ -64605,7 +64605,7 @@
 			"scale_x": 0.99999988079071,
 			"scale_y": 1.0,
 			"scale_z": 0.99999988079071,
-			"scene": "res://models/objects/enviroments/05/05_laptop_destructible.glb",
+			"scene": "res://models/objects/enviroments/05/05_laptop2_destructible.glb",
 			"settled_physics": {
 				"version": 1
 			},
@@ -64638,7 +64638,7 @@
 			"scale_x": 0.99999988079071,
 			"scale_y": 1.0,
 			"scale_z": 0.99999988079071,
-			"scene": "res://models/objects/enviroments/05/05_laptop_destructible.glb",
+			"scene": "res://models/objects/enviroments/05/05_laptop2_destructible.glb",
 			"settled_physics": {
 				"version": 1
 			},
