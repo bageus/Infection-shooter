@@ -65,6 +65,7 @@ game/features/combat/tests/run_floor_danger_zone_tests.gd
 game/bootstrap/app/tests/run_blast_shelter_tests.gd
 game/bootstrap/app/tests/run_colossus_shelter_tests.gd
 game/presentation/office_floor/tests/run_sound_hook_tests.gd
+game/presentation/office_floor/tests/run_impact_sound_sleep_tests.gd
 game/presentation/office_floor/tests/run_destruction_sound_tests.gd
 game/features/player/tests/run_heal_feedback_tests.gd
 game/bootstrap/app/tests/run_destruction_wiring_tests.gd
