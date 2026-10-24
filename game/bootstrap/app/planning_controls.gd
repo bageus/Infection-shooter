@@ -114,6 +114,9 @@ func setup_controls() -> void:
 	light_view.setup(self)
 	fixture_toggles.setup(self)
 	light_default_editor.setup(self)
+	var fog := preload("res://game/bootstrap/app/planning_fog.gd").new()
+	add_child(fog)
+	fog.setup(session.ui)
 	var box: Node = session.ui.get_node("Panel/VBox")
 	for control_name in ["LightInfo", "LightLevel", "LightAngleInfo", "LightAngle"]:
 		box.move_child(box.get_node(control_name), palette.get_index())
