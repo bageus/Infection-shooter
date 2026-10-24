@@ -7,6 +7,8 @@ var main: VBoxContainer
 var constructor: VBoxContainer
 var collapse: Button
 var selection: PanelContainer
+var center: VBoxContainer
+var help_scroll: ScrollContainer
 var selected_name: Label
 var collapsed := false
 var _controls: Node
@@ -67,30 +69,63 @@ func setup(controls: Node) -> void:
 	collapse.offset_top = 8
 	collapse.offset_bottom = 44
 	collapse.pressed.connect(toggle_right)
+	_build_center(controls, ui, box)
+
+
+func _build_center(controls: Node, ui: Control, box: Node) -> void:
+	# Wave settings share the palette scroll instead of covering the center HUD.
+	var waves: Control = controls.spawn_options.panel
+	waves.reparent(box)
+	box.move_child(waves, controls.palette.get_index())
+	waves.set_anchors_and_offsets_preset(Control.PRESET_TOP_LEFT)
+	waves.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	center = VBoxContainer.new()
+	center.name = "PlanningCenterHUD"
+	center.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	center.add_theme_constant_override("separation", 4)
+	ui.add_child(center)
+	controls.planning_toolbar.reparent(center)
+	var actions: Node = controls.undo_button.get_parent()
+	controls.help_button.reparent(actions)
+	for action: Button in [controls.undo_button, controls.duplicate_button]:
+		action.clip_text = true
+		action.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		action.add_theme_font_size_override("font_size", 14)
 	selection = PanelContainer.new()
 	selection.name = "SelectedObjectHUD"
-	ui.add_child(selection)
-	selection.set_anchors_preset(Control.PRESET_CENTER_TOP)
-	selection.offset_left = -165
-	selection.offset_right = 165
-	selection.offset_top = 52
+	center.add_child(selection)
 	selection.add_theme_stylebox_override("panel", _style())
 	var info := VBoxContainer.new()
+	info.add_theme_constant_override("separation", 0)
 	selection.add_child(info)
 	selected_name = Label.new()
 	selected_name.name = "ObjectName"
-	selected_name.max_lines_visible = 2
+	selected_name.max_lines_visible = 1
 	selected_name.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
-	selected_name.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	selected_name.clip_text = true
+	selected_name.add_theme_font_size_override("font_size", 12)
 	info.add_child(selected_name)
 	controls.status.reparent(info)
-	controls.status.custom_minimum_size = Vector2(0, 64)
+	controls.status.custom_minimum_size = Vector2.ZERO
 	controls.status.clip_text = true
-	controls.status.max_lines_visible = 3
-	controls.status.text_overrun_behavior = TextServer.OVERRUN_NO_TRIMMING
-	controls.status.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-	controls.help_button.set_anchors_preset(Control.PRESET_CENTER_TOP)
-	controls.help_button.position = Vector2(ui.size.x * 0.5 + 170, 8)
+	controls.status.max_lines_visible = 1
+	controls.status.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
+	controls.status.autowrap_mode = TextServer.AUTOWRAP_OFF
+	controls.status.add_theme_font_size_override("font_size", 12)
+	controls.status.mouse_entered.connect(_status_tooltip)
+	help_scroll = ScrollContainer.new()
+	help_scroll.name = "PlanningHelpScroll"
+	help_scroll.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
+	center.add_child(help_scroll)
+	var help_panel := ui.get_node("HelpPanel") as Control
+	help_panel.reparent(help_scroll)
+	help_panel.set_anchors_and_offsets_preset(Control.PRESET_TOP_LEFT)
+	help_panel.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	controls.help.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	help_panel.visibility_changed.connect(func() -> void: help_scroll.visible = help_panel.visible)
+	help_scroll.hide()
+	ui.resized.connect(_resize_center)
+	_resize_center()
 	controls.planning_toolbar.visibility_changed.connect(_toolbar_visibility_changed)
 	update_selection(controls)
 
@@ -135,13 +170,29 @@ func toggle_right() -> void:
 	collapse.text = "›" if right.visible else "‹"
 	collapse.offset_left = -400 if right.visible else -36
 	collapse.offset_right = -372 if right.visible else -8
+	_resize_center()
 
 
 func contains_point(point: Vector2) -> bool:
-	for control: Control in [right, collapse, selection, _controls.help_button, _controls.session.ui.get_node("HelpPanel")]:
+	for control: Control in [right, collapse, selection, _controls.help_button, help_scroll]:
 		if is_instance_valid(control) and control.is_visible_in_tree() and control.get_global_rect().has_point(point):
 			return true
 	return false
+
+
+func _resize_center() -> void:
+	var ui: Control = _controls.session.ui
+	var left: Control = ui.get_node("Panel")
+	var start := left.position.x + left.size.x + 8
+	var end := ui.size.x + collapse.offset_left - 8
+	var width := minf(400, maxf(1, end - start))
+	center.position = Vector2(start + (end - start - width) * .5, 8)
+	center.size.x = width
+	help_scroll.custom_minimum_size.y = maxf(40, ui.size.y - 108)
+
+
+func _status_tooltip() -> void:
+	_controls.status.tooltip_text = _controls.status.text
 
 
 func update_selection(controls: Node) -> void:

@@ -95,3 +95,11 @@ objects. До удаления legacy scripts/scenes нужны явный alias
 14 props и4 старых pickup scenes сохранены; публичный fog_overlay также сохранён.
 Инвентаризация/ограничения: docs/qa/cleanup_candidates.md и JSON рядом. Это не
 новая активная задача и не разрешение менять public API; T004 остаётся единственной.
+
+
+- PLANNER_FULL_MAP_ROUNDTRIP_FB6C79A (25.10.2026): run_planning_mode_tests
+  на mainfb6c79a с5003records даёт Named map round trip preserves all object
+  records FAIL. Воспроизведено с исходными planning_hud_layout/planning_fog
+  и с HUD candidate; численность5003→5003, различия transforms/decor_pose.
+  Расследовать сохранение/восстановление отдельно; UI/fog правки не меняют DTO
+  или числовые допуски теста. Evidence: docs/qa/planner_hud_overlap.md.

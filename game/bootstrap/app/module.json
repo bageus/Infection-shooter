@@ -13,7 +13,7 @@
     "Versioned local keyboard/mouse bindings and read-only runtime diagnostics",
     "One-time shader warm-up quads at mission start",
     "Scene-local mission/menu music and explicitly transferred application-owned completion playback, crossfades and derived combat intensity",
-    "Persistent fog-of-war rendering permission exposed in the level planner; reveal state remains owned by office_floor zones"
+    "Persistent planner-only fog-of-war preview preference; gameplay rendering stays enabled and reveal state remains owned by office_floor zones"
   ],
   "public_api": [],
   "dependencies": [
