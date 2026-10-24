@@ -1,4 +1,4 @@
-extends Node
+extends Node3D
 ## Plays a landing/knock sound when its parent rigid body is stopped hard
 ## (falls, topples, slams into a wall) (ADR-0018). Runs only while the body
 ## is awake, so resting props cost nothing.
@@ -35,8 +35,16 @@ func _ready() -> void:
 		queue_free()
 		return
 	_body.sleeping_state_changed.connect(_on_sleeping_changed)
+	# Scripted sleeping=false does not emit sleeping_state_changed. Inherit the
+	# body's transform so its first movement wakes observation without idle polling.
+	set_notify_transform(true)
 	# Frozen (wall-mounted) props never report sleeping; they wait for wake().
 	set_physics_process(not _body.sleeping and not _body.freeze)
+
+
+func _notification(what: int) -> void:
+	if what == NOTIFICATION_TRANSFORM_CHANGED and is_instance_valid(_body) and not is_physics_processing():
+		_on_sleeping_changed()
 
 
 ## Resumes watching a body that was just unfrozen (a prop knocked off a wall).
@@ -58,7 +66,8 @@ func reset_fragment() -> void:
 
 
 func _physics_process(delta: float) -> void:
-	if _body.freeze:
+	# Prepared maps can assign sleep directly, bypassing the engine's signal.
+	if _body.freeze or _body.sleeping:
 		set_physics_process(false)
 		return
 	_quiet -= delta
