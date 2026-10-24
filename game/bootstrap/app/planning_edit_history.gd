@@ -1,5 +1,6 @@
 extends RefCounted
 const BLOOD_PLACEMENT := preload("res://game/bootstrap/app/planning_blood_placement.gd")
+const DARKNESS := preload("res://game/bootstrap/app/planning_darkness_config.gd")
 
 const WAVE_DIRECTOR := preload("res://game/features/spawning/public/wave_director.gd")
 const LIMIT := 32
@@ -18,6 +19,7 @@ func record_transform(node: Node3D) -> void:
 		"light_energy": node.get_meta("planning_light_energy", -1.0), "light_angle": node.get_meta("planning_light_angle", -1.0),
 		"loot": _loot_of(node), "enemy_stats": node.call("get_enemy_stats") if node.has_method("configure_stats") else {},
 		"fruit": _fruit_of(node),
+		"darkness": DARKNESS.capture(node),
 		"spawn": _spawn_of(node), "spawn_triggers": node.get_meta(WAVE_DIRECTOR.TRIGGER_META, [])})
 
 
@@ -91,6 +93,7 @@ func undo() -> void:
 			if is_instance_valid(node):
 				node.transform = action["transform"]
 				node.scale = action["scale"]
+				DARKNESS.apply(node, action.get("darkness", {}))
 				if not (action.get("blood", {}) as Dictionary).is_empty():
 					_apply_blood(node, action["blood"])
 				if not (action.get("display", {}) as Dictionary).is_empty():
@@ -147,6 +150,7 @@ func _capture(node: Node3D) -> Dictionary:
 		"blood": node.call("get_blood_config") if node.has_method("get_blood_config") else {},
 		"loot": _loot_of(node), "enemy_stats": node.call("get_enemy_stats") if node.has_method("configure_stats") else {},
 		"fruit": _fruit_of(node),
+		"darkness": DARKNESS.capture(node),
 		"spawn": _spawn_of(node), "spawn_triggers": node.get_meta(WAVE_DIRECTOR.TRIGGER_META, [])}
 
 
@@ -213,6 +217,7 @@ func _restore(record: Dictionary, offset: Vector3, new_desk: bool) -> Node3D:
 	if node.has_method("configure_fixture"):
 		var fixture: Dictionary = record.get("fixture", {})
 		node.call("configure_fixture", str(fixture.get("shape", "point")), bool(fixture.get("visible_in_game", false)))
+	DARKNESS.apply(node, record.get("darkness", {}))
 	parent.add_child(node)
 	if node.has_method("set_planning_visual"):
 		node.call("set_planning_visual", planner.active)
