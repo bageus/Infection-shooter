@@ -434,20 +434,22 @@ func load_layout() -> void:
 
 
 
-func _prepare_save() -> bool:
+func _prepare_save(job: RefCounted = null) -> bool:
 	_save_notice = ""
 	if not session.active:
 		return true
 	map_loading = true
-	var settled: bool = await SETTLE.new().run(session, objects.placed.duplicate(), controls.status)
+	if job == null: job = SETTLE.new()
+	var settled: bool = await job.run(session, objects.placed.duplicate(), controls.status)
 	if not is_instance_valid(session) or not session.is_inside_tree():
 		map_loading = false
 		return false
 	# Physics already moved desk attachments; reset the editing baseline.
 	objects.workstation_transforms.clear()
 	if not settled:
-		_save_notice = " | unsettled props kept at authored positions; check red objects"
-		push_warning("Planner physics preparation timed out; saving authored positions without settled_physics stamps")
+		map_loading = false
+		controls.status.text = "NOT SAVED | " + str(job.failure_reason)
+		return false
 	return true
 
 

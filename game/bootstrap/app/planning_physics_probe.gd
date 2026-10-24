@@ -6,7 +6,8 @@ static func lift_embedded(body: RigidBody3D) -> void:
 	for shape: CollisionShape3D in body.find_children("*", "CollisionShape3D", true, false):
 		if shape.disabled or shape.get_parent() != body or shape.shape == null:
 			continue
-		var world := shape.global_transform * shape.shape.get_debug_mesh().get_aabb()
+		var local: AABB = AABB(-shape.shape.size * 0.5, shape.shape.size) if shape.shape is BoxShape3D else shape.shape.get_debug_mesh().get_aabb()
+		var world := shape.global_transform * local
 		bounds = bounds.merge(world) if found else world
 		found = true
 	if not found:

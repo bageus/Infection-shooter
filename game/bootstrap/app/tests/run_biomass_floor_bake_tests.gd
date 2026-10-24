@@ -6,6 +6,17 @@ const CAPTURE := preload("res://game/bootstrap/app/planning_layout_capture.gd")
 const BAKE := preload("res://game/bootstrap/app/planning_biomass_bake.gd")
 var failures := 0
 
+class RejectedSave extends "res://game/bootstrap/app/planning_storage.gd":
+	var capture_started := false
+	func enforce_wall_fixtures() -> String: return ""
+	func _prepare_save(_job: RefCounted = null) -> bool:
+		var job := preload("res://game/bootstrap/app/planning_settle.gd").new()
+		job.tick_limit = 1
+		return await super._prepare_save(job)
+	func _capture_save() -> Dictionary:
+		capture_started = true
+		return await super._capture_save()
+
 class Objects extends Node:
 	var session: Node
 	var placed: Array = []
@@ -182,12 +193,17 @@ func _save_pipeline() -> void:
 	session.root.add_child(falling)
 	objects.placed = [falling]
 	paused = true
-	_check(await storage._prepare_save(), "Timeout does not block saving the layout")
-	_check(not str(storage.get("_save_notice")).is_empty() and not falling.has_meta("planning_settled_transform"), "Saved fallback warns and does not claim settled physics")
-	data = await storage._capture_save()
-	_check(float(data.objects[0].y) == 10.0 and not data.has("floor_biomass_v1"), "Fallback capture keeps authored position and removes obsolete pixels")
-	var path := "user://unsettled_layout_roundtrip.json"
-	_check(not MAP.write(path, data).has("error") and not MAP.read(path).has("error"), "Unsettled layout still completes atomic save/read")
+	var rejected := RejectedSave.new()
+	rejected.session = session
+	rejected.objects = objects
+	rejected.controls = {"status": status}
+	var path := rejected.SAVE_PATH
+	_check(not MAP.write(path, {"version": 8, "objects": []}).has("error"), "Prior save exists before failed preparation")
+	var previous := FileAccess.get_file_as_string(path)
+	await rejected.save_layout()
+	_check(not rejected.capture_started and not rejected.map_loading, "Unsettled physics prevents capture/bake/write and releases the UI")
+	_check(status.text.begins_with("NOT SAVED") and not falling.has_meta("planning_settled_transform"), "Failure is shown instead of a false SAVED status")
+	_check(FileAccess.get_file_as_string(path) == previous and not FileAccess.file_exists(path + ".bak"), "Prior save stays byte-identical, including backup, on timeout")
 	paused = false
 	session.free()
 	DirAccess.remove_absolute(path)

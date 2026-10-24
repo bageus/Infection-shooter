@@ -86,6 +86,7 @@ func _run() -> void:
 	_anchor_replacement(stage)
 	await _low_fps(stage, label)
 	await _timeout_snapshot(stage, label)
+	await _whole_location(label)
 	_freed_resume(stage)
 	var position_before := box.position
 	paused = false
@@ -286,12 +287,85 @@ func _timeout_snapshot(stage: Node3D, status: Label) -> void:
 	shape.shape = BoxShape3D.new()
 	body.add_child(shape)
 	stage.add_child(body)
-	var before := body.transform
 	body.set_meta("planning_settled_transform", Transform3D())
 	body.set_meta("planning_settled_count", 1)
 	var job := SETTLE.new()
 	job.tick_limit = 1
 	_check(not await job.run(stage, [body], status), "Unfinished physics is reported honestly")
-	_check(body.transform.is_equal_approx(before), "Timeout restores authored placement instead of saving a falling intermediate pose")
+	_check(not job.failure_reason.is_empty(), "Timeout explains why no prepared snapshot is available")
 	_check(not body.has_meta("planning_settled_transform"), "Unsettled authored placement is not stamped as prepared")
 	body.free()
+
+
+func _cube(parent: Node3D, at: Vector3) -> RigidBody3D:
+	var body := RigidBody3D.new()
+	body.position = at
+	var shape := CollisionShape3D.new()
+	shape.shape = BoxShape3D.new()
+	body.add_child(shape)
+	parent.add_child(body)
+	body.owner = parent
+	shape.owner = parent
+	return body
+
+
+func _whole_location(status: Label) -> void:
+	var stage := Node3D.new()
+	stage.position.x = 100
+	root.add_child(stage)
+	var floor_body := StaticBody3D.new()
+	floor_body.position.y = -0.1
+	var shape := CollisionShape3D.new()
+	shape.shape = BoxShape3D.new()
+	shape.shape.size = Vector3(40, 0.2, 40)
+	floor_body.add_child(shape)
+	stage.add_child(floor_body)
+	floor_body.owner = stage
+	shape.owner = stage
+	# The upper prop was in the first 192-body batch, its support in a later
+	# batch. Both begin in the air and must fall together to real ground.
+	var upper := _cube(stage, Vector3(0, 5, 0))
+	var nodes: Array = [upper]
+	for index in 200:
+		var x := float(index % 15) * 2.0 - 14.0
+		var z := float(floori(float(index) / 15)) * 2.0 - 14.0
+		if absf(x) < 0.1 and absf(z) < 0.1: continue
+		nodes.append(_cube(stage, Vector3(x, 1.5, z)))
+	var lower := _cube(stage, Vector3(0, 3, 0))
+	nodes.append(lower)
+	var bin: Node3D = preload("res://game/bootstrap/app/planning_catalog.gd").new()._instantiate_asset("res://models/objects/enviroments/09/09_trash_bin_small.glb")
+	bin.position = Vector3(3, 0.015, 17)
+	stage.add_child(bin)
+	bin.owner = stage
+	nodes.append(bin)
+	var job := SETTLE.new()
+	_check(await job.run(stage, nodes, status), "Entire scene settles together across the former batch boundary")
+	_check(absf(lower.position.y - 0.5) < 0.04 and absf(upper.position.y - 1.5) < 0.04, "Falling support and upper prop reach their actual final positions")
+	for node: RigidBody3D in nodes:
+		_check(node.sleeping and node.get_meta("planning_settled_transform") == node.transform, "Only final transforms receive prepared sleep stamps")
+	var packed := PackedScene.new()
+	_check(packed.pack(stage) == OK, "Settled location packs as a scene")
+	var loaded := packed.instantiate() as Node3D
+	loaded.position.x = 200
+	root.add_child(loaded)
+	PHYSICS.resume(loaded.get_children())
+	var loader := preload("res://game/bootstrap/app/menu/mission_loader.gd").new()
+	loader.pending = loaded
+	var frame_before := Engine.get_process_frames()
+	await loader._settle_props(self)
+	_check(Engine.get_process_frames() == frame_before, "Prepared map skips the loading-time physics settle loop")
+	loader.free()
+	var transforms := {}
+	for node in loaded.get_children():
+		if node is RigidBody3D:
+			_check(node.sleeping, "Loading does not wake prepared furniture")
+			transforms[node] = node.transform
+	paused = false
+	for frame in 60: await physics_frame
+	for node: RigidBody3D in transforms:
+		var before: Transform3D = transforms[node]
+		var rotation_delta := before.basis.get_rotation_quaternion().angle_to(node.basis.get_rotation_quaternion())
+		_check(node.position.distance_to(before.origin) < 0.001 and rotation_delta < 0.001 and node.sleeping, "Loaded furniture stays at its final pose (1 mm / 0.001 rad contact tolerance)")
+	paused = true
+	loaded.free()
+	stage.free()

@@ -141,7 +141,8 @@ func prepare_planner_physics() -> void:
 		_physics.call("launch", Vector3.ZERO)
 	if _physics != null and _physics.get("_guard") != null:
 		_physics.get("_guard").process_mode = Node.PROCESS_MODE_ALWAYS
-		_physics.get("_guard").busy_limit_seconds = 2.0
+		# The planner decides when the whole scene is supported and at rest.
+		_physics.get("_guard").busy_limit_seconds = INF
 
 
 func finalize_planner_physics() -> void:

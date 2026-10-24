@@ -9,9 +9,11 @@ static func resume(nodes: Array) -> void:
 			node.call("set_runtime_physics", true)
 		if not is_instance_valid(node):
 			continue
-		if node is RigidBody3D and not node.freeze:
-			node.sleeping = node.has_meta("planning_settled_transform") and node.get_meta("planning_settled_transform") == node.transform
 		resume(node.get_children())
+		if node is RigidBody3D and not node.freeze:
+			var prepared: bool = node.has_meta("planning_settled_transform") and node.get_meta("planning_settled_transform") == node.transform
+			node.sleeping = prepared
+			PhysicsServer3D.body_set_state(node.get_rid(), PhysicsServer3D.BODY_STATE_SLEEPING, prepared)
 
 
 ## Save regenerates automatic wall fixtures even when their authored placement is

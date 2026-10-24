@@ -409,11 +409,19 @@ Player applies Devourer independently of absorbed mutation; spent clouds retain
 presence monitoring. Antidote preview/use share the same pure domain result and
 current effectiveness. State ownership/dependency graph/save formats unchanged.
 
-ADR-0064: bootstrap.app сохраняет авторские transforms при finite timeout подготовки
-физики, разрешает snapshot с предупреждением без settled stamps и проверяет
-freed-ссылки до typed cast. Office-floor владеет immutable sparse PNG страницами
+ADR-0064: bootstrap.app проверяет freed-ссылки до typed cast. По уточнению владельца24.10
+сохранение допускается только после совместного покоя всей подвижной локации;
+timeout/cancel не публикует snapshot и не заменяет файл (отменяет fallback PR457). Office-floor владеет immutable sparse PNG страницами
 напольной биомассы; bootstrap генерирует optional map-v8 floor_biomass_v1 при
 Save Map/Layout и передаёт explicit bake/render commands через public API.
 Owners/edges/policy прежние. Canonical SHA256 render inputs нормализует JSON
 числа; cache не применяется к изменённым исходникам. Запечён только diffuse свет
 биомассы, не глобальное освещение всей разрушаемой сцены; legacy maps совместимы.
+
+
+Уточнение ADR0055/0064 (24.10.2026): planning_settle симулирует props и декор
+совместно, затем сохраняет конечные transforms/poses и native sleep state.
+При загрузке prepared тела восстанавливаются sleeping непосредственно в
+PhysicsServer3D; legacy loading settle loop пропускается при полном native
+покое. Ragdoll planner busy timeout не фиксирует тело на лету; завершением
+владеет общий scheduler. Владельцы, зависимости, API и map DTO прежние.
