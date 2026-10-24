@@ -249,6 +249,7 @@ func _place(entry: Dictionary) -> void:
 	if node.get("darkness") != null:
 		node.set("darkness", float(record.get("darkness", 0.88)))
 		node.set("permanent", bool(record.get("permanent_darkness", true)))
+		node.set("room_id", maxi(int(record.get("room_id", 0)), 0))
 		if node.has_method("configure_zone"):
 			# The restored node scale already stretches the 4 m base zone.
 			node.call("configure_zone", Vector2(4.0, 4.0), node.get("darkness"), node.get("permanent"))

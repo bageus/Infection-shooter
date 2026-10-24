@@ -226,8 +226,9 @@ func _leave_floor(seconds: float, budget_full: bool) -> void:
 		return
 	if pool_owner == null and _is_standing_big():
 		# A big piece still standing or propped must not be frozen into the floor as a fake frame: it
-		# stays a body until it lies flat (and can be broken again). Only a full budget removes it.
-		if budget_full:
+		# stays a body until it lies flat (and can be broken again), also when the budget asks for it.
+		# A full budget only removes it when the debris is already far past the burst limit.
+		if budget_full and not (is_instance_valid(_runtime) and _runtime.active.size() < QUALITY.piece_burst()):
 			DEBRIS.fade_free(self, seconds)
 			return
 		_expiry = create_tween()

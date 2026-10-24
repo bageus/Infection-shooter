@@ -9,7 +9,7 @@ const CABINET := MODELS + "03/03_file_cabinet_largest.glb"
 const PLANT := MODELS + "11/11_plant_small.glb"
 const RECEPTION := MODELS + "07/07_reception_counter_two_heights_2.glb"
 const SERVER_RACK := MODELS + "03/03_server_rack3.glb"
-const LAPTOP := MODELS + "05/05_laptop_destructible.glb"
+const LAPTOP := MODELS + "05/05_laptop2_destructible.glb"
 
 var failures := 0
 

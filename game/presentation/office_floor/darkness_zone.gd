@@ -6,11 +6,24 @@ extends Node3D
 @export var reveal_distance := 2.2
 @export var door_link_radius := 4.0
 @export var require_door_open := true
+## Exploration zones sharing a room_id (> 0) are one room under solid fog: it lifts while the
+## player is inside, and otherwise shows only what the camera sees through open doors and glass.
+@export var room_id := 0
+
+const SHADER := preload("res://game/presentation/office_floor/darkness_zone.gdshader")
+const DOOR_REACH := 1.5
+const PORTALS := preload("res://game/presentation/office_floor/darkness_portals.gd")
+const FADE_SPEED := 5.0
+const PORTAL_REFRESH := 0.25
 
 @onready var overlay: MeshInstance3D = $Overlay
 var _revealed := false
 var _player: Node3D
 var _linked_doors: Array[Node3D] = []
+var _fade := 1.0
+var _portal_timer := 0.0
+# Glass panes stay see-through after they break, so they are remembered once found.
+var _glass_portals: Dictionary = {}
 
 func _ready() -> void:
 	add_to_group("darkness_zone")
@@ -20,7 +33,21 @@ func _ready() -> void:
 	overlay.visible = true
 	call_deferred("_find_linked_doors")
 
-func _process(_delta: float) -> void:
+func _process(delta: float) -> void:
+	if room_id > 0 and not permanent:
+		if _player == null:
+			_player = get_tree().get_first_node_in_group("player") as Node3D
+		_fade = move_toward(_fade, 0.0 if _player_inside() else 1.0, FADE_SPEED * delta)
+		overlay.visible = _fade > 0.01
+		set_meta("explored", not overlay.visible)
+		_portal_timer -= delta
+		if overlay.visible and _portal_timer <= 0.0:
+			_portal_timer = PORTAL_REFRESH
+			_push_portals()
+		var material := overlay.mesh.material as ShaderMaterial if overlay.mesh != null else null
+		if material != null:
+			material.set_shader_parameter("darkness", _fade)
+		return
 	if permanent or _revealed or _player == null:
 		return
 	var delta_pos := _player.global_position - global_position
@@ -49,8 +76,88 @@ func _find_linked_doors() -> void:
 	for door in get_tree().get_nodes_in_group("interactive_doors"):
 		if door is Node3D:
 			var door_node := door as Node3D
-			if global_position.distance_to(door_node.global_position) <= door_link_radius:
+			if room_id > 0:
+				if _edge_distance(door_node.global_position) <= DOOR_REACH:
+					_linked_doors.append(door_node)
+			elif global_position.distance_to(door_node.global_position) <= door_link_radius:
 				_linked_doors.append(door_node)
+
+
+## Horizontal distance from a world point to this zone's rectangle (0 inside).
+func _edge_distance(point: Vector3) -> float:
+	var local := global_transform.affine_inverse() * point
+	var half := size * 0.5
+	var edge := Vector3(clampf(local.x, -half.x, half.x), 0.0, clampf(local.z, -half.y, half.y))
+	var nearest := global_transform * edge
+	return Vector2(nearest.x - point.x, nearest.z - point.z).length()
+
+
+## The cover lifts while the player stands in any part of the room.
+func _player_inside() -> bool:
+	if _player == null:
+		return false
+	for zone in get_tree().get_nodes_in_group("darkness_zone"):
+		if zone.get("room_id") == room_id and not zone.get("permanent") and zone.call("_edge_distance", _player.global_position) <= 0.3:
+			return true
+	return false
+
+
+## Fog is solid; the camera still sees in through open doors and glass, wherever they meet this room.
+func _push_portals() -> void:
+	var material := overlay.mesh.material as ShaderMaterial if overlay.mesh != null else null
+	if material == null:
+		return
+	for body in get_tree().get_nodes_in_group("infected_breakable_glass"):
+		for shape in body.find_children("*", "CollisionShape3D", true, false):
+			if not _glass_portals.has(shape.get_instance_id()) and _edge_distance(shape.global_position) <= PORTALS.GLASS_REACH:
+				var pane: Dictionary = PORTALS.pane(shape, global_position)
+				if not pane.is_empty():
+					_glass_portals[shape.get_instance_id()] = pane
+	var portals: Array = _glass_portals.values()
+	for door in _linked_doors:
+		if is_instance_valid(door) and door.has_method("is_open_for_exploration") and bool(door.call("is_open_for_exploration")):
+			portals.append(PORTALS.door(door, global_position))
+	portals = portals.slice(0, PORTALS.MAX_PORTALS)
+	var centres := PackedVector3Array()
+	var normals := PackedVector3Array()
+	var us := PackedVector3Array()
+	var vs := PackedVector3Array()
+	for portal: Dictionary in portals:
+		centres.append(portal.centre)
+		normals.append(portal.normal)
+		us.append(portal.u)
+		vs.append(portal.v)
+	for _i in range(portals.size(), PORTALS.MAX_PORTALS):
+		centres.append(Vector3.ZERO)
+		normals.append(Vector3.ZERO)
+		us.append(Vector3.ZERO)
+		vs.append(Vector3.ZERO)
+	material.set_shader_parameter("portal_count", portals.size())
+	material.set_shader_parameter("portal_centre", centres)
+	material.set_shader_parameter("portal_normal", normals)
+	material.set_shader_parameter("portal_u", us)
+	material.set_shader_parameter("portal_v", vs)
+
+
+## True when the cover is up and the segment from `from` to `to` passes through it.
+func blocks_view(from: Vector3, to: Vector3) -> bool:
+	if not overlay.visible or not is_visible_in_tree():
+		return false
+	var top := global_position.y
+	if (from.y - top) * (to.y - top) >= 0.0:
+		return false
+	var hit := from.lerp(to, (top - from.y) / (to.y - from.y))
+	return _edge_distance(Vector3(hit.x, top, hit.z)) <= 0.0
+
+
+func set_view_hole(center: Vector2, viewport: Vector2, radius: float, depth: float) -> void:
+	var material := overlay.mesh.material as ShaderMaterial if overlay.mesh != null else null
+	if material == null:
+		return
+	material.set_shader_parameter("hole_center", center)
+	material.set_shader_parameter("viewport_size", viewport)
+	material.set_shader_parameter("hole_radius", radius)
+	material.set_shader_parameter("player_depth", depth)
 
 
 func configure_zone(new_size: Vector2, new_darkness: float, is_permanent: bool) -> void:
@@ -65,13 +172,10 @@ func _rebuild() -> void:
 	var mesh := QuadMesh.new()
 	mesh.size = size
 	mesh.orientation = PlaneMesh.FACE_Y
-	var material := StandardMaterial3D.new()
-	material.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
-	material.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
-	material.albedo_color = Color(0.0, 0.0, 0.0, darkness)
-	material.no_depth_test = false
-	material.cull_mode = BaseMaterial3D.CULL_DISABLED
+	var material := ShaderMaterial.new()
+	material.shader = SHADER
 	material.render_priority = 10
+	material.set_shader_parameter("darkness", darkness)
 	mesh.material = material
 	overlay.mesh = mesh
 	overlay.position = Vector3.ZERO

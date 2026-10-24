@@ -212,6 +212,11 @@ func _ray_blocked(point: Vector3, target: Node3D) -> bool:
 	if target is CollisionObject3D:
 		query.exclude = [target.get_rid()]
 	rays_last_tick += 1
+	# Only the hero shows through darkness; enemies and items stay hidden in the fog.
+	if target == player:
+		for zone in get_tree().get_nodes_in_group("darkness_zone"):
+			if zone.has_method("blocks_view") and zone.call("blocks_view", camera.global_position, point):
+				return true
 	var hit := world.get_world_3d().direct_space_state.intersect_ray(query)
 	if hit.is_empty():
 		return false
@@ -229,10 +234,18 @@ func _update_hole() -> void:
 	var side := camera.unproject_position(point + camera.global_basis.x * HOLE_RADIUS)
 	var size := get_viewport().get_visible_rect().size
 	if size.x < 1.0 or size.y < 1.0 or not center.is_finite() or camera.is_position_behind(point):
-		walls.update_hole(Vector2(-10, -10), Vector2.ONE, 0.0, 0.0)
+		_set_hole(Vector2(-10, -10), Vector2.ONE, 0.0, 0.0)
 		return
 	var depth := -(camera.global_transform.affine_inverse() * point).z
-	walls.update_hole(center / size, size, center.distance_to(side) if _hero_blocked else 0.0, depth)
+	_set_hole(center / size, size, center.distance_to(side) if _hero_blocked else 0.0, depth)
+
+
+## Walls and darkness covers share one hole, so the lens works through both.
+func _set_hole(center: Vector2, size: Vector2, radius: float, depth: float) -> void:
+	walls.update_hole(center, size, radius, depth)
+	for zone in get_tree().get_nodes_in_group("darkness_zone"):
+		if zone.has_method("set_view_hole"):
+			zone.call("set_view_hole", center, size, radius, depth)
 
 
 func _clear() -> void:
@@ -244,6 +257,8 @@ func _clear() -> void:
 	_removed_roots.clear()
 	walls.clear()
 	query_layer.clear()
+	if is_inside_tree():
+		_set_hole(Vector2(-10, -10), Vector2.ONE, 0.0, 0.0)
 	_subject_cursor = 0
 	_check_credit = 0.0
 	_hero_blocked = false

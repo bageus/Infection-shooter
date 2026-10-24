@@ -12,7 +12,7 @@ const BLAST := preload("res://game/presentation/office_floor/blast_effect.gd")
 const QUALITY := preload("res://game/core/vfx/public/destruction_quality.gd")
 const MODELS := [
 	"07/07_table_circular", "08/08_office_desk_2", "08/08_divider_full_H_desk", "06/06_office_chair_2",
-	"05/05_printer_destructible", "04/04_cardboard_boxes_1", "10/10_armchair_green_destructible", "01/01_wood_slat_partition_destructible",
+	"05/05_computer_tower_destructible", "04/04_cardboard_boxes_1", "10/10_armchair_green_destructible", "01/01_wood_slat_partition_destructible",
 ]
 var _out_dir := "/tmp/destruction_review"
 var _level := 1

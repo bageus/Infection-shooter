@@ -42,6 +42,7 @@ static func collect(objects: Node, nodes: Array, include_player: bool = true) ->
 			"flicker_step": node.get_meta("planning_flicker_step", 0.2),
 			"darkness": node.get("darkness") if node.get("darkness") != null else 0.0,
 			"permanent_darkness": node.get("permanent") if node.get("permanent") != null else false,
+			"room_id": node.get("room_id") if node.get("room_id") != null else 0,
 			"spawn_x": (node.get_meta("planning_spawn_transform") as Transform3D).origin.x if node.has_meta("planning_spawn_transform") else node.position.x,
 			"spawn_y": (node.get_meta("planning_spawn_transform") as Transform3D).origin.y if node.has_meta("planning_spawn_transform") else node.position.y,
 			"spawn_z": (node.get_meta("planning_spawn_transform") as Transform3D).origin.z if node.has_meta("planning_spawn_transform") else node.position.z
