@@ -25,6 +25,7 @@ var rebuild_count := 0
 var _dirty := true
 var _elapsed := 0.0
 var _hero_blocked := false
+var _hero_fog_blocked := false
 var _subjects_by_id: Dictionary = {}
 var _added_roots: Dictionary = {}
 var _removed_roots: Dictionary = {}
@@ -161,7 +162,7 @@ func _collect(node: Node) -> void:
 			query_layer.add_root(node)
 		if mode == 1 and node.is_in_group("camera_occluder"):
 			walls.add_root(node)
-		elif mode == 0:
+		if mode == 0 or node == player:
 			if not _subjects_by_id.has(node.get_instance_id()):
 				if node == player:
 					_add_subject(node, HERO_COLOR)
@@ -174,7 +175,7 @@ func _collect(node: Node) -> void:
 
 
 func _add_subject(node: Node3D, tint: Color) -> void:
-	var subject := SUBJECT.new(node, tint)
+	var subject := SUBJECT.new(node, tint, mode == 1 and node == player)
 	_subjects_by_id[node.get_instance_id()] = subject
 	subjects.append(subject)
 
@@ -182,6 +183,9 @@ func _add_subject(node: Node3D, tint: Color) -> void:
 func _check_subjects(limit: int = SUBJECTS_PER_TICK) -> void:
 	if mode == 1:
 		_hero_blocked = _blocked(player)
+		var subject: RefCounted = _subjects_by_id.get(player.get_instance_id())
+		if subject != null:
+			subject.set_revealed(player.is_visible_in_tree() and _hero_blocked, _hero_fog_blocked)
 		return
 	for index in mini(limit, subjects.size()):
 		_subject_cursor %= subjects.size()
@@ -192,10 +196,13 @@ func _check_subjects(limit: int = SUBJECTS_PER_TICK) -> void:
 		var live := node != null and node.is_visible_in_tree()
 		if live and node.has_method("is_dead"):
 			live = not bool(node.call("is_dead"))
-		subject.set_revealed(live and _blocked(node))
+		var blocked := live and _blocked(node)
+		subject.set_revealed(blocked, node == player and _hero_fog_blocked)
 
 
 func _blocked(node: Node3D) -> bool:
+	if node == player:
+		_hero_fog_blocked = false
 	if camera.is_position_behind(node.global_position) or camera.global_position.distance_to(node.global_position) > 45.0:
 		return false
 	var screen := camera.unproject_position(node.global_position)
@@ -216,6 +223,7 @@ func _ray_blocked(point: Vector3, target: Node3D) -> bool:
 	if target == player:
 		for zone in get_tree().get_nodes_in_group("darkness_zone"):
 			if zone.has_method("blocks_view") and zone.call("blocks_view", camera.global_position, point):
+				_hero_fog_blocked = true
 				return true
 	var hit := world.get_world_3d().direct_space_state.intersect_ray(query)
 	if hit.is_empty():
@@ -240,7 +248,7 @@ func _update_hole() -> void:
 	_set_hole(center / size, size, center.distance_to(side) if _hero_blocked else 0.0, depth)
 
 
-## Walls and darkness covers share one hole, so the lens works through both.
+## The lens accents the blocking wall, without exposing the room behind it.
 func _set_hole(center: Vector2, size: Vector2, radius: float, depth: float) -> void:
 	walls.update_hole(center, size, radius, depth)
 	for zone in get_tree().get_nodes_in_group("darkness_zone"):
@@ -262,6 +270,7 @@ func _clear() -> void:
 	_subject_cursor = 0
 	_check_credit = 0.0
 	_hero_blocked = false
+	_hero_fog_blocked = false
 
 
 func _exit_tree() -> void:

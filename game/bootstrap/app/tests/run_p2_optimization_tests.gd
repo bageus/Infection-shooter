@@ -6,7 +6,7 @@ var failures := 0
 class Subject extends RefCounted:
 	var target: WeakRef
 	var calls := 0
-	func set_revealed(_value: bool) -> void:
+	func set_revealed(_value: bool, _force_visible: bool = false) -> void:
 		calls += 1
 	func clear() -> void:
 		pass

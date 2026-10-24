@@ -1,3 +1,4 @@
+game/bootstrap/app/tests/run_hero_xray_tests.gd
 game/bootstrap/app/tests/run_startup_resource_memory_tests.gd
 game/bootstrap/app/tests/run_menu_tests.gd
 game/bootstrap/app/tests/run_lighting_tests.gd

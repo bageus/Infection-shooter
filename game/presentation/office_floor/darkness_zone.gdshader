@@ -16,12 +16,13 @@ void vertex() {
 }
 void fragment() {
     float cover = darkness;
-    // Lens x-ray: same dithered hole the walls get, so the hero stays visible under the cover.
-    if (main_view > 0.5 && hole_radius > 0.0 && -VERTEX.z < player_depth - 0.05) {
+    // X-ray never opens the room cover; the hero has its own reveal pass.
+    // In the lens, keep ceiling fixtures above the cover from leaking through it.
+    // The mask never writes depth; normal views retain the authored depth test.
+    DEPTH = FRAGCOORD.z;
+    if (main_view > 0.5 && hole_radius > 0.0) {
         float distance_px = length((SCREEN_UV - hole_center) * viewport_size);
-        float fade = smoothstep(hole_radius * 0.88, hole_radius, distance_px);
-        float dither = fract(dot(floor(FRAGCOORD.xy), vec2(0.754877666, 0.569840296)));
-        if (fade < dither + 0.0001) discard;
+        if (distance_px < hole_radius) DEPTH = 1.0;
     }
     // Fog rooms: a view ray that enters through an open door or glass pane sees the room, so the cover opens there.
     vec3 camera = INV_VIEW_MATRIX[3].xyz;
