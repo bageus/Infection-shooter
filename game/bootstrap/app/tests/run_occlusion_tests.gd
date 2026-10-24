@@ -59,7 +59,7 @@ func _run() -> void:
 	for cycle in 5:
 		effects.set_mode(1)
 		await _settle()
-		_check(effects.walls.records.size() == 1 and effects.subjects.is_empty(), "hole mode only overrides structural wall")
+		_check(effects.walls.records.size() == 1 and effects.subjects.size() == 1, "x-ray keeps structural blockers and reveals only the hero")
 		_check(effects.get("_hero_blocked"), "hole is gated by hero blocker")
 		var wall_rebuilds: int = effects.rebuild_count
 		scene.remove_child(wall)

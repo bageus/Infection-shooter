@@ -35,3 +35,29 @@ Revert the commit to remove the effects/UI/classifications. Unrecognized config 
 ## Validation
 
 Runtime tests exercise modes, blockers, dynamically added subjects, restoration, persistence and planner cycles. Rendered tests must exercise hidden versus visible fragments and the opening in actual Compatibility and Forward+; headless does not validate shader output. Windows/browser gameplay acceptance and frame budget in the fully furnished level remain manual.
+
+
+## Уточнение владельца: просвет только для героя — 24.10.2026
+
+Реальное вырезание стены/крышки тумана открывало раковины и потолочные
+светильники. В mode=1 геометрия стен сохраняет непрозрачность и depth;
+локальная линза только затемняет стену. Отдельная копия героя разделяет mesh,
+skin, skeleton и morph weights, копирует стандартные PBR параметры/текстуры,
+проверяет исходный scene depth и рисует перекрытые фрагменты перед преградой.
+Clip-space depth сжат к ближней плоскости с сохранением относительной глубины
+частей героя; LIGHT_VERTEX сохраняет авторское положение для освещения.
+Проход ограничен основной камерой и не отбрасывает тени.
+
+Туман не вырезается: в пределах активной линзы depth test его маски
+перекрывает также потолочные элементы выше самой плоскости тумана.
+Маска depth не записывает; настоящий проход через дверь/стекло остаётся.
+У героя есть force flag для покрытия туманом, не пишущим scene depth.
+Mode=0 сохраняет прежние цветные силуэты; mode=1 не создаёт копий врагов,
+предметов или потолочных объектов. При нормальном обзоре копия героя скрыта.
+
+Новых viewport/обхода мебели/коллизий/DTO/зависимостей нет. Изменяется только
+визуальный контракт уже согласованного режима; запрос владельца разрешает
+ограничить просвет героем. Откат — revert PR, настройки 0/1 совместимы.
+Шесть фиксированных wall/hero shader variants включены в прежний warm-up.
+Native GL Compatibility и настоящий Forward+/Vulkan проверяются новым
+run_hero_xray_tests с пиксельными проверками и запусками в CI.

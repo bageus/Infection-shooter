@@ -18,7 +18,7 @@ func _run() -> void:
 	current_scene = app
 	var camera := (app.get("player") as Node).get("camera") as Camera3D
 	var warmup := camera.get_node_or_null("ShaderWarmup")
-	_check(warmup != null and warmup.get_child_count() == paths.size() + 2, "One quad per spatial shader plus the two runtime cull variants under the camera")
+	_check(warmup != null and warmup.get_child_count() == paths.size() + 4, "One quad per spatial shader plus the four wall/hero runtime cull variants under the camera")
 	var walls := preload("res://game/bootstrap/app/occlusion_wall_materials.gd")
 	_check(walls.shader_for_cull(BaseMaterial3D.CULL_DISABLED) == walls.shader_for_cull(BaseMaterial3D.CULL_DISABLED) and walls.shader_for_cull(BaseMaterial3D.CULL_DISABLED) != walls.shader_for_cull(BaseMaterial3D.CULL_FRONT), "Cull variants are built once and shared, so the warm-up compiles the shaders walls use")
 	var hit_viewport := app.get_node_or_null("HitEffectWarmup") as SubViewport

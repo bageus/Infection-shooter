@@ -1,6 +1,7 @@
 extends RefCounted
 ## Runtime-only materials, restored exactly on mode change or teardown.
 const SHADER := preload("res://game/bootstrap/app/occlusion_hole.gdshader")
+const HERO_SHADER := preload("res://game/bootstrap/app/occlusion_hero.gdshader")
 var records: Dictionary = {}
 
 
@@ -59,26 +60,29 @@ func remove_root(root: Node) -> void:
 			records.erase(id)
 
 
-static func shader_for_cull(cull_mode: int) -> Shader:
+static func shader_for_cull(cull_mode: int, hero: bool = false) -> Shader:
+	var shader := HERO_SHADER if hero else SHADER
 	if cull_mode == BaseMaterial3D.CULL_BACK:
-		return SHADER
-	if not _cull_variants.has(cull_mode):
+		return shader
+	var key := Vector2i(cull_mode, int(hero))
+	if not _cull_variants.has(key):
 		var variant := Shader.new()
-		variant.code = SHADER.code.replace("shader_type spatial;", "shader_type spatial;\nrender_mode " + ("cull_disabled" if cull_mode == BaseMaterial3D.CULL_DISABLED else "cull_front") + ";")
-		_cull_variants[cull_mode] = variant
-	return _cull_variants[cull_mode]
+		variant.code = shader.code.replace("shader_type spatial;", "shader_type spatial;\nrender_mode " + ("cull_disabled" if cull_mode == BaseMaterial3D.CULL_DISABLED else "cull_front") + ";")
+		_cull_variants[key] = variant
+	return _cull_variants[key]
 
 
 ## The shaders the occlusion pass can install, so the warm-up compiles the very same resources.
 static func runtime_shaders() -> Array[Shader]:
-	return [SHADER, shader_for_cull(BaseMaterial3D.CULL_DISABLED), shader_for_cull(BaseMaterial3D.CULL_FRONT)]
+	return [SHADER, shader_for_cull(BaseMaterial3D.CULL_DISABLED), shader_for_cull(BaseMaterial3D.CULL_FRONT),
+		HERO_SHADER, shader_for_cull(BaseMaterial3D.CULL_DISABLED, true), shader_for_cull(BaseMaterial3D.CULL_FRONT, true)]
 
 
-func _copy_surface(source: BaseMaterial3D) -> ShaderMaterial:
-	if surface_cache.has(source):
-		return surface_cache[source]
+func _copy_surface(source: BaseMaterial3D, hero: bool = false) -> ShaderMaterial:
+	if surface_cache.has(source) and surface_cache[source].has(hero):
+		return surface_cache[source][hero]
 	var material := ShaderMaterial.new()
-	material.shader = shader_for_cull(source.cull_mode)
+	material.shader = shader_for_cull(source.cull_mode, hero)
 	for pair in [["base_color", source.albedo_color], ["base_texture", source.albedo_texture],
 		["use_texture", source.albedo_texture != null], ["roughness_value", source.roughness],
 		["metallic_value", source.metallic], ["specular_value", source.metallic_specular],
@@ -94,7 +98,9 @@ func _copy_surface(source: BaseMaterial3D) -> ShaderMaterial:
 		["emission_texture", source.emission_texture], ["use_emission", source.emission_enabled and source.emission_texture != null],
 		["normal_texture", source.normal_texture], ["use_normal", source.normal_enabled], ["normal_scale", source.normal_scale]]:
 		material.set_shader_parameter(pair[0], pair[1])
-	surface_cache[source] = material
+	if not surface_cache.has(source):
+		surface_cache[source] = {}
+	surface_cache[source][hero] = material
 	active_materials.append(material)
 	return material
 
