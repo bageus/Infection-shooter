@@ -23,12 +23,8 @@ void fragment() {
 	float mullion = smoothstep(0.5 - 0.016 - aa.x, 0.5 - 0.016, cell.x) * (1.0 - smoothstep(0.5 + 0.016, 0.5 + 0.016 + aa.x, cell.x));
 	pane *= 1.0 - mullion;
 	pane = mix(0.0, pane, COLOR.a);
-	vec2 id = floor(grid);
-	float seed = dot(id, vec2(12.9898, 78.233));
-	float lit = step(0.88, fract(sin(seed) * 43758.5453));
 	float sheen = 0.5 + 0.5 * sin(UV.x * 0.35 + UV.y * 0.22);
 	vec3 glass = mix(vec3(0.09, 0.16, 0.26), vec3(0.27, 0.38, 0.52), sheen);
-	glass = mix(glass, vec3(0.78, 0.59, 0.32), lit * 0.4);
 	vec3 frame = vec3(0.08, 0.10, 0.13);
 	vec3 surface = mix(frame, glass, pane);
 	float fog = 1.0 - smoothstep(-65.0, -12.0, world_y);
