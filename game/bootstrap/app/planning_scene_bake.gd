@@ -2,6 +2,7 @@ extends RefCounted
 ## Bounded authored scene cloning; shared resources remain immutable.
 const SCENE_SCRIPTS := preload("res://game/bootstrap/app/planning_scene_scripts.gd")
 const DOOR_OPTIONS := preload("res://game/bootstrap/app/planning_door_options.gd")
+const DARKNESS := preload("res://game/bootstrap/app/planning_darkness_config.gd")
 const WAVE_DIRECTOR := preload("res://game/features/spawning/public/wave_director.gd")
 var catalog: Variant
 var surface_settings: Dictionary = {}
@@ -65,6 +66,7 @@ func _append(node: Node3D, scene_root: Node3D) -> void:
 	scene_root.add_child(copy)
 	copy.owner = scene_root
 	copy.transform = node.transform
+	DARKNESS.apply(copy, DARKNESS.capture(node))
 	if node.has_meta("planning_settled_transform") and node.get_meta("planning_settled_transform") == node.transform:
 		copy.set_meta("planning_settled_transform", copy.transform)
 	if node.has_meta("planning_object_id"):

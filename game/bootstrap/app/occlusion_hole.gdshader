@@ -36,17 +36,18 @@ void vertex() {
 }
 void fragment() {
     float edge = 0.0;
+    float lens = 0.0;
     if (main_view > 0.5 && hole_radius > 0.0 && -VERTEX.z < player_depth - 0.05) {
         float distance_px = length((SCREEN_UV - hole_center) * viewport_size);
         float fade = smoothstep(hole_radius * 0.88, hole_radius, distance_px);
-        float dither = fract(dot(floor(FRAGCOORD.xy), vec2(0.754877666, 0.569840296)));
-        if (fade < dither + 0.0001) discard;
+        // Keep wall colour/depth opaque: only the separate hero pass sees through it.
+        lens = 1.0 - fade;
         edge = (1.0 - smoothstep(hole_radius, hole_radius * 1.08, distance_px)) * 0.12;
     }
     vec4 base = base_color;
     if (use_texture) base *= texture(base_texture, UV);
     if (use_vertex_color) base *= COLOR;
-    ALBEDO = base.rgb;
+    ALBEDO = base.rgb * mix(1.0, 0.55, lens);
     ROUGHNESS = roughness_value;
     if (use_roughness) ROUGHNESS *= dot(texture(roughness_texture, UV), roughness_channel);
     METALLIC = metallic_value;
