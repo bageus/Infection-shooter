@@ -332,6 +332,8 @@ func _install_occlusion_walls(tree: SceneTree) -> void:
 ## the overlay dropped. Step only the physics server (nodes stay paused) until most props are asleep.
 func _settle_props(tree: SceneTree) -> void:
 	var bodies: Array[Node] = pending.find_children("*", "RigidBody3D", true, false)
+	if bodies.all(func(body: Node) -> bool: return not is_instance_valid(body) or (body as RigidBody3D).freeze or bool(PhysicsServer3D.body_get_state(body.get_rid(), PhysicsServer3D.BODY_STATE_SLEEPING))):
+		return
 	var started := Time.get_ticks_msec()
 	var first_tick := Engine.get_physics_frames()
 	PhysicsServer3D.set_active(true)

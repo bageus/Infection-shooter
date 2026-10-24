@@ -11,7 +11,7 @@
 
 ## Decision
 
-Ссылки проверяются как Variant до приведения к Node; конечный timeout возвращает динамические props в исходные авторские transforms, удаляет prepared stamps и позволяет атомарно сохранить карту с предупреждением. Результат не выдаётся за завершённое settling.
+Ссылки проверяются как Variant до приведения к Node. Уточнение владельца24.10 отменяет fallback из первой версии PR457: карта сохраняется только после совместного settling всей локации (см. ADR0055). При timeout/cancel ни capture, ни raster/light bake, ни запись JSON/scene не начинаются; существующее сохранение не заменяется.
 
 Map v8 получает optional `floor_biomass_v1={version:1,y,pages:[{x,z,png}],source_signature}`: sparse участки 8×8м, 512×512 RGBA PNG base64, не более64. Source_signature — SHA256 canonical render inputs (порядок pieces сохранён, числовые поля нормализованы до4 знаков, JSON int/float эквивалентны); при несовпадении cache не используется. Исходные blood records сохраняются, остаются редактируемыми. Новый public baked_biomass_floor — владелец transient Image/Texture/plane; отдельный private rasterizer того же модуля; `set_floor_biomass_baked` public blood scene — явная команда из bootstrap. Footstep alpha-запрос читает страницы. Новых dependency edges, owners, Autoload/policy exceptions нет.
 
