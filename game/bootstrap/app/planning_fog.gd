@@ -1,0 +1,55 @@
+extends Node
+## Application preference exposed in the planner; zones own their reveal state.
+const FILE := "user://planner_settings.cfg"
+var enabled := true
+var button: CheckButton
+var _file := FILE
+
+
+func setup(ui: Control, settings_file: String = FILE) -> void:
+	_file = settings_file
+	var config := ConfigFile.new()
+	if config.load(_file) == OK:
+		var value: Variant = config.get_value("view", "fog_of_war", true)
+		enabled = value if value is bool else true
+	button = CheckButton.new()
+	button.name = "FogOfWarToggle"
+	button.text = "Туман войны (затемнение)"
+	button.tooltip_text = "Показывать затемнение комнат в планировщике и игре. Зоны остаются на карте. Сохраняется между запусками."
+	var box := ui.get_node("Panel/VBox")
+	box.add_child(button)
+	box.move_child(button, box.get_node("LocalLights").get_index() + 1)
+	button.toggled.connect(set_enabled)
+	get_tree().node_added.connect(_on_node_added)
+	set_enabled(enabled, false)
+
+
+func set_enabled(value: bool, persist: bool = true) -> void:
+	enabled = value
+	button.set_pressed_no_signal(enabled)
+	for zone in get_tree().get_nodes_in_group("darkness_zone"):
+		_apply_zone(weakref(zone))
+	if persist:
+		var config := ConfigFile.new()
+		config.load(_file)
+		config.set_value("view", "fog_of_war", enabled)
+		var error := config.save(_file)
+		if error != OK:
+			push_warning("Unable to save fog-of-war preference: %s" % error_string(error))
+
+
+func _on_node_added(node: Node) -> void:
+	# Wait for _ready to build the overlay, including zones packed into baked maps.
+	if node.has_method("set_fog_of_war_enabled"):
+		_apply_zone.call_deferred(weakref(node))
+
+
+func _apply_zone(reference: WeakRef) -> void:
+	var zone := reference.get_ref() as Node
+	if is_instance_valid(zone) and not zone.is_queued_for_deletion() and zone.has_method("set_fog_of_war_enabled"):
+		zone.call("set_fog_of_war_enabled", enabled)
+
+
+func _exit_tree() -> void:
+	if get_tree().node_added.is_connected(_on_node_added):
+		get_tree().node_added.disconnect(_on_node_added)

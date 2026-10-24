@@ -24,7 +24,6 @@ var fixture_toggles = preload("res://game/bootstrap/app/planning_fixture_toggles
 var light_default_editor = preload("res://game/bootstrap/app/planning_light_defaults.gd").new()
 
 const LIGHT_DEFAULT_HEIGHT = 2.5
-const DARKNESS_DEFAULT_HEIGHT = 2.75
 
 var palette: ItemList
 var status: Label
@@ -114,6 +113,9 @@ func setup_controls() -> void:
 	light_view.setup(self)
 	fixture_toggles.setup(self)
 	light_default_editor.setup(self)
+	var fog := preload("res://game/bootstrap/app/planning_fog.gd").new()
+	add_child(fog)
+	fog.setup(session.ui)
 	var box: Node = session.ui.get_node("Panel/VBox")
 	for control_name in ["LightInfo", "LightLevel", "LightAngleInfo", "LightAngle"]:
 		box.move_child(box.get_node(control_name), palette.get_index())
@@ -207,6 +209,7 @@ func _configure_new_asset(node: Node3D, entry: Dictionary) -> void:
 	fruit_options.call("configure_new", node)
 	spawn_options.call("configure_new", node)
 	fixtures.configure_new_asset(node, entry)
+	room_options.configure_new(node, entry)
 	if str(entry.get("kind", "")) != "blood" or not node.has_method("configure_blood"):
 		return
 	var surface: String = ["floor", "wall", "object"][blood_surface.selected] if blood_surface != null else "floor"
@@ -278,6 +281,8 @@ func settings_kind(node: Node3D) -> String:
 		return ""
 	if light_default_editor.is_lamp(node):
 		return "lamp"
+	if room_options.applies_to(node):
+		return "darkness"
 	if door_options.lockable_controller(node) != null:
 		return "door"
 	if display_options.applies_to(node):
@@ -430,7 +435,7 @@ func _apply_special_default_height(node: Node3D, kind: String) -> void:
 		node.global_position.y = float(default_light_height.value) if default_light_height != null else LIGHT_DEFAULT_HEIGHT
 		_apply_new_light_defaults(node)
 	elif kind == "darkness" or kind == "exploration_darkness":
-		node.global_position.y = DARKNESS_DEFAULT_HEIGHT
+		room_options.apply_default_height(node)
 	elif kind == "spawn_point":
 		node.global_position.y = 0.0
 
