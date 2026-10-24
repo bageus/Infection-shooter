@@ -77,3 +77,14 @@ Credits меняются только в marker sections с сохранение
 Старый WAV importer явно исторический и закрыт для текущего refresh receipt.
 Runtime owners, API, DTO и зависимости игры прежние; исключений нет.
 Инструкции и evidence: [QA generators](../qa/audio_generator_safety.md).
+
+
+## Уточнение 24.10.2026 — спящая мебель
+
+Private ImpactSound останавливает physics callbacks после прямого
+восстановления prepared sleep. Для scripted wake без native sleep signal
+наблюдение возобновляется уведомлением об изменении унаследованного transform
+(Node3D child); спящие предметы не опрашиваются таймерами. Прежние native signal,
+wall-detachment wake и fragment reset сохранены. Физическое поведение, owners,
+public API, карты/сцены/DTO и зависимости прежние.
+Проверка: [QA](../qa/sleeping_prop_impact_audio.md).
