@@ -212,6 +212,8 @@ func _clear_preview() -> void:
 		controls.fruit_options.hide()
 	if controls.door_options != null:
 		controls.door_options.hide()
+	if controls.room_options != null:
+		controls.room_options.hide()
 	controls.fixtures.selected_panel.hide()
 	controls.light_info.hide()
 	controls.light_level.hide()
@@ -462,7 +464,7 @@ func _update_status() -> void:
 		controls.status.text = "%d objects | select palette or object" % placed.size()
 		return
 	if selected.is_in_group("darkness_zone"):
-		controls.status.text = "DARKNESS | scale X/Z changes covered area | Delete removes"
+		controls.status.text = "DARKNESS | room %d | scale X/Z changes covered area | Delete removes" % int(selected.get("room_id"))
 		return
 	controls.status.text = "SELECTED | pos %.1f %.1f | rot %.0f | scale %.2f %.2f %.2f" % [
 		selected.position.x, selected.position.z, selected.rotation_degrees.y,

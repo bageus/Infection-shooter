@@ -7,10 +7,12 @@ const DISPLAY_OPTIONS := preload("res://game/bootstrap/app/planning_display_opti
 var display_options: Node
 const LOOT_OPTIONS := preload("res://game/bootstrap/app/planning_loot_options.gd")
 const DOOR_OPTIONS := preload("res://game/bootstrap/app/planning_door_options.gd")
+const ROOM_OPTIONS := preload("res://game/bootstrap/app/planning_room_options.gd")
 var loot_options: Node
 const FRUIT_OPTIONS := preload("res://game/bootstrap/app/planning_fruit_options.gd")
 var fruit_options: Node
 var door_options: Node
+var room_options: Node
 const SPAWN_OPTIONS := preload("res://game/bootstrap/app/planning_spawn_options.gd")
 const BIOMASS_OPTIONS := preload("res://game/bootstrap/app/planning_biomass_options.gd")
 var spawn_options: Node
@@ -102,6 +104,9 @@ func setup_controls() -> void:
 	door_options = DOOR_OPTIONS.new()
 	add_child(door_options)
 	door_options.call("setup", session, objects)
+	room_options = ROOM_OPTIONS.new()
+	add_child(room_options)
+	room_options.call("setup", session, objects)
 	spawn_options = SPAWN_OPTIONS.new()
 	add_child(spawn_options)
 	spawn_options.call("setup", session, objects)
@@ -297,6 +302,8 @@ func _update_light_ui() -> void:
 		fruit_options.call("update")
 	if door_options != null:
 		door_options.call("update")
+	if room_options != null:
+		room_options.call("update")
 	if spawn_options != null:
 		spawn_options.call("update")
 	var target = objects.selected
