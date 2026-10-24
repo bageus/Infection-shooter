@@ -6,6 +6,7 @@ const VALIDATOR := preload("res://game/bootstrap/app/planning_layout_validator.g
 const LAYOUT_PROPERTIES := preload("res://game/bootstrap/app/planning_layout_properties.gd")
 const BLOOD_PLACEMENT := preload("res://game/bootstrap/app/planning_blood_placement.gd")
 const PLAYER := "res://game/features/player/public/player.tscn"
+var _biomass_cache: Dictionary = {}
 var objects: Node
 var session: Variant
 var catalog: Variant
@@ -164,6 +165,8 @@ func _stage(record: Dictionary, prepared: Dictionary) -> bool:
 
 func _check_plan(data: Dictionary, prepared: Dictionary) -> Dictionary:
 	prepared["surface_decals_v1"] = data.get("surface_decals_v1", {}).duplicate(true)
+	var cache: Dictionary = data.get("floor_biomass_v1", {})
+	prepared["floor_biomass_v1"] = cache if str(cache.get("source_signature", "")) == preload("res://game/bootstrap/app/planning_biomass_bake.gd").signature(data.objects) else {}
 	if not data.objects.is_empty() and prepared.entries.is_empty() and prepared.player.is_empty():
 		_discard(prepared)
 		return {"error": "map has no loadable objects"}
@@ -180,6 +183,8 @@ func _discard(prepared: Dictionary) -> void:
 
 func _begin(prepared: Dictionary) -> void:
 	objects.clear_layout(false, true)
+	_biomass_cache = prepared.get("floor_biomass_v1", {})
+	preload("res://game/bootstrap/app/planning_biomass_bake.gd").restore(session, {})
 	SURFACE_SETTINGS.restore(session, prepared.get("surface_decals_v1", {}))
 	session.edit_history.stack.clear()
 	if not prepared.player.is_empty():
@@ -208,6 +213,8 @@ func _place(entry: Dictionary) -> void:
 	var restoring_chair := scene_path.get_file() == "06_conference_chair.glb"
 	if record.has("settled_physics") or restoring_chair:
 		node.set_meta("planning_settled_transform", node.transform)
+	if not _biomass_cache.is_empty() and not bool(session.get("active")) and node.has_method("set_floor_biomass_baked"):
+		node.call("set_floor_biomass_baked", true)
 	var ready_started := Time.get_ticks_usec()
 	target_parent.add_child(node)
 	timings.ready_usec += Time.get_ticks_usec() - ready_started
@@ -282,6 +289,7 @@ func _finish(prepared: Dictionary) -> Dictionary:
 
 
 func _report(prepared: Dictionary) -> Dictionary:
+	preload("res://game/bootstrap/app/planning_biomass_bake.gd").restore(session, prepared.get("floor_biomass_v1", {}))
 	objects._update_status()
 	if controls != null:
 		controls.call("_update_history_buttons")

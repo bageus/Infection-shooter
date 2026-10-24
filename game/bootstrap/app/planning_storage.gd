@@ -1,4 +1,5 @@
 extends RefCounted
+const BIOMASS_BAKE := preload("res://game/bootstrap/app/planning_biomass_bake.gd")
 const SURFACE_SETTINGS := preload("res://game/bootstrap/app/planning_surface_decals.gd")
 const SCENE_BAKE := preload("res://game/bootstrap/app/planning_scene_bake.gd")
 const PHYSICS := preload("res://game/bootstrap/app/planning_physics.gd")
@@ -22,6 +23,7 @@ const AUTHORED_SCENE_PATH = LAYOUT_DIR + "base_office_layout.tscn"
 const DEFAULT_MAP_PATH = LAYOUT_DIR + "base_office_map.json"
 
 var map_loading := false
+var _save_notice := ""
 var map_name_edit: LineEdit
 var map_select: OptionButton
 
@@ -294,7 +296,7 @@ func save_named_map() -> void:
 	_remember_level(safe_name)
 	_refresh_map_list(safe_name)
 	map_loading = false
-	controls.status.text = "MAP SAVED | " + safe_name + fixtures
+	controls.status.text = "MAP SAVED | " + safe_name + fixtures + _save_notice
 
 
 func load_selected_map() -> void:
@@ -412,7 +414,7 @@ func save_layout() -> void:
 			controls.status.text = "SAVED | %d objects | scene bake error %d" % [records.size(), scene_error]
 			return
 	map_loading = false
-	controls.status.text = "SAVED | %d objects%s" % [records.size(), fixtures]
+	controls.status.text = "SAVED | %d objects%s%s" % [records.size(), fixtures, _save_notice]
 
 
 func _save_authored_scene(target: String = AUTHORED_SCENE_PATH) -> Error:
@@ -433,6 +435,7 @@ func load_layout() -> void:
 
 
 func _prepare_save() -> bool:
+	_save_notice = ""
 	if not session.active:
 		return true
 	map_loading = true
@@ -443,9 +446,9 @@ func _prepare_save() -> bool:
 	# Physics already moved desk attachments; reset the editing baseline.
 	objects.workstation_transforms.clear()
 	if not settled:
-		map_loading = false
-		controls.status.text = "NOT SAVED | Physics still moving: check red objects and retry"
-	return settled
+		_save_notice = " | unsettled props kept at authored positions; check red objects"
+		push_warning("Planner physics preparation timed out; saving authored positions without settled_physics stamps")
+	return true
 
 
 func _capture_save() -> Dictionary:
@@ -457,9 +460,28 @@ func _capture_save() -> Dictionary:
 	if result.has("error"):
 		map_loading = false
 		return {}
-	return result.data
+	var data: Dictionary = result.data
+	var cache: Dictionary = await BIOMASS_BAKE.bake(session, data, controls.status)
+	if not is_instance_valid(session) or not session.is_inside_tree():
+		map_loading = false
+		return {}
+	if cache.has("error"):
+		# Preserve the user's map even when the optional visual cache cannot be built.
+		_save_notice += " | biomass bake failed: " + str(cache.error)
+		data.erase(BIOMASS_BAKE.KEY)
+		BIOMASS_BAKE.restore(session, {})
+	elif cache.is_empty():
+		data.erase(BIOMASS_BAKE.KEY)
+		BIOMASS_BAKE.restore(session, {})
+	else:
+		cache["source_signature"] = preload("res://game/bootstrap/app/planning_biomass_bake.gd").signature(data.objects)
+		data[BIOMASS_BAKE.KEY] = cache
+		BIOMASS_BAKE.restore(session, cache)
+	return data
 
 func _scene_bake() -> RefCounted:
 	var bake := SCENE_BAKE.new(catalog)
 	bake.surface_settings = SURFACE_SETTINGS.capture(session)
+	var container: Node = session.get("root")
+	bake.biomass_cache = container.get_meta(BIOMASS_BAKE.KEY, {})
 	return bake

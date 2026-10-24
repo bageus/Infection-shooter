@@ -10,6 +10,8 @@ static func has_biomass_at(container: Node, world_position: Vector3) -> bool:
 	if not is_instance_valid(container):
 		return false
 	for child in container.get_children():
+		if child.has_meta("baked_biomass_floor") and child.call("covers", world_position): return true
+		if child.get("floor_biomass_baked") == true: continue
 		if not child.has_meta("biomass_piece") or str(child.get("surface")) != "floor":
 			continue
 		if not child.has_meta(PROBE):

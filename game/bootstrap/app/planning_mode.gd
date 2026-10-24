@@ -132,6 +132,7 @@ func enter() -> void:
 	var world_activation := host.get_node_or_null("WorldActivation")
 	if world_activation != null:
 		world_activation.call("rebuild")
+	preload("res://game/bootstrap/app/planning_biomass_bake.gd").editing(self, true)
 	_set_light_markers_visible(true)
 	_set_spawn_markers_visible(true)
 	for node in hud_nodes:
@@ -168,6 +169,7 @@ func exit() -> void:
 	var world_activation := host.get_node_or_null("WorldActivation")
 	if world_activation != null:
 		world_activation.call("rebuild")
+	preload("res://game/bootstrap/app/planning_biomass_bake.gd").editing(self, false)
 	objects._activate_all_enemies()
 	camera_rig.transform = saved_camera_rig_transform
 	camera.transform = saved_camera_transform

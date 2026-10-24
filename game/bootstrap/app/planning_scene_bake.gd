@@ -6,6 +6,7 @@ const DARKNESS := preload("res://game/bootstrap/app/planning_darkness_config.gd"
 const WAVE_DIRECTOR := preload("res://game/features/spawning/public/wave_director.gd")
 var catalog: Variant
 var surface_settings: Dictionary = {}
+var biomass_cache: Dictionary = {}
 
 func _init(asset_catalog: Variant) -> void:
 	catalog = asset_catalog
@@ -37,6 +38,13 @@ func save_async(nodes: Array, target: String, session: Node, status: Label) -> E
 
 func _write(scene_root: Node3D, target: String) -> Error:
 	if not surface_settings.is_empty(): scene_root.set_meta("surface_decals_v1", surface_settings)
+	if not biomass_cache.is_empty():
+		var view := preload("res://game/presentation/office_floor/public/baked_biomass_floor.gd").new()
+		view.name = "BakedFloorBiomass"
+		view.cache = biomass_cache
+		scene_root.add_child(view)
+		view.owner = scene_root
+		scene_root.set_meta("floor_biomass_v1", biomass_cache)
 	var packed := PackedScene.new()
 	var problem := packed.pack(scene_root)
 	if problem == OK:
@@ -87,6 +95,8 @@ func _append(node: Node3D, scene_root: Node3D) -> void:
 		copy.call("configure_blood", str(blood["texture"]), str(blood["surface"]))
 		copy.call("configure_blood_normal", node.get("surface_normal"))
 		copy.call("configure_blood_attachment", node.call("get_blood_attachment"))
+		if not biomass_cache.is_empty() and copy.has_method("set_floor_biomass_baked"):
+			copy.call("set_floor_biomass_baked", true)
 	if node.has_meta("planning_desk_id"):
 		copy.set_meta("planning_desk_id", node.get_meta("planning_desk_id"))
 	if node.has_meta("planning_attachment"):
