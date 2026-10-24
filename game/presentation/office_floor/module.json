@@ -141,6 +141,9 @@
     },
     "footstep_surface_v1": {
       "has_glass_at": "has_glass_at(world_position: Vector3) -> bool; bounded read-only query of visible floor glass and marked physical shards"
+    },
+    "fog_of_war_v1": {
+      "set_fog_of_war_enabled": "set_fog_of_war_enabled(enabled: bool) -> void on public/props/darkness_zone.tscn; transient rendering permission. Disabling hides only the overlay and suspends exploration; enabling preserves reveal/fade state. Authored visibility and map serialization are unchanged."
     }
   }
 }

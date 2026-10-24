@@ -349,6 +349,10 @@ func _snap_neighbors(node: Node3D) -> Array[Dictionary]:
 
 
 func _combined_aabb(node: Node3D, ignore_selection: bool = false) -> AABB:
+	# Darkness stays editable when its rendering is disabled by the planner toggle.
+	if node.has_method("configure_zone") and node.get("room_id") != null:
+		var zone_size: Vector2 = node.get("size")
+		return AABB(Vector3(-zone_size.x * 0.5, -0.03, -zone_size.y * 0.5), Vector3(zone_size.x, 0.06, zone_size.y))
 	if node.has_method("get_planner_bounds"):
 		var posed: AABB = node.call("get_planner_bounds")
 		if posed.size.length_squared() > .0001:

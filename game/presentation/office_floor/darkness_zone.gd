@@ -24,16 +24,18 @@ var _fade := 1.0
 var _portal_timer := 0.0
 # Glass panes stay see-through after they break, so they are remembered once found.
 var _glass_portals: Dictionary = {}
+var _fog_enabled := true
 
 func _ready() -> void:
 	add_to_group("darkness_zone")
 	_player = get_tree().get_first_node_in_group("player") as Node3D
 	_revealed = false
 	_rebuild()
-	overlay.visible = true
 	call_deferred("_find_linked_doors")
 
 func _process(delta: float) -> void:
+	if not _fog_enabled:
+		return
 	if room_id > 0 and not permanent:
 		if _player == null:
 			_player = get_tree().get_first_node_in_group("player") as Node3D
@@ -60,6 +62,13 @@ func _process(delta: float) -> void:
 			if is_instance_valid(door) and door.has_method("is_open_for_exploration") and bool(door.call("is_open_for_exploration")):
 				reveal()
 				return
+
+## Rendering permission from bootstrap; authored zones and exploration stay intact.
+func set_fog_of_war_enabled(enabled: bool) -> void:
+	_fog_enabled = enabled
+	if overlay != null:
+		overlay.visible = enabled and not _revealed and (permanent or room_id <= 0 or _fade > 0.01)
+
 
 func reveal() -> void:
 	if permanent or _revealed:
@@ -180,3 +189,4 @@ func _rebuild() -> void:
 	overlay.mesh = mesh
 	overlay.position = Vector3.ZERO
 	overlay.rotation_degrees = Vector3.ZERO
+	set_fog_of_war_enabled(_fog_enabled)
