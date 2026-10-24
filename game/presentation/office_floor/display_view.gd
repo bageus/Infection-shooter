@@ -1,6 +1,7 @@
 extends Node3D
 
 const PROFILES := preload("res://game/presentation/office_floor/display_surface_profiles.gd")
+const GLOW := preload("res://game/presentation/office_floor/display_glow.gd")
 const CONTENT := preload("res://game/presentation/office_floor/display_content.gd")
 
 var prop: Node3D
@@ -11,10 +12,29 @@ var config: Dictionary = {}
 var television := false
 var tiled := false
 var damaged := false
-var powered := false
+var powered := false:
+	set(value):
+		if powered != value:
+			powered = value
+			_invalidate_lighting()
 var elapsed := 0.0
 var _group_index := -1
 var _next_frame_time := 0.0
+
+
+func _ready() -> void:
+	set_notify_transform(true)
+	visibility_changed.connect(_invalidate_lighting)
+
+
+func _enter_tree() -> void:
+	if is_instance_valid(registry):
+		registry.call("register_display", self)
+
+
+func _invalidate_lighting() -> void:
+	if is_instance_valid(registry):
+		registry.call("_invalidate_lighting")
 
 
 func setup(owner_prop: Node3D, path: String, authored: Dictionary, wall: Node) -> void:
@@ -23,7 +43,6 @@ func setup(owner_prop: Node3D, path: String, authored: Dictionary, wall: Node) -
 	tiled = "wall_TV_frameless" in path.get_file()
 	for profile: Dictionary in PROFILES.new().screens(path):
 		_build_screen(profile)
-	set_notify_transform(tiled)
 	set_registry(wall)
 	configure(authored)
 
@@ -127,7 +146,8 @@ func _build_screen(profile: Dictionary) -> void:
 	surface.add_surface_from_arrays(Mesh.PRIMITIVE_TRIANGLES, arrays)
 	mesh.mesh = surface
 	add_child(mesh)
-	var light := SpotLight3D.new()
+	var light := GLOW.new()
+	light.changed = _invalidate_lighting
 	light.name = "DisplayGlow%d" % screens.size()
 	var right: Vector3 = PROFILES.vector(profile["right"])
 	var up: Vector3 = PROFILES.vector(profile["up"])
@@ -142,6 +162,7 @@ func _build_screen(profile: Dictionary) -> void:
 	light.shadow_enabled = false
 	add_child(light)
 	screens.append({"mesh": mesh, "light": light, "profile": profile, "index": 0, "dynamic": false})
+	_invalidate_lighting()
 
 
 func wall_frame() -> Transform3D:
@@ -168,8 +189,10 @@ func set_wall_content(index: int, rectangle: Rect2) -> void:
 
 
 func _notification(what: int) -> void:
-	if what == NOTIFICATION_TRANSFORM_CHANGED and is_instance_valid(registry):
-		registry.call("request_layout")
+	if what == NOTIFICATION_TRANSFORM_CHANGED:
+		_invalidate_lighting()
+		if tiled and is_instance_valid(registry):
+			registry.call("request_layout")
 
 
 func _exit_tree() -> void:

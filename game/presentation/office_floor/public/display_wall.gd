@@ -1,5 +1,6 @@
 extends Node
 
+const VIEW := preload("res://game/presentation/office_floor/display_view.gd")
 const CONTENT := preload("res://game/presentation/office_floor/display_content.gd")
 const LAYOUT := preload("res://game/presentation/office_floor/display_wall_layout.gd")
 
@@ -11,6 +12,7 @@ func _ready() -> void:
 var displays: Array[Node3D] = []
 var elapsed := 0.0
 var _animated: Array[Node3D] = []
+var _visible_animated: Array[Node3D] = []
 var _frames: Array[Vector4] = []
 var _next_frame_time := 0.0
 var dirty := false
@@ -22,6 +24,8 @@ var _cached_view: Array = []
 var _cached_shadows := false
 var _cached_displays: Array[Node3D] = []
 var _light_inputs := {}
+# Legacy/custom adapters keep polling compatibility; native DisplayView reports changes.
+var _polled_displays: Array[Node3D] = []
 # Displays that are neither in the frustum nor near the camera are not re-drawn.
 var _in_view := {}
 var shadows_allowed := true
@@ -52,6 +56,7 @@ func unregister_display(display: Node3D) -> void:
 	_in_view.erase(display)
 	_light_inputs.erase(display)
 	_animated.erase(display)
+	_visible_animated.erase(display)
 	request_layout()
 	_lighting_wait = 0.0
 	_lighting_dirty = true
@@ -77,7 +82,7 @@ func _process(delta: float) -> void:
 		_layout_wait = .15
 		dirty = false
 		_layout.apply(displays)
-	if _animated.is_empty() or elapsed < _next_frame_time:
+	if _visible_animated.is_empty() or elapsed < _next_frame_time:
 		return
 	_frames.clear()
 	var delay := INF
@@ -85,9 +90,8 @@ func _process(delta: float) -> void:
 		_frames.append(content.frame_rect(i, elapsed))
 		delay = minf(delay, content.frame_delay(i, elapsed))
 	_next_frame_time = elapsed + delay
-	for display in _animated:
-		if _in_view.get(display, true):
-			display.call("tick", elapsed, _frames)
+	for display in _visible_animated:
+		display.call("tick", elapsed, _frames)
 
 
 # Called locally by a display whenever its powered/content state changes.
@@ -95,18 +99,26 @@ func update_animation(display: Node3D) -> void:
 	_lighting_wait = 0.0
 	_lighting_dirty = true
 	_animated.erase(display)
+	_visible_animated.erase(display)
 	if display.get("powered"):
 		for screen: Dictionary in display.get("screens"):
 			if screen["dynamic"]:
 				_animated.append(display)
+				if _in_view.get(display, true) and display.is_visible_in_tree():
+					_visible_animated.append(display)
 				break
 	_next_frame_time = 0.0
+
+
+func _invalidate_lighting() -> void:
+	# Motion keeps the existing .2s budget cadence; configure/register still refresh promptly.
+	_lighting_dirty = true
 
 
 func _lighting_changed() -> bool:
 	if _lighting_dirty or shadows_allowed != _cached_shadows or displays != _cached_displays:
 		return true
-	for display in displays:
+	for display in _polled_displays:
 		if not is_instance_valid(display):
 			if _light_inputs.has(display):
 				return true
@@ -135,9 +147,11 @@ func _view_state(camera: Camera3D) -> Array:
 func _remember_inputs() -> void:
 	_cached_displays = displays.duplicate()
 	var current := {}
+	_polled_displays.clear()
 	for display in displays:
-		if not is_instance_valid(display):
+		if not is_instance_valid(display) or display is VIEW:
 			continue
+		_polled_displays.append(display)
 		if not _light_inputs.has(display):
 			_light_inputs[display] = [Transform3D.IDENTITY, false, false, [], PackedVector3Array()]
 		var saved: Array = _light_inputs[display]
@@ -163,9 +177,9 @@ func _refresh_lights(capture_inputs: bool = true) -> void:
 		if not is_instance_valid(display):
 			continue
 		_update_view(display, camera)
+		var powered := bool(display.get("powered")) and display.is_visible_in_tree()
 		for screen: Dictionary in display.get("screens"):
 			var light := screen.light as SpotLight3D
-			var powered := bool(display.get("powered")) and display.is_visible_in_tree()
 			var setting := {"light": light, "visible": powered and camera == null, "shadows": false}
 			settings.append(setting)
 			if not powered or camera == null:
@@ -190,6 +204,10 @@ func _refresh_lights(capture_inputs: bool = true) -> void:
 		if light.shadow_enabled != bool(setting.shadows):
 			light.shadow_enabled = setting.shadows
 
+	_visible_animated.clear()
+	for display in _animated:
+		if _in_view.get(display, true) and display.is_visible_in_tree() and bool(display.get("powered")):
+			_visible_animated.append(display)
 	_cached_shadows = shadows_allowed
 	_lighting_dirty = not capture_inputs
 	if capture_inputs:

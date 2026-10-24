@@ -1,0 +1,172 @@
+{
+  "date": "2026-10-25",
+  "engine": "Godot 4.7.2",
+  "display_server": "headless",
+  "fixture": "180 real DisplayView with real extracted screen mesh, material and SpotLight3D; no GLB furniture or GPU draw; 200 controller callbacks at .2s simulated intervals; setup/warmup excluded",
+  "baseline_commit": "fb6c79a251b7ed7c50e43beae29750712421ea9a",
+  "production_blobs": {
+    "game/presentation/office_floor/public/display_wall.gd": "f553c243891313a343fb55713541bdec3532769b",
+    "game/presentation/office_floor/display_view.gd": "6af5d25f114b5854ec508d96d7fba93293881154",
+    "game/presentation/office_floor/display_glow.gd": "25bfeecb39068786a2df583f2d07172f2c87989a"
+  },
+  "runs": {
+    "baseline": [
+      {
+        "displays": 180,
+        "idle": {
+          "p95_usec": 185,
+          "total_usec": 32963
+        },
+        "moving": {
+          "p95_usec": 836,
+          "total_usec": 128950
+        },
+        "polls": 200
+      },
+      {
+        "displays": 180,
+        "idle": {
+          "p95_usec": 288,
+          "total_usec": 39493
+        },
+        "moving": {
+          "p95_usec": 906,
+          "total_usec": 147622
+        },
+        "polls": 200
+      },
+      {
+        "displays": 180,
+        "idle": {
+          "p95_usec": 193,
+          "total_usec": 34743
+        },
+        "moving": {
+          "p95_usec": 757,
+          "total_usec": 128561
+        },
+        "polls": 200
+      },
+      {
+        "displays": 180,
+        "idle": {
+          "p95_usec": 196,
+          "total_usec": 34680
+        },
+        "moving": {
+          "p95_usec": 688,
+          "total_usec": 123417
+        },
+        "polls": 200
+      },
+      {
+        "displays": 180,
+        "idle": {
+          "p95_usec": 238,
+          "total_usec": 34541
+        },
+        "moving": {
+          "p95_usec": 707,
+          "total_usec": 123730
+        },
+        "polls": 200
+      }
+    ],
+    "candidate": [
+      {
+        "displays": 180,
+        "idle": {
+          "p95_usec": 7,
+          "total_usec": 1193
+        },
+        "moving": {
+          "p95_usec": 735,
+          "total_usec": 126944
+        },
+        "polls": 200
+      },
+      {
+        "displays": 180,
+        "idle": {
+          "p95_usec": 5,
+          "total_usec": 1070
+        },
+        "moving": {
+          "p95_usec": 779,
+          "total_usec": 133216
+        },
+        "polls": 200
+      },
+      {
+        "displays": 180,
+        "idle": {
+          "p95_usec": 6,
+          "total_usec": 1308
+        },
+        "moving": {
+          "p95_usec": 935,
+          "total_usec": 144000
+        },
+        "polls": 200
+      },
+      {
+        "displays": 180,
+        "idle": {
+          "p95_usec": 6,
+          "total_usec": 1154
+        },
+        "moving": {
+          "p95_usec": 831,
+          "total_usec": 137673
+        },
+        "polls": 200
+      },
+      {
+        "displays": 180,
+        "idle": {
+          "p95_usec": 6,
+          "total_usec": 1168
+        },
+        "moving": {
+          "p95_usec": 797,
+          "total_usec": 134758
+        },
+        "polls": 200
+      }
+    ]
+  },
+  "summary": {
+    "baseline": {
+      "idle": {
+        "median_total_usec": 34680,
+        "range_total_usec": [
+          32963,
+          39493
+        ]
+      },
+      "moving": {
+        "median_total_usec": 128561,
+        "range_total_usec": [
+          123417,
+          147622
+        ]
+      }
+    },
+    "candidate": {
+      "idle": {
+        "median_total_usec": 1168,
+        "range_total_usec": [
+          1070,
+          1308
+        ]
+      },
+      "moving": {
+        "median_total_usec": 134758,
+        "range_total_usec": [
+          126944,
+          144000
+        ]
+      }
+    }
+  }
+}

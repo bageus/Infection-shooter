@@ -52,3 +52,16 @@ Project gates; headless import; дисплейные runtime и planner regressi
 ## Approval
 
 Владелец явно запросил реализовать эти настройки, изображения, свечение и объединение экранов; затем загрузил ассеты и поручил «проверяй». Одобрение относится к узкому аддитивному display_v1/optional display DTO, необходимому для сохранения запрошенных настроек. Новые модули, зависимости, плагины и архитектурные исключения не вводятся.
+
+
+## Оптимизация idle updates25.10.2026
+
+По прямому поручению владельца managed DisplayView сообщает controller о
+transform/visibility/power/configure изменениях. Private display_glow наследует
+прежний SpotLight3D и наблюдает native transform без _process/нового узла.
+Registry сохраняет polling только для legacy/custom adapters, пересчитывает
+камеру и прежние budgets; движения сохраняют0.2с cadence. Видимый animated
+subset пропускает полностью скрытые timelines и восстанавливает актуальный
+кадр при возвращении. Public display_v1, DTO/owners/edges/policy прежние;
+reentry/rebind/exit имеют явный lifecycle. QA и raw CPU evidence:
+docs/qa/display_idle_updates.md и display_idle_metrics.json.
