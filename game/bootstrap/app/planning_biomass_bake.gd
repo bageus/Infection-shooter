@@ -82,7 +82,10 @@ static func signature(records: Array) -> String:
 
 
 static func _canonical(value: Variant) -> Variant:
-	if value is float or value is int: return String.num(float(value), 4)
+	if value is float or value is int:
+		var number := String.num(float(value), 4)
+		# JSON writes IEEE -0.0 as 0.0; both describe the same render input.
+		return "0.0" if number == "-0.0" else number
 	if value is Array:
 		var result: Array = []
 		for child: Variant in value: result.append(_canonical(child))

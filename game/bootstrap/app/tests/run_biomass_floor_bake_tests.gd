@@ -45,6 +45,7 @@ func _check(value: bool, message: String) -> void:
 		push_error(message)
 
 func _run() -> void:
+	_signed_zero_signature()
 	var records: Array = [{"scene": DECAL.resource_path, "blood_texture": "biomass_01", "blood_surface": "floor", "blood_attachment": {"owner": "", "mesh": ""}, "x": 2.0, "y": 0.0135, "z": 2.0, "scale_x": 2.0, "scale_z": 2.0, "rotation_y": 27.0}]
 	var alive := func() -> bool: return true
 	var progress := func(_text: String) -> void: pass
@@ -242,3 +243,17 @@ func _light_shadows() -> void:
 	for index in vertices.size():
 		_check(uvs[index].is_equal_approx(Vector2(vertices[index].x / 8 + 0.5, vertices[index].z / 8 + 0.5)), "Page UV orientation matches footstep/query coordinates")
 	stage.free()
+
+
+func _signed_zero_signature() -> void:
+	# Construct the sign at runtime: JSON intentionally erases IEEE negative zero.
+	var negative_zero := -absf(float(failures))
+	var records: Array = [{"scene": DECAL.resource_path, "blood_texture": "biomass_01", "blood_surface": "floor", "x": 2.0, "rotation_x": negative_zero, "blood_normal": [negative_zero, 1.0, negative_zero]}]
+	var signature := BAKE.signature(records)
+	_check(signature == BAKE.signature(JSON.parse_string(JSON.stringify(records))), "Signed zero fingerprint survives JSON save/load")
+	var positive: Array = records.duplicate(true)
+	positive[0].rotation_x = absf(negative_zero)
+	positive[0].blood_normal = [absf(negative_zero), 1.0, absf(negative_zero)]
+	_check(signature == BAKE.signature(positive), "Positive and negative zero describe the same baked surface")
+	positive[0].x += 0.25
+	_check(signature != BAKE.signature(positive), "A real placement edit still invalidates the cache")

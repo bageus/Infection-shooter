@@ -103,3 +103,10 @@ objects. До удаления legacy scripts/scenes нужны явный alias
   и с HUD candidate; численность5003→5003, различия transforms/decor_pose.
   Расследовать сохранение/восстановление отдельно; UI/fog правки не меняют DTO
   или числовые допуски теста. Evidence: docs/qa/planner_hud_overlap.md.
+
+- RESOLVED25.10.2026 — PLANNER_FULL_MAP_ROUNDTRIP_FB6C79A, PR465 CI repair.
+  Все5003object records сохранялись; различалась только optional cache
+  floor_biomass_v1. SHA256 native -0.0 отличалась от JSON0.0. Нормализация
+  signed zero устраняет отказ cache; исходный planning_mode suite теперь
+  PASS без изменения assertions/tolerances. Новая regression до2failures,
+  после0; реальные правки координат по-прежнему инвалидируют cache.

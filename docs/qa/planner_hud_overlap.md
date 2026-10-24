@@ -36,11 +36,20 @@ preference не меняется при выходе, restart/invalid/pause/mate
 run_planner_light_view_tests. validate_project PASS,387scene refs PASS,
 resource paths/diff-check PASS, final editor import без ERROR.
 
-Расширенный run_planning_mode_tests имеет один Named map round trip failure
-(5003→5003records). Baseline с исходными HEAD planning_hud_layout/planning_fog
-на той же карте повторяет тот же assertion, exit1. Исходники после сравнения
-восстановлены. Различия transforms/decor_pose требуют отдельного расследования,
-числовые допуски тестов не менялись. BACKLOG фиксирует baseline defect.
+CI repair25.10.2026: Named map roundtrip5003→5003records падал и на
+baseline. Диагностика выделила исчезновение floor_biomass_v1, а не потерю
+object records: после JSON -0.0 превращался в0.0, подпись кэша отличалась.
+Нормализован signed zero в planning_biomass_bake._canonical без изменения
+precision/остальных render inputs. Новый regression: исходный helper2failures,
+исправленный0, реальное перемещение всё ещё инвалидирует cache. Полный
+неизменённый run_planning_mode_tests теперь PASS на карте с5003records;
+assertions/числовые допуски не ослаблены. BACKLOG defect закрыт.
+
+Music job121013079563 дополнительно падал в run_menu_tests: два spawn-point
+Label3D не имели общего body.ttf. У маркера явно задан тот же immutable font;
+run_menu_tests и run_spawn_planner_tests теперь0failures. Музыка не менялась.
+Editor import без ERROR, validate_project/resource-size/CI-registration PASS.
+
 Ручная визуальная приёмка на Windows/Web и скриншот с native GPU не выполнены.
 Публичные API/форматы карт/сцены/Autoload/owners прежние.
 
