@@ -460,14 +460,15 @@ func _ground_conference_chair(node: Node3D) -> void:
 
 
 func _update_status() -> void:
+	controls.hud_layout.update_selection(controls)
 	if selected == null:
 		controls.status.text = "%d objects | select palette or object" % placed.size()
 		return
 	if selected.is_in_group("darkness_zone"):
 		controls.status.text = "DARKNESS | room %d | scale X/Z changes covered area | Delete removes" % int(selected.get("room_id"))
 		return
-	controls.status.text = "SELECTED | pos %.1f %.1f | rot %.0f | scale %.2f %.2f %.2f" % [
-		selected.position.x, selected.position.z, selected.rotation_degrees.y,
+	controls.status.text = "Позиция: %.2f / %.2f / %.2f\nПоворот: %.0f° | Размер: %.2f / %.2f / %.2f" % [
+		selected.position.x, selected.position.y, selected.position.z, selected.rotation_degrees.y,
 		selected.scale.x, selected.scale.y, selected.scale.z
 	]
 

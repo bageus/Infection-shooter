@@ -23,9 +23,8 @@ func setup(owner_controls: Node) -> void:
 
 
 func update_catalog() -> void:
-	button.visible = controls.catalog.active_catalog == controls.catalog.lighting_catalog
-	if not button.visible:
-		set_enabled(false)
+	# Overhead view is available from Main for every palette.
+	button.show()
 
 
 func set_enabled(enabled: bool) -> void:

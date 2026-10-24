@@ -1,5 +1,10 @@
 extends Node
 
+const HUD_LAYOUT := preload("res://game/bootstrap/app/planning_hud_layout.gd")
+const DECAL_PALETTE := preload("res://game/bootstrap/app/planning_decal_palette.gd")
+var hud_layout = HUD_LAYOUT.new()
+var decal_palette = DECAL_PALETTE.new()
+
 const SURFACE_OPTIONS := preload("res://game/bootstrap/app/planning_surface_decal_options.gd")
 const DECOR_POSES := preload("res://game/bootstrap/app/planning_decor_poses.gd")
 const COLOR_POPUP := preload("res://game/bootstrap/app/planner_color_popup.gd")
@@ -115,6 +120,7 @@ func setup_controls() -> void:
 	light_default_editor.setup(self)
 	var fog := preload("res://game/bootstrap/app/planning_fog.gd").new()
 	add_child(fog)
+	fog.session = session
 	fog.setup(session.ui)
 	var box: Node = session.ui.get_node("Panel/VBox")
 	for control_name in ["LightInfo", "LightLevel", "LightAngleInfo", "LightAngle"]:
@@ -124,6 +130,7 @@ func setup_controls() -> void:
 	var surface_options := SURFACE_OPTIONS.new()
 	add_child(surface_options)
 	surface_options.setup(session)
+	decal_palette.setup(self)
 
 
 # Gore and Blood palettes (ADR-0017): dead infected, loose body parts and
@@ -131,7 +138,7 @@ func setup_controls() -> void:
 func _build_gore_controls() -> void:
 	var tabs: Node = session.ui.get_node_or_null("Panel/VBox/Tabs")
 	if tabs != null:
-		for entry in [["Gore", _show_gore_catalog], ["Blood", _show_blood_catalog]]:
+		for entry in [["Gore", _show_gore_catalog], ["Decals", _show_blood_catalog], ["Biomass", _show_biomass_catalog]]:
 			var button := Button.new()
 			button.name = str(entry[0])
 			button.text = str(entry[0])
@@ -146,11 +153,8 @@ func _build_gore_controls() -> void:
 	items.text = "Items"
 	items.tooltip_text = "Key, DNA, ammo, medkits, antidote, armor"
 	items.pressed.connect(_show_item_catalog)
-	var palette_box: Node = session.ui.get_node("Panel/VBox")
-	palette_box.add_child(items)
-	palette_box.move_child(items, palette.get_index())
-	palette_box.add_child(weapons)
-	palette_box.move_child(weapons, palette.get_index())
+	tabs.add_child(items)
+	tabs.add_child(weapons)
 	blood_options = HBoxContainer.new()
 	blood_options.name = "BloodOptions"
 	var surface_label := Label.new()
@@ -186,8 +190,13 @@ func _show_gore_catalog() -> void:
 
 
 func _show_blood_catalog() -> void:
-	_enter_simple_catalog(catalog.blood_catalog(), "BLOOD and BIOMASS | choose surface and size, then place; touching biomass fuses into one mass")
+	decal_palette.open()
+
+
+func _show_biomass_catalog() -> void:
+	_enter_simple_catalog(catalog.biomass_catalog(), "BIOMASS | choose a patch or apply a procedural network")
 	blood_options.show()
+	biomass_options.panel.show()
 
 
 func _enter_simple_catalog(entries: Array, title: String) -> void:
@@ -258,6 +267,7 @@ func _build_planning_toolbar() -> void:
 
 
 func _update_history_buttons() -> void:
+	hud_layout.update_selection(self)
 	if undo_button != null:
 		undo_button.disabled = (session.edit_history.get("stack") as Array).is_empty()
 	if duplicate_button != null:
@@ -355,6 +365,9 @@ func _recommended_flicker_step(mode: int) -> float:
 
 
 func _rebuild_palette() -> void:
+	decal_palette.hide()
+	if biomass_options != null:
+		biomass_options.panel.hide()
 	light_view.update_catalog()
 	palette.clear()
 	for entry: Dictionary in catalog.active_catalog:

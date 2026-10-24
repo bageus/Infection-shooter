@@ -66,6 +66,8 @@ func _process(delta: float) -> void:
 ## Rendering permission from bootstrap; authored zones and exploration stay intact.
 func set_fog_of_war_enabled(enabled: bool) -> void:
 	_fog_enabled = enabled
+	set_meta("planning_pick_disabled", not enabled)
+	set_process(enabled)
 	if overlay != null:
 		overlay.visible = enabled and not _revealed and (permanent or room_id <= 0 or _fade > 0.01)
 

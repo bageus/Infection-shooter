@@ -48,7 +48,8 @@ func _run() -> void:
 		_check(lamp.get_fixture_config().shape == controls.fixtures.SHAPES[index], "Each palette shape is preserved")
 		# The palette lamp is still active here: a plain click on the installed lamp must pick it.
 		var placed_before: int = planner.objects.placed.size()
-		await _click(planner.camera.unproject_position(lamp.global_position))
+		var click_point: Vector2 = planner.camera.unproject_position(lamp.global_position)
+		await _click(click_point)
 		_check(planner.objects.placed.size() == placed_before and planner.objects.selected == lamp, "Plain click on an installed lamp selects it instead of placing another")
 		_check(controls.light_defaults.visible and is_equal_approx(controls.default_light_energy.value, lamp.get_authored_energy()), "Selection shows the lamp's own parameters")
 		controls.default_light_energy.value = 6.25 + index
@@ -84,7 +85,7 @@ func _run() -> void:
 	_check(camera.global_position.is_equal_approx(original.origin + Vector3(4, 0, -3)), "Returning to normal view preserves overhead panning")
 	view.button.button_pressed = true
 	controls._show_structure_catalog()
-	_check(not view.active and not view.button.visible and camera.projection == projection, "Leaving Lights restores normal projection")
+	_check(view.active and view.button.visible and camera.projection == Camera3D.PROJECTION_ORTHOGONAL, "Main overhead view stays available outside Lights")
 	controls._show_lighting_catalog()
 	view.button.button_pressed = true
 	planner.exit()
