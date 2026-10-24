@@ -125,7 +125,8 @@ jobs:
           set -o pipefail
           timeout 240 godot --headless --path . --editor --quit 2>&1 | tee /tmp/import.log
           if grep -E 'SCRIPT ERROR|^ERROR:' /tmp/import.log; then exit 1; fi
-          timeout 60 godot --headless --path . res://game/bootstrap/app/main.tscn --quit-after 10 2>&1 | tee /tmp/main.log
+          # Full authored map startup and worker teardown need margin on shared CI CPUs.
+          timeout 180 godot --headless --path . res://game/bootstrap/app/main.tscn --quit-after 10 2>&1 | tee /tmp/main.log
           if grep -E 'SCRIPT ERROR|^ERROR:' /tmp/main.log; then exit 1; fi
           for suite in game/presentation/office_floor/tests/run_blood_decor_tests.gd game/bootstrap/app/tests/run_gameplay_planner_repairs_tests.gd game/presentation/office_floor/tests/run_door_runtime_tests.gd game/presentation/office_floor/tests/run_blood_effects_tests.gd game/features/combat/tests/run_grenade_vfx_tests.gd game/features/infected/tests/run_body_topology_tests.gd; do
             timeout 120 godot --headless --path . --script "$suite" 2>&1 | tee /tmp/integration.log

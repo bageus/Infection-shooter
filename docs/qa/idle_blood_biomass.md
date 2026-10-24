@@ -88,3 +88,6 @@ base_office_layout (94a20af) добавлена публичная spawn_point.t
 features.spawning. Манифест office_floor теперь декларирует существующую
 композиционную зависимость presentation→features; policy это разрешает,
 циклов нет. Точка спавна, карта и её JSON сохранены; validators не ослаблены.
+
+
+25.10.2026 — повтор CI PR464: Architecture validation уже PASS. Integration main smoke на merge02ef185 завершался timeout60 без script errors; локально тот же полный main.tscn/quit-after10 на merged candidate завершился exit0 за51.14с. Лимит smoke повышен до180с для startup/worker teardown полной authored карты на shared runner, error checks и прочие suites сохранены. Headless idle suite0failures, editor import и validate_project на head и merge с main PASS. Это ограниченный CI budget, не исправление/заявление FPS.
