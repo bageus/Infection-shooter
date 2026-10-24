@@ -1,6 +1,7 @@
 extends Node
 ## Application preference exposed in the planner; zones own their reveal state.
 const FILE := "user://planner_settings.cfg"
+var session: Node
 var enabled := true
 var button: CheckButton
 var _file := FILE
@@ -15,7 +16,7 @@ func setup(ui: Control, settings_file: String = FILE) -> void:
 	button = CheckButton.new()
 	button.name = "FogOfWarToggle"
 	button.text = "Туман войны (затемнение)"
-	button.tooltip_text = "Показывать затемнение комнат в планировщике и игре. Зоны остаются на карте. Сохраняется между запусками."
+	button.tooltip_text = "Показывать затемнение комнат в планировщике и игре. Отключённые зоны не перехватывают выбор объектов. Сохраняется между запусками."
 	var box := ui.get_node("Panel/VBox")
 	box.add_child(button)
 	box.move_child(button, box.get_node("LocalLights").get_index() + 1)
@@ -29,6 +30,8 @@ func set_enabled(value: bool, persist: bool = true) -> void:
 	button.set_pressed_no_signal(enabled)
 	for zone in get_tree().get_nodes_in_group("darkness_zone"):
 		_apply_zone(weakref(zone))
+	if not enabled and session != null and is_instance_valid(session.objects.selected) and session.objects.selected.is_in_group("darkness_zone"):
+		session.objects._reset_selection()
 	if persist:
 		var config := ConfigFile.new()
 		config.load(_file)

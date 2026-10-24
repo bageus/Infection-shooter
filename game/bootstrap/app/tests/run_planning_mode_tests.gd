@@ -111,7 +111,7 @@ func _exercise_gore_palette(planner: Node) -> void:
 	var catalog: Variant = planner.get("catalog")
 	controls.call("_show_blood_catalog")
 	var blood_entries: Array = catalog.get("active_catalog")
-	_check(blood_entries.size() == 50, "Blood palette lists the 44 in-game blood atlas frames and 6 biomass patches")
+	_check(blood_entries.size() == 44, "Decals blood palette lists 44 blood atlas frames without biomass")
 	_check((controls.get("blood_options") as Control).visible, "Blood palette shows surface and size options")
 	(controls.get("blood_surface") as OptionButton).select(1)
 	(controls.get("blood_size") as SpinBox).value = 1.6

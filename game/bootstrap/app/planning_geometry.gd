@@ -158,7 +158,7 @@ func _visual_object_at(screen_pos: Vector2) -> Node3D:
 	var best: Node3D
 	var best_distance = INF
 	for node in objects.placed:
-		if not is_instance_valid(node):
+		if not is_instance_valid(node) or bool(node.get_meta("planning_pick_disabled", false)):
 			continue
 		var aabb = _combined_aabb(node)
 		if aabb.size.length_squared() <= 0.0001:
@@ -349,7 +349,7 @@ func _snap_neighbors(node: Node3D) -> Array[Dictionary]:
 
 
 func _combined_aabb(node: Node3D, ignore_selection: bool = false) -> AABB:
-	# Darkness stays editable when its rendering is disabled by the planner toggle.
+	# Authored zone bounds are used for scaling; picking separately respects the fog toggle.
 	if node.has_method("configure_zone") and node.get("room_id") != null:
 		var zone_size: Vector2 = node.get("size")
 		return AABB(Vector3(-zone_size.x * 0.5, -0.03, -zone_size.y * 0.5), Vector3(zone_size.x, 0.06, zone_size.y))

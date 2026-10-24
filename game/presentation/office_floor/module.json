@@ -15,6 +15,7 @@
     "Mission-local bounded baked glass/wall/column receiver textures and independent floor damage/scuff layers"
   ],
   "public_api": [
+    "public/surface_decor_catalog.gd",
     "public/base_office_layout.tscn",
     "public/base_floor_renderer.gd",
     "public/props/07_table.tscn",
@@ -146,6 +147,7 @@
     "baked_biomass_floor_v1": {
       "cache": "Optional map-v8 floor_biomass_v1 version1 sparse8m/512px PNG pages+source_signature; max64; ready-only unshaded views; covers(world) supports footsteps; valid/cache builder explicit bootstrap commands.",
       "editing": "blood_decal.set_floor_biomass_baked(bool) suppresses eligible floor visual/fit/process, restores editable source geometry when false. Original blood records are unchanged."
-    }
+    },
+    "planner_surface_decor_v1": "Read-only public/surface_decor_catalog entries(category, material) and texture_entry(id); existing planner_decor_v1 blood texture string accepts surface:<atlas kind>:<zero-based frame>. Map-v8 fields, placement, attachment and old IDs unchanged; ADR0065."
   }
 }

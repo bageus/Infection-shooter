@@ -4,6 +4,7 @@ extends Node3D
 ## the long side). It uses a flat textured quad, so it renders the same in
 ## every renderer and is selectable in the planner like other objects.
 
+const SURFACE_DECOR := preload("res://game/presentation/office_floor/public/surface_decor_catalog.gd")
 const LIBRARY := preload("res://game/presentation/office_floor/blood_texture_library.gd")
 const BIOMASS := preload("res://game/presentation/office_floor/biomass_atlas.gd")
 const BIOMASS_MESH := preload("res://game/presentation/office_floor/biomass_mesh.gd")
@@ -208,7 +209,7 @@ func _rebuild() -> void:
 	material.normal_enabled = entry.get("normal") != null
 	material.normal_texture = entry.get("normal")
 	material.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
-	material.roughness = 0.35
+	material.roughness = float(entry.get("roughness", 0.35))
 	material.cull_mode = BaseMaterial3D.CULL_DISABLED
 	quad.material = material
 	_visual.mesh = quad
@@ -223,6 +224,8 @@ func _apply_surface() -> void:
 
 
 static func texture_entry(texture_id: String) -> Dictionary:
+	if texture_id.begins_with("surface:"):
+		return SURFACE_DECOR.texture_entry(texture_id)
 	if _library == null:
 		_library = LIBRARY.new()
 		_library.call("load_assets")

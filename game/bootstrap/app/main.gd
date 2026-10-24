@@ -105,6 +105,7 @@ func _ready() -> void:
 	entries.name = "LevelEntries"
 	add_child(entries)
 	entries.setup(self, player, planning_mode)
+	planning_mode.controls.hud_layout.setup(planning_mode.controls)
 	var occlusion := OCCLUSION.new()
 	occlusion.name = "OcclusionEffects"
 	add_child(occlusion)

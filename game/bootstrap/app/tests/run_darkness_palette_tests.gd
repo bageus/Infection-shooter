@@ -120,7 +120,7 @@ func _test_groups(first: Node3D, second: Node3D, other: Node3D) -> void:
 	options.highlights._process(0)
 	_check(options.highlights.markers[first.get_instance_id()].visual.visible, "Highlight works with fog disabled")
 	var geometry := GEOMETRY.new()
-	_check(geometry._combined_aabb(first).size.x > 0.0, "A zone stays pickable while fog is disabled")
+	_check(geometry._combined_aabb(first).size.x > 0.0, "Authored scaling bounds remain available while disabled fog is excluded from picking")
 	first.position = Vector3(3, 5, 2)
 	first.scale = Vector3(2, 1, 3)
 	options.highlights._process(0)
