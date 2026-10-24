@@ -1,5 +1,5 @@
 extends Node
-## Planner panel under the Blood palette (ADR-0062): an amount slider and an
+## Planner panel in the dedicated Biomass palette (ADR-0062): an amount slider and an
 ## "Apply biomass" button. Applying lays a procedural network of biomass decals
 ## across the floor that joins every spawn hole (biomass_generator.gd); it
 ## replaces the network applied before in this session and is one undo step.
@@ -21,7 +21,7 @@ var readout: Label
 var apply_button: Button
 
 
-## after: the control the panel follows; it shows and hides with that control.
+## Anchor sets the insertion point; the palette owner controls visibility.
 func setup(context: Variant, anchor: Control) -> void:
 	session = context
 	panel = VBoxContainer.new()
@@ -56,7 +56,6 @@ func setup(context: Variant, anchor: Control) -> void:
 	box.add_child(panel)
 	box.move_child(panel, anchor.get_index() + 1)
 	panel.visible = anchor.visible
-	anchor.visibility_changed.connect(func() -> void: panel.visible = anchor.visible)
 	_amount_changed(amount.value)
 
 

@@ -1,5 +1,5 @@
 extends SceneTree
-## ADR-0062 in the planner: the Blood tab offers an amount slider and an
+## ADR-0062 in the planner: the Biomass tab offers an amount slider and an
 ## "Apply biomass" button; applying lays floor biomass joining the spawn holes,
 ## replaces the previous network, and undoes in one step.
 const MAIN := preload("res://game/bootstrap/app/main.tscn")
@@ -34,12 +34,12 @@ func _run() -> void:
 	objects = planner.objects
 	controls = planner.controls
 	var options: Node = controls.biomass_options
-	_check(not options.panel.visible, "the generator is hidden outside the Blood tab")
-	controls._show_blood_catalog()
-	_check(options.panel.visible and options.apply_button.text == "Apply biomass", "the Blood tab shows the amount slider and the apply button")
+	_check(not options.panel.visible, "the generator is hidden outside the Biomass tab")
+	controls._show_biomass_catalog()
+	_check(options.panel.visible and options.apply_button.text == "Apply biomass", "the Biomass tab shows the amount slider and the apply button")
 	controls._show_gore_catalog()
 	_check(not options.panel.visible, "it hides again with the tab")
-	controls._show_blood_catalog()
+	controls._show_biomass_catalog()
 	var before := _biomass().size()
 	options.apply_button.pressed.emit()
 	_check(_biomass().size() == before and "spawn hole" in controls.status.text, "without spawn holes nothing is laid and the status says why")

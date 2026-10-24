@@ -229,6 +229,8 @@ func _input(event: InputEvent) -> void:
 		if desk_setup.handle_input(event):
 			get_viewport().set_input_as_handled()
 		return
+	if event is InputEventMouse and controls.hud_layout.contains_point(event.position):
+		return
 	if event is InputEventMouse and controls.planning_toolbar.get_global_rect().has_point(event.position):
 		return
 	if event is InputEventMouse and controls.spawn_options.contains_point(event.position):

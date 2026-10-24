@@ -27,7 +27,7 @@ func _run() -> void:
 	var direction := -overhead.global_basis.z.normalized()
 	_check(direction.y < 0.0 and is_equal_approx(rad_to_deg(direction.angle_to(Vector3.DOWN)), 25.0), "Global -Z points down, 25 degrees from vertical")
 	_check(not controller.get("local_lights_enabled"), "Local lamps default off")
-	var toggle := app.get_node("PlanningUI/Panel/VBox/LocalLights") as CheckButton
+	var toggle := app.get_node("PlanningUI/RightPanel/Content/PlanningTabs/Основная/LocalLights") as CheckButton
 	_check(not toggle.button_pressed, "Planner toggle matches startup")
 	for node: Node in get_nodes_in_group("planner_lights"):
 		_check_lamp_off(node)
