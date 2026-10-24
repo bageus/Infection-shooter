@@ -158,28 +158,20 @@ def main():
     args = parser.parse_args()
     layout = json.loads((GROUP/'atlas_layout.json').read_text())
     paths = sorted(GROUP.glob('*.glb'))
-    assert len(paths) == 25 and not (GROUP/'01_stairs_2.glb').exists()
+    assert len(paths) == 24 and not (GROUP/'01_stairs_2.glb').exists()
     for path in paths:
         relative = path.relative_to(ROOT).as_posix()
-        if path.name != '01_column_2.glb':
-            validate_model(path, layout)
+        validate_model(path, layout)
         if args.compare_ref:
             data = subprocess.check_output(['git', 'show', args.compare_ref+':'+relative], cwd=ROOT)
-            if path.name == '01_column_2.glb':
-                assert data == path.read_bytes(), 'Test column changed'
-            else:
-                compare_geometry(data, path.read_bytes(), path.name)
-    if args.compare_ref:
-        for path in [GROUP/'01_column_2.glb.import', *GROUP.glob('01_column_2_Image_*')]:
-            data = subprocess.check_output(['git', 'show', args.compare_ref+':'+path.relative_to(ROOT).as_posix()], cwd=ROOT)
-            assert data == path.read_bytes(), 'Test-column dependencies changed'
+            compare_geometry(data, path.read_bytes(), path.name)
     for kind, size in [('albedo', 2048), ('normal', 1024), ('orm', 1024)]:
         p = GROUP/f'textures/unified/group01_{kind}.png'
         assert struct.unpack('>II', p.read_bytes()[16:24]) == (2048, 2048)
         profile = Path(str(p)+'.import').read_text()
         for setting in ['compress/mode=2', 'mipmaps/generate=true', 'process/size_limit='+str(size), 'detect_3d/compress_to=0']:
             assert setting in profile, f'{kind}: wrong import budget'
-    print('Group 01 atlas: 24 production models + unchanged test column; UV, metal, buffers and budgets PASS' + ('; geometry/stages match '+args.compare_ref if args.compare_ref else ''))
+    print('Group 01 atlas: 24 production models; UV, metal, buffers and budgets PASS' + ('; geometry/stages match '+args.compare_ref if args.compare_ref else ''))
 
 
 if __name__ == '__main__':
