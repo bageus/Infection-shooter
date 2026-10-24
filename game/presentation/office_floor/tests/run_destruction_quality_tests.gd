@@ -223,6 +223,7 @@ func _test_standing_not_baked() -> void:
 	leaning.expire_fast()
 	_expect(runtime.get("_baked").count() == 0, "A standing or leaning big piece is not baked")
 	_expect(is_instance_valid(standing) and not standing.is_queued_for_deletion() and not standing.has_meta("debris_fading"), "An unforced standing piece stays a loose body")
+	_expect(is_instance_valid(leaning) and not leaning.has_meta("debris_fading"), "A standing piece the budget asks for does not vanish while the debris is under the burst limit")
 	lying.expire()
 	_expect(runtime.get("_baked").count() == 1, "A big piece lying flat is baked")
 	effects.queue_free()
