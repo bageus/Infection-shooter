@@ -408,3 +408,12 @@ deduplicated per physics frame and delivered through the existing wall check.
 Player applies Devourer independently of absorbed mutation; spent clouds retain
 presence monitoring. Antidote preview/use share the same pure domain result and
 current effectiveness. State ownership/dependency graph/save formats unchanged.
+
+ADR-0064: bootstrap.app сохраняет авторские transforms при finite timeout подготовки
+физики, разрешает snapshot с предупреждением без settled stamps и проверяет
+freed-ссылки до typed cast. Office-floor владеет immutable sparse PNG страницами
+напольной биомассы; bootstrap генерирует optional map-v8 floor_biomass_v1 при
+Save Map/Layout и передаёт explicit bake/render commands через public API.
+Owners/edges/policy прежние. Canonical SHA256 render inputs нормализует JSON
+числа; cache не применяется к изменённым исходникам. Запечён только diffuse свет
+биомассы, не глобальное освещение всей разрушаемой сцены; legacy maps совместимы.

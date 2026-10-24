@@ -11,6 +11,8 @@ const BIOMASS_FIT := preload("res://game/presentation/office_floor/biomass_fit.g
 const IMPACT_AUDIO := preload("res://game/presentation/office_floor/biomass_impact_audio.gd")
 const BIOMASS_CLIP := preload("res://game/presentation/office_floor/biomass_clip.gd")
 const BIOMASS_SUPPORT := preload("res://game/presentation/office_floor/biomass_support.gd")
+@export var floor_biomass_baked := false
+
 const FLOOR_OFFSET := 0.002
 ## Floor height when nothing is found below a settling piece (planner floor).
 const SETTLE_FLOOR := 0.0135
@@ -154,7 +156,7 @@ func _init() -> void:
 
 func _ready() -> void:
 	_rebuild()
-	set_process(_anchor != null or BIOMASS.is_biomass_id(texture_name))
+	set_process(not floor_biomass_baked and (_anchor != null or BIOMASS.is_biomass_id(texture_name)))
 
 
 func _exit_tree() -> void:
@@ -177,6 +179,9 @@ func get_blood_config() -> Dictionary:
 
 
 func _rebuild() -> void:
+	if floor_biomass_baked:
+		set_process(false)
+		return
 	set_meta("planning_wall_mount", surface == "wall")
 	set_meta("planning_free_place", true)
 	if _visual != null:
@@ -448,3 +453,21 @@ func _settle(glass: bool) -> void:
 		_restyle()
 	fall.call(0.0)
 	create_tween().set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_IN).tween_method(fall, 0.0, 1.0, SETTLE_SECONDS)
+
+
+## Authored floor cells stay serializable, but have no visuals or callbacks in play.
+func set_floor_biomass_baked(enabled: bool) -> void:
+	if not BIOMASS.is_biomass_id(texture_name) or surface != "floor" or not attachment_owner.is_empty() or absf(rotation_degrees.x) > 0.01 or absf(rotation_degrees.z) > 0.01:
+		return
+	if floor_biomass_baked == enabled: return
+	floor_biomass_baked = enabled
+	if _fit != null:
+		_fit.free()
+		_fit = null
+	if _visual != null:
+		_visual.free()
+		_visual = null
+	if enabled:
+		set_process(false)
+	else:
+		_rebuild()

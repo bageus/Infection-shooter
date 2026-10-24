@@ -1,11 +1,14 @@
 extends RefCounted
 ## Resume free bodies only after the authored map snapshot; anchors stay fixed.
 static func resume(nodes: Array) -> void:
-	for node: Node in nodes:
-		if not is_instance_valid(node):
+	for candidate: Variant in nodes:
+		if not is_instance_valid(candidate) or not candidate is Node:
 			continue
+		var node: Node = candidate
 		if node.has_method("set_runtime_physics"):
 			node.call("set_runtime_physics", true)
+		if not is_instance_valid(node):
+			continue
 		if node is RigidBody3D and not node.freeze:
 			node.sleeping = node.has_meta("planning_settled_transform") and node.get_meta("planning_settled_transform") == node.transform
 		resume(node.get_children())
@@ -15,7 +18,10 @@ static func resume(nodes: Array) -> void:
 ## unchanged. Carry preparation across an identical anchored replacement.
 static func capture_anchors(nodes: Array) -> Array[Dictionary]:
 	var result: Array[Dictionary] = []
-	for node: Node in nodes:
+	for candidate: Variant in nodes:
+		if not is_instance_valid(candidate) or not candidate is Node:
+			continue
+		var node: Node = candidate
 		if not is_instance_valid(node) or not node is RigidBody3D or not node.freeze:
 			continue
 		if node.has_meta("planning_auto_fixture") and node.has_meta("planning_settled_transform") and node.get_meta("planning_settled_transform") == node.transform:
@@ -24,7 +30,10 @@ static func capture_anchors(nodes: Array) -> Array[Dictionary]:
 
 
 static func restore_anchors(nodes: Array, stamps: Array[Dictionary]) -> void:
-	for node: Node in nodes:
+	for candidate: Variant in nodes:
+		if not is_instance_valid(candidate) or not candidate is Node:
+			continue
+		var node: Node = candidate
 		if not is_instance_valid(node) or not node is RigidBody3D or not node.freeze or not node.has_meta("planning_auto_fixture"):
 			continue
 		for stamp in stamps:

@@ -32,6 +32,7 @@
   ],
   "runtime_contracts": {
     "level_chain_v1": "user://level_chain.json {version:1, maps:[{name, entries:[{type none|ceiling|floor, x, z, placed} x2]}]}; map order is the chain, slot 0 leads to the previous map, slot 1 to the next. Map files and layout DTO unchanged.",
-    "planned_physics_v1": "DTO v8 optional settled_physics={version:1}; transform-scoped sleep state. Corpse decor_pose.physics_v1 validated before replacement. Legacy v1-v8 compatible, ADR0055."
+    "planned_physics_v1": "DTO v8 optional settled_physics={version:1}; transform-scoped sleep state. Corpse decor_pose.physics_v1 validated before replacement. Legacy v1-v8 compatible, ADR0055.",
+    "baked_floor_biomass_v1": "Map v8 optional floor_biomass_v1={version:1,y,pages:[{x,z,png}],source_signature}; generated on Save Map/Layout, validated before replacement, restored as immutable pages; source records preserved. ADR0064."
   }
 }

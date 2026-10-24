@@ -5,11 +5,14 @@ const BATCH_SIZE := 192
 const MAX_TICKS := 720
 const MAX_MSEC := 15000
 const QUIET_TICKS := 12
+var tick_limit := MAX_TICKS
+var time_limit_msec := MAX_MSEC
 var ticks := 0
 var elapsed_msec := 0
 var contact_guards := 0
 var _bodies: Array[RigidBody3D] = []
 var _corpses: Array[Node3D] = []
+var _authored: Dictionary = {}
 
 
 func run(session: Node, nodes: Array, status: Label) -> bool:
@@ -20,9 +23,10 @@ func run(session: Node, nodes: Array, status: Label) -> bool:
 	var pending: Array[RigidBody3D] = []
 	var dirty := false
 	for index in nodes.size():
-		var node: Node3D = nodes[index]
-		if not is_instance_valid(node):
+		var candidate: Variant = nodes[index]
+		if not is_instance_valid(candidate) or not candidate is Node3D:
 			continue
+		var node: Node3D = candidate
 		dirty = dirty or not node.has_meta("planning_settled_transform") or node.get_meta("planning_settled_transform") != node.transform or int(node.get_meta("planning_settled_count", -1)) != nodes.size()
 		if node.has_method("prepare_planner_physics"):
 			_corpses.append(node)
@@ -37,7 +41,8 @@ func run(session: Node, nodes: Array, status: Label) -> bool:
 		print("Planner physics: unchanged prepared layer")
 		return true
 	for index in _bodies.size():
-		var body := _bodies[index]
+		var body: Variant = _bodies[index]
+		_authored[body] = body.transform
 		body.linear_velocity = Vector3.ZERO
 		body.angular_velocity = Vector3.ZERO
 		if PROBE.may_move(body):
@@ -68,11 +73,13 @@ func run(session: Node, nodes: Array, status: Label) -> bool:
 			body.freeze = true
 	if success:
 		success = await _settle_corpses(session, status)
+	if not success:
+		_restore_authored(nodes)
 	await _restore_bodies(tree)
 	if not _alive(session):
 		return false
 	if success:
-		for node: Node3D in nodes:
+		for node: Variant in nodes:
 			if is_instance_valid(node):
 				node.set_meta("planning_settled_transform", node.transform)
 				node.set_meta("planning_settled_count", nodes.size())
@@ -110,7 +117,7 @@ func _step(session: Node, samples: Array, status: Label) -> bool:
 	var step_ticks := 0
 	var message := status.text
 	PhysicsServer3D.set_active(true)
-	while step_ticks < MAX_TICKS and Time.get_ticks_msec() - started < MAX_MSEC:
+	while step_ticks < tick_limit and Time.get_ticks_msec() - started < time_limit_msec:
 		await tree.process_frame
 		if not _alive(session):
 			PhysicsServer3D.set_active(not tree.paused)
@@ -145,9 +152,22 @@ func _step(session: Node, samples: Array, status: Label) -> bool:
 	return quiet >= QUIET_TICKS
 
 
+## A timed-out preparation must not lose authored positions (or bless them as settled).
+func _restore_authored(nodes: Array) -> void:
+	for body: Variant in _authored:
+		if is_instance_valid(body):
+			body.transform = _authored[body]
+	for node: Variant in nodes:
+		if is_instance_valid(node):
+			if node.has_meta("planning_settled_transform"):
+				node.remove_meta("planning_settled_transform")
+			if node.has_meta("planning_settled_count"):
+				node.remove_meta("planning_settled_count")
+
+
 func _restore_bodies(tree: SceneTree) -> void:
 	for index in _bodies.size():
-		var body := _bodies[index]
+		var body: Variant = _bodies[index]
 		if is_instance_valid(body):
 			body.freeze = false
 			body.linear_velocity = Vector3.ZERO
@@ -231,7 +251,7 @@ static func _collect_bodies(node: Node, result: Array[RigidBody3D]) -> void:
 
 static func _quiet(samples: Array, previous: Dictionary) -> bool:
 	var quiet := true
-	for sample: Node3D in samples:
+	for sample: Variant in samples:
 		if not is_instance_valid(sample):
 			continue
 		if sample is RigidBody3D:

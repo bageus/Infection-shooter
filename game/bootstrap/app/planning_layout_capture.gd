@@ -85,6 +85,7 @@ static func collect(objects: Node, nodes: Array, include_player: bool = true) ->
 	var data := {"version": 8, "objects": records}
 	var settings := SURFACE_SETTINGS.capture(objects.session)
 	if not settings.is_empty(): data["surface_decals_v1"] = settings
+	preload("res://game/bootstrap/app/planning_biomass_bake.gd").capture(objects.session, data)
 	return data
 
 

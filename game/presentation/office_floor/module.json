@@ -47,7 +47,8 @@
     "public/display_wall.gd",
     "public/hit_effect_warmup.gd",
     "public/city_backdrop.tscn",
-    "public/surface_decal_config.gd"
+    "public/surface_decal_config.gd",
+    "public/baked_biomass_floor.gd"
   ],
   "dependencies": [
     "features.player",
@@ -141,6 +142,10 @@
     },
     "footstep_surface_v1": {
       "has_glass_at": "has_glass_at(world_position: Vector3) -> bool; bounded read-only query of visible floor glass and marked physical shards"
+    },
+    "baked_biomass_floor_v1": {
+      "cache": "Optional map-v8 floor_biomass_v1 version1 sparse8m/512px PNG pages+source_signature; max64; ready-only unshaded views; covers(world) supports footsteps; valid/cache builder explicit bootstrap commands.",
+      "editing": "blood_decal.set_floor_biomass_baked(bool) suppresses eligible floor visual/fit/process, restores editable source geometry when false. Original blood records are unchanged."
     }
   }
 }
