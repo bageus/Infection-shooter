@@ -7,6 +7,9 @@ owner: AI
 updated: 2026-10-18
 ---
 
+25.10.2026 — исправление CI PR464: Architecture validation и runtime Project gates падали на merge с main fb6c79a: authored base_office_layout из commit94a20af содержит публичную spawn_point.tscn, а presentation.office_floor не декларировал features.spawning. Добавлена декларация существующей композиционной зависимости; направление presentation→features разрешено policy, цикла/нового владельца/API/DTO нет. Карта и точка спавна сохранены, валидатор не ослаблен. T004/Phase1 прежние.
+
+
 
 25.10.2026 — третий пункт FPS-диагностики, прямое поручение владельца: сократить idle работу крови/биомассы. T004/Phase1/P1_LOGIC остаётся единственной задачей. Владельцы — presentation.office_floor; production область blood_decal_prop и biomass_fit, focused tests/CI/QA/ADR0061. План: не пересчитывать attachment inverse без движения, не создавать clip stamp array до подтверждённой подгонки; останавливать Fit process после settle/worker completion, пробуждать по inherited transform и существующим release/adopt/start. Root process для отслеживания destroyed/hidden anchors и periodic support checks сохраняется. Root473строки reviewed: прежний render/attachment adapter, новые owners/helpers не нужны; Fit266строк отвечает только за fusion lifecycle. Риски: редактирование неподвижного anchor, follower release, новый сосед у спящего leader, worker teardown, periodic masks, planner/bake переключение. Public API/сцены/ресурсы/DTO/owners/edges/policy прежние; исключений не планируется. Readiness gates PASS. Следующее действие — baseline callback/CPU comparison, минимальные правки и связанные regressions, затем отдельный PR без merge.
 

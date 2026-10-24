@@ -79,3 +79,12 @@ Godot4.7.2 headless, все0failures:
 validate_project PASS:227 suites,219runtime+8special. Final editor import без ERROR,385scene refs,resource paths и diff-check PASS.
 Windows/Web, ручная визуальная приёмка и FPS карты владельца не проверены.
 Откат — revert этого инкремента, данные и схема сохранений совместимы.
+
+
+### Исправление CI при обновлении main (25.10.2026)
+
+CI проверял merge с main fb6c79a и нашёл undeclared dependency: в authored
+base_office_layout (94a20af) добавлена публичная spawn_point.tscn из
+features.spawning. Манифест office_floor теперь декларирует существующую
+композиционную зависимость presentation→features; policy это разрешает,
+циклов нет. Точка спавна, карта и её JSON сохранены; validators не ослаблены.

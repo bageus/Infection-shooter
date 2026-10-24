@@ -54,6 +54,7 @@
     "features.player",
     "features.infected",
     "features.infection_source",
+    "features.spawning",
     "features.combat",
     "features.pickups",
     "core.audio",
