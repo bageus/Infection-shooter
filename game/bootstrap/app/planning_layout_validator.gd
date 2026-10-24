@@ -7,6 +7,8 @@ const DOOR_OPTIONS := preload("res://game/bootstrap/app/planning_door_options.gd
 
 
 static func error(data: Dictionary) -> String:
+	if data.has("floor_biomass_v1") and not preload("res://game/presentation/office_floor/public/baked_biomass_floor.gd").valid(data.floor_biomass_v1):
+		return "invalid floor_biomass_v1"
 	if data.has("surface_decals_v1") and not SURFACE_CONFIG.valid(data.surface_decals_v1):
 		return "invalid surface_decals_v1"
 	if not data.get("objects") is Array:

@@ -85,6 +85,8 @@ func _run() -> void:
 	_warning_budget(stage)
 	_anchor_replacement(stage)
 	await _low_fps(stage, label)
+	await _timeout_snapshot(stage, label)
+	_freed_resume(stage)
 	var position_before := box.position
 	paused = false
 	for frame in 30:
@@ -262,3 +264,34 @@ func _freed_warnings(stage: Node3D) -> void:
 	_check(warning.get("_marks").is_empty(), "Deleted body is pruned without assigning freed marker")
 	warning.clear()
 	objects.free()
+
+
+func _freed_resume(stage: Node3D) -> void:
+	var live := RigidBody3D.new()
+	stage.add_child(live)
+	var gone := Node3D.new()
+	var entries: Array = [gone, live]
+	gone.free()
+	PHYSICS.resume(entries)
+	_check(is_instance_valid(live), "Resume tolerates a freed entry before a live body")
+	_check(PHYSICS.capture_anchors(entries).is_empty(), "Anchor capture tolerates freed entries")
+	PHYSICS.restore_anchors(entries, [])
+	live.free()
+
+
+func _timeout_snapshot(stage: Node3D, status: Label) -> void:
+	var body := RigidBody3D.new()
+	body.position = Vector3(2, 20, 2)
+	var shape := CollisionShape3D.new()
+	shape.shape = BoxShape3D.new()
+	body.add_child(shape)
+	stage.add_child(body)
+	var before := body.transform
+	body.set_meta("planning_settled_transform", Transform3D())
+	body.set_meta("planning_settled_count", 1)
+	var job := SETTLE.new()
+	job.tick_limit = 1
+	_check(not await job.run(stage, [body], status), "Unfinished physics is reported honestly")
+	_check(body.transform.is_equal_approx(before), "Timeout restores authored placement instead of saving a falling intermediate pose")
+	_check(not body.has_meta("planning_settled_transform"), "Unsettled authored placement is not stamped as prepared")
+	body.free()
