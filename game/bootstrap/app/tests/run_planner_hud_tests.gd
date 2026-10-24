@@ -35,20 +35,33 @@ func _run() -> void:
 	var maps := layout.main.get_node("MapManager/Maps") as OptionButton
 	maps.add_item("long map name ".repeat(100))
 	maps.select(maps.item_count - 1)
+	layout.selected_name.text = "long selected object name ".repeat(100)
 	controls.status.text = "long notification ".repeat(200)
 	await process_frame
 	await process_frame
-	_check(layout.selection.size.y < 160, "Long notifications cannot cover the world with a tall selection HUD")
+	_check(layout.selection.size.y <= 44, "Selection HUD stays within two compact lines")
 	for name in ["Items", "Weapons", "Biomass", "Decals"]:
 		_check(left.has_node("VBox/Tabs/" + name), name + " is a top palette tab")
 	controls.palette.add_item("very long catalogue name ".repeat(20))
-	for size in [Vector2i(1200, 700), Vector2i(1600, 900)]:
+	for size in [Vector2i(1024, 600), Vector2i(1200, 700), Vector2i(1600, 900)]:
 		root.size = size
 		await process_frame
 		await process_frame
+		_assert_hud_separation(layout, left)
 		_check(is_equal_approx(left.size.x, width), "Long entries and viewport changes keep the palette width fixed")
 		_check(left.get_node("VBox").size.x <= width, "Palette contents fit within the fixed HUD")
 		_check(is_equal_approx(layout.right.size.x, 360.0) and layout.right_content.size.x <= 360, "Long map names cannot widen the right HUD")
+	await _exercise_tabs(layout, left)
+	await _exercise_selection()
+	await _exercise_decal_roundtrip()
+	planner.exit()
+	stage.queue_free()
+	await process_frame
+	print("Planner HUD tests: %d failure(s)." % failures)
+	quit(failures)
+
+
+func _exercise_tabs(layout: RefCounted, left: Control) -> void:
 	layout.right_tabs.current_tab = 1
 	await process_frame
 	_check(layout.constructor.is_visible_in_tree() and not layout.main.is_visible_in_tree(), "Constructor tab switches its whole content")
@@ -58,6 +71,22 @@ func _run() -> void:
 	layout.toggle_right()
 	_check(layout.right_tabs.current_tab == 1, "Restoring keeps the selected tab")
 	layout.right_tabs.current_tab = 0
+	controls._show_actor_catalog()
+	await process_frame
+	await process_frame
+	_check(controls.spawn_options.panel.get_parent() == controls.palette.get_parent(), "Wave settings share the palette scroll")
+	_assert_hud_separation(layout, left)
+	controls._toggle_help()
+	await process_frame
+	await process_frame
+	_check(layout.help_scroll.visible, "Help opens inside the center scroll")
+	_assert_hud_separation(layout, left)
+	layout.toggle_right()
+	await process_frame
+	await process_frame
+	_assert_hud_separation(layout, left)
+	layout.toggle_right()
+	controls._toggle_help()
 	controls._show_blood_catalog()
 	_check(planner.catalog.active_catalog.size() == 44 and not controls.biomass_options.panel.visible, "Blood contains only blood and no generator")
 	controls._show_biomass_catalog()
@@ -73,13 +102,18 @@ func _run() -> void:
 	_check(planner.catalog.active_catalog.size() == 24, "Glass offers cracks and impacts")
 	controls._show_item_catalog()
 	_check(not controls.decal_palette.panel.visible and not controls.biomass_options.panel.visible, "Items hides unrelated palette options")
-	await _exercise_selection()
-	await _exercise_decal_roundtrip()
-	planner.exit()
-	stage.queue_free()
-	await process_frame
-	print("Planner HUD tests: %d failure(s)." % failures)
-	quit(failures)
+
+
+func _assert_hud_separation(layout: RefCounted, left: Control) -> void:
+	var parts: Array[Control] = [controls.planning_toolbar, layout.selection, left, layout.collapse]
+	if layout.right.visible:
+		parts.append(layout.right)
+	if layout.help_scroll.visible:
+		parts.append(layout.help_scroll)
+	for i in parts.size():
+		for j in range(i + 1, parts.size()):
+			_check(not parts[i].get_global_rect().intersects(parts[j].get_global_rect()), "HUD rectangles do not overlap: %s / %s" % [parts[i].name, parts[j].name])
+	_check(layout.selection.size.y <= 44, "Selection stays within two lines at every viewport size")
 
 
 func _exercise_selection() -> void:

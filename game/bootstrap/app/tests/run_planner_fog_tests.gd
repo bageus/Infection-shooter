@@ -61,6 +61,15 @@ func _run() -> void:
 	await process_frame
 	_check(not late.get_node("Overlay").visible, "A zone loaded while disabled inherits the setting")
 	_check(not baked.get_node("Overlay").visible, "A baked zone without a source scene path inherits the setting")
+	ui.hide()
+	_check(permanent.get_node("Overlay").visible and room.get_node("Overlay").visible, "Exiting planner always restores gameplay darkness")
+	_check(not fog.enabled and not fog.button.button_pressed, "Gameplay does not change the saved preview preference")
+	var gameplay_zone := _zone(true)
+	await process_frame
+	await process_frame
+	_check(gameplay_zone.get_node("Overlay").visible, "Zones loaded during gameplay always enable fog")
+	ui.show()
+	_check(not permanent.get_node("Overlay").visible and not gameplay_zone.get_node("Overlay").visible, "Reentering planner reapplies the disabled preview")
 	var config := ConfigFile.new()
 	_check(config.load(FILE) == OK and config.get_value("view", "fog_of_war", true) == false, "Switch persists the preference")
 	paused = true
@@ -87,7 +96,7 @@ func _run() -> void:
 	fallback.setup(ui, FILE)
 	_check(fallback.enabled, "Malformed preference falls back to on")
 	fallback.queue_free()
-	for node in [permanent, legacy, room, hidden, late, baked, ui]:
+	for node in [permanent, legacy, room, hidden, late, baked, gameplay_zone, ui]:
 		node.queue_free()
 	await process_frame
 	DirAccess.remove_absolute(ProjectSettings.globalize_path(FILE))

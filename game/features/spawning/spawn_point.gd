@@ -2,6 +2,7 @@ extends Node3D
 ## Planner object: a broken-floor hole that a wave of infected comes out of.
 ## Settings live in the config (spawn_config.gd); the wave director runs the wave.
 
+const MARKER_FONT := preload("res://assets/interface/fonts/body.ttf")
 const SPAWN_CONFIG := preload("res://game/features/spawning/public/spawn_config.gd")
 const SPAWN_HOLE := preload("res://game/features/spawning/spawn_hole.gd")
 const POINT_GROUP := &"enemy_spawn_points"
@@ -18,6 +19,7 @@ func _ready() -> void:
 	SPAWN_HOLE.build(self, str(get_meta(&"planning_object_id", "")).hash())
 	_marker = Label3D.new()
 	_marker.name = "PlanningMarker"
+	_marker.font = MARKER_FONT
 	_marker.billboard = BaseMaterial3D.BILLBOARD_ENABLED
 	_marker.no_depth_test = true
 	_marker.fixed_size = true

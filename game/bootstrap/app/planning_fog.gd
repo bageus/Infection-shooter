@@ -1,14 +1,17 @@
 extends Node
-## Application preference exposed in the planner; zones own their reveal state.
+## Planner-only preview preference; gameplay always enables authored fog.
 const FILE := "user://planner_settings.cfg"
 var session: Node
 var enabled := true
 var button: CheckButton
 var _file := FILE
+var _ui: Control
 
 
 func setup(ui: Control, settings_file: String = FILE) -> void:
 	_file = settings_file
+	_ui = ui
+	ui.visibility_changed.connect(_apply_all)
 	var config := ConfigFile.new()
 	if config.load(_file) == OK:
 		var value: Variant = config.get_value("view", "fog_of_war", true)
@@ -16,7 +19,7 @@ func setup(ui: Control, settings_file: String = FILE) -> void:
 	button = CheckButton.new()
 	button.name = "FogOfWarToggle"
 	button.text = "Туман войны (затемнение)"
-	button.tooltip_text = "Показывать затемнение комнат в планировщике и игре. Отключённые зоны не перехватывают выбор объектов. Сохраняется между запусками."
+	button.tooltip_text = "Показывать затемнение комнат только в режиме планирования. В игре затемнение всегда включено. Выбор предпросмотра сохраняется между запусками."
 	var box := ui.get_node("Panel/VBox")
 	box.add_child(button)
 	box.move_child(button, box.get_node("LocalLights").get_index() + 1)
@@ -28,8 +31,7 @@ func setup(ui: Control, settings_file: String = FILE) -> void:
 func set_enabled(value: bool, persist: bool = true) -> void:
 	enabled = value
 	button.set_pressed_no_signal(enabled)
-	for zone in get_tree().get_nodes_in_group("darkness_zone"):
-		_apply_zone(weakref(zone))
+	_apply_all()
 	if not enabled and session != null and is_instance_valid(session.objects.selected) and session.objects.selected.is_in_group("darkness_zone"):
 		session.objects._reset_selection()
 	if persist:
@@ -41,6 +43,11 @@ func set_enabled(value: bool, persist: bool = true) -> void:
 			push_warning("Unable to save fog-of-war preference: %s" % error_string(error))
 
 
+func _apply_all() -> void:
+	for zone in get_tree().get_nodes_in_group("darkness_zone"):
+		_apply_zone(weakref(zone))
+
+
 func _on_node_added(node: Node) -> void:
 	# Wait for _ready to build the overlay, including zones packed into baked maps.
 	if node.has_method("set_fog_of_war_enabled"):
@@ -50,7 +57,7 @@ func _on_node_added(node: Node) -> void:
 func _apply_zone(reference: WeakRef) -> void:
 	var zone := reference.get_ref() as Node
 	if is_instance_valid(zone) and not zone.is_queued_for_deletion() and zone.has_method("set_fog_of_war_enabled"):
-		zone.call("set_fog_of_war_enabled", enabled)
+		zone.call("set_fog_of_war_enabled", enabled if _ui.is_visible_in_tree() else true)
 
 
 func _exit_tree() -> void:
