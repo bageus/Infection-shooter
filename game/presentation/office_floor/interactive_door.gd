@@ -41,6 +41,8 @@ var _fallback_leaf_collisions: Array[CollisionShape3D] = []
 var _key_hint: Node3D
 const BUDGET_LIGHT := preload("res://game/presentation/office_floor/budget_omni_light.gd")
 const PRESENCE := preload("res://game/presentation/office_floor/door_presence.gd")
+const RUNTIME_CACHE := preload("res://game/presentation/office_floor/door_runtime_cache.gd")
+var _runtime_cache := RUNTIME_CACHE.new()
 var _presence: Area3D
 var _elevator_neighbors: Array[WeakRef] = []
 var _impact_pool: Node
@@ -78,8 +80,13 @@ func configure_player(actor: Node3D) -> void:
 
 
 func _enter_tree() -> void:
+	_runtime_cache.bind(self, mode == DoorMode.GLASS_SWING)
 	if mode == DoorMode.SLIDING_ELEVATOR:
 		call_deferred("_bind_elevator_neighbors")
+
+
+func _exit_tree() -> void:
+	_runtime_cache.clear()
 
 
 func _ready() -> void:
@@ -127,16 +134,26 @@ func _apply_lock_visuals() -> void:
 func _physics_process(delta: float) -> void:
 	if not is_instance_valid(_player):
 		return
-	var wants_open := _requested_open and not requires_emergency_key
-	_requested_open = false
 	var local_player := to_local(_player.global_position)
 	if mode == DoorMode.GLASS_SWING:
-		var visual := get_parent().get_node_or_null("Visual") as Node3D
-		if visual != null:
-			local_player = to_local(_player.global_position - (visual.global_position - global_position))
+		local_player = _runtime_cache.local_player(self, _player.global_position, true)
+		_refresh_glass_collision()
+	# Keep the cheap proximity check every tick: a teleport or fast approach
+	# must open immediately, while animation/delay/remote requests always run.
+	var idle_distance := maxf(3.0, trigger_distance + LOCKED_CUE_REARM_DISTANCE)
+	if _pose_ready and _open_amount == 0.0 and _close_timer <= 0.0 and not _requested_open and Vector2(local_player.x, local_player.z).length_squared() > idle_distance * idle_distance:
+		if _key_hint != null and _key_hint.visible:
+			_key_hint.hide()
+		_locked_cue_armed = true
+		_swing_side = 0.0
+		if mode == DoorMode.GLASS_SWING and _glass_hinge != null:
+			_swing_side = _player_side(local_player)
+		return
+	var wants_open := _requested_open and not requires_emergency_key
+	_requested_open = false
 	var horizontal_distance := Vector2(local_player.x, local_player.z).length()
 	var emergency_exit_side := signf(local_player.z) == signf(one_way_allowed_side)
-	var has_emergency_key := _player.has_method("has_emergency_key") and bool(_player.call("has_emergency_key"))
+	var has_emergency_key := requires_emergency_key and _player.has_method("has_emergency_key") and bool(_player.call("has_emergency_key"))
 	if _key_hint != null:
 		_key_hint.visible = requires_emergency_key and horizontal_distance < 3.0 and (permanently_locked or (not emergency_exit_side and not has_emergency_key))
 	var blocked := permanently_locked or (requires_emergency_key and not emergency_exit_side and not has_emergency_key)
@@ -177,7 +194,6 @@ func _physics_process(delta: float) -> void:
 				_swing_side = 0.0
 
 	_play_door_sound(before, _open_amount)
-	_refresh_glass_collision()
 	if mode == DoorMode.GLASS_SWING and _glass_hinge != null and _swing_side == 0.0:
 		_swing_side = _player_side(local_player)
 	if before != _open_amount or not _pose_ready:
@@ -194,13 +210,7 @@ func _announce_locked() -> void:
 
 
 func _refresh_glass_collision() -> void:
-	if mode == DoorMode.GLASS_SWING:
-		var glass_body := get_parent().get_node_or_null("GlassBody") as StaticBody3D
-		if glass_body != null:
-			var broken := bool(glass_body.get("_broken"))
-			for child in glass_body.get_children():
-				if child is CollisionShape3D and (child as CollisionShape3D).disabled != (broken):
-					(child as CollisionShape3D).set_deferred("disabled", broken)
+	_runtime_cache.refresh_glass_collision()
 
 
 func _update_door_visuals(local_player: Vector3) -> void:

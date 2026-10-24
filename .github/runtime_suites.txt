@@ -173,6 +173,7 @@ game/bootstrap/app/tests/run_ammo_box_tests.gd
 game/bootstrap/app/tests/run_placed_ammo_pickup_tests.gd
 game/bootstrap/app/tests/run_item_palette_ammo_tests.gd
 game/bootstrap/app/tests/run_planner_door_lock_tests.gd
+game/presentation/office_floor/tests/run_door_idle_tests.gd
 game/bootstrap/app/tests/run_planner_door_select_tests.gd
 game/bootstrap/app/tests/run_ui_translation_tests.gd
 game/presentation/prototype_hud/tests/run_mutation_veil_tests.gd
