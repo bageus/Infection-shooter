@@ -1,4 +1,4 @@
-extends Node
+extends Node3D
 ## Automatic fitting of planner biomass (ADR-0061). Every biomass decal owns one
 ## of these. Pieces that share a surface and touch each other are grouped; the
 ## first piece of a group draws the whole group as one fused mass and the others
@@ -34,6 +34,13 @@ var _queued: Dictionary = {}
 func _ready() -> void:
 	piece = get_parent() as Node3D
 	_last_transform = piece.global_transform
+	set_notify_transform(true)
+
+
+func _notification(what: int) -> void:
+	if what == NOTIFICATION_TRANSFORM_CHANGED and not is_processing() and is_instance_valid(piece) and piece.is_inside_tree():
+		if not piece.global_transform.is_equal_approx(_last_transform):
+			set_process(true)
 
 
 func _process(delta: float) -> void:
@@ -49,6 +56,8 @@ func _process(delta: float) -> void:
 		if _wait < 0.0:
 			_fit_neighbours()
 	_collect_job()
+	if _wait < 0.0 and _task < 0 and _queued.is_empty():
+		set_process(false)
 
 
 func _exit_tree() -> void:
@@ -67,6 +76,7 @@ func show_own_relief() -> void:
 
 
 func release() -> void:
+	set_process(true)
 	_wait = 0.05
 	shown_signature = 0
 	piece.call("biomass_show_cell")
@@ -234,6 +244,7 @@ func adopt(others: Array[WeakRef], members: Array, key: int) -> void:
 
 
 func _start(job: Dictionary) -> void:
+	set_process(true)
 	_job = job
 	var members: Array = job["members"]
 	var albedo := ATLAS.albedo_bytes()

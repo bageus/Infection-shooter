@@ -50,6 +50,7 @@ var _receivers: Array[Dictionary] = []
 var _projection_dirty := true
 var _projection_transform := Transform3D()
 var _last_anchor_transform := Transform3D()
+var _last_decal_transform := Transform3D()
 var _impact_audio := IMPACT_AUDIO.new()
 var _anchor_seen := false
 var _clip_stamp: Array = []
@@ -84,6 +85,7 @@ func attach_blood(anchor: Node3D, owner_id: String) -> void:
 	attachment_mesh = str(anchor.name)
 	_anchor_transform = anchor.global_transform.affine_inverse() * global_transform
 	_last_anchor_transform = anchor.global_transform
+	_last_decal_transform = global_transform
 	_anchor_seen = false
 	process_mode = Node.PROCESS_MODE_ALWAYS
 	set_process(true)
@@ -124,7 +126,8 @@ func _process(_delta: float) -> void:
 			set_process(false)
 		return
 	var anchor := _anchor.get_ref() as Node3D if _anchor != null else null
-	if anchor != null and anchor.is_visible_in_tree():
+	var anchor_visible := anchor != null and anchor.is_visible_in_tree()
+	if anchor_visible:
 		_anchor_seen = true
 	if _biomass_orphaned(anchor):
 		_settle(_is_glass(anchor))
@@ -134,14 +137,22 @@ func _process(_delta: float) -> void:
 			_visual.hide()
 		set_process(false)
 		return
-	if not anchor.global_transform.is_equal_approx(_last_anchor_transform):
-		global_transform = anchor.global_transform * _anchor_transform
-	else:
-		_anchor_transform = anchor.global_transform.affine_inverse() * global_transform
-	_last_anchor_transform = anchor.global_transform
-	_project_surface()
+	var anchor_transform := anchor.global_transform
+	var decal_transform := global_transform
+	if not anchor_transform.is_equal_approx(_last_anchor_transform):
+		decal_transform = anchor_transform * _anchor_transform
+		global_transform = decal_transform
+		_last_decal_transform = decal_transform
+	elif decal_transform != _last_decal_transform:
+		_anchor_transform = anchor_transform.affine_inverse() * decal_transform
+		_last_decal_transform = decal_transform
+	_last_anchor_transform = anchor_transform
+	if BIOMASS.is_biomass_id(texture_name):
+		_clip_biomass()
+	elif _projection_dirty or not decal_transform.is_equal_approx(_projection_transform) or not _visual.mesh is ArrayMesh or _receivers_changed():
+		_project_surface()
 	if _visual != null:
-		_visual.visible = anchor.is_visible_in_tree() and not _biomass_hidden
+		_visual.visible = anchor_visible and not _biomass_hidden
 
 
 static var _library: RefCounted
@@ -376,8 +387,10 @@ func _clip_biomass() -> void:
 	var floor_mass := anchor == null and surface == "floor"
 	var now := Time.get_ticks_msec()
 	var recheck := (floor_mass and now - _born_msec < FLOOR_RECHECK_SPAN and now - _last_fit_msec > FLOOR_RECHECK_STEP) or (anchor != null and now - _last_fit_msec > SUPPORT_RECHECK_STEP + int(absi(get_instance_id()) % 400))
-	var stamp := [_visual.global_transform, anchor.global_transform if anchor != null else Transform3D(), anchor, _visual.mesh]
-	var unchanged: bool = not _clip_stamp.is_empty() and stamp[0].is_equal_approx(_clip_stamp[0]) and stamp[1].is_equal_approx(_clip_stamp[1]) and stamp[2] == _clip_stamp[2] and stamp[3] == _clip_stamp[3]
+	var visual_transform := _visual.global_transform
+	var anchor_transform := anchor.global_transform if anchor != null else Transform3D()
+	var mesh := _visual.mesh
+	var unchanged: bool = not _clip_stamp.is_empty() and visual_transform.is_equal_approx(_clip_stamp[0]) and anchor_transform.is_equal_approx(_clip_stamp[1]) and anchor == _clip_stamp[2] and mesh == _clip_stamp[3]
 	if unchanged and not recheck:
 		return
 	if unchanged or _clip_stamp.is_empty():
@@ -388,7 +401,7 @@ func _clip_biomass() -> void:
 		if _fit_count >= FITS_PER_FRAME or (unchanged and frame % RECHECK_FRAME_GAP != 0):
 			return
 		_fit_count += 1
-	_clip_stamp = stamp
+	_clip_stamp = [visual_transform, anchor_transform, anchor, mesh]
 	_last_fit_msec = now
 	var space := get_world_3d().direct_space_state
 	if anchor != null:

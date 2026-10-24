@@ -62,3 +62,15 @@ SDF/метаболы в шейдере: нужен renderer-специфичны
 
 Процедурный генератор биомассы, напольное огибание стен и границы уровня описаны в
 `0062-procedural-biomass.md`.
+
+
+## Уточнение 25.10.2026 — idle lifecycle
+
+Private BiomassFit останавливает process после settle/worker completion;
+inherited transform notification (Node3D child), release и worker start
+возобновляют обработку. Ожидание очереди/worker teardown сохраняется.
+Blood root продолжает наблюдать anchor destruction/visibility и прежние
+periodic support masks; повторные attachment matrices и временные clip stamp
+arrays в покое сокращены. Владельцы, public API, сцены/ресурсы, DTO и edges
+прежние, исключений policy нет. Откат — revert инкремента без миграции данных.
+Evidence: [QA](../qa/idle_blood_biomass.md).
