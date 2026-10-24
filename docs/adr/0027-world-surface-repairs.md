@@ -58,3 +58,17 @@ owners прежние; потеря крепления не ломает intact 
 крепления выделен в отдельную private ответственность. Исключений нет.
 Проверки/ограничения: docs/qa/door_blood_and_wall_support.md.
 Откатить этот инкремент целиком; форматы и существующие сцены совместимы.
+
+
+## Уточнение 24.10.2026 — idle door runtime
+
+Closed/far guard пропускает key/sound/pose work только после начальной позы,
+без close delay/request_open; proximity проверяется каждый physics tick,
+поэтому приближение и teleport не ждут timer. Glass hinge side и defensive
+broken collider repair сохраняются также вдали. Private door_runtime_cache
+удерживает только geometry bindings; shape-list invalidation — по child events,
+teardown отключает подписки. Transform/player/locks остаются живыми,
+управление и mutable door state принадлежат прежнему root. Новых Timer/Area3D,
+distance collision disabling, публичных API, DTO, owners/edges или исключений
+policy нет. Root597строк reviewed; resource/scene изменения не нужны.
+Проверки и CPU-ограничения: [QA](../qa/idle_door_runtime.md).
