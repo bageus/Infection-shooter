@@ -2,6 +2,7 @@ extends Node3D
 
 const BLOOD_PLACEMENT := preload("res://game/bootstrap/app/planning_blood_placement.gd")
 const EXPLOSION_TRACE := preload("res://game/features/combat/public/explosion_trace.gd")
+const AMBIENT_SOUNDS := preload("res://game/presentation/office_floor/public/ambient_prop_sounds.gd")
 const DISPLAY_WALL := preload("res://game/presentation/office_floor/public/display_wall.gd")
 const WORLD_BINDINGS := preload("res://game/bootstrap/app/world_bindings.gd")
 const IMPACT_POOL := preload("res://game/features/combat/public/impact_effects.gd")
@@ -425,6 +426,10 @@ func _setup_world_bindings() -> void:
 	var display_wall := DISPLAY_WALL.new()
 	display_wall.name = "DisplayWall"
 	add_child(display_wall)
+	var ambient := AMBIENT_SOUNDS.new()
+	ambient.name = "AmbientPropSounds"
+	ambient.player = player
+	add_child(ambient)
 	world_bindings = WORLD_BINDINGS.new(mission_objects, impact_pool, player, drop_weapon_pickup, display_wall, player.get("camera") as Camera3D)
 	world_bindings.set("debris_floor", $Floor)
 	world_bindings.call("bind_scene", player)

@@ -5,6 +5,7 @@ extends Node3D
 ## every renderer and is selectable in the planner like other objects.
 
 const SURFACE_DECOR := preload("res://game/presentation/office_floor/public/surface_decor_catalog.gd")
+const AMBIENT_SOUNDS := preload("res://game/presentation/office_floor/public/ambient_prop_sounds.gd")
 const LIBRARY := preload("res://game/presentation/office_floor/blood_texture_library.gd")
 const BIOMASS := preload("res://game/presentation/office_floor/biomass_atlas.gd")
 const BIOMASS_MESH := preload("res://game/presentation/office_floor/biomass_mesh.gd")
@@ -168,6 +169,8 @@ func _init() -> void:
 
 func _ready() -> void:
 	_rebuild()
+	if BIOMASS.is_biomass_id(texture_name):
+		AMBIENT_SOUNDS.tag_events(self, [&"biomass_gurgle"])
 	set_process(not floor_biomass_baked and (_anchor != null or BIOMASS.is_biomass_id(texture_name)))
 
 
