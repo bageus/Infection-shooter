@@ -247,7 +247,7 @@ jobs:
             /tmp/import.log
   runtime:
     runs-on: ubuntu-latest
-    timeout-minutes: 45
+    timeout-minutes: 30
     steps:
       - uses: actions/checkout@v4
       - name: Install Godot
@@ -330,43 +330,37 @@ jobs:
           set -o pipefail
           timeout 120 godot --headless --path . res://game/bootstrap/app/main.tscn --quit-after 180 2>&1 | tee /tmp/main.log
           if grep -E 'SCRIPT ERROR|^ERROR:' /tmp/main.log; then exit 1; fi
-      - name: Capture menu screens
-        if: ${{ !cancelled() }}
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          retention-days: 7
+          name: runtime-logs
+          path: |
+            /tmp/import.log
+            /tmp/main.log
+            /tmp/rendered.log
+            /tmp/group04.log
+  menu-capture:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install Godot and software renderer
         run: |
+          bash tools/ci_download_godot.sh
+          unzip -q /tmp/godot.zip -d /tmp/godot
+          chmod +x /tmp/godot/Godot*
+          sudo ln -s /tmp/godot/Godot* /usr/local/bin/godot
           bash tools/ci_apt_install.sh xvfb libgl1-mesa-dri mesa-vulkan-drivers libvulkan1
+      - name: Import
+        run: |
+          set -o pipefail
+          timeout 600 godot --headless --path . --editor --quit 2>&1 | tee /tmp/import.log
+          if grep -E 'SCRIPT ERROR|^ERROR:' /tmp/import.log; then exit 1; fi
+      - name: Capture menu screens
+        run: |
           # 300 s: the capture loads the whole gameplay scene on the software renderer. It took 173 s on a green run and 200 s with apt on a red one, so 180 s killed it.
           timeout 300 xvfb-run -a godot --path . --audio-driver Dummy --rendering-method gl_compatibility --script game/bootstrap/app/tests/capture_menu_screens.gd
-      - name: Occlusion and blast pixels in both renderers
-        env:
-          OCCLUSION_CAPTURE_DIR: /tmp/menu_previews
-          XRAY_CAPTURE_DIR: /tmp/menu_previews
-          DISPLAY_CAPTURE_DIR: /tmp/menu_previews
-          POSE_CAPTURE_DIR: /tmp/menu_previews
-          RUNTIME_PROFILE_DIR: /tmp/menu_previews
-        if: ${{ !cancelled() }}
-        shell: bash
-        run: |
-          failed=0
-          for renderer in gl_compatibility forward_plus; do
-            for suite in game/bootstrap/app/tests/run_hero_xray_tests.gd game/presentation/prototype_hud/tests/run_vital_bar_feedback_tests.gd game/bootstrap/app/tests/run_planner_light_view_tests.gd game/presentation/office_floor/tests/run_display_shadow_profile.gd game/presentation/prototype_hud/tests/run_radar_tests.gd game/presentation/office_floor/tests/run_floor_batch_tests.gd game/presentation/office_floor/tests/run_glass_floor_debris_tests.gd game/presentation/office_floor/tests/run_material_floor_debris_tests.gd game/presentation/office_floor/tests/run_floor_decal_visibility_tests.gd game/presentation/office_floor/tests/run_baked_surface_decal_tests.gd game/bootstrap/app/tests/run_surface_decal_options_tests.gd game/features/combat/tests/run_grenade_vfx_tests.gd game/features/infected/tests/run_corpse_physics_tests.gd game/bootstrap/app/tests/run_settings_tabs_tests.gd game/bootstrap/app/tests/run_surface_pose_tests.gd game/features/combat/tests/run_cursor_aim_tests.gd game/bootstrap/app/tests/run_gameplay_planner_repairs_tests.gd game/bootstrap/app/tests/run_runtime_debug_tests.gd game/bootstrap/app/tests/run_blast_feedback_tests.gd; do
-              suite_status=0
-              started_at=$(date +%s)
-              # 300 s: full-mission rendered suites run 85-200 s on the software renderer (run_runtime_debug_tests: 84 s this morning, ~190 s on current main) and 180 s+ on shared runners.
-              native_log_args=()
-              if [ "$suite" = game/bootstrap/app/tests/run_surface_pose_tests.gd ]; then native_log_args+=(--verbose); fi
-              timeout 300 xvfb-run -a godot "${native_log_args[@]}" --path . --audio-driver Dummy --rendering-method "$renderer" --script "$suite" > /tmp/occlusion.log 2>&1 || suite_status=$?
-              elapsed=$(( $(date +%s) - started_at ))
-              echo "$renderer: $suite exited $suite_status in ${elapsed}s"
-              if [ "$suite_status" != 0 ]; then
-                failed=1
-                echo "::error title=Rendered suite exit::$renderer $suite exited $suite_status in ${elapsed}s"
-              fi
-              cp /tmp/occlusion.log /tmp/menu_previews/$(basename "$suite" .gd)_${renderer}.log
-              cat /tmp/occlusion.log
-              if grep -E 'SHADER ERROR|SCRIPT ERROR|^ERROR:' /tmp/occlusion.log; then failed=1; fi
-            done
-          done
-          exit "$failed"
       - uses: actions/upload-artifact@v4
         if: always()
         with:
@@ -375,6 +369,62 @@ jobs:
           path: |
             /tmp/menu_previews/*
             /tmp/import.log
-            /tmp/main.log
-            /tmp/rendered.log
-            /tmp/group04.log
+  rendered-pixels:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    strategy:
+      fail-fast: false
+      matrix:
+        renderer: [gl_compatibility, forward_plus]
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install Godot and software renderer
+        run: |
+          bash tools/ci_download_godot.sh
+          unzip -q /tmp/godot.zip -d /tmp/godot
+          chmod +x /tmp/godot/Godot*
+          sudo ln -s /tmp/godot/Godot* /usr/local/bin/godot
+          bash tools/ci_apt_install.sh xvfb libgl1-mesa-dri mesa-vulkan-drivers libvulkan1
+      - name: Import
+        run: |
+          set -o pipefail
+          timeout 600 godot --headless --path . --editor --quit 2>&1 | tee /tmp/import.log
+          if grep -E 'SCRIPT ERROR|^ERROR:' /tmp/import.log; then exit 1; fi
+      - name: Occlusion and blast pixels
+        env:
+          OCCLUSION_CAPTURE_DIR: /tmp/menu_previews
+          XRAY_CAPTURE_DIR: /tmp/menu_previews
+          DISPLAY_CAPTURE_DIR: /tmp/menu_previews
+          POSE_CAPTURE_DIR: /tmp/menu_previews
+          RUNTIME_PROFILE_DIR: /tmp/menu_previews
+        shell: bash
+        run: |
+          failed=0
+          mkdir -p /tmp/menu_previews
+          renderer=${{ matrix.renderer }}
+          for suite in game/bootstrap/app/tests/run_hero_xray_tests.gd game/presentation/prototype_hud/tests/run_vital_bar_feedback_tests.gd game/bootstrap/app/tests/run_planner_light_view_tests.gd game/presentation/office_floor/tests/run_display_shadow_profile.gd game/presentation/prototype_hud/tests/run_radar_tests.gd game/presentation/office_floor/tests/run_floor_batch_tests.gd game/presentation/office_floor/tests/run_glass_floor_debris_tests.gd game/presentation/office_floor/tests/run_material_floor_debris_tests.gd game/presentation/office_floor/tests/run_floor_decal_visibility_tests.gd game/presentation/office_floor/tests/run_baked_surface_decal_tests.gd game/bootstrap/app/tests/run_surface_decal_options_tests.gd game/features/combat/tests/run_grenade_vfx_tests.gd game/features/infected/tests/run_corpse_physics_tests.gd game/bootstrap/app/tests/run_settings_tabs_tests.gd game/bootstrap/app/tests/run_surface_pose_tests.gd game/features/combat/tests/run_cursor_aim_tests.gd game/bootstrap/app/tests/run_gameplay_planner_repairs_tests.gd game/bootstrap/app/tests/run_runtime_debug_tests.gd game/bootstrap/app/tests/run_blast_feedback_tests.gd; do
+            suite_status=0
+            started_at=$(date +%s)
+            # 300 s: full-mission rendered suites run 85-200 s on the software renderer (run_runtime_debug_tests: 84 s this morning, ~190 s on current main) and 180 s+ on shared runners.
+            native_log_args=()
+            if [ "$suite" = game/bootstrap/app/tests/run_surface_pose_tests.gd ]; then native_log_args+=(--verbose); fi
+            timeout 300 xvfb-run -a godot "${native_log_args[@]}" --path . --audio-driver Dummy --rendering-method "$renderer" --script "$suite" > /tmp/occlusion.log 2>&1 || suite_status=$?
+            elapsed=$(( $(date +%s) - started_at ))
+            echo "$renderer: $suite exited $suite_status in ${elapsed}s"
+            if [ "$suite_status" != 0 ]; then
+              failed=1
+              echo "::error title=Rendered suite exit::$renderer $suite exited $suite_status in ${elapsed}s"
+            fi
+            cp /tmp/occlusion.log /tmp/menu_previews/$(basename "$suite" .gd)_${renderer}.log
+            cat /tmp/occlusion.log
+            if grep -E 'SHADER ERROR|SCRIPT ERROR|^ERROR:' /tmp/occlusion.log; then failed=1; fi
+          done
+          exit "$failed"
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          retention-days: 7
+          name: rendered-pixels-${{ matrix.renderer }}
+          path: |
+            /tmp/menu_previews/*
+            /tmp/import.log
