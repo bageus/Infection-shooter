@@ -352,7 +352,9 @@ jobs:
               suite_status=0
               started_at=$(date +%s)
               # 300 s: full-mission rendered suites run 85-200 s on the software renderer (run_runtime_debug_tests: 84 s this morning, ~190 s on current main) and 180 s+ on shared runners.
-              timeout 300 xvfb-run -a godot --path . --audio-driver Dummy --rendering-method "$renderer" --script "$suite" > /tmp/occlusion.log 2>&1 || suite_status=$?
+              native_log_args=()
+              if [ "$suite" = game/bootstrap/app/tests/run_surface_pose_tests.gd ]; then native_log_args+=(--verbose); fi
+              timeout 300 xvfb-run -a godot "${native_log_args[@]}" --path . --audio-driver Dummy --rendering-method "$renderer" --script "$suite" > /tmp/occlusion.log 2>&1 || suite_status=$?
               elapsed=$(( $(date +%s) - started_at ))
               echo "$renderer: $suite exited $suite_status in ${elapsed}s"
               if [ "$suite_status" != 0 ]; then
