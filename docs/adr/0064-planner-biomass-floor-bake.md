@@ -58,3 +58,11 @@ String.num(...,4) нормализуется в «0.0», как при JSON-се
 инвалидирует cache. Формат map-v8 и источник-объекты не меняются. Старый cache
 с уже несовпадающей подписью использует прежний безопасный fallback и
 обновляется при Save Map/Layout; исходные данные не удаляются.
+
+
+25.10.2026 — N03: save-time sampler применяет существующую долю энергии
+planner_light к каждому Spot:1 для единственного, 0.7/N для многоточечной
+лампы. Источник — authored energy×multiplier, без transient fade/flicker,
+поэтому вне camera budget свет не теряется. Runtime/DTO/API/owners/edges
+прежние; уже сохранённые PNG обновляются следующим Save Map/Layout. Реальные
+public fixtures и RGB8 grid проверены, подробности docs/qa/biomass_light_energy.md.

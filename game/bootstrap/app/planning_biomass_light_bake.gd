@@ -28,9 +28,12 @@ func configure(host: Node3D, check: Callable) -> void:
 	if controller == null or not bool(controller.get("local_lights_enabled")): return
 	for fixture: Node in tree.get_nodes_in_group("budget_lights"):
 		if not host.is_ancestor_of(fixture): continue
-		for node: Node in fixture.find_children("*", "SpotLight3D", true, false):
+		var spots := fixture.find_children("*", "SpotLight3D", true, false)
+		# Match planner_light's authored split, independent of runtime fade/flicker.
+		var share := 1.0 if spots.size() <= 1 else 0.7 / float(spots.size())
+		for node: Node in spots:
 			var light := node as SpotLight3D
-			var energy := float(fixture.call("get_authored_energy")) * float(fixture.get("energy_multiplier")) if fixture.has_method("get_authored_energy") else light.light_energy
+			var energy := float(fixture.call("get_authored_energy")) * float(fixture.get("energy_multiplier")) * share if fixture.has_method("get_authored_energy") else light.light_energy
 			lamps.append({"shadows": bool(controller.get("shadows_allowed")), "position": light.global_position, "direction": -light.global_basis.z.normalized(), "color": light.light_color, "energy": energy, "range": light.spot_range, "angle": cos(deg_to_rad(light.spot_angle)), "cone": light.spot_angle_attenuation, "attenuation": light.spot_attenuation})
 
 
