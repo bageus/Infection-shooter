@@ -66,3 +66,11 @@ planner_light к каждому Spot:1 для единственного, 0.7/N 
 поэтому вне camera budget свет не теряется. Runtime/DTO/API/owners/edges
 прежние; уже сохранённые PNG обновляются следующим Save Map/Layout. Реальные
 public fixtures и RGB8 grid проверены, подробности docs/qa/biomass_light_energy.md.
+
+
+25.10.2026 — N04: structural shadows в existing biomass diffuse cache
+независимы от runtime dynamic-shadow permission/quality/flags. CPU sampler
+всегда проверяет camera_occluder для положительного вклада Spot/Directional,
+не включает renderer shadow passes. DTO/API/owners/edges прежние; старые PNG
+обновляются Save Map/Layout. Это не G01 whole-scene layer. Regression13→0
+и ограничения: docs/qa/biomass_static_shadows.md.

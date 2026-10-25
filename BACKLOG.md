@@ -125,3 +125,10 @@ IMPLEMENTED / CI_PENDING внутри T004: исходные наклоны/ма
 ## N03 — энергия bake (25.10.2026)
 
 IMPLEMENTED / CI_PENDING: sampler совпадает с существующим runtime распределением Spot energy. [QA](docs/qa/biomass_light_energy.md). Существующие страницы обновляются через Save Map/Layout. Следующий этап — N04 (переключатель динамических теней не должен менять статический bake), затем N05/G01 по очереди аудита. T004 остаётся единственной активной задачей.
+
+
+## N04 — статические тени биомассы (25.10.2026)
+
+IMPLEMENTED / CI_PENDING в T004: structural bake не зависит от dynamic-shadow preference/quality. [QA](docs/qa/biomass_static_shadows.md). Старые PNG требуют Save Map/Layout. G01 остаётся отдельным дизайном общего shadow layer; N05 — следующий audit fix.
+
+Подтверждённый CI blocker базы PR474: sound_event OGG-only отвергает WAV/import assets (run40236269088/job121298414524, остальные suites/native jobs успешны). Исправить отдельным инкрементом, сохранить пользовательские исходники, не ослаблять тест без согласованной asset policy.

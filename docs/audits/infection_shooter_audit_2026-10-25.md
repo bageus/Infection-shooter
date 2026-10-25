@@ -45,6 +45,8 @@ _signature включает scene, позицию и rotation_y, но не rotat
 
 ### N04. Параметр динамических теней вшивается в неизменяемый bake
 
+IMPLEMENTED / CI_PENDING25.10.2026: static structural rays независимы от runtime flags; regression13→0, четыре источника×on/off×4 качества, PNG/JSON/runtime view. [QA](../qa/biomass_static_shadows.md). Исходное evidence ниже сохранено.
+
 Источник: `planning_biomass_light_bake.gd:27, 34, 48–51`; `game/presentation/office_floor/public/baked_biomass_floor.gd:24`.
 
 Запекатель читает shadows_allowed текущих графических настроек; при false пропускает проверку преграды. Полученный слой — SHADING_MODE_UNSHADED, его пиксели после загрузки не реагируют на настройку света/теней. В физической проверке одного Spot и преграды один и тот же texel меняется с 0.2471 на 0.9176 только от shadows_allowed. Это противоречит требованию владельца: отключение динамических теней должно оставлять статические запечённые тени. Входы renderer preference также не входят в source_signature.
