@@ -1,0 +1,53 @@
+extends SceneTree
+const LOADER = preload("res://game/bootstrap/app/planning_layout_loader.gd")
+const CAPTURE = preload("res://game/bootstrap/app/planning_layout_capture.gd")
+const FILE = preload("res://game/bootstrap/app/planning_map_file.gd")
+class Catalog extends RefCounted:
+ var ENEMY_SCENES: Array = []
+ var bind_asset: Callable
+ func _migrate_scene_path(path: String) -> String: return path
+ func _create_asset(_path: String) -> Node3D: return Node3D.new()
+class Geometry extends RefCounted:
+ func _restore_floor_surface(_node: Node3D,_path: String) -> void: pass
+class History extends RefCounted:
+ var stack: Array = []
+class Session extends Node:
+ var root: Node3D
+ var host: Node
+ var active := false
+ var edit_history := History.new()
+class Objects extends Node:
+ var session: Session
+ var catalog := Catalog.new()
+ var geometry := Geometry.new()
+ var controls: Variant
+ var placed: Array = []
+ var keep_on_clear := {}
+ var player_spawn_defined := false
+ var player_spawn_transform := Transform3D.IDENTITY
+ func clear_layout(_update: bool = true, _immediate: bool = false) -> void:
+  for node in placed:
+   if is_instance_valid(node): node.free()
+  placed.clear()
+ func _update_status() -> void: pass
+func _initialize() -> void: call_deferred("run")
+func run() -> void:
+ var session := Session.new()
+ root.add_child(session)
+ session.root = Node3D.new()
+ session.add_child(session.root)
+ var objects := Objects.new()
+ session.add_child(objects)
+ objects.session = session
+ var initial := {"version":8,"objects":[{"scene":"res://probe_prop.tscn","x":1.0},{"scene":"res://unavailable_model.glb","x":2.0,"object_id":"precious"}]}
+ var path := "/tmp/infection-audit-probes/roundtrip.json"
+ var first: Dictionary = FILE.write(path,initial)
+ var loader := LOADER.new(objects)
+ var report: Dictionary = loader.apply(initial)
+ var captured: Dictionary = CAPTURE.collect(objects,objects.placed)
+ var written: Dictionary = FILE.write(path,captured)
+ var actual: Dictionary = FILE.read(path)
+ print("MAP_INITIAL=",initial.objects.size()," LOAD_REPORT=",report," CAPTURE=",captured.objects.size()," WRITE=",written," RELOADED=",actual.data.objects.size())
+ session.free()
+ await process_frame
+ quit()
