@@ -16,6 +16,7 @@ const SPARKS = preload("res://game/presentation/office_floor/electric_sparks.gd"
 const BLAST = preload("res://game/presentation/office_floor/blast_effect.gd")
 const DAMAGE = preload("res://game/presentation/office_floor/environment_damage.gd")
 const DEBRIS = preload("res://game/presentation/office_floor/debris_lifecycle.gd")
+const BULLET_PUSH := preload("res://game/presentation/office_floor/bullet_push.gd")
 const CONTACT = preload("res://game/presentation/office_floor/prop_contact.gd")
 const WEIGHT = preload("res://game/presentation/office_floor/prop_weight.gd")
 const MAX_MODEL_PIECES := 12
@@ -90,17 +91,10 @@ func take_projectile_hit(damage: float, hit_position: Vector3, _hit_normal: Vect
 	if _damage_category() == "tech" and (_health >= max_health or repeated_electronic_particles):
 		SPARKS.spawn(self, hit_position)
 	var multiplier := 1.1 if weapon_name == "SHOTGUN" else (0.7 if weapon_name == "UZI" else 1.0)
-	# Shotgun pellets each deliver a separate hit; share a modest kick across
-	# the spread instead of applying a full pistol-sized impulse eight times.
-	var impulse := minf(bullet_impulse * 0.22, mass * 0.12) if weapon_name == "SHOTGUN" else bullet_impulse * multiplier
-	sleeping = false
-	if mass >= 5.0:
-		apply_central_impulse((direction.normalized() + Vector3.UP * 0.1).normalized() * minf(impulse, mass * 0.12))
-	else:
-		apply_impulse((direction.normalized() + Vector3.UP * (0.3 if weapon_name == "SHOTGUN" else 0.0)).normalized() * impulse, hit_position - global_position)
+	BULLET_PUSH.apply(self, weight_kg, weapon_name, direction, hit_position)
 	_health -= BALANCE.object_damage(maxf(damage, 0.0), weapon_name, _damage_category()) * multiplier
 	if breakable and _health <= 0.0:
-		_break_physical_prop(hit_position, direction)
+		_break_physical_prop(hit_position, direction, weapon_name == "GRENADE")
 	return true
 
 func _rupture_extinguisher(hit_position: Vector3) -> void:
@@ -125,7 +119,7 @@ func _integrate_forces(state: PhysicsDirectBodyState3D) -> void:
 		state.angular_velocity = state.angular_velocity.normalized() * max_angular_speed
 
 
-func _break_physical_prop(hit_position: Vector3, direction: Vector3) -> void:
+func _break_physical_prop(hit_position: Vector3, direction: Vector3, blast: bool = false) -> void:
 	if is_queued_for_deletion():
 		return
 	_floor_debris.emit(self, String(get_parent().name) + " " + String(name), "break", hit_position, direction)
@@ -157,10 +151,10 @@ func _break_physical_prop(hit_position: Vector3, direction: Vector3) -> void:
 			found = true
 			# Whole-cabinet sized meshes would leave a ghost object lying around.
 			if spawned < MAX_MODEL_PIECES and mesh_bounds.size.length() <= MAX_PIECE_SIZE:
-				if DAMAGE.spawn_piece(self, mesh, null, 0, spawned, direction, hit_position) != null:
+				if DAMAGE.spawn_piece(self, mesh, null, 0, spawned, direction, hit_position, blast) != null:
 					spawned += 1
 	if bounds.size.length_squared() < 0.0001:
 		bounds = AABB(global_position - Vector3(0.25, 0.25, 0.25), Vector3(0.5, 0.5, 0.5))
-	DEBRIS.spawn_chunks(self, bounds, tint, CRUMBLE_CHUNKS if spawned < 3 else 4, direction, hit_position)
+	DEBRIS.spawn_chunks(self, bounds, tint, CRUMBLE_CHUNKS if spawned < 3 else 4, direction, hit_position, blast)
 	DEBRIS.dust_puff(self, bounds.get_center() - Vector3(0.0, bounds.size.y * 0.2, 0.0), bounds.size.length())
 	queue_free()

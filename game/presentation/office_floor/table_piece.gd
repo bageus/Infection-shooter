@@ -25,7 +25,7 @@ func _physics_process(delta: float) -> void:
 func take_projectile_hit(damage: float, hit_position: Vector3, _normal: Vector3, direction: Vector3, weapon: String) -> bool:
 	if last_stage:
 		sleeping = false
-		apply_impulse(direction.normalized() * 0.9, hit_position - global_position)
+		apply_central_impulse(direction.normalized() * mass * (2.0 if weapon == "GRENADE" else 0.08))
 	elif is_instance_valid(table):
 		table.call("hit_piece", piece_id, hit_position, direction, damage, weapon)
 	return true

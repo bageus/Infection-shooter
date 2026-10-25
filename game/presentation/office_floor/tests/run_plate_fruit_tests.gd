@@ -94,17 +94,16 @@ func _shoot_plate(round_index: int) -> void:
 	var prop := _make_plate({"enabled": true, "count": 1 + round_index % 5, "seed": 500 + round_index}, Vector3(0, 0.02, 0))
 	for i in 20:
 		await physics_frame
-	var pieces_before := effects.get_child_count()
+	var pieces_before := effects.get_children().filter(func(node: Node) -> bool: return node is RigidBody3D).size()
 	prop.call("take_projectile_hit", 19.0, prop.global_position + Vector3(0, 0.1, 0), Vector3.UP, Vector3.FORWARD, "PISTOL")
 	for i in 40:
 		await physics_frame
 	var count := 1 + round_index % 5
-	_check(effects.get_child_count() - pieces_before >= count, "Round %d: the %d fruit scatter as loose pieces (%d)." % [round_index, count, effects.get_child_count() - pieces_before])
-	_check(not (prop.get_node("Visual") as Node3D).visible, "Round %d: the plate breaks on its first hit." % round_index)
-	_check(prop.collision_layer == 0, "Round %d: a broken plate stops blocking." % round_index)
+	_check(effects.get_children().filter(func(node: Node) -> bool: return node is RigidBody3D).size() == pieces_before, "Round %d: plate and %d fruit leave only floor decals." % [round_index, count])
+	_check(not is_instance_valid(prop), "Round %d: the plate and fruit are removed on their first hit." % round_index)
 	for piece in effects.get_children():
 		piece.queue_free()
-	prop.queue_free()
+	if is_instance_valid(prop): prop.queue_free()
 	await process_frame
 
 
@@ -113,9 +112,9 @@ func _check_plain_plate() -> void:
 	for i in 10:
 		await physics_frame
 	_check(_fruit_meshes(prop) == 0, "A default plate has no fruit.")
-	var before := effects.get_child_count()
+	var before := effects.get_children().filter(func(node: Node) -> bool: return node is RigidBody3D).size()
 	prop.call("take_projectile_hit", 19.0, prop.global_position, Vector3.UP, Vector3.FORWARD, "PISTOL")
-	_check(effects.get_child_count() > before, "A plain plate breaks into pieces on a pistol hit.")
+	_check(effects.get_children().filter(func(node: Node) -> bool: return node is RigidBody3D).size() == before, "A plain plate leaves no physical pieces on a pistol hit.")
 	_check(not (prop.get_node("Visual") as Node3D).visible, "A plain plate no longer stands whole.")
 	prop.queue_free()
 

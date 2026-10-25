@@ -31,7 +31,6 @@ func configure_damage_particles(enabled: bool) -> void:
 
 
 const SPARKS = preload("res://game/presentation/office_floor/electric_sparks.gd")
-const PAPER = preload("res://game/presentation/office_floor/paper_shreds.gd")
 const BLAST = preload("res://game/presentation/office_floor/blast_effect.gd")
 const WALL_MOUNT = preload("res://game/presentation/office_floor/wall_mount_models.gd")
 const BOOK_STACK = preload("res://game/presentation/office_floor/book_stack_breakup.gd")
@@ -340,9 +339,6 @@ func take_projectile_hit(damage: float, hit_position: Vector3, _normal: Vector3,
 		BULLET_PUSH.apply(self, weight_kg, weapon, direction, hit_position)
 		_trigger_extinguisher(hit_position, direction)
 		return false
-	if PAPER.is_paper(model_path) and not BOOK_STACK.contains(model_path):
-		_tear_paper(hit_position, direction)
-		return false
 	if damage > 0.0 and FRAGILE.shatter(self, _visual, _shapes, _damage, _floor_debris, hit_position, direction):
 		return false
 	if damage > 0.0 and is_instance_valid(glass_debris_floor) and has_display():
@@ -458,19 +454,6 @@ func _put_out_lamp() -> void:
 
 
 # Any paper object is torn apart completely by a single shot.
-func _tear_paper(hit_position: Vector3, direction: Vector3) -> void:
-	if not _damage.tear_paper():
-		return
-	_floor_debris.emit(self, model_path, "paper", hit_position, direction)
-	PAPER.tear(self, hit_position, direction)
-	collision_layer = 0
-	if _visual != null:
-		_visual.hide()
-	for collision in _shapes:
-		collision.set_deferred("disabled", true)
-	queue_free.call_deferred()
-
-
 func _trigger_extinguisher(hit_position: Vector3, direction: Vector3) -> void:
 	if not _damage.trigger_extinguisher():
 		return

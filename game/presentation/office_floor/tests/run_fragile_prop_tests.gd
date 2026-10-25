@@ -4,7 +4,7 @@ const PROP_SCENE := preload("res://game/presentation/office_floor/public/props/e
 const FRAGILE := preload("res://game/presentation/office_floor/fragile_prop.gd")
 const RECIPE := preload("res://game/presentation/office_floor/prop_debris_recipe.gd")
 const DIR := "res://models/objects/enviroments/09/"
-const FRAGILE_MODELS := ["09_mug.glb", "09_mug_alt_2.glb", "09_glass.glb", "09_glass_2.glb", "09_fruit_plate.glb", "09_fruit_apple.glb", "09_painting.glb", "09_painting_small.glb"]
+const FRAGILE_MODELS := ["09_mug.glb", "09_mug_alt_2.glb", "09_glass.glb", "09_glass_2.glb", "09_fruit_plate.glb", "09_fruit_apple.glb", "09_book_big.glb", "09_pen_1.glb", "09_painting.glb", "09_painting_small.glb"]
 var failures := 0
 var stage: Node3D
 var effects: Node3D
@@ -37,7 +37,7 @@ func _check_applies() -> void:
 	for model in FRAGILE_MODELS:
 		_check(FRAGILE.applies(DIR + model), "%s is a fragile item" % model)
 	for model in ["09_glass_water_bottle_clear_250ml.glb", "09_book_big.glb", "09_pen_1.glb", "09_fruit_plate_2.glb"]:
-		_check(FRAGILE.applies(DIR + model) == (model == "09_fruit_plate_2.glb"), "%s fragile only when it is fruit or glassware" % model)
+		_check(FRAGILE.applies(DIR + model), "%s uses complete small-item disposal" % model)
 	_check(not FRAGILE.is_glassware(DIR + "09_painting.glb"), "A painting is not glassware")
 	_check(FRAGILE.is_glassware(DIR + "09_fruit_plate_2.glb"), "A fruit plate is glassware")
 
@@ -65,19 +65,19 @@ func _shoot(model: String, weapon: String) -> void:
 		await physics_frame
 	var visual := prop.get_node_or_null("Visual") as Node3D
 	var kinds_before: int = floor_view.get("kinds").size()
-	var pieces_before := effects.get_child_count()
+	var pieces_before := effects.get_children().filter(func(node: Node) -> bool: return node is RigidBody3D).size()
 	prop.call("take_projectile_hit", 5.0, prop.global_position + Vector3.UP * 0.1, Vector3.UP, Vector3.FORWARD, weapon)
 	for i in 5:
 		await physics_frame
 	var label := "%s by %s" % [model, weapon]
-	_check(visual != null and not visual.visible, "%s breaks on its first hit" % label)
-	_check(prop.collision_layer == 0, "%s stops blocking once broken" % label)
-	_check(effects.get_child_count() > pieces_before, "%s leaves loose pieces" % label)
+	_check(not is_instance_valid(visual), "%s removes its visual on its first hit" % label)
+	_check(not is_instance_valid(prop), "%s removes its physical body once broken" % label)
+	_check(effects.get_children().filter(func(node: Node) -> bool: return node is RigidBody3D).size() == pieces_before, "%s leaves decals without loose pieces" % label)
 	_check(floor_view.get("kinds").size() > kinds_before, "%s reports decals to the floor" % label)
 	for piece in effects.get_children():
 		piece.queue_free()
 	floor_view.set("kinds", [])
-	prop.queue_free()
+	if is_instance_valid(prop): prop.queue_free()
 	await process_frame
 
 

@@ -40,11 +40,7 @@ func _test_paper() -> void:
 		await process_frame
 		await process_frame
 		_expect(not is_instance_valid(prop), "One shot destroys paper completely: " + model)
-		var scraps := effects.find_children("Flipbook*", "", false, false).size()
-		if ATLASES.available(ATLASES.TORN_PAPER):
-			_expect(scraps >= 5 and scraps <= 6, "Torn paper bursts into 5-6 sheet scraps (%d): %s" % [scraps, model])
-		else:
-			_expect(effects.get_node_or_null("TornPaper") != null, "Torn paper falls back to shreds: " + model)
+		_expect(effects.find_children("Flipbook*", "", false, false).is_empty() and effects.get_node_or_null("TornPaper") == null, "Destroyed paper leaves no flying sheet scraps: " + model)
 		effects.queue_free()
 		await process_frame
 

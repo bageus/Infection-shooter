@@ -87,6 +87,9 @@ Material suite проверяет138 реальных cropped frames, альфу
 Это одобрение additive floor_debris_v2; смены owners/edges и архитектурных
 исключений нет.
 
+## Удаление мелких предметов — 25.10.2026
+
+По прямому уточнению владельца мелкие props после повреждающего попадания оставляют только прежние material floor stamps. fragile_prop использует общий one-shot путь для посуды, фруктов, бумаги/книг/файлов, канцелярии и мыши/клавиатуры; paper_prop больше не создаёт параллельные shreds. Рецепты бумаги/пластика выбираются по материалу, painting и glassware сохраняют свои смеси. Тело/visual удаляются, а не остаются скрытыми RigidBody. Настройки и бюджеты floor_debris_v2 прежние; новых атласов/форматов нет. Evidence: docs/qa/prop_destruction_reactions.md.
 ## Visibility calibration follow-up (2026-10-25)
 
 The owner reported missing wood/plastic/fabric floor marks. Color compositing already worked; many marks fell inside the original prop footprint. Scatter offsets now start beyond the source edge without adding queries, nodes or queue capacity. Seeded geometry and actual bake-image checks reproduce the old failure and pass with this change. Native pixel checks join the existing two-renderer CI. Evidence and limits: docs/qa/dynamic_shadows_floor_visibility.md.

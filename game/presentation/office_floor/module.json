@@ -102,7 +102,7 @@
     "plate_fruit_v1": {
       "has_fruit": "has_fruit() -> bool; true for the flat fruit plate model only",
       "configure_fruit": "configure_fruit(config: Dictionary {enabled: bool, count: 1..5, seed: int}) -> void; one baked body, seeded random layout, rebuilt live",
-      "get_fruit_config": "get_fruit_config() -> Dictionary; saved as the optional `fruit` map record only while enabled; a shot plate breaks or flips and its fruit scatters as loose pieces"
+      "get_fruit_config": "get_fruit_config() -> Dictionary; saved as the optional `fruit` map record only while enabled; a damaging hit destroys the plate and baked fruit completely, leaving bounded floor decals without loose physical pieces"
     },
     "display_placement_v1": {
       "get_display_edges": "get_display_edges() -> Dictionary {frame: Transform3D, size: Vector2}; empty when not a frameless TV",
@@ -112,7 +112,7 @@
       "push_from_character": "push_from_character(character_position: Vector3, movement: Vector3, strength: float = 1.0) -> void; movement is the intended pre-slide velocity, weight-limited push",
       "weight_kg": "weight_kg: float on environment and physical props; RigidBody mass unchanged",
       "kickable": "items <= 2 kg and <= 0.45 m high use layer value 4/mask 7, never block characters and are kicked by touching CharacterBody3D feet",
-      "shots": "every bullet hit pushes a loose (not frozen) prop by weapon momentum / weight_kg, max 3.2 m/s per hit, at the hit point; grenades push through their blast"
+      "shots": "bullets gently nudge loose props by weapon momentum / weight_kg, max 0.35 m/s along the shot including same-frame pellets; no added lift or hit-point torque; grenades push through their blast"
     },
     "surface_decor_v1": {
       "table_finish": "07_table_longest: Modern_Warm_White surfaces -> chocolate wood, Modern_Graphite -> graphite; per-surface overrides survive fragments",
