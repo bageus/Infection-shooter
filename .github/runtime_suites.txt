@@ -225,3 +225,4 @@ game/bootstrap/app/tests/run_biomass_light_energy_tests.gd
 game/bootstrap/app/tests/run_darkness_palette_tests.gd
 game/bootstrap/app/tests/run_planner_fog_tests.gd
 game/bootstrap/app/tests/run_planner_hud_tests.gd
+game/presentation/office_floor/tests/run_ambient_prop_sounds_tests.gd

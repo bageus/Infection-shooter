@@ -18,6 +18,7 @@
     "public/surface_decor_catalog.gd",
     "public/base_office_layout.tscn",
     "public/base_floor_renderer.gd",
+    "public/ambient_prop_sounds.gd",
     "public/props/07_table.tscn",
     "public/props/planner_light.tscn",
     "public/props/environment_prop.tscn",

@@ -1,5 +1,6 @@
 extends RigidBody3D
 ## Scene boundary for prop physics, hit commands and authored display configuration.
+const AMBIENT_SOUNDS := preload("res://game/presentation/office_floor/public/ambient_prop_sounds.gd")
 const SERVER_AUDIO := preload("res://game/presentation/office_floor/server_ambience.gd")
 const BUDGET_LIGHT := preload("res://game/presentation/office_floor/budget_omni_light.gd")
 const GEOMETRY := preload("res://game/presentation/office_floor/environment_prop_geometry.gd")
@@ -217,6 +218,7 @@ func _ready() -> void:
 	var volume := _geometry.add_shapes(self, visual)
 	_setup_display()
 	SERVER_AUDIO.attach(self, model_path)
+	AMBIENT_SOUNDS.tag(self, model_path)
 	SURFACE_DECOR.apply(visual, model_path, _display, display_seed)
 	if model_path.get_file() == "06_conference_chair.glb" and global_position.y < 0.25 and not has_meta("planning_settled_transform"):
 		var lowest := INF
