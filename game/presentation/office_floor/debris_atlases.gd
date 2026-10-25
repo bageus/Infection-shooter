@@ -59,8 +59,20 @@ func prepare() -> void:
 				var source := image.get_region(Rect2i(low, high - low))
 				source.resize(SOURCE_SIZE, SOURCE_SIZE, Image.INTERPOLATE_LANCZOS)
 				source.clear_mipmaps()
+				if kind == "floor_scuff": source = _scuff_coverage(source)
 				frames.append(source)
 		sources[kind] = frames
+
+
+## Calibrate the authored mask for small runtime stamps while preserving its soft edges.
+## Normalize only the cached copy once, so the existing opacity control remains authoritative.
+static func _scuff_coverage(source: Image) -> Image:
+	var bytes := source.get_data()
+	var peak := 0
+	for index in range(3, bytes.size(), 4): peak = maxi(peak, bytes[index])
+	if peak == 0 or peak == 255: return source
+	for index in range(3, bytes.size(), 4): bytes[index] = roundi(float(bytes[index]) * 255.0 / peak)
+	return Image.create_from_data(source.get_width(), source.get_height(), false, Image.FORMAT_RGBA8, bytes)
 
 
 ## RGBA8 relief for one frame: R/G = tangent-space normal x/z (0.5 neutral, +x right, +z down in the image),

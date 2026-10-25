@@ -101,3 +101,7 @@ Iris Xe/Web аппаратный FPS проверяется отдельно о�
 «реализуй и создай PR». Additive contracts/optional DTO нужны для порученного
 результата. Несколько adapters рассмотрены как один scope; новых владельцев,
 dependencies, Autoload или архитектурных исключений нет.
+
+## Small scuff visibility follow-up (2026-10-25)
+
+Normalize the cached floor_scuff source mask coverage while preserving its shape/RGB and immutable source asset. Calibrate ordinary grounded footstep marks to 0.35–0.6 m and 25% chance, retaining opacity controls, contact gating and frame budgets. This is presentation tuning requested by the owner; no furniture-drag event or new receiver contract is added. Evidence: docs/qa/dynamic_shadows_floor_visibility.md.

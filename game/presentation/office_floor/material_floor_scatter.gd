@@ -30,6 +30,8 @@ static func _scatter_once(floor_view: Node3D, center: Vector3, footprint: Vector
 	var angle := (0.0 if footprint.x >= footprint.y else PI * 0.5) + rng.randf_range(-0.45, 0.45)
 	var axis := Vector2(cos(angle), sin(angle))
 	var across := Vector2(-axis.y, axis.x)
+	# Clear the source footprint: retained bodies and nearby physical fragments hide centre stamps.
+	var edge := Vector2(absf(across.x), absf(across.y)).dot(footprint) * 0.5
 	var pattern := PATTERN.build_pattern(width, rng)
 	var materials := recipe.duplicate()
 	while materials.size() > pattern.size():
@@ -43,6 +45,7 @@ static func _scatter_once(floor_view: Node3D, center: Vector3, footprint: Vector
 	for index in materials.size():
 		var mark: Dictionary = pattern[floori(index * float(pattern.size() - 1) / maxi(materials.size() - 1, 1))]
 		var offset: Vector2 = mark.offset
+		offset.y += signf(offset.y) * edge
 		var planar := Vector2(center.x, center.z) + axis * offset.x + across * offset.y
 		planar += Vector2(push.x, push.z).limit_length(1.0) * 0.12
 		if not _reaches(floor_view, center, planar, excluded):
@@ -66,7 +69,9 @@ static func _scatter_once(floor_view: Node3D, center: Vector3, footprint: Vector
 			if specks >= max_specks:
 				return
 			specks += 1
-			var planar := Vector2(center.x, center.z) + Vector2(rng.randf_range(-0.5, 0.5) * (footprint.x + 1.0), rng.randf_range(-0.5, 0.5) * (footprint.y + 1.0))
+			var side := -1.0 if rng.randf() < .5 else 1.0
+			var offset := axis * rng.randf_range(-width * .5, width * .5) + across * side * (edge + rng.randf_range(.15, .8))
+			var planar := Vector2(center.x, center.z) + offset
 			planar += Vector2(push.x, push.z).limit_length(1.0) * 0.12
 			if not _reaches(floor_view, center, planar, excluded):
 				continue

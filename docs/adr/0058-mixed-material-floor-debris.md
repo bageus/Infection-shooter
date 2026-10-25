@@ -86,3 +86,7 @@ Material suite проверяет138 реальных cropped frames, альфу
 материалы, рассеивание как у стекла и «реализуй создай ветку и PR».
 Это одобрение additive floor_debris_v2; смены owners/edges и архитектурных
 исключений нет.
+
+## Visibility calibration follow-up (2026-10-25)
+
+The owner reported missing wood/plastic/fabric floor marks. Color compositing already worked; many marks fell inside the original prop footprint. Scatter offsets now start beyond the source edge without adding queries, nodes or queue capacity. Seeded geometry and actual bake-image checks reproduce the old failure and pass with this change. Native pixel checks join the existing two-renderer CI. Evidence and limits: docs/qa/dynamic_shadows_floor_visibility.md.
