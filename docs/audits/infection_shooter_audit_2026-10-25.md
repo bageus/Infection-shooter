@@ -35,6 +35,8 @@ _signature включает scene, позицию и rotation_y, но не rotat
 
 ### N03. Энергия многоточечного светильника учитывается несколько раз
 
+**25.10.2026: IMPLEMENTED / CI_PENDING.** [Исправление и evidence](../qa/biomass_light_energy.md): baseline32failures→0; real runtime/bake totals1/0.7/0.7. Существующие PNG требуют Save Map/Layout. Исходное доказательство ниже сохранено.
+
 Источник: `game/bootstrap/app/planning_biomass_light_bake.gd:29–34` против `game/presentation/office_floor/planner_light.gd:217–229, 301–327`.
 
 В игре общий выход длинной/прямоугольной лампы распределён: каждый Spot получает authored energy × multiplier × 0.7 / число Spot. Запекатель каждому Spot назначает целую authored energy × multiplier. При authored=1, multiplier=1: point 1→1, linear 0.7→2, rectangle 0.7→4. Это примерно 2.86× / 5.71× лишней суммарной энергии до attenuation/clamp, а не измеренное во столько же раз отличие экранной яркости. Clamp дополнительно теряет детали в ярких участках.
