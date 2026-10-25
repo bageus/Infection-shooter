@@ -143,7 +143,7 @@ static func _alive(check: Callable) -> bool:
 
 
 func _empty_plan() -> Dictionary:
-	return {"entries": [], "player": {}, "missing": []}
+	return {"entries": [], "player": {}, "missing": [], "unresolved": []}
 
 
 func _stage(record: Dictionary, prepared: Dictionary) -> bool:
@@ -153,6 +153,7 @@ func _stage(record: Dictionary, prepared: Dictionary) -> bool:
 		return true
 	if path.is_empty() or not ResourceLoader.exists(path):
 		prepared.missing.append(record.scene)
+		prepared.unresolved.append(record.duplicate(true))
 		return true
 	var started := Time.get_ticks_usec()
 	var node: Node3D = catalog._create_asset(path)
@@ -183,6 +184,7 @@ func _discard(prepared: Dictionary) -> void:
 
 func _begin(prepared: Dictionary) -> void:
 	objects.clear_layout(false, true)
+	objects.unresolved_records.assign(prepared.unresolved.duplicate(true))
 	_biomass_cache = prepared.get("floor_biomass_v1", {})
 	preload("res://game/bootstrap/app/planning_biomass_bake.gd").restore(session, {})
 	SURFACE_SETTINGS.restore(session, prepared.get("surface_decals_v1", {}))

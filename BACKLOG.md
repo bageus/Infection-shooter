@@ -110,3 +110,8 @@ objects. До удаления legacy scripts/scenes нужны явный alias
   signed zero устраняет отказ cache; исходный planning_mode suite теперь
   PASS без изменения assertions/tolerances. Новая regression до2failures,
   после0; реальные правки координат по-прежнему инвалидируют cache.
+
+
+## N01 — сохранность missing records (25.10.2026)
+
+IMPLEMENTED / CI_PENDING в рамках T004 по прямому поручению владельца после [аудита PR470](https://github.com/bageus/Infection-shooter/pull/470). Deep-copy records сохраняются в существующем objects DTO при sync/async load-save-load; clear/replacement и восстановление модели проверены. QA: [unresolved_map_records](docs/qa/unresolved_map_records.md). Следующее действие — полный CI N01, затем N02 (полное восстановление authored transform); T004 остаётся единственной активной задачей.
