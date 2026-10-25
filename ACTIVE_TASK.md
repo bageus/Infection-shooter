@@ -529,6 +529,11 @@ Procedural generation, save/checkpoints, unrequested HUD redesign, monetization,
 
 ## Progress
 
+25.10.2026 — повторный CI failure после слитого PR #468: run 40196456111 / job 121178426333. Все 223 headless suites и остальные native jobs PASS; surface_pose только в Compatibility сообщает 4 ObjectDB instances / 2 resources после 0 assertion failures. T004 / Phase 1 / P1_LOGIC / Implementation, readiness PASS. Scope: bootstrap surface_pose fixture lifecycle и verbose CI diagnostics. Production / API / DTO / owners / dependencies прежние. Исправление отдельной веткой от main 303904d.
+
+Диагностика: после прежних двух кадров освобождения сцены WeakRef всё ещё видит AudioStreamPlaybackOggVorbis (до следующего mix около 48 ms). Fixture теперь отслеживает собственные playback через WeakRef, ждёт освобождения максимум 1 s и проверяет результат. Native probe удерживает реальный OGG playback на 50 ms: прежнее завершение даёт 2 assertion failures, исправленное проходит. Ошибки CI не фильтруются, музыка игры не отключается. Подробности и результаты: docs/qa/surface_pose_native_cleanup.md. Локально PASS: настоящий native Compatibility и Vulkan Forward+ (0 failures, без leaks/errors), headless surface_pose/music_shutdown/world_bindings, editor import, project/resource/scene gates, CI coverage (11) и runner tests (3), diff check. Следующий шаг: опубликовать отдельный PR и проверить полный GitHub CI; T004 остаётся IN_PROGRESS.
+
+
 25.10.2026 — после merge main a0cd5f0 в CI-repair branch:11combined suites(settings_tabs, floor_decal_visibility, prop_destruction_reaction, glass_cup_break, biomass_floor_bake, planner_object_settings, material_floor_debris, baked_surface_decal, prop_weight, fragile_prop, plate_fruit) PASS0failures без ERROR/SCRIPT ERROR/leaks. Combined editor import и project gate231suites(223runtime+8special), resource paths/scene387, runner3+coverage11unit PASS. Конфликт только ADR0058, оба уточнения сохранены. Следующее действие — update PR468 integration commit с проверенным tree и lease b90b2ea; наблюдать CI, merge не поручен.
 
 
