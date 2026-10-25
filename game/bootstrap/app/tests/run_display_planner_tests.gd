@@ -12,6 +12,8 @@ func _initialize() -> void:
 
 func _run() -> void:
 	var stage := MAIN.instantiate()
+	# This regression supplies its own fixtures; full authored-map coverage runs separately.
+	stage.set("defer_layout_loading", true)
 	root.add_child(stage)
 	current_scene = stage
 	await process_frame

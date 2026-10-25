@@ -196,6 +196,8 @@ func _planner_roundtrip() -> void:
 	var rendering_disabled := root.disable_3d
 	root.disable_3d = true
 	var game := MAIN.instantiate()
+	# This regression supplies its own fixtures; full authored-map coverage runs separately.
+	game.set("defer_layout_loading", true)
 	root.add_child(game)
 	current_scene = game
 	await process_frame

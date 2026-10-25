@@ -45,6 +45,7 @@ func _check(value: bool, message: String) -> void:
 		push_error(message)
 
 func _run() -> void:
+	_authored_cache()
 	_signed_zero_signature()
 	var records: Array = [{"scene": DECAL.resource_path, "blood_texture": "biomass_01", "blood_surface": "floor", "blood_attachment": {"owner": "", "mesh": ""}, "x": 2.0, "y": 0.0135, "z": 2.0, "scale_x": 2.0, "scale_z": 2.0, "rotation_y": 27.0}]
 	var alive := func() -> bool: return true
@@ -257,3 +258,24 @@ func _signed_zero_signature() -> void:
 	_check(signature == BAKE.signature(positive), "Positive and negative zero describe the same baked surface")
 	positive[0].x += 0.25
 	_check(signature != BAKE.signature(positive), "A real placement edit still invalidates the cache")
+
+
+func _authored_cache() -> void:
+	var data: Dictionary = JSON.parse_string(FileAccess.get_file_as_string("res://game/presentation/office_floor/public/base_office_map.json"))
+	var cache: Dictionary = data.get("floor_biomass_v1", {})
+	_check(VIEW.valid(cache), "Authored map retains valid baked biomass pages")
+	_check(str(cache.get("source_signature", "")) == BAKE.signature(data.objects), "Authored bake matches current map placements")
+	var packed := load("res://game/presentation/office_floor/public/base_office_layout.tscn") as PackedScene
+	var state := packed.get_state()
+	var scene_cache: Dictionary = {}
+	for index in state.get_node_property_count(0):
+		if state.get_node_property_name(0, index) == &"metadata/floor_biomass_v1":
+			scene_cache = state.get_node_property_value(0, index)
+	_check(VIEW.valid(scene_cache) and scene_cache.get("source_signature", "") == cache.get("source_signature", ""), "Baked scene and JSON carry the same current source signature")
+	var scene_pages: Array = scene_cache.get("pages", [])
+	var json_pages: Array = cache.get("pages", [])
+	_check(scene_pages.size() == json_pages.size(), "Scene and JSON retain the same number of baked pages")
+	for index in mini(scene_pages.size(), json_pages.size()):
+		var a: Dictionary = scene_pages[index]
+		var b: Dictionary = json_pages[index]
+		_check(int(a.x) == int(b.x) and int(a.z) == int(b.z) and str(a.png) == str(b.png), "Scene and JSON retain identical PNG bytes/cells despite JSON numeric types")

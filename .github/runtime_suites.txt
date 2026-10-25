@@ -196,6 +196,7 @@ game/features/player/tests/run_mutation_dash_motion_tests.gd
 game/bootstrap/app/tests/run_active_loadout_ui_tests.gd
 game/presentation/office_floor/tests/run_glass_floor_debris_tests.gd
 game/presentation/office_floor/tests/run_material_floor_debris_tests.gd
+game/presentation/office_floor/tests/run_floor_decal_visibility_tests.gd
 game/bootstrap/app/tests/run_glass_footstep_tests.gd
 game/presentation/office_floor/tests/run_plate_fruit_tests.gd
 game/bootstrap/app/tests/run_level_chain_tests.gd

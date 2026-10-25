@@ -22,6 +22,8 @@ func _initialize() -> void:
 func _run() -> void:
 	root.size = Vector2i(320, 180)
 	var stage := MAIN.instantiate()
+	# This regression supplies its own fixtures; full authored-map coverage runs separately.
+	stage.set("defer_layout_loading", true)
 	root.add_child(stage)
 	current_scene = stage
 	(stage.get_node("Gameplay/Enemies") as Node).process_mode = Node.PROCESS_MODE_DISABLED
