@@ -381,6 +381,7 @@ func _apply_damage(amount: float, damage_type: String, point: Vector3, direction
 	var remaining: float = mutation_effects.call("on_player_hit", maxf(amount, 0.0), damage_type)
 	var absorbed:=minf(armor,remaining)
 	armor-=absorbed
+	if absorbed > 0.0: _play_sound(&"damage_absorb")
 	remaining-=absorbed
 	_wound += minf(remaining, health)
 	health=maxf(0.0,health-remaining)

@@ -93,7 +93,7 @@ func growl(volume_offset := 0.0) -> void:
 
 
 func scream(volume_offset := 0.0) -> void:
-	if growl_sound == &"growl_hunger":
+	if growl_sound == &"growl_hunger" or growl_sound == &"growl_brute":
 		_voice(&"alert", volume_offset, true)
 	else:
 		_vocal = SFX.play(body, scream_sound, Vector3.INF, volume_offset, voice_pitch)

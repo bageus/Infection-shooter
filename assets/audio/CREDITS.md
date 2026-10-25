@@ -363,3 +363,7 @@ Glass crunch recordings the_crunch_of_glass__1–4 and roll recording The_heavy_
 ## Авторская музыка Hold / Threat — 20.10.2026
 
 Владелец добавил tower_hold_1.wav и tower_threat_1.wav и запросил конверсию в stereo48kHz Vorbisq5 с удалением проверенных WAV. Hold обрезан до56с, Threat сохраняет30с вступления с повтором тела. server_oper_active.ogg — производная существующего server_oper.ogg без20/10с тишины. SHA256, точные длительности и loop offsets — mission_music_processing.json; источники доступны в parent PR. Старые лицензии сторонних SFX новым авторским записям не назначаются.
+
+## Owner-supplied additions (2026-10-25)
+
+Converted from the owner's WAV files to OGG Vorbis (originals removed): `control_lost` (brutal_man_grunting), `control_repair`, `damage_absorb` (damage_absorption_armor), `access_denied`, `biological_rupture`, `claw_cutting`, `brute_*` voices, `biomass_gurgle`, `cooler_gurgle`, `phone_ring`, `pc_hum` (sound_PC), `light_flicker`. Phone, PC, cooler and biomass ambience are registered events not yet placed in the level.

@@ -150,6 +150,24 @@ const EVENTS := {
 	&"hunger_death": [1, -1.0, 40.0, 5.0, 0.02, 4],
 	&"revenant_death": [1, -1.0, 40.0, 5.0, 0.02, 4],
 	&"heavy_death": [1, 1.0, 50.0, 6.0, 0.02, 4],
+	# Owner-supplied loss-of-control, armor and atmosphere cues.
+	&"damage_absorb": [1, -2.0, 24.0, 3.0, 0.04, 2],
+	&"control_lost": [1, 0.0, 30.0, 4.0, 0.0, 1],
+	&"control_repair": [1, 0.0, 30.0, 4.0, 0.0, 1],
+	&"biological_rupture": [1, 1.0, 50.0, 6.0, 0.05, 3],
+	&"claw_cutting": [1, -3.0, 30.0, 4.0, 0.05, 3],
+	&"brute_idle": [3, 0.0, 42.0, 5.0, 0.02, 2],
+	&"brute_voice": [3, 0.0, 42.0, 5.0, 0.02, 2],
+	&"brute_alert": [1, 1.0, 50.0, 6.0, 0.02, 2],
+	&"brute_attack": [2, 0.0, 42.0, 5.0, 0.02, 2],
+	&"brute_pain": [2, -2.0, 36.0, 4.0, 0.03, 2],
+	&"brute_death": [2, 1.0, 50.0, 6.0, 0.02, 3],
+	&"biomass_gurgle": [4, -8.0, 16.0, 2.5, 0.05, 1],
+	&"cooler_gurgle": [1, -8.0, 14.0, 2.5, 0.04, 1],
+	&"phone_ring": [2, -6.0, 22.0, 3.0, 0.02, 1],
+	&"pc_hum": [1, -10.0, 10.0, 2.0, 0.03, 1],
+	&"blinds": [2, -4.0, 20.0, 3.0, 0.05, 2],
+	&"light_flicker": [1, -8.0, 14.0, 2.5, 0.05, 2],
 }
 
 
@@ -240,6 +258,7 @@ const UI_EVENTS := {
 	&"mutation_lock": [preload("res://assets/audio/ui/mutation_lock.ogg"), -7.0],
 	&"mutation_unlock": [preload("res://assets/audio/ui/mutation_unlock.ogg"), -7.0],
 	&"door_locked": [preload("res://assets/audio/ui/door_locked.ogg"), -5.0],
+	&"access_denied": [preload("res://assets/audio/sfx/access_denied/access_denied_1.ogg"), -6.0],
 }
 
 
@@ -276,6 +295,8 @@ static func _event_path(event: StringName, variant: int) -> String:
 		return "res://assets/audio/sfx/biomass/Thudding_impact_of_b.ogg"
 	if event == &"step_biomass":
 		return "res://assets/audio/sfx/biomass/step_biomass_%d.ogg" % variant
+	if event == &"blinds":
+		return "res://assets/audio/sfx/blinds/the_blinds_hit_each_%d.ogg" % variant
 	if event == &"skill_cooldown_done":
 		return "res://assets/audio/sfx/skill_ready/taking_skill.ogg"
 	if event == &"skill_power_strike":

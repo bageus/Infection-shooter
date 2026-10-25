@@ -89,6 +89,7 @@ func claw_slash(enemy: Node3D) -> void:
 		return
 	var height := 1.1 * (enemy.get_node("Body") as Node3D).scale.y if enemy.has_node("Body") else 1.1
 	PROCEDURAL.claw_slash(_world(), enemy.global_position + Vector3.UP * height)
+	SFX.play(_world(), &"claw_cutting", enemy.global_position + Vector3.UP * height)
 
 ## Temporary armor gained or soaking a hit: the shield dome flashes once.
 func energy_shield() -> void:

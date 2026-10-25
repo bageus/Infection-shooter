@@ -285,6 +285,11 @@ func get_critical_threshold() -> float:
 	return _domain.critical_threshold
 
 
+## Seconds of the current control loss left; 0 when control is held.
+func get_control_loss_remaining() -> float:
+	return _domain.control_loss_remaining
+
+
 func is_control_lost() -> bool:
 	return _domain.is_control_lost()
 
