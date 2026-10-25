@@ -25,6 +25,8 @@ _stage при недоступном пути добавляет только п
 
 ### N02. Неполный fingerprint и неполное восстановление transform
 
+**25.10.2026: IMPLEMENTED / CI_PENDING.** [Исправление и regression evidence](../qa/authored_transform_restore.md): baseline18failures→0, full TRS/reuse/legacy/N01. Первоначальное доказательство ниже сохранено.
+
 Источник: `game/bootstrap/app/planning_storage.gd:172–178, 183–188, 247–254`.
 
 _signature включает scene, позицию и rotation_y, но не rotation_x/z и scale. Если предмет опрокинулся, почти не изменив позицию/yaw, restore_authored решает, что всё осталось на месте, и выходит. Отдельно _put_back восстанавливает позицию и все углы, но не scale. Проверка настоящих методов: исходный X=0°, scale=1; текущий X=90°, scale=2; restore_authored=false оставляет оба изменения. Прямой _put_back исправляет X, но оставляет scale=2. Изменение масштаба в обычном бою не требуется для появления ошибки наклона; это отдельная проверка полноты восстановления.

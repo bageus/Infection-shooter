@@ -173,6 +173,7 @@ func _put_back(node: Node3D, record: Dictionary, kept: Dictionary) -> void:
 	kept[node] = true
 	node.position = Vector3(float(record.get("x", 0.0)), float(record.get("y", 0.0)), float(record.get("z", 0.0)))
 	node.rotation_degrees = Vector3(float(record.get("rotation_x", 0)), float(record.get("rotation_y", 0)), float(record.get("rotation_z", 0)))
+	node.scale = Vector3(float(record.get("scale_x", 1.0)), float(record.get("scale_y", 1.0)), float(record.get("scale_z", 1.0)))
 	if node is RigidBody3D:
 		(node as RigidBody3D).linear_velocity = Vector3.ZERO
 		(node as RigidBody3D).angular_velocity = Vector3.ZERO
@@ -243,13 +244,15 @@ func _reusable_nodes() -> Dictionary:
 	return pool
 
 
-# Layout fingerprint that ignores physics jitter below 5 cm / 2 degrees.
+# Layout fingerprint with 5 cm position, 2 degree rotation and 0.0001 scale quantization.
 static func _signature(data: Dictionary) -> String:
 	var rows: Array[String] = []
 	for record in data.get("objects", []):
 		var row := record as Dictionary
-		rows.append("%s|%s|%s|%s|%s" % [row.get("scene", ""), snappedf(float(row.get("x", 0.0)), 0.05),
-			snappedf(float(row.get("y", 0.0)), 0.05), snappedf(float(row.get("z", 0.0)), 0.05), snappedf(float(row.get("rotation_y", 0.0)), 2.0)])
+		var angles := Vector3(float(row.get("rotation_x", 0.0)), float(row.get("rotation_y", 0.0)), float(row.get("rotation_z", 0.0))).snapped(Vector3.ONE * 2.0)
+		var size := Vector3(float(row.get("scale_x", 1.0)), float(row.get("scale_y", 1.0)), float(row.get("scale_z", 1.0))).snapped(Vector3.ONE * 0.0001)
+		rows.append("%s|%s|%s|%s|%s|%s" % [row.get("scene", ""), snappedf(float(row.get("x", 0.0)), 0.05),
+			snappedf(float(row.get("y", 0.0)), 0.05), snappedf(float(row.get("z", 0.0)), 0.05), angles, size])
 	rows.sort()
 	return "\n".join(rows) + "|surface_decals_v1:" + JSON.stringify(SURFACE_SETTINGS.CONFIG.normalized(data.get("surface_decals_v1", {})))
 
