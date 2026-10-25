@@ -72,6 +72,7 @@ func _physics_process(delta: float) -> void:
 		near = absf(local_player.x) < 0.85 and absf(local_player.z) < 0.55 and local_player.y > -0.5 and local_player.y < 3.2
 	if near and not _player_near_blinds:
 		_sway_strength = 0.16
+		SFX.play(self, &"blinds", _player.global_position)
 	_player_near_blinds = near
 	_sway_time += delta * 8.0
 	_sway_strength = move_toward(_sway_strength, 0.0, delta * 0.055)

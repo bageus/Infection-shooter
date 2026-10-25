@@ -79,6 +79,8 @@ func _foot_position() -> Vector3:
 
 
 func configure_skills(runtime: Node) -> void:
+	if runtime.has_signal("control_loss_changed"):
+		runtime.connect("control_loss_changed", func(lost: bool) -> void: play(&"control_lost" if lost else &"control_repair"))
 	if runtime.has_signal("skill_cast"):
 		runtime.connect("skill_cast", _on_skill_cast)
 	if runtime.has_signal("passive_triggered"):

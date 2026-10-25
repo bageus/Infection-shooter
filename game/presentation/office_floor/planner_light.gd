@@ -1,5 +1,7 @@
 extends Node3D
 
+const SFX := preload("res://game/core/audio/public/sound_events.gd")
+
 @export_range(0.0, 2.0, 0.01) var energy_multiplier := 0.65:
 	set(value):
 		energy_multiplier = maxf(value, 0.0)
@@ -98,6 +100,8 @@ func _process(delta: float) -> void:
 					_target_factor = 0.0 if _rng.randf() < 0.16 else 1.0
 					if _target_factor == 0.0:
 						_flicker_factor = 0.0
+			if _target_factor < 0.5 and _is_active():
+				SFX.play(self, &"light_flicker")
 		_flicker_factor = lerpf(_flicker_factor, _target_factor, minf(delta * (24.0 if flicker_mode == 1 else 4.0), 1.0))
 	_apply_energy()
 	set_process(_needs_process())

@@ -7,6 +7,7 @@ const TITLE_FONT := preload("res://assets/interface/fonts/title.ttf")
 const MUTATION_ALARM := preload("res://game/presentation/prototype_hud/mutation_alarm_pulse.gd")
 const BAR_FEEDBACK := preload("res://game/presentation/prototype_hud/vital_bar_feedback.gd")
 const VITALS_FX := preload("res://game/presentation/prototype_hud/vitals_screen_fx.gd")
+const CONTROL_LOSS_OVERLAY := preload("res://game/presentation/prototype_hud/control_loss_overlay.gd")
 const MUTATION_VEIL := preload("res://game/presentation/prototype_hud/mutation_veil.gd")
 const SFX := preload("res://game/core/audio/public/sound_events.gd")
 const UI_TRANSLATIONS := preload("res://game/core/localization/public/ui_translations.gd")
@@ -74,6 +75,7 @@ var _objective: PanelContainer
 var _texts_locale := ""
 var _scale_blink: Tween
 var _veil: ColorRect
+var _control_overlay: ColorRect
 var _antidote_flash_remaining := 0.0
 var _was_control_lost := false
 var _control_losses := 0
@@ -104,6 +106,10 @@ func _ready() -> void:
 	_veil.name = "MutationVeil"
 	add_child(_veil)
 	move_child(_veil, 0)
+	_control_overlay = CONTROL_LOSS_OVERLAY.new()
+	_control_overlay.name = "ControlLossOverlay"
+	add_child(_control_overlay)
+	move_child(_control_overlay, 1)
 	_control_notice = _make_banner("", PALETTE.WARNING)
 	_control_notice.name = "ControlNotice"
 	_control_notice.offset_top = CONTROL_NOTICE_TOP
@@ -183,6 +189,7 @@ func _process(delta: float) -> void:
 		_start_antidote_flash()
 	_was_control_lost = _control_notice.visible
 	_veil.call("update", delta, bool(infection.call("is_escalated")))
+	_control_overlay.call("update", delta, float(infection.call("get_control_loss_remaining")))
 	_antidote_flash_remaining = maxf(0.0, _antidote_flash_remaining - delta)
 	_mutation_alarm.update(delta, _control_notice.visible)
 	_vitals_fx.update(delta, float(infection.call("get_mutation")), float(infection.call("get_critical_threshold")), _control_notice.visible, float(player.health), float(player.max_health))

@@ -1,4 +1,5 @@
 extends RefCounted
+const SFX := preload("res://game/core/audio/public/sound_events.gd")
 const B := preload("res://game/features/infection/public/mutation_balance.gd")
 ## Mutation poison and collision-limited displacement in metres.
 var destination := Vector3.ZERO
@@ -38,6 +39,7 @@ func step(host: CharacterBody3D, delta: float) -> bool:
 			host.set_meta("mutation_infection_death", true)
 		host.take_damage(damage)
 		if fatal and host._dead:
+			SFX.play(host.get_parent(), &"biological_rupture", host.global_position)
 			for enemy in host.get_tree().get_nodes_in_group("infected_alive"):
 				if enemy is Node3D and enemy.global_position.distance_squared_to(host.global_position) <= pow(B.value("blood_infection", "explosion_radius"), 2.0):
 					enemy.take_damage(B.value("blood_infection", "explosion"))

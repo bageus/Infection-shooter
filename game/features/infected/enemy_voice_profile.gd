@@ -22,6 +22,14 @@ const PROFILES := {
 		&"pain": [0.35, [&"growl_revenant"]],
 		&"death": [1.0, [&"revenant_death"]],
 	},
+	&"growl_brute": {
+		&"idle": [0.65, [&"brute_idle"]],
+		&"voice": [1.0, [&"brute_voice", &"growl_brute"]],
+		&"alert": [1.0, [&"brute_alert"]],
+		&"attack": [0.5, [&"brute_attack", &"growl_brute"]],
+		&"pain": [0.35, [&"brute_pain"]],
+		&"death": [1.0, [&"brute_death"]],
+	},
 	&"growl_colossus": {
 		&"idle": [0.65, [&"colossus_idle"]],
 		&"voice": [1.0, [&"colossus_voice", &"growl_colossus"]],
