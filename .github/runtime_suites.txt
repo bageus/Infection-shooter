@@ -221,6 +221,7 @@ game/features/player/tests/run_issue7_passive_tests.gd
 game/bootstrap/app/tests/run_issue7_card_loot_tests.gd
 game/bootstrap/app/tests/run_darkness_room_tests.gd
 game/bootstrap/app/tests/run_biomass_floor_bake_tests.gd
+game/bootstrap/app/tests/run_biomass_light_energy_tests.gd
 game/bootstrap/app/tests/run_darkness_palette_tests.gd
 game/bootstrap/app/tests/run_planner_fog_tests.gd
 game/bootstrap/app/tests/run_planner_hud_tests.gd
