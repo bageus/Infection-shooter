@@ -1,0 +1,4 @@
+Godot Engine v4.7.2.stable.official.ed1daf0bf - https://godotengine.org
+
+Mission loading: { "peak_in_flight": 0, "resource_wait_usec": 0, "loaded": 0 }; instantiate 0.00 ms; add_child/_ready 0.01 ms
+MAP_INITIAL=2 LOAD_REPORT={ "loaded": 1, "skipped": 1, "missing": ["res://unavailable_model.glb"] } CAPTURE=1 WRITE={ "saved": true } RELOADED=1
