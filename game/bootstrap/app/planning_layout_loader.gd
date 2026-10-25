@@ -168,7 +168,8 @@ func _check_plan(data: Dictionary, prepared: Dictionary) -> Dictionary:
 	prepared["surface_decals_v1"] = data.get("surface_decals_v1", {}).duplicate(true)
 	var cache: Dictionary = data.get("floor_biomass_v1", {})
 	prepared["floor_biomass_v1"] = cache if str(cache.get("source_signature", "")) == preload("res://game/bootstrap/app/planning_biomass_bake.gd").signature(data.objects) else {}
-	if not data.objects.is_empty() and prepared.entries.is_empty() and prepared.player.is_empty():
+	# Authored restoration can retain every live node and stage only unavailable records.
+	if not data.objects.is_empty() and prepared.entries.is_empty() and prepared.player.is_empty() and objects.keep_on_clear.is_empty():
 		_discard(prepared)
 		return {"error": "map has no loadable objects"}
 	return prepared
