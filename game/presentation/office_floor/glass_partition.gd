@@ -104,7 +104,7 @@ func take_projectile_hit(_damage: float, hit_position: Vector3, hit_normal: Vect
 	if _weapon_name != "GRENADE" and _crack_count < _cracks_needed:
 		_add_crack(hit_position, hit_normal)
 		return false
-	_break_glass(hit_position, _direction)
+	_break_glass(hit_position, _direction, _weapon_name == "GRENADE")
 	return false
 
 
@@ -199,7 +199,7 @@ func _authored_visible(node: Node3D) -> bool:
 	return false
 
 
-func _break_glass(hit_position: Vector3, direction: Vector3 = Vector3.ZERO) -> void:
+func _break_glass(hit_position: Vector3, direction: Vector3 = Vector3.ZERO, blast: bool = false) -> void:
 	if _broken:
 		return
 	_broken = true
@@ -236,7 +236,7 @@ func _break_glass(hit_position: Vector3, direction: Vector3 = Vector3.ZERO) -> v
 			if is_instance_valid(glass) and glass is MeshInstance3D:
 				panes.append(glass as MeshInstance3D)
 		_debris_floor.call("scatter_glass_debris", panes, direction)
-	_spawn_fragments(hit_position, direction)
+	_spawn_fragments(hit_position, direction, blast)
 
 
 # Wall signs fixed to the pane fall together with it.
@@ -344,7 +344,7 @@ func _hide_named(node: Node, token: String) -> void:
 		_hide_named(child, token)
 
 
-func _spawn_fragments(hit_position: Vector3, direction: Vector3 = Vector3.ZERO) -> void:
+func _spawn_fragments(hit_position: Vector3, direction: Vector3 = Vector3.ZERO, blast: bool = false) -> void:
 	var visual := get_parent().get_node_or_null("Visual") as Node3D
 	var group: Node3D = DAMAGE.find_named(visual, "Glass_Shards") if visual != null else null
 	if group != null:
@@ -358,7 +358,7 @@ func _spawn_fragments(hit_position: Vector3, direction: Vector3 = Vector3.ZERO) 
 			var center: Vector3 = (shard.global_transform * shard.get_aabb()).get_center()
 			var distance := center.distance_to(hit_position)
 			if distance <= burst_radius:
-				_drop_shard(shard, index, push + Vector3.DOWN * 0.1, hit_position, true)
+				_drop_shard(shard, index, push + Vector3.DOWN * 0.1, hit_position, blast)
 				continue
 			var delay := distance * crumble_seconds_per_metre + randf_range(0.0, 0.12)
 			var piece: WeakRef = weakref(shard)
@@ -380,7 +380,7 @@ func _spawn_fragments(hit_position: Vector3, direction: Vector3 = Vector3.ZERO) 
 		source.mesh = box
 		get_parent().add_child(source)
 		source.global_position = hit_position + Vector3(randf_range(-0.35, 0.35), randf_range(-0.35, 0.35), 0)
-		DAMAGE.spawn_piece(self, source, null, 0, index, Vector3.UP, hit_position, false, true)
+		DAMAGE.spawn_piece(self, source, null, 0, index, Vector3.UP, hit_position, blast, true)
 		source.queue_free()
 
 

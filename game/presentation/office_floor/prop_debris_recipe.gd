@@ -9,7 +9,7 @@ static func is_screen(model: String) -> bool:
 
 static func for_model(model: String, event: String) -> Array[String]:
 	var label := model.to_lower()
-	if event == "shatter":
+	if event == "shatter" and (has_any(label, ["painting", "09_fruit_", "09_glass", "09_mug"])):
 		return _shattered(label)
 	if event == "screen":
 		if is_screen(label):
@@ -41,7 +41,7 @@ static func for_model(model: String, event: String) -> Array[String]:
 		return _mix(["paper", "plastic", "wood"], [8, 3, 1])
 	if has_any(label, ["wood", "simple_chair", "shelf", "capboard", "cupboard"]):
 		return _mix(["wood", "paper", "plastic"], [8, 3, 1])
-	if has_any(label, ["05_", "plastic", "keyboard", "printer", "computer", "phone", "trash_bin", "pencil_holder", "water_cooler", "coffee_machine", "microwave", "kittle", "vending", "arcade"]):
+	if has_any(label, ["09_pen_", "09_pencil", "09_marker", "stapler", "05_", "plastic", "keyboard", "printer", "computer", "phone", "trash_bin", "pencil_holder", "water_cooler", "coffee_machine", "microwave", "kittle", "vending", "arcade"]):
 		return _mix(["plastic", "paper", "wood", "fabric"], [8, 2, 1, 1])
 	return []
 

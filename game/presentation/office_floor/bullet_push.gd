@@ -1,17 +1,15 @@
 extends RefCounted
 ## How a bullet hit shoves a movable prop (prop_weight_v1 addition, ADR-0032).
-## Every weapon pushes every loose item, scaled by its weight: light items
-## jump and tumble, chairs slide and turn, heavy furniture only creeps.
+## Bullets give a bounded nudge by weight; only explosions scatter objects.
 ## Grenades push through their own blast. Pure rules plus one apply().
 
 ## Momentum of one hit in kg*m/s (one pellet for the shotgun).
-const WEAPON_PUSH := {"PISTOL": 5.5, "UZI": 4.0, "RIFLE": 9.0, "SHOTGUN": 1.5}
-const DEFAULT_PUSH := 5.5
+const WEAPON_PUSH := {"PISTOL": 0.7, "UZI": 0.5, "RIFLE": 1.0, "AK": 1.0, "M4": 0.8, "SNIPER": 1.2, "MINIGUN": 0.8, "SHOTGUN": 0.1}
+const DEFAULT_PUSH := 0.7
 ## Speed a single hit can give at most, however light the item.
-const MAX_SPEED := 3.2
-## Items up to this weight also hop off the floor a little.
-const HOP_MAX_KG := 3.0
-const HOP_SHARE := 0.25
+const MAX_SPEED := 0.35
+const FRAME_BUDGET := &"bullet_push_frame"
+const FRAME_USED := &"bullet_push_used"
 
 
 ## Speed in m/s one hit of weapon gives an item of weight_kg.
@@ -20,12 +18,17 @@ static func speed(weapon: String, weight_kg: float) -> float:
 	return minf(push / maxf(weight_kg, 0.05), MAX_SPEED)
 
 
-## Shoves body along the shot; the hit point off the centre turns it too.
-static func apply(body: RigidBody3D, weight_kg: float, weapon: String, direction: Vector3, hit_position: Vector3) -> void:
+## Pellets share a frame budget; position is retained for compatible callers.
+static func apply(body: RigidBody3D, weight_kg: float, weapon: String, direction: Vector3, _hit_position: Vector3) -> void:
 	if body.freeze or weapon.to_upper() == "GRENADE" or direction.is_zero_approx():
 		return
-	var push := direction.normalized()
-	if weight_kg <= HOP_MAX_KG:
-		push = (push + Vector3.UP * HOP_SHARE).normalized()
+	var frame := Engine.get_physics_frames()
+	var used := float(body.get_meta(FRAME_USED, 0.0)) if int(body.get_meta(FRAME_BUDGET, -1)) == frame else 0.0
+	var current := maxf(body.linear_velocity.dot(direction.normalized()), 0.0)
+	var delta_speed := minf(speed(weapon, weight_kg), maxf(MAX_SPEED - current - used, 0.0))
+	if delta_speed <= 0.0: return
+	body.set_meta(FRAME_BUDGET, frame)
+	body.set_meta(FRAME_USED, used + delta_speed)
 	body.sleeping = false
-	body.apply_impulse(push * speed(weapon, weight_kg) * body.mass, hit_position - body.global_position)
+	# A central nudge avoids huge torque on small inertias and never injects vertical lift.
+	body.apply_central_impulse(direction.normalized() * delta_speed * body.mass)
