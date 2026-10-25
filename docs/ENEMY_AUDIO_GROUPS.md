@@ -49,6 +49,12 @@
 | revenant / attack | revenant_attack / growl_revenant | 50% | 6 | 7 |
 | revenant / pain | growl_revenant | 35% | 3 | 4 |
 | revenant / death | revenant_death | 100% | 1 | 1 |
+| brute / idle | brute_idle | 65% | 3 | 4 |
+| brute / voice | brute_voice / growl_brute | 100% | 6 | 6 |
+| brute / alert | brute_alert | 100% | 1 | 1 |
+| brute / attack | brute_attack / growl_brute | 50% | 5 | 6 |
+| brute / pain | brute_pain | 35% | 2 | 3 |
+| brute / death | brute_death | 100% | 2 | 2 |
 | colossus / idle | colossus_idle | 65% | 1 | 2 |
 | colossus / voice | colossus_voice / growl_colossus | 100% | 4 | 4 |
 | colossus / attack | colossus_attack | 50% | 1 | 2 |
@@ -75,7 +81,7 @@ Fours применяется к Hunger на четвереньках; голос
 | hunger | 112 | 84 | 24 | 1 |
 | revenant | 112 | 84 | 24 | 1 |
 | zombie | 96 | 72 | 36 | 4 |
-| brute | 64 | 48 | 24 | 4 |
+| brute | 96 | 72 | 18 | 2 |
 | titan | 32 | 24 | 24 | 1 |
 | colossus | 32 | 24 | 24 | 1 |
 | horde | 48 | 36 | 18 | 4 |
