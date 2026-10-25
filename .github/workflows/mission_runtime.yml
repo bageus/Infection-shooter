@@ -303,6 +303,7 @@ jobs:
           python tools/test_workstation_templates.py
           python tools/test_glass_openings.py
           python tools/test_architecture_scene_access.py
+          python tools/test_runtime_suite_runner.py
       - name: Runtime regressions
         shell: bash
         run: |
