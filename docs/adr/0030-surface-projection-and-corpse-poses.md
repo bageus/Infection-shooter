@@ -31,3 +31,6 @@ Revert этого инкремента возвращает плоские де�
 
 ## Approval
 Прямой запрос владельца в этом сообщении разрешает описанные изменения. Стоящее разрешение T002 позволяет сохранять проверенные изменения в main до MVP. Архитектурных исключений нет.
+
+## Fixture lifecycle follow-up — 2026-10-25
+Native surface/pose regression освобождает сцену до завершения процесса. Два process_frame не гарантируют, что audio mixer уже отпустил OGG playback. Bootstrap test fixture отслеживает только свои активные playback через WeakRef и перед quit ждёт освобождения максимум 1 s с assertion. Native probe моделирует отложенное освобождение реального OGG playback. Это изменение тестового lifecycle, без изменения production ownership, публичных контрактов, DTO и зависимостей. CI сохраняет строгий leak/error gate и включает verbose только для этого native suite.

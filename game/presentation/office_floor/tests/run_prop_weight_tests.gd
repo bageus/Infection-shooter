@@ -171,39 +171,26 @@ func _test_kicks() -> void:
 
 # Weight controls the initial push; collider shape/contact affects final travel.
 func _test_shots_move_items() -> void:
-	_expect(BULLET_PUSH.speed("PISTOL", 2.5) > BULLET_PUSH.speed("PISTOL", 4.5) and BULLET_PUSH.speed("PISTOL", 4.5) > BULLET_PUSH.speed("PISTOL", 150.0) * 10.0, "Shots push light items much further than heavy ones.")
-	_expect(BULLET_PUSH.speed("PISTOL", 0.01) <= BULLET_PUSH.MAX_SPEED, "A single hit never launches an item faster than the cap.")
-	_expect(BULLET_PUSH.speed("RIFLE", 4.5) > BULLET_PUSH.speed("UZI", 4.5), "A rifle round pushes harder than an Uzi round.")
+	_expect(BULLET_PUSH.speed("PISTOL", 2.5) > BULLET_PUSH.speed("PISTOL", 4.5) and BULLET_PUSH.speed("PISTOL", 4.5) > BULLET_PUSH.speed("PISTOL", 150.0) * 10.0, "Weight still scales the gentle bullet nudge.")
+	_expect(BULLET_PUSH.speed("PISTOL", 0.01) <= .35, "Ordinary shots have a gentle speed ceiling.")
+	_expect(BULLET_PUSH.speed("RIFLE", 4.5) > BULLET_PUSH.speed("UZI", 4.5), "A rifle nudges harder than an Uzi below the cap.")
 	var stage := _stage()
-	var chair := _prop(stage, CHAIR, Vector3(0, 0.05, 0))
-	var bin := _prop(stage, TRASH_BIN, Vector3(4, 0.05, 0))
-	var table := _prop(stage, LONG_TABLE, Vector3(10, 0.05, 0))
-	for frame in 40:
-		await physics_frame
-	var starts := [chair.global_position, bin.global_position, table.global_position]
-	var first_push: Array[float] = []
+	var props := [_prop(stage, CHAIR, Vector3(0, 5, 0)), _prop(stage, TRASH_BIN, Vector3(4, 5, 0)), _prop(stage, LONG_TABLE, Vector3(10, 5, 0))]
+	# Isolate shot momentum from floor friction without replacing the actual public props.
+	for item: RigidBody3D in props:
+		item.gravity_scale = 0
+		item.collision_mask = 0
+		item.freeze = false
+	await physics_frame
+	await physics_frame
 	for shot in 3:
-		var speeds_before: Array[float] = []
-		for item: RigidBody3D in [chair, bin, table]:
-			speeds_before.append(item.linear_velocity.x)
-			item.call("take_projectile_hit", 6.0, item.global_position + Vector3(0, 0.4, 0), Vector3.UP, Vector3(1, 0, 0), "PISTOL")
-		if shot == 0:
-			# apply_impulse is consumed by the next physics step.
-			await physics_frame
-			await physics_frame
-			for index in 3:
-				var item: RigidBody3D = [chair, bin, table][index]
-				first_push.append(item.linear_velocity.x - speeds_before[index])
-		await create_timer(0.15).timeout
-	await create_timer(0.8).timeout
-	var moved: Array[float] = []
-	for index in 3:
-		var item: RigidBody3D = [chair, bin, table][index]
-		moved.append(Vector2(item.global_position.x - starts[index].x, item.global_position.z - starts[index].z).length())
-	_expect(moved[0] > 0.05, "Pistol shots move a chair (%.2f m)." % moved[0])
-	_expect(moved[1] > 0.05, "Pistol shots move a trash bin (%.2f m)." % moved[1])
-	_expect(first_push[1] > first_push[0] and first_push[0] > first_push[2] * 10.0, "A hit gives a lighter prop more speed (bin %.2f, chair %.2f, table %.2f m/s)." % [first_push[1], first_push[0], first_push[2]])
-	_expect(moved[2] < 0.1, "A long table barely creeps (%.2f m)." % moved[2])
+		for item: RigidBody3D in props:
+			item.call("take_projectile_hit", 6.0, item.global_position + Vector3(0, .4, 0), Vector3.UP, Vector3.RIGHT, "PISTOL")
+		await physics_frame
+		await physics_frame
+	for item: RigidBody3D in props:
+		_expect(item.linear_velocity.x > 0 and item.linear_velocity.x <= .36, "A real loose prop is nudged without being launched (%.3f m/s)." % item.linear_velocity.x)
+		_expect(absf(item.linear_velocity.y) < .001, "Shots add no hop to a real prop.")
 	stage.queue_free()
 	await process_frame
 

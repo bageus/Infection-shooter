@@ -14,6 +14,7 @@ const CASES := [
 	["03_locker_tall.tscn", "res://models/objects/enviroments/03/03_locker_tall_dented.glb", 55.0, .25, .45],
 ]
 class Controls extends Node:
+	var hud_layout := preload("res://game/bootstrap/app/planning_hud_layout.gd").new()
 	var status := Label.new()
 	func _update_history_buttons() -> void:
 		pass

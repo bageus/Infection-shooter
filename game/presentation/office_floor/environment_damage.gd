@@ -37,10 +37,13 @@ static func _collect(node: Node, meshes: Array[MeshInstance3D]) -> void:
 		_collect(child, meshes)
 
 
-static func spawn_piece(host: Node3D, mesh: MeshInstance3D, owner: Node3D, stage: int, index: int, direction: Vector3, hit_point: Vector3, blast: bool = false, glass: bool = false) -> RigidBody3D:
+static func spawn_piece(host: Node3D, mesh: MeshInstance3D, owner: Node3D, stage: int, index: int, direction: Vector3, hit_point: Vector3, blast: bool = false, glass: bool = false, frame: Transform3D = Transform3D.IDENTITY, motion: RigidBody3D = null) -> RigidBody3D:
 	if not is_instance_valid(host.get("effects_root")):
 		return null
-	var bounds: AABB = mesh.global_transform * mesh.get_aabb()
+	var world := frame * mesh.global_transform
+	var local_bounds := mesh.get_aabb()
+	var size := local_bounds.size * world.basis.get_scale().abs()
+	var bounds := AABB(world * local_bounds.get_center() - size * .5, size)
 	if bounds.size.length_squared() < 0.000001:
 		return null
 	var fragment := RigidBody3D.new()
@@ -52,6 +55,7 @@ static func spawn_piece(host: Node3D, mesh: MeshInstance3D, owner: Node3D, stage
 	fragment.set("piece_name", mesh.name)
 	fragment.set("stage_index", stage)
 	fragment.set("kickable", index % 3 == 0)
+	fragment.set("blast_motion", blast)
 	fragment.mass = clampf(bounds.size.length() * 0.3, 0.1, 3.0)
 	var shape := CollisionShape3D.new()
 	var box := BoxShape3D.new()
@@ -68,13 +72,13 @@ static func spawn_piece(host: Node3D, mesh: MeshInstance3D, owner: Node3D, stage
 		copy.set_surface_override_material(surface, mesh.get_surface_override_material(surface))
 	fragment.add_child(copy)
 	(host.get("effects_root") as Node3D).add_child(fragment)
-	fragment.global_position = bounds.get_center()
-	copy.global_transform = mesh.global_transform
+	fragment.global_transform = Transform3D(world.basis.orthonormalized(), bounds.get_center())
+	copy.global_transform = world
 	var away := fragment.global_position - hit_point
 	away.y = maxf(away.y, 0.1)
-	var impulse := (away.normalized() * 0.75 + direction.normalized() * 0.25 + Vector3.UP * 0.35).normalized() * fragment.mass * randf_range(1.5, 3.0) if blast else direction.normalized() * randf_range(0.15, 0.7) + Vector3.UP * 0.3
+	var impulse := (away.normalized() * 0.75 + direction.normalized() * 0.25 + Vector3.UP * 0.35).normalized() * fragment.mass * randf_range(1.5, 3.0) if blast else Vector3.ZERO
 	fragment.apply_impulse(impulse, (hit_point - fragment.global_position).limit_length(0.3))
-	_inherit_motion(host, fragment)
+	_inherit_motion(motion if motion != null else host, fragment, blast)
 	if not glass and maxf(bounds.size.x, maxf(bounds.size.y, bounds.size.z)) >= FRAGMENT_SCRIPT.PIECE_MIN_EDGE:
 		# Slats and rails (thin in two dimensions) skip piece contacts: dozens of long sticks would
 		# otherwise wedge on each other and hang at an angle instead of lying on the floor.
@@ -83,8 +87,8 @@ static func spawn_piece(host: Node3D, mesh: MeshInstance3D, owner: Node3D, stage
 		if sorted[1] > STICK_THICKNESS or sorted[2] <= STICK_MIN_LENGTH:
 			fragment.enable_piece_contacts()
 		else:
-			fragment.lie_down = true
-		fragment.topple_from(bounds.size, hit_point, direction)
+			fragment.lie_down = blast
+		if blast: fragment.topple_from(bounds.size, hit_point, direction)
 	return fragment
 
 
@@ -120,11 +124,12 @@ static func spawn_loose(effects: Node3D, mesh: Mesh, material: Material, shadow:
 
 # Pieces of a moving or tipping object keep its motion instead of starting from rest,
 # plus a little tumble so they do not slide flat across the floor.
-static func _inherit_motion(host: Node3D, fragment: RigidBody3D) -> void:
+static func _inherit_motion(host: Node3D, fragment: RigidBody3D, blast: bool) -> void:
 	if host is RigidBody3D:
 		var body := host as RigidBody3D
 		var lever := fragment.global_position - body.global_position
 		fragment.linear_velocity += body.linear_velocity + body.angular_velocity.cross(lever)
 		fragment.angular_velocity += body.angular_velocity
+	if not blast: return
 	var tumble := 2.5 / (0.6 + fragment.mass)
 	fragment.angular_velocity += Vector3(randf_range(-1.0, 1.0), randf_range(-1.0, 1.0), randf_range(-1.0, 1.0)) * tumble

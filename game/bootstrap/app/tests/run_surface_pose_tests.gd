@@ -15,6 +15,7 @@ class SoftBody:
 var failures := 0
 var stage: Node3D
 var pool: Node3D
+var _pending_playbacks: Array[WeakRef] = []
 
 
 func _initialize() -> void:
@@ -30,9 +31,14 @@ func _run() -> void:
 	await _projection()
 	await _muzzle_guard()
 	await _poses()
+	_track_audio(stage)
 	stage.queue_free()
 	await process_frame
 	await _planner_roundtrip()
+	if DisplayServer.get_name() != "headless":
+		await _deferred_audio_release_probe()
+	else:
+		await _finish_audio()
 	print("Surface/pose tests: %d failures" % failures)
 	quit(failures)
 
@@ -196,6 +202,8 @@ func _planner_roundtrip() -> void:
 	var rendering_disabled := root.disable_3d
 	root.disable_3d = true
 	var game := MAIN.instantiate()
+	# This regression supplies its own fixtures; full authored-map coverage runs separately.
+	game.set("defer_layout_loading", true)
 	root.add_child(game)
 	current_scene = game
 	await process_frame
@@ -239,6 +247,7 @@ func _planner_roundtrip() -> void:
 	var records: Array = planner.storage._collect_layout_data()["objects"].filter(func(record: Dictionary) -> bool: return record.has("decor_pose"))
 	_check(records.filter(func(record: Dictionary) -> bool: return record["decor_pose"] == expected).size() >= 2, "Optional DTO v8 corpse poses survive full map roundtrip")
 	planner.call("exit")
+	_track_audio(game)
 	game.queue_free()
 	await process_frame
 	await process_frame
@@ -284,3 +293,42 @@ func _capture(label: String, target: Vector3) -> void:
 	var directory := OS.get_environment("POSE_CAPTURE_DIR")
 	DirAccess.make_dir_recursive_absolute(directory)
 	root.get_texture().get_image().save_png(directory.path_join(label + "_" + RenderingServer.get_current_rendering_method() + ".png"))
+
+
+# Node deletion queues playback removal; the audio mixer releases its OGG resources later.
+# Weak refs observe fixture-owned voices without keeping their streams alive.
+func _track_audio(owner: Node) -> void:
+	for node in owner.find_children("*", "", true, false):
+		if node is AudioStreamPlayer or node is AudioStreamPlayer2D or node is AudioStreamPlayer3D:
+			if node.has_stream_playback():
+				_pending_playbacks.append(weakref(node.get_stream_playback()))
+
+
+func _finish_audio() -> void:
+	var started := Time.get_ticks_msec()
+	var live := func() -> bool:
+		return _pending_playbacks.any(func(ref: WeakRef) -> bool: return ref.get_ref() != null)
+	while live.call() and Time.get_ticks_msec() - started < 1000:
+		await create_timer(.01, true, false, true).timeout
+	_check(not live.call(), "Fixture native audio playback is released before quitting")
+	print("Surface audio teardown: %d voices, %d ms" % [_pending_playbacks.size(), Time.get_ticks_msec() - started])
+	_pending_playbacks.clear()
+
+
+# Make the mixer's delayed release observable on fast machines too. This holds a real
+# OGG playback for one simulated slow mixer interval, without changing game audio.
+func _deferred_audio_release_probe() -> void:
+	var owner := Node.new()
+	root.add_child(owner)
+	var voice := AudioStreamPlayer.new()
+	voice.stream = preload("res://assets/audio/music/server_oper_active.ogg")
+	owner.add_child(voice)
+	voice.play()
+	_check(voice.has_stream_playback(), "Native cleanup probe starts a real OGG voice")
+	var held := {"playback": voice.get_stream_playback()}
+	_track_audio(owner)
+	owner.queue_free()
+	await process_frame
+	create_timer(.05, true, false, true).timeout.connect(func() -> void: held.clear())
+	await _finish_audio()
+	_check(held.is_empty(), "Audio cleanup waits for deferred mixer ownership to end")

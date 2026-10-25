@@ -378,7 +378,7 @@ func _read_layout_file(path: String) -> Dictionary:
 
 static func _skipped_text(report: Dictionary) -> String:
 	var skipped := int(report.get("skipped", 0))
-	return "" if skipped == 0 else " | %d missing object(s) skipped" % skipped
+	return "" if skipped == 0 else " | %d missing object(s) skipped; records preserved" % skipped
 
 
 func save_layout() -> void:
@@ -436,6 +436,9 @@ func load_layout() -> void:
 
 func _prepare_save(job: RefCounted = null) -> bool:
 	_save_notice = ""
+	var unresolved: Variant = objects.get("unresolved_records")
+	if unresolved is Array and not unresolved.is_empty():
+		_save_notice = " | %d unavailable object record(s) preserved" % unresolved.size()
 	if not session.active:
 		return true
 	map_loading = true

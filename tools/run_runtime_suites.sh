@@ -28,13 +28,17 @@ run_one() {
 	log="$work/$name.log"
 	data="$work/data/$name"
 	mkdir -p "$data"
-	# This suite saves and restores the entire authored map (5,000+ objects).
-	# Measured at 115-118 s locally and timed out at 121 s on shared CI.
-	# Keep its real map/physics assertions and allow normal runner variation.
+	# Full authored-map integrations each hold ~1 GiB and compete for Jolt workers.
+	# Serialize those loads/restarts, retaining every real-map assertion and a bounded timeout.
 	limit=120
-	if [ "$suite" = "game/bootstrap/app/tests/run_planning_mode_tests.gd" ]; then
-		limit=180
-	fi
+	case "$name" in
+		run_menu_tests|run_startup_resource_memory_tests|run_planning_mode_tests|run_occlusion_tests|run_planner_extension_tests|run_planner_light_view_tests|run_wall_tv_hit_tests)
+			local map_lock
+			exec {map_lock}>"$work/full-map.lock"
+			flock "$map_lock"
+			limit=300
+			;;
+	esac
 	start=$(date +%s)
 	XDG_DATA_HOME="$data" timeout "$limit" godot --headless --path . --script "$suite" > "$log" 2>&1
 	status=$?

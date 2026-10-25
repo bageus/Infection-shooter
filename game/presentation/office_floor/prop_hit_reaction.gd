@@ -4,7 +4,7 @@ extends RefCounted
 ## always restored before the owner rebuilds its collision shapes.
 
 const DEBRIS := preload("res://game/presentation/office_floor/debris_lifecycle.gd")
-const SHUDDER_DISTANCE := 0.025
+const SHUDDER_DISTANCE := 0.004
 
 var _host: Node3D
 var _visual: Node3D
@@ -25,7 +25,6 @@ func shudder(direction: Vector3) -> void:
 	var kick := (_host.global_basis.inverse() * Vector3(direction.x, 0.0, direction.z)).normalized() * SHUDDER_DISTANCE
 	_tween = _host.create_tween()
 	_tween.tween_property(_visual, "position", _rest + kick, 0.04)
-	_tween.tween_property(_visual, "position", _rest - kick * 0.4, 0.06)
 	_tween.tween_property(_visual, "position", _rest, 0.06)
 
 

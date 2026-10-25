@@ -10,6 +10,7 @@ const PLAYER := "res://game/features/player/public/player.tscn"
 var failures := 0
 
 class Controls extends Node:
+	var hud_layout := preload("res://game/bootstrap/app/planning_hud_layout.gd").new()
 	var status := Label.new()
 	func _update_history_buttons() -> void:
 		pass

@@ -111,7 +111,7 @@ static func dust_puff(host: Node3D, world_position: Vector3, size: float, tint: 
 
 
 # Small tinted chunks for objects whose model cannot be split into parts.
-static func spawn_chunks(host: Node3D, bounds: AABB, tint: Color, count: int, direction: Vector3, hit_position: Vector3) -> void:
+static func spawn_chunks(host: Node3D, bounds: AABB, tint: Color, count: int, direction: Vector3, hit_position: Vector3, blast: bool = false) -> void:
 	var world := host.get("effects_root") as Node3D
 	if not is_instance_valid(world):
 		return
@@ -125,10 +125,12 @@ static func spawn_chunks(host: Node3D, bounds: AABB, tint: Color, count: int, di
 		chunk.set("piece_name", "Chunk")
 		chunk.set("stage_index", 99)
 		chunk.set("kickable", index % 4 == 0)
+		chunk.set("blast_motion", blast)
 		world.add_child(chunk)
 		var spot := bounds.position + Vector3(randf() * bounds.size.x, randf() * bounds.size.y, randf() * bounds.size.z)
 		chunk.global_position = spot
 		chunk.global_rotation = Vector3(randf() * TAU, randf() * TAU, randf() * TAU)
 		var away := (spot - hit_position).normalized() * 0.6 + direction.normalized() * 0.4 + Vector3.UP * 0.5
-		chunk.apply_central_impulse(away.normalized() * randf_range(0.2, 0.7))
-		chunk.angular_velocity = Vector3(randf_range(-6, 6), randf_range(-6, 6), randf_range(-6, 6))
+		if blast:
+			chunk.apply_central_impulse(away.normalized() * randf_range(0.2, 0.7))
+			chunk.angular_velocity = Vector3(randf_range(-6, 6), randf_range(-6, 6), randf_range(-6, 6))

@@ -1,0 +1,120 @@
+extends SceneTree
+const STORE = preload("res://game/bootstrap/app/planning_storage.gd")
+const BAKE = preload("res://game/bootstrap/app/planning_biomass_bake.gd")
+const LIGHT = preload("res://game/bootstrap/app/planning_biomass_light_bake.gd")
+const FIXTURE = preload("res://game/presentation/office_floor/planner_light.gd")
+const CROWD = preload("res://game/features/infected/crowd_separation.gd")
+class Objects extends Node:
+ var placed: Array = []
+ var player_spawn_defined := false
+ var player_spawn_transform := Transform3D.IDENTITY
+ var session: Variant
+class Controller extends Node:
+ var local_lights_enabled := true
+ var shadows_allowed := true
+ var world_environment: WorldEnvironment
+class Fixture extends Node3D:
+ var energy_multiplier := 1.0
+ func get_authored_energy() -> float: return 1.0
+func _initialize() -> void: call_deferred("run")
+func run() -> void:
+ var record := {"scene":"res://example.tscn","x":0.0,"y":0.0,"z":0.0,"rotation_y":0.0,"rotation_x":0.0,"rotation_z":0.0,"scale_x":1.0,"scale_y":1.0,"scale_z":1.0}
+ var changed := record.duplicate(true)
+ changed.rotation_x = 90.0
+ changed.scale_x = 2.0
+ print("RESTORE_SIGNATURE_IGNORES_TILT_SCALE=", STORE._signature({"objects":[record]}) == STORE._signature({"objects":[changed]}))
+ var objects := Objects.new()
+ var prop := Node3D.new()
+ prop.set_meta("planning_scene_path", "res://example.tscn")
+ prop.rotation_degrees.x = 90.0
+ prop.scale.x = 2.0
+ objects.add_child(prop)
+ objects.placed = [prop]
+ var store := STORE.new()
+ store.objects = objects
+ store.authored_layout = {"version":8,"objects":[record]}
+ print("RESTORE_AUTHORED_RETURN=", store.restore_authored(), " TILT=", prop.rotation_degrees.x, " SCALE=",prop.scale.x)
+ store._put_back(prop,record,{})
+ print("RESTORE_PUT_BACK_TILT=",prop.rotation_degrees.x," SCALE=",prop.scale.x)
+ objects.free()
+ var point := {"scene":"res://lamp.tscn","fixture_shape":"point"}
+ var linear := {"scene":"res://lamp.tscn","fixture_shape":"linear"}
+ print("BIOMASS_SIGNATURE_IGNORES_FIXTURE_SHAPE=", BAKE.signature([point]) == BAKE.signature([linear]))
+ var host := Node3D.new()
+ root.add_child(host)
+ var control := Controller.new()
+ control.name = "PlanningLighting"
+ host.add_child(control)
+ var fixture := Fixture.new()
+ host.add_child(fixture)
+ fixture.add_to_group("budget_lights")
+ var spot := SpotLight3D.new()
+ fixture.add_child(spot)
+ spot.position = Vector3(4,4,4)
+ spot.rotation_degrees.x = -90
+ spot.spot_range = 12.0
+ spot.spot_angle = 48.0
+ var wall := StaticBody3D.new()
+ wall.add_to_group("camera_occluder")
+ host.add_child(wall)
+ wall.position = Vector3(4,2,4)
+ var shape := CollisionShape3D.new()
+ shape.shape = BoxShape3D.new()
+ shape.shape.size = Vector3(2,.2,2)
+ wall.add_child(shape)
+ await physics_frame
+ await physics_frame
+ var bake := LIGHT.new()
+ bake.configure(host, func(): return true)
+ var shaded: Image = await bake.sample(Vector2i.ZERO,0.0)
+ control.shadows_allowed = false
+ var no_shadow := LIGHT.new()
+ no_shadow.configure(host, func(): return true)
+ var unshaded: Image = await no_shadow.sample(Vector2i.ZERO,0.0)
+ print("BIOMASS_SAVE_GRAPHICS_SHADOW_ON=",shaded.get_pixel(16,16)," OFF=",unshaded.get_pixel(16,16))
+ fixture.free()
+ wall.free()
+ for kind in ["point","linear","rectangle"]:
+  var actual := FIXTURE.new()
+  actual.configure_fixture(kind,false)
+  actual.energy_multiplier = 1.0
+  actual.set_authored_energy(1.0)
+  actual.position = Vector3(4,4,4)
+  var marker := MeshInstance3D.new()
+  marker.name = "Marker"
+  actual.add_child(marker)
+  var actual_spot := SpotLight3D.new()
+  actual_spot.name = "Light"
+  actual_spot.rotation_degrees.x = -90
+  actual.add_child(actual_spot)
+  host.add_child(actual)
+  actual.set_local_lighting_enabled(true)
+  var real_energy := 0.0
+  for child in actual.get_children():
+   if child is SpotLight3D: real_energy += child.light_energy
+  var actual_bake := LIGHT.new()
+  actual_bake.configure(host,func(): return true)
+  var bake_energy := 0.0
+  for lamp in actual_bake.lamps: bake_energy += lamp.energy
+  print("FIXTURE_ENERGY_",kind," RUNTIME=",real_energy," BAKE=",bake_energy)
+  actual.free()
+ host.free()
+ var viewport_a := SubViewport.new()
+ viewport_a.own_world_3d = true
+ root.add_child(viewport_a)
+ var a := Node3D.new()
+ viewport_a.add_child(a)
+ var viewport_b := SubViewport.new()
+ viewport_b.own_world_3d = true
+ root.add_child(viewport_b)
+ var b := Node3D.new()
+ viewport_b.add_child(b)
+ await physics_frame
+ CROWD.spread(a,null)
+ await physics_frame
+ var pushed: Vector3 = CROWD.spread(b,null)
+ print("SEPARATE_WORLD_IDS=",a.get_world_3d().get_instance_id(),"/",b.get_world_3d().get_instance_id()," CROSS_WORLD_PUSH=",pushed.length())
+ viewport_a.free()
+ viewport_b.free()
+ await process_frame
+ quit()

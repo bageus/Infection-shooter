@@ -226,6 +226,7 @@ func _video() -> void:
 	var shadows := CheckButton.new()
 	shadows.name = "Shadows"
 	shadows.text = dialog.view.text("shadows")
+	shadows.tooltip_text = dialog.view.text("shadowsHint")
 	shadows.button_pressed = dialog.view.preferences.values.shadows
 	dialog.get("layout").add_child(shadows)
 	_shadow_quality()
@@ -269,6 +270,7 @@ func _shadow_quality() -> void:
 	name_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
 	var slider := HSlider.new()
 	slider.name = "ShadowQuality"
+	slider.tooltip_text = dialog.view.text("shadowQualityHint")
 	slider.custom_minimum_size.x = 160
 	slider.min_value = 0
 	slider.max_value = SHADOWS.level_count() - 1

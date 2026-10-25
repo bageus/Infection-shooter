@@ -185,6 +185,7 @@ func _test_standing_panel() -> void:
 	effects.add_child(runtime)
 	var panel := RigidBody3D.new()
 	panel.set_script(FRAGMENT)
+	panel.set("blast_motion", true)
 	var shape := CollisionShape3D.new()
 	var box := BoxShape3D.new()
 	box.size = Vector3(0.05, 1.0, 0.8)

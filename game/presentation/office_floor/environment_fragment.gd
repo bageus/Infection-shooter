@@ -7,6 +7,7 @@ const IMPACT_SOUND := preload("res://game/presentation/office_floor/impact_sound
 ## walls and props (mask 3) and ignore the player and infected explicitly.
 ## Pieces shrink away when their lifetime ends or the debris budget is full.
 
+const BULLET_PUSH := preload("res://game/presentation/office_floor/bullet_push.gd")
 const BALANCE = preload("res://game/features/combat/public/projectile_balance.gd")
 const DEBRIS = preload("res://game/presentation/office_floor/debris_lifecycle.gd")
 const QUALITY = preload("res://game/core/vfx/public/destruction_quality.gd")
@@ -58,6 +59,8 @@ var stage_index := -1
 var kickable := false
 # A piece with a next stage keeps its body while it rests, so a later hit can break it further.
 var breakable := false
+var blast_hit := false
+var blast_motion := false
 var _kick_cooldown := 0.0
 var _age := 0.0
 var rest_time := 0.0
@@ -83,7 +86,7 @@ func _ready() -> void:
 	if _surface == null:
 		_surface = PhysicsMaterial.new()
 		_surface.friction = 0.7
-		_surface.bounce = 0.22
+		_surface.bounce = 0.02
 	physics_material_override = _surface
 	linear_damp = 0.35
 	angular_damp = 0.9
@@ -249,7 +252,7 @@ func _leave_floor(seconds: float, budget_full: bool) -> void:
 # A resting piece that stands on its edge (a cabinet side, a tabletop) or hangs propped on others is
 # pushed over along its thin axis so it falls flat. False once it lies down or the retries are spent.
 func unstick() -> bool:
-	if not sleeping or _unstick_tries >= UNSTICK_RETRIES or _half_extents == Vector3.ZERO:
+	if not blast_motion or not sleeping or _unstick_tries >= UNSTICK_RETRIES or _half_extents == Vector3.ZERO:
 		return false
 	var thin := 0
 	for axis in 3:
@@ -344,9 +347,10 @@ func take_projectile_hit(damage: float, hit_position: Vector3, _normal: Vector3,
 	_piece_health -= BALANCE.object_damage(damage, weapon, "large")
 	if _piece_health > 0.0:
 		sleeping = false
-		apply_central_impulse(direction.normalized() * 0.35)
+		BULLET_PUSH.apply(self, maxf(mass, 1.0), weapon, direction, hit_position)
 		return false
 	_piece_health = 55.0
+	blast_hit = weapon == "GRENADE"
 	var piece_owner: Node = null
 	if source != null:
 		piece_owner = source.get_ref() as Node
@@ -354,7 +358,10 @@ func take_projectile_hit(damage: float, hit_position: Vector3, _normal: Vector3,
 		piece_owner.call("hit_environment_fragment", self, hit_position, direction)
 	else:
 		sleeping = false
-		apply_central_impulse(direction.normalized() * 0.5)
+		if weapon == "GRENADE":
+			apply_central_impulse(direction.normalized() * mass * 2.0)
+		else:
+			BULLET_PUSH.apply(self, maxf(mass, 1.0), weapon, direction, hit_position)
 	return false
 
 

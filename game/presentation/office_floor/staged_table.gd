@@ -118,7 +118,7 @@ func hit_piece(part_id: String, hit_position: Vector3, direction: Vector3, damag
 	_part_health.erase(part_id)
 	var body: RigidBody3D = _active[part_id]
 	_active.erase(part_id)
-	call_deferred("_transition_piece", part_id, body, hit_position, direction)
+	call_deferred("_transition_piece", part_id, body, hit_position, direction, weapon == "GRENADE")
 
 
 func _switch_to_modular() -> void:
@@ -134,7 +134,7 @@ func _switch_to_modular() -> void:
 	_assembly.collision_layer = 1
 
 
-func _transition_piece(part_id: String, body: RigidBody3D, hit_position: Vector3, direction: Vector3) -> void:
+func _transition_piece(part_id: String, body: RigidBody3D, hit_position: Vector3, direction: Vector3, blast: bool = false) -> void:
 	_floor_debris.emit(self, "07_table", "part_" + part_id, hit_position, direction)
 	SFX.play(get_parent(), &"break_wood", hit_position)
 	var original: MeshInstance3D = _parts[part_id]
@@ -147,23 +147,23 @@ func _transition_piece(part_id: String, body: RigidBody3D, hit_position: Vector3
 	var authored_fragments: Array = _parts.keys().filter(func(key: String) -> bool: return key.begins_with(part_id + "_fragment_"))
 	if not authored_fragments.is_empty():
 		for fragment_id: String in authored_fragments:
-			_spawn_piece(fragment_id, part_id, original_transform, hit_position, direction, true)
+			_spawn_piece(fragment_id, part_id, original_transform, hit_position, direction, true, blast)
 		if part_id == "Top":
-			_drop_remaining_legs(hit_position, direction)
+			_drop_remaining_legs(hit_position, direction, blast)
 		elif part_id in LEG_IDS and body == _assembly:
-			_on_leg_lost(part_id, hit_position)
+			_on_leg_lost(part_id, hit_position, blast)
 	elif part_id == "Top":
 		for index in range(1, 9):
-			_spawn_piece("Top_%02d" % index, part_id, original_transform, hit_position, direction, false)
-		_drop_remaining_legs(hit_position, direction)
+			_spawn_piece("Top_%02d" % index, part_id, original_transform, hit_position, direction, false, blast)
+		_drop_remaining_legs(hit_position, direction, blast)
 	elif part_id.begins_with("Leg_"):
-		_spawn_piece(part_id + "_lower", part_id, original_transform, hit_position, direction, true)
-		_spawn_piece(part_id + "_upper", part_id, original_transform, hit_position, direction, true)
+		_spawn_piece(part_id + "_lower", part_id, original_transform, hit_position, direction, true, blast)
+		_spawn_piece(part_id + "_upper", part_id, original_transform, hit_position, direction, true, blast)
 		if body == _assembly:
-			_on_leg_lost(part_id, hit_position)
+			_on_leg_lost(part_id, hit_position, blast)
 	elif part_id.begins_with("Top_"):
-		_spawn_piece(part_id + "_A", part_id, original_transform, hit_position, direction, true)
-		_spawn_piece(part_id + "_B", part_id, original_transform, hit_position, direction, true)
+		_spawn_piece(part_id + "_A", part_id, original_transform, hit_position, direction, true, blast)
+		_spawn_piece(part_id + "_B", part_id, original_transform, hit_position, direction, true, blast)
 
 
 func _build_assembly() -> void:
@@ -195,7 +195,7 @@ func _build_assembly() -> void:
 		_active[part_id] = _assembly
 
 
-func _on_leg_lost(part_id: String, _hit_position: Vector3) -> void:
+func _on_leg_lost(part_id: String, _hit_position: Vector3, blast: bool = false) -> void:
 	_broken_legs.append(part_id)
 	var tilt := Vector3.ZERO
 	for missing in _broken_legs:
@@ -214,11 +214,11 @@ func _on_leg_lost(part_id: String, _hit_position: Vector3) -> void:
 	_assembly.freeze = false
 	_assembly.sleeping = false
 	_assembly.apply_torque_impulse(Vector3.UP.cross(tilt) * strength)
-	_wake_tabletop_items(tilt, strength)
+	_wake_tabletop_items(tilt, strength if blast else 0.0)
 
 
-func _drop_remaining_legs(_hit_position: Vector3, direction: Vector3) -> void:
-	_wake_tabletop_items(direction, two_leg_tilt_impulse)
+func _drop_remaining_legs(_hit_position: Vector3, direction: Vector3, blast: bool = false) -> void:
+	_wake_tabletop_items(direction, two_leg_tilt_impulse if blast else 0.0)
 	for part_id in LEG_IDS:
 		if not _active.has(part_id):
 			continue
@@ -240,8 +240,9 @@ func _drop_remaining_legs(_hit_position: Vector3, direction: Vector3) -> void:
 			outward = direction
 		outward.y = 0.0
 		outward = outward.normalized()
-		body.apply_impulse((outward + Vector3.UP * 0.15).normalized() * fragment_impulse, Vector3.UP * 0.25)
-		body.apply_torque_impulse(Vector3.UP.cross(outward) * fragment_impulse * 0.4)
+		if blast:
+			body.apply_impulse((outward + Vector3.UP * 0.15).normalized() * fragment_impulse, Vector3.UP * 0.25)
+			body.apply_torque_impulse(Vector3.UP.cross(outward) * fragment_impulse * 0.4)
 		_schedule_settle(body, fragment_lifetime * 2.0)
 	_modular.reparent(get_node("Visual"), true)
 	_modular.hide()
@@ -267,7 +268,8 @@ func _wake_tabletop_items(direction: Vector3, strength: float) -> void:
 			continue
 		item.freeze = false
 		item.sleeping = false
-		item.apply_impulse((direction.normalized() + Vector3.UP * 0.15).normalized() * minf(strength * 0.25, 1.5))
+		if strength > 0.0:
+			item.apply_impulse((direction.normalized() + Vector3.UP * 0.15).normalized() * minf(strength * 0.25, 1.5))
 
 
 func _current_mesh_transform(mesh: MeshInstance3D, body: RigidBody3D) -> Transform3D:
@@ -276,7 +278,7 @@ func _current_mesh_transform(mesh: MeshInstance3D, body: RigidBody3D) -> Transfo
 	return body.global_transform * Transform3D(Basis.IDENTITY, -mesh.get_aabb().get_center())
 
 
-func _spawn_piece(part_id: String, source_name: String, source_current: Transform3D, hit_position: Vector3, direction: Vector3, final_stage: bool) -> void:
+func _spawn_piece(part_id: String, source_name: String, source_current: Transform3D, hit_position: Vector3, direction: Vector3, final_stage: bool, blast: bool = false) -> void:
 	var mesh: MeshInstance3D = _parts.get(part_id)
 	if mesh == null:
 		push_error("07_table.glb is missing fragment " + part_id)
@@ -296,7 +298,8 @@ func _spawn_piece(part_id: String, source_name: String, source_current: Transfor
 	_add_fracture_marks(body, mesh, hit_position)
 	var offset := body.global_position - hit_position
 	var away := (direction.normalized() + offset.normalized() * 0.5 + Vector3.UP * 0.5).normalized()
-	body.apply_impulse(away * fragment_impulse, (hit_position - body.global_position).limit_length(0.3))
+	if blast:
+		body.apply_impulse(away * fragment_impulse, (hit_position - body.global_position).limit_length(0.3))
 	_schedule_settle(body, fragment_lifetime if final_stage else fragment_lifetime * 2.0)
 
 

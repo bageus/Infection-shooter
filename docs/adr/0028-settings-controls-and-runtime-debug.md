@@ -28,3 +28,7 @@ Settings tests cover page ownership, conflicts, persistence, reset, capture canc
 
 ## Asset compatibility follow-up
 Deleted single decals also broke baseline tests. The already owner-requested surface_atlas_v1 helper from PR #25 is included: core.vfx exposes material(texture, cell), combat selects bullet cells 0–4 and scorch 5–7, glass selects 0–7. Existing module dependency edges suffice. Wood paths use wood_decals. No surface-projection/door/display features from PR #25 are implied by this narrow repair.
+
+## Dynamic shadow wording follow-up (2026-10-25)
+
+The owner requested explicit dynamic-shadow wording. RU/EN labels and tooltips distinguish runtime shadows and their quality from retained baked/contact layers. Preference keys and presets stay compatible. Settings tests retain an actual baked biomass texture/material and prop contact shadow across toggle/quality changes. Full wall-shadow baking is not introduced. Evidence: docs/qa/dynamic_shadows_floor_visibility.md.

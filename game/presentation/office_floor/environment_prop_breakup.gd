@@ -28,17 +28,19 @@ static func chip_facade(body: RigidBody3D, geometry: GEOMETRY, hit_position: Vec
 	return true
 
 
-static func spawn_stage(body: RigidBody3D, geometry: GEOMETRY, stage_index: int, prefix: String, hit_position: Vector3, direction: Vector3, blast: bool = false) -> bool:
+static func spawn_stage(body: RigidBody3D, geometry: GEOMETRY, stage_index: int, prefix: String, hit_position: Vector3, direction: Vector3, blast: bool = false, from_piece: RigidBody3D = null) -> bool:
 	if stage_index >= geometry.stages.size() or not geometry.ensure_group(geometry.stages[stage_index]):
 		return false
 	var meshes: Array[MeshInstance3D] = DAMAGE.reveal_meshes(geometry.stages[stage_index])
+	if not prefix.is_empty():
+		meshes = meshes.filter(func(mesh: MeshInstance3D) -> bool:
+			return _piece_id(mesh.name) == _piece_id(prefix) or _piece_id(mesh.name).begins_with(_piece_id(prefix) + "_"))
+		# Some authored stages retain an unsplittable pedestal/body verbatim.
+		if meshes.size() == 1 and _piece_id(meshes[0].name) == _piece_id(prefix): return false
 	var spawned := 0
+	var frame := _continuation_frame(geometry, from_piece)
 	for mesh in meshes:
-		if not prefix.is_empty() and mesh.name != prefix and not mesh.name.begins_with(prefix + "_"):
-			continue
-		if spawned >= 32:
-			break
-		var fragment: RigidBody3D = DAMAGE.spawn_piece(body, mesh, body, stage_index, spawned, direction, hit_position, blast)
+		var fragment: RigidBody3D = DAMAGE.spawn_piece(body, mesh, body, stage_index, spawned, direction, hit_position, blast, false, frame, from_piece)
 		if fragment != null:
 			fragment.set("breakable", stage_index + 1 < geometry.stages.size())
 			spawned += 1
@@ -62,24 +64,43 @@ static func _split_later(body: RigidBody3D, geometry: GEOMETRY, fragment: RigidB
 		var live_body: RigidBody3D = body_ref.get_ref() as RigidBody3D
 		var live_fragment: RigidBody3D = fragment_ref.get_ref() as RigidBody3D
 		if live_body != null and live_fragment != null and not live_fragment.is_queued_for_deletion():
-			hit_fragment(live_body, geometry, live_fragment, hit_position, direction))
+			hit_fragment(live_body, geometry, live_fragment, hit_position, direction, true))
 
 
-static func hit_fragment(body: RigidBody3D, geometry: GEOMETRY, fragment: RigidBody3D, hit_position: Vector3, direction: Vector3) -> void:
+static func hit_fragment(body: RigidBody3D, geometry: GEOMETRY, fragment: RigidBody3D, hit_position: Vector3, direction: Vector3, blast: bool = false) -> void:
+	blast = blast or bool(fragment.get("blast_hit"))
 	var name_part: String = fragment.get("piece_name")
 	var next_stage: int = int(fragment.get("stage_index")) + 1
 	while next_stage < geometry.stages.size():
-		if spawn_stage(body, geometry, next_stage, name_part, hit_position, direction):
+		if spawn_stage(body, geometry, next_stage, name_part, hit_position, direction, blast, fragment):
 			fragment.queue_free()
 			return
 		next_stage += 1
 	# A single-piece stage (a knocked-over plant pot) shatters into the whole next stage.
 	var stage_index := int(fragment.get("stage_index"))
 	if stage_index + 1 < geometry.stages.size() and DAMAGE.reveal_meshes(geometry.stages[stage_index]).size() == 1:
-		if spawn_stage(body, geometry, stage_index + 1, "", hit_position, direction, true):
+		if spawn_stage(body, geometry, stage_index + 1, "", hit_position, direction, blast, fragment):
 			fragment.queue_free()
 			return
-	fragment.apply_central_impulse(direction.normalized() * 0.6)
+	fragment.set("breakable", false)
+	fragment.apply_central_impulse(direction.normalized() * fragment.mass * (2.0 if blast else 0.08))
+
+
+# Blender suffixes distinguish imported nodes, not the authored part hierarchy.
+static func _piece_id(value: String) -> String:
+	var suffix := value.get_extension()
+	return value.get_basename() if suffix.is_valid_int() else value
+
+
+static func _continuation_frame(geometry: GEOMETRY, piece: RigidBody3D) -> Transform3D:
+	if piece == null: return Transform3D.IDENTITY
+	var stage := int(piece.get("stage_index"))
+	for mesh in DAMAGE.reveal_meshes(geometry.stages[stage]):
+		if _piece_id(mesh.name) != _piece_id(str(piece.get("piece_name"))): continue
+		for child in piece.get_children():
+			if child is MeshInstance3D:
+				return child.global_transform * mesh.global_transform.affine_inverse()
+	return Transform3D.IDENTITY
 
 
 static func shatter_glass(body: RigidBody3D, geometry: GEOMETRY, hit_position: Vector3, direction: Vector3) -> void:
@@ -122,7 +143,7 @@ static func shatter_glass(body: RigidBody3D, geometry: GEOMETRY, hit_position: V
 	elif _nothing_visible(geometry):
 		# A drinking glass is only its pane: with the pane hidden nothing stands, so the pane itself breaks.
 		for index in panes.size():
-			DAMAGE.spawn_piece(body, panes[index], body, geometry.stages.size(), index, direction, hit_position, true)
+			DAMAGE.spawn_piece(body, panes[index], body, geometry.stages.size(), index, direction, hit_position, false, true)
 		body.collision_layer = 0
 		body.freeze = true
 	else:
