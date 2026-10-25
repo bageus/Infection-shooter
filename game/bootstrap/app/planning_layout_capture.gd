@@ -7,6 +7,10 @@ const WAVE_DIRECTOR := preload("res://game/features/spawning/public/wave_directo
 
 static func collect(objects: Node, nodes: Array, include_player: bool = true) -> Dictionary:
 	var records: Array = []
+	# Full snapshots include unavailable records once; async batches collect only nodes.
+	var unresolved: Variant = objects.get("unresolved_records")
+	if include_player and unresolved is Array:
+		records.append_array(unresolved.duplicate(true))
 	if include_player and objects.player_spawn_defined:
 		records.append({
 			"scene":"res://game/features/player/public/player.tscn",

@@ -112,6 +112,6 @@ objects. До удаления legacy scripts/scenes нужны явный alias
   после0; реальные правки координат по-прежнему инвалидируют cache.
 
 
-## Аудит 25.10.2026
+## N01 — сохранность missing records (25.10.2026)
 
-N01→N02→N03/N04/N05→G01→R01; затем существующие Q02/D02. Доказательства, условия и приоритеты: [новый аудит](docs/audits/infection_shooter_audit_2026-10-25.md). Это очередь исправлений внутри T004, не новые одновременно активные задачи; исправления этим документом не реализованы.
+IMPLEMENTED / CI_PENDING в рамках T004 по прямому поручению владельца после [аудита PR470](https://github.com/bageus/Infection-shooter/pull/470). Deep-copy records сохраняются в существующем objects DTO при sync/async load-save-load; clear/replacement и восстановление модели проверены. QA: [unresolved_map_records](docs/qa/unresolved_map_records.md). Следующее действие — полный CI N01, затем N02 (полное восстановление authored transform); T004 остаётся единственной активной задачей.

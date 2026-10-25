@@ -15,6 +15,8 @@ var rotation_y = 0.0
 var pose := Basis.IDENTITY
 var last_mouse_world = Vector3.ZERO
 var placed: Array[Node3D] = []
+# Valid authored records whose assets cannot currently be instantiated.
+var unresolved_records: Array[Dictionary] = []
 # Nodes clear_layout leaves alone once (planner restore reuses untouched ones).
 var keep_on_clear: Dictionary = {}
 var workstation_transforms: Dictionary = {}
@@ -479,6 +481,7 @@ func _apply_layout_data(data: Dictionary) -> Dictionary:
 
 
 func clear_layout(update_status: bool = true, immediate: bool = false) -> void:
+	unresolved_records.clear()
 	var host: Node = session.get("host") if session is Dictionary or is_instance_valid(session) else null
 	if is_instance_valid(host):
 		var floor_view := host.get_node_or_null("Floor") as Node3D

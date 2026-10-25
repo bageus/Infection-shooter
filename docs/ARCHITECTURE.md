@@ -304,6 +304,13 @@ planning_map_file записывает JSON во временный соседн
 и прежнюю schema v1–v8, готовит проверенную .bak предыдущей валидной карты,
 затем заменяет основной файл. mission_loader предлагает backup/default при
 повреждении, не исправляя пользовательский файл без команды сохранения.
+Недоступные валидные object records остаются в authored document bootstrap
+(planning_objects.unresolved_records), отдельно от созданных nodes. Loader
+публикует deep copies только при успешной замене; полный sync/async capture
+включает их ровно один раз перед live records. Clear/успешная новая карта
+очищают прежние unresolved записи. Исходные DTO v1–v8 и владельцы прежние;
+запись не подменяется похожей моделью и не удаляется из-за отсутствующего asset.
+
 
 features.infected сохраняет route/budget_v1: A* frontier и очередь порций
 используют приватный stable binary heap, ожидание повышает приоритет дальних
