@@ -310,6 +310,11 @@ planning_map_file записывает JSON во временный соседн
 включает их ровно один раз перед live records. Clear/успешная новая карта
 очищают прежние unresolved записи. Исходные DTO v1–v8 и владельцы прежние;
 запись не подменяется похожей моделью и не удаляется из-за отсутствующего asset.
+Authored restore сравнивает позицию, все три угла и scale, возвращает полный
+TRS у reused nodes. Внутренний replacement с keep_on_clear может содержать
+только unresolved records; explicit load полностью недоступной карты без
+сохраняемых live nodes по-прежнему отклоняется. DTO/owners/edges прежние.
+
 
 
 features.infected сохраняет route/budget_v1: A* frontier и очередь порций

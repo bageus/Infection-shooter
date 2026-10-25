@@ -115,3 +115,8 @@ objects. До удаления legacy scripts/scenes нужны явный alias
 ## N01 — сохранность missing records (25.10.2026)
 
 IMPLEMENTED / CI_PENDING в рамках T004 по прямому поручению владельца после [аудита PR470](https://github.com/bageus/Infection-shooter/pull/470). Deep-copy records сохраняются в существующем objects DTO при sync/async load-save-load; clear/replacement и восстановление модели проверены. QA: [unresolved_map_records](docs/qa/unresolved_map_records.md). Следующее действие — полный CI N01, затем N02 (полное восстановление authored transform); T004 остаётся единственной активной задачей.
+
+
+## N02 — authored transform (25.10.2026)
+
+IMPLEMENTED / CI_PENDING внутри T004: исходные наклоны/масштаб восстанавливаются, reuse и N01 сохранены; [QA](docs/qa/authored_transform_restore.md). Следующий этап после проверки N02 CI — N03, неверная энергия многоточечных ламп при bake. Новая параллельная активная задача не создаётся.
