@@ -282,6 +282,13 @@ func _end_run(reason: String) -> void:
 		completion_music = preload("res://game/bootstrap/app/completion_music.gd").new()
 		get_tree().root.add_child(completion_music)
 		game_over.get("_music").set("completion_music", completion_music)
+	if kind == "failed":
+		var boom := AudioStreamPlayer.new()
+		boom.stream = preload("res://assets/audio/music/music_cinematic_boom.ogg")
+		boom.process_mode = Node.PROCESS_MODE_ALWAYS # the tree is paused below
+		boom.finished.connect(boom.queue_free)
+		add_child(boom)
+		boom.play()
 	game_over.call("show_screen", kind, reason_key)
 	game_over.move_to_front()
 	Input.mouse_mode = Input.MOUSE_MODE_VISIBLE
