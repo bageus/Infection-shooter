@@ -44,6 +44,8 @@ func _run() -> void:
 	_check(STORAGE._safe_map_name("Карта офиса 2") == "карта_офиса_2", "Russian map names stay readable")
 	_check(STORAGE._safe_map_name("  ../?*  ").is_empty(), "A name without letters is rejected instead of saving '.json'")
 	var stage := MAIN.instantiate()
+	# This regression supplies its own fixtures; full authored-map coverage runs separately.
+	stage.set("defer_layout_loading", true)
 	root.add_child(stage)
 	(stage.get("player") as Node).set_physics_process(false)
 	current_scene = stage

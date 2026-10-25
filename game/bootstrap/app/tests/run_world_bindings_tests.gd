@@ -35,6 +35,8 @@ func _run() -> void:
 	root.add_child(decoy)
 	current_scene = decoy # The actual mission must never discover this unrelated root.
 	var stage := MAIN.instantiate()
+	# This regression supplies its own fixtures; full authored-map coverage runs separately.
+	stage.set("defer_layout_loading", true)
 	root.add_child(stage)
 	await process_frame
 	var player := stage.get_node("Gameplay/Player") as Node3D
