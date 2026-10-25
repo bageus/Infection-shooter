@@ -2,6 +2,8 @@ extends SceneTree
 const DESTRUCTION_QUALITY := preload("res://game/core/vfx/public/destruction_quality.gd")
 const FRONT := preload("res://game/bootstrap/app/menu/front_end.tscn")
 const EFFECTS_QUALITY := preload("res://game/core/vfx/public/effects_quality.gd")
+const BAKED := preload("res://game/presentation/office_floor/public/baked_biomass_floor.gd")
+const PROP := preload("res://game/presentation/office_floor/public/props/environment_prop.tscn")
 const PREFS := preload("res://game/bootstrap/app/menu/menu_preferences.gd")
 var failures := 0
 
@@ -142,10 +144,28 @@ func _sunlight_checks(tabs: TabContainer, dialog: Control) -> void:
 	_check(dialog.view.preferences.values.sunlight, "Sunlight can be re-enabled")
 
 
+func _retained_shadow_layers(stage: Node3D) -> Dictionary:
+	var image := Image.create(512, 512, false, Image.FORMAT_RGBA8)
+	image.fill(Color(.2, .15, .1, .8))
+	var baked := BAKED.new()
+	baked.cache = {"version": 1, "y": .02, "pages": [{"x": 0, "z": 0, "png": Marshalls.raw_to_base64(image.save_png_to_buffer())}]}
+	stage.add_child(baked)
+	var mesh := baked.get_child(0) as MeshInstance3D
+	var prop := PROP.instantiate() as RigidBody3D
+	prop.model_path = "res://models/objects/enviroments/07/07_table_longest.glb"
+	stage.add_child(prop)
+	prop.freeze = true
+	var contact := prop.get_node("ContactShadow/ContactShadowQuad") as MeshInstance3D
+	var material := mesh.material_override as StandardMaterial3D
+	return {"baked": baked, "mesh": mesh, "material": material, "texture": material.albedo_texture, "contact": contact}
+
+
 func _shadow_checks(tabs: TabContainer, dialog: Control) -> void:
 	await _destruction_checks(tabs)
 	var shadows := tabs.get_child(2).find_child("Shadows", true, false) as CheckButton
 	var quality := tabs.get_child(2).find_child("ShadowQuality", true, false) as HSlider
+	_check(shadows.text == "Динамические тени" and not shadows.tooltip_text.is_empty(), "Shadow toggle clearly describes dynamic-only behavior")
+	_check(quality.tooltip_text == dialog.view.text("shadowQualityHint"), "Quality slider explains dynamic-only scope")
 	_check(shadows != null and shadows.button_pressed, "Shadows toggle belongs to Video and defaults on")
 	_check(quality != null and quality.value == 1.0 and quality.max_value == 3.0 and quality.step == 1.0, "Shadow quality slider has 4 levels and defaults to Medium")
 	quality.value = 0.0
@@ -162,11 +182,14 @@ func _shadow_checks(tabs: TabContainer, dialog: Control) -> void:
 	sun.directional_shadow_mode = DirectionalLight3D.SHADOW_PARALLEL_2_SPLITS
 	stage.add_child(sun)
 	root.add_child(stage)
+	var retained := _retained_shadow_layers(stage)
 	var previous_scene := current_scene
 	current_scene = stage
 	shadow_prefs.values.shadows = false
 	shadow_prefs.values.shadow_quality = 0
 	shadow_prefs.apply_to_game(self)
+	_check(retained.baked.visible and retained.baked.get_child_count() == 1 and retained.mesh.material_override == retained.material, "Dynamic off retains the actual baked-layer material")
+	_check(retained.contact.visible and retained.material.albedo_texture == retained.texture, "Dynamic off preserves contact shadows and baked texture")
 	_check(sun.shadow_enabled and is_equal_approx(sun.directional_shadow_max_distance, SHADOWS_OFF_DISTANCE), "Off shrinks the sun's range without touching shader-variant switches")
 	shadow_prefs.values.shadows = true
 	shadow_prefs.values.shadow_quality = 2
@@ -177,6 +200,7 @@ func _shadow_checks(tabs: TabContainer, dialog: Control) -> void:
 	_check(sun.directional_shadow_max_distance == 32.0 and sun.directional_shadow_mode == DirectionalLight3D.SHADOW_PARALLEL_2_SPLITS, "Low quality shortens range and keeps the split mode")
 	shadow_prefs.values.shadow_quality = 2
 	shadow_prefs.apply_to_game(self)
+	_check(retained.mesh.material_override == retained.material and retained.material.albedo_texture == retained.texture and retained.contact.visible, "Quality changes never rebuild or hide baked/contact layers")
 	var mesh_lod := tabs.get_child(2).find_child("MeshLod", true, false) as CheckButton
 	_check(mesh_lod != null and mesh_lod.button_pressed and PREFS.new().values.mesh_lod, "LOD toggle belongs to Video and defaults on")
 	shadow_prefs.values.mesh_lod = false

@@ -8,6 +8,8 @@ const BIOMASS_AUDIO := preload("res://game/presentation/office_floor/biomass_imp
 var receivers := RECEIVERS.new()
 var floor_view: Node3D
 var settings: Dictionary = SETTINGS.normalized({})
+const STEP_CHANCE := 0.25
+const STEP_SIZE := Vector2(0.35, 0.6)
 var _step_frame := -1
 var _steps := 0
 var _corners: Dictionary = {}
@@ -104,11 +106,11 @@ func step_at(point: Vector3, normal: Vector3) -> void:
 	if _step_frame != frame:
 		_step_frame = frame
 		_steps = 0
-	if _steps >= 2 or normal.y < 0.8 or randf() > 0.12: return
+	if _steps >= 2 or normal.y < 0.8 or randf() > STEP_CHANCE: return
 	_steps += 1
 	var local := floor_view.to_local(point)
 	if absf(local.y) > 0.16: return
-	_floor_stamp(Vector2(local.x, local.z), "floor_scuff", randi_range(0, 15), randf_range(0.2, 0.45))
+	_floor_stamp(Vector2(local.x, local.z), "floor_scuff", randi_range(0, 15), randf_range(STEP_SIZE.x, STEP_SIZE.y))
 
 func clear() -> void:
 	receivers.clear()

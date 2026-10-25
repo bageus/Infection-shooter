@@ -17,3 +17,7 @@
 До исправления local object-settings воспроизводит16failures, CI summary обрезал их до первых3. После исправления16целевых suites проходят, focused fixtures6–15сек вместо120с timeout. Runtime runner probe проверяет serialization/isolation, SCRIPT ERROR при exit0, process exit3 и timeout exit124; все3теста PASS. CI suite coverage unit11PASS. Все7full-map интеграций через настоящий shell runner PASS: startup108с, menu101, planning111, occlusion56, extension49, light-view62, TV37. Полный startup/restart/memory budget и сохранение4997объектов проверены. Всего25runtime suites PASS; editor import, resource paths, scene387refs PASS. Штатный baker пересчитал5PNGpages; floor_biomass suite проверяет актуальный signature и идентичные PNG/cells JSON/tscn, не сравнивая различающиеся после JSON float/int типы.
 
 Production scripts, API/DTO/owners/dependencies не меняются; только tests/runner/workflow и9authored positions с derived cache. Новых архитектурных исключений нет. Rollback: revert CI repair. Hardware FPS/Windows/Web и визуальная приёмка не заявлены.
+
+PR467 слит владельцем в main a0cd5f0 во время работы. Общий fix теперь доставляется через PR468 вместе с интеграцией main; последующее обновление закрытой ветки467 само по себе не меняет main. Конфликт ADR0058 разрешён сохранением обоих принятых уточнений.
+
+После интеграции main:11combined suites PASS, project gate231suites(223runtime+8special), import/resource paths/scene387 и runner3+coverage11unit PASS. Проверены одновременно оба набора изменений: тени/декали из467 и новые разрушения из468.
