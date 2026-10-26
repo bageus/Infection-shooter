@@ -48,15 +48,17 @@ func _run() -> void:
 	_arm(hole_entry)
 	_check(options.point_box.visible and options.title.text.contains("размещение"), "armed spawn hole opens its settings for the next one")
 	# Defaults for the next hole: 8 brutes, bursts of 4.
-	options.enemy_option.select(2)
-	options.count_spin.value = 8
-	options.rule_option.select(1)
-	options._changed()
-	options.batch_spin.value = 4
+	options.editor.entries_box.get_child(0).get_child(0).select(2)
+	options.editor.entries_box.get_child(0).get_child(0).item_selected.emit(2)
+	options.editor.entries_box.get_child(0).get_child(1).value = 8
+	options.editor.rule_option.select(1)
+	options.editor.rule_option.item_selected.emit(1)
+	options.editor.batch_spin.value = 4
 	hole = _place(hole_entry, SPOTS[0])
 	_check(hole != null, "spawn hole placed")
 	var config: Dictionary = hole.call("get_spawn_config")
-	_check(config["enemy"] == "brute" and config["count"] == 8 and config["rule"] == "burst" and config["batch"] == 4, "the new hole starts with the panel defaults %s" % str(config))
+	var queue: Dictionary = config["queues"][0]
+	_check(queue["enemies"] == [{"enemy": "brute", "count": 8}] and queue["rule"] == "burst" and queue["batch"] == 4, "the new hole starts with the panel defaults %s" % str(config))
 	_check(hole.global_position.y == 0.0, "the hole lies on the floor")
 	hole_id = str(hole.get_meta("planning_object_id", ""))
 	_check(hole_id.begins_with("spawn_"), "the hole has an id for links")
@@ -77,13 +79,14 @@ func _edit_and_link() -> void:
 	objects._reset_selection()
 	objects._select(hole)
 	_check(options.panel.visible and options.point_box.visible and not options.enemy_box.visible, "selected hole shows its settings")
-	_check(options.link_note.text.contains("Нет связанных"), "an unlinked hole warns that it will not fire")
-	options.count_spin.value = 12
-	options.interval_spin.value = 2.5
-	options.trigger_option.select(1)
-	options._changed()
-	var edited: Dictionary = hole.call("get_spawn_config")
-	_check(edited["count"] == 12 and edited["interval"] == 2.5 and edited["trigger"] == "all", "panel edits reach the hole")
+	_check(options.link_note.text.contains("нет связанных"), "an unlinked hole warns that it will not fire")
+	options.editor.entries_box.get_child(0).get_child(1).value = 12
+	options.editor.interval_spin.value = 2.5
+	options.editor.trigger_option.select(1)
+	options.editor.trigger_option.item_selected.emit(1)
+	var edited: Dictionary = hole.call("get_spawn_config")["queues"][0]
+	_check(edited["enemies"][0]["count"] == 12 and edited["interval"] == 2.5 and edited["trigger"] == "all", "panel edits reach the hole")
+	_queue_editing()
 	# A real click on a guard keeps the wave panel open (clearing the preview must not hide it).
 	objects._reset_selection()
 	objects._click_world(planner.camera.unproject_position(guards[0].global_position + Vector3(0, 1, 0)))
@@ -106,6 +109,26 @@ func _edit_and_link() -> void:
 	(options.link_list.get_child(0) as CheckBox).button_pressed = true
 
 
+func _queue_editing() -> void:
+	var editor: Node = options.editor
+	editor.add_queue_button.pressed.emit()
+	_check(editor.current == 1 and hole.call("get_spawn_config")["queues"].size() == 2, "adding a queue selects it")
+	_check(editor.start_row.visible and editor.delay_row.visible and not editor.trigger_row.visible, "a later queue starts by time by default")
+	editor.add_entry_button.pressed.emit()
+	editor.delay_spin.value = 5.0
+	var queue: Dictionary = hole.call("get_spawn_config")["queues"][1]
+	_check(queue["enemies"].size() == 2 and queue["delay"] == 5.0, "a queue holds several kinds and its own delay")
+	_check(queue["enemies"][0]["enemy"] != queue["enemies"][1]["enemy"] or queue["enemies"][0]["count"] != 0, "the added kind is valid")
+	editor.start_option.select(1)
+	editor.start_option.item_selected.emit(1)
+	_check(editor.trigger_row.visible and not editor.delay_row.visible, "trigger start shows the trigger rule")
+	editor.start_option.select(0)
+	editor.start_option.item_selected.emit(0)
+	editor.queue_option.select(0)
+	editor.queue_option.item_selected.emit(0)
+	_check(editor.current == 0 and not editor.start_row.visible, "the first queue has no start choice")
+
+
 func _persistence() -> void:
 	# Save and reload.
 	var data: Dictionary = JSON.parse_string(JSON.stringify(planner.storage._collect_layout_data()))
@@ -123,7 +146,9 @@ func _persistence() -> void:
 	_check(reloaded != null, "hole survives reload")
 	if reloaded != null:
 		var again: Dictionary = reloaded.call("get_spawn_config")
-		_check(again["enemy"] == "brute" and again["count"] == 12 and again["trigger"] == "all" and again["interval"] == 2.5, "hole settings survive reload")
+		var first: Dictionary = again["queues"][0]
+		_check(first["enemies"][0] == {"enemy": "brute", "count": 12} and first["trigger"] == "all" and first["interval"] == 2.5, "hole settings survive reload")
+		_check(again["queues"].size() == 2 and again["queues"][1]["enemies"].size() == 2 and again["queues"][1]["delay"] == 5.0, "extra queue and its infected survive reload")
 		_check(str(reloaded.get_meta("planning_object_id", "")) == hole_id, "hole id survives reload")
 		var linked: Array = options.linked_enemies(hole_id)
 		_check(linked.size() == 2, "both links survive reload (%d)" % linked.size())
@@ -132,7 +157,7 @@ func _persistence() -> void:
 
 func _mission(reloaded: Node3D, linked: Array) -> void:
 	# Close the planner; killing a guard fires the wave once.
-	reloaded.call("configure_spawn", {"enemy": "hunger", "count": 3, "interval": 0.1, "rule": "stream", "trigger": "any"})
+	reloaded.call("configure_spawn", {"queues": [{"enemies": [{"enemy": "hunger", "count": 3}], "interval": 0.1, "rule": "stream", "trigger": "any"}]})
 	planner.exit()
 	var director: Node = stage.get("wave_director")
 	_check(director.is_armed(), "closing the planner arms the director")
