@@ -10,6 +10,8 @@ const DECOR_POSES := preload("res://game/bootstrap/app/planning_decor_poses.gd")
 const COLOR_POPUP := preload("res://game/bootstrap/app/planner_color_popup.gd")
 const DISPLAY_OPTIONS := preload("res://game/bootstrap/app/planning_display_options.gd")
 var display_options: Node
+const MOUNT_OPTIONS := preload("res://game/bootstrap/app/planning_mount_options.gd")
+var mount_options: Node
 const LOOT_OPTIONS := preload("res://game/bootstrap/app/planning_loot_options.gd")
 const DOOR_OPTIONS := preload("res://game/bootstrap/app/planning_door_options.gd")
 const ROOM_OPTIONS := preload("res://game/bootstrap/app/planning_room_options.gd")
@@ -101,6 +103,9 @@ func setup_controls() -> void:
 	display_options = DISPLAY_OPTIONS.new()
 	add_child(display_options)
 	display_options.call("setup", session, objects)
+	mount_options = MOUNT_OPTIONS.new()
+	add_child(mount_options)
+	mount_options.call("setup", session, objects)
 	loot_options = LOOT_OPTIONS.new()
 	add_child(loot_options)
 	loot_options.call("setup", session, objects)
@@ -219,6 +224,7 @@ func _enter_simple_catalog(entries: Array, title: String) -> void:
 func _configure_new_asset(node: Node3D, entry: Dictionary) -> void:
 	DECOR_POSES.configure_new(node, objects.preview)
 	display_options.call("configure_new", node)
+	mount_options.call("configure_new", node)
 	loot_options.call("configure_new", node)
 	fruit_options.call("configure_new", node)
 	spawn_options.call("configure_new", node)
@@ -316,6 +322,8 @@ func settings_kind(node: Node3D) -> String:
 func _update_light_ui() -> void:
 	if display_options != null:
 		display_options.call("update")
+	if mount_options != null:
+		mount_options.call("update")
 	if loot_options != null:
 		loot_options.call("update")
 	if fruit_options != null:

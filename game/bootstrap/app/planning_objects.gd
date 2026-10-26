@@ -202,6 +202,7 @@ func _rebuild_preview() -> void:
 	geometry._set_preview_collision(preview, true)
 	controls._apply_special_default_height(preview, _selected_kind())
 	controls.display_options.update()
+	controls.mount_options.update()
 	controls._update_light_ui()
 
 
@@ -212,6 +213,8 @@ func _selected_kind() -> String:
 func _clear_preview() -> void:
 	if controls.display_options != null:
 		controls.display_options.hide()
+	if controls.mount_options != null:
+		controls.mount_options.hide()
 	if controls.loot_options != null:
 		controls.loot_options.hide()
 	if controls.fruit_options != null:
