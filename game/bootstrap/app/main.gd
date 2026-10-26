@@ -111,10 +111,11 @@ func _ready() -> void:
 	occlusion.name = "OcclusionEffects"
 	add_child(occlusion)
 	occlusion.setup(player, player.get("camera") as Camera3D, self)
-	var debug := DEBUG_OVERLAY.new()
-	debug.name = "RuntimeDebug"
-	add_child(debug)
-	debug.setup(infection_runtime, occlusion)
+	if OS.is_debug_build(): # F3 diagnostics stay out of release exports
+		var debug := DEBUG_OVERLAY.new()
+		debug.name = "RuntimeDebug"
+		add_child(debug)
+		debug.setup(infection_runtime, occlusion)
 	var feedback := BLAST_FEEDBACK.new()
 	feedback.name = "BlastFeedback"
 	add_child(feedback)
