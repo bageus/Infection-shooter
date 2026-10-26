@@ -3,10 +3,10 @@ extends SkeletonModifier3D
 ## the shotgun) from the vest and feeds it into the weapon. Runs after the
 ## aim turn so the pouch follows the torso. Presentation only.
 const FADE_SPEED := 9.0
-const POUCH := Vector3(.13, .20, .10)
+const POUCH := Vector3(.14, .12, .10)
 const POLE := Vector3(.65, .10, .0)
 const POLE_RIGHT := Vector3(-.65, .15, .10)
-const TUCK := Vector3(-.05, .45, .25)
+const TUCK := Vector3(-.05, .36, .25)
 const TUCK_REACH := .2
 var mount: Node
 var weight := 0.0
