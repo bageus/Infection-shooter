@@ -99,6 +99,7 @@ func _weapon() -> void:
 	stage.add_child(actor)
 	actor.set_physics_process(false)
 	_check(_count(&"weapon_switch") == 0, "Initial equipment is silent")
+	actor.call("import_loadout", {"slots": [0, 1, 2]})
 	actor.call("select_weapon_slot", 0)
 	_check(_count(&"weapon_switch") == 0, "Selecting current slot is silent")
 	actor.call("select_weapon_slot", 1)

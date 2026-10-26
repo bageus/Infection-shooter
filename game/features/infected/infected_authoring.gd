@@ -6,6 +6,8 @@ const LOOT_DROP := preload("res://game/features/pickups/public/loot_drop.gd")
 const LOOT_CONFIG := preload("res://game/features/pickups/public/loot_config.gd")
 const ENEMY_DIFFICULTY := preload("res://game/features/infected/public/enemy_difficulty.gd")
 const ENEMY_TUNING := preload("res://game/features/infected/public/enemy_tuning.gd")
+const DEATH_CLOUD := preload("res://game/features/infected/public/death_cloud_settings.gd")
+const CORPSE_BUDGET := preload("res://game/features/infected/public/corpse_budget.gd")
 var drop_weapon: Callable
 var _owner: Node
 var _base := {}
@@ -21,6 +23,26 @@ func set_loot(config: Dictionary) -> void:
 
 func loot() -> Dictionary:
 	return LOOT_CONFIG.sanitize(_owner.get_meta(&"planning_loot") if _owner.has_meta(&"planning_loot") else null, "auto")
+
+
+func set_death_cloud(config: Dictionary) -> void:
+	_owner.set_meta(&"planning_death_cloud", DEATH_CLOUD.sanitize(config))
+
+
+func death_cloud() -> Dictionary:
+	return DEATH_CLOUD.sanitize(_owner.get_meta(&"planning_death_cloud") if _owner.has_meta(&"planning_death_cloud") else null)
+
+
+## Starts the death cloud with the planner's settings; without one the body is freed when hidden.
+func start_death_cloud(cloud: Node) -> void:
+	var config := death_cloud()
+	if not config["enabled"]:
+		CORPSE_BUDGET.without_cloud(_owner)
+		return
+	var target: Node = _owner.get("_target")
+	cloud.set("heals_visitors", is_instance_valid(target) and target.has_method("get_infection_skill") and bool(target.call("get_infection_skill", "devourer")))
+	DEATH_CLOUD.apply(cloud, config)
+	cloud.call("activate")
 
 
 func stats() -> Dictionary:

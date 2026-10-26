@@ -131,6 +131,8 @@ func configure_loot_drop(drop_weapon: Callable) -> void: _authoring.drop_weapon 
 func configure_loot(config: Dictionary) -> void: _authoring.set_loot(config)
 func get_loot_config() -> Dictionary: return _authoring.loot()
 func configure_stats(config: Dictionary) -> void: _authoring.set_stats(config)
+func configure_death_cloud(config: Dictionary) -> void: _authoring.set_death_cloud(config)
+func get_death_cloud_config() -> Dictionary: return _authoring.death_cloud()
 func get_enemy_stats() -> Dictionary: return _authoring.stats()
 func get_damage_percent() -> float: return _authoring.damage_percent()
 
@@ -585,8 +587,7 @@ func _die() -> void:
 	if _ragdoll == null:
 		_fall_watch = DEATH_CLIP.play(self, _parts, _animation, fall, landing)
 	preload("res://game/features/infected/corpse_blood_pool.gd").start(self, _parts, global_position + landing)
-	death_cloud.set("heals_visitors", is_instance_valid(_target) and _target.has_method("get_infection_skill") and bool(_target.call("get_infection_skill", "devourer")))
-	death_cloud.call("activate")
+	_authoring.start_death_cloud(death_cloud)
 
 
 func _hide_corpse() -> void:
