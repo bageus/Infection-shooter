@@ -3,6 +3,8 @@ extends Node3D
 @export var glass_body_path: NodePath = NodePath("GlassBody")
 @export var visual_path: NodePath = NodePath("Visual")
 @export var solid_window_collision := false
+## Meshes whose node name holds one of these tokens become glass collision boxes.
+@export var name_tokens := PackedStringArray(["glass"])
 
 
 func _ready() -> void:
@@ -43,7 +45,7 @@ func _add_window_barrier(visual: Node3D, body: StaticBody3D) -> void:
 
 
 func _add_glass_meshes(node: Node, body: StaticBody3D) -> void:
-	if node is MeshInstance3D and "glass" in node.name.to_lower():
+	if node is MeshInstance3D and _is_glass_name(node.name):
 		var mesh_instance := node as MeshInstance3D
 		if mesh_instance.mesh != null and _visible_in_model(mesh_instance) and absf(mesh_instance.global_basis.determinant()) > 0.000000000001:
 			var bounds := mesh_instance.get_aabb()
@@ -67,3 +69,11 @@ func _visible_in_model(mesh: Node3D) -> bool:
 			return false
 		current = current.get_parent()
 	return true
+
+
+func _is_glass_name(node_name: StringName) -> bool:
+	var lower := str(node_name).to_lower()
+	for token in name_tokens:
+		if token in lower:
+			return true
+	return false
