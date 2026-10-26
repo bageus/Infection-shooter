@@ -91,14 +91,7 @@ func _run() -> void:
 	dialog.call("_defaults")
 	_check(menu.preferences.bindings.values.move_up.code == KEY_W and menu.preferences.values.bullet_impact_smoke and menu.preferences.values.sunlight and menu.preferences.values.walk_speed_multiplier == 1.0 and menu.preferences.values.walk_animation_multiplier == 1.0, "Reset restores controls, sunlight and both walk multipliers")
 	menu.close_dialog()
-	menu.activate("about")
-	await process_frame
-	var found := false
-	for label: Label in menu.modal.find_children("*", "Label", true, false):
-		if label.text == "VECTRION":
-			found = true
-			_check(label.horizontal_alignment == HORIZONTAL_ALIGNMENT_CENTER, "VECTRION heading is centred")
-	_check(found, "Company heading exists")
+	await _check_about(menu)
 	frontend.free()
 	await process_frame
 	if had:
@@ -282,6 +275,21 @@ func _quality_checks(tabs: TabContainer) -> void:
 	_check(quality_prefs.values.effects_quality == 0 and EFFECTS_QUALITY.level == 0, "Effects quality survives reload and reaches the effects")
 	quality.select(2)
 	quality.item_selected.emit(2)
+
+
+func _check_about(menu: Node) -> void:
+	menu.activate("about")
+	await process_frame
+	var found := false
+	for label: Label in menu.modal.find_children("*", "Label", true, false):
+		if label.text == "VECTRION":
+			found = true
+			_check(label.horizontal_alignment == HORIZONTAL_ALIGNMENT_CENTER, "VECTRION heading is centred")
+	_check(found, "Company heading exists")
+	var credit_lines := 0
+	for label: Label in menu.modal.find_children("*", "Label", true, false):
+		credit_lines += int(label.text.contains("http"))
+	_check(credit_lines >= 20, "About lists the attribution-required sound credits")
 
 
 func _check(condition: bool, message: String) -> void:

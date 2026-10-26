@@ -1,5 +1,9 @@
 {
   "ru": {
+    "credits": "Авторы",
+    "creditsAudio": "Звуки (требуют указания авторства):",
+    "creditsModels": "3D-модели: студия ju7tconnection-1",
+    "creditsFont": "Шрифт: DejaVu Sans (лицензия Bitstream Vera)",
     "demo": "ИНТЕРАКТИВНЫЙ МАКЕТ",
     "mainPreview": "Меню",
     "pause": "Пауза",
@@ -359,6 +363,10 @@
     "mutationStrikeHint": "Область удара расширяется от {width_start} до {width_end} м. Разбивает стекло и перегородки, толкает предметы."
   },
   "en": {
+    "credits": "Credits",
+    "creditsAudio": "Sounds (attribution required):",
+    "creditsModels": "3D models: studio ju7tconnection-1",
+    "creditsFont": "Font: DejaVu Sans (Bitstream Vera licence)",
     "demo": "INTERACTIVE UI DEMO",
     "mainPreview": "Menu",
     "pause": "Paused",
