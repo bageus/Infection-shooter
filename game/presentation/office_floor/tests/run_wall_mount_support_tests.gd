@@ -2,7 +2,7 @@ extends SceneTree
 ## Every catalog wall prop loses its real backing; adjacent supports stay intact.
 const PROP := preload("res://game/presentation/office_floor/public/props/environment_prop.tscn")
 const BATHROOM := preload("res://game/presentation/office_floor/public/props/bathroom_fixture.tscn")
-const MOUNTS := preload("res://game/presentation/office_floor/wall_mount_models.gd")
+const MOUNTS := preload("res://game/presentation/office_floor/public/wall_mount_models.gd")
 const PARTITION := "res://models/objects/enviroments/01/01_wood_slat_partition_destructible.glb"
 const MODELS := "res://models/objects/enviroments/"
 var failures := 0
@@ -15,6 +15,11 @@ func _run() -> void:
 	stage = Node3D.new()
 	root.add_child(stage)
 	_floor()
+	_expect(MOUNTS.contains(MODELS + "01/01_duct_rect_straight.glb"), "Ducts hug walls by default")
+	_expect(MOUNTS.contains(MODELS + "01/01_pipe_water_wall_straight.glb"), "Wall pipes hug walls by default")
+	_expect(not MOUNTS.contains(MODELS + "01/01_pipe_sewer_floor_elbow.glb"), "Floor pipes stand apart by default")
+	_expect(MOUNTS.is_adjustable(MODELS + "01/01_pipe_sewer_floor_elbow.glb"), "Floor pipes can still be mounted")
+	_expect(not MOUNTS.is_adjustable(MODELS + "01/01_wall_metal_door.glb"), "Doors are not adjustable")
 	var paths: Array[String] = []
 	_models(MODELS, paths)
 	paths.sort()

@@ -177,6 +177,8 @@ func _put_back(node: Node3D, record: Dictionary, kept: Dictionary) -> void:
 	if node is RigidBody3D:
 		(node as RigidBody3D).linear_velocity = Vector3.ZERO
 		(node as RigidBody3D).angular_velocity = Vector3.ZERO
+	if record.has("wall_mount") and node.has_method("configure_wall_mount"):
+		node.call("configure_wall_mount", bool(record["wall_mount"]))
 
 
 ## Puts the world back to the authored map when gameplay changed it: killed
