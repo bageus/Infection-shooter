@@ -18,6 +18,11 @@ signal depleted
 @export var cloud_radius := 1.35
 ## Legacy visitor fallback; players own Devourer via on_mutagen_cloud().
 @export var heals_visitors := false
+## False: no time limit, so the cloud lasts until it is absorbed (needs ends_when_absorbed).
+@export var timed := true
+## The cloud ends once it has given absorb_units of mutagen, rather than after its feed budget.
+@export var ends_when_absorbed := false
+@export var absorb_units := 10.0
 const HEAL_PER_SECOND := 2.0
 
 var _floor_offset := 0.0
@@ -26,6 +31,7 @@ var _absorption_remaining: float = 0.0
 var _lifetime_remaining: float = 0.0
 var _cycle_elapsed: float = 0.0
 var _delay_remaining: float = 0.0
+var _absorbed_units: float = 0.0
 # Variant, seed, spin and stagger of every puff (what the MultiMesh holds).
 var _puffs: Array[Color] = []
 @onready var _visual: MultiMeshInstance3D = $Visual
@@ -40,8 +46,11 @@ func _ready() -> void:
 
 func activate() -> void:
 	_active = true
-	_absorption_remaining = absorption_seconds
-	_lifetime_remaining = lifetime_seconds
+	# An absorption-ended cloud feeds until its mutagen threshold; INF keeps the budget open.
+	_absorption_remaining = INF if ends_when_absorbed else absorption_seconds
+	_absorbed_units = 0.0
+	# An untimed cloud has no end; INF keeps its progress at the fresh end.
+	_lifetime_remaining = lifetime_seconds if timed else INF
 	_cycle_elapsed = 0.0
 	_delay_remaining = 0.0 if permanent else absorb_delay
 	_floor_offset = _support_height() - global_position.y
@@ -134,6 +143,10 @@ func _feed(body: Node, step: float) -> void:
 	if gained is float and float(gained) <= 0.0:
 		return
 	_absorption_remaining -= step
+	if gained is float and ends_when_absorbed:
+		_absorbed_units += float(gained)
+		if _absorbed_units >= absorb_units:
+			_dissipate_early()
 	# Keep detecting presence until dissipation: a visitor may have Devourer
 	# even when this cloud was created before that skill became active.
 

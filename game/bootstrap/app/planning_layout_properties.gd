@@ -20,6 +20,8 @@ static func restore(node: Node3D, record: Dictionary) -> void:
 		door.call("configure_lock_state", StringName(str(record["door_lock"])))
 	if node.has_method("configure_stats") and record.get("enemy_stats") is Dictionary:
 		node.call("configure_stats", record["enemy_stats"])
+	if node.has_method("configure_death_cloud") and record.get("death_cloud") is Dictionary:
+		node.call("configure_death_cloud", record["death_cloud"])
 	if node.has_method("configure_spawn") and record.get("spawn_point") is Dictionary:
 		node.call("configure_spawn", record["spawn_point"])
 	if record.get("spawn_triggers") is Array and not (record["spawn_triggers"] as Array).is_empty():
