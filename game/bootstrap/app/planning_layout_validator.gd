@@ -32,7 +32,7 @@ static func error(data: Dictionary) -> String:
 		for field: String in ["scale_x", "scale_y", "scale_z"]:
 			if record.has(field) and is_zero_approx(float(record[field])):
 				return "object %d has zero scale" % index
-		for field: String in ["display", "decor_pose", "blood_attachment", "loot", "fruit", "enemy_stats", "spawn_point"]:
+		for field: String in ["display", "decor_pose", "blood_attachment", "loot", "fruit", "enemy_stats", "death_cloud", "spawn_point"]:
 			if record.has(field) and not record[field] is Dictionary:
 				return "object %d has an invalid %s" % [index, field]
 		for field: String in ["display", "decor_pose"]:

@@ -83,6 +83,8 @@ func _append(node: Node3D, scene_root: Node3D) -> void:
 		copy_door.call("configure_lock_state", door.call("get_lock_state"))
 	if node.has_method("get_enemy_stats") and node.has_meta(&"planning_enemy_stats"):
 		copy.call("configure_stats", node.call("get_enemy_stats"))
+	if node.has_method("get_death_cloud_config") and node.has_meta(&"planning_death_cloud"):
+		copy.call("configure_death_cloud", node.call("get_death_cloud_config"))
 	if node.has_method("get_spawn_config"):
 		copy.call("configure_spawn", node.call("get_spawn_config"))
 	if node.has_meta(WAVE_DIRECTOR.TRIGGER_META):

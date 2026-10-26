@@ -17,7 +17,7 @@ func record_transform(node: Node3D) -> void:
 		"fixture": node.call("get_fixture_config") if node.has_method("get_fixture_config") else {},
 		"light_color": node.call("get_authored_color") if node.has_method("get_authored_color") else null,
 		"light_energy": node.get_meta("planning_light_energy", -1.0), "light_angle": node.get_meta("planning_light_angle", -1.0),
-		"loot": _loot_of(node), "enemy_stats": node.call("get_enemy_stats") if node.has_method("configure_stats") else {},
+		"loot": _loot_of(node), "enemy_stats": node.call("get_enemy_stats") if node.has_method("configure_stats") else {}, "death_cloud": _cloud_of(node),
 		"fruit": _fruit_of(node),
 		"darkness": DARKNESS.capture(node),
 		"spawn": _spawn_of(node), "spawn_triggers": node.get_meta(WAVE_DIRECTOR.TRIGGER_META, [])})
@@ -111,7 +111,7 @@ func undo() -> void:
 					if spot != null:
 						spot.spot_angle = float(action["light_angle"])
 						node.set_meta("planning_light_angle", spot.spot_angle)
-				_apply_loot(node, action.get("loot", {}), action.get("enemy_stats", {}))
+				_apply_loot(node, action.get("loot", {}), action.get("enemy_stats", {}), action.get("death_cloud", {}))
 				_apply_fruit(node, action.get("fruit", {}))
 				_apply_spawn(node, action.get("spawn", {}), action.get("spawn_triggers", []))
 				planner._sync_workstations()
@@ -148,7 +148,7 @@ func _capture(node: Node3D) -> Dictionary:
 		"light_angle": float(node.get_meta("planning_light_angle", -1.0)),
 		"flicker_mode": int(node.get_meta("planning_flicker_mode", 0)), "flicker_step": float(node.get_meta("planning_flicker_step", 0.2)),
 		"blood": node.call("get_blood_config") if node.has_method("get_blood_config") else {},
-		"loot": _loot_of(node), "enemy_stats": node.call("get_enemy_stats") if node.has_method("configure_stats") else {},
+		"loot": _loot_of(node), "enemy_stats": node.call("get_enemy_stats") if node.has_method("configure_stats") else {}, "death_cloud": _cloud_of(node),
 		"fruit": _fruit_of(node),
 		"darkness": DARKNESS.capture(node),
 		"spawn": _spawn_of(node), "spawn_triggers": node.get_meta(WAVE_DIRECTOR.TRIGGER_META, [])}
@@ -184,7 +184,15 @@ func _loot_of(node: Node3D) -> Dictionary:
 	return {}
 
 
-func _apply_loot(node: Node3D, loot: Dictionary, stats: Dictionary) -> void:
+func _cloud_of(node: Node3D) -> Dictionary:
+	if node.has_method("get_death_cloud_config") and node.has_meta(&"planning_death_cloud"):
+		return node.call("get_death_cloud_config")
+	return {}
+
+
+func _apply_loot(node: Node3D, loot: Dictionary, stats: Dictionary, death: Dictionary = {}) -> void:
+	if node.has_method("configure_death_cloud") and not death.is_empty():
+		node.call("configure_death_cloud", death)
 	if node.has_method("configure_loot"):
 		if loot.is_empty():
 			node.remove_meta(&"planning_loot")
@@ -248,7 +256,7 @@ func _restore(record: Dictionary, offset: Vector3, new_desk: bool) -> Node3D:
 			node.set_meta("planning_light_angle", spot.spot_angle)
 	if node.has_method("configure_flicker"):
 		node.call("configure_flicker", int(record["flicker_mode"]), float(record["flicker_step"]))
-	_apply_loot(node, record.get("loot", {}), record.get("enemy_stats", {}))
+	_apply_loot(node, record.get("loot", {}), record.get("enemy_stats", {}), record.get("death_cloud", {}))
 	_apply_fruit(node, record.get("fruit", {}))
 	_apply_spawn(node, record.get("spawn", {}), record.get("spawn_triggers", []))
 	if node.has_method("watch_target") and str(record["kind"]) == "enemy":

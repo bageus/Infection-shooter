@@ -4,6 +4,7 @@ extends Node
 ## which spawn points its death starts. Links are drawn while one end is selected.
 
 const SPAWN_CONFIG := preload("res://game/features/spawning/public/spawn_config.gd")
+const QUEUE_EDITOR := preload("res://game/bootstrap/app/planning_spawn_queue_editor.gd")
 const DIRECTOR := preload("res://game/features/spawning/public/wave_director.gd")
 const LINK_COLOR := Color(0.25, 0.95, 1.0)
 const LINK_LIFT := Vector3(0.0, 1.0, 0.0)
@@ -13,24 +14,17 @@ var objects: Variant
 var panel: PanelContainer
 var title: Label
 var hint: Label
+var point_scroll: ScrollContainer
 var point_box: VBoxContainer
 var enemy_box: VBoxContainer
-var enemy_option: OptionButton
-var count_spin: SpinBox
-var interval_spin: SpinBox
-var rule_option: OptionButton
-var batch_row: HBoxContainer
-var batch_label: Label
-var batch_spin: SpinBox
-var trigger_option: OptionButton
-var health_spin: SpinBox
-var damage_spin: SpinBox
+var editor: VBoxContainer
 var link_note: Label
 var link_list: VBoxContainer
 var links: MeshInstance3D
 # What the next placed spawn point starts with (kept between placements).
 var spawn_defaults: Dictionary = {}
 var _updating := false
+var _loaded_point: Node3D
 
 
 func setup(context: Variant, planner_objects: Variant) -> void:
@@ -62,21 +56,15 @@ func setup(context: Variant, planner_objects: Variant) -> void:
 	hint.text = "Выберите точку спавна (вкладка «Враги»), чтобы настроить волну, или врага, чтобы отметить волны, которые запускает его смерть."
 	column.add_child(hint)
 	point_box = VBoxContainer.new()
-	column.add_child(point_box)
-	enemy_option = _option_row(point_box, "Враг", SPAWN_CONFIG.ENEMY_LABELS)
-	count_spin = _spin_row(point_box, "Количество", 1, SPAWN_CONFIG.COUNT_MAX, 1)
-	interval_spin = _spin_row(point_box, "Интервал, сек", SPAWN_CONFIG.INTERVAL_MIN, SPAWN_CONFIG.INTERVAL_MAX, 0.1)
-	rule_option = _option_row(point_box, "Правило", SPAWN_CONFIG.RULE_LABELS)
-	batch_row = HBoxContainer.new()
-	point_box.add_child(batch_row)
-	batch_label = Label.new()
-	batch_label.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	batch_row.add_child(batch_label)
-	batch_spin = _spin(1, SPAWN_CONFIG.BATCH_MAX, 1)
-	batch_row.add_child(batch_spin)
-	trigger_option = _option_row(point_box, "Запуск", SPAWN_CONFIG.TRIGGER_LABELS)
-	health_spin = _spin_row(point_box, "Живучесть, %", SPAWN_CONFIG.STAT_MIN, SPAWN_CONFIG.STAT_MAX, 5.0)
-	damage_spin = _spin_row(point_box, "Урон, %", SPAWN_CONFIG.STAT_MIN, SPAWN_CONFIG.STAT_MAX, 5.0)
+	point_scroll = ScrollContainer.new()
+	point_scroll.custom_minimum_size = Vector2(320, 430)
+	point_scroll.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
+	point_box.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	point_scroll.add_child(point_box)
+	column.add_child(point_scroll)
+	editor = QUEUE_EDITOR.new()
+	editor.changed.connect(_changed)
+	point_box.add_child(editor)
 	link_note = Label.new()
 	link_note.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	link_note.custom_minimum_size.x = 300
@@ -107,42 +95,6 @@ func setup(context: Variant, planner_objects: Variant) -> void:
 	session.host.add_child(links)
 
 
-func _option_row(parent: Control, text: String, labels: Array[String]) -> OptionButton:
-	var row := HBoxContainer.new()
-	var label := Label.new()
-	label.text = text
-	label.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	row.add_child(label)
-	var option := OptionButton.new()
-	option.custom_minimum_size.x = 170
-	for entry in labels:
-		option.add_item(entry)
-	option.item_selected.connect(_changed)
-	row.add_child(option)
-	parent.add_child(row)
-	return option
-
-
-func _spin_row(parent: Control, text: String, low: float, high: float, step: float) -> SpinBox:
-	var row := HBoxContainer.new()
-	var label := Label.new()
-	label.text = text
-	label.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	row.add_child(label)
-	row.add_child(_spin(low, high, step))
-	parent.add_child(row)
-	return row.get_child(1) as SpinBox
-
-
-func _spin(low: float, high: float, step: float) -> SpinBox:
-	var spin := SpinBox.new()
-	spin.min_value = low
-	spin.max_value = high
-	spin.step = step
-	spin.value_changed.connect(_changed)
-	return spin
-
-
 func contains_point(screen_position: Vector2) -> bool:
 	return panel != null and panel.is_visible_in_tree() and panel.get_global_rect().has_point(screen_position)
 
@@ -168,6 +120,11 @@ func _point_id(point: Node3D) -> String:
 	return str(point.get_meta("planning_object_id", ""))
 
 
+func _linked_keys(enemy: Node) -> Array:
+	return Array(enemy.get_meta(DIRECTOR.TRIGGER_META, [])).map(func(key: Variant) -> String: return str(key))
+
+
+## Infected whose death can start the queue with this link key.
 func linked_enemies(point_id: String) -> Array[Node3D]:
 	var found: Array[Node3D] = []
 	for enemy in session.enemies_root.get_children():
@@ -187,6 +144,7 @@ func update() -> void:
 		return
 	_updating = true
 	point_box.visible = point != null
+	point_scroll.visible = point != null
 	enemy_box.visible = enemy != null
 	hint.visible = point == null and enemy == null
 	title.text = "ВОЛНЫ СПАВНА"
@@ -200,23 +158,22 @@ func update() -> void:
 
 
 func _load_point(point: Node3D) -> void:
-	var config: Dictionary = point.call("get_spawn_config")
-	enemy_option.select(maxi(SPAWN_CONFIG.ENEMIES.find(str(config["enemy"])), 0))
-	count_spin.set_value_no_signal(float(config["count"]))
-	interval_spin.set_value_no_signal(float(config["interval"]))
-	rule_option.select(maxi(SPAWN_CONFIG.RULES.find(str(config["rule"])), 0))
-	batch_spin.set_value_no_signal(float(config["batch"]))
-	var rule := str(config["rule"])
-	batch_row.visible = rule != "stream"
-	batch_label.text = "Размер пачки" if rule == "burst" else "Держать рядом, не более"
-	trigger_option.select(maxi(SPAWN_CONFIG.TRIGGERS.find(str(config["trigger"])), 0))
-	health_spin.set_value_no_signal(float(config["health"]))
-	damage_spin.set_value_no_signal(float(config["damage"]))
+	editor.load_config(point.call("get_spawn_config"), editor.current if point == _loaded_point else 0)
+	_loaded_point = point
 	if objects.selected == null:
-		link_note.text = "После размещения выберите врага и отметьте эту точку."
+		link_note.text = "После размещения выберите врага и отметьте эту очередь."
 		return
-	var count := linked_enemies(_point_id(point)).size()
-	link_note.text = "Связано врагов: %d" % count if count > 0 else "Нет связанных врагов: волна не запустится. Выберите врага и отметьте эту точку."
+	var point_id := _point_id(point)
+	var lines: Array[String] = []
+	var queues: Array = point.call("get_spawn_config")["queues"]
+	for index in queues.size():
+		if index == 0 or str(queues[index]["start"]) == "trigger":
+			lines.append("Очередь %d: связано врагов %d" % [index + 1, linked_enemies(SPAWN_CONFIG.link_key(point_id, index)).size()])
+		else:
+			lines.append("Очередь %d: через %.1f с после предыдущей" % [index + 1, float(queues[index]["delay"])])
+	link_note.text = "\n".join(lines)
+	if linked_enemies(point_id).is_empty():
+		link_note.text += "\nУ первой очереди нет связанных врагов: она не запустится. Выберите врага и отметьте эту точку."
 
 
 func _load_enemy(enemy: Node3D) -> void:
@@ -225,29 +182,36 @@ func _load_enemy(enemy: Node3D) -> void:
 		child.queue_free()
 	var ids := Array(enemy.get_meta(DIRECTOR.TRIGGER_META, []))
 	var points := _points()
-	if points.is_empty():
+	var shown := 0
+	for index in points.size():
+		var config: Dictionary = points[index].call("get_spawn_config")
+		var queues: Array = config["queues"]
+		for queue_index in queues.size():
+			if queue_index > 0 and str(queues[queue_index]["start"]) != "trigger":
+				continue
+			var key := SPAWN_CONFIG.link_key(_point_id(points[index]), queue_index)
+			var box := CheckBox.new()
+			box.text = "Точка %d, очередь %d: %s (%.0f, %.0f)" % [index + 1, queue_index + 1, SPAWN_CONFIG.queue_summary(queues[queue_index]), points[index].position.x, points[index].position.z]
+			box.button_pressed = ids.has(key)
+			box.toggled.connect(_toggle_link.bind(key))
+			link_list.add_child(box)
+			shown += 1
+	if shown == 0:
 		var empty := Label.new()
 		empty.text = "На карте нет точек спавна."
 		link_list.add_child(empty)
-	for index in points.size():
-		var id := _point_id(points[index])
-		var box := CheckBox.new()
-		box.text = "Точка %d: %s (%.0f, %.0f)" % [index + 1, SPAWN_CONFIG.summary(points[index].call("get_spawn_config")), points[index].position.x, points[index].position.z]
-		box.button_pressed = ids.has(id)
-		box.toggled.connect(_toggle_link.bind(id))
-		link_list.add_child(box)
 
 
-func _toggle_link(on: bool, point_id: String) -> void:
+func _toggle_link(on: bool, key: String) -> void:
 	var enemy: Node3D = objects.selected
 	if _updating or not _is_enemy(enemy):
 		return
 	session.edit_history.call("record_transform", enemy)
 	var ids := Array(enemy.get_meta(DIRECTOR.TRIGGER_META, []))
-	if on and not ids.has(point_id):
-		ids.append(point_id)
+	if on and not ids.has(key):
+		ids.append(key)
 	elif not on:
-		ids.erase(point_id)
+		ids.erase(key)
 	if ids.is_empty():
 		enemy.remove_meta(DIRECTOR.TRIGGER_META)
 	else:
@@ -270,16 +234,7 @@ func configure_new(node: Node3D) -> void:
 		node.set_meta("planning_object_id", "spawn_%d" % Time.get_ticks_usec())
 
 
-func _read_config() -> Dictionary:
-	return {
-		"enemy": SPAWN_CONFIG.ENEMIES[enemy_option.selected], "count": int(count_spin.value),
-		"interval": interval_spin.value, "rule": SPAWN_CONFIG.RULES[rule_option.selected],
-		"batch": int(batch_spin.value), "trigger": SPAWN_CONFIG.TRIGGERS[trigger_option.selected],
-		"health": health_spin.value, "damage": damage_spin.value,
-	}
-
-
-func _changed(_value: Variant = null) -> void:
+func _changed(config: Dictionary) -> void:
 	if _updating:
 		return
 	var point := _point_target()
@@ -287,7 +242,6 @@ func _changed(_value: Variant = null) -> void:
 		return
 	if objects.selected != null:
 		session.edit_history.call("record_transform", point)
-	var config := _read_config()
 	point.call("configure_spawn", config)
 	if objects.selected == null:
 		spawn_defaults = config
@@ -305,11 +259,12 @@ func _process(_delta: float) -> void:
 	var selected: Node3D = objects.selected
 	if _is_enemy(selected):
 		for point in _points():
-			if Array(selected.get_meta(DIRECTOR.TRIGGER_META, [])).has(_point_id(point)):
+			if _linked_keys(selected).any(func(key: String) -> bool: return SPAWN_CONFIG.split_link(key)[0] == _point_id(point)):
 				pairs.append([selected.global_position, point.global_position])
 	elif selected != null and selected.has_method("configure_spawn"):
-		for enemy in linked_enemies(_point_id(selected)):
-			pairs.append([enemy.global_position, selected.global_position])
+		for enemy in session.enemies_root.get_children():
+			if enemy is Node3D and _linked_keys(enemy).any(func(key: String) -> bool: return SPAWN_CONFIG.split_link(key)[0] == _point_id(selected)):
+				pairs.append([enemy.global_position, selected.global_position])
 	if pairs.is_empty():
 		return
 	mesh.surface_begin(Mesh.PRIMITIVE_LINES)

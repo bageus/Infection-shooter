@@ -73,8 +73,6 @@ var _shot_recoil := preload("res://game/features/player/shot_recoil.gd").new()
 var _shooting_camera := preload("res://game/features/player/shooting_camera_state.gd").new()
 var health: float
 var armor: float
-## A plate was picked up on this map or an earlier one of the chain; arriving on a new map refills armor then.
-var _armor_found := false
 var antidotes: int
 ## Settings toggle: antidote syringes are not spent while it is on.
 var infinite_antidotes: bool = false
@@ -95,7 +93,7 @@ var _original_master_volume := 0.0
 var mutation_effects: Node
 var _mutation_control := CONTROL_LOSS.new()
 var _mutation_menu_open := false
-var _slot_weapons: Array[int] = [0, 1, 2]
+var _slot_weapons: Array[int] = [0, -1, -1] ## Weapon index per slot, -1 when empty; a new game starts with the pistol only.
 var _emergency_key := false
 var effects_root: Node3D
 var impact_pool: Node
@@ -214,7 +212,7 @@ func _handle_actions() -> void:
 	if Input.is_action_just_pressed("antidote"): use_antidote()
 	if Input.is_action_just_pressed("melee") and _roll_remaining <= 0.0 and not bool(infection_runtime.call("is_control_lost")) and mutation_effects.call("melee") != &"": _play_sound(&"attack_swing")
 func _select_weapon(index:int)->void:
-	if index<0 or index>=_slot_weapons.size(): return
+	if index<0 or index>=_slot_weapons.size() or _slot_weapons[index]<0: return
 	var old:=get_current_weapon()
 	if old!=null: old.call("cancel_reload")
 	current_weapon_index=index
@@ -250,7 +248,7 @@ func _has_presentation_activity() -> bool:
 func select_weapon_slot(index: int) -> bool:
 	if get_tree().paused or _mutation_menu_open or infection_runtime.call("is_control_lost") or infection_runtime.call("is_defeated"):
 		return false
-	if index < 0 or index >= _slot_weapons.size():
+	if index < 0 or index >= _slot_weapons.size() or _slot_weapons[index] < 0:
 		return false
 	_select_weapon(index)
 	return true
@@ -295,29 +293,30 @@ func get_weapon_in_slot(index: int) -> int:
 func pickup_weapon(index: int) -> bool:
 	if index < 0 or index >= weapons.size() or _slot_weapons.has(index):
 		return false
-	var previous := _slot_weapons[current_weapon_index]
-	if not _drop_weapon_command.is_valid():
-		return false
-	var offset := camera.global_basis.x
-	offset.y = 0.0
-	if not bool(_drop_weapon_command.call(previous, global_position + offset.normalized() * 1.3)):
-		return false
-	get_current_weapon().call("cancel_reload")
-	_slot_weapons[current_weapon_index] = index
-	_select_weapon(current_weapon_index)
+	var slot := _slot_weapons.find(-1)
+	if slot < 0:
+		slot = current_weapon_index
+		var previous := _slot_weapons[slot]
+		if not _drop_weapon_command.is_valid():
+			return false
+		var offset := camera.global_basis.x
+		offset.y = 0.0
+		if not bool(_drop_weapon_command.call(previous, global_position + offset.normalized() * 1.3)):
+			return false
+		get_current_weapon().call("cancel_reload")
+	_slot_weapons[slot] = index
+	_select_weapon(slot)
 	_play_sound(&"weapon_pickup")
 	return true
 
-## Armor plate, weapon slots and each weapon's reserve carried to the next map of a level chain
-## (health and key start fresh; armor refills only once a plate has been found).
+## Weapon slots, armor and each weapon's reserve carried to the next map of a level chain
+## (health and key start fresh).
 func export_loadout() -> Dictionary:
-	return {"slots": _slot_weapons.duplicate(), "armor_found": _armor_found, "ammo": weapons.map(func(gun: Node) -> int: return int(gun.call("carried_ammo")))}
+	return {"slots": _slot_weapons.duplicate(), "armor": armor, "ammo": weapons.map(func(gun: Node) -> int: return int(gun.call("carried_ammo")))}
 
 
 func import_loadout(loadout: Dictionary) -> void:
-	if bool(loadout.get("armor_found", false)):
-		_armor_found = true
-		armor = max_armor
+	armor = clampf(float(loadout.get("armor", 0.0)), 0.0, max_armor)
 	var ammo: Variant = loadout.get("ammo")
 	if ammo is Array and ammo.size() == weapons.size():
 		for index in weapons.size():
@@ -328,9 +327,10 @@ func import_loadout(loadout: Dictionary) -> void:
 	var seen: Array[int] = []
 	for raw in slots:
 		var index := int(raw)
-		if index < 0 or index >= weapons.size() or seen.has(index):
+		if index < -1 or index >= weapons.size() or (index >= 0 and seen.has(index)):
 			return
 		seen.append(index)
+	if seen[0] < 0: return # Slot 0 always holds a weapon: pickups fill empty slots from the first one.
 	_slot_weapons = seen
 	_select_weapon(0)
 
@@ -338,7 +338,6 @@ func import_loadout(loadout: Dictionary) -> void:
 ## Armor plate collected: the armor bar fills to its maximum.
 func pickup_armor() -> void:
 	armor = max_armor
-	_armor_found = true
 	_play_sound(&"medkit_pickup")
 
 

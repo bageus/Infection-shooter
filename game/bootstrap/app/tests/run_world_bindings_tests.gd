@@ -68,6 +68,7 @@ func _run() -> void:
 		if child.has_method("_explode_at"):
 			child.set_physics_process(false)
 			child.call("_explode_at", Vector3(0, 1, -8), Vector3.UP, null)
+	player.call("import_loadout", {"slots": [0, 1, 2]})
 	_check(bool(player.call("pickup_weapon", 3)), "Injected drop command allows weapon replacement")
 	player.call("configure_weapon_drop", func(_index: int, _at: Vector3) -> bool: return false)
 	_check(not bool(player.call("pickup_weapon", 0)), "Failed drop rejects replacement")
