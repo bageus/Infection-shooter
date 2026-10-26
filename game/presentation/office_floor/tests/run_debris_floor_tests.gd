@@ -14,6 +14,11 @@ const REWORK := "res://docs/qa/destruction_model_rework.json"
 const FLOOR_TOP := 0.0135
 const TOLERANCE := 0.02
 const SETTLE_SECONDS := 2.0
+# A piece is spawned at the pose of its model part, which can overlap the floor (a wall-mounted TV
+# placed on the floor spawns half sunk); the solver pushes it out within a few ticks. Pieces are only
+# measured after this many physics ticks, so the result does not depend on whether a sample happens to
+# land on the tick a piece was created. A piece that really tunnels keeps falling and is still caught.
+const SPAWN_GRACE_TICKS := 20
 const MAX_HITS := 14
 const FRAGMENT_ROUNDS := 2
 const SUBSET := ["03_file_cabinet_largest", "03_file_cabinet_smaller", "03_bookshelf", "05_wall_TV_destructible", "07_table_longest", "08_divider_full_U.glb", "06_office_chair.glb", "10_couch_red"]
@@ -21,6 +26,7 @@ const SUBSET := ["03_file_cabinet_largest", "03_file_cabinet_smaller", "03_books
 var failures := 0
 var _filter := ""
 var _vertices := {}
+var _first_seen := {}
 var _lowest_ever := INF
 
 
@@ -71,6 +77,7 @@ func _model_paths() -> Array[String]:
 
 func _test_model(stage: Node3D, path: String) -> void:
 	_lowest_ever = INF
+	_first_seen.clear()
 	var effects := Node3D.new()
 	stage.add_child(effects)
 	var prop := PROP_SCENE.instantiate() as RigidBody3D
@@ -117,7 +124,14 @@ func _step(effects: Node, frames: int) -> void:
 			await process_frame
 		await physics_frame
 		for fragment in _fragments(effects):
-			_lowest_ever = minf(_lowest_ever, _lowest_point(fragment))
+			var born: int = _first_seen.get_or_add(fragment.get_instance_id(), Engine.get_physics_frames())
+			if Engine.get_physics_frames() - born < SPAWN_GRACE_TICKS:
+				continue
+			var low := _lowest_point(fragment)
+			if low < FLOOR_TOP - TOLERANCE and low < _lowest_ever and _lowest_ever >= FLOOR_TOP - TOLERANCE:
+				# First dip below the floor: say which piece, how fast, and when, so a CI-only failure can be diagnosed.
+				print("DIP %s low=%.3f pos=%s vel=%s age=%.2f physics_frame=%d process_frame=%d" % [fragment.name, low, fragment.global_position, fragment.linear_velocity, float(fragment.get("_age")), Engine.get_physics_frames(), Engine.get_process_frames()])
+			_lowest_ever = minf(_lowest_ever, low)
 
 
 func _fragments(effects: Node) -> Array[RigidBody3D]:
