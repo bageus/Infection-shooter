@@ -8,13 +8,11 @@ the licence of their source (CC0 / CC-BY).
 
 | Source file | Author | Licence | Link | Collection |
 |---|---|---|---|---|
-| close_door/door_metal/close_door_metal.ogg | Analog Bleep Ten | Sampling Plus 1.0 | https://freesound.org/people/Analog%20Bleep%20Ten/sounds/75826/ | CC-Sounds (Fris0uman/CDDA-Soundpacks) |
 | close_door/window/close_window.ogg | cabled_mess | CC0 1.0 | https://freesound.org/people/cabled_mess/sounds/407644/ | CC-Sounds (Fris0uman/CDDA-Soundpacks) |
 | deal_damage/hurt_m/hurt_m_1.ogg | micahlg | CC0 1.0 | https://freesound.org/people/micahlg/sounds/413181/ | CC-Sounds (Fris0uman/CDDA-Soundpacks) |
 | deal_damage/hurt_m/hurt_m_2.ogg | micahlg | CC0 1.0 | https://freesound.org/people/micahlg/sounds/413183/ | CC-Sounds (Fris0uman/CDDA-Soundpacks) |
 | explosion/huge/explosion_huge_2.ogg | unfa | CC0 1.0 | https://freesound.org/people/unfa/sounds/352143/ | CC-Sounds (Fris0uman/CDDA-Soundpacks) |
 | explosion/small/explosion_small.ogg | j1987 | CC0 1.0 | https://freesound.org/people/j1987/sounds/140727/ | CC-Sounds (Fris0uman/CDDA-Soundpacks) |
-| fire_gun/empty_1.ogg | Rolly-SFX | CC0 1.0 | https://freesound.org/people/Rolly-SFX/sounds/528708/ | CC-Sounds (Fris0uman/CDDA-Soundpacks) |
 | melee_attack/monster_melee_hit/monster_melee_hit_1.ogg | Slave2theLight | CC BY 3.0 | https://freesound.org/people/Slave2theLight/sounds/157112/ | CC-Sounds (Fris0uman/CDDA-Soundpacks) |
 | melee_attack/monster_melee_hit/monster_melee_hit_2.ogg | Slave2theLight | CC BY 3.0 | https://freesound.org/people/Slave2theLight/sounds/157112/ | CC-Sounds (Fris0uman/CDDA-Soundpacks) |
 | melee_attack/monster_melee_hit/monster_melee_hit_3.ogg | Slave2theLight | CC BY 3.0 | https://freesound.org/people/Slave2theLight/sounds/157112/ | CC-Sounds (Fris0uman/CDDA-Soundpacks) |
@@ -143,7 +141,6 @@ the licence of their source (CC0 / CC-BY).
 ## Events and their sources
 
 - `antidote_pickup`: cdda/sound/CC-Sounds/smash_fail/glass/smash_fail_glass_1.ogg, cdda/sound/CC-Sounds/smash_fail/plastic/smash_fail_plastic_2.ogg
-- `antidote_use`: cdda/sound/CC-Sounds/fire_gun/empty_1.ogg, redeclipse_sounds/sfx/extinguish.ogg
 - `attack_bite`: cdda/sound/CC-Sounds/mon_bite/bite_hit/bite_hit_1.ogg, cdda/sound/CC-Sounds/mon_bite/bite_hit/bite_hit_3.ogg, cdda/sound/CC-Sounds/mon_bite/bite_hit/bite_hit_5.ogg
 - `attack_hit`: cdda/sound/CC-Sounds/melee_attack/monster_melee_hit/monster_melee_hit_1.ogg, cdda/sound/CC-Sounds/melee_attack/monster_melee_hit/monster_melee_hit_2.ogg, cdda/sound/CC-Sounds/melee_attack/monster_melee_hit/monster_melee_hit_3.ogg, cdda/sound/CC-Sounds/melee_attack/monster_melee_hit/monster_melee_hit_4.ogg
 - `attack_swing`: cdda/sound/CC-Sounds/melee_swing/big_bash/big_bash_swing_1.ogg, cdda/sound/CC-Sounds/melee_swing/small_bash/small_bash_swing_1.ogg, cdda/sound/CC-Sounds/melee_swing/small_bash/small_bash_swing_3.ogg, cdda/sound/CC-Sounds/melee_swing/small_bash/small_bash_swing_5.ogg
@@ -175,7 +172,6 @@ the licence of their source (CC0 / CC-BY).
 - `hit_wall`: cdda/sound/CC-Sounds/smash_fail/brick/smash_fail_brick_1.ogg, cdda/sound/CC-Sounds/smash_fail/brick/smash_fail_brick_2.ogg, cdda/sound/CC-Sounds/smash_fail/concrete/smash_fail_concrete.ogg, cdda/sound/CC-Sounds/smash_fail/concrete/smash_fail_concrete_3.ogg, cdda/sound/CC-Sounds/smash_fail/concrete/smash_fail_concrete_4.ogg
 - `hit_wood`: cdda/sound/CC-Sounds/smash_fail/door_wood/door_smash_fail_1.ogg, cdda/sound/CC-Sounds/smash_fail/door_wood/door_smash_fail_3.ogg, cdda/sound/CC-Sounds/smash_fail/wood_furn/smash_fail_wood.ogg, cdda/sound/CC-Sounds/smash_fail/wood_furn/smash_fail_wood_2.ogg, cdda/sound/CC-Sounds/smash_fail/wood_furn/smash_fail_wood_4.ogg
 - `horde_ram_hit`: cdda/sound/CC-Sounds/melee_hit_flesh/big_bash/big_bash_flesh_1.ogg, cdda/sound/CC-Sounds/melee_hit_flesh/big_bash/big_bash_flesh_2.ogg, cdda/sound/CC-Sounds/smash_success/wood_furn/smash_success_wood.ogg
-- `metal_door_close`: cdda/sound/CC-Sounds/close_door/door_metal/close_door_metal.ogg
 - `metal_door_open`: cdda/sound/CC-Sounds/open_door/door_metal/open_door_metal.ogg
 - `skill_berserk`: cdda/sound/CC-Sounds/speech/ferals/male_scream_1.ogg, cdda/sound/CC-Sounds/speech/ferals/male_scream_2.ogg, cdda/sound/CC-Sounds/speech/zombie/speech_zombie_groan_1.ogg, cdda/sound/CC-Sounds/speech/zombie/speech_zombie_groan_2.ogg, synthesised
 - `skill_blood_burst`: cdda/sound/CC-Sounds/melee_hit_flesh/big_stabbing/big_stabbing_flesh_1.ogg, cdda/sound/CC-Sounds/melee_hit_flesh/big_stabbing/big_stabbing_flesh_2.ogg, cdda/sound/CC-Sounds/melee_hit_flesh/big_stabbing/big_stabbing_flesh_3.ogg, cdda/sound/CC-Sounds/mon_death/zombie_gibbed/zombie_gibbed_1.ogg, cdda/sound/CC-Sounds/mon_death/zombie_gibbed/zombie_gibbed_2.ogg, synthesised
@@ -280,3 +276,7 @@ Converted from the owner's WAV files to mono OGG Vorbis (originals removed, rece
 Events `skill_living_harvest`, `skill_overload`, `skill_acid_spit`, `acid_sizzle`, `skill_spore_cocoon`, `skill_epidemic` and `bone_blades_whirl` were never played by the game (plus `rifle_fire`, `assault_rifle_fire` and `rifle_reload`, which no weapon uses); their files, credits and generator entries were removed, and `music/seamless_loop.ogg` was deleted.
 
 The second 2026-10-26 batch (`break_metal`, `break_electronics`, `break_lamp`, `grenade_explode`, `extinguisher_spray`, `medkit_pickup`, `medkit_use` from bandage_use, `elevator_open`, `elevator_close`) is owner-supplied; converted by `tools/import_effects_audio.py`. `break_electronics` plays its two files in order.
+
+## Owner-confirmed recordings (2026-10-26)
+
+The owner states that `antidote_use`, `sniper_fire` and `metal_door_close` are their own recordings, so their source rows were removed. `sniper_fire` had three identical copies; it now has one file.

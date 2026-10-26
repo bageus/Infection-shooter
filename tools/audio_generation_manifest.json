@@ -200,7 +200,10 @@
     "sniper_reload",
     "titan_attack",
     "titan_idle",
-    "zombie_misc"
+    "zombie_misc",
+    "antidote_use",
+    "sniper_fire",
+    "metal_door_close"
   ],
   "retired_events": [
     "acid_sizzle",
