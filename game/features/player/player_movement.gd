@@ -212,8 +212,7 @@ func _handle_actions() -> void:
 		var w:=get_current_weapon()
 		if w!=null: w.call("start_reload")
 	if Input.is_action_just_pressed("antidote"): use_antidote()
-	if Input.is_action_just_pressed("melee") and _roll_remaining <= 0.0 and not bool(infection_runtime.call("is_control_lost")) and mutation_effects.call("melee") != &"":
-		_play_sound(&"attack_swing")
+	if Input.is_action_just_pressed("melee") and _roll_remaining <= 0.0 and not bool(infection_runtime.call("is_control_lost")) and mutation_effects.call("melee") != &"": _play_sound(&"attack_swing")
 func _select_weapon(index:int)->void:
 	if index<0 or index>=_slot_weapons.size(): return
 	var old:=get_current_weapon()
