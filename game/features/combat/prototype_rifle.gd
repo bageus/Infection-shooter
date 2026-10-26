@@ -15,13 +15,13 @@ const WEAPON_SOUNDS := {
 	"PISTOL": [&"pistol_fire", &"pistol_reload", &"casing_brass"],
 	"UZI": [&"uzi_fire", &"uzi_reload", &"casing_brass"],
 	"SHOTGUN": [&"shotgun_fire", &"shotgun_shell_load", &"casing_shell"],
-	"SNIPER RIFLE": [&"sniper_fire", &"sniper_reload", &"casing_brass"],
-	"AK": [&"ak_fire", &"ak_reload", &"casing_brass"],
-	"M4": [&"m4_fire", &"m4_reload", &"casing_brass"],
-	"MINIGUN": [&"minigun_fire", &"rifle_reload", &"casing_brass"],
-	"RIFLE": [&"rifle_fire", &"rifle_reload", &"casing_brass"],
-	"ASSAULT RIFLE": [&"assault_rifle_fire", &"rifle_reload", &"casing_brass"],
-	"GRENADE LAUNCHER": [&"launcher_fire", &"launcher_reload", &"casing_heavy"],
+	"SNIPER RIFLE": [&"sniper_fire", &"sniper_reload", &"casing_heavy"],
+	"AK": [&"ak_fire", &"ak_reload", &"casing_heavy"],
+	"M4": [&"m4_fire", &"m4_reload", &"casing_heavy"],
+	"MINIGUN": [&"minigun_fire", &"rifle_reload", &"casing_heavy"],
+	"RIFLE": [&"rifle_fire", &"rifle_reload", &"casing_heavy"],
+	"ASSAULT RIFLE": [&"assault_rifle_fire", &"rifle_reload", &"casing_heavy"],
+	"GRENADE LAUNCHER": [&"launcher_fire", &"launcher_reload", &"casing_launcher"],
 }
 const SPIN_HOLD := 0.12
 # Time the barrels keep turning at full speed after the trigger is released.
@@ -142,7 +142,9 @@ func _process(delta: float) -> void:
 			_reload_remaining = reload_time
 			if _reserve.amount > 0 and _magazine_ammo < magazine_size:
 				_play_reload_sound()
-		else: _reloading = false
+		else:
+			_reloading = false
+			SFX.play(self, &"shotgun_pump")
 	else:
 		var loaded := mini(magazine_size - _magazine_ammo, _reserve.amount)
 		_magazine_ammo += loaded
@@ -168,6 +170,7 @@ func try_fire_at(target_point: Vector3) -> bool:
 	# A shell-by-shell reload is interrupted by firing once a shell is in.
 	if _reloading and shotgun_shell_reload and _magazine_ammo > 0:
 		cancel_reload()
+		SFX.play(self, &"shotgun_pump")
 	if spin_up_time > 0.0:
 		# The barrels must reach full speed before the first bullet leaves.
 		_spin_hold = SPIN_HOLD

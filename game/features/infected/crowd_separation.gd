@@ -14,10 +14,12 @@ const INFECTED_LAYER := 2
 static var _frame := -1
 static var _current := {}
 static var _previous := {}
-static var _current_ids := {}
-static var _previous_ids := {}
-static var _current_positions := {}
-static var _previous_positions := {}
+
+# One value-only snapshot per physics space. Never retain a World3D or body node.
+class _WorldFrame extends RefCounted:
+	var cells := {}
+	var ids := {}
+	var positions := {}
 
 
 static func body_radius(shape_node: CollisionShape3D, scale: float) -> float:
@@ -34,35 +36,38 @@ static func spread(who: Node3D, shape_node: CollisionShape3D) -> Vector3:
 	var frame := Engine.get_physics_frames()
 	if frame != _frame:
 		_previous = _current if frame == _frame + 1 else {}
-		_previous_ids = _current_ids if frame == _frame + 1 else {}
-		_previous_positions = _current_positions if frame == _frame + 1 else {}
-		_current_positions = {}
 		_current = {}
-		_current_ids = {}
 		_frame = frame
+	var space := who.get_world_3d().space
+	var current: _WorldFrame = _current.get(space)
+	if current == null:
+		current = _WorldFrame.new()
+		_current[space] = current
+	var previous: _WorldFrame = _previous.get(space)
 	var self_id := who.get_instance_id()
 	var position := who.global_position
-	_current_positions[self_id] = position
+	current.positions[self_id] = position
 	# Compare both bodies at the same frame; moving coincident pairs otherwise
 	# see their shared velocity as separation and can remain exactly stacked.
-	var previous_position: Vector3 = _previous_positions.get(self_id, position)
+	var previous_position: Vector3 = previous.positions.get(self_id, position) if previous != null else position
 	var cell := Vector2i(floori(position.x / CELL), floori(position.z / CELL))
 	# Packed arrays are values: append to a local copy and store it back.
-	var registered: PackedVector3Array = _current.get(cell, PackedVector3Array())
+	var registered: PackedVector3Array = current.cells.get(cell, PackedVector3Array())
 	registered.append(position)
-	_current[cell] = registered
-	var registered_ids: PackedInt64Array = _current_ids.get(cell, PackedInt64Array())
+	current.cells[cell] = registered
+	var registered_ids: PackedInt64Array = current.ids.get(cell, PackedInt64Array())
 	registered_ids.append(self_id)
-	_current_ids[cell] = registered_ids
+	current.ids[cell] = registered_ids
+	if previous == null: return Vector3.ZERO
 	var width := 2.0 * body_radius(shape_node, who.global_basis.x.length())
 	var push := Vector3.ZERO
 	var width_sq := width * width
 	var previous_cell := Vector2i(floori(previous_position.x / CELL), floori(previous_position.z / CELL))
 	for index in 9:
 		var key := Vector2i(previous_cell.x + index % 3 - 1, previous_cell.y + floori(index / 3.0) - 1)
-		var neighbours: Variant = _previous.get(key)
+		var neighbours: Variant = previous.cells.get(key)
 		if neighbours != null:
-			var ids: PackedInt64Array = _previous_ids[key]
+			var ids: PackedInt64Array = previous.ids[key]
 			var points: PackedVector3Array = neighbours
 			for slot in points.size():
 				if ids[slot] == self_id:

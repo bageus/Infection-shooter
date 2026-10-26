@@ -54,5 +54,5 @@ func start_reload() -> void:
 		for index in 6:
 			var point := ejection_port.global_transform
 			point.origin += Vector3(randf_range(-0.08, 0.08), 0, randf_range(-0.07, 0.07))
-			pool.call("spawn_casing", casings, point, casing_radius, get_parent().get_parent() as CollisionObject3D, sound_event(2) if index < 3 else &"", 0.7)
+			pool.call("spawn_casing", casings, point, casing_radius, get_parent().get_parent() as CollisionObject3D, sound_event(2) if index < 4 else &"", 0.7)
 	super.start_reload()

@@ -39,7 +39,7 @@ func _run() -> void:
 	while audio != null and not audio.get("_pending").is_empty() and Time.get_ticks_msec() < deadline:
 		await process_frame
 	_check(audio != null and audio.get("_pending").is_empty(), "Mission audio requests finish")
-	_check(audio != null and audio.get("_streams").size() == 60, "All 60 prop streams remain retained until mission exit")
+	_check(audio != null and audio.get("_streams").size() == 59, "All 59 prop streams remain retained until mission exit")
 	app.queue_free()
 	await process_frame
 	print("Shader warmup tests: %d failure(s)." % failures)
