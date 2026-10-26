@@ -83,6 +83,8 @@ G01, высокий приоритет относительно ранее ук�
 
 ## Условный риск загрузки
 
+R01 IMPLEMENTED / CI_PENDING26.10.2026: private request lifecycle/watchdog/cancel/drain и rollback проверены в7 suites; actual engine hang не заявлен воспроизведённым. [QA](../qa/loading_deadline_cancel.md). Исходное evidence ниже.
+
 R01: `scene_resource_queue.gd:30–76` и `menu/mission_loader.gd:209–214` не имеют deadline/cancel для THREAD_LOAD_IN_PROGRESS. Если native запрос зависнет, ожидание не ограничено, Back показывается лишь при _fail. Само зависание загрузчика в этой проверке не воспроизведено; подтверждено отсутствие выхода из такого состояния. ResourceLoader не имеет простого безопасного cancel, поэтому нужны deadline/диагностика и управляемый жизненный цикл выданных запросов, а не free ресурсов работающего worker.
 
 ## Проверки и ограничения

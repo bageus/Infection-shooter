@@ -6,6 +6,7 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
 SOURCE_DIRS = (
+    "source_audio/",
     "models/objects/enviroments/01/textures/master_4k/",
     "models/objects/weapons/textures/master_4k/",
     "models/objects/textures/blood_decals_45/source/",
