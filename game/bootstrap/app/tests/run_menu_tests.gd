@@ -134,6 +134,8 @@ func _test_results_and_return(app: Node) -> void:
 	var result: Control = app.get("game_over")
 	_check(paused and result.visible and result.get("screen_kind") == "failed", "mutation defeat opens failure artwork")
 	_check(result.get("reason_key") == "failedMutation", "defeat reason is localized")
+	var boom := app.get_children().filter(func(n): return n is AudioStreamPlayer and n.stream.resource_path.ends_with("music_cinematic_boom.ogg"))
+	_check(boom.size() == 1 and boom[0].process_mode == Node.PROCESS_MODE_ALWAYS, "defeat plays the boom while paused")
 	_check(result.get("buttons")[0].disabled, "checkpoint is honestly unavailable")
 	var infection: Node = app.get("infection_runtime")
 	app.set("progression_level_id", "menu_test_floor")
