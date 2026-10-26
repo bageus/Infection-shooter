@@ -39,3 +39,14 @@ Pinned Godot4.7.2 `ed1daf0bf`. Targeted suites и editor проверяются 
 
 
 Финальная проверка:5 focused suites crowd_world, crowd_separation (реальная толпа12 и moving coincident pair), chase_real_enemy_slope, chase_route, chase_search_motion — exit0/0 failures, без engine errors/утечек. Реальный infected дошёл до цели на flat/slope15,100% floor contact в174/375 проверенных кадрах. Final headless editor import/open — exit0, error/leak scan чистый. Исходный новый world suite7failures→0, однопроцессные trace before/after без ошибок/утечек.
+
+
+## Repair всех import jobs PR487 — 26.10.2026
+
+Head059425b9: Architecture SUCCESS, run40340793554 — все11jobs FAILURE на стадии Import (до runtime assertions). В runtime job121634619998 и planner Forward+121634620287 повторяются одни parser errors: `assets/icons/game_icon_{32,64,128,256,512}.png.import:6`, Expected value, got '='. В каждом файле из base2836f85 остались `<<<<<<< HEAD / ======= / >>>>>>>107de261` вокруг двух UID. Это не ошибка world snapshot/crowd logic.
+
+Удалены только markers и дублирующий incoming UID. Сохранены UID исходного HEAD, сверенные с094f5ff8; path/source/params и PNG не меняются. Хеши всех5 PNG совпадают с git HEAD. Parser errors воспроизведены на pinned Godot4.7.2 editor:20 ERROR lines; после исправления0 errors/leaks. ConfigFile.load и Texture2D.load для всех5icons PASS, размеры32/64/128/256/512 совпадают.
+
+`check_import_files.py` теперь отклоняет unresolved merge/diff3 markers в существующем import metadata. Он включён в validate_project для раннего отказа; существующие valid=false/unsafe recompression checks сохранены.6 unit tests (merge/diff3/incomplete, valid metadata, quoted marker text, failed import, recompression) PASS, добавлены в architecture workflow. Вместе с11coverage+3runner —20Python tests PASS. До исправления actual metadata новый gate отклонял все5 файлов, после PASS. Финальные editor, icon probe, crowd_world и crowd_separation — exit0, error/leak scans чистые; project239suites/636sources/177warnings, import guard и diff-check PASS.
+
+Production Q02 code/математика/owners/API/DTO/сцены/бинарные icons не меняются в repair. Full new GitHub CI/native/Windows/Web пока CI_PENDING. Следующее действие — обновить текущий PR487 и проверить все jobs.
