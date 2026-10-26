@@ -5,6 +5,7 @@ const MENU := preload("res://game/bootstrap/app/menu/front_end.tscn")
 const TREE_UI := preload("res://game/bootstrap/app/mutation_tree_ui.gd")
 const INFECTION := preload("res://game/features/infection/public/infection_runtime.gd")
 var failures := 0
+var _pending_playbacks: Array[WeakRef] = []
 
 
 class Host:
@@ -50,11 +51,13 @@ func _run() -> void:
 	modal.settings.tabs.current_tab = 3
 	modal.find_child("SoundToggle", true, false).mouse_entered.emit()
 	_check(_count(menu, &"menu_hover") == before + 1, "Only audio toggle has settings hover sound")
+	_track_audio(frontend)
 	frontend.queue_free()
 	await process_frame
 	await _test_mutation_tree()
 	AudioServer.set_bus_mute(master, saved_mute)
 	AudioServer.set_bus_volume_db(master, saved_volume)
+	await _deferred_mixer_probe()
 	print("UI sound tests: %d failure(s)." % failures)
 	quit(failures)
 
@@ -127,6 +130,7 @@ func _test_mutation_tree() -> void:
 	ui.close_tree()
 	_check(_count(ui, &"mutation_close") == 1, "Closing an already closed tree is silent")
 	_check_reverse(&"mutation_open", &"mutation_close")
+	_track_audio(ui)
 	ui.queue_free()
 	host.queue_free()
 	await process_frame
@@ -159,3 +163,37 @@ func _check_reverse(forward: StringName, backward: StringName) -> void:
 	var second := SFX.UI_EVENTS[backward][0] as AudioStreamOggVorbis
 	_check(is_equal_approx(first.get_length(), second.get_length()), "Reverse Vorbis cues retain their duration")
 	_check(first != second and first.get_length() > 0.03, "Reverse cues are distinct playable recordings")
+
+
+# Removing a voice node does not synchronously release its mixer-owned OGG playback.
+func _track_audio(owner: Node) -> void:
+	for node in owner.find_children("*", "", true, false):
+		if node is AudioStreamPlayer or node is AudioStreamPlayer2D or node is AudioStreamPlayer3D:
+			if node.has_stream_playback(): _pending_playbacks.append(weakref(node.get_stream_playback()))
+
+
+func _finish_audio() -> void:
+	var started := Time.get_ticks_msec()
+	var live := func() -> bool:
+		return _pending_playbacks.any(func(ref: WeakRef) -> bool: return ref.get_ref() != null)
+	while live.call() and Time.get_ticks_msec() - started < 1000:
+		await create_timer(.01, true, false, true).timeout
+	_check(not live.call(), "UI mixer releases fixture playback before process shutdown")
+	_pending_playbacks.clear()
+
+
+func _deferred_mixer_probe() -> void:
+	var owner := Node.new()
+	root.add_child(owner)
+	var voice := AudioStreamPlayer.new()
+	voice.stream = SFX.UI_EVENTS[&"menu_hover"][0]
+	owner.add_child(voice)
+	voice.play()
+	_check(voice.has_stream_playback(), "Mixer cleanup probe starts a real OGG voice")
+	var held := {"playback": voice.get_stream_playback()}
+	_track_audio(owner)
+	owner.queue_free()
+	await process_frame
+	create_timer(.05, true, false, true).timeout.connect(func() -> void: held.clear())
+	await _finish_audio()
+	_check(held.is_empty(), "UI cleanup waits through deferred mixer ownership")

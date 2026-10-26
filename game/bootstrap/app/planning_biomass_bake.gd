@@ -77,6 +77,10 @@ static func signature(records: Array) -> String:
 		var row: Array = []
 		for field in fields:
 			row.append(_canonical(record.get(field)))
+		# Default point topology is unchanged: retain existing point-only map caches.
+		# Old nondefault caches fail validation on load before their view is created.
+		var shape := str(record.get("fixture_shape", "point"))
+		if shape != "point": row.append({"fixture_shape": shape})
 		rows.append(row)
 	return JSON.stringify(rows).sha256_text()
 

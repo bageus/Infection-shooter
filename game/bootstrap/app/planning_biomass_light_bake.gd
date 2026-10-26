@@ -24,7 +24,7 @@ func configure(host: Node3D, check: Callable) -> void:
 	for node: Node in host.find_children("*", "DirectionalLight3D", true, false):
 		var light := node as DirectionalLight3D
 		if light.is_visible_in_tree() and light.light_energy > 0.0:
-			lamps.append({"directional": true, "direction": -light.global_basis.z.normalized(), "color": light.light_color, "energy": light.light_energy, "shadows": light.shadow_enabled})
+			lamps.append({"directional": true, "direction": -light.global_basis.z.normalized(), "color": light.light_color, "energy": light.light_energy})
 	if controller == null or not bool(controller.get("local_lights_enabled")): return
 	for fixture: Node in tree.get_nodes_in_group("budget_lights"):
 		if not host.is_ancestor_of(fixture): continue
@@ -34,7 +34,7 @@ func configure(host: Node3D, check: Callable) -> void:
 		for node: Node in spots:
 			var light := node as SpotLight3D
 			var energy := float(fixture.call("get_authored_energy")) * float(fixture.get("energy_multiplier")) * share if fixture.has_method("get_authored_energy") else light.light_energy
-			lamps.append({"shadows": bool(controller.get("shadows_allowed")), "position": light.global_position, "direction": -light.global_basis.z.normalized(), "color": light.light_color, "energy": energy, "range": light.spot_range, "angle": cos(deg_to_rad(light.spot_angle)), "cone": light.spot_angle_attenuation, "attenuation": light.spot_attenuation})
+			lamps.append({"position": light.global_position, "direction": -light.global_basis.z.normalized(), "color": light.light_color, "energy": energy, "range": light.spot_range, "angle": cos(deg_to_rad(light.spot_angle)), "cone": light.spot_angle_attenuation, "attenuation": light.spot_attenuation})
 
 
 func sample(cell: Vector2i, height: float) -> Image:
@@ -50,7 +50,8 @@ func sample(cell: Vector2i, height: float) -> Image:
 			for lamp in nearby:
 				var contribution := diffuse(lamp, point)
 				var target: Vector3 = point - (lamp.direction as Vector3) * 100.0 if lamp.get("directional", false) else lamp.position
-				if contribution.get_luminance() > 0.001 and (not bool(lamp.get("shadows", true)) or not _blocked(point, target)): color += contribution
+				# Structural occlusion belongs to saved pixels, not dynamic shadow settings.
+				if contribution.get_luminance() > 0.001 and not _blocked(point, target): color += contribution
 			image.set_pixel(x, z, Color(clampf(color.r, 0.0, 1.0), clampf(color.g, 0.0, 1.0), clampf(color.b, 0.0, 1.0)))
 		await tree.process_frame
 		if not alive.call(): return null

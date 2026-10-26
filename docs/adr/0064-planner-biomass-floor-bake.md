@@ -66,3 +66,26 @@ planner_light к каждому Spot:1 для единственного, 0.7/N 
 поэтому вне camera budget свет не теряется. Runtime/DTO/API/owners/edges
 прежние; уже сохранённые PNG обновляются следующим Save Map/Layout. Реальные
 public fixtures и RGB8 grid проверены, подробности docs/qa/biomass_light_energy.md.
+
+
+25.10.2026 — N04: structural shadows в existing biomass diffuse cache
+независимы от runtime dynamic-shadow permission/quality/flags. CPU sampler
+всегда проверяет camera_occluder для положительного вклада Spot/Directional,
+не включает renderer shadow passes. DTO/API/owners/edges прежние; старые PNG
+обновляются Save Map/Layout. Это не G01 whole-scene layer. Regression13→0
+и ограничения: docs/qa/biomass_static_shadows.md.
+
+
+26.10.2026 — N05: private canonical render signature включает fixture_shape,
+поскольку она меняет Spot count/offsets при той же энергии. Existing loader
+и planner exit отбрасывают stale cache, сохраняя source records. Старые
+неполные подписи безопасно используют исходники до Save Map/Layout; DTO/API/
+owners/edges прежние, bake при load не добавлен. N04 интегрируется в main
+здесь: PR475 был merged в feature branch. QA docs/qa/biomass_cache_shape.md.
+
+
+26.10.2026 — repair N05: не добавлять пустой столбец в каждую canonical row.
+Default point сохраняет прежнюю подпись (включая shipped5pages/322pieces),
+nondefault shape добавляется именованным полем и инвалидирует старый cache
+до создания view при load. Форматы прежние, source/PNG не переподписаны.
+Тест structural rays приведён к N04 policy. QA docs/qa/biomass_cache_shape.md.
