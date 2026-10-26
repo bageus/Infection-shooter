@@ -13,7 +13,6 @@
     },
     "build_sounds": {
       "antidote_pickup/antidote_pickup_1.ogg": "0d31eac75788144ca6e2ea7f0bedea0f1953f7a1fe154a79d9f8aeca4c29fa55",
-      "antidote_use/antidote_use_1.ogg": "fcf9e4d53c0f7f37242dcd71e00ad484a28ca94881cd7232a8c460da66347d9b",
       "attack_bite/attack_bite_1.ogg": "a7dca60b77027fbaf7e073f6bd66de4eac3c2c309f291f1a28d537deb761155c",
       "attack_bite/attack_bite_2.ogg": "1d5a294913adc3770a3345b66a0297e87f3a4b4dfebe751c65c8974f172fadae",
       "attack_bite/attack_bite_3.ogg": "97891340156fdc0a10bf2fda2a313194627afd1d256a7cf210cc62b76f425836",
@@ -110,7 +109,6 @@
       "hit_wood/hit_wood_5.ogg": "f1e66bba043033f1fafc3ce77352be6ab9b0c0f25c99434478cec5efdbafc465",
       "horde_ram_hit/horde_ram_hit_1.ogg": "d7d8096ec9b44df84602dbcedd48791ac914a707125a305099e306110c7e8b0a",
       "horde_ram_hit/horde_ram_hit_2.ogg": "a00218ab2dfe8d02d5e5dd5254b3092240511dec8ce954b574314df1c324546c",
-      "metal_door_close/metal_door_close_1.ogg": "0cb79ba17cc3c990cb247792779041ad4b9e60127dbe114714324c3511e2ced6",
       "metal_door_open/metal_door_open_1.ogg": "3535ac82efffd7a2464d68b567565a6f9decc4b2b8b7ac771ac7df6a024e6b64",
       "skill_berserk/skill_berserk_1.ogg": "dd9fbbe5f3522aaa33effceac158715a7cdd436e15572f3d7fc721ef9c38bb35",
       "skill_berserk/skill_berserk_2.ogg": "e56b6f92f767b86b71624490862227f11f68c162bafaa2af4d2ca06f4e685d3b",
@@ -162,10 +160,7 @@
       "dna_pickup/dna_pickup_2.ogg": "ecd0e3bf84342083984eddb544ae4f0c719b63df99bcea91669aea72a13bd491",
       "minigun_fire/minigun_fire_1.ogg": "4596a7e22f91dfac203568ae349bb957bf77f5bc06c94ae9d2eefc056b7d7241",
       "minigun_fire/minigun_fire_2.ogg": "7114c7dee2b15b5ecef286d86c68e73dd016cfe17d8173f6a8837052bb38095e",
-      "minigun_fire/minigun_fire_3.ogg": "f8447584ed2b88e0e1e5f8c17e6e272c8afd8fdfb7c00d5ab58c612433cd4218",
-      "sniper_fire/sniper_fire_1.ogg": "c1e1be3a3643cf4280163816e1162d61af46684c15426ceb4be3004d88e467a2",
-      "sniper_fire/sniper_fire_2.ogg": "c1e1be3a3643cf4280163816e1162d61af46684c15426ceb4be3004d88e467a2",
-      "sniper_fire/sniper_fire_3.ogg": "c1e1be3a3643cf4280163816e1162d61af46684c15426ceb4be3004d88e467a2"
+      "minigun_fire/minigun_fire_3.ogg": "f8447584ed2b88e0e1e5f8c17e6e272c8afd8fdfb7c00d5ab58c612433cd4218"
     }
   },
   "protected_events": [
