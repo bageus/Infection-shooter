@@ -189,6 +189,8 @@ func _activate_pending(tree: SceneTree, previous: Node) -> void:
 
 
 func _log_begin() -> void:
+	if not OS.is_debug_build():
+		return
 	print("Mission begin: texture profile 1K; renderer %s; allocator %.1f MiB" % [
 		RenderingServer.get_current_rendering_method(), float(OS.get_static_memory_usage()) / 1048576.0])
 
@@ -224,9 +226,10 @@ func _request_scene(tree: SceneTree) -> PackedScene:
 func _set_progress(value: float, phase: String) -> void:
 	if phase != _logged_phase:
 		_logged_phase = phase
-		print("Mission phase: %s; allocator %.1f MiB; video %.1f MiB" % [phase,
-			float(OS.get_static_memory_usage()) / 1048576.0,
-			float(Performance.get_monitor(Performance.RENDER_VIDEO_MEM_USED)) / 1048576.0])
+		if OS.is_debug_build():
+			print("Mission phase: %s; allocator %.1f MiB; video %.1f MiB" % [phase,
+				float(OS.get_static_memory_usage()) / 1048576.0,
+				float(Performance.get_monitor(Performance.RENDER_VIDEO_MEM_USED)) / 1048576.0])
 	progress.value = maxf(progress.value, value * 100.0)
 	var names := {"resources": "Загрузка ресурсов…", "prepare": "Подготовка карты…", "objects": "Создание локации…", "materials": "Подготовка текстур…", "ready": "Готово"} if _ru else {"resources": "Loading resources…", "prepare": "Preparing map…", "objects": "Building location…", "materials": "Preparing textures…", "ready": "Ready"}
 	label.text = names[phase]
