@@ -46,8 +46,14 @@ func _run() -> void:
 	var projectile := Node3D.new()
 	stage.add_child(projectile)
 	EXPLOSION.explode(projectile, Vector3(0.0, 0.6, 0.0), Vector3.UP, null, stage, null)
-	for i in 5:
-		await physics_frame
+	# The destruction budget spreads the breakup over a few frames; every prop must still break promptly.
+	for i in 60:
+		await process_frame
+		var pending := false
+		for prop in props:
+			pending = pending or (is_instance_valid(prop) and not bool(prop.get("_broken")))
+		if not pending:
+			break
 	for prop in props:
 		var broken: bool = not is_instance_valid(prop) or bool(prop.get("_broken"))
 		_check(broken, "Blast breaks %s" % String(prop.get("model_path")).get_file() if is_instance_valid(prop) else "Blast breaks a prop")

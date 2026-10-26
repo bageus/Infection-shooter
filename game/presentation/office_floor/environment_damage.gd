@@ -8,6 +8,10 @@ const THIN_PIECE := 0.1
 # A piece whose two smaller dimensions are both under this (a slat, a rail) does not collide with other pieces.
 const STICK_THICKNESS := 0.15
 const STICK_MIN_LENGTH := 1.5
+# A chip (largest edge under SMALL_SHADOW_EDGE, m) or a sheet (thinner than SHEET_SHADOW_THICKNESS) casts no
+# shadow: hundreds of them would each be drawn again in every shadow pass for a shadow nobody sees.
+const SMALL_SHADOW_EDGE := 0.4
+const SHEET_SHADOW_THICKNESS := 0.05
 
 
 static func find_named(node: Node, wanted: String) -> Node3D:
@@ -70,6 +74,8 @@ static func spawn_piece(host: Node3D, mesh: MeshInstance3D, owner: Node3D, stage
 	copy.material_override = mesh.material_override
 	for surface in mesh.get_surface_override_material_count():
 		copy.set_surface_override_material(surface, mesh.get_surface_override_material(surface))
+	if maxf(bounds.size.x, maxf(bounds.size.y, bounds.size.z)) <= SMALL_SHADOW_EDGE or minf(bounds.size.x, minf(bounds.size.y, bounds.size.z)) <= SHEET_SHADOW_THICKNESS:
+		copy.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
 	fragment.add_child(copy)
 	(host.get("effects_root") as Node3D).add_child(fragment)
 	fragment.global_transform = Transform3D(world.basis.orthonormalized(), bounds.get_center())

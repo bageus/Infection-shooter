@@ -6,6 +6,7 @@ const BUDGET_LIGHT := preload("res://game/presentation/office_floor/budget_omni_
 const GEOMETRY := preload("res://game/presentation/office_floor/environment_prop_geometry.gd")
 const BREAK_SOUND := preload("res://game/presentation/office_floor/prop_break_sound.gd")
 const BREAKUP := preload("res://game/presentation/office_floor/environment_prop_breakup.gd")
+const BUDGET := preload("res://game/presentation/office_floor/destruction_budget.gd")
 const FLOOR_DEBRIS := preload("res://game/presentation/office_floor/prop_floor_debris.gd")
 var _floor_debris := FLOOR_DEBRIS.new()
 const PLATE_FRUIT := preload("res://game/presentation/office_floor/plate_fruit.gd")
@@ -377,7 +378,7 @@ func take_projectile_hit(damage: float, hit_position: Vector3, _normal: Vector3,
 			BOOK_STACK.scatter(self, _visual, hit_position, direction)
 			queue_free()
 		PROP_DAMAGE.HitAction.TRANSITION:
-			call_deferred("_apply_damage", hit_position, direction)
+			BUDGET.enqueue(effects_root, Callable(self, "_apply_damage").bind(hit_position, direction))
 		PROP_DAMAGE.HitAction.SHUDDER:
 			_reaction.shudder(direction)
 		PROP_DAMAGE.HitAction.CHIP_FACADE:

@@ -5,7 +5,7 @@ extends SceneTree
 const SFX := preload("res://game/core/audio/public/sound_events.gd")
 
 ## Beds that run for a whole skill effect (storm field, acid pool, blade orbit).
-const LASTING := [&"extinguisher_spray", &"skill_storm_field", &"acid_sizzle", &"bone_blades_whirl", &"display_intro", &"vectrion_is_the_future"]
+const LASTING := [&"extinguisher_spray", &"skill_storm_field", &"display_intro", &"vectrion_is_the_future"]
 
 var failures := 0
 

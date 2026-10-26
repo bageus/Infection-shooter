@@ -5,6 +5,7 @@ extends RefCounted
 const DAMAGE := preload("res://game/presentation/office_floor/environment_damage.gd")
 const GEOMETRY := preload("res://game/presentation/office_floor/environment_prop_geometry.gd")
 const SFX := preload("res://game/core/audio/public/sound_events.gd")
+const BUDGET := preload("res://game/presentation/office_floor/destruction_budget.gd")
 
 
 # A cabinet piece with an edge at least this long (m) is split further when a blast breaks it.
@@ -64,7 +65,10 @@ static func _split_later(body: RigidBody3D, geometry: GEOMETRY, fragment: RigidB
 		var live_body: RigidBody3D = body_ref.get_ref() as RigidBody3D
 		var live_fragment: RigidBody3D = fragment_ref.get_ref() as RigidBody3D
 		if live_body != null and live_fragment != null and not live_fragment.is_queued_for_deletion():
-			hit_fragment(live_body, geometry, live_fragment, hit_position, direction, true))
+			# Every cabinet piece of one blast splits at the same moment; the budget spreads them over frames.
+			BUDGET.enqueue(live_body.get("effects_root") as Node, func() -> void:
+				if is_instance_valid(live_body) and is_instance_valid(live_fragment) and not live_fragment.is_queued_for_deletion():
+					hit_fragment(live_body, geometry, live_fragment, hit_position, direction, true)))
 
 
 static func hit_fragment(body: RigidBody3D, geometry: GEOMETRY, fragment: RigidBody3D, hit_position: Vector3, direction: Vector3, blast: bool = false) -> void:
