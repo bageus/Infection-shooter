@@ -72,7 +72,8 @@ static func capture(session: Variant, data: Dictionary) -> void:
 ## JSON parses integer literals as floats; normalize saved render inputs before hashing.
 static func signature(records: Array) -> String:
 	var rows: Array = []
-	var fields := ["scene", "x", "y", "z", "rotation_x", "rotation_y", "rotation_z", "scale_x", "scale_y", "scale_z", "light_energy", "light_angle", "energy_multiplier", "light_color", "flicker_mode", "flicker_step", "blood_texture", "blood_surface", "blood_normal", "blood_attachment"]
+	# Fixture shape changes Spot count and offsets, even when energy is unchanged.
+	var fields := ["scene", "x", "y", "z", "rotation_x", "rotation_y", "rotation_z", "scale_x", "scale_y", "scale_z", "light_energy", "light_angle", "energy_multiplier", "light_color", "fixture_shape", "flicker_mode", "flicker_step", "blood_texture", "blood_surface", "blood_normal", "blood_attachment"]
 	for record: Dictionary in records:
 		var row: Array = []
 		for field in fields:
