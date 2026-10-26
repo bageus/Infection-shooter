@@ -40,6 +40,11 @@ static func cloud_gone(owner: Node, shown: bool) -> void:
 		owner.queue_free()
 
 
+## A body that never had a death cloud is freed when it is hidden, as if its cloud had ended.
+static func without_cloud(owner: Node) -> void:
+	owner.set_meta(&"cloud_gone", true)
+
+
 ## Called when a body is hidden: its hitboxes go, and a body whose cloud has
 ## already ended is freed.
 static func hidden(owner: Node, parts: Node) -> void:
