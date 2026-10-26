@@ -210,9 +210,6 @@ Reproducible with `python tools/build_destruction_sounds.py`. Derived from the e
 | break_wood | hit_wood, fall_wood |
 | break_furniture | hit_wood, hit_metal, fall_wood, fall_debris |
 | break_cardboard | hit_paper, fall_light |
-| break_metal | hit_metal, fall_metal, fall_debris |
-| break_electronics | hit_electronics, hit_metal, glass_break, fall_tech |
-| break_lamp | hit_glass, glass_break, hit_electronics, fall_metal |
 
 mutation_open/mutation_close: original CC0-1.0 procedural synthesis with tools/build_ui_sounds.py; close is the exact reverse of open, by 16-bit sample.
 
