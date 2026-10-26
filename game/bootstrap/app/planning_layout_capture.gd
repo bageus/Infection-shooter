@@ -3,6 +3,7 @@ extends RefCounted
 const SURFACE_SETTINGS := preload("res://game/bootstrap/app/planning_surface_decals.gd")
 const DOOR_OPTIONS := preload("res://game/bootstrap/app/planning_door_options.gd")
 const WAVE_DIRECTOR := preload("res://game/features/spawning/public/wave_director.gd")
+const WALL_MOUNT := preload("res://game/presentation/office_floor/public/wall_mount_models.gd")
 
 
 static func collect(objects: Node, nodes: Array, include_player: bool = true) -> Dictionary:
@@ -59,6 +60,8 @@ static func collect(objects: Node, nodes: Array, include_player: bool = true) ->
 			records[-1]["decor_pose"] = node.call("get_decor_pose")
 		if node.has_method("has_display") and node.call("has_display"):
 			records[-1]["display"] = node.call("get_display_config")
+		if node.has_method("is_wall_mounted") and WALL_MOUNT.is_adjustable(str(node.get("model_path"))):
+			records[-1]["wall_mount"] = node.call("is_wall_mounted")
 		if node.has_method("get_loot_config") and node.has_meta(&"planning_loot"):
 			records[-1]["loot"] = node.call("get_loot_config")
 		if node.has_method("has_fruit") and node.call("has_fruit") and bool(node.call("get_fruit_config")["enabled"]):
