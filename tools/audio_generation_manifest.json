@@ -12,9 +12,6 @@
       "break_furniture/break_furniture_3.ogg": "0858b7061381b7fa345599cf1efcb6a969e9a3ff6ed4ea39dd5dd63e09d94464",
       "break_lamp/break_lamp_1.ogg": "fa84631dfa786d2e98d433e5b86be9e2e06bbddf1778108ac9dfcafa630654b3",
       "break_lamp/break_lamp_2.ogg": "1704cf91c4a10e143723a4c257b4c87c76ee33c4d3c9c5d7e542070c15c201cf",
-      "break_metal/break_metal_1.ogg": "664dfa867a86ce1bf263b035bd36bb4970c8a312703f6830be90f65b01081261",
-      "break_metal/break_metal_2.ogg": "9e6ae407b99e0c6d607265475afef259a5ac8ac0e1950a97d4e80489805e600c",
-      "break_metal/break_metal_3.ogg": "0c64b4c86381b7deae30d4a2a73184530036f992e48f60d894f6ebe454f37bdf",
       "break_wood/break_wood_1.ogg": "1d15d900fd2a84548558eb5b7e58735446dae45f3b9444338fd053a0c3efcd3d",
       "break_wood/break_wood_2.ogg": "8a1c356fda7dfab812527463407e6a0fbef26dc02b9acd22324ff7038788a1e9",
       "break_wood/break_wood_3.ogg": "d8b5ab81bb631e64d9db78ee72df5aaf678de52d71f6c251db98b407eae657fb"
@@ -208,6 +205,7 @@
   },
   "protected_events": [
     "ak_reload",
+    "break_metal",
     "coller_server",
     "colossus_attack",
     "colossus_idle",
