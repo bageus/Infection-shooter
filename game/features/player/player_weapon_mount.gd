@@ -1,7 +1,9 @@
 extends Node
 
+const RELOAD_POSE := preload("res://game/features/player/player_reload_pose.gd")
 const EQUIPMENT_POSE := preload("res://game/features/player/player_equipment_pose.gd")
 var equipment_pose: SkeletonModifier3D
+var reload_pose: SkeletonModifier3D
 var skeleton: Skeleton3D
 var socket: Node3D
 var _remote: RemoteTransform3D
@@ -42,6 +44,11 @@ func _ready() -> void:
 	aim.name = "BodyAim"
 	aim.mount = self
 	skeleton.add_child(aim)
+	var reload := RELOAD_POSE.new()
+	reload.name = "ReloadPose"
+	reload.mount = self
+	skeleton.add_child(reload)
+	reload_pose = reload
 	skeleton.skeleton_updated.connect(_sync_active)
 	_remote = RemoteTransform3D.new()
 	_remote.name = "ActiveWeaponTransform"

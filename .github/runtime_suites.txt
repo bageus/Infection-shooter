@@ -231,3 +231,4 @@ game/bootstrap/app/tests/run_planner_hud_tests.gd
 game/presentation/office_floor/tests/run_ambient_prop_sounds_tests.gd
 game/presentation/office_floor/tests/run_destruction_budget_tests.gd
 game/bootstrap/app/tests/run_user_data_migration_tests.gd
+game/features/player/tests/run_reload_pose_tests.gd
