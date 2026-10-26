@@ -81,6 +81,7 @@ func _build() -> void:
 			for index in range(1, 7):
 				_heading("corpChapter" + str(index))
 				_copy("corpHistory" + str(index))
+			_credits()
 			var back := _button("back", view.close_dialog)
 			back.reparent(_fixed_actions)
 		"briefing":
@@ -96,6 +97,23 @@ func _build() -> void:
 			_copy(prefix + "Copy")
 			_button("confirm", view.dispatch.bind(kind))
 			_button("cancel", view.close_dialog)
+
+
+# Attribution for CC-BY / CC-BY-SA sources; CREDITS.md itself is not exported.
+func _credits() -> void:
+	_heading("credits")
+	_copy("creditsModels")
+	_copy("creditsFont")
+	_copy("creditsAudio")
+	var file := FileAccess.open("res://assets/interface/credits.json", FileAccess.READ)
+	var data: Variant = JSON.parse_string(file.get_as_text()) if file != null else null
+	if not data is Dictionary:
+		return
+	for entry: Array in data.get("audio", []):
+		var line := STYLE.label("%s, %s\n%s" % [entry[0], entry[1], entry[2]], roundi(11 * view.preferences.values.text_scale))
+		line.autowrap_mode = TextServer.AUTOWRAP_ARBITRARY
+		line.add_theme_color_override("font_color", STYLE.MUTED)
+		layout.add_child(line)
 
 
 func _heading(key: String, translated: bool = true) -> void:
