@@ -231,11 +231,12 @@ func _light_shadows() -> void:
 	sampler.ambient = Color(0, 0, 0)
 	var lamp := {"position": Vector3(2, 3, 2), "direction": Vector3.DOWN, "color": Color.RED, "energy": 2.0, "range": 6.0, "angle": 0.7, "cone": 1.0, "attenuation": 1.0, "shadows": false}
 	sampler.lamps = [lamp]
+	roof.remove_from_group("camera_occluder")
 	var lit: Image = await sampler.sample(Vector2i.ZERO, 0.0135)
 	_check(lit.get_pixel(8, 8).r > 0.5 and lit.get_pixel(8, 8).g == 0, "Authored light color/energy are baked")
-	lamp.shadows = true
+	roof.add_to_group("camera_occluder")
 	var shadowed: Image = await sampler.sample(Vector2i.ZERO, 0.0135)
-	_check(shadowed.get_pixel(8, 8).r == 0, "Structural shadow is baked, not evaluated in gameplay")
+	_check(shadowed.get_pixel(8, 8).r == 0, "Structural shadow is baked even with legacy dynamic shadows=false")
 	var plane := PlaneMesh.new()
 	plane.size = Vector2(8, 8)
 	var arrays := plane.surface_get_arrays(0)
@@ -248,7 +249,7 @@ func _light_shadows() -> void:
 
 func _signed_zero_signature() -> void:
 	# Construct the sign at runtime: JSON intentionally erases IEEE negative zero.
-	var negative_zero := -absf(float(failures))
+	var negative_zero := -absf(float("0"))
 	var records: Array = [{"scene": DECAL.resource_path, "blood_texture": "biomass_01", "blood_surface": "floor", "x": 2.0, "rotation_x": negative_zero, "blood_normal": [negative_zero, 1.0, negative_zero]}]
 	var signature := BAKE.signature(records)
 	_check(signature == BAKE.signature(JSON.parse_string(JSON.stringify(records))), "Signed zero fingerprint survives JSON save/load")

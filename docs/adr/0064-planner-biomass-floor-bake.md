@@ -82,3 +82,10 @@ public fixtures и RGB8 grid проверены, подробности docs/qa/
 неполные подписи безопасно используют исходники до Save Map/Layout; DTO/API/
 owners/edges прежние, bake при load не добавлен. N04 интегрируется в main
 здесь: PR475 был merged в feature branch. QA docs/qa/biomass_cache_shape.md.
+
+
+26.10.2026 — repair N05: не добавлять пустой столбец в каждую canonical row.
+Default point сохраняет прежнюю подпись (включая shipped5pages/322pieces),
+nondefault shape добавляется именованным полем и инвалидирует старый cache
+до создания view при load. Форматы прежние, source/PNG не переподписаны.
+Тест structural rays приведён к N04 policy. QA docs/qa/biomass_cache_shape.md.

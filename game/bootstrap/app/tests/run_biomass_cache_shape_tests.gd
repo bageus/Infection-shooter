@@ -123,6 +123,10 @@ func _prepared(data: Dictionary, accepted: bool) -> void:
 
 
 func _legacy_and_canonical() -> void:
+	var point := _capture("point")
+	var legacy_signature := BAKE.signature(point.objects)
+	point.objects[0].erase("fixture_shape")
+	_check(legacy_signature == BAKE.signature(point.objects), "Missing shape and explicit default point retain the same legacy signature")
 	var data := _capture("rectangle")
 	_check(BAKE.signature(data.objects) == BAKE.signature(JSON.parse_string(JSON.stringify(data.objects))), "Shape signature preserves JSON integer/float equivalence")
 	data.objects[0].x = -0.0
