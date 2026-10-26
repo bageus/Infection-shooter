@@ -10,7 +10,8 @@ config_version=5
 
 [application]
 
-config/name="Infecrion shooter"
+config/name="Infection Shooter"
+config/icon="res://assets/icons/game_icon_256.png"
 run/main_scene="res://game/bootstrap/app/menu/front_end.tscn"
 config/features=PackedStringArray("4.7", "GL Compatibility")
 

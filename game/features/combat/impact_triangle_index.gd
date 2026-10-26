@@ -12,6 +12,7 @@ var _root := -1
 
 func _init(source: PackedVector3Array) -> void:
 	triangles = source
+	@warning_ignore("integer_division")
 	var count := triangles.size() / 3
 	if count > 0:
 		_build(_morton_order(count))
