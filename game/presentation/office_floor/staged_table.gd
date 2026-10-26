@@ -6,6 +6,7 @@ var _floor_debris := FLOOR_DEBRIS.new()
 const PIECE_SCRIPT = preload("res://game/presentation/office_floor/table_piece.gd")
 const BAKED_SCRIPT = preload("res://game/presentation/office_floor/table_baked_pieces.gd")
 const ASSEMBLY_SCRIPT = preload("res://game/presentation/office_floor/table_assembly.gd")
+const BUDGET := preload("res://game/presentation/office_floor/destruction_budget.gd")
 const EFFECTS_SCRIPT = preload("res://game/features/combat/public/impact_effects.gd")
 const BALANCE = preload("res://game/features/combat/public/projectile_balance.gd")
 const DEBRIS = preload("res://game/presentation/office_floor/debris_lifecycle.gd")
@@ -118,7 +119,7 @@ func hit_piece(part_id: String, hit_position: Vector3, direction: Vector3, damag
 	_part_health.erase(part_id)
 	var body: RigidBody3D = _active[part_id]
 	_active.erase(part_id)
-	call_deferred("_transition_piece", part_id, body, hit_position, direction, weapon == "GRENADE")
+	BUDGET.enqueue(get_parent(), Callable(self, "_transition_piece").bind(part_id, body, hit_position, direction, weapon == "GRENADE"))
 
 
 func _switch_to_modular() -> void:

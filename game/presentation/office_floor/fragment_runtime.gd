@@ -124,11 +124,10 @@ func _compact() -> void:
 	if _head >= 128:
 		_fifo = _fifo.slice(_head)
 		_head = 0
-	# Directly freed fragments can leave tombstones without overflowing the budget.
-	if _fifo.size() > 256:
-		_fifo.clear()
-		for id: int in active:
-			_fifo.append({"id": id, "reference": active[id]})
+	# Directly freed fragments leave tombstones without overflowing the budget; drop them once they
+	# outnumber the live entries (rebuilding on every register was quadratic in a big blast).
+	if _fifo.size() > maxi(256, active.size() * 2):
+		_fifo = _fifo.filter(func(record: Dictionary) -> bool: return active.has(record.id) and active[record.id] == record.reference)
 		_head = 0
 
 
