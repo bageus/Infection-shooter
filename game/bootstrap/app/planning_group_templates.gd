@@ -177,6 +177,9 @@ func _save_recording() -> void:
 
 func _refresh_list() -> void:
 	list.clear()
+	# A folder is created on the first save; listing it before then logs an engine error.
+	if not DirAccess.dir_exists_absolute(ProjectSettings.globalize_path(ROOT)):
+		return
 	var found: Array[Dictionary] = []
 	for file in DirAccess.get_files_at(ROOT):
 		if file.ends_with(".json"):
