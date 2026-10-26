@@ -65,6 +65,8 @@ IMPLEMENTED / CI_PENDING26.10.2026: поле включено в подпись,
 
 ### Q02-recheck. Crowd separation не изолирован по World3D
 
+IMPLEMENTED / CI_PENDING26.10.2026: snapshots изолированы по physics-space RID, including previous positions при reparent. Regression7→0, shared-world viewports и10800 unchanged same-world velocities проверены. [QA](../qa/crowd_world_isolation.md). Исходное evidence ниже сохранено.
+
 Источник: `game/features/infected/crowd_separation.gd:14–20, 34–59`.
 
 Это подтверждение незакрытого Q02 прежнего аудита, а не новая проблема обычной сцены с одним миром. _current/_previous и frame глобальны для script resource, ключ — только XZ-cell. В пробе объекты разных SubViewport/World3D оказываются соседями; единственный объект второго мира получает push 2.4964 м/с. Требует двух одновременно работающих миров; влияние на обычный single-world gameplay не доказано. Аналогичные общие лимиты звука/трупов требуют отдельного теста; они не объявлены неисправными только по наличию static.

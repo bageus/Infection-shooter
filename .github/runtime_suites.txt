@@ -83,6 +83,7 @@ game/features/infected/tests/run_chase_wall_beyond_range_tests.gd
 game/features/infected/tests/run_chase_stairs_slope_tests.gd
 game/features/infected/tests/run_chase_real_enemy_slope_tests.gd
 game/features/infected/tests/run_crowd_separation_tests.gd
+game/features/infected/tests/run_crowd_world_tests.gd
 game/features/infected/tests/run_enemy_perception_tests.gd
 game/features/combat/tests/run_weapon_noise_tests.gd
 game/features/infected/tests/run_enemy_idle_lod_tests.gd

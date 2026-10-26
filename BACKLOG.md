@@ -137,3 +137,8 @@ IMPLEMENTED / CI_PENDING в T004: structural bake не зависит от dynam
 ## N05 — форма лампы и подпись cache (26.10.2026)
 
 IMPLEMENTED / CI_PENDING в T004: fixture_shape входит в canonical signature; real capture, planner exit, sync/async load, legacy/JSON/undo regression24→0. [QA](docs/qa/biomass_cache_shape.md). N04 перенесён из merged PR475 в новую ветку непосредственно от main70ab64d, так как прежний merge был только в branch PR474. Main conversions закрыли прежний WAV/OGG blocker (tracked WAV/import0), audio untouched. Старые неполные cache signatures требуют Save Map/Layout; исходники сохранены. После CI следующий пункт — Q02 World3D crowd isolation; G01 whole-scene shadows остаётся отдельным дизайном.
+
+
+## Q02 — независимые миры толпы (26.10.2026)
+
+IMPLEMENTED / CI_PENDING в T004: private snapshot по physics-space RID, complete positions/IDs/cells; раздельные миры не влияют, общий World3D через разные viewports сохраняет взаимодействие. Reparent/lifecycle/frame gap и baseline7→0,10800 same-world vectors совпали. [QA](docs/qa/crowd_world_isolation.md). После CI следующий R01 (loading deadline/cancel), G01 — отдельный дизайн static shadow layer.
