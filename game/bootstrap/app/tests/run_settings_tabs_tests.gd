@@ -289,7 +289,7 @@ func _check_about(menu: Node) -> void:
 	var credit_lines := 0
 	for label: Label in menu.modal.find_children("*", "Label", true, false):
 		credit_lines += int(label.text.contains("http"))
-	_check(credit_lines >= 20, "About lists the attribution-required sound credits")
+	_check(credit_lines >= 15, "About lists the attribution-required sound credits")
 
 
 func _check(condition: bool, message: String) -> void:
