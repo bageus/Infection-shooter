@@ -58,6 +58,10 @@ func _release_slam() -> void:
 	wave.configure(feet, slam_radius, slam_wave_speed, slam_player_damage * get_damage_percent() / 100.0, slam_object_damage, self, Color(0.6, 0.46, 0.34, 0.8))
 
 
+func _armor_capped() -> bool:
+	return true
+
+
 # The swipe is not used while the slam animation owns the body.
 func _try_attack() -> void:
 	if _slam_busy > 0.0:

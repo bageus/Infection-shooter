@@ -135,6 +135,7 @@ func configure_death_cloud(config: Dictionary) -> void: _authoring.set_death_clo
 func get_death_cloud_config() -> Dictionary: return _authoring.death_cloud()
 func get_enemy_stats() -> Dictionary: return _authoring.stats()
 func get_damage_percent() -> float: return _authoring.damage_percent()
+func _armor_capped() -> bool: return false # Colossus overrides: its hits never pierce armor
 
 
 func configure_chase_budget(budget: Node) -> void:
@@ -526,7 +527,7 @@ func _deliver_attack() -> void:
 	offset.y = 0.0
 	if offset.length() > attack_range * attack_reach_tolerance:
 		return
-	PERCEPTION.RULES.damage(_target, attack_damage * _attack_scale)
+	PERCEPTION.RULES.damage(_target, attack_damage * _attack_scale, _armor_capped())
 	audio.attack_landed(_attack_scale < 1.0)
 
 

@@ -4,6 +4,7 @@ extends Node
 const B := preload("res://game/features/infection/public/mutation_balance.gd")
 var hybrids := preload("res://game/features/player/passive_hybrid_effects.gd").new(self)
 var retaliation_cooldown := 0.0
+const EXPLOSION := preload("res://game/features/combat/public/grenade_explosion.gd")
 const SKILL_VFX := preload("res://game/features/player/mutation_skill_vfx.gd")
 const VFX_BUFFS := ["storm_pulse", "bone_blades", "berserk"]
 var _active_effects := preload("res://game/features/player/active_mutation_effects.gd").new(self)
@@ -506,22 +507,6 @@ func _enemies_near(center: Vector3, radius: float, nearest_first: bool = false) 
 	return result
 
 
-## Skills stop at static walls as shots do; furniture and bodies do not block them.
+## Skills stop at static walls exactly as grenade blasts do (shared helper).
 func _unwalled(center: Vector3, enemy: Node3D) -> bool:
-	var origin := center + Vector3.UP * 0.8
-	var target := enemy.global_position + Vector3.UP * 0.8
-	var excluded: Array[RID] = [player.get_rid()]
-	if enemy is CollisionObject3D:
-		excluded.append((enemy as CollisionObject3D).get_rid())
-	var space := player.get_world_3d().direct_space_state
-	for _attempt in 16:
-		var hit := space.intersect_ray(PhysicsRayQueryParameters3D.create(origin, target, 1, excluded))
-		if hit.is_empty():
-			return true
-		var collider := hit["collider"] as CollisionObject3D
-		if collider == null:
-			return true
-		if collider is StaticBody3D:
-			return false
-		excluded.append(collider.get_rid())
-	return true
+	return not EXPLOSION.is_sheltered(player.get_world_3d(), center + Vector3.UP * 0.8, enemy)

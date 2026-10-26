@@ -367,6 +367,7 @@ func get_projectile_material(_shape_index: int = -1) -> String:
 	return "flesh"
 
 
+func take_armor_capped_damage(amount: float) -> void: _apply_damage(amount, "physical", global_position, Vector3.FORWARD, "physical", true) # Colossus: armor soaks the whole blow
 func take_projectile_damage(amount: float, point: Vector3, direction: Vector3, weapon: String) -> void:
 	_apply_damage(amount, "physical", point, direction, weapon)
 
@@ -375,14 +376,13 @@ func take_blast_damage(amount: float, origin: Vector3) -> void:
 	_apply_damage(amount, "fire", global_position, (global_position - origin).normalized(), "GRENADE")
 
 
-func _apply_damage(amount: float, damage_type: String, point: Vector3, direction: Vector3, weapon: String) -> void:
+func _apply_damage(amount: float, damage_type: String, point: Vector3, direction: Vector3, weapon: String, armor_capped: bool = false) -> void:
 	if amount <= 0.0 or health <= 0.0 or _iframes_remaining > 0.0:
 		return
 	var remaining: float = mutation_effects.call("on_player_hit", maxf(amount, 0.0), damage_type)
-	var absorbed:=minf(armor,remaining)
-	armor-=absorbed
+	var absorbed:=remaining if armor_capped and armor > 0.0 else minf(armor,remaining)
+	armor=maxf(0.0,armor-absorbed); remaining-=absorbed
 	if absorbed > 0.0: _play_sound(&"damage_absorb")
-	remaining-=absorbed
 	_wound += minf(remaining, health)
 	health=maxf(0.0,health-remaining)
 	if health <= 0.0 and mutation_effects.call("survive_lethal"):
