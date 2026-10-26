@@ -13,11 +13,13 @@ var display_options: Node
 const LOOT_OPTIONS := preload("res://game/bootstrap/app/planning_loot_options.gd")
 const DOOR_OPTIONS := preload("res://game/bootstrap/app/planning_door_options.gd")
 const ROOM_OPTIONS := preload("res://game/bootstrap/app/planning_room_options.gd")
+const GROUP_TEMPLATES := preload("res://game/bootstrap/app/planning_group_templates.gd")
 var loot_options: Node
 const FRUIT_OPTIONS := preload("res://game/bootstrap/app/planning_fruit_options.gd")
 var fruit_options: Node
 var door_options: Node
 var room_options: Node
+var group_templates: Node
 const SPAWN_OPTIONS := preload("res://game/bootstrap/app/planning_spawn_options.gd")
 const BIOMASS_OPTIONS := preload("res://game/bootstrap/app/planning_biomass_options.gd")
 var spawn_options: Node
@@ -111,6 +113,9 @@ func setup_controls() -> void:
 	room_options = ROOM_OPTIONS.new()
 	add_child(room_options)
 	room_options.call("setup", session, objects)
+	group_templates = GROUP_TEMPLATES.new()
+	add_child(group_templates)
+	group_templates.setup(session, objects)
 	spawn_options = SPAWN_OPTIONS.new()
 	add_child(spawn_options)
 	spawn_options.call("setup", session, objects)
