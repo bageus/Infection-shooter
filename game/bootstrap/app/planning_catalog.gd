@@ -167,7 +167,11 @@ func _environment_scene_for(file_name: String) -> String:
 		"01_glass_door_breakable.glb": "res://game/presentation/office_floor/public/structural/sliding_glass_door.tscn",
 		"01_glass_partition_blinds_breakable.glb": "res://game/presentation/office_floor/public/structural/glass_partition_blinds.tscn",
 		"01_glass_partition_half_breakable.glb": "res://game/presentation/office_floor/public/structural/glass_partition_half.tscn",
-		"01_glass_wall_full_breakable.glb": "res://game/presentation/office_floor/public/structural/glass_wall_full.tscn"
+		"01_glass_wall_full_breakable.glb": "res://game/presentation/office_floor/public/structural/glass_wall_full.tscn",
+		"01_wall_lab_glass.glb": "res://game/presentation/office_floor/public/structural/lab_glass_wall.tscn",
+		"01_wall_lab_glass_door.glb": "res://game/presentation/office_floor/public/structural/lab_glass_door.tscn",
+		"01_wall_metal_grille.glb": "res://game/presentation/office_floor/public/structural/metal_grille.tscn",
+		"01_wall_metal_door.glb": "res://game/presentation/office_floor/public/structural/metal_door.tscn"
 	}
 	if structural.has(file_name):
 		return str(structural[file_name])
