@@ -17,7 +17,6 @@ the licence of their source (CC0 / CC-BY).
 | explosion/default/explosion_default_2.ogg | bmlake | CC BY 3.0 | https://freesound.org/people/bmlake/sounds/251617/ | CC-Sounds (Fris0uman/CDDA-Soundpacks) |
 | explosion/huge/explosion_huge_2.ogg | unfa | CC0 1.0 | https://freesound.org/people/unfa/sounds/352143/ | CC-Sounds (Fris0uman/CDDA-Soundpacks) |
 | explosion/small/explosion_small.ogg | j1987 | CC0 1.0 | https://freesound.org/people/j1987/sounds/140727/ | CC-Sounds (Fris0uman/CDDA-Soundpacks) |
-| fire_gun/empty_1.ogg | Rolly-SFX | CC0 1.0 | https://freesound.org/people/Rolly-SFX/sounds/528708/ | CC-Sounds (Fris0uman/CDDA-Soundpacks) |
 | fire_gun/rifles/automatic_rifle/indoor_gunfire/556_auto_rifle_shot_01.ogg | DoctorBoomstick | CC BY 4.0 | Audio was recorded by myself at nominal distance from a shooter firing a 5.56mm rifle on an outdoor gun range, a Sig Sauer MCX Spear LT, and touching up the resulting audio | CC-Sounds (Fris0uman/CDDA-Soundpacks) |
 | fire_gun/rifles/automatic_rifle/indoor_gunfire/556_auto_rifle_shot_02.ogg | DoctorBoomstick | CC BY 4.0 | Audio was recorded by myself at nominal distance from a shooter firing a 5.56mm rifle on an outdoor gun range, a Sig Sauer MCX Spear LT, and touching up the resulting audio | CC-Sounds (Fris0uman/CDDA-Soundpacks) |
 | fire_gun/rifles/automatic_rifle/indoor_gunfire/556_auto_rifle_shot_03.ogg | DoctorBoomstick | CC BY 4.0 | Audio was recorded by myself at nominal distance from a shooter firing a 5.56mm rifle on an outdoor gun range, a Sig Sauer MCX Spear LT, and touching up the resulting audio | CC-Sounds (Fris0uman/CDDA-Soundpacks) |
@@ -174,7 +173,6 @@ the licence of their source (CC0 / CC-BY).
 
 - `acid_sizzle`: redeclipse_sounds/sfx/corrodedamage.ogg, synthesised
 - `antidote_pickup`: cdda/sound/CC-Sounds/smash_fail/glass/smash_fail_glass_1.ogg, cdda/sound/CC-Sounds/smash_fail/plastic/smash_fail_plastic_2.ogg
-- `antidote_use`: cdda/sound/CC-Sounds/fire_gun/empty_1.ogg, redeclipse_sounds/sfx/extinguish.ogg
 - `assault_rifle_fire`: cdda/sound/CC-Sounds/fire_gun/rifles/automatic_rifle/indoor_gunfire/556_auto_rifle_shot_01.ogg, cdda/sound/CC-Sounds/fire_gun/rifles/automatic_rifle/indoor_gunfire/556_auto_rifle_shot_02.ogg, cdda/sound/CC-Sounds/fire_gun/rifles/automatic_rifle/indoor_gunfire/556_auto_rifle_shot_03.ogg
 - `attack_bite`: cdda/sound/CC-Sounds/mon_bite/bite_hit/bite_hit_1.ogg, cdda/sound/CC-Sounds/mon_bite/bite_hit/bite_hit_3.ogg, cdda/sound/CC-Sounds/mon_bite/bite_hit/bite_hit_5.ogg
 - `attack_hit`: cdda/sound/CC-Sounds/melee_attack/monster_melee_hit/monster_melee_hit_1.ogg, cdda/sound/CC-Sounds/melee_attack/monster_melee_hit/monster_melee_hit_2.ogg, cdda/sound/CC-Sounds/melee_attack/monster_melee_hit/monster_melee_hit_3.ogg, cdda/sound/CC-Sounds/melee_attack/monster_melee_hit/monster_melee_hit_4.ogg
@@ -214,7 +212,6 @@ the licence of their source (CC0 / CC-BY).
 - `horde_ram_hit`: cdda/sound/CC-Sounds/melee_hit_flesh/big_bash/big_bash_flesh_1.ogg, cdda/sound/CC-Sounds/melee_hit_flesh/big_bash/big_bash_flesh_2.ogg, cdda/sound/CC-Sounds/smash_success/wood_furn/smash_success_wood.ogg
 - `medkit_pickup`: cdda/sound/CC-Sounds/close_door/window/close_curtain.ogg, cdda/sound/CC-Sounds/smash_fail/plastic/smash_fail_plastic_2.ogg
 - `medkit_use`: cdda/sound/CC-Sounds/close_door/window/close_curtain.ogg, cdda/sound/CC-Sounds/melee_swing/small_cutting/small_cutting_swing_2.ogg, cdda/sound/CC-Sounds/smash_fail/plastic/smash_fail_plastic_2.ogg
-- `metal_door_close`: cdda/sound/CC-Sounds/close_door/door_metal/close_door_metal.ogg
 - `metal_door_open`: cdda/sound/CC-Sounds/open_door/door_metal/open_door_metal.ogg
 - `rifle_fire`: cdda/sound/CC-Sounds/fire_gun/rifles/rifle_1.ogg
 - `rifle_reload`: cdda/sound/CC-Sounds/reload/mag_fed_bolt_action_rifle/bolt_action_rifle_load_02.ogg, cdda/sound/CC-Sounds/reload/mag_fed_bolt_action_rifle/bolt_action_rifle_load_04.ogg
@@ -246,7 +243,6 @@ assets/audio/ui/*.ogg: original procedural synthesis for this project, dedicated
 
 | Event | Derived from | Processing |
 |---|---|---|
-| sniper_fire | rifle_fire (see table above) | lower, longer report with a boom and echo tail |
 | minigun_fire | *synthesised* by tools/build_weapon_sounds.py | deep thump, breech crack and mechanical clack |
 | minigun_spin | *synthesised* by tools/build_weapon_sounds.py | looping steady whine with ticks, played while the barrels turn |
 | key_pickup | *synthesised* by tools/build_weapon_sounds.py | three inharmonic brass partials struck in turn |
@@ -320,3 +316,8 @@ Atmosphere cues (`phone_ring`, `pc_hum`, `cooler_gurgle`, `biomass_gurgle`, `dis
 ## Owner-supplied weapon, door and pickup sounds (2026-10-26)
 
 Converted from the owner's WAV files to mono OGG Vorbis (originals removed, receipts in `audio_refresh_processing.json`, script `tools/import_weapon_audio.py`): shots (`pistol_fire`, `uzi_fire`, `shotgun_fire`, `ak_fire`, `m4_fire`, `launcher_fire`), reloads (`pistol_reload`, `uzi_reload`, `ak_reload`, `m4_reload`, `sniper_reload`, `launcher_reload`, `shotgun_shell_load` and `shotgun_pump`), casings (`casing_brass`, `casing_heavy`, `casing_shell`, `casing_launcher`), `dry_fire`, `weapon_pickup`, `weapon_switch`, `ammo_pickup`, `door_open`, `door_close`. They replace the earlier derived recordings, whose attribution rows were removed from this file when no remaining event used them.
+
+
+## Owner-confirmed recordings (2026-10-26)
+
+The owner states that `antidote_use`, `sniper_fire` and `metal_door_close` are their own recordings, so their source rows were removed. `sniper_fire` had three identical copies; it now has one file.

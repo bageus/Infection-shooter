@@ -23,7 +23,6 @@
       "acid_sizzle/acid_sizzle_1.ogg": "d390f83bcbae88be3d85f567cf656a4cd1f566eb696f6cc72090b30b9b6e0896",
       "acid_sizzle/acid_sizzle_2.ogg": "f34c03ef2c3194b15c60aa17c80d344a92ccfa2132c7f3fd458ce474416018c7",
       "antidote_pickup/antidote_pickup_1.ogg": "0d31eac75788144ca6e2ea7f0bedea0f1953f7a1fe154a79d9f8aeca4c29fa55",
-      "antidote_use/antidote_use_1.ogg": "fcf9e4d53c0f7f37242dcd71e00ad484a28ca94881cd7232a8c460da66347d9b",
       "assault_rifle_fire/assault_rifle_fire_1.ogg": "b69476f164d7a61d7beca3e883a3e47c031f1f1326f7935835fdaafc2a9d5760",
       "assault_rifle_fire/assault_rifle_fire_2.ogg": "f1e464c868de34295cc006cf5bbe88f61871c6e88424e4b0a9cca0ac67360730",
       "assault_rifle_fire/assault_rifle_fire_3.ogg": "b24cefb52db09afabd99b3df6e6c1c255f1e142cafea6e6bdff7f17b0d61dfe8",
@@ -133,7 +132,6 @@
       "horde_ram_hit/horde_ram_hit_2.ogg": "a00218ab2dfe8d02d5e5dd5254b3092240511dec8ce954b574314df1c324546c",
       "medkit_pickup/medkit_pickup_1.ogg": "ab1a8f60e8e20bd67aa9c14fa2d52161928213a5aa4fbb97d7731feb4ba3cca5",
       "medkit_use/medkit_use_1.ogg": "8b660578b903218d1054e59d3bcc0359180bc5bbb657d0864dba4a1512bed8b9",
-      "metal_door_close/metal_door_close_1.ogg": "0cb79ba17cc3c990cb247792779041ad4b9e60127dbe114714324c3511e2ced6",
       "metal_door_open/metal_door_open_1.ogg": "3535ac82efffd7a2464d68b567565a6f9decc4b2b8b7ac771ac7df6a024e6b64",
       "rifle_fire/rifle_fire_1.ogg": "5cb0605df6cece664f6f66ed904befd6209b1239165cb1a629c3bea821650d41",
       "rifle_fire/rifle_fire_2.ogg": "3fc58dc5d23c9ecc8aab02b054ae9a9e4225aa9dd57498406bbf8d77556f01af",
@@ -200,14 +198,12 @@
       "dna_pickup/dna_pickup_2.ogg": "ecd0e3bf84342083984eddb544ae4f0c719b63df99bcea91669aea72a13bd491",
       "minigun_fire/minigun_fire_1.ogg": "4596a7e22f91dfac203568ae349bb957bf77f5bc06c94ae9d2eefc056b7d7241",
       "minigun_fire/minigun_fire_2.ogg": "7114c7dee2b15b5ecef286d86c68e73dd016cfe17d8173f6a8837052bb38095e",
-      "minigun_fire/minigun_fire_3.ogg": "f8447584ed2b88e0e1e5f8c17e6e272c8afd8fdfb7c00d5ab58c612433cd4218",
-      "sniper_fire/sniper_fire_1.ogg": "c1e1be3a3643cf4280163816e1162d61af46684c15426ceb4be3004d88e467a2",
-      "sniper_fire/sniper_fire_2.ogg": "c1e1be3a3643cf4280163816e1162d61af46684c15426ceb4be3004d88e467a2",
-      "sniper_fire/sniper_fire_3.ogg": "c1e1be3a3643cf4280163816e1162d61af46684c15426ceb4be3004d88e467a2"
+      "minigun_fire/minigun_fire_3.ogg": "f8447584ed2b88e0e1e5f8c17e6e272c8afd8fdfb7c00d5ab58c612433cd4218"
     }
   },
   "protected_events": [
     "ak_reload",
+    "antidote_use",
     "coller_server",
     "colossus_attack",
     "colossus_idle",
@@ -228,6 +224,7 @@
     "hunger_voice",
     "key_pickup",
     "m4_reload",
+    "metal_door_close",
     "minigun_spin",
     "revenant_attack",
     "revenant_death",
@@ -235,6 +232,7 @@
     "revenant_voice",
     "skill_cooldown_done",
     "skill_second_heart",
+    "sniper_fire",
     "sniper_reload",
     "titan_attack",
     "titan_idle",
