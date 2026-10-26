@@ -17,8 +17,10 @@ func _run() -> void:
 	_config()
 	_trigger_rules()
 	_queue_rules()
+	_mixed_queue()
 	await _director()
 	await _burst_spread()
+	await _queues()
 	print("Wave tests: %d failures" % failures)
 	quit(failures)
 
@@ -32,15 +34,34 @@ func _check(condition: bool, message: String) -> void:
 
 func _config() -> void:
 	var clean := CONFIG.sanitize({"enemy": "dragon", "count": 9999, "interval": -4, "rule": "burst", "batch": "x", "trigger": "all"})
-	_check(clean["enemy"] == "hunger" and clean["count"] == CONFIG.COUNT_MAX, "bad enemy falls back and count is capped")
-	_check(clean["interval"] == CONFIG.INTERVAL_MIN and clean["batch"] == 5, "interval floor and default batch")
-	_check(clean["rule"] == "burst" and clean["trigger"] == "all", "valid rule and trigger are kept")
+	var queue: Dictionary = clean["queues"][0]
+	_check(clean["queues"].size() == 1, "a flat legacy config becomes one queue")
+	_check(queue["enemies"] == [{"enemy": "hunger", "count": CONFIG.COUNT_MAX}], "bad enemy falls back and count is capped")
+	_check(queue["interval"] == CONFIG.INTERVAL_MIN and queue["batch"] == 5, "interval floor and default batch")
+	_check(queue["rule"] == "burst" and queue["trigger"] == "all", "valid rule and trigger are kept")
 	_check(CONFIG.sanitize("junk") == CONFIG.defaults(), "non-dictionary gives defaults")
-	var stats := CONFIG.sanitize({"health": 999, "damage": 10})
+	var stats: Dictionary = CONFIG.sanitize({"health": 999, "damage": 10})["queues"][0]
 	_check(stats["health"] == CONFIG.STAT_MAX and stats["damage"] == CONFIG.STAT_MIN, "health and damage are clamped to 50-200%")
-	_check(CONFIG.sanitize({"enemy": "hunger"})["health"] == 100.0, "health and damage default to 100%")
+	_check(CONFIG.sanitize({"enemy": "hunger"})["queues"][0]["health"] == 100.0, "health and damage default to 100%")
 	for id in CONFIG.ENEMIES:
 		_check(ResourceLoader.exists(CONFIG.scene_path(id)), "enemy scene exists: " + id)
+	var many := CONFIG.sanitize({"queues": [
+		{"enemies": [{"enemy": "brute", "count": 3}, {"enemy": "x", "count": 2}], "start": "time", "delay": 9999},
+		{"enemies": [], "start": "time", "delay": 4},
+		"junk",
+	]})
+	var queues: Array = many["queues"]
+	_check(queues.size() == 3, "queues are kept and junk entries repaired (%d)" % queues.size())
+	_check(queues[0]["start"] == "trigger", "the first queue always starts by trigger")
+	_check(queues[0]["delay"] == CONFIG.DELAY_MAX and queues[0]["enemies"][1]["enemy"] == "hunger", "delay is capped and a bad kind falls back")
+	_check(queues[1]["start"] == "time" and queues[1]["delay"] == 4.0 and CONFIG.total_count(queues[1]) == 20, "a queue without enemies gets the default one")
+	var wide := []
+	for index in 20:
+		wide.append({"enemies": [{"enemy": "brute", "count": 1}]})
+	_check(CONFIG.sanitize({"queues": wide})["queues"].size() == CONFIG.QUEUES_MAX, "queue count is capped")
+	_check(CONFIG.summary(many).contains("Brute ×3") and CONFIG.summary(many).contains("3 оч."), "summary lists the first queue and the queue count")
+	_check(CONFIG.link_key("a", 0) == "a" and CONFIG.link_key("a", 2) == "a#2", "link keys: bare id for the first queue")
+	_check(CONFIG.split_link("a#2") == ["a", 2] and CONFIG.split_link("a") == ["a", 0], "link keys split back")
 
 
 func _trigger_rules() -> void:
@@ -84,6 +105,16 @@ func _queue_rules() -> void:
 		for order in queue.step(0.1, 89, 90, {}):
 			served[order["id"]] += int(order["count"])
 	_check(abs(int(served["x"]) - int(served["y"])) <= 1 and int(served["x"]) > 3, "two points share one free slot in turn %s" % str(served))
+
+
+func _mixed_queue() -> void:
+	var queue := QUEUE.new()
+	queue.activate("m", {"enemies": [{"enemy": "hunger", "count": 3}, {"enemy": "brute", "count": 1}], "interval": 0.1, "rule": "burst", "batch": 10})
+	var order := queue.step(0.1, 0, 90, {})[0]
+	var kinds: Array = order["enemies"]
+	_check(kinds.size() == 4 and kinds.count("hunger") == 3 and kinds.count("brute") == 1, "a queue spawns each of its kinds in full %s" % str(kinds))
+	_check(kinds[0] != kinds[1], "kinds take turns")
+	_check(queue.pending("m") == 0, "the mixed queue is spent")
 
 
 func _stage() -> Dictionary:
@@ -238,5 +269,44 @@ func _burst_spread() -> void:
 		previous = now
 	_check(previous == 10, "a burst of 10 still arrives in full (%d)" % previous)
 	_check(most <= DIRECTOR.SPAWNS_PER_FRAME, "no more than %d infected appear in one frame (%d)" % [DIRECTOR.SPAWNS_PER_FRAME, most])
+	stage.queue_free()
+	await process_frame
+
+
+func _queues() -> void:
+	var world := _stage()
+	var stage: Node3D = world["stage"]
+	var enemies: Node3D = world["enemies"]
+	var player: Node3D = world["player"]
+	var point := POINT.instantiate() as Node3D
+	point.set_meta("planning_object_id", "spawn_q")
+	stage.add_child(point)
+	var timed := {"enemies": [{"enemy": "hunger", "count": 2}, {"enemy": "brute", "count": 1}], "interval": 0.1, "start": "time", "delay": 1.0, "health": 150}
+	var by_trigger := {"enemies": [{"enemy": "hunger", "count": 2}], "interval": 0.1, "start": "trigger", "trigger": "all"}
+	point.call("configure_spawn", {"queues": [{"enemies": [{"enemy": "hunger", "count": 1}], "interval": 0.1}, timed, by_trigger]})
+	point.position = Vector3(-10, 0, -8)
+	# One infected starts queue 1 and (together with the second) queue 3; the second also starts the shared point 2.
+	var second := _enemy(enemies, Vector3(2, 1, 4), ["spawn_q#2"])
+	var third := _enemy(enemies, Vector3(4, 1, 4), ["spawn_q#2", "spawn_q"])
+	var director := DIRECTOR.new()
+	stage.add_child(director)
+	director.configure(enemies, player)
+	director.arm()
+	await _frames(6)
+	_check(not director.has_fired("spawn_q") and not director.has_fired("spawn_q#1") and not director.has_fired("spawn_q#2"), "no queue starts while the triggers live")
+	third.call("take_damage", 9999.0)
+	await _frames(20)
+	_check(director.has_fired("spawn_q") and not director.has_fired("spawn_q#2"), "one trigger starts queue 1; queue 3 waits for all of its infected")
+	var early := _spawned(enemies).filter(func(enemy: Node3D) -> bool: return enemy.get_meta(&"spawned_queue") == 1)
+	_check(early.is_empty() and not director.has_fired("spawn_q#1"), "the timed queue waits for its delay")
+	await _frames(70)
+	_check(director.has_fired("spawn_q#1"), "the timed queue starts after its delay")
+	var mixed := _spawned(enemies).filter(func(enemy: Node3D) -> bool: return enemy.get_meta(&"spawned_queue") == 1)
+	_check(mixed.size() == 3, "the timed queue spawns all its infected (%d)" % mixed.size())
+	_check(mixed.all(func(enemy: Node3D) -> bool: return enemy.call("get_enemy_stats")["health"] == 150.0), "each queue has its own health")
+	second.call("take_damage", 9999.0)
+	await _frames(40)
+	_check(director.has_fired("spawn_q#2"), "the last linked death starts the trigger queue")
+	_check(_spawned(enemies).filter(func(enemy: Node3D) -> bool: return enemy.get_meta(&"spawned_queue") == 2).size() == 2, "the trigger queue spawns its own infected")
 	stage.queue_free()
 	await process_frame

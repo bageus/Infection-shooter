@@ -1,8 +1,10 @@
-Copyright (c) 2026 ju7tconnection-1. All rights reserved.
+Copyright (c) 2026 ju7tconnect-one. All rights reserved.
 
-Infection Shooter, including its source code and original game content, is
-proprietary. No permission is granted to copy, modify, distribute or use it
-without the written consent of the copyright holder.
+Infection Shooter, including its source code, 3D models (models/) and all
+other original game content, is proprietary. The studio ju7tconnect-one
+created the source code and every 3D model in this project and holds all
+rights to them. No permission is granted to copy, modify, distribute or use
+them without the written consent of the copyright holder.
 
 Third-party components keep their own licences: the DejaVu font
 (assets/interface/fonts/LICENSE.txt) and the attributed sound recordings

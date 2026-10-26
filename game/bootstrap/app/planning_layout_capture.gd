@@ -71,6 +71,8 @@ static func collect(objects: Node, nodes: Array, include_player: bool = true) ->
 			records[-1]["door_lock"] = str(door.call("get_lock_state"))
 		if node.has_method("get_enemy_stats") and node.has_meta(&"planning_enemy_stats"):
 			records[-1]["enemy_stats"] = node.call("get_enemy_stats")
+		if node.has_method("get_death_cloud_config") and node.has_meta(&"planning_death_cloud"):
+			records[-1]["death_cloud"] = node.call("get_death_cloud_config")
 		if node.has_method("get_spawn_config"):
 			records[-1]["spawn_point"] = node.call("get_spawn_config")
 		if node.has_meta(WAVE_DIRECTOR.TRIGGER_META):

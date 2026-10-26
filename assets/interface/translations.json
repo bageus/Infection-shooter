@@ -2,7 +2,7 @@
   "ru": {
     "credits": "Авторы",
     "creditsAudio": "Звуки (требуют указания авторства):",
-    "creditsModels": "3D-модели: студия ju7tconnection-1",
+    "creditsModels": "3D-модели: студия ju7tconnect-one",
     "creditsFont": "Шрифт: DejaVu Sans (лицензия Bitstream Vera)",
     "demo": "ИНТЕРАКТИВНЫЙ МАКЕТ",
     "mainPreview": "Меню",
@@ -365,7 +365,7 @@
   "en": {
     "credits": "Credits",
     "creditsAudio": "Sounds (attribution required):",
-    "creditsModels": "3D models: studio ju7tconnection-1",
+    "creditsModels": "3D models: studio ju7tconnect-one",
     "creditsFont": "Font: DejaVu Sans (Bitstream Vera licence)",
     "demo": "INTERACTIVE UI DEMO",
     "mainPreview": "Menu",
