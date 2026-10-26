@@ -34,7 +34,7 @@ func configure_damage_particles(enabled: bool) -> void:
 
 const SPARKS = preload("res://game/presentation/office_floor/electric_sparks.gd")
 const BLAST = preload("res://game/presentation/office_floor/blast_effect.gd")
-const WALL_MOUNT = preload("res://game/presentation/office_floor/wall_mount_models.gd")
+const WALL_MOUNT = preload("res://game/presentation/office_floor/public/wall_mount_models.gd")
 const BOOK_STACK = preload("res://game/presentation/office_floor/book_stack_breakup.gd")
 const EXTINGUISHER_FX = preload("res://game/presentation/office_floor/extinguisher_hit_fx.tscn")
 const HIT_REACTION = preload("res://game/presentation/office_floor/prop_hit_reaction.gd")
@@ -59,6 +59,17 @@ var _display_wall: Node
 ## Screens have power and content settings; the desk lamp shares the power setting (on or off).
 func has_display() -> bool:
 	return model_path.get_file() in DISPLAY_PROFILES.MODELS or is_desk_lamp()
+
+
+## Pipes and ducts hug a wall or stand apart; the planner's choice overrides the name.
+func is_wall_mounted() -> bool:
+	return bool(get_meta(&"planning_mount_choice", WALL_MOUNT.contains(model_path)))
+
+
+func configure_wall_mount(attached: bool) -> void:
+	set_meta(&"planning_mount_choice", attached)
+	set_meta("planning_wall_mount", attached)
+	(add_to_group if attached else remove_from_group).call(&"wall_mounted_props")
 
 
 func is_desk_lamp() -> bool:
@@ -184,7 +195,7 @@ func _release_loot() -> void:
 func _ready() -> void:
 	if model_path.is_empty():
 		return
-	var wall_mounted: bool = WALL_MOUNT.contains(model_path)
+	var wall_mounted := is_wall_mounted()
 	if wall_mounted:
 		set_meta("planning_wall_mount", true)
 		add_to_group(&"wall_mounted_props")
