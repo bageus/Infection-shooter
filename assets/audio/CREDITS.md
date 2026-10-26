@@ -12,7 +12,6 @@ the licence of their source (CC0 / CC-BY).
 | deal_damage/hurt_m/hurt_m_1.ogg | micahlg | CC0 1.0 | https://freesound.org/people/micahlg/sounds/413181/ | CC-Sounds (Fris0uman/CDDA-Soundpacks) |
 | deal_damage/hurt_m/hurt_m_2.ogg | micahlg | CC0 1.0 | https://freesound.org/people/micahlg/sounds/413183/ | CC-Sounds (Fris0uman/CDDA-Soundpacks) |
 | explosion/huge/explosion_huge_2.ogg | unfa | CC0 1.0 | https://freesound.org/people/unfa/sounds/352143/ | CC-Sounds (Fris0uman/CDDA-Soundpacks) |
-| explosion/small/explosion_small.ogg | j1987 | CC0 1.0 | https://freesound.org/people/j1987/sounds/140727/ | CC-Sounds (Fris0uman/CDDA-Soundpacks) |
 | melee_attack/monster_melee_hit/monster_melee_hit_1.ogg | Slave2theLight | CC BY 3.0 | https://freesound.org/people/Slave2theLight/sounds/157112/ | CC-Sounds (Fris0uman/CDDA-Soundpacks) |
 | melee_attack/monster_melee_hit/monster_melee_hit_2.ogg | Slave2theLight | CC BY 3.0 | https://freesound.org/people/Slave2theLight/sounds/157112/ | CC-Sounds (Fris0uman/CDDA-Soundpacks) |
 | melee_attack/monster_melee_hit/monster_melee_hit_3.ogg | Slave2theLight | CC BY 3.0 | https://freesound.org/people/Slave2theLight/sounds/157112/ | CC-Sounds (Fris0uman/CDDA-Soundpacks) |
@@ -86,7 +85,6 @@ the licence of their source (CC0 / CC-BY).
 | smash_fail/wood_furn/smash_fail_wood_2.ogg | magnuswaker | CC0 1.0 | https://freesound.org/people/magnuswaker/sounds/698544/ | CC-Sounds (Fris0uman/CDDA-Soundpacks) |
 | smash_fail/wood_furn/smash_fail_wood_3.ogg | magnuswaker | CC0 1.0 | https://freesound.org/people/magnuswaker/sounds/698544/ | CC-Sounds (Fris0uman/CDDA-Soundpacks) |
 | smash_fail/wood_furn/smash_fail_wood_4.ogg | magnuswaker | CC0 1.0 | https://freesound.org/people/magnuswaker/sounds/698544/ | CC-Sounds (Fris0uman/CDDA-Soundpacks) |
-| smash_success/concrete/smash_success_concrete.ogg | magnuswaker | CC0 1.0 | https://freesound.org/people/magnuswaker/sounds/522099/ | CC-Sounds (Fris0uman/CDDA-Soundpacks) |
 | smash_success/glass/smash_success_glass.ogg | InspectorJ | CC BY 4.0 | https://freesound.org/people/InspectorJ/sounds/344266/ | CC-Sounds (Fris0uman/CDDA-Soundpacks) |
 | smash_success/glass/smash_success_glass_1.ogg | chewiesmissus | CC0 1.0 | https://freesound.org/people/chewiesmissus/sounds/244238/ | CC-Sounds (Fris0uman/CDDA-Soundpacks) |
 | smash_success/glass/smash_success_glass_2.ogg | pfranzen | CC BY 4.0 | https://freesound.org/people/pfranzen/sounds/387177/ | CC-Sounds (Fris0uman/CDDA-Soundpacks) |
@@ -145,7 +143,6 @@ the licence of their source (CC0 / CC-BY).
 - `attack_hit`: cdda/sound/CC-Sounds/melee_attack/monster_melee_hit/monster_melee_hit_1.ogg, cdda/sound/CC-Sounds/melee_attack/monster_melee_hit/monster_melee_hit_2.ogg, cdda/sound/CC-Sounds/melee_attack/monster_melee_hit/monster_melee_hit_3.ogg, cdda/sound/CC-Sounds/melee_attack/monster_melee_hit/monster_melee_hit_4.ogg
 - `attack_swing`: cdda/sound/CC-Sounds/melee_swing/big_bash/big_bash_swing_1.ogg, cdda/sound/CC-Sounds/melee_swing/small_bash/small_bash_swing_1.ogg, cdda/sound/CC-Sounds/melee_swing/small_bash/small_bash_swing_3.ogg, cdda/sound/CC-Sounds/melee_swing/small_bash/small_bash_swing_5.ogg
 - `body_part_fall`: cdda/sound/CC-Sounds/melee_hit_flesh/big_bash/big_bash_flesh_1.ogg, cdda/sound/CC-Sounds/melee_hit_flesh/big_bash/big_bash_flesh_2.ogg
-- `colossus_slam`: cdda/sound/CC-Sounds/explosion/huge/explosion_huge_2.ogg, cdda/sound/CC-Sounds/explosion/small/explosion_small.ogg, cdda/sound/CC-Sounds/melee_hit_flesh/big_bash/big_bash_flesh_1.ogg, cdda/sound/CC-Sounds/smash_success/concrete/smash_success_concrete.ogg
 - `dismember`: cdda/sound/CC-Sounds/melee_hit_flesh/big_cutting/big_cutting_flesh_1.ogg, cdda/sound/CC-Sounds/melee_hit_flesh/big_cutting/big_cutting_flesh_2.ogg, cdda/sound/CC-Sounds/mon_death/zombie_gibbed/zombie_gibbed_1.ogg, cdda/sound/CC-Sounds/mon_death/zombie_gibbed/zombie_gibbed_2.ogg
 - `dna_pickup`: synthesised
 - `enemy_death`: cdda/sound/CC-Sounds/mon_death/zombie_death/zombie_death_1.ogg, cdda/sound/CC-Sounds/mon_death/zombie_death/zombie_death_2.ogg, cdda/sound/CC-Sounds/mon_death/zombie_death/zombie_death_3.ogg, cdda/sound/CC-Sounds/mon_death/zombie_death/zombie_death_4.ogg
@@ -277,3 +274,5 @@ The second 2026-10-26 batch (`break_metal`, `break_electronics`, `break_lamp`, `
 ## Owner-confirmed recordings (2026-10-26)
 
 The owner states that `antidote_use`, `sniper_fire` and `metal_door_close` are their own recordings, so their source rows were removed. `sniper_fire` had three identical copies; it now has one file.
+
+The owner also supplied `colossus_slam` (2026-10-26, `tools/import_colossus_audio.py`); its source rows were removed.

@@ -806,6 +806,19 @@
       "seam_step": null,
       "source_sha256": "176090f1f630270c204bc103176b2966d4a65f9525be57a969d2f00d02097016",
       "output_sha256": "47f468003ed3a5b2c4c9228aafda5654d5d2c1cafcf63393bd6125c16d0dfee7"
+    },
+    {
+      "source": "assets/audio/sfx/colossus_slam/colossus_slam.wav",
+      "output": "assets/audio/sfx/colossus_slam/colossus_slam_1.ogg",
+      "source_seconds": 0.6065,
+      "trim_end_seconds": 0.0,
+      "overlap_seconds": 0.0,
+      "output_seconds": 0.6065,
+      "channels": 1,
+      "loop": false,
+      "seam_step": null,
+      "source_sha256": "26589aaf6660c5ade16d3a77fb1a986f125e7e2beb06577e4045163fad934feb",
+      "output_sha256": "d8d3cdd47efb5a17e67f90ff710075e77bc0a3e7270b9b25cdfe06d76f1beb61"
     }
   ],
   "wav_sources_removed": true

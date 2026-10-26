@@ -26,8 +26,6 @@
       "attack_swing/attack_swing_4.ogg": "6f052635c687089f202a37282d4fc59802ea1bccba0aedc6a1db02438b952da5",
       "body_part_fall/body_part_fall_1.ogg": "8290a09cbac7e57b14bf44c2709138e8aaf747e97fef34edb313e49052184492",
       "body_part_fall/body_part_fall_2.ogg": "0326d2284eaa787d8297e7289c04291b3e1ca3d19520e8e073bda1892443ada8",
-      "colossus_slam/colossus_slam_1.ogg": "a69afc53b687939cbe0d2ff025c4bfed71286e0af1ebcad55f4eed60d6c03076",
-      "colossus_slam/colossus_slam_2.ogg": "9c798ad883ec671dfaf1d2c6d421b531c04c999f433c565fb5700585211101a0",
       "dismember/dismember_1.ogg": "6fd68856f2461e7c9a3c014203a78b8e3a94c899ef0c26bf733a523a77367bcd",
       "dismember/dismember_2.ogg": "8683820744cb3aee59e952139151521b9256cd44679b54b2a735218f28a27f37",
       "enemy_death/enemy_death_1.ogg": "1b0c389e2ca5377f33073e096a7f83ec953615ae8057868bc85cc0d11bb700e9",
@@ -198,7 +196,8 @@
     "zombie_misc",
     "antidote_use",
     "sniper_fire",
-    "metal_door_close"
+    "metal_door_close",
+    "colossus_slam"
   ],
   "retired_events": [
     "acid_sizzle",
