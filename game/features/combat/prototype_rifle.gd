@@ -18,9 +18,7 @@ const WEAPON_SOUNDS := {
 	"SNIPER RIFLE": [&"sniper_fire", &"sniper_reload", &"casing_heavy"],
 	"AK": [&"ak_fire", &"ak_reload", &"casing_heavy"],
 	"M4": [&"m4_fire", &"m4_reload", &"casing_heavy"],
-	"MINIGUN": [&"minigun_fire", &"rifle_reload", &"casing_heavy"],
-	"RIFLE": [&"rifle_fire", &"rifle_reload", &"casing_heavy"],
-	"ASSAULT RIFLE": [&"assault_rifle_fire", &"rifle_reload", &"casing_heavy"],
+	"MINIGUN": [&"minigun_fire", &"", &"casing_heavy"],
 	"GRENADE LAUNCHER": [&"launcher_fire", &"launcher_reload", &"casing_launcher"],
 }
 const SPIN_HOLD := 0.12

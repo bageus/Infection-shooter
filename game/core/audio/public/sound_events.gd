@@ -25,22 +25,19 @@ const EVENTS := {
 	&"pistol_fire": [1, 0.0, 70.0, 9.0, 0.03, 4],
 	&"uzi_fire": [1, -1.0, 70.0, 9.0, 0.04, 5],
 	&"shotgun_fire": [1, 1.0, 80.0, 10.0, 0.03, 3],
-	&"rifle_fire": [3, 1.0, 90.0, 10.0, 0.03, 3],
-	&"assault_rifle_fire": [3, 0.0, 85.0, 10.0, 0.04, 5],
 	&"launcher_fire": [1, 0.0, 70.0, 8.0, 0.03, 2],
 	&"ak_fire": [1, 0.5, 85.0, 10.0, 0.04, 4],
 	&"m4_fire": [1, 0.0, 80.0, 9.0, 0.04, 5],
 	&"sniper_fire": [3, 8.0, 150.0, 14.0, 0.02, 2],
 	&"minigun_fire": [3, 3.0, 90.0, 10.0, 0.05, 5],
 	&"dry_fire": [1, -6.0, 15.0, 2.5, 0.05, 2],
-	&"grenade_explode": [2, 3.0, 120.0, 14.0, 0.05, 3],
+	&"grenade_explode": [1, 3.0, 120.0, 14.0, 0.05, 3],
 	&"extinguisher_burst": [1, 1.0, 80.0, 10.0, 0.05, 2],
-	&"extinguisher_spray": [2, -2.0, 40.0, 4.0, 0.03, 2],
+	&"extinguisher_spray": [1, -2.0, 40.0, 4.0, 0.03, 2],
 	&"pistol_reload": [1, -2.0, 20.0, 3.0, 0.02, 1],
 	&"uzi_reload": [1, -2.0, 20.0, 3.0, 0.02, 1],
 	&"shotgun_shell_load": [2, -2.0, 20.0, 3.0, 0.03, 2],
 	&"launcher_reload": [1, -2.0, 20.0, 3.0, 0.02, 1],
-	&"rifle_reload": [2, -2.0, 20.0, 3.0, 0.02, 1],
 	&"shotgun_pump": [1, -2.0, 20.0, 3.0, 0.02, 1],
 	&"casing_launcher": [1, -4.0, 16.0, 2.0, 0.06, 4],
 	&"casing_brass": [1, -6.0, 14.0, 1.6, 0.08, 6],
@@ -71,8 +68,8 @@ const EVENTS := {
 	&"break_furniture": [3, 0.0, 48.0, 5.0, 0.06, 3],
 	&"break_cardboard": [3, -2.0, 32.0, 3.5, 0.06, 3],
 	&"break_metal": [3, 0.0, 48.0, 5.0, 0.06, 3],
-	&"break_electronics": [3, 0.0, 48.0, 5.0, 0.06, 3],
-	&"break_lamp": [2, -1.0, 40.0, 4.0, 0.06, 3],
+	&"break_electronics": [2, 0.0, 48.0, 5.0, 0.06, 3],
+	&"break_lamp": [1, -1.0, 40.0, 4.0, 0.06, 3],
 	&"weapon_switch": [1, -4.0, 18.0, 2.5, 0.06, 3],
 	&"glass_break": [4, 1.0, 60.0, 7.0, 0.05, 3],
 	&"flesh_hit": [6, -2.0, 34.0, 4.0, 0.08, 5],
@@ -109,21 +106,14 @@ const EVENTS := {
 	# Mutation skills (cast on the player; fields last as long as the effect).
 	&"skill_blood_burst": [2, 1.0, 50.0, 7.0, 0.04, 2],
 	&"skill_parasite": [2, -1.0, 30.0, 4.0, 0.05, 2],
-	&"skill_living_harvest": [2, -1.0, 30.0, 4.0, 0.03, 1],
 	&"skill_discharge": [2, 0.0, 60.0, 7.0, 0.05, 2],
-	&"skill_overload": [2, -1.0, 36.0, 5.0, 0.03, 1],
 	&"skill_storm_pulse": [2, 0.0, 60.0, 7.0, 0.04, 2],
 	&"skill_storm_field": [2, -3.0, 30.0, 4.0, 0.02, 1],
-	&"skill_acid_spit": [2, -1.0, 34.0, 4.0, 0.05, 2],
-	&"acid_sizzle": [2, -4.0, 22.0, 3.0, 0.04, 3],
-	&"skill_spore_cocoon": [2, -1.0, 30.0, 4.0, 0.05, 2],
 	&"spore_burst": [2, 0.0, 46.0, 6.0, 0.05, 3],
-	&"skill_epidemic": [2, -1.0, 40.0, 5.0, 0.04, 1],
 	&"skill_predator_dash": [2, 0.0, 34.0, 5.0, 0.05, 2],
 	&"skill_bone_blades": [2, 0.0, 34.0, 5.0, 0.04, 1],
 	&"skill_power_strike": [1, 0.0, 50.0, 7.0, 0.0, 1],
 	&"skill_heartbeat": [1, -3.0, 20.0, 3.0, 0.0, 1],
-	&"bone_blades_whirl": [2, 2.0, 24.0, 3.5, 0.02, 1],
 	&"skill_berserk": [2, 1.0, 60.0, 8.0, 0.03, 1],
 	&"skill_second_heart": [1, 0.0, 30.0, 5.0, 0.0, 1],
 	&"skill_retaliation": [2, 0.0, 46.0, 6.0, 0.05, 1],
@@ -193,6 +183,19 @@ static func preload_event(event: StringName) -> void:
 			ResourceLoader.load_threaded_request(path)
 
 
+# Events whose variants play in order (1, 2, 1, ...) instead of at random.
+const SEQUENTIAL: Array[StringName] = [&"break_electronics"]
+static var _sequence: Dictionary = {}
+
+
+static func _next_variant(event: StringName, count: int) -> int:
+	if not SEQUENTIAL.has(event):
+		return randi_range(1, count)
+	var index: int = _sequence.get(event, 0)
+	_sequence[event] = (index + 1) % count
+	return index + 1
+
+
 static var _voices := 0
 static var _per_event: Dictionary = {}
 
@@ -208,7 +211,7 @@ static func play(parent: Node, event: StringName, position := Vector3.INF, volum
 	# Running counts instead of scanning groups for every footstep and clink.
 	if int(_per_event.get(event, 0)) >= int(spec[MAX_SAME]) or _voices >= MAX_VOICES:
 		return null
-	var path := _event_path(event, randi_range(1, int(spec[VARIANTS])))
+	var path := _event_path(event, _next_variant(event, int(spec[VARIANTS])))
 	var stream := load(path) as AudioStream
 	if stream == null:
 		return null
