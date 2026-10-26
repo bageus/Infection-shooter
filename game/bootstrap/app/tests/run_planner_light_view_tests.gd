@@ -11,9 +11,11 @@ func _run() -> void:
 	var stage := MAIN.instantiate()
 	root.add_child(stage)
 	current_scene = stage
+	_bound_render_budget()
 	await process_frame
 	var planner: Node = stage.get("planning_mode")
 	planner.enter()
+	print("Planner light view: entered @%d" % Time.get_ticks_msec())
 	var controls: Node = planner.controls
 	controls._show_lighting_catalog()
 	var view: RefCounted = controls.light_view
@@ -66,7 +68,9 @@ func _run() -> void:
 		planner.edit_history.undo()
 		_check(is_equal_approx(lamp.global_position.y, height_before), "Undo restores height")
 	var saved: Dictionary = JSON.parse_string(JSON.stringify(planner.storage._collect_layout_data()))
+	print("Planner light view: placed and edited @%d" % Time.get_ticks_msec())
 	planner.objects._apply_layout_data(saved)
+	print("Planner light view: reloaded @%d" % Time.get_ticks_msec())
 	for entry: Array in expected:
 		var found := false
 		for node: Node3D in planner.objects.placed:
@@ -97,6 +101,17 @@ func _run() -> void:
 	await process_frame
 	print("Planner light view tests: %d failure(s)." % failures)
 	quit(1 if failures > 0 else 0)
+
+
+# This suite asserts input/projection/state, not pixels. Retain the full map,
+# native renderer and logical HUD size while bounding software Vulkan raster cost.
+func _bound_render_budget() -> void:
+	if RenderingServer.get_current_rendering_method() != "forward_plus": return
+	var logical_size := root.get_visible_rect().size
+	root.scaling_3d_scale = 0.25
+	root.positional_shadow_atlas_size = 256
+	RenderingServer.directional_shadow_atlas_set_size(256, true)
+	_check(root.get_visible_rect().size == logical_size, "Render budget preserves HUD and mouse coordinates")
 
 
 # A wall or desk box around the lamp must not steal the click from its marker.
