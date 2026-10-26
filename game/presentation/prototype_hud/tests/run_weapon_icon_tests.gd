@@ -44,6 +44,7 @@ func _run() -> void:
 	player.name = "Player"
 	stage.add_child(player)
 	player.call("configure_weapon_drop", Callable(stage, "drop_weapon_pickup"))
+	player.call("import_loadout", {"slots": [0, 1, 2]})
 	var hud := HUD.instantiate()
 	hud.set("player_path", NodePath("../Player"))
 	stage.add_child(hud)

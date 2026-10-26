@@ -180,7 +180,7 @@ func _test_minigun(actor: CharacterBody3D, effects: Node3D, crosshair: Node) -> 
 		gun.set("_spin", 1.0)
 		gun.call("_process", 0.1)
 	_check(is_equal_approx(spin_sound.volume_db, idle_db), "Minigun whine returns to full level after firing")
-	_check(actor.call("select_weapon_slot", 1), "Normal weapon switch remains usable")
+	_check(actor.call("select_weapon_slot", 0), "Normal weapon switch remains usable")
 	await process_frame
 	await process_frame
 	_check(not pose.backpack.visible, "Backpack is hidden when minigun is holstered")
