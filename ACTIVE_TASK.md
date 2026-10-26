@@ -7,6 +7,9 @@ owner: AI
 updated: 2026-10-18
 ---
 
+26.10.2026 — прямое поручение владельца: клавиша C (melee) играет процедурную анимацию удара. Ногой вперёд, если рядом нет врагов (ящики с лутом ломаются сразу, остальные предметы отлетают от персонажа); левой рукой, если враг ближе 2 м. Скрытый кулдаун 2 с. Владельцы: features.player (player_melee.gd), features.character_animation (strike_pose.gd, play_strike), ADR-0066, тесты run_melee_strike_tests и run_strike_pose_tests. Зависимости/policy/DTO без изменений. T004/Phase1 прежние.
+
+
 25.10.2026 — исправление CI PR464: Architecture validation и runtime Project gates падали на merge с main fb6c79a: authored base_office_layout из commit94a20af содержит публичную spawn_point.tscn, а presentation.office_floor не декларировал features.spawning. Добавлена декларация существующей композиционной зависимости; направление presentation→features разрешено policy, цикла/нового владельца/API/DTO нет. Карта и точка спавна сохранены, валидатор не ослаблен. T004/Phase1 прежние.
 
 
