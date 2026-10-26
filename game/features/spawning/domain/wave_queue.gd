@@ -22,13 +22,17 @@ static func trigger_met(mode: String, dead: Array) -> bool:
 	return dead.has(true)
 
 
-## Starts a point's wave. Each point fires once, however many triggers die later.
+## Starts one queue of a point (`point_id` is its link key). Each queue fires once,
+## however many triggers die later.
 func activate(point_id: String, config: Dictionary) -> bool:
 	if _fired.has(point_id):
 		return false
 	_fired[point_id] = true
-	var clean := SPAWN_CONFIG.sanitize(config)
-	_plans.append({"id": point_id, "config": clean, "remaining": int(clean["count"]), "cooldown": 0.0})
+	var clean := SPAWN_CONFIG.sanitize_queue(config)
+	var entries: Array[Dictionary] = []
+	for entry: Dictionary in clean["enemies"]:
+		entries.append({"enemy": entry["enemy"], "remaining": int(entry["count"])})
+	_plans.append({"id": point_id, "config": clean, "entries": entries, "remaining": SPAWN_CONFIG.total_count(clean), "cooldown": 0.0, "turn": 0})
 	return true
 
 
@@ -56,7 +60,8 @@ func clear() -> void:
 	_cursor = 0
 
 
-## Advances every wave by `delta` and returns [{"id", "count"}] to spawn now.
+## Advances every wave by `delta` and returns [{"id", "count", "enemies"}] to spawn now;
+## "enemies" names the kind of each infected, taking turns between the queue's kinds.
 ## `alive_total` is every living infected on the level; `alive_by_point` maps a
 ## point id to how many of its own are alive (the "refill" rule).
 func step(delta: float, alive_total: int, cap: int, alive_by_point: Dictionary) -> Array[Dictionary]:
@@ -75,7 +80,7 @@ func step(delta: float, alive_total: int, cap: int, alive_by_point: Dictionary) 
 		var count := mini(_wanted(plan, int(alive_by_point.get(plan["id"], 0))), free)
 		if count <= 0:
 			continue
-		orders.append({"id": plan["id"], "count": count})
+		orders.append({"id": plan["id"], "count": count, "enemies": _take(plan, count)})
 		plan["remaining"] = int(plan["remaining"]) - count
 		plan["cooldown"] = float(plan["config"]["interval"])
 		free -= count
@@ -84,6 +89,18 @@ func step(delta: float, alive_total: int, cap: int, alive_by_point: Dictionary) 
 	_plans = _plans.filter(func(plan: Dictionary) -> bool: return int(plan["remaining"]) > 0)
 	_cursor = next_cursor % maxi(_plans.size(), 1)
 	return orders
+
+
+func _take(plan: Dictionary, count: int) -> Array[String]:
+	var kinds: Array[String] = []
+	var entries: Array = plan["entries"]
+	while kinds.size() < count:
+		var entry: Dictionary = entries[int(plan["turn"]) % entries.size()]
+		plan["turn"] = int(plan["turn"]) + 1
+		if int(entry["remaining"]) > 0:
+			entry["remaining"] = int(entry["remaining"]) - 1
+			kinds.append(str(entry["enemy"]))
+	return kinds
 
 
 func _wanted(plan: Dictionary, alive_own: int) -> int:

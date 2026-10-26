@@ -38,7 +38,7 @@ func configure_spawn(config: Dictionary) -> void:
 
 
 func get_spawn_config() -> Dictionary:
-	return _config.duplicate()
+	return _config.duplicate(true)
 
 
 ## The planner shows the wave summary over the hole; the game does not.
