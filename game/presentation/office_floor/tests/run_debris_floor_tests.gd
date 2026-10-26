@@ -111,6 +111,10 @@ func _test_model(stage: Node3D, path: String) -> void:
 # Advances physics and tracks the lowest point ever reached: a piece that tunnels may later be culled.
 func _step(effects: Node, frames: int) -> void:
 	for frame in frames:
+		# Breakups are spread over frames by the destruction budget; let it finish, then step the new pieces once.
+		var queue := effects.get_node_or_null("DestructionBudget")
+		while queue != null and int(queue.call("pending")) > 0:
+			await process_frame
 		await physics_frame
 		for fragment in _fragments(effects):
 			_lowest_ever = minf(_lowest_ever, _lowest_point(fragment))
