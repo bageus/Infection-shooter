@@ -182,6 +182,7 @@ func _test_directional_selection(player: PLAYER_SCRIPT, selector: SELECTION, ani
 
 
 func _test_switch_and_fire(player: PLAYER_SCRIPT, effects: Node3D) -> void:
+	player.call("import_loadout", {"slots": [0, 1, 2]})
 	for slot in 3:
 		player.call("select_weapon_slot", slot)
 		var weapon: Node3D = player.call("get_current_weapon")
