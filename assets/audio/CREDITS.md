@@ -9,7 +9,6 @@ the licence of their source (CC0 / CC-BY).
 | Source file | Author | Licence | Link | Collection |
 |---|---|---|---|---|
 | close_door/door_metal/close_door_metal.ogg | Analog Bleep Ten | Sampling Plus 1.0 | https://freesound.org/people/Analog%20Bleep%20Ten/sounds/75826/ | CC-Sounds (Fris0uman/CDDA-Soundpacks) |
-| close_door/door_wood/close_door.ogg | kyles | CC0 1.0 | https://freesound.org/people/kyles/sounds/407312/ | CC-Sounds (Fris0uman/CDDA-Soundpacks) |
 | close_door/window/close_curtain.ogg | cmusounddesign (mix by Peter Havran Raven2236) | CC-BY | https://freesound.org/people/cmusounddesign/sounds/84708/ | CC-Sounds (Fris0uman/CDDA-Soundpacks) |
 | close_door/window/close_window.ogg | cabled_mess | CC0 1.0 | https://freesound.org/people/cabled_mess/sounds/407644/ | CC-Sounds (Fris0uman/CDDA-Soundpacks) |
 | deal_damage/hurt_m/hurt_m_1.ogg | micahlg | CC0 1.0 | https://freesound.org/people/micahlg/sounds/413181/ | CC-Sounds (Fris0uman/CDDA-Soundpacks) |
@@ -18,19 +17,11 @@ the licence of their source (CC0 / CC-BY).
 | explosion/default/explosion_default_2.ogg | bmlake | CC BY 3.0 | https://freesound.org/people/bmlake/sounds/251617/ | CC-Sounds (Fris0uman/CDDA-Soundpacks) |
 | explosion/huge/explosion_huge_2.ogg | unfa | CC0 1.0 | https://freesound.org/people/unfa/sounds/352143/ | CC-Sounds (Fris0uman/CDDA-Soundpacks) |
 | explosion/small/explosion_small.ogg | j1987 | CC0 1.0 | https://freesound.org/people/j1987/sounds/140727/ | CC-Sounds (Fris0uman/CDDA-Soundpacks) |
-| fire_gun/brass_eject.ogg | FST180081 | CC BY 4.0 | https://freesound.org/people/FST180081/sounds/441806/ | CC-Sounds (Fris0uman/CDDA-Soundpacks) |
-| fire_gun/brass_eject_1.ogg | FST180081 | CC BY 4.0 | https://freesound.org/people/FST180081/sounds/441809/ | CC-Sounds (Fris0uman/CDDA-Soundpacks) |
-| fire_gun/empty.ogg | Sophia_C | CC BY 4.0 | https://freesound.org/people/Sophia_C/sounds/467183/ | CC-Sounds (Fris0uman/CDDA-Soundpacks) |
 | fire_gun/empty_1.ogg | Rolly-SFX | CC0 1.0 | https://freesound.org/people/Rolly-SFX/sounds/528708/ | CC-Sounds (Fris0uman/CDDA-Soundpacks) |
-| fire_gun/handguns/handgun_1.ogg | GoodSoundForYou | CC-BY-3.0 | https://soundbible.com/2120-9mm-Gunshot.html# | CC-Sounds (Fris0uman/CDDA-Soundpacks) |
-| fire_gun/launchers/launcher_1.ogg | LeMudCrab | CC0 | https://freesound.org/people/LeMudCrab/sounds/163458/ | CC-Sounds (Fris0uman/CDDA-Soundpacks) |
-| fire_gun/machineguns/machinegun_1.ogg | WEL | CC-BY-3.0 | https://soundbible.com/1575-High-Definition-Machine-Gun.html | CC-Sounds (Fris0uman/CDDA-Soundpacks) |
 | fire_gun/rifles/automatic_rifle/indoor_gunfire/556_auto_rifle_shot_01.ogg | DoctorBoomstick | CC BY 4.0 | Audio was recorded by myself at nominal distance from a shooter firing a 5.56mm rifle on an outdoor gun range, a Sig Sauer MCX Spear LT, and touching up the resulting audio | CC-Sounds (Fris0uman/CDDA-Soundpacks) |
 | fire_gun/rifles/automatic_rifle/indoor_gunfire/556_auto_rifle_shot_02.ogg | DoctorBoomstick | CC BY 4.0 | Audio was recorded by myself at nominal distance from a shooter firing a 5.56mm rifle on an outdoor gun range, a Sig Sauer MCX Spear LT, and touching up the resulting audio | CC-Sounds (Fris0uman/CDDA-Soundpacks) |
 | fire_gun/rifles/automatic_rifle/indoor_gunfire/556_auto_rifle_shot_03.ogg | DoctorBoomstick | CC BY 4.0 | Audio was recorded by myself at nominal distance from a shooter firing a 5.56mm rifle on an outdoor gun range, a Sig Sauer MCX Spear LT, and touching up the resulting audio | CC-Sounds (Fris0uman/CDDA-Soundpacks) |
 | fire_gun/rifles/rifle_1.ogg | Mike Koenig | CC-BY-3.0 | https://soundbible.com/1998-Gun-Fire.html | CC-Sounds (Fris0uman/CDDA-Soundpacks) |
-| fire_gun/shotguns/shotgun_1.ogg | MATRIXXX_ | CC-BY | https://freesound.org/people/MATRIXXX_/sounds/473846/ | CC-Sounds (Fris0uman/CDDA-Soundpacks) |
-| humming/electric.ogg | nicola_ariutti | CC BY 4.0 | https://freesound.org/people/nicola_ariutti/sounds/335365/ | CC-Sounds (Fris0uman/CDDA-Soundpacks) |
 | humming/machinery.ogg | joe_anderson22 | CC0 1.0 | https://freesound.org/people/joe_anderson22/sounds/392983/ | CC-Sounds (Fris0uman/CDDA-Soundpacks) |
 | melee_attack/monster_melee_hit/monster_melee_hit_1.ogg | Slave2theLight | CC BY 3.0 | https://freesound.org/people/Slave2theLight/sounds/157112/ | CC-Sounds (Fris0uman/CDDA-Soundpacks) |
 | melee_attack/monster_melee_hit/monster_melee_hit_2.ogg | Slave2theLight | CC BY 3.0 | https://freesound.org/people/Slave2theLight/sounds/157112/ | CC-Sounds (Fris0uman/CDDA-Soundpacks) |
@@ -75,10 +66,8 @@ the licence of their source (CC0 / CC-BY).
 | mon_death/zombie_gibbed/zombie_gibbed_2.ogg | Audionautics | CC-BY | https://freesound.org/people/Audionautics/sounds/133968/ | CC-Sounds (Fris0uman/CDDA-Soundpacks) |
 | open_door/door_fence/open_door_fence.ogg | quality83 | CC0 1.0 | https://freesound.org/people/quality83/sounds/546160/ | CC-Sounds (Fris0uman/CDDA-Soundpacks) |
 | open_door/door_metal/open_door_metal.ogg | Fabrizio84 | CC0 1.0 | https://freesound.org/people/Fabrizio84/sounds/457550/ | CC-Sounds (Fris0uman/CDDA-Soundpacks) |
-| open_door/door_wood/open_door.ogg | Peter Havran (Raven2236) | CC BY 3.0 | https://freesound.org/people/MaxDemianAGL/sounds/183603/ | CC-Sounds (Fris0uman/CDDA-Soundpacks) |
 | open_door/gun_safe/open_safe.ogg | DoctorBoomstick | CC BY 4.0 | Audio was recorded by myself opening the door of a metal cabinet gunsafe | CC-Sounds (Fris0uman/CDDA-Soundpacks) |
 | open_door/window/open_window.ogg | xdrav | CC0 1.0 | https://freesound.org/people/xdrav/sounds/112841/ | CC-Sounds (Fris0uman/CDDA-Soundpacks) |
-| plmove/clear_obstacle/clear_obstacle_2.ogg | MWsfx | CC0 1.0 | https://freesound.org/s/574247/ | CC-Sounds (Fris0uman/CDDA-Soundpacks) |
 | plmove/walk_barefoot_1.ogg | SpliceSound | CC0 | https://freesound.org/s/338106/ | CC-Sounds (Fris0uman/CDDA-Soundpacks) |
 | plmove/walk_barefoot_2.ogg | SpliceSound | CC0 | https://freesound.org/s/338106/ | CC-Sounds (Fris0uman/CDDA-Soundpacks) |
 | plmove/walk_barefoot_3.ogg | SpliceSound | CC0 | https://freesound.org/s/338106/ | CC-Sounds (Fris0uman/CDDA-Soundpacks) |
@@ -91,19 +80,8 @@ the licence of their source (CC0 / CC-BY).
 | plmove/walk_t_floor/walk_t_floor_4.ogg | kretopi | CC0 1.0 | https://freesound.org/s/406747/ | CC-Sounds (Fris0uman/CDDA-Soundpacks) |
 | plmove/walk_t_floor/walk_t_floor_5.ogg | kretopi | CC0 1.0 | https://freesound.org/s/406748/ | CC-Sounds (Fris0uman/CDDA-Soundpacks) |
 | plmove/walk_t_floor/walk_t_floor_6.ogg | kretopi | CC0 1.0 | https://freesound.org/s/406749/ | CC-Sounds (Fris0uman/CDDA-Soundpacks) |
-| reload/default.ogg | magnuswaker | CC0 1.0 | https://freesound.org/people/magnuswaker/sounds/530225/ | CC-Sounds (Fris0uman/CDDA-Soundpacks) |
-| reload/mag_fed_bolt_action_rifle/bolt_action_rifle_load_01.ogg | DoctorBoomstick | CC BY 4.0 | Audio was recorded by myself, loading a magazine into an IG1889 federal rifle, locking the magazine into the receiver with the magazine-disconnector switch, and cycling the bolt | CC-Sounds (Fris0uman/CDDA-Soundpacks) |
 | reload/mag_fed_bolt_action_rifle/bolt_action_rifle_load_02.ogg | DoctorBoomstick | CC BY 4.0 | Audio was recorded by myself, loading a magazine into an IG1889 federal rifle, locking the magazine into the receiver with the magazine-disconnector switch, and cycling the bolt | CC-Sounds (Fris0uman/CDDA-Soundpacks) |
-| reload/mag_fed_bolt_action_rifle/bolt_action_rifle_load_03.ogg | DoctorBoomstick | CC BY 4.0 | Audio was recorded by myself, locking the bolt back on an IG1889 federal rifle, extracting the magazine after flipping down the magazine-disconnector switch, loading a fresh magazine (it’s actually the same one but shush), locking it into place with the disconnector, and cycling the bolt forwards | CC-Sounds (Fris0uman/CDDA-Soundpacks) |
 | reload/mag_fed_bolt_action_rifle/bolt_action_rifle_load_04.ogg | DoctorBoomstick | CC BY 4.0 | Audio was recorded by myself, loading a magazine into an IG1889 federal rifle, locking the magazine into the receiver with the magazine-disconnector switch, and cycling the bolt | CC-Sounds (Fris0uman/CDDA-Soundpacks) |
-| reload/pocket_pistol/pocket_pistol_load_01.ogg | DoctorBoomstick | CC BY 4.0 | Audio was recorded by myself, loading a magazine into a Berretta M1934 and manually operating the slide with the safety disengaged | CC-Sounds (Fris0uman/CDDA-Soundpacks) |
-| reload/pocket_pistol/pocket_pistol_load_02.ogg | DoctorBoomstick | CC BY 4.0 | Audio was recorded by myself, loading a magazine into a Berretta M1934 while the slide was already locked back, then disengaging the safety to drop the slide | CC-Sounds (Fris0uman/CDDA-Soundpacks) |
-| reload/pocket_pistol/pocket_pistol_load_03.ogg | DoctorBoomstick | CC BY 4.0 | Audio was recorded by myself, loading a magazine into a Beretta M1934 with the safety engaged, racking back the slide, and then releasing the safety to chamber a round | CC-Sounds (Fris0uman/CDDA-Soundpacks) |
-| reload/pocket_pistol/pocket_pistol_load_04.ogg | DoctorBoomstick | CC BY 4.0 | Audio was recorded by myself, loading a magazine into a Berretta M1934 while the slide was already locked back, then disengaging the safety to drop the slide | CC-Sounds (Fris0uman/CDDA-Soundpacks) |
-| reload/tube_fed_shotgun/shell_load_01.ogg | DoctorBoomstick | CC BY 4.0 | Audio was recorded by myself, loading an empty shell into the tube magazine of a Browning Auto 5 | CC-Sounds (Fris0uman/CDDA-Soundpacks) |
-| reload/tube_fed_shotgun/shell_load_02.ogg | DoctorBoomstick | CC BY 4.0 | Audio was recorded by myself, loading an empty shell into the tube magazine of a Browning Auto 5 | CC-Sounds (Fris0uman/CDDA-Soundpacks) |
-| reload/tube_fed_shotgun/shell_load_03.ogg | DoctorBoomstick | CC BY 4.0 | Audio was recorded by myself, loading an empty shell into the tube magazine of a Browning Auto 5 | CC-Sounds (Fris0uman/CDDA-Soundpacks) |
-| reload/tube_fed_shotgun/shell_load_04.ogg | DoctorBoomstick | CC BY 4.0 | Audio was recorded by myself, loading an empty shell into the tube magazine of a Browning Auto 5 | CC-Sounds (Fris0uman/CDDA-Soundpacks) |
 | smash_fail/brick/smash_fail_brick_1.ogg | This_Is_A_Hoax | CC0 1.0 | https://freesound.org/people/This_Is_A_Hoax/sounds/354111/ | CC-Sounds (Fris0uman/CDDA-Soundpacks) |
 | smash_fail/brick/smash_fail_brick_2.ogg | This_Is_A_Hoax | CC0 1.0 | https://freesound.org/people/This_Is_A_Hoax/sounds/354111/ | CC-Sounds (Fris0uman/CDDA-Soundpacks) |
 | smash_fail/concrete/smash_fail_concrete.ogg | oscaraudiogeek | CC0 1.0 | https://freesound.org/people/oscaraudiogeek/sounds/342888/ | CC-Sounds (Fris0uman/CDDA-Soundpacks) |
@@ -140,7 +118,6 @@ the licence of their source (CC0 / CC-BY).
 | speech/ferals/female_anguish_heavy_breathing_2.ogg | dmoran87 | CC0 1.0 | https://freesound.org/people/dmoran87/sounds/128772/ | CC-Sounds (Fris0uman/CDDA-Soundpacks) |
 | speech/ferals/female_mad_whisper_2.ogg | carmsie | CC0 1.0 | https://freesound.org/people/carmsie/sounds/271633/ | CC-Sounds (Fris0uman/CDDA-Soundpacks) |
 | speech/ferals/male_heavy_breathing_1.ogg | Teebee_Deael | CC0 1.0 | https://freesound.org/people/Teebee_Deael/sounds/620932/ | CC-Sounds (Fris0uman/CDDA-Soundpacks) |
-| speech/ferals/male_scared_heavy_breathing_1.ogg | Nox_Sound | CC0 1.0 | https://freesound.org/people/Nox_Sound/sounds/554906/ | CC-Sounds (Fris0uman/CDDA-Soundpacks) |
 | speech/ferals/male_scream_1.ogg | tim.kahn | CC BY 4.0 | https://freesound.org/people/tim.kahn/sounds/631835/ | CC-Sounds (Fris0uman/CDDA-Soundpacks) |
 | speech/ferals/male_scream_2.ogg | tim.kahn | CC BY 4.0 | https://freesound.org/people/tim.kahn/sounds/631835/ | CC-Sounds (Fris0uman/CDDA-Soundpacks) |
 | speech/zombie/speech_zombie_groan.ogg | FuzzyTuesday | CC0 | https://freesound.org/people/FuzzyTuesday/sounds/730386/ | CC-Sounds (Fris0uman/CDDA-Soundpacks) |
@@ -166,10 +143,6 @@ the licence of their source (CC0 / CC-BY).
 | sfx/extinguish.ogg | Red Eclipse team | CC-BY-SA 4.0 | https://github.com/redeclipse/sounds | Red Eclipse sounds |
 | sfx/extinguish2.ogg | Red Eclipse team | CC-BY-SA 4.0 | https://github.com/redeclipse/sounds | Red Eclipse sounds |
 | sfx/regen_begin.ogg | Red Eclipse team | CC-BY-SA 4.0 | https://github.com/redeclipse/sounds | Red Eclipse sounds |
-| sfx/shell.ogg | Red Eclipse team | CC-BY-SA 4.0 | https://github.com/redeclipse/sounds | Red Eclipse sounds |
-| sfx/shell3.ogg | Red Eclipse team | CC-BY-SA 4.0 | https://github.com/redeclipse/sounds | Red Eclipse sounds |
-| sfx/shell5.ogg | Red Eclipse team | CC-BY-SA 4.0 | https://github.com/redeclipse/sounds | Red Eclipse sounds |
-| sfx/shell6.ogg | Red Eclipse team | CC-BY-SA 4.0 | https://github.com/redeclipse/sounds | Red Eclipse sounds |
 | sfx/shockdamage.ogg | Red Eclipse team | CC-BY-SA 4.0 | https://github.com/redeclipse/sounds | Red Eclipse sounds |
 | sfx/splosh.ogg | Red Eclipse team | CC-BY-SA 4.0 | https://github.com/redeclipse/sounds | Red Eclipse sounds |
 | sfx/splosh2.ogg | Red Eclipse team | CC-BY-SA 4.0 | https://github.com/redeclipse/sounds | Red Eclipse sounds |
@@ -185,7 +158,6 @@ the licence of their source (CC0 / CC-BY).
 | weapons/ricochet.ogg | Red Eclipse team | CC-BY-SA 4.0 | https://github.com/redeclipse/sounds | Red Eclipse sounds |
 | weapons/smallblast.ogg | Red Eclipse team | CC-BY-SA 4.0 | https://github.com/redeclipse/sounds | Red Eclipse sounds |
 | weapons/smallblast2.ogg | Red Eclipse team | CC-BY-SA 4.0 | https://github.com/redeclipse/sounds | Red Eclipse sounds |
-| weapons/smg/reload.ogg | Red Eclipse team | CC-BY-SA 4.0 | https://github.com/redeclipse/sounds | Red Eclipse sounds |
 | weapons/sword/switch.ogg | Red Eclipse team | CC-BY-SA 4.0 | https://github.com/redeclipse/sounds | Red Eclipse sounds |
 | weapons/thud.ogg | Red Eclipse team | CC-BY-SA 4.0 | https://github.com/redeclipse/sounds | Red Eclipse sounds |
 | weapons/thud2.ogg | Red Eclipse team | CC-BY-SA 4.0 | https://github.com/redeclipse/sounds | Red Eclipse sounds |
@@ -201,7 +173,6 @@ the licence of their source (CC0 / CC-BY).
 ## Events and their sources
 
 - `acid_sizzle`: redeclipse_sounds/sfx/corrodedamage.ogg, synthesised
-- `ammo_pickup`: cdda/sound/CC-Sounds/reload/pocket_pistol/pocket_pistol_load_01.ogg, cdda/sound/CC-Sounds/reload/pocket_pistol/pocket_pistol_load_02.ogg
 - `antidote_pickup`: cdda/sound/CC-Sounds/smash_fail/glass/smash_fail_glass_1.ogg, cdda/sound/CC-Sounds/smash_fail/plastic/smash_fail_plastic_2.ogg
 - `antidote_use`: cdda/sound/CC-Sounds/fire_gun/empty_1.ogg, redeclipse_sounds/sfx/extinguish.ogg
 - `assault_rifle_fire`: cdda/sound/CC-Sounds/fire_gun/rifles/automatic_rifle/indoor_gunfire/556_auto_rifle_shot_01.ogg, cdda/sound/CC-Sounds/fire_gun/rifles/automatic_rifle/indoor_gunfire/556_auto_rifle_shot_02.ogg, cdda/sound/CC-Sounds/fire_gun/rifles/automatic_rifle/indoor_gunfire/556_auto_rifle_shot_03.ogg
@@ -210,20 +181,12 @@ the licence of their source (CC0 / CC-BY).
 - `attack_swing`: cdda/sound/CC-Sounds/melee_swing/big_bash/big_bash_swing_1.ogg, cdda/sound/CC-Sounds/melee_swing/small_bash/small_bash_swing_1.ogg, cdda/sound/CC-Sounds/melee_swing/small_bash/small_bash_swing_3.ogg, cdda/sound/CC-Sounds/melee_swing/small_bash/small_bash_swing_5.ogg
 - `body_part_fall`: cdda/sound/CC-Sounds/melee_hit_flesh/big_bash/big_bash_flesh_1.ogg, cdda/sound/CC-Sounds/melee_hit_flesh/big_bash/big_bash_flesh_2.ogg
 - `bone_blades_whirl`: cdda/sound/CC-Sounds/melee_swing/small_cutting/small_cutting_swing_1.ogg, cdda/sound/CC-Sounds/melee_swing/small_cutting/small_cutting_swing_3.ogg, cdda/sound/CC-Sounds/melee_swing/small_cutting/small_cutting_swing_4.ogg, cdda/sound/CC-Sounds/melee_swing/small_cutting/small_cutting_swing_6.ogg, synthesised
-- `canister_drop`: cdda/sound/CC-Sounds/smash_fail/metal/smash_fail_metal_2.ogg, synthesised
-- `casing_brass`: cdda/sound/CC-Sounds/fire_gun/brass_eject.ogg, cdda/sound/CC-Sounds/fire_gun/brass_eject_1.ogg
-- `casing_heavy`: cdda/sound/CC-Sounds/smash_fail/metal/smash_fail_metal_1.ogg, cdda/sound/CC-Sounds/smash_fail/metal/smash_fail_metal_2.ogg, cdda/sound/CC-Sounds/smash_fail/metal/smash_fail_metal_4.ogg
-- `casing_shell`: redeclipse_sounds/sfx/shell.ogg, redeclipse_sounds/sfx/shell3.ogg, redeclipse_sounds/sfx/shell5.ogg, redeclipse_sounds/sfx/shell6.ogg
 - `colossus_slam`: cdda/sound/CC-Sounds/explosion/huge/explosion_huge_2.ogg, cdda/sound/CC-Sounds/explosion/small/explosion_small.ogg, cdda/sound/CC-Sounds/melee_hit_flesh/big_bash/big_bash_flesh_1.ogg, cdda/sound/CC-Sounds/smash_success/concrete/smash_success_concrete.ogg
 - `dismember`: cdda/sound/CC-Sounds/melee_hit_flesh/big_cutting/big_cutting_flesh_1.ogg, cdda/sound/CC-Sounds/melee_hit_flesh/big_cutting/big_cutting_flesh_2.ogg, cdda/sound/CC-Sounds/mon_death/zombie_gibbed/zombie_gibbed_1.ogg, cdda/sound/CC-Sounds/mon_death/zombie_gibbed/zombie_gibbed_2.ogg
 - `dna_pickup`: synthesised
-- `door_close`: cdda/sound/CC-Sounds/close_door/door_wood/close_door.ogg
-- `door_open`: cdda/sound/CC-Sounds/open_door/door_wood/open_door.ogg
-- `dry_fire`: cdda/sound/CC-Sounds/fire_gun/empty.ogg, cdda/sound/CC-Sounds/fire_gun/empty_1.ogg
 - `elevator_close`: cdda/sound/CC-Sounds/close_door/door_metal/close_door_metal.ogg, cdda/sound/CC-Sounds/humming/machinery.ogg, cdda/sound/CC-Sounds/open_door/gun_safe/open_safe.ogg
 - `elevator_open`: cdda/sound/CC-Sounds/humming/machinery.ogg, cdda/sound/CC-Sounds/open_door/gun_safe/open_safe.ogg, synthesised
 - `enemy_death`: cdda/sound/CC-Sounds/mon_death/zombie_death/zombie_death_1.ogg, cdda/sound/CC-Sounds/mon_death/zombie_death/zombie_death_2.ogg, cdda/sound/CC-Sounds/mon_death/zombie_death/zombie_death_3.ogg, cdda/sound/CC-Sounds/mon_death/zombie_death/zombie_death_4.ogg
-- `extinguisher_burst`: cdda/sound/CC-Sounds/explosion/small/explosion_small.ogg, redeclipse_sounds/sfx/extinguish.ogg, synthesised
 - `extinguisher_spray`: redeclipse_sounds/sfx/extinguish2.ogg, synthesised
 - `fall_debris`: redeclipse_sounds/sfx/debris.ogg, redeclipse_sounds/sfx/debris2.ogg, redeclipse_sounds/sfx/debris3.ogg
 - `fall_light`: cdda/sound/CC-Sounds/smash_fail/plastic/smash_fail_plastic.ogg, cdda/sound/CC-Sounds/smash_fail/plastic/smash_fail_plastic_1.ogg, cdda/sound/CC-Sounds/smash_fail/plastic/smash_fail_plastic_2.ogg, redeclipse_sounds/sfx/drop.ogg
@@ -249,22 +212,12 @@ the licence of their source (CC0 / CC-BY).
 - `hit_wall`: cdda/sound/CC-Sounds/smash_fail/brick/smash_fail_brick_1.ogg, cdda/sound/CC-Sounds/smash_fail/brick/smash_fail_brick_2.ogg, cdda/sound/CC-Sounds/smash_fail/concrete/smash_fail_concrete.ogg, cdda/sound/CC-Sounds/smash_fail/concrete/smash_fail_concrete_3.ogg, cdda/sound/CC-Sounds/smash_fail/concrete/smash_fail_concrete_4.ogg
 - `hit_wood`: cdda/sound/CC-Sounds/smash_fail/door_wood/door_smash_fail_1.ogg, cdda/sound/CC-Sounds/smash_fail/door_wood/door_smash_fail_3.ogg, cdda/sound/CC-Sounds/smash_fail/wood_furn/smash_fail_wood.ogg, cdda/sound/CC-Sounds/smash_fail/wood_furn/smash_fail_wood_2.ogg, cdda/sound/CC-Sounds/smash_fail/wood_furn/smash_fail_wood_4.ogg
 - `horde_ram_hit`: cdda/sound/CC-Sounds/melee_hit_flesh/big_bash/big_bash_flesh_1.ogg, cdda/sound/CC-Sounds/melee_hit_flesh/big_bash/big_bash_flesh_2.ogg, cdda/sound/CC-Sounds/smash_success/wood_furn/smash_success_wood.ogg
-- `horde_summon`: cdda/sound/CC-Sounds/humming/electric.ogg, cdda/sound/CC-Sounds/speech/zombie/speech_zombie_groan.ogg, cdda/sound/CC-Sounds/speech/zombie/speech_zombie_groan_1.ogg, cdda/sound/CC-Sounds/speech/zombie/speech_zombie_groan_2.ogg, cdda/sound/CC-Sounds/speech/zombie/speech_zombie_groan_3.ogg
-- `key_pickup`: synthesised
-- `launcher_fire`: cdda/sound/CC-Sounds/fire_gun/launchers/launcher_1.ogg
-- `launcher_reload`: cdda/sound/CC-Sounds/reload/mag_fed_bolt_action_rifle/bolt_action_rifle_load_01.ogg, cdda/sound/CC-Sounds/reload/mag_fed_bolt_action_rifle/bolt_action_rifle_load_03.ogg
 - `medkit_pickup`: cdda/sound/CC-Sounds/close_door/window/close_curtain.ogg, cdda/sound/CC-Sounds/smash_fail/plastic/smash_fail_plastic_2.ogg
 - `medkit_use`: cdda/sound/CC-Sounds/close_door/window/close_curtain.ogg, cdda/sound/CC-Sounds/melee_swing/small_cutting/small_cutting_swing_2.ogg, cdda/sound/CC-Sounds/smash_fail/plastic/smash_fail_plastic_2.ogg
 - `metal_door_close`: cdda/sound/CC-Sounds/close_door/door_metal/close_door_metal.ogg
 - `metal_door_open`: cdda/sound/CC-Sounds/open_door/door_metal/open_door_metal.ogg
-- `pistol_fire`: cdda/sound/CC-Sounds/fire_gun/handguns/handgun_1.ogg
-- `pistol_reload`: cdda/sound/CC-Sounds/reload/pocket_pistol/pocket_pistol_load_01.ogg, cdda/sound/CC-Sounds/reload/pocket_pistol/pocket_pistol_load_02.ogg, cdda/sound/CC-Sounds/reload/pocket_pistol/pocket_pistol_load_04.ogg
 - `rifle_fire`: cdda/sound/CC-Sounds/fire_gun/rifles/rifle_1.ogg
 - `rifle_reload`: cdda/sound/CC-Sounds/reload/mag_fed_bolt_action_rifle/bolt_action_rifle_load_02.ogg, cdda/sound/CC-Sounds/reload/mag_fed_bolt_action_rifle/bolt_action_rifle_load_04.ogg
-- `roar_heavy`: cdda/sound/CC-Sounds/deal_damage/hurt_m/hurt_m_2.ogg, cdda/sound/CC-Sounds/speech/ferals/male_scream_1.ogg, cdda/sound/CC-Sounds/speech/ferals/male_scream_2.ogg, cdda/sound/CC-Sounds/speech/zombie/speech_zombie_groan.ogg, cdda/sound/CC-Sounds/speech/zombie/speech_zombie_groan_1.ogg, cdda/sound/CC-Sounds/speech/zombie/speech_zombie_groan_2.ogg, cdda/sound/CC-Sounds/speech/zombie/speech_zombie_groan_3.ogg, synthesised
-- `scream_zombie`: cdda/sound/CC-Sounds/deal_damage/hurt_m/hurt_m_1.ogg, cdda/sound/CC-Sounds/speech/ferals/male_scream_1.ogg, cdda/sound/CC-Sounds/speech/ferals/male_scream_2.ogg, cdda/sound/CC-Sounds/speech/zombie/speech_zombie_groan.ogg, cdda/sound/CC-Sounds/speech/zombie/speech_zombie_groan_1.ogg, cdda/sound/CC-Sounds/speech/zombie/speech_zombie_groan_2.ogg, cdda/sound/CC-Sounds/speech/zombie/speech_zombie_groan_3.ogg, cdda/sound/CC-Sounds/speech/zombie/speech_zombie_groan_4.ogg
-- `shotgun_fire`: cdda/sound/CC-Sounds/fire_gun/shotguns/shotgun_1.ogg
-- `shotgun_shell_load`: cdda/sound/CC-Sounds/reload/tube_fed_shotgun/shell_load_01.ogg, cdda/sound/CC-Sounds/reload/tube_fed_shotgun/shell_load_02.ogg, cdda/sound/CC-Sounds/reload/tube_fed_shotgun/shell_load_03.ogg, cdda/sound/CC-Sounds/reload/tube_fed_shotgun/shell_load_04.ogg
 - `skill_acid_spit`: redeclipse_sounds/sfx/splosh.ogg, redeclipse_sounds/sfx/splosh2.ogg, redeclipse_sounds/weapons/corroder/secondary4.ogg, redeclipse_sounds/weapons/corroder/secondary5.ogg, synthesised
 - `skill_berserk`: cdda/sound/CC-Sounds/speech/ferals/male_scream_1.ogg, cdda/sound/CC-Sounds/speech/ferals/male_scream_2.ogg, cdda/sound/CC-Sounds/speech/zombie/speech_zombie_groan_1.ogg, cdda/sound/CC-Sounds/speech/zombie/speech_zombie_groan_2.ogg, synthesised
 - `skill_blood_burst`: cdda/sound/CC-Sounds/melee_hit_flesh/big_stabbing/big_stabbing_flesh_1.ogg, cdda/sound/CC-Sounds/melee_hit_flesh/big_stabbing/big_stabbing_flesh_2.ogg, cdda/sound/CC-Sounds/melee_hit_flesh/big_stabbing/big_stabbing_flesh_3.ogg, cdda/sound/CC-Sounds/mon_death/zombie_gibbed/zombie_gibbed_1.ogg, cdda/sound/CC-Sounds/mon_death/zombie_gibbed/zombie_gibbed_2.ogg, synthesised
@@ -276,7 +229,6 @@ the licence of their source (CC0 / CC-BY).
 - `skill_parasite`: cdda/sound/CC-Sounds/melee_hit_flesh/small_stabbing/small_stabbing_flesh_2.ogg, cdda/sound/CC-Sounds/melee_hit_flesh/small_stabbing/small_stabbing_flesh_5.ogg, cdda/sound/CC-Sounds/mon_bite/bite_hit/bite_hit_1.ogg, cdda/sound/CC-Sounds/mon_bite/bite_hit/bite_hit_3.ogg, redeclipse_sounds/sfx/splosh.ogg, synthesised
 - `skill_predator_dash`: cdda/sound/CC-Sounds/deal_damage/hurt_m/hurt_m_1.ogg, cdda/sound/CC-Sounds/deal_damage/hurt_m/hurt_m_2.ogg, cdda/sound/CC-Sounds/melee_swing/big_cutting/big_cutting_swing_1.ogg, redeclipse_sounds/player/impulse.ogg, redeclipse_sounds/player/impulse2.ogg, synthesised
 - `skill_retaliation`: redeclipse_sounds/sfx/shockdamage.ogg, redeclipse_sounds/weapons/bzap.ogg, redeclipse_sounds/weapons/smallblast.ogg, synthesised
-- `skill_second_heart`: cdda/sound/CC-Sounds/speech/ferals/male_scared_heavy_breathing_1.ogg, redeclipse_sounds/sfx/regen_begin.ogg, synthesised
 - `skill_spore_cocoon`: cdda/sound/CC-Sounds/melee_hit_flesh/small_bash/small_bash_flesh_1.ogg, cdda/sound/CC-Sounds/melee_hit_flesh/small_bash/small_bash_flesh_3.ogg, redeclipse_sounds/sfx/regen_begin.ogg, redeclipse_sounds/sfx/splosh3.ogg, synthesised
 - `skill_storm_field`: redeclipse_sounds/weapons/bzap.ogg, redeclipse_sounds/weapons/bzzt.ogg, redeclipse_sounds/weapons/hum.ogg, redeclipse_sounds/weapons/zapper/beam.ogg, redeclipse_sounds/weapons/zapper/beam2.ogg, redeclipse_sounds/weapons/zapper/beam3.ogg, synthesised
 - `skill_storm_pulse`: redeclipse_sounds/weapons/bzap.ogg, redeclipse_sounds/weapons/bzzt.ogg, redeclipse_sounds/weapons/smallblast.ogg, redeclipse_sounds/weapons/smallblast2.ogg, redeclipse_sounds/weapons/zapper/beam.ogg, redeclipse_sounds/weapons/zapper/beam3.ogg, redeclipse_sounds/weapons/zapper/primary_begin.ogg, redeclipse_sounds/weapons/zapper/primary_begin2.ogg, synthesised
@@ -285,9 +237,6 @@ the licence of their source (CC0 / CC-BY).
 - `step_horde`: cdda/sound/CC-Sounds/melee_hit_flesh/small_stabbing/small_stabbing_flesh_1.ogg, cdda/sound/CC-Sounds/melee_hit_flesh/small_stabbing/small_stabbing_flesh_3.ogg, cdda/sound/CC-Sounds/melee_hit_flesh/small_stabbing/small_stabbing_flesh_4.ogg, cdda/sound/CC-Sounds/melee_hit_flesh/small_stabbing/small_stabbing_flesh_6.ogg
 - `step_light`: cdda/sound/CC-Sounds/plmove/walk_barefoot_1.ogg, cdda/sound/CC-Sounds/plmove/walk_barefoot_2.ogg, cdda/sound/CC-Sounds/plmove/walk_barefoot_3.ogg, cdda/sound/CC-Sounds/plmove/walk_barefoot_4.ogg, cdda/sound/CC-Sounds/plmove/walk_barefoot_5.ogg, cdda/sound/CC-Sounds/plmove/walk_barefoot_6.ogg
 - `step_player`: cdda/sound/CC-Sounds/plmove/walk_t_floor/walk_t_floor_1.ogg, cdda/sound/CC-Sounds/plmove/walk_t_floor/walk_t_floor_2.ogg, cdda/sound/CC-Sounds/plmove/walk_t_floor/walk_t_floor_3.ogg, cdda/sound/CC-Sounds/plmove/walk_t_floor/walk_t_floor_4.ogg, cdda/sound/CC-Sounds/plmove/walk_t_floor/walk_t_floor_5.ogg, cdda/sound/CC-Sounds/plmove/walk_t_floor/walk_t_floor_6.ogg, redeclipse_sounds/player/stepl.ogg, redeclipse_sounds/player/stepl3.ogg, redeclipse_sounds/player/stepr.ogg, redeclipse_sounds/player/stepr3.ogg
-- `uzi_fire`: cdda/sound/CC-Sounds/fire_gun/machineguns/machinegun_1.ogg
-- `uzi_reload`: cdda/sound/CC-Sounds/reload/default.ogg, redeclipse_sounds/weapons/smg/reload.ogg
-- `weapon_pickup`: cdda/sound/CC-Sounds/plmove/clear_obstacle/clear_obstacle_2.ogg, cdda/sound/CC-Sounds/reload/default.ogg, cdda/sound/CC-Sounds/reload/pocket_pistol/pocket_pistol_load_03.ogg
 
 ## Interface cues (2026-10-05)
 
@@ -297,10 +246,8 @@ assets/audio/ui/*.ogg: original procedural synthesis for this project, dedicated
 
 | Event | Derived from | Processing |
 |---|---|---|
-| ak_fire | rifle_fire (see table above) | mid crack, light drive |
 | sniper_fire | rifle_fire (see table above) | lower, longer report with a boom and echo tail |
 | minigun_fire | *synthesised* by tools/build_weapon_sounds.py | deep thump, breech crack and mechanical clack |
-| m4_fire | *synthesised* by tools/build_weapon_sounds.py | sharp 5.56 crack with a light body |
 | minigun_spin | *synthesised* by tools/build_weapon_sounds.py | looping steady whine with ticks, played while the barrels turn |
 | key_pickup | *synthesised* by tools/build_weapon_sounds.py | three inharmonic brass partials struck in turn |
 | dna_pickup | *synthesised* by tools/build_weapon_sounds.py | rising warm glide with vibrato and a soft pop |
@@ -317,7 +264,6 @@ Reproducible with `python tools/build_destruction_sounds.py`. Derived from the e
 | break_metal | hit_metal, fall_metal, fall_debris |
 | break_electronics | hit_electronics, hit_metal, glass_break, fall_tech |
 | break_lamp | hit_glass, glass_break, hit_electronics, fall_metal |
-| weapon_switch | weapon_pickup, dry_fire (short handling cut) |
 
 mutation_open/mutation_close: original CC0-1.0 procedural synthesis with tools/build_ui_sounds.py; close is the exact reverse of open, by 16-bit sample.
 
@@ -369,3 +315,8 @@ Glass crunch recordings the_crunch_of_glass__1–4 and roll recording The_heavy_
 Converted from the owner's WAV files to OGG Vorbis (originals removed): `control_lost` (brutal_man_grunting), `control_repair`, `damage_absorb` (damage_absorption_armor), `access_denied`, `biological_rupture`, `claw_cutting`, `brute_*` voices, `biomass_gurgle`, `cooler_gurgle`, `phone_ring`, `pc_hum` (sound_PC), `light_flicker`. Phone, PC, cooler and biomass ambience are registered events not yet placed in the level.
 
 Atmosphere cues (`phone_ring`, `pc_hum`, `cooler_gurgle`, `biomass_gurgle`, `display_intro` from intro_1-3, `vectrion_is_the_future`) are played by `ambient_prop_sounds.gd` near intact props; the reception line sounds once per level.
+
+
+## Owner-supplied weapon, door and pickup sounds (2026-10-26)
+
+Converted from the owner's WAV files to mono OGG Vorbis (originals removed, receipts in `audio_refresh_processing.json`, script `tools/import_weapon_audio.py`): shots (`pistol_fire`, `uzi_fire`, `shotgun_fire`, `ak_fire`, `m4_fire`, `launcher_fire`), reloads (`pistol_reload`, `uzi_reload`, `ak_reload`, `m4_reload`, `sniper_reload`, `launcher_reload`, `shotgun_shell_load` and `shotgun_pump`), casings (`casing_brass`, `casing_heavy`, `casing_shell`, `casing_launcher`), `dry_fire`, `weapon_pickup`, `weapon_switch`, `ammo_pickup`, `door_open`, `door_close`. They replace the earlier derived recordings, whose attribution rows were removed from this file when no remaining event used them.

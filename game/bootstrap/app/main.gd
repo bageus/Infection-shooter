@@ -55,6 +55,11 @@ var mission_layout: Node3D
 var blood_effects: Node3D
 
 
+# Before any child reads user://: carry saves over from the old project name.
+func _init() -> void:
+	preload("res://game/bootstrap/app/user_data_migration.gd").run()
+
+
 func _ready() -> void:
 	get_window().title = "Infection Shooter"
 	add_child(preload("res://game/bootstrap/app/mission_music.gd").new())

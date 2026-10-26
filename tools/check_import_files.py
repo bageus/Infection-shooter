@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Fail when a committed Godot .import file records a failed import.
+"""Fail when committed Godot .import metadata is conflicted or records a failed import.
 
 An editor that cannot import an asset (crash mid-import, failed VRAM
 compression, locked file) writes `valid=false` and drops the imported path;
@@ -18,17 +18,25 @@ def main() -> int:
     tracked = subprocess.run(["git", "ls-files", "*.import"], cwd=ROOT, capture_output=True, text=True, check=True).stdout.splitlines()
     broken = []
     recompress = []
+    conflicts = []
     for rel in tracked:
         path = ROOT / rel
         if not path.is_file():
             continue
         text = path.read_text(encoding="utf-8", errors="ignore")
+        if any(line.startswith(("<<<<<<<", "|||||||", ">>>>>>>")) or line == "=======" for line in text.splitlines()):
+            conflicts.append(rel)
         if "\nvalid=false" in text:
             broken.append(rel)
         elif "detect_3d/compress_to=1" in text:
             # The editor silently recompresses such textures to VRAM formats
             # once it sees them in 3D; a failed recompression leaves valid=false.
             recompress.append(rel)
+    if conflicts:
+        print("Unresolved merge conflicts in Godot import metadata:")
+        for rel in conflicts:
+            print("  -", rel)
+        return 1
     if broken:
         print("Failed imports committed (valid=false) — reimport them in the editor:")
         for rel in broken:
