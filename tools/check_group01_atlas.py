@@ -126,15 +126,18 @@ def containing_tile(uv, tiles):
 
 def validate_model(path, layout):
     doc, binary = read_glb(path.read_bytes())
-    assert doc['images'] == [{'uri': f'textures/unified/group01_{kind}.png'} for kind in ['albedo', 'normal', 'orm']], f'{path.name}: stale images'
-    assert len(doc['textures']) == 3
+    # Non-destructible models carry their own materials and are outside the atlas.
+    atlas = 'images' in doc
+    if atlas:
+        assert doc['images'] == [{'uri': f'textures/unified/group01_{kind}.png'} for kind in ['albedo', 'normal', 'orm']], f'{path.name}: stale images'
+        assert len(doc['textures']) == 3
     live = set()
     for mesh in doc['meshes']:
         for p in mesh['primitives']:
             live.update(p['attributes'].values())
             live.add(p['indices'])
             material = doc['materials'][p['material']]
-            if 'baseColorTexture' not in material.get('pbrMetallicRoughness', {}):
+            if not atlas or 'baseColorTexture' not in material.get('pbrMetallicRoughness', {}):
                 continue
             assert material['name'] in {'Group01Opaque', 'Group01OpaqueDoubleSided', 'Group01OpaqueDark'}
             uv = expanded(doc, binary, p, 'TEXCOORD_0')
@@ -148,6 +151,8 @@ def validate_model(path, layout):
     assert {a['bufferView'] for a in doc['accessors']} == set(range(len(doc['bufferViews']))), f'{path.name}: orphan buffers'
     used_bytes = sum(v['byteLength'] for v in doc['bufferViews'])
     assert len(binary)-used_bytes <= 4*len(doc['bufferViews']), f'{path.name}: stale binary payload'
+    if not atlas:
+        return
     profile = Path(str(path)+'.import').read_text()
     assert 'import_script/path="res://addons/staged_glb_import/group01_material_post_import.gd"' in profile
 
@@ -158,7 +163,7 @@ def main():
     args = parser.parse_args()
     layout = json.loads((GROUP/'atlas_layout.json').read_text())
     paths = sorted(GROUP.glob('*.glb'))
-    assert len(paths) == 24 and not (GROUP/'01_stairs_2.glb').exists()
+    assert len(paths) == 39 and not (GROUP/'01_stairs_2.glb').exists()
     for path in paths:
         relative = path.relative_to(ROOT).as_posix()
         validate_model(path, layout)
@@ -171,7 +176,8 @@ def main():
         profile = Path(str(p)+'.import').read_text()
         for setting in ['compress/mode=2', 'mipmaps/generate=true', 'process/size_limit='+str(size), 'detect_3d/compress_to=0']:
             assert setting in profile, f'{kind}: wrong import budget'
-    print('Group 01 atlas: 24 production models; UV, metal, buffers and budgets PASS' + ('; geometry/stages match '+args.compare_ref if args.compare_ref else ''))
+    atlas_count = sum('images' in read_glb(path.read_bytes())[0] for path in paths)
+    print(f'Group 01 atlas: {atlas_count} atlas models of {len(paths)}; UV, metal, buffers and budgets PASS' + ('; geometry/stages match '+args.compare_ref if args.compare_ref else ''))
 
 
 if __name__ == '__main__':
