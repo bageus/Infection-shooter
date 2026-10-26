@@ -371,7 +371,7 @@ jobs:
             /tmp/import.log
   rendered-pixels:
     runs-on: ubuntu-latest
-    timeout-minutes: 25
+    timeout-minutes: 30
     strategy:
       fail-fast: false
       matrix:
@@ -405,10 +405,10 @@ jobs:
           for suite in game/bootstrap/app/tests/run_hero_xray_tests.gd game/presentation/prototype_hud/tests/run_vital_bar_feedback_tests.gd game/bootstrap/app/tests/run_planner_light_view_tests.gd game/presentation/office_floor/tests/run_display_shadow_profile.gd game/presentation/prototype_hud/tests/run_radar_tests.gd game/presentation/office_floor/tests/run_floor_batch_tests.gd game/presentation/office_floor/tests/run_glass_floor_debris_tests.gd game/presentation/office_floor/tests/run_material_floor_debris_tests.gd game/presentation/office_floor/tests/run_floor_decal_visibility_tests.gd game/presentation/office_floor/tests/run_baked_surface_decal_tests.gd game/bootstrap/app/tests/run_surface_decal_options_tests.gd game/features/combat/tests/run_grenade_vfx_tests.gd game/features/infected/tests/run_corpse_physics_tests.gd game/bootstrap/app/tests/run_settings_tabs_tests.gd game/bootstrap/app/tests/run_surface_pose_tests.gd game/features/combat/tests/run_cursor_aim_tests.gd game/bootstrap/app/tests/run_gameplay_planner_repairs_tests.gd game/bootstrap/app/tests/run_runtime_debug_tests.gd game/bootstrap/app/tests/run_blast_feedback_tests.gd; do
             suite_status=0
             started_at=$(date +%s)
-            # 300 s: full-mission rendered suites run 85-200 s on the software renderer (run_runtime_debug_tests: 84 s this morning, ~190 s on current main) and 180 s+ on shared runners.
+            # 480 s: full-mission rendered suites run 85-300 s on the software renderer (run_planner_light_view_tests took 299 s on a shared runner and timed out at 300 s).
             native_log_args=()
             if [ "$suite" = game/bootstrap/app/tests/run_surface_pose_tests.gd ]; then native_log_args+=(--verbose); fi
-            timeout 300 xvfb-run -a godot "${native_log_args[@]}" --path . --audio-driver Dummy --rendering-method "$renderer" --script "$suite" > /tmp/occlusion.log 2>&1 || suite_status=$?
+            timeout 480 xvfb-run -a godot "${native_log_args[@]}" --path . --audio-driver Dummy --rendering-method "$renderer" --script "$suite" > /tmp/occlusion.log 2>&1 || suite_status=$?
             elapsed=$(( $(date +%s) - started_at ))
             echo "$renderer: $suite exited $suite_status in ${elapsed}s"
             if [ "$suite_status" != 0 ]; then

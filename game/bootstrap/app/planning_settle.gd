@@ -32,7 +32,8 @@ func run(session: Node, nodes: Array, status: Label) -> bool:
 			await tree.process_frame
 			if not _alive(session): return false
 	if not dirty:
-		print("Planner physics: unchanged prepared layer")
+		if OS.is_debug_build():
+			print("Planner physics: unchanged prepared layer")
 		return true
 	_invalidate(nodes)
 	var bones: Array = []
@@ -64,7 +65,8 @@ func run(session: Node, nodes: Array, status: Label) -> bool:
 				node.set_meta("planning_settled_transform", node.transform)
 				node.set_meta("planning_settled_count", nodes.size())
 	elapsed_msec = Time.get_ticks_msec() - started
-	print("Planner whole-world physics: %d props, %d bodies, %d ticks, %d ms, complete=%s" % [_bodies.size(), _corpses.size(), ticks, elapsed_msec, success])
+	if OS.is_debug_build():
+		print("Planner whole-world physics: %d props, %d bodies, %d ticks, %d ms, complete=%s" % [_bodies.size(), _corpses.size(), ticks, elapsed_msec, success])
 	return success
 
 
