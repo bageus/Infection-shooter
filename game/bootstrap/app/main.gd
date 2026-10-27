@@ -186,6 +186,11 @@ func set_infinite_antidotes_enabled(enabled: bool) -> void:
 
 
 ## Settings: floor chevrons that point toward the emergency key and the exit.
+## Settings: light camera shake on shots.
+func set_camera_shake_enabled(enabled: bool) -> void:
+	player.call("set_camera_shake_enabled", enabled)
+
+
 func set_floor_hints_enabled(enabled: bool) -> void:
 	if is_instance_valid(mission_layout):
 		mission_layout.call("set_floor_hints_enabled", enabled)

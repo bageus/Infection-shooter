@@ -121,6 +121,13 @@ func _general() -> void:
 	floor_hints.button_pressed = dialog.view.preferences.values.floor_hints
 	floor_hints.toggled.connect(func(value: bool) -> void: dialog.call("_change", "floor_hints", value))
 	dialog.get("layout").add_child(floor_hints)
+	var shake := CheckButton.new()
+	shake.name = "CameraShake"
+	shake.text = dialog.view.text("cameraShake")
+	shake.tooltip_text = dialog.view.text("cameraShakeHint")
+	shake.button_pressed = dialog.view.preferences.values.camera_shake
+	shake.toggled.connect(func(value: bool) -> void: dialog.call("_change", "camera_shake", value))
+	dialog.get("layout").add_child(shake)
 	var dodge := OptionButton.new()
 	dodge.name = "DodgeAnimation"
 	dodge.add_item(dialog.view.text("dodgeAnimationRoll"))

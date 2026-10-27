@@ -28,10 +28,29 @@ func _run() -> void:
 		_check(state.remaining.length() <= 0.080001 and state.remaining.x < 0.0, "Burst residue is capped in the shot direction")
 		state.step(1.0)
 		_check(state.remaining.is_zero_approx(), "Residual recoil expires without a forward spring")
+	_kick_and_shake()
 	await _player()
 	await create_timer(0.2).timeout
 	print("Shot recoil tests: %d failures" % failures)
 	quit(1 if failures else 0)
+
+func _kick_and_shake() -> void:
+	var state := RECOIL.new()
+	state.shot("SHOTGUN", Vector3.FORWARD)
+	_check(is_equal_approx(state.kick, 1.0), "A heavy shot gives full visual kick")
+	state.step(1.0)
+	_check(state.kick == 0.0, "Visual kick decays to zero")
+	var peak := 0.0
+	state.shot("SHOTGUN", Vector3.FORWARD)
+	for i in 20:
+		peak = maxf(peak, state.camera_shake(0.0).length())
+	_check(peak > 0.0 and peak <= RECOIL.SHAKE_METRES * 1.5, "Shot shakes the camera within the cap")
+	state.shake_enabled = false
+	_check(state.camera_shake(0.0) == Vector3.ZERO, "Disabled shake keeps the camera still")
+	state.shake_enabled = true
+	state.camera_shake(5.0)
+	_check(state.camera_shake(0.0) == Vector3.ZERO, "Camera shake settles")
+
 
 func _player() -> void:
 	var stage := Node3D.new()
@@ -42,6 +61,9 @@ func _player() -> void:
 	player.gravity_acceleration = 0.0
 	player.configure_world(stage, null)
 	player.set("_aim_point", Vector3(10, 1, 0))
+	player.call("set_camera_shake_enabled", false)
+	_check(not player.get("_shot_recoil").shake_enabled, "Player forwards the camera shake setting")
+	player.call("set_camera_shake_enabled", true)
 	var weapon: Node3D = player.get_current_weapon()
 	_check(player._fire_weapon(weapon), "A real pistol shot succeeds")
 	var state = player.get("_shot_recoil")

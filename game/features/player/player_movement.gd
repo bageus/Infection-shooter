@@ -99,7 +99,6 @@ var effects_root: Node3D
 var impact_pool: Node
 var _drop_weapon_command: Callable
 
-
 func _ready() -> void:
 	floor_snap_length = 0.45
 	# A freshly loaded map starts with the camera at its closest allowed distance, snapped without a zoom-in.
@@ -166,11 +165,12 @@ func _physics_process(delta: float) -> void:
 ## Skill presentation asks for a short camera pull (see shooting_camera_state).
 func camera_kick(amount: float) -> void:
 	_shooting_camera.kick(amount)
-
+## Settings: light camera shake on shots; recoil of the weapon and body stays on.
+func set_camera_shake_enabled(enabled: bool) -> void:
+	_shot_recoil.shake_enabled = enabled
 
 func warm_up_skill_fx(parent: Node3D) -> void:
 	mutation_effects.get("vfx").call("warm_up", parent)
-
 
 func _unhandled_input(event: InputEvent) -> void:
 	if get_tree().paused:
@@ -223,7 +223,6 @@ func _select_weapon(index:int)->void:
 	if audio != null and old != get_current_weapon():
 		audio.play(&"weapon_switch")
 
-
 func _fire_weapon(weapon: Node3D) -> bool:
 	var previous := weapon_stance.begin_fire_attempt()
 	$AnimationDriver.call("configure_clip_selector", _animation_selection.select_clip)
@@ -234,7 +233,6 @@ func _fire_weapon(weapon: Node3D) -> bool:
 		_shooting_camera.shot(String(weapon.call("get_weapon_name")))
 		_shot_recoil.shot(String(weapon.call("get_weapon_name")), -weapon.get_node("Muzzle").global_basis.z)
 	return fired
-
 
 func _has_presentation_activity() -> bool:
 	if _roll_remaining > 0.0 or bool(infection_runtime.call("is_control_lost")):
@@ -253,11 +251,9 @@ func select_weapon_slot(index: int) -> bool:
 	_select_weapon(index)
 	return true
 
-
 # Public scene wiring v1 for the office floor; forwards to the spent casing pool.
 func configure_floor_debris(floor_view: Node3D) -> void:
 	$AimPivot/SpentCasings.call("configure_floor_debris", floor_view)
-
 
 # Public scene wiring v1; owned by the mission composition.
 func configure_world(container: Node3D, impacts: Node) -> void:
@@ -271,7 +267,6 @@ func configure_world(container: Node3D, impacts: Node) -> void:
 	if is_instance_valid(mutation_effects):
 		mutation_effects.call("configure_world", container)
 
-
 func configure_footstep_surface(query: Callable, biomass_query := Callable()) -> void:
 	_footstep_surface = query
 	_biomass_footstep_surface = biomass_query
@@ -279,10 +274,8 @@ func configure_footstep_surface(query: Callable, biomass_query := Callable()) ->
 		audio.set("glass_surface_query", query)
 		audio.set("biomass_surface_query", biomass_query)
 
-
 func configure_weapon_drop(command: Callable) -> void:
 	_drop_weapon_command = command
-
 
 func get_current_weapon()->Node3D:
 	return weapons[_slot_weapons[current_weapon_index]]
@@ -314,7 +307,6 @@ func pickup_weapon(index: int) -> bool:
 func export_loadout() -> Dictionary:
 	return {"slots": _slot_weapons.duplicate(), "armor": armor, "ammo": weapons.map(func(gun: Node) -> int: return int(gun.call("carried_ammo")))}
 
-
 func import_loadout(loadout: Dictionary) -> void:
 	armor = clampf(float(loadout.get("armor", 0.0)), 0.0, max_armor)
 	var ammo: Variant = loadout.get("ammo")
@@ -334,22 +326,18 @@ func import_loadout(loadout: Dictionary) -> void:
 	_slot_weapons = seen
 	_select_weapon(0)
 
-
 ## Armor plate collected: the armor bar fills to its maximum.
 func pickup_armor() -> void:
 	armor = max_armor
 	_play_sound(&"medkit_pickup")
 
-
 func acquire_emergency_key() -> void:
 	_emergency_key = true
 	_play_sound(&"key_pickup")
 
-
 # Public sound wiring v1 (ADR-0018): item and pickup sounds on the player.
 func play_item_sound(event: StringName) -> void:
 	_play_sound(event)
-
 
 func _play_sound(event: StringName) -> void:
 	if audio != null:
@@ -361,19 +349,15 @@ func get_current_weapon_index()->int: return current_weapon_index
 func take_damage(amount: float, damage_type: String = "physical") -> void:
 	_apply_damage(amount, damage_type, global_position, Vector3.FORWARD, damage_type)
 
-
 func get_projectile_material(_shape_index: int = -1) -> String:
 	return "flesh"
-
 
 func take_armor_capped_damage(amount: float) -> void: _apply_damage(amount, "physical", global_position, Vector3.FORWARD, "physical", true) # Colossus: armor soaks the whole blow
 func take_projectile_damage(amount: float, point: Vector3, direction: Vector3, weapon: String) -> void:
 	_apply_damage(amount, "physical", point, direction, weapon)
 
-
 func take_blast_damage(amount: float, origin: Vector3) -> void:
 	_apply_damage(amount, "fire", global_position, (global_position - origin).normalized(), "GRENADE")
-
 
 func _apply_damage(amount: float, damage_type: String, point: Vector3, direction: Vector3, weapon: String, armor_capped: bool = false) -> void:
 	if amount <= 0.0 or health <= 0.0 or _iframes_remaining > 0.0:
@@ -430,6 +414,7 @@ func _update_camera(delta: float) -> void:
 	view_distance *= 1.0 + _shooting_camera.tick(delta)
 	if absf(camera.position.length() - view_distance) > 0.001:
 		camera.position = camera.position.normalized() * lerpf(camera.position.length(), view_distance, 1.0 - exp(-8.0 * delta))
+	camera_rig.position = _shot_recoil.camera_shake(delta)
 	var turn := Input.get_axis("camera_left", "camera_right")
 	if _stun_remaining > 0.0 and _stun_intensity > 0.35:
 		turn = -turn
@@ -456,12 +441,10 @@ func apply_blast_stun(duration: float, intensity: float) -> void:
 func _exit_tree() -> void:
 	_end_blast_stun()
 
-
 # Pause, game over and the planner must not keep the muffled, ringing mix.
 func _notification(what: int) -> void:
 	if what == NOTIFICATION_PAUSED:
 		_end_blast_stun()
-
 
 func _end_blast_stun() -> void:
 	if _stun_remaining <= 0.0:
@@ -472,7 +455,6 @@ func _end_blast_stun() -> void:
 	if is_instance_valid(_stun_ringing):
 		_stun_ringing.stop()
 	blast_stun_ended.emit()
-
 
 func _update_move(delta:float)->void:
 	_mutation_dash_motion.before_move(self, delta)
@@ -578,22 +560,18 @@ func _aim_uncontrolled() -> void:
 	aim_pivot.look_at(_aim_point, Vector3.UP)
 	body_visual.look_at(body_visual.global_position + direction, Vector3.UP, true)
 
-
 # Public weapon_view_v1: read-only view data, never persisted.
 func get_weapon_view() -> Dictionary:
 	var weapon := get_current_weapon()
 	var magnification := 0.0 if _scope_raise.hidden else _scope_magnification(weapon)
 	return {"camera": camera, "target": _aim_point, "magnification": magnification}
 
-
 func _scope_magnification(weapon: Node3D) -> float:
 	var magnification: Variant = weapon.get("scope_magnification") if weapon != null else null
 	return float(magnification) if magnification != null else 0.0
 
-
 func get_camera_adjustment() -> Dictionary:
 	return _view_adjustment.snapshot(self)
-
 
 func set_camera_adjustment(values: Dictionary) -> void:
 	_view_adjustment.restore(self, values)
