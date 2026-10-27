@@ -6,6 +6,9 @@ uniform bool lens_zone = false;
 uniform mat4 zone_inverse = mat4(1.0);
 uniform vec2 zone_half = vec2(0.0);
 uniform float wall_margin = 0.3;
+uniform vec3 hero_pos = vec3(0.0);
+uniform float outside_reach = 2.5;
+uniform float outside_height = 0.6;
 uniform vec2 hole_center = vec2(-10.0);
 uniform vec2 viewport_size = vec2(1280.0, 720.0);
 uniform float hole_radius = 0.0;
@@ -34,9 +37,16 @@ void fragment() {
             ndc.z = depth * 2.0 - 1.0;
 #endif
             vec4 view = INV_PROJECTION_MATRIX * vec4(ndc, 1.0);
-            vec3 local = (zone_inverse * INV_VIEW_MATRIX * vec4(view.xyz / view.w, 1.0)).xyz;
+            vec3 world = (INV_VIEW_MATRIX * vec4(view.xyz / view.w, 1.0)).xyz;
+            vec3 local = (zone_inverse * vec4(world, 1.0)).xyz;
             DEPTH = 1.0;
-            bool in_room = lens_zone && local.y < -0.1 && abs(local.x) < zone_half.x - wall_margin && abs(local.z) < zone_half.y - wall_margin;
+            bool below = local.y < -0.1;
+            bool in_room = lens_zone && below && abs(local.x) < zone_half.x - wall_margin && abs(local.z) < zone_half.y - wall_margin;
+            // The hero stands outside this zone (its cover only hangs over him in perspective):
+            // open the low floor-level surfaces next to him that belong to his own side of the wall.
+            bool outside = !lens_zone && below && world.y < outside_height && distance(world.xz, hero_pos.xz) < outside_reach
+                && (abs(local.x) > zone_half.x + wall_margin || abs(local.z) > zone_half.y + wall_margin);
+            in_room = in_room || outside;
             if (in_room) cover *= smoothstep(hole_radius * 0.6, hole_radius, distance_px);
         }
     }
