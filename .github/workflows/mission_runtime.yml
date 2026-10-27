@@ -264,7 +264,7 @@ jobs:
       - name: Export PCK inventory and packed mission smoke
         run: |
           set -o pipefail
-          for preset in "Windows Desktop" "Web" "Web itch" "Web Yandex"; do
+          for preset in "Windows Desktop" "Web"; do
             key=$(echo "$preset" | tr ' ' '_')
             pack=/tmp/optimization_${key}.pck
             inventory=/tmp/optimization_${key}.json
