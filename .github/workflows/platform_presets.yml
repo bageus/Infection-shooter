@@ -1,0 +1,41 @@
+name: Platform export presets
+# The runtime job is near its 30 minute limit, so the itch and Yandex packs get their own job.
+on:
+  push:
+    branches: [main]
+    paths: ['export_presets.cfg', 'game/infrastructure/platform/**', 'project.godot']
+  pull_request:
+    paths: ['export_presets.cfg', 'game/infrastructure/platform/**', 'project.godot']
+permissions:
+  contents: read
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event_name == 'pull_request' && github.head_ref || github.sha }}
+  cancel-in-progress: true
+jobs:
+  export:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install Godot
+        run: |
+          bash tools/ci_download_godot.sh
+          unzip -q /tmp/godot.zip -d /tmp/godot
+          chmod +x /tmp/godot/Godot*
+          sudo ln -s /tmp/godot/Godot* /usr/local/bin/godot
+      - name: Import
+        run: |
+          set -o pipefail
+          timeout 600 godot --headless --path . --editor --quit 2>&1 | tee /tmp/import.log
+          if grep -E 'SCRIPT ERROR|^ERROR:' /tmp/import.log; then exit 1; fi
+      - name: Export packs and boot the packed game
+        run: |
+          set -o pipefail
+          for preset in "Web itch" "Web Yandex"; do
+            key=$(echo "$preset" | tr ' ' '_')
+            timeout 300 godot --headless --path . --export-pack "$preset" "/tmp/$key.pck" > "/tmp/export_$key.log" 2>&1
+            if grep -E 'SCRIPT ERROR|^ERROR:' "/tmp/export_$key.log"; then exit 1; fi
+            timeout 120 godot --headless --main-pack "/tmp/$key.pck" res://game/bootstrap/app/main.tscn --quit-after 180 > "/tmp/packed_$key.log" 2>&1
+            if grep -E 'SCRIPT ERROR|^ERROR:' "/tmp/packed_$key.log"; then exit 1; fi
+            rm "/tmp/$key.pck"
+          done
