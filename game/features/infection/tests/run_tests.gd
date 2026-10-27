@@ -39,6 +39,7 @@ func _run() -> void:
 	_test_ampule_notification_and_antidote()
 	_test_skill_tree_lock_and_reactivation()
 	_test_skill_branch_order_and_locked_prerequisites()
+	_test_gas_mask_blocks_mutagen()
 
 	if failures == 0:
 		print("T001 infection domain tests passed.")
@@ -224,6 +225,15 @@ func _test_ampule_notification_and_antidote() -> void:
 	locked_runtime.absorb_mutagen(2.0)
 	_expect(locked_notifications[0] == locked_before, "Returning to a locked skill with no new candidate does not reopen the menu.")
 	locked_runtime.free()
+
+
+func _test_gas_mask_blocks_mutagen() -> void:
+	var domain = InfectionDomain.new()
+	domain.gas_mask_worn = true
+	_expect_float(domain.absorb_mutagen(2.0), 0.0, "A worn gas mask takes no mutagen from a cloud.")
+	_expect_float(domain.mutation, 0.0, "Mutation stays unchanged while the mask is worn.")
+	domain.gas_mask_worn = false
+	_expect_float(domain.absorb_mutagen(2.0), 10.0, "Mutagen is absorbed again once the mask is taken off.")
 
 
 func _test_cloud_rate_and_bounds() -> void:

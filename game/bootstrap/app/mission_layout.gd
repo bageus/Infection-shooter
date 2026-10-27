@@ -1,12 +1,10 @@
 extends Node3D
 
-const KEY := preload("res://game/bootstrap/app/mission_key.gd")
 const WEAPON := preload("res://game/bootstrap/app/weapon_pickup.gd")
 const FLOOR_HINT := preload("res://game/bootstrap/app/floor_hint_guide.gd")
 const FLOOR_TOP := 0.0135 # Visible base floor top; physics floor pieces must match it (see main.tscn FloorBody)
 const CUT_STEP := 0.5
 const STAIR_REFRESH_SECONDS := 0.35
-const KEY_REVEAL_SECONDS := 600.0
 const STAIR_TOP_HEIGHT := 3.0 # Upper landing in local y, see _stair_surface_height.
 
 var _stage: Node3D
@@ -16,10 +14,7 @@ var _stairs: Dictionary[int, Dictionary] = {}
 var _openings: Array[Rect2] = []
 var _scan_remaining := 0.0
 var _player: Node3D
-var _key: Node3D
 var _hints: Node3D
-var _elapsed := 0.0
-var _key_revealed := false
 
 
 func setup(stage: Node3D, player: Node3D, _infection: Node) -> void:
@@ -32,11 +27,6 @@ func setup(stage: Node3D, player: Node3D, _infection: Node) -> void:
 	for node in _objects.get_children():
 		_register_stair(weakref(node))
 	_refresh_stairs()
-	var key := KEY.new()
-	key.name = "EmergencyKey"
-	add_child(key)
-	key.global_position = Vector3(20, 0.25, 15)
-	_key = key
 	_hints = FLOOR_HINT.new()
 	_hints.name = "FloorHints"
 	_hints.player = player
@@ -48,8 +38,7 @@ func set_floor_hints_enabled(enabled: bool) -> void:
 	_hints.call("set_hints_enabled", enabled)
 
 
-# Goal for the floor chevrons: the emergency key once revealed and not yet taken, then the door it opens,
-# otherwise the nearest exit opening.
+# Goal for the floor chevrons: the door the carried emergency key opens, otherwise the nearest exit opening.
 func floor_hint_target() -> Vector3:
 	if not is_instance_valid(_player):
 		return Vector3.INF
@@ -58,8 +47,6 @@ func floor_hint_target() -> Vector3:
 		var door := _key_door_target(from)
 		if door.is_finite():
 			return door
-	elif _key_revealed and is_instance_valid(_key):
-		return _key.global_position
 	var best := Vector3.INF
 	var best_distance := INF
 	for opening in _openings:
@@ -88,11 +75,6 @@ func _key_door_target(from: Vector2) -> Vector3:
 
 
 func _process(delta: float) -> void:
-	_elapsed += delta
-	if not _key_revealed and _elapsed >= KEY_REVEAL_SECONDS:
-		_key_revealed = true
-		if is_instance_valid(_key):
-			_key.call("reveal_arrow")
 	_scan_remaining -= delta
 	if _scan_remaining <= 0.0:
 		_scan_remaining = STAIR_REFRESH_SECONDS
