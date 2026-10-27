@@ -49,6 +49,10 @@ func _on_palette_selected(index: int) -> void:
 
 
 func _click_world(screen_pos: Vector2) -> void:
+	# Shift+LMB marks objects for a template while its mode is on; it never places or selects.
+	if controls.group_templates.recording() and Input.is_key_pressed(KEY_SHIFT):
+		controls.group_templates.toggle_pick(geometry._planned_object_at(screen_pos))
+		return
 	if selected_kind == GROUP_TEMPLATES.KIND and preview != null:
 		controls.group_templates.place(screen_pos)
 		return
@@ -310,7 +314,6 @@ func _place_selected(screen_pos: Vector2) -> void:
 		_ground_conference_chair(node)
 	node.set_meta("planning_scene_path", selected_path)
 	placed.append(node)
-	controls.group_templates.note_placed(node)
 	session.edit_history.call("record_added", node)
 	if not catalog.WORKSTATIONS.desk_name(selected_path).is_empty():
 		var desk_id = str(Time.get_ticks_usec())
