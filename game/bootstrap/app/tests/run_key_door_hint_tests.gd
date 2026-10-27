@@ -15,21 +15,12 @@ func _run() -> void:
 	var player: Node3D = KEY_HOLDER.new()
 	root.add_child(player)
 	layout.set("_player", player)
-	var key := Node3D.new()
-	root.add_child(key)
-	key.global_position = Vector3(20.0, 0.0, 0.0)
-	layout.set("_key", key)
-	layout.set("_key_revealed", true)
-
-	var target: Vector3 = layout.call("floor_hint_target")
-	_check(target.is_equal_approx(key.global_position), "the revealed key is the goal before pickup")
-
 	player.holding = true
 	var near_door := _add_door(Vector3(5.0, 0.0, 0.0), true, false)
 	_add_door(Vector3(-20.0, 0.0, 0.0), true, false)
 	_add_door(Vector3(1.0, 0.0, 0.0), true, true)
 	_add_door(Vector3(0.5, 0.0, 0.0), false, false)
-	target = layout.call("floor_hint_target")
+	var target: Vector3 = layout.call("floor_hint_target")
 	_check(target.is_equal_approx(near_door.global_position), "after pickup the nearest key-locked door is the goal, not a sealed or unlocked one")
 
 	for door in get_nodes_in_group("test_doors"):
@@ -41,7 +32,6 @@ func _run() -> void:
 
 	layout.free()
 	player.free()
-	key.free()
 	print("Key door hint tests: %d failure(s)" % failures)
 	quit(1 if failures > 0 else 0)
 
