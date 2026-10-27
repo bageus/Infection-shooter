@@ -49,6 +49,7 @@ func _run() -> void:
 		await process_frame
 		_assert_hud_separation(layout, left)
 		_check(is_equal_approx(left.size.x, width), "Long entries and viewport changes keep the palette width fixed")
+		_check(controls.palette.fixed_column_width > 0 and controls.palette.fixed_column_width <= controls.palette.size.x, "Palette entries share one column as wide as the list, so they centre on one axis")
 		_check(left.get_node("VBox").size.x <= width, "Palette contents fit within the fixed HUD")
 		_check(is_equal_approx(layout.right.size.x, 360.0) and layout.right_content.size.x <= 360, "Long map names cannot widen the right HUD")
 	await _exercise_tabs(layout, left)

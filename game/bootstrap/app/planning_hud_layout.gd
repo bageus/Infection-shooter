@@ -1,5 +1,6 @@
 extends RefCounted
 ## Planner-only panel composition after all widget owners have connected their signals.
+const PALETTE_INSET := 24
 var right: Control
 var right_content: Control
 var right_tabs: TabContainer
@@ -40,8 +41,10 @@ func setup(controls: Node) -> void:
 		button.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
 	old_tabs.queue_free()
 	controls.palette.custom_minimum_size.x = 0
-	controls.palette.fixed_column_width = 0
 	controls.palette.clip_contents = true
+	controls.palette.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
+	controls.palette.resized.connect(_fit_palette_columns.bind(controls.palette))
+	_fit_palette_columns(controls.palette)
 	right = ui.get_node("RightPanel")
 	right.offset_top = 8
 	right.offset_left = -368
@@ -160,6 +163,11 @@ func _build_right_tabs(right_box: Node, left_box: Node) -> void:
 		if child is Button:
 			child.clip_text = true
 			child.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
+
+
+# One column as wide as the list, so every entry is centred on the same axis in every tab.
+func _fit_palette_columns(palette: ItemList) -> void:
+	palette.fixed_column_width = maxi(1, int(palette.size.x) - PALETTE_INSET)
 
 
 func _toolbar_visibility_changed() -> void:
