@@ -70,6 +70,8 @@ static func collect(objects: Node, nodes: Array, include_player: bool = true) ->
 		var door := DOOR_OPTIONS.lockable_controller(node)
 		if door != null:
 			records[-1]["door_lock"] = str(door.call("get_lock_state"))
+			if DOOR_OPTIONS.is_one_way(door):
+				records[-1]["door_one_way"] = true
 		if node.has_method("get_enemy_stats") and node.has_meta(&"planning_enemy_stats"):
 			records[-1]["enemy_stats"] = node.call("get_enemy_stats")
 		if node.has_method("get_death_cloud_config") and node.has_meta(&"planning_death_cloud"):

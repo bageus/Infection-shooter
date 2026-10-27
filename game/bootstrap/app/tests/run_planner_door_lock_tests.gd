@@ -22,6 +22,12 @@ func _run() -> void:
 	_expect(door.get_lock_state() == &"open", "Layout restore applies an open door")
 	LAYOUT_PROPERTIES.restore(wall, {})
 	_expect(door.get_lock_state() == &"open", "Records without door_lock leave the door as restored")
+	LAYOUT_PROPERTIES.restore(wall, {"door_one_way": true})
+	_expect(PLANNER_DOOR.is_one_way(door), "Layout restore applies a one-way door")
+	LAYOUT_PROPERTIES.restore(wall, {})
+	_expect(not PLANNER_DOOR.is_one_way(door), "Records without door_one_way open both ways")
+	var bad_way := {"objects": [{"scene": "res://x.tscn", "door_one_way": "yes"}]}
+	_expect(LAYOUT_VALIDATOR.error(bad_way) != "", "Validator rejects a non-bool door_one_way")
 	var bad := {"objects": [{"scene": "res://x.tscn", "door_lock": "bogus"}]}
 	_expect(LAYOUT_VALIDATOR.error(bad) != "", "Validator rejects an unknown door_lock")
 	var good := {"objects": [{"scene": "res://x.tscn", "door_lock": "sealed"}]}

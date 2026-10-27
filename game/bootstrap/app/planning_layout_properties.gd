@@ -18,6 +18,8 @@ static func restore(node: Node3D, record: Dictionary) -> void:
 	var door := DOOR_OPTIONS.lockable_controller(node)
 	if door != null and DOOR_OPTIONS.is_valid_state(record.get("door_lock", "")):
 		door.call("configure_lock_state", StringName(str(record["door_lock"])))
+	if door != null:
+		door.call("configure_one_way", bool(record.get("door_one_way", false)))
 	if node.has_method("configure_stats") and record.get("enemy_stats") is Dictionary:
 		node.call("configure_stats", record["enemy_stats"])
 	if node.has_method("configure_death_cloud") and record.get("death_cloud") is Dictionary:

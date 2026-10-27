@@ -81,6 +81,7 @@ func _append(node: Node3D, scene_root: Node3D) -> void:
 	var copy_door := DOOR_OPTIONS.lockable_controller(copy)
 	if door != null and copy_door != null:
 		copy_door.call("configure_lock_state", door.call("get_lock_state"))
+		copy_door.call("configure_one_way", DOOR_OPTIONS.is_one_way(door))
 	if node.has_method("get_enemy_stats") and node.has_meta(&"planning_enemy_stats"):
 		copy.call("configure_stats", node.call("get_enemy_stats"))
 	if node.has_method("get_death_cloud_config") and node.has_meta(&"planning_death_cloud"):

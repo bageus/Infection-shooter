@@ -57,6 +57,9 @@ func _check_door(entry: Dictionary) -> void:
 		for state: StringName in STATES:
 			controller.call("configure_lock_state", state)
 			_check(controller.call("get_lock_state") == state, "%s keeps the %s state" % [label, state])
+		for one_way: bool in [true, false]:
+			controller.call("configure_one_way", one_way)
+			_check(PLANNER_DOOR.is_one_way(controller) == one_way, "%s takes one-way %s" % [label, one_way])
 	node.queue_free()
 	await process_frame
 
