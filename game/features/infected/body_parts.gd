@@ -8,6 +8,7 @@ extends Node
 
 signal part_severed(part: StringName, piece: RigidBody3D)
 
+const BLOOD_LEVEL := preload("res://game/core/vfx/public/blood_level.gd")
 const MESH := preload("res://game/features/infected/body_part_mesh.gd")
 const MODIFIER := preload("res://game/features/infected/dismember_modifier.gd")
 const SEVERED := preload("res://game/features/infected/severed_part.gd")
@@ -367,7 +368,7 @@ func drip_mark_points() -> Array[Vector3]:
 func _attach_cap(parent: Node3D, offset: Vector3, radius: float, axis: Vector3) -> void:
 	if _cap_material == null:
 		_cap_material = StandardMaterial3D.new()
-		_cap_material.albedo_color = Color(0.3, 0.02, 0.02)
+		_cap_material.albedo_color = BLOOD_LEVEL.GREEN_COLOR if BLOOD_LEVEL.is_green() else Color(0.3, 0.02, 0.02)
 		_cap_material.roughness = 0.25
 	var cap := MeshInstance3D.new()
 	cap.set_meta("body_part_cap", true)

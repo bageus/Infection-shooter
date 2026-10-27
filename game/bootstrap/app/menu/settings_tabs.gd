@@ -317,6 +317,8 @@ func _blood_level() -> void:
 	slider.step = 1
 	slider.tick_count = BLOOD_LEVEL.COUNT
 	slider.value = dialog.view.preferences.values.blood_level
+	slider.editable = not BLOOD_LEVEL.forced_green
+	slider.modulate.a = .4 if BLOOD_LEVEL.forced_green else 1.0
 	name_label.text = dialog.view.text("bloodLevel" + str(int(slider.value)))
 	var settle := Timer.new()
 	settle.one_shot = true
