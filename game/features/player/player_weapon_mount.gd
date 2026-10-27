@@ -5,6 +5,9 @@ const EQUIPMENT_POSE := preload("res://game/features/player/player_equipment_pos
 var equipment_pose: SkeletonModifier3D
 var reload_pose: SkeletonModifier3D
 var skeleton: Skeleton3D
+## The player's ShotRecoil, source of the visual kick; null in isolated scenes.
+var recoil: RefCounted
+const MUZZLE_RISE_DEGREES := 5.0
 var socket: Node3D
 var _remote: RemoteTransform3D
 var _aim_target := Vector3.INF
@@ -44,6 +47,11 @@ func _ready() -> void:
 	aim.name = "BodyAim"
 	aim.mount = self
 	skeleton.add_child(aim)
+	recoil = get_parent().get("_shot_recoil")
+	var jolt := preload("res://game/features/player/player_kick_pose.gd").new()
+	jolt.name = "KickPose"
+	jolt.mount = self
+	skeleton.add_child(jolt)
 	var reload := RELOAD_POSE.new()
 	reload.name = "ReloadPose"
 	reload.mount = self
@@ -106,8 +114,13 @@ func aim_at(target: Vector3) -> void:
 
 
 func _sync_active() -> void:
-	if is_instance_valid(_active):
-		sync_weapon(_active)
+	if not is_instance_valid(_active):
+		return
+	sync_weapon(_active)
+	# Muzzle rise is drawn only here, so aim and bullets keep the unkicked weapon pose.
+	var kick := float(recoil.get("kick")) if recoil != null else 0.0
+	if kick > 0.0:
+		_active.global_basis = Basis(_active.global_basis.x.normalized(), deg_to_rad(MUZZLE_RISE_DEGREES) * kick) * _active.global_basis
 
 
 func _exit_tree() -> void:
