@@ -11,6 +11,7 @@ const INTERVAL := 0.15
 const SAME_SPACE_STOP := 0.4
 const CHEST := 0.9
 const DOORWAY := 0.6
+const DOOR_SIDE := 0.7
 var outlines: Dictionary = {}
 var rays_last_tick := 0
 var _elapsed := 0.0
@@ -61,7 +62,11 @@ func _flat_distance(a: Node3D, b: Node3D) -> float:
 ## Same room: equal fog-of-war room ids (the player's reach covers a doorway); outside any room, no wall at chest height.
 func same_space(effects: Node, item: Node3D) -> bool:
 	var player_room := _room_of(effects, effects.player.global_position, DOORWAY)
-	if player_room != _room_of(effects, item.global_position, 0.3):
+	# A door stands between two rooms: either side counts.
+	var sides: Array[Vector3] = [item.global_position]
+	if item.is_in_group("interactive_doors"):
+		sides = [item.global_position + item.global_basis.z * DOOR_SIDE, item.global_position - item.global_basis.z * DOOR_SIDE]
+	if not sides.any(func(side: Vector3) -> bool: return _room_of(effects, side, 0.3) == player_room):
 		return false
 	if player_room > 0:
 		return true
@@ -98,7 +103,7 @@ func hidden_from_camera(effects: Node, item: Node3D) -> bool:
 
 func _hits_structure(effects: Node, from: Vector3, to: Vector3, own: Node3D) -> bool:
 	var exclude: Array[RID] = []
-	for _attempt in 3:
+	for _attempt in 5:
 		var query := PhysicsRayQueryParameters3D.create(from, to, QUERY_LAYER.MASK)
 		query.exclude = exclude
 		var hit: Dictionary = effects.world.get_world_3d().direct_space_state.intersect_ray(query)
@@ -109,11 +114,18 @@ func _hits_structure(effects: Node, from: Vector3, to: Vector3, own: Node3D) -> 
 			exclude.append((collider as CollisionObject3D).get_rid())
 			continue
 		var ancestor := collider
+		var see_through := false
 		while ancestor != null and ancestor != effects.world:
 			if ancestor.is_in_group("camera_occluder") and (ancestor as Node3D).is_visible_in_tree():
-				return true
+				# The camera sees through glass walls (and the glass doors set in them); rooms are still split by them.
+				see_through = own != null and ancestor.scene_file_path.to_lower().contains("glass")
+				if not see_through:
+					return true
+				break
 			ancestor = ancestor.get_parent()
-		return false
+		if not see_through:
+			return false
+		exclude.append((collider as CollisionObject3D).get_rid())
 	return false
 
 

@@ -102,6 +102,15 @@ func _run() -> void:
 	# The lens opens the hero's own room below the cover plane; ceiling fixtures stay covered.
 	fog.call("set_view_hole", Vector2(0.5, 0.5), Vector2(640, 480), 40.0, 20.0)
 	await _pixels("fog")
+	# Hero outside the cover's rectangle, which only hangs over him in perspective: his floor still opens.
+	fog.call("configure_zone", Vector2(30, 8), 1.0, true)
+	fog.position = Vector3(0, 1.8, 5.0)
+	await _settle()
+	fog.call("set_view_hole", Vector2(0.5, 0.5), Vector2(640, 480), 40.0, 20.0)
+	await _pixels("outside")
+	if DisplayServer.get_name() != "headless":
+		var low := _pixel(root.get_texture().get_image(), prop.global_position + Vector3(0, -0.3, 0.26))
+		_check(low.r > low.g + 0.15, "outside: the low part next to the hero opens under a cover that only hangs over him")
 	effects.set_runtime_enabled(false)
 	_check(effects.subjects.is_empty(), "Planner/teardown releases the hero pass")
 	scene.free()
@@ -149,6 +158,8 @@ func _pixels(stage: String) -> void:
 	var plate := _pixel(image, Vector3(0.1, 1.1, 0.5))
 	_check(plate.r > plate.b + 0.2 and plate.r > plate.g * 0.9, stage + ": front gear preserves self-occlusion and colour")
 	for mesh in [prop, fixture]:
+		if stage == "outside":
+			continue
 		var pixel := _pixel(image, mesh.global_position)
 		if stage == "clear":
 			_check(pixel.r > pixel.g + 0.15, "Clear view keeps normal props visible")

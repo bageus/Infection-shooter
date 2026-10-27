@@ -72,6 +72,7 @@ func _test_extinguisher() -> void:
 	var prop: RigidBody3D = setup[0]
 	var effects: Node3D = setup[1]
 	_expect(prop.freeze and prop.freeze_mode == RigidBody3D.FREEZE_MODE_KINEMATIC, "A wall-mounted extinguisher hangs kinematic, so the shot that frees it costs no static-to-dynamic switch.")
+	var shot_at := Time.get_ticks_msec()
 	prop.call("take_projectile_hit", 10.0, prop.global_position + Vector3(0, 0.3, 0), Vector3.BACK, Vector3.FORWARD, "PISTOL")
 	await physics_frame
 	_expect(not prop.freeze, "The shot frees the extinguisher.")
@@ -80,6 +81,9 @@ func _test_extinguisher() -> void:
 	var jet := prop.find_children("Flipbook*", "", true, false)
 	_expect(jet.size() == 1 and float((jet[0] as GeometryInstance3D).get_instance_shader_parameter(&"axial")) > 0.5, "The powder jet from the sheet streams out of the nozzle.")
 	_expect(await _heard(&"extinguisher_fall", 3.0), "The toppled cylinder clangs on the floor.")
+	# The hiss must still run after the spray stops (3.2 s) and before the rupture (3.6 s).
+	await _wait_until(shot_at + 3500)
+	_expect(_voices(&"extinguisher_spray") == 1, "The hiss keeps going until the extinguisher ruptures.")
 	_expect(await _heard(&"extinguisher_burst", 4.5), "The extinguisher ruptures with a burst.")
 	await create_timer(0.2).timeout
 	_expect(_voices(&"extinguisher_spray") == 0, "The spray sound stops when it ruptures.")
@@ -88,6 +92,11 @@ func _test_extinguisher() -> void:
 		prop.queue_free()
 	effects.queue_free()
 	await process_frame
+
+
+func _wait_until(ticks_ms: int) -> void:
+	while Time.get_ticks_msec() < ticks_ms:
+		await process_frame
 
 
 func _spawn(path: String, position: Vector3) -> Array:
