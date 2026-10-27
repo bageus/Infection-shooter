@@ -1,9 +1,9 @@
 extends SceneTree
 
-# Renders the kick and the left-hand jab from the side: godot --path . --script tools/capture_melee_strike.gd -- <out_dir>
+# Renders the kick key poses from the side and from the front-quarter: godot --path . --script tools/capture_melee_strike.gd -- <out_dir>
 const DRIVER := preload("res://game/features/character_animation/public/character_animation_driver.gd")
 const MODEL := preload("res://models/objects/characters/soldier_animated.glb")
-const POSES := [[&"kick", 0.3], [&"kick", 0.5], [&"kick", 0.9], [&"punch", 0.3], [&"punch", 0.45], [&"punch", 0.6]]
+const POSES := [[&"kick", 0.15], [&"kick", 0.3], [&"kick", 0.42], [&"kick", 0.52], [&"kick", 0.72], [&"kick", 0.9]]
 
 
 func _init() -> void:
@@ -18,9 +18,7 @@ func _run() -> void:
 	light.rotation_degrees = Vector3(-50, 40, 0)
 	stage.add_child(light)
 	var camera := Camera3D.new()
-	camera.position = Vector3(3.0, 0.9, 0.0)
 	stage.add_child(camera)
-	camera.look_at(Vector3(0, 0.9, 0))
 	var character := CharacterBody3D.new()
 	stage.add_child(character)
 	var body := MODEL.instantiate() as Node3D
@@ -32,17 +30,23 @@ func _run() -> void:
 	character.add_child(driver)
 	root.size = Vector2i(1280, 720)
 	await process_frame
+	# Frozen time: each pose is held exactly at its share of the strike.
+	Engine.time_scale = 0.0
 	var images: Array[Image] = []
-	for pose: Array in POSES:
-		driver.call("play_strike", pose[0])
-		var duration: float = driver.strike.call("start", pose[0])
-		driver.strike.set("_elapsed", float(pose[1]) * duration - 0.016)
-		await process_frame
-		await process_frame
-		images.append(root.get_viewport().get_texture().get_image())
-	var strip := Image.create(400 * POSES.size(), 500, false, Image.FORMAT_RGBA8)
+	for view: Vector3 in [Vector3(3.2, 0.8, 0.0), Vector3(2.3, 0.9, 2.3)]:
+		camera.position = view
+		camera.look_at(Vector3(0, 0.75, 0.35))
+		for pose: Array in POSES:
+			driver.call("play_strike", pose[0])
+			var duration: float = driver.strike.call("start", pose[0])
+			for frame in 3:
+				driver.strike.set("_elapsed", float(pose[1]) * duration)
+				await process_frame
+			images.append(root.get_viewport().get_texture().get_image())
+	Engine.time_scale = 1.0
+	var strip := Image.create(400 * POSES.size(), 1200, false, Image.FORMAT_RGBA8)
 	for index in images.size():
-		strip.blit_rect(images[index], Rect2i(440, 110, 400, 500), Vector2i(400 * index, 0))
-	strip.save_png(out_dir.path_join("melee_strike_poses.png"))
+		strip.blit_rect(images[index], Rect2i(400, 60, 400, 600), Vector2i(400 * (index % POSES.size()), 600 * (index / POSES.size())))
+	strip.save_png(out_dir.path_join("kick_poses.png"))
 	print("Melee strike poses written to %s" % out_dir)
 	quit(0)

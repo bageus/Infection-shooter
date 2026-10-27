@@ -1,30 +1,41 @@
 extends SkeletonModifier3D
-## Procedural melee strike layered over the playing clip (ADR-0066): a forward
+## Procedural melee strike layered over the playing clip (ADR-0066): a push
 ## kick with the right leg or a jab with the left arm. Each limb bone is aimed
 ## along keyframed skeleton-space directions (wind-up, strike, recovery) and
-## blended in and out, so everything else keeps its clip. Front is +Z, up +Y.
-## Presentation only.
+## blended in and out, so everything else keeps its clip. The kick chambers the
+## knee high, drives the sole forward with the hips behind it while the torso
+## leans back and the standing leg braces, then re-chambers and sets the foot
+## down. Front is +Z, up +Y. Presentation only.
 
 const KICK := &"kick"
 const PUNCH := &"punch"
-const KICK_SECONDS := 0.6
+const KICK_SECONDS := 0.65
 const PUNCH_SECONDS := 0.4
 ## Seconds from the start to the moment the foot or fist lands.
-const KICK_IMPACT := 0.24
+const KICK_IMPACT := 0.27
 const PUNCH_IMPACT := 0.14
 
 # Limb tracks: bone -> [child bone (gives the bone's direction), keys]; a key is
 # [time share, skeleton-space direction the bone points along].
 const KICK_TRACKS := {
-	"RightUpLeg": ["RightLeg", [[0.0, Vector3(0, -1, 0)], [0.3, Vector3(0, -0.85, 0.5)], [0.45, Vector3(0, -0.1, 1.0)], [0.65, Vector3(0, -0.1, 1.0)], [1.0, Vector3(0, -1, 0)]]],
-	"RightLeg": ["RightFoot", [[0.0, Vector3(0, -1, 0)], [0.3, Vector3(0, -0.8, -0.6)], [0.45, Vector3(0, 0.05, 1.0)], [0.65, Vector3(0, 0.05, 1.0)], [1.0, Vector3(0, -1, 0)]]],
+	"RightUpLeg": ["RightLeg", [[0.0, Vector3(0, -1, 0)], [0.3, Vector3(0, 0.5, 1.0)], [0.42, Vector3(0, 0.15, 1.0)], [0.52, Vector3(0, 0.15, 1.0)], [0.72, Vector3(0, 0.4, 1.0)], [1.0, Vector3(0, -1, 0)]]],
+	"RightLeg": ["RightFoot", [[0.0, Vector3(0, -1, 0)], [0.3, Vector3(0, -1.0, -0.35)], [0.42, Vector3(0, 0.1, 1.0)], [0.52, Vector3(0, 0.1, 1.0)], [0.72, Vector3(0, -1.0, -0.3)], [1.0, Vector3(0, -1, 0)]]],
+	# Toes pull up at the strike so the sole, not the toes, pushes forward.
+	"RightFoot": ["RightToeBase", [[0.0, Vector3(0, -0.45, 0.9)], [0.3, Vector3(0, -0.15, 1.0)], [0.42, Vector3(0, 1.0, 0.3)], [0.52, Vector3(0, 1.0, 0.3)], [0.72, Vector3(0, -0.15, 1.0)], [1.0, Vector3(0, -0.45, 0.9)]]],
 }
+## Kick drive keys [time share, 0..1]: how far the hips have pushed in behind the sole.
+const KICK_DRIVE := [[0.0, 0.0], [0.3, 0.25], [0.42, 1.0], [0.52, 1.0], [0.72, 0.3], [1.0, 0.0]]
+## Hips shift at full drive, as a share of the kicking leg's length (forward, slightly down).
+const KICK_HIPS_SHIFT := Vector3(0.0, -0.03, 0.16)
+## Standing leg turn (degrees about skeleton X; positive swings the foot back) at full
+## drive: the thigh tilts back under the shifted hips and the knee softens.
+const KICK_BRACE := {"LeftUpLeg": 9.0, "LeftLeg": 5.0}
 const PUNCH_TRACKS := {
 	"LeftArm": ["LeftForeArm", [[0.0, Vector3(0.6, -0.8, 0.3)], [0.3, Vector3(0.6, -0.4, -0.6)], [0.5, Vector3(0.12, 0.05, 1.0)], [0.65, Vector3(0.12, 0.05, 1.0)], [1.0, Vector3(0.6, -0.8, 0.3)]]],
 	"LeftForeArm": ["LeftWrist", [[0.0, Vector3(0.3, -0.5, 0.8)], [0.3, Vector3(0.2, 0.3, 0.9)], [0.5, Vector3(0.1, 0.05, 1.0)], [0.65, Vector3(0.1, 0.05, 1.0)], [1.0, Vector3(0.3, -0.5, 0.8)]]],
 }
 # Torso lean/twist (degrees about skeleton axes) at the strike moment, scaled by the envelope.
-const KICK_TORSO := Vector3(-9.0, 0.0, 0.0)
+const KICK_TORSO := Vector3(-18.0, 0.0, 0.0)
 const PUNCH_TORSO := Vector3(-3.0, -14.0, 0.0)
 const TORSO_BONES := ["Spine1", "Spine2"]
 ## Share of the blend that is in full effect: ramps in over the first 15 % and out over the last 25 %.
@@ -92,7 +103,10 @@ func _process_modification_with_delta(delta: float) -> void:
 		return
 	var t := _elapsed / _duration
 	var weight := envelope(t)
-	var torso := (KICK_TORSO if _kind == KICK else PUNCH_TORSO) * weight * _torso_swing(t)
+	var swing := drive_at(t) if _kind == KICK else _torso_swing(t)
+	var torso := (KICK_TORSO if _kind == KICK else PUNCH_TORSO) * weight * swing
+	if _kind == KICK:
+		_brace(skeleton, weight * swing)
 	for bone_name: String in TORSO_BONES:
 		var torso_bone := skeleton.find_bone(bone_name)
 		if torso_bone >= 0:
@@ -106,6 +120,35 @@ func _process_modification_with_delta(delta: float) -> void:
 			continue
 		var turn := Quaternion(current.normalized(), direction_at(_kind, bone_name, t))
 		_rotate_bone_quaternion(skeleton, bone, Quaternion.IDENTITY.slerp(turn, weight))
+
+
+## How far the kick's hips have driven in at time share `t` (0..1).
+static func drive_at(t: float) -> float:
+	for index in range(1, KICK_DRIVE.size()):
+		var next: Array = KICK_DRIVE[index]
+		if t <= float(next[0]):
+			var previous: Array = KICK_DRIVE[index - 1]
+			var k := (t - float(previous[0])) / (float(next[0]) - float(previous[0]))
+			return lerpf(float(previous[1]), float(next[1]), k * k * (3.0 - 2.0 * k))
+	return 0.0
+
+
+# Pushes the hips in behind the kick and braces the standing leg so its foot stays put.
+func _brace(skeleton: Skeleton3D, amount: float) -> void:
+	var hips := skeleton.find_bone("Hips")
+	var thigh := skeleton.find_bone("RightUpLeg")
+	var foot := skeleton.find_bone("RightFoot")
+	if hips >= 0 and thigh >= 0 and foot >= 0:
+		var leg := skeleton.get_bone_global_rest(thigh).origin.distance_to(skeleton.get_bone_global_rest(foot).origin)
+		var shift := KICK_HIPS_SHIFT * leg * amount
+		var parent := skeleton.get_bone_parent(hips)
+		if parent >= 0:
+			shift = skeleton.get_bone_global_pose(parent).basis.inverse() * shift
+		skeleton.set_bone_pose_position(hips, skeleton.get_bone_pose_position(hips) + shift)
+	for bone_name: String in KICK_BRACE:
+		var bone := skeleton.find_bone(bone_name)
+		if bone >= 0:
+			_rotate_bone(skeleton, bone, Vector3(deg_to_rad(float(KICK_BRACE[bone_name]) * amount), 0.0, 0.0))
 
 
 # 0 at the start, 1 once the foot or fist has landed, back to 0 on recovery.
