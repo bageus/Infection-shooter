@@ -4,7 +4,7 @@ Godot 4.7.2; switch in **Esc → Настройки → Перекрытие о�
 
 | Mode | Behavior |
 | --- | --- |
-| Цветные силуэты (default, 0) | Hidden hero cyan `0.2,0.85,1`; enemies red `1,0.24,0.28`; weapons, medkits, ammo amber `1,0.78,0.22`. Opacity 0.9. Visible fragments retain their authored color. |
+| Цветные силуэты (default, 0) | Hidden hero cyan `0.2,0.85,1`; enemies red `1,0.24,0.28`. Opacity 0.9. Items are not silhouetted; see the hidden-item outline below. Visible fragments retain their authored color. |
 | Отверстие вокруг героя (1) | Two-metre world radius projected into the camera, through opaque foreground walls/columns, with a narrow dithered transition and faint cyan halo. Floor/furniture remain visible; collisions remain active. |
 
 Preference is additive interface_v1.occlusion_mode, persisted in user://interface_settings.cfg. Old/missing settings default to 0. Maps are not rewritten. Settings apply immediately while paused; planner suspends effects without changing the choice; map loads and late-spawned enemies/pickups are registered automatically. Ray classification runs at 10 Hz, screen/range culled (45 m). Cosmetic particles/blood spawns do not rebuild the registry. Shader reconstructs depth separately for Compatibility OpenGL and Forward+ Vulkan. Silhouette copies share the actor mesh/skin/live skeleton and update on replaced body meshes. Shared resources are never mutated. Hole shader copies structural PBR parameters/textures; transparent glass/custom shader surfaces stay authored, not converted. Original overrides are restored exactly. Source shadows are retained.
@@ -26,3 +26,7 @@ These checks use an isolated synthetic scene and software llvmpipe. They confirm
 Known boundaries: only opaque BaseMaterial3D structural surfaces are converted for the hole; custom shader/transparent glass surfaces retain their source materials. The first pass uses 10 Hz blocker checks (up to 100 ms activation delay) and a two-metre radius, subject to manual adjustment. No gameplay damage, targeting, picking or collision changes.
 
 Changed files: bootstrap main/planning hooks, menu_preferences/menu_dialog, occlusion_effects/subject/wall_materials + two shaders, run_occlusion_tests; translations; classification groups in structural wall/column/door/window scenes and public health/ammo scenes; three module manifests; runtime workflow; ADR-0023, architecture and continuity docs. No architecture exception.
+
+## Hidden-item outline (both modes)
+
+Doors, crates with authored loot, fire extinguishers, ammo, antidote, medkits, weapons and the key get a yellow 3 px outline through walls (stencil mask keeps the interior clear) when all hold: the camera ray is blocked by a `camera_occluder`, the item is within 6 m of the player (6.5 m to drop it), and it is in the player's room (same `room_id` fog zone, otherwise no structure between them at chest height). Items under solid room fog stay hidden. DNA and armor are not outlined. Tests: `run_hidden_outline_tests.gd`.
