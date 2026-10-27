@@ -200,7 +200,8 @@ static var _voices := 0
 static var _per_event: Dictionary = {}
 
 
-static func play(parent: Node, event: StringName, position := Vector3.INF, volume_offset_db := 0.0, pitch := 1.0) -> AudioStreamPlayer3D:
+## `looped` repeats the recording until the caller frees the returned player.
+static func play(parent: Node, event: StringName, position := Vector3.INF, volume_offset_db := 0.0, pitch := 1.0, looped := false) -> AudioStreamPlayer3D:
 	if parent == null or not parent.is_inside_tree():
 		return null
 	var spec: Array = EVENTS.get(event, [])
@@ -215,6 +216,11 @@ static func play(parent: Node, event: StringName, position := Vector3.INF, volum
 	var stream := load(path) as AudioStream
 	if stream == null:
 		return null
+	if looped and stream is AudioStreamOggVorbis:
+		# Own copy: the cached stream is shared by every voice of this event.
+		var looping := (stream as AudioStreamOggVorbis).duplicate() as AudioStreamOggVorbis
+		looping.loop = true
+		stream = looping
 	var player := AudioStreamPlayer3D.new()
 	player.name = "Sfx_" + String(event)
 	player.stream = stream
@@ -242,11 +248,13 @@ static func play(parent: Node, event: StringName, position := Vector3.INF, volum
 	if DisplayServer.get_name() == "headless":
 		# No audio device: keep the voice for its duration without decoding,
 		# so limits and tests behave the same and nothing plays at exit.
-		var voice: WeakRef = weakref(player)
-		tree.create_timer(stream.get_length() / player.pitch_scale).timeout.connect(func() -> void:
-			var live := voice.get_ref() as Node
-			if live != null:
-				live.queue_free())
+		# A looped voice has no end: its owner frees it.
+		if not looped:
+			var voice: WeakRef = weakref(player)
+			tree.create_timer(stream.get_length() / player.pitch_scale).timeout.connect(func() -> void:
+				var live := voice.get_ref() as Node
+				if live != null:
+					live.queue_free())
 		return player
 	player.play()
 	return player

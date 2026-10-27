@@ -113,7 +113,8 @@ func start(hit_point: Vector3, bullet_direction: Vector3) -> void:
 	_mist.emitting = true
 	_mist.amount_ratio = 0.35 if sheet else 1.0
 	_landed = false
-	_spray_sound = SFX.play(_nozzle, &"extinguisher_spray")
+	# The hiss loops until the rupture stops it, however long rupture_delay is.
+	_spray_sound = SFX.play(_nozzle, &"extinguisher_spray", Vector3.INF, 0.0, 1.0, true)
 	TRACE.mark("spray sound started")
 	_start_jet_sheet()
 	TRACE.mark("jet sheet started (end of start)")
@@ -131,7 +132,6 @@ func _physics_process(delta: float) -> void:
 	if _elapsed >= spray_seconds:
 		_jet.emitting = false
 		_mist.emitting = false
-		_stop_spray_sound()
 		_stop_jet_sheet(0.35)
 		return
 	_jet.amount_ratio = pressure
