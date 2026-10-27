@@ -1,5 +1,5 @@
 extends Node
-## Group templates: a set of placed objects saved under a name and placed as one ghost that follows the cursor.
+## Group templates: objects picked with Shift in template mode are saved under a name, and a saved group ghosts and places as one.
 const KIND := "group_template"
 const ROOT := "user://planner_templates"
 const CAPTURE := preload("res://game/bootstrap/app/planning_layout_capture.gd")
@@ -7,6 +7,8 @@ const LOADER := preload("res://game/bootstrap/app/planning_layout_loader.gd")
 const SAFE_NAME := preload("res://game/bootstrap/app/desk_setup_template_files.gd")
 # Identity and desk links belong to the source map; a copy placed elsewhere must not claim them.
 const DROPPED_FIELDS := ["object_id", "desk_id", "attachment", "zone", "blood_attachment", "auto_fixture"]
+const HIGHLIGHT := "TemplatePickHighlight"
+const HIGHLIGHT_COLOR := Color(1.0, 0.7, 0.1, 0.35)
 
 var session: Variant
 var objects: Variant
@@ -14,10 +16,12 @@ var tab: VBoxContainer
 var list: ItemList
 var name_edit: LineEdit
 var create_button: Button
+var edit_button: Button
 var cancel_button: Button
 var status: Label
 var _recording := false
-var _recorded: Array = []
+var _picked: Array[Node3D] = []
+var _place_pending := false
 var _template: Dictionary = {}
 
 
@@ -30,7 +34,7 @@ func build_tab() -> Control:
 	tab = VBoxContainer.new()
 	tab.name = "Шаблоны"
 	var title := Label.new()
-	title.text = "Шаблоны групп | клик по шаблону + наведение на поле"
+	title.text = "Шаблоны групп | Create: Shift+клик отмечает объекты | клик по шаблону + наведение на поле"
 	title.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	tab.add_child(title)
 	list = ItemList.new()
@@ -41,10 +45,16 @@ func build_tab() -> Control:
 	name_edit = LineEdit.new()
 	name_edit.placeholder_text = "Название шаблона"
 	tab.add_child(name_edit)
+	var buttons := HBoxContainer.new()
+	tab.add_child(buttons)
 	create_button = Button.new()
 	create_button.text = "Create template"
 	create_button.pressed.connect(_create_pressed)
-	tab.add_child(create_button)
+	buttons.add_child(create_button)
+	edit_button = Button.new()
+	edit_button.text = "Edit"
+	edit_button.pressed.connect(_edit_pressed)
+	buttons.add_child(edit_button)
 	cancel_button = Button.new()
 	cancel_button.text = "Отмена записи"
 	cancel_button.hide()
@@ -57,10 +67,24 @@ func build_tab() -> Control:
 	return tab
 
 
-## Objects placed while recording become the template; the mode ends on save or cancel.
-func note_placed(node: Node3D) -> void:
-	if _recording:
-		_recorded.append(node)
+func recording() -> bool:
+	return _recording
+
+
+## Shift+click in template mode: the object joins the template, or leaves it when already picked.
+func toggle_pick(node: Node3D) -> void:
+	if node == null or node == objects.session.main_player or not objects.placed.has(node):
+		return
+	if not str(node.get_meta("planning_desk_id", "")).is_empty() or not str(node.get_meta("planning_attachment", "")).is_empty():
+		status.text = "Мебель с рабочим местом не входит в шаблон"
+		return
+	if _picked.has(node):
+		_unmark(node)
+		_picked.erase(node)
+	else:
+		_mark(node)
+		_picked.append(node)
+	status.text = "В шаблоне объектов: %d" % _picked.size()
 
 
 func move_ghost(screen_pos: Vector2) -> void:
@@ -93,6 +117,14 @@ func place(screen_pos: Vector2) -> void:
 		added.append(node)
 	objects.session.edit_history.record_added_group(added)
 	status.text = "Шаблон «%s» размещён: %d объектов" % [_template.name, count]
+	if _place_pending:
+		# Edit places one copy, then the copy's objects are picked so more can be added with Shift.
+		_place_pending = false
+		_clear_ghost()
+		for node in added:
+			_mark(node)
+			_picked.append(node)
+		status.text = "Редактирование «%s»: Shift+клик добавляет объекты, затем Save template" % _template.name
 
 
 func _ghost() -> Node3D:
@@ -123,6 +155,11 @@ func _template_selected(index: int) -> void:
 	if _template.is_empty():
 		status.text = "Шаблон не читается"
 		return
+	_show_ghost()
+	status.text = "Наведите на поле и кликните. RMB — отмена"
+
+
+func _show_ghost() -> void:
 	objects._clear_preview()
 	objects.selected_path = ""
 	objects.selected_kind = KIND
@@ -133,7 +170,11 @@ func _template_selected(index: int) -> void:
 	objects.controls.palette.deselect_all()
 	objects.preview = _ghost()
 	objects.session.host.add_child(objects.preview)
-	status.text = "Наведите на поле и кликните. RMB — отмена"
+
+
+func _clear_ghost() -> void:
+	objects._clear_preview()
+	objects.selected_kind = ""
 
 
 func _create_pressed() -> void:
@@ -143,36 +184,102 @@ func _create_pressed() -> void:
 	if SAFE_NAME.safe_name(name_edit.text).is_empty():
 		status.text = "Сначала введите название шаблона"
 		return
+	_start_recording()
+	status.text = "Запись: Shift+клик отмечает объекты, затем нажмите Save template"
+
+
+## Edit loads a saved template as a ghost; its first placed copy becomes the picked set to extend.
+func _edit_pressed() -> void:
+	if _recording:
+		status.text = "Сначала сохраните или отмените запись"
+		return
+	var selected := list.get_selected_items()
+	if selected.is_empty():
+		status.text = "Выберите шаблон в списке"
+		return
+	_template = load_template(str(list.get_item_metadata(selected[0])))
+	if _template.is_empty():
+		status.text = "Шаблон не читается"
+		return
+	name_edit.text = _template.name
+	_start_recording()
+	_place_pending = true
+	_show_ghost()
+	status.text = "Наведите на поле и кликните, чтобы разместить «%s» для правки" % _template.name
+
+
+func _start_recording() -> void:
+	_clear_picks()
+	_clear_ghost()
+	objects._select(null)
+	objects.controls.palette.deselect_all()
 	_recording = true
-	_recorded.clear()
 	create_button.text = "Save template"
 	cancel_button.show()
-	status.text = "Запись: размещайте объекты, затем нажмите Save template"
 
 
 func _cancel_recording() -> void:
+	_end_recording()
+	status.text = "Запись шаблона отменена"
+
+
+func _end_recording() -> void:
+	_clear_picks()
+	_clear_ghost()
 	_recording = false
-	_recorded.clear()
+	_place_pending = false
 	create_button.text = "Create template"
 	cancel_button.hide()
-	status.text = "Запись шаблона отменена"
 
 
 func _save_recording() -> void:
 	var nodes: Array[Node3D] = []
-	for node in _recorded:
-		if is_instance_valid(node) and objects.placed.has(node) and str(node.get_meta("planning_desk_id", "")).is_empty() and str(node.get_meta("planning_attachment", "")).is_empty():
+	for node in _picked:
+		if is_instance_valid(node) and objects.placed.has(node):
 			nodes.append(node)
 	if nodes.is_empty():
-		status.text = "Разместите хотя бы один объект (мебель с рабочим местом не входит в шаблон)"
+		status.text = "Отметьте хотя бы один объект Shift+кликом"
 		return
 	var template := make_template(name_edit.text.strip_edges(), CAPTURE.collect(objects, nodes, false).objects)
 	if not write(SAFE_NAME.safe_name(name_edit.text), template):
 		status.text = "Не удалось записать шаблон в user://planner_templates"
 		return
-	_cancel_recording()
+	_end_recording()
 	_refresh_list()
 	status.text = "Сохранён шаблон «%s»: %d объектов" % [template.name, nodes.size()]
+
+
+func _mark(node: Node3D) -> void:
+	var aabb: AABB = objects.geometry._combined_aabb(node, true)
+	if aabb.size.length_squared() <= 0.0001:
+		return
+	var box := MeshInstance3D.new()
+	box.name = HIGHLIGHT
+	box.set_meta("planning_selection_highlight", true)
+	var mesh := BoxMesh.new()
+	mesh.size = aabb.size + Vector3.ONE * 0.08
+	var material := StandardMaterial3D.new()
+	material.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
+	material.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
+	material.albedo_color = HIGHLIGHT_COLOR
+	material.no_depth_test = true
+	mesh.material = material
+	box.mesh = mesh
+	box.position = aabb.get_center()
+	node.add_child(box)
+
+
+func _unmark(node: Node3D) -> void:
+	var box := node.get_node_or_null(HIGHLIGHT)
+	if box != null:
+		box.queue_free()
+
+
+func _clear_picks() -> void:
+	for node in _picked:
+		if is_instance_valid(node):
+			_unmark(node)
+	_picked.clear()
 
 
 func _refresh_list() -> void:
