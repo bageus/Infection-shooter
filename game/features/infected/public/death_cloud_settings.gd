@@ -1,13 +1,16 @@
 extends RefCounted
 ## Planner options of an infected's death mutagen cloud: whether one forms, when it
 ## ends by time (none, auto or a set duration) and/or after absorbing some mutagen.
-## {"enabled": bool, "time": "none" | "auto" | "manual", "seconds": float, "absorb": bool, "units": float}
+## {"enabled": bool, "time": "none" | "auto" | "manual", "seconds": float, "absorb": bool, "units": float, "radius": float}
 
 const TIME_MODES: Array[String] = ["none", "auto", "manual"]
 const SECONDS_MIN := 2.0
 const SECONDS_MAX := 60.0
 const UNITS_MIN := 1.0
 const UNITS_MAX := 100.0
+const RADIUS_MIN := 0.5
+const RADIUS_MAX := 4.0
+const RADIUS_DEFAULT := 1.35
 
 
 ## Always returns a usable config; unknown modes and bad numbers fall back to the defaults.
@@ -26,6 +29,7 @@ static func sanitize(raw: Variant) -> Dictionary:
 		"seconds": clampf(_number(source.get("seconds"), 14.0), SECONDS_MIN, SECONDS_MAX),
 		"absorb": absorb,
 		"units": clampf(_number(source.get("units"), 10.0), UNITS_MIN, UNITS_MAX),
+		"radius": clampf(_number(source.get("radius"), RADIUS_DEFAULT), RADIUS_MIN, RADIUS_MAX),
 	}
 
 
@@ -36,6 +40,7 @@ static func apply(cloud: Node, config: Dictionary) -> void:
 		cloud.set("lifetime_seconds", config["seconds"])
 	cloud.set("ends_when_absorbed", config["absorb"])
 	cloud.set("absorb_units", config["units"])
+	cloud.set("cloud_radius", config["radius"])
 
 
 static func _number(value: Variant, fallback: float) -> float:

@@ -8,6 +8,7 @@ updated: 2026-10-18
 ---
 
 27.10.2026 — прямое поручение владельца: удар ногой на C переделан в пинок вперёд. Колено высоко поднимается (chamber), стопа подошвой толкает вперёд, бёдра подаются за ударом, корпус отклоняется назад, опорная нога упирается; затем колено снова поднимается и нога опускается. Длительность 0.65 с, удар 0.27 с после нажатия (player_melee IMPACT_DELAY и ADR-0066 обновлены). Владельцы: features.character_animation (strike_pose.gd, тест run_strike_pose_tests), features.player (player_melee.gd). Скриншоты: /mnt/project-files/kick_review/. Зависимости/policy/DTO без изменений. T004/Phase1 прежние.
+27.10.2026 — прямое поручение владельца: в редакторе врагов у облака мутагена после смерти появился параметр «Радиус облака» (0.5–4 м, по умолчанию 1.35 м). Облако растёт вместе с радиусом, а зона всасывания (колонна коллизии) масштабируется по нему. Владелец: bootstrap.app (planning_loot_options), features.infected (death_cloud_settings), features.infection_source (mutagen_cloud.gd), тест run_death_cloud_tests. Зависимости/policy/DTO без изменений. T004/Phase1 прежние.
 
 
 27.10.2026 — прямое поручение владельца: декали пола, ткани и бумаги в палитре планировщика ставятся одной декалью, а не целым атласом. Причина: AtlasTexture в 3D-материале рисует весь атлас; blood_decal_prop.gd теперь берёт UV-регион ячейки. Владелец: presentation.office_floor (blood_decal_prop.gd). Скриншоты: /mnt/project-files/decal_palette_review/. T004/Phase1 прежние.
