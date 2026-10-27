@@ -90,6 +90,9 @@ func _check_fusion() -> void:
 	# A degenerate transform must give "nothing to draw", not a failed huge allocation.
 	var broken := Transform2D(Vector2(NAN, 0.0), Vector2(0.0, 1.0), Vector2.ZERO)
 	_expect(FUSION.fuse([{"cell": 1, "xform": broken}], albedo, relief, 300.0).is_empty(), "A NaN transform fuses to nothing.")
+	var two := [{"cell": 1, "xform": Transform2D.IDENTITY}, {"cell": 2, "xform": Transform2D(0.0, Vector2(0.1, 0.0))}]
+	_expect(FUSION.fuse(two, albedo, relief, 300.0, [true]).is_empty(), "A cancelled fusion returns nothing.")
+	_expect(not FUSION.fuse(two, albedo, relief, 300.0, [false]).is_empty(), "An uncancelled fusion still draws.")
 	var stretched := Transform2D(Vector2(1e30, 0.0), Vector2(0.0, 1.0), Vector2.ZERO)
 	var huge: Dictionary = FUSION.fuse([{"cell": 1, "xform": stretched}], albedo, relief, 300.0)
 	_expect(huge.is_empty() or (huge["albedo"] as Image).get_width() <= 897, "An extreme transform keeps the buffers bounded.")

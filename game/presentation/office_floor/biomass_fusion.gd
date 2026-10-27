@@ -28,8 +28,9 @@ const SOURCE_PIXELS_PER_UNIT := 627.0
 ## members: [{cell: int, xform: Transform2D}] where xform maps the cell's local
 ## quad (x right, y up, FOOTPRINT centred on the origin) into the shared plane.
 ## Returns {albedo: Image, relief: Image, rect: Rect2, ppu: float} or {} when
-## there is nothing to draw.
-static func fuse(members: Array, albedo_data: PackedByteArray, relief_data: PackedByteArray, target_ppu: float) -> Dictionary:
+## there is nothing to draw. `cancel` is a one-element array the caller sets to true to abandon a
+## long fusion early; the result is then {}.
+static func fuse(members: Array, albedo_data: PackedByteArray, relief_data: PackedByteArray, target_ppu: float, cancel: Array = [false]) -> Dictionary:
 	if members.is_empty():
 		return {}
 	var half := ATLAS.FOOTPRINT * 0.5
@@ -62,8 +63,11 @@ static func fuse(members: Array, albedo_data: PackedByteArray, relief_data: Pack
 	var planes := [heights, alphas, reds, greens, blues]
 	var samples: Array[PackedVector2Array] = []
 	for index in members.size():
+		if cancel[0]:
+			return {}
 		samples.append(_draw_member(members[index], bounds[index], rect, ppu, width, height, albedo_data, relief_data, planes))
-	_bridge(samples, rect, ppu, width, height, planes)
+	if not _bridge(samples, rect, ppu, width, height, planes, cancel):
+		return {}
 	return _finish(rect, ppu, width, height, heights, alphas, reds, greens, blues)
 
 
@@ -146,7 +150,8 @@ static func _draw_member(member: Dictionary, box: Rect2, rect: Rect2, ppu: float
 
 # Joins pieces whose masses stop just short of each other with a short vein, so
 # neighbours that were placed edge to edge still read as one connected body.
-static func _bridge(samples: Array[PackedVector2Array], rect: Rect2, ppu: float, width: int, height: int, planes: Array) -> void:
+# Returns false when `cancel` was set before all pairs were joined.
+static func _bridge(samples: Array[PackedVector2Array], rect: Rect2, ppu: float, width: int, height: int, planes: Array, cancel: Array) -> bool:
 	for i in samples.size():
 		for j in range(i + 1, samples.size()):
 			var best := BRIDGE_REACH * BRIDGE_REACH
@@ -155,6 +160,8 @@ static func _bridge(samples: Array[PackedVector2Array], rect: Rect2, ppu: float,
 			var found := false
 			var closest_overall := INF
 			for a in samples[i]:
+				if cancel[0]:
+					return false
 				for b in samples[j]:
 					var gap := a.distance_squared_to(b)
 					closest_overall = minf(closest_overall, gap)
@@ -165,6 +172,7 @@ static func _bridge(samples: Array[PackedVector2Array], rect: Rect2, ppu: float,
 						found = true
 			if found and closest_overall > BRIDGE_MIN * BRIDGE_MIN:
 				_stamp_vein(from, to, rect, ppu, width, height, planes)
+	return true
 
 
 static func _stamp_vein(from: Vector2, to: Vector2, rect: Rect2, ppu: float, width: int, height: int, planes: Array) -> void:

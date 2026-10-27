@@ -27,6 +27,7 @@ var _last_transform := Transform3D()
 var _wait := 0.05
 var _members: Array[WeakRef] = []
 var _task := -1
+static var _orphans: Array[int] = []
 var _job: Dictionary = {}
 var _queued: Dictionary = {}
 
@@ -62,9 +63,30 @@ func _process(delta: float) -> void:
 
 func _exit_tree() -> void:
 	_release_members()
-	if _task >= 0:
-		WorkerThreadPool.wait_for_task_completion(_task)
-		_task = -1
+	if _task < 0:
+		return
+	# A large group can take tens of seconds to fuse, and waiting here would also make this thread run
+	# other pieces' queued fusions. The worker is told to stop and is collected on later frames.
+	var cancel: Array = _job.get("cancel", [])
+	if not cancel.is_empty():
+		cancel[0] = true
+	_orphans.append(_task)
+	_task = -1
+	var tree := get_tree()
+	if not tree.process_frame.is_connected(_reap_orphans):
+		tree.process_frame.connect(_reap_orphans)
+
+
+## Collects cancelled fusions of pieces that left the tree, without ever blocking a frame.
+static func _reap_orphans() -> void:
+	for task in _orphans.duplicate():
+		if WorkerThreadPool.is_task_completed(task):
+			WorkerThreadPool.wait_for_task_completion(task)
+			_orphans.erase(task)
+	if _orphans.is_empty():
+		var tree := Engine.get_main_loop() as SceneTree
+		if tree != null:
+			tree.process_frame.disconnect(_reap_orphans)
 
 
 # Restores the piece's own cell and wakes anything it hid.
@@ -250,7 +272,9 @@ func _start(job: Dictionary) -> void:
 	var albedo := ATLAS.albedo_bytes()
 	var relief := ATLAS.relief_bytes()
 	var output := _job
-	_task = WorkerThreadPool.add_task(func() -> void: output["result"] = FUSION.fuse(members, albedo, relief, TARGET_PPU))
+	var cancel := [false]
+	output["cancel"] = cancel
+	_task = WorkerThreadPool.add_task(func() -> void: output["result"] = FUSION.fuse(members, albedo, relief, TARGET_PPU, cancel))
 
 
 func _collect_job() -> void:
