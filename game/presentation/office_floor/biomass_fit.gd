@@ -33,11 +33,7 @@ var _queued: Dictionary = {}
 
 
 func _ready() -> void:
-	if not is_instance_valid(_reaper):
-		_reaper = Reaper.new()
-		_reaper.name = "BiomassFitReaper"
-		_reaper.set_process(false)
-		get_tree().root.add_child.call_deferred(_reaper)
+	_ensure_reaper()
 	piece = get_parent() as Node3D
 	_last_transform = piece.global_transform
 	set_notify_transform(true)
@@ -75,7 +71,7 @@ func _exit_tree() -> void:
 	var cancel: Array = _job.get("cancel", [])
 	if not cancel.is_empty():
 		cancel[0] = true
-	if is_instance_valid(_reaper):
+	if is_instance_valid(_reaper) and _reaper.get_parent() != null:
 		_reaper.tasks.append(_task)
 		_reaper.set_process(true)
 	else:
@@ -83,8 +79,23 @@ func _exit_tree() -> void:
 	_task = -1
 
 
+# The reaper lives under the topmost scene node above the piece, so it exists for as long as the pieces do.
+func _ensure_reaper() -> void:
+	var scene: Node = self
+	while scene.get_parent() != null and not scene.get_parent() is Window:
+		scene = scene.get_parent()
+	if scene == self or (is_instance_valid(_reaper) and (_reaper.is_inside_tree() or _reaper.get_parent() != null or _reaper.has_meta(&"adding"))):
+		return
+	if not is_instance_valid(_reaper):
+		_reaper = Reaper.new()
+		_reaper.name = "BiomassFitReaper"
+		_reaper.set_process(false)
+	_reaper.set_meta(&"adding", true)
+	scene.add_child.call_deferred(_reaper)
+
+
 ## Collects the cancelled fusions of pieces that left the tree, one frame at a time, so freeing a
-## whole map never blocks. Every task must still be awaited, so the shutdown waits for the rest.
+## whole map never blocks. Every task must still be awaited, so the reaper waits for the rest when it goes.
 class Reaper extends Node:
 	var tasks: Array[int] = []
 

@@ -65,13 +65,13 @@ static func fuse(members: Array, albedo_data: PackedByteArray, relief_data: Pack
 	for index in members.size():
 		if cancel[0]:
 			return {}
-		samples.append(_draw_member(members[index], bounds[index], rect, ppu, width, height, albedo_data, relief_data, planes))
+		samples.append(_draw_member(members[index], bounds[index], rect, ppu, width, height, albedo_data, relief_data, planes, cancel))
 	if not _bridge(samples, rect, ppu, width, height, planes, cancel):
 		return {}
-	return _finish(rect, ppu, width, height, heights, alphas, reds, greens, blues)
+	return _finish(rect, ppu, width, height, heights, alphas, reds, greens, blues, cancel)
 
 
-static func _draw_member(member: Dictionary, box: Rect2, rect: Rect2, ppu: float, width: int, height: int, albedo_data: PackedByteArray, relief_data: PackedByteArray, planes: Array) -> PackedVector2Array:
+static func _draw_member(member: Dictionary, box: Rect2, rect: Rect2, ppu: float, width: int, height: int, albedo_data: PackedByteArray, relief_data: PackedByteArray, planes: Array, cancel: Array) -> PackedVector2Array:
 	var solid := PackedVector2Array()
 	var heights: PackedFloat32Array = planes[0]
 	var alphas: PackedFloat32Array = planes[1]
@@ -90,6 +90,8 @@ static func _draw_member(member: Dictionary, box: Rect2, rect: Rect2, ppu: float
 	var last_x := ATLAS.ATLAS.x - 1
 	var last_y := ATLAS.ATLAS.y - 1
 	for row in range(y0, y1 + 1):
+		if cancel[0]:
+			return solid
 		var plane_y := rect.end.y - (row + 0.5) / ppu
 		for column in range(x0, x1 + 1):
 			var local := inverse * Vector2(rect.position.x + (column + 0.5) / ppu, plane_y)
@@ -216,7 +218,7 @@ static func _smooth_max(a: float, b: float) -> float:
 	return top + gap * gap / (4.0 * SOFT)
 
 
-static func _finish(rect: Rect2, ppu: float, width: int, height: int, heights: PackedFloat32Array, alphas: PackedFloat32Array, reds: PackedFloat32Array, greens: PackedFloat32Array, blues: PackedFloat32Array) -> Dictionary:
+static func _finish(rect: Rect2, ppu: float, width: int, height: int, heights: PackedFloat32Array, alphas: PackedFloat32Array, reds: PackedFloat32Array, greens: PackedFloat32Array, blues: PackedFloat32Array, cancel: Array) -> Dictionary:
 	var count := width * height
 	# Premultiplied occupancy, colour and height, blurred by a down/up resize.
 	var field := PackedByteArray()
@@ -224,6 +226,8 @@ static func _finish(rect: Rect2, ppu: float, width: int, height: int, heights: P
 	var field_height := PackedByteArray()
 	field_height.resize(count)
 	for index in count:
+		if (index & 8191) == 0 and cancel[0]:
+			return {}
 		var alpha := alphas[index]
 		field[index * 4] = int(reds[index] * alpha * 255.0)
 		field[index * 4 + 1] = int(greens[index] * alpha * 255.0)
@@ -237,6 +241,8 @@ static func _finish(rect: Rect2, ppu: float, width: int, height: int, heights: P
 	var albedo := PackedByteArray()
 	albedo.resize(count * 4)
 	for index in count:
+		if (index & 8191) == 0 and cancel[0]:
+			return {}
 		var alpha := alphas[index]
 		var occupancy := blurred[index * 4 + 3] / 255.0
 		if alpha < 0.02 and occupancy > BRIDGE_LOW:
@@ -256,6 +262,8 @@ static func _finish(rect: Rect2, ppu: float, width: int, height: int, heights: P
 	relief.resize(count * 3)
 	var slope := SLOPE_PIXELS * 0.5 * ppu / SOURCE_PIXELS_PER_UNIT
 	for row in height:
+		if cancel[0]:
+			return {}
 		var up := maxi(row - 1, 0) * width
 		var down := mini(row + 1, height - 1) * width
 		var here := row * width
