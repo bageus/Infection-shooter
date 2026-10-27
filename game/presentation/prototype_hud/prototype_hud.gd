@@ -61,7 +61,7 @@ var _key_filled: StyleBoxFlat
 var _control_notice: PanelContainer
 var _last_weapon_index := -1
 var _weapon_icons: Array[Texture2D] = []
-var _slot_weapon_indices := [-1, -1, -1]
+var _slot_weapon_indices := [-2, -2, -2] # -2 never matches a slot value, so the first refresh also clears empty slots.
 var _vital_snapshot: Array = []
 var _hp_flash: Tween
 var _health_feedback: Control
