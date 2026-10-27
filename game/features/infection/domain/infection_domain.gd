@@ -24,6 +24,8 @@ var mutation: float = 0.0
 var active_ability: int = AbilityChoice.NONE
 var priority_ability: int = AbilityChoice.NONE
 var ability_choice_pending: bool = false
+## A worn gas mask keeps mutagen out: the body takes nothing from clouds.
+var gas_mask_worn: bool = false
 
 var critical_threshold: float = BASE_CRITICAL_THRESHOLD
 var control_loss_remaining: float = 0.0
@@ -33,7 +35,7 @@ var defeated: bool = false
 
 
 func absorb_mutagen(delta_seconds: float) -> float:
-	if delta_seconds <= 0.0 or defeated or is_control_lost():
+	if delta_seconds <= 0.0 or defeated or is_control_lost() or gas_mask_worn:
 		return 0.0
 	# Above the limit the cloud is no longer absorbed; touching it escalates the loss.
 	if mutation > critical_threshold:
