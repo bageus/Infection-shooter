@@ -85,6 +85,9 @@ def build(destination):
     scripts.mkdir(parents=True, exist_ok=True)
     for name in ["body_skin_materials.gd", "body_blood_bake.gd", "body_wound.gdshader", "poison_tint.gdshader"]:
         shutil.copyfile(repository / "game/features/infected" / name, scripts / name)
+    vfx = destination / "game/core/vfx/public"
+    vfx.mkdir(parents=True, exist_ok=True)
+    shutil.copyfile(repository / "game/core/vfx/public/blood_level.gd", vfx / "blood_level.gd")
     shutil.copyfile(repository / "tools/web_skin_probe.gd", destination / "probe.gd")
     template = destination / "web-template.zip"
     with zipfile.ZipFile(RangedArchive()) as archive:
