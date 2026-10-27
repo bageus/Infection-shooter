@@ -1,8 +1,32 @@
 {
   "version": 1,
   "platforms": {
-    "desktop": {"mode": "campaign", "levels": ["tutorial", "level_1", "level_2", "level_3"]},
-    "itch": {"mode": "campaign", "levels": ["tutorial", "level_1", "level_2"]},
-    "yandex": {"mode": "endless", "levels": ["tutorial", "endless"]}
-  }
+    "desktop": {
+      "mode": "campaign",
+      "levels": [
+        "tutorial",
+        "level_1",
+        "level_2",
+        "level_3"
+      ]
+    },
+    "itch": {
+      "mode": "campaign",
+      "levels": [
+        "tutorial",
+        "level_1",
+        "level_2"
+      ]
+    },
+    "yandex": {
+      "mode": "endless",
+      "levels": [
+        "tutorial",
+        "endless"
+      ],
+      "steam_promo": true,
+      "ads": true
+    }
+  },
+  "steam_url": "https://store.steampowered.com/"
 }

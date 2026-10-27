@@ -360,7 +360,8 @@
     "mutationSkill_organic_ammo_description": "Пустой магазин автоматически заполняется за {health} ед. здоровья. При здоровье ниже {threshold}% — бесплатно. Перезарядка: {cooldown} с.",
     "mutationSkill_organic_ammo_name": "Органический боезапас",
     "mutationLightningHint": "Повторные попадания разрешены. Одиночная цель получает все попадания, пока жива.",
-    "mutationStrikeHint": "Область удара расширяется от {width_start} до {width_end} м. Разбивает стекло и перегородки, толкает предметы."
+    "mutationStrikeHint": "Область удара расширяется от {width_start} до {width_end} м. Разбивает стекло и перегородки, толкает предметы.",
+    "steamPromo": "Добавить в желаемое в Steam"
   },
   "en": {
     "credits": "Credits",
@@ -723,6 +724,7 @@
     "mutationSkill_organic_ammo_name": "Organic Ammo",
     "mutationSkill_organic_ammo_description": "An empty magazine automatically refills for {health} health. Free below {threshold}% health. Recovery: {cooldown}s.",
     "mutationLightningHint": "Repeated hits are allowed. A lone target receives every hit while alive.",
-    "mutationStrikeHint": "The strike widens from {width_start} to {width_end}m. Breaks glass and partitions and pushes objects."
+    "mutationStrikeHint": "The strike widens from {width_start} to {width_end}m. Breaks glass and partitions and pushes objects.",
+    "steamPromo": "Wishlist on Steam"
   }
 }

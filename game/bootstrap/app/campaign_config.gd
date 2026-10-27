@@ -9,6 +9,7 @@ const FALLBACK := "desktop"
 const MAPS_DIR := "res://content/levels/"
 
 var platforms: Dictionary = {}
+var steam_url := ""
 
 
 func load_file(path: String = PATH) -> bool:
@@ -16,6 +17,7 @@ func load_file(path: String = PATH) -> bool:
 	if not data is Dictionary or int(data.get("version", 0)) != VERSION or not data.get("platforms") is Dictionary:
 		return false
 	platforms.clear()
+	steam_url = str(data.get("steam_url", ""))
 	for key in data.platforms:
 		var raw: Variant = data.platforms[key]
 		if not raw is Dictionary or str(raw.get("mode", "")) not in MODES or not raw.get("levels") is Array:
@@ -23,7 +25,7 @@ func load_file(path: String = PATH) -> bool:
 		var names: Array[String] = []
 		for item in raw.levels:
 			names.append(str(item))
-		platforms[str(key)] = {"mode": str(raw.mode), "levels": names}
+		platforms[str(key)] = {"mode": str(raw.mode), "levels": names, "steam_promo": bool(raw.get("steam_promo", false)), "ads": bool(raw.get("ads", false))}
 	return platforms.has(FALLBACK)
 
 
@@ -59,3 +61,13 @@ func endless_level(platform_id: String) -> String:
 func first_shipped_map(platform_id: String) -> String:
 	var paths := map_paths(platform_id)
 	return paths[0] if not paths.is_empty() and FileAccess.file_exists(paths[0]) else ""
+
+
+## Store page to promote on this platform's menus and loading screen, or "" when it shows no promo.
+func steam_promo_url(platform_id: String) -> String:
+	return steam_url if bool(_entry(platform_id).get("steam_promo", false)) else ""
+
+
+## True when the platform shows a fullscreen advertisement before a restart.
+func shows_ads(platform_id: String) -> bool:
+	return bool(_entry(platform_id).get("ads", false))

@@ -3,6 +3,8 @@ extends CanvasLayer
 signal completed(success: bool)
 const RESOURCE_QUEUE := preload("res://game/bootstrap/app/scene_resource_queue.gd")
 const LAYOUT := preload("res://game/bootstrap/app/planning_layout_loader.gd")
+const CAMPAIGN := preload("res://game/bootstrap/app/campaign_config.gd")
+const PLATFORM := preload("res://game/infrastructure/platform/public/platform.gd")
 const MATERIAL_WARMUP := preload("res://game/bootstrap/app/mission_material_warmup.gd")
 var warmed_materials := 0
 var completion_music: Node
@@ -43,6 +45,20 @@ var _cancel_requested := false
 var _closed := false
 
 
+## A wishlist link on platforms that promote the Steam release.
+func _add_steam_link(column: VBoxContainer) -> void:
+	var campaign := CAMPAIGN.new()
+	campaign.load_file()
+	var url := campaign.steam_promo_url(PLATFORM.detect_id())
+	if not url.begins_with("https://"):
+		return
+	var link := LinkButton.new()
+	link.text = "Добавить в желаемое в Steam" if _ru else "Wishlist on Steam"
+	link.uri = url
+	link.name = "SteamLink"
+	column.add_child(link)
+
+
 func _ready() -> void:
 	process_mode = Node.PROCESS_MODE_ALWAYS
 	layer = 250
@@ -69,6 +85,7 @@ func _ready() -> void:
 	progress = ProgressBar.new()
 	progress.show_percentage = false
 	column.add_child(progress)
+	_add_steam_link(column)
 	cancel = Button.new()
 	cancel.text = "Отменить загрузку" if _ru else "Cancel loading"
 	cancel.hide()

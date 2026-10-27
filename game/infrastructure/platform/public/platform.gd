@@ -23,6 +23,7 @@ func _ready() -> void:
 
 
 func setup(platform_id: String, platform_adapter: RefCounted) -> void:
+	process_mode = Node.PROCESS_MODE_ALWAYS # ads end while the defeat screen holds the tree paused
 	id = platform_id
 	adapter = platform_adapter
 	adapter.start()
