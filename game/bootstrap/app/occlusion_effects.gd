@@ -3,9 +3,9 @@ extends Node
 const SUBJECT := preload("res://game/bootstrap/app/occlusion_subject.gd")
 const WALLS := preload("res://game/bootstrap/app/occlusion_wall_materials.gd")
 const QUERY_LAYER := preload("res://game/bootstrap/app/occlusion_query_layer.gd")
+const OUTLINES := preload("res://game/bootstrap/app/occlusion_outlines.gd")
 const HERO_COLOR := Color(0.2, 0.85, 1.0, 0.9)
 const ENEMY_COLOR := Color(1.0, 0.24, 0.28, 0.9)
-const ITEM_COLOR := Color(1.0, 0.78, 0.22, 0.9)
 const HOLE_RADIUS := 2.0
 const CHECK_INTERVAL := 0.1
 const SUBJECTS_PER_TICK := 8
@@ -17,6 +17,7 @@ var world: Node3D
 var subjects: Array[RefCounted] = []
 var walls := WALLS.new()
 var query_layer := QUERY_LAYER.new()
+var outlines := OUTLINES.new()
 var checks_last_tick := 0
 var rays_last_tick := 0
 var _subject_cursor := 0
@@ -72,7 +73,7 @@ func _node_removed(node: Node) -> void:
 
 
 func _is_classified(node: Node) -> bool:
-	return node == player or node.is_in_group("camera_occluder") or node.is_in_group("infected") or node.is_in_group("occlusion_items") or node.is_in_group("weapon_pickups")
+	return node == player or node.is_in_group("camera_occluder") or node.is_in_group("infected")
 
 
 func _check_added_root(reference: WeakRef) -> void:
@@ -97,6 +98,7 @@ func _physics_process(delta: float) -> void:
 		_rebuild()
 	else:
 		_apply_pending_roots()
+	outlines.tick(delta, self)
 	if mode == 0:
 		_check_credit = minf(_check_credit + delta * subjects.size() / CHECK_INTERVAL, SUBJECTS_PER_TICK)
 		var count := mini(int(_check_credit), SUBJECTS_PER_TICK)
@@ -168,8 +170,6 @@ func _collect(node: Node) -> void:
 					_add_subject(node, HERO_COLOR)
 				elif node.is_in_group("infected"):
 					_add_subject(node, ENEMY_COLOR)
-				elif node.is_in_group("occlusion_items") or node.is_in_group("weapon_pickups"):
-					_add_subject(node, ITEM_COLOR)
 	for child in node.get_children():
 		_collect(child)
 
@@ -265,6 +265,7 @@ func _clear() -> void:
 	_removed_roots.clear()
 	walls.clear()
 	query_layer.clear()
+	outlines.clear()
 	if is_inside_tree():
 		_set_hole(Vector2(-10, -10), Vector2.ONE, 0.0, 0.0)
 	_subject_cursor = 0
