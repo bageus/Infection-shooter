@@ -144,6 +144,9 @@ func _build_right_tabs(right_box: Node, left_box: Node) -> void:
 	for child in right_box.get_children():
 		child.reparent(main if child.name in [&"MapManager", &"Save"] else constructor)
 	right_box.queue_free()
+	var floor_row: Control = _controls.floor_size.build_row()
+	main.add_child(floor_row)
+	main.move_child(floor_row, 0)
 	for node_name in ["LightingPreview", "LocalLights", "FogOfWarToggle", "AutoFireAlarms", "AutoLightSwitches", "SurfaceDecalSettings", "LightTopView", "Clear", "Close"]:
 		var child := left_box.get_node(node_name) as Control
 		child.reparent(main)

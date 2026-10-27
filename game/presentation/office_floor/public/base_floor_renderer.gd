@@ -136,6 +136,15 @@ func set_stair_openings(areas: Array[Rect2]) -> void:
 	_build_tiles()
 
 
+## Resizes the tile grid; the caller resizes any collision that matches it.
+func set_floor_size(size: Vector2) -> void:
+	if size == floor_size:
+		return
+	floor_size = size
+	if is_node_ready():
+		_build_tiles()
+
+
 func scatter_glass_debris(panes: Array[MeshInstance3D], direction: Vector3) -> void:
 	GLASS_SCATTER.scatter(self, panes, direction)
 

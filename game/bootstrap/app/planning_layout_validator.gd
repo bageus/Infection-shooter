@@ -11,6 +11,8 @@ static func error(data: Dictionary) -> String:
 		return "invalid floor_biomass_v1"
 	if data.has("surface_decals_v1") and not SURFACE_CONFIG.valid(data.surface_decals_v1):
 		return "invalid surface_decals_v1"
+	if data.has("floor_size_v1") and not preload("res://game/bootstrap/app/planning_floor_size.gd").valid(data.floor_size_v1):
+		return "invalid floor_size_v1"
 	if not data.get("objects") is Array:
 		return "objects must be an array"
 	if data.has("version"):

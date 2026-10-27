@@ -3,13 +3,13 @@ extends Node3D
 const KEY := preload("res://game/bootstrap/app/mission_key.gd")
 const WEAPON := preload("res://game/bootstrap/app/weapon_pickup.gd")
 const FLOOR_HINT := preload("res://game/bootstrap/app/floor_hint_guide.gd")
-const FLOOR_BOUNDS := Rect2(-40, -30, 80, 60)
 const FLOOR_TOP := 0.0135 # Visible base floor top; physics floor pieces must match it (see main.tscn FloorBody)
 const CUT_STEP := 0.5
 const STAIR_REFRESH_SECONDS := 0.35
 const KEY_REVEAL_SECONDS := 600.0
 
 var _stage: Node3D
+var _floor_bounds := Rect2(-40, -30, 80, 60)
 var _objects: Node
 var _stairs: Dictionary[int, Dictionary] = {}
 var _openings: Array[Rect2] = []
@@ -178,6 +178,10 @@ func _cached_openings(stair: Node3D) -> Array[Rect2]:
 func _refresh_stairs() -> void:
 	if not is_instance_valid(_stage):
 		return
+	# The location field size is a map setting, so the stair cuts follow the floor that was actually built.
+	var floor_size: Variant = _stage.get_node("Floor").get("floor_size")
+	if floor_size is Vector2:
+		_floor_bounds = Rect2(-floor_size * 0.5, floor_size)
 	var next_openings: Array[Rect2] = []
 	for stair in _tracked_stairs():
 		next_openings.append_array(_cached_openings(stair))
@@ -211,24 +215,24 @@ func _visual_bounds(stair: Node3D) -> AABB:
 
 func _stair_openings(stair: Node3D, bounds: AABB) -> Array[Rect2]:
 	var result: Array[Rect2] = []
-	var first_x := maxi(0, floori((bounds.position.x - FLOOR_BOUNDS.position.x) / CUT_STEP))
-	var last_x := mini(floori(FLOOR_BOUNDS.size.x / CUT_STEP), ceili((bounds.end.x - FLOOR_BOUNDS.position.x) / CUT_STEP))
-	var first_z := maxi(0, floori((bounds.position.z - FLOOR_BOUNDS.position.y) / CUT_STEP))
-	var last_z := mini(floori(FLOOR_BOUNDS.size.y / CUT_STEP), ceili((bounds.end.z - FLOOR_BOUNDS.position.y) / CUT_STEP))
+	var first_x := maxi(0, floori((bounds.position.x - _floor_bounds.position.x) / CUT_STEP))
+	var last_x := mini(floori(_floor_bounds.size.x / CUT_STEP), ceili((bounds.end.x - _floor_bounds.position.x) / CUT_STEP))
+	var first_z := maxi(0, floori((bounds.position.z - _floor_bounds.position.y) / CUT_STEP))
+	var last_z := mini(floori(_floor_bounds.size.y / CUT_STEP), ceili((bounds.end.z - _floor_bounds.position.y) / CUT_STEP))
 	for z in range(first_z, last_z):
 		var start := -1
 		for x in range(first_x, last_x + 1):
 			var below := false
 			if x < last_x:
-				var world_x := FLOOR_BOUNDS.position.x + (x + 0.5) * CUT_STEP
-				var world_z := FLOOR_BOUNDS.position.y + (z + 0.5) * CUT_STEP
+				var world_x := _floor_bounds.position.x + (x + 0.5) * CUT_STEP
+				var world_z := _floor_bounds.position.y + (z + 0.5) * CUT_STEP
 				var local := stair.to_local(Vector3(world_x, stair.global_position.y, world_z))
 				var surface := _stair_surface_height(local)
 				below = surface >= 0.0 and stair.to_global(Vector3(local.x, surface, local.z)).y < -0.06
 			if below and start < 0:
 				start = x
 			elif not below and start >= 0:
-				result.append(Rect2(FLOOR_BOUNDS.position + Vector2(start, z) * CUT_STEP, Vector2(x - start, 1) * CUT_STEP))
+				result.append(Rect2(_floor_bounds.position + Vector2(start, z) * CUT_STEP, Vector2(x - start, 1) * CUT_STEP))
 				start = -1
 	return result
 
@@ -256,7 +260,7 @@ func _update_floor_collision(body: StaticBody3D) -> void:
 	original.set_deferred("disabled", not _openings.is_empty())
 	if _openings.is_empty():
 		return
-	var regions: Array[Rect2] = [FLOOR_BOUNDS]
+	var regions: Array[Rect2] = [_floor_bounds]
 	for opening in _openings:
 		var remaining: Array[Rect2] = []
 		for region in regions:

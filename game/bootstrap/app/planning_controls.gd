@@ -22,6 +22,8 @@ var fruit_options: Node
 var door_options: Node
 var room_options: Node
 var group_templates: Node
+const FLOOR_SIZE := preload("res://game/bootstrap/app/planning_floor_size.gd")
+var floor_size: Node
 const SPAWN_OPTIONS := preload("res://game/bootstrap/app/planning_spawn_options.gd")
 const BIOMASS_OPTIONS := preload("res://game/bootstrap/app/planning_biomass_options.gd")
 var spawn_options: Node
@@ -121,6 +123,9 @@ func setup_controls() -> void:
 	group_templates = GROUP_TEMPLATES.new()
 	add_child(group_templates)
 	group_templates.setup(session, objects)
+	floor_size = FLOOR_SIZE.new()
+	add_child(floor_size)
+	floor_size.setup(session)
 	spawn_options = SPAWN_OPTIONS.new()
 	add_child(spawn_options)
 	spawn_options.call("setup", session, objects)
