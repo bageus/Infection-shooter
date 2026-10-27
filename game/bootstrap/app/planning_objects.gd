@@ -270,8 +270,11 @@ func _place_selected(screen_pos: Vector2) -> void:
 	var kind = _selected_kind()
 	if kind == "player":
 		session.edit_history.call("record_player_spawn")
+		# The planner camera hangs under the hero, so moving the spawn would carry the view along and shift the next click.
+		var view: Transform3D = session.camera.global_transform
 		session.main_player.global_position = geometry._snap(world) + Vector3(0.0, 1.0, 0.0)
 		session.main_player.rotation_degrees.y = rotation_y
+		session.camera.global_transform = view
 		player_spawn_defined = true
 		player_spawn_transform = session.main_player.transform
 		session.main_player.set_meta("planning_scene_path", "res://game/features/player/public/player.tscn")
