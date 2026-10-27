@@ -47,6 +47,10 @@ func _run() -> void:
 	divider.free()
 	await _settle()
 	_check(_shown(), "outline returns once the wall is gone")
+	wall.scene_file_path = "res://game/presentation/office_floor/public/structural/glass_wall_full.tscn"
+	await _settle()
+	_check(not _shown(), "a glass wall does not hide an item from the camera")
+	wall.scene_file_path = ""
 	var room_a := _room(1, Rect2(-1, -2, 1.5, 4))
 	var room_b := _room(2, Rect2(0.8, -2, 4, 4))
 	await _settle()
@@ -99,6 +103,15 @@ func _door_check() -> void:
 	await _settle()
 	var outline = effects.outlines.outlines.get(controller.get_instance_id())
 	_check(outline != null and outline.shown and not outline.copies.is_empty(), "a hidden door gets its leaf outlined")
+	var rooms := [_room(3, Rect2(-4, -2, 6, 2.3)), _room(4, Rect2(-4, 0.3, 6, 1.2)), _room(5, Rect2(-4, 1.5, 6, 1.4))]
+	await _settle()
+	_check(effects.outlines.outlines[controller.get_instance_id()].shown, "a door between two rooms outlines from either side")
+	hero.position.z = 2.0
+	await _settle()
+	_check(not effects.outlines.outlines[controller.get_instance_id()].shown, "a door in neither of the hero's rooms stays plain")
+	hero.position.z = 0.0
+	for room in rooms:
+		room.free()
 
 
 func _shown() -> bool:
