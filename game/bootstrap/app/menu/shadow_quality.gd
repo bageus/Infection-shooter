@@ -8,6 +8,7 @@ extends RefCounted
 ## which froze the menu on every slider step. "Off" therefore shrinks the sun's
 ## range to half a metre instead of disabling the light's shadow.
 
+const WALL_BASE_SHADOW := preload("res://game/presentation/office_floor/public/wall_base_shadow.gd")
 const DEFAULT_LEVEL := 2
 const OFF_DISTANCE := 0.5
 const LEVELS: Array[Dictionary] = [
@@ -36,6 +37,8 @@ static func apply(tree: SceneTree, enabled: bool, level: int) -> void:
 		return
 	if tree.root.positional_shadow_atlas_size != int(preset.atlas):
 		tree.root.positional_shadow_atlas_size = int(preset.atlas)
+	# Walls bake a contact strip on the floor only while real shadows are off.
+	WALL_BASE_SHADOW.set_shadows_allowed(tree, enabled)
 	var scene := tree.current_scene
 	if scene == null:
 		return
