@@ -53,6 +53,7 @@ func _run() -> void:
 		_check(is_equal_approx(layout.right.size.x, 360.0) and layout.right_content.size.x <= 360, "Long map names cannot widen the right HUD")
 	await _exercise_tabs(layout, left)
 	await _exercise_selection()
+	_exercise_center_button(layout)
 	await _exercise_decal_roundtrip()
 	planner.exit()
 	stage.queue_free()
@@ -147,6 +148,21 @@ func _exercise_selection() -> void:
 	controls._show_weapon_catalog()
 	_check(controls.light_view.active and controls.light_view.button.visible, "Top view works across palettes")
 	controls.light_view.set_enabled(false)
+
+
+func _exercise_center_button(layout: RefCounted) -> void:
+	_check(controls.center_button.get_parent() == controls.undo_button.get_parent(), "Центр локации sits with Undo and Duplicate")
+	var floor_view := stage.get_node("Floor") as Node3D
+	var field_center := floor_view.global_position
+	floor_view.call("set_floor_size", Vector2(120, 90))
+	planner.camera.global_position = Vector3(40, 12, -25)
+	planner.camera_anchor = planner.camera.global_position
+	controls.center_button.pressed.emit()
+	var p: Vector3 = planner.camera.global_position
+	_check(is_equal_approx(p.x, field_center.x) and is_equal_approx(p.z, field_center.z), "Центр локации moves the camera to the centre of a resized field")
+	_check(is_equal_approx(p.y, 12.0), "Центр локации keeps the camera height")
+	_check(is_equal_approx(planner.camera_anchor.x, p.x) and is_equal_approx(planner.camera_anchor.z, p.z), "Центр локации updates the camera anchor")
+	floor_view.call("set_floor_size", Vector2(80, 60))
 
 
 func _exercise_decal_roundtrip() -> void:

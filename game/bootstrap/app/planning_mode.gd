@@ -334,6 +334,17 @@ func _rotate_camera(relative: Vector2) -> void:
 	camera.global_position = current_position
 
 
+## The location field is centred on the floor origin for every size, so its centre is the floor position.
+func center_on_location() -> void:
+	var floor_view := host.get_node("Floor") as Node3D
+	var center := floor_view.global_position
+	var p := camera.global_position
+	p.x = center.x
+	p.z = center.z
+	camera.global_position = p
+	camera_anchor = p
+
+
 func _zoom_camera(amount: float) -> void:
 	if controls.light_view.active:
 		controls.light_view.zoom(amount)
