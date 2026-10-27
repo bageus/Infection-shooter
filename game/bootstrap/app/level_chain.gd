@@ -6,7 +6,7 @@ extends RefCounted
 const VERSION := 1
 const PATH := "user://level_chain.json"
 ## A platform build ships its chain here; it is read when the player has none of their own.
-const SHIPPED_PATH := "res://content/levels/level_chain.json"
+const SHIPPED_PATH := "res://content/levels/" + "level_chain.json"
 const TYPES: Array[String] = ["none", "ceiling", "floor"]
 const SLOT_COUNT := 2
 ## Player height beyond which the stairs count as climbed (ceiling) or descended (floor).
