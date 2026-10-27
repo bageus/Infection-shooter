@@ -10,6 +10,7 @@ const RELEASE_RADIUS := 6.5
 const INTERVAL := 0.15
 const SAME_SPACE_STOP := 0.4
 const CHEST := 0.9
+const DOORWAY := 0.6
 var outlines: Dictionary = {}
 var rays_last_tick := 0
 var _elapsed := 0.0
@@ -57,12 +58,13 @@ func _flat_distance(a: Node3D, b: Node3D) -> float:
 	return delta.length()
 
 
-## Same room by the fog-of-war room ids when both sit in one; otherwise no wall between them at chest height.
+## Same room: equal fog-of-war room ids (the player's reach covers a doorway); outside any room, no wall at chest height.
 func same_space(effects: Node, item: Node3D) -> bool:
-	var player_room := _room_of(effects, effects.player.global_position)
-	var item_room := _room_of(effects, item.global_position)
-	if player_room > 0 and item_room > 0:
-		return player_room == item_room
+	var player_room := _room_of(effects, effects.player.global_position, DOORWAY)
+	if player_room != _room_of(effects, item.global_position, 0.3):
+		return false
+	if player_room > 0:
+		return true
 	var from: Vector3 = effects.player.global_position + Vector3.UP * CHEST
 	var to := Vector3(item.global_position.x, from.y, item.global_position.z)
 	var gap := to - from
@@ -73,15 +75,15 @@ func same_space(effects: Node, item: Node3D) -> bool:
 	return not _hits_structure(effects, from, to, null)
 
 
-func _room_of(effects: Node, point: Vector3) -> int:
+func _room_of(effects: Node, point: Vector3, reach: float) -> int:
 	for zone: Node in effects.get_tree().get_nodes_in_group("darkness_zone"):
 		var room := int(zone.get("room_id"))
-		if room > 0 and not zone.get("permanent") and zone.call("_edge_distance", point) <= 0.3:
+		if room > 0 and not zone.get("permanent") and zone.call("_edge_distance", point) <= reach:
 			return room
 	return 0
 
 
-## The camera ray is stopped by a structure (or by solid room fog) before it reaches the item.
+## The camera ray is stopped by a structure or by solid fog before it reaches the item.
 func hidden_from_camera(effects: Node, item: Node3D) -> bool:
 	var camera: Camera3D = effects.camera
 	var point := item.global_position + Vector3.UP * 0.3
@@ -89,7 +91,7 @@ func hidden_from_camera(effects: Node, item: Node3D) -> bool:
 		return false
 	for zone: Node in effects.get_tree().get_nodes_in_group("darkness_zone"):
 		if zone.has_method("blocks_view") and zone.call("blocks_view", camera.global_position, point):
-			return false
+			return true
 	rays_last_tick += 1
 	return _hits_structure(effects, camera.global_position, point, item)
 
