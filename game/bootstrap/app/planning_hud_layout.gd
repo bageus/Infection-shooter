@@ -87,7 +87,7 @@ func _build_center(controls: Node, ui: Control, box: Node) -> void:
 	controls.planning_toolbar.reparent(center)
 	var actions: Node = controls.undo_button.get_parent()
 	controls.help_button.reparent(actions)
-	for action: Button in [controls.undo_button, controls.duplicate_button]:
+	for action: Button in [controls.undo_button, controls.duplicate_button, controls.center_button]:
 		action.clip_text = true
 		action.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 		action.add_theme_font_size_override("font_size", 14)

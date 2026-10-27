@@ -55,6 +55,7 @@ var desk_setup_button: Button
 var planning_toolbar: PanelContainer
 var undo_button: Button
 var duplicate_button: Button
+var center_button: Button
 
 var session: Variant
 var objects: Variant
@@ -279,6 +280,10 @@ func _build_planning_toolbar() -> void:
 	duplicate_button.text = "Duplicate selected"
 	duplicate_button.pressed.connect(func() -> void: session.edit_history.call("duplicate_selected"))
 	toolbar_buttons.add_child(duplicate_button)
+	center_button = Button.new()
+	center_button.text = "Центр локации"
+	center_button.pressed.connect(func() -> void: session.center_on_location())
+	toolbar_buttons.add_child(center_button)
 	_update_history_buttons()
 
 
