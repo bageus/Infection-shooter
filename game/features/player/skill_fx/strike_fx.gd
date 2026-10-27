@@ -7,6 +7,7 @@ extends RefCounted
 
 const NODE := preload("res://game/features/player/skill_fx/skill_fx_node.gd")
 const COMET_SHADER := preload("res://game/features/player/skill_fx/fx_strike_comet.gdshader")
+const FIST_SHADER := preload("res://game/features/player/skill_fx/fx_strike_fist.gdshader")
 const LANE_SHADER := preload("res://game/features/player/skill_fx/fx_strike_lane.gdshader")
 const RING_SHADER := preload("res://game/features/player/skill_fx/fx_ground_ring.gdshader")
 const DANGER := preload("res://game/features/combat/public/floor_danger_zone.gd")
@@ -20,6 +21,13 @@ const LIFE := 1.2
 const SPARKS := 10
 const SMOKE := 3
 const HEIGHT := 0.9
+const SHARDS := 9
+## The fist cracks from this share of the lunge and bursts into pieces at SHATTER.
+const CRACK_AT := 0.3
+const SHATTER_AT := 0.55
+const FIST_SIZE := Vector2(0.75, 0.8)
+const GRAVITY := 12.0
+const SHARD_LIFE := 0.55
 
 static var _materials := {}
 static var _meshes := {}
@@ -37,8 +45,21 @@ static func play(parent: Node, center: Vector3, direction: Vector3) -> Node3D:
 	# player's height would tilt the whole strike up into the air.
 	fx.look_at(fx.global_position + direction, Vector3.UP)
 	var lane := _lane(fx)
-	var fist := _quad(fx, _material("comet", COMET_SHADER, {}))
+	var tail := _quad(fx, _material("comet", COMET_SHADER, {"brightness": 1.2}))
+	tail.position = Vector3(0.0, HEIGHT, BACK)
+	var fist_material := _material("fist", FIST_SHADER, {})
+	var fist := _quad(fx, fist_material)
 	fist.position = Vector3(0.0, HEIGHT, BACK)
+	fist.set_instance_shader_parameter(&"size", FIST_SIZE)
+	# Each piece flies on from the fist's last position, outwards from its centre.
+	var shards: Array[Dictionary] = []
+	for i in SHARDS:
+		var piece := _quad(fx, fist_material)
+		piece.visible = false
+		piece.set_instance_shader_parameter(&"size", FIST_SIZE)
+		piece.set_instance_shader_parameter(&"cell", float(i))
+		var outward := Vector3(randf_range(-1.0, 1.0), randf_range(0.2, 1.4), randf_range(-0.6, 0.6))
+		shards.append({"node": piece, "outward": outward, "spin": randf_range(-4.0, 4.0)})
 	var flash := _quad(fx, _material("flash", PUFF_SHADER, {"color": Color(0.85, 0.05, 0.07), "glow": 0.35}))
 	flash.position = Vector3(0.0, HEIGHT, -REACH)
 	flash.visible = false
@@ -62,23 +83,32 @@ static func play(parent: Node, center: Vector3, direction: Vector3) -> Node3D:
 		var speed := randf_range(2.0, 5.0)
 		# Splatter bounces off the wall: sideways and back towards the player, never past the reach.
 		sparks.append({"node": spark, "velocity": Vector3(cos(angle) * speed, randf_range(1.5, 4.0), absf(sin(angle)) * speed * 0.5 + 0.5)})
-	fx.step = _step.bind(lane, fist, flash, ring, smoke, sparks)
+	fx.step = _step.bind(lane, tail, fist, shards, flash, ring, smoke, sparks)
 	return fx
 
 
-static func _step(age: float, _fade: float, lane: MeshInstance3D, fist: MeshInstance3D, flash: MeshInstance3D, ring: MeshInstance3D, smoke: Array[MeshInstance3D], sparks: Array[Dictionary]) -> void:
+static func _step(age: float, _fade: float, lane: MeshInstance3D, tail: MeshInstance3D, fist: MeshInstance3D, shards: Array[Dictionary], flash: MeshInstance3D, ring: MeshInstance3D, smoke: Array[MeshInstance3D], sparks: Array[Dictionary]) -> void:
 	lane.set_instance_shader_parameter(&"alpha", clampf(1.0 - (age - 0.3) / 0.65, 0.0, 1.0) if age > 0.3 else clampf(age / 0.04, 0.0, 1.0))
 	lane.set_instance_shader_parameter(&"open", lerpf(0.03, 1.0, smoothstep(0.05, 0.25, age)))
 	var arrival := GATHER + LUNGE
-	if age < arrival:
-		var travel := clampf((age - GATHER) / LUNGE, 0.0, 1.0)
-		# Decelerates into the end of the reach, like a fist meeting a wall.
-		fist.position.z = lerpf(BACK, -REACH, 1.0 - (1.0 - travel) * (1.0 - travel))
+	var travel := clampf((age - GATHER) / LUNGE, 0.0, 1.0)
+	# Decelerates into the end of the reach, like a fist meeting a wall.
+	var eased := 1.0 - (1.0 - travel) * (1.0 - travel)
+	var head_z := lerpf(BACK, -REACH, eased)
+	var shattered := travel >= SHATTER_AT
+	fist.visible = not shattered
+	tail.visible = not shattered
+	if not shattered:
 		var gather := clampf(age / GATHER, 0.0, 1.0)
-		fist.set_instance_shader_parameter(&"size", Vector2(lerpf(0.25, 0.5, gather), lerpf(0.5, 1.0, gather) + travel * 1.8))
+		fist.position.z = head_z
+		fist.set_instance_shader_parameter(&"size", FIST_SIZE * lerpf(0.6, 1.0, gather))
 		fist.set_instance_shader_parameter(&"alpha", gather)
+		fist.set_instance_shader_parameter(&"crack", smoothstep(CRACK_AT, SHATTER_AT, travel))
+		tail.position.z = head_z + 1.9
+		tail.set_instance_shader_parameter(&"size", Vector2(0.45, 1.9) * gather)
+		tail.set_instance_shader_parameter(&"alpha", gather * 0.8)
 	else:
-		fist.visible = false
+		_scatter(age - (GATHER + LUNGE * SHATTER_AT), shards, lerpf(BACK, -REACH, 1.0 - pow(1.0 - SHATTER_AT, 2.0)))
 	var since := age - arrival
 	if since < 0.0:
 		return
@@ -101,6 +131,21 @@ static func _step(age: float, _fade: float, lane: MeshInstance3D, fist: MeshInst
 		node.position = Vector3(point.x, maxf(point.y, 0.03), point.z)
 		node.scale = Vector3.ONE * 0.16 * (1.0 - since / 0.5)
 		node.set_instance_shader_parameter(&"progress", 0.25)
+
+
+# Flies the pieces on with the fist's momentum, which dies away, then lets them
+# drop to the floor and fade.
+static func _scatter(since: float, shards: Array[Dictionary], start_z: float) -> void:
+	var fade := 1.0 - smoothstep(SHARD_LIFE * 0.6, SHARD_LIFE, since)
+	for shard in shards:
+		var piece: MeshInstance3D = shard["node"]
+		var outward: Vector3 = shard["outward"]
+		piece.visible = fade > 0.0
+		var glide := 1.0 - exp(-since * 5.0)
+		var y := HEIGHT + outward.y * since * 1.2 - 0.5 * GRAVITY * since * since
+		piece.position = Vector3(outward.x * glide * 0.8, maxf(y, 0.05), start_z - 1.1 * glide + outward.z * glide)
+		piece.set_instance_shader_parameter(&"spin", float(shard["spin"]) * since)
+		piece.set_instance_shader_parameter(&"alpha", fade)
 
 
 # The scorched wedge: bright edges, faint fill, chevrons running outwards.
