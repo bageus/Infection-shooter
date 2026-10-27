@@ -28,6 +28,8 @@ var main_player: Node3D
 var ui: Control
 var hud_nodes: Array[Node] = []
 var active := false
+# Release exports ship without the planner; enter() refuses while this is false.
+var available := OS.is_debug_build()
 var camera_anchor := Vector3.ZERO
 var camera_height := 24.0
 var saved_camera_transform := Transform3D.IDENTITY
@@ -104,6 +106,8 @@ func setup(app_owner: Node3D, planning_root: Node3D, planning_ui: Control, load_
 
 
 func enter() -> void:
+	if not available:
+		return
 	active = true
 	Engine.set_meta("planning_active", true)
 	_set_occlusion_enabled(false)

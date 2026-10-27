@@ -152,7 +152,8 @@ func _build_content() -> void:
 			_add_button("exit", "quit")
 		"pause":
 			_add_button("continue", "resume")
-			_add_button("planning", "planning")
+			if OS.is_debug_build(): # The planner stays out of release exports
+				_add_button("planning", "planning")
 			_add_button("settings", "settings")
 			_add_button("restart", "restart")
 			_add_button("toMain", "main")
