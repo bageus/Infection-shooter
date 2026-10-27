@@ -187,6 +187,11 @@ func _real_stair_edits() -> void:
 		stair.position = pose
 		await _sync()
 		_equivalent("Moved/upstairs staircase")
+	# A flight that rises above the floor leads up, so it must not cut the floor.
+	stair.position = Vector3(6, -1.5, 2)
+	await _sync()
+	_check(floor_view.openings.is_empty(), "Staircase rising above the floor cuts no hole")
+	_equivalent("Rising staircase")
 	stair.rotation.y = PI / 2
 	stair.scale = Vector3.ONE * 1.2
 	await _sync()

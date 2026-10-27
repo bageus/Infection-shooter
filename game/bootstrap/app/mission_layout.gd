@@ -7,6 +7,7 @@ const FLOOR_TOP := 0.0135 # Visible base floor top; physics floor pieces must ma
 const CUT_STEP := 0.5
 const STAIR_REFRESH_SECONDS := 0.35
 const KEY_REVEAL_SECONDS := 600.0
+const STAIR_TOP_HEIGHT := 3.0 # Upper landing in local y, see _stair_surface_height.
 
 var _stage: Node3D
 var _floor_bounds := Rect2(-40, -30, 80, 60)
@@ -215,6 +216,9 @@ func _visual_bounds(stair: Node3D) -> AABB:
 
 func _stair_openings(stair: Node3D, bounds: AABB) -> Array[Rect2]:
 	var result: Array[Rect2] = []
+	# Only a flight whose upper landing sits at floor level leads down; a flight that rises above the floor needs no hole.
+	if stair.global_position.y + STAIR_TOP_HEIGHT > FLOOR_TOP:
+		return result
 	var first_x := maxi(0, floori((bounds.position.x - _floor_bounds.position.x) / CUT_STEP))
 	var last_x := mini(floori(_floor_bounds.size.x / CUT_STEP), ceili((bounds.end.x - _floor_bounds.position.x) / CUT_STEP))
 	var first_z := maxi(0, floori((bounds.position.z - _floor_bounds.position.y) / CUT_STEP))
