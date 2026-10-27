@@ -47,6 +47,7 @@ var current_level := "":
 		current_level = value
 		_sync_endless()
 var _mission_loading := false
+var _ad_showing := false
 var _ended := false
 var completion_music: Node
 var _music_handed_off := false
@@ -343,8 +344,14 @@ func _on_menu_action(action: String) -> void:
 			_on_planning_pressed()
 		"continue":
 			_on_continue_pressed()
-		"restart", "start":
+		"restart":
+			_after_ad(_on_restart_pressed)
+		"start":
 			_on_restart_pressed()
+		"steam":
+			var url := str(game_over.get("steam_url"))
+			if url.begins_with("https://"):
+				OS.shell_open(url)
 		"main", "quit":
 			get_tree().paused = false
 			if is_instance_valid(completion_music):
@@ -352,6 +359,25 @@ func _on_menu_action(action: String) -> void:
 				preload("res://game/bootstrap/app/menu/music_navigation.gd").show_main(get_tree(), self, completion_music)
 			else:
 				get_tree().change_scene_to_file("res://game/bootstrap/app/menu/front_end.tscn")
+
+
+## Platforms with ads show one fullscreen advertisement (sound muted) before `next` runs.
+func _after_ad(next: Callable) -> void:
+	var platform := get_tree().root.get_node_or_null("Platform")
+	var campaign := CAMPAIGN.new()
+	campaign.load_file()
+	if _ad_showing:
+		return
+	if platform == null or not campaign.shows_ads(str(platform.get("id"))):
+		next.call()
+		return
+	_ad_showing = true
+	AudioServer.set_bus_mute(AudioServer.get_bus_index(&"Master"), true)
+	platform.call("show_ad")
+	await platform.ad_finished
+	AudioServer.set_bus_mute(AudioServer.get_bus_index(&"Master"), false)
+	_ad_showing = false
+	next.call()
 
 
 func _on_restart_pressed() -> void:

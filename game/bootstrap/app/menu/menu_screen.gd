@@ -5,6 +5,8 @@ signal action_requested(action: String)
 const SFX := preload("res://game/core/audio/public/sound_events.gd")
 const STYLE := preload("res://game/bootstrap/app/menu/menu_style.gd")
 const PREFERENCES := preload("res://game/bootstrap/app/menu/menu_preferences.gd")
+const CAMPAIGN := preload("res://game/bootstrap/app/campaign_config.gd")
+const PLATFORM := preload("res://game/infrastructure/platform/public/platform.gd")
 const DIALOG := preload("res://game/bootstrap/app/menu/menu_dialog.gd")
 const BACKGROUNDS := {
 	"main": preload("res://assets/interface/backgrounds/main.png"),
@@ -23,6 +25,8 @@ var content: VBoxContainer
 var footer: Label
 var keyboard: Label
 var reason_key := ""
+## Store page offered on the defeat and victory screens; empty on platforms without the promo.
+var steam_url := ""
 var _click_player: AudioStreamPlayer
 var _music: AudioStreamPlayer
 
@@ -32,6 +36,9 @@ func _ready() -> void:
 	set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 	mouse_filter = Control.MOUSE_FILTER_STOP
 	translations = JSON.parse_string(FileAccess.get_file_as_string("res://assets/interface/translations.json"))
+	var campaign := CAMPAIGN.new()
+	campaign.load_file()
+	steam_url = campaign.steam_promo_url(PLATFORM.detect_id())
 	preferences.load_settings()
 	# The game scene (and its environment) may not be current yet; apply once
 	# the tree has settled so saved volume and brightness hold from the start.
@@ -153,10 +160,12 @@ func _build_content() -> void:
 			_add_button("checkpoint", "continue", true)
 			_add_button("restart", "restart")
 			_add_button("toMain", "main")
+			_add_steam_button()
 		"complete":
 			_add_button("continue", "continue")
 			_add_button("toMain", "main")
 			_add_button("new", "restart")
+			_add_steam_button()
 	var note := STYLE.label(text(_note_key()), roundi(11 * factor))
 	note.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	note.add_theme_color_override("font_color", STYLE.MUTED)
@@ -165,6 +174,11 @@ func _build_content() -> void:
 		content.add_child(note)
 	else:
 		note.free()
+
+
+func _add_steam_button() -> void:
+	if not steam_url.is_empty():
+		_add_button("steamPromo", "steam")
 
 
 func _note_key() -> String:
