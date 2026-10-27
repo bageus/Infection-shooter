@@ -1,6 +1,7 @@
 extends RefCounted
 ## Prepare a complete map before replacing it; optionally commit between frames.
 const SURFACE_SETTINGS := preload("res://game/bootstrap/app/planning_surface_decals.gd")
+const FLOOR_SIZE := preload("res://game/bootstrap/app/planning_floor_size.gd")
 const RESOURCE_QUEUE := preload("res://game/bootstrap/app/scene_resource_queue.gd")
 const VALIDATOR := preload("res://game/bootstrap/app/planning_layout_validator.gd")
 const LAYOUT_PROPERTIES := preload("res://game/bootstrap/app/planning_layout_properties.gd")
@@ -166,6 +167,7 @@ func _stage(record: Dictionary, prepared: Dictionary) -> bool:
 
 func _check_plan(data: Dictionary, prepared: Dictionary) -> Dictionary:
 	prepared["surface_decals_v1"] = data.get("surface_decals_v1", {}).duplicate(true)
+	prepared["floor_size_v1"] = data.get("floor_size_v1", [])
 	var cache: Dictionary = data.get("floor_biomass_v1", {})
 	prepared["floor_biomass_v1"] = cache if str(cache.get("source_signature", "")) == preload("res://game/bootstrap/app/planning_biomass_bake.gd").signature(data.objects) else {}
 	# Authored restoration can retain every live node and stage only unavailable records.
@@ -189,6 +191,7 @@ func _begin(prepared: Dictionary) -> void:
 	_biomass_cache = prepared.get("floor_biomass_v1", {})
 	preload("res://game/bootstrap/app/planning_biomass_bake.gd").restore(session, {})
 	SURFACE_SETTINGS.restore(session, prepared.get("surface_decals_v1", {}))
+	FLOOR_SIZE.restore(session, prepared.get("floor_size_v1", []))
 	session.edit_history.stack.clear()
 	if not prepared.player.is_empty():
 		var latest: Dictionary = prepared.player
