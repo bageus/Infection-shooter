@@ -1,5 +1,6 @@
 extends Node3D
 ## Scene-local, bounded exit particles. No lights or gameplay state.
+const BLOOD_LEVEL := preload("res://game/core/vfx/public/blood_level.gd")
 const MAX_ACTIVE := 24
 var _blood: SphereMesh
 var _sparks: SphereMesh
@@ -60,7 +61,7 @@ func _mesh(blood: bool) -> SphereMesh:
 	mesh.radial_segments = 6
 	mesh.rings = 3
 	var material := StandardMaterial3D.new()
-	material.albedo_color = Color(0.36, 0.01, 0.01) if blood else Color(0.65, 0.32, 0.06)
+	material.albedo_color = BLOOD_LEVEL.color() if blood else Color(0.65, 0.32, 0.06)
 	material.roughness = 0.2
 	if not blood:
 		material.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED

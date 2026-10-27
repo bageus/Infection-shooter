@@ -11,6 +11,8 @@ const AMOUNT := [1.0, 0.5, 1.0, 1.0]
 const SPEED := [1.0, 1.0, 1.0, 3.0]
 const RED_COLOR := Color(0.36, 0.01, 0.01)
 const GREEN_COLOR := Color(0.10, 0.42, 0.06)
+## Dark centre of a wound on a body, red-black at the red levels.
+const GREEN_WOUND_CORE := Color(0.01, 0.09, 0.01)
 
 static var level := 2
 ## A platform that must not show red blood (children may play) pins the level to green.

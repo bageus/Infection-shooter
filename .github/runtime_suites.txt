@@ -241,3 +241,4 @@ game/features/infected/tests/run_death_cloud_tests.gd
 game/bootstrap/app/tests/run_campaign_config_tests.gd
 game/features/spawning/tests/run_endless_tests.gd
 game/bootstrap/app/tests/run_platform_promo_tests.gd
+game/features/infected/tests/run_green_wound_tests.gd

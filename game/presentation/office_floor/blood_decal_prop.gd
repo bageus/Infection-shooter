@@ -6,6 +6,7 @@ extends Node3D
 
 const SURFACE_DECOR := preload("res://game/presentation/office_floor/public/surface_decor_catalog.gd")
 const AMBIENT_SOUNDS := preload("res://game/presentation/office_floor/public/ambient_prop_sounds.gd")
+const BLOOD_LEVEL := preload("res://game/core/vfx/public/blood_level.gd")
 const LIBRARY := preload("res://game/presentation/office_floor/blood_texture_library.gd")
 const BIOMASS := preload("res://game/presentation/office_floor/biomass_atlas.gd")
 const BIOMASS_MESH := preload("res://game/presentation/office_floor/biomass_mesh.gd")
@@ -157,6 +158,7 @@ func _process(_delta: float) -> void:
 
 
 static var _library: RefCounted
+static var _library_green := false
 var _visual: MeshInstance3D
 var _fit: Node
 var _fused := false
@@ -240,9 +242,11 @@ func _apply_surface() -> void:
 static func texture_entry(texture_id: String) -> Dictionary:
 	if texture_id.begins_with("surface:"):
 		return SURFACE_DECOR.texture_entry(texture_id)
-	if _library == null:
+	if _library == null or _library_green != BLOOD_LEVEL.forced_green:
 		_library = LIBRARY.new()
-		_library.call("load_assets")
+		_library_green = BLOOD_LEVEL.forced_green
+		# A platform with green blood draws placed decals with the same procedural frames the game uses.
+		_library.call("load_assets", 512, 1.18, BLOOD_LEVEL.forced_green, BLOOD_LEVEL.color()) if BLOOD_LEVEL.forced_green else _library.call("load_assets")
 	var category := texture_id.get_slice("_", 0)
 	var variant := int(texture_id.get_slice("_", 1))
 	# Layouts saved before the atlases may name a variant the category no

@@ -2,6 +2,7 @@ extends RefCounted
 ## Derived skin presentation for one geometry/material combination. A page shares
 ## one material per surface; actor/piece leases own distinct texture-array layers.
 ## 128 layers is below WebGL2's minimum MAX_ARRAY_TEXTURE_LAYERS (256).
+const BLOOD_LEVEL := preload("res://game/core/vfx/public/blood_level.gd")
 const BAKE := preload("res://game/features/infected/body_blood_bake.gd")
 const SHADER := preload("res://game/features/infected/body_wound.gdshader")
 const PAGE_LAYERS := 128
@@ -148,6 +149,9 @@ static func material_shader() -> Shader:
 static func create_material(original: Material, shader: Shader = SHADER) -> ShaderMaterial:
 	var material := ShaderMaterial.new()
 	material.shader = shader
+	if BLOOD_LEVEL.is_green():
+		material.set_shader_parameter("blood_color", BLOOD_LEVEL.GREEN_COLOR)
+		material.set_shader_parameter("wound_core_color", BLOOD_LEVEL.GREEN_WOUND_CORE)
 	if original is BaseMaterial3D:
 		var base := original as BaseMaterial3D
 		material.set_shader_parameter("albedo_color", base.albedo_color)
