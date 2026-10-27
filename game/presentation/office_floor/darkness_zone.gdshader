@@ -2,6 +2,10 @@ shader_type spatial;
 render_mode unshaded, cull_disabled, depth_draw_never, shadows_disabled;
 uniform sampler2D scene_depth : hint_depth_texture, repeat_disable, filter_nearest;
 uniform float darkness = 0.88;
+uniform bool lens_zone = false;
+uniform mat4 zone_inverse = mat4(1.0);
+uniform vec2 zone_half = vec2(0.0);
+uniform float wall_margin = 0.3;
 uniform vec2 hole_center = vec2(-10.0);
 uniform vec2 viewport_size = vec2(1280.0, 720.0);
 uniform float hole_radius = 0.0;
@@ -17,9 +21,9 @@ void vertex() {
 }
 void fragment() {
     float cover = darkness;
-    // Lens: a soft circle of floor around the hero. Anything nearer than the cover (ceiling fixtures,
-    // walls) stays covered, so the lens never shows what is behind a wall. The mask never writes depth
-    // except to be drawn over those nearer surfaces inside the lens.
+    // Lens: a soft circle that opens only in the room the hero stands in: what lies inside that room
+    // and below the cover plane shows, walls on its edge, ceiling fixtures and other rooms stay covered.
+    // The hero has its own reveal pass. The cover is drawn over everything inside the lens.
     DEPTH = FRAGCOORD.z;
     if (main_view > 0.5 && hole_radius > 0.0) {
         float distance_px = length((SCREEN_UV - hole_center) * viewport_size);
@@ -30,8 +34,10 @@ void fragment() {
             ndc.z = depth * 2.0 - 1.0;
 #endif
             vec4 view = INV_PROJECTION_MATRIX * vec4(ndc, 1.0);
+            vec3 local = (zone_inverse * INV_VIEW_MATRIX * vec4(view.xyz / view.w, 1.0)).xyz;
             DEPTH = 1.0;
-            if (-view.z / view.w >= -VERTEX.z - 0.05) cover *= smoothstep(hole_radius * 0.6, hole_radius, distance_px);
+            bool in_room = lens_zone && local.y < -0.1 && abs(local.x) < zone_half.x - wall_margin && abs(local.z) < zone_half.y - wall_margin;
+            if (in_room) cover *= smoothstep(hole_radius * 0.6, hole_radius, distance_px);
         }
     }
     // Fog rooms: a view ray that enters through an open door or glass pane sees the room, so the cover opens there.
