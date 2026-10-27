@@ -117,10 +117,13 @@ func _strike_shots(center: Vector3) -> void:
 	_camera.look_at_from_position(center + Vector3(4.5, 6.0, 3.5), center + Vector3(0, 0, -2.0), Vector3.UP)
 	_player.global_position = center
 	_vfx.call("power_strike", center, Vector3.FORWARD)
-	await _shot("power_strike_gather", 0.08)
-	await _shot("power_strike_lunge", 0.14)
-	await _shot("power_strike_burst", 0.1)
-	await _shot("power_strike_afterglow", 0.25)
+	await _shot("power_strike_1_gather", 0.1)
+	await _shot("power_strike_2_flight", 0.1)
+	await _shot("power_strike_3_cracking", 0.06)
+	await _shot("power_strike_4_shatter", 0.06)
+	await _shot("power_strike_5_falling", 0.1)
+	await _shot("power_strike_6_burst", 0.1)
+	await _shot("power_strike_7_afterglow", 0.25)
 
 
 func _build_stage() -> void:
