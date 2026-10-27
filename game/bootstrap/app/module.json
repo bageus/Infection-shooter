@@ -13,7 +13,8 @@
     "Versioned local keyboard/mouse bindings and read-only runtime diagnostics",
     "One-time shader warm-up quads at mission start",
     "Scene-local mission/menu music and explicitly transferred application-owned completion playback, crossfades and derived combat intensity",
-    "Persistent planner-only fog-of-war preview preference; gameplay rendering stays enabled and reveal state remains owned by office_floor zones"
+    "Persistent planner-only fog-of-war preview preference; gameplay rendering stays enabled and reveal state remains owned by office_floor zones",
+    "Per-platform campaign config: level list and mode for each export build"
   ],
   "public_api": [],
   "dependencies": [
@@ -29,7 +30,8 @@
     "features.infection",
     "core.world_badge",
     "core.localization",
-    "core.vfx"
+    "core.vfx",
+    "infrastructure.platform"
   ],
   "runtime_contracts": {
     "level_chain_v1": "user://level_chain.json {version:1, maps:[{name, entries:[{type none|ceiling|floor, x, z, placed} x2]}]}; map order is the chain, slot 0 leads to the previous map, slot 1 to the next. Map files and layout DTO unchanged.",
