@@ -1,5 +1,7 @@
 extends Node3D
 
+const CAMPAIGN := preload("res://game/bootstrap/app/campaign_config.gd")
+const PLATFORM := preload("res://game/infrastructure/platform/public/platform.gd")
 const BLOOD_PLACEMENT := preload("res://game/bootstrap/app/planning_blood_placement.gd")
 const EXPLOSION_TRACE := preload("res://game/features/combat/public/explosion_trace.gd")
 const AMBIENT_SOUNDS := preload("res://game/presentation/office_floor/public/ambient_prop_sounds.gd")
@@ -40,7 +42,10 @@ var impact_pool: Node3D
 
 var defer_layout_loading := false
 ## Name of the saved map being played; the level chain uses it to find its neighbours.
-var current_level := ""
+var current_level := "":
+	set(value):
+		current_level = value
+		_sync_endless()
 var _mission_loading := false
 var _ended := false
 var completion_music: Node
@@ -102,6 +107,7 @@ func _ready() -> void:
 	wave_director.name = "WaveDirector"
 	add_child(wave_director)
 	wave_director.call("configure", enemies, player)
+	_sync_endless()
 	planning_lighting = $PlanningLighting
 	planning_lighting.setup($WorldEnvironment, $PlanningUI/Panel/VBox/LightingPreview, $PlanningUI/Panel/VBox/LocalLights)
 	mission_layout = MISSION_LAYOUT.new()
@@ -137,6 +143,15 @@ func _ready() -> void:
 	for enemy in enemies.get_children():
 		if enemy.has_method("watch_target"):
 			enemy.call("watch_target", player)
+
+
+## The platform's endless level plays endless rounds instead of the authored triggers.
+func _sync_endless() -> void:
+	if not is_instance_valid(wave_director):
+		return
+	var campaign := CAMPAIGN.new()
+	campaign.load_file()
+	wave_director.set("endless", not current_level.is_empty() and current_level == campaign.endless_level(PLATFORM.detect_id()))
 
 
 func refresh_control_labels() -> void:
@@ -372,7 +387,7 @@ func travel_to_level(map_name: String, arrival: Dictionary) -> void:
 	_music_handed_off = is_instance_valid(completion_music)
 	loader.completed.connect(func(_success: bool) -> void: _mission_loading = false)
 	var carry := {"loadout": player.call("export_loadout"), "threshold": infection_runtime.call("get_critical_threshold"), "control": infection_runtime.call("export_control_progress")}
-	loader.start_map(planning_mode.storage._map_path(map_name), map_name, arrival, carry)
+	loader.start_map(planning_mode.storage.read_map_path(map_name), map_name, arrival, carry)
 
 
 func _setup_blood_effects() -> void:

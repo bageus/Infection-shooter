@@ -5,6 +5,8 @@ extends RefCounted
 
 const VERSION := 1
 const PATH := "user://level_chain.json"
+## A platform build ships its chain here; it is read when the player has none of their own.
+const SHIPPED_PATH := "res://content/levels/" + "level_chain.json"
 const TYPES: Array[String] = ["none", "ceiling", "floor"]
 const SLOT_COUNT := 2
 ## Player height beyond which the stairs count as climbed (ceiling) or descended (floor).
@@ -145,5 +147,7 @@ func save(path: String = PATH) -> Error:
 
 func load_file(path: String = PATH) -> void:
 	maps.clear()
+	if path == PATH and not FileAccess.file_exists(path):
+		path = SHIPPED_PATH
 	if FileAccess.file_exists(path):
 		load_dict(JSON.parse_string(FileAccess.get_file_as_string(path)))

@@ -35,6 +35,7 @@ updated: 2026-10-18
 
 ---
 
+27.10.2026 — прямой запрос владельца (вне T004): бесконечный уровень (раунды поверх очередей спавна, wave_director.endless), поставляемые карты платформы в content/levels, ADR0067. Монетизация/Steam/зелёная кровь — следующими PR.
 26.10.2026 (шаблоны групп в планировщике — прямой запрос владельца Vadim): новая вкладка «Шаблоны» в правом HUD (`planning_group_templates.gd`). «Create template» включает запись: объекты, размещённые в этом режиме, сохраняются под заданным именем в user://planner_templates через существующий DTO слоя карты. Клик по шаблону и наведение на поле показывают призрак группы, клик размещает все объекты через LAYOUT_LOADER.append и одним undo. Объекты рабочих мест в шаблон не входят. Новый suite run_group_templates_tests зарегистрирован в runtime_suites. Проверено: suite PASS, run_planning_mode_tests PASS без SCRIPT ERROR, validate_project PASS. Не проверено визуально в живой сессии редактора. Поле размеров локации ждёт решения владельца, потому что меняет формат карты.
 
 27.10.2026 — прямой запрос владельца (вне T004, без смены задачи/фазы): пресеты экспорта «Web itch»/«Web Yandex» с custom feature tags, модуль infrastructure.platform с Autoload Platform (show_ad, Yandex SDK через JavaScriptBridge, mock для тестов), campaign_config.json по площадкам, ADR0066. Бесконечный уровень, монетизация, призывы в Steam и зелёная кровь для yandex — следующими PR.
