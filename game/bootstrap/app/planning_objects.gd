@@ -1,6 +1,7 @@
 extends Node
 const BLOOD_PLACEMENT := preload("res://game/bootstrap/app/planning_blood_placement.gd")
 const TILT := preload("res://game/bootstrap/app/planning_tilt.gd")
+const GROUP_TEMPLATES := preload("res://game/bootstrap/app/planning_group_templates.gd")
 
 
 var player_spawn_defined = false
@@ -48,6 +49,9 @@ func _on_palette_selected(index: int) -> void:
 
 
 func _click_world(screen_pos: Vector2) -> void:
+	if selected_kind == GROUP_TEMPLATES.KIND and preview != null:
+		controls.group_templates.place(screen_pos)
+		return
 	# Ctrl+LMB picks an installed object even while a palette item is active.
 	if Input.is_key_pressed(KEY_CTRL) and (not selected_path.is_empty() or selected_kind == "player"):
 		var existing = geometry._planned_object_at(screen_pos)
@@ -234,6 +238,9 @@ func _clear_preview() -> void:
 func _update_preview(screen_pos: Vector2) -> void:
 	if preview == null:
 		return
+	if selected_kind == GROUP_TEMPLATES.KIND:
+		controls.group_templates.move_ghost(screen_pos)
+		return
 	var world = geometry._screen_to_surface(screen_pos, preview)
 	if not world.is_finite():
 		preview.hide()
@@ -303,6 +310,7 @@ func _place_selected(screen_pos: Vector2) -> void:
 		_ground_conference_chair(node)
 	node.set_meta("planning_scene_path", selected_path)
 	placed.append(node)
+	controls.group_templates.note_placed(node)
 	session.edit_history.call("record_added", node)
 	if not catalog.WORKSTATIONS.desk_name(selected_path).is_empty():
 		var desk_id = str(Time.get_ticks_usec())

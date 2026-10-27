@@ -18,13 +18,10 @@ var battle_stacks := 0
 var _alive_cache: Array = []
 var _alive_frame := -1
 var _alive_count := -1
-## Seconds between melee strikes; reach is measured to the enemy's surface.
-const MELEE_COOLDOWN := 0.5
-const MELEE_REACH := 1.1
 const WEAPON_BUFFS := ["overload", "combat_reflex", "battle_metabolism", "killer_instinct", "berserk", "reflex_arc"]
 var _weapons_dirty := false
 var _weapon_factors := Vector4.ZERO
-var melee_cooldown := 0.0
+var _melee := preload("res://game/features/player/player_melee.gd").new()
 var acid_pools: Array[Dictionary] = []
 ## Acid Spit pool radius: 3.4 m across.
 const ACID_POOL_RADIUS := 1.7
@@ -103,6 +100,7 @@ func configure_world(container: Node3D) -> void:
 
 func configure(host: CharacterBody3D, infection: Node, guns: Array[Node3D]) -> void:
 	player = host
+	_melee.configure(self)
 	runtime = infection
 	weapons = guns
 	vfx = SKILL_VFX.new()
@@ -165,7 +163,7 @@ func _process(delta: float) -> void:
 	retaliation_cooldown = maxf(0.0, retaliation_cooldown - delta)
 	hybrids.tick(delta)
 	heart_cooldown = maxf(0.0, heart_cooldown - delta)
-	melee_cooldown = maxf(0.0, melee_cooldown - delta)
+	_melee.tick(delta)
 	if active_buff("second_heart"):
 		player.call("heal", SECOND_HEART_HEAL * minf(delta, float(buffs["second_heart"])))
 	for key in buffs.keys():
@@ -306,19 +304,10 @@ func on_roll() -> void:
 		_passive_buff("reflex_arc", B.value("reflex_arc", "duration"))
 
 
-func melee() -> bool:
-	if melee_cooldown > 0.0:
-		return false
-	melee_cooldown = MELEE_COOLDOWN
-	var forward := -(player.get_node("AimPivot") as Node3D).global_basis.z
-	for enemy in _enemies_near(player.global_position, MELEE_REACH + 2.5, true):
-		var offset := enemy.global_position - player.global_position
-		offset.y = 0.0
-		if offset.length() - _body_radius(enemy) > MELEE_REACH or offset.normalized().dot(forward) <= 0.0:
-			continue
-		enemy.call("take_damage", _scented(enemy, 17.0))
-		return true
-	return false
+## The melee key: a kick, or a left-hand jab with an enemy close by (ADR-0066).
+## Returns the kind started, &"" while the hidden cooldown runs.
+func melee() -> StringName:
+	return _melee.start()
 
 
 static func _body_radius(body: Node) -> float:

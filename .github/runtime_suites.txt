@@ -19,6 +19,7 @@ game/bootstrap/app/tests/run_world_surface_tests.gd
 game/bootstrap/app/tests/run_smooth_planner_tests.gd
 game/bootstrap/app/tests/run_planner_persistence_tests.gd
 game/bootstrap/app/tests/run_planner_extension_tests.gd
+game/bootstrap/app/tests/run_group_templates_tests.gd
 game/bootstrap/app/tests/run_gameplay_planner_repairs_tests.gd
 game/bootstrap/app/tests/run_runtime_debug_tests.gd
 game/bootstrap/app/tests/run_world_bindings_tests.gd
@@ -232,6 +233,8 @@ game/bootstrap/app/tests/run_planner_hud_tests.gd
 game/presentation/office_floor/tests/run_ambient_prop_sounds_tests.gd
 game/presentation/office_floor/tests/run_destruction_budget_tests.gd
 game/bootstrap/app/tests/run_user_data_migration_tests.gd
+game/features/player/tests/run_melee_strike_tests.gd
+game/features/character_animation/tests/run_strike_pose_tests.gd
 game/features/player/tests/run_reload_pose_tests.gd
 game/features/infected/tests/run_death_cloud_tests.gd
 game/bootstrap/app/tests/run_campaign_config_tests.gd
