@@ -32,6 +32,7 @@ func _run() -> void:
 	_check(camera.global_position.y > before.y, "Planning camera responds to wheel command")
 	await _exercise_edits(planner)
 	_exercise_tilt(planner)
+	_exercise_spawn_placement(planner)
 	await _exercise_gore_palette(planner)
 	await _exercise_maps(planner)
 	planner.call("exit")
@@ -42,6 +43,29 @@ func _run() -> void:
 	if _failures == 0:
 		print("Planning mode tests passed")
 	quit(0 if _failures == 0 else 1)
+
+
+func _exercise_spawn_placement(planner: Node) -> void:
+	# Clicking the same spot twice must put the hero on the same tile; a view that moved with the hero would drift it away.
+	var objects: Node = planner.get("objects")
+	var camera := planner.get("camera") as Camera3D
+	var player := planner.get("main_player") as Node3D
+	var spot := Vector2(470, 230)
+	var view_before := camera.global_transform
+	objects._reset_selection()
+	objects.selected_kind = "player"
+	objects.selected_path = ""
+	objects.selected_entry = {}
+	objects._rebuild_preview()
+	objects._place_selected(spot)
+	var first := player.global_position
+	_check(camera.global_transform.is_equal_approx(view_before), "placing the hero spawn keeps the planner view")
+	objects._place_selected(spot)
+	_check(player.global_position.is_equal_approx(first), "a second click on the same spot keeps the spawn (%s vs %s)" % [player.global_position, first])
+	planner.get("edit_history").call("undo")
+	_check(camera.global_transform.is_equal_approx(view_before), "undo of the spawn keeps the planner view")
+	_check(player.global_position.is_equal_approx(first), "undo returns the spawn to the first click (%s vs %s)" % [player.global_position, first])
+	objects._reset_selection()
 
 
 func _exercise_edits(planner: Node) -> void:

@@ -7,6 +7,8 @@ active_task_id: T004
 last_completed_task_id: DISC-001
 build_status: T002_HEADLESS_VALIDATED_VISUAL_PENDING
 updated: 2026-10-18
+27.10.2026 (точка спавна героя в планировщике): установка спавна двигала героя вместе с камерой планировщика, потому что камера висит под героем (`Gameplay/Player/CameraRig`). Вид уезжал за героем, и каждый следующий клик на тот же экранный участок уводил спавн дальше. Исправлено в `planning_objects.gd`: при установке спавна камера сохраняет свою мировую позицию. Проверено: run_planning_mode_tests (новая проверка повторного клика, без фикса падает) и run_spawn_planner_tests PASS, validate_source_size, validate_architecture, validate_project PASS. Отмена (Undo) спавна тоже сохраняет вид: запись действия несёт камеру, и undo возвращает её вместе с героем (проверено в run_planning_mode_tests).
+
 27.10.2026 (скрыть отладку в релизе — решение владельца Vadim): режим планирования недоступен в релизных сборках. Кнопка «Планирование» в меню паузы создаётся только при `OS.is_debug_build()` (`menu/menu_screen.gd`), а `PlanningMode.enter()` защищён флагом `available = OS.is_debug_build()`, поэтому любой другой вход тоже закрыт. Проверено: run_planning_mode_tests (новая проверка отказа входа) и run_menu_tests PASS, validate_project PASS, редакторский импорт без ERROR. Не проверено: сборка релиза веб/Steam. Следующий шаг — предложение разделения настроек для web и Steam, без реализации до одобрения.
 
 
