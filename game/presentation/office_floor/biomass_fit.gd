@@ -33,7 +33,6 @@ var _queued: Dictionary = {}
 
 
 func _ready() -> void:
-	_ensure_reaper()
 	piece = get_parent() as Node3D
 	_last_transform = piece.global_transform
 	set_notify_transform(true)
@@ -48,6 +47,8 @@ func _notification(what: int) -> void:
 func _process(delta: float) -> void:
 	if piece == null or not piece.is_inside_tree():
 		return
+	if not is_instance_valid(_reaper) or _reaper.get_parent() == null:
+		_ensure_reaper()
 	var current := piece.global_transform
 	if not current.is_equal_approx(_last_transform):
 		_last_transform = current
@@ -84,14 +85,13 @@ func _ensure_reaper() -> void:
 	var scene: Node = self
 	while scene.get_parent() != null and not scene.get_parent() is Window:
 		scene = scene.get_parent()
-	if scene == self or (is_instance_valid(_reaper) and (_reaper.is_inside_tree() or _reaper.get_parent() != null or _reaper.has_meta(&"adding"))):
+	if scene == self:
 		return
 	if not is_instance_valid(_reaper):
 		_reaper = Reaper.new()
 		_reaper.name = "BiomassFitReaper"
 		_reaper.set_process(false)
-	_reaper.set_meta(&"adding", true)
-	scene.add_child.call_deferred(_reaper)
+	scene.add_child(_reaper)
 
 
 ## Collects the cancelled fusions of pieces that left the tree, one frame at a time, so freeing a
