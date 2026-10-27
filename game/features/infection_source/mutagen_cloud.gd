@@ -55,6 +55,11 @@ func activate() -> void:
 	_delay_remaining = 0.0 if permanent else absorb_delay
 	_floor_offset = _support_height() - global_position.y
 	($CollisionShape3D as CollisionShape3D).position.y = _floor_offset + 1.25
+	# The absorption column follows the puffs: the scene shape is 1.8 m at the default 1.35 m radius.
+	var column := CylinderShape3D.new()
+	column.radius = cloud_radius * 1.8 / 1.35
+	column.height = 1.5
+	($CollisionShape3D as CollisionShape3D).shape = column
 	var walls := WALL_FIELD.texture_for(self)
 	var phase := randf_range(0.0, 100.0)
 	# Every cloud is new: its own puffs, variants, layout, spin and shade.
