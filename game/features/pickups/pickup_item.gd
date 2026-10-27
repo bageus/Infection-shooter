@@ -24,6 +24,7 @@ var _consumed := false
 var _recheck := 0.0
 
 func _ready() -> void:
+	add_to_group("hidden_outline")
 	set_physics_process(false)
 	set_process(false)
 	var visual := get_node_or_null("Visual") as Node3D

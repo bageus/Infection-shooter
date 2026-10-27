@@ -41,6 +41,8 @@ func _process(delta: float) -> void:
 
 
 func travel(index: int, slot: int) -> void:
+	if slot != LEVEL_CHAIN.FORWARD_SLOT:
+		return
 	_main.call("travel_to_level", chain.neighbour(index, slot), chain.arrival(index, slot))
 
 

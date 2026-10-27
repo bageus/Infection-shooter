@@ -128,7 +128,7 @@ func _strike(collider: Node3D, shape_index: int, offset: Vector3) -> void:
 	direction = direction.normalized()
 	if collider.is_in_group("player"):
 		if player_damage > 0.0 and collider.has_method("take_damage"):
-			preload("res://game/features/infected/enemy_interaction_rules.gd").damage(collider, player_damage * falloff)
+			preload("res://game/features/infected/enemy_interaction_rules.gd").damage(collider, player_damage * falloff, true)
 		return
 	if object_damage > 0.0:
 		if collider.has_method("take_projectile_hit_at_shape"):

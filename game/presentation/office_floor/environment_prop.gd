@@ -166,6 +166,7 @@ func has_loot() -> bool:
 func configure_loot(config: Dictionary) -> void:
 	if has_loot():
 		set_meta(&"planning_loot", LOOT_CONFIG.sanitize(config, "empty"))
+		(add_to_group if get_loot_config().mode != "empty" else remove_from_group).call(&"hidden_outline")  # empty crates are not outlined
 
 
 ## A crate without authored loot stays empty, as before.
@@ -241,6 +242,7 @@ func _ready() -> void:
 			global_position.y += FLOOR_TOP - lowest
 	mass = clampf(volume * 18.0, 0.12, 55.0)
 	if "fire_extinguisher" in model_path.get_file():
+		add_to_group(&"hidden_outline")
 		mass = 1.8
 		linear_damp = 3.5
 		angular_damp = 2.5

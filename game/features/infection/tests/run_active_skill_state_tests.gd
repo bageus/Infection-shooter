@@ -35,6 +35,7 @@ func _test_running_effect_keeps_slot() -> void:
 	_expect(r.upgrade_skill("blood_burst") and r.upgrade_skill("discharge"), "Two skills are equipped for the slot test")
 	r.active_state.effects["discharge"] = 5.0
 	_expect(not r.assign_skill(1, ""), "A running effect keeps its slot from being cleared.")
+	_expect(r.equipped_skills()[1] == "discharge", "A refused clear leaves the running skill in its slot.")
 	r.active_state.effects.erase("discharge")
 	_expect(r.assign_skill(1, ""), "A finished effect frees its slot.")
 

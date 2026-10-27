@@ -7,9 +7,10 @@ static func ignores(target: Node) -> bool:
 	return _flag(target, "ignore_player")
 
 
-static func damage(target: Node, amount: float) -> void:
+## armor_capped: armor (if any) absorbs the whole hit instead of letting the excess through (Colossus).
+static func damage(target: Node, amount: float, armor_capped: bool = false) -> void:
 	if is_instance_valid(target) and target.has_method("take_damage") and not ignores(target) and not _flag(target, "no_damage"):
-		target.call("take_damage", amount)
+		target.call("take_armor_capped_damage" if armor_capped and target.has_method("take_armor_capped_damage") else "take_damage", amount)
 
 
 static func _flag(target: Node, key: String) -> bool:

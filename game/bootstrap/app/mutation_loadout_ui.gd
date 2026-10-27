@@ -3,6 +3,7 @@ extends HBoxContainer
 const TEXT := preload("res://game/bootstrap/app/mutation_text.gd")
 const ICONS := preload("res://game/bootstrap/app/mutation_skill_icons.gd")
 const INFO := preload("res://game/bootstrap/app/mutation_skill_info.gd")
+const SFX := preload("res://game/core/audio/public/sound_events.gd")
 const STYLE := preload("res://game/bootstrap/app/menu/menu_style.gd")
 # Same glyph size as the tree circles, so hotbar and tree read as one system.
 const ICON_SIZE := 42
@@ -53,7 +54,10 @@ func configure(infection: Node, bindings: Array[String], show_card: Callable, hi
 			choices.append(candidate)
 			popup.add_icon_item(ICONS.for_skill(candidate), TEXT.skill_name(candidate), choices.size() - 1)
 		var slot := index
-		popup.id_pressed.connect(func(item: int) -> void: runtime.call("assign_skill", slot, choices[item]))
+		popup.id_pressed.connect(func(item: int) -> void:
+			# Refused while the slot's effect runs (or the choice is invalid): audible denial.
+			if choices[item] != equipped[slot] and not bool(runtime.call("assign_skill", slot, choices[item])):
+				SFX.play_ui(self, &"access_denied"))
 		# Items are numbered in list order, so the item id doubles as its row.
 		popup.id_focused.connect(func(item: int) -> void:
 			if choices[item].is_empty():

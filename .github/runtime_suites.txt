@@ -3,6 +3,7 @@ game/bootstrap/app/tests/run_startup_resource_memory_tests.gd
 game/bootstrap/app/tests/run_menu_tests.gd
 game/bootstrap/app/tests/run_lighting_tests.gd
 game/bootstrap/app/tests/run_occlusion_tests.gd
+game/bootstrap/app/tests/run_hidden_outline_tests.gd
 game/bootstrap/app/tests/run_global_lighting_tests.gd
 game/bootstrap/app/tests/run_planner_loot_tests.gd
 game/bootstrap/app/tests/run_enemy_loot_tests.gd
@@ -67,6 +68,7 @@ game/presentation/office_floor/tests/run_glass_span_tests.gd
 game/features/combat/tests/run_grenade_vfx_tests.gd
 game/features/combat/tests/run_floor_danger_zone_tests.gd
 game/bootstrap/app/tests/run_blast_shelter_tests.gd
+game/bootstrap/app/tests/run_colossus_armor_tests.gd
 game/bootstrap/app/tests/run_colossus_shelter_tests.gd
 game/presentation/office_floor/tests/run_sound_hook_tests.gd
 game/presentation/office_floor/tests/run_impact_sound_sleep_tests.gd

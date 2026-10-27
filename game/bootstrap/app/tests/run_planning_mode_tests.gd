@@ -19,6 +19,10 @@ func _run() -> void:
 	await process_frame
 	await physics_frame
 	var planner: Node = stage.get("planning_mode")
+	planner.set("available", false)
+	stage.call("_on_planning_pressed")
+	_check(not planner.get("active") and not paused, "Release builds refuse the planner entry")
+	planner.set("available", true)
 	stage.call("_on_planning_pressed")
 	_check(planner.get("active") and paused, "Planning opens and pauses gameplay")
 	_check(not (stage.get_node("PrototypeHUD") as CanvasLayer).visible, "Planning hides HUD")
