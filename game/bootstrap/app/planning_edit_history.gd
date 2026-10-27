@@ -25,7 +25,7 @@ func record_transform(node: Node3D) -> void:
 
 func record_player_spawn() -> void:
 	_record({"kind": "player", "defined": planner.player_spawn_defined,
-		"transform": planner.player_spawn_transform, "position": planner.main_player.transform})
+		"transform": planner.player_spawn_transform, "position": planner.main_player.transform, "view": planner.camera.global_transform})
 
 
 func record_added(node: Node3D) -> void:
@@ -121,6 +121,8 @@ func undo() -> void:
 			planner.player_spawn_defined = bool(action["defined"])
 			planner.player_spawn_transform = action["transform"]
 			planner.main_player.transform = action["position"]
+			# The camera hangs under the hero; restore the view it had, as placing the spawn does.
+			planner.camera.global_transform = action["view"]
 	planner._update_history_buttons()
 	planner.controls._update_light_ui()
 	planner.status.text = "Last action undone"

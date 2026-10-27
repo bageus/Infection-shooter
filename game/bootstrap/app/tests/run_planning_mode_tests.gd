@@ -62,6 +62,9 @@ func _exercise_spawn_placement(planner: Node) -> void:
 	_check(camera.global_transform.is_equal_approx(view_before), "placing the hero spawn keeps the planner view")
 	objects._place_selected(spot)
 	_check(player.global_position.is_equal_approx(first), "a second click on the same spot keeps the spawn (%s vs %s)" % [player.global_position, first])
+	planner.get("edit_history").call("undo")
+	_check(camera.global_transform.is_equal_approx(view_before), "undo of the spawn keeps the planner view")
+	_check(player.global_position.is_equal_approx(first), "undo returns the spawn to the first click (%s vs %s)" % [player.global_position, first])
 	objects._reset_selection()
 
 
