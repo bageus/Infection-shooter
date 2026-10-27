@@ -25,11 +25,14 @@ func _run() -> void:
 	var runtime: Node = game.get("infection_runtime")
 	var slots: Array = player.call("export_loadout").slots
 	_check(slots.size() == 3, "three weapon slots")
-	var other := slots.duplicate()
-	other.reverse()
+	_check(slots == [0, -1, -1], "a new game starts with the pistol only")
+	_check(not bool(player.call("select_weapon_slot", 1)), "empty slot cannot be selected")
+	_check(bool(player.call("pickup_weapon", 3)) and player.call("export_loadout").slots == [0, 3, -1], "pickup fills the first empty slot")
+	var other := [0, 2, -1]
 	player.call("import_loadout", {"slots": other})
 	_check(player.call("export_loadout").slots == other, "loadout imported")
 	player.call("import_loadout", {"slots": [0, 0, 1]})
+	player.call("import_loadout", {"slots": [-1, 1, 2]})
 	player.call("import_loadout", {"slots": [99, 1, 2]})
 	_check(player.call("export_loadout").slots == other, "invalid loadouts ignored")
 	runtime.call("restore_critical_threshold", 45.0)

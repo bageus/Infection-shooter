@@ -54,7 +54,7 @@ func prepare_async(data: Dictionary, tree: SceneTree, progress: Callable, alive:
 	if not problem.is_empty():
 		return {"error": problem}
 	var paths := _resource_paths(data)
-	var resource_error := await _load_resources(paths, tree, progress)
+	var resource_error := await _load_resources(paths, tree, progress, alive)
 	if not resource_error.is_empty() or not _alive(alive):
 		_discard(_empty_plan())
 		return {"error": resource_error if not resource_error.is_empty() else "loading cancelled"}
@@ -83,8 +83,8 @@ func _resource_paths(data: Dictionary) -> Array[String]:
 	return paths
 
 
-func _load_resources(paths: Array[String], tree: SceneTree, progress: Callable) -> String:
-	var problem := await resource_queue.load_all(paths, tree, progress)
+func _load_resources(paths: Array[String], tree: SceneTree, progress: Callable, alive: Callable = Callable()) -> String:
+	var problem := await resource_queue.load_all(paths, tree, progress, alive)
 	_resources.assign(resource_queue.resources)
 	return problem
 
@@ -139,7 +139,7 @@ func clear_async(tree: SceneTree, progress: Callable, alive: Callable) -> bool:
 
 
 static func _alive(check: Callable) -> bool:
-	return not check.is_valid() or bool(check.call())
+	return check.is_null() or (check.is_valid() and bool(check.call()))
 
 
 func _empty_plan() -> Dictionary:

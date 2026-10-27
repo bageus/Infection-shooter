@@ -21,7 +21,7 @@ func _run() -> void:
 	var player := stage.get("player") as Node3D
 	player.set_physics_process(false)
 	_expect(is_equal_approx(float(player.get("armor")), 0.0), "Player starts without armor")
-	_expect(not bool(player.call("export_loadout").get("armor_found", true)), "No plate found at start")
+	_expect(is_equal_approx(float(player.call("export_loadout").get("armor", -1.0)), 0.0), "Carried armor is empty at start")
 
 	var catalog: RefCounted = stage.get("planning_mode").get("catalog")
 	var entry := {}
@@ -45,14 +45,13 @@ func _run() -> void:
 		await process_frame
 	_expect(float(player.get("armor")) >= float(player.get("max_armor")) - 0.01, "Walking through armor fills the bar")
 	_expect(not is_instance_valid(pickup), "Collected armor leaves the world")
-	_expect(bool(player.call("export_loadout").get("armor_found", false)), "Found plate is carried")
+	_expect(is_equal_approx(float(player.call("export_loadout").get("armor", -1.0)), float(player.get("max_armor"))), "Found plate is carried")
 
-	player.set("armor", 12.0)
-	player.call("import_loadout", {"slots": player.call("export_loadout").slots})
-	_expect(is_equal_approx(float(player.get("armor")), 12.0), "Carry without a found plate keeps armor empty")
+	player.set("armor", 40.0)
+	var carried: Dictionary = player.call("export_loadout")
 	player.set("armor", 0.0)
-	player.call("import_loadout", {"slots": player.call("export_loadout").slots, "armor_found": true})
-	_expect(is_equal_approx(float(player.get("armor")), float(player.get("max_armor"))), "New map refills armor after a plate was found")
+	player.call("import_loadout", carried)
+	_expect(is_equal_approx(float(player.get("armor")), 40.0), "Next map keeps the current armor value")
 
 	stage.queue_free()
 	await process_frame

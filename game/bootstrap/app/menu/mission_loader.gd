@@ -1,7 +1,7 @@
 extends CanvasLayer
 ## Keep the previous scene until a threaded, staged mission is ready.
 signal completed(success: bool)
-const RESOURCE_PREPARATION := preload("res://game/bootstrap/app/scene_resource_preparation.gd")
+const RESOURCE_QUEUE := preload("res://game/bootstrap/app/scene_resource_queue.gd")
 const LAYOUT := preload("res://game/bootstrap/app/planning_layout_loader.gd")
 const MATERIAL_WARMUP := preload("res://game/bootstrap/app/mission_material_warmup.gd")
 var warmed_materials := 0
@@ -18,6 +18,7 @@ var scene_path := MAIN_PATH
 var label: Label
 var progress: ProgressBar
 var back: Button
+var cancel: Button
 var pending: Node3D
 var _started := false
 var _logged_phase := ""
@@ -36,6 +37,10 @@ var _carry := {}
 var _recovery_requested := false
 var _choices: VBoxContainer
 var _column: VBoxContainer
+var resource_timeout_msec := 120000
+var _waiting_resources := false
+var _cancel_requested := false
+var _closed := false
 
 
 func _ready() -> void:
@@ -64,6 +69,11 @@ func _ready() -> void:
 	progress = ProgressBar.new()
 	progress.show_percentage = false
 	column.add_child(progress)
+	cancel = Button.new()
+	cancel.text = "Отменить загрузку" if _ru else "Cancel loading"
+	cancel.hide()
+	cancel.pressed.connect(_cancel_loading)
+	column.add_child(cancel)
 	back = Button.new()
 	back.text = "Назад" if _ru else "Back"
 	back.hide()
@@ -81,9 +91,11 @@ func start_map(path: String, level_name: String, arrival: Dictionary, carry: Dic
 
 
 func start() -> void:
-	if _started:
+	if _started or _closed:
 		return
 	_started = true
+	_cancel_requested = false
+	_waiting(true)
 	if is_instance_valid(completion_music):
 		completion_music.call("to_loading")
 	_log_begin()
@@ -118,15 +130,14 @@ func start() -> void:
 	# Render the overlay before any foreground instantiation.
 	await tree.process_frame
 	await tree.process_frame
-	var scripts := RESOURCE_PREPARATION.new()
-	if not await scripts.prepare(scene_path, tree):
-		_fail("Cannot prepare mission scripts")
-		return
 	var packed := await _request_scene(tree)
 	if packed == null:
 		return
 	_set_progress(0.15, "prepare")
 	await tree.process_frame
+	if not _loading_alive():
+		_fail("loading cancelled")
+		return
 	var instance := packed.instantiate()
 	if not instance is Node3D:
 		instance.free()
@@ -138,6 +149,9 @@ func start() -> void:
 	tree.root.add_child(pending)
 	Input.mouse_mode = Input.MOUSE_MODE_VISIBLE
 	await tree.process_frame
+	if not _loading_alive():
+		_fail("loading cancelled")
+		return
 	var planner: Node = pending.get("planning_mode")
 	var storage: Variant = planner.get("storage")
 	var read: Dictionary = storage.read_startup_layout(_recovery_path)
@@ -146,10 +160,12 @@ func start() -> void:
 		_offer_recovery(read.get("recovery", []))
 		return
 	var layout := LAYOUT.new(planner.get("objects"))
-	var prepared := await layout.prepare_async(read.data, tree, _set_progress)
+	layout.resource_queue.timeout_msec = resource_timeout_msec
+	var prepared := await layout.prepare_async(read.data, tree, _set_progress, _loading_alive)
 	if prepared.has("error"):
 		_fail(str(prepared.error))
 		return
+	_waiting(false)
 	var report := await layout.commit_async(prepared, tree, _set_progress)
 	if int(report.skipped) > 0:
 		push_warning("Planned layout: %d missing object(s) skipped: %s" % [report.skipped, ", ".join(report.missing)])
@@ -205,22 +221,40 @@ func _enter_level(planner: Node) -> void:
 
 
 func _request_scene(tree: SceneTree) -> PackedScene:
-	if ResourceLoader.load_threaded_request(scene_path, "PackedScene", false) != OK:
-		_fail("Не удалось открыть миссию." if _ru else "Cannot open mission.")
+	var queue := _new_resource_queue()
+	queue.timeout_msec = resource_timeout_msec
+	var paths: Array[String] = [scene_path]
+	var problem := await queue.load_all(paths, tree, _scene_progress, _loading_alive)
+	if not problem.is_empty():
+		_fail(problem)
 		return null
-	var status := ResourceLoader.load_threaded_get_status(scene_path)
-	while status == ResourceLoader.THREAD_LOAD_IN_PROGRESS:
-		var fraction: Array = []
-		status = ResourceLoader.load_threaded_get_status(scene_path, fraction)
-		_set_progress(0.15 * float(fraction[0]) if not fraction.is_empty() else 0.0, "resources")
-		await tree.process_frame
-	if status != ResourceLoader.THREAD_LOAD_LOADED:
-		_fail("Не удалось загрузить миссию." if _ru else "Cannot load mission.")
-		return null
-	var packed := ResourceLoader.load_threaded_get(scene_path) as PackedScene
-	if packed == null:
+	if queue.resources.is_empty():
 		_fail("Invalid mission scene")
-	return packed
+		return null
+	return queue.resources[0] as PackedScene
+
+
+func _new_resource_queue() -> RESOURCE_QUEUE: return RESOURCE_QUEUE.new()
+
+
+func _scene_progress(value: float, phase: String) -> void:
+	_set_progress(clampf((value - 0.15) / 0.35, 0.0, 1.0) * 0.15, phase)
+
+
+func _loading_alive() -> bool: return is_inside_tree() and not _cancel_requested
+
+
+func _waiting(enabled: bool) -> void:
+	_waiting_resources = enabled
+	cancel.visible = enabled
+	cancel.disabled = false
+	back.hide()
+
+
+func _cancel_loading() -> void:
+	if _waiting_resources:
+		_cancel_requested = true
+		cancel.disabled = true
 
 
 func _set_progress(value: float, phase: String) -> void:
@@ -236,6 +270,7 @@ func _set_progress(value: float, phase: String) -> void:
 
 
 func _fail(reason: String) -> void:
+	_waiting(false)
 	_recovery_requested = false
 	_restore_previous_visual()
 	if pending != null:
@@ -251,9 +286,15 @@ func _fail(reason: String) -> void:
 	progress.hide()
 	back.show()
 	back.grab_focus()
+	if _cancel_requested: _close_error()
 
 
 func _close_error() -> void:
+	if _closed: return
+	if _waiting_resources:
+		_cancel_loading()
+		return
+	_closed = true
 	Input.mouse_mode = _previous_mouse
 	completed.emit(false)
 	if _released_previous or is_instance_valid(completion_music):
@@ -306,7 +347,7 @@ func _offer_recovery(choices: Array) -> void:
 
 
 func _retry_recovery(path: String) -> void:
-	if _recovery_requested:
+	if _recovery_requested or _closed:
 		return
 	_recovery_requested = true
 	_recovery_path = path
