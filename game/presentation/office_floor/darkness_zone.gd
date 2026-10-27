@@ -172,6 +172,8 @@ func set_view_hole(center: Vector2, viewport: Vector2, radius: float, depth: flo
 	material.set_shader_parameter("lens_zone", _hero_in_room())
 	material.set_shader_parameter("zone_inverse", global_transform.affine_inverse())
 	material.set_shader_parameter("zone_half", size * 0.5)
+	if _player != null:
+		material.set_shader_parameter("hero_pos", _player.global_position)
 
 
 ## The lens opens this cover only when the hero stands in this zone, or in another part of its room.
