@@ -6,6 +6,8 @@ const PHYSICS := preload("res://game/bootstrap/app/planning_physics.gd")
 const SETTLE := preload("res://game/bootstrap/app/planning_settle.gd")
 const CAPTURE := preload("res://game/bootstrap/app/planning_layout_capture.gd")
 const MAP_LOAD := preload("res://game/bootstrap/app/planning_map_load.gd")
+const CAMPAIGN := preload("res://game/bootstrap/app/campaign_config.gd")
+const PLATFORM := preload("res://game/infrastructure/platform/public/platform.gd")
 const MAP_FILE := preload("res://game/bootstrap/app/planning_map_file.gd")
 const WALL_FIXTURES := preload("res://game/bootstrap/app/planning_wall_fixtures.gd")
 const LAYOUT_LOADER := preload("res://game/bootstrap/app/planning_layout_loader.gd")
@@ -75,6 +77,12 @@ static func _safe_map_name(raw_name: String) -> String:
 
 func _map_path(map_name: String) -> String:
 	return MAPS_DIR + "/" + _safe_map_name(map_name) + ".json"
+
+
+## Map to read for a level: the one shipped with the build, else the player's saved map.
+func read_map_path(map_name: String) -> String:
+	var shipped := CAMPAIGN.MAPS_DIR + _safe_map_name(map_name) + ".json"
+	return shipped if FileAccess.file_exists(shipped) else _map_path(map_name)
 
 
 func _collect_layout_data() -> Dictionary:
@@ -374,6 +382,12 @@ func _load_layout_from_path(path: String) -> Dictionary:
 
 
 func read_startup_layout(recovery_path: String = "") -> Dictionary:
+	var campaign := CAMPAIGN.new()
+	campaign.load_file()
+	var first := campaign.first_shipped_map(PLATFORM.detect_id()) if recovery_path.is_empty() else ""
+	if not first.is_empty():
+		_remember_level(campaign.levels(PLATFORM.detect_id())[0])
+		return MAP_FILE.read(first)
 	return MAP_FILE.startup(SAVE_PATH, DEFAULT_MAP_PATH) if recovery_path.is_empty() else MAP_FILE.read(recovery_path)
 
 

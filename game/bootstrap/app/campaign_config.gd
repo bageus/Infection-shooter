@@ -5,6 +5,8 @@ const VERSION := 1
 const PATH := "res://game/bootstrap/app/campaign_config.json"
 const MODES: Array[String] = ["campaign", "endless"]
 const FALLBACK := "desktop"
+## Shipped maps (and an optional level_chain.json) of a platform build live here, one <level>.json per level.
+const MAPS_DIR := "res://content/levels/"
 
 var platforms: Dictionary = {}
 
@@ -37,3 +39,23 @@ func levels(platform_id: String) -> Array[String]:
 	var result: Array[String] = []
 	result.assign(_entry(platform_id).levels)
 	return result
+
+
+## Where the shipped map of every level of the platform lives (the file may not exist yet).
+func map_paths(platform_id: String) -> Array[String]:
+	var result: Array[String] = []
+	for level in levels(platform_id):
+		result.append(MAPS_DIR + level + ".json")
+	return result
+
+
+## The level whose waves never end (the last one of an endless platform), else "".
+func endless_level(platform_id: String) -> String:
+	var names := levels(platform_id)
+	return names[-1] if mode(platform_id) == "endless" and not names.is_empty() else ""
+
+
+## Map of the first level when the platform ships one, else "" (the default map plays).
+func first_shipped_map(platform_id: String) -> String:
+	var paths := map_paths(platform_id)
+	return paths[0] if not paths.is_empty() and FileAccess.file_exists(paths[0]) else ""

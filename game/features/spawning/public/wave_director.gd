@@ -6,6 +6,7 @@ extends Node
 
 const SPAWN_CONFIG := preload("res://game/features/spawning/public/spawn_config.gd")
 const WAVE_QUEUE := preload("res://game/features/spawning/domain/wave_queue.gd")
+const ENDLESS := preload("res://game/features/spawning/domain/endless_waves.gd")
 ## Meta on a placed infected: Array of link keys (spawn_config.link_key) whose queue its death can start.
 const TRIGGER_META := &"spawn_triggers"
 const POINT_GROUP := &"enemy_spawn_points"
@@ -16,7 +17,12 @@ const TRIGGER_POLL := 0.25
 ## Infected instantiated per physics frame; a big batch is spread over several frames.
 const SPAWNS_PER_FRAME := 3
 
+signal round_started(round_number: int)
+
 var max_alive := WAVE_QUEUE.MAX_ALIVE
+## Endless mode: authored triggers are ignored and all queues replay, harder each round.
+var endless := false
+var round_number := 0
 
 var _enemies_root: Node3D
 var _player: Node3D
@@ -82,6 +88,7 @@ func disarm() -> void:
 	_queue.clear()
 	_backlog.clear()
 	_armed = false
+	round_number = 0
 	_wave_clock = 0.0
 	_poll_clock = 0.0
 	_elapsed = 0.0
@@ -106,6 +113,8 @@ func alive_count() -> int:
 func _physics_process(delta: float) -> void:
 	if not _armed:
 		arm()
+	if endless:
+		_advance_rounds()
 	_poll_clock += delta
 	if _poll_clock >= TRIGGER_POLL:
 		_poll_clock = 0.0
@@ -119,6 +128,8 @@ func _physics_process(delta: float) -> void:
 
 ## Starts every queue whose linked infected have died.
 func check_triggers() -> void:
+	if endless:
+		return
 	for key: String in _queues:
 		var queue: Dictionary = _queues[key]
 		var config: Dictionary = queue["config"]
@@ -135,6 +146,8 @@ func check_triggers() -> void:
 
 ## Starts every timed queue whose predecessor started long enough ago.
 func _check_delays() -> void:
+	if endless:
+		return
 	for key: String in _queues:
 		var queue: Dictionary = _queues[key]
 		var config: Dictionary = queue["config"]
@@ -144,6 +157,25 @@ func _check_delays() -> void:
 		var previous := SPAWN_CONFIG.link_key(str(queue["point"]), index - 1)
 		if _fired_at.has(previous) and _elapsed >= float(_fired_at[previous]) + float(config["delay"]):
 			_fire(key)
+
+
+## Endless: once the last round is spawned and dead, every queue starts again one step harder.
+func _advance_rounds() -> void:
+	if _queues.is_empty() or pending_total() > 0:
+		return
+	for key: String in _spawned:
+		for enemy in _spawned[key]:
+			if is_instance_valid(enemy) and not bool(enemy.call("is_dead")):
+				return
+	_queue.clear()
+	round_number += 1
+	for key: String in _queues:
+		var queue: Dictionary = _queues[key]
+		var config: Dictionary = queue["config"]
+		var scaled: Dictionary = ENDLESS.first_queue_for_round(config, round_number) if int(queue["index"]) == 0 else ENDLESS.queue_for_round(config, round_number)
+		_queue.activate(key, scaled)
+		_fired_at[key] = _elapsed
+	round_started.emit(round_number)
 
 
 func _fire(key: String) -> void:

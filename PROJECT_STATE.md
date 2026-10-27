@@ -35,6 +35,8 @@ updated: 2026-10-18
 
 ---
 
+27.10.2026 — прямой запрос владельца (вне T004): бесконечный уровень (раунды поверх очередей спавна, wave_director.endless), поставляемые карты платформы в content/levels, ADR0067. Монетизация/Steam/зелёная кровь — следующими PR.
+
 27.10.2026 — прямой запрос владельца (вне T004, без смены задачи/фазы): пресеты экспорта «Web itch»/«Web Yandex» с custom feature tags, модуль infrastructure.platform с Autoload Platform (show_ad, Yandex SDK через JavaScriptBridge, mock для тестов), campaign_config.json по площадкам, ADR0066. Бесконечный уровень, монетизация, призывы в Steam и зелёная кровь для yandex — следующими PR.
 
 25.10.2026 — исправление CI PR464: Architecture validation и runtime Project gates падали на merge с main fb6c79a: authored base_office_layout из commit94a20af содержит публичную spawn_point.tscn, а presentation.office_floor не декларировал features.spawning. Добавлена декларация существующей композиционной зависимости; направление presentation→features разрешено policy, цикла/нового владельца/API/DTO нет. Карта и точка спавна сохранены, валидатор не ослаблен. T004/Phase1 прежние.
