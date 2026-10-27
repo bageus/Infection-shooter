@@ -1,0 +1,22 @@
+{
+  "id": "infrastructure.platform",
+  "layer": "infrastructure",
+  "purpose": "Adapt the publishing platform (itch, Yandex Games, plain desktop) behind one Autoload so the rest of the game never touches a platform SDK.",
+  "state_owner": [
+    "Detected platform id and the active platform adapter",
+    "State of the pending advertisement request"
+  ],
+  "public_api": [
+    "public/platform.gd",
+    "public/platform_adapter.gd",
+    "public/mock_platform_adapter.gd"
+  ],
+  "dependencies": [],
+  "runtime_contracts": {
+    "platform_v1": {
+      "id": "Platform.id is \"yandex\", \"itch\" or \"desktop\", taken from the export preset custom feature tag.",
+      "show_ad": "Platform.show_ad() -> void asks for a fullscreen advertisement; ad_finished(shown: bool) fires once, immediately with false when the platform has no ads.",
+      "adapter": "platform_adapter.gd is the base class; yandex_adapter.gd calls the Yandex Games SDK through JavaScriptBridge, mock_platform_adapter.gd drives tests without an SDK."
+    }
+  }
+}
