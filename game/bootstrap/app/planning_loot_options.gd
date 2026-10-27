@@ -31,6 +31,7 @@ var cloud_seconds_row: Control
 var cloud_absorb: CheckBox
 var cloud_units: SpinBox
 var cloud_units_row: Control
+var cloud_radius: SpinBox
 var _updating := false
 # What the next placed crate / infected starts with (kept between placements).
 var loot_defaults: Dictionary = {}
@@ -134,6 +135,8 @@ func _cloud_rows() -> void:
 	stats_box.add_child(cloud_absorb)
 	cloud_units = _spin(DEATH_CLOUD.UNITS_MIN, DEATH_CLOUD.UNITS_MAX, 1, 10, "")
 	cloud_units_row = _row("Мутаген, ед.", cloud_units)
+	cloud_radius = _spin(DEATH_CLOUD.RADIUS_MIN, DEATH_CLOUD.RADIUS_MAX, 0.05, DEATH_CLOUD.RADIUS_DEFAULT, " м")
+	_row("Радиус облака", cloud_radius)
 
 
 func _target() -> Node3D:
@@ -181,6 +184,7 @@ func update() -> void:
 		cloud_seconds.set_value_no_signal(float(death["seconds"]))
 		cloud_absorb.set_pressed_no_signal(bool(death["absorb"]))
 		cloud_units.set_value_no_signal(float(death["units"]))
+		cloud_radius.set_value_no_signal(float(death["radius"]))
 		cloud_seconds_row.visible = str(death["time"]) == "manual"
 		cloud_units_row.visible = bool(death["absorb"])
 	_updating = false
@@ -220,7 +224,7 @@ func _read_config() -> Dictionary:
 
 func _read_cloud() -> Dictionary:
 	return {"enabled": cloud_on.button_pressed, "time": DEATH_CLOUD.TIME_MODES[cloud_time.selected], "seconds": cloud_seconds.value,
-		"absorb": cloud_absorb.button_pressed, "units": cloud_units.value}
+		"absorb": cloud_absorb.button_pressed, "units": cloud_units.value, "radius": cloud_radius.value}
 
 
 func _changed(_value: Variant = null) -> void:

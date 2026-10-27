@@ -33,7 +33,7 @@ func _run() -> void:
 
 func _check_defaults() -> void:
 	var config := SETTINGS.sanitize(null)
-	_expect(config == {"enabled": true, "time": "auto", "seconds": 14.0, "absorb": false, "units": 10.0}, "Default death cloud keeps today's behaviour.")
+	_expect(config == {"enabled": true, "time": "auto", "seconds": 14.0, "absorb": false, "units": 10.0, "radius": 1.35}, "Default death cloud keeps today's behaviour.")
 
 
 func _check_sanitize() -> void:
@@ -43,6 +43,8 @@ func _check_sanitize() -> void:
 	_expect(SETTINGS.sanitize({"seconds": 999.0})["seconds"] == SETTINGS.SECONDS_MAX, "Duration is clamped.")
 	_expect(SETTINGS.sanitize({"units": -4.0})["units"] == SETTINGS.UNITS_MIN, "Absorbed mutagen is clamped.")
 	_expect(SETTINGS.sanitize({"units": "many"})["units"] == 10.0, "A non-number absorbed mutagen falls back to the default.")
+	_expect(SETTINGS.sanitize({"radius": 99.0})["radius"] == SETTINGS.RADIUS_MAX, "Cloud radius is clamped.")
+	_expect(SETTINGS.sanitize({"radius": 0.1})["radius"] == SETTINGS.RADIUS_MIN, "A tiny cloud radius is clamped.")
 
 
 func _check_timed_cloud(stage: Node3D) -> void:
@@ -50,6 +52,8 @@ func _check_timed_cloud(stage: Node3D) -> void:
 	SETTINGS.apply(cloud, SETTINGS.sanitize({"time": "manual", "seconds": 5.0}))
 	cloud.call("activate")
 	_expect(float(cloud.get("_lifetime_remaining")) == 5.0, "A manual duration sets the cloud's lifetime.")
+	var column := (cloud.get_node("CollisionShape3D") as CollisionShape3D).shape as CylinderShape3D
+	_expect(is_equal_approx(column.radius, 1.8), "The default radius keeps the absorption column size.")
 	var depleted := [false]
 	cloud.connect("depleted", func() -> void: depleted[0] = true)
 	cloud.call("_physics_process", 5.5)
