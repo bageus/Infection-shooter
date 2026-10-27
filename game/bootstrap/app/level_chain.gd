@@ -9,6 +9,8 @@ const PATH := "user://level_chain.json"
 const SHIPPED_PATH := "res://content/levels/" + "level_chain.json"
 const TYPES: Array[String] = ["none", "ceiling", "floor"]
 const SLOT_COUNT := 2
+## One-way chain: only the slot to the next map is ever triggered; slot 0 stays a pure arrival point.
+const FORWARD_SLOT := 1
 ## Player height beyond which the stairs count as climbed (ceiling) or descended (floor).
 const CLIMB_HEIGHT := 2.4
 ## Horizontal reach of an entry point around its x/z.
@@ -100,7 +102,7 @@ func is_active(index: int, slot: int) -> bool:
 func triggered_slot(index: int, x: float, z: float, height: float) -> int:
 	if index < 0 or index >= maps.size():
 		return -1
-	for slot in SLOT_COUNT:
+	for slot in [FORWARD_SLOT]:
 		if not is_active(index, slot):
 			continue
 		var item := entry(index, slot)
