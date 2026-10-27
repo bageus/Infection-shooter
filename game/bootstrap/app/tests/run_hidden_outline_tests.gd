@@ -6,6 +6,9 @@ extends Node3D
 var room_id := 0
 var permanent := false
 var rect := Rect2()
+var fog := false
+func blocks_view(_from: Vector3, _to: Vector3) -> bool:
+	return fog
 func _edge_distance(point: Vector3) -> float:
 	return 0.0 if rect.has_point(Vector2(point.x, point.z)) else 5.0
 """
@@ -52,6 +55,18 @@ func _run() -> void:
 	room_b.room_id = 1
 	await _settle()
 	_check(_shown(), "same fog-of-war room outlines")
+	room_b.rect = Rect2(5, -2, 1, 4)
+	room_b.room_id = 0
+	await _settle()
+	_check(not _shown(), "hero in a room never outlines items outside it, even with a doorway between")
+	room_b.rect = Rect2(0.8, -2, 4, 4)
+	room_b.room_id = 1
+	room_b.fog = true
+	wall.position.x = 20.0
+	await _settle()
+	_check(_shown(), "an item under solid fog counts as hidden")
+	room_b.fog = false
+	wall.position.x = 0.0
 	room_a.free()
 	room_b.free()
 	wall.position.x = 20.0
@@ -63,8 +78,27 @@ func _run() -> void:
 	item.set("scene_file_path", "res://game/features/pickups/public/dna_pickup.tscn")
 	await _settle()
 	_check(not _shown(), "DNA is not on the outlined list")
+	wall.position.x = 0.0
+	await _door_check()
 	print("Hidden outline tests: %d failures" % failures)
 	quit(1 if failures > 0 else 0)
+
+
+func _door_check() -> void:
+	var door_root := Node3D.new()
+	scene.add_child(door_root)
+	door_root.position = Vector3(-1.5, 0, 0)
+	var visual := Node3D.new()
+	visual.name = "Visual"
+	door_root.add_child(visual)
+	_mesh(visual, Vector3(0, 1, 0), Vector3(1, 2, 0.1), Color(0.3, 0.3, 0.9))
+	var controller := Node3D.new()
+	controller.set_script(load("res://game/bootstrap/app/tests/fixtures/door_stub.gd"))
+	controller.add_to_group("interactive_doors")
+	door_root.add_child(controller)
+	await _settle()
+	var outline = effects.outlines.outlines.get(controller.get_instance_id())
+	_check(outline != null and outline.shown and not outline.copies.is_empty(), "a hidden door gets its leaf outlined")
 
 
 func _shown() -> bool:

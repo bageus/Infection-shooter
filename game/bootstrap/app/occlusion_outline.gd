@@ -27,7 +27,7 @@ func _build() -> void:
 	var node := target.get_ref() as Node3D
 	if node == null:
 		return
-	for source: MeshInstance3D in node.find_children("*", "MeshInstance3D", true, false):
+	for source: MeshInstance3D in _meshes(node):
 		# Beacons, glows and lock icons are decoration, not the item.
 		if source.mesh == null or source.has_meta("occlusion_copy") or source.has_meta("planning_bounds_excluded") or source.mesh is QuadMesh or not source.is_visible_in_tree():
 			continue
@@ -49,6 +49,20 @@ func _build() -> void:
 		copy.material_override = mask
 		source.add_child(copy)
 		copies.append(copy)
+
+
+## A door controller holds no meshes; outline its moving leaf (the sibling Visual for glass and elevator doors), not the wall around it.
+func _meshes(node: Node3D) -> Array[MeshInstance3D]:
+	var roots: Array = [node]
+	if node.is_in_group("interactive_doors"):
+		roots = node.get("_door_parts") if not node.get("_door_parts").is_empty() else [node.get_parent().get_node_or_null("Visual")]
+	var found: Array[MeshInstance3D] = []
+	for part in roots:
+		if part != null:
+			found.append_array(part.find_children("*", "MeshInstance3D", true, false))
+			if part is MeshInstance3D:
+				found.append(part)
+	return found
 
 
 func clear() -> void:
