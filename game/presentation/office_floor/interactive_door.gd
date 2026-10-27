@@ -112,6 +112,9 @@ func configure_lock_state(state: StringName) -> void:
 		_apply_lock_visuals()
 
 
+func configure_one_way(one_way: bool) -> void: mode = DoorMode.SWING_ONE_WAY if one_way else DoorMode.SWING_BIDIRECTIONAL
+
+
 # Elevator doors are not locked; the planner leaves them out of the setting.
 func is_lockable() -> bool:
 	return mode != DoorMode.SLIDING_ELEVATOR
