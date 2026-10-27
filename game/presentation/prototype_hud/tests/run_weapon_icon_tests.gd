@@ -62,6 +62,7 @@ func _run() -> void:
 	_test_cached_updates(hud, player)
 	_test_key_buttons(hud, player)
 	_test_key_cell(hud, player)
+	_test_empty_slots_are_blank(stage)
 	stage.queue_free()
 	await process_frame
 	print("Weapon icon tests: %d failures" % failures)
@@ -121,6 +122,26 @@ func _test_key_cell(hud: Node, player: Node) -> void:
 	_expect(objective.visible, "The mission goal appears once the key is held.")
 	_expect(_label_text(objective) == "Двигайся к пожарному выходу!", "The mission goal names the fire exit in Russian.")
 	_expect(objective.get_parent() == hud and objective.get_global_rect().get_center().x > hud.get_viewport().get_visible_rect().size.x * 0.4, "The mission goal sits at the top centre.")
+
+
+func _test_empty_slots_are_blank(stage: Node) -> void:
+	# A fresh HUD, so the first refresh is what decides empty slots.
+	var player := PLAYER.instantiate() as Node3D
+	player.name = "EmptyPlayer"
+	stage.add_child(player)
+	player.call("import_loadout", {"slots": [0, -1, -1]})
+	var hud := HUD.instantiate()
+	hud.set("player_path", NodePath("../EmptyPlayer"))
+	stage.add_child(hud)
+	hud.call("_update_weapon")
+	_expect((hud.get_node("WeaponPanel/Slot1/Icon") as TextureRect).texture != null, "Filled weapon slot keeps its artwork.")
+	for index in range(1, 3):
+		var icon := hud.get_node("WeaponPanel/Slot%d/Icon" % (index + 1)) as TextureRect
+		_expect(icon.texture == null, "Empty weapon slot %d shows no artwork." % (index + 1))
+		var key := hud.get_node("WeaponPanel/Slot%d/KeyHint" % (index + 1)) as Button
+		_expect(key.text == str(index + 1), "Empty weapon slot %d keeps its dimmed number." % (index + 1))
+	hud.queue_free()
+	player.queue_free()
 
 
 func _label_text(panel: Node) -> String:
