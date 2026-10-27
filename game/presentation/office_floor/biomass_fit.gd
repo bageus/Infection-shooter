@@ -27,12 +27,17 @@ var _last_transform := Transform3D()
 var _wait := 0.05
 var _members: Array[WeakRef] = []
 var _task := -1
-static var _orphans: Array[int] = []
+static var _reaper: Reaper
 var _job: Dictionary = {}
 var _queued: Dictionary = {}
 
 
 func _ready() -> void:
+	if not is_instance_valid(_reaper):
+		_reaper = Reaper.new()
+		_reaper.name = "BiomassFitReaper"
+		_reaper.set_process(false)
+		get_tree().root.add_child.call_deferred(_reaper)
 	piece = get_parent() as Node3D
 	_last_transform = piece.global_transform
 	set_notify_transform(true)
@@ -66,27 +71,35 @@ func _exit_tree() -> void:
 	if _task < 0:
 		return
 	# A large group can take tens of seconds to fuse, and waiting here would also make this thread run
-	# other pieces' queued fusions. The worker is told to stop and is collected on later frames.
+	# other pieces' queued fusions. The worker is told to stop and the reaper collects it later.
 	var cancel: Array = _job.get("cancel", [])
 	if not cancel.is_empty():
 		cancel[0] = true
-	_orphans.append(_task)
+	if is_instance_valid(_reaper):
+		_reaper.tasks.append(_task)
+		_reaper.set_process(true)
+	else:
+		WorkerThreadPool.wait_for_task_completion(_task)
 	_task = -1
-	var tree := get_tree()
-	if not tree.process_frame.is_connected(_reap_orphans):
-		tree.process_frame.connect(_reap_orphans)
 
 
-## Collects cancelled fusions of pieces that left the tree, without ever blocking a frame.
-static func _reap_orphans() -> void:
-	for task in _orphans.duplicate():
-		if WorkerThreadPool.is_task_completed(task):
-			WorkerThreadPool.wait_for_task_completion(task)
-			_orphans.erase(task)
-	if _orphans.is_empty():
-		var tree := Engine.get_main_loop() as SceneTree
-		if tree != null:
-			tree.process_frame.disconnect(_reap_orphans)
+## Collects the cancelled fusions of pieces that left the tree, one frame at a time, so freeing a
+## whole map never blocks. Every task must still be awaited, so the shutdown waits for the rest.
+class Reaper extends Node:
+	var tasks: Array[int] = []
+
+	func _process(_delta: float) -> void:
+		for task in tasks.duplicate():
+			if WorkerThreadPool.is_task_completed(task):
+				WorkerThreadPool.wait_for_task_completion(task)
+				tasks.erase(task)
+		set_process(not tasks.is_empty())
+
+	func _notification(what: int) -> void:
+		if what == NOTIFICATION_PREDELETE:
+			for task in tasks:
+				WorkerThreadPool.wait_for_task_completion(task)
+			tasks.clear()
 
 
 # Restores the piece's own cell and wakes anything it hid.
