@@ -1,5 +1,6 @@
 shader_type spatial;
 render_mode unshaded, cull_disabled, depth_draw_never, shadows_disabled;
+uniform sampler2D scene_depth : hint_depth_texture, repeat_disable, filter_nearest;
 uniform float darkness = 0.88;
 uniform vec2 hole_center = vec2(-10.0);
 uniform vec2 viewport_size = vec2(1280.0, 720.0);
@@ -16,13 +17,22 @@ void vertex() {
 }
 void fragment() {
     float cover = darkness;
-    // X-ray never opens the room cover; the hero has its own reveal pass.
-    // In the lens, keep ceiling fixtures above the cover from leaking through it.
-    // The mask never writes depth; normal views retain the authored depth test.
+    // Lens: a soft circle of floor around the hero. Anything nearer than the cover (ceiling fixtures,
+    // walls) stays covered, so the lens never shows what is behind a wall. The mask never writes depth
+    // except to be drawn over those nearer surfaces inside the lens.
     DEPTH = FRAGCOORD.z;
     if (main_view > 0.5 && hole_radius > 0.0) {
         float distance_px = length((SCREEN_UV - hole_center) * viewport_size);
-        if (distance_px < hole_radius) DEPTH = 1.0;
+        if (distance_px < hole_radius) {
+            float depth = textureLod(scene_depth, SCREEN_UV, 0.0).r;
+            vec3 ndc = vec3(SCREEN_UV * 2.0 - 1.0, depth);
+#if CURRENT_RENDERER == RENDERER_COMPATIBILITY
+            ndc.z = depth * 2.0 - 1.0;
+#endif
+            vec4 view = INV_PROJECTION_MATRIX * vec4(ndc, 1.0);
+            DEPTH = 1.0;
+            if (-view.z / view.w >= -VERTEX.z - 0.05) cover *= smoothstep(hole_radius * 0.6, hole_radius, distance_px);
+        }
     }
     // Fog rooms: a view ray that enters through an open door or glass pane sees the room, so the cover opens there.
     vec3 camera = INV_VIEW_MATRIX[3].xyz;

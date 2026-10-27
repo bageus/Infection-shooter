@@ -98,8 +98,8 @@ func _run() -> void:
 	await _settle()
 	_check(effects.get("_hero_fog_blocked"), "Room cover blocks the hero without a wall")
 	_check(effects.subjects[0].copies[0].get_active_material(0).get_shader_parameter("force_visible") == true, "Hero-only pass also works over depth-less fog")
-	# Both controls remain compatible, but lens parameters cannot reveal the room.
-	fog.call("set_view_hole", Vector2(0.5, 0.5), Vector2(640, 480), 250.0, 20.0)
+	# The lens opens a soft circle of floor around the hero but keeps ceiling fixtures covered.
+	fog.call("set_view_hole", Vector2(0.5, 0.5), Vector2(640, 480), 40.0, 20.0)
 	await _pixels("fog")
 	effects.set_runtime_enabled(false)
 	_check(effects.subjects.is_empty(), "Planner/teardown releases the hero pass")
@@ -151,6 +151,8 @@ func _pixels(stage: String) -> void:
 		var pixel := _pixel(image, mesh.global_position)
 		if stage == "clear":
 			_check(pixel.r > pixel.g + 0.15, "Clear view keeps normal props visible")
+		elif stage == "fog" and mesh == prop:
+			_check(pixel.r > pixel.g + 0.15, "fog: the lens opens the floor props around the hero")
 		else:
 			_check(pixel.r < pixel.g + 0.1, stage + ": occluded furniture/fixture stays hidden")
 	var directory := OS.get_environment("XRAY_CAPTURE_DIR")
