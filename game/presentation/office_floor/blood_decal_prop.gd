@@ -221,7 +221,15 @@ func _rebuild() -> void:
 	_footprint = quad.size
 	var material := StandardMaterial3D.new()
 	_surface_material = material
-	material.albedo_texture = entry.get("texture")
+	# 3D materials ignore an AtlasTexture's region and draw the whole atlas, so sample the cell through the UV transform.
+	var albedo := entry.get("texture") as Texture2D
+	if albedo is AtlasTexture:
+		var atlas := albedo as AtlasTexture
+		var atlas_size := atlas.atlas.get_size()
+		material.uv1_scale = Vector3(atlas.region.size.x / atlas_size.x, atlas.region.size.y / atlas_size.y, 1.0)
+		material.uv1_offset = Vector3(atlas.region.position.x / atlas_size.x, atlas.region.position.y / atlas_size.y, 0.0)
+		albedo = atlas.atlas
+	material.albedo_texture = albedo
 	material.normal_enabled = entry.get("normal") != null
 	material.normal_texture = entry.get("normal")
 	material.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA

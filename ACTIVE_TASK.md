@@ -7,6 +7,9 @@ owner: AI
 updated: 2026-10-18
 ---
 
+27.10.2026 — прямое поручение владельца: декали пола, ткани и бумаги в палитре планировщика ставятся одной декалью, а не целым атласом. Причина: AtlasTexture в 3D-материале рисует весь атлас; blood_decal_prop.gd теперь берёт UV-регион ячейки. Владелец: presentation.office_floor (blood_decal_prop.gd). Скриншоты: /mnt/project-files/decal_palette_review/. T004/Phase1 прежние.
+
+
 27.10.2026 — прямое поручение владельца: в режиме без теней вдоль стен (wall_straight) на полу запекается мягкая тень-полоса с обеих сторон, чтобы чётко читалась граница стены и пола. Владелец: presentation.office_floor (public/wall_base_shadow.gd, wall_base_shadow.gdshader), переключение из bootstrap.app (shadow_quality.gd), тест run_wall_base_shadow_tests. Две плоскости на стену с общим мешем и материалом, без света и теней; в режиме с тенями скрыты. Новых зависимостей/DTO нет. T004/Phase1 прежние.
 
 
