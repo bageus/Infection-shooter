@@ -26,7 +26,12 @@ func _run() -> void:
 	var generated: Dictionary = green.get("entries")
 	var pixel := _strongest_pixel((generated["splatter"][0] as Dictionary)["texture"] as Texture2D)
 	_expect(pixel.g > pixel.r, "Procedural decals take the green colour at the green level")
+	BLOOD_LEVEL.force_green()
+	BLOOD_LEVEL.set_level(3)
+	_expect(BLOOD_LEVEL.is_green() and BLOOD_LEVEL.color() == BLOOD_LEVEL.GREEN_COLOR, "A platform that forces green blood ignores any other level")
+	BLOOD_LEVEL.forced_green = false
 	BLOOD_LEVEL.set_level(2)
+	_expect(BLOOD_LEVEL.level == 2, "Blood level is free again once the force is lifted")
 	print("Blood level tests: %d failures" % failures)
 	quit(0 if failures == 0 else 1)
 

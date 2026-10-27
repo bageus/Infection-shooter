@@ -13,10 +13,17 @@ const RED_COLOR := Color(0.36, 0.01, 0.01)
 const GREEN_COLOR := Color(0.10, 0.42, 0.06)
 
 static var level := 2
+## A platform that must not show red blood (children may play) pins the level to green.
+static var forced_green := false
+
+
+static func force_green() -> void:
+	forced_green = true
+	level = GREEN
 
 
 static func set_level(value: int) -> void:
-	level = clampi(value, 0, COUNT - 1)
+	level = GREEN if forced_green else clampi(value, 0, COUNT - 1)
 
 
 static func is_green() -> bool:

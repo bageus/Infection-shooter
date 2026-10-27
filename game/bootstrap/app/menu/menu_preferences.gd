@@ -7,6 +7,7 @@ const UI_TRANSLATIONS := preload("res://game/core/localization/public/ui_transla
 const CORPSE_BUDGET := preload("res://game/features/infected/public/corpse_budget.gd")
 const ENEMY_DIFFICULTY := preload("res://game/features/infected/public/enemy_difficulty.gd")
 const ENEMY_TUNING := preload("res://game/features/infected/public/enemy_tuning.gd")
+const PLATFORM := preload("res://game/infrastructure/platform/public/platform.gd")
 const BLOOD_LEVEL := preload("res://game/core/vfx/public/blood_level.gd")
 const EFFECTS_QUALITY := preload("res://game/core/vfx/public/effects_quality.gd")
 const DESTRUCTION_QUALITY := preload("res://game/core/vfx/public/destruction_quality.gd")
@@ -40,6 +41,10 @@ func load_settings() -> void:
 	values.enemy_difficulty = clampi(values.enemy_difficulty, ENEMY_DIFFICULTY.LOW, ENEMY_DIFFICULTY.HIGH)
 	values.blood_style = clampi(values.blood_style, 0, 1)
 	values.blood_level = clampi(values.blood_level, 0, BLOOD_LEVEL.COUNT - 1)
+	if PLATFORM.detect_id() == "yandex":
+		BLOOD_LEVEL.force_green()
+	if BLOOD_LEVEL.forced_green:
+		values.blood_level = BLOOD_LEVEL.GREEN
 	values.effects_quality = clampi(values.effects_quality, 0, EFFECTS_QUALITY.COUNT - 1)
 	values.destruction_quality = clampi(values.destruction_quality, 0, DESTRUCTION_QUALITY.COUNT - 1)
 	values.dodge_animation = clampi(values.dodge_animation, 0, 1)
