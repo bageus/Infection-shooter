@@ -169,6 +169,21 @@ func set_view_hole(center: Vector2, viewport: Vector2, radius: float, depth: flo
 	material.set_shader_parameter("viewport_size", viewport)
 	material.set_shader_parameter("hole_radius", radius)
 	material.set_shader_parameter("player_depth", depth)
+	material.set_shader_parameter("lens_zone", _hero_in_room())
+	material.set_shader_parameter("zone_inverse", global_transform.affine_inverse())
+	material.set_shader_parameter("zone_half", size * 0.5)
+
+
+## The lens opens this cover only when the hero stands in this zone, or in another part of its room.
+func _hero_in_room() -> bool:
+	if _player == null:
+		return false
+	if room_id <= 0:
+		return _edge_distance(_player.global_position) <= 0.0
+	for zone in get_tree().get_nodes_in_group("darkness_zone"):
+		if zone.get("room_id") == room_id and zone.call("_edge_distance", _player.global_position) <= 0.0:
+			return true
+	return false
 
 
 func configure_zone(new_size: Vector2, new_darkness: float, is_permanent: bool) -> void:

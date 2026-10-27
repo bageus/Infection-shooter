@@ -49,6 +49,7 @@ func _make_fixture() -> void:
 	camera.far = 100.0
 	camera.current = true
 	hero = Node3D.new()
+	hero.add_to_group("player")
 	scene.add_child(hero)
 	var hero_mesh := _mesh(hero, Vector3(0, 0.8, 0), Vector3(0.7, 1.6, 0.5), Color(0.15, 0.9, 0.1))
 	(hero_mesh.material_override as BaseMaterial3D).cull_mode = BaseMaterial3D.CULL_DISABLED
@@ -98,7 +99,7 @@ func _run() -> void:
 	await _settle()
 	_check(effects.get("_hero_fog_blocked"), "Room cover blocks the hero without a wall")
 	_check(effects.subjects[0].copies[0].get_active_material(0).get_shader_parameter("force_visible") == true, "Hero-only pass also works over depth-less fog")
-	# The lens opens only floor-level surfaces around the hero; raised props and fixtures stay covered.
+	# The lens opens the hero's own room below the cover plane; ceiling fixtures stay covered.
 	fog.call("set_view_hole", Vector2(0.5, 0.5), Vector2(640, 480), 40.0, 20.0)
 	await _pixels("fog")
 	effects.set_runtime_enabled(false)
@@ -152,7 +153,7 @@ func _pixels(stage: String) -> void:
 		if stage == "clear":
 			_check(pixel.r > pixel.g + 0.15, "Clear view keeps normal props visible")
 		elif stage == "fog" and mesh == prop:
-			_check(pixel.r < pixel.g + 0.1, "fog: the lens keeps raised props covered")
+			_check(pixel.r > pixel.g + 0.15, "fog: the lens shows props in the hero's room")
 		else:
 			_check(pixel.r < pixel.g + 0.1, stage + ": occluded furniture/fixture stays hidden")
 	var directory := OS.get_environment("XRAY_CAPTURE_DIR")
