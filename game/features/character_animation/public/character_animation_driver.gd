@@ -14,6 +14,7 @@ const LEG_MOTION := preload("res://game/features/character_animation/leg_clip_mo
 const CLIP_LOOKUP := preload("res://game/features/character_animation/clip_lookup.gd")
 const OVERLAY := preload("res://game/features/character_animation/clip_overlay.gd")
 const LEG_OVERLAY := preload("res://game/features/character_animation/leg_overlay.gd")
+const STRIKE_POSE := preload("res://game/features/character_animation/strike_pose.gd")
 const DODGE_ROLL := 0
 const DODGE_STRAFE := 1
 const STATE_ATTACK := &"attack"
@@ -94,6 +95,7 @@ var legs: SkeletonModifier3D
 var dodge_style := DODGE_ROLL
 var hit_reaction: SkeletonModifier3D
 var overlay: SkeletonModifier3D
+var strike: SkeletonModifier3D
 var leg_overlay: SkeletonModifier3D
 var _current := ""
 var _animations: Dictionary = {}
@@ -194,6 +196,28 @@ func play_overlay(clip_name: StringName) -> bool:
 		(skeletons[0] as Node).add_child(overlay)
 	overlay.call("play", animation_player.get_animation(clip_name))
 	return true
+
+
+# Public animation_events_v1 addition (ADR-0066): a procedural melee strike,
+# &"kick" (right leg) or &"punch" (left arm), over the playing clips. Returns
+# its duration, 0.0 for an unknown kind, a dead body or a skeleton without the bones.
+func play_strike(kind: StringName) -> float:
+	prepare_visual()
+	if _dead or animation_player == null:
+		return 0.0
+	if strike == null:
+		var skeletons := animation_player.get_parent().find_children("*", "Skeleton3D", true, false)
+		if skeletons.is_empty():
+			return 0.0
+		strike = STRIKE_POSE.new()
+		strike.name = "StrikePose"
+		(skeletons[0] as Node).add_child(strike)
+	return float(strike.call("start", kind))
+
+
+# Public animation_events_v1 addition (ADR-0066): true while a strike pose plays.
+func is_striking() -> bool:
+	return strike != null and bool(strike.call("is_playing"))
 
 
 # Public animation_events_v1 addition (ADR-0045): length of a clip, 0.0 if unknown.

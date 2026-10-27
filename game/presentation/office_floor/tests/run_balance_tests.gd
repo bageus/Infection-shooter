@@ -59,12 +59,12 @@ func _test_melee_cooldown() -> void:
 	await physics_frame
 	var effects_node: Node = player.get("mutation_effects")
 	var health := float(enemy.get("health"))
-	_expect(bool(effects_node.call("melee")), "A melee strike lands on an enemy in reach.")
-	_expect(float(enemy.get("health")) < health, "The strike hurts.")
-	_expect(not bool(effects_node.call("melee")), "A second strike right away is on cooldown.")
-	await create_timer(0.55).timeout
-	var gap := (enemy.global_position - player.global_position); gap.y = 0.0
-	_expect(bool(effects_node.call("melee")), "After the cooldown the next strike lands (cd=%.2f, gap=%.2f, hp=%.0f)." % [float(effects_node.get("melee_cooldown")), gap.length(), float(enemy.get("health"))])
+	_expect(effects_node.call("melee") == &"punch", "With an enemy in reach the strike is a left-hand jab.")
+	_expect(effects_node.call("melee") == &"", "A second strike right away is on cooldown.")
+	await create_timer(0.4).timeout
+	_expect(float(enemy.get("health")) < health, "The jab hurts once the fist lands.")
+	await create_timer(1.8).timeout
+	_expect(effects_node.call("melee") == &"punch", "After the two-second cooldown the next strike starts.")
 	enemy.queue_free()
 	player.queue_free()
 	await process_frame
