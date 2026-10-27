@@ -135,6 +135,7 @@ game/bootstrap/app/tests/run_planner_contact_tests.gd
 game/bootstrap/app/tests/run_p2_optimization_tests.gd
 game/bootstrap/app/tests/run_group01_asset_tests.gd
 game/presentation/office_floor/tests/run_contact_shadow_tests.gd
+game/presentation/office_floor/tests/run_wall_base_shadow_tests.gd
 game/presentation/office_floor/tests/run_biomass_tests.gd
 game/presentation/office_floor/tests/run_decal_idle_tests.gd
 game/bootstrap/app/tests/run_biomass_catalog_tests.gd

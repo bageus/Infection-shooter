@@ -50,7 +50,8 @@
     "public/hit_effect_warmup.gd",
     "public/city_backdrop.tscn",
     "public/surface_decal_config.gd",
-    "public/baked_biomass_floor.gd"
+    "public/baked_biomass_floor.gd",
+    "public/wall_base_shadow.gd"
   ],
   "dependencies": [
     "features.player",
