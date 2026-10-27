@@ -142,3 +142,8 @@ IMPLEMENTED / CI_PENDING в T004: fixture_shape входит в canonical signat
 ## Q02 — независимые миры толпы (26.10.2026)
 
 IMPLEMENTED / CI_PENDING в T004: private snapshot по physics-space RID, complete positions/IDs/cells; раздельные миры не влияют, общий World3D через разные viewports сохраняет взаимодействие. Reparent/lifecycle/frame gap и baseline7→0,10800 same-world vectors совпали. [QA](docs/qa/crowd_world_isolation.md). После CI следующий R01 (loading deadline/cancel), G01 — отдельный дизайн static shadow layer.
+
+
+## R01 — ожидание ресурсов и отмена (26.10.2026)
+
+IMPLEMENTED / CI_PENDING в T004. Deadline120s на native IN_PROGRESS/path, script-prep checks, existing alive callback до queue, Cancel ранних стадий миссии, диагностика path/status/progress, nonblocking drain без native cancellation/IN_PROGRESS get.7 suites +editor/project241suites/20Python PASS; [QA](docs/qa/loading_deadline_cancel.md). Actual engine hang/target hardware не воспроизведены, синхронный load/compile нельзя прервать. После CI следующий G01 — дизайн общего static shadow layer; D02 docs cleanup остаётся отдельно.

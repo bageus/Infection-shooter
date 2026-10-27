@@ -125,6 +125,10 @@ func _resources() -> void:
 	var invalid: Array[String] = [paths[0], "res://game/bootstrap/app/tests/fixtures/queue_model.gd", paths[2]]
 	result = await queue.load_all(invalid, self, func(_value: float, _phase: String) -> void: pass)
 	_expect(not result.is_empty() and queue.resources.is_empty(), "A non-scene payload drains jobs and discards retained resources")
+	# The abandoned engine job for paths[0] drains on frames; a retry before then is refused as still loading.
+	for _frame in 600:
+		if ResourceLoader.load_threaded_get_status(paths[0]) == ResourceLoader.THREAD_LOAD_INVALID_RESOURCE: break
+		await process_frame
 	var duplicate: Array[String] = [paths[0], paths[0]]
 	result = await queue.load_all(duplicate, self, func(_value: float, _phase: String) -> void: pass)
 	_expect(result.is_empty() and queue.resources.size() == 1, "A queue can recover after failure and deduplicates paths")

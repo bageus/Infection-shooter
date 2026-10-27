@@ -1,0 +1,76 @@
+{
+  "records": [
+    {
+      "original": "assets/audio/sfx/break_electronics/break_electr_1.wav",
+      "archive": "source_audio/incoming_2026_10_26/assets/audio/sfx/break_electronics/break_electr_1.wav",
+      "sha256": "45ef189d8a7fb59d2a29a23fe41fee83c812143f85a096e6b2c18d65682e8af8",
+      "runtime": "not_connected"
+    },
+    {
+      "original": "assets/audio/sfx/break_electronics/break_electr_2.wav",
+      "archive": "source_audio/incoming_2026_10_26/assets/audio/sfx/break_electronics/break_electr_2.wav",
+      "sha256": "b6a6e45b486ad79a4b9103dcda47fdc77ba92d03e7ab486dc2a1f1752b9b4105",
+      "runtime": "not_connected"
+    },
+    {
+      "original": "assets/audio/sfx/break_lamp/break_lamp.wav",
+      "archive": "source_audio/incoming_2026_10_26/assets/audio/sfx/break_lamp/break_lamp.wav",
+      "sha256": "f3632e94c6f253423b60df2ee3e4b66bca640bd42de7d79985618e547c5dc45a",
+      "runtime": "not_connected"
+    },
+    {
+      "original": "assets/audio/sfx/break_metal/break_metal_3.wav",
+      "archive": "source_audio/incoming_2026_10_26/assets/audio/sfx/break_metal/break_metal_3.wav",
+      "sha256": "176090f1f630270c204bc103176b2966d4a65f9525be57a969d2f00d02097016",
+      "runtime": "assets/audio/sfx/break_metal/break_metal_3.ogg",
+      "output_sha256": "5127f7dd70aed7411a24f4de2646abe0724a1f749ad64e0dcf1ace944e9fbe05",
+      "processing": {
+        "source": "source_audio/incoming_2026_10_26/assets/audio/sfx/break_metal/break_metal_3.wav",
+        "output": "assets/audio/sfx/break_metal/break_metal_3.ogg",
+        "source_seconds": 0.6065,
+        "trim_end_seconds": 0.0,
+        "overlap_seconds": 0.0,
+        "output_seconds": 0.6065,
+        "channels": 1,
+        "loop": false,
+        "seam_step": null
+      }
+    },
+    {
+      "original": "assets/audio/sfx/elevator_close/elevator_close_ring.wav",
+      "archive": "source_audio/incoming_2026_10_26/assets/audio/sfx/elevator_close/elevator_close_ring.wav",
+      "sha256": "ba1ad41f7e0adf9b1b4c443d4efdfe1c5be1d6bcb9cefbd3e79761163ad70a37",
+      "runtime": "not_connected"
+    },
+    {
+      "original": "assets/audio/sfx/elevator_open/elevator_open_ring.wav",
+      "archive": "source_audio/incoming_2026_10_26/assets/audio/sfx/elevator_open/elevator_open_ring.wav",
+      "sha256": "4a37df02538608f6a3fa5f825dc5440f70a7dc15db59a0374dbf9ee9603a77c2",
+      "runtime": "not_connected"
+    },
+    {
+      "original": "assets/audio/sfx/extinguisher_spray/extinguisher_spray.wav",
+      "archive": "source_audio/incoming_2026_10_26/assets/audio/sfx/extinguisher_spray/extinguisher_spray.wav",
+      "sha256": "392f73262a6c95d2e8f829ad594b97475177042dc32354289090f64ee726923e",
+      "runtime": "not_connected"
+    },
+    {
+      "original": "assets/audio/sfx/grenade_explode/grenade_explode.wav",
+      "archive": "source_audio/incoming_2026_10_26/assets/audio/sfx/grenade_explode/grenade_explode.wav",
+      "sha256": "a9a3c3aac5f96d49fa1b13c4da08b929bb12975f9344412dfbe5aa2d6a992e42",
+      "runtime": "not_connected"
+    },
+    {
+      "original": "assets/audio/sfx/medkit_pickup/medkit_pickup.wav",
+      "archive": "source_audio/incoming_2026_10_26/assets/audio/sfx/medkit_pickup/medkit_pickup.wav",
+      "sha256": "eeb6b31a7bfca138429a2cf14cde50c2e80da0716b5179dbd387853f88521edf",
+      "runtime": "not_connected"
+    },
+    {
+      "original": "assets/audio/sfx/medkit_use/bandage_use.wav",
+      "archive": "source_audio/incoming_2026_10_26/assets/audio/sfx/medkit_use/bandage_use.wav",
+      "sha256": "65ec973aa24cf79a9c3a2defd72ae9540cb888aabcc769fddedc0f86f6ac64fb",
+      "runtime": "not_connected"
+    }
+  ]
+}

@@ -45,6 +45,7 @@ game/features/infected/tests/run_enemy_animation_tests.gd
 game/bootstrap/app/tests/run_shelf_glass_loading_tests.gd
 game/presentation/office_floor/tests/run_balance_tests.gd
 game/bootstrap/app/tests/run_mission_loading_tests.gd
+game/bootstrap/app/tests/run_loading_deadline_tests.gd
 game/features/character_animation/tests/run_gait_tests.gd
 game/features/character_animation/tests/run_leg_clips_tests.gd
 game/bootstrap/app/tests/run_mutation_feedback_tests.gd
@@ -233,4 +234,5 @@ game/presentation/office_floor/tests/run_destruction_budget_tests.gd
 game/bootstrap/app/tests/run_user_data_migration_tests.gd
 game/features/player/tests/run_melee_strike_tests.gd
 game/features/character_animation/tests/run_strike_pose_tests.gd
+game/features/player/tests/run_reload_pose_tests.gd
 game/features/infected/tests/run_death_cloud_tests.gd

@@ -3,17 +3,20 @@ extends RefCounted
 ## Godot 4.7 worker-side preload compilation can stall and leak temporary tokens.
 var _scripts: Array[Script] = []
 var _visited: Dictionary = {}
+const REQUEST := preload("res://game/bootstrap/app/scene_resource_request.gd")
 
 
-func prepare(path: String, tree: SceneTree) -> bool:
+func prepare(path: String, tree: SceneTree, check: Callable = Callable()) -> bool:
 	var pending: Array[String] = [path]
 	var started := Time.get_ticks_msec()
 	while not pending.is_empty():
+		if not REQUEST.allowed(check): return false
 		var current: String = pending.pop_back()
 		if _visited.has(current):
 			continue
 		_visited[current] = true
 		for dependency: String in ResourceLoader.get_dependencies(current):
+			if not REQUEST.allowed(check): return false
 			var target: String = dependency.split("::")[-1]
 			if target.ends_with(".gd"):
 				var script := load(target) as Script
@@ -25,4 +28,4 @@ func prepare(path: String, tree: SceneTree) -> bool:
 			if Time.get_ticks_msec() - started >= 4:
 				await tree.process_frame
 				started = Time.get_ticks_msec()
-	return true
+	return REQUEST.allowed(check)
