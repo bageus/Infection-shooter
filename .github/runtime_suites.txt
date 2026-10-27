@@ -132,6 +132,7 @@ game/presentation/office_floor/tests/run_fragile_prop_tests.gd
 game/presentation/office_floor/tests/run_prop_destruction_reaction_tests.gd
 game/presentation/office_floor/tests/run_office_breakage_tests.gd
 game/bootstrap/app/tests/run_planner_contact_tests.gd
+game/bootstrap/app/tests/run_pipe_snap_tests.gd
 game/bootstrap/app/tests/run_p2_optimization_tests.gd
 game/bootstrap/app/tests/run_group01_asset_tests.gd
 game/presentation/office_floor/tests/run_contact_shadow_tests.gd

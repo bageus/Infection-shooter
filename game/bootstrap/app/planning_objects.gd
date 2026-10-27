@@ -255,6 +255,7 @@ func _update_preview(screen_pos: Vector2) -> void:
 	controls._apply_special_default_height(preview, _selected_kind())
 	_orient(preview, world.y)
 	geometry._apply_wall_mount(preview)
+	geometry._apply_pipe_ceiling(preview)
 	controls.DECOR_POSES.place(preview)
 	BLOOD_PLACEMENT.preview_projection(preview)
 	controls._update_light_ui()
@@ -311,6 +312,7 @@ func _place_selected(screen_pos: Vector2) -> void:
 			node.call("watch_target", session.main_player)
 	_orient(node, world.y)
 	geometry._apply_wall_mount(node)
+	geometry._apply_pipe_ceiling(node)
 	controls.DECOR_POSES.place(node)
 	BLOOD_PLACEMENT.apply_probe(node, preview)
 	if selected_path.get_file() == "06_conference_chair.glb":
@@ -460,6 +462,7 @@ func _drag_selected(screen_pos: Vector2) -> void:
 	selected.global_position = geometry._snap_position_for(selected, world)
 	if geometry._is_ceiling_tool(selected):
 		selected.global_position.y = locked_y
+	geometry._apply_pipe_ceiling(selected)
 	_update_status()
 
 
@@ -467,6 +470,7 @@ func _move_selected_height(amount: float) -> void:
 	if selected != null:
 		session.edit_history.call("record_transform", selected)
 		selected.position.y += amount
+		geometry._apply_pipe_ceiling(selected)
 		_update_status()
 	elif preview != null:
 		preview.position.y += amount

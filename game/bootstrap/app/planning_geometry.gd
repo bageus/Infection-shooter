@@ -3,6 +3,7 @@ const BLOOD_PLACEMENT := preload("res://game/bootstrap/app/planning_blood_placem
 
 const SURFACE_PLACEMENT := preload("res://game/bootstrap/app/planning_surface_placement.gd")
 const EDGE_SNAP := preload("res://game/bootstrap/app/planning_edge_snap.gd")
+const PIPE_SNAP := preload("res://game/bootstrap/app/planning_pipe_snap.gd")
 const GRID_SIZE = 0.25
 const SNAP_DISTANCE = 0.8
 const FLOOR_WALL_SNAP = preload("res://game/bootstrap/app/floor_wall_snap.gd")
@@ -267,7 +268,17 @@ func _screen_to_floor(screen_pos: Vector2) -> Vector3:
 	return origin + direction * distance
 
 
+# Ducts and pipes raised near the ceiling hang from it and join the neighbours up there.
+func _apply_pipe_ceiling(node: Node3D) -> void:
+	if PIPE_SNAP.settle_ceiling(node, _combined_aabb(node)):
+		var joined: Variant = PIPE_SNAP.join(node, node.global_position, _snap_neighbors(node), false)
+		if joined != null:
+			node.global_position = joined
+
+
 func _is_ceiling_tool(node: Node3D) -> bool:
+	if PIPE_SNAP.on_ceiling(node):
+		return true
 	if node.is_in_group("planner_lights") or node.is_in_group("darkness_zone"):
 		return true
 	var kind = str(node.get_meta("planning_kind", ""))
@@ -283,6 +294,10 @@ func _apply_wall_mount(node: Node3D) -> void:
 		return
 	var normal: Vector3 = node.get_meta("planning_wall_normal")
 	SURFACE_PLACEMENT.mount(node, _combined_aabb(node), normal)
+	var joined: Variant = PIPE_SNAP.join(node, node.global_position, _snap_neighbors(node), true)
+	if joined != null:
+		node.global_position = joined
+		return
 	node.global_position = EDGE_SNAP.position_for(node, _combined_aabb(node), node.global_position, _snap_neighbors(node), true)
 	if node.has_method("snap_display_edges"):
 		var neighbors: Array[Dictionary] = []
@@ -310,6 +325,10 @@ func _snap_position_for(node: Node3D, value: Vector3) -> Vector3:
 		base.y = SURFACE_PLACEMENT.ground_height(node, source_aabb, support_y)
 	if source_aabb.size.length_squared() <= 0.0001:
 		return base
+	if not PIPE_SNAP.on_ceiling(node):
+		var joined: Variant = PIPE_SNAP.join(node, base, _snap_neighbors(node), false)
+		if joined != null:
+			return joined
 	var best := EDGE_SNAP.position_for(node, source_aabb, base, _snap_neighbors(node))
 	if node is RigidBody3D or bool(node.get_meta("planning_surface_placeable", false)):
 		return FLOOR_WALL_SNAP.position_for(node, source_aabb, best)
