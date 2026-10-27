@@ -19,6 +19,7 @@ game/bootstrap/app/tests/run_world_surface_tests.gd
 game/bootstrap/app/tests/run_smooth_planner_tests.gd
 game/bootstrap/app/tests/run_planner_persistence_tests.gd
 game/bootstrap/app/tests/run_planner_extension_tests.gd
+game/bootstrap/app/tests/run_group_templates_tests.gd
 game/bootstrap/app/tests/run_gameplay_planner_repairs_tests.gd
 game/bootstrap/app/tests/run_runtime_debug_tests.gd
 game/bootstrap/app/tests/run_world_bindings_tests.gd
