@@ -23,7 +23,7 @@ const CRATE_BREAK_DAMAGE := 10000.0
 const OBJECT_MASK := 7
 const OBJECT_QUERY_LIMIT := 32
 ## Seconds from the key press to the foot or fist landing (strike_pose.gd).
-const IMPACT_DELAY := {KICK: 0.24, PUNCH: 0.14}
+const IMPACT_DELAY := {KICK: 0.27, PUNCH: 0.14}
 
 var cooldown := 0.0
 var _host: Node
