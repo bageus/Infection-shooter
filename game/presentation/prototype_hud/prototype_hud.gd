@@ -45,6 +45,7 @@ const CONTROL_LOSS_HINTS := 3
 @onready var enemy_count_label: Label = $EnemyCount
 @onready var slot_keys: Array[Button] = [$WeaponPanel/Slot1/KeyHint, $WeaponPanel/Slot2/KeyHint, $WeaponPanel/Slot3/KeyHint]
 @onready var antidote_key: Button = $AntidotePanel/KeyHint
+@onready var gas_mask_panel: Panel = $GasMaskPanel
 @onready var key_panel: Panel = $KeyPanel
 @onready var key_icon: TextureRect = $KeyPanel/KeyIcon
 @onready var health_caption: Label = $HealthPanel/HealthCaption
@@ -189,6 +190,7 @@ func _process(delta: float) -> void:
 		_start_antidote_flash()
 	_was_control_lost = _control_notice.visible
 	_veil.call("update", delta, bool(infection.call("is_escalated")))
+	gas_mask_panel.call("set_state", bool(infection.call("is_gas_mask_worn")), float(infection.call("gas_mask_cooldown_remaining")))
 	_control_overlay.call("update", delta, float(infection.call("get_control_loss_remaining")))
 	_antidote_flash_remaining = maxf(0.0, _antidote_flash_remaining - delta)
 	_mutation_alarm.update(delta, _control_notice.visible)

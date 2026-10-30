@@ -363,7 +363,21 @@
     "mutationSkill_organic_ammo_name": "Органический боезапас",
     "mutationLightningHint": "Повторные попадания разрешены. Одиночная цель получает все попадания, пока жива.",
     "mutationStrikeHint": "Область удара расширяется от {width_start} до {width_end} м. Разбивает стекло и перегородки, толкает предметы.",
-    "steamPromo": "Добавить в желаемое в Steam"
+    "steamPromo": "Добавить в желаемое в Steam",
+    "tutScaleThreshold": "Когда шкала мутации дойдёт до этого рубежа, вы потеряете контроль.",
+    "tutScaleAntidote": "Теперь используйте антидот. Его кнопка здесь.",
+    "tutScaleSpend": "И последнее: грамотно расходуйте антидот.",
+    "tutBranches": "Здесь две ветки мутаций: пассивные и активные.",
+    "tutActive": "Активные способности можно использовать в бою по-своему, а также назначать на быстрые клавиши.",
+    "tutPassive": "Пассивные срабатывают сами в игре или дают постоянные эффекты.",
+    "tutPickStrike": "Выберите активный навык «Мощный удар».",
+    "tutKillStrike": "Убейте заражённого, применив активную способность. Вы получите мутаген, и откроется ещё одна способность, уже пассивная: «Ускорение перезарядки».",
+    "tutPin": "Выбранные способности можно закрепить. Закреплённые будут всегда активироваться, когда мутация достигает нужного уровня.",
+    "tutLossAntidote": "Вы потеряли контроль. Используйте антидот.",
+    "tutLossEffect": "Антидот снижает уровень мутации, но отключает способности.",
+    "tutLossMask": "Чтобы сохранить способности, используйте противогаз. Его иконка справа от антидота.",
+    "tutLossMaskCooldown": "Противогаз можно снимать и надевать, но после снятия и после надевания есть кулдаун 60 секунд.",
+    "tutContinue": "Нажмите, чтобы продолжить"
   },
   "en": {
     "credits": "Credits",
@@ -729,6 +743,20 @@
     "mutationSkill_organic_ammo_description": "An empty magazine automatically refills for {health} health. Free below {threshold}% health. Recovery: {cooldown}s.",
     "mutationLightningHint": "Repeated hits are allowed. A lone target receives every hit while alive.",
     "mutationStrikeHint": "The strike widens from {width_start} to {width_end}m. Breaks glass and partitions and pushes objects.",
-    "steamPromo": "Wishlist on Steam"
+    "steamPromo": "Wishlist on Steam",
+    "tutScaleThreshold": "When the mutation scale reaches this mark, you lose control.",
+    "tutScaleAntidote": "Now use the antidote. Its button is here.",
+    "tutScaleSpend": "Last thing: spend the antidote wisely.",
+    "tutBranches": "There are two mutation branches here: passive and active.",
+    "tutActive": "Active abilities can be used in combat your way, and assigned to quick keys.",
+    "tutPassive": "Passive abilities trigger on their own or give permanent effects.",
+    "tutPickStrike": "Choose the active ability Power Strike.",
+    "tutKillStrike": "Kill an infected with an active ability. You gain mutagen and unlock one more ability, a passive one: Accelerated Reload.",
+    "tutPin": "You can pin chosen abilities. Pinned abilities always activate once the mutation reaches their level.",
+    "tutLossAntidote": "You lost control. Use the antidote.",
+    "tutLossEffect": "The antidote lowers the mutation level, but it disables abilities.",
+    "tutLossMask": "To keep your abilities, use the gas mask. Its icon is to the right of the antidote.",
+    "tutLossMaskCooldown": "The gas mask can be taken off and put on again, but there is a 60-second cooldown after each change.",
+    "tutContinue": "Click to continue"
   }
 }

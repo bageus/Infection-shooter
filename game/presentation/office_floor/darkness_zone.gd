@@ -39,7 +39,7 @@ func _process(delta: float) -> void:
 	if room_id > 0 and not permanent:
 		if _player == null:
 			_player = get_tree().get_first_node_in_group("player") as Node3D
-		_fade = move_toward(_fade, 0.0 if _player_inside() else 1.0, FADE_SPEED * delta)
+		_fade = move_toward(_fade, 0.0 if _player_inside() or _room_has_open_door() else 1.0, FADE_SPEED * delta)
 		overlay.visible = _fade > 0.01
 		set_meta("explored", not overlay.visible)
 		_portal_timer -= delta
@@ -101,6 +101,21 @@ func _edge_distance(point: Vector3) -> float:
 	var edge := Vector3(clampf(local.x, -half.x, half.x), 0.0, clampf(local.z, -half.y, half.y))
 	var nearest := global_transform * edge
 	return Vector2(nearest.x - point.x, nearest.z - point.z).length()
+
+
+## An open door into any part of the room shows the whole room, as entering it does.
+func _room_has_open_door() -> bool:
+	for zone in get_tree().get_nodes_in_group("darkness_zone"):
+		if zone.get("room_id") == room_id and not zone.get("permanent") and zone.call("_has_open_door"):
+			return true
+	return false
+
+
+func _has_open_door() -> bool:
+	for door in _linked_doors:
+		if is_instance_valid(door) and door.has_method("is_open_for_exploration") and bool(door.call("is_open_for_exploration")):
+			return true
+	return false
 
 
 ## The cover lifts while the player stands in any part of the room.

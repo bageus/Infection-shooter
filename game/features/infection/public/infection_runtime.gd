@@ -49,12 +49,16 @@ func absorb_mutagen(delta_seconds: float) -> float:
 	return gained
 
 
-func set_gas_mask_worn(worn: bool) -> void:
-	_domain.gas_mask_worn = worn
+func toggle_gas_mask() -> bool:
+	return _domain.toggle_gas_mask()
 
 
 func is_gas_mask_worn() -> bool:
 	return _domain.gas_mask_worn
+
+
+func gas_mask_cooldown_remaining() -> float:
+	return _domain.gas_mask_cooldown
 
 
 func use_antidote() -> bool:

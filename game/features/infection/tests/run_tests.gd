@@ -234,6 +234,19 @@ func _test_gas_mask_blocks_mutagen() -> void:
 	_expect_float(domain.mutation, 0.0, "Mutation stays unchanged while the mask is worn.")
 	domain.gas_mask_worn = false
 	_expect_float(domain.absorb_mutagen(2.0), 10.0, "Mutagen is absorbed again once the mask is taken off.")
+	_test_gas_mask_toggle_cooldown()
+
+
+func _test_gas_mask_toggle_cooldown() -> void:
+	var domain = InfectionDomain.new()
+	_expect(domain.toggle_gas_mask() and domain.gas_mask_worn, "The first toggle puts the mask on.")
+	_expect(not domain.toggle_gas_mask() and domain.gas_mask_worn, "The mask cannot come off during the 60 s cooldown.")
+	domain.tick(59.0)
+	_expect(not domain.toggle_gas_mask(), "The cooldown still blocks a toggle after 59 s.")
+	domain.tick(1.0)
+	_expect(domain.toggle_gas_mask() and not domain.gas_mask_worn, "The mask comes off once the cooldown ends.")
+	_expect(not domain.toggle_gas_mask(), "Putting the mask back on also waits for the cooldown.")
+	_expect_float(domain.gas_mask_cooldown, 60.0, "Each toggle restarts the 60 s cooldown.")
 
 
 func _test_cloud_rate_and_bounds() -> void:
