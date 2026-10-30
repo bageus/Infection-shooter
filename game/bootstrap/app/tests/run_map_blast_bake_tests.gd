@@ -1,11 +1,11 @@
 extends SceneTree
-## Grenades fired at real map props (wood partitions, desk dividers, flower pots): after the debris
+## Grenades fired at real map props (cardboard boxes, a tall locker, a crate): after the debris
 ## expires, no big piece that is still standing may have been baked into the floor as a fake frame.
 const MAP := preload("res://game/presentation/office_floor/public/base_office_layout.tscn")
 const EXPLOSION := preload("res://game/features/combat/public/grenade_explosion.gd")
 const WORLD_BINDINGS := preload("res://game/bootstrap/app/world_bindings.gd")
 const QUALITY := preload("res://game/core/vfx/public/destruction_quality.gd")
-const TARGETS := ["slat_partition", "divider", "plant"]
+const TARGETS := ["cardboard_box", "locker", "crate"]
 const PIECE_GROUP := "fallen_environment_fragment"
 const SETTLE_FRAMES := 300
 
@@ -44,7 +44,7 @@ func _run() -> void:
 			if token in str(prop.get("model_path")).get_file():
 				chosen.append(prop)
 				break
-	_check(chosen.size() == TARGETS.size(), "The map has a partition, a divider desk and a plant (%d found)" % chosen.size())
+	_check(chosen.size() == TARGETS.size(), "The map has a cardboard box, a locker and a crate (%d found)" % chosen.size())
 	for prop: Node3D in chosen:
 		var name := str(prop.get("model_path")).get_file()
 		var holder := Node3D.new()
