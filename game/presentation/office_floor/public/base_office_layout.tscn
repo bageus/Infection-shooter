@@ -90,7 +90,7 @@ metadata/floor_biomass_v1 = {
 "x": -1,
 "z": -2
 }],
-"source_signature": "0c4d7af7ba6640179c16ed087b19019455a6414d12238b3bf63bcaf2a44fbd34",
+"source_signature": "acbb143bac413a790f9e4c62c7b27877576f88377a72de5827af6a1cd9d4a874",
 "version": 1,
 "y": 0.013500000000000002
 }
@@ -10599,7 +10599,7 @@ cache = {
 "x": -1,
 "z": -2
 }],
-"source_signature": "0c4d7af7ba6640179c16ed087b19019455a6414d12238b3bf63bcaf2a44fbd34",
+"source_signature": "acbb143bac413a790f9e4c62c7b27877576f88377a72de5827af6a1cd9d4a874",
 "version": 1,
 "y": 0.013500000000000002
 }
