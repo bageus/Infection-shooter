@@ -31553,7 +31553,7 @@
 			"scale_x": 1.0,
 			"scale_y": 1.0,
 			"scale_z": 1.0,
-			"scene": "res://game/bootstrap/app/weapon_pickups/uzi.tscn",
+			"scene": "res://game/features/pickups/public/weapons/uzi.tscn",
 			"settled_physics": {
 				"version": 1
 			},
@@ -31582,7 +31582,7 @@
 			"scale_x": 1.0,
 			"scale_y": 1.0,
 			"scale_z": 1.0,
-			"scene": "res://game/bootstrap/app/item_pickups/key.tscn",
+			"scene": "res://game/features/pickups/public/key_pickup.tscn",
 			"settled_physics": {
 				"version": 1
 			},
@@ -33907,7 +33907,7 @@
 			"scale_x": 1.0,
 			"scale_y": 1.0,
 			"scale_z": 1.0,
-			"scene": "res://game/bootstrap/app/armor_pickups/armor.tscn",
+			"scene": "res://game/features/pickups/public/armor_pickup.tscn",
 			"settled_physics": {
 				"version": 1
 			},

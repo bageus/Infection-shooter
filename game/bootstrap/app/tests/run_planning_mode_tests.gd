@@ -177,6 +177,7 @@ func _exercise_maps(planner: Node) -> void:
 	var light_records: Array = snapshot["objects"].filter(func(record: Dictionary) -> bool: return record.get("object_id", "") == "regression_light")
 	_check(light_records.size() == 1 and light_records[0].get("light_energy", 0.0) > 0.0, "Layout captures edited light")
 	var name := "codex_planning_regression_%d" % Time.get_ticks_usec()
+	storage.set("bake_dir", "user://test_bakes/")
 	(storage.get("map_name_edit") as LineEdit).text = name
 	await storage.call("save_named_map")
 	# Saving adds the automatic wall fixtures, so compare against the state the save left.

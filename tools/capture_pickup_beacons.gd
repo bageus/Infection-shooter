@@ -1,9 +1,9 @@
 extends SceneTree
 ## Renders the emergency key, DNA and weapon pickups with their markers.
 ## xvfb-run godot --path . --script res://tools/capture_pickup_beacons.gd -- /out/dir
-const KEY := preload("res://game/bootstrap/app/mission_key.gd")
+const KEY := preload("res://game/features/pickups/public/mission_key.gd")
 const DNA := preload("res://game/bootstrap/app/tests/fixtures/test_dna_pickup.gd")
-const WEAPON := preload("res://game/bootstrap/app/weapon_pickup.gd")
+const WEAPON := preload("res://game/features/pickups/public/weapon_pickup.gd")
 var _out := ""
 
 

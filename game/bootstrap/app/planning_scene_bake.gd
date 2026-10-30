@@ -48,6 +48,7 @@ func _write(scene_root: Node3D, target: String) -> Error:
 	var packed := PackedScene.new()
 	var problem := packed.pack(scene_root)
 	if problem == OK:
+		DirAccess.make_dir_recursive_absolute(target.get_base_dir())
 		problem = ResourceSaver.save(packed, target)
 		if problem == OK:
 			problem = SCENE_SCRIPTS.canonicalize(target)

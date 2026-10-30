@@ -222,7 +222,7 @@ func _weapons(planner: Node) -> void:
 	var result: Dictionary = editor.call("_apply_layout_data", {"version": 8, "objects": records})
 	_check(result.get("loaded", 0) == 8, "All weapon scenes load from map v8")
 	var saved: Dictionary = planner.get("storage").call("_collect_layout_data")
-	var weapon_records: Array = saved.objects.filter(func(entry: Dictionary) -> bool: return "weapon_pickups/" in str(entry.scene))
+	var weapon_records: Array = saved.objects.filter(func(entry: Dictionary) -> bool: return "pickups/public/weapons/" in str(entry.scene))
 	_check(weapon_records.size() == 8, "Map snapshot retains all weapon scene identities")
 	result = editor.call("_apply_layout_data", {"version": 8, "objects": weapon_records})
 	_check(result.get("loaded", 0) == 8, "Weapon snapshot reloads")

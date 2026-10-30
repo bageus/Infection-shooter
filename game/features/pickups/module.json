@@ -12,9 +12,26 @@
     "public/dna_pickup.tscn",
     "public/loot_config.gd",
     "public/loot_drop.gd",
-    "public/pickup_beacon.gd"
+    "public/pickup_beacon.gd",
+    "public/armor_pickup.tscn",
+    "public/armor_pickup.gd",
+    "public/key_pickup.tscn",
+    "public/placed_key.gd",
+    "public/mission_key.gd",
+    "public/weapon_pickup.gd",
+    "public/weapons/ak.tscn",
+    "public/weapons/launcher.tscn",
+    "public/weapons/m4.tscn",
+    "public/weapons/minigun.tscn",
+    "public/weapons/pistol.tscn",
+    "public/weapons/shotgun.tscn",
+    "public/weapons/sniper.tscn",
+    "public/weapons/uzi.tscn"
   ],
-  "dependencies": [],
+  "dependencies": [
+    "core.world_badge",
+    "features.combat"
+  ],
   "runtime_contracts": {
     "occlusion_visual_v1": {
       "occlusion_items": "Public health/ammo scene roots carry occlusion_items; render classification only."

@@ -5,7 +5,7 @@ extends SceneTree
 # icon over an emergency door. Output: /tmp/hud_previews/*.png
 
 const MAIN := preload("res://game/bootstrap/app/main.tscn")
-const WEAPON := preload("res://game/bootstrap/app/weapon_pickup.gd")
+const WEAPON := preload("res://game/features/pickups/public/weapon_pickup.gd")
 const EMERGENCY_DOOR := preload("res://game/presentation/office_floor/public/structural/wall_emergency_door.tscn")
 const OUT := "/tmp/hud_previews/"
 
