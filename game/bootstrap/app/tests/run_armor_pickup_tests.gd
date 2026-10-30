@@ -2,7 +2,7 @@ extends SceneTree
 ## Armor plate: starts absent, is listed in the Items palette, refills the bar on contact,
 ## and refills again on a new map of the chain only after a plate was found.
 const MAIN := preload("res://game/bootstrap/app/main.tscn")
-const ARMOR_SCENE := "res://game/bootstrap/app/armor_pickups/armor.tscn"
+const ARMOR_SCENE := "res://game/features/pickups/public/armor_pickup.tscn"
 var failures := 0
 
 

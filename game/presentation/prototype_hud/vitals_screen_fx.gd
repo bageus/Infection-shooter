@@ -8,7 +8,6 @@ extends Control
 
 const SHADER := preload("res://game/presentation/prototype_hud/vitals_screen_fx.gdshader")
 const BREATHING := preload("res://assets/audio/vitals/heavy_breathing.ogg")
-const PRESSURE := preload("res://assets/audio/vitals/mutagen_pressure.ogg")
 
 const SMOKE_START_RATIO := 0.4
 const BLOOD_START_HEALTH := 0.6
@@ -43,7 +42,8 @@ func _ready() -> void:
 	_rect.visible = false
 	add_child(_rect)
 	_breathing = _make_player(BREATHING)
-	_pressure = _make_player(PRESSURE)
+	# Loaded here, not preloaded: a script constant keeps the stream alive until exit.
+	_pressure = _make_player(load("res://assets/audio/vitals/mutagen_pressure.ogg"))
 	resized.connect(_update_aspect)
 	_update_aspect()
 

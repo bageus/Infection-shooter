@@ -7,7 +7,7 @@
 				"z": -2
 			}
 		],
-		"source_signature": "0c4d7af7ba6640179c16ed087b19019455a6414d12238b3bf63bcaf2a44fbd34",
+		"source_signature": "acbb143bac413a790f9e4c62c7b27877576f88377a72de5827af6a1cd9d4a874",
 		"version": 1,
 		"y": 0.0135
 	},
@@ -16,31 +16,6 @@
 		60.0
 	],
 	"objects": [
-		{
-			"attachment": "",
-			"darkness": 0.0,
-			"desk_id": "",
-			"flicker_mode": 0.0,
-			"flicker_step": 0.2,
-			"light_angle": 48.0,
-			"light_energy": 0.0,
-			"object_id": "",
-			"permanent_darkness": false,
-			"rotation_x": 0.0,
-			"rotation_y": 0.0,
-			"rotation_z": 0.0,
-			"scale_x": 1.0,
-			"scale_y": 1.0,
-			"scale_z": 1.0,
-			"scene": "res://models/objects/enviroments/09/09_case_with_money_close.glb",
-			"spawn_x": -14.655797958374,
-			"spawn_y": 0.86063414812088,
-			"spawn_z": -8.05977153778076,
-			"x": -14.655797958374,
-			"y": 0.86063414812088,
-			"z": -8.05977153778076,
-			"zone": -1.0
-		},
 		{
 			"rotation_y": 0.0,
 			"scale_x": 1.0,
@@ -31578,7 +31553,7 @@
 			"scale_x": 1.0,
 			"scale_y": 1.0,
 			"scale_z": 1.0,
-			"scene": "res://game/bootstrap/app/weapon_pickups/uzi.tscn",
+			"scene": "res://game/features/pickups/public/weapons/uzi.tscn",
 			"settled_physics": {
 				"version": 1
 			},
@@ -31607,7 +31582,7 @@
 			"scale_x": 1.0,
 			"scale_y": 1.0,
 			"scale_z": 1.0,
-			"scene": "res://game/bootstrap/app/item_pickups/key.tscn",
+			"scene": "res://game/features/pickups/public/key_pickup.tscn",
 			"settled_physics": {
 				"version": 1
 			},
@@ -33932,7 +33907,7 @@
 			"scale_x": 1.0,
 			"scale_y": 1.0,
 			"scale_z": 1.0,
-			"scene": "res://game/bootstrap/app/armor_pickups/armor.tscn",
+			"scene": "res://game/features/pickups/public/armor_pickup.tscn",
 			"settled_physics": {
 				"version": 1
 			},

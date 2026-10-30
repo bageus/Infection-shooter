@@ -47,7 +47,7 @@ var actor_catalog = [
 ]
 
 var item_catalog = [
-	{"name":"Ключ","path":"res://game/bootstrap/app/item_pickups/key.tscn","kind":"item"},
+	{"name":"Ключ","path":"res://game/features/pickups/public/key_pickup.tscn","kind":"item"},
 	{"name":"ДНК","path":"res://game/features/pickups/public/dna_pickup.tscn","kind":"item"},
 	{"name":"Патроны: пистолет","path":"res://game/features/pickups/public/ammo_pistol_pickup.tscn","kind":"item"},
 	{"name":"Патроны: UZI","path":"res://game/features/pickups/public/ammo_uzi_pickup.tscn","kind":"item"},
@@ -58,18 +58,18 @@ var item_catalog = [
 	{"name":"Патроны: гранатомёт","path":"res://game/features/pickups/public/ammo_grenade_pickup.tscn","kind":"item"},
 	{"name":"Аптечка","path":"res://game/features/pickups/public/medkit_pickup.tscn","kind":"item"},
 	{"name":"Антидот","path":"res://game/features/pickups/public/antidote_pickup.tscn","kind":"item"},
-	{"name":"Броня","path":"res://game/bootstrap/app/armor_pickups/armor.tscn","kind":"item"}
+	{"name":"Броня","path":"res://game/features/pickups/public/armor_pickup.tscn","kind":"item"}
 ]
 
 var weapon_catalog = [
-	{"name":"PISTOL","path":"res://game/bootstrap/app/weapon_pickups/pistol.tscn","kind":"weapon"},
-	{"name":"UZI","path":"res://game/bootstrap/app/weapon_pickups/uzi.tscn","kind":"weapon"},
-	{"name":"SHOTGUN","path":"res://game/bootstrap/app/weapon_pickups/shotgun.tscn","kind":"weapon"},
-	{"name":"LAUNCHER","path":"res://game/bootstrap/app/weapon_pickups/launcher.tscn","kind":"weapon"},
-	{"name":"AK","path":"res://game/bootstrap/app/weapon_pickups/ak.tscn","kind":"weapon"},
-	{"name":"M4","path":"res://game/bootstrap/app/weapon_pickups/m4.tscn","kind":"weapon"},
-	{"name":"SNIPER","path":"res://game/bootstrap/app/weapon_pickups/sniper.tscn","kind":"weapon"},
-	{"name":"MINIGUN","path":"res://game/bootstrap/app/weapon_pickups/minigun.tscn","kind":"weapon"}
+	{"name":"PISTOL","path":"res://game/features/pickups/public/weapons/pistol.tscn","kind":"weapon"},
+	{"name":"UZI","path":"res://game/features/pickups/public/weapons/uzi.tscn","kind":"weapon"},
+	{"name":"SHOTGUN","path":"res://game/features/pickups/public/weapons/shotgun.tscn","kind":"weapon"},
+	{"name":"LAUNCHER","path":"res://game/features/pickups/public/weapons/launcher.tscn","kind":"weapon"},
+	{"name":"AK","path":"res://game/features/pickups/public/weapons/ak.tscn","kind":"weapon"},
+	{"name":"M4","path":"res://game/features/pickups/public/weapons/m4.tscn","kind":"weapon"},
+	{"name":"SNIPER","path":"res://game/features/pickups/public/weapons/sniper.tscn","kind":"weapon"},
+	{"name":"MINIGUN","path":"res://game/features/pickups/public/weapons/minigun.tscn","kind":"weapon"}
 ]
 
 

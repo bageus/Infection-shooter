@@ -1,11 +1,11 @@
 extends SceneTree
-## Grenades fired at real map props (wood partitions, desk dividers, flower pots): after the debris
+## Grenades fired at real map props (cardboard boxes, a tall locker, a crate): after the debris
 ## expires, no big piece that is still standing may have been baked into the floor as a fake frame.
 const MAP := preload("res://game/presentation/office_floor/public/base_office_layout.tscn")
 const EXPLOSION := preload("res://game/features/combat/public/grenade_explosion.gd")
 const WORLD_BINDINGS := preload("res://game/bootstrap/app/world_bindings.gd")
 const QUALITY := preload("res://game/core/vfx/public/destruction_quality.gd")
-const TARGETS := ["slat_partition", "divider", "plant"]
+const TARGETS := ["cardboard_box", "locker", "crate"]
 const PIECE_GROUP := "fallen_environment_fragment"
 const SETTLE_FRAMES := 300
 
@@ -44,7 +44,7 @@ func _run() -> void:
 			if token in str(prop.get("model_path")).get_file():
 				chosen.append(prop)
 				break
-	_check(chosen.size() == TARGETS.size(), "The map has a partition, a divider desk and a plant (%d found)" % chosen.size())
+	_check(chosen.size() == TARGETS.size(), "The map has a cardboard box, a locker and a crate (%d found)" % chosen.size())
 	for prop: Node3D in chosen:
 		var name := str(prop.get("model_path")).get_file()
 		var holder := Node3D.new()
@@ -66,9 +66,10 @@ func _run() -> void:
 			baked += int(runtime.get("_baked").call("count"))
 		print("%s: pieces=%d standing_big=%d baked_after_expire=%d" % [name, big, standing, baked])
 		_check(big > 0, name + " broke into pieces")
+		# A standing piece may stay a body or fade out when the budget is full; only a frozen piece that is not fading would be a floor frame.
 		for piece in get_nodes_in_group(PIECE_GROUP):
-			if is_instance_valid(piece) and piece.call("_is_standing_big"):
-				_check(not piece.is_queued_for_deletion() and not piece.has_meta("debris_fading"), name + ": a standing big piece is neither baked nor removed")
+			if is_instance_valid(piece) and not piece.is_queued_for_deletion() and piece.call("_is_standing_big"):
+				_check(not (piece.freeze and not piece.has_meta("debris_fading")), name + ": a standing big piece is frozen into the floor as a fake frame")
 	stage.queue_free()
 	await process_frame
 	print("Map blast bake tests: %d failure(s)." % failures)

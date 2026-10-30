@@ -95,6 +95,10 @@ func _run() -> void:
 	_check(not paused, "Nothing stays paused")
 
 	await _mask_hud(hud, runtime)
+	# The HUD owns audio players that hold their streams; free it so nothing is still in use at exit.
+	hud.queue_free()
+	await process_frame
+	await process_frame
 	DirAccess.remove_absolute(SAVE)
 	if failures == 0:
 		print("Tutorial tests passed.")

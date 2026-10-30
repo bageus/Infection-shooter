@@ -15,6 +15,7 @@ var _failures := 0
 
 # Saving over an existing map asks for a second press; text fields keep keys.
 func _test_map_overwrite(storage: Variant, planner: Node) -> Dictionary:
+	storage.set("bake_dir", "user://test_bakes/")
 	var name_edit := storage.get("map_name_edit") as LineEdit
 	name_edit.text = "overwrite_check"
 	var path: String = storage.call("_map_path", "overwrite_check")

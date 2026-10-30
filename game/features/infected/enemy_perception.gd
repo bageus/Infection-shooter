@@ -31,7 +31,7 @@ var wander_enabled := true
 var sight_range := 18.0
 var close_notice_range := 3.5
 var fov_cos := cos(deg_to_rad(65.0))
-var hearing := preload("res://game/features/infected/hearing_profile.gd").new()
+var hearing := preload("res://game/features/infected/public/hearing_profile.gd").new()
 var _alert_announced := false
 var _interaction_target: Node3D
 var _forced_assignment := false

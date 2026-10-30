@@ -37,6 +37,7 @@ class Catalog extends RefCounted:
 		return "" if value == RECOVER and not available else value
 	func _create_asset(value: String) -> Node3D:
 		return (load(value) as PackedScene).instantiate() as Node3D
+	func _instantiate_asset(_value: String) -> Node3D: return null
 
 class Geometry extends RefCounted:
 	func _restore_floor_surface(_node: Node3D, _path: String) -> void: pass
@@ -78,6 +79,8 @@ func _setup() -> void:
 	objects.configure({"session": session, "catalog": catalog, "controls": controls, "geometry": Geometry.new()})
 	storage = FixtureStorage.new()
 	storage.configure({"session": session, "objects": objects, "controls": controls, "catalog": catalog})
+	storage.bake_dir = "user://test_bakes/"
+	DirAccess.make_dir_recursive_absolute(storage.bake_dir)
 	storage.map_name_edit = LineEdit.new()
 	session.add_child(storage.map_name_edit)
 	storage.map_name_edit.text = "unresolved_map_test_%d" % OS.get_process_id()

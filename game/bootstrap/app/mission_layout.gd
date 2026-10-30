@@ -1,6 +1,6 @@
 extends Node3D
 
-const WEAPON := preload("res://game/bootstrap/app/weapon_pickup.gd")
+const WEAPON := preload("res://game/features/pickups/public/weapon_pickup.gd")
 const FLOOR_HINT := preload("res://game/bootstrap/app/floor_hint_guide.gd")
 const FLOOR_TOP := 0.0135 # Visible base floor top; physics floor pieces must match it (see main.tscn FloorBody)
 const CUT_STEP := 0.5
