@@ -3,7 +3,6 @@
 [ext_resource type="Script" path="res://game/presentation/prototype_hud/prototype_hud.gd" id="1"]
 [ext_resource type="Texture2D" path="res://assets/icon_interface.png" id="2_icons"]
 [ext_resource type="FontFile" path="res://assets/interface/fonts/title.ttf" id="3_title"]
-[ext_resource type="Script" path="res://game/presentation/prototype_hud/gas_mask_panel.gd" id="4_gasmask"]
 
 [sub_resource type="StyleBoxFlat" id="HudFrame"]
 bg_color = Color(0.0824, 0.102, 0.1098, 0.8784)
@@ -275,26 +274,13 @@ theme_override_font_sizes/font_size = 11
 vertical_alignment = 1
 visible = false
 
-[node name="GasMaskPanel" type="Panel" parent="."]
+[node name="KeyPanel" type="Panel" parent="."]
 anchors_preset = 2
 anchor_top = 1.0
 anchor_bottom = 1.0
 offset_left = 470.0
 offset_top = -82.0
 offset_right = 544.0
-offset_bottom = -18.0
-grow_vertical = 0
-theme_override_styles/panel = SubResource("ItemFrame")
-script = ExtResource("4_gasmask")
-tooltip_text = "Gas mask [Tab]"
-
-[node name="KeyPanel" type="Panel" parent="."]
-anchors_preset = 2
-anchor_top = 1.0
-anchor_bottom = 1.0
-offset_left = 552.0
-offset_top = -82.0
-offset_right = 626.0
 offset_bottom = -18.0
 grow_vertical = 0
 theme_override_styles/panel = SubResource("ItemFrame")

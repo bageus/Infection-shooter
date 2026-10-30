@@ -15,7 +15,6 @@ const WorldActivation = preload("res://game/bootstrap/app/world_activation.gd")
 const TEST_CLOUD := preload("res://game/features/infection_source/public/mutagen_cloud.tscn")
 @export var progression_level_id := "prototype_floor"
 const MUTATION_UI := preload("res://game/bootstrap/app/mutation_tree_ui.gd")
-const MUTATION_TUTORIAL := preload("res://game/bootstrap/app/mutation_tutorial.gd")
 const BLOOD_EFFECTS := preload("res://game/presentation/office_floor/public/blood_effects_3d.tscn")
 const SHADER_WARMUP := preload("res://game/bootstrap/app/shader_warmup.gd")
 const HIT_EFFECT_WARMUP := preload("res://game/presentation/office_floor/public/hit_effect_warmup.gd")
@@ -58,7 +57,6 @@ var world_activation: Node
 var wave_director: Node
 var planning_lighting: Node
 var mutation_tree_ui: CanvasLayer
-var mutation_tutorial: Node
 var mission_layout: Node3D
 var blood_effects: Node3D
 
@@ -91,13 +89,6 @@ func _ready() -> void:
 	add_child(mutation_tree_ui)
 	infection_runtime.call("begin_control_level", progression_level_id)
 	mutation_tree_ui.call("configure", infection_runtime)
-	mutation_tutorial = MUTATION_TUTORIAL.new()
-	add_child(mutation_tutorial)
-	mutation_tutorial.call("setup", infection_runtime, {
-		"mutation_bar": $PrototypeHUD/HealthPanel/MutationBar,
-		"antidote": $PrototypeHUD/AntidotePanel,
-		"gas_mask": $PrototypeHUD/GasMaskPanel,
-	}, mutation_tree_ui)
 	$MutationChoice/Panel/VBox/Choices/FastHands.pressed.connect(_choose_fast_hands)
 	$MutationChoice/Panel/VBox/Choices/LegMutation.pressed.connect(_choose_leg_mutation)
 	$MutationChoice/Panel/VBox/Choices/EnhancedAmmo.pressed.connect(_choose_enhanced_ammo)
