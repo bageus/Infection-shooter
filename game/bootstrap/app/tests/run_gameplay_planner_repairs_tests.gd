@@ -99,9 +99,9 @@ func _blood(player: Node3D) -> void:
 	await physics_frame
 	player.set("armor", 0.0)
 	# Splat angle and jitter are random, and the quad path drops a splat that does not fit the wall,
-	# so a single hit can miss; allow a few hits before the wall check.
+	# so a single hit can miss; allow several hits before the wall check.
 	var container: Node3D = budget.get("container")
-	for attempt in range(3):
+	for attempt in range(8):
 		player.call("take_projectile_damage", 10.0, player.global_position, Vector3.FORWARD, "PISTOL")
 		await physics_frame
 		await physics_frame
