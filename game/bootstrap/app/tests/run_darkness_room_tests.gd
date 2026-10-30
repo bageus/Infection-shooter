@@ -45,11 +45,11 @@ func _run() -> void:
 	_expect(_portals(first) == 0, "A closed door gives no view")
 	door.open = true
 	await create_timer(0.6).timeout
-	_expect(first.overlay.visible and second.overlay.visible, "An open door keeps the fog up")
-	_expect(_portals(first) == 1 and _portals(second) == 0, "Only the room part by the door gets the opening")
+	_expect(not first.overlay.visible and not second.overlay.visible, "An open door shows the whole room at once")
+	_expect(other.overlay.visible, "An open door does not reveal another room")
 	door.open = false
 	await create_timer(0.6).timeout
-	_expect(_portals(first) == 0, "Closing the door removes the opening")
+	_expect(first.overlay.visible and second.overlay.visible, "Closing the door darkens the room again")
 	player.position = Vector3(4.5, 0.0, 0.5)
 	await create_timer(0.6).timeout
 	_expect(not first.overlay.visible and not second.overlay.visible, "Standing in one part lifts the fog of the whole room")
