@@ -11,6 +11,7 @@ const CONTROL_LOSS_OVERLAY := preload("res://game/presentation/prototype_hud/con
 const MUTATION_VEIL := preload("res://game/presentation/prototype_hud/mutation_veil.gd")
 const SFX := preload("res://game/core/audio/public/sound_events.gd")
 const UI_TRANSLATIONS := preload("res://game/core/localization/public/ui_translations.gd")
+const GAS_MASK_ICON := preload("res://game/presentation/prototype_hud/gas_mask_icon.gd")
 const ANTIDOTE_HINT := preload("res://game/presentation/prototype_hud/antidote_hint_frame.gd")
 const CONTROL_NOTICE_TOP := 60.0
 const ANTIDOTE_FLASH_SECONDS := 1.0
@@ -34,6 +35,9 @@ const CONTROL_LOSS_HINTS := 3
 @onready var armor_value: Label = $HealthPanel/ArmorValue
 @onready var antidote_panel: Panel = $AntidotePanel
 @onready var antidote_count: Label = $AntidotePanel/AntidoteCount
+@onready var gas_mask_panel: Panel = $GasMaskPanel
+@onready var gas_mask_key: Button = $GasMaskPanel/KeyHint
+@onready var gas_mask_cooldown: Label = $GasMaskPanel/Cooldown
 @onready var weapon_name: Label = $WeaponPanel/WeaponName
 @onready var magazine: Label = $WeaponPanel/Magazine
 @onready var reserve: Label = $WeaponPanel/Reserve
@@ -80,6 +84,7 @@ var _antidote_flash_remaining := 0.0
 var _was_control_lost := false
 var _control_losses := 0
 var _antidote_hint: Control
+var _gas_mask_icon: Control
 
 
 func _ready() -> void:
@@ -100,6 +105,12 @@ func _ready() -> void:
 	_configure_icon_tints()
 	_configure_icon_regions()
 	_configure_key_buttons()
+	_gas_mask_icon = GAS_MASK_ICON.new()
+	_gas_mask_icon.name = "Icon"
+	_gas_mask_icon.position = Vector2(26, 14)
+	_gas_mask_icon.size = Vector2(42, 38)
+	gas_mask_panel.add_child(_gas_mask_icon)
+	gas_mask_key.pressed.connect(_on_gas_mask_key_pressed)
 	weapon_name.hide()
 	weapon_name.text = ""
 	_veil = MUTATION_VEIL.new()
@@ -133,6 +144,7 @@ func _apply_texts() -> void:
 	key_caption.text = tr("hudKey")
 	antidote_key.tooltip_text = tr("hudAntidoteTip")
 	key_panel.tooltip_text = tr("hudEmergencyKeyTip")
+	gas_mask_panel.tooltip_text = tr("hudGasMaskTip")
 	for index in slot_keys.size():
 		slot_keys[index].tooltip_text = tr("hudSelectWeapon") % (index + 1)
 	_vital_snapshot = []
@@ -199,6 +211,7 @@ func _process(delta: float) -> void:
 	_update_weapon()
 	_antidote_hint_remaining = maxf(0.0, _antidote_hint_remaining - delta)
 	_update_key_buttons()
+	_update_gas_mask()
 	_perf_timer += delta
 	if _perf_timer >= 0.25:
 		_perf_timer = 0.0
@@ -416,6 +429,31 @@ func _on_antidote_key_pressed() -> void:
 		_antidote_hint_remaining = 0.18
 		_update_vitals()
 	_update_key_buttons()
+
+
+# Screen rectangles the tutorial spotlights; the HUD keeps ownership of its own layout.
+func tutorial_rect(kind: String) -> Rect2:
+	match kind:
+		"mutation":
+			return mutation_bar.get_global_rect().merge(mutation_caption.get_global_rect()).merge(mutation_value.get_global_rect())
+		"antidote":
+			return antidote_panel.get_global_rect()
+		"gas_mask":
+			return gas_mask_panel.get_global_rect()
+	return Rect2()
+
+
+func _on_gas_mask_key_pressed() -> void:
+	infection.call("toggle_gas_mask")
+
+
+# Worn mask: dark icon. Taking it off or putting it on locks the panel for the cooldown.
+func _update_gas_mask() -> void:
+	var worn := bool(infection.call("is_gas_mask_worn"))
+	var cooldown := float(infection.call("gas_mask_cooldown_remaining"))
+	_gas_mask_icon.modulate = Color(1, 1, 1, 0.3) if worn else Color.WHITE
+	gas_mask_cooldown.text = str(ceili(cooldown)) if cooldown > 0.0 else ""
+	_set_key_state(gas_mask_key, worn, cooldown > 0.0 or bool(infection.call("is_control_lost")))
 
 
 func _update_key_buttons() -> void:
