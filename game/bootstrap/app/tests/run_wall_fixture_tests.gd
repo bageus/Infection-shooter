@@ -236,7 +236,10 @@ func _base_map() -> void:
 	var manual_switches: int = data.objects.filter(func(r: Dictionary) -> bool:
 		return str(r.scene) == PLACER.SWITCH and str(r.get("auto_fixture", "")).is_empty()).size()
 	_check(_count(plan.records, "switch") + plan.shortfall.switch + manual_switches == doors * 3, "Base map: three switch points per door (%d doors incl. glass)" % doors)
-	_check(_count(plan.records, "alarm") + plan.shortfall.alarm == doors * 1 and _count(plan.records, "call_point") == _count(plan.records, "alarm"), "Base map: one alarm point per door, one call point under each")
+	# Hand-placed alarms count toward the per-door totals, as hand-placed switches do.
+	var manual_alarms: int = data.objects.filter(func(r: Dictionary) -> bool:
+		return str(r.scene).get_file() == "13_wall_emergency_alarm.glb" and str(r.get("auto_fixture", "")).is_empty()).size()
+	_check(_count(plan.records, "alarm") + plan.shortfall.alarm + manual_alarms == doors * 1 and _count(plan.records, "call_point") == _count(plan.records, "alarm"), "Base map: one alarm point per door, one call point under each")
 	_check(plan.shortfall.switch == 0 and plan.shortfall.alarm == 0, "Base map has room for every point")
 	_check(_mounted_on_walls(data.objects, plan.records), "Base map: every fixture sits on a wall or column face")
 	var seen := {}
