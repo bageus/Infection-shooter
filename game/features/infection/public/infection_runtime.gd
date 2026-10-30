@@ -13,6 +13,8 @@ signal ability_choice_requested
 signal ability_changed(choice: int)
 signal tree_changed
 signal skill_available
+## Fact: the gas mask was put on (true) or taken off (false).
+signal gas_mask_changed(worn: bool)
 signal skill_cast(skill_id: String)
 ## Fact: an owned active skill's running cooldown reached zero.
 signal skill_cooldown_finished(skill_id: String)
@@ -55,6 +57,18 @@ func set_gas_mask_worn(worn: bool) -> void:
 
 func is_gas_mask_worn() -> bool:
 	return _domain.gas_mask_worn
+
+
+## Player action: swaps the mask and starts the 60 s cooldown; false while it runs.
+func toggle_gas_mask() -> bool:
+	var changed: bool = _domain.toggle_gas_mask()
+	if changed:
+		gas_mask_changed.emit(_domain.gas_mask_worn)
+	return changed
+
+
+func gas_mask_cooldown_remaining() -> float:
+	return _domain.gas_mask_cooldown_remaining
 
 
 func use_antidote() -> bool:

@@ -89,6 +89,10 @@ func _ready() -> void:
 	add_child(mutation_tree_ui)
 	infection_runtime.call("begin_control_level", progression_level_id)
 	mutation_tree_ui.call("configure", infection_runtime)
+	if DisplayServer.get_name() != "headless": # lessons pause the game; automated runs skip them
+		var tutorial := preload("res://game/bootstrap/app/tutorial/tutorial_director.gd").new()
+		add_child(tutorial)
+		tutorial.call("configure", player, $PrototypeHUD, mutation_tree_ui)
 	$MutationChoice/Panel/VBox/Choices/FastHands.pressed.connect(_choose_fast_hands)
 	$MutationChoice/Panel/VBox/Choices/LegMutation.pressed.connect(_choose_leg_mutation)
 	$MutationChoice/Panel/VBox/Choices/EnhancedAmmo.pressed.connect(_choose_enhanced_ammo)

@@ -210,6 +210,30 @@ func close_tree() -> void:
 	_set_open(false)
 
 
+# Screen rectangles for the tutorial: "active" / "passive" groups, "skill:<id>" circles and "skill:lock:<id>" locks.
+func tutorial_rect(kind: String) -> Rect2:
+	if content == null or not is_tree_open():
+		return Rect2()
+	var found := Rect2()
+	var hybrids := {}
+	for row in runtime.call("skill_catalog"):
+		if int(row[3]) == 3:
+			hybrids[str(row[0])] = true
+	for button in content.find_children("*", "Button", true, false):
+		if button.is_queued_for_deletion() or not button.has_meta("skill_id"):
+			continue
+		var id := str(button.get_meta("skill_id"))
+		var hit := false
+		if kind.begins_with("skill:"):
+			hit = id == kind.trim_prefix("skill:")
+		else:
+			var is_lock := id.begins_with("lock:")
+			hit = not is_lock and not hybrids.has(id) and bool(runtime.call("skill_requirements", id).get("active", false)) == (kind == "active")
+		if hit:
+			found = button.get_global_rect() if found.size == Vector2.ZERO else found.merge(button.get_global_rect())
+	return found.grow(10.0) if found.size != Vector2.ZERO else found
+
+
 func is_tree_open() -> bool:
 	return window != null and window.visible
 

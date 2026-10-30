@@ -40,6 +40,7 @@ func _run() -> void:
 	_test_skill_tree_lock_and_reactivation()
 	_test_skill_branch_order_and_locked_prerequisites()
 	_test_gas_mask_blocks_mutagen()
+	_test_gas_mask_cooldown()
 
 	if failures == 0:
 		print("T001 infection domain tests passed.")
@@ -234,6 +235,18 @@ func _test_gas_mask_blocks_mutagen() -> void:
 	_expect_float(domain.mutation, 0.0, "Mutation stays unchanged while the mask is worn.")
 	domain.gas_mask_worn = false
 	_expect_float(domain.absorb_mutagen(2.0), 10.0, "Mutagen is absorbed again once the mask is taken off.")
+
+
+func _test_gas_mask_cooldown() -> void:
+	var domain = InfectionDomain.new()
+	_expect(domain.toggle_gas_mask() and domain.gas_mask_worn, "The mask goes on at once.")
+	_expect(not domain.toggle_gas_mask() and domain.gas_mask_worn, "The mask cannot come off during the cooldown.")
+	domain.tick(59.0)
+	_expect(not domain.toggle_gas_mask(), "59 s after putting it on the mask is still locked.")
+	domain.tick(1.0)
+	_expect(domain.toggle_gas_mask() and not domain.gas_mask_worn, "After 60 s the mask can come off.")
+	_expect_float(domain.gas_mask_cooldown_remaining, 60.0, "Taking it off starts a new 60 s cooldown.")
+	_expect(not domain.toggle_gas_mask(), "The mask cannot go back on during that cooldown.")
 
 
 func _test_cloud_rate_and_bounds() -> void:
