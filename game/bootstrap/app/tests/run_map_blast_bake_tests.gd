@@ -66,9 +66,10 @@ func _run() -> void:
 			baked += int(runtime.get("_baked").call("count"))
 		print("%s: pieces=%d standing_big=%d baked_after_expire=%d" % [name, big, standing, baked])
 		_check(big > 0, name + " broke into pieces")
+		# A standing piece may stay a body or fade out when the budget is full; only a frozen piece that is not fading would be a floor frame.
 		for piece in get_nodes_in_group(PIECE_GROUP):
-			if is_instance_valid(piece) and piece.call("_is_standing_big"):
-				_check(not piece.is_queued_for_deletion() and not piece.has_meta("debris_fading"), name + ": a standing big piece is neither baked nor removed")
+			if is_instance_valid(piece) and not piece.is_queued_for_deletion() and piece.call("_is_standing_big"):
+				_check(not (piece.freeze and not piece.has_meta("debris_fading")), name + ": a standing big piece is frozen into the floor as a fake frame")
 	stage.queue_free()
 	await process_frame
 	print("Map blast bake tests: %d failure(s)." % failures)
