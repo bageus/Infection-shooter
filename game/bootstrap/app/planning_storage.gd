@@ -20,6 +20,8 @@ const LOOSE_RETURN_RADIUS := 2.0
 const MAPS_DIR = "user://maps"
 const LAYOUT_DIR = "res://game/presentation/office_floor/public/"
 const AUTHORED_SCENE_PATH = LAYOUT_DIR + "base_office_layout.tscn"
+# Each named map bakes to its own scene; the unnamed layout is the "default" map.
+const BAKE_DIR = LAYOUT_DIR + "maps/"
 # The shipped map: saved next to the baked scene from the editor and loaded
 # when this computer has no planned_layout.json of its own (fresh install, Web).
 const DEFAULT_MAP_PATH = LAYOUT_DIR + "base_office_map.json"
@@ -27,6 +29,8 @@ const DEFAULT_MAP_PATH = LAYOUT_DIR + "base_office_map.json"
 var map_loading := false
 var _save_notice := ""
 var map_name_edit: LineEdit
+# Tests point this at user:// so saving a named map does not write into the repository.
+var bake_dir := BAKE_DIR
 var map_select: OptionButton
 
 var session: Variant
@@ -77,6 +81,14 @@ static func _safe_map_name(raw_name: String) -> String:
 
 func _map_path(map_name: String) -> String:
 	return MAPS_DIR + "/" + _safe_map_name(map_name) + ".json"
+
+
+## Scene a map bakes to. The unnamed layout is "default", which keeps the original scene path.
+func _bake_path(map_name: String) -> String:
+	var safe := _safe_map_name(map_name)
+	if safe.is_empty() or safe == "default":
+		return AUTHORED_SCENE_PATH
+	return bake_dir + safe + ".tscn"
 
 
 ## Map to read for a level: the one shipped with the build, else the player's saved map.
@@ -305,6 +317,13 @@ func save_named_map() -> void:
 		map_loading = false
 		controls.status.text = "MAP SAVE ERROR | " + str(result.error)
 		return
+	# Same rule as the layout: bakes are written from the editor only, since res:// is read-only in a build.
+	if OS.has_feature("editor"):
+		var scene_error: Error = await _scene_bake().save_async(objects.placed.duplicate(), _bake_path(safe_name), session, controls.status)
+		if scene_error != OK:
+			map_loading = false
+			controls.status.text = "MAP SAVED | scene bake error %d" % scene_error
+			return
 	map_name_edit.text = safe_name
 	_remember_level(safe_name)
 	_refresh_map_list(safe_name)
@@ -424,7 +443,7 @@ func save_layout() -> void:
 			map_loading = false
 			controls.status.text = "SAVED | shipped map error: " + str(shipped.error)
 			return
-		var scene_error: Error = await _scene_bake().save_async(objects.placed.duplicate(), AUTHORED_SCENE_PATH, session, controls.status)
+		var scene_error: Error = await _scene_bake().save_async(objects.placed.duplicate(), _bake_path(map_name_edit.text), session, controls.status)
 		if not is_instance_valid(session) or not session.is_inside_tree():
 			map_loading = false
 			return
