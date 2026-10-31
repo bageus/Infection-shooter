@@ -141,6 +141,7 @@ var _reaction := HIT_REACTION.new()
 
 var effects_root: Node3D
 var _drop_weapon: Callable
+var _carried_weapons: Callable
 var impact_pool: Node
 var glass_debris_floor: Node3D
 
@@ -179,15 +180,14 @@ func has_fruit() -> bool: return PLATE_FRUIT.applies(model_path)
 func get_fruit_config() -> Dictionary: return _fruit.config.duplicate()
 func configure_fruit(raw: Dictionary) -> void: _fruit.configure(self, _geometry, raw)
 
-func configure_loot_drop(drop_weapon: Callable) -> void:
-	_drop_weapon = drop_weapon
+func configure_loot_drop(drop_weapon: Callable, carried_weapons: Callable = Callable()) -> void: _drop_weapon = drop_weapon; _carried_weapons = carried_weapons
 
 
 func _release_loot() -> void:
 	var world: Node = effects_root if is_instance_valid(effects_root) else get_parent()
 	if not has_loot() or not has_meta(&"planning_loot") or world == null:
 		return
-	LOOT_DROP.release_crate(world, global_position, get_loot_config(), "large" if "large" in model_path.get_file() else "small", _drop_weapon)
+	LOOT_DROP.release_crate(world, global_position, get_loot_config(), "large" if "large" in model_path.get_file() else "small", _drop_weapon, _carried_weapons)
 
 
 func _ready() -> void:

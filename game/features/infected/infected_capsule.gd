@@ -127,7 +127,7 @@ func configure_world(container: Node3D, impacts: Node) -> void:
 	impact_pool = impacts
 
 
-func configure_loot_drop(drop_weapon: Callable) -> void: _authoring.drop_weapon = drop_weapon
+func configure_loot_drop(drop_weapon: Callable, carried_weapons: Callable = Callable()) -> void: _authoring.drop_weapon = drop_weapon; _authoring.carried_weapons = carried_weapons
 func configure_loot(config: Dictionary) -> void: _authoring.set_loot(config)
 func get_loot_config() -> Dictionary: return _authoring.loot()
 func configure_stats(config: Dictionary) -> void: _authoring.set_stats(config)

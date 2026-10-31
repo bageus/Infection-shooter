@@ -12,6 +12,7 @@ const SCENES := {
 	"ammo_grenade": preload("res://game/features/pickups/public/ammo_grenade_pickup.tscn"),
 	"antidote": preload("res://game/features/pickups/public/antidote_pickup.tscn"),
 	"dna": preload("res://game/features/pickups/public/dna_pickup.tscn"),
+	"armor": preload("res://game/features/pickups/public/armor_pickup.tscn"),
 }
 
 const DROP_LIFETIME := 75.0
@@ -29,8 +30,9 @@ const WALL_MASK := 129
 # Antidote is deliberately less common than health/ammo.
 @export_range(0.0, 1.0) var antidote_weight := 0.35
 
-func drop_for_enemy(world: Node, at: Vector3, ammo_multiplier: float = 1.0) -> void:
-	var weights := CONFIG.AUTO_WEIGHTS.duplicate()
+## `carried` is the player's weapon slot indices (null keeps every ammo type).
+func drop_for_enemy(world: Node, at: Vector3, ammo_multiplier: float = 1.0, carried: Variant = null) -> void:
+	var weights := CONFIG.auto_weights(carried)
 	weights.erase("dna")
 	weights["antidote"] = antidote_weight
 	var item_id := roll_item(randf(), weights, any_drop_chance, ammo_multiplier)

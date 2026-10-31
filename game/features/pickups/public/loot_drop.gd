@@ -7,16 +7,17 @@ const SCENES := DROP_TABLE.SCENES
 
 
 ## Crate contents on destruction. `empty` drops nothing, `auto` rolls by crate size.
-static func release_crate(world: Node, at: Vector3, config: Dictionary, size_hint: String, drop_weapon: Callable) -> void:
+## `carried_weapons` returns the weapon slot indices the player holds; auto loot skips other weapons' ammo.
+static func release_crate(world: Node, at: Vector3, config: Dictionary, size_hint: String, drop_weapon: Callable, carried_weapons: Callable = Callable()) -> void:
 	match str(config.get("mode", "empty")):
 		"manual":
 			spawn(world, CONFIG.manual_list(config), at, drop_weapon)
 		"auto":
-			spawn(world, CONFIG.auto_list(size_hint), at, drop_weapon)
+			spawn(world, CONFIG.auto_list(size_hint, CONFIG.auto_weights(_carried(carried_weapons))), at, drop_weapon)
 
 
 ## Infected death. Without a config the classic random drop applies.
-static func release_enemy(world: Node, at: Vector3, raw_config: Variant, drop_weapon: Callable, ammo_multiplier: float = 1.0) -> void:
+static func release_enemy(world: Node, at: Vector3, raw_config: Variant, drop_weapon: Callable, ammo_multiplier: float = 1.0, carried_weapons: Callable = Callable()) -> void:
 	var config := CONFIG.sanitize(raw_config, "auto")
 	match str(config["mode"]):
 		"manual":
@@ -24,8 +25,12 @@ static func release_enemy(world: Node, at: Vector3, raw_config: Variant, drop_we
 		"auto":
 			var table := DROP_TABLE.new()
 			world.add_child(table)
-			table.call("drop_for_enemy", world, at, ammo_multiplier)
+			table.call("drop_for_enemy", world, at, ammo_multiplier, _carried(carried_weapons))
 			table.queue_free()
+
+
+static func _carried(carried_weapons: Callable) -> Variant:
+	return carried_weapons.call() if carried_weapons.is_valid() else null
 
 
 static func spawn(world: Node, ids: Array[String], at: Vector3, drop_weapon: Callable) -> void:
