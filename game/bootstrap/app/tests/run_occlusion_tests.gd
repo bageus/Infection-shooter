@@ -1,4 +1,5 @@
 extends SceneTree
+const AudioRelease := preload("res://game/bootstrap/app/tests/audio_release.gd")
 
 const EFFECTS := preload("res://game/bootstrap/app/occlusion_effects.gd")
 const PREFS := preload("res://game/bootstrap/app/menu/menu_preferences.gd")
@@ -79,6 +80,7 @@ func _run() -> void:
 	await process_frame
 	await _integration()
 	print("Occlusion tests: %d failures" % failures)
+	await AudioRelease.release(self)
 	quit(0 if failures == 0 else 1)
 
 
