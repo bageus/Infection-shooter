@@ -61,12 +61,16 @@ func _run() -> void:
 	await process_frame
 	_check(director.get("current") == "move" and bool(overlay.get("active")), "The first lesson is movement")
 	_check(overlay.get("step").has("keys") and overlay.get("keys").visible, "Movement shows animated key caps")
-	_check(not paused, "Movement does not pause the game")
+	_check(paused, "The first screen pauses the game")
+	await _advance(overlay)
+	_check(not paused and not str(overlay.get("step").get("objective")).is_empty(), "Then the task moves to the objective and the game runs")
+	_check((hud.get_node("Objective").get_child(0) as Label).text == str(overlay.get("step").get("objective")), "The HUD banner shows the task")
 	_check(PROGRESS.new(SAVE).is_done("move"), "The lesson is remembered as soon as it starts")
 	await _walk(actor, 0.0, 5.0)
 	_check(director.get("current") == "", "Without a door target five steps finish the movement lesson")
 	await _walk(actor, 5.0, 8.0)
 	_check(director.get("current") == "shoot", "A few steps later the shooting lesson starts")
+	await _advance(overlay)
 	var gone: Variant = bottle.get("_damage")
 	gone.glass_broken = true
 	await process_frame
@@ -76,6 +80,7 @@ func _run() -> void:
 	_check(TARGET.standing(self, "bottle").is_empty(), "No bottle target stands any more")
 	await _walk(actor, 8.0, 14.0)
 	_check(director.get("current") == "look", "Then the camera lesson")
+	await _advance(overlay)
 	Input.action_press("camera_left")
 	await process_frame
 	_check(float(director.get("_look_seconds")) > 0.0, "Holding the camera key is counted")
@@ -146,6 +151,17 @@ func _baked_scene() -> void:
 	loaded.free()
 	holder.free()
 	packed = null
+
+
+func _advance(overlay: Node) -> void:
+	var started := Time.get_ticks_msec()
+	while Time.get_ticks_msec() - started < 400:
+		await process_frame
+	var press := InputEventKey.new()
+	press.keycode = KEY_SPACE
+	press.pressed = true
+	overlay.call("_input", press)
+	await process_frame
 
 
 func _check(condition: bool, message: String) -> void:

@@ -76,6 +76,7 @@ var _has_key := false
 var _mutation_alarm: RefCounted
 var _vitals_fx: Control
 var _objective: PanelContainer
+var _tutorial_objective := ""
 var _texts_locale := ""
 var _scale_blink: Tween
 var _veil: ColorRect
@@ -158,8 +159,15 @@ func _build_objective() -> void:
 	add_child(_objective)
 
 
+## A tutorial lesson may put its task in the objective banner until it clears the text.
+func set_tutorial_objective(text: String) -> void:
+	_tutorial_objective = text
+	_set_objective_text()
+
+
 func _set_objective_text() -> void:
-	(_objective.get_child(0) as Label).text = tr("objectiveFireExit" if _has_key else "objectiveFindKey")
+	var fallback := tr("objectiveFireExit" if _has_key else "objectiveFindKey")
+	(_objective.get_child(0) as Label).text = _tutorial_objective if not _tutorial_objective.is_empty() else fallback
 
 
 # Top-centre banner in the shared HUD frame; objective and control-loss notices use the same look.

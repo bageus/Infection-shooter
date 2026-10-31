@@ -207,10 +207,12 @@ func _start_next() -> void:
 
 
 func _next_step() -> void:
+	_hud.call("set_tutorial_objective", "")
 	if _steps.is_empty():
 		_end_lesson()
 		return
 	var step: Dictionary = _steps.pop_front()
+	_hud.call("set_tutorial_objective", str(step.get("objective", "")))
 	overlay.call("play", step)
 
 
@@ -264,31 +266,26 @@ func _build_steps(lesson: String) -> Array:
 		"move":
 			var doors := TARGET.standing(get_tree(), "door")
 			if doors.is_empty():
-				return [_task(TEXT.t("tutMoveFree"), KEYS.movement(), "cycle", func() -> bool: return _steps_since_last_lesson() >= 5.0)]
+				return _task(TEXT.t("tutMoveFree"), TEXT.t("objMoveFree"), KEYS.movement(), "cycle", func() -> bool: return _steps_since_last_lesson() >= 5.0)
 			var door: Node3D = doors[0]
-			return [_task(TEXT.t("tutMove"), KEYS.movement(), "cycle", _near.bind(door))]
+			return _task(TEXT.t("tutMove"), TEXT.t("objMove"), KEYS.movement(), "cycle", _near.bind(door))
 		"shoot":
-			return [_task(TEXT.t("tutShoot") % KEYS.binding("fire"), KEYS.row(["fire"]), "all",
-					func() -> bool: return TARGET.standing(get_tree(), "bottle").is_empty())]
+			return _task(TEXT.t("tutShoot") % KEYS.binding("fire"), TEXT.t("objShoot"), KEYS.row(["fire"]), "all",
+					func() -> bool: return TARGET.standing(get_tree(), "bottle").is_empty())
 		"look":
-			return [_task(TEXT.t("tutLook") % [KEYS.binding("camera_left"), KEYS.binding("camera_right")],
+			return _task(TEXT.t("tutLook") % [KEYS.binding("camera_left"), KEYS.binding("camera_right")], TEXT.t("objLook"),
 					KEYS.row(["camera_left", "camera_right"]), "cycle",
-					func() -> bool: return _look_seconds >= LOOK_SECONDS or _lesson_seconds() >= 15.0)]
+					func() -> bool: return _look_seconds >= LOOK_SECONDS or _lesson_seconds() >= 15.0)
 		"one_way":
-			return [
-				_click(TEXT.t("tutOneWay"), []),
-				_task(TEXT.t("tutOneWayFind"), [], "cycle", _lesson_over_after.bind(6.0)),
-			]
+			return [_click(TEXT.t("tutOneWay"), [])] + _task(TEXT.t("tutOneWayFind"), TEXT.t("objOneWay"), [], "cycle", _lesson_over_after.bind(6.0))
 		"roll":
-			return [
-				_task(TEXT.t("tutRoll") % KEYS.binding("roll"), KEYS.row(["roll"]), "all", func() -> bool: return _rolled),
-				_task(TEXT.t("tutSprint") % KEYS.binding("sprint"), KEYS.row(["sprint"]), "all", func() -> bool: return _sprinted_seconds >= 0.5),
-			]
+			return (_task(TEXT.t("tutRoll") % KEYS.binding("roll"), TEXT.t("objRoll") % KEYS.binding("roll"), KEYS.row(["roll"]), "all", func() -> bool: return _rolled)
+					+ _task(TEXT.t("tutSprint") % KEYS.binding("sprint"), TEXT.t("objSprint") % KEYS.binding("sprint"), KEYS.row(["sprint"]), "all", func() -> bool: return _sprinted_seconds >= 0.5))
 		"explore":
-			return [_task(TEXT.t("tutExplore"), [], "cycle", func() -> bool: return _crate_in_sight() or _lesson_seconds() >= 30.0)]
+			return _task(TEXT.t("tutExplore"), TEXT.t("objExplore"), [], "cycle", func() -> bool: return _crate_in_sight() or _lesson_seconds() >= 30.0)
 		"crates":
-			return [_task(TEXT.t("tutCrates") % KEYS.binding("melee"), KEYS.row(["melee"]), "all",
-					func() -> bool: return TARGET.standing(get_tree(), "crate").is_empty())]
+			return _task(TEXT.t("tutCrates") % KEYS.binding("melee"), TEXT.t("objCrates"), KEYS.row(["melee"]), "all",
+					func() -> bool: return TARGET.standing(get_tree(), "crate").is_empty())
 		"weapons":
 			return [_click(TEXT.t("tutWeapons") % [KEYS.binding("weapon_1"), KEYS.binding("weapon_2"), KEYS.binding("weapon_3")], [_hud_rect.bind("weapons")])]
 		"armor":
@@ -300,16 +297,14 @@ func _build_steps(lesson: String) -> Array:
 				_picture(TEXT.t("tutMeterLimit")),
 				_click(TEXT.t("tutAntidote") % antidote_key, [antidote]),
 				_click(TEXT.t("tutAntidoteWise"), [antidote]),
-				_task(TEXT.t("tutInhale"), [], "cycle", _cloud_inhaled),
-			]
+			] + _task(TEXT.t("tutInhale"), TEXT.t("objInhale"), [], "cycle", _cloud_inhaled)
 		"active_skill":
 			return [
 				_click(TEXT.t("tutBranches"), [_tree_rect.bind("active"), _tree_rect.bind("passive")], _tree_open),
 				_click(TEXT.t("tutActive"), [_tree_rect.bind("active")], _tree_open),
 				_click(TEXT.t("tutPassive"), [_tree_rect.bind("passive")], _tree_open),
 				_wait(TEXT.t("tutPickPower"), [_tree_rect.bind("skill:power_strike")], _power_strike_chosen, _tree_open, true),
-				_hint(TEXT.t("tutKillActive") % KEYS.binding("skill_1"), _skill_ready.bind("muscle_memory")),
-			]
+			] + _task(TEXT.t("tutKillActive") % KEYS.binding("skill_1"), TEXT.t("objKill") % KEYS.binding("skill_1"), [], "cycle", _skill_ready.bind("muscle_memory"))
 		"passive_skill":
 			return [
 				_wait(TEXT.t("tutPickReload"), [_tree_rect.bind("skill:muscle_memory")], _skill_learned.bind("muscle_memory"), _tree_open, true),
@@ -322,8 +317,7 @@ func _build_steps(lesson: String) -> Array:
 				_click(TEXT.t("tutAntidoteEffect"), [mutation]),
 			]
 		"open_menu":
-			return [
-				_hint(TEXT.t("tutOpenMenu") % KEYS.binding("mutation_tree"), _tree_open),
+			return _task(TEXT.t("tutOpenMenu") % KEYS.binding("mutation_tree"), TEXT.t("objOpenMenu") % KEYS.binding("mutation_tree"), [], "cycle", _tree_open) + [
 				_wait(TEXT.t("tutPassiveUse"), [_tree_rect.bind("passive")], func() -> bool: return not _tree_open(), _tree_open, false),
 			]
 		"gas_mask":
@@ -340,17 +334,16 @@ func _picture(text: String) -> Dictionary:
 		"mutation": _runtime.call("get_mutation"), "threshold": _runtime.call("get_critical_threshold")}
 
 
-func _hint(text: String, done: Callable) -> Dictionary:
-	return {"text": text, "targets": [], "mode": "wait", "done": done, "hint": true, "dim": false}
-
-
-# A task banner at the top with animated key caps; the game keeps running.
-func _task(text: String, keys: Array, keys_mode: String, done: Callable) -> Dictionary:
-	var step := _hint(text, done)
+# A task: first a full-screen overlay that pauses the game and shows the key caps, then the task sits in
+# the HUD objective banner (the game runs) until `done` is true.
+func _task(text: String, objective: String, keys: Array, keys_mode: String, done: Callable) -> Array:
+	var intro := {"text": text, "targets": [], "mode": "click", "requires": Callable()}
 	if not keys.is_empty():
-		step["keys"] = keys
-		step["keys_mode"] = keys_mode
-	return step
+		intro["keys"] = keys
+		intro["keys_mode"] = keys_mode
+	var pending := {"text": objective, "targets": [], "mode": "wait", "done": done, "objective": objective,
+			"requires": func() -> bool: return false}
+	return [intro, pending]
 
 
 func _wait(text: String, targets: Array, done: Callable, requires: Callable, arrow: bool, dim: bool = true) -> Dictionary:
