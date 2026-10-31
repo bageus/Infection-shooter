@@ -17,6 +17,8 @@ const DOOR_REACHED := 1.6
 const CLOUD_RANGE := 5.0
 const CRATE_SIGHT := 9.0
 const LOOK_SECONDS := 0.8
+const ADOPT_WINDOW := 30.0 # seconds after start in which a loading map may still add targets
+const FIRST_LESSON_DELAY := 2.0
 const ONE_WAY_MODE := 1 # DoorMode.SWING_ONE_WAY in interactive_door.gd
 
 var overlay: Node
@@ -40,6 +42,8 @@ var _rolled := false
 var _sprinted_seconds := 0.0
 var _key_hunt := false
 var _door_clock := 0.0
+var _since_start := 0.0
+var _adopt_clock := 0.0
 
 
 func configure(player: Node, hud: Node, tree_ui: Node, progress_state: RefCounted = null, host: Node = null) -> void:
@@ -76,13 +80,18 @@ func request(lesson: String) -> void:
 
 func _process(delta: float) -> void:
 	_track_input(delta)
+	_since_start += delta
+	_adopt_clock -= delta
+	if _adopt_clock <= 0.0 and _since_start < ADOPT_WINDOW:
+		_adopt_clock = 0.5
+		TARGET.adopt_baked(get_tree())
 	_door_clock -= delta
 	if _door_clock <= 0.0:
 		_door_clock = 0.15
 		_watch_one_way_doors()
 	if _key_hunt and bool(_player.call("has_emergency_key")):
 		_end_key_hunt()
-	if current.is_empty() and _queue.is_empty():
+	if current.is_empty() and _queue.is_empty() and _since_start >= FIRST_LESSON_DELAY:
 		_start_first_run_lesson()
 
 

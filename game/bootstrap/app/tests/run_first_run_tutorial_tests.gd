@@ -56,6 +56,7 @@ func _run() -> void:
 	root.add_child(director)
 	director.call("configure", actor, hud, tree_ui, PROGRESS.new(SAVE))
 	var overlay: Node = director.get("overlay")
+	director.set("_since_start", 3.0) # skip the start-up delay
 	await process_frame
 	await process_frame
 	_check(director.get("current") == "move" and bool(overlay.get("active")), "The first lesson is movement")
@@ -92,6 +93,7 @@ func _run() -> void:
 	_check(director.get("current") == "", "A seen lesson never starts again")
 	TARGET.configure(crate, false)
 	_check(not TARGET.is_target(crate) and crate.get_node_or_null(TARGET.MARKER_NAME) == null, "The flag can be removed")
+	_baked_scene()
 	var saved := _prop("res://models/objects/enviroments/09/09_fire_extinguisher.glb", Vector3(20, 0, 0))
 	PROPERTIES.restore(saved, {"tutorial_target": true})
 	_check(TARGET.kind_of(saved) == "extinguisher" and TARGET.is_target(saved), "A saved map record restores the target flag")
@@ -114,6 +116,29 @@ func _walk(actor: Node3D, from: float, to: float) -> void:
 		await process_frame
 	await process_frame
 	await process_frame
+
+
+func _baked_scene() -> void:
+	# A baked (packed) map keeps the flag and its marker; an old bake with only the meta is re-flagged.
+	var holder := Node3D.new()
+	var baked := PROP.instantiate() as Node3D
+	baked.set("model_path", "res://models/objects/enviroments/09/09_plastic_water_bottle_blue_500ml.glb")
+	holder.add_child(baked)
+	baked.owner = holder
+	TARGET.configure(baked, true)
+	var packed := PackedScene.new()
+	packed.pack(holder)
+	var loaded: Node = packed.instantiate()
+	root.add_child(loaded)
+	var again := loaded.get_child(0)
+	_check(again.is_in_group(TARGET.GROUP) and again.get_node_or_null(TARGET.MARKER_NAME) != null, "A baked scene keeps the target flag and marker")
+	again.remove_from_group(TARGET.GROUP)
+	again.get_node(TARGET.MARKER_NAME).free()
+	TARGET.adopt_baked(self)
+	_check(again.is_in_group(TARGET.GROUP) and again.get_node_or_null(TARGET.MARKER_NAME) != null, "A map baked without the group is re-flagged from its meta")
+	loaded.free()
+	holder.free()
+	packed = null
 
 
 func _check(condition: bool, message: String) -> void:
