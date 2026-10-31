@@ -144,6 +144,8 @@ func _start_first_run_lesson() -> void:
 		return
 	if not _over("weapons") and _occupied_weapon_slots() >= 2:
 		request("weapons")
+	if not _over("armor") and float(_player.get("armor")) > 0.0:
+		request("armor")
 
 
 func _occupied_weapon_slots() -> int:
@@ -289,6 +291,9 @@ func _build_steps(lesson: String) -> Array:
 					func() -> bool: return TARGET.standing(get_tree(), "crate").is_empty())]
 		"weapons":
 			return [_click(TEXT.t("tutWeapons") % [KEYS.binding("weapon_1"), KEYS.binding("weapon_2"), KEYS.binding("weapon_3")], [_hud_rect.bind("weapons")])]
+		"armor":
+			return [{"text": TEXT.t("tutArmor"), "targets": [_hud_rect.bind("armor")], "mode": "click", "picture": true,
+					"armor": float(_player.get("armor")) / maxf(float(_player.get("max_armor")), 1.0)}]
 		"mutation_scale":
 			return [
 				_click(TEXT.t("tutMeterGrow"), [mutation]),

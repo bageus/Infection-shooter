@@ -4,7 +4,7 @@ extends CanvasLayer
 ## A "click" step pauses the game and ends on any key or mouse press.
 ## A "wait" step lets input through and ends when its `done` callable returns true.
 ## Step keys: text, targets (Array of Callable -> Rect2), mode, arrow, picture (+ mutation, threshold),
-## hint (text at the top, no dim), dim, requires, done, keys (animated key caps) and keys_mode ("cycle" or "all").
+## armor (0..1: show the armor bar picture), hint (text at the top, no dim), dim, requires, done, keys (animated key caps) and keys_mode ("cycle" or "all").
 
 const PALETTE := preload("res://game/bootstrap/app/tutorial/tutorial_palette.gd")
 const TEXT := preload("res://game/bootstrap/app/mutation_text.gd")
@@ -91,6 +91,7 @@ func play(next_step: Dictionary) -> void:
 	picture.visible = bool(step.get("picture", false))
 	picture.set("mutation", float(step.get("mutation", 0.0)))
 	picture.set("threshold", float(step.get("threshold", 30.0)))
+	picture.set("armor", float(step.get("armor", -1.0)))
 	picture.queue_redraw()
 	keys.visible = step.has("keys")
 	if keys.visible:

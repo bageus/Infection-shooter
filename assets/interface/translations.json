@@ -394,7 +394,9 @@
     "tutWeapons": "Переключайтесь между оружием горячими клавишами %s, %s и %s.",
     "tutInhale": "Задание: вдохните весь мутаген из облака. Для этого просто стойте в облаке.",
     "tutOpenMenu": "Нажмите [%s] и проверьте очки мутации.",
-    "tutPassiveUse": "Это пассивные навыки. Выберите пассивный навык и используйте его."
+    "tutPassiveUse": "Это пассивные навыки. Выберите пассивный навык и используйте его.",
+    "hudArmor": "БРОНЯ",
+    "tutArmor": "Вы получили броню. Её шкала стоит над шкалой здоровья: урон сначала забирает броня, потом здоровье."
   },
   "en": {
     "credits": "Credits",
@@ -791,6 +793,8 @@
     "tutWeapons": "Switch between weapons with the hotkeys %s, %s and %s.",
     "tutInhale": "Task: inhale all the mutagen from the cloud. Just stand in the cloud.",
     "tutOpenMenu": "Press [%s] and check your mutation points.",
-    "tutPassiveUse": "These are passive skills. Pick a passive skill and use it."
+    "tutPassiveUse": "These are passive skills. Pick a passive skill and use it.",
+    "hudArmor": "ARMOR",
+    "tutArmor": "You got armor. Its bar sits above the health bar: damage hits the armor first, then your health."
   }
 }

@@ -91,6 +91,12 @@ func _run() -> void:
 	director.call("request", "shoot")
 	await process_frame
 	_check(director.get("current") == "", "A seen lesson never starts again")
+	actor.set("armor", 60.0)
+	await process_frame
+	await process_frame
+	_check(director.get("current") == "armor" and bool(overlay.get("picture").visible), "Getting armor for the first time shows the armor bar")
+	_check(is_equal_approx(float(overlay.get("picture").get("armor")), 0.6), "The picture shows the armor held")
+	_check(not hud.call("tutorial_rect", "armor").size.is_zero_approx(), "The HUD armor bar is spotlighted")
 	TARGET.configure(crate, false)
 	_check(not TARGET.is_target(crate) and crate.get_node_or_null(TARGET.MARKER_NAME) == null, "The flag can be removed")
 	_baked_scene()
@@ -101,6 +107,7 @@ func _run() -> void:
 		print("First-run tutorial tests passed.")
 	else:
 		push_error("First-run tutorial tests failed: %d failure(s)." % failures)
+	director.free()
 	hud.queue_free()
 	await process_frame
 	DirAccess.remove_absolute(SAVE)

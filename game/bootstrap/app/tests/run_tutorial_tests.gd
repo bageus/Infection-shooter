@@ -33,7 +33,7 @@ func _run() -> void:
 	var director := DIRECTOR.new()
 	root.add_child(director)
 	var seen := PROGRESS.new(SAVE)
-	for first_run in ["move", "shoot", "look", "one_way", "roll", "explore", "crates", "weapons"]:
+	for first_run in ["move", "shoot", "look", "one_way", "roll", "explore", "crates", "weapons", "armor"]:
 		seen.mark_done(first_run) # the first-run chain has its own test
 	director.call("configure", actor, hud, tree_ui, PROGRESS.new(SAVE))
 	var overlay: Node = director.get("overlay")
@@ -96,6 +96,7 @@ func _run() -> void:
 	for sound: AudioStreamPlayer in hud.find_children("*", "AudioStreamPlayer", true, false):
 		sound.stop()
 	await create_timer(0.3).timeout # the audio thread lets go of a stopped stream a moment later
+	director.free() # its lessons hold callables bound to the HUD
 	hud.queue_free()
 	await create_timer(0.3).timeout
 	DirAccess.remove_absolute(SAVE)
