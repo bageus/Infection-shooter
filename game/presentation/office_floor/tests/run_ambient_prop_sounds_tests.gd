@@ -36,6 +36,7 @@ func _run() -> void:
 		await process_frame
 	_expect(rang > 0 and rang < 40, "A near phone rings now and then (%d of 40)." % rang)
 	# A ring is a burst of beeps one period apart, never a single long tone.
+	await create_timer(1.2).timeout # let voices from the scans above end
 	ambient._ring(phone.global_position, 2)
 	_expect(_voices(&"phone_ring") == 1, "A ring starts with its first beep.")
 	await create_timer(1.3).timeout
