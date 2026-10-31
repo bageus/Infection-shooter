@@ -95,6 +95,7 @@ var _mutation_control := CONTROL_LOSS.new()
 var _mutation_menu_open := false
 var _slot_weapons: Array[int] = [0, -1, -1] ## Weapon index per slot, -1 when empty; a new game starts with the pistol only.
 var _emergency_key := false
+var _manual_hero_spawn: Dictionary = {}
 var effects_root: Node3D
 var impact_pool: Node
 var _drop_weapon_command: Callable
@@ -330,6 +331,23 @@ func import_loadout(loadout: Dictionary) -> void:
 	if seen[0] < 0: return # Slot 0 always holds a weapon: pickups fill empty slots from the first one.
 	_slot_weapons = seen
 	_select_weapon(0)
+
+## Manual hero spawn from the planner: replaces the start state. Empty or automatic settings change nothing.
+func apply_hero_spawn(hero: Dictionary) -> void:
+	_manual_hero_spawn = hero if str(hero.get("mode", "")) == "manual" else {}
+	if _manual_hero_spawn.is_empty():
+		return
+	health = clampf(float(hero.health), 1.0, max_health)
+	antidotes = clampi(int(hero.antidotes), 0, max_antidotes)
+	import_loadout({"slots": hero.slots, "armor": max_armor if bool(hero.armor) else 0.0, "ammo": hero.ammo})
+	infection_runtime.call("restore_critical_threshold", float(hero.threshold))
+	infection_runtime.call("set_gas_mask_worn", bool(hero.gas_mask))
+	# shortcut: no key item exists yet, so the key setting is saved but not applied.
+
+## The carry from the previous map runs after the spawn is applied, so a manual spawn is set again over it.
+func restore_manual_hero_spawn() -> void:
+	if not _manual_hero_spawn.is_empty():
+		apply_hero_spawn(_manual_hero_spawn)
 
 ## Armor plate collected: the armor bar fills to its maximum.
 func pickup_armor() -> void:

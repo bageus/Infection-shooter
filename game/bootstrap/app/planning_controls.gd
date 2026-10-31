@@ -27,6 +27,8 @@ var floor_size: Node
 const SPAWN_OPTIONS := preload("res://game/bootstrap/app/planning_spawn_options.gd")
 const BIOMASS_OPTIONS := preload("res://game/bootstrap/app/planning_biomass_options.gd")
 var spawn_options: Node
+const HERO_SPAWN_OPTIONS := preload("res://game/bootstrap/app/planning_hero_spawn_options.gd")
+var hero_spawn_options: Node
 var biomass_options: Node
 const FIXTURE_CONTROLS := preload("res://game/bootstrap/app/planning_light_fixtures.gd")
 var fixtures = FIXTURE_CONTROLS.new()
@@ -130,6 +132,9 @@ func setup_controls() -> void:
 	spawn_options = SPAWN_OPTIONS.new()
 	add_child(spawn_options)
 	spawn_options.call("setup", session, objects)
+	hero_spawn_options = HERO_SPAWN_OPTIONS.new()
+	add_child(hero_spawn_options)
+	hero_spawn_options.call("setup", session, objects)
 	fixtures.setup(self)
 	light_view.setup(self)
 	fixture_toggles.setup(self)

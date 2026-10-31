@@ -6,6 +6,8 @@ const GROUP_TEMPLATES := preload("res://game/bootstrap/app/planning_group_templa
 
 var player_spawn_defined = false
 var player_spawn_transform = Transform3D.IDENTITY
+## Hero spawn settings of the Player Spawn (see planning_hero_spawn.gd); absent means automatic.
+var hero_spawn: Dictionary = {}
 var selected_path = ""
 var selected_kind = ""
 var selected_entry: Dictionary = {}
@@ -238,6 +240,8 @@ func _clear_preview() -> void:
 	preview = null
 	if controls.spawn_options != null:
 		controls.spawn_options.update()
+	if controls.hero_spawn_options != null:
+		controls.hero_spawn_options.update()
 
 
 func _update_preview(screen_pos: Vector2) -> void:

@@ -18,7 +18,8 @@ static func collect(objects: Node, nodes: Array, include_player: bool = true) ->
 			"scene":"res://game/features/player/public/player.tscn",
 			"x":objects.player_spawn_transform.origin.x, "y":objects.player_spawn_transform.origin.y, "z":objects.player_spawn_transform.origin.z,
 			"rotation_y":objects.player_spawn_transform.basis.get_euler().y * 180.0 / PI,
-			"scale_x":1.0, "scale_y":1.0, "scale_z":1.0
+			"scale_x":1.0, "scale_y":1.0, "scale_z":1.0,
+			"hero":objects.hero_spawn.duplicate(true)
 		})
 	for node in nodes:
 		if not is_instance_valid(node):
