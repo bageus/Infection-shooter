@@ -1,4 +1,5 @@
 extends SceneTree
+const AudioRelease := preload("res://game/bootstrap/app/tests/audio_release.gd")
 const SNAP := preload("res://game/bootstrap/app/planning_edge_snap.gd")
 const FLOOR := preload("res://game/bootstrap/app/floor_wall_snap.gd")
 const GEOMETRY := preload("res://game/bootstrap/app/planning_geometry.gd")
@@ -22,6 +23,7 @@ func _run() -> void:
 	stage.queue_free()
 	await process_frame
 	print("Planner contacts: %d failures" % failures)
+	await AudioRelease.release(self)
 	quit(failures)
 
 func _node(position: Vector3, angle: float = 0.0, wall: bool = false) -> Node3D:
