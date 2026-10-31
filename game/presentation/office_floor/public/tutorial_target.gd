@@ -40,7 +40,7 @@ static func configure(node: Node3D, enabled: bool) -> void:
 		return
 	if enabled:
 		node.set_meta(META, true)
-		node.add_to_group(GROUP)
+		node.add_to_group(GROUP, true) # persistent: a baked scene keeps the flag
 	else:
 		node.remove_meta(META)
 		node.remove_from_group(GROUP)
@@ -51,6 +51,21 @@ static func configure(node: Node3D, enabled: bool) -> void:
 		var marker := Marker.new()
 		marker.name = MARKER_NAME
 		node.add_child(marker)
+		marker.owner = node.owner # saved with a baked scene
+
+
+## Maps baked before the flag was persistent still carry its meta: flag those objects again.
+static func adopt_baked(tree: SceneTree) -> void:
+	for node: Node in tree.root.find_children("*", "Node3D", true, false):
+		if node.has_meta(META) and not node.is_in_group(GROUP):
+			configure(node as Node3D, true)
+
+
+## The tutorial calls this when a stage starts: flagged objects of these kinds show their markers.
+static func reveal(tree: SceneTree, kinds: Array[String]) -> void:
+	for node in tree.get_nodes_in_group(GROUP):
+		if kind_of(node) in kinds:
+			node.set_meta(&"planning_tutorial_revealed", true)
 
 
 ## A target is finished once the object is gone or has been broken, shattered or burst.
