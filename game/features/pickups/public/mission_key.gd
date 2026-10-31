@@ -13,6 +13,7 @@ var _beacon: Node3D
 
 func _ready() -> void:
 	add_to_group("hidden_outline")
+	add_to_group("mission_key")
 	_art = Node3D.new()
 	add_child(_art)
 	var golden := StandardMaterial3D.new()

@@ -2,6 +2,7 @@ extends RefCounted
 ## Restore optional authored properties before a map object enters the tree.
 
 const DOOR_OPTIONS := preload("res://game/bootstrap/app/planning_door_options.gd")
+const TARGET := preload("res://game/presentation/office_floor/public/tutorial_target.gd")
 const WAVE_DIRECTOR := preload("res://game/features/spawning/public/wave_director.gd")
 
 static func restore(node: Node3D, record: Dictionary) -> void:
@@ -15,6 +16,8 @@ static func restore(node: Node3D, record: Dictionary) -> void:
 		node.call("configure_loot", record["loot"])
 	if node.has_method("configure_fruit") and record.get("fruit") is Dictionary:
 		node.call("configure_fruit", record["fruit"])
+	if record.get("tutorial_target", false) == true:
+		TARGET.configure(node, true)
 	var door := DOOR_OPTIONS.lockable_controller(node)
 	if door != null and DOOR_OPTIONS.is_valid_state(record.get("door_lock", "")):
 		door.call("configure_lock_state", StringName(str(record["door_lock"])))

@@ -15,6 +15,8 @@ var _openings: Array[Rect2] = []
 var _scan_remaining := 0.0
 var _player: Node3D
 var _hints: Node3D
+var _hint_override := Callable()
+var _hints_were_visible := true
 
 
 func setup(stage: Node3D, player: Node3D, _infection: Node) -> void:
@@ -35,11 +37,24 @@ func setup(stage: Node3D, player: Node3D, _infection: Node) -> void:
 
 
 func set_floor_hints_enabled(enabled: bool) -> void:
-	_hints.call("set_hints_enabled", enabled)
+	_hints_were_visible = enabled
+	if not _hint_override.is_valid():
+		_hints.call("set_hints_enabled", enabled)
+
+
+## A lesson may point the floor chevrons at its own goal for a while, whatever the setting says;
+## an invalid callable gives control back to the setting.
+func set_tutorial_hint(target: Callable) -> void:
+	if target.is_valid() and not _hint_override.is_valid():
+		_hints_were_visible = _hints.visible
+	_hint_override = target
+	_hints.call("set_hints_enabled", target.is_valid() or _hints_were_visible)
 
 
 # Goal for the floor chevrons: the door the carried emergency key opens, otherwise the nearest exit opening.
 func floor_hint_target() -> Vector3:
+	if _hint_override.is_valid():
+		return _hint_override.call()
 	if not is_instance_valid(_player):
 		return Vector3.INF
 	var from := Vector2(_player.global_position.x, _player.global_position.z)

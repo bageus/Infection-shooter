@@ -440,6 +440,8 @@ func tutorial_rect(kind: String) -> Rect2:
 			return antidote_panel.get_global_rect()
 		"gas_mask":
 			return gas_mask_panel.get_global_rect()
+		"weapons":
+			return $WeaponPanel.get_global_rect()
 	return Rect2()
 
 

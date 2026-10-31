@@ -5,6 +5,7 @@ const TREE_UI := preload("res://game/bootstrap/app/mutation_tree_ui.gd")
 const DIRECTOR := preload("res://game/bootstrap/app/tutorial/tutorial_director.gd")
 const PROGRESS := preload("res://game/bootstrap/app/tutorial/tutorial_progress.gd")
 const LOCALIZATION := preload("res://game/core/localization/public/ui_translations.gd")
+const TEXT := preload("res://game/bootstrap/app/mutation_text.gd")
 const SAVE := "user://tutorial_test.cfg"
 var failures := 0
 
@@ -31,6 +32,9 @@ func _run() -> void:
 	tree_ui.call("configure", runtime)
 	var director := DIRECTOR.new()
 	root.add_child(director)
+	var seen := PROGRESS.new(SAVE)
+	for first_run in ["move", "shoot", "look", "one_way", "roll", "explore", "crates", "weapons"]:
+		seen.mark_done(first_run) # the first-run chain has its own test
 	director.call("configure", actor, hud, tree_ui, PROGRESS.new(SAVE))
 	var overlay: Node = director.get("overlay")
 	await process_frame
@@ -47,8 +51,13 @@ func _run() -> void:
 	await _advance(overlay)
 	await _advance(overlay)
 	await _advance(overlay)
-	_check(director.get("current") == "" and not paused, "The scale lesson ends and unpauses")
-	_check(PROGRESS.new(SAVE).is_done("mutation_scale"), "The finished lesson is remembered")
+	_check(bool(overlay.get("step").get("hint")) and not paused, "The scale lesson ends with the inhale task, game running")
+	_check(not TEXT.t("tutAntidoteWise").is_empty() and not "tutKillActive" in TEXT.t("tutKillActive"), "Lesson texts resolve")
+	_check(not "мутаген и откро" in TEXT.t("tutKillActive") and not "absorb mutagen" in TEXT.t("tutKillActive"), "The kill hint no longer promises mutagen and a skill")
+	await process_frame
+	await process_frame
+	_check(director.get("current") == "" and not paused, "With no cloud left the inhale task is done")
+	_check(PROGRESS.new(SAVE).is_done("mutation_scale"), "The lesson is remembered")
 
 	runtime.get("_domain").mutation = 25.0
 	runtime.call("absorb_mutagen", 0.01)
@@ -64,17 +73,7 @@ func _run() -> void:
 	await process_frame
 	await process_frame
 	_check(bool(overlay.get("step").get("hint")), "Learning it shows the kill hint")
-	runtime.get("_domain").mutation = 29.99
-	runtime.call("absorb_mutagen", 0.002)
-	await process_frame
-	await process_frame
-	_check(director.get("current") == "passive_skill", "The next point starts the passive lesson")
-	runtime.call("upgrade_skill", "muscle_memory")
-	await process_frame
-	await process_frame
-	_check(str(overlay.get("step").get("mode")) == "click", "The lock explanation follows learning the passive skill")
-	await _advance(overlay)
-	_check(director.get("current") == "", "The passive lesson ends")
+	await _passive_lesson(director, overlay, runtime)
 
 	tree_ui.call("close_tree")
 	runtime.get("_domain").mutation = 40.0
@@ -89,22 +88,53 @@ func _run() -> void:
 	await process_frame
 	await process_frame
 	await _advance(overlay)
-	_check(not hud.call("tutorial_rect", "gas_mask").size.is_zero_approx(), "The last step spotlights the gas mask icon")
-	await _advance(overlay)
-	_check(director.get("current") == "", "The control loss lesson ends")
+	await _menu_lessons(director, overlay, hud, tree_ui)
 	_check(not paused, "Nothing stays paused")
 
 	await _mask_hud(hud, runtime)
 	# The HUD owns audio players that hold their streams; free it so nothing is still in use at exit.
+	for sound: AudioStreamPlayer in hud.find_children("*", "AudioStreamPlayer", true, false):
+		sound.stop()
+	await create_timer(0.3).timeout # the audio thread lets go of a stopped stream a moment later
 	hud.queue_free()
-	await process_frame
-	await process_frame
+	await create_timer(0.3).timeout
 	DirAccess.remove_absolute(SAVE)
 	if failures == 0:
 		print("Tutorial tests passed.")
 	else:
 		push_error("Tutorial tests failed: %d failure(s)." % failures)
 	quit(failures)
+
+
+func _passive_lesson(director: Node, overlay: Node, runtime: Node) -> void:
+	runtime.get("_domain").mutation = 29.99
+	runtime.call("absorb_mutagen", 0.002)
+	await process_frame
+	await process_frame
+	_check(director.get("current") == "passive_skill", "The next point starts the passive lesson")
+	runtime.call("upgrade_skill", "muscle_memory")
+	await process_frame
+	await process_frame
+	_check(str(overlay.get("step").get("mode")) == "click", "The lock explanation follows learning the passive skill")
+	await _advance(overlay)
+	_check(director.get("current") == "", "The passive lesson ends")
+
+
+func _menu_lessons(director: Node, overlay: Node, hud: Node, tree_ui: Node) -> void:
+	_check(director.get("current") == "open_menu", "After the antidote lesson the M menu lesson follows")
+	_check(bool(overlay.get("step").get("hint")), "It first asks to press M")
+	tree_ui.call("open_tree")
+	await process_frame
+	await process_frame
+	_check(not tree_ui.call("tutorial_rect", "passive").size.is_zero_approx() and str(overlay.get("step").get("mode")) == "wait",
+			"With the menu open the passive group is highlighted")
+	tree_ui.call("close_tree")
+	await process_frame
+	await process_frame
+	_check(director.get("current") == "gas_mask", "Then the gas mask lesson")
+	_check(not hud.call("tutorial_rect", "gas_mask").size.is_zero_approx(), "It spotlights the gas mask icon")
+	await _advance(overlay)
+	_check(director.get("current") == "", "The gas mask lesson ends")
 
 
 func _mask_hud(hud: Node, runtime: Node) -> void:
