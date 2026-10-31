@@ -331,6 +331,14 @@ func import_loadout(loadout: Dictionary) -> void:
 	_slot_weapons = seen
 	_select_weapon(0)
 
+## Weapon slot indices the player holds now; empty slots are left out.
+func carried_weapon_indices() -> Array[int]:
+	var carried: Array[int] = []
+	for index in _slot_weapons:
+		if index >= 0:
+			carried.append(index)
+	return carried
+
 ## Armor plate collected: the armor bar fills to its maximum.
 func pickup_armor() -> void:
 	armor = max_armor
