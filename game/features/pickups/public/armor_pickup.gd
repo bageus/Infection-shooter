@@ -30,6 +30,12 @@ func _ready() -> void:
 	add_child(BEACON.make(GLOW, 0.8, 0.0, 0.45))
 
 
+# Spawners call this on every drop; the vest hovers from the spot it is given.
+# shortcut: no floor raycast, a vest dropped over a ledge hangs at the kill height; upgrade to PickupItem-style settling if that shows up.
+func settle_on_floor() -> void:
+	pass
+
+
 func _process(delta: float) -> void:
 	if not _runtime_active:
 		# The mission layout moves the pickup after _ready: hover above its final floor spot.

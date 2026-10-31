@@ -5,10 +5,13 @@ extends RefCounted
 const MODES: Array[String] = ["empty", "manual", "auto"]
 const WEAPON_PREFIX := "weapon_"
 const WEAPON_NAMES: Array[String] = ["Pistol", "Uzi", "Shotgun", "Launcher", "AK", "M4", "Sniper", "Minigun"]
-const SUPPLIES: Array[String] = ["ammo_pistol", "ammo_uzi", "ammo_shotgun", "ammo_automate", "ammo_sniper", "ammo_minigun", "ammo_grenade", "medkit", "antidote", "dna"]
+const SUPPLIES: Array[String] = ["ammo_pistol", "ammo_uzi", "ammo_shotgun", "ammo_automate", "ammo_sniper", "ammo_minigun", "ammo_grenade", "medkit", "antidote", "dna", "armor"]
 const MAX_COUNT := 9
 ## Antidote and DNA are rarer than other supplies in auto loot. Grenade rounds are as rare as sniper rounds.
+## Armor is manual only: auto loot never rolls it.
 const AUTO_WEIGHTS := {"ammo_pistol": 0.75, "ammo_uzi": 0.60, "ammo_shotgun": 0.60, "ammo_automate": 0.60, "ammo_sniper": 0.15, "ammo_minigun": 0.20, "ammo_grenade": 0.15, "medkit": 1.0, "antidote": 0.35, "dna": 0.2}
+## Weapon slot indices (WEAPON_NAMES order) that take each ammo id.
+const AMMO_WEAPONS := {"ammo_pistol": [0], "ammo_uzi": [1], "ammo_shotgun": [2], "ammo_grenade": [3], "ammo_automate": [4, 5], "ammo_sniper": [6], "ammo_minigun": [7]}
 const STAT_MIN := 50.0
 const STAT_MAX := 200.0
 
@@ -51,12 +54,25 @@ static func manual_list(config: Dictionary) -> Array[String]:
 	return list
 
 
+## Auto weights without the ammo of weapons not in `carried`; null `carried` keeps every weight.
+static func auto_weights(carried: Variant) -> Dictionary:
+	var weights := AUTO_WEIGHTS.duplicate()
+	if carried is Array:
+		for id: String in AMMO_WEAPONS:
+			var carries := false
+			for index: int in AMMO_WEAPONS[id]:
+				carries = carries or (carried as Array).has(index)
+			if not carries:
+				weights.erase(id)
+	return weights
+
+
 ## Random supplies for an automatic crate; bigger crates hold more.
-static func auto_list(size_hint: String) -> Array[String]:
+static func auto_list(size_hint: String, weights: Dictionary = AUTO_WEIGHTS) -> Array[String]:
 	var list: Array[String] = []
 	var count := randi_range(2, 4) if size_hint == "large" else randi_range(1, 2)
 	for _i in count:
-		list.append(weighted_item(randf(), AUTO_WEIGHTS))
+		list.append(weighted_item(randf(), weights))
 	return list
 
 
