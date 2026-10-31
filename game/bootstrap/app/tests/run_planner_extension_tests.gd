@@ -24,6 +24,9 @@ func _run() -> void:
 	stage = MAIN.instantiate()
 	root.add_child(stage)
 	current_scene = stage
+	for child in stage.get_children(): # first-run lessons pause the tree on a fresh profile
+		if child.get_script() != null and str(child.get_script().resource_path).ends_with("tutorial_director.gd"):
+			child.free()
 	(stage.get_node("Gameplay/Enemies") as Node).process_mode = Node.PROCESS_MODE_DISABLED
 	await process_frame
 	var player: Node3D = stage.get("player")
