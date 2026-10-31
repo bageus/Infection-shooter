@@ -1,4 +1,5 @@
 extends SceneTree
+const AudioRelease := preload("res://game/bootstrap/app/tests/audio_release.gd")
 const EFFECTS := preload("res://game/bootstrap/app/occlusion_effects.gd")
 const QUEUE := preload("res://game/bootstrap/app/scene_resource_queue.gd")
 var failures := 0
@@ -42,6 +43,7 @@ func _run() -> void:
 	await _resources()
 	await _dummy_mesh_loading()
 	print("P2 optimization tests: %d failures" % failures)
+	await AudioRelease.release(self)
 	quit(0 if failures == 0 else 1)
 
 
