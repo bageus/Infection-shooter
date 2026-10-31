@@ -36,7 +36,7 @@ func _run() -> void:
 	var before: Array = objects.get("placed").duplicate()
 	var furniture: Array[Node3D] = []
 	for node: Node3D in before:
-		if is_instance_valid(node) and not node.has_meta("planning_actor_kind") and not node.has_meta("planning_existing"):
+		if is_instance_valid(node) and not node.has_meta("planning_actor_kind") and not node.has_meta("planning_existing") and not _is_pickup(node):
 			furniture.append(node)
 	if furniture.size() < 100:
 		_finish(1, "too few placed furniture nodes: %d" % furniture.size())
@@ -84,3 +84,8 @@ func _finish(failures: int, message: String) -> void:
 		DirAccess.remove_absolute(ProjectSettings.globalize_path(SAVE))
 	print("Smooth planner restore failures: ", failures)
 	quit(failures)
+
+
+# Loose rigid bodies (pickups, pushable cases) are reused by restore, not rebuilt; this test checks static furniture.
+func _is_pickup(node: Node) -> bool:
+	return node is RigidBody3D or node.is_in_group("weapon_pickups") or node.is_in_group("armor_pickups") or node.is_in_group("mission_key")

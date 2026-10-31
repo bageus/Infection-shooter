@@ -1,4 +1,5 @@
 extends SceneTree
+const AudioRelease := preload("res://game/bootstrap/app/tests/audio_release.gd")
 const MAIN := preload("res://game/bootstrap/app/main.tscn")
 const CORPSE := preload("res://game/features/infected/public/decor/corpse_hunger.tscn")
 const HORDE := preload("res://game/features/infected/public/decor/corpse_horde.tscn")
@@ -47,6 +48,7 @@ func _run() -> void:
 	await process_frame
 	await create_timer(.2).timeout
 	print("Planner extension tests: %d failures" % failures)
+	await AudioRelease.release(self)
 	quit(failures)
 
 func _snap(catalog: RefCounted) -> void:
