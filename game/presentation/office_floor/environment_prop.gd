@@ -379,7 +379,7 @@ func take_projectile_hit(damage: float, hit_position: Vector3, _normal: Vector3,
 			queue_free.call_deferred()
 		return false
 	# Every loose item moves when shot, by its weight (anchored ones stay).
-	BULLET_PUSH.apply(self, weight_kg, weapon, direction, hit_position)
+	BULLET_PUSH.shot(self, weight_kg, weapon, direction, hit_position)
 	var action := _damage.hit(damage, weapon, BOOK_STACK.contains(model_path),
 		bool(get_meta("planning_wall_mount", false)), freeze, _is_facade_damage())
 	match action:
