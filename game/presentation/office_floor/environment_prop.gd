@@ -11,6 +11,7 @@ const FLOOR_DEBRIS := preload("res://game/presentation/office_floor/prop_floor_d
 var _floor_debris := FLOOR_DEBRIS.new()
 const PLATE_FRUIT := preload("res://game/presentation/office_floor/plate_fruit.gd")
 var _fruit := PLATE_FRUIT.new()
+const CRATE_WALLS := preload("res://game/presentation/office_floor/crate_walls.gd")
 const FRAGILE := preload("res://game/presentation/office_floor/fragile_prop.gd")
 var _geometry := GEOMETRY.new()
 var _retained := preload("res://game/presentation/office_floor/retained_prop_body.gd").new()
@@ -404,15 +405,11 @@ func take_projectile_hit(damage: float, hit_position: Vector3, _normal: Vector3,
 
 
 # A cardboard box has no staged pieces: its panels fly apart at the moment it breaks.
+# A big wooden crate is cut into its walls, which topple and pile up before they are baked.
 func _collapse_box(hit_position: Vector3, direction: Vector3) -> void:
 	_floor_debris.emit(self, model_path, "break", hit_position, direction)
 	BREAK_SOUND.play(self, effects_root, model_path, get_projectile_material(), hit_position)
-	var index := 0
-	for child in _visual.find_children("*", "MeshInstance3D", true, false):
-		var mesh := child as MeshInstance3D
-		if mesh != null and mesh.mesh != null and mesh.is_visible_in_tree():
-			DAMAGE.spawn_piece(self, mesh, self, 0, index, direction, hit_position)
-			index += 1
+	CRATE_WALLS.spawn_pieces(self, _visual, hit_position, direction)
 	_visual.hide()
 	for shape in _shapes:
 		shape.set_deferred("disabled", true)
@@ -538,7 +535,10 @@ func _apply_damage(hit_position: Vector3, direction: Vector3) -> void:
 			shape.set_deferred("disabled", true)
 		collision_layer = 0
 		freeze = true
+		var first := effects_root.get_child_count() if is_instance_valid(effects_root) else 0
 		BREAKUP.spawn_stage(self, _geometry, 0, "", hit_position, direction, _damage.full_break)
+		if is_instance_valid(effects_root):
+			CRATE_WALLS.scatter_pallet(model_path, effects_root.get_children().slice(first), global_position)
 
 
 func _is_facade_damage() -> bool:
