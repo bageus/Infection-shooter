@@ -184,13 +184,10 @@ func configure_loot_drop(drop_weapon: Callable) -> void:
 
 
 func _release_loot() -> void:
-	if not has_loot() or not has_meta(&"planning_loot"):
-		return
 	var world: Node = effects_root if is_instance_valid(effects_root) else get_parent()
-	if world == null:
+	if not has_loot() or not has_meta(&"planning_loot") or world == null:
 		return
-	var size_hint := "large" if "large" in model_path.get_file() else "small"
-	LOOT_DROP.release_crate(world, global_position, get_loot_config(), size_hint, _drop_weapon)
+	LOOT_DROP.release_crate(world, global_position, get_loot_config(), "large" if "large" in model_path.get_file() else "small", _drop_weapon)
 
 
 func _ready() -> void:
@@ -489,6 +486,11 @@ func take_melee_hit(damage: float, hit_position: Vector3, direction: Vector3) ->
 	if bool(get_meta("planning_wall_mount", false)) and freeze:
 		return
 	take_projectile_hit(damage, hit_position, Vector3.ZERO, direction, "MELEE")
+
+func break_by_strike(hit_position: Vector3, direction: Vector3) -> void:
+	if _damage.shatter():
+		_release_loot()
+		_collapse_box(hit_position, direction)
 
 
 func _apply_damage(hit_position: Vector3, direction: Vector3) -> void:

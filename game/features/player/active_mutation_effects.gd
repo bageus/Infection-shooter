@@ -162,7 +162,10 @@ func _strike_objects(forward: Vector3, damage: float) -> void:
 		hit_ids[body.get_instance_id()] = true
 		if body is RigidBody3D and not (body as RigidBody3D).freeze:
 			body.call("push_from_character", player.global_position, forward * STRIKE_PUSH_SPEED, 1.0)
-		body.call("take_melee_hit", damage, body.global_position, forward)
+		if body.has_method("has_loot") and bool(body.call("has_loot")) and body.has_method("break_by_strike"):
+			body.call("break_by_strike", body.global_position, forward)
+		else:
+			body.call("take_melee_hit", damage, body.global_position, forward)
 
 
 static func _strikeable(body: Node3D) -> bool:
