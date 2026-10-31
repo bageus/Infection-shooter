@@ -27,6 +27,8 @@ func _run() -> void:
 	await _test_partition_logo(stage)
 	await _test_partition_sound()
 	await _test_crate_strike(stage)
+	await _test_crate_walls(stage)
+	await _test_pallet_scatter(stage)
 	print("%d failure(s)" % failures)
 	quit(1 if failures > 0 else 0)
 
@@ -57,6 +59,42 @@ func _test_crate_strike(stage: Node3D) -> void:
 	await process_frame
 	_expect(not visual.visible and crate.freeze, "A kick or heavy punch breaks a loot crate in one blow, stages or not.")
 	await _clear(crate, setup[1])
+
+
+func _test_crate_walls(stage: Node3D) -> void:
+	var setup := await _spawn(stage, WOOD_CRATE, Vector3(-10, 0.0135, -6))
+	var crate: RigidBody3D = setup[0]
+	crate.call("break_by_strike", crate.global_position + Vector3(0.3, 0.3, 0), Vector3.FORWARD)
+	await physics_frame
+	var walls: Array[RigidBody3D] = []
+	for child in setup[1].get_children():
+		if child is RigidBody3D:
+			walls.append(child)
+	_expect(walls.size() >= 4, "A big wooden crate breaks into its walls, not one piece (%d)." % walls.size())
+	for frame in 240:
+		await physics_frame
+	var flat := true
+	for wall in walls:
+		flat = flat and is_instance_valid(wall) and wall.global_position.y < 0.5
+	_expect(flat, "The walls of a broken crate fall down and lie on the floor.")
+	await _clear(crate, setup[1])
+
+
+func _test_pallet_scatter(stage: Node3D) -> void:
+	var setup := await _spawn(stage, MODELS + "02/02_pallet.glb", Vector3(-10, 0.0135, 6))
+	var pallet: RigidBody3D = setup[0]
+	for i in 14:
+		if is_instance_valid(pallet) and not bool(pallet.get("_broken")):
+			pallet.call("take_projectile_hit", 60.0, pallet.global_position + Vector3(0.3, 0.1, 0), Vector3.UP, Vector3.FORWARD, "SHOTGUN")
+			await physics_frame
+	for frame in 90:
+		await physics_frame
+	var farthest := 0.0
+	for child in setup[1].get_children():
+		if child is RigidBody3D:
+			farthest = maxf(farthest, Vector2(child.global_position.x + 10.0, child.global_position.z - 6.0).length())
+	_expect(farthest > 0.9, "A broken pallet falls apart: boards and blocks spread out (%.2f m)." % farthest)
+	await _clear(pallet, setup[1])
 
 
 func _test_monitor_power_off(stage: Node3D) -> void:
@@ -134,7 +172,7 @@ func _add_floor(stage: Node3D) -> void:
 	shape.shape = box
 	floor_body.add_child(shape)
 	stage.add_child(floor_body)
-	floor_body.position.y = -0.1
+	floor_body.position.y = -0.0865 # Top at the real floor height (FLOOR_TOP).
 
 
 func _expect(condition: bool, message: String) -> void:
