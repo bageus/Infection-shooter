@@ -82,6 +82,11 @@ func _build_center(controls: Node, ui: Control, box: Node) -> void:
 	box.move_child(waves, controls.palette.get_index())
 	waves.set_anchors_and_offsets_preset(Control.PRESET_TOP_LEFT)
 	waves.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	# The hero spawn panel takes the same place: only one of them is shown at a time.
+	var hero: Control = controls.hero_spawn_options.panel
+	hero.reparent(box)
+	box.move_child(hero, controls.palette.get_index())
+	hero.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	center = VBoxContainer.new()
 	center.name = "PlanningCenterHUD"
 	center.mouse_filter = Control.MOUSE_FILTER_IGNORE

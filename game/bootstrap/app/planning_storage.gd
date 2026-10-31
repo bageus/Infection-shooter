@@ -215,6 +215,7 @@ func restore_authored() -> bool:
 			records.append(record)
 	var keep_spawn: bool = objects.player_spawn_defined
 	var spawn: Transform3D = objects.player_spawn_transform
+	var keep_hero: Dictionary = objects.hero_spawn
 	var pending := _reusable_nodes()
 	var missing: Array = []
 	var unmatched: Array = []
@@ -247,6 +248,7 @@ func restore_authored() -> bool:
 	_remember_marks()
 	objects.player_spawn_defined = keep_spawn
 	objects.player_spawn_transform = spawn
+	objects.hero_spawn = keep_hero
 	return true
 
 
