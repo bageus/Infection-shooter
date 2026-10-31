@@ -17,6 +17,8 @@ const DOOR_REACHED := 1.6
 const CLOUD_RANGE := 5.0
 const CRATE_SIGHT := 9.0
 const LOOK_SECONDS := 0.8
+const ADOPT_WINDOW := 30.0 # seconds after start in which a loading map may still add targets
+const FIRST_LESSON_DELAY := 2.0
 const ONE_WAY_MODE := 1 # DoorMode.SWING_ONE_WAY in interactive_door.gd
 
 var overlay: Node
@@ -40,6 +42,8 @@ var _rolled := false
 var _sprinted_seconds := 0.0
 var _key_hunt := false
 var _door_clock := 0.0
+var _since_start := 0.0
+var _adopt_clock := 0.0
 
 
 func configure(player: Node, hud: Node, tree_ui: Node, progress_state: RefCounted = null, host: Node = null) -> void:
@@ -76,13 +80,18 @@ func request(lesson: String) -> void:
 
 func _process(delta: float) -> void:
 	_track_input(delta)
+	_since_start += delta
+	_adopt_clock -= delta
+	if _adopt_clock <= 0.0 and _since_start < ADOPT_WINDOW:
+		_adopt_clock = 0.5
+		TARGET.adopt_baked(get_tree())
 	_door_clock -= delta
 	if _door_clock <= 0.0:
 		_door_clock = 0.15
 		_watch_one_way_doors()
 	if _key_hunt and bool(_player.call("has_emergency_key")):
 		_end_key_hunt()
-	if current.is_empty() and _queue.is_empty():
+	if current.is_empty() and _queue.is_empty() and _since_start >= FIRST_LESSON_DELAY:
 		_start_first_run_lesson()
 
 
@@ -135,6 +144,8 @@ func _start_first_run_lesson() -> void:
 		return
 	if not _over("weapons") and _occupied_weapon_slots() >= 2:
 		request("weapons")
+	if not _over("armor") and float(_player.get("armor")) > 0.0:
+		request("armor")
 
 
 func _occupied_weapon_slots() -> int:
@@ -185,6 +196,7 @@ func _start_next() -> void:
 	progress.mark_done(current)
 	_walked_at_end = _walked
 	_steps = _build_steps(current)
+	_reveal_targets(current)
 	_started_mutation = float(_runtime.call("get_mutation"))
 	_lesson_started_ms = Time.get_ticks_msec()
 	_look_seconds = 0.0
@@ -195,11 +207,24 @@ func _start_next() -> void:
 	_next_step()
 
 
+# Each stage shows only its own markers, the moment the stage starts.
+func _reveal_targets(lesson: String) -> void:
+	match lesson:
+		"move":
+			TARGET.reveal(get_tree(), ["door"])
+		"shoot":
+			TARGET.reveal(get_tree(), ["bottle", "extinguisher"])
+		"crates":
+			TARGET.reveal(get_tree(), ["crate"])
+
+
 func _next_step() -> void:
+	_hud.call("set_tutorial_objective", "")
 	if _steps.is_empty():
 		_end_lesson()
 		return
 	var step: Dictionary = _steps.pop_front()
+	_hud.call("set_tutorial_objective", str(step.get("objective", "")))
 	overlay.call("play", step)
 
 
@@ -253,49 +278,45 @@ func _build_steps(lesson: String) -> Array:
 		"move":
 			var doors := TARGET.standing(get_tree(), "door")
 			if doors.is_empty():
-				return [_task(TEXT.t("tutMoveFree"), KEYS.movement(), "cycle", func() -> bool: return _steps_since_last_lesson() >= 5.0)]
+				return _task(TEXT.t("tutMoveFree"), TEXT.t("objMoveFree"), KEYS.movement(), "cycle", func() -> bool: return _steps_since_last_lesson() >= 5.0)
 			var door: Node3D = doors[0]
-			return [_task(TEXT.t("tutMove"), KEYS.movement(), "cycle", _near.bind(door))]
+			return _task(TEXT.t("tutMove"), TEXT.t("objMove"), KEYS.movement(), "cycle", _near.bind(door))
 		"shoot":
-			return [_task(TEXT.t("tutShoot") % KEYS.binding("fire"), KEYS.row(["fire"]), "all",
-					func() -> bool: return TARGET.standing(get_tree(), "bottle").is_empty())]
+			return _task(TEXT.t("tutShoot") % KEYS.binding("fire"), TEXT.t("objShoot"), KEYS.row(["fire"]), "all",
+					func() -> bool: return TARGET.standing(get_tree(), "bottle").is_empty())
 		"look":
-			return [_task(TEXT.t("tutLook") % [KEYS.binding("camera_left"), KEYS.binding("camera_right")],
+			return _task(TEXT.t("tutLook") % [KEYS.binding("camera_left"), KEYS.binding("camera_right")], TEXT.t("objLook"),
 					KEYS.row(["camera_left", "camera_right"]), "cycle",
-					func() -> bool: return _look_seconds >= LOOK_SECONDS or _lesson_seconds() >= 15.0)]
+					func() -> bool: return _look_seconds >= LOOK_SECONDS or _lesson_seconds() >= 15.0)
 		"one_way":
-			return [
-				_click(TEXT.t("tutOneWay"), []),
-				_task(TEXT.t("tutOneWayFind"), [], "cycle", _lesson_over_after.bind(6.0)),
-			]
+			return [_click(TEXT.t("tutOneWay"), [])] + _task(TEXT.t("tutOneWayFind"), TEXT.t("objOneWay"), [], "cycle", _lesson_over_after.bind(6.0))
 		"roll":
-			return [
-				_task(TEXT.t("tutRoll") % KEYS.binding("roll"), KEYS.row(["roll"]), "all", func() -> bool: return _rolled),
-				_task(TEXT.t("tutSprint") % KEYS.binding("sprint"), KEYS.row(["sprint"]), "all", func() -> bool: return _sprinted_seconds >= 0.5),
-			]
+			return (_task(TEXT.t("tutRoll") % KEYS.binding("roll"), TEXT.t("objRoll") % KEYS.binding("roll"), KEYS.row(["roll"]), "all", func() -> bool: return _rolled)
+					+ _task(TEXT.t("tutSprint") % KEYS.binding("sprint"), TEXT.t("objSprint") % KEYS.binding("sprint"), KEYS.row(["sprint"]), "all", func() -> bool: return _sprinted_seconds >= 0.5))
 		"explore":
-			return [_task(TEXT.t("tutExplore"), [], "cycle", func() -> bool: return _crate_in_sight() or _lesson_seconds() >= 30.0)]
+			return _task(TEXT.t("tutExplore"), TEXT.t("objExplore"), [], "cycle", func() -> bool: return _crate_in_sight() or _lesson_seconds() >= 30.0)
 		"crates":
-			return [_task(TEXT.t("tutCrates") % KEYS.binding("melee"), KEYS.row(["melee"]), "all",
-					func() -> bool: return TARGET.standing(get_tree(), "crate").is_empty())]
+			return _task(TEXT.t("tutCrates") % KEYS.binding("melee"), TEXT.t("objCrates"), KEYS.row(["melee"]), "all",
+					func() -> bool: return TARGET.standing(get_tree(), "crate").is_empty())
 		"weapons":
 			return [_click(TEXT.t("tutWeapons") % [KEYS.binding("weapon_1"), KEYS.binding("weapon_2"), KEYS.binding("weapon_3")], [_hud_rect.bind("weapons")])]
+		"armor":
+			return [{"text": TEXT.t("tutArmor"), "targets": [_hud_rect.bind("armor")], "mode": "click", "picture": true,
+					"armor": float(_player.get("armor")) / maxf(float(_player.get("max_armor")), 1.0)}]
 		"mutation_scale":
 			return [
 				_click(TEXT.t("tutMeterGrow"), [mutation]),
 				_picture(TEXT.t("tutMeterLimit")),
 				_click(TEXT.t("tutAntidote") % antidote_key, [antidote]),
 				_click(TEXT.t("tutAntidoteWise"), [antidote]),
-				_task(TEXT.t("tutInhale"), [], "cycle", _cloud_inhaled),
-			]
+			] + _task(TEXT.t("tutInhale"), TEXT.t("objInhale"), [], "cycle", _cloud_inhaled)
 		"active_skill":
 			return [
 				_click(TEXT.t("tutBranches"), [_tree_rect.bind("active"), _tree_rect.bind("passive")], _tree_open),
 				_click(TEXT.t("tutActive"), [_tree_rect.bind("active")], _tree_open),
 				_click(TEXT.t("tutPassive"), [_tree_rect.bind("passive")], _tree_open),
 				_wait(TEXT.t("tutPickPower"), [_tree_rect.bind("skill:power_strike")], _power_strike_chosen, _tree_open, true),
-				_hint(TEXT.t("tutKillActive") % KEYS.binding("skill_1"), _skill_ready.bind("muscle_memory")),
-			]
+			] + _task(TEXT.t("tutKillActive") % KEYS.binding("skill_1"), TEXT.t("objKill") % KEYS.binding("skill_1"), [], "cycle", _skill_ready.bind("muscle_memory"))
 		"passive_skill":
 			return [
 				_wait(TEXT.t("tutPickReload"), [_tree_rect.bind("skill:muscle_memory")], _skill_learned.bind("muscle_memory"), _tree_open, true),
@@ -308,8 +329,7 @@ func _build_steps(lesson: String) -> Array:
 				_click(TEXT.t("tutAntidoteEffect"), [mutation]),
 			]
 		"open_menu":
-			return [
-				_hint(TEXT.t("tutOpenMenu") % KEYS.binding("mutation_tree"), _tree_open),
+			return _task(TEXT.t("tutOpenMenu") % KEYS.binding("mutation_tree"), TEXT.t("objOpenMenu") % KEYS.binding("mutation_tree"), [], "cycle", _tree_open) + [
 				_wait(TEXT.t("tutPassiveUse"), [_tree_rect.bind("passive")], func() -> bool: return not _tree_open(), _tree_open, false),
 			]
 		"gas_mask":
@@ -326,17 +346,16 @@ func _picture(text: String) -> Dictionary:
 		"mutation": _runtime.call("get_mutation"), "threshold": _runtime.call("get_critical_threshold")}
 
 
-func _hint(text: String, done: Callable) -> Dictionary:
-	return {"text": text, "targets": [], "mode": "wait", "done": done, "hint": true, "dim": false}
-
-
-# A task banner at the top with animated key caps; the game keeps running.
-func _task(text: String, keys: Array, keys_mode: String, done: Callable) -> Dictionary:
-	var step := _hint(text, done)
+# A task: first a full-screen overlay that pauses the game and shows the key caps, then the task sits in
+# the HUD objective banner (the game runs) until `done` is true.
+func _task(text: String, objective: String, keys: Array, keys_mode: String, done: Callable) -> Array:
+	var intro := {"text": text, "targets": [], "mode": "click", "requires": Callable()}
 	if not keys.is_empty():
-		step["keys"] = keys
-		step["keys_mode"] = keys_mode
-	return step
+		intro["keys"] = keys
+		intro["keys_mode"] = keys_mode
+	var pending := {"text": objective, "targets": [], "mode": "wait", "done": done, "objective": objective,
+			"requires": func() -> bool: return false}
+	return [intro, pending]
 
 
 func _wait(text: String, targets: Array, done: Callable, requires: Callable, arrow: bool, dim: bool = true) -> Dictionary:

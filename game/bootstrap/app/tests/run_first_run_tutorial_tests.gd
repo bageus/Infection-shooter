@@ -56,16 +56,23 @@ func _run() -> void:
 	root.add_child(director)
 	director.call("configure", actor, hud, tree_ui, PROGRESS.new(SAVE))
 	var overlay: Node = director.get("overlay")
+	director.set("_since_start", 3.0) # skip the start-up delay
 	await process_frame
 	await process_frame
 	_check(director.get("current") == "move" and bool(overlay.get("active")), "The first lesson is movement")
 	_check(overlay.get("step").has("keys") and overlay.get("keys").visible, "Movement shows animated key caps")
-	_check(not paused, "Movement does not pause the game")
+	_check(paused, "The first screen pauses the game")
+	await _advance(overlay)
+	_check(not paused and not str(overlay.get("step").get("objective")).is_empty(), "Then the task moves to the objective and the game runs")
+	_check((hud.get_node("Objective").get_child(0) as Label).text == str(overlay.get("step").get("objective")), "The HUD banner shows the task")
 	_check(PROGRESS.new(SAVE).is_done("move"), "The lesson is remembered as soon as it starts")
 	await _walk(actor, 0.0, 5.0)
 	_check(director.get("current") == "", "Without a door target five steps finish the movement lesson")
 	await _walk(actor, 5.0, 8.0)
 	_check(director.get("current") == "shoot", "A few steps later the shooting lesson starts")
+	await _advance(overlay)
+	_check(bottle.get_meta(&"planning_tutorial_revealed", false) == true and bottle.get_node(TARGET.MARKER_NAME).visible, "The shooting stage reveals the bottle marker")
+	_check(crate.get_meta(&"planning_tutorial_revealed", false) != true, "The crate marker stays hidden until its own stage")
 	var gone: Variant = bottle.get("_damage")
 	gone.glass_broken = true
 	await process_frame
@@ -75,6 +82,7 @@ func _run() -> void:
 	_check(TARGET.standing(self, "bottle").is_empty(), "No bottle target stands any more")
 	await _walk(actor, 8.0, 14.0)
 	_check(director.get("current") == "look", "Then the camera lesson")
+	await _advance(overlay)
 	Input.action_press("camera_left")
 	await process_frame
 	_check(float(director.get("_look_seconds")) > 0.0, "Holding the camera key is counted")
@@ -90,8 +98,15 @@ func _run() -> void:
 	director.call("request", "shoot")
 	await process_frame
 	_check(director.get("current") == "", "A seen lesson never starts again")
+	actor.set("armor", 60.0)
+	await process_frame
+	await process_frame
+	_check(director.get("current") == "armor" and bool(overlay.get("picture").visible), "Getting armor for the first time shows the armor bar")
+	_check(is_equal_approx(float(overlay.get("picture").get("armor")), 0.6), "The picture shows the armor held")
+	_check(not hud.call("tutorial_rect", "armor").size.is_zero_approx(), "The HUD armor bar is spotlighted")
 	TARGET.configure(crate, false)
 	_check(not TARGET.is_target(crate) and crate.get_node_or_null(TARGET.MARKER_NAME) == null, "The flag can be removed")
+	_baked_scene()
 	var saved := _prop("res://models/objects/enviroments/09/09_fire_extinguisher.glb", Vector3(20, 0, 0))
 	PROPERTIES.restore(saved, {"tutorial_target": true})
 	_check(TARGET.kind_of(saved) == "extinguisher" and TARGET.is_target(saved), "A saved map record restores the target flag")
@@ -99,6 +114,7 @@ func _run() -> void:
 		print("First-run tutorial tests passed.")
 	else:
 		push_error("First-run tutorial tests failed: %d failure(s)." % failures)
+	director.free()
 	hud.queue_free()
 	await process_frame
 	DirAccess.remove_absolute(SAVE)
@@ -113,6 +129,40 @@ func _walk(actor: Node3D, from: float, to: float) -> void:
 		actor.global_position = Vector3(x, 0, 0)
 		await process_frame
 	await process_frame
+	await process_frame
+
+
+func _baked_scene() -> void:
+	# A baked (packed) map keeps the flag and its marker; an old bake with only the meta is re-flagged.
+	var holder := Node3D.new()
+	var baked := PROP.instantiate() as Node3D
+	baked.set("model_path", "res://models/objects/enviroments/09/09_plastic_water_bottle_blue_500ml.glb")
+	holder.add_child(baked)
+	baked.owner = holder
+	TARGET.configure(baked, true)
+	var packed := PackedScene.new()
+	packed.pack(holder)
+	var loaded: Node = packed.instantiate()
+	root.add_child(loaded)
+	var again := loaded.get_child(0)
+	_check(again.is_in_group(TARGET.GROUP) and again.get_node_or_null(TARGET.MARKER_NAME) != null, "A baked scene keeps the target flag and marker")
+	again.remove_from_group(TARGET.GROUP)
+	again.get_node(TARGET.MARKER_NAME).free()
+	TARGET.adopt_baked(self)
+	_check(again.is_in_group(TARGET.GROUP) and again.get_node_or_null(TARGET.MARKER_NAME) != null, "A map baked without the group is re-flagged from its meta")
+	loaded.free()
+	holder.free()
+	packed = null
+
+
+func _advance(overlay: Node) -> void:
+	var started := Time.get_ticks_msec()
+	while Time.get_ticks_msec() - started < 400:
+		await process_frame
+	var press := InputEventKey.new()
+	press.keycode = KEY_SPACE
+	press.pressed = true
+	overlay.call("_input", press)
 	await process_frame
 
 

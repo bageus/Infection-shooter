@@ -37,6 +37,7 @@ func _run() -> void:
 		var centre := _pixel(image, camera.unproject_position(item.global_position + Vector3.UP * 0.5))
 		_check(not _is_yellow(centre), "outline leaves the item interior clear")
 		_check(_yellow_count(image, camera.unproject_position(item.global_position + Vector3.UP * 0.5)) > 20, "rim pixels are yellow")
+		await _hero_covers_outline()
 	item.position.x = 8.0
 	await _settle()
 	_check(not _shown(), "beyond 6 m nothing is outlined")
@@ -86,6 +87,36 @@ func _run() -> void:
 	await _door_check()
 	print("Hidden outline tests: %d failures" % failures)
 	quit(1 if failures > 0 else 0)
+
+
+# The hero stands between the camera and the hidden item: no yellow may be painted over the hero.
+func _hero_covers_outline() -> void:
+	hero.position = Vector3(item.position.x, 0, 1.2)
+	await _settle()
+	await RenderingServer.frame_post_draw
+	var image := root.get_texture().get_image()
+	_capture(image, "hero_in_front")
+	var yellow := 0
+	var hero_rows := 0
+	for y in image.get_height():
+		var first := -1
+		var last := -1
+		for x in image.get_width():
+			var c := image.get_pixel(x, y)
+			if c.r < 0.4 and c.g > 0.6:
+				first = x if first < 0 else first
+				last = x
+		if first < 0:
+			continue
+		hero_rows += 1
+		for x in range(first, last + 1):
+			if _is_yellow(image.get_pixel(x, y)):
+				yellow += 1
+	_check(hero_rows > 20, "the hero is on screen")
+	_check(_shown(), "item stays outlined with the hero in front")
+	_check(yellow == 0, "the hero covers the outline when standing in front of it")
+	hero.position = Vector3.ZERO
+	await _settle()
 
 
 func _door_check() -> void:

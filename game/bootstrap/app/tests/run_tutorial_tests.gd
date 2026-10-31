@@ -33,7 +33,7 @@ func _run() -> void:
 	var director := DIRECTOR.new()
 	root.add_child(director)
 	var seen := PROGRESS.new(SAVE)
-	for first_run in ["move", "shoot", "look", "one_way", "roll", "explore", "crates", "weapons"]:
+	for first_run in ["move", "shoot", "look", "one_way", "roll", "explore", "crates", "weapons", "armor"]:
 		seen.mark_done(first_run) # the first-run chain has its own test
 	director.call("configure", actor, hud, tree_ui, PROGRESS.new(SAVE))
 	var overlay: Node = director.get("overlay")
@@ -51,7 +51,9 @@ func _run() -> void:
 	await _advance(overlay)
 	await _advance(overlay)
 	await _advance(overlay)
-	_check(bool(overlay.get("step").get("hint")) and not paused, "The scale lesson ends with the inhale task, game running")
+	_check(str(overlay.get("step").get("text")) == TEXT.t("tutInhale") and paused, "The inhale task opens as a full-screen paused overlay")
+	await _advance(overlay)
+	_check(not paused and str(overlay.get("step").get("objective")) == TEXT.t("objInhale"), "Then it becomes the objective and the game runs")
 	_check(not TEXT.t("tutAntidoteWise").is_empty() and not "tutKillActive" in TEXT.t("tutKillActive"), "Lesson texts resolve")
 	_check(not "мутаген и откро" in TEXT.t("tutKillActive") and not "absorb mutagen" in TEXT.t("tutKillActive"), "The kill hint no longer promises mutagen and a skill")
 	await process_frame
@@ -72,7 +74,9 @@ func _run() -> void:
 	runtime.call("upgrade_skill", "power_strike")
 	await process_frame
 	await process_frame
-	_check(bool(overlay.get("step").get("hint")), "Learning it shows the kill hint")
+	_check(str(overlay.get("step").get("mode")) == "click" and paused, "Learning it opens the kill task as a paused overlay")
+	await _advance(overlay)
+	_check(str(overlay.get("step").get("objective")) != "", "The kill task then waits as the objective")
 	await _passive_lesson(director, overlay, runtime)
 
 	tree_ui.call("close_tree")
@@ -96,6 +100,7 @@ func _run() -> void:
 	for sound: AudioStreamPlayer in hud.find_children("*", "AudioStreamPlayer", true, false):
 		sound.stop()
 	await create_timer(0.3).timeout # the audio thread lets go of a stopped stream a moment later
+	director.free() # its lessons hold callables bound to the HUD
 	hud.queue_free()
 	await create_timer(0.3).timeout
 	DirAccess.remove_absolute(SAVE)
@@ -122,7 +127,9 @@ func _passive_lesson(director: Node, overlay: Node, runtime: Node) -> void:
 
 func _menu_lessons(director: Node, overlay: Node, hud: Node, tree_ui: Node) -> void:
 	_check(director.get("current") == "open_menu", "After the antidote lesson the M menu lesson follows")
-	_check(bool(overlay.get("step").get("hint")), "It first asks to press M")
+	_check(str(overlay.get("step").get("mode")) == "click", "It first asks to press M on a paused overlay")
+	await _advance(overlay)
+	_check(not paused and str(overlay.get("step").get("objective")) != "", "Then it waits for the menu as the objective")
 	tree_ui.call("open_tree")
 	await process_frame
 	await process_frame

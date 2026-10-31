@@ -1,6 +1,6 @@
 extends Node3D
 ## Target ring plus a small downward arrow above the parent object; bobs gently and
-## hides itself when the object is broken.
+## hides itself when the object is broken. It stays hidden until the tutorial reveals its kind, and walls hide it.
 
 const COLOR := Color("ff5a1f")
 const CLEARANCE := 0.28
@@ -20,7 +20,6 @@ func _ready() -> void:
 	material.emission = COLOR
 	material.emission_energy_multiplier = 1.4
 	material.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
-	material.no_depth_test = true
 	material.render_priority = 10
 	var ring := MeshInstance3D.new()
 	var torus := TorusMesh.new()
@@ -73,7 +72,7 @@ func _place() -> void:
 func _process(delta: float) -> void:
 	_time += delta
 	_bob.position.y = sin(_time * 3.0) * 0.05
-	visible = _is_standing()
+	visible = _host != null and bool(_host.get_meta(&"planning_tutorial_revealed", false)) and _is_standing()
 
 
 func _is_standing() -> bool:
