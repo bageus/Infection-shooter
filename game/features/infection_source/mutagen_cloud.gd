@@ -32,6 +32,9 @@ var _lifetime_remaining: float = 0.0
 var _cycle_elapsed: float = 0.0
 var _delay_remaining: float = 0.0
 var _absorbed_units: float = 0.0
+# Mutagen per second the body last took from this cloud (0 until the first feed).
+var _units_per_second: float = 0.0
+const UNIT_EPSILON := 0.0001
 # Variant, seed, spin and stagger of every puff (what the MultiMesh holds).
 var _puffs: Array[Color] = []
 @onready var _visual: MultiMeshInstance3D = $Visual
@@ -55,6 +58,7 @@ func activate() -> void:
 	# An absorption-ended cloud feeds until its mutagen threshold; INF keeps the budget open.
 	_absorption_remaining = INF if ends_when_absorbed else absorption_seconds
 	_absorbed_units = 0.0
+	_units_per_second = 0.0
 	# An untimed cloud has no end; INF keeps its progress at the fresh end.
 	_lifetime_remaining = lifetime_seconds if timed else INF
 	_cycle_elapsed = 0.0
@@ -149,15 +153,22 @@ func _physics_process(delta: float) -> void:
 
 # The cloud only spends what the body actually takes: while the player has
 # lost control the infection refuses mutagen, and the cloud keeps it.
+# With ends_when_absorbed the cloud holds exactly absorb_units: the step is capped
+# to what is left (at the rate the body last took) and the cloud ends when empty.
 func _feed(body: Node, step: float) -> void:
-	var gained: Variant = body.call("absorb_mutagen", step)
+	var capped := step
+	if ends_when_absorbed and _units_per_second > 0.0:
+		capped = minf(step, maxf(absorb_units - _absorbed_units, 0.0) / _units_per_second)
+	var gained: Variant = body.call("absorb_mutagen", capped)
 	if gained is float and float(gained) <= 0.0:
 		return
-	_absorption_remaining -= step
+	_absorption_remaining -= capped
 	if gained is float and ends_when_absorbed:
 		_absorbed_units += float(gained)
-		if _absorbed_units >= absorb_units:
-			_dissipate_early()
+		if capped > 0.0:
+			_units_per_second = float(gained) / capped
+		if _absorbed_units >= absorb_units - UNIT_EPSILON:
+			_finish()
 	# Keep detecting presence until dissipation: a visitor may have Devourer
 	# even when this cloud was created before that skill became active.
 
