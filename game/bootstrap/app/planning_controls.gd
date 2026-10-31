@@ -17,6 +17,8 @@ const DOOR_OPTIONS := preload("res://game/bootstrap/app/planning_door_options.gd
 const ROOM_OPTIONS := preload("res://game/bootstrap/app/planning_room_options.gd")
 const GROUP_TEMPLATES := preload("res://game/bootstrap/app/planning_group_templates.gd")
 var loot_options: Node
+const TARGET_OPTIONS := preload("res://game/bootstrap/app/planning_target_options.gd")
+var target_options: Node
 const FRUIT_OPTIONS := preload("res://game/bootstrap/app/planning_fruit_options.gd")
 var fruit_options: Node
 var door_options: Node
@@ -115,6 +117,9 @@ func setup_controls() -> void:
 	fruit_options = FRUIT_OPTIONS.new()
 	add_child(fruit_options)
 	fruit_options.call("setup", session, objects)
+	target_options = TARGET_OPTIONS.new()
+	add_child(target_options)
+	target_options.call("setup", session, objects)
 	door_options = DOOR_OPTIONS.new()
 	add_child(door_options)
 	door_options.call("setup", session, objects)
@@ -233,6 +238,7 @@ func _configure_new_asset(node: Node3D, entry: Dictionary) -> void:
 	mount_options.call("configure_new", node)
 	loot_options.call("configure_new", node)
 	fruit_options.call("configure_new", node)
+	target_options.call("configure_new", node)
 	spawn_options.call("configure_new", node)
 	fixtures.configure_new_asset(node, entry)
 	room_options.configure_new(node, entry)
@@ -326,6 +332,8 @@ func settings_kind(node: Node3D) -> String:
 		return "enemy"
 	if loot_options.applies_to(node):
 		return "loot"
+	if target_options.applies_to(node):
+		return "target"
 	return ""
 
 
@@ -338,6 +346,8 @@ func _update_light_ui() -> void:
 		loot_options.call("update")
 	if fruit_options != null:
 		fruit_options.call("update")
+	if target_options != null:
+		target_options.call("update")
 	if door_options != null:
 		door_options.call("update")
 	if room_options != null:

@@ -39,6 +39,11 @@ var _puffs: Array[Color] = []
 @onready var _spores: GPUParticles3D = $Spores
 
 
+## True once this cloud has nothing left to feed (spent, dissolved or not started).
+func is_spent() -> bool:
+	return not _active or _absorption_remaining <= 0.0
+
+
 func _ready() -> void:
 	monitoring = false
 	visible = false
@@ -46,6 +51,7 @@ func _ready() -> void:
 
 func activate() -> void:
 	_active = true
+	add_to_group(&"mutagen_clouds")
 	# An absorption-ended cloud feeds until its mutagen threshold; INF keeps the budget open.
 	_absorption_remaining = INF if ends_when_absorbed else absorption_seconds
 	_absorbed_units = 0.0
