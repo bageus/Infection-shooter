@@ -67,6 +67,15 @@ func set_revealed(value: bool, force_visible: bool = false) -> void:
 			copy.show()
 
 
+## The copy skips the screen area where the lens has cut the wall away: the real hero shows there.
+func set_lens(center: Vector2, size: Vector2, radius: float, depth: float) -> void:
+	for material in _materials.active_materials:
+		material.set_shader_parameter("hole_center", center)
+		material.set_shader_parameter("viewport_size", size)
+		material.set_shader_parameter("hole_radius", radius)
+		material.set_shader_parameter("player_depth", depth)
+
+
 func clear() -> void:
 	for copy in copies:
 		if is_instance_valid(copy):

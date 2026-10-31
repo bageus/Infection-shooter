@@ -12,6 +12,8 @@ extends Node3D
 
 const SHADER := preload("res://game/presentation/office_floor/darkness_zone.gdshader")
 const DOOR_REACH := 1.5
+const DOOR_PROBE := 0.9
+const DOOR_PROBE_TOLERANCE := 0.3
 const PORTALS := preload("res://game/presentation/office_floor/darkness_portals.gd")
 const FADE_SPEED := 5.0
 const PORTAL_REFRESH := 0.25
@@ -88,10 +90,26 @@ func _find_linked_doors() -> void:
 		if door is Node3D:
 			var door_node := door as Node3D
 			if room_id > 0:
-				if _edge_distance(door_node.global_position) <= DOOR_REACH:
+				if _door_leads_here(door_node):
 					_linked_doors.append(door_node)
 			elif global_position.distance_to(door_node.global_position) <= door_link_radius:
 				_linked_doors.append(door_node)
+
+
+## A door belongs to the rooms it opens onto: those that contain the point just in front of it or just
+## behind it, along the door's own normal. A room that merely lies near the door, around a corner or
+## beside the wall, is not opened by it.
+func _door_leads_here(door_node: Node3D) -> bool:
+	var wall := (door_node.get_parent() as Node3D) if door_node.name == &"DoorController" else door_node
+	var normal := wall.global_basis.orthonormalized().z
+	normal.y = 0.0
+	if normal.length() < 0.5:
+		return _edge_distance(door_node.global_position) <= DOOR_REACH
+	normal = normal.normalized()
+	for side in [-1.0, 1.0]:
+		if _edge_distance(wall.global_position + normal * DOOR_PROBE * side) <= DOOR_PROBE_TOLERANCE:
+			return true
+	return false
 
 
 ## Horizontal distance from a world point to this zone's rectangle (0 inside).
@@ -123,7 +141,7 @@ func _player_inside() -> bool:
 	if _player == null:
 		return false
 	for zone in get_tree().get_nodes_in_group("darkness_zone"):
-		if zone.get("room_id") == room_id and not zone.get("permanent") and zone.call("_edge_distance", _player.global_position) <= 0.3:
+		if zone.get("room_id") == room_id and not zone.get("permanent") and zone.call("_edge_distance", _player.global_position) <= 0.0:
 			return true
 	return false
 

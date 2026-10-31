@@ -251,6 +251,8 @@ func _update_hole() -> void:
 ## The lens accents the blocking wall, without exposing the room behind it.
 func _set_hole(center: Vector2, size: Vector2, radius: float, depth: float) -> void:
 	walls.update_hole(center, size, radius, depth)
+	for subject in subjects:
+		subject.set_lens(center, size, radius, depth)
 	for zone in get_tree().get_nodes_in_group("darkness_zone"):
 		if zone.has_method("set_view_hole"):
 			zone.call("set_view_hole", center, size, radius, depth)

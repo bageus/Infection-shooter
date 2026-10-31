@@ -51,7 +51,9 @@ void fragment() {
 #endif
     vec4 view = INV_PROJECTION_MATRIX * vec4(ndc, 1.0);
     float nearest = -view.z / view.w;
-    if (!force_visible && -authored_view_position.z <= nearest + 0.04) discard;
+    // Inside the lens the blocking wall is cut away, so the real hero shows there and needs no copy.
+    bool in_lens = hole_radius > 0.0 && length((SCREEN_UV - hole_center) * viewport_size) < hole_radius * 0.88;
+    if (!force_visible && (in_lens || -authored_view_position.z <= nearest + 0.04)) discard;
     LIGHT_VERTEX = authored_view_position;
     vec4 base = base_color;
     if (use_texture) base *= texture(base_texture, UV);
