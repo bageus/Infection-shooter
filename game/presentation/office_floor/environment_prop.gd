@@ -491,6 +491,15 @@ func take_melee_hit(damage: float, hit_position: Vector3, direction: Vector3) ->
 	take_projectile_hit(damage, hit_position, Vector3.ZERO, direction, "MELEE")
 
 
+## A kick or a heavy punch breaks a loot crate in one blow, whatever stages the model has.
+func break_by_strike(hit_position: Vector3, direction: Vector3) -> void:
+	if not has_loot() or not _damage.shatter():
+		return
+	_release_loot()
+	_reaction.break_dust(_shape_meshes)
+	_collapse_box(hit_position, direction)
+
+
 func _apply_damage(hit_position: Vector3, direction: Vector3) -> void:
 	if _broken:
 		return
