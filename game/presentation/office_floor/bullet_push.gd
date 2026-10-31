@@ -18,6 +18,15 @@ static func speed(weapon: String, weight_kg: float) -> float:
 	return minf(push / maxf(weight_kg, 0.05), MAX_SPEED)
 
 
+const BUCKET_MOP := preload("res://game/presentation/office_floor/bucket_mop_split.gd")
+
+
+## A shot that hits the prop: a bucket with a mop splits off its mop first, then the item is pushed.
+static func shot(body: RigidBody3D, weight_kg: float, weapon: String, direction: Vector3, hit_position: Vector3) -> void:
+	BUCKET_MOP.split(body, direction)
+	apply(body, weight_kg, weapon, direction, hit_position)
+
+
 ## Pellets share a frame budget; position is retained for compatible callers.
 static func apply(body: RigidBody3D, weight_kg: float, weapon: String, direction: Vector3, _hit_position: Vector3) -> void:
 	if body.freeze or weapon.to_upper() == "GRENADE" or direction.is_zero_approx():
