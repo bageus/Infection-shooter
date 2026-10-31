@@ -40,8 +40,11 @@ void fragment() {
     if (main_view > 0.5 && hole_radius > 0.0 && -VERTEX.z < player_depth - 0.05) {
         float distance_px = length((SCREEN_UV - hole_center) * viewport_size);
         float fade = smoothstep(hole_radius * 0.88, hole_radius, distance_px);
-        // Keep wall colour/depth opaque: only the separate hero pass sees through it.
+        // Cut the wall (or column) open inside the lens with a dithered soft rim; the room fog cover is
+        // drawn over everything in the lens, so what lies behind stays dark where it should.
         lens = 1.0 - fade;
+        float noise = fract(52.9829189 * fract(dot(FRAGCOORD.xy, vec2(0.06711056, 0.00583715))));
+        if (lens > noise) discard;
         edge = (1.0 - smoothstep(hole_radius, hole_radius * 1.08, distance_px)) * 0.12;
     }
     vec4 base = base_color;
