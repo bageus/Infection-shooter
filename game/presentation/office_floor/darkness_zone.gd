@@ -123,7 +123,7 @@ func _player_inside() -> bool:
 	if _player == null:
 		return false
 	for zone in get_tree().get_nodes_in_group("darkness_zone"):
-		if zone.get("room_id") == room_id and not zone.get("permanent") and zone.call("_edge_distance", _player.global_position) <= 0.3:
+		if zone.get("room_id") == room_id and not zone.get("permanent") and zone.call("_edge_distance", _player.global_position) <= 0.0:
 			return true
 	return false
 

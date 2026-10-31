@@ -54,6 +54,9 @@ func _run() -> void:
 	await create_timer(0.6).timeout
 	_expect(not first.overlay.visible and not second.overlay.visible, "Standing in one part lifts the fog of the whole room")
 	_expect(other.overlay.visible, "Another room stays dark")
+	player.position = Vector3(-2.2, 0.0, 0.5)
+	await create_timer(0.6).timeout
+	_expect(first.overlay.visible, "Hugging the outside of a wall keeps the neighbouring room dark")
 	player.position = Vector3(-3.0, 0.0, 0.5)
 	await create_timer(0.6).timeout
 	_expect(first.overlay.visible, "Leaving the room brings the fog back")
