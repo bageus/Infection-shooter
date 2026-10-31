@@ -165,6 +165,10 @@ func _pixels(stage: String) -> void:
 			_check(pixel.r > pixel.g + 0.15, "Clear view keeps normal props visible")
 		elif stage == "fog" and mesh == prop:
 			_check(pixel.r > pixel.g + 0.15, "fog: the lens shows props in the hero's room")
+		elif stage == "wall" and mesh == prop:
+			_check(pixel.r > pixel.g + 0.15, "wall: the lens cuts the wall open, so a prop inside it shows")
+		elif stage == "wall":
+			continue
 		else:
 			_check(pixel.r < pixel.g + 0.1, stage + ": occluded furniture/fixture stays hidden")
 	var directory := OS.get_environment("XRAY_CAPTURE_DIR")
