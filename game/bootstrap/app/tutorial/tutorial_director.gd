@@ -196,6 +196,7 @@ func _start_next() -> void:
 	progress.mark_done(current)
 	_walked_at_end = _walked
 	_steps = _build_steps(current)
+	_reveal_targets(current)
 	_started_mutation = float(_runtime.call("get_mutation"))
 	_lesson_started_ms = Time.get_ticks_msec()
 	_look_seconds = 0.0
@@ -204,6 +205,17 @@ func _start_next() -> void:
 	if current == "active_skill" or current == "passive_skill":
 		_tree_ui.call("open_tree")
 	_next_step()
+
+
+# Each stage shows only its own markers, the moment the stage starts.
+func _reveal_targets(lesson: String) -> void:
+	match lesson:
+		"move":
+			TARGET.reveal(get_tree(), ["door"])
+		"shoot":
+			TARGET.reveal(get_tree(), ["bottle", "extinguisher"])
+		"crates":
+			TARGET.reveal(get_tree(), ["crate"])
 
 
 func _next_step() -> void:

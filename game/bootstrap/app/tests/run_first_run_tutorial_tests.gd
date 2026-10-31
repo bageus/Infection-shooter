@@ -71,6 +71,8 @@ func _run() -> void:
 	await _walk(actor, 5.0, 8.0)
 	_check(director.get("current") == "shoot", "A few steps later the shooting lesson starts")
 	await _advance(overlay)
+	_check(bottle.get_meta(&"planning_tutorial_revealed", false) == true and bottle.get_node(TARGET.MARKER_NAME).visible, "The shooting stage reveals the bottle marker")
+	_check(crate.get_meta(&"planning_tutorial_revealed", false) != true, "The crate marker stays hidden until its own stage")
 	var gone: Variant = bottle.get("_damage")
 	gone.glass_broken = true
 	await process_frame

@@ -61,6 +61,13 @@ static func adopt_baked(tree: SceneTree) -> void:
 			configure(node as Node3D, true)
 
 
+## The tutorial calls this when a stage starts: flagged objects of these kinds show their markers.
+static func reveal(tree: SceneTree, kinds: Array[String]) -> void:
+	for node in tree.get_nodes_in_group(GROUP):
+		if kind_of(node) in kinds:
+			node.set_meta(&"planning_tutorial_revealed", true)
+
+
 ## A target is finished once the object is gone or has been broken, shattered or burst.
 static func is_standing(node: Node) -> bool:
 	if not is_instance_valid(node) or node.is_queued_for_deletion():
