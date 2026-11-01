@@ -4,7 +4,7 @@ Godot 4.7.2; switch in **Esc → Настройки → Перекрытие о�
 
 | Mode | Behavior |
 | --- | --- |
-| Цветные силуэты (default, 0) | Hidden hero cyan `0.2,0.85,1`; enemies red `1,0.24,0.28`. Opacity 0.9. Items are not silhouetted; see the hidden-item outline below. Visible fragments retain their authored color. |
+| Цветные силуэты (default, 0) | Hidden hero cyan `0.2,0.85,1`. Opacity 0.9. Enemies and items are not silhouetted (enemies were removed from silhouettes on 2026-11-01); see the hidden-item outline below. Visible fragments retain their authored color. |
 | Отверстие вокруг героя (1) | Two-metre world radius projected into the camera, through opaque foreground walls/columns, with a narrow dithered transition and faint cyan halo. Floor/furniture remain visible; collisions remain active. |
 
 Preference is additive interface_v1.occlusion_mode, persisted in user://interface_settings.cfg. Old/missing settings default to 0. Maps are not rewritten. Settings apply immediately while paused; planner suspends effects without changing the choice; map loads and late-spawned enemies/pickups are registered automatically. Ray classification runs at 10 Hz, screen/range culled (45 m). Cosmetic particles/blood spawns do not rebuild the registry. Shader reconstructs depth separately for Compatibility OpenGL and Forward+ Vulkan. Silhouette copies share the actor mesh/skin/live skeleton and update on replaced body meshes. Shared resources are never mutated. Hole shader copies structural PBR parameters/textures; transparent glass/custom shader surfaces stay authored, not converted. Original overrides are restored exactly. Source shadows are retained.
@@ -18,7 +18,7 @@ These checks use an isolated synthetic scene and software llvmpipe. They confirm
 ## Manual route
 
 1. In the same map, put the hero behind a full wall and then a column; rotate the camera and use minimum/maximum zoom.
-2. Silhouettes: verify hidden portions of the hero, all enemy species including Horde summons, a dropped weapon, a medkit and ammo. Visible portions retain their color; dead enemies do not reveal. Walk away from blockers and verify highlights disappear.
+2. Silhouettes: verify hidden portions of the hero only; enemies must not be highlighted in either mode. Check a dropped weapon, a medkit and ammo through the hidden-item outline. Visible portions retain their color; dead enemies do not reveal. Walk away from blockers and verify highlights disappear.
 3. Hole: verify the hero and nearby floor are revealed; the rest of the wall remains solid, furniture is not cut, collisions and direct shadows are unchanged. Move around the column and corners; inspect the dithered edge at native resolution.
 4. Switch while paused, resume, enter/exit Planning mode repeatedly; load/save a map and restart. Choice persists and materials do not remain cut in the planner.
 5. Repeat in native Windows Forward+ and desktop browser Compatibility. Record resolution/device/CPU and GPU time for both modes in the same populated fight. 60 FPS remains a separate acceptance item.
