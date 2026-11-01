@@ -17,6 +17,7 @@ const DOOR_SPAN := 1.6 # half width, metres along the door, in which a crossing 
 const DOOR_DEPTH := 3.0 # how far from the door a side is recorded
 const DOOR_SIDE := 0.5 # clear of the door plane
 const CLOUD_RANGE := 5.0
+const INHALE_GAIN := 0.5 # meter rise that counts as having inhaled mutagen
 const CRATE_SIGHT := 9.0
 const LOOK_SECONDS := 0.8
 const ADOPT_WINDOW := 30.0 # seconds after start in which a loading map may still add targets
@@ -203,6 +204,8 @@ func _start_next() -> void:
 		current = ""
 		return
 	current = _queue.pop_front()
+	if current == "one_way":
+		_end_key_hunt() # "find another way" is now the active objective, not the key
 	progress.mark_done(current)
 	_walked_at_end = _walked
 	_steps = _build_steps(current)
@@ -406,14 +409,17 @@ func _crate_in_sight() -> bool:
 	return false
 
 
-# Every cloud that was near the player when the task began has given all its mutagen (or is gone).
+# The player has taken mutagen in since the task began (the meter went up), or every cloud near at the start is spent.
 func _inhaled_all() -> Callable:
+	var start := float(_runtime.call("get_mutation"))
 	var clouds: Array = []
 	for cloud: Node3D in get_tree().get_nodes_in_group("mutagen_clouds"):
 		if cloud.global_position.distance_to(_player.global_position) <= CLOUD_RANGE:
 			clouds.append(cloud)
 	return func() -> bool:
-		return clouds.all(func(cloud: Node3D) -> bool: return not is_instance_valid(cloud) or bool(cloud.call("is_spent")))
+		if float(_runtime.call("get_mutation")) >= start + INHALE_GAIN:
+			return true
+		return not clouds.is_empty() and clouds.all(func(cloud: Node3D) -> bool: return not is_instance_valid(cloud) or bool(cloud.call("is_spent")))
 
 
 func _hud_rect(kind: String) -> Rect2:

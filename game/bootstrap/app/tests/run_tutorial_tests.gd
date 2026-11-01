@@ -56,9 +56,7 @@ func _run() -> void:
 	_check(not paused and str(overlay.get("step").get("objective")) == TEXT.t("objInhale"), "Then it becomes the objective and the game runs")
 	_check(not TEXT.t("tutAntidoteWise").is_empty() and not "tutKillActive" in TEXT.t("tutKillActive"), "Lesson texts resolve")
 	_check(not "мутаген и откро" in TEXT.t("tutKillActive") and not "absorb mutagen" in TEXT.t("tutKillActive"), "The kill hint no longer promises mutagen and a skill")
-	await process_frame
-	await process_frame
-	_check(director.get("current") == "" and not paused, "With no cloud left the inhale task is done")
+	await _inhale_task(director, runtime)
 	_check(PROGRESS.new(SAVE).is_done("mutation_scale"), "The lesson is remembered")
 
 	runtime.get("_domain").mutation = 25.0
@@ -96,6 +94,7 @@ func _run() -> void:
 	_check(not paused, "Nothing stays paused")
 
 	await _door_passage(director, actor)
+	await _key_pointer(director, overlay)
 	await _replay_level(director, overlay)
 	await _mask_hud(hud, runtime)
 	# The HUD owns audio players that hold their streams; free it so nothing is still in use at exit.
@@ -146,6 +145,16 @@ func _menu_lessons(director: Node, overlay: Node, hud: Node, tree_ui: Node) -> v
 	_check(director.get("current") == "", "The gas mask lesson ends")
 
 
+func _inhale_task(director: Node, runtime: Node) -> void:
+	await process_frame
+	await process_frame
+	_check(director.get("current") == "mutation_scale" and not paused, "Without inhaling the task stays active")
+	runtime.call("absorb_mutagen", 1.0)
+	await process_frame
+	await process_frame
+	_check(director.get("current") == "" and not paused, "Inhaling mutagen completes the task")
+
+
 # "Walk through the door" counts only when the hero ends up on the other side of the opening.
 func _door_passage(director: Node, actor: Node3D) -> void:
 	var door := Node3D.new()
@@ -169,6 +178,30 @@ func _door_passage(director: Node, actor: Node3D) -> void:
 	actor.global_position = Vector3(40, 0, 42.5)
 	_check(passed.call(), "Walking from one side to the other passes the door")
 	door.free()
+
+
+# "Find another way" becomes the active objective and the key pointer goes away.
+func _key_pointer(director: Node, overlay: Node) -> void:
+	var script := GDScript.new()
+	script.source_code = "extends Node\nvar current_level := \"tutorial_lvl\"\nvar hint := Callable()\nfunc set_tutorial_hint(target: Callable) -> void:\n\thint = target\n"
+	script.reload()
+	var host := Node.new()
+	host.set_script(script)
+	var key := Node3D.new()
+	key.add_to_group("mission_key")
+	root.add_child(key)
+	director.set("_host", host)
+	director.call("_begin_key_hunt")
+	_check(host.get("hint").is_valid(), "The key pointer shows while the key is being hunted")
+	director.get("_finished").erase("one_way")
+	director.call("request", "one_way")
+	_check(director.get("current") == "one_way" and not host.get("hint").is_valid(), "Find another way removes the key pointer")
+	director.set("_steps", [])
+	overlay.call("finish", true) # no steps left: the lesson ends
+	director.set("_host", null)
+	director.set("_key_hunt", false)
+	key.free()
+	host.free()
 
 
 # On tutorial_lvl a lesson shows again even though the saved flags say it was seen.
