@@ -7,6 +7,8 @@ owner: AI
 updated: 2026-10-18
 ---
 
+02.11.2026 — поручение владельца Vadim (звук ресепшена): реплика «Векрион будущее» у стойки ресепшена убрана из ambient_prop_sounds.gd (стойка больше не звучит). Тест run_ambient_prop_sounds_tests обновлён. Проверено: run_ambient_prop_sounds_tests, run_sound_event_tests PASS; validate_* PASS. Владелец: presentation.office_floor. Зависимости/policy/DTO без изменений. T004/Phase1 прежние.
+
 01.11.2026 — поручение владельца Vadim (поправка HUD): плашка текущего задания («Исследуйте уровень») обрезалась у левого края, когда текст был длиннее экрана (баннер центрировался по минимальной ширине без ограничения). Теперь длинный текст переносится по ширине экрана (prototype_hud.gd, _fit_banners), пересчёт при изменении окна. Проверено: run_tutorial_tests, run_ui_translation_tests, run_first_run_tutorial_tests PASS; validate_source_size, validate_architecture, validate_scene_resources PASS; скриншот длинной плашки в пределах экрана. Владелец: presentation.prototype_hud. Зависимости/policy/DTO без изменений. T004/Phase1 прежние.
 
 31.10.2026 — прямое поручение владельца: большой деревянный ящик при разрушении режется на шесть стенок (crate_walls.gd), которые падают, валятся и складываются, и только потом запекаются; доски и блоки поддона разлетаются при поломке. Декали не менялись. Владелец: presentation.office_floor (crate_walls, environment_prop), тест run_office_breakage_tests. Зависимости/policy/DTO без изменений. T004/Phase1 прежние.

@@ -257,7 +257,7 @@ Glass crunch recordings the_crunch_of_glass__1–4 and roll recording The_heavy_
 
 Converted from the owner's WAV files to OGG Vorbis (originals removed): `control_lost` (brutal_man_grunting), `control_repair`, `damage_absorb` (damage_absorption_armor), `access_denied`, `biological_rupture`, `claw_cutting`, `brute_*` voices, `biomass_gurgle`, `cooler_gurgle`, `phone_ring`, `pc_hum` (sound_PC), `light_flicker`. Phone, PC, cooler and biomass ambience are registered events not yet placed in the level.
 
-Atmosphere cues (`phone_ring`, `pc_hum`, `cooler_gurgle`, `biomass_gurgle`, `display_intro` from intro_1-3, `vectrion_is_the_future`) are played by `ambient_prop_sounds.gd` near intact props; the reception line sounds once per level.
+Atmosphere cues (`phone_ring`, `pc_hum`, `cooler_gurgle`, `biomass_gurgle`, `display_intro` from intro_1-3) are played by `ambient_prop_sounds.gd` near intact props. The reception counter is silent (`vectrion_is_the_future` is no longer placed in any level).
 
 
 ## Owner-supplied weapon, door and pickup sounds (2026-10-26)
