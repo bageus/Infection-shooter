@@ -19,6 +19,8 @@ const CRATE_SIGHT := 9.0
 const LOOK_SECONDS := 0.8
 const ADOPT_WINDOW := 30.0 # seconds after start in which a loading map may still add targets
 const FIRST_LESSON_DELAY := 2.0
+# Maps that replay every lesson regardless of the saved "seen" flags. Empty the list to restore once-only lessons.
+const ALWAYS_ON_LEVELS: Array[String] = ["tutorial_lvl"]
 const ONE_WAY_MODE := 1 # DoorMode.SWING_ONE_WAY in interactive_door.gd
 
 var overlay: Node
@@ -62,8 +64,15 @@ func configure(player: Node, hud: Node, tree_ui: Node, progress_state: RefCounte
 	_runtime.control_loss_changed.connect(_on_control_loss_changed)
 
 
+# On a replay level only this run's own lessons count as seen.
+func _seen(lesson: String) -> bool:
+	if _host != null and str(_host.get("current_level")) in ALWAYS_ON_LEVELS:
+		return _finished.has(lesson)
+	return progress.is_done(lesson)
+
+
 func request(lesson: String) -> void:
-	if progress.is_done(lesson) or lesson == current or lesson in _queue:
+	if _seen(lesson) or lesson == current or lesson in _queue:
 		return
 	# Losing control cannot wait: the lesson in progress restarts after it.
 	if lesson == "control_loss" and not current.is_empty():
@@ -117,7 +126,7 @@ func _steps_since_last_lesson() -> float:
 
 # A lesson counts as over when it ended this session or an earlier one, and is not playing now.
 func _over(lesson: String) -> bool:
-	return (_finished.has(lesson) or progress.is_done(lesson)) and lesson != current and not lesson in _queue
+	return (_finished.has(lesson) or _seen(lesson)) and lesson != current and not lesson in _queue
 
 
 func _start_first_run_lesson() -> void:
@@ -179,7 +188,7 @@ func _on_skill_available() -> void:
 		return
 	if bool(_runtime.call("can_upgrade_skill", "power_strike")):
 		request("active_skill")
-	elif (current == "active_skill" or progress.is_done("active_skill")) and bool(_runtime.call("can_upgrade_skill", "muscle_memory")):
+	elif (current == "active_skill" or _seen("active_skill") or _finished.has("active_skill")) and bool(_runtime.call("can_upgrade_skill", "muscle_memory")):
 		request("passive_skill")
 
 

@@ -95,6 +95,7 @@ func _run() -> void:
 	await _menu_lessons(director, overlay, hud, tree_ui)
 	_check(not paused, "Nothing stays paused")
 
+	await _replay_level(director, overlay)
 	await _mask_hud(hud, runtime)
 	# The HUD owns audio players that hold their streams; free it so nothing is still in use at exit.
 	for sound: AudioStreamPlayer in hud.find_children("*", "AudioStreamPlayer", true, false):
@@ -142,6 +143,28 @@ func _menu_lessons(director: Node, overlay: Node, hud: Node, tree_ui: Node) -> v
 	_check(not hud.call("tutorial_rect", "gas_mask").size.is_zero_approx(), "It spotlights the gas mask icon")
 	await _advance(overlay)
 	_check(director.get("current") == "", "The gas mask lesson ends")
+
+
+# On tutorial_lvl a lesson shows again even though the saved flags say it was seen.
+func _replay_level(director: Node, overlay: Node) -> void:
+	var host := Node.new()
+	host.set_script(GDScript.new())
+	director.set("_host", host)
+	director.call("request", "gas_mask")
+	_check(director.get("current") == "", "Another level keeps a seen lesson hidden")
+	host.free()
+	var level := Node.new()
+	var script := GDScript.new()
+	script.source_code = "extends Node\nvar current_level := \"tutorial_lvl\"\n"
+	script.reload()
+	level.set_script(script)
+	director.set("_host", level)
+	director.get("_finished").erase("gas_mask")
+	director.call("request", "gas_mask")
+	_check(director.get("current") == "gas_mask", "tutorial_lvl replays a lesson already marked seen")
+	await _advance(overlay)
+	director.set("_host", null)
+	level.free()
 
 
 func _mask_hud(hud: Node, runtime: Node) -> void:
