@@ -7,6 +7,8 @@ owner: AI
 updated: 2026-10-18
 ---
 
+02.11.2026 — поручение владельца Vadim (звук ресепшена): реплика «Векрион будущее» у стойки ресепшена убрана из ambient_prop_sounds.gd (стойка больше не звучит). Тест run_ambient_prop_sounds_tests обновлён. Проверено: run_ambient_prop_sounds_tests, run_sound_event_tests PASS; validate_* PASS. Владелец: presentation.office_floor. Зависимости/policy/DTO без изменений. T004/Phase1 прежние.
+
 01.11.2026 — поручение владельца Vadim (поправка HUD): плашка текущего задания («Исследуйте уровень») обрезалась у левого края, когда текст был длиннее экрана (баннер центрировался по минимальной ширине без ограничения). Теперь длинный текст переносится по ширине экрана (prototype_hud.gd, _fit_banners), пересчёт при изменении окна. Проверено: run_tutorial_tests, run_ui_translation_tests, run_first_run_tutorial_tests PASS; validate_source_size, validate_architecture, validate_scene_resources PASS; скриншот длинной плашки в пределах экрана. Владелец: presentation.prototype_hud. Зависимости/policy/DTO без изменений. T004/Phase1 прежние.
 
 01.11.2026 (брезентовые ящики — поручение владельца Vadim): большой ящик с брезентом (`02_crate_canvas_large`) при ударе ногой или сильным ударом теперь режется на шесть стенок, как деревянный (`crate_walls.gd`, `MODELS`). Раньше он оставался одним куском. Стрельба по большим ящикам не менялась, как и у деревянных. Проверено: run_office_breakage_tests PASS (новая проверка падает без фикса), validate_project, validate_source_size, validate_architecture, validate_scene_resources, check_resource_paths, run_destruction_sound_tests PASS. Владелец: presentation.office_floor (crate_walls, environment_prop). Зависимости/policy/DTO без изменений.

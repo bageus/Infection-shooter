@@ -1,7 +1,7 @@
 extends Node
 ## Occasional atmosphere from intact props near the player: phones ring, monitors and
-## towers hum, coolers and biomass gurgle, a powered screen plays its intro tune and the
-## reception speaks once per level. A cheap one-second scan of the tagged props.
+## towers hum, coolers and biomass gurgle, a powered screen plays its intro tune. The
+## reception counter is silent. A cheap one-second scan of the tagged props.
 
 const SFX := preload("res://game/core/audio/public/sound_events.gd")
 const GROUP := &"ambient_sound"
@@ -16,7 +16,6 @@ const RULES := {
 	&"cooler_gurgle": [5.0, 0.3, 18.0, false],
 	&"biomass_gurgle": [5.0, 0.3, 12.0, false],
 	&"display_intro": [6.0, 0.25, 30.0, false],
-	&"vectrion_is_the_future": [7.0, 1.0, 0.0, true],
 }
 const MODEL_EVENTS := {
 	"05_desk_phone.glb": [&"phone_ring"],
@@ -33,8 +32,6 @@ const MODEL_EVENTS := {
 	"02_water_cooler_destructible.glb": [&"cooler_gurgle"],
 	"02_water_cooler_bottle.glb": [&"cooler_gurgle"],
 	"02_water_cooler_bottle_attached_destructible.glb": [&"cooler_gurgle"],
-	"07_reception_counter_two_heights.glb": [&"vectrion_is_the_future"],
-	"07_reception_counter_two_heights_2.glb": [&"vectrion_is_the_future"],
 }
 
 var player: Node3D

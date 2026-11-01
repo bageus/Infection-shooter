@@ -1,6 +1,6 @@
 extends SceneTree
 ## Ambient prop sounds: only intact tagged props near the player sound, rarely, and the
-## reception line plays once.
+## the reception counter stays silent.
 
 const AMBIENT := preload("res://game/presentation/office_floor/public/ambient_prop_sounds.gd")
 
@@ -46,12 +46,7 @@ func _run() -> void:
 	var reception := Node3D.new()
 	stage.add_child(reception)
 	AMBIENT.tag(reception, "res://models/objects/enviroments/07/07_reception_counter_two_heights.glb")
-	reception.position = Vector3(1, 0, 0)
-	var spoke := 0
-	for attempt in 3:
-		spoke += _plays(ambient, &"vectrion_is_the_future")
-		await process_frame
-	_expect(spoke == 1, "The reception line plays once per level (%d)." % spoke)
+	_expect(not reception.is_in_group(AMBIENT.GROUP), "The reception counter is not a sound source.")
 	print("Ambient prop sound tests: %d failures" % failures)
 	quit(failures)
 
