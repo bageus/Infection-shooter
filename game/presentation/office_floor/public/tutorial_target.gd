@@ -26,6 +26,11 @@ static func kind_of(node: Node) -> String:
 	return "object"
 
 
+## A free-standing marker: put it under a Node3D whose "planning_tutorial_revealed" meta shows it.
+static func new_marker() -> Node3D:
+	return Marker.new()
+
+
 static func applies_to(node: Node) -> bool:
 	return not kind_of(node).is_empty()
 

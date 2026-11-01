@@ -146,9 +146,10 @@ func _build_right_tabs(right_box: Node, left_box: Node) -> void:
 	main.name = "Основная"
 	right_tabs.add_child(main)
 	constructor = VBoxContainer.new()
-	constructor.name = "Конструктор"
+	constructor.name = "Конструктор карт"
 	right_tabs.add_child(constructor)
 	right_tabs.add_child(_controls.group_templates.build_tab())
+	right_tabs.add_child(_controls.quest_panel.build_tab())
 	for child in right_box.get_children():
 		child.reparent(main if child.name in [&"MapManager", &"Save"] else constructor)
 	right_box.queue_free()
