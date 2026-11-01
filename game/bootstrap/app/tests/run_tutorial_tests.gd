@@ -56,9 +56,7 @@ func _run() -> void:
 	_check(not paused and str(overlay.get("step").get("objective")) == TEXT.t("objInhale"), "Then it becomes the objective and the game runs")
 	_check(not TEXT.t("tutAntidoteWise").is_empty() and not "tutKillActive" in TEXT.t("tutKillActive"), "Lesson texts resolve")
 	_check(not "мутаген и откро" in TEXT.t("tutKillActive") and not "absorb mutagen" in TEXT.t("tutKillActive"), "The kill hint no longer promises mutagen and a skill")
-	await process_frame
-	await process_frame
-	_check(director.get("current") == "" and not paused, "With no cloud left the inhale task is done")
+	await _inhale_task(director, runtime)
 	_check(PROGRESS.new(SAVE).is_done("mutation_scale"), "The lesson is remembered")
 
 	runtime.get("_domain").mutation = 25.0
@@ -95,6 +93,9 @@ func _run() -> void:
 	await _menu_lessons(director, overlay, hud, tree_ui)
 	_check(not paused, "Nothing stays paused")
 
+	await _door_passage(director, actor)
+	await _key_pointer(director, overlay)
+	await _resume_after_loss(director, overlay)
 	await _replay_level(director, overlay)
 	await _mask_hud(hud, runtime)
 	# The HUD owns audio players that hold their streams; free it so nothing is still in use at exit.
@@ -127,7 +128,10 @@ func _passive_lesson(director: Node, overlay: Node, runtime: Node) -> void:
 
 
 func _menu_lessons(director: Node, overlay: Node, hud: Node, tree_ui: Node) -> void:
-	_check(director.get("current") == "open_menu", "After the antidote lesson the M menu lesson follows")
+	_check(director.get("current") == "gas_mask", "After the first antidote the gas mask lesson comes next")
+	_check(not hud.call("tutorial_rect", "gas_mask").size.is_zero_approx(), "It spotlights the gas mask icon")
+	await _advance(overlay)
+	_check(director.get("current") == "open_menu", "Then the M menu lesson follows")
 	_check(str(overlay.get("step").get("mode")) == "click", "It first asks to press M on a paused overlay")
 	await _advance(overlay)
 	_check(not paused and str(overlay.get("step").get("objective")) != "", "Then it waits for the menu as the objective")
@@ -139,10 +143,92 @@ func _menu_lessons(director: Node, overlay: Node, hud: Node, tree_ui: Node) -> v
 	tree_ui.call("close_tree")
 	await process_frame
 	await process_frame
-	_check(director.get("current") == "gas_mask", "Then the gas mask lesson")
-	_check(not hud.call("tutorial_rect", "gas_mask").size.is_zero_approx(), "It spotlights the gas mask icon")
+	_check(director.get("current") == "", "The menu lesson ends")
+
+
+
+func _inhale_task(director: Node, runtime: Node) -> void:
+	await process_frame
+	await process_frame
+	_check(director.get("current") == "mutation_scale" and not paused, "Without inhaling the task stays active")
+	runtime.call("absorb_mutagen", 1.0)
+	await process_frame
+	await process_frame
+	_check(director.get("current") == "" and not paused, "Inhaling mutagen completes the task")
+
+
+# "Walk through the door" counts only when the hero ends up on the other side of the opening.
+func _door_passage(director: Node, actor: Node3D) -> void:
+	var door := Node3D.new()
+	var frame := Node3D.new()
+	frame.name = "DoorController"
+	door.add_child(frame)
+	root.add_child(door)
+	door.global_position = Vector3(40, 0, 40)
+	var passed: Callable = director.call("_through", [door])
+	actor.global_position = Vector3(40, 0, 37.5)
+	_check(not passed.call(), "Standing in front of the door is not passing it")
+	actor.global_position = Vector3(40, 0, 39.9)
+	_check(not passed.call(), "Touching the door plane is not passing it")
+	actor.global_position = Vector3(46, 0, 42.5) # round the wall, far to the side
+	passed.call()
+	actor.global_position = Vector3(40, 0, 42.5)
+	_check(not passed.call(), "Coming round the wall to the far side is not passing the door")
+	passed = director.call("_through", [door])
+	actor.global_position = Vector3(40, 0, 37.5)
+	passed.call()
+	actor.global_position = Vector3(40, 0, 42.5)
+	_check(passed.call(), "Walking from one side to the other passes the door")
+	door.free()
+
+
+# "Find another way" becomes the active objective and the key pointer goes away.
+func _key_pointer(director: Node, overlay: Node) -> void:
+	var script := GDScript.new()
+	script.source_code = "extends Node\nvar current_level := \"tutorial_lvl\"\nvar hint := Callable()\nfunc set_tutorial_hint(target: Callable) -> void:\n\thint = target\n"
+	script.reload()
+	var host := Node.new()
+	host.set_script(script)
+	var key := Node3D.new()
+	key.add_to_group("mission_key")
+	root.add_child(key)
+	director.set("_host", host)
+	director.call("_begin_key_hunt")
+	_check(host.get("hint").is_valid(), "The key pointer shows while the key is being hunted")
+	director.get("_finished").erase("one_way")
+	director.call("request", "one_way")
+	_check(director.get("current") == "one_way" and not host.get("hint").is_valid(), "Find another way removes the key pointer")
+	director.set("_steps", [])
+	overlay.call("finish", true) # no steps left: the lesson ends
+	director.set("_host", null)
+	director.set("_key_hunt", false)
+	key.free()
+	host.free()
+
+
+# A control loss cuts a lesson short: afterwards it goes on from the step it stopped at, not from its intro.
+func _resume_after_loss(director: Node, overlay: Node) -> void:
+	var script := GDScript.new()
+	script.source_code = "extends Node\nvar current_level := \"tutorial_lvl\"\nfunc set_tutorial_hint(_target: Callable) -> void:\n\tpass\n"
+	script.reload()
+	var host := Node.new()
+	host.set_script(script)
+	director.set("_host", host)
+	for lesson in ["open_menu", "control_loss"]:
+		director.get("_finished").erase(lesson)
+	director.call("request", "open_menu")
 	await _advance(overlay)
-	_check(director.get("current") == "", "The gas mask lesson ends")
+	_check(str(overlay.get("step").get("mode")) == "wait", "The menu lesson is waiting for M")
+	director.call("request", "control_loss")
+	_check(director.get("current") == "control_loss", "Losing control takes over")
+	director.set("_steps", [])
+	overlay.call("finish", true)
+	_check(director.get("current") == "open_menu" and str(overlay.get("step").get("mode")) == "wait", "The cut lesson resumes at its waiting step")
+	director.get("_queue").clear()
+	director.set("_steps", [])
+	overlay.call("finish", true)
+	director.set("_host", null)
+	host.free()
 
 
 # On tutorial_lvl a lesson shows again even though the saved flags say it was seen.
