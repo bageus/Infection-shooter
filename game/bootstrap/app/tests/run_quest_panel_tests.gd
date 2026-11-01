@@ -53,7 +53,6 @@ func _run() -> void:
 	_check(book.quests[1].text == "Моё описание" and book.quests[1].trigger.kind == "time" and book.quests[1].trigger.value == 7.0, "Edits go to the quest")
 	var prop := PROP.instantiate() as Node3D
 	prop.set("model_path", "res://models/objects/enviroments/09/09_mug.glb")
-	prop.set_meta(&"planning_scene_path", "res://x.tscn")
 	stage.add_child(prop)
 	TARGET.configure(prop, true)
 	list.item_selected.emit(1)
