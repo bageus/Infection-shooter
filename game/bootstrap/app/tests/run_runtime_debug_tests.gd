@@ -94,6 +94,9 @@ func _run() -> void:
 			var instance := bottle.instantiate()
 			app.add_child(instance)
 			_check(not instance.find_children("*", "MeshInstance3D", true, false).is_empty(), "Each of four bottle placements retains its mesh")
+	for sound: Node in app.find_children("*", "AudioStreamPlayer*", true, false):
+		sound.stop() # a playing loop keeps its stream in use at exit
+	await create_timer(0.3).timeout # the audio thread lets go of a stopped stream a moment later
 	app.free()
 	paused = false
 	await process_frame
