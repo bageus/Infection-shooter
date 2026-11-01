@@ -5,7 +5,6 @@ const WALLS := preload("res://game/bootstrap/app/occlusion_wall_materials.gd")
 const QUERY_LAYER := preload("res://game/bootstrap/app/occlusion_query_layer.gd")
 const OUTLINES := preload("res://game/bootstrap/app/occlusion_outlines.gd")
 const HERO_COLOR := Color(0.2, 0.85, 1.0, 0.9)
-const ENEMY_COLOR := Color(1.0, 0.24, 0.28, 0.9)
 const HOLE_RADIUS := 2.0
 const CHECK_INTERVAL := 0.1
 const SUBJECTS_PER_TICK := 8
@@ -73,7 +72,7 @@ func _node_removed(node: Node) -> void:
 
 
 func _is_classified(node: Node) -> bool:
-	return node == player or node.is_in_group("camera_occluder") or node.is_in_group("infected")
+	return node == player or node.is_in_group("camera_occluder")
 
 
 func _check_added_root(reference: WeakRef) -> void:
@@ -164,12 +163,9 @@ func _collect(node: Node) -> void:
 			query_layer.add_root(node)
 		if mode == 1 and node.is_in_group("camera_occluder"):
 			walls.add_root(node)
-		if mode == 0 or node == player:
-			if not _subjects_by_id.has(node.get_instance_id()):
-				if node == player:
-					_add_subject(node, HERO_COLOR)
-				elif node.is_in_group("infected"):
-					_add_subject(node, ENEMY_COLOR)
+		# Only the hero is highlighted in both modes; enemies get no silhouette.
+		if node == player and not _subjects_by_id.has(node.get_instance_id()):
+			_add_subject(node, HERO_COLOR)
 	for child in node.get_children():
 		_collect(child)
 
@@ -208,7 +204,7 @@ func _blocked(node: Node3D) -> bool:
 	var screen := camera.unproject_position(node.global_position)
 	if not get_viewport().get_visible_rect().grow(100.0).has_point(screen):
 		return false
-	for height in [0.2, 0.8, 1.4] if node == player or node.is_in_group("infected") else [0.15]:
+	for height in [0.2, 0.8, 1.4]:
 		if _ray_blocked(node.global_position + Vector3.UP * height, node):
 			return true
 	return false
