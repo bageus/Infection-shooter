@@ -28,6 +28,7 @@ func _run() -> void:
 	_test_exact_threshold_and_immediate_crossing()
 	_test_below_threshold_has_no_delayed_loss()
 	_test_mutagen_pauses_during_control_loss()
+	_test_frame_steps_land_on_threshold()
 	_test_progression_budget_and_stages()
 	_test_retained_budget_and_preview()
 	_test_pinned_skill_refreshes_tree_on_antidote()
@@ -430,6 +431,15 @@ func _test_mutagen_pauses_during_control_loss() -> void:
 	var mutation_before: float = domain.mutation
 	_expect_float(domain.absorb_mutagen(2.0), 0.0, "Mutagen does not accumulate during control loss.")
 	_expect_float(domain.mutation, mutation_before, "Mutation remains unchanged during control loss.")
+
+
+func _test_frame_steps_land_on_threshold() -> void:
+	# 60 FPS absorption used to drift to 24.9999... and grant the first point one frame late.
+	var domain = InfectionDomain.new()
+	for _frame in range(300):
+		domain.absorb_mutagen(1.0 / 60.0)
+	_expect_float(domain.mutation, 25.0, "Frame-sized absorption lands exactly on the first threshold.")
+	_expect(MutationTree.new().points(domain.mutation) == 1, "The first mutation point is granted at 25, not one frame later.")
 
 
 func _reach_first_control_loss():

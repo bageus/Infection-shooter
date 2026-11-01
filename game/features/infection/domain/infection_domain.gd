@@ -46,13 +46,19 @@ func absorb_mutagen(delta_seconds: float) -> float:
 		return 0.0
 
 	var previous := mutation
-	mutation = clampf(
+	mutation = _settle_on_whole(clampf(
 		mutation + CLOUD_MUTATION_PER_SECOND * delta_seconds,
 		MUTATION_MIN,
 		MUTATION_MAX
-	)
+	))
 	_after_mutation_changed()
 	return mutation - previous
+
+
+# Float sums of frame deltas can end at 24.99999999 instead of 25.0; thresholds are whole numbers.
+static func _settle_on_whole(value: float) -> float:
+	var nearest := roundf(value)
+	return nearest if absf(value - nearest) < 0.00001 else value
 
 
 func select_ability(choice: int, mark_priority: bool = false) -> bool:
