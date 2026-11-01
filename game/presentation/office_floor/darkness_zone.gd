@@ -13,6 +13,9 @@ extends Node3D
 const SHADER := preload("res://game/presentation/office_floor/darkness_zone.gdshader")
 const DOOR_REACH := 1.5
 const DOOR_PROBE := 0.9
+const LIFTED_REACH := 0.35
+const MAX_BLOCKERS := 8
+const BLOCKER_REACH := 3.0
 const DOOR_PROBE_TOLERANCE := 0.3
 const PORTALS := preload("res://game/presentation/office_floor/darkness_portals.gd")
 const FADE_SPEED := 5.0
@@ -136,12 +139,15 @@ func _has_open_door() -> bool:
 	return false
 
 
-## The cover lifts while the player stands in any part of the room.
+## The cover lifts while the player stands in any part of the room. Entering takes standing inside a
+## zone rectangle (hugging the far side of a wall does not count); once lifted it stays lifted a little
+## beyond the rectangles, because the floor along an inner wall can lie just outside them.
 func _player_inside() -> bool:
 	if _player == null:
 		return false
+	var reach := LIFTED_REACH if _fade < 0.5 else 0.0
 	for zone in get_tree().get_nodes_in_group("darkness_zone"):
-		if zone.get("room_id") == room_id and not zone.get("permanent") and zone.call("_edge_distance", _player.global_position) <= 0.0:
+		if zone.get("room_id") == room_id and not zone.get("permanent") and zone.call("_edge_distance", _player.global_position) <= reach:
 			return true
 	return false
 
@@ -207,6 +213,38 @@ func set_view_hole(center: Vector2, viewport: Vector2, radius: float, depth: flo
 	material.set_shader_parameter("zone_half", size * 0.5)
 	if _player != null:
 		material.set_shader_parameter("hero_pos", _player.global_position)
+		var blockers := _closed_rects_near(_player.global_position)
+		material.set_shader_parameter("blocker_count", blockers.size())
+		while blockers.size() < MAX_BLOCKERS:
+			blockers.append(Vector4.ZERO)
+		material.set_shader_parameter("blockers", blockers)
+
+
+## Footprints (centre x, centre z, half x, half z) of the covers still up near the hero, once per frame.
+## The lens never opens a surface inside one: that floor belongs to a closed room, not to the hero's side.
+## shortcut: zones are treated as axis-aligned, which every authored zone is; handle rotation if one is not.
+static var _rects_frame := -1
+static var _rects: PackedVector4Array = PackedVector4Array()
+
+
+func _closed_rects_near(point: Vector3) -> PackedVector4Array:
+	var frame := Engine.get_process_frames()
+	if frame != _rects_frame:
+		_rects_frame = frame
+		_rects = PackedVector4Array()
+		var near: Array[Node3D] = []
+		for zone: Node3D in get_tree().get_nodes_in_group("darkness_zone"):
+			if zone.get("permanent") or not zone.overlay.visible:
+				continue
+			var half: Vector2 = zone.get("size") * 0.5
+			if absf(zone.global_position.x - point.x) <= half.x + BLOCKER_REACH and absf(zone.global_position.z - point.z) <= half.y + BLOCKER_REACH:
+				near.append(zone)
+		near.sort_custom(func(a: Node3D, b: Node3D) -> bool:
+			return a.global_position.distance_squared_to(point) < b.global_position.distance_squared_to(point))
+		for zone in near.slice(0, MAX_BLOCKERS):
+			var half: Vector2 = zone.get("size") * 0.5
+			_rects.append(Vector4(zone.global_position.x, zone.global_position.z, half.x, half.y))
+	return _rects.duplicate()
 
 
 ## The lens opens this cover only when the hero stands in this zone, or in another part of its room.

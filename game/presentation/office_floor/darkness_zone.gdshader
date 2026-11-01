@@ -13,6 +13,8 @@ uniform vec2 hole_center = vec2(-10.0);
 uniform vec2 viewport_size = vec2(1280.0, 720.0);
 uniform float hole_radius = 0.0;
 uniform float player_depth = 0.0;
+uniform int blocker_count = 0;
+uniform vec4 blockers[8];
 uniform int portal_count = 0;
 uniform vec3 portal_centre[8];
 uniform vec3 portal_normal[8];
@@ -46,6 +48,10 @@ void fragment() {
             // open the low floor-level surfaces next to him that belong to his own side of the wall.
             bool outside = !lens_zone && below && world.y < outside_height && distance(world.xz, hero_pos.xz) < outside_reach
                 && (abs(local.x) > zone_half.x + wall_margin || abs(local.z) > zone_half.y + wall_margin);
+            // A floor inside another cover's footprint belongs to a closed room: never open it from here.
+            for (int i = 0; i < blocker_count; i++) {
+                if (abs(world.x - blockers[i].x) < blockers[i].z && abs(world.z - blockers[i].y) < blockers[i].w) outside = false;
+            }
             in_room = in_room || outside;
             if (in_room) cover *= smoothstep(hole_radius * 0.6, hole_radius, distance_px);
         }
