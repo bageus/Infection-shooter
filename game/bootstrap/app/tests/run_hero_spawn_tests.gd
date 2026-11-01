@@ -51,7 +51,7 @@ func _run() -> void:
 	player.call("apply_hero_spawn", HERO.defaults())
 	_expect(is_equal_approx(float(player.get("health")), 40.0), "Automatic settings leave the start state alone")
 	player.call("apply_hero_spawn", HERO.sanitize(hero))
-	player.call("restore_manual_hero_spawn")
+	player.call("apply_hero_spawn", {})
 	_expect(is_equal_approx(float(player.get("health")), 40.0), "A manual spawn is restored after a carry")
 
 	if failures == 0:

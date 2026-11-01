@@ -35,8 +35,15 @@ func _run() -> void:
 	root.add_child(player)
 	var door := FakeDoor.new()
 	door.add_to_group("interactive_doors")
-	door.position = Vector3(-2.5, 0.0, 0.0)
+	door.position = Vector3(-2.0, 0.0, 0.0)
+	door.rotation.y = PI * 0.5
 	root.add_child(door)
+	# A door beside the room, not opening onto it, must not open it.
+	var side_door := FakeDoor.new()
+	side_door.add_to_group("interactive_doors")
+	side_door.position = Vector3(0.0, 0.0, 3.0)
+	side_door.rotation.y = PI * 0.5
+	root.add_child(side_door)
 	var first := _zone(0.0, 3)
 	var second := _zone(4.0, 3)
 	var other := _zone(20.0, 4)
@@ -48,12 +55,19 @@ func _run() -> void:
 	_expect(not first.overlay.visible and not second.overlay.visible, "An open door shows the whole room at once")
 	_expect(other.overlay.visible, "An open door does not reveal another room")
 	door.open = false
+	side_door.open = true
+	await create_timer(0.6).timeout
+	_expect(first.overlay.visible and second.overlay.visible, "A door beside the room does not open it")
+	side_door.open = false
 	await create_timer(0.6).timeout
 	_expect(first.overlay.visible and second.overlay.visible, "Closing the door darkens the room again")
 	player.position = Vector3(4.5, 0.0, 0.5)
 	await create_timer(0.6).timeout
 	_expect(not first.overlay.visible and not second.overlay.visible, "Standing in one part lifts the fog of the whole room")
 	_expect(other.overlay.visible, "Another room stays dark")
+	player.position = Vector3(-2.2, 0.0, 0.5)
+	await create_timer(0.6).timeout
+	_expect(first.overlay.visible, "Hugging the outside of a wall keeps the neighbouring room dark")
 	player.position = Vector3(-3.0, 0.0, 0.5)
 	await create_timer(0.6).timeout
 	_expect(first.overlay.visible, "Leaving the room brings the fog back")

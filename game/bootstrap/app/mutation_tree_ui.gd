@@ -24,6 +24,7 @@ var hint_label: Label
 var content: Control
 var skill_bar: SKILL_BAR
 var _last_skill_tier := -1
+var _hotbar_signature := ""
 var _previous_pause := false
 
 
@@ -359,6 +360,17 @@ func _fill_hotbar() -> void:
 	for index in active_skills.size():
 		keys.append(_binding_label("skill_%d" % (index + 1)) if index < 2 else "")
 	skill_bar.rebuild(active_skills, keys, _binding_label("mutation_tree"))
+	_hotbar_signature = _bindings_signature()
+
+
+func _bindings_signature() -> String:
+	return "|".join([_binding_label("skill_1"), _binding_label("skill_2"), _binding_label("mutation_tree")])
+
+
+# Settings can rebind M, Q and E while play continues; rebuild the hotbar and loadout labels once when they change.
+func _process(_delta: float) -> void:
+	if runtime != null and _bindings_signature() != _hotbar_signature:
+		_refresh()
 
 
 func _add_skill(canvas: Control, row: Array, center: Vector2, skills: Array) -> void:

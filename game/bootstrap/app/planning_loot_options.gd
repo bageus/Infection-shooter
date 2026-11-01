@@ -10,7 +10,7 @@ const ITEM_LABELS := {
 	"ammo_automate": "Патроны АК/M4", "ammo_sniper": "Патроны снайпер", "ammo_minigun": "Патроны миниган",
 	"ammo_grenade": "Патроны гранатомёт",
 	"ammo_pistol": "Патроны пистолет", "ammo_uzi": "Патроны UZI", "ammo_shotgun": "Патроны дробовик",
-	"medkit": "Аптечка", "antidote": "Антидот", "dna": "ДНК",
+	"medkit": "Аптечка", "antidote": "Антидот", "dna": "ДНК", "armor": "Броня",
 }
 
 var session: Variant

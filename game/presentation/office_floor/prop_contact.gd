@@ -3,6 +3,7 @@ extends RefCounted
 ## push while walking into it, or a kick when the feet brush a light item.
 
 const WEIGHT := preload("res://game/presentation/office_floor/prop_weight.gd")
+const BUCKET_MOP := preload("res://game/presentation/office_floor/bucket_mop_split.gd")
 const KICKABLE_LAYER := 4
 # Floor/walls/props (1-2) and other kicked items (3) carry kickable items.
 const KICKABLE_MASK := 7
@@ -26,6 +27,7 @@ static func push(body: RigidBody3D, weight: float, character_position: Vector3, 
 		return false
 	body.sleeping = false
 	body.apply_central_impulse(direction * gain * body.mass)
+	BUCKET_MOP.split(body, direction)
 	return true
 
 
@@ -64,6 +66,7 @@ static func kick(body: RigidBody3D, weight: float, character: Node) -> bool:
 	body.sleeping = false
 	body.apply_central_impulse((direction + Vector3.UP * 0.28) * speed * body.mass)
 	body.apply_torque_impulse(Vector3.UP.cross(direction) * speed * body.mass * 0.08)
+	BUCKET_MOP.split(body, direction)
 	return true
 
 

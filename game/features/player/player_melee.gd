@@ -19,7 +19,6 @@ const KICK_HEIGHT := 1.2
 const KICK_IMPULSE := 90.0
 const KICK_MIN_SPEED := 1.5
 const KICK_MAX_SPEED := 8.0
-const CRATE_BREAK_DAMAGE := 10000.0
 const OBJECT_MASK := 7
 const OBJECT_QUERY_LIMIT := 32
 ## Seconds from the key press to the foot or fist landing (strike_pose.gd).
@@ -97,8 +96,8 @@ func _kick_impact() -> void:
 		if body == null or seen.has(body.get_instance_id()) or body is CharacterBody3D:
 			continue
 		seen[body.get_instance_id()] = true
-		if body.has_method("has_loot") and bool(body.call("has_loot")) and body.has_method("take_melee_hit"):
-			body.call("take_melee_hit", CRATE_BREAK_DAMAGE, body.global_position, forward)
+		if body.has_method("has_loot") and bool(body.call("has_loot")) and body.has_method("break_by_strike"):
+			body.call("break_by_strike", body.global_position, forward)
 		elif body is RigidBody3D and not (body as RigidBody3D).freeze and not _is_creature(body):
 			_throw(body as RigidBody3D, player.global_position)
 

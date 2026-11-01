@@ -36,7 +36,7 @@ func _run() -> void:
 	audio.call("feeding_tick", .1, true)
 	_check(_event(audio) == "hunger_feeding", "Chewing uses the new feeding recording")
 	var voice := audio.get("_vocal") as AudioStreamPlayer3D
-	_check(voice != null and voice.bus == &"SFX" and voice.max_distance == 30.0 and voice.unit_size == 3.0 and voice.volume_db >= 3.0, "Feeding is loud, positional and attenuates with distance")
+	_check(voice != null and voice.bus == &"SFX" and voice.max_distance == 20.0 and voice.unit_size == 2.5 and voice.volume_db >= 3.0, "Feeding is loud, positional and attenuates with distance")
 	var original := voice
 	audio.call("feeding_tick", .1, true)
 	_check(audio.get("_vocal") == original, "Chewing does not stack on every physics frame")

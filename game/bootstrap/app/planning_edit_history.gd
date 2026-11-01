@@ -1,5 +1,6 @@
 extends RefCounted
 const BLOOD_PLACEMENT := preload("res://game/bootstrap/app/planning_blood_placement.gd")
+const TARGET := preload("res://game/presentation/office_floor/public/tutorial_target.gd")
 const DARKNESS := preload("res://game/bootstrap/app/planning_darkness_config.gd")
 
 const WAVE_DIRECTOR := preload("res://game/features/spawning/public/wave_director.gd")
@@ -18,7 +19,7 @@ func record_transform(node: Node3D) -> void:
 		"light_color": node.call("get_authored_color") if node.has_method("get_authored_color") else null,
 		"light_energy": node.get_meta("planning_light_energy", -1.0), "light_angle": node.get_meta("planning_light_angle", -1.0),
 		"loot": _loot_of(node), "enemy_stats": node.call("get_enemy_stats") if node.has_method("configure_stats") else {}, "death_cloud": _cloud_of(node),
-		"fruit": _fruit_of(node),
+		"fruit": _fruit_of(node), "tutorial_target": TARGET.is_target(node),
 		"darkness": DARKNESS.capture(node),
 		"spawn": _spawn_of(node), "spawn_triggers": node.get_meta(WAVE_DIRECTOR.TRIGGER_META, [])})
 
@@ -113,6 +114,7 @@ func undo() -> void:
 						node.set_meta("planning_light_angle", spot.spot_angle)
 				_apply_loot(node, action.get("loot", {}), action.get("enemy_stats", {}), action.get("death_cloud", {}))
 				_apply_fruit(node, action.get("fruit", {}))
+				TARGET.configure(node, bool(action.get("tutorial_target", false)))
 				_apply_spawn(node, action.get("spawn", {}), action.get("spawn_triggers", []))
 				planner._sync_workstations()
 				if planner.selected == node:
@@ -260,6 +262,7 @@ func _restore(record: Dictionary, offset: Vector3, new_desk: bool) -> Node3D:
 		node.call("configure_flicker", int(record["flicker_mode"]), float(record["flicker_step"]))
 	_apply_loot(node, record.get("loot", {}), record.get("enemy_stats", {}), record.get("death_cloud", {}))
 	_apply_fruit(node, record.get("fruit", {}))
+	TARGET.configure(node, bool(record.get("tutorial_target", false)))
 	_apply_spawn(node, record.get("spawn", {}), record.get("spawn_triggers", []))
 	if node.has_method("watch_target") and str(record["kind"]) == "enemy":
 		node.call("watch_target", planner.main_player)

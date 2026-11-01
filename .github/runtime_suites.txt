@@ -130,6 +130,7 @@ game/presentation/office_floor/tests/run_destruction_fixes_tests.gd
 game/presentation/office_floor/tests/run_glass_cup_break_tests.gd
 game/presentation/office_floor/tests/run_fragile_prop_tests.gd
 game/presentation/office_floor/tests/run_prop_destruction_reaction_tests.gd
+game/presentation/office_floor/tests/run_bucket_mop_split_tests.gd
 game/presentation/office_floor/tests/run_office_breakage_tests.gd
 game/bootstrap/app/tests/run_planner_contact_tests.gd
 game/bootstrap/app/tests/run_pipe_snap_tests.gd
@@ -161,6 +162,7 @@ game/presentation/office_floor/tests/run_electronics_hit_tests.gd
 game/features/infected/tests/run_late_spawn_debris_tests.gd
 game/features/infected/tests/run_blood_events_tests.gd
 game/features/pickups/tests/run_pickup_floor_tests.gd
+game/features/pickups/tests/run_loot_carried_tests.gd
 game/bootstrap/app/tests/run_legacy_pickup_tests.gd
 game/presentation/office_floor/tests/run_floor_batch_tests.gd
 game/presentation/office_floor/tests/run_elevator_collision_tests.gd
@@ -249,3 +251,4 @@ game/features/spawning/tests/run_endless_tests.gd
 game/bootstrap/app/tests/run_platform_promo_tests.gd
 game/features/infected/tests/run_green_wound_tests.gd
 game/bootstrap/app/tests/run_tutorial_tests.gd
+game/bootstrap/app/tests/run_first_run_tutorial_tests.gd

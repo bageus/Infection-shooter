@@ -2,6 +2,7 @@ extends CharacterBody3D
 
 const MUTATION_BALANCE := preload("res://game/features/infection/public/mutation_balance.gd")
 const CONSUMABLES := preload("res://game/features/player/player_consumables.gd")
+const HERO_START := preload("res://game/features/player/hero_spawn_start.gd")
 
 signal projectile_blood(position: Vector3, direction: Vector3, weapon: String, excluded: Array[RID], source_id: int)
 signal blood_wounded(position: Vector3, excluded: Array[RID])
@@ -332,22 +333,21 @@ func import_loadout(loadout: Dictionary) -> void:
 	_slot_weapons = seen
 	_select_weapon(0)
 
-## Manual hero spawn from the planner: replaces the start state. Empty or automatic settings change nothing.
+## Manual hero spawn from the planner replaces the start state; automatic settings change nothing.
+## Called with {} after a carry from the previous map, to set the stored manual spawn over it.
 func apply_hero_spawn(hero: Dictionary) -> void:
-	_manual_hero_spawn = hero if str(hero.get("mode", "")) == "manual" else {}
-	if _manual_hero_spawn.is_empty():
-		return
-	health = clampf(float(hero.health), 1.0, max_health)
-	antidotes = clampi(int(hero.antidotes), 0, max_antidotes)
-	import_loadout({"slots": hero.slots, "armor": max_armor if bool(hero.armor) else 0.0, "ammo": hero.ammo})
-	infection_runtime.call("restore_critical_threshold", float(hero.threshold))
-	infection_runtime.call("set_gas_mask_worn", bool(hero.gas_mask))
-	# shortcut: no key item exists yet, so the key setting is saved but not applied.
-
-## The carry from the previous map runs after the spawn is applied, so a manual spawn is set again over it.
-func restore_manual_hero_spawn() -> void:
+	if hero.get("mode") == "manual":
+		_manual_hero_spawn = hero
 	if not _manual_hero_spawn.is_empty():
-		apply_hero_spawn(_manual_hero_spawn)
+		HERO_START.apply(self, _manual_hero_spawn)
+
+## Weapon slot indices the player holds now; empty slots are left out.
+func carried_weapon_indices() -> Array[int]:
+	var carried: Array[int] = []
+	for index in _slot_weapons:
+		if index >= 0:
+			carried.append(index)
+	return carried
 
 ## Armor plate collected: the armor bar fills to its maximum.
 func pickup_armor() -> void:

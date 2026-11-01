@@ -9,6 +9,7 @@ const ENEMY_TUNING := preload("res://game/features/infected/public/enemy_tuning.
 const DEATH_CLOUD := preload("res://game/features/infected/public/death_cloud_settings.gd")
 const CORPSE_BUDGET := preload("res://game/features/infected/public/corpse_budget.gd")
 var drop_weapon: Callable
+var carried_weapons: Callable
 var _owner: Node
 var _base := {}
 
@@ -82,4 +83,4 @@ func apply_saved_stats() -> void:
 func release(world: Node, at: Vector3) -> void:
 	var target: Node = _owner.get("_target")
 	var recycling := is_instance_valid(target) and target.has_method("get_infection_skill") and bool(target.call("get_infection_skill", "recycling"))
-	LOOT_DROP.release_enemy(world, at, _owner.get_meta(&"planning_loot") if _owner.has_meta(&"planning_loot") else null, drop_weapon, 1.0 + MUTATION_BALANCE.value("recycling", "percent") / 100.0 if recycling else 1.0)
+	LOOT_DROP.release_enemy(world, at, _owner.get_meta(&"planning_loot") if _owner.has_meta(&"planning_loot") else null, drop_weapon, 1.0 + MUTATION_BALANCE.value("recycling", "percent") / 100.0 if recycling else 1.0, carried_weapons)

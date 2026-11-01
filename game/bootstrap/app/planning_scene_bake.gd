@@ -1,6 +1,7 @@
 extends RefCounted
 ## Bounded authored scene cloning; shared resources remain immutable.
 const SCENE_SCRIPTS := preload("res://game/bootstrap/app/planning_scene_scripts.gd")
+const TARGET := preload("res://game/presentation/office_floor/public/tutorial_target.gd")
 const DOOR_OPTIONS := preload("res://game/bootstrap/app/planning_door_options.gd")
 const DARKNESS := preload("res://game/bootstrap/app/planning_darkness_config.gd")
 const WAVE_DIRECTOR := preload("res://game/features/spawning/public/wave_director.gd")
@@ -78,6 +79,8 @@ func _append(node: Node3D, scene_root: Node3D) -> void:
 		copy.call("configure_loot", node.call("get_loot_config"))
 	if node.has_method("has_fruit") and node.call("has_fruit") and bool(node.call("get_fruit_config")["enabled"]):
 		copy.call("configure_fruit", node.call("get_fruit_config"))
+	if TARGET.is_target(node):
+		TARGET.configure(copy, true)
 	var door := DOOR_OPTIONS.lockable_controller(node)
 	var copy_door := DOOR_OPTIONS.lockable_controller(copy)
 	if door != null and copy_door != null:

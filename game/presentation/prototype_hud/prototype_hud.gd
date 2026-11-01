@@ -73,9 +73,11 @@ var _mutation_feedback: Control
 var _weapon_snapshot: Array = []
 
 var _has_key := false
+var _key_signature := ""
 var _mutation_alarm: RefCounted
 var _vitals_fx: Control
 var _objective: PanelContainer
+var _tutorial_objective := ""
 var _texts_locale := ""
 var _scale_blink: Tween
 var _veil: ColorRect
@@ -142,13 +144,41 @@ func _apply_texts() -> void:
 	health_caption.text = tr("hudHealth")
 	mutation_caption.text = tr("hudMutation")
 	key_caption.text = tr("hudKey")
-	antidote_key.tooltip_text = tr("hudAntidoteTip")
 	key_panel.tooltip_text = tr("hudEmergencyKeyTip")
 	gas_mask_panel.tooltip_text = tr("hudGasMaskTip")
-	for index in slot_keys.size():
-		slot_keys[index].tooltip_text = tr("hudSelectWeapon") % (index + 1)
+	_key_signature = ""
 	_vital_snapshot = []
 	_weapon_snapshot = []
+
+
+# Key captions follow the live InputMap, so a rebinding in settings shows here on the next frame.
+func _refresh_key_labels() -> void:
+	var antidote := _action_label("antidote")
+	var weapons: Array[String] = []
+	for index in slot_keys.size():
+		weapons.append(_action_label("weapon_%d" % (index + 1)))
+	var signature := TranslationServer.get_locale() + "|" + antidote + "|" + "|".join(weapons)
+	if signature == _key_signature:
+		return
+	_key_signature = signature
+	antidote_key.text = antidote
+	antidote_key.tooltip_text = tr("hudAntidoteTip") % antidote
+	for index in slot_keys.size():
+		slot_keys[index].text = weapons[index]
+		slot_keys[index].tooltip_text = tr("hudSelectWeapon") % weapons[index]
+
+
+static func _action_label(action: String) -> String:
+	var events := InputMap.action_get_events(action)
+	if events.is_empty():
+		return "?"
+	var event: InputEvent = events[0]
+	if event is InputEventMouseButton:
+		return ["LMB", "RMB", "MMB"][clampi((event as InputEventMouseButton).button_index - 1, 0, 2)]
+	if event is InputEventKey:
+		var key := event as InputEventKey
+		return OS.get_keycode_string(key.physical_keycode if key.physical_keycode else key.keycode)
+	return event.as_text()
 
 
 # Current goal, styled like the HUD frames: find the key first, then head for the fire exit.
@@ -158,8 +188,15 @@ func _build_objective() -> void:
 	add_child(_objective)
 
 
+## A tutorial lesson may put its task in the objective banner until it clears the text.
+func set_tutorial_objective(text: String) -> void:
+	_tutorial_objective = text
+	_set_objective_text()
+
+
 func _set_objective_text() -> void:
-	(_objective.get_child(0) as Label).text = tr("objectiveFireExit" if _has_key else "objectiveFindKey")
+	var fallback := tr("objectiveFireExit" if _has_key else "objectiveFindKey")
+	(_objective.get_child(0) as Label).text = _tutorial_objective if not _tutorial_objective.is_empty() else fallback
 
 
 # Top-centre banner in the shared HUD frame; objective and control-loss notices use the same look.
@@ -211,6 +248,7 @@ func _process(delta: float) -> void:
 	_update_weapon()
 	_antidote_hint_remaining = maxf(0.0, _antidote_hint_remaining - delta)
 	_update_key_buttons()
+	_refresh_key_labels()
 	_update_gas_mask()
 	_perf_timer += delta
 	if _perf_timer >= 0.25:
@@ -257,7 +295,6 @@ func _refresh_slot_icons() -> void:
 			continue
 		_slot_weapon_indices[i] = weapon_index
 		slot_icons[i].texture = _weapon_icons[weapon_index] if weapon_index >= 0 and weapon_index < _weapon_icons.size() else null
-		slot_keys[i].text = str(i + 1)
 
 
 func _set_active_weapon_icon(index: int) -> void:
@@ -440,6 +477,10 @@ func tutorial_rect(kind: String) -> Rect2:
 			return antidote_panel.get_global_rect()
 		"gas_mask":
 			return gas_mask_panel.get_global_rect()
+		"armor":
+			return armor_bar.get_global_rect().merge(armor_value.get_global_rect())
+		"weapons":
+			return $WeaponPanel.get_global_rect()
 	return Rect2()
 
 

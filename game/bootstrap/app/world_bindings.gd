@@ -8,6 +8,7 @@ var _container: Node3D
 var _impacts: Node
 var _player: Node3D
 var _drop_weapon: Callable
+var _carried_weapons: Callable
 var _particle_targets: Dictionary = {}
 var _electronic_particles := true
 var _displays: Node
@@ -21,6 +22,7 @@ func _init(container: Node3D, impacts: Node, player: Node3D, drop_weapon: Callab
 	_impacts = impacts
 	_player = player
 	_drop_weapon = drop_weapon
+	_carried_weapons = Callable(player, "carried_weapon_indices")
 	_displays = displays
 	if is_instance_valid(_container):
 		_chase_budget = CHASE_BUDGET.new()
@@ -55,7 +57,7 @@ func _bind_collaborators(node: Node) -> void:
 	if node.has_method("configure_weapon_drop"):
 		node.call("configure_weapon_drop", _drop_weapon)
 	if node.has_method("configure_loot_drop"):
-		node.call("configure_loot_drop", _drop_weapon)
+		node.call("configure_loot_drop", _drop_weapon, _carried_weapons)
 	if node.has_method("configure_player"):
 		node.call("configure_player", _player)
 	if node.has_method("configure_world"):

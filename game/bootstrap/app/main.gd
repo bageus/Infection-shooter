@@ -92,7 +92,7 @@ func _ready() -> void:
 	if DisplayServer.get_name() != "headless": # lessons pause the game; automated runs skip them
 		var tutorial := preload("res://game/bootstrap/app/tutorial/tutorial_director.gd").new()
 		add_child(tutorial)
-		tutorial.call("configure", player, $PrototypeHUD, mutation_tree_ui)
+		tutorial.call("configure", player, $PrototypeHUD, mutation_tree_ui, null, self)
 	$MutationChoice/Panel/VBox/Choices/FastHands.pressed.connect(_choose_fast_hands)
 	$MutationChoice/Panel/VBox/Choices/LegMutation.pressed.connect(_choose_leg_mutation)
 	$MutationChoice/Panel/VBox/Choices/EnhancedAmmo.pressed.connect(_choose_enhanced_ammo)
@@ -193,6 +193,12 @@ func set_infinite_antidotes_enabled(enabled: bool) -> void:
 ## Settings: light camera shake on shots.
 func set_camera_shake_enabled(enabled: bool) -> void:
 	player.call("set_camera_shake_enabled", enabled)
+
+
+## Tutorial: points the floor chevrons at a lesson goal until called with an invalid callable.
+func set_tutorial_hint(target: Callable) -> void:
+	if is_instance_valid(mission_layout):
+		mission_layout.call("set_tutorial_hint", target)
 
 
 func set_floor_hints_enabled(enabled: bool) -> void:
@@ -409,7 +415,7 @@ func apply_carry(carry: Dictionary) -> void:
 	player.call("import_loadout", carry.get("loadout", {}))
 	infection_runtime.call("restore_critical_threshold", float(carry.get("threshold", 0.0)))
 	infection_runtime.call("restore_control_progress", carry.get("control", {}))
-	player.call("restore_manual_hero_spawn")
+	player.call("apply_hero_spawn", {})
 
 
 ## Level chain: reload the scene with another saved map, arriving at `arrival` ({x, z} or {}).

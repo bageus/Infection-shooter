@@ -11,6 +11,7 @@ const FLOOR_DEBRIS := preload("res://game/presentation/office_floor/prop_floor_d
 var _floor_debris := FLOOR_DEBRIS.new()
 const PLATE_FRUIT := preload("res://game/presentation/office_floor/plate_fruit.gd")
 var _fruit := PLATE_FRUIT.new()
+const CRATE_WALLS := preload("res://game/presentation/office_floor/crate_walls.gd")
 const FRAGILE := preload("res://game/presentation/office_floor/fragile_prop.gd")
 var _geometry := GEOMETRY.new()
 var _retained := preload("res://game/presentation/office_floor/retained_prop_body.gd").new()
@@ -141,6 +142,7 @@ var _reaction := HIT_REACTION.new()
 
 var effects_root: Node3D
 var _drop_weapon: Callable
+var _carried_weapons: Callable
 var impact_pool: Node
 var glass_debris_floor: Node3D
 
@@ -179,18 +181,14 @@ func has_fruit() -> bool: return PLATE_FRUIT.applies(model_path)
 func get_fruit_config() -> Dictionary: return _fruit.config.duplicate()
 func configure_fruit(raw: Dictionary) -> void: _fruit.configure(self, _geometry, raw)
 
-func configure_loot_drop(drop_weapon: Callable) -> void:
-	_drop_weapon = drop_weapon
+func configure_loot_drop(drop_weapon: Callable, carried_weapons: Callable = Callable()) -> void: _drop_weapon = drop_weapon; _carried_weapons = carried_weapons
 
 
 func _release_loot() -> void:
-	if not has_loot() or not has_meta(&"planning_loot"):
-		return
 	var world: Node = effects_root if is_instance_valid(effects_root) else get_parent()
-	if world == null:
+	if not has_loot() or not has_meta(&"planning_loot") or world == null:
 		return
-	var size_hint := "large" if "large" in model_path.get_file() else "small"
-	LOOT_DROP.release_crate(world, global_position, get_loot_config(), size_hint, _drop_weapon)
+	LOOT_DROP.release_crate(world, global_position, get_loot_config(), "large" if "large" in model_path.get_file() else "small", _drop_weapon, _carried_weapons)
 
 
 func _ready() -> void:
@@ -382,7 +380,7 @@ func take_projectile_hit(damage: float, hit_position: Vector3, _normal: Vector3,
 			queue_free.call_deferred()
 		return false
 	# Every loose item moves when shot, by its weight (anchored ones stay).
-	BULLET_PUSH.apply(self, weight_kg, weapon, direction, hit_position)
+	BULLET_PUSH.shot(self, weight_kg, weapon, direction, hit_position)
 	var action := _damage.hit(damage, weapon, BOOK_STACK.contains(model_path),
 		bool(get_meta("planning_wall_mount", false)), freeze, _is_facade_damage())
 	match action:
@@ -407,15 +405,11 @@ func take_projectile_hit(damage: float, hit_position: Vector3, _normal: Vector3,
 
 
 # A cardboard box has no staged pieces: its panels fly apart at the moment it breaks.
+# A big wooden crate is cut into its walls, which topple and pile up before they are baked.
 func _collapse_box(hit_position: Vector3, direction: Vector3) -> void:
 	_floor_debris.emit(self, model_path, "break", hit_position, direction)
 	BREAK_SOUND.play(self, effects_root, model_path, get_projectile_material(), hit_position)
-	var index := 0
-	for child in _visual.find_children("*", "MeshInstance3D", true, false):
-		var mesh := child as MeshInstance3D
-		if mesh != null and mesh.mesh != null and mesh.is_visible_in_tree():
-			DAMAGE.spawn_piece(self, mesh, self, 0, index, direction, hit_position)
-			index += 1
+	CRATE_WALLS.spawn_pieces(self, _visual, hit_position, direction)
 	_visual.hide()
 	for shape in _shapes:
 		shape.set_deferred("disabled", true)
@@ -490,6 +484,11 @@ func take_melee_hit(damage: float, hit_position: Vector3, direction: Vector3) ->
 		return
 	take_projectile_hit(damage, hit_position, Vector3.ZERO, direction, "MELEE")
 
+func break_by_strike(hit_position: Vector3, direction: Vector3) -> void:
+	if _damage.shatter():
+		_release_loot()
+		_collapse_box(hit_position, direction)
+
 
 func _apply_damage(hit_position: Vector3, direction: Vector3) -> void:
 	if _broken:
@@ -536,7 +535,10 @@ func _apply_damage(hit_position: Vector3, direction: Vector3) -> void:
 			shape.set_deferred("disabled", true)
 		collision_layer = 0
 		freeze = true
+		var first := effects_root.get_child_count() if is_instance_valid(effects_root) else 0
 		BREAKUP.spawn_stage(self, _geometry, 0, "", hit_position, direction, _damage.full_break)
+		if is_instance_valid(effects_root):
+			CRATE_WALLS.scatter_pallet(model_path, effects_root.get_children().slice(first), global_position)
 
 
 func _is_facade_damage() -> bool:

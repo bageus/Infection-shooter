@@ -51,7 +51,8 @@
     "public/city_backdrop.tscn",
     "public/surface_decal_config.gd",
     "public/baked_biomass_floor.gd",
-    "public/wall_base_shadow.gd"
+    "public/wall_base_shadow.gd",
+    "public/tutorial_target.gd"
   ],
   "dependencies": [
     "features.player",

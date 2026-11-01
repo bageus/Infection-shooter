@@ -39,8 +39,8 @@ class Crate:
 	func has_loot() -> bool:
 		return true
 
-	func take_melee_hit(damage: float, _at: Vector3, _direction: Vector3) -> void:
-		hits += damage
+	func break_by_strike(_at: Vector3, _direction: Vector3) -> void:
+		hits += 10000.0
 
 
 func _init() -> void:

@@ -1,4 +1,5 @@
 extends SceneTree
+const AudioRelease := preload("res://game/bootstrap/app/tests/audio_release.gd")
 const MAIN := preload("res://game/bootstrap/app/main.tscn")
 const CORPSE := preload("res://game/features/infected/public/decor/corpse_hunger.tscn")
 const HORDE := preload("res://game/features/infected/public/decor/corpse_horde.tscn")
@@ -23,6 +24,9 @@ func _run() -> void:
 	stage = MAIN.instantiate()
 	root.add_child(stage)
 	current_scene = stage
+	for child in stage.get_children(): # first-run lessons pause the tree on a fresh profile
+		if child.get_script() != null and str(child.get_script().resource_path).ends_with("tutorial_director.gd"):
+			child.free()
 	(stage.get_node("Gameplay/Enemies") as Node).process_mode = Node.PROCESS_MODE_DISABLED
 	await process_frame
 	var player: Node3D = stage.get("player")
@@ -47,6 +51,7 @@ func _run() -> void:
 	await process_frame
 	await create_timer(.2).timeout
 	print("Planner extension tests: %d failures" % failures)
+	await AudioRelease.release(self)
 	quit(failures)
 
 func _snap(catalog: RefCounted) -> void:

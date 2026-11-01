@@ -4,12 +4,13 @@ extends CanvasLayer
 ## A "click" step pauses the game and ends on any key or mouse press.
 ## A "wait" step lets input through and ends when its `done` callable returns true.
 ## Step keys: text, targets (Array of Callable -> Rect2), mode, arrow, picture (+ mutation, threshold),
-## hint (text at the top, no dim), dim, requires, done.
+## armor (0..1: show the armor bar picture), hint (text at the top, no dim), dim, requires, done, keys (animated key caps) and keys_mode ("cycle" or "all").
 
 const PALETTE := preload("res://game/bootstrap/app/tutorial/tutorial_palette.gd")
 const TEXT := preload("res://game/bootstrap/app/mutation_text.gd")
 const SPOTLIGHT := preload("res://game/bootstrap/app/tutorial/tutorial_spotlight.gdshader")
 const PICTURE := preload("res://game/bootstrap/app/tutorial/tutorial_meter_picture.gd")
+const KEYS := preload("res://game/bootstrap/app/tutorial/tutorial_keys_picture.gd")
 const TITLE_FONT := preload("res://assets/interface/fonts/title.ttf")
 const GROW := 8.0
 const MIN_STEP_SECONDS := 0.3
@@ -20,6 +21,7 @@ signal step_finished
 var active := false
 var step: Dictionary = {}
 var picture: Control
+var keys: Control
 var _dim: ColorRect
 var _frame: Control
 var _panel: PanelContainer
@@ -63,6 +65,9 @@ func _ready() -> void:
 	_panel.add_child(column)
 	picture = PICTURE.new()
 	column.add_child(picture)
+	keys = KEYS.new()
+	keys.visible = false
+	column.add_child(keys)
 	_label = Label.new()
 	_label.custom_minimum_size.x = TEXT_WIDTH
 	_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
@@ -86,7 +91,11 @@ func play(next_step: Dictionary) -> void:
 	picture.visible = bool(step.get("picture", false))
 	picture.set("mutation", float(step.get("mutation", 0.0)))
 	picture.set("threshold", float(step.get("threshold", 30.0)))
+	picture.set("armor", float(step.get("armor", -1.0)))
 	picture.queue_redraw()
+	keys.visible = step.has("keys")
+	if keys.visible:
+		keys.call("show_keys", step["keys"], str(step.get("keys_mode", "cycle")))
 	_footer.text = TEXT.t("tutContinue") if _is_click() else ""
 	_footer.visible = _is_click()
 	_refresh()

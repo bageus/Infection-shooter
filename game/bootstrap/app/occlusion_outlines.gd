@@ -5,6 +5,7 @@ const QUERY_LAYER := preload("res://game/bootstrap/app/occlusion_query_layer.gd"
 const GROUPS: Array[StringName] = [&"occlusion_items", &"weapon_pickups", &"interactive_doors", &"hidden_outline"]
 # DNA and armor share the item group but are not on the outlined list.
 const EXCLUDED_GROUPS: Array[StringName] = [&"armor_pickups"]
+const COVER := preload("res://game/bootstrap/app/occlusion_outline_cover.gdshader")
 const RADIUS := 6.0
 const RELEASE_RADIUS := 6.5
 const INTERVAL := 0.15
@@ -15,6 +16,8 @@ const DOOR_SIDE := 0.7
 var outlines: Dictionary = {}
 var rays_last_tick := 0
 var _elapsed := 0.0
+var _cover: ShaderMaterial
+var _covered: Array[MeshInstance3D] = []
 
 
 func tick(delta: float, effects: Node) -> void:
@@ -44,6 +47,29 @@ func tick(delta: float, effects: Node) -> void:
 		if not seen.has(id) or outlines[id].target.get_ref() == null:
 			outlines[id].clear()
 			outlines.erase(id)
+	_cover_player(player)
+
+
+## The rim ignores depth, so the hero is stencil-marked to stay in front of it.
+func _cover_player(player: Node3D) -> void:
+	if outlines.is_empty():
+		_uncover()
+		return
+	if _cover == null:
+		_cover = ShaderMaterial.new()
+		_cover.shader = COVER
+		_cover.render_priority = 19
+	for mesh: MeshInstance3D in player.find_children("*", "MeshInstance3D", true, false):
+		if mesh.material_overlay == null:
+			mesh.material_overlay = _cover
+			_covered.append(mesh)
+
+
+func _uncover() -> void:
+	for mesh in _covered:
+		if is_instance_valid(mesh) and mesh.material_overlay == _cover:
+			mesh.material_overlay = null
+	_covered.clear()
 
 
 func _eligible(item: Node) -> bool:
@@ -133,4 +159,5 @@ func clear() -> void:
 	for outline in outlines.values():
 		outline.clear()
 	outlines.clear()
+	_uncover()
 	_elapsed = 0.0

@@ -49,6 +49,7 @@ func _run() -> void:
 		var shader := ((forever.get_node(layer) as GeometryInstance3D).material_override as ShaderMaterial).shader
 		_expect(not shader.code.contains("instance uniform"), "Cloud %s takes no instance-uniform slot (256-object renderer limit)." % layer)
 	_check_refused_mutagen_stays(stage)
+	_check_absorb_units_are_exact(stage)
 	await _check_overlapping_clouds_heal_once(stage)
 	var depleted := [false]
 	first.connect("depleted", func() -> void: depleted[0] = true)
@@ -87,6 +88,28 @@ func _check_refused_mutagen_stays(stage: Node3D) -> void:
 	body.accepts = true
 	cloud.call("_feed", body, 0.5)
 	_expect(is_equal_approx(float(cloud.get("_absorption_remaining")), full - 0.5), "Absorbed mutagen is spent from the cloud.")
+	body.queue_free()
+	cloud.queue_free()
+
+
+# A cloud set to hold N units gives exactly N, then ends at once with nothing left to absorb.
+func _check_absorb_units_are_exact(stage: Node3D) -> void:
+	var cloud := _spawn(stage, Vector3(50, 0, 0), 14.0)
+	cloud.set("ends_when_absorbed", true)
+	cloud.set("absorb_units", 5.0)
+	cloud.call("activate")
+	var body := Absorber.new()
+	stage.add_child(body)
+	var ended := [false]
+	cloud.connect("depleted", func() -> void: ended[0] = true)
+	for _step in 40:
+		cloud.call("_feed", body, 0.3)
+		if ended[0]:
+			break
+	var total := float(cloud.get("_absorbed_units"))
+	_expect(is_equal_approx(total, 5.0), "A 5-unit cloud gives exactly 5 units (%.4f)." % total)
+	_expect(ended[0] and not cloud.visible, "An emptied cloud ends at once.")
+	_expect(bool(cloud.call("is_spent")), "An emptied cloud has nothing left to feed.")
 	body.queue_free()
 	cloud.queue_free()
 
