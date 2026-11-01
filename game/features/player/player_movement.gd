@@ -2,6 +2,7 @@ extends CharacterBody3D
 
 const MUTATION_BALANCE := preload("res://game/features/infection/public/mutation_balance.gd")
 const CONSUMABLES := preload("res://game/features/player/player_consumables.gd")
+const HERO_START := preload("res://game/features/player/hero_spawn_start.gd")
 
 signal projectile_blood(position: Vector3, direction: Vector3, weapon: String, excluded: Array[RID], source_id: int)
 signal blood_wounded(position: Vector3, excluded: Array[RID])
@@ -95,6 +96,7 @@ var _mutation_control := CONTROL_LOSS.new()
 var _mutation_menu_open := false
 var _slot_weapons: Array[int] = [0, -1, -1] ## Weapon index per slot, -1 when empty; a new game starts with the pistol only.
 var _emergency_key := false
+var _manual_hero_spawn: Dictionary = {}
 var effects_root: Node3D
 var impact_pool: Node
 var _drop_weapon_command: Callable
@@ -330,6 +332,14 @@ func import_loadout(loadout: Dictionary) -> void:
 	if seen[0] < 0: return # Slot 0 always holds a weapon: pickups fill empty slots from the first one.
 	_slot_weapons = seen
 	_select_weapon(0)
+
+## Manual hero spawn from the planner replaces the start state; automatic settings change nothing.
+## Called with {} after a carry from the previous map, to set the stored manual spawn over it.
+func apply_hero_spawn(hero: Dictionary) -> void:
+	if hero.get("mode") == "manual":
+		_manual_hero_spawn = hero
+	if not _manual_hero_spawn.is_empty():
+		HERO_START.apply(self, _manual_hero_spawn)
 
 ## Weapon slot indices the player holds now; empty slots are left out.
 func carried_weapon_indices() -> Array[int]:

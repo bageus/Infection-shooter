@@ -239,6 +239,8 @@ func _input(event: InputEvent) -> void:
 		return
 	if event is InputEventMouse and controls.spawn_options.contains_point(event.position):
 		return
+	if event is InputEventMouse and controls.hero_spawn_options.contains_point(event.position):
+		return
 	if event is InputEventMouse and (ui.get_node("Panel") as Control).get_global_rect().has_point(event.position):
 		# _input precedes GUI dispatch: let the palette receive this event.
 		return

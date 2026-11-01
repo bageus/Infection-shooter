@@ -415,6 +415,7 @@ func apply_carry(carry: Dictionary) -> void:
 	player.call("import_loadout", carry.get("loadout", {}))
 	infection_runtime.call("restore_critical_threshold", float(carry.get("threshold", 0.0)))
 	infection_runtime.call("restore_control_progress", carry.get("control", {}))
+	player.call("apply_hero_spawn", {})
 
 
 ## Level chain: reload the scene with another saved map, arriving at `arrival` ({x, z} or {}).

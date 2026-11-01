@@ -2,6 +2,7 @@ extends RefCounted
 ## Prepare a complete map before replacing it; optionally commit between frames.
 const SURFACE_SETTINGS := preload("res://game/bootstrap/app/planning_surface_decals.gd")
 const FLOOR_SIZE := preload("res://game/bootstrap/app/planning_floor_size.gd")
+const HERO_SPAWN := preload("res://game/bootstrap/app/planning_hero_spawn.gd")
 const RESOURCE_QUEUE := preload("res://game/bootstrap/app/scene_resource_queue.gd")
 const VALIDATOR := preload("res://game/bootstrap/app/planning_layout_validator.gd")
 const LAYOUT_PROPERTIES := preload("res://game/bootstrap/app/planning_layout_properties.gd")
@@ -199,6 +200,10 @@ func _begin(prepared: Dictionary) -> void:
 		session.main_player.position = Vector3(float(latest.get("x", 0.0)), float(latest.get("y", 1.0)), float(latest.get("z", 0.0)))
 		session.main_player.rotation_degrees.y = float(latest.get("rotation_y", 0.0))
 		objects.player_spawn_transform = session.main_player.transform
+		# Records saved before the hero settings existed have none: they load as automatic.
+		objects.hero_spawn = HERO_SPAWN.sanitize(latest.get("hero", {}))
+		if session.main_player.has_method("apply_hero_spawn"):
+			session.main_player.call("apply_hero_spawn", objects.hero_spawn)
 
 
 func _place(entry: Dictionary) -> void:
