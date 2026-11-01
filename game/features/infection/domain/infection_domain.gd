@@ -18,7 +18,8 @@ const MAX_CRITICAL_THRESHOLD := 95.0
 const ANTIDOTE_REDUCTION := 10.0
 const FIRST_CONTROL_LOSS_DURATION := 2.0
 const SECOND_CONTROL_LOSS_DURATION := 5.0
-const GAS_MASK_COOLDOWN := 60.0
+const GAS_MASK_WEAR_DURATION := 60.0
+const GAS_MASK_COOLDOWN := 120.0
 const EPSILON := 0.00001
 
 var mutation: float = 0.0
@@ -27,7 +28,9 @@ var priority_ability: int = AbilityChoice.NONE
 var ability_choice_pending: bool = false
 ## A worn gas mask keeps mutagen out: the body takes nothing from clouds.
 var gas_mask_worn: bool = false
-## Seconds until the mask may be put on or taken off again.
+## Seconds the mask stays on before it comes off by itself.
+var gas_mask_worn_remaining: float = 0.0
+## Seconds until the mask may be put on again.
 var gas_mask_cooldown_remaining: float = 0.0
 
 var critical_threshold: float = BASE_CRITICAL_THRESHOLD
@@ -109,17 +112,26 @@ func use_antidote(effectiveness: float = 1.0) -> bool:
 	return true
 
 
-## Takes the mask off or puts it on; refused while the cooldown from the last change runs.
-func toggle_gas_mask() -> bool:
-	if gas_mask_cooldown_remaining > 0.0 or defeated or is_control_lost():
+## Puts the mask on for 60 s; refused while it is worn or the cooldown runs.
+func put_on_gas_mask() -> bool:
+	if gas_mask_worn or gas_mask_cooldown_remaining > 0.0 or defeated or is_control_lost():
 		return false
-	gas_mask_worn = not gas_mask_worn
-	gas_mask_cooldown_remaining = GAS_MASK_COOLDOWN
+	set_gas_mask_worn(true)
 	return true
+
+
+func set_gas_mask_worn(worn: bool) -> void:
+	gas_mask_worn = worn
+	gas_mask_worn_remaining = GAS_MASK_WEAR_DURATION if worn else 0.0
 
 
 func tick(delta_seconds: float) -> void:
 	gas_mask_cooldown_remaining = maxf(0.0, gas_mask_cooldown_remaining - maxf(delta_seconds, 0.0))
+	if gas_mask_worn:
+		gas_mask_worn_remaining = maxf(0.0, gas_mask_worn_remaining - maxf(delta_seconds, 0.0))
+		if gas_mask_worn_remaining <= 0.0:
+			set_gas_mask_worn(false)
+			gas_mask_cooldown_remaining = GAS_MASK_COOLDOWN
 	if not is_control_lost() or defeated:
 		return
 	control_loss_remaining = maxf(0.0, control_loss_remaining - maxf(delta_seconds, 0.0))
