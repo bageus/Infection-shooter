@@ -199,7 +199,7 @@ func play_overlay(clip_name: StringName) -> bool:
 
 
 # Public animation_events_v1 addition (ADR-0066): a procedural melee strike,
-# &"kick" (right leg) or &"punch" (left arm), over the playing clips. Returns
+# &"kick" (rear left leg) or &"punch" (left arm), over the playing clips. Returns
 # its duration, 0.0 for an unknown kind, a dead body or a skeleton without the bones.
 func play_strike(kind: StringName) -> float:
 	prepare_visual()

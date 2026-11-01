@@ -3,7 +3,7 @@ extends SceneTree
 # Renders the kick key poses from the side and from the front-quarter: godot --path . --script tools/capture_melee_strike.gd -- <out_dir>
 const DRIVER := preload("res://game/features/character_animation/public/character_animation_driver.gd")
 const MODEL := preload("res://models/objects/characters/soldier_animated.glb")
-const POSES := [[&"kick", 0.15], [&"kick", 0.3], [&"kick", 0.42], [&"kick", 0.52], [&"kick", 0.72], [&"kick", 0.9]]
+const POSES := [[&"kick", 0.1], [&"kick", 0.25], [&"kick", 0.45], [&"kick", 0.55], [&"kick", 0.75], [&"kick", 0.9]]
 
 
 func _init() -> void:
