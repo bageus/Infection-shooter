@@ -1,15 +1,18 @@
 extends RefCounted
-## A large wooden crate is one authored mesh. When it breaks, the mesh is cut into its six walls
-## (by the face each triangle lies nearest to) so the walls fall, topple and pile up as separate
-## pieces instead of the whole crate being baked into the floor as one piece.
+## A large crate is one authored mesh (wooden, or covered with a canvas tarp). When it breaks, the mesh
+## is cut into its six walls (by the face each triangle lies nearest to) so the walls fall, topple and
+## pile up as separate pieces instead of the whole crate staying one piece.
 
 const DAMAGE := preload("res://game/presentation/office_floor/environment_damage.gd")
-const MODEL := "crate_wood_large"
+const MODELS := ["crate_wood_large", "crate_canvas_large"]
 const ARRAY_KINDS := [Mesh.ARRAY_VERTEX, Mesh.ARRAY_NORMAL, Mesh.ARRAY_TANGENT, Mesh.ARRAY_COLOR, Mesh.ARRAY_TEX_UV, Mesh.ARRAY_TEX_UV2]
 
 
 static func applies(model_path: String) -> bool:
-	return MODEL in model_path.get_file()
+	for model in MODELS:
+		if model in model_path.get_file():
+			return true
+	return false
 
 
 ## A pallet is a tight stack: its boards and blocks only pull apart, and then fall onto the floor, when they
