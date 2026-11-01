@@ -511,10 +511,10 @@ func _on_gas_mask_key_pressed() -> void:
 # Worn mask: dark icon and a locked panel. The mask comes off after 60 s, then the 120 s cooldown runs.
 func _update_gas_mask() -> void:
 	var worn := bool(infection.call("is_gas_mask_worn"))
-	var cooldown := float(infection.call("gas_mask_cooldown_remaining"))
+	var timer := float(infection.call("gas_mask_timer_remaining"))
 	_gas_mask_icon.modulate = Color(1, 1, 1, 0.3) if worn else Color.WHITE
-	gas_mask_cooldown.text = str(ceili(cooldown)) if cooldown > 0.0 else ""
-	_set_key_state(gas_mask_key, worn, worn or cooldown > 0.0 or bool(infection.call("is_control_lost")))
+	gas_mask_cooldown.text = str(ceili(timer)) if timer > 0.0 else ""
+	_set_key_state(gas_mask_key, worn, timer > 0.0 or bool(infection.call("is_control_lost")))
 
 
 func _update_key_buttons() -> void:

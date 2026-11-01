@@ -70,8 +70,9 @@ func put_on_gas_mask() -> bool:
 	return put_on
 
 
-func gas_mask_cooldown_remaining() -> float:
-	return _domain.gas_mask_cooldown_remaining
+## Seconds left on the mask while worn, otherwise on its cooldown.
+func gas_mask_timer_remaining() -> float:
+	return _domain.gas_mask_worn_remaining if _domain.gas_mask_worn else _domain.gas_mask_cooldown_remaining
 
 
 func use_antidote() -> bool:

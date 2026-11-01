@@ -179,6 +179,7 @@ func _mask_hud(hud: Node, runtime: Node) -> void:
 	runtime.call("put_on_gas_mask")
 	await process_frame
 	_check(icon.modulate.a < 0.5, "A worn mask shows a dark icon")
+	_check((hud.get_node("GasMaskPanel/Cooldown") as Label).text == "60", "The icon counts the 60 s wear down")
 	domain.gas_mask_worn_remaining = 0.0
 	domain.tick(0.0)
 	await process_frame
