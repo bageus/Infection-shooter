@@ -8,6 +8,7 @@ const TYPE_LABELS: Array[String] = ["None", "Ceiling (stairs up)", "Floor (stair
 var runtime: Node
 var planner: Node
 var list: ItemList
+var map_picker: OptionButton
 var kind_pickers: Array[OptionButton] = []
 var place_buttons: Array[Button] = []
 var _slot_labels: Array[Label] = []
@@ -27,6 +28,12 @@ func build(owner_runtime: Node, session: Node) -> void:
 	list.custom_minimum_size = Vector2(0, 110)
 	list.item_selected.connect(_on_selected)
 	box.add_child(list)
+	map_picker = OptionButton.new()
+	map_picker.name = "SavedMap"
+	map_picker.tooltip_text = "Saved map to add to the chain"
+	map_picker.clip_text = true
+	map_picker.get_popup().about_to_popup.connect(_sync_picker)
+	box.add_child(map_picker)
 	var row := HBoxContainer.new()
 	box.add_child(row)
 	row.add_child(_button("ADD MAP", _add_selected_map, "AddMap"))
@@ -76,12 +83,32 @@ func _save() -> void:
 	runtime.refresh_markers()
 
 
+## Mirrors the saved maps of the planner into the picker, keeping the current choice when it still exists.
+func _sync_picker() -> void:
+	var storage: Variant = planner.get("storage")
+	if storage == null:
+		return
+	var saved: OptionButton = storage.map_select
+	var previous := map_picker.get_item_text(map_picker.selected) if map_picker.selected >= 0 else ""
+	map_picker.clear()
+	var keep := -1
+	for i in saved.item_count:
+		var text := saved.get_item_text(i)
+		map_picker.add_item(text)
+		if text == previous:
+			keep = i
+	if keep >= 0:
+		map_picker.select(keep)
+	elif map_picker.item_count > 0:
+		map_picker.select(0)
+
+
 func _add_selected_map() -> void:
-	var select: OptionButton = planner.storage.map_select
-	if select.item_count <= 0:
+	_sync_picker()
+	if map_picker.item_count <= 0:
 		_say("NO SAVED MAPS")
 		return
-	var map_name := select.get_item_text(select.selected)
+	var map_name := map_picker.get_item_text(map_picker.selected)
 	if not runtime.chain.add_map(map_name):
 		_say("MAP ALREADY IN THE CHAIN")
 		return
@@ -135,6 +162,7 @@ func _play_chain() -> void:
 
 func _refresh(select_index: int = -1) -> void:
 	_syncing = true
+	_sync_picker()
 	list.clear()
 	for i in runtime.chain.maps.size():
 		list.add_item("%d. %s" % [i + 1, runtime.chain.maps[i].name])

@@ -216,6 +216,7 @@ game/bootstrap/app/tests/run_glass_footstep_tests.gd
 game/presentation/office_floor/tests/run_plate_fruit_tests.gd
 game/bootstrap/app/tests/run_level_chain_tests.gd
 game/bootstrap/app/tests/run_level_carry_tests.gd
+game/bootstrap/app/tests/run_level_constructor_tests.gd
 game/bootstrap/app/tests/run_armor_pickup_tests.gd
 game/bootstrap/app/tests/run_hero_spawn_tests.gd
 game/bootstrap/app/tests/run_surface_decal_options_tests.gd
