@@ -54,9 +54,44 @@ func _run() -> void:
 	player.call("apply_hero_spawn", {})
 	_expect(is_equal_approx(float(player.get("health")), 40.0), "A manual spawn is restored after a carry")
 
+	_check_slot_panel()
 	if failures == 0:
 		print("hero spawn tests passed")
 	quit(failures)
+
+
+class StubSession extends Node:
+	var ui: Node
+
+
+class StubObjects extends Node:
+	var hero_spawn: Dictionary = {}
+
+	func _selected_kind() -> String:
+		return "player"
+
+
+## A slot set to the pistol shows the pistol and saves it, and "Пусто" saves an empty slot.
+func _check_slot_panel() -> void:
+	var session := StubSession.new()
+	session.ui = Control.new()
+	root.add_child(session.ui)
+	var objects := StubObjects.new()
+	objects.hero_spawn = HERO.sanitize({"mode": "manual", "slots": [0, -1, -1]})
+	var panel: Node = preload("res://game/bootstrap/app/planning_hero_spawn_options.gd").new()
+	panel.setup(session, objects)
+	panel.update()
+	var first: OptionButton = panel._slots[0]
+	_expect(first.get_item_text(first.selected) == "Пистолет", "Slot 1 shows the pistol it holds")
+	var second: OptionButton = panel._slots[1]
+	_expect(second.is_item_disabled(second.get_item_index(0)), "A weapon held in slot 1 cannot be picked in slot 2")
+	_expect(first.is_item_disabled(first.get_item_index(panel.EMPTY_SLOT)), "Slot 1 cannot be emptied")
+	second.select(second.get_item_index(2))
+	panel._changed()
+	_expect(objects.hero_spawn.slots[1] == 2 and second.get_item_text(second.selected) == "Дробовик", "A free weapon picked in slot 2 is saved and shown")
+	second.select(second.get_item_index(panel.EMPTY_SLOT))
+	panel._changed()
+	_expect(objects.hero_spawn.slots[1] == -1, "Choosing Пусто saves an empty slot")
 
 
 func _expect(condition: bool, message: String) -> void:
