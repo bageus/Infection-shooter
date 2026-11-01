@@ -94,10 +94,7 @@ func _run() -> void:
 			var instance := bottle.instantiate()
 			app.add_child(instance)
 			_check(not instance.find_children("*", "MeshInstance3D", true, false).is_empty(), "Each of four bottle placements retains its mesh")
-	for sound: Node in app.find_children("*", "AudioStreamPlayer*", true, false):
-		sound.stop() # a playing loop keeps its stream in use at exit
-	await create_timer(0.3).timeout # the audio thread lets go of a stopped stream a moment later
-	app.free()
+	await _free_app(app)
 	paused = false
 	await process_frame
 	if had:
@@ -132,3 +129,11 @@ func _blocker(app: Node3D, effects: Node, start: Vector3) -> MeshInstance3D:
 	blocker.global_position = effects.camera.global_position.lerp(start + Vector3.UP * .8, .5)
 	blocker.global_basis = effects.camera.global_basis
 	return mesh
+
+
+## A playing loop keeps its stream in use at exit, so the sounds are stopped before the app is freed.
+func _free_app(app: Node) -> void:
+	for sound: Node in app.find_children("*", "AudioStreamPlayer*", true, false):
+		sound.stop()
+	await create_timer(0.3).timeout # the audio thread lets go of a stopped stream a moment later
+	app.free()
