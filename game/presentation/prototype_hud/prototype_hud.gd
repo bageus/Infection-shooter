@@ -4,6 +4,9 @@ const ICON_REGIONS := preload("res://game/presentation/prototype_hud/weapon_icon
 const PALETTE := preload("res://game/presentation/prototype_hud/hud_palette.gd")
 const ICON_TINT := preload("res://game/presentation/prototype_hud/icon_tint.gdshader")
 const TITLE_FONT := preload("res://assets/interface/fonts/title.ttf")
+const BANNER_SIDE_MARGIN := 16.0
+# Content margins (16 px on each side) plus the 1 px frame border on both sides.
+const BANNER_CHROME_WIDTH := 34.0
 const MUTATION_ALARM := preload("res://game/presentation/prototype_hud/mutation_alarm_pulse.gd")
 const BAR_FEEDBACK := preload("res://game/presentation/prototype_hud/vital_bar_feedback.gd")
 const VITALS_FX := preload("res://game/presentation/prototype_hud/vitals_screen_fx.gd")
@@ -129,6 +132,7 @@ func _ready() -> void:
 	_control_notice.visible = false
 	add_child(_control_notice)
 	_build_objective()
+	get_viewport().size_changed.connect(_fit_banners)
 	_antidote_hint = ANTIDOTE_HINT.new()
 	_antidote_hint.name = "AntidoteHint"
 	add_child(_antidote_hint)
@@ -141,6 +145,7 @@ func _apply_texts() -> void:
 	_texts_locale = TranslationServer.get_locale()
 	(_control_notice.get_child(0) as Label).text = tr("controlLost")
 	_set_objective_text()
+	_fit_banners()
 	health_caption.text = tr("hudHealth")
 	mutation_caption.text = tr("hudMutation")
 	key_caption.text = tr("hudKey")
@@ -197,6 +202,21 @@ func set_tutorial_objective(text: String) -> void:
 func _set_objective_text() -> void:
 	var fallback := tr("objectiveFireExit" if _has_key else "objectiveFindKey")
 	(_objective.get_child(0) as Label).text = _tutorial_objective if not _tutorial_objective.is_empty() else fallback
+	_fit_banners()
+
+
+# The banners are centred on the screen, so a single line wider than the screen would be cut at its edges.
+# Long text wraps inside the largest width that still fits, and the viewport size is checked on every resize.
+func _fit_banners() -> void:
+	if _objective == null or _control_notice == null:
+		return
+	var room := get_viewport().get_visible_rect().size.x - 2.0 * BANNER_SIDE_MARGIN - BANNER_CHROME_WIDTH
+	for banner in [_objective, _control_notice]:
+		var label := (banner as PanelContainer).get_child(0) as Label
+		var natural := TITLE_FONT.get_string_size(label.text, HORIZONTAL_ALIGNMENT_LEFT, -1, 16).x
+		label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+		label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+		label.custom_minimum_size.x = minf(natural, maxf(room, 0.0))
 
 
 # Top-centre banner in the shared HUD frame; objective and control-loss notices use the same look.
