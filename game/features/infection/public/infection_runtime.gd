@@ -39,7 +39,10 @@ var active_state := ACTIVE_STATE.new()
 
 func _physics_process(delta: float) -> void:
 	var previous_mutation: float = _domain.mutation
+	var was_worn: bool = _domain.gas_mask_worn
 	_domain.tick(delta)
+	if _domain.gas_mask_worn != was_worn:
+		gas_mask_changed.emit(_domain.gas_mask_worn)
 	_tick_skills(delta, true)
 	_emit_state_changes(previous_mutation)
 
@@ -52,19 +55,19 @@ func absorb_mutagen(delta_seconds: float) -> float:
 
 
 func set_gas_mask_worn(worn: bool) -> void:
-	_domain.gas_mask_worn = worn
+	_domain.set_gas_mask_worn(worn)
 
 
 func is_gas_mask_worn() -> bool:
 	return _domain.gas_mask_worn
 
 
-## Player action: swaps the mask and starts the 60 s cooldown; false while it runs.
-func toggle_gas_mask() -> bool:
-	var changed: bool = _domain.toggle_gas_mask()
-	if changed:
-		gas_mask_changed.emit(_domain.gas_mask_worn)
-	return changed
+## Player action: wears the mask for 60 s, then a 120 s cooldown; false while worn or cooling down.
+func put_on_gas_mask() -> bool:
+	var put_on: bool = _domain.put_on_gas_mask()
+	if put_on:
+		gas_mask_changed.emit(true)
+	return put_on
 
 
 func gas_mask_cooldown_remaining() -> float:

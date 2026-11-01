@@ -182,7 +182,7 @@ func _unhandled_input(event: InputEvent) -> void:
 		return
 	if event is InputEventKey and event.pressed and not event.is_echo() and event.keycode == KEY_TAB:
 		if not _mutation_menu_open and not infection_runtime.call("is_control_lost"):
-			infection_runtime.call("toggle_gas_mask")
+			infection_runtime.call("put_on_gas_mask")
 		get_viewport().set_input_as_handled()
 		return
 	if event is InputEventMouseMotion:

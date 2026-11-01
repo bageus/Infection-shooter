@@ -239,14 +239,17 @@ func _test_gas_mask_blocks_mutagen() -> void:
 
 func _test_gas_mask_cooldown() -> void:
 	var domain = InfectionDomain.new()
-	_expect(domain.toggle_gas_mask() and domain.gas_mask_worn, "The mask goes on at once.")
-	_expect(not domain.toggle_gas_mask() and domain.gas_mask_worn, "The mask cannot come off during the cooldown.")
+	_expect(domain.put_on_gas_mask() and domain.gas_mask_worn, "The mask goes on at once.")
+	_expect(not domain.put_on_gas_mask(), "A worn mask cannot be put on again.")
 	domain.tick(59.0)
-	_expect(not domain.toggle_gas_mask(), "59 s after putting it on the mask is still locked.")
+	_expect(domain.gas_mask_worn and not domain.put_on_gas_mask(), "59 s after putting it on the mask is still worn.")
 	domain.tick(1.0)
-	_expect(domain.toggle_gas_mask() and not domain.gas_mask_worn, "After 60 s the mask can come off.")
-	_expect_float(domain.gas_mask_cooldown_remaining, 60.0, "Taking it off starts a new 60 s cooldown.")
-	_expect(not domain.toggle_gas_mask(), "The mask cannot go back on during that cooldown.")
+	_expect(not domain.gas_mask_worn, "After 60 s the mask comes off by itself.")
+	_expect_float(domain.gas_mask_cooldown_remaining, 120.0, "Coming off starts a 120 s cooldown.")
+	domain.tick(119.0)
+	_expect(not domain.put_on_gas_mask(), "The mask cannot go back on during the cooldown.")
+	domain.tick(1.0)
+	_expect(domain.put_on_gas_mask() and domain.gas_mask_worn, "After 120 s the mask can be put on again.")
 
 
 func _test_cloud_rate_and_bounds() -> void:
