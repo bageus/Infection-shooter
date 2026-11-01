@@ -70,6 +70,13 @@ func _run() -> void:
 	crate.add_child(crate_shape)
 	crate.position = Vector3(0, 0.6, -1.0)
 	root.add_child(crate)
+	var far_crate := Crate.new()
+	far_crate.gravity_scale = 0.0
+	var far_shape := CollisionShape3D.new()
+	far_shape.shape = BoxShape3D.new()
+	far_crate.add_child(far_shape)
+	far_crate.position = Vector3(0, 0.6, -1.4)
+	root.add_child(far_crate)
 	var chair := RigidBody3D.new()
 	chair.gravity_scale = 0.0
 	chair.mass = 5.0
@@ -87,7 +94,8 @@ func _run() -> void:
 	melee.tick(0.1)
 	_expect(crate.hits == 0.0, "The crate holds until the foot lands.")
 	melee.tick(0.2)
-	_expect(crate.hits >= 1000.0, "The kick breaks a loot crate at once.")
+	_expect(crate.hits >= 1000.0, "The kick breaks the nearest loot crate at once.")
+	_expect(far_crate.hits == 0.0, "The kick leaves the farther loot crate whole.")
 	await physics_frame
 	_expect(chair.linear_velocity.length() > 1.0 and chair.linear_velocity.z < 0.0, "The kick throws a loose item away from the character.")
 	melee.tick(1.6)
