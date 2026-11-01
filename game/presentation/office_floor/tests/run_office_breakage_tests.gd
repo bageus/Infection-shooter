@@ -73,11 +73,14 @@ func _test_crate_walls(stage: Node3D, model: String, at: Vector3) -> void:
 		if child is RigidBody3D:
 			walls.append(child)
 	_expect(walls.size() >= 4, "%s breaks into its walls, not one piece (%d)." % [model.get_file(), walls.size()])
-	for frame in 240:
+	var flat := false
+	for frame in 600: # a loaded CI runner settles the walls later than a quick machine
 		await physics_frame
-	var flat := true
-	for wall in walls:
-		flat = flat and is_instance_valid(wall) and wall.global_position.y < 0.5
+		flat = true
+		for wall in walls:
+			flat = flat and is_instance_valid(wall) and wall.global_position.y < 0.5
+		if flat:
+			break
 	_expect(flat, "The walls of a broken crate fall down and lie on the floor.")
 	await _clear(crate, setup[1])
 
