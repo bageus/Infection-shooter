@@ -13,7 +13,9 @@ const TARGET := preload("res://game/presentation/office_floor/public/tutorial_ta
 const KEYS := preload("res://game/bootstrap/app/tutorial/tutorial_keys.gd")
 const SCALE_TRIGGER := 5.0
 const STEP_METERS := 0.8
-const DOOR_REACHED := 1.6
+const DOOR_SPAN := 1.6 # half width, metres along the door, in which a crossing counts
+const DOOR_DEPTH := 3.0 # how far from the door a side is recorded
+const DOOR_SIDE := 0.5 # clear of the door plane
 const CLOUD_RANGE := 5.0
 const CRATE_SIGHT := 9.0
 const LOOK_SECONDS := 0.8
@@ -38,7 +40,6 @@ var _finished := {}
 var _walked := 0.0
 var _walked_at_end := 0.0
 var _last_position := Vector3.INF
-var _lesson_started_ms := 0
 var _look_seconds := 0.0
 var _rolled := false
 var _sprinted_seconds := 0.0
@@ -207,7 +208,6 @@ func _start_next() -> void:
 	_steps = _build_steps(current)
 	_reveal_targets(current)
 	_started_mutation = float(_runtime.call("get_mutation"))
-	_lesson_started_ms = Time.get_ticks_msec()
 	_look_seconds = 0.0
 	_rolled = false
 	_sprinted_seconds = 0.0
@@ -289,21 +289,21 @@ func _build_steps(lesson: String) -> Array:
 			if doors.is_empty():
 				return _task(TEXT.t("tutMoveFree"), TEXT.t("objMoveFree"), KEYS.movement(), "cycle", func() -> bool: return _steps_since_last_lesson() >= 5.0)
 			var door: Node3D = doors[0]
-			return _task(TEXT.t("tutMove"), TEXT.t("objMove"), KEYS.movement(), "cycle", _near.bind(door))
+			return _task(TEXT.t("tutMove"), TEXT.t("objMove"), KEYS.movement(), "cycle", _through([door]))
 		"shoot":
 			return _task(TEXT.t("tutShoot") % KEYS.binding("fire"), TEXT.t("objShoot"), KEYS.row(["fire"]), "all",
 					func() -> bool: return TARGET.standing(get_tree(), "bottle").is_empty())
 		"look":
 			return _task(TEXT.t("tutLook") % [KEYS.binding("camera_left"), KEYS.binding("camera_right")], TEXT.t("objLook"),
 					KEYS.row(["camera_left", "camera_right"]), "cycle",
-					func() -> bool: return _look_seconds >= LOOK_SECONDS or _lesson_seconds() >= 15.0)
+					func() -> bool: return _look_seconds >= LOOK_SECONDS)
 		"one_way":
-			return [_click(TEXT.t("tutOneWay"), [])] + _task(TEXT.t("tutOneWayFind"), TEXT.t("objOneWay"), [], "cycle", _lesson_over_after.bind(6.0))
+			return [_click(TEXT.t("tutOneWay"), [])] + _task(TEXT.t("tutOneWayFind"), TEXT.t("objOneWay"), [], "cycle", _through_any_door())
 		"roll":
 			return (_task(TEXT.t("tutRoll") % KEYS.binding("roll"), TEXT.t("objRoll") % KEYS.binding("roll"), KEYS.row(["roll"]), "all", func() -> bool: return _rolled)
 					+ _task(TEXT.t("tutSprint") % KEYS.binding("sprint"), TEXT.t("objSprint") % KEYS.binding("sprint"), KEYS.row(["sprint"]), "all", func() -> bool: return _sprinted_seconds >= 0.5))
 		"explore":
-			return _task(TEXT.t("tutExplore"), TEXT.t("objExplore"), [], "cycle", func() -> bool: return _crate_in_sight() or _lesson_seconds() >= 30.0)
+			return _task(TEXT.t("tutExplore"), TEXT.t("objExplore"), [], "cycle", func() -> bool: return _crate_in_sight() or TARGET.standing(get_tree(), "crate").is_empty())
 		"crates":
 			return _task(TEXT.t("tutCrates") % KEYS.binding("melee"), TEXT.t("objCrates"), KEYS.row(["melee"]), "all",
 					func() -> bool: return TARGET.standing(get_tree(), "crate").is_empty())
@@ -318,7 +318,7 @@ func _build_steps(lesson: String) -> Array:
 				_picture(TEXT.t("tutMeterLimit")),
 				_click(TEXT.t("tutAntidote") % antidote_key, [antidote]),
 				_click(TEXT.t("tutAntidoteWise"), [antidote]),
-			] + _task(TEXT.t("tutInhale"), TEXT.t("objInhale"), [], "cycle", _cloud_inhaled)
+			] + _task(TEXT.t("tutInhale"), TEXT.t("objInhale"), [], "cycle", _inhaled_all())
 		"active_skill":
 			return [
 				_click(TEXT.t("tutBranches"), [_tree_rect.bind("active"), _tree_rect.bind("passive")], _tree_open),
@@ -371,19 +371,31 @@ func _wait(text: String, targets: Array, done: Callable, requires: Callable, arr
 	return {"text": text, "targets": targets, "mode": "wait", "done": done, "requires": requires, "arrow": arrow, "dim": dim}
 
 
-func _lesson_seconds() -> float:
-	return float(Time.get_ticks_msec() - _lesson_started_ms) / 1000.0
+# True once the player has walked through one of the doors, from one side of its plane to the other.
+func _through(targets: Array) -> Callable:
+	var sides := {}
+	return func() -> bool:
+		for target: Node3D in targets:
+			if not is_instance_valid(target):
+				return true
+			var frame: Node3D = target.get_node_or_null("DoorController")
+			if frame == null:
+				frame = target
+			var local := frame.to_local(_player.global_position)
+			var id := frame.get_instance_id()
+			if absf(local.x) > DOOR_SPAN or absf(local.z) > DOOR_DEPTH:
+				sides.erase(id) # far from the opening: a walk around does not count
+			elif absf(local.z) >= DOOR_SIDE:
+				var side := signf(local.z)
+				if sides.has(id) and sides[id] != side:
+					return true
+				sides[id] = side
+		return false
 
 
-func _lesson_over_after(seconds: float) -> bool:
-	return _lesson_seconds() >= seconds
-
-
-func _near(door: Node3D) -> bool:
-	if not is_instance_valid(door):
-		return true
-	var from: Vector3 = _player.global_position
-	return Vector2(door.global_position.x - from.x, door.global_position.z - from.z).length() <= DOOR_REACHED
+# "Find another way": the player gets through some door (a one-way door's closed side cannot be passed).
+func _through_any_door() -> Callable:
+	return _through(get_tree().get_nodes_in_group("interactive_doors"))
 
 
 func _crate_in_sight() -> bool:
@@ -394,14 +406,14 @@ func _crate_in_sight() -> bool:
 	return false
 
 
-# Every cloud near the player has given all its mutagen (or no cloud is left).
-func _cloud_inhaled() -> bool:
-	if _lesson_seconds() >= 25.0:
-		return true
+# Every cloud that was near the player when the task began has given all its mutagen (or is gone).
+func _inhaled_all() -> Callable:
+	var clouds: Array = []
 	for cloud: Node3D in get_tree().get_nodes_in_group("mutagen_clouds"):
-		if cloud.global_position.distance_to(_player.global_position) <= CLOUD_RANGE and not bool(cloud.call("is_spent")):
-			return false
-	return true
+		if cloud.global_position.distance_to(_player.global_position) <= CLOUD_RANGE:
+			clouds.append(cloud)
+	return func() -> bool:
+		return clouds.all(func(cloud: Node3D) -> bool: return not is_instance_valid(cloud) or bool(cloud.call("is_spent")))
 
 
 func _hud_rect(kind: String) -> Rect2:

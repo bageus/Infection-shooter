@@ -95,6 +95,7 @@ func _run() -> void:
 	await _menu_lessons(director, overlay, hud, tree_ui)
 	_check(not paused, "Nothing stays paused")
 
+	await _door_passage(director, actor)
 	await _replay_level(director, overlay)
 	await _mask_hud(hud, runtime)
 	# The HUD owns audio players that hold their streams; free it so nothing is still in use at exit.
@@ -143,6 +144,31 @@ func _menu_lessons(director: Node, overlay: Node, hud: Node, tree_ui: Node) -> v
 	_check(not hud.call("tutorial_rect", "gas_mask").size.is_zero_approx(), "It spotlights the gas mask icon")
 	await _advance(overlay)
 	_check(director.get("current") == "", "The gas mask lesson ends")
+
+
+# "Walk through the door" counts only when the hero ends up on the other side of the opening.
+func _door_passage(director: Node, actor: Node3D) -> void:
+	var door := Node3D.new()
+	var frame := Node3D.new()
+	frame.name = "DoorController"
+	door.add_child(frame)
+	root.add_child(door)
+	door.global_position = Vector3(40, 0, 40)
+	var passed: Callable = director.call("_through", [door])
+	actor.global_position = Vector3(40, 0, 37.5)
+	_check(not passed.call(), "Standing in front of the door is not passing it")
+	actor.global_position = Vector3(40, 0, 39.9)
+	_check(not passed.call(), "Touching the door plane is not passing it")
+	actor.global_position = Vector3(46, 0, 42.5) # round the wall, far to the side
+	passed.call()
+	actor.global_position = Vector3(40, 0, 42.5)
+	_check(not passed.call(), "Coming round the wall to the far side is not passing the door")
+	passed = director.call("_through", [door])
+	actor.global_position = Vector3(40, 0, 37.5)
+	passed.call()
+	actor.global_position = Vector3(40, 0, 42.5)
+	_check(passed.call(), "Walking from one side to the other passes the door")
+	door.free()
 
 
 # On tutorial_lvl a lesson shows again even though the saved flags say it was seen.
