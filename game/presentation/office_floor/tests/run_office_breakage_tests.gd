@@ -10,6 +10,7 @@ const MONITOR := MODELS + "05/05_monitor_destructible.glb"
 const PARTITION := MODELS + "01/01_wood_slat_partition_destructible.glb"
 const LOGO := MODELS + "01/01_VECTRION_Destructible.glb"
 const WOOD_CRATE := MODELS + "02/02_crate_wood_large.glb"
+const CANVAS_CRATE := MODELS + "02/02_crate_canvas_large.glb"
 
 var failures := 0
 
@@ -27,7 +28,8 @@ func _run() -> void:
 	await _test_partition_logo(stage)
 	await _test_partition_sound()
 	await _test_crate_strike(stage)
-	await _test_crate_walls(stage)
+	await _test_crate_walls(stage, WOOD_CRATE, Vector3(-10, 0.0135, -6))
+	await _test_crate_walls(stage, CANVAS_CRATE, Vector3(-16, 0.0135, -6))
 	await _test_pallet_scatter(stage)
 	print("%d failure(s)" % failures)
 	quit(1 if failures > 0 else 0)
@@ -61,8 +63,8 @@ func _test_crate_strike(stage: Node3D) -> void:
 	await _clear(crate, setup[1])
 
 
-func _test_crate_walls(stage: Node3D) -> void:
-	var setup := await _spawn(stage, WOOD_CRATE, Vector3(-10, 0.0135, -6))
+func _test_crate_walls(stage: Node3D, model: String, at: Vector3) -> void:
+	var setup := await _spawn(stage, model, at)
 	var crate: RigidBody3D = setup[0]
 	crate.call("break_by_strike", crate.global_position + Vector3(0.3, 0.3, 0), Vector3.FORWARD)
 	await physics_frame
@@ -70,7 +72,7 @@ func _test_crate_walls(stage: Node3D) -> void:
 	for child in setup[1].get_children():
 		if child is RigidBody3D:
 			walls.append(child)
-	_expect(walls.size() >= 4, "A big wooden crate breaks into its walls, not one piece (%d)." % walls.size())
+	_expect(walls.size() >= 4, "%s breaks into its walls, not one piece (%d)." % [model.get_file(), walls.size()])
 	for frame in 240:
 		await physics_frame
 	var flat := true
