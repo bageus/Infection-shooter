@@ -202,7 +202,8 @@ func _begin(prepared: Dictionary) -> void:
 		objects.player_spawn_transform = session.main_player.transform
 		# Records saved before the hero settings existed have none: they load as automatic.
 		objects.hero_spawn = HERO_SPAWN.sanitize(latest.get("hero", {}))
-		session.main_player.call("apply_hero_spawn", objects.hero_spawn)
+		if session.main_player.has_method("apply_hero_spawn"):
+			session.main_player.call("apply_hero_spawn", objects.hero_spawn)
 
 
 func _place(entry: Dictionary) -> void:
