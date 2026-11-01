@@ -11,7 +11,6 @@ const PROGRESS := preload("res://game/bootstrap/app/tutorial/tutorial_progress.g
 const TEXT := preload("res://game/bootstrap/app/mutation_text.gd")
 const TARGET := preload("res://game/presentation/office_floor/public/tutorial_target.gd")
 const KEYS := preload("res://game/bootstrap/app/tutorial/tutorial_keys.gd")
-const SCALE_TRIGGER := 5.0
 const STEP_METERS := 0.8
 const DOOR_SPAN := 1.6 # half width, metres along the door, in which a crossing counts
 const DOOR_DEPTH := 3.0 # how far from the door a side is recorded
@@ -21,10 +20,6 @@ const INHALE_GAIN := 0.5 # meter rise that counts as having inhaled mutagen
 const CRATE_SIGHT := 9.0
 const LOOK_SECONDS := 0.8
 const ADOPT_WINDOW := 30.0 # seconds after start in which a loading map may still add targets
-const FIRST_LESSON_DELAY := 2.0
-# Maps that replay every lesson regardless of the saved "seen" flags. Empty the list to restore once-only lessons.
-const ALWAYS_ON_LEVELS: Array[String] = ["tutorial_lvl"]
-const ONE_WAY_MODE := 1 # DoorMode.SWING_ONE_WAY in interactive_door.gd
 
 var overlay: Node
 var progress: RefCounted
@@ -38,6 +33,7 @@ var _player: Node
 var _started_mutation := 0.0
 var _host: Node
 var _finished := {}
+var _forced := {}
 var _resume := {} # lesson -> steps left when a control loss cut it short
 var _antidotes_left := -1
 var _walked := 0.0
@@ -46,8 +42,6 @@ var _last_position := Vector3.INF
 var _look_seconds := 0.0
 var _rolled := false
 var _sprinted_seconds := 0.0
-var _key_hunt := false
-var _door_clock := 0.0
 var _since_start := 0.0
 var _adopt_clock := 0.0
 
@@ -63,16 +57,26 @@ func configure(player: Node, hud: Node, tree_ui: Node, progress_state: RefCounte
 	overlay.name = "TutorialOverlay"
 	add_child(overlay)
 	overlay.step_finished.connect(_next_step)
-	_runtime.mutation_changed.connect(_on_mutation_changed)
-	_runtime.skill_available.connect(_on_skill_available)
-	_runtime.control_loss_changed.connect(_on_control_loss_changed)
 
 
-# On a replay level only this run's own lessons count as seen.
+# Lessons the quest list starts always play, whatever the saved "seen" flags say.
 func _seen(lesson: String) -> bool:
-	if _host != null and str(_host.get("current_level")) in ALWAYS_ON_LEVELS:
-		return _finished.has(lesson)
-	return progress.is_done(lesson)
+	return not _forced.has(lesson) and progress.is_done(lesson)
+
+
+## Starts a lesson on behalf of a quest, even if it was seen before.
+func play(lesson: String) -> void:
+	_forced[lesson] = true
+	_finished.erase(lesson)
+	request(lesson)
+
+
+func is_finished(lesson: String) -> bool:
+	return _finished.has(lesson) and lesson != current and not lesson in _queue
+
+
+func _steps_since_last_lesson() -> float:
+	return (_walked - _walked_at_end) / STEP_METERS
 
 
 func request(lesson: String) -> void:
@@ -95,20 +99,11 @@ func request(lesson: String) -> void:
 
 func _process(delta: float) -> void:
 	_track_input(delta)
-	_watch_antidote()
 	_since_start += delta
 	_adopt_clock -= delta
 	if _adopt_clock <= 0.0 and _since_start < ADOPT_WINDOW:
 		_adopt_clock = 0.5
 		TARGET.adopt_baked(get_tree())
-	_door_clock -= delta
-	if _door_clock <= 0.0:
-		_door_clock = 0.15
-		_watch_one_way_doors()
-	if _key_hunt and bool(_player.call("has_emergency_key")):
-		_end_key_hunt()
-	if current.is_empty() and _queue.is_empty() and _since_start >= FIRST_LESSON_DELAY:
-		_start_first_run_lesson()
 
 
 # Walked distance, camera turning, roll and sprint: what the first-run lessons wait for.
@@ -127,98 +122,11 @@ func _track_input(delta: float) -> void:
 		_sprinted_seconds += delta
 
 
-# The first antidote taken leads on to the gas mask lesson.
-func _watch_antidote() -> void:
-	var left := int(_player.get("antidotes"))
-	if _antidotes_left >= 0 and left < _antidotes_left:
-		request("gas_mask")
-	_antidotes_left = left
-
-
-func _steps_since_last_lesson() -> float:
-	return (_walked - _walked_at_end) / STEP_METERS
-
-
-# A lesson counts as over when it ended this session or an earlier one, and is not playing now.
-func _over(lesson: String) -> bool:
-	return (_finished.has(lesson) or _seen(lesson)) and lesson != current and not lesson in _queue
-
-
-func _start_first_run_lesson() -> void:
-	if not _over("move"):
-		request("move")
-		return
-	var bottles := TARGET.standing(get_tree(), "bottle")
-	if not _over("shoot") and not bottles.is_empty():
-		if _steps_since_last_lesson() >= 3.0:
-			request("shoot")
-		return
-	if not _over("look"):
-		if _steps_since_last_lesson() >= 5.0:
-			request("look")
-		return
-	if not _over("explore") and bool(_player.call("has_emergency_key")):
-		request("explore")
-		return
-	if _over("explore") and not _over("crates") and not TARGET.standing(get_tree(), "crate").is_empty():
-		request("crates")
-		return
-	if not _over("roll") and (_over("one_way") or _over("explore")) and _steps_since_last_lesson() >= 5.0:
-		request("roll")
-		return
-	if not _over("weapons") and _occupied_weapon_slots() >= 2:
-		request("weapons")
-	if not _over("armor") and float(_player.get("armor")) > 0.0:
-		request("armor")
-
-
-func _occupied_weapon_slots() -> int:
-	var count := 0
-	for slot in 3:
-		if int(_player.call("get_weapon_in_slot", slot)) >= 0:
-			count += 1
-	return count
-
-
-# One-way doors tell the player once, on the first approach from the closed side.
-func _watch_one_way_doors() -> void:
-	for node in get_tree().get_nodes_in_group("interactive_doors"):
-		var door := node as Node3D
-		if door == null or int(door.get("mode")) != ONE_WAY_MODE:
-			continue
-		var local := door.to_local(_player.global_position)
-		var closed_side := signf(local.z) != signf(float(door.get("one_way_allowed_side")))
-		if closed_side and Vector2(local.x, local.z).length() <= float(door.get("trigger_distance")):
-			request("one_way")
-			return
-
-
-func _on_mutation_changed(amount: float, _limit: float) -> void:
-	if amount >= SCALE_TRIGGER and not bool(_runtime.call("is_control_lost")):
-		request("mutation_scale")
-
-
-func _on_skill_available() -> void:
-	if bool(_runtime.call("is_control_lost")) or bool(_runtime.call("is_defeated")):
-		return
-	if bool(_runtime.call("can_upgrade_skill", "power_strike")):
-		request("active_skill")
-	elif (current == "active_skill" or _seen("active_skill") or _finished.has("active_skill")) and bool(_runtime.call("can_upgrade_skill", "muscle_memory")):
-		request("passive_skill")
-
-
-func _on_control_loss_changed(active: bool) -> void:
-	if active:
-		request("control_loss")
-
-
 func _start_next() -> void:
 	if _queue.is_empty():
 		current = ""
 		return
 	current = _queue.pop_front()
-	if current == "one_way":
-		_end_key_hunt() # "find another way" is now the active objective, not the key
 	progress.mark_done(current)
 	_walked_at_end = _walked
 	_steps = _resume.get(current, []) if _resume.has(current) else _build_steps(current)
@@ -257,43 +165,9 @@ func _next_step() -> void:
 func _end_lesson() -> void:
 	var lesson := current
 	_finished[lesson] = true
+	_forced.erase(lesson)
 	_walked_at_end = _walked
-	match lesson:
-		"move":
-			for door in TARGET.standing(get_tree(), "door"):
-				TARGET.configure(door, false) # the fire door has been reached
-		"look":
-			_begin_key_hunt()
-		"control_loss":
-			request("gas_mask")
-			request("open_menu")
 	_start_next()
-
-
-# The look lesson ends quickly; the arrow keeps pointing at the key until it is taken.
-func _begin_key_hunt() -> void:
-	if bool(_player.call("has_emergency_key")) or get_tree().get_nodes_in_group("mission_key").is_empty():
-		return
-	_key_hunt = true
-	if _host != null:
-		_host.call("set_tutorial_hint", _key_goal)
-
-
-func _end_key_hunt() -> void:
-	_key_hunt = false
-	if _host != null:
-		_host.call("set_tutorial_hint", Callable())
-
-
-func _key_goal() -> Vector3:
-	var best := Vector3.INF
-	var best_distance := INF
-	for key: Node3D in get_tree().get_nodes_in_group("mission_key"):
-		var distance := key.global_position.distance_squared_to(_player.global_position)
-		if distance < best_distance:
-			best_distance = distance
-			best = key.global_position
-	return best
 
 
 func _build_steps(lesson: String) -> Array:
@@ -317,8 +191,9 @@ func _build_steps(lesson: String) -> Array:
 		"one_way":
 			return [_click(TEXT.t("tutOneWay"), [])] + _task(TEXT.t("tutOneWayFind"), TEXT.t("objOneWay"), [], "cycle", _through_any_door())
 		"roll":
-			return (_task(TEXT.t("tutRoll") % KEYS.binding("roll"), TEXT.t("objRoll") % KEYS.binding("roll"), KEYS.row(["roll"]), "all", func() -> bool: return _rolled)
-					+ _task(TEXT.t("tutSprint") % KEYS.binding("sprint"), TEXT.t("objSprint") % KEYS.binding("sprint"), KEYS.row(["sprint"]), "all", func() -> bool: return _sprinted_seconds >= 0.5))
+			return _task(TEXT.t("tutRoll") % KEYS.binding("roll"), TEXT.t("objRoll") % KEYS.binding("roll"), KEYS.row(["roll"]), "all", func() -> bool: return _rolled)
+		"sprint":
+			return (_task(TEXT.t("tutSprint") % KEYS.binding("sprint"), TEXT.t("objSprint") % KEYS.binding("sprint"), KEYS.row(["sprint"]), "all", func() -> bool: return _sprinted_seconds >= 0.5))
 		"explore":
 			return _task(TEXT.t("tutExplore"), TEXT.t("objExplore"), [], "cycle", func() -> bool: return _crate_in_sight() or TARGET.standing(get_tree(), "crate").is_empty())
 		"crates":
@@ -358,6 +233,10 @@ func _build_steps(lesson: String) -> Array:
 			return _task(TEXT.t("tutOpenMenu") % KEYS.binding("mutation_tree"), TEXT.t("objOpenMenu") % KEYS.binding("mutation_tree"), [], "cycle", _tree_open) + [
 				_wait(TEXT.t("tutPassiveUse"), [_tree_rect.bind("passive")], func() -> bool: return not _tree_open(), _tree_open, false),
 			]
+		"antidote":
+			return [_click(TEXT.t("tutAntidote") % antidote_key, [antidote]), _click(TEXT.t("tutAntidoteWise"), [antidote])]
+		"dna":
+			return [_click(TEXT.t("tutDna"), [])]
 		"gas_mask":
 			return [_click(TEXT.t("tutGasMask") % "TAB", [_hud_rect.bind("gas_mask")])]
 	return []

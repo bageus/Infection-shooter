@@ -53,6 +53,9 @@ var completion_music: Node
 var _music_handed_off := false
 var _pause_open := false
 var planning_mode: Node
+var tutorial: Node
+var quest_book: Node
+var quest_runner: Node
 var world_activation: Node
 var wave_director: Node
 var planning_lighting: Node
@@ -90,9 +93,10 @@ func _ready() -> void:
 	infection_runtime.call("begin_control_level", progression_level_id)
 	mutation_tree_ui.call("configure", infection_runtime)
 	if DisplayServer.get_name() != "headless": # lessons pause the game; automated runs skip them
-		var tutorial := preload("res://game/bootstrap/app/tutorial/tutorial_director.gd").new()
+		tutorial = preload("res://game/bootstrap/app/tutorial/tutorial_director.gd").new()
 		add_child(tutorial)
 		tutorial.call("configure", player, $PrototypeHUD, mutation_tree_ui, null, self)
+	_setup_quests()
 	$MutationChoice/Panel/VBox/Choices/FastHands.pressed.connect(_choose_fast_hands)
 	$MutationChoice/Panel/VBox/Choices/LegMutation.pressed.connect(_choose_leg_mutation)
 	$MutationChoice/Panel/VBox/Choices/EnhancedAmmo.pressed.connect(_choose_enhanced_ammo)
@@ -536,3 +540,14 @@ func _on_continue_pressed() -> void:
 func _exit_tree() -> void:
 	if is_instance_valid(completion_music) and not _music_handed_off:
 		completion_music.call("dispose")
+
+
+# The map's quest list and the runner that plays it in order. Lessons come from the tutorial director when it exists.
+func _setup_quests() -> void:
+	quest_book = preload("res://game/bootstrap/app/quest/quest_book.gd").new()
+	quest_book.name = "QuestBook"
+	add_child(quest_book)
+	quest_runner = preload("res://game/bootstrap/app/quest/quest_runner.gd").new()
+	quest_runner.name = "QuestRunner"
+	add_child(quest_runner)
+	quest_runner.call("configure", quest_book, player, $PrototypeHUD, tutorial, self)

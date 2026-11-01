@@ -44,11 +44,11 @@ func _run() -> void:
 	var crate := _prop("res://models/objects/enviroments/02/02_crate_wood_large.glb", Vector3(6, 0, 0))
 	var table := _prop("res://models/objects/enviroments/09/09_mug.glb", Vector3(9, 0, 0))
 	_check(TARGET.kind_of(bottle) == "bottle" and TARGET.kind_of(crate) == "crate", "Bottles and crates can be targets")
-	_check(TARGET.kind_of(table) == "", "A mug cannot be a target")
+	_check(TARGET.kind_of(table) == "object", "Any other object can be a target too")
 	TARGET.configure(bottle, true)
 	TARGET.configure(crate, true)
 	TARGET.configure(table, true)
-	_check(not TARGET.is_target(table), "An unsupported object ignores the flag")
+	_check(TARGET.is_target(table), "Any object takes the flag")
 	_check(bottle.get_node_or_null(TARGET.MARKER_NAME) != null and bottle.is_in_group(TARGET.GROUP), "A flagged bottle gets its marker")
 	_check(TARGET.standing(self, "bottle").size() == 1, "A flagged bottle stands until broken")
 
@@ -56,8 +56,11 @@ func _run() -> void:
 	root.add_child(director)
 	director.call("configure", actor, hud, tree_ui, PROGRESS.new(SAVE))
 	var overlay: Node = director.get("overlay")
-	director.set("_since_start", 3.0) # skip the start-up delay
+	director.set("_since_start", 3.0)
 	await process_frame
+	await process_frame
+	_check(director.get("current") == "", "Nothing starts by itself any more")
+	director.call("play", "move")
 	await process_frame
 	_check(director.get("current") == "move" and bool(overlay.get("active")), "The first lesson is movement")
 	_check(overlay.get("step").has("keys") and overlay.get("keys").visible, "Movement shows animated key caps")
@@ -68,8 +71,8 @@ func _run() -> void:
 	_check(PROGRESS.new(SAVE).is_done("move"), "The lesson is remembered as soon as it starts")
 	await _walk(actor, 0.0, 5.0)
 	_check(director.get("current") == "", "Without a door target five steps finish the movement lesson")
-	await _walk(actor, 5.0, 8.0)
-	_check(director.get("current") == "shoot", "A few steps later the shooting lesson starts")
+	director.call("play", "shoot")
+	_check(director.get("current") == "shoot", "A quest starts the shooting lesson")
 	await _advance(overlay)
 	_check(bottle.get_meta(&"planning_tutorial_revealed", false) == true and bottle.get_node(TARGET.MARKER_NAME).visible, "The shooting stage reveals the bottle marker")
 	_check(crate.get_meta(&"planning_tutorial_revealed", false) != true, "The crate marker stays hidden until its own stage")
@@ -80,7 +83,7 @@ func _run() -> void:
 	_check(director.get("current") == "", "Breaking the bottle completes the lesson")
 	_check(not bottle.get_node(TARGET.MARKER_NAME).visible, "A broken bottle loses its marker")
 	_check(TARGET.standing(self, "bottle").is_empty(), "No bottle target stands any more")
-	await _walk(actor, 8.0, 14.0)
+	director.call("play", "look")
 	_check(director.get("current") == "look", "Then the camera lesson")
 	await _advance(overlay)
 	Input.action_press("camera_left")
@@ -98,12 +101,7 @@ func _run() -> void:
 	director.call("request", "shoot")
 	await process_frame
 	_check(director.get("current") == "", "A seen lesson never starts again")
-	actor.set("armor", 60.0)
-	await process_frame
-	await process_frame
-	_check(director.get("current") == "armor" and bool(overlay.get("picture").visible), "Getting armor for the first time shows the armor bar")
-	_check(is_equal_approx(float(overlay.get("picture").get("armor")), 0.6), "The picture shows the armor held")
-	_check(not hud.call("tutorial_rect", "armor").size.is_zero_approx(), "The HUD armor bar is spotlighted")
+	await _armor_lesson(director, overlay, hud, actor)
 	TARGET.configure(crate, false)
 	_check(not TARGET.is_target(crate) and crate.get_node_or_null(TARGET.MARKER_NAME) == null, "The flag can be removed")
 	_baked_scene()
@@ -130,6 +128,17 @@ func _walk(actor: Node3D, from: float, to: float) -> void:
 		await process_frame
 	await process_frame
 	await process_frame
+
+
+func _armor_lesson(director: Node, overlay: Node, hud: Node, actor: Node) -> void:
+	actor.set("armor", 60.0)
+	await process_frame
+	_check(director.get("current") == "", "Getting armor starts nothing by itself")
+	director.call("play", "armor")
+	await process_frame
+	_check(director.get("current") == "armor" and bool(overlay.get("picture").visible), "Getting armor for the first time shows the armor bar")
+	_check(is_equal_approx(float(overlay.get("picture").get("armor")), 0.6), "The picture shows the armor held")
+	_check(not hud.call("tutorial_rect", "armor").size.is_zero_approx(), "The HUD armor bar is spotlighted")
 
 
 func _baked_scene() -> void:
