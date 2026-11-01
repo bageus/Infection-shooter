@@ -95,6 +95,7 @@ func _run() -> void:
 
 	await _door_passage(director, actor)
 	await _key_pointer(director, overlay)
+	await _resume_after_loss(director, overlay)
 	await _replay_level(director, overlay)
 	await _mask_hud(hud, runtime)
 	# The HUD owns audio players that hold their streams; free it so nothing is still in use at exit.
@@ -127,7 +128,10 @@ func _passive_lesson(director: Node, overlay: Node, runtime: Node) -> void:
 
 
 func _menu_lessons(director: Node, overlay: Node, hud: Node, tree_ui: Node) -> void:
-	_check(director.get("current") == "open_menu", "After the antidote lesson the M menu lesson follows")
+	_check(director.get("current") == "gas_mask", "After the first antidote the gas mask lesson comes next")
+	_check(not hud.call("tutorial_rect", "gas_mask").size.is_zero_approx(), "It spotlights the gas mask icon")
+	await _advance(overlay)
+	_check(director.get("current") == "open_menu", "Then the M menu lesson follows")
 	_check(str(overlay.get("step").get("mode")) == "click", "It first asks to press M on a paused overlay")
 	await _advance(overlay)
 	_check(not paused and str(overlay.get("step").get("objective")) != "", "Then it waits for the menu as the objective")
@@ -139,10 +143,8 @@ func _menu_lessons(director: Node, overlay: Node, hud: Node, tree_ui: Node) -> v
 	tree_ui.call("close_tree")
 	await process_frame
 	await process_frame
-	_check(director.get("current") == "gas_mask", "Then the gas mask lesson")
-	_check(not hud.call("tutorial_rect", "gas_mask").size.is_zero_approx(), "It spotlights the gas mask icon")
-	await _advance(overlay)
-	_check(director.get("current") == "", "The gas mask lesson ends")
+	_check(director.get("current") == "", "The menu lesson ends")
+
 
 
 func _inhale_task(director: Node, runtime: Node) -> void:
@@ -201,6 +203,31 @@ func _key_pointer(director: Node, overlay: Node) -> void:
 	director.set("_host", null)
 	director.set("_key_hunt", false)
 	key.free()
+	host.free()
+
+
+# A control loss cuts a lesson short: afterwards it goes on from the step it stopped at, not from its intro.
+func _resume_after_loss(director: Node, overlay: Node) -> void:
+	var script := GDScript.new()
+	script.source_code = "extends Node\nvar current_level := \"tutorial_lvl\"\nfunc set_tutorial_hint(_target: Callable) -> void:\n\tpass\n"
+	script.reload()
+	var host := Node.new()
+	host.set_script(script)
+	director.set("_host", host)
+	for lesson in ["open_menu", "control_loss"]:
+		director.get("_finished").erase(lesson)
+	director.call("request", "open_menu")
+	await _advance(overlay)
+	_check(str(overlay.get("step").get("mode")) == "wait", "The menu lesson is waiting for M")
+	director.call("request", "control_loss")
+	_check(director.get("current") == "control_loss", "Losing control takes over")
+	director.set("_steps", [])
+	overlay.call("finish", true)
+	_check(director.get("current") == "open_menu" and str(overlay.get("step").get("mode")) == "wait", "The cut lesson resumes at its waiting step")
+	director.get("_queue").clear()
+	director.set("_steps", [])
+	overlay.call("finish", true)
+	director.set("_host", null)
 	host.free()
 
 

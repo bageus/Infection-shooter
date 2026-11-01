@@ -38,6 +38,8 @@ var _player: Node
 var _started_mutation := 0.0
 var _host: Node
 var _finished := {}
+var _resume := {} # lesson -> steps left when a control loss cut it short
+var _antidotes_left := -1
 var _walked := 0.0
 var _walked_at_end := 0.0
 var _last_position := Vector3.INF
@@ -78,6 +80,8 @@ func request(lesson: String) -> void:
 		return
 	# Losing control cannot wait: the lesson in progress restarts after it.
 	if lesson == "control_loss" and not current.is_empty():
+		if bool(overlay.get("active")):
+			_resume[current] = [overlay.get("step")] + _steps # picks up where it stopped, not from the intro
 		overlay.call("finish", false)
 		_queue.push_front(current)
 		current = ""
@@ -91,6 +95,7 @@ func request(lesson: String) -> void:
 
 func _process(delta: float) -> void:
 	_track_input(delta)
+	_watch_antidote()
 	_since_start += delta
 	_adopt_clock -= delta
 	if _adopt_clock <= 0.0 and _since_start < ADOPT_WINDOW:
@@ -120,6 +125,14 @@ func _track_input(delta: float) -> void:
 		_rolled = true
 	if Input.is_action_pressed("sprint"):
 		_sprinted_seconds += delta
+
+
+# The first antidote taken leads on to the gas mask lesson.
+func _watch_antidote() -> void:
+	var left := int(_player.get("antidotes"))
+	if _antidotes_left >= 0 and left < _antidotes_left:
+		request("gas_mask")
+	_antidotes_left = left
 
 
 func _steps_since_last_lesson() -> float:
@@ -208,7 +221,8 @@ func _start_next() -> void:
 		_end_key_hunt() # "find another way" is now the active objective, not the key
 	progress.mark_done(current)
 	_walked_at_end = _walked
-	_steps = _build_steps(current)
+	_steps = _resume.get(current, []) if _resume.has(current) else _build_steps(current)
+	_resume.erase(current)
 	_reveal_targets(current)
 	_started_mutation = float(_runtime.call("get_mutation"))
 	_look_seconds = 0.0
@@ -251,8 +265,8 @@ func _end_lesson() -> void:
 		"look":
 			_begin_key_hunt()
 		"control_loss":
-			request("open_menu")
 			request("gas_mask")
+			request("open_menu")
 	_start_next()
 
 
