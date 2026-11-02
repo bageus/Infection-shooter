@@ -2,6 +2,7 @@ extends SceneTree
 ## Quests and the level chain survive save → clear → load of a named map, a saved layout and a mission start.
 const MAIN := preload("res://game/bootstrap/app/main.tscn")
 const LAYOUT := preload("res://game/bootstrap/app/planning_layout_loader.gd")
+const STARTUP := preload("res://game/bootstrap/app/planning_startup_map.gd")
 const NAME := "quest_save_test"
 var failures := 0
 
@@ -49,7 +50,13 @@ func _run() -> void:
 	var prepared: Dictionary = await layout.prepare_async(read.data, self, func(_a, _b) -> void: pass, func() -> bool: return true)
 	await layout.commit_async(prepared, self, func(_a, _b) -> void: pass)
 	_check(book.quests.size() == 2, "A mission start restores the quests")
+	_check(STARTUP.map_name() == NAME, "Saving a map makes it the map the game starts with")
+	var startup: Dictionary = storage.read_startup_layout()
+	_check(startup.has("data") and startup.data.get("quests_v1", []).size() == 2, "A fresh start reads the saved map with its quests")
+	STARTUP.clear()
+	_check(not storage.read_startup_layout().get("data", {}).has("quests_v1"), "Without the pointer the start layout is used")
 	chain.load_dict(old_chain)
+	STARTUP.clear()
 	DirAccess.remove_absolute(storage._map_path(NAME))
 	DirAccess.remove_absolute(storage._bake_path(NAME))
 	DirAccess.remove_absolute(storage._bake_path(NAME) + ".uid")

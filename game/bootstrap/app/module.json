@@ -38,6 +38,7 @@
     "planned_physics_v1": "DTO v8 optional settled_physics={version:1}; transform-scoped sleep state. Corpse decor_pose.physics_v1 validated before replacement. Legacy v1-v8 compatible, ADR0055.",
     "baked_floor_biomass_v1": "Map v8 optional floor_biomass_v1={version:1,y,pages:[{x,z,png}],source_signature}; generated on Save Map/Layout, validated before replacement, restored as immutable pages; source records preserved. ADR0064.",
     "quests_v1": "Map v8 optional quests_v1=[{type find|kill|destroy|pickup|message|lesson, lesson, trigger{kind previous|time|steps|reach,value,target,point}, targets[object_id], complete{kind reach|destroy|collect|steps,value}, delay, text}]; normalized on load, played in list order by quest_runner, object ids from planning_object_id.",
-    "level_chain_in_map_v1": "Map v8 optional level_chain_v1 = the level_chain_v1 structure (maps order and entries) at save time; every map file carries it; loading adopts it only when the player has no chain."
+    "level_chain_in_map_v1": "Map v8 optional level_chain_v1 = the level_chain_v1 structure (maps order and entries) at save time; every map file carries it; loading adopts it only when the player has no chain.",
+    "startup_map_v1": "user://startup_map.cfg [startup] map=<name>: set by SAVE MAP, cleared by SAVE LAYOUT; when it names an existing user map the game starts with that map instead of the saved start layout."
   }
 }
