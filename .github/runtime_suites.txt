@@ -256,3 +256,4 @@ game/bootstrap/app/tests/run_tutorial_tests.gd
 game/bootstrap/app/tests/run_first_run_tutorial_tests.gd
 game/bootstrap/app/tests/run_quest_tests.gd
 game/bootstrap/app/tests/run_quest_panel_tests.gd
+game/bootstrap/app/tests/run_quest_save_tests.gd
