@@ -31,5 +31,5 @@ static func first_queue_for_round(queue: Dictionary, round_number: int) -> Dicti
 	for unlock: Array in UNLOCKS:
 		if round_number < int(unlock[0]) or config["enemies"].size() >= SPAWN_CONFIG.ENTRIES_MAX:
 			continue
-		config["enemies"].append({"enemy": unlock[1], "count": 1 + (round_number - int(unlock[0])) / 2})
+		config["enemies"].append({"enemy": unlock[1], "count": 1 + floori((round_number - int(unlock[0])) / 2.0)})
 	return config

@@ -31,10 +31,10 @@ func _ready() -> void:
 		strip.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
 		# The strip's -Z edge lies on the wall face; the second one is turned half a circle.
 		var outward := 1.0 if side == 0 else -1.0
-		var basis := Basis.from_scale(Vector3(box.size.x, 1.0, DEPTH))
+		var strip_basis := Basis.from_scale(Vector3(box.size.x, 1.0, DEPTH))
 		if side == 1:
-			basis = Basis(Vector3.UP, PI) * basis
-		strip.transform = Transform3D(basis, Vector3(center.x, 0.0, center.z + outward * (half_thickness + DEPTH * 0.5)))
+			strip_basis = Basis(Vector3.UP, PI) * strip_basis
+		strip.transform = Transform3D(strip_basis, Vector3(center.x, 0.0, center.z + outward * (half_thickness + DEPTH * 0.5)))
 		add_child(strip)
 		strip.global_position.y = FLOOR_Y
 		_strips.append(strip)

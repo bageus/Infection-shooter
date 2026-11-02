@@ -254,7 +254,10 @@ static func texture_entry(texture_id: String) -> Dictionary:
 		_library = LIBRARY.new()
 		_library_green = BLOOD_LEVEL.forced_green
 		# A platform with green blood draws placed decals with the same procedural frames the game uses.
-		_library.call("load_assets", 512, 1.18, BLOOD_LEVEL.forced_green, BLOOD_LEVEL.color()) if BLOOD_LEVEL.forced_green else _library.call("load_assets")
+		if BLOOD_LEVEL.forced_green:
+			_library.call("load_assets", 512, 1.18, BLOOD_LEVEL.forced_green, BLOOD_LEVEL.color())
+		else:
+			_library.call("load_assets")
 	var category := texture_id.get_slice("_", 0)
 	var variant := int(texture_id.get_slice("_", 1))
 	# Layouts saved before the atlases may name a variant the category no
