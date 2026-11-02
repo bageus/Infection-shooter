@@ -92,6 +92,10 @@ func _check_slot_panel() -> void:
 	second.select(second.get_item_index(panel.EMPTY_SLOT))
 	panel._changed()
 	_expect(objects.hero_spawn.slots[1] == -1, "Choosing Пусто saves an empty slot")
+	panel.free()
+	objects.free()
+	session.ui.free()
+	session.free()
 
 
 func _expect(condition: bool, message: String) -> void:
