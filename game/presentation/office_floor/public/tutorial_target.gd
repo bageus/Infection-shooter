@@ -45,7 +45,7 @@ static func configure(node: Node3D, enabled: bool) -> void:
 		return
 	if enabled:
 		if node.has_meta(&"planning_scene_path") and str(node.get_meta(&"planning_object_id", "")).is_empty():
-			node.set_meta(&"planning_object_id", "object_%d" % Time.get_ticks_usec()) # quests refer to targets by id
+			node.set_meta(&"planning_object_id", "object_%d_%d" % [Time.get_ticks_usec(), randi()]) # quests refer to targets by id
 		node.set_meta(META, true)
 		node.add_to_group(GROUP, true) # persistent: a baked scene keeps the flag
 	else:

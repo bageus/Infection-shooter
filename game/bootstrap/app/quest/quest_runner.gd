@@ -163,7 +163,7 @@ func _activate() -> void:
 	match str(quest.type):
 		"lesson":
 			if director != null:
-				director.call("play", str(quest.lesson))
+				director.call("play", str(quest.lesson), _targets)
 		"message":
 			_message_left = MESSAGE_SECONDS
 			_set_objective(str(quest.text))

@@ -16,6 +16,21 @@ func _initialize() -> void:
 	call_deferred("_run")
 
 
+func _scoped_lesson(director: Node, overlay: Node) -> void:
+	var other := _prop("res://models/objects/enviroments/09/09_glass_water_bottle_clear_250ml.glb", Vector3(-3, 0, 0))
+	var mine := _prop("res://models/objects/enviroments/09/09_glass_water_bottle_clear_250ml.glb", Vector3(0, 0, 3))
+	TARGET.configure(other, true)
+	TARGET.configure(mine, true)
+	director.call("play", "shoot", [mine])
+	await _advance(overlay)
+	_check(other.get_meta(&"planning_tutorial_revealed", false) != true, "A quest's lesson leaves targets outside its list alone")
+	var mine_damage: Variant = mine.get("_damage")
+	mine_damage.glass_broken = true
+	await process_frame
+	await process_frame
+	_check(director.get("current") == "", "A quest's lesson ends when its own targets are done, not every flagged bottle")
+
+
 func _prop(model: String, at: Vector3) -> Node3D:
 	var node := PROP.instantiate() as Node3D
 	node.set("model_path", model)
@@ -83,6 +98,7 @@ func _run() -> void:
 	_check(director.get("current") == "", "Breaking the bottle completes the lesson")
 	_check(not bottle.get_node(TARGET.MARKER_NAME).visible, "A broken bottle loses its marker")
 	_check(TARGET.standing(self, "bottle").is_empty(), "No bottle target stands any more")
+	await _scoped_lesson(director, overlay)
 	director.call("play", "look")
 	_check(director.get("current") == "look", "Then the camera lesson")
 	await _advance(overlay)
