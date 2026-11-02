@@ -405,7 +405,7 @@ func take_projectile_hit(damage: float, hit_position: Vector3, _normal: Vector3,
 
 
 # A cardboard box has no staged pieces: its panels fly apart at the moment it breaks.
-# A big crate (wooden or under a canvas tarp) is cut into its walls, which topple and pile up before they are baked.
+# A big wooden crate is cut into its walls, which topple and pile up before they are baked.
 func _collapse_box(hit_position: Vector3, direction: Vector3) -> void:
 	_floor_debris.emit(self, model_path, "break", hit_position, direction)
 	BREAK_SOUND.play(self, effects_root, model_path, get_projectile_material(), hit_position)
@@ -485,7 +485,7 @@ func take_melee_hit(damage: float, hit_position: Vector3, direction: Vector3) ->
 	take_projectile_hit(damage, hit_position, Vector3.ZERO, direction, "MELEE")
 
 func break_by_strike(hit_position: Vector3, direction: Vector3) -> void:
-	if _damage.shatter():
+	if "02_crate_canvas_large" not in model_path and _damage.shatter(): # Tarp-covered crates are indestructible.
 		_release_loot()
 		_collapse_box(hit_position, direction)
 

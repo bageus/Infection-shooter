@@ -1,10 +1,10 @@
 extends RefCounted
-## A large crate is one authored mesh (wooden, or covered with a canvas tarp). When it breaks, the mesh
-## is cut into its six walls (by the face each triangle lies nearest to) so the walls fall, topple and
-## pile up as separate pieces instead of the whole crate staying one piece.
+## A large wooden crate is one authored mesh. When it breaks, the mesh is cut into its six walls
+## (by the face each triangle lies nearest to) so the walls fall, topple and pile up as separate
+## pieces instead of the whole crate being baked into the floor as one piece.
 
 const DAMAGE := preload("res://game/presentation/office_floor/environment_damage.gd")
-const MODELS := ["crate_wood_large", "crate_canvas_large"]
+const MODELS := ["crate_wood_large"]
 const ARRAY_KINDS := [Mesh.ARRAY_VERTEX, Mesh.ARRAY_NORMAL, Mesh.ARRAY_TANGENT, Mesh.ARRAY_COLOR, Mesh.ARRAY_TEX_UV, Mesh.ARRAY_TEX_UV2]
 
 
