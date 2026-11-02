@@ -101,6 +101,7 @@ func _run() -> void:
 	director.call("request", "shoot")
 	await process_frame
 	_check(director.get("current") == "", "A seen lesson never starts again")
+	await _reload_lesson(director, overlay)
 	await _armor_lesson(director, overlay, hud, actor)
 	TARGET.configure(crate, false)
 	_check(not TARGET.is_target(crate) and crate.get_node_or_null(TARGET.MARKER_NAME) == null, "The flag can be removed")
@@ -128,6 +129,18 @@ func _walk(actor: Node3D, from: float, to: float) -> void:
 		await process_frame
 	await process_frame
 	await process_frame
+
+
+func _reload_lesson(director: Node, overlay: Node) -> void:
+	director.call("play", "reload")
+	_check(director.get("current") == "reload" and "R" in str(overlay.get("step").get("text")), "The reload lesson names the reload key")
+	await _advance(overlay)
+	Input.action_press("reload")
+	await process_frame
+	await process_frame
+	Input.action_release("reload")
+	await process_frame
+	_check(director.get("current") == "", "Pressing reload completes the lesson")
 
 
 func _armor_lesson(director: Node, overlay: Node, hud: Node, actor: Node) -> void:

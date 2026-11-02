@@ -166,7 +166,8 @@ func _refresh_candidates() -> void:
 	if not target_picker.is_inside_tree():
 		return
 	for node: Node in target_picker.get_tree().get_nodes_in_group(TARGET.GROUP):
-		if node is Node3D and not str(node.get_meta(BOOK.ID_META, "")).is_empty():
+		if node is Node3D:
+			BOOK.ensure_id(node) # targets flagged before quests existed have no id yet
 			_candidates.append(node)
 			target_picker.add_item(_describe(node))
 			trigger_target.add_item(_describe(node))
@@ -255,6 +256,10 @@ func _point_marker(quest: Dictionary) -> void:
 	_point_node.global_position = Vector3(float(point[0]), 0.0, float(point[1]))
 	_point_node.add_child(TARGET.new_marker())
 	_point_node.set_meta(&"planning_tutorial_revealed", true) # the panel hides it again when the tab closes
+
+
+func is_candidate_list_current() -> bool:
+	return target_picker.is_inside_tree() and _candidates.size() == target_picker.get_tree().get_nodes_in_group(TARGET.GROUP).size()
 
 
 func show_point(shown: bool) -> void:

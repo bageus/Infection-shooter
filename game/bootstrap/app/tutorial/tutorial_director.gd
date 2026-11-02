@@ -41,6 +41,7 @@ var _walked_at_end := 0.0
 var _last_position := Vector3.INF
 var _look_seconds := 0.0
 var _rolled := false
+var _reloaded := false
 var _sprinted_seconds := 0.0
 var _since_start := 0.0
 var _adopt_clock := 0.0
@@ -118,6 +119,8 @@ func _track_input(delta: float) -> void:
 		_look_seconds += delta
 	if Input.is_action_just_pressed("roll"):
 		_rolled = true
+	if Input.is_action_just_pressed("reload"):
+		_reloaded = true
 	if Input.is_action_pressed("sprint"):
 		_sprinted_seconds += delta
 
@@ -135,6 +138,7 @@ func _start_next() -> void:
 	_started_mutation = float(_runtime.call("get_mutation"))
 	_look_seconds = 0.0
 	_rolled = false
+	_reloaded = false
 	_sprinted_seconds = 0.0
 	if current == "active_skill" or current == "passive_skill":
 		_tree_ui.call("open_tree")
@@ -184,6 +188,8 @@ func _build_steps(lesson: String) -> Array:
 		"shoot":
 			return _task(TEXT.t("tutShoot") % KEYS.binding("fire"), TEXT.t("objShoot"), KEYS.row(["fire"]), "all",
 					func() -> bool: return TARGET.standing(get_tree(), "bottle").is_empty())
+		"reload":
+			return _task(TEXT.t("tutReload") % KEYS.binding("reload"), TEXT.t("objReload") % KEYS.binding("reload"), KEYS.row(["reload"]), "all", func() -> bool: return _reloaded)
 		"look":
 			return _task(TEXT.t("tutLook") % [KEYS.binding("camera_left"), KEYS.binding("camera_right")], TEXT.t("objLook"),
 					KEYS.row(["camera_left", "camera_right"]), "cycle",

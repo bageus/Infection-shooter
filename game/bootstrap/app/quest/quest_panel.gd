@@ -130,6 +130,8 @@ func _sync_markers() -> void:
 	if tab == null or not tab.is_inside_tree():
 		return
 	var shown: Array = []
+	if tab.is_visible_in_tree() and not params.is_candidate_list_current():
+		params.show_quest(book.selected) # targets marked since the last visit
 	if tab.is_visible_in_tree() and book.selected >= 0 and book.selected < book.quests.size():
 		shown = params.marker_nodes(book.quests[book.selected])
 	BOOK.show_markers(tab.get_tree(), shown)

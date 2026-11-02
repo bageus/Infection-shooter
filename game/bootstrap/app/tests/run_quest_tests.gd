@@ -30,7 +30,11 @@ func _model() -> void:
 	_check(quest.text == "Базовое обучение: ДНК" and quest.lesson == "dna", "A lesson quest starts with its preset text")
 	_check(MODEL.make("kill").complete.kind == "destroy" and MODEL.make("pickup").complete.kind == "collect", "Each type has a default completion")
 	_check(MODEL.make("find").delay == 0.0 and MODEL.make("find").trigger.kind == "previous", "Delay is 0 and the trigger is the previous quest by default")
-	_check(MODEL.LESSONS.size() == 13, "All thirteen lessons are listed")
+	var director_source := FileAccess.get_file_as_string("res://game/bootstrap/app/tutorial/tutorial_director.gd")
+	for lesson in MODEL.lesson_ids():
+		_check('\t\t"%s":' % lesson in director_source, "Lesson %s exists in the director" % lesson)
+	for lesson in ["move", "look", "roll", "sprint", "shoot", "reload", "mutation_scale", "active_skill", "passive_skill", "gas_mask", "antidote", "crates", "dna", "armor", "weapons", "one_way", "explore", "control_loss", "open_menu"]:
+		_check(lesson in MODEL.lesson_ids(), "Lesson %s is in the picker" % lesson)
 	var messy := MODEL.normalize({"type": "bogus", "delay": -5, "targets": ["a", "a", "", "b"], "trigger": {"kind": "xx", "value": 9.0}, "text": "hi"})
 	_check(messy.type == "find" and messy.delay == 0.0 and messy.targets == ["a", "b"] and messy.trigger.kind == "previous", "Normalizing repairs bad values")
 	_check(messy.text == "hi", "A custom description survives")
