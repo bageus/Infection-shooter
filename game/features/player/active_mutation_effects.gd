@@ -151,7 +151,7 @@ func _strike_objects(forward: Vector3, damage: float) -> void:
 	box.size = Vector3(3.0, 2.0, STRIKE_REACH)
 	var query := PhysicsShapeQueryParameters3D.new()
 	query.shape = box
-	query.transform = Transform3D(Basis.looking_at(forward), player.global_position + forward * STRIKE_REACH * 0.5 + Vector3.UP * 0.9)
+	query.transform = Transform3D(Basis.looking_at(forward), player.global_position + forward * STRIKE_REACH * 0.5 + Vector3.UP * 0.1)  # box spans from the floor up: origin is the capsule centre
 	query.collision_mask = STRIKE_OBJECT_MASK
 	query.exclude = [player.get_rid()]
 	var hit_ids := {}
@@ -160,7 +160,6 @@ func _strike_objects(forward: Vector3, damage: float) -> void:
 		if body == null or hit_ids.has(body.get_instance_id()) or not _strikeable(body):
 			continue
 		hit_ids[body.get_instance_id()] = true
-		print("PUNCHDBG ", body.get("model_path") if "model_path" in body else body.name, " class=", body.get_class(), " loot=", body.call("has_loot") if body.has_method("has_loot") else "-")
 		if body is RigidBody3D and not (body as RigidBody3D).freeze:
 			body.call("push_from_character", player.global_position, forward * STRIKE_PUSH_SPEED, 1.0)
 		if body.has_method("has_loot") and bool(body.call("has_loot")) and body.has_method("break_by_strike"):
