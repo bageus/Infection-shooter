@@ -39,6 +39,7 @@ var _elevator_lights: Array[Node3D] = []
 var _indicator_glow: OmniLight3D
 var _fallback_leaf_collisions: Array[CollisionShape3D] = []
 var _key_hint: Node3D
+var _hints := HINT_BADGES.new()
 const BUDGET_LIGHT := preload("res://game/presentation/office_floor/budget_omni_light.gd")
 const PRESENCE := preload("res://game/presentation/office_floor/door_presence.gd")
 const RUNTIME_CACHE := preload("res://game/presentation/office_floor/door_runtime_cache.gd")
@@ -50,12 +51,9 @@ var _leaf_surfaces: Dictionary = {}
 var _pose_ready := false
 var _locked_cue_armed := true
 const SFX := preload("res://game/core/audio/public/sound_events.gd")
-const BADGE := preload("res://game/core/world_badge/public/world_badge.gd")
+const HINT_BADGES := preload("res://game/presentation/office_floor/door_hint_badges.gd")
 const LOCKED_ICON := preload("res://assets/interface/icon/locked_door.png")
 const LOCKED_TINT := Color("dcae4a")
-# Badge centre height in the door's local space, and its size next to the old one.
-const LOCK_ICON_HEIGHT := 1.1
-const LOCK_ICON_SCALE := 0.8
 # Beyond this distance the next approach plays the locked cue again.
 const LOCKED_CUE_REARM_DISTANCE := 0.5
 
@@ -123,10 +121,7 @@ func is_lockable() -> bool:
 func _apply_lock_visuals() -> void:
 	if requires_emergency_key and _key_hint == null:
 		# Locked-door icon in the HUD style, gold like the emergency key cell.
-		_key_hint = BADGE.icon(LOCKED_ICON, Rect2(), LOCKED_TINT, LOCK_ICON_HEIGHT)
-		_key_hint.name = "LockedDoorIcon"
-		_key_hint.scale = Vector3.ONE * LOCK_ICON_SCALE
-		add_child(_key_hint)
+		_key_hint = HINT_BADGES.make(self, LOCKED_ICON, LOCKED_TINT, "LockedDoorIcon")
 	if requires_emergency_key and _presence == null:
 		_presence = PRESENCE.new()
 		add_child(_presence)
@@ -147,6 +142,7 @@ func _physics_process(delta: float) -> void:
 	if _pose_ready and _open_amount == 0.0 and _close_timer <= 0.0 and not _requested_open and Vector2(local_player.x, local_player.z).length_squared() > idle_distance * idle_distance:
 		if _key_hint != null and _key_hint.visible:
 			_key_hint.hide()
+		_hints.update_no_entry(self, false, local_player)
 		_locked_cue_armed = true
 		_swing_side = 0.0
 		if mode == DoorMode.GLASS_SWING and _glass_hinge != null:
@@ -158,7 +154,11 @@ func _physics_process(delta: float) -> void:
 	var emergency_exit_side := signf(local_player.z) == signf(one_way_allowed_side)
 	var has_emergency_key := requires_emergency_key and _player.has_method("has_emergency_key") and bool(_player.call("has_emergency_key"))
 	if _key_hint != null:
-		_key_hint.visible = requires_emergency_key and horizontal_distance < 3.0 and (permanently_locked or (not emergency_exit_side and not has_emergency_key))
+		_key_hint.visible = requires_emergency_key and horizontal_distance < HINT_BADGES.RANGE and (permanently_locked or (not emergency_exit_side and not has_emergency_key))
+		HINT_BADGES.toward_player(_key_hint, local_player)
+	# One-way: the crossed circle marks the side nobody can pass from, unless the locked icon shows.
+	var no_entry_shown := mode == DoorMode.SWING_ONE_WAY and not permanently_locked and not emergency_exit_side and _open_amount < 0.02 and horizontal_distance < HINT_BADGES.RANGE
+	_hints.update_no_entry(self, no_entry_shown and not (_key_hint != null and _key_hint.visible), local_player)
 	var blocked := permanently_locked or (requires_emergency_key and not emergency_exit_side and not has_emergency_key)
 	if horizontal_distance > trigger_distance + LOCKED_CUE_REARM_DISTANCE:
 		_locked_cue_armed = true
