@@ -24,6 +24,7 @@ const PROP_DAMAGE := preload("res://game/features/combat/public/prop_damage_stat
 var _damage := PROP_DAMAGE.new()
 const WEIGHT = preload("res://game/presentation/office_floor/prop_weight.gd")
 const CONTACT = preload("res://game/presentation/office_floor/prop_contact.gd")
+const STRIKE_BREAK := preload("res://game/presentation/office_floor/prop_strike_break.gd")
 const BULLET_PUSH = preload("res://game/presentation/office_floor/bullet_push.gd")
 const FLOOR_TOP := 0.0135 # Visible base floor top (tile_y .001 + half its .025 thickness); the physics floor matches it.
 var repeated_electronic_particles := true
@@ -485,9 +486,7 @@ func take_melee_hit(damage: float, hit_position: Vector3, direction: Vector3) ->
 	take_projectile_hit(damage, hit_position, Vector3.ZERO, direction, "MELEE")
 
 func break_by_strike(hit_position: Vector3, direction: Vector3) -> void:
-	if "02_crate_canvas_large" not in model_path and _damage.shatter(): # Tarp-covered crates are indestructible.
-		_release_loot()
-		_collapse_box(hit_position, direction)
+	STRIKE_BREAK.break_crate(self, hit_position, direction)
 
 
 func _apply_damage(hit_position: Vector3, direction: Vector3) -> void:
