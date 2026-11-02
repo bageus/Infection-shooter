@@ -13,10 +13,12 @@ const TYPE_LABELS := {
 	"pickup": "Подобрать", "message": "Показать сообщение", "lesson": "Запустить обучение",
 }
 # Trigger: what starts the quest. "previous" means right after the earlier quest is complete.
-const TRIGGERS: Array[String] = ["previous", "time", "steps", "reach"]
+const TRIGGERS: Array[String] = ["previous", "time", "steps", "reach", "mutation_rise", "menu_open", "control_lost"]
 const TRIGGER_LABELS := {
 	"previous": "Выполнено предыдущее задание", "time": "Время (секунды)",
 	"steps": "Шаги (количество)", "reach": "Достижение цели или места",
+	"mutation_rise": "Заполнение шкалы мутации (на сколько поднялась)", "menu_open": "Появление меню мутации у игрока",
+	"control_lost": "Потеря контроля",
 }
 # Completion: when the quest counts as done.
 const COMPLETIONS: Array[String] = ["reach", "destroy", "collect", "steps"]

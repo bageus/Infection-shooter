@@ -24,6 +24,7 @@ var _walked := 0.0
 var _walked_at_start := 0.0
 var _last_position := Vector3.INF
 var _targets: Array = []
+var _mutation_at_start := 0.0
 var _trigger_node: Node3D
 var _was_planning := false
 
@@ -94,6 +95,7 @@ func _begin_quest() -> void:
 	phase = Phase.TRIGGER
 	_idle = 0.0
 	_walked_at_start = _walked
+	_mutation_at_start = _mutation()
 	_targets = []
 	_trigger_node = null
 	if is_finished() or not is_inside_tree():
@@ -123,7 +125,23 @@ func _trigger_context() -> Dictionary:
 	elif quest.trigger.point is Array and (quest.trigger.point as Array).size() == 2:
 		var point: Array = quest.trigger.point
 		reach = _flat(Vector3(float(point[0]), 0.0, float(point[1])))
-	return {"idle": _idle, "steps": _steps_since_start(), "reach": reach}
+	return {"idle": _idle, "steps": _steps_since_start(), "reach": reach, "mutation_gain": _mutation() - _mutation_at_start,
+			"menu_open": _menu_open(), "control_lost": _control_lost()}
+
+
+func _mutation() -> float:
+	var runtime: Variant = player.get("infection_runtime") if player != null else null
+	return float(runtime.call("get_mutation")) if runtime != null else 0.0
+
+
+func _control_lost() -> bool:
+	var runtime: Variant = player.get("infection_runtime") if player != null else null
+	return runtime != null and bool(runtime.call("is_control_lost"))
+
+
+func _menu_open() -> bool:
+	var menu: Variant = host.get("mutation_tree_ui") if host != null else null
+	return menu != null and bool(menu.call("is_tree_open"))
 
 
 func _flat(position: Vector3) -> float:

@@ -36,6 +36,16 @@ func _model() -> void:
 	for lesson in ["move", "look", "roll", "sprint", "shoot", "reload", "mutation_scale", "active_skill", "passive_skill", "gas_mask", "antidote", "crates", "dna", "armor", "weapons", "one_way", "explore", "control_loss", "open_menu"]:
 		_check(lesson in MODEL.lesson_ids(), "Lesson %s is in the picker" % lesson)
 	var messy := MODEL.normalize({"type": "bogus", "delay": -5, "targets": ["a", "a", "", "b"], "trigger": {"kind": "xx", "value": 9.0}, "text": "hi"})
+	var rise := MODEL.make("find")
+	rise.trigger = {"kind": "mutation_rise", "value": 2.0, "target": "", "point": []}
+	_check(not LOGIC.trigger_ready(rise, {"mutation_gain": 1.5}) and LOGIC.trigger_ready(rise, {"mutation_gain": 2.0}), "The mutation rise trigger waits for the meter to climb")
+	var menu := MODEL.make("find")
+	menu.trigger.kind = "menu_open"
+	_check(not LOGIC.trigger_ready(menu, {}) and LOGIC.trigger_ready(menu, {"menu_open": true}), "The menu trigger waits for the menu")
+	var lost := MODEL.make("find")
+	lost.trigger.kind = "control_lost"
+	_check(not LOGIC.trigger_ready(lost, {}) and LOGIC.trigger_ready(lost, {"control_lost": true}), "The control loss trigger waits for the loss")
+	_check(MODEL.normalize({"trigger": {"kind": "control_lost"}}).trigger.kind == "control_lost", "The new trigger kinds survive normalizing")
 	_check(not MODEL.make("find").pointer and MODEL.normalize({"pointer": true}).pointer, "The pointer flag defaults off and survives normalizing")
 	_check(messy.type == "find" and messy.delay == 0.0 and messy.targets == ["a", "b"] and messy.trigger.kind == "previous", "Normalizing repairs bad values")
 	_check(messy.text == "hi", "A custom description survives")
