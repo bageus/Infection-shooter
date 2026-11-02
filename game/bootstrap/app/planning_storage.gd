@@ -479,6 +479,9 @@ func _prepare_save(job: RefCounted = null) -> bool:
 	var unresolved: Variant = objects.get("unresolved_records")
 	if unresolved is Array and not unresolved.is_empty():
 		_save_notice = " | %d unavailable object record(s) preserved" % unresolved.size()
+	var quest_book := preload("res://game/bootstrap/app/quest/quest_store.gd").book(session)
+	if quest_book != null:
+		_save_notice += " | заданий: %d" % quest_book.quests.size()
 	if not session.active:
 		return true
 	map_loading = true

@@ -119,9 +119,11 @@ func _test_key_cell(hud: Node, player: Node) -> void:
 	var key_icon := cell.get_node("KeyIcon") as TextureRect
 	_expect(key_icon.texture != null and key_icon.texture.get_size() == ICONS.ARTWORK_BOUNDS[6].size, "Key cell shows the atlas key artwork.")
 	var objective := hud.get_node("Objective") as Control
-	_expect(objective.visible, "The mission goal appears once the key is held.")
-	_expect(_label_text(objective) == "Двигайся к пожарному выходу!", "The mission goal names the fire exit in Russian.")
+	_expect(not objective.visible, "Without a quest the goal banner stays hidden, key or not.")
+	hud.call("set_tutorial_objective", "Найдите выход")
+	_expect(objective.visible and _label_text(objective) == "Найдите выход", "A quest's text fills the goal banner.")
 	_expect(objective.get_parent() == hud and objective.get_global_rect().get_center().x > hud.get_viewport().get_visible_rect().size.x * 0.4, "The mission goal sits at the top centre.")
+	hud.call("set_tutorial_objective", "")
 
 
 func _test_empty_slots_are_blank(stage: Node) -> void:

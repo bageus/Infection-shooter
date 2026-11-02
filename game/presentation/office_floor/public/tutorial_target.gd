@@ -9,7 +9,7 @@ const COLOR := Color("ff5a1f")
 const Marker := preload("res://game/presentation/office_floor/tutorial_target_marker.gd")
 
 
-## "bottle", "crate", "extinguisher", "door", or "" when the object cannot be a target.
+## "bottle", "crate", "extinguisher", "door", otherwise "object" (any placed prop, item or enemy); "" for no node.
 static func kind_of(node: Node) -> String:
 	if node == null:
 		return ""
@@ -23,7 +23,12 @@ static func kind_of(node: Node) -> String:
 	var controller := node.get_node_or_null("DoorController")
 	if controller != null and controller.has_method("is_lockable") and bool(controller.call("is_lockable")):
 		return "door"
-	return ""
+	return "object"
+
+
+## A free-standing marker: put it under a Node3D whose "planning_tutorial_revealed" meta shows it.
+static func new_marker() -> Node3D:
+	return Marker.new()
 
 
 static func applies_to(node: Node) -> bool:
@@ -39,6 +44,8 @@ static func configure(node: Node3D, enabled: bool) -> void:
 	if not applies_to(node):
 		return
 	if enabled:
+		if node.has_meta(&"planning_scene_path") and str(node.get_meta(&"planning_object_id", "")).is_empty():
+			node.set_meta(&"planning_object_id", "object_%d" % Time.get_ticks_usec()) # quests refer to targets by id
 		node.set_meta(META, true)
 		node.add_to_group(GROUP, true) # persistent: a baked scene keeps the flag
 	else:
