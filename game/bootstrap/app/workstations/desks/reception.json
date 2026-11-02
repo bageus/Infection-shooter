@@ -1,15 +1,15 @@
 {
-  "height": 0.75,
+  "height": 0.82,
   "stations": [
     {
       "x": 0,
       "z": 0.09,
       "angle": 0,
-      "usable_width": 2.5,
-      "usable_depth": 0.8,
+      "usable_width": 1.98,
+      "usable_depth": 0.84,
       "zone_depth": 0.75,
-      "grid_width": 2.4,
-      "grid_depth": 0.7
+      "grid_width": 1.98,
+      "grid_depth": 0.84
     }
   ],
   "optional": [
