@@ -56,14 +56,14 @@ func _run() -> void:
 		var shape := CollisionShape3D.new()
 		shape.shape = BoxShape3D.new()
 		crate.add_child(shape)
-		crate.position = Vector3(0, 0.6, -distance)
+		crate.position = Vector3(0, 0.25, -distance)
 		root.add_child(crate)
 		crates.append(crate)
 	await physics_frame
 	await physics_frame
 	for step in crates.size():
 		# Each kick comes from one metre in front of the next crate, facing -Z.
-		player.global_position = crates[step].global_position + Vector3(0.0, -0.6, 1.0)
+		player.global_position = crates[step].global_position + Vector3(0.0, 0.65, 1.0) # origin is the capsule centre, 0.9 above the floor
 		await physics_frame
 		mutation.call("melee")
 		await create_timer(0.5).timeout

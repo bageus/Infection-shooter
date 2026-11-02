@@ -54,6 +54,18 @@ class WorkstationTemplatesTest(unittest.TestCase):
         profile = json.loads((DATA / "desks" / f"{key}.json").read_text())
         self.assertEqual([station["grid_height"] for station in profile["stations"]], [0.78, 1.1])
 
+    def test_single_height_reception_grid_matches_its_countertop(self):
+        # Measured from the intact mesh of 07_reception_counter_two_heights: the flat top is at
+        # y=0.82, x ±0.99, z -0.33..0.51. The grid must sit on it, not sink below or overhang it.
+        key = DESK_CATALOG.get("07_reception_counter_two_heights")
+        profile = json.loads((DATA / "desks" / f"{key}.json").read_text())
+        self.assertAlmostEqual(profile["height"], 0.82)
+        station = profile["stations"][0]
+        self.assertLessEqual(station["grid_width"], 1.98 + 0.001)
+        self.assertLessEqual(station["grid_depth"], 0.84 + 0.001)
+        self.assertAlmostEqual(station["z"] - station["grid_depth"] / 2, -0.33 + 0.005, delta=0.01)
+        self.assertAlmostEqual(station["z"] + station["grid_depth"] / 2, 0.51 - 0.005, delta=0.01)
+
     def test_every_named_model_exists(self):
         names = set(re.findall(r'"(\d\d_[A-Za-z0-9_]+)"', SCRIPT))
         for folder in (DATA / "desks", DATA / "setups"):

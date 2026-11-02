@@ -13,6 +13,8 @@ const NEAR_ENEMY := 2.0
 const PUNCH_REACH := 1.1
 const PUNCH_DAMAGE := 17.0
 const KICK_LENGTH := 1.7
+## The player origin is the capsule centre; the floor is this far below it.
+const PLAYER_HALF_HEIGHT := 0.9
 const KICK_WIDTH := 1.8
 const KICK_HEIGHT := 1.2
 ## Impulse (kg*m/s) behind a kick, split by the item's mass and capped in speed.
@@ -87,7 +89,7 @@ func _kick_impact() -> void:
 	box.size = Vector3(KICK_WIDTH, KICK_HEIGHT, KICK_LENGTH)
 	var query := PhysicsShapeQueryParameters3D.new()
 	query.shape = box
-	query.transform = Transform3D(Basis.looking_at(forward), player.global_position + forward * KICK_LENGTH * 0.5 + Vector3.UP * (KICK_HEIGHT * 0.5 + 0.1))
+	query.transform = Transform3D(Basis.looking_at(forward), player.global_position + Vector3.DOWN * PLAYER_HALF_HEIGHT + forward * KICK_LENGTH * 0.5 + Vector3.UP * (KICK_HEIGHT * 0.5 + 0.1))
 	query.collision_mask = OBJECT_MASK
 	query.exclude = [player.get_rid()]
 	var seen := {}
@@ -97,13 +99,11 @@ func _kick_impact() -> void:
 		if body == null or seen.has(body.get_instance_id()) or body is CharacterBody3D:
 			continue
 		seen[body.get_instance_id()] = true
-		print("KICKDBG hit ", body.get("model_path") if "model_path" in body else body.name, " class=", body.get_class(), " loot=", body.call("has_loot") if body.has_method("has_loot") else "-", " freeze=", body.get("freeze"), " layer=", body.get("collision_layer"))
 		if body.has_method("has_loot") and bool(body.call("has_loot")) and body.has_method("break_by_strike"):
 			if nearest_crate == null or body.global_position.distance_squared_to(player.global_position) < nearest_crate.global_position.distance_squared_to(player.global_position):
 				nearest_crate = body
 		elif body is RigidBody3D and not (body as RigidBody3D).freeze and not _is_creature(body):
 			_throw(body as RigidBody3D, player.global_position)
-	print("KICKDBG hits=", seen.size(), " nearest=", nearest_crate.get("model_path") if nearest_crate != null else "none", " at=", nearest_crate.global_position if nearest_crate != null else "-", " player=", player.global_position, " forward=", forward)
 	# One kick breaks the nearest crate only; a crowd of crates takes one kick each.
 	if nearest_crate != null:
 		nearest_crate.call("break_by_strike", nearest_crate.global_position, forward)

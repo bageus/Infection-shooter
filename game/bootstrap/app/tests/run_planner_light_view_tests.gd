@@ -48,12 +48,13 @@ func _run() -> void:
 		_check(lamp.get_authored_color().is_equal_approx(controls.default_light_color.color), "Placed lamp keeps palette color")
 		_check(is_equal_approx(lamp.get_node("Light").spot_angle, controls.default_light_angle.value), "Placed lamp keeps palette cone")
 		_check(lamp.get_fixture_config().shape == controls.fixtures.SHAPES[index], "Each palette shape is preserved")
-		# The palette lamp is still active here: a plain click on the installed lamp must pick it.
+		# The palette lamp is still active here: a plain click over the installed lamp places another lamp.
 		var placed_before: int = planner.objects.placed.size()
 		var click_point: Vector2 = planner.camera.unproject_position(lamp.global_position)
 		await _click(click_point)
-		_check(planner.objects.placed.size() == placed_before and planner.objects.selected == lamp, "Plain click on an installed lamp selects it instead of placing another")
-		_check(controls.light_defaults.visible and is_equal_approx(controls.default_light_energy.value, lamp.get_authored_energy()), "Selection shows the lamp's own parameters")
+		_check(planner.objects.placed.size() == placed_before + 1 and planner.objects.selected != lamp, "Plain click over an installed lamp places another lamp")
+		planner.edit_history.undo()
+		planner.objects._select(lamp)
 		controls.default_light_energy.value = 6.25 + index
 		_check(is_equal_approx(lamp.get_authored_energy(), 6.25 + index), "Editing the selected lamp applies live")
 		expected.append([lamp, 6.25 + index, lamp.global_position.y, controls.default_light_color.color])

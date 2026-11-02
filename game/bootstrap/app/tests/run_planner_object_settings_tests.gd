@@ -1,6 +1,6 @@
 extends SceneTree
-## Every installed object with planner settings opens its settings panel when it is clicked,
-## even while a palette item of the same kind is still active, and edits apply live and persist.
+## Every installed object with planner settings opens its settings panel when it is selected,
+## a plain click with a palette item active places that item instead, and edits apply live and persist.
 const MAIN := preload("res://game/bootstrap/app/main.tscn")
 # [label, catalog file, settings kind, panel node that must show]
 const CASES := [
@@ -60,8 +60,13 @@ func _run() -> void:
 		var count: int = objects.placed.size()
 		var at := _screen_of(node)
 		_click(at)
-		_check(objects.selected == node, "Clicking the installed %s selects it" % item[0])
-		_check(objects.placed.size() == count, "Clicking the installed %s places nothing" % item[0])
+		_check(objects.placed.size() == count + 1, "Clicking over the installed %s places a new one" % item[0])
+		planner.edit_history.undo()
+		_check(objects.placed.size() == count, "Undo removes the %s placed over the installed one" % item[0])
+		# Picking the installed object takes Ctrl+LMB, which this headless test does not press: select it directly.
+		objects._reset_selection()
+		objects._select(node)
+		_check(objects.selected == node, "The installed %s can be selected" % item[0])
 		_check(_panel_visible(str(item[2])), "The %s settings panel is open" % item[0])
 		_edit_and_check(str(item[0]), node)
 		# Nothing armed in the palette: a plain click selects it and its panel must stay open.
