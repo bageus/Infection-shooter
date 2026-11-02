@@ -11,6 +11,7 @@ const TEXT := preload("res://game/bootstrap/app/mutation_text.gd")
 const SPOTLIGHT := preload("res://game/bootstrap/app/tutorial/tutorial_spotlight.gdshader")
 const PICTURE := preload("res://game/bootstrap/app/tutorial/tutorial_meter_picture.gd")
 const KEYS := preload("res://game/bootstrap/app/tutorial/tutorial_keys_picture.gd")
+const PREVIEW := preload("res://game/bootstrap/app/tutorial/tutorial_enemy_preview.gd")
 const TITLE_FONT := preload("res://assets/interface/fonts/title.ttf")
 const GROW := 8.0
 const MIN_STEP_SECONDS := 0.3
@@ -22,6 +23,9 @@ var active := false
 var step: Dictionary = {}
 var picture: Control
 var keys: Control
+var _column: VBoxContainer
+var _preview: Control
+var _title: Label
 var _dim: ColorRect
 var _frame: Control
 var _panel: PanelContainer
@@ -60,25 +64,32 @@ func _ready() -> void:
 	style.shadow_color = Color(0, 0, 0, 0.4)
 	style.shadow_size = 8
 	_panel.add_theme_stylebox_override("panel", style)
-	var column := VBoxContainer.new()
-	column.add_theme_constant_override("separation", 10)
-	_panel.add_child(column)
+	_column = VBoxContainer.new()
+	_column.add_theme_constant_override("separation", 10)
+	_panel.add_child(_column)
 	picture = PICTURE.new()
-	column.add_child(picture)
+	_column.add_child(picture)
 	keys = KEYS.new()
 	keys.visible = false
-	column.add_child(keys)
+	_column.add_child(keys)
+	_title = Label.new()
+	_title.visible = false
+	_title.custom_minimum_size.x = TEXT_WIDTH
+	_title.add_theme_font_override("font", TITLE_FONT)
+	_title.add_theme_font_size_override("font_size", 22)
+	_title.add_theme_color_override("font_color", PALETTE.KEY_GOLD)
+	_column.add_child(_title)
 	_label = Label.new()
 	_label.custom_minimum_size.x = TEXT_WIDTH
 	_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	_label.add_theme_font_override("font", TITLE_FONT)
 	_label.add_theme_font_size_override("font_size", 17)
 	_label.add_theme_color_override("font_color", PALETTE.INK)
-	column.add_child(_label)
+	_column.add_child(_label)
 	_footer = Label.new()
 	_footer.add_theme_font_size_override("font_size", 11)
 	_footer.add_theme_color_override("font_color", PALETTE.FAINT)
-	column.add_child(_footer)
+	_column.add_child(_footer)
 	add_child(_panel)
 
 
@@ -88,6 +99,8 @@ func play(next_step: Dictionary) -> void:
 	active = true
 	_started_ms = Time.get_ticks_msec()
 	_label.text = str(step.get("text", ""))
+	_set_title(str(step.get("title", "")))
+	_set_preview(str(step.get("preview", "")))
 	picture.visible = bool(step.get("picture", false))
 	picture.set("mutation", float(step.get("mutation", 0.0)))
 	picture.set("threshold", float(step.get("threshold", 30.0)))
@@ -107,9 +120,25 @@ func finish(notify: bool = true) -> void:
 		return
 	active = false
 	visible = false
+	_set_preview("")
 	_release_pause()
 	if notify:
 		step_finished.emit()
+
+
+func _set_title(text: String) -> void:
+	_title.text = text
+	_title.visible = not text.is_empty()
+
+
+# A live enemy model above the text; freed with the step so its viewport stops rendering.
+func _set_preview(scene_path: String) -> void:
+	if is_instance_valid(_preview):
+		_preview.queue_free()
+	_preview = PREVIEW.build(scene_path) if not scene_path.is_empty() else null
+	if _preview != null:
+		_column.add_child(_preview)
+		_column.move_child(_preview, 0)
 
 
 func _is_click() -> bool:
