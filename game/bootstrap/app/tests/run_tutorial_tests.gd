@@ -33,7 +33,7 @@ func _run() -> void:
 	var director := DIRECTOR.new()
 	root.add_child(director)
 	var seen := PROGRESS.new(SAVE)
-	for first_run in ["move", "shoot", "look", "one_way", "roll", "explore", "crates", "weapons", "armor"]:
+	for first_run in ["move", "shoot", "look", "one_way", "roll", "explore", "crates", "weapons", "armor", "mutation_scale", "active_skill", "passive_skill", "control_loss", "gas_mask", "open_menu"]:
 		seen.mark_done(first_run) # the first-run chain has its own test
 	director.call("configure", actor, hud, tree_ui, PROGRESS.new(SAVE))
 	var overlay: Node = director.get("overlay")
@@ -43,7 +43,10 @@ func _run() -> void:
 	runtime.get("_domain").mutation = 5.0
 	runtime.call("absorb_mutagen", 0.01)
 	await process_frame
-	_check(director.get("current") == "mutation_scale" and bool(overlay.get("active")), "Mutation 5 starts the scale lesson")
+	_check(not bool(overlay.get("active")), "Growing mutation no longer starts a lesson by itself")
+	director.call("play", "mutation_scale")
+	await process_frame
+	_check(director.get("current") == "mutation_scale" and bool(overlay.get("active")), "A quest starts the scale lesson")
 	_check(paused, "A click step pauses the game")
 	_check(not hud.call("tutorial_rect", "mutation").size.is_zero_approx(), "The scale lesson spotlights the HUD bar")
 	await _advance(overlay)
@@ -61,6 +64,7 @@ func _run() -> void:
 
 	runtime.get("_domain").mutation = 25.0
 	runtime.call("absorb_mutagen", 0.01)
+	director.call("play", "active_skill")
 	await process_frame
 	_check(director.get("current") == "active_skill" and bool(tree_ui.call("is_tree_open")), "A first skill point opens the tree lesson")
 	await process_frame
@@ -77,24 +81,10 @@ func _run() -> void:
 	_check(str(overlay.get("step").get("objective")) != "", "The kill task then waits as the objective")
 	await _passive_lesson(director, overlay, runtime)
 
-	tree_ui.call("close_tree")
-	runtime.get("_domain").mutation = 40.0
-	runtime.get("_domain").control_loss_remaining = 2.0
-	runtime.get("_domain").active_control_loss_stage = 1
-	runtime.call("absorb_mutagen", 0.0)
-	await process_frame
-	_check(director.get("current") == "control_loss" or PROGRESS.new(SAVE).is_done("control_loss") == false, "Control loss starts its lesson")
-	await _advance(overlay)
-	_check(str(overlay.get("step").get("mode")) == "wait", "Then it waits for the antidote")
-	actor.call("use_antidote")
-	await process_frame
-	await process_frame
-	await _advance(overlay)
-	await _menu_lessons(director, overlay, hud, tree_ui)
+	await _control_loss_lessons(director, overlay, hud, tree_ui, runtime, actor)
 	_check(not paused, "Nothing stays paused")
 
 	await _door_passage(director, actor)
-	await _key_pointer(director, overlay)
 	await _resume_after_loss(director, overlay)
 	await _replay_level(director, overlay)
 	await _mask_hud(hud, runtime)
@@ -113,9 +103,32 @@ func _run() -> void:
 	quit(failures)
 
 
+func _control_loss_lessons(director: Node, overlay: Node, hud: Node, tree_ui: Node, runtime: Node, actor: Node) -> void:
+	tree_ui.call("close_tree")
+	runtime.get("_domain").mutation = 40.0
+	runtime.get("_domain").control_loss_remaining = 2.0
+	runtime.get("_domain").active_control_loss_stage = 1
+	runtime.call("absorb_mutagen", 0.0)
+	await process_frame
+	_check(director.get("current") == "", "Losing control no longer starts a lesson by itself")
+	director.call("play", "control_loss")
+	await process_frame
+	_check(director.get("current") == "control_loss", "A quest starts the control loss lesson")
+	await _advance(overlay)
+	_check(str(overlay.get("step").get("mode")) == "wait", "Then it waits for the antidote")
+	actor.call("use_antidote")
+	await process_frame
+	await process_frame
+	await _advance(overlay)
+	director.call("play", "gas_mask")
+	director.call("play", "open_menu")
+	await _menu_lessons(director, overlay, hud, tree_ui)
+
+
 func _passive_lesson(director: Node, overlay: Node, runtime: Node) -> void:
 	runtime.get("_domain").mutation = 29.99
 	runtime.call("absorb_mutagen", 0.002)
+	director.call("play", "passive_skill")
 	await process_frame
 	await process_frame
 	_check(director.get("current") == "passive_skill", "The next point starts the passive lesson")
@@ -128,7 +141,7 @@ func _passive_lesson(director: Node, overlay: Node, runtime: Node) -> void:
 
 
 func _menu_lessons(director: Node, overlay: Node, hud: Node, tree_ui: Node) -> void:
-	_check(director.get("current") == "gas_mask", "After the first antidote the gas mask lesson comes next")
+	_check(director.get("current") == "gas_mask", "The gas mask lesson plays when asked")
 	_check(not hud.call("tutorial_rect", "gas_mask").size.is_zero_approx(), "It spotlights the gas mask icon")
 	await _advance(overlay)
 	_check(director.get("current") == "open_menu", "Then the M menu lesson follows")
@@ -182,30 +195,6 @@ func _door_passage(director: Node, actor: Node3D) -> void:
 	door.free()
 
 
-# "Find another way" becomes the active objective and the key pointer goes away.
-func _key_pointer(director: Node, overlay: Node) -> void:
-	var script := GDScript.new()
-	script.source_code = "extends Node\nvar current_level := \"tutorial_lvl\"\nvar hint := Callable()\nfunc set_tutorial_hint(target: Callable) -> void:\n\thint = target\n"
-	script.reload()
-	var host := Node.new()
-	host.set_script(script)
-	var key := Node3D.new()
-	key.add_to_group("mission_key")
-	root.add_child(key)
-	director.set("_host", host)
-	director.call("_begin_key_hunt")
-	_check(host.get("hint").is_valid(), "The key pointer shows while the key is being hunted")
-	director.get("_finished").erase("one_way")
-	director.call("request", "one_way")
-	_check(director.get("current") == "one_way" and not host.get("hint").is_valid(), "Find another way removes the key pointer")
-	director.set("_steps", [])
-	overlay.call("finish", true) # no steps left: the lesson ends
-	director.set("_host", null)
-	director.set("_key_hunt", false)
-	key.free()
-	host.free()
-
-
 # A control loss cuts a lesson short: afterwards it goes on from the step it stopped at, not from its intro.
 func _resume_after_loss(director: Node, overlay: Node) -> void:
 	var script := GDScript.new()
@@ -216,10 +205,10 @@ func _resume_after_loss(director: Node, overlay: Node) -> void:
 	director.set("_host", host)
 	for lesson in ["open_menu", "control_loss"]:
 		director.get("_finished").erase(lesson)
-	director.call("request", "open_menu")
+	director.call("play", "open_menu")
 	await _advance(overlay)
 	_check(str(overlay.get("step").get("mode")) == "wait", "The menu lesson is waiting for M")
-	director.call("request", "control_loss")
+	director.call("play", "control_loss")
 	_check(director.get("current") == "control_loss", "Losing control takes over")
 	director.set("_steps", [])
 	overlay.call("finish", true)
@@ -231,26 +220,16 @@ func _resume_after_loss(director: Node, overlay: Node) -> void:
 	host.free()
 
 
-# On tutorial_lvl a lesson shows again even though the saved flags say it was seen.
+# A lesson started by a quest shows again even though the saved flags say it was seen.
 func _replay_level(director: Node, overlay: Node) -> void:
-	var host := Node.new()
-	host.set_script(GDScript.new())
-	director.set("_host", host)
-	director.call("request", "gas_mask")
-	_check(director.get("current") == "", "Another level keeps a seen lesson hidden")
-	host.free()
-	var level := Node.new()
-	var script := GDScript.new()
-	script.source_code = "extends Node\nvar current_level := \"tutorial_lvl\"\n"
-	script.reload()
-	level.set_script(script)
-	director.set("_host", level)
 	director.get("_finished").erase("gas_mask")
 	director.call("request", "gas_mask")
-	_check(director.get("current") == "gas_mask", "tutorial_lvl replays a lesson already marked seen")
+	_check(director.get("current") == "", "A plain request keeps a seen lesson hidden")
+	director.call("play", "gas_mask")
+	_check(director.get("current") == "gas_mask", "A quest replays a lesson already marked seen")
+	_check(not bool(director.call("is_finished", "gas_mask")), "The lesson is not finished while it plays")
 	await _advance(overlay)
-	director.set("_host", null)
-	level.free()
+	_check(bool(director.call("is_finished", "gas_mask")), "The lesson is finished once its steps are done")
 
 
 func _mask_hud(hud: Node, runtime: Node) -> void:

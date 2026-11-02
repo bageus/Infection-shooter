@@ -13,14 +13,16 @@ func _init() -> void:
 
 
 func _run() -> void:
-	_expect(POSE.direction_at(POSE.KICK, "RightUpLeg", 0.5).z > 0.9, "The kick swings the right thigh forward.")
-	_expect(POSE.direction_at(POSE.KICK, "RightUpLeg", 0.3).y > 0.3, "The kick chambers the knee above the hip.")
-	_expect(POSE.direction_at(POSE.KICK, "RightLeg", 0.3).y < -0.9, "The shin hangs under the raised knee in the chamber.")
-	_expect(POSE.direction_at(POSE.KICK, "RightLeg", 0.45).z > 0.9, "The shin drives the foot forward at the strike.")
-	_expect(POSE.direction_at(POSE.KICK, "RightFoot", 0.45).y > 0.9, "The toes pull up so the sole pushes forward.")
-	_expect(POSE.direction_at(POSE.KICK, "RightLeg", 0.72).y < -0.9, "The leg re-chambers before it comes down.")
-	_expect(is_equal_approx(POSE.drive_at(POSE.KICK_IMPACT / POSE.KICK_SECONDS + 0.02), 1.0) and POSE.drive_at(0.0) == 0.0 and POSE.drive_at(1.0) == 0.0, "The hips drive in fully at the strike and settle back.")
-	_expect(POSE.direction_at(POSE.KICK, "RightUpLeg", 1.0).is_equal_approx(Vector3.DOWN), "The leg is back at rest when the kick ends.")
+	var impact: float = POSE.KICK_IMPACT / POSE.KICK_SECONDS
+	_expect(POSE.direction_at(POSE.KICK, "LeftUpLeg", impact).z > 0.9, "The kick swings the rear (left) thigh forward.")
+	_expect(POSE.direction_at(POSE.KICK, "LeftUpLeg", 0.35).y > 0.2, "The kick chambers the knee above the hip.")
+	_expect(POSE.direction_at(POSE.KICK, "LeftLeg", 0.24).y < -0.7, "The shin hangs under the knee in the chamber.")
+	_expect(POSE.direction_at(POSE.KICK, "LeftLeg", impact).z > 0.9, "The shin drives the foot forward at the strike.")
+	_expect(POSE.direction_at(POSE.KICK, "LeftFoot", impact).y > 0.9, "The toes pull up so the sole pushes forward.")
+	_expect(POSE.direction_at(POSE.KICK, "LeftUpLeg", 1.0).y < -0.7, "The leg comes back down when the kick ends.")
+	_expect(POSE.direction_at(POSE.KICK, "RightUpLeg", 0.5) == Vector3.ZERO, "The standing leg is turned, not aimed.")
+	_expect(POSE.sample(POSE.KICK_DATA.KICK_HIPS, impact).z > 0.2, "The hips travel forward behind the kick.")
+	_expect(POSE.sample(POSE.KICK_DATA.KICK_HIPS, 0.0) == Vector3.ZERO, "The hips start where the clip is.")
 	_expect(POSE.direction_at(POSE.PUNCH, "LeftArm", 0.55).z > 0.9, "The jab extends the left arm.")
 	_expect(POSE.direction_at(POSE.PUNCH, "RightArm", 0.5) == Vector3.ZERO, "The jab leaves the right arm alone.")
 	var character := CharacterBody3D.new()
@@ -36,11 +38,14 @@ func _run() -> void:
 	_expect(driver.play_strike(&"wave") == 0.0, "An unknown strike kind plays nothing.")
 	_expect(driver.play_strike(POSE.KICK) > 0.0 and driver.is_striking(), "The kick plays on the soldier skeleton.")
 	var skeleton: Skeleton3D = driver.strike.get_skeleton()
-	var foot := skeleton.find_bone("RightFoot")
-	var rest_z := skeleton.get_bone_global_pose(foot).origin.z
-	driver.strike.set("_elapsed", 0.25 * POSE.KICK_SECONDS)
+	var foot := skeleton.find_bone("LeftFoot")
 	await process_frame
-	_expect(skeleton.get_bone_global_pose(foot).origin.z > rest_z + 0.1, "The right foot is thrown forward at the strike.")
+	var rest_z := skeleton.get_bone_global_pose(foot).origin.z
+	driver.strike.set("_elapsed", POSE.KICK_IMPACT)
+	await process_frame
+	driver.strike.set("_elapsed", POSE.KICK_IMPACT)
+	await process_frame
+	_expect(driver.strike.kick_foot.z > rest_z + 0.3, "The left foot is thrown forward at the strike.")
 	await create_timer(0.7).timeout
 	_expect(not driver.is_striking(), "The strike ends on its own.")
 	print("strike pose failures: ", failures)

@@ -15,6 +15,7 @@ var mount_options: Node
 const LOOT_OPTIONS := preload("res://game/bootstrap/app/planning_loot_options.gd")
 const DOOR_OPTIONS := preload("res://game/bootstrap/app/planning_door_options.gd")
 const ROOM_OPTIONS := preload("res://game/bootstrap/app/planning_room_options.gd")
+const QUEST_PANEL := preload("res://game/bootstrap/app/quest/quest_panel.gd")
 const GROUP_TEMPLATES := preload("res://game/bootstrap/app/planning_group_templates.gd")
 var loot_options: Node
 const TARGET_OPTIONS := preload("res://game/bootstrap/app/planning_target_options.gd")
@@ -24,6 +25,7 @@ var fruit_options: Node
 var door_options: Node
 var room_options: Node
 var group_templates: Node
+var quest_panel: Node
 const FLOOR_SIZE := preload("res://game/bootstrap/app/planning_floor_size.gd")
 var floor_size: Node
 const SPAWN_OPTIONS := preload("res://game/bootstrap/app/planning_spawn_options.gd")
@@ -131,6 +133,9 @@ func setup_controls() -> void:
 	group_templates = GROUP_TEMPLATES.new()
 	add_child(group_templates)
 	group_templates.setup(session, objects)
+	quest_panel = QUEST_PANEL.new()
+	add_child(quest_panel)
+	quest_panel.setup(session)
 	floor_size = FLOOR_SIZE.new()
 	add_child(floor_size)
 	floor_size.setup(session)

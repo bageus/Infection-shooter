@@ -200,8 +200,9 @@ func set_tutorial_objective(text: String) -> void:
 
 
 func _set_objective_text() -> void:
-	var fallback := tr("objectiveFireExit" if _has_key else "objectiveFindKey")
-	(_objective.get_child(0) as Label).text = _tutorial_objective if not _tutorial_objective.is_empty() else fallback
+	# The banner shows only the quest the map's quest list is playing; without one it is hidden.
+	(_objective.get_child(0) as Label).text = _tutorial_objective
+	_objective.visible = not _tutorial_objective.is_empty()
 	_fit_banners()
 
 

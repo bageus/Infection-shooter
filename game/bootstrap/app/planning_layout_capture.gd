@@ -1,6 +1,7 @@
 extends RefCounted
 ## One DTO projection for synchronous persistence and staged named-map snapshots.
 const SURFACE_SETTINGS := preload("res://game/bootstrap/app/planning_surface_decals.gd")
+const QUESTS := preload("res://game/bootstrap/app/quest/quest_store.gd")
 const FLOOR_SIZE := preload("res://game/bootstrap/app/planning_floor_size.gd")
 const TARGET := preload("res://game/presentation/office_floor/public/tutorial_target.gd")
 const DOOR_OPTIONS := preload("res://game/bootstrap/app/planning_door_options.gd")
@@ -101,11 +102,11 @@ static func collect(objects: Node, nodes: Array, include_player: bool = true) ->
 	var data := {"version": 8, "objects": records}
 	var settings := SURFACE_SETTINGS.capture(objects.session)
 	if not settings.is_empty(): data["surface_decals_v1"] = settings
+	QUESTS.add_to(objects.session, data)
 	var floor_size := FLOOR_SIZE.capture(objects.session)
 	if not floor_size.is_empty(): data["floor_size_v1"] = floor_size
 	preload("res://game/bootstrap/app/planning_biomass_bake.gd").capture(objects.session, data)
 	return data
-
 
 
 static func collect_async(objects: Node, tree: SceneTree, progress: Callable, alive: Callable) -> Dictionary:

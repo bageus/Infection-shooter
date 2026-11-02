@@ -11,6 +11,12 @@ static func error(data: Dictionary) -> String:
 		return "invalid floor_biomass_v1"
 	if data.has("surface_decals_v1") and not SURFACE_CONFIG.valid(data.surface_decals_v1):
 		return "invalid surface_decals_v1"
+	if data.has("quests_v1"):
+		var quest_error: String = preload("res://game/bootstrap/app/quest/quest_model.gd").error(data.quests_v1)
+		if not quest_error.is_empty():
+			return quest_error
+	if data.has("level_chain_v1") and not data.level_chain_v1 is Dictionary:
+		return "invalid level_chain_v1"
 	if data.has("floor_size_v1") and not preload("res://game/bootstrap/app/planning_floor_size.gd").valid(data.floor_size_v1):
 		return "invalid floor_size_v1"
 	if not data.get("objects") is Array:

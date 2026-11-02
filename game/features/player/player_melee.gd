@@ -91,15 +91,20 @@ func _kick_impact() -> void:
 	query.collision_mask = OBJECT_MASK
 	query.exclude = [player.get_rid()]
 	var seen := {}
+	var nearest_crate: Node3D = null
 	for hit in player.get_world_3d().direct_space_state.intersect_shape(query, OBJECT_QUERY_LIMIT):
 		var body := hit.get("collider") as Node3D
 		if body == null or seen.has(body.get_instance_id()) or body is CharacterBody3D:
 			continue
 		seen[body.get_instance_id()] = true
 		if body.has_method("has_loot") and bool(body.call("has_loot")) and body.has_method("break_by_strike"):
-			body.call("break_by_strike", body.global_position, forward)
+			if nearest_crate == null or body.global_position.distance_squared_to(player.global_position) < nearest_crate.global_position.distance_squared_to(player.global_position):
+				nearest_crate = body
 		elif body is RigidBody3D and not (body as RigidBody3D).freeze and not _is_creature(body):
 			_throw(body as RigidBody3D, player.global_position)
+	# One kick breaks the nearest crate only; a crowd of crates takes one kick each.
+	if nearest_crate != null:
+		nearest_crate.call("break_by_strike", nearest_crate.global_position, forward)
 
 
 # Flings a loose item away from the character; heavy ones barely move.

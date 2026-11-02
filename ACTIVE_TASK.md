@@ -7,6 +7,8 @@ owner: AI
 updated: 2026-10-18
 ---
 
+02.11.2026 — поручение владельца Vadim (анимация удара): удар ногой на C взят из FBX «Standing Melee Attack Kick Ver. 1» — ноги, поворот и ход бёдер, корпус и опорная нога запечены в kick_clip_data.gd, руки остаются в своей позе. Запись бьёт правой ногой из стойки с левой ногой вперёд, а у героя вперёд правая нога, поэтому анимация отзеркалена: бьёт задняя левая нога. Длительность 0.6 с, удар на 0.27 с (player_melee IMPACT_DELAY не менялся). Владелец: features.character_animation (strike_pose.gd, kick_clip_data.gd, тест run_strike_pose_tests). Скриншоты: /mnt/project-files/kick_review/ (kick_fbx_before/after). Зависимости/policy/DTO без изменений. T004/Phase1 прежние.
+
 02.11.2026 — поручение владельца Vadim (звук ресепшена): реплика «Векрион будущее» у стойки ресепшена убрана из ambient_prop_sounds.gd (стойка больше не звучит). Тест run_ambient_prop_sounds_tests обновлён. Проверено: run_ambient_prop_sounds_tests, run_sound_event_tests PASS; validate_* PASS. Владелец: presentation.office_floor. Зависимости/policy/DTO без изменений. T004/Phase1 прежние.
 
 01.11.2026 — поручение владельца Vadim (поправка HUD): плашка текущего задания («Исследуйте уровень») обрезалась у левого края, когда текст был длиннее экрана (баннер центрировался по минимальной ширине без ограничения). Теперь длинный текст переносится по ширине экрана (prototype_hud.gd, _fit_banners), пересчёт при изменении окна. Проверено: run_tutorial_tests, run_ui_translation_tests, run_first_run_tutorial_tests PASS; validate_source_size, validate_architecture, validate_scene_resources PASS; скриншот длинной плашки в пределах экрана. Владелец: presentation.prototype_hud. Зависимости/policy/DTO без изменений. T004/Phase1 прежние.
