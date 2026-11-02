@@ -245,7 +245,9 @@ func restore_authored() -> bool:
 		objects.clear_layout(false, true)
 	else:
 		# The repair re-applies only the missing objects; the map's quests and floor size must survive it.
-		var repair := {"version": authored_layout.get("version", 7), "objects": missing, "floor_size_v1": authored_layout.get("floor_size_v1", [])}
+		var repair := {"version": authored_layout.get("version", 7), "objects": missing}
+		if authored_layout.has("floor_size_v1"):
+			repair["floor_size_v1"] = authored_layout["floor_size_v1"]
 		QUESTS.add_to(session, repair)
 		objects._apply_layout_data(repair)
 	objects.keep_on_clear = {}
