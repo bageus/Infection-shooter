@@ -1,6 +1,6 @@
 extends SceneTree
-## With a door still active in the palette, a plain click on an installed door selects it
-## and opens its settings instead of placing another door.
+## Regression: with a door still active in the palette, a plain click over an installed door
+## places the active door. Picking the installed door needs Ctrl+LMB.
 const MAIN := preload("res://game/bootstrap/app/main.tscn")
 const DOOR_PATH := "res://game/presentation/office_floor/public/structural/wall_emergency_door.tscn"
 var failures := 0
@@ -52,9 +52,13 @@ func _run() -> void:
 		# The planner's own input handler, so a headless window's stretch cannot move the click.
 		planner._input(event)
 		await process_frame
-	_check(objects.placed.size() == count, "Clicking an installed door places nothing")
-	_check(objects.selected == door, "Clicking an installed door selects it")
-	_check(planner.controls.door_options.panel.visible, "The door settings open for the installed door")
+	_check(objects.placed.size() == count + 1, "Clicking over an installed door places the active door")
+	_check(objects.selected != door, "Clicking over an installed door does not select the installed door")
+	# The new door is the one placed under the cursor; the installed door keeps its place.
+	_check(is_instance_valid(door) and door.is_inside_tree(), "The installed door stays in the layout")
+	planner.edit_history.undo()
+	await process_frame
+	_check(objects.placed.size() == count, "Undo removes the door placed over the installed one")
 	planner.exit()
 	stage.queue_free()
 	await process_frame
