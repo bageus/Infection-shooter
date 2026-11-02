@@ -19,7 +19,7 @@ func setup(controls: Node) -> void:
 	_controls = controls
 	var ui: Control = controls.session.ui
 	var left := ui.get_node("Panel") as ScrollContainer
-	left.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_SHOW_NEVER
+	left.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
 	left.add_theme_stylebox_override("panel", _style())
 	var box := left.get_node("VBox")
 	box.size_flags_vertical = Control.SIZE_EXPAND_FILL
@@ -49,7 +49,7 @@ func setup(controls: Node) -> void:
 	right.offset_top = 8
 	right.offset_left = -368
 	right.offset_right = -8
-	right.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_SHOW_NEVER
+	right.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
 	right.add_theme_stylebox_override("panel", _style())
 	var right_box := right.get_node("VBox")
 	right_box.custom_minimum_size.x = 0

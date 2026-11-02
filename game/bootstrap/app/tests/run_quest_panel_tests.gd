@@ -63,6 +63,10 @@ func _run() -> void:
 	_check(book.quests[0].type == "find", "A quest moves up")
 	tab.get_node("QuestButtons/RemoveQuest").pressed.emit()
 	_check(book.quests.size() == 1 and list.item_count == 1, "A quest is removed")
+	book.add("lesson", "locked_door")
+	await process_frame
+	_check(tab.get_combined_minimum_size().x <= 320, "Long lesson names never widen the panel (%d)" % tab.get_combined_minimum_size().x)
+	_check(list.text_overrun_behavior == TextServer.OVERRUN_TRIM_ELLIPSIS and list.max_columns == 1, "The list trims long entries instead of scrolling sideways")
 	prop.free()
 	stage.queue_free()
 	await process_frame
