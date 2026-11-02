@@ -7,7 +7,8 @@ const STEP_METERS := 0.8
 
 
 ## `context`: {"idle": seconds since the previous quest ended, "steps": steps since then,
-## "reach": distance to the trigger target or point, INF when there is none}.
+## "reach": distance to the trigger target or point, INF when there is none, "mutation_gain": meter rise
+## since the previous quest ended, "menu_open" and "control_lost": the player's state now}.
 static func trigger_ready(quest: Dictionary, context: Dictionary) -> bool:
 	var trigger: Dictionary = quest.trigger
 	match str(trigger.kind):
@@ -17,6 +18,12 @@ static func trigger_ready(quest: Dictionary, context: Dictionary) -> bool:
 			return float(context.get("steps", 0.0)) >= float(trigger.value)
 		"reach":
 			return float(context.get("reach", INF)) <= NEAR
+		"mutation_rise":
+			return float(context.get("mutation_gain", 0.0)) >= float(trigger.value)
+		"menu_open":
+			return bool(context.get("menu_open", false))
+		"control_lost":
+			return bool(context.get("control_lost", false))
 	return true
 
 

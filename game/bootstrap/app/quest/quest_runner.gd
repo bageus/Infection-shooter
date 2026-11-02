@@ -24,6 +24,7 @@ var _walked := 0.0
 var _walked_at_start := 0.0
 var _last_position := Vector3.INF
 var _targets: Array = []
+var _mutation_at_start := 0.0
 var _trigger_node: Node3D
 var _was_planning := false
 
@@ -39,6 +40,7 @@ func configure(quest_book: Node, hero: Node3D, interface: Node, lessons: Node, o
 
 func reset() -> void:
 	index = 0
+	_point_floor(Callable())
 	_begin_quest()
 	_set_objective("")
 	BOOK.show_markers(get_tree(), [])
@@ -93,6 +95,7 @@ func _begin_quest() -> void:
 	phase = Phase.TRIGGER
 	_idle = 0.0
 	_walked_at_start = _walked
+	_mutation_at_start = _mutation()
 	_targets = []
 	_trigger_node = null
 	if is_finished() or not is_inside_tree():
@@ -122,7 +125,23 @@ func _trigger_context() -> Dictionary:
 	elif quest.trigger.point is Array and (quest.trigger.point as Array).size() == 2:
 		var point: Array = quest.trigger.point
 		reach = _flat(Vector3(float(point[0]), 0.0, float(point[1])))
-	return {"idle": _idle, "steps": _steps_since_start(), "reach": reach}
+	return {"idle": _idle, "steps": _steps_since_start(), "reach": reach, "mutation_gain": _mutation() - _mutation_at_start,
+			"menu_open": _menu_open(), "control_lost": _control_lost()}
+
+
+func _mutation() -> float:
+	var runtime: Variant = player.get("infection_runtime") if player != null else null
+	return float(runtime.call("get_mutation")) if runtime != null else 0.0
+
+
+func _control_lost() -> bool:
+	var runtime: Variant = player.get("infection_runtime") if player != null else null
+	return runtime != null and bool(runtime.call("is_control_lost"))
+
+
+func _menu_open() -> bool:
+	var menu: Variant = host.get("mutation_tree_ui") if host != null else null
+	return menu != null and bool(menu.call("is_tree_open"))
 
 
 func _flat(position: Vector3) -> float:
@@ -139,6 +158,8 @@ func _activate() -> void:
 		if node != null:
 			_targets.append(node)
 	BOOK.show_markers(get_tree(), _targets)
+	if bool(quest.get("pointer", false)):
+		_point_floor(_pointer_target)
 	match str(quest.type):
 		"lesson":
 			if director != null:
@@ -175,10 +196,30 @@ func _alive(node: Variant) -> bool:
 
 func _finish_quest() -> void:
 	phase = Phase.DONE
+	_point_floor(Callable())
 	_set_objective("")
 	BOOK.show_markers(get_tree(), [])
 	index += 1
 	_begin_quest()
+
+
+## The floor chevrons lead to the nearest target still standing; an invalid callable turns them off.
+func _point_floor(target: Callable) -> void:
+	if host != null and host.has_method("set_tutorial_hint"):
+		host.call("set_tutorial_hint", target)
+
+
+func _pointer_target() -> Vector3:
+	var best := Vector3.INF
+	var best_distance := INF
+	for node in _targets:
+		if _alive(node):
+			var distance := _flat((node as Node3D).global_position)
+			if distance < best_distance:
+				best_distance = distance
+				var position := (node as Node3D).global_position
+				best = Vector3(position.x, 0.0, position.z)
+	return best
 
 
 func _set_objective(text: String) -> void:

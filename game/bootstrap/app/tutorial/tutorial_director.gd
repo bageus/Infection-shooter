@@ -195,6 +195,8 @@ func _build_steps(lesson: String) -> Array:
 					func() -> bool: return _look_seconds >= LOOK_SECONDS)
 		"one_way":
 			return [_click(TEXT.t("tutOneWay"), [])] + _task(TEXT.t("tutOneWayFind"), TEXT.t("objOneWay"), [], "cycle", _through_any_door())
+		"locked_door":
+			return [_click(TEXT.t("tutLockedDoor"), [])]
 		"roll":
 			return _task(TEXT.t("tutRoll") % KEYS.binding("roll"), TEXT.t("objRoll") % KEYS.binding("roll"), KEYS.row(["roll"]), "all", func() -> bool: return _rolled)
 		"sprint":

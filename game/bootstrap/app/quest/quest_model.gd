@@ -13,10 +13,12 @@ const TYPE_LABELS := {
 	"pickup": "Подобрать", "message": "Показать сообщение", "lesson": "Запустить обучение",
 }
 # Trigger: what starts the quest. "previous" means right after the earlier quest is complete.
-const TRIGGERS: Array[String] = ["previous", "time", "steps", "reach"]
+const TRIGGERS: Array[String] = ["previous", "time", "steps", "reach", "mutation_rise", "menu_open", "control_lost"]
 const TRIGGER_LABELS := {
 	"previous": "Выполнено предыдущее задание", "time": "Время (секунды)",
 	"steps": "Шаги (количество)", "reach": "Достижение цели или места",
+	"mutation_rise": "Заполнение шкалы мутации (на сколько поднялась)", "menu_open": "Появление меню мутации у игрока",
+	"control_lost": "Потеря контроля",
 }
 # Completion: when the quest counts as done.
 const COMPLETIONS: Array[String] = ["reach", "destroy", "collect", "steps"]
@@ -34,7 +36,8 @@ const LESSONS: Array[Array] = [
 	["gas_mask", "Базовое обучение: противогаз"], ["antidote", "Базовое обучение: антидот"],
 	["crates", "Базовое обучение: разрушение ящиков в ближнем бою"], ["dna", "Базовое обучение: ДНК"],
 	["armor", "Базовое обучение: броня"],
-	["weapons", "Базовое обучение: оружие 1-3"], ["one_way", "Базовое обучение: односторонние двери"],
+	["weapons", "Базовое обучение: оружие 1-3"], ["one_way", "Базовое обучение: двери, открывающиеся с одной стороны"],
+	["locked_door", "Базовое обучение: двери, запертые на ключ"],
 	["explore", "Базовое обучение: исследование уровня"], ["control_loss", "Базовое обучение: потеря контроля и антидот"],
 	["open_menu", "Базовое обучение: меню мутаций"],
 ]
@@ -64,7 +67,7 @@ static func make(type: String, lesson: String = "") -> Dictionary:
 		"type": type, "lesson": lesson if type == "lesson" else "",
 		"trigger": {"kind": "previous", "value": 0.0, "target": "", "point": []},
 		"targets": [], "complete": {"kind": DEFAULT_COMPLETION[type], "value": 0.0},
-		"delay": 0.0, "text": preset_text(type, lesson),
+		"delay": 0.0, "text": preset_text(type, lesson), "pointer": false,
 	}
 
 
@@ -107,6 +110,7 @@ static func normalize(raw: Variant) -> Dictionary:
 	quest.complete = {"kind": done if done in COMPLETIONS or done.is_empty() else str(quest.complete.kind),
 			"value": clampf(float(complete.get("value", 0.0)), 0.0, 100000.0)}
 	quest.delay = clampf(float(source.get("delay", 0.0)), 0.0, 3600.0)
+	quest.pointer = bool(source.get("pointer", false))
 	quest.text = str(source.get("text", quest.text)).left(MAX_TEXT)
 	return quest
 
