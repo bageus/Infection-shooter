@@ -485,6 +485,7 @@ func take_melee_hit(damage: float, hit_position: Vector3, direction: Vector3) ->
 	take_projectile_hit(damage, hit_position, Vector3.ZERO, direction, "MELEE")
 
 func break_by_strike(hit_position: Vector3, direction: Vector3) -> void:
+	print("KICKDBG break_by_strike ", model_path.get_file(), " broken=", _damage.broken, " visible=", _visual.visible if _visual != null else "-")
 	if _damage.shatter():
 		_release_loot()
 		_collapse_box(hit_position, direction)
