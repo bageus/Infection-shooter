@@ -85,7 +85,7 @@ static func find_object(tree: SceneTree, object_id: String) -> Node3D:
 static func ensure_id(node: Node) -> String:
 	var id := str(node.get_meta(ID_META, ""))
 	if id.is_empty():
-		id = "object_%d" % Time.get_ticks_usec()
+		id = "object_%d_%d" % [Time.get_ticks_usec(), randi()]
 		node.set_meta(ID_META, id)
 	return id
 

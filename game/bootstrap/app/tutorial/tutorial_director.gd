@@ -35,6 +35,7 @@ var _started_mutation := 0.0
 var _host: Node
 var _finished := {}
 var _forced := {}
+var _scopes := {} # lesson -> the nodes its quest picked as targets; absent for the first-run lessons
 var _resume := {} # lesson -> steps left when a control loss cut it short
 var _walked := 0.0
 var _walked_at_end := 0.0
@@ -66,7 +67,9 @@ func _seen(lesson: String) -> bool:
 
 
 ## Starts a lesson on behalf of a quest, even if it was seen before.
-func play(lesson: String) -> void:
+func play(lesson: String, targets: Variant = null) -> void:
+	if targets is Array:
+		_scopes[lesson] = targets
 	_forced[lesson] = true
 	_finished.erase(lesson)
 	request(lesson)
@@ -147,6 +150,8 @@ func _start_next() -> void:
 
 # Each stage shows only its own markers, the moment the stage starts.
 func _reveal_targets(lesson: String) -> void:
+	if _scopes.has(lesson):
+		return # the quest already revealed exactly its own targets
 	match lesson:
 		"move":
 			TARGET.reveal(get_tree(), ["door"])
@@ -168,6 +173,7 @@ func _next_step() -> void:
 
 func _end_lesson() -> void:
 	var lesson := current
+	_scopes.erase(lesson)
 	_finished[lesson] = true
 	_forced.erase(lesson)
 	_walked_at_end = _walked
@@ -182,14 +188,14 @@ func _build_steps(lesson: String) -> Array:
 	var antidote_key := KEYS.binding("antidote")
 	match lesson:
 		"move":
-			var doors := TARGET.standing(get_tree(), "door")
+			var doors := _standing(lesson, "door")
 			if doors.is_empty():
 				return _task(TEXT.t("tutMoveFree"), TEXT.t("objMoveFree"), KEYS.movement(), "cycle", func() -> bool: return _steps_since_last_lesson() >= 5.0)
 			var door: Node3D = doors[0]
 			return _task(TEXT.t("tutMove"), TEXT.t("objMove"), KEYS.movement(), "cycle", _through([door]))
 		"shoot":
 			return _task(TEXT.t("tutShoot") % KEYS.binding("fire"), TEXT.t("objShoot"), KEYS.row(["fire"]), "all",
-					func() -> bool: return TARGET.standing(get_tree(), "bottle").is_empty())
+					func() -> bool: return _standing(lesson, "bottle").is_empty())
 		"reload":
 			return _task(TEXT.t("tutReload") % KEYS.binding("reload"), TEXT.t("objReload") % KEYS.binding("reload"), KEYS.row(["reload"]), "all", func() -> bool: return _reloaded)
 		"look":
@@ -197,7 +203,7 @@ func _build_steps(lesson: String) -> Array:
 					KEYS.row(["camera_left", "camera_right"]), "cycle",
 					func() -> bool: return _look_seconds >= LOOK_SECONDS)
 		"one_way":
-			return [_click(TEXT.t("tutOneWay"), [])] + _task(TEXT.t("tutOneWayFind"), TEXT.t("objOneWay"), [], "cycle", _through_any_door())
+			return [_click(TEXT.t("tutOneWay"), [])]
 		"locked_door":
 			return [_click(TEXT.t("tutLockedDoor"), [])]
 		"roll":
@@ -205,10 +211,10 @@ func _build_steps(lesson: String) -> Array:
 		"sprint":
 			return (_task(TEXT.t("tutSprint") % KEYS.binding("sprint"), TEXT.t("objSprint") % KEYS.binding("sprint"), KEYS.row(["sprint"]), "all", func() -> bool: return _sprinted_seconds >= 0.5))
 		"explore":
-			return _task(TEXT.t("tutExplore"), TEXT.t("objExplore"), [], "cycle", func() -> bool: return _crate_in_sight() or TARGET.standing(get_tree(), "crate").is_empty())
+			return _task(TEXT.t("tutExplore"), TEXT.t("objExplore"), [], "cycle", func() -> bool: return _crate_in_sight(lesson) or _standing(lesson, "crate").is_empty())
 		"crates":
 			return _task(TEXT.t("tutCrates") % KEYS.binding("melee"), TEXT.t("objCrates"), KEYS.row(["melee"]), "all",
-					func() -> bool: return TARGET.standing(get_tree(), "crate").is_empty())
+					func() -> bool: return _standing(lesson, "crate").is_empty())
 		"weapons":
 			return [_click(TEXT.t("tutWeapons") % [KEYS.binding("weapon_1"), KEYS.binding("weapon_2"), KEYS.binding("weapon_3")], [_hud_rect.bind("weapons")])]
 		"armor":
@@ -250,6 +256,14 @@ func _build_steps(lesson: String) -> Array:
 		"gas_mask":
 			return [_click(TEXT.t("tutGasMask") % "TAB", [_hud_rect.bind("gas_mask")])]
 	return []
+
+
+## Flagged objects of one kind still standing; a lesson started by a quest counts only that quest's targets.
+func _standing(lesson: String, kind: String) -> Array[Node]:
+	var found := TARGET.standing(get_tree(), kind)
+	if _scopes.has(lesson):
+		found = found.filter(func(node: Node) -> bool: return node in _scopes[lesson])
+	return found
 
 
 func _click(text: String, targets: Array, requires: Callable = Callable()) -> Dictionary:
@@ -301,13 +315,8 @@ func _through(targets: Array) -> Callable:
 		return false
 
 
-# "Find another way": the player gets through some door (a one-way door's closed side cannot be passed).
-func _through_any_door() -> Callable:
-	return _through(get_tree().get_nodes_in_group("interactive_doors"))
-
-
-func _crate_in_sight() -> bool:
-	for crate: Node3D in TARGET.standing(get_tree(), "crate"):
+func _crate_in_sight(lesson: String) -> bool:
+	for crate: Node3D in _standing(lesson, "crate"):
 		var from: Vector3 = _player.global_position
 		if Vector2(crate.global_position.x - from.x, crate.global_position.z - from.z).length() <= CRATE_SIGHT:
 			return true
