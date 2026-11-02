@@ -197,7 +197,7 @@ func _build_steps(lesson: String) -> Array:
 					KEYS.row(["camera_left", "camera_right"]), "cycle",
 					func() -> bool: return _look_seconds >= LOOK_SECONDS)
 		"one_way":
-			return [_click(TEXT.t("tutOneWay"), [])] + _task(TEXT.t("tutOneWayFind"), TEXT.t("objOneWay"), [], "cycle", _through_any_door())
+			return [_click(TEXT.t("tutOneWay"), [])]
 		"locked_door":
 			return [_click(TEXT.t("tutLockedDoor"), [])]
 		"roll":
@@ -299,11 +299,6 @@ func _through(targets: Array) -> Callable:
 					return true
 				sides[id] = side
 		return false
-
-
-# "Find another way": the player gets through some door (a one-way door's closed side cannot be passed).
-func _through_any_door() -> Callable:
-	return _through(get_tree().get_nodes_in_group("interactive_doors"))
 
 
 func _crate_in_sight() -> bool:
