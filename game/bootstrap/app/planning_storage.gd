@@ -8,6 +8,7 @@ const CAPTURE := preload("res://game/bootstrap/app/planning_layout_capture.gd")
 const MAP_LOAD := preload("res://game/bootstrap/app/planning_map_load.gd")
 const CAMPAIGN := preload("res://game/bootstrap/app/campaign_config.gd")
 const PLATFORM := preload("res://game/infrastructure/platform/public/platform.gd")
+const STARTUP := preload("res://game/bootstrap/app/planning_startup_map.gd")
 const MAP_FILE := preload("res://game/bootstrap/app/planning_map_file.gd")
 const WALL_FIXTURES := preload("res://game/bootstrap/app/planning_wall_fixtures.gd")
 const LAYOUT_LOADER := preload("res://game/bootstrap/app/planning_layout_loader.gd")
@@ -328,9 +329,10 @@ func save_named_map() -> void:
 			return
 	map_name_edit.text = safe_name
 	_remember_level(safe_name)
+	STARTUP.remember(safe_name)
 	_refresh_map_list(safe_name)
 	map_loading = false
-	controls.status.text = "MAP SAVED | " + safe_name + fixtures + _save_notice
+	controls.status.text = "MAP SAVED (the game starts with it) | " + safe_name + fixtures + _save_notice
 
 
 func load_selected_map() -> void:
@@ -409,7 +411,14 @@ func read_startup_layout(recovery_path: String = "") -> Dictionary:
 	if not first.is_empty():
 		_remember_level(campaign.levels(PLATFORM.detect_id())[0])
 		return MAP_FILE.read(first)
+	if recovery_path.is_empty() and _startup_map_exists():
+		_remember_level(STARTUP.map_name())
+		return MAP_FILE.read(_map_path(STARTUP.map_name()))
 	return MAP_FILE.startup(SAVE_PATH, DEFAULT_MAP_PATH) if recovery_path.is_empty() else MAP_FILE.read(recovery_path)
+
+
+func _startup_map_exists() -> bool:
+	return not STARTUP.map_name().is_empty() and FileAccess.file_exists(_map_path(STARTUP.map_name()))
 
 
 func _read_layout_file(path: String) -> Dictionary:
@@ -437,6 +446,7 @@ func save_layout() -> void:
 		controls.status.text = "SAVE ERROR | " + str(result.error)
 		return
 	authored_layout = data
+	STARTUP.clear()
 	# Baking the authored scene into the project only makes sense (and is only
 	# possible: res:// is read-only in a build) when running from the editor.
 	if OS.has_feature("editor"):
@@ -464,6 +474,9 @@ func _save_authored_scene(target: String = AUTHORED_SCENE_PATH) -> Error:
 
 func load_layout() -> void:
 	var path := SAVE_PATH if FileAccess.file_exists(SAVE_PATH) else DEFAULT_MAP_PATH
+	if _startup_map_exists():
+		path = _map_path(STARTUP.map_name())
+		_remember_level(STARTUP.map_name())
 	if FileAccess.file_exists(path):
 		var report := _load_layout_from_path(path)
 		if report.has("error"):
