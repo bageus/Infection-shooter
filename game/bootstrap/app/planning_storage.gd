@@ -8,6 +8,7 @@ const CAPTURE := preload("res://game/bootstrap/app/planning_layout_capture.gd")
 const MAP_LOAD := preload("res://game/bootstrap/app/planning_map_load.gd")
 const CAMPAIGN := preload("res://game/bootstrap/app/campaign_config.gd")
 const PLATFORM := preload("res://game/infrastructure/platform/public/platform.gd")
+const QUESTS := preload("res://game/bootstrap/app/quest/quest_store.gd")
 const STARTUP := preload("res://game/bootstrap/app/planning_startup_map.gd")
 const MAP_FILE := preload("res://game/bootstrap/app/planning_map_file.gd")
 const WALL_FIXTURES := preload("res://game/bootstrap/app/planning_wall_fixtures.gd")
@@ -243,7 +244,12 @@ func restore_authored() -> bool:
 	if missing.is_empty():
 		objects.clear_layout(false, true)
 	else:
-		objects._apply_layout_data({"version": authored_layout.get("version", 7), "objects": missing})
+		# The repair re-applies only the missing objects; the map's quests and floor size must survive it.
+		var repair := {"version": authored_layout.get("version", 7), "objects": missing}
+		if authored_layout.has("floor_size_v1"):
+			repair["floor_size_v1"] = authored_layout["floor_size_v1"]
+		QUESTS.add_to(session, repair)
+		objects._apply_layout_data(repair)
 	objects.keep_on_clear = {}
 	SURFACE_SETTINGS.restore(session, authored_layout.get("surface_decals_v1", {}))
 	_remember_marks()

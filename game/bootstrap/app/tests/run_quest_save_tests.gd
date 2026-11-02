@@ -53,6 +53,7 @@ func _run() -> void:
 	_check(STARTUP.map_name() == NAME, "Saving a map makes it the map the game starts with")
 	var startup: Dictionary = storage.read_startup_layout()
 	_check(startup.has("data") and startup.data.get("quests_v1", []).size() == 2, "A fresh start reads the saved map with its quests")
+	await _entering_the_planner_after_play(planner, storage, book)
 	STARTUP.clear()
 	_check(not storage.read_startup_layout().get("data", {}).has("quests_v1"), "Without the pointer the start layout is used")
 	chain.load_dict(old_chain)
@@ -65,6 +66,21 @@ func _run() -> void:
 	else:
 		push_error("Quest save tests failed: %d failure(s)." % failures)
 	quit(failures)
+
+
+# Gameplay removes an object; entering the planner puts it back. That repair must keep the quest list.
+func _entering_the_planner_after_play(planner: Node, storage: Variant, book: Node) -> void:
+	var light := {"scene": "res://game/presentation/office_floor/public/props/planner_light.tscn", "x": 0.0, "y": 2.0, "z": 0.0}
+	var before: Array = planner.objects.placed.duplicate()
+	planner.objects._apply_layout_data({"version": 8, "objects": [light], "quests_v1": [{"type": "message"}, {"type": "find"}]})
+	storage.snapshot_authored()
+	for node: Node in planner.objects.placed.duplicate():
+		if not before.has(node):
+			planner.objects.placed.erase(node)
+			node.queue_free()
+	await process_frame
+	var restored: bool = storage.restore_authored()
+	_check(restored and book.quests.size() == 2, "Entering the planner after play keeps the quest list")
 
 
 func _check(condition: bool, message: String) -> void:
