@@ -234,8 +234,8 @@ func clip_meta(clip_name: StringName, key: StringName, default: Variant = null) 
 
 # Plays faster when the clip's strike lands later than the wind-up allows.
 func _strike_speed(animation: Animation) -> float:
-	var strike := float(animation.get_meta("strike_time", 0.0))
-	return clampf(strike / STRIKE_WINDUP, 1.0, MAX_ATTACK_SPEED) if strike > 0.0 else 1.0
+	var strike_time := float(animation.get_meta("strike_time", 0.0))
+	return clampf(strike_time / STRIKE_WINDUP, 1.0, MAX_ATTACK_SPEED) if strike_time > 0.0 else 1.0
 
 
 # Public animation_events_v1 addition (ADR-0044): plays the dodge clip for

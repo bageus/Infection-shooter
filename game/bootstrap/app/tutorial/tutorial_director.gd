@@ -35,7 +35,6 @@ var _host: Node
 var _finished := {}
 var _forced := {}
 var _resume := {} # lesson -> steps left when a control loss cut it short
-var _antidotes_left := -1
 var _walked := 0.0
 var _walked_at_end := 0.0
 var _last_position := Vector3.INF
@@ -277,9 +276,11 @@ func _wait(text: String, targets: Array, done: Callable, requires: Callable, arr
 func _through(targets: Array) -> Callable:
 	var sides := {}
 	return func() -> bool:
-		for target: Node3D in targets:
-			if not is_instance_valid(target):
+		for raw in targets:
+			# Typed loop variables fail on freed nodes, so check validity before typing.
+			if not is_instance_valid(raw):
 				return true
+			var target: Node3D = raw
 			var frame: Node3D = target.get_node_or_null("DoorController")
 			if frame == null:
 				frame = target

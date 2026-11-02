@@ -128,9 +128,9 @@ func _process(_delta: float) -> void:
 
 func _refresh() -> void:
 	var requires: Callable = step.get("requires", Callable())
-	var ready := not requires.is_valid() or bool(requires.call())
-	visible = ready
-	if not ready:
+	var is_ready := not requires.is_valid() or bool(requires.call())
+	visible = is_ready
+	if not is_ready:
 		_release_pause()
 		return
 	if _is_click() and not get_tree().paused:

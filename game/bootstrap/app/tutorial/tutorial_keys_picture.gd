@@ -15,11 +15,11 @@ var mode := "cycle"
 func show_keys(layout: Array, press_mode: String) -> void:
 	items = layout
 	mode = press_mode
-	var size := Vector2.ZERO
+	var extent := Vector2.ZERO
 	for item: Dictionary in items:
-		size.x = maxf(size.x, (float(item["x"]) + float(item.get("w", 1.0))) * UNIT)
-		size.y = maxf(size.y, (float(item["y"]) + 1.0) * UNIT)
-	custom_minimum_size = size
+		extent.x = maxf(extent.x, (float(item["x"]) + float(item.get("w", 1.0))) * UNIT)
+		extent.y = maxf(extent.y, (float(item["y"]) + 1.0) * UNIT)
+	custom_minimum_size = extent
 	queue_redraw()
 
 
