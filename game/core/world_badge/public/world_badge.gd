@@ -112,17 +112,18 @@ static func key(label: String, height := 0.0) -> Node3D:
 	var badge: Node3D = load(SCRIPT_PATH).new()
 	var key_face := KeyFace.new()
 	key_face.label = label
-	badge.call("_build", key_face, Vector2i(96, 96), true, height)
+	badge.call("_build", key_face, Vector2i(96, 96), true, height, false)
 	return badge
 
 
-static func icon(texture: Texture2D, region: Rect2, tint: Color, height := 0.0) -> Node3D:
+# depth_tested: the badge is hidden by nearer geometry (a character's head) instead of drawn over it.
+static func icon(texture: Texture2D, region: Rect2, tint: Color, height := 0.0, depth_tested := false) -> Node3D:
 	var badge: Node3D = load(SCRIPT_PATH).new()
 	var icon_face := IconFace.new()
 	icon_face.texture = texture
 	icon_face.region = region
 	icon_face.tint = tint
-	badge.call("_build", icon_face, Vector2i(120, 120), false, height)
+	badge.call("_build", icon_face, Vector2i(120, 120), false, height, depth_tested)
 	icon_face.build_icon()
 	return badge
 
@@ -138,7 +139,7 @@ func press_amount() -> float:
 	return (face as KeyFace).press if face is KeyFace else 0.0
 
 
-func _build(new_face: Control, pixels: Vector2i, animated: bool, height: float) -> void:
+func _build(new_face: Control, pixels: Vector2i, animated: bool, height: float, depth_tested: bool) -> void:
 	name = "WorldBadge"
 	position.y = height
 	_animated = animated
@@ -158,7 +159,7 @@ func _build(new_face: Control, pixels: Vector2i, animated: bool, height: float) 
 	_sprite.pixel_size = PIXEL_SIZE
 	_sprite.billboard = BaseMaterial3D.BILLBOARD_ENABLED
 	_sprite.shaded = false
-	_sprite.no_depth_test = true
+	_sprite.no_depth_test = not depth_tested
 	_sprite.render_priority = 10
 	_sprite.texture_filter = BaseMaterial3D.TEXTURE_FILTER_LINEAR
 	add_child(_sprite)

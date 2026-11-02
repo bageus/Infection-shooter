@@ -1,6 +1,7 @@
 extends SceneTree
 const DOOR := preload("res://game/presentation/office_floor/interactive_door.gd")
 const PRESENCE := preload("res://game/presentation/office_floor/door_presence.gd")
+const HINTS := preload("res://game/presentation/office_floor/door_hint_badges.gd")
 class Actor extends CharacterBody3D:
 	var health := 100.0
 
@@ -45,6 +46,7 @@ func _run() -> void:
 	_expect(not presence.occupied(frame), "Actor deletion releases presence")
 	await _test_elevators(stage)
 	await _test_lock_states(stage)
+	await _test_one_way_hint(stage)
 	stage.queue_free()
 	await _settle()
 	print("Door runtime tests: %d failure(s)." % failures)
@@ -94,8 +96,8 @@ func _test_lock_states(stage: Node3D) -> void:
 	await _settle()
 	_expect(keyed.get_lock_state() == DOOR.LOCK_KEY, "Key lock state survives configuration before entering the tree")
 	_expect(keyed.get_node_or_null("LockedDoorIcon") != null, "Key-locked door gets its locked icon")
-	_expect(keyed.get_node("LockedDoorIcon").scale.is_equal_approx(Vector3.ONE * DOOR.LOCK_ICON_SCALE), "Locked icon is 20 percent smaller")
-	_expect(is_equal_approx(keyed.get_node("LockedDoorIcon").position.y, DOOR.LOCK_ICON_HEIGHT), "Locked icon sits at door-centre height")
+	_expect(keyed.get_node("LockedDoorIcon").scale.is_equal_approx(Vector3.ONE * HINTS.SCALE), "Locked icon is 20 percent smaller")
+	_expect(is_equal_approx(keyed.get_node("LockedDoorIcon").position.y, HINTS.HEIGHT), "Locked icon sits at door-centre height")
 	# Standing in front of a locked door (not on its exit side): one cue per approach.
 	player.position = keyed.to_global(Vector3(0, 0, -0.5))
 	keyed.call("_physics_process", .016)
@@ -151,6 +153,47 @@ func _test_lock_states(stage: Node3D) -> void:
 	plain.queue_free()
 	keyed.queue_free()
 	sealed.queue_free()
+	await _settle()
+
+func _test_one_way_hint(stage: Node3D) -> void:
+	var player := Node3D.new()
+	stage.add_child(player)
+	var one_way := DOOR.new()
+	one_way.configure_one_way(true)
+	one_way.one_way_allowed_side = 1.0
+	one_way.configure_player(player)
+	one_way.set_physics_process(false)
+	one_way.position = Vector3(120, 0, 0)
+	stage.add_child(one_way)
+	await _settle()
+	# The passable side is +z; the crossed circle marks the -z side only.
+	player.position = one_way.to_global(Vector3(0, 0, -1.0))
+	one_way.call("_physics_process", .016)
+	var hint := one_way.get_node_or_null("NoEntryIcon")
+	_expect(hint != null and hint.visible, "One-way door shows the no-entry icon on the blocked side")
+	_expect(hint != null and hint.position.z < 0.0, "No-entry icon is drawn toward the player, clear of the door plane")
+	player.position = one_way.to_global(Vector3(0, 0, 1.0))
+	one_way.call("_physics_process", .016)
+	_expect(hint != null and not hint.visible, "No-entry icon is hidden on the passable side")
+	player.position = one_way.to_global(Vector3(0, 0, -1.0))
+	one_way.set("_open_amount", 1.0)
+	one_way.call("_physics_process", .016)
+	_expect(hint != null and not hint.visible, "No-entry icon is hidden while the door is open")
+	one_way.set("_open_amount", 0.0)
+	one_way.call("_physics_process", .016)
+	_expect(hint != null and hint.visible, "No-entry icon returns once the door is shut again")
+	var two_way := DOOR.new()
+	two_way.configure_player(player)
+	two_way.set_physics_process(false)
+	two_way.position = Vector3(124, 0, 0)
+	stage.add_child(two_way)
+	await _settle()
+	player.position = two_way.to_global(Vector3(0, 0, -1.0))
+	two_way.call("_physics_process", .016)
+	_expect(two_way.get_node_or_null("NoEntryIcon") == null, "Two-way door gets no no-entry icon")
+	player.queue_free()
+	one_way.queue_free()
+	two_way.queue_free()
 	await _settle()
 
 func _test_pose(a: Node3D) -> void:

@@ -42,7 +42,10 @@ func _run() -> void:
 	stage.visible = true
 	var icon := BADGE.icon(ICON, Rect2(), Color("dcae4a"), 2.5)
 	stage.add_child(icon)
+	var solid := BADGE.icon(ICON, Rect2(), Color("dcae4a"), 0.5, true)
+	stage.add_child(solid)
 	await process_frame
+	_expect(not (solid.find_children("*", "Sprite3D", false, false)[0] as Sprite3D).no_depth_test, "Depth-tested icon is hidden by nearer geometry such as a character.")
 	var icon_viewport := icon.find_children("*", "SubViewport", false, false)[0] as SubViewport
 	_expect(not icon.is_processing(), "Static icon badge does not animate.")
 	_expect(icon_viewport.render_target_update_mode != SubViewport.UPDATE_ALWAYS, "Static icon badge renders once, not every frame.")
