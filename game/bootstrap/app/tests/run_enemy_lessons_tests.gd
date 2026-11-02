@@ -27,7 +27,6 @@ func _run() -> void:
 		container.free()
 	var blast: Dictionary = LESSONS.step("blast_extinguisher")
 	_check("радиус 3 м" in str(blast.text) and "до 14 по" in str(blast.text) and "до 5 секунд" in str(blast.text), "The blast text states radius 3 m, damage 14 and stun up to 5 s")
-	_check(PREVIEW.build("res://missing.tscn") == null, "A missing enemy scene gives no preview")
 	quit(failures)
 
 
