@@ -97,11 +97,13 @@ func _kick_impact() -> void:
 		if body == null or seen.has(body.get_instance_id()) or body is CharacterBody3D:
 			continue
 		seen[body.get_instance_id()] = true
+		print("KICKDBG hit ", body.get("model_path") if "model_path" in body else body.name, " class=", body.get_class(), " loot=", body.call("has_loot") if body.has_method("has_loot") else "-", " freeze=", body.get("freeze"), " layer=", body.get("collision_layer"))
 		if body.has_method("has_loot") and bool(body.call("has_loot")) and body.has_method("break_by_strike"):
 			if nearest_crate == null or body.global_position.distance_squared_to(player.global_position) < nearest_crate.global_position.distance_squared_to(player.global_position):
 				nearest_crate = body
 		elif body is RigidBody3D and not (body as RigidBody3D).freeze and not _is_creature(body):
 			_throw(body as RigidBody3D, player.global_position)
+	print("KICKDBG hits=", seen.size(), " nearest=", nearest_crate.get("model_path") if nearest_crate != null else "none", " at=", nearest_crate.global_position if nearest_crate != null else "-", " player=", player.global_position, " forward=", forward)
 	# One kick breaks the nearest crate only; a crowd of crates takes one kick each.
 	if nearest_crate != null:
 		nearest_crate.call("break_by_strike", nearest_crate.global_position, forward)

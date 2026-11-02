@@ -160,6 +160,7 @@ func _strike_objects(forward: Vector3, damage: float) -> void:
 		if body == null or hit_ids.has(body.get_instance_id()) or not _strikeable(body):
 			continue
 		hit_ids[body.get_instance_id()] = true
+		print("PUNCHDBG ", body.get("model_path") if "model_path" in body else body.name, " class=", body.get_class(), " loot=", body.call("has_loot") if body.has_method("has_loot") else "-")
 		if body is RigidBody3D and not (body as RigidBody3D).freeze:
 			body.call("push_from_character", player.global_position, forward * STRIKE_PUSH_SPEED, 1.0)
 		if body.has_method("has_loot") and bool(body.call("has_loot")) and body.has_method("break_by_strike"):
