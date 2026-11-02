@@ -46,7 +46,10 @@ func build_tab() -> Control:
 	tab.add_child(_button("AddQuest", "Добавить задание", _add))
 	list = ItemList.new()
 	list.name = "QuestList"
-	list.custom_minimum_size.y = 150
+	list.custom_minimum_size = Vector2(0, 150) # the list scrolls by itself; the panel stays as wide as the HUD
+	list.max_columns = 1
+	list.auto_width = false
+	list.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
 	list.item_selected.connect(_picked)
 	tab.add_child(list)
 	var row := HBoxContainer.new()
@@ -60,8 +63,25 @@ func build_tab() -> Control:
 	params.setup(session, book)
 	tab.add_child(params.build())
 	tab.visibility_changed.connect(_sync_markers)
+	_fit_to_hud(tab)
 	refresh()
 	return tab
+
+
+## Long texts never widen the HUD: smaller font, buttons cut with an ellipsis (the tooltip keeps the full text).
+func _fit_to_hud(root: Control) -> void:
+	var small := Theme.new()
+	small.default_font_size = 13
+	root.theme = small
+	root.clip_contents = true
+	for node: Node in root.find_children("*", "Button", true, false):
+		var button := node as Button
+		button.clip_text = true
+		button.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
+		button.tooltip_text = button.text
+		button.custom_minimum_size.x = 0
+		if button is OptionButton:
+			(button as OptionButton).fit_to_longest_item = false
 
 
 func _button(node_name: String, text: String, action: Callable) -> Button:
@@ -121,7 +141,7 @@ func refresh() -> void:
 
 static func label_of(quest: Dictionary) -> String:
 	if str(quest.type) == "lesson":
-		return "Обучение: " + MODEL.lesson_label(str(quest.lesson))
+		return "Урок: " + MODEL.lesson_label(str(quest.lesson)).get_slice(": ", 1)
 	return str(MODEL.TYPE_LABELS[quest.type])
 
 
