@@ -36,6 +36,7 @@ func _model() -> void:
 	for lesson in ["move", "look", "roll", "sprint", "shoot", "reload", "mutation_scale", "active_skill", "passive_skill", "gas_mask", "antidote", "crates", "dna", "armor", "weapons", "one_way", "explore", "control_loss", "open_menu"]:
 		_check(lesson in MODEL.lesson_ids(), "Lesson %s is in the picker" % lesson)
 	var messy := MODEL.normalize({"type": "bogus", "delay": -5, "targets": ["a", "a", "", "b"], "trigger": {"kind": "xx", "value": 9.0}, "text": "hi"})
+	_check(not MODEL.make("find").pointer and MODEL.normalize({"pointer": true}).pointer, "The pointer flag defaults off and survives normalizing")
 	_check(messy.type == "find" and messy.delay == 0.0 and messy.targets == ["a", "b"] and messy.trigger.kind == "previous", "Normalizing repairs bad values")
 	_check(messy.text == "hi", "A custom description survives")
 	_check(MODEL.error([{"type": "find"}]).is_empty() and not MODEL.error([{"type": "nope"}]).is_empty() and not MODEL.error("x").is_empty(), "The map validator checks the list")
@@ -100,8 +101,15 @@ func _runner() -> void:
 	root.add_child(book)
 	var runner := RUNNER.new()
 	root.add_child(runner)
-	runner.configure(book, player, hud, null, null)
+	var host := Node.new()
+	var host_script := GDScript.new()
+	host_script.source_code = "extends Node\nvar hint := Callable()\nfunc set_tutorial_hint(target: Callable) -> void:\n\thint = target\n"
+	host_script.reload()
+	host.set_script(host_script)
+	root.add_child(host)
+	runner.configure(book, player, hud, null, host)
 	var find := MODEL.make("find")
+	find.pointer = true
 	find.targets = [id]
 	find.text = "Go to the box"
 	var wait := MODEL.make("find")
@@ -113,10 +121,12 @@ func _runner() -> void:
 	await process_frame
 	_check(hud.text == "Go to the box" and runner.index == 0, "The first quest shows its text")
 	_check(prop.get_meta(&"planning_tutorial_revealed", false) == true, "Its target marker is revealed")
+	_check(host.hint.is_valid() and host.hint.call() == Vector3(10, 0, 0), "A quest with a pointer leads the floor chevrons to its target")
 	player.global_position = Vector3(9, 0, 0)
 	await process_frame
 	await process_frame
 	_check(runner.index == 1 and not (prop.get_meta(&"planning_tutorial_revealed", false) == true), "Reaching the target ends it and hides the marker")
+	_check(not host.hint.is_valid(), "The pointer disappears when the quest is done")
 	_check(hud.text == "", "The second quest waits for its time trigger")
 	await create_timer(0.5).timeout
 	_check(hud.text == "Second" and runner.index == 1, "The time trigger starts the next quest")
@@ -124,6 +134,7 @@ func _runner() -> void:
 	await process_frame
 	_check(runner.index == 0, "Loading new quests restarts the sequence")
 	runner.free()
+	host.free()
 	book.free()
 	hud.free()
 	prop.free()

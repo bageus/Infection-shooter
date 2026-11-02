@@ -65,7 +65,7 @@ static func make(type: String, lesson: String = "") -> Dictionary:
 		"type": type, "lesson": lesson if type == "lesson" else "",
 		"trigger": {"kind": "previous", "value": 0.0, "target": "", "point": []},
 		"targets": [], "complete": {"kind": DEFAULT_COMPLETION[type], "value": 0.0},
-		"delay": 0.0, "text": preset_text(type, lesson),
+		"delay": 0.0, "text": preset_text(type, lesson), "pointer": false,
 	}
 
 
@@ -108,6 +108,7 @@ static func normalize(raw: Variant) -> Dictionary:
 	quest.complete = {"kind": done if done in COMPLETIONS or done.is_empty() else str(quest.complete.kind),
 			"value": clampf(float(complete.get("value", 0.0)), 0.0, 100000.0)}
 	quest.delay = clampf(float(source.get("delay", 0.0)), 0.0, 3600.0)
+	quest.pointer = bool(source.get("pointer", false))
 	quest.text = str(source.get("text", quest.text)).left(MAX_TEXT)
 	return quest
 

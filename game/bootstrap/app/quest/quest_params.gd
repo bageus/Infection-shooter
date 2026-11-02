@@ -18,6 +18,7 @@ var target_list: ItemList
 var done_kind: OptionButton
 var done_value: SpinBox
 var delay: SpinBox
+var pointer_check: CheckBox
 var text_edit: TextEdit
 var index := -1
 var _candidates: Array[Node3D] = []
@@ -72,6 +73,11 @@ func build() -> Control:
 	delay = _spin("Delay", 0.0, 3600.0, 0.5)
 	delay.value_changed.connect(func(v: float) -> void: _set_field("delay", v))
 	box.add_child(delay)
+	pointer_check = CheckBox.new()
+	pointer_check.name = "PointerCheck"
+	pointer_check.text = "Добавить указатель до цели на полу"
+	pointer_check.toggled.connect(func(on: bool) -> void: _set_field("pointer", on))
+	box.add_child(pointer_check)
 	box.add_child(_label("Описание"))
 	text_edit = TextEdit.new()
 	text_edit.name = "QuestText"
@@ -134,6 +140,7 @@ func show_quest(new_index: int) -> void:
 	done_kind.select(maxi(MODEL.COMPLETIONS.find(quest.complete.kind), 0))
 	done_value.value = quest.complete.value
 	delay.value = quest.delay
+	pointer_check.button_pressed = bool(quest.get("pointer", false))
 	text_edit.text = quest.text
 	target_list.clear()
 	for id: String in quest.targets:

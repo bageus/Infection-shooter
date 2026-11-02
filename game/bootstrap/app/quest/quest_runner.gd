@@ -39,6 +39,7 @@ func configure(quest_book: Node, hero: Node3D, interface: Node, lessons: Node, o
 
 func reset() -> void:
 	index = 0
+	_point_floor(Callable())
 	_begin_quest()
 	_set_objective("")
 	BOOK.show_markers(get_tree(), [])
@@ -139,6 +140,8 @@ func _activate() -> void:
 		if node != null:
 			_targets.append(node)
 	BOOK.show_markers(get_tree(), _targets)
+	if bool(quest.get("pointer", false)):
+		_point_floor(_pointer_target)
 	match str(quest.type):
 		"lesson":
 			if director != null:
@@ -175,10 +178,30 @@ func _alive(node: Variant) -> bool:
 
 func _finish_quest() -> void:
 	phase = Phase.DONE
+	_point_floor(Callable())
 	_set_objective("")
 	BOOK.show_markers(get_tree(), [])
 	index += 1
 	_begin_quest()
+
+
+## The floor chevrons lead to the nearest target still standing; an invalid callable turns them off.
+func _point_floor(target: Callable) -> void:
+	if host != null and host.has_method("set_tutorial_hint"):
+		host.call("set_tutorial_hint", target)
+
+
+func _pointer_target() -> Vector3:
+	var best := Vector3.INF
+	var best_distance := INF
+	for node in _targets:
+		if _alive(node):
+			var distance := _flat((node as Node3D).global_position)
+			if distance < best_distance:
+				best_distance = distance
+				var position := (node as Node3D).global_position
+				best = Vector3(position.x, 0.0, position.z)
+	return best
 
 
 func _set_objective(text: String) -> void:
