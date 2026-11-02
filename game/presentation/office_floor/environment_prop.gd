@@ -484,13 +484,8 @@ func take_melee_hit(damage: float, hit_position: Vector3, direction: Vector3) ->
 		return
 	take_projectile_hit(damage, hit_position, Vector3.ZERO, direction, "MELEE")
 
-## Tarp-covered large crate: kick, punch and shots never break it.
-const COVERED_CRATE := "02_crate_canvas_large"
-
 func break_by_strike(hit_position: Vector3, direction: Vector3) -> void:
-	if COVERED_CRATE in model_path.get_file():
-		return # A tarp-covered crate is indestructible.
-	if _damage.shatter():
+	if "02_crate_canvas_large" not in model_path and _damage.shatter(): # Tarp-covered crates are indestructible.
 		_release_loot()
 		_collapse_box(hit_position, direction)
 
