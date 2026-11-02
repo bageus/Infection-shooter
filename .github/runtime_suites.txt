@@ -255,5 +255,6 @@ game/features/infected/tests/run_green_wound_tests.gd
 game/bootstrap/app/tests/run_tutorial_tests.gd
 game/bootstrap/app/tests/run_first_run_tutorial_tests.gd
 game/bootstrap/app/tests/run_quest_tests.gd
+game/bootstrap/app/tests/run_enemy_lessons_tests.gd
 game/bootstrap/app/tests/run_quest_panel_tests.gd
 game/bootstrap/app/tests/run_quest_save_tests.gd

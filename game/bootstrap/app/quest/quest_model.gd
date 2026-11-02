@@ -37,6 +37,10 @@ const LESSONS: Array[Array] = [
 	["weapons", "Базовое обучение: оружие 1-3"], ["one_way", "Базовое обучение: односторонние двери"],
 	["explore", "Базовое обучение: исследование уровня"], ["control_loss", "Базовое обучение: потеря контроля и антидот"],
 	["open_menu", "Базовое обучение: меню мутаций"],
+	["enemy_infected", "Враг: Заражённый"], ["enemy_hunger", "Враг: Голодный"],
+	["enemy_revenant", "Враг: Ревенант"], ["enemy_brute", "Враг: Громила"],
+	["enemy_titan", "Враг: Титан"], ["enemy_colossus", "Враг: Колосс"], ["enemy_horde", "Враг: Орда"],
+	["blast_extinguisher", "Взрыв огнетушителя"],
 ]
 const DEFAULT_COMPLETION := {
 	"find": "reach", "kill": "destroy", "destroy": "destroy", "pickup": "collect", "message": "", "lesson": "",

@@ -11,6 +11,7 @@ const PROGRESS := preload("res://game/bootstrap/app/tutorial/tutorial_progress.g
 const TEXT := preload("res://game/bootstrap/app/mutation_text.gd")
 const TARGET := preload("res://game/presentation/office_floor/public/tutorial_target.gd")
 const KEYS := preload("res://game/bootstrap/app/tutorial/tutorial_keys.gd")
+const ENEMY_LESSONS := preload("res://game/bootstrap/app/tutorial/tutorial_enemy_lessons.gd")
 const STEP_METERS := 0.8
 const DOOR_SPAN := 1.6 # half width, metres along the door, in which a crossing counts
 const DOOR_DEPTH := 3.0 # how far from the door a side is recorded
@@ -174,6 +175,8 @@ func _end_lesson() -> void:
 
 
 func _build_steps(lesson: String) -> Array:
+	if ENEMY_LESSONS.has(lesson):
+		return [ENEMY_LESSONS.step(lesson)]
 	var mutation := _hud_rect.bind("mutation")
 	var antidote := _hud_rect.bind("antidote")
 	var antidote_key := KEYS.binding("antidote")
