@@ -33,7 +33,7 @@ func _model() -> void:
 	var director_source := FileAccess.get_file_as_string("res://game/bootstrap/app/tutorial/tutorial_director.gd")
 	for lesson in MODEL.lesson_ids():
 		_check('\t\t"%s":' % lesson in director_source, "Lesson %s exists in the director" % lesson)
-	for lesson in ["move", "look", "roll", "sprint", "shoot", "mutation_scale", "active_skill", "passive_skill", "gas_mask", "antidote", "crates", "dna", "armor", "weapons", "one_way", "explore", "control_loss", "open_menu"]:
+	for lesson in ["move", "look", "roll", "sprint", "shoot", "reload", "mutation_scale", "active_skill", "passive_skill", "gas_mask", "antidote", "crates", "dna", "armor", "weapons", "one_way", "explore", "control_loss", "open_menu"]:
 		_check(lesson in MODEL.lesson_ids(), "Lesson %s is in the picker" % lesson)
 	var messy := MODEL.normalize({"type": "bogus", "delay": -5, "targets": ["a", "a", "", "b"], "trigger": {"kind": "xx", "value": 9.0}, "text": "hi"})
 	_check(messy.type == "find" and messy.delay == 0.0 and messy.targets == ["a", "b"] and messy.trigger.kind == "previous", "Normalizing repairs bad values")
