@@ -66,12 +66,7 @@ func _click_world(screen_pos: Vector2) -> void:
 			_select(existing)
 		return
 	if not selected_path.is_empty() or selected_kind == "player":
-		# An installed object with the same kind of settings as the palette item is picked, not covered by another.
-		var installed := _installed_same_kind_at(screen_pos)
-		if installed != null:
-			_reset_selection()
-			_select(installed)
-			return
+		# Placement takes priority: a plain click places the palette item even over an installed object. Ctrl+LMB picks it.
 		_place_selected(screen_pos)
 		return
 	var hit_node = geometry._planned_object_at(screen_pos)
@@ -79,14 +74,6 @@ func _click_world(screen_pos: Vector2) -> void:
 	if hit_node != null:
 		_clear_preview()
 	_select(hit_node)
-
-
-func _installed_same_kind_at(screen_pos: Vector2) -> Node3D:
-	var kind: String = controls.settings_kind(preview)
-	if kind.is_empty():
-		return null
-	var existing: Node3D = geometry.lamp_at(screen_pos) if kind == "lamp" else geometry._planned_object_at(screen_pos)
-	return existing if controls.settings_kind(existing) == kind else null
 
 
 func _select(node: Node3D) -> void:
