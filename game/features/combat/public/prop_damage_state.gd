@@ -2,8 +2,10 @@ extends RefCounted
 ## Runtime damage rules for one prop. No scenes, rendering or physics dependencies.
 const BALANCE := preload("res://game/features/combat/public/projectile_balance.gd")
 enum HitAction { NONE, SHUDDER, SCATTER, TRANSITION, CHIP_FACADE, DETACH, PUSH, COLLAPSE }
+## Broken 04 crates: one shotgun blast, two or three AK/M4/UZI shots, one minigun or sniper shot; pistols do nothing.
+const BROKEN_CRATE_HEALTH := 70.0
 enum Transition { NONE, VARIANT, BREAK }
-const BIG_CRATES := ["02_crate_wood_large.glb", "02_crate_canvas_large.glb"]
+const BIG_CRATES := ["02_crate_wood_large.glb"]
 var category := "large"
 var health := 0.0
 var broken := false
@@ -25,7 +27,7 @@ func configure(model_name: String, variant_count: int, has_fragments: bool) -> v
 	_variant_count = variant_count
 	_has_fragments = has_fragments
 	collapses = not has_fragments and (model_name.to_lower().contains("cardboard") or model_name in BIG_CRATES)
-	health = _stage_health()
+	health = BROKEN_CRATE_HEALTH if model_name.begins_with("04_crate") else _stage_health()
 
 
 func hit(amount: float, weapon: String, book_stack: bool, wall_mounted: bool, anchored: bool, facade: bool) -> HitAction:

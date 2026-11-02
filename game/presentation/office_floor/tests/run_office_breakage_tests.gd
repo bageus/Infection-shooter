@@ -27,9 +27,10 @@ func _run() -> void:
 	await _test_monitor_power_off(stage)
 	await _test_partition_logo(stage)
 	await _test_partition_sound()
+	await _test_broken_crate_shots(stage)
 	await _test_crate_strike(stage)
 	await _test_crate_walls(stage, WOOD_CRATE, Vector3(-10, 0.0135, -6))
-	await _test_crate_walls(stage, CANVAS_CRATE, Vector3(-16, 0.0135, -6))
+	await _test_tarp_crate_untouched(stage)
 	await _test_crate_shots(stage)
 	await _test_pallet_scatter(stage)
 	print("%d failure(s)" % failures)
@@ -51,6 +52,35 @@ func _test_cardboard(stage: Node3D) -> void:
 	_expect(shots <= 8, "A cardboard box breaks in as few shotgun pellets as a wooden crate.")
 	_expect(setup[1].get_child_count() > 0, "A broken cardboard box leaves its panels as pieces.")
 	await _clear(box, setup[1])
+
+
+## Shots that break a broken 04 crate: a pistol never does, the others need the listed number of hits.
+func _test_broken_crate_shots(stage: Node3D) -> void:
+	var cases := [["PISTOL", 19.0, 0], ["UZI", 38.0, 3], ["AK", 65.0, 2], ["M4", 58.0, 2], ["MINIGUN", 70.0, 1], ["SNIPER RIFLE", 110.0, 1], ["SHOTGUN", 32.0, 3]]
+	for model in [MODELS + "04/04_crate_small_broken.glb", MODELS + "04/04_crate_large_broken.glb"]:
+		for case in cases:
+			var needed: int = case[2]
+			if needed == 0:
+				_expect(not await _broken_after(stage, model, case, 10), "%s does not break %s." % [case[0], model.get_file()])
+				continue
+			_expect(await _broken_after(stage, model, case, needed), "%s breaks %s in %d shot(s)." % [case[0], model.get_file(), needed])
+			if needed > 1:
+				_expect(not await _broken_after(stage, model, case, needed - 1), "%s needs %d shots on %s, not fewer." % [case[0], needed, model.get_file()])
+
+
+# Fires `shots` hits from `weapon` at a fresh crate and reports whether it broke.
+func _broken_after(stage: Node3D, model: String, case: Array, shots: int) -> bool:
+	var setup := await _spawn(stage, model, Vector3(-14, 0, 0))
+	var crate: RigidBody3D = setup[0]
+	var visual := crate.get_node("Visual") as Node3D
+	for i in shots:
+		crate.call("take_projectile_hit", case[1], crate.global_position + Vector3(0, 0.3, 0), Vector3.UP, Vector3.FORWARD, case[0])
+		await process_frame
+	for i in 3:
+		await process_frame
+	var broken := not visual.visible
+	await _clear(crate, setup[1])
+	return broken
 
 
 func _test_crate_strike(stage: Node3D) -> void:
@@ -87,19 +117,35 @@ func _test_crate_walls(stage: Node3D, model: String, at: Vector3) -> void:
 
 
 func _test_crate_shots(stage: Node3D) -> void:
-	var setup := await _spawn(stage, CANVAS_CRATE, Vector3(-16, 0.0135, 6))
+	var setup := await _spawn(stage, WOOD_CRATE, Vector3(-16, 0.0135, 6))
 	var crate: RigidBody3D = setup[0]
 	var shots := 0
 	while is_instance_valid(crate) and not bool(crate.get("_broken")) and shots < 40:
 		crate.call("take_projectile_hit", 32.0, crate.global_position + Vector3(0, 0.8, 0), Vector3.BACK, Vector3.FORWARD, "SHOTGUN")
 		shots += 1
 		await physics_frame
-	_expect(shots < 40, "A tarp-covered crate breaks from shotgun shots (%d)." % shots)
+	_expect(shots < 40, "A wooden crate breaks from shotgun shots (%d)." % shots)
 	var walls := 0
 	for child in setup[1].get_children():
 		if child is RigidBody3D:
 			walls += 1
-	_expect(walls >= 4, "A tarp-covered crate shot apart leaves its walls (%d)." % walls)
+	_expect(walls >= 4, "A wooden crate shot apart leaves its walls (%d)." % walls)
+	await _clear(crate, setup[1])
+
+
+## A tarp-covered crate cannot be broken: no kick, punch or shot does anything to it.
+func _test_tarp_crate_untouched(stage: Node3D) -> void:
+	var setup := await _spawn(stage, CANVAS_CRATE, Vector3(-16, 0.0135, -6))
+	var crate: RigidBody3D = setup[0]
+	var visual := crate.get_node("Visual") as Node3D
+	crate.call("break_by_strike", crate.global_position + Vector3(0.3, 0.3, 0), Vector3.FORWARD)
+	for shot in 40:
+		crate.call("take_projectile_hit", 32.0, crate.global_position + Vector3(0, 0.8, 0), Vector3.BACK, Vector3.FORWARD, "SHOTGUN")
+		await physics_frame
+	for frame in 30:
+		await physics_frame
+	_expect(is_instance_valid(crate) and visual.visible and not crate.freeze, "A tarp-covered crate survives a kick and shotgun fire.")
+	_expect(setup[1].get_child_count() == 0, "A tarp-covered crate leaves no pieces.")
 	await _clear(crate, setup[1])
 
 

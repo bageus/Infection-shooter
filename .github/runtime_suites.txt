@@ -244,6 +244,7 @@ game/presentation/office_floor/tests/run_ambient_prop_sounds_tests.gd
 game/presentation/office_floor/tests/run_destruction_budget_tests.gd
 game/bootstrap/app/tests/run_user_data_migration_tests.gd
 game/features/player/tests/run_melee_strike_tests.gd
+game/features/player/tests/run_kick_gameplay_tests.gd
 game/features/character_animation/tests/run_strike_pose_tests.gd
 game/features/player/tests/run_reload_pose_tests.gd
 game/features/infected/tests/run_death_cloud_tests.gd
@@ -253,3 +254,5 @@ game/bootstrap/app/tests/run_platform_promo_tests.gd
 game/features/infected/tests/run_green_wound_tests.gd
 game/bootstrap/app/tests/run_tutorial_tests.gd
 game/bootstrap/app/tests/run_first_run_tutorial_tests.gd
+game/bootstrap/app/tests/run_quest_tests.gd
+game/bootstrap/app/tests/run_quest_panel_tests.gd
