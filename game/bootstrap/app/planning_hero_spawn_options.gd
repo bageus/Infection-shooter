@@ -3,6 +3,8 @@ extends Node
 ## from the linked mission, or a manual loadout (weapon slots, ammo, health, threshold, items).
 
 const HERO := preload("res://game/bootstrap/app/planning_hero_spawn.gd")
+## Item id of "Пусто": OptionButton gives id -1 a sequential id, which would clash with pistol (0).
+const EMPTY_SLOT := 8
 
 var session: Variant
 var objects: Variant
@@ -48,7 +50,7 @@ func setup(context: Variant, planner_objects: Variant) -> void:
 	column.add_child(_manual)
 	for slot in HERO.SLOT_COUNT:
 		var option := OptionButton.new()
-		option.add_item("Пусто", -1)
+		option.add_item("Пусто", EMPTY_SLOT)
 		for weapon in HERO.WEAPON_NAMES.size():
 			option.add_item(HERO.WEAPON_NAMES[weapon], weapon)
 		option.item_selected.connect(func(_index: int) -> void: _changed())
@@ -90,7 +92,8 @@ func update() -> void:
 	_updating = true
 	_mode.select(1 if hero.mode == "manual" else 0)
 	for slot in HERO.SLOT_COUNT:
-		_slots[slot].select(_slots[slot].get_item_index(hero.slots[slot]))
+		_slots[slot].select(_slots[slot].get_item_index(hero.slots[slot] if hero.slots[slot] >= 0 else EMPTY_SLOT))
+	_refresh_choices()
 	for weapon in HERO.WEAPON_NAMES.size():
 		_ammo[weapon].value = hero.ammo[weapon]
 	_health.value = hero.health
@@ -103,13 +106,27 @@ func update() -> void:
 	_updating = false
 
 
+## A weapon sits in one slot only, and slot 1 always holds one: greyed-out choices cannot be picked.
+func _refresh_choices() -> void:
+	for slot in HERO.SLOT_COUNT:
+		var option: OptionButton = _slots[slot]
+		var held: Array = []
+		for other in HERO.SLOT_COUNT:
+			if other != slot:
+				held.append(_slots[other].get_item_id(_slots[other].selected))
+		for index in option.item_count:
+			var id := option.get_item_id(index)
+			option.set_item_disabled(index, held.has(id) or (id == EMPTY_SLOT and slot == 0))
+
+
 func _changed() -> void:
 	if _updating:
 		return
 	var hero := HERO.defaults()
 	hero.mode = "manual" if _mode.selected == 1 else "auto"
 	for slot in HERO.SLOT_COUNT:
-		hero.slots[slot] = _slots[slot].get_item_id(_slots[slot].selected)
+		var weapon := _slots[slot].get_item_id(_slots[slot].selected)
+		hero.slots[slot] = weapon if weapon != EMPTY_SLOT else -1
 	for weapon in HERO.WEAPON_NAMES.size():
 		hero.ammo[weapon] = int(_ammo[weapon].value)
 	hero.health = _health.value
