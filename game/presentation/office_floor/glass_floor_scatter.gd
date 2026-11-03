@@ -1,6 +1,7 @@
 extends RefCounted
 ## Bounded placement along the real pane's horizontal axis, including opened doors.
 const MAX_MARKS := 12
+const ELEVATED_LIMIT := 0.15 # Panes whose lowest point is above this (metres) sit on furniture, not the floor.
 
 
 static func scatter(floor_view: Node3D, panes: Array[MeshInstance3D], direction: Vector3) -> void:
@@ -22,6 +23,9 @@ static func scatter(floor_view: Node3D, panes: Array[MeshInstance3D], direction:
 				axis = horizontal
 		var width := axis.length()
 		if width < 0.1 or center.y < -0.2 or center.y > 4.0:
+			continue
+		# A pane resting on a table, cabinet or nightstand is not a floor fragment; baking it would show through the furniture.
+		if (pose * bounds).position.y > ELEVATED_LIMIT:
 			continue
 		axis = axis.normalized()
 		var across := Vector2(-axis.y, axis.x)
