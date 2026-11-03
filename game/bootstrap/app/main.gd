@@ -24,6 +24,7 @@ const DEBUG_OVERLAY := preload("res://game/bootstrap/app/runtime_debug_overlay.g
 const OCCLUSION := preload("res://game/bootstrap/app/occlusion_effects.gd")
 const MISSION_LAYOUT := preload("res://game/bootstrap/app/mission_layout.gd")
 const LEVEL_ENTRIES := preload("res://game/bootstrap/app/level_entry_runtime.gd")
+const CHECKPOINT := preload("res://game/bootstrap/app/checkpoint_progress.gd")
 const WAVE_DIRECTOR := preload("res://game/features/spawning/public/wave_director.gd")
 
 @onready var player: Node3D = $Gameplay/Player
@@ -318,6 +319,8 @@ func _choose_enhanced_ammo() -> void:
 func _end_run(reason: String) -> void:
 	_ended = true
 	var kind := "complete" if reason == "MISSION COMPLETE" else "failed"
+	if kind == "complete":
+		CHECKPOINT.on_completed(current_level)
 	var reason_key: String = {"MUTATION OVERTOOK YOU": "failedMutation",
 		"YOU FELL OUTSIDE THE FLOOR": "failedFall", "YOU DIED": "failedHealth"}.get(reason, "")
 	if kind == "complete" and not is_instance_valid(completion_music):
