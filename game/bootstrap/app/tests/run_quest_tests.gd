@@ -50,6 +50,12 @@ func _model() -> void:
 	var lost := MODEL.make("find")
 	lost.trigger.kind = "control_lost"
 	_check(not LOGIC.trigger_ready(lost, {}) and LOGIC.trigger_ready(lost, {"control_lost": true}), "The control loss trigger waits for the loss")
+	var taken := MODEL.make("find")
+	taken.trigger.kind = "collect"
+	_check(not LOGIC.trigger_ready(taken, {}) and LOGIC.trigger_ready(taken, {"trigger_collected": true}), "The collect trigger waits for the object to be taken")
+	var leave := MODEL.make("leave")
+	_check(leave.complete.kind == "" and leave.text.contains("лестниц"), "A leave quest has its own preset text")
+	_check(not LOGIC.complete(leave, {}) and LOGIC.complete(leave, {"left_level": true}), "A leave quest is done when the level is left")
 	_check(MODEL.normalize({"trigger": {"kind": "control_lost"}}).trigger.kind == "control_lost", "The new trigger kinds survive normalizing")
 	_check(not MODEL.make("find").pointer and MODEL.normalize({"pointer": true}).pointer, "The pointer flag defaults off and survives normalizing")
 	_check(messy.type == "find" and messy.delay == 0.0 and messy.targets == ["a", "b"] and messy.trigger.kind == "previous", "Normalizing repairs bad values")
