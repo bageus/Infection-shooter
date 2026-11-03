@@ -128,13 +128,6 @@ func _general() -> void:
 	shake.button_pressed = dialog.view.preferences.values.camera_shake
 	shake.toggled.connect(func(value: bool) -> void: dialog.call("_change", "camera_shake", value))
 	dialog.get("layout").add_child(shake)
-	var dodge := OptionButton.new()
-	dodge.name = "DodgeAnimation"
-	dodge.add_item(dialog.view.text("dodgeAnimationRoll"))
-	dodge.add_item(dialog.view.text("dodgeAnimationStrafe"))
-	dodge.selected = dialog.view.preferences.values.dodge_animation
-	dodge.item_selected.connect(func(index: int) -> void: dialog.call("_change", "dodge_animation", index))
-	dialog.call("_row", "dodgeAnimation", dodge)
 	dialog.call("_slider", "walkSpeed", "walk_speed_multiplier", 0.5, 1.5, 0.05, "%.2f×")
 	dialog.call("_slider", "walkAnimationSpeed", "walk_animation_multiplier", 0.5, 2.0, 0.05, "%.2f×")
 	dialog.call("_slider", "enemyMoveSpeed", "enemy_move_speed_multiplier", 0.5, 2.0, 0.05, "%.2f×")

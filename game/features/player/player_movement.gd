@@ -417,9 +417,6 @@ func add_antidote(amount:int=1)->bool:
 func absorb_mutagen(delta_seconds:float)->float:return infection_runtime.call("absorb_mutagen",delta_seconds)
 func on_mutagen_cloud(delta_seconds: float) -> void:
 	mutation_effects.hybrids.cloud(delta_seconds)
-## Settings: which animation the dodge plays, 0 = dive roll, 1 = strafe jump.
-func set_dodge_animation_style(style: int) -> void:
-	$AnimationDriver.set("dodge_style", clampi(style, 0, 1))
 ## Settings multiply authored walk speed; applying them repeatedly never compounds it.
 func set_walk_tuning(speed_multiplier: float, animation_multiplier: float) -> void:
 	_walk_speed_multiplier = clampf(speed_multiplier, 0.5, 1.5) if is_finite(speed_multiplier) else 1.0
