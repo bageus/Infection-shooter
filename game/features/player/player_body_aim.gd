@@ -50,9 +50,10 @@ func _process_modification_with_delta(_delta: float) -> void:
 		var arms := Quaternion.IDENTITY.slerp(pitch, 1.0 - TORSO_PITCH_SHARE)
 		# One-handed: the free arm stays along the body instead of swinging with the aim.
 		var stance: Object = mount.get_parent().get("weapon_stance")
-		var one_hand := stance != null and int(stance.get("stance")) == 1
-		for shoulder in _shoulders:
-			if not (one_hand and shoulder == _shoulders[0]):
+		var state := int(stance.get("stance")) if stance != null else 2
+		# Lowered (idle): the arm hangs down, it must not follow the cursor.
+		for shoulder in [] if state == 0 else _shoulders:
+			if not (state == 1 and shoulder == _shoulders[0]):
 				_rotate(skeleton, shoulder, arms)
 	mount.call("sync_weapon", weapon)
 	mount.set("_aim_modifying", false)
