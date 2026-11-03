@@ -107,6 +107,9 @@ static func _continuation_frame(geometry: GEOMETRY, piece: RigidBody3D) -> Trans
 	return Transform3D.IDENTITY
 
 
+const FLOOR_CONTACT_LIMIT := 0.15 # Panes higher than this (m) are on furniture, not the floor.
+
+
 static func shatter_glass(body: RigidBody3D, geometry: GEOMETRY, hit_position: Vector3, direction: Vector3) -> void:
 	SFX.play(body, &"glass_break", hit_position)
 	var glass_bounds := AABB()
@@ -128,6 +131,14 @@ static func shatter_glass(body: RigidBody3D, geometry: GEOMETRY, hit_position: V
 	var floor_view := body.get("glass_debris_floor") as Node3D
 	if is_instance_valid(floor_view):
 		floor_view.call("scatter_glass_debris", panes, direction)
+		# Panes resting on furniture leave their decals on that furniture, not on the floor beneath it.
+		var furniture: Array[MeshInstance3D] = []
+		for mesh in geometry.meshes:
+			if is_instance_valid(mesh) and mesh.is_visible_in_tree() and not GEOMETRY.is_glass_mesh(mesh):
+				furniture.append(mesh)
+		for pane in panes:
+			if (pane.global_transform * pane.get_aabb()).position.y > FLOOR_CONTACT_LIMIT:
+				floor_view.call("bake_furniture_glass", pane, furniture)
 	var shards: Node3D = DAMAGE.find_named(geometry.visual, "Glass_Shards")
 	if shards != null:
 		# Vending machines keep their shard group below a hidden damage variant.
