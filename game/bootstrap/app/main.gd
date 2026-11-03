@@ -217,11 +217,6 @@ func set_blood_level(level: int, procedural_style: bool) -> void:
 		blood_effects.call("set_blood_level", level, procedural_style)
 
 
-## Settings: dodge animation, 0 = dive roll, 1 = strafe jump.
-func set_dodge_animation_style(style: int) -> void:
-	player.call("set_dodge_animation_style", style)
-
-
 func set_walk_tuning(speed_multiplier: float, animation_multiplier: float) -> void:
 	player.call("set_walk_tuning", speed_multiplier, animation_multiplier)
 

@@ -108,13 +108,6 @@ func _dodge_checks(character: CharacterBody3D, driver: Node, skeleton: Skeleton3
 	await create_timer(0.5).timeout
 	await create_timer(0.3).timeout
 	_expect(not driver.is_dodging() and guard.active, "The dodge ends and wakes the aim modifiers.")
-	driver.dodge_style = 1
-	_expect(driver.play_dodge(Vector3(1, 0, 0), 0.5), "A strafe jump starts.")
-	_expect(driver.legs.get("_dodge") == "Dodge_Strafe_Left", "Travel toward +X (left) jumps with the left clip.")
-	driver.legs.call("cancel_dodge")
-	_expect(driver.play_dodge(Vector3(0, 0, 1), 0.5), "A forward strafe jump starts.")
-	_expect(absf(float(driver.legs.get("_dodge_yaw"))) > 1.0, "A forward dodge in strafe mode turns the body toward the side clip.")
-	driver.legs.call("cancel_dodge")
 
 
 func _expect(condition: bool, message: String) -> void:
