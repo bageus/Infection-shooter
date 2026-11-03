@@ -180,7 +180,7 @@ func _menu() -> void:
 	old.save(PREFS.FILE)
 	var prefs := PREFS.new()
 	prefs.load_settings()
-	_check(prefs.values.menu_music and prefs.values.menu_music_volume == 1.0, "Old settings keep menu music enabled")
+	_check(prefs.values.menu_music_volume == 1.0, "Old settings keep the menu music volume at full")
 	var front := FRONT.instantiate()
 	root.add_child(front)
 	current_scene = front
@@ -206,12 +206,14 @@ func _menu() -> void:
 	var bus := AudioServer.get_bus_index(&"MenuMusic")
 	_check(AudioServer.is_bus_mute(AudioServer.get_bus_index(&"Music")) and not AudioServer.is_bus_mute(bus), "Menu and gameplay volume are independent")
 	_check(absf(AudioServer.get_bus_volume_linear(bus)-.35) < .001, "Menu volume applies live")
-	prefs.values.menu_music = false
+	prefs.values.menu_music_volume = 0.0
 	prefs.save_settings()
 	prefs.apply_to_game(self)
 	var reloaded := PREFS.new()
 	reloaded.load_settings()
-	_check(not reloaded.values.menu_music and AudioServer.is_bus_mute(bus), "Menu switch persists and mutes the menu bus")
+	_check(is_equal_approx(reloaded.values.menu_music_volume, 0.0) and AudioServer.is_bus_mute(bus), "A zero menu volume persists and mutes the menu bus")
+	prefs.values.menu_music_volume = .35
+	prefs.apply_to_game(self)
 	menu.hide()
 	_check(not bool(track.get("active")) and not track.playing, "Closing a menu stops its track")
 	menu.show_screen("main")
@@ -242,16 +244,12 @@ func _check_menu_controls(menu: Control) -> void:
 	menu.call("activate", "settings")
 	var dialog: Control = menu.get("modal")
 	var audio_page: Node = dialog.get("settings").tabs.get_child(3)
-	var toggle := audio_page.find_child("MenuMusicToggle", true, false) as CheckButton
 	var slider := audio_page.find_child("MenuMusicVolume", true, false) as HSlider
-	_check(toggle != null and slider != null, "Both menu music controls exist in Audio settings")
-	if toggle != null and slider != null:
-		toggle.set_pressed(false)
-		var preferences := PREFS.new()
-		preferences.load_settings()
-		_check(not preferences.values.menu_music, "The actual menu toggle saves its setting")
-		toggle.set_pressed(true)
+	_check(slider != null, "The menu music slider exists in Audio settings")
+	_check(audio_page.find_child("MenuMusicToggle", true, false) == null and audio_page.find_child("SoundToggle", true, false) == null, "Audio settings have no on/off toggles")
+	if slider != null:
 		slider.value = .4
+		var preferences := PREFS.new()
 		preferences.load_settings()
 		_check(is_equal_approx(preferences.values.menu_music_volume, .4), "The actual menu slider saves its setting")
 	menu.call("close_dialog")

@@ -283,7 +283,7 @@ func _focus_first() -> void:
 
 
 func play_click() -> void:
-	if preferences.values.sound and preferences.values.volume > 0:
+	if preferences.values.volume > 0:
 		_click_player.volume_db = linear_to_db(preferences.values.volume * 0.15)
 		_click_player.play()
 
@@ -294,5 +294,5 @@ func _click_stream() -> AudioStreamOggVorbis:
 func play_hover(control: Control) -> void:
 	if not is_visible_in_tree() or (control is BaseButton and control.disabled):
 		return
-	if preferences.values.sound and preferences.values.volume > 0:
+	if preferences.values.volume > 0:
 		SFX.play_ui(self, &"menu_hover")

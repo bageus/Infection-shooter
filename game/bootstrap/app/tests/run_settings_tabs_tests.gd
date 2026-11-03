@@ -44,7 +44,7 @@ func _run() -> void:
 	lighting.set_pressed(true)
 	_sunlight_checks(tabs, dialog)
 	await _shadow_checks(tabs, dialog)
-	_check(tabs.get_child(3).find_child("SoundToggle", true, false) != null, "Sound belongs to Audio")
+	_check(tabs.get_child(3).find_child("SoundToggle", true, false) == null and tabs.get_child(3).find_child("MenuMusicToggle", true, false) == null, "Audio has no on/off toggles; sliders control volume")
 	_slider_checks(tabs)
 	_check_notice_badge(dialog, tabs)
 	dialog.settings.notices._show(1)
