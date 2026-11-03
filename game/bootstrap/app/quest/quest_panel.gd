@@ -80,6 +80,8 @@ func _fit_to_hud(root: Control) -> void:
 		button.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
 		button.tooltip_text = button.text
 		button.custom_minimum_size.x = 0
+		if button.get_parent() is HBoxContainer:
+			button.size_flags_horizontal = Control.SIZE_EXPAND_FILL # a clipped button has no minimum width: it would collapse to nothing
 		if button is OptionButton:
 			(button as OptionButton).fit_to_longest_item = false
 

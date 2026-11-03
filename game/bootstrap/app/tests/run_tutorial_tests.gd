@@ -151,12 +151,17 @@ func _menu_lessons(director: Node, overlay: Node, hud: Node, tree_ui: Node) -> v
 	tree_ui.call("open_tree")
 	await process_frame
 	await process_frame
-	_check(not tree_ui.call("tutorial_rect", "passive").size.is_zero_approx() and str(overlay.get("step").get("mode")) == "wait",
-			"With the menu open the passive group is highlighted")
-	tree_ui.call("close_tree")
-	await process_frame
+	_check(not tree_ui.call("tutorial_rect", "passive").size.is_zero_approx() and str(overlay.get("step").get("mode")) == "click"
+			and str(overlay.get("step").get("text")) == TEXT.t("tutBranches"), "With the menu open it shows the split into active and passive")
+	await _advance(overlay)
+	_check(str(overlay.get("step").get("text")) == TEXT.t("tutActive"), "Then it explains the active branch")
+	await _advance(overlay)
+	_check(str(overlay.get("step").get("text")) == TEXT.t("tutPassive"), "Then the passive branch, not a passive skill lesson")
+	await _advance(overlay)
 	await process_frame
 	_check(director.get("current") == "", "The menu lesson ends")
+	tree_ui.call("close_tree")
+	await process_frame
 
 
 
