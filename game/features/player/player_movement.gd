@@ -59,6 +59,7 @@ const MUTATION_DASH_SPEED := 13.0
 @export var max_antidotes: int = 5
 @onready var camera_rig: Node3D = $CameraRig
 @onready var camera: Camera3D = $CameraRig/Camera3D
+const BODY_TURN_RATE := 14.0
 @onready var aim_pivot: Node3D = $AimPivot
 @onready var body_visual: Node3D = $Body
 @onready var weapons: Array[Node3D] = [$AimPivot/Pistol,$AimPivot/Uzi,$AimPivot/Shotgun,$AimPivot/GrenadeLauncher,$AimPivot/AkRifle,$AimPivot/M4Rifle,$AimPivot/SniperRifle,$AimPivot/Minigun]
@@ -573,7 +574,13 @@ func _update_aim()->void:
 	if flat_direction.length_squared()>0.0001:
 		var target_direction:=flat_direction.normalized()
 		aim_pivot.look_at(aim_pivot.global_position+target_direction,Vector3.UP)
-		body_visual.look_at(body_visual.global_position+target_direction,Vector3.UP,true)
+		_turn_body(target_direction)
+
+## Eases the body yaw toward the aim so a cursor flip does not snap 180 degrees; aim_pivot (bullets) stays exact.
+func _turn_body(direction: Vector3) -> void:
+	var target := atan2(direction.x, direction.z)
+	var yaw := lerp_angle(body_visual.global_rotation.y, target, 1.0 - exp(-BODY_TURN_RATE * get_physics_process_delta_time()))
+	body_visual.global_rotation = Vector3(0.0, yaw, 0.0)
 
 func _aim_uncontrolled() -> void:
 	var direction: Vector3 = _mutation_control.direction
@@ -581,7 +588,7 @@ func _aim_uncontrolled() -> void:
 		return
 	_aim_point = aim_pivot.global_position + direction * 8.0
 	aim_pivot.look_at(_aim_point, Vector3.UP)
-	body_visual.look_at(body_visual.global_position + direction, Vector3.UP, true)
+	_turn_body(direction)
 
 # Public weapon_view_v1: read-only view data, never persisted.
 func get_weapon_view() -> Dictionary:
