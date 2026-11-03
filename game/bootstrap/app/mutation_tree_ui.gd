@@ -23,6 +23,7 @@ var stability_value: Label
 var hint_label: Label
 var content: Control
 var skill_bar: SKILL_BAR
+var cards_suppressed := false # set by the tutorial while a lesson talks over the menu
 var _last_skill_tier := -1
 var _hotbar_signature := ""
 var _previous_pause := false
@@ -482,7 +483,7 @@ func _add_lock(canvas: Control, row: Array, center: Vector2) -> void:
 
 
 func _show_card(button: Control) -> void:
-	if not button.is_inside_tree():
+	if cards_suppressed or not button.is_inside_tree():
 		return
 	var info: Dictionary = button.get_meta("card_info", {})
 	_present_card(str(button.get_meta("skill_id")), info, button.get_global_rect())

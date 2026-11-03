@@ -151,6 +151,7 @@ func _menu_lessons(director: Node, overlay: Node, hud: Node, tree_ui: Node) -> v
 	tree_ui.call("open_tree")
 	await process_frame
 	await process_frame
+	_check(bool(tree_ui.get("cards_suppressed")), "Skill cards stay hidden while a lesson is shown over the menu")
 	_check(not tree_ui.call("tutorial_rect", "passive").size.is_zero_approx() and str(overlay.get("step").get("mode")) == "click"
 			and str(overlay.get("step").get("text")) == TEXT.t("tutBranches"), "With the menu open it shows the split into active and passive")
 	for kind in ["active", "passive"]:
