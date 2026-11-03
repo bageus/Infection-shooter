@@ -201,7 +201,6 @@ func _handle_actions() -> void:
 	if Input.is_action_just_pressed("weapon_1"): _select_weapon(0)
 	elif Input.is_action_just_pressed("weapon_2"): _select_weapon(1)
 	elif Input.is_action_just_pressed("weapon_3"): _select_weapon(2)
-	elif Input.is_action_just_pressed("weapon_4") and _slot_weapons.has(3): _select_weapon(_slot_weapons.find(3))
 	if Input.is_action_just_pressed("pickup_weapon"):
 		var nearest: Node3D
 		var best := 2.4
@@ -244,7 +243,7 @@ func _fire_weapon(weapon: Node3D) -> bool:
 func _has_presentation_activity() -> bool:
 	if _roll_remaining > 0.0 or bool(infection_runtime.call("is_control_lost")):
 		return true
-	for action in ["move_left", "move_right", "move_up", "move_down", "fire", "reload", "weapon_1", "weapon_2", "weapon_3", "weapon_4", "roll", "camera_left", "camera_right"]:
+	for action in ["move_left", "move_right", "move_up", "move_down", "fire", "reload", "weapon_1", "weapon_2", "weapon_3", "roll", "camera_left", "camera_right"]:
 		if Input.is_action_pressed(action):
 			return true
 	return false
