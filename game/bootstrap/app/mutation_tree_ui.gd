@@ -220,9 +220,12 @@ func tutorial_rect(kind: String) -> Rect2:
 	for row in runtime.call("skill_catalog"):
 		if int(row[3]) == 3:
 			hybrids[str(row[0])] = true
+	var left_edge := INF # the row captions ("Активные", "Пассивные") sit left of the buttons, at the canvas edge
 	for button in content.find_children("*", "Button", true, false):
 		if button.is_queued_for_deletion() or not button.has_meta("skill_id"):
 			continue
+		if button.get_parent() is Control:
+			left_edge = minf(left_edge, (button.get_parent() as Control).get_global_rect().position.x)
 		var id := str(button.get_meta("skill_id"))
 		var hit := false
 		if kind.begins_with("skill:"):
@@ -232,7 +235,11 @@ func tutorial_rect(kind: String) -> Rect2:
 			hit = not is_lock and not hybrids.has(id) and bool(runtime.call("skill_requirements", id).get("active", false)) == (kind == "active")
 		if hit:
 			found = button.get_global_rect() if found.size == Vector2.ZERO else found.merge(button.get_global_rect())
-	return found.grow(10.0) if found.size != Vector2.ZERO else found
+	if found.size == Vector2.ZERO:
+		return found
+	if (kind == "active" or kind == "passive") and left_edge < found.position.x:
+		found = Rect2(Vector2(left_edge, found.position.y), found.size + Vector2(found.position.x - left_edge, 0.0))
+	return found.grow(10.0)
 
 
 func is_tree_open() -> bool:

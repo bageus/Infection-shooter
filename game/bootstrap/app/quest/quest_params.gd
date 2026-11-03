@@ -156,9 +156,9 @@ func _update_visibility() -> void:
 	var is_lesson: bool = quest.type == "lesson"
 	var is_message: bool = quest.type == "message"
 	trigger_value.visible = kind == "time" or kind == "steps" or kind == "mutation_rise"
-	trigger_target.visible = kind == "reach"
+	trigger_target.visible = kind == "reach" or kind == "collect"
 	trigger_place.visible = kind == "reach"
-	var has_targets := not is_lesson and not is_message
+	var has_targets: bool = not is_lesson and not is_message and quest.type != "leave"
 	target_picker.visible = has_targets
 	target_list.visible = has_targets
 	done_kind.visible = has_targets

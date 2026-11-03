@@ -153,6 +153,11 @@ func _menu_lessons(director: Node, overlay: Node, hud: Node, tree_ui: Node) -> v
 	await process_frame
 	_check(not tree_ui.call("tutorial_rect", "passive").size.is_zero_approx() and str(overlay.get("step").get("mode")) == "click"
 			and str(overlay.get("step").get("text")) == TEXT.t("tutBranches"), "With the menu open it shows the split into active and passive")
+	for kind in ["active", "passive"]:
+		var group_rect: Rect2 = tree_ui.call("tutorial_rect", kind)
+		var caption := TEXT.t("mutationActive" if kind == "active" else "mutationPassive")
+		var captions := tree_ui.find_children("*", "Label", true, false).filter(func(label: Node) -> bool: return (label as Label).text == caption)
+		_check(not captions.is_empty() and group_rect.position.x <= (captions[0] as Label).get_global_rect().position.x, "The %s frame reaches left over its row caption" % kind)
 	await _advance(overlay)
 	_check(str(overlay.get("step").get("text")) == TEXT.t("tutActive"), "Then it explains the active branch")
 	await _advance(overlay)

@@ -7,18 +7,19 @@ const MAX_QUESTS := 64
 const MAX_TARGETS := 16
 const MAX_TEXT := 400
 
-const TYPES: Array[String] = ["find", "kill", "destroy", "pickup", "message", "lesson"]
+const TYPES: Array[String] = ["find", "kill", "destroy", "pickup", "message", "lesson", "leave"]
 const TYPE_LABELS := {
 	"find": "Найти объект/предмет/врага", "kill": "Убить врага", "destroy": "Разрушить",
 	"pickup": "Подобрать", "message": "Показать сообщение", "lesson": "Запустить обучение",
+	"leave": "Покинуть уровень по лестнице вниз",
 }
 # Trigger: what starts the quest. "previous" means right after the earlier quest is complete.
-const TRIGGERS: Array[String] = ["previous", "time", "steps", "reach", "mutation_rise", "menu_open", "control_lost"]
+const TRIGGERS: Array[String] = ["previous", "time", "steps", "reach", "mutation_rise", "menu_open", "control_lost", "collect"]
 const TRIGGER_LABELS := {
 	"previous": "Выполнено предыдущее задание", "time": "Время (секунды)",
 	"steps": "Шаги (количество)", "reach": "Достижение цели или места",
 	"mutation_rise": "Заполнение шкалы мутации (на сколько поднялась)", "menu_open": "Появление меню мутации у игрока",
-	"control_lost": "Потеря контроля",
+	"control_lost": "Потеря контроля", "collect": "Собрать объект",
 }
 # Completion: when the quest counts as done.
 const COMPLETIONS: Array[String] = ["reach", "destroy", "collect", "steps"]
@@ -46,11 +47,12 @@ const LESSONS: Array[Array] = [
 	["blast_extinguisher", "Взрыв огнетушителя"],
 ]
 const DEFAULT_COMPLETION := {
-	"find": "reach", "kill": "destroy", "destroy": "destroy", "pickup": "collect", "message": "", "lesson": "",
+	"find": "reach", "kill": "destroy", "destroy": "destroy", "pickup": "collect", "message": "", "lesson": "", "leave": "",
 }
 const PRESETS := {
 	"find": "Найдите цель", "kill": "Убейте врага", "destroy": "Разрушьте цель",
 	"pickup": "Подберите предмет", "message": "Сообщение",
+	"leave": "Покиньте уровень: спуститесь по лестнице вниз",
 }
 
 

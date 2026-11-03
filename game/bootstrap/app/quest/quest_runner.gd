@@ -26,6 +26,7 @@ var _last_position := Vector3.INF
 var _targets: Array = []
 var _mutation_at_start := 0.0
 var _trigger_node: Node3D
+var _trigger_existed := false
 var _was_planning := false
 
 
@@ -102,6 +103,7 @@ func _begin_quest() -> void:
 		return
 	var quest := current()
 	_trigger_node = BOOK.find_object(get_tree(), str(quest.trigger.target))
+	_trigger_existed = _trigger_node != null
 
 
 func _track_steps() -> void:
@@ -126,7 +128,8 @@ func _trigger_context() -> Dictionary:
 		var point: Array = quest.trigger.point
 		reach = _flat(Vector3(float(point[0]), 0.0, float(point[1])))
 	return {"idle": _idle, "steps": _steps_since_start(), "reach": reach, "mutation_gain": _mutation() - _mutation_at_start,
-			"menu_open": _menu_open(), "control_lost": _control_lost()}
+			"menu_open": _menu_open(), "control_lost": _control_lost(),
+			"trigger_collected": _trigger_existed and not _alive(_trigger_node)}
 
 
 func _mutation() -> float:
@@ -137,6 +140,11 @@ func _mutation() -> float:
 func _control_lost() -> bool:
 	var runtime: Variant = player.get("infection_runtime") if player != null else null
 	return runtime != null and bool(runtime.call("is_control_lost"))
+
+
+func _left_level() -> bool:
+	var layout: Variant = host.get("mission_layout") if host != null else null
+	return layout != null and bool(layout.call("goal_reached", player.global_position))
 
 
 func _menu_open() -> bool:
@@ -174,6 +182,8 @@ func _activate() -> void:
 func _quest_done(quest: Dictionary) -> bool:
 	if str(quest.type) == "message":
 		return _message_left <= 0.0
+	if str(quest.type) == "leave":
+		return LOGIC.complete(quest, {"left_level": _left_level()})
 	var context := {"steps": _steps_since_start(), "distances": [], "gone": []}
 	for node in _targets:
 		var alive := _alive(node)

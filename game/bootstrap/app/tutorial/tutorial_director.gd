@@ -214,7 +214,7 @@ func _build_steps(lesson: String) -> Array:
 			return _task(TEXT.t("tutExplore"), TEXT.t("objExplore"), [], "cycle", func() -> bool: return _crate_in_sight(lesson) or _standing(lesson, "crate").is_empty())
 		"crates":
 			return _task(TEXT.t("tutCrates") % KEYS.binding("melee"), TEXT.t("objCrates"), KEYS.row(["melee"]), "all",
-					func() -> bool: return _standing(lesson, "crate").is_empty())
+					func() -> bool: return _standing(lesson, "crate").is_empty()) + [_click(TEXT.t("tutCratesAbilities"), [])]
 		"weapons":
 			return [_click(TEXT.t("tutWeapons") % [KEYS.binding("weapon_1"), KEYS.binding("weapon_2"), KEYS.binding("weapon_3")], [_hud_rect.bind("weapons")])]
 		"armor":

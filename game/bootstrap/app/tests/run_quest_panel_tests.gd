@@ -26,7 +26,7 @@ func _run() -> void:
 	var tab: Node = tabs.get_node("Конструктор заданий")
 	var book: Node = stage.get("quest_book")
 	var type_picker: OptionButton = tab.get_node("QuestType")
-	_check(type_picker.item_count == 6, "Six quest types can be picked")
+	_check(type_picker.item_count == 7, "Seven quest types can be picked")
 	(tab.get_node("QuestLesson") as OptionButton).select(2)
 	type_picker.select(5)
 	type_picker.item_selected.emit(5)
