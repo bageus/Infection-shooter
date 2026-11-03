@@ -162,7 +162,7 @@ func _strike_objects(forward: Vector3, damage: float) -> void:
 		hit_ids[body.get_instance_id()] = true
 		# A loot crate breaks on its own; the shove below would only move the pieces.
 		if body.has_method("has_loot") and bool(body.call("has_loot")) and body.has_method("break_by_strike"):
-			body.call("break_by_strike", body.global_position, forward)
+			body.call("break_by_strike", body.global_position, forward, true)
 			continue
 		if body is RigidBody3D and not (body as RigidBody3D).freeze:
 			body.call("push_from_character", player.global_position, forward * STRIKE_PUSH_SPEED, 1.0)
