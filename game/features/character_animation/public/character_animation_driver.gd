@@ -199,7 +199,7 @@ func play_overlay(clip_name: StringName) -> bool:
 	return true
 
 
-# animation_events_v1 (ADR-0066): procedural melee strike, &"kick" (rear left leg) or &"punch" (left arm); returns its duration, 0.0 if impossible.
+# animation_events_v1 (ADR-0066): procedural melee strike, &"kick" (rear left leg), &"punch" (left arm) or &"inject" (left hand stabs the left thigh); returns its duration, 0.0 if impossible.
 func play_strike(kind: StringName) -> float:
 	prepare_visual()
 	if _dead or animation_player == null:

@@ -13,4 +13,7 @@ func request(player: Node) -> bool:
 		if not player.infinite_antidotes:
 			player.antidotes -= 1
 		player.play_item_sound(&"antidote_use")
+		var driver: Node = player.get_node_or_null("AnimationDriver")
+		if driver != null and driver.has_method("play_strike"):
+			driver.call("play_strike", &"inject")
 	return used
