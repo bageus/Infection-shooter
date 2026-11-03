@@ -21,8 +21,9 @@ const PUNCH_IMPACT := 0.14
 # Limb tracks: bone -> [child bone (gives the bone's direction), keys]; a key is
 # [time share, skeleton-space direction the bone points along]. The kick's come from kick_clip_data.gd.
 const KICK_TRACKS := KICK_DATA.KICK_LEG
-## Degrees the kicking foot is turned about its shin, towards the body's centre (the clip's foot points out).
-const KICK_FOOT_TURN := 35.0
+## Degrees (x) the kicking foot is turned about its shin towards the body's centre by time share: the
+## foot comes round during the wind-up, before the leg thrusts out, and stays turned through the strike.
+const KICK_FOOT_TURN := [[0.0, Vector3(0, 0, 0)], [0.12, Vector3(45, 0, 0)], [0.3, Vector3(60, 0, 0)], [0.45, Vector3(40, 0, 0)], [1.0, Vector3(35, 0, 0)]]
 ## Bones that keep their skeleton-space orientation through a kick (the arms hold their pose).
 const KICK_HELD := ["LeftShoulder", "LeftArm", "LeftForeArm", "LeftHand", "RightShoulder", "RightArm", "RightForeArm", "RightHand"]
 const PUNCH_TRACKS := {
@@ -157,7 +158,7 @@ func _kick(skeleton: Skeleton3D, t: float, weight: float) -> void:
 		skeleton.set_bone_pose_rotation(bone, (parent_rotation.inverse() * (held[bone] as Quaternion)).normalized())
 	_aim_tracks(skeleton, KICK_TRACKS, t, weight)
 	var shin := skeleton.get_bone_global_pose(skeleton.find_bone("LeftFoot")).origin - skeleton.get_bone_global_pose(skeleton.find_bone("LeftLeg")).origin
-	_rotate_bone_quaternion(skeleton, skeleton.find_bone("LeftFoot"), Quaternion(shin.normalized(), deg_to_rad(KICK_FOOT_TURN) * weight))
+	_rotate_bone_quaternion(skeleton, skeleton.find_bone("LeftFoot"), Quaternion(shin.normalized(), deg_to_rad(sample(KICK_FOOT_TURN, t).x) * weight))
 	kick_foot = skeleton.get_bone_global_pose(skeleton.find_bone("LeftFoot")).origin
 
 
