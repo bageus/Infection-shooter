@@ -25,7 +25,9 @@ float chevron(vec2 p, float lift) {
 }
 
 void fragment() {
-	vec2 p = (UV - 0.5) * 2.0;
+	// The double chevron spans y -1.05..0.7, wider than the quad: scale and centre it so no tip is cut off.
+	vec2 edge = (UV - 0.5) * 2.0;
+	vec2 p = edge * 1.5 + vec2(0.0, -0.175);
 	float d = min(chevron(p, 0.0), chevron(p, 0.5));
 	float body = 1.0 - smoothstep(0.1, 0.13, d);
 	float halo = (1.0 - smoothstep(0.13, 0.4, d)) * 0.35;
@@ -38,5 +40,5 @@ void fragment() {
 	tone += paint * halo * glow * 0.6;
 	float alpha = clamp(paint_cover * (0.45 + 0.5 * glow) + halo * glow * 0.5, 0.0, 1.0);
 	ALBEDO = tone;
-	ALPHA = alpha * (1.0 - smoothstep(0.92, 1.0, max(abs(p.x), abs(p.y))));
+	ALPHA = alpha * (1.0 - smoothstep(0.92, 1.0, max(abs(edge.x), abs(edge.y))));
 }
