@@ -12,8 +12,11 @@ const KICK_DATA := preload("res://game/features/character_animation/kick_clip_da
 
 const KICK := &"kick"
 const PUNCH := &"punch"
+## Antidote shot: the left hand stabs a syringe into the left thigh.
+const INJECT := &"inject"
 const KICK_SECONDS := 0.6
 const PUNCH_SECONDS := 0.4
+const INJECT_SECONDS := 0.9
 ## Seconds from the start to the moment the foot or fist lands.
 const KICK_IMPACT := 0.27
 const PUNCH_IMPACT := 0.14
@@ -30,6 +33,13 @@ const PUNCH_TRACKS := {
 	"LeftArm": ["LeftForeArm", [[0.0, Vector3(0.6, -0.8, 0.3)], [0.3, Vector3(0.6, -0.4, -0.6)], [0.5, Vector3(0.12, 0.05, 1.0)], [0.65, Vector3(0.12, 0.05, 1.0)], [1.0, Vector3(0.6, -0.8, 0.3)]]],
 	"LeftForeArm": ["LeftWrist", [[0.0, Vector3(0.3, -0.5, 0.8)], [0.3, Vector3(0.2, 0.3, 0.9)], [0.5, Vector3(0.1, 0.05, 1.0)], [0.65, Vector3(0.1, 0.05, 1.0)], [1.0, Vector3(0.3, -0.5, 0.8)]]],
 }
+## Left arm reaches down to the left thigh, holds while the needle goes in (a small push at 0.5), and returns.
+const INJECT_TRACKS := {
+	"LeftArm": ["LeftForeArm", [[0.0, Vector3(0.6, -0.8, 0.3)], [0.3, Vector3(0.3, -0.95, 0.1)], [0.45, Vector3(0.3, -0.95, 0.1)], [0.55, Vector3(0.32, -0.93, 0.15)], [0.75, Vector3(0.3, -0.95, 0.1)], [1.0, Vector3(0.6, -0.8, 0.3)]]],
+	"LeftForeArm": ["LeftHand", [[0.0, Vector3(0.3, -0.5, 0.8)], [0.3, Vector3(-0.35, -0.9, -0.2)], [0.45, Vector3(-0.35, -0.9, -0.2)], [0.55, Vector3(-0.3, -0.95, -0.1)], [0.75, Vector3(-0.35, -0.9, -0.2)], [1.0, Vector3(0.3, -0.5, 0.8)]]],
+}
+## Torso bows towards the thigh while the shot is given.
+const INJECT_TORSO := Vector3(14.0, 0.0, -6.0)
 # Torso lean/twist (degrees about skeleton axes) at the strike moment, scaled by the envelope.
 const PUNCH_TORSO := Vector3(-3.0, -14.0, 0.0)
 const TORSO_BONES := ["Spine1", "Spine2"]
@@ -39,6 +49,9 @@ const RAMP_OUT := 0.25
 
 ## Kicking foot's skeleton-space position after the last kick update (read back by tests).
 var kick_foot := Vector3.ZERO
+## Left hand and the upper-thigh point after the last arm update (read back by tests).
+var hand := Vector3.ZERO
+var thigh_point := Vector3.ZERO
 var _kind: StringName = &""
 var _elapsed := 0.0
 var _duration := 0.0
@@ -55,7 +68,7 @@ func start(kind: StringName) -> float:
 			return 0.0
 	_kind = kind
 	_elapsed = 0.0
-	_duration = KICK_SECONDS if kind == KICK else PUNCH_SECONDS
+	_duration = KICK_SECONDS if kind == KICK else (INJECT_SECONDS if kind == INJECT else PUNCH_SECONDS)
 	return _duration
 
 
@@ -104,12 +117,14 @@ func _process_modification_with_delta(delta: float) -> void:
 	if _kind == KICK:
 		_kick(skeleton, t, weight)
 		return
-	var torso := PUNCH_TORSO * weight * _torso_swing(t)
+	var torso := (INJECT_TORSO if _kind == INJECT else PUNCH_TORSO) * weight * _torso_swing(t)
 	for bone_name: String in TORSO_BONES:
 		var torso_bone := skeleton.find_bone(bone_name)
 		if torso_bone >= 0:
 			_rotate_bone(skeleton, torso_bone, Vector3(deg_to_rad(torso.x), deg_to_rad(torso.y), deg_to_rad(torso.z)) * 0.5)
-	_aim_tracks(skeleton, PUNCH_TRACKS, t, weight)
+	_aim_tracks(skeleton, _tracks(_kind), t, weight)
+	hand = skeleton.get_bone_global_pose(skeleton.find_bone("LeftHand")).origin
+	thigh_point = skeleton.get_bone_global_pose(skeleton.find_bone("LeftUpLeg")).origin.lerp(skeleton.get_bone_global_pose(skeleton.find_bone("LeftLeg")).origin, 0.25)
 
 
 ## Value of the baked key list `keys` ([[share, Vector3], ...]) at time share `t`.
@@ -200,6 +215,8 @@ static func _tracks(kind: StringName) -> Dictionary:
 			return KICK_TRACKS
 		PUNCH:
 			return PUNCH_TRACKS
+		INJECT:
+			return INJECT_TRACKS
 	return {}
 
 
