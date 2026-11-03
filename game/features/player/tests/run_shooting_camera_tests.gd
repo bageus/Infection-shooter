@@ -125,5 +125,15 @@ func _test_adjustment() -> void:
 	_check(is_zero_approx(view.yaw) and absf(view.pitch + 5.0) < 0.001 and view.distance == player.camera_max_distance, "Preferences clamp yaw, pitch and distance")
 	player.set_camera_adjustment({"yaw": 0.0, "pitch": -200.0, "distance": 20.0})
 	_check(absf(player.get_camera_adjustment().pitch + 85.0) < 0.001, "Pitch cannot drop below the steepest allowed angle")
+	player.set_camera_adjustment({"yaw": 0.0, "pitch": -37.3, "distance": 20.0})
+	var key := InputEventKey.new()
+	key.keycode = KEY_I
+	key.pressed = true
+	player._unhandled_input(key)
+	_check(absf(player.get_camera_adjustment().pitch + 38.3) < 0.001, "I raises the camera one step")
+	key.keycode = KEY_K
+	player._unhandled_input(key)
+	player._unhandled_input(key)
+	_check(absf(player.get_camera_adjustment().pitch + 36.3) < 0.001, "K lowers the camera one step per press")
 	player.queue_free()
 	await process_frame
