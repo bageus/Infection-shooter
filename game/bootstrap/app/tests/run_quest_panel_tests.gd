@@ -66,6 +66,12 @@ func _run() -> void:
 	book.add("lesson", "locked_door")
 	await process_frame
 	_check(tab.get_combined_minimum_size().x <= 320, "Long lesson names never widen the panel (%d)" % tab.get_combined_minimum_size().x)
+	(tab.get_parent() as TabContainer).current_tab = tab.get_index() # laid out only while shown
+	for i in 3:
+		await process_frame
+	for button_path in ["QuestButtons/QuestUp", "QuestButtons/QuestDown", "QuestButtons/RemoveQuest", "QuestParams/TargetButtons/AddTarget", "QuestParams/TargetButtons/RemoveTarget"]:
+		var button := tab.get_node(button_path) as Button
+		_check(button.size.x >= 30.0 and button.size.y > 0.0, "The button %s keeps a usable size (%s)" % [button_path, button.size])
 	_check(list.text_overrun_behavior == TextServer.OVERRUN_TRIM_ELLIPSIS and list.max_columns == 1, "The list trims long entries instead of scrolling sideways")
 	prop.free()
 	stage.queue_free()
