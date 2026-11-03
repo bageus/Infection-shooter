@@ -177,9 +177,9 @@ func _test_settings_reach_game(app: Node) -> void:
 	_check(AudioServer.get_bus_volume_db(master) < -5.0, "menu volume lowers the game's master bus")
 	var world := app.get_node_or_null("WorldEnvironment") as WorldEnvironment
 	_check(world != null and world.environment.adjustment_enabled and is_equal_approx(world.environment.adjustment_brightness, 1.3), "brightness reaches the game scene")
-	prefs.values.sound = false
+	prefs.values.volume = 0.0
 	prefs.apply_to_game(app.get_tree())
-	_check(AudioServer.is_bus_mute(master), "turning sound off mutes the game")
+	_check(AudioServer.get_bus_volume_db(master) < -40.0, "a zero volume slider silences the game")
 	prefs.reset()
 	prefs.apply_to_game(app.get_tree())
 	_check(not AudioServer.is_bus_mute(master) and absf(AudioServer.get_bus_volume_db(master)) < 0.01, "default settings keep the authored mix")

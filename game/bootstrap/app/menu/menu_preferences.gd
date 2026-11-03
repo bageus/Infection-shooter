@@ -18,7 +18,7 @@ const DEFAULTS := {"window_mode": 0, "resolution": "1280x720", "language": "ru",
 	"enemies_ignore_player": false, "enemies_no_damage": false, "enemy_difficulty": 1,
 	"walk_speed_multiplier": 1.0, "walk_animation_multiplier": 1.0,
 	"enemy_move_speed_multiplier": 1.0, "enemy_animation_multiplier": 1.0,
-	"volume": 0.4, "effects_volume": 1.0, "music_volume": 1.0, "menu_music": true, "menu_music_volume": 1.0, "sound": true, "occlusion_mode": 0, "test_mutagen": false, "infinite_antidotes": false, "lighting": true, "game_lights_only": false, "electronic_particles": true, "blood_style": 0, "blood_level": 2, "effects_quality": 2, "destruction_quality": 1,
+	"volume": 0.4, "effects_volume": 1.0, "music_volume": 1.0, "menu_music_volume": 1.0, "occlusion_mode": 0, "test_mutagen": false, "infinite_antidotes": false, "lighting": true, "game_lights_only": false, "electronic_particles": true, "blood_style": 0, "blood_level": 2, "effects_quality": 2, "destruction_quality": 1,
 	"bullet_impact_smoke": true, "sunlight": true, "shadows": true, "shadow_quality": 1, "mesh_lod": true, "keep_corpses": true, "floor_hints": true, "camera_shake": true}
 var values: Dictionary = DEFAULTS.duplicate()
 
@@ -83,8 +83,7 @@ func apply_to_game(tree: SceneTree, display_user_action: bool = false) -> void:
 	UI_TRANSLATIONS.apply_language(str(values.language))
 	var master := AudioServer.get_bus_index(&"Master")
 	if master >= 0:
-		AudioServer.set_bus_mute(master, not bool(values.sound))
-		AudioServer.set_bus_volume_db(master, linear_to_db(clampf(float(values.volume) / float(DEFAULTS.volume), 0.0001, 2.0)))
+			AudioServer.set_bus_volume_db(master, linear_to_db(clampf(float(values.volume) / float(DEFAULTS.volume), 0.0001, 2.0)))
 	for bus_name in [&"SFX", &"UI", &"Music"]:
 		var index := AudioServer.get_bus_index(bus_name)
 		if index >= 0:
@@ -94,7 +93,7 @@ func apply_to_game(tree: SceneTree, display_user_action: bool = false) -> void:
 	var menu_bus := AudioServer.get_bus_index(&"MenuMusic")
 	if menu_bus >= 0:
 		AudioServer.set_bus_volume_db(menu_bus, linear_to_db(maxf(float(values.menu_music_volume), 0.0001)))
-		AudioServer.set_bus_mute(menu_bus, not bool(values.menu_music) or float(values.menu_music_volume) <= 0.0)
+		AudioServer.set_bus_mute(menu_bus, float(values.menu_music_volume) <= 0.0)
 	EFFECTS_QUALITY.set_level(int(values.effects_quality))
 	DESTRUCTION_QUALITY.set_level(int(values.destruction_quality))
 	var scene := tree.current_scene if tree != null else null
