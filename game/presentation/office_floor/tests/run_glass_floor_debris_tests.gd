@@ -47,7 +47,16 @@ func _test_elevated_panes_stay_off_floor() -> void:
 	table_pane.position = Vector3(0.0, 0.2, 0.0)
 	floor_view.call("scatter_glass_debris", [table_pane] as Array[MeshInstance3D], Vector3.FORWARD)
 	_check(floor_view.is_processing(), "A pane standing on the floor still bakes its decal")
+	var table := MeshInstance3D.new()
+	var top := BoxMesh.new()
+	top.size = Vector3(1.6, 0.05, 0.8)
+	table.mesh = top
+	stage.add_child(table)
+	table.position = Vector3(0.0, 0.75, 0.0)
+	table_pane.position = Vector3(0.0, 1.1, 0.0)
+	_check(floor_view.call("bake_furniture_glass", table_pane, [table] as Array[MeshInstance3D]), "A pane above a table decals the tabletop")
 	floor_view.call("clear_glass_debris")
+	table.queue_free()
 	table_pane.queue_free()
 
 

@@ -3,6 +3,7 @@ extends Node3D
 const TILE_SCENE := preload("res://game/presentation/office_floor/public/structural/base_floor_tile.tscn")
 const TILE_MATERIAL := preload("res://game/presentation/office_floor/floor_tile_material.tres")
 const MATERIAL_VARIANTS := 2
+const FURNITURE_REACH := 0.8 # Metres from a pane to the furniture it rests on or hangs beside.
 const SECTION_TILES := 4
 const GLASS_SURFACE := preload("res://game/presentation/office_floor/glass_footstep_surface.gd")
 const GLASS_BAKE := preload("res://game/presentation/office_floor/glass_floor_bake.gd")
@@ -239,6 +240,27 @@ func bake_glass_hit(pane: Node3D, point: Vector3, normal: Vector3) -> bool:
 			distance = d
 			target = node as MeshInstance3D
 	return _surface_events.glass_hit(target, point, normal) if target != null else false
+
+## Glass from a pane on furniture (table, cabinet) decals the nearest furniture surface, not the floor.
+func bake_furniture_glass(pane: MeshInstance3D, furniture: Array) -> bool:
+	var center := (pane.global_transform * pane.get_aabb()).get_center()
+	var target: MeshInstance3D
+	var point := Vector3.ZERO
+	var distance := INF
+	for node in furniture:
+		var mesh := node as MeshInstance3D
+		if not is_instance_valid(mesh): continue
+		var bounds: AABB = mesh.global_transform * mesh.get_aabb()
+		var closest := center.clamp(bounds.position, bounds.end)
+		var d := center.distance_squared_to(closest)
+		if d < distance:
+			distance = d
+			target = mesh
+			point = closest
+	if target == null or distance > FURNITURE_REACH * FURNITURE_REACH: return false
+	var bounds: AABB = target.global_transform * target.get_aabb()
+	var normal := Vector3.UP if point.y >= bounds.end.y - 0.02 else (point - bounds.get_center()).normalized()
+	return _surface_events.glass_hit(target, point, normal)
 
 func bake_display_hit(prop: Node3D, point: Vector3, normal: Vector3) -> void:
 	var display := prop.get("_display") as Node3D
