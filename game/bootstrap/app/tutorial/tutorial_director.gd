@@ -103,6 +103,8 @@ func request(lesson: String) -> void:
 
 func _process(delta: float) -> void:
 	_track_input(delta)
+	if is_instance_valid(_tree_ui):
+		_tree_ui.set("cards_suppressed", not current.is_empty())
 	_since_start += delta
 	_adopt_clock -= delta
 	if _adopt_clock <= 0.0 and _since_start < ADOPT_WINDOW:
