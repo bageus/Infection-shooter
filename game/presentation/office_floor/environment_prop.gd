@@ -186,6 +186,7 @@ func configure_loot_drop(drop_weapon: Callable, carried_weapons: Callable = Call
 
 
 func _release_loot() -> void:
+	remove_from_group(&"hidden_outline") # A broken crate no longer shows its loot outline.
 	var world: Node = effects_root if is_instance_valid(effects_root) else get_parent()
 	if not has_loot() or not has_meta(&"planning_loot") or world == null:
 		return
