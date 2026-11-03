@@ -16,6 +16,10 @@ const RING := ["Run_Forward", "Run_Forward_Left", "Run_Left", "Run_Backward_Left
 const LEG_BONES := ["LeftUpLeg", "LeftLeg", "LeftFoot", "LeftToeBase", "RightUpLeg", "RightLeg", "RightFoot", "RightToeBase"]
 const SPINE_NAMES := ["Spine", "mixamorig:Spine"]
 const HIPS_NAMES := ["Hips", "mixamorig:Hips"]
+## Body turn rate (rad/s) where on-the-spot stepping starts and where it is full.
+const TURN_RATE_MIN := 0.8
+const TURN_RATE_FULL := 2.5
+const TURN_TIME_SCALE := 0.8
 const DODGE_BLEND_IN := 0.06
 const DODGE_BLEND_OUT := 0.12
 
@@ -31,6 +35,8 @@ var min_time_scale := 0.5
 var max_time_scale := 1.7
 var playback_multiplier := 1.0
 
+var _last_yaw := 0.0
+var _has_yaw := false
 var _hips := -1
 var _spine := -1
 var _bones: Array[int] = [] # LEG_BONES order
@@ -83,10 +89,18 @@ func _apply_run(skeleton: Skeleton3D, delta: float) -> void:
 	var to_skeleton := skeleton.global_basis.inverse()
 	var velocity := to_skeleton * Vector3(character.velocity.x, 0.0, character.velocity.z)
 	var speed := Vector2(velocity.x, velocity.z).length()
-	weight = move_toward(weight, smoothstep(0.15, 0.9, speed), delta * 6.0)
+	# Turning on the spot steps the feet (the forward cycle, slowed) instead of spinning rigidly.
+	var yaw := skeleton.global_rotation.y
+	var turn_rate := absf(angle_difference(_last_yaw, yaw)) / maxf(delta, 0.0001) if _has_yaw else 0.0
+	_last_yaw = yaw
+	_has_yaw = true
+	var turning := smoothstep(TURN_RATE_MIN, TURN_RATE_FULL, turn_rate) if speed <= 0.15 else 0.0
+	weight = move_toward(weight, maxf(smoothstep(0.15, 0.9, speed), turning), delta * 6.0)
 	if weight <= 0.001:
 		return
-	if speed > 0.15:
+	if speed <= 0.15:
+		travel_angle = wrapf(travel_angle + angle_difference(travel_angle, 0.0) * (1.0 - exp(-14.0 * delta)), -PI, PI)
+	else:
 		var wanted := atan2(velocity.x, velocity.z)
 		travel_angle = wrapf(travel_angle + angle_difference(travel_angle, wanted) * (1.0 - exp(-14.0 * delta)), -PI, PI)
 	var sector := (travel_angle + TAU) / (PI * 0.25)
@@ -95,7 +109,7 @@ func _apply_run(skeleton: Skeleton3D, delta: float) -> void:
 	var from_data := _clip(RING[first])
 	var to_data := _clip(RING[(first + 1) % 8])
 	var reference := lerpf(from_data.ref_speed, to_data.ref_speed, mix)
-	var time_scale := clampf(speed / maxf(reference, 0.1), min_time_scale, max_time_scale) * playback_multiplier
+	var time_scale := (TURN_TIME_SCALE if speed <= 0.15 else clampf(speed / maxf(reference, 0.1), min_time_scale, max_time_scale)) * playback_multiplier
 	var previous := phase
 	var cycle := lerpf(from_data.length, to_data.length, mix)
 	phase = fposmod(phase + delta * time_scale / cycle, 1.0)
