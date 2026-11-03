@@ -6,6 +6,8 @@ const MELEE := preload("res://game/features/player/player_melee.gd")
 const DRIVER := preload("res://game/features/character_animation/public/character_animation_driver.gd")
 const MODEL := preload("res://models/objects/characters/soldier_animated.glb")
 
+## A jab shoves less than a kick (1 m).
+const KICK_PUSH_LIMIT := 1.0
 var failures := 0
 
 
@@ -122,6 +124,7 @@ func _run() -> void:
 	_expect(melee.start() == MELEE.PUNCH, "With an enemy beside the player the strike is a left-hand jab.")
 	melee.tick(0.3)
 	_expect(enemy.damage > 0.0, "The jab hurts the enemy in front.")
+	_expect(enemy.pushed.z < 0.0 and enemy.pushed.length() < KICK_PUSH_LIMIT, "The jab shoves the enemy a little.")
 	print("melee strike failures: ", failures)
 	quit(1 if failures > 0 else 0)
 

@@ -23,6 +23,8 @@ const KICK_MIN_SPEED := 1.5
 const KICK_MAX_SPEED := 8.0
 ## Metres a kick shoves an enemy it lands on.
 const KICK_ENEMY_PUSH := 1.0
+## Metres a jab shoves the enemy it hits.
+const PUNCH_ENEMY_PUSH := 0.4
 const OBJECT_MASK := 7
 const OBJECT_QUERY_LIMIT := 32
 ## Seconds from the key press to the foot or fist landing (strike_pose.gd).
@@ -81,6 +83,8 @@ func _punch_impact() -> void:
 		if offset.length() - _host._body_radius(enemy) > PUNCH_REACH or offset.normalized().dot(forward) <= 0.0:
 			continue
 		enemy.call("take_damage", _host._scented(enemy, PUNCH_DAMAGE))
+		if enemy.has_method("apply_skill_push"):
+			enemy.call("apply_skill_push", forward, PUNCH_ENEMY_PUSH)
 		return
 
 
