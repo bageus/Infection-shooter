@@ -24,7 +24,8 @@ var _walked := 0.0
 var _walked_at_start := 0.0
 var _last_position := Vector3.INF
 var _targets: Array = []
-var _mutation_at_start := 0.0
+var _mutation_last := 0.0
+var _mutation_rise := 0.0 # everything the meter climbed since the quest began; falls do not count back
 var _trigger_node: Node3D
 var _trigger_existed := false
 var _was_planning := false
@@ -36,6 +37,8 @@ func configure(quest_book: Node, hero: Node3D, interface: Node, lessons: Node, o
 	hud = interface
 	director = lessons
 	host = owner_node
+	# The mutation menu pauses the game, and "menu open" must still be noticed, so the runner keeps running then.
+	process_mode = Node.PROCESS_MODE_ALWAYS
 	book.changed.connect(reset)
 
 
@@ -61,7 +64,7 @@ func _planning() -> bool:
 
 
 func _process(delta: float) -> void:
-	if player == null or book == null:
+	if player == null or book == null or (get_tree().paused and not _menu_open()):
 		return
 	var planning := _planning()
 	if planning:
@@ -96,7 +99,8 @@ func _begin_quest() -> void:
 	phase = Phase.TRIGGER
 	_idle = 0.0
 	_walked_at_start = _walked
-	_mutation_at_start = _mutation()
+	_mutation_last = _mutation()
+	_mutation_rise = 0.0
 	_targets = []
 	_trigger_node = null
 	if is_finished() or not is_inside_tree():
@@ -127,9 +131,16 @@ func _trigger_context() -> Dictionary:
 	elif quest.trigger.point is Array and (quest.trigger.point as Array).size() == 2:
 		var point: Array = quest.trigger.point
 		reach = _flat(Vector3(float(point[0]), 0.0, float(point[1])))
-	return {"idle": _idle, "steps": _steps_since_start(), "reach": reach, "mutation_gain": _mutation() - _mutation_at_start,
+	return {"idle": _idle, "steps": _steps_since_start(), "reach": reach, "mutation_gain": _track_mutation(),
 			"menu_open": _menu_open(), "control_lost": _control_lost(),
 			"trigger_collected": _trigger_existed and not _alive(_trigger_node)}
+
+
+func _track_mutation() -> float:
+	var now := _mutation()
+	_mutation_rise += maxf(0.0, now - _mutation_last)
+	_mutation_last = now
+	return _mutation_rise
 
 
 func _mutation() -> float:

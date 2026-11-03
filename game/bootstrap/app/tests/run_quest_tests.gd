@@ -19,6 +19,7 @@ func _run() -> void:
 	_logic()
 	_book()
 	await _runner()
+	await _menu_while_paused()
 	if failures == 0:
 		print("Quest tests passed.")
 	else:
@@ -159,6 +160,38 @@ func _runner() -> void:
 	book.free()
 	hud.free()
 	prop.free()
+	player.free()
+
+
+# The mutation menu pauses the game; the quest waiting for it must still see it open.
+func _menu_while_paused() -> void:
+	var player := Node3D.new()
+	root.add_child(player)
+	var host := Node.new()
+	var script := GDScript.new()
+	script.source_code = "extends Node\nvar mutation_tree_ui := self\nvar open := false\nfunc is_tree_open() -> bool:\n\treturn open\nfunc set_tutorial_objective(_value: String) -> void:\n\tpass\n"
+	script.reload()
+	host.set_script(script)
+	root.add_child(host)
+	var book := BOOK.new()
+	root.add_child(book)
+	var runner := RUNNER.new()
+	root.add_child(runner)
+	runner.configure(book, player, host, null, host)
+	var open_menu := MODEL.make("message")
+	open_menu.trigger = {"kind": "menu_open", "value": 0.0, "target": "", "point": []}
+	book.restore([open_menu])
+	await process_frame
+	_check(runner.phase == runner.Phase.TRIGGER, "A quest waits for the menu")
+	paused = true
+	host.open = true
+	await process_frame
+	await process_frame
+	paused = false
+	_check(runner.phase != runner.Phase.TRIGGER, "The menu trigger fires although the menu paused the game")
+	runner.free()
+	host.free()
+	book.free()
 	player.free()
 
 
