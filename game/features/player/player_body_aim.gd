@@ -16,7 +16,7 @@ func _process_modification_with_delta(_delta: float) -> void:
 			_spine = skeleton.find_bone(label)
 			if _spine >= 0:
 				break
-	if _shoulders.is_empty():
+	if _shoulders.is_empty(): # left first: _shoulders[0] is the free arm
 		for label in ["LeftShoulder", "RightShoulder"]:
 			if skeleton.find_bone(label) >= 0:
 				_shoulders.append(skeleton.find_bone(label))
@@ -48,8 +48,12 @@ func _process_modification_with_delta(_delta: float) -> void:
 		var pitch := full * yaw.inverse()
 		_rotate(skeleton, _spine, yaw * Quaternion.IDENTITY.slerp(pitch, TORSO_PITCH_SHARE))
 		var arms := Quaternion.IDENTITY.slerp(pitch, 1.0 - TORSO_PITCH_SHARE)
+		# One-handed: the free arm stays along the body instead of swinging with the aim.
+		var stance: Object = mount.get_parent().get("weapon_stance")
+		var one_hand := stance != null and int(stance.get("stance")) == 1
 		for shoulder in _shoulders:
-			_rotate(skeleton, shoulder, arms)
+			if not (one_hand and shoulder == _shoulders[0]):
+				_rotate(skeleton, shoulder, arms)
 	mount.call("sync_weapon", weapon)
 	mount.set("_aim_modifying", false)
 
