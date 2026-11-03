@@ -247,7 +247,9 @@ func _build_steps(lesson: String) -> Array:
 			]
 		"open_menu":
 			return _task(TEXT.t("tutOpenMenu") % KEYS.binding("mutation_tree"), TEXT.t("objOpenMenu") % KEYS.binding("mutation_tree"), [], "cycle", _tree_open) + [
-				_wait(TEXT.t("tutPassiveUse"), [_tree_rect.bind("passive")], func() -> bool: return not _tree_open(), _tree_open, false),
+				_click(TEXT.t("tutBranches"), [_tree_rect.bind("active"), _tree_rect.bind("passive")], _tree_open),
+				_click(TEXT.t("tutActive"), [_tree_rect.bind("active")], _tree_open),
+				_click(TEXT.t("tutPassive"), [_tree_rect.bind("passive")], _tree_open),
 			]
 		"antidote":
 			return [_click(TEXT.t("tutAntidote") % antidote_key, [antidote]), _click(TEXT.t("tutAntidoteWise"), [antidote])]
