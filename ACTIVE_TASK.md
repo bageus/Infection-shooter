@@ -7,6 +7,8 @@ owner: AI
 updated: 2026-10-18
 ---
 
+03.11.2026 — поручение владельца Vadim (поза миниганa): миниган держится на уровне пояса (player_equipment_pose.gd, MINIGUN_RIGHT_HAND), правая рука хватом сверху, левая сбоку на дополнительной рукояти. Владелец: features.player. Тесты: run_new_weapon_tests, run_weapon_presentation_tests PASS; validate_* PASS. Скриншоты: /mnt/project-files/minigun_pose_review/. Зависимости/policy/DTO без изменений.
+
 03.11.2026 — поручение владельца Vadim (правка удара ногой): стопа бьющей ноги в ударе повёрнута к центру (до 60° вокруг голени, поворот идёт в замахе до выброса ноги, strike_pose.gd KICK_FOOT_TURN), а удар теперь отталкивает врагов в зоне удара на 1 м, джеб — на 0.4 м (player_melee KICK_ENEMY_PUSH, apply_skill_push). Стойка: задняя стопа в Idle-клипах повёрнута к центру на 30° (stance_feet.gd). Владельцы: features.character_animation, features.player (тест run_melee_strike_tests). Скриншоты: /mnt/project-files/kick_review/kick_foot_turn_*.png. Зависимости/policy/DTO без изменений. T004/Phase1 прежние.
 
 02.11.2026 — поручение владельца Vadim (маркер цели): маркер квеста над целью переделан: шейдерный (`tutorial_target_marker.gdshader`) пульсирующий круг на полу с вращающимися шевронами, стрелка из трёх шевронов с бегущей подсветкой и световой луч вверх; размер круга по основанию объекта. Владелец: presentation.office_floor (tutorial_target_marker). Скриншоты: /mnt/project-files/objective_marker_review/. Проверено: run_quest_tests PASS, validate_source_size, validate_architecture, validate_project, validate_ci_suites, validate_scene_resources PASS. Зависимости/policy/DTO без изменений.

@@ -1,6 +1,8 @@
 extends SkeletonModifier3D
 ## Fits the supporting hand to the new kit; minigun uses a low two-arm pose.
 const BACKPACK := preload("res://models/objects/weapons/minigun_ammo_backpack_lowpoly.glb")
+## Rear hand of the minigun in skeleton space: belt height, gripped from above.
+const MINIGUN_RIGHT_HAND := Vector3(-.22, -.02, .14)
 var mount: Node
 var backpack: Node3D
 var _back_attachment: BoneAttachment3D
@@ -43,7 +45,7 @@ func _process_modification_with_delta(_delta: float) -> void:
 	# chest; the sniper's longer stock needs a little more clearance.
 	var rifle_depth := .17 if name_value == "SNIPER RIFLE" else .19
 	var rifle_side := .03 if name_value == "SNIPER RIFLE" else -.13
-	var target_right := Vector3(-.27, .23, .08) if name_value == "MINIGUN" else Vector3(rifle_side, .43, rifle_depth)
+	var target_right := MINIGUN_RIGHT_HAND if name_value == "MINIGUN" else Vector3(rifle_side, .43, rifle_depth)
 	_fit_arm(skeleton, "Right", target_right, Vector3(-.65, .15, .10))
 	_level_right_hand(skeleton)
 	mount.call("sync_weapon", weapon)
