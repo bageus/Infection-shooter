@@ -14,6 +14,7 @@ const LEG_MOTION := preload("res://game/features/character_animation/leg_clip_mo
 const CLIP_LOOKUP := preload("res://game/features/character_animation/clip_lookup.gd")
 const OVERLAY := preload("res://game/features/character_animation/clip_overlay.gd")
 const LEG_OVERLAY := preload("res://game/features/character_animation/leg_overlay.gd")
+const STANCE_FEET := preload("res://game/features/character_animation/stance_feet.gd")
 const STRIKE_POSE := preload("res://game/features/character_animation/strike_pose.gd")
 const DODGE_ROLL := 0
 const DODGE_STRAFE := 1
@@ -198,9 +199,7 @@ func play_overlay(clip_name: StringName) -> bool:
 	return true
 
 
-# Public animation_events_v1 addition (ADR-0066): a procedural melee strike,
-# &"kick" (rear left leg) or &"punch" (left arm), over the playing clips. Returns
-# its duration, 0.0 for an unknown kind, a dead body or a skeleton without the bones.
+# animation_events_v1 (ADR-0066): procedural melee strike, &"kick" (rear left leg) or &"punch" (left arm); returns its duration, 0.0 if impossible.
 func play_strike(kind: StringName) -> float:
 	prepare_visual()
 	if _dead or animation_player == null:
@@ -328,6 +327,7 @@ func prepare_visual() -> void:
 		elif procedural_gait:
 			_attach_gait(model)
 		_attach_hit_reaction(model)
+		STANCE_FEET.attach(model, animation_player)
 		set_active(_active_requested)
 		_play_locomotion(&"idle", 0.0)
 		return

@@ -21,6 +21,10 @@ const KICK_HEIGHT := 1.2
 const KICK_IMPULSE := 90.0
 const KICK_MIN_SPEED := 1.5
 const KICK_MAX_SPEED := 8.0
+## Metres a kick shoves an enemy it lands on.
+const KICK_ENEMY_PUSH := 1.0
+## Metres a jab shoves the enemy it hits.
+const PUNCH_ENEMY_PUSH := 0.4
 const OBJECT_MASK := 7
 const OBJECT_QUERY_LIMIT := 32
 ## Seconds from the key press to the foot or fist landing (strike_pose.gd).
@@ -79,6 +83,8 @@ func _punch_impact() -> void:
 		if offset.length() - _host._body_radius(enemy) > PUNCH_REACH or offset.normalized().dot(forward) <= 0.0:
 			continue
 		enemy.call("take_damage", _host._scented(enemy, PUNCH_DAMAGE))
+		if enemy.has_method("apply_skill_push"):
+			enemy.call("apply_skill_push", forward, PUNCH_ENEMY_PUSH)
 		return
 
 
@@ -104,6 +110,11 @@ func _kick_impact() -> void:
 				nearest_crate = body
 		elif body is RigidBody3D and not (body as RigidBody3D).freeze and not _is_creature(body):
 			_throw(body as RigidBody3D, player.global_position)
+	for enemy in _host._enemies_near(player.global_position, KICK_LENGTH + 1.5):
+		var offset := _flat_offset(enemy)
+		var reach := float(_host._body_radius(enemy))
+		if enemy.has_method("apply_skill_push") and offset.dot(forward) > 0.0 and offset.dot(forward) <= KICK_LENGTH + reach and absf(offset.cross(forward).y) <= KICK_WIDTH * 0.5 + reach:
+			enemy.call("apply_skill_push", forward, KICK_ENEMY_PUSH)
 	# One kick breaks the nearest crate only; a crowd of crates takes one kick each.
 	if nearest_crate != null:
 		nearest_crate.call("break_by_strike", nearest_crate.global_position, forward)

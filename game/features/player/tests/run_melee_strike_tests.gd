@@ -6,6 +6,8 @@ const MELEE := preload("res://game/features/player/player_melee.gd")
 const DRIVER := preload("res://game/features/character_animation/public/character_animation_driver.gd")
 const MODEL := preload("res://models/objects/characters/soldier_animated.glb")
 
+## A jab shoves less than a kick (1 m).
+const KICK_PUSH_LIMIT := 1.0
 var failures := 0
 
 
@@ -27,6 +29,10 @@ class Host:
 class Enemy:
 	extends Node3D
 	var damage := 0.0
+	var pushed := Vector3.ZERO
+
+	func apply_skill_push(direction: Vector3, distance: float) -> void:
+		pushed = direction * distance
 
 	func take_damage(amount: float) -> void:
 		damage += amount
@@ -101,6 +107,16 @@ func _run() -> void:
 	melee.tick(1.6)
 	_expect(melee.start() == &"", "Still blocked at 1.9 s after the press.")
 	melee.tick(0.2)
+	var shoved := Enemy.new()
+	shoved.position = Vector3(0.3, 0, -1.3)
+	root.add_child(shoved)
+	var missed := Enemy.new()
+	missed.position = Vector3(3.0, 0, -1.3)
+	root.add_child(missed)
+	host.enemies = [shoved, missed]
+	melee.call("_kick_impact")
+	_expect(shoved.pushed.z < -0.5, "A kick shoves the enemy it lands on forward.")
+	_expect(missed.pushed == Vector3.ZERO, "A kick leaves an enemy off to the side alone.")
 	var enemy := Enemy.new()
 	enemy.position = Vector3(0, 0, -1.0)
 	root.add_child(enemy)
@@ -108,6 +124,7 @@ func _run() -> void:
 	_expect(melee.start() == MELEE.PUNCH, "With an enemy beside the player the strike is a left-hand jab.")
 	melee.tick(0.3)
 	_expect(enemy.damage > 0.0, "The jab hurts the enemy in front.")
+	_expect(enemy.pushed.z < 0.0 and enemy.pushed.length() < KICK_PUSH_LIMIT, "The jab shoves the enemy a little.")
 	print("melee strike failures: ", failures)
 	quit(1 if failures > 0 else 0)
 
