@@ -485,8 +485,8 @@ func take_melee_hit(damage: float, hit_position: Vector3, direction: Vector3) ->
 		return
 	take_projectile_hit(damage, hit_position, Vector3.ZERO, direction, "MELEE")
 
-func break_by_strike(hit_position: Vector3, direction: Vector3) -> void:
-	STRIKE_BREAK.break_crate(self, hit_position, direction)
+func break_by_strike(hit_position: Vector3, direction: Vector3, burst: bool = false) -> void:
+	STRIKE_BREAK.break_crate(self, hit_position, direction, burst)
 
 
 func _apply_damage(hit_position: Vector3, direction: Vector3) -> void:
