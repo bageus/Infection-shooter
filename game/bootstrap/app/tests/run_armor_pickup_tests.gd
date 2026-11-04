@@ -47,6 +47,23 @@ func _run() -> void:
 	_expect(not is_instance_valid(pickup), "Collected armor leaves the world")
 	_expect(is_equal_approx(float(player.call("export_loadout").get("armor", -1.0)), float(player.get("max_armor"))), "Found plate is carried")
 
+	# A planner-placed vest bobs like a planner-placed weapon: it rises from its spot and never sinks below it.
+	var planned := (load(ARMOR_SCENE) as PackedScene).instantiate() as Node3D
+	planned.set_meta("planning_scene_path", ARMOR_SCENE)
+	stage.add_child(planned)
+	planned.global_position = player.global_position + Vector3(-5.0, 1.0, 0.0)
+	var placed_y := planned.global_position.y
+	var lowest := placed_y
+	var highest := placed_y
+	for i in 40:
+		await process_frame
+		lowest = minf(lowest, planned.global_position.y)
+		highest = maxf(highest, planned.global_position.y)
+	_expect(lowest >= placed_y - 0.001, "Planner-placed armor never sinks below its placed spot")
+	_expect(highest - placed_y > 0.02, "Planner-placed armor bobs up visibly")
+	_expect(highest - placed_y < 0.1, "Planner-placed armor does not hover above its placed spot")
+	planned.queue_free()
+
 	player.set("armor", 40.0)
 	var carried: Dictionary = player.call("export_loadout")
 	player.set("armor", 0.0)
