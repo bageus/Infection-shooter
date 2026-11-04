@@ -133,7 +133,8 @@ func _planner_blood() -> void:
 	objects.call("_on_palette_selected", 0)
 	var preview: Node3D = objects.get("preview")
 	var camera: Camera3D = planner.get("camera")
-	var screen := camera.unproject_position(Vector3.ZERO)
+	# A point ahead of the camera: the world origin falls behind it at some planner yaws.
+	var screen := camera.unproject_position(camera.global_position - camera.global_basis.z * 10.0)
 	var geometry: RefCounted = planner.get("geometry")
 	var point: Vector3 = geometry.call("_screen_to_surface", screen, preview)
 	_check(point.is_finite() and point.y >= .0135, "Blood probe lands above rendered floor, not underneath its tiles")

@@ -86,6 +86,7 @@ var _roll_cooldown_remaining: float = 0.0
 var _aim_point := Vector3.ZERO
 var _camera_distance := 0.0
 var _view_adjustment := preload("res://game/features/player/camera_adjustment.gd").new()
+var camera_stair_room := false # set by bootstrap; eases the camera pitch
 var _stun_remaining := 0.0
 var _stun_intensity := 0.0
 var _stun_rotation := 0
@@ -428,6 +429,7 @@ func get_mutation()->float:return infection_runtime.call("get_mutation")
 func get_infection_skill(skill_id: String) -> bool:
 	return bool(infection_runtime.call("has_skill", skill_id))
 func _update_camera(delta: float) -> void:
+	_view_adjustment.tick(self, delta)
 	var bonus: Variant = get_current_weapon().get("camera_distance_bonus")
 	var view_distance := _camera_distance + (float(bonus) if bonus != null else 0.0)
 	view_distance *= 1.0 + _shooting_camera.tick(delta)

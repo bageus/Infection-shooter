@@ -8,6 +8,7 @@ const CEILING_Y := 2.8
 
 
 func _ready() -> void:
+	add_to_group("staircase")
 	var packed := load(model_path) as PackedScene
 	if packed == null:
 		push_error("Staircase model unavailable: " + model_path)

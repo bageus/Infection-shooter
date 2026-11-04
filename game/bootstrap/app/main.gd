@@ -110,6 +110,9 @@ func _ready() -> void:
 		var camera_tuning := preload("res://game/bootstrap/app/gameplay_camera_tuning.gd").new()
 		add_child(camera_tuning)
 		camera_tuning.setup(player)
+	var camera_room := preload("res://game/bootstrap/app/camera_stair_room.gd").new()
+	add_child(camera_room)
+	camera_room.setup(player)
 	world_activation = WorldActivation.new()
 	world_activation.name = "WorldActivation"
 	add_child(world_activation)
