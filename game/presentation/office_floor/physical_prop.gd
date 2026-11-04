@@ -5,11 +5,7 @@ const IMPACT_SOUND := preload("res://game/presentation/office_floor/impact_sound
 const BALANCE = preload("res://game/features/combat/public/projectile_balance.gd")
 const FLOOR_DEBRIS := preload("res://game/presentation/office_floor/prop_floor_debris.gd")
 var _floor_debris := FLOOR_DEBRIS.new()
-var repeated_electronic_particles := true
-
-
-func configure_damage_particles(enabled: bool) -> void:
-	repeated_electronic_particles = enabled
+var repeated_electronic_particles := not OS.has_feature("web") # repeated sparks are off on web builds
 
 
 const SPARKS = preload("res://game/presentation/office_floor/electric_sparks.gd")

@@ -94,7 +94,7 @@ func _unwind(came: Dictionary, last: Vector2i) -> Array[Vector2i]:
 
 
 ## Drops waypoints the straight line can skip, so the arrows follow corridors and corners, not the grid.
-func _pull_straight(cells: Array[Vector2i], start: Vector2i, target: Vector2i, from: Vector3, goal: Vector3) -> Array[Vector3]:
+func _pull_straight(cells: Array[Vector2i], _start: Vector2i, _target: Vector2i, from: Vector3, goal: Vector3) -> Array[Vector3]:
 	var points: Array[Vector3] = []
 	var anchor := from
 	var index := 0
@@ -154,6 +154,7 @@ func _push(heap: Array, entry: Array) -> void:
 	heap.append(entry)
 	var child := heap.size() - 1
 	while child > 0:
+		@warning_ignore("integer_division")
 		var parent := (child - 1) / 2
 		if float(heap[parent][0]) <= float(heap[child][0]):
 			break

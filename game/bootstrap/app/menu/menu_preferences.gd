@@ -20,7 +20,7 @@ const DEFAULTS := {"window_mode": 0, "resolution": "1280x720", "language": "ru",
 	"enemies_ignore_player": false, "enemies_no_damage": false, "enemy_difficulty": 1,
 	"walk_speed_multiplier": 1.0, "walk_animation_multiplier": 1.0,
 	"enemy_move_speed_multiplier": 1.0, "enemy_animation_multiplier": 1.0,
-	"volume": 0.4, "effects_volume": 1.0, "music_volume": 1.0, "menu_music_volume": 1.0, "occlusion_mode": 0, "test_mutagen": false, "infinite_antidotes": false, "lighting": true, "game_lights_only": false, "electronic_particles": true, "blood_style": 0, "blood_level": 2, "effects_quality": 2, "destruction_quality": 1,
+	"volume": 0.4, "effects_volume": 1.0, "music_volume": 1.0, "menu_music_volume": 1.0, "occlusion_mode": 0, "test_mutagen": false, "infinite_antidotes": false, "lighting": true, "game_lights_only": false, "blood_style": 0, "blood_level": 2, "effects_quality": 2, "destruction_quality": 1,
 	"bullet_impact_smoke": true, "sunlight": true, "shadows": true, "shadow_quality": 1, "mesh_lod": true, "keep_corpses": true, "floor_hints": true, "camera_shake": true}
 var values: Dictionary = DEFAULTS.duplicate()
 
@@ -67,18 +67,17 @@ func load_settings() -> void:
 ## Web builds show no rows for these, so their values are fixed here: shadows and the sun off,
 ## lights and mesh LOD on, silhouettes only, bodies kept to the 60 budget, blood procedural
 ## (no decal assets) and green or red. Effects quality keeps its default.
-static func apply_web_rules(values: Dictionary) -> void:
-	values.shadows = false
-	values.sunlight = false
-	values.lighting = true
-	values.game_lights_only = false
-	values.mesh_lod = true
-	values.occlusion_mode = 0
-	values.keep_corpses = true
-	values.electronic_particles = false
-	values.effects_quality = DEFAULTS.effects_quality
-	values.blood_style = 1
-	values.blood_level = BLOOD_LEVEL.GREEN if int(values.blood_level) == BLOOD_LEVEL.GREEN else WEB_RED_BLOOD
+static func apply_web_rules(settings: Dictionary) -> void:
+	settings.shadows = false
+	settings.sunlight = false
+	settings.lighting = true
+	settings.game_lights_only = false
+	settings.mesh_lod = true
+	settings.occlusion_mode = 0
+	settings.keep_corpses = true
+	settings.effects_quality = DEFAULTS.effects_quality
+	settings.blood_style = 1
+	settings.blood_level = BLOOD_LEVEL.GREEN if int(settings.blood_level) == BLOOD_LEVEL.GREEN else WEB_RED_BLOOD
 
 
 func save_settings() -> Error:
@@ -138,8 +137,6 @@ func apply_to_game(tree: SceneTree, display_user_action: bool = false) -> void:
 		scene.call("set_blood_level", int(values.blood_level), int(values.blood_style) == 1)
 	if scene != null and scene.has_method("set_walk_tuning"):
 		scene.call("set_walk_tuning", float(values.walk_speed_multiplier), float(values.walk_animation_multiplier))
-	if scene != null and scene.has_method("set_electronic_particles_enabled"):
-		scene.call("set_electronic_particles_enabled", bool(values.electronic_particles))
 	var impacts := scene.get_node_or_null("ImpactEffects") if scene != null else null
 	if impacts != null:
 		impacts.set("bullet_smoke_enabled", bool(values.bullet_impact_smoke))

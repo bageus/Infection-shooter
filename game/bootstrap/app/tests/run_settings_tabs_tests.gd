@@ -288,7 +288,7 @@ func _web_rule_checks() -> void:
 	values.blood_level = 0
 	PREFS.apply_web_rules(values)
 	_check(not values.shadows and not values.sunlight and values.lighting and values.mesh_lod and values.keep_corpses, "Web fixes shadows, sun, lights, mesh LOD and body budget")
-	_check(values.occlusion_mode == 0 and not values.electronic_particles and values.blood_style == 1, "Web uses silhouettes, no sparks and procedural blood")
+	_check(values.occlusion_mode == 0 and values.blood_style == 1, "Web uses silhouettes and procedural blood")
 	_check(values.blood_level == 0, "Web keeps green blood when chosen")
 	values.blood_level = 3
 	PREFS.apply_web_rules(values)
@@ -352,7 +352,7 @@ func _smoke_checks(tabs: TabContainer) -> void:
 	smoke.set_pressed(false)
 	var saved := PREFS.new()
 	saved.load_settings()
-	_check(not saved.values.bullet_impact_smoke and saved.values.electronic_particles, "Smoke off persists independently of electronic sparks")
+	_check(not saved.values.bullet_impact_smoke, "Smoke off persists")
 	smoke.set_pressed(true)
 
 

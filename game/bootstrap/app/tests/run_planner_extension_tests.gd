@@ -154,13 +154,9 @@ func _installed_lamps(planner: Node) -> void:
 func _particles(catalog: RefCounted) -> void:
 	var prop = catalog.call("_instantiate_asset", "res://models/objects/enviroments/05/05_wall_TV_frameless_destructible.glb")
 	stage.add_child(prop)
-	stage.call("set_electronic_particles_enabled", false)
-	_check(not prop.get("repeated_electronic_particles"), "Settings reach existing electronic objects")
-	var later = catalog.call("_instantiate_asset", "res://models/objects/enviroments/05/05_wall_TV_frameless_destructible.glb")
-	stage.add_child(later)
-	_check(not later.get("repeated_electronic_particles"), "Settings reach subsequently placed electronics")
-	var prefs := PREFS.new()
-	_check(prefs.values.electronic_particles, "Old settings preserve sparks by default")
+	_check(prop.get("repeated_electronic_particles") == not OS.has_feature("web"), "Repeated sparks follow the build rule (on for desktop, off for web)")
+	if OS.has_feature("web"):
+		return
 	# First-hit effects finish before measuring only subsequent hits.
 	prop.call("take_projectile_hit", 0.0, prop.global_position, Vector3.BACK, Vector3.FORWARD, "PISTOL")
 	var disabled := root.disable_3d
@@ -171,11 +167,7 @@ func _particles(catalog: RefCounted) -> void:
 	var effects := stage.get("mission_objects") as Node3D
 	var count := effects.get_child_count()
 	prop.call("take_projectile_hit", 0.0, prop.global_position, Vector3.BACK, Vector3.FORWARD, "PISTOL")
-	_check(effects.get_child_count() == count, "Disabled repeat hit creates no spark particles")
-	stage.call("set_electronic_particles_enabled", true)
-	_check(prop.get("repeated_electronic_particles"), "Toggle re-enables effects")
-	prop.call("take_projectile_hit", 0.0, prop.global_position, Vector3.BACK, Vector3.FORWARD, "PISTOL")
-	_check(effects.get_child_count() > count, "Enabled repeat hit creates spark particles")
+	_check(effects.get_child_count() > count, "Desktop repeat hit creates spark particles")
 
 func _corpse() -> void:
 	var floor_body := StaticBody3D.new()

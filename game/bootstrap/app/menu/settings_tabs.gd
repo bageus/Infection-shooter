@@ -256,12 +256,6 @@ func _video() -> void:
 		keep_corpses.button_pressed = dialog.view.preferences.values.keep_corpses
 		keep_corpses.toggled.connect(func(value: bool) -> void: dialog.call("_change", "keep_corpses", value))
 		dialog.get("layout").add_child(keep_corpses)
-		var particles := CheckButton.new()
-		particles.name = "ElectronicParticles"
-		particles.text = dialog.view.text("electronicParticles")
-		particles.button_pressed = dialog.view.preferences.values.electronic_particles
-		particles.toggled.connect(func(value: bool) -> void: dialog.call("_change", "electronic_particles", value))
-		dialog.get("layout").add_child(particles)
 	var smoke := CheckButton.new()
 	smoke.name = "BulletImpactSmoke"
 	smoke.text = dialog.view.text("bulletImpactSmoke")

@@ -250,8 +250,8 @@ func bake_furniture_glass(pane: MeshInstance3D, furniture: Array) -> bool:
 	for node in furniture:
 		var mesh := node as MeshInstance3D
 		if not is_instance_valid(mesh): continue
-		var bounds: AABB = mesh.global_transform * mesh.get_aabb()
-		var closest := center.clamp(bounds.position, bounds.end)
+		var mesh_bounds: AABB = mesh.global_transform * mesh.get_aabb()
+		var closest := center.clamp(mesh_bounds.position, mesh_bounds.end)
 		var d := center.distance_squared_to(closest)
 		if d < distance:
 			distance = d

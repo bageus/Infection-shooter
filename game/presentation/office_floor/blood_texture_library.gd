@@ -56,6 +56,8 @@ static func frame_count(category: String) -> int:
 func load_assets(max_dimension: int = 512, brightness: float = 1.18, procedural: bool = false, color: Color = DEFAULT_PROCEDURAL_COLOR) -> void:
 	if not entries.is_empty():
 		return
+	# Web exports cannot decode these atlases (WebP, image files), so web blood is always drawn in code.
+	procedural = procedural or OS.has_feature("web")
 	var key := "%d|%.3f|%s|%s" % [max_dimension, brightness, procedural, color.to_html()]
 	if _shared.has(key):
 		entries = _shared[key]

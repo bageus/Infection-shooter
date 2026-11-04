@@ -29,7 +29,6 @@ func _initialize() -> void:
 
 
 func _run() -> void:
-	_exercise_particle_binding()
 	_exercise_glass_binding()
 	var decoy := Node3D.new()
 	root.add_child(decoy)
@@ -83,30 +82,6 @@ func _run() -> void:
 	await create_timer(0.15).timeout
 	print("World bindings tests: %d failures" % _failures)
 	quit(_failures)
-
-
-func _exercise_particle_binding() -> void:
-	var bindings := BINDINGS.new(null, null, null, Callable())
-	var branch := Node.new()
-	var middle := Node.new()
-	var target := ParticleTarget.new()
-	var public_root := PublicRoot.new()
-	var nested := ParticleTarget.new()
-	branch.add_child(middle)
-	middle.add_child(target)
-	branch.add_child(public_root)
-	public_root.add_child(nested)
-	bindings.bind_scene(branch)
-	_check(target.configurations == 1 and nested.configurations == 1, "Nested particle targets are configured once, including descendants of a public root")
-	_check(public_root.configurations == 1, "Public root receives collaborators once")
-	bindings.bind_scene(branch)
-	_check(target.configurations == 1 and nested.configurations == 1, "Repeated scene binding does not register duplicate particle targets")
-	bindings.set_electronic_particles_enabled(false)
-	_check(target.configurations == 2 and nested.configurations == 2 and not target.enabled and not nested.enabled, "Setting change reaches each registered target once")
-	target.free()
-	bindings.set_electronic_particles_enabled(true)
-	_check(bindings.get("_particle_targets").size() == 1 and nested.enabled, "Freed targets are pruned without losing live targets")
-	branch.free()
 
 
 func _exercise_glass_binding() -> void:
