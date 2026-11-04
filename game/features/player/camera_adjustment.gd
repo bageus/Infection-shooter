@@ -42,6 +42,7 @@ func restore(actor: Node3D, values: Dictionary) -> void:
 		if not values.has(key) or not (values[key] is float or values[key] is int) or not is_finite(float(values[key])):
 			return
 	actor.camera_rig.rotation.y = deg_to_rad(wrapf(float(values.yaw), -180.0, 180.0))
+	actor.camera.rotation.y = 0.0
 	_base_pitch = clampf(float(values.pitch), PITCH_MIN, PITCH_MAX)
 	_apply_pitch(actor)
 	actor._camera_distance = clampf(float(values.distance), actor.camera_min_distance, actor.camera_max_distance)
@@ -54,7 +55,7 @@ func tick(actor: Node3D, delta: float) -> void:
 
 
 func _apply_pitch(actor: Node3D) -> void:
-	actor.camera.rotation = Vector3(deg_to_rad(clampf(_base_pitch + _room_offset, PITCH_MIN, PITCH_MAX)), 0.0, 0.0)
+	actor.camera.rotation.x = deg_to_rad(clampf(_base_pitch + _room_offset, PITCH_MIN, PITCH_MAX))
 
 
 func _apply(actor: Node3D, values: Dictionary) -> void:
