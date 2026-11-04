@@ -78,7 +78,7 @@ func _run() -> void:
 	var body := character.get_node("Body") as Node3D
 	create_tween().tween_property(body, "rotation:y", body.rotation.y + 3.0, 1.0)
 	await create_timer(0.5).timeout
-	_expect(float(legs.weight) > 0.8 and absf(float(legs.travel_angle)) < 0.2, "Turning on the spot steps the feet (%.2f)." % legs.weight)
+	_expect(float(legs.weight) > 0.2 and float(legs.weight) < 0.5 and absf(float(legs.travel_angle)) < 0.2, "Turning on the spot steps the feet (%.2f)." % legs.weight)
 	await create_timer(1.0).timeout
 	_expect(float(legs.weight) < 0.01, "Feet settle once the turn ends.")
 	body.rotation.y -= 3.0

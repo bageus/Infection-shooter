@@ -19,6 +19,8 @@ const HIPS_NAMES := ["Hips", "mixamorig:Hips"]
 ## Body turn rate (rad/s) where on-the-spot stepping starts and where it is full.
 const TURN_RATE_MIN := 0.8
 const TURN_RATE_FULL := 2.5
+## Share of the run cycle's amplitude used when turning: small shuffling steps, not jogging.
+const TURN_STEP_WEIGHT := 0.3
 const TURN_TIME_SCALE := 0.8
 const DODGE_BLEND_IN := 0.06
 const DODGE_BLEND_OUT := 0.12
@@ -95,7 +97,7 @@ func _apply_run(skeleton: Skeleton3D, delta: float) -> void:
 	_last_yaw = yaw
 	_has_yaw = true
 	var turning := smoothstep(TURN_RATE_MIN, TURN_RATE_FULL, turn_rate) if speed <= 0.15 else 0.0
-	weight = move_toward(weight, maxf(smoothstep(0.15, 0.9, speed), turning), delta * 6.0)
+	weight = move_toward(weight, maxf(smoothstep(0.15, 0.9, speed), turning * TURN_STEP_WEIGHT), delta * 6.0)
 	if weight <= 0.001:
 		return
 	if speed <= 0.15:
