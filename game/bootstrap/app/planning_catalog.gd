@@ -206,8 +206,6 @@ func _instantiate_asset(asset_path: String) -> Node3D:
 
 
 func _create_asset(asset_path: String) -> Node3D:
-	if asset_path == ENVIRONMENT_ROOT + "/01/01_stairs_2.glb":
-		asset_path = ENVIRONMENT_ROOT + "/01/01_stairs.glb"
 	if asset_path.begins_with(ENVIRONMENT_ROOT + "/") and asset_path.ends_with(".glb"):
 		var pickup_scene := _pickup_scene_for(asset_path.get_file())
 		if not pickup_scene.is_empty():
@@ -247,7 +245,7 @@ func _migrate_scene_path(old_path: String) -> String:
 		if not pickup_scene.is_empty():
 			return pickup_scene
 	if old_path.begins_with(group_one) and old_path.ends_with(".glb"):
-		var filename := old_path.get_file().replace("01_glass_wall_full_breakable(1).glb", "01_glass_wall_full_breakable.glb").replace("01_stairs_2.glb", "01_stairs.glb")
+		var filename := old_path.get_file().replace("01_glass_wall_full_breakable(1).glb", "01_glass_wall_full_breakable.glb")
 		var canonical := group_one + filename
 		if ResourceLoader.exists(canonical):
 			return canonical
