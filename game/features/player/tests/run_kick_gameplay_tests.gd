@@ -24,6 +24,13 @@ class Runtime extends Node:
 		return false
 
 
+class Table extends RigidBody3D:
+	var melee_hits := 0
+
+	func take_melee_hit(_damage: float, _at: Vector3, _direction: Vector3) -> void:
+		melee_hits += 1
+
+
 class Crate extends RigidBody3D:
 	var hits := 0.0
 
@@ -73,6 +80,22 @@ func _run() -> void:
 				broken += 1
 		_expect(broken == step + 1, "Kick %d breaks exactly one more crate (%d broken)." % [step + 1, broken])
 		await create_timer(2.2).timeout
+	# A table or nightstand takes the kick as a melee hit and is shoved away from the character.
+	var table := Table.new()
+	table.gravity_scale = 0.0
+	var table_shape := CollisionShape3D.new()
+	table_shape.shape = BoxShape3D.new()
+	table.add_child(table_shape)
+	table.position = Vector3(10, 0.25, -1.0)
+	root.add_child(table)
+	await physics_frame
+	await physics_frame
+	player.global_position = Vector3(10, 0.65, 0.0)
+	await physics_frame
+	mutation.call("melee")
+	await create_timer(0.5).timeout
+	_expect(table.melee_hits == 1, "Kick lands one melee hit on a table (%d)." % table.melee_hits)
+	_expect(table.linear_velocity.length() > 0.0, "Kick moves the table.")
 	print("gameplay kick failures: ", failures)
 	quit(1 if failures > 0 else 0)
 

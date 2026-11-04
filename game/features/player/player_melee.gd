@@ -15,6 +15,10 @@ const PUNCH_DAMAGE := 17.0
 const KICK_LENGTH := 1.7
 ## The player origin is the capsule centre; the floor is this far below it.
 const PLAYER_HALF_HEIGHT := 0.9
+## Damage a kick deals to a prop it hits (tables, nightstands); a few kicks break one.
+const KICK_OBJECT_DAMAGE := 50.0
+const HIT_EVENTS := {"metal": &"hit_metal", "tech": &"hit_electronics", "glass": &"hit_glass"}
+const SFX := preload("res://game/core/audio/public/sound_events.gd")
 const KICK_WIDTH := 1.8
 const KICK_HEIGHT := 1.2
 ## Impulse (kg*m/s) behind a kick, split by the item's mass and capped in speed.
@@ -108,8 +112,8 @@ func _kick_impact() -> void:
 		if body.has_method("has_loot") and bool(body.call("has_loot")) and body.has_method("break_by_strike"):
 			if nearest_crate == null or body.global_position.distance_squared_to(player.global_position) < nearest_crate.global_position.distance_squared_to(player.global_position):
 				nearest_crate = body
-		elif body is RigidBody3D and not (body as RigidBody3D).freeze and not _is_creature(body):
-			_throw(body as RigidBody3D, player.global_position)
+		elif not _is_creature(body):
+			_kick_object(body, forward)
 	for enemy in _host._enemies_near(player.global_position, KICK_LENGTH + 1.5):
 		var offset := _flat_offset(enemy)
 		var reach := float(_host._body_radius(enemy))
@@ -118,6 +122,21 @@ func _kick_impact() -> void:
 	# One kick breaks the nearest crate only; a crowd of crates takes one kick each.
 	if nearest_crate != null:
 		nearest_crate.call("break_by_strike", nearest_crate.global_position, forward)
+
+
+# A kick hits any prop the punch can hit (tables, nightstands, glass) and thuds; loose items also fly.
+func _kick_object(body: Node3D, forward: Vector3) -> void:
+	var player: CharacterBody3D = _host.player
+	if body.has_method("take_melee_hit"):
+		body.call("take_melee_hit", KICK_OBJECT_DAMAGE, body.global_position, forward)
+		SFX.play(player, _hit_event(body), body.global_position)
+	if body is RigidBody3D and not (body as RigidBody3D).freeze:
+		_throw(body as RigidBody3D, player.global_position)
+
+
+static func _hit_event(body: Node3D) -> StringName:
+	var material := str(body.call("get_projectile_material", -1)) if body.has_method("get_projectile_material") else "wood"
+	return HIT_EVENTS.get(material, &"hit_wood")
 
 
 # Flings a loose item away from the character; heavy ones barely move.
