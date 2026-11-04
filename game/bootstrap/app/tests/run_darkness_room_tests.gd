@@ -2,6 +2,7 @@ extends SceneTree
 ## Exploration darkness rooms: shared door and presence, re-darkening, hero view and validator.
 const ZONE := preload("res://game/presentation/office_floor/public/props/darkness_zone.tscn")
 const LAYOUT_VALIDATOR := preload("res://game/bootstrap/app/planning_layout_validator.gd")
+const DOOR_LINKS := preload("res://game/presentation/office_floor/public/door_darkness_links.gd")
 var failures := 0
 
 
@@ -35,6 +36,7 @@ func _run() -> void:
 	root.add_child(player)
 	var door := FakeDoor.new()
 	door.add_to_group("interactive_doors")
+	DOOR_LINKS.set_rooms(door, [3])
 	door.position = Vector3(-2.0, 0.0, 0.0)
 	door.rotation.y = PI * 0.5
 	root.add_child(door)
@@ -82,6 +84,18 @@ func _run() -> void:
 	_expect(not first.blocks_view(Vector3(0.0, 8.0, 6.0), Vector3(30.0, 0.5, 0.0)), "A ray outside the cover is not blocked")
 	var bad := {"objects": [{"scene": "res://x.tscn", "room_id": "a"}]}
 	_expect(LAYOUT_VALIDATOR.error(bad) != "", "Validator rejects a non-numeric room_id")
+	# Door darkness lists: a door switches only the rooms it lists; auto finds the zones it leads into.
+	_expect(DOOR_LINKS.detect(door, root) == [3], "Auto finds the room the door opens onto")
+	_expect(DOOR_LINKS.detect(side_door, root).is_empty(), "Auto skips a room the door does not open onto")
+	DOOR_LINKS.set_rooms(side_door, [3, 3, 0, -1])
+	_expect(DOOR_LINKS.rooms(side_door) == [3], "A saved list keeps only unique positive room ids")
+	DOOR_LINKS.set_rooms(side_door, [])
+	_expect(DOOR_LINKS.to_record(side_door).is_empty(), "A door with no list saves nothing")
+	DOOR_LINKS.set_rooms(side_door, [3], true)
+	var record := DOOR_LINKS.to_record(side_door)
+	_expect(DOOR_LINKS.is_valid_record(record) and record["auto"] == true, "An auto record round-trips as valid")
+	_expect(not DOOR_LINKS.is_valid_record({"rooms": [0], "auto": false}), "Validator rejects a non-positive room id")
+	_expect(not DOOR_LINKS.is_valid_record({"rooms": [3], "auto": "yes"}), "Validator rejects a non-bool auto flag")
 	print("Darkness room tests: %d failure(s)." % failures)
 	quit(failures)
 

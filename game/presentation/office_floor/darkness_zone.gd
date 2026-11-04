@@ -8,6 +8,7 @@ extends Node3D
 @export var require_door_open := true
 ## Exploration zones sharing a room_id (> 0) are one room under solid fog: it lifts while the
 ## player is inside, and otherwise shows only what the camera sees through open doors and glass.
+## Doors switch a room only when its room_id is in the door's own darkness list (DOOR_LINKS).
 @export var room_id := 0
 
 const SHADER := preload("res://game/presentation/office_floor/darkness_zone.gdshader")
@@ -18,6 +19,7 @@ const MAX_BLOCKERS := 8
 const BLOCKER_REACH := 3.0
 const DOOR_PROBE_TOLERANCE := 0.3
 const PORTALS := preload("res://game/presentation/office_floor/darkness_portals.gd")
+const DOOR_LINKS := preload("res://game/presentation/office_floor/public/door_darkness_links.gd")
 const FADE_SPEED := 5.0
 const PORTAL_REFRESH := 0.25
 
@@ -93,16 +95,15 @@ func _find_linked_doors() -> void:
 		if door is Node3D:
 			var door_node := door as Node3D
 			if room_id > 0:
-				if _door_leads_here(door_node):
+				if DOOR_LINKS.rooms(door_node).has(room_id):
 					_linked_doors.append(door_node)
 			elif global_position.distance_to(door_node.global_position) <= door_link_radius:
 				_linked_doors.append(door_node)
 
 
-## A door belongs to the rooms it opens onto: those that contain the point just in front of it or just
-## behind it, along the door's own normal. A room that merely lies near the door, around a corner or
-## beside the wall, is not opened by it.
-func _door_leads_here(door_node: Node3D) -> bool:
+## A door leads into this zone when the point just in front of it or just behind it, along the door's
+## own normal, lies in the zone. Used by the planner's auto setting; the game itself follows the door's list.
+func door_leads_here(door_node: Node3D) -> bool:
 	var wall := (door_node.get_parent() as Node3D) if door_node.name == &"DoorController" else door_node
 	var normal := wall.global_basis.orthonormalized().z
 	normal.y = 0.0
