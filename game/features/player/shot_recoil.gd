@@ -19,8 +19,13 @@ const WEIGHTS := {
 var remaining := Vector3.ZERO
 ## 0..1 envelope of the weapon/torso kick, decays in step().
 var kick := 0.0
+## Blast shake: the camera is thrown away from the explosion, stronger when closer.
+const BLAST_METRES := 0.25
+const BLAST_DECAY_PER_SECOND := 2.5
 var shake_enabled := true
 var _trauma := 0.0
+var _blast_trauma := 0.0
+var _blast_push := Vector3.ZERO
 
 
 func shot(weapon: String, forward: Vector3) -> void:
@@ -45,10 +50,27 @@ func step(delta: float) -> Vector3:
 	return motion
 
 
+## Explosion nearby. `away` is the horizontal direction from the blast centre to the player, in
+## the player's local space; `strength` 0..1 (1 at the centre). The camera is pushed along it.
+func blast(away: Vector3, strength: float) -> void:
+	_blast_trauma = minf(1.0, _blast_trauma + clampf(strength, 0.0, 1.0))
+	away.y = 0.0
+	if not away.is_zero_approx():
+		_blast_push = away.normalized()
+
+
 ## Camera-rig offset for this frame; zero when shake is off.
 func camera_shake(delta: float) -> Vector3:
 	_trauma = maxf(0.0, _trauma - TRAUMA_DECAY_PER_SECOND * maxf(delta, 0.0))
-	if not shake_enabled or _trauma <= 0.0:
+	_blast_trauma = maxf(0.0, _blast_trauma - BLAST_DECAY_PER_SECOND * maxf(delta, 0.0))
+	if not shake_enabled:
 		return Vector3.ZERO
-	var power := _trauma * _trauma * SHAKE_METRES
-	return Vector3(randf_range(-1.0, 1.0), randf_range(-1.0, 1.0), 0.0) * power
+	var offset := Vector3.ZERO
+	if _trauma > 0.0:
+		var power := _trauma * _trauma * SHAKE_METRES
+		offset = Vector3(randf_range(-1.0, 1.0), randf_range(-1.0, 1.0), 0.0) * power
+	if _blast_trauma > 0.0:
+		# Mostly a push away from the blast, with some jitter so it reads as a jolt.
+		var jitter := Vector3(randf_range(-1.0, 1.0), 0.0, randf_range(-1.0, 1.0)) * 0.35
+		offset += (_blast_push + jitter) * (_blast_trauma * _blast_trauma * BLAST_METRES)
+	return offset

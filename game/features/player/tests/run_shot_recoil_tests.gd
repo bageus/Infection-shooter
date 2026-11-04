@@ -50,6 +50,27 @@ func _kick_and_shake() -> void:
 	state.shake_enabled = true
 	state.camera_shake(5.0)
 	_check(state.camera_shake(0.0) == Vector3.ZERO, "Camera shake settles")
+	_blast_shake()
+
+
+func _blast_shake() -> void:
+	var push := RECOIL.new()
+	push.blast(Vector3.LEFT, 1.0)
+	var sum := Vector3.ZERO
+	for i in 40:
+		sum += push.camera_shake(0.0)
+	_check(sum.x < 0.0 and absf(sum.x) > absf(sum.z) * 2.0, "Blast on the right throws the camera left, mostly along the push")
+	var near := RECOIL.new()
+	near.blast(Vector3.FORWARD, 1.0)
+	var far := RECOIL.new()
+	far.blast(Vector3.FORWARD, 0.2)
+	_check(near.camera_shake(0.0).length() > far.camera_shake(0.0).length() * 3.0, "A closer blast shakes the camera harder")
+	var off := RECOIL.new()
+	off.shake_enabled = false
+	off.blast(Vector3.LEFT, 1.0)
+	_check(off.camera_shake(0.0) == Vector3.ZERO, "Disabled shake ignores blasts")
+	push.camera_shake(5.0)
+	_check(push.camera_shake(0.0) == Vector3.ZERO, "Blast shake settles")
 
 
 func _player() -> void:
@@ -64,6 +85,12 @@ func _player() -> void:
 	player.call("set_camera_shake_enabled", false)
 	_check(not player.get("_shot_recoil").shake_enabled, "Player forwards the camera shake setting")
 	player.call("set_camera_shake_enabled", true)
+	player.call("apply_blast_shake", player.global_position + Vector3(3, 0, 0), 1.0)
+	var blast_shake: Vector3 = Vector3.ZERO
+	for i in 40:
+		blast_shake += player.get("_shot_recoil").camera_shake(0.0)
+	_check(blast_shake.x < 0.0, "Player: blast on the right throws the camera left")
+	player.get("_shot_recoil").camera_shake(5.0)
 	var weapon: Node3D = player.get_current_weapon()
 	_check(player._fire_weapon(weapon), "A real pistol shot succeeds")
 	var state = player.get("_shot_recoil")

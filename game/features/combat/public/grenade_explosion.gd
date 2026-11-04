@@ -100,6 +100,8 @@ static func explode(projectile: Node3D, location: Vector3, normal: Vector3, cont
 			elif collider.has_method("take_damage"):
 				collider.call("take_damage", CREATURE_DAMAGE * factor)
 		push_body(collider, direction, factor)
+		if collider.has_method("apply_blast_shake"):
+			collider.call("apply_blast_shake", location, factor)
 		if collider.has_method("apply_blast_stun") and float(collider.get("health")) > 0.0:
 			collider.call("apply_blast_stun", 3.0 + 2.0 * factor, factor)
 	TRACE.mark("%d bodies in blast processed" % hit_ids.size())
