@@ -97,6 +97,12 @@ func _check_legacy_stairs(catalog: RefCounted) -> void:
 	var stairs := catalog.call("_create_asset", ROOT_PATH + "01_stairs_2.glb") as Node3D
 	_check(stairs != null and stairs.get("model_path") == ROOT_PATH + "01_stairs_2.glb", "Staircase 2 is placed as its own model")
 	if stairs != null:
+		root.add_child(stairs)
+		var boxes := 0
+		for shape: CollisionShape3D in stairs.find_children("*", "CollisionShape3D", true, false):
+			boxes += int(shape.shape is BoxShape3D)
+		_check(boxes == 4, "Staircase 2 has no invented top landing collision")
+		root.remove_child(stairs)
 		stairs.free()
 
 
