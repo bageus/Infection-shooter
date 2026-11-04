@@ -25,6 +25,7 @@ const OCCLUSION := preload("res://game/bootstrap/app/occlusion_effects.gd")
 const MISSION_LAYOUT := preload("res://game/bootstrap/app/mission_layout.gd")
 const LEVEL_ENTRIES := preload("res://game/bootstrap/app/level_entry_runtime.gd")
 const CHECKPOINT := preload("res://game/bootstrap/app/checkpoint_progress.gd")
+const LEVEL_TEXT := preload("res://game/bootstrap/app/level_text.gd")
 const WAVE_DIRECTOR := preload("res://game/features/spawning/public/wave_director.gd")
 
 @onready var player: Node3D = $Gameplay/Player
@@ -343,6 +344,16 @@ func _end_run(reason: String) -> void:
 		notice.set_anchors_and_offsets_preset(Control.PRESET_BOTTOM_WIDE)
 		notice.offset_top = -100
 		notice.offset_bottom = -40
+	var outro := LEVEL_TEXT.after(current_level)
+	if kind == "complete" and not outro.is_empty():
+		var description := Label.new()
+		description.text = outro
+		description.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+		description.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+		game_over.add_child(description)
+		description.set_anchors_and_offsets_preset(Control.PRESET_TOP_WIDE)
+		description.offset_top = 40
+		description.offset_bottom = 160
 
 
 func drop_weapon_pickup(index: int, world_position: Vector3) -> bool:

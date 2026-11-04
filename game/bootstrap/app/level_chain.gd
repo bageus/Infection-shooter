@@ -9,6 +9,8 @@ const PATH := "user://level_chain.json"
 const SHIPPED_PATH := "res://content/levels/" + "level_chain.json"
 const TYPES: Array[String] = ["none", "ceiling", "floor"]
 const SLOT_COUNT := 2
+## Text shown before a map starts and after it is completed.
+const DESCRIPTION_KEYS: Array[String] = ["description_before", "description_after"]
 ## One-way chain: only the slot to the next map is ever triggered; slot 0 stays a pure arrival point.
 const FORWARD_SLOT := 1
 ## Player height beyond which the stairs count as climbed (ceiling) or descended (floor).
@@ -51,7 +53,8 @@ func index_of(map_name: String) -> int:
 func add_map(map_name: String) -> bool:
 	if map_name.is_empty() or index_of(map_name) >= 0:
 		return false
-	maps.append({"name": map_name, "entries": [empty_entry(), empty_entry()], "checkpoint": false})
+	maps.append({"name": map_name, "entries": [empty_entry(), empty_entry()], "checkpoint": false,
+		"description_before": "", "description_after": ""})
 	return true
 
 
@@ -78,6 +81,15 @@ func is_checkpoint(index: int) -> bool:
 func set_checkpoint(index: int, on: bool) -> void:
 	if index >= 0 and index < maps.size():
 		maps[index]["checkpoint"] = on
+
+
+func description(index: int, key: String) -> String:
+	return str(maps[index].get(key, "")) if index >= 0 and index < maps.size() else ""
+
+
+func set_description(index: int, key: String, text: String) -> void:
+	if index >= 0 and index < maps.size() and key in DESCRIPTION_KEYS:
+		maps[index][key] = text
 
 
 ## Name of the map that follows `map_name` in the chain, or "" when it is the last one or unknown.
@@ -152,6 +164,7 @@ func load_dict(data: Variant) -> void:
 			continue
 		var entries: Array = raw.get("entries", []) if raw.get("entries") is Array else []
 		maps.append({"name": str(raw.name), "checkpoint": bool(raw.get("checkpoint", false)),
+			"description_before": str(raw.get("description_before", "")), "description_after": str(raw.get("description_after", "")),
 			"entries": [_clean_entry(entries[0] if entries.size() > 0 else null), _clean_entry(entries[1] if entries.size() > 1 else null)]})
 
 
