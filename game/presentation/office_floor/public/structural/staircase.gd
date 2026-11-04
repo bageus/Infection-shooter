@@ -26,7 +26,9 @@ func _ready() -> void:
 	_add_walkable_box(body, Vector3(1.06, 2.17, 1.41), Vector3(1.85, 0.18, 3.2), atan(1.5 / 2.82))
 	_add_walkable_box(body, Vector3(0, -0.11, -0.71), Vector3(3.9, 0.20, 1.4), 0.0)
 	_add_walkable_box(body, Vector3(0, 1.40, 3.52), Vector3(3.9, 0.20, 1.4), 0.0)
-	_add_walkable_box(body, Vector3(0, 2.90, -0.71), Vector3(3.9, 0.20, 1.4), 0.0)
+	# 01_stairs_2 has no top landing; its upper flight ends open at y ≈ 3.0.
+	if not model_path.ends_with("01_stairs_2.glb"):
+		_add_walkable_box(body, Vector3(0, 2.90, -0.71), Vector3(3.9, 0.20, 1.4), 0.0)
 
 
 func _add_mesh_collisions(node: Node, body: StaticBody3D) -> void:
