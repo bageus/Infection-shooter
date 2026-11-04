@@ -70,9 +70,7 @@ func _run() -> void:
 	await process_frame
 	_check(not tree_ui.call("tutorial_rect", "active").size.is_zero_approx(), "The tree exposes the active group rectangle")
 	_check(not tree_ui.call("tutorial_rect", "skill:power_strike").size.is_zero_approx(), "The tree exposes the Power Strike circle")
-	for i in 3:
-		await _advance(overlay)
-	_check(str(overlay.get("step").get("mode")) == "wait", "Choosing Power Strike is a wait step")
+	_check(str(overlay.get("step").get("mode")) == "wait" and str(overlay.get("step").get("text")) == TEXT.t("tutPickPower"), "The active lesson starts at choosing Power Strike, without repeating the branch intro")
 	runtime.call("upgrade_skill", "power_strike")
 	await process_frame
 	await process_frame
