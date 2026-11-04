@@ -12,6 +12,7 @@ var map_picker: OptionButton
 var kind_pickers: Array[OptionButton] = []
 var place_buttons: Array[Button] = []
 var checkpoint_box: CheckBox
+var text_edits: Array[LineEdit] = []
 var _slot_labels: Array[Label] = []
 var _syncing := false
 
@@ -46,6 +47,13 @@ func build(owner_runtime: Node, session: Node) -> void:
 	checkpoint_box.text = "CHECKPOINT (passing it saves progress)"
 	checkpoint_box.toggled.connect(_on_checkpoint_toggled)
 	box.add_child(checkpoint_box)
+	for slot in LEVEL_CHAIN.DESCRIPTION_KEYS.size():
+		var edit := LineEdit.new()
+		edit.name = "Description%d" % slot
+		edit.placeholder_text = "Text shown before the level" if slot == 0 else "Text shown after the level"
+		edit.text_changed.connect(_on_description_changed.bind(slot))
+		box.add_child(edit)
+		text_edits.append(edit)
 	for slot in LEVEL_CHAIN.SLOT_COUNT:
 		var label := Label.new()
 		label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
@@ -147,6 +155,13 @@ func _on_checkpoint_toggled(on: bool) -> void:
 	_save()
 
 
+func _on_description_changed(text: String, slot: int) -> void:
+	if _syncing or _selected() < 0:
+		return
+	runtime.chain.set_description(_selected(), LEVEL_CHAIN.DESCRIPTION_KEYS[slot], text)
+	_save()
+
+
 func _on_kind_picked(option: int, slot: int) -> void:
 	if _syncing or _selected() < 0:
 		return
@@ -186,6 +201,9 @@ func _refresh(select_index: int = -1) -> void:
 	var index := _selected()
 	checkpoint_box.disabled = index < 0
 	checkpoint_box.button_pressed = index >= 0 and runtime.chain.is_checkpoint(index)
+	for slot in text_edits.size():
+		text_edits[slot].editable = index >= 0
+		text_edits[slot].text = runtime.chain.description(index, LEVEL_CHAIN.DESCRIPTION_KEYS[slot]) if index >= 0 else ""
 	for slot in LEVEL_CHAIN.SLOT_COUNT:
 		var enabled := index >= 0
 		kind_pickers[slot].disabled = not enabled

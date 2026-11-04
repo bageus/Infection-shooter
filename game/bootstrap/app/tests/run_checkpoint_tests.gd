@@ -3,7 +3,8 @@ extends SceneTree
 
 const LEVEL_CHAIN := preload("res://game/bootstrap/app/level_chain.gd")
 const CHECKPOINT := preload("res://game/bootstrap/app/checkpoint_progress.gd")
-const CAPTION := preload("res://game/bootstrap/app/checkpoint_notice.gd")
+const LEVEL_TEXT := preload("res://game/bootstrap/app/level_text.gd")
+const CAPTION := preload("res://game/bootstrap/app/level_caption.gd")
 const FRONT := preload("res://game/bootstrap/app/menu/front_end.tscn")
 const CHAIN_PATH := "user://level_chain.json"
 var failures := 0
@@ -27,11 +28,17 @@ func _run() -> void:
 	chain.set_checkpoint(0, true)
 	_check(chain.is_checkpoint(0) and not chain.is_checkpoint(1), "Only the flagged map is a checkpoint")
 	_check(chain.name_after("tutorial_lvl") == "level_a" and chain.name_after("level_b") == "", "name_after gives the next map or nothing")
+	chain.set_description(0, "description_before", "Перед уровнем")
+	chain.set_description(0, "description_after", "После уровня")
 	_check(chain.save(CHAIN_PATH) == OK, "chain saves")
 	var reloaded: RefCounted = LEVEL_CHAIN.new()
 	reloaded.load_file(CHAIN_PATH)
 	_check(reloaded.is_checkpoint(0) and not reloaded.is_checkpoint(2), "The checkpoint flag survives a reload")
 	_check(reloaded.name_after("missing") == "", "An unknown map has no next map")
+	_check(reloaded.description(0, "description_before") == "Перед уровнем" and reloaded.description(0, "description_after") == "После уровня", "Descriptions survive a reload")
+	_check(reloaded.description(1, "description_before") == "" and reloaded.description(9, "description_after") == "", "Maps without descriptions and unknown indexes give empty text")
+	_check(LEVEL_TEXT.before("tutorial_lvl") == "Перед уровнем" and LEVEL_TEXT.after("tutorial_lvl") == "После уровня", "Level text helper reads the chain")
+	_check(LEVEL_TEXT.after("") == "" and LEVEL_TEXT.before("missing") == "", "Level text helper is empty for unknown maps")
 
 	_check(CHECKPOINT.resume_map() == "", "No checkpoint passed, nothing to continue")
 	CHECKPOINT.on_completed("level_a")
@@ -66,7 +73,7 @@ func _run() -> void:
 	caption.caption = "Checkpoint"
 	root.add_child(caption)
 	await process_frame
-	var label := caption.get_node_or_null("CheckpointCaption") as Label
+	var label := caption.find_child("LevelCaption", true, false) as Label
 	_check(label != null and label.text == "Checkpoint", "The caption reads Checkpoint")
 	caption.queue_free()
 	await process_frame

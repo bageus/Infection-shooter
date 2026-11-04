@@ -6,7 +6,8 @@ const LAYOUT := preload("res://game/bootstrap/app/planning_layout_loader.gd")
 const CAMPAIGN := preload("res://game/bootstrap/app/campaign_config.gd")
 const PLATFORM := preload("res://game/infrastructure/platform/public/platform.gd")
 const MATERIAL_WARMUP := preload("res://game/bootstrap/app/mission_material_warmup.gd")
-const CHECKPOINT_NOTICE := preload("res://game/bootstrap/app/checkpoint_notice.gd")
+const LEVEL_CAPTION := preload("res://game/bootstrap/app/level_caption.gd")
+const LEVEL_TEXT := preload("res://game/bootstrap/app/level_text.gd")
 var warmed_materials := 0
 ## Set when the level was started from "Continue": the mission shows a centered checkpoint caption.
 var checkpoint_notice := false
@@ -215,9 +216,16 @@ func _activate_pending(tree: SceneTree, previous: Node) -> void:
 		completion_music = null
 	tree.paused = false
 	Input.mouse_mode = Input.MOUSE_MODE_VISIBLE
+	var lines := PackedStringArray()
 	if checkpoint_notice:
-		var caption: CanvasLayer = CHECKPOINT_NOTICE.new()
-		caption.caption = "Чекпоинт" if _ru else "Checkpoint"
+		lines.append("Чекпоинт" if _ru else "Checkpoint")
+	var description := LEVEL_TEXT.before(_level_name)
+	if not description.is_empty():
+		lines.append(description)
+	if not lines.is_empty():
+		var caption: CanvasLayer = LEVEL_CAPTION.new()
+		caption.caption = "\n".join(lines)
+		caption.seconds = 6.0 if not description.is_empty() else 2.5
 		tree.root.add_child(caption)
 	pending = null
 	_previous_collisions.clear()
