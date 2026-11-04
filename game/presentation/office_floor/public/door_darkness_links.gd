@@ -36,6 +36,12 @@ static func detect(door: Node3D, inside: Node) -> Array:
 	return found
 
 
+## Auto lists follow the zones in the layout; called before saving so a stale list is never written.
+static func refresh_auto(door: Node) -> void:
+	if is_auto(door):
+		set_rooms(door, detect(door, door), true)
+
+
 ## Saved form, or an empty dictionary when the door keeps the default (no list, not auto).
 static func to_record(door: Node) -> Dictionary:
 	if rooms(door).is_empty() and not is_auto(door):

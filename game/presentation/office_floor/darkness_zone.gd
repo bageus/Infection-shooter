@@ -44,6 +44,8 @@ func _process(delta: float) -> void:
 	if not _fog_enabled:
 		return
 	if room_id > 0 and not permanent:
+		# Door lists can change after the zone starts (planner, layout load), so links are read every frame.
+		_find_linked_doors()
 		if _player == null:
 			_player = get_tree().get_first_node_in_group("player") as Node3D
 		_fade = move_toward(_fade, 0.0 if _player_inside() or _room_has_open_door() else 1.0, FADE_SPEED * delta)

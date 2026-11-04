@@ -124,5 +124,6 @@ static func _door_fields(record: Dictionary, door: Node) -> void:
 	record["door_lock"] = str(door.call("get_lock_state"))
 	if DOOR_OPTIONS.is_one_way(door):
 		record["door_one_way"] = true
+	DOOR_LINKS.refresh_auto(door)
 	if not DOOR_LINKS.to_record(door).is_empty():
 		record["door_darkness"] = DOOR_LINKS.to_record(door)
