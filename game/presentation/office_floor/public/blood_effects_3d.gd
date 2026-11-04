@@ -46,6 +46,8 @@ var _decal := false
 var _hit_times: Dictionary = {}
 var _effect_requests: Array[Dictionary] = []
 var _diagnostics: Dictionary = {}
+# F3 overlay: where blood requests are lost (dropped by the queue, or no surface under them).
+var _counts := {"requests": 0, "dropped": 0, "no_surface": 0}
 var _projection_pool: Node
 
 
@@ -179,7 +181,9 @@ func death_pool(point: Vector3, excluded: Array[RID], death_id: int) -> void:
 
 
 func _queue_effect(method: String, arguments: Array) -> void:
+	_counts["requests"] += 1
 	if _effect_requests.size() >= 64:
+		_counts["dropped"] += 1
 		# Preserve one-off deaths; discard excess transient hit/trail work.
 		if method != "_emit_death_pool":
 			return
@@ -278,6 +282,8 @@ func _emit_death_pool(point: Vector3, excluded: Array[RID], death_id: int) -> vo
 
 
 func _submit(category: String, surface: Dictionary, direction: Vector3, sizes: Vector2, directed: bool = false, heavy: bool = false) -> void:
+	if surface.is_empty():
+		_counts["no_surface"] += 1
 	surface = _surfaces.call("jitter_surface", surface, 0.12 if category == "splatter" else 0.025)
 	var definition := _definition(category, surface, direction, sizes, directed, heavy)
 	_budget.call("submit", definition, surface)
@@ -312,4 +318,6 @@ func clear_marks() -> void:
 
 
 func statistics() -> Dictionary:
-	return _budget.call("statistics")
+	var result: Dictionary = _budget.call("statistics")
+	result.merge(_counts)
+	return result
