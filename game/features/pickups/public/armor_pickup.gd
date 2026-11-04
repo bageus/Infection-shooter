@@ -39,10 +39,12 @@ func settle_on_floor() -> void:
 func _process(delta: float) -> void:
 	if not _runtime_active:
 		# The mission layout moves the pickup after _ready: hover above its final floor spot.
-		_base_y = global_position.y + HOVER
+		# Planner-placed vests bob exactly like planner-placed weapons (weapon_pickup.gd): no lift, rise-only wave.
+		_base_y = global_position.y + (0.0 if has_meta("planning_scene_path") else HOVER)
 		_runtime_active = true
 	_elapsed += delta
-	global_position.y = _base_y + sin(_elapsed * 1.6) * 0.07
+	var wave := sin(_elapsed * 1.6)
+	global_position.y = _base_y + (absf(wave) if has_meta("planning_scene_path") else wave) * 0.07
 	_art.rotation.y += delta * 0.55
 	var player := get_tree().get_first_node_in_group("player") as Node3D
 	if player != null and player.global_position.distance_to(global_position) <= COLLECT_DISTANCE and player.has_method("pickup_armor"):
