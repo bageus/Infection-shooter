@@ -519,11 +519,6 @@ func bind_world_object(node: Node) -> void:
 		world_bindings.call("bind_scene", node)
 
 
-func set_electronic_particles_enabled(enabled: bool) -> void:
-	if world_bindings != null:
-		world_bindings.call("set_electronic_particles_enabled", enabled)
-
-
 func _on_continue_pressed() -> void:
 	if has_node("LevelEntries"):
 		var chain: RefCounted = $LevelEntries.chain

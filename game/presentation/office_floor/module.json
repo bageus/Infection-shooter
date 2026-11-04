@@ -100,7 +100,6 @@
       "internals": "biomass_atlas/fusion/fit/mesh and biomass_surface.gdshader are private"
     },
     "damage_particles_v1": {
-      "configure_damage_particles": "configure_damage_particles(enabled: bool) -> void; repeated electronics sparks only"
     },
     "plate_fruit_v1": {
       "has_fruit": "has_fruit() -> bool; true for the flat fruit plate model only",

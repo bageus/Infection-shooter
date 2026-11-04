@@ -27,11 +27,7 @@ const CONTACT = preload("res://game/presentation/office_floor/prop_contact.gd")
 const STRIKE_BREAK := preload("res://game/presentation/office_floor/prop_strike_break.gd")
 const BULLET_PUSH = preload("res://game/presentation/office_floor/bullet_push.gd")
 const FLOOR_TOP := 0.0135 # Visible base floor top (tile_y .001 + half its .025 thickness); the physics floor matches it.
-var repeated_electronic_particles := true
-
-
-func configure_damage_particles(enabled: bool) -> void:
-	repeated_electronic_particles = enabled
+var repeated_electronic_particles := not OS.has_feature("web") # repeated sparks are off on web builds
 
 
 const SPARKS = preload("res://game/presentation/office_floor/electric_sparks.gd")
