@@ -19,6 +19,7 @@ var _base: ColorRect
 var _hit_rect: ColorRect
 var _hit_material: ShaderMaterial
 var _last_health := -1.0
+var _time := 0.0
 
 
 func _ready() -> void:
@@ -54,6 +55,8 @@ func update(delta: float, health: float, max_health: float) -> void:
 		hit = maxf(hit, hit_for_loss(_last_health - health, max_health))
 	_last_health = health
 	hit = maxf(0.0, hit - delta * HIT_DECAY)
+	_time += delta
+	(_base.material as ShaderMaterial).set_shader_parameter("grain_frame", float(int(_time * 24.0) % 24))
 	_apply()
 
 

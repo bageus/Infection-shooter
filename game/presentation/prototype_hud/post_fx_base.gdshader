@@ -11,6 +11,8 @@ uniform float grain_amount : hint_range(0.0, 0.2) = 0.05;
 uniform float tint_amount : hint_range(0.0, 0.3) = 0.07;
 uniform vec3 tint_color : source_color = vec3(0.05, 0.13, 0.12);
 uniform float aspect = 1.7778;
+// Driven by post_fx.gd (not TIME) so the grain freezes with the game on pause.
+uniform float grain_frame = 0.0;
 
 float hash21(vec2 p) {
 	p = fract(p * vec2(123.34, 456.21));
@@ -21,7 +23,7 @@ float hash21(vec2 p) {
 void fragment() {
 	vec2 c = (UV - 0.5) * vec2(aspect, 1.0);
 	float vig = smoothstep(0.45, 1.05, length(c)) * vignette_amount;
-	float g = hash21(floor(UV * vec2(aspect, 1.0) * 540.0) + floor(fract(TIME * 24.0) * 24.0) * 7.31);
+	float g = hash21(floor(UV * vec2(aspect, 1.0) * 540.0) + grain_frame * 7.31);
 	// Layer 1: tint. Layer 2: grain (white or black speckle). Layer 3: vignette.
 	vec4 col = vec4(tint_color, tint_amount);
 	vec4 gr = vec4(vec3(step(0.5, g)), grain_amount * 0.5);
