@@ -32,6 +32,10 @@ jobs:
           cp /tmp/tpl/templates/web_nothreads_*release.zip ~/.local/share/godot/export_templates/$v/ || true
           cp /tmp/tpl/templates/version.txt ~/.local/share/godot/export_templates/$v/
           cp /tmp/tpl/templates/web_* ~/.local/share/godot/export_templates/$v/
+      - name: Shrink assets for Web (CI tree only, not committed)
+        run: |
+          sudo apt-get install -y -q ffmpeg python3-pil
+          python3 tools/web_shrink_imports.py .
       - name: Import
         run: |
           set -o pipefail
