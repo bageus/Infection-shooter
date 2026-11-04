@@ -259,3 +259,4 @@ game/bootstrap/app/tests/run_quest_tests.gd
 game/bootstrap/app/tests/run_enemy_lessons_tests.gd
 game/bootstrap/app/tests/run_quest_panel_tests.gd
 game/bootstrap/app/tests/run_quest_save_tests.gd
+game/presentation/office_floor/tests/run_water_puddle_shape_tests.gd

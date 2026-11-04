@@ -2,6 +2,7 @@ extends RefCounted
 ## A shot cooler bottle bursts and spills its water; it never drops off whole.
 const PET_MATERIAL := "transparent_pet_bottle"
 const WATER := Color(0.62, 0.84, 0.96, 0.55)
+const OUTLINE_POINTS := 28
 
 
 static func find_bottle(meshes: Array) -> int:
@@ -61,21 +62,55 @@ static func _splash(center: Vector3, direction: Vector3, height: float) -> CPUPa
 	return particles
 
 
+## Irregular spill outline: a lumpy, stretched and rotated blob, unique per puddle.
+static func puddle_outline(rng: RandomNumberGenerator, radius: float) -> PackedVector2Array:
+	var phase_a := rng.randf() * TAU
+	var phase_b := rng.randf() * TAU
+	var phase_c := rng.randf() * TAU
+	var stretch := rng.randf_range(0.55, 1.0)
+	var turn := rng.randf() * TAU
+	var points := PackedVector2Array()
+	for i in OUTLINE_POINTS:
+		var a := TAU * float(i) / OUTLINE_POINTS
+		var wobble := 1.0 + 0.2 * sin(2.0 * a + phase_a) + 0.12 * sin(3.0 * a + phase_b) + 0.07 * sin(5.0 * a + phase_c) + rng.randf_range(-0.05, 0.05)
+		var point := Vector2(cos(a) * radius * wobble, sin(a) * radius * wobble * stretch)
+		points.append(point.rotated(turn))
+	return points
+
+
+static func puddle_mesh(rng: RandomNumberGenerator, radius: float) -> ArrayMesh:
+	var outline := puddle_outline(rng, radius)
+	var vertices := PackedVector3Array([Vector3.ZERO])
+	var normals := PackedVector3Array([Vector3.UP])
+	for point in outline:
+		vertices.append(Vector3(point.x, 0.0, point.y))
+		normals.append(Vector3.UP)
+	var indices := PackedInt32Array()
+	for i in outline.size():
+		indices.append_array([0, 1 + (i + 1) % outline.size(), 1 + i])
+	var arrays := []
+	arrays.resize(Mesh.ARRAY_MAX)
+	arrays[Mesh.ARRAY_VERTEX] = vertices
+	arrays[Mesh.ARRAY_NORMAL] = normals
+	arrays[Mesh.ARRAY_INDEX] = indices
+	var mesh := ArrayMesh.new()
+	mesh.add_surface_from_arrays(Mesh.PRIMITIVE_TRIANGLES, arrays)
+	return mesh
+
+
 static func _puddle(position: Vector3, diameter: float) -> MeshInstance3D:
 	var puddle := MeshInstance3D.new()
 	puddle.name = "WaterPuddle"
-	var disc := CylinderMesh.new()
-	disc.top_radius = diameter * 0.9
-	disc.bottom_radius = diameter * 0.9
-	disc.height = 0.002
-	disc.radial_segments = 24
-	disc.rings = 1
+	var rng := RandomNumberGenerator.new()
+	rng.randomize()
+	var disc := puddle_mesh(rng, diameter * 0.9)
 	var material := StandardMaterial3D.new()
 	material.albedo_color = Color(WATER.r, WATER.g, WATER.b, 0.0)
 	material.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
+	material.cull_mode = BaseMaterial3D.CULL_DISABLED
 	material.roughness = 0.05
 	material.metallic_specular = 0.9
-	disc.material = material
+	disc.surface_set_material(0, material)
 	puddle.mesh = disc
 	puddle.position = position
 	puddle.scale = Vector3(0.2, 1.0, 0.2)
