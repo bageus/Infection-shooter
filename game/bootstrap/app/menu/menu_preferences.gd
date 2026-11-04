@@ -11,6 +11,8 @@ const PLATFORM := preload("res://game/infrastructure/platform/public/platform.gd
 const BLOOD_LEVEL := preload("res://game/core/vfx/public/blood_level.gd")
 const EFFECTS_QUALITY := preload("res://game/core/vfx/public/effects_quality.gd")
 const DESTRUCTION_QUALITY := preload("res://game/core/vfx/public/destruction_quality.gd")
+## Red blood on web: the red level the desktop slider starts on.
+const WEB_RED_BLOOD := 2
 var bindings := BINDINGS.new()
 
 const FILE := "user://interface_settings.cfg"
@@ -58,6 +60,25 @@ func load_settings() -> void:
 	values.menu_music_volume = clampf(values.menu_music_volume, 0.0, 1.0)
 	if values.text_scale not in [1.0, 1.15, 1.3]:
 		values.text_scale = 1.0
+	if OS.has_feature("web"):
+		apply_web_rules(values)
+
+
+## Web builds show no rows for these, so their values are fixed here: shadows and the sun off,
+## lights and mesh LOD on, silhouettes only, bodies kept to the 60 budget, blood procedural
+## (no decal assets) and green or red. Effects quality keeps its default.
+static func apply_web_rules(values: Dictionary) -> void:
+	values.shadows = false
+	values.sunlight = false
+	values.lighting = true
+	values.game_lights_only = false
+	values.mesh_lod = true
+	values.occlusion_mode = 0
+	values.keep_corpses = true
+	values.electronic_particles = false
+	values.effects_quality = DEFAULTS.effects_quality
+	values.blood_style = 1
+	values.blood_level = BLOOD_LEVEL.GREEN if int(values.blood_level) == BLOOD_LEVEL.GREEN else WEB_RED_BLOOD
 
 
 func save_settings() -> Error:

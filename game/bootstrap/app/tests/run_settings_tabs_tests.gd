@@ -47,6 +47,7 @@ func _run() -> void:
 	_check(tabs.get_child(3).find_child("SoundToggle", true, false) == null and tabs.get_child(3).find_child("MenuMusicToggle", true, false) == null, "Audio has no on/off toggles; sliders control volume")
 	_slider_checks(tabs)
 	_check_notice_badge(dialog, tabs)
+	_web_rule_checks()
 	dialog.settings.notices._show(1)
 	await process_frame
 	if DisplayServer.get_name() != "headless":
@@ -279,6 +280,19 @@ func _check_about(menu: Node) -> void:
 	for label: Label in menu.modal.find_children("*", "Label", true, false):
 		credit_lines += int(label.text.contains("http"))
 	_check(credit_lines >= 15, "About lists the attribution-required sound credits")
+
+
+## Web builds fix these values in code: checked on the pure rule, since headless tests run as desktop.
+func _web_rule_checks() -> void:
+	var values: Dictionary = PREFS.new().values.duplicate()
+	values.blood_level = 0
+	PREFS.apply_web_rules(values)
+	_check(not values.shadows and not values.sunlight and values.lighting and values.mesh_lod and values.keep_corpses, "Web fixes shadows, sun, lights, mesh LOD and body budget")
+	_check(values.occlusion_mode == 0 and not values.electronic_particles and values.blood_style == 1, "Web uses silhouettes, no sparks and procedural blood")
+	_check(values.blood_level == 0, "Web keeps green blood when chosen")
+	values.blood_level = 3
+	PREFS.apply_web_rules(values)
+	_check(values.blood_level == 2, "Web maps any non-green blood to red")
 
 
 func _check(condition: bool, message: String) -> void:

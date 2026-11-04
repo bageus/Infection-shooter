@@ -178,82 +178,90 @@ func _enemy_difficulty() -> void:
 
 
 func _video() -> void:
-	preload("res://game/bootstrap/app/menu/display_options.gd").build(dialog)
+	var web := OS.has_feature("web")
+	if not web:
+		preload("res://game/bootstrap/app/menu/display_options.gd").build(dialog)
 	dialog.call("_slider", "brightness", "brightness", .8, 1.4, .05)
-	var occlusion := OptionButton.new()
-	occlusion.name = "Occlusion"
-	occlusion.add_item(dialog.view.text("occlusionSilhouettes"))
-	occlusion.add_item(dialog.view.text("occlusionHole"))
-	occlusion.selected = dialog.view.preferences.values.occlusion_mode
-	occlusion.item_selected.connect(func(index: int) -> void: dialog.call("_change", "occlusion_mode", index))
-	dialog.call("_row", "occlusion", occlusion)
-	var blood_style := OptionButton.new()
-	blood_style.name = "BloodStyle"
-	blood_style.add_item(dialog.view.text("bloodStyleAssets"))
-	blood_style.add_item(dialog.view.text("bloodStyleProcedural"))
-	blood_style.selected = dialog.view.preferences.values.blood_style
-	blood_style.item_selected.connect(func(index: int) -> void: dialog.call("_change", "blood_style", index))
-	dialog.call("_row", "bloodStyle", blood_style)
-	_blood_level()
+	if not web:
+		var occlusion := OptionButton.new()
+		occlusion.name = "Occlusion"
+		occlusion.add_item(dialog.view.text("occlusionSilhouettes"))
+		occlusion.add_item(dialog.view.text("occlusionHole"))
+		occlusion.selected = dialog.view.preferences.values.occlusion_mode
+		occlusion.item_selected.connect(func(index: int) -> void: dialog.call("_change", "occlusion_mode", index))
+		dialog.call("_row", "occlusion", occlusion)
+	if web:
+		_blood_color()
+	else:
+		var blood_style := OptionButton.new()
+		blood_style.name = "BloodStyle"
+		blood_style.add_item(dialog.view.text("bloodStyleAssets"))
+		blood_style.add_item(dialog.view.text("bloodStyleProcedural"))
+		blood_style.selected = dialog.view.preferences.values.blood_style
+		blood_style.item_selected.connect(func(index: int) -> void: dialog.call("_change", "blood_style", index))
+		dialog.call("_row", "bloodStyle", blood_style)
+		_blood_level()
 	_destruction_quality()
-	var effects_quality := OptionButton.new()
-	effects_quality.name = "EffectsQuality"
-	for key in ["effectsQuality0", "effectsQuality1", "effectsQuality2"]:
-		effects_quality.add_item(dialog.view.text(key))
-	effects_quality.selected = dialog.view.preferences.values.effects_quality
-	effects_quality.item_selected.connect(func(index: int) -> void: dialog.call("_change", "effects_quality", index))
-	dialog.call("_row", "effectsQuality", effects_quality)
-	var lighting := CheckButton.new()
-	lighting.name = "Lighting"
-	lighting.text = dialog.view.text("lighting")
-	lighting.button_pressed = dialog.view.preferences.values.lighting
-	lighting.toggled.connect(func(value: bool) -> void: dialog.call("_change", "lighting", value))
-	dialog.get("layout").add_child(lighting)
-	var game_only := CheckButton.new()
-	game_only.name = "GameLightsOnly"
-	game_only.text = dialog.view.text("gameLightsOnly")
-	game_only.tooltip_text = dialog.view.text("gameLightsOnlyHint")
-	game_only.button_pressed = dialog.view.preferences.values.game_lights_only
-	game_only.toggled.connect(func(value: bool) -> void: dialog.call("_change", "game_lights_only", value))
-	dialog.get("layout").add_child(game_only)
-	var sunlight := CheckButton.new()
-	sunlight.name = "Sunlight"
-	sunlight.text = dialog.view.text("sunlight")
-	sunlight.tooltip_text = dialog.view.text("sunlightHint")
-	sunlight.button_pressed = dialog.view.preferences.values.sunlight
-	sunlight.toggled.connect(func(value: bool) -> void: dialog.call("_change", "sunlight", value))
-	dialog.get("layout").add_child(sunlight)
-	var shadows := CheckButton.new()
-	shadows.name = "Shadows"
-	shadows.text = dialog.view.text("shadows")
-	shadows.tooltip_text = dialog.view.text("shadowsHint")
-	shadows.button_pressed = dialog.view.preferences.values.shadows
-	dialog.get("layout").add_child(shadows)
-	_shadow_quality()
-	var quality := dialog.get("layout").find_child("ShadowQuality", true, false) as HSlider
-	var quality_name := dialog.get("layout").find_child("ShadowQualityName", true, false) as Label
-	_set_shadow_quality_enabled(quality, quality_name, shadows.button_pressed)
-	shadows.toggled.connect(func(value: bool) -> void:
-		_set_shadow_quality_enabled(quality, quality_name, value)
-		dialog.call("_change", "shadows", value))
-	var mesh_lod := CheckButton.new()
-	mesh_lod.name = "MeshLod"
-	mesh_lod.text = dialog.view.text("meshLod")
-	mesh_lod.button_pressed = dialog.view.preferences.values.mesh_lod
-	mesh_lod.toggled.connect(func(value: bool) -> void: dialog.call("_change", "mesh_lod", value))
-	dialog.get("layout").add_child(mesh_lod)
-	var keep_corpses := CheckButton.new()
-	keep_corpses.name = "KeepCorpses"
-	keep_corpses.text = dialog.view.text("keepCorpses")
-	keep_corpses.button_pressed = dialog.view.preferences.values.keep_corpses
-	keep_corpses.toggled.connect(func(value: bool) -> void: dialog.call("_change", "keep_corpses", value))
-	dialog.get("layout").add_child(keep_corpses)
-	var particles := CheckButton.new()
-	particles.name = "ElectronicParticles"
-	particles.text = dialog.view.text("electronicParticles")
-	particles.button_pressed = dialog.view.preferences.values.electronic_particles
-	particles.toggled.connect(func(value: bool) -> void: dialog.call("_change", "electronic_particles", value))
-	dialog.get("layout").add_child(particles)
+	if not web:
+		var effects_quality := OptionButton.new()
+		effects_quality.name = "EffectsQuality"
+		for key in ["effectsQuality0", "effectsQuality1", "effectsQuality2"]:
+			effects_quality.add_item(dialog.view.text(key))
+		effects_quality.selected = dialog.view.preferences.values.effects_quality
+		effects_quality.item_selected.connect(func(index: int) -> void: dialog.call("_change", "effects_quality", index))
+		dialog.call("_row", "effectsQuality", effects_quality)
+	if not web:
+		var lighting := CheckButton.new()
+		lighting.name = "Lighting"
+		lighting.text = dialog.view.text("lighting")
+		lighting.button_pressed = dialog.view.preferences.values.lighting
+		lighting.toggled.connect(func(value: bool) -> void: dialog.call("_change", "lighting", value))
+		dialog.get("layout").add_child(lighting)
+		var game_only := CheckButton.new()
+		game_only.name = "GameLightsOnly"
+		game_only.text = dialog.view.text("gameLightsOnly")
+		game_only.tooltip_text = dialog.view.text("gameLightsOnlyHint")
+		game_only.button_pressed = dialog.view.preferences.values.game_lights_only
+		game_only.toggled.connect(func(value: bool) -> void: dialog.call("_change", "game_lights_only", value))
+		dialog.get("layout").add_child(game_only)
+		var sunlight := CheckButton.new()
+		sunlight.name = "Sunlight"
+		sunlight.text = dialog.view.text("sunlight")
+		sunlight.tooltip_text = dialog.view.text("sunlightHint")
+		sunlight.button_pressed = dialog.view.preferences.values.sunlight
+		sunlight.toggled.connect(func(value: bool) -> void: dialog.call("_change", "sunlight", value))
+		dialog.get("layout").add_child(sunlight)
+		var shadows := CheckButton.new()
+		shadows.name = "Shadows"
+		shadows.text = dialog.view.text("shadows")
+		shadows.tooltip_text = dialog.view.text("shadowsHint")
+		shadows.button_pressed = dialog.view.preferences.values.shadows
+		dialog.get("layout").add_child(shadows)
+		_shadow_quality()
+		var quality := dialog.get("layout").find_child("ShadowQuality", true, false) as HSlider
+		var quality_name := dialog.get("layout").find_child("ShadowQualityName", true, false) as Label
+		_set_shadow_quality_enabled(quality, quality_name, shadows.button_pressed)
+		shadows.toggled.connect(func(value: bool) -> void:
+			_set_shadow_quality_enabled(quality, quality_name, value)
+			dialog.call("_change", "shadows", value))
+		var mesh_lod := CheckButton.new()
+		mesh_lod.name = "MeshLod"
+		mesh_lod.text = dialog.view.text("meshLod")
+		mesh_lod.button_pressed = dialog.view.preferences.values.mesh_lod
+		mesh_lod.toggled.connect(func(value: bool) -> void: dialog.call("_change", "mesh_lod", value))
+		dialog.get("layout").add_child(mesh_lod)
+		var keep_corpses := CheckButton.new()
+		keep_corpses.name = "KeepCorpses"
+		keep_corpses.text = dialog.view.text("keepCorpses")
+		keep_corpses.button_pressed = dialog.view.preferences.values.keep_corpses
+		keep_corpses.toggled.connect(func(value: bool) -> void: dialog.call("_change", "keep_corpses", value))
+		dialog.get("layout").add_child(keep_corpses)
+		var particles := CheckButton.new()
+		particles.name = "ElectronicParticles"
+		particles.text = dialog.view.text("electronicParticles")
+		particles.button_pressed = dialog.view.preferences.values.electronic_particles
+		particles.toggled.connect(func(value: bool) -> void: dialog.call("_change", "electronic_particles", value))
+		dialog.get("layout").add_child(particles)
 	var smoke := CheckButton.new()
 	smoke.name = "BulletImpactSmoke"
 	smoke.text = dialog.view.text("bulletImpactSmoke")
@@ -372,3 +380,15 @@ func _audio() -> void:
 	dialog.call("_slider", "effectsVolume", "effects_volume", 0, 1, .05)
 	dialog.call("_slider", "musicVolume", "music_volume", 0, 1, .05)
 	dialog.call("_slider", "menuMusicVolume", "menu_music_volume", 0, 1, .05)
+
+
+## Web builds: blood is green or red, stored as the same blood_level the desktop slider uses.
+func _blood_color() -> void:
+	var color := OptionButton.new()
+	color.name = "BloodColor"
+	color.add_item(dialog.view.text("bloodColorGreen"))
+	color.add_item(dialog.view.text("bloodColorRed"))
+	color.selected = 0 if dialog.view.preferences.values.blood_level == BLOOD_LEVEL.GREEN else 1
+	color.item_selected.connect(func(index: int) -> void:
+		dialog.call("_change", "blood_level", BLOOD_LEVEL.GREEN if index == 0 else 2))
+	dialog.call("_row", "bloodColor", color)
