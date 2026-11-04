@@ -9,6 +9,7 @@ const BANNER_SIDE_MARGIN := 16.0
 const BANNER_CHROME_WIDTH := 34.0
 const MUTATION_ALARM := preload("res://game/presentation/prototype_hud/mutation_alarm_pulse.gd")
 const BAR_FEEDBACK := preload("res://game/presentation/prototype_hud/vital_bar_feedback.gd")
+const POST_FX := preload("res://game/presentation/prototype_hud/post_fx.gd")
 const VITALS_FX := preload("res://game/presentation/prototype_hud/vitals_screen_fx.gd")
 const CONTROL_LOSS_OVERLAY := preload("res://game/presentation/prototype_hud/control_loss_overlay.gd")
 const MUTATION_VEIL := preload("res://game/presentation/prototype_hud/mutation_veil.gd")
@@ -79,6 +80,7 @@ var _has_key := false
 var _key_signature := ""
 var _mutation_alarm: RefCounted
 var _vitals_fx: Control
+var _post_fx: CanvasLayer
 var _objective: PanelContainer
 var _tutorial_objective := ""
 var _texts_locale := ""
@@ -107,6 +109,9 @@ func _ready() -> void:
 	_vitals_fx.name = "VitalsScreenFx"
 	add_child(_vitals_fx)
 	move_child(_vitals_fx, 0)
+	_post_fx = POST_FX.new()
+	_post_fx.name = "PostFx"
+	add_child(_post_fx)
 	_configure_icon_tints()
 	_configure_icon_regions()
 	_configure_key_buttons()
@@ -263,6 +268,7 @@ func _process(delta: float) -> void:
 	_antidote_flash_remaining = maxf(0.0, _antidote_flash_remaining - delta)
 	_mutation_alarm.update(delta, _control_notice.visible)
 	_vitals_fx.update(delta, float(infection.call("get_mutation")), float(infection.call("get_critical_threshold")), _control_notice.visible, float(player.health), float(player.max_health))
+	_post_fx.update(delta, float(player.health), float(player.max_health))
 	_update_vitals()
 	_health_feedback.advance(delta)
 	_mutation_feedback.advance(delta, MUTATION_ALARM.LOST_SCALE if _control_notice.visible else Vector2.ONE)
@@ -562,3 +568,8 @@ func _set_key_state(button: Button, selected: bool, blocked: bool) -> void:
 	for state in ["font_color", "font_hover_color", "font_disabled_color"]:
 		button.add_theme_color_override(state, ink)
 	button.add_theme_color_override("font_pressed_color", PALETTE.INK)
+
+
+## Settings: grade, vignette, grain and the damage aberration flash.
+func set_post_fx_enabled(enabled: bool) -> void:
+	_post_fx.call("set_enabled", enabled)

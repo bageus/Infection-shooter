@@ -204,6 +204,11 @@ func set_camera_shake_enabled(enabled: bool) -> void:
 	player.call("set_camera_shake_enabled", enabled)
 
 
+## Settings: post-processing (grade, vignette, grain, damage flash).
+func set_post_fx_enabled(enabled: bool) -> void:
+	$PrototypeHUD.call("set_post_fx_enabled", enabled)
+
+
 ## Tutorial: points the floor chevrons at a lesson goal until called with an invalid callable.
 func set_tutorial_hint(target: Callable) -> void:
 	if is_instance_valid(mission_layout):
