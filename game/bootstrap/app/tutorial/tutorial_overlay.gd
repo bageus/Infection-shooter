@@ -216,6 +216,15 @@ func _draw_frame() -> void:
 func _input(event: InputEvent) -> void:
 	if not active or not visible or not _is_click():
 		return
+	var hotkey := str(step.get("hotkey", ""))
+	if not hotkey.is_empty() and event.is_action_pressed(hotkey) and not event.is_echo():
+		# The key the step asks for counts as the action itself, not as "press any key".
+		get_viewport().set_input_as_handled()
+		var action: Variant = step.get("hotkey_call")
+		finish()
+		if action is Callable and (action as Callable).is_valid():
+			(action as Callable).call()
+		return
 	var pressed: bool = (event is InputEventKey and event.pressed and not event.is_echo()) or (event is InputEventMouseButton and event.pressed)
 	if not pressed or Time.get_ticks_msec() - _started_ms < int(MIN_STEP_SECONDS * 1000.0):
 		return
