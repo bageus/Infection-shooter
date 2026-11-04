@@ -8,7 +8,7 @@ music and sound effects are re-encoded at a lower bitrate, and JSON data is
 minified. The repository's assets, and the itch and desktop presets, stay
 untouched.
 
-Usage: python3 tools/build_yandex_web.py [--out build/yandex] [--ogg-quality 3]
+Usage: python3 tools/build_yandex_web.py [--out build/yandex] [--ogg-quality 0]
 The asset list tools/yandex_assets.txt is the source files a boot of main.tscn opens,
 from: strace -f -e trace=openat godot --headless --path . res://game/bootstrap/app/main.tscn
 Needs Godot 4.7.2 on PATH with export templates, Pillow and ffmpeg.
@@ -69,6 +69,24 @@ def halve_textures() -> int:
         import_file.write_text(
             SIZE_LINE.sub(f"process/size_limit={limit}", text), encoding="utf-8"
         )
+        count += 1
+    return count
+
+
+def lossy_atlases() -> int:
+    """Lossless atlases (decals, displays) become lossy WebP; UI, logos and biomass stay lossless."""
+    keep = KEEP_FULL_SIZE + ("assets/logo/", "assets/interface/", "assets/icons/")
+    count = 0
+    for import_file in STAGING.rglob("*.import"):
+        text = import_file.read_text(encoding="utf-8")
+        source = SOURCE_LINE.search(text)
+        if 'importer="texture"' not in text or source is None or source.group(1).startswith(keep):
+            continue
+        if "compress/mode=0" not in text:
+            continue
+        text = text.replace("compress/mode=0", "compress/mode=1")
+        text = re.sub(r"^compress/lossy_quality=.*$", "compress/lossy_quality=0.8", text, flags=re.M)
+        import_file.write_text(text, encoding="utf-8")
         count += 1
     return count
 
@@ -142,13 +160,14 @@ def reencode_all_ogg(quality: int) -> int:
 def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__.splitlines()[0])
     parser.add_argument("--out", default="build/yandex", help="output folder under the repository")
-    parser.add_argument("--ogg-quality", type=int, default=3, help="libvorbis -q:a value, 0 to 10")
+    parser.add_argument("--ogg-quality", type=int, default=0, help="libvorbis -q:a value, 0 to 10")
     args = parser.parse_args()
 
     if STAGING.exists():
         shutil.rmtree(STAGING)
     shutil.copytree(ROOT, STAGING, ignore=IGNORED)
     print(f"textures halved: {halve_textures()}")
+    print(f"atlases made lossy: {lossy_atlases()}")
     print(f"ogg re-encoded: {reencode_all_ogg(args.ogg_quality)}")
     print(f"json minified: {minify_json()}")
 
