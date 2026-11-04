@@ -3,7 +3,7 @@ extends Node3D
 ## Floor chevrons from the player toward the current goal, shown when the floor hints setting is on.
 ## Each chevron rises forward and settles back. The trail follows a walkable route around walls.
 
-const CHEVRON_COUNT := 3
+const CHEVRON_COUNT := 5
 const FIRST_DISTANCE := 2.0
 const SPACING := 2.2
 const BOB_AMPLITUDE := 0.22

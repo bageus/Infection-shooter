@@ -7,8 +7,9 @@ const CELL := 0.8
 const RADIUS := 0.32
 const HEIGHT := 0.6
 const MASK := 3
-const MAX_EXPANSIONS := 3500
-const MARGIN_CELLS := 24 # how far the search may leave the box around the start and the goal
+const MAX_EXPANSIONS := 7000
+const MARGIN_CELLS := 40 # how far the search may leave the box around the start and the goal
+const GREED := 1.6 # a heuristic weight above 1 trades a slightly longer way for far fewer cells searched
 const CACHE_MSEC := 4000
 const SAMPLE_STEP := 0.4
 const STEPS: Array[Vector2i] = [Vector2i(1, 0), Vector2i(-1, 0), Vector2i(0, 1), Vector2i(0, -1),
@@ -34,7 +35,7 @@ func find(space: PhysicsDirectSpaceState3D, from: Vector3, goal: Vector3, exclud
 	var cells := _search(start, target)
 	if cells.is_empty():
 		return []
-	return _pull_straight(cells, start, target, from, goal)
+	return _pull_straight(cells, target, from, goal)
 
 
 func _cell_of(point: Vector3) -> Vector2i:
@@ -50,9 +51,10 @@ func _search(start: Vector2i, target: Vector2i) -> Array[Vector2i]:
 	var high := Vector2i(maxi(start.x, target.x), maxi(start.y, target.y)) + Vector2i.ONE * MARGIN_CELLS
 	var best := {start: 0.0}
 	var came := {}
-	var open: Array = [[_heuristic(start, target), start]] # a binary min-heap on the first element
+	var open: Array = [[GREED * _heuristic(start, target), start]] # a binary min-heap on the first element
 	var closed := {}
 	var expansions := 0
+	var nearest := start # when the budget runs out, the way leads to the closest cell reached
 	while not open.is_empty() and expansions < MAX_EXPANSIONS:
 		var cell: Vector2i = _pop(open)[1]
 		if cell == target:
@@ -61,6 +63,8 @@ func _search(start: Vector2i, target: Vector2i) -> Array[Vector2i]:
 			continue
 		closed[cell] = true
 		expansions += 1
+		if _heuristic(cell, target) < _heuristic(nearest, target):
+			nearest = cell
 		for step in STEPS:
 			var next := cell + step
 			if closed.has(next) or next.x < low.x or next.y < low.y or next.x > high.x or next.y > high.y:
@@ -75,8 +79,8 @@ func _search(start: Vector2i, target: Vector2i) -> Array[Vector2i]:
 			if not best.has(next) or cost < float(best[next]):
 				best[next] = cost
 				came[next] = cell
-				_push(open, [cost + _heuristic(next, target), next])
-	return []
+				_push(open, [cost + GREED * _heuristic(next, target), next])
+	return _unwind(came, nearest) if nearest != start else []
 
 
 func _heuristic(from: Vector2i, to: Vector2i) -> float:
@@ -94,7 +98,7 @@ func _unwind(came: Dictionary, last: Vector2i) -> Array[Vector2i]:
 
 
 ## Drops waypoints the straight line can skip, so the arrows follow corridors and corners, not the grid.
-func _pull_straight(cells: Array[Vector2i], _start: Vector2i, _target: Vector2i, from: Vector3, goal: Vector3) -> Array[Vector3]:
+func _pull_straight(cells: Array[Vector2i], target: Vector2i, from: Vector3, goal: Vector3) -> Array[Vector3]:
 	var points: Array[Vector3] = []
 	var anchor := from
 	var index := 0
@@ -107,7 +111,7 @@ func _pull_straight(cells: Array[Vector2i], _start: Vector2i, _target: Vector2i,
 		points.append(_center(cells[farthest]))
 		anchor = _center(cells[farthest])
 		index = farthest
-	if points.is_empty() or points[-1].distance_to(goal) > 0.01:
+	if cells[-1] == target and (points.is_empty() or points[-1].distance_to(goal) > 0.01): # a partial way ends where it ends
 		points.append(Vector3(goal.x, 0.0, goal.z))
 	return points
 

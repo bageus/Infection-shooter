@@ -32,6 +32,7 @@ var _hud: Node
 var _tree_ui: Node
 var _player: Node
 var _started_mutation := 0.0
+var _last_cast := ""
 var _host: Node
 var _finished := {}
 var _forced := {}
@@ -54,6 +55,7 @@ func configure(player: Node, hud: Node, tree_ui: Node, progress_state: RefCounte
 	_hud = hud
 	_tree_ui = tree_ui
 	_runtime = player.get("infection_runtime")
+	_runtime.connect("skill_cast", func(skill_id: String) -> void: _last_cast = skill_id)
 	progress = progress_state if progress_state != null else PROGRESS.new()
 	overlay = OVERLAY.new()
 	overlay.name = "TutorialOverlay"
@@ -141,6 +143,7 @@ func _start_next() -> void:
 	_resume.erase(current)
 	_reveal_targets(current)
 	_started_mutation = float(_runtime.call("get_mutation"))
+	_last_cast = ""
 	_look_seconds = 0.0
 	_rolled = false
 	_reloaded = false
@@ -235,7 +238,7 @@ func _build_steps(lesson: String) -> Array:
 				_click(TEXT.t("tutActive"), [_tree_rect.bind("active")], _tree_open),
 				_click(TEXT.t("tutPassive"), [_tree_rect.bind("passive")], _tree_open),
 				_wait(TEXT.t("tutPickPower"), [_tree_rect.bind("skill:power_strike")], _power_strike_chosen, _tree_open, true),
-			] + _task(TEXT.t("tutKillActive") % KEYS.binding("skill_1"), TEXT.t("objKill") % KEYS.binding("skill_1"), [], "cycle", _skill_ready.bind("muscle_memory"))
+			] + _task(TEXT.t("tutKillActive") % KEYS.binding("skill_1"), TEXT.t("objKill") % KEYS.binding("skill_1"), [], "cycle", _power_strike_cast)
 		"passive_skill":
 			return [
 				_wait(TEXT.t("tutPickReload"), [_tree_rect.bind("skill:muscle_memory")], _skill_learned.bind("muscle_memory"), _tree_open, true),
@@ -359,6 +362,10 @@ func _skill_learned(skill_id: String) -> bool:
 # The first point is spent: on Power Strike, or on whatever else the player preferred.
 func _power_strike_chosen() -> bool:
 	return _skill_learned("power_strike") or int(_runtime.call("mutation_points")) <= 0
+
+
+func _power_strike_cast() -> bool:
+	return _last_cast.begins_with("power_strike")
 
 
 func _skill_ready(skill_id: String) -> bool:
