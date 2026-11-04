@@ -6,7 +6,7 @@ var failures := 0
 var shared_materials: Dictionary = {}
 const ATLAS_PATH := ROOT_PATH + "textures/unified/"
 # Non-destructible models with their own materials, outside the atlas.
-const NON_ATLAS := ["01_duct_rect_elbow.glb", "01_duct_rect_straight.glb", "01_elevator_drive_unit.glb", "01_pipe_sewer_floor_elbow.glb", "01_pipe_sewer_floor_straight.glb", "01_pipe_sewer_wall_elbow.glb", "01_pipe_sewer_wall_straight.glb", "01_pipe_water_floor_elbow.glb", "01_pipe_water_floor_straight.glb", "01_pipe_water_wall_elbow.glb", "01_pipe_water_wall_straight.glb", "01_wall_lab_glass.glb", "01_wall_lab_glass_door.glb", "01_wall_metal_door.glb", "01_wall_metal_grille.glb"]
+const NON_ATLAS := ["01_stairs_2.glb", "01_duct_rect_elbow.glb", "01_duct_rect_straight.glb", "01_elevator_drive_unit.glb", "01_pipe_sewer_floor_elbow.glb", "01_pipe_sewer_floor_straight.glb", "01_pipe_sewer_wall_elbow.glb", "01_pipe_sewer_wall_straight.glb", "01_pipe_water_floor_elbow.glb", "01_pipe_water_floor_straight.glb", "01_pipe_water_wall_elbow.glb", "01_pipe_water_wall_straight.glb", "01_wall_lab_glass.glb", "01_wall_lab_glass_door.glb", "01_wall_metal_door.glb", "01_wall_metal_grille.glb"]
 
 
 func _initialize() -> void:
@@ -17,7 +17,7 @@ func _run() -> void:
 	var catalog := CATALOG.new()
 	catalog.call("_build_environment_catalogs")
 	var entries: Array = catalog.group_catalogs["01"]
-	_check(entries.size() == 39, "Group 01 exposes 39 palette assets")
+	_check(entries.size() == 40, "Group 01 exposes 40 palette assets")
 	var palette_paths := {}
 	for entry: Dictionary in entries:
 		_check(not palette_paths.has(entry.path), "Palette entry is unique: " + str(entry.path))
@@ -38,7 +38,7 @@ func _run() -> void:
 		model.free()
 		var migrated := ROOT_PATH + filename
 		_check(catalog.call("_migrate_scene_path", ROOT_PATH + "models/" + filename) == migrated, "Nested saved path migrates: " + filename)
-	_check(count == 39, "Runtime folder contains 39 models")
+	_check(count == 40, "Runtime folder contains 40 models")
 	_check(catalog.call("_migrate_scene_path", ROOT_PATH + "models/01_glass_wall_full_breakable(1).glb") == ROOT_PATH + "01_glass_wall_full_breakable.glb", "Glass wall upload name migrates")
 	_check(catalog.call("_environment_scene_for", "01_glass_wall_full_breakable.glb").ends_with("glass_wall_full.tscn"), "Glass wall uses its destructible structural scene")
 	_check_legacy_stairs(catalog)
@@ -93,9 +93,9 @@ func _check(condition: bool, message: String) -> void:
 
 func _check_legacy_stairs(catalog: RefCounted) -> void:
 	for prefix: String in ["", "models/"]:
-		_check(catalog.call("_migrate_scene_path", ROOT_PATH + prefix + "01_stairs_2.glb") == ROOT_PATH + "01_stairs.glb", "Duplicate staircase saved path migrates")
+		_check(catalog.call("_migrate_scene_path", ROOT_PATH + prefix + "01_stairs_2.glb") == ROOT_PATH + "01_stairs_2.glb", "Staircase 2 saved path keeps its own model")
 	var stairs := catalog.call("_create_asset", ROOT_PATH + "01_stairs_2.glb") as Node3D
-	_check(stairs != null and stairs.get("model_path") == ROOT_PATH + "01_stairs.glb", "Direct legacy staircase uses canonical model")
+	_check(stairs != null and stairs.get("model_path") == ROOT_PATH + "01_stairs_2.glb", "Staircase 2 is placed as its own model")
 	if stairs != null:
 		stairs.free()
 

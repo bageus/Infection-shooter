@@ -16,6 +16,7 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
 GROUP = ROOT / 'models/objects/enviroments/01'
+SELF_TEXTURED = {'01_stairs_2.glb'}
 FORMATS = {5121: 'B', 5123: 'H', 5125: 'I', 5126: 'f'}
 WIDTHS = {'SCALAR': 1, 'VEC2': 2, 'VEC3': 3, 'VEC4': 4}
 
@@ -127,7 +128,8 @@ def containing_tile(uv, tiles):
 def validate_model(path, layout):
     doc, binary = read_glb(path.read_bytes())
     # Non-destructible models carry their own materials and are outside the atlas.
-    atlas = 'images' in doc
+    # 01_stairs_2 keeps its own embedded 1024 px maps and is outside the atlas.
+    atlas = 'images' in doc and path.name not in SELF_TEXTURED
     if atlas:
         assert doc['images'] == [{'uri': f'textures/unified/group01_{kind}.png'} for kind in ['albedo', 'normal', 'orm']], f'{path.name}: stale images'
         assert len(doc['textures']) == 3
@@ -163,7 +165,7 @@ def main():
     args = parser.parse_args()
     layout = json.loads((GROUP/'atlas_layout.json').read_text())
     paths = sorted(GROUP.glob('*.glb'))
-    assert len(paths) == 39 and not (GROUP/'01_stairs_2.glb').exists()
+    assert len(paths) == 40 and (GROUP/'01_stairs_2.glb').exists()
     for path in paths:
         relative = path.relative_to(ROOT).as_posix()
         validate_model(path, layout)
