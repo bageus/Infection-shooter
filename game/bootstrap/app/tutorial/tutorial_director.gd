@@ -233,10 +233,8 @@ func _build_steps(lesson: String) -> Array:
 				_click(TEXT.t("tutAntidoteWise"), [antidote]),
 			] + _task(TEXT.t("tutInhale"), TEXT.t("objInhale"), [], "cycle", _inhaled_all())
 		"active_skill":
+			# The split into active and passive branches belongs to the basic menu lesson.
 			return [
-				_click(TEXT.t("tutBranches"), [_tree_rect.bind("active"), _tree_rect.bind("passive")], _tree_open),
-				_click(TEXT.t("tutActive"), [_tree_rect.bind("active")], _tree_open),
-				_click(TEXT.t("tutPassive"), [_tree_rect.bind("passive")], _tree_open),
 				_wait(TEXT.t("tutPickPower"), [_tree_rect.bind("skill:power_strike")], _power_strike_chosen, _tree_open, true),
 			] + _task(TEXT.t("tutKillActive") % KEYS.binding("skill_1"), TEXT.t("objKill") % KEYS.binding("skill_1"), [], "cycle", _power_strike_cast)
 		"passive_skill":
