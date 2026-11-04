@@ -8,6 +8,7 @@ const CEILING_Y := 2.8
 
 
 func _ready() -> void:
+	add_to_group("staircase")
 	var packed := load(model_path) as PackedScene
 	if packed == null:
 		push_error("Staircase model unavailable: " + model_path)
@@ -33,7 +34,8 @@ func _ready() -> void:
 	if not model_path.ends_with("01_stairs_2.glb"):
 		_add_walkable_box(body, Vector3(0, 2.90, -0.71), Vector3(3.9, 0.20, 1.4), 0.0)
 	# Ceiling slab over the stair footprint: a 1.8 m player cannot climb past it.
-	_add_walkable_box(body, Vector3(0, CEILING_Y + 0.1, 1.4), Vector3(4.2, 0.2, 5.8), 0.0)
+	# Measured from the floor: a stair below floor level must not put the slab at floor height.
+	_add_walkable_box(body, Vector3(0, CEILING_Y - global_position.y + 0.1, 1.4), Vector3(4.2, 0.2, 5.8), 0.0)
 
 
 func _fade_above_ceiling(node: Node) -> void:
