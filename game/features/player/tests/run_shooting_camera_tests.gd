@@ -125,15 +125,25 @@ func _test_adjustment() -> void:
 	_check(is_zero_approx(view.yaw) and absf(view.pitch + 5.0) < 0.001 and view.distance == player.camera_max_distance, "Preferences clamp yaw, pitch and distance")
 	player.set_camera_adjustment({"yaw": 0.0, "pitch": -200.0, "distance": 20.0})
 	_check(absf(player.get_camera_adjustment().pitch + 85.0) < 0.001, "Pitch cannot drop below the steepest allowed angle")
-	player.set_camera_adjustment({"yaw": 0.0, "pitch": -37.3, "distance": 20.0})
+	player.set_camera_adjustment({"yaw": 0.0, "pitch": -44.81, "distance": 20.0})
 	var key := InputEventKey.new()
 	key.keycode = KEY_I
 	key.pressed = true
 	player._unhandled_input(key)
-	_check(absf(player.get_camera_adjustment().pitch + 38.3) < 0.001, "I raises the camera one step")
+	_check(absf(player.get_camera_adjustment().pitch + 45.81) < 0.001, "I raises the camera one step")
 	key.keycode = KEY_K
 	player._unhandled_input(key)
 	player._unhandled_input(key)
-	_check(absf(player.get_camera_adjustment().pitch + 36.3) < 0.001, "K lowers the camera one step per press")
+	_check(absf(player.get_camera_adjustment().pitch + 43.81) < 0.001, "K lowers the camera one step per press")
+	player.set_camera_adjustment({"yaw": 0.0, "pitch": -44.81, "distance": 20.0})
+	player.camera_stair_room = true
+	for i in 120:
+		player._update_camera(1.0 / 60.0)
+	_check(absf(player.camera.rotation_degrees.x + 58.81) < 0.01, "Stair room eases the camera to -58.81")
+	_check(absf(player.get_camera_adjustment().pitch + 44.81) < 0.001, "Stair room leaves the saved pitch alone")
+	player.camera_stair_room = false
+	for i in 120:
+		player._update_camera(1.0 / 60.0)
+	_check(absf(player.camera.rotation_degrees.x + 44.81) < 0.01, "Leaving the stair room returns the camera to -44.81")
 	player.queue_free()
 	await process_frame
