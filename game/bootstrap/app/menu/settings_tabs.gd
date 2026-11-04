@@ -142,6 +142,13 @@ func _comfort_rows() -> void:
 	shake.button_pressed = dialog.view.preferences.values.camera_shake
 	shake.toggled.connect(func(value: bool) -> void: dialog.call("_change", "camera_shake", value))
 	dialog.get("layout").add_child(shake)
+	var post_fx := CheckButton.new()
+	post_fx.name = "PostFx"
+	post_fx.text = dialog.view.text("postFx")
+	post_fx.tooltip_text = dialog.view.text("postFxHint")
+	post_fx.button_pressed = dialog.view.preferences.values.post_fx
+	post_fx.toggled.connect(func(value: bool) -> void: dialog.call("_change", "post_fx", value))
+	dialog.get("layout").add_child(post_fx)
 
 
 func _tuning_sliders() -> void:

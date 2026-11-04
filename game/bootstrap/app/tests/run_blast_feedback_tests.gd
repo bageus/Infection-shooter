@@ -84,6 +84,8 @@ func _render_checks() -> void:
 		return
 	app.hide()
 	app.get("gameplay").process_mode = Node.PROCESS_MODE_DISABLED
+	# The animated grain of the post-processing layer would break the static baseline.
+	app.find_child("PostFx", true, false).call("set_enabled", false)
 	var fixture := _render_fixture()
 	var hud := CanvasLayer.new()
 	hud.layer = 150
