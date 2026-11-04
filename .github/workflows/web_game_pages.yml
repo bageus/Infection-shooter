@@ -1,0 +1,59 @@
+name: Web game (GitHub Pages)
+# Exports the full game with the "Web" preset (single-threaded, so Pages needs
+# no COOP/COEP headers) and publishes it to GitHub Pages. Run it by hand
+# (Actions > Web game (GitHub Pages) > Run workflow). Pages source must be
+# set to "GitHub Actions" in the repository settings.
+on:
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: web-game-pages
+  cancel-in-progress: true
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install Godot
+        run: |
+          bash tools/ci_download_godot.sh
+          unzip -q /tmp/godot.zip -d /tmp/godot
+          chmod +x /tmp/godot/Godot*
+          sudo ln -s /tmp/godot/Godot* /usr/local/bin/godot
+      - name: Install Web export templates
+        run: |
+          v=4.7.2.stable
+          curl -fSL --retry 3 -o /tmp/templates.tpz \
+            https://github.com/godotengine/godot-builds/releases/download/4.7.2-stable/Godot_v4.7.2-stable_export_templates.tpz
+          mkdir -p ~/.local/share/godot/export_templates/$v
+          unzip -q /tmp/templates.tpz -d /tmp/tpl
+          cp /tmp/tpl/templates/web_nothreads_*release.zip ~/.local/share/godot/export_templates/$v/ || true
+          cp /tmp/tpl/templates/version.txt ~/.local/share/godot/export_templates/$v/
+          cp /tmp/tpl/templates/web_* ~/.local/share/godot/export_templates/$v/
+      - name: Import
+        run: |
+          set -o pipefail
+          timeout 900 godot --headless --path . --editor --quit 2>&1 | tee /tmp/import.log
+      - name: Export Web
+        run: |
+          set -o pipefail
+          mkdir -p build/web
+          timeout 900 godot --headless --path . --export-release Web build/web/index.html 2>&1 | tee /tmp/export.log
+          ls -la build/web
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: build/web
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    permissions:
+      pages: write
+      id-token: write
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v4
