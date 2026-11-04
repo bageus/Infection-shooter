@@ -105,7 +105,7 @@ func _ready() -> void:
 	add_child(planning_mode)
 	planning_mode.process_mode = Node.PROCESS_MODE_ALWAYS
 	planning_mode.setup(self, planning_root, planning_ui, not defer_layout_loading)
-	if OS.is_debug_build(): # Alt camera editing stays out of release exports
+	if OS.is_debug_build() or OS.has_feature("web"): # Alt camera editing stays out of desktop release exports; web builds keep the hint
 		var camera_tuning := preload("res://game/bootstrap/app/gameplay_camera_tuning.gd").new()
 		add_child(camera_tuning)
 		camera_tuning.setup(player)
