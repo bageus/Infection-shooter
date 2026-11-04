@@ -80,7 +80,9 @@ func _search(start: Vector2i, target: Vector2i) -> Array[Vector2i]:
 				best[next] = cost
 				came[next] = cell
 				_push(open, [cost + GREED * _heuristic(next, target), next])
-	return _unwind(came, nearest) if nearest != start else []
+	if nearest == start:
+		return []
+	return _unwind(came, nearest)
 
 
 func _heuristic(from: Vector2i, to: Vector2i) -> float:

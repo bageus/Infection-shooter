@@ -66,6 +66,11 @@ func _wall_route(guide: Node3D, player: Node3D, state: Dictionary) -> void:
 	_check(waypoints.size() > 1, "a wall on the way adds route bends")
 	_check(waypoints.any(func(point: Vector3) -> bool: return absf(point.z) > 4.0), "the route goes around the wall end")
 	_check(waypoints[-1].distance_to(state.goal) < 0.1, "the route ends at the goal")
+	state.goal = Vector3(5.0, 0.0, 30.0) # beyond the wall's end and far: a way still leads toward it
+	guide.set("_route", FLOOR_ROUTE.new())
+	guide.set("_route_age", 99.0)
+	guide.call("_process", 0.016)
+	_check((guide.get("_waypoints") as Array).size() > 0, "a far goal still gets a route")
 
 
 func _visible_chevrons(guide: Node3D) -> Array[MeshInstance3D]:
