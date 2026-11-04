@@ -58,6 +58,17 @@ func _run() -> void:
 	_check(CHECKPOINT.resume_map() == "", "No Continue after the last map of the chain")
 
 	chain.set_checkpoint(0, true)
+	chain.save(CHAIN_PATH)
+	var fresh := FRONT.instantiate()
+	root.add_child(fresh)
+	current_scene = fresh
+	await process_frame
+	fresh.call("_action", "start")
+	await process_frame
+	var started: CanvasLayer = fresh.get_child(fresh.get_child_count() - 1)
+	_check(started.get("_level_name") == "tutorial_lvl", "New game starts the constructor chain from its first map")
+	fresh.queue_free()
+	await process_frame
 	CHECKPOINT.save_passed("tutorial_lvl")
 	var frontend := FRONT.instantiate()
 	root.add_child(frontend)

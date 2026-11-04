@@ -1,6 +1,7 @@
 extends Control
 
 const CHECKPOINT := preload("res://game/bootstrap/app/checkpoint_progress.gd")
+const LEVEL_CHAIN := preload("res://game/bootstrap/app/level_chain.gd")
 
 @onready var menu = $Menu
 var _loading := false
@@ -27,7 +28,13 @@ func _action(action: String) -> void:
 			loader.completed.connect(func(_success: bool) -> void: _loading = false)
 			loader.set("completion_music", completion_music)
 			completion_music = null
-			loader.start()
+			# A level chain in the constructor starts a new game from its first map.
+			var chain: RefCounted = LEVEL_CHAIN.new()
+			chain.load_file()
+			if chain.names().is_empty():
+				loader.start()
+			else:
+				loader.start_map(CHECKPOINT.map_file(chain.names()[0]), chain.names()[0], {})
 		"continue":
 			var map_name := CHECKPOINT.resume_map()
 			if map_name.is_empty():
