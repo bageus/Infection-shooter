@@ -30,6 +30,8 @@ const KICK_ENEMY_PUSH := 1.0
 ## Metres a jab shoves the enemy it hits.
 const PUNCH_ENEMY_PUSH := 0.4
 const OBJECT_MASK := 7
+## Default physics layer: walls, floors and props, not the enemy layers.
+const WALL_MASK := 1
 const OBJECT_QUERY_LIMIT := 32
 ## Seconds from the key press to the foot or fist landing (strike_pose.gd).
 const IMPACT_DELAY := {KICK: 0.27, PUNCH: 0.14}
@@ -109,6 +111,8 @@ func _kick_impact() -> void:
 		if body == null or seen.has(body.get_instance_id()) or body is CharacterBody3D:
 			continue
 		seen[body.get_instance_id()] = true
+		if not _clear_line(body):
+			continue
 		if body.has_method("has_loot") and bool(body.call("has_loot")) and body.has_method("break_by_strike"):
 			if nearest_crate == null or body.global_position.distance_squared_to(player.global_position) < nearest_crate.global_position.distance_squared_to(player.global_position):
 				nearest_crate = body
@@ -117,11 +121,28 @@ func _kick_impact() -> void:
 	for enemy in _host._enemies_near(player.global_position, KICK_LENGTH + 1.5):
 		var offset := _flat_offset(enemy)
 		var reach := float(_host._body_radius(enemy))
-		if enemy.has_method("apply_skill_push") and offset.dot(forward) > 0.0 and offset.dot(forward) <= KICK_LENGTH + reach and absf(offset.cross(forward).y) <= KICK_WIDTH * 0.5 + reach:
+		if enemy.has_method("apply_skill_push") and offset.dot(forward) > 0.0 and offset.dot(forward) <= KICK_LENGTH + reach and absf(offset.cross(forward).y) <= KICK_WIDTH * 0.5 + reach and _clear_line(enemy):
 			enemy.call("apply_skill_push", forward, KICK_ENEMY_PUSH)
 	# One kick breaks the nearest crate only; a crowd of crates takes one kick each.
 	if nearest_crate != null:
 		nearest_crate.call("break_by_strike", nearest_crate.global_position, forward)
+
+
+# Walls and floor block the kick: the target is reachable only if the first static hit on the way is the target.
+func _clear_line(target: Node3D) -> bool:
+	var player: CharacterBody3D = _host.player
+	var query := PhysicsRayQueryParameters3D.create(player.global_position, target.global_position, WALL_MASK)
+	query.exclude = [player.get_rid()]
+	for _pass in OBJECT_QUERY_LIMIT:
+		var hit := player.get_world_3d().direct_space_state.intersect_ray(query)
+		if hit.is_empty() or hit.collider == target or target.is_ancestor_of(hit.collider):
+			return true
+		if not hit.collider is RigidBody3D:
+			return false # static geometry: a wall or floor
+		var excluded := query.exclude # Godot hands out a copy, so assign it back
+		excluded.append(hit.rid) # loose props in the way do not block the kick
+		query.exclude = excluded
+	return false
 
 
 # A kick hits any prop the punch can hit (tables, nightstands, glass) and thuds; loose items also fly.

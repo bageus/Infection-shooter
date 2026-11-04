@@ -96,6 +96,28 @@ func _run() -> void:
 	await create_timer(0.5).timeout
 	_expect(table.melee_hits == 1, "Kick lands one melee hit on a table (%d)." % table.melee_hits)
 	_expect(table.linear_velocity.length() > 0.0, "Kick moves the table.")
+	# A wall between the player and a table stops the kick.
+	var behind := Table.new()
+	behind.gravity_scale = 0.0
+	var behind_shape := CollisionShape3D.new()
+	behind_shape.shape = BoxShape3D.new()
+	behind.add_child(behind_shape)
+	behind.position = Vector3(20, 0.25, -1.0)
+	root.add_child(behind)
+	var wall := StaticBody3D.new()
+	var wall_shape := CollisionShape3D.new()
+	wall_shape.shape = BoxShape3D.new()
+	(wall_shape.shape as BoxShape3D).size = Vector3(3.0, 2.0, 0.2)
+	wall.add_child(wall_shape)
+	wall.position = Vector3(20, 1.0, -0.4)
+	root.add_child(wall)
+	await physics_frame
+	await physics_frame
+	player.global_position = Vector3(20, 0.65, 0.0)
+	await physics_frame
+	mutation.call("melee")
+	await create_timer(0.5).timeout
+	_expect(behind.melee_hits == 0, "Kick does not reach a table behind a wall (%d)." % behind.melee_hits)
 	print("gameplay kick failures: ", failures)
 	quit(1 if failures > 0 else 0)
 
