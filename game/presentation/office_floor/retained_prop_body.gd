@@ -73,6 +73,10 @@ func detach(host: RigidBody3D, geometry: RefCounted, position: Vector3, directio
 		if fragment == null:
 			return true
 		fragment.set("breakable", false)
+		# A shot part flies off along the shot; a plain spawn would only drop from the body.
+		var fling := direction.normalized() if direction.length_squared() > 0.0001 else Vector3.FORWARD
+		var launch := (fling * 0.8 + Vector3.UP * 0.4).normalized() * fragment.mass * randf_range(2.5, 3.5)
+		fragment.apply_impulse(launch, (position - fragment.global_position).limit_length(0.3))
 		mesh.hide()
 		geometry.shapes[i].set_deferred("disabled", true)
 		detached = true
