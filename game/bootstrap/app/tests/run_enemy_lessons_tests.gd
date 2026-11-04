@@ -26,7 +26,7 @@ func _run() -> void:
 		_check(view.find_children("*", "Camera3D", true, false).size() == 1, "%s has one camera" % lesson)
 		container.free()
 	var blast: Dictionary = LESSONS.step("blast_extinguisher")
-	_check("радиус 3 м" in str(blast.text) and "до 14 по" in str(blast.text) and "до 5 секунд" in str(blast.text), "The blast text states radius 3 m, damage 14 and stun up to 5 s")
+	_check(str(blast.text) == "Взрыв огнетушителя наносит небольшой урон и оглушает всех, кто находится в зоне поражения.", "The blast lesson is the single sentence about damage and stun")
 	quit(failures)
 
 

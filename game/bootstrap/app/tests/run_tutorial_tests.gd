@@ -79,6 +79,11 @@ func _run() -> void:
 	_check(str(overlay.get("step").get("mode")) == "click" and paused, "Learning it opens the kill task as a paused overlay")
 	await _advance(overlay)
 	_check(str(overlay.get("step").get("objective")) != "", "The kill task then waits as the objective")
+	_check(director.get("current") == "active_skill", "The task waits until Power Strike is used")
+	runtime.emit_signal("skill_cast", "power_strike")
+	await process_frame
+	await process_frame
+	_check(director.get("current") == "", "Using Power Strike ends the active lesson")
 	await _passive_lesson(director, overlay, runtime)
 
 	await _control_loss_lessons(director, overlay, hud, tree_ui, runtime, actor)
