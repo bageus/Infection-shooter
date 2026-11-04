@@ -105,8 +105,6 @@ func request(lesson: String) -> void:
 
 func _process(delta: float) -> void:
 	_track_input(delta)
-	if is_instance_valid(_tree_ui):
-		_tree_ui.set("cards_suppressed", not current.is_empty())
 	_since_start += delta
 	_adopt_clock -= delta
 	if _adopt_clock <= 0.0 and _since_start < ADOPT_WINDOW:
@@ -135,8 +133,10 @@ func _track_input(delta: float) -> void:
 func _start_next() -> void:
 	if _queue.is_empty():
 		current = ""
+		_tree_ui.set("cards_suppressed", false)
 		return
 	current = _queue.pop_front()
+	_tree_ui.set("cards_suppressed", true) # skill cards would cover the lesson; set here, as the paused menu stops _process
 	progress.mark_done(current)
 	_walked_at_end = _walked
 	_steps = _resume.get(current, []) if _resume.has(current) else _build_steps(current)
@@ -251,10 +251,15 @@ func _build_steps(lesson: String) -> Array:
 				_click(TEXT.t("tutAntidoteEffect"), [mutation]),
 			]
 		"open_menu":
-			return _task(TEXT.t("tutOpenMenu") % KEYS.binding("mutation_tree"), TEXT.t("objOpenMenu") % KEYS.binding("mutation_tree"), [], "cycle", _tree_open) + [
+			var intro := _task(TEXT.t("tutOpenMenu") % KEYS.binding("mutation_tree"), TEXT.t("objOpenMenu") % KEYS.binding("mutation_tree"), [], "cycle", _tree_open)
+			intro[0]["hotkey"] = "mutation_tree" # pressing the asked key here opens the menu
+			intro[0]["hotkey_call"] = func() -> void: _tree_ui.call("open_tree")
+			return intro + [
 				_click(TEXT.t("tutBranches"), [_tree_rect.bind("active"), _tree_rect.bind("passive")], _tree_open),
 				_click(TEXT.t("tutActive"), [_tree_rect.bind("active")], _tree_open),
 				_click(TEXT.t("tutPassive"), [_tree_rect.bind("passive")], _tree_open),
+				# The lesson is over only when the menu is closed again, so nothing else starts over it.
+				_wait(TEXT.t("tutCloseMenu") % KEYS.binding("mutation_tree"), [], func() -> bool: return not _tree_open(), Callable(), false, false),
 			]
 		"antidote":
 			return [_click(TEXT.t("tutAntidote") % antidote_key, [antidote]), _click(TEXT.t("tutAntidoteWise"), [antidote])]

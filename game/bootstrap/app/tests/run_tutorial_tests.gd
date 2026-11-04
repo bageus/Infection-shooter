@@ -151,9 +151,15 @@ func _menu_lessons(director: Node, overlay: Node, hud: Node, tree_ui: Node) -> v
 	await _advance(overlay)
 	_check(director.get("current") == "open_menu", "Then the M menu lesson follows")
 	_check(str(overlay.get("step").get("mode")) == "click", "It first asks to press M on a paused overlay")
-	await _advance(overlay)
-	_check(not paused and str(overlay.get("step").get("objective")) != "", "Then it waits for the menu as the objective")
-	tree_ui.call("open_tree")
+	var started := Time.get_ticks_msec()
+	while Time.get_ticks_msec() - started < 400:
+		await process_frame
+	var press_m := InputEventAction.new()
+	press_m.action = "mutation_tree"
+	press_m.pressed = true
+	overlay.call("_input", press_m)
+	await process_frame
+	_check(bool(tree_ui.call("is_tree_open")), "Pressing M on the overlay opens the menu instead of just dismissing it")
 	await process_frame
 	await process_frame
 	_check(bool(tree_ui.get("cards_suppressed")), "Skill cards stay hidden while a lesson is shown over the menu")
@@ -170,9 +176,11 @@ func _menu_lessons(director: Node, overlay: Node, hud: Node, tree_ui: Node) -> v
 	_check(str(overlay.get("step").get("text")) == TEXT.t("tutPassive"), "Then the passive branch, not a passive skill lesson")
 	await _advance(overlay)
 	await process_frame
-	_check(director.get("current") == "", "The menu lesson ends")
+	_check(director.get("current") == "open_menu" and str(overlay.get("step").get("text")) == TEXT.t("tutCloseMenu") % "M", "The lesson waits for the menu to be closed")
 	tree_ui.call("close_tree")
 	await process_frame
+	await process_frame
+	_check(director.get("current") == "", "Closing the menu ends the lesson")
 
 
 
