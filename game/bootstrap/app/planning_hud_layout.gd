@@ -132,7 +132,9 @@ func _build_center(controls: Node, ui: Control, box: Node) -> void:
 	controls.help.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	help_panel.visibility_changed.connect(func() -> void: help_scroll.visible = help_panel.visible)
 	help_scroll.hide()
+	# The UI canvas keeps its base size when the window changes, so the window signal is needed too.
 	ui.resized.connect(_resize_center)
+	ui.get_viewport().size_changed.connect(_resize_center)
 	_resize_center()
 	controls.planning_toolbar.visibility_changed.connect(_toolbar_visibility_changed)
 	update_selection(controls)
