@@ -52,6 +52,7 @@ func _run() -> void:
 		_check(controls.palette.fixed_column_width > 0 and controls.palette.fixed_column_width <= controls.palette.size.x, "Palette entries share one column as wide as the list, so they centre on one axis")
 		_check(left.get_node("VBox").size.x <= width, "Palette contents fit within the fixed HUD")
 		_check(is_equal_approx(layout.right.size.x, 360.0) and layout.right_content.size.x <= 360, "Long map names cannot widen the right HUD")
+		_check(layout.center.size.x >= 380.0, "Planner centre panel keeps its width after a window resize (%s)" % str(size))
 	await _exercise_tabs(layout, left)
 	await _exercise_selection()
 	_exercise_center_button(layout)

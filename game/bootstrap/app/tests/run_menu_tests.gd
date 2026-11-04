@@ -105,7 +105,7 @@ func _test_pause_and_planner(app: Node) -> void:
 	root.push_input(gameplay_key)
 	await process_frame
 	_check(not app.get("mutation_tree_ui").call("is_tree_open"), "pause consumes mutation-tree shortcut behind menu")
-	_check(pause.get("buttons")[1].text == "PLANNING MODE", "planner entry is in pause menu")
+	_check(pause.get("buttons")[2].text == "PLANNING MODE", "planner entry is in pause menu")
 	var infection := app.get_node("Gameplay/Player/InfectionRuntime")
 	var mutation_before := float(infection.call("get_mutation"))
 	await create_timer(0.1).timeout
@@ -119,7 +119,9 @@ func _test_pause_and_planner(app: Node) -> void:
 	pause.call("_input", event)
 	_check(not paused and not pause.visible, "second Escape resumes simulation")
 	app.call("_open_pause_menu")
-	pause.get("buttons")[1].pressed.emit()
+	for button: Button in pause.get("buttons"):
+		if button.name == &"Planning":
+			button.pressed.emit()
 	var planner: Node = app.get("planning_mode")
 	_check(planner.get("active") and paused and not pause.visible, "planner button enters existing editor")
 	_check(app.get_node("PlanningUI").visible, "planner UI is visible")
