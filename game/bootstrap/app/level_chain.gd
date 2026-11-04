@@ -51,7 +51,7 @@ func index_of(map_name: String) -> int:
 func add_map(map_name: String) -> bool:
 	if map_name.is_empty() or index_of(map_name) >= 0:
 		return false
-	maps.append({"name": map_name, "entries": [empty_entry(), empty_entry()]})
+	maps.append({"name": map_name, "entries": [empty_entry(), empty_entry()], "checkpoint": false})
 	return true
 
 
@@ -68,6 +68,22 @@ func move_map(index: int, direction: int) -> int:
 	maps[index] = maps[target]
 	maps[target] = item
 	return target
+
+
+## A checkpoint map: passing it saves progress, and "Continue" starts the map after it.
+func is_checkpoint(index: int) -> bool:
+	return index >= 0 and index < maps.size() and bool(maps[index].get("checkpoint", false))
+
+
+func set_checkpoint(index: int, on: bool) -> void:
+	if index >= 0 and index < maps.size():
+		maps[index]["checkpoint"] = on
+
+
+## Name of the map that follows `map_name` in the chain, or "" when it is the last one or unknown.
+func name_after(map_name: String) -> String:
+	var index := index_of(map_name)
+	return str(maps[index + 1].name) if index >= 0 and index + 1 < maps.size() else ""
 
 
 func entry(index: int, slot: int) -> Dictionary:
@@ -135,7 +151,7 @@ func load_dict(data: Variant) -> void:
 		if not raw is Dictionary or str(raw.get("name", "")).is_empty() or index_of(str(raw.name)) >= 0:
 			continue
 		var entries: Array = raw.get("entries", []) if raw.get("entries") is Array else []
-		maps.append({"name": str(raw.name),
+		maps.append({"name": str(raw.name), "checkpoint": bool(raw.get("checkpoint", false)),
 			"entries": [_clean_entry(entries[0] if entries.size() > 0 else null), _clean_entry(entries[1] if entries.size() > 1 else null)]})
 
 

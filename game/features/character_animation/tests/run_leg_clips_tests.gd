@@ -75,6 +75,14 @@ func _run() -> void:
 	character.velocity = Vector3.ZERO
 	await create_timer(0.6).timeout
 	_expect(float(legs.weight) < 0.01, "Standing hands the legs back to the authored idle.")
+	var body := character.get_node("Body") as Node3D
+	create_tween().tween_property(body, "rotation:y", body.rotation.y + 3.0, 1.0)
+	await create_timer(0.5).timeout
+	_expect(float(legs.weight) > 0.8 and absf(float(legs.travel_angle)) < 0.2, "Turning on the spot steps the feet (%.2f)." % legs.weight)
+	await create_timer(1.0).timeout
+	_expect(float(legs.weight) < 0.01, "Feet settle once the turn ends.")
+	body.rotation.y -= 3.0
+	await process_frame
 	await _dodge_checks(character, driver, skeleton)
 	print("Leg clip tests: %d failure(s)." % failures)
 	quit(failures)
@@ -100,13 +108,6 @@ func _dodge_checks(character: CharacterBody3D, driver: Node, skeleton: Skeleton3
 	await create_timer(0.5).timeout
 	await create_timer(0.3).timeout
 	_expect(not driver.is_dodging() and guard.active, "The dodge ends and wakes the aim modifiers.")
-	driver.dodge_style = 1
-	_expect(driver.play_dodge(Vector3(1, 0, 0), 0.5), "A strafe jump starts.")
-	_expect(driver.legs.get("_dodge") == "Dodge_Strafe_Left", "Travel toward +X (left) jumps with the left clip.")
-	driver.legs.call("cancel_dodge")
-	_expect(driver.play_dodge(Vector3(0, 0, 1), 0.5), "A forward strafe jump starts.")
-	_expect(absf(float(driver.legs.get("_dodge_yaw"))) > 1.0, "A forward dodge in strafe mode turns the body toward the side clip.")
-	driver.legs.call("cancel_dodge")
 
 
 func _expect(condition: bool, message: String) -> void:

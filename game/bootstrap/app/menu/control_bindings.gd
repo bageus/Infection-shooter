@@ -1,7 +1,7 @@
 extends RefCounted
 ## Versioned keyboard/mouse preferences owned by bootstrap, never by gameplay.
-const ACTIONS: Array[String] = ["move_up", "move_down", "move_left", "move_right", "sprint", "roll", "fire", "reload", "melee", "antidote", "pickup_weapon", "weapon_1", "weapon_2", "weapon_3", "weapon_4", "camera_left", "camera_right", "mutation_tree", "skill_1", "skill_2"]
-const KEYS: Array[int] = [KEY_W, KEY_S, KEY_A, KEY_D, KEY_SHIFT, KEY_SPACE, 0, KEY_R, KEY_C, KEY_F, KEY_G, KEY_1, KEY_2, KEY_3, KEY_V, KEY_Z, KEY_X, KEY_M, KEY_Q, KEY_E]
+const ACTIONS: Array[String] = ["move_up", "move_down", "move_left", "move_right", "sprint", "roll", "fire", "reload", "melee", "antidote", "pickup_weapon", "weapon_1", "weapon_2", "weapon_3", "camera_left", "camera_right", "mutation_tree", "skill_1", "skill_2"]
+const KEYS: Array[int] = [KEY_W, KEY_S, KEY_A, KEY_D, KEY_SHIFT, KEY_SPACE, 0, KEY_R, KEY_C, KEY_F, KEY_G, KEY_1, KEY_2, KEY_3, KEY_Z, KEY_X, KEY_M, KEY_Q, KEY_E]
 var values: Dictionary = {}
 
 

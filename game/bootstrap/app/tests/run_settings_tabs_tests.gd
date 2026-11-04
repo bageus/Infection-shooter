@@ -44,7 +44,7 @@ func _run() -> void:
 	lighting.set_pressed(true)
 	_sunlight_checks(tabs, dialog)
 	await _shadow_checks(tabs, dialog)
-	_check(tabs.get_child(3).find_child("SoundToggle", true, false) != null, "Sound belongs to Audio")
+	_check(tabs.get_child(3).find_child("SoundToggle", true, false) == null and tabs.get_child(3).find_child("MenuMusicToggle", true, false) == null, "Audio has no on/off toggles; sliders control volume")
 	_slider_checks(tabs)
 	_check_notice_badge(dialog, tabs)
 	dialog.settings.notices._show(1)
@@ -211,7 +211,6 @@ func _general_checks(tabs: TabContainer) -> void:
 	_quality_checks(tabs)
 	_check_presentation_options(tabs)
 	_enemy_modes_checks(tabs)
-	_dodge_checks(tabs)
 	_walk_checks(tabs)
 
 
@@ -238,16 +237,6 @@ func _walk_checks(tabs: TabContainer) -> void:
 		saved.load_settings()
 		_check(saved.values[key] == 1.25, "Walk tuning survives config reload")
 		slider.value = 1.0
-
-
-func _dodge_checks(tabs: TabContainer) -> void:
-	var dodge := tabs.get_child(0).find_child("DodgeAnimation", true, false) as OptionButton
-	_check(dodge != null and dodge.item_count == 2 and dodge.selected == 0, "Dodge animation (roll / strafe jump) sits in General and defaults to the roll")
-	dodge.item_selected.emit(1)
-	var dodge_prefs := PREFS.new()
-	dodge_prefs.load_settings()
-	_check(dodge_prefs.values.dodge_animation == 1, "Dodge animation choice survives settings reload")
-	dodge.item_selected.emit(0)
 
 
 func _destruction_checks(tabs: TabContainer) -> void:

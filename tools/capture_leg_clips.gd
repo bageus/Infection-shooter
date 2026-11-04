@@ -6,8 +6,7 @@ extends SceneTree
 ##
 ## Every sheet has a side view (top row), the game's isometric view (middle
 ## row) and, for runs, the old procedural gait in the same pose (bottom row).
-## Sheets: run_<heading>.png for the eight headings, dodge_roll.png, dodge_strafe_forward.png,
-## dodge_strafe_left.png, dodge_strafe_right.png.
+## Sheets: run_<heading>.png for the eight headings, dodge_roll.png.
 
 const PLAYER_MODEL := preload("res://models/objects/characters/soldier_animated.glb")
 const DRIVER := preload("res://game/features/character_animation/public/character_animation_driver.gd")
@@ -37,9 +36,8 @@ func _capture() -> void:
 	for heading: String in HEADINGS:
 		if only.is_empty() or only == "run":
 			await _run_sheet(stage, heading)
-	for dodge in ["roll", "strafe_forward", "strafe_left", "strafe_right"]:
-		if only.is_empty() or only == "dodge":
-			await _dodge_sheet(stage, dodge)
+	if only.is_empty() or only == "dodge":
+		await _dodge_sheet(stage, "roll")
 	print("Sheets written to ", _out_dir)
 	quit(0)
 
@@ -90,8 +88,7 @@ func _run_sheet(stage: Node3D, heading: String) -> void:
 func _dodge_sheet(stage: Node3D, kind: String) -> void:
 	var character := _make_character(stage, true, &"Walk_Pistol_TwoHand_Forward")
 	var driver := character.get_node("AnimationDriver")
-	driver.dodge_style = 0 if kind == "roll" else 1
-	var heading := deg_to_rad({"roll": 0.0, "strafe_forward": 0.0, "strafe_left": 90.0, "strafe_right": -90.0}[kind])
+	var heading := 0.0
 	var direction: Vector3 = character.global_basis * Vector3(sin(heading), 0.0, cos(heading))
 	var duration := 0.55
 	character.velocity = direction * 5.0

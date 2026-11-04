@@ -128,13 +128,6 @@ func _general() -> void:
 	shake.button_pressed = dialog.view.preferences.values.camera_shake
 	shake.toggled.connect(func(value: bool) -> void: dialog.call("_change", "camera_shake", value))
 	dialog.get("layout").add_child(shake)
-	var dodge := OptionButton.new()
-	dodge.name = "DodgeAnimation"
-	dodge.add_item(dialog.view.text("dodgeAnimationRoll"))
-	dodge.add_item(dialog.view.text("dodgeAnimationStrafe"))
-	dodge.selected = dialog.view.preferences.values.dodge_animation
-	dodge.item_selected.connect(func(index: int) -> void: dialog.call("_change", "dodge_animation", index))
-	dialog.call("_row", "dodgeAnimation", dodge)
 	dialog.call("_slider", "walkSpeed", "walk_speed_multiplier", 0.5, 1.5, 0.05, "%.2f×")
 	dialog.call("_slider", "walkAnimationSpeed", "walk_animation_multiplier", 0.5, 2.0, 0.05, "%.2f×")
 	dialog.call("_slider", "enemyMoveSpeed", "enemy_move_speed_multiplier", 0.5, 2.0, 0.05, "%.2f×")
@@ -379,16 +372,3 @@ func _audio() -> void:
 	dialog.call("_slider", "effectsVolume", "effects_volume", 0, 1, .05)
 	dialog.call("_slider", "musicVolume", "music_volume", 0, 1, .05)
 	dialog.call("_slider", "menuMusicVolume", "menu_music_volume", 0, 1, .05)
-	var music := CheckButton.new()
-	music.name = "MenuMusicToggle"
-	music.text = dialog.view.text("menuMusic")
-	music.button_pressed = dialog.view.preferences.values.menu_music
-	music.toggled.connect(func(value: bool) -> void: dialog.call("_change", "menu_music", value))
-	dialog.get("layout").add_child(music)
-	var sound := CheckButton.new()
-	sound.name = "SoundToggle"
-	sound.text = dialog.view.text("sound")
-	sound.button_pressed = dialog.view.preferences.values.sound
-	sound.toggled.connect(func(value: bool) -> void: dialog.call("_change", "sound", value))
-	sound.mouse_entered.connect(dialog.view.play_hover.bind(sound))
-	dialog.get("layout").add_child(sound)

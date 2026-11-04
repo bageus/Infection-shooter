@@ -7,6 +7,7 @@ const STYLE := preload("res://game/bootstrap/app/menu/menu_style.gd")
 const PREFERENCES := preload("res://game/bootstrap/app/menu/menu_preferences.gd")
 const CAMPAIGN := preload("res://game/bootstrap/app/campaign_config.gd")
 const PLATFORM := preload("res://game/infrastructure/platform/public/platform.gd")
+const CHECKPOINT := preload("res://game/bootstrap/app/checkpoint_progress.gd")
 const DIALOG := preload("res://game/bootstrap/app/menu/menu_dialog.gd")
 const BACKGROUNDS := {
 	"main": preload("res://assets/interface/backgrounds/main.png"),
@@ -135,8 +136,9 @@ func _build_content() -> void:
 	match screen_kind:
 		"main":
 			_add_button("new", "briefing")
-			var disabled_continue := _add_button("continue", "continue", true)
-			disabled_continue.tooltip_text = text("noSave")
+			var can_continue := not CHECKPOINT.resume_map().is_empty()
+			var disabled_continue := _add_button("continue", "continue", not can_continue)
+			disabled_continue.tooltip_text = "" if can_continue else text("noSave")
 			var row := HBoxContainer.new()
 			content.remove_child(disabled_continue)
 			content.add_child(row)
@@ -144,6 +146,7 @@ func _build_content() -> void:
 			row.add_child(disabled_continue)
 			var no_save := STYLE.label(text("noSave"), roundi(10 * factor))
 			no_save.name = "NoSave"
+			no_save.visible = not can_continue
 			no_save.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
 			no_save.add_theme_color_override("font_color", STYLE.MUTED)
 			row.add_child(no_save)
@@ -280,7 +283,7 @@ func _focus_first() -> void:
 
 
 func play_click() -> void:
-	if preferences.values.sound and preferences.values.volume > 0:
+	if preferences.values.volume > 0:
 		_click_player.volume_db = linear_to_db(preferences.values.volume * 0.15)
 		_click_player.play()
 
@@ -291,5 +294,5 @@ func _click_stream() -> AudioStreamOggVorbis:
 func play_hover(control: Control) -> void:
 	if not is_visible_in_tree() or (control is BaseButton and control.disabled):
 		return
-	if preferences.values.sound and preferences.values.volume > 0:
+	if preferences.values.volume > 0:
 		SFX.play_ui(self, &"menu_hover")

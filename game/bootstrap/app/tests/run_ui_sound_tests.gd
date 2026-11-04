@@ -28,16 +28,15 @@ func _run() -> void:
 	var saved_volume := AudioServer.get_bus_volume_db(master)
 	AudioServer.set_bus_mute(master, false)
 	AudioServer.set_bus_volume_db(master, 0)
-	menu.preferences.values.sound = true
 	menu.preferences.values.volume = 0.4
 	menu.buttons[0].mouse_entered.emit()
 	_check(_count(menu, &"menu_hover") == 1, "Menu item hover creates one non-positional cue")
 	menu.buttons[1].mouse_entered.emit()
 	_check(_count(menu, &"menu_hover") == 1, "Disabled menu item is silent")
-	menu.preferences.values.sound = false
+	menu.preferences.values.volume = 0.0
 	menu.buttons[2].mouse_entered.emit()
-	_check(_count(menu, &"menu_hover") == 1, "Menu sound preference disables hover")
-	menu.preferences.values.sound = true
+	_check(_count(menu, &"menu_hover") == 1, "A zero volume disables hover")
+	menu.preferences.values.volume = 0.4
 	menu.activate("settings")
 	await process_frame
 	var modal: Control = menu.modal
@@ -45,12 +44,8 @@ func _run() -> void:
 	_check(not dialog_buttons.is_empty(), "Settings exposes controls")
 	var before := _count(menu, &"menu_hover")
 	for button in dialog_buttons:
-		if button.name != "SoundToggle":
-			button.mouse_entered.emit()
+		button.mouse_entered.emit()
 	_check(_count(menu, &"menu_hover") == before, "Settings buttons are silent on hover")
-	modal.settings.tabs.current_tab = 3
-	modal.find_child("SoundToggle", true, false).mouse_entered.emit()
-	_check(_count(menu, &"menu_hover") == before + 1, "Only audio toggle has settings hover sound")
 	_track_audio(frontend)
 	frontend.queue_free()
 	await process_frame

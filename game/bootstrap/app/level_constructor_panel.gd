@@ -11,6 +11,7 @@ var list: ItemList
 var map_picker: OptionButton
 var kind_pickers: Array[OptionButton] = []
 var place_buttons: Array[Button] = []
+var checkpoint_box: CheckBox
 var _slot_labels: Array[Label] = []
 var _syncing := false
 
@@ -40,6 +41,11 @@ func build(owner_runtime: Node, session: Node) -> void:
 	row.add_child(_button("REMOVE", _remove_selected, "RemoveMap"))
 	row.add_child(_button("UP", _move.bind(-1), "MoveUp"))
 	row.add_child(_button("DOWN", _move.bind(1), "MoveDown"))
+	checkpoint_box = CheckBox.new()
+	checkpoint_box.name = "Checkpoint"
+	checkpoint_box.text = "CHECKPOINT (passing it saves progress)"
+	checkpoint_box.toggled.connect(_on_checkpoint_toggled)
+	box.add_child(checkpoint_box)
 	for slot in LEVEL_CHAIN.SLOT_COUNT:
 		var label := Label.new()
 		label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
@@ -133,6 +139,14 @@ func _on_selected(_index: int) -> void:
 	_save()
 
 
+func _on_checkpoint_toggled(on: bool) -> void:
+	if _syncing or _selected() < 0:
+		return
+	runtime.chain.set_checkpoint(_selected(), on)
+	_refresh(_selected())
+	_save()
+
+
 func _on_kind_picked(option: int, slot: int) -> void:
 	if _syncing or _selected() < 0:
 		return
@@ -165,10 +179,13 @@ func _refresh(select_index: int = -1) -> void:
 	_sync_picker()
 	list.clear()
 	for i in runtime.chain.maps.size():
-		list.add_item("%d. %s" % [i + 1, runtime.chain.maps[i].name])
+		var checkpoint := " [CHECKPOINT]" if runtime.chain.is_checkpoint(i) else ""
+		list.add_item("%d. %s%s" % [i + 1, runtime.chain.maps[i].name, checkpoint])
 	if select_index >= 0 and select_index < list.item_count:
 		list.select(select_index)
 	var index := _selected()
+	checkpoint_box.disabled = index < 0
+	checkpoint_box.button_pressed = index >= 0 and runtime.chain.is_checkpoint(index)
 	for slot in LEVEL_CHAIN.SLOT_COUNT:
 		var enabled := index >= 0
 		kind_pickers[slot].disabled = not enabled

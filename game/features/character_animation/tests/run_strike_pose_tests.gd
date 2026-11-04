@@ -48,6 +48,15 @@ func _run() -> void:
 	_expect(driver.strike.kick_foot.z > rest_z + 0.3, "The left foot is thrown forward at the strike.")
 	await create_timer(0.7).timeout
 	_expect(not driver.is_striking(), "The strike ends on its own.")
+	_expect(POSE.direction_at(POSE.INJECT, "LeftArm", 0.45).y < -0.8, "The injection reaches the left arm down to the thigh.")
+	_expect(driver.play_strike(POSE.INJECT) > 0.0 and driver.is_striking(), "The injection plays on the soldier skeleton.")
+	for _i in 2:
+		driver.strike.set("_elapsed", 0.5 * POSE.INJECT_SECONDS)
+		await process_frame
+	var gap: float = driver.strike.hand.distance_to(driver.strike.thigh_point)
+	_expect(gap < 0.2, "The left hand reaches the left thigh during the injection (gap %.2f)." % gap)
+	await create_timer(1.0).timeout
+	_expect(not driver.is_striking(), "The injection ends on its own.")
 	print("strike pose failures: ", failures)
 	quit(1 if failures > 0 else 0)
 

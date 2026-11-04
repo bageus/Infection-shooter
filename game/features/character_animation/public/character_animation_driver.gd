@@ -16,8 +16,6 @@ const OVERLAY := preload("res://game/features/character_animation/clip_overlay.g
 const LEG_OVERLAY := preload("res://game/features/character_animation/leg_overlay.gd")
 const STANCE_FEET := preload("res://game/features/character_animation/stance_feet.gd")
 const STRIKE_POSE := preload("res://game/features/character_animation/strike_pose.gd")
-const DODGE_ROLL := 0
-const DODGE_STRAFE := 1
 const STATE_ATTACK := &"attack"
 const STATE_DEATH := &"death"
 # Directional deaths (ADR-0034) fall back to the plain death clip.
@@ -92,8 +90,6 @@ var character: CharacterBody3D
 var animation_player: AnimationPlayer
 var gait: SkeletonModifier3D
 var legs: SkeletonModifier3D
-## Which dodge clips play_dodge uses: DODGE_ROLL (dive roll) or DODGE_STRAFE (strafe jump).
-var dodge_style := DODGE_ROLL
 var hit_reaction: SkeletonModifier3D
 var overlay: SkeletonModifier3D
 var strike: SkeletonModifier3D
@@ -199,7 +195,7 @@ func play_overlay(clip_name: StringName) -> bool:
 	return true
 
 
-# animation_events_v1 (ADR-0066): procedural melee strike, &"kick" (rear left leg) or &"punch" (left arm); returns its duration, 0.0 if impossible.
+# animation_events_v1 (ADR-0066): procedural melee strike, &"kick" (rear left leg), &"punch" (left arm) or &"inject" (left hand stabs the left thigh); returns its duration, 0.0 if impossible.
 func play_strike(kind: StringName) -> float:
 	prepare_visual()
 	if _dead or animation_player == null:
@@ -237,10 +233,9 @@ func _strike_speed(animation: Animation) -> float:
 	return clampf(strike_time / STRIKE_WINDUP, 1.0, MAX_ATTACK_SPEED) if strike_time > 0.0 else 1.0
 
 
-# Public animation_events_v1 addition (ADR-0044): plays the dodge clip for
+# Public animation_events_v1 addition (ADR-0044): plays the dodge roll for
 # `duration` seconds toward a world-space direction, relative to the body.
-# Returns false without leg clips. The roll turns the whole body along the
-# dodge; the strafe jump keeps facing forward and jumps to the nearer side.
+# Returns false without leg clips. The roll turns the whole body along the dodge.
 func play_dodge(world_direction: Vector3, duration: float) -> bool:
 	if legs == null or _dead:
 		return false
@@ -249,9 +244,6 @@ func play_dodge(world_direction: Vector3, duration: float) -> bool:
 	if local.length_squared() < 0.0001:
 		return false
 	var heading := atan2(local.x, local.z)
-	if dodge_style == DODGE_STRAFE:
-		var side := PI * 0.5 if heading >= 0.0 else -PI * 0.5
-		return bool(legs.call("start_dodge", "Dodge_Strafe_Left" if side > 0.0 else "Dodge_Strafe_Right", duration, heading - side))
 	return bool(legs.call("start_dodge", "Dodge_Roll", duration, heading))
 
 

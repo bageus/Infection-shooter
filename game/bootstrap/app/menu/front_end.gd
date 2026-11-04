@@ -1,5 +1,7 @@
 extends Control
 
+const CHECKPOINT := preload("res://game/bootstrap/app/checkpoint_progress.gd")
+
 @onready var menu = $Menu
 var _loading := false
 var completion_music: Node
@@ -26,6 +28,18 @@ func _action(action: String) -> void:
 			loader.set("completion_music", completion_music)
 			completion_music = null
 			loader.start()
+		"continue":
+			var map_name := CHECKPOINT.resume_map()
+			if map_name.is_empty():
+				return
+			_loading = true
+			var loader := preload("res://game/bootstrap/app/menu/mission_loader.gd").new()
+			add_child(loader)
+			loader.completed.connect(func(_success: bool) -> void: _loading = false)
+			loader.set("completion_music", completion_music)
+			loader.set("checkpoint_notice", true)
+			completion_music = null
+			loader.start_map(CHECKPOINT.map_file(map_name), map_name, {})
 		"quit":
 			if OS.has_feature("web"):
 				menu.reason_key = "webQuit"
