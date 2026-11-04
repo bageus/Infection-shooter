@@ -37,12 +37,11 @@ func _ready() -> void:
 
 
 func _fade_above_ceiling(node: Node) -> void:
-	if node is MeshInstance3D:
+	# Each stair mesh has one surface, so one override per mesh covers it.
+	if node is MeshInstance3D and (node as MeshInstance3D).mesh != null:
 		var mesh := node as MeshInstance3D
-		for surface in (mesh.mesh.get_surface_count() if mesh.mesh != null else 0):
-			var source := mesh.get_active_material(surface) as BaseMaterial3D
-			if source == null:
-				continue
+		var source := mesh.get_active_material(0) as BaseMaterial3D
+		if source != null:
 			var fade := ShaderMaterial.new()
 			fade.shader = FADE_SHADER
 			fade.set_shader_parameter("albedo_tex", source.albedo_texture)
@@ -51,7 +50,7 @@ func _fade_above_ceiling(node: Node) -> void:
 			fade.set_shader_parameter("ao_mask", _channel_mask(source.ao_texture_channel))
 			fade.set_shader_parameter("roughness_mask", _channel_mask(source.roughness_texture_channel))
 			fade.set_shader_parameter("metallic_mask", _channel_mask(source.metallic_texture_channel))
-			mesh.set_surface_override_material(surface, fade)
+			mesh.material_override = fade
 	for child in node.get_children():
 		_fade_above_ceiling(child)
 
