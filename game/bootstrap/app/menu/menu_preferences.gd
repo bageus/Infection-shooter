@@ -77,7 +77,32 @@ static func apply_web_rules(settings: Dictionary) -> void:
 	settings.keep_corpses = true
 	settings.effects_quality = DEFAULTS.effects_quality
 	settings.blood_style = 1
+	for key in ["enemies_ignore_player", "enemies_no_damage", "test_mutagen", "infinite_antidotes"]:
+		settings[key] = false
+	for key in ["walk_speed_multiplier", "walk_animation_multiplier", "enemy_move_speed_multiplier", "enemy_animation_multiplier"]:
+		settings[key] = 1.0
 	settings.blood_level = BLOOD_LEVEL.GREEN if int(settings.blood_level) == BLOOD_LEVEL.GREEN else WEB_RED_BLOOD
+
+
+## The web (Compatibility) renderer ignores the Environment brightness adjustment, so the web
+## build dims or lifts the 3D view with a full-screen overlay under the HUD (layer -1).
+func _apply_web_brightness(scene: Node) -> void:
+	var layer := scene.get_node_or_null("WebBrightness") as CanvasLayer
+	if layer == null:
+		layer = CanvasLayer.new()
+		layer.name = "WebBrightness"
+		layer.layer = -1
+		var rect := ColorRect.new()
+		rect.name = "Overlay"
+		rect.set_anchors_preset(Control.PRESET_FULL_RECT)
+		rect.mouse_filter = Control.MOUSE_FILTER_IGNORE
+		rect.material = CanvasItemMaterial.new()
+		layer.add_child(rect)
+		scene.add_child(layer)
+	var rect := layer.get_node("Overlay") as ColorRect
+	var level := float(values.brightness)
+	(rect.material as CanvasItemMaterial).blend_mode = CanvasItemMaterial.BLEND_MODE_ADD if level > 1.0 else CanvasItemMaterial.BLEND_MODE_MIX
+	rect.color = Color(1, 1, 1, (level - 1.0) * 0.5) if level > 1.0 else Color(0, 0, 0, 1.0 - level)
 
 
 func save_settings() -> Error:
@@ -123,6 +148,8 @@ func apply_to_game(tree: SceneTree, display_user_action: bool = false) -> void:
 	if world != null and world.environment != null:
 		world.environment.adjustment_enabled = true
 		world.environment.adjustment_brightness = float(values.brightness)
+	if scene != null and OS.has_feature("web"):
+		_apply_web_brightness(scene)
 	if scene != null and scene.has_method("set_enemy_gameplay_modes"):
 		scene.call("set_enemy_gameplay_modes", bool(values.enemies_ignore_player), bool(values.enemies_no_damage))
 	if scene != null and scene.has_method("set_test_mutagen_enabled"):

@@ -100,8 +100,19 @@ func _general() -> void:
 	scale.selected = [1.0, 1.15, 1.3].find(dialog.view.preferences.values.text_scale)
 	scale.item_selected.connect(dialog._scale_changed)
 	dialog.call("_row", "scale", scale)
-	_enemy_modes()
+	var web := OS.has_feature("web")
+	if not web:
+		_enemy_modes()
 	_enemy_difficulty()
+	if not web:
+		_debug_rows()
+	_comfort_rows()
+	if not web:
+		_tuning_sliders()
+
+
+## Debug toggles; web builds show no rows for them and apply_web_rules fixes their values.
+func _debug_rows() -> void:
 	var cloud := CheckButton.new()
 	cloud.name = "TestMutagen"
 	cloud.text = dialog.view.text("testMutagen")
@@ -114,6 +125,9 @@ func _general() -> void:
 	antidotes.button_pressed = dialog.view.preferences.values.infinite_antidotes
 	antidotes.toggled.connect(func(value: bool) -> void: dialog.call("_change", "infinite_antidotes", value))
 	dialog.get("layout").add_child(antidotes)
+
+
+func _comfort_rows() -> void:
 	var floor_hints := CheckButton.new()
 	floor_hints.name = "FloorHints"
 	floor_hints.text = dialog.view.text("floorHints")
@@ -128,6 +142,9 @@ func _general() -> void:
 	shake.button_pressed = dialog.view.preferences.values.camera_shake
 	shake.toggled.connect(func(value: bool) -> void: dialog.call("_change", "camera_shake", value))
 	dialog.get("layout").add_child(shake)
+
+
+func _tuning_sliders() -> void:
 	dialog.call("_slider", "walkSpeed", "walk_speed_multiplier", 0.5, 1.5, 0.05, "%.2f×")
 	dialog.call("_slider", "walkAnimationSpeed", "walk_animation_multiplier", 0.5, 2.0, 0.05, "%.2f×")
 	dialog.call("_slider", "enemyMoveSpeed", "enemy_move_speed_multiplier", 0.5, 2.0, 0.05, "%.2f×")

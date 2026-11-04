@@ -293,6 +293,11 @@ func _web_rule_checks() -> void:
 	values.blood_level = 3
 	PREFS.apply_web_rules(values)
 	_check(values.blood_level == 2, "Web maps any non-green blood to red")
+	values.test_mutagen = true
+	values.enemies_no_damage = true
+	values.walk_speed_multiplier = 1.3
+	PREFS.apply_web_rules(values)
+	_check(not values.test_mutagen and not values.enemies_no_damage and values.walk_speed_multiplier == 1.0, "Web resets debug toggles and speed tuning, which have no rows")
 
 
 func _check(condition: bool, message: String) -> void:
