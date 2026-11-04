@@ -97,7 +97,11 @@ func _check_legacy_stairs(catalog: RefCounted) -> void:
 	var stairs := catalog.call("_create_asset", ROOT_PATH + "01_stairs_2.glb") as Node3D
 	_check(stairs != null and stairs.get("model_path") == ROOT_PATH + "01_stairs_2.glb", "Staircase 2 is placed as its own model")
 	if stairs != null:
+		stairs.position = Vector3(0, -3, 0) # Descending stair below floor level
 		root.add_child(stairs)
+		for shape: CollisionShape3D in stairs.find_children("*", "CollisionShape3D", true, false):
+			if shape.shape is BoxShape3D and is_equal_approx((shape.shape as BoxShape3D).size.x, 4.2):
+				_check(is_equal_approx(shape.global_position.y, 2.9), "Ceiling slab sits 2.8 m above the floor for a stair below floor")
 		var boxes := 0
 		for shape: CollisionShape3D in stairs.find_children("*", "CollisionShape3D", true, false):
 			boxes += int(shape.shape is BoxShape3D)
