@@ -437,8 +437,10 @@ func _update_camera(delta: float) -> void:
 	var turn := Input.get_axis("camera_left", "camera_right")
 	if _stun_remaining > 0.0 and _stun_intensity > 0.35:
 		turn = -turn
-		camera_rig.position = Vector3(randf_range(-0.06, 0.06), randf_range(-0.04, 0.04), 0) * _stun_intensity
+		camera_rig.position += Vector3(randf_range(-0.06, 0.06), randf_range(-0.04, 0.04), 0) * _stun_intensity
 	camera_rig.rotate_y(deg_to_rad(turn * camera_rotation_speed * delta))
+
+func apply_blast_shake(origin: Vector3, strength: float) -> void: _shot_recoil.blast(global_basis.inverse() * (global_position - origin), strength)
 
 func apply_blast_stun(duration: float, intensity: float) -> void:
 	if _stun_remaining <= 0.0:
