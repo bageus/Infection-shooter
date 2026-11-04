@@ -28,6 +28,10 @@ func _ready() -> void:
 	_hit_material = _hit_rect.material as ShaderMaterial
 	_hit_rect.visible = false
 	_base.resized.connect(_update_aspect)
+	# A CanvasLayer is not hidden with its parent, so follow the HUD's visibility explicitly.
+	var parent := get_parent() as CanvasItem
+	if parent != null:
+		parent.visibility_changed.connect(_apply)
 	_update_aspect()
 
 
@@ -56,6 +60,7 @@ func update(delta: float, health: float, max_health: float) -> void:
 func _apply() -> void:
 	var parent := get_parent() as CanvasItem
 	var shown := enabled and (parent == null or parent.is_visible_in_tree())
+	visible = shown
 	_base.visible = shown
 	_hit_rect.visible = shown and hit > 0.0
 	_hit_material.set_shader_parameter("hit", hit)
