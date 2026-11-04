@@ -3,6 +3,8 @@ extends Node3D
 # Use the authored stair meshes as walkable static geometry. A single box around
 # the imported object would seal the flights and stop the player at the entrance.
 @export_file("*.glb") var model_path := "res://models/objects/enviroments/01/01_stairs.glb"
+const FADE_SHADER := preload("res://game/presentation/office_floor/public/structural/stair_ceiling_fade.gdshader")
+const CEILING_Y := 2.8
 
 
 func _ready() -> void:
@@ -15,6 +17,7 @@ func _ready() -> void:
 		return
 	visual.name = "Visual"
 	add_child(visual)
+	_fade_above_ceiling(visual)
 	var body := StaticBody3D.new()
 	body.name = "WalkableStairCollision"
 	body.collision_layer = 3
@@ -29,6 +32,33 @@ func _ready() -> void:
 	# 01_stairs_2 has no top landing; its upper flight ends open at y ≈ 3.0.
 	if not model_path.ends_with("01_stairs_2.glb"):
 		_add_walkable_box(body, Vector3(0, 2.90, -0.71), Vector3(3.9, 0.20, 1.4), 0.0)
+	# Ceiling slab over the stair footprint: a 1.8 m player cannot climb past it.
+	_add_walkable_box(body, Vector3(0, CEILING_Y + 0.1, 1.4), Vector3(4.2, 0.2, 5.8), 0.0)
+
+
+func _fade_above_ceiling(node: Node) -> void:
+	# Each stair mesh has one surface, so one override per mesh covers it.
+	if node is MeshInstance3D and (node as MeshInstance3D).mesh != null:
+		var mesh := node as MeshInstance3D
+		var source := mesh.get_active_material(0) as BaseMaterial3D
+		if source != null:
+			var fade := ShaderMaterial.new()
+			fade.shader = FADE_SHADER
+			fade.set_shader_parameter("albedo_tex", source.albedo_texture)
+			fade.set_shader_parameter("normal_tex", source.normal_texture)
+			fade.set_shader_parameter("orm_tex", source.get_texture(BaseMaterial3D.TEXTURE_ORM))
+			fade.set_shader_parameter("ao_mask", _channel_mask(source.ao_texture_channel))
+			fade.set_shader_parameter("roughness_mask", _channel_mask(source.roughness_texture_channel))
+			fade.set_shader_parameter("metallic_mask", _channel_mask(source.metallic_texture_channel))
+			mesh.material_override = fade
+	for child in node.get_children():
+		_fade_above_ceiling(child)
+
+
+func _channel_mask(channel: int) -> Vector4:
+	var mask := Vector4.ZERO
+	mask[channel] = 1.0
+	return mask
 
 
 func _add_mesh_collisions(node: Node, body: StaticBody3D) -> void:

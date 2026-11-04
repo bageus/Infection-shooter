@@ -101,7 +101,9 @@ func _check_legacy_stairs(catalog: RefCounted) -> void:
 		var boxes := 0
 		for shape: CollisionShape3D in stairs.find_children("*", "CollisionShape3D", true, false):
 			boxes += int(shape.shape is BoxShape3D)
-		_check(boxes == 4, "Staircase 2 has no invented top landing collision")
+		_check(boxes == 5, "Staircase 2: four walkable boxes plus the ceiling slab, no top landing")
+		var faded := stairs.find_children("*", "MeshInstance3D", true, false)[0] as MeshInstance3D
+		_check(faded.get_active_material(0) is ShaderMaterial, "Staircase above the ceiling uses the dissolve shader")
 		root.remove_child(stairs)
 		stairs.free()
 
