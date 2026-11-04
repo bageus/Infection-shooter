@@ -3,6 +3,7 @@ extends SceneTree
 const PLANNER_DOOR := preload("res://game/bootstrap/app/planning_door_options.gd")
 const LAYOUT_PROPERTIES := preload("res://game/bootstrap/app/planning_layout_properties.gd")
 const LAYOUT_VALIDATOR := preload("res://game/bootstrap/app/planning_layout_validator.gd")
+const DOOR_LINKS := preload("res://game/presentation/office_floor/public/door_darkness_links.gd")
 const EMERGENCY_DOOR := preload("res://game/presentation/office_floor/public/structural/wall_emergency_door.tscn")
 const ELEVATOR_DOOR := preload("res://game/presentation/office_floor/public/structural/elevator_door.tscn")
 var failures := 0
@@ -32,6 +33,15 @@ func _run() -> void:
 	_expect(LAYOUT_VALIDATOR.error(bad) != "", "Validator rejects an unknown door_lock")
 	var good := {"objects": [{"scene": "res://x.tscn", "door_lock": "sealed"}]}
 	_expect(LAYOUT_VALIDATOR.error(good) == "", "Validator accepts a sealed door_lock")
+	# Darkness list: restored from the record, validated, and empty by default.
+	LAYOUT_PROPERTIES.restore(wall, {"door_darkness": {"rooms": [2, 5], "auto": true}})
+	_expect(DOOR_LINKS.rooms(door) == [2, 5] and DOOR_LINKS.is_auto(door), "Layout restore applies a darkness list")
+	LAYOUT_PROPERTIES.restore(wall, {})
+	_expect(DOOR_LINKS.rooms(door) == [2, 5], "Records without door_darkness keep the door's list")
+	var bad_rooms := {"objects": [{"scene": "res://x.tscn", "door_darkness": {"rooms": ["a"], "auto": false}}]}
+	_expect(LAYOUT_VALIDATOR.error(bad_rooms) != "", "Validator rejects a non-numeric darkness room")
+	var good_rooms := {"objects": [{"scene": "res://x.tscn", "door_darkness": {"rooms": [2], "auto": false}}]}
+	_expect(LAYOUT_VALIDATOR.error(good_rooms) == "", "Validator accepts a darkness list")
 	wall.queue_free()
 	# Elevators are not part of the setting.
 	var elevator := ELEVATOR_DOOR.instantiate() as Node3D

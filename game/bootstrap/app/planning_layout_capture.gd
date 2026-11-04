@@ -5,6 +5,7 @@ const QUESTS := preload("res://game/bootstrap/app/quest/quest_store.gd")
 const FLOOR_SIZE := preload("res://game/bootstrap/app/planning_floor_size.gd")
 const TARGET := preload("res://game/presentation/office_floor/public/tutorial_target.gd")
 const DOOR_OPTIONS := preload("res://game/bootstrap/app/planning_door_options.gd")
+const DOOR_LINKS := preload("res://game/presentation/office_floor/public/door_darkness_links.gd")
 const WAVE_DIRECTOR := preload("res://game/features/spawning/public/wave_director.gd")
 const WALL_MOUNT := preload("res://game/presentation/office_floor/public/wall_mount_models.gd")
 
@@ -72,11 +73,7 @@ static func collect(objects: Node, nodes: Array, include_player: bool = true) ->
 			records[-1]["fruit"] = node.call("get_fruit_config")
 		if TARGET.is_target(node):
 			records[-1]["tutorial_target"] = true
-		var door := DOOR_OPTIONS.lockable_controller(node)
-		if door != null:
-			records[-1]["door_lock"] = str(door.call("get_lock_state"))
-			if DOOR_OPTIONS.is_one_way(door):
-				records[-1]["door_one_way"] = true
+		_door_fields(records[-1], DOOR_OPTIONS.lockable_controller(node))
 		if node.has_method("get_enemy_stats") and node.has_meta(&"planning_enemy_stats"):
 			records[-1]["enemy_stats"] = node.call("get_enemy_stats")
 		if node.has_method("get_death_cloud_config") and node.has_meta(&"planning_death_cloud"):
@@ -119,3 +116,13 @@ static func collect_async(objects: Node, tree: SceneTree, progress: Callable, al
 		if not alive.call():
 			return {"error": "loading cancelled"}
 	return {"data": data}
+
+
+static func _door_fields(record: Dictionary, door: Node) -> void:
+	if door == null:
+		return
+	record["door_lock"] = str(door.call("get_lock_state"))
+	if DOOR_OPTIONS.is_one_way(door):
+		record["door_one_way"] = true
+	if not DOOR_LINKS.to_record(door).is_empty():
+		record["door_darkness"] = DOOR_LINKS.to_record(door)

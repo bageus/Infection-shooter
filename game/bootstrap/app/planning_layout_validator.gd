@@ -4,6 +4,7 @@ const SURFACE_CONFIG := preload("res://game/presentation/office_floor/public/sur
 const PHYSICS_FORMAT := preload("res://game/bootstrap/app/planning_physics_format.gd")
 const NUMBERS := ["x", "y", "z", "rotation_x", "rotation_y", "rotation_z", "scale_x", "scale_y", "scale_z", "zone", "light_energy", "light_angle", "energy_multiplier", "flicker_mode", "flicker_step", "darkness", "spawn_x", "spawn_y", "spawn_z"]
 const DOOR_OPTIONS := preload("res://game/bootstrap/app/planning_door_options.gd")
+const DOOR_LINKS := preload("res://game/presentation/office_floor/public/door_darkness_links.gd")
 
 
 static func error(data: Dictionary) -> String:
@@ -56,6 +57,8 @@ static func error(data: Dictionary) -> String:
 			return "object %d has an invalid tutorial_target" % index
 		if record.has("door_one_way") and not record["door_one_way"] is bool:
 			return "object %d has an invalid door_one_way" % index
+		if record.has("door_darkness") and not DOOR_LINKS.is_valid_record(record["door_darkness"]):
+			return "object %d has an invalid door_darkness" % index
 		if record.has("room_id") and not _number(record["room_id"]):
 			return "object %d has an invalid room_id" % index
 		for field: String in ["light_color", "blood_normal"]:
