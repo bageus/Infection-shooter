@@ -90,6 +90,7 @@ func _run() -> void:
 	root.add_child(table)
 	await physics_frame
 	await physics_frame
+	await create_timer(2.2).timeout # the melee cooldown
 	player.global_position = Vector3(10, 0.65, 0.0)
 	await physics_frame
 	mutation.call("melee")
@@ -113,13 +114,44 @@ func _run() -> void:
 	root.add_child(wall)
 	await physics_frame
 	await physics_frame
+	await create_timer(2.2).timeout # the melee cooldown
 	player.global_position = Vector3(20, 0.65, 0.0)
 	await physics_frame
 	mutation.call("melee")
 	await create_timer(0.5).timeout
 	_expect(behind.melee_hits == 0, "Kick does not reach a table behind a wall (%d)." % behind.melee_hits)
+	await _debris_kick(player, mutation)
 	print("gameplay kick failures: ", failures)
 	quit(1 if failures > 0 else 0)
+
+
+## Loose debris on the floor fills the kick's query; a crate under the same box is still found.
+func _debris_kick(player: Node3D, mutation: Node) -> void:
+	var debris_clear := Crate.new()
+	debris_clear.gravity_scale = 0.0
+	var debris_shape := CollisionShape3D.new()
+	debris_shape.shape = BoxShape3D.new()
+	debris_clear.add_child(debris_shape)
+	debris_clear.position = Vector3(30, 0.25, -1.4)
+	root.add_child(debris_clear)
+	for i in 40:
+		var debris := RigidBody3D.new()
+		debris.collision_layer = 4 # glass and crate fragments live on this layer
+		debris.gravity_scale = 0.0
+		debris.add_to_group("contactless_debris")
+		var debris_part := CollisionShape3D.new()
+		debris_part.shape = BoxShape3D.new()
+		debris.add_child(debris_part)
+		debris.position = Vector3(29.2 + 0.05 * (i % 20), 0.1, -0.2 - 0.07 * (i / 20))
+		root.add_child(debris)
+	await physics_frame
+	await physics_frame
+	await create_timer(2.2).timeout # the melee cooldown
+	player.global_position = Vector3(30, 0.65, 0.0)
+	await physics_frame
+	mutation.call("melee")
+	await create_timer(0.5).timeout
+	_expect(debris_clear.hits >= 1000.0, "Kick breaks a loot crate even with 40 debris pieces in its box (%d)." % int(debris_clear.hits))
 
 
 func _expect(condition: bool, message: String) -> void:
