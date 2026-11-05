@@ -5,7 +5,7 @@ const PLANNER_DOOR := preload("res://game/bootstrap/app/planning_door_options.gd
 # Named like doors but not doors: a wall sign with no leaf.
 const NOT_DOORS := ["13_wall_fire_door.glb"]
 # Doors still waiting for a decision on how their glass leaf swings; remove an entry once it is settled.
-const PENDING := ["lab_glass_door.tscn"]
+const PENDING := []
 const STATES := [&"key", &"sealed", &"open"]
 var failures := 0
 
