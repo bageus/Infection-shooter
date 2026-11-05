@@ -273,7 +273,6 @@ func _begin_death() -> void:
 	_dying = true
 	# Dead hero: input blocked, physics stays on so a mid-air death still falls.
 	player.input_locked = true
-	# Silent no-op until the man_damage_3 file and its catalog entry exist.
 	SFX.play(self, &"man_damage_3")
 	var fade := DEATH_FADE.new()
 	fade.name = "DeathFade"

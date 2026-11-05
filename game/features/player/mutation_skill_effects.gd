@@ -214,12 +214,14 @@ func on_player_hit(amount: float, damage_type: String = "physical") -> float:
 	buffs["temporary_armor"] = reserve - absorbed
 	if absorbed > 0.0:
 		vfx.energy_shield()
+		player.call("play_item_sound", &"energy_absorb")
 	amount -= absorbed
 	var reduction := 0.0
 	if damage_type == "physical":
 		if enabled("bone_armor"):
 			reduction += 1.0 - 1.0 / B.value("bone_armor", "divisor")
 			_passive("bone_armor")
+			player.call("play_item_sound", &"bone_absorb")
 		if enabled("hardened"):
 			reduction += B.value("hardened", "physical") / 100.0
 			_passive("hardened")

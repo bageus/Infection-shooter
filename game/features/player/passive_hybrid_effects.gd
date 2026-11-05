@@ -52,6 +52,7 @@ func absorb(amount: float) -> float:
 	absorption -= taken
 	if taken > 0.0:
 		host.vfx.energy_shield()
+		host.player.call("play_item_sound", &"energy_absorb")
 	return amount - taken
 
 func hyperactive() -> bool:

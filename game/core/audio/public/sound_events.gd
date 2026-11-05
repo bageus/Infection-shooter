@@ -161,6 +161,31 @@ const EVENTS := {
 	&"blinds": [2, -4.0, 20.0, 3.0, 0.05, 2],
 	&"display_intro": [3, -6.0, 18.0, 3.0, 0.02, 1],
 	&"light_flicker": [1, -8.0, 14.0, 2.5, 0.05, 2],
+	# Owner-supplied player damage, absorption, claw and door cues (files in PATHS).
+	&"man_damage_1": [1, 0.0, 40.0, 4.0, 0.03, 1],
+	&"man_damage_2": [1, 0.0, 40.0, 4.0, 0.03, 1],
+	&"man_damage_3": [1, 1.0, 40.0, 4.0, 0.0, 1],
+	&"claw_damage_1": [1, -3.0, 30.0, 4.0, 0.05, 3],
+	&"energy_absorb": [1, -2.0, 24.0, 3.0, 0.04, 2],
+	&"bone_absorb": [1, -2.0, 24.0, 3.0, 0.04, 2],
+	&"armored_absorb": [1, -2.0, 24.0, 3.0, 0.04, 2],
+	&"the_door_is_locked": [1, -3.0, 26.0, 3.5, 0.0, 1],
+	&"door_access_denied": [1, -3.0, 26.0, 3.5, 0.0, 1],
+}
+
+# Events whose file is not <event>/<event>_N.ogg.
+const PATHS := {
+	&"man_damage_1": "character_damage/man_damage_1.ogg",
+	&"man_damage_2": "character_damage/man_damage_2.ogg",
+	&"man_damage_3": "character_damage/man_damage_3.ogg",
+	&"claw_damage_1": "claw_cutting/claw_damage_1.ogg",
+	&"energy_absorb": "damage_absorption/energy_absorb.ogg",
+	&"bone_absorb": "damage_absorption/bone_absorb.ogg",
+	&"armored_absorb": "damage_absorption/armored_absorb.ogg",
+	&"the_door_is_locked": "door_locked/the_door_is_locked.ogg",
+	&"door_access_denied": "door_locked/door_access_denied.ogg",
+	&"metal_door_open": "door_gigle/opening_a_metal_door.ogg",
+	&"metal_door_close": "door_gigle/close_a_metal_door.ogg",
 }
 
 
@@ -271,7 +296,6 @@ const UI_EVENTS := {
 	&"mutation_click": [preload("res://assets/audio/ui/mutation_click.ogg"), -6.0],
 	&"mutation_lock": [preload("res://assets/audio/ui/mutation_lock.ogg"), -7.0],
 	&"mutation_unlock": [preload("res://assets/audio/ui/mutation_unlock.ogg"), -7.0],
-	&"door_locked": [preload("res://assets/audio/ui/door_locked.ogg"), -5.0],
 	&"access_denied": [preload("res://assets/audio/sfx/access_denied/access_denied_1.ogg"), -6.0],
 }
 
@@ -305,6 +329,8 @@ static func play_ui(parent: Node, event: StringName) -> AudioStreamPlayer:
 
 
 static func _event_path(event: StringName, variant: int) -> String:
+	if PATHS.has(event):
+		return ROOT + PATHS[event]
 	if event == &"hit_biomass":
 		return "res://assets/audio/sfx/biomass/Thudding_impact_of_b.ogg"
 	if event == &"step_biomass":
