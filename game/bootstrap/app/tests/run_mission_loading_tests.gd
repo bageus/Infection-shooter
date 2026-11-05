@@ -100,6 +100,12 @@ func _run() -> void:
 	current_scene.queue_free()
 	await process_frame
 	_restore_save()
+	var low := preload("res://game/bootstrap/app/menu/mission_loader.gd").new()
+	root.add_child(low)
+	low.set("_low_memory", true)
+	low.call("_fail", "loading cancelled")
+	_expect("memory" in str((low.get("label") as Label).text) or "памяти" in str((low.get("label") as Label).text), "Low memory shows a clear message")
+	low.free()
 	print("Mission loading tests: %d failures" % failures)
 	quit(0 if failures == 0 else 1)
 

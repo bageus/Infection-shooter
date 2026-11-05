@@ -12,6 +12,8 @@ var warmed_materials := 0
 ## Set when the level was started from "Continue": the mission shows a centered checkpoint caption.
 var checkpoint_notice := false
 var completion_music: Node
+## Free memory below this stops a load with a clear message instead of failing allocations.
+const LOW_MEMORY_BYTES := 200 * 1024 * 1024
 ## Props need ~160 physics ticks to fall asleep; a slow machine gets a wall-clock cap instead.
 const SETTLE_MAX_TICKS := 240
 const SETTLE_MAX_MSEC := 10000
@@ -46,6 +48,7 @@ var _column: VBoxContainer
 var resource_timeout_msec := 120000
 var _waiting_resources := false
 var _cancel_requested := false
+var _low_memory := false
 var _closed := false
 
 
@@ -116,6 +119,7 @@ func start() -> void:
 		return
 	_started = true
 	_cancel_requested = false
+	_low_memory = false
 	_waiting(true)
 	if is_instance_valid(completion_music):
 		completion_music.call("to_loading")
@@ -190,6 +194,9 @@ func start() -> void:
 	var report := await layout.commit_async(prepared, tree, _set_progress)
 	if int(report.skipped) > 0:
 		push_warning("Planned layout: %d missing object(s) skipped: %s" % [report.skipped, ", ".join(report.missing)])
+	if _memory_low():
+		_fail("memory")
+		return
 	storage.snapshot_authored()
 	_enter_level(planner)
 	# Keep physics paused and cover the first real material draws with the overlay.
@@ -273,7 +280,16 @@ func _scene_progress(value: float, phase: String) -> void:
 	_set_progress(clampf((value - 0.15) / 0.35, 0.0, 1.0) * 0.15, phase)
 
 
-func _loading_alive() -> bool: return is_inside_tree() and not _cancel_requested
+func _loading_alive() -> bool: return is_inside_tree() and not _cancel_requested and not _memory_low()
+
+
+## Stops loading while some memory is still free: once an allocation fails the engine only prints errors.
+## Unknown free memory (-1, e.g. in a browser) never stops a load.
+func _memory_low() -> bool:
+	var available := int(OS.get_memory_info().get("available", -1))
+	if available >= 0 and available < LOW_MEMORY_BYTES:
+		_low_memory = true
+	return _low_memory
 
 
 func _waiting(enabled: bool) -> void:
@@ -302,6 +318,8 @@ func _set_progress(value: float, phase: String) -> void:
 
 
 func _fail(reason: String) -> void:
+	if _low_memory:
+		reason = "недостаточно оперативной памяти. Закройте другие программы (в том числе редактор Godot) и повторите." if _ru else "not enough free memory. Close other programs (including the Godot editor) and try again."
 	_waiting(false)
 	_recovery_requested = false
 	_restore_previous_visual()
