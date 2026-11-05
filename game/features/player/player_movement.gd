@@ -95,6 +95,7 @@ var _original_master_volume := 0.0
 var mutation_effects: Node
 var _mutation_control := CONTROL_LOSS.new()
 var _mutation_menu_open := false
+var input_locked := false  # Death fade: ignore player input; physics (gravity) keeps running.
 var _slot_weapons: Array[int] = [0, -1, -1] ## Weapon index per slot, -1 when empty; a new game starts with the pistol only.
 var _emergency_key := false
 var _manual_hero_spawn: Dictionary = {}
@@ -148,19 +149,18 @@ func _physics_process(delta: float) -> void:
 	if control_lost:
 		_roll_remaining = 0.0
 		_iframes_remaining = 0.0
-		if Input.is_action_just_pressed("antidote"):
-			use_antidote()
-	if not _mutation_menu_open and not control_lost:
+		if not input_locked and Input.is_action_just_pressed("antidote"): use_antidote()
+	if not _mutation_menu_open and not control_lost and not input_locked:
 		_handle_actions()
 	_update_camera(delta)
 	if control_lost:
 		_aim_uncontrolled()
-	else:
+	elif not input_locked:
 		_update_aim()
 	weapon_mount.call("aim_at", _aim_point)
 	_update_move(delta)
 	var w:=get_current_weapon()
-	var fire_pressed := w != null and not Input.is_key_pressed(KEY_ALT) and not _mutation_menu_open and _roll_remaining <= 0.0 and (control_lost or (Input.is_action_pressed("fire") if bool(w.call("wants_continuous_fire")) else Input.is_action_just_pressed("fire")))
+	var fire_pressed := w != null and not input_locked and not Input.is_key_pressed(KEY_ALT) and not _mutation_menu_open and _roll_remaining <= 0.0 and (control_lost or (Input.is_action_pressed("fire") if bool(w.call("wants_continuous_fire")) else Input.is_action_just_pressed("fire")))
 	if w != null and _scope_raise.step(delta, _scope_magnification(w) > 1.0, fire_pressed and not control_lost):
 		_fire_weapon(w)
 	elif fire_pressed and control_lost:
@@ -176,7 +176,7 @@ func warm_up_skill_fx(parent: Node3D) -> void:
 	mutation_effects.get("vfx").call("warm_up", parent)
 
 func _unhandled_input(event: InputEvent) -> void:
-	if get_tree().paused:
+	if get_tree().paused or input_locked:
 		return
 	if _view_adjustment.handle_input(self, event):
 		get_viewport().set_input_as_handled()
@@ -251,7 +251,7 @@ func _has_presentation_activity() -> bool:
 
 # Public v1 command used by the HUD's slot buttons.
 func select_weapon_slot(index: int) -> bool:
-	if get_tree().paused or _mutation_menu_open or infection_runtime.call("is_control_lost") or infection_runtime.call("is_defeated"):
+	if get_tree().paused or input_locked or _mutation_menu_open or infection_runtime.call("is_control_lost") or infection_runtime.call("is_defeated"):
 		return false
 	if index < 0 or index >= _slot_weapons.size() or _slot_weapons[index] < 0:
 		return false
@@ -436,7 +436,7 @@ func _update_camera(delta: float) -> void:
 	if absf(camera.position.length() - view_distance) > 0.001:
 		camera.position = camera.position.normalized() * lerpf(camera.position.length(), view_distance, 1.0 - exp(-8.0 * delta))
 	camera_rig.position = _shot_recoil.camera_shake(delta)
-	var turn := Input.get_axis("camera_left", "camera_right")
+	var turn := 0.0 if input_locked else Input.get_axis("camera_left", "camera_right")
 	if _stun_remaining > 0.0 and _stun_intensity > 0.35:
 		turn = -turn
 		camera_rig.position += Vector3(randf_range(-0.06, 0.06), randf_range(-0.04, 0.04), 0) * _stun_intensity
@@ -538,7 +538,7 @@ func _push_roll_contacts()->void:
 			enemy.call("apply_player_push",direction,roll_push_strength)
 
 func _move_direction()->Vector3:
-	if _mutation_menu_open:
+	if _mutation_menu_open or input_locked:
 		return Vector3.ZERO
 	if bool(infection_runtime.call("is_control_lost")):
 		return _mutation_control.direction
