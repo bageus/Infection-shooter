@@ -39,10 +39,6 @@
 			"path": "res://models/objects/enviroments/02/02_coffee_vending_1_dented.glb"
 		},
 		{
-			"name": "coffee vending 2 dented",
-			"path": "res://models/objects/enviroments/02/02_coffee_vending_2_dented.glb"
-		},
-		{
 			"name": "dishwasher dented",
 			"path": "res://models/objects/enviroments/02/02_dishwasher_dented.glb"
 		},
@@ -375,14 +371,6 @@
 		{
 			"name": "bamboo",
 			"path": "res://models/objects/enviroments/11/11_bamboo.glb"
-		},
-		{
-			"name": "deco 2",
-			"path": "res://models/objects/enviroments/11/11_deco_2.glb"
-		},
-		{
-			"name": "deco 3",
-			"path": "res://models/objects/enviroments/11/11_deco_3.glb"
 		},
 		{
 			"name": "deco plant",
