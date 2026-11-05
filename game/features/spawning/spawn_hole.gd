@@ -1,12 +1,15 @@
 extends RefCounted
 ## Procedural broken-floor hole: jagged concrete rim, a dark depth centre, loose
-## chunks and bent rebar. Flat enough to walk over; purely visual.
+## chunks and bent rebar. The visuals are flat, and a solid core of BLOCK_RADIUS
+## stops walking into the centre, so the hole reads as a hole in the floor.
 
 const RIM_OUTER := 1.35
 const HOLE_RADIUS := 0.8
 const SEGMENTS := 28
 const RIM_Y := 0.012
 const DEPTH_Y := 0.022
+const BLOCK_RADIUS := 0.5 # metres from the centre that players cannot enter
+const BLOCK_HEIGHT := 1.0
 
 
 static func build(root: Node3D, seed_value: int = 7) -> void:
@@ -17,6 +20,24 @@ static func build(root: Node3D, seed_value: int = 7) -> void:
 	_add(root, "Depth", _depth_mesh(edge), _depth_material(), DEPTH_Y)
 	_add(root, "Chunks", _chunks_mesh(rng, edge), _chunk_material(), 0.0)
 	_add(root, "Rebar", _rebar_mesh(rng, edge), _rebar_material(), 0.0)
+	_add_block(root)
+
+
+# Invisible solid under the hole centre: the depth disc is the only thing drawn there.
+static func _add_block(root: Node3D) -> void:
+	var shape := CylinderShape3D.new()
+	shape.radius = BLOCK_RADIUS
+	shape.height = BLOCK_HEIGHT
+	var collider := CollisionShape3D.new()
+	collider.name = "Shape"
+	collider.shape = shape
+	collider.position.y = BLOCK_HEIGHT * 0.5
+	var body := StaticBody3D.new()
+	body.name = "Block"
+	body.collision_layer = 1
+	body.collision_mask = 0
+	body.add_child(collider)
+	root.add_child(body)
 
 
 static func _edge_radii(rng: RandomNumberGenerator) -> Array[float]:

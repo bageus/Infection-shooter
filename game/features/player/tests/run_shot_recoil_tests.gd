@@ -60,11 +60,17 @@ func _blast_shake() -> void:
 	for i in 40:
 		sum += push.camera_shake(0.0)
 	_check(sum.x < 0.0 and absf(sum.x) > absf(sum.z) * 2.0, "Blast on the right throws the camera left, mostly along the push")
+	# Average over many frames: the jitter is random, so one sample can flip the ratio.
 	var near := RECOIL.new()
 	near.blast(Vector3.FORWARD, 1.0)
 	var far := RECOIL.new()
 	far.blast(Vector3.FORWARD, 0.2)
-	_check(near.camera_shake(0.0).length() > far.camera_shake(0.0).length() * 3.0, "A closer blast shakes the camera harder")
+	var near_total := 0.0
+	var far_total := 0.0
+	for i in 40:
+		near_total += near.camera_shake(0.0).length()
+		far_total += far.camera_shake(0.0).length()
+	_check(near_total > far_total * 3.0, "A closer blast shakes the camera harder")
 	var mid := RECOIL.new()
 	mid.blast(Vector3.FORWARD, 0.5)
 	_check(mid.camera_shake(0.0).length() >= 0.1, "A mid-range blast (about 2 m) moves the camera at least 10 cm")
