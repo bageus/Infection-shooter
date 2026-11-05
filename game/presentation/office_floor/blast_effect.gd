@@ -27,6 +27,8 @@ static func detonate(host: Node3D, location: Vector3, radius: float = EXTINGUISH
 				victim.call("take_damage", CREATURE_DAMAGE * force)
 			if victim.has_method("apply_blast_stun"):
 				victim.call("apply_blast_stun", STUN_BASE + STUN_FALLOFF * force, force)
+			if victim.has_method("apply_blast_shake"):
+				victim.call("apply_blast_shake", location, force)
 	_damage_objects(host, location, radius)
 
 
