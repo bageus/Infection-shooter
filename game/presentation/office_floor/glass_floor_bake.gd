@@ -1,4 +1,5 @@
 extends RefCounted
+const MEMORY_GUARD := preload("res://game/core/vfx/public/memory_guard.gd")
 ## Shared mission-local debris pixels; the original glass entry point stays compatible.
 const ATLASES := preload("res://game/presentation/office_floor/debris_atlases.gd")
 const QUALITY := preload("res://game/core/vfx/public/destruction_quality.gd")
@@ -43,6 +44,8 @@ func prepare() -> void:
 
 
 func stamp(at: Vector2, frame: int, size: float, turns: int = 0, kind: String = "glass", opacity: float = 1.0) -> bool:
+	if MEMORY_GUARD.low():
+		return false
 	if not is_finite(opacity) or opacity <= 0.0 or not at.is_finite() or not is_finite(size) or size < MIN_SIZE or size > 1.5 or frame < 0 or frame >= ATLASES.frame_count(kind):
 		return false
 	if queue.size() >= QUALITY.queue_max():

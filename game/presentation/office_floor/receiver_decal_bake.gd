@@ -2,6 +2,7 @@ extends RefCounted
 ## One packed texture pair per receiver, never a new object for each hit.
 const SHADER := preload("res://game/presentation/office_floor/receiver_decal.gdshader")
 const PIXELS := preload("res://game/presentation/office_floor/decal_pixels.gd")
+const MEMORY_GUARD := preload("res://game/core/vfx/public/memory_guard.gd")
 const FACE := 128
 const MAX_RECEIVERS := 12
 const MAX_QUEUE := 32
@@ -15,6 +16,7 @@ var uploads := 0
 var sources: RefCounted
 
 func stamp(anchor: MeshInstance3D, point: Vector3, normal: Vector3, kind: String, frame: int, size: float, opacity: float, turns: int = 0, glass: bool = false, center: Vector2 = Vector2(0.5, 0.5)) -> bool:
+	if MEMORY_GUARD.low(): return false
 	if not is_instance_valid(anchor) or anchor.mesh == null or not point.is_finite() or not normal.is_finite() or not is_finite(opacity) or opacity <= 0.0 or not is_finite(size) or size <= 0.0 or queue.size() >= MAX_QUEUE: return false
 	if absf(anchor.global_basis.determinant()) < 1e-9 or not sources.sources.has(kind) or frame < 0 or frame >= sources.sources[kind].size(): return false
 	queue.append({"anchor": weakref(anchor), "point": anchor.to_local(point), "normal": (anchor.global_basis.transposed() * normal).normalized(),
