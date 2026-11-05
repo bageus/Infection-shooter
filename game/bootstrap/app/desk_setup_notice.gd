@@ -32,7 +32,8 @@ func _ready() -> void:
 func show_reason(reason: String) -> void:
 	_message.text = reason
 	show()
-	_timer.start()
+	if _timer.is_inside_tree():
+		_timer.start()
 
 
 func dismiss() -> void:
