@@ -2,6 +2,7 @@ extends Node
 
 # Host-side effects. The infection runtime owns selection and cooldown state.
 const B := preload("res://game/features/infection/public/mutation_balance.gd")
+const SFX := preload("res://game/core/audio/public/sound_events.gd")
 var hybrids := preload("res://game/features/player/passive_hybrid_effects.gd").new(self)
 var retaliation_cooldown := 0.0
 const EXPLOSION := preload("res://game/features/combat/public/grenade_explosion.gd")
@@ -221,7 +222,7 @@ func on_player_hit(amount: float, damage_type: String = "physical") -> float:
 		if enabled("bone_armor"):
 			reduction += 1.0 - 1.0 / B.value("bone_armor", "divisor")
 			_passive("bone_armor")
-			player.call("play_item_sound", &"bone_absorb")
+			SFX.play(player, &"bone_absorb")
 		if enabled("hardened"):
 			reduction += B.value("hardened", "physical") / 100.0
 			_passive("hardened")
