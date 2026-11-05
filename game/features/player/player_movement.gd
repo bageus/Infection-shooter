@@ -559,7 +559,7 @@ func _update_aim()->void:
 	query.exclude=[get_rid()]
 	var hit:=get_world_3d().direct_space_state.intersect_ray(query)
 	if not hit.is_empty():
-		_aim_point=hit.get("position")
+		_aim_point=preload("res://game/features/player/player_aim_level.gd").level_aim_point(hit.get("position"),origin,camera.project_ray_normal(mouse),aim_pivot.global_position.y+preload("res://game/features/player/player_aim_level.gd").AIM_HEIGHT)
 	else:
 		# Fallback to the gameplay floor so the cursor always has a world target.
 		var direction:=camera.project_ray_normal(mouse)
