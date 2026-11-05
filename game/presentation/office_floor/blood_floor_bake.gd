@@ -38,7 +38,8 @@ func stamp(texture: Texture2D, tint: Color, footprint: Vector2, at: Vector3, mar
 	if _queue.size() >= MAX_QUEUE:
 		_queue.pop_front()
 	_queue.append({"texture": texture, "tint": tint, "footprint": footprint, "position": at, "basis": mark_basis.orthonormalized()})
-	if _timer != null and _timer.is_stopped():
+	# A stain can arrive after this node left the tree; the next stamp starts the timer again.
+	if _timer != null and _timer.is_stopped() and _timer.is_inside_tree():
 		_timer.start()
 	return true
 

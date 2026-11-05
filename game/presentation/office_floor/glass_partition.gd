@@ -27,6 +27,10 @@ var _crack_marks: Array[Node3D] = []
 var _glass_nodes: Array[Node3D] = []
 var _blinds: Array[Node3D] = []
 var _blinds_rest: Array[Basis] = []
+## The hidden shard set is dropped while the pane is whole and rebuilt from the model when it breaks.
+var _shards_parent := NodePath()
+var _shards_transform := Transform3D.IDENTITY
+var _shards_stripped := false
 var _player: Node3D
 var _player_near_blinds := false
 var _sway_strength := 0.0
@@ -60,6 +64,7 @@ func _ready() -> void:
 	if blinds_pass_through:
 		_collect_blinds(get_parent().get_node_or_null("Visual"))
 	set_physics_process(blinds_pass_through)
+	_strip_shards(get_parent().get_node_or_null("Visual"))
 
 
 func _physics_process(delta: float) -> void:
@@ -345,9 +350,42 @@ func _hide_named(node: Node, token: String) -> void:
 		_hide_named(child, token)
 
 
+## A whole pane carries no shard nodes: they are about a third of the model's nodes and are hidden until it breaks.
+func _strip_shards(visual: Node3D) -> void:
+	if visual == null or visual.scene_file_path.is_empty():
+		return
+	var group := DAMAGE.find_named(visual, "Glass_Shards")
+	if group == null:
+		return
+	_shards_parent = visual.get_path_to(group.get_parent())
+	_shards_transform = group.transform
+	_shards_stripped = true
+	group.get_parent().remove_child(group)
+	group.free()
+
+
+func _restore_shards(visual: Node3D) -> Node3D:
+	if not _shards_stripped:
+		return null
+	_shards_stripped = false
+	var copy := (load(visual.scene_file_path) as PackedScene).instantiate()
+	var group := DAMAGE.find_named(copy, "Glass_Shards")
+	if group == null:
+		copy.free()
+		return null
+	group.get_parent().remove_child(group)
+	copy.free()
+	visual.get_node(_shards_parent).add_child(group)
+	group.transform = _shards_transform
+	FRESNEL.apply(group)
+	return group
+
+
 func _spawn_fragments(hit_position: Vector3, direction: Vector3 = Vector3.ZERO, blast: bool = false) -> void:
 	var visual := get_parent().get_node_or_null("Visual") as Node3D
 	var group: Node3D = DAMAGE.find_named(visual, "Glass_Shards") if visual != null else null
+	if group == null and visual != null:
+		group = _restore_shards(visual)
 	if group != null:
 		# Every shard stays in its place in the frame and falls from there.
 		var shards: Array[MeshInstance3D] = DAMAGE.reveal_meshes(group)

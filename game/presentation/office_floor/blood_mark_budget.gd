@@ -183,7 +183,8 @@ func _reload_near_dormant() -> void:
 
 
 func _wake() -> void:
-	if _timer != null and _timer.is_stopped():
+	# Work can be submitted while the budget is outside the tree; the next submit starts the timer.
+	if _timer != null and _timer.is_stopped() and _timer.is_inside_tree():
 		_timer.start()
 
 
