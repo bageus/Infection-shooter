@@ -1,6 +1,7 @@
 extends RefCounted
 ## Player-owned hybrid clocks, absorption and automatic ammunition conversion.
 const B := preload("res://game/features/infection/public/mutation_balance.gd")
+const SFX := preload("res://game/core/audio/public/sound_events.gd")
 var host: Node
 var absorption := 0.0
 var absorption_left := 0.0
@@ -52,6 +53,7 @@ func absorb(amount: float) -> float:
 	absorption -= taken
 	if taken > 0.0:
 		host.vfx.energy_shield()
+		SFX.play(host.player, &"energy_absorb")
 	return amount - taken
 
 func hyperactive() -> bool:

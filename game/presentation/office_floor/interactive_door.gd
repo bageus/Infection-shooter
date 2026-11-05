@@ -164,8 +164,8 @@ func _physics_process(delta: float) -> void:
 		_locked_cue_armed = true
 
 	if horizontal_distance <= trigger_distance:
-		if blocked:
-			_announce_locked()
+		if blocked or no_entry_shown:
+			_announce_locked(&"the_door_is_locked" if blocked else &"door_access_denied")
 		else:
 			match mode:
 				DoorMode.SWING_BIDIRECTIONAL:
@@ -205,11 +205,11 @@ func _physics_process(delta: float) -> void:
 
 
 # One rattle per approach: the cue re-arms only after the player walks away.
-func _announce_locked() -> void:
+func _announce_locked(event: StringName) -> void:
 	if not _locked_cue_armed:
 		return
 	_locked_cue_armed = false
-	SFX.play_ui(self, &"door_locked")
+	SFX.play(self, event)
 
 
 func _refresh_glass_collision() -> void:

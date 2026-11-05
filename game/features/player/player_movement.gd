@@ -388,12 +388,12 @@ func _apply_damage(amount: float, damage_type: String, point: Vector3, direction
 	var remaining: float = mutation_effects.call("on_player_hit", maxf(amount, 0.0), damage_type)
 	var absorbed:=remaining if armor_capped and armor > 0.0 else minf(armor,remaining)
 	armor=maxf(0.0,armor-absorbed); remaining-=absorbed
-	if absorbed > 0.0: _play_sound(&"damage_absorb")
-	_wound += minf(remaining, health)
-	health=maxf(0.0,health-remaining)
+	if absorbed > 0.0: _play_sound(&"armored_absorb")
+	_wound += minf(remaining, health); health=maxf(0.0,health-remaining)
 	if health <= 0.0 and mutation_effects.call("survive_lethal"):
 		health = MUTATION_BALANCE.value("second_heart", "health")
 	if remaining > 0.0:
+		_play_sound(&"man_damage_1" if remaining <= 15.0 else &"man_damage_2")
 		var excluded: Array[RID] = [get_rid()]
 		projectile_blood.emit(point, direction, weapon, excluded, get_instance_id())
 		blood_wounded.emit(global_position, excluded)
