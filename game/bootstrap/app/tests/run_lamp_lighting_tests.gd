@@ -60,6 +60,7 @@ func _test_fixture_lights() -> void:
 			_check(span_x >= 0.7 and span_z < 0.01, "linear lights spread along the long side")
 		if shape == "rectangle":
 			_check(span_x >= 0.4 and span_z >= 0.3, "rectangle lights cover both sides")
+		lamp.call("set_planning_visual", true)
 		for mesh_name in ["Housing", "Diffuser"]:
 			var mesh := lamp.get_node("Fixture/" + mesh_name) as MeshInstance3D
 			_check(mesh.cast_shadow == GeometryInstance3D.SHADOW_CASTING_SETTING_OFF, "%s of the %s fixture casts no shadow" % [mesh_name, shape])

@@ -15,6 +15,7 @@ func _init() -> void:
 
 func _run() -> void:
 	_config()
+	_hole_block()
 	_trigger_rules()
 	_queue_rules()
 	_mixed_queue()
@@ -23,6 +24,17 @@ func _run() -> void:
 	await _queues()
 	print("Wave tests: %d failures" % failures)
 	quit(failures)
+
+
+func _hole_block() -> void:
+	var point := POINT.instantiate() as Node3D
+	root.add_child(point)
+	var block := point.find_child("Block", true, false) as StaticBody3D
+	var shape := block.get_child(0).get("shape") as CylinderShape3D if block != null else null
+	_check(block != null and block.collision_layer == 1 and shape != null, "the spawn hole has a solid centre")
+	_check(shape != null and is_equal_approx(shape.radius, 0.5), "the solid centre is 0.5 m around the hole")
+	root.remove_child(point)
+	point.free()
 
 
 func _check(condition: bool, message: String) -> void:

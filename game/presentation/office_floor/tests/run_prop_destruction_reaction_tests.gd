@@ -196,7 +196,8 @@ func _glass_reaction() -> void:
 		var pane := wall.get_node("GlassBody") as StaticBody3D
 		pane.call("configure_world", effects, null)
 		pane.set("_cracks_needed", 0)
-		var group := DAMAGE.find_named(wall.get_node("Visual"), "Glass_Shards")
+		# A whole pane carries no shard nodes; bring them back to aim at one.
+		var group := pane.call("_restore_shards", wall.get_node("Visual")) as Node3D
 		var shards := DAMAGE.reveal_meshes(group)
 		var point := shards[0].global_transform * shards[0].get_aabb().get_center()
 		pane.call("take_projectile_hit", 5.0, point, Vector3.BACK, Vector3.FORWARD, weapon)

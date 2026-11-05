@@ -2,6 +2,7 @@ extends SceneTree
 ## Enemy lessons: every enemy has a text step with a live idle preview, the blast lesson states its numbers.
 const LESSONS := preload("res://game/bootstrap/app/tutorial/tutorial_enemy_lessons.gd")
 const PREVIEW := preload("res://game/bootstrap/app/tutorial/tutorial_enemy_preview.gd")
+const LOCALIZATION := preload("res://game/core/localization/public/ui_translations.gd")
 var failures := 0
 
 
@@ -25,10 +26,15 @@ func _run() -> void:
 		_check(player != null and player.current_animation == "Idle", "%s plays its Idle clip" % lesson)
 		_check(view.find_children("*", "Camera3D", true, false).size() == 1, "%s has one camera" % lesson)
 		container.free()
+	# Every lesson must have real text in both menu languages, not a raw translation key.
+	for language in ["ru", "en"]:
+		LOCALIZATION.apply_language(language)
+		for lesson in LESSONS.ids():
+			var localized: Dictionary = LESSONS.step(lesson)
+			_check(not str(localized.title).begins_with("tut") and not str(localized.text).begins_with("tut"), "%s lesson is translated to %s" % [lesson, language])
+	LOCALIZATION.apply_language("ru")
 	var blast: Dictionary = LESSONS.step("blast_extinguisher")
-	_check(str(blast.text) == "Взрыв огнетушителя наносит небольшой урон и оглушает всех, кто находится в зоне поражения.", "The blast lesson is the single sentence about damage and stun")
-	var hole: Dictionary = LESSONS.step("spawn_hole")
-	_check(str(hole.title) != "tutSpawnHoleTitle" and str(hole.text) != "tutSpawnHole", "The spawn hole lesson takes its title and text from the translations")
+	_check(str(blast.text) == "Взрыв огнетушителя наносит небольшой урон и оглушает всех в зоне поражения.", "The blast lesson text is the one-sentence summary")
 	quit(failures)
 
 

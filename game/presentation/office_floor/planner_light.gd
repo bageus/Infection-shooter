@@ -16,6 +16,8 @@ const SFX := preload("res://game/core/audio/public/sound_events.gd")
 # Defaults preserve invisible fixtures in legacy authored scenes/maps.
 @export_enum("point", "linear", "rectangle") var fixture_shape := "point"
 @export var fixture_visible_in_game := false
+## Fixtures are drawn in the planner only: in play a lamp keeps its light and loses the housing meshes and materials.
+const SHOW_FIXTURES_IN_GAME := false
 var _planning_visual := false
 var _fixture: Node3D
 var _diffuser_material: StandardMaterial3D
@@ -201,6 +203,13 @@ func _sync_activation(fade_budget := false) -> void:
 
 func set_planning_visual(enabled: bool) -> void:
 	_planning_visual = enabled
+	if is_node_ready():
+		if enabled and (_fixture == null or _fixture.get_child_count() == 0):
+			_build_fixture_meshes()
+		elif not enabled and not _fixture_wanted() and _fixture != null:
+			_fixture.free()
+			_fixture = null
+			_diffuser_material = null
 	visible = true
 	if marker != null:
 		marker.visible = enabled
@@ -265,7 +274,21 @@ func get_fixture_config() -> Dictionary:
 	return {"shape": fixture_shape, "visible_in_game": fixture_visible_in_game}
 
 
+func _fixture_wanted() -> bool:
+	return _planning_visual or (SHOW_FIXTURES_IN_GAME and fixture_visible_in_game)
+
+
 func _build_fixture() -> void:
+	_build_sub_lights()
+	if _fixture_wanted():
+		_build_fixture_meshes()
+		return
+	_apply_color()
+	_apply_energy()
+	_sync_fixture_visibility()
+
+
+func _build_fixture_meshes() -> void:
 	# Geometry and materials are per-instance; shared scene resources stay immutable.
 	if _fixture == null:
 		_fixture = Node3D.new()
@@ -293,7 +316,6 @@ func _build_fixture() -> void:
 	diffuser.material_override = _diffuser_material
 	diffuser.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
 	_fixture.add_child(diffuser)
-	_build_sub_lights()
 	_apply_color()
 	_apply_energy()
 	_sync_fixture_visibility()
@@ -344,4 +366,4 @@ func _fixture_mesh(diffuser: bool) -> PrimitiveMesh:
 
 func _sync_fixture_visibility() -> void:
 	if _fixture != null:
-		_fixture.visible = _planning_visual or (fixture_visible_in_game and _runtime_active)
+		_fixture.visible = _planning_visual or (SHOW_FIXTURES_IN_GAME and fixture_visible_in_game and _runtime_active)

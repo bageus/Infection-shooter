@@ -92,12 +92,12 @@ func _apply_web_brightness(scene: Node) -> void:
 		layer = CanvasLayer.new()
 		layer.name = "WebBrightness"
 		layer.layer = -1
-		var rect := ColorRect.new()
-		rect.name = "Overlay"
-		rect.set_anchors_preset(Control.PRESET_FULL_RECT)
-		rect.mouse_filter = Control.MOUSE_FILTER_IGNORE
-		rect.material = CanvasItemMaterial.new()
-		layer.add_child(rect)
+		var overlay := ColorRect.new()
+		overlay.name = "Overlay"
+		overlay.set_anchors_preset(Control.PRESET_FULL_RECT)
+		overlay.mouse_filter = Control.MOUSE_FILTER_IGNORE
+		overlay.material = CanvasItemMaterial.new()
+		layer.add_child(overlay)
 		scene.add_child(layer)
 	var rect := layer.get_node("Overlay") as ColorRect
 	var level := float(values.brightness)
