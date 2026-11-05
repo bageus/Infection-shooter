@@ -12,8 +12,7 @@ var warmed_materials := 0
 ## Set when the level was started from "Continue": the mission shows a centered checkpoint caption.
 var checkpoint_notice := false
 var completion_music: Node
-## Free memory below this stops a load with a clear message instead of failing allocations.
-const LOW_MEMORY_BYTES := 200 * 1024 * 1024
+const MEMORY_GUARD := preload("res://game/core/vfx/public/memory_guard.gd")
 ## Props need ~160 physics ticks to fall asleep; a slow machine gets a wall-clock cap instead.
 const SETTLE_MAX_TICKS := 240
 const SETTLE_MAX_MSEC := 10000
@@ -286,8 +285,7 @@ func _loading_alive() -> bool: return is_inside_tree() and not _cancel_requested
 ## Stops loading while some memory is still free: once an allocation fails the engine only prints errors.
 ## Unknown free memory (-1, e.g. in a browser) never stops a load.
 func _memory_low() -> bool:
-	var available := int(OS.get_memory_info().get("available", -1))
-	if available >= 0 and available < LOW_MEMORY_BYTES:
+	if MEMORY_GUARD.low(true):
 		_low_memory = true
 	return _low_memory
 
