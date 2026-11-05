@@ -27,6 +27,8 @@ func _run() -> void:
 		container.free()
 	var blast: Dictionary = LESSONS.step("blast_extinguisher")
 	_check(str(blast.text) == "Взрыв огнетушителя наносит небольшой урон и оглушает всех, кто находится в зоне поражения.", "The blast lesson is the single sentence about damage and stun")
+	var hole: Dictionary = LESSONS.step("spawn_hole")
+	_check(str(hole.title) != "tutSpawnHoleTitle" and str(hole.text) != "tutSpawnHole", "The spawn hole lesson takes its title and text from the translations")
 	quit(failures)
 
 
