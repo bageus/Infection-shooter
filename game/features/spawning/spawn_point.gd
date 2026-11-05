@@ -41,6 +41,11 @@ func get_spawn_config() -> Dictionary:
 	return _config.duplicate(true)
 
 
+## A quest target is done once the hole's waves are spent and every infected they spawned is dead.
+func is_target_done() -> bool:
+	return bool(get_meta(&"spawn_spent", false))
+
+
 ## The planner shows the wave summary over the hole; the game does not.
 func set_planning_visual(enabled: bool) -> void:
 	if _marker != null:

@@ -9,10 +9,12 @@ const COLOR := Color("ff5a1f")
 const Marker := preload("res://game/presentation/office_floor/tutorial_target_marker.gd")
 
 
-## "bottle", "crate", "extinguisher", "door", otherwise "object" (any placed prop, item or enemy); "" for no node.
+## "bottle", "crate", "extinguisher", "door", "spawn" (a spawn hole), otherwise "object" (any placed prop, item or enemy); "" for no node.
 static func kind_of(node: Node) -> String:
 	if node == null:
 		return ""
+	if node.has_method("is_target_done"):
+		return "spawn"
 	var file := str(node.get("model_path")).get_file().to_lower()
 	if "fire_extinguisher" in file:
 		return "extinguisher"
@@ -75,9 +77,12 @@ static func reveal(tree: SceneTree, kinds: Array[String]) -> void:
 			node.set_meta(&"planning_tutorial_revealed", true)
 
 
-## A target is finished once the object is gone or has been broken, shattered or burst.
+## A target is finished once the object is gone or has been broken, shattered or burst;
+## a spawn hole is finished once its waves are spent (see is_target_done).
 static func is_standing(node: Node) -> bool:
 	if not is_instance_valid(node) or node.is_queued_for_deletion():
+		return false
+	if node.has_method("is_target_done") and bool(node.call("is_target_done")):
 		return false
 	var damage: Variant = node.get("_damage")
 	if damage == null:

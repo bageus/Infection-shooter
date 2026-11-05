@@ -25,6 +25,9 @@ var trigger_row: HBoxContainer
 var trigger_option: OptionButton
 var health_spin: SpinBox
 var damage_spin: SpinBox
+var loot_option: OptionButton
+var loot_chance_row: HBoxContainer
+var loot_chance_spin: SpinBox
 var current := 0
 var _config := SPAWN_CONFIG.defaults()
 var _updating := false
@@ -60,6 +63,9 @@ func _init() -> void:
 	trigger_row = trigger_option.get_parent()
 	health_spin = _spin_row("Живучесть, %", SPAWN_CONFIG.STAT_MIN, SPAWN_CONFIG.STAT_MAX, 5.0)
 	damage_spin = _spin_row("Урон, %", SPAWN_CONFIG.STAT_MIN, SPAWN_CONFIG.STAT_MAX, 5.0)
+	loot_option = _option_row("Лут врагов дыры", SPAWN_CONFIG.LOOT_LABELS)
+	loot_chance_spin = _spin_row("Выпадение, %", 0.0, 100.0, 5.0)
+	loot_chance_row = loot_chance_spin.get_parent()
 
 
 func config() -> Dictionary:
@@ -94,6 +100,10 @@ func load_config(new_config: Dictionary, queue_index: int = -1) -> void:
 	trigger_option.select(maxi(SPAWN_CONFIG.TRIGGERS.find(str(queue["trigger"])), 0))
 	health_spin.set_value_no_signal(float(queue["health"]))
 	damage_spin.set_value_no_signal(float(queue["damage"]))
+	var loot: Dictionary = _config["loot"]
+	loot_option.select(maxi(SPAWN_CONFIG.LOOT_MODES.find(str(loot["mode"])), 0))
+	loot_chance_spin.set_value_no_signal(float(loot["chance"]))
+	loot_chance_row.visible = str(loot["mode"]) == "manual"
 	_updating = false
 
 
@@ -179,6 +189,7 @@ func _read_settings(_value: Variant = null) -> void:
 	queue["trigger"] = SPAWN_CONFIG.TRIGGERS[trigger_option.selected]
 	queue["health"] = health_spin.value
 	queue["damage"] = damage_spin.value
+	_config["loot"] = {"mode": SPAWN_CONFIG.LOOT_MODES[loot_option.selected], "chance": loot_chance_spin.value}
 	_commit()
 
 

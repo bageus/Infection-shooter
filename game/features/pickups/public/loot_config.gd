@@ -41,7 +41,11 @@ static func sanitize(raw: Variant, fallback_mode: String = "empty") -> Dictionar
 				var count := clampi(int(listed.get(id, 0)) if _number(listed.get(id, 0)) else 0, 0, MAX_COUNT)
 				if count > 0:
 					items[id] = count
-	return {"mode": mode, "items": items}
+	var config := {"mode": mode, "items": items}
+	# Chance (percent) that an infected with auto loot drops anything; 100 is the usual drop and is not stored.
+	if raw is Dictionary and _number((raw as Dictionary).get("chance")) and float(raw["chance"]) < 100.0:
+		config["chance"] = clampf(float(raw["chance"]), 0.0, 100.0)
+	return config
 
 
 ## Flat list of item ids to spawn for a manual config.
