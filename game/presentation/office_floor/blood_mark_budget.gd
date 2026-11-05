@@ -1,5 +1,6 @@
 extends Node3D
 
+const MEMORY_GUARD := preload("res://game/core/vfx/public/memory_guard.gd")
 const MARK := preload("res://game/presentation/office_floor/blood_mark_3d.gd")
 const SURFACES := preload("res://game/presentation/office_floor/blood_surface_query.gd")
 const FIFO := preload("res://game/presentation/office_floor/blood_mark_fifo.gd")
@@ -52,7 +53,7 @@ func _ready() -> void:
 
 
 func submit(definition: Dictionary, surface: Dictionary) -> void:
-	if definition.is_empty() or SURFACES.resolve(surface).is_empty():
+	if MEMORY_GUARD.low() or definition.is_empty() or SURFACES.resolve(surface).is_empty():
 		return
 	if not _admit(definition, surface):
 		if _pending.size() >= 16:

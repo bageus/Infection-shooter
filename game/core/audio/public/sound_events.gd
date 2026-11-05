@@ -94,6 +94,9 @@ const EVENTS := {
 	&"door_close": [1, -3.0, 26.0, 3.5, 0.05, 2],
 	&"metal_door_open": [1, -2.0, 30.0, 4.0, 0.04, 2],
 	&"metal_door_close": [1, -2.0, 30.0, 4.0, 0.04, 2],
+	# Laboratory hermetic door: volume/distance values copied from metal_door.
+	&"laboratory_door_open": [1, -2.0, 30.0, 4.0, 0.04, 2],
+	&"laboratory_door_close": [1, -2.0, 30.0, 4.0, 0.04, 2],
 	&"glass_door_open": [2, -3.0, 26.0, 3.5, 0.05, 2],
 	&"glass_door_close": [1, -3.0, 26.0, 3.5, 0.05, 2],
 	&"elevator_open": [1, -2.0, 32.0, 4.0, 0.0, 1],
@@ -186,6 +189,8 @@ const PATHS := {
 	&"door_access_denied": "door_locked/door_access_denied.ogg",
 	&"metal_door_open": "door_gigle/opening_a_metal_door.ogg",
 	&"metal_door_close": "door_gigle/close_a_metal_door.ogg",
+	&"laboratory_door_open": "door_laboratory/laboratory_hermetic_opening.ogg",
+	&"laboratory_door_close": "door_laboratory/laboratory_hermetic_closing.ogg",
 }
 
 

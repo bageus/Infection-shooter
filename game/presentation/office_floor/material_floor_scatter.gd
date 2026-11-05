@@ -1,4 +1,5 @@
 extends RefCounted
+const MEMORY_GUARD := preload("res://game/core/vfx/public/memory_guard.gd")
 const PATTERN := preload("res://game/presentation/office_floor/glass_floor_scatter.gd")
 const ATLASES := preload("res://game/presentation/office_floor/debris_atlases.gd")
 const QUALITY := preload("res://game/core/vfx/public/destruction_quality.gd")
@@ -17,6 +18,8 @@ const DEBRIS_SCALE := 0.57
 
 # Higher destruction quality lays the whole pattern down again with fresh randomness.
 static func scatter(floor_view: Node3D, center: Vector3, footprint: Vector2, recipe: Array[String], direction: Vector3, excluded: Array[RID]) -> void:
+	if MEMORY_GUARD.low():
+		return
 	for _pass in QUALITY.scatter_passes():
 		_scatter_once(floor_view, center, footprint, recipe, direction, excluded)
 
