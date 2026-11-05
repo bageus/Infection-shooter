@@ -20,8 +20,8 @@ var remaining := Vector3.ZERO
 ## 0..1 envelope of the weapon/torso kick, decays in step().
 var kick := 0.0
 ## Blast shake: the camera is thrown away from the explosion, stronger when closer.
-const BLAST_METRES := 0.25
-const BLAST_DECAY_PER_SECOND := 2.5
+const BLAST_METRES := 0.35
+const BLAST_DECAY_PER_SECOND := 2.0
 var shake_enabled := true
 var _trauma := 0.0
 var _blast_trauma := 0.0
@@ -72,5 +72,5 @@ func camera_shake(delta: float) -> Vector3:
 	if _blast_trauma > 0.0:
 		# Mostly a push away from the blast, with some jitter so it reads as a jolt.
 		var jitter := Vector3(randf_range(-1.0, 1.0), 0.0, randf_range(-1.0, 1.0)) * 0.35
-		offset += (_blast_push + jitter) * (_blast_trauma * _blast_trauma * BLAST_METRES)
+		offset += (_blast_push + jitter) * (_blast_trauma * BLAST_METRES)
 	return offset

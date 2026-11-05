@@ -65,6 +65,9 @@ func _blast_shake() -> void:
 	var far := RECOIL.new()
 	far.blast(Vector3.FORWARD, 0.2)
 	_check(near.camera_shake(0.0).length() > far.camera_shake(0.0).length() * 3.0, "A closer blast shakes the camera harder")
+	var mid := RECOIL.new()
+	mid.blast(Vector3.FORWARD, 0.5)
+	_check(mid.camera_shake(0.0).length() >= 0.1, "A mid-range blast (about 2 m) moves the camera at least 10 cm")
 	var off := RECOIL.new()
 	off.shake_enabled = false
 	off.blast(Vector3.LEFT, 1.0)
