@@ -271,9 +271,8 @@ func _process(_delta: float) -> void:
 ## The defeat menu waits for the blur-to-black fade; death still happens once.
 func _begin_death() -> void:
 	_dying = true
-	# Dead hero: no move/aim/fire/skills/melee; both entry points live on the player node.
-	player.set_physics_process(false)
-	player.set_process_unhandled_input(false)
+	# Dead hero: input blocked, physics stays on so a mid-air death still falls.
+	player.input_locked = true
 	# Silent no-op until the man_damage_3 file and its catalog entry exist.
 	SFX.play(self, &"man_damage_3")
 	var fade := DEATH_FADE.new()
