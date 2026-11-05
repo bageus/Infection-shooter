@@ -11,6 +11,8 @@ enum DoorMode { SWING_BIDIRECTIONAL, SWING_ONE_WAY, SLIDING_ELEVATOR, GLASS_SWIN
 @export var slide_distance: float = 0.72
 @export var elevator_sync_radius: float = 4.0
 @export var requires_emergency_key := false
+## Plays the laboratory hermetic door sounds instead of the generic ones.
+@export var laboratory_sound := false
 # Sealed for good: never opens, not even with the emergency key or from the exit side.
 @export var permanently_locked := false
 
@@ -260,15 +262,9 @@ func _play_door_sound(before: float, after: float) -> void:
 		closing = before > 0.001 and after <= 0.001
 	if not opening and not closing:
 		return
-	var kind := "door"
-	match mode:
-		DoorMode.SLIDING_ELEVATOR:
-			kind = "elevator"
-		DoorMode.GLASS_SWING:
-			kind = "glass_door"
-		_:
-			if requires_emergency_key:
-				kind = "metal_door"
+	var kind := "elevator" if mode == DoorMode.SLIDING_ELEVATOR else "glass_door" if mode == DoorMode.GLASS_SWING else "metal_door" if requires_emergency_key else "door"
+	if laboratory_sound:
+		kind = "laboratory_door"
 	SFX.play(self, StringName(kind + ("_open" if opening else "_close")))
 
 
