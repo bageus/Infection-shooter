@@ -19,6 +19,8 @@ const BLOOD_EFFECTS := preload("res://game/presentation/office_floor/public/bloo
 const SHADER_WARMUP := preload("res://game/bootstrap/app/shader_warmup.gd")
 const HIT_EFFECT_WARMUP := preload("res://game/presentation/office_floor/public/hit_effect_warmup.gd")
 const GRENADE_EXPLOSION := preload("res://game/features/combat/public/grenade_explosion.gd")
+const DEATH_FADE := preload("res://game/bootstrap/app/death_fade.gd")
+const SFX := preload("res://game/core/audio/public/sound_events.gd")
 const BLAST_FEEDBACK := preload("res://game/bootstrap/app/blast_feedback.gd")
 const DEBUG_OVERLAY := preload("res://game/bootstrap/app/runtime_debug_overlay.gd")
 const OCCLUSION := preload("res://game/bootstrap/app/occlusion_effects.gd")
@@ -51,6 +53,7 @@ var current_level := "":
 var _mission_loading := false
 var _ad_showing := false
 var _ended := false
+var _dying := false
 var completion_music: Node
 var _music_handed_off := false
 var _pause_open := false
@@ -249,7 +252,7 @@ func _unhandled_key_input(event: InputEvent) -> void:
 
 
 func _process(_delta: float) -> void:
-	if _ended or _pause_open or planning_mode.active:
+	if _ended or _dying or _pause_open or planning_mode.active:
 		return
 	if mission_layout.call("goal_reached", player.global_position):
 		_end_run("MISSION COMPLETE")
@@ -262,7 +265,18 @@ func _process(_delta: float) -> void:
 		return
 	var health_value: Variant = player.get("health")
 	if health_value != null and float(health_value) <= 0.0:
-		_end_run("YOU DIED")
+		_begin_death()
+
+
+## The defeat menu waits for the blur-to-black fade; death still happens once.
+func _begin_death() -> void:
+	_dying = true
+	# Silent no-op until the man_damage_3 file and its catalog entry exist.
+	SFX.play(self, &"man_damage_3")
+	var fade := DEATH_FADE.new()
+	fade.name = "DeathFade"
+	add_child(fade)
+	fade.finished.connect(_end_run.bind("YOU DIED"), CONNECT_ONE_SHOT)
 
 
 func _open_pause_menu() -> void:
@@ -492,7 +506,7 @@ func _bind_enemy_blood(enemy: Node) -> void:
 
 
 func _on_mutation_defeated() -> void:
-	if _ended:
+	if _ended or _dying:
 		return
 	if mutation_tree_ui != null and mutation_tree_ui.call("is_tree_open"):
 		mutation_tree_ui.call("close_tree")
