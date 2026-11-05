@@ -317,12 +317,8 @@ func _test_fixture_visibility(lamp: Node3D) -> void:
 	lamp.call("set_local_lighting_enabled", true)
 	lamp.call("configure_flicker", 0, 0.2)
 	var energy: float = lamp.get_node("Light").light_energy
-	var shown: bool = lamp.call("get_fixture_config")["visible_in_game"]
 	lamp.call("set_planning_visual", true)
 	_check(lamp.get_node("Fixture").visible, "Every fixture can be seen and selected in the planner")
-	lamp.call("set_planning_visual", false)
-	_check(lamp.get_node("Fixture").visible == shown, "Leaving the planner applies authored visibility")
-	_check(is_equal_approx(lamp.get_node("Light").light_energy, energy), "Hiding a body preserves its emitted light")
 	var housing := lamp.get_node("Fixture/Housing") as MeshInstance3D
 	var shape: String = lamp.call("get_fixture_config")["shape"]
 	if shape == "point":
@@ -330,6 +326,9 @@ func _test_fixture_visibility(lamp: Node3D) -> void:
 	else:
 		var size: Vector3 = (housing.mesh as BoxMesh).size
 		_check(size.x > size.z * 5.0 if shape == "linear" else size.z > 0.5, "Linear and rectangular footprints differ")
+	lamp.call("set_planning_visual", false)
+	_check(lamp.get_node_or_null("Fixture") == null, "Play keeps the light and drops the fixture meshes")
+	_check(is_equal_approx(lamp.get_node("Light").light_energy, energy), "Hiding a body preserves its emitted light")
 	lamp.call("set_planning_visual", true)
 
 

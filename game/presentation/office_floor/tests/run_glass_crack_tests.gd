@@ -42,9 +42,7 @@ func _test_pane(kind: String, at: Vector3) -> void:
 	glass.call("configure_world", effects, null)
 	await physics_frame
 	var pane := _pane_center(scene)
-	var shards := _shards(scene)
-	_expect(shards.size() >= 20, "%s: the pane is cut into many shards (%d)." % [kind, shards.size()])
-	_expect(_irregular(shards), "%s: shards are uneven in size." % kind)
+	_expect(_shards(scene).is_empty(), "%s: a whole pane carries no shard nodes." % kind)
 	var needed := int(glass.get("_cracks_needed"))
 	_expect(needed >= 2 and needed <= 4, "%s: 2-4 cracks before shattering (%d)." % [kind, needed])
 	for i in needed:
@@ -54,6 +52,9 @@ func _test_pane(kind: String, at: Vector3) -> void:
 	glass.call("take_projectile_hit", 30.0, pane, Vector3.BACK, Vector3.FORWARD, "PISTOL")
 	_expect(bool(glass.get("_broken")), "%s: the hit after the last crack shatters the pane." % kind)
 	_expect(int(glass.call("crack_count")) == 0, "%s: cracks go with the glass." % kind)
+	var shards := _shards(scene)
+	_expect(shards.size() >= 20, "%s: the pane is cut into many shards (%d)." % [kind, shards.size()])
+	_expect(_irregular(shards), "%s: shards are uneven in size." % kind)
 	await physics_frame
 	var first := _fragments(effects)
 	_expect(not first.is_empty() and first.size() < shards.size(), "%s: shards near the hit burst out first (%d of %d)." % [kind, first.size(), shards.size()])
