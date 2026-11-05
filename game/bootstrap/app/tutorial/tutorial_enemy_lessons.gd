@@ -4,6 +4,7 @@ extends RefCounted
 ## from blast_effect.gd (EXTINGUISHER_RADIUS, CREATURE_DAMAGE, STUN_BASE + STUN_FALLOFF); the test checks these, so a changed stat fails it.
 
 const PREVIEW := preload("res://game/bootstrap/app/tutorial/tutorial_enemy_preview.gd")
+const TEXT := preload("res://game/bootstrap/app/mutation_text.gd")
 const SCENE_DIR := "res://game/features/infected/public/"
 
 const DATA := {
@@ -23,6 +24,8 @@ const DATA := {
 		"text": "150 здоровья, скорость 5.0, удар 14 урона. Призывает подкрепление: примерно раз в 12 секунд, если игрок в 24 м, появляются голодные, ревенанты или громилы."},
 	"blast_extinguisher": {"name": "Взрыв огнетушителя",
 		"text": "Взрыв огнетушителя наносит небольшой урон и оглушает всех, кто находится в зоне поражения."},
+	# Localized: the title and text come from translations.json (tutSpawnHoleTitle, tutSpawnHole).
+	"spawn_hole": {"title_key": "tutSpawnHoleTitle", "text_key": "tutSpawnHole"},
 }
 
 
@@ -40,7 +43,9 @@ static func has(lesson: String) -> bool:
 ## The one step of an enemy or blast lesson. Enemies get a live preview of their idle model.
 static func step(lesson: String) -> Dictionary:
 	var entry: Dictionary = DATA[lesson]
-	var result := {"title": str(entry.name), "text": str(entry.text), "targets": [], "mode": "click"}
+	var title := TEXT.t(str(entry.title_key)) if entry.has("title_key") else str(entry.name)
+	var body := TEXT.t(str(entry.text_key)) if entry.has("text_key") else str(entry.text)
+	var result := {"title": title, "text": body, "targets": [], "mode": "click"}
 	if entry.has("scene"):
 		result["preview"] = str(entry.scene)
 	return result
