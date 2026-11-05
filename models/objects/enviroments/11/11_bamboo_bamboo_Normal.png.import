@@ -2,24 +2,20 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://bniw7fdum0g5f"
-path.s3tc="res://.godot/imported/11_bamboo_bamboo_Normal.png-622d9114d5f090b2d59550ceb6c16314.s3tc.ctex"
+uid="uid://booic7kppp2wt"
+path="res://.godot/imported/11_bamboo_bamboo_Normal.png-622d9114d5f090b2d59550ceb6c16314.ctex"
 metadata={
-"imported_formats": ["s3tc_bptc"],
-"vram_texture": true
-}
-generator_parameters={
-"md5": "130f92a43b678813b8755602d632b442"
+"vram_texture": false
 }
 
 [deps]
 
 source_file="res://models/objects/enviroments/11/11_bamboo_bamboo_Normal.png"
-dest_files=["res://.godot/imported/11_bamboo_bamboo_Normal.png-622d9114d5f090b2d59550ceb6c16314.s3tc.ctex"]
+dest_files=["res://.godot/imported/11_bamboo_bamboo_Normal.png-622d9114d5f090b2d59550ceb6c16314.ctex"]
 
 [params]
 
-compress/mode=2
+compress/mode=0
 compress/high_quality=false
 compress/lossy_quality=0.7
 compress/uastc_level=0
@@ -40,5 +36,5 @@ process/premult_alpha=false
 process/normal_map_invert_y=false
 process/hdr_as_srgb=false
 process/hdr_clamp_exposure=false
-process/size_limit=512
+process/size_limit=0
 detect_3d/compress_to=0
