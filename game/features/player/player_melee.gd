@@ -91,6 +91,7 @@ func _punch_impact() -> void:
 		if offset.length() - _host._body_radius(enemy) > PUNCH_REACH or offset.normalized().dot(forward) <= 0.0:
 			continue
 		enemy.call("take_damage", _host._scented(enemy, PUNCH_DAMAGE))
+		SFX.play(enemy, &"loud_flesh_hit_1")
 		if enemy.has_method("apply_skill_push"):
 			enemy.call("apply_skill_push", forward, PUNCH_ENEMY_PUSH)
 		return
@@ -125,6 +126,7 @@ func _kick_impact() -> void:
 		var reach := float(_host._body_radius(enemy))
 		if enemy.has_method("apply_skill_push") and offset.dot(forward) > 0.0 and offset.dot(forward) <= KICK_LENGTH + reach and absf(offset.cross(forward).y) <= KICK_WIDTH * 0.5 + reach and _clear_line(enemy):
 			enemy.call("apply_skill_push", forward, KICK_ENEMY_PUSH)
+			SFX.play(enemy, &"loud_dull_flesh_foot_1")
 	# One kick breaks the nearest crate only; a crowd of crates takes one kick each.
 	if nearest_crate != null:
 		nearest_crate.call("break_by_strike", nearest_crate.global_position, forward)
