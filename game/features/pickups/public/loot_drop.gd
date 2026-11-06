@@ -23,6 +23,8 @@ static func release_enemy(world: Node, at: Vector3, raw_config: Variant, drop_we
 		"manual":
 			spawn(world, CONFIG.manual_list(config), at, drop_weapon)
 		"auto":
+			if randf() * 100.0 >= float(config.get("chance", 100.0)):
+				return
 			var table := DROP_TABLE.new()
 			world.add_child(table)
 			table.call("drop_for_enemy", world, at, ammo_multiplier, _carried(carried_weapons))

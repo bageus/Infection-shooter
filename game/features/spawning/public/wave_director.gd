@@ -10,6 +10,8 @@ const ENDLESS := preload("res://game/features/spawning/domain/endless_waves.gd")
 ## Meta on a placed infected: Array of link keys (spawn_config.link_key) whose queue its death can start.
 const TRIGGER_META := &"spawn_triggers"
 const POINT_GROUP := &"enemy_spawn_points"
+## Meta on a spawn point once its waves are over and every infected they spawned is dead (a quest target is then done).
+const SPENT_META := &"spawn_spent"
 ## Group of living infected, owned by features.infected.
 const ALIVE_GROUP := &"infected_alive"
 const WAVE_STEP := 0.1
@@ -29,6 +31,7 @@ var _player: Node3D
 var _queue := WAVE_QUEUE.new()
 var _armed := false
 var _points := {}
+var _loot := {}
 var _linked := {}
 var _spawned := {}
 var _queues := {}
@@ -57,7 +60,10 @@ func arm() -> void:
 		if id.is_empty():
 			continue
 		_points[id] = node
-		var queues: Array = node.call("get_spawn_config")["queues"]
+		node.remove_meta(SPENT_META)
+		var config: Dictionary = node.call("get_spawn_config")
+		_loot[id] = config["loot"]
+		var queues: Array = config["queues"]
 		for index in queues.size():
 			var key := SPAWN_CONFIG.link_key(id, index)
 			_queues[key] = {"point": id, "index": index, "config": queues[index]}
@@ -79,6 +85,7 @@ func disarm() -> void:
 			if is_instance_valid(enemy):
 				enemy.queue_free()
 	_points.clear()
+	_loot.clear()
 	_linked.clear()
 	_spawned.clear()
 	_queues.clear()
@@ -119,6 +126,7 @@ func _physics_process(delta: float) -> void:
 	if _poll_clock >= TRIGGER_POLL:
 		_poll_clock = 0.0
 		check_triggers()
+		_mark_spent()
 	_wave_clock += delta
 	if _wave_clock >= WAVE_STEP:
 		advance(_wave_clock)
@@ -142,6 +150,29 @@ func check_triggers() -> void:
 			dead.append(not is_instance_valid(enemy) or bool(enemy.call("is_dead")))
 		if WAVE_QUEUE.trigger_met(str(config["trigger"]), dead):
 			_fire(key)
+
+
+## Marks each spawn point whose queues have all fired, with no wave still pending for it and no living infected of its own.
+func _mark_spent() -> void:
+	if endless:
+		return
+	for id: String in _points:
+		var point: Node3D = _points[id]
+		if not is_instance_valid(point) or point.has_meta(SPENT_META):
+			continue
+		var done := true
+		for key: String in _queues:
+			if str(_queues[key]["point"]) != id:
+				continue
+			if not _queue.has_fired(key) or _queue.pending(key) > 0 or _backlog.any(func(order: Dictionary) -> bool: return order["key"] == key):
+				done = false
+				break
+			for enemy in _spawned[key]:
+				if is_instance_valid(enemy) and not bool(enemy.call("is_dead")):
+					done = false
+					break
+		if done:
+			point.set_meta(SPENT_META, true)
 
 
 ## Starts every timed queue whose predecessor started long enough ago.
@@ -222,6 +253,7 @@ func _spawn(key: String, enemy_id: String) -> void:
 	var enemy := packed.instantiate() as Node3D
 	if enemy.has_method("configure_stats"):
 		enemy.call("configure_stats", {"health": config["health"], "damage": config["damage"]})
+	_apply_loot(enemy, _loot.get(point_id, {}))
 	var ground: Vector3 = point.call("spawn_position", index)
 	var yaw := 0.0
 	if is_instance_valid(_player):
@@ -236,6 +268,17 @@ func _spawn(key: String, enemy_id: String) -> void:
 	if enemy.has_method("set_target"):
 		enemy.call("set_target", _player)
 	_spawned[key].append(enemy)
+
+
+## The point's loot setting becomes the infected's own loot config; auto keeps the usual drops.
+func _apply_loot(enemy: Node, loot: Dictionary) -> void:
+	if not enemy.has_method("configure_loot"):
+		return
+	match str(loot.get("mode", "auto")):
+		"none":
+			enemy.call("configure_loot", {"mode": "empty"})
+		"manual":
+			enemy.call("configure_loot", {"mode": "auto", "chance": float(loot.get("chance", 0.0))})
 
 
 # Tall infected (capsule up to 2.9 m) must start above the floor, not inside it.

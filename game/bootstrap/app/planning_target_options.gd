@@ -72,7 +72,7 @@ func configure_new(target: Node3D) -> void:
 
 
 func _kind_label(kind: String) -> String:
-	return {"bottle": "бутылка", "crate": "ящик", "extinguisher": "огнетушитель", "door": "дверь", "object": "объект"}.get(kind, "")
+	return {"bottle": "бутылка", "crate": "ящик", "extinguisher": "огнетушитель", "door": "дверь", "spawn": "дыра спавна", "object": "объект"}.get(kind, "")
 
 
 func _changed(_value: Variant = null) -> void:

@@ -28,6 +28,11 @@ const TRIGGER_LABELS: Array[String] = ["Любой из связанных", "В
 ## started, or by the death of the infected linked to it (`trigger`).
 const STARTS: Array[String] = ["time", "trigger"]
 const START_LABELS: Array[String] = ["Через время после предыдущей", "По триггеру"]
+## Loot of the infected this point spawns: auto = the usual enemy drops, none = nothing,
+## manual = the usual drops with the chance (percent) that a dead infected drops anything.
+const LOOT_MODES: Array[String] = ["auto", "none", "manual"]
+const LOOT_LABELS: Array[String] = ["Авто", "Нет", "Вручную"]
+const LOOT_CHANCE_DEFAULT := 50.0
 const QUEUES_MAX := 8
 const ENTRIES_MAX := 6
 const DELAY_MAX := 600.0
@@ -40,7 +45,11 @@ const STAT_MAX := 200.0
 
 
 static func defaults() -> Dictionary:
-	return {"queues": [default_queue()]}
+	return {"queues": [default_queue()], "loot": default_loot()}
+
+
+static func default_loot() -> Dictionary:
+	return {"mode": "auto", "chance": LOOT_CHANCE_DEFAULT}
 
 
 static func default_queue() -> Dictionary:
@@ -63,7 +72,19 @@ static func sanitize(raw: Variant) -> Dictionary:
 	if queues.is_empty():
 		queues.append(sanitize_queue(source))
 	queues[0]["start"] = "trigger"
-	return {"queues": queues}
+	return {"queues": queues, "loot": sanitize_loot(source.get("loot"))}
+
+
+## Unknown modes fall back to auto (the usual drops), so maps saved before this setting keep them.
+static func sanitize_loot(raw: Variant) -> Dictionary:
+	var loot := default_loot()
+	if raw is Dictionary:
+		var source: Dictionary = raw
+		if str(source.get("mode", "")) in LOOT_MODES:
+			loot["mode"] = str(source["mode"])
+		if _number(source.get("chance")):
+			loot["chance"] = clampf(float(source["chance"]), 0.0, 100.0)
+	return loot
 
 
 static func sanitize_queue(raw: Variant) -> Dictionary:
