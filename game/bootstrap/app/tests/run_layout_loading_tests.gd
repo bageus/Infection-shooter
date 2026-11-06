@@ -98,6 +98,14 @@ func _run() -> void:
 	_expect(objects.placed[63].position.x == 63, "Async commit retains record order")
 	for index in 64:
 		_expect(ready_transforms[index] == objects.placed[index].transform, "Async ready registers each object at its saved transform")
+	var guard := load("res://game/core/vfx/public/memory_guard.gd")
+	prepared = await loader.prepare_async({"objects": records}, self, func(_value: float, _phase: String) -> void: pass)
+	guard.available_override = 50 * 1024 * 1024
+	guard.low(true)
+	report = await loader.commit_async(prepared, self, func(_value: float, _phase: String) -> void: pass)
+	guard.available_override = -2
+	guard.low(true)
+	_expect(report.has("error"), "Low memory cancels the async commit")
 	_expect(not objects._apply_layout_data({"objects": []}).has("error") and objects.placed.is_empty(), "Explicit empty map is a valid clear operation")
 	world.queue_free()
 	await process_frame

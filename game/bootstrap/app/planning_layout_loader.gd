@@ -8,6 +8,7 @@ const RESOURCE_QUEUE := preload("res://game/bootstrap/app/scene_resource_queue.g
 const VALIDATOR := preload("res://game/bootstrap/app/planning_layout_validator.gd")
 const LAYOUT_PROPERTIES := preload("res://game/bootstrap/app/planning_layout_properties.gd")
 const BLOOD_PLACEMENT := preload("res://game/bootstrap/app/planning_blood_placement.gd")
+const MEMORY_GUARD := preload("res://game/core/vfx/public/memory_guard.gd")
 const PLAYER := "res://game/features/player/public/player.tscn"
 var _biomass_cache: Dictionary = {}
 var objects: Node
@@ -141,8 +142,9 @@ func clear_async(tree: SceneTree, progress: Callable, alive: Callable) -> bool:
 	return true
 
 
+## Loading also stops when memory runs low: a failed allocation only prints errors and leaves half a map.
 static func _alive(check: Callable) -> bool:
-	return check.is_null() or (check.is_valid() and bool(check.call()))
+	return (check.is_null() or (check.is_valid() and bool(check.call()))) and not MEMORY_GUARD.low()
 
 
 func _empty_plan() -> Dictionary:

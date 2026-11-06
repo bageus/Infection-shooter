@@ -190,7 +190,9 @@ func start() -> void:
 		_fail(str(prepared.error))
 		return
 	_waiting(false)
-	var report := await layout.commit_async(prepared, tree, _set_progress)
+	var report := await layout.commit_async(prepared, tree, _set_progress, _loading_alive)
+	if report.has("error"):
+		return _fail(str(report.error))
 	if int(report.skipped) > 0:
 		push_warning("Planned layout: %d missing object(s) skipped: %s" % [report.skipped, ", ".join(report.missing)])
 	if _memory_low():
@@ -285,7 +287,7 @@ func _loading_alive() -> bool: return is_inside_tree() and not _cancel_requested
 ## Stops loading while some memory is still free: once an allocation fails the engine only prints errors.
 ## Unknown free memory (-1, e.g. in a browser) never stops a load.
 func _memory_low() -> bool:
-	if MEMORY_GUARD.low(true):
+	if MEMORY_GUARD.low():
 		_low_memory = true
 	return _low_memory
 
@@ -316,7 +318,7 @@ func _set_progress(value: float, phase: String) -> void:
 
 
 func _fail(reason: String) -> void:
-	if _low_memory:
+	if _low_memory or MEMORY_GUARD.low():
 		reason = "недостаточно оперативной памяти. Закройте другие программы (в том числе редактор Godot) и повторите." if _ru else "not enough free memory. Close other programs (including the Godot editor) and try again."
 	_waiting(false)
 	_recovery_requested = false
