@@ -114,10 +114,7 @@ func configure_lock_state(state: StringName) -> void:
 
 # Clearing one-way must not turn a glass door into a plain swing door.
 func configure_one_way(one_way: bool) -> void:
-	if one_way:
-		mode = DoorMode.SWING_ONE_WAY
-	elif mode == DoorMode.SWING_ONE_WAY:
-		mode = DoorMode.SWING_BIDIRECTIONAL
+	if one_way or mode == DoorMode.SWING_ONE_WAY: mode = DoorMode.SWING_ONE_WAY if one_way else DoorMode.SWING_BIDIRECTIONAL
 
 
 # Elevator doors are not locked; the planner leaves them out of the setting.
