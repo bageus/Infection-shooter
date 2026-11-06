@@ -192,7 +192,9 @@ def semantic_digest(path: Path, data: bytes) -> str:
 
 
 def tracked() -> list[Path]:
-    return [ROOT / name for name in subprocess.check_output(['git', 'ls-files'], cwd=ROOT, text=True).splitlines()]
+    names = subprocess.check_output(['git', 'ls-files'], cwd=ROOT, text=True).splitlines()
+    # Files removed by --apply stay in the index until committed, so skip them.
+    return [ROOT / name for name in names if (ROOT / name).exists()]
 
 
 def plan(files: list[Path]) -> tuple[dict[Path, Path], dict[Path, dict[int, Path]], dict]:
