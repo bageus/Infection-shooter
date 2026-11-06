@@ -8603,16 +8603,6 @@ metadata/planning_object_id = ""
 metadata/planning_desk_id = ""
 metadata/planning_attachment = ""
 
-[node name="@RigidBody3D@42224" type="RigidBody3D" parent="." unique_id=1775672140 instance=ExtResource("18_d8fyg")]
-transform = Transform3D(1, 1.2358907e-06, 1.2622694e-06, -1.2358903e-06, 1, -2.8917347e-07, -1.2622698e-06, 2.8917194e-07, 1, 12.499979, 0.013499737, -29.000063)
-
-model_path = "res://models/objects/enviroments/11/11_deco_3.glb"
-metadata/world_bound = true
-metadata/planning_settled_transform = Transform3D(1, 1.2358907e-06, 1.2622694e-06, -1.2358903e-06, 1, -2.8917347e-07, -1.2622698e-06, 2.8917194e-07, 1, 12.499979, 0.013499737, -29.000063)
-metadata/planning_object_id = ""
-metadata/planning_desk_id = ""
-metadata/planning_attachment = ""
-
 [node name="@RigidBody3D@42225" type="RigidBody3D" parent="." unique_id=2073559777 instance=ExtResource("18_d8fyg")]
 transform = Transform3D(1, -3.6850151e-06, -4.0391656e-06, 3.6849765e-06, 1, -9.595964e-06, 4.039201e-06, 9.595949e-06, 1, 17.17783, 0.013492525, -28.65496)
 
@@ -8749,16 +8739,6 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.5000042, 0.01578471, -26.2
 model_path = "res://models/objects/enviroments/11/11_deco_plant.glb"
 metadata/world_bound = true
 metadata/planning_settled_transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.5000042, 0.01578471, -26.249989)
-metadata/planning_object_id = ""
-metadata/planning_desk_id = ""
-metadata/planning_attachment = ""
-
-[node name="@RigidBody3D@42239" type="RigidBody3D" parent="." unique_id=1388133351 instance=ExtResource("18_d8fyg")]
-transform = Transform3D(1, 7.3699957e-06, -2.4640376e-06, -7.3699994e-06, 1, -1.4616367e-06, 2.4640267e-06, 1.4616548e-06, 1, -5.4599857, 0.015784502, -29.75032)
-
-model_path = "res://models/objects/enviroments/11/11_deco_2.glb"
-metadata/world_bound = true
-metadata/planning_settled_transform = Transform3D(1, 7.3699957e-06, -2.4640376e-06, -7.3699994e-06, 1, -1.4616367e-06, 2.4640267e-06, 1.4616548e-06, 1, -5.4599857, 0.015784502, -29.75032)
 metadata/planning_object_id = ""
 metadata/planning_desk_id = ""
 metadata/planning_attachment = ""
@@ -9886,36 +9866,6 @@ metadata/planning_object_id = ""
 metadata/planning_desk_id = "desk_50350790814857"
 metadata/planning_attachment = ""
 
-[node name="@RigidBody3D@42348" type="RigidBody3D" parent="." unique_id=1568258549 instance=ExtResource("18_d8fyg")]
-transform = Transform3D(-1.2874603e-05, 4.6645548e-07, 1, -9.897054e-07, 1, -4.6646824e-07, -1, -9.897115e-07, -1.2874603e-05, 3.2501426, 0.013499618, -17.50068)
-
-model_path = "res://models/objects/enviroments/11/11_deco_3.glb"
-metadata/world_bound = true
-metadata/planning_settled_transform = Transform3D(-1.2874603e-05, 4.6645548e-07, 1, -9.897054e-07, 1, -4.6646824e-07, -1, -9.897115e-07, -1.2874603e-05, 3.2501426, 0.013499618, -17.50068)
-metadata/planning_object_id = ""
-metadata/planning_desk_id = ""
-metadata/planning_attachment = ""
-
-[node name="@RigidBody3D@42349" type="RigidBody3D" parent="." unique_id=1381704317 instance=ExtResource("18_d8fyg")]
-transform = Transform3D(-0.0126821995, 5.5340263e-07, 0.99991965, -1.0988227e-06, 1, -5.673837e-07, -0.99991965, -1.10593e-06, -0.0126821995, 4.718545, 0.013499618, -17.435204)
-
-model_path = "res://models/objects/enviroments/11/11_deco_3.glb"
-metadata/world_bound = true
-metadata/planning_settled_transform = Transform3D(-0.0126821995, 5.5340263e-07, 0.99991965, -1.0988227e-06, 1, -5.673837e-07, -0.99991965, -1.10593e-06, -0.0126821995, 4.718545, 0.013499618, -17.435204)
-metadata/planning_object_id = ""
-metadata/planning_desk_id = ""
-metadata/planning_attachment = ""
-
-[node name="@RigidBody3D@42350" type="RigidBody3D" parent="." unique_id=1571538409 instance=ExtResource("18_d8fyg")]
-transform = Transform3D(-1.0728836e-06, 1.0206218e-06, 1, 3.942637e-07, 1, -1.0206213e-06, -1, 3.9426266e-07, -1.0728836e-06, 4.9999294, 0.013499379, 17.250021)
-
-model_path = "res://models/objects/enviroments/11/11_deco_3.glb"
-metadata/world_bound = true
-metadata/planning_settled_transform = Transform3D(-1.0728836e-06, 1.0206218e-06, 1, 3.942637e-07, 1, -1.0206213e-06, -1, 3.9426266e-07, -1.0728836e-06, 4.9999294, 0.013499379, 17.250021)
-metadata/planning_object_id = ""
-metadata/planning_desk_id = ""
-metadata/planning_attachment = ""
-
 [node name="@RigidBody3D@42351" type="RigidBody3D" parent="." unique_id=604368383 instance=ExtResource("18_d8fyg")]
 transform = Transform3D(-1.2, 0, -2.1839112e-06, 0, 1.2, 0, 2.1839112e-06, 0, -1.2, 0.25, 1.25, 17.89191)
 
@@ -10088,36 +10038,6 @@ metadata/planning_object_id = ""
 metadata/planning_desk_id = ""
 metadata/planning_attachment = "7726408051"
 metadata/planning_zone = 4
-
-[node name="@RigidBody3D@42368" type="RigidBody3D" parent="." unique_id=729845451 instance=ExtResource("18_d8fyg")]
-transform = Transform3D(-1.1920929e-06, 3.2510502e-07, 1, -7.2172213e-07, 1, -3.2510587e-07, -1, -7.2172253e-07, -1.1920929e-06, -14.757067, 0.013499379, -23.531395)
-
-model_path = "res://models/objects/enviroments/11/11_deco_3.glb"
-metadata/world_bound = true
-metadata/planning_settled_transform = Transform3D(-1.1920929e-06, 3.2510502e-07, 1, -7.2172213e-07, 1, -3.2510587e-07, -1, -7.2172253e-07, -1.1920929e-06, -14.757067, 0.013499379, -23.531395)
-metadata/planning_object_id = ""
-metadata/planning_desk_id = ""
-metadata/planning_attachment = ""
-
-[node name="@RigidBody3D@42369" type="RigidBody3D" parent="." unique_id=1649674658 instance=ExtResource("18_d8fyg")]
-transform = Transform3D(-1.0728836e-06, 4.06661e-07, 1, -1.063033e-06, 1, -4.0666208e-07, -1, -1.0630333e-06, -1.0728836e-06, -13.042069, 0.013499737, -23.5314)
-
-model_path = "res://models/objects/enviroments/11/11_deco_3.glb"
-metadata/world_bound = true
-metadata/planning_settled_transform = Transform3D(-1.0728836e-06, 4.06661e-07, 1, -1.063033e-06, 1, -4.0666208e-07, -1, -1.0630333e-06, -1.0728836e-06, -13.042069, 0.013499737, -23.5314)
-metadata/planning_object_id = ""
-metadata/planning_desk_id = ""
-metadata/planning_attachment = ""
-
-[node name="@RigidBody3D@42370" type="RigidBody3D" parent="." unique_id=1794097887 instance=ExtResource("18_d8fyg")]
-transform = Transform3D(-1.1920929e-06, 2.4983223e-07, 1, -1.1447796e-06, 1, -2.4983362e-07, -1, -1.1447798e-06, -1.1920929e-06, -11.50008, 0.013499737, -23.499968)
-
-model_path = "res://models/objects/enviroments/11/11_deco_3.glb"
-metadata/world_bound = true
-metadata/planning_settled_transform = Transform3D(-1.1920929e-06, 2.4983223e-07, 1, -1.1447796e-06, 1, -2.4983362e-07, -1, -1.1447798e-06, -1.1920929e-06, -11.50008, 0.013499737, -23.499968)
-metadata/planning_object_id = ""
-metadata/planning_desk_id = ""
-metadata/planning_attachment = ""
 
 [node name="@RigidBody3D@42371" type="RigidBody3D" parent="." unique_id=2038166977 instance=ExtResource("18_d8fyg")]
 transform = Transform3D(-4.371139e-08, 0, 1, 0, 1, 0, -1, 0, -4.371139e-08, -29.997972, 0.015499961, 28.888506)
@@ -13263,46 +13183,6 @@ model_path = "res://models/objects/enviroments/11/11_bamboo.glb"
 metadata/world_bound = true
 metadata/planning_settled_transform = Transform3D(1, -1.5733318e-06, 4.4005236e-07, 1.573332e-06, 1, -3.1657282e-07, -4.4005185e-07, 3.165735e-07, 1, -29.5, 0.0134990215, 26.41615)
 metadata/planning_object_id = "object_8488826279"
-metadata/planning_desk_id = ""
-metadata/planning_attachment = ""
-
-[node name="@RigidBody3D@42668" type="RigidBody3D" parent="." unique_id=729207070 instance=ExtResource("18_d8fyg")]
-transform = Transform3D(0.99999946, -1.0421573e-05, -0.0010393589, 1.0403962e-05, 1, -1.6949367e-05, 0.0010393591, 1.6938544e-05, 0.99999946, -18.49979, 0.015783548, 29.497055)
-
-model_path = "res://models/objects/enviroments/11/11_deco_2.glb"
-metadata/world_bound = true
-metadata/planning_settled_transform = Transform3D(0.99999946, -1.0421573e-05, -0.0010393589, 1.0403962e-05, 1, -1.6949367e-05, 0.0010393591, 1.6938544e-05, 0.99999946, -18.49979, 0.015783548, 29.497055)
-metadata/planning_object_id = ""
-metadata/planning_desk_id = ""
-metadata/planning_attachment = ""
-
-[node name="@RigidBody3D@42669" type="RigidBody3D" parent="." unique_id=793038036 instance=ExtResource("18_d8fyg")]
-transform = Transform3D(-1.0728836e-06, 4.8995423e-07, 1, -8.510365e-07, 1, -4.899551e-07, -1, -8.51037e-07, -1.0728836e-06, -19.004084, 0.013499737, 12.409372)
-
-model_path = "res://models/objects/enviroments/11/11_deco_3.glb"
-metadata/world_bound = true
-metadata/planning_settled_transform = Transform3D(-1.0728836e-06, 4.8995423e-07, 1, -8.510365e-07, 1, -4.899551e-07, -1, -8.51037e-07, -1.0728836e-06, -19.004084, 0.013499737, 12.409372)
-metadata/planning_object_id = ""
-metadata/planning_desk_id = ""
-metadata/planning_attachment = ""
-
-[node name="@RigidBody3D@42670" type="RigidBody3D" parent="." unique_id=1138781767 instance=ExtResource("18_d8fyg")]
-transform = Transform3D(0.9999995, -9.482972e-06, -0.00094749173, 9.467052e-06, 1, -1.6807318e-05, 0.00094749185, 1.679834e-05, 0.9999995, -39.499844, 0.015783548, 12.496774)
-
-model_path = "res://models/objects/enviroments/11/11_deco_2.glb"
-metadata/world_bound = true
-metadata/planning_settled_transform = Transform3D(0.9999995, -9.482972e-06, -0.00094749173, 9.467052e-06, 1, -1.6807318e-05, 0.00094749185, 1.679834e-05, 0.9999995, -39.499844, 0.015783548, 12.496774)
-metadata/planning_object_id = ""
-metadata/planning_desk_id = ""
-metadata/planning_attachment = ""
-
-[node name="@RigidBody3D@42671" type="RigidBody3D" parent="." unique_id=257078172 instance=ExtResource("18_d8fyg")]
-transform = Transform3D(0.99999785, 0.00011272809, -0.0020667664, -0.000112699585, 1, 1.3906469e-05, 0.0020667678, -1.3673514e-05, 0.99999785, -33.74545, 0.015800238, 21.99801)
-
-model_path = "res://models/objects/enviroments/11/11_deco_2.glb"
-metadata/world_bound = true
-metadata/planning_settled_transform = Transform3D(0.99999785, 0.00011272809, -0.0020667664, -0.000112699585, 1, 1.3906469e-05, 0.0020667678, -1.3673514e-05, 0.99999785, -33.74545, 0.015800238, 21.99801)
-metadata/planning_object_id = ""
 metadata/planning_desk_id = ""
 metadata/planning_attachment = ""
 
@@ -26578,16 +26458,6 @@ metadata/planning_object_id = ""
 metadata/planning_desk_id = ""
 metadata/planning_attachment = "3215103367"
 metadata/planning_zone = 13
-
-[node name="@RigidBody3D@43872" type="RigidBody3D" parent="." unique_id=96337377 instance=ExtResource("18_d8fyg")]
-transform = Transform3D(1, -8.4959654e-05, -3.2594133e-05, 8.495968e-05, 1, 9.5164364e-07, 3.2594053e-05, -9.544128e-07, 1, 5.462105, 0.015772223, -29.769968)
-
-model_path = "res://models/objects/enviroments/11/11_deco_2.glb"
-metadata/world_bound = true
-metadata/planning_settled_transform = Transform3D(1, -8.4959654e-05, -3.2594133e-05, 8.495968e-05, 1, 9.5164364e-07, 3.2594053e-05, -9.544128e-07, 1, 5.462105, 0.015772223, -29.769968)
-metadata/planning_object_id = ""
-metadata/planning_desk_id = ""
-metadata/planning_attachment = ""
 
 [node name="@RigidBody3D@43873" type="RigidBody3D" parent="." unique_id=1082558442 instance=ExtResource("18_d8fyg")]
 transform = Transform3D(0.9985681, -1.85569e-06, 0.05349542, 9.1408333e-07, 1, 1.76261e-05, -0.05349542, -1.7551962e-05, 0.9985681, -4.0035176, 0.010707349, 28.253117)

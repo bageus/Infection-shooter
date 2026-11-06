@@ -2,16 +2,19 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://drdygfpewadso"
-path="res://.godot/imported/02_vending_automat_2_dented_orm.png-9c24517ffc5659d7771c88a28d2d64b4.ctex"
+uid="uid://dnfvwx6kahayf"
+path="res://.godot/imported/11_plant_large_11_bamboo_ceramic_BaseColor.png-51fc8443ff4fecdf40281458f52b9b4e.ctex"
 metadata={
 "vram_texture": false
+}
+generator_parameters={
+"md5": "58d75911986af1ac630ba82e2bd62f3d"
 }
 
 [deps]
 
-source_file="res://models/objects/enviroments/02/02_vending_automat_2_dented_orm.png"
-dest_files=["res://.godot/imported/02_vending_automat_2_dented_orm.png-9c24517ffc5659d7771c88a28d2d64b4.ctex"]
+source_file="res://models/objects/enviroments/11/11_plant_large_11_bamboo_ceramic_BaseColor.png"
+dest_files=["res://.godot/imported/11_plant_large_11_bamboo_ceramic_BaseColor.png-51fc8443ff4fecdf40281458f52b9b4e.ctex"]
 
 [params]
 
