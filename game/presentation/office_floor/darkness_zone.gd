@@ -22,6 +22,7 @@ const PORTALS := preload("res://game/presentation/office_floor/darkness_portals.
 const DOOR_LINKS := preload("res://game/presentation/office_floor/public/door_darkness_links.gd")
 const FADE_SPEED := 5.0
 const PORTAL_REFRESH := 0.25
+const LINKS_REFRESH := 0.25
 
 @onready var overlay: MeshInstance3D = $Overlay
 var _revealed := false
@@ -29,6 +30,11 @@ var _player: Node3D
 var _linked_doors: Array[Node3D] = []
 var _fade := 1.0
 var _portal_timer := 0.0
+var _links_timer := 0.0
+# Per-frame room state shared by all zones, so the room checks are one pass per frame, not one per zone.
+static var _cache_frame := -1
+static var _room_distance: Dictionary = {}
+static var _room_open: Dictionary = {}
 # Glass panes stay see-through after they break, so they are remembered once found.
 var _glass_portals: Dictionary = {}
 var _fog_enabled := true
@@ -44,8 +50,11 @@ func _process(delta: float) -> void:
 	if not _fog_enabled:
 		return
 	if room_id > 0 and not permanent:
-		# Door lists can change after the zone starts (planner, layout load), so links are read every frame.
-		_find_linked_doors()
+		# Door lists can change after the zone starts (planner, layout load), so links are re-read a few times a second.
+		_links_timer -= delta
+		if _links_timer <= 0.0:
+			_links_timer = LINKS_REFRESH
+			_find_linked_doors()
 		if _player == null:
 			_player = get_tree().get_first_node_in_group("player") as Node3D
 		_fade = move_toward(_fade, 0.0 if _player_inside() or _room_has_open_door() else 1.0, FADE_SPEED * delta)
@@ -129,10 +138,25 @@ func _edge_distance(point: Vector3) -> float:
 
 ## An open door into any part of the room shows the whole room, as entering it does.
 func _room_has_open_door() -> bool:
+	_refresh_rooms()
+	return _room_open.has(room_id)
+
+
+func _refresh_rooms() -> void:
+	var frame := Engine.get_process_frames()
+	if frame == _cache_frame:
+		return
+	_cache_frame = frame
+	_room_distance.clear()
+	_room_open.clear()
 	for zone in get_tree().get_nodes_in_group("darkness_zone"):
-		if zone.get("room_id") == room_id and not zone.get("permanent") and zone.call("_has_open_door"):
-			return true
-	return false
+		if zone.get("permanent"):
+			continue
+		var id: Variant = zone.get("room_id")
+		if _player != null:
+			_room_distance[id] = minf(_room_distance.get(id, INF), zone.call("_edge_distance", _player.global_position))
+		if zone.call("_has_open_door"):
+			_room_open[id] = true
 
 
 func _has_open_door() -> bool:
@@ -148,11 +172,8 @@ func _has_open_door() -> bool:
 func _player_inside() -> bool:
 	if _player == null:
 		return false
-	var reach := LIFTED_REACH if _fade < 0.5 else 0.0
-	for zone in get_tree().get_nodes_in_group("darkness_zone"):
-		if zone.get("room_id") == room_id and not zone.get("permanent") and zone.call("_edge_distance", _player.global_position) <= reach:
-			return true
-	return false
+	_refresh_rooms()
+	return _room_distance.get(room_id, INF) <= (LIFTED_REACH if _fade < 0.5 else 0.0)
 
 
 ## Fog is solid; the camera still sees in through open doors and glass, wherever they meet this room.
