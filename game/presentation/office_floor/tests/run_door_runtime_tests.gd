@@ -50,6 +50,11 @@ func _run() -> void:
 	stage.queue_free()
 	await _settle()
 	print("Door runtime tests: %d failure(s)." % failures)
+	var glass := DOOR.new()
+	glass.mode = DOOR.DoorMode.GLASS_SWING
+	glass.configure_one_way(false)
+	_expect(glass.mode == DOOR.DoorMode.GLASS_SWING, "Planner bake keeps the glass door in its glass mode")
+	glass.free()
 	quit(failures)
 
 func _test_elevators(stage: Node3D) -> void:
