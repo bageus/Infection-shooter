@@ -112,7 +112,10 @@ func configure_lock_state(state: StringName) -> void:
 		_apply_lock_visuals()
 
 
-func configure_one_way(one_way: bool) -> void: mode = DoorMode.SWING_ONE_WAY if one_way else DoorMode.SWING_BIDIRECTIONAL
+# Only the swing doors have a one-way setting; glass and elevator doors keep their own mode.
+func configure_one_way(one_way: bool) -> void:
+	if mode == DoorMode.SWING_BIDIRECTIONAL or mode == DoorMode.SWING_ONE_WAY:
+		mode = DoorMode.SWING_ONE_WAY if one_way else DoorMode.SWING_BIDIRECTIONAL
 
 
 # Elevator doors are not locked; the planner leaves them out of the setting.
