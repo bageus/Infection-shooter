@@ -174,6 +174,8 @@ const EVENTS := {
 	&"armored_absorb": [1, -2.0, 24.0, 3.0, 0.04, 2],
 	&"the_door_is_locked": [1, -3.0, 26.0, 3.5, 0.0, 1],
 	&"door_access_denied": [1, -3.0, 26.0, 3.5, 0.0, 1],
+	&"loud_flesh_hit_1": [1, -2.0, 30.0, 4.0, 0.06, 3],
+	&"loud_dull_flesh_foot_1": [1, -2.0, 30.0, 4.0, 0.06, 2],
 }
 
 # Events whose file is not <event>/<event>_N.ogg.
@@ -187,6 +189,8 @@ const PATHS := {
 	&"armored_absorb": "damage_absorption/armored_absorb.ogg",
 	&"the_door_is_locked": "door_locked/the_door_is_locked.ogg",
 	&"door_access_denied": "door_locked/door_access_denied.ogg",
+	&"loud_flesh_hit_1": "kick/loud_flesh_hit_1.ogg",
+	&"loud_dull_flesh_foot_1": "kick/loud_dull_flesh_foot_1.ogg",
 	&"metal_door_open": "door_gigle/opening_a_metal_door.ogg",
 	&"metal_door_close": "door_gigle/close_a_metal_door.ogg",
 	&"laboratory_door_open": "door_laboratory/laboratory_hermetic_opening.ogg",
