@@ -33,7 +33,6 @@ const WALL_MASK := 129
 ## `carried` is the player's weapon slot indices (null keeps every ammo type).
 func drop_for_enemy(world: Node, at: Vector3, ammo_multiplier: float = 1.0, carried: Variant = null) -> void:
 	var weights := CONFIG.auto_weights(carried)
-	weights.erase("dna")
 	weights["antidote"] = antidote_weight
 	var item_id := roll_item(randf(), weights, any_drop_chance, ammo_multiplier)
 	if item_id.is_empty():
