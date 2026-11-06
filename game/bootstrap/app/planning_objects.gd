@@ -358,13 +358,28 @@ func _delete_node(node: Node3D) -> void:
 	controls._update_history_buttons()
 
 
+var _desk_cache: Array = []
+var _desk_cache_key := 0
+var _desk_cache_msec := 0
+
+
+## Desks (nodes with a planning_desk_id) among placed. Rebuilt only when the placed list changes
+## (or once per second as a safety net), so the per-frame sync does not scan every object's meta.
+func _desks() -> Array:
+	var key := placed.hash()
+	var now := Time.get_ticks_msec()
+	if key != _desk_cache_key or now - _desk_cache_msec > 1000:
+		_desk_cache_key = key
+		_desk_cache_msec = now
+		_desk_cache = placed.filter(func(n): return is_instance_valid(n) and n.has_meta("planning_desk_id") and not str(n.get_meta("planning_desk_id")).is_empty())
+	return _desk_cache
+
+
 func _sync_workstations() -> void:
-	for desk in placed:
+	for desk in _desks():
 		if not is_instance_valid(desk):
 			continue
 		var desk_id = str(desk.get_meta("planning_desk_id", ""))
-		if desk_id.is_empty():
-			continue
 		if not workstation_transforms.has(desk_id):
 			workstation_transforms[desk_id] = desk.global_transform
 			continue
