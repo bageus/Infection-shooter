@@ -19,6 +19,9 @@ func _run() -> void:
 	for _i in 200:
 		_check(CONFIG.auto_list("large", pistol_only).all(func(id: String) -> bool: return pistol_only.has(id)), "Auto crate rolls only carried ammo")
 	_check(not CONFIG.AUTO_WEIGHTS.has("armor"), "Auto loot never rolls armor")
+	_check(not CONFIG.AUTO_WEIGHTS.has("dna"), "Auto loot never rolls DNA")
+	for _i in 200:
+		_check(not CONFIG.auto_list("large", CONFIG.AUTO_WEIGHTS).has("dna"), "Auto crate never rolls DNA")
 	_check(CONFIG.sanitize({"mode": "manual", "items": {"armor": 2}})["items"] == {"armor": 2}, "Manual armor survives sanitization")
 	_check(DROP_TABLE.SCENES.has("armor"), "Armor has a pickup scene for manual drops")
 	print("Loot carried tests: %d failures" % failures)
