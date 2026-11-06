@@ -146,7 +146,9 @@ func _ghost() -> Node3D:
 
 func _anchor(world: Vector3) -> Vector3:
 	var anchor: Vector3 = objects.geometry._snap(world)
-	anchor.y = world.y
+	# The cursor can rest on a desk, partition or shelf top; taking that height
+	# lifted the whole group into the air. A group stands on the floor (or pad).
+	anchor.y = objects.geometry._support_height_at(objects.preview, anchor)
 	return anchor
 
 
