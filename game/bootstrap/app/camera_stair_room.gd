@@ -1,6 +1,6 @@
 extends Node
 ## Level-start camera yaw, and the camera pitch offset while the player stands in a room with a staircase.
-const START_YAW := -138.65
+const START_YAW := 153.27
 const EPSILON := 0.01
 var actor: Node3D
 

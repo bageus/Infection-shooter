@@ -9,7 +9,7 @@ const PITCH := -44.81
 const PITCH_MIN := -85.0
 const PITCH_MAX := -5.0
 const ROOM_PITCH_OFFSET := -14.0
-const ROOM_PITCH_SPEED := 12.0
+const ROOM_PITCH_SPEED := 18.0
 
 var _base_pitch := PITCH
 var _room_offset := 0.0
