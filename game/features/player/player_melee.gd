@@ -32,7 +32,9 @@ const PUNCH_ENEMY_PUSH := 0.4
 const OBJECT_MASK := 7
 ## Default physics layer: walls, floors and props, not the enemy layers.
 const WALL_MASK := 1
-const OBJECT_QUERY_LIMIT := 32
+## Debris fills the box, so the cap is high: a crate under a crowd of pieces must still be returned.
+const OBJECT_QUERY_LIMIT := 256
+const LINE_CHECK_PASSES := 16
 ## Seconds from the key press to the foot or fist landing (strike_pose.gd).
 const IMPACT_DELAY := {KICK: 0.27, PUNCH: 0.14}
 
@@ -133,7 +135,7 @@ func _clear_line(target: Node3D) -> bool:
 	var player: CharacterBody3D = _host.player
 	var query := PhysicsRayQueryParameters3D.create(player.global_position, target.global_position, WALL_MASK)
 	query.exclude = [player.get_rid()]
-	for _pass in OBJECT_QUERY_LIMIT:
+	for _pass in LINE_CHECK_PASSES:
 		var hit := player.get_world_3d().direct_space_state.intersect_ray(query)
 		if hit.is_empty() or hit.collider == target or target.is_ancestor_of(hit.collider):
 			return true

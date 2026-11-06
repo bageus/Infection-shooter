@@ -5,7 +5,8 @@ const STRIKE_REACH := 3.0
 const STRIKE_PUSH_SPEED := 6.0
 # Same world, prop and enemy layers as the grenade blast.
 const STRIKE_OBJECT_MASK := 7
-const STRIKE_OBJECT_QUERY_LIMIT := 32
+# Debris fills the box: the cap must leave room for a crate under a crowd of pieces.
+const STRIKE_OBJECT_QUERY_LIMIT := 256
 
 var host: Node
 var running: Dictionary = {}
