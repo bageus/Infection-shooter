@@ -126,6 +126,14 @@ class TextureDeduplicationTest(unittest.TestCase):
         self.assertEqual(dedup.semantic_digest(self.model, self.data), dedup.semantic_digest(self.model, data))
         self.assertEqual(data, dedup.rewrite_glb(self.model, data, {}, {}))
 
+    def test_tracked_files_missing_from_disk_are_skipped(self):
+        # `git ls-files` still lists files deleted by --apply until they are committed.
+        with patch.object(dedup.subprocess, 'check_output', return_value='models/gone.png\nmodels/kept.png\n'):
+            with patch.object(dedup, 'ROOT', self.root):
+                (self.root / 'models').mkdir()
+                (self.root / 'models' / 'kept.png').write_bytes(b'x')
+                self.assertEqual(dedup.tracked(), [self.root / 'models' / 'kept.png'])
+
     def test_invalid_header_is_rejected(self):
         with self.assertRaises(ValueError):
             dedup.read_glb(b'INVALID!' + self.data[8:])

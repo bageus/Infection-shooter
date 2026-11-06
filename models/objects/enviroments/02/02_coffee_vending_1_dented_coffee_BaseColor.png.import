@@ -2,19 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://l1abqq1s44hw"
-path="res://.godot/imported/02_vending_machine_fantas_dented_vending_drinks_orm.png-dd947c52410c98acb76a96eac6818b6e.ctex"
+uid="uid://5o013nh7pet2"
+path="res://.godot/imported/02_coffee_vending_1_dented_coffee_BaseColor.png-acbc3295a8743ef6e712095fc8e88970.ctex"
 metadata={
 "vram_texture": false
-}
-generator_parameters={
-"md5": "efcb7346a29640db1a9a9d3b506e812b"
 }
 
 [deps]
 
-source_file="res://models/objects/enviroments/02/02_vending_machine_fantas_dented_vending_drinks_orm.png"
-dest_files=["res://.godot/imported/02_vending_machine_fantas_dented_vending_drinks_orm.png-dd947c52410c98acb76a96eac6818b6e.ctex"]
+source_file="res://models/objects/enviroments/02/02_coffee_vending_1_dented_coffee_BaseColor.png"
+dest_files=["res://.godot/imported/02_coffee_vending_1_dented_coffee_BaseColor.png-acbc3295a8743ef6e712095fc8e88970.ctex"]
 
 [params]
 

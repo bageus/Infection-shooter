@@ -2,19 +2,19 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://dwgjwb8hbrw7a"
-path="res://.godot/imported/02_vending_automat_1_dented_orm.png-4b1b56cc86243f3427a25b3d9c48c48a.ctex"
+uid="uid://dcb4ni1p344xt"
+path="res://.godot/imported/11_plant_large_11_bamboo_ceramic_Normal.png-e4234a508c6e74f2673e07c7536ef9f1.ctex"
 metadata={
 "vram_texture": false
 }
 generator_parameters={
-"md5": "dc22b0a50a0b41b2242340a05875e488"
+"md5": "6aea1d940b81859c1b3eb305cd75c410"
 }
 
 [deps]
 
-source_file="res://models/objects/enviroments/02/02_vending_automat_1_dented_orm.png"
-dest_files=["res://.godot/imported/02_vending_automat_1_dented_orm.png-4b1b56cc86243f3427a25b3d9c48c48a.ctex"]
+source_file="res://models/objects/enviroments/11/11_plant_large_11_bamboo_ceramic_Normal.png"
+dest_files=["res://.godot/imported/11_plant_large_11_bamboo_ceramic_Normal.png-e4234a508c6e74f2673e07c7536ef9f1.ctex"]
 
 [params]
 
@@ -24,12 +24,12 @@ compress/lossy_quality=0.7
 compress/uastc_level=0
 compress/rdo_quality_loss=0.0
 compress/hdr_compression=1
-compress/normal_map=0
+compress/normal_map=1
 compress/channel_pack=0
 mipmaps/generate=true
 mipmaps/limit=-1
-roughness/mode=0
-roughness/src_normal=""
+roughness/mode=1
+roughness/src_normal="res://models/objects/enviroments/11/11_plant_large_11_bamboo_ceramic_Normal.png"
 process/channel_remap/red=0
 process/channel_remap/green=1
 process/channel_remap/blue=2
