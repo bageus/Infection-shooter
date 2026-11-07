@@ -29,6 +29,8 @@ var _revealed := false
 var _player: Node3D
 var _linked_doors: Array[Node3D] = []
 var _fade := 1.0
+# The fade value last applied to the overlay once it stopped moving; -1 while it moves.
+var _settled := -1.0
 var _portal_timer := 0.0
 var _links_timer := 0.0
 # Per-frame room state shared by all zones, so the room checks are one pass per frame, not one per zone.
@@ -44,6 +46,9 @@ func _ready() -> void:
 	_player = get_tree().get_first_node_in_group("player") as Node3D
 	_revealed = false
 	_rebuild()
+	# Zones load together; staggered timers keep their door and portal scans from all landing on one frame.
+	_portal_timer = randf() * PORTAL_REFRESH
+	_links_timer = randf() * LINKS_REFRESH
 	call_deferred("_find_linked_doors")
 
 func _process(delta: float) -> void:
@@ -57,7 +62,18 @@ func _process(delta: float) -> void:
 			_find_linked_doors()
 		if _player == null:
 			_player = get_tree().get_first_node_in_group("player") as Node3D
-		_fade = move_toward(_fade, 0.0 if _player_inside() or _room_has_open_door() else 1.0, FADE_SPEED * delta)
+		var target := 0.0 if _player_inside() or _room_has_open_door() else 1.0
+		# A settled cover (fully up or fully lifted) needs no per-frame writes, which is most rooms most of the time.
+		# A covered room still re-reads its portals now and then, since doors and glass can appear after it loads.
+		if _fade == target and _settled == target:
+			if target > 0.0:
+				_portal_timer -= delta
+				if _portal_timer <= 0.0:
+					_portal_timer = PORTAL_REFRESH * 4.0
+					_push_portals()
+			return
+		_fade = move_toward(_fade, target, FADE_SPEED * delta)
+		_settled = target if _fade == target else -1.0
 		overlay.visible = _fade > 0.01
 		set_meta("explored", not overlay.visible)
 		_portal_timer -= delta
@@ -102,7 +118,7 @@ func _find_linked_doors() -> void:
 	_linked_doors.clear()
 	if permanent:
 		return
-	for door in get_tree().get_nodes_in_group("interactive_doors"):
+	for door in _all_doors():
 		if door is Node3D:
 			var door_node := door as Node3D
 			if room_id > 0:
@@ -110,6 +126,49 @@ func _find_linked_doors() -> void:
 					_linked_doors.append(door_node)
 			elif global_position.distance_to(door_node.global_position) <= door_link_radius:
 				_linked_doors.append(door_node)
+
+
+## Doors and glass panes are the same for every zone, so one frame's (or second's) scan is shared by all of them.
+static var _doors_frame := -1
+static var _doors: Array = []
+static var _glass_time := -1000000
+static var _glass_shapes: Array = []
+const GLASS_SCAN_MSEC := 1000
+
+
+## Zones that fade (not permanent), re-read from the group once a second or when the group changes size.
+static var _room_zone_list: Array = []
+static var _room_zone_count := -1
+static var _room_zone_time := -1000000
+
+
+func _room_zones() -> Array:
+	var all := get_tree().get_nodes_in_group("darkness_zone")
+	var now := Time.get_ticks_msec()
+	if all.size() != _room_zone_count or now - _room_zone_time >= GLASS_SCAN_MSEC:
+		_room_zone_count = all.size()
+		_room_zone_time = now
+		_room_zone_list = all.filter(func(zone): return not zone.permanent)
+	return _room_zone_list
+
+
+func _all_doors() -> Array:
+	var frame := Engine.get_process_frames()
+	if frame != _doors_frame:
+		_doors_frame = frame
+		_doors = get_tree().get_nodes_in_group("interactive_doors")
+	return _doors
+
+
+func _glass_panes() -> Array:
+	var now := Time.get_ticks_msec()
+	if now - _glass_time >= GLASS_SCAN_MSEC:
+		_glass_time = now
+		_glass_shapes = []
+		for body in get_tree().get_nodes_in_group("infected_breakable_glass"):
+			for shape in body.find_children("*", "CollisionShape3D", true, false):
+				_glass_shapes.append(shape)
+	return _glass_shapes
 
 
 ## A door leads into this zone when the point just in front of it or just behind it, along the door's
@@ -149,13 +208,15 @@ func _refresh_rooms() -> void:
 	_cache_frame = frame
 	_room_distance.clear()
 	_room_open.clear()
-	for zone in get_tree().get_nodes_in_group("darkness_zone"):
-		if zone.get("permanent"):
+	var player_position := _player.global_position if _player != null else Vector3.ZERO
+	for zone in _room_zones():
+		if not is_instance_valid(zone):
+			_room_zone_count = -1
 			continue
-		var id: Variant = zone.get("room_id")
+		var id: Variant = zone.room_id
 		if _player != null:
-			_room_distance[id] = minf(_room_distance.get(id, INF), zone.call("_edge_distance", _player.global_position))
-		if zone.call("_has_open_door"):
+			_room_distance[id] = minf(_room_distance.get(id, INF), zone._edge_distance(player_position))
+		if zone._has_open_door():
 			_room_open[id] = true
 
 
@@ -181,12 +242,11 @@ func _push_portals() -> void:
 	var material := overlay.mesh.material as ShaderMaterial if overlay.mesh != null else null
 	if material == null:
 		return
-	for body in get_tree().get_nodes_in_group("infected_breakable_glass"):
-		for shape in body.find_children("*", "CollisionShape3D", true, false):
-			if not _glass_portals.has(shape.get_instance_id()) and _edge_distance(shape.global_position) <= PORTALS.GLASS_REACH:
-				var pane: Dictionary = PORTALS.pane(shape, global_position)
-				if not pane.is_empty():
-					_glass_portals[shape.get_instance_id()] = pane
+	for shape in _glass_panes():
+		if is_instance_valid(shape) and not _glass_portals.has(shape.get_instance_id()) and _edge_distance(shape.global_position) <= PORTALS.GLASS_REACH:
+			var pane: Dictionary = PORTALS.pane(shape, global_position)
+			if not pane.is_empty():
+				_glass_portals[shape.get_instance_id()] = pane
 	var portals: Array = _glass_portals.values()
 	for door in _linked_doors:
 		if is_instance_valid(door) and door.has_method("is_open_for_exploration") and bool(door.call("is_open_for_exploration")):
