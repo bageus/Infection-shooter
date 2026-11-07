@@ -7,6 +7,7 @@ const BOOK := preload("res://game/bootstrap/app/quest/quest_book.gd")
 const TARGET := preload("res://game/presentation/office_floor/public/tutorial_target.gd")
 const MESSAGE_SECONDS := 6.0
 const TELEPORT := 3.0
+const MODEL := preload("res://game/bootstrap/app/quest/quest_model.gd")
 
 enum Phase { TRIGGER, DELAY, ACTIVE, DONE }
 
@@ -29,6 +30,7 @@ var _mutation_rise := 0.0 # everything the meter climbed since the quest began; 
 var _trigger_node: Node3D
 var _trigger_existed := false
 var _was_planning := false
+var _objective_text := "" # the quest text as stored; shown through MODEL.display_text
 
 
 func configure(quest_book: Node, hero: Node3D, interface: Node, lessons: Node, owner_node: Node) -> void:
@@ -244,5 +246,16 @@ func _pointer_target() -> Vector3:
 
 
 func _set_objective(text: String) -> void:
+	_objective_text = text
+	_show_objective()
+
+
+func _show_objective() -> void:
 	if hud != null:
-		hud.call("set_tutorial_objective", text)
+		hud.call("set_tutorial_objective", MODEL.display_text(_objective_text))
+
+
+# A language change re-reads the shown quest text, so the banner switches at once.
+func _notification(what: int) -> void:
+	if what == NOTIFICATION_TRANSLATION_CHANGED and not _objective_text.is_empty():
+		_show_objective()
