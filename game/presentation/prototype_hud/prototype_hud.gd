@@ -344,7 +344,8 @@ func _update_vitals() -> void:
 		_flash_health_bar()
 	_health_feedback.set_value(float(player.health), float(player.max_health))
 	_update_armor(float(player.armor), float(player.max_armor))
-	_mutation_feedback.set_value(mutation, 100.0)
+	# Floor, not round: 24.7 must not read as 25 while the skills at 25 are still locked out.
+	_mutation_feedback.set_value(floorf(mutation), 100.0)
 	_mutation_feedback.set_marker_fraction(critical / 100.0)
 	antidote_count.text = "∞" if player.infinite_antidotes else ("MAX" if player.antidotes >= player.max_antidotes else str(player.antidotes))
 	_update_key_cell(has_key)
