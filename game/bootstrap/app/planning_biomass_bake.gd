@@ -3,6 +3,7 @@ extends RefCounted
 const VIEW := preload("res://game/presentation/office_floor/public/baked_biomass_floor.gd")
 const LIGHT := preload("res://game/bootstrap/app/planning_biomass_light_bake.gd")
 const SURFACE := preload("res://game/bootstrap/app/planning_surface_decals.gd")
+const MEMORY_GUARD := preload("res://game/core/vfx/public/memory_guard.gd")
 const KEY := &"floor_biomass_v1"
 const VIEW_NAME := "BakedFloorBiomass"
 
@@ -39,6 +40,8 @@ static func restore(session: Variant, raw: Dictionary) -> void:
 		return
 	if not VIEW.valid(raw): return
 	container.set_meta(KEY, raw)
+	# Page textures need memory; without them the floor keeps live decals, and the cache stays for saving.
+	if MEMORY_GUARD.low(): return
 	var view := VIEW.new()
 	view.name = VIEW_NAME
 	view.cache = raw
