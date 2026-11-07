@@ -60,6 +60,7 @@ func _run() -> void:
 		for after in ["point", "linear", "rectangle"]:
 			if before != after: await _transition(before, after)
 	_legacy_and_canonical()
+	_low_memory()
 	session.queue_free()
 	await process_frame
 	await process_frame
@@ -138,6 +139,18 @@ func _legacy_and_canonical() -> void:
 	var plan: Dictionary = loader.prepare(data)
 	_check(not plan.has("error"), "Legacy map without shape or cache still loads")
 	loader._discard(plan)
+
+
+func _low_memory() -> void:
+	var guard := load("res://game/core/vfx/public/memory_guard.gd")
+	var cache := _cache(_capture("point").objects)
+	guard.available_override = 50 * 1024 * 1024
+	guard.low(true)
+	BAKE.restore(session, cache)
+	var skipped := session.root.get_node_or_null("BakedFloorBiomass") == null and session.root.has_meta(BAKE.KEY)
+	guard.available_override = -2
+	guard.low(true)
+	_check(skipped, "Low memory skips the baked pages but keeps the cache for saving")
 
 
 func _check(value: bool, message: String) -> void:
