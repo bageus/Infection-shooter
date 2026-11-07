@@ -56,6 +56,21 @@ const PRESETS := {
 }
 
 
+## Translation keys of the presets. The stored text stays the Russian preset; the game shows the key's text.
+const PRESET_KEYS := {
+	"find": "questFind", "kill": "questKill", "destroy": "questDestroy",
+	"pickup": "questPickup", "message": "questMessage", "leave": "questLeave",
+}
+
+
+## The text to show for a quest: a preset is shown in the current language, any other text as written.
+static func display_text(text: String) -> String:
+	for type: String in PRESET_KEYS:
+		if str(PRESETS[type]) == text:
+			return TranslationServer.translate(PRESET_KEYS[type])
+	return text
+
+
 static func lesson_ids() -> Array[String]:
 	var ids: Array[String] = []
 	for lesson in LESSONS:

@@ -7,6 +7,7 @@ const STORE := preload("res://game/bootstrap/app/quest/quest_store.gd")
 const VALIDATOR := preload("res://game/bootstrap/app/planning_layout_validator.gd")
 const TARGET := preload("res://game/presentation/office_floor/public/tutorial_target.gd")
 const ENEMY_LESSONS := preload("res://game/bootstrap/app/tutorial/tutorial_enemy_lessons.gd")
+const UI_TRANSLATIONS := preload("res://game/core/localization/public/ui_translations.gd")
 var failures := 0
 
 
@@ -20,6 +21,7 @@ func _run() -> void:
 	_book()
 	await _runner()
 	await _menu_while_paused()
+	await _language_switch()
 	if failures == 0:
 		print("Quest tests passed.")
 	else:
@@ -101,6 +103,32 @@ func _book() -> void:
 	_check(book.quests.size() == 2, "A quest is removed")
 	book.free()
 	other.free()
+
+
+## A preset quest text follows the language, also when the language changes while the banner shows it.
+func _language_switch() -> void:
+	UI_TRANSLATIONS.apply_language("en")
+	_check(MODEL.display_text("Найдите цель") == "Find the target", "A preset quest text is shown in English")
+	_check(MODEL.display_text("Свой текст задания") == "Свой текст задания", "An authored quest text is shown as written")
+	var hud := Node.new()
+	var script := GDScript.new()
+	script.source_code = "extends Node\nvar text := \"\"\nfunc set_tutorial_objective(value: String) -> void:\n\ttext = value\n"
+	script.reload()
+	hud.set_script(script)
+	root.add_child(hud)
+	var runner = RUNNER.new()
+	runner.hud = hud
+	root.add_child(runner)
+	runner._set_objective("Найдите цель")
+	_check(hud.text == "Find the target", "The banner shows the preset in the current language")
+	UI_TRANSLATIONS.apply_language("ru")
+	await process_frame
+	_check(hud.text == "Найдите цель", "The banner switches to Russian when the language changes")
+	UI_TRANSLATIONS.apply_language("en")
+	await process_frame
+	_check(hud.text == "Find the target", "The banner switches to English when the language changes")
+	runner.free()
+	hud.free()
 
 
 func _runner() -> void:
