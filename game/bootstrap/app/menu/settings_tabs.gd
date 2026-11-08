@@ -232,6 +232,7 @@ func _video() -> void:
 		for key in ["effectsQuality0", "effectsQuality1", "effectsQuality2"]:
 			effects_quality.add_item(dialog.view.text(key))
 		effects_quality.selected = dialog.view.preferences.values.effects_quality
+		effects_quality.tooltip_text = dialog.view.text("effectsQualityHint")
 		effects_quality.item_selected.connect(func(index: int) -> void: dialog.call("_change", "effects_quality", index))
 		dialog.call("_row", "effectsQuality", effects_quality)
 	if not web:

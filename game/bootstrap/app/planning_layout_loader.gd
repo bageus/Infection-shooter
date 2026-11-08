@@ -10,6 +10,7 @@ const LAYOUT_PROPERTIES := preload("res://game/bootstrap/app/planning_layout_pro
 const BLOOD_PLACEMENT := preload("res://game/bootstrap/app/planning_blood_placement.gd")
 const MEMORY_GUARD := preload("res://game/core/vfx/public/memory_guard.gd")
 const PLAYER := "res://game/features/player/public/player.tscn"
+const PROP_TRIM := preload("res://game/bootstrap/app/planning_prop_trim.gd")
 var _biomass_cache: Dictionary = {}
 var objects: Node
 var session: Variant
@@ -158,6 +159,9 @@ func _stage(record: Dictionary, prepared: Dictionary) -> bool:
 		return true
 	if path.is_empty() or not ResourceLoader.exists(path):
 		prepared.missing.append(record.scene)
+		prepared.unresolved.append(record.duplicate(true))
+		return true
+	if PROP_TRIM.drops(record, path, bool(session.get("active"))):
 		prepared.unresolved.append(record.duplicate(true))
 		return true
 	var started := Time.get_ticks_usec()
