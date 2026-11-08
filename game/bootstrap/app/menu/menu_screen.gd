@@ -71,6 +71,7 @@ func _ready() -> void:
 	footer = STYLE.label("", 10)
 	add_child(footer)
 	keyboard = STYLE.label("", 10)
+	keyboard.add_theme_color_override("font_color", Color.BLACK)
 	add_child(keyboard)
 	resized.connect(_layout)
 	visibility_changed.connect(_focus_first)
@@ -106,7 +107,7 @@ func refresh() -> void:
 	_build_content()
 	footer.text = "━━   " + text({"main": "quarantine", "pause": "floor", "failed": "lastSignal", "complete": "evac"}[screen_kind]).to_upper()
 	footer.visible = screen_kind != "main"
-	keyboard.text = text("keys")
+	keyboard.text = "v." + str(ProjectSettings.get_setting("application/config/version", "0.00.000"))
 	_layout()
 	_focus_first()
 
