@@ -22,7 +22,7 @@ const PORTALS := preload("res://game/presentation/office_floor/darkness_portals.
 const DOOR_LINKS := preload("res://game/presentation/office_floor/public/door_darkness_links.gd")
 const FADE_SPEED := 5.0
 const PORTAL_REFRESH := 0.25
-const LINKS_REFRESH := 1.0
+const LINKS_REFRESH := 0.25
 
 @onready var overlay: MeshInstance3D = $Overlay
 var _revealed := false
