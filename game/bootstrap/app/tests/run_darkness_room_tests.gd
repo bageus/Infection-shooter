@@ -96,6 +96,20 @@ func _run() -> void:
 	_expect(DOOR_LINKS.is_valid_record(record) and record["auto"] == true, "An auto record round-trips as valid")
 	_expect(not DOOR_LINKS.is_valid_record({"rooms": [0], "auto": false}), "Validator rejects a non-positive room id")
 	_expect(not DOOR_LINKS.is_valid_record({"rooms": [3], "auto": "yes"}), "Validator rejects a non-bool auto flag")
+	# An enemy inside a covered room is hidden whole, and shown again when it leaves or the cover lifts.
+	var enemy := Node3D.new()
+	enemy.add_to_group("infected_alive")
+	enemy.position = Vector3(0.0, 0.0, 0.0)
+	root.add_child(enemy)
+	first._update_hidden_enemies(true)
+	_expect(not enemy.visible, "An enemy inside a covered room is hidden")
+	enemy.position = Vector3(30.0, 0.0, 30.0)
+	first._update_hidden_enemies(true)
+	_expect(enemy.visible, "An enemy that left the covered room is shown")
+	enemy.position = Vector3.ZERO
+	first._update_hidden_enemies(true)
+	first._update_hidden_enemies(false)
+	_expect(enemy.visible, "A lifted cover shows its enemies again")
 	print("Darkness room tests: %d failure(s)." % failures)
 	quit(failures)
 

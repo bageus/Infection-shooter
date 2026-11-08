@@ -40,6 +40,10 @@ static var _room_open: Dictionary = {}
 # Glass panes stay see-through after they break, so they are remembered once found.
 var _glass_portals: Dictionary = {}
 var _fog_enabled := true
+# Enemies this zone hid while its cover is up: an arm leaning through a thin wall must not show in the lit room.
+var _hidden_enemies: Array[Node3D] = []
+var _hide_timer := 0.0
+const ENEMY_HIDE_INTERVAL := 0.2
 
 func _ready() -> void:
 	add_to_group("darkness_zone")
@@ -63,6 +67,10 @@ func _process(delta: float) -> void:
 		if _player == null:
 			_player = get_tree().get_first_node_in_group("player") as Node3D
 		var target := 0.0 if _player_inside() or _room_has_open_door() else 1.0
+		_hide_timer -= delta
+		if _hide_timer <= 0.0:
+			_hide_timer = ENEMY_HIDE_INTERVAL
+			_update_hidden_enemies(target > 0.0 and _fade > 0.5 and _glass_portals.is_empty())
 		# A settled cover (fully up or fully lifted) needs no per-frame writes, which is most rooms most of the time.
 		# A covered room still re-reads its portals now and then, since doors and glass can appear after it loads.
 		if _fade == target and _settled == target:
@@ -96,6 +104,24 @@ func _process(delta: float) -> void:
 			if is_instance_valid(door) and door.has_method("is_open_for_exploration") and bool(door.call("is_open_for_exploration")):
 				reveal()
 				return
+
+## While the cover is up, enemies standing inside the room are hidden whole, so no limb shows past the wall.
+func _update_hidden_enemies(covered: bool) -> void:
+	var keep: Array[Node3D] = []
+	if covered:
+		for enemy: Node in get_tree().get_nodes_in_group("infected_alive"):
+			var body := enemy as Node3D
+			if body != null and body.visible and _edge_distance(body.global_position) <= 0.0:
+				body.visible = false
+				keep.append(body)
+		for body in _hidden_enemies:
+			if is_instance_valid(body) and not body.visible and _edge_distance(body.global_position) <= 0.0:
+				keep.append(body)
+	for body in _hidden_enemies:
+		if is_instance_valid(body) and not keep.has(body):
+			body.visible = true
+	_hidden_enemies = keep
+
 
 ## Rendering permission from bootstrap; authored zones and exploration stay intact.
 func set_fog_of_war_enabled(enabled: bool) -> void:
