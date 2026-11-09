@@ -5,6 +5,10 @@ var failures := 0
 
 
 func _initialize() -> void:
+	call_deferred("_run")
+
+
+func _run() -> void:
 	var scene := Node3D.new()
 	root.add_child(scene)
 	var host_script := GDScript.new()
