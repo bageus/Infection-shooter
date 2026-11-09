@@ -35,6 +35,7 @@ var _camera: Camera3D
 var _has_camera := false
 var _timer: Timer
 var _floor_bake: Node3D
+var _last_reason := ""
 
 
 func _ready() -> void:
@@ -64,8 +65,10 @@ func submit(definition: Dictionary, surface: Dictionary) -> void:
 
 func schedule_pool(death_id: int, definition: Dictionary, surface: Dictionary, delay: float) -> void:
 	if _death_ids.has(death_id):
+		_log("pool skipped: death %d already has one" % death_id)
 		return
 	_death_ids[death_id] = true
+	_log("pool scheduled: death %d delay %.2f paused %s timer %s" % [death_id, delay, get_tree().paused, _timer != null and not _timer.is_stopped()])
 	if not definition.is_empty() and not surface.is_empty():
 		if get_tree().paused:
 			# Game-over freezes simulation; still show the already reported death.
@@ -85,10 +88,12 @@ func _admit(definition: Dictionary, surface: Dictionary, evict: bool = true) -> 
 	var key := body.get_instance_id()
 	var state: Dictionary = _surfaces[key] if _surfaces.has(key) else {"count": 0, "fading": 0, "active": FIFO.new()}
 	if per_surface_limit > 0 and state["count"] >= per_surface_limit:
+		_last_reason = "surface limit %d" % per_surface_limit
 		if evict and state["active"].first >= 0 and state["fading"] == 0:
 			_retire(state["active"].first)
 		return false
 	if _records.size() >= maxi(max_marks, 1):
+		_last_reason = "budget full %d/%d" % [_records.size(), max_marks]
 		if evict and _active.first >= 0 and _fading < mini(8, _pending.size() + 1):
 			_retire(_active.first)
 		return false
@@ -99,11 +104,13 @@ func _admit(definition: Dictionary, surface: Dictionary, evict: bool = true) -> 
 		render_definition["basis"] = (body.global_basis * render_definition["local_basis"]).orthonormalized()
 	if not mark.call("configure", hit, render_definition, settings):
 		# An unsupported projection is not a rendered mark and consumes no budget.
+		_log("not drawn: projection gave no geometry at %s on %s" % [hit["position"], body.name])
 		mark.free()
 		return true
 	_next_id += 1
 	var expires := _clock + lifetime if lifetime > 0.0 else INF
 	_records[_next_id] = {"mark": weakref(mark), "key": key, "expires": expires, "fading": false, "definition": definition, "surface": surface, "position": hit["position"]}
+	_log_mark(mark, hit, definition)
 	state["count"] += 1
 	state["active"].append(_next_id)
 	_surfaces[key] = state
@@ -117,6 +124,7 @@ func _maintenance() -> void:
 	_read_camera()
 	for request in _deaths.duplicate():
 		if request["due"] <= _clock:
+			_log("pool due: submitting")
 			submit(request["definition"], request["surface"])
 			_deaths.erase(request)
 	for id in _records.keys():
@@ -251,3 +259,27 @@ func clear_marks() -> void:
 
 func statistics() -> Dictionary:
 	return {"marks": _records.size(), "pending": _pending.size(), "pending_pools": _deaths.size(), "dormant": _dormant.size(), "baked": _floor_bake.call("statistics") if _floor_bake != null else {}}
+
+
+# F3 / console diagnostics (debug builds only): why a blood mark was or was not drawn.
+func _log(message: String) -> void:
+	if OS.is_debug_build():
+		print("[Blood] t=%.1f %s" % [Time.get_ticks_msec() * 0.001, message])
+
+
+func _log_mark(mark: Node3D, hit: Dictionary, definition: Dictionary) -> void:
+	if not OS.is_debug_build():
+		return
+	var camera := get_viewport().get_camera_3d() if is_inside_tree() else null
+	var position: Vector3 = hit["position"]
+	var pieces: Array = mark.get("_projected")
+	var shown := 0
+	for piece in pieces:
+		var node := (piece as WeakRef).get_ref() as Node3D
+		if node != null and node.is_visible_in_tree():
+			shown += 1
+	_log("mark %s at %s on %s | footprint %s | decal %s pieces %d visible %d | in tree %s | camera dist %s on screen %s | records %d" % [
+		definition.get("category", "?"), position, (hit["collider"] as Node).name, definition["footprint"],
+		mark.get("_decal") != null, pieces.size(), shown, mark.is_inside_tree(),
+		"%.1f" % camera.global_position.distance_to(position) if camera != null else "no camera",
+		camera != null and camera.is_position_in_frustum(position), _records.size() + 1])

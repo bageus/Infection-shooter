@@ -184,6 +184,7 @@ func _queue_effect(method: String, arguments: Array) -> void:
 	_counts["requests"] += 1
 	if _effect_requests.size() >= 64:
 		_counts["dropped"] += 1
+		_budget.call("_log", "request dropped: queue full (%s)" % method)
 		# Preserve one-off deaths; discard excess transient hit/trail work.
 		if method != "_emit_death_pool":
 			return
@@ -207,6 +208,7 @@ func _emit_splatter_hit(point: Vector3, direction: Vector3, weapon: String, excl
 	var now := Time.get_ticks_msec() * 0.001
 	if now - float(_hit_times.get(source_id, -10.0)) < hit_interval:
 		return
+	_budget.call("_log", "hit by %s at %s" % [weapon, point])
 	_hit_times[source_id] = now
 	if _hit_times.size() > 256:
 		for id in _hit_times.keys():
@@ -292,9 +294,11 @@ func _submit(category: String, surface: Dictionary, direction: Vector3, sizes: V
 func _definition(category: String, surface: Dictionary, direction: Vector3, sizes: Vector2, directed: bool, heavy: bool = false) -> Dictionary:
 	var hit := SURFACES.resolve(surface)
 	if hit.is_empty():
+		_budget.call("_log", "%s: no surface under the hit" % category)
 		return {}
 	var entry: Dictionary = _library.choose(category)
 	if entry.is_empty():
+		_budget.call("_log", "%s: texture library has no frames" % category)
 		return {}
 	var length := randf_range(sizes.x, sizes.y)
 	if heavy:
@@ -306,8 +310,9 @@ func _definition(category: String, surface: Dictionary, direction: Vector3, size
 	if not _decal and not is_instance_valid(_projection_pool):
 		footprint = _surfaces.call("fit_quad", surface, mark_basis, footprint)
 		if footprint == Vector2.ZERO:
+			_budget.call("_log", "%s: quad does not fit the surface" % category)
 			return {}
-	return {"texture": entry["texture"], "normal": entry.get("normal"), "footprint": footprint, "basis": mark_basis, "local_basis": (hit["collider"] as Node3D).global_basis.inverse() * mark_basis, "tint": Color(1.0, randf_range(0.90, 1.0), randf_range(0.90, 1.0), randf_range(0.96, 1.0))}
+	return {"category": category, "texture": entry["texture"], "normal": entry.get("normal"), "footprint": footprint, "basis": mark_basis, "local_basis": (hit["collider"] as Node3D).global_basis.inverse() * mark_basis, "tint": Color(1.0, randf_range(0.90, 1.0), randf_range(0.90, 1.0), randf_range(0.96, 1.0))}
 
 
 func clear_marks() -> void:
