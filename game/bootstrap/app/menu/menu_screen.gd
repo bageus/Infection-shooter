@@ -71,7 +71,7 @@ func _ready() -> void:
 	footer = STYLE.label("", 10)
 	add_child(footer)
 	keyboard = STYLE.label("", 10)
-	keyboard.add_theme_color_override("font_color", Color.BLACK)
+	keyboard.add_theme_color_override("font_color", Color("74262b"))
 	add_child(keyboard)
 	resized.connect(_layout)
 	visibility_changed.connect(_focus_first)
