@@ -17,6 +17,7 @@ const MEMORY_GUARD := preload("res://game/core/vfx/public/memory_guard.gd")
 const SETTLE_MAX_TICKS := 240
 const SETTLE_MAX_MSEC := 10000
 const SETTLE_AWAKE_LIMIT := 600
+const STATIC_MERGE := preload("res://game/bootstrap/app/planning_static_merge.gd")
 const PHYSICS := preload("res://game/bootstrap/app/planning_physics.gd")
 const PREFERENCES := preload("res://game/bootstrap/app/menu/menu_preferences.gd")
 const MAIN_PATH := "res://game/bootstrap/app/main.tscn"
@@ -253,6 +254,7 @@ func _log_begin() -> void:
 
 ## Chain travel: the player appears at the entry point that leads back to the previous map.
 func _enter_level(planner: Node) -> void:
+	STATIC_MERGE.merge(planner.get("objects").get("placed"), pending)
 	pending.set("current_level", _level_name)
 	if not _carry.is_empty():
 		pending.call("apply_carry", _carry)
