@@ -119,6 +119,11 @@ func configure_projection(anchor: Node3D) -> void:
 		_project_surface()
 
 
+const IDLE_FRAMES := 8
+const IDLE_STRIDE := 4
+var _idle_frames := 0
+
+
 func _process(_delta: float) -> void:
 	if _anchor == null:
 		# Mass lying on the floor: fitted to the level and the walls round it.
@@ -128,6 +133,9 @@ func _process(_delta: float) -> void:
 			set_process(false)
 		return
 	var anchor := _anchor.get_ref() as Node3D if _anchor != null else null
+	# A decal on a prop that has not moved for a while only re-checks every 4th frame (spread by id).
+	if _idle_frames > IDLE_FRAMES and anchor != null and anchor.global_transform.is_equal_approx(_last_anchor_transform) and global_transform == _last_decal_transform and (Engine.get_process_frames() + get_instance_id()) % IDLE_STRIDE != 0:
+		return
 	var anchor_visible := anchor != null and anchor.is_visible_in_tree()
 	if anchor_visible:
 		_anchor_seen = true
@@ -141,6 +149,7 @@ func _process(_delta: float) -> void:
 		return
 	var anchor_transform := anchor.global_transform
 	var decal_transform := global_transform
+	_idle_frames = _idle_frames + 1 if anchor_transform.is_equal_approx(_last_anchor_transform) and decal_transform == _last_decal_transform else 0
 	if not anchor_transform.is_equal_approx(_last_anchor_transform):
 		decal_transform = anchor_transform * _anchor_transform
 		global_transform = decal_transform
