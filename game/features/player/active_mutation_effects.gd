@@ -173,7 +173,9 @@ func _strike_objects(forward: Vector3, damage: float) -> void:
 static func _strikeable(body: Node3D) -> bool:
 	if body is CharacterBody3D or not body.has_method("take_melee_hit"):
 		return false
-	return not (body.is_in_group("infected") or body.is_in_group("player") or body.is_in_group("contactless_debris"))
+	# Corpse hit volumes belong to enemies the blow already damaged; hitting them again
+	# severs the limbs of every body in reach, a half-second stall.
+	return not (body.is_in_group("infected") or body.is_in_group("player") or body.is_in_group("contactless_debris") or body.is_in_group("corpse_hitbox"))
 
 
 func _dash() -> void:
