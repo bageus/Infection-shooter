@@ -131,6 +131,12 @@ func set_gas_mask_worn(worn: bool) -> void:
 	gas_mask_worn_remaining = GAS_MASK_WEAR_DURATION if worn else 0.0
 
 
+## Level start: the mask is off and no cooldown runs.
+func reset_gas_mask() -> void:
+	set_gas_mask_worn(false)
+	gas_mask_cooldown_remaining = 0.0
+
+
 func tick(delta_seconds: float) -> void:
 	gas_mask_cooldown_remaining = maxf(0.0, gas_mask_cooldown_remaining - maxf(delta_seconds, 0.0))
 	if gas_mask_worn:

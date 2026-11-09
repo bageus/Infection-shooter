@@ -62,6 +62,14 @@ func is_gas_mask_worn() -> bool:
 	return _domain.gas_mask_worn
 
 
+## Level start: the mask comes off and its cooldown is cleared.
+func reset_gas_mask() -> void:
+	var was_worn: bool = _domain.gas_mask_worn
+	_domain.reset_gas_mask()
+	if was_worn:
+		gas_mask_changed.emit(false)
+
+
 ## Player action: wears the mask for 60 s, then a 120 s cooldown; false while worn or cooling down.
 func put_on_gas_mask() -> bool:
 	var put_on: bool = _domain.put_on_gas_mask()
