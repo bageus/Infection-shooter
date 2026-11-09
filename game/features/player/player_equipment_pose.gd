@@ -32,7 +32,10 @@ func _process_modification_with_delta(_delta: float) -> void:
 		return
 	var name_value: String = weapon.call("get_weapon_name")
 	backpack.visible = name_value == "MINIGUN"
-	if name_value not in ["AK", "M4", "SNIPER RIFLE", "MINIGUN"]:
+	var full_kit := name_value in ["AK", "M4", "SNIPER RIFLE", "MINIGUN"]
+	# Shotgun and launcher keep their clip pose for the rear hand; only the
+	# support hand is fitted to the forend.
+	if not full_kit and name_value not in ["SHOTGUN", "GRENADE LAUNCHER"]:
 		return
 	var skeleton := get_skeleton()
 	var socket_offset: Transform3D = mount.get("_socket_offset")
@@ -45,9 +48,10 @@ func _process_modification_with_delta(_delta: float) -> void:
 	# chest; the sniper's longer stock needs a little more clearance.
 	var rifle_depth := .17 if name_value == "SNIPER RIFLE" else .19
 	var rifle_side := .03 if name_value == "SNIPER RIFLE" else -.13
-	var target_right := MINIGUN_RIGHT_HAND if name_value == "MINIGUN" else Vector3(rifle_side, .43, rifle_depth)
-	_fit_arm(skeleton, "Right", target_right, Vector3(-.65, .15, .10))
-	_level_right_hand(skeleton)
+	if full_kit:
+		var target_right := MINIGUN_RIGHT_HAND if name_value == "MINIGUN" else Vector3(rifle_side, .43, rifle_depth)
+		_fit_arm(skeleton, "Right", target_right, Vector3(-.65, .15, .10))
+		_level_right_hand(skeleton)
 	mount.call("sync_weapon", weapon)
 	var left_grip := weapon.find_child("Grip_L", true, false) as Node3D
 	if left_grip != null:
