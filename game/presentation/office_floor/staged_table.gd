@@ -40,6 +40,9 @@ var _rest_transforms: Dictionary = {}
 var _broken_legs: Array[String] = []
 var _intact_health := 155.0
 var _part_health: Dictionary = {}
+const NUDGE_DISTANCE := 0.05
+var _nudge_tween: Tween
+var _rest_position := Vector3.ZERO
 
 
 func configure_glass_debris(floor_view: Node3D) -> void:
@@ -49,6 +52,8 @@ func configure_glass_debris(floor_view: Node3D) -> void:
 func take_projectile_hit(damage: float, hit_point: Vector3, _normal: Vector3, direction: Vector3, weapon: String) -> bool:
 	if not _started:
 		_intact_health -= BALANCE.object_damage(damage, weapon, "large")
+		if weapon == "MELEE" and _intact_health > 0.0:
+			_nudge(direction)
 		if _intact_health <= 0.0:
 			_floor_debris.emit(self, "07_table", "break", hit_point, direction)
 			_switch_to_modular()
@@ -57,6 +62,20 @@ func take_projectile_hit(damage: float, hit_point: Vector3, _normal: Vector3, di
 	else:
 		hit_piece(_part_at(hit_point), hit_point, direction, damage, weapon)
 	return true
+
+
+# An intact table is static, so a kick shows its inertia as a short slide that settles back.
+func _nudge(direction: Vector3) -> void:
+	var flat := Vector3(direction.x, 0.0, direction.z)
+	if flat.is_zero_approx():
+		return
+	if _nudge_tween != null and _nudge_tween.is_valid():
+		_nudge_tween.kill()
+	else:
+		_rest_position = position
+	_nudge_tween = create_tween()
+	_nudge_tween.tween_property(self, "position", _rest_position + flat.normalized() * NUDGE_DISTANCE, 0.08).set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_OUT)
+	_nudge_tween.tween_property(self, "position", _rest_position, 0.4).set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_IN_OUT)
 
 
 func take_melee_hit(damage: float, hit_point: Vector3, direction: Vector3) -> void:

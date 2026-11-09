@@ -22,7 +22,7 @@ const SFX := preload("res://game/core/audio/public/sound_events.gd")
 const KICK_WIDTH := 1.8
 const KICK_HEIGHT := 1.2
 ## Impulse (kg*m/s) behind a kick, split by the item's mass and capped in speed.
-const KICK_IMPULSE := 90.0
+const KICK_IMPULSE := 25.0 # heavy items move only a little; was 90, which sent a 27 kg cabinet at 3.3 m/s
 const KICK_MIN_SPEED := 1.5
 const KICK_MAX_SPEED := 8.0
 ## Metres a kick shoves an enemy it lands on.
@@ -150,8 +150,13 @@ func _clear_line(target: Node3D) -> bool:
 
 
 # A kick hits any prop the punch can hit (tables, nightstands, glass) and thuds; loose items also fly.
-func _kick_object(body: Node3D, forward: Vector3) -> void:
+func _kick_object(hit: Node3D, forward: Vector3) -> void:
 	var player: CharacterBody3D = _host.player
+	# An intact table's collider is a static child; the owning prop takes the hit, as bullets do.
+	var body := hit
+	var owner := body.get_parent() as Node3D
+	if not body.has_method("take_melee_hit") and owner != null and owner.has_method("take_melee_hit"):
+		body = owner
 	if body.has_method("take_melee_hit"):
 		body.call("take_melee_hit", KICK_OBJECT_DAMAGE, body.global_position, forward)
 		SFX.play(player, _hit_event(body), body.global_position)
