@@ -41,7 +41,12 @@ func setup(owner_body: CharacterBody3D, size: float) -> void:
 
 
 # Called every simulated tick while alive.
-func tick(delta: float, charging: bool, near_target: bool) -> void:
+# Beyond hearing range the clock runs every 16th frame, with 16 frames' delta.
+func tick(delta: float, charging: bool, near_target: bool, lod_offset := 0) -> void:
+	if not near_target:
+		if Engine.get_physics_frames() % 16 != lod_offset % 16:
+			return
+		delta *= 16.0
 	_pain_wait = maxf(0.0, _pain_wait - delta)
 	var moved := body.global_position - _last_position
 	_last_position = body.global_position

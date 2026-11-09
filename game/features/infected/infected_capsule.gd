@@ -14,6 +14,7 @@ const BODY_PARTS := preload("res://game/features/infected/body_parts.gd")
 const BLOOD_FX := preload("res://game/features/infected/blood_drip_fx.gd")
 const BLAST_DISMEMBER_DAMAGE := 60.0
 const AUDIO := preload("res://game/features/infected/infected_audio.gd")
+const SCREEN_REACH := preload("res://game/features/infected/enemy_screen_reach.gd")
 const DEATH_FALL := preload("res://game/features/infected/death_fall.gd")
 const DEATH_OBSTACLE := preload("res://game/features/infected/death_obstacle.gd")
 const DEATH_CLIP := preload("res://game/features/infected/death_clip.gd")
@@ -367,7 +368,8 @@ func _physics_process(delta: float) -> void:
 	if _target == null or not is_instance_valid(_target):
 		return
 	_senses.refresh_modes(self)
-	audio.tick(delta, _pace.charging, global_position.distance_squared_to(_target.global_position) < 576.0)
+	SCREEN_REACH.update(self, _animation, _sleeping_far)
+	audio.tick(delta, _pace.charging, global_position.distance_squared_to(_target.global_position) < 576.0, _lod_frame_offset)
 	if not _senses.is_chasing():
 		_unaware_tick(delta)
 		if not _senses.is_chasing():
@@ -381,10 +383,7 @@ func _physics_process(delta: float) -> void:
 	var physics_frame := Engine.get_physics_frames()
 
 	var far := distance_sq > sleep_distance * sleep_distance
-	if far != _sleeping_far:
-		_sleeping_far = far
-		if _animation != null:
-			_animation.call("set_active", not far)
+	_sleeping_far = far
 	if far and physics_frame % 12 != _lod_frame_offset:
 		return
 	# A far enemy ticks every 12th frame, so its clocks advance 12 frames' worth.

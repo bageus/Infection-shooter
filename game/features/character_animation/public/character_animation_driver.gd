@@ -270,6 +270,9 @@ func notify_hit(world_point: Vector3 = Vector3.ZERO, world_direction: Vector3 = 
 	_flinch_elapsed = 0.0
 
 
+func is_active() -> bool: return _active_requested
+
+
 # Public animation_events_v1: pause animation work for far or hidden characters.
 func set_active(active: bool) -> void:
 	_active_requested = active
