@@ -146,11 +146,13 @@ func _blood_motion_and_cost() -> void:
 	_expect(pool.calls == before, "Stationary blood reuses projected geometry")
 	print("BLOOD_IDLE_METRICS pieces=%d frames=60 callback_usec=%d projections=%d" % [COUNT, elapsed, pool.calls - before])
 	var piece: Node3D = pieces[0]
+	_expect(int(piece.get("_idle_frames")) > 8, "Blood on a stationary anchor counts idle frames")
 	var offset := anchor.global_transform.affine_inverse() * piece.global_transform
 	anchor.rotation.y = 0.4
 	anchor.position = Vector3(2, 0, 1)
 	piece.call("_process", 0.016)
 	_expect(piece.global_transform.is_equal_approx(anchor.global_transform * offset), "Blood follows a translated and rotated anchor")
+	_expect(int(piece.get("_idle_frames")) == 0, "Anchor movement ends the idle throttle at once")
 	piece.position += Vector3(0.3, 0, 0.2)
 	piece.call("_process", 0.016)
 	offset = anchor.global_transform.affine_inverse() * piece.global_transform
