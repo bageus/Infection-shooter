@@ -508,6 +508,7 @@ func _apply_damage(hit_position: Vector3, direction: Vector3) -> void:
 		_rebuild_shapes()
 		BREAK_SOUND.play(self, effects_root, model_path, get_projectile_material(), hit_position)
 	elif transition == PROP_DAMAGE.Transition.BREAK:
+		remove_from_group(&"hidden_outline") # A broken crate's debris is never outlined, even on the retained-part path below.
 		if _retained.detach(self, _geometry, hit_position, direction):
 			return
 		_floor_debris.emit(self, model_path, "break", hit_position, direction)
