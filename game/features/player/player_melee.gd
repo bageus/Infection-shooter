@@ -22,7 +22,7 @@ const SFX := preload("res://game/core/audio/public/sound_events.gd")
 const KICK_WIDTH := 1.8
 const KICK_HEIGHT := 1.2
 ## Impulse (kg*m/s) behind a kick, split by the item's mass and capped in speed.
-const KICK_IMPULSE := 90.0
+const KICK_IMPULSE := 25.0 # heavy items move only a little; was 90, which sent a 27 kg cabinet at 3.3 m/s
 const KICK_MIN_SPEED := 1.5
 const KICK_MAX_SPEED := 8.0
 ## Metres a kick shoves an enemy it lands on.
