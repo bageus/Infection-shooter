@@ -7,6 +7,7 @@ const SIZES_PATH := "res://game/bootstrap/app/prop_sizes.json"
 const MAX_SIZE_BY_LEVEL := [0.5, 0.25, 0.0]
 const GROUP := &"trim_decor"
 const META := &"trim_size"
+const LAYERS := &"trim_layers"
 const ENVIRONMENT_DIR := "/models/objects/enviroments/"
 static var _sizes: Dictionary = {}
 
@@ -34,7 +35,7 @@ static func tag(node: Node3D, record: Dictionary, scene_path: String) -> void:
 	if size < INF:
 		node.set_meta(META, size)
 		node.add_to_group(GROUP)
-		node.visible = size > _limit()
+		_show(node, size > _limit())
 
 
 ## Hides tagged decor that the current quality drops.
@@ -43,7 +44,22 @@ static func apply_live(tree: SceneTree) -> void:
 		return
 	var limit := _limit()
 	for node in tree.get_nodes_in_group(GROUP):
-		(node as Node3D).visible = float(node.get_meta(META, INF)) > limit
+		_show(node as Node3D, float(node.get_meta(META, INF)) > limit)
+
+
+## Hidden decor is also switched off: no scripts, no physics, no hits, so it costs nothing.
+static func _show(node: Node3D, shown: bool) -> void:
+	node.visible = shown
+	node.process_mode = Node.PROCESS_MODE_INHERIT if shown else Node.PROCESS_MODE_DISABLED
+	var bodies := node.find_children("*", "CollisionObject3D", true, false)
+	if node is CollisionObject3D:
+		bodies.append(node)
+	for body: CollisionObject3D in bodies:
+		if not body.has_meta(LAYERS):
+			body.set_meta(LAYERS, Vector2i(body.collision_layer, body.collision_mask))
+		var saved: Vector2i = body.get_meta(LAYERS)
+		body.collision_layer = saved.x if shown else 0
+		body.collision_mask = saved.y if shown else 0
 
 
 static func _limit() -> float:

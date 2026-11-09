@@ -26,12 +26,17 @@ func _initialize() -> void:
 	_check(not TRIM.drops({}, ENV + "99/unknown_model.glb", false), "A model missing from the size table stays")
 	var node := Node3D.new()
 	root.add_child(node)
+	var body := StaticBody3D.new()
+	body.collision_layer = 5
+	node.add_child(body)
 	await process_frame
 	TRIM.tag(node, {}, MOUSE)
 	_check(not node.visible, "Low hides tagged tiny decor on tagging")
+	_check(node.process_mode == Node.PROCESS_MODE_DISABLED and body.collision_layer == 0, "Hidden decor stops processing and hits")
 	QUALITY.set_level(QUALITY.HIGH)
 	TRIM.apply_live(self)
 	_check(node.visible, "High shows tagged decor again at once")
+	_check(node.process_mode == Node.PROCESS_MODE_INHERIT and body.collision_layer == 5, "Shown decor gets its processing and hits back")
 	QUALITY.set_level(QUALITY.MEDIUM)
 	TRIM.apply_live(self)
 	_check(not node.visible, "Medium hides it again at once")
