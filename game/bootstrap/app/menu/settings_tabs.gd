@@ -214,9 +214,8 @@ func _video() -> void:
 		occlusion.selected = dialog.view.preferences.values.occlusion_mode
 		occlusion.item_selected.connect(func(index: int) -> void: dialog.call("_change", "occlusion_mode", index))
 		dialog.call("_row", "occlusion", occlusion)
-	if web:
-		_blood_color()
-	else:
+	_blood_color()
+	if not web:
 		var blood_style := OptionButton.new()
 		blood_style.name = "BloodStyle"
 		blood_style.add_item(dialog.view.text("bloodStyleAssets"))
@@ -330,7 +329,7 @@ func _set_shadow_quality_enabled(slider: HSlider, name_label: Label, enabled: bo
 	name_label.modulate.a = 1.0 if enabled else .4
 
 
-## Blood level 0..3 (green, few, medium, maximum). Like shadow quality, the
+## Blood amount 0..2 (low, medium, maximum). The colour is a separate switch. Like shadow quality, the
 ## change is applied once the slider stops moving.
 func _blood_level() -> void:
 	var name_label := Label.new()
@@ -345,7 +344,7 @@ func _blood_level() -> void:
 	slider.step = 1
 	slider.tick_count = BLOOD_LEVEL.COUNT
 	slider.value = dialog.view.preferences.values.blood_level
-	slider.editable = not BLOOD_LEVEL.forced_green and not blood_locked()
+	slider.editable = not blood_locked()
 	slider.modulate.a = 1.0 if slider.editable else .4
 	if blood_locked():
 		slider.tooltip_text = dialog.view.text("bloodLockedHint")
@@ -404,15 +403,15 @@ func _audio() -> void:
 	dialog.call("_slider", "menuMusicVolume", "menu_music_volume", 0, 1, .05)
 
 
-## Web builds: blood is green or red, stored as the same blood_level the desktop slider uses.
+## Blood colour: green or red, on every platform. It is a separate switch from the amount.
 func _blood_color() -> void:
 	var color := OptionButton.new()
 	color.name = "BloodColor"
 	color.add_item(dialog.view.text("bloodColorGreen"))
 	color.add_item(dialog.view.text("bloodColorRed"))
-	color.selected = 0 if dialog.view.preferences.values.blood_level == BLOOD_LEVEL.GREEN else 1
-	color.item_selected.connect(func(index: int) -> void:
-		dialog.call("_change", "blood_level", BLOOD_LEVEL.GREEN if index == 0 else 2))
+	color.selected = 0 if dialog.view.preferences.values.blood_green else 1
+	color.disabled = BLOOD_LEVEL.forced_green
+	color.item_selected.connect(func(index: int) -> void: dialog.call("_change", "blood_green", index == 0))
 	_lock_blood(color)
 	dialog.call("_row", "bloodColor", color)
 

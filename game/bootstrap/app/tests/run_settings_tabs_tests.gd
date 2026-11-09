@@ -285,14 +285,17 @@ func _check_about(menu: Node) -> void:
 ## Web builds fix these values in code: checked on the pure rule, since headless tests run as desktop.
 func _web_rule_checks() -> void:
 	var values: Dictionary = PREFS.new().values.duplicate()
+	values.blood_green = true
 	values.blood_level = 0
 	PREFS.apply_web_rules(values)
 	_check(not values.shadows and not values.sunlight and values.lighting and values.mesh_lod and values.keep_corpses, "Web fixes shadows, sun, lights, mesh LOD and body budget")
 	_check(values.occlusion_mode == 0 and values.blood_style == 1, "Web uses silhouettes and procedural blood")
-	_check(values.blood_level == 0, "Web keeps green blood when chosen")
-	values.blood_level = 3
+	_check(values.blood_green, "Web keeps green blood when chosen")
+	_check(values.blood_level == PREFS.DEFAULTS.blood_level, "Web fixes the blood amount at medium")
+	values.blood_green = false
+	values.blood_level = 2
 	PREFS.apply_web_rules(values)
-	_check(values.blood_level == 2, "Web maps any non-green blood to red")
+	_check(not values.blood_green and values.blood_level == PREFS.DEFAULTS.blood_level, "Web keeps red blood when chosen, at the fixed amount")
 	values.test_mutagen = true
 	values.enemies_no_damage = true
 	values.walk_speed_multiplier = 1.3

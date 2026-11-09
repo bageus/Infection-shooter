@@ -138,7 +138,7 @@ func set_procedural_blood(enabled: bool) -> void:
 	_library.load_assets(texture_max_dimension, blood_brightness, enabled, color)
 
 
-# Settings: blood level 0 is green procedural blood; the others follow the style setting.
+# Settings: green blood is always procedural; red blood follows the style setting.
 func set_blood_level(level: int, procedural_style: bool) -> void:
 	BLOOD_LEVEL.set_level(level)
 	set_procedural_blood(procedural_style or BLOOD_LEVEL.is_green())

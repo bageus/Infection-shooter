@@ -1,5 +1,7 @@
 extends Node3D
 
+const EFFECTS_QUALITY := preload("res://game/core/vfx/public/effects_quality.gd")
+
 var collision_mask := 128
 var visual_mask := 128
 var floor_reach := 3.2
@@ -57,13 +59,21 @@ func _cast(start: Vector3, finish: Vector3, excluded: Array[RID], floor_only: bo
 			return {}
 		var collider := hit.get("collider") as PhysicsBody3D
 		var normal: Vector3 = hit["normal"]
-		if collider != null and not collider is CharacterBody3D and (not floor_only or normal.y > 0.3):
+		if collider != null and not collider is CharacterBody3D and (not floor_only or normal.y > 0.3) and not _blocked_prop(collider):
 			return _capture_hit(hit)
 		if collider == null:
 			return {}
 		skipped.append(collider.get_rid())
 		query.exclude = skipped
 	return {}
+
+
+## Low effects quality keeps blood off furniture and loose items: only walls and the floor take it.
+## Those props are the rigid bodies (or their collision children); walls and floors are static.
+static func _blocked_prop(collider: PhysicsBody3D) -> bool:
+	if EFFECTS_QUALITY.level != EFFECTS_QUALITY.LOW:
+		return false
+	return collider is RigidBody3D or collider.get_parent() is RigidBody3D
 
 
 func _capture_hit(hit: Dictionary) -> Dictionary:
