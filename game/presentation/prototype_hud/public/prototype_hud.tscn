@@ -251,10 +251,10 @@ theme_override_styles/normal = SubResource("KeyHintFrame")
 theme_override_styles/pressed = SubResource("KeyHintFilled")
 
 [node name="AntidoteCount" type="Label" parent="AntidotePanel"]
-offset_left = 48.0
-offset_top = 3.0
+offset_left = 30.0
+offset_top = 2.0
 offset_right = 68.0
-offset_bottom = 21.0
+offset_bottom = 20.0
 mouse_filter = 2
 text = "2"
 theme_override_colors/font_color = Color(0.8863, 0.8745, 0.8314, 1)
