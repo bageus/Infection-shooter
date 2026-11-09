@@ -11,6 +11,7 @@ var part: StringName
 func _ready() -> void:
 	collision_layer = HIT_LAYER
 	collision_mask = 0
+	add_to_group(&"corpse_hitbox")
 
 
 func take_projectile_hit(damage: float, hit_position: Vector3, _normal: Vector3, direction: Vector3, weapon: String) -> bool:

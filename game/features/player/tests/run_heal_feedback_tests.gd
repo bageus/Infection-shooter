@@ -33,6 +33,7 @@ func _run() -> void:
 	_expect(_numbers(feedback).is_empty(), "Full health shows no heal number.")
 	await _test_medkit_and_regen(player, feedback, events)
 	_test_bleeding_follows_damage(player)
+	await _test_idle_bleed(player)
 	_test_dna_burst(player, feedback)
 	stage.queue_free()
 	await process_frame
@@ -88,6 +89,29 @@ func _test_bleeding_follows_damage(player: Node3D) -> void:
 	_expect(not bool(player.call("is_wounded")), "Healing the damage stops the bleeding below the raised cap.")
 	player.set("max_health", float(player.get("max_health")) - 25.0)
 	player.call("heal", 1000.0)
+
+
+# Below half health a standing wounded player keeps dripping blood onto the
+# floor; at or above half, or once healed, nothing drips.
+func _test_idle_bleed(player: Node3D) -> void:
+	var drips: Array = []
+	var listener := func(_position: Vector3, _excluded: Array[RID]) -> void: drips.append(true)
+	player.connect("blood_wounded", listener)
+	player.call("heal", 1000.0)
+	player.set("armor", 0.0)
+	player.call("take_damage", 20.0)
+	drips.clear()
+	await create_timer(1.5).timeout
+	_expect(drips.is_empty(), "A wound above half health does not drip while standing.")
+	player.call("take_damage", 60.0)
+	drips.clear()
+	await create_timer(1.0).timeout
+	_expect(drips.size() >= 1 and drips.size() < 10, "A standing player below half health drips blood onto the floor.")
+	player.call("heal", 1000.0)
+	drips.clear()
+	await create_timer(1.0).timeout
+	_expect(drips.is_empty(), "Healing stops the idle drips.")
+	player.disconnect("blood_wounded", listener)
 
 
 func _test_dna_burst(player: Node, feedback: Node3D) -> void:

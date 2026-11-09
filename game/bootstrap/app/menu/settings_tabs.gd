@@ -223,6 +223,7 @@ func _video() -> void:
 		blood_style.add_item(dialog.view.text("bloodStyleProcedural"))
 		blood_style.selected = dialog.view.preferences.values.blood_style
 		blood_style.item_selected.connect(func(index: int) -> void: dialog.call("_change", "blood_style", index))
+		_lock_blood(blood_style)
 		dialog.call("_row", "bloodStyle", blood_style)
 		_blood_level()
 	_destruction_quality()
@@ -344,8 +345,10 @@ func _blood_level() -> void:
 	slider.step = 1
 	slider.tick_count = BLOOD_LEVEL.COUNT
 	slider.value = dialog.view.preferences.values.blood_level
-	slider.editable = not BLOOD_LEVEL.forced_green
-	slider.modulate.a = .4 if BLOOD_LEVEL.forced_green else 1.0
+	slider.editable = not BLOOD_LEVEL.forced_green and not blood_locked()
+	slider.modulate.a = 1.0 if slider.editable else .4
+	if blood_locked():
+		slider.tooltip_text = dialog.view.text("bloodLockedHint")
 	name_label.text = dialog.view.text("bloodLevel" + str(int(slider.value)))
 	var settle := Timer.new()
 	settle.one_shot = true
@@ -410,4 +413,20 @@ func _blood_color() -> void:
 	color.selected = 0 if dialog.view.preferences.values.blood_level == BLOOD_LEVEL.GREEN else 1
 	color.item_selected.connect(func(index: int) -> void:
 		dialog.call("_change", "blood_level", BLOOD_LEVEL.GREEN if index == 0 else 2))
+	_lock_blood(color)
 	dialog.call("_row", "bloodColor", color)
+
+
+## Release builds keep the blood choice fixed while a game runs; it changes in the menu before a game
+## starts. Debug builds can change it any time.
+func blood_locked() -> bool:
+	if OS.is_debug_build():
+		return false
+	var scene: Node = dialog.view.get_tree().current_scene
+	return scene != null and scene.has_method("set_blood_level")
+
+
+func _lock_blood(option: OptionButton) -> void:
+	if blood_locked():
+		option.disabled = true
+		option.tooltip_text = dialog.view.text("bloodLockedHint")
