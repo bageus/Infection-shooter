@@ -327,6 +327,8 @@ func _test_lowered_torso_not_twisted() -> void:
 		if modifier.get_script() != null and String(modifier.get_script().resource_path).ends_with("player_body_aim.gd"):
 			body_aim = modifier
 	_check(body_aim != null, "body aim modifier exists")
+	# Aim by hand: the frame loop sets the target on its own schedule, which made this test timing-dependent.
+	(player.get_node("WeaponMount") as MOUNT).aim_at(Vector3(8, 0, -4))
 	var before := skeleton.get_bone_pose_rotation(spine)
 	body_aim._process_modification_with_delta(0.0)
 	_check(before.angle_to(skeleton.get_bone_pose_rotation(spine)) < 0.0001, "lowered pistol does not twist the spine toward the cursor")

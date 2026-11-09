@@ -9,6 +9,7 @@ const ENEMY_DIFFICULTY := preload("res://game/features/infected/public/enemy_dif
 const ENEMY_TUNING := preload("res://game/features/infected/public/enemy_tuning.gd")
 const PLATFORM := preload("res://game/infrastructure/platform/public/platform.gd")
 const BLOOD_LEVEL := preload("res://game/core/vfx/public/blood_level.gd")
+const PROP_TRIM := preload("res://game/bootstrap/app/planning_prop_trim.gd")
 const EFFECTS_QUALITY := preload("res://game/core/vfx/public/effects_quality.gd")
 const DESTRUCTION_QUALITY := preload("res://game/core/vfx/public/destruction_quality.gd")
 ## Red blood on web: the red level the desktop slider starts on.
@@ -140,6 +141,7 @@ func apply_to_game(tree: SceneTree, display_user_action: bool = false) -> void:
 		AudioServer.set_bus_volume_db(menu_bus, linear_to_db(maxf(float(values.menu_music_volume), 0.0001)))
 		AudioServer.set_bus_mute(menu_bus, float(values.menu_music_volume) <= 0.0)
 	EFFECTS_QUALITY.set_level(int(values.effects_quality))
+	PROP_TRIM.apply_live(tree)
 	DESTRUCTION_QUALITY.set_level(int(values.destruction_quality))
 	var scene := tree.current_scene if tree != null else null
 	if scene != null and scene.has_method("refresh_control_labels"):
