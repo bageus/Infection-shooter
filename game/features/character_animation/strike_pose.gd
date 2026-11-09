@@ -30,6 +30,8 @@ const KICK_FOOT_TURN := [[0.0, Vector3(0, 0, 0)], [0.12, Vector3(45, 0, 0)], [0.
 ## Share of the capture's backward lean (turn about the skeleton's x axis) that is kept; the capture leans the
 ## body back ~35 degrees, which reads as sitting down once the standing leg stays upright.
 const KICK_LEAN_SCALE := 0.5
+## Degrees the whole raised kicking leg is lowered from the capture, in proportion to how far forward the thigh points.
+const KICK_LOWER_DEGREES := 20.0
 ## Bones that keep their skeleton-space orientation through a kick (the arms hold their pose).
 const KICK_HELD := ["LeftShoulder", "LeftArm", "LeftForeArm", "LeftHand", "RightShoulder", "RightArm", "RightForeArm", "RightHand"]
 const PUNCH_TRACKS := {
@@ -85,6 +87,14 @@ func stop() -> void:
 
 ## Direction `bone` points along at time share `t` of `kind`; zero for a bone the strike leaves alone.
 static func direction_at(kind: StringName, bone: String, t: float) -> Vector3:
+	var direction := _keyed_direction(kind, bone, t)
+	if kind != KICK or direction == Vector3.ZERO:
+		return direction
+	var forward := clampf(_keyed_direction(kind, "LeftUpLeg", t).z, 0.0, 1.0)
+	return Quaternion(Vector3.RIGHT, deg_to_rad(KICK_LOWER_DEGREES) * forward) * direction
+
+
+static func _keyed_direction(kind: StringName, bone: String, t: float) -> Vector3:
 	var tracks := _tracks(kind)
 	if not tracks.has(bone):
 		return Vector3.ZERO
