@@ -54,8 +54,10 @@ func configure(hit: Dictionary, definition: Dictionary, settings: Dictionary) ->
 		_material.roughness = 0.95
 		if settings["distance_fade"]:
 			_material.distance_fade_mode = BaseMaterial3D.DISTANCE_FADE_PIXEL_ALPHA
-			_material.distance_fade_min_distance = settings["fade_begin"]
-			_material.distance_fade_max_distance = settings["fade_begin"] + settings["fade_length"]
+			# max < min reverses the fade: opaque up to fade_begin, gone at fade_begin + fade_length.
+			# The other order hides every mark closer than fade_begin.
+			_material.distance_fade_min_distance = settings["fade_begin"] + settings["fade_length"]
+			_material.distance_fade_max_distance = settings["fade_begin"]
 		var reference: Variant = settings.get("projection_pool")
 		var pool: Node = reference.get_ref() if reference is WeakRef else null
 		if pool != null:
