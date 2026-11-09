@@ -271,3 +271,4 @@ game/presentation/office_floor/tests/run_water_puddle_shape_tests.gd
 game/features/player/tests/run_level_aim_tests.gd
 game/bootstrap/app/tests/run_prop_trim_tests.gd
 game/bootstrap/app/tests/run_static_merge_tests.gd
+game/bootstrap/app/tests/run_frame_spike_log_tests.gd
