@@ -34,7 +34,7 @@ var _settled := -1.0
 var _portal_timer := 0.0
 var _links_timer := 0.0
 # Per-frame room state shared by all zones, so the room checks are one pass per frame, not one per zone.
-static var _cache_frame := -1
+static var _cache_frame := -1000 # msec of the last room scan
 static var _room_distance: Dictionary = {}
 static var _room_open: Dictionary = {}
 # Glass panes stay see-through after they break, so they are remembered once found.
@@ -44,6 +44,7 @@ var _fog_enabled := true
 var _hidden_enemies: Array[Node3D] = []
 var _hide_timer := 0.0
 const ENEMY_HIDE_INTERVAL := 0.2
+const REFRESH_MSEC := 80
 
 func _ready() -> void:
 	add_to_group("darkness_zone")
@@ -111,7 +112,7 @@ func _update_hidden_enemies(covered: bool) -> void:
 	if covered:
 		for enemy: Node in get_tree().get_nodes_in_group("infected_alive"):
 			var body := enemy as Node3D
-			if body != null and body.visible and _edge_distance(body.global_position) <= 0.0:
+			if body != null and body.visible and _may_contain(body.global_position) and _edge_distance(body.global_position) <= 0.0:
 				body.visible = false
 				keep.append(body)
 		for body in _hidden_enemies:
@@ -122,6 +123,11 @@ func _update_hidden_enemies(covered: bool) -> void:
 			body.visible = true
 	_hidden_enemies = keep
 
+
+# Cheap circle test that skips the exact rectangle distance for enemies far from this zone.
+func _may_contain(point: Vector3) -> bool:
+	var reach := size.length() * 0.5
+	return Vector2(point.x - global_position.x, point.z - global_position.z).length_squared() <= reach * reach
 
 ## Rendering permission from bootstrap; authored zones and exploration stay intact.
 func set_fog_of_war_enabled(enabled: bool) -> void:
@@ -228,10 +234,11 @@ func _room_has_open_door() -> bool:
 
 
 func _refresh_rooms() -> void:
-	var frame := Engine.get_process_frames()
-	if frame == _cache_frame:
+	# One room scan serves every zone for REFRESH_MSEC: 180 zones re-scanning every frame cost ~1 ms.
+	var now := Time.get_ticks_msec()
+	if now - _cache_frame < REFRESH_MSEC:
 		return
-	_cache_frame = frame
+	_cache_frame = now
 	_room_distance.clear()
 	_room_open.clear()
 	var player_position := _player.global_position if _player != null else Vector3.ZERO
