@@ -28,8 +28,9 @@ func _initialize() -> void:
 func _run() -> void:
 	root.msaa_3d = Viewport.MSAA_DISABLED
 	_make_fixture()
+	var room := _room(7, Rect2(-5, -5, 10, 10))
 	await _settle()
-	_check(_shown(), "hidden crate near the hero in open space is outlined")
+	_check(_shown(), "hidden crate near the hero in the hero's room is outlined")
 	if DisplayServer.get_name() != "headless":
 		await RenderingServer.frame_post_draw
 		var image := root.get_texture().get_image()
@@ -38,20 +39,27 @@ func _run() -> void:
 		_check(not _is_yellow(centre), "outline leaves the item interior clear")
 		_check(_yellow_count(image, camera.unproject_position(item.global_position + Vector3.UP * 0.5)) > 20, "rim pixels are yellow")
 		await _hero_covers_outline()
+	room.free()
+	await _settle()
+	_check(not _shown(), "open space outside every room is not outlined")
+	room = _room(7, Rect2(-5, -5, 10, 10))
+	await _settle()
+	_check(_shown(), "outline returns in the hero's room")
 	item.position.x = 8.0
 	await _settle()
 	_check(not _shown(), "beyond 6 m nothing is outlined")
 	item.position.x = 1.5
 	var divider := _box_wall(Vector3(0.75, 1, 0), Vector3(0.2, 6, 2))
 	await _settle()
-	_check(not _shown(), "a wall between hero and item means another room")
+	_check(_shown(), "a wall inside the hero's room still outlines the hidden item")
 	divider.free()
 	await _settle()
-	_check(_shown(), "outline returns once the wall is gone")
+	_check(_shown(), "outline stays once the wall is gone")
 	wall.scene_file_path = "res://game/presentation/office_floor/public/structural/glass_wall_full.tscn"
 	await _settle()
 	_check(not _shown(), "a glass wall does not hide an item from the camera")
 	wall.scene_file_path = ""
+	room.free()
 	var room_a := _room(1, Rect2(-1, -2, 1.5, 4))
 	var room_b := _room(2, Rect2(0.8, -2, 4, 4))
 	await _settle()
@@ -132,9 +140,10 @@ func _door_check() -> void:
 	controller.add_to_group("interactive_doors")
 	door_root.add_child(controller)
 	await _settle()
+	var rooms := [_room(3, Rect2(-4, -2, 6, 2.3)), _room(4, Rect2(-4, 0.3, 6, 1.2)), _room(5, Rect2(-4, 1.5, 6, 1.4))]
+	await _settle()
 	var outline = effects.outlines.outlines.get(controller.get_instance_id())
 	_check(outline != null and outline.shown and not outline.copies.is_empty(), "a hidden door gets its leaf outlined")
-	var rooms := [_room(3, Rect2(-4, -2, 6, 2.3)), _room(4, Rect2(-4, 0.3, 6, 1.2)), _room(5, Rect2(-4, 1.5, 6, 1.4))]
 	await _settle()
 	_check(effects.outlines.outlines[controller.get_instance_id()].shown, "a door between two rooms outlines from either side")
 	hero.position.z = 2.0

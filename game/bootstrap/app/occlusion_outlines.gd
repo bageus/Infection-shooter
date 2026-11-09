@@ -9,8 +9,6 @@ const COVER := preload("res://game/bootstrap/app/occlusion_outline_cover.gdshade
 const RADIUS := 6.0
 const RELEASE_RADIUS := 6.5
 const INTERVAL := 0.15
-const SAME_SPACE_STOP := 0.4
-const CHEST := 0.9
 const DOORWAY := 0.6
 const DOOR_SIDE := 0.7
 var outlines: Dictionary = {}
@@ -85,7 +83,7 @@ func _flat_distance(a: Node3D, b: Node3D) -> float:
 	return delta.length()
 
 
-## Same room: equal fog-of-war room ids (the player's reach covers a doorway); outside any room, no wall at chest height.
+## Same room only: equal fog-of-war room ids (the player's reach covers a doorway). Outside any room nothing is outlined.
 func same_space(effects: Node, item: Node3D) -> bool:
 	var player_room := _room_of(effects, effects.player.global_position, DOORWAY)
 	# A door stands between two rooms: either side counts.
@@ -94,16 +92,8 @@ func same_space(effects: Node, item: Node3D) -> bool:
 		sides = [item.global_position + item.global_basis.z * DOOR_SIDE, item.global_position - item.global_basis.z * DOOR_SIDE]
 	if not sides.any(func(side: Vector3) -> bool: return _room_of(effects, side, 0.3) == player_room):
 		return false
-	if player_room > 0:
-		return true
-	var from: Vector3 = effects.player.global_position + Vector3.UP * CHEST
-	var to := Vector3(item.global_position.x, from.y, item.global_position.z)
-	var gap := to - from
-	if gap.length() <= SAME_SPACE_STOP:
-		return true
-	to = from + gap.normalized() * (gap.length() - SAME_SPACE_STOP)
-	rays_last_tick += 1
-	return not _hits_structure(effects, from, to, null)
+	# Outside every room there is no "same room": nothing is outlined there.
+	return player_room > 0
 
 
 func _room_of(effects: Node, point: Vector3, reach: float) -> int:
