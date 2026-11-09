@@ -18,16 +18,16 @@ static func merge(placed: Array, parent: Node3D) -> int:
 			continue
 		for found in (node as Node3D).find_children("*", "MeshInstance3D", true, false):
 			var mesh_node := found as MeshInstance3D
-			if mesh_node.mesh == null or mesh_node.skeleton != NodePath() or not _shown_in(mesh_node, node):
+			if mesh_node.mesh == null or mesh_node.skeleton != NodePath() or mesh_node.material_override != null or mesh_node.has_meta("planning_bounds_excluded") or not _shown_in(mesh_node, node):
 				continue
 			if absf(mesh_node.global_basis.determinant()) < 0.000001:
+				continue
+			if not _all_opaque(mesh_node):
 				continue
 			sources.append(mesh_node)
 			var cell := Vector2i(floori(mesh_node.global_position.x / CHUNK), floori(mesh_node.global_position.z / CHUNK))
 			for surface in mesh_node.mesh.get_surface_count():
 				var material := mesh_node.get_active_material(surface)
-				if material == null:
-					continue
 				var key := [cell, material.get_instance_id(), mesh_node.cast_shadow, mesh_node.layers]
 				if not batches.has(key):
 					batches[key] = {"material": material, "shadow": mesh_node.cast_shadow, "layers": mesh_node.layers, "items": []}
@@ -62,6 +62,15 @@ static func restore(tree: SceneTree) -> void:
 				source.visible = true
 		holder.queue_free()
 		holder.remove_from_group(GROUP)
+
+
+## Only plain opaque materials are merged: shaders, blending and script-driven overlays (wall base shadow strips) stay as they are.
+static func _all_opaque(mesh_node: MeshInstance3D) -> bool:
+	for surface in mesh_node.mesh.get_surface_count():
+		var material := mesh_node.get_active_material(surface) as BaseMaterial3D
+		if material == null or material.transparency != BaseMaterial3D.TRANSPARENCY_DISABLED:
+			return false
+	return true
 
 
 ## True when the mesh and every parent up to the placed node are visible (the whole level may still be hidden while loading).
