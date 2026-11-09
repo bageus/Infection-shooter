@@ -20,6 +20,7 @@ func _run() -> void:
 	_test_uzi_pistol_rounds()
 	await _test_player_wiring()
 	await _test_generic_fallback()
+	await _test_lowered_torso_not_twisted()
 	await process_frame
 	await process_frame
 	print("Weapon presentation tests: %d failures" % failures)
@@ -304,3 +305,33 @@ func _local_to(boundary: Node3D, marker: Node3D) -> Transform3D:
 			result = (node as Node3D).transform * result
 		node = node.get_parent()
 	return result
+
+
+# Lowered pistol hangs by the leg: the torso must not chase the cursor, otherwise the vest on the back stretches.
+func _test_lowered_torso_not_twisted() -> void:
+	var player := PLAYER.instantiate() as PLAYER_SCRIPT
+	player.set_physics_process(false)
+	root.add_child(player)
+	var effects := Node3D.new()
+	root.add_child(effects)
+	player.call("configure_world", effects, null)
+	player.weapon_stance.select_weapon(0)
+	player.weapon_stance.tick(25.0, false)
+	var skeleton := (player.get_node("WeaponMount") as MOUNT).skeleton
+	var spine := skeleton.find_bone("Spine")
+	player.set("_aim_point", Vector3(8, 0, -4))
+	await process_frame
+	await process_frame
+	var body_aim: SkeletonModifier3D
+	for modifier in skeleton.find_children("*", "SkeletonModifier3D", false, false):
+		if modifier.get_script() != null and String(modifier.get_script().resource_path).ends_with("player_body_aim.gd"):
+			body_aim = modifier
+	_check(body_aim != null, "body aim modifier exists")
+	var before := skeleton.get_bone_pose_rotation(spine)
+	body_aim._process_modification_with_delta(0.0)
+	_check(before.angle_to(skeleton.get_bone_pose_rotation(spine)) < 0.0001, "lowered pistol does not twist the spine toward the cursor")
+	player.weapon_stance.record_activity()
+	body_aim._process_modification_with_delta(0.0)
+	_check(before.angle_to(skeleton.get_bone_pose_rotation(spine)) > 0.05, "raised pistol still turns the torso to the cursor")
+	player.queue_free()
+	effects.queue_free()
