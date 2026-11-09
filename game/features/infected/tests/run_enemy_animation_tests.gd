@@ -69,6 +69,7 @@ func _run() -> void:
 	await _test_attack_misses_when_target_leaves(stage)
 	await _test_death_animation_then_sink(stage)
 	await _test_far_enemy_pauses_animation(stage)
+	await _test_offscreen_enemy_pauses_animation(stage)
 	await _test_colossus_slam(stage)
 	await _test_horde_ram(stage)
 	await _test_horde_summon(stage)
@@ -468,13 +469,35 @@ func _test_far_enemy_pauses_animation(stage: Node3D) -> void:
 	target.global_position = enemy.global_position + Vector3(60, 0, 0)
 	enemy.call("set_target", target)
 	var player := _player_of(enemy)
-	await physics_frame
-	await physics_frame
+	await _physics(8)
 	_expect(not player.active, "Far enemies stop animating.")
 	target.global_position = enemy.global_position + Vector3(6, 0, 0)
-	await physics_frame
-	await physics_frame
+	await _physics(8)
 	_expect(player.active, "Enemies animate again when the player approaches.")
+	enemy.queue_free()
+	target.queue_free()
+	await process_frame
+
+
+func _test_offscreen_enemy_pauses_animation(stage: Node3D) -> void:
+	var camera := Camera3D.new()
+	stage.add_child(camera)
+	camera.current = true
+	camera.global_position = Vector3(0, 10, 0)
+	camera.look_at(Vector3(0, 0, -10))
+	var enemy := await _spawn(stage, ZOMBIE, Vector3(-20, 1.5, 0))
+	var target := FakeTarget.new()
+	stage.add_child(target)
+	target.global_position = enemy.global_position + Vector3(8, 0, 0)
+	enemy.call("set_target", target)
+	var player := _player_of(enemy)
+	await _physics(12)
+	_expect(not player.active, "Enemies outside the camera frame stop animating.")
+	enemy.global_position = Vector3(0, 1.5, -10)
+	target.global_position = enemy.global_position + Vector3(8, 0, 0)
+	await _physics(12)
+	_expect(player.active, "Enemies in the frame animate.")
+	camera.queue_free()
 	enemy.queue_free()
 	target.queue_free()
 	await process_frame
