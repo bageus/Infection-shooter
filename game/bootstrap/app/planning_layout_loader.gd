@@ -161,9 +161,6 @@ func _stage(record: Dictionary, prepared: Dictionary) -> bool:
 		prepared.missing.append(record.scene)
 		prepared.unresolved.append(record.duplicate(true))
 		return true
-	if PROP_TRIM.drops(record, path, bool(session.get("active"))):
-		prepared.unresolved.append(record.duplicate(true))
-		return true
 	var started := Time.get_ticks_usec()
 	var node: Node3D = catalog._create_asset(path)
 	timings.instantiate_usec += Time.get_ticks_usec() - started
@@ -286,6 +283,8 @@ func _place(entry: Dictionary) -> void:
 		node.global_position.y = float(record.get("y", 1.0))
 		if node.has_method("watch_target"):
 			node.call("watch_target", session.main_player)
+	if not bool(session.get("active")):
+		PROP_TRIM.tag(node, record, scene_path)
 	objects.placed.append(node)
 
 
