@@ -27,6 +27,9 @@ const KICK_TRACKS := KICK_DATA.KICK_LEG
 ## Degrees (x) the kicking foot is turned about its shin towards the body's centre by time share: the
 ## foot comes round during the wind-up, before the leg thrusts out, and stays turned through the strike.
 const KICK_FOOT_TURN := [[0.0, Vector3(0, 0, 0)], [0.12, Vector3(45, 0, 0)], [0.3, Vector3(60, 0, 0)], [0.45, Vector3(40, 0, 0)], [1.0, Vector3(35, 0, 0)]]
+## Share of the capture's backward lean (turn about the skeleton's x axis) that is kept; the capture leans the
+## body back ~35 degrees, which reads as sitting down once the standing leg stays upright.
+const KICK_LEAN_SCALE := 0.5
 ## Bones that keep their skeleton-space orientation through a kick (the arms hold their pose).
 const KICK_HELD := ["LeftShoulder", "LeftArm", "LeftForeArm", "LeftHand", "RightShoulder", "RightArm", "RightForeArm", "RightHand"]
 const PUNCH_TRACKS := {
@@ -156,7 +159,9 @@ func _kick(skeleton: Skeleton3D, t: float, weight: float) -> void:
 	for bone_name: String in KICK_DATA.KICK_TORSO_TURNS:
 		var bone := skeleton.find_bone(bone_name)
 		if bone >= 0:
-			_rotate_bone(skeleton, bone, sample(KICK_DATA.KICK_TORSO_TURNS[bone_name], t) * weight)
+			var torso_turn := sample(KICK_DATA.KICK_TORSO_TURNS[bone_name], t) * weight
+			torso_turn.x *= KICK_LEAN_SCALE
+			_rotate_bone(skeleton, bone, torso_turn)
 	for bone_name: String in KICK_DATA.STAND_LEG:
 		var turn := sample(KICK_DATA.STAND_LEG[bone_name][1], t) * weight
 		var angle := turn.length()
