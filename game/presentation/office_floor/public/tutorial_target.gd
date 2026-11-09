@@ -65,9 +65,16 @@ static func configure(node: Node3D, enabled: bool) -> void:
 
 ## Maps baked before the flag was persistent still carry its meta: flag those objects again.
 static func adopt_baked(tree: SceneTree) -> void:
-	for node: Node in tree.root.find_children("*", "Node3D", true, false):
-		if node.has_meta(META) and not node.is_in_group(GROUP):
-			configure(node as Node3D, true)
+	_adopt_walk(tree.root)
+
+
+## Walks the tree without building a node array: find_children on a whole map allocated a huge array
+## every call and ran the engine out of memory (cowdata realloc errors, multi-second stalls).
+static func _adopt_walk(node: Node) -> void:
+	if node is Node3D and node.has_meta(META) and not node.is_in_group(GROUP):
+		configure(node as Node3D, true)
+	for child in node.get_children():
+		_adopt_walk(child)
 
 
 ## The tutorial calls this when a stage starts: flagged objects of these kinds show their markers.

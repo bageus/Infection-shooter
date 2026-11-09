@@ -108,7 +108,7 @@ func _process(delta: float) -> void:
 	_since_start += delta
 	_adopt_clock -= delta
 	if _adopt_clock <= 0.0 and _since_start < ADOPT_WINDOW:
-		_adopt_clock = 0.5
+		_adopt_clock = 2.0
 		TARGET.adopt_baked(get_tree())
 
 
