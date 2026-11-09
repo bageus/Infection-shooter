@@ -42,7 +42,10 @@ const ONE_SHOT_TOKENS := {
 const STRIKE_WINDUP := 0.35
 const MAX_ATTACK_SPEED := 2.2
 const FLINCH_SECONDS := 0.16
-const MOVING_ATTACKS := [&"attack", &"attack_left", &"attack_right"]
+const MOVING_ATTACKS := [&"attack", &"attack_left", &"attack_right", &"attack_crawl"]
+# A crawler that strikes while still dragging itself keeps this cycle on its legs.
+const CRAWL_LEGS := "Crawl"
+const STATE_ATTACK_CRAWL := &"attack_crawl"
 
 @export var character_path: NodePath = NodePath("..")
 @export var model_path: NodePath = NodePath("Body")
@@ -434,6 +437,8 @@ func _play_selected_clip(speed: float = 0.0) -> bool:
 func _update_attack_legs(speed: float) -> void:
 	var state := &"run" if speed > run_speed_threshold or _locomotion.get(&"walk", "").is_empty() else &"walk"
 	var clip: String = _transition_legs if not _transition_legs.is_empty() else _locomotion.get(state, "")
+	if _one_shot == STATE_ATTACK_CRAWL and animation_player.has_animation(CRAWL_LEGS):
+		clip = CRAWL_LEGS
 	var wanted := (_one_shot in MOVING_ATTACKS or not _transition_legs.is_empty()) and not _dead and leg_clips == null and not clip.is_empty()
 	if leg_overlay == null and wanted and speed > 0.15:
 		leg_overlay = LEG_OVERLAY.attach(animation_player.get_parent())

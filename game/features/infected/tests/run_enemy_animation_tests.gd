@@ -58,6 +58,7 @@ func _run() -> void:
 	await _test_one_shots(stage)
 	for path: String in HUMANOIDS:
 		await _test_attack_keeps_legs_moving(stage, load(path) as PackedScene, path.get_file())
+	await _test_crawl_attack_legs(stage)
 	await _test_dead_legs_stop(stage)
 	await _test_hunger_transition_legs(stage)
 	await _test_skinned_rig(stage)
@@ -280,6 +281,34 @@ func _test_attack_keeps_legs_moving(stage: Node3D, scene: PackedScene, label: St
 	enemy.velocity = Vector3.ZERO
 	await create_timer(0.3).timeout
 	_expect(overlay == null or not bool(overlay.call("is_following")), "%s legs are released after the attack." % label)
+	enemy.queue_free()
+	await process_frame
+
+
+# A crawling Hunger that strikes while still moving keeps its legs on the crawl cycle.
+func _test_crawl_attack_legs(stage: Node3D) -> void:
+	var enemy := await _spawn(stage, HUNGER)
+	var driver := enemy.get_node("AnimationDriver")
+	var skeleton := enemy.find_children("*", "Skeleton3D", true, false)[0] as Skeleton3D
+	var thigh := skeleton.find_bone("L_Thigh")
+	var length := float(driver.call("play_one_shot", &"attack_crawl"))
+	_expect(length > 0.0, "Hunger has a crawl attack.")
+	var angles := {}
+	for case in ["still", "moving"]:
+		driver.call("play_one_shot", &"attack_crawl")
+		var seen: Array[Quaternion] = []
+		for i in 12:
+			enemy.velocity = Vector3(0, 0, 0.0 if case == "still" else 1.5)
+			await process_frame
+			seen.append(skeleton.get_bone_pose_rotation(thigh))
+		angles[case] = seen
+		await create_timer(length + 0.3).timeout
+	var differs := 0
+	for i in 12:
+		if not (angles["still"][i] as Quaternion).is_equal_approx(angles["moving"][i]):
+			differs += 1
+	var overlay = driver.get("leg_overlay")
+	_expect(differs >= 6 and overlay != null, "A crawling attack keeps the legs on the crawl cycle while moving.")
 	enemy.queue_free()
 	await process_frame
 
