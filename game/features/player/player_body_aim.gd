@@ -26,6 +26,11 @@ func _process_modification_with_delta(_delta: float) -> void:
 	var weapon := mount.get("_active") as Node3D
 	if not target.is_finite() or not is_instance_valid(weapon):
 		return
+	# Lowered (idle): the pistol hangs by the leg, so its muzzle says nothing about the aim.
+	# Turning the spine to it only twists and stretches the vest on the back.
+	var held: Object = mount.get_parent().get("weapon_stance")
+	if held != null and int(held.get("stance")) == 0:
+		return
 	mount.set("_aim_modifying", true)
 	for iteration in 2:
 		mount.call("sync_weapon", weapon)
