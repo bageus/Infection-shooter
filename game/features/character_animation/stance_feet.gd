@@ -15,7 +15,9 @@ func _process_modification_with_delta(delta: float) -> void:
 	var leg := skeleton.find_bone("LeftLeg") if skeleton != null else -1
 	if foot < 0 or leg < 0 or player == null:
 		return
-	var idle := String(player.current_animation).begins_with("Idle")
+	var clip := String(player.current_animation)
+	# The lowered-pistol idle already has both feet straight; turning the left one bends the leg inward.
+	var idle := clip.begins_with("Idle") and not clip.begins_with("Idle_Pistol_Down")
 	_amount = move_toward(_amount, 1.0 if idle else 0.0, BLEND_PER_SECOND * delta)
 	if _amount <= 0.0:
 		return
