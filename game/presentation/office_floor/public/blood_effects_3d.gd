@@ -4,6 +4,7 @@ const LIBRARY := preload("res://game/presentation/office_floor/blood_texture_lib
 const SURFACES := preload("res://game/presentation/office_floor/blood_surface_query.gd")
 const EXIT_SPLATTER := preload("res://game/presentation/office_floor/blood_exit_splatter.gd")
 const BUDGET := preload("res://game/presentation/office_floor/blood_mark_budget.gd")
+const MARK := preload("res://game/presentation/office_floor/blood_mark_3d.gd")
 const BLOOD_LEVEL := preload("res://game/core/vfx/public/blood_level.gd")
 # Radians around the shot's flat direction: two near-forward rays and two sideways rays.
 const SIDE_SPLATTER_ANGLES := [-1.3, -0.6, 0.6, 1.3]
@@ -326,3 +327,10 @@ func statistics() -> Dictionary:
 	var result: Dictionary = _budget.call("statistics")
 	result.merge(_counts)
 	return result
+
+
+# Debug (F4): paint every mark magenta, then also draw it over everything, then back to normal.
+func cycle_debug() -> int:
+	MARK.debug_mode = (MARK.debug_mode + 1) % 3
+	_budget.call("apply_debug")
+	return MARK.debug_mode

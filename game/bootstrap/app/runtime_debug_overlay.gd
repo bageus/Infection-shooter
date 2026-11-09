@@ -33,6 +33,13 @@ func _unhandled_key_input(event: InputEvent) -> void:
 		get_viewport().set_input_as_handled()
 
 
+func _input(event: InputEvent) -> void:
+	if event is InputEventKey and event.pressed and not event.echo and event.keycode == KEY_F4:
+		var effects = get_parent().get("blood_effects")
+		if is_instance_valid(effects):
+			print("[Blood] F4 debug paint mode %d (0 off, 1 magenta unshaded, 2 magenta over everything)" % effects.call("cycle_debug"))
+
+
 func _process(delta: float) -> void:
 	_elapsed += delta
 	if _elapsed >= .25:
