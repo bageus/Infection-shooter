@@ -42,6 +42,7 @@ func _run() -> void:
 	_test_skill_branch_order_and_locked_prerequisites()
 	_test_gas_mask_blocks_mutagen()
 	_test_gas_mask_cooldown()
+	_test_gas_mask_resets_at_level_start()
 
 	if failures == 0:
 		print("T001 infection domain tests passed.")
@@ -251,6 +252,22 @@ func _test_gas_mask_cooldown() -> void:
 	_expect(not domain.put_on_gas_mask(), "The mask cannot go back on during the cooldown.")
 	domain.tick(1.0)
 	_expect(domain.put_on_gas_mask() and domain.gas_mask_worn, "After 120 s the mask can be put on again.")
+
+
+func _test_gas_mask_resets_at_level_start() -> void:
+	var domain = InfectionDomain.new()
+	domain.put_on_gas_mask()
+	domain.tick(60.0)
+	_expect(not domain.gas_mask_worn and domain.gas_mask_cooldown_remaining > 0.0, "Setup: the mask is off and cooling down.")
+	domain.reset_gas_mask()
+	_expect(not domain.gas_mask_worn, "A new level starts with the mask off.")
+	_expect_float(domain.gas_mask_worn_remaining, 0.0, "A new level clears the wear timer.")
+	_expect_float(domain.gas_mask_cooldown_remaining, 0.0, "A new level clears the mask cooldown.")
+	_expect(domain.put_on_gas_mask(), "The mask can be put on at once in a new level.")
+	domain.reset_gas_mask()
+	domain.put_on_gas_mask()
+	domain.reset_gas_mask()
+	_expect(not domain.gas_mask_worn and domain.gas_mask_cooldown_remaining == 0.0, "Resetting a worn mask also clears it.")
 
 
 func _test_cloud_rate_and_bounds() -> void:

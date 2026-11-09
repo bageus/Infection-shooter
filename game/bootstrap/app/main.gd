@@ -96,6 +96,7 @@ func _ready() -> void:
 	mutation_tree_ui = MUTATION_UI.new()
 	add_child(mutation_tree_ui)
 	infection_runtime.call("begin_control_level", progression_level_id)
+	infection_runtime.call("reset_gas_mask")
 	mutation_tree_ui.call("configure", infection_runtime)
 	if DisplayServer.get_name() != "headless": # lessons pause the game; automated runs skip them
 		tutorial = preload("res://game/bootstrap/app/tutorial/tutorial_director.gd").new()

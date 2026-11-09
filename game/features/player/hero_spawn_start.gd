@@ -8,5 +8,5 @@ static func apply(player: Node, hero: Dictionary) -> void:
 	player.import_loadout({"slots": hero.slots, "armor": player.max_armor * float(hero.armor), "ammo": hero.ammo})
 	var infection: Node = player.infection_runtime
 	infection.call("restore_critical_threshold", float(hero.threshold))
-	infection.call("set_gas_mask_worn", bool(hero.gas_mask))
+	# The gas mask is never on at level start (main.gd resets it), so the planner's gas mask setting is not applied.
 	# shortcut: no key item exists yet, so the key setting is saved but not applied.
