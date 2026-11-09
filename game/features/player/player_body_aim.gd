@@ -3,8 +3,8 @@ extends SkeletonModifier3D
 var mount: Node
 const BODY_TURN_RATE := 14.0
 const TORSO_PITCH_SHARE := 0.15
-## Shoulders pitched more than this drag the vest skin into a spike on the back (cursor at the feet).
-const MAX_PITCH := deg_to_rad(8.0)
+## Shoulders pitched down more than this drag the vest skin into a spike on the back (cursor at the feet).
+const MAX_PITCH := deg_to_rad(13.0)
 var _spine := -1
 var _shoulders: Array[int] = []
 
@@ -53,7 +53,8 @@ func _process_modification_with_delta(_delta: float) -> void:
 		var full := turn.get_rotation_quaternion()
 		var yaw := Quaternion(0.0, full.y, 0.0, full.w).normalized()
 		var pitch := full * yaw.inverse()
-		pitch = limit_pitch(pitch)
+		if destination.y < reference.y:
+			pitch = limit_pitch(pitch)
 		_rotate(skeleton, _spine, yaw * Quaternion.IDENTITY.slerp(pitch, TORSO_PITCH_SHARE))
 		var arms := Quaternion.IDENTITY.slerp(pitch, 1.0 - TORSO_PITCH_SHARE)
 		# One-handed: the free arm stays along the body instead of swinging with the aim.
