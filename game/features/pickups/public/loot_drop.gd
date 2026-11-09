@@ -7,8 +7,7 @@ const SCENES := DROP_TABLE.SCENES
 const BEACON := preload("res://game/features/pickups/public/pickup_beacon.gd")
 
 
-## Crate loot hovers above the debris with a gold beacon, so the pieces never hide it.
-const CRATE_LIFT := 0.6
+## Crate loot is marked with a gold beacon so debris does not hide it.
 const CRATE_BEACON_COLOR := Color(1.0, 0.82, 0.25)
 const CRATE_BEACON_GLOW := 0.45
 const CRATE_BEACON_ARROW_HEIGHT := 0.9
@@ -59,8 +58,6 @@ static func spawn(world: Node, ids: Array[String], at: Vector3, drop_weapon: Cal
 		item.global_position = spot
 		if crate:
 			item.add_child(BEACON.make(CRATE_BEACON_COLOR, CRATE_BEACON_GLOW, CRATE_BEACON_ARROW_HEIGHT, CRATE_BEACON_ENERGY))
-			if "lift" in item:
-				item.set("lift", CRATE_LIFT)
 		item.call("settle_on_floor")
 		# Authored loot stays until collected; enemy drops fade (drop_table.gd).
 		item.set_meta(&"persistent_loot", true)

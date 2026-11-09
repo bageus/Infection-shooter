@@ -4,11 +4,10 @@ extends Node3D
 
 const GLOW_TEXTURE_SIZE := 64
 const ARROW_BLINK_PERIOD := 0.8
-const ARROW_MIN_ALPHA := 0.55
 static var _glow_texture: GradientTexture2D
 
-var _arrow: Node3D
-var _arrow_material: StandardMaterial3D
+var _arrow: MeshInstance3D
+var _arrow_material: ShaderMaterial
 var _glow_material: StandardMaterial3D
 var _arrow_base := 1.3
 var _glow_energy := 1.0
@@ -39,32 +38,15 @@ func _build(color: Color, glow_radius: float, arrow_height: float, glow_energy: 
 	_add(quad).position.y = glow_radius * 0.3
 	if arrow_height > 0.0:
 		_arrow_base = arrow_height
-		_arrow = Node3D.new()
+		var arrow := QuadMesh.new()
+		arrow.size = Vector2(0.5, 0.7)
+		arrow.center_offset = Vector3(0.0, 0.35, 0.0) # tip at the node origin
+		_arrow = _add(arrow)
 		_arrow.position.y = arrow_height
-		add_child(_arrow)
-		_arrow_material = StandardMaterial3D.new()
-		_arrow_material.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
-		_arrow_material.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
-		_arrow_material.blend_mode = BaseMaterial3D.BLEND_MODE_ADD
-		_arrow_material.albedo_color = color
-		var head := CylinderMesh.new()
-		head.top_radius = 0.0
-		head.bottom_radius = 0.24
-		head.height = 0.36
-		head.radial_segments = 12
-		head.rings = 1
-		head.material = _arrow_material
-		var head_node := _add(head, _arrow)
-		head_node.rotation.x = PI
-		head_node.position.y = 0.0
-		var shaft := CylinderMesh.new()
-		shaft.top_radius = 0.08
-		shaft.bottom_radius = 0.08
-		shaft.height = 0.3
-		shaft.radial_segments = 12
-		shaft.rings = 1
-		shaft.material = _arrow_material
-		_add(shaft, _arrow).position.y = 0.33
+		_arrow_material = ShaderMaterial.new()
+		_arrow_material.shader = load("res://game/features/pickups/public/pickup_arrow.gdshader")
+		_arrow_material.set_shader_parameter("arrow_color", color)
+		_arrow.material_override = _arrow_material
 
 
 func _ready() -> void:
@@ -94,8 +76,8 @@ func _process(delta: float) -> void:
 	_glow_material.albedo_color.a = 0.55 * _glow_energy * pulse
 	if _arrow != null:
 		_arrow.position.y = _arrow_base + sin(_time * 3.4) * 0.14
-		# Smooth blink: eases between full and a visible floor, so the arrow never vanishes.
-		_arrow_material.albedo_color.a = lerpf(ARROW_MIN_ALPHA, 1.0, 0.5 + 0.5 * sin(_time * TAU / ARROW_BLINK_PERIOD))
+		# Smooth blink 0..1; the shader keeps a visible floor so the arrow never vanishes.
+		_arrow_material.set_shader_parameter("blink", 0.5 + 0.5 * sin(_time * TAU / ARROW_BLINK_PERIOD))
 
 
 ## Shows or hides the blinking arrow; a beacon built without one ignores the call.

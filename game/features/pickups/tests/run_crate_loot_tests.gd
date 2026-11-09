@@ -1,5 +1,5 @@
 extends SceneTree
-## Crate loot hovers above the debris and carries a beacon; drops from enemies stay as they were.
+## Crate loot carries a beacon and sits on the floor; drops from enemies stay as they were.
 const LOOT_DROP := preload("res://game/features/pickups/public/loot_drop.gd")
 const DROP_TABLE := preload("res://game/features/pickups/public/drop_table.gd")
 var failures := 0
@@ -41,10 +41,16 @@ func _run() -> void:
 	_expect(plain != null and crate != null, "Both drops spawn.")
 	if plain == null or crate == null:
 		return _finish()
-	var lift := crate.global_position.y - plain.global_position.y
-	_expect(is_equal_approx(lift, LOOT_DROP.CRATE_LIFT), "Crate loot hovers %.2f m above the floor drop (%.2f)." % [LOOT_DROP.CRATE_LIFT, lift])
+	_expect(is_equal_approx(crate.global_position.y, plain.global_position.y), "Crate loot rests on the floor like other drops.")
 	_expect(_has_beacon(crate), "Crate loot carries a beacon.")
 	_expect(not _has_beacon(plain), "Enemy and placed drops get no crate beacon.")
+	var beacon_script := load("res://game/features/pickups/public/pickup_beacon.gd")
+	var arrow_beacon: Node3D = beacon_script.make(Color.GREEN, 1.0, 1.0)
+	var no_arrow_beacon: Node3D = beacon_script.make(Color.GREEN, 1.0, 0.0)
+	_expect(arrow_beacon.get("_arrow") != null and arrow_beacon.get("_arrow").material_override is ShaderMaterial, "Beacon arrow is shader-drawn.")
+	_expect(no_arrow_beacon.get("_arrow") == null, "Beacon without arrow height has no arrow.")
+	arrow_beacon.free()
+	no_arrow_beacon.free()
 	for drop in [plain, crate]:
 		drop.queue_free()
 	stage.queue_free()
