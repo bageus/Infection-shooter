@@ -61,6 +61,7 @@ func _run() -> void:
 	_expect(not (first.get_node("Spores") as GPUParticles3D).emitting, "Spores stop as the cloud thins out.")
 	await create_timer(1.3).timeout
 	_expect(depleted[0] and not first.visible, "The death cloud dissipates and reports it.")
+	_expect(_units_ended[0] and not _units_cloud.visible, "An emptied cloud finishes dissipating and reports it.")
 	_expect(forever.visible, "The permanent cloud stays.")
 	stage.queue_free()
 	await process_frame
@@ -92,26 +93,30 @@ func _check_refused_mutagen_stays(stage: Node3D) -> void:
 	cloud.queue_free()
 
 
-# A cloud set to hold N units gives exactly N, then ends at once with nothing left to absorb.
+# A cloud set to hold N units gives exactly N, stops absorbing at once and then fades out gradually.
 func _check_absorb_units_are_exact(stage: Node3D) -> void:
-	var cloud := _spawn(stage, Vector3(50, 0, 0), 14.0)
-	cloud.set("ends_when_absorbed", true)
-	cloud.set("absorb_units", 5.0)
-	cloud.call("activate")
+	_units_cloud = _spawn(stage, Vector3(50, 0, 0), 2.0)
+	_units_cloud.set("ends_when_absorbed", true)
+	_units_cloud.set("absorb_units", 5.0)
+	_units_cloud.call("activate")
 	var body := Absorber.new()
 	stage.add_child(body)
-	var ended := [false]
-	cloud.connect("depleted", func() -> void: ended[0] = true)
+	_units_cloud.connect("depleted", func() -> void: _units_ended[0] = true)
 	for _step in 40:
-		cloud.call("_feed", body, 0.3)
-		if ended[0]:
-			break
-	var total := float(cloud.get("_absorbed_units"))
+		_units_cloud.call("_feed", body, 0.3)
+	var total := float(_units_cloud.get("_absorbed_units"))
 	_expect(is_equal_approx(total, 5.0), "A 5-unit cloud gives exactly 5 units (%.4f)." % total)
-	_expect(ended[0] and not cloud.visible, "An emptied cloud ends at once.")
-	_expect(bool(cloud.call("is_spent")), "An emptied cloud has nothing left to feed.")
+	_expect(bool(_units_cloud.call("is_spent")), "An emptied cloud has nothing left to feed.")
+	_expect(_units_cloud.visible and not _units_ended[0], "An emptied cloud fades out instead of vanishing at once.")
+	_units_taken = total
+	_units_cloud.call("_feed", body, 0.3)
+	_expect(is_equal_approx(float(_units_cloud.get("_absorbed_units")), _units_taken), "A faded cloud is not absorbed any further.")
 	body.queue_free()
-	cloud.queue_free()
+
+
+var _units_cloud: Area3D
+var _units_ended := [false]
+var _units_taken := 0.0
 
 
 class Visitor extends CharacterBody3D:
