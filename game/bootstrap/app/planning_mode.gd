@@ -109,6 +109,7 @@ func enter() -> void:
 	if not available:
 		return
 	active = true
+	preload("res://game/bootstrap/app/planning_static_merge.gd").restore(get_tree())
 	Engine.set_meta("planning_active", true)
 	_set_occlusion_enabled(false)
 	# The planner edits the authored map, not what the fight left of it.
