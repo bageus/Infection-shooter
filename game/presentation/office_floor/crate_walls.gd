@@ -38,7 +38,7 @@ static func spawn_pieces(host: RigidBody3D, visual: Node3D, hit_position: Vector
 	var index := 0
 	for child in visual.find_children("*", "MeshInstance3D", true, false):
 		var source := child as MeshInstance3D
-		if source == null or source.mesh == null or not source.is_visible_in_tree():
+		if source == null or source.mesh == null or source.has_meta("occlusion_copy") or not source.is_visible_in_tree():
 			continue
 		if not cut:
 			DAMAGE.spawn_piece(host, source, host, 0, index, direction, hit_position)

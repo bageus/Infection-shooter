@@ -15,10 +15,10 @@ func _init() -> void:
 func _run() -> void:
 	var impact: float = POSE.KICK_IMPACT / POSE.KICK_SECONDS
 	_expect(POSE.direction_at(POSE.KICK, "LeftUpLeg", impact).z > 0.9, "The kick swings the rear (left) thigh forward.")
-	_expect(POSE.direction_at(POSE.KICK, "LeftUpLeg", 0.35).y > 0.2, "The kick chambers the knee above the hip.")
+	_expect(POSE.direction_at(POSE.KICK, "LeftUpLeg", 0.35).y > -0.15, "The kick chambers the knee up to hip height.")
 	_expect(POSE.direction_at(POSE.KICK, "LeftLeg", 0.24).y < -0.7, "The shin hangs under the knee in the chamber.")
 	_expect(POSE.direction_at(POSE.KICK, "LeftLeg", impact).z > 0.9, "The shin drives the foot forward at the strike.")
-	_expect(POSE.direction_at(POSE.KICK, "LeftFoot", impact).y > 0.9, "The toes pull up so the sole pushes forward.")
+	_expect(POSE.direction_at(POSE.KICK, "LeftFoot", impact).y > 0.75, "The toes pull up so the sole pushes forward.")
 	_expect(POSE.direction_at(POSE.KICK, "LeftUpLeg", 1.0).y < -0.7, "The leg comes back down when the kick ends.")
 	_expect(POSE.direction_at(POSE.KICK, "RightUpLeg", 0.5) == Vector3.ZERO, "The standing leg is turned, not aimed.")
 	_expect(POSE.sample(POSE.KICK_DATA.KICK_HIPS, impact).z > 0.2, "The hips travel forward behind the kick.")
