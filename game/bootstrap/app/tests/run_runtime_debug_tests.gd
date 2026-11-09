@@ -7,9 +7,7 @@ func _initialize() -> void:
 	call_deferred("_run")
 
 func _run() -> void:
-	# Keep the full scene, live rendering and 96 movement frames (two thirds of a full
-	# sine sweep; software rendering of the full mission is ~0.7 s per frame).
-	# This suite checks state/material lifecycle, not pixel resolution.
+	# Full scene, live rendering and 96 movement frames; checks state/material lifecycle, not pixels.
 	root.size = Vector2i(320, 180)
 	root.msaa_3d = Viewport.MSAA_DISABLED
 	var had := FileAccess.file_exists(PREFS.FILE)
@@ -56,6 +54,7 @@ func _run() -> void:
 	key.keycode = KEY_F3
 	debug.call("_unhandled_key_input", key)
 	_check(debug.label.visible and debug.label.text.contains("Mutation"), "F3 shows runtime diagnostics")
+	_check_planner_cover(app, debug)
 	_check(float(runtime.call("get_mutation")) == mutation_before, "Diagnostics are read-only")
 	var mouse := InputEventMouseButton.new()
 	mouse.pressed = true
@@ -105,6 +104,15 @@ func _run() -> void:
 		DirAccess.remove_absolute(PREFS.FILE)
 	print("Runtime debug tests: %d failures" % failures)
 	quit(failures)
+
+
+func _check_planner_cover(app: Node, debug: Node) -> void:
+	app.planning_ui.show()
+	debug.call("_process", 0.0)
+	_check(not debug.label.visible, "Diagnostics stay hidden under the open planner panels")
+	app.planning_ui.hide()
+	debug.call("_process", 0.0)
+	_check(debug.label.visible, "Diagnostics return when the planner closes")
 
 func _check(condition: bool, message: String) -> void:
 	if not condition:

@@ -5,12 +5,15 @@ var occlusion: Node
 var label: Label
 const SPIKES := preload("res://game/bootstrap/app/frame_spike_log.gd")
 var spikes := SPIKES.new()
+var planning_ui: Control
+var _wanted := false
 var _elapsed := 0.0
 
 
 func setup(runtime: Node, effects: Node) -> void:
 	infection = runtime
 	occlusion = effects
+	planning_ui = get_parent().get_node_or_null("PlanningUI") as Control
 	layer = 90
 	process_mode = Node.PROCESS_MODE_ALWAYS
 	label = Label.new()
@@ -29,8 +32,9 @@ func setup(runtime: Node, effects: Node) -> void:
 
 func _unhandled_key_input(event: InputEvent) -> void:
 	if event is InputEventKey and event.pressed and not event.echo and event.keycode == KEY_F3:
-		label.visible = not label.visible
-		set_process(label.visible)
+		_wanted = not _wanted
+		set_process(_wanted)
+		_apply_visibility()
 		refresh()
 		get_viewport().set_input_as_handled()
 
@@ -44,10 +48,16 @@ func _input(event: InputEvent) -> void:
 
 func _process(delta: float) -> void:
 	spikes.tick(delta, get_tree())
+	_apply_visibility()
 	_elapsed += delta
 	if _elapsed >= .25:
 		_elapsed = 0.0
 		refresh()
+
+
+## The planner's panels are drawn under this label's layer, so the text is hidden while the planner is open.
+func _apply_visibility() -> void:
+	label.visible = _wanted and not (is_instance_valid(planning_ui) and planning_ui.visible)
 
 
 func refresh() -> void:
@@ -71,7 +81,7 @@ func _blood_line() -> String:
 
 
 func _control_loss_changed(active: bool) -> void:
-	if active and label.visible:
+	if active and _wanted:
 		print("Runtime debug: mutation control loss, mutation=%.2f threshold=%.2f" % [infection.call("get_mutation"), infection.call("get_critical_threshold")])
 
 
