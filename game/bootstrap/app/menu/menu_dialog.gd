@@ -218,7 +218,11 @@ func _scale_changed(index: int) -> void:
 
 
 func _defaults() -> void:
+	var blood := [view.preferences.values.blood_style, view.preferences.values.blood_level]
 	view.preferences.reset()
+	if settings != null and settings.blood_locked():
+		view.preferences.values.blood_style = blood[0]
+		view.preferences.values.blood_level = blood[1]
 	if view.preferences.save_settings() != OK:
 		settings.notices.set_notice(settings_tab, view.text("storeUnavailable"))
 	view.preferences.apply_to_game(view.get_tree())
