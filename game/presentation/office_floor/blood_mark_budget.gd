@@ -92,11 +92,14 @@ func _admit(definition: Dictionary, surface: Dictionary, evict: bool = true) -> 
 		if evict and state["active"].first >= 0 and state["fading"] == 0:
 			_retire(state["active"].first)
 		return false
-	if _records.size() >= maxi(max_marks, 1):
-		_last_reason = "budget full %d/%d" % [_records.size(), max_marks]
-		if evict and _active.first >= 0 and _fading < mini(8, _pending.size() + 1):
-			_retire(_active.first)
+	var limit := maxi(max_marks, 1)
+	# Fading marks no longer count: a full budget retires the oldest mark and draws the new one at once,
+	# so fresh blood is never held back or dropped behind old stains. The hard ceiling bounds the fade queue.
+	if _records.size() >= limit + maxi(limit / 4, 1):
+		_last_reason = "budget full %d/%d" % [_records.size(), limit]
 		return false
+	if _records.size() - _fading >= limit and evict and _active.first >= 0:
+		_retire(_active.first)
 	var mark := MARK.new() as Node3D
 	container.add_child(mark)
 	var render_definition := definition.duplicate()
