@@ -229,7 +229,9 @@ func _emit_side_splatters(point: Vector3, direction: Vector3, excluded: Array[RI
 	if flat.length_squared() < 0.0001:
 		return
 	flat = flat.normalized()
-	for angle in SIDE_SPLATTER_ANGLES:
+	var angles := SIDE_SPLATTER_ANGLES.duplicate()
+	angles.shuffle()
+	for angle in angles.slice(0, mini(BLOOD_LEVEL.scale_amount(angles.size()), angles.size())):
 		var side := flat.rotated(Vector3.UP, angle)
 		var surface: Dictionary = _surfaces.call("find_behind", point, side, excluded)
 		if not surface.is_empty():
@@ -238,7 +240,7 @@ func _emit_side_splatters(point: Vector3, direction: Vector3, excluded: Array[RI
 
 func _emit_severed_burst(point: Vector3, direction: Vector3, excluded: Array[RID]) -> void:
 	var flat := Vector3(direction.x, 0.0, direction.z)
-	for index in range(12):
+	for index in range(BLOOD_LEVEL.scale_amount(12)):
 		var spread := Vector3(randf_range(-0.9, 0.9), 0.0, randf_range(-0.9, 0.9)) + flat.normalized() * randf_range(0.2, 1.2)
 		var surface: Dictionary = _surfaces.call("find_floor", point + spread, excluded)
 		_submit("splatter", surface, spread if spread.length_squared() > 0.01 else flat, splatter_size * 1.8, true, true)
@@ -287,7 +289,7 @@ func _emit_death_pool(point: Vector3, excluded: Array[RID], death_id: int) -> vo
 func _submit(category: String, surface: Dictionary, direction: Vector3, sizes: Vector2, directed: bool = false, heavy: bool = false) -> void:
 	if surface.is_empty():
 		_counts["no_surface"] += 1
-	surface = _surfaces.call("jitter_surface", surface, 0.12 if category == "splatter" else 0.025)
+	surface = _surfaces.call("jitter_surface", surface, BLOOD_LEVEL.scale_spread(0.12) if category == "splatter" else 0.025)
 	var definition := _definition(category, surface, direction, sizes, directed, heavy)
 	_budget.call("submit", definition, surface)
 
@@ -301,7 +303,7 @@ func _definition(category: String, surface: Dictionary, direction: Vector3, size
 	if entry.is_empty():
 		_budget.call("_log", "%s: texture library has no frames" % category)
 		return {}
-	var length := randf_range(sizes.x, sizes.y)
+	var length := BLOOD_LEVEL.scale_size(randf_range(sizes.x, sizes.y))
 	if heavy:
 		length = maxf(length, sizes.y * 0.75)
 	var aspect: float = entry["aspect"]

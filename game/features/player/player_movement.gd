@@ -21,7 +21,7 @@ signal blast_stun_ended()
 @warning_ignore("unused_signal")
 signal healed(amount: float, source: StringName)
 var _antidote_action := preload("res://game/features/player/player_antidote.gd").new()
-
+var _idle_bleed := preload("res://game/features/player/player_idle_bleed.gd").new()
 const CONTROL_LOSS := preload("res://game/features/player/mutation_control_loss.gd")
 const MUTATION_EFFECTS := preload("res://game/features/player/mutation_skill_effects.gd")
 const SCOPE_RAISE := preload("res://game/features/player/scope_raise_state.gd")
@@ -158,7 +158,7 @@ func _physics_process(delta: float) -> void:
 	elif not input_locked:
 		_update_aim()
 	weapon_mount.call("aim_at", _aim_point)
-	_update_move(delta)
+	_update_move(delta); _idle_bleed.tick(self, delta)
 	var w:=get_current_weapon()
 	var fire_pressed := w != null and not input_locked and not Input.is_key_pressed(KEY_ALT) and not _mutation_menu_open and _roll_remaining <= 0.0 and (control_lost or (Input.is_action_pressed("fire") if bool(w.call("wants_continuous_fire")) else Input.is_action_just_pressed("fire")))
 	if w != null and _scope_raise.step(delta, _scope_magnification(w) > 1.0, fire_pressed and not control_lost):

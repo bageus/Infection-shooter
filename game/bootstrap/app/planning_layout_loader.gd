@@ -11,6 +11,11 @@ const BLOOD_PLACEMENT := preload("res://game/bootstrap/app/planning_blood_placem
 const MEMORY_GUARD := preload("res://game/core/vfx/public/memory_guard.gd")
 const PLAYER := "res://game/features/player/public/player.tscn"
 const PROP_TRIM := preload("res://game/bootstrap/app/planning_prop_trim.gd")
+# Deleted as unused in d288bda. Saved plans may still place them; keep those records without a missing-object warning.
+const RETIRED_MODELS := {
+	"res://models/objects/enviroments/11/11_deco_2.glb": true,
+	"res://models/objects/enviroments/11/11_deco_3.glb": true,
+}
 var _biomass_cache: Dictionary = {}
 var objects: Node
 var session: Variant
@@ -158,7 +163,8 @@ func _stage(record: Dictionary, prepared: Dictionary) -> bool:
 		prepared.player = record
 		return true
 	if path.is_empty() or not ResourceLoader.exists(path):
-		prepared.missing.append(record.scene)
+		if not RETIRED_MODELS.has(str(record.scene)):
+			prepared.missing.append(record.scene)
 		prepared.unresolved.append(record.duplicate(true))
 		return true
 	var started := Time.get_ticks_usec()

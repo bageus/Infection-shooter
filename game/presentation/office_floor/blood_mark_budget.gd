@@ -95,7 +95,7 @@ func _admit(definition: Dictionary, surface: Dictionary, evict: bool = true) -> 
 	var limit := maxi(max_marks, 1)
 	# Fading marks no longer count: a full budget retires the oldest mark and draws the new one at once,
 	# so fresh blood is never held back or dropped behind old stains. The hard ceiling bounds the fade queue.
-	if _records.size() >= limit + maxi(limit / 4, 1):
+	if _records.size() >= limit + maxi(int(limit * 0.25), 1):
 		_last_reason = "budget full %d/%d" % [_records.size(), limit]
 		return false
 	if _records.size() - _fading >= limit and evict and _active.first >= 0:
@@ -274,7 +274,7 @@ func _log_mark(mark: Node3D, hit: Dictionary, definition: Dictionary) -> void:
 	if not OS.is_debug_build():
 		return
 	var camera := get_viewport().get_camera_3d() if is_inside_tree() else null
-	var position: Vector3 = hit["position"]
+	var hit_point: Vector3 = hit["position"]
 	var pieces: Array = mark.get("_projected")
 	var shown := 0
 	for piece in pieces:
@@ -282,10 +282,10 @@ func _log_mark(mark: Node3D, hit: Dictionary, definition: Dictionary) -> void:
 		if node != null and node.is_visible_in_tree():
 			shown += 1
 	_log("mark %s at %s on %s | footprint %s | decal %s pieces %d visible %d | in tree %s | camera dist %s on screen %s | records %d" % [
-		definition.get("category", "?"), position, (hit["collider"] as Node).name, definition["footprint"],
+		definition.get("category", "?"), hit_point, (hit["collider"] as Node).name, definition["footprint"],
 		mark.get("_decal") != null, pieces.size(), shown, mark.is_inside_tree(),
-		"%.1f" % camera.global_position.distance_to(position) if camera != null else "no camera",
-		camera != null and camera.is_position_in_frustum(position), _records.size() + 1])
+		"%.1f" % camera.global_position.distance_to(hit_point) if camera != null else "no camera",
+		camera != null and camera.is_position_in_frustum(hit_point), _records.size() + 1])
 
 
 func apply_debug() -> void:
