@@ -20,6 +20,9 @@ func _initialize() -> void:
 	world.add_child(other)
 	placed.append(other)
 	await process_frame
+	for wall in placed.slice(0, 3):
+		for strip in wall.find_children("Strip*", "MeshInstance3D", true, false):
+			strip.set_meta("was_visible", strip.visible)
 	var originals: Array[MeshInstance3D] = []
 	var vertex_total := 0
 	for wall in placed.slice(0, 3):
@@ -41,6 +44,12 @@ func _initialize() -> void:
 	_check(merged_vertices == vertex_total, "no vertex lost (%d vs %d)" % [merged_vertices, vertex_total])
 	_check(holder.get_child_count() < originals.size(), "fewer meshes than before (%d vs %d)" % [holder.get_child_count(), originals.size()])
 	_check(box.position.x < 0.5 and box.end.x > 3.5, "merged meshes sit at the walls' world positions")
+	var strips := 0
+	for wall in placed.slice(0, 3):
+		for strip in wall.find_children("Strip*", "MeshInstance3D", true, false):
+			strips += 1
+			_check((strip as MeshInstance3D).visible == (strip as MeshInstance3D).get_meta("was_visible"), "wall base shadow strips are left alone")
+	_check(strips == 6, "each wall has its two shadow strips (%d)" % strips)
 	MERGE.restore(self)
 	await process_frame
 	_check(originals.all(func(m: MeshInstance3D) -> bool: return m.visible), "restore shows the originals again")
