@@ -46,7 +46,8 @@ func _run() -> void:
 	_expect(int(player.get("current_weapon_index")) == 0, "Manual spawn selects the first slot")
 	var infection: Node = stage.get("infection_runtime")
 	_expect(is_equal_approx(float(infection.get("_domain").critical_threshold), 55.0), "Manual spawn sets the mutagen threshold")
-	_expect(bool(infection.call("is_gas_mask_worn")), "Manual spawn sets the gas mask")
+	_expect(not bool(infection.call("is_gas_mask_worn")), "Manual spawn does not put the gas mask on at level start")
+	_expect(is_equal_approx(float(infection.call("gas_mask_timer_remaining")), 0.0), "Level start has no gas mask cooldown")
 
 	player.call("apply_hero_spawn", HERO.defaults())
 	_expect(is_equal_approx(float(player.get("health")), 40.0), "Automatic settings leave the start state alone")
