@@ -185,6 +185,11 @@ func _test_cached_updates(hud: Node, player: Node) -> void:
 	player.set("antidotes", int(player.get("max_antidotes")))
 	hud.call("_update_vitals")
 	_expect((hud.get("antidote_count") as Label).text == "MAX", "A full antidote stock shows MAX instead of the number")
+	var max_label := hud.get("antidote_count") as Label
+	var max_font := max_label.get_theme_font("font")
+	var max_width := max_font.get_string_size("MAX", HORIZONTAL_ALIGNMENT_LEFT, -1, max_label.get_theme_font_size("font_size")).x
+	_expect(max_width <= max_label.offset_right - max_label.offset_left, "MAX fits horizontally inside the antidote count box")
+	_expect(max_label.offset_top >= 0.0 and max_label.offset_bottom <= (hud.get("antidote_panel") as Panel).offset_bottom - (hud.get("antidote_panel") as Panel).offset_top, "MAX stays inside the antidote cell vertically")
 	player.set("antidotes", stock)
 	hud.call("_update_vitals")
 	_expect((hud.get("antidote_count") as Label).text == str(stock), "Below the cap the antidote count shows its number")

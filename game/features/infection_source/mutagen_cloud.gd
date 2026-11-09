@@ -167,8 +167,9 @@ func _feed(body: Node, step: float) -> void:
 		_absorbed_units += float(gained)
 		if capped > 0.0:
 			_units_per_second = float(gained) / capped
+		# The limit stops absorption at once; the cloud then thins out gradually instead of vanishing.
 		if _absorbed_units >= absorb_units - UNIT_EPSILON:
-			_finish()
+			_dissipate_early()
 	# Keep detecting presence until dissipation: a visitor may have Devourer
 	# even when this cloud was created before that skill became active.
 
