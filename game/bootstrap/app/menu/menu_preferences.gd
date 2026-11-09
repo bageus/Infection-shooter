@@ -12,8 +12,6 @@ const BLOOD_LEVEL := preload("res://game/core/vfx/public/blood_level.gd")
 const PROP_TRIM := preload("res://game/bootstrap/app/planning_prop_trim.gd")
 const EFFECTS_QUALITY := preload("res://game/core/vfx/public/effects_quality.gd")
 const DESTRUCTION_QUALITY := preload("res://game/core/vfx/public/destruction_quality.gd")
-## Red blood on web: the red level the desktop slider starts on.
-const WEB_RED_BLOOD := 2
 var bindings := BINDINGS.new()
 
 const FILE := "user://interface_settings.cfg"
@@ -21,7 +19,7 @@ const DEFAULTS := {"window_mode": 0, "resolution": "1280x720", "language": "ru",
 	"enemies_ignore_player": false, "enemies_no_damage": false, "enemy_difficulty": 1,
 	"walk_speed_multiplier": 1.0, "walk_animation_multiplier": 1.0,
 	"enemy_move_speed_multiplier": 1.0, "enemy_animation_multiplier": 1.0,
-	"volume": 0.4, "effects_volume": 1.0, "music_volume": 1.0, "menu_music_volume": 1.0, "occlusion_mode": 0, "test_mutagen": false, "infinite_antidotes": false, "lighting": true, "game_lights_only": false, "blood_style": 0, "blood_level": 2, "effects_quality": 2, "destruction_quality": 1,
+	"volume": 0.4, "effects_volume": 1.0, "music_volume": 1.0, "menu_music_volume": 1.0, "occlusion_mode": 0, "test_mutagen": false, "infinite_antidotes": false, "lighting": true, "game_lights_only": false, "blood_style": 0, "blood_level": 1, "blood_green": false, "effects_quality": 2, "destruction_quality": 1,
 	"bullet_impact_smoke": true, "sunlight": true, "shadows": true, "shadow_quality": 1, "mesh_lod": true, "keep_corpses": true, "floor_hints": true, "camera_shake": true, "post_fx": true}
 var values: Dictionary = DEFAULTS.duplicate()
 
@@ -31,10 +29,16 @@ func load_settings() -> void:
 	if config.load(FILE) != OK:
 		return
 	bindings.load_config(config)
+	var legacy_blood := not config.has_section_key("interface_v1", "blood_green")
 	for key in DEFAULTS:
 		var value: Variant = config.get_value("interface_v1", key, DEFAULTS[key])
 		if typeof(value) == typeof(DEFAULTS[key]):
 			values[key] = value
+	if legacy_blood:
+		# Older saves kept one list: 0 green, then red few, medium, maximum as 1..3.
+		var old_level := int(values.blood_level)
+		values.blood_green = old_level == 0
+		values.blood_level = BLOOD_LEVEL.MEDIUM if old_level == 0 else clampi(old_level - 1, BLOOD_LEVEL.LOW, BLOOD_LEVEL.COUNT - 1)
 	values.window_mode = clampi(values.window_mode, 0, 1)
 	if values.resolution != "auto" and DISPLAY.CATALOG.parse(values.resolution) == Vector2i.ZERO:
 		values.resolution = DISPLAY.CATALOG.DEFAULT
@@ -44,10 +48,11 @@ func load_settings() -> void:
 	values.enemy_difficulty = clampi(values.enemy_difficulty, ENEMY_DIFFICULTY.LOW, ENEMY_DIFFICULTY.HIGH)
 	values.blood_style = clampi(values.blood_style, 0, 1)
 	values.blood_level = clampi(values.blood_level, 0, BLOOD_LEVEL.COUNT - 1)
+	values.blood_green = bool(values.blood_green)
 	if PLATFORM.detect_id() == "yandex":
 		BLOOD_LEVEL.force_green()
 	if BLOOD_LEVEL.forced_green:
-		values.blood_level = BLOOD_LEVEL.GREEN
+		values.blood_green = true
 	values.effects_quality = clampi(values.effects_quality, 0, EFFECTS_QUALITY.COUNT - 1)
 	values.destruction_quality = clampi(values.destruction_quality, 0, DESTRUCTION_QUALITY.COUNT - 1)
 	values.walk_speed_multiplier = clampf(values.walk_speed_multiplier, 0.5, 1.5) if is_finite(values.walk_speed_multiplier) else 1.0
@@ -78,11 +83,12 @@ static func apply_web_rules(settings: Dictionary) -> void:
 	settings.keep_corpses = true
 	settings.effects_quality = DEFAULTS.effects_quality
 	settings.blood_style = 1
+	# The amount step is fixed on web; the colour switch stays.
+	settings.blood_level = DEFAULTS.blood_level
 	for key in ["enemies_ignore_player", "enemies_no_damage", "test_mutagen", "infinite_antidotes"]:
 		settings[key] = false
 	for key in ["walk_speed_multiplier", "walk_animation_multiplier", "enemy_move_speed_multiplier", "enemy_animation_multiplier"]:
 		settings[key] = 1.0
-	settings.blood_level = BLOOD_LEVEL.GREEN if int(settings.blood_level) == BLOOD_LEVEL.GREEN else WEB_RED_BLOOD
 
 
 ## The web (Compatibility) renderer ignores the Environment brightness adjustment, so the web
@@ -141,6 +147,7 @@ func apply_to_game(tree: SceneTree, display_user_action: bool = false) -> void:
 		AudioServer.set_bus_volume_db(menu_bus, linear_to_db(maxf(float(values.menu_music_volume), 0.0001)))
 		AudioServer.set_bus_mute(menu_bus, float(values.menu_music_volume) <= 0.0)
 	EFFECTS_QUALITY.set_level(int(values.effects_quality))
+	BLOOD_LEVEL.set_green(bool(values.blood_green))
 	PROP_TRIM.apply_live(tree)
 	DESTRUCTION_QUALITY.set_level(int(values.destruction_quality))
 	var scene := tree.current_scene if tree != null else null

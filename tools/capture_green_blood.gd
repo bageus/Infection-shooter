@@ -33,7 +33,7 @@ func _capture() -> void:
 	# The mission starts in an unrevealed fog zone; the capture is about blood, not exploration.
 	for zone in get_nodes_in_group("darkness_zone"):
 		zone.queue_free()
-	game.call("set_blood_level", 0, false)
+	game.call("set_blood_level", 1, false)
 	var player := game.get_node("Gameplay/Player") as Node3D
 	player.set("camera_max_distance", 9.0)
 	player.set("_camera_distance", 9.0)

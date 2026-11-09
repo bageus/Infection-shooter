@@ -7,6 +7,7 @@ var failures := 0
 
 
 func _init() -> void:
+	BLOOD_LEVEL.set_green(false)
 	BLOOD_LEVEL.set_level(2)
 	var red := SKIN.create_material(null)
 	if red.get_shader_parameter("blood_color") == BLOOD_LEVEL.GREEN_COLOR:
@@ -18,6 +19,7 @@ func _init() -> void:
 		failures += 1
 		push_error("FAIL: wounds are not green when green blood is forced")
 	BLOOD_LEVEL.forced_green = false
-	BLOOD_LEVEL.set_level(2)
+	BLOOD_LEVEL.set_green(false)
+	BLOOD_LEVEL.set_level(1)
 	print("Green wound tests: %d failures" % failures)
 	quit(failures)
