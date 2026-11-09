@@ -42,7 +42,8 @@ static func _collect(node: Node, meshes: Array[MeshInstance3D]) -> void:
 
 
 static func spawn_piece(host: Node3D, mesh: MeshInstance3D, owner: Node3D, stage: int, index: int, direction: Vector3, hit_point: Vector3, blast: bool = false, glass: bool = false, frame: Transform3D = Transform3D.IDENTITY, motion: RigidBody3D = null) -> RigidBody3D:
-	if not is_instance_valid(host.get("effects_root")):
+	# The yellow occlusion outline is a mesh child of the prop; breaking must not turn it into a lit fragment.
+	if mesh.has_meta("occlusion_copy") or not is_instance_valid(host.get("effects_root")):
 		return null
 	var world := frame * mesh.global_transform
 	var local_bounds := mesh.get_aabb()
