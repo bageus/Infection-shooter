@@ -286,3 +286,10 @@ func _log_mark(mark: Node3D, hit: Dictionary, definition: Dictionary) -> void:
 		mark.get("_decal") != null, pieces.size(), shown, mark.is_inside_tree(),
 		"%.1f" % camera.global_position.distance_to(position) if camera != null else "no camera",
 		camera != null and camera.is_position_in_frustum(position), _records.size() + 1])
+
+
+func apply_debug() -> void:
+	for record in _records.values():
+		var mark := (record["mark"] as WeakRef).get_ref() as Node
+		if mark != null:
+			mark.call("apply_debug")

@@ -9,6 +9,8 @@ var _growth: Tween
 var _fade: Tween
 var _depth := 0.08
 var _projected: Array[WeakRef] = []
+## Debug (F4): 0 normal, 1 unshaded magenta, 2 unshaded magenta drawn over everything.
+static var debug_mode := 0
 
 
 func _init() -> void:
@@ -82,6 +84,7 @@ func configure(hit: Dictionary, definition: Dictionary, settings: Dictionary) ->
 		else:
 			_set_opacity(.35)
 			_growth.tween_method(_set_opacity, .35, 1.0, duration)
+	apply_debug()
 	_anchor = RemoteTransform3D.new()
 	_anchor.set_meta("blood_effect", true)
 	_anchor.update_scale = false
@@ -89,6 +92,15 @@ func configure(hit: Dictionary, definition: Dictionary, settings: Dictionary) ->
 	_anchor.global_transform = global_transform
 	_anchor.remote_path = _anchor.get_path_to(self)
 	return true
+
+
+func apply_debug() -> void:
+	if _material == null or debug_mode == 0 and _material.shading_mode != BaseMaterial3D.SHADING_MODE_UNSHADED:
+		return
+	var on := debug_mode > 0
+	_material.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED if on else BaseMaterial3D.SHADING_MODE_PER_PIXEL
+	_material.no_depth_test = debug_mode == 2
+	_material.albedo_color = Color(1, 0, 1, _material.albedo_color.a) if on else Color(1, 0.95, 0.95, _material.albedo_color.a)
 
 
 func _set_dimensions(footprint: Vector2) -> void:
