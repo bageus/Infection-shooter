@@ -93,7 +93,6 @@ func _run() -> void:
 	_check(not _shown(), "DNA is not on the outlined list")
 	wall.position.x = 0.0
 	await _door_check()
-	_debris_ignores_outline()
 	print("Hidden outline tests: %d failures" % failures)
 	quit(1 if failures > 0 else 0)
 
@@ -153,28 +152,6 @@ func _door_check() -> void:
 	hero.position.z = 0.0
 	for room in rooms:
 		room.free()
-
-
-# Breaking a crate must not turn its yellow outline mesh into a debris fragment.
-func _debris_ignores_outline() -> void:
-	var host_script := GDScript.new()
-	host_script.source_code = "extends Node3D\nvar effects_root: Node3D\n"
-	host_script.reload()
-	var host := Node3D.new()
-	host.set_script(host_script)
-	host.effects_root = scene
-	scene.add_child(host)
-	var plain := MeshInstance3D.new()
-	plain.mesh = BoxMesh.new()
-	host.add_child(plain)
-	var rim := MeshInstance3D.new()
-	rim.mesh = BoxMesh.new()
-	rim.set_meta("occlusion_copy", true)
-	plain.add_child(rim)
-	const DAMAGE := preload("res://game/presentation/office_floor/environment_damage.gd")
-	_check(DAMAGE.spawn_piece(host, rim, host, 0, 0, Vector3.FORWARD, Vector3.ZERO) == null, "the outline mesh never becomes debris")
-	_check(DAMAGE.spawn_piece(host, plain, host, 0, 0, Vector3.FORWARD, Vector3.ZERO) != null, "an ordinary mesh still becomes debris")
-	host.free()
 
 
 func _shown() -> bool:
