@@ -20,6 +20,8 @@ const SUPPLY_BOX_VOLUME := 0.0501
 @export var weapon_names: PackedStringArray = PackedStringArray()
 @export_flags_3d_physics var floor_mask := 129
 @export_range(0.001, 0.05) var floor_clearance := 0.018
+## Extra height above the floor, set by spawners that must keep the item clear of debris (crate loot).
+var lift := 0.0
 var _consumed := false
 var _recheck := 0.0
 
@@ -79,7 +81,7 @@ func _physics_process(_delta: float) -> void:
 			return
 		var receiver := hit.get("collider") as PhysicsBody3D
 		if receiver != null and not receiver is CharacterBody3D and not receiver is RigidBody3D and (hit["normal"] as Vector3).y > 0.5:
-			global_position.y = (hit["position"] as Vector3).y + floor_clearance - _visual_bottom_offset()
+			global_position.y = (hit["position"] as Vector3).y + floor_clearance + lift - _visual_bottom_offset()
 			return
 		if receiver == null:
 			break
