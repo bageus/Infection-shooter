@@ -3,11 +3,13 @@ extends CanvasLayer
 var infection: Node
 var occlusion: Node
 var label: Label
+const PROBE := preload("res://game/bootstrap/app/enemy_render_probe.gd")
 const SPIKES := preload("res://game/bootstrap/app/frame_spike_log.gd")
 var spikes := SPIKES.new()
 var planning_ui: Control
 var _wanted := false
 var _elapsed := 0.0
+var _probe := 0
 
 
 func setup(runtime: Node, effects: Node) -> void:
@@ -40,6 +42,9 @@ func _unhandled_key_input(event: InputEvent) -> void:
 
 
 func _input(event: InputEvent) -> void:
+	if event is InputEventKey and event.pressed and not event.echo and event.keycode == KEY_F5:
+		_probe = (_probe + 1) % PROBE.NAMES.size()
+		PROBE.apply(get_tree(), _probe)
 	if event is InputEventKey and event.pressed and not event.echo and event.keycode == KEY_F4:
 		var effects = get_parent().get("blood_effects")
 		if is_instance_valid(effects):
@@ -52,6 +57,8 @@ func _process(delta: float) -> void:
 	_elapsed += delta
 	if _elapsed >= .25:
 		_elapsed = 0.0
+		if _probe > 0:
+			PROBE.apply(get_tree(), _probe)
 		refresh()
 
 
@@ -63,13 +70,13 @@ func _apply_visibility() -> void:
 func refresh() -> void:
 	if not is_instance_valid(infection) or not is_instance_valid(occlusion):
 		return
-	label.text = "F3 DEBUG | FPS %d | process %.1f ms | physics %.1f ms\nMutation %.1f / threshold %.1f | control lost %s | paused %s\nOcclusion %d | walls %d | material variants %d | queued %d | rebuilds %d\nRender: draw calls %d | objects %d | primitives %dk | video %d MiB\n%s\n%s" % [
+	label.text = "F3 DEBUG | FPS %d | process %.1f ms | physics %.1f ms\nMutation %.1f / threshold %.1f | control lost %s | paused %s\nOcclusion %d | walls %d | material variants %d | queued %d | rebuilds %d\nRender: draw calls %d | objects %d | primitives %dk | video %d MiB\n%s\n%s\nF5 probe: %s" % [
 		Engine.get_frames_per_second(), Performance.get_monitor(Performance.TIME_PROCESS) * 1000.0,
 		Performance.get_monitor(Performance.TIME_PHYSICS_PROCESS) * 1000.0,
 		infection.call("get_mutation"), infection.call("get_critical_threshold"), infection.call("is_control_lost"), get_tree().paused,
 		occlusion.mode, occlusion.walls.records.size(), occlusion.walls.active_materials.size(), occlusion.walls.pending.size(), occlusion.rebuild_count,
 		Performance.get_monitor(Performance.RENDER_TOTAL_DRAW_CALLS_IN_FRAME), Performance.get_monitor(Performance.RENDER_TOTAL_OBJECTS_IN_FRAME),
-		Performance.get_monitor(Performance.RENDER_TOTAL_PRIMITIVES_IN_FRAME) / 1000.0, Performance.get_monitor(Performance.RENDER_VIDEO_MEM_USED) / 1048576.0, _blood_line(), spikes.summary()]
+		Performance.get_monitor(Performance.RENDER_TOTAL_PRIMITIVES_IN_FRAME) / 1000.0, Performance.get_monitor(Performance.RENDER_VIDEO_MEM_USED) / 1048576.0, _blood_line(), spikes.summary(), PROBE.NAMES[_probe]]
 
 
 func _blood_line() -> String:
