@@ -28,6 +28,8 @@ var group_templates: Node
 var quest_panel: Node
 const FLOOR_SIZE := preload("res://game/bootstrap/app/planning_floor_size.gd")
 var floor_size: Node
+const FLOOR_TYPE := preload("res://game/bootstrap/app/planning_floor_type.gd")
+var floor_type: Node
 const SPAWN_OPTIONS := preload("res://game/bootstrap/app/planning_spawn_options.gd")
 const BIOMASS_OPTIONS := preload("res://game/bootstrap/app/planning_biomass_options.gd")
 var spawn_options: Node
@@ -139,6 +141,9 @@ func setup_controls() -> void:
 	floor_size = FLOOR_SIZE.new()
 	add_child(floor_size)
 	floor_size.setup(session)
+	floor_type = FLOOR_TYPE.new()
+	add_child(floor_type)
+	floor_type.setup(session, self)
 	spawn_options = SPAWN_OPTIONS.new()
 	add_child(spawn_options)
 	spawn_options.call("setup", session, objects)
@@ -409,6 +414,8 @@ func _recommended_flicker_step(mode: int) -> float:
 
 func _rebuild_palette() -> void:
 	decal_palette.hide()
+	if floor_type != null and floor_type.panel != null:
+		floor_type.panel.hide()
 	if biomass_options != null:
 		biomass_options.panel.hide()
 	light_view.update_catalog()
