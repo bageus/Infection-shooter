@@ -29,9 +29,11 @@ static func props_in(zone: Node3D, size: Vector2, tree: SceneTree) -> Array[Node
 	var centre := zone.global_position
 	for cx in range(floori((centre.x - reach) / CELL), floori((centre.x + reach) / CELL) + 1):
 		for cz in range(floori((centre.z - reach) / CELL), floori((centre.z + reach) / CELL) + 1):
-			for prop: Node3D in _grid.get(Vector2i(cx, cz), []):
-				if not is_instance_valid(prop) or not prop.visible:
+			for entry in _grid.get(Vector2i(cx, cz), []):
+				# Freed props may linger in the grid until the next re-index; a typed loop variable would error on them.
+				if not is_instance_valid(entry) or not (entry as Node3D).visible:
 					continue
+				var prop := entry as Node3D
 				var local := inverse * prop.global_position
 				if absf(local.x) < half.x and absf(local.z) < half.y:
 					found.append(prop)
