@@ -21,6 +21,7 @@ static func could_be_seen(enemy: Node3D, move_speed: float) -> bool:
 static func update(enemy: Node3D, animation: Node, asleep: bool) -> void:
 	if animation == null or Engine.get_physics_frames() % 6 != enemy.get_instance_id() % 6:
 		return
-	var wanted := not asleep and could_be_seen(enemy, float(enemy.get("move_speed")))
+	# F6 bisect switch: level 1 and up bring back the old behaviour (animation always runs).
+	var wanted := not asleep and (int(Engine.get_meta("legacy_perf", 0)) >= 1 or could_be_seen(enemy, float(enemy.get("move_speed"))))
 	if wanted != bool(animation.call("is_active")):
 		animation.call("set_active", wanted)

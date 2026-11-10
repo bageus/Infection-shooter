@@ -67,6 +67,8 @@ static func _show(node: Node3D, shown: bool) -> void:
 
 
 static func _limit() -> float:
+	if Engine.get_meta("planning_active", false):
+		return 0.0 # The planner shows everything; leaving it applies the quality setting.
 	return MAX_SIZE_BY_LEVEL[clampi(EFFECTS_QUALITY.level, 0, MAX_SIZE_BY_LEVEL.size() - 1)]
 
 

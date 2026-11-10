@@ -292,8 +292,7 @@ func _place(entry: Dictionary) -> void:
 			node.call("watch_target", session.main_player)
 	# Tagged even while the planner is open (maps loaded from it): culling only acts in play.
 	ROOM_CULL.tag(node, record, scene_path)
-	if not bool(session.get("active")):
-		PROP_TRIM.tag(node, record, scene_path)
+	PROP_TRIM.tag(node, record, scene_path)
 	objects.placed.append(node)
 
 
