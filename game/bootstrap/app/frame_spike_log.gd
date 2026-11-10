@@ -46,10 +46,17 @@ func _write(msec: float, resources: int, nodes: int, tree: SceneTree) -> void:
 	if file == null:
 		return
 	file.seek_end()
-	file.store_line("t=%.1fs frame=%.0fms process=%.1f physics=%.1f draw=%d objects=%d resources=%+d nodes=%+d (%d) static=%dMiB video=%dMiB enemies=%d bodies=%d player=%s" % [
+	var hidden := _culled(tree)
+	file.store_line("t=%.1fs frame=%.0fms process=%.1f physics=%.1f draw=%d objects=%d resources=%+d nodes=%+d (%d) static=%dMiB video=%dMiB enemies=%d culled=%d/%d player=%s" % [
 		Time.get_ticks_msec() / 1000.0, msec, Performance.get_monitor(Performance.TIME_PROCESS) * 1000.0,
 		Performance.get_monitor(Performance.TIME_PHYSICS_PROCESS) * 1000.0,
 		Performance.get_monitor(Performance.RENDER_TOTAL_DRAW_CALLS_IN_FRAME), Performance.get_monitor(Performance.RENDER_TOTAL_OBJECTS_IN_FRAME),
 		resources - _resources, nodes - _nodes, nodes, Performance.get_monitor(Performance.MEMORY_STATIC) / 1048576.0,
 		Performance.get_monitor(Performance.RENDER_VIDEO_MEM_USED) / 1048576.0,
-		(tree.get_nodes_in_group("infected_alive").size() if tree != null else 0), Performance.get_monitor(Performance.PHYSICS_3D_ACTIVE_OBJECTS), at])
+		(tree.get_nodes_in_group("infected_alive").size() if tree != null else 0), hidden[0], hidden[1], at])
+
+
+# Room-culled furniture: [hidden now, tagged in total].
+func _culled(tree: SceneTree) -> Array:
+	var props := tree.get_nodes_in_group(&"room_prop") if tree != null else []
+	return [props.filter(func(prop): return not prop.visible).size(), props.size()]
