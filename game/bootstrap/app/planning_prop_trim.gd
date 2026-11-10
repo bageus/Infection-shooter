@@ -26,6 +26,9 @@ static func size_of(record: Dictionary, scene_path: String) -> float:
 		return INF
 	var size: float = float(_table().get(scene_path.get_file(), INF))
 	var scale := maxf(absf(float(record.get("scale_x", 1.0))), maxf(absf(float(record.get("scale_y", 1.0))), absf(float(record.get("scale_z", 1.0)))))
+	# Cardboard boxes are 0.7 m but clutter the floor: they go with the Low setting too.
+	if scene_path.get_file().begins_with("04_cardboard"):
+		return minf(size * scale, MAX_SIZE_BY_LEVEL[0])
 	return size * scale
 
 

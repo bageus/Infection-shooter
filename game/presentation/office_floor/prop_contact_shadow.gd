@@ -9,7 +9,7 @@ const FLOOR_Y := 0.0135 + 0.003
 ## Only props standing on the floor with a footprint this wide get a shadow.
 const MAX_BASE_HEIGHT := 0.15
 const MIN_FOOTPRINT := 0.3
-const MARGIN := 0.22
+const MARGIN := 0.12
 ## Lifted this high above its resting floor the shadow is gone.
 const FADE_HEIGHT := 0.6
 

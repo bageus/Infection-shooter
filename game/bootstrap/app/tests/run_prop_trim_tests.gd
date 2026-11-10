@@ -18,6 +18,11 @@ func _initialize() -> void:
 	_check(TRIM.drops({}, MOUSE, false), "Low drops a tiny model")
 	_check(TRIM.drops({}, PHONE, false), "Low drops a small model")
 	_check(not TRIM.drops({}, CHAIR, false), "Low keeps a large model")
+	var boxes := ENV + "04/04_cardboard_box_open.glb"
+	_check(TRIM.drops({"scale_x": 1.5, "scale_y": 1.5, "scale_z": 1.5}, boxes, false), "Low drops cardboard boxes at any scale")
+	QUALITY.set_level(QUALITY.MEDIUM)
+	_check(not TRIM.drops({}, boxes, false), "Medium keeps cardboard boxes")
+	QUALITY.set_level(QUALITY.LOW)
 	_check(not TRIM.drops({"scale_x": 6.0, "scale_y": 6.0, "scale_z": 6.0}, MOUSE, false), "A model scaled up past the limit stays")
 	_check(not TRIM.drops({"object_id": "object_1"}, MOUSE, false), "A model with an object id stays")
 	_check(not TRIM.drops({"desk_id": "desk_1"}, MOUSE, false), "A desk item stays")

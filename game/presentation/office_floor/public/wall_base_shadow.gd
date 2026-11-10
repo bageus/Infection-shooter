@@ -7,7 +7,7 @@ const SHADER := preload("res://game/presentation/office_floor/wall_base_shadow.g
 const GROUP := &"wall_base_shadows"
 ## Same floor lift as the prop contact shadows (floor top .0135 plus a margin).
 const FLOOR_Y := 0.0135 + 0.003
-const DEPTH := 0.5
+const DEPTH := 0.3
 static var _shadows_allowed := true
 static var _quad: QuadMesh
 static var _material: ShaderMaterial
