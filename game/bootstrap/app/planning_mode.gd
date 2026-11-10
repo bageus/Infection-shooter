@@ -7,6 +7,8 @@ const GEOMETRY := preload("res://game/bootstrap/app/planning_geometry.gd")
 const CONTROLS := preload("res://game/bootstrap/app/planning_controls.gd")
 const CATALOG := preload("res://game/bootstrap/app/planning_catalog.gd")
 const STORAGE := preload("res://game/bootstrap/app/planning_storage.gd")
+const PROP_TRIM := preload("res://game/bootstrap/app/planning_prop_trim.gd")
+const STATIC_MERGE := preload("res://game/bootstrap/app/planning_static_merge.gd")
 
 const CAMERA_SPEED := 18.0
 const CAMERA_ZOOM_STEP := 2.5
@@ -109,9 +111,10 @@ func enter() -> void:
 	if not available:
 		return
 	active = true
-	preload("res://game/bootstrap/app/planning_static_merge.gd").restore(get_tree())
+	STATIC_MERGE.restore(get_tree())
 	get_tree().call_group("darkness_zone", "uncull_room")
 	Engine.set_meta("planning_active", true)
+	PROP_TRIM.apply_live(get_tree())
 	_set_occlusion_enabled(false)
 	# The planner edits the authored map, not what the fight left of it.
 	var restored: bool = storage.restore_authored()
@@ -166,6 +169,9 @@ func exit() -> void:
 	storage.snapshot_authored()
 	active = false
 	Engine.set_meta("planning_active", false)
+	PROP_TRIM.apply_live(get_tree())
+	# The planner un-merges fixed structure for editing; play draws it merged again.
+	STATIC_MERGE.merge(objects.placed, host)
 	_set_occlusion_enabled(true)
 	controls.help.get_parent().get_parent().hide()
 	controls.help_button.hide()
