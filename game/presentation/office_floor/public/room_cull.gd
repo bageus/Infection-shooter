@@ -43,8 +43,10 @@ static func props_in(zone: Node3D, size: Vector2, tree: SceneTree) -> Array[Node
 static func set_shown(props: Array[Node3D], shown: bool) -> void:
 	for prop in props:
 		# A prop the effects quality hid meanwhile (meta set by the decor trim) stays hidden.
-		if is_instance_valid(prop) and not (shown and prop.get_meta(&"trim_hidden", false)):
-			prop.visible = shown
+		if is_instance_valid(prop):
+			prop.set_meta(&"room_culled", not shown) # The decor trim must not show a prop its room still hides.
+			if not (shown and prop.get_meta(&"trim_hidden", false)):
+				prop.visible = shown
 
 
 # One pass over all tagged props, redone when props are added or removed.

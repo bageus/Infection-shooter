@@ -216,6 +216,8 @@ func start() -> void:
 
 func _activate_pending(tree: SceneTree, previous: Node) -> void:
 	tree.current_scene = pending
+	# After physics woke the props: every entry into play ends in the same prepared scene.
+	PLAY_PREP.apply(pending.get("planning_mode").get("objects").get("placed"), pending)
 	pending.show()
 	var preferences := PREFERENCES.new()
 	preferences.load_settings()

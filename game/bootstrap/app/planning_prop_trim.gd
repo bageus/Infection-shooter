@@ -52,7 +52,7 @@ static func apply_live(tree: SceneTree) -> void:
 
 ## Hidden decor is also switched off: no scripts, no physics, no hits, so it costs nothing.
 static func _show(node: Node3D, shown: bool) -> void:
-	node.visible = shown
+	node.visible = shown and not node.get_meta(&"room_culled", false)
 	node.set_meta(&"trim_hidden", not shown) # Room culling must not show props the quality setting hides.
 	node.process_mode = Node.PROCESS_MODE_INHERIT if shown else Node.PROCESS_MODE_DISABLED
 	var bodies := node.find_children("*", "CollisionObject3D", true, false)
