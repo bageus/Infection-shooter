@@ -209,6 +209,7 @@ func start() -> void:
 	warmed_materials = warmup.material_count
 	PHYSICS.resume(planner.get("objects").get("placed"))
 	await _settle_props(tree)
+	PLAY_PREP.apply(planner.get("objects").get("placed"), pending) # After physics woke the props: same end state as every entry.
 	_set_progress(1.0, "ready")
 	await tree.process_frame
 	_activate_pending(tree, previous)

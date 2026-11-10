@@ -170,8 +170,6 @@ func exit() -> void:
 	storage.snapshot_authored()
 	active = false
 	Engine.set_meta("planning_active", false)
-	# The planner un-merges fixed structure for editing; play readies the scene the way every other entry does.
-	PLAY_PREP.apply(objects.placed, host)
 	_set_occlusion_enabled(true)
 	controls.help.get_parent().get_parent().hide()
 	controls.help_button.hide()
@@ -198,6 +196,9 @@ func exit() -> void:
 	objects._select(null)
 	ui.hide()
 	preload("res://game/bootstrap/app/planning_physics.gd").resume(objects.placed)
+	# Last, after everything above has woken the props: the planner un-merged the structure and showed all decor,
+	# and play readies the scene the way every other entry does.
+	PLAY_PREP.apply(objects.placed, host)
 	var director := host.get_node_or_null("WaveDirector")
 	if director != null:
 		director.call("arm")
