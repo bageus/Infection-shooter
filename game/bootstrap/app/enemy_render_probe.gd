@@ -1,14 +1,24 @@
 extends RefCounted
 ## F5 debug probe: switches off parts of the enemy rendering one step at a time (particles, shadows, models), so the
 ## frame time shown by F3 says what the enemies cost on this GPU. Simulation keeps running; mode 0 restores everything.
-const NAMES := ["normal", "enemy particles off", "+ enemy shadows off", "+ enemy models hidden", "+ blood hidden", "+ lights off", "+ all particles off"]
+const NAMES := ["normal", "enemy particles off", "+ enemy shadows off", "+ enemy models hidden", "+ blood hidden", "+ lights off", "+ all particles off", "+ enemies frozen", "+ 3D drawing off"]
 const HIDDEN := &"probe_hidden"
 const SHADOW := &"probe_shadow"
+const FROZEN := &"probe_frozen"
 
 
 ## Switches off scene-wide parts for modes 4+ (blood marks, lights, particles). Walks the whole tree, so call it
 ## only when the mode changes, not every frame.
 static func apply_world(tree: SceneTree, mode: int) -> void:
+	# Mode 7 stops enemy scripts and physics, mode 8 stops drawing 3D: what stays slow is the rest of the game.
+	for enemy: Node in tree.get_nodes_in_group("infected"):
+		if mode >= 7 and enemy.process_mode != Node.PROCESS_MODE_DISABLED:
+			enemy.set_meta(FROZEN, enemy.process_mode)
+			enemy.process_mode = Node.PROCESS_MODE_DISABLED
+		elif mode < 7 and enemy.has_meta(FROZEN):
+			enemy.process_mode = enemy.get_meta(FROZEN)
+			enemy.remove_meta(FROZEN)
+	tree.root.disable_3d = mode >= 8
 	for node in tree.root.find_children("*", "Node3D", true, false):
 		var cls := 0
 		if node.has_meta("blood_effect"):
