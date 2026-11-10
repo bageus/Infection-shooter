@@ -180,6 +180,7 @@ func _stage(record: Dictionary, prepared: Dictionary) -> bool:
 func _check_plan(data: Dictionary, prepared: Dictionary) -> Dictionary:
 	prepared["surface_decals_v1"] = data.get("surface_decals_v1", {}).duplicate(true)
 	prepared["floor_size_v1"] = data.get("floor_size_v1", [])
+	prepared["floor_type_v1"] = data.get("floor_type_v1", "")
 	QUESTS.stage(data, prepared)
 	var cache: Dictionary = data.get("floor_biomass_v1", {})
 	prepared["floor_biomass_v1"] = cache if str(cache.get("source_signature", "")) == preload("res://game/bootstrap/app/planning_biomass_bake.gd").signature(data.objects) else {}
@@ -205,6 +206,7 @@ func _begin(prepared: Dictionary) -> void:
 	preload("res://game/bootstrap/app/planning_biomass_bake.gd").restore(session, {})
 	SURFACE_SETTINGS.restore(session, prepared.get("surface_decals_v1", {}))
 	FLOOR_SIZE.restore(session, prepared.get("floor_size_v1", []))
+	preload("res://game/bootstrap/app/planning_floor_type.gd").restore(session, prepared.get("floor_type_v1", ""))
 	QUESTS.restore(session, prepared)
 	session.edit_history.stack.clear()
 	if not prepared.player.is_empty():

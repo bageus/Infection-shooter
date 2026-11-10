@@ -5,6 +5,9 @@ render_mode blend_mix, depth_draw_opaque, cull_back, diffuse_burley, specular_sc
 // world-space wear so neighbouring tiles never repeat the same scuffs.
 uniform vec3 base_color : source_color = vec3(0.4, 0.42, 0.44);
 uniform float tint = 1.0;
+// Matte worn concrete instead of tile: no seams, drag scuffs, pitting and traffic polish.
+uniform bool concrete = false;
+uniform vec3 concrete_color : source_color = vec3(0.46, 0.46, 0.45);
 uniform vec3 grout_color : source_color = vec3(0.17, 0.175, 0.18);
 // Seam half-width and bevel width in metres, measured from the tile edge.
 uniform float grout_width = 0.011;
@@ -88,6 +91,21 @@ void fragment() {
 	SPECULAR = specular_amount * (1.0 - grout);
 	CLEARCOAT = clearcoat_amount * (1.0 - wear * 0.7) * (1.0 - max(grout, bevel * 0.5));
 	CLEARCOAT_ROUGHNESS = mix(0.45, 0.7, wear);
+	if (concrete) {
+		float blotch = texture(surface_noise, world_xz * 0.07 + vec2(0.21, 0.43)).r;
+		float cloud = texture(surface_noise, world_xz * 0.9 + vec2(0.52, 0.18)).r;
+		float pits = smoothstep(0.62, 0.86, texture(detail_noise, world_xz * 3.1 + vec2(0.3, 0.8)).r);
+		float drag = max(scuff * 1.4, marks);
+		vec3 stone = concrete_color * tint * mix(0.88, 1.1, blotch) * mix(0.96, 1.04, cloud);
+		stone *= 1.0 - 0.18 * pits;
+		stone *= 1.0 - 0.12 * drag;
+		stone = mix(stone, stone * 1.12, traffic * 0.5 * (1.0 - drag));
+		ALBEDO = stone;
+		float concrete_wear = clamp(traffic * 0.5 + drag * 0.5, 0.0, 1.0);
+		ROUGHNESS = clamp(mix(0.9, 0.72, concrete_wear) + roughness_offset + pits * 0.06, 0.0, 1.0);
+		SPECULAR = 0.18 + 0.12 * concrete_wear;
+		CLEARCOAT = 0.0;
+	}
 	if (glass_enabled) {
 		vec4 damage = has_floor_damage ? texture(floor_damage, glass_uv) : vec4(0.0);
 		vec4 scuff = has_floor_scuff ? texture(floor_scuff, glass_uv) : vec4(0.0);
