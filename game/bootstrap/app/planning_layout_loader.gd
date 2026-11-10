@@ -10,6 +10,7 @@ const LAYOUT_PROPERTIES := preload("res://game/bootstrap/app/planning_layout_pro
 const BLOOD_PLACEMENT := preload("res://game/bootstrap/app/planning_blood_placement.gd")
 const MEMORY_GUARD := preload("res://game/core/vfx/public/memory_guard.gd")
 const PLAYER := "res://game/features/player/public/player.tscn"
+const ROOM_CULL := preload("res://game/presentation/office_floor/public/room_cull.gd")
 const PROP_TRIM := preload("res://game/bootstrap/app/planning_prop_trim.gd")
 # Deleted as unused in d288bda. Saved plans may still place them; keep those records without a missing-object warning.
 const RETIRED_MODELS := {
@@ -291,6 +292,7 @@ func _place(entry: Dictionary) -> void:
 			node.call("watch_target", session.main_player)
 	if not bool(session.get("active")):
 		PROP_TRIM.tag(node, record, scene_path)
+		ROOM_CULL.tag(node, record, scene_path)
 	objects.placed.append(node)
 
 
