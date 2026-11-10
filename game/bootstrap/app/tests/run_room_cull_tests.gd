@@ -61,6 +61,15 @@ func _run() -> void:
 	player.position = Vector3(0.0, 0.0, 0.0)
 	await create_timer(0.2).timeout
 	_expect(inside.visible, "Entering the room shows the furniture")
+	player.position = Vector3(50.0, 0.0, 50.0)
+	await create_timer(0.8).timeout
+	_expect(not inside.visible, "Fogged again before the quality check")
+	inside.set_meta(&"trim_hidden", true)
+	player.position = Vector3(0.0, 0.0, 0.0)
+	await create_timer(0.2).timeout
+	_expect(not inside.visible, "Entering the room does not show a prop the quality setting hides")
+	inside.set_meta(&"trim_hidden", false)
+	inside.visible = true
 	Engine.set_meta("planning_active", true)
 	player.position = Vector3(50.0, 0.0, 50.0)
 	await create_timer(0.8).timeout
