@@ -61,6 +61,11 @@ func _run() -> void:
 	player.position = Vector3(0.0, 0.0, 0.0)
 	await create_timer(0.2).timeout
 	_expect(inside.visible, "Entering the room shows the furniture")
+	Engine.set_meta("planning_active", true)
+	player.position = Vector3(50.0, 0.0, 50.0)
+	await create_timer(0.8).timeout
+	_expect(inside.visible, "The open planner always shows the furniture")
+	Engine.set_meta("planning_active", false)
 	print("Room cull tests: %d failure(s)." % failures)
 	quit(failures)
 

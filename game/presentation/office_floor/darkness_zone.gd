@@ -72,7 +72,7 @@ func _process(delta: float) -> void:
 		if _player == null:
 			_player = get_tree().get_first_node_in_group("player") as Node3D
 		var target := 0.0 if _player_inside() or _room_has_open_door() else 1.0
-		_cull_room(target > 0.0 and _fade >= 1.0 and _glass_portals.is_empty())
+		_cull_room(target > 0.0 and _fade >= 1.0 and _glass_portals.is_empty() and not Engine.get_meta("planning_active", false))
 		_hide_timer -= delta
 		if _hide_timer <= 0.0:
 			_hide_timer = ENEMY_HIDE_INTERVAL
