@@ -18,6 +18,7 @@ const LIFTED_REACH := 0.35
 const MAX_BLOCKERS := 8
 const BLOCKER_REACH := 3.0
 const DOOR_PROBE_TOLERANCE := 0.3
+const ROOM_CULL := preload("res://game/presentation/office_floor/public/room_cull.gd")
 const PORTALS := preload("res://game/presentation/office_floor/darkness_portals.gd")
 const DOOR_LINKS := preload("res://game/presentation/office_floor/public/door_darkness_links.gd")
 const FADE_SPEED := 5.0
@@ -43,6 +44,9 @@ var _fog_enabled := true
 # Enemies this zone hid while its cover is up: an arm leaning through a thin wall must not show in the lit room.
 var _hidden_enemies: Array[Node3D] = []
 var _hide_timer := 0.0
+# Furniture hidden while this room sits under solid fog.
+var _culled: Array[Node3D] = []
+var _culled_on := false
 const ENEMY_HIDE_INTERVAL := 0.2
 const REFRESH_MSEC := 80
 
@@ -68,6 +72,7 @@ func _process(delta: float) -> void:
 		if _player == null:
 			_player = get_tree().get_first_node_in_group("player") as Node3D
 		var target := 0.0 if _player_inside() or _room_has_open_door() else 1.0
+		_cull_room(target > 0.0 and _fade >= 1.0 and _glass_portals.is_empty())
 		_hide_timer -= delta
 		if _hide_timer <= 0.0:
 			_hide_timer = ENEMY_HIDE_INTERVAL
@@ -124,6 +129,22 @@ func _update_hidden_enemies(covered: bool) -> void:
 	_hidden_enemies = keep
 
 
+## Hides the furniture of a room that is fully fogged, shows it again as soon as the fog lifts.
+func _cull_room(hidden: bool) -> void:
+	if hidden == _culled_on:
+		return
+	_culled_on = hidden
+	if hidden:
+		_culled = ROOM_CULL.props_in(self, size, get_tree())
+		ROOM_CULL.set_shown(_culled, false)
+	else:
+		ROOM_CULL.set_shown(_culled, true)
+		_culled = []
+
+
+func uncull_room() -> void: _cull_room(false)
+
+
 # Cheap circle test that skips the exact rectangle distance for enemies far from this zone.
 func _may_contain(point: Vector3) -> bool:
 	var reach := size.length() * 0.5
@@ -132,6 +153,8 @@ func _may_contain(point: Vector3) -> bool:
 ## Rendering permission from bootstrap; authored zones and exploration stay intact.
 func set_fog_of_war_enabled(enabled: bool) -> void:
 	_fog_enabled = enabled
+	if not enabled:
+		_cull_room(false)
 	set_meta("planning_pick_disabled", not enabled)
 	set_process(enabled)
 	if overlay != null:
