@@ -46,6 +46,7 @@ func _input(event: InputEvent) -> void:
 		_probe = (_probe + 1) % PROBE.NAMES.size()
 		spikes.probe_mode = _probe
 		PROBE.apply(get_tree(), _probe)
+		PROBE.apply_world(get_tree(), _probe)
 	if event is InputEventKey and event.pressed and not event.echo and event.keycode == KEY_F4:
 		var effects = get_parent().get("blood_effects")
 		if is_instance_valid(effects):

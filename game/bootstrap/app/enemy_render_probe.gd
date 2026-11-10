@@ -1,9 +1,24 @@
 extends RefCounted
 ## F5 debug probe: switches off parts of the enemy rendering one step at a time (particles, shadows, models), so the
 ## frame time shown by F3 says what the enemies cost on this GPU. Simulation keeps running; mode 0 restores everything.
-const NAMES := ["normal", "enemy particles off", "+ enemy shadows off", "+ enemy models hidden"]
+const NAMES := ["normal", "enemy particles off", "+ enemy shadows off", "+ enemy models hidden", "+ blood hidden", "+ lights off", "+ all particles off"]
 const HIDDEN := &"probe_hidden"
 const SHADOW := &"probe_shadow"
+
+
+## Switches off scene-wide parts for modes 4+ (blood marks, lights, particles). Walks the whole tree, so call it
+## only when the mode changes, not every frame.
+static func apply_world(tree: SceneTree, mode: int) -> void:
+	for node in tree.root.find_children("*", "Node3D", true, false):
+		var cls := 0
+		if node.has_meta("blood_effect"):
+			cls = 4
+		elif node is Light3D:
+			cls = 5
+		elif node is GPUParticles3D or node is CPUParticles3D:
+			cls = 6
+		if cls > 0 and not node.is_in_group("infected"):
+			_hide(node, mode >= cls)
 
 
 ## Applies `mode` to every living enemy; call again for new spawns.
