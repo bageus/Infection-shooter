@@ -47,6 +47,11 @@ func _input(event: InputEvent) -> void:
 		spikes.probe_mode = _probe
 		PROBE.apply(get_tree(), _probe)
 		PROBE.apply_world(get_tree(), _probe)
+	if event is InputEventKey and event.pressed and not event.echo and event.keycode == KEY_F6:
+		# Bisect switch for the recent speed-ups: 1 animation always on, 2 + sounds every frame, 3 + rooms not culled.
+		Engine.set_meta("legacy_perf", (int(Engine.get_meta("legacy_perf", 0)) + 1) % 4)
+		if int(Engine.get_meta("legacy_perf")) >= 3:
+			get_tree().call_group("darkness_zone", "uncull_room")
 	if event is InputEventKey and event.pressed and not event.echo and event.keycode == KEY_F4:
 		var effects = get_parent().get("blood_effects")
 		if is_instance_valid(effects):
@@ -78,7 +83,7 @@ func refresh() -> void:
 		infection.call("get_mutation"), infection.call("get_critical_threshold"), infection.call("is_control_lost"), get_tree().paused,
 		occlusion.mode, occlusion.walls.records.size(), occlusion.walls.active_materials.size(), occlusion.walls.pending.size(), occlusion.rebuild_count,
 		Performance.get_monitor(Performance.RENDER_TOTAL_DRAW_CALLS_IN_FRAME), Performance.get_monitor(Performance.RENDER_TOTAL_OBJECTS_IN_FRAME),
-		Performance.get_monitor(Performance.RENDER_TOTAL_PRIMITIVES_IN_FRAME) / 1000.0, Performance.get_monitor(Performance.RENDER_VIDEO_MEM_USED) / 1048576.0, _blood_line(), spikes.summary(), PROBE.NAMES[_probe]]
+		Performance.get_monitor(Performance.RENDER_TOTAL_PRIMITIVES_IN_FRAME) / 1000.0, Performance.get_monitor(Performance.RENDER_VIDEO_MEM_USED) / 1048576.0, _blood_line(), spikes.summary(), "%s | F6 legacy: %d" % [PROBE.NAMES[_probe], int(Engine.get_meta("legacy_perf", 0))]]
 
 
 func _blood_line() -> String:

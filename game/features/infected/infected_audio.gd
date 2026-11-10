@@ -43,7 +43,7 @@ func setup(owner_body: CharacterBody3D, size: float) -> void:
 # Called every simulated tick while alive.
 # Beyond hearing range the clock runs every 16th frame, with 16 frames' delta.
 func tick(delta: float, charging: bool, near_target: bool, lod_offset := 0) -> void:
-	if not near_target:
+	if not near_target and int(Engine.get_meta("legacy_perf", 0)) < 2:
 		if Engine.get_physics_frames() % 16 != lod_offset % 16:
 			return
 		delta *= 16.0
