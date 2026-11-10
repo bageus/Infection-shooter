@@ -7,6 +7,7 @@ const GEOMETRY := preload("res://game/bootstrap/app/planning_geometry.gd")
 const CONTROLS := preload("res://game/bootstrap/app/planning_controls.gd")
 const CATALOG := preload("res://game/bootstrap/app/planning_catalog.gd")
 const STORAGE := preload("res://game/bootstrap/app/planning_storage.gd")
+const PLAY_PREP := preload("res://game/bootstrap/app/play_scene_prep.gd")
 const PROP_TRIM := preload("res://game/bootstrap/app/planning_prop_trim.gd")
 const STATIC_MERGE := preload("res://game/bootstrap/app/planning_static_merge.gd")
 
@@ -169,9 +170,8 @@ func exit() -> void:
 	storage.snapshot_authored()
 	active = false
 	Engine.set_meta("planning_active", false)
-	PROP_TRIM.apply_live(get_tree())
-	# The planner un-merges fixed structure for editing; play draws it merged again.
-	STATIC_MERGE.merge(objects.placed, host)
+	# The planner un-merges fixed structure for editing; play readies the scene the way every other entry does.
+	PLAY_PREP.apply(objects.placed, host)
 	_set_occlusion_enabled(true)
 	controls.help.get_parent().get_parent().hide()
 	controls.help_button.hide()
