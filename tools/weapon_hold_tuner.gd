@@ -14,6 +14,8 @@ var _name := "AK"
 var _sliders := {}
 var _readout: TextEdit
 var _loading := false
+var _base := {}   # weapon name -> {"Grip_R": Vector3, "Grip_L": Vector3} authored positions in the weapon's own units
+var _shift := {}  # weapon name -> {"Grip_R": Vector3, "Grip_L": Vector3} slider offsets
 
 
 func _ready() -> void:
@@ -51,6 +53,7 @@ func _process(_delta: float) -> void:
 	_actor.get_node("AimPivot").look_at(_actor.get_node("AimPivot").global_position + flat.normalized(), Vector3.UP)
 	_actor.get_node("Body").global_rotation = Vector3(0.0, atan2(flat.x, flat.z), 0.0)
 	_actor.get_node("WeaponMount").call("aim_at", point)
+	_apply_markers()
 	var center := _actor.global_position + Vector3(0, .8, 0)
 	_camera.look_at_from_position(center + VIEWS[_view] * 4.0, center, Vector3(0, 0, -1) if _view in ["Top", "Bottom"] else Vector3.UP)
 
@@ -61,9 +64,12 @@ func _build_ui() -> void:
 	var panel := PanelContainer.new()
 	panel.position = Vector2(10, 10)
 	layer.add_child(panel)
+	var scroll := ScrollContainer.new()
+	scroll.custom_minimum_size = Vector2(360, 600)
+	panel.add_child(scroll)
 	var box := VBoxContainer.new()
 	box.custom_minimum_size.x = 340
-	panel.add_child(box)
+	scroll.add_child(box)
 	var guns := OptionButton.new()
 	for index in GUNS:
 		guns.add_item(GUNS[index], index)
@@ -82,6 +88,12 @@ func _build_ui() -> void:
 	_add_slider(box, "Рука: высота", "y", .2, .7, .005)
 	_add_slider(box, "Рука: вперёд от груди", "z", 0.0, .6, .005)
 	_add_slider(box, "Правая рука дальше по стволу", "reach", 0.0, .4, .005)
+	_add_slider(box, "Точка рукояти Grip_R: вперёд по стволу", "r_x", -.4, .4, .005)
+	_add_slider(box, "Точка рукояти Grip_R: вниз", "r_y", -.4, .4, .005)
+	_add_slider(box, "Точка рукояти Grip_R: вбок", "r_z", -.2, .2, .005)
+	_add_slider(box, "Точка цевья Grip_L: вперёд по стволу", "l_x", -.4, .4, .005)
+	_add_slider(box, "Точка цевья Grip_L: вниз", "l_y", -.4, .4, .005)
+	_add_slider(box, "Точка цевья Grip_L: вбок", "l_z", -.2, .2, .005)
 	_readout = TextEdit.new()
 	_readout.custom_minimum_size.y = 150
 	_readout.editable = false
@@ -116,6 +128,12 @@ func _pick(index: int) -> void:
 	_sliders["y"].value = spec[1].y
 	_sliders["z"].value = spec[1].z
 	_sliders["reach"].value = spec[2]
+	var shift: Dictionary = _shift.get(_name, {"Grip_R": Vector3.ZERO, "Grip_L": Vector3.ZERO})
+	for key in ["r", "l"]:
+		var v: Vector3 = shift["Grip_R" if key == "r" else "Grip_L"]
+		_sliders[key + "_x"].value = v.x
+		_sliders[key + "_y"].value = v.y
+		_sliders[key + "_z"].value = v.z
 	_loading = false
 	_apply()
 
@@ -125,4 +143,36 @@ func _apply() -> void:
 		return
 	var point := Vector3(_sliders["x"].value, _sliders["y"].value, _sliders["z"].value)
 	_pose.tuning[_name] = [_sliders["scale"].value, point, _sliders["reach"].value]
+	_shift[_name] = {"Grip_R": Vector3(_sliders["r_x"].value, _sliders["r_y"].value, _sliders["r_z"].value), "Grip_L": Vector3(_sliders["l_x"].value, _sliders["l_y"].value, _sliders["l_z"].value)}
+	var moved: Dictionary = _shift[_name]
 	_readout.text = 'В таблицу LONG_GUN:\n"%s": [%.2f, Vector3(%.3f, %.3f, %.3f)],\n\nВ FOREND_REACH:\n"%s": %.3f' % [_name, _sliders["scale"].value, point.x, point.y, point.z, _name, _sliders["reach"].value]
+	_readout.text += "\n\nТочки (сдвиг от нынешних, в единицах оружия), пришли это мне:\n%s: Grip_R %s, Grip_L %s" % [_name, moved["Grip_R"], moved["Grip_L"]]
+
+
+## Moves the live grip markers by the slider offsets and draws them: red Grip_R (rear hand), blue Grip_L (forend).
+func _apply_markers() -> void:
+	var weapon := _actor.get_node("WeaponMount").get("_active") as Node3D
+	if weapon == null or not _shift.has(_name):
+		return
+	for marker_name in ["Grip_R", "Grip_L"]:
+		var marker := weapon.find_child(marker_name, true, false) as Node3D
+		if marker == null:
+			continue
+		var base: Dictionary = _base.get(_name, {})
+		if not base.has(marker_name):
+			base[marker_name] = weapon.to_local(marker.global_position)
+			_base[_name] = base
+			var ball := MeshInstance3D.new()
+			var sphere := SphereMesh.new()
+			sphere.radius = .02
+			sphere.height = .04
+			var material := StandardMaterial3D.new()
+			material.albedo_color = Color.RED if marker_name == "Grip_R" else Color.BLUE
+			material.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
+			material.no_depth_test = true
+			sphere.material = material
+			ball.mesh = sphere
+			ball.scale = Vector3.ONE / weapon.scale.x
+			marker.add_child(ball)
+		var offset: Vector3 = _shift[_name][marker_name]
+		marker.global_position = weapon.to_global(base[marker_name] + Vector3(offset.x, offset.y, offset.z))
