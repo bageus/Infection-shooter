@@ -21,6 +21,7 @@ func _run() -> void:
 	await _test_player_wiring()
 	await _test_generic_fallback()
 	await _test_lowered_torso_not_twisted()
+	await _test_walk_lean()
 	await process_frame
 	await process_frame
 	print("Weapon presentation tests: %d failures" % failures)
@@ -340,5 +341,26 @@ func _test_lowered_torso_not_twisted() -> void:
 	_check(is_equal_approx(BODY_AIM.limit_pitch(steep).get_angle(), BODY_AIM.MAX_PITCH), "steep cursor pitch is capped so the vest does not spike")
 	var gentle := Quaternion(Vector3.RIGHT, deg_to_rad(3.0))
 	_check(BODY_AIM.limit_pitch(gentle).is_equal_approx(gentle), "gentle pitch is kept")
+	player.queue_free()
+	effects.queue_free()
+
+
+func _test_walk_lean() -> void:
+	var player := PLAYER.instantiate() as PLAYER_SCRIPT
+	player.set_physics_process(false)
+	root.add_child(player)
+	var effects := Node3D.new()
+	root.add_child(effects)
+	player.call("configure_world", effects, null)
+	await process_frame
+	var walk_lean: SkeletonModifier3D = (player.get_node("WeaponMount") as MOUNT).skeleton.get_node("WalkLean")
+	player.velocity = Vector3(0, 0, -2.5)
+	for i in 60:
+		walk_lean._process_modification_with_delta(1.0 / 60.0)
+	_check(walk_lean.lean > deg_to_rad(7.0), "torso tips forward while walking")
+	player.velocity = Vector3.ZERO
+	for i in 120:
+		walk_lean._process_modification_with_delta(1.0 / 60.0)
+	_check(walk_lean.lean < deg_to_rad(0.1), "torso straightens when standing")
 	player.queue_free()
 	effects.queue_free()

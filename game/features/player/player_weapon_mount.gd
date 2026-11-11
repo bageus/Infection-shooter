@@ -43,6 +43,11 @@ func _ready() -> void:
 	equipment_pose.name = "EquipmentPose"
 	equipment_pose.mount = self
 	skeleton.add_child(equipment_pose)
+	var lean := preload("res://game/features/player/player_walk_lean.gd").new()
+	lean.name = "WalkLean"
+	lean.player = get_parent() as CharacterBody3D
+	skeleton.add_child(lean)
+	skeleton.move_child(lean, equipment_pose.get_index()) # before the arm fit, so hands follow the tipped chest
 	var aim := preload("res://game/features/player/player_body_aim.gd").new()
 	aim.name = "BodyAim"
 	aim.mount = self
