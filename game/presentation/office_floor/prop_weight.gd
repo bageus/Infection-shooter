@@ -21,6 +21,9 @@ const KICK_REACH_HEIGHT := 0.6
 
 # First matching file-name fragment wins; values are kilograms.
 const WEIGHTS := [
+	# Construction pallets (group 15) are loaded stacks: they barely move from pushes, shots or blasts.
+	["15_pallet_drywall_flat_full", 350.0], ["15_pallet_drywall_flat", 300.0], ["15_pallet_drywall_on_edge", 300.0],
+	["15_pallet_concrete_blocks", 900.0], ["15_pallet_mix_sacks", 800.0], ["15_pallet_timber", 250.0],
 	["tablet", 0.6], ["toilet_paper", 0.12], ["white_board_stand", 12.0],
 	["vending", 240.0], ["arcade", 150.0], ["server_rack2", 220.0], ["server_rack3", 260.0], ["server_rack", 120.0],
 	["frige", 85.0], ["washing_machine", 70.0], ["dishwasher", 45.0], ["water_cooler_bottle_attached", 28.0],
