@@ -26,7 +26,7 @@ func _run() -> void:
 	var layout: RefCounted = controls.hud_layout
 	_check(layout.right.offset_top == 8, "Right HUD aligns with the other HUDs")
 	_check(layout.main.has_node("MapManager") and layout.main.has_node("Save"), "Main owns map and layout controls")
-	for name in ["FogOfWarToggle", "LocalLights", "AutoFireAlarms", "AutoLightSwitches", "SurfaceDecalSettings", "LightingPreview", "LightTopView", "Clear", "Close"]:
+	for name in ["FogOfWarToggle", "LocalLights", "AutoFireAlarms", "ClearFireAlarms", "AutoLightSwitches", "ClearLightSwitches", "ClearLights", "SurfaceDecalSettings", "LightingPreview", "LightTopView", "Clear", "Close"]:
 		_check(layout.main.has_node(name), "Main contains " + name)
 	_check(layout.constructor.has_node("ChainList"), "Constructor owns the chain list")
 	_check(not layout.main.has_node("ChainList"), "Chain controls stay out of Main")
