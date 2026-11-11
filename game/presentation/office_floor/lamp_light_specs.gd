@@ -16,7 +16,7 @@ const SPECS := {
 
 ## Range and angle the planner chose for a directional lamp; empty for other lamps.
 static func shape(file: String, given: Dictionary) -> Dictionary:
-	var spec: Dictionary = SPECS[file]
+	var spec: Dictionary = SPECS.get(file, {})
 	if not spec.has("dir"):
 		return {}
 	return {"range": clampf(float(given.get("range", spec["range"])), RANGE_LIMITS.x, RANGE_LIMITS.y), "angle": clampf(float(given.get("angle", spec["angle"])), ANGLE_LIMITS.x, ANGLE_LIMITS.y)}
