@@ -9,14 +9,18 @@ const LONG_GUN := {
 	"AK": [.74, Vector3(-.165, .41, .77)],
 	"M4": [.74, Vector3(-.165, .41, .77)],
 	"SNIPER RIFLE": [.75, Vector3(-.16, .44, .22)],
-	"SHOTGUN": [.85, Vector3(-.16, .43, .33)],
+	"SHOTGUN": [.79, Vector3(-.145, .415, .505)],
 	"GRENADE LAUNCHER": [.7, Vector3(-.16, .43, .42)],
 }
 ## Short guns have grips so close together that both hands collide: the forend hand holds this much further along the barrel (weapon units).
-const FOREND_REACH := {"SHOTGUN": .06, "GRENADE LAUNCHER": .18, "AK": -.055, "M4": -.055}
+const FOREND_REACH := {"SHOTGUN": .045, "GRENADE LAUNCHER": .18, "AK": -.055, "M4": -.055}
 ## Extra arm posing per weapon, set by hand in tools/weapon_hold_tuner.tscn: joint turns in degrees
 ## (bone -> Vector3) and hand nudges in skeleton space (side -> Vector3).
 const ARM_TUNING := {
+	"SHOTGUN": {
+		"bones": {"RightArm": Vector3(-7, 50, -3), "RightForeArm": Vector3(3, -8, 16), "RightHand": Vector3(-11, -3, -4), "LeftArm": Vector3(0, 22, 10), "LeftForeArm": Vector3(-6, -40, 6), "LeftHand": Vector3(-21, 37, -39)},
+		"hands": {"Right": Vector3(-.04, .085, .015), "Left": Vector3(-.105, .065, .06)},
+	},
 	"AK": {
 		"bones": {"RightArm": Vector3(-7, 10, 0), "RightForeArm": Vector3(-10, -9, 3), "RightHand": Vector3(-5, -5, -9), "LeftArm": Vector3(4, 9, 10)},
 		"hands": {"Right": Vector3(-.065, -.115, -.23)},
@@ -119,6 +123,11 @@ func _process_modification_with_delta(_delta: float) -> void:
 
 
 ## Scale, rear-hand point and forend reach of a long gun, from the tuner when it overrides them.
+## Hand nudge for a side: the tuner's slider in manual mode, otherwise the weapon's ARM_TUNING.
+func _nudge(side: String) -> Vector3:
+	return hand_offset.get(side, Vector3.ZERO) if manual_arms else ARM_TUNING.get(_held, {}).get("hands", {}).get(side, Vector3.ZERO)
+
+
 ## Bone turns for the held weapon, in degrees.
 func arm_bones() -> Dictionary:
 	return ARM_TUNING.get(_held, {}).get("bones", {})
@@ -131,7 +140,7 @@ func _spec(weapon_name: String) -> Array:
 
 
 func _fit_arm(skeleton: Skeleton3D, side: String, target: Vector3, pole: Vector3) -> void:
-	target += hand_offset.get(side, Vector3.ZERO) if manual_arms else ARM_TUNING.get(_held, {}).get("hands", {}).get(side, Vector3.ZERO)
+	target += _nudge(side)
 	var upper := skeleton.find_bone(side + "Arm")
 	var lower := skeleton.find_bone(side + "ForeArm")
 	var hand := skeleton.find_bone(side + "Hand")
