@@ -58,9 +58,9 @@ func _test_rules() -> void:
 	_expect(is_equal_approx(WEIGHT.weight_kg("09_tablet.glb", 1.0), 0.6) and is_equal_approx(WEIGHT.weight_kg("09_toilet_paper_roll_v.glb", 1.0), 0.12), "Specific small items are not mistaken for tables or toilets.")
 	_expect(is_equal_approx(WEIGHT.weight_kg("unknown_thing.glb", 0.5), 30.0), "Unknown models fall back to a volume estimate.")
 	_expect(WEIGHT.push_speed(3.0, 1.0, 6.0) > WEIGHT.push_speed(12.0, 1.0, 6.0) * 2.0, "A light item slides much faster than a heavy one.")
-	for pallet in ["15_pallet_timber.glb", "15_pallet_drywall_flat.glb", "15_pallet_drywall_flat_full.glb", "15_pallet_drywall_on_edge.glb", "15_pallet_concrete_blocks.glb", "15_pallet_mix_sacks.glb"]:
+	for pallet in ["15_pallet_timber.glb", "15_pallet_drywall_flat.glb", "15_pallet_drywall_flat_full.glb", "15_pallet_drywall_on_edge.glb", "15_pallet_concrete_blocks.glb", "15_pallet_mix_sacks.glb", "04_crate_canvas_large.glb"]:
 		var weight := WEIGHT.weight_kg(pallet, 0.1)
-		_expect(weight >= 250.0 and not WEIGHT.is_kickable(weight, Vector3(1.2, 0.2, 1.0)) and BULLET_PUSH.speed("RIFLE", weight) < 0.01, "Construction pallet %s is too light to move." % pallet)
+		_expect(weight >= 250.0 and not WEIGHT.is_kickable(weight, Vector3(1.2, 0.2, 1.0)) and BULLET_PUSH.speed("RIFLE", weight) < 0.01, "Heavy prop %s is too light to move." % pallet)
 	_expect(WEIGHT.push_speed(3.0, 1.0, 6.0) < 6.0 * 0.7, "Even a light box slows the walker down.")
 	_expect(not WEIGHT.can_push(32.0, 1.0) and WEIGHT.can_push(32.0, 2.0), "A military crate needs a Brute's strength.")
 	_expect(not WEIGHT.can_push(240.0, 3.2), "Nobody walks a vending machine across the floor.")
