@@ -14,6 +14,8 @@ const LONG_GUN := {
 }
 ## Short guns have grips so close together that both hands collide: the forend hand holds this much further along the barrel (weapon units).
 const FOREND_REACH := {"SHOTGUN": .06, "GRENADE LAUNCHER": .18}
+## Live overrides for the hold tuner (tools/weapon_hold_tuner.tscn): weapon name -> [scale, rear hand, forend reach].
+var tuning := {}
 var mount: Node
 var backpack: Node3D
 var _back_attachment: BoneAttachment3D
@@ -50,7 +52,7 @@ func _process_modification_with_delta(_delta: float) -> void:
 	if not full_kit:
 		return
 	if name_value in LONG_GUN:
-		weapon.scale = Vector3.ONE * float(LONG_GUN[name_value][0])
+		weapon.scale = Vector3.ONE * float(_spec(name_value)[0])
 	var skeleton := get_skeleton()
 	var socket_offset: Transform3D = mount.get("_socket_offset")
 	var reference_weapon := skeleton.get_bone_global_pose(skeleton.find_bone("RightHand")).basis * socket_offset.basis
@@ -60,13 +62,13 @@ func _process_modification_with_delta(_delta: float) -> void:
 	# arms can reach the new, longer kit without stretching bones.
 	# Rifle stocks extend behind the rear hand, so the hand sits ahead of the
 	# chest; the sniper's longer stock needs a little more clearance.
-	var target_right: Vector3 = MINIGUN_RIGHT_HAND if name_value == "MINIGUN" else LONG_GUN[name_value][1]
+	var target_right: Vector3 = MINIGUN_RIGHT_HAND if name_value == "MINIGUN" else _spec(name_value)[1]
 	# Long guns are held with the right hand on the forend and the left on the trigger grip.
 	# The weapon stays where it was: the right hand goes to the forend, the left to the old rear grip.
 	var left_grip := weapon.find_child("Grip_L", true, false) as Node3D
 	if name_value in LONG_GUN:
 		var rear := _grip_local(weapon, weapon.find_child("Grip_R", true, false) as Node3D)
-		var fore := _grip_local(weapon, left_grip) + Vector3.RIGHT * float(FOREND_REACH.get(name_value, 0.0)) * weapon.scale.x
+		var fore := _grip_local(weapon, left_grip) + Vector3.RIGHT * float(_spec(name_value)[2]) * weapon.scale.x
 		mount.set("grip_shift", -fore)
 		target_right += _barrel_basis() * (fore - rear)
 		left_grip = weapon.find_child("Grip_R", true, false) as Node3D
@@ -90,12 +92,19 @@ func _process_modification_with_delta(_delta: float) -> void:
 			hand_error = skeleton.get_bone_global_pose(skeleton.find_bone("LeftHand")).origin.distance_to(target)
 	mount.call("sync_weapon", weapon)
 	if name_value in LONG_GUN:
-		forend_error = (skeleton.get_bone_global_pose(skeleton.find_bone("RightHand")) * socket_offset).origin.distance_to(skeleton.to_local(weapon.find_child("Grip_L", true, false).global_position + weapon.global_basis.orthonormalized().x * float(FOREND_REACH.get(name_value, 0.0)) * weapon.scale.x))
+		forend_error = (skeleton.get_bone_global_pose(skeleton.find_bone("RightHand")) * socket_offset).origin.distance_to(skeleton.to_local(weapon.find_child("Grip_L", true, false).global_position + weapon.global_basis.orthonormalized().x * float(_spec(name_value)[2]) * weapon.scale.x))
 	if capture_pose:
 		posed_bones.clear()
 		for bone in skeleton.get_bone_count():
 			posed_bones.append(skeleton.get_bone_global_pose(bone))
 	mount.set("_aim_modifying", false)
+
+
+## Scale, rear-hand point and forend reach of a long gun, from the tuner when it overrides them.
+func _spec(weapon_name: String) -> Array:
+	if tuning.has(weapon_name):
+		return tuning[weapon_name]
+	return [LONG_GUN[weapon_name][0], LONG_GUN[weapon_name][1], FOREND_REACH.get(weapon_name, 0.0)]
 
 
 func _fit_arm(skeleton: Skeleton3D, side: String, target: Vector3, pole: Vector3) -> void:
