@@ -81,8 +81,7 @@ func setup(app_owner: Node3D, planning_root: Node3D, planning_ui: Control, load_
 	]
 	catalog.bind_asset = Callable(host, "bind_world_object")
 	catalog._build_environment_catalogs()
-	catalog.active_catalog = catalog.group_catalogs["01"]
-	controls._rebuild_palette()
+	controls.open_folder("01", "")
 	controls.palette.item_selected.connect(objects._on_palette_selected)
 	desk_setup = DESK_SETUP_MODE.new()
 	add_child(desk_setup)

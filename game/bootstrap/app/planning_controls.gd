@@ -45,6 +45,7 @@ var light_default_editor = preload("res://game/bootstrap/app/planning_light_defa
 const LIGHT_DEFAULT_HEIGHT = 2.5
 
 var palette: ItemList
+var structure_group := ""
 var status: Label
 var help: Label
 var help_button: Button
@@ -431,20 +432,23 @@ func _show_structure_catalog() -> void:
 		blood_options.hide()
 	light_defaults.hide()
 	objects._reset_selection()
-	catalog.active_catalog = catalog.group_catalogs["01"]
-	light_defaults.hide()
 	session.ui.get_node("Panel/VBox/GroupTabs").show()
-	_rebuild_palette()
+	open_folder("01", "")
 	status.text = "STRUCTURE | choose building object"
 
 
 func _show_structure_group(group_name: String) -> void:
 	light_defaults.hide()
 	objects._reset_selection()
-	catalog.active_catalog = catalog.group_catalogs.get(group_name, [])
-	light_defaults.hide()
-	_rebuild_palette()
+	open_folder(group_name, "")
 	status.text = "STRUCTURE " + group_name
+
+
+# Shows one folder level of a structure group; "[ name ]" rows enter a folder, "[ .. ]" goes up.
+func open_folder(group_name: String, folder: String) -> void:
+	structure_group = group_name
+	catalog.active_catalog = catalog.folder_view(group_name, folder)
+	_rebuild_palette()
 
 
 func _show_lighting_catalog() -> void:
