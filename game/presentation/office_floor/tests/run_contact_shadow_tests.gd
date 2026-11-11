@@ -8,7 +8,7 @@ const MODELS := "res://models/objects/enviroments/"
 const TABLE := MODELS + "07/07_table_longest.glb"
 const CHAIR := MODELS + "06/06_simple_chair.glb"
 const CLOCK := MODELS + "09/09_wall_clock.glb"
-const MUG := MODELS + "09/09_mug.glb"
+const MUG := MODELS + "09/glass_mug/09_mug.glb"
 const CABINET := MODELS + "03/03_file_cabinet_smaller.glb"
 
 var failures := 0

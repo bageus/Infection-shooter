@@ -173,7 +173,7 @@ func _wall(point: Vector3) -> StaticBody3D:
 
 func _placement() -> void:
 	var geometry: RefCounted = planner.get("geometry")
-	for model in ["01/01_floor_2x2.glb", "05/05_wall_TV_frameless_destructible.glb", "01/01_VECTRION_Destructible.glb"]:
+	for model in ["01/floor/01_floor_2x2.glb", "05/05_wall_TV_frameless_destructible.glb", "01/01_VECTRION_Destructible.glb"]:
 		var item := planner.call("_instantiate_asset", "res://models/objects/enviroments/" + model) as Node3D
 		stage.add_child(item)
 		item.set("freeze", true)

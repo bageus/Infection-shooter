@@ -7,7 +7,7 @@ const EXPLOSION := preload("res://game/features/combat/public/grenade_explosion.
 const MODELS := [
 	"res://models/objects/enviroments/08/08_office_desk_2.glb",
 	"res://models/objects/enviroments/06/06_office_chair.glb",
-	"res://models/objects/enviroments/05/05_monitor_destructible.glb",
+	"res://models/objects/enviroments/05/monitor/05_monitor_destructible.glb",
 	"res://models/objects/enviroments/03/03_file_cabinet_largest.glb",
 ]
 var failures := 0

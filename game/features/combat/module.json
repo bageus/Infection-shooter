@@ -32,7 +32,8 @@
   ],
   "dependencies": [
     "core.audio",
-    "core.vfx"
+    "core.vfx",
+    "core.model_paths"
   ],
   "runtime_contracts": {
     "mission_wiring_v1": {

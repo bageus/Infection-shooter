@@ -70,7 +70,7 @@ func _environment(path: String, event: StringName) -> void:
 
 func _lamp() -> void:
 	var lamp := PROP.instantiate() as RigidBody3D
-	lamp.set("model_path", "res://models/objects/enviroments/05/05_lamp.glb")
+	lamp.set("model_path", "res://models/objects/enviroments/05/lamp/05_lamp.glb")
 	lamp.call("configure_world", effects, null)
 	stage.add_child(lamp)
 	lamp.call("take_projectile_hit", 1.0, Vector3.ZERO, Vector3.UP, Vector3.FORWARD, "PISTOL")

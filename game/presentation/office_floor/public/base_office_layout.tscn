@@ -4292,7 +4292,7 @@ metadata/planning_attachment = ""
 [node name="@RigidBody3D@8747" type="RigidBody3D" parent="." unique_id=1362451216 instance=ExtResource("11_sytgd")]
 transform = Transform3D(5.9604645e-07, 0, 1, 0, 1, 0, -1, 0, 5.9604645e-07, -0.25000012, 2.25, 9)
 
-model_path = "res://models/objects/enviroments/01/01_duct_rect_elbow.glb"
+model_path = "res://models/objects/enviroments/01/pipe_duct/01_duct_rect_elbow.glb"
 metadata/world_bound = true
 metadata/planning_settled_transform = Transform3D(5.9604645e-07, 0, 1, 0, 1, 0, -1, 0, 5.9604645e-07, -0.25000012, 2.25, 9)
 metadata/planning_object_id = ""
@@ -5152,7 +5152,7 @@ metadata/planning_attachment = ""
 [node name="@RigidBody3D@8813" type="RigidBody3D" parent="." unique_id=935993055 instance=ExtResource("11_sytgd")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -9.25, 2.25, -10)
 
-model_path = "res://models/objects/enviroments/01/01_duct_rect_elbow.glb"
+model_path = "res://models/objects/enviroments/01/pipe_duct/01_duct_rect_elbow.glb"
 metadata/world_bound = true
 metadata/planning_settled_transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -9.25, 2.25, -10)
 metadata/planning_object_id = ""
@@ -5162,7 +5162,7 @@ metadata/planning_attachment = ""
 [node name="@RigidBody3D@8814" type="RigidBody3D" parent="." unique_id=554080624 instance=ExtResource("11_sytgd")]
 transform = Transform3D(0, 0, -1, -1, 0, 0, 0, 1, 0, -7.25, 1.0079999, -16.5)
 
-model_path = "res://models/objects/enviroments/01/01_pipe_sewer_wall_elbow.glb"
+model_path = "res://models/objects/enviroments/01/pipe_duct/01_pipe_sewer_wall_elbow.glb"
 metadata/world_bound = true
 metadata/planning_settled_transform = Transform3D(0, 0, -1, -1, 0, 0, 0, 1, 0, -7.25, 1.0079999, -16.5)
 metadata/planning_object_id = ""
@@ -5172,7 +5172,7 @@ metadata/planning_attachment = ""
 [node name="@RigidBody3D@8815" type="RigidBody3D" parent="." unique_id=1372966128 instance=ExtResource("11_sytgd")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -4.5, 2, -16.25)
 
-model_path = "res://models/objects/enviroments/01/01_pipe_sewer_floor_straight.glb"
+model_path = "res://models/objects/enviroments/01/pipe_duct/01_pipe_sewer_floor_straight.glb"
 metadata/world_bound = true
 metadata/planning_settled_transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -4.5, 2, -16.25)
 metadata/planning_object_id = ""
@@ -5182,7 +5182,7 @@ metadata/planning_attachment = ""
 [node name="@RigidBody3D@8816" type="RigidBody3D" parent="." unique_id=290235015 instance=ExtResource("11_sytgd")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -4.25, 2, -16.25)
 
-model_path = "res://models/objects/enviroments/01/01_pipe_sewer_floor_straight.glb"
+model_path = "res://models/objects/enviroments/01/pipe_duct/01_pipe_sewer_floor_straight.glb"
 metadata/world_bound = true
 metadata/planning_settled_transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -4.25, 2, -16.25)
 metadata/planning_object_id = ""
@@ -5192,7 +5192,7 @@ metadata/planning_attachment = ""
 [node name="@RigidBody3D@8817" type="RigidBody3D" parent="." unique_id=888219356 instance=ExtResource("11_sytgd")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -4, 2.25, -16.25)
 
-model_path = "res://models/objects/enviroments/01/01_pipe_sewer_floor_straight.glb"
+model_path = "res://models/objects/enviroments/01/pipe_duct/01_pipe_sewer_floor_straight.glb"
 metadata/world_bound = true
 metadata/planning_settled_transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -4, 2.25, -16.25)
 metadata/planning_object_id = ""
@@ -5202,7 +5202,7 @@ metadata/planning_attachment = ""
 [node name="@RigidBody3D@8818" type="RigidBody3D" parent="." unique_id=1829107315 instance=ExtResource("11_sytgd")]
 transform = Transform3D(-3.5762787e-07, 0, -0.99999994, 0, 1, 0, 0.99999994, 0, -3.5762787e-07, -5.999998, -0.5, 15.5)
 
-model_path = "res://models/objects/enviroments/01/01_pipe_sewer_wall_elbow.glb"
+model_path = "res://models/objects/enviroments/01/pipe_duct/01_pipe_sewer_wall_elbow.glb"
 metadata/world_bound = true
 metadata/planning_settled_transform = Transform3D(-3.5762787e-07, 0, -0.99999994, 0, 1, 0, 0.99999994, 0, -3.5762787e-07, -5.999998, -0.5, 15.5)
 metadata/planning_object_id = ""
@@ -5212,7 +5212,7 @@ metadata/planning_attachment = ""
 [node name="@RigidBody3D@8819" type="RigidBody3D" parent="." unique_id=15491104 instance=ExtResource("11_sytgd")]
 transform = Transform3D(-8.742237e-08, 2.4278972e-06, 1, 1, -1.6292068e-07, 8.742277e-08, 1.629209e-07, 1, -2.4278972e-06, -4.25, 0.10050004, 10)
 
-model_path = "res://models/objects/enviroments/01/01_pipe_water_floor_elbow.glb"
+model_path = "res://models/objects/enviroments/01/pipe_duct/01_pipe_water_floor_elbow.glb"
 metadata/world_bound = true
 metadata/planning_settled_transform = Transform3D(-8.742237e-08, 2.4278972e-06, 1, 1, -1.6292068e-07, 8.742277e-08, 1.629209e-07, 1, -2.4278972e-06, -4.25, 0.10050004, 10)
 metadata/planning_object_id = ""
@@ -5222,7 +5222,7 @@ metadata/planning_attachment = ""
 [node name="@RigidBody3D@8820" type="RigidBody3D" parent="." unique_id=334178502 instance=ExtResource("11_sytgd")]
 transform = Transform3D(1, 1.8199236e-06, -7.955138e-14, 0, -4.371139e-08, -1, -1.8199236e-06, 1, -4.371139e-08, -3.25, 3.0205002, 10)
 
-model_path = "res://models/objects/enviroments/01/01_pipe_water_floor_straight.glb"
+model_path = "res://models/objects/enviroments/01/pipe_duct/01_pipe_water_floor_straight.glb"
 metadata/world_bound = true
 metadata/planning_settled_transform = Transform3D(1, 1.8199236e-06, -7.955138e-14, 0, -4.371139e-08, -1, -1.8199236e-06, 1, -4.371139e-08, -3.25, 3.0205002, 10)
 metadata/planning_object_id = ""
@@ -5232,7 +5232,7 @@ metadata/planning_attachment = ""
 [node name="@RigidBody3D@8821" type="RigidBody3D" parent="." unique_id=1642556846 instance=ExtResource("11_sytgd")]
 transform = Transform3D(-1, 0, -1.8199258e-06, 0, 1, 0, 1.8199258e-06, 0, -1, -9.25, 2.25, -12)
 
-model_path = "res://models/objects/enviroments/01/01_duct_rect_straight.glb"
+model_path = "res://models/objects/enviroments/01/pipe_duct/01_duct_rect_straight.glb"
 metadata/world_bound = true
 metadata/planning_settled_transform = Transform3D(-1, 0, -1.8199258e-06, 0, 1, 0, 1.8199258e-06, 0, -1, -9.25, 2.25, -12)
 metadata/planning_object_id = ""
@@ -5242,7 +5242,7 @@ metadata/planning_attachment = ""
 [node name="@RigidBody3D@8822" type="RigidBody3D" parent="." unique_id=2145358653 instance=ExtResource("11_sytgd")]
 transform = Transform3D(-1, 0, -1.8199258e-06, 0, 1, 0, 1.8199258e-06, 0, -1, -9.25, 2.25, -10)
 
-model_path = "res://models/objects/enviroments/01/01_duct_rect_straight.glb"
+model_path = "res://models/objects/enviroments/01/pipe_duct/01_duct_rect_straight.glb"
 metadata/world_bound = true
 metadata/planning_settled_transform = Transform3D(-1, 0, -1.8199258e-06, 0, 1, 0, 1.8199258e-06, 0, -1, -9.25, 2.25, -10)
 metadata/planning_object_id = ""
@@ -5252,7 +5252,7 @@ metadata/planning_attachment = ""
 [node name="@RigidBody3D@8823" type="RigidBody3D" parent="." unique_id=280942938 instance=ExtResource("11_sytgd")]
 transform = Transform3D(-1, 0, -1.8199258e-06, 0, 1, 0, 1.8199258e-06, 0, -1, -9.25, 2.25, -14)
 
-model_path = "res://models/objects/enviroments/01/01_duct_rect_straight.glb"
+model_path = "res://models/objects/enviroments/01/pipe_duct/01_duct_rect_straight.glb"
 metadata/world_bound = true
 metadata/planning_settled_transform = Transform3D(-1, 0, -1.8199258e-06, 0, 1, 0, 1.8199258e-06, 0, -1, -9.25, 2.25, -14)
 metadata/planning_object_id = ""
@@ -5262,7 +5262,7 @@ metadata/planning_attachment = ""
 [node name="@RigidBody3D@8824" type="RigidBody3D" parent="." unique_id=1911847787 instance=ExtResource("11_sytgd")]
 transform = Transform3D(-3.5762787e-07, 0, 0.99999994, 0, 1, 0, -0.99999994, 0, -3.5762787e-07, -6.25, 2.25, -9)
 
-model_path = "res://models/objects/enviroments/01/01_duct_rect_straight.glb"
+model_path = "res://models/objects/enviroments/01/pipe_duct/01_duct_rect_straight.glb"
 metadata/world_bound = true
 metadata/planning_settled_transform = Transform3D(-3.5762787e-07, 0, 0.99999994, 0, 1, 0, -0.99999994, 0, -3.5762787e-07, -6.25, 2.25, -9)
 metadata/planning_object_id = ""
@@ -5272,7 +5272,7 @@ metadata/planning_attachment = ""
 [node name="@RigidBody3D@8825" type="RigidBody3D" parent="." unique_id=79686107 instance=ExtResource("11_sytgd")]
 transform = Transform3D(-3.5762787e-07, 0, 0.99999994, 0, 1, 0, -0.99999994, 0, -3.5762787e-07, -8.25, 2.25, -9)
 
-model_path = "res://models/objects/enviroments/01/01_duct_rect_straight.glb"
+model_path = "res://models/objects/enviroments/01/pipe_duct/01_duct_rect_straight.glb"
 metadata/world_bound = true
 metadata/planning_settled_transform = Transform3D(-3.5762787e-07, 0, 0.99999994, 0, 1, 0, -0.99999994, 0, -3.5762787e-07, -8.25, 2.25, -9)
 metadata/planning_object_id = ""
@@ -5282,7 +5282,7 @@ metadata/planning_attachment = ""
 [node name="@RigidBody3D@8826" type="RigidBody3D" parent="." unique_id=866813534 instance=ExtResource("11_sytgd")]
 transform = Transform3D(-1, 0, 1.8199258e-06, 0, 1, 0, -1.8199258e-06, 0, -1, 0.750001, 2.25, -8)
 
-model_path = "res://models/objects/enviroments/01/01_duct_rect_elbow.glb"
+model_path = "res://models/objects/enviroments/01/pipe_duct/01_duct_rect_elbow.glb"
 metadata/world_bound = true
 metadata/planning_settled_transform = Transform3D(-1, 0, 1.8199258e-06, 0, 1, 0, -1.8199258e-06, 0, -1, 0.750001, 2.25, -8)
 metadata/planning_object_id = ""
@@ -5292,7 +5292,7 @@ metadata/planning_attachment = ""
 [node name="@RigidBody3D@8827" type="RigidBody3D" parent="." unique_id=1295721565 instance=ExtResource("11_sytgd")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.75, 2.25, -8)
 
-model_path = "res://models/objects/enviroments/01/01_duct_rect_straight.glb"
+model_path = "res://models/objects/enviroments/01/pipe_duct/01_duct_rect_straight.glb"
 metadata/world_bound = true
 metadata/planning_settled_transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.75, 2.25, -8)
 metadata/planning_object_id = ""
@@ -5302,7 +5302,7 @@ metadata/planning_attachment = ""
 [node name="@RigidBody3D@8828" type="RigidBody3D" parent="." unique_id=614356489 instance=ExtResource("11_sytgd")]
 transform = Transform3D(5.9604645e-07, 0, 1, 0, 1, 0, -1, 0, 5.9604645e-07, -2.25, 2.25, -9)
 
-model_path = "res://models/objects/enviroments/01/01_duct_rect_straight.glb"
+model_path = "res://models/objects/enviroments/01/pipe_duct/01_duct_rect_straight.glb"
 metadata/world_bound = true
 metadata/planning_settled_transform = Transform3D(5.9604645e-07, 0, 1, 0, 1, 0, -1, 0, 5.9604645e-07, -2.25, 2.25, -9)
 metadata/planning_object_id = ""
@@ -5312,7 +5312,7 @@ metadata/planning_attachment = ""
 [node name="@RigidBody3D@8829" type="RigidBody3D" parent="." unique_id=873208847 instance=ExtResource("11_sytgd")]
 transform = Transform3D(5.9604645e-07, 0, 1, 0, 1, 0, -1, 0, 5.9604645e-07, -4.25, 2.25, -9)
 
-model_path = "res://models/objects/enviroments/01/01_duct_rect_straight.glb"
+model_path = "res://models/objects/enviroments/01/pipe_duct/01_duct_rect_straight.glb"
 metadata/world_bound = true
 metadata/planning_settled_transform = Transform3D(5.9604645e-07, 0, 1, 0, 1, 0, -1, 0, 5.9604645e-07, -4.25, 2.25, -9)
 metadata/planning_object_id = ""
@@ -5322,7 +5322,7 @@ metadata/planning_attachment = ""
 [node name="@RigidBody3D@8830" type="RigidBody3D" parent="." unique_id=162746555 instance=ExtResource("11_sytgd")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.75, 2.25, -6)
 
-model_path = "res://models/objects/enviroments/01/01_duct_rect_straight.glb"
+model_path = "res://models/objects/enviroments/01/pipe_duct/01_duct_rect_straight.glb"
 metadata/world_bound = true
 metadata/planning_settled_transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.75, 2.25, -6)
 metadata/planning_object_id = ""
@@ -5332,7 +5332,7 @@ metadata/planning_attachment = ""
 [node name="@RigidBody3D@8831" type="RigidBody3D" parent="." unique_id=552336922 instance=ExtResource("11_sytgd")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.75, 2.25, -4)
 
-model_path = "res://models/objects/enviroments/01/01_duct_rect_straight.glb"
+model_path = "res://models/objects/enviroments/01/pipe_duct/01_duct_rect_straight.glb"
 metadata/world_bound = true
 metadata/planning_settled_transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.75, 2.25, -4)
 metadata/planning_object_id = ""
@@ -5342,7 +5342,7 @@ metadata/planning_attachment = ""
 [node name="@RigidBody3D@8832" type="RigidBody3D" parent="." unique_id=536316319 instance=ExtResource("11_sytgd")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.75, 2.25, -2)
 
-model_path = "res://models/objects/enviroments/01/01_duct_rect_straight.glb"
+model_path = "res://models/objects/enviroments/01/pipe_duct/01_duct_rect_straight.glb"
 metadata/world_bound = true
 metadata/planning_settled_transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.75, 2.25, -2)
 metadata/planning_object_id = ""
@@ -5352,7 +5352,7 @@ metadata/planning_attachment = ""
 [node name="@RigidBody3D@8833" type="RigidBody3D" parent="." unique_id=362622295 instance=ExtResource("11_sytgd")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.75, 2.25, 0)
 
-model_path = "res://models/objects/enviroments/01/01_duct_rect_straight.glb"
+model_path = "res://models/objects/enviroments/01/pipe_duct/01_duct_rect_straight.glb"
 metadata/world_bound = true
 metadata/planning_settled_transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.75, 2.25, 0)
 metadata/planning_object_id = ""
@@ -5362,7 +5362,7 @@ metadata/planning_attachment = ""
 [node name="@RigidBody3D@8834" type="RigidBody3D" parent="." unique_id=1214410404 instance=ExtResource("11_sytgd")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.75, 2.25, 1.9999999)
 
-model_path = "res://models/objects/enviroments/01/01_duct_rect_straight.glb"
+model_path = "res://models/objects/enviroments/01/pipe_duct/01_duct_rect_straight.glb"
 metadata/world_bound = true
 metadata/planning_settled_transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.75, 2.25, 1.9999999)
 metadata/planning_object_id = ""
@@ -5372,7 +5372,7 @@ metadata/planning_attachment = ""
 [node name="@RigidBody3D@8835" type="RigidBody3D" parent="." unique_id=1459165123 instance=ExtResource("11_sytgd")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.75, 2.25, 4)
 
-model_path = "res://models/objects/enviroments/01/01_duct_rect_straight.glb"
+model_path = "res://models/objects/enviroments/01/pipe_duct/01_duct_rect_straight.glb"
 metadata/world_bound = true
 metadata/planning_settled_transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.75, 2.25, 4)
 metadata/planning_object_id = ""
@@ -5382,7 +5382,7 @@ metadata/planning_attachment = ""
 [node name="@RigidBody3D@8836" type="RigidBody3D" parent="." unique_id=627668234 instance=ExtResource("11_sytgd")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.75, 2.25, 6)
 
-model_path = "res://models/objects/enviroments/01/01_duct_rect_straight.glb"
+model_path = "res://models/objects/enviroments/01/pipe_duct/01_duct_rect_straight.glb"
 metadata/world_bound = true
 metadata/planning_settled_transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.75, 2.25, 6)
 metadata/planning_object_id = ""
@@ -5392,7 +5392,7 @@ metadata/planning_attachment = ""
 [node name="@RigidBody3D@8837" type="RigidBody3D" parent="." unique_id=1786759964 instance=ExtResource("11_sytgd")]
 transform = Transform3D(-1.9073486e-06, 0, 1, 0, 1, 0, -1, 0, -1.9073486e-06, -4.25, 2.25, 9)
 
-model_path = "res://models/objects/enviroments/01/01_duct_rect_straight.glb"
+model_path = "res://models/objects/enviroments/01/pipe_duct/01_duct_rect_straight.glb"
 metadata/world_bound = true
 metadata/planning_settled_transform = Transform3D(-1.9073486e-06, 0, 1, 0, 1, 0, -1, 0, -1.9073486e-06, -4.25, 2.25, 9)
 metadata/planning_object_id = ""
@@ -5402,7 +5402,7 @@ metadata/planning_attachment = ""
 [node name="@RigidBody3D@8838" type="RigidBody3D" parent="." unique_id=910109735 instance=ExtResource("11_sytgd")]
 transform = Transform3D(5.9604645e-07, 0, 1, 0, 1, 0, -1, 0, 5.9604645e-07, -2.25, 2.25, 9)
 
-model_path = "res://models/objects/enviroments/01/01_duct_rect_straight.glb"
+model_path = "res://models/objects/enviroments/01/pipe_duct/01_duct_rect_straight.glb"
 metadata/world_bound = true
 metadata/planning_settled_transform = Transform3D(5.9604645e-07, 0, 1, 0, 1, 0, -1, 0, 5.9604645e-07, -2.25, 2.25, 9)
 metadata/planning_object_id = ""
@@ -5412,7 +5412,7 @@ metadata/planning_attachment = ""
 [node name="@RigidBody3D@8839" type="RigidBody3D" parent="." unique_id=556780643 instance=ExtResource("11_sytgd")]
 transform = Transform3D(-1.9073486e-06, 0, 1, 0, 1, 0, -1, 0, -1.9073486e-06, -6.25, 2.25, 9)
 
-model_path = "res://models/objects/enviroments/01/01_duct_rect_straight.glb"
+model_path = "res://models/objects/enviroments/01/pipe_duct/01_duct_rect_straight.glb"
 metadata/world_bound = true
 metadata/planning_settled_transform = Transform3D(-1.9073486e-06, 0, 1, 0, 1, 0, -1, 0, -1.9073486e-06, -6.25, 2.25, 9)
 metadata/planning_object_id = ""
@@ -5422,7 +5422,7 @@ metadata/planning_attachment = ""
 [node name="@RigidBody3D@8840" type="RigidBody3D" parent="." unique_id=602489709 instance=ExtResource("11_sytgd")]
 transform = Transform3D(-1.9073486e-06, 0, 1, 0, 1, 0, -1, 0, -1.9073486e-06, -8.25, 2.25, 9)
 
-model_path = "res://models/objects/enviroments/01/01_duct_rect_straight.glb"
+model_path = "res://models/objects/enviroments/01/pipe_duct/01_duct_rect_straight.glb"
 metadata/world_bound = true
 metadata/planning_settled_transform = Transform3D(-1.9073486e-06, 0, 1, 0, 1, 0, -1, 0, -1.9073486e-06, -8.25, 2.25, 9)
 metadata/planning_object_id = ""
@@ -5432,7 +5432,7 @@ metadata/planning_attachment = ""
 [node name="@RigidBody3D@8841" type="RigidBody3D" parent="." unique_id=1522738690 instance=ExtResource("11_sytgd")]
 transform = Transform3D(5.9604645e-07, 0, -1, 0, 1, 0, 1, 0, 5.9604645e-07, -8.249998, 2.25, 9)
 
-model_path = "res://models/objects/enviroments/01/01_duct_rect_elbow.glb"
+model_path = "res://models/objects/enviroments/01/pipe_duct/01_duct_rect_elbow.glb"
 metadata/world_bound = true
 metadata/planning_settled_transform = Transform3D(5.9604645e-07, 0, -1, 0, 1, 0, 1, 0, 5.9604645e-07, -8.249998, 2.25, 9)
 metadata/planning_object_id = ""
@@ -5442,7 +5442,7 @@ metadata/planning_attachment = ""
 [node name="@RigidBody3D@8842" type="RigidBody3D" parent="." unique_id=1252690282 instance=ExtResource("11_sytgd")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -9.25, 2.25, 10)
 
-model_path = "res://models/objects/enviroments/01/01_duct_rect_straight.glb"
+model_path = "res://models/objects/enviroments/01/pipe_duct/01_duct_rect_straight.glb"
 metadata/world_bound = true
 metadata/planning_settled_transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -9.25, 2.25, 10)
 metadata/planning_object_id = ""
@@ -5452,7 +5452,7 @@ metadata/planning_attachment = ""
 [node name="@RigidBody3D@8843" type="RigidBody3D" parent="." unique_id=281721531 instance=ExtResource("11_sytgd")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -9.25, 2.25, 12)
 
-model_path = "res://models/objects/enviroments/01/01_duct_rect_straight.glb"
+model_path = "res://models/objects/enviroments/01/pipe_duct/01_duct_rect_straight.glb"
 metadata/world_bound = true
 metadata/planning_settled_transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -9.25, 2.25, 12)
 metadata/planning_object_id = ""
@@ -5462,7 +5462,7 @@ metadata/planning_attachment = ""
 [node name="@RigidBody3D@8844" type="RigidBody3D" parent="." unique_id=1415992743 instance=ExtResource("11_sytgd")]
 transform = Transform3D(-1, 0, -1.8199258e-06, 0, 1, 0, 1.8199258e-06, 0, -1, -9.25, 2.25, 16)
 
-model_path = "res://models/objects/enviroments/01/01_duct_rect_straight.glb"
+model_path = "res://models/objects/enviroments/01/pipe_duct/01_duct_rect_straight.glb"
 metadata/world_bound = true
 metadata/planning_settled_transform = Transform3D(-1, 0, -1.8199258e-06, 0, 1, 0, 1.8199258e-06, 0, -1, -9.25, 2.25, 16)
 metadata/planning_object_id = ""
@@ -5472,7 +5472,7 @@ metadata/planning_attachment = ""
 [node name="@RigidBody3D@8845" type="RigidBody3D" parent="." unique_id=670312964 instance=ExtResource("11_sytgd")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -19.25, 0, 6)
 
-model_path = "res://models/objects/enviroments/01/01_duct_rect_straight.glb"
+model_path = "res://models/objects/enviroments/01/pipe_duct/01_duct_rect_straight.glb"
 metadata/world_bound = true
 metadata/planning_settled_transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -19.25, 0, 6)
 metadata/planning_object_id = ""
@@ -5482,7 +5482,7 @@ metadata/planning_attachment = ""
 [node name="@RigidBody3D@8846" type="RigidBody3D" parent="." unique_id=1700550558 instance=ExtResource("11_sytgd")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -19.25, 0, 8)
 
-model_path = "res://models/objects/enviroments/01/01_duct_rect_straight.glb"
+model_path = "res://models/objects/enviroments/01/pipe_duct/01_duct_rect_straight.glb"
 metadata/world_bound = true
 metadata/planning_settled_transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -19.25, 0, 8)
 metadata/planning_object_id = ""
@@ -5492,7 +5492,7 @@ metadata/planning_attachment = ""
 [node name="@RigidBody3D@8847" type="RigidBody3D" parent="." unique_id=625507863 instance=ExtResource("11_sytgd")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -19.25, 1, 8)
 
-model_path = "res://models/objects/enviroments/01/01_duct_rect_straight.glb"
+model_path = "res://models/objects/enviroments/01/pipe_duct/01_duct_rect_straight.glb"
 metadata/world_bound = true
 metadata/planning_settled_transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -19.25, 1, 8)
 metadata/planning_object_id = ""
@@ -5502,7 +5502,7 @@ metadata/planning_attachment = ""
 [node name="@RigidBody3D@8848" type="RigidBody3D" parent="." unique_id=911212651 instance=ExtResource("11_sytgd")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -19.25, 2, 8)
 
-model_path = "res://models/objects/enviroments/01/01_duct_rect_straight.glb"
+model_path = "res://models/objects/enviroments/01/pipe_duct/01_duct_rect_straight.glb"
 metadata/world_bound = true
 metadata/planning_settled_transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -19.25, 2, 8)
 metadata/planning_object_id = ""
@@ -5512,7 +5512,7 @@ metadata/planning_attachment = ""
 [node name="@RigidBody3D@8849" type="RigidBody3D" parent="." unique_id=1720355801 instance=ExtResource("11_sytgd")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -19.25, 0, 10)
 
-model_path = "res://models/objects/enviroments/01/01_duct_rect_straight.glb"
+model_path = "res://models/objects/enviroments/01/pipe_duct/01_duct_rect_straight.glb"
 metadata/world_bound = true
 metadata/planning_settled_transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -19.25, 0, 10)
 metadata/planning_object_id = ""
@@ -5522,7 +5522,7 @@ metadata/planning_attachment = ""
 [node name="@RigidBody3D@8850" type="RigidBody3D" parent="." unique_id=765728875 instance=ExtResource("11_sytgd")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -19.25, 0, 12)
 
-model_path = "res://models/objects/enviroments/01/01_duct_rect_straight.glb"
+model_path = "res://models/objects/enviroments/01/pipe_duct/01_duct_rect_straight.glb"
 metadata/world_bound = true
 metadata/planning_settled_transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -19.25, 0, 12)
 metadata/planning_object_id = ""
@@ -5532,7 +5532,7 @@ metadata/planning_attachment = ""
 [node name="@RigidBody3D@8851" type="RigidBody3D" parent="." unique_id=2128999861 instance=ExtResource("11_sytgd")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -19.25, 0, 14)
 
-model_path = "res://models/objects/enviroments/01/01_duct_rect_straight.glb"
+model_path = "res://models/objects/enviroments/01/pipe_duct/01_duct_rect_straight.glb"
 metadata/world_bound = true
 metadata/planning_settled_transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -19.25, 0, 14)
 metadata/planning_object_id = ""
@@ -5542,7 +5542,7 @@ metadata/planning_attachment = ""
 [node name="@RigidBody3D@8852" type="RigidBody3D" parent="." unique_id=1403836164 instance=ExtResource("11_sytgd")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -19.25, 1, 10)
 
-model_path = "res://models/objects/enviroments/01/01_duct_rect_straight.glb"
+model_path = "res://models/objects/enviroments/01/pipe_duct/01_duct_rect_straight.glb"
 metadata/world_bound = true
 metadata/planning_settled_transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -19.25, 1, 10)
 metadata/planning_object_id = ""
@@ -5552,7 +5552,7 @@ metadata/planning_attachment = ""
 [node name="@RigidBody3D@8853" type="RigidBody3D" parent="." unique_id=1067397609 instance=ExtResource("11_sytgd")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -19.25, 1, 12)
 
-model_path = "res://models/objects/enviroments/01/01_duct_rect_straight.glb"
+model_path = "res://models/objects/enviroments/01/pipe_duct/01_duct_rect_straight.glb"
 metadata/world_bound = true
 metadata/planning_settled_transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -19.25, 1, 12)
 metadata/planning_object_id = ""
@@ -5562,7 +5562,7 @@ metadata/planning_attachment = ""
 [node name="@RigidBody3D@8854" type="RigidBody3D" parent="." unique_id=793598857 instance=ExtResource("11_sytgd")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -19.25, 1, 14)
 
-model_path = "res://models/objects/enviroments/01/01_duct_rect_straight.glb"
+model_path = "res://models/objects/enviroments/01/pipe_duct/01_duct_rect_straight.glb"
 metadata/world_bound = true
 metadata/planning_settled_transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -19.25, 1, 14)
 metadata/planning_object_id = ""
@@ -5572,7 +5572,7 @@ metadata/planning_attachment = ""
 [node name="@RigidBody3D@8855" type="RigidBody3D" parent="." unique_id=1877599664 instance=ExtResource("11_sytgd")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -19.25, 2, 10)
 
-model_path = "res://models/objects/enviroments/01/01_duct_rect_straight.glb"
+model_path = "res://models/objects/enviroments/01/pipe_duct/01_duct_rect_straight.glb"
 metadata/world_bound = true
 metadata/planning_settled_transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -19.25, 2, 10)
 metadata/planning_object_id = ""
@@ -5582,7 +5582,7 @@ metadata/planning_attachment = ""
 [node name="@RigidBody3D@8856" type="RigidBody3D" parent="." unique_id=1293936884 instance=ExtResource("11_sytgd")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -19.25, 2, 12)
 
-model_path = "res://models/objects/enviroments/01/01_duct_rect_straight.glb"
+model_path = "res://models/objects/enviroments/01/pipe_duct/01_duct_rect_straight.glb"
 metadata/world_bound = true
 metadata/planning_settled_transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -19.25, 2, 12)
 metadata/planning_object_id = ""
@@ -5592,7 +5592,7 @@ metadata/planning_attachment = ""
 [node name="@RigidBody3D@8857" type="RigidBody3D" parent="." unique_id=1931775484 instance=ExtResource("11_sytgd")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -19.25, 2, 14)
 
-model_path = "res://models/objects/enviroments/01/01_duct_rect_straight.glb"
+model_path = "res://models/objects/enviroments/01/pipe_duct/01_duct_rect_straight.glb"
 metadata/world_bound = true
 metadata/planning_settled_transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -19.25, 2, 14)
 metadata/planning_object_id = ""
@@ -5602,7 +5602,7 @@ metadata/planning_attachment = ""
 [node name="@RigidBody3D@8858" type="RigidBody3D" parent="." unique_id=105233299 instance=ExtResource("11_sytgd")]
 transform = Transform3D(8.940697e-07, 0.99999994, 1.4901161e-07, 5.9604645e-08, -1.1920929e-07, 1, 1, -8.6426735e-07, 0, -12.249999, 0.2909996, 15)
 
-model_path = "res://models/objects/enviroments/01/01_duct_rect_elbow.glb"
+model_path = "res://models/objects/enviroments/01/pipe_duct/01_duct_rect_elbow.glb"
 metadata/world_bound = true
 metadata/planning_settled_transform = Transform3D(8.940697e-07, 0.99999994, 1.4901161e-07, 5.9604645e-08, -1.1920929e-07, 1, 1, -8.6426735e-07, 0, -12.249999, 0.2909996, 15)
 metadata/planning_object_id = ""
@@ -5612,7 +5612,7 @@ metadata/planning_attachment = ""
 [node name="@RigidBody3D@8859" type="RigidBody3D" parent="." unique_id=1119973984 instance=ExtResource("11_sytgd")]
 transform = Transform3D(8.940697e-07, 0.99999994, 1.4901161e-07, 5.9604645e-08, -1.1920929e-07, 1, 1, -8.6426735e-07, 0, -11.25, 0.29100007, 15)
 
-model_path = "res://models/objects/enviroments/01/01_duct_rect_elbow.glb"
+model_path = "res://models/objects/enviroments/01/pipe_duct/01_duct_rect_elbow.glb"
 metadata/world_bound = true
 metadata/planning_settled_transform = Transform3D(8.940697e-07, 0.99999994, 1.4901161e-07, 5.9604645e-08, -1.1920929e-07, 1, 1, -8.6426735e-07, 0, -11.25, 0.29100007, 15)
 metadata/planning_object_id = ""
@@ -5622,7 +5622,7 @@ metadata/planning_attachment = ""
 [node name="@RigidBody3D@8860" type="RigidBody3D" parent="." unique_id=1077272748 instance=ExtResource("11_sytgd")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -19.25, 0, 4)
 
-model_path = "res://models/objects/enviroments/01/01_duct_rect_straight.glb"
+model_path = "res://models/objects/enviroments/01/pipe_duct/01_duct_rect_straight.glb"
 metadata/world_bound = true
 metadata/planning_settled_transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -19.25, 0, 4)
 metadata/planning_object_id = ""
@@ -5632,7 +5632,7 @@ metadata/planning_attachment = ""
 [node name="@RigidBody3D@8861" type="RigidBody3D" parent="." unique_id=937275169 instance=ExtResource("11_sytgd")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -19.25, 0, 0)
 
-model_path = "res://models/objects/enviroments/01/01_duct_rect_straight.glb"
+model_path = "res://models/objects/enviroments/01/pipe_duct/01_duct_rect_straight.glb"
 metadata/world_bound = true
 metadata/planning_settled_transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -19.25, 0, 0)
 metadata/planning_object_id = ""
@@ -5642,7 +5642,7 @@ metadata/planning_attachment = ""
 [node name="@RigidBody3D@8862" type="RigidBody3D" parent="." unique_id=1008060999 instance=ExtResource("11_sytgd")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -19.25, 0, 1.9999999)
 
-model_path = "res://models/objects/enviroments/01/01_duct_rect_straight.glb"
+model_path = "res://models/objects/enviroments/01/pipe_duct/01_duct_rect_straight.glb"
 metadata/world_bound = true
 metadata/planning_settled_transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -19.25, 0, 1.9999999)
 metadata/planning_object_id = ""
@@ -5652,7 +5652,7 @@ metadata/planning_attachment = ""
 [node name="@RigidBody3D@8863" type="RigidBody3D" parent="." unique_id=450331116 instance=ExtResource("11_sytgd")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -19.25, 0, -2)
 
-model_path = "res://models/objects/enviroments/01/01_duct_rect_straight.glb"
+model_path = "res://models/objects/enviroments/01/pipe_duct/01_duct_rect_straight.glb"
 metadata/world_bound = true
 metadata/planning_settled_transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -19.25, 0, -2)
 metadata/planning_object_id = ""
@@ -5662,7 +5662,7 @@ metadata/planning_attachment = ""
 [node name="@RigidBody3D@8864" type="RigidBody3D" parent="." unique_id=365918225 instance=ExtResource("11_sytgd")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -19.25, 0, -4)
 
-model_path = "res://models/objects/enviroments/01/01_duct_rect_straight.glb"
+model_path = "res://models/objects/enviroments/01/pipe_duct/01_duct_rect_straight.glb"
 metadata/world_bound = true
 metadata/planning_settled_transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -19.25, 0, -4)
 metadata/planning_object_id = ""
@@ -5672,7 +5672,7 @@ metadata/planning_attachment = ""
 [node name="@RigidBody3D@8865" type="RigidBody3D" parent="." unique_id=838973868 instance=ExtResource("11_sytgd")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -19.25, 0, -6)
 
-model_path = "res://models/objects/enviroments/01/01_duct_rect_straight.glb"
+model_path = "res://models/objects/enviroments/01/pipe_duct/01_duct_rect_straight.glb"
 metadata/world_bound = true
 metadata/planning_settled_transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -19.25, 0, -6)
 metadata/planning_object_id = ""
@@ -5682,7 +5682,7 @@ metadata/planning_attachment = ""
 [node name="@RigidBody3D@8866" type="RigidBody3D" parent="." unique_id=1752434841 instance=ExtResource("11_sytgd")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -19.25, 0, -8)
 
-model_path = "res://models/objects/enviroments/01/01_duct_rect_straight.glb"
+model_path = "res://models/objects/enviroments/01/pipe_duct/01_duct_rect_straight.glb"
 metadata/world_bound = true
 metadata/planning_settled_transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -19.25, 0, -8)
 metadata/planning_object_id = ""
@@ -5692,7 +5692,7 @@ metadata/planning_attachment = ""
 [node name="@RigidBody3D@8867" type="RigidBody3D" parent="." unique_id=511088673 instance=ExtResource("11_sytgd")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -19.25, 0, -10)
 
-model_path = "res://models/objects/enviroments/01/01_duct_rect_straight.glb"
+model_path = "res://models/objects/enviroments/01/pipe_duct/01_duct_rect_straight.glb"
 metadata/world_bound = true
 metadata/planning_settled_transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -19.25, 0, -10)
 metadata/planning_object_id = ""
@@ -5702,7 +5702,7 @@ metadata/planning_attachment = ""
 [node name="@RigidBody3D@8868" type="RigidBody3D" parent="." unique_id=362066846 instance=ExtResource("11_sytgd")]
 transform = Transform3D(-1, 0, -1.8199258e-06, 0, 1, 0, 1.8199258e-06, 0, -1, -19.250002, 0, -9.999999)
 
-model_path = "res://models/objects/enviroments/01/01_duct_rect_elbow.glb"
+model_path = "res://models/objects/enviroments/01/pipe_duct/01_duct_rect_elbow.glb"
 metadata/world_bound = true
 metadata/planning_settled_transform = Transform3D(-1, 0, -1.8199258e-06, 0, 1, 0, 1.8199258e-06, 0, -1, -19.250002, 0, -9.999999)
 metadata/planning_object_id = ""
@@ -5712,7 +5712,7 @@ metadata/planning_attachment = ""
 [node name="@RigidBody3D@8869" type="RigidBody3D" parent="." unique_id=522803197 instance=ExtResource("11_sytgd")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -19.25, 1, 4)
 
-model_path = "res://models/objects/enviroments/01/01_duct_rect_straight.glb"
+model_path = "res://models/objects/enviroments/01/pipe_duct/01_duct_rect_straight.glb"
 metadata/world_bound = true
 metadata/planning_settled_transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -19.25, 1, 4)
 metadata/planning_object_id = ""
@@ -5722,7 +5722,7 @@ metadata/planning_attachment = ""
 [node name="@RigidBody3D@8870" type="RigidBody3D" parent="." unique_id=471923799 instance=ExtResource("11_sytgd")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -19.25, 1, 6)
 
-model_path = "res://models/objects/enviroments/01/01_duct_rect_straight.glb"
+model_path = "res://models/objects/enviroments/01/pipe_duct/01_duct_rect_straight.glb"
 metadata/world_bound = true
 metadata/planning_settled_transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -19.25, 1, 6)
 metadata/planning_object_id = ""
@@ -5732,7 +5732,7 @@ metadata/planning_attachment = ""
 [node name="@RigidBody3D@8871" type="RigidBody3D" parent="." unique_id=1167724078 instance=ExtResource("11_sytgd")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -19.25, 1, 1.9999999)
 
-model_path = "res://models/objects/enviroments/01/01_duct_rect_straight.glb"
+model_path = "res://models/objects/enviroments/01/pipe_duct/01_duct_rect_straight.glb"
 metadata/world_bound = true
 metadata/planning_settled_transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -19.25, 1, 1.9999999)
 metadata/planning_object_id = ""
@@ -5742,7 +5742,7 @@ metadata/planning_attachment = ""
 [node name="@RigidBody3D@8872" type="RigidBody3D" parent="." unique_id=474584988 instance=ExtResource("11_sytgd")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -19.25, 1, 0)
 
-model_path = "res://models/objects/enviroments/01/01_duct_rect_straight.glb"
+model_path = "res://models/objects/enviroments/01/pipe_duct/01_duct_rect_straight.glb"
 metadata/world_bound = true
 metadata/planning_settled_transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -19.25, 1, 0)
 metadata/planning_object_id = ""
@@ -5752,7 +5752,7 @@ metadata/planning_attachment = ""
 [node name="@RigidBody3D@8873" type="RigidBody3D" parent="." unique_id=771699552 instance=ExtResource("11_sytgd")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -19.25, 1, -2)
 
-model_path = "res://models/objects/enviroments/01/01_duct_rect_straight.glb"
+model_path = "res://models/objects/enviroments/01/pipe_duct/01_duct_rect_straight.glb"
 metadata/world_bound = true
 metadata/planning_settled_transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -19.25, 1, -2)
 metadata/planning_object_id = ""
@@ -5762,7 +5762,7 @@ metadata/planning_attachment = ""
 [node name="@RigidBody3D@8874" type="RigidBody3D" parent="." unique_id=1365677168 instance=ExtResource("11_sytgd")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -19.25, 1, -4)
 
-model_path = "res://models/objects/enviroments/01/01_duct_rect_straight.glb"
+model_path = "res://models/objects/enviroments/01/pipe_duct/01_duct_rect_straight.glb"
 metadata/world_bound = true
 metadata/planning_settled_transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -19.25, 1, -4)
 metadata/planning_object_id = ""
@@ -5772,7 +5772,7 @@ metadata/planning_attachment = ""
 [node name="@RigidBody3D@8875" type="RigidBody3D" parent="." unique_id=1241128757 instance=ExtResource("11_sytgd")]
 transform = Transform3D(-1, 0, -1.8199258e-06, 0, 1, 0, 1.8199258e-06, 0, -1, -19.250002, 1, -4)
 
-model_path = "res://models/objects/enviroments/01/01_duct_rect_elbow.glb"
+model_path = "res://models/objects/enviroments/01/pipe_duct/01_duct_rect_elbow.glb"
 metadata/world_bound = true
 metadata/planning_settled_transform = Transform3D(-1, 0, -1.8199258e-06, 0, 1, 0, 1.8199258e-06, 0, -1, -19.250002, 1, -4)
 metadata/planning_object_id = ""
@@ -5782,7 +5782,7 @@ metadata/planning_attachment = ""
 [node name="@RigidBody3D@8876" type="RigidBody3D" parent="." unique_id=859703132 instance=ExtResource("11_sytgd")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -19.25, 2, 4)
 
-model_path = "res://models/objects/enviroments/01/01_duct_rect_straight.glb"
+model_path = "res://models/objects/enviroments/01/pipe_duct/01_duct_rect_straight.glb"
 metadata/world_bound = true
 metadata/planning_settled_transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -19.25, 2, 4)
 metadata/planning_object_id = ""
@@ -5792,7 +5792,7 @@ metadata/planning_attachment = ""
 [node name="@RigidBody3D@8877" type="RigidBody3D" parent="." unique_id=1935183346 instance=ExtResource("11_sytgd")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -19.25, 2, 6)
 
-model_path = "res://models/objects/enviroments/01/01_duct_rect_straight.glb"
+model_path = "res://models/objects/enviroments/01/pipe_duct/01_duct_rect_straight.glb"
 metadata/world_bound = true
 metadata/planning_settled_transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -19.25, 2, 6)
 metadata/planning_object_id = ""
@@ -5802,7 +5802,7 @@ metadata/planning_attachment = ""
 [node name="@RigidBody3D@8878" type="RigidBody3D" parent="." unique_id=1741232801 instance=ExtResource("11_sytgd")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -19.25, 2, 1.9999999)
 
-model_path = "res://models/objects/enviroments/01/01_duct_rect_straight.glb"
+model_path = "res://models/objects/enviroments/01/pipe_duct/01_duct_rect_straight.glb"
 metadata/world_bound = true
 metadata/planning_settled_transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -19.25, 2, 1.9999999)
 metadata/planning_object_id = ""
@@ -5812,7 +5812,7 @@ metadata/planning_attachment = ""
 [node name="@RigidBody3D@8879" type="RigidBody3D" parent="." unique_id=133916092 instance=ExtResource("11_sytgd")]
 transform = Transform3D(-1, 0, -1.8199258e-06, 0, 1, 0, 1.8199258e-06, 0, -1, -19.250002, 2, 2.0000007)
 
-model_path = "res://models/objects/enviroments/01/01_duct_rect_elbow.glb"
+model_path = "res://models/objects/enviroments/01/pipe_duct/01_duct_rect_elbow.glb"
 metadata/world_bound = true
 metadata/planning_settled_transform = Transform3D(-1, 0, -1.8199258e-06, 0, 1, 0, 1.8199258e-06, 0, -1, -19.250002, 2, 2.0000007)
 metadata/planning_object_id = ""
@@ -5822,7 +5822,7 @@ metadata/planning_attachment = ""
 [node name="@RigidBody3D@8880" type="RigidBody3D" parent="." unique_id=787616545 instance=ExtResource("11_sytgd")]
 transform = Transform3D(-1.6292067e-07, 0, 0.99999994, 0, 1, 0, -0.99999994, 0, -1.6292067e-07, -20, 0, -13)
 
-model_path = "res://models/objects/enviroments/01/01_pipe_sewer_floor_elbow.glb"
+model_path = "res://models/objects/enviroments/01/pipe_duct/01_pipe_sewer_floor_elbow.glb"
 metadata/world_bound = true
 metadata/planning_settled_transform = Transform3D(-1.6292067e-07, 0, 0.99999994, 0, 1, 0, -0.99999994, 0, -1.6292067e-07, -20, 0, -13)
 metadata/planning_object_id = ""
@@ -5832,7 +5832,7 @@ metadata/planning_attachment = ""
 [node name="@RigidBody3D@8881" type="RigidBody3D" parent="." unique_id=47632363 instance=ExtResource("11_sytgd")]
 transform = Transform3D(-1.6292067e-07, 0, 0.99999994, 0, 1, 0, -0.99999994, 0, -1.6292067e-07, -20, 0.24999999, -13)
 
-model_path = "res://models/objects/enviroments/01/01_pipe_sewer_floor_elbow.glb"
+model_path = "res://models/objects/enviroments/01/pipe_duct/01_pipe_sewer_floor_elbow.glb"
 metadata/world_bound = true
 metadata/planning_settled_transform = Transform3D(-1.6292067e-07, 0, 0.99999994, 0, 1, 0, -0.99999994, 0, -1.6292067e-07, -20, 0.24999999, -13)
 metadata/planning_object_id = ""
@@ -5842,7 +5842,7 @@ metadata/planning_attachment = ""
 [node name="@RigidBody3D@8882" type="RigidBody3D" parent="." unique_id=1147220596 instance=ExtResource("11_sytgd")]
 transform = Transform3D(-1.6292067e-07, 0, 0.99999994, 0, 1, 0, -0.99999994, 0, -1.6292067e-07, -20, 0.75, -13.25)
 
-model_path = "res://models/objects/enviroments/01/01_pipe_sewer_floor_elbow.glb"
+model_path = "res://models/objects/enviroments/01/pipe_duct/01_pipe_sewer_floor_elbow.glb"
 metadata/world_bound = true
 metadata/planning_settled_transform = Transform3D(-1.6292067e-07, 0, 0.99999994, 0, 1, 0, -0.99999994, 0, -1.6292067e-07, -20, 0.75, -13.25)
 metadata/planning_object_id = ""
@@ -5852,7 +5852,7 @@ metadata/planning_attachment = ""
 [node name="@RigidBody3D@8883" type="RigidBody3D" parent="." unique_id=1944688960 instance=ExtResource("11_sytgd")]
 transform = Transform3D(-1.6292067e-07, 0, 0.99999994, 0, 1, 0, -0.99999994, 0, -1.6292067e-07, -19.75, 1.5, -13.5)
 
-model_path = "res://models/objects/enviroments/01/01_pipe_sewer_floor_elbow.glb"
+model_path = "res://models/objects/enviroments/01/pipe_duct/01_pipe_sewer_floor_elbow.glb"
 metadata/world_bound = true
 metadata/planning_settled_transform = Transform3D(-1.6292067e-07, 0, 0.99999994, 0, 1, 0, -0.99999994, 0, -1.6292067e-07, -19.75, 1.5, -13.5)
 metadata/planning_object_id = ""
@@ -5862,7 +5862,7 @@ metadata/planning_attachment = ""
 [node name="@RigidBody3D@8884" type="RigidBody3D" parent="." unique_id=1755271539 instance=ExtResource("11_sytgd")]
 transform = Transform3D(9.0996286e-07, 0.99999994, 3.894142e-07, -0.99999994, 9.0996286e-07, -1.5632217e-14, -3.6998467e-13, -3.8941417e-07, 1, -12.5, 1.0245001, -16)
 
-model_path = "res://models/objects/enviroments/01/01_pipe_sewer_floor_elbow.glb"
+model_path = "res://models/objects/enviroments/01/pipe_duct/01_pipe_sewer_floor_elbow.glb"
 metadata/world_bound = true
 metadata/planning_settled_transform = Transform3D(9.0996286e-07, 0.99999994, 3.894142e-07, -0.99999994, 9.0996286e-07, -1.5632217e-14, -3.6998467e-13, -3.8941417e-07, 1, -12.5, 1.0245001, -16)
 metadata/planning_object_id = ""
@@ -5872,7 +5872,7 @@ metadata/planning_attachment = ""
 [node name="@RigidBody3D@8885" type="RigidBody3D" parent="." unique_id=1844133297 instance=ExtResource("11_sytgd")]
 transform = Transform3D(9.0996286e-07, 0.99999994, 0, -0.99999994, 9.0996286e-07, 0, 0, 0, 1, -13, 2.0110002, -16)
 
-model_path = "res://models/objects/enviroments/01/01_pipe_sewer_floor_elbow.glb"
+model_path = "res://models/objects/enviroments/01/pipe_duct/01_pipe_sewer_floor_elbow.glb"
 metadata/world_bound = true
 metadata/planning_settled_transform = Transform3D(9.0996286e-07, 0.99999994, 0, -0.99999994, 9.0996286e-07, 0, 0, 0, 1, -13, 2.0110002, -16)
 metadata/planning_object_id = ""
@@ -5882,7 +5882,7 @@ metadata/planning_attachment = ""
 [node name="@RigidBody3D@8886" type="RigidBody3D" parent="." unique_id=632871548 instance=ExtResource("11_sytgd")]
 transform = Transform3D(9.0996286e-07, 0.99999994, 1.7053612e-14, -0.99999994, 9.0996286e-07, -1.7484554e-07, -1.7484552e-07, 1.4204934e-13, 1, -15.75, 2.519, -16)
 
-model_path = "res://models/objects/enviroments/01/01_pipe_sewer_floor_elbow.glb"
+model_path = "res://models/objects/enviroments/01/pipe_duct/01_pipe_sewer_floor_elbow.glb"
 metadata/world_bound = true
 metadata/planning_settled_transform = Transform3D(9.0996286e-07, 0.99999994, 1.7053612e-14, -0.99999994, 9.0996286e-07, -1.7484554e-07, -1.7484552e-07, 1.4204934e-13, 1, -15.75, 2.519, -16)
 metadata/planning_object_id = ""
@@ -5892,7 +5892,7 @@ metadata/planning_attachment = ""
 [node name="@RigidBody3D@8887" type="RigidBody3D" parent="." unique_id=1128272166 instance=ExtResource("11_sytgd")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -18.75, 1.5, -16.5)
 
-model_path = "res://models/objects/enviroments/01/01_pipe_sewer_floor_straight.glb"
+model_path = "res://models/objects/enviroments/01/pipe_duct/01_pipe_sewer_floor_straight.glb"
 metadata/world_bound = true
 metadata/planning_settled_transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -18.75, 1.5, -16.5)
 metadata/planning_object_id = ""
@@ -5902,7 +5902,7 @@ metadata/planning_attachment = ""
 [node name="@RigidBody3D@8888" type="RigidBody3D" parent="." unique_id=2096607452 instance=ExtResource("11_sytgd")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -19, 0.75, -16.25)
 
-model_path = "res://models/objects/enviroments/01/01_pipe_sewer_floor_straight.glb"
+model_path = "res://models/objects/enviroments/01/pipe_duct/01_pipe_sewer_floor_straight.glb"
 metadata/world_bound = true
 metadata/planning_settled_transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -19, 0.75, -16.25)
 metadata/planning_object_id = ""
@@ -5912,7 +5912,7 @@ metadata/planning_attachment = ""
 [node name="@RigidBody3D@8889" type="RigidBody3D" parent="." unique_id=1210327325 instance=ExtResource("11_sytgd")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -19, 0, -16)
 
-model_path = "res://models/objects/enviroments/01/01_pipe_sewer_floor_straight.glb"
+model_path = "res://models/objects/enviroments/01/pipe_duct/01_pipe_sewer_floor_straight.glb"
 metadata/world_bound = true
 metadata/planning_settled_transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -19, 0, -16)
 metadata/planning_object_id = ""
@@ -5922,7 +5922,7 @@ metadata/planning_attachment = ""
 [node name="@RigidBody3D@8890" type="RigidBody3D" parent="." unique_id=1683880176 instance=ExtResource("11_sytgd")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -19, 0.25, -16)
 
-model_path = "res://models/objects/enviroments/01/01_pipe_sewer_floor_straight.glb"
+model_path = "res://models/objects/enviroments/01/pipe_duct/01_pipe_sewer_floor_straight.glb"
 metadata/world_bound = true
 metadata/planning_settled_transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -19, 0.25, -16)
 metadata/planning_object_id = ""
@@ -5932,7 +5932,7 @@ metadata/planning_attachment = ""
 [node name="@RigidBody3D@8891" type="RigidBody3D" parent="." unique_id=1146231015 instance=ExtResource("11_sytgd")]
 transform = Transform3D(1, 7.6419245e-15, -3.3403912e-22, 0, -4.371139e-08, -1, -7.6419245e-15, 1, -4.371139e-08, -12.75, 1.0305002, -15.25)
 
-model_path = "res://models/objects/enviroments/01/01_pipe_sewer_floor_straight.glb"
+model_path = "res://models/objects/enviroments/01/pipe_duct/01_pipe_sewer_floor_straight.glb"
 metadata/world_bound = true
 metadata/planning_settled_transform = Transform3D(1, 7.6419245e-15, -3.3403912e-22, 0, -4.371139e-08, -1, -7.6419245e-15, 1, -4.371139e-08, -12.75, 1.0305002, -15.25)
 metadata/planning_object_id = ""
@@ -5942,7 +5942,7 @@ metadata/planning_attachment = ""
 [node name="@RigidBody3D@8892" type="RigidBody3D" parent="." unique_id=1552791915 instance=ExtResource("11_sytgd")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -4.5, 2, -14.75)
 
-model_path = "res://models/objects/enviroments/01/01_pipe_sewer_floor_straight.glb"
+model_path = "res://models/objects/enviroments/01/pipe_duct/01_pipe_sewer_floor_straight.glb"
 metadata/world_bound = true
 metadata/planning_settled_transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -4.5, 2, -14.75)
 metadata/planning_object_id = ""
@@ -5952,7 +5952,7 @@ metadata/planning_attachment = ""
 [node name="@RigidBody3D@8893" type="RigidBody3D" parent="." unique_id=1885907922 instance=ExtResource("11_sytgd")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -4.25, 2, -14.75)
 
-model_path = "res://models/objects/enviroments/01/01_pipe_sewer_floor_straight.glb"
+model_path = "res://models/objects/enviroments/01/pipe_duct/01_pipe_sewer_floor_straight.glb"
 metadata/world_bound = true
 metadata/planning_settled_transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -4.25, 2, -14.75)
 metadata/planning_object_id = ""
@@ -5962,7 +5962,7 @@ metadata/planning_attachment = ""
 [node name="@RigidBody3D@8894" type="RigidBody3D" parent="." unique_id=1251645226 instance=ExtResource("11_sytgd")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -4, 2.25, -14.75)
 
-model_path = "res://models/objects/enviroments/01/01_pipe_sewer_floor_straight.glb"
+model_path = "res://models/objects/enviroments/01/pipe_duct/01_pipe_sewer_floor_straight.glb"
 metadata/world_bound = true
 metadata/planning_settled_transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -4, 2.25, -14.75)
 metadata/planning_object_id = ""
@@ -5972,7 +5972,7 @@ metadata/planning_attachment = ""
 [node name="@RigidBody3D@8895" type="RigidBody3D" parent="." unique_id=1533011274 instance=ExtResource("11_sytgd")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -4.5, 2, -13.25)
 
-model_path = "res://models/objects/enviroments/01/01_pipe_sewer_floor_straight.glb"
+model_path = "res://models/objects/enviroments/01/pipe_duct/01_pipe_sewer_floor_straight.glb"
 metadata/world_bound = true
 metadata/planning_settled_transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -4.5, 2, -13.25)
 metadata/planning_object_id = ""
@@ -5982,7 +5982,7 @@ metadata/planning_attachment = ""
 [node name="@RigidBody3D@8896" type="RigidBody3D" parent="." unique_id=1509693693 instance=ExtResource("11_sytgd")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -4.25, 2, -13.25)
 
-model_path = "res://models/objects/enviroments/01/01_pipe_sewer_floor_straight.glb"
+model_path = "res://models/objects/enviroments/01/pipe_duct/01_pipe_sewer_floor_straight.glb"
 metadata/world_bound = true
 metadata/planning_settled_transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -4.25, 2, -13.25)
 metadata/planning_object_id = ""
@@ -5992,7 +5992,7 @@ metadata/planning_attachment = ""
 [node name="@RigidBody3D@8897" type="RigidBody3D" parent="." unique_id=1019007758 instance=ExtResource("11_sytgd")]
 transform = Transform3D(-1.6292067e-07, 0.99999994, -4.1212103e-14, -0.99999994, -1.6292067e-07, -1.7484554e-07, -1.7484552e-07, 1.2726147e-14, 1, -4.75, 2.2730005, -11.25)
 
-model_path = "res://models/objects/enviroments/01/01_pipe_sewer_floor_elbow.glb"
+model_path = "res://models/objects/enviroments/01/pipe_duct/01_pipe_sewer_floor_elbow.glb"
 metadata/world_bound = true
 metadata/planning_settled_transform = Transform3D(-1.6292067e-07, 0.99999994, -4.1212103e-14, -0.99999994, -1.6292067e-07, -1.7484554e-07, -1.7484552e-07, 1.2726147e-14, 1, -4.75, 2.2730005, -11.25)
 metadata/planning_object_id = ""
@@ -6002,7 +6002,7 @@ metadata/planning_attachment = ""
 [node name="@RigidBody3D@8898" type="RigidBody3D" parent="." unique_id=109289066 instance=ExtResource("11_sytgd")]
 transform = Transform3D(-1.6292068e-07, 1, -3.0032404e-14, -1, -1.6292068e-07, -1.7484554e-07, -1.7484554e-07, 1.5464484e-15, 1, -4.5, 2.2730005, -11.25)
 
-model_path = "res://models/objects/enviroments/01/01_pipe_sewer_floor_elbow.glb"
+model_path = "res://models/objects/enviroments/01/pipe_duct/01_pipe_sewer_floor_elbow.glb"
 metadata/world_bound = true
 metadata/planning_settled_transform = Transform3D(-1.6292068e-07, 1, -3.0032404e-14, -1, -1.6292068e-07, -1.7484554e-07, -1.7484554e-07, 1.5464484e-15, 1, -4.5, 2.2730005, -11.25)
 metadata/planning_object_id = ""
@@ -6012,7 +6012,7 @@ metadata/planning_attachment = ""
 [node name="@RigidBody3D@8899" type="RigidBody3D" parent="." unique_id=1688166046 instance=ExtResource("11_sytgd")]
 transform = Transform3D(-1.6292068e-07, 1, -3.0032404e-14, -1, -1.6292068e-07, -1.7484554e-07, -1.7484554e-07, 1.5464484e-15, 1, -4.25, 2.5230005, -11.75)
 
-model_path = "res://models/objects/enviroments/01/01_pipe_sewer_floor_elbow.glb"
+model_path = "res://models/objects/enviroments/01/pipe_duct/01_pipe_sewer_floor_elbow.glb"
 metadata/world_bound = true
 metadata/planning_settled_transform = Transform3D(-1.6292068e-07, 1, -3.0032404e-14, -1, -1.6292068e-07, -1.7484554e-07, -1.7484554e-07, 1.5464484e-15, 1, -4.25, 2.5230005, -11.75)
 metadata/planning_object_id = ""
@@ -6022,7 +6022,7 @@ metadata/planning_attachment = ""
 [node name="@RigidBody3D@8900" type="RigidBody3D" parent="." unique_id=2100338387 instance=ExtResource("11_sytgd")]
 transform = Transform3D(1, 7.6419245e-15, -3.3403912e-22, 0, -4.371139e-08, -1, -7.6419245e-15, 1, -4.371139e-08, -4.25, 1.5305002, -10.5)
 
-model_path = "res://models/objects/enviroments/01/01_pipe_sewer_floor_straight.glb"
+model_path = "res://models/objects/enviroments/01/pipe_duct/01_pipe_sewer_floor_straight.glb"
 metadata/world_bound = true
 metadata/planning_settled_transform = Transform3D(1, 7.6419245e-15, -3.3403912e-22, 0, -4.371139e-08, -1, -7.6419245e-15, 1, -4.371139e-08, -4.25, 1.5305002, -10.5)
 metadata/planning_object_id = ""
@@ -6032,7 +6032,7 @@ metadata/planning_attachment = ""
 [node name="@RigidBody3D@8901" type="RigidBody3D" parent="." unique_id=1727779679 instance=ExtResource("11_sytgd")]
 transform = Transform3D(-1, 1.8199258e-06, -7.9551484e-14, 0, -4.371139e-08, -1, -1.8199258e-06, -1, 4.371139e-08, -4.5, 2.046501, -10)
 
-model_path = "res://models/objects/enviroments/01/01_pipe_sewer_floor_straight.glb"
+model_path = "res://models/objects/enviroments/01/pipe_duct/01_pipe_sewer_floor_straight.glb"
 metadata/world_bound = true
 metadata/planning_settled_transform = Transform3D(-1, 1.8199258e-06, -7.9551484e-14, 0, -4.371139e-08, -1, -1.8199258e-06, -1, 4.371139e-08, -4.5, 2.046501, -10)
 metadata/planning_object_id = ""
@@ -6042,7 +6042,7 @@ metadata/planning_attachment = ""
 [node name="@RigidBody3D@8902" type="RigidBody3D" parent="." unique_id=894198085 instance=ExtResource("11_sytgd")]
 transform = Transform3D(1, 7.6419245e-15, -3.3403912e-22, 0, -4.371139e-08, -1, -7.6419245e-15, 1, -4.371139e-08, -4, 1.5305002, -11)
 
-model_path = "res://models/objects/enviroments/01/01_pipe_sewer_floor_straight.glb"
+model_path = "res://models/objects/enviroments/01/pipe_duct/01_pipe_sewer_floor_straight.glb"
 metadata/world_bound = true
 metadata/planning_settled_transform = Transform3D(1, 7.6419245e-15, -3.3403912e-22, 0, -4.371139e-08, -1, -7.6419245e-15, 1, -4.371139e-08, -4, 1.5305002, -11)
 metadata/planning_object_id = ""
@@ -6052,7 +6052,7 @@ metadata/planning_attachment = ""
 [node name="@RigidBody3D@8903" type="RigidBody3D" parent="." unique_id=1207662909 instance=ExtResource("11_sytgd")]
 transform = Transform3D(-1.6292067e-07, 0, 0.99999994, 0, 1, 0, -0.99999994, 0, -1.6292067e-07, 14.105089, 2.5, -15.000002)
 
-model_path = "res://models/objects/enviroments/01/01_pipe_sewer_floor_elbow.glb"
+model_path = "res://models/objects/enviroments/01/pipe_duct/01_pipe_sewer_floor_elbow.glb"
 metadata/world_bound = true
 metadata/planning_settled_transform = Transform3D(-1.6292067e-07, 0, 0.99999994, 0, 1, 0, -0.99999994, 0, -1.6292067e-07, 14.105089, 2.5, -15.000002)
 metadata/planning_object_id = ""
@@ -6062,7 +6062,7 @@ metadata/planning_attachment = ""
 [node name="@RigidBody3D@8904" type="RigidBody3D" parent="." unique_id=138974482 instance=ExtResource("11_sytgd")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 7, 2.5, -16)
 
-model_path = "res://models/objects/enviroments/01/01_pipe_sewer_floor_elbow.glb"
+model_path = "res://models/objects/enviroments/01/pipe_duct/01_pipe_sewer_floor_elbow.glb"
 metadata/world_bound = true
 metadata/planning_settled_transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 7, 2.5, -16)
 metadata/planning_object_id = ""
@@ -6072,7 +6072,7 @@ metadata/planning_attachment = ""
 [node name="@RigidBody3D@8905" type="RigidBody3D" parent="." unique_id=423865980 instance=ExtResource("11_sytgd")]
 transform = Transform3D(9.099629e-07, 1.7484538e-07, 0.99999994, 1.7484552e-07, 1, -1.7484552e-07, -0.99999994, 1.748457e-07, 9.0996286e-07, 8, 2.5160005, -15)
 
-model_path = "res://models/objects/enviroments/01/01_pipe_sewer_floor_straight.glb"
+model_path = "res://models/objects/enviroments/01/pipe_duct/01_pipe_sewer_floor_straight.glb"
 metadata/world_bound = true
 metadata/planning_settled_transform = Transform3D(9.099629e-07, 1.7484538e-07, 0.99999994, 1.7484552e-07, 1, -1.7484552e-07, -0.99999994, 1.748457e-07, 9.0996286e-07, 8, 2.5160005, -15)
 metadata/planning_object_id = ""
@@ -6082,7 +6082,7 @@ metadata/planning_attachment = ""
 [node name="@RigidBody3D@8906" type="RigidBody3D" parent="." unique_id=1262558423 instance=ExtResource("11_sytgd")]
 transform = Transform3D(-4.3711356e-08, 1.7484555e-07, 1, 1.7484554e-07, 1, -1.7484554e-07, -1, 1.7484552e-07, -4.371139e-08, 10, 2.5160005, -15)
 
-model_path = "res://models/objects/enviroments/01/01_pipe_sewer_floor_straight.glb"
+model_path = "res://models/objects/enviroments/01/pipe_duct/01_pipe_sewer_floor_straight.glb"
 metadata/world_bound = true
 metadata/planning_settled_transform = Transform3D(-4.3711356e-08, 1.7484555e-07, 1, 1.7484554e-07, 1, -1.7484554e-07, -1, 1.7484552e-07, -4.371139e-08, 10, 2.5160005, -15)
 metadata/planning_object_id = ""
@@ -6092,7 +6092,7 @@ metadata/planning_attachment = ""
 [node name="@RigidBody3D@8907" type="RigidBody3D" parent="." unique_id=60429234 instance=ExtResource("11_sytgd")]
 transform = Transform3D(-4.3711356e-08, 1.7484555e-07, 1, 1.7484554e-07, 1, -1.7484554e-07, -1, 1.7484552e-07, -4.371139e-08, 12, 2.5160005, -15)
 
-model_path = "res://models/objects/enviroments/01/01_pipe_sewer_floor_straight.glb"
+model_path = "res://models/objects/enviroments/01/pipe_duct/01_pipe_sewer_floor_straight.glb"
 metadata/world_bound = true
 metadata/planning_settled_transform = Transform3D(-4.3711356e-08, 1.7484555e-07, 1, 1.7484554e-07, 1, -1.7484554e-07, -1, 1.7484552e-07, -4.371139e-08, 12, 2.5160005, -15)
 metadata/planning_object_id = ""
@@ -6102,7 +6102,7 @@ metadata/planning_attachment = ""
 [node name="@RigidBody3D@8908" type="RigidBody3D" parent="." unique_id=766608137 instance=ExtResource("11_sytgd")]
 transform = Transform3D(9.0996286e-07, -0.9999999, -4.3711385e-08, 0, -4.3711385e-08, 0.99999994, -0.99999994, -9.099628e-07, -3.977574e-14, -10, 1.5877924, -3.7499998)
 
-model_path = "res://models/objects/enviroments/01/01_pipe_water_floor_elbow.glb"
+model_path = "res://models/objects/enviroments/01/pipe_duct/01_pipe_water_floor_elbow.glb"
 metadata/world_bound = true
 metadata/planning_settled_transform = Transform3D(9.0996286e-07, -0.9999999, -4.3711385e-08, 0, -4.3711385e-08, 0.99999994, -0.99999994, -9.099628e-07, -3.977574e-14, -10, 1.5877924, -3.7499998)
 metadata/planning_object_id = ""
@@ -6112,7 +6112,7 @@ metadata/planning_attachment = ""
 [node name="@RigidBody3D@8909" type="RigidBody3D" parent="." unique_id=1209053335 instance=ExtResource("11_sytgd")]
 transform = Transform3D(9.0996286e-07, -0.99999994, 1.1920914e-07, 0.99999994, 9.0996286e-07, -1.7484554e-07, 1.7484541e-07, 1.1920929e-07, 1, -10, 2.6100004, -6.75)
 
-model_path = "res://models/objects/enviroments/01/01_pipe_water_floor_straight.glb"
+model_path = "res://models/objects/enviroments/01/pipe_duct/01_pipe_water_floor_straight.glb"
 metadata/world_bound = true
 metadata/planning_settled_transform = Transform3D(9.0996286e-07, -0.99999994, 1.1920914e-07, 0.99999994, 9.0996286e-07, -1.7484554e-07, 1.7484541e-07, 1.1920929e-07, 1, -10, 2.6100004, -6.75)
 metadata/planning_object_id = ""
@@ -6122,7 +6122,7 @@ metadata/planning_attachment = ""
 [node name="@RigidBody3D@8910" type="RigidBody3D" parent="." unique_id=308486821 instance=ExtResource("11_sytgd")]
 transform = Transform3D(-4.3711367e-08, -1, 1.1920915e-07, 1, -4.371139e-08, -1.7484554e-07, 1.7484554e-07, 1.1920914e-07, 1, -10, 2.6100004, -8.75)
 
-model_path = "res://models/objects/enviroments/01/01_pipe_water_floor_straight.glb"
+model_path = "res://models/objects/enviroments/01/pipe_duct/01_pipe_water_floor_straight.glb"
 metadata/world_bound = true
 metadata/planning_settled_transform = Transform3D(-4.3711367e-08, -1, 1.1920915e-07, 1, -4.371139e-08, -1.7484554e-07, 1.7484554e-07, 1.1920914e-07, 1, -10, 2.6100004, -8.75)
 metadata/planning_object_id = ""
@@ -6132,7 +6132,7 @@ metadata/planning_attachment = ""
 [node name="@RigidBody3D@8911" type="RigidBody3D" parent="." unique_id=909716293 instance=ExtResource("11_sytgd")]
 transform = Transform3D(-4.371139e-08, 1, 4.371139e-08, 0, -4.371139e-08, 1, 1, 4.371139e-08, 1.9106855e-15, -10.5, 1.6117927, -9.75)
 
-model_path = "res://models/objects/enviroments/01/01_pipe_water_floor_elbow.glb"
+model_path = "res://models/objects/enviroments/01/pipe_duct/01_pipe_water_floor_elbow.glb"
 metadata/world_bound = true
 metadata/planning_settled_transform = Transform3D(-4.371139e-08, 1, 4.371139e-08, 0, -4.371139e-08, 1, 1, 4.371139e-08, 1.9106855e-15, -10.5, 1.6117927, -9.75)
 metadata/planning_object_id = ""
@@ -6142,7 +6142,7 @@ metadata/planning_attachment = ""
 [node name="@RigidBody3D@8912" type="RigidBody3D" parent="." unique_id=426357631 instance=ExtResource("11_sytgd")]
 transform = Transform3D(-4.371139e-08, -1, 4.371139e-08, 0, -4.371139e-08, -1, 1, -4.371139e-08, 1.9106855e-15, -10, 1.7590003, -9.75)
 
-model_path = "res://models/objects/enviroments/01/01_pipe_water_floor_straight.glb"
+model_path = "res://models/objects/enviroments/01/pipe_duct/01_pipe_water_floor_straight.glb"
 metadata/world_bound = true
 metadata/planning_settled_transform = Transform3D(-4.371139e-08, -1, 4.371139e-08, 0, -4.371139e-08, -1, 1, -4.371139e-08, 1.9106855e-15, -10, 1.7590003, -9.75)
 metadata/planning_object_id = ""
@@ -6152,7 +6152,7 @@ metadata/planning_attachment = ""
 [node name="@RigidBody3D@8913" type="RigidBody3D" parent="." unique_id=880456189 instance=ExtResource("11_sytgd")]
 transform = Transform3D(9.099629e-07, -1, 4.371139e-08, 0, -4.371139e-08, -1, 1, 9.099629e-07, -3.9775742e-14, -10, 1.7590003, -3.75)
 
-model_path = "res://models/objects/enviroments/01/01_pipe_water_floor_straight.glb"
+model_path = "res://models/objects/enviroments/01/pipe_duct/01_pipe_water_floor_straight.glb"
 metadata/world_bound = true
 metadata/planning_settled_transform = Transform3D(9.099629e-07, -1, 4.371139e-08, 0, -4.371139e-08, -1, 1, 9.099629e-07, -3.9775742e-14, -10, 1.7590003, -3.75)
 metadata/planning_object_id = ""
@@ -6162,7 +6162,7 @@ metadata/planning_attachment = ""
 [node name="@RigidBody3D@8914" type="RigidBody3D" parent="." unique_id=1726198306 instance=ExtResource("11_sytgd")]
 transform = Transform3D(-4.371139e-08, -1, 4.371139e-08, 0, -4.371139e-08, -1, 1, -4.371139e-08, 1.9106855e-15, 13.899909, 1.0171416, -3.900002)
 
-model_path = "res://models/objects/enviroments/01/01_pipe_water_floor_straight.glb"
+model_path = "res://models/objects/enviroments/01/pipe_duct/01_pipe_water_floor_straight.glb"
 metadata/world_bound = true
 metadata/planning_settled_transform = Transform3D(-4.371139e-08, -1, 4.371139e-08, 0, -4.371139e-08, -1, 1, -4.371139e-08, 1.9106855e-15, 13.899909, 1.0171416, -3.900002)
 metadata/planning_object_id = ""
@@ -6172,7 +6172,7 @@ metadata/planning_attachment = ""
 [node name="@RigidBody3D@8915" type="RigidBody3D" parent="." unique_id=1419009917 instance=ExtResource("11_sytgd")]
 transform = Transform3D(-4.371139e-08, -1, 4.371139e-08, 0, -4.371139e-08, -1, 1, -4.371139e-08, 1.9106855e-15, 13.899909, 1.0171416, -3.7000022)
 
-model_path = "res://models/objects/enviroments/01/01_pipe_water_floor_straight.glb"
+model_path = "res://models/objects/enviroments/01/pipe_duct/01_pipe_water_floor_straight.glb"
 metadata/world_bound = true
 metadata/planning_settled_transform = Transform3D(-4.371139e-08, -1, 4.371139e-08, 0, -4.371139e-08, -1, 1, -4.371139e-08, 1.9106855e-15, 13.899909, 1.0171416, -3.7000022)
 metadata/planning_object_id = ""
@@ -6182,7 +6182,7 @@ metadata/planning_attachment = ""
 [node name="@RigidBody3D@8916" type="RigidBody3D" parent="." unique_id=2064790589 instance=ExtResource("11_sytgd")]
 transform = Transform3D(-4.371139e-08, -1, 4.371139e-08, 0, -4.371139e-08, -1, 1, -4.371139e-08, 1.9106855e-15, 13.899909, 1.0171416, -3.5000024)
 
-model_path = "res://models/objects/enviroments/01/01_pipe_water_floor_straight.glb"
+model_path = "res://models/objects/enviroments/01/pipe_duct/01_pipe_water_floor_straight.glb"
 metadata/world_bound = true
 metadata/planning_settled_transform = Transform3D(-4.371139e-08, -1, 4.371139e-08, 0, -4.371139e-08, -1, 1, -4.371139e-08, 1.9106855e-15, 13.899909, 1.0171416, -3.5000024)
 metadata/planning_object_id = ""
@@ -6192,7 +6192,7 @@ metadata/planning_attachment = ""
 [node name="@RigidBody3D@8917" type="RigidBody3D" parent="." unique_id=1289737446 instance=ExtResource("11_sytgd")]
 transform = Transform3D(5.9604645e-07, 0, -1, 0, 1, 0, 1, 0, 5.9604645e-07, 13.89991, 1.0271415, -3.7000012)
 
-model_path = "res://models/objects/enviroments/01/01_pipe_water_wall_straight.glb"
+model_path = "res://models/objects/enviroments/01/pipe_duct/01_pipe_water_wall_straight.glb"
 metadata/world_bound = true
 metadata/planning_settled_transform = Transform3D(5.9604645e-07, 0, -1, 0, 1, 0, 1, 0, 5.9604645e-07, 13.89991, 1.0271415, -3.7000012)
 metadata/planning_object_id = ""
@@ -6202,7 +6202,7 @@ metadata/planning_attachment = ""
 [node name="@RigidBody3D@8918" type="RigidBody3D" parent="." unique_id=246592597 instance=ExtResource("11_sytgd")]
 transform = Transform3D(5.9604645e-07, 0, -1, 0, 1, 0, 1, 0, 5.9604645e-07, 13.89991, 1.0271415, -3.5000014)
 
-model_path = "res://models/objects/enviroments/01/01_pipe_water_wall_straight.glb"
+model_path = "res://models/objects/enviroments/01/pipe_duct/01_pipe_water_wall_straight.glb"
 metadata/world_bound = true
 metadata/planning_settled_transform = Transform3D(5.9604645e-07, 0, -1, 0, 1, 0, 1, 0, 5.9604645e-07, 13.89991, 1.0271415, -3.5000014)
 metadata/planning_object_id = ""
@@ -6212,7 +6212,7 @@ metadata/planning_attachment = ""
 [node name="@RigidBody3D@8919" type="RigidBody3D" parent="." unique_id=1277491105 instance=ExtResource("11_sytgd")]
 transform = Transform3D(5.9604645e-07, 0, -1, 0, 1, 0, 1, 0, 5.9604645e-07, 13.89991, 1.0271415, -3.900001)
 
-model_path = "res://models/objects/enviroments/01/01_pipe_water_wall_straight.glb"
+model_path = "res://models/objects/enviroments/01/pipe_duct/01_pipe_water_wall_straight.glb"
 metadata/world_bound = true
 metadata/planning_settled_transform = Transform3D(5.9604645e-07, 0, -1, 0, 1, 0, 1, 0, 5.9604645e-07, 13.89991, 1.0271415, -3.900001)
 metadata/planning_object_id = ""
@@ -6222,7 +6222,7 @@ metadata/planning_attachment = ""
 [node name="@RigidBody3D@8920" type="RigidBody3D" parent="." unique_id=1010894743 instance=ExtResource("11_sytgd")]
 transform = Transform3D(9.099629e-07, -1, 4.371139e-08, 0, -4.371139e-08, -1, 1, 9.099629e-07, -3.9775742e-14, 13.899909, 1.0171416, -4.3000016)
 
-model_path = "res://models/objects/enviroments/01/01_pipe_water_floor_straight.glb"
+model_path = "res://models/objects/enviroments/01/pipe_duct/01_pipe_water_floor_straight.glb"
 metadata/world_bound = true
 metadata/planning_settled_transform = Transform3D(9.099629e-07, -1, 4.371139e-08, 0, -4.371139e-08, -1, 1, 9.099629e-07, -3.9775742e-14, 13.899909, 1.0171416, -4.3000016)
 metadata/planning_object_id = ""
@@ -6232,7 +6232,7 @@ metadata/planning_attachment = ""
 [node name="@RigidBody3D@8921" type="RigidBody3D" parent="." unique_id=1120880084 instance=ExtResource("11_sytgd")]
 transform = Transform3D(9.099629e-07, -1, 4.371139e-08, 0, -4.371139e-08, -1, 1, 9.099629e-07, -3.9775742e-14, 13.899909, 1.0171416, -4.5000014)
 
-model_path = "res://models/objects/enviroments/01/01_pipe_water_floor_straight.glb"
+model_path = "res://models/objects/enviroments/01/pipe_duct/01_pipe_water_floor_straight.glb"
 metadata/world_bound = true
 metadata/planning_settled_transform = Transform3D(9.099629e-07, -1, 4.371139e-08, 0, -4.371139e-08, -1, 1, 9.099629e-07, -3.9775742e-14, 13.899909, 1.0171416, -4.5000014)
 metadata/planning_object_id = ""
@@ -6242,7 +6242,7 @@ metadata/planning_attachment = ""
 [node name="@RigidBody3D@8922" type="RigidBody3D" parent="." unique_id=549127674 instance=ExtResource("11_sytgd")]
 transform = Transform3D(5.9604645e-07, 0, -1, 0, 1, 0, 1, 0, 5.9604645e-07, 13.899909, 1.0271415, -4.3000016)
 
-model_path = "res://models/objects/enviroments/01/01_pipe_water_wall_straight.glb"
+model_path = "res://models/objects/enviroments/01/pipe_duct/01_pipe_water_wall_straight.glb"
 metadata/world_bound = true
 metadata/planning_settled_transform = Transform3D(5.9604645e-07, 0, -1, 0, 1, 0, 1, 0, 5.9604645e-07, 13.899909, 1.0271415, -4.3000016)
 metadata/planning_object_id = ""
@@ -6252,7 +6252,7 @@ metadata/planning_attachment = ""
 [node name="@RigidBody3D@8923" type="RigidBody3D" parent="." unique_id=305204338 instance=ExtResource("11_sytgd")]
 transform = Transform3D(5.9604645e-07, 0, -1, 0, 1, 0, 1, 0, 5.9604645e-07, 13.899909, 1.0271415, -4.5000014)
 
-model_path = "res://models/objects/enviroments/01/01_pipe_water_wall_straight.glb"
+model_path = "res://models/objects/enviroments/01/pipe_duct/01_pipe_water_wall_straight.glb"
 metadata/world_bound = true
 metadata/planning_settled_transform = Transform3D(5.9604645e-07, 0, -1, 0, 1, 0, 1, 0, 5.9604645e-07, 13.899909, 1.0271415, -4.5000014)
 metadata/planning_object_id = ""
@@ -6592,7 +6592,7 @@ metadata/planning_attachment = ""
 [node name="PaperProp" type="RigidBody3D" parent="." unique_id=625791488 instance=ExtResource("16_fbhie")]
 transform = Transform3D(0.9966338, 1.607798e-05, -0.08198162, -1.6117307e-05, 1, 1.8209005e-07, 0.08198162, 1.1398458e-06, 0.9966338, 4.840952, 1.4220691, -15.3556185)
 
-model_path = "res://models/objects/enviroments/09/09_paper_stray.glb"
+model_path = "res://models/objects/enviroments/09/paper/09_paper_stray.glb"
 metadata/world_bound = true
 metadata/planning_settled_transform = Transform3D(0.9966338, 1.607798e-05, -0.08198162, -1.6117307e-05, 1, 1.8209005e-07, 0.08198162, 1.1398458e-06, 0.9966338, 4.840952, 1.4220691, -15.3556185)
 metadata/planning_object_id = ""
@@ -6603,7 +6603,7 @@ metadata/planning_zone = 0
 [node name="@RigidBody3D@8956" type="RigidBody3D" parent="." unique_id=412604880 instance=ExtResource("16_fbhie")]
 transform = Transform3D(0.99998367, 1.5808999e-05, -0.005712898, -1.5817704e-05, 1, -1.4785999e-06, 0.005712898, 1.5689407e-06, 0.99998367, 4.7036963, 1.4220711, -15.384525)
 
-model_path = "res://models/objects/enviroments/09/09_office_files_a.glb"
+model_path = "res://models/objects/enviroments/09/files/09_office_files_a.glb"
 metadata/world_bound = true
 metadata/planning_settled_transform = Transform3D(0.99998367, 1.5808999e-05, -0.005712898, -1.5817704e-05, 1, -1.4785999e-06, 0.005712898, 1.5689407e-06, 0.99998367, 4.7036963, 1.4220711, -15.384525)
 metadata/planning_object_id = ""
@@ -13099,7 +13099,7 @@ metadata/planning_attachment = ""
 [node name="@RigidBody3D@9540" type="RigidBody3D" parent="." unique_id=18683712 instance=ExtResource("11_sytgd")]
 transform = Transform3D(-0.04840803, 0.009044984, 0.9987867, 0.0023161818, 0.9999573, -0.008943327, -0.99882495, 0.0018804423, -0.048426867, 6.3011465, 0.0044988394, -6.749881)
 
-model_path = "res://models/objects/enviroments/09/09_bucket_with_mop.glb"
+model_path = "res://models/objects/enviroments/09/bin_bucket_mop/09_bucket_with_mop.glb"
 metadata/world_bound = true
 metadata/planning_settled_transform = Transform3D(-0.04840803, 0.009044984, 0.9987867, 0.0023161818, 0.9999573, -0.008943327, -0.99882495, 0.0018804423, -0.048426867, 6.3011465, 0.0044988394, -6.749881)
 metadata/planning_object_id = ""
@@ -13109,7 +13109,7 @@ metadata/planning_attachment = ""
 [node name="@RigidBody3D@9541" type="RigidBody3D" parent="." unique_id=1329349102 instance=ExtResource("11_sytgd")]
 transform = Transform3D(0.011442363, 0.007997034, 0.9999026, 0.013495807, 0.9998757, -0.008151259, -0.9998435, 0.013587762, 0.011332989, -10.502651, 0.0044296384, -7.343243)
 
-model_path = "res://models/objects/enviroments/09/09_bucket_with_mop.glb"
+model_path = "res://models/objects/enviroments/09/bin_bucket_mop/09_bucket_with_mop.glb"
 metadata/world_bound = true
 metadata/planning_settled_transform = Transform3D(0.011442363, 0.007997034, 0.9999026, 0.013495807, 0.9998757, -0.008151259, -0.9998435, 0.013587762, 0.011332989, -10.502651, 0.0044296384, -7.343243)
 metadata/planning_object_id = ""
@@ -13119,7 +13119,7 @@ metadata/planning_attachment = ""
 [node name="@RigidBody3D@9542" type="RigidBody3D" parent="." unique_id=382924864 instance=ExtResource("11_sytgd")]
 transform = Transform3D(0.00013279915, -0.0010852332, 0.9999994, 0.008375621, 0.99996436, 0.001084083, -0.99996495, 0.008375472, 0.00014185905, -17.499378, 0.005365312, -8.303017)
 
-model_path = "res://models/objects/enviroments/09/09_bucket_with_mop.glb"
+model_path = "res://models/objects/enviroments/09/bin_bucket_mop/09_bucket_with_mop.glb"
 metadata/world_bound = true
 metadata/planning_settled_transform = Transform3D(0.00013279915, -0.0010852332, 0.9999994, 0.008375621, 0.99996436, 0.001084083, -0.99996495, 0.008375472, 0.00014185905, -17.499378, 0.005365312, -8.303017)
 metadata/planning_object_id = ""
@@ -13129,7 +13129,7 @@ metadata/planning_attachment = ""
 [node name="@RigidBody3D@9543" type="RigidBody3D" parent="." unique_id=1707139863 instance=ExtResource("11_sytgd")]
 transform = Transform3D(0.9999996, 4.9040624e-05, -0.0009269434, -4.9050832e-05, 1, -1.0992735e-05, 0.0009269428, 1.1038197e-05, 0.9999996, -17.193579, 0.013414621, -8.368048)
 
-model_path = "res://models/objects/enviroments/09/09_mop.glb"
+model_path = "res://models/objects/enviroments/09/bin_bucket_mop/09_mop.glb"
 metadata/world_bound = true
 metadata/planning_settled_transform = Transform3D(0.9999996, 4.9040624e-05, -0.0009269434, -4.9050832e-05, 1, -1.0992735e-05, 0.0009269428, 1.1038197e-05, 0.9999996, -17.193579, 0.013414621, -8.368048)
 metadata/planning_object_id = ""
@@ -13139,7 +13139,7 @@ metadata/planning_attachment = ""
 [node name="@RigidBody3D@9544" type="RigidBody3D" parent="." unique_id=2013299995 instance=ExtResource("11_sytgd")]
 transform = Transform3D(0.00011342764, 0.00012553272, 1, -6.877057e-06, 1, -0.00012553195, -1, -6.862807e-06, 0.00011342764, 12.870305, 1.2704644, -0.16604047)
 
-model_path = "res://models/objects/enviroments/09/09_mug_alt_3.glb"
+model_path = "res://models/objects/enviroments/09/glass_mug/09_mug_alt_3.glb"
 metadata/world_bound = true
 metadata/planning_settled_transform = Transform3D(0.00011342764, 0.00012553272, 1, -6.877057e-06, 1, -0.00012553195, -1, -6.862807e-06, 0.00011342764, 12.870305, 1.2704644, -0.16604047)
 metadata/planning_object_id = ""
@@ -13149,7 +13149,7 @@ metadata/planning_attachment = ""
 [node name="@RigidBody3D@9545" type="RigidBody3D" parent="." unique_id=826192140 instance=ExtResource("16_fbhie")]
 transform = Transform3D(1, -1.3054017e-06, -4.3473727e-05, 1.3053981e-06, 1, -8.544287e-08, 4.3473727e-05, 8.538613e-08, 1, 13.009942, 1.4030651, 1.7993541)
 
-model_path = "res://models/objects/enviroments/09/09_office_files_e.glb"
+model_path = "res://models/objects/enviroments/09/files/09_office_files_e.glb"
 metadata/world_bound = true
 metadata/planning_settled_transform = Transform3D(1, -1.3054017e-06, -4.3473727e-05, 1.3053981e-06, 1, -8.544287e-08, 4.3473727e-05, 8.538613e-08, 1, 13.009942, 1.4030651, 1.7993541)
 metadata/planning_object_id = ""
@@ -13159,7 +13159,7 @@ metadata/planning_attachment = ""
 [node name="@RigidBody3D@9546" type="RigidBody3D" parent="." unique_id=985032233 instance=ExtResource("11_sytgd")]
 transform = Transform3D(-3.5762787e-07, 0, 0.99999994, 0, 1, 0, -0.99999994, 0, -3.5762787e-07, 14.135088, 2.25, 0.9999994)
 
-model_path = "res://models/objects/enviroments/01/01_duct_rect_straight.glb"
+model_path = "res://models/objects/enviroments/01/pipe_duct/01_duct_rect_straight.glb"
 metadata/world_bound = true
 metadata/planning_settled_transform = Transform3D(-3.5762787e-07, 0, 0.99999994, 0, 1, 0, -0.99999994, 0, -3.5762787e-07, 14.135088, 2.25, 0.9999994)
 metadata/planning_object_id = ""
@@ -13169,7 +13169,7 @@ metadata/planning_attachment = ""
 [node name="@RigidBody3D@9547" type="RigidBody3D" parent="." unique_id=1972980833 instance=ExtResource("11_sytgd")]
 transform = Transform3D(-3.5762787e-07, 0, 0.99999994, 0, 1, 0, -0.99999994, 0, -3.5762787e-07, 16.25, 2.25, 1.0000011)
 
-model_path = "res://models/objects/enviroments/01/01_duct_rect_straight.glb"
+model_path = "res://models/objects/enviroments/01/pipe_duct/01_duct_rect_straight.glb"
 metadata/world_bound = true
 metadata/planning_settled_transform = Transform3D(-3.5762787e-07, 0, 0.99999994, 0, 1, 0, -0.99999994, 0, -3.5762787e-07, 16.25, 2.25, 1.0000011)
 metadata/planning_object_id = ""
@@ -13213,7 +13213,7 @@ metadata/planning_flicker_step = 0.1
 [node name="@RigidBody3D@9550" type="RigidBody3D" parent="." unique_id=1088110607 instance=ExtResource("11_sytgd")]
 transform = Transform3D(-3.5762787e-07, 0, 0.99999994, 0, 1, 0, -0.99999994, 0, -3.5762787e-07, 18.25, 2.25, 1.0000011)
 
-model_path = "res://models/objects/enviroments/01/01_duct_rect_straight.glb"
+model_path = "res://models/objects/enviroments/01/pipe_duct/01_duct_rect_straight.glb"
 metadata/world_bound = true
 metadata/planning_settled_transform = Transform3D(-3.5762787e-07, 0, 0.99999994, 0, 1, 0, -0.99999994, 0, -3.5762787e-07, 18.25, 2.25, 1.0000011)
 metadata/planning_object_id = ""
@@ -13223,7 +13223,7 @@ metadata/planning_attachment = ""
 [node name="@RigidBody3D@9551" type="RigidBody3D" parent="." unique_id=1166763527 instance=ExtResource("11_sytgd")]
 transform = Transform3D(1, 3.693854e-05, 8.222751e-06, -3.6938418e-05, 1, -1.5300624e-05, -8.223316e-06, 1.5300322e-05, 1, 0.13208558, 0.01345396, 11.037008)
 
-model_path = "res://models/objects/enviroments/02/02_crate_canvas_large.glb"
+model_path = "res://models/objects/enviroments/04/04_crate_canvas_large.glb"
 metadata/world_bound = true
 metadata/planning_settled_transform = Transform3D(1, 3.693854e-05, 8.222751e-06, -3.6938418e-05, 1, -1.5300624e-05, -8.223316e-06, 1.5300322e-05, 1, 0.13208558, 0.01345396, 11.037008)
 metadata/planning_object_id = ""
@@ -13233,7 +13233,7 @@ metadata/planning_attachment = ""
 [node name="@RigidBody3D@9552" type="RigidBody3D" parent="." unique_id=455088141 instance=ExtResource("11_sytgd")]
 transform = Transform3D(1, -2.741861e-08, -2.5030164e-07, 2.7411572e-08, 1, -2.811157e-05, 2.5030243e-07, 2.811157e-05, 1, -10.979996, 0.013476074, 6.499998)
 
-model_path = "res://models/objects/enviroments/02/02_crate_wood_large.glb"
+model_path = "res://models/objects/enviroments/04/04_crate_wood_large.glb"
 metadata/world_bound = true
 metadata/planning_settled_transform = Transform3D(1, -2.741861e-08, -2.5030164e-07, 2.7411572e-08, 1, -2.811157e-05, 2.5030243e-07, 2.811157e-05, 1, -10.979996, 0.013476074, 6.499998)
 metadata/planning_object_id = ""
@@ -13243,7 +13243,7 @@ metadata/planning_attachment = ""
 [node name="@RigidBody3D@9553" type="RigidBody3D" parent="." unique_id=1292486003 instance=ExtResource("11_sytgd")]
 transform = Transform3D(1, -1.764664e-08, 9.4315993e-07, 1.7664258e-08, 1, -1.8680206e-05, -9.431596e-07, 1.8680206e-05, 1, -10.979999, 0.01348418, 0.500004)
 
-model_path = "res://models/objects/enviroments/02/02_crate_wood_large.glb"
+model_path = "res://models/objects/enviroments/04/04_crate_wood_large.glb"
 metadata/world_bound = true
 metadata/planning_settled_transform = Transform3D(1, -1.764664e-08, 9.4315993e-07, 1.7664258e-08, 1, -1.8680206e-05, -9.431596e-07, 1.8680206e-05, 1, -10.979999, 0.01348418, 0.500004)
 metadata/planning_object_id = ""
@@ -13253,7 +13253,7 @@ metadata/planning_attachment = ""
 [node name="@RigidBody3D@9554" type="RigidBody3D" parent="." unique_id=649774801 instance=ExtResource("11_sytgd")]
 transform = Transform3D(1, 4.7269616e-05, 8.721789e-06, -4.7269506e-05, 1, -1.2906717e-05, -8.722398e-06, 1.2906304e-05, 1, -2.7501376, 0.013448894, -15.016983)
 
-model_path = "res://models/objects/enviroments/02/02_crate_wood_large.glb"
+model_path = "res://models/objects/enviroments/04/04_crate_wood_large.glb"
 metadata/world_bound = true
 metadata/planning_settled_transform = Transform3D(1, 4.7269616e-05, 8.721789e-06, -4.7269506e-05, 1, -1.2906717e-05, -8.722398e-06, 1.2906304e-05, 1, -2.7501376, 0.013448894, -15.016983)
 metadata/planning_object_id = ""
@@ -13263,7 +13263,7 @@ metadata/planning_attachment = ""
 [node name="@RigidBody3D@9555" type="RigidBody3D" parent="." unique_id=554771801 instance=ExtResource("11_sytgd")]
 transform = Transform3D(1, -4.7542576e-06, -6.5852932e-06, 4.7541484e-06, 1, -1.6579588e-05, 6.5853724e-06, 1.6579555e-05, 1, 13.019994, 0.013481975, -15.016967)
 
-model_path = "res://models/objects/enviroments/02/02_crate_wood_large.glb"
+model_path = "res://models/objects/enviroments/04/04_crate_wood_large.glb"
 metadata/world_bound = true
 metadata/planning_settled_transform = Transform3D(1, -4.7542576e-06, -6.5852932e-06, 4.7541484e-06, 1, -1.6579588e-05, 6.5853724e-06, 1.6579555e-05, 1, 13.019994, 0.013481975, -15.016967)
 metadata/planning_object_id = ""
@@ -13273,7 +13273,7 @@ metadata/planning_attachment = ""
 [node name="@RigidBody3D@9556" type="RigidBody3D" parent="." unique_id=420294559 instance=ExtResource("11_sytgd")]
 transform = Transform3D(1, 1.7496388e-05, -1.2405484e-06, -1.7496424e-05, 1, -2.8906776e-05, 1.2400427e-06, 2.8906798e-05, 1, 11.339956, 0.013460636, -15.016996)
 
-model_path = "res://models/objects/enviroments/02/02_crate_wood_large.glb"
+model_path = "res://models/objects/enviroments/04/04_crate_wood_large.glb"
 metadata/world_bound = true
 metadata/planning_settled_transform = Transform3D(1, 1.7496388e-05, -1.2405484e-06, -1.7496424e-05, 1, -2.8906776e-05, 1.2400427e-06, 2.8906798e-05, 1, 11.339956, 0.013460636, -15.016996)
 metadata/planning_object_id = ""
@@ -13283,7 +13283,7 @@ metadata/planning_attachment = ""
 [node name="@RigidBody3D@9557" type="RigidBody3D" parent="." unique_id=1853076692 instance=ExtResource("11_sytgd")]
 transform = Transform3D(0.99999994, 3.252416e-05, -0.00024877128, -3.2530344e-05, 1, -2.4859042e-05, 0.00024877046, 2.4867133e-05, 0.99999994, 9.633212, 0.013448596, -14.962782)
 
-model_path = "res://models/objects/enviroments/02/02_crate_canvas_large.glb"
+model_path = "res://models/objects/enviroments/04/04_crate_canvas_large.glb"
 metadata/world_bound = true
 metadata/planning_settled_transform = Transform3D(0.99999994, 3.252416e-05, -0.00024877128, -3.2530344e-05, 1, -2.4859042e-05, 0.00024877046, 2.4867133e-05, 0.99999994, 9.633212, 0.013448596, -14.962782)
 metadata/planning_object_id = ""
@@ -13293,7 +13293,7 @@ metadata/planning_attachment = ""
 [node name="@RigidBody3D@9558" type="RigidBody3D" parent="." unique_id=1396150794 instance=ExtResource("11_sytgd")]
 transform = Transform3D(1, 3.0687006e-06, 6.350676e-07, -3.068696e-06, 1, -7.1656164e-06, -6.350895e-07, 7.1656145e-06, 1, 12.998923, 0.013480067, -9.249993)
 
-model_path = "res://models/objects/enviroments/02/02_crate_canvas_large.glb"
+model_path = "res://models/objects/enviroments/04/04_crate_canvas_large.glb"
 metadata/world_bound = true
 metadata/planning_settled_transform = Transform3D(1, 3.0687006e-06, 6.350676e-07, -3.068696e-06, 1, -7.1656164e-06, -6.350895e-07, 7.1656145e-06, 1, 12.998923, 0.013480067, -9.249993)
 metadata/planning_object_id = ""
@@ -13303,7 +13303,7 @@ metadata/planning_attachment = ""
 [node name="@RigidBody3D@9559" type="RigidBody3D" parent="." unique_id=1125524127 instance=ExtResource("11_sytgd")]
 transform = Transform3D(1, -1.324007e-06, 4.6970501e-07, 1.3240141e-06, 1, -1.4818764e-05, -4.696854e-07, 1.4818764e-05, 1, 12.998931, 0.013482213, -11.064008)
 
-model_path = "res://models/objects/enviroments/02/02_crate_canvas_large.glb"
+model_path = "res://models/objects/enviroments/04/04_crate_canvas_large.glb"
 metadata/world_bound = true
 metadata/planning_settled_transform = Transform3D(1, -1.324007e-06, 4.6970501e-07, 1.3240141e-06, 1, -1.4818764e-05, -4.696854e-07, 1.4818764e-05, 1, 12.998931, 0.013482213, -11.064008)
 metadata/planning_object_id = ""
@@ -13313,7 +13313,7 @@ metadata/planning_attachment = ""
 [node name="@RigidBody3D@9560" type="RigidBody3D" parent="." unique_id=1394201884 instance=ExtResource("11_sytgd")]
 transform = Transform3D(1, -1.1517695e-06, 9.566626e-08, 1.1517718e-06, 1, -2.4424175e-05, -9.563812e-08, 2.4424175e-05, 1, 19.020014, 0.013478339, -3.0365238)
 
-model_path = "res://models/objects/enviroments/02/02_crate_wood_large.glb"
+model_path = "res://models/objects/enviroments/04/04_crate_wood_large.glb"
 metadata/world_bound = true
 metadata/planning_settled_transform = Transform3D(1, -1.1517695e-06, 9.566626e-08, 1.1517718e-06, 1, -2.4424175e-05, -9.563812e-08, 2.4424175e-05, 1, 19.020014, 0.013478339, -3.0365238)
 metadata/planning_object_id = ""
@@ -13323,7 +13323,7 @@ metadata/planning_attachment = ""
 [node name="@RigidBody3D@9561" type="RigidBody3D" parent="." unique_id=1014955694 instance=ExtResource("11_sytgd")]
 transform = Transform3D(1, 6.701297e-08, -1.0238252e-06, -6.698661e-08, 1, 2.5746192e-05, 1.023827e-06, -2.5746192e-05, 1, 14.979992, 0.013477445, 14.75002)
 
-model_path = "res://models/objects/enviroments/02/02_crate_wood_large.glb"
+model_path = "res://models/objects/enviroments/04/04_crate_wood_large.glb"
 metadata/world_bound = true
 metadata/planning_settled_transform = Transform3D(1, 6.701297e-08, -1.0238252e-06, -6.698661e-08, 1, 2.5746192e-05, 1.023827e-06, -2.5746192e-05, 1, 14.979992, 0.013477445, 14.75002)
 metadata/planning_object_id = ""
@@ -13333,7 +13333,7 @@ metadata/planning_attachment = ""
 [node name="@RigidBody3D@9562" type="RigidBody3D" parent="." unique_id=221703806 instance=ExtResource("11_sytgd")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 8.960501, 0.013500035, 12.963511)
 
-model_path = "res://models/objects/enviroments/02/02_crate_wood_large.glb"
+model_path = "res://models/objects/enviroments/04/04_crate_wood_large.glb"
 metadata/world_bound = true
 metadata/planning_settled_transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 8.960501, 0.013500035, 12.963511)
 metadata/planning_object_id = ""
@@ -13343,7 +13343,7 @@ metadata/planning_attachment = ""
 [node name="@RigidBody3D@9563" type="RigidBody3D" parent="." unique_id=1947828312 instance=ExtResource("11_sytgd")]
 transform = Transform3D(0.5999818, -0.0045137177, 0.0011068038, 0.004512096, 0.5999822, 0.0008808333, -0.0011133973, -0.0008724833, 0.5999983, -0.25491703, 0.1495789, 15.249912)
 
-model_path = "res://models/objects/enviroments/02/02_crate_wood_large.glb"
+model_path = "res://models/objects/enviroments/04/04_crate_wood_large.glb"
 metadata/world_bound = true
 metadata/planning_settled_transform = Transform3D(0.5999818, -0.0045137177, 0.0011068038, 0.004512096, 0.5999822, 0.0008808333, -0.0011133973, -0.0008724833, 0.5999983, -0.25491703, 0.1495789, 15.249912)
 metadata/planning_object_id = ""
@@ -13353,7 +13353,7 @@ metadata/planning_attachment = ""
 [node name="@RigidBody3D@9564" type="RigidBody3D" parent="." unique_id=1243321069 instance=ExtResource("11_sytgd")]
 transform = Transform3D(0.59999937, -0.00074573664, 0.00041118573, 0.0007451625, 0.59999895, 0.0008371038, -0.0004122255, -0.0008365924, 0.5999991, 0.7526449, 0.15029141, 15.247136)
 
-model_path = "res://models/objects/enviroments/02/02_crate_wood_large.glb"
+model_path = "res://models/objects/enviroments/04/04_crate_wood_large.glb"
 metadata/world_bound = true
 metadata/planning_settled_transform = Transform3D(0.59999937, -0.00074573664, 0.00041118573, 0.0007451625, 0.59999895, 0.0008371038, -0.0004122255, -0.0008365924, 0.5999991, 0.7526449, 0.15029141, 15.247136)
 metadata/planning_object_id = ""
@@ -13363,7 +13363,7 @@ metadata/planning_attachment = ""
 [node name="@RigidBody3D@9565" type="RigidBody3D" parent="." unique_id=157747765 instance=ExtResource("11_sytgd")]
 transform = Transform3D(0.59999985, -5.745836e-07, -0.00023605884, 5.495022e-07, 0.5999999, -6.375039e-05, 0.00023605891, 6.375017e-05, 0.59999985, 1.748966, 0.013445199, 10.750436)
 
-model_path = "res://models/objects/enviroments/02/02_crate_wood_large.glb"
+model_path = "res://models/objects/enviroments/04/04_crate_wood_large.glb"
 metadata/world_bound = true
 metadata/planning_settled_transform = Transform3D(0.59999985, -5.745836e-07, -0.00023605884, 5.495022e-07, 0.5999999, -6.375039e-05, 0.00023605891, 6.375017e-05, 0.59999985, 1.748966, 0.013445199, 10.750436)
 metadata/planning_object_id = ""
@@ -13373,7 +13373,7 @@ metadata/planning_attachment = ""
 [node name="@RigidBody3D@9566" type="RigidBody3D" parent="." unique_id=2145028509 instance=ExtResource("11_sytgd")]
 transform = Transform3D(0.599963, 0.006647564, 0.00016555903, -0.006647831, 0.5999623, 0.0010062128, -0.00015440048, -0.0010079853, 0.5999991, 1.7608645, 0.1491229, 15.24812)
 
-model_path = "res://models/objects/enviroments/02/02_crate_wood_large.glb"
+model_path = "res://models/objects/enviroments/04/04_crate_wood_large.glb"
 metadata/world_bound = true
 metadata/planning_settled_transform = Transform3D(0.599963, 0.006647564, 0.00016555903, -0.006647831, 0.5999623, 0.0010062128, -0.00015440048, -0.0010079853, 0.5999991, 1.7608645, 0.1491229, 15.24812)
 metadata/planning_object_id = ""
@@ -13383,7 +13383,7 @@ metadata/planning_attachment = ""
 [node name="@RigidBody3D@9567" type="RigidBody3D" parent="." unique_id=840464705 instance=ExtResource("11_sytgd")]
 transform = Transform3D(0.99999994, 3.4719407e-05, 0.00041108212, -3.47131e-05, 1, -1.5353793e-05, -0.00041108264, 1.5339521e-05, 0.99999994, -1.7500824, 0.013455927, 11.037356)
 
-model_path = "res://models/objects/enviroments/02/02_crate_canvas_large.glb"
+model_path = "res://models/objects/enviroments/04/04_crate_canvas_large.glb"
 metadata/world_bound = true
 metadata/planning_settled_transform = Transform3D(0.99999994, 3.4719407e-05, 0.00041108212, -3.47131e-05, 1, -1.5353793e-05, -0.00041108264, 1.5339521e-05, 0.99999994, -1.7500824, 0.013455927, 11.037356)
 metadata/planning_object_id = ""
@@ -13393,7 +13393,7 @@ metadata/planning_attachment = ""
 [node name="@RigidBody3D@9568" type="RigidBody3D" parent="." unique_id=371361998 instance=ExtResource("11_sytgd")]
 transform = Transform3D(0.6999999, -2.4765413e-06, -2.2980712e-06, 2.4765384e-06, 0.6999999, -8.733034e-07, 2.2980744e-06, 8.732953e-07, 0.6999999, 6.9687333, 0.013497293, 7.0000095)
 
-model_path = "res://models/objects/enviroments/02/02_crate_canvas_large.glb"
+model_path = "res://models/objects/enviroments/04/04_crate_canvas_large.glb"
 metadata/world_bound = true
 metadata/planning_settled_transform = Transform3D(0.6999999, -2.4765413e-06, -2.2980712e-06, 2.4765384e-06, 0.6999999, -8.733034e-07, 2.2980744e-06, 8.732953e-07, 0.6999999, 6.9687333, 0.013497293, 7.0000095)
 metadata/planning_object_id = ""
@@ -13403,7 +13403,7 @@ metadata/planning_attachment = ""
 [node name="@RigidBody3D@9569" type="RigidBody3D" parent="." unique_id=390560890 instance=ExtResource("11_sytgd")]
 transform = Transform3D(0.6999999, 6.2488716e-06, 5.675681e-07, -6.2488757e-06, 0.6999999, 4.5068987e-06, -5.675279e-07, -4.506904e-06, 0.6999999, 6.9999843, 0.013489187, 5.7500124)
 
-model_path = "res://models/objects/enviroments/02/02_crate_canvas_large.glb"
+model_path = "res://models/objects/enviroments/04/04_crate_canvas_large.glb"
 metadata/world_bound = true
 metadata/planning_settled_transform = Transform3D(0.6999999, 6.2488716e-06, 5.675681e-07, -6.2488757e-06, 0.6999999, 4.5068987e-06, -5.675279e-07, -4.506904e-06, 0.6999999, 6.9999843, 0.013489187, 5.7500124)
 metadata/planning_object_id = ""
@@ -13413,7 +13413,7 @@ metadata/planning_attachment = ""
 [node name="@RigidBody3D@9570" type="RigidBody3D" parent="." unique_id=1770214374 instance=ExtResource("11_sytgd")]
 transform = Transform3D(0.6999999, -1.7334701e-06, -3.2454145e-06, 1.7334758e-06, 0.6999999, 1.2363934e-06, 3.2454113e-06, -1.2364013e-06, 0.6999999, 6.9999914, 0.013497472, 4.499999)
 
-model_path = "res://models/objects/enviroments/02/02_crate_canvas_large.glb"
+model_path = "res://models/objects/enviroments/04/04_crate_canvas_large.glb"
 metadata/world_bound = true
 metadata/planning_settled_transform = Transform3D(0.6999999, -1.7334701e-06, -3.2454145e-06, 1.7334758e-06, 0.6999999, 1.2363934e-06, 3.2454113e-06, -1.2364013e-06, 0.6999999, 6.9999914, 0.013497472, 4.499999)
 metadata/planning_object_id = ""
@@ -13628,7 +13628,7 @@ metadata/planning_attachment = ""
 [node name="@RigidBody3D@9587" type="RigidBody3D" parent="." unique_id=1390280617 instance=ExtResource("11_sytgd")]
 transform = Transform3D(1, -1.0048922e-05, 7.32288e-06, 1.0049217e-05, 1, -4.0286395e-05, -7.322475e-06, 4.0286468e-05, 1, -11.004154, 0.013453603, 9.037041)
 
-model_path = "res://models/objects/enviroments/02/02_crate_canvas_large.glb"
+model_path = "res://models/objects/enviroments/04/04_crate_canvas_large.glb"
 metadata/world_bound = true
 metadata/planning_settled_transform = Transform3D(1, -1.0048922e-05, 7.32288e-06, 1.0049217e-05, 1, -4.0286395e-05, -7.322475e-06, 4.0286468e-05, 1, -11.004154, 0.013453603, 9.037041)
 metadata/planning_object_id = ""
@@ -13638,7 +13638,7 @@ metadata/planning_attachment = ""
 [node name="@RigidBody3D@9588" type="RigidBody3D" parent="." unique_id=304860857 instance=ExtResource("11_sytgd")]
 transform = Transform3D(1, 3.588769e-05, -2.8141908e-06, -3.5887726e-05, 1, -1.3345725e-05, 2.813712e-06, 1.3345827e-05, 1, -12.750125, 0.013456821, 9.037025)
 
-model_path = "res://models/objects/enviroments/02/02_crate_canvas_large.glb"
+model_path = "res://models/objects/enviroments/04/04_crate_canvas_large.glb"
 metadata/world_bound = true
 metadata/planning_settled_transform = Transform3D(1, 3.588769e-05, -2.8141908e-06, -3.5887726e-05, 1, -1.3345725e-05, 2.813712e-06, 1.3345827e-05, 1, -12.750125, 0.013456821, 9.037025)
 metadata/planning_object_id = ""
@@ -13741,7 +13741,7 @@ metadata/planning_attachment = ""
 [node name="@RigidBody3D@9599" type="RigidBody3D" parent="." unique_id=1562057930 instance=ExtResource("11_sytgd")]
 transform = Transform3D(9.0996286e-07, 0.99999994, 0, -0.99999994, 9.0996286e-07, 0, 0, 0, 1, -14.75, 1.261, -16)
 
-model_path = "res://models/objects/enviroments/01/01_pipe_sewer_floor_elbow.glb"
+model_path = "res://models/objects/enviroments/01/pipe_duct/01_pipe_sewer_floor_elbow.glb"
 metadata/world_bound = true
 metadata/planning_settled_transform = Transform3D(9.0996286e-07, 0.99999994, 0, -0.99999994, 9.0996286e-07, 0, 0, 0, 1, -14.75, 1.261, -16)
 metadata/planning_object_id = ""
@@ -13751,7 +13751,7 @@ metadata/planning_attachment = ""
 [node name="@RigidBody3D@9600" type="RigidBody3D" parent="." unique_id=7135788 instance=ExtResource("11_sytgd")]
 transform = Transform3D(1, 7.6419245e-15, -3.3403912e-22, 0, -4.371139e-08, -1, -7.6419245e-15, 1, -4.371139e-08, -15.5, 1.5305002, -15.25)
 
-model_path = "res://models/objects/enviroments/01/01_pipe_sewer_floor_straight.glb"
+model_path = "res://models/objects/enviroments/01/pipe_duct/01_pipe_sewer_floor_straight.glb"
 metadata/world_bound = true
 metadata/planning_settled_transform = Transform3D(1, 7.6419245e-15, -3.3403912e-22, 0, -4.371139e-08, -1, -7.6419245e-15, 1, -4.371139e-08, -15.5, 1.5305002, -15.25)
 metadata/planning_object_id = ""
@@ -13761,7 +13761,7 @@ metadata/planning_attachment = ""
 [node name="@RigidBody3D@9601" type="RigidBody3D" parent="." unique_id=1520380164 instance=ExtResource("11_sytgd")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -4, 2.25, -13.25)
 
-model_path = "res://models/objects/enviroments/01/01_pipe_sewer_floor_straight.glb"
+model_path = "res://models/objects/enviroments/01/pipe_duct/01_pipe_sewer_floor_straight.glb"
 metadata/world_bound = true
 metadata/planning_settled_transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -4, 2.25, -13.25)
 metadata/planning_object_id = ""
@@ -13771,7 +13771,7 @@ metadata/planning_attachment = ""
 [node name="@RigidBody3D@9602" type="RigidBody3D" parent="." unique_id=1658504421 instance=ExtResource("11_sytgd")]
 transform = Transform3D(1, -8.560914e-05, 1.3363031e-05, 8.560584e-05, 0.99999994, 0.00024716236, -1.33841895e-05, -0.0002471612, 0.99999994, 12.999999, 1.2704767, 1.2499712)
 
-model_path = "res://models/objects/enviroments/09/09_mug_alt_3.glb"
+model_path = "res://models/objects/enviroments/09/glass_mug/09_mug_alt_3.glb"
 metadata/world_bound = true
 metadata/planning_settled_transform = Transform3D(1, -8.560914e-05, 1.3363031e-05, 8.560584e-05, 0.99999994, 0.00024716236, -1.33841895e-05, -0.0002471612, 0.99999994, 12.999999, 1.2704767, 1.2499712)
 metadata/planning_object_id = ""
@@ -13781,7 +13781,7 @@ metadata/planning_attachment = ""
 [node name="@RigidBody3D@9603" type="RigidBody3D" parent="." unique_id=304303734 instance=ExtResource("16_fbhie")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 13.011132, 1.2705008, 1.5250269)
 
-model_path = "res://models/objects/enviroments/09/09_office_files_a_2.glb"
+model_path = "res://models/objects/enviroments/09/files/09_office_files_a_2.glb"
 metadata/world_bound = true
 metadata/planning_settled_transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 13.011132, 1.2705008, 1.5250269)
 metadata/planning_object_id = ""
@@ -13844,7 +13844,7 @@ metadata/planning_attachment = ""
 [node name="@RigidBody3D@9609" type="RigidBody3D" parent="." unique_id=195784078 groups=["tutorial_target"] instance=ExtResource("11_sytgd")]
 transform = Transform3D(1, -3.7964953e-06, -0.00015734519, 3.7931165e-06, 1, -2.1474483e-05, 0.00015734528, 2.1473887e-05, 1, 12.749876, 0.89549947, -5.500233)
 
-model_path = "res://models/objects/enviroments/09/09_glass_water_bottle_clear_250ml.glb"
+model_path = "res://models/objects/enviroments/09/glass_mug/09_glass_water_bottle_clear_250ml.glb"
 metadata/world_bound = true
 metadata/planning_settled_transform = Transform3D(1, -3.7964953e-06, -0.00015734519, 3.7931165e-06, 1, -2.1474483e-05, 0.00015734528, 2.1473887e-05, 1, 12.749876, 0.89549947, -5.500233)
 metadata/planning_object_id = "object_601052253"
@@ -13858,7 +13858,7 @@ script = ExtResource("4_yfotv")
 [node name="@RigidBody3D@9610" type="RigidBody3D" parent="." unique_id=59627419 groups=["tutorial_target"] instance=ExtResource("11_sytgd")]
 transform = Transform3D(1, -3.1679388e-06, -0.00015735035, 3.164495e-06, 1, -2.1886159e-05, 0.00015735041, 2.188566e-05, 1, 12.499875, 0.89549947, -4.7502317)
 
-model_path = "res://models/objects/enviroments/09/09_glass_water_bottle_clear_250ml.glb"
+model_path = "res://models/objects/enviroments/09/glass_mug/09_glass_water_bottle_clear_250ml.glb"
 metadata/world_bound = true
 metadata/planning_settled_transform = Transform3D(1, -3.1679388e-06, -0.00015735035, 3.164495e-06, 1, -2.1886159e-05, 0.00015735041, 2.188566e-05, 1, 12.499875, 0.89549947, -4.7502317)
 metadata/planning_object_id = "object_598454735"
@@ -13872,7 +13872,7 @@ script = ExtResource("4_yfotv")
 [node name="@RigidBody3D@9611" type="RigidBody3D" parent="." unique_id=585513924 groups=["tutorial_target"] instance=ExtResource("11_sytgd")]
 transform = Transform3D(1, -1.2758484e-06, -0.00015718167, 1.2723377e-06, 1, -2.2335284e-05, 0.0001571817, 2.2335083e-05, 1, 12.749876, 0.8954994, -4.5002327)
 
-model_path = "res://models/objects/enviroments/09/09_glass_water_bottle_clear_250ml.glb"
+model_path = "res://models/objects/enviroments/09/glass_mug/09_glass_water_bottle_clear_250ml.glb"
 metadata/world_bound = true
 metadata/planning_settled_transform = Transform3D(1, -1.2758484e-06, -0.00015718167, 1.2723377e-06, 1, -2.2335284e-05, 0.0001571817, 2.2335083e-05, 1, 12.749876, 0.8954994, -4.5002327)
 metadata/planning_object_id = "object_603717243"
@@ -13886,7 +13886,7 @@ script = ExtResource("4_yfotv")
 [node name="@RigidBody3D@9612" type="RigidBody3D" parent="." unique_id=1567624025 groups=["tutorial_target"] instance=ExtResource("11_sytgd")]
 transform = Transform3D(1, -2.9824025e-06, -0.00015727396, 2.9789146e-06, 1, -2.2177961e-05, 0.00015727401, 2.2177492e-05, 1, 12.749876, 0.89549947, -4.2502337)
 
-model_path = "res://models/objects/enviroments/09/09_glass_water_bottle_clear_250ml.glb"
+model_path = "res://models/objects/enviroments/09/glass_mug/09_glass_water_bottle_clear_250ml.glb"
 metadata/world_bound = true
 metadata/planning_settled_transform = Transform3D(1, -2.9824025e-06, -0.00015727396, 2.9789146e-06, 1, -2.2177961e-05, 0.00015727401, 2.2177492e-05, 1, 12.749876, 0.89549947, -4.2502337)
 metadata/planning_object_id = "object_606212984"

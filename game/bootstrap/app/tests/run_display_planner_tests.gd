@@ -2,7 +2,7 @@ extends SceneTree
 const LAYOUT_ASSERTIONS := preload("res://game/bootstrap/app/tests/layout_assertions.gd")
 
 const MAIN := preload("res://game/bootstrap/app/main.tscn")
-const MODEL := "res://models/objects/enviroments/05/05_monitor3_server_destructible.glb"
+const MODEL := "res://models/objects/enviroments/05/monitor/05_monitor3_server_destructible.glb"
 var failures := 0
 
 

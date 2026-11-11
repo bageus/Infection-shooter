@@ -1,5 +1,6 @@
 extends RefCounted
 
+const MODEL_PATHS := preload("res://game/core/model_paths/public/model_paths.gd")
 const ENVIRONMENT_ROOT = "res://models/objects/enviroments"
 const ENVIRONMENT_SCENE = preload("res://game/presentation/office_floor/public/props/environment_prop.tscn")
 const BATHROOM_FIXTURE_SCENE = preload("res://game/presentation/office_floor/public/props/bathroom_fixture.tscn")
@@ -130,22 +131,17 @@ func biomass_catalog() -> Array:
 
 func _build_environment_catalogs() -> void:
 	group_catalogs.clear()
-	for group_index in range(1, 14): # model groups 01-13
+	for group_index in range(1, 16): # model groups 01-15
 		var group = "%02d" % group_index
-		var directory = ENVIRONMENT_ROOT + "/" + group
 		var entries: Array = []
-		group_catalogs[group] = entries
-		# ResourceLoader also lists models in exported builds, where the source
-		# .glb files are replaced by their imported resources.
-		for file_name: String in ResourceLoader.list_directory(directory):
-			if file_name.to_lower().ends_with(".glb"):
-				var model_path = directory + "/" + file_name
-				var special_scene = _environment_scene_for(file_name)
-				entries.append({
-					"name": _environment_display_name(file_name),
-					"path": special_scene if not special_scene.is_empty() else model_path,
-					"kind": "" if not special_scene.is_empty() else "environment"
-				})
+		for model_path in MODEL_PATHS.list(group):
+			var file_name := model_path.get_file()
+			var special_scene = _environment_scene_for(file_name)
+			entries.append({
+				"name": _environment_display_name(file_name),
+				"path": special_scene if not special_scene.is_empty() else model_path,
+				"kind": "" if not special_scene.is_empty() else "environment"
+			})
 		entries.sort_custom(func(a, b): return str(a["name"]).naturalnocasecmp_to(str(b["name"])) < 0)
 		group_catalogs[group] = entries
 

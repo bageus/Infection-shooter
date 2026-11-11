@@ -4,12 +4,12 @@ importer="scene"
 importer_version=1
 type="PackedScene"
 uid="uid://8bh5hte34taj"
-path="res://.godot/imported/09_pen_2.glb-284c264efbd225a3e35927c5c1338f3e.scn"
+path="res://.godot/imported/09_pen_2.glb-d0428d082ef3cb90cbe07f1d89ebc1da.scn"
 
 [deps]
 
-source_file="res://models/objects/enviroments/09/09_pen_2.glb"
-dest_files=["res://.godot/imported/09_pen_2.glb-284c264efbd225a3e35927c5c1338f3e.scn"]
+source_file="res://models/objects/enviroments/09/chancery/09_pen_2.glb"
+dest_files=["res://.godot/imported/09_pen_2.glb-d0428d082ef3cb90cbe07f1d89ebc1da.scn"]
 
 [params]
 

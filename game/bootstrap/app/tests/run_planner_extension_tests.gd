@@ -34,6 +34,10 @@ func _run() -> void:
 	var planner: Node = stage.get("planning_mode")
 	var catalog = planner.get("catalog")
 	_check(catalog.group_catalogs["13"].size() == 10, "All ten wall objects are in group 13")
+	_check(catalog.group_catalogs["01"].size() == 44 and catalog.group_catalogs["09"].size() == 99, "Palette lists models from group subfolders")
+	_check(catalog.group_catalogs["14"].size() == 6 and catalog.group_catalogs["15"].size() == 15, "Groups 14 and 15 are in the palette")
+	for entry: Dictionary in catalog.group_catalogs["03"]:
+		_check("/damage/" not in str(entry["path"]), "Damage stages stay out of the palette")
 	var wall = catalog.call("_instantiate_asset", "res://models/objects/enviroments/13/13_wall_cafeteria.glb")
 	stage.add_child(wall)
 	_check(wall.get_meta("planning_wall_mount", false) and wall.freeze, "Group 13 stays attached to wall")

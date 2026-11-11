@@ -3,7 +3,7 @@ extends SceneTree
 
 const PROP := preload("res://game/presentation/office_floor/public/props/environment_prop.tscn")
 const FLOOR := preload("res://game/presentation/office_floor/public/base_floor_renderer.gd")
-const MODELS := ["res://models/objects/enviroments/09/09_glass.glb", "res://models/objects/enviroments/09/09_glass_2.glb"]
+const MODELS := ["res://models/objects/enviroments/09/glass_mug/09_glass.glb", "res://models/objects/enviroments/09/glass_mug/09_glass_2.glb"]
 var failures := 0
 var stage: Node3D
 var floor_view: Node3D

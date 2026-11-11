@@ -10,10 +10,10 @@ func _initialize() -> void:
 func _run() -> void:
 	var stage := Node3D.new()
 	root.add_child(stage)
-	var small := _prop(stage, "09/09_book_small.glb")
-	var bottle := _prop(stage, "09/09_plastic_water_bottle_blue_500ml.glb")
+	var small := _prop(stage, "09/books/09_book_small.glb")
+	var bottle := _prop(stage, "09/glass_mug/09_plastic_water_bottle_blue_500ml.glb")
 	var large := _prop(stage, "06/06_simple_chair.glb")
-	var wall := _prop(stage, "01/01_column.glb")
+	var wall := _prop(stage, "01/wall/01_column.glb")
 	await process_frame
 	_check(_all_off(small), "Small book meshes do not cast shadows")
 	_check(_all_off(bottle), "Small bottle meshes do not cast shadows")

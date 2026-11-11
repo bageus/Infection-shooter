@@ -4,12 +4,12 @@ importer="scene"
 importer_version=1
 type="PackedScene"
 uid="uid://cadk0vlxn3bb2"
-path="res://.godot/imported/09_stapler.glb-20df22be6c819481d6765df68723f6eb.scn"
+path="res://.godot/imported/09_stapler.glb-d7525e72629e02f24cdcb30667890e2b.scn"
 
 [deps]
 
-source_file="res://models/objects/enviroments/09/09_stapler.glb"
-dest_files=["res://.godot/imported/09_stapler.glb-20df22be6c819481d6765df68723f6eb.scn"]
+source_file="res://models/objects/enviroments/09/chancery/09_stapler.glb"
+dest_files=["res://.godot/imported/09_stapler.glb-d7525e72629e02f24cdcb30667890e2b.scn"]
 
 [params]
 

@@ -3,7 +3,7 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://bjvn8ki5gebcw"
-path.s3tc="res://.godot/imported/09_paper_stack_paper.jpg-248dba276861aaf352ef168439311443.s3tc.ctex"
+path.s3tc="res://.godot/imported/09_paper_stack_paper.jpg-21f2d0358dc663ff16ab6aad5fb4e710.s3tc.ctex"
 metadata={
 "imported_formats": ["s3tc_bptc"],
 "vram_texture": true
@@ -14,8 +14,8 @@ generator_parameters={
 
 [deps]
 
-source_file="res://models/objects/enviroments/09/09_paper_stack_paper.jpg"
-dest_files=["res://.godot/imported/09_paper_stack_paper.jpg-248dba276861aaf352ef168439311443.s3tc.ctex"]
+source_file="res://models/objects/enviroments/09/paper/09_paper_stack_paper.jpg"
+dest_files=["res://.godot/imported/09_paper_stack_paper.jpg-21f2d0358dc663ff16ab6aad5fb4e710.s3tc.ctex"]
 
 [params]
 

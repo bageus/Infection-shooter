@@ -3,7 +3,7 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://bqur7s857wfd6"
-path.s3tc="res://.godot/imported/09_board_stand_white_whiteboard_text.png-b13789a1954e54224d8b9b77fdf7fe07.s3tc.ctex"
+path.s3tc="res://.godot/imported/09_board_stand_white_whiteboard_text.png-456f93f7fbf42788b258f0000d3b7d9f.s3tc.ctex"
 metadata={
 "imported_formats": ["s3tc_bptc"],
 "vram_texture": true
@@ -14,8 +14,8 @@ generator_parameters={
 
 [deps]
 
-source_file="res://models/objects/enviroments/09/09_board_stand_white_whiteboard_text.png"
-dest_files=["res://.godot/imported/09_board_stand_white_whiteboard_text.png-b13789a1954e54224d8b9b77fdf7fe07.s3tc.ctex"]
+source_file="res://models/objects/enviroments/09/board/09_board_stand_white_whiteboard_text.png"
+dest_files=["res://.godot/imported/09_board_stand_white_whiteboard_text.png-456f93f7fbf42788b258f0000d3b7d9f.s3tc.ctex"]
 
 [params]
 

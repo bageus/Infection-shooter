@@ -32,7 +32,7 @@ func _run() -> void:
 
 
 func _test_paper() -> void:
-	for model in ["09/09_paper_stack.glb", "09/09_notepad.glb", "09/09_office_files_a.glb"]:
+	for model in ["09/paper/09_paper_stack.glb", "09/chancery/09_notepad.glb", "09/files/09_office_files_a.glb"]:
 		var setup := await _spawn(MODELS + model, Vector3(0, 0.0, 0))
 		var prop: RigidBody3D = setup[0]
 		var effects: Node3D = setup[1]

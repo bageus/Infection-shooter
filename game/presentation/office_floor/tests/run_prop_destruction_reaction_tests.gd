@@ -41,9 +41,9 @@ func _run() -> void:
 	quit(failures)
 
 func _small_items() -> void:
-	var models := ["09/09_fruit_apple.glb", "09/09_fruit_plate_2.glb", "09/09_glass.glb", "09/09_mug.glb",
-		"09/09_pen_1.glb", "09/09_pencil.glb", "05/05_computer_mouse.glb", "05/05_keyboard.glb",
-		"09/09_book_small.glb", "09/09_books.glb", "09/09_file_binder.glb", "09/09_office_files_a.glb", "09/09_paper_stray.glb"]
+	var models := ["09/fruit/09_fruit_apple.glb", "09/fruit/09_fruit_plate_2.glb", "09/glass_mug/09_glass.glb", "09/glass_mug/09_mug.glb",
+		"09/chancery/09_pen_1.glb", "09/chancery/09_pencil.glb", "05/05_computer_mouse.glb", "05/05_keyboard.glb",
+		"09/books/09_book_small.glb", "09/books/09_books.glb", "09/files/09_file_binder.glb", "09/files/09_office_files_a.glb", "09/paper/09_paper_stray.glb"]
 	for model: String in models:
 		for weapon: String in ["SHOTGUN", "AK", "GRENADE"]:
 			floor_view.clear_glass_debris()
@@ -138,7 +138,7 @@ func _moved_stage() -> void:
 	await process_frame
 
 func _authored_stages() -> void:
-	for model: String in ["07/07_table_longest.glb", "08/08_office_desk_2.glb", "05/05_monitor_destructible.glb"]:
+	for model: String in ["07/07_table_longest.glb", "08/08_office_desk_2.glb", "05/monitor/05_monitor_destructible.glb"]:
 		var prop := PROP.instantiate() as RigidBody3D
 		prop.set("model_path", "res://models/objects/enviroments/" + model)
 		stage.add_child(prop)

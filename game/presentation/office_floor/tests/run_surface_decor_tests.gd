@@ -2,6 +2,7 @@ extends SceneTree
 ## surface_decor_v1 (ADR-0033): conference table finish, document print on the
 ## top paper sheet and 0-3 sticky notes along monitor edges.
 
+const MODEL_PATHS := preload("res://game/core/model_paths/public/model_paths.gd")
 const DECOR := preload("res://game/presentation/office_floor/office_surface_decor.gd")
 const DAMAGE := preload("res://game/presentation/office_floor/environment_damage.gd")
 const PROP := preload("res://game/presentation/office_floor/public/props/environment_prop.tscn")
@@ -68,7 +69,7 @@ func _test_table() -> void:
 
 
 func _test_paper(model: String) -> void:
-	var paper := _spawn(MODELS + "09/" + model)
+	var paper := _spawn(MODEL_PATHS.find("09", model))
 	var visual := paper.get_node("Visual") as Node3D
 	var document_prints := visual.find_children("DocumentPrint", "MeshInstance3D", false, false)
 	_check(document_prints.size() == 1, "%s gets exactly one document print" % model)
@@ -98,7 +99,7 @@ func _test_paper(model: String) -> void:
 
 
 func _test_document_variety() -> void:
-	var paper := _spawn(MODELS + "09/09_paper_stack.glb")
+	var paper := _spawn(MODELS + "09/paper/09_paper_stack.glb")
 	var visual := paper.get_node("Visual") as Node3D
 	for overlay in visual.find_children("DocumentPrint", "MeshInstance3D", false, false):
 		overlay.free()
@@ -117,7 +118,7 @@ func _test_document_variety() -> void:
 func _test_stickers() -> void:
 	var counts := {}
 	for display_seed in range(1, 41):
-		var monitor := _spawn(MODELS + "05/05_monitor2_destructible.glb", display_seed)
+		var monitor := _spawn(MODELS + "05/monitor/05_monitor2_destructible.glb", display_seed)
 		var visual := monitor.get_node("Visual") as Node3D
 		var stickers := visual.find_children("Sticker*", "MeshInstance3D", false, false)
 		counts[stickers.size()] = true
@@ -140,19 +141,19 @@ func _test_stickers() -> void:
 			for j in range(i + 1, centers.size()):
 				_check(centers[i].distance_to(centers[j]) > size.x * 0.1, "Stickers use distinct slots")
 		# The display seed is persisted, so the same monitor keeps its stickers.
-		var again := _spawn(MODELS + "05/05_monitor2_destructible.glb", display_seed)
+		var again := _spawn(MODELS + "05/monitor/05_monitor2_destructible.glb", display_seed)
 		_check((again.get_node("Visual") as Node3D).find_children("Sticker*", "MeshInstance3D", false, false).size() == stickers.size(),
 			"Stickers are stable for a display seed")
 		again.free()
 		monitor.free()
 	_check(counts.size() == 4, "Monitors get 0, 1, 2 and 3 stickers across seeds")
-	var server := _spawn(MODELS + "05/05_monitor3_server_destructible.glb", 7)
+	var server := _spawn(MODELS + "05/monitor/05_monitor3_server_destructible.glb", 7)
 	_check(server.get_node("Visual").find_children("DocumentPrint", "", false, false).is_empty(), "Monitors get no documents")
 	server.free()
 
 
 func _test_untouched_models() -> void:
-	for path in [MODELS + "05/05_laptop2_destructible.glb", MODELS + "09/09_paper_A4_heavily_crumpled.glb", MODELS + "07/07_table_square_tall.glb"]:
+	for path in [MODELS + "05/laptop/05_laptop2_destructible.glb", MODELS + "09/paper/09_paper_A4_heavily_crumpled.glb", MODELS + "07/07_table_square_tall.glb"]:
 		var prop := _spawn(path, 5 if "laptop" in path else 0)
 		var visual := prop.get_node("Visual") as Node3D
 		var added := visual.find_children("Sticker*", "", false, false).size() + visual.find_children("DocumentPrint", "", false, false).size()

@@ -1,7 +1,7 @@
 extends RefCounted
 ## A bucket with a mop comes apart on its first hit or touch: the mop becomes its own prop.
 const FILE := "09_bucket_with_mop.glb"
-const MOP_MODEL := "res://models/objects/enviroments/09/09_mop.glb"
+const MOP_MODEL := "res://models/objects/enviroments/09/bin_bucket_mop/09_mop.glb"
 const DAMAGE := preload("res://game/presentation/office_floor/environment_damage.gd")
 
 

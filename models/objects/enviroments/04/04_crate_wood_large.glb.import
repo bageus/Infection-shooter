@@ -4,12 +4,12 @@ importer="scene"
 importer_version=1
 type="PackedScene"
 uid="uid://cqmc1g4bnos6u"
-path="res://.godot/imported/02_crate_wood_large.glb-4b65d9c59a13c5f25711968aa625be26.scn"
+path="res://.godot/imported/04_crate_wood_large.glb-ef79adb32dcc86217ca90327b20f15d1.scn"
 
 [deps]
 
-source_file="res://models/objects/enviroments/02/02_crate_wood_large.glb"
-dest_files=["res://.godot/imported/02_crate_wood_large.glb-4b65d9c59a13c5f25711968aa625be26.scn"]
+source_file="res://models/objects/enviroments/04/04_crate_wood_large.glb"
+dest_files=["res://.godot/imported/04_crate_wood_large.glb-ef79adb32dcc86217ca90327b20f15d1.scn"]
 
 [params]
 

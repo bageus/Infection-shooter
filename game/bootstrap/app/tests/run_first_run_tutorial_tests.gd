@@ -17,8 +17,8 @@ func _initialize() -> void:
 
 
 func _scoped_lesson(director: Node, overlay: Node) -> void:
-	var other := _prop("res://models/objects/enviroments/09/09_glass_water_bottle_clear_250ml.glb", Vector3(-3, 0, 0))
-	var mine := _prop("res://models/objects/enviroments/09/09_glass_water_bottle_clear_250ml.glb", Vector3(0, 0, 3))
+	var other := _prop("res://models/objects/enviroments/09/glass_mug/09_glass_water_bottle_clear_250ml.glb", Vector3(-3, 0, 0))
+	var mine := _prop("res://models/objects/enviroments/09/glass_mug/09_glass_water_bottle_clear_250ml.glb", Vector3(0, 0, 3))
 	TARGET.configure(other, true)
 	TARGET.configure(mine, true)
 	director.call("play", "shoot", [mine])
@@ -55,9 +55,9 @@ func _run() -> void:
 	var tree_ui := TREE_UI.new()
 	root.add_child(tree_ui)
 	tree_ui.call("configure", runtime)
-	var bottle := _prop("res://models/objects/enviroments/09/09_glass_water_bottle_clear_250ml.glb", Vector3(3, 0, 0))
-	var crate := _prop("res://models/objects/enviroments/02/02_crate_wood_large.glb", Vector3(6, 0, 0))
-	var table := _prop("res://models/objects/enviroments/09/09_mug.glb", Vector3(9, 0, 0))
+	var bottle := _prop("res://models/objects/enviroments/09/glass_mug/09_glass_water_bottle_clear_250ml.glb", Vector3(3, 0, 0))
+	var crate := _prop("res://models/objects/enviroments/04/04_crate_wood_large.glb", Vector3(6, 0, 0))
+	var table := _prop("res://models/objects/enviroments/09/glass_mug/09_mug.glb", Vector3(9, 0, 0))
 	_check(TARGET.kind_of(bottle) == "bottle" and TARGET.kind_of(crate) == "crate", "Bottles and crates can be targets")
 	_check(TARGET.kind_of(table) == "object", "Any other object can be a target too")
 	TARGET.configure(bottle, true)
@@ -174,7 +174,7 @@ func _baked_scene() -> void:
 	# A baked (packed) map keeps the flag and its marker; an old bake with only the meta is re-flagged.
 	var holder := Node3D.new()
 	var baked := PROP.instantiate() as Node3D
-	baked.set("model_path", "res://models/objects/enviroments/09/09_plastic_water_bottle_blue_500ml.glb")
+	baked.set("model_path", "res://models/objects/enviroments/09/glass_mug/09_plastic_water_bottle_blue_500ml.glb")
 	holder.add_child(baked)
 	baked.owner = holder
 	TARGET.configure(baked, true)
