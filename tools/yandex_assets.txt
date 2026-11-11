@@ -57,9 +57,9 @@ models/objects/enviroments/03/materials/group03_opaque.tres
 models/objects/enviroments/03/materials/group03_opaque_single_sided.tres
 models/objects/enviroments/04/materials/group04_opaque.tres
 models/objects/enviroments/04/materials/group04_opaque_double_sided.tres
-models/objects/enviroments/09/09_book_big.glb
-models/objects/enviroments/09/09_book_fat.glb
-models/objects/enviroments/09/09_book_small.glb
+models/objects/enviroments/09/books/09_book_big.glb
+models/objects/enviroments/09/books/09_book_fat.glb
+models/objects/enviroments/09/books/09_book_small.glb
 models/objects/textures/blood_decals_45/cells.json
 models/objects/textures/bullet_decals/Eight-panel bullet and scorch decal atlas.png
 models/objects/textures/display/Eight-note colorful office sticker atlas.png
