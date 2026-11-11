@@ -15,6 +15,12 @@ var _active: Node3D
 var _aim_modifying := false
 var _hand := -1
 var _socket_offset := Transform3D.IDENTITY
+## Weapon-frame offset that puts another grip, not the origin, into the socket hand.
+var grip_shift := Vector3.ZERO:
+	set(value):
+		grip_shift = value
+		if _remote != null:
+			_remote.position = value # the remote pushes the weapon position, so the shift must live there too
 
 
 func _ready() -> void:
@@ -43,6 +49,11 @@ func _ready() -> void:
 	equipment_pose.name = "EquipmentPose"
 	equipment_pose.mount = self
 	skeleton.add_child(equipment_pose)
+	var lean := preload("res://game/features/player/player_walk_lean.gd").new()
+	lean.name = "WalkLean"
+	lean.player = get_parent() as CharacterBody3D
+	skeleton.add_child(lean)
+	skeleton.move_child(lean, equipment_pose.get_index()) # before the arm fit, so hands follow the tipped chest
 	var aim := preload("res://game/features/player/player_body_aim.gd").new()
 	aim.name = "BodyAim"
 	aim.mount = self
@@ -83,7 +94,7 @@ func sync_weapon(weapon: Node3D) -> void:
 		_socket_offset = socket.transform
 	var original_scale := weapon.scale
 	var hand := skeleton.global_transform * skeleton.get_bone_global_pose(_hand) * _socket_offset if _aim_modifying else socket.global_transform
-	weapon.global_transform = Transform3D(hand.basis.orthonormalized(), hand.origin)
+	weapon.global_transform = Transform3D(hand.basis.orthonormalized(), hand.origin + hand.basis.orthonormalized() * grip_shift)
 	weapon.scale = original_scale
 
 
