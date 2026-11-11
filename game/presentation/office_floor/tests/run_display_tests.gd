@@ -4,7 +4,7 @@ const PROP := preload("res://game/presentation/office_floor/public/props/environ
 const WALL := preload("res://game/presentation/office_floor/public/display_wall.gd")
 const PROFILES := preload("res://game/presentation/office_floor/display_surface_profiles.gd")
 const CONTENT := preload("res://game/presentation/office_floor/display_content.gd")
-const MODEL_ROOT := "res://models/objects/enviroments/05/"
+const MODEL_PATHS := preload("res://game/core/model_paths/public/model_paths.gd")
 var failures := 0
 var stage: Node3D
 var wall: Node
@@ -36,7 +36,7 @@ func _run() -> void:
 
 func _spawn(model: String, display_seed: int = 2, mode: String = "static") -> Node3D:
 	var prop := PROP.instantiate() as Node3D
-	prop.set("model_path", MODEL_ROOT + model)
+	prop.set("model_path", MODEL_PATHS.find("05", model))
 	prop.call("configure_display", {"power": "on", "content": mode, "seed": display_seed})
 	prop.call("configure_displays", wall)
 	stage.add_child(prop)

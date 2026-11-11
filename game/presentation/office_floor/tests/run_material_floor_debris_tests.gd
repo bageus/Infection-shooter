@@ -179,8 +179,8 @@ func _test_emission_history() -> void:
 
 
 func _test_props() -> void:
-	var cases := {"09/09_book_small.glb": "paper", "09/09_file_binder.glb": "paper",
-		"04/04_cardboard_boxes_1.glb": "cardboard", "05/05_monitor_destructible.glb": "glass",
+	var cases := {"09/books/09_book_small.glb": "paper", "09/files/09_file_binder.glb": "paper",
+		"04/04_cardboard_boxes_1.glb": "cardboard", "05/monitor/05_monitor_destructible.glb": "glass",
 		"05/05_wall_TV_destructible.glb": "glass", "09/09_fire_extinguisher.glb": "extinguisher",
 		"10/10_armchair_green_destructible.glb": "fabric"}
 	for model: String in cases:

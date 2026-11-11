@@ -1,6 +1,7 @@
 extends Node3D
 
 const SFX := preload("res://game/core/audio/public/sound_events.gd")
+const DAMAGE := preload("res://game/presentation/office_floor/environment_damage.gd")
 const FLOOR_DEBRIS := preload("res://game/presentation/office_floor/prop_floor_debris.gd")
 var _floor_debris := FLOOR_DEBRIS.new()
 const PIECE_SCRIPT = preload("res://game/presentation/office_floor/table_piece.gd")
@@ -24,6 +25,7 @@ const WOOD_MARKS := [
 const SAG_SHIFT := 0.45
 const LEG_PIECE_CLEAR_TIME := 1.2
 
+var _stage_scenes: Array[PackedScene] = [] # keep loaded stage resources alive
 var _intact: Node3D
 var _modular: Node3D
 var _fragments: Node3D
@@ -97,6 +99,10 @@ func _ready() -> void:
 	if _fragments == null:
 		_fragments = _find(visual, "SmallFragments")
 	_secondary = _find(visual, "TopSecondary")
+	# The parts are collected below, so the damage stages load with the table.
+	for group: Node3D in [_modular, _fragments, _secondary]:
+		if group != null and group.has_meta(&"lazy_stage_path"):
+			_stage_scenes.append(DAMAGE.load_lazy_group(group))
 	if _intact == null or _modular == null or _fragments == null:
 		push_error("07_table.glb is missing a destruction group")
 		return

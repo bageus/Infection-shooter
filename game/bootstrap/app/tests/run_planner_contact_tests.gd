@@ -133,7 +133,7 @@ func _test_cabinets() -> void:
 	var catalog := CATALOG.new()
 	var geometry := GEOMETRY.new()
 	for name in ["02_capboard_down_destructible.glb", "02_capboard_up_double_destructible.glb"]:
-		var path: String = "res://models/objects/enviroments/02/" + name
+		var path: String = "res://models/objects/enviroments/02/capboard/" + name
 		var target := catalog._instantiate_asset(path)
 		var source := catalog._instantiate_asset(path)
 		stage.add_child(target)
@@ -177,7 +177,7 @@ func _capture_contacts() -> void:
 		walls.append(wall)
 	_wall(Vector3(12, .1, 9), Vector3(0, -.05, 0))
 	for index in 2:
-		var cabinet := catalog._instantiate_asset("res://models/objects/enviroments/02/02_capboard_down_destructible.glb")
+		var cabinet := catalog._instantiate_asset("res://models/objects/enviroments/02/capboard/02_capboard_down_destructible.glb")
 		stage.add_child(cabinet)
 		cabinet.freeze = true
 		var bounds: AABB = geometry._combined_aabb(cabinet)
@@ -218,7 +218,7 @@ func _test_wall_probe() -> void:
 	camera.position = Vector3(0, 2, 8)
 	camera.look_at(Vector3(0, 1.5, -1))
 	camera.current = true
-	var neighbor := catalog._instantiate_asset("res://models/objects/enviroments/02/02_capboard_up_double_destructible.glb")
+	var neighbor := catalog._instantiate_asset("res://models/objects/enviroments/02/capboard/02_capboard_up_double_destructible.glb")
 	stage.add_child(neighbor)
 	neighbor.position = Vector3(0, 1.5, -.4)
 	objects.placed.append(neighbor)

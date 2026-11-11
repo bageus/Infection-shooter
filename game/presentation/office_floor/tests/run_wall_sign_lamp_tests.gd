@@ -5,7 +5,7 @@ extends SceneTree
 const PROP := preload("res://game/presentation/office_floor/public/props/environment_prop.tscn")
 const WALL := preload("res://game/presentation/office_floor/public/structural/glass_wall_full.tscn")
 const SIGN := "res://models/objects/enviroments/13/13_wall_exit_lit.glb"
-const LAMP := "res://models/objects/enviroments/05/05_lamp.glb"
+const LAMP := "res://models/objects/enviroments/05/lamp/05_lamp.glb"
 var failures := 0
 var stage: Node3D
 

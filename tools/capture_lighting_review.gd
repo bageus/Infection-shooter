@@ -47,7 +47,7 @@ func _capture() -> void:
 	_new_stage()
 	_floor(12.0)
 	var desk := PROP.instantiate() as RigidBody3D
-	desk.set("model_path", "res://models/objects/enviroments/05/05_lamp.glb")
+	desk.set("model_path", "res://models/objects/enviroments/05/lamp/05_lamp.glb")
 	desk.position = Vector3(0, 0.33, 0)
 	desk.freeze = true
 	_stage.add_child(desk)

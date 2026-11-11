@@ -90,7 +90,7 @@ func setup(app_owner: Node3D, planning_root: Node3D, planning_ui: Control, load_
 	ui.get_node("Panel/VBox/Tabs/Structure").pressed.connect(controls._show_structure_catalog)
 	ui.get_node("Panel/VBox/Tabs/Actors").pressed.connect(controls._show_actor_catalog)
 	ui.get_node("Panel/VBox/Tabs/Lighting").pressed.connect(controls._show_lighting_catalog)
-	for group_name in ["01","02","03","04","05","06","07","08","09","10","11","12","13"]:
+	for group_name in ["01","02","03","04","05","06","07","08","09","10","11","12","13","14","15"]:
 		var button := ui.get_node("Panel/VBox/GroupTabs/G" + group_name) as Button
 		button.pressed.connect(controls._show_structure_group.bind(group_name))
 	ui.get_node("RightPanel/VBox/MapManager/Buttons/SaveMap").pressed.connect(storage.save_named_map)

@@ -99,7 +99,8 @@ def main():
     parser.add_argument('--compare-ref')
     args = parser.parse_args()
     layout = json.loads((GROUP / 'atlas_layout.json').read_text())
-    paths = sorted(GROUP.glob('*.glb'))
+    # The two large crates joined group 04 with their own materials, outside the atlas.
+    paths = sorted(p for p in GROUP.glob('*.glb') if p.stem not in ('04_crate_wood_large', '04_crate_canvas_large'))
     assert len(paths) == 7 and len(layout['tiles']) == 7
     assert not list(GROUP.glob('*_Image_*.png*')), 'Legacy extracted images remain'
     for path in paths:

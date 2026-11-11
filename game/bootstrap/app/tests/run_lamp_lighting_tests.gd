@@ -251,7 +251,7 @@ func _test_desk_lamp() -> void:
 	controller.setup(environment)
 	controller.local_lights_enabled = true
 	var prop := PROP.instantiate() as RigidBody3D
-	prop.set("model_path", "res://models/objects/enviroments/05/05_lamp.glb")
+	prop.set("model_path", "res://models/objects/enviroments/05/lamp/05_lamp.glb")
 	root.add_child(prop)
 	await process_frame
 	var glow := prop.find_child("BudgetLight", true, false) as OmniLight3D

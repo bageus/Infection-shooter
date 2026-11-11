@@ -55,7 +55,7 @@ func _run() -> void:
 	var table := _prop("07/07_table_longest.glb", Vector3(-.7, 0, 0))
 	var table_top := _bounds(table).end.y
 	_prop("06/06_simple_chair.glb", Vector3(-1.8, 0, 1.1))
-	var small := ["09/09_book_small.glb", "09/09_book_big.glb", "09/09_mug.glb", "09/09_plastic_water_bottle_blue_500ml.glb", "09/09_glass_water_bottle_green_330ml.glb"]
+	var small := ["09/books/09_book_small.glb", "09/books/09_book_big.glb", "09/glass_mug/09_mug.glb", "09/glass_mug/09_plastic_water_bottle_blue_500ml.glb", "09/glass_mug/09_glass_water_bottle_green_330ml.glb"]
 	for index in small.size():
 		_prop(small[index], Vector3(-1.7 + index * .45, table_top + .005, -.15))
 	for index in 10:

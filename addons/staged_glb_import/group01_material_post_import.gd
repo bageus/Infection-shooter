@@ -2,6 +2,7 @@
 extends EditorScenePostImport
 ## Share immutable authored materials across every group-01 model and damage stage.
 
+const PLACEHOLDERS := preload("res://addons/staged_glb_import/lazy_stage_placeholders.gd")
 const MATERIALS := {
 	"Group01Opaque": preload("res://models/objects/enviroments/01/materials/group01_opaque.tres"),
 	"Group01OpaqueDoubleSided": preload("res://models/objects/enviroments/01/materials/group01_opaque_double_sided.tres"),
@@ -11,6 +12,7 @@ const MATERIALS := {
 
 func _post_import(scene: Node) -> Object:
 	_visit(scene)
+	PLACEHOLDERS.add(scene, get_source_file())
 	return scene
 
 

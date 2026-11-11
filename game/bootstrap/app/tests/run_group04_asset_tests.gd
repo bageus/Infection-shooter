@@ -25,7 +25,7 @@ func _run() -> void:
 	var catalog := CATALOG.new()
 	catalog.call("_build_environment_catalogs")
 	var entries: Array = catalog.group_catalogs["04"]
-	_check(entries.size() == 7, "Seven group-04 palette entries remain")
+	_check(entries.size() == 9, "Seven atlas models and the two large crates are in the group-04 palette")
 	for entry: Dictionary in entries:
 		_check(ResourceLoader.exists(str(entry.path)), "Palette path loads")
 	for filename: String in COUNTS:
@@ -33,10 +33,18 @@ func _run() -> void:
 		_check(packed != null, "Model imports: " + filename)
 		if packed == null:
 			continue
-		var model := packed.instantiate() as Node3D
+		# The prop owns lazy stage loading; split stage files fill their placeholders on demand.
+		var prop := PROP.instantiate() as Node3D
+		prop.set("model_path", GROUP + filename)
+		root.add_child(prop)
+		var model := prop.get_node("Visual") as Node3D
+		for stage_name in ["LargeParts", "SmallFragments"]:
+			var group := model.get_node_or_null(stage_name) as Node3D
+			if group != null:
+				prop.get("_geometry").ensure_group(group)
 		_check_stages(model, filename)
 		_check_materials(model, filename)
-		model.free()
+		prop.free()
 	_check(shared.size() == 2, "All surfaces allocate only two shared materials")
 	_check_budget()
 	await _check_breakage("04_cardboard_box_closed.glb", false)

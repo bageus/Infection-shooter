@@ -7,6 +7,7 @@ var shadows := SHADOWS.new()
 const SHELF_COLLISION := preload("res://game/presentation/office_floor/shelf_collision_geometry.gd")
 var shelf_collision := false
 const DAMAGE := preload("res://game/presentation/office_floor/environment_damage.gd")
+const SURFACE_DECOR := preload("res://game/presentation/office_floor/office_surface_decor.gd")
 var visual: Node3D
 var intact: Node3D
 var stages: Array[Node3D] = []
@@ -157,25 +158,11 @@ func ensure_group(group: Node3D) -> bool:
 		return false
 	if not group.has_meta(&"lazy_stage_path"):
 		return true
-	var path := str(group.get_meta(&"lazy_stage_path"))
-	var packed := load(path) as PackedScene
+	var packed := DAMAGE.load_lazy_group(group)
 	if packed == null:
-		push_error("Damage stage unavailable: " + path)
 		return false
-	var source := packed.instantiate() as Node3D
-	if source == null:
-		return false
-	var authored := DAMAGE.find_named(source, str(group.name))
-	if authored == null:
-		source.free()
-		push_error("Damage group missing: " + path)
-		return false
-	for child: Node in authored.get_children():
-		child.owner = null
-		authored.remove_child(child)
-		group.add_child(child)
-	source.free()
-	group.remove_meta(&"lazy_stage_path")
 	_stage_resources.append(packed)
 	shadows.apply_loaded_group(group)
+	if visual != null:
+		SURFACE_DECOR.apply_stage(group, visual.scene_file_path)
 	return true

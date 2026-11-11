@@ -1,5 +1,6 @@
 extends SceneTree
 
+const MODEL_PATHS := preload("res://game/core/model_paths/public/model_paths.gd")
 const CATALOG := preload("res://game/bootstrap/app/planning_catalog.gd")
 const UPDATED_MODELS: Array[String] = [
 	"03_book_case", "03_book_case_small", "03_book_case_with_back",
@@ -154,7 +155,7 @@ func _check_catalog_models() -> void:
 	for name: String in UPDATED_MODELS + UPDATED_ELECTRONICS:
 		var group := name.left(2)
 		var entries: Array = catalog.group_catalogs[group]
-		var path := "res://models/objects/enviroments/" + group + "/" + name + ".glb"
+		var path: String = MODEL_PATHS.find(group, name + ".glb")
 		var listed := false
 		for entry: Dictionary in entries:
 			listed = listed or entry.path == path

@@ -3,7 +3,7 @@ extends SceneTree
 const PROP_SCENE := preload("res://game/presentation/office_floor/public/props/environment_prop.tscn")
 const FRAGILE := preload("res://game/presentation/office_floor/fragile_prop.gd")
 const RECIPE := preload("res://game/presentation/office_floor/prop_debris_recipe.gd")
-const DIR := "res://models/objects/enviroments/09/"
+const MODEL_PATHS := preload("res://game/core/model_paths/public/model_paths.gd")
 const FRAGILE_MODELS := ["09_mug.glb", "09_mug_alt_2.glb", "09_glass.glb", "09_glass_2.glb", "09_fruit_plate.glb", "09_fruit_apple.glb", "09_book_big.glb", "09_pen_1.glb", "09_painting.glb", "09_painting_small.glb"]
 var failures := 0
 var stage: Node3D
@@ -35,11 +35,11 @@ func _run() -> void:
 
 func _check_applies() -> void:
 	for model in FRAGILE_MODELS:
-		_check(FRAGILE.applies(DIR + model), "%s is a fragile item" % model)
+		_check(FRAGILE.applies(MODEL_PATHS.find("09", model)), "%s is a fragile item" % model)
 	for model in ["09_glass_water_bottle_clear_250ml.glb", "09_book_big.glb", "09_pen_1.glb", "09_fruit_plate_2.glb"]:
-		_check(FRAGILE.applies(DIR + model), "%s uses complete small-item disposal" % model)
-	_check(not FRAGILE.is_glassware(DIR + "09_painting.glb"), "A painting is not glassware")
-	_check(FRAGILE.is_glassware(DIR + "09_fruit_plate_2.glb"), "A fruit plate is glassware")
+		_check(FRAGILE.applies(MODEL_PATHS.find("09", model)), "%s uses complete small-item disposal" % model)
+	_check(not FRAGILE.is_glassware(MODEL_PATHS.find("09", "09_painting.glb")), "A painting is not glassware")
+	_check(FRAGILE.is_glassware(MODEL_PATHS.find("09", "09_fruit_plate_2.glb")), "A fruit plate is glassware")
 
 
 func _check_recipes() -> void:
@@ -55,7 +55,7 @@ func _check_recipes() -> void:
 
 func _shoot(model: String, weapon: String) -> void:
 	var prop := PROP_SCENE.instantiate() as RigidBody3D
-	prop.set("model_path", DIR + model)
+	prop.set("model_path", MODEL_PATHS.find("09", model))
 	prop.collision_mask = 3
 	stage.add_child(prop)
 	prop.global_position = Vector3(0, 0.02, 0)

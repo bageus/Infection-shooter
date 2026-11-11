@@ -22,7 +22,7 @@ class GlassOpeningTest(unittest.TestCase):
             scene = (SCENES / f"{scene_name}.tscn").read_text()
             self.assertIn("preserve_open_frame = true", scene)
             self.assertIn(f"{model_name}.glb", scene)
-            data = (MODELS / f"{model_name}.glb").read_bytes()
+            data = next(MODELS.rglob(f"{model_name}.glb")).read_bytes()
             json_size = struct.unpack_from("<I", data, 12)[0]
             gltf = json.loads(data[20 : 20 + json_size])
             parents = {

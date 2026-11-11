@@ -2,6 +2,7 @@ extends RefCounted
 
 # Authored in game/bootstrap/app/workstations. Coordinates are metres in the desk's
 # local space: the seated person looks towards positive Z.
+const MODEL_PATHS := preload("res://game/core/model_paths/public/model_paths.gd")
 const ROOT := "res://game/bootstrap/app/workstations/"
 const TEMPLATE_FILES := preload("res://game/bootstrap/app/desk_setup_template_files.gd")
 const ZONE_GEOMETRY := preload("res://game/bootstrap/app/desk_setup_zone_geometry.gd")
@@ -102,7 +103,7 @@ static func from_saved_template(desk: Node3D, path: String, parent: Node3D, make
 static func available_models() -> Array[String]:
 	var result: Array[String] = []
 	for group in ["02", "03", "05", "06", "09", "11"]:
-		for file: String in ResourceLoader.list_directory(MODEL_ROOT + group):
+		for file: String in MODEL_PATHS.list(group).map(func(path: String) -> String: return path.get_file()):
 			if file.ends_with(".glb") and (group != "03" or file == "03_file_cabinet_smaller.glb") and (group != "02" or file.begins_with("02_water_cooler_bottle")) and not _wall_or_large_fixture(file.get_basename()):
 				result.append(file.get_basename())
 	result.sort()
@@ -177,8 +178,7 @@ static func _read(path: String) -> Dictionary:
 static func _model_path(model: String) -> String:
 	if model.length() < 2 or not model.substr(0, 2).is_valid_int():
 		return ""
-	var path := MODEL_ROOT + model.substr(0, 2) + "/" + model + ".glb"
-	return path if ResourceLoader.exists(path) else ""
+	return MODEL_PATHS.find(model.substr(0, 2), model + ".glb")
 
 
 static func _add_item(entry: Dictionary, station: Dictionary, height: float, desk: Node3D, parent: Node3D, existing: Array[Node3D], created: Array[Node3D], occupied: Array[Rect2], random: RandomNumberGenerator, make_asset: Callable) -> void:

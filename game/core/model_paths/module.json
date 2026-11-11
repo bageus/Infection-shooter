@@ -1,0 +1,16 @@
+{
+  "id": "core.model_paths",
+  "layer": "core",
+  "purpose": "Find environment models by group and file name, because group folders hold topic subfolders and lazily loaded damage stages.",
+  "state_owner": [],
+  "public_api": [
+    "public/model_paths.gd"
+  ],
+  "dependencies": [],
+  "runtime_contracts": {
+    "model_paths_v1": {
+      "find": "find(group: String, file: String) -> String; res:// path of the .glb in the group folder or any subfolder except damage, empty when missing",
+      "list": "list(group: String) -> Array[String]; res:// paths of every placeable .glb in the group, damage stages excluded"
+    }
+  }
+}

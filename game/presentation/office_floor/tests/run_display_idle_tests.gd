@@ -3,7 +3,7 @@ extends SceneTree
 const WALL := preload("res://game/presentation/office_floor/public/display_wall.gd")
 const VIEW := preload("res://game/presentation/office_floor/display_view.gd")
 const CONTENT := preload("res://game/presentation/office_floor/display_content.gd")
-const MODEL := "res://models/objects/enviroments/05/05_monitor2_destructible.glb"
+const MODEL := "res://models/objects/enviroments/05/monitor/05_monitor2_destructible.glb"
 var failures := 0
 var stage: Node3D
 var camera: Camera3D

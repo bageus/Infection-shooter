@@ -228,6 +228,14 @@ text = "12"
 layout_mode = 2
 text = "13"
 
+[node name="G14" type="Button" parent="PlanningUI/Panel/VBox/GroupTabs" unique_id=408490122]
+layout_mode = 2
+text = "14"
+
+[node name="G15" type="Button" parent="PlanningUI/Panel/VBox/GroupTabs" unique_id=408490123]
+layout_mode = 2
+text = "15"
+
 [node name="LightDefaults" type="VBoxContainer" parent="PlanningUI/Panel/VBox" unique_id=554629760]
 visible = false
 layout_mode = 2

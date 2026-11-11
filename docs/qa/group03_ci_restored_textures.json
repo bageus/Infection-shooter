@@ -1,102 +1,102 @@
 [
   {
-    "path": "models/objects/enviroments/02/02_capboard_down_destructible_laminate_BaseColor.png",
+    "path": "models/objects/enviroments/02/capboard/02_capboard_down_destructible_laminate_BaseColor.png",
     "source_ref": "f49af602b5bb533bdf18e9d12e74a30b2706a9c4^",
     "sha256": "708a1274f6a5afa114062728c648676bab7714ac425b7233b14e9e97aa5488b6",
     "bytes": 1136648
   },
   {
-    "path": "models/objects/enviroments/02/02_capboard_down_destructible_laminate_Normal.png",
+    "path": "models/objects/enviroments/02/capboard/02_capboard_down_destructible_laminate_Normal.png",
     "source_ref": "f49af602b5bb533bdf18e9d12e74a30b2706a9c4^",
     "sha256": "10e0233a1429d02288c6d6cdbe65edca5de559ca8e34d9354793e750892c667c",
     "bytes": 3102178
   },
   {
-    "path": "models/objects/enviroments/02/02_capboard_down_destructible_laminate_ORM.png",
+    "path": "models/objects/enviroments/02/capboard/02_capboard_down_destructible_laminate_ORM.png",
     "source_ref": "f49af602b5bb533bdf18e9d12e74a30b2706a9c4^",
     "sha256": "7d2c02e366e5bfba656c78a48786d4f0a081fb23196247a123152b436900e183",
     "bytes": 2272243
   },
   {
-    "path": "models/objects/enviroments/02/02_capboard_down_destructible_steel_BaseColor.png",
+    "path": "models/objects/enviroments/02/capboard/02_capboard_down_destructible_steel_BaseColor.png",
     "source_ref": "f49af602b5bb533bdf18e9d12e74a30b2706a9c4^",
     "sha256": "f4378bcb05292dbc9b3a41bb3e38620d070d068d2f2f4811053ef7e909f40e42",
     "bytes": 540130
   },
   {
-    "path": "models/objects/enviroments/02/02_capboard_down_destructible_steel_Normal.png",
+    "path": "models/objects/enviroments/02/capboard/02_capboard_down_destructible_steel_Normal.png",
     "source_ref": "f49af602b5bb533bdf18e9d12e74a30b2706a9c4^",
     "sha256": "dad80800a593302b4091071355e3cc283013d54f0aa94e2faab99f8b6d2058c1",
     "bytes": 793866
   },
   {
-    "path": "models/objects/enviroments/02/02_capboard_down_destructible_steel_ORM.png",
+    "path": "models/objects/enviroments/02/capboard/02_capboard_down_destructible_steel_ORM.png",
     "source_ref": "f49af602b5bb533bdf18e9d12e74a30b2706a9c4^",
     "sha256": "499af7f65834a216b891fdda2a3d18d0e79e4b8e4ed99120646d798d7eb91274",
     "bytes": 898469
   },
   {
-    "path": "models/objects/enviroments/02/02_capboard_down_destructible_stone_BaseColor.png",
+    "path": "models/objects/enviroments/02/capboard/02_capboard_down_destructible_stone_BaseColor.png",
     "source_ref": "f49af602b5bb533bdf18e9d12e74a30b2706a9c4^",
     "sha256": "0299b6b2918ead06d2884bd8c3d07c48bff4664c4a1f2849a4948c54b1c25365",
     "bytes": 1293334
   },
   {
-    "path": "models/objects/enviroments/02/02_capboard_down_destructible_stone_Normal.png",
+    "path": "models/objects/enviroments/02/capboard/02_capboard_down_destructible_stone_Normal.png",
     "source_ref": "f49af602b5bb533bdf18e9d12e74a30b2706a9c4^",
     "sha256": "53ac9d2abadcc2c9d383fcd867b6c079f5edaeef76862b5dd0639e2d13dea465",
     "bytes": 3102720
   },
   {
-    "path": "models/objects/enviroments/02/02_capboard_down_destructible_stone_ORM.png",
+    "path": "models/objects/enviroments/02/capboard/02_capboard_down_destructible_stone_ORM.png",
     "source_ref": "f49af602b5bb533bdf18e9d12e74a30b2706a9c4^",
     "sha256": "10908f7bd01c44a7de53dc7254110c6eaa0db3d630e9a47f5ab4def8058e273c",
     "bytes": 1876554
   },
   {
-    "path": "models/objects/enviroments/02/02_capboard_down_destructible_wood_BaseColor.png",
+    "path": "models/objects/enviroments/02/capboard/02_capboard_down_destructible_wood_BaseColor.png",
     "source_ref": "f49af602b5bb533bdf18e9d12e74a30b2706a9c4^",
     "sha256": "af3f84972247883b474ea5f2617fe6b4d615057a00f1d0d2da6b1ae030c81b4f",
     "bytes": 641734
   },
   {
-    "path": "models/objects/enviroments/02/02_capboard_down_destructible_wood_Normal.png",
+    "path": "models/objects/enviroments/02/capboard/02_capboard_down_destructible_wood_Normal.png",
     "source_ref": "f49af602b5bb533bdf18e9d12e74a30b2706a9c4^",
     "sha256": "f8d4088e6989edca05a3928bdc078e4e0b4628daacdc46ac98bbc8c828c01e2d",
     "bytes": 327287
   },
   {
-    "path": "models/objects/enviroments/02/02_capboard_down_destructible_wood_ORM.png",
+    "path": "models/objects/enviroments/02/capboard/02_capboard_down_destructible_wood_ORM.png",
     "source_ref": "f49af602b5bb533bdf18e9d12e74a30b2706a9c4^",
     "sha256": "23242892d4669c207bf1feefd27bc099e674a68528351232872c3bb8a5a6963a",
     "bytes": 1676396
   },
   {
-    "path": "models/objects/enviroments/02/02_capboard_down_sink_destructible_coated_BaseColor.png",
+    "path": "models/objects/enviroments/02/capboard/02_capboard_down_sink_destructible_coated_BaseColor.png",
     "source_ref": "f49af602b5bb533bdf18e9d12e74a30b2706a9c4^",
     "sha256": "12671e0df3b7e430db3de18a014277975ebb532ae470026b0e2542fecfde9a69",
     "bytes": 1134721
   },
   {
-    "path": "models/objects/enviroments/02/02_capboard_down_sink_destructible_coated_Normal.png",
+    "path": "models/objects/enviroments/02/capboard/02_capboard_down_sink_destructible_coated_Normal.png",
     "source_ref": "f49af602b5bb533bdf18e9d12e74a30b2706a9c4^",
     "sha256": "0b273af0a55179b45ac50dc8f4dd028d745d903f5fd3e04bc4aca42950ed98e2",
     "bytes": 3102212
   },
   {
-    "path": "models/objects/enviroments/02/02_capboard_down_sink_destructible_coated_ORM.png",
+    "path": "models/objects/enviroments/02/capboard/02_capboard_down_sink_destructible_coated_ORM.png",
     "source_ref": "f49af602b5bb533bdf18e9d12e74a30b2706a9c4^",
     "sha256": "a5f095d61a417d678bab878740482f9f7494f95a9d2387b51a2b91e121c6202e",
     "bytes": 2272040
   },
   {
-    "path": "models/objects/enviroments/02/02_coffee_vending_1_dented_Finish_2K_Normal.png",
+    "path": "models/objects/enviroments/02/vending/02_coffee_vending_1_dented_Finish_2K_Normal.png",
     "source_ref": "f49af602b5bb533bdf18e9d12e74a30b2706a9c4^",
     "sha256": "073a3a39907c51a338e6efbd561eaad8a50c66c337b52f0bf9bdd302eaad82d0",
     "bytes": 2181722
   },
   {
-    "path": "models/objects/enviroments/02/02_coffee_vending_1_dented_Finish_2K_ORM.png",
+    "path": "models/objects/enviroments/02/vending/02_coffee_vending_1_dented_Finish_2K_ORM.png",
     "source_ref": "f49af602b5bb533bdf18e9d12e74a30b2706a9c4^",
     "sha256": "5a8e86e6b00938dbcb1de13e3cf0a14e90020a33a62f1b9db8333f3051170caf",
     "bytes": 4462538
@@ -306,37 +306,37 @@
     "bytes": 59326
   },
   {
-    "path": "models/objects/enviroments/02/02_vending_automat_1_dented_Finish_2K_Normal_6.png",
+    "path": "models/objects/enviroments/02/vending/02_vending_automat_1_dented_Finish_2K_Normal_6.png",
     "source_ref": "f49af602b5bb533bdf18e9d12e74a30b2706a9c4^",
     "sha256": "cc93c60e02a3f9e39028112d5bd991804b66dbb20ec30189ce88ea94f43850ec",
     "bytes": 59326
   },
   {
-    "path": "models/objects/enviroments/02/02_vending_automat_1_dented_Finish_2K_ORM.png",
+    "path": "models/objects/enviroments/02/vending/02_vending_automat_1_dented_Finish_2K_ORM.png",
     "source_ref": "f49af602b5bb533bdf18e9d12e74a30b2706a9c4^",
     "sha256": "ed718d24e0636e6d401ee515f0bf2929fb8158dc6c8e08e29b4cb93a3e889f7e",
     "bytes": 1069566
   },
   {
-    "path": "models/objects/enviroments/02/02_vending_automat_1_dented_Finish_2K_ORM_5.png",
+    "path": "models/objects/enviroments/02/vending/02_vending_automat_1_dented_Finish_2K_ORM_5.png",
     "source_ref": "f49af602b5bb533bdf18e9d12e74a30b2706a9c4^",
     "sha256": "83217bf5699482211fd08f4365ace9efb02d847528b76ac927e4120ab99182c7",
     "bytes": 59326
   },
   {
-    "path": "models/objects/enviroments/02/02_vending_machine_fantas_dented_Finish_2K_Normal.png",
+    "path": "models/objects/enviroments/02/vending/02_vending_machine_fantas_dented_Finish_2K_Normal.png",
     "source_ref": "f49af602b5bb533bdf18e9d12e74a30b2706a9c4^",
     "sha256": "6d1111f8f8ec7015841a8df69535e8483b2322a7743a4e648b273c108f90ba7b",
     "bytes": 1294131
   },
   {
-    "path": "models/objects/enviroments/02/02_vending_machine_fantas_dented_Finish_2K_ORM.png",
+    "path": "models/objects/enviroments/02/vending/02_vending_machine_fantas_dented_Finish_2K_ORM.png",
     "source_ref": "f49af602b5bb533bdf18e9d12e74a30b2706a9c4^",
     "sha256": "a07be90b15a12bd3443167f33ff1c25ba62bfecf1db36d889fb014d8f3a08d52",
     "bytes": 2776237
   },
   {
-    "path": "models/objects/enviroments/02/02_vending_machine_fantas_dented_Neutral_DRINKS_Corrected_Label.png",
+    "path": "models/objects/enviroments/02/vending/02_vending_machine_fantas_dented_Neutral_DRINKS_Corrected_Label.png",
     "source_ref": "f49af602b5bb533bdf18e9d12e74a30b2706a9c4^",
     "sha256": "b9eda896b9ae5b8e3cb68db4ed5d4295442aaceea1a18977b4bc028fc40ce573",
     "bytes": 173031

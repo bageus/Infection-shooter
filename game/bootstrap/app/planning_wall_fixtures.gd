@@ -10,7 +10,7 @@ const SIGN_HEIGHT := 1.75
 const MOUNT_HEIGHTS := {"02_wall_urinal_improved": 0.25, "16_wall_urinal": 0.25,
 	"05_wall_hand_dryer_improved": 1.25, "16_wall_hand_dryer": 1.25}
 const META := &"planning_auto_fixture"
-const SKIPPED_PATHS := ["planner_light", "darkness_zone", "blood_decal", "floor_pad", "/enviroments/12/", "/enviroments/01/01_floor_",
+const SKIPPED_PATHS := ["planner_light", "darkness_zone", "blood_decal", "floor_pad", "/enviroments/12/", "/enviroments/01/floor/01_floor_",
 	"player.tscn", "corpse_", "part_hunger", "infected_"]
 
 

@@ -214,7 +214,7 @@
       "stage_meshes_times_placements": 156
     },
     {
-      "path": "models/objects/enviroments/02/02_capboard_down_destructible.glb",
+      "path": "models/objects/enviroments/02/capboard/02_capboard_down_destructible.glb",
       "source_mesh_nodes": 24,
       "source_triangles": 1792,
       "stages": {
@@ -298,7 +298,7 @@
       "stage_meshes_times_placements": 37
     },
     {
-      "path": "models/objects/enviroments/02/02_capboard_down_sink_destructible.glb",
+      "path": "models/objects/enviroments/02/capboard/02_capboard_down_sink_destructible.glb",
       "source_mesh_nodes": 30,
       "source_triangles": 5492,
       "stages": {
@@ -344,7 +344,7 @@
       "stage_meshes_times_placements": 23
     },
     {
-      "path": "models/objects/enviroments/02/02_capboard_down_one_destructible.glb",
+      "path": "models/objects/enviroments/02/capboard/02_capboard_down_one_destructible.glb",
       "source_mesh_nodes": 21,
       "source_triangles": 1152,
       "stages": {
@@ -446,7 +446,7 @@
       "stage_meshes_times_placements": 8
     },
     {
-      "path": "models/objects/enviroments/05/05_laptop2_destructible.glb",
+      "path": "models/objects/enviroments/05/laptop/05_laptop2_destructible.glb",
       "source_mesh_nodes": 4,
       "source_triangles": 312,
       "stages": {
@@ -932,7 +932,7 @@
       "stage_meshes_times_placements": 0
     },
     {
-      "path": "models/objects/enviroments/01/01_glass_door_breakable.glb",
+      "path": "models/objects/enviroments/01/door/01_glass_door_breakable.glb",
       "source_mesh_nodes": 39,
       "source_triangles": 1164,
       "stages": {
@@ -946,7 +946,7 @@
       "stage_meshes_times_placements": 0
     },
     {
-      "path": "models/objects/enviroments/01/01_glass_partition_blinds_breakable.glb",
+      "path": "models/objects/enviroments/01/wall/01_glass_partition_blinds_breakable.glb",
       "source_mesh_nodes": 39,
       "source_triangles": 3904,
       "stages": {
@@ -960,7 +960,7 @@
       "stage_meshes_times_placements": 0
     },
     {
-      "path": "models/objects/enviroments/01/01_glass_wall_full_breakable.glb",
+      "path": "models/objects/enviroments/01/wall/01_glass_wall_full_breakable.glb",
       "source_mesh_nodes": 36,
       "source_triangles": 992,
       "stages": {
@@ -992,7 +992,7 @@
       "stage_meshes_times_placements": 0
     },
     {
-      "path": "models/objects/enviroments/01/01_glass_partition_half_breakable.glb",
+      "path": "models/objects/enviroments/01/wall/01_glass_partition_half_breakable.glb",
       "source_mesh_nodes": 35,
       "source_triangles": 1060,
       "stages": {
@@ -1362,7 +1362,7 @@
       "stage_meshes_times_placements": 0
     },
     {
-      "path": "models/objects/enviroments/09/09_books.glb",
+      "path": "models/objects/enviroments/09/books/09_books.glb",
       "source_mesh_nodes": 14,
       "source_triangles": 990,
       "stages": {
@@ -1376,7 +1376,7 @@
       "stage_meshes_times_placements": 0
     },
     {
-      "path": "models/objects/enviroments/09/09_books_alt_2.glb",
+      "path": "models/objects/enviroments/09/books/09_books_alt_2.glb",
       "source_mesh_nodes": 10,
       "source_triangles": 594,
       "stages": {
@@ -1390,7 +1390,7 @@
       "stage_meshes_times_placements": 0
     },
     {
-      "path": "models/objects/enviroments/02/02_capboard_up_double_destructible.glb",
+      "path": "models/objects/enviroments/02/capboard/02_capboard_up_double_destructible.glb",
       "source_mesh_nodes": 19,
       "source_triangles": 1656,
       "stages": {
@@ -1434,7 +1434,7 @@
       "stage_meshes_times_placements": 0
     },
     {
-      "path": "models/objects/enviroments/02/02_capboard_up_one_destructible.glb",
+      "path": "models/objects/enviroments/02/capboard/02_capboard_up_one_destructible.glb",
       "source_mesh_nodes": 16,
       "source_triangles": 1008,
       "stages": {
@@ -1452,7 +1452,7 @@
       "stage_meshes_times_placements": 0
     },
     {
-      "path": "models/objects/enviroments/09/09_books_alt.glb",
+      "path": "models/objects/enviroments/09/books/09_books_alt.glb",
       "source_mesh_nodes": 7,
       "source_triangles": 427,
       "stages": {
@@ -1466,7 +1466,7 @@
       "stage_meshes_times_placements": 0
     },
     {
-      "path": "models/objects/enviroments/05/05_MFU_2_extra_trays_destructible.glb",
+      "path": "models/objects/enviroments/05/mfu/05_MFU_2_extra_trays_destructible.glb",
       "source_mesh_nodes": 6,
       "source_triangles": 6396,
       "stages": {
@@ -1480,7 +1480,7 @@
       "stage_meshes_times_placements": 0
     },
     {
-      "path": "models/objects/enviroments/05/05_monitor3_server_destructible.glb",
+      "path": "models/objects/enviroments/05/monitor/05_monitor3_server_destructible.glb",
       "source_mesh_nodes": 6,
       "source_triangles": 1068,
       "stages": {
@@ -1494,7 +1494,7 @@
       "stage_meshes_times_placements": 0
     },
     {
-      "path": "models/objects/enviroments/05/05_monitor4_server_destructible.glb",
+      "path": "models/objects/enviroments/05/monitor/05_monitor4_server_destructible.glb",
       "source_mesh_nodes": 6,
       "source_triangles": 1068,
       "stages": {
@@ -1578,7 +1578,7 @@
       "stage_meshes_times_placements": 0
     },
     {
-      "path": "models/objects/enviroments/05/05_monitor2_destructible.glb",
+      "path": "models/objects/enviroments/05/monitor/05_monitor2_destructible.glb",
       "source_mesh_nodes": 5,
       "source_triangles": 276,
       "stages": {
@@ -1592,7 +1592,7 @@
       "stage_meshes_times_placements": 0
     },
     {
-      "path": "models/objects/enviroments/05/05_MFU_destructible.glb",
+      "path": "models/objects/enviroments/05/mfu/05_MFU_destructible.glb",
       "source_mesh_nodes": 3,
       "source_triangles": 5988,
       "stages": {
@@ -1620,7 +1620,7 @@
       "stage_meshes_times_placements": 0
     },
     {
-      "path": "models/objects/enviroments/05/05_laptop_close_destructible.glb",
+      "path": "models/objects/enviroments/05/laptop/05_laptop_close_destructible.glb",
       "source_mesh_nodes": 4,
       "source_triangles": 55137,
       "stages": {
@@ -1648,7 +1648,7 @@
       "stage_meshes_times_placements": 0
     },
     {
-      "path": "models/objects/enviroments/05/05_monitor_destructible.glb",
+      "path": "models/objects/enviroments/05/monitor/05_monitor_destructible.glb",
       "source_mesh_nodes": 4,
       "source_triangles": 1830,
       "stages": {
@@ -1662,7 +1662,7 @@
       "stage_meshes_times_placements": 0
     },
     {
-      "path": "models/objects/enviroments/05/05_monitor_wide_destructible.glb",
+      "path": "models/objects/enviroments/05/monitor/05_monitor_wide_destructible.glb",
       "source_mesh_nodes": 4,
       "source_triangles": 1830,
       "stages": {
@@ -1676,7 +1676,7 @@
       "stage_meshes_times_placements": 0
     },
     {
-      "path": "models/objects/enviroments/01/01_column.glb",
+      "path": "models/objects/enviroments/01/wall/01_column.glb",
       "source_mesh_nodes": 3,
       "source_triangles": 36,
       "stages": {},
@@ -1712,7 +1712,7 @@
       "stage_meshes_times_placements": 0
     },
     {
-      "path": "models/objects/enviroments/01/01_elevator_door.glb",
+      "path": "models/objects/enviroments/01/door/01_elevator_door.glb",
       "source_mesh_nodes": 4,
       "source_triangles": 384,
       "stages": {},
@@ -1721,7 +1721,7 @@
       "stage_meshes_times_placements": 0
     },
     {
-      "path": "models/objects/enviroments/01/01_floor_1x1.glb",
+      "path": "models/objects/enviroments/01/floor/01_floor_1x1.glb",
       "source_mesh_nodes": 1,
       "source_triangles": 2,
       "stages": {},
@@ -1730,7 +1730,7 @@
       "stage_meshes_times_placements": 0
     },
     {
-      "path": "models/objects/enviroments/01/01_floor_2x2.glb",
+      "path": "models/objects/enviroments/01/floor/01_floor_2x2.glb",
       "source_mesh_nodes": 1,
       "source_triangles": 2,
       "stages": {},
@@ -1739,7 +1739,7 @@
       "stage_meshes_times_placements": 0
     },
     {
-      "path": "models/objects/enviroments/01/01_floor_3x3.glb",
+      "path": "models/objects/enviroments/01/floor/01_floor_3x3.glb",
       "source_mesh_nodes": 1,
       "source_triangles": 2,
       "stages": {},
@@ -1748,7 +1748,7 @@
       "stage_meshes_times_placements": 0
     },
     {
-      "path": "models/objects/enviroments/01/01_floor_corner_round.glb",
+      "path": "models/objects/enviroments/01/floor/01_floor_corner_round.glb",
       "source_mesh_nodes": 1,
       "source_triangles": 2,
       "stages": {},
@@ -1757,7 +1757,7 @@
       "stage_meshes_times_placements": 0
     },
     {
-      "path": "models/objects/enviroments/01/01_floor_corner_round_half.glb",
+      "path": "models/objects/enviroments/01/floor/01_floor_corner_round_half.glb",
       "source_mesh_nodes": 1,
       "source_triangles": 2,
       "stages": {},
@@ -1766,7 +1766,7 @@
       "stage_meshes_times_placements": 0
     },
     {
-      "path": "models/objects/enviroments/01/01_floor_pad.glb",
+      "path": "models/objects/enviroments/01/floor/01_floor_pad.glb",
       "source_mesh_nodes": 1,
       "source_triangles": 24,
       "stages": {},
@@ -1775,7 +1775,7 @@
       "stage_meshes_times_placements": 0
     },
     {
-      "path": "models/objects/enviroments/01/01_only_door.glb",
+      "path": "models/objects/enviroments/01/door/01_only_door.glb",
       "source_mesh_nodes": 1,
       "source_triangles": 24,
       "stages": {},
@@ -1802,7 +1802,7 @@
       "stage_meshes_times_placements": 0
     },
     {
-      "path": "models/objects/enviroments/01/01_wall_door.glb",
+      "path": "models/objects/enviroments/01/door/01_wall_door.glb",
       "source_mesh_nodes": 2,
       "source_triangles": 108,
       "stages": {},
@@ -1811,7 +1811,7 @@
       "stage_meshes_times_placements": 0
     },
     {
-      "path": "models/objects/enviroments/01/01_wall_door_without.glb",
+      "path": "models/objects/enviroments/01/door/01_wall_door_without.glb",
       "source_mesh_nodes": 1,
       "source_triangles": 84,
       "stages": {},
@@ -1820,7 +1820,7 @@
       "stage_meshes_times_placements": 0
     },
     {
-      "path": "models/objects/enviroments/01/01_wall_emergency_door.glb",
+      "path": "models/objects/enviroments/01/door/01_wall_emergency_door.glb",
       "source_mesh_nodes": 2,
       "source_triangles": 568,
       "stages": {},
@@ -1829,7 +1829,7 @@
       "stage_meshes_times_placements": 0
     },
     {
-      "path": "models/objects/enviroments/01/01_wall_half_panel.glb",
+      "path": "models/objects/enviroments/01/wall/01_wall_half_panel.glb",
       "source_mesh_nodes": 2,
       "source_triangles": 60,
       "stages": {},
@@ -1838,7 +1838,7 @@
       "stage_meshes_times_placements": 0
     },
     {
-      "path": "models/objects/enviroments/01/01_wall_straight.glb",
+      "path": "models/objects/enviroments/01/wall/01_wall_straight.glb",
       "source_mesh_nodes": 1,
       "source_triangles": 24,
       "stages": {},
@@ -1870,7 +1870,7 @@
       "stage_meshes_times_placements": 0
     },
     {
-      "path": "models/objects/enviroments/02/02_arcade_machine_V1.glb",
+      "path": "models/objects/enviroments/14/02_arcade_machine_V1.glb",
       "source_mesh_nodes": 1,
       "source_triangles": 1045,
       "stages": {},
@@ -1879,7 +1879,7 @@
       "stage_meshes_times_placements": 0
     },
     {
-      "path": "models/objects/enviroments/02/02_arcade_machine_V2.glb",
+      "path": "models/objects/enviroments/14/02_arcade_machine_V2.glb",
       "source_mesh_nodes": 1,
       "source_triangles": 858,
       "stages": {},
@@ -1888,7 +1888,7 @@
       "stage_meshes_times_placements": 0
     },
     {
-      "path": "models/objects/enviroments/02/02_arcade_machine_V3.glb",
+      "path": "models/objects/enviroments/14/02_arcade_machine_V3.glb",
       "source_mesh_nodes": 1,
       "source_triangles": 1328,
       "stages": {},
@@ -1897,7 +1897,7 @@
       "stage_meshes_times_placements": 0
     },
     {
-      "path": "models/objects/enviroments/02/02_arcade_machine_V4.glb",
+      "path": "models/objects/enviroments/14/02_arcade_machine_V4.glb",
       "source_mesh_nodes": 1,
       "source_triangles": 1030,
       "stages": {},
@@ -1906,7 +1906,7 @@
       "stage_meshes_times_placements": 0
     },
     {
-      "path": "models/objects/enviroments/02/02_arcade_machine_V5.glb",
+      "path": "models/objects/enviroments/14/02_arcade_machine_V5.glb",
       "source_mesh_nodes": 1,
       "source_triangles": 2852,
       "stages": {},
@@ -1915,7 +1915,7 @@
       "stage_meshes_times_placements": 0
     },
     {
-      "path": "models/objects/enviroments/02/02_arcade_machine_V6.glb",
+      "path": "models/objects/enviroments/14/02_arcade_machine_V6.glb",
       "source_mesh_nodes": 1,
       "source_triangles": 2850,
       "stages": {},
@@ -1924,7 +1924,7 @@
       "stage_meshes_times_placements": 0
     },
     {
-      "path": "models/objects/enviroments/02/02_coffee_vending_1_dented.glb",
+      "path": "models/objects/enviroments/02/vending/02_coffee_vending_1_dented.glb",
       "source_mesh_nodes": 4,
       "source_triangles": 31262,
       "stages": {},
@@ -1978,7 +1978,7 @@
       "stage_meshes_times_placements": 0
     },
     {
-      "path": "models/objects/enviroments/02/02_vending_automat_1_dented.glb",
+      "path": "models/objects/enviroments/02/vending/02_vending_automat_1_dented.glb",
       "source_mesh_nodes": 15,
       "source_triangles": 18984,
       "stages": {},
@@ -1987,7 +1987,7 @@
       "stage_meshes_times_placements": 0
     },
     {
-      "path": "models/objects/enviroments/02/02_vending_automat_2_dented.glb",
+      "path": "models/objects/enviroments/02/vending/02_vending_automat_2_dented.glb",
       "source_mesh_nodes": 15,
       "source_triangles": 31234,
       "stages": {},
@@ -1996,7 +1996,7 @@
       "stage_meshes_times_placements": 0
     },
     {
-      "path": "models/objects/enviroments/02/02_vending_machine_fantas_dented.glb",
+      "path": "models/objects/enviroments/02/vending/02_vending_machine_fantas_dented.glb",
       "source_mesh_nodes": 28,
       "source_triangles": 94668,
       "stages": {},
@@ -2068,7 +2068,7 @@
       "stage_meshes_times_placements": 0
     },
     {
-      "path": "models/objects/enviroments/05/05_lamp.glb",
+      "path": "models/objects/enviroments/05/lamp/05_lamp.glb",
       "source_mesh_nodes": 1,
       "source_triangles": 2364,
       "stages": {},
@@ -2122,7 +2122,7 @@
       "stage_meshes_times_placements": 0
     },
     {
-      "path": "models/objects/enviroments/09/09_board_stand_white.glb",
+      "path": "models/objects/enviroments/09/board/09_board_stand_white.glb",
       "source_mesh_nodes": 6,
       "source_triangles": 464,
       "stages": {},
@@ -2131,7 +2131,7 @@
       "stage_meshes_times_placements": 0
     },
     {
-      "path": "models/objects/enviroments/09/09_book_big.glb",
+      "path": "models/objects/enviroments/09/books/09_book_big.glb",
       "source_mesh_nodes": 1,
       "source_triangles": 44,
       "stages": {},
@@ -2140,7 +2140,7 @@
       "stage_meshes_times_placements": 0
     },
     {
-      "path": "models/objects/enviroments/09/09_book_fat.glb",
+      "path": "models/objects/enviroments/09/books/09_book_fat.glb",
       "source_mesh_nodes": 1,
       "source_triangles": 44,
       "stages": {},
@@ -2149,7 +2149,7 @@
       "stage_meshes_times_placements": 0
     },
     {
-      "path": "models/objects/enviroments/09/09_book_filearchive.glb",
+      "path": "models/objects/enviroments/09/books/09_book_filearchive.glb",
       "source_mesh_nodes": 1,
       "source_triangles": 66,
       "stages": {},
@@ -2158,7 +2158,7 @@
       "stage_meshes_times_placements": 0
     },
     {
-      "path": "models/objects/enviroments/09/09_book_folder.glb",
+      "path": "models/objects/enviroments/09/books/09_book_folder.glb",
       "source_mesh_nodes": 1,
       "source_triangles": 64,
       "stages": {},
@@ -2167,7 +2167,7 @@
       "stage_meshes_times_placements": 0
     },
     {
-      "path": "models/objects/enviroments/09/09_book_small.glb",
+      "path": "models/objects/enviroments/09/books/09_book_small.glb",
       "source_mesh_nodes": 1,
       "source_triangles": 68,
       "stages": {},
@@ -2176,7 +2176,7 @@
       "stage_meshes_times_placements": 0
     },
     {
-      "path": "models/objects/enviroments/09/09_book_st.glb",
+      "path": "models/objects/enviroments/09/books/09_book_st.glb",
       "source_mesh_nodes": 1,
       "source_triangles": 54,
       "stages": {},
@@ -2230,7 +2230,7 @@
       "stage_meshes_times_placements": 0
     },
     {
-      "path": "models/objects/enviroments/09/09_file_binder.glb",
+      "path": "models/objects/enviroments/09/files/09_file_binder.glb",
       "source_mesh_nodes": 1,
       "source_triangles": 28,
       "stages": {},
@@ -2239,7 +2239,7 @@
       "stage_meshes_times_placements": 0
     },
     {
-      "path": "models/objects/enviroments/09/09_file_binder_alt_1.glb",
+      "path": "models/objects/enviroments/09/files/09_file_binder_alt_1.glb",
       "source_mesh_nodes": 1,
       "source_triangles": 28,
       "stages": {
@@ -2265,7 +2265,7 @@
       "stage_meshes_times_placements": 0
     },
     {
-      "path": "models/objects/enviroments/09/09_file_binder_alt_1_fell.glb",
+      "path": "models/objects/enviroments/09/files/09_file_binder_alt_1_fell.glb",
       "source_mesh_nodes": 1,
       "source_triangles": 28,
       "stages": {
@@ -2291,7 +2291,7 @@
       "stage_meshes_times_placements": 0
     },
     {
-      "path": "models/objects/enviroments/09/09_file_binder_alt_2.glb",
+      "path": "models/objects/enviroments/09/files/09_file_binder_alt_2.glb",
       "source_mesh_nodes": 1,
       "source_triangles": 28,
       "stages": {
@@ -2309,7 +2309,7 @@
       "stage_meshes_times_placements": 0
     },
     {
-      "path": "models/objects/enviroments/09/09_file_binder_alt_2_fell.glb",
+      "path": "models/objects/enviroments/09/files/09_file_binder_alt_2_fell.glb",
       "source_mesh_nodes": 1,
       "source_triangles": 28,
       "stages": {
@@ -2375,7 +2375,7 @@
       "stage_meshes_times_placements": 0
     },
     {
-      "path": "models/objects/enviroments/09/09_file_binder_alt_fell.glb",
+      "path": "models/objects/enviroments/09/files/09_file_binder_alt_fell.glb",
       "source_mesh_nodes": 1,
       "source_triangles": 28,
       "stages": {
@@ -2393,7 +2393,7 @@
       "stage_meshes_times_placements": 0
     },
     {
-      "path": "models/objects/enviroments/09/09_file_binder_fell.glb",
+      "path": "models/objects/enviroments/09/files/09_file_binder_fell.glb",
       "source_mesh_nodes": 1,
       "source_triangles": 28,
       "stages": {
@@ -2428,7 +2428,7 @@
       "stage_meshes_times_placements": 0
     },
     {
-      "path": "models/objects/enviroments/09/09_fruit_apple.glb",
+      "path": "models/objects/enviroments/09/fruit/09_fruit_apple.glb",
       "source_mesh_nodes": 1,
       "source_triangles": 110,
       "stages": {},
@@ -2437,7 +2437,7 @@
       "stage_meshes_times_placements": 0
     },
     {
-      "path": "models/objects/enviroments/09/09_fruit_banana.glb",
+      "path": "models/objects/enviroments/09/fruit/09_fruit_banana.glb",
       "source_mesh_nodes": 1,
       "source_triangles": 206,
       "stages": {},
@@ -2446,7 +2446,7 @@
       "stage_meshes_times_placements": 0
     },
     {
-      "path": "models/objects/enviroments/09/09_fruit_banana_b.glb",
+      "path": "models/objects/enviroments/09/fruit/09_fruit_banana_b.glb",
       "source_mesh_nodes": 1,
       "source_triangles": 142,
       "stages": {},
@@ -2455,7 +2455,7 @@
       "stage_meshes_times_placements": 0
     },
     {
-      "path": "models/objects/enviroments/09/09_fruit_orange.glb",
+      "path": "models/objects/enviroments/09/fruit/09_fruit_orange.glb",
       "source_mesh_nodes": 1,
       "source_triangles": 126,
       "stages": {},
@@ -2464,7 +2464,7 @@
       "stage_meshes_times_placements": 0
     },
     {
-      "path": "models/objects/enviroments/09/09_fruit_plate.glb",
+      "path": "models/objects/enviroments/09/fruit/09_fruit_plate.glb",
       "source_mesh_nodes": 1,
       "source_triangles": 188,
       "stages": {},
@@ -2473,7 +2473,7 @@
       "stage_meshes_times_placements": 0
     },
     {
-      "path": "models/objects/enviroments/09/09_fruit_plate_2.glb",
+      "path": "models/objects/enviroments/09/fruit/09_fruit_plate_2.glb",
       "source_mesh_nodes": 1,
       "source_triangles": 140,
       "stages": {},
@@ -2482,7 +2482,7 @@
       "stage_meshes_times_placements": 0
     },
     {
-      "path": "models/objects/enviroments/09/09_glass.glb",
+      "path": "models/objects/enviroments/09/glass_mug/09_glass.glb",
       "source_mesh_nodes": 1,
       "source_triangles": 36,
       "stages": {},
@@ -2491,7 +2491,7 @@
       "stage_meshes_times_placements": 0
     },
     {
-      "path": "models/objects/enviroments/09/09_glass_2.glb",
+      "path": "models/objects/enviroments/09/glass_mug/09_glass_2.glb",
       "source_mesh_nodes": 1,
       "source_triangles": 36,
       "stages": {},
@@ -2500,7 +2500,7 @@
       "stage_meshes_times_placements": 0
     },
     {
-      "path": "models/objects/enviroments/09/09_glass_water_bottle_clear_250ml.glb",
+      "path": "models/objects/enviroments/09/glass_mug/09_glass_water_bottle_clear_250ml.glb",
       "source_mesh_nodes": 3,
       "source_triangles": 848,
       "stages": {},
@@ -2509,7 +2509,7 @@
       "stage_meshes_times_placements": 0
     },
     {
-      "path": "models/objects/enviroments/09/09_glass_water_bottle_green_330ml.glb",
+      "path": "models/objects/enviroments/09/glass_mug/09_glass_water_bottle_green_330ml.glb",
       "source_mesh_nodes": 3,
       "source_triangles": 704,
       "stages": {},
@@ -2518,7 +2518,7 @@
       "stage_meshes_times_placements": 0
     },
     {
-      "path": "models/objects/enviroments/09/09_marker.glb",
+      "path": "models/objects/enviroments/09/chancery/09_marker.glb",
       "source_mesh_nodes": 1,
       "source_triangles": 166,
       "stages": {},
@@ -2527,7 +2527,7 @@
       "stage_meshes_times_placements": 0
     },
     {
-      "path": "models/objects/enviroments/09/09_marker_eraser.glb",
+      "path": "models/objects/enviroments/09/chancery/09_marker_eraser.glb",
       "source_mesh_nodes": 1,
       "source_triangles": 70,
       "stages": {},
@@ -2536,7 +2536,7 @@
       "stage_meshes_times_placements": 0
     },
     {
-      "path": "models/objects/enviroments/09/09_mug.glb",
+      "path": "models/objects/enviroments/09/glass_mug/09_mug.glb",
       "source_mesh_nodes": 1,
       "source_triangles": 204,
       "stages": {},
@@ -2545,7 +2545,7 @@
       "stage_meshes_times_placements": 0
     },
     {
-      "path": "models/objects/enviroments/09/09_mug_alt_1.glb",
+      "path": "models/objects/enviroments/09/glass_mug/09_mug_alt_1.glb",
       "source_mesh_nodes": 1,
       "source_triangles": 204,
       "stages": {},
@@ -2554,7 +2554,7 @@
       "stage_meshes_times_placements": 0
     },
     {
-      "path": "models/objects/enviroments/09/09_mug_alt_2.glb",
+      "path": "models/objects/enviroments/09/glass_mug/09_mug_alt_2.glb",
       "source_mesh_nodes": 1,
       "source_triangles": 204,
       "stages": {},
@@ -2563,7 +2563,7 @@
       "stage_meshes_times_placements": 0
     },
     {
-      "path": "models/objects/enviroments/09/09_mug_alt_3.glb",
+      "path": "models/objects/enviroments/09/glass_mug/09_mug_alt_3.glb",
       "source_mesh_nodes": 1,
       "source_triangles": 204,
       "stages": {},
@@ -2572,7 +2572,7 @@
       "stage_meshes_times_placements": 0
     },
     {
-      "path": "models/objects/enviroments/09/09_notepad.glb",
+      "path": "models/objects/enviroments/09/chancery/09_notepad.glb",
       "source_mesh_nodes": 1,
       "source_triangles": 40,
       "stages": {},
@@ -2581,7 +2581,7 @@
       "stage_meshes_times_placements": 0
     },
     {
-      "path": "models/objects/enviroments/09/09_office_file_single.glb",
+      "path": "models/objects/enviroments/09/files/09_office_file_single.glb",
       "source_mesh_nodes": 3,
       "source_triangles": 132,
       "stages": {},
@@ -2590,7 +2590,7 @@
       "stage_meshes_times_placements": 0
     },
     {
-      "path": "models/objects/enviroments/09/09_office_files_a.glb",
+      "path": "models/objects/enviroments/09/files/09_office_files_a.glb",
       "source_mesh_nodes": 1,
       "source_triangles": 60,
       "stages": {},
@@ -2599,7 +2599,7 @@
       "stage_meshes_times_placements": 0
     },
     {
-      "path": "models/objects/enviroments/09/09_office_files_a_2.glb",
+      "path": "models/objects/enviroments/09/files/09_office_files_a_2.glb",
       "source_mesh_nodes": 7,
       "source_triangles": 180,
       "stages": {},
@@ -2608,7 +2608,7 @@
       "stage_meshes_times_placements": 0
     },
     {
-      "path": "models/objects/enviroments/09/09_office_files_d_custom.glb",
+      "path": "models/objects/enviroments/09/files/09_office_files_d_custom.glb",
       "source_mesh_nodes": 3,
       "source_triangles": 132,
       "stages": {},
@@ -2617,7 +2617,7 @@
       "stage_meshes_times_placements": 0
     },
     {
-      "path": "models/objects/enviroments/09/09_office_files_e.glb",
+      "path": "models/objects/enviroments/09/files/09_office_files_e.glb",
       "source_mesh_nodes": 1,
       "source_triangles": 60,
       "stages": {},
@@ -2626,7 +2626,7 @@
       "stage_meshes_times_placements": 0
     },
     {
-      "path": "models/objects/enviroments/09/09_office_files_e_2.glb",
+      "path": "models/objects/enviroments/09/files/09_office_files_e_2.glb",
       "source_mesh_nodes": 1,
       "source_triangles": 60,
       "stages": {},
@@ -2635,7 +2635,7 @@
       "stage_meshes_times_placements": 0
     },
     {
-      "path": "models/objects/enviroments/09/09_office_files_f.glb",
+      "path": "models/objects/enviroments/09/files/09_office_files_f.glb",
       "source_mesh_nodes": 1,
       "source_triangles": 108,
       "stages": {},
@@ -2644,7 +2644,7 @@
       "stage_meshes_times_placements": 0
     },
     {
-      "path": "models/objects/enviroments/09/09_office_files_f_2.glb",
+      "path": "models/objects/enviroments/09/files/09_office_files_f_2.glb",
       "source_mesh_nodes": 1,
       "source_triangles": 108,
       "stages": {},
@@ -2653,7 +2653,7 @@
       "stage_meshes_times_placements": 0
     },
     {
-      "path": "models/objects/enviroments/09/09_office_files_f_3.glb",
+      "path": "models/objects/enviroments/09/files/09_office_files_f_3.glb",
       "source_mesh_nodes": 1,
       "source_triangles": 108,
       "stages": {},
@@ -2662,7 +2662,7 @@
       "stage_meshes_times_placements": 0
     },
     {
-      "path": "models/objects/enviroments/09/09_painting.glb",
+      "path": "models/objects/enviroments/09/painting/09_painting.glb",
       "source_mesh_nodes": 1,
       "source_triangles": 28,
       "stages": {},
@@ -2671,7 +2671,7 @@
       "stage_meshes_times_placements": 0
     },
     {
-      "path": "models/objects/enviroments/09/09_painting_small.glb",
+      "path": "models/objects/enviroments/09/painting/09_painting_small.glb",
       "source_mesh_nodes": 1,
       "source_triangles": 28,
       "stages": {},
@@ -2680,7 +2680,7 @@
       "stage_meshes_times_placements": 0
     },
     {
-      "path": "models/objects/enviroments/09/09_painting_small_2.glb",
+      "path": "models/objects/enviroments/09/painting/09_painting_small_2.glb",
       "source_mesh_nodes": 1,
       "source_triangles": 38,
       "stages": {},
@@ -2689,7 +2689,7 @@
       "stage_meshes_times_placements": 0
     },
     {
-      "path": "models/objects/enviroments/09/09_paper_A4_compact_crumpled_wad.glb",
+      "path": "models/objects/enviroments/09/paper/09_paper_A4_compact_crumpled_wad.glb",
       "source_mesh_nodes": 1,
       "source_triangles": 432,
       "stages": {},
@@ -2698,7 +2698,7 @@
       "stage_meshes_times_placements": 0
     },
     {
-      "path": "models/objects/enviroments/09/09_paper_A4_heavily_crumpled.glb",
+      "path": "models/objects/enviroments/09/paper/09_paper_A4_heavily_crumpled.glb",
       "source_mesh_nodes": 1,
       "source_triangles": 552,
       "stages": {},
@@ -2707,7 +2707,7 @@
       "stage_meshes_times_placements": 0
     },
     {
-      "path": "models/objects/enviroments/09/09_paper_A4_moderately_crumpled.glb",
+      "path": "models/objects/enviroments/09/paper/09_paper_A4_moderately_crumpled.glb",
       "source_mesh_nodes": 1,
       "source_triangles": 552,
       "stages": {},
@@ -2716,7 +2716,7 @@
       "stage_meshes_times_placements": 0
     },
     {
-      "path": "models/objects/enviroments/09/09_paper_A4_slightly_crumpled.glb",
+      "path": "models/objects/enviroments/09/paper/09_paper_A4_slightly_crumpled.glb",
       "source_mesh_nodes": 1,
       "source_triangles": 552,
       "stages": {},
@@ -2725,7 +2725,7 @@
       "stage_meshes_times_placements": 0
     },
     {
-      "path": "models/objects/enviroments/09/09_paper_stack.glb",
+      "path": "models/objects/enviroments/09/paper/09_paper_stack.glb",
       "source_mesh_nodes": 1,
       "source_triangles": 12,
       "stages": {},
@@ -2734,7 +2734,7 @@
       "stage_meshes_times_placements": 0
     },
     {
-      "path": "models/objects/enviroments/09/09_paper_stray.glb",
+      "path": "models/objects/enviroments/09/paper/09_paper_stray.glb",
       "source_mesh_nodes": 1,
       "source_triangles": 100,
       "stages": {},
@@ -2743,7 +2743,7 @@
       "stage_meshes_times_placements": 0
     },
     {
-      "path": "models/objects/enviroments/09/09_paper_towel_roll_h.glb",
+      "path": "models/objects/enviroments/09/paper/09_paper_towel_roll_h.glb",
       "source_mesh_nodes": 8,
       "source_triangles": 384,
       "stages": {},
@@ -2752,7 +2752,7 @@
       "stage_meshes_times_placements": 0
     },
     {
-      "path": "models/objects/enviroments/09/09_paper_towel_roll_v.glb",
+      "path": "models/objects/enviroments/09/paper/09_paper_towel_roll_v.glb",
       "source_mesh_nodes": 1,
       "source_triangles": 384,
       "stages": {},
@@ -2761,7 +2761,7 @@
       "stage_meshes_times_placements": 0
     },
     {
-      "path": "models/objects/enviroments/09/09_pen_1.glb",
+      "path": "models/objects/enviroments/09/chancery/09_pen_1.glb",
       "source_mesh_nodes": 1,
       "source_triangles": 42,
       "stages": {},
@@ -2770,7 +2770,7 @@
       "stage_meshes_times_placements": 0
     },
     {
-      "path": "models/objects/enviroments/09/09_pen_2.glb",
+      "path": "models/objects/enviroments/09/chancery/09_pen_2.glb",
       "source_mesh_nodes": 1,
       "source_triangles": 42,
       "stages": {},
@@ -2779,7 +2779,7 @@
       "stage_meshes_times_placements": 0
     },
     {
-      "path": "models/objects/enviroments/09/09_pen_3.glb",
+      "path": "models/objects/enviroments/09/chancery/09_pen_3.glb",
       "source_mesh_nodes": 1,
       "source_triangles": 46,
       "stages": {},
@@ -2788,7 +2788,7 @@
       "stage_meshes_times_placements": 0
     },
     {
-      "path": "models/objects/enviroments/09/09_pen_4.glb",
+      "path": "models/objects/enviroments/09/chancery/09_pen_4.glb",
       "source_mesh_nodes": 1,
       "source_triangles": 42,
       "stages": {},
@@ -2797,7 +2797,7 @@
       "stage_meshes_times_placements": 0
     },
     {
-      "path": "models/objects/enviroments/09/09_pen_5.glb",
+      "path": "models/objects/enviroments/09/chancery/09_pen_5.glb",
       "source_mesh_nodes": 1,
       "source_triangles": 42,
       "stages": {},
@@ -2806,7 +2806,7 @@
       "stage_meshes_times_placements": 0
     },
     {
-      "path": "models/objects/enviroments/09/09_pen_6.glb",
+      "path": "models/objects/enviroments/09/chancery/09_pen_6.glb",
       "source_mesh_nodes": 1,
       "source_triangles": 34,
       "stages": {},
@@ -2815,7 +2815,7 @@
       "stage_meshes_times_placements": 0
     },
     {
-      "path": "models/objects/enviroments/09/09_pencil.glb",
+      "path": "models/objects/enviroments/09/chancery/09_pencil.glb",
       "source_mesh_nodes": 1,
       "source_triangles": 218,
       "stages": {},
@@ -2824,7 +2824,7 @@
       "stage_meshes_times_placements": 0
     },
     {
-      "path": "models/objects/enviroments/09/09_pencil_box.glb",
+      "path": "models/objects/enviroments/09/chancery/09_pencil_box.glb",
       "source_mesh_nodes": 1,
       "source_triangles": 264,
       "stages": {},
@@ -2833,7 +2833,7 @@
       "stage_meshes_times_placements": 0
     },
     {
-      "path": "models/objects/enviroments/09/09_pencil_holder.glb",
+      "path": "models/objects/enviroments/09/chancery/09_pencil_holder.glb",
       "source_mesh_nodes": 1,
       "source_triangles": 252,
       "stages": {},
@@ -2842,7 +2842,7 @@
       "stage_meshes_times_placements": 0
     },
     {
-      "path": "models/objects/enviroments/09/09_plastic_water_bottle_blue_500ml.glb",
+      "path": "models/objects/enviroments/09/glass_mug/09_plastic_water_bottle_blue_500ml.glb",
       "source_mesh_nodes": 1,
       "source_triangles": 1056,
       "stages": {},
@@ -2851,7 +2851,7 @@
       "stage_meshes_times_placements": 0
     },
     {
-      "path": "models/objects/enviroments/09/09_plastic_water_bottle_clear_330ml.glb",
+      "path": "models/objects/enviroments/09/glass_mug/09_plastic_water_bottle_clear_330ml.glb",
       "source_mesh_nodes": 1,
       "source_triangles": 1056,
       "stages": {},
@@ -2860,7 +2860,7 @@
       "stage_meshes_times_placements": 0
     },
     {
-      "path": "models/objects/enviroments/09/09_stapler.glb",
+      "path": "models/objects/enviroments/09/chancery/09_stapler.glb",
       "source_mesh_nodes": 1,
       "source_triangles": 136,
       "stages": {},
@@ -2869,7 +2869,7 @@
       "stage_meshes_times_placements": 0
     },
     {
-      "path": "models/objects/enviroments/09/09_tablet.glb",
+      "path": "models/objects/enviroments/09/chancery/09_tablet.glb",
       "source_mesh_nodes": 1,
       "source_triangles": 586,
       "stages": {},
@@ -2878,7 +2878,7 @@
       "stage_meshes_times_placements": 0
     },
     {
-      "path": "models/objects/enviroments/09/09_toilet_paper_roll_h.glb",
+      "path": "models/objects/enviroments/09/paper/09_toilet_paper_roll_h.glb",
       "source_mesh_nodes": 1,
       "source_triangles": 384,
       "stages": {},
@@ -2887,7 +2887,7 @@
       "stage_meshes_times_placements": 0
     },
     {
-      "path": "models/objects/enviroments/09/09_toilet_paper_roll_v.glb",
+      "path": "models/objects/enviroments/09/paper/09_toilet_paper_roll_v.glb",
       "source_mesh_nodes": 1,
       "source_triangles": 384,
       "stages": {},
@@ -2896,7 +2896,7 @@
       "stage_meshes_times_placements": 0
     },
     {
-      "path": "models/objects/enviroments/09/09_trash_bin.glb",
+      "path": "models/objects/enviroments/09/bin_bucket_mop/09_trash_bin.glb",
       "source_mesh_nodes": 1,
       "source_triangles": 28,
       "stages": {},
@@ -2905,7 +2905,7 @@
       "stage_meshes_times_placements": 0
     },
     {
-      "path": "models/objects/enviroments/09/09_trash_bin_small.glb",
+      "path": "models/objects/enviroments/09/bin_bucket_mop/09_trash_bin_small.glb",
       "source_mesh_nodes": 1,
       "source_triangles": 28,
       "stages": {},
@@ -2932,7 +2932,7 @@
       "stage_meshes_times_placements": 0
     },
     {
-      "path": "models/objects/enviroments/09/09_white_board_big.glb",
+      "path": "models/objects/enviroments/09/board/09_white_board_big.glb",
       "source_mesh_nodes": 1,
       "source_triangles": 52,
       "stages": {},
@@ -2941,7 +2941,7 @@
       "stage_meshes_times_placements": 0
     },
     {
-      "path": "models/objects/enviroments/09/09_white_board_stand.glb",
+      "path": "models/objects/enviroments/09/board/09_white_board_stand.glb",
       "source_mesh_nodes": 1,
       "source_triangles": 52,
       "stages": {},
