@@ -22,6 +22,6 @@ static func update(enemy: Node3D, animation: Node, asleep: bool) -> void:
 	if animation == null or Engine.get_physics_frames() % 6 != enemy.get_instance_id() % 6:
 		return
 	# F6 bisect switch: level 1 and up bring back the old behaviour (animation always runs).
-	var wanted := not asleep and (int(Engine.get_meta("legacy_perf", 0)) >= 1 or could_be_seen(enemy, float(enemy.get("move_speed"))))
+	var wanted := not asleep and not bool(Engine.get_meta("probe_no_animation", false)) and (int(Engine.get_meta("legacy_perf", 0)) >= 1 or could_be_seen(enemy, float(enemy.get("move_speed"))))
 	if wanted != bool(animation.call("is_active")):
 		animation.call("set_active", wanted)
