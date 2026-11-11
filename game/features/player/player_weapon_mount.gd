@@ -15,6 +15,8 @@ var _active: Node3D
 var _aim_modifying := false
 var _hand := -1
 var _socket_offset := Transform3D.IDENTITY
+## Weapon-frame offset that puts another grip, not the origin, into the socket hand.
+var grip_shift := Vector3.ZERO
 
 
 func _ready() -> void:
@@ -88,7 +90,7 @@ func sync_weapon(weapon: Node3D) -> void:
 		_socket_offset = socket.transform
 	var original_scale := weapon.scale
 	var hand := skeleton.global_transform * skeleton.get_bone_global_pose(_hand) * _socket_offset if _aim_modifying else socket.global_transform
-	weapon.global_transform = Transform3D(hand.basis.orthonormalized(), hand.origin)
+	weapon.global_transform = Transform3D(hand.basis.orthonormalized(), hand.origin + hand.basis.orthonormalized() * grip_shift)
 	weapon.scale = original_scale
 
 

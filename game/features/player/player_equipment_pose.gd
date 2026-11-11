@@ -18,6 +18,8 @@ var _back_attachment: BoneAttachment3D
 var capture_pose := false
 var posed_bones: Array[Transform3D] = []
 var hand_error := 0.0
+## Distance of the right hand from the forend on long guns.
+var forend_error := 0.0
 var arm_geometry: Dictionary = {}
 
 
@@ -42,6 +44,7 @@ func _process_modification_with_delta(_delta: float) -> void:
 	var name_value: String = weapon.call("get_weapon_name")
 	backpack.visible = name_value == "MINIGUN"
 	var full_kit := name_value in LONG_GUN or name_value == "MINIGUN"
+	mount.set("grip_shift", Vector3.ZERO)
 	if not full_kit:
 		return
 	if name_value in LONG_GUN:
@@ -56,10 +59,18 @@ func _process_modification_with_delta(_delta: float) -> void:
 	# Rifle stocks extend behind the rear hand, so the hand sits ahead of the
 	# chest; the sniper's longer stock needs a little more clearance.
 	var target_right: Vector3 = MINIGUN_RIGHT_HAND if name_value == "MINIGUN" else LONG_GUN[name_value][1]
+	# Long guns are held with the right hand on the forend and the left on the trigger grip.
+	# The weapon stays where it was: the right hand goes to the forend, the left to the old rear grip.
+	var left_grip := weapon.find_child("Grip_L", true, false) as Node3D
+	if name_value in LONG_GUN:
+		var rear := _grip_local(weapon, weapon.find_child("Grip_R", true, false) as Node3D)
+		var fore := _grip_local(weapon, left_grip)
+		mount.set("grip_shift", -fore)
+		target_right += _barrel_basis() * (fore - rear)
+		left_grip = weapon.find_child("Grip_R", true, false) as Node3D
 	_fit_arm(skeleton, "Right", target_right, Vector3(-.65, .15, .10))
 	_level_right_hand(skeleton)
 	mount.call("sync_weapon", weapon)
-	var left_grip := weapon.find_child("Grip_L", true, false) as Node3D
 	if left_grip != null:
 		var target := skeleton.to_local(left_grip.global_position)
 		_fit_arm(skeleton, "Left", target, Vector3(.65, .20, .15))
@@ -67,6 +78,8 @@ func _process_modification_with_delta(_delta: float) -> void:
 		_curl_support_hand(skeleton, target, skeleton.global_basis.inverse() * weapon.global_basis)
 		hand_error = skeleton.get_bone_global_pose(skeleton.find_bone("LeftHand")).origin.distance_to(target)
 	mount.call("sync_weapon", weapon)
+	if name_value in LONG_GUN:
+		forend_error = (skeleton.get_bone_global_pose(skeleton.find_bone("RightHand")) * socket_offset).origin.distance_to(skeleton.to_local(weapon.find_child("Grip_L", true, false).global_position))
 	if capture_pose:
 		posed_bones.clear()
 		for bone in skeleton.get_bone_count():
@@ -114,10 +127,17 @@ func _turn_bone(skeleton: Skeleton3D, bone: int, from: Vector3, to: Vector3) -> 
 
 func _level_right_hand(skeleton: Skeleton3D) -> void:
 	var socket_offset: Transform3D = mount.get("_socket_offset")
+	_set_hand_basis(skeleton, "Right", _barrel_basis() * socket_offset.basis.inverse())
+
+
+func _barrel_basis() -> Basis:
 	var barrel := Vector3(.30, 0, sqrt(.91))
-	var weapon_basis := Basis(barrel, Vector3.DOWN, barrel.cross(Vector3.DOWN))
-	var hand_basis := weapon_basis * socket_offset.basis.inverse()
-	_set_hand_basis(skeleton, "Right", hand_basis)
+	return Basis(barrel, Vector3.DOWN, barrel.cross(Vector3.DOWN))
+
+
+## Marker position in the weapon's own frame, with the weapon's scale applied.
+func _grip_local(weapon: Node3D, marker: Node3D) -> Vector3:
+	return (weapon.global_transform.affine_inverse() * marker.global_position) * weapon.scale.x
 
 
 func _set_hand_basis(skeleton: Skeleton3D, side: String, hand_basis: Basis) -> void:
