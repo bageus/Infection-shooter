@@ -25,7 +25,7 @@ func _run() -> void:
 	var catalog := CATALOG.new()
 	catalog.call("_build_environment_catalogs")
 	var entries: Array = catalog.group_catalogs["04"]
-	_check(entries.size() == 7, "Seven group-04 palette entries remain")
+	_check(entries.size() == 9, "Seven atlas models and the two large crates are in the group-04 palette")
 	for entry: Dictionary in entries:
 		_check(ResourceLoader.exists(str(entry.path)), "Palette path loads")
 	for filename: String in COUNTS:
