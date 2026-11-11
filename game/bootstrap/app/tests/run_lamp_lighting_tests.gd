@@ -280,7 +280,7 @@ func _test_model_lamps() -> void:
 		prop.set("model_path", "res://models/objects/enviroments/05/lamp/" + file)
 		root.add_child(prop)
 		await process_frame
-		var glow := prop.find_child("BudgetLight", true, false) as OmniLight3D
+		var glow := prop.find_child("BudgetLight", true, false) as Light3D
 		_check(glow != null and prop.call("is_lamp") and prop.call("has_display"), "%s is a lamp with a light and a power setting" % file)
 		if glow != null:
 			controller.refresh_light_budget()
@@ -289,6 +289,10 @@ func _test_model_lamps() -> void:
 			_check(not glow.visible, "%s goes dark when switched off" % file)
 			prop.call("configure_display", {"power": "on"})
 			_check(glow.visible, "%s glows again when switched on" % file)
+			_check(glow is SpotLight3D and prop.call("get_display_config").has("range"), "%s is a spot with a range setting" % file)
+			prop.call("configure_display", {"power": "on", "range": 8.0, "angle": 30.0})
+			_check(is_equal_approx((glow as SpotLight3D).spot_range, 8.0) and is_equal_approx((glow as SpotLight3D).spot_angle, 30.0), "%s takes its range and angle from the planner" % file)
+			_check(is_equal_approx(float(prop.call("get_display_config")["range"]), 8.0), "%s saves its range in the map record" % file)
 		prop.free()
 		controller.free()
 

@@ -7,6 +7,8 @@ var title: Label
 var power: OptionButton
 var content: OptionButton
 var reroll: Button
+var range_slider: HSlider
+var angle_slider: HSlider
 var _updating := false
 var defaults := {"power": "auto", "content": "static"}
 
@@ -26,6 +28,10 @@ func setup(context: Variant, planner_objects: Variant) -> void:
 	reroll.text = "Другое случайное изображение"
 	reroll.pressed.connect(_reroll)
 	panel.add_child(reroll)
+	range_slider = _slider("Дальность", 1.0, 12.0, 0.5)
+	angle_slider = _slider("Угол", 10.0, 80.0, 1.0)
+	range_slider.value_changed.connect(_shape_changed)
+	angle_slider.value_changed.connect(_shape_changed)
 	var box: Node = session.ui.get_node("Panel/VBox")
 	box.add_child(panel)
 	box.move_child(panel, session.ui.get_node("Panel/VBox/Palette").get_index() + 1)
@@ -44,6 +50,21 @@ func _choice(label_text: String, labels: Array) -> OptionButton:
 	row.add_child(choice)
 	panel.add_child(row)
 	return choice
+
+
+func _slider(label_text: String, low: float, high: float, step: float) -> HSlider:
+	var row := HBoxContainer.new()
+	var label := Label.new()
+	label.text = label_text
+	row.add_child(label)
+	var slider := HSlider.new()
+	slider.min_value = low
+	slider.max_value = high
+	slider.step = step
+	slider.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	row.add_child(slider)
+	panel.add_child(row)
+	return slider
 
 
 func _target() -> Node3D:
@@ -77,6 +98,12 @@ func update() -> void:
 	content.select(1 if str(config["content"]) == "dynamic" else 0)
 	content.disabled = "wall_TV" in str(target.get("model_path"))
 	content.tooltip_text = "На телевизорах всегда динамическая заставка" if content.disabled else ""
+	# Only directional lamps (floodlight, operating lamp) have a range and a cone angle.
+	var directional := config.has("range")
+	range_slider.get_parent().visible = directional
+	angle_slider.get_parent().visible = directional
+	range_slider.value = float(config.get("range", 0.0))
+	angle_slider.value = float(config.get("angle", 0.0))
 	_updating = false
 
 
@@ -104,10 +131,17 @@ func _changed(_index: int) -> void:
 	var config: Dictionary = target.call("get_display_config")
 	config["power"] = ["on", "off", "auto"][power.selected]
 	config["content"] = "dynamic" if content.selected == 1 else "static"
+	if config.has("range"):
+		config["range"] = range_slider.value
+		config["angle"] = angle_slider.value
 	target.call("configure_display", config)
 	if objects.selected == null:
 		defaults = {"power": config["power"], "content": config["content"]}
 	update()
+
+
+func _shape_changed(_value: float) -> void:
+	_changed(0)
 
 
 func _reroll() -> void:
