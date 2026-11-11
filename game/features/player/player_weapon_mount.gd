@@ -16,7 +16,11 @@ var _aim_modifying := false
 var _hand := -1
 var _socket_offset := Transform3D.IDENTITY
 ## Weapon-frame offset that puts another grip, not the origin, into the socket hand.
-var grip_shift := Vector3.ZERO
+var grip_shift := Vector3.ZERO:
+	set(value):
+		grip_shift = value
+		if _remote != null:
+			_remote.position = value # the remote pushes the weapon position, so the shift must live there too
 
 
 func _ready() -> void:

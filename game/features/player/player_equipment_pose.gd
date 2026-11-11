@@ -73,10 +73,19 @@ func _process_modification_with_delta(_delta: float) -> void:
 	mount.call("sync_weapon", weapon)
 	if left_grip != null:
 		var target := skeleton.to_local(left_grip.global_position)
-		_fit_arm(skeleton, "Left", target, Vector3(.65, .20, .15))
-		_set_hand_basis(skeleton, "Left", skeleton.global_basis.inverse() * weapon.global_basis * support_orientation)
-		_curl_support_hand(skeleton, target, skeleton.global_basis.inverse() * weapon.global_basis)
-		hand_error = skeleton.get_bone_global_pose(skeleton.find_bone("LeftHand")).origin.distance_to(target)
+		if name_value in LONG_GUN:
+			# The trigger hand holds the grip like the right hand does, mirrored: the palm, not the wrist, sits on the grip.
+			var mirror := Basis(Vector3(-1, 0, 0), Vector3.UP, Vector3.BACK)
+			var hand_basis := _barrel_basis() * (mirror * socket_offset.basis * mirror).inverse()
+			var wrist := target - hand_basis * (mirror * socket_offset.origin)
+			_fit_arm(skeleton, "Left", wrist, Vector3(.65, .20, .15))
+			_set_hand_basis(skeleton, "Left", hand_basis)
+			hand_error = skeleton.get_bone_global_pose(skeleton.find_bone("LeftHand")).origin.distance_to(wrist)
+		else:
+			_fit_arm(skeleton, "Left", target, Vector3(.65, .20, .15))
+			_set_hand_basis(skeleton, "Left", skeleton.global_basis.inverse() * weapon.global_basis * support_orientation)
+			_curl_support_hand(skeleton, target, skeleton.global_basis.inverse() * weapon.global_basis)
+			hand_error = skeleton.get_bone_global_pose(skeleton.find_bone("LeftHand")).origin.distance_to(target)
 	mount.call("sync_weapon", weapon)
 	if name_value in LONG_GUN:
 		forend_error = (skeleton.get_bone_global_pose(skeleton.find_bone("RightHand")) * socket_offset).origin.distance_to(skeleton.to_local(weapon.find_child("Grip_L", true, false).global_position))
