@@ -187,7 +187,7 @@ def ak():
     m.box('ChargingHandle',(.075,.104,.057),(.07,.012,.038),1,.003)
     m.box('Selector',(-.032,.057,.043),(.087,.014,.007),1,.004)
     for x in [-.08,.012,.09]:m.cylinder('ReceiverPin',(x,.065,.039),.006,.005,1,axis='z',segments=8)
-    m.marker('Grip_L',(.23,.034,0));m.marker('Muzzle',(.637,.086,0));m.marker('WeaponSocket_R',(-.117,-.017,0))
+    m.marker('Grip_L',(.265,-.001,.005));m.marker('Muzzle',(.637,.086,0));m.marker('WeaponSocket_R',(-.067,-.017,.015))
     return m
 
 def m4():
@@ -216,7 +216,7 @@ def m4():
     m.box('EjectionPort',(-.01,.113,.038),(.072,.027,.006),2,.004)
     m.box('ForwardAssist',(-.094,.099,.052),(.028,.022,.027),1,.004)
     m.box('ChargingLatch',(-.144,.147,0),(.034,.014,.09),1,.004)
-    m.marker('Grip_L',(.242,-.016,0));m.marker('Muzzle',(.608,.105,0));m.marker('WeaponSocket_R',(-.11,-.016,0))
+    m.marker('Grip_L',(.277,-.051,.005));m.marker('Muzzle',(.608,.105,0));m.marker('WeaponSocket_R',(-.06,-.014,.015))
     return m
 
 def minigun():
