@@ -151,6 +151,7 @@ func _build_content() -> void:
 			no_save.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
 			no_save.add_theme_color_override("font_color", STYLE.MUTED)
 			row.add_child(no_save)
+			if OS.is_debug_build(): _add_button("loadMap", "load_map") # Planner only; release exports have none
 			_add_button("settings", "settings")
 			_add_button("about", "about")
 			_add_button("exit", "quit")
@@ -205,7 +206,7 @@ func _add_button(key: String, action: String, disabled: bool = false) -> Button:
 
 func activate(action: String) -> void:
 	play_click()
-	if action in ["settings", "about", "briefing", "quit", "restart", "main"]:
+	if action in ["settings", "about", "briefing", "quit", "restart", "main", "load_map"]:
 		_open_dialog(action)
 	else:
 		dispatch(action)

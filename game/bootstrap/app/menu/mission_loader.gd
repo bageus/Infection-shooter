@@ -11,6 +11,8 @@ const LEVEL_TEXT := preload("res://game/bootstrap/app/level_text.gd")
 var warmed_materials := 0
 ## Set when the level was started from "Continue": the mission shows a centered checkpoint caption.
 var checkpoint_notice := false
+## Set from the debug main menu: the map opens in the planner instead of play.
+var open_planner := false
 var completion_music: Node
 const MEMORY_GUARD := preload("res://game/core/vfx/public/memory_guard.gd")
 ## Props need ~160 physics ticks to fall asleep; a slow machine gets a wall-clock cap instead.
@@ -238,6 +240,8 @@ func _activate_pending(tree: SceneTree, previous: Node) -> void:
 		caption.caption = "\n".join(lines)
 		caption.seconds = 6.0 if not description.is_empty() else 2.5
 		tree.root.add_child(caption)
+	if open_planner:
+		pending.get("planning_mode").call("enter")
 	pending = null
 	_previous_collisions.clear()
 	_previous_scene = null
