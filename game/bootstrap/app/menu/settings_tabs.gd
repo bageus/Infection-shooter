@@ -315,7 +315,7 @@ func _shadow_quality() -> void:
 	slider.value_changed.connect(func(value: float) -> void:
 		name_label.text = dialog.view.text("shadowQuality" + str(int(value)))
 		dialog.view.preferences.values.shadow_quality = int(value)
-		settle.start())
+		if settle.is_inside_tree(): settle.start())
 	var box := HBoxContainer.new()
 	box.add_child(slider)
 	box.add_child(name_label)
@@ -357,7 +357,7 @@ func _blood_level() -> void:
 	slider.value_changed.connect(func(value: float) -> void:
 		name_label.text = dialog.view.text("bloodLevel" + str(int(value)))
 		dialog.view.preferences.values.blood_level = int(value)
-		settle.start())
+		if settle.is_inside_tree(): settle.start())
 	var box := HBoxContainer.new()
 	box.add_child(slider)
 	box.add_child(name_label)
@@ -389,7 +389,7 @@ func _destruction_quality() -> void:
 	slider.value_changed.connect(func(value: float) -> void:
 		name_label.text = dialog.view.text("destructionQuality" + str(int(value)))
 		dialog.view.preferences.values.destruction_quality = int(value)
-		settle.start())
+		if settle.is_inside_tree(): settle.start())
 	var box := HBoxContainer.new()
 	box.add_child(slider)
 	box.add_child(name_label)
