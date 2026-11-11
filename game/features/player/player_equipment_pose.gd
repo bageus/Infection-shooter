@@ -6,18 +6,45 @@ const MINIGUN_RIGHT_HAND := Vector3(-.22, -.02, .14)
 ## Long guns are scaled to the character and gripped near the chest: scale, then the rear hand in skeleton space.
 ## Their forend must stay within reach of the support arm (about .55 m from the left shoulder).
 const LONG_GUN := {
-	"AK": [.85, Vector3(-.16, .43, .22)],
-	"M4": [.85, Vector3(-.16, .43, .22)],
-	"SNIPER RIFLE": [.75, Vector3(-.16, .44, .22)],
-	"SHOTGUN": [.85, Vector3(-.16, .43, .33)],
-	"GRENADE LAUNCHER": [.7, Vector3(-.16, .43, .42)],
+	"AK": [.74, Vector3(-.165, .41, .77)],
+	"M4": [.74, Vector3(-.165, .41, .77)],
+	"SNIPER RIFLE": [.70, Vector3(-.145, .39, .22)],
+	"SHOTGUN": [.79, Vector3(-.145, .415, .505)],
+	"GRENADE LAUNCHER": [.87, Vector3(-.085, .415, .725)],
 }
 ## Short guns have grips so close together that both hands collide: the forend hand holds this much further along the barrel (weapon units).
-const FOREND_REACH := {"SHOTGUN": .06, "GRENADE LAUNCHER": .18}
+const FOREND_REACH := {"SHOTGUN": .045, "GRENADE LAUNCHER": -.18, "SNIPER RIFLE": -.075, "AK": -.055, "M4": -.055}
+## Extra arm posing per weapon, set by hand in tools/weapon_hold_tuner.tscn: joint turns in degrees
+## (bone -> Vector3) and hand nudges in skeleton space (side -> Vector3).
+const ARM_TUNING := {
+	"SNIPER RIFLE": {
+		"bones": {"RightArm": Vector3(-9, 28, 0), "RightForeArm": Vector3(-3, -22, 15), "RightHand": Vector3(-5, 8, -9), "LeftArm": Vector3(0, 22, 10), "LeftForeArm": Vector3(-6, -64, 11), "LeftHand": Vector3(-42, -15, 19)},
+		"hands": {"Right": Vector3(-.11, -.03, .06), "Left": Vector3(.045, .165, .055)},
+	},
+	"GRENADE LAUNCHER": {
+		"bones": {"RightArm": Vector3(-9, 28, 0), "RightForeArm": Vector3(-3, -22, 15), "RightHand": Vector3(-5, 8, -9), "LeftArm": Vector3(0, 22, 10), "LeftForeArm": Vector3(-6, -64, 11), "LeftHand": Vector3(-21, 90, -33)},
+		"hands": {"Right": Vector3(-.11, -.03, .06), "Left": Vector3(-.125, .14, -.045)},
+	},
+	"SHOTGUN": {
+		"bones": {"RightArm": Vector3(-7, 50, -3), "RightForeArm": Vector3(3, -8, 16), "RightHand": Vector3(-11, -3, -4), "LeftArm": Vector3(0, 22, 10), "LeftForeArm": Vector3(-6, -40, 6), "LeftHand": Vector3(-21, 37, -39)},
+		"hands": {"Right": Vector3(-.04, .085, .015), "Left": Vector3(-.105, .065, .06)},
+	},
+	"AK": {
+		"bones": {"RightArm": Vector3(-7, 10, 0), "RightForeArm": Vector3(-10, -9, 3), "RightHand": Vector3(-5, -5, -9), "LeftArm": Vector3(4, 9, 10)},
+		"hands": {"Right": Vector3(-.065, -.115, -.23)},
+	},
+	"M4": {
+		"bones": {"RightArm": Vector3(-7, 10, 0), "RightForeArm": Vector3(-10, -9, 3), "RightHand": Vector3(-5, -5, -9), "LeftArm": Vector3(4, 9, 10)},
+		"hands": {"Right": Vector3(-.065, -.115, -.23)},
+	},
+}
 ## Live overrides for the hold tuner (tools/weapon_hold_tuner.tscn): weapon name -> [scale, rear hand, forend reach].
 var tuning := {}
 ## Hand position nudges for the tuner: "Right"/"Left" -> Vector3 in skeleton space.
 var hand_offset := {}
+## The tuner sets this to drive the arm nudges and bone turns itself instead of ARM_TUNING.
+var manual_arms := false
+var _held := ""
 var mount: Node
 var backpack: Node3D
 var _back_attachment: BoneAttachment3D
@@ -48,6 +75,7 @@ func _process_modification_with_delta(_delta: float) -> void:
 	if not is_instance_valid(weapon):
 		return
 	var name_value: String = weapon.call("get_weapon_name")
+	_held = name_value
 	backpack.visible = name_value == "MINIGUN"
 	var full_kit := name_value in LONG_GUN or name_value == "MINIGUN"
 	mount.set("grip_shift", Vector3.ZERO)
@@ -103,6 +131,16 @@ func _process_modification_with_delta(_delta: float) -> void:
 
 
 ## Scale, rear-hand point and forend reach of a long gun, from the tuner when it overrides them.
+## Hand nudge for a side: the tuner's slider in manual mode, otherwise the weapon's ARM_TUNING.
+func _nudge(side: String) -> Vector3:
+	return hand_offset.get(side, Vector3.ZERO) if manual_arms else ARM_TUNING.get(_held, {}).get("hands", {}).get(side, Vector3.ZERO)
+
+
+## Bone turns for the held weapon, in degrees.
+func arm_bones() -> Dictionary:
+	return ARM_TUNING.get(_held, {}).get("bones", {})
+
+
 func _spec(weapon_name: String) -> Array:
 	if tuning.has(weapon_name):
 		return tuning[weapon_name]
@@ -110,7 +148,7 @@ func _spec(weapon_name: String) -> Array:
 
 
 func _fit_arm(skeleton: Skeleton3D, side: String, target: Vector3, pole: Vector3) -> void:
-	target += hand_offset.get(side, Vector3.ZERO)
+	target += _nudge(side)
 	var upper := skeleton.find_bone(side + "Arm")
 	var lower := skeleton.find_bone(side + "ForeArm")
 	var hand := skeleton.find_bone(side + "Hand")

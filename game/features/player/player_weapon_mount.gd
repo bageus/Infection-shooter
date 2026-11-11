@@ -10,6 +10,7 @@ var recoil: RefCounted
 const MUZZLE_RISE_DEGREES := 5.0
 var socket: Node3D
 var _remote: RemoteTransform3D
+var arm_offsets: SkeletonModifier3D
 var _aim_target := Vector3.INF
 var _active: Node3D
 var _aim_modifying := false
@@ -68,6 +69,10 @@ func _ready() -> void:
 	reload.mount = self
 	skeleton.add_child(reload)
 	reload_pose = reload
+	arm_offsets = preload("res://game/features/player/player_arm_offsets.gd").new()
+	arm_offsets.name = "ArmOffsets"
+	arm_offsets.pose = equipment_pose
+	skeleton.add_child(arm_offsets) # last, so it turns the arms after every other modifier
 	skeleton.skeleton_updated.connect(_sync_active)
 	_remote = RemoteTransform3D.new()
 	_remote.name = "ActiveWeaponTransform"
