@@ -16,8 +16,8 @@ const SFX := preload("res://game/core/audio/public/sound_events.gd")
 # Defaults preserve invisible fixtures in legacy authored scenes/maps.
 @export_enum("point", "linear", "rectangle") var fixture_shape := "point"
 @export var fixture_visible_in_game := false
-## Fixtures are drawn in the planner only: in play a lamp keeps its light and loses the housing meshes and materials.
-const SHOW_FIXTURES_IN_GAME := false
+## In play a lamp keeps only its light unless the map-wide LAMP_FIXTURES switch shows the housing meshes.
+const LAMP_FIXTURES := preload("res://game/presentation/office_floor/public/lamp_fixtures.gd")
 var _planning_visual := false
 var _fixture: Node3D
 var _diffuser_material: StandardMaterial3D
@@ -203,19 +203,25 @@ func _sync_activation(fade_budget := false) -> void:
 
 func set_planning_visual(enabled: bool) -> void:
 	_planning_visual = enabled
-	if is_node_ready():
-		if enabled and (_fixture == null or _fixture.get_child_count() == 0):
-			_build_fixture_meshes()
-		elif not enabled and not _fixture_wanted() and _fixture != null:
-			_fixture.free()
-			_fixture = null
-			_diffuser_material = null
+	refresh_fixture()
 	visible = true
 	if marker != null:
 		marker.visible = enabled
 		marker.top_level = true
 		marker.global_position = global_position
 	_sync_activation()
+
+
+# Builds or drops the housing to match planning mode and the map-wide in-game switch.
+func refresh_fixture() -> void:
+	if is_node_ready():
+		if _fixture_wanted() and (_fixture == null or _fixture.get_child_count() == 0):
+			_build_fixture_meshes()
+		elif not _fixture_wanted() and _fixture != null:
+			_fixture.free()
+			_fixture = null
+			_diffuser_material = null
+	_sync_fixture_visibility()
 
 
 func get_authored_energy() -> float:
@@ -275,7 +281,7 @@ func get_fixture_config() -> Dictionary:
 
 
 func _fixture_wanted() -> bool:
-	return _planning_visual or (SHOW_FIXTURES_IN_GAME and fixture_visible_in_game)
+	return _planning_visual or LAMP_FIXTURES.in_game
 
 
 func _build_fixture() -> void:
@@ -366,4 +372,4 @@ func _fixture_mesh(diffuser: bool) -> PrimitiveMesh:
 
 func _sync_fixture_visibility() -> void:
 	if _fixture != null:
-		_fixture.visible = _planning_visual or (SHOW_FIXTURES_IN_GAME and fixture_visible_in_game and _runtime_active)
+		_fixture.visible = _planning_visual or (LAMP_FIXTURES.in_game and _runtime_active)

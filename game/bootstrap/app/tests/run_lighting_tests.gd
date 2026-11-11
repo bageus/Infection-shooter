@@ -329,6 +329,13 @@ func _test_fixture_visibility(lamp: Node3D) -> void:
 	lamp.call("set_planning_visual", false)
 	_check(lamp.get_node_or_null("Fixture") == null, "Play keeps the light and drops the fixture meshes")
 	_check(is_equal_approx(lamp.get_node("Light").light_energy, energy), "Hiding a body preserves its emitted light")
+	var in_game := preload("res://game/presentation/office_floor/public/lamp_fixtures.gd")
+	in_game.in_game = true
+	lamp.call("refresh_fixture")
+	_check(lamp.get_node_or_null("Fixture") != null and lamp.get_node("Fixture").visible, "The map-wide switch shows the housing in play")
+	in_game.in_game = false
+	lamp.call("refresh_fixture")
+	_check(lamp.get_node_or_null("Fixture") == null, "Switching it off hides the housing again")
 	lamp.call("set_planning_visual", true)
 
 

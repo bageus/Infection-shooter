@@ -39,6 +39,9 @@ func configure(context: Dictionary) -> void:
 
 func _on_palette_selected(index: int) -> void:
 	var entry: Dictionary = catalog.active_catalog[index]
+	if str(entry.get("kind", "")) == "folder":
+		controls.open_folder(controls.structure_group, str(entry["folder"]))
+		return
 	selected_path = str(entry.get("path", ""))
 	selected_kind = str(entry.get("kind", ""))
 	selected_entry = entry

@@ -140,10 +140,32 @@ func _build_environment_catalogs() -> void:
 			entries.append({
 				"name": _environment_display_name(file_name),
 				"path": special_scene if not special_scene.is_empty() else model_path,
-				"kind": "" if not special_scene.is_empty() else "environment"
+				"kind": "" if not special_scene.is_empty() else "environment",
+				"folder": model_path.trim_prefix(ENVIRONMENT_ROOT + "/" + group + "/").get_base_dir()
 			})
 		entries.sort_custom(func(a, b): return str(a["name"]).naturalnocasecmp_to(str(b["name"])) < 0)
 		group_catalogs[group] = entries
+
+
+# One folder level of a group: sub-folders first (kind "folder"), then the models stored directly in it.
+func folder_view(group: String, folder: String) -> Array:
+	var folders: Array = []
+	var models: Array = []
+	var seen := {}
+	var prefix := "" if folder.is_empty() else folder + "/"
+	for entry: Dictionary in group_catalogs.get(group, []):
+		var entry_folder := str(entry.get("folder", ""))
+		if entry_folder == folder:
+			models.append(entry)
+		elif entry_folder.begins_with(prefix):
+			var child := prefix + entry_folder.trim_prefix(prefix).get_slice("/", 0)
+			if not seen.has(child):
+				seen[child] = true
+				folders.append({"name": "[ " + child.get_file() + " ]", "kind": "folder", "folder": child})
+	folders.sort_custom(func(a, b): return str(a["name"]).naturalnocasecmp_to(str(b["name"])) < 0)
+	if not folder.is_empty():
+		folders.push_front({"name": "[ .. ]", "kind": "folder", "folder": folder.get_base_dir()})
+	return folders + models
 
 
 func _environment_display_name(file_name: String) -> String:

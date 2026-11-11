@@ -39,12 +39,14 @@ var biomass_options: Node
 const FIXTURE_CONTROLS := preload("res://game/bootstrap/app/planning_light_fixtures.gd")
 var fixtures = FIXTURE_CONTROLS.new()
 var light_view = preload("res://game/bootstrap/app/planning_light_view.gd").new()
+var lamp_visibility = preload("res://game/bootstrap/app/planning_lamp_visibility.gd").new()
 var fixture_toggles = preload("res://game/bootstrap/app/planning_fixture_toggles.gd").new()
 var light_default_editor = preload("res://game/bootstrap/app/planning_light_defaults.gd").new()
 
 const LIGHT_DEFAULT_HEIGHT = 2.5
 
 var palette: ItemList
+var structure_group := ""
 var status: Label
 var help: Label
 var help_button: Button
@@ -152,6 +154,7 @@ func setup_controls() -> void:
 	hero_spawn_options.call("setup", session, objects)
 	fixtures.setup(self)
 	light_view.setup(self)
+	lamp_visibility.setup(self)
 	fixture_toggles.setup(self)
 	light_default_editor.setup(self)
 	var fog := preload("res://game/bootstrap/app/planning_fog.gd").new()
@@ -419,6 +422,7 @@ func _rebuild_palette() -> void:
 	if biomass_options != null:
 		biomass_options.panel.hide()
 	light_view.update_catalog()
+	lamp_visibility.update_catalog()
 	palette.clear()
 	for entry: Dictionary in catalog.active_catalog:
 		palette.add_item(str(entry.get("name", "")))
@@ -431,20 +435,23 @@ func _show_structure_catalog() -> void:
 		blood_options.hide()
 	light_defaults.hide()
 	objects._reset_selection()
-	catalog.active_catalog = catalog.group_catalogs["01"]
-	light_defaults.hide()
 	session.ui.get_node("Panel/VBox/GroupTabs").show()
-	_rebuild_palette()
+	open_folder("01", "")
 	status.text = "STRUCTURE | choose building object"
 
 
 func _show_structure_group(group_name: String) -> void:
 	light_defaults.hide()
 	objects._reset_selection()
-	catalog.active_catalog = catalog.group_catalogs.get(group_name, [])
-	light_defaults.hide()
-	_rebuild_palette()
+	open_folder(group_name, "")
 	status.text = "STRUCTURE " + group_name
+
+
+# Shows one folder level of a structure group; "[ name ]" rows enter a folder, "[ .. ]" goes up.
+func open_folder(group_name: String, folder: String) -> void:
+	structure_group = group_name
+	catalog.active_catalog = catalog.folder_view(group_name, folder)
+	_rebuild_palette()
 
 
 func _show_lighting_catalog() -> void:
