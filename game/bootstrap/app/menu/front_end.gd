@@ -17,8 +17,23 @@ func _ready() -> void:
 		menu.get("_music").call("wait_for_completion", completion_music)
 
 
+## Debug main menu: loads the chosen map and opens it in the planner once it is ready.
+func _plan_map(path: String) -> void:
+	_loading = true
+	var loader := preload("res://game/bootstrap/app/menu/mission_loader.gd").new()
+	add_child(loader)
+	loader.completed.connect(func(_success: bool) -> void: _loading = false)
+	loader.set("completion_music", completion_music)
+	completion_music = null
+	loader.set("open_planner", true)
+	loader.start_map(path, path.get_file().get_basename(), {})
+
+
 func _action(action: String) -> void:
 	if _loading:
+		return
+	if action.begins_with("plan_map:"):
+		_plan_map(action.trim_prefix("plan_map:"))
 		return
 	match action:
 		"start", "restart":

@@ -5,6 +5,7 @@ var settings: RefCounted
 var settings_tab := 0
 
 const STYLE := preload("res://game/bootstrap/app/menu/menu_style.gd")
+const DEBUG_MAP_PICKER := preload("res://game/bootstrap/app/menu/debug_map_picker.gd")
 const MARK := preload("res://assets/interface/branding/vectrion_mark.svg")
 var view
 var kind := ""
@@ -91,6 +92,9 @@ func _build() -> void:
 			_copy("warning")
 			_button("deploy", view.dispatch.bind("start"))
 			_button("back", view.close_dialog)
+		"load_map":
+			_heading("loadMap")
+			DEBUG_MAP_PICKER.build(view, layout)
 		_:
 			var prefix: String = {"quit": "exit", "main": "leave", "restart": "retry"}[kind]
 			_heading(prefix + "Title")
