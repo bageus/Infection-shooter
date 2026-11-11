@@ -1,0 +1,753 @@
+{
+  "models": [
+    {
+      "file": "01_VECTRION_Destructible.glb",
+      "source_bytes": 3536360,
+      "output_bytes": 1973248,
+      "source_surfaces": 121,
+      "output_surfaces": 121,
+      "nodes_preserved": 121,
+      "materials": [
+        {
+          "original_material": "SVG_Ivory",
+          "shared_material": "Group01Opaque"
+        }
+      ],
+      "geometry": "exact triangle positions"
+    },
+    {
+      "file": "01_column.glb",
+      "source_bytes": 14476,
+      "output_bytes": 8416,
+      "source_surfaces": 3,
+      "output_surfaces": 3,
+      "nodes_preserved": 4,
+      "materials": [
+        {
+          "original_material": "10_column_1.001",
+          "shared_material": "Group01OpaqueDoubleSided"
+        },
+        {
+          "original_material": "10_column_2.001",
+          "shared_material": "Group01OpaqueDoubleSided"
+        },
+        {
+          "original_material": "10_column_3.001",
+          "shared_material": "Group01OpaqueDoubleSided"
+        }
+      ],
+      "geometry": "exact triangle positions"
+    },
+    {
+      "file": "01_elevator_cabin_freight.glb",
+      "source_bytes": 258936,
+      "output_bytes": 160564,
+      "source_surfaces": 34,
+      "output_surfaces": 34,
+      "nodes_preserved": 35,
+      "materials": [
+        {
+          "original_material": "Dark_Steel.001",
+          "shared_material": "Group01Opaque"
+        },
+        {
+          "original_material": "Cabin_Wall.001",
+          "shared_material": "Group01Opaque"
+        },
+        {
+          "original_material": "Ceiling.001",
+          "shared_material": "Group01Opaque"
+        },
+        {
+          "original_material": "Floor.001",
+          "shared_material": "Group01Opaque"
+        },
+        {
+          "original_material": "Rail.001",
+          "shared_material": "Group01Opaque"
+        },
+        {
+          "original_material": "Brushed_Steel.001",
+          "shared_material": "Group01Opaque"
+        },
+        {
+          "original_material": "Buttons.001",
+          "shared_material": "Group01Opaque"
+        }
+      ],
+      "geometry": "exact triangle positions"
+    },
+    {
+      "file": "01_elevator_cabin_passenger.glb",
+      "source_bytes": 209808,
+      "output_bytes": 129784,
+      "source_surfaces": 27,
+      "output_surfaces": 27,
+      "nodes_preserved": 28,
+      "materials": [
+        {
+          "original_material": "Cabin_Wall",
+          "shared_material": "Group01Opaque"
+        },
+        {
+          "original_material": "Ceiling",
+          "shared_material": "Group01Opaque"
+        },
+        {
+          "original_material": "Floor",
+          "shared_material": "Group01Opaque"
+        },
+        {
+          "original_material": "Dark_Steel",
+          "shared_material": "Group01Opaque"
+        },
+        {
+          "original_material": "Brushed_Steel",
+          "shared_material": "Group01Opaque"
+        },
+        {
+          "original_material": "Rail",
+          "shared_material": "Group01Opaque"
+        },
+        {
+          "original_material": "Buttons",
+          "shared_material": "Group01Opaque"
+        },
+        {
+          "original_material": "Rear_Panel",
+          "shared_material": "Group01Opaque"
+        }
+      ],
+      "geometry": "exact triangle positions"
+    },
+    {
+      "file": "01_elevator_door.glb",
+      "source_bytes": 101112,
+      "output_bytes": 48904,
+      "source_surfaces": 12,
+      "output_surfaces": 5,
+      "nodes_preserved": 7,
+      "materials": [
+        {
+          "original_material": "Frame_Metal.002",
+          "shared_material": "Group01Opaque"
+        },
+        {
+          "original_material": "ElevatorDoor_Metal.002",
+          "shared_material": "Group01Opaque"
+        },
+        {
+          "original_material": "Panel_Metal.002",
+          "shared_material": "Group01Opaque"
+        },
+        {
+          "original_material": "Shaft_Dark.002",
+          "shared_material": "Group01OpaqueDark"
+        },
+        {
+          "original_material": "Button.002",
+          "shared_material": "Group01Opaque"
+        },
+        {
+          "original_material": "Wall_Painted.004",
+          "shared_material": "Group01Opaque"
+        },
+        {
+          "original_material": "Wall_Painted.002",
+          "shared_material": "Group01Opaque"
+        },
+        {
+          "original_material": "Wall_Painted.001",
+          "shared_material": "Group01Opaque"
+        }
+      ],
+      "geometry": "exact triangle positions"
+    },
+    {
+      "file": "01_floor_1x1.glb",
+      "source_bytes": 10248,
+      "output_bytes": 2092,
+      "source_surfaces": 1,
+      "output_surfaces": 1,
+      "nodes_preserved": 1,
+      "materials": [
+        {
+          "original_material": "carpet",
+          "shared_material": "Group01OpaqueDoubleSided"
+        }
+      ],
+      "geometry": "same surface; split at 1m repeat boundaries"
+    },
+    {
+      "file": "01_floor_2x2.glb",
+      "source_bytes": 10248,
+      "output_bytes": 2712,
+      "source_surfaces": 1,
+      "output_surfaces": 1,
+      "nodes_preserved": 1,
+      "materials": [
+        {
+          "original_material": "carpet",
+          "shared_material": "Group01OpaqueDoubleSided"
+        }
+      ],
+      "geometry": "same surface; split at 1m repeat boundaries"
+    },
+    {
+      "file": "01_floor_3x3.glb",
+      "source_bytes": 10248,
+      "output_bytes": 3736,
+      "source_surfaces": 1,
+      "output_surfaces": 1,
+      "nodes_preserved": 1,
+      "materials": [
+        {
+          "original_material": "carpet",
+          "shared_material": "Group01OpaqueDoubleSided"
+        }
+      ],
+      "geometry": "same surface; split at 1m repeat boundaries"
+    },
+    {
+      "file": "01_floor_corner_round.glb",
+      "source_bytes": 10256,
+      "output_bytes": 3432,
+      "source_surfaces": 1,
+      "output_surfaces": 1,
+      "nodes_preserved": 1,
+      "materials": [
+        {
+          "original_material": "carpet",
+          "shared_material": "Group01OpaqueDoubleSided"
+        }
+      ],
+      "geometry": "same surface; split at 1m repeat boundaries"
+    },
+    {
+      "file": "01_floor_corner_round_half.glb",
+      "source_bytes": 10264,
+      "output_bytes": 2920,
+      "source_surfaces": 1,
+      "output_surfaces": 1,
+      "nodes_preserved": 1,
+      "materials": [
+        {
+          "original_material": "carpet",
+          "shared_material": "Group01OpaqueDoubleSided"
+        }
+      ],
+      "geometry": "same surface; split at 1m repeat boundaries"
+    },
+    {
+      "file": "01_floor_pad.glb",
+      "source_bytes": 9148,
+      "output_bytes": 6360,
+      "source_surfaces": 2,
+      "output_surfaces": 2,
+      "nodes_preserved": 3,
+      "materials": [
+        {
+          "original_material": "29_floor_pad_2.002",
+          "shared_material": "Group01OpaqueDoubleSided"
+        }
+      ],
+      "geometry": "same surface; split at 1m repeat boundaries"
+    },
+    {
+      "file": "01_glass_door_breakable.glb",
+      "source_bytes": 183516,
+      "output_bytes": 136340,
+      "source_surfaces": 42,
+      "output_surfaces": 39,
+      "nodes_preserved": 46,
+      "materials": [
+        {
+          "original_material": "Material_2.006",
+          "shared_material": "Group01Opaque"
+        },
+        {
+          "original_material": "Material_0.004",
+          "shared_material": "Group01Opaque"
+        },
+        {
+          "original_material": "Material_0.006",
+          "shared_material": "Group01Opaque"
+        }
+      ],
+      "geometry": "exact triangle positions"
+    },
+    {
+      "file": "01_glass_partition_blinds_breakable.glb",
+      "source_bytes": 564348,
+      "output_bytes": 315264,
+      "source_surfaces": 69,
+      "output_surfaces": 37,
+      "nodes_preserved": 47,
+      "materials": [
+        {
+          "original_material": "Material_0.002",
+          "shared_material": "Group01Opaque"
+        },
+        {
+          "original_material": "Material_2.073",
+          "shared_material": "Group01Opaque"
+        },
+        {
+          "original_material": "Material_2.001",
+          "shared_material": "Group01Opaque"
+        },
+        {
+          "original_material": "Material_2.042",
+          "shared_material": "Group01Opaque"
+        },
+        {
+          "original_material": "Material_2.043",
+          "shared_material": "Group01Opaque"
+        },
+        {
+          "original_material": "Material_2.044",
+          "shared_material": "Group01Opaque"
+        },
+        {
+          "original_material": "Material_2.045",
+          "shared_material": "Group01Opaque"
+        },
+        {
+          "original_material": "Material_2.046",
+          "shared_material": "Group01Opaque"
+        },
+        {
+          "original_material": "Material_2.047",
+          "shared_material": "Group01Opaque"
+        },
+        {
+          "original_material": "Material_2.048",
+          "shared_material": "Group01Opaque"
+        },
+        {
+          "original_material": "Material_2.049",
+          "shared_material": "Group01Opaque"
+        },
+        {
+          "original_material": "Material_2.050",
+          "shared_material": "Group01Opaque"
+        },
+        {
+          "original_material": "Material_2.051",
+          "shared_material": "Group01Opaque"
+        },
+        {
+          "original_material": "Material_2.052",
+          "shared_material": "Group01Opaque"
+        },
+        {
+          "original_material": "Material_2.053",
+          "shared_material": "Group01Opaque"
+        },
+        {
+          "original_material": "Material_2.054",
+          "shared_material": "Group01Opaque"
+        },
+        {
+          "original_material": "Material_2.055",
+          "shared_material": "Group01Opaque"
+        },
+        {
+          "original_material": "Material_2.056",
+          "shared_material": "Group01Opaque"
+        },
+        {
+          "original_material": "Material_2.057",
+          "shared_material": "Group01Opaque"
+        },
+        {
+          "original_material": "Material_2.058",
+          "shared_material": "Group01Opaque"
+        },
+        {
+          "original_material": "Material_2.059",
+          "shared_material": "Group01Opaque"
+        },
+        {
+          "original_material": "Material_2.060",
+          "shared_material": "Group01Opaque"
+        },
+        {
+          "original_material": "Material_2.061",
+          "shared_material": "Group01Opaque"
+        },
+        {
+          "original_material": "Material_2.062",
+          "shared_material": "Group01Opaque"
+        },
+        {
+          "original_material": "Material_2.063",
+          "shared_material": "Group01Opaque"
+        },
+        {
+          "original_material": "Material_2.064",
+          "shared_material": "Group01Opaque"
+        },
+        {
+          "original_material": "Material_2.065",
+          "shared_material": "Group01Opaque"
+        },
+        {
+          "original_material": "Material_2.066",
+          "shared_material": "Group01Opaque"
+        },
+        {
+          "original_material": "Material_2.067",
+          "shared_material": "Group01Opaque"
+        },
+        {
+          "original_material": "Material_2.068",
+          "shared_material": "Group01Opaque"
+        },
+        {
+          "original_material": "Material_2.069",
+          "shared_material": "Group01Opaque"
+        },
+        {
+          "original_material": "Material_2.070",
+          "shared_material": "Group01Opaque"
+        },
+        {
+          "original_material": "Material_2.071",
+          "shared_material": "Group01Opaque"
+        },
+        {
+          "original_material": "Material_2.072",
+          "shared_material": "Group01Opaque"
+        }
+      ],
+      "geometry": "exact triangle positions"
+    },
+    {
+      "file": "01_glass_partition_half_breakable.glb",
+      "source_bytes": 138228,
+      "output_bytes": 109880,
+      "source_surfaces": 35,
+      "output_surfaces": 35,
+      "nodes_preserved": 41,
+      "materials": [
+        {
+          "original_material": "Material_0.044",
+          "shared_material": "Group01Opaque"
+        },
+        {
+          "original_material": "Material_2.040",
+          "shared_material": "Group01Opaque"
+        }
+      ],
+      "geometry": "exact triangle positions"
+    },
+    {
+      "file": "01_glass_wall_full_breakable.glb",
+      "source_bytes": 128928,
+      "output_bytes": 106500,
+      "source_surfaces": 36,
+      "output_surfaces": 36,
+      "nodes_preserved": 42,
+      "materials": [
+        {
+          "original_material": "Material_0.039",
+          "shared_material": "Group01Opaque"
+        },
+        {
+          "original_material": "Material_1.039",
+          "shared_material": "Group01Opaque"
+        }
+      ],
+      "geometry": "exact triangle positions"
+    },
+    {
+      "file": "01_only_door.glb",
+      "source_bytes": 10268,
+      "output_bytes": 4904,
+      "source_surfaces": 2,
+      "output_surfaces": 1,
+      "nodes_preserved": 3,
+      "materials": [
+        {
+          "original_material": "04_wall_door_2.008",
+          "shared_material": "Group01OpaqueDoubleSided"
+        },
+        {
+          "original_material": "04_wall_door_3.010",
+          "shared_material": "Group01OpaqueDoubleSided"
+        }
+      ],
+      "geometry": "exact triangle positions"
+    },
+    {
+      "file": "01_stairs.glb",
+      "source_bytes": 199120,
+      "output_bytes": 93312,
+      "source_surfaces": 11,
+      "output_surfaces": 9,
+      "nodes_preserved": 14,
+      "materials": [
+        {
+          "original_material": "Steel_Trim.010",
+          "shared_material": "Group01Opaque"
+        },
+        {
+          "original_material": "Steel_Epoxy.009",
+          "shared_material": "Group01Opaque"
+        },
+        {
+          "original_material": "Floor_Grip.005",
+          "shared_material": "Group01Opaque"
+        },
+        {
+          "original_material": "Floor_Grip.006",
+          "shared_material": "Group01Opaque"
+        },
+        {
+          "original_material": "Steel_Trim.011",
+          "shared_material": "Group01Opaque"
+        },
+        {
+          "original_material": "Floor_Grip.007",
+          "shared_material": "Group01Opaque"
+        },
+        {
+          "original_material": "Floor_Grip.008",
+          "shared_material": "Group01Opaque"
+        }
+      ],
+      "geometry": "exact triangle positions"
+    },
+    {
+      "file": "01_wall_door.glb",
+      "source_bytes": 37700,
+      "output_bytes": 14544,
+      "source_surfaces": 7,
+      "output_surfaces": 2,
+      "nodes_preserved": 4,
+      "materials": [
+        {
+          "original_material": "04_wall_door_2.001",
+          "shared_material": "Group01OpaqueDoubleSided"
+        },
+        {
+          "original_material": "04_wall_door_3.001",
+          "shared_material": "Group01OpaqueDoubleSided"
+        },
+        {
+          "original_material": "04_wall_door_1.002",
+          "shared_material": "Group01OpaqueDoubleSided"
+        },
+        {
+          "original_material": "04_wall_door_10.002",
+          "shared_material": "Group01OpaqueDoubleSided"
+        },
+        {
+          "original_material": "04_wall_door_5.003",
+          "shared_material": "Group01OpaqueDoubleSided"
+        },
+        {
+          "original_material": "04_wall_door_6.002",
+          "shared_material": "Group01OpaqueDoubleSided"
+        },
+        {
+          "original_material": "04_wall_door_5.006",
+          "shared_material": "Group01OpaqueDoubleSided"
+        }
+      ],
+      "geometry": "exact triangle positions"
+    },
+    {
+      "file": "01_wall_door_without.glb",
+      "source_bytes": 28644,
+      "output_bytes": 10720,
+      "source_surfaces": 5,
+      "output_surfaces": 1,
+      "nodes_preserved": 2,
+      "materials": [
+        {
+          "original_material": "04_wall_door_1.002",
+          "shared_material": "Group01OpaqueDoubleSided"
+        },
+        {
+          "original_material": "04_wall_door_10.002",
+          "shared_material": "Group01OpaqueDoubleSided"
+        },
+        {
+          "original_material": "04_wall_door_5.003",
+          "shared_material": "Group01OpaqueDoubleSided"
+        },
+        {
+          "original_material": "04_wall_door_6.002",
+          "shared_material": "Group01OpaqueDoubleSided"
+        },
+        {
+          "original_material": "04_wall_door_5.006",
+          "shared_material": "Group01OpaqueDoubleSided"
+        }
+      ],
+      "geometry": "exact triangle positions"
+    },
+    {
+      "file": "01_wall_emergency_door.glb",
+      "source_bytes": 162036,
+      "output_bytes": 84852,
+      "source_surfaces": 9,
+      "output_surfaces": 3,
+      "nodes_preserved": 4,
+      "materials": [
+        {
+          "original_material": "04_wall_door_1.005",
+          "shared_material": "Group01OpaqueDoubleSided"
+        },
+        {
+          "original_material": "04_wall_door_10.004",
+          "shared_material": "Group01OpaqueDoubleSided"
+        },
+        {
+          "original_material": "04_wall_door_5.004",
+          "shared_material": "Group01OpaqueDoubleSided"
+        },
+        {
+          "original_material": "04_wall_door_6.004",
+          "shared_material": "Group01OpaqueDoubleSided"
+        },
+        {
+          "original_material": "04_wall_door_5.005",
+          "shared_material": "Group01OpaqueDoubleSided"
+        },
+        {
+          "original_material": "04_wall_door_3.015",
+          "shared_material": "Group01OpaqueDoubleSided"
+        },
+        {
+          "original_material": "Material_1.003",
+          "shared_material": "Group01Opaque"
+        },
+        {
+          "original_material": "Material_2.003",
+          "shared_material": "Group01Opaque"
+        },
+        {
+          "original_material": "Material_4.003",
+          "shared_material": "Group01Opaque"
+        }
+      ],
+      "geometry": "exact triangle positions"
+    },
+    {
+      "file": "01_wall_half_panel.glb",
+      "source_bytes": 20192,
+      "output_bytes": 9424,
+      "source_surfaces": 5,
+      "output_surfaces": 2,
+      "nodes_preserved": 3,
+      "materials": [
+        {
+          "original_material": "05_wall_half_panel_1.001",
+          "shared_material": "Group01OpaqueDoubleSided"
+        },
+        {
+          "original_material": "05_wall_half_panel_3.001",
+          "shared_material": "Group01OpaqueDoubleSided"
+        },
+        {
+          "original_material": "05_wall_half_panel_5.001",
+          "shared_material": "Group01OpaqueDoubleSided"
+        },
+        {
+          "original_material": "05_wall_half_panel_6.001",
+          "shared_material": "Group01OpaqueDoubleSided"
+        }
+      ],
+      "geometry": "exact triangle positions"
+    },
+    {
+      "file": "01_wall_straight.glb",
+      "source_bytes": 10184,
+      "output_bytes": 5120,
+      "source_surfaces": 2,
+      "output_surfaces": 1,
+      "nodes_preserved": 2,
+      "materials": [
+        {
+          "original_material": "01_wall_straight_1.001",
+          "shared_material": "Group01OpaqueDoubleSided"
+        },
+        {
+          "original_material": "01_wall_straight_2.001",
+          "shared_material": "Group01OpaqueDoubleSided"
+        }
+      ],
+      "geometry": "exact triangle positions"
+    },
+    {
+      "file": "01_window_double.glb",
+      "source_bytes": 24556,
+      "output_bytes": 10252,
+      "source_surfaces": 6,
+      "output_surfaces": 2,
+      "nodes_preserved": 3,
+      "materials": [
+        {
+          "original_material": "07_window_double_6.001",
+          "shared_material": "Group01OpaqueDoubleSided"
+        },
+        {
+          "original_material": "07_window_double_2.001",
+          "shared_material": "Group01OpaqueDoubleSided"
+        },
+        {
+          "original_material": "07_window_double_3.001",
+          "shared_material": "Group01OpaqueDoubleSided"
+        },
+        {
+          "original_material": "07_window_double_4.001",
+          "shared_material": "Group01OpaqueDoubleSided"
+        },
+        {
+          "original_material": "07_window_double_5.001",
+          "shared_material": "Group01OpaqueDoubleSided"
+        }
+      ],
+      "geometry": "exact triangle positions"
+    },
+    {
+      "file": "01_wood_slat_partition_destructible.glb",
+      "source_bytes": 190728,
+      "output_bytes": 95092,
+      "source_surfaces": 28,
+      "output_surfaces": 28,
+      "nodes_preserved": 29,
+      "materials": [
+        {
+          "original_material": "Natural_oak",
+          "shared_material": "Group01Opaque"
+        }
+      ],
+      "geometry": "exact triangle positions"
+    }
+  ],
+  "retired_files": [
+    "01_glass_door_breakable_Image_0.png",
+    "01_glass_wall_full_breakable_Image_1.png",
+    "01_glass_partition_half_breakable_Image_1.png",
+    "01_wall_emergency_door_Image_1.png",
+    "textures/carpet_normal.png",
+    "textures/architecture_orm.png",
+    "textures/carpet_orm.png",
+    "textures/architecture_albedo.png",
+    "textures/architecture_normal.png",
+    "textures/stairs_elevators/architecture_orm.png",
+    "textures/stairs_elevators/architecture_normal.png",
+    "textures/architecture/architecture_orm.png",
+    "textures/architecture/architecture_albedo.png",
+    "textures/architecture/architecture_normal.png",
+    "textures/carpet/carpet_albedo.png",
+    "textures/carpet/carpet_normal.png",
+    "textures/carpet/carpet_orm.png",
+    "01_stairs_2.glb"
+  ],
+  "retired_file_bytes": 38311520
+}
