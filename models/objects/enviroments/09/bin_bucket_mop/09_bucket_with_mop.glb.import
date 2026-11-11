@@ -4,12 +4,12 @@ importer="scene"
 importer_version=1
 type="PackedScene"
 uid="uid://by0qn1u2xsir1"
-path="res://.godot/imported/09_bucket_with_mop.glb-a0d2cf5668d7352f7ef4f34a775ee4cb.scn"
+path="res://.godot/imported/09_bucket_with_mop.glb-b009815f85c598603a5c64a9f6483aa9.scn"
 
 [deps]
 
-source_file="res://models/objects/enviroments/09/09_bucket_with_mop.glb"
-dest_files=["res://.godot/imported/09_bucket_with_mop.glb-a0d2cf5668d7352f7ef4f34a775ee4cb.scn"]
+source_file="res://models/objects/enviroments/09/bin_bucket_mop/09_bucket_with_mop.glb"
+dest_files=["res://.godot/imported/09_bucket_with_mop.glb-b009815f85c598603a5c64a9f6483aa9.scn"]
 
 [params]
 

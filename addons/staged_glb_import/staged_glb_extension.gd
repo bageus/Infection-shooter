@@ -20,7 +20,13 @@ func _import_post_parse(state: GLTFState) -> Error:
 		if not (scenes[i] as Dictionary).get("nodes", []).is_empty():
 			filled.append(i)
 	if filled.size() < 2:
-		return OK
+		# A split model keeps one scene; its name rides in asset.extras.
+		var extras: Variant = (state.json.get("asset", {}) as Dictionary).get("extras", {})
+		if filled.size() == 1 and extras is Dictionary and (extras as Dictionary).has("staged_group"):
+			scenes = [{"name": str((extras as Dictionary)["staged_group"]), "nodes": (scenes[filled[0]] as Dictionary)["nodes"]}]
+			filled = [0]
+		else:
+			return OK
 	var default_scene := int(state.json.get("scene", 0))
 	var nodes: Array[GLTFNode] = state.get_nodes()
 	var roots := PackedInt32Array()

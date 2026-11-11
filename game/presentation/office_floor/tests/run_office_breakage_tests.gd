@@ -6,11 +6,11 @@ extends SceneTree
 const PROP_SCENE := preload("res://game/presentation/office_floor/public/props/environment_prop.tscn")
 const MODELS := "res://models/objects/enviroments/"
 const CARDBOARD := MODELS + "04/04_cardboard_boxes_1.glb"
-const MONITOR := MODELS + "05/05_monitor_destructible.glb"
+const MONITOR := MODELS + "05/monitor/05_monitor_destructible.glb"
 const PARTITION := MODELS + "01/01_wood_slat_partition_destructible.glb"
 const LOGO := MODELS + "01/01_VECTRION_Destructible.glb"
-const WOOD_CRATE := MODELS + "02/02_crate_wood_large.glb"
-const CANVAS_CRATE := MODELS + "02/02_crate_canvas_large.glb"
+const WOOD_CRATE := MODELS + "04/04_crate_wood_large.glb"
+const CANVAS_CRATE := MODELS + "04/04_crate_canvas_large.glb"
 
 var failures := 0
 

@@ -4,12 +4,12 @@ importer="scene"
 importer_version=1
 type="PackedScene"
 uid="uid://dmj66nn0rub4o"
-path="res://.godot/imported/05_laptop_close_destructible.glb-7d661858dbbfcd8ffbb5d4435b22b340.scn"
+path="res://.godot/imported/05_laptop_close_destructible.glb-c7106ed2d112d4befb638555d4c74476.scn"
 
 [deps]
 
-source_file="res://models/objects/enviroments/05/05_laptop_close_destructible.glb"
-dest_files=["res://.godot/imported/05_laptop_close_destructible.glb-7d661858dbbfcd8ffbb5d4435b22b340.scn"]
+source_file="res://models/objects/enviroments/05/laptop/05_laptop_close_destructible.glb"
+dest_files=["res://.godot/imported/05_laptop_close_destructible.glb-c7106ed2d112d4befb638555d4c74476.scn"]
 
 [params]
 
@@ -35,7 +35,7 @@ animation/fps=30
 animation/trimming=false
 animation/remove_immutable_tracks=true
 animation/import_rest_as_RESET=false
-import_script/path=""
+import_script/path="res://addons/staged_glb_import/lazy_stage_post_import.gd"
 materials/extract=0
 materials/extract_format=0
 materials/extract_path=""

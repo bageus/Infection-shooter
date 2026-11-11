@@ -1,0 +1,404 @@
+{
+  "01_VECTRION_Destructible.glb": [
+    {
+      "name": "LargeParts",
+      "path": "res://models/objects/enviroments/01/damage/01_VECTRION_Destructible_largeparts.glb"
+    },
+    {
+      "name": "JaggedFragments",
+      "path": "res://models/objects/enviroments/01/damage/01_VECTRION_Destructible_jaggedfragments.glb"
+    }
+  ],
+  "02_pallet.glb": [
+    {
+      "name": "LargeParts",
+      "path": "res://models/objects/enviroments/02/damage/02_pallet_largeparts.glb"
+    },
+    {
+      "name": "SmallFragments",
+      "path": "res://models/objects/enviroments/02/damage/02_pallet_smallfragments.glb"
+    }
+  ],
+  "04_cardboard_archive_box.glb": [
+    {
+      "name": "LargeParts",
+      "path": "res://models/objects/enviroments/04/damage/04_cardboard_archive_box_largeparts.glb"
+    }
+  ],
+  "04_cardboard_box_closed.glb": [
+    {
+      "name": "LargeParts",
+      "path": "res://models/objects/enviroments/04/damage/04_cardboard_box_closed_largeparts.glb"
+    }
+  ],
+  "04_cardboard_box_open.glb": [
+    {
+      "name": "LargeParts",
+      "path": "res://models/objects/enviroments/04/damage/04_cardboard_box_open_largeparts.glb"
+    }
+  ],
+  "04_cardboard_boxes.glb": [
+    {
+      "name": "LargeParts",
+      "path": "res://models/objects/enviroments/04/damage/04_cardboard_boxes_largeparts.glb"
+    }
+  ],
+  "04_cardboard_boxes_1.glb": [
+    {
+      "name": "LargeParts",
+      "path": "res://models/objects/enviroments/04/damage/04_cardboard_boxes_1_largeparts.glb"
+    }
+  ],
+  "04_crate_large_broken.glb": [
+    {
+      "name": "LargeParts",
+      "path": "res://models/objects/enviroments/04/damage/04_crate_large_broken_largeparts.glb"
+    },
+    {
+      "name": "SmallFragments",
+      "path": "res://models/objects/enviroments/04/damage/04_crate_large_broken_smallfragments.glb"
+    }
+  ],
+  "04_crate_small_broken.glb": [
+    {
+      "name": "LargeParts",
+      "path": "res://models/objects/enviroments/04/damage/04_crate_small_broken_largeparts.glb"
+    },
+    {
+      "name": "SmallFragments",
+      "path": "res://models/objects/enviroments/04/damage/04_crate_small_broken_smallfragments.glb"
+    }
+  ],
+  "05_MFU_2_extra_trays_destructible.glb": [
+    {
+      "name": "LargeParts",
+      "path": "res://models/objects/enviroments/05/mfu/damage/05_MFU_2_extra_trays_destructible_largeparts.glb"
+    },
+    {
+      "name": "SmallFragments",
+      "path": "res://models/objects/enviroments/05/mfu/damage/05_MFU_2_extra_trays_destructible_smallfragments.glb"
+    }
+  ],
+  "05_MFU_destructible.glb": [
+    {
+      "name": "LargeParts",
+      "path": "res://models/objects/enviroments/05/mfu/damage/05_MFU_destructible_largeparts.glb"
+    },
+    {
+      "name": "SmallFragments",
+      "path": "res://models/objects/enviroments/05/mfu/damage/05_MFU_destructible_smallfragments.glb"
+    }
+  ],
+  "05_PC_destructible.glb": [
+    {
+      "name": "LargeParts",
+      "path": "res://models/objects/enviroments/05/damage/05_PC_destructible_largeparts.glb"
+    },
+    {
+      "name": "SmallFragments",
+      "path": "res://models/objects/enviroments/05/damage/05_PC_destructible_smallfragments.glb"
+    }
+  ],
+  "05_aircondition_destructible.glb": [
+    {
+      "name": "LargeParts",
+      "path": "res://models/objects/enviroments/05/damage/05_aircondition_destructible_largeparts.glb"
+    },
+    {
+      "name": "SmallFragments",
+      "path": "res://models/objects/enviroments/05/damage/05_aircondition_destructible_smallfragments.glb"
+    },
+    {
+      "name": "Power_Off",
+      "path": "res://models/objects/enviroments/05/damage/05_aircondition_destructible_poweroff.glb"
+    }
+  ],
+  "05_computer_tower_destructible.glb": [
+    {
+      "name": "LargeParts",
+      "path": "res://models/objects/enviroments/05/damage/05_computer_tower_destructible_largeparts.glb"
+    },
+    {
+      "name": "SmallFragments",
+      "path": "res://models/objects/enviroments/05/damage/05_computer_tower_destructible_smallfragments.glb"
+    }
+  ],
+  "05_desk_phone.glb": [
+    {
+      "name": "LargeParts",
+      "path": "res://models/objects/enviroments/05/damage/05_desk_phone_largeparts.glb"
+    }
+  ],
+  "05_laptop_close_destructible.glb": [
+    {
+      "name": "LargeParts",
+      "path": "res://models/objects/enviroments/05/laptop/damage/05_laptop_close_destructible_largeparts.glb"
+    },
+    {
+      "name": "SmallFragments",
+      "path": "res://models/objects/enviroments/05/laptop/damage/05_laptop_close_destructible_smallfragments.glb"
+    },
+    {
+      "name": "Power_Off",
+      "path": "res://models/objects/enviroments/05/laptop/damage/05_laptop_close_destructible_poweroff.glb"
+    }
+  ],
+  "05_wall_TV_destructible.glb": [
+    {
+      "name": "LargeParts",
+      "path": "res://models/objects/enviroments/05/damage/05_wall_TV_destructible_largeparts.glb"
+    },
+    {
+      "name": "SmallFragments",
+      "path": "res://models/objects/enviroments/05/damage/05_wall_TV_destructible_smallfragments.glb"
+    }
+  ],
+  "05_wall_TV_frameless_destructible.glb": [
+    {
+      "name": "LargeParts",
+      "path": "res://models/objects/enviroments/05/damage/05_wall_TV_frameless_destructible_largeparts.glb"
+    },
+    {
+      "name": "SmallFragments",
+      "path": "res://models/objects/enviroments/05/damage/05_wall_TV_frameless_destructible_smallfragments.glb"
+    }
+  ],
+  "06_office_chair.glb": [
+    {
+      "name": "LargeParts",
+      "path": "res://models/objects/enviroments/06/damage/06_office_chair_largeparts.glb"
+    }
+  ],
+  "06_office_chair_2.glb": [
+    {
+      "name": "LargeParts",
+      "path": "res://models/objects/enviroments/06/damage/06_office_chair_2_largeparts.glb"
+    }
+  ],
+  "06_simple_chair.glb": [
+    {
+      "name": "LargeParts",
+      "path": "res://models/objects/enviroments/06/damage/06_simple_chair_largeparts.glb"
+    }
+  ],
+  "06_simple_chair_fell.glb": [
+    {
+      "name": "LargeParts",
+      "path": "res://models/objects/enviroments/06/damage/06_simple_chair_fell_largeparts.glb"
+    }
+  ],
+  "07_coffee_table.glb": [
+    {
+      "name": "LargeParts",
+      "path": "res://models/objects/enviroments/07/damage/07_coffee_table_largeparts.glb"
+    },
+    {
+      "name": "SmallFragments",
+      "path": "res://models/objects/enviroments/07/damage/07_coffee_table_smallfragments.glb"
+    }
+  ],
+  "07_coffee_table2.glb": [
+    {
+      "name": "LargeParts",
+      "path": "res://models/objects/enviroments/07/damage/07_coffee_table2_largeparts.glb"
+    },
+    {
+      "name": "SmallFragments",
+      "path": "res://models/objects/enviroments/07/damage/07_coffee_table2_smallfragments.glb"
+    }
+  ],
+  "07_reception_counter_two_heights_2.glb": [
+    {
+      "name": "DamageReady",
+      "path": "res://models/objects/enviroments/07/damage/07_reception_counter_two_heights_2_damageready.glb"
+    }
+  ],
+  "07_round_dining_table.glb": [
+    {
+      "name": "LargeParts",
+      "path": "res://models/objects/enviroments/07/damage/07_round_dining_table_largeparts.glb"
+    },
+    {
+      "name": "SmallFragments",
+      "path": "res://models/objects/enviroments/07/damage/07_round_dining_table_smallfragments.glb"
+    }
+  ],
+  "07_table.glb": [
+    {
+      "name": "LargeParts",
+      "path": "res://models/objects/enviroments/07/damage/07_table_largeparts.glb"
+    },
+    {
+      "name": "SmallFragments",
+      "path": "res://models/objects/enviroments/07/damage/07_table_smallfragments.glb"
+    }
+  ],
+  "07_table_circular.glb": [
+    {
+      "name": "LargeParts",
+      "path": "res://models/objects/enviroments/07/damage/07_table_circular_largeparts.glb"
+    },
+    {
+      "name": "SmallFragments",
+      "path": "res://models/objects/enviroments/07/damage/07_table_circular_smallfragments.glb"
+    }
+  ],
+  "07_table_longest.glb": [
+    {
+      "name": "LargeParts",
+      "path": "res://models/objects/enviroments/07/damage/07_table_longest_largeparts.glb"
+    },
+    {
+      "name": "SmallFragments",
+      "path": "res://models/objects/enviroments/07/damage/07_table_longest_smallfragments.glb"
+    }
+  ],
+  "07_table_square_tall.glb": [
+    {
+      "name": "LargeParts",
+      "path": "res://models/objects/enviroments/07/damage/07_table_square_tall_largeparts.glb"
+    },
+    {
+      "name": "SmallFragments",
+      "path": "res://models/objects/enviroments/07/damage/07_table_square_tall_smallfragments.glb"
+    }
+  ],
+  "08_divider_full_H.glb": [
+    {
+      "name": "LargeParts",
+      "path": "res://models/objects/enviroments/08/damage/08_divider_full_H_largeparts.glb"
+    },
+    {
+      "name": "SmallFragments",
+      "path": "res://models/objects/enviroments/08/damage/08_divider_full_H_smallfragments.glb"
+    }
+  ],
+  "08_divider_full_H_desk.glb": [
+    {
+      "name": "LargeParts",
+      "path": "res://models/objects/enviroments/08/damage/08_divider_full_H_desk_largeparts.glb"
+    },
+    {
+      "name": "SmallFragments",
+      "path": "res://models/objects/enviroments/08/damage/08_divider_full_H_desk_smallfragments.glb"
+    }
+  ],
+  "08_divider_full_U.glb": [
+    {
+      "name": "LargeParts",
+      "path": "res://models/objects/enviroments/08/damage/08_divider_full_U_largeparts.glb"
+    },
+    {
+      "name": "SmallFragments",
+      "path": "res://models/objects/enviroments/08/damage/08_divider_full_U_smallfragments.glb"
+    }
+  ],
+  "08_divider_full_U_desk.glb": [
+    {
+      "name": "LargeParts",
+      "path": "res://models/objects/enviroments/08/damage/08_divider_full_U_desk_largeparts.glb"
+    },
+    {
+      "name": "SmallFragments",
+      "path": "res://models/objects/enviroments/08/damage/08_divider_full_U_desk_smallfragments.glb"
+    }
+  ],
+  "08_office_desk_4_coner.glb": [
+    {
+      "name": "LargeParts",
+      "path": "res://models/objects/enviroments/08/damage/08_office_desk_4_coner_largeparts.glb"
+    },
+    {
+      "name": "SmallFragments",
+      "path": "res://models/objects/enviroments/08/damage/08_office_desk_4_coner_smallfragments.glb"
+    }
+  ],
+  "09_books.glb": [
+    {
+      "name": "LargeParts",
+      "path": "res://models/objects/enviroments/09/books/damage/09_books_largeparts.glb"
+    }
+  ],
+  "09_books_alt.glb": [
+    {
+      "name": "LargeParts",
+      "path": "res://models/objects/enviroments/09/books/damage/09_books_alt_largeparts.glb"
+    }
+  ],
+  "09_books_alt_2.glb": [
+    {
+      "name": "LargeParts",
+      "path": "res://models/objects/enviroments/09/books/damage/09_books_alt_2_largeparts.glb"
+    }
+  ],
+  "11_bamboo.glb": [
+    {
+      "name": "PlantDestroyed",
+      "path": "res://models/objects/enviroments/11/damage/11_bamboo_plantdestroyed.glb"
+    },
+    {
+      "name": "DamageParts",
+      "path": "res://models/objects/enviroments/11/damage/11_bamboo_damageparts.glb"
+    },
+    {
+      "name": "PotFragments",
+      "path": "res://models/objects/enviroments/11/damage/11_bamboo_potfragments.glb"
+    }
+  ],
+  "11_deco_plant.glb": [
+    {
+      "name": "PlantDestroyed",
+      "path": "res://models/objects/enviroments/11/damage/11_deco_plant_plantdestroyed.glb"
+    },
+    {
+      "name": "DamageParts",
+      "path": "res://models/objects/enviroments/11/damage/11_deco_plant_damageparts.glb"
+    },
+    {
+      "name": "PotFragments",
+      "path": "res://models/objects/enviroments/11/damage/11_deco_plant_potfragments.glb"
+    }
+  ],
+  "11_plant_large.glb": [
+    {
+      "name": "PlantDestroyed",
+      "path": "res://models/objects/enviroments/11/damage/11_plant_large_plantdestroyed.glb"
+    },
+    {
+      "name": "DamageParts",
+      "path": "res://models/objects/enviroments/11/damage/11_plant_large_damageparts.glb"
+    },
+    {
+      "name": "PotFragments",
+      "path": "res://models/objects/enviroments/11/damage/11_plant_large_potfragments.glb"
+    }
+  ],
+  "11_plant_medium.glb": [
+    {
+      "name": "PlantDestroyed",
+      "path": "res://models/objects/enviroments/11/damage/11_plant_medium_plantdestroyed.glb"
+    },
+    {
+      "name": "DamageParts",
+      "path": "res://models/objects/enviroments/11/damage/11_plant_medium_damageparts.glb"
+    },
+    {
+      "name": "PotFragments",
+      "path": "res://models/objects/enviroments/11/damage/11_plant_medium_potfragments.glb"
+    }
+  ],
+  "11_plant_small.glb": [
+    {
+      "name": "PlantDestroyed",
+      "path": "res://models/objects/enviroments/11/damage/11_plant_small_plantdestroyed.glb"
+    },
+    {
+      "name": "DamageParts",
+      "path": "res://models/objects/enviroments/11/damage/11_plant_small_damageparts.glb"
+    },
+    {
+      "name": "PotFragments",
+      "path": "res://models/objects/enviroments/11/damage/11_plant_small_potfragments.glb"
+    }
+  ]
+}

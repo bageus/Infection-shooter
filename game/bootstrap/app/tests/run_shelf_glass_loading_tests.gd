@@ -71,7 +71,7 @@ func _shelves(stage: Node3D) -> void:
 			_check(clearance.get("collider") != shelf, "%s keeps the opening above each shelf" % model)
 			supported += 1
 			var book := PROP.instantiate() as RigidBody3D
-			book.set("model_path", ROOT + "09/09_book_small.glb")
+			book.set("model_path", ROOT + "09/books/09_book_small.glb")
 			stage.add_child(book)
 			book.global_position = hit.position + Vector3.UP * .08
 			book.rotation.y = shelf.rotation.y

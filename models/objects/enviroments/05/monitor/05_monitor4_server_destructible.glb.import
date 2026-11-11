@@ -4,12 +4,12 @@ importer="scene"
 importer_version=1
 type="PackedScene"
 uid="uid://bj206lev05i3v"
-path="res://.godot/imported/05_monitor4_server_destructible.glb-124394e81e6f804cd04b28c14578c1b7.scn"
+path="res://.godot/imported/05_monitor4_server_destructible.glb-3e3ca9b9a39757ee12fcfe56e04ba66c.scn"
 
 [deps]
 
-source_file="res://models/objects/enviroments/05/05_monitor4_server_destructible.glb"
-dest_files=["res://.godot/imported/05_monitor4_server_destructible.glb-124394e81e6f804cd04b28c14578c1b7.scn"]
+source_file="res://models/objects/enviroments/05/monitor/05_monitor4_server_destructible.glb"
+dest_files=["res://.godot/imported/05_monitor4_server_destructible.glb-3e3ca9b9a39757ee12fcfe56e04ba66c.scn"]
 
 [params]
 

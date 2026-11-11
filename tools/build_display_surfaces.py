@@ -47,8 +47,10 @@ def connected_triangles(candidates):
 
 
 def extract(name, profile):
-    source = MODELS / (name + '.glb')
-    deferred = MODELS / 'damage' / (name + '_' + profile[0].lower() + '.glb')
+    source = next(MODELS.rglob(name + '.glb'))
+    deferred = source.parent / 'damage' / (name + '_' + profile[0].lower() + '.glb')
+    if not deferred.is_file():
+        deferred = MODELS / 'damage' / deferred.name
     if deferred.is_file():
         source = deferred
     data = source.read_bytes()

@@ -2,8 +2,8 @@ extends SceneTree
 ## A bucket with a mop splits into two objects on its first hit or touch; the mop becomes its own prop.
 const PROP := preload("res://game/presentation/office_floor/public/props/environment_prop.tscn")
 const DAMAGE := preload("res://game/presentation/office_floor/environment_damage.gd")
-const BUCKET := "res://models/objects/enviroments/09/09_bucket_with_mop.glb"
-const MOP := "res://models/objects/enviroments/09/09_mop.glb"
+const BUCKET := "res://models/objects/enviroments/09/bin_bucket_mop/09_bucket_with_mop.glb"
+const MOP := "res://models/objects/enviroments/09/bin_bucket_mop/09_mop.glb"
 var failures := 0
 
 
@@ -74,7 +74,7 @@ func _touch_splits(stage: Node3D) -> void:
 
 
 func _other_props_stay_whole(stage: Node3D) -> void:
-	var mug := _spawn(stage, "res://models/objects/enviroments/09/09_bucket.glb", Vector3(10, 0.5, 0))
+	var mug := _spawn(stage, "res://models/objects/enviroments/09/bin_bucket_mop/09_bucket.glb", Vector3(10, 0.5, 0))
 	await process_frame
 	mug.take_melee_hit(10.0, mug.global_position, Vector3.FORWARD)
 	mug.push_from_character(mug.global_position + Vector3(-1, 0, 0), Vector3(2, 0, 0), 1.0)

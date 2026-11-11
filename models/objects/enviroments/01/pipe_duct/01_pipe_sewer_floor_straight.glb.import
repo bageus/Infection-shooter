@@ -4,12 +4,12 @@ importer="scene"
 importer_version=1
 type="PackedScene"
 uid="uid://l7rk3f2hp3r0"
-path="res://.godot/imported/01_pipe_sewer_floor_straight.glb-76335cd1785178095867c0a23f9d397f.scn"
+path="res://.godot/imported/01_pipe_sewer_floor_straight.glb-338cfbaf9c2a386eaae5a4642355981b.scn"
 
 [deps]
 
-source_file="res://models/objects/enviroments/01/01_pipe_sewer_floor_straight.glb"
-dest_files=["res://.godot/imported/01_pipe_sewer_floor_straight.glb-76335cd1785178095867c0a23f9d397f.scn"]
+source_file="res://models/objects/enviroments/01/pipe_duct/01_pipe_sewer_floor_straight.glb"
+dest_files=["res://.godot/imported/01_pipe_sewer_floor_straight.glb-338cfbaf9c2a386eaae5a4642355981b.scn"]
 
 [params]
 

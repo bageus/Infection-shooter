@@ -4,12 +4,12 @@ importer="scene"
 importer_version=1
 type="PackedScene"
 uid="uid://d4mdpmq458jqt"
-path="res://.godot/imported/05_MFU_2_extra_trays_destructible.glb-3ea19ac818ecc7eb83409d6f61aaff62.scn"
+path="res://.godot/imported/05_MFU_2_extra_trays_destructible.glb-d76261efbfa764cbdb94b04d2c6982c3.scn"
 
 [deps]
 
-source_file="res://models/objects/enviroments/05/05_MFU_2_extra_trays_destructible.glb"
-dest_files=["res://.godot/imported/05_MFU_2_extra_trays_destructible.glb-3ea19ac818ecc7eb83409d6f61aaff62.scn"]
+source_file="res://models/objects/enviroments/05/mfu/05_MFU_2_extra_trays_destructible.glb"
+dest_files=["res://.godot/imported/05_MFU_2_extra_trays_destructible.glb-d76261efbfa764cbdb94b04d2c6982c3.scn"]
 
 [params]
 
@@ -35,7 +35,7 @@ animation/fps=30
 animation/trimming=false
 animation/remove_immutable_tracks=true
 animation/import_rest_as_RESET=false
-import_script/path=""
+import_script/path="res://addons/staged_glb_import/lazy_stage_post_import.gd"
 materials/extract=0
 materials/extract_format=0
 materials/extract_path=""

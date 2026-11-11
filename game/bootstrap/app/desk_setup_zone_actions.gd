@@ -1,5 +1,6 @@
 extends RefCounted
 
+const MODEL_PATHS := preload("res://game/core/model_paths/public/model_paths.gd")
 const RULES := preload("res://game/bootstrap/app/desk_setup_zone_rules.gd")
 const WORKSTATIONS := preload("res://game/bootstrap/app/workstation_templates.gd")
 const GEOMETRY := preload("res://game/bootstrap/app/desk_setup_zone_geometry.gd")
@@ -223,8 +224,8 @@ static func place_model(mode: Variant, model: String, local: Vector3) -> void:
 	if RULES.category_for(model) != str(zone["category"]):
 		mode._notify_failure("%s is in %s; this zone accepts %s." % [model, RULES.category_for(model), str(zone["category"])])
 		return
-	var path := MODEL_ROOT + model.substr(0, 2) + "/" + model + ".glb"
-	if not ResourceLoader.exists(path):
+	var path := MODEL_PATHS.find(model.substr(0, 2), model + ".glb")
+	if path.is_empty():
 		mode._notify_failure("Model file is missing: " + model)
 		return
 	var object: Node3D = mode.planner._instantiate_asset(path) as Node3D

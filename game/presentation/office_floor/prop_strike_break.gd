@@ -6,7 +6,7 @@ const BLOW := 500.0 # Far above a crate's health; the weapon multiplier still br
 
 
 static func break_crate(prop: Node3D, hit_position: Vector3, direction: Vector3, burst: bool) -> void:
-	if "02_crate_canvas_large" in str(prop.get("model_path")):
+	if "04_crate_canvas_large" in str(prop.get("model_path")):
 		return # Tarp-covered crates are indestructible.
 	# The blast weapon tag makes the break a full one, with pieces thrown outward from the hit.
 	prop.call("take_projectile_hit", BLOW, hit_position, Vector3.UP, direction, "GRENADE" if burst else "SHOTGUN")

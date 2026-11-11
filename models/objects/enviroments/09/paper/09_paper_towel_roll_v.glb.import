@@ -4,12 +4,12 @@ importer="scene"
 importer_version=1
 type="PackedScene"
 uid="uid://b1lpaik8qxo2e"
-path="res://.godot/imported/09_paper_towel_roll_v.glb-32b10ba3acf8fa44f809abdcfa6bf958.scn"
+path="res://.godot/imported/09_paper_towel_roll_v.glb-f0d6347f2859f0fca475c0dc6f80e944.scn"
 
 [deps]
 
-source_file="res://models/objects/enviroments/09/09_paper_towel_roll_v.glb"
-dest_files=["res://.godot/imported/09_paper_towel_roll_v.glb-32b10ba3acf8fa44f809abdcfa6bf958.scn"]
+source_file="res://models/objects/enviroments/09/paper/09_paper_towel_roll_v.glb"
+dest_files=["res://.godot/imported/09_paper_towel_roll_v.glb-f0d6347f2859f0fca475c0dc6f80e944.scn"]
 
 [params]
 

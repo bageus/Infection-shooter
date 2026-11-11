@@ -10,12 +10,14 @@ import argparse
 import hashlib
 import json
 import math
+import os
 import struct
 import subprocess
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
 GROUP = ROOT / 'models/objects/enviroments/01'
+FACILITY_MODELS = {'01_wall_blocks_partial', '01_wall_concrete_blocks', '01_wall_frame_drywall', '01_wall_timber_frame_only'}
 SELF_TEXTURED = {'01_stairs_2.glb'}
 FORMATS = {5121: 'B', 5123: 'H', 5125: 'I', 5126: 'f'}
 WIDTHS = {'SCALAR': 1, 'VEC2': 2, 'VEC3': 3, 'VEC4': 4}
@@ -131,7 +133,7 @@ def validate_model(path, layout):
     # 01_stairs_2 keeps its own embedded 1024 px maps and is outside the atlas.
     atlas = 'images' in doc and path.name not in SELF_TEXTURED
     if atlas:
-        assert doc['images'] == [{'uri': f'textures/unified/group01_{kind}.png'} for kind in ['albedo', 'normal', 'orm']], f'{path.name}: stale images'
+        assert doc['images'] == [{'uri': os.path.relpath(GROUP/f'textures/unified/group01_{kind}.png', path.parent).replace(os.sep, '/')} for kind in ['albedo', 'normal', 'orm']], f'{path.name}: stale images'
         assert len(doc['textures']) == 3
     live = set()
     for mesh in doc['meshes']:
@@ -164,7 +166,8 @@ def main():
     parser.add_argument('--compare-ref', help='Pre-atlas source revision, e.g. atlas_layout.json source_ref')
     args = parser.parse_args()
     layout = json.loads((GROUP/'atlas_layout.json').read_text())
-    paths = sorted(GROUP.glob('*.glb'))
+    # Facility-atlas walls (01/wall) carry their own textures and sit outside the group 01 atlas.
+    paths = sorted(p for p in GROUP.rglob('*.glb') if p.stem not in FACILITY_MODELS and p.parent.name != 'damage')
     assert len(paths) == 40 and (GROUP/'01_stairs_2.glb').exists()
     for path in paths:
         relative = path.relative_to(ROOT).as_posix()

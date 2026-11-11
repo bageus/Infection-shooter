@@ -3,7 +3,7 @@ extends SceneTree
 
 const PROP := preload("res://game/presentation/office_floor/public/props/environment_prop.tscn")
 const WALL := preload("res://game/presentation/office_floor/public/display_wall.gd")
-const MODEL := "res://models/objects/enviroments/05/05_monitor2_destructible.glb"
+const MODEL := "res://models/objects/enviroments/05/monitor/05_monitor2_destructible.glb"
 var failures := 0
 var lights: Array[SpotLight3D] = []
 var registry: Node

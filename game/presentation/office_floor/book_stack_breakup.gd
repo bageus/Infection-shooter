@@ -2,9 +2,9 @@ extends RefCounted
 
 const DAMAGE := preload("res://game/presentation/office_floor/environment_damage.gd")
 const BOOKS := [
-	preload("res://models/objects/enviroments/09/09_book_small.glb"),
-	preload("res://models/objects/enviroments/09/09_book_big.glb"),
-	preload("res://models/objects/enviroments/09/09_book_fat.glb")
+	preload("res://models/objects/enviroments/09/books/09_book_small.glb"),
+	preload("res://models/objects/enviroments/09/books/09_book_big.glb"),
+	preload("res://models/objects/enviroments/09/books/09_book_fat.glb")
 ]
 
 

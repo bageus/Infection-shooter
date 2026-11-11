@@ -3,7 +3,7 @@ extends SceneTree
 ## that breaks on its first hit while its fruit scatters as loose pieces.
 const PROP_SCENE := preload("res://game/presentation/office_floor/public/props/environment_prop.tscn")
 const PLATE_FRUIT := preload("res://game/presentation/office_floor/plate_fruit.gd")
-const PLATE := "res://models/objects/enviroments/09/09_fruit_plate_2.glb"
+const PLATE := "res://models/objects/enviroments/09/fruit/09_fruit_plate_2.glb"
 var failures := 0
 var stage: Node3D
 var effects: Node3D

@@ -3,7 +3,7 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://dw7x61jtlp4wx"
-path.s3tc="res://.godot/imported/09_file_binder_file_binder.jpg-fd0e4e4a3dc5e90b4ac30e55255c6777.s3tc.ctex"
+path.s3tc="res://.godot/imported/09_file_binder_file_binder.jpg-39b0c19bbb6eee9a2d4d76f70a1aab07.s3tc.ctex"
 metadata={
 "imported_formats": ["s3tc_bptc"],
 "vram_texture": true
@@ -14,8 +14,8 @@ generator_parameters={
 
 [deps]
 
-source_file="res://models/objects/enviroments/09/09_file_binder_file_binder.jpg"
-dest_files=["res://.godot/imported/09_file_binder_file_binder.jpg-fd0e4e4a3dc5e90b4ac30e55255c6777.s3tc.ctex"]
+source_file="res://models/objects/enviroments/09/files/09_file_binder_file_binder.jpg"
+dest_files=["res://.godot/imported/09_file_binder_file_binder.jpg-39b0c19bbb6eee9a2d4d76f70a1aab07.s3tc.ctex"]
 
 [params]
 

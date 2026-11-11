@@ -5,7 +5,7 @@ const ZONE := preload("res://game/presentation/office_floor/public/props/darknes
 const ROOM_CULL := preload("res://game/presentation/office_floor/public/room_cull.gd")
 const CHAIR := "res://models/objects/enviroments/06/06_conference_chair.glb"
 const DOOR_LINKS := preload("res://game/presentation/office_floor/public/door_darkness_links.gd")
-const WALL := "res://models/objects/enviroments/01/01_wall_straight.glb"
+const WALL := "res://models/objects/enviroments/01/wall/01_wall_straight.glb"
 var failures := 0
 
 

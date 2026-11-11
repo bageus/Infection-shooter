@@ -4,12 +4,12 @@ importer="scene"
 importer_version=1
 type="PackedScene"
 uid="uid://dvlg0lpfxqyym"
-path="res://.godot/imported/05_laptop2_destructible.glb-39dc2910bdc7be8d3623e44969d13abc.scn"
+path="res://.godot/imported/05_laptop2_destructible.glb-23d9aa844a1e0247d74300117faaecdd.scn"
 
 [deps]
 
-source_file="res://models/objects/enviroments/05/05_laptop2_destructible.glb"
-dest_files=["res://.godot/imported/05_laptop2_destructible.glb-39dc2910bdc7be8d3623e44969d13abc.scn"]
+source_file="res://models/objects/enviroments/05/laptop/05_laptop2_destructible.glb"
+dest_files=["res://.godot/imported/05_laptop2_destructible.glb-23d9aa844a1e0247d74300117faaecdd.scn"]
 
 [params]
 

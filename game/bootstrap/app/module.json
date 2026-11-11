@@ -30,6 +30,7 @@
     "core.audio",
     "features.infection",
     "core.world_badge",
+    "core.model_paths",
     "core.localization",
     "core.vfx",
     "infrastructure.platform"

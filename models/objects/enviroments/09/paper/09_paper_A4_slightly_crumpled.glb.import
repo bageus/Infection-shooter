@@ -4,12 +4,12 @@ importer="scene"
 importer_version=1
 type="PackedScene"
 uid="uid://yxqecagklmau"
-path="res://.godot/imported/09_paper_A4_slightly_crumpled.glb-d0227799b6b91f957cf99d19f407d2a0.scn"
+path="res://.godot/imported/09_paper_A4_slightly_crumpled.glb-1bdaef03f714af7c1d1407bcab93d93a.scn"
 
 [deps]
 
-source_file="res://models/objects/enviroments/09/09_paper_A4_slightly_crumpled.glb"
-dest_files=["res://.godot/imported/09_paper_A4_slightly_crumpled.glb-d0227799b6b91f957cf99d19f407d2a0.scn"]
+source_file="res://models/objects/enviroments/09/paper/09_paper_A4_slightly_crumpled.glb"
+dest_files=["res://.godot/imported/09_paper_A4_slightly_crumpled.glb-1bdaef03f714af7c1d1407bcab93d93a.scn"]
 
 [params]
 

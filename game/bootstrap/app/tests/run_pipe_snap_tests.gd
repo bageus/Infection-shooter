@@ -2,6 +2,7 @@ extends SceneTree
 ## Group 01 ducts and water pipes: open ends meet one to one, mounting sides stay flush,
 ## raised pieces hang from the ceiling.
 const SNAP := preload("res://game/bootstrap/app/planning_pipe_snap.gd")
+const MODEL_PATHS := preload("res://game/core/model_paths/public/model_paths.gd")
 const ROOT := "res://models/objects/enviroments/01/"
 const DUCT_BOX := AABB(Vector3(-0.5475, 0, -0.035), Vector3(1.095, 0.8, 2.07))
 const ELBOW_BOX := AABB(Vector3(-0.5475, 0, -0.035), Vector3(1.5825, 0.8, 1.5825))
@@ -31,7 +32,7 @@ func _run() -> void:
 
 func _piece(model: String, position: Vector3 = Vector3.ZERO, yaw: float = 0.0) -> Node3D:
 	var node := Node3D.new()
-	node.set_meta("planning_scene_path", ROOT + model + ".glb")
+	node.set_meta("planning_scene_path", MODEL_PATHS.find("01", model + ".glb"))
 	stage.add_child(node)
 	node.position = position
 	node.rotation.y = yaw
@@ -54,7 +55,7 @@ func _check(condition: bool, message: String) -> void:
 # The ends table must describe the real meshes: vertices lie on the end plane around its centre.
 func _test_model_ends() -> void:
 	for name: String in SNAP.MODELS:
-		var model := (load(ROOT + name + ".glb") as PackedScene).instantiate() as Node3D
+		var model := (load(MODEL_PATHS.find("01", name + ".glb")) as PackedScene).instantiate() as Node3D
 		stage.add_child(model)
 		var node := _piece(name)
 		for end: Dictionary in SNAP.world_ends(node, Vector3.ZERO):

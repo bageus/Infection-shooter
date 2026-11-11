@@ -3,9 +3,9 @@ extends SceneTree
 ## shape, which dropped it through the desk) and server racks do not glow white.
 const PROP_SCENE := preload("res://game/presentation/office_floor/public/props/environment_prop.tscn")
 const MONITORS := [
-	"res://models/objects/enviroments/05/05_monitor4_server_destructible.glb",
-	"res://models/objects/enviroments/05/05_monitor2_destructible.glb",
-	"res://models/objects/enviroments/05/05_laptop2_destructible.glb",
+	"res://models/objects/enviroments/05/monitor/05_monitor4_server_destructible.glb",
+	"res://models/objects/enviroments/05/monitor/05_monitor2_destructible.glb",
+	"res://models/objects/enviroments/05/laptop/05_laptop2_destructible.glb",
 ]
 const RACK_MATERIAL := "res://models/objects/enviroments/03/materials/group03_emission.tres"
 var failures := 0

@@ -4,12 +4,12 @@ importer="scene"
 importer_version=1
 type="PackedScene"
 uid="uid://bnm3nibw6omdp"
-path="res://.godot/imported/01_glass_wall_full_breakable.glb-057e2ac677364da63c2a3d4d5aa9055e.scn"
+path="res://.godot/imported/01_glass_wall_full_breakable.glb-178001b0548ee2253fa7248859456e07.scn"
 
 [deps]
 
-source_file="res://models/objects/enviroments/01/01_glass_wall_full_breakable.glb"
-dest_files=["res://.godot/imported/01_glass_wall_full_breakable.glb-057e2ac677364da63c2a3d4d5aa9055e.scn"]
+source_file="res://models/objects/enviroments/01/wall/01_glass_wall_full_breakable.glb"
+dest_files=["res://.godot/imported/01_glass_wall_full_breakable.glb-178001b0548ee2253fa7248859456e07.scn"]
 
 [params]
 

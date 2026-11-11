@@ -53,7 +53,7 @@ func _chain(count: int, side: float, kind: String, with_wall: bool) -> void:
 	if with_wall:
 		var barrier: PhysicsBody3D = StaticBody3D.new() if kind == "static" else Prop.new()
 		if barrier is Prop:
-			barrier.model_path = "res://models/objects/enviroments/01/01_wall_straight.glb"
+			barrier.model_path = "res://models/objects/enviroments/01/wall/01_wall_straight.glb"
 			barrier.gravity_scale = 0.0
 		_box(barrier, Vector3(side * 2, 1, 0), Vector3(.05, 3, 3))
 	for index in count:

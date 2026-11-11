@@ -6,8 +6,8 @@ const COOLER := "res://models/objects/enviroments/02/02_water_cooler_bottle_atta
 const EMPTY_COOLER := "res://models/objects/enviroments/02/02_water_cooler_destructible.glb"
 const MICROWAVE := "res://models/objects/enviroments/02/02_microwave_destructible.glb"
 const FRIDGE := "res://models/objects/enviroments/02/02_frige_dented.glb"
-const WALL_BOARD := "res://models/objects/enviroments/09/09_white_board_stand.glb"
-const FLOOR_BOARD := "res://models/objects/enviroments/09/09_board_stand_white.glb"
+const WALL_BOARD := "res://models/objects/enviroments/09/board/09_white_board_stand.glb"
+const FLOOR_BOARD := "res://models/objects/enviroments/09/board/09_board_stand_white.glb"
 const CASE_OPEN := "res://models/objects/enviroments/09/09_case_with_money_open.glb"
 var failures := 0
 var stage: Node3D

@@ -175,7 +175,7 @@ func _test_glass() -> void:
 func _test_displays() -> void:
 	for path: String in ["05_monitor_destructible.glb", "05_wall_TV_destructible.glb"]:
 		var prop := PROP.instantiate() as RigidBody3D
-		prop.set("model_path", "res://models/objects/enviroments/05/" + path)
+		prop.set("model_path", "res://models/objects/enviroments/05/" + ("monitor/" if "monitor" in path else "") + path)
 		stage.add_child(prop)
 		prop.freeze = true
 		prop.call("configure_glass_debris", floor_view)

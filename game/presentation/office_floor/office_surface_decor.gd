@@ -46,6 +46,12 @@ static func apply(visual: Node3D, model_path: String, display: Node3D = null, di
 		add_stickers(visual, profiles, display_seed)
 
 
+# Damage stages load after apply(); they need the same finish as the whole model.
+static func apply_stage(group: Node3D, model_path: String) -> void:
+	if model_path.get_file() in TABLE_MODELS:
+		finish_table(group)
+
+
 static func finish_table(visual: Node3D) -> int:
 	var changed := 0
 	for node in visual.find_children("*", "MeshInstance3D", true, false):

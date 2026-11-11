@@ -3,6 +3,7 @@ extends RefCounted
 ## The plate breaks on its first hit and the fruit flies apart with it (environment_prop.gd).
 ## Authored config {"enabled": bool, "count": 1..5, "seed": int}; a plate without fruit stays as before.
 
+const MODEL_PATHS := preload("res://game/core/model_paths/public/model_paths.gd")
 const GEOMETRY := preload("res://game/presentation/office_floor/environment_prop_geometry.gd")
 const MODEL_DIR := "res://models/objects/enviroments/09/"
 ## Only the flat round plate carries fruit; the platter model already has its own.
@@ -70,7 +71,7 @@ func build(visual: Node3D, model_path: String) -> void:
 	holder.name = NODE_NAME
 	visual.add_child(holder)
 	for item: Dictionary in layout(int(config["count"]), int(config["seed"])):
-		var packed := load(MODEL_DIR + str(item["model"])) as PackedScene
+		var packed := load(MODEL_PATHS.find("09", str(item["model"]))) as PackedScene
 		if packed == null:
 			continue
 		var pivot := Node3D.new()

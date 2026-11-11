@@ -4,12 +4,12 @@ importer="scene"
 importer_version=1
 type="PackedScene"
 uid="uid://b7p6gol1m2hvg"
-path="res://.godot/imported/02_crate_canvas_large.glb-90e2cc2c1f3eb7190ae4fdf53b134557.scn"
+path="res://.godot/imported/04_crate_canvas_large.glb-68b58d275a93c1ef68573a36f1493ae6.scn"
 
 [deps]
 
-source_file="res://models/objects/enviroments/02/02_crate_canvas_large.glb"
-dest_files=["res://.godot/imported/02_crate_canvas_large.glb-90e2cc2c1f3eb7190ae4fdf53b134557.scn"]
+source_file="res://models/objects/enviroments/04/04_crate_canvas_large.glb"
+dest_files=["res://.godot/imported/04_crate_canvas_large.glb-68b58d275a93c1ef68573a36f1493ae6.scn"]
 
 [params]
 

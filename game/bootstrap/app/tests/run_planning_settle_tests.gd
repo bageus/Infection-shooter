@@ -334,7 +334,7 @@ func _whole_location(status: Label) -> void:
 		nodes.append(_cube(stage, Vector3(x, 1.5, z)))
 	var lower := _cube(stage, Vector3(0, 3, 0))
 	nodes.append(lower)
-	var bin: Node3D = preload("res://game/bootstrap/app/planning_catalog.gd").new()._instantiate_asset("res://models/objects/enviroments/09/09_trash_bin_small.glb")
+	var bin: Node3D = preload("res://game/bootstrap/app/planning_catalog.gd").new()._instantiate_asset("res://models/objects/enviroments/09/bin_bucket_mop/09_trash_bin_small.glb")
 	bin.position = Vector3(3, 0.015, 17)
 	stage.add_child(bin)
 	bin.owner = stage

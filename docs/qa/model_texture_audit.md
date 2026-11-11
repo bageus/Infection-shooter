@@ -20,43 +20,43 @@
 | `models/objects/characters/enemy/Titan.glb` | 3 | 1/1 | 1/1 | baseColorTexture, metallicRoughnessTexture, normalTexture |
 | `models/objects/characters/soldier_animated.glb` | 3 | 1/1 | 1/1 | baseColorTexture, metallicRoughnessTexture, normalTexture |
 | `models/objects/enviroments/01/01_VECTRION_Destructible.glb` | 3 | 121/121 | 121/121 | baseColorTexture, metallicRoughnessTexture, normalTexture, occlusionTexture |
-| `models/objects/enviroments/01/01_column.glb` | 3 | 3/3 | 3/3 | baseColorTexture, metallicRoughnessTexture, normalTexture, occlusionTexture |
+| `models/objects/enviroments/01/wall/01_column.glb` | 3 | 3/3 | 3/3 | baseColorTexture, metallicRoughnessTexture, normalTexture, occlusionTexture |
 | `models/objects/enviroments/01/01_elevator_cabin_freight.glb` | 3 | 31/34 | 31/34 | baseColorTexture, metallicRoughnessTexture, normalTexture, occlusionTexture |
 | `models/objects/enviroments/01/01_elevator_cabin_passenger.glb` | 3 | 25/27 | 25/27 | baseColorTexture, metallicRoughnessTexture, normalTexture, occlusionTexture |
-| `models/objects/enviroments/01/01_elevator_door.glb` | 3 | 12/12 | 12/12 | baseColorTexture, metallicRoughnessTexture, normalTexture, occlusionTexture |
-| `models/objects/enviroments/01/01_floor_1x1.glb` | 3 | 1/1 | 1/1 | baseColorTexture, metallicRoughnessTexture, normalTexture, occlusionTexture |
-| `models/objects/enviroments/01/01_floor_2x2.glb` | 3 | 1/1 | 1/1 | baseColorTexture, metallicRoughnessTexture, normalTexture, occlusionTexture |
-| `models/objects/enviroments/01/01_floor_3x3.glb` | 3 | 1/1 | 1/1 | baseColorTexture, metallicRoughnessTexture, normalTexture, occlusionTexture |
-| `models/objects/enviroments/01/01_floor_corner_round.glb` | 3 | 1/1 | 1/1 | baseColorTexture, metallicRoughnessTexture, normalTexture, occlusionTexture |
-| `models/objects/enviroments/01/01_floor_corner_round_half.glb` | 3 | 1/1 | 1/1 | baseColorTexture, metallicRoughnessTexture, normalTexture, occlusionTexture |
-| `models/objects/enviroments/01/01_floor_pad.glb` | 3 | 1/2 | 2/2 | baseColorTexture, metallicRoughnessTexture, normalTexture, occlusionTexture |
-| `models/objects/enviroments/01/01_glass_door_breakable.glb` | 4 | 6/42 | 42/42 | baseColorTexture, metallicRoughnessTexture, normalTexture, occlusionTexture |
-| `models/objects/enviroments/01/01_glass_partition_blinds_breakable.glb` | 5 | 34/69 | 69/69 | baseColorTexture, metallicRoughnessTexture, normalTexture, occlusionTexture |
-| `models/objects/enviroments/01/01_glass_partition_half_breakable.glb` | 5 | 2/35 | 35/35 | baseColorTexture, metallicRoughnessTexture, normalTexture, occlusionTexture |
-| `models/objects/enviroments/01/01_glass_wall_full_breakable.glb` | 5 | 2/36 | 36/36 | baseColorTexture, metallicRoughnessTexture, normalTexture, occlusionTexture |
-| `models/objects/enviroments/01/01_only_door.glb` | 3 | 2/2 | 2/2 | baseColorTexture, metallicRoughnessTexture, normalTexture, occlusionTexture |
+| `models/objects/enviroments/01/door/01_elevator_door.glb` | 3 | 12/12 | 12/12 | baseColorTexture, metallicRoughnessTexture, normalTexture, occlusionTexture |
+| `models/objects/enviroments/01/floor/01_floor_1x1.glb` | 3 | 1/1 | 1/1 | baseColorTexture, metallicRoughnessTexture, normalTexture, occlusionTexture |
+| `models/objects/enviroments/01/floor/01_floor_2x2.glb` | 3 | 1/1 | 1/1 | baseColorTexture, metallicRoughnessTexture, normalTexture, occlusionTexture |
+| `models/objects/enviroments/01/floor/01_floor_3x3.glb` | 3 | 1/1 | 1/1 | baseColorTexture, metallicRoughnessTexture, normalTexture, occlusionTexture |
+| `models/objects/enviroments/01/floor/01_floor_corner_round.glb` | 3 | 1/1 | 1/1 | baseColorTexture, metallicRoughnessTexture, normalTexture, occlusionTexture |
+| `models/objects/enviroments/01/floor/01_floor_corner_round_half.glb` | 3 | 1/1 | 1/1 | baseColorTexture, metallicRoughnessTexture, normalTexture, occlusionTexture |
+| `models/objects/enviroments/01/floor/01_floor_pad.glb` | 3 | 1/2 | 2/2 | baseColorTexture, metallicRoughnessTexture, normalTexture, occlusionTexture |
+| `models/objects/enviroments/01/door/01_glass_door_breakable.glb` | 4 | 6/42 | 42/42 | baseColorTexture, metallicRoughnessTexture, normalTexture, occlusionTexture |
+| `models/objects/enviroments/01/wall/01_glass_partition_blinds_breakable.glb` | 5 | 34/69 | 69/69 | baseColorTexture, metallicRoughnessTexture, normalTexture, occlusionTexture |
+| `models/objects/enviroments/01/wall/01_glass_partition_half_breakable.glb` | 5 | 2/35 | 35/35 | baseColorTexture, metallicRoughnessTexture, normalTexture, occlusionTexture |
+| `models/objects/enviroments/01/wall/01_glass_wall_full_breakable.glb` | 5 | 2/36 | 36/36 | baseColorTexture, metallicRoughnessTexture, normalTexture, occlusionTexture |
+| `models/objects/enviroments/01/door/01_only_door.glb` | 3 | 2/2 | 2/2 | baseColorTexture, metallicRoughnessTexture, normalTexture, occlusionTexture |
 | `models/objects/enviroments/01/01_stairs.glb` | 3 | 11/11 | 11/11 | baseColorTexture, metallicRoughnessTexture, normalTexture, occlusionTexture |
 | `models/objects/enviroments/01/01_stairs_2.glb` | 3 | 11/11 | 11/11 | baseColorTexture, metallicRoughnessTexture, normalTexture, occlusionTexture |
-| `models/objects/enviroments/01/01_wall_door.glb` | 3 | 7/7 | 7/7 | baseColorTexture, metallicRoughnessTexture, normalTexture, occlusionTexture |
-| `models/objects/enviroments/01/01_wall_door_without.glb` | 3 | 5/5 | 5/5 | baseColorTexture, metallicRoughnessTexture, normalTexture, occlusionTexture |
-| `models/objects/enviroments/01/01_wall_emergency_door.glb` | 4 | 9/9 | 9/9 | baseColorTexture, metallicRoughnessTexture, normalTexture, occlusionTexture |
-| `models/objects/enviroments/01/01_wall_half_panel.glb` | 3 | 4/5 | 4/5 | baseColorTexture, metallicRoughnessTexture, normalTexture, occlusionTexture |
-| `models/objects/enviroments/01/01_wall_straight.glb` | 3 | 2/2 | 2/2 | baseColorTexture, metallicRoughnessTexture, normalTexture, occlusionTexture |
+| `models/objects/enviroments/01/door/01_wall_door.glb` | 3 | 7/7 | 7/7 | baseColorTexture, metallicRoughnessTexture, normalTexture, occlusionTexture |
+| `models/objects/enviroments/01/door/01_wall_door_without.glb` | 3 | 5/5 | 5/5 | baseColorTexture, metallicRoughnessTexture, normalTexture, occlusionTexture |
+| `models/objects/enviroments/01/door/01_wall_emergency_door.glb` | 4 | 9/9 | 9/9 | baseColorTexture, metallicRoughnessTexture, normalTexture, occlusionTexture |
+| `models/objects/enviroments/01/wall/01_wall_half_panel.glb` | 3 | 4/5 | 4/5 | baseColorTexture, metallicRoughnessTexture, normalTexture, occlusionTexture |
+| `models/objects/enviroments/01/wall/01_wall_straight.glb` | 3 | 2/2 | 2/2 | baseColorTexture, metallicRoughnessTexture, normalTexture, occlusionTexture |
 | `models/objects/enviroments/01/01_window_double.glb` | 3 | 5/6 | 5/6 | baseColorTexture, metallicRoughnessTexture, normalTexture, occlusionTexture |
 | `models/objects/enviroments/01/01_wood_slat_partition_destructible.glb` | 3 | 28/28 | 28/28 | baseColorTexture, metallicRoughnessTexture, normalTexture, occlusionTexture |
-| `models/objects/enviroments/02/02_arcade_machine_V1.glb` | 0 | 0/2 | 2/2 | Только материал/цвет |
-| `models/objects/enviroments/02/02_arcade_machine_V2.glb` | 0 | 0/2 | 2/2 | Только материал/цвет |
-| `models/objects/enviroments/02/02_arcade_machine_V3.glb` | 0 | 0/2 | 2/2 | Только материал/цвет |
-| `models/objects/enviroments/02/02_arcade_machine_V4.glb` | 0 | 0/2 | 2/2 | Только материал/цвет |
-| `models/objects/enviroments/02/02_arcade_machine_V5.glb` | 0 | 0/3 | 3/3 | Только материал/цвет |
-| `models/objects/enviroments/02/02_arcade_machine_V6.glb` | 0 | 0/2 | 2/2 | Только материал/цвет |
-| `models/objects/enviroments/02/02_capboard_down_destructible.glb` | 12 | 31/31 | 31/31 | baseColorTexture, metallicRoughnessTexture, normalTexture, occlusionTexture |
-| `models/objects/enviroments/02/02_capboard_down_one_destructible.glb` | 12 | 25/25 | 25/25 | baseColorTexture, metallicRoughnessTexture, normalTexture, occlusionTexture |
-| `models/objects/enviroments/02/02_capboard_down_sink_destructible.glb` | 15 | 50/50 | 50/50 | baseColorTexture, metallicRoughnessTexture, normalTexture, occlusionTexture |
-| `models/objects/enviroments/02/02_capboard_up_double_destructible.glb` | 9 | 25/25 | 25/25 | baseColorTexture, metallicRoughnessTexture, normalTexture, occlusionTexture |
-| `models/objects/enviroments/02/02_capboard_up_one_destructible.glb` | 9 | 19/19 | 19/19 | baseColorTexture, metallicRoughnessTexture, normalTexture, occlusionTexture |
+| `models/objects/enviroments/14/02_arcade_machine_V1.glb` | 0 | 0/2 | 2/2 | Только материал/цвет |
+| `models/objects/enviroments/14/02_arcade_machine_V2.glb` | 0 | 0/2 | 2/2 | Только материал/цвет |
+| `models/objects/enviroments/14/02_arcade_machine_V3.glb` | 0 | 0/2 | 2/2 | Только материал/цвет |
+| `models/objects/enviroments/14/02_arcade_machine_V4.glb` | 0 | 0/2 | 2/2 | Только материал/цвет |
+| `models/objects/enviroments/14/02_arcade_machine_V5.glb` | 0 | 0/3 | 3/3 | Только материал/цвет |
+| `models/objects/enviroments/14/02_arcade_machine_V6.glb` | 0 | 0/2 | 2/2 | Только материал/цвет |
+| `models/objects/enviroments/02/capboard/02_capboard_down_destructible.glb` | 12 | 31/31 | 31/31 | baseColorTexture, metallicRoughnessTexture, normalTexture, occlusionTexture |
+| `models/objects/enviroments/02/capboard/02_capboard_down_one_destructible.glb` | 12 | 25/25 | 25/25 | baseColorTexture, metallicRoughnessTexture, normalTexture, occlusionTexture |
+| `models/objects/enviroments/02/capboard/02_capboard_down_sink_destructible.glb` | 15 | 50/50 | 50/50 | baseColorTexture, metallicRoughnessTexture, normalTexture, occlusionTexture |
+| `models/objects/enviroments/02/capboard/02_capboard_up_double_destructible.glb` | 9 | 25/25 | 25/25 | baseColorTexture, metallicRoughnessTexture, normalTexture, occlusionTexture |
+| `models/objects/enviroments/02/capboard/02_capboard_up_one_destructible.glb` | 9 | 19/19 | 19/19 | baseColorTexture, metallicRoughnessTexture, normalTexture, occlusionTexture |
 | `models/objects/enviroments/02/02_coffee_machine_destructible.glb` | 15 | 43/43 | 43/43 | baseColorTexture, metallicRoughnessTexture, normalTexture, occlusionTexture |
-| `models/objects/enviroments/02/02_coffee_vending_1_dented.glb` | 9 | 4/4 | 4/4 | baseColorTexture, clearcoatNormalTexture, clearcoatRoughnessTexture, emissiveTexture, metallicRoughnessTexture, normalTexture, occlusionTexture, specularTexture |
+| `models/objects/enviroments/02/vending/02_coffee_vending_1_dented.glb` | 9 | 4/4 | 4/4 | baseColorTexture, clearcoatNormalTexture, clearcoatRoughnessTexture, emissiveTexture, metallicRoughnessTexture, normalTexture, occlusionTexture, specularTexture |
 | `models/objects/enviroments/02/02_coffee_vending_2_dented.glb` | 4 | 4/4 | 4/4 | baseColorTexture, metallicRoughnessTexture, normalTexture, occlusionTexture |
 | `models/objects/enviroments/02/02_dishwasher_dented.glb` | 6 | 12/12 | 12/12 | baseColorTexture, metallicRoughnessTexture, normalTexture, occlusionTexture |
 | `models/objects/enviroments/02/02_frige_dented.glb` | 6 | 20/20 | 20/20 | baseColorTexture, metallicRoughnessTexture, normalTexture, occlusionTexture |
@@ -64,9 +64,9 @@
 | `models/objects/enviroments/02/02_microwave_destructible.glb` | 18 | 57/57 | 57/57 | baseColorTexture, metallicRoughnessTexture, normalTexture, occlusionTexture |
 | `models/objects/enviroments/02/02_sink_pedestal_improved.glb` | 9 | 7/7 | 7/7 | baseColorTexture, metallicRoughnessTexture, normalTexture, occlusionTexture |
 | `models/objects/enviroments/02/02_toilet_new.glb` | 9 | 8/8 | 8/8 | baseColorTexture, metallicRoughnessTexture, normalTexture, occlusionTexture |
-| `models/objects/enviroments/02/02_vending_automat_1_dented.glb` | 9 | 15/15 | 15/15 | baseColorTexture, emissiveTexture, metallicRoughnessTexture, normalTexture, occlusionTexture |
-| `models/objects/enviroments/02/02_vending_automat_2_dented.glb` | 9 | 15/15 | 15/15 | baseColorTexture, emissiveTexture, metallicRoughnessTexture, normalTexture, occlusionTexture |
-| `models/objects/enviroments/02/02_vending_machine_fantas_dented.glb` | 7 | 28/28 | 28/28 | baseColorTexture, emissiveTexture, metallicRoughnessTexture, normalTexture, occlusionTexture |
+| `models/objects/enviroments/02/vending/02_vending_automat_1_dented.glb` | 9 | 15/15 | 15/15 | baseColorTexture, emissiveTexture, metallicRoughnessTexture, normalTexture, occlusionTexture |
+| `models/objects/enviroments/02/vending/02_vending_automat_2_dented.glb` | 9 | 15/15 | 15/15 | baseColorTexture, emissiveTexture, metallicRoughnessTexture, normalTexture, occlusionTexture |
+| `models/objects/enviroments/02/vending/02_vending_machine_fantas_dented.glb` | 7 | 28/28 | 28/28 | baseColorTexture, emissiveTexture, metallicRoughnessTexture, normalTexture, occlusionTexture |
 | `models/objects/enviroments/02/02_wall_urinal_improved.glb` | 6 | 7/7 | 7/7 | baseColorTexture, metallicRoughnessTexture, normalTexture, occlusionTexture |
 | `models/objects/enviroments/02/02_washing_machine_dented.glb` | 15 | 41/41 | 41/41 | baseColorTexture, metallicRoughnessTexture, normalTexture, occlusionTexture |
 | `models/objects/enviroments/02/02_water_cooler_bottle.glb` | 6 | 2/2 | 2/2 | baseColorTexture, metallicRoughnessTexture, normalTexture, occlusionTexture |
@@ -94,24 +94,24 @@
 | `models/objects/enviroments/04/04_cardboard_boxes_1.glb` | 2 | 21/29 | 29/29 | baseColorTexture |
 | `models/objects/enviroments/04/04_crate_large_broken.glb` | 0 | 0/143 | 0/143 | Только материал/цвет |
 | `models/objects/enviroments/04/04_crate_small_broken.glb` | 0 | 0/135 | 0/135 | Только материал/цвет |
-| `models/objects/enviroments/05/05_MFU_2_extra_trays_destructible.glb` | 6 | 15/15 | 15/15 | baseColorTexture, metallicRoughnessTexture, normalTexture, occlusionTexture |
-| `models/objects/enviroments/05/05_MFU_destructible.glb` | 6 | 10/10 | 10/10 | baseColorTexture, metallicRoughnessTexture, normalTexture, occlusionTexture |
+| `models/objects/enviroments/05/mfu/05_MFU_2_extra_trays_destructible.glb` | 6 | 15/15 | 15/15 | baseColorTexture, metallicRoughnessTexture, normalTexture, occlusionTexture |
+| `models/objects/enviroments/05/mfu/05_MFU_destructible.glb` | 6 | 10/10 | 10/10 | baseColorTexture, metallicRoughnessTexture, normalTexture, occlusionTexture |
 | `models/objects/enviroments/05/05_PC_destructible.glb` | 0 | 0/5 | 0/5 | Только материал/цвет |
 | `models/objects/enviroments/05/05_aircondition_destructible.glb` | 3 | 6/6 | 6/6 | baseColorTexture, metallicRoughnessTexture, normalTexture, occlusionTexture |
 | `models/objects/enviroments/05/05_computer_mouse.glb` | 3 | 1/1 | 1/1 | baseColorTexture, metallicRoughnessTexture, normalTexture, occlusionTexture |
 | `models/objects/enviroments/05/05_computer_tower_destructible.glb` | 6 | 5/5 | 5/5 | baseColorTexture, metallicRoughnessTexture, normalTexture, occlusionTexture |
 | `models/objects/enviroments/05/05_desk_phone.glb` | 4 | 5/5 | 5/5 | baseColorTexture, metallicRoughnessTexture, normalTexture, occlusionTexture |
 | `models/objects/enviroments/05/05_keyboard.glb` | 4 | 3/3 | 3/3 | baseColorTexture, metallicRoughnessTexture, normalTexture, occlusionTexture |
-| `models/objects/enviroments/05/05_lamp.glb` | 6 | 3/3 | 3/3 | baseColorTexture, metallicRoughnessTexture, normalTexture, occlusionTexture |
-| `models/objects/enviroments/05/05_laptop2_destructible.glb` | 3 | 6/6 | 6/6 | baseColorTexture, metallicRoughnessTexture, normalTexture, occlusionTexture |
-| `models/objects/enviroments/05/05_laptop_close_destructible.glb` | 6 | 21/21 | 21/21 | baseColorTexture, metallicRoughnessTexture, normalTexture, occlusionTexture |
+| `models/objects/enviroments/05/lamp/05_lamp.glb` | 6 | 3/3 | 3/3 | baseColorTexture, metallicRoughnessTexture, normalTexture, occlusionTexture |
+| `models/objects/enviroments/05/laptop/05_laptop2_destructible.glb` | 3 | 6/6 | 6/6 | baseColorTexture, metallicRoughnessTexture, normalTexture, occlusionTexture |
+| `models/objects/enviroments/05/laptop/05_laptop_close_destructible.glb` | 6 | 21/21 | 21/21 | baseColorTexture, metallicRoughnessTexture, normalTexture, occlusionTexture |
 | `models/objects/enviroments/05/05_laptop_destructible.glb` | 6 | 21/21 | 21/21 | baseColorTexture, metallicRoughnessTexture, normalTexture, occlusionTexture |
 | `models/objects/enviroments/05/05_minipc.glb` | 6 | 2/2 | 2/2 | baseColorTexture, metallicRoughnessTexture, normalTexture, occlusionTexture |
-| `models/objects/enviroments/05/05_monitor2_destructible.glb` | 3 | 8/8 | 8/8 | baseColorTexture, metallicRoughnessTexture, normalTexture, occlusionTexture |
-| `models/objects/enviroments/05/05_monitor3_server_destructible.glb` | 3 | 11/11 | 11/11 | baseColorTexture, metallicRoughnessTexture, normalTexture, occlusionTexture |
-| `models/objects/enviroments/05/05_monitor4_server_destructible.glb` | 3 | 11/11 | 11/11 | baseColorTexture, metallicRoughnessTexture, normalTexture, occlusionTexture |
-| `models/objects/enviroments/05/05_monitor_destructible.glb` | 3 | 9/9 | 9/9 | baseColorTexture, metallicRoughnessTexture, normalTexture, occlusionTexture |
-| `models/objects/enviroments/05/05_monitor_wide_destructible.glb` | 3 | 9/9 | 9/9 | baseColorTexture, metallicRoughnessTexture, normalTexture, occlusionTexture |
+| `models/objects/enviroments/05/monitor/05_monitor2_destructible.glb` | 3 | 8/8 | 8/8 | baseColorTexture, metallicRoughnessTexture, normalTexture, occlusionTexture |
+| `models/objects/enviroments/05/monitor/05_monitor3_server_destructible.glb` | 3 | 11/11 | 11/11 | baseColorTexture, metallicRoughnessTexture, normalTexture, occlusionTexture |
+| `models/objects/enviroments/05/monitor/05_monitor4_server_destructible.glb` | 3 | 11/11 | 11/11 | baseColorTexture, metallicRoughnessTexture, normalTexture, occlusionTexture |
+| `models/objects/enviroments/05/monitor/05_monitor_destructible.glb` | 3 | 9/9 | 9/9 | baseColorTexture, metallicRoughnessTexture, normalTexture, occlusionTexture |
+| `models/objects/enviroments/05/monitor/05_monitor_wide_destructible.glb` | 3 | 9/9 | 9/9 | baseColorTexture, metallicRoughnessTexture, normalTexture, occlusionTexture |
 | `models/objects/enviroments/05/05_phone_a_base.glb` | 4 | 2/2 | 2/2 | baseColorTexture, metallicRoughnessTexture, normalTexture, occlusionTexture |
 | `models/objects/enviroments/05/05_phone_a_base_hang.glb` | 4 | 3/3 | 3/3 | baseColorTexture, metallicRoughnessTexture, normalTexture, occlusionTexture |
 | `models/objects/enviroments/05/05_phone_b.glb` | 3 | 1/1 | 1/1 | baseColorTexture, metallicRoughnessTexture, normalTexture, occlusionTexture |
@@ -145,87 +145,87 @@
 | `models/objects/enviroments/08/08_divider_full_U_desk.glb` | 12 | 330/330 | 330/330 | baseColorTexture, metallicRoughnessTexture, normalTexture, occlusionTexture |
 | `models/objects/enviroments/08/08_office_desk_2.glb` | 12 | 138/138 | 138/138 | baseColorTexture, metallicRoughnessTexture, normalTexture, occlusionTexture |
 | `models/objects/enviroments/08/08_office_desk_4_coner.glb` | 9 | 237/237 | 237/237 | baseColorTexture, metallicRoughnessTexture, normalTexture, occlusionTexture |
-| `models/objects/enviroments/09/09_board_stand_white.glb` | 2 | 8/8 | 8/8 | baseColorTexture |
-| `models/objects/enviroments/09/09_book_big.glb` | 0 | 0/1 | 1/1 | Только материал/цвет |
-| `models/objects/enviroments/09/09_book_fat.glb` | 0 | 0/1 | 1/1 | Только материал/цвет |
-| `models/objects/enviroments/09/09_book_filearchive.glb` | 0 | 0/1 | 1/1 | Только материал/цвет |
-| `models/objects/enviroments/09/09_book_folder.glb` | 0 | 0/1 | 1/1 | Только материал/цвет |
-| `models/objects/enviroments/09/09_book_small.glb` | 0 | 0/1 | 1/1 | Только материал/цвет |
-| `models/objects/enviroments/09/09_book_st.glb` | 0 | 0/1 | 1/1 | Только материал/цвет |
-| `models/objects/enviroments/09/09_books.glb` | 1 | 14/27 | 14/27 | baseColorTexture |
-| `models/objects/enviroments/09/09_books_alt.glb` | 1 | 7/12 | 7/12 | baseColorTexture |
-| `models/objects/enviroments/09/09_books_alt_2.glb` | 1 | 10/17 | 10/17 | baseColorTexture |
+| `models/objects/enviroments/09/board/09_board_stand_white.glb` | 2 | 8/8 | 8/8 | baseColorTexture |
+| `models/objects/enviroments/09/books/09_book_big.glb` | 0 | 0/1 | 1/1 | Только материал/цвет |
+| `models/objects/enviroments/09/books/09_book_fat.glb` | 0 | 0/1 | 1/1 | Только материал/цвет |
+| `models/objects/enviroments/09/books/09_book_filearchive.glb` | 0 | 0/1 | 1/1 | Только материал/цвет |
+| `models/objects/enviroments/09/books/09_book_folder.glb` | 0 | 0/1 | 1/1 | Только материал/цвет |
+| `models/objects/enviroments/09/books/09_book_small.glb` | 0 | 0/1 | 1/1 | Только материал/цвет |
+| `models/objects/enviroments/09/books/09_book_st.glb` | 0 | 0/1 | 1/1 | Только материал/цвет |
+| `models/objects/enviroments/09/books/09_books.glb` | 1 | 14/27 | 14/27 | baseColorTexture |
+| `models/objects/enviroments/09/books/09_books_alt.glb` | 1 | 7/12 | 7/12 | baseColorTexture |
+| `models/objects/enviroments/09/books/09_books_alt_2.glb` | 1 | 10/17 | 10/17 | baseColorTexture |
 | `models/objects/enviroments/09/09_camera.glb` | 0 | 0/5 | 5/5 | Только материал/цвет |
 | `models/objects/enviroments/09/09_case_with_money_close.glb` | 3 | 1/1 | 1/1 | baseColorTexture, metallicRoughnessTexture, normalTexture, occlusionTexture |
 | `models/objects/enviroments/09/09_case_with_money_open.glb` | 10 | 6/6 | 6/6 | baseColorTexture, metallicRoughnessTexture, normalTexture, occlusionTexture |
 | `models/objects/enviroments/09/09_casehand_1.glb` | 0 | 0/1 | 1/1 | Только материал/цвет |
 | `models/objects/enviroments/09/09_casehand_2.glb` | 0 | 0/1 | 1/1 | Только материал/цвет |
-| `models/objects/enviroments/09/09_file_binder.glb` | 0 | 0/1 | 0/1 | Только материал/цвет |
-| `models/objects/enviroments/09/09_file_binder_alt_1.glb` | 0 | 0/1 | 0/1 | Только материал/цвет |
-| `models/objects/enviroments/09/09_file_binder_alt_1_fell.glb` | 0 | 0/1 | 0/1 | Только материал/цвет |
-| `models/objects/enviroments/09/09_file_binder_alt_2.glb` | 0 | 0/2 | 0/2 | Только материал/цвет |
-| `models/objects/enviroments/09/09_file_binder_alt_2_fell.glb` | 0 | 0/2 | 0/2 | Только материал/цвет |
-| `models/objects/enviroments/09/09_file_binder_alt_fell.glb` | 0 | 0/2 | 0/2 | Только материал/цвет |
-| `models/objects/enviroments/09/09_file_binder_fell.glb` | 1 | 1/1 | 1/1 | baseColorTexture |
+| `models/objects/enviroments/09/files/09_file_binder.glb` | 0 | 0/1 | 0/1 | Только материал/цвет |
+| `models/objects/enviroments/09/files/09_file_binder_alt_1.glb` | 0 | 0/1 | 0/1 | Только материал/цвет |
+| `models/objects/enviroments/09/files/09_file_binder_alt_1_fell.glb` | 0 | 0/1 | 0/1 | Только материал/цвет |
+| `models/objects/enviroments/09/files/09_file_binder_alt_2.glb` | 0 | 0/2 | 0/2 | Только материал/цвет |
+| `models/objects/enviroments/09/files/09_file_binder_alt_2_fell.glb` | 0 | 0/2 | 0/2 | Только материал/цвет |
+| `models/objects/enviroments/09/files/09_file_binder_alt_fell.glb` | 0 | 0/2 | 0/2 | Только материал/цвет |
+| `models/objects/enviroments/09/files/09_file_binder_fell.glb` | 1 | 1/1 | 1/1 | baseColorTexture |
 | `models/objects/enviroments/09/09_fire_extinguisher.glb` | 14 | 5/5 | 5/5 | baseColorTexture, metallicRoughnessTexture, normalTexture, occlusionTexture |
-| `models/objects/enviroments/09/09_fruit_apple.glb` | 0 | 0/1 | 1/1 | Только материал/цвет |
-| `models/objects/enviroments/09/09_fruit_banana.glb` | 0 | 0/1 | 1/1 | Только материал/цвет |
-| `models/objects/enviroments/09/09_fruit_banana_b.glb` | 0 | 0/1 | 1/1 | Только материал/цвет |
-| `models/objects/enviroments/09/09_fruit_orange.glb` | 0 | 0/1 | 1/1 | Только материал/цвет |
-| `models/objects/enviroments/09/09_fruit_plate.glb` | 0 | 0/1 | 1/1 | Только материал/цвет |
-| `models/objects/enviroments/09/09_fruit_plate_2.glb` | 0 | 0/1 | 1/1 | Только материал/цвет |
-| `models/objects/enviroments/09/09_glass.glb` | 1 | 1/1 | 1/1 | baseColorTexture |
-| `models/objects/enviroments/09/09_glass_2.glb` | 1 | 1/1 | 1/1 | baseColorTexture |
-| `models/objects/enviroments/09/09_glass_water_bottle_clear_250ml.glb` | 0 | 0/6 | 0/6 | Только материал/цвет |
-| `models/objects/enviroments/09/09_glass_water_bottle_green_330ml.glb` | 0 | 0/6 | 0/6 | Только материал/цвет |
-| `models/objects/enviroments/09/09_marker.glb` | 0 | 0/1 | 1/1 | Только материал/цвет |
-| `models/objects/enviroments/09/09_marker_eraser.glb` | 0 | 0/1 | 1/1 | Только материал/цвет |
-| `models/objects/enviroments/09/09_mug.glb` | 1 | 1/1 | 1/1 | baseColorTexture |
-| `models/objects/enviroments/09/09_mug_alt_1.glb` | 1 | 1/1 | 1/1 | baseColorTexture |
-| `models/objects/enviroments/09/09_mug_alt_2.glb` | 1 | 1/1 | 1/1 | baseColorTexture |
-| `models/objects/enviroments/09/09_mug_alt_3.glb` | 1 | 1/1 | 1/1 | baseColorTexture |
-| `models/objects/enviroments/09/09_notepad.glb` | 0 | 0/1 | 1/1 | Только материал/цвет |
-| `models/objects/enviroments/09/09_office_file_single.glb` | 0 | 0/3 | 3/3 | Только материал/цвет |
-| `models/objects/enviroments/09/09_office_files_a.glb` | 0 | 0/1 | 1/1 | Только материал/цвет |
-| `models/objects/enviroments/09/09_office_files_a_2.glb` | 0 | 0/7 | 7/7 | Только материал/цвет |
-| `models/objects/enviroments/09/09_office_files_d_custom.glb` | 0 | 0/4 | 4/4 | Только материал/цвет |
-| `models/objects/enviroments/09/09_office_files_e.glb` | 0 | 0/1 | 1/1 | Только материал/цвет |
-| `models/objects/enviroments/09/09_office_files_e_2.glb` | 0 | 0/1 | 1/1 | Только материал/цвет |
-| `models/objects/enviroments/09/09_office_files_f.glb` | 0 | 0/1 | 1/1 | Только материал/цвет |
-| `models/objects/enviroments/09/09_office_files_f_2.glb` | 0 | 0/1 | 1/1 | Только материал/цвет |
-| `models/objects/enviroments/09/09_office_files_f_3.glb` | 0 | 0/1 | 1/1 | Только материал/цвет |
-| `models/objects/enviroments/09/09_painting.glb` | 0 | 0/2 | 2/2 | Только материал/цвет |
-| `models/objects/enviroments/09/09_painting_small.glb` | 0 | 0/2 | 2/2 | Только материал/цвет |
-| `models/objects/enviroments/09/09_painting_small_2.glb` | 0 | 0/2 | 2/2 | Только материал/цвет |
-| `models/objects/enviroments/09/09_paper_A4_compact_crumpled_wad.glb` | 0 | 0/3 | 0/3 | Только материал/цвет |
-| `models/objects/enviroments/09/09_paper_A4_heavily_crumpled.glb` | 0 | 0/2 | 0/2 | Только материал/цвет |
-| `models/objects/enviroments/09/09_paper_A4_moderately_crumpled.glb` | 0 | 0/2 | 0/2 | Только материал/цвет |
-| `models/objects/enviroments/09/09_paper_A4_slightly_crumpled.glb` | 0 | 0/2 | 0/2 | Только материал/цвет |
-| `models/objects/enviroments/09/09_paper_stack.glb` | 1 | 1/1 | 1/1 | baseColorTexture |
-| `models/objects/enviroments/09/09_paper_stray.glb` | 0 | 0/1 | 1/1 | Только материал/цвет |
-| `models/objects/enviroments/09/09_paper_towel_roll_h.glb` | 0 | 0/8 | 0/8 | Только материал/цвет |
-| `models/objects/enviroments/09/09_paper_towel_roll_v.glb` | 0 | 0/4 | 0/4 | Только материал/цвет |
-| `models/objects/enviroments/09/09_pen_1.glb` | 1 | 1/1 | 1/1 | baseColorTexture |
-| `models/objects/enviroments/09/09_pen_2.glb` | 1 | 1/1 | 1/1 | baseColorTexture |
-| `models/objects/enviroments/09/09_pen_3.glb` | 1 | 1/1 | 1/1 | baseColorTexture |
-| `models/objects/enviroments/09/09_pen_4.glb` | 1 | 1/1 | 1/1 | baseColorTexture |
-| `models/objects/enviroments/09/09_pen_5.glb` | 1 | 1/1 | 1/1 | baseColorTexture |
-| `models/objects/enviroments/09/09_pen_6.glb` | 1 | 1/1 | 1/1 | baseColorTexture |
-| `models/objects/enviroments/09/09_pencil.glb` | 0 | 0/4 | 4/4 | Только материал/цвет |
-| `models/objects/enviroments/09/09_pencil_box.glb` | 0 | 0/1 | 1/1 | Только материал/цвет |
-| `models/objects/enviroments/09/09_pencil_holder.glb` | 0 | 0/1 | 1/1 | Только материал/цвет |
-| `models/objects/enviroments/09/09_plastic_water_bottle_blue_500ml.glb` | 0 | 0/5 | 0/5 | Только материал/цвет |
-| `models/objects/enviroments/09/09_plastic_water_bottle_clear_330ml.glb` | 0 | 0/5 | 0/5 | Только материал/цвет |
-| `models/objects/enviroments/09/09_stapler.glb` | 0 | 0/1 | 1/1 | Только материал/цвет |
-| `models/objects/enviroments/09/09_tablet.glb` | 0 | 0/2 | 2/2 | Только материал/цвет |
-| `models/objects/enviroments/09/09_toilet_paper_roll_h.glb` | 0 | 0/4 | 0/4 | Только материал/цвет |
-| `models/objects/enviroments/09/09_toilet_paper_roll_v.glb` | 0 | 0/4 | 0/4 | Только материал/цвет |
-| `models/objects/enviroments/09/09_trash_bin.glb` | 0 | 0/1 | 1/1 | Только материал/цвет |
-| `models/objects/enviroments/09/09_trash_bin_small.glb` | 0 | 0/1 | 1/1 | Только материал/цвет |
+| `models/objects/enviroments/09/fruit/09_fruit_apple.glb` | 0 | 0/1 | 1/1 | Только материал/цвет |
+| `models/objects/enviroments/09/fruit/09_fruit_banana.glb` | 0 | 0/1 | 1/1 | Только материал/цвет |
+| `models/objects/enviroments/09/fruit/09_fruit_banana_b.glb` | 0 | 0/1 | 1/1 | Только материал/цвет |
+| `models/objects/enviroments/09/fruit/09_fruit_orange.glb` | 0 | 0/1 | 1/1 | Только материал/цвет |
+| `models/objects/enviroments/09/fruit/09_fruit_plate.glb` | 0 | 0/1 | 1/1 | Только материал/цвет |
+| `models/objects/enviroments/09/fruit/09_fruit_plate_2.glb` | 0 | 0/1 | 1/1 | Только материал/цвет |
+| `models/objects/enviroments/09/glass_mug/09_glass.glb` | 1 | 1/1 | 1/1 | baseColorTexture |
+| `models/objects/enviroments/09/glass_mug/09_glass_2.glb` | 1 | 1/1 | 1/1 | baseColorTexture |
+| `models/objects/enviroments/09/glass_mug/09_glass_water_bottle_clear_250ml.glb` | 0 | 0/6 | 0/6 | Только материал/цвет |
+| `models/objects/enviroments/09/glass_mug/09_glass_water_bottle_green_330ml.glb` | 0 | 0/6 | 0/6 | Только материал/цвет |
+| `models/objects/enviroments/09/chancery/09_marker.glb` | 0 | 0/1 | 1/1 | Только материал/цвет |
+| `models/objects/enviroments/09/chancery/09_marker_eraser.glb` | 0 | 0/1 | 1/1 | Только материал/цвет |
+| `models/objects/enviroments/09/glass_mug/09_mug.glb` | 1 | 1/1 | 1/1 | baseColorTexture |
+| `models/objects/enviroments/09/glass_mug/09_mug_alt_1.glb` | 1 | 1/1 | 1/1 | baseColorTexture |
+| `models/objects/enviroments/09/glass_mug/09_mug_alt_2.glb` | 1 | 1/1 | 1/1 | baseColorTexture |
+| `models/objects/enviroments/09/glass_mug/09_mug_alt_3.glb` | 1 | 1/1 | 1/1 | baseColorTexture |
+| `models/objects/enviroments/09/chancery/09_notepad.glb` | 0 | 0/1 | 1/1 | Только материал/цвет |
+| `models/objects/enviroments/09/files/09_office_file_single.glb` | 0 | 0/3 | 3/3 | Только материал/цвет |
+| `models/objects/enviroments/09/files/09_office_files_a.glb` | 0 | 0/1 | 1/1 | Только материал/цвет |
+| `models/objects/enviroments/09/files/09_office_files_a_2.glb` | 0 | 0/7 | 7/7 | Только материал/цвет |
+| `models/objects/enviroments/09/files/09_office_files_d_custom.glb` | 0 | 0/4 | 4/4 | Только материал/цвет |
+| `models/objects/enviroments/09/files/09_office_files_e.glb` | 0 | 0/1 | 1/1 | Только материал/цвет |
+| `models/objects/enviroments/09/files/09_office_files_e_2.glb` | 0 | 0/1 | 1/1 | Только материал/цвет |
+| `models/objects/enviroments/09/files/09_office_files_f.glb` | 0 | 0/1 | 1/1 | Только материал/цвет |
+| `models/objects/enviroments/09/files/09_office_files_f_2.glb` | 0 | 0/1 | 1/1 | Только материал/цвет |
+| `models/objects/enviroments/09/files/09_office_files_f_3.glb` | 0 | 0/1 | 1/1 | Только материал/цвет |
+| `models/objects/enviroments/09/painting/09_painting.glb` | 0 | 0/2 | 2/2 | Только материал/цвет |
+| `models/objects/enviroments/09/painting/09_painting_small.glb` | 0 | 0/2 | 2/2 | Только материал/цвет |
+| `models/objects/enviroments/09/painting/09_painting_small_2.glb` | 0 | 0/2 | 2/2 | Только материал/цвет |
+| `models/objects/enviroments/09/paper/09_paper_A4_compact_crumpled_wad.glb` | 0 | 0/3 | 0/3 | Только материал/цвет |
+| `models/objects/enviroments/09/paper/09_paper_A4_heavily_crumpled.glb` | 0 | 0/2 | 0/2 | Только материал/цвет |
+| `models/objects/enviroments/09/paper/09_paper_A4_moderately_crumpled.glb` | 0 | 0/2 | 0/2 | Только материал/цвет |
+| `models/objects/enviroments/09/paper/09_paper_A4_slightly_crumpled.glb` | 0 | 0/2 | 0/2 | Только материал/цвет |
+| `models/objects/enviroments/09/paper/09_paper_stack.glb` | 1 | 1/1 | 1/1 | baseColorTexture |
+| `models/objects/enviroments/09/paper/09_paper_stray.glb` | 0 | 0/1 | 1/1 | Только материал/цвет |
+| `models/objects/enviroments/09/paper/09_paper_towel_roll_h.glb` | 0 | 0/8 | 0/8 | Только материал/цвет |
+| `models/objects/enviroments/09/paper/09_paper_towel_roll_v.glb` | 0 | 0/4 | 0/4 | Только материал/цвет |
+| `models/objects/enviroments/09/chancery/09_pen_1.glb` | 1 | 1/1 | 1/1 | baseColorTexture |
+| `models/objects/enviroments/09/chancery/09_pen_2.glb` | 1 | 1/1 | 1/1 | baseColorTexture |
+| `models/objects/enviroments/09/chancery/09_pen_3.glb` | 1 | 1/1 | 1/1 | baseColorTexture |
+| `models/objects/enviroments/09/chancery/09_pen_4.glb` | 1 | 1/1 | 1/1 | baseColorTexture |
+| `models/objects/enviroments/09/chancery/09_pen_5.glb` | 1 | 1/1 | 1/1 | baseColorTexture |
+| `models/objects/enviroments/09/chancery/09_pen_6.glb` | 1 | 1/1 | 1/1 | baseColorTexture |
+| `models/objects/enviroments/09/chancery/09_pencil.glb` | 0 | 0/4 | 4/4 | Только материал/цвет |
+| `models/objects/enviroments/09/chancery/09_pencil_box.glb` | 0 | 0/1 | 1/1 | Только материал/цвет |
+| `models/objects/enviroments/09/chancery/09_pencil_holder.glb` | 0 | 0/1 | 1/1 | Только материал/цвет |
+| `models/objects/enviroments/09/glass_mug/09_plastic_water_bottle_blue_500ml.glb` | 0 | 0/5 | 0/5 | Только материал/цвет |
+| `models/objects/enviroments/09/glass_mug/09_plastic_water_bottle_clear_330ml.glb` | 0 | 0/5 | 0/5 | Только материал/цвет |
+| `models/objects/enviroments/09/chancery/09_stapler.glb` | 0 | 0/1 | 1/1 | Только материал/цвет |
+| `models/objects/enviroments/09/chancery/09_tablet.glb` | 0 | 0/2 | 2/2 | Только материал/цвет |
+| `models/objects/enviroments/09/paper/09_toilet_paper_roll_h.glb` | 0 | 0/4 | 0/4 | Только материал/цвет |
+| `models/objects/enviroments/09/paper/09_toilet_paper_roll_v.glb` | 0 | 0/4 | 0/4 | Только материал/цвет |
+| `models/objects/enviroments/09/bin_bucket_mop/09_trash_bin.glb` | 0 | 0/1 | 1/1 | Только материал/цвет |
+| `models/objects/enviroments/09/bin_bucket_mop/09_trash_bin_small.glb` | 0 | 0/1 | 1/1 | Только материал/цвет |
 | `models/objects/enviroments/09/09_wall_clock.glb` | 1 | 1/1 | 1/1 | baseColorTexture |
 | `models/objects/enviroments/09/09_wall_mirror.glb` | 0 | 0/2 | 0/2 | Только материал/цвет |
-| `models/objects/enviroments/09/09_white_board_big.glb` | 0 | 0/2 | 2/2 | Только материал/цвет |
-| `models/objects/enviroments/09/09_white_board_stand.glb` | 0 | 0/2 | 2/2 | Только материал/цвет |
+| `models/objects/enviroments/09/board/09_white_board_big.glb` | 0 | 0/2 | 2/2 | Только материал/цвет |
+| `models/objects/enviroments/09/board/09_white_board_stand.glb` | 0 | 0/2 | 2/2 | Только материал/цвет |
 | `models/objects/enviroments/10/10_armchair_green_destructible.glb` | 6 | 181/181 | 181/181 | baseColorTexture, metallicRoughnessTexture, normalTexture, occlusionTexture |
 | `models/objects/enviroments/10/10_couch_large_blue_destructible.glb` | 6 | 197/197 | 197/197 | baseColorTexture, metallicRoughnessTexture, normalTexture, occlusionTexture |
 | `models/objects/enviroments/10/10_couch_red_destructible.glb` | 6 | 189/189 | 189/189 | baseColorTexture, metallicRoughnessTexture, normalTexture, occlusionTexture |

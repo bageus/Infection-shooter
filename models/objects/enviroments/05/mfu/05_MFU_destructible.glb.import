@@ -4,12 +4,12 @@ importer="scene"
 importer_version=1
 type="PackedScene"
 uid="uid://dt5do24asuqnw"
-path="res://.godot/imported/05_MFU_destructible.glb-dfc197373a732e7fc5a78edf57f57eee.scn"
+path="res://.godot/imported/05_MFU_destructible.glb-97145bc72916cf5e8013e83d5f71b133.scn"
 
 [deps]
 
-source_file="res://models/objects/enviroments/05/05_MFU_destructible.glb"
-dest_files=["res://.godot/imported/05_MFU_destructible.glb-dfc197373a732e7fc5a78edf57f57eee.scn"]
+source_file="res://models/objects/enviroments/05/mfu/05_MFU_destructible.glb"
+dest_files=["res://.godot/imported/05_MFU_destructible.glb-97145bc72916cf5e8013e83d5f71b133.scn"]
 
 [params]
 
@@ -35,7 +35,7 @@ animation/fps=30
 animation/trimming=false
 animation/remove_immutable_tracks=true
 animation/import_rest_as_RESET=false
-import_script/path=""
+import_script/path="res://addons/staged_glb_import/lazy_stage_post_import.gd"
 materials/extract=0
 materials/extract_format=0
 materials/extract_path=""

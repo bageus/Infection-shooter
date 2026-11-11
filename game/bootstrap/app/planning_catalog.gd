@@ -1,5 +1,6 @@
 extends RefCounted
 
+const MODEL_PATHS := preload("res://game/core/model_paths/public/model_paths.gd")
 const ENVIRONMENT_ROOT = "res://models/objects/enviroments"
 const ENVIRONMENT_SCENE = preload("res://game/presentation/office_floor/public/props/environment_prop.tscn")
 const BATHROOM_FIXTURE_SCENE = preload("res://game/presentation/office_floor/public/props/bathroom_fixture.tscn")
@@ -130,22 +131,17 @@ func biomass_catalog() -> Array:
 
 func _build_environment_catalogs() -> void:
 	group_catalogs.clear()
-	for group_index in range(1, 14): # model groups 01-13
+	for group_index in range(1, 16): # model groups 01-15
 		var group = "%02d" % group_index
-		var directory = ENVIRONMENT_ROOT + "/" + group
 		var entries: Array = []
-		group_catalogs[group] = entries
-		# ResourceLoader also lists models in exported builds, where the source
-		# .glb files are replaced by their imported resources.
-		for file_name: String in ResourceLoader.list_directory(directory):
-			if file_name.to_lower().ends_with(".glb"):
-				var model_path = directory + "/" + file_name
-				var special_scene = _environment_scene_for(file_name)
-				entries.append({
-					"name": _environment_display_name(file_name),
-					"path": special_scene if not special_scene.is_empty() else model_path,
-					"kind": "" if not special_scene.is_empty() else "environment"
-				})
+		for model_path in MODEL_PATHS.list(group):
+			var file_name := model_path.get_file()
+			var special_scene = _environment_scene_for(file_name)
+			entries.append({
+				"name": _environment_display_name(file_name),
+				"path": special_scene if not special_scene.is_empty() else model_path,
+				"kind": "" if not special_scene.is_empty() else "environment"
+			})
 		entries.sort_custom(func(a, b): return str(a["name"]).naturalnocasecmp_to(str(b["name"])) < 0)
 		group_catalogs[group] = entries
 
@@ -249,11 +245,21 @@ func _migrate_scene_path(old_path: String) -> String:
 		var canonical := group_one + filename
 		if ResourceLoader.exists(canonical):
 			return canonical
+		var moved_model := MODEL_PATHS.find("01", filename)
+		if not moved_model.is_empty():
+			return moved_model
+	# Saved maps from before models moved into group subfolders keep loading.
+	if old_path.begins_with(ENVIRONMENT_ROOT + "/") and old_path.ends_with(".glb") and not ResourceLoader.exists(old_path):
+		var moved := MODEL_PATHS.find(old_path.trim_prefix(ENVIRONMENT_ROOT + "/").get_slice("/", 0), old_path.get_file())
+		if not moved.is_empty():
+			return moved
 	var replacements = {
 		# Saved maps from before the pickups moved under game/features/pickups.
 		"res://game/bootstrap/app/weapon_pickups/uzi.tscn": "res://game/features/pickups/public/weapons/uzi.tscn",
 		"res://game/bootstrap/app/item_pickups/key.tscn": "res://game/features/pickups/public/key_pickup.tscn",
 		"res://game/bootstrap/app/armor_pickups/armor.tscn": "res://game/features/pickups/public/armor_pickup.tscn",
+		"res://models/objects/enviroments/02/02_crate_wood_large.glb": "res://models/objects/enviroments/04/04_crate_wood_large.glb",
+		"res://models/objects/enviroments/02/02_crate_canvas_large.glb": "res://models/objects/enviroments/04/04_crate_canvas_large.glb",
 		# No closed case model exists any more; the open case is the closest current model.
 		"res://models/objects/enviroments/09/09_case_with_money_close.glb": "res://models/objects/enviroments/09/09_case_with_money_open.glb",
 		"res://models/objects/enviroments/06/06_office_chair_2_fell.glb": "res://models/objects/enviroments/06/06_office_chair_2.glb",

@@ -1,4 +1,5 @@
 extends Node3D
+const MODEL_PATHS := preload("res://game/core/model_paths/public/model_paths.gd")
 const LAUNCHER_MODEL_PATH := "res://models/objects/weapons/six_chamber_launcher_lowpoly.glb"
 const ART_SETUP := preload("res://game/features/combat/weapon_art_setup.gd")
 
@@ -11,14 +12,15 @@ func _ready() -> void:
 static func launcher_model() -> PackedScene:
 	if ResourceLoader.exists(LAUNCHER_MODEL_PATH):
 		return load(LAUNCHER_MODEL_PATH) as PackedScene
-	var folders := ["res://models/objects/weapons/"]
-	for index in range(1, 14):
-		folders.append("res://models/objects/enviroments/%02d/" % index)
-	for directory_path in folders:
-		for file: String in ResourceLoader.list_directory(directory_path):
-			var lower := file.to_lower()
-			if file.ends_with(".glb") and "casing" not in lower and ("launcher" in lower or "grenade" in lower):
-				return load(directory_path + file) as PackedScene
+	var paths: Array[String] = []
+	for file: String in ResourceLoader.list_directory("res://models/objects/weapons/"):
+		paths.append("res://models/objects/weapons/" + file)
+	for index in range(1, 16):
+		paths.append_array(MODEL_PATHS.list("%02d" % index))
+	for path in paths:
+		var lower := path.get_file().to_lower()
+		if path.ends_with(".glb") and "casing" not in lower and ("launcher" in lower or "grenade" in lower):
+			return load(path) as PackedScene
 	return null
 
 

@@ -1,6 +1,9 @@
 extends SceneTree
 ## Verify the real imported assets and palette, including prior saved paths.
 const CATALOG := preload("res://game/bootstrap/app/planning_catalog.gd")
+const MODEL_PATHS := preload("res://game/core/model_paths/public/model_paths.gd")
+# Facility-atlas walls carry their own shared atlas outside the group 01 atlas.
+const FACILITY := ["01_wall_blocks_partial.glb", "01_wall_concrete_blocks.glb", "01_wall_frame_drywall.glb", "01_wall_timber_frame_only.glb"]
 const ROOT_PATH := "res://models/objects/enviroments/01/"
 var failures := 0
 var shared_materials: Dictionary = {}
@@ -17,29 +20,27 @@ func _run() -> void:
 	var catalog := CATALOG.new()
 	catalog.call("_build_environment_catalogs")
 	var entries: Array = catalog.group_catalogs["01"]
-	_check(entries.size() == 40, "Group 01 exposes 40 palette assets")
+	_check(entries.size() == 44, "Group 01 exposes 44 palette assets")
 	var palette_paths := {}
 	for entry: Dictionary in entries:
 		_check(not palette_paths.has(entry.path), "Palette entry is unique: " + str(entry.path))
 		palette_paths[entry.path] = true
 		_check(ResourceLoader.exists(str(entry.path)), "Palette entry loads: " + str(entry.name))
 	var count := 0
-	for filename: String in ResourceLoader.list_directory(ROOT_PATH):
-		if not filename.ends_with(".glb"):
-			continue
+	for model_path: String in MODEL_PATHS.list("01"):
+		var filename := model_path.get_file()
 		count += 1
-		var packed := load(ROOT_PATH + filename) as PackedScene
+		var packed := load(model_path) as PackedScene
 		_check(packed != null, "Model imports: " + filename)
 		if packed == null:
 			continue
 		var model := packed.instantiate() as Node3D
-		if not NON_ATLAS.has(filename):
+		if not NON_ATLAS.has(filename) and not FACILITY.has(filename):
 			_check_model(model, filename)
 		model.free()
-		var migrated := ROOT_PATH + filename
-		_check(catalog.call("_migrate_scene_path", ROOT_PATH + "models/" + filename) == migrated, "Nested saved path migrates: " + filename)
-	_check(count == 40, "Runtime folder contains 40 models")
-	_check(catalog.call("_migrate_scene_path", ROOT_PATH + "models/01_glass_wall_full_breakable(1).glb") == ROOT_PATH + "01_glass_wall_full_breakable.glb", "Glass wall upload name migrates")
+		_check(catalog.call("_migrate_scene_path", ROOT_PATH + "models/" + filename) == model_path, "Nested saved path migrates: " + filename)
+	_check(count == 44, "Runtime folder contains 44 models")
+	_check(catalog.call("_migrate_scene_path", ROOT_PATH + "models/01_glass_wall_full_breakable(1).glb") == MODEL_PATHS.find("01", "01_glass_wall_full_breakable.glb"), "Glass wall upload name migrates")
 	_check(catalog.call("_environment_scene_for", "01_glass_wall_full_breakable.glb").ends_with("glass_wall_full.tscn"), "Glass wall uses its destructible structural scene")
 	_check_legacy_stairs(catalog)
 	_check_atlas_budget()

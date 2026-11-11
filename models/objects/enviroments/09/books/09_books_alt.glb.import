@@ -4,12 +4,12 @@ importer="scene"
 importer_version=1
 type="PackedScene"
 uid="uid://cmm4usl2k8y7d"
-path="res://.godot/imported/09_books_alt.glb-bae5767ea8c223ce93d791845d6a50b9.scn"
+path="res://.godot/imported/09_books_alt.glb-4e32618cea2096c199b1b1108aab11d5.scn"
 
 [deps]
 
-source_file="res://models/objects/enviroments/09/09_books_alt.glb"
-dest_files=["res://.godot/imported/09_books_alt.glb-bae5767ea8c223ce93d791845d6a50b9.scn"]
+source_file="res://models/objects/enviroments/09/books/09_books_alt.glb"
+dest_files=["res://.godot/imported/09_books_alt.glb-4e32618cea2096c199b1b1108aab11d5.scn"]
 
 [params]
 
@@ -35,7 +35,7 @@ animation/fps=30
 animation/trimming=false
 animation/remove_immutable_tracks=true
 animation/import_rest_as_RESET=false
-import_script/path=""
+import_script/path="res://addons/staged_glb_import/lazy_stage_post_import.gd"
 materials/extract=0
 materials/extract_format=0
 materials/extract_path=""
