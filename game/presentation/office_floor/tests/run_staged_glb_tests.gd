@@ -10,6 +10,7 @@ const PLANT := MODELS + "11/11_plant_small.glb"
 const RECEPTION := MODELS + "07/07_reception_counter_two_heights_2.glb"
 const SERVER_RACK := MODELS + "03/03_server_rack3.glb"
 const LAPTOP := MODELS + "05/laptop/05_laptop2_destructible.glb"
+const BEAM := MODELS + "15/15_timber_beam.glb"
 
 var failures := 0
 
@@ -24,6 +25,7 @@ func _run() -> void:
 	_add_floor(stage)
 	_test_stage_groups()
 	await _test_cabinet(stage)
+	await _test_timber_beam(stage)
 	await _test_plant(stage)
 	await _test_reception(stage)
 	await _test_power_off(stage)
@@ -67,6 +69,24 @@ func _test_cabinet(stage: Node3D) -> void:
 	await _break(prop)
 	await create_timer(0.5).timeout
 	_expect(_find_fragment(effects, "Fragment_Component_1_Left_Fragment_") != null, "A grenade splits the cabinet carcass into small fragments.")
+	await _clear(prop, effects)
+
+
+func _test_timber_beam(stage: Node3D) -> void:
+	var setup := await _spawn(stage, BEAM, Vector3(-6, 0, 0))
+	var prop: RigidBody3D = setup[0]
+	var effects: Node3D = setup[1]
+	await _break(prop)
+	for i in 30:
+		if bool(prop.get("_broken")):
+			break
+		await create_timer(0.1).timeout
+	await create_timer(0.5).timeout
+	var pieces := 0
+	for child in effects.get_children():
+		if child is RigidBody3D and str(child.name).begins_with("Fragment_TimberBeam"):
+			pieces += 1
+	_expect(bool(prop.get("_broken")) and pieces == 2, "A broken timber beam falls apart into its two large halves.")
 	await _clear(prop, effects)
 
 
