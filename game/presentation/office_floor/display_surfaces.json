@@ -2,7 +2,7 @@
   "version": 1,
   "profiles": {
     "05_monitor_destructible.glb": {
-      "source_sha256": "4f03d9a38ed0c3205457e3b79facb99d4aaf73c7a1aad7ddb173c990cef7c987",
+      "source_sha256": "193e7ed18a139d99baa682a94880c82f5988d94fa8cbb7534619e7f035938278",
       "screens": [
         {
           "center": [
@@ -77,7 +77,7 @@
       ]
     },
     "05_monitor_wide_destructible.glb": {
-      "source_sha256": "4cf55ff0dae360322152df88bf0e6f5d3e7db3e75852ba87c389b46992e2b372",
+      "source_sha256": "fc3358368906afeccbe38990437512da03bede537d4d2cb1211733c8fec3f345",
       "screens": [
         {
           "center": [
@@ -152,7 +152,7 @@
       ]
     },
     "05_monitor2_destructible.glb": {
-      "source_sha256": "a5985f65d6f4786aac0856c3d2103243b0e4966b0301e120a5414e12254d3d1b",
+      "source_sha256": "d0027f416c53d17ae5f2e0b98c540dfe03861d4c3103354d241d1fecef0b4484",
       "screens": [
         {
           "center": [
@@ -227,7 +227,7 @@
       ]
     },
     "05_monitor3_server_destructible.glb": {
-      "source_sha256": "a9869c47fee5c07da45df344cc8189795e722075f7a1f8ae9e201cf971f4c82f",
+      "source_sha256": "54654ce3d4c432c04886b05361a736656387cfb07d97efd7fc308c5295017f29",
       "screens": [
         {
           "center": [
@@ -540,7 +540,7 @@
       ]
     },
     "05_monitor4_server_destructible.glb": {
-      "source_sha256": "4e8f0d4b1b057fa60930a39eb0448d464fe5716aab9b1cdde6c96ab1b183e8df",
+      "source_sha256": "b71c96c893d21d789884f2942d958a0333f34aaff100541c24b45331316e34c2",
       "screens": [
         {
           "center": [
@@ -853,7 +853,7 @@
       ]
     },
     "05_laptop2_destructible.glb": {
-      "source_sha256": "3b3f87fed2349578513731b67e5a379c63ddb203539767df5723a27aa3596d71",
+      "source_sha256": "4ee6279e37596d96a85f787807810ad546b76330778cdfa000bfc97ce907d3ee",
       "screens": [
         {
           "center": [

@@ -73,7 +73,7 @@ class WorkstationTemplatesTest(unittest.TestCase):
                 names.update(re.findall(r'"(\d\d_[A-Za-z0-9_]+)"', path.read_text()))
         self.assertGreater(len(names), 25)
         for name in names:
-            self.assertTrue((MODELS / name[:2] / f"{name}.glb").is_file(), name)
+            self.assertTrue(any((MODELS / name[:2]).rglob(f"{name}.glb")), name)
 
 
 if __name__ == "__main__":
