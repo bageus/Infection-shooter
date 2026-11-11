@@ -25,11 +25,11 @@ func update_catalog() -> void:
 	button.visible = controls.catalog.active_catalog == controls.catalog.lighting_catalog
 
 
-static func capture(session: Variant) -> bool:
+static func capture(_session: Variant) -> bool:
 	return LAMP_FIXTURES.in_game
 
 
-static func apply(session: Variant, enabled: bool) -> void:
+static func apply(_session: Variant, enabled: bool) -> void:
 	LAMP_FIXTURES.in_game = enabled
 	for lamp: Node in (Engine.get_main_loop() as SceneTree).get_nodes_in_group("planner_lights"):
 		lamp.call("refresh_fixture")

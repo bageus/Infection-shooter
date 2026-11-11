@@ -48,7 +48,9 @@ func sync() -> void:
 	_delay.stop()
 	stream = MAIN if kind == "main" else PAUSE
 	if kind == "main":
-		_delay.start()
+		# Setup can run before this player joins the tree; then there is no delay to wait for.
+		if _delay.is_inside_tree(): _delay.start()
+		else: _start()
 	else:
 		_start()
 
