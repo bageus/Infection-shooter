@@ -123,6 +123,11 @@ func _add_crack(hit_position: Vector3, hit_normal: Vector3) -> void:
 
 
 ## Cracks shown on the pane (0 once it has shattered).
+## True once the pane has shattered; a broken glass door is an open doorway.
+func is_broken() -> bool:
+	return _broken
+
+
 func crack_count() -> int:
 	return _crack_count
 

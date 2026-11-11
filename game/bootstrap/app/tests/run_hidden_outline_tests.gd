@@ -150,6 +150,15 @@ func _door_check() -> void:
 	await _settle()
 	_check(not effects.outlines.outlines[controller.get_instance_id()].shown, "a door in neither of the hero's rooms stays plain")
 	hero.position.z = 0.0
+	await _settle()
+	_check(effects.outlines.outlines[controller.get_instance_id()].shown, "the door is outlined again back in the room")
+	var glass := Node3D.new()
+	glass.name = "GlassBody"
+	glass.set_script(load("res://game/bootstrap/app/tests/fixtures/broken_glass_stub.gd"))
+	door_root.add_child(glass)
+	await _settle()
+	var broken = effects.outlines.outlines.get(controller.get_instance_id())
+	_check(broken == null or not broken.shown, "a shattered glass door drops its outline, even while the hero stands by it")
 	for room in rooms:
 		room.free()
 

@@ -32,11 +32,9 @@ func tick(delta: float, effects: Node) -> void:
 			if item == null or seen.has(item.get_instance_id()) or not effects.world.is_ancestor_of(item):
 				continue
 			seen[item.get_instance_id()] = true
-			if not _eligible(item):
-				continue
 			var id := item.get_instance_id()
 			var limit := RELEASE_RADIUS if outlines.has(id) and outlines[id].shown else RADIUS
-			var show := _flat_distance(player, item) <= limit and item.is_visible_in_tree() and same_space(effects, item) and hidden_from_camera(effects, item)
+			var show := _eligible(item) and _flat_distance(player, item) <= limit and item.is_visible_in_tree() and same_space(effects, item) and hidden_from_camera(effects, item)
 			if show and not outlines.has(id):
 				outlines[id] = OUTLINE.new(item)
 			if outlines.has(id):
@@ -73,6 +71,11 @@ func _uncover() -> void:
 func _eligible(item: Node) -> bool:
 	for group in EXCLUDED_GROUPS:
 		if item.is_in_group(group):
+			return false
+	# A shattered glass door leaves an empty doorway and fallen pieces: nothing to outline.
+	if item.is_in_group("interactive_doors") and item.get_parent() != null:
+		var glass := item.get_parent().get_node_or_null("GlassBody")
+		if glass != null and glass.has_method("is_broken") and glass.call("is_broken"):
 			return false
 	return not String(item.scene_file_path).ends_with("dna_pickup.tscn")
 
