@@ -290,6 +290,33 @@ func _planner() -> void:
 	_check(first_text.contains("signs adjusted 1") and text.contains("wall fixtures 6"), "Save reports the corrected sign and the placed fixtures: %s / %s" % [first_text, text])
 	var wall_sign: Node3D = objects.placed.filter(func(n: Node3D) -> bool: return str(n.get_meta("planning_scene_path", "")) == SIGN)[0]
 	_check(is_equal_approx(wall_sign.position.y, 1.75), "The sign was moved to 1.75 m")
+	var cleared_switch: Node3D = objects.placed.filter(func(n: Node3D) -> bool: return is_instance_valid(n) and n.has_meta("planning_auto_fixture") and str(n.get_meta("planning_auto_fixture")) == "switch")[0]
+	var other_kinds := auto.size() - 3
+	toggles.clear_switches.pressed.emit()
+	await process_frame
+	var remaining: Array = objects.placed.filter(func(n: Node3D) -> bool: return is_instance_valid(n) and n.has_meta("planning_auto_fixture"))
+	_check(remaining.size() == other_kinds and not toggles.switches.button_pressed and toggles.fire.button_pressed, "Clearing switches removes only the 3 auto switches and turns their toggle off (%d)" % remaining.size())
+	_check(not is_instance_valid(cleared_switch) or cleared_switch.is_queued_for_deletion(), "The cleared switch is gone")
+	toggles.clear_fire.pressed.emit()
+	await process_frame
+	remaining = objects.placed.filter(func(n: Node3D) -> bool: return is_instance_valid(n) and n.has_meta("planning_auto_fixture") and not n.is_queued_for_deletion())
+	_check(remaining.size() == 1 and not toggles.fire.button_pressed, "Clearing fire alarms removes the alarm and call point and keeps the extinguisher (%d)" % remaining.size())
+	toggles.switches.button_pressed = true
+	toggles.fire.button_pressed = true
+	storage.call("enforce_wall_fixtures")
+	await process_frame
+	var props := "res://game/presentation/office_floor/public/props/"
+	preload("res://game/bootstrap/app/planning_layout_loader.gd").new(objects).append([
+		{"scene": props + "planner_light.tscn", "x": -3.0, "y": 2.5, "z": 18.0},
+		{"scene": props + "planner_light.tscn", "x": 3.0, "y": 2.5, "z": 18.0},
+		{"scene": props + "darkness_zone.tscn", "x": 0.0, "y": 0.0, "z": 15.0}])
+	await process_frame
+	var lamp_scene := func(n: Node) -> bool: return is_instance_valid(n) and not n.is_queued_for_deletion() and str(n.get_meta("planning_scene_path", "")).ends_with("planner_light.tscn")
+	var zone_scene := func(n: Node) -> bool: return is_instance_valid(n) and not n.is_queued_for_deletion() and str(n.get_meta("planning_scene_path", "")).ends_with("darkness_zone.tscn")
+	_check(objects.placed.filter(lamp_scene).size() == 2 and objects.placed.filter(zone_scene).size() == 1, "Lamp test layout adds two lamps and a darkness zone")
+	toggles.clear_lights.pressed.emit()
+	await process_frame
+	_check(objects.placed.filter(lamp_scene).is_empty() and objects.placed.filter(zone_scene).size() == 1, "Clearing lamps removes every lamp and keeps darkness zones")
 	var first_records: Array = storage.call("_collect_layout_data").objects.filter(func(r: Dictionary) -> bool: return r.has("auto_fixture"))
 	storage.call("enforce_wall_fixtures")
 	await process_frame

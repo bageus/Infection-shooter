@@ -158,7 +158,7 @@ func _build_right_tabs(right_box: Node, left_box: Node) -> void:
 	var floor_row: Control = _controls.floor_size.build_row()
 	main.add_child(floor_row)
 	main.move_child(floor_row, 0)
-	for node_name in ["LightingPreview", "LocalLights", "FogOfWarToggle", "AutoFireAlarms", "AutoLightSwitches", "SurfaceDecalSettings", "LightTopView", "Clear", "Close"]:
+	for node_name in ["LightingPreview", "LocalLights", "FogOfWarToggle", "AutoFireAlarms", "ClearFireAlarms", "AutoLightSwitches", "ClearLightSwitches", "ClearLights", "SurfaceDecalSettings", "LightTopView", "Clear", "Close"]:
 		var child := left_box.get_node(node_name) as Control
 		child.reparent(main)
 		child.show()
