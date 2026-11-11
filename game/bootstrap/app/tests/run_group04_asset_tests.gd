@@ -1,6 +1,7 @@
 extends SceneTree
 ## Check real imported stages, shared GPU resources and crate/cardboard breakage.
 const PROP := preload("res://game/presentation/office_floor/public/props/environment_prop.tscn")
+const DAMAGE := preload("res://game/presentation/office_floor/environment_damage.gd")
 const CATALOG := preload("res://game/bootstrap/app/planning_catalog.gd")
 const GROUP := "res://models/objects/enviroments/04/"
 const MAPS := GROUP + "textures/unified/"
@@ -49,6 +50,11 @@ func _check_stages(model: Node3D, filename: String) -> void:
 	_check(int(model.get_meta(&"staged_glb_version", 0)) >= 1, "Staged importer retained")
 	var intact := model.get_node_or_null("Intact") as Node3D
 	var parts := model.get_node_or_null("LargeParts") as Node3D
+	var lazy := model.get_node_or_null("SmallFragments") as Node3D
+	for group: Node3D in [parts, lazy]:
+		# Split models keep stages in separate files; load them to count parts.
+		if group != null and group.has_meta(&"lazy_stage_path"):
+			DAMAGE.load_lazy_group(group)
 	_check(intact != null and intact.scale == Vector3.ONE, "Intact stage visible")
 	_check(parts != null and parts.scale == Vector3.ZERO, "Large parts hidden initially")
 	if parts != null:

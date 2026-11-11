@@ -158,6 +158,10 @@ static func load_lazy_group(group: Node3D) -> PackedScene:
 		source.free()
 		push_error("Damage group missing: " + path)
 		return null
+	# The single-scene import roots the file in a node of the same name; use the inner group.
+	var inner := authored.get_node_or_null(NodePath(str(group.name))) as Node3D
+	if inner != null and not inner is MeshInstance3D:
+		authored = inner
 	for child: Node in authored.get_children():
 		child.owner = null
 		authored.remove_child(child)
