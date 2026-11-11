@@ -20,6 +20,8 @@ static func error(data: Dictionary) -> String:
 		return "invalid level_chain_v1"
 	if data.has("floor_size_v1") and not preload("res://game/bootstrap/app/planning_floor_size.gd").valid(data.floor_size_v1):
 		return "invalid floor_size_v1"
+	if data.has("lamp_fixtures_v1") and not data.lamp_fixtures_v1 is bool:
+		return "invalid lamp_fixtures_v1"
 	if data.has("floor_type_v1") and not preload("res://game/bootstrap/app/planning_floor_type.gd").valid(data.floor_type_v1):
 		return "invalid floor_type_v1"
 	if not data.get("objects") is Array:

@@ -39,6 +39,7 @@ var biomass_options: Node
 const FIXTURE_CONTROLS := preload("res://game/bootstrap/app/planning_light_fixtures.gd")
 var fixtures = FIXTURE_CONTROLS.new()
 var light_view = preload("res://game/bootstrap/app/planning_light_view.gd").new()
+var lamp_visibility = preload("res://game/bootstrap/app/planning_lamp_visibility.gd").new()
 var fixture_toggles = preload("res://game/bootstrap/app/planning_fixture_toggles.gd").new()
 var light_default_editor = preload("res://game/bootstrap/app/planning_light_defaults.gd").new()
 
@@ -153,6 +154,7 @@ func setup_controls() -> void:
 	hero_spawn_options.call("setup", session, objects)
 	fixtures.setup(self)
 	light_view.setup(self)
+	lamp_visibility.setup(self)
 	fixture_toggles.setup(self)
 	light_default_editor.setup(self)
 	var fog := preload("res://game/bootstrap/app/planning_fog.gd").new()
@@ -420,6 +422,7 @@ func _rebuild_palette() -> void:
 	if biomass_options != null:
 		biomass_options.panel.hide()
 	light_view.update_catalog()
+	lamp_visibility.update_catalog()
 	palette.clear()
 	for entry: Dictionary in catalog.active_catalog:
 		palette.add_item(str(entry.get("name", "")))

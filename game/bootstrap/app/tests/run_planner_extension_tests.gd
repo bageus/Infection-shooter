@@ -49,6 +49,16 @@ func _run() -> void:
 	_check(palette_controls.get("palette").item_count == wall_view.size(), "Palette shows the opened folder")
 	planner.get("objects").call("_on_palette_selected", 0)
 	_check(palette_controls.get("palette").item_count == root_view.size(), "Up row returns to the group root")
+	var switch_button: CheckButton = palette_controls.get("lamp_visibility").button
+	palette_controls.call("_show_lighting_catalog")
+	_check(switch_button.visible, "Lighting tab has the lamps-in-game switch")
+	palette_controls.call("open_folder", "01", "")
+	palette_controls.call("_rebuild_palette")
+	_check(not switch_button.visible, "Other tabs do not show the lamps-in-game switch")
+	switch_button.button_pressed = true
+	_check(preload("res://game/bootstrap/app/planning_lamp_visibility.gd").capture(planner) and preload("res://game/presentation/office_floor/public/lamp_fixtures.gd").in_game, "Switch turns lamp housings on for the map")
+	preload("res://game/bootstrap/app/planning_lamp_visibility.gd").restore(planner, false)
+	_check(not switch_button.button_pressed and not preload("res://game/presentation/office_floor/public/lamp_fixtures.gd").in_game, "A map without the key restores hidden lamps")
 	for entry: Dictionary in catalog.group_catalogs["03"]:
 		_check("/damage/" not in str(entry["path"]), "Damage stages stay out of the palette")
 	var wall = catalog.call("_instantiate_asset", "res://models/objects/enviroments/13/13_wall_cafeteria.glb")

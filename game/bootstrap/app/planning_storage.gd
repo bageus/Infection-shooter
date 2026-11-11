@@ -248,6 +248,8 @@ func restore_authored() -> bool:
 		var repair := {"version": authored_layout.get("version", 7), "objects": missing}
 		if authored_layout.has("floor_size_v1"):
 			repair["floor_size_v1"] = authored_layout["floor_size_v1"]
+		if authored_layout.has("lamp_fixtures_v1"):
+			repair["lamp_fixtures_v1"] = authored_layout["lamp_fixtures_v1"]
 		if authored_layout.has("floor_type_v1"):
 			repair["floor_type_v1"] = authored_layout["floor_type_v1"]
 		QUESTS.add_to(session, repair)

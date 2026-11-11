@@ -16,6 +16,7 @@
   ],
   "public_api": [
     "public/surface_decor_catalog.gd",
+    "public/lamp_fixtures.gd",
     "public/base_office_layout.tscn",
     "public/base_floor_renderer.gd",
     "public/ambient_prop_sounds.gd",
