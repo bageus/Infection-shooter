@@ -140,3 +140,28 @@ static func _inherit_motion(host: Node3D, fragment: RigidBody3D, blast: bool) ->
 	if not blast: return
 	var tumble := 2.5 / (0.6 + fragment.mass)
 	fragment.angular_velocity += Vector3(randf_range(-1.0, 1.0), randf_range(-1.0, 1.0), randf_range(-1.0, 1.0)) * tumble
+
+
+## Fills a lazy-stage placeholder from its own GLB. The caller keeps the returned
+## PackedScene alive (null when the stage could not be loaded).
+static func load_lazy_group(group: Node3D) -> PackedScene:
+	var path := str(group.get_meta(&"lazy_stage_path"))
+	var packed := load(path) as PackedScene
+	if packed == null:
+		push_error("Damage stage unavailable: " + path)
+		return null
+	var source := packed.instantiate() as Node3D
+	if source == null:
+		return null
+	var authored := find_named(source, str(group.name))
+	if authored == null:
+		source.free()
+		push_error("Damage group missing: " + path)
+		return null
+	for child: Node in authored.get_children():
+		child.owner = null
+		authored.remove_child(child)
+		group.add_child(child)
+	source.free()
+	group.remove_meta(&"lazy_stage_path")
+	return packed

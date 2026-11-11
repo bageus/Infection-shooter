@@ -45,6 +45,8 @@ func _spawn(path: String, display_seed: int = 0) -> Node3D:
 func _test_table() -> void:
 	var table := _spawn(MODELS + "07/07_table_longest.glb")
 	var visual := table.get_node("Visual") as Node3D
+	for stage_name in ["LargeParts", "SmallFragments"]:
+		table.get("_geometry").ensure_group(visual.find_child(stage_name, true, false))
 	var top := visual.find_child("Top", true, false) as MeshInstance3D
 	var leg := visual.find_child("Leg_BL", true, false) as MeshInstance3D
 	var intact := visual.find_child("Intact", true, false)

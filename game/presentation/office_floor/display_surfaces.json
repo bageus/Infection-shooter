@@ -928,7 +928,7 @@
       ]
     },
     "05_wall_TV_destructible.glb": {
-      "source_sha256": "5ebfe1d5ed9e14eabc0f487550030d7cc16298d725374114bbf7819b7c6b3085",
+      "source_sha256": "8e67d8b70c7c49192afd0e0976e3ca884668d89ee4021260e6d28451d90d2190",
       "screens": [
         {
           "center": [
@@ -1003,7 +1003,7 @@
       ]
     },
     "05_wall_TV_frameless_destructible.glb": {
-      "source_sha256": "551e1a9ff2e5a4e43334675871d3c8b77fe3b3f9762d130c90bde27dc5db6ca4",
+      "source_sha256": "4b6cf0d84f021b8b5089472ffb9e6fe080371f3b1a08052d3f7222a912fcf8e1",
       "screens": [
         {
           "center": [

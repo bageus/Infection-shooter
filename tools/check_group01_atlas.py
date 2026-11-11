@@ -167,7 +167,7 @@ def main():
     args = parser.parse_args()
     layout = json.loads((GROUP/'atlas_layout.json').read_text())
     # Facility-atlas walls (01/wall) carry their own textures and sit outside the group 01 atlas.
-    paths = sorted(p for p in GROUP.rglob('*.glb') if p.stem not in FACILITY_MODELS)
+    paths = sorted(p for p in GROUP.rglob('*.glb') if p.stem not in FACILITY_MODELS and p.parent.name != 'damage')
     assert len(paths) == 40 and (GROUP/'01_stairs_2.glb').exists()
     for path in paths:
         relative = path.relative_to(ROOT).as_posix()
