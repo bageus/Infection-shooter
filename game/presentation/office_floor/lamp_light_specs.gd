@@ -36,3 +36,20 @@ static func apply(glow: Node, shape_values: Dictionary) -> void:
 	if glow is SpotLight3D and not shape_values.is_empty():
 		glow.spot_range = shape_values["range"]
 		glow.spot_angle = shape_values["angle"]
+
+
+## Turns a lamp's light and the glow of its lens together; the lens is dark when the lamp is off or broken.
+static func set_lit(lamp: Node, lit: bool) -> void:
+	var glow := lamp.find_child("BudgetLight", true, false)
+	if glow != null:
+		glow.call("set_wanted", lit)
+	for node in lamp.find_children("*", "MeshInstance3D", true, false):
+		var instance := node as MeshInstance3D
+		if instance.mesh == null:
+			continue
+		for surface in instance.mesh.get_surface_count():
+			var base := instance.mesh.surface_get_material(surface) as BaseMaterial3D
+			if base != null and base.resource_name.contains("Lamp_Diffuser"):
+				var copy := base.duplicate() as BaseMaterial3D
+				copy.emission_enabled = lit and base.emission_enabled
+				instance.set_surface_override_material(surface, copy)

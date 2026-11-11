@@ -53,6 +53,7 @@ const SURFACE_DECOR := preload("res://game/presentation/office_floor/office_surf
 var _display: Node3D
 var _display_wall: Node
 var lamp_shape := {} # range and cone angle of a directional lamp
+var _lamp_broken := false # a lamp put out by damage stays out
 
 
 ## Screens have power and content settings; the desk lamp shares the power setting (on or off).
@@ -279,9 +280,7 @@ func _add_lamp_light() -> void:
 func _apply_lamp_power() -> void:
 	if not is_lamp() or not is_inside_tree():
 		return
-	var glow := find_child("BudgetLight", true, false)
-	if glow != null:
-		glow.call("set_wanted", display_power != "off")
+	LAMP_SPECS.set_lit(self, display_power != "off" and not _lamp_broken)
 
 
 # Furniture standing on the floor gets a light shadow under it.
@@ -458,9 +457,8 @@ func _vanish_after(seconds: float) -> void:
 
 
 func _put_out_lamp() -> void:
-	var glow := find_child("BudgetLight", true, false)
-	if glow != null:
-		glow.call("set_wanted", false)
+	_lamp_broken = true
+	_apply_lamp_power()
 
 
 # Any paper object is torn apart completely by a single shot.
