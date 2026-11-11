@@ -280,17 +280,38 @@ func _test_model_lamps() -> void:
 		prop.set("model_path", "res://models/objects/enviroments/05/lamp/" + file)
 		root.add_child(prop)
 		await process_frame
-		var glow := prop.find_child("BudgetLight", true, false) as OmniLight3D
+		var glow := prop.find_child("BudgetLight", true, false) as Light3D
 		_check(glow != null and prop.call("is_lamp") and prop.call("has_display"), "%s is a lamp with a light and a power setting" % file)
 		if glow != null:
 			controller.refresh_light_budget()
 			_check(glow.visible, "%s glows by default" % file)
 			prop.call("configure_display", {"power": "off"})
 			_check(not glow.visible, "%s goes dark when switched off" % file)
+			_check(_lit_lenses(prop) == 0, "%s lens goes dark when switched off" % file)
 			prop.call("configure_display", {"power": "on"})
 			_check(glow.visible, "%s glows again when switched on" % file)
+			_check(_lit_lenses(prop) > 0, "%s lens glows when switched on" % file)
+			prop.call("_put_out_lamp")
+			_check(_lit_lenses(prop) == 0 and not glow.visible, "%s lens and light go out when broken" % file)
+			prop.call("configure_display", {"power": "on"})
+			_check(not glow.visible, "%s stays out after damage when switched on again" % file)
+			_check(glow is SpotLight3D and prop.call("get_display_config").has("range"), "%s is a spot with a range setting" % file)
+			prop.call("configure_display", {"power": "on", "range": 8.0, "angle": 30.0})
+			_check(is_equal_approx((glow as SpotLight3D).spot_range, 8.0) and is_equal_approx((glow as SpotLight3D).spot_angle, 30.0), "%s takes its range and angle from the planner" % file)
+			_check(is_equal_approx(float(prop.call("get_display_config")["range"]), 8.0), "%s saves its range in the map record" % file)
 		prop.free()
 		controller.free()
+
+
+func _lit_lenses(prop: Node) -> int:
+	var count := 0
+	for node in prop.find_children("*", "MeshInstance3D", true, false):
+		var instance := node as MeshInstance3D
+		for surface in (instance.mesh.get_surface_count() if instance.mesh != null else 0):
+			var material := instance.get_surface_override_material(surface) as BaseMaterial3D
+			if material != null and material.emission_enabled:
+				count += 1
+	return count
 
 
 func _test_elevator() -> void:

@@ -2,7 +2,6 @@ extends RigidBody3D
 ## Scene boundary for prop physics, hit commands and authored display configuration.
 const AMBIENT_SOUNDS := preload("res://game/presentation/office_floor/public/ambient_prop_sounds.gd")
 const SERVER_AUDIO := preload("res://game/presentation/office_floor/server_ambience.gd")
-const BUDGET_LIGHT := preload("res://game/presentation/office_floor/budget_omni_light.gd")
 const LAMP_SPECS := preload("res://game/presentation/office_floor/lamp_light_specs.gd")
 const GEOMETRY := preload("res://game/presentation/office_floor/environment_prop_geometry.gd")
 const BREAK_SOUND := preload("res://game/presentation/office_floor/prop_break_sound.gd")
@@ -53,6 +52,8 @@ const SURFACE_DECOR := preload("res://game/presentation/office_floor/office_surf
 @export var display_seed := 0
 var _display: Node3D
 var _display_wall: Node
+var lamp_shape := {} # range and cone angle of a directional lamp
+var _lamp_broken := false # a lamp put out by damage stays out
 
 
 ## Screens have power and content settings; the desk lamp shares the power setting (on or off).
@@ -80,6 +81,8 @@ func configure_display(config: Dictionary) -> void:
 	var power := str(config.get("power", "auto"))
 	var content_type := str(config.get("content", "static"))
 	display_power = power if power in ["on", "off", "auto"] else "auto"
+	lamp_shape = LAMP_SPECS.shape(model_path.get_file(), config)
+	LAMP_SPECS.apply(find_child("BudgetLight", true, false), lamp_shape)
 	_apply_lamp_power()
 	display_content = content_type if content_type in ["static", "dynamic"] else "static"
 	if "wall_TV" in model_path.get_file():
@@ -92,8 +95,10 @@ func configure_display(config: Dictionary) -> void:
 func get_display_config() -> Dictionary:
 	if display_seed == 0:
 		display_seed = randi_range(1, 2147483646)
-	return {"power": display_power, "content": "dynamic" if "wall_TV" in model_path.get_file() else display_content,
+	var config := {"power": display_power, "content": "dynamic" if "wall_TV" in model_path.get_file() else display_content,
 		"seed": display_seed}
+	config.merge(lamp_shape)
+	return config
 
 
 func configure_displays(wall: Node) -> void:
@@ -265,9 +270,7 @@ func _ready() -> void:
 
 
 func _add_lamp_light() -> void:
-	var spec: Dictionary = LAMP_SPECS.SPECS[model_path.get_file()]
-	var glow := BUDGET_LIGHT.create(spec["color"], spec["energy"], spec["range"])
-	glow.position = spec["at"]
+	var glow := LAMP_SPECS.create(model_path.get_file(), lamp_shape)
 	var shade: Node = _visual.find_child("Lamp_*", true, false)
 	(shade if shade != null else _visual).add_child(glow)
 	_apply_lamp_power()
@@ -277,9 +280,7 @@ func _add_lamp_light() -> void:
 func _apply_lamp_power() -> void:
 	if not is_lamp() or not is_inside_tree():
 		return
-	var glow := find_child("BudgetLight", true, false)
-	if glow != null:
-		glow.call("set_wanted", display_power != "off")
+	LAMP_SPECS.set_lit(self, display_power != "off" and not _lamp_broken)
 
 
 # Furniture standing on the floor gets a light shadow under it.
@@ -456,9 +457,8 @@ func _vanish_after(seconds: float) -> void:
 
 
 func _put_out_lamp() -> void:
-	var glow := find_child("BudgetLight", true, false)
-	if glow != null:
-		glow.call("set_wanted", false)
+	_lamp_broken = true
+	_apply_lamp_power()
 
 
 # Any paper object is torn apart completely by a single shot.
