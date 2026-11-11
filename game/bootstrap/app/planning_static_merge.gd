@@ -3,7 +3,8 @@ extends RefCounted
 ## one per map chunk and material, so the renderer issues one draw call where it issued dozens.
 ## Colliders stay on the original nodes; only their MeshInstance3D nodes are hidden. Doors, glass and
 ## anything destructible are not in SCENES and keep drawing on their own.
-const SCENES := ["wall_straight.tscn", "column.tscn", "floor_pad.tscn", "wall_half_panel.tscn", "elevator_cabin_freight.tscn", "elevator_cabin_passenger.tscn"]
+const SCENES := ["wall_straight.tscn", "column.tscn", "floor_pad.tscn", "wall_half_panel.tscn", "elevator_cabin_freight.tscn", "elevator_cabin_passenger.tscn",
+	"window_double.tscn", "metal_grille.tscn", "01_duct_rect_straight.glb", "01_pipe_sewer_floor_straight.glb", "01_pipe_sewer_floor_elbow.glb", "01_pipe_water_floor_straight.glb", "07_reception_counter_two_heights.glb"]
 const CHUNK := 12.0
 const GROUP := &"static_merged"
 const SOURCES := &"static_merge_sources"
