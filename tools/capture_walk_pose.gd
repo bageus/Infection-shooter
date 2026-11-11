@@ -6,9 +6,9 @@ extends SceneTree
 ##
 ## Writes one sheet: a row per weapon, columns front, back, left, right.
 const PLAYER := preload("res://game/features/player/public/player.tscn")
-const CELL := Vector2i(480, 400)
+const CELL := Vector2i(480, 800)
 const NAMES := ["pistol", "uzi", "shotgun", "grenade", "ak", "m4", "sniper", "minigun"]
-const SHOW := [2, 4, 5]
+const SHOW := [0]
 const FRAMES := 4
 const VIEWS := {"threeq": Vector3(.7, 0, .7), "threeq_l": Vector3(-.7, 0, .7), "front": Vector3(0, 0, 1), "back": Vector3(0, 0, -1), "left": Vector3(-1, 0, 0), "right": Vector3(1, 0, 0)}
 var _out := "/tmp/walk_pose.png"
@@ -66,7 +66,7 @@ func _capture() -> void:
 	_viewport.world_3d = stage.get_world_3d()
 	_camera = Camera3D.new()
 	_camera.projection = Camera3D.PROJECTION_ORTHOGONAL
-	_camera.size = 1.6
+	_camera.size = 4.2
 	_viewport.add_child(_camera)
 	_camera.current = true
 	var sheet := Image.create(CELL.x * FRAMES, CELL.y * SHOW.size(), false, Image.FORMAT_RGBA8)
@@ -79,7 +79,7 @@ func _capture() -> void:
 		_actor.velocity = Vector3(0, 0, -2.5)
 		for i in 10:
 			await _tick()
-		var center := _actor.global_position + Vector3(0, 0.5, 0)
+		var center := _actor.global_position + Vector3(0, 0.7, 0)
 		for col in FRAMES:
 			for i in 7:
 				await _tick()

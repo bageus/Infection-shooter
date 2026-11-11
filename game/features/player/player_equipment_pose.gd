@@ -3,6 +3,15 @@ extends SkeletonModifier3D
 const BACKPACK := preload("res://models/objects/weapons/minigun_ammo_backpack_lowpoly.glb")
 ## Rear hand of the minigun in skeleton space: belt height, gripped from above.
 const MINIGUN_RIGHT_HAND := Vector3(-.22, -.02, .14)
+## Long guns are scaled to the character and gripped near the chest: scale, then the rear hand in skeleton space.
+## Their forend must stay within reach of the support arm (about .55 m from the left shoulder).
+const LONG_GUN := {
+	"AK": [.85, Vector3(-.16, .43, .22)],
+	"M4": [.85, Vector3(-.16, .43, .22)],
+	"SNIPER RIFLE": [.75, Vector3(-.16, .44, .22)],
+	"SHOTGUN": [.85, Vector3(-.16, .43, .27)],
+	"GRENADE LAUNCHER": [.7, Vector3(-.16, .43, .38)],
+}
 var mount: Node
 var backpack: Node3D
 var _back_attachment: BoneAttachment3D
@@ -32,11 +41,11 @@ func _process_modification_with_delta(_delta: float) -> void:
 		return
 	var name_value: String = weapon.call("get_weapon_name")
 	backpack.visible = name_value == "MINIGUN"
-	var full_kit := name_value in ["AK", "M4", "SNIPER RIFLE", "MINIGUN"]
-	# Shotgun and launcher keep their clip pose for the rear hand; only the
-	# support hand is fitted to the forend.
-	if not full_kit and name_value not in ["SHOTGUN", "GRENADE LAUNCHER"]:
+	var full_kit := name_value in LONG_GUN or name_value == "MINIGUN"
+	if not full_kit:
 		return
+	if name_value in LONG_GUN:
+		weapon.scale = Vector3.ONE * float(LONG_GUN[name_value][0])
 	var skeleton := get_skeleton()
 	var socket_offset: Transform3D = mount.get("_socket_offset")
 	var reference_weapon := skeleton.get_bone_global_pose(skeleton.find_bone("RightHand")).basis * socket_offset.basis
@@ -46,12 +55,9 @@ func _process_modification_with_delta(_delta: float) -> void:
 	# arms can reach the new, longer kit without stretching bones.
 	# Rifle stocks extend behind the rear hand, so the hand sits ahead of the
 	# chest; the sniper's longer stock needs a little more clearance.
-	var rifle_depth := .17 if name_value == "SNIPER RIFLE" else .19
-	var rifle_side := .03 if name_value == "SNIPER RIFLE" else -.13
-	if full_kit:
-		var target_right := MINIGUN_RIGHT_HAND if name_value == "MINIGUN" else Vector3(rifle_side, .43, rifle_depth)
-		_fit_arm(skeleton, "Right", target_right, Vector3(-.65, .15, .10))
-		_level_right_hand(skeleton)
+	var target_right: Vector3 = MINIGUN_RIGHT_HAND if name_value == "MINIGUN" else LONG_GUN[name_value][1]
+	_fit_arm(skeleton, "Right", target_right, Vector3(-.65, .15, .10))
+	_level_right_hand(skeleton)
 	mount.call("sync_weapon", weapon)
 	var left_grip := weapon.find_child("Grip_L", true, false) as Node3D
 	if left_grip != null:

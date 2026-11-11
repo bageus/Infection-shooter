@@ -22,6 +22,7 @@ func _run() -> void:
 	await _test_generic_fallback()
 	await _test_lowered_torso_not_twisted()
 	await _test_walk_lean()
+	await _test_long_guns_reachable()
 	await process_frame
 	await process_frame
 	print("Weapon presentation tests: %d failures" % failures)
@@ -362,5 +363,23 @@ func _test_walk_lean() -> void:
 	for i in 120:
 		walk_lean._process_modification_with_delta(1.0 / 60.0)
 	_check(walk_lean.lean < deg_to_rad(0.1), "torso straightens when standing")
+	player.queue_free()
+	effects.queue_free()
+
+
+func _test_long_guns_reachable() -> void:
+	var player := PLAYER.instantiate() as PLAYER_SCRIPT
+	player.set_physics_process(false)
+	root.add_child(player)
+	var effects := Node3D.new()
+	root.add_child(effects)
+	player.call("configure_world", effects, null)
+	player.call("configure_weapon_drop", func(_i: int, _p: Vector3) -> bool: return true)
+	var pose: SkeletonModifier3D = (player.get_node("WeaponMount") as MOUNT).equipment_pose
+	for index in [2, 3, 4, 5, 6]:
+		player.call("pickup_weapon", index)
+		for i in 4:
+			await process_frame
+		_check(pose.hand_error < .05, "support hand reaches the forend of weapon %d (error %.3f)" % [index, pose.hand_error])
 	player.queue_free()
 	effects.queue_free()
