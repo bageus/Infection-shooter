@@ -25,3 +25,13 @@ static func update(enemy: Node3D, animation: Node, asleep: bool) -> void:
 	var wanted := not asleep and not bool(Engine.get_meta("probe_no_animation", false)) and (int(Engine.get_meta("legacy_perf", 0)) >= 1 or could_be_seen(enemy, float(enemy.get("move_speed"))))
 	if wanted != bool(animation.call("is_active")):
 		animation.call("set_active", wanted)
+	animation.get("step_state").set_step(animation.get("animation_player"), _step_for(enemy))
+
+
+# Skeleton poses every frame within 12 m of the player, every 2nd frame to 22 m, every 4th beyond.
+static func _step_for(enemy: Node3D) -> int:
+	var player := enemy.get_tree().get_first_node_in_group("player") as Node3D
+	if player == null or int(Engine.get_meta("legacy_perf", 0)) >= 1:
+		return 1
+	var ground := Vector2(enemy.global_position.x - player.global_position.x, enemy.global_position.z - player.global_position.z).length()
+	return 1 if ground < 12.0 else (2 if ground < 22.0 else 4)

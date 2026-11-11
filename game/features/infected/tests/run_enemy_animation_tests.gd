@@ -70,6 +70,7 @@ func _run() -> void:
 	await _test_death_animation_then_sink(stage)
 	await _test_far_enemy_pauses_animation(stage)
 	await _test_offscreen_enemy_pauses_animation(stage)
+	await _test_far_enemy_poses_less_often(stage)
 	await _test_colossus_slam(stage)
 	await _test_horde_ram(stage)
 	await _test_horde_summon(stage)
@@ -477,6 +478,28 @@ func _test_far_enemy_pauses_animation(stage: Node3D) -> void:
 	enemy.queue_free()
 	target.queue_free()
 	await process_frame
+
+
+func _test_far_enemy_poses_less_often(stage: Node3D) -> void:
+	var player_body := FakePlayer.new()
+	player_body.add_to_group("player")
+	stage.add_child(player_body)
+	player_body.global_position = Vector3(0, 1, 0)
+	var enemy := await _spawn(stage, ZOMBIE, Vector3(30, 1.0, 0))
+	enemy.call("set_target", player_body)
+	var driver: Node = enemy.get_node("AnimationDriver")
+	var mixer := _player_of(enemy)
+	await _physics(12)
+	_expect(driver.get("step_state").step == 4, "An enemy over 22 m away poses every 4th frame.")
+	_expect(mixer.callback_mode_process == AnimationMixer.ANIMATION_CALLBACK_MODE_PROCESS_MANUAL, "Stepped enemies advance their animation by hand.")
+	var before: float = mixer.current_animation_position
+	await _physics(30)
+	_expect(not is_equal_approx(before, mixer.current_animation_position), "A stepped enemy still animates.")
+	enemy.global_position = Vector3(5, 1.0, 0)
+	await _physics(12)
+	_expect(driver.get("step_state").step == 1 and mixer.callback_mode_process == AnimationMixer.ANIMATION_CALLBACK_MODE_PROCESS_IDLE, "Coming close restores per-frame animation.")
+	enemy.queue_free()
+	player_body.queue_free()
 
 
 func _test_offscreen_enemy_pauses_animation(stage: Node3D) -> void:

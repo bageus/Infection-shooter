@@ -87,6 +87,7 @@ const STATE_ATTACK_CRAWL := &"attack_crawl"
 @export var procedural_death_seconds := 1.2
 
 var _active_requested := true
+var step_state := preload("res://game/features/character_animation/animation_step.gd").new() # Far characters pose less often.
 var defer_setup := false
 var _prepared := false
 var character: CharacterBody3D
@@ -272,7 +273,6 @@ func notify_hit(world_point: Vector3 = Vector3.ZERO, world_direction: Vector3 = 
 
 func is_active() -> bool: return _active_requested
 
-
 # Public animation_events_v1: pause animation work for far or hidden characters.
 func set_active(active: bool) -> void:
 	_active_requested = active
@@ -357,6 +357,7 @@ func _process(delta: float) -> void:
 	var speed := Vector2(character.velocity.x, character.velocity.z).length()
 	if animation_player != null:
 		_process_skeletal(speed)
+		if step_state.step > 1: step_state.advance(animation_player, delta, get_instance_id())
 	elif _target != null:
 		_process_procedural(speed, delta)
 
