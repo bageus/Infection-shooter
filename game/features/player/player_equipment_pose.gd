@@ -16,6 +16,8 @@ const LONG_GUN := {
 const FOREND_REACH := {"SHOTGUN": .06, "GRENADE LAUNCHER": .18}
 ## Live overrides for the hold tuner (tools/weapon_hold_tuner.tscn): weapon name -> [scale, rear hand, forend reach].
 var tuning := {}
+## Hand position nudges for the tuner: "Right"/"Left" -> Vector3 in skeleton space.
+var hand_offset := {}
 var mount: Node
 var backpack: Node3D
 var _back_attachment: BoneAttachment3D
@@ -108,6 +110,7 @@ func _spec(weapon_name: String) -> Array:
 
 
 func _fit_arm(skeleton: Skeleton3D, side: String, target: Vector3, pole: Vector3) -> void:
+	target += hand_offset.get(side, Vector3.ZERO)
 	var upper := skeleton.find_bone(side + "Arm")
 	var lower := skeleton.find_bone(side + "ForeArm")
 	var hand := skeleton.find_bone(side + "Hand")
