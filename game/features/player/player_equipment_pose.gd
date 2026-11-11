@@ -9,9 +9,11 @@ const LONG_GUN := {
 	"AK": [.85, Vector3(-.16, .43, .22)],
 	"M4": [.85, Vector3(-.16, .43, .22)],
 	"SNIPER RIFLE": [.75, Vector3(-.16, .44, .22)],
-	"SHOTGUN": [.85, Vector3(-.16, .43, .27)],
-	"GRENADE LAUNCHER": [.7, Vector3(-.16, .43, .38)],
+	"SHOTGUN": [.85, Vector3(-.16, .43, .33)],
+	"GRENADE LAUNCHER": [.7, Vector3(-.16, .43, .42)],
 }
+## Short guns have grips so close together that both hands collide: the forend hand holds this much further along the barrel (weapon units).
+const FOREND_REACH := {"SHOTGUN": .06, "GRENADE LAUNCHER": .18}
 var mount: Node
 var backpack: Node3D
 var _back_attachment: BoneAttachment3D
@@ -64,7 +66,7 @@ func _process_modification_with_delta(_delta: float) -> void:
 	var left_grip := weapon.find_child("Grip_L", true, false) as Node3D
 	if name_value in LONG_GUN:
 		var rear := _grip_local(weapon, weapon.find_child("Grip_R", true, false) as Node3D)
-		var fore := _grip_local(weapon, left_grip)
+		var fore := _grip_local(weapon, left_grip) + Vector3.RIGHT * float(FOREND_REACH.get(name_value, 0.0)) * weapon.scale.x
 		mount.set("grip_shift", -fore)
 		target_right += _barrel_basis() * (fore - rear)
 		left_grip = weapon.find_child("Grip_R", true, false) as Node3D
@@ -88,7 +90,7 @@ func _process_modification_with_delta(_delta: float) -> void:
 			hand_error = skeleton.get_bone_global_pose(skeleton.find_bone("LeftHand")).origin.distance_to(target)
 	mount.call("sync_weapon", weapon)
 	if name_value in LONG_GUN:
-		forend_error = (skeleton.get_bone_global_pose(skeleton.find_bone("RightHand")) * socket_offset).origin.distance_to(skeleton.to_local(weapon.find_child("Grip_L", true, false).global_position))
+		forend_error = (skeleton.get_bone_global_pose(skeleton.find_bone("RightHand")) * socket_offset).origin.distance_to(skeleton.to_local(weapon.find_child("Grip_L", true, false).global_position + weapon.global_basis.orthonormalized().x * float(FOREND_REACH.get(name_value, 0.0)) * weapon.scale.x))
 	if capture_pose:
 		posed_bones.clear()
 		for bone in skeleton.get_bone_count():
