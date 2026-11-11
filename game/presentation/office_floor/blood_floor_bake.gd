@@ -147,7 +147,8 @@ func _show(cell: Vector2i, tile: Dictionary) -> void:
 		var material := StandardMaterial3D.new()
 		material.albedo_texture = texture
 		material.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
-		material.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
+		material.roughness = 0.95 # lit like the other blood marks, so it darkens with the room
+		material.metallic_specular = 0.0
 		quad.material = material
 		var visual := MeshInstance3D.new()
 		visual.mesh = quad
