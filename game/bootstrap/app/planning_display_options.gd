@@ -55,7 +55,7 @@ func applies_to(target: Node3D) -> bool:
 
 
 func _is_lamp(target: Node3D) -> bool:
-	return target.has_method("is_desk_lamp") and target.call("is_desk_lamp")
+	return target.has_method("is_lamp") and target.call("is_lamp")
 
 
 func update() -> void:
@@ -68,7 +68,7 @@ func update() -> void:
 	var config: Dictionary = target.call("get_display_config")
 	var lamp := _is_lamp(target)
 	var suffix := "" if objects.selected != null else " | размещение"
-	title.text = ("НАСТОЛЬНАЯ ЛАМПА" if lamp else "ДИСПЛЕЙ") + suffix
+	title.text = ("ЛАМПА" if lamp else "ДИСПЛЕЙ") + suffix
 	# A lamp is simply on or off; screens also have the random "auto" state and content.
 	power.set_item_disabled(2, lamp)
 	power.select(1 if str(config["power"]) == "off" else (0 if lamp else ["on", "off", "auto"].find(str(config["power"]))))

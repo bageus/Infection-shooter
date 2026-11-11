@@ -21,6 +21,7 @@ func _run() -> void:
 	await _test_view_rule()
 	await _test_wall_shadows()
 	await _test_desk_lamp()
+	await _test_model_lamps()
 	await _test_elevator()
 	print("Lamp lighting tests: %d failure(s)." % _failures)
 	quit(0 if _failures == 0 else 1)
@@ -264,6 +265,32 @@ func _test_desk_lamp() -> void:
 		_check(not glow.visible, "Desk lamp light follows the lighting setting")
 	prop.free()
 	controller.free()
+
+
+# Operating lamp and construction floodlight glow too, and the planner's power setting switches them.
+func _test_model_lamps() -> void:
+	for file in ["05_operating_lamp.glb", "05_construction_floodlight.glb"]:
+		var controller := LIGHTING.new()
+		root.add_child(controller)
+		var environment := WorldEnvironment.new()
+		controller.add_child(environment)
+		controller.setup(environment)
+		controller.local_lights_enabled = true
+		var prop := PROP.instantiate() as RigidBody3D
+		prop.set("model_path", "res://models/objects/enviroments/05/lamp/" + file)
+		root.add_child(prop)
+		await process_frame
+		var glow := prop.find_child("BudgetLight", true, false) as OmniLight3D
+		_check(glow != null and prop.call("is_lamp") and prop.call("has_display"), "%s is a lamp with a light and a power setting" % file)
+		if glow != null:
+			controller.refresh_light_budget()
+			_check(glow.visible, "%s glows by default" % file)
+			prop.call("configure_display", {"power": "off"})
+			_check(not glow.visible, "%s goes dark when switched off" % file)
+			prop.call("configure_display", {"power": "on"})
+			_check(glow.visible, "%s glows again when switched on" % file)
+		prop.free()
+		controller.free()
 
 
 func _test_elevator() -> void:

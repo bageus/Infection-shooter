@@ -3,6 +3,7 @@ extends RigidBody3D
 const AMBIENT_SOUNDS := preload("res://game/presentation/office_floor/public/ambient_prop_sounds.gd")
 const SERVER_AUDIO := preload("res://game/presentation/office_floor/server_ambience.gd")
 const BUDGET_LIGHT := preload("res://game/presentation/office_floor/budget_omni_light.gd")
+const LAMP_SPECS := preload("res://game/presentation/office_floor/lamp_light_specs.gd")
 const GEOMETRY := preload("res://game/presentation/office_floor/environment_prop_geometry.gd")
 const BREAK_SOUND := preload("res://game/presentation/office_floor/prop_break_sound.gd")
 const BREAKUP := preload("res://game/presentation/office_floor/environment_prop_breakup.gd")
@@ -56,7 +57,7 @@ var _display_wall: Node
 
 ## Screens have power and content settings; the desk lamp shares the power setting (on or off).
 func has_display() -> bool:
-	return model_path.get_file() in DISPLAY_PROFILES.MODELS or is_desk_lamp()
+	return model_path.get_file() in DISPLAY_PROFILES.MODELS or is_lamp()
 
 
 ## Pipes and ducts hug a wall or stand apart; the planner's choice overrides the name.
@@ -70,8 +71,9 @@ func configure_wall_mount(attached: bool) -> void:
 	(add_to_group if attached else remove_from_group).call(&"wall_mounted_props")
 
 
-func is_desk_lamp() -> bool:
-	return model_path.get_file() == "05_lamp.glb"
+# Lamps glow in play; the planner switches each one on or off (saved with the map).
+func is_lamp() -> bool:
+	return model_path.get_file() in LAMP_SPECS.SPECS
 
 
 func configure_display(config: Dictionary) -> void:
@@ -254,28 +256,26 @@ func _ready() -> void:
 	continuous_cd = mass < 4.0
 	_setup_weight(volume)
 	_add_contact_shadow(wall_mounted)
-	if is_desk_lamp():
-		_add_desk_lamp_light()
+	if is_lamp():
+		_add_lamp_light()
 	if not freeze or wall_mounted:
 		IMPACT_SOUND.watch(self)
 	_geometry.shadows.configure(self, _visual, _shape_meshes, model_path)
 	set_notify_transform(true)
 
 
-# The desk lamp lights its own surroundings from under the shade.
-func _add_desk_lamp_light() -> void:
-	var shade := _visual.find_child("Lamp_*", true, false) as Node3D
-	if shade == null:
-		return
-	var glow := BUDGET_LIGHT.create(Color(1.0, 0.86, 0.62), 1.1, 2.8)
-	glow.position = Vector3(0.0, 0.12, 0.0)
-	shade.add_child(glow)
+func _add_lamp_light() -> void:
+	var spec: Dictionary = LAMP_SPECS.SPECS[model_path.get_file()]
+	var glow := BUDGET_LIGHT.create(spec["color"], spec["energy"], spec["range"])
+	glow.position = spec["at"]
+	var shade: Node = _visual.find_child("Lamp_*", true, false)
+	(shade if shade != null else _visual).add_child(glow)
 	_apply_lamp_power()
 
 
 # The planner can switch a desk lamp off; a lamp put out by damage stays out.
 func _apply_lamp_power() -> void:
-	if not is_desk_lamp() or not is_inside_tree():
+	if not is_lamp() or not is_inside_tree():
 		return
 	var glow := find_child("BudgetLight", true, false)
 	if glow != null:
@@ -356,7 +356,7 @@ func take_projectile_hit(damage: float, hit_position: Vector3, _normal: Vector3,
 	if damage > 0.0 and is_instance_valid(glass_debris_floor) and has_display():
 		glass_debris_floor.call("bake_display_hit", self, hit_position, _normal)
 	if _damage.category == "tech":
-		if damage > 0.0 and model_path.get_file() == "05_lamp.glb":
+		if damage > 0.0 and is_lamp():
 			_put_out_lamp()
 		if not _damage.short_circuit():
 			if repeated_electronic_particles:
@@ -368,7 +368,7 @@ func take_projectile_hit(damage: float, hit_position: Vector3, _normal: Vector3,
 				_display.call("disable")
 				_show_power_off_stage()
 			SPARKS.short_circuit(self, hit_position, _normal)
-			if is_desk_lamp():
+			if is_lamp():
 				BREAK_SOUND.play(self, effects_root, model_path, "tech", hit_position)
 	if model_path.get_file() == "02_water_cooler_bottle.glb":
 		var bottle := BOTTLE_BURST.find_bottle(_shape_meshes)
