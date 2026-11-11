@@ -3,13 +3,13 @@
 importer="scene"
 importer_version=1
 type="PackedScene"
-uid="uid://bj0owl1wvhrc3"
-path="res://.godot/imported/01_wall_lab_glass_door.glb-684b6e67be52bbd8071983efda97facc.scn"
+uid="uid://dk4leldmpqfvr"
+path="res://.godot/imported/01_wall_lab_glass_door.glb-a109e3f3e2b28ef8c0cbad6b2451c884.scn"
 
 [deps]
 
-source_file="res://models/objects/enviroments/01/01_wall_lab_glass_door.glb"
-dest_files=["res://.godot/imported/01_wall_lab_glass_door.glb-684b6e67be52bbd8071983efda97facc.scn"]
+source_file="res://models/objects/enviroments/01/door/01_wall_lab_glass_door.glb"
+dest_files=["res://.godot/imported/01_wall_lab_glass_door.glb-a109e3f3e2b28ef8c0cbad6b2451c884.scn"]
 
 [params]
 

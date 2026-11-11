@@ -4,12 +4,12 @@ importer="scene"
 importer_version=1
 type="PackedScene"
 uid="uid://ppyy2kyfcoi1"
-path="res://.godot/imported/01_VECTRION_Destructible.glb-02e33d0e0d07817e184cd89439ab05fc.scn"
+path="res://.godot/imported/01_VECTRION_Destructible.glb-2f220f7ec5522cb86ef4677a5b145264.scn"
 
 [deps]
 
-source_file="res://models/objects/enviroments/01/01_VECTRION_Destructible.glb"
-dest_files=["res://.godot/imported/01_VECTRION_Destructible.glb-02e33d0e0d07817e184cd89439ab05fc.scn"]
+source_file="res://models/objects/enviroments/01/textures/01/01_VECTRION_Destructible.glb"
+dest_files=["res://.godot/imported/01_VECTRION_Destructible.glb-2f220f7ec5522cb86ef4677a5b145264.scn"]
 
 [params]
 

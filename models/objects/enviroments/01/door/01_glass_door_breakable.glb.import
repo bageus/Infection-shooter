@@ -3,13 +3,13 @@
 importer="scene"
 importer_version=1
 type="PackedScene"
-uid="uid://d17wb3k5rae8b"
-path="res://.godot/imported/01_glass_door_breakable.glb-091d8ef0a4e1cda74d9b31d675eb2ac0.scn"
+uid="uid://cgyty76enpno1"
+path="res://.godot/imported/01_glass_door_breakable.glb-0d23431e61ee6eab72f6bdef2ce94e91.scn"
 
 [deps]
 
-source_file="res://models/objects/enviroments/01/01_glass_door_breakable.glb"
-dest_files=["res://.godot/imported/01_glass_door_breakable.glb-091d8ef0a4e1cda74d9b31d675eb2ac0.scn"]
+source_file="res://models/objects/enviroments/01/door/01_glass_door_breakable.glb"
+dest_files=["res://.godot/imported/01_glass_door_breakable.glb-0d23431e61ee6eab72f6bdef2ce94e91.scn"]
 
 [params]
 

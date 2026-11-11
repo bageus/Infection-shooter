@@ -3,13 +3,13 @@
 importer="scene"
 importer_version=1
 type="PackedScene"
-uid="uid://dnqdb20w6v0m8"
-path="res://.godot/imported/01_glass_partition_blinds_breakable.glb-ab3320269ecd31f8664c421fe577d316.scn"
+uid="uid://cgfqupue2yf2p"
+path="res://.godot/imported/01_glass_partition_blinds_breakable.glb-b8a4075bc9afbae1d961d29aba2ade04.scn"
 
 [deps]
 
-source_file="res://models/objects/enviroments/01/01_glass_partition_blinds_breakable.glb"
-dest_files=["res://.godot/imported/01_glass_partition_blinds_breakable.glb-ab3320269ecd31f8664c421fe577d316.scn"]
+source_file="res://models/objects/enviroments/01/wall/01_glass_partition_blinds_breakable.glb"
+dest_files=["res://.godot/imported/01_glass_partition_blinds_breakable.glb-b8a4075bc9afbae1d961d29aba2ade04.scn"]
 
 [params]
 

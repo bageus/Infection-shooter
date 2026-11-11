@@ -3,7 +3,7 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://c24sclac6285j"
-path="res://.godot/imported/01_stairs_2_group01_normal.png-398f7ee46c7441245e818ce3a4fdffed.ctex"
+path="res://.godot/imported/01_stairs_2_group01_normal.png-4b2293039a82c0b4a0139a0d6d0db3cf.ctex"
 metadata={
 "vram_texture": false
 }
@@ -13,8 +13,8 @@ generator_parameters={
 
 [deps]
 
-source_file="res://models/objects/enviroments/01/01_stairs_2_group01_normal.png"
-dest_files=["res://.godot/imported/01_stairs_2_group01_normal.png-398f7ee46c7441245e818ce3a4fdffed.ctex"]
+source_file="res://models/objects/enviroments/01/textures/01/01_stairs_2_group01_normal.png"
+dest_files=["res://.godot/imported/01_stairs_2_group01_normal.png-4b2293039a82c0b4a0139a0d6d0db3cf.ctex"]
 
 [params]
 

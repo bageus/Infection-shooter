@@ -4,12 +4,12 @@ importer="scene"
 importer_version=1
 type="PackedScene"
 uid="uid://caxx5i1wkui22"
-path="res://.godot/imported/01_glass_partition_half_breakable.glb-00b55fecddf63b28d675e076a8fd7086.scn"
+path="res://.godot/imported/01_glass_partition_half_breakable.glb-3a528bf319f8c34c1a93365627f349bd.scn"
 
 [deps]
 
-source_file="res://models/objects/enviroments/01/01_glass_partition_half_breakable.glb"
-dest_files=["res://.godot/imported/01_glass_partition_half_breakable.glb-00b55fecddf63b28d675e076a8fd7086.scn"]
+source_file="res://models/objects/enviroments/01/textures/01/wall/01_glass_partition_half_breakable.glb"
+dest_files=["res://.godot/imported/01_glass_partition_half_breakable.glb-3a528bf319f8c34c1a93365627f349bd.scn"]
 
 [params]
 

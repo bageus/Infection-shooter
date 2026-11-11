@@ -4,12 +4,12 @@ importer="scene"
 importer_version=1
 type="PackedScene"
 uid="uid://dpg0d8xrdcnmb"
-path="res://.godot/imported/09_plastic_water_bottle_blue_500ml.glb-db4b83e6ef6bbb4395204263f2861b89.scn"
+path="res://.godot/imported/09_plastic_water_bottle_blue_500ml.glb-1f35400ed524beba513b6fe1c675601b.scn"
 
 [deps]
 
-source_file="res://models/objects/enviroments/09/09_plastic_water_bottle_blue_500ml.glb"
-dest_files=["res://.godot/imported/09_plastic_water_bottle_blue_500ml.glb-db4b83e6ef6bbb4395204263f2861b89.scn"]
+source_file="res://models/objects/enviroments/09/glass_mug/09_plastic_water_bottle_blue_500ml.glb"
+dest_files=["res://.godot/imported/09_plastic_water_bottle_blue_500ml.glb-1f35400ed524beba513b6fe1c675601b.scn"]
 
 [params]
 

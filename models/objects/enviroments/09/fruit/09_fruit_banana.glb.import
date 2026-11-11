@@ -4,12 +4,12 @@ importer="scene"
 importer_version=1
 type="PackedScene"
 uid="uid://bobrj65n331xn"
-path="res://.godot/imported/09_fruit_banana.glb-76f8c6a627341da8361f472a5e98bc5a.scn"
+path="res://.godot/imported/09_fruit_banana.glb-050fb16f0a5b36c96c66aaa0e61756bf.scn"
 
 [deps]
 
-source_file="res://models/objects/enviroments/09/09_fruit_banana.glb"
-dest_files=["res://.godot/imported/09_fruit_banana.glb-76f8c6a627341da8361f472a5e98bc5a.scn"]
+source_file="res://models/objects/enviroments/09/fruit/09_fruit_banana.glb"
+dest_files=["res://.godot/imported/09_fruit_banana.glb-050fb16f0a5b36c96c66aaa0e61756bf.scn"]
 
 [params]
 

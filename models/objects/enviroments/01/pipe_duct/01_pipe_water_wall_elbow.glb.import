@@ -3,13 +3,13 @@
 importer="scene"
 importer_version=1
 type="PackedScene"
-uid="uid://fl5r74o60m6"
-path="res://.godot/imported/01_pipe_water_wall_elbow.glb-2a752c3dbf6d6bb0c3be25c8a223bfc4.scn"
+uid="uid://y02aj7ajxbvc"
+path="res://.godot/imported/01_pipe_water_wall_elbow.glb-1883448a5038563d543627a372d17bfb.scn"
 
 [deps]
 
-source_file="res://models/objects/enviroments/01/01_pipe_water_wall_elbow.glb"
-dest_files=["res://.godot/imported/01_pipe_water_wall_elbow.glb-2a752c3dbf6d6bb0c3be25c8a223bfc4.scn"]
+source_file="res://models/objects/enviroments/01/pipe_duct/01_pipe_water_wall_elbow.glb"
+dest_files=["res://.godot/imported/01_pipe_water_wall_elbow.glb-1883448a5038563d543627a372d17bfb.scn"]
 
 [params]
 

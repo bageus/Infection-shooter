@@ -4,12 +4,12 @@ importer="scene"
 importer_version=1
 type="PackedScene"
 uid="uid://brqfedox0t12"
-path="res://.godot/imported/09_paper_A4_compact_crumpled_wad.glb-d19e20d6c1381486eb76f34a6ac29d60.scn"
+path="res://.godot/imported/09_paper_A4_compact_crumpled_wad.glb-54fcf560931fd0fe0858e655d25d15fd.scn"
 
 [deps]
 
-source_file="res://models/objects/enviroments/09/09_paper_A4_compact_crumpled_wad.glb"
-dest_files=["res://.godot/imported/09_paper_A4_compact_crumpled_wad.glb-d19e20d6c1381486eb76f34a6ac29d60.scn"]
+source_file="res://models/objects/enviroments/09/paper/09_paper_A4_compact_crumpled_wad.glb"
+dest_files=["res://.godot/imported/09_paper_A4_compact_crumpled_wad.glb-54fcf560931fd0fe0858e655d25d15fd.scn"]
 
 [params]
 

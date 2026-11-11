@@ -3,13 +3,13 @@
 importer="scene"
 importer_version=1
 type="PackedScene"
-uid="uid://s0rnq2o87vo0"
-path="res://.godot/imported/01_wall_metal_door.glb-74e29c949814d30c52c76ea388819ecc.scn"
+uid="uid://bq2r56fqa6cpf"
+path="res://.godot/imported/01_wall_metal_door.glb-9e3c53437709758796f6682e258defb2.scn"
 
 [deps]
 
-source_file="res://models/objects/enviroments/01/01_wall_metal_door.glb"
-dest_files=["res://.godot/imported/01_wall_metal_door.glb-74e29c949814d30c52c76ea388819ecc.scn"]
+source_file="res://models/objects/enviroments/01/door/01_wall_metal_door.glb"
+dest_files=["res://.godot/imported/01_wall_metal_door.glb-9e3c53437709758796f6682e258defb2.scn"]
 
 [params]
 

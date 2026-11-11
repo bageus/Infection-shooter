@@ -3,13 +3,13 @@
 importer="scene"
 importer_version=1
 type="PackedScene"
-uid="uid://btbofc0ick5h0"
-path="res://.godot/imported/01_pipe_water_floor_straight.glb-bab92c37866803195681930e71beb195.scn"
+uid="uid://ddjv0m21e8ebt"
+path="res://.godot/imported/01_pipe_water_floor_straight.glb-fc72a0f0fb3f20ef14918fc30e6a41eb.scn"
 
 [deps]
 
-source_file="res://models/objects/enviroments/01/01_pipe_water_floor_straight.glb"
-dest_files=["res://.godot/imported/01_pipe_water_floor_straight.glb-bab92c37866803195681930e71beb195.scn"]
+source_file="res://models/objects/enviroments/01/pipe_duct/01_pipe_water_floor_straight.glb"
+dest_files=["res://.godot/imported/01_pipe_water_floor_straight.glb-fc72a0f0fb3f20ef14918fc30e6a41eb.scn"]
 
 [params]
 

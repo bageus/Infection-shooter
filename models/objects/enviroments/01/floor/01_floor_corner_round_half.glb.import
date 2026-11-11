@@ -3,13 +3,13 @@
 importer="scene"
 importer_version=1
 type="PackedScene"
-uid="uid://bxean8wp8bsef"
-path="res://.godot/imported/01_floor_corner_round_half.glb-220700222075df34a3811b20e53b4945.scn"
+uid="uid://dhh7sdy0xmefw"
+path="res://.godot/imported/01_floor_corner_round_half.glb-9b96832d1a1b0bd27cbd7d5dca8239ef.scn"
 
 [deps]
 
-source_file="res://models/objects/enviroments/01/01_floor_corner_round_half.glb"
-dest_files=["res://.godot/imported/01_floor_corner_round_half.glb-220700222075df34a3811b20e53b4945.scn"]
+source_file="res://models/objects/enviroments/01/floor/01_floor_corner_round_half.glb"
+dest_files=["res://.godot/imported/01_floor_corner_round_half.glb-9b96832d1a1b0bd27cbd7d5dca8239ef.scn"]
 
 [params]
 

@@ -4,12 +4,12 @@ importer="scene"
 importer_version=1
 type="PackedScene"
 uid="uid://tscwboukn288"
-path="res://.godot/imported/01_floor_pad.glb-6939c3a90266f89ecc8cb55c6a115a5c.scn"
+path="res://.godot/imported/01_floor_pad.glb-96e58a87e83f852bd9c4f521f1a7151c.scn"
 
 [deps]
 
-source_file="res://models/objects/enviroments/01/01_floor_pad.glb"
-dest_files=["res://.godot/imported/01_floor_pad.glb-6939c3a90266f89ecc8cb55c6a115a5c.scn"]
+source_file="res://models/objects/enviroments/01/textures/01/floor/01_floor_pad.glb"
+dest_files=["res://.godot/imported/01_floor_pad.glb-96e58a87e83f852bd9c4f521f1a7151c.scn"]
 
 [params]
 

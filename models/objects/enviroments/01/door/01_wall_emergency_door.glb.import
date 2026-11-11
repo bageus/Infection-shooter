@@ -3,13 +3,13 @@
 importer="scene"
 importer_version=1
 type="PackedScene"
-uid="uid://brnow73ia1a7y"
-path="res://.godot/imported/01_wall_emergency_door.glb-019d1cbe009c3bce4fdd8665f9108369.scn"
+uid="uid://l2sdwyx5gnpu"
+path="res://.godot/imported/01_wall_emergency_door.glb-5c4421da89840544f1f7af58b491981b.scn"
 
 [deps]
 
-source_file="res://models/objects/enviroments/01/01_wall_emergency_door.glb"
-dest_files=["res://.godot/imported/01_wall_emergency_door.glb-019d1cbe009c3bce4fdd8665f9108369.scn"]
+source_file="res://models/objects/enviroments/01/door/01_wall_emergency_door.glb"
+dest_files=["res://.godot/imported/01_wall_emergency_door.glb-5c4421da89840544f1f7af58b491981b.scn"]
 
 [params]
 

@@ -4,12 +4,12 @@ importer="scene"
 importer_version=1
 type="PackedScene"
 uid="uid://frcahkkv0u46"
-path="res://.godot/imported/09_file_binder_fell.glb-a7d7ff9f56df0984ed4465f864496edf.scn"
+path="res://.godot/imported/09_file_binder_fell.glb-175adfee77bfbf69076eb6135a437116.scn"
 
 [deps]
 
-source_file="res://models/objects/enviroments/09/09_file_binder_fell.glb"
-dest_files=["res://.godot/imported/09_file_binder_fell.glb-a7d7ff9f56df0984ed4465f864496edf.scn"]
+source_file="res://models/objects/enviroments/09/files/09_file_binder_fell.glb"
+dest_files=["res://.godot/imported/09_file_binder_fell.glb-175adfee77bfbf69076eb6135a437116.scn"]
 
 [params]
 

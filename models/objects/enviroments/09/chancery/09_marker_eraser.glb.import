@@ -4,12 +4,12 @@ importer="scene"
 importer_version=1
 type="PackedScene"
 uid="uid://d37f7fh8kji7s"
-path="res://.godot/imported/09_marker_eraser.glb-600e6dd4b85b0bcf698638eeb8f231e7.scn"
+path="res://.godot/imported/09_marker_eraser.glb-77e0c023b56265c4825d2fc7ce4630d7.scn"
 
 [deps]
 
-source_file="res://models/objects/enviroments/09/09_marker_eraser.glb"
-dest_files=["res://.godot/imported/09_marker_eraser.glb-600e6dd4b85b0bcf698638eeb8f231e7.scn"]
+source_file="res://models/objects/enviroments/09/chancery/09_marker_eraser.glb"
+dest_files=["res://.godot/imported/09_marker_eraser.glb-77e0c023b56265c4825d2fc7ce4630d7.scn"]
 
 [params]
 

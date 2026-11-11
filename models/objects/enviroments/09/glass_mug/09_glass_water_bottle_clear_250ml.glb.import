@@ -4,12 +4,12 @@ importer="scene"
 importer_version=1
 type="PackedScene"
 uid="uid://cnkif58waajyj"
-path="res://.godot/imported/09_glass_water_bottle_clear_250ml.glb-bde550b3fa49a4af0aaddb3a45c91f85.scn"
+path="res://.godot/imported/09_glass_water_bottle_clear_250ml.glb-dd0e3b0117a54ac0076aeadd55f31ca5.scn"
 
 [deps]
 
-source_file="res://models/objects/enviroments/09/09_glass_water_bottle_clear_250ml.glb"
-dest_files=["res://.godot/imported/09_glass_water_bottle_clear_250ml.glb-bde550b3fa49a4af0aaddb3a45c91f85.scn"]
+source_file="res://models/objects/enviroments/09/glass_mug/09_glass_water_bottle_clear_250ml.glb"
+dest_files=["res://.godot/imported/09_glass_water_bottle_clear_250ml.glb-dd0e3b0117a54ac0076aeadd55f31ca5.scn"]
 
 [params]
 

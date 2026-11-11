@@ -3,13 +3,13 @@
 importer="scene"
 importer_version=1
 type="PackedScene"
-uid="uid://drrp8qjdrhw18"
-path="res://.godot/imported/01_pipe_sewer_floor_elbow.glb-6c4531e56f5647a0741faaab488d02de.scn"
+uid="uid://bb775t00d58c8"
+path="res://.godot/imported/01_pipe_sewer_floor_elbow.glb-0bff2586a2051e9bd9776c2b23251eb1.scn"
 
 [deps]
 
-source_file="res://models/objects/enviroments/01/01_pipe_sewer_floor_elbow.glb"
-dest_files=["res://.godot/imported/01_pipe_sewer_floor_elbow.glb-6c4531e56f5647a0741faaab488d02de.scn"]
+source_file="res://models/objects/enviroments/01/pipe_duct/01_pipe_sewer_floor_elbow.glb"
+dest_files=["res://.godot/imported/01_pipe_sewer_floor_elbow.glb-0bff2586a2051e9bd9776c2b23251eb1.scn"]
 
 [params]
 

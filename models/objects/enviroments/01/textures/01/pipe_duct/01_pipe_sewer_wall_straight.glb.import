@@ -4,12 +4,12 @@ importer="scene"
 importer_version=1
 type="PackedScene"
 uid="uid://rkilbcgr4vis"
-path="res://.godot/imported/01_pipe_sewer_wall_straight.glb-4f769d8eb44daefa453fec25afd51f34.scn"
+path="res://.godot/imported/01_pipe_sewer_wall_straight.glb-14d8f19c0b79f6d2f43ef58fae474433.scn"
 
 [deps]
 
-source_file="res://models/objects/enviroments/01/01_pipe_sewer_wall_straight.glb"
-dest_files=["res://.godot/imported/01_pipe_sewer_wall_straight.glb-4f769d8eb44daefa453fec25afd51f34.scn"]
+source_file="res://models/objects/enviroments/01/textures/01/pipe_duct/01_pipe_sewer_wall_straight.glb"
+dest_files=["res://.godot/imported/01_pipe_sewer_wall_straight.glb-14d8f19c0b79f6d2f43ef58fae474433.scn"]
 
 [params]
 

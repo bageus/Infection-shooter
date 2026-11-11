@@ -4,12 +4,12 @@ importer="scene"
 importer_version=1
 type="PackedScene"
 uid="uid://da4f2o6ktfexh"
-path="res://.godot/imported/01_wood_slat_partition_destructible.glb-9f124bb3a489be78f1e560d2c4368cb2.scn"
+path="res://.godot/imported/01_wood_slat_partition_destructible.glb-7d79d5bab9ebe63e6f1ed2c45c13f668.scn"
 
 [deps]
 
-source_file="res://models/objects/enviroments/01/01_wood_slat_partition_destructible.glb"
-dest_files=["res://.godot/imported/01_wood_slat_partition_destructible.glb-9f124bb3a489be78f1e560d2c4368cb2.scn"]
+source_file="res://models/objects/enviroments/01/textures/01/01_wood_slat_partition_destructible.glb"
+dest_files=["res://.godot/imported/01_wood_slat_partition_destructible.glb-7d79d5bab9ebe63e6f1ed2c45c13f668.scn"]
 
 [params]
 

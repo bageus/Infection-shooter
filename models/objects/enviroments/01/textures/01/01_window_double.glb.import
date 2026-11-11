@@ -4,12 +4,12 @@ importer="scene"
 importer_version=1
 type="PackedScene"
 uid="uid://bmomd3y5spr55"
-path="res://.godot/imported/01_window_double.glb-5f24217699afd98aae81d70afd14f942.scn"
+path="res://.godot/imported/01_window_double.glb-e381d37e495323916059ac353e66c629.scn"
 
 [deps]
 
-source_file="res://models/objects/enviroments/01/01_window_double.glb"
-dest_files=["res://.godot/imported/01_window_double.glb-5f24217699afd98aae81d70afd14f942.scn"]
+source_file="res://models/objects/enviroments/01/textures/01/01_window_double.glb"
+dest_files=["res://.godot/imported/01_window_double.glb-e381d37e495323916059ac353e66c629.scn"]
 
 [params]
 

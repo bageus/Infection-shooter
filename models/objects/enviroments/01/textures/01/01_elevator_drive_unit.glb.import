@@ -4,12 +4,12 @@ importer="scene"
 importer_version=1
 type="PackedScene"
 uid="uid://dlal1fdm7lk7r"
-path="res://.godot/imported/01_elevator_drive_unit.glb-5289b334b5a7f24de2ad59f6201cc02e.scn"
+path="res://.godot/imported/01_elevator_drive_unit.glb-dbf6ccb3beb23625e096be004c8215ac.scn"
 
 [deps]
 
-source_file="res://models/objects/enviroments/01/01_elevator_drive_unit.glb"
-dest_files=["res://.godot/imported/01_elevator_drive_unit.glb-5289b334b5a7f24de2ad59f6201cc02e.scn"]
+source_file="res://models/objects/enviroments/01/textures/01/01_elevator_drive_unit.glb"
+dest_files=["res://.godot/imported/01_elevator_drive_unit.glb-dbf6ccb3beb23625e096be004c8215ac.scn"]
 
 [params]
 

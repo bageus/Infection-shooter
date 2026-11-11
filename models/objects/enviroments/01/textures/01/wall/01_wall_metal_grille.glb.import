@@ -4,12 +4,12 @@ importer="scene"
 importer_version=1
 type="PackedScene"
 uid="uid://cpqprtsi6i8yv"
-path="res://.godot/imported/01_wall_metal_grille.glb-aa376d03d35d00e5881500d9c7499631.scn"
+path="res://.godot/imported/01_wall_metal_grille.glb-96706ad56933d48673b924bd0d9658e9.scn"
 
 [deps]
 
-source_file="res://models/objects/enviroments/01/01_wall_metal_grille.glb"
-dest_files=["res://.godot/imported/01_wall_metal_grille.glb-aa376d03d35d00e5881500d9c7499631.scn"]
+source_file="res://models/objects/enviroments/01/textures/01/wall/01_wall_metal_grille.glb"
+dest_files=["res://.godot/imported/01_wall_metal_grille.glb-96706ad56933d48673b924bd0d9658e9.scn"]
 
 [params]
 

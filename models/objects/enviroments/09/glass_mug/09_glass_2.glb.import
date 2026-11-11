@@ -4,12 +4,12 @@ importer="scene"
 importer_version=1
 type="PackedScene"
 uid="uid://io2iou1mb1jw"
-path="res://.godot/imported/09_glass_2.glb-ab5936092b45f87155c99e9e65b24ef6.scn"
+path="res://.godot/imported/09_glass_2.glb-da3dc64e929f4623e3e5a41624ed1c66.scn"
 
 [deps]
 
-source_file="res://models/objects/enviroments/09/09_glass_2.glb"
-dest_files=["res://.godot/imported/09_glass_2.glb-ab5936092b45f87155c99e9e65b24ef6.scn"]
+source_file="res://models/objects/enviroments/09/glass_mug/09_glass_2.glb"
+dest_files=["res://.godot/imported/09_glass_2.glb-da3dc64e929f4623e3e5a41624ed1c66.scn"]
 
 [params]
 

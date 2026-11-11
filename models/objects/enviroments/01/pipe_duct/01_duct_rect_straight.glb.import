@@ -3,13 +3,13 @@
 importer="scene"
 importer_version=1
 type="PackedScene"
-uid="uid://c8mqwof767mg8"
-path="res://.godot/imported/01_duct_rect_straight.glb-ce724bbaa5646ecf9fe79a1eb7a4ee40.scn"
+uid="uid://dyshecrw3jcbv"
+path="res://.godot/imported/01_duct_rect_straight.glb-57b7047055bede9455c512442f16b03c.scn"
 
 [deps]
 
-source_file="res://models/objects/enviroments/01/01_duct_rect_straight.glb"
-dest_files=["res://.godot/imported/01_duct_rect_straight.glb-ce724bbaa5646ecf9fe79a1eb7a4ee40.scn"]
+source_file="res://models/objects/enviroments/01/pipe_duct/01_duct_rect_straight.glb"
+dest_files=["res://.godot/imported/01_duct_rect_straight.glb-57b7047055bede9455c512442f16b03c.scn"]
 
 [params]
 

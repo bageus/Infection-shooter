@@ -4,12 +4,12 @@ importer="scene"
 importer_version=1
 type="PackedScene"
 uid="uid://bc1c2d2uph13l"
-path="res://.godot/imported/09_paper_stray.glb-a972055ec16580029fe6d4c7be948120.scn"
+path="res://.godot/imported/09_paper_stray.glb-64b9f9bdc23bae756a91553fc50d94c0.scn"
 
 [deps]
 
-source_file="res://models/objects/enviroments/09/09_paper_stray.glb"
-dest_files=["res://.godot/imported/09_paper_stray.glb-a972055ec16580029fe6d4c7be948120.scn"]
+source_file="res://models/objects/enviroments/09/paper/09_paper_stray.glb"
+dest_files=["res://.godot/imported/09_paper_stray.glb-64b9f9bdc23bae756a91553fc50d94c0.scn"]
 
 [params]
 

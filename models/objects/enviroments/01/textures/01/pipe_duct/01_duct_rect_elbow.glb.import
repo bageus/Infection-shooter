@@ -4,12 +4,12 @@ importer="scene"
 importer_version=1
 type="PackedScene"
 uid="uid://chl0hg773b40d"
-path="res://.godot/imported/01_duct_rect_elbow.glb-0aa180f75c3171acf7eda38a29e3dee3.scn"
+path="res://.godot/imported/01_duct_rect_elbow.glb-be03f9cd1f82860e2e96ab61f049907b.scn"
 
 [deps]
 
-source_file="res://models/objects/enviroments/01/01_duct_rect_elbow.glb"
-dest_files=["res://.godot/imported/01_duct_rect_elbow.glb-0aa180f75c3171acf7eda38a29e3dee3.scn"]
+source_file="res://models/objects/enviroments/01/textures/01/pipe_duct/01_duct_rect_elbow.glb"
+dest_files=["res://.godot/imported/01_duct_rect_elbow.glb-be03f9cd1f82860e2e96ab61f049907b.scn"]
 
 [params]
 

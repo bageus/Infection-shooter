@@ -4,12 +4,12 @@ importer="scene"
 importer_version=1
 type="PackedScene"
 uid="uid://dtck2bo4lucjr"
-path="res://.godot/imported/01_floor_2x2.glb-0ef183aa2b968a7e72f93534f1019eef.scn"
+path="res://.godot/imported/01_floor_2x2.glb-04ce473158a277093f2ad7557f789201.scn"
 
 [deps]
 
-source_file="res://models/objects/enviroments/01/01_floor_2x2.glb"
-dest_files=["res://.godot/imported/01_floor_2x2.glb-0ef183aa2b968a7e72f93534f1019eef.scn"]
+source_file="res://models/objects/enviroments/01/textures/01/floor/01_floor_2x2.glb"
+dest_files=["res://.godot/imported/01_floor_2x2.glb-04ce473158a277093f2ad7557f789201.scn"]
 
 [params]
 

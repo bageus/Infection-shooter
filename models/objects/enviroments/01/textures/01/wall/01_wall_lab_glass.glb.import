@@ -4,12 +4,12 @@ importer="scene"
 importer_version=1
 type="PackedScene"
 uid="uid://cdcktin2olb1w"
-path="res://.godot/imported/01_wall_lab_glass.glb-77685cb7a05d0d56596e4aa5e6c76a45.scn"
+path="res://.godot/imported/01_wall_lab_glass.glb-259b24c7a60d5c23c01060dd801106e2.scn"
 
 [deps]
 
-source_file="res://models/objects/enviroments/01/01_wall_lab_glass.glb"
-dest_files=["res://.godot/imported/01_wall_lab_glass.glb-77685cb7a05d0d56596e4aa5e6c76a45.scn"]
+source_file="res://models/objects/enviroments/01/textures/01/wall/01_wall_lab_glass.glb"
+dest_files=["res://.godot/imported/01_wall_lab_glass.glb-259b24c7a60d5c23c01060dd801106e2.scn"]
 
 [params]
 

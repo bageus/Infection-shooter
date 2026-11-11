@@ -4,12 +4,12 @@ importer="scene"
 importer_version=1
 type="PackedScene"
 uid="uid://bcs1h7ksy8dwx"
-path="res://.godot/imported/01_elevator_cabin_passenger.glb-c5c988689520329abc3461a8998466dc.scn"
+path="res://.godot/imported/01_elevator_cabin_passenger.glb-7dc53abed504b223ff9ac5dc208cfaf7.scn"
 
 [deps]
 
-source_file="res://models/objects/enviroments/01/01_elevator_cabin_passenger.glb"
-dest_files=["res://.godot/imported/01_elevator_cabin_passenger.glb-c5c988689520329abc3461a8998466dc.scn"]
+source_file="res://models/objects/enviroments/01/textures/01/01_elevator_cabin_passenger.glb"
+dest_files=["res://.godot/imported/01_elevator_cabin_passenger.glb-7dc53abed504b223ff9ac5dc208cfaf7.scn"]
 
 [params]
 

@@ -4,12 +4,12 @@ importer="scene"
 importer_version=1
 type="PackedScene"
 uid="uid://c8mqwof767mg8"
-path="res://.godot/imported/01_duct_rect_straight.glb-ce724bbaa5646ecf9fe79a1eb7a4ee40.scn"
+path="res://.godot/imported/01_duct_rect_straight.glb-3dc84fa3e55fdc3bc320e233c2fcc425.scn"
 
 [deps]
 
-source_file="res://models/objects/enviroments/01/01_duct_rect_straight.glb"
-dest_files=["res://.godot/imported/01_duct_rect_straight.glb-ce724bbaa5646ecf9fe79a1eb7a4ee40.scn"]
+source_file="res://models/objects/enviroments/01/textures/01/pipe_duct/01_duct_rect_straight.glb"
+dest_files=["res://.godot/imported/01_duct_rect_straight.glb-3dc84fa3e55fdc3bc320e233c2fcc425.scn"]
 
 [params]
 

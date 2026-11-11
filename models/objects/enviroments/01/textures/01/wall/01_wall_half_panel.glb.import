@@ -4,12 +4,12 @@ importer="scene"
 importer_version=1
 type="PackedScene"
 uid="uid://bs1jisfp8fju"
-path="res://.godot/imported/01_wall_half_panel.glb-498b3d0e34f98bd391a27961b1ce8f9c.scn"
+path="res://.godot/imported/01_wall_half_panel.glb-dc24dcb30550b5ec97d40c7228821d89.scn"
 
 [deps]
 
-source_file="res://models/objects/enviroments/01/01_wall_half_panel.glb"
-dest_files=["res://.godot/imported/01_wall_half_panel.glb-498b3d0e34f98bd391a27961b1ce8f9c.scn"]
+source_file="res://models/objects/enviroments/01/textures/01/wall/01_wall_half_panel.glb"
+dest_files=["res://.godot/imported/01_wall_half_panel.glb-dc24dcb30550b5ec97d40c7228821d89.scn"]
 
 [params]
 
