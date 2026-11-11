@@ -564,6 +564,8 @@ func _shatter_glass(hit_position: Vector3, direction: Vector3) -> void:
 # feet; everything else is pushed according to its weight.
 func _setup_weight(volume: float) -> void:
 	weight_kg = WEIGHT.weight_kg(model_path.get_file(), volume)
+	if "15_pallet" in model_path.get_file():
+		mass = weight_kg # Explosions and collisions move a loaded pallet by its real weight.
 	if freeze:
 		return
 	var bounds := AABB()
