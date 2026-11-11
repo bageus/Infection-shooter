@@ -43,8 +43,8 @@ func _ready() -> void:
 	_camera.fov = 30.0
 	add_child(_camera)
 	_camera.current = true
-	_arm_offsets = preload("res://tools/weapon_hold_arm_offsets.gd").new()
-	_pose.get_skeleton().add_child(_arm_offsets) # last child, so it runs after all other arm modifiers
+	_arm_offsets = _actor.get_node("WeaponMount").arm_offsets
+	_pose.manual_arms = true
 	_pose.hand_offset = {"Right": Vector3.ZERO, "Left": Vector3.ZERO}
 	_build_ui()
 	_pick(4)
@@ -164,6 +164,17 @@ func _pick(index: int) -> void:
 		_sliders[key + "_x"].value = v.x
 		_sliders[key + "_y"].value = v.y
 		_sliders[key + "_z"].value = v.z
+	var tuning: Dictionary = _pose.ARM_TUNING.get(_name, {})
+	for side in ["Right", "Left"]:
+		for joint in ARM_BONES:
+			var turn: Vector3 = tuning.get("bones", {}).get(side + ARM_BONES[joint], Vector3.ZERO)
+			_sliders["%s_%s_x" % [side, joint]].value = turn.x
+			_sliders["%s_%s_y" % [side, joint]].value = turn.y
+			_sliders["%s_%s_z" % [side, joint]].value = turn.z
+		var move: Vector3 = tuning.get("hands", {}).get(side, Vector3.ZERO)
+		_sliders["%s_move_x" % side].value = move.x
+		_sliders["%s_move_y" % side].value = move.y
+		_sliders["%s_move_z" % side].value = move.z
 	_loading = false
 	_apply()
 

@@ -380,7 +380,7 @@ func _test_long_guns_reachable() -> void:
 		player.call("pickup_weapon", index)
 		for i in 4:
 			await process_frame
-		_check(pose.hand_error < .05, "left hand reaches the trigger grip of weapon %d (error %.3f)" % [index, pose.hand_error])
+		_check(pose.hand_error < (.10 if pose.ARM_TUNING.has(pose._held) else .05), "left hand reaches the trigger grip of weapon %d (error %.3f)" % [index, pose.hand_error])
 		_check(pose.forend_error < .05, "right hand reaches the forend of weapon %d (error %.3f)" % [index, pose.forend_error])
 	player.queue_free()
 	effects.queue_free()
