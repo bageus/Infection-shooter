@@ -9,7 +9,11 @@ const VIEWS := {"Right": Vector3(1, 0, 0), "Top": Vector3(0, 1, 0), "Bottom": Ve
 var _actor: Node3D
 var _camera: Camera3D
 var _pose: SkeletonModifier3D
-var _view := "Right"
+var _yaw := PI * .5
+var _pitch := 0.0
+var _distance := 4.5
+var _focus := Vector3(0, .8, 0)
+var _arm_offsets: SkeletonModifier3D
 var _name := "AK"
 var _sliders := {}
 var _readout: TextEdit
@@ -36,10 +40,12 @@ func _ready() -> void:
 	_actor.call("configure_weapon_drop", func(_i: int, _p: Vector3) -> bool: return true)
 	_pose = _actor.get_node("WeaponMount").equipment_pose
 	_camera = Camera3D.new()
-	_camera.projection = Camera3D.PROJECTION_ORTHOGONAL
-	_camera.size = 2.4
+	_camera.fov = 30.0
 	add_child(_camera)
 	_camera.current = true
+	_arm_offsets = preload("res://tools/weapon_hold_arm_offsets.gd").new()
+	_pose.get_skeleton().add_child(_arm_offsets) # last child, so it runs after all other arm modifiers
+	_pose.hand_offset = {"Right": Vector3.ZERO, "Left": Vector3.ZERO}
 	_build_ui()
 	_pick(4)
 
@@ -54,8 +60,31 @@ func _process(_delta: float) -> void:
 	_actor.get_node("Body").global_rotation = Vector3(0.0, atan2(flat.x, flat.z), 0.0)
 	_actor.get_node("WeaponMount").call("aim_at", point)
 	_apply_markers()
-	var center := _actor.global_position + Vector3(0, .8, 0)
-	_camera.look_at_from_position(center + VIEWS[_view] * 4.0, center, Vector3(0, 0, -1) if _view in ["Top", "Bottom"] else Vector3.UP)
+	var offset := Vector3(sin(_yaw) * cos(_pitch), sin(_pitch), cos(_yaw) * cos(_pitch))
+	_camera.look_at_from_position(_actor.global_position + _focus + offset * _distance, _actor.global_position + _focus, Vector3.UP)
+
+
+## Orbit like Blender or the Godot editor: right or middle mouse turns, Shift + middle (or right) pans, wheel zooms.
+func _unhandled_input(event: InputEvent) -> void:
+	if event is InputEventMouseMotion and (event.button_mask & (MOUSE_BUTTON_MASK_MIDDLE | MOUSE_BUTTON_MASK_RIGHT)) != 0:
+		if Input.is_key_pressed(KEY_SHIFT):
+			var right := _camera.global_basis.x
+			var up := _camera.global_basis.y
+			_focus += (-right * event.relative.x + up * event.relative.y) * _distance * .0015
+		else:
+			_yaw -= event.relative.x * .008
+			_pitch = clampf(_pitch + event.relative.y * .008, -1.5, 1.5)
+	elif event is InputEventMouseButton and event.pressed:
+		if event.button_index == MOUSE_BUTTON_WHEEL_UP:
+			_distance = maxf(.8, _distance * .9)
+		elif event.button_index == MOUSE_BUTTON_WHEEL_DOWN:
+			_distance = minf(12.0, _distance * 1.1)
+
+
+func _set_view(view: String) -> void:
+	var direction: Vector3 = VIEWS[view].normalized()
+	_yaw = atan2(direction.x, direction.z)
+	_pitch = clampf(asin(direction.y), -1.5, 1.5)
 
 
 func _build_ui() -> void:
@@ -80,7 +109,7 @@ func _build_ui() -> void:
 	for view in VIEWS:
 		var button := Button.new()
 		button.text = view
-		button.pressed.connect(func() -> void: _view = view)
+		button.pressed.connect(func() -> void: _set_view(view))
 		views.add_child(button)
 	box.add_child(views)
 	_add_slider(box, "Размер оружия", "scale", .3, 1.6, .01)
@@ -94,6 +123,7 @@ func _build_ui() -> void:
 	_add_slider(box, "Точка цевья Grip_L: вперёд по стволу", "l_x", -.4, .4, .005)
 	_add_slider(box, "Точка цевья Grip_L: вниз", "l_y", -.4, .4, .005)
 	_add_slider(box, "Точка цевья Grip_L: вбок", "l_z", -.2, .2, .005)
+	_add_arm_sliders(box)
 	_readout = TextEdit.new()
 	_readout.custom_minimum_size.y = 150
 	_readout.editable = false
@@ -144,8 +174,13 @@ func _apply() -> void:
 	var point := Vector3(_sliders["x"].value, _sliders["y"].value, _sliders["z"].value)
 	_pose.tuning[_name] = [_sliders["scale"].value, point, _sliders["reach"].value]
 	_shift[_name] = {"Grip_R": Vector3(_sliders["r_x"].value, _sliders["r_y"].value, _sliders["r_z"].value), "Grip_L": Vector3(_sliders["l_x"].value, _sliders["l_y"].value, _sliders["l_z"].value)}
+	for side in ["Right", "Left"]:
+		for joint in ARM_BONES:
+			_arm_offsets.offsets[side + ARM_BONES[joint]] = Vector3(_sliders["%s_%s_x" % [side, joint]].value, _sliders["%s_%s_y" % [side, joint]].value, _sliders["%s_%s_z" % [side, joint]].value)
+		_pose.hand_offset[side] = Vector3(_sliders["%s_move_x" % side].value, _sliders["%s_move_y" % side].value, _sliders["%s_move_z" % side].value)
 	var moved: Dictionary = _shift[_name]
 	_readout.text = 'В таблицу LONG_GUN:\n"%s": [%.2f, Vector3(%.3f, %.3f, %.3f)],\n\nВ FOREND_REACH:\n"%s": %.3f' % [_name, _sliders["scale"].value, point.x, point.y, point.z, _name, _sliders["reach"].value]
+	_readout.text += "\n\nРуки (пришли и это):\n" + _arm_text()
 	_readout.text += "\n\nТочки (сдвиг от нынешних, в единицах оружия), пришли это мне:\n%s: Grip_R %s, Grip_L %s" % [_name, moved["Grip_R"], moved["Grip_L"]]
 
 
@@ -176,3 +211,39 @@ func _apply_markers() -> void:
 			marker.add_child(ball)
 		var offset: Vector3 = _shift[_name][marker_name]
 		marker.global_position = weapon.to_global(base[marker_name] + Vector3(offset.x, offset.y, offset.z))
+
+
+const ARM_BONES := {"Shoulder": "Arm", "Elbow": "ForeArm", "Wrist": "Hand"}
+
+
+func _add_arm_sliders(box: Control) -> void:
+	for side in ["Right", "Left"]:
+		var side_title := "правая" if side == "Right" else "левая"
+		for joint in ARM_BONES:
+			for axis in ["x", "y", "z"]:
+				_add_slider(box, "%s рука, %s: поворот %s (градусы)" % [side_title.capitalize(), joint, axis.to_upper()], "%s_%s_%s" % [side, joint, axis], -90.0, 90.0, 1.0)
+		for axis in ["x", "y", "z"]:
+			_add_slider(box, "%s кисть: сдвиг %s (метры)" % [side_title.capitalize(), axis.to_upper()], "%s_move_%s" % [side, axis], -.3, .3, .005)
+	for key in _sliders:
+		if key.begins_with("Right_") or key.begins_with("Left_"):
+			_sliders[key].set_value_no_signal(0.0)
+	var reset := Button.new()
+	reset.text = "Сбросить руки"
+	reset.pressed.connect(func() -> void:
+		for key in _sliders:
+			if key.begins_with("Right_") or key.begins_with("Left_"):
+				_sliders[key].value = 0.0)
+	box.add_child(reset)
+
+
+func _arm_text() -> String:
+	var lines := PackedStringArray()
+	for side in ["Right", "Left"]:
+		for joint in ARM_BONES:
+			var turn: Vector3 = _arm_offsets.offsets.get(side + ARM_BONES[joint], Vector3.ZERO)
+			if not turn.is_zero_approx():
+				lines.append("%s %s: %s" % [side, joint, turn])
+		var move: Vector3 = _pose.hand_offset.get(side, Vector3.ZERO)
+		if not move.is_zero_approx():
+			lines.append("%s кисть сдвиг: %s" % [side, move])
+	return "\n".join(lines) if not lines.is_empty() else "(руки не трогал)"
