@@ -400,5 +400,11 @@
       "name": "PotFragments",
       "path": "res://models/objects/enviroments/11/damage/11_plant_small_potfragments.glb"
     }
+  ],
+  "15_timber_beam.glb": [
+    {
+      "name": "LargeParts",
+      "path": "res://models/objects/enviroments/15/damage/15_timber_beam_largeparts.glb"
+    }
   ]
 }
