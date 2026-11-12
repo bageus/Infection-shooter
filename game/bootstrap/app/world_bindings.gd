@@ -8,7 +8,7 @@ var _container: Node3D
 var _impacts: Node
 var _player: Node3D
 var _drop_weapon: Callable
-var _carried_weapons: Callable
+var _loot_needs: Callable
 var _displays: Node
 var _visual_budget: Node
 var _chase_budget: Node
@@ -20,7 +20,7 @@ func _init(container: Node3D, impacts: Node, player: Node3D, drop_weapon: Callab
 	_impacts = impacts
 	_player = player
 	_drop_weapon = drop_weapon
-	_carried_weapons = Callable(player, "carried_weapon_indices")
+	_loot_needs = Callable(self, "_needs_snapshot").bind(player)
 	_displays = displays
 	if is_instance_valid(_container):
 		_chase_budget = CHASE_BUDGET.new()
@@ -54,7 +54,7 @@ func _bind_collaborators(node: Node) -> void:
 	if node.has_method("configure_weapon_drop"):
 		node.call("configure_weapon_drop", _drop_weapon)
 	if node.has_method("configure_loot_drop"):
-		node.call("configure_loot_drop", _drop_weapon, _carried_weapons)
+		node.call("configure_loot_drop", _drop_weapon, _loot_needs)
 	if node.has_method("configure_player"):
 		node.call("configure_player", _player)
 	if node.has_method("configure_world"):
@@ -65,3 +65,15 @@ func _bind_collaborators(node: Node) -> void:
 
 
 
+## What the player needs right now, for auto crate loot (see loot_config.gd crate_weights).
+func _needs_snapshot(player: Node3D) -> Dictionary:
+	var carried: Array[int] = player.carried_weapon_indices()
+	var weapons: Array = player.get("weapons")
+	var reserve := {}
+	for index in carried:
+		var gun: Node = weapons[index]
+		var cap := float(gun.get("max_reserve_ammo"))
+		if cap > 0.0 and gun.has_method("carried_ammo"):
+			reserve[index] = float(gun.call("carried_ammo")) / cap
+	var max_health := maxf(float(player.get("max_health")), 1.0)
+	return {"carried": carried, "reserve": reserve, "health": float(player.get("health")) / max_health, "antidotes": int(player.get("antidotes"))}
