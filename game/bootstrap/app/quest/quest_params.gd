@@ -172,12 +172,11 @@ func _refresh_candidates() -> void:
 	trigger_target.add_item("— объект не выбран —")
 	if not target_picker.is_inside_tree():
 		return
-	for node: Node in target_picker.get_tree().get_nodes_in_group(TARGET.GROUP):
-		if node is Node3D:
-			BOOK.ensure_id(node) # targets flagged before quests existed have no id yet
-			_candidates.append(node)
-			target_picker.add_item(_describe(node))
-			trigger_target.add_item(_describe(node))
+	for node in BOOK.candidates(target_picker.get_tree()):
+		BOOK.ensure_id(node) # targets flagged before quests existed have no id yet
+		_candidates.append(node)
+		target_picker.add_item(_describe(node))
+		trigger_target.add_item(_describe(node))
 	var current: String = _quest().trigger.target
 	for i in _candidates.size():
 		if str(_candidates[i].get_meta(BOOK.ID_META)) == current:
@@ -186,7 +185,8 @@ func _refresh_candidates() -> void:
 
 func _describe(node: Node3D) -> String:
 	var file := str(node.get_meta(&"planning_scene_path", node.name)).get_file().get_basename()
-	return "%s (%.0f; %.0f)" % [file, node.global_position.x, node.global_position.z]
+	var label := "%s (%.0f; %.0f)" % [file, node.global_position.x, node.global_position.z]
+	return label + " [ключ]" if BOOK.drops_key(node) else label
 
 
 func _name_of(id: String) -> String:
@@ -266,7 +266,7 @@ func _point_marker(quest: Dictionary) -> void:
 
 
 func is_candidate_list_current() -> bool:
-	return target_picker.is_inside_tree() and _candidates.size() == target_picker.get_tree().get_nodes_in_group(TARGET.GROUP).size()
+	return target_picker.is_inside_tree() and _candidates.size() == BOOK.candidates(target_picker.get_tree()).size()
 
 
 func show_point(shown: bool) -> void:

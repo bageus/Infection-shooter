@@ -5,6 +5,7 @@ extends Node
 const LOGIC := preload("res://game/bootstrap/app/quest/quest_logic.gd")
 const BOOK := preload("res://game/bootstrap/app/quest/quest_book.gd")
 const TARGET := preload("res://game/presentation/office_floor/public/tutorial_target.gd")
+const DROP_TABLE := preload("res://game/features/pickups/public/drop_table.gd")
 const MESSAGE_SECONDS := 6.0
 const TELEPORT := 3.0
 const MODEL := preload("res://game/bootstrap/app/quest/quest_model.gd")
@@ -135,7 +136,7 @@ func _trigger_context() -> Dictionary:
 		reach = _flat(Vector3(float(point[0]), 0.0, float(point[1])))
 	return {"idle": _idle, "steps": _steps_since_start(), "reach": reach, "mutation_gain": _track_mutation(),
 			"menu_open": _menu_open(), "control_lost": _control_lost(),
-			"trigger_collected": _trigger_existed and not _alive(_trigger_node)}
+			"trigger_collected": _trigger_existed and _gone(_trigger_node)}
 
 
 func _track_mutation() -> float:
@@ -200,12 +201,28 @@ func _quest_done(quest: Dictionary) -> bool:
 	var context := {"steps": _steps_since_start(), "distances": [], "gone": []}
 	for node in _targets:
 		var alive := _alive(node)
-		(context.gone as Array).append(not alive)
+		(context.gone as Array).append(_gone(node))
 		if alive:
 			(context.distances as Array).append(_flat((node as Node3D).global_position))
 	if str(quest.type) == "lesson":
 		context["lesson_done"] = director == null or bool(director.call("is_finished", str(quest.lesson)))
 	return LOGIC.complete(quest, context)
+
+
+## Gone for good: not alive, and no key it drops is still lying on the floor.
+func _gone(node: Variant) -> bool:
+	if _alive(node):
+		return false
+	return not is_instance_valid(node) or not _key_on_floor(str((node as Node).get_meta(BOOK.ID_META, "")))
+
+
+func _key_on_floor(source_id: String) -> bool:
+	if source_id.is_empty():
+		return false
+	for key in get_tree().get_nodes_in_group(DROP_TABLE.DROP_GROUP):
+		if str(key.get_meta(&"key_source_id", "")) == source_id and not key.is_queued_for_deletion():
+			return true
+	return false
 
 
 ## Standing, alive and not yet taken.

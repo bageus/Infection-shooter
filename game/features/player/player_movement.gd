@@ -29,6 +29,7 @@ const WEAPON_STANCE := preload("res://game/features/player/player_weapon_stance.
 const ANIMATION_SELECTION := preload("res://game/features/player/player_animation_selection.gd")
 const PLAYER_AUDIO := preload("res://game/features/player/player_audio.gd")
 const HEAL_FEEDBACK := preload("res://game/features/player/player_heal_feedback.gd")
+const HIT_FEEDBACK := preload("res://game/features/player/player_hit_feedback.gd")
 @export var move_speed: float = 5.4
 var _walk_speed_multiplier := 1.0
 @export var sprint_speed: float = 8.1
@@ -88,6 +89,7 @@ var _camera_distance := 0.0
 var _view_adjustment := preload("res://game/features/player/camera_adjustment.gd").new()
 var camera_stair_room := false # set by bootstrap; eases the camera pitch
 var _stun_remaining := 0.0
+var _hit_feedback := HIT_FEEDBACK.new()
 var _stun_intensity := 0.0
 var _stun_rotation := 0
 var _stun_ringing: AudioStreamPlayer
@@ -131,6 +133,7 @@ func _ready() -> void:
 	heal_feedback.name = "HealFeedback"
 	add_child(heal_feedback)
 	heal_feedback.configure(self)
+	_hit_feedback.configure(self)
 func _physics_process(delta: float) -> void:
 	weapon_stance.tick(delta, _has_presentation_activity())
 	if _stun_remaining > 0.0:
@@ -289,7 +292,6 @@ func get_current_weapon()->Node3D:
 
 func get_weapon_in_slot(index: int) -> int:
 	return _slot_weapons[index] if index >= 0 and index < _slot_weapons.size() else -1
-
 func pickup_weapon(index: int) -> bool:
 	if index < 0 or index >= weapons.size() or _slot_weapons.has(index):
 		return false
@@ -308,12 +310,10 @@ func pickup_weapon(index: int) -> bool:
 	_select_weapon(slot)
 	_play_sound(&"weapon_pickup")
 	return true
-
 ## Weapon slots, armor and each weapon's reserve carried to the next map of a level chain
 ## (health and key start fresh).
 func export_loadout() -> Dictionary:
 	return {"slots": _slot_weapons.duplicate(), "armor": armor, "ammo": weapons.map(func(gun: Node) -> int: return int(gun.call("carried_ammo")))}
-
 func import_loadout(loadout: Dictionary) -> void:
 	armor = clampf(float(loadout.get("armor", 0.0)), 0.0, max_armor)
 	var ammo: Variant = loadout.get("ammo")
@@ -332,7 +332,6 @@ func import_loadout(loadout: Dictionary) -> void:
 	if seen[0] < 0: return # Slot 0 always holds a weapon: pickups fill empty slots from the first one.
 	_slot_weapons = seen
 	_select_weapon(0)
-
 ## Manual hero spawn from the planner replaces the start state; automatic settings change nothing.
 ## Called with {} after a carry from the previous map, to set the stored manual spawn over it.
 func apply_hero_spawn(hero: Dictionary) -> void:
@@ -340,7 +339,6 @@ func apply_hero_spawn(hero: Dictionary) -> void:
 		_manual_hero_spawn = hero
 	if not _manual_hero_spawn.is_empty():
 		HERO_START.apply(self, _manual_hero_spawn)
-
 ## Weapon slot indices the player holds now; empty slots are left out.
 func carried_weapon_indices() -> Array[int]:
 	var carried: Array[int] = []
@@ -369,6 +367,7 @@ func _play_sound(event: StringName) -> void:
 func has_emergency_key() -> bool:
 	return _emergency_key
 func get_current_weapon_index()->int: return current_weapon_index
+func note_hit_direction(direction: Vector3) -> void: _hit_feedback.direction = direction # recoil of the next hit
 func take_damage(amount: float, damage_type: String = "physical") -> void:
 	_apply_damage(amount, damage_type, global_position, Vector3.FORWARD, damage_type)
 
@@ -389,6 +388,7 @@ func _apply_damage(amount: float, damage_type: String, point: Vector3, direction
 	var absorbed:=remaining if armor_capped and armor > 0.0 else minf(armor,remaining)
 	armor=maxf(0.0,armor-absorbed); remaining-=absorbed
 	if absorbed > 0.0: _play_sound(&"armored_absorb")
+	_hit_feedback.play(absorbed > 0.0)
 	_wound += minf(remaining, health); health=maxf(0.0,health-remaining)
 	if health <= 0.0 and mutation_effects.call("survive_lethal"):
 		health = MUTATION_BALANCE.value("second_heart", "health")

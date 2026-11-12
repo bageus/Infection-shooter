@@ -10,7 +10,8 @@
     "Owned weapon slots and emergency key possession",
     "Uncontrolled mutation movement and aim phase",
     "Player weapon presentation stance and gameplay activity timers",
-    "Heal feedback effects (pickup burst, sparkles, floating HP numbers)"
+    "Heal feedback effects (pickup burst, sparkles, floating HP numbers)",
+    "Hit feedback (white or light-blue body flash, recoil)"
   ],
   "public_api": [
     "public/player.tscn"
