@@ -8,8 +8,15 @@ var _failures := 0
 class FakePlayer:
 	extends StaticBody3D
 	var damage_taken := 0.0
+	var health := 100.0
+	var armor := 0.0
+	var stuns: Array = []
 	func take_damage(amount: float, _kind: String = "physical") -> void:
 		damage_taken += amount
+		health -= amount
+		armor = 0.0
+	func apply_blast_stun(duration: float, _intensity: float) -> void:
+		stuns.append(duration)
 
 
 func _init() -> void:
@@ -29,6 +36,7 @@ func _run() -> void:
 	for dodge in [false, true]:
 		await _round(stage, dodge, false)
 	await _round(stage, false, true)
+	await _test_stun_and_shape(stage)
 	print("Titan throw tests, failures: %d" % _failures)
 	quit(_failures)
 
@@ -88,3 +96,28 @@ func _expect(condition: bool, message: String) -> void:
 		push_error("FAIL: " + message)
 	else:
 		print("PASS: " + message)
+
+
+# A centred rock hit stuns for 1 s, a glancing one for 0.5 s, and every rock has its own shape.
+func _test_stun_and_shape(stage: Node3D) -> void:
+	var target := FakePlayer.new()
+	target.add_to_group("player")
+	stage.add_child(target)
+	target.global_position = Vector3(0, 1.0, 0)
+	for miss in [0.0, 1.0]:
+		var rock := preload("res://game/features/infected/titan_rock.gd").new() as Node3D
+		stage.add_child(rock)
+		rock.set("damage", 10.0)
+		rock.call("launch", Vector3(0, 1, -8), target.global_position + Vector3(miss, 0, 0), 0.2)
+		await create_timer(0.5).timeout
+	_expect(target.stuns.size() == 2, "Each rock hit stuns the player.")
+	if target.stuns.size() == 2:
+		_expect(is_equal_approx(target.stuns[0], 1.0), "A centred hit stuns for 1 s.")
+		_expect(target.stuns[1] >= 0.5 and target.stuns[1] < 0.6, "A glancing hit stuns for about 0.5 s.")
+	var sizes := {}
+	for i in 5:
+		var rock := preload("res://game/features/infected/titan_rock.gd").new() as Node3D
+		stage.add_child(rock)
+		sizes[((rock.get_child(0) as MeshInstance3D).mesh as ArrayMesh).get_aabb().size] = true
+	_expect(sizes.size() >= 4, "Rocks differ in shape.")
+	target.queue_free()
