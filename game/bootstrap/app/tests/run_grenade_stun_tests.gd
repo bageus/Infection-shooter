@@ -50,7 +50,7 @@ func _run() -> void:
 	var speed := before - chaser.position.x
 	_expect(speed > 0.5, "test enemy chases before the blast (%.2f)" % speed)
 	BLAST.explode(anchor, chaser.position + Vector3(2, 0.5, 0), Vector3.UP, null, stage, null)
-	_expect(float(chaser.get("_blast_stun_remaining")) > 0.5 and float(chaser.get("health")) > 0.0, "surviving chaser is stunned")
+	_expect(float(chaser.get("_blast_stun_remaining")) > 2.5 and float(chaser.get("health")) > 0.0, "surviving chaser gets a full stun at 2 m")
 	var x0 := chaser.position.x
 	for _frame in 30:
 		await physics_frame
