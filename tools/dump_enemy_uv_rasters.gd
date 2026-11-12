@@ -1,7 +1,7 @@
 extends SceneTree
 ## Rasterises per-vertex geometry data of the enemy game meshes into UV space for
 ## tools/build_enemy_glow_masks.py: R = blister bump (how far a vertex sits above
-## its Laplacian-smoothed neighbourhood), G = head region (top 0.28 m of the model).
+## its Laplacian-smoothed neighbourhood), G = head region (top 0.28 m of the model), B = height inside that region.
 ## usage: godot --headless --path . -s tools/dump_enemy_uv_rasters.gd -- <out dir>
 const NAMES := ["Brute", "Colossus", "Titan", "Horde", "Revenant", "Hunger"]
 const SIZE := 1024
@@ -57,12 +57,15 @@ func _dump(n: String, out: String, verts: PackedVector3Array, normals: PackedVec
 		smooth = next
 	var bump := PackedFloat32Array()
 	bump.resize(verts.size())
+	var heady := PackedFloat32Array()
+	heady.resize(verts.size())
 	var head := PackedFloat32Array()
 	head.resize(verts.size())
 	for i in verts.size():
 		var g := group[i]
 		bump[i] = clampf((pos[g] - smooth[g]).dot(nor[g].normalized()) / BUMP_RANGE, 0.0, 1.0)
 		head[i] = 1.0 if verts[i].y > box.end.y - 0.28 else 0.0
+		heady[i] = clampf((verts[i].y - (box.end.y - 0.28)) / 0.28, 0.0, 1.0)
 	var image := Image.create(SIZE, SIZE, false, Image.FORMAT_RGB8)
 	for t in idx.size() / 3:
 		var tri: Array[Vector2] = []
@@ -70,7 +73,7 @@ func _dump(n: String, out: String, verts: PackedVector3Array, normals: PackedVec
 		for k in 3:
 			var vi := idx[t * 3 + k]
 			tri.append(uvs[vi] * SIZE)
-			val.append(Color(bump[vi], head[vi], 0.0))
+			val.append(Color(bump[vi], head[vi], heady[vi]))
 		_fill(image, tri, val)
 	image.save_png("%s/%s_raster.png" % [out, n])
 
