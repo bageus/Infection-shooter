@@ -5,10 +5,10 @@ extends RefCounted
 const MODES: Array[String] = ["empty", "manual", "auto"]
 const WEAPON_PREFIX := "weapon_"
 const WEAPON_NAMES: Array[String] = ["Pistol", "Uzi", "Shotgun", "Launcher", "AK", "M4", "Sniper", "Minigun"]
-const SUPPLIES: Array[String] = ["ammo_pistol", "ammo_uzi", "ammo_shotgun", "ammo_automate", "ammo_sniper", "ammo_minigun", "ammo_grenade", "medkit", "antidote", "dna", "armor"]
+const SUPPLIES: Array[String] = ["ammo_pistol", "ammo_uzi", "ammo_shotgun", "ammo_automate", "ammo_sniper", "ammo_minigun", "ammo_grenade", "medkit", "antidote", "dna", "armor", "key"]
 const MAX_COUNT := 9
 ## Antidote is rarer than other supplies in auto loot. Grenade rounds are as rare as sniper rounds.
-## Armor and DNA are manual only: auto loot never rolls them.
+## Armor, DNA and keys are manual only: auto loot never rolls them.
 const AUTO_WEIGHTS := {"ammo_pistol": 0.75, "ammo_uzi": 0.60, "ammo_shotgun": 0.60, "ammo_automate": 0.60, "ammo_sniper": 0.15, "ammo_minigun": 0.20, "ammo_grenade": 0.15, "medkit": 1.0, "antidote": 0.35}
 ## Weapon slot indices (WEAPON_NAMES order) that take each ammo id.
 const AMMO_WEAPONS := {"ammo_pistol": [0], "ammo_uzi": [1], "ammo_shotgun": [2], "ammo_grenade": [3], "ammo_automate": [4, 5], "ammo_sniper": [6], "ammo_minigun": [7]}
