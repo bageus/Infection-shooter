@@ -23,7 +23,6 @@ const KICK_WIDTH := 1.8
 const KICK_HEIGHT := 1.2
 ## Impulse (kg*m/s) behind a kick, split by the item's mass and capped in speed.
 const KICK_IMPULSE := 25.0 # heavy items move only a little; was 90, which sent a 27 kg cabinet at 3.3 m/s
-const KICK_MIN_SPEED := 1.5
 const KICK_MAX_SPEED := 8.0
 ## Metres a kick shoves an enemy it lands on.
 const KICK_ENEMY_PUSH := 1.0
@@ -175,7 +174,7 @@ static func _throw(body: RigidBody3D, from: Vector3) -> void:
 	away.y = 0.0
 	if away.length_squared() < 0.0001:
 		return
-	var speed := clampf(KICK_IMPULSE / maxf(body.mass, 0.01), KICK_MIN_SPEED, KICK_MAX_SPEED)
+	var speed := minf(KICK_IMPULSE / maxf(body.mass, 0.01), KICK_MAX_SPEED) # No floor: heavy items must not be flung at a minimum speed.
 	body.sleeping = false
 	body.apply_central_impulse((away.normalized() + Vector3.UP * 0.25) * speed * body.mass)
 	body.apply_torque_impulse(Vector3.UP.cross(away.normalized()) * speed * body.mass * 0.08)
