@@ -1,7 +1,7 @@
 [gd_scene load_steps=5 format=3]
 
 [ext_resource type="Script" path="res://game/features/character_animation/public/character_animation_driver.gd" id="1_driver"]
-[ext_resource type="Script" path="res://game/features/infected/infected_capsule.gd" id="2_enemy"]
+[ext_resource type="Script" path="res://game/features/infected/infected_brute.gd" id="2_enemy"]
 [ext_resource type="PackedScene" path="res://game/features/infection_source/public/mutagen_cloud.tscn" id="3_cloud"]
 [ext_resource type="PackedScene" path="res://models/objects/characters/enemy/game/Brute_rig.tscn" id="4_rig"]
 
