@@ -24,6 +24,7 @@ const SFX := preload("res://game/core/audio/public/sound_events.gd")
 const BLAST_FEEDBACK := preload("res://game/bootstrap/app/blast_feedback.gd")
 const DEBUG_OVERLAY := preload("res://game/bootstrap/app/runtime_debug_overlay.gd")
 const OCCLUSION := preload("res://game/bootstrap/app/occlusion_effects.gd")
+const ENEMY_HEALTH_BARS := preload("res://game/bootstrap/app/enemy_health_bars.gd")
 const MISSION_LAYOUT := preload("res://game/bootstrap/app/mission_layout.gd")
 const LEVEL_ENTRIES := preload("res://game/bootstrap/app/level_entry_runtime.gd")
 const CHECKPOINT := preload("res://game/bootstrap/app/checkpoint_progress.gd")
@@ -67,6 +68,7 @@ var planning_lighting: Node
 var mutation_tree_ui: CanvasLayer
 var mission_layout: Node3D
 var blood_effects: Node3D
+var enemy_health_bars: Control
 
 
 # Before any child reads user://: carry saves over from the old project name.
@@ -141,6 +143,10 @@ func _ready() -> void:
 	occlusion.name = "OcclusionEffects"
 	add_child(occlusion)
 	occlusion.setup(player, player.get("camera") as Camera3D, self)
+	enemy_health_bars = ENEMY_HEALTH_BARS.new()
+	enemy_health_bars.name = "EnemyHealthBars"
+	add_child(enemy_health_bars)
+	enemy_health_bars.call("setup", player.get("camera") as Camera3D)
 	if OS.is_debug_build(): # F3 diagnostics stay out of release exports
 		var debug := DEBUG_OVERLAY.new()
 		debug.name = "RuntimeDebug"
@@ -222,6 +228,12 @@ func set_tutorial_hint(target: Callable) -> void:
 func set_floor_hints_enabled(enabled: bool) -> void:
 	if is_instance_valid(mission_layout):
 		mission_layout.call("set_floor_hints_enabled", enabled)
+
+
+## Settings: a small health bar above each live enemy.
+func set_enemy_health_bars_enabled(enabled: bool) -> void:
+	if is_instance_valid(enemy_health_bars):
+		enemy_health_bars.call("set_enabled", enabled)
 
 
 ## Settings: blood level 0..3 (green at 0, amount, flight distance) and own procedural blood instead of the decal atlases.
