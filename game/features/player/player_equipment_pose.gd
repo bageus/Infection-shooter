@@ -68,15 +68,6 @@ func _ready() -> void:
 	backpack.rotation.y = PI
 	backpack.position = Vector3(0, .10, -.23)
 	backpack.hide()
-	# Faint always-on light from the pack so the hero stays readable in the dark (one light, no shadows).
-	var glow := OmniLight3D.new()
-	glow.name = "BackpackGlow"
-	glow.light_color = Color(0.7, 0.85, 1.0)
-	glow.light_energy = 0.5
-	glow.omni_range = 2.4
-	glow.shadow_enabled = false
-	glow.position = Vector3(0, 0.35, 0.3)
-	_back_attachment.add_child(glow)
 
 
 func _process_modification_with_delta(_delta: float) -> void:
