@@ -8,7 +8,7 @@
 bind_count = 22
 bind/0/name = &""
 bind/0/bone = 0
-bind/0/pose = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.95117724, 0)
+bind/0/pose = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.95132214, 0)
 bind/1/name = &""
 bind/1/bone = 1
 bind/1/pose = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.01999998, 0.004)
@@ -73,21 +73,21 @@ bind/21/name = &""
 bind/21/bone = 21
 bind/21/pose = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.191, 0.911, -0.11699999)
 
-[node name="Visual" type="Node3D" unique_id=568698262]
+[node name="Visual" type="Node3D" unique_id=1332109544]
 
-[node name="Skeleton3D" type="Skeleton3D" parent="." unique_id=839479071]
+[node name="Skeleton3D" type="Skeleton3D" parent="." unique_id=223577088]
 bones/0/name = "Root"
 bones/0/parent = -1
-bones/0/rest = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.95117724, 0)
+bones/0/rest = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.95132214, 0)
 bones/0/enabled = true
-bones/0/position = Vector3(0, -0.95117724, 0)
+bones/0/position = Vector3(0, -0.95132214, 0)
 bones/0/rotation = Quaternion(0, 0, 0, 1)
 bones/0/scale = Vector3(1, 1, 1)
 bones/1/name = "Hips"
 bones/1/parent = 0
-bones/1/rest = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.93117726, -0.004)
+bones/1/rest = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.93132216, -0.004)
 bones/1/enabled = true
-bones/1/position = Vector3(0, 0.93117726, -0.004)
+bones/1/position = Vector3(0, 0.93132216, -0.004)
 bones/1/rotation = Quaternion(0, 0, 0, 1)
 bones/1/scale = Vector3(1, 1, 1)
 bones/2/name = "Spine"
@@ -231,11 +231,11 @@ bones/21/position = Vector3(0, -0.051, 0.129)
 bones/21/rotation = Quaternion(0, 0, 0, 1)
 bones/21/scale = Vector3(1, 1, 1)
 
-[node name="Mesh" type="MeshInstance3D" parent="Skeleton3D" unique_id=213222360]
+[node name="Mesh" type="MeshInstance3D" parent="Skeleton3D" unique_id=963692150]
 mesh = ExtResource("1_5rw83")
 skin = SubResource("Skin_2r47k")
 skeleton = NodePath("..")
 surface_material_override/0 = ExtResource("2_ap5em")
 
-[node name="AnimationPlayer" type="AnimationPlayer" parent="." unique_id=2022532749]
+[node name="AnimationPlayer" type="AnimationPlayer" parent="." unique_id=1781813465]
 libraries/ = ExtResource("3_vcgbb")
