@@ -35,6 +35,7 @@ func _run() -> void:
 	_far_cost()
 	_responsiveness()
 	_custom_trigger()
+	_fallen_door()
 	await _glass_coordinates_and_collision()
 	stage.free()
 	await process_frame
@@ -145,6 +146,25 @@ func _custom_trigger() -> void:
 	door.call("_physics_process", 0.1)
 	_expect(door.get("_open_amount") == 0.0, "One-way door does not open from the forbidden side")
 	door.get_parent().free()
+
+
+# A door laid on its side (planner lay) stays shut; an upright door at the same spot opens.
+func _fallen_door() -> void:
+	player.key = false
+	var fallen := _door(Vector3.ZERO)
+	fallen.get_parent().basis = Basis.from_euler(Vector3(PI * 0.5, 0.0, 0.0))
+	player.position = Vector3(0.5, 0.0, 0.0)
+	for tick in 30: fallen.call("_physics_process", 0.05)
+	_expect(float(fallen.get("_open_amount")) == 0.0, "Door laid on its side does not open when the player approaches")
+	fallen.call("request_open")
+	fallen.call("_physics_process", 0.05)
+	_expect(float(fallen.get("_open_amount")) == 0.0, "Door laid on its side ignores remote open requests")
+	fallen.get_parent().free()
+	var upright := _door(Vector3(10, 0, 0))
+	player.position = Vector3(10.5, 0.0, 0.0)
+	upright.call("_physics_process", 0.05)
+	_expect(float(upright.get("_open_amount")) > 0.0, "Upright door at the same distance opens (control)")
+	upright.get_parent().free()
 
 
 func _glass_coordinates_and_collision() -> void:
