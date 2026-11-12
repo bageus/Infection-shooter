@@ -363,28 +363,39 @@ func _slam_keys(style: Dictionary) -> Array:
 	return [[0.0, stance], [0.40, raise], [0.46, raise], [0.52, swing_down], [0.56, impact], [0.64, shudder], [0.72, impact], [1.0, stance]]
 
 
-# Stoop and rip a rock off the floor (0.30), haul it overhead, then hurl it forward (0.62).
+# Stoop and grab a rock off the floor (0.28-0.34), lift it (0.50), deep wind-up: twist and lean
+# back with the rock behind the head and the weight on the back leg (0.62), then hurl it with a
+# long step forward (0.72). Fractions match infected_titan.gd (grab 0.34, release 0.72).
 func _throw_keys(style: Dictionary) -> Array:
 	var stance := _stance(style)
 	var crouch := stance.duplicate()
 	crouch.merge({
-		"lean": 52.0, "neck": 10.0, "head": -26.0, "hips_y": -0.2 * hips_height,
-		"L_flex": 70.0, "R_flex": 70.0, "L_abd": 8.0, "R_abd": 8.0, "L_elbow": 30.0, "R_elbow": 30.0,
-		"L_knee": 70.0, "R_knee": 64.0, "L_swing": 40.0, "R_swing": 36.0, "L_ankle": -20.0, "R_ankle": -18.0,
+		"lean": 58.0, "neck": 10.0, "head": -30.0, "hips_y": -0.24 * hips_height, "twist": 8.0,
+		"L_flex": 55.0, "R_flex": 55.0, "L_abd": 10.0, "R_abd": 10.0, "L_elbow": 22.0, "R_elbow": 22.0,
+		"L_knee": 78.0, "R_knee": 70.0, "L_swing": 44.0, "R_swing": 40.0, "L_ankle": -22.0, "R_ankle": -20.0,
 	}, true)
-	var haul := stance.duplicate()
-	haul.merge({
-		"lean": -16.0, "head": -18.0, "hips_y": 0.01 * hips_height,
-		"L_flex": 150.0, "R_flex": 150.0, "L_abd": 14.0, "R_abd": 14.0, "L_elbow": 70.0, "R_elbow": 70.0,
-		"L_shrug": 16.0, "R_shrug": 16.0, "L_knee": 8.0, "R_knee": 8.0,
+	var lift := stance.duplicate()
+	lift.merge({
+		"lean": 8.0, "head": -10.0, "hips_y": -0.04 * hips_height,
+		"L_flex": 105.0, "R_flex": 105.0, "L_abd": 12.0, "R_abd": 12.0, "L_elbow": 80.0, "R_elbow": 80.0,
+		"L_knee": 24.0, "R_knee": 20.0, "L_swing": 10.0, "R_swing": 10.0,
+	}, true)
+	var windup := stance.duplicate()
+	windup.merge({
+		"lean": -24.0, "neck": -4.0, "head": -22.0, "twist": -34.0, "hips_yaw": -14.0, "hips_z": -0.07 * hips_height,
+		"hips_y": -0.1 * hips_height, "L_flex": 150.0, "R_flex": 172.0, "L_abd": 22.0, "R_abd": 10.0,
+		"L_elbow": 62.0, "R_elbow": 96.0, "L_shrug": 18.0, "R_shrug": 22.0,
+		"L_swing": 24.0, "R_swing": -20.0, "L_knee": 20.0, "R_knee": 46.0,
 	}, true)
 	var release := stance.duplicate()
 	release.merge({
-		"lean": 30.0, "head": -12.0, "hips_y": -0.06 * hips_height,
-		"L_flex": 40.0, "R_flex": 40.0, "L_elbow": 6.0, "R_elbow": 6.0, "L_protract": 14.0, "R_protract": 14.0,
-		"L_swing": 14.0, "R_swing": 28.0, "L_knee": 22.0, "R_knee": 30.0,
+		"lean": 38.0, "neck": 8.0, "head": -14.0, "twist": 26.0, "hips_yaw": 12.0, "hips_z": 0.1 * hips_height,
+		"hips_y": -0.16 * hips_height, "L_flex": 30.0, "R_flex": 52.0, "L_abd": 30.0, "R_elbow": 8.0, "L_elbow": 18.0,
+		"R_protract": 18.0, "L_swing": 52.0, "L_knee": 56.0, "R_swing": -26.0, "R_knee": 24.0, "L_ankle": -14.0,
 	}, true)
-	return [[0.0, stance], [0.30, crouch], [0.38, crouch], [0.54, haul], [0.62, haul], [0.70, release], [1.0, stance]]
+	var follow := release.duplicate()
+	follow.merge({"lean": 30.0, "twist": 14.0, "R_flex": 22.0, "R_elbow": 14.0}, true)
+	return [[0.0, stance], [0.28, crouch], [0.34, crouch], [0.50, lift], [0.62, windup], [0.66, windup], [0.72, release], [0.82, follow], [1.0, stance]]
 
 
 # ---------------------------------------------------------------- pose maths
