@@ -16,7 +16,7 @@ DIR = "models/objects/characters/enemy/game/"
 SIZE = 1024
 # Pupil centres in rest space, measured on each face: x of both eyes and depth below the top of the model.
 # The front of the face is +z.
-PUPILS = {"Hunger": ((-0.040, 0.021), 0.150), "Brute": ((-0.048, 0.025), 0.165), "Revenant": ((-0.0575, 0.0247), 0.151)}
+PUPILS = {"Hunger": ((-0.044, 0.040), 0.125), "Brute": ((-0.048, 0.025), 0.165), "Revenant": ((-0.0575, 0.0247), 0.151)}
 EYE_RADIUS = 0.0085
 
 
