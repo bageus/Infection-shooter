@@ -139,6 +139,9 @@ func _write_texture(enemy_name: String, source_index: int, suffix: String) -> bo
 
 
 func _write_material(enemy_name: String) -> void:
+	# Keep existing material tuning (glow colour, energy) as set by the glow pass; only write a missing file.
+	if FileAccess.file_exists(OUTPUT_DIR + enemy_name + "_game.tres"):
+		return
 	var text := """[gd_resource type="StandardMaterial3D" load_steps=4 format=3]
 
 [ext_resource type="Texture2D" path="%s%s_albedo.jpg" id="1_albedo"]
@@ -152,10 +155,9 @@ albedo_texture = ExtResource("1_albedo")
 roughness = 0.8
 normal_enabled = true
 normal_texture = ExtResource("2_normal")
-# Glowing eyes and blisters: masks come from tools/build_enemy_glow_masks.py.
 emission_enabled = true
-emission = Color(1, 1, 1, 1)
-emission_energy_multiplier = 1.0
+emission = Color(1, 0.35, 0.1, 1)
+emission_energy_multiplier = 0.3
 emission_texture = ExtResource("3_glow")
 """ % [OUTPUT_DIR, enemy_name, OUTPUT_DIR, enemy_name, OUTPUT_DIR, enemy_name, enemy_name]
 	var file := FileAccess.open(OUTPUT_DIR + enemy_name + "_game.tres", FileAccess.WRITE)
