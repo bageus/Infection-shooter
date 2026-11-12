@@ -25,6 +25,7 @@ func _run() -> void:
 	revenant.global_position = Vector3.ZERO
 	await process_frame
 
+	revenant.set_physics_process(false) # Only the explicit scans below count kills.
 	var corpses: Array[Corpse] = []
 	for i in 4:
 		var enemy := Corpse.new()
@@ -40,21 +41,49 @@ func _run() -> void:
 
 	revenant.call("_scan_kills")
 	_check(revenant.get("_known").size() == 4, "Only the four nearby enemies are remembered.")
+	# Chance 1 with four kills: the fourth death starts berserk, the first three do not.
+	revenant.set("berserk_chance", 1.0)
+	revenant.set("_kills_needed", 4)
 	corpses[0].dead = true
 	corpses[0].remove_from_group("infected_alive")
 	revenant.call("_scan_kills")
-	_check(int(revenant.get("_kills_seen")) == 1, "A nearby death is counted once.")
 	revenant.call("_scan_kills")
-	_check(int(revenant.get("_kills_seen")) == 1, "A death is not counted again on the next scan.")
-
-	for enemy in corpses.slice(1):
+	_check(int(revenant.get("_kills_seen")) == 1, "A nearby death is counted once, not again on the next scan.")
+	for enemy in corpses.slice(1, 3):
 		enemy.dead = true
 		enemy.remove_from_group("infected_alive")
 	revenant.call("_scan_kills")
-	# Three or four kills either start berserk or reset the count and roll a new threshold.
-	var needed := int(revenant.get("_kills_needed"))
-	_check(bool(revenant.get("berserk")) or (int(revenant.get("_kills_seen")) == 0 and needed >= 3 and needed <= 4),
-		"Four nearby deaths either start berserk or restart the count.")
+	_check(not bool(revenant.get("berserk")) and int(revenant.get("_kills_seen")) == 3, "Three kills of four needed do not start berserk.")
+	corpses[3].dead = true
+	corpses[3].remove_from_group("infected_alive")
+	revenant.call("_scan_kills")
+	_check(bool(revenant.get("berserk")), "The fourth nearby death starts berserk when the chance is 1.")
+
+	# Chance 0 with three kills needed: the roll fails, the count restarts and a new threshold is rolled.
+	var second := REVENANT.instantiate() as CharacterBody3D
+	stage.add_child(second)
+	second.global_position = Vector3(0.0, 0.0, 0.0)
+	second.set_physics_process(false)
+	await process_frame
+	second.set("berserk_chance", 0.0)
+	second.set("_kills_needed", 3)
+	var fresh: Array[Corpse] = []
+	for i in 3:
+		var enemy := Corpse.new()
+		enemy.add_to_group("infected_alive")
+		stage.add_child(enemy)
+		enemy.global_position = Vector3(1.0 + i * 0.5, 0.0, 1.0)
+		fresh.append(enemy)
+	second.call("_scan_kills")
+	for enemy in fresh:
+		enemy.dead = true
+		enemy.remove_from_group("infected_alive")
+	second.call("_scan_kills")
+	_check(not bool(second.get("berserk")), "A failed roll does not start berserk.")
+	_check(int(second.get("_kills_seen")) == 0, "A failed roll restarts the kill count.")
+	var needed := int(second.get("_kills_needed"))
+	_check(needed >= 3 and needed <= 4, "A failed roll rolls the next threshold as 3 or 4.")
+	second.queue_free()
 
 	var base_speed: float = revenant.get("move_speed")
 	var base_damage: float = revenant.get("attack_damage")
