@@ -11,8 +11,14 @@ uniform sampler2D normal_texture : hint_normal, filter_linear_mipmap, repeat_ena
 uniform bool use_normal_texture = false;
 uniform float roughness_value : hint_range(0.0, 1.0) = 0.85;
 uniform float metallic_value : hint_range(0.0, 1.0) = 0.0;
-uniform sampler2D emission_texture : source_color, filter_linear_mipmap, repeat_enable;
-uniform float emission_energy = 0.0; // glowing eyes and blisters, 0 = none
+// Glow mask (tools/build_enemy_glow_masks.py): R = blister, G = eye, B = alt blister colour.
+uniform sampler2D emission_texture : filter_linear_mipmap, repeat_enable;
+uniform bool use_glow = false;
+uniform vec3 blister_color : source_color = vec3(1.0, 0.1, 0.04);
+uniform vec3 blister_alt_color : source_color = vec3(0.3, 1.0, 0.12);
+uniform float emission_energy = 0.3; // blister peak brightness
+uniform vec3 eye_color : source_color = vec3(1.0, 0.16, 0.05);
+uniform float eye_energy = 0.35;
 uniform sampler2DArray blood_masks : filter_linear, repeat_disable;
 // Slot 0 belongs to the poison overlay (fade); all skin surfaces use slot 1.
 instance uniform float blood_layer : instance_index(1) = -1.0;
@@ -59,9 +65,17 @@ void fragment() {
 	ROUGHNESS = mix(roughness_value, 0.18, blood);
 	METALLIC = metallic_value;
 	SPECULAR = mix(0.5, 0.75, blood);
-	if (emission_energy > 0.0) {
+	if (use_glow) {
+		vec3 mask = texture(emission_texture, UV).rgb;
+		// Slow heartbeat; the phase drifts across the body so blisters do not blink in unison.
+		float phase = value_noise(rest_position * 6.0) * 6.2832;
+		float beat = 0.65 + 0.35 * sin(TIME * 1.7 + phase);
+		// Inner glow: strongest where the skin faces the camera, fading towards the silhouette.
+		float inner = mix(0.45, 1.0, pow(clamp(dot(NORMAL, VIEW), 0.0, 1.0), 1.5));
+		vec3 blister = mix(blister_color, blister_alt_color, mask.b) * mask.r * beat * inner * emission_energy;
+		vec3 eyes = eye_color * mask.g * eye_energy;
 		// Blood covers the skin, so it also hides the glow underneath.
-		EMISSION = texture(emission_texture, UV).rgb * emission_energy * (1.0 - blood * 0.8);
+		EMISSION = (blister + eyes) * (1.0 - blood * 0.8);
 	}
 	if (use_normal_texture) {
 		NORMAL_MAP = texture(normal_texture, UV).rgb;
