@@ -61,6 +61,8 @@ func _test_rules() -> void:
 	for pallet in ["15_pallet_timber.glb", "15_pallet_drywall_flat.glb", "15_pallet_drywall_flat_full.glb", "15_pallet_drywall_on_edge.glb", "15_pallet_concrete_blocks.glb", "15_pallet_mix_sacks.glb", "04_crate_canvas_large.glb"]:
 		var weight := WEIGHT.weight_kg(pallet, 0.1)
 		_expect(weight >= 250.0 and not WEIGHT.is_kickable(weight, Vector3(1.2, 0.2, 1.0)) and BULLET_PUSH.speed("RIFLE", weight) < 0.01, "Heavy prop %s is too light to move." % pallet)
+	for heavy in ["08_office_desk_2.glb", "02_vending_automat_2_dented.glb", "03_file_cabinet_largest.glb", "03_file_cabinet_large_shelf_fancy.glb"]:
+		_expect(WEIGHT.known_weight(heavy) >= WEIGHT.HEAVY_KG, "Desk, vending machine or large cabinet %s is not heavy." % heavy)
 	_expect(WEIGHT.push_speed(3.0, 1.0, 6.0) < 6.0 * 0.7, "Even a light box slows the walker down.")
 	_expect(not WEIGHT.can_push(32.0, 1.0) and WEIGHT.can_push(32.0, 2.0), "A military crate needs a Brute's strength.")
 	_expect(not WEIGHT.can_push(240.0, 3.2), "Nobody walks a vending machine across the floor.")
