@@ -25,6 +25,14 @@ func _run() -> void:
 		keys += 1
 		_check(node.get_meta(&"key_source_id", "") == "enemy_1", "Dropped key remembers the enemy that dropped it.")
 	_check(keys == 1, "Manual enemy drop spawns exactly one key.")
+	LOOT_DROP.release_enemy(stage, Vector3.ZERO, config, Callable(), 1.0, Callable(), "enemy_2", Vector3(3, 0, 0))
+	await process_frame
+	var at_spot := 0
+	for node in get_nodes_in_group("mission_key"):
+		var at: Vector3 = (node as Node3D).global_position
+		if Vector2(at.x - 3.0, at.z).length() < 0.01:  # y bobs while the key hovers
+			at_spot += 1
+	_check(at_spot == 1, "A key given a spot lands there, in front of the enemy.")
 	var source := Node3D.new()
 	source.set_meta(&"planning_loot", config)
 	stage.add_child(source)
