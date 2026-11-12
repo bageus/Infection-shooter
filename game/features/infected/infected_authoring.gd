@@ -12,7 +12,7 @@ const CROWD := preload("res://game/features/infected/crowd_separation.gd")
 ## Gap between the body edge and a dropped key, so the key is clear of the body.
 const KEY_GAP := 0.5
 var drop_weapon: Callable
-var carried_weapons: Callable
+var needs: Callable
 var _owner: Node
 var _base := {}
 
@@ -91,4 +91,4 @@ func release(world: Node, at: Vector3) -> void:
 	var size: float = (_owner.get("body_visual") as Node3D).scale.x
 	var reach := CROWD.body_radius(_owner.get("collision_shape"), size) + KEY_GAP
 	var key_at: Vector3 = at + forward.normalized() * reach if forward.length() > 0.01 else at
-	LOOT_DROP.release_enemy(world, at, _owner.get_meta(&"planning_loot") if _owner.has_meta(&"planning_loot") else null, drop_weapon, 1.0 + MUTATION_BALANCE.value("recycling", "percent") / 100.0 if recycling else 1.0, carried_weapons, str(_owner.get_meta(&"planning_object_id", "")), key_at)
+	LOOT_DROP.release_enemy(world, at, _owner.get_meta(&"planning_loot") if _owner.has_meta(&"planning_loot") else null, drop_weapon, 1.0 + MUTATION_BALANCE.value("recycling", "percent") / 100.0 if recycling else 1.0, needs, str(_owner.get_meta(&"planning_object_id", "")), key_at)

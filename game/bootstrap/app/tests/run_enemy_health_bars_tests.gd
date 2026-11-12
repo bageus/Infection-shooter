@@ -61,11 +61,14 @@ func _bars_follow_the_setting() -> void:
 	await process_frame
 	_check(is_instance_valid(bars), "Bars draw a live damaged enemy without errors")
 	var heights := {}
-	for key in ["infected_hunger", "infected_brute", "infected_colossus", "infected_titan"]:
+	var widths := {}
+	for key in ["infected_hunger", "infected_brute", "infected_colossus", "infected_titan", "infected_horde"]:
 		var kind := (load("res://game/features/infected/public/%s.tscn" % key) as PackedScene).instantiate() as Node3D
 		stage.add_child(kind)
 		heights[key] = BARS._bar_height(kind)
+		widths[key] = BARS._body_width(kind)
 		kind.free()
+	_check(widths["infected_horde"] > widths["infected_colossus"] and widths["infected_colossus"] > widths["infected_hunger"], "Bar width grows with body width, horde widest")
 	_check(heights["infected_colossus"] > heights["infected_hunger"] and heights["infected_colossus"] > heights["infected_titan"], "Bar height follows each enemy type")
 	_check(is_equal_approx(heights["infected_hunger"], 0.925 + 0.3), "Hunger bar sits just above its capsule")
 	bars.call("set_enabled", false)
