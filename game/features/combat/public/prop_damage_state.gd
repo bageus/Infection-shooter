@@ -6,6 +6,8 @@ enum HitAction { NONE, SHUDDER, SCATTER, TRANSITION, CHIP_FACADE, DETACH, PUSH, 
 const BROKEN_CRATE_HEALTH := 70.0
 enum Transition { NONE, VARIANT, BREAK }
 const BIG_CRATES := ["04_crate_wood_large.glb"]
+## Props no blow breaks: a full drywall pallet is a solid stack, kept whole like the tarp-covered crate.
+const INDESTRUCTIBLE := ["15_pallet_drywall_flat_full.glb"]
 var category := "large"
 var health := 0.0
 var broken := false
@@ -13,6 +15,7 @@ var variant_index := -1
 var transition_pending := false
 var full_break := false
 var collapses := false # Cardboard and big crates: no staged pieces, so they break apart on their own.
+var indestructible := false
 var short_circuited := false
 var paper_torn := false
 var extinguisher_triggered := false
@@ -28,9 +31,12 @@ func configure(model_name: String, variant_count: int, has_fragments: bool) -> v
 	_has_fragments = has_fragments
 	collapses = not has_fragments and (model_name.to_lower().contains("cardboard") or model_name in BIG_CRATES)
 	health = BROKEN_CRATE_HEALTH if model_name.begins_with("04_crate") else _stage_health()
+	indestructible = model_name in INDESTRUCTIBLE
 
 
 func hit(amount: float, weapon: String, book_stack: bool, wall_mounted: bool, anchored: bool, facade: bool) -> HitAction:
+	if indestructible:
+		return HitAction.NONE
 	if book_stack and not broken:
 		health -= BALANCE.object_damage(amount, weapon, "small")
 		if health <= 0.0:

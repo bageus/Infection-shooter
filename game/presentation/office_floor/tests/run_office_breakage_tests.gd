@@ -11,6 +11,7 @@ const PARTITION := MODELS + "01/01_wood_slat_partition_destructible.glb"
 const LOGO := MODELS + "01/01_VECTRION_Destructible.glb"
 const WOOD_CRATE := MODELS + "04/04_crate_wood_large.glb"
 const CANVAS_CRATE := MODELS + "04/04_crate_canvas_large.glb"
+const DRYWALL_FULL_PALLET := MODELS + "15/15_pallet_drywall_flat_full.glb"
 
 var failures := 0
 
@@ -33,6 +34,7 @@ func _run() -> void:
 	await _test_tarp_crate_untouched(stage)
 	await _test_crate_shots(stage)
 	await _test_pallet_scatter(stage)
+	await _test_drywall_full_pallet_untouched(stage)
 	print("%d failure(s)" % failures)
 	quit(1 if failures > 0 else 0)
 
@@ -163,6 +165,21 @@ func _test_pallet_scatter(stage: Node3D) -> void:
 		if child is RigidBody3D:
 			farthest = maxf(farthest, Vector2(child.global_position.x + 10.0, child.global_position.z - 6.0).length())
 	_expect(farthest > 0.9, "A broken pallet falls apart: boards and blocks spread out (%.2f m)." % farthest)
+	await _clear(pallet, setup[1])
+
+
+func _test_drywall_full_pallet_untouched(stage: Node3D) -> void:
+	var setup := await _spawn(stage, DRYWALL_FULL_PALLET, Vector3(-16, 0.0135, 10))
+	var pallet: RigidBody3D = setup[0]
+	var visual := pallet.get_node("Visual") as Node3D
+	pallet.call("break_by_strike", pallet.global_position + Vector3(0.3, 0.3, 0), Vector3.FORWARD)
+	for shot in 40:
+		pallet.call("take_projectile_hit", 60.0, pallet.global_position + Vector3(0, 0.8, 0), Vector3.BACK, Vector3.FORWARD, "SHOTGUN")
+		await physics_frame
+	for frame in 30:
+		await physics_frame
+	_expect(is_instance_valid(pallet) and visual.visible and not pallet.freeze, "A full drywall pallet survives a kick and shotgun fire.")
+	_expect(setup[1].get_child_count() == 0, "A full drywall pallet leaves no pieces.")
 	await _clear(pallet, setup[1])
 
 
