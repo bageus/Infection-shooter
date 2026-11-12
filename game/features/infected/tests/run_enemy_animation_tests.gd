@@ -556,7 +556,7 @@ func _test_colossus_slam(stage: Node3D) -> void:
 	await physics_frame
 	var player := _player_of(enemy)
 	_expect(player.current_animation == "Slam", "Colossus slams when the player is close.")
-	var slam := player.get_animation("Slam").length
+	var slam := player.get_animation("Slam").length / float(enemy.get("slam_anim_speed"))
 	await create_timer(slam * 0.5).timeout
 	_expect(prop.hits == 0, "Nothing breaks before the fists hit the floor.")
 	var crate_start := crate.global_position
