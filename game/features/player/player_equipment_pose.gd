@@ -1,6 +1,9 @@
 extends SkeletonModifier3D
 ## Fits the supporting hand to the new kit; minigun uses a low two-arm pose.
 const BACKPACK := preload("res://models/objects/weapons/minigun_ammo_backpack_lowpoly.glb")
+## Flashlight sits this far (m) to the side of the muzzle, and is dim enough to read the room, not light it.
+const FLASHLIGHT_SIDE := .04
+const FLASHLIGHT_ENERGY := .6
 ## Rear hand of the minigun in skeleton space: belt height, gripped from above.
 const MINIGUN_RIGHT_HAND := Vector3(-.22, -.02, .14)
 ## Long guns are scaled to the character and gripped near the chest: scale, then the rear hand in skeleton space.
@@ -48,6 +51,9 @@ var _held := ""
 var mount: Node
 var backpack: Node3D
 var _back_attachment: BoneAttachment3D
+var _flashlight: SpotLight3D
+var _dark_check := 0.0
+var _dark := false
 var capture_pose := false
 var posed_bones: Array[Transform3D] = []
 var hand_error := 0.0
@@ -68,26 +74,28 @@ func _ready() -> void:
 	backpack.rotation.y = PI
 	backpack.position = Vector3(0, .10, -.23)
 	backpack.hide()
-	# Soft fill from the back: the hero stays faintly readable in dark rooms, with or without the backpack shown.
-	# shortcut: the light sits behind the body, so only back and top surfaces catch it; front faces stay dim.
-	var glow := OmniLight3D.new()
-	glow.name = "BackpackGlow"
-	glow.light_color = Color(.85, .92, 1.0)
-	glow.light_energy = .35
-	glow.omni_range = 2.0
-	glow.omni_attenuation = 1.5
-	glow.shadow_enabled = false
-	glow.position = Vector3(0, .25, -.3)
-	_back_attachment.add_child(glow)
+	# Weapon flashlight: a dim spot beside the muzzle, moved onto whichever weapon is held.
+	# shortcut: the dark test checks only darkness zones the hero stands in, not the lamps' real light level.
+	_flashlight = SpotLight3D.new()
+	_flashlight.name = "Flashlight"
+	_flashlight.light_color = Color(1.0, .96, .88)
+	_flashlight.light_energy = 0.0
+	_flashlight.spot_range = 7.0
+	_flashlight.spot_angle = 22.0
+	_flashlight.spot_attenuation = 1.6
+	_flashlight.shadow_enabled = false
+	_flashlight.position = Vector3(FLASHLIGHT_SIDE, 0, 0)
+	add_child(_flashlight)
 
 
-func _process_modification_with_delta(_delta: float) -> void:
+func _process_modification_with_delta(delta: float) -> void:
 	var weapon := mount.get("_active") as Node3D
 	if not is_instance_valid(weapon):
 		return
 	var name_value: String = weapon.call("get_weapon_name")
 	_held = name_value
 	backpack.visible = name_value == "MINIGUN"
+	_update_flashlight(weapon, delta)
 	var full_kit := name_value in LONG_GUN or name_value == "MINIGUN"
 	mount.set("grip_shift", Vector3.ZERO)
 	if not full_kit:
@@ -235,3 +243,24 @@ func _curl_support_hand(skeleton: Skeleton3D, grip: Vector3, weapon_basis: Basis
 		_turn_bone(skeleton, first, skeleton.get_bone_global_pose(second).origin - base, knuckle - base)
 		var joint := skeleton.get_bone_global_pose(second).origin
 		_turn_bone(skeleton, second, skeleton.get_bone_global_pose(end).origin - joint, tip - joint)
+
+
+## Keeps the flashlight on the held weapon's muzzle and lights it only while the hero stands in a dark zone.
+func _update_flashlight(weapon: Node3D, delta: float) -> void:
+	var muzzle := weapon.get_node_or_null("Muzzle") as Node3D
+	if muzzle != null and _flashlight.get_parent() != muzzle:
+		_flashlight.reparent(muzzle, false)
+	_dark_check -= delta
+	if _dark_check <= 0.0:
+		_dark_check = .25
+		_dark = _hero_in_dark()
+	_flashlight.light_energy = move_toward(_flashlight.light_energy, FLASHLIGHT_ENERGY if _dark else 0.0, delta * 3.0)
+
+
+## A covered darkness zone (fog up) around the hero means it is dark there.
+func _hero_in_dark() -> bool:
+	var hero := get_skeleton().global_position
+	for zone: Node in get_tree().get_nodes_in_group("darkness_zone"):
+		if zone.overlay.visible and zone.call("_edge_distance", hero) <= 0.0:
+			return true
+	return false
