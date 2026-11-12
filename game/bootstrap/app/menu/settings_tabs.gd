@@ -135,6 +135,13 @@ func _comfort_rows() -> void:
 	floor_hints.button_pressed = dialog.view.preferences.values.floor_hints
 	floor_hints.toggled.connect(func(value: bool) -> void: dialog.call("_change", "floor_hints", value))
 	dialog.get("layout").add_child(floor_hints)
+	var health_bars := CheckButton.new()
+	health_bars.name = "EnemyHealthBars"
+	health_bars.text = dialog.view.text("enemyHealthBars")
+	health_bars.tooltip_text = dialog.view.text("enemyHealthBarsHint")
+	health_bars.button_pressed = dialog.view.preferences.values.enemy_health_bars
+	health_bars.toggled.connect(func(value: bool) -> void: dialog.call("_change", "enemy_health_bars", value))
+	dialog.get("layout").add_child(health_bars)
 	var shake := CheckButton.new()
 	shake.name = "CameraShake"
 	shake.text = dialog.view.text("cameraShake")
