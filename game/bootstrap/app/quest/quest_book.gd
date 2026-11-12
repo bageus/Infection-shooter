@@ -3,6 +3,7 @@ extends Node
 
 const MODEL := preload("res://game/bootstrap/app/quest/quest_model.gd")
 const TARGET := preload("res://game/presentation/office_floor/public/tutorial_target.gd")
+const LOOT := preload("res://game/features/pickups/public/loot_config.gd")
 const ID_META := &"planning_object_id"
 
 signal changed
@@ -68,6 +69,26 @@ func quests_using(object_id: String) -> Array[int]:
 		var quest: Dictionary = quests[i]
 		if object_id in quest.targets or str(quest.trigger.target) == object_id:
 			found.append(i + 1)
+	return found
+
+
+## An enemy or crate whose manual loot includes a key: the key is a quest object once it drops.
+static func drops_key(node: Node) -> bool:
+	if not node.has_meta(&"planning_loot"):
+		return false
+	var config: Dictionary = LOOT.sanitize(node.get_meta(&"planning_loot"))
+	return config.mode == "manual" and LOOT.manual_list(config).has("key")
+
+
+## Objects a quest can refer to: flagged targets and objects that drop a key.
+static func candidates(tree: SceneTree) -> Array[Node3D]:
+	var found: Array[Node3D] = []
+	for node: Node in tree.get_nodes_in_group(TARGET.GROUP):
+		if node is Node3D:
+			found.append(node)
+	for node: Node in tree.root.find_children("*", "Node3D", true, false):
+		if not node.is_in_group(TARGET.GROUP) and drops_key(node):
+			found.append(node)
 	return found
 
 

@@ -35,7 +35,7 @@ const STYLES := {
 	"Hunger": {"scale": 1.0, "walk_mps": 2.16, "run_mps": 5.4, "walk_swing": 28.0, "run_swing": 40.0, "lean": 30.0, "reach": 1.0, "heavy": 0.0, "attack_seconds": 0.9, "death_seconds": 1.5},
 	"Revenant": {"scale": 1.0, "walk_mps": 1.84, "run_mps": 4.6, "walk_swing": 27.0, "run_swing": 38.0, "lean": 26.0, "reach": 0.8, "heavy": 0.1, "attack_seconds": 1.0, "death_seconds": 1.6},
 	"Brute": {"scale": 1.1, "walk_mps": 1.64, "run_mps": 4.1, "walk_swing": 26.0, "run_swing": 36.0, "lean": 24.0, "reach": 0.6, "heavy": 0.35, "attack_seconds": 1.1, "death_seconds": 1.7},
-	"Titan": {"scale": 1.35, "walk_mps": 1.32, "run_mps": 3.3, "walk_swing": 24.0, "run_swing": 32.0, "lean": 20.0, "reach": 0.4, "heavy": 0.7, "attack_seconds": 1.3, "death_seconds": 2.0},
+	"Titan": {"scale": 1.35, "walk_mps": 1.32, "run_mps": 3.3, "walk_swing": 24.0, "run_swing": 32.0, "lean": 20.0, "reach": 0.4, "heavy": 0.7, "attack_seconds": 1.3, "death_seconds": 2.0, "throw": true, "throw_seconds": 1.7},
 	"Colossus": {"scale": 1.55, "walk_mps": 1.16, "run_mps": 2.9, "walk_swing": 22.0, "run_swing": 30.0, "lean": 18.0, "reach": 0.3, "heavy": 1.0, "attack_seconds": 1.4, "death_seconds": 2.2, "slam": true, "slam_seconds": 1.7},
 }
 

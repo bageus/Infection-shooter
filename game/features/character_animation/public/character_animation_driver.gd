@@ -26,7 +26,7 @@ const LOCOMOTION_TOKENS := {
 	&"run": ["run", "sprint", "jog"],
 }
 const LOOPING_TOKENS := ["idle", "stand", "walk", "locomotion", "run", "sprint", "jog"]
-const NON_LOOPING_TOKENS := ["attack", "death", "hit", "aim", "slam", "summon"]
+const NON_LOOPING_TOKENS := ["attack", "death", "hit", "aim", "slam", "summon", "throw"]
 const ONE_SHOT_TOKENS := {
 	&"attack": ["attackleft", "attackright", "attack"],
 	&"attack_left": ["attackleft", "attack"],
@@ -35,7 +35,7 @@ const ONE_SHOT_TOKENS := {
 	&"death_forward": ["deathforward", "death", "dead"],
 	&"death_back": ["deathback", "death", "dead"],
 	&"slam": ["slam"],
-	&"summon": ["summon"],
+	&"summon": ["summon"], &"throw": ["throw"],
 	&"attack_crawl": ["crawlattack"],
 }
 # A strike lands this many seconds into a clip that names its strike_time.
@@ -136,7 +136,7 @@ func play_one_shot(state: StringName) -> float:
 	prepare_visual()
 	if _dead or not ONE_SHOT_TOKENS.has(state):
 		return 0.0
-	if animation_player == null and state in [&"slam", &"summon"]:
+	if animation_player == null and state in [&"slam", &"summon", &"throw"]:
 		return 0.0
 	var length := 0.0
 	if animation_player != null:
