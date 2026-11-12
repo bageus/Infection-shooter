@@ -18,8 +18,10 @@ var color := Color(0.62, 0.5, 0.38, 0.75)
 var _radius := 0.2
 var _hit := {}
 var _ring: MeshInstance3D
-var _material: StandardMaterial3D
+var _material: ShaderMaterial
+var _fade := 1.0
 var _shape := SphereShape3D.new()
+static var _mesh: ArrayMesh
 
 
 func configure(origin: Vector3, radius: float, wave_speed: float, damage_to_player: float, damage_to_objects: float, wave_source: Node3D, tint: Color) -> void:
@@ -33,24 +35,85 @@ func configure(origin: Vector3, radius: float, wave_speed: float, damage_to_play
 
 
 func _ready() -> void:
-	_material = StandardMaterial3D.new()
-	_material.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
-	_material.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
-	_material.albedo_color = color
-	_material.cull_mode = BaseMaterial3D.CULL_DISABLED
-	var torus := TorusMesh.new()
-	torus.inner_radius = 0.9
-	torus.outer_radius = 1.0
-	torus.rings = 48
-	torus.ring_segments = 6
-	torus.material = _material
+	_material = ShaderMaterial.new()
+	_material.shader = preload("res://game/features/infected/ground_shockwave.gdshader")
+	_material.set_shader_parameter("tint", color)
+	# Slam wave lifts the floor; the Horde's summoning pulse barely ripples it.
+	_material.set_shader_parameter("lift", 0.6 if player_damage > 0.0 or object_damage > 0.0 else 0.08)
 	_ring = MeshInstance3D.new()
 	_ring.name = "Ring"
-	_ring.mesh = torus
+	_ring.mesh = _annulus()
+	_ring.material_override = _material
 	_ring.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
-	_ring.position.y = 0.06
+	_ring.position.y = 0.03
+	# Only the floor plane scales; the shader keeps the crest height in metres.
+	_ring.scale = Vector3(max_radius, 1.0, max_radius)
 	add_child(_ring)
+	if player_damage > 0.0 or object_damage > 0.0:
+		add_child(_dust())
 	_update_ring()
+
+
+# Unit-radius flat ring mesh, built once and shared; the vertex shader raises it.
+static func _annulus() -> ArrayMesh:
+	if _mesh != null:
+		return _mesh
+	var rings := 28
+	var segments := 72
+	var vertices := PackedVector3Array()
+	var indices := PackedInt32Array()
+	for i in rings + 1:
+		var r := 0.02 + 0.98 * float(i) / rings
+		for j in segments + 1:
+			var a := TAU * float(j) / segments
+			vertices.append(Vector3(cos(a) * r, 0.0, sin(a) * r))
+	for i in rings:
+		for j in segments:
+			var k := i * (segments + 1) + j
+			indices.append_array([k, k + 1, k + segments + 1, k + 1, k + segments + 2, k + segments + 1])
+	var arrays := []
+	arrays.resize(Mesh.ARRAY_MAX)
+	arrays[Mesh.ARRAY_VERTEX] = vertices
+	arrays[Mesh.ARRAY_INDEX] = indices
+	_mesh = ArrayMesh.new()
+	_mesh.add_surface_from_arrays(Mesh.PRIMITIVE_TRIANGLES, arrays)
+	# Displaced vertices leave the flat bounds, so keep the node from being culled.
+	_mesh.custom_aabb = AABB(Vector3(-1, -0.2, -1), Vector3(2, 3, 2))
+	return _mesh
+
+
+# One burst of rubble kicked up at the impact point.
+func _dust() -> CPUParticles3D:
+	var dust := CPUParticles3D.new()
+	dust.name = "Dust"
+	dust.amount = 24
+	dust.one_shot = true
+	dust.explosiveness = 1.0
+	dust.lifetime = 0.7
+	dust.emission_shape = CPUParticles3D.EMISSION_SHAPE_RING
+	dust.emission_ring_axis = Vector3.UP
+	dust.emission_ring_radius = 1.2
+	dust.emission_ring_inner_radius = 0.4
+	dust.emission_ring_height = 0.1
+	dust.direction = Vector3.UP
+	dust.spread = 55.0
+	dust.initial_velocity_min = 2.0
+	dust.initial_velocity_max = 5.0
+	dust.gravity = Vector3(0, -9.0, 0)
+	dust.scale_amount_min = 0.5
+	dust.scale_amount_max = 1.4
+	var mesh := SphereMesh.new()
+	mesh.radius = 0.12
+	mesh.height = 0.24
+	mesh.radial_segments = 6
+	mesh.rings = 3
+	var material := StandardMaterial3D.new()
+	material.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
+	material.albedo_color = color.darkened(0.25)
+	mesh.material = material
+	dust.mesh = mesh
+	dust.emitting = true
+	return dust
 
 
 func _physics_process(delta: float) -> void:
@@ -61,14 +124,20 @@ func _physics_process(delta: float) -> void:
 	if _radius >= max_radius:
 		set_physics_process(false)
 		var tween := create_tween()
-		tween.tween_property(_material, "albedo_color:a", 0.0, 0.25)
+		tween.tween_method(_set_fade, _fade, 0.0, 0.25)
 		tween.tween_callback(queue_free)
 
 
 func _update_ring() -> void:
-	var fade := 1.0 - 0.6 * (_radius / maxf(max_radius, 0.01))
-	_ring.scale = Vector3(_radius, 0.35 + 0.4 * fade, _radius)
-	_material.albedo_color = Color(color.r, color.g, color.b, color.a * fade)
+	var progress := _radius / maxf(max_radius, 0.01)
+	_material.set_shader_parameter("front", progress)
+	_material.set_shader_parameter("band", 1.8 / maxf(max_radius, 0.01))
+	_set_fade(1.0 - 0.6 * progress if _radius < max_radius else _fade)
+
+
+func _set_fade(value: float) -> void:
+	_fade = value
+	_material.set_shader_parameter("fade", value)
 
 
 func _strike_passed_bodies() -> void:
