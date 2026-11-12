@@ -193,7 +193,7 @@ func _release_loot() -> void:
 	var world: Node = effects_root if is_instance_valid(effects_root) else get_parent()
 	if not has_loot() or not has_meta(&"planning_loot") or world == null:
 		return
-	LOOT_DROP.release_crate(world, global_position, get_loot_config(), "large" if "large" in model_path.get_file() else "small", _drop_weapon, _carried_weapons)
+	LOOT_DROP.release_crate(world, global_position, get_loot_config(), "large" if "large" in model_path.get_file() else "small", _drop_weapon, _carried_weapons, str(get_meta(&"planning_object_id", "")))
 
 
 func _ready() -> void:

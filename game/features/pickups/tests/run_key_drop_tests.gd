@@ -18,12 +18,16 @@ func _run() -> void:
 	_check(config["items"].get("key", 0) == 1, "Key survives sanitize in a manual config.")
 	_check(CONFIG.manual_list(config).has("key"), "Manual list includes the key.")
 	_check(not CONFIG.AUTO_WEIGHTS.has("key"), "Auto loot never rolls the key.")
-	LOOT_DROP.release_enemy(stage, Vector3(0, 0, 0), config, Callable())
+	LOOT_DROP.release_enemy(stage, Vector3(0, 0, 0), config, Callable(), 1.0, Callable(), "enemy_1")
 	await process_frame
 	var keys := 0
 	for node in get_nodes_in_group("mission_key"):
 		keys += 1
+		_check(node.get_meta(&"key_source_id", "") == "enemy_1", "Dropped key remembers the enemy that dropped it.")
 	_check(keys == 1, "Manual enemy drop spawns exactly one key.")
+	var source := Node3D.new()
+	source.set_meta(&"planning_loot", config)
+	stage.add_child(source)
 	for node in get_nodes_in_group(DROP_TABLE.DROP_GROUP):
 		_check(node.has_meta(&"persistent_loot"), "Key drop stays until collected.")
 	stage.queue_free()
