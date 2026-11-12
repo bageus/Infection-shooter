@@ -14,10 +14,9 @@ from PIL import Image, ImageFilter
 
 DIR = "models/objects/characters/enemy/game/"
 SIZE = 1024
-PUPILS = {"Hunger": 0.9, "Brute": 0.9, "Revenant": 0.9}  # name: relative pupil size
-# Pupil centres in rest space: x of both eyes, depth below the top of the model; front is +z.
-EYE_X = (-0.0575, 0.0247)
-EYE_BELOW_TOP = 0.151
+# Pupil centres in rest space, measured on each face: x of both eyes and depth below the top of the model.
+# The front of the face is +z.
+PUPILS = {"Hunger": ((-0.040, 0.021), 0.150), "Brute": ((-0.048, 0.025), 0.165), "Revenant": ((-0.0575, 0.0247), 0.151)}
 EYE_RADIUS = 0.0085
 
 
@@ -48,10 +47,12 @@ def value_noise(p, seed):
              y(x(corner(0, 0, 1), corner(1, 0, 1)), x(corner(0, 1, 1), corner(1, 1, 1))))
 
 
-def veins(p, freq=9.0):
-    """Thin branching lines: the zero set of two noise fields."""
+def veins(p, freq=9.0, fine=False):
+    """Branching lines: the zero set of two noise fields; fine = thinner lines."""
     thin = 1 - np.abs(value_noise(p * freq, 1) * 2 - 1)
     branch = 1 - np.abs(value_noise(p * freq * 2.3, 2) * 2 - 1)
+    if fine:
+        return np.maximum(smooth(thin, 0.95, 0.985), 0.6 * smooth(branch, 0.97, 0.992))
     return np.maximum(smooth(thin, 0.9, 0.97), 0.8 * smooth(branch, 0.94, 0.985))
 
 
@@ -86,15 +87,17 @@ def main(raster_dir):
             vein = veins(pos) * (mutated & (head < 0.5))
         elif name == "Horde":
             blisters = bumpy
-            vein = veins(pos) * mapped
+            # patchy, not the whole body: green veins here read as too much
+            vein = veins(pos, fine=True) * mapped * smooth(value_noise(pos * 3, 5), 0.4, 0.55)
         if blisters is not None:
             out[..., 0] = blur(blisters, 4)
         if vein is not None:
             out[..., 2] = blur(vein.astype(np.float32), 0.7)
         if name in PUPILS:
             eyes = np.zeros((SIZE, SIZE), bool)
-            for ex in EYE_X:
-                eyes |= (np.hypot(x - ex, y - (top - EYE_BELOW_TOP)) < EYE_RADIUS * PUPILS[name]) & (z > 0.07)
+            eye_x, below = PUPILS[name]
+            for ex in eye_x:
+                eyes |= (np.hypot(x - ex, y - (top - below)) < EYE_RADIUS) & (z > 0.07)
             out[..., 1] = blur((eyes & mapped).astype(np.float32), 0.8)
         Image.fromarray((np.clip(out, 0, 1) * 255).astype(np.uint8)).save(DIR + name + "_glow.png")
         print(name, [int((out[..., c] > 0.1).sum()) for c in range(3)])
