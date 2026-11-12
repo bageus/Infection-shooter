@@ -7,6 +7,7 @@ var failures := 0
 
 
 func _initialize() -> void:
+	DirAccess.copy_absolute("res://game/bootstrap/app/tests/fixtures/office_map_fixture.json", "user://planned_layout.json")
 	call_deferred("_run")
 
 
