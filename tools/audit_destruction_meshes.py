@@ -69,7 +69,7 @@ def main() -> int:
     parser.add_argument('--report', type=Path, default=ROOT / 'docs/qa/destruction_model_rework.md')
     parser.add_argument('--json', type=Path, default=ROOT / 'docs/qa/destruction_model_rework.json')
     args = parser.parse_args()
-    base = json.loads((ROOT / 'game/presentation/office_floor/public/base_office_map.json').read_text())
+    base = json.loads((ROOT / 'game/bootstrap/app/tests/fixtures/office_map_fixture.json').read_text())
     placements = {}
     for record in base['objects']:
         key = str(record.get('scene', '')).removeprefix('res://')
@@ -87,7 +87,7 @@ def main() -> int:
     args.json.parent.mkdir(parents=True, exist_ok=True)
     args.json.write_text(json.dumps({'schema_version': 1, 'models': rows}, ensure_ascii=False, indent=2) + '\n')
     text = '# Модели для переработки стадий разрушения\n\n'
-    text += 'Источник: активные GLB и авторская base_office_map.json из репозитория. Это аудит геометрии, не замер FPS или числа физических тел. '
+    text += 'Источник: активные GLB и авторская карта office_map_fixture.json из репозитория. Это аудит геометрии, не замер FPS или числа физических тел. '
     text += 'Mesh-узел считается отдельно от mesh-ресурса и его material surfaces. Повторные ссылки на один ресурс считаются отдельными узлами; недостижимые узлы исключены. '
     text += 'Стадии определяются по тем же именам групп, которые использует environment_prop_geometry, и именам экспортированных сцен.\n\n'
     text += '**Важное ограничение:** environment_prop_breakup.spawn_stage уже ограничивает один вызов 32 фрагментами, стеклянные shards — 12. '

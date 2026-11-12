@@ -19,6 +19,7 @@ func _initialize() -> void:
 
 func _run() -> void:
 	_audio()
+	DirAccess.copy_absolute("res://game/bootstrap/app/tests/fixtures/office_map_fixture.json", "user://planned_layout.json")
 	stage = MAIN.instantiate()
 	root.add_child(stage)
 	current_scene = stage

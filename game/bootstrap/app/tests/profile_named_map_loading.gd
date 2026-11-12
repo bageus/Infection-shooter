@@ -2,7 +2,7 @@ extends SceneTree
 ## Manual A/B harness; --sync runs the original named-map route. Not a CI budget.
 const MAIN := preload("res://game/bootstrap/app/main.tscn")
 const CATALOG := preload("res://game/bootstrap/app/planning_catalog.gd")
-const MAP := "res://game/presentation/office_floor/public/base_office_map.json"
+const MAP := "res://game/bootstrap/app/tests/fixtures/office_map_fixture.json"
 var samples: Array[float] = []
 var observing := false
 var last_usec := 0

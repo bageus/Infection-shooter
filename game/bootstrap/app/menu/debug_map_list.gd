@@ -18,7 +18,7 @@ static func entries() -> Array:
 				rows.append({"label": file_name.get_basename(), "path": STORAGE.MAPS_DIR + "/" + file_name, "shipped": false})
 	var campaign := CAMPAIGN.new()
 	campaign.load_file()
-	var shipped: Array[String] = [STORAGE.DEFAULT_MAP_PATH]
+	var shipped: Array[String] = []
 	shipped.append_array(campaign.map_paths(PLATFORM.detect_id()))
 	for path in shipped:
 		if FileAccess.file_exists(path):
