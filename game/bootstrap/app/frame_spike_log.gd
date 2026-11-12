@@ -13,6 +13,8 @@ var _window_age := 0.0
 var _resources := 0
 var _nodes := 0
 var _path := PATH
+var _rigid_bodies: Array = []
+var _rigid_at := 0
 
 
 ## Call once per frame with the frame time in seconds; returns true when this frame was logged.
@@ -49,13 +51,14 @@ func _write(msec: float, resources: int, nodes: int, tree: SceneTree) -> void:
 	file.seek_end()
 	var hidden := _culled(tree)
 	var plan := _plan_state(tree)
-	file.store_line("t=%.1fs frame=%.0fms process=%.1f physics=%.1f draw=%d objects=%d resources=%+d nodes=%+d (%d) static=%dMiB video=%dMiB enemies=%d culled=%d/%d merged=%d trim=%d/%d bodies=%d pairs=%d islands=%d probe=%d player=%s" % [
+	var rigid := _rigid(tree)
+	file.store_line("t=%.1fs frame=%.0fms process=%.1f physics=%.1f draw=%d objects=%d resources=%+d nodes=%+d (%d) static=%dMiB video=%dMiB enemies=%d culled=%d/%d merged=%d trim=%d/%d rigid=%d awake=%d probe=%d player=%s" % [
 		Time.get_ticks_msec() / 1000.0, msec, Performance.get_monitor(Performance.TIME_PROCESS) * 1000.0,
 		Performance.get_monitor(Performance.TIME_PHYSICS_PROCESS) * 1000.0,
 		Performance.get_monitor(Performance.RENDER_TOTAL_DRAW_CALLS_IN_FRAME), Performance.get_monitor(Performance.RENDER_TOTAL_OBJECTS_IN_FRAME),
 		resources - _resources, nodes - _nodes, nodes, Performance.get_monitor(Performance.MEMORY_STATIC) / 1048576.0,
 		Performance.get_monitor(Performance.RENDER_VIDEO_MEM_USED) / 1048576.0,
-		(tree.get_nodes_in_group("infected_alive").size() if tree != null else 0), hidden[0], hidden[1], plan[0], plan[1], plan[2], Performance.get_monitor(Performance.PHYSICS_3D_ACTIVE_OBJECTS), Performance.get_monitor(Performance.PHYSICS_3D_COLLISION_PAIRS), Performance.get_monitor(Performance.PHYSICS_3D_ISLAND_COUNT), probe_mode, at])
+		(tree.get_nodes_in_group("infected_alive").size() if tree != null else 0), hidden[0], hidden[1], plan[0], plan[1], plan[2], rigid[0], rigid[1], probe_mode, at])
 
 
 # Room-culled furniture: [hidden now, tagged in total].
@@ -73,3 +76,17 @@ func _plan_state(tree: SceneTree) -> Array:
 		merged += (holder.get_meta(&"static_merge_sources", []) as Array).size()
 	var trimmed := tree.get_nodes_in_group(&"trim_decor")
 	return [merged, trimmed.filter(func(node): return not node.visible).size(), trimmed.size()]
+
+
+# Physics monitors read 0 with Jolt, so count the rigid bodies ourselves: [all, awake]. The tree is walked at most every 5 s.
+func _rigid(tree: SceneTree) -> Array:
+	if tree == null or tree.current_scene == null:
+		return [0, 0]
+	if _rigid_bodies.is_empty() or Time.get_ticks_msec() - _rigid_at > 5000:
+		_rigid_at = Time.get_ticks_msec()
+		_rigid_bodies = tree.current_scene.find_children("*", "RigidBody3D", true, false)
+	var awake := 0
+	for body in _rigid_bodies:
+		if is_instance_valid(body) and not (body as RigidBody3D).sleeping:
+			awake += 1
+	return [_rigid_bodies.size(), awake]
