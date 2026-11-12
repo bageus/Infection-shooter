@@ -35,7 +35,9 @@ func _test_percent_per_level() -> void:
 	DIFFICULTY.level = DIFFICULTY.NORMAL
 	_check(is_equal_approx(DIFFICULTY.percent(200.0), 200.0), "Normal keeps the authored value")
 	DIFFICULTY.level = DIFFICULTY.HIGH
-	_check(is_equal_approx(DIFFICULTY.percent(50.0), 200.0), "High uses the editor maximum")
+	_check(is_equal_approx(DIFFICULTY.percent(50.0), 100.0), "High doubles an authored 50")
+	_check(is_equal_approx(DIFFICULTY.percent(200.0), 400.0), "High doubles an authored 200")
+	_check(DIFFICULTY.percent(50.0) < DIFFICULTY.percent(200.0), "High keeps higher percent harder")
 	DIFFICULTY.level = DIFFICULTY.NORMAL
 
 
@@ -49,8 +51,8 @@ func _test_stats_follow_level() -> void:
 	_check(is_equal_approx(enemy.obstacle_damage, 5.0), "Low halves obstacle damage too")
 	DIFFICULTY.level = DIFFICULTY.HIGH
 	authoring.set_stats({"health": 50.0, "damage": 50.0})
-	_check(is_equal_approx(enemy.max_health, 200.0), "High gives 200% health")
-	_check(is_equal_approx(enemy.attack_damage, 20.0), "High gives 200% damage")
+	_check(is_equal_approx(enemy.max_health, 100.0), "High gives 100% health from authored 50")
+	_check(is_equal_approx(enemy.attack_damage, 10.0), "High gives 100% damage from authored 50")
 	DIFFICULTY.level = DIFFICULTY.NORMAL
 	authoring.set_stats({"health": 200.0, "damage": 200.0})
 	_check(is_equal_approx(enemy.max_health, 200.0), "Normal keeps the authored health")
