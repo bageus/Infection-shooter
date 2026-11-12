@@ -3,12 +3,13 @@ extends "res://game/features/infected/infected_capsule.gd"
 ## where it stood) and hurls it at the spot the player occupies at release.
 
 const ROCK := preload("res://game/features/infected/titan_rock.gd")
+const THROW_STEP_SPEED := 3.0
 
 @export var throw_min_distance := 5.0
 @export var throw_max_distance := 14.0
 @export var throw_cooldown := 14.0
-@export_range(0.1, 0.9) var throw_grab_fraction := 0.35
-@export_range(0.1, 0.95) var throw_release_fraction := 0.62
+@export_range(0.1, 0.9) var throw_grab_fraction := 0.34
+@export_range(0.1, 0.95) var throw_release_fraction := 0.72
 @export var throw_flight_seconds := 0.85
 @export var throw_damage := 30.0
 
@@ -16,6 +17,7 @@ var _throw_cooldown := 6.0
 var _throw_elapsed := -1.0
 var _throw_length := 0.0
 var _rock: Node3D
+var _rock_ground := Vector3.ZERO
 
 
 func _behaviour_tick(delta: float, target_offset: Vector3) -> void:
@@ -35,6 +37,7 @@ func _start_throw() -> void:
 		return
 	_attack_cooldown = maxf(_attack_cooldown, attack_interval)
 	audio.growl(1.5)
+	_spawn_rock()
 	_throw_elapsed = 0.0
 	_cached_desired = Vector3.ZERO
 
@@ -49,24 +52,46 @@ func _tick_throw(delta: float) -> void:
 	var grab_at := _throw_length * throw_grab_fraction
 	var release_at := _throw_length * throw_release_fraction
 	if before < grab_at and _throw_elapsed >= grab_at:
-		_grab_rock()
+		_stamp_crater(_rock_ground)
 	if is_instance_valid(_rock) and _throw_elapsed < release_at:
-		_rock.global_position = _hand_position()
+		_rock.global_position = _rock_position(_throw_elapsed / _throw_length)
+	# A short step forward during the throw itself.
+	if _throw_elapsed >= release_at - _throw_length * 0.1 and _throw_elapsed < release_at + _throw_length * 0.06:
+		_cached_desired = -global_transform.basis.z * THROW_STEP_SPEED
 	if _throw_elapsed >= release_at:
 		_release_rock()
 	if _throw_elapsed >= _throw_length:
 		_throw_elapsed = -1.0
 
 
-func _grab_rock() -> void:
-	var ground := _ground_point(-global_transform.basis.z * 1.1)
-	_stamp_crater(ground)
+# The rock lies on the floor in front of the Titan from the start of the throw,
+# so the stoop and grab are visible.
+func _spawn_rock() -> void:
+	_rock_ground = _ground_point(-global_transform.basis.z * 1.1)
 	_rock = ROCK.new()
 	_rock.name = "TitanRock"
 	_rock.set("damage", throw_damage * get_damage_percent() / 100.0)
 	var parent: Node = effects_root if is_instance_valid(effects_root) else get_parent()
 	parent.add_child(_rock)
-	_rock.global_position = ground
+	_rock.global_position = _rock_ground + Vector3.UP * 0.3
+
+
+# Rock path by clip progress: floor until the grab, up to the chest, back behind
+# the head for the wind-up, then forward to the release point.
+func _rock_position(progress: float) -> Vector3:
+	var forward := -global_transform.basis.z
+	var floor_point := _rock_ground + Vector3.UP * 0.3
+	var lift := global_position + Vector3.UP * 1.1 + forward * 0.9
+	var windup := global_position + Vector3.UP * 1.8 - forward * 0.15
+	var release := global_position + Vector3.UP * 1.4 + forward * 1.0
+	var grab := throw_grab_fraction
+	if progress < grab:
+		return floor_point
+	if progress < 0.5:
+		return floor_point.lerp(lift, smoothstep(grab, 0.5, progress))
+	if progress < 0.62:
+		return lift.lerp(windup, smoothstep(0.5, 0.62, progress))
+	return windup.lerp(release, smoothstep(0.62, throw_release_fraction, progress))
 
 
 func _release_rock() -> void:
@@ -84,10 +109,6 @@ func _cancel_throw() -> void:
 	if is_instance_valid(_rock):
 		_rock.queue_free()
 	_rock = null
-
-
-func _hand_position() -> Vector3:
-	return global_position + Vector3.UP * 1.1 - global_transform.basis.z * 0.9
 
 
 func _ground_point(offset: Vector3) -> Vector3:
