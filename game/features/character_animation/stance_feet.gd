@@ -24,7 +24,8 @@ func _process_modification_with_delta(delta: float) -> void:
 		return
 	var clip := String(player.current_animation)
 	_walk_amount = move_toward(_walk_amount, 1.0 if clip.begins_with("Walk_") else 0.0, BLEND_PER_SECOND * delta)
-	if _walk_amount > 0.0 and skeleton.get_node_or_null("ProceduralGait") == null:
+	# Gait and leg clips already set the knees; only the bare authored Walk_* legs need the nudge.
+	if _walk_amount > 0.0 and skeleton.get_node_or_null("ProceduralGait") == null and skeleton.get_node_or_null("LegClips") == null:
 		_nudge_knee_in(skeleton, "Left")
 		_nudge_knee_in(skeleton, "Right")
 	# The lowered-pistol idle already has both feet straight; turning the left one bends the leg inward.
