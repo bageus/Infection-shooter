@@ -142,8 +142,10 @@ func _physics_process(delta: float) -> void:
 		_refresh_glass_collision()
 	# Keep the cheap proximity check every tick: a teleport or fast approach
 	# must open immediately, while animation/delay/remote requests always run.
+	# A door laid on its side (planner lay) has a horizontal up axis: it stays idle.
+	var fallen := absf(global_basis.y.normalized().y) < 0.5
 	var idle_distance := maxf(3.0, trigger_distance + LOCKED_CUE_REARM_DISTANCE)
-	if _pose_ready and _open_amount == 0.0 and _close_timer <= 0.0 and not _requested_open and Vector2(local_player.x, local_player.z).length_squared() > idle_distance * idle_distance:
+	if _pose_ready and _open_amount == 0.0 and _close_timer <= 0.0 and not _requested_open and (fallen or Vector2(local_player.x, local_player.z).length_squared() > idle_distance * idle_distance):
 		if _key_hint != null and _key_hint.visible:
 			_key_hint.hide()
 		_hints.update_no_entry(self, false, local_player)
@@ -152,22 +154,22 @@ func _physics_process(delta: float) -> void:
 		if mode == DoorMode.GLASS_SWING and _glass_hinge != null:
 			_swing_side = _player_side(local_player)
 		return
-	var wants_open := _requested_open and not requires_emergency_key
+	var wants_open := _requested_open and not requires_emergency_key and not fallen
 	_requested_open = false
 	var horizontal_distance := Vector2(local_player.x, local_player.z).length()
 	var emergency_exit_side := signf(local_player.z) == signf(one_way_allowed_side)
 	var has_emergency_key := requires_emergency_key and _player.has_method("has_emergency_key") and bool(_player.call("has_emergency_key"))
 	if _key_hint != null:
-		_key_hint.visible = requires_emergency_key and horizontal_distance < HINT_BADGES.RANGE and (permanently_locked or (not emergency_exit_side and not has_emergency_key))
+		_key_hint.visible = not fallen and requires_emergency_key and horizontal_distance < HINT_BADGES.RANGE and (permanently_locked or (not emergency_exit_side and not has_emergency_key))
 		HINT_BADGES.toward_player(_key_hint, local_player)
 	# One-way: the crossed circle marks the side nobody can pass from, unless the locked icon shows.
-	var no_entry_shown := mode == DoorMode.SWING_ONE_WAY and not permanently_locked and not emergency_exit_side and _open_amount < 0.02 and horizontal_distance < HINT_BADGES.RANGE
+	var no_entry_shown := not fallen and mode == DoorMode.SWING_ONE_WAY and not permanently_locked and not emergency_exit_side and _open_amount < 0.02 and horizontal_distance < HINT_BADGES.RANGE
 	_hints.update_no_entry(self, no_entry_shown and not (_key_hint != null and _key_hint.visible), local_player)
 	var blocked := permanently_locked or (requires_emergency_key and not emergency_exit_side and not has_emergency_key)
 	if horizontal_distance > trigger_distance + LOCKED_CUE_REARM_DISTANCE:
 		_locked_cue_armed = true
 
-	if horizontal_distance <= trigger_distance:
+	if horizontal_distance <= trigger_distance and not fallen:
 		if blocked or no_entry_shown:
 			_announce_locked(&"the_door_is_locked" if blocked else &"door_access_denied")
 		else:
@@ -187,7 +189,7 @@ func _physics_process(delta: float) -> void:
 					if mode == DoorMode.SLIDING_ELEVATOR:
 						_request_nearby_elevator_open()
 
-	if requires_emergency_key and _open_amount > 0.04 and _someone_in_doorway():
+	if requires_emergency_key and _open_amount > 0.04 and not fallen and _someone_in_doorway():
 		wants_open = true
 	var before := _open_amount
 	if wants_open:
