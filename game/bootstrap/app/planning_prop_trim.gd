@@ -8,6 +8,7 @@ const MAX_SIZE_BY_LEVEL := [0.5, 0.25, 0.0]
 const GROUP := &"trim_decor"
 const META := &"trim_size"
 const LAYERS := &"trim_layers"
+const SHADOW := &"trim_shadow"
 const ENVIRONMENT_DIR := "/models/objects/enviroments/"
 static var _sizes: Dictionary = {}
 
@@ -55,6 +56,7 @@ static func _show(node: Node3D, shown: bool) -> void:
 	node.visible = shown and not node.get_meta(&"room_culled", false)
 	node.set_meta(&"trim_hidden", not shown) # Room culling must not show props the quality setting hides.
 	node.process_mode = Node.PROCESS_MODE_INHERIT if shown else Node.PROCESS_MODE_DISABLED
+	_cast_shadows(node, Engine.get_meta("planning_active", false) or EFFECTS_QUALITY.at_least(EFFECTS_QUALITY.MEDIUM))
 	var bodies := node.find_children("*", "CollisionObject3D", true, false)
 	if node is CollisionObject3D:
 		bodies.append(node)
@@ -64,6 +66,15 @@ static func _show(node: Node3D, shown: bool) -> void:
 		var saved: Vector2i = body.get_meta(LAYERS)
 		body.collision_layer = saved.x if shown else 0
 		body.collision_mask = saved.y if shown else 0
+
+
+## Low draws props without casting into the sun's shadow map (each caster costs a second draw); their baked contact shadow stays.
+static func _cast_shadows(node: Node3D, on: bool) -> void:
+	for found in node.find_children("*", "MeshInstance3D", true, false):
+		var mesh_node := found as MeshInstance3D
+		if not mesh_node.has_meta(SHADOW):
+			mesh_node.set_meta(SHADOW, mesh_node.cast_shadow)
+		mesh_node.cast_shadow = mesh_node.get_meta(SHADOW) if on else GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
 
 
 static func _limit() -> float:
