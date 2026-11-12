@@ -86,7 +86,7 @@ func _build_parts(strength: float) -> void:
 	if skeleton.find_bone("T0_A") >= 0:
 		for index in TENTACLES:
 			definitions[StringName("tentacle_%d" % index)] = {"bones": ["T%d_A" % index, "T%d_B" % index], "share": 0.3}
-		definitions[TORSO] = {"bones": ["Hips", "Body", "Crown"], "share": 0.0}
+		definitions[TORSO] = {"bones": ["Hips", "Body", "Crown", "L0", "L1", "L2", "L3", "L4", "L5"], "share": 0.0}
 	else:
 		definitions = HUMANOID_PARTS
 	for part: StringName in definitions:
