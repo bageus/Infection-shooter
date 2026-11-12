@@ -78,6 +78,7 @@ var _intended_motion := Vector3.ZERO
 @export var voice_pitch := 1.0
 @export var step_pitch := 1.0
 @export var death_sink_depth := 0.45
+@export var death_ragdoll := true
 
 @onready var body_visual: Node3D = $Body
 @onready var collision_shape: CollisionShape3D = $CollisionShape3D
@@ -581,9 +582,9 @@ func _die() -> void:
 	collision_layer = 0
 	collision_mask = 0
 	collision_shape.disabled = true
-	if _parts != null:
+	if _parts != null and death_ragdoll:
 		_parts.enable_corpse_hitboxes()
-	_ragdoll = DEATH_RAGDOLL.start(self, _parts, _animation, Vector3(velocity.x, 0.0, velocity.z), _death_push if fresh else Vector3.ZERO, size)
+	_ragdoll = null if not death_ragdoll else DEATH_RAGDOLL.start(self, _parts, _animation, Vector3(velocity.x, 0.0, velocity.z), _death_push if fresh else Vector3.ZERO, size)
 	if _ragdoll == null:
 		_fall_watch = DEATH_CLIP.play(self, _parts, _animation, fall, landing)
 	preload("res://game/features/infected/corpse_blood_pool.gd").start(self, _parts, global_position + landing)

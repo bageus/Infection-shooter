@@ -68,6 +68,15 @@ func _run() -> void:
 	horde.health = 0.0
 	horde._release_summon()
 	_check(_summoned_count(stage) == previous.size(), "Dead Horde cannot release pending waves")
+	var dying := HORDE.instantiate() as CharacterBody3D
+	dying.position.y = 1.365
+	stage.add_child(dying)
+	dying.set_physics_process(false)
+	dying.configure_world(effects, null)
+	dying._die()
+	_check(dying._ragdoll == null, "A dying Horde sits down with its clip instead of a limb ragdoll")
+	var player := dying.get_node("Body/Visual/AnimationPlayer") as AnimationPlayer
+	_check(player.current_animation == "Death", "Horde plays its Death clip")
 	var old := LEGACY.instantiate()
 	stage.add_child(old)
 	_check(not FileAccess.file_exists("res://models/objects/characters/mutant_animated.glb"), "Retired mutant model is absent")

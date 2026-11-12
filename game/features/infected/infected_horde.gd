@@ -217,7 +217,15 @@ func _enter(next: State) -> void:
 	_state_time = 0.0
 
 
+# No ragdoll: the Death clip squashes bones unevenly, which Jolt rejects on a
+# hitbox, so the corpse becomes shootable once it has settled.
+func _enable_settled_hitboxes() -> void:
+	if _parts != null:
+		_parts.enable_corpse_hitboxes()
+
+
 func _die() -> void:
 	_summon_pending = -1.0
 	_enter(State.RECOVER)
 	super._die()
+	create_tween().tween_callback(_enable_settled_hitboxes).set_delay(1.6)
