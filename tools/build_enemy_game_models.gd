@@ -139,10 +139,11 @@ func _write_texture(enemy_name: String, source_index: int, suffix: String) -> bo
 
 
 func _write_material(enemy_name: String) -> void:
-	var text := """[gd_resource type="StandardMaterial3D" load_steps=3 format=3]
+	var text := """[gd_resource type="StandardMaterial3D" load_steps=4 format=3]
 
 [ext_resource type="Texture2D" path="%s%s_albedo.jpg" id="1_albedo"]
 [ext_resource type="Texture2D" path="%s%s_normal.jpg" id="2_normal"]
+[ext_resource type="Texture2D" path="%s%s_glow.png" id="3_glow"]
 
 [resource]
 resource_name = "%s_game"
@@ -151,7 +152,12 @@ albedo_texture = ExtResource("1_albedo")
 roughness = 0.8
 normal_enabled = true
 normal_texture = ExtResource("2_normal")
-""" % [OUTPUT_DIR, enemy_name, OUTPUT_DIR, enemy_name, enemy_name]
+# Glowing eyes and blisters: masks come from tools/build_enemy_glow_masks.py.
+emission_enabled = true
+emission = Color(1, 1, 1, 1)
+emission_energy_multiplier = 1.0
+emission_texture = ExtResource("3_glow")
+""" % [OUTPUT_DIR, enemy_name, OUTPUT_DIR, enemy_name, OUTPUT_DIR, enemy_name, enemy_name]
 	var file := FileAccess.open(OUTPUT_DIR + enemy_name + "_game.tres", FileAccess.WRITE)
 	file.store_string(text)
 	file.close()
