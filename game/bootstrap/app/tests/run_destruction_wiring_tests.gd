@@ -1,6 +1,7 @@
 extends SceneTree
 ## Audit actual catalog wrappers, rather than only glTF group names.
 const CATALOG := preload("res://game/bootstrap/app/planning_catalog.gd")
+const DAMAGE_STATE := preload("res://game/features/combat/public/prop_damage_state.gd")
 const STAGE_NAMES := ["Modular", "Door_Off", "LargeParts", "SmallFragments", "JaggedFragments", "PlantDestroyed", "PotFragments", "Broken_7", "Fragments", "Primary", "Panels", "Medium", "Fine", "TopSecondary", "DamageReady"]
 const VARIANT_NAMES := ["Hit_01", "Dent_01", "Dent_02", "Dent_03", "Power_Off"]
 var failures := 0
@@ -69,13 +70,17 @@ func _audit(catalog: RefCounted, path: String) -> void:
 						break
 					prop.call("take_projectile_hit", 10000.0, prop.global_position, Vector3.BACK, Vector3.FORWARD, "AK")
 					await process_frame
-				_check(not is_instance_valid(prop) or bool(prop.get("_broken")), "Rifle damage breaks staged model: " + path)
-				if is_instance_valid(prop):
-					if "server_rack" in path or "DamageReady" in authored_stages:
-						_check(groups[0].visible, "In-place damage geometry is visible: " + path)
-					else:
-						_check(effects.get_child_count() > 0, "Breakage emits authored fragments: " + path)
-				row["checked"] = "rifle break"
+				if path.get_file() in DAMAGE_STATE.INDESTRUCTIBLE:
+					_check(is_instance_valid(prop) and not bool(prop.get("_broken")), "Indestructible model survives rifle damage: " + path)
+					row["checked"] = "indestructible"
+				else:
+					_check(not is_instance_valid(prop) or bool(prop.get("_broken")), "Rifle damage breaks staged model: " + path)
+					if is_instance_valid(prop):
+						if "server_rack" in path or "DamageReady" in authored_stages:
+							_check(groups[0].visible, "In-place damage geometry is visible: " + path)
+						else:
+							_check(effects.get_child_count() > 0, "Breakage emits authored fragments: " + path)
+					row["checked"] = "rifle break"
 			else:
 				prop.call("take_projectile_hit", 10000.0, prop.global_position, Vector3.BACK, Vector3.FORWARD, "AK")
 				await process_frame
