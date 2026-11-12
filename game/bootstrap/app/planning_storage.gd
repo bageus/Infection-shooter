@@ -21,12 +21,8 @@ const SAVE_PATH = "user://planned_layout.json"
 const LOOSE_RETURN_RADIUS := 2.0
 const MAPS_DIR = "user://maps"
 const LAYOUT_DIR = "res://game/presentation/office_floor/public/"
-const AUTHORED_SCENE_PATH = LAYOUT_DIR + "base_office_layout.tscn"
-# Each named map bakes to its own scene; the unnamed layout is the "default" map.
+# Each named map bakes to its own scene.
 const BAKE_DIR = LAYOUT_DIR + "maps/"
-# The shipped map: saved next to the baked scene from the editor and loaded
-# when this computer has no planned_layout.json of its own (fresh install, Web).
-const DEFAULT_MAP_PATH = LAYOUT_DIR + "base_office_map.json"
 
 var map_loading := false
 var _save_notice := ""
@@ -85,12 +81,10 @@ func _map_path(map_name: String) -> String:
 	return MAPS_DIR + "/" + _safe_map_name(map_name) + ".json"
 
 
-## Scene a map bakes to. The unnamed layout is "default", which keeps the original scene path.
+## Scene a map bakes to; empty when the map has no name.
 func _bake_path(map_name: String) -> String:
 	var safe := _safe_map_name(map_name)
-	if safe.is_empty() or safe == "default":
-		return AUTHORED_SCENE_PATH
-	return bake_dir + safe + ".tscn"
+	return "" if safe.is_empty() else bake_dir + safe + ".tscn"
 
 
 ## Map to read for a level: the one shipped with the build, else the player's saved map.
@@ -424,7 +418,12 @@ func read_startup_layout(recovery_path: String = "") -> Dictionary:
 	if recovery_path.is_empty() and _startup_map_exists():
 		_remember_level(STARTUP.map_name())
 		return MAP_FILE.read(_map_path(STARTUP.map_name()))
-	return MAP_FILE.startup(SAVE_PATH, DEFAULT_MAP_PATH) if recovery_path.is_empty() else MAP_FILE.read(recovery_path)
+	if not recovery_path.is_empty():
+		return MAP_FILE.read(recovery_path)
+	# No map yet (fresh install): start with an empty floor.
+	if not FileAccess.file_exists(SAVE_PATH) and not FileAccess.file_exists(SAVE_PATH + ".bak"):
+		return {"data": {"objects": []}}
+	return MAP_FILE.startup(SAVE_PATH, "")
 
 
 func _startup_map_exists() -> bool:
@@ -457,14 +456,9 @@ func save_layout() -> void:
 		return
 	authored_layout = data
 	STARTUP.clear()
-	# Baking the authored scene into the project only makes sense (and is only
-	# possible: res:// is read-only in a build) when running from the editor.
-	if OS.has_feature("editor"):
-		var shipped := MAP_FILE.write(DEFAULT_MAP_PATH, data)
-		if shipped.has("error"):
-			map_loading = false
-			controls.status.text = "SAVED | shipped map error: " + str(shipped.error)
-			return
+	# Baking into the project only makes sense (and is only possible: res:// is
+	# read-only in a build) when running from the editor, and only for a named map.
+	if OS.has_feature("editor") and not _bake_path(map_name_edit.text).is_empty():
 		var scene_error: Error = await _scene_bake().save_async(objects.placed.duplicate(), _bake_path(map_name_edit.text), session, controls.status)
 		if not is_instance_valid(session) or not session.is_inside_tree():
 			map_loading = false
@@ -477,13 +471,13 @@ func save_layout() -> void:
 	controls.status.text = "SAVED | %d objects%s%s" % [records.size(), fixtures, _save_notice]
 
 
-func _save_authored_scene(target: String = AUTHORED_SCENE_PATH) -> Error:
+func _save_authored_scene(target: String) -> Error:
 	var bake := _scene_bake()
 	return bake.save(objects.placed, target)
 
 
 func load_layout() -> void:
-	var path := SAVE_PATH if FileAccess.file_exists(SAVE_PATH) else DEFAULT_MAP_PATH
+	var path := SAVE_PATH
 	if _startup_map_exists():
 		path = _map_path(STARTUP.map_name())
 		_remember_level(STARTUP.map_name())

@@ -2,12 +2,13 @@ extends Node
 const BLOOD_PLACEMENT := preload("res://game/bootstrap/app/planning_blood_placement.gd")
 const TILT := preload("res://game/bootstrap/app/planning_tilt.gd")
 const GROUP_TEMPLATES := preload("res://game/bootstrap/app/planning_group_templates.gd")
+const HERO_SPAWN := preload("res://game/bootstrap/app/planning_hero_spawn.gd")
 
 
 var player_spawn_defined = false
 var player_spawn_transform = Transform3D.IDENTITY
-## Hero spawn settings of the Player Spawn (see planning_hero_spawn.gd); absent means automatic.
-var hero_spawn: Dictionary = {}
+## Hero spawn settings of the Player Spawn (see planning_hero_spawn.gd); a fresh floor starts automatic.
+var hero_spawn: Dictionary = HERO_SPAWN.defaults()
 var selected_path = ""
 var selected_kind = ""
 var selected_entry: Dictionary = {}
@@ -157,7 +158,7 @@ func _register_actor_objects() -> void:
 
 
 func _is_editable_scene_object(node: Node3D) -> bool:
-	var is_bake := node.scene_file_path.ends_with("base_office_layout.tscn") or node.scene_file_path.begins_with("res://game/presentation/office_floor/public/maps/")
+	var is_bake := node.scene_file_path.begins_with("res://game/presentation/office_floor/public/maps/")
 	if node == session.root or node == session.structure_root or is_bake:
 		return false
 	if node.is_in_group("planner_lights"):

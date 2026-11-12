@@ -32,7 +32,7 @@ run_one() {
 	# Serialize those loads/restarts, retaining every real-map assertion and a bounded timeout.
 	limit=120
 	case "$name" in
-		run_menu_tests|run_startup_resource_memory_tests|run_planning_mode_tests|run_occlusion_tests|run_planner_extension_tests|run_planner_light_view_tests|run_wall_tv_hit_tests)
+		run_menu_tests|run_startup_resource_memory_tests|run_planning_mode_tests|run_occlusion_tests|run_planner_extension_tests|run_planner_light_view_tests)
 			local map_lock
 			exec {map_lock}>"$work/full-map.lock"
 			flock "$map_lock"

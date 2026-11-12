@@ -7,7 +7,7 @@ var peak_video := 0
 var _had_save := false
 var _save := PackedByteArray()
 const SAVE := "user://planned_layout.json"
-const BASE := "res://game/presentation/office_floor/public/base_office_map.json"
+const BASE := "res://game/bootstrap/app/tests/fixtures/office_map_fixture.json"
 # The budget dates from when a restart held two copies of the map (4696 objects: peak 1236 MiB);
 # a restart now frees the old mission first, so the real peak is well below it.
 const ALLOCATOR_LIMIT := 1344 * 1024 * 1024
