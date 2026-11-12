@@ -14,8 +14,6 @@ func _initialize() -> void:
 
 
 func _run() -> void:
-	# A level chain left by an earlier suite would start a map this test does not write.
-	DirAccess.remove_absolute("user://level_chain.json")
 	_had_save = FileAccess.file_exists(SAVE)
 	if _had_save:
 		_saved_bytes = FileAccess.get_file_as_bytes(SAVE)
