@@ -60,6 +60,14 @@ func _bars_follow_the_setting() -> void:
 	await process_frame
 	await process_frame
 	_check(is_instance_valid(bars), "Bars draw a live damaged enemy without errors")
+	var heights := {}
+	for key in ["infected_hunger", "infected_brute", "infected_colossus", "infected_titan"]:
+		var kind := (load("res://game/features/infected/public/%s.tscn" % key) as PackedScene).instantiate() as Node3D
+		stage.add_child(kind)
+		heights[key] = BARS._bar_height(kind)
+		kind.free()
+	_check(heights["infected_colossus"] > heights["infected_hunger"] and heights["infected_colossus"] > heights["infected_titan"], "Bar height follows each enemy type")
+	_check(is_equal_approx(heights["infected_hunger"], 0.925 + 0.3), "Hunger bar sits just above its capsule")
 	bars.call("set_enabled", false)
 	_check(not bars.visible and not bars.is_processing(), "Turning the setting off hides the bars and stops drawing")
 	stage.queue_free()
