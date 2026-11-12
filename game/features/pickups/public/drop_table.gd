@@ -13,6 +13,7 @@ const SCENES := {
 	"antidote": preload("res://game/features/pickups/public/antidote_pickup.tscn"),
 	"dna": preload("res://game/features/pickups/public/dna_pickup.tscn"),
 	"armor": preload("res://game/features/pickups/public/armor_pickup.tscn"),
+	"key": preload("res://game/features/pickups/public/key_pickup.tscn"),
 }
 
 const DROP_LIFETIME := 75.0

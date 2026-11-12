@@ -46,6 +46,11 @@ func _ready() -> void:
 	add_child(_beacon)
 
 
+# Dropped keys hover at the spot they land on, so nothing is snapped to the floor.
+func settle_on_floor() -> void:
+	pass
+
+
 # The mission calls this once the player has searched for a while; the arrow then blinks above the key.
 func reveal_arrow() -> void:
 	_beacon.call("set_arrow_visible", true)
