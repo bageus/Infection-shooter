@@ -15,6 +15,7 @@ func _run() -> void:
 	_test_percent_per_level()
 	_test_stats_follow_level()
 	_test_reapply_does_not_compound()
+	_test_every_type_keeps_order()
 	print("Enemy difficulty tests: %d failures" % failures)
 	quit(1 if failures > 0 else 0)
 
@@ -35,7 +36,9 @@ func _test_percent_per_level() -> void:
 	DIFFICULTY.level = DIFFICULTY.NORMAL
 	_check(is_equal_approx(DIFFICULTY.percent(200.0), 200.0), "Normal keeps the authored value")
 	DIFFICULTY.level = DIFFICULTY.HIGH
-	_check(is_equal_approx(DIFFICULTY.percent(50.0), 200.0), "High uses the editor maximum")
+	_check(is_equal_approx(DIFFICULTY.percent(50.0), 100.0), "High doubles an authored 50")
+	_check(is_equal_approx(DIFFICULTY.percent(200.0), 400.0), "High doubles an authored 200")
+	_check(DIFFICULTY.percent(50.0) < DIFFICULTY.percent(200.0), "High keeps higher percent harder")
 	DIFFICULTY.level = DIFFICULTY.NORMAL
 
 
@@ -49,8 +52,8 @@ func _test_stats_follow_level() -> void:
 	_check(is_equal_approx(enemy.obstacle_damage, 5.0), "Low halves obstacle damage too")
 	DIFFICULTY.level = DIFFICULTY.HIGH
 	authoring.set_stats({"health": 50.0, "damage": 50.0})
-	_check(is_equal_approx(enemy.max_health, 200.0), "High gives 200% health")
-	_check(is_equal_approx(enemy.attack_damage, 20.0), "High gives 200% damage")
+	_check(is_equal_approx(enemy.max_health, 100.0), "High gives 100% health from authored 50")
+	_check(is_equal_approx(enemy.attack_damage, 10.0), "High gives 100% damage from authored 50")
 	DIFFICULTY.level = DIFFICULTY.NORMAL
 	authoring.set_stats({"health": 200.0, "damage": 200.0})
 	_check(is_equal_approx(enemy.max_health, 200.0), "Normal keeps the authored health")
@@ -69,6 +72,22 @@ func _test_reapply_does_not_compound() -> void:
 	_check(is_equal_approx(enemy.max_health, 100.0), "Reapplying low does not halve again")
 	DIFFICULTY.level = DIFFICULTY.NORMAL
 	enemy.free()
+
+
+## Every enemy scene must keep higher health and damage percents harder on every level.
+func _test_every_type_keeps_order() -> void:
+	for scene in ["infected_hunger", "infected_brute", "infected_colossus", "infected_titan", "infected_revenant", "infected_horde", "mutant_level2", "infected_capsule"]:
+		for level in [DIFFICULTY.LOW, DIFFICULTY.NORMAL, DIFFICULTY.HIGH]:
+			DIFFICULTY.level = level
+			var low = load("res://game/features/infected/public/%s.tscn" % scene).instantiate()
+			low.configure_stats({"health": 50.0, "damage": 50.0})
+			var high = load("res://game/features/infected/public/%s.tscn" % scene).instantiate()
+			high.configure_stats({"health": 200.0, "damage": 200.0})
+			_check(low.max_health < high.max_health, "%s health order at level %d" % [scene, level])
+			_check(low.attack_damage < high.attack_damage, "%s damage order at level %d" % [scene, level])
+			low.free()
+			high.free()
+	DIFFICULTY.level = DIFFICULTY.NORMAL
 
 
 func _check(condition: bool, label: String) -> void:
