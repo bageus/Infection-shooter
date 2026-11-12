@@ -15,17 +15,17 @@ const CRATE_BEACON_ENERGY := 0.9
 
 
 ## Crate contents on destruction. `empty` drops nothing, `auto` rolls by crate size.
-## `carried_weapons` returns the weapon slot indices the player holds; auto loot skips other weapons' ammo.
-static func release_crate(world: Node, at: Vector3, config: Dictionary, size_hint: String, drop_weapon: Callable, carried_weapons: Callable = Callable(), source_id := "") -> void:
+## `needs` returns the player's needs (see CONFIG.crate_weights); auto loot favours what the player lacks.
+static func release_crate(world: Node, at: Vector3, config: Dictionary, size_hint: String, drop_weapon: Callable, needs: Callable = Callable(), source_id := "") -> void:
 	match str(config.get("mode", "empty")):
 		"manual":
 			spawn(world, CONFIG.manual_list(config), at, drop_weapon, true, source_id)
 		"auto":
-			spawn(world, CONFIG.auto_list(size_hint, CONFIG.auto_weights(_carried(carried_weapons))), at, drop_weapon, true)
+			spawn(world, CONFIG.auto_list(size_hint, CONFIG.crate_weights(_needs(needs))), at, drop_weapon, true)
 
 
 ## Infected death. Without a config the classic random drop applies.
-static func release_enemy(world: Node, at: Vector3, raw_config: Variant, drop_weapon: Callable, ammo_multiplier: float = 1.0, carried_weapons: Callable = Callable(), source_id := "") -> void:
+static func release_enemy(world: Node, at: Vector3, raw_config: Variant, drop_weapon: Callable, ammo_multiplier: float = 1.0, needs: Callable = Callable(), source_id := "") -> void:
 	var config := CONFIG.sanitize(raw_config, "auto")
 	match str(config["mode"]):
 		"manual":
@@ -35,12 +35,12 @@ static func release_enemy(world: Node, at: Vector3, raw_config: Variant, drop_we
 				return
 			var table := DROP_TABLE.new()
 			world.add_child(table)
-			table.call("drop_for_enemy", world, at, ammo_multiplier, _carried(carried_weapons))
+			table.call("drop_for_enemy", world, at, ammo_multiplier, _needs(needs).get("carried"))
 			table.queue_free()
 
 
-static func _carried(carried_weapons: Callable) -> Variant:
-	return carried_weapons.call() if carried_weapons.is_valid() else null
+static func _needs(needs: Callable) -> Dictionary:
+	return needs.call() if needs.is_valid() else {}
 
 
 ## `source_id` is the planner id of the enemy or crate that drops the key: quests wait for that key to be picked up.

@@ -12,6 +12,11 @@ const MAX_COUNT := 9
 const AUTO_WEIGHTS := {"ammo_pistol": 0.75, "ammo_uzi": 0.60, "ammo_shotgun": 0.60, "ammo_automate": 0.60, "ammo_sniper": 0.15, "ammo_minigun": 0.20, "ammo_grenade": 0.15, "medkit": 1.0, "antidote": 0.35}
 ## Weapon slot indices (WEAPON_NAMES order) that take each ammo id.
 const AMMO_WEAPONS := {"ammo_pistol": [0], "ammo_uzi": [1], "ammo_shotgun": [2], "ammo_grenade": [3], "ammo_automate": [4, 5], "ammo_sniper": [6], "ammo_minigun": [7]}
+## Crate needs: an empty reserve weighs up to 3x, medkits 0.25x at full health to 3x at zero, antidotes 2x with none and fall off with each one held.
+const NEED_LOW_AMMO_BOOST := 2.0
+const NEED_MEDKIT_FULL := 0.25
+const NEED_MEDKIT_EMPTY := 3.0
+const NEED_ANTIDOTE_NONE := 2.0
 const STAT_MIN := 50.0
 const STAT_MAX := 200.0
 
@@ -71,11 +76,31 @@ static func auto_weights(carried: Variant) -> Dictionary:
 	return weights
 
 
-## Random supplies for an automatic crate; bigger crates hold more.
+## Auto crate weights from the player's needs (see `needs` in loot_drop.gd). Missing keys change nothing:
+## `carried` (weapon indices), `reserve` ({weapon index: 0..1 reserve fill}), `health` (0..1), `antidotes` (count).
+static func crate_weights(needs: Dictionary) -> Dictionary:
+	var weights := auto_weights(needs.get("carried"))
+	var reserve: Dictionary = needs.get("reserve", {})
+	for id: String in weights.keys():
+		if not AMMO_WEAPONS.has(id):
+			continue
+		var fill := 1.0
+		for index: int in AMMO_WEAPONS[id]:
+			if reserve.has(index):
+				fill = minf(fill, clampf(float(reserve[index]), 0.0, 1.0))
+		weights[id] = float(weights[id]) * (1.0 + NEED_LOW_AMMO_BOOST * (1.0 - fill))
+	if needs.has("health"):
+		var missing := 1.0 - clampf(float(needs["health"]), 0.0, 1.0)
+		weights["medkit"] = float(weights["medkit"]) * lerpf(NEED_MEDKIT_FULL, NEED_MEDKIT_EMPTY, missing)
+	if needs.has("antidotes"):
+		weights["antidote"] = float(weights["antidote"]) * NEED_ANTIDOTE_NONE / (1.0 + maxi(int(needs["antidotes"]), 0))
+	return weights
+
+
+## Random supplies for an automatic crate: two from a large crate, one from a small one.
 static func auto_list(size_hint: String, weights: Dictionary = AUTO_WEIGHTS) -> Array[String]:
 	var list: Array[String] = []
-	var count := randi_range(2, 4) if size_hint == "large" else randi_range(1, 2)
-	for _i in count:
+	for _i in (2 if size_hint == "large" else 1):
 		list.append(weighted_item(randf(), weights))
 	return list
 
