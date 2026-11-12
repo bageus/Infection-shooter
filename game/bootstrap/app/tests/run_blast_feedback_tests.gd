@@ -86,6 +86,10 @@ func _render_checks() -> void:
 	app.get("gameplay").process_mode = Node.PROCESS_MODE_DISABLED
 	# The animated grain of the post-processing layer would break the static baseline.
 	app.find_child("PostFx", true, false).call("set_enabled", false)
+	# So would the HUD's FPS counter and its labels, which refresh by the clock and switch language late.
+	for layer in app.find_children("*", "CanvasLayer", true, false):
+		if layer.get_script() != null and layer.get_script().resource_path.ends_with("prototype_hud.gd"):
+			layer.hide()
 	var fixture := _render_fixture()
 	var hud := CanvasLayer.new()
 	hud.layer = 150
