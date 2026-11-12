@@ -13,6 +13,7 @@ const MEMORY_GUARD := preload("res://game/core/vfx/public/memory_guard.gd")
 const PLAYER := "res://game/features/player/public/player.tscn"
 const ROOM_CULL := preload("res://game/presentation/office_floor/public/room_cull.gd")
 const PROP_TRIM := preload("res://game/bootstrap/app/planning_prop_trim.gd")
+const SIMPLE_CASING := preload("res://game/bootstrap/app/planning_simple_casing.gd")
 # Deleted as unused in d288bda. Saved plans may still place them; keep those records without a missing-object warning.
 const RETIRED_MODELS := {
 	"res://models/objects/enviroments/11/11_deco_2.glb": true,
@@ -296,6 +297,7 @@ func _place(entry: Dictionary) -> void:
 		if node.has_method("watch_target"):
 			node.call("watch_target", session.main_player)
 	# Tagged even while the planner is open (maps loaded from it): culling only acts in play.
+	SIMPLE_CASING.apply(node, scene_path)
 	ROOM_CULL.tag(node, record, scene_path)
 	PROP_TRIM.tag(node, record, scene_path)
 	objects.placed.append(node)
