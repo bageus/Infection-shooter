@@ -19,6 +19,7 @@ func _run() -> void:
 	_model()
 	_logic()
 	_book()
+	_key_sources()
 	await _runner()
 	await _menu_while_paused()
 	await _language_switch()
@@ -27,6 +28,15 @@ func _run() -> void:
 	else:
 		push_error("Quest tests failed: %d failure(s)." % failures)
 	quit(failures)
+
+
+func _key_sources() -> void:
+	var source := Node3D.new()
+	source.set_meta(&"planning_loot", {"mode": "manual", "items": {"key": 1}})
+	_check(BOOK.drops_key(source), "An object whose manual loot has a key is a quest candidate.")
+	source.set_meta(&"planning_loot", {"mode": "auto", "items": {"key": 1}})
+	_check(not BOOK.drops_key(source), "An auto-loot object is not a key source, even with a key listed.")
+	source.free()
 
 
 func _model() -> void:
