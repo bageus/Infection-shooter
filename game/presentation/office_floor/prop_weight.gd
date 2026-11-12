@@ -27,7 +27,7 @@ const WEIGHTS := [
 	["15_pallet_drywall_flat_full", 350.0], ["15_pallet_drywall_flat", 300.0], ["15_pallet_drywall_on_edge", 300.0],
 	["15_pallet_concrete_blocks", 900.0], ["15_pallet_mix_sacks", 800.0], ["15_pallet_timber", 250.0],
 	["crate_canvas_large", 300.0], # A large crate under a tarp is as heavy as a loaded pallet.
-	["table_desk", 120.0], ["file_cabinet_largest", 200.0], ["file_cabinet_large_shelf", 150.0], ["file_cabinet", 150.0],
+	["table_desk", 120.0], ["file_cabinet_largest", 200.0], ["file_cabinet_large_shelf", 150.0],
 	["tablet", 0.6], ["toilet_paper", 0.12], ["white_board_stand", 12.0],
 	["vending", 240.0], ["arcade", 150.0], ["server_rack2", 220.0], ["server_rack3", 260.0], ["server_rack", 120.0],
 	["frige", 85.0], ["washing_machine", 70.0], ["dishwasher", 45.0], ["water_cooler_bottle_attached", 28.0],
@@ -36,7 +36,7 @@ const WEIGHTS := [
 	["book_case_small", 38.0], ["book_case_with_back_small", 40.0], ["book_case", 65.0], ["bookshelf", 42.0],
 	["box_1_metal", 24.0], ["file_cabinet_small_with_shelfs", 30.0],
 	["file_cabinet_smaller", 18.0], ["file_cabinet_small_shelf", 10.0],
-	["locker", 45.0], ["drawer_cabinet_mobile", 16.0], ["drawer_cabinet", 22.0],
+	["locker", 45.0], ["drawer_cabinet_mobile", 16.0], ["drawer_cabinet", 22.0], ["file_cabinet", 150.0],
 	["cardboard_archive_box", 3.5], ["cardboard_box_closed", 3.0], ["cardboard_box_open", 2.4],
 	["cardboard_boxes_1", 1.4], ["cardboard_boxes", 2.2], ["crate_small", 6.0], ["crate_large", 12.0],
 	["military_crate", 32.0], ["MFU_2", 55.0], ["MFU", 40.0], ["PC_", 12.0], ["computer_tower", 8.0],
