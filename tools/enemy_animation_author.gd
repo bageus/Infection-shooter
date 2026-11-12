@@ -95,7 +95,7 @@ func pace(style: Dictionary) -> Dictionary:
 
 # Builds the humanoid clip library. style keys: scale, walk_mps, run_mps, walk_swing,
 # run_swing, lean, reach, heavy (0..1), attack_seconds, death_seconds,
-# slam (bool), slam_seconds.
+# slam (bool), slam_seconds, throw (bool), throw_seconds.
 func build_humanoid_library(source_style: Dictionary) -> AnimationLibrary:
 	var style := source_style.duplicate()
 	style.merge(pace(style), true)
@@ -117,6 +117,9 @@ func build_humanoid_library(source_style: Dictionary) -> AnimationLibrary:
 	if bool(style.get("slam", false)):
 		var slam_length := float(style.slam_seconds)
 		library.add_animation(&"Slam", _bake(func(t: float) -> Dictionary: return _keyed(t / slam_length, _slam_keys(style), style), slam_length, false))
+	if bool(style.get("throw", false)):
+		var throw_length := float(style.throw_seconds)
+		library.add_animation(&"Throw", _bake(func(t: float) -> Dictionary: return _keyed(t / throw_length, _throw_keys(style), style), throw_length, false))
 	return library
 
 
@@ -358,6 +361,30 @@ func _slam_keys(style: Dictionary) -> Array:
 	var shudder := impact.duplicate()
 	shudder.merge({"lean": 44.0, "hips_y": -0.23 * hips_height, "head": -24.0}, true)
 	return [[0.0, stance], [0.40, raise], [0.46, raise], [0.52, swing_down], [0.56, impact], [0.64, shudder], [0.72, impact], [1.0, stance]]
+
+
+# Stoop and rip a rock off the floor (0.30), haul it overhead, then hurl it forward (0.62).
+func _throw_keys(style: Dictionary) -> Array:
+	var stance := _stance(style)
+	var crouch := stance.duplicate()
+	crouch.merge({
+		"lean": 52.0, "neck": 10.0, "head": -26.0, "hips_y": -0.2 * hips_height,
+		"L_flex": 70.0, "R_flex": 70.0, "L_abd": 8.0, "R_abd": 8.0, "L_elbow": 30.0, "R_elbow": 30.0,
+		"L_knee": 70.0, "R_knee": 64.0, "L_swing": 40.0, "R_swing": 36.0, "L_ankle": -20.0, "R_ankle": -18.0,
+	}, true)
+	var haul := stance.duplicate()
+	haul.merge({
+		"lean": -16.0, "head": -18.0, "hips_y": 0.01 * hips_height,
+		"L_flex": 150.0, "R_flex": 150.0, "L_abd": 14.0, "R_abd": 14.0, "L_elbow": 70.0, "R_elbow": 70.0,
+		"L_shrug": 16.0, "R_shrug": 16.0, "L_knee": 8.0, "R_knee": 8.0,
+	}, true)
+	var release := stance.duplicate()
+	release.merge({
+		"lean": 30.0, "head": -12.0, "hips_y": -0.06 * hips_height,
+		"L_flex": 40.0, "R_flex": 40.0, "L_elbow": 6.0, "R_elbow": 6.0, "L_protract": 14.0, "R_protract": 14.0,
+		"L_swing": 14.0, "R_swing": 28.0, "L_knee": 22.0, "R_knee": 30.0,
+	}, true)
+	return [[0.0, stance], [0.30, crouch], [0.38, crouch], [0.54, haul], [0.62, haul], [0.70, release], [1.0, stance]]
 
 
 # ---------------------------------------------------------------- pose maths
