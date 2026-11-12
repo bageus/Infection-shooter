@@ -15,9 +15,7 @@ extends SceneTree
 const SOURCE_DIR := "res://models/objects/characters/enemy/"
 const OUTPUT_DIR := "res://models/objects/characters/enemy/game/"
 const NAMES := ["Hunger", "Revenant", "Brute", "Titan", "Colossus", "Horde"]
-const TARGET_INDICES := 15000 # about 5k triangles per enemy
-# Lower targets collapse the Horde LOD chain (baked LOD check fails), so it keeps the old budget.
-const TARGET_OVERRIDES := {"Horde": 27000}
+const TARGET_INDICES := 27000 # about 9k triangles per enemy; lower budgets flatten faces (heads lose nose/jaw shape)
 const TEXTURE_SIZE := 1024
 const JPG_QUALITY := 0.9
 
@@ -52,7 +50,7 @@ func _build(enemy_name: String) -> bool:
 	var importer := ImporterMesh.new()
 	importer.add_surface(Mesh.PRIMITIVE_TRIANGLES, arrays, [], {}, null, enemy_name)
 	importer.generate_lods(25.0, 60.0, [])
-	var chosen := _choose_lod(importer, TARGET_OVERRIDES.get(enemy_name, TARGET_INDICES))
+	var chosen := _choose_lod(importer, TARGET_INDICES)
 	var indices: PackedInt32Array = importer.get_surface_lod_indices(0, chosen) if chosen >= 0 else arrays[Mesh.ARRAY_INDEX]
 	var compact := _compact(arrays, indices)
 	var lod_builder := ImporterMesh.new()
