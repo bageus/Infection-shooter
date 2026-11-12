@@ -136,8 +136,8 @@ func _test_minigun(actor: CharacterBody3D, effects: Node3D, crosshair: Node) -> 
 	_check(pose.hand_error < .025, "Minigun support hand reaches the front grip")
 	_check(pose.backpack.visible, "Backpack appears on the equipped player")
 	_check(pose.backpack.get_parent() is BoneAttachment3D, "Backpack follows the spine")
-	var glow := pose.backpack.get_parent().find_child("BackpackGlow", false, false) as OmniLight3D
-	_check(glow != null and not glow.shadow_enabled and glow.light_energy > 0.0, "Backpack glow lights the hero without shadows")
+	var markers: Array = pose.get_skeleton().find_children("GlowMarker", "MeshInstance3D", true, false)
+	_check(markers.size() == 6 and markers.all(func(m: Node) -> bool: return m.cast_shadow == GeometryInstance3D.SHADOW_CASTING_SETTING_OFF), "Six white outline markers sit on helmet, knees and vest without shadows")
 	_check(not crosshair.scope.visible, "Switching to minigun disables scope render")
 	_check(gun.call("get_magazine_ammo") == 400 and gun.call("get_reserve_ammo") == 0, "HUD exposes one 400-round belt")
 	_check(not actor.call("_fire_weapon", gun), "Minigun does not fire before its barrels spin up")

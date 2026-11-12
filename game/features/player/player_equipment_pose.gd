@@ -68,17 +68,27 @@ func _ready() -> void:
 	backpack.rotation.y = PI
 	backpack.position = Vector3(0, .10, -.23)
 	backpack.hide()
-	# Soft fill from the back: the hero stays faintly readable in dark rooms, with or without the backpack shown.
-	# shortcut: the light sits behind the body, so only back and top surfaces catch it; front faces stay dim.
-	var glow := OmniLight3D.new()
-	glow.name = "BackpackGlow"
-	glow.light_color = Color(.85, .92, 1.0)
-	glow.light_energy = .35
-	glow.omni_range = 2.0
-	glow.omni_attenuation = 1.5
-	glow.shadow_enabled = false
-	glow.position = Vector3(0, .25, -.3)
-	_back_attachment.add_child(glow)
+	# Small white emissive markers (helmet, knees, vest) outline the hero in dark rooms without lighting the scene.
+	# shortcut: marker offsets are set by eye on the authored bones, re-check them when the hero model changes.
+	var dot := SphereMesh.new()
+	dot.radius = .035
+	dot.height = .07
+	dot.material = StandardMaterial3D.new()
+	dot.material.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
+	dot.material.albedo_color = Color.WHITE
+	dot.material.emission_enabled = true
+	dot.material.emission = Color.WHITE
+	dot.material.emission_energy_multiplier = 2.0
+	for spot in [["Head", Vector3(0, .1, -.17)], ["Head", Vector3(0, .1, .15)], ["LeftLeg", Vector3(0, 0, .14)], ["RightLeg", Vector3(0, 0, .14)], ["Spine2", Vector3(0, .05, .2)], ["Spine2", Vector3(0, .05, -.2)]]:
+		var attach := BoneAttachment3D.new()
+		attach.bone_name = spot[0]
+		skeleton.add_child(attach)
+		var marker := MeshInstance3D.new()
+		marker.name = "GlowMarker"
+		marker.mesh = dot
+		marker.position = spot[1]
+		marker.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+		attach.add_child(marker)
 
 
 func _process_modification_with_delta(_delta: float) -> void:
