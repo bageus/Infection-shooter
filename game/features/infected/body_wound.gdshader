@@ -11,6 +11,8 @@ uniform sampler2D normal_texture : hint_normal, filter_linear_mipmap, repeat_ena
 uniform bool use_normal_texture = false;
 uniform float roughness_value : hint_range(0.0, 1.0) = 0.85;
 uniform float metallic_value : hint_range(0.0, 1.0) = 0.0;
+uniform sampler2D emission_texture : source_color, filter_linear_mipmap, repeat_enable;
+uniform float emission_energy = 0.0; // glowing eyes and blisters, 0 = none
 uniform sampler2DArray blood_masks : filter_linear, repeat_disable;
 // Slot 0 belongs to the poison overlay (fade); all skin surfaces use slot 1.
 instance uniform float blood_layer : instance_index(1) = -1.0;
@@ -57,6 +59,10 @@ void fragment() {
 	ROUGHNESS = mix(roughness_value, 0.18, blood);
 	METALLIC = metallic_value;
 	SPECULAR = mix(0.5, 0.75, blood);
+	if (emission_energy > 0.0) {
+		// Blood covers the skin, so it also hides the glow underneath.
+		EMISSION = texture(emission_texture, UV).rgb * emission_energy * (1.0 - blood * 0.8);
+	}
 	if (use_normal_texture) {
 		NORMAL_MAP = texture(normal_texture, UV).rgb;
 		NORMAL_MAP_DEPTH = 1.0 - blood * 0.7;
