@@ -15,6 +15,7 @@ func _run() -> void:
 	_test_percent_per_level()
 	_test_stats_follow_level()
 	_test_reapply_does_not_compound()
+	_test_every_type_keeps_order()
 	print("Enemy difficulty tests: %d failures" % failures)
 	quit(1 if failures > 0 else 0)
 
@@ -71,6 +72,22 @@ func _test_reapply_does_not_compound() -> void:
 	_check(is_equal_approx(enemy.max_health, 100.0), "Reapplying low does not halve again")
 	DIFFICULTY.level = DIFFICULTY.NORMAL
 	enemy.free()
+
+
+## Every enemy scene must keep higher health and damage percents harder on every level.
+func _test_every_type_keeps_order() -> void:
+	for scene in ["infected_hunger", "infected_brute", "infected_colossus", "infected_titan", "infected_revenant", "infected_horde", "mutant_level2", "infected_capsule"]:
+		for level in [DIFFICULTY.LOW, DIFFICULTY.NORMAL, DIFFICULTY.HIGH]:
+			DIFFICULTY.level = level
+			var low = load("res://game/features/infected/public/%s.tscn" % scene).instantiate()
+			low.configure_stats({"health": 50.0, "damage": 50.0})
+			var high = load("res://game/features/infected/public/%s.tscn" % scene).instantiate()
+			high.configure_stats({"health": 200.0, "damage": 200.0})
+			_check(low.max_health < high.max_health, "%s health order at level %d" % [scene, level])
+			_check(low.attack_damage < high.attack_damage, "%s damage order at level %d" % [scene, level])
+			low.free()
+			high.free()
+	DIFFICULTY.level = DIFFICULTY.NORMAL
 
 
 func _check(condition: bool, label: String) -> void:
