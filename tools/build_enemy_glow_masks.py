@@ -2,10 +2,11 @@
 
 Run tools/dump_enemy_uv_rasters.gd first, then:
     python3 tools/build_enemy_glow_masks.py <raster dir>
-Channels (read by body_wound.gdshader): R = blister, G = eye, B = alternative blister colour (Horde green).
-Colour and brightness live in the <Enemy>_game.tres material. Colossus blisters are keyed by albedo colour
-(red patches); Titan, Brute, Revenant and Horde use the geometric bump raster. Eyes are the reddest albedo
-pixels inside a narrow height band of the head.
+Channels (read by body_wound.gdshader): R = blister, G = pupil, B = vein.
+Colour and brightness live in the <Enemy>_game.tres material and the shader. Colossus blisters are keyed by
+albedo colour (red patches); the other blisters use the geometric bump raster or noise blobs on the rest-space
+position. Veins are ridged 3D noise on the rest-space position, so they run across texture seams.
+Pupils are discs around two fixed 3D points on the face (measured on the Revenant head).
 """
 import sys
 import numpy as np
@@ -13,8 +14,11 @@ from PIL import Image, ImageFilter
 
 DIR = "models/objects/characters/enemy/game/"
 SIZE = 1024
-# Height band (0..1 inside the top 0.28 m of the model) where the eyes sit; missing = no eyes.
-EYE_BAND = {"Hunger": (0.4, 0.6), "Brute": (0.3, 0.5), "Revenant": (0.4, 0.6), "Titan": (0.3, 0.5)}
+PUPILS = {"Hunger": 0.9, "Brute": 0.9, "Revenant": 0.9}  # name: relative pupil size
+# Pupil centres in rest space: x of both eyes, depth below the top of the model; front is +z.
+EYE_X = (-0.0575, 0.0247)
+EYE_BELOW_TOP = 0.151
+EYE_RADIUS = 0.0085
 
 
 def blur(a, r):
@@ -26,31 +30,74 @@ def smooth(a, lo, hi):
     return t * t * (3 - 2 * t)
 
 
+def value_noise(p, seed):
+    """Trilinear value noise of an (H, W, 3) array of positions, in 0..1."""
+    i = np.floor(p).astype(np.int64)
+    f = p - i
+    f = f * f * (3 - 2 * f)
+
+    def corner(dx, dy, dz):
+        h = (i[..., 0] + dx) * 73856093 ^ (i[..., 1] + dy) * 19349663 ^ (i[..., 2] + dz) * 83492791 ^ seed * 2654435761
+        h = (h ^ (h >> 13)) * 1274126177 & 0xFFFFFFFF
+        return (h & 0xFFFF).astype(np.float32) / 65535
+
+    x = lambda a, b: a + (b - a) * f[..., 0]
+    y = lambda a, b: a + (b - a) * f[..., 1]
+    z = lambda a, b: a + (b - a) * f[..., 2]
+    return z(y(x(corner(0, 0, 0), corner(1, 0, 0)), x(corner(0, 1, 0), corner(1, 1, 0))),
+             y(x(corner(0, 0, 1), corner(1, 0, 1)), x(corner(0, 1, 1), corner(1, 1, 1))))
+
+
+def veins(p, freq=9.0):
+    """Thin branching lines: the zero set of two noise fields."""
+    thin = 1 - np.abs(value_noise(p * freq, 1) * 2 - 1)
+    branch = 1 - np.abs(value_noise(p * freq * 2.3, 2) * 2 - 1)
+    return np.maximum(smooth(thin, 0.9, 0.97), 0.8 * smooth(branch, 0.94, 0.985))
+
+
 def main(raster_dir):
     for name in ["Colossus", "Titan", "Brute", "Revenant", "Horde", "Hunger"]:
         alb = np.asarray(Image.open(DIR + name + "_albedo.jpg").convert("RGB").resize((SIZE, SIZE))).astype(np.float32)
         r, g, b = alb[..., 0], alb[..., 1], alb[..., 2]
         ras = np.asarray(Image.open(f"{raster_dir}/{name}_raster.png")).astype(np.float32) / 255
-        bump, head, height = ras[..., 0], ras[..., 1], ras[..., 2]
+        bump, head = ras[..., 0], ras[..., 1]
+        pos = np.fromfile(f"{raster_dir}/{name}_pos.f32", np.float32).reshape(SIZE, SIZE, 3)
+        top = float(open(f"{raster_dir}/{name}_top.txt").read())
+        x, y, z = pos[..., 0], pos[..., 1], pos[..., 2]
+        mapped = np.abs(pos).sum(axis=2) > 0
+        skin = (r > 110) & (r >= g) & (g >= b * 0.9) & ~((r > 195) & (g > 185)) & mapped
+        lo, hi = np.percentile(bump[skin & (bump > 0)], [82, 96])
+        bumpy = smooth(bump, lo, hi) * skin
+        mutated = blur(bumpy, 14) > 0.07  # mutated skin is the bumpy skin; clothes stay out
+        arm = np.abs(x) > 0.28
         out = np.zeros((SIZE, SIZE, 3), np.float32)
-        skin = (r > 110) & (r >= g) & (g >= b * 0.9) & ~((r > 195) & (g > 185))
-        if name != "Hunger":
-            if name == "Colossus":
-                mask = blur(((r > 1.6 * g) & (r > 110) & (g < 110)).astype(np.float32), 3)
-            else:
-                lo, hi = np.percentile(bump[skin & (bump > 0)], [82, 96])
-                mask = blur(smooth(bump, lo, hi) * skin * (1 - head), 5)  # no glowing scalp
-            out[..., 0] = mask
-            if name == "Horde":
-                cells = np.random.default_rng(7).random((SIZE // 24 + 1, SIZE // 24 + 1)).repeat(24, 0).repeat(24, 1)[:SIZE, :SIZE]
-                out[..., 2] = blur(cells, 2) > 0.5
-        if name in EYE_BAND:
-            lo, hi = EYE_BAND[name]
-            t = 2.6 if name == "Hunger" else 1.5  # Hunger's face is bloody, so only the reddest pixels
-            eye = (r > 100) & (r > t * g) & (r > t * b) & (head > 0.5) & (height >= lo) & (height <= hi)
-            out[..., 1] = blur(eye.astype(np.float32), 1.0) * 1.5
+        blisters = vein = None
+        if name == "Colossus":
+            blisters = ((r > 1.6 * g) & (r > 110) & (g < 110)).astype(np.float32)
+        elif name == "Titan":
+            back = (z < -0.1) & (y > -0.1) & (y < 0.8)
+            blobs = smooth(value_noise(pos * 9, 3), 0.5, 0.68)
+            blisters = np.maximum(bumpy, blobs * 0.9) * back * skin
+            vein = veins(pos) * (mutated & arm & ~back)
+        elif name == "Brute":
+            blisters = bumpy * (head > 0.5)  # the lump on the head
+            vein = veins(pos) * (mutated & arm & (head < 0.5))
+        elif name == "Revenant":
+            vein = veins(pos) * (mutated & (head < 0.5))
+        elif name == "Horde":
+            blisters = bumpy
+            vein = veins(pos) * mapped
+        if blisters is not None:
+            out[..., 0] = blur(blisters, 4)
+        if vein is not None:
+            out[..., 2] = blur(vein.astype(np.float32), 0.7)
+        if name in PUPILS:
+            eyes = np.zeros((SIZE, SIZE), bool)
+            for ex in EYE_X:
+                eyes |= (np.hypot(x - ex, y - (top - EYE_BELOW_TOP)) < EYE_RADIUS * PUPILS[name]) & (z > 0.07)
+            out[..., 1] = blur((eyes & mapped).astype(np.float32), 0.8)
         Image.fromarray((np.clip(out, 0, 1) * 255).astype(np.uint8)).save(DIR + name + "_glow.png")
-        print(name, "blister px", int((out[..., 0] > 0.1).sum()), "eye px", int((out[..., 1] > 0.1).sum()))
+        print(name, [int((out[..., c] > 0.1).sum()) for c in range(3)])
 
 
 main(sys.argv[1])

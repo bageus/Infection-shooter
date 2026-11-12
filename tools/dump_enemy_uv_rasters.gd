@@ -76,6 +76,20 @@ func _dump(n: String, out: String, verts: PackedVector3Array, normals: PackedVec
 			val.append(Color(bump[vi], head[vi], heady[vi]))
 		_fill(image, tri, val)
 	image.save_png("%s/%s_raster.png" % [out, n])
+	# Rest-space position per texel as float32 xyz (+ top of the model in the first three floats' file name key).
+	var floats := PackedFloat32Array()
+	floats.resize(SIZE * SIZE * 3)
+	for t in idx.size() / 3:
+		var tri2: Array[Vector2] = []
+		for k in 3:
+			tri2.append(uvs[idx[t * 3 + k]] * SIZE)
+		_fill_position(floats, tri2, [verts[idx[t * 3]], verts[idx[t * 3 + 1]], verts[idx[t * 3 + 2]]])
+	var file := FileAccess.open("%s/%s_pos.f32" % [out, n], FileAccess.WRITE)
+	file.store_buffer(floats.to_byte_array())
+	file.close()
+	var info := FileAccess.open("%s/%s_top.txt" % [out, n], FileAccess.WRITE)
+	info.store_string(str(box.end.y))
+	info.close()
 
 func _fill(image: Image, p: Array[Vector2], c: Array[Color]) -> void:
 	var lo := Vector2i(p[0].min(p[1]).min(p[2]).floor()).clamp(Vector2i.ZERO, Vector2i(SIZE - 1, SIZE - 1))
@@ -91,3 +105,23 @@ func _fill(image: Image, p: Array[Vector2], c: Array[Color]) -> void:
 			var w2 := 1.0 - w0 - w1
 			if w0 >= -0.02 and w1 >= -0.02 and w2 >= -0.02:
 				image.set_pixel(x, y, c[0] * w0 + c[1] * w1 + c[2] * w2)
+
+
+func _fill_position(floats: PackedFloat32Array, p: Array[Vector2], v: Array) -> void:
+	var lo := Vector2i(p[0].min(p[1]).min(p[2]).floor()).clamp(Vector2i.ZERO, Vector2i(SIZE - 1, SIZE - 1))
+	var hi := Vector2i(p[0].max(p[1]).max(p[2]).ceil()).clamp(Vector2i.ZERO, Vector2i(SIZE - 1, SIZE - 1))
+	var d := (p[1].y - p[2].y) * (p[0].x - p[2].x) + (p[2].x - p[1].x) * (p[0].y - p[2].y)
+	if absf(d) < 1e-6:
+		return
+	for y in range(lo.y, hi.y + 1):
+		for x in range(lo.x, hi.x + 1):
+			var q := Vector2(x + 0.5, y + 0.5)
+			var w0 := ((p[1].y - p[2].y) * (q.x - p[2].x) + (p[2].x - p[1].x) * (q.y - p[2].y)) / d
+			var w1 := ((p[2].y - p[0].y) * (q.x - p[2].x) + (p[0].x - p[2].x) * (q.y - p[2].y)) / d
+			var w2 := 1.0 - w0 - w1
+			if w0 >= -0.02 and w1 >= -0.02 and w2 >= -0.02:
+				var at: Vector3 = v[0] * w0 + v[1] * w1 + v[2] * w2
+				var i := (y * SIZE + x) * 3
+				floats[i] = at.x
+				floats[i + 1] = at.y
+				floats[i + 2] = at.z
