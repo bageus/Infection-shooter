@@ -4,7 +4,7 @@ var failures := 0
 var _had_save := false
 var _save := PackedByteArray()
 const SAVE := "user://planned_layout.json"
-const BASE := "res://game/presentation/office_floor/public/base_office_map.json"
+const BASE := "res://game/bootstrap/app/tests/fixtures/office_map_fixture.json"
 
 func _initialize() -> void:
 	root.size = Vector2i(320, 180)

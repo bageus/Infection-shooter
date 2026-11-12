@@ -86,7 +86,7 @@ func _build_parts(strength: float) -> void:
 	if skeleton.find_bone("T0_A") >= 0:
 		for index in TENTACLES:
 			definitions[StringName("tentacle_%d" % index)] = {"bones": ["T%d_A" % index, "T%d_B" % index], "share": 0.3}
-		definitions[TORSO] = {"bones": ["Hips", "Body", "Crown"], "share": 0.0}
+		definitions[TORSO] = {"bones": ["Hips", "Body", "Crown", "L0", "L1", "L2", "L3", "L4", "L5"], "share": 0.0}
 	else:
 		definitions = HUMANOID_PARTS
 	for part: StringName in definitions:
@@ -404,6 +404,11 @@ func enable_corpse_hitboxes() -> void:
 			var start: Vector3 = to_local * _world(bone, segment.start)
 			var finish: Vector3 = to_local * _world(bone, segment.end)
 			var hitbox := HITBOX.new()
+			# Jolt rejects a non-uniform scale on a body; bone scale is slightly uneven, so even it out.
+			var bone_scale := bone_world.basis.get_scale()
+			var even := (bone_scale.x + bone_scale.y + bone_scale.z) / 3.0
+			if even > 0.001:
+				hitbox.transform = Transform3D(Basis.from_scale(Vector3(even / maxf(bone_scale.x, 0.001), even / maxf(bone_scale.y, 0.001), even / maxf(bone_scale.z, 0.001))), Vector3.ZERO)
 			hitbox.parts = self
 			hitbox.part = part
 			var shape_node := CollisionShape3D.new()

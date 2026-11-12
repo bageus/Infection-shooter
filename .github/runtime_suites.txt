@@ -70,6 +70,7 @@ game/presentation/office_floor/tests/run_hit_effect_tests.gd
 game/presentation/office_floor/tests/run_glass_crack_tests.gd
 game/presentation/office_floor/tests/run_glass_span_tests.gd
 game/features/combat/tests/run_grenade_vfx_tests.gd
+game/bootstrap/app/tests/run_grenade_stun_tests.gd
 game/features/combat/tests/run_floor_danger_zone_tests.gd
 game/bootstrap/app/tests/run_blast_shelter_tests.gd
 game/bootstrap/app/tests/run_colossus_armor_tests.gd
@@ -171,6 +172,7 @@ game/features/infected/tests/run_late_spawn_debris_tests.gd
 game/features/infected/tests/run_blood_events_tests.gd
 game/features/pickups/tests/run_pickup_floor_tests.gd
 game/features/pickups/tests/run_crate_loot_tests.gd
+game/features/pickups/tests/run_key_drop_tests.gd
 game/features/pickups/tests/run_loot_carried_tests.gd
 game/bootstrap/app/tests/run_legacy_pickup_tests.gd
 game/presentation/office_floor/tests/run_floor_batch_tests.gd
@@ -212,7 +214,6 @@ game/bootstrap/app/tests/run_display_settings_tests.gd
 game/bootstrap/app/tests/run_door_blood_attachment_tests.gd
 game/presentation/office_floor/tests/run_wall_mount_support_tests.gd
 game/presentation/office_floor/tests/run_bathroom_lying_water_tests.gd
-game/presentation/office_floor/tests/run_wall_tv_hit_tests.gd
 game/bootstrap/app/tests/run_planning_settle_tests.gd
 game/features/infected/tests/run_visual_preparation_tests.gd
 game/features/infection/tests/run_active_skill_state_tests.gd
@@ -240,7 +241,6 @@ game/bootstrap/app/tests/run_updated_prop_models_tests.gd
 game/presentation/office_floor/tests/run_debris_floor_tests.gd
 game/presentation/office_floor/tests/run_table_topple_tests.gd
 game/presentation/office_floor/tests/run_destruction_quality_tests.gd
-game/bootstrap/app/tests/run_map_blast_bake_tests.gd
 game/features/player/tests/run_issue7_passive_tests.gd
 game/bootstrap/app/tests/run_issue7_card_loot_tests.gd
 game/bootstrap/app/tests/run_darkness_room_tests.gd
@@ -281,4 +281,5 @@ game/bootstrap/app/tests/run_static_merge_tests.gd
 game/bootstrap/app/tests/run_frame_spike_log_tests.gd
 game/bootstrap/app/tests/run_play_scene_prep_tests.gd
 game/bootstrap/app/tests/run_simple_casing_tests.gd
+game/features/infected/tests/run_titan_throw_tests.gd
 game/bootstrap/app/tests/run_enemy_health_bars_tests.gd

@@ -35,7 +35,7 @@ const STYLES := {
 	"Hunger": {"scale": 1.0, "walk_mps": 2.16, "run_mps": 5.4, "walk_swing": 28.0, "run_swing": 40.0, "lean": 30.0, "reach": 1.0, "heavy": 0.0, "attack_seconds": 0.9, "death_seconds": 1.5},
 	"Revenant": {"scale": 1.0, "walk_mps": 1.84, "run_mps": 4.6, "walk_swing": 27.0, "run_swing": 38.0, "lean": 26.0, "reach": 0.8, "heavy": 0.1, "attack_seconds": 1.0, "death_seconds": 1.6},
 	"Brute": {"scale": 1.1, "walk_mps": 1.64, "run_mps": 4.1, "walk_swing": 26.0, "run_swing": 36.0, "lean": 24.0, "reach": 0.6, "heavy": 0.35, "attack_seconds": 1.1, "death_seconds": 1.7},
-	"Titan": {"scale": 1.35, "walk_mps": 1.32, "run_mps": 3.3, "walk_swing": 24.0, "run_swing": 32.0, "lean": 20.0, "reach": 0.4, "heavy": 0.7, "attack_seconds": 1.3, "death_seconds": 2.0},
+	"Titan": {"scale": 1.35, "walk_mps": 1.32, "run_mps": 3.3, "walk_swing": 24.0, "run_swing": 32.0, "lean": 20.0, "reach": 0.4, "heavy": 0.7, "attack_seconds": 1.3, "death_seconds": 2.0, "throw": true, "throw_seconds": 1.7},
 	"Colossus": {"scale": 1.55, "walk_mps": 1.16, "run_mps": 2.9, "walk_swing": 22.0, "run_swing": 30.0, "lean": 18.0, "reach": 0.3, "heavy": 1.0, "attack_seconds": 1.4, "death_seconds": 2.2, "slam": true, "slam_seconds": 1.7},
 }
 
@@ -435,7 +435,7 @@ func _build_horde() -> bool:
 	var source := load(OUTPUT_DIR + "Horde_game.res") as ArrayMesh
 	if source == null:
 		return false
-	var arrays := source.surface_get_arrays(0)
+	var arrays := _drop_underside(source.surface_get_arrays(0))
 	var vertices: PackedVector3Array = arrays[Mesh.ARRAY_VERTEX]
 	var author := HORDE_AUTHOR.new()
 	var skeleton: Skeleton3D = author.build_skeleton(vertices)
@@ -443,3 +443,48 @@ func _build_horde() -> bool:
 	var library: AnimationLibrary = author.build_library(skeleton)
 	print("Horde: crawl %.2f m/s, ram %.2f m/s" % [author.crawl_speed(), author.ram_speed()])
 	return _save_rig("Horde", skeleton, arrays, dense, library)
+
+
+# The Horde sits on the floor, so downward-facing triangles in its lowest
+# fifth are never seen. Drop them and the vertices only they used.
+func _drop_underside(arrays: Array) -> Array:
+	var vertices: PackedVector3Array = arrays[Mesh.ARRAY_VERTEX]
+	var indices: PackedInt32Array = arrays[Mesh.ARRAY_INDEX]
+	var low := vertices[0].y
+	var high := low
+	for vertex in vertices:
+		low = minf(low, vertex.y)
+		high = maxf(high, vertex.y)
+	var limit := low + (high - low) * 0.2
+	var kept := PackedInt32Array()
+	for t in indices.size() / 3:
+		var a := vertices[indices[t * 3]]
+		var b := vertices[indices[t * 3 + 1]]
+		var c := vertices[indices[t * 3 + 2]]
+		var normal := (b - a).cross(c - a).normalized()
+		if normal.y < -0.3 and maxf(a.y, maxf(b.y, c.y)) < limit:
+			continue
+		kept.append_array(PackedInt32Array([indices[t * 3], indices[t * 3 + 1], indices[t * 3 + 2]]))
+	var remap := {}
+	var order := PackedInt32Array()
+	var mapped := PackedInt32Array()
+	for index in kept:
+		if not remap.has(index):
+			remap[index] = order.size()
+			order.append(index)
+		mapped.append(remap[index])
+	var result := arrays.duplicate()
+	for slot in Mesh.ARRAY_MAX:
+		var data: Variant = arrays[slot]
+		if slot == Mesh.ARRAY_INDEX or data == null or data.is_empty():
+			continue
+		var stride: int = data.size() / vertices.size()
+		var packed: Variant = data.duplicate()
+		packed.resize(order.size() * stride)
+		for n in order.size():
+			for k in stride:
+				packed[n * stride + k] = data[order[n] * stride + k]
+		result[slot] = packed
+	result[Mesh.ARRAY_INDEX] = mapped
+	print("Horde underside: %d -> %d triangles, %d -> %d vertices" % [indices.size() / 3, kept.size() / 3, vertices.size(), order.size()])
+	return result

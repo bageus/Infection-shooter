@@ -4,7 +4,7 @@ extends "res://game/features/infected/infected_capsule.gd"
 
 const BERSERK_RADIUS := 7.0
 const BERSERK_KILLS := Vector2i(3, 4)
-const BERSERK_CHANCE := 0.4
+var berserk_chance := 0.4 # Test-settable: 0 and 1 make the roll deterministic.
 const BERSERK_SPEED := 1.5
 const BERSERK_DAMAGE := 1.5
 const WATCH_INTERVAL := 0.25
@@ -52,7 +52,7 @@ func _count_kill() -> void:
 	_kills_seen += 1
 	if _kills_seen < _kills_needed:
 		return
-	if randf() < BERSERK_CHANCE:
+	if randf() < berserk_chance:
 		_start_berserk()
 	else:
 		_kills_seen = 0
