@@ -13,5 +13,5 @@ normal_enabled = true
 normal_texture = ExtResource("2_normal")
 emission_enabled = true
 emission = Color(1, 1, 1, 1)
-emission_energy_multiplier = 1.0
+emission_energy_multiplier = 0.0
 emission_texture = ExtResource("3_glow")
