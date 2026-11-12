@@ -25,6 +25,11 @@ func take_projectile_hit(_hit_damage: float, hit_position: Vector3, _normal: Vec
 	return true
 
 
+## True when the fixture is tipped past 60 degrees from upright, including upside down.
+func is_laid_down() -> bool:
+	return absf(global_basis.y.dot(Vector3.UP)) < 0.5
+
+
 func get_projectile_material(_shape_index: int = -1) -> String:
 	return "tech" if "hand_dryer" in model_path.get_file() else "concrete"
 
@@ -56,7 +61,8 @@ func _break_fixture(hit_position: Vector3, direction: Vector3, outlet: Vector3, 
 		var part := pieces[index]
 		if is_instance_valid(part):
 			DAMAGE.spawn_piece(self, part, null, 0, index, direction, hit_position)
-	if not dryer:
+	# A fixture lying on its side has no tank or bowl full of water to spill.
+	if not dryer and not is_laid_down():
 		WATER.spawn(self, outlet, "urinal" in model_path.get_file())
 	# Keep the anchor until the water shuts off, independently of debris lifetime.
 	get_tree().create_timer(11.0).timeout.connect(queue_free)
