@@ -4,6 +4,7 @@ extends Node3D
 
 const HIT_RADIUS := 1.1
 const HIT_HEIGHT := 1.8
+const STUN_INTENSITY := 0.4
 
 var damage := 0.0
 var source: Node3D
@@ -16,14 +17,27 @@ var _flying := false
 
 func _ready() -> void:
 	var material := StandardMaterial3D.new()
-	material.albedo_color = Color(0.36, 0.32, 0.28)
+	var shade := randf_range(0.8, 1.15)
+	material.albedo_color = Color(0.36, 0.32, 0.28) * shade
 	material.roughness = 1.0
-	var mesh := SphereMesh.new()
-	mesh.radius = 0.4
-	mesh.height = 0.7
-	mesh.radial_segments = 8
-	mesh.rings = 5
-	mesh.material = material
+	# Every rock is a different lump: a jittered sphere, squashed unevenly.
+	var source := SphereMesh.new()
+	source.radius = 0.3
+	source.height = 0.6
+	source.radial_segments = 10
+	source.rings = 6
+	var arrays := source.get_mesh_arrays()
+	var vertices := arrays[Mesh.ARRAY_VERTEX] as PackedVector3Array
+	var phase := Vector3(randf() * TAU, randf() * TAU, randf() * TAU)
+	var squash := Vector3(randf_range(0.75, 1.25), randf_range(0.7, 1.1), randf_range(0.75, 1.25)) * randf_range(0.85, 1.15)
+	for i in vertices.size():
+		var v := vertices[i]
+		var bump := 1.0 + 0.18 * sin(v.x * 17.0 + phase.x) * sin(v.y * 13.0 + phase.y) + 0.14 * sin(v.z * 19.0 + phase.z)
+		vertices[i] = v * bump * squash
+	arrays[Mesh.ARRAY_VERTEX] = vertices
+	var mesh := ArrayMesh.new()
+	mesh.add_surface_from_arrays(Mesh.PRIMITIVE_TRIANGLES, arrays)
+	mesh.surface_set_material(0, material)
 	var visual := MeshInstance3D.new()
 	visual.mesh = mesh
 	add_child(visual)
@@ -66,6 +80,21 @@ func _land() -> void:
 	var player := get_tree().get_first_node_in_group("player") as Node3D
 	if player != null and damage > 0.0:
 		var offset := player.global_position - _to
-		if Vector2(offset.x, offset.z).length() <= HIT_RADIUS and absf(offset.y) <= HIT_HEIGHT:
-			preload("res://game/features/infected/enemy_interaction_rules.gd").damage(player, damage)
+		var flat := Vector2(offset.x, offset.z)
+		if flat.length() <= HIT_RADIUS and absf(offset.y) <= HIT_HEIGHT:
+			_hit_player(player, flat.length())
 	queue_free()
+
+
+# A centred hit stuns longer (1 s) than a glancing one (0.5 s).
+func _hit_player(player: Node3D, miss_distance: float) -> void:
+	var before := _vitals(player)
+	if player.has_method("note_hit_direction"):
+		player.call("note_hit_direction", (player.global_position - _from).normalized())
+	preload("res://game/features/infected/enemy_interaction_rules.gd").damage(player, damage)
+	if _vitals(player) < before and player.has_method("apply_blast_stun"):
+		player.call("apply_blast_stun", lerpf(1.0, 0.5, clampf(miss_distance / HIT_RADIUS, 0.0, 1.0)), STUN_INTENSITY)
+
+
+func _vitals(player: Node3D) -> float:
+	return float(player.get("health")) + float(player.get("armor")) if player.get("health") != null and player.get("armor") != null else 0.0
