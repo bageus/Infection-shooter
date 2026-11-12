@@ -3,6 +3,7 @@ extends SkeletonModifier3D
 const BACKPACK := preload("res://models/objects/weapons/minigun_ammo_backpack_lowpoly.glb")
 ## Flashlight sits this far (m) to the side of the muzzle, and is dim enough to read the room, not light it.
 const FLASHLIGHT_SIDE := .04
+const FLASHLIGHT_MODEL := preload("res://models/objects/weapons/weapon_flashlight_lowpoly.glb")
 const FLASHLIGHT_ENERGY := .6
 ## Rear hand of the minigun in skeleton space: belt height, gripped from above.
 const MINIGUN_RIGHT_HAND := Vector3(-.22, -.02, .14)
@@ -51,6 +52,7 @@ var _held := ""
 var mount: Node
 var backpack: Node3D
 var _back_attachment: BoneAttachment3D
+var _flashlight_model: Node3D
 var _flashlight: SpotLight3D
 var _dark_check := 0.0
 var _dark := false
@@ -76,6 +78,10 @@ func _ready() -> void:
 	backpack.hide()
 	# Weapon flashlight: a dim spot beside the muzzle, moved onto whichever weapon is held.
 	# shortcut: the dark test checks only darkness zones the hero stands in, not the lamps' real light level.
+	_flashlight_model = FLASHLIGHT_MODEL.instantiate() as Node3D
+	_flashlight_model.position = Vector3(FLASHLIGHT_SIDE, 0, 0)
+	add_child(_flashlight_model)
+	# The beam leaves the model's LightSocket (the lens), pointing where the muzzle points.
 	_flashlight = SpotLight3D.new()
 	_flashlight.name = "Flashlight"
 	_flashlight.light_color = Color(1.0, .96, .88)
@@ -84,8 +90,7 @@ func _ready() -> void:
 	_flashlight.spot_angle = 22.0
 	_flashlight.spot_attenuation = 1.6
 	_flashlight.shadow_enabled = false
-	_flashlight.position = Vector3(FLASHLIGHT_SIDE, 0, 0)
-	add_child(_flashlight)
+	_flashlight_model.find_child("LightSocket", true, false).add_child(_flashlight)
 
 
 func _process_modification_with_delta(delta: float) -> void:
@@ -248,8 +253,8 @@ func _curl_support_hand(skeleton: Skeleton3D, grip: Vector3, weapon_basis: Basis
 ## Keeps the flashlight on the held weapon's muzzle and lights it only while the hero stands in a dark zone.
 func _update_flashlight(weapon: Node3D, delta: float) -> void:
 	var muzzle := weapon.get_node_or_null("Muzzle") as Node3D
-	if muzzle != null and _flashlight.get_parent() != muzzle:
-		_flashlight.reparent(muzzle, false)
+	if muzzle != null and _flashlight_model.get_parent() != muzzle:
+		_flashlight_model.reparent(muzzle, false)
 	_dark_check -= delta
 	if _dark_check <= 0.0:
 		_dark_check = .25
