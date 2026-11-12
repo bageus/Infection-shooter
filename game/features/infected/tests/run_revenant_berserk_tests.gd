@@ -51,9 +51,9 @@ func _run() -> void:
 		enemy.dead = true
 		enemy.remove_from_group("infected_alive")
 	revenant.call("_scan_kills")
-	# Berserk starts, or a failed roll at kill 3 reset the count and kill 4 is already counted (seen 1).
+	# Three or four kills either start berserk or reset the count and roll a new threshold.
 	var needed := int(revenant.get("_kills_needed"))
-	_check(bool(revenant.get("berserk")) or (int(revenant.get("_kills_seen")) <= 1 and needed >= 3 and needed <= 4),
+	_check(bool(revenant.get("berserk")) or (int(revenant.get("_kills_seen")) == 0 and needed >= 3 and needed <= 4),
 		"Four nearby deaths either start berserk or restart the count.")
 
 	var base_speed: float = revenant.get("move_speed")
