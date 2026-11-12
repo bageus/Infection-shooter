@@ -68,6 +68,17 @@ func _ready() -> void:
 	backpack.rotation.y = PI
 	backpack.position = Vector3(0, .10, -.23)
 	backpack.hide()
+	# Soft fill from the back: the hero stays faintly readable in dark rooms, with or without the backpack shown.
+	# shortcut: the light sits behind the body, so only back and top surfaces catch it; front faces stay dim.
+	var glow := OmniLight3D.new()
+	glow.name = "BackpackGlow"
+	glow.light_color = Color(.85, .92, 1.0)
+	glow.light_energy = .35
+	glow.omni_range = 2.0
+	glow.omni_attenuation = 1.5
+	glow.shadow_enabled = false
+	glow.position = Vector3(0, .25, -.3)
+	_back_attachment.add_child(glow)
 
 
 func _process_modification_with_delta(_delta: float) -> void:

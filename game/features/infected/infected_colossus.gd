@@ -12,10 +12,15 @@ const SHOCKWAVE := preload("res://game/features/infected/ground_shockwave.gd")
 @export var slam_wave_speed := 14.0
 @export var slam_player_damage := 32.0
 @export var slam_object_damage := 320.0
+@export var slam_lean_degrees := 14.0
+@export var slam_crouch := 0.3
 
 var _slam_cooldown := 2.5
 var _slam_pending := -1.0
 var _slam_busy := 0.0
+var _slam_tween: Tween
+var _rest_position := Vector3.ZERO
+var _rest_basis := Basis.IDENTITY
 
 
 func _behaviour_tick(delta: float, target_offset: Vector3) -> void:
@@ -47,6 +52,11 @@ func _start_slam() -> void:
 		return
 	_slam_busy = duration
 	_slam_pending = duration * slam_hit_fraction
+	_rest_position = body_visual.position
+	_rest_basis = body_visual.basis
+	_slam_tween = create_tween()
+	_slam_tween.tween_method(_slam_pose, 0.0, 1.0, duration)
+	_slam_tween.tween_callback(_slam_pose.bind(1.0))
 
 
 func _play_slam() -> float:
@@ -54,6 +64,14 @@ func _play_slam() -> float:
 		return 0.0
 	var duration := float(_animation.call("play_named_one_shot", &"Slam", 0.08, slam_anim_speed))
 	return duration if duration > 0.0 else _play_animation(&"slam")
+
+
+# Body dips forward and down into the floor strike, then straightens up (t is slam progress 0..1).
+func _slam_pose(t: float) -> void:
+	var weight := smoothstep(0.35, slam_hit_fraction, t) * (1.0 - smoothstep(0.72, 1.0, t))
+	# The model faces -Z of the root; pitching about +X by a negative angle leans it that way.
+	body_visual.basis = Basis(Vector3.RIGHT, -deg_to_rad(slam_lean_degrees) * weight) * _rest_basis
+	body_visual.position = _rest_position + Vector3.DOWN * slam_crouch * weight
 
 
 func _release_slam() -> void:
@@ -79,6 +97,9 @@ func _try_attack() -> void:
 
 
 func _die() -> void:
+	if _slam_tween != null and _slam_tween.is_valid():
+		_slam_tween.kill()
+		_slam_pose(1.0)
 	_slam_pending = -1.0
 	_slam_busy = 0.0
 	super._die()

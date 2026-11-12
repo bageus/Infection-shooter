@@ -555,14 +555,17 @@ func _test_colossus_slam(stage: Node3D) -> void:
 	await physics_frame
 	await physics_frame
 	var player := _player_of(enemy)
+	var rest_y: float = enemy.body_visual.position.y
 	_expect(player.current_animation == "Slam", "Colossus slams when the player is close.")
 	var slam := player.get_animation("Slam").length / float(enemy.get("slam_anim_speed"))
 	await create_timer(slam * 0.5).timeout
 	_expect(prop.hits == 0, "Nothing breaks before the fists hit the floor.")
+	_expect(enemy.body_visual.position.y < rest_y - 0.05, "Colossus crouches into the slam.")
 	var crate_start := crate.global_position
 	await create_timer(slam * 0.06 + 0.8).timeout
 	_expect(crate.global_position.distance_to(crate_start) > 0.3, "The slam wave throws loose objects outward.")
 	_expect(prop.hits == 1, "The slam wave hits breakable objects around it once.")
+	_expect(is_equal_approx(enemy.body_visual.position.y, rest_y), "Colossus straightens up after the slam.")
 	_expect(target.damage_taken > 0.0, "The slam wave hurts the player.")
 	_expect(float(ally.get("health")) == float(ally.get("max_health")), "The slam wave spares other infected.")
 	enemy.queue_free()

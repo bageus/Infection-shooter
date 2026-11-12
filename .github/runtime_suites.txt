@@ -285,3 +285,4 @@ game/bootstrap/app/tests/run_simple_casing_tests.gd
 game/features/infected/tests/run_titan_throw_tests.gd
 game/features/player/tests/run_player_hit_feedback_tests.gd
 game/bootstrap/app/tests/run_enemy_health_bars_tests.gd
+game/features/infected/tests/run_enemy_glow_tests.gd
