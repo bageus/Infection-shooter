@@ -15,6 +15,10 @@ func _run() -> void:
 	var prefs := PREFS.new()
 	prefs.values.occlusion_mode = 1
 	prefs.save_settings()
+	# The game starts from the saved map; these suites need the populated test floor.
+	var saved_map := FileAccess.open("user://planned_layout.json", FileAccess.WRITE)
+	saved_map.store_string(FileAccess.get_file_as_string("res://game/bootstrap/app/tests/fixtures/office_map_fixture.json"))
+	saved_map.close()
 	var app := MAIN.instantiate()
 	root.add_child(app)
 	current_scene = app

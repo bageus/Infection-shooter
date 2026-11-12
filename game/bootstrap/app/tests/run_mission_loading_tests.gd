@@ -14,6 +14,8 @@ func _initialize() -> void:
 
 
 func _run() -> void:
+	# A level chain left by an earlier suite would start a map this test does not write.
+	DirAccess.remove_absolute("user://level_chain.json")
 	_had_save = FileAccess.file_exists(SAVE)
 	if _had_save:
 		_saved_bytes = FileAccess.get_file_as_bytes(SAVE)
@@ -35,7 +37,7 @@ func _run() -> void:
 	await _wait(func() -> bool: return is_instance_valid(loader) and (loader.get("back") as Button).visible)
 	_expect(current_scene == frontend and is_instance_valid(frontend) and not paused, "Invalid map preserves the previous menu and pause state")
 	_expect(loader.get("pending") == null, "Failed pending mission is released")
-	_expect(loader.get("_choices") != null and (loader.get("_choices") as VBoxContainer).get_child_count() == 1, "Corrupt save offers the valid shipped map")
+	_expect(loader.get("_choices") == null, "Corrupt save without a backup offers no recovery map")
 	_expect("objects must be an array" in str((loader.get("label") as Label).text), "Recovery UI explains schema corruption")
 	loader.call("_close_error")
 	await process_frame
@@ -91,7 +93,7 @@ func _run() -> void:
 	recovery_menu.call("_action", "start")
 	var recovery_loader: Node = recovery_menu.find_children("*", "CanvasLayer", true, false)[0]
 	await _wait(func() -> bool: return (recovery_loader.get("back") as Button).visible)
-	_expect((recovery_loader.get("_choices") as VBoxContainer).get_child_count() == 2, "Recovery offers both valid backup and shipped map")
+	_expect((recovery_loader.get("_choices") as VBoxContainer).get_child_count() == 1, "Recovery offers the valid backup (no shipped map)")
 	(recovery_loader.get("_choices") as VBoxContainer).get_child(0).emit_signal("pressed")
 	(recovery_loader.get("_choices") as VBoxContainer).get_child(0).emit_signal("pressed")
 	await _wait(func() -> bool: return current_scene != recovery_menu)

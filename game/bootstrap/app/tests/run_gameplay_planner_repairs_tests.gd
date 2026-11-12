@@ -19,6 +19,10 @@ func _initialize() -> void:
 
 func _run() -> void:
 	_audio()
+	# The game starts from the saved map; these suites need the populated test floor.
+	var saved_map := FileAccess.open("user://planned_layout.json", FileAccess.WRITE)
+	saved_map.store_string(FileAccess.get_file_as_string("res://game/bootstrap/app/tests/fixtures/office_map_fixture.json"))
+	saved_map.close()
 	stage = MAIN.instantiate()
 	root.add_child(stage)
 	current_scene = stage
