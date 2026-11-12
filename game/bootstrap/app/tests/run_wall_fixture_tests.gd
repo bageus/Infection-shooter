@@ -7,7 +7,7 @@ const PLACER := preload("res://game/bootstrap/app/wall_fixture_placer.gd")
 const MAIN := preload("res://game/bootstrap/app/main.tscn")
 const STRUCT := "res://game/presentation/office_floor/public/structural/"
 const SIGN := "res://models/objects/enviroments/13/13_wall_exit_lit.glb"
-const BASE_MAP := "res://game/presentation/office_floor/public/base_office_map.json"
+const BASE_MAP := "res://game/bootstrap/app/tests/fixtures/office_map_fixture.json"
 var failures := 0
 
 

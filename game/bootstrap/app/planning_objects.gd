@@ -157,7 +157,7 @@ func _register_actor_objects() -> void:
 
 
 func _is_editable_scene_object(node: Node3D) -> bool:
-	var is_bake := node.scene_file_path.ends_with("base_office_layout.tscn") or node.scene_file_path.begins_with("res://game/presentation/office_floor/public/maps/")
+	var is_bake := node.scene_file_path.begins_with("res://game/presentation/office_floor/public/maps/")
 	if node == session.root or node == session.structure_root or is_bake:
 		return false
 	if node.is_in_group("planner_lights"):
