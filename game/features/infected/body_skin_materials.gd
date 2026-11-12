@@ -133,7 +133,8 @@ static func signature(originals: Array) -> Array:
 		if original is BaseMaterial3D:
 			var base := original as BaseMaterial3D
 			values.append([base.albedo_color, base.roughness, base.metallic,
-				base.albedo_texture, base.normal_enabled, base.normal_texture])
+				base.albedo_texture, base.normal_enabled, base.normal_texture,
+				base.emission_texture if base.emission_enabled else null])
 		else:
 			values.append(null)
 	return values
@@ -160,6 +161,9 @@ static func create_material(original: Material, shader: Shader = SHADER) -> Shad
 		if base.albedo_texture != null:
 			material.set_shader_parameter("albedo_texture", base.albedo_texture)
 			material.set_shader_parameter("use_albedo_texture", true)
+		if base.emission_enabled and base.emission_texture != null:
+			material.set_shader_parameter("emission_texture", base.emission_texture)
+			material.set_shader_parameter("emission_energy", base.emission_energy_multiplier)
 		if base.normal_enabled and base.normal_texture != null:
 			material.set_shader_parameter("normal_texture", base.normal_texture)
 			material.set_shader_parameter("use_normal_texture", true)
