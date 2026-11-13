@@ -57,7 +57,8 @@ static func list_for(desk_type: String) -> Array[Dictionary]:
 	return results
 
 
-static func load(path: String, desk_type: String) -> Dictionary:
+## migrate maps a saved model path to its current one, as level loading does for saved maps.
+static func load(path: String, desk_type: String, migrate := Callable()) -> Dictionary:
 	if not desk_type.is_valid_identifier() or path.get_base_dir() != ROOT or not path.begins_with(ROOT + "/" + desk_type + "_") or not path.ends_with(".json"):
 		return {}
 	var file := FileAccess.open(path, FileAccess.READ)
@@ -65,6 +66,20 @@ static func load(path: String, desk_type: String) -> Dictionary:
 		return {}
 	var data: Variant = JSON.parse_string(file.get_as_text())
 	file.close()
+	if migrate.is_valid() and data is Dictionary and data.get("items") is Array:
+		data["items"] = _migrated(data.items, migrate)
 	if SCHEMA.valid(data, desk_type):
 		return data
 	return {}
+
+
+static func _migrated(items: Array, migrate: Callable) -> Array:
+	var result: Array = []
+	for item in items:
+		if item is Dictionary and item.get("path") is String:
+			var copy: Dictionary = item.duplicate()
+			copy["path"] = migrate.call(item.path)
+			result.append(copy)
+		else:
+			result.append(item)
+	return result
