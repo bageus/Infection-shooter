@@ -272,7 +272,7 @@ func sever(part: StringName, direction: Vector3, spawn_piece := true) -> RigidBo
 	if spawn_piece:
 		piece = _spawn_piece(part, info, joint_world, direction)
 	_modifier.severed.append(root)
-	_add_stump(root, _nearest_point(_skin_points(info.bones), joint_world), float(root_segment.radius), spawn_piece)
+	_add_stump(root, _cut_center(_skin_points(info.bones), joint_world), float(root_segment.radius), spawn_piece)
 	_remove_hitboxes(part)
 	part_severed.emit(part, piece)
 	return piece
@@ -302,7 +302,7 @@ func _spawn_piece(part: StringName, info: Dictionary, joint_world: Vector3, dire
 	piece.mass = clampf(bounds.size.x * bounds.size.y * bounds.size.z * 120.0, 0.3, 25.0)
 	var cap_offset: Vector3 = joint_world - built.center
 	# The bone joint can sit beside the cut, so the blood starts at the nearest piece surface.
-	var cut := _nearest_point(_mesh_points(built.mesh), cap_offset)
+	var cut := _cut_center(_mesh_points(built.mesh), cap_offset)
 	_attach_cap(piece, cut, float(info.segments[0].radius) * world_scale, cap_offset)
 	var parent := _piece_parent()
 	if parent == null:
@@ -329,6 +329,18 @@ static func _nearest_point(points: PackedVector3Array, from: Vector3) -> Vector3
 			best_distance = distance
 			best = point
 	return best
+
+
+# Centre of the open cut: the points nearly as close to the joint as the nearest one form the rim.
+static func _cut_center(points: PackedVector3Array, from: Vector3) -> Vector3:
+	var limit := from.distance_to(_nearest_point(points, from)) + 0.02
+	var sum := Vector3.ZERO
+	var count := 0
+	for point in points:
+		if point.distance_to(from) <= limit:
+			sum += point
+			count += 1
+	return sum / float(count) if count > 0 else from
 
 
 static func _mesh_points(mesh: ArrayMesh) -> PackedVector3Array:
@@ -418,7 +430,7 @@ func _attach_cap(parent: Node3D, offset: Vector3, radius: float, axis: Vector3) 
 	var cap := MeshInstance3D.new()
 	cap.set_meta("body_part_cap", true)
 	var sphere := SphereMesh.new()
-	sphere.radius = maxf(radius * 0.6, 0.012)
+	sphere.radius = maxf(radius, 0.012)
 	sphere.height = sphere.radius * 2.0
 	sphere.radial_segments = 10
 	sphere.rings = 6
