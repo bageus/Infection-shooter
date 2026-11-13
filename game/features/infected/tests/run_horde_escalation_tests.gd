@@ -68,6 +68,7 @@ func _run() -> void:
 	horde.health = 0.0
 	horde._release_summon()
 	_check(_summoned_count(stage) == previous.size(), "Dead Horde cannot release pending waves")
+	await _test_wander(stage, effects)
 	var dying := HORDE.instantiate() as CharacterBody3D
 	dying.position.y = 1.365
 	stage.add_child(dying)
@@ -118,6 +119,37 @@ func _test_blocked_spawn(stage: Node3D, horde: CharacterBody3D, before: int) -> 
 	_check(_summoned_count(stage) == before, "Blocked capsules are skipped instead of spawning inside geometry")
 	blocker.queue_free()
 	await process_frame
+
+
+# Unaware, the Horde strolls well away from its post instead of standing still.
+func _test_wander(stage: Node3D, effects: Node3D) -> void:
+	var yard := Node3D.new()
+	yard.position = Vector3(200, 0, 0)
+	stage.add_child(yard)
+	var floor_body := StaticBody3D.new()
+	var floor_shape := CollisionShape3D.new()
+	var slab := BoxShape3D.new()
+	slab.size = Vector3(80, 1, 80)
+	floor_shape.shape = slab
+	floor_body.add_child(floor_shape)
+	floor_body.position.y = -0.5
+	yard.add_child(floor_body)
+	var far_target := Target.new()
+	far_target.position = Vector3(0, 1, 70)
+	yard.add_child(far_target)
+	var wanderer := HORDE.instantiate() as CharacterBody3D
+	wanderer.position = Vector3(0, 1.4, 0)
+	yard.add_child(wanderer)
+	wanderer.configure_world(effects, null)
+	wanderer.set_target(far_target)
+	_check(is_equal_approx(wanderer.crawl_speed, 3.0), "Horde crawls a little faster")
+	var start := wanderer.global_position
+	var farthest := 0.0
+	for frame in 900:
+		await physics_frame
+		farthest = maxf(farthest, wanderer.global_position.distance_to(start))
+	_check(farthest > 3.5, "Unaware Horde wanders beyond 3.5 m from its post (%.1f m)" % farthest)
+	yard.queue_free()
 
 
 func _summoned_count(stage: Node) -> int:
