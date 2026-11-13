@@ -16,6 +16,8 @@ const LONG_GUN := {
 	"SHOTGUN": [.79, Vector3(-.145, .415, .505)],
 	"GRENADE LAUNCHER": [.87, Vector3(-.085, .415, .725)],
 }
+## Rifles that keep the authored full-body clip, arms included (no arm fitting, no ARM_TUNING).
+const CLIP_ARMS := ["AK", "M4"]
 ## Short guns have grips so close together that both hands collide: the forend hand holds this much further along the barrel (weapon units).
 const FOREND_REACH := {"SHOTGUN": .045, "GRENADE LAUNCHER": -.18, "SNIPER RIFLE": -.075, "AK": -.055, "M4": -.055}
 ## Extra arm posing per weapon, set by hand in tools/weapon_hold_tuner.tscn: joint turns in degrees
@@ -107,6 +109,10 @@ func _process_modification_with_delta(delta: float) -> void:
 		return
 	if name_value in LONG_GUN:
 		weapon.scale = Vector3.ONE * float(_spec(name_value)[0])
+	if name_value in CLIP_ARMS:
+		hand_error = 0.0
+		forend_error = 0.0
+		return
 	var skeleton := get_skeleton()
 	var socket_offset: Transform3D = mount.get("_socket_offset")
 	var reference_weapon := skeleton.get_bone_global_pose(skeleton.find_bone("RightHand")).basis * socket_offset.basis
@@ -162,6 +168,8 @@ func _nudge(side: String) -> Vector3:
 
 ## Bone turns for the held weapon, in degrees.
 func arm_bones() -> Dictionary:
+	if _held in CLIP_ARMS and not manual_arms:
+		return {}
 	return ARM_TUNING.get(_held, {}).get("bones", {})
 
 
