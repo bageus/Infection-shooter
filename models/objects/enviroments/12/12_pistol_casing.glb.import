@@ -3,13 +3,13 @@
 importer="scene"
 importer_version=1
 type="PackedScene"
-uid="uid://cawmk5dxvxf0f"
-path="res://.godot/imported/03_drawer_cabinet.glb-6d3dcca4654f752f693df6190036ecac.scn"
+uid="uid://dnktfoyok107s"
+path="res://.godot/imported/12_pistol_casing.glb-8b4f1ed39022657f4bbbe5769e63c66c.scn"
 
 [deps]
 
-source_file="res://models/objects/03_drawer_cabinet.glb"
-dest_files=["res://.godot/imported/03_drawer_cabinet.glb-6d3dcca4654f752f693df6190036ecac.scn"]
+source_file="res://models/objects/enviroments/12/12_pistol_casing.glb"
+dest_files=["res://.godot/imported/12_pistol_casing.glb-8b4f1ed39022657f4bbbe5769e63c66c.scn"]
 
 [params]
 
