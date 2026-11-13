@@ -272,7 +272,7 @@ func sever(part: StringName, direction: Vector3, spawn_piece := true) -> RigidBo
 	if spawn_piece:
 		piece = _spawn_piece(part, info, joint_world, direction)
 	_modifier.severed.append(root)
-	_add_stump(root, joint_world, float(root_segment.radius), spawn_piece)
+	_add_stump(root, _nearest_point(_skin_points(info.bones), joint_world), float(root_segment.radius), spawn_piece)
 	_remove_hitboxes(part)
 	part_severed.emit(part, piece)
 	return piece
@@ -301,7 +301,9 @@ func _spawn_piece(part: StringName, info: Dictionary, joint_world: Vector3, dire
 		bounds = bounds.expand(point)
 	piece.mass = clampf(bounds.size.x * bounds.size.y * bounds.size.z * 120.0, 0.3, 25.0)
 	var cap_offset: Vector3 = joint_world - built.center
-	_attach_cap(piece, cap_offset, float(info.segments[0].radius) * world_scale, cap_offset)
+	# The bone joint can sit beside the cut, so the blood starts at the nearest piece surface.
+	var cut := _nearest_point(_mesh_points(built.mesh), cap_offset)
+	_attach_cap(piece, cut, float(info.segments[0].radius) * world_scale, cap_offset)
 	var parent := _piece_parent()
 	if parent == null:
 		piece.free()
@@ -314,8 +316,51 @@ func _spawn_piece(part: StringName, info: Dictionary, joint_world: Vector3, dire
 		inherited = (owner_body as CharacterBody3D).velocity * 0.6
 	piece.linear_velocity = inherited + push * randf_range(2.2, 3.6) + Vector3.UP * randf_range(1.2, 2.4) + cap_offset.normalized() * -0.6
 	piece.angular_velocity = Vector3(randf_range(-7, 7), randf_range(-7, 7), randf_range(-7, 7))
-	piece.start_bleeding(cap_offset, cap_offset.normalized(), 0.8)
+	piece.start_bleeding(cut, cap_offset.normalized(), 0.8)
 	return piece
+
+
+static func _nearest_point(points: PackedVector3Array, from: Vector3) -> Vector3:
+	var best := from
+	var best_distance := INF
+	for point in points:
+		var distance := point.distance_squared_to(from)
+		if distance < best_distance:
+			best_distance = distance
+			best = point
+	return best
+
+
+static func _mesh_points(mesh: ArrayMesh) -> PackedVector3Array:
+	var points := PackedVector3Array()
+	for surface in mesh.get_surface_count():
+		points.append_array(mesh.surface_get_arrays(surface)[Mesh.ARRAY_VERTEX])
+	return points
+
+
+# World-space skin vertices bound mostly to this part's bones, at the current pose.
+# shortcut: uses each vertex's strongest bone instead of blending, a few mm off at joints.
+func _skin_points(bones: PackedInt32Array) -> PackedVector3Array:
+	var points := PackedVector3Array()
+	for surface: Dictionary in _data.surfaces:
+		var vertices: PackedVector3Array = surface.vertices
+		var influences: PackedInt32Array = surface.bones
+		var weights: PackedFloat32Array = surface.weights
+		var stride: int = surface.stride
+		if influences.is_empty():
+			continue
+		for index in vertices.size():
+			var best := -1
+			var best_weight := 0.0
+			for k in stride:
+				if weights[index * stride + k] > best_weight:
+					best_weight = weights[index * stride + k]
+					best = influences[index * stride + k]
+			if best < 0 or not bones.has(best) or not _data.binds.has(best):
+				continue
+			var skin: Transform3D = skeleton.global_transform * skeleton.get_bone_global_pose(best) * (_data.binds[best] as Transform3D)
+			points.append(skin * vertices[index])
+	return points
 
 
 func _piece_parent() -> Node3D:
