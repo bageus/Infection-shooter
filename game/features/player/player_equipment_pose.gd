@@ -1,6 +1,7 @@
 extends SkeletonModifier3D
 ## Fits the supporting hand to the new kit; minigun uses a low two-arm pose.
 const BACKPACK := preload("res://models/objects/weapons/minigun_ammo_backpack_lowpoly.glb")
+const AMMO_BELT := preload("res://game/features/player/minigun_ammo_belt.gd")
 ## Flashlight sits this far (m) to the side of the muzzle, at twice the model's size, and is dim enough to read the room, not light it.
 const FLASHLIGHT_SIDE := .09
 const FLASHLIGHT_SCALE := 2.0
@@ -52,6 +53,7 @@ var manual_arms := false
 var _held := ""
 var mount: Node
 var backpack: Node3D
+var ammo_belt: MultiMeshInstance3D
 var _back_attachment: BoneAttachment3D
 var _flashlight_model: Node3D
 var _flashlight: SpotLight3D
@@ -76,6 +78,8 @@ func _ready() -> void:
 	backpack.rotation.y = PI
 	backpack.position = Vector3(0, .10, -.23)
 	backpack.hide()
+	ammo_belt = AMMO_BELT.new()
+	skeleton.add_child(ammo_belt)
 	# Weapon flashlight: a dim spot beside the muzzle, moved onto whichever weapon is held.
 	_flashlight_model = FLASHLIGHT_MODEL.instantiate() as Node3D
 	_flashlight_model.position = Vector3(FLASHLIGHT_SIDE, 0, 0)
@@ -100,6 +104,7 @@ func _process_modification_with_delta(delta: float) -> void:
 	var name_value: String = weapon.call("get_weapon_name")
 	_held = name_value
 	backpack.visible = name_value == "MINIGUN"
+	ammo_belt.visible = backpack.visible
 	_update_flashlight(weapon, delta)
 	var full_kit := name_value in LONG_GUN or name_value == "MINIGUN"
 	mount.set("grip_shift", Vector3.ZERO)
@@ -145,6 +150,13 @@ func _process_modification_with_delta(delta: float) -> void:
 			_curl_support_hand(skeleton, target, skeleton.global_basis.inverse() * weapon.global_basis)
 			hand_error = skeleton.get_bone_global_pose(skeleton.find_bone("LeftHand")).origin.distance_to(target)
 	mount.call("sync_weapon", weapon)
+	if name_value == "MINIGUN":
+		# Belt runs from the backpack's feed port to the minigun's, after both have settled this frame.
+			var pack_port := backpack.find_child("FeedPort", true, false) as Node3D
+			var gun_port := weapon.find_child("FeedPort", true, false) as Node3D
+			var to_skeleton := skeleton.global_basis.inverse()
+			# Each port's outward axis: backpack +X, minigun +Z.
+			ammo_belt.update_belt(skeleton.to_local(pack_port.global_position), to_skeleton * pack_port.global_basis.x, skeleton.to_local(gun_port.global_position), to_skeleton * gun_port.global_basis.z)
 	if name_value in LONG_GUN:
 		forend_error = (skeleton.get_bone_global_pose(skeleton.find_bone("RightHand")) * socket_offset).origin.distance_to(skeleton.to_local(weapon.find_child("Grip_L", true, false).global_position + weapon.global_basis.orthonormalized().x * float(_spec(name_value)[2]) * weapon.scale.x))
 	if capture_pose:
