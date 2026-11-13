@@ -102,9 +102,9 @@ static func explode(projectile: Node3D, location: Vector3, normal: Vector3, cont
 		push_body(collider, direction, factor)
 		if collider.has_method("apply_blast_shake"):
 			collider.call("apply_blast_shake", location, factor)
-		if collider.has_method("apply_blast_stun") and float(collider.get("health")) > 0.0:
-			# Infected get the full stun at any range inside the blast: scaled down it lasted under a second.
-			collider.call("apply_blast_stun", 3.0 + 2.0 * factor, 1.0 if collider.has_method("take_blast_damage") else factor)
+		# Infected are hurt but never stunned by a grenade; only the player is.
+		if collider.has_method("apply_blast_stun") and not collider.has_method("take_blast_damage") and float(collider.get("health")) > 0.0:
+			collider.call("apply_blast_stun", 3.0 + 2.0 * factor, factor)
 	TRACE.mark("%d bodies in blast processed" % hit_ids.size())
 	if contact != null and (not contact.has_method("take_projectile_hit") or contact.has_method("get_projectile_material") and str(contact.call("get_projectile_material")) in ["concrete", "metal"]):
 		_scorch(scene, location, normal, impacts, contact as Node3D)
