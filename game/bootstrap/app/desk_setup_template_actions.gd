@@ -39,8 +39,17 @@ static func save(mode: Variant) -> void:
 static func refresh(mode: Variant) -> void:
 	mode.template_list.clear()
 	for item in TEMPLATE_FILES.list_for(WORKSTATIONS.desk_name(mode._desk_path())):
+		# Offer only what Apply accepts, so the list and the check agree.
+		if _load(mode, str(item["path"])).is_empty():
+			continue
 		mode.template_list.add_item(str(item["name"]))
 		mode.template_list.set_item_metadata(mode.template_list.item_count - 1, item["path"])
+
+
+static func _load(mode: Variant, path: String) -> Dictionary:
+	var catalog: Variant = mode.planner.get("catalog")
+	var migrate := Callable(catalog, "_migrate_scene_path") if catalog != null else Callable()
+	return TEMPLATE_FILES.load(path, WORKSTATIONS.desk_name(mode._desk_path()), migrate)
 
 
 static func load_selected(mode: Variant) -> void:
@@ -48,7 +57,7 @@ static func load_selected(mode: Variant) -> void:
 		mode._notify_failure("Select a saved template before applying it.")
 		return
 	var path: String = mode.template_list.get_item_metadata(mode.template_list.selected)
-	var data: Dictionary = TEMPLATE_FILES.load(path, WORKSTATIONS.desk_name(mode._desk_path()))
+	var data: Dictionary = _load(mode, path)
 	if data.is_empty():
 		mode._notify_failure("Template does not match this desk.")
 		return

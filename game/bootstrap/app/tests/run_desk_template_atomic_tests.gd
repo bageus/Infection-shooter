@@ -5,11 +5,13 @@ const ACTIONS := preload("res://game/bootstrap/app/desk_setup_template_actions.g
 const SCHEMA := preload("res://game/bootstrap/app/desk_setup_template_schema.gd")
 const MODEL := "res://models/objects/enviroments/05/05_computer_mouse.glb"
 const PATH := "user://desk_setups/office_desk_2_atomic_regression.json"
+const RETIRED := "res://models/objects/enviroments/05/05_computer_mouse_retired.glb"
 
 class Planner extends RefCounted:
 	var root: Node3D
 	var placed: Array[Node3D] = []
 	var created: Array[WeakRef] = []
+	var catalog: Object
 	var attempts := 0
 	var fail_at := -1
 	var without_geometry := false
@@ -25,6 +27,10 @@ class Planner extends RefCounted:
 			object.add_child(mesh)
 		created.append(weakref(object))
 		return object
+
+class Catalog extends RefCounted:
+	func _migrate_scene_path(old_path: String) -> String:
+		return MODEL if old_path == RETIRED else old_path
 
 class Mode extends RefCounted:
 	var desk: Node3D
@@ -90,6 +96,7 @@ func _run() -> void:
 	await _test_valid_replacement(false, true)
 	await _test_empty_replacement()
 	await _test_tilt_round_trip()
+	await _test_retired_model_migrates()
 	_test_save_preserves_valid_file()
 	DirAccess.remove_absolute(PATH)
 	print("Desk template atomic tests: %d failures (%d invalid payloads)" % [failures, bad.size()])
@@ -259,6 +266,29 @@ func _test_tilt_round_trip() -> void:
 		var object: Node3D = prepared.items[0]
 		_expect(is_equal_approx(object.rotation.x, 1.2) and is_equal_approx(object.rotation.z, -0.6), "Loaded template restores the saved lay.")
 		_expect(is_equal_approx(object.rotation.y, mode.desk.rotation.y + .4), "Loaded lay keeps the saved yaw relative to the desk.")
+	await _clear()
+
+
+## A template saved before its model was retired applies, and the list offers only applicable templates.
+func _test_retired_model_migrates() -> void:
+	_start()
+	mode.planner.catalog = Catalog.new()
+	var data := _payload()
+	data.items[0].path = RETIRED
+	_write_raw(data)
+	_expect(FILES.load(PATH, "office_desk_2").is_empty(), "Retired model path is refused without migration.")
+	ACTIONS.load_selected(mode)
+	_expect(mode.failures.is_empty() and mode.planner.placed.size() == 2 and original.is_queued_for_deletion(), "Migrated template applies and replaces the desk's attachments.")
+	await _clear()
+	_start()
+	mode.planner.catalog = Catalog.new()
+	var broken := FileAccess.open(ProjectSettings.globalize_path("user://desk_setups/office_desk_2_atomic_broken.json"), FileAccess.WRITE)
+	broken.store_string("{}")
+	broken.close()
+	_write_raw(data)
+	ACTIONS.refresh(mode)
+	_expect(mode.template_list.item_count == 1, "List offers only templates that Apply accepts.")
+	DirAccess.remove_absolute(ProjectSettings.globalize_path("user://desk_setups/office_desk_2_atomic_broken.json"))
 	await _clear()
 
 
