@@ -302,9 +302,11 @@ func _spawn_piece(part: StringName, info: Dictionary, joint_world: Vector3, dire
 	piece.mass = clampf(bounds.size.x * bounds.size.y * bounds.size.z * 120.0, 0.3, 25.0)
 	var cap_offset: Vector3 = joint_world - built.center
 	# The bone joint can sit beside the cut, so the blood starts at the nearest piece surface.
-	var rim := _face_rim(_mesh_points(built.mesh), cap_offset.normalized())
+	# The cut faces back along the bone, from the far tip toward the joint.
+	var axis := (joint_world - _world(info.bones[0], info.segments[0].end)).normalized()
+	var rim := _face_rim(_mesh_points(built.mesh), axis)
 	var cut := _average(rim, cap_offset)
-	piece.add_child(_closing_disc(rim, cut, cap_offset))
+	piece.add_child(_closing_disc(rim, cut, axis))
 	_attach_cap(piece, cut, float(info.segments[0].radius) * world_scale, cap_offset)
 	var parent := _piece_parent()
 	if parent == null:
@@ -367,12 +369,11 @@ static func _cut_center(points: PackedVector3Array, from: Vector3) -> Vector3:
 
 
 # Closes the open cut with a flat fan over the rim, in the piece's local space.
-func _closing_disc(rim: PackedVector3Array, center: Vector3, from: Vector3) -> MeshInstance3D:
+func _closing_disc(rim: PackedVector3Array, center: Vector3, normal: Vector3) -> MeshInstance3D:
 	var disc := MeshInstance3D.new()
 	disc.name = "CutFace"
 	if rim.size() < 3:
 		return disc
-	var normal := (center - from).normalized()
 	var side := normal.cross(Vector3.UP if absf(normal.y) < 0.9 else Vector3.RIGHT).normalized()
 	var up := normal.cross(side)
 	var order: Array[Vector2] = []
