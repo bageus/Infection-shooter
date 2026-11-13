@@ -10,7 +10,7 @@ const VIEWS := [
 	[Vector3(-.8, .3, 1.0), 1.2, .45],
 	[Vector3(-1, .05, 0), 1.2, .45],
 	[Vector3(-.8, .25, -1.0), 1.2, .45],
-	[Vector3(-.5, .3, 1.0), .6, .3],
+	[Vector3(-1.0, -.2, .6), .7, .25],
 ]
 var _out := "/tmp/minigun_belt.png"
 var _actor: Node3D
