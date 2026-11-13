@@ -2,13 +2,13 @@ extends MultiMeshInstance3D
 ## Wide cartridge belt from the backpack feed port to the minigun feed port, rebuilt each frame in skeleton space.
 const LINKS := 30
 const ROUNDS_ACROSS := 3
-## Belt sag as a share of the span: a slight hang only.
-const SAG := .05
+## Belt sag as a share of the span: a deep loop down from the backpack, as drawn by Vadim.
+const SAG := .5
 ## Strap pitch per link, strap width and thickness (m).
 const LINK_PITCH := .02
-const STRAP_WIDTH := .04
+const STRAP_WIDTH := .06
 const STRAP_THICKNESS := .006
-const ROUND_SPACING := .0125
+const ROUND_SPACING := .019
 const ROUND_RADIUS := .0065
 const ROUND_LENGTH := .026
 var _rounds: MultiMeshInstance3D
