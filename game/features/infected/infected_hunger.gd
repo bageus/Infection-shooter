@@ -201,7 +201,7 @@ func _play_transition(clip: StringName, legs: StringName) -> void:
 
 func _part_lost(part: StringName) -> void:
 	super._part_lost(part)
-	if not _dead and String(part).begins_with("leg") and posture != Posture.CRAWL:
+	if not _dead and BODY_PARTS.limb_of(part) == "leg" and posture != Posture.CRAWL:
 		_collapse()
 
 

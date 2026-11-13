@@ -74,37 +74,30 @@ var weapon_catalog = [
 ]
 
 
-# Dead infected and loose body parts placed as decoration (ADR-0017).
-var gore_catalog = [
-	{"name":"Corpse Hunger","path":"res://game/features/infected/public/decor/corpse_hunger.tscn","kind":"decor"},
-	{"name":"Corpse Hunger mutilated","path":"res://game/features/infected/public/decor/corpse_hunger_mutilated.tscn","kind":"decor"},
-	{"name":"Head Hunger","path":"res://game/features/infected/public/decor/part_hunger_head.tscn","kind":"decor"},
-	{"name":"Arm Hunger","path":"res://game/features/infected/public/decor/part_hunger_arm.tscn","kind":"decor"},
-	{"name":"Leg Hunger","path":"res://game/features/infected/public/decor/part_hunger_leg.tscn","kind":"decor"},
-	{"name":"Corpse Revenant","path":"res://game/features/infected/public/decor/corpse_revenant.tscn","kind":"decor"},
-	{"name":"Corpse Revenant mutilated","path":"res://game/features/infected/public/decor/corpse_revenant_mutilated.tscn","kind":"decor"},
-	{"name":"Head Revenant","path":"res://game/features/infected/public/decor/part_revenant_head.tscn","kind":"decor"},
-	{"name":"Arm Revenant","path":"res://game/features/infected/public/decor/part_revenant_arm.tscn","kind":"decor"},
-	{"name":"Leg Revenant","path":"res://game/features/infected/public/decor/part_revenant_leg.tscn","kind":"decor"},
-	{"name":"Corpse Brute","path":"res://game/features/infected/public/decor/corpse_brute.tscn","kind":"decor"},
-	{"name":"Corpse Brute mutilated","path":"res://game/features/infected/public/decor/corpse_brute_mutilated.tscn","kind":"decor"},
-	{"name":"Head Brute","path":"res://game/features/infected/public/decor/part_brute_head.tscn","kind":"decor"},
-	{"name":"Arm Brute","path":"res://game/features/infected/public/decor/part_brute_arm.tscn","kind":"decor"},
-	{"name":"Leg Brute","path":"res://game/features/infected/public/decor/part_brute_leg.tscn","kind":"decor"},
-	{"name":"Corpse Titan","path":"res://game/features/infected/public/decor/corpse_titan.tscn","kind":"decor"},
-	{"name":"Corpse Titan mutilated","path":"res://game/features/infected/public/decor/corpse_titan_mutilated.tscn","kind":"decor"},
-	{"name":"Head Titan","path":"res://game/features/infected/public/decor/part_titan_head.tscn","kind":"decor"},
-	{"name":"Arm Titan","path":"res://game/features/infected/public/decor/part_titan_arm.tscn","kind":"decor"},
-	{"name":"Leg Titan","path":"res://game/features/infected/public/decor/part_titan_leg.tscn","kind":"decor"},
-	{"name":"Corpse Colossus","path":"res://game/features/infected/public/decor/corpse_colossus.tscn","kind":"decor"},
-	{"name":"Corpse Colossus mutilated","path":"res://game/features/infected/public/decor/corpse_colossus_mutilated.tscn","kind":"decor"},
-	{"name":"Head Colossus","path":"res://game/features/infected/public/decor/part_colossus_head.tscn","kind":"decor"},
-	{"name":"Arm Colossus","path":"res://game/features/infected/public/decor/part_colossus_arm.tscn","kind":"decor"},
-	{"name":"Leg Colossus","path":"res://game/features/infected/public/decor/part_colossus_leg.tscn","kind":"decor"},
-	{"name":"Corpse Horde","path":"res://game/features/infected/public/decor/corpse_horde.tscn","kind":"decor"},
-	{"name":"Corpse Horde mutilated","path":"res://game/features/infected/public/decor/corpse_horde_mutilated.tscn","kind":"decor"},
-	{"name":"Tentacle Horde","path":"res://game/features/infected/public/decor/part_horde_tentacle.tscn","kind":"decor"}
-]
+# Dead infected and loose body parts placed as decoration (ADR-0017). A corpse has a
+# destruction level in the planner panel; parts are one entry each, halves and whole limbs.
+const GORE_DIR := "res://game/features/infected/public/decor/"
+const GORE_ENEMIES := ["Hunger", "Revenant", "Brute", "Titan", "Colossus"]
+const GORE_PART_LABELS := {
+	"head": "Head", "torso": "Torso",
+	"upperarm_l": "Upper arm L", "upperarm_r": "Upper arm R", "forearm_l": "Forearm+hand L", "forearm_r": "Forearm+hand R",
+	"arm_l": "Whole arm L", "arm_r": "Whole arm R",
+	"thigh_l": "Thigh L", "thigh_r": "Thigh R", "shin_l": "Shin+foot L", "shin_r": "Shin+foot R",
+	"leg_l": "Whole leg L", "leg_r": "Whole leg R",
+}
+var gore_catalog: Array = _gore_catalog()
+
+
+func _gore_catalog() -> Array:
+	var entries: Array = []
+	for enemy: String in GORE_ENEMIES + ["Horde"]:
+		var key := enemy.to_lower()
+		entries.append({"name": "Corpse " + enemy, "path": GORE_DIR + "corpse_%s.tscn" % key, "kind": "decor"})
+		var parts: Array = GORE_PART_LABELS.keys() if enemy != "Horde" else ["torso", "tentacle_0", "tentacle_1", "tentacle_2", "tentacle_3", "tentacle_4", "tentacle_5", "tentacle_6", "tentacle_7"]
+		for part: String in parts:
+			var label: String = GORE_PART_LABELS.get(part, "Body" if part == "torso" else "Tentacle " + part.trim_prefix("tentacle_"))
+			entries.append({"name": "%s %s" % [enemy, label], "path": GORE_DIR + "part_%s_%s.tscn" % [key, part], "kind": "decor"})
+	return entries
 
 
 # Blood decals from the in-game texture set; surface and size come from the

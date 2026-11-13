@@ -1,0 +1,11 @@
+[gd_resource type="StandardMaterial3D" load_steps=2 format=3]
+
+[ext_resource type="Texture2D" path="res://models/objects/characters/enemy/game/Colossus_wound.jpg" id="1_wound"]
+
+[resource]
+resource_name = "Colossus_wound"
+cull_mode = 2
+albedo_texture = ExtResource("1_wound")
+roughness = 0.33
+clearcoat_enabled = true
+clearcoat = 0.15

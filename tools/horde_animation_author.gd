@@ -22,6 +22,10 @@ var _floor_y := -0.55
 var _top_y := 0.55
 var _radius := 0.93
 var _rest := {}
+## Tentacle azimuths (radians, ascending) and {a, b} joint points taken from the model's legs;
+## empty means eight evenly spread tentacles.
+var leg_angles: Array = []
+var leg_joints: Array = []
 
 
 func crawl_speed() -> float:
@@ -51,14 +55,35 @@ func build_skeleton(vertices: PackedVector3Array) -> Skeleton3D:
 		var lump_out := Vector3(sin(lump_angle), 0.0, cos(lump_angle))
 		_add(skeleton, "L%d" % k, "Body", lump_out * _radius * 0.45 + Vector3(0.0, _floor_y + height * (0.5 + 0.12 * float(k % 2)), 0.0))
 	for i in TENTACLES:
-		var angle := TAU * float(i) / float(TENTACLES)
+		var angle := _angle(i)
 		var out := Vector3(sin(angle), 0.0, cos(angle))
-		_add(skeleton, "T%d_A" % i, "Hips", out * _radius * 0.32 + Vector3(0.0, _floor_y + height * 0.1, 0.0))
-		_add(skeleton, "T%d_B" % i, "T%d_A" % i, out * _radius * 0.64 + Vector3(0.0, _floor_y + height * 0.05, 0.0))
+		var root := out * _radius * 0.32 + Vector3(0.0, _floor_y + height * 0.1, 0.0)
+		var mid := out * _radius * 0.64 + Vector3(0.0, _floor_y + height * 0.05, 0.0)
+		if i < leg_joints.size():
+			root = leg_joints[i].a
+			mid = leg_joints[i].b
+		_add(skeleton, "T%d_A" % i, "Hips", root)
+		_add(skeleton, "T%d_B" % i, "T%d_A" % i, mid)
 	skeleton.reset_bone_poses()
 	for index in skeleton.get_bone_count():
 		_rest[skeleton.get_bone_name(index)] = skeleton.get_bone_rest(index)
 	return skeleton
+
+
+func _angle(i: int) -> float:
+	return float(leg_angles[i]) if i < leg_angles.size() else TAU * float(i) / float(TENTACLES)
+
+
+# Fractional tentacle slot of an azimuth: the integer part is the slot whose angle is just below it.
+func _sector(azimuth: float) -> float:
+	var first := TENTACLES - 1
+	for i in TENTACLES:
+		if _angle(i) <= azimuth:
+			first = i
+	var from := _angle(first)
+	var to := _angle((first + 1) % TENTACLES)
+	var span := fposmod(to - from, TAU)
+	return float(first) + (fposmod(azimuth - from, TAU) / span if span > 0.0 else 0.0)
 
 
 func _add(skeleton: Skeleton3D, bone: String, parent: String, global_origin: Vector3) -> void:
@@ -103,7 +128,7 @@ func weights(vertices: PackedVector3Array, skeleton: Skeleton3D) -> Array:
 		row[skeleton.find_bone("Body")] = upper * (1.0 - crown) * (1.0 - hips)
 		row[skeleton.find_bone("Hips")] = upper * (1.0 - crown) * hips
 		if skirt > 0.0:
-			var sector := fposmod(atan2(vertex.x, vertex.z), TAU) / TAU * float(TENTACLES)
+			var sector := _sector(azimuth)
 			var first := int(floorf(sector)) % TENTACLES
 			var second := (first + 1) % TENTACLES
 			var blend := sector - floorf(sector)
@@ -167,7 +192,7 @@ func _summon(t: float) -> Dictionary:
 	pose.Body = [Quaternion.IDENTITY, body_scale]
 	pose.Crown = [Quaternion(Vector3.RIGHT, deg_to_rad(-8.0 * burst)), Vector3.ONE * (1.0 + 0.3 * burst + 0.1 * pulse)]
 	for i in TENTACLES:
-		var angle := TAU * float(i) / float(TENTACLES)
+		var angle := _angle(i)
 		var axis := _lift_axis(angle)
 		var lift := -14.0 * gather + 6.0 * burst + 5.0 * pulse * sin(angle * 3.0)
 		pose["T%d_A" % i] = [Quaternion(axis, deg_to_rad(lift)), Vector3(1.0, 1.0, 1.0)]
@@ -184,7 +209,7 @@ func _death(t: float) -> Dictionary:
 	pose.Body = [Quaternion(Vector3.BACK, deg_to_rad(6.0 * spasm)), Vector3(1.0 + 0.25 * collapse, 1.0 - 0.62 * collapse, 1.0 + 0.25 * collapse)]
 	pose.Crown = [Quaternion(Vector3.RIGHT, deg_to_rad(20.0 * collapse)), Vector3.ONE * (1.0 - 0.45 * collapse)]
 	for i in TENTACLES:
-		var angle := TAU * float(i) / float(TENTACLES)
+		var angle := _angle(i)
 		var axis := _lift_axis(angle)
 		var twitch := 12.0 * spasm * sin(angle * 5.0 + u * 30.0)
 		pose["T%d_A" % i] = [Quaternion(axis, deg_to_rad(-6.0 * collapse + twitch)), Vector3.ONE]
@@ -197,7 +222,7 @@ func _death(t: float) -> Dictionary:
 # With `scatter` every leg steps on its own phase and stride, not as a wave.
 func _ripple(pose: Dictionary, phase: float, lift_degrees: float, curl_degrees: float, waves: float, push := false, scatter := false) -> void:
 	for i in TENTACLES:
-		var angle := TAU * float(i) / float(TENTACLES)
+		var angle := _angle(i)
 		var axis := _lift_axis(angle)
 		var local := phase - angle * waves
 		var vigour := 1.0
