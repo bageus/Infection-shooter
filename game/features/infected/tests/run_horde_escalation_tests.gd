@@ -42,7 +42,7 @@ func _run() -> void:
 	var capsule: CapsuleShape3D = horde.get_node("CollisionShape3D").shape
 	_check(is_equal_approx(capsule.radius, 1.365) and is_equal_approx(capsule.height, 2.73), "Collision scales with the visual")
 	var previous: Array[Node3D] = []
-	for entry in [[900.0, "infected_hunger.tscn"], [600.0, "infected_revenant.tscn"], [300.0, "infected_brute.tscn"], [150.0, "infected_brute.tscn"]]:
+	for entry in [[2700.0, "infected_hunger.tscn"], [1800.0, "infected_revenant.tscn"], [900.0, "infected_brute.tscn"], [450.0, "infected_brute.tscn"]]:
 		horde.health = float(entry[0])
 		horde._enter(0)
 		horde._summon_cooldown = 0.0
@@ -89,7 +89,7 @@ func _run() -> void:
 
 func _test_ram_damage(horde: CharacterBody3D, target: Target) -> void:
 	horde._summon_cooldown = 1000.0
-	horde.health = 900.0
+	horde.health = 2700.0
 	target.position = horde.position + Vector3.FORWARD
 	var before := target.damage_taken
 	for _i in 60:

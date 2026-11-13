@@ -8,8 +8,11 @@ const ENEMY_DIFFICULTY := preload("res://game/features/infected/public/enemy_dif
 const ENEMY_TUNING := preload("res://game/features/infected/public/enemy_tuning.gd")
 const DEATH_CLOUD := preload("res://game/features/infected/public/death_cloud_settings.gd")
 const CORPSE_BUDGET := preload("res://game/features/infected/public/corpse_budget.gd")
+const CROWD := preload("res://game/features/infected/crowd_separation.gd")
+## Gap between the body edge and a dropped key, so the key is clear of the body.
+const KEY_GAP := 0.5
 var drop_weapon: Callable
-var carried_weapons: Callable
+var needs: Callable
 var _owner: Node
 var _base := {}
 
@@ -83,4 +86,9 @@ func apply_saved_stats() -> void:
 func release(world: Node, at: Vector3) -> void:
 	var target: Node = _owner.get("_target")
 	var recycling := is_instance_valid(target) and target.has_method("get_infection_skill") and bool(target.call("get_infection_skill", "recycling"))
-	LOOT_DROP.release_enemy(world, at, _owner.get_meta(&"planning_loot") if _owner.has_meta(&"planning_loot") else null, drop_weapon, 1.0 + MUTATION_BALANCE.value("recycling", "percent") / 100.0 if recycling else 1.0, carried_weapons, str(_owner.get_meta(&"planning_object_id", "")))
+	var forward: Vector3 = -(_owner as Node3D).global_basis.z
+	forward.y = 0.0
+	var size: float = (_owner.get("body_visual") as Node3D).scale.x
+	var reach := CROWD.body_radius(_owner.get("collision_shape"), size) + KEY_GAP
+	var key_at: Vector3 = at + forward.normalized() * reach if forward.length() > 0.01 else at
+	LOOT_DROP.release_enemy(world, at, _owner.get_meta(&"planning_loot") if _owner.has_meta(&"planning_loot") else null, drop_weapon, 1.0 + MUTATION_BALANCE.value("recycling", "percent") / 100.0 if recycling else 1.0, needs, str(_owner.get_meta(&"planning_object_id", "")), key_at)

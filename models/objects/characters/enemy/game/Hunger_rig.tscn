@@ -73,9 +73,9 @@ bind/21/name = &""
 bind/21/bone = 21
 bind/21/pose = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.183, 0.911, -0.11)
 
-[node name="Visual" type="Node3D" unique_id=1843433090]
+[node name="Visual" type="Node3D" unique_id=838230343]
 
-[node name="Skeleton3D" type="Skeleton3D" parent="." unique_id=1572157354]
+[node name="Skeleton3D" type="Skeleton3D" parent="." unique_id=1323214863]
 bones/0/name = "Root"
 bones/0/parent = -1
 bones/0/rest = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.9510761, 0)
@@ -231,11 +231,11 @@ bones/21/position = Vector3(0, -0.051, 0.109)
 bones/21/rotation = Quaternion(0, 0, 0, 1)
 bones/21/scale = Vector3(1, 1, 1)
 
-[node name="Mesh" type="MeshInstance3D" parent="Skeleton3D" unique_id=1433769498]
+[node name="Mesh" type="MeshInstance3D" parent="Skeleton3D" unique_id=2145713424]
 mesh = ExtResource("1_ffd4v")
 skin = SubResource("Skin_uldnc")
 skeleton = NodePath("..")
 surface_material_override/0 = ExtResource("2_7bs4c")
 
-[node name="AnimationPlayer" type="AnimationPlayer" parent="." unique_id=643807459]
+[node name="AnimationPlayer" type="AnimationPlayer" parent="." unique_id=54900707]
 libraries/ = ExtResource("3_lyxnm")
