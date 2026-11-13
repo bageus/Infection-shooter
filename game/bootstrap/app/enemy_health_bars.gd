@@ -10,8 +10,9 @@ const BAR_SIZE := Vector2(40.0, 5.0)
 const MAX_BAR_WIDTH := 220.0
 ## Bars past this distance are too small to read and cost a projection each, so they are skipped.
 const MAX_DISTANCE := 40.0
-const BACK_COLOR := Color(0.0, 0.0, 0.0, 0.6)
-const FILL_COLOR := Color(0.86, 0.22, 0.22, 0.95)
+## Bars are drawn wider than the body's on-screen width, so the size difference reads at a glance.
+const BAR_WIDTH_SCALE := 1.5
+const SHADER := preload("res://game/bootstrap/app/enemy_health_bar.gdshader")
 
 var camera: Camera3D
 
@@ -20,6 +21,8 @@ func setup(view: Camera3D) -> void:
 	camera = view
 	mouse_filter = Control.MOUSE_FILTER_IGNORE
 	set_anchors_preset(Control.PRESET_FULL_RECT)
+	material = ShaderMaterial.new()
+	material.shader = SHADER
 	set_enabled(false)
 
 
@@ -51,11 +54,18 @@ func _draw() -> void:
 		if camera.is_position_behind(point) or distance > MAX_DISTANCE:
 			continue
 		# Pixels per metre at this distance, so the bar matches the enemy's width on screen.
-		var pixels := clampf(_body_width(body) * pixels_per_tan / distance, BAR_SIZE.x, MAX_BAR_WIDTH)
+		var pixels := clampf(_body_width(body) * BAR_WIDTH_SCALE * pixels_per_tan / distance, BAR_SIZE.x, MAX_BAR_WIDTH)
 		var bar := Vector2(pixels, BAR_SIZE.y)
 		var origin := camera.unproject_position(point) - bar * 0.5
-		draw_rect(Rect2(origin - Vector2.ONE, bar + Vector2(2.0, 2.0)), BACK_COLOR)
-		draw_rect(Rect2(origin, Vector2(bar.x * clampf(hp / max_hp, 0.0, 1.0), bar.y)), FILL_COLOR)
+		_draw_bar(Rect2(origin, bar), clampf(hp / max_hp, 0.0, 1.0))
+
+
+## One quad per bar; the shader reads the health fraction from the vertex colour.
+func _draw_bar(rect: Rect2, fraction: float) -> void:
+	var points := PackedVector2Array([rect.position, rect.position + Vector2(rect.size.x, 0.0), rect.end, rect.position + Vector2(0.0, rect.size.y)])
+	var uvs := PackedVector2Array([Vector2(0, 0), Vector2(1, 0), Vector2(1, 1), Vector2(0, 1)])
+	var tint := Color(fraction, 0.0, 0.0, 1.0)
+	draw_polygon(points, PackedColorArray([tint, tint, tint, tint]), uvs)
 
 
 ## Each enemy type has its own capsule, so the bar follows the type instead of a fixed height.
