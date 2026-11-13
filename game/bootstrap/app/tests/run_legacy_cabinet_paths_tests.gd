@@ -1,5 +1,5 @@
 extends SceneTree
-## Real map load/save/load preserves the four historical cabinet scene contracts.
+## Real map load/save/load preserves the historical locker scene contract.
 const CATALOG := preload("res://game/bootstrap/app/planning_catalog.gd")
 const OBJECTS := preload("res://game/bootstrap/app/planning_objects.gd")
 const LOADER := preload("res://game/bootstrap/app/planning_layout_loader.gd")
@@ -8,9 +8,6 @@ const MAP := preload("res://game/bootstrap/app/planning_map_file.gd")
 const PREFIX := "res://game/presentation/office_floor/public/props/"
 const FILE := "user://legacy_cabinet_round_trip.json"
 const CASES := [
-	["03_drawer_cabinet.tscn", "res://models/objects/03_drawer_cabinet.glb", 18.0, .75, 1.5],
-	["03_drawer_cabinet_mobile.tscn", "res://models/objects/03_drawer_cabinet.glb", 14.0, .9, 1.8],
-	["03_file_cabinet_tall.tscn", "res://models/objects/03_file_cabinet_tall.glb", 55.0, .25, .45],
 	["03_locker_tall.tscn", "res://models/objects/enviroments/03/03_locker_tall_dented.glb", 55.0, .25, .45],
 ]
 class Controls extends Node:

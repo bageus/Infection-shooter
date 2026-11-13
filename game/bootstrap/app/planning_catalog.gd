@@ -282,8 +282,6 @@ func _migrate_scene_path(old_path: String) -> String:
 		"res://game/bootstrap/app/armor_pickups/armor.tscn": "res://game/features/pickups/public/armor_pickup.tscn",
 		"res://models/objects/enviroments/02/02_crate_wood_large.glb": "res://models/objects/enviroments/04/04_crate_wood_large.glb",
 		"res://models/objects/enviroments/02/02_crate_canvas_large.glb": "res://models/objects/enviroments/04/04_crate_canvas_large.glb",
-		# No closed case model exists any more; the open case is the closest current model.
-		"res://models/objects/enviroments/09/09_case_with_money_close.glb": "res://models/objects/enviroments/09/09_case_with_money_open.glb",
 		"res://models/objects/enviroments/06/06_office_chair_2_fell.glb": "res://models/objects/enviroments/06/06_office_chair_2.glb",
 		"res://game/presentation/office_floor/public/props/06_office_chair_2_fell.tscn": "res://models/objects/enviroments/06/06_office_chair_2.glb",
 		"res://models/objects/enviroments/05/09_phone_a_base.glb": "res://models/objects/enviroments/05/05_desk_phone.glb",
@@ -315,7 +313,7 @@ func _migrate_scene_path(old_path: String) -> String:
 			return old_path
 		# These historical scenes have no name-matched model in the current
 		# catalogue. Keep their exact visual and rigid-body configuration.
-		if old_path.get_file() in ["03_drawer_cabinet.tscn", "03_drawer_cabinet_mobile.tscn", "03_file_cabinet_tall.tscn", "03_locker_tall.tscn"]:
+		if old_path.get_file() in ["03_locker_tall.tscn"]:
 			return old_path
 		var legacy_name = old_path.get_file().get_basename().substr(3).to_lower()
 		for group in group_catalogs.values():

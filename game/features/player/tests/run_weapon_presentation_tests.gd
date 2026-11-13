@@ -357,14 +357,20 @@ func _test_walk_lean() -> void:
 	player.call("configure_world", effects, null)
 	await process_frame
 	var walk_lean: SkeletonModifier3D = (player.get_node("WeaponMount") as MOUNT).skeleton.get_node("WalkLean")
-	player.velocity = Vector3(0, 0, -2.5)
-	for i in 60:
-		walk_lean._process_modification_with_delta(1.0 / 60.0)
-	_check(walk_lean.lean > deg_to_rad(7.0), "torso tips forward while walking")
-	player.velocity = Vector3.ZERO
-	for i in 120:
-		walk_lean._process_modification_with_delta(1.0 / 60.0)
-	_check(walk_lean.lean < deg_to_rad(0.1), "torso straightens when standing")
+	var skeleton := (player.get_node("WeaponMount") as MOUNT).skeleton
+	var settle := func(local: Vector3) -> float:
+		player.velocity = skeleton.global_basis * local
+		for i in 90:
+			walk_lean._process_modification_with_delta(1.0 / 60.0)
+		return walk_lean.lean
+	var walking: float = settle.call(Vector3(0, 0, 5.4))
+	var running: float = settle.call(Vector3(0, 0, 8.1))
+	var backing: float = settle.call(Vector3(0, 0, -5.4))
+	_check(walking > deg_to_rad(4.0), "torso tips forward while walking")
+	_check(running > walking + deg_to_rad(3.0), "torso tips further forward while running")
+	_check(backing < -deg_to_rad(3.0), "torso leans back while walking backwards")
+	settle.call(Vector3.ZERO)
+	_check(absf(walk_lean.lean) < deg_to_rad(0.1), "torso straightens when standing")
 	player.queue_free()
 	effects.queue_free()
 

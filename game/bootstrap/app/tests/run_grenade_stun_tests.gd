@@ -1,5 +1,5 @@
 extends SceneTree
-## A grenade stuns the infected it hurts but does not kill, and a killed horde's hitboxes stay uniform in scale.
+## A grenade hurts but never stuns the infected, and a killed horde's hitboxes stay uniform in scale.
 const BLAST := preload("res://game/features/combat/public/grenade_explosion.gd")
 const HORDE := preload("res://game/features/infected/public/infected_horde.tscn")
 var failures := 0
@@ -31,7 +31,7 @@ func _run() -> void:
 	stage.add_child(anchor)
 	BLAST.explode(anchor, Vector3(0, 0.5, 0), Vector3.UP, null, stage, null)
 	_expect(float(horde.get("health")) < 5000.0, "grenade hurt the horde")
-	_expect(float(horde.get("_blast_stun_remaining")) > 0.0, "surviving horde is stunned")
+	_expect(float(horde.get("_blast_stun_remaining")) == 0.0, "surviving horde is not stunned")
 	var chaser := HORDE.instantiate() as CharacterBody3D
 	stage.add_child(chaser)
 	chaser.position = Vector3(10, 0.05, 0)
@@ -50,11 +50,11 @@ func _run() -> void:
 	var speed := before - chaser.position.x
 	_expect(speed > 0.5, "test enemy chases before the blast (%.2f)" % speed)
 	BLAST.explode(anchor, chaser.position + Vector3(2, 0.5, 0), Vector3.UP, null, stage, null)
-	_expect(float(chaser.get("_blast_stun_remaining")) > 2.5 and float(chaser.get("health")) > 0.0, "surviving chaser gets a full stun at 2 m")
+	_expect(float(chaser.get("_blast_stun_remaining")) == 0.0 and float(chaser.get("health")) > 0.0, "surviving chaser is not stunned at 2 m")
 	var x0 := chaser.position.x
 	for _frame in 30:
 		await physics_frame
-	_expect(absf(x0 - chaser.position.x) < 0.05, "stunned chaser stands still")
+	_expect(absf(x0 - chaser.position.x) > 0.5, "chaser keeps running after the blast")
 	horde.set("health", 1.0)
 	BLAST.explode(anchor, Vector3(0, 0.5, 0), Vector3.UP, null, stage, null)
 	for _frame in 5:
