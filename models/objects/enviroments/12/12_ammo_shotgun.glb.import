@@ -3,13 +3,13 @@
 importer="scene"
 importer_version=1
 type="PackedScene"
-uid="uid://dlnmre7aiup2a"
-path="res://.godot/imported/09_white_board_stand.glb-e2095874e09c7f1b20da35e7508a6d3a.scn"
+uid="uid://be4574ajk6oot"
+path="res://.godot/imported/12_ammo_shotgun.glb-abfb546d1f0bc4cb1d286d26f04b1934.scn"
 
 [deps]
 
-source_file="res://models/objects/enviroments/09/board/09_white_board_stand.glb"
-dest_files=["res://.godot/imported/09_white_board_stand.glb-e2095874e09c7f1b20da35e7508a6d3a.scn"]
+source_file="res://models/objects/enviroments/12/12_ammo_shotgun.glb"
+dest_files=["res://.godot/imported/12_ammo_shotgun.glb-abfb546d1f0bc4cb1d286d26f04b1934.scn"]
 
 [params]
 

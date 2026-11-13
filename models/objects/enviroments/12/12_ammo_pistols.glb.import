@@ -3,13 +3,13 @@
 importer="scene"
 importer_version=1
 type="PackedScene"
-uid="uid://dl84ry7rn5won"
-path="res://.godot/imported/03_file_cabinet_tall.glb-4653d69df3f4cbc035e28bf9f78d4bc3.scn"
+uid="uid://bap7gkek23hn8"
+path="res://.godot/imported/12_ammo_pistols.glb-a97c5eab1e6f1e8ac200ec12d40fc292.scn"
 
 [deps]
 
-source_file="res://models/objects/03_file_cabinet_tall.glb"
-dest_files=["res://.godot/imported/03_file_cabinet_tall.glb-4653d69df3f4cbc035e28bf9f78d4bc3.scn"]
+source_file="res://models/objects/enviroments/12/12_ammo_pistols.glb"
+dest_files=["res://.godot/imported/12_ammo_pistols.glb-a97c5eab1e6f1e8ac200ec12d40fc292.scn"]
 
 [params]
 
