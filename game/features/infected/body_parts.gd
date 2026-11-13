@@ -302,7 +302,9 @@ func _spawn_piece(part: StringName, info: Dictionary, joint_world: Vector3, dire
 	piece.mass = clampf(bounds.size.x * bounds.size.y * bounds.size.z * 120.0, 0.3, 25.0)
 	var cap_offset: Vector3 = joint_world - built.center
 	# The bone joint can sit beside the cut, so the blood starts at the nearest piece surface.
-	var cut := _cut_center(_mesh_points(built.mesh), cap_offset)
+	var rim := _face_rim(_mesh_points(built.mesh), cap_offset.normalized())
+	var cut := _average(rim, cap_offset)
+	piece.add_child(_closing_disc(rim, cut, cap_offset))
 	_attach_cap(piece, cut, float(info.segments[0].radius) * world_scale, cap_offset)
 	var parent := _piece_parent()
 	if parent == null:
@@ -331,16 +333,77 @@ static func _nearest_point(points: PackedVector3Array, from: Vector3) -> Vector3
 	return best
 
 
-# Centre of the open cut: the points nearly as close to the joint as the nearest one form the rim.
-static func _cut_center(points: PackedVector3Array, from: Vector3) -> Vector3:
+# The open cut's rim: points nearly as close to the joint as the nearest one.
+static func _rim(points: PackedVector3Array, from: Vector3) -> PackedVector3Array:
 	var limit := from.distance_to(_nearest_point(points, from)) + 0.02
-	var sum := Vector3.ZERO
-	var count := 0
+	var rim := PackedVector3Array()
 	for point in points:
 		if point.distance_to(from) <= limit:
-			sum += point
-			count += 1
-	return sum / float(count) if count > 0 else from
+			rim.append(point)
+	return rim
+
+
+# Piece-local vertices on the cut face: the last layer along `axis` (pointing at the joint).
+static func _face_rim(points: PackedVector3Array, axis: Vector3) -> PackedVector3Array:
+	var top := -INF
+	for point in points:
+		top = maxf(top, point.dot(axis))
+	var rim := PackedVector3Array()
+	for point in points:
+		if point.dot(axis) >= top - 0.012:
+			rim.append(point)
+	return rim
+
+
+static func _average(points: PackedVector3Array, fallback: Vector3) -> Vector3:
+	var sum := Vector3.ZERO
+	for point in points:
+		sum += point
+	return sum / float(points.size()) if not points.is_empty() else fallback
+
+
+static func _cut_center(points: PackedVector3Array, from: Vector3) -> Vector3:
+	return _average(_rim(points, from), from)
+
+
+# Closes the open cut with a flat fan over the rim, in the piece's local space.
+func _closing_disc(rim: PackedVector3Array, center: Vector3, from: Vector3) -> MeshInstance3D:
+	var disc := MeshInstance3D.new()
+	disc.name = "CutFace"
+	if rim.size() < 3:
+		return disc
+	var normal := (center - from).normalized()
+	var side := normal.cross(Vector3.UP if absf(normal.y) < 0.9 else Vector3.RIGHT).normalized()
+	var up := normal.cross(side)
+	var order: Array[Vector2] = []
+	for index in rim.size():
+		var offset := rim[index] - center
+		order.append(Vector2(atan2(offset.dot(up), offset.dot(side)), float(index)))
+	order.sort_custom(func(a: Vector2, b: Vector2) -> bool: return a.x < b.x)
+	var verts := PackedVector3Array([center])
+	for entry in order:
+		verts.append(rim[int(entry.y)])
+	var indices := PackedInt32Array()
+	for index in rim.size():
+		indices.append_array([0, index + 1, (index + 1) % rim.size() + 1])
+	var arrays := []
+	arrays.resize(Mesh.ARRAY_MAX)
+	arrays[Mesh.ARRAY_VERTEX] = verts
+	arrays[Mesh.ARRAY_INDEX] = indices
+	var mesh := ArrayMesh.new()
+	mesh.add_surface_from_arrays(Mesh.PRIMITIVE_TRIANGLES, arrays)
+	disc.mesh = mesh
+	disc.material_override = _wound_material()
+	return disc
+
+
+func _wound_material() -> StandardMaterial3D:
+	if _cap_material == null:
+		_cap_material = StandardMaterial3D.new()
+		_cap_material.albedo_color = BLOOD_LEVEL.GREEN_COLOR if BLOOD_LEVEL.is_green() else Color(0.3, 0.02, 0.02)
+		_cap_material.roughness = 0.25
+		_cap_material.cull_mode = BaseMaterial3D.CULL_DISABLED
+	return _cap_material
 
 
 static func _mesh_points(mesh: ArrayMesh) -> PackedVector3Array:
@@ -423,10 +486,6 @@ func drip_mark_points() -> Array[Vector3]:
 
 # A flattened wet disc closing the cut, its flat side facing along `axis`.
 func _attach_cap(parent: Node3D, offset: Vector3, radius: float, axis: Vector3) -> void:
-	if _cap_material == null:
-		_cap_material = StandardMaterial3D.new()
-		_cap_material.albedo_color = BLOOD_LEVEL.GREEN_COLOR if BLOOD_LEVEL.is_green() else Color(0.3, 0.02, 0.02)
-		_cap_material.roughness = 0.25
 	var cap := MeshInstance3D.new()
 	cap.set_meta("body_part_cap", true)
 	var sphere := SphereMesh.new()
@@ -434,7 +493,7 @@ func _attach_cap(parent: Node3D, offset: Vector3, radius: float, axis: Vector3) 
 	sphere.height = sphere.radius * 2.0
 	sphere.radial_segments = 10
 	sphere.rings = 6
-	sphere.material = _cap_material
+	sphere.material = _wound_material()
 	cap.mesh = sphere
 	var up := axis.normalized() if axis.length_squared() > 0.0001 else Vector3.UP
 	cap.transform = Transform3D(Basis(Quaternion(Vector3.UP, up)) * Basis.from_scale(Vector3(1.0, 0.4, 1.0)), offset)
