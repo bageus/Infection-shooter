@@ -250,11 +250,10 @@ static func build_piece(data: Dictionary, chain: PackedInt32Array, skeleton: Ske
 		mesh.add_surface_from_arrays(Mesh.PRIMITIVE_TRIANGLES, arrays, [], {}, Mesh.ARRAY_CUSTOM_RGBA_FLOAT << Mesh.ARRAY_FORMAT_CUSTOM0_SHIFT)
 		if entry.material != null:
 			mesh.surface_set_material(mesh.get_surface_count() - 1, entry.material)
-	# The real hull of the piece: a sparse sample leaves a lumpy shape that rocks on the floor.
 	var hull := PackedVector3Array()
-	for point in all_points:
-		hull.append(point - center)
-	hull = (mesh.create_convex_shape(true, true) as ConvexPolygonShape3D).points
+	var step := maxi(1, floori(all_points.size() / 48.0))
+	for index in range(0, all_points.size(), step):
+		hull.append(all_points[index] - center)
 	return {"mesh": mesh, "center": center, "points": hull}
 
 
