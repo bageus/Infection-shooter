@@ -379,11 +379,16 @@ func _write_textures(enemy_name: String) -> bool:
 	for suffix: String in wanted:
 		var texture: Dictionary = document.textures[wanted[suffix]]
 		var image_info: Dictionary = document.images[int(texture.source)]
-		var view: Dictionary = document.bufferViews[int(image_info.bufferView)]
-		var start := bin_start + int(view.get("byteOffset", 0))
-		var data := bytes.slice(start, start + int(view.byteLength))
+		var data: PackedByteArray
+		if image_info.has("uri"):
+			# deduplicate_model_textures.py may have replaced the embedded image by a shared file.
+			data = FileAccess.get_file_as_bytes(SOURCE_DIR + str(image_info.uri).uri_decode())
+		else:
+			var view: Dictionary = document.bufferViews[int(image_info.bufferView)]
+			var start := bin_start + int(view.get("byteOffset", 0))
+			data = bytes.slice(start, start + int(view.byteLength))
 		var image := Image.new()
-		var error := image.load_jpg_from_buffer(data) if str(image_info.mimeType) == "image/jpeg" else image.load_png_from_buffer(data)
+		var error := image.load_jpg_from_buffer(data) if data.slice(0, 2) == PackedByteArray([0xFF, 0xD8]) else image.load_png_from_buffer(data)
 		if error != OK:
 			push_error("Cannot decode %s texture of %s" % [suffix, enemy_name])
 			ok = false
