@@ -56,8 +56,7 @@ var backpack: Node3D
 var _back_attachment: BoneAttachment3D
 var _flashlight_model: Node3D
 var _flashlight: SpotLight3D
-var _dark_check := 0.0
-var _dark := false
+var _flashlight_on := false
 var capture_pose := false
 var posed_bones: Array[Transform3D] = []
 var hand_error := 0.0
@@ -79,7 +78,6 @@ func _ready() -> void:
 	backpack.position = Vector3(0, .10, -.23)
 	backpack.hide()
 	# Weapon flashlight: a dim spot beside the muzzle, moved onto whichever weapon is held.
-	# shortcut: the dark test checks only darkness zones the hero stands in, not the lamps' real light level.
 	_flashlight_model = FLASHLIGHT_MODEL.instantiate() as Node3D
 	_flashlight_model.position = Vector3(FLASHLIGHT_SIDE, 0, 0)
 	add_child(_flashlight_model)
@@ -258,22 +256,11 @@ func _curl_support_hand(skeleton: Skeleton3D, grip: Vector3, weapon_basis: Basis
 		_turn_bone(skeleton, second, skeleton.get_bone_global_pose(end).origin - joint, tip - joint)
 
 
-## Keeps the flashlight on the held weapon's muzzle and lights it only while the hero stands in a dark zone.
+## Keeps the flashlight on the held weapon's muzzle; the flashlight action (T) switches the beam.
 func _update_flashlight(weapon: Node3D, delta: float) -> void:
 	var muzzle := weapon.get_node_or_null("Muzzle") as Node3D
 	if muzzle != null and _flashlight_model.get_parent() != muzzle:
 		_flashlight_model.reparent(muzzle, false)
-	_dark_check -= delta
-	if _dark_check <= 0.0:
-		_dark_check = .25
-		_dark = _hero_in_dark()
-	_flashlight.light_energy = move_toward(_flashlight.light_energy, FLASHLIGHT_ENERGY if _dark else 0.0, delta * 3.0)
-
-
-## A covered darkness zone (fog up) around the hero means it is dark there.
-func _hero_in_dark() -> bool:
-	var hero := get_skeleton().global_position
-	for zone: Node in get_tree().get_nodes_in_group("darkness_zone"):
-		if zone.overlay.visible and zone.call("_edge_distance", hero) <= 0.0:
-			return true
-	return false
+	if Input.is_action_just_pressed("flashlight"):
+		_flashlight_on = not _flashlight_on
+	_flashlight.light_energy = move_toward(_flashlight.light_energy, FLASHLIGHT_ENERGY if _flashlight_on else 0.0, delta * 3.0)
