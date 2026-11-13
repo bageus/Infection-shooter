@@ -1,8 +1,9 @@
 extends SkeletonModifier3D
 ## Fits the supporting hand to the new kit; minigun uses a low two-arm pose.
 const BACKPACK := preload("res://models/objects/weapons/minigun_ammo_backpack_lowpoly.glb")
-## Flashlight sits this far (m) to the side of the muzzle, and is dim enough to read the room, not light it.
-const FLASHLIGHT_SIDE := .04
+## Flashlight sits this far (m) to the side of the muzzle, at twice the model's size, and is dim enough to read the room, not light it.
+const FLASHLIGHT_SIDE := .09
+const FLASHLIGHT_SCALE := 2.0
 const FLASHLIGHT_MODEL := preload("res://models/objects/weapons/weapon_flashlight_lowpoly.glb")
 const FLASHLIGHT_ENERGY := .6
 ## Rear hand of the minigun in skeleton space: belt height, gripped from above.
@@ -80,6 +81,7 @@ func _ready() -> void:
 	# Weapon flashlight: a dim spot beside the muzzle, moved onto whichever weapon is held.
 	_flashlight_model = FLASHLIGHT_MODEL.instantiate() as Node3D
 	_flashlight_model.position = Vector3(FLASHLIGHT_SIDE, 0, 0)
+	_flashlight_model.scale = Vector3.ONE * FLASHLIGHT_SCALE
 	add_child(_flashlight_model)
 	# The beam leaves the model's LightSocket (the lens), pointing where the muzzle points.
 	_flashlight = SpotLight3D.new()
