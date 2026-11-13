@@ -1,14 +1,16 @@
 extends MultiMeshInstance3D
-## Wide cartridge belt from the backpack feed port to the minigun feed port, rebuilt each frame in skeleton space.
+## Wide snake-like cartridge belt: it leaves the backpack port end-on, sags, and enters the minigun port end-on. Rebuilt each frame in skeleton space.
 const LINKS := 30
 const ROUNDS_ACROSS := 3
-## How far each end drops before the belt turns, as a share of the span: a U-shaped loop, as drawn by Vadim.
-const DROP := .6
+## Straight run out of each port, as a share of the span, so the belt leaves and enters end-on.
+const LEAD := .3
+## How far the belt sags below the midpoint, as a share of the span.
+const DROP := .5
 ## Strap pitch per link, strap width and thickness (m).
 const LINK_PITCH := .02
-const STRAP_WIDTH := .06
+const STRAP_WIDTH := .09
 const STRAP_THICKNESS := .006
-const ROUND_SPACING := .019
+const ROUND_SPACING := .03
 const ROUND_RADIUS := .0065
 const ROUND_LENGTH := .026
 var _rounds: MultiMeshInstance3D
@@ -50,18 +52,24 @@ func _make_multimesh(mesh: Mesh, count: int) -> MultiMesh:
 	return result
 
 
-## Lays the strap links and their rounds along a U-shaped cubic curve from start to end (skeleton space).
-func update_belt(start: Vector3, end: Vector3) -> void:
+## Two cubic Hermite segments through a sagging midpoint. start_out and end_out are the port outward directions (skeleton space).
+func update_belt(start: Vector3, start_out: Vector3, end: Vector3, end_out: Vector3) -> void:
 	if start.is_equal_approx(end):
 		return
-	var drop := Vector3.DOWN * start.distance_to(end) * DROP
-	var near := start + drop
-	var far := end + drop
+	var span := start.distance_to(end)
+	var reach := span * LEAD
+	var mid := (start + end) * .5 + Vector3.DOWN * span * DROP
+	var mid_dir := (end - start).normalized() * reach
 	for i in LINKS:
-		var t := (float(i) + .5) / LINKS
-		var u := 1.0 - t
-		var point := start * (u * u * u) + near * (3.0 * u * u * t) + far * (3.0 * u * t * t) + end * (t * t * t)
-		var tangent := (near - start) * (3.0 * u * u) + (far - near) * (6.0 * u * t) + (end - far) * (3.0 * t * t)
+		var s := (float(i) + .5) / LINKS
+		var point: Vector3
+		var tangent: Vector3
+		if s < .5:
+			point = _hermite(start, start_out * reach, mid, mid_dir, s * 2.0)
+			tangent = _hermite_direction(start, start_out * reach, mid, mid_dir, s * 2.0)
+		else:
+			point = _hermite(mid, mid_dir, end, -end_out * reach, (s - .5) * 2.0)
+			tangent = _hermite_direction(mid, mid_dir, end, -end_out * reach, (s - .5) * 2.0)
 		tangent = tangent.normalized()
 		# Width runs horizontally across the belt; the strap lies flat on it.
 		var side := tangent.cross(Vector3.UP).normalized()
@@ -71,3 +79,14 @@ func update_belt(start: Vector3, end: Vector3) -> void:
 			var across := (float(k) - (ROUNDS_ACROSS - 1) * .5) * ROUND_SPACING
 			var seat := point + side * across + normal * (STRAP_THICKNESS * .5 + ROUND_RADIUS)
 			_rounds.multimesh.set_instance_transform(i * ROUNDS_ACROSS + k, Transform3D(Basis(side, tangent, side.cross(tangent)), seat))
+
+
+func _hermite(p0: Vector3, m0: Vector3, p1: Vector3, m1: Vector3, t: float) -> Vector3:
+	var t2 := t * t
+	var t3 := t2 * t
+	return p0 * (2.0 * t3 - 3.0 * t2 + 1.0) + m0 * (t3 - 2.0 * t2 + t) + p1 * (3.0 * t2 - 2.0 * t3) + m1 * (t3 - t2)
+
+
+func _hermite_direction(p0: Vector3, m0: Vector3, p1: Vector3, m1: Vector3, t: float) -> Vector3:
+	var t2 := t * t
+	return p0 * (6.0 * t2 - 6.0 * t) + m0 * (3.0 * t2 - 4.0 * t + 1.0) + p1 * (6.0 * t - 6.0 * t2) + m1 * (3.0 * t2 - 2.0 * t)

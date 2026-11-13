@@ -152,7 +152,11 @@ func _process_modification_with_delta(delta: float) -> void:
 	mount.call("sync_weapon", weapon)
 	if name_value == "MINIGUN":
 		# Belt runs from the backpack's feed port to the minigun's, after both have settled this frame.
-		ammo_belt.update_belt(skeleton.to_local(backpack.find_child("FeedPort", true, false).global_position), skeleton.to_local(weapon.find_child("FeedPort", true, false).global_position))
+			var pack_port := backpack.find_child("FeedPort", true, false) as Node3D
+			var gun_port := weapon.find_child("FeedPort", true, false) as Node3D
+			var to_skeleton := skeleton.global_basis.inverse()
+			# Each port's outward axis: backpack +X, minigun +Z.
+			ammo_belt.update_belt(skeleton.to_local(pack_port.global_position), to_skeleton * pack_port.global_basis.x, skeleton.to_local(gun_port.global_position), to_skeleton * gun_port.global_basis.z)
 	if name_value in LONG_GUN:
 		forend_error = (skeleton.get_bone_global_pose(skeleton.find_bone("RightHand")) * socket_offset).origin.distance_to(skeleton.to_local(weapon.find_child("Grip_L", true, false).global_position + weapon.global_basis.orthonormalized().x * float(_spec(name_value)[2]) * weapon.scale.x))
 	if capture_pose:
