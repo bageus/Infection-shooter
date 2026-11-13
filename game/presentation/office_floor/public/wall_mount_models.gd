@@ -8,7 +8,7 @@ static func contains(model_path: String) -> bool:
 	if is_adjustable(model_path):
 		return not ("_floor_" in model_path.get_file())
 	var model := model_path.get_file().get_basename().to_lower()
-	for token in ["01_vectrion_destructible", "wall_tv", "wall_clock", "wall_mirror", "wall_urinal", "wall_hand_dryer", "fire_extinguisher", "painting", "aircondition", "white_board_big", "white_board_stand", "capboard_up_"]:
+	for token in ["01_vectrion_destructible", "wall_tv", "wall_clock", "wall_mirror", "wall_urinal", "wall_hand_dryer", "fire_extinguisher", "painting", "aircondition", "white_board_big", "capboard_up_"]:
 		if token in model:
 			return true
 	return false
