@@ -3,9 +3,9 @@ extends MultiMeshInstance3D
 const LINKS := 30
 const ROUNDS_ACROSS := 3
 ## Straight run out of each port, as a share of the span, so the belt leaves and enters end-on.
-const LEAD := .3
+const LEAD := .5
 ## How far the belt sags below the midpoint, as a share of the span.
-const DROP := .5
+const DROP := .4
 ## Strap pitch per link, strap width and thickness (m).
 const LINK_PITCH := .02
 const STRAP_WIDTH := .09
