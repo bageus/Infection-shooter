@@ -24,6 +24,8 @@ const TURN_STEP_WEIGHT := 0.3
 const TURN_TIME_SCALE := 0.8
 const DODGE_BLEND_IN := 0.06
 const DODGE_BLEND_OUT := 0.12
+## Bones kept at or above their rest height (skeleton space): the rest pose stands on the floor.
+const GROUND_BONES := ["LeftFoot", "LeftToeBase", "RightFoot", "RightToeBase"]
 
 var character: CharacterBody3D
 var clips: AnimationLibrary
@@ -32,9 +34,9 @@ var suspend_during_dodge: Array[StringName] = [&"BodyAim", &"EquipmentPose"]
 var weight := 0.0
 var phase := 0.0
 var travel_angle := 0.0 # radians, 0 forward, + toward the body's left
-## Playback speed follows speed / the clip's planted-foot speed within these bounds.
+## Playback speed follows speed / the clip's planted-foot speed within these bounds (2.6 lets the 8.1 m/s sprint keep its feet planted).
 var min_time_scale := 0.5
-var max_time_scale := 1.7
+var max_time_scale := 2.6
 var playback_multiplier := 1.0
 
 var _last_yaw := 0.0
@@ -42,6 +44,7 @@ var _has_yaw := false
 var _hips := -1
 var _spine := -1
 var _bones: Array[int] = [] # LEG_BONES order
+var _ground: Array[Vector2] = [] # GROUND_BONES: (bone, rest height)
 var _ready_bones := false
 var _data: Dictionary = {} # clip name -> sampled frames
 var _dodge := ""
@@ -131,6 +134,19 @@ func _apply_run(skeleton: Skeleton3D, delta: float) -> void:
 		var target := _sample_rotation(from_data, index + 1, phase).slerp(_sample_rotation(to_data, index + 1, phase), mix)
 		var bone: int = _bones[index]
 		skeleton.set_bone_pose_rotation(bone, skeleton.get_bone_pose_rotation(bone).slerp(target, weight))
+	_keep_feet_above_floor(skeleton)
+
+
+# Retargeted run clips put the planted foot a few centimetres under the floor; lift the hips until it is on it.
+func _keep_feet_above_floor(skeleton: Skeleton3D) -> void:
+	var lift := 0.0
+	for entry in _ground:
+		lift = maxf(lift, entry.y - skeleton.get_bone_global_pose(int(entry.x)).origin.y)
+	if lift <= 0.0:
+		return
+	var parent := skeleton.get_bone_parent(_hips)
+	var up := Vector3(0.0, lift, 0.0) if parent < 0 else skeleton.get_bone_global_pose(parent).basis.inverse() * Vector3(0.0, lift, 0.0)
+	skeleton.set_bone_pose_position(_hips, skeleton.get_bone_pose_position(_hips) + up)
 
 
 func _apply_dodge(skeleton: Skeleton3D, delta: float) -> void:
@@ -262,6 +278,10 @@ func _resolve(skeleton: Skeleton3D) -> bool:
 		if index < 0:
 			return false
 		_bones.append(index)
+	_ground.clear()
+	for bone_name: String in GROUND_BONES:
+		var bone := skeleton.find_bone(bone_name)
+		_ground.append(Vector2(bone, skeleton.get_bone_global_rest(bone).origin.y))
 	for clip_name: String in RING:
 		if not clips.has_animation(clip_name):
 			return false
