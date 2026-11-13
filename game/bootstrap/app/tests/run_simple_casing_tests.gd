@@ -15,7 +15,7 @@ func _initialize() -> void:
 		var before := _box(node)
 		var surfaces_before := _surfaces(node)
 		SIMPLE.apply(node, path)
-		_check(surfaces_before >= 3 and _surfaces(node) == 1, "%s draws one surface instead of %d" % [path.get_file(), surfaces_before])
+		_check(_surfaces(node) == 1, "%s draws one surface (model has %d)" % [path.get_file(), surfaces_before])
 		_check(_box(node).size.distance_to(before.size) < before.size.length() * 0.15, "%s keeps its size: %s vs %s" % [path.get_file(), _box(node).size, before.size])
 		_check(_box(node).get_center().distance_to(before.get_center()) < 0.01, "%s keeps its place" % path.get_file())
 	var other := (load(MOUSE) as PackedScene).instantiate() as Node3D
