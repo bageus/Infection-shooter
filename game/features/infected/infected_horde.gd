@@ -9,7 +9,7 @@ const SUMMON_RULE := preload("res://game/features/infected/domain/horde_summon.g
 
 enum State { CRAWL, BRACE, RAM, RECOVER, SUMMON }
 
-@export var crawl_speed := 2.4
+@export var crawl_speed := 3.0
 @export var ram_trigger_distance := 8.0
 @export var ram_speed := 8.6
 @export var ram_brace_seconds := 0.4
@@ -36,6 +36,16 @@ var _ram_struck := false
 var _summon_cooldown := 5.0
 var _summon_pending := -1.0
 var _summon_busy_until := 0.0
+
+
+func _ready() -> void:
+	super._ready()
+	# Unaware, the Horde never stands still: it drifts 4-9 m from its post with short pauses.
+	_senses.wander_factor = 0.5
+	_senses.wander_min = 4.0
+	_senses.wander_max = 9.0
+	_senses.wander_pause_min = 0.4
+	_senses.wander_pause_max = 1.5
 
 
 func _behaviour_tick(delta: float, target_offset: Vector3) -> void:

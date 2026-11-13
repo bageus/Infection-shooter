@@ -28,6 +28,12 @@ const GLASS_GROUP := "infected_breakable_glass"
 var state := State.CHASE
 var forced := false
 var wander_enabled := true
+# Idle stroll tuning; a Horde keeps on the move, so it sets longer, faster, less paused strolls.
+var wander_factor := WANDER_FACTOR
+var wander_min := WANDER_MIN
+var wander_max := WANDER_MAX
+var wander_pause_min := 1.5
+var wander_pause_max := 4.0
 var sight_range := 18.0
 var close_notice_range := 3.5
 var fov_cos := cos(deg_to_rad(65.0))
@@ -265,7 +271,7 @@ func _idle_wander(actor: CharacterBody3D, delta: float, route: ROUTE, radius: fl
 		_wander_wait -= delta
 		if _wander_wait <= 0.0:
 			var angle := randf() * TAU
-			_wander = _home + Vector3(cos(angle), 0.0, sin(angle)) * randf_range(WANDER_MIN, WANDER_MAX)
+			_wander = _home + Vector3(cos(angle), 0.0, sin(angle)) * randf_range(wander_min, wander_max)
 			_wandering = true
 			_state_time = 0.0
 		return Vector3.ZERO
@@ -273,11 +279,11 @@ func _idle_wander(actor: CharacterBody3D, delta: float, route: ROUTE, radius: fl
 	flat.y = 0.0
 	if flat.length() <= 0.4 or _state_time > WANDER_TIMEOUT:
 		_wandering = false
-		_wander_wait = randf_range(1.5, 4.0)
+		_wander_wait = randf_range(wander_pause_min, wander_pause_max)
 		return Vector3.ZERO
 	# A batched distant step can cover 12 physics ticks; stop at the goal
 	# instead of overshooting it and leaving the authored wander radius.
-	var walk_speed := minf(speed * WANDER_FACTOR, flat.length() / delta) if delta > 0.0 else 0.0
+	var walk_speed := minf(speed * wander_factor, flat.length() / delta) if delta > 0.0 else 0.0
 	return _walk(actor, route, _wander, radius, walk_speed, 0.4, State.UNAWARE)
 
 
