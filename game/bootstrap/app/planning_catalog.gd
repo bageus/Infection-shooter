@@ -315,7 +315,7 @@ func _migrate_scene_path(old_path: String) -> String:
 			return old_path
 		# These historical scenes have no name-matched model in the current
 		# catalogue. Keep their exact visual and rigid-body configuration.
-		if old_path.get_file() in ["03_drawer_cabinet.tscn", "03_drawer_cabinet_mobile.tscn", "03_file_cabinet_tall.tscn", "03_locker_tall.tscn"]:
+		if old_path.get_file() in ["03_locker_tall.tscn"]:
 			return old_path
 		var legacy_name = old_path.get_file().get_basename().substr(3).to_lower()
 		for group in group_catalogs.values():
