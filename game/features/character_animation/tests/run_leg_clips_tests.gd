@@ -66,6 +66,7 @@ func _run() -> void:
 	var left_foot := skeleton.get_bone_global_pose(skeleton.find_bone("LeftFoot")).origin
 	var hips := skeleton.get_bone_global_pose(skeleton.find_bone("Hips")).origin
 	_expect(hips.y - left_foot.y < 0.8 and hips.y - left_foot.y > 0.4, "The legs reach the floor (hips %.2f above foot)." % (hips.y - left_foot.y))
+	await _sprint_checks(character, legs, skeleton)
 	character.velocity = Vector3(5.0, 0, 0)
 	await create_timer(0.8).timeout
 	_expect(absf(float(legs.travel_angle) - PI * 0.5) < 0.15, "Travel to the body's left (+X) plays the left run (%.2f)." % legs.travel_angle)
@@ -108,6 +109,32 @@ func _dodge_checks(character: CharacterBody3D, driver: Node, skeleton: Skeleton3
 	await create_timer(0.5).timeout
 	await create_timer(0.3).timeout
 	_expect(not driver.is_dodging() and guard.active, "The dodge ends and wakes the aim modifiers.")
+
+
+# Sprint (8.1 m/s): the cycle keeps pace with the ground and no foot dips below its rest (floor) height.
+func _sprint_checks(character: CharacterBody3D, legs: SkeletonModifier3D, skeleton: Skeleton3D) -> void:
+	character.velocity = Vector3(0, 0, 8.1)
+	await create_timer(0.4).timeout
+	var sink := [0.0]
+	var watch := func() -> void:
+		for bone in ["LeftFoot", "LeftToeBase", "RightFoot", "RightToeBase"]:
+			var index := skeleton.find_bone(bone)
+			sink[0] = maxf(sink[0], skeleton.get_bone_global_rest(index).origin.y - skeleton.get_bone_global_pose(index).origin.y)
+	skeleton.skeleton_updated.connect(watch)
+	var start := Time.get_ticks_usec()
+	var travelled := 0.0
+	var previous := float(legs.phase)
+	while Time.get_ticks_usec() - start < 600000:
+		await process_frame
+		travelled += fposmod(float(legs.phase) - previous, 1.0)
+		previous = float(legs.phase)
+	skeleton.skeleton_updated.disconnect(watch)
+	var clip := CLIPS.get_animation("Run_Forward")
+	var ground_speed := travelled * clip.length * float(clip.get_meta("ref_speed")) / ((Time.get_ticks_usec() - start) / 1000000.0)
+	_expect(ground_speed > 7.3, "Sprint legs keep pace with 8.1 m/s (%.1f m/s)." % ground_speed)
+	_expect(sink[0] < 0.01, "Running feet stay on the floor (%.3f m under)." % sink[0])
+	character.velocity = Vector3(0, 0, 5.0)
+	await create_timer(0.3).timeout
 
 
 func _expect(condition: bool, message: String) -> void:
