@@ -2,8 +2,8 @@ extends MultiMeshInstance3D
 ## Wide cartridge belt from the backpack feed port to the minigun feed port, rebuilt each frame in skeleton space.
 const LINKS := 30
 const ROUNDS_ACROSS := 3
-## Belt sag as a share of the span: a deep loop down from the backpack, as drawn by Vadim.
-const SAG := .5
+## How far each end drops before the belt turns, as a share of the span: a U-shaped loop, as drawn by Vadim.
+const DROP := .6
 ## Strap pitch per link, strap width and thickness (m).
 const LINK_PITCH := .02
 const STRAP_WIDTH := .06
@@ -50,15 +50,19 @@ func _make_multimesh(mesh: Mesh, count: int) -> MultiMesh:
 	return result
 
 
-## Lays the strap links and their rounds along a sagging quadratic curve from start to end (skeleton space).
+## Lays the strap links and their rounds along a U-shaped cubic curve from start to end (skeleton space).
 func update_belt(start: Vector3, end: Vector3) -> void:
 	if start.is_equal_approx(end):
 		return
-	var control := (start + end) * .5 + Vector3.DOWN * start.distance_to(end) * SAG
+	var drop := Vector3.DOWN * start.distance_to(end) * DROP
+	var near := start + drop
+	var far := end + drop
 	for i in LINKS:
 		var t := (float(i) + .5) / LINKS
-		var point := start.lerp(control, t).lerp(control.lerp(end, t), t)
-		var tangent := ((control - start).lerp(end - control, t)).normalized()
+		var u := 1.0 - t
+		var point := start * (u * u * u) + near * (3.0 * u * u * t) + far * (3.0 * u * t * t) + end * (t * t * t)
+		var tangent := (near - start) * (3.0 * u * u) + (far - near) * (6.0 * u * t) + (end - far) * (3.0 * t * t)
+		tangent = tangent.normalized()
 		# Width runs horizontally across the belt; the strap lies flat on it.
 		var side := tangent.cross(Vector3.UP).normalized()
 		var normal := tangent.cross(side)
