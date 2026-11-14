@@ -10,7 +10,7 @@ const FLOOR := preload("res://game/presentation/office_floor/public/base_floor_r
 const PROP := preload("res://game/presentation/office_floor/public/props/environment_prop.tscn")
 const MODELS := [
 	"res://models/objects/enviroments/08/08_office_desk_2.glb",
-	"res://models/objects/enviroments/06/06_office_chair_2.glb",
+	"res://models/objects/enviroments/06/06_office_chair.glb",
 	"res://models/objects/enviroments/08/08_divider_full_H_desk.glb",
 ]
 var _out_dir := "/tmp/destruction_review"

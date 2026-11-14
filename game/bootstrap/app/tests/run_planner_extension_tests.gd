@@ -35,7 +35,7 @@ func _run() -> void:
 	var catalog = planner.get("catalog")
 	_check(catalog.group_catalogs["13"].size() == 10, "All ten wall objects are in group 13")
 	_check(catalog.group_catalogs["01"].size() == 44 and catalog.group_catalogs["09"].size() == 97, "Palette lists models from group subfolders")
-	_check(catalog.group_catalogs["14"].size() == 6 and catalog.group_catalogs["15"].size() == 15, "Groups 14 and 15 are in the palette")
+	_check(catalog.group_catalogs["14"].size() == 6 and catalog.group_catalogs["15"].size() == 17, "Groups 14 and 15 are in the palette")
 	var root_view: Array = catalog.folder_view("01", "")
 	var wall_row := root_view.filter(func(e): return str(e.get("kind", "")) == "folder" and str(e["folder"]) == "wall")
 	_check(wall_row.size() == 1, "Group 01 shows its wall folder")

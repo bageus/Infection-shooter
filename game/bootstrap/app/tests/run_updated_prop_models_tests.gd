@@ -143,8 +143,8 @@ func _fixed_fridge() -> void:
 		prop.call("take_projectile_hit", 1000.0, prop.position, Vector3.BACK, Vector3.FORWARD, "AK")
 		await _ticks()
 		prop.call("push_from_character", Vector3.LEFT, Vector3.RIGHT * 5.0, 20.0)
-		_check(prop.freeze and prop.transform.is_equal_approx(original), "Fridge remains anchored across all damage variants")
-	_check(int(prop.get("_damage").variant_index) == 2, "Fridge damage variants still advance")
+		_check(prop.freeze and prop.transform.is_equal_approx(original), "Fridge remains anchored under fire")
+	_check(int(prop.get("_damage").variant_index) == -1, "Fridge is indestructible: no damage variant advances")
 	_check(_pieces().is_empty(), "Fridge never becomes debris")
 	await _cleanup(prop)
 

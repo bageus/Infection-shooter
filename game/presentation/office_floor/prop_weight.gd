@@ -25,7 +25,7 @@ const KICK_REACH_HEIGHT := 0.6
 const WEIGHTS := [
 	# Construction pallets (group 15) are loaded stacks: they barely move from pushes, shots or blasts.
 	["15_pallet_drywall_flat_full", 350.0], ["15_pallet_drywall_flat", 300.0], ["15_pallet_drywall_on_edge", 300.0],
-	["15_pallet_concrete_blocks", 900.0], ["15_pallet_mix_sacks", 800.0], ["15_pallet_timber", 250.0],
+	["15_pallet_concrete_blocks_double", 1800.0], ["15_pallet_concrete_blocks", 900.0], ["15_pallet_mix_sacks", 800.0], ["15_pallet_timber", 250.0],
 	["crate_canvas_large", 300.0], # A large crate under a tarp is as heavy as a loaded pallet.
 	["table_desk", 120.0], ["file_cabinet_largest", 200.0], ["file_cabinet_large_shelf", 150.0],
 	["tablet", 0.6], ["toilet_paper", 0.12], ["white_board_stand", 12.0],
