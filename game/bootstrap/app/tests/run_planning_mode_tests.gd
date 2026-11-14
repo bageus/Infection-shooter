@@ -154,7 +154,7 @@ func _exercise_gore_palette(planner: Node) -> void:
 	_check(str(blood.call("get_blood_config")["texture"]) == str(entry["blood_texture"]), "Blood keeps the chosen texture")
 	controls.call("_show_gore_catalog")
 	var gore: Array = catalog.get("active_catalog")
-	_check(gore.size() == 28, "Gore palette lists current corpses and body parts (%d)" % gore.size())
+	_check(gore.size() == 85, "Gore palette lists current corpses and body parts (%d)" % gore.size())
 	_check(not (controls.get("blood_options") as Control).visible, "Blood options hide outside the Blood palette")
 	for index in [0, 1, gore.size() - 1]:
 		var decor_entry: Dictionary = gore[index]
@@ -163,6 +163,7 @@ func _exercise_gore_palette(planner: Node) -> void:
 		if decor == null:
 			continue
 		(planner.get("root") as Node3D).add_child(decor)
+		decor.position = Vector3(3.0 + 1.5 * mini(index, 2), 0.0, 3.0)  # apart from the test table
 		decor.set_meta("planning_scene_path", str(decor_entry["path"]))
 		(editor.get("placed") as Array).append(decor)
 		_check(not decor.find_children("*", "MeshInstance3D", true, false).is_empty(), "Gore entry has visible geometry: " + str(decor_entry["name"]))

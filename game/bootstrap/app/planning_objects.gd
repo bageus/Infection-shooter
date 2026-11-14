@@ -215,6 +215,8 @@ func _clear_preview() -> void:
 		controls.mount_options.hide()
 	if controls.loot_options != null:
 		controls.loot_options.hide()
+	if controls.corpse_options != null:
+		controls.corpse_options.hide()
 	if controls.fruit_options != null:
 		controls.fruit_options.hide()
 	if controls.target_options != null:

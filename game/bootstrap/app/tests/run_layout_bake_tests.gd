@@ -24,7 +24,7 @@ func _run() -> void:
 	planner.root.add_child(wall)
 	wall.set_meta("planning_scene_path", GLASS_WALL)
 	objects.placed.append(wall)
-	for asset in ["res://game/features/infected/public/decor/part_hunger_arm.tscn", "res://game/features/infected/public/decor/corpse_hunger.tscn", "res://game/features/pickups/public/ammo_pistol_pickup.tscn"]:
+	for asset in ["res://game/features/infected/public/decor/part_hunger_arm_r.tscn", "res://game/features/infected/public/decor/corpse_hunger.tscn", "res://game/features/pickups/public/ammo_pistol_pickup.tscn"]:
 		var decor := planner.call("_instantiate_asset", asset) as Node3D
 		planner.root.add_child(decor)
 		decor.set_meta("planning_scene_path", asset)

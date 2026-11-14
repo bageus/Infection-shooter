@@ -4,7 +4,7 @@ const STABILITY := preload("res://game/bootstrap/app/planning_stability.gd")
 const PHYSICS := preload("res://game/bootstrap/app/planning_physics.gd")
 const VALIDATOR := preload("res://game/bootstrap/app/planning_layout_validator.gd")
 const HUNGER := preload("res://game/features/infected/public/decor/corpse_hunger.tscn")
-const PART := preload("res://game/features/infected/public/decor/part_horde_tentacle.tscn")
+const PART := preload("res://game/features/infected/public/decor/part_horde_tentacle_0.tscn")
 var failures := 0
 
 class Controls extends Node:
@@ -49,7 +49,8 @@ func _run() -> void:
 	var part := PART.instantiate() as RigidBody3D
 	part.position = Vector3(-4, 0, 0)
 	stage.add_child(part)
-	var mutilated := (load("res://game/features/infected/public/decor/corpse_hunger_mutilated.tscn") as PackedScene).instantiate() as Node3D
+	var mutilated := (load("res://game/features/infected/public/decor/corpse_hunger.tscn") as PackedScene).instantiate() as Node3D
+	mutilated.set("destruction", 4)
 	mutilated.position = Vector3(5, 0, 5)
 	stage.add_child(mutilated)
 	await physics_frame

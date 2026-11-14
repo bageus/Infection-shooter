@@ -8,7 +8,6 @@ extends Node
 
 signal part_severed(part: StringName, piece: RigidBody3D)
 
-const BLOOD_LEVEL := preload("res://game/core/vfx/public/blood_level.gd")
 const MESH := preload("res://game/features/infected/body_part_mesh.gd")
 const MODIFIER := preload("res://game/features/infected/dismember_modifier.gd")
 const SEVERED := preload("res://game/features/infected/severed_part.gd")
@@ -16,14 +15,29 @@ const HITBOX := preload("res://game/features/infected/body_part_hitbox.gd")
 const FX := preload("res://game/features/infected/blood_drip_fx.gd")
 const BLOOD_BAKE := preload("res://game/features/infected/body_blood_bake.gd")
 const TORSO := &"torso"
+# Limbs come in two cuts: the lower part (forearm+hand, shin+foot) alone, or the whole
+# limb at the shoulder/hip, which takes the lower part with it. Lower parts come first
+# so a hit on them picks them over the whole limb that shares their bones.
 const HUMANOID_PARTS := {
 	&"head": {"bones": ["Head"], "share": 0.6},
-	&"arm_l": {"bones": ["L_UpperArm", "L_Forearm", "L_Hand"], "share": 0.7},
-	&"arm_r": {"bones": ["R_UpperArm", "R_Forearm", "R_Hand"], "share": 0.7},
-	&"leg_l": {"bones": ["L_Thigh", "L_Shin", "L_Foot", "L_Toe"], "share": 0.8},
-	&"leg_r": {"bones": ["R_Thigh", "R_Shin", "R_Foot", "R_Toe"], "share": 0.8},
+	&"forearm_l": {"bones": ["L_Forearm", "L_Hand"], "share": 0.4},
+	&"forearm_r": {"bones": ["R_Forearm", "R_Hand"], "share": 0.4},
+	&"arm_l": {"bones": ["L_UpperArm", "L_Forearm", "L_Hand"], "share": 0.7, "children": [&"forearm_l"]},
+	&"arm_r": {"bones": ["R_UpperArm", "R_Forearm", "R_Hand"], "share": 0.7, "children": [&"forearm_r"]},
+	&"shin_l": {"bones": ["L_Shin", "L_Foot", "L_Toe"], "share": 0.45},
+	&"shin_r": {"bones": ["R_Shin", "R_Foot", "R_Toe"], "share": 0.45},
+	&"leg_l": {"bones": ["L_Thigh", "L_Shin", "L_Foot", "L_Toe"], "share": 0.8, "children": [&"shin_l"]},
+	&"leg_r": {"bones": ["R_Thigh", "R_Shin", "R_Foot", "R_Toe"], "share": 0.8, "children": [&"shin_r"]},
 	&"torso": {"bones": ["Hips", "Spine", "Chest", "Neck", "L_Shoulder", "R_Shoulder"], "share": 0.0},
 }
+# Upper arm and thigh alone only exist as loose decoration pieces; in play they go with the whole limb.
+const DECOR_ONLY_PARTS := {
+	&"upperarm_l": {"bones": ["L_UpperArm"], "share": 0.0},
+	&"upperarm_r": {"bones": ["R_UpperArm"], "share": 0.0},
+	&"thigh_l": {"bones": ["L_Thigh"], "share": 0.0},
+	&"thigh_r": {"bones": ["R_Thigh"], "share": 0.0},
+}
+const WHOLE_LIMB := {&"forearm_l": &"arm_l", &"forearm_r": &"arm_r", &"shin_l": &"leg_l", &"shin_r": &"leg_r"}
 const TENTACLES := 8
 
 var enabled := false
@@ -35,7 +49,6 @@ var _entries: Array = []
 var _data: Dictionary = {}
 var _modifier: SkeletonModifier3D
 var _hitboxes: Dictionary = {}
-var _cap_material: StandardMaterial3D
 # Bleeding stumps: [WeakRef holder, until msec, last mark position, last mark msec].
 var _bleeding_stumps: Array = []
 const STUMP_BLEED_SECONDS := 3.5
@@ -90,29 +103,43 @@ func _build_parts(strength: float) -> void:
 	else:
 		definitions = HUMANOID_PARTS
 	for part: StringName in definitions:
-		var definition: Dictionary = definitions[part]
-		var bones := PackedInt32Array()
-		for bone_name: String in definition.bones:
-			var bone := skeleton.find_bone(bone_name)
-			if bone >= 0:
-				bones.append(bone)
-		if bones.is_empty():
-			continue
-		var segments: Array = []
-		for index in bones.size():
-			var bone := bones[index]
-			var child: Variant = null
-			if index + 1 < bones.size() and skeleton.get_bone_parent(bones[index + 1]) == bone:
-				child = MESH.joint(_data, bones[index + 1], skeleton)
-			elif part == TORSO:
-				child = _torso_child_joint(bone)
-			var stats := MESH.bone_stats(_data, bone, child, skeleton)
-			segments.append({"bone": bone, "start": stats.start, "end": stats.end, "radius": stats.radius})
-		var durability := strength * float(definition.share)
-		parts[part] = {
-			"bones": bones, "segments": segments, "max_hp": durability, "hp": durability,
-			"severable": part != TORSO, "severed": false,
-		}
+		var entry := _part_entry(part, definitions[part], strength)
+		if not entry.is_empty():
+			parts[part] = entry
+
+
+func _part_entry(part: StringName, definition: Dictionary, strength: float) -> Dictionary:
+	var bones := PackedInt32Array()
+	for bone_name: String in definition.bones:
+		var bone := skeleton.find_bone(bone_name)
+		if bone >= 0:
+			bones.append(bone)
+	if bones.is_empty():
+		return {}
+	var segments: Array = []
+	for index in bones.size():
+		var bone := bones[index]
+		var child: Variant = null
+		if index + 1 < bones.size() and skeleton.get_bone_parent(bones[index + 1]) == bone:
+			child = MESH.joint(_data, bones[index + 1], skeleton)
+		elif part == TORSO:
+			child = _torso_child_joint(bone)
+		var stats := MESH.bone_stats(_data, bone, child, skeleton)
+		segments.append({"bone": bone, "start": stats.start, "end": stats.end, "radius": stats.radius})
+	var durability := strength * float(definition.share)
+	return {
+		"bones": bones, "segments": segments, "max_hp": durability, "hp": durability,
+		"severable": part != TORSO, "severed": false, "children": definition.get("children", []),
+	}
+
+
+# Bones, cut position and thickness of a loose piece: a play part, or an upper arm / thigh.
+func piece_info(part: StringName) -> Dictionary:
+	if parts.has(part):
+		return parts[part]
+	if DECOR_ONLY_PARTS.has(part):
+		return _part_entry(part, DECOR_ONLY_PARTS[part], 0.0)
+	return {}
 
 
 func _torso_child_joint(bone: int) -> Variant:
@@ -129,18 +156,38 @@ func is_severed(part: StringName) -> bool:
 
 # The attack state of an enemy that swings with whichever arm is still attached.
 func attack_state() -> StringName:
-	var left := not is_severed(&"arm_l")
-	var right := not is_severed(&"arm_r")
+	var left := arm_usable(&"l")
+	var right := arm_usable(&"r")
 	if left and not right:
 		return &"attack_left"
 	return &"attack_right" if right and not left else &"attack"
 
 
+## A limb that lost its lower part no longer works as a limb.
+func arm_usable(side: StringName) -> bool:
+	return not is_severed(StringName("arm_" + side)) and not is_severed(StringName("forearm_" + side))
+
+
+## Gameplay group of a part: lower arm counts as arm, shin as leg.
+static func limb_of(part: StringName) -> String:
+	var label := String(part)
+	if label.begins_with("forearm") or label.begins_with("arm"):
+		return "arm"
+	if label.begins_with("shin") or label.begins_with("leg"):
+		return "leg"
+	return label
+
+
+# Working limbs of a group ("arm", "leg", "tentacle"): whole parts that still have their lower part.
 func remaining(prefix: String) -> int:
 	var count := 0
 	for part: StringName in parts:
-		if String(part).begins_with(prefix) and not bool(parts[part].severed):
-			count += 1
+		if not String(part).begins_with(prefix) or bool(parts[part].severed):
+			continue
+		var lower := String(part).replace("arm_", "forearm_").replace("leg_", "shin_")
+		if lower != String(part) and is_severed(StringName(lower)):
+			continue
+		count += 1
 	return count
 
 
@@ -255,14 +302,26 @@ func damage_part(part: StringName, amount: float) -> bool:
 	return float(parts[part].hp) <= 0.0
 
 
-# Collapses the part on the body, leaves a bleeding stump and (optionally)
-# throws the part away as a physics piece. Returns the piece or null.
+# Collapses the part on the body and throws it away as a physics piece (optional).
+# The bone collapse hides the part and exposes the cut tissue of its neighbour,
+# which is where the stump bleeds. A whole limb takes its lower part with it.
+# Returns the piece or null.
 func sever(part: StringName, direction: Vector3, spawn_piece := true) -> RigidBody3D:
 	if not enabled or not parts.has(part) or bool(parts[part].severed) or not bool(parts[part].severable):
 		return null
 	var info: Dictionary = parts[part]
+	# Bones that already left with a lower part stay out of the piece.
+	var chain := PackedInt32Array()
+	for bone: int in info.bones:
+		if not _modifier.severed.has(bone):
+			chain.append(bone)
 	info.severed = true
 	info.hp = 0.0
+	for child: StringName in info.children:
+		if parts.has(child) and not bool(parts[child].severed):
+			parts[child].severed = true
+			parts[child].hp = 0.0
+			_remove_hitboxes(child)
 	var root: int = info.bones[0]
 	var root_segment: Dictionary = info.segments[0]
 	var joint_world := _world(root, root_segment.start)
@@ -270,18 +329,19 @@ func sever(part: StringName, direction: Vector3, spawn_piece := true) -> RigidBo
 	add_rest_wound(root_segment.start, float(root_segment.radius) * 1.35)
 	var piece: RigidBody3D = null
 	if spawn_piece:
-		piece = _spawn_piece(part, info, joint_world, direction)
+		piece = _spawn_piece(part, info, chain, joint_world, direction)
 	_modifier.severed.append(root)
-	_add_stump(root, _nearest_point(_skin_points(info.bones), joint_world), float(root_segment.radius), spawn_piece)
+	# The bleeding stump is the neighbour's cut tissue: nearest cap vertex outside the part.
+	_add_stump(root, _nearest_point(_skin_points(info.bones, true, true), joint_world), spawn_piece)
 	_remove_hitboxes(part)
 	part_severed.emit(part, piece)
 	return piece
 
 
-func _spawn_piece(part: StringName, info: Dictionary, joint_world: Vector3, direction: Vector3) -> RigidBody3D:
+func _spawn_piece(part: StringName, info: Dictionary, chain: PackedInt32Array, joint_world: Vector3, direction: Vector3) -> RigidBody3D:
 	var entry: Dictionary = _entries[0]
 	var lease := piece_skin(entry)
-	var built := MESH.build_piece(entry.data, info.bones, skeleton, lease.materials)
+	var built := MESH.build_piece(entry.data, chain, skeleton, lease.materials)
 	if built.is_empty():
 		return null
 	var piece := SEVERED.new()
@@ -301,9 +361,8 @@ func _spawn_piece(part: StringName, info: Dictionary, joint_world: Vector3, dire
 		bounds = bounds.expand(point)
 	piece.mass = clampf(bounds.size.x * bounds.size.y * bounds.size.z * 120.0, 0.3, 25.0)
 	var cap_offset: Vector3 = joint_world - built.center
-	# The bone joint can sit beside the cut, so the blood starts at the nearest piece surface.
-	var cut := _nearest_point(_mesh_points(built.mesh), cap_offset)
-	_attach_cap(piece, cut, float(info.segments[0].radius) * world_scale, cap_offset)
+	# The piece is a closed part: its own cut tissue (surface 1) is where the blood starts.
+	var cut := _nearest_point(_mesh_points(built.mesh, 1), cap_offset)
 	var parent := _piece_parent()
 	if parent == null:
 		piece.free()
@@ -331,18 +390,23 @@ static func _nearest_point(points: PackedVector3Array, from: Vector3) -> Vector3
 	return best
 
 
-static func _mesh_points(mesh: ArrayMesh) -> PackedVector3Array:
+# Vertices of one surface, or of all when it does not exist.
+static func _mesh_points(mesh: ArrayMesh, only_surface := -1) -> PackedVector3Array:
 	var points := PackedVector3Array()
 	for surface in mesh.get_surface_count():
-		points.append_array(mesh.surface_get_arrays(surface)[Mesh.ARRAY_VERTEX])
+		if only_surface < 0 or surface == only_surface or mesh.get_surface_count() <= only_surface:
+			points.append_array(mesh.surface_get_arrays(surface)[Mesh.ARRAY_VERTEX])
 	return points
 
 
 # World-space skin vertices bound mostly to this part's bones, at the current pose.
 # shortcut: uses each vertex's strongest bone instead of blending, a few mm off at joints.
-func _skin_points(bones: PackedInt32Array) -> PackedVector3Array:
+func _skin_points(bones: PackedInt32Array, caps_only := false, outside := false) -> PackedVector3Array:
 	var points := PackedVector3Array()
-	for surface: Dictionary in _data.surfaces:
+	for surface_index in _data.surfaces.size():
+		if caps_only and surface_index != 1 and _data.surfaces.size() > 1:
+			continue
+		var surface: Dictionary = _data.surfaces[surface_index]
 		var vertices: PackedVector3Array = surface.vertices
 		var influences: PackedInt32Array = surface.bones
 		var weights: PackedFloat32Array = surface.weights
@@ -356,7 +420,7 @@ func _skin_points(bones: PackedInt32Array) -> PackedVector3Array:
 				if weights[index * stride + k] > best_weight:
 					best_weight = weights[index * stride + k]
 					best = influences[index * stride + k]
-			if best < 0 or not bones.has(best) or not _data.binds.has(best):
+			if best < 0 or bones.has(best) == outside or not _data.binds.has(best):
 				continue
 			var skin: Transform3D = skeleton.global_transform * skeleton.get_bone_global_pose(best) * (_data.binds[best] as Transform3D)
 			points.append(skin * vertices[index])
@@ -368,9 +432,9 @@ func _piece_parent() -> Node3D:
 	return parent if parent != null else owner_body
 
 
-func _add_stump(root: int, joint_world: Vector3, rest_radius: float, bleed: bool) -> void:
+func _add_stump(root: int, joint_world: Vector3, bleed: bool) -> void:
 	var parent_bone := skeleton.get_bone_parent(root)
-	if parent_bone < 0:
+	if parent_bone < 0 or not bleed:
 		return
 	var attachment := BoneAttachment3D.new()
 	attachment.name = "Stump_" + skeleton.get_bone_name(root)
@@ -382,10 +446,8 @@ func _add_stump(root: int, joint_world: Vector3, rest_radius: float, bleed: bool
 	holder.position = local
 	attachment.add_child(holder)
 	var outward := local.normalized() if local.length_squared() > 0.0001 else Vector3.UP
-	_attach_cap(holder, Vector3.ZERO, rest_radius, outward)
-	if bleed:
-		FX.bleed(holder, Vector3.ZERO, outward, STUMP_BLEED_SECONDS, 1.0)
-		_bleeding_stumps.append([weakref(holder), Time.get_ticks_msec() + int(STUMP_BLEED_SECONDS * 1000.0), Vector3.INF, 0])
+	FX.bleed(holder, Vector3.ZERO, outward, STUMP_BLEED_SECONDS, 1.0)
+	_bleeding_stumps.append([weakref(holder), Time.get_ticks_msec() + int(STUMP_BLEED_SECONDS * 1000.0), Vector3.INF, 0])
 
 
 ## Points where dripping stumps should leave a floor mark now: once on a new
@@ -407,27 +469,6 @@ func drip_mark_points() -> Array[Vector3]:
 			entry[3] = now
 			points.append(point)
 	return points
-
-
-# A flattened wet disc closing the cut, its flat side facing along `axis`.
-func _attach_cap(parent: Node3D, offset: Vector3, radius: float, axis: Vector3) -> void:
-	if _cap_material == null:
-		_cap_material = StandardMaterial3D.new()
-		_cap_material.albedo_color = BLOOD_LEVEL.GREEN_COLOR if BLOOD_LEVEL.is_green() else Color(0.3, 0.02, 0.02)
-		_cap_material.roughness = 0.25
-	var cap := MeshInstance3D.new()
-	cap.set_meta("body_part_cap", true)
-	var sphere := SphereMesh.new()
-	sphere.radius = maxf(radius * 0.6, 0.012)
-	sphere.height = sphere.radius * 2.0
-	sphere.radial_segments = 10
-	sphere.rings = 6
-	sphere.material = _cap_material
-	cap.mesh = sphere
-	var up := axis.normalized() if axis.length_squared() > 0.0001 else Vector3.UP
-	cap.transform = Transform3D(Basis(Quaternion(Vector3.UP, up)) * Basis.from_scale(Vector3(1.0, 0.4, 1.0)), offset)
-	cap.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
-	parent.add_child(cap)
 
 
 # Bullet-only volumes on every remaining part so a corpse stays shootable.

@@ -23,16 +23,16 @@
 [ext_resource type="PackedScene" path="res://game/presentation/office_floor/public/props/blood_decal.tscn" id="27_cscw6"]
 [ext_resource type="PackedScene" path="res://game/features/infected/public/decor/part_hunger_head.tscn" id="29_18yb3"]
 [ext_resource type="PackedScene" path="res://models/objects/characters/enemy/game/Hunger_rig.tscn" id="31_xxxcq"]
-[ext_resource type="PackedScene" path="res://game/features/infected/public/decor/part_hunger_arm.tscn" id="32_ndyln"]
-[ext_resource type="PackedScene" path="res://game/features/infected/public/decor/part_hunger_leg.tscn" id="33_sf7aj"]
+[ext_resource type="PackedScene" path="res://game/features/infected/public/decor/part_hunger_arm_r.tscn" id="32_ndyln"]
+[ext_resource type="PackedScene" path="res://game/features/infected/public/decor/part_hunger_leg_r.tscn" id="33_sf7aj"]
 [ext_resource type="PackedScene" path="res://game/features/infected/public/decor/part_revenant_head.tscn" id="34_jo0dc"]
 [ext_resource type="PackedScene" path="res://models/objects/characters/enemy/game/Revenant_rig.tscn" id="35_yipt0"]
-[ext_resource type="PackedScene" path="res://game/features/infected/public/decor/part_revenant_leg.tscn" id="36_jyaih"]
-[ext_resource type="PackedScene" path="res://game/features/infected/public/decor/part_brute_leg.tscn" id="37_tbk4y"]
+[ext_resource type="PackedScene" path="res://game/features/infected/public/decor/part_revenant_leg_r.tscn" id="36_jyaih"]
+[ext_resource type="PackedScene" path="res://game/features/infected/public/decor/part_brute_leg_r.tscn" id="37_tbk4y"]
 [ext_resource type="PackedScene" path="res://models/objects/characters/enemy/game/Brute_rig.tscn" id="38_n1f87"]
 [ext_resource type="PackedScene" path="res://game/presentation/office_floor/public/props/darkness_zone.tscn" id="39_5u12a"]
 [ext_resource type="PackedScene" path="res://game/features/infected/public/decor/corpse_hunger.tscn" id="41_21okg"]
-[ext_resource type="PackedScene" path="res://game/features/infected/public/decor/corpse_hunger_mutilated.tscn" id="43_8wbth"]
+[ext_resource type="PackedScene" path="res://game/features/infected/public/decor/corpse_hunger.tscn" id="43_8wbth"]
 [ext_resource type="PackedScene" path="res://game/features/infected/public/decor/corpse_revenant.tscn" id="44_2s112"]
 [ext_resource type="PackedScene" path="res://game/features/spawning/public/spawn_point.tscn" id="45_rpdth"]
 [ext_resource type="PackedScene" path="res://game/presentation/office_floor/public/props/planner_light.tscn" id="47_0a6i4"]
@@ -41262,6 +41262,7 @@ metadata/planning_attachment = ""
 
 [node name="CorpseHungerMutilated" type="Node3D" parent="." unique_id=1711594947 instance=ExtResource("43_8wbth")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -33.916336, 0.0155, 26.75)
+severed_parts = PackedStringArray("head", "arm_r")
 
 physics_pose = {
 "body": [7.54979e-08, 0.0, 1.0, 0.0, 1.0, 0.0, -1.0, 0.0, 7.54979e-08, 0.0, 1.9966953, 0.0],
@@ -41875,6 +41876,7 @@ metadata/planning_attachment = ""
 
 [node name="@Node3D@37630" type="Node3D" parent="." unique_id=481406687 instance=ExtResource("43_8wbth")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -29.020853, 0.0155, 28.75)
+severed_parts = PackedStringArray("head", "arm_r")
 
 physics_pose = {
 "body": [-1.3446424e-07, 0.5646425, -0.8253356, 9.199194e-08, 0.8253356, 0.5646425, 1.0, 0.0, -1.6292068e-07, 0.0, 1.8301115, 0.0],
@@ -41919,6 +41921,7 @@ metadata/planning_attachment = ""
 
 [node name="@Node3D@37631" type="Node3D" parent="." unique_id=1520123906 instance=ExtResource("43_8wbth")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -16.15293, 0.0155, 24.774145)
+severed_parts = PackedStringArray("head", "arm_r")
 
 physics_pose = {
 "body": [-1.118341e-06, -0.5646425, -0.8253356, -7.650982e-07, 0.8253356, -0.5646425, 1.0, 0.0, -1.3550135e-06, 0.0, 1.8350443, 0.0],
@@ -41963,6 +41966,7 @@ metadata/planning_attachment = ""
 
 [node name="@Node3D@37632" type="Node3D" parent="." unique_id=1318307058 instance=ExtResource("43_8wbth")]
 transform = Transform3D(0.96592575, 0, -0.258819, 0, 1, 0, 0.258819, 0, 0.96592575, -8.75, 0.6175004, 27)
+severed_parts = PackedStringArray("head", "arm_r")
 
 physics_pose = {
 "body": [4.313906e-08, -1.0, -7.0503163e-09, -0.98690665, -4.371139e-08, 0.16129243, -0.16129243, 0.0, -0.98690665, 0.0, 0.6207511, 0.0],
@@ -42051,6 +42055,7 @@ metadata/planning_attachment = ""
 
 [node name="@Node3D@37634" type="Node3D" parent="." unique_id=2026421446 instance=ExtResource("43_8wbth")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 13.25, 0.0155, 27.5)
+severed_parts = PackedStringArray("head", "arm_r")
 
 physics_pose = {
 "body": [4.344238e-08, 1.0, -4.8420055e-09, 0.9938458, -4.371139e-08, -0.11077218, -0.11077218, 0.0, -0.9938458, 0.0, 0.6230315, 0.0],
@@ -42095,6 +42100,7 @@ metadata/planning_attachment = ""
 
 [node name="@Node3D@37635" type="Node3D" parent="." unique_id=1791834083 instance=ExtResource("43_8wbth")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 13.5, 0.0155, 18.25)
+severed_parts = PackedStringArray("head", "arm_r")
 
 physics_pose = {
 "body": [-4.287793e-08, -1.0, -8.495217e-09, 0.98093265, -4.371139e-08, 0.19434792, -0.19434792, 0.0, 0.98093265, 0.0, 0.620751, 0.0],
@@ -42139,6 +42145,7 @@ metadata/planning_attachment = ""
 
 [node name="@Node3D@37636" type="Node3D" parent="." unique_id=286594684 instance=ExtResource("43_8wbth")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 15.75, 0.8730427, 9.75)
+severed_parts = PackedStringArray("head", "arm_r")
 
 physics_pose = {
 "body": [-0.8202204, 0.0, 0.57204765, 0.57204765, -4.371139e-08, 0.8202204, 2.5004997e-08, 1.0, 3.5852974e-08, 0.0, 0.20295006, 0.0],
@@ -42183,6 +42190,7 @@ metadata/planning_attachment = ""
 
 [node name="@Node3D@37637" type="Node3D" parent="." unique_id=10806445 instance=ExtResource("43_8wbth")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 23.75, 0.0155, 8.25)
+severed_parts = PackedStringArray("head", "arm_r")
 
 physics_pose = {
 "body": [2.0986892e-08, 1.0, -3.8343654e-08, 0.48012415, -4.371139e-08, -0.87720054, -0.87720054, 0.0, -0.48012415, 0.0, 0.6230315, 0.0],
@@ -42227,6 +42235,7 @@ metadata/planning_attachment = ""
 
 [node name="@Node3D@37638" type="Node3D" parent="." unique_id=1227501561 instance=ExtResource("43_8wbth")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 21.5, 0.0155, 6.25)
+severed_parts = PackedStringArray("head", "arm_r")
 
 physics_pose = {
 "body": [1.3526341e-08, 1.0, 4.1565894e-08, 0.3094466, -4.371139e-08, 0.9509168, 0.9509168, 0.0, -0.3094466, 0.0, 0.6230315, 0.0],
@@ -42271,6 +42280,7 @@ metadata/planning_attachment = ""
 
 [node name="@Node3D@37639" type="Node3D" parent="." unique_id=1527664873 instance=ExtResource("43_8wbth")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 23.25, 0.0155, 2.5)
+severed_parts = PackedStringArray("head", "arm_r")
 
 physics_pose = {
 "body": [0.4523415, 0.0, -0.8918448, -0.8918448, -4.371139e-08, -0.4523415, -3.8983774e-08, 1.0, -1.9772475e-08, 0.0, 0.20295002, 0.0],
@@ -42315,6 +42325,7 @@ metadata/planning_attachment = ""
 
 [node name="@Node3D@37640" type="Node3D" parent="." unique_id=95662018 instance=ExtResource("43_8wbth")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 19.75, 0.015500008, -0.7259869)
+severed_parts = PackedStringArray("head", "arm_r")
 
 physics_pose = {
 "body": [-0.8253356, -0.5646425, 7.2153135e-08, -0.5646425, 0.8253356, 4.9362615e-08, -8.742278e-08, 0.0, -1.0, 0.0, 1.8618315, 0.0],
@@ -42359,6 +42370,7 @@ metadata/planning_attachment = ""
 
 [node name="@Node3D@37641" type="Node3D" parent="." unique_id=1269054988 instance=ExtResource("43_8wbth")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 9.75, 0.0155, 8.25)
+severed_parts = PackedStringArray("head", "arm_r")
 
 physics_pose = {
 "body": [-1.3446424e-07, 0.5646425, 0.8253356, 9.199194e-08, 0.8253356, -0.5646425, -1.0, 0.0, -1.6292068e-07, 0.0, 1.8154584, 0.0],
@@ -42451,6 +42463,7 @@ metadata/planning_attachment = ""
 
 [node name="@Node3D@37645" type="Node3D" parent="." unique_id=288968394 instance=ExtResource("43_8wbth")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -8.260062, 0.0155, -4.4684315)
+severed_parts = PackedStringArray("head", "arm_r")
 
 physics_pose = {
 "body": [-0.8253356, -0.5646425, 1.2462222e-07, -0.5646425, 0.8253356, 8.525865e-08, -1.509958e-07, 0.0, -1.0, 0.0, 1.8759693, 0.0],
@@ -42495,6 +42508,7 @@ metadata/planning_attachment = ""
 
 [node name="@Node3D@37646" type="Node3D" parent="." unique_id=2007708148 instance=ExtResource("43_8wbth")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -7.9718795, 0.0155, -4.615619)
+severed_parts = PackedStringArray("head", "arm_r")
 
 physics_pose = {
 "body": [2.6821285e-08, 1.0, 3.4515274e-08, 0.6135995, -4.371139e-08, 0.7896174, 0.7896174, 0.0, -0.6135995, 0.0, 0.6230315, 0.0],

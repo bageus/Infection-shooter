@@ -28,11 +28,16 @@ func setup(parts: Node) -> void:
 			var entry := segment.duplicate()
 			entry["part"] = label
 			segments.append(entry)
+	# A whole limb and its lower part share bones: one volume per bone, listed under both parts.
+	var by_bone := {}
 	# Parents must exist and have their posed transform before child joints bind.
 	segments.sort_custom(func(a: Dictionary, b: Dictionary) -> bool: return int(a["bone"]) < int(b["bone"]))
 	for segment in segments:
-		var bone := _build(segment)
-		_bones[segment["part"]].append(bone)
+		var shared: Variant = by_bone.get(int(segment["bone"]))
+		if shared == null:
+			shared = _build(segment)
+			by_bone[int(segment["bone"])] = shared
+		_bones[segment["part"]].append(shared)
 	for bone: PhysicalBone3D in simulator.get_children():
 		bone.global_transform = skeleton.global_transform * skeleton.get_bone_global_pose(bone.get_bone_id()) * bone.body_offset
 	for bone: PhysicalBone3D in simulator.get_children():
