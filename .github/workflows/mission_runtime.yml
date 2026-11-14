@@ -50,8 +50,8 @@ jobs:
           for revision in before after; do
             project="$PWD"
             if [ "$revision" = before ]; then project=/tmp/skin-base; fi
-            timeout 180 xvfb-run -a godot --path "$project" --fixed-fps 60 --audio-driver Dummy --rendering-method gl_compatibility --script tools/capture_enemy_skins.gd -- "/tmp/skin-review/$revision" 2>&1 | tee "/tmp/skin-review/$revision-capture.log"
-            timeout 180 xvfb-run -a godot --path "$project" --fixed-fps 60 --audio-driver Dummy --rendering-method gl_compatibility --script tools/bench_enemy_materials.gd -- --wounded 2>&1 | tee "/tmp/skin-review/$revision-bench.log"
+            timeout 420 xvfb-run -a godot --path "$project" --fixed-fps 60 --audio-driver Dummy --rendering-method gl_compatibility --script tools/capture_enemy_skins.gd -- "/tmp/skin-review/$revision" 2>&1 | tee "/tmp/skin-review/$revision-capture.log"
+            timeout 420 xvfb-run -a godot --path "$project" --fixed-fps 60 --audio-driver Dummy --rendering-method gl_compatibility --script tools/bench_enemy_materials.gd -- --wounded 2>&1 | tee "/tmp/skin-review/$revision-bench.log"
           done
           if grep -E 'SHADER ERROR|SCRIPT ERROR|^ERROR:' /tmp/skin-review/*.log; then exit 1; fi
       - name: WebGL2 skin layers and page boundary

@@ -9,8 +9,8 @@ const FX := preload("res://game/features/infected/blood_drip_fx.gd")
 const TITAN := preload("res://game/features/infected/public/infected_titan.tscn")
 const COLOSSUS := preload("res://game/features/infected/public/infected_colossus.tscn")
 const HORDE := preload("res://game/features/infected/public/infected_horde.tscn")
-const CORPSE := "res://game/features/infected/public/decor/corpse_hunger_mutilated.tscn"
-const PART := "res://game/features/infected/public/decor/part_titan_arm.tscn"
+const CORPSE := "res://game/features/infected/public/decor/corpse_hunger.tscn"
+const PART := "res://game/features/infected/public/decor/part_titan_arm_r.tscn"
 
 class FakeTarget:
 	extends Node3D
@@ -40,6 +40,8 @@ func _run() -> void:
 	await _test_droplets_stop_at_floor(stage)
 	await _test_horde_size_and_tentacles(stage)
 	await _test_decorations(stage)
+	await _test_part_and_whole_limb(stage)
+	await _test_every_part_has_a_mesh(stage)
 	stage.queue_free()
 	await process_frame
 	print("Dismemberment tests: %d failure(s)." % failures)
@@ -74,7 +76,8 @@ func _shoot(enemy: Node, part: StringName, damage: float, shots: int, weapon := 
 		if bool(enemy.get("_dead")) or parts.is_severed(part):
 			return
 		var segments: Array = parts.parts[part].segments
-		var segment: Dictionary = segments[mini(1, segments.size() - 1)]
+		# Whole limbs are hit through the upper segment: the lower one belongs to its own part.
+		var segment: Dictionary = segments[0 if String(part).begins_with("arm_") or String(part).begins_with("leg_") else mini(1, segments.size() - 1)]
 		var target: Vector3 = parts._world(segment.bone, (segment.start + segment.end) * 0.5)
 		var outward := target - (enemy as Node3D).global_position
 		outward.y = 0.0
@@ -101,14 +104,18 @@ func _test_arm_shot_off(stage: Node3D) -> void:
 	var segment: Dictionary = parts.parts[&"arm_l"].segments[1]
 	var through: Vector3 = parts._world(segment.bone, (segment.start + segment.end) * 0.5)
 	var inward := Vector3(enemy.global_position.x - through.x, 0.0, enemy.global_position.z - through.z).normalized()
-	_expect(parts.pick_part(through - inward * 0.35, inward) == &"arm_l", "A shot through the left forearm picks the left arm.")
+	_expect(parts.pick_part(through - inward * 0.35, inward) == &"forearm_l", "A shot through the left forearm picks the forearm, not the whole arm.")
+	var upper: Dictionary = parts.parts[&"arm_l"].segments[0]
+	var upper_point: Vector3 = parts._world(upper.bone, (upper.start + upper.end) * 0.5)
+	var upper_inward := Vector3(enemy.global_position.x - upper_point.x, 0.0, enemy.global_position.z - upper_point.z).normalized()
+	_expect(parts.pick_part(upper_point - upper_inward * 0.35, upper_inward) == &"arm_l", "A shot through the upper arm picks the whole arm.")
 	_expect(parts.pick_part(enemy.global_position + Vector3(0, 0.2, -0.6), Vector3(0, 0, 1)) == &"torso", "A shot through the belly picks the torso.")
 	var before := _pieces(stage).size()
 	await _shoot(enemy, &"arm_l", 12.0, 1)
 	var painted := false
 	for surface_mask: Dictionary in parts._entries[0].get("masks", []):
-		if (surface_mask.image as Image).get_data().has(255):
-			painted = true
+		for byte in (surface_mask.image as Image).get_data():
+			painted = painted or byte > 64
 	_expect(painted, "A hit bakes a wound into the skin's blood mask.")
 	await _shoot(enemy, &"arm_l", 12.0, 6)
 	_expect(parts.is_severed(&"arm_l"), "Enough damage shoots the arm off.")
@@ -291,7 +298,15 @@ func _test_decorations(stage: Node3D) -> void:
 	stage.add_child(corpse)
 	await process_frame
 	var parts: Node = corpse.get("parts")
-	_expect(parts != null and parts.is_severed(&"head") and parts.is_severed(&"arm_r"), "The mutilated corpse decoration starts without head and arm.")
+	_expect(parts != null and not parts.is_severed(&"head") and not parts.is_severed(&"arm_r"), "A corpse decoration starts whole.")
+	corpse.configure_decor_pose({"seed": 1, "pose": "legacy", "destruction": corpse.level_count() - 1})
+	await process_frame
+	parts = corpse.get("parts")
+	_expect(parts != null and parts.is_severed(&"head") and parts.is_severed(&"arm_r") and parts.is_severed(&"leg_l") and parts.is_severed(&"forearm_l"), "The highest destruction level tears off the head, arms and legs.")
+	corpse.configure_decor_pose({"seed": 1, "pose": "legacy", "destruction": 1})
+	await process_frame
+	parts = corpse.get("parts")
+	_expect(parts != null and parts.is_severed(&"forearm_r") and not parts.is_severed(&"arm_r") and not parts.is_severed(&"head"), "A lower destruction level builds the body again with fewer parts lost.")
 	_expect(not corpse.find_children("*", "StaticBody3D", true, false).is_empty(), "Corpse decorations can be shot.")
 	var piece := (load(PART) as PackedScene).instantiate() as RigidBody3D
 	stage.add_child(piece)
@@ -304,6 +319,60 @@ func _test_decorations(stage: Node3D) -> void:
 	corpse.queue_free()
 	piece.queue_free()
 	await process_frame
+
+
+# The lower part comes off alone; the whole limb takes it along and drops as one piece.
+func _test_part_and_whole_limb(stage: Node3D) -> void:
+	var enemy := await _spawn(stage, HUNGER, Vector3(30, 1.0, 0))
+	var parts: Node = enemy.get("_parts")
+	if parts == null:
+		_expect(false, "Hunger has destructible body parts.")
+		return
+	var before := _pieces(stage).size()
+	var piece: RigidBody3D = parts.sever(&"forearm_r", Vector3.RIGHT)
+	_expect(piece != null and parts.is_severed(&"forearm_r") and not parts.is_severed(&"arm_r"), "A shot-off forearm leaves the upper arm on the body.")
+	_expect(parts.remaining("arm") == 1 and not parts.arm_usable(&"r"), "An arm without its forearm no longer counts as a working arm.")
+	_expect(_pieces(stage).size() == before + 1, "The forearm drops as its own piece.")
+	var cut: Vector3 = piece.get("_cut") if piece != null and piece.get("_cut") != null else Vector3.ZERO
+	var caps := piece.find_children("*", "MeshInstance3D", true, false)[0] as MeshInstance3D if piece != null else null
+	_expect(caps != null and caps.mesh.get_surface_count() == 2, "A piece is a closed part: skin plus its cut tissue.")
+	parts.sever(&"arm_r", Vector3.RIGHT)
+	_expect(parts.is_severed(&"arm_r") and parts.is_severed(&"forearm_r"), "A whole arm takes the forearm with it.")
+	_expect(_pieces(stage).size() == before + 2, "The rest of the arm drops as a second piece, not a copy of the forearm.")
+	parts.sever(&"leg_l", Vector3.RIGHT)
+	_expect(parts.is_severed(&"shin_l") and parts.remaining("leg") == 1, "A whole leg takes the shin with it.")
+	enemy.queue_free()
+	await process_frame
+	for stray in _pieces(stage):
+		stray.queue_free()
+	cut = cut
+
+
+# Every enemy has a loose-part scene for each body part and each one builds a mesh.
+func _test_every_part_has_a_mesh(stage: Node3D) -> void:
+	var kinds := ["head", "torso", "upperarm_l", "forearm_r", "arm_l", "thigh_r", "shin_l", "leg_r"]
+	for enemy in ["hunger", "revenant", "brute", "titan", "colossus"]:
+		for kind: String in kinds:
+			var path := "res://game/features/infected/public/decor/part_%s_%s.tscn" % [enemy, kind]
+			_expect(ResourceLoader.exists(path), "Part scene exists: " + path)
+			if not ResourceLoader.exists(path):
+				continue
+			var piece := (load(path) as PackedScene).instantiate() as RigidBody3D
+			stage.add_child(piece)
+			piece.global_position = Vector3(40, 1.0, 0)
+			await process_frame
+			var meshes := piece.find_children("*", "MeshInstance3D", true, false)
+			_expect(not meshes.is_empty(), "Part decoration builds geometry: " + path)
+			piece.queue_free()
+			await process_frame
+	for index in 8:
+		var path := "res://game/features/infected/public/decor/part_horde_tentacle_%d.tscn" % index
+		var piece := (load(path) as PackedScene).instantiate() as RigidBody3D
+		stage.add_child(piece)
+		await process_frame
+		_expect(not piece.find_children("*", "MeshInstance3D", true, false).is_empty(), "Horde tentacle decoration builds geometry: %d" % index)
+		piece.queue_free()
+		await process_frame
 
 
 func _expect(condition: bool, message: String) -> void:

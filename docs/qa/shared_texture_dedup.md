@@ -18,12 +18,11 @@ images and 761.24 MiB in embedded payloads. Git history is unchanged, so this do
 not shrink existing historical objects. The local rebuilt Godot cache decreased
 from approximately 991 to 536 MiB. FPS and GPU-memory improvements are unmeasured.
 
-Horde keeps its existing GLB path; its largest geometry buffer view is stored in
-Horde_geometry.bin. This lossless external buffer keeps each upload below the
-connector's 16 MiB request limit. Imported scene, geometry and image payloads are
-identical. The migration reader supports external geometry buffers and validates
-lengths. Display profiles were rebuilt only to refresh source hashes; their screen
-geometry is unchanged.
+The Horde used to keep its largest geometry buffer view in Horde_geometry.bin so that
+each upload stayed below the connector's 16 MiB request limit. The part-based Horde.glb
+(13.11.2026) is a single self-contained file again and Horde_geometry.bin was removed;
+the migration reader still supports external geometry buffers for other models. Display
+profiles were rebuilt only to refresh source hashes; their screen geometry is unchanged.
 
 ## Protection and validation
 

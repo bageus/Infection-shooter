@@ -21,17 +21,17 @@
 [ext_resource type="PackedScene" path="res://game/presentation/office_floor/public/structural/lab_glass_wall.tscn" id="28_qayl5"]
 [ext_resource type="PackedScene" path="res://game/features/infected/public/decor/corpse_hunger.tscn" id="29_k1r3t"]
 [ext_resource type="PackedScene" path="res://models/objects/characters/enemy/game/Hunger_rig.tscn" id="31_g71xt"]
-[ext_resource type="PackedScene" path="res://game/features/infected/public/decor/corpse_hunger_mutilated.tscn" id="32_c4mkl"]
-[ext_resource type="PackedScene" path="res://game/features/infected/public/decor/corpse_revenant_mutilated.tscn" id="33_o43xi"]
+[ext_resource type="PackedScene" path="res://game/features/infected/public/decor/corpse_hunger.tscn" id="32_c4mkl"]
+[ext_resource type="PackedScene" path="res://game/features/infected/public/decor/corpse_revenant.tscn" id="33_o43xi"]
 [ext_resource type="PackedScene" path="res://models/objects/characters/enemy/game/Revenant_rig.tscn" id="34_r2583"]
-[ext_resource type="PackedScene" path="res://game/features/infected/public/decor/corpse_titan_mutilated.tscn" id="35_7p8g6"]
+[ext_resource type="PackedScene" path="res://game/features/infected/public/decor/corpse_titan.tscn" id="35_7p8g6"]
 [ext_resource type="PackedScene" path="res://models/objects/characters/enemy/game/Titan_rig.tscn" id="36_bq6nx"]
 [ext_resource type="PackedScene" path="res://game/features/infected/public/decor/part_titan_head.tscn" id="37_jxxyg"]
-[ext_resource type="PackedScene" path="res://game/features/infected/public/decor/part_titan_arm.tscn" id="39_rffkb"]
-[ext_resource type="PackedScene" path="res://game/features/infected/public/decor/part_colossus_arm.tscn" id="40_vcesl"]
+[ext_resource type="PackedScene" path="res://game/features/infected/public/decor/part_titan_arm_r.tscn" id="39_rffkb"]
+[ext_resource type="PackedScene" path="res://game/features/infected/public/decor/part_colossus_arm_r.tscn" id="40_vcesl"]
 [ext_resource type="PackedScene" path="res://models/objects/characters/enemy/game/Colossus_rig.tscn" id="41_chctb"]
 [ext_resource type="PackedScene" path="res://game/features/infected/public/decor/part_hunger_head.tscn" id="42_8xaun"]
-[ext_resource type="PackedScene" path="res://game/features/infected/public/decor/part_hunger_arm.tscn" id="43_mo5j1"]
+[ext_resource type="PackedScene" path="res://game/features/infected/public/decor/part_hunger_arm_r.tscn" id="43_mo5j1"]
 
 [node name="BaseOfficeLayout" type="Node3D" unique_id=2032962840]
 metadata/surface_decals_v1 = {
@@ -9521,6 +9521,7 @@ metadata/planning_settled_transform = Transform3D(0.5000002, 7.571038e-08, 0.866
 
 [node name="CorpseHungerMutilated" type="Node3D" parent="." unique_id=1495477598 instance=ExtResource("32_c4mkl")]
 transform = Transform3D(-0.4999999, 7.571036e-08, 0.86602545, 0, -1, 8.7422784e-08, 0.86602545, 4.371139e-08, 0.4999999, -25, 1.9972192, -11.25)
+severed_parts = PackedStringArray("head", "arm_r")
 
 physics_pose = {
 "body": [-0.58898026, 0.0, 0.80814743, -0.80814743, -4.371139e-08, -0.58898026, 3.5325247e-08, -1.0, 2.5745145e-08, 0.0, 0.52494276, 0.0],
@@ -9562,6 +9563,7 @@ metadata/planning_settled_transform = Transform3D(-0.4999999, 7.571036e-08, 0.86
 
 [node name="CorpseRevenantMutilated" type="Node3D" parent="." unique_id=1650170614 instance=ExtResource("33_o43xi")]
 transform = Transform3D(-0.9659258, -2.2626688e-08, -0.25881913, 0, -1, 8.742278e-08, -0.25881913, 8.444392e-08, 0.9659258, -22, 2.4649558, -7.5)
+severed_parts = PackedStringArray("head", "arm_r")
 
 physics_pose = {
 "body": [-0.946306, 0.0, -0.3232723, 0.3232723, -4.371139e-08, -0.946306, -1.4130681e-08, -1.0, 4.136435e-08, 0.0, 0.49230504, 0.0],
@@ -9617,6 +9619,7 @@ metadata/planning_settled_transform = Transform3D(1.3999999, 0, 2.2531107e-07, 0
 
 [node name="CorpseTitanMutilated" type="Node3D" parent="." unique_id=1870485530 instance=ExtResource("35_7p8g6")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -22.75, 1.8522136, -17.5)
+severed_parts = PackedStringArray("head", "arm_r")
 
 physics_pose = {
 "body": [-0.21456116, 0.0, -1.3328404, -1.3328404, -5.9010375e-08, 0.21456116, -5.82603e-08, 1.35, 9.378766e-09, 0.0, 0.5270747, 0.0],

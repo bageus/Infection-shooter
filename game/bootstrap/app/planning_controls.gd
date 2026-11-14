@@ -13,11 +13,13 @@ var display_options: Node
 const MOUNT_OPTIONS := preload("res://game/bootstrap/app/planning_mount_options.gd")
 var mount_options: Node
 const LOOT_OPTIONS := preload("res://game/bootstrap/app/planning_loot_options.gd")
+const CORPSE_OPTIONS := preload("res://game/bootstrap/app/planning_corpse_options.gd")
 const DOOR_OPTIONS := preload("res://game/bootstrap/app/planning_door_options.gd")
 const ROOM_OPTIONS := preload("res://game/bootstrap/app/planning_room_options.gd")
 const QUEST_PANEL := preload("res://game/bootstrap/app/quest/quest_panel.gd")
 const GROUP_TEMPLATES := preload("res://game/bootstrap/app/planning_group_templates.gd")
 var loot_options: Node
+var corpse_options: Node
 const TARGET_OPTIONS := preload("res://game/bootstrap/app/planning_target_options.gd")
 var target_options: Node
 const FRUIT_OPTIONS := preload("res://game/bootstrap/app/planning_fruit_options.gd")
@@ -122,6 +124,9 @@ func setup_controls() -> void:
 	loot_options = LOOT_OPTIONS.new()
 	add_child(loot_options)
 	loot_options.call("setup", session, objects)
+	corpse_options = CORPSE_OPTIONS.new()
+	add_child(corpse_options)
+	corpse_options.call("setup", session, objects)
 	fruit_options = FRUIT_OPTIONS.new()
 	add_child(fruit_options)
 	fruit_options.call("setup", session, objects)
@@ -255,6 +260,7 @@ func _configure_new_asset(node: Node3D, entry: Dictionary) -> void:
 	display_options.call("configure_new", node)
 	mount_options.call("configure_new", node)
 	loot_options.call("configure_new", node)
+	corpse_options.call("configure_new", node)
 	fruit_options.call("configure_new", node)
 	target_options.call("configure_new", node)
 	spawn_options.call("configure_new", node)
@@ -348,6 +354,8 @@ func settings_kind(node: Node3D) -> String:
 		return "spawn"
 	if node.has_method("configure_stats"):
 		return "enemy"
+	if corpse_options.applies_to(node):
+		return "corpse"
 	if loot_options.applies_to(node):
 		return "loot"
 	if target_options.applies_to(node):
@@ -362,6 +370,8 @@ func _update_light_ui() -> void:
 		mount_options.call("update")
 	if loot_options != null:
 		loot_options.call("update")
+	if corpse_options != null:
+		corpse_options.call("update")
 	if fruit_options != null:
 		fruit_options.call("update")
 	if target_options != null:

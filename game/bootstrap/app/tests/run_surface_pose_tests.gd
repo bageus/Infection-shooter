@@ -6,7 +6,7 @@ const PISTOL := preload("res://game/features/combat/public/pistol.tscn")
 const BLOOD := preload("res://game/presentation/office_floor/public/props/blood_decal.tscn")
 const DECOR := preload("res://game/bootstrap/app/planning_decor_poses.gd")
 const CORPSE := preload("res://game/features/infected/public/decor/corpse_hunger.tscn")
-const PART := preload("res://game/features/infected/public/decor/part_hunger_arm.tscn")
+const PART := preload("res://game/features/infected/public/decor/part_hunger_arm_r.tscn")
 class SoftBody:
 	extends StaticBody3D
 	func get_projectile_material(_shape_index: int = -1) -> String:

@@ -5,6 +5,13 @@ extends Node3D
 
 const PHYSICS_POSE := preload("res://game/features/infected/decor_physics_pose.gd")
 const CORPSE_GROUP := &"infected_corpse"
+# Parts lost by each destruction level, cumulative (index = level).
+const HUMANOID_LEVELS := [
+	[], [&"forearm_r"], [&"arm_r"], [&"arm_r", &"forearm_l"], [&"arm_r", &"arm_l"],
+	[&"arm_r", &"arm_l", &"shin_r"], [&"arm_r", &"arm_l", &"leg_r"], [&"arm_r", &"arm_l", &"leg_r", &"shin_l"],
+	[&"arm_r", &"arm_l", &"leg_r", &"leg_l"], [&"arm_r", &"arm_l", &"leg_r", &"leg_l", &"head"],
+]
+const HORDE_LEVELS := 9
 @export var physics_pose: Dictionary = {}
 var _settling := false
 
@@ -23,6 +30,9 @@ const BODY_PARTS := preload("res://game/features/infected/body_parts.gd")
 @export var feet_offset := 0.0
 @export var pose_clip := "Death"
 @export var severed_parts: PackedStringArray = PackedStringArray()
+## How wrecked the body is: 0 whole, higher levels cumulatively lose forearms, arms, shins, legs, head
+## (Horde: tentacles one by one). Added to severed_parts.
+@export var destruction := 0
 @export var durability := 60.0
 
 var parts: Node
@@ -32,6 +42,50 @@ var _physics: RefCounted
 
 
 func _ready() -> void:
+	_build()
+
+
+# Number of destruction levels of this body (level 0 is whole).
+func level_count() -> int:
+	return (HORDE_LEVELS if _is_horde() else HUMANOID_LEVELS.size())
+
+
+func _is_horde() -> bool:
+	return visual_scene != null and visual_scene.resource_path.contains("Horde")
+
+
+func _destroyed_parts() -> Array[StringName]:
+	var result: Array[StringName] = []
+	for part_name in severed_parts:
+		result.append(StringName(part_name))
+	var level := clampi(destruction, 0, level_count() - 1)
+	if _is_horde():
+		for index in level:
+			result.append(StringName("tentacle_%d" % index))
+	else:
+		for part_name: StringName in HUMANOID_LEVELS[level]:
+			if not result.has(part_name):
+				result.append(part_name)
+	return result
+
+
+func _teardown() -> void:
+	remove_from_group(CORPSE_GROUP)
+	if _physics != null:
+		_physics.call("dispose")
+		_physics = null
+	_release_meshes()
+	if has_node("Body"):
+		var body := get_node("Body")
+		remove_child(body)
+		body.free()
+	if parts != null:
+		remove_child(parts)
+		parts.free()
+		parts = null
+
+
+func _build() -> void:
 	if visual_scene == null:
 		return
 	var body := Node3D.new()
@@ -64,25 +118,32 @@ func _ready() -> void:
 		return
 	if pose_variant != "legacy":
 		_apply_pose(body, visual)
-	for part_name in severed_parts:
-		parts.sever(StringName(part_name), Vector3.ZERO, false)
+	for part_name in _destroyed_parts():
+		parts.sever(part_name, Vector3.ZERO, false)
 	parts.enable_corpse_hitboxes()
 	_restore_physics_pose()
 
 
 func get_decor_pose() -> Dictionary:
-	var result := {"seed": pose_seed, "pose": pose_variant, "facing": pose_facing}
+	var result := {"seed": pose_seed, "pose": pose_variant, "facing": pose_facing, "destruction": destruction}
 	if not physics_pose.is_empty():
 		result["physics_v1"] = physics_pose.duplicate(true)
 	return result
 
 
 func configure_decor_pose(config: Dictionary) -> void:
+	var level := maxi(0, int(config.get("destruction", destruction)))
+	var rebuild := is_node_ready() and parts != null and level != destruction
+	destruction = level
 	physics_pose = config.get("physics_v1", {}).duplicate(true)
 	pose_seed = maxi(0, int(config.get("seed", 1)))
 	pose_variant = str(config.get("pose", "auto"))
 	pose_facing = float(config.get("facing", float(posmod(pose_seed, 6283)) / 1000.0 - PI))
-	if is_node_ready() and parts != null:
+	if rebuild:
+		# Fewer parts than before cannot be put back: build the body again.
+		_teardown()
+		_build()
+	elif is_node_ready() and parts != null:
 		var body := get_node("Body") as Node3D
 		_apply_pose(body, body.get_child(0) as Node3D)
 		_restore_physics_pose()
@@ -109,7 +170,11 @@ func is_dead() -> bool:
 func _notification(what: int) -> void:
 	if what != NOTIFICATION_PREDELETE:
 		return
-	# Release skin geometry while its per-instance wound materials still exist.
+	_release_meshes()
+
+
+# Release skin geometry while its per-instance wound materials still exist.
+func _release_meshes() -> void:
 	if parts != null:
 		for entry: Dictionary in parts.get("_entries"):
 			var mesh := entry.get("instance") as MeshInstance3D
