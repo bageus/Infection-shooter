@@ -50,7 +50,7 @@ func _run() -> void:
 	floor_view.free()
 	player.set("_roll_remaining", 0.0)
 	player.get("audio").call("_on_footstep", 0, 5.4)
-	_check(_voices(&"step_player").size() == 1, "Freed query collaborator falls back safely")
+	_check(_voices(&"step_concrete").size() == 1, "Freed query collaborator falls back safely")
 	stage.queue_free()
 	await process_frame
 	print("Glass footstep tests: %d failures" % failures)
@@ -97,7 +97,7 @@ func _test_footsteps(contact: Vector3) -> void:
 	player.global_position = contact + Vector3.UP * 0.9
 	var driver := player.get_node("AnimationDriver")
 	driver.emit_signal("footstep", 0, 5.4)
-	_check(_voices(&"step_glass").size() == 1 and _voices(&"step_player").is_empty(), "Animation contact selects glass from the feet, not capsule centre")
+	_check(_voices(&"step_glass").size() == 1 and _voices(&"step_concrete").is_empty(), "Animation contact selects glass from the feet, not capsule centre")
 	_clear_voices()
 	var paths: Dictionary = {}
 	seed(28173)
@@ -114,13 +114,13 @@ func _test_footsteps(contact: Vector3) -> void:
 	player.set("_roll_remaining", 0.0)
 	player.position = Vector3(6, 0.9, 2)
 	driver.emit_signal("footstep", 1, 5.4)
-	_check(_voices(&"step_player").size() == 1, "Leaving glass restores ordinary footsteps")
+	_check(_voices(&"step_concrete").size() == 1, "Leaving glass restores ordinary footsteps")
 	_clear_voices()
 	player.velocity = Vector3.UP * 8.0
 	player.move_and_slide()
 	await physics_frame
 	driver.emit_signal("footstep", 0, 5.4)
-	_check(_voices(&"step_player").is_empty() and _voices(&"step_glass").is_empty(), "Airborne contacts stay silent")
+	_check(_voices(&"step_concrete").is_empty() and _voices(&"step_glass").is_empty(), "Airborne contacts stay silent")
 
 
 func _test_shards() -> void:
