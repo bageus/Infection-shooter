@@ -3,6 +3,7 @@ const BARREL_GUARD := preload("res://game/features/combat/weapon_barrel_guard.gd
 const TRACE := preload("res://game/features/combat/public/explosion_trace.gd")
 const AIM_GEOMETRY := preload("res://game/features/combat/weapon_aim_geometry.gd")
 const MUZZLE_FLASH := preload("res://game/features/combat/muzzle_flash.tscn")
+const MUZZLE_SMOKE := preload("res://game/features/combat/muzzle_smoke.gd")
 const MUZZLE_FLASH_SCRIPT := preload("res://game/features/combat/muzzle_flash.gd")
 const ART_SETUP := preload("res://game/features/combat/weapon_art_setup.gd")
 const SFX := preload("res://game/core/audio/public/sound_events.gd")
