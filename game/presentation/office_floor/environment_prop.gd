@@ -45,6 +45,7 @@ const LOOT_CONFIG := preload("res://game/features/pickups/public/loot_config.gd"
 const DISPLAY_VIEW := preload("res://game/presentation/office_floor/display_view.gd")
 const DISPLAY_PROFILES := preload("res://game/presentation/office_floor/display_surface_profiles.gd")
 const SURFACE_DECOR := preload("res://game/presentation/office_floor/office_surface_decor.gd")
+const IMPACT_MATERIAL := preload("res://game/presentation/office_floor/environment_impact_material.gd")
 
 @export_file("*.glb") var model_path := ""
 @export_enum("on", "off", "auto") var display_power := "auto"
@@ -339,9 +340,7 @@ func _push_cooler(hit_position: Vector3, direction: Vector3, weapon: String) -> 
 
 
 func get_impact_sound_material(shape_index: int = -1) -> String:
-	for model in ["01_wood_slat_partition", "03_book_case", "03_bookshelf", "03_file_cabinet", "03_drawer_cabinet"]:
-		if model in model_path: return "wood"
-	return get_projectile_material(shape_index)
+	return IMPACT_MATERIAL.resolve(model_path, get_projectile_material(shape_index))
 
 
 func take_projectile_hit(damage: float, hit_position: Vector3, _normal: Vector3, direction: Vector3, weapon: String) -> bool:

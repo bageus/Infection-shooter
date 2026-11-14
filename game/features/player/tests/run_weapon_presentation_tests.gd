@@ -288,6 +288,14 @@ func _test_flash_anchors(player: PLAYER_SCRIPT) -> void:
 		weapon.call("_show_muzzle_flash")
 		var flash := marker.get_child(marker.get_child_count() - 1) as Node3D
 		_check(flash.name == "MuzzleFlash", "flash is attached directly to authored Muzzle")
+		var atlas_file := (flash.get("atlas") as Texture2D).resource_path.get_file()
+		var weapon_name: String = weapon.get_weapon_name()
+		if weapon_name == "SHOTGUN":
+			_check(atlas_file == "shotgun_muzzle.png", "shotgun flash uses its own muzzle atlas")
+		elif weapon_name in ["PISTOL", "UZI", "GRENADE LAUNCHER"]:
+			_check(atlas_file == "gun_fog.png", "%s flash keeps the gun_fog atlas" % weapon_name)
+		else:
+			_check(atlas_file.begins_with("frame_muzzle_"), "%s flash uses a frame_muzzle atlas" % weapon_name)
 		_check(flash.global_position.is_equal_approx(marker.global_position), "flash origin uses actual model marker")
 		var visual := flash.get_node("Visual") as MeshInstance3D
 		var tip := visual.global_transform * Vector3(float(flash.get("tip_position")) - 0.5, 0, 0)
