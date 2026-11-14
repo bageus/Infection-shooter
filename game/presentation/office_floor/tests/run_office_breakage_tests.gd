@@ -152,7 +152,7 @@ func _test_tarp_crate_untouched(stage: Node3D) -> void:
 
 
 func _test_pallet_scatter(stage: Node3D) -> void:
-	var setup := await _spawn(stage, MODELS + "02/02_pallet.glb", Vector3(-10, 0.0135, 6))
+	var setup := await _spawn(stage, MODELS + "15/15_pallet.glb", Vector3(-10, 0.0135, 6))
 	var pallet: RigidBody3D = setup[0]
 	for i in 14:
 		if is_instance_valid(pallet) and not bool(pallet.get("_broken")):

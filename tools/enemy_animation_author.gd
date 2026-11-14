@@ -300,7 +300,7 @@ func _attack_keys(style: Dictionary) -> Array:
 	var windup := stance.duplicate()
 	windup.merge({
 		"twist": -28.0, "lean": 2.0, "side_bend": 6.0,
-		"R_flex": 150.0, "R_abd": 42.0, "R_elbow": 95.0 - 40.0 * heavy, "R_wrist": -25.0, "R_shrug": 18.0, "R_protract": -12.0,
+		"R_flex": 150.0, "R_abd": 42.0, "R_elbow": 80.0 - 40.0 * heavy, "R_wrist": -25.0, "R_shrug": 18.0, "R_protract": -12.0,
 		"L_flex": 48.0, "L_abd": 6.0, "L_elbow": 48.0,
 		"L_swing": 14.0, "L_knee": 14.0, "R_swing": -14.0, "R_knee": 10.0,
 		"hips_y": -0.04 * hips_height, "hips_yaw": -10.0, "head": -10.0, "neck": 4.0,

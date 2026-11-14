@@ -275,8 +275,15 @@ func _migrate_scene_path(old_path: String) -> String:
 		"res://game/bootstrap/app/armor_pickups/armor.tscn": "res://game/features/pickups/public/armor_pickup.tscn",
 		"res://models/objects/enviroments/02/02_crate_wood_large.glb": "res://models/objects/enviroments/04/04_crate_wood_large.glb",
 		"res://models/objects/enviroments/02/02_crate_canvas_large.glb": "res://models/objects/enviroments/04/04_crate_canvas_large.glb",
-		"res://models/objects/enviroments/06/06_office_chair_2_fell.glb": "res://models/objects/enviroments/06/06_office_chair_2.glb",
-		"res://game/presentation/office_floor/public/props/06_office_chair_2_fell.tscn": "res://models/objects/enviroments/06/06_office_chair_2.glb",
+		# Retired chairs: chair 2 reloads as the remaining office chair, the fallen simple chair is dropped.
+		"res://models/objects/enviroments/06/06_office_chair_2.glb": "res://models/objects/enviroments/06/06_office_chair.glb",
+		"res://models/objects/enviroments/06/06_office_chair_2_fell.glb": "res://models/objects/enviroments/06/06_office_chair.glb",
+		"res://game/presentation/office_floor/public/props/06_office_chair_2.tscn": "res://models/objects/enviroments/06/06_office_chair.glb",
+		"res://game/presentation/office_floor/public/props/06_office_chair_2_fell.tscn": "res://models/objects/enviroments/06/06_office_chair.glb",
+		"res://models/objects/enviroments/06/06_simple_chair_fell.glb": "",
+		"res://game/presentation/office_floor/public/props/06_simple_chair_fell.tscn": "",
+		# The pallet moved from group 02 to 15 (simplified, same size).
+		"res://models/objects/enviroments/02/02_pallet.glb": "res://models/objects/enviroments/15/15_pallet.glb",
 		"res://models/objects/enviroments/05/09_phone_a_base.glb": "res://models/objects/enviroments/05/05_desk_phone.glb",
 		"res://models/objects/enviroments/05/09_phone_a_base_hang.glb": "res://models/objects/enviroments/05/05_desk_phone.glb",
 		"res://models/objects/enviroments/05/09_phone_b.glb": "res://models/objects/enviroments/05/05_desk_phone.glb",
