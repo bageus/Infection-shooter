@@ -44,12 +44,12 @@ func _run() -> void:
 	var driver := player.get_node("AnimationDriver")
 	player.global_position = solid + Vector3.UP * 0.9
 	driver.emit_signal("footstep", 0, 5.4)
-	_check(_voices(&"step_biomass").size() == 1 and _voices(&"step_player").is_empty(), "A step on floor biomass plays the wet step")
+	_check(_voices(&"step_biomass").size() == 1 and _voices(&"step_concrete").is_empty(), "A step on floor biomass plays the wet step")
 	_check(_voices(&"hit_biomass").is_empty(), "It is not the biomass damage sound")
 	_clear()
 	player.global_position = Vector3(8, 0.9, 8)
 	driver.emit_signal("footstep", 1, 5.4)
-	_check(_voices(&"step_player").size() == 1 and _voices(&"step_biomass").is_empty(), "Off the biomass the ordinary step returns")
+	_check(_voices(&"step_concrete").size() == 1 and _voices(&"step_biomass").is_empty(), "Off the biomass the ordinary step returns")
 	_clear()
 	var paths := {}
 	player.global_position = solid + Vector3.UP * 0.9
