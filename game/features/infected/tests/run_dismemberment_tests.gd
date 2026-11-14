@@ -110,6 +110,8 @@ func _test_arm_shot_off(stage: Node3D) -> void:
 	var upper_inward := Vector3(enemy.global_position.x - upper_point.x, 0.0, enemy.global_position.z - upper_point.z).normalized()
 	_expect(parts.pick_part(upper_point - upper_inward * 0.35, upper_inward) == &"arm_l", "A shot through the upper arm picks the whole arm.")
 	_expect(parts.pick_part(enemy.global_position + Vector3(0, 0.2, -0.6), Vector3(0, 0, 1)) == &"torso", "A shot through the belly picks the torso.")
+	var body: MeshInstance3D = parts._entries[0].instance
+	_expect(body.mesh.get_surface_count() == 1, "A whole enemy draws skin only, no cut tissue.")
 	var before := _pieces(stage).size()
 	await _shoot(enemy, &"arm_l", 12.0, 1)
 	var painted := false
@@ -119,6 +121,7 @@ func _test_arm_shot_off(stage: Node3D) -> void:
 	_expect(painted, "A hit bakes a wound into the skin's blood mask.")
 	await _shoot(enemy, &"arm_l", 12.0, 6)
 	_expect(parts.is_severed(&"arm_l"), "Enough damage shoots the arm off.")
+	_expect(body.mesh.get_surface_count() == 2 and body.get_surface_override_material(1) != null, "Severing brings the cut tissue back with its material.")
 	_expect(not bool(enemy.get("_dead")), "Losing an arm does not kill.")
 	_expect(_events.has("severed"), "Severing emits a limb_severed blood fact.")
 	var pieces := _pieces(stage)

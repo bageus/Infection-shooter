@@ -93,6 +93,24 @@ static func _surface_lods(source: ArrayMesh, surface: int) -> Dictionary:
 	return result
 
 
+# Skin-only copy of the body mesh (surface 0): a whole enemy draws no cut tissue, which sits
+# inside the body. Built once per cached body; the full mesh returns when a part is severed.
+static func whole_mesh(data: Dictionary) -> ArrayMesh:
+	if data.has("whole_mesh"):
+		return data.whole_mesh
+	var full := data.mesh as ArrayMesh
+	var arrays := full.surface_get_arrays(0)
+	var format := full.surface_get_format(0)
+	var flags := Mesh.ARRAY_CUSTOM_RGBA_FLOAT << Mesh.ARRAY_FORMAT_CUSTOM0_SHIFT
+	if format & Mesh.ARRAY_FLAG_USE_8_BONE_WEIGHTS:
+		flags |= Mesh.ARRAY_FLAG_USE_8_BONE_WEIGHTS
+	var skin_only := ArrayMesh.new()
+	skin_only.add_surface_from_arrays(full.surface_get_primitive_type(0), arrays, [], _surface_lods(full, 0), flags)
+	skin_only.surface_set_material(0, full.surface_get_material(0))
+	data.whole_mesh = skin_only
+	return skin_only
+
+
 static func _bind_bones(mesh_instance: MeshInstance3D, skeleton: Skeleton3D) -> Dictionary:
 	var result := {}
 	var skin := mesh_instance.skin
