@@ -7042,17 +7042,6 @@ metadata/planning_desk_id = ""
 metadata/planning_attachment = "4927777982"
 metadata/planning_zone = 3
 
-[node name="@RigidBody3D@33572" type="RigidBody3D" parent="." unique_id=1837751205 instance=ExtResource("16_oajpx")]
-transform = Transform3D(0.99998945, 4.2293427e-06, 0.004598028, -4.236201e-06, 1, 1.4818362e-06, -0.004598028, -1.5012987e-06, 0.99998945, 0.64738077, 0.005399227, -28.74121)
-
-model_path = "res://models/objects/enviroments/06/06_simple_chair_fell.glb"
-metadata/world_bound = true
-metadata/planning_settled_transform = Transform3D(0.99998945, 4.2293427e-06, 0.004598028, -4.236201e-06, 1, 1.4818362e-06, -0.004598028, -1.5012987e-06, 0.99998945, 0.64738077, 0.005399227, -28.74121)
-metadata/planning_object_id = ""
-metadata/planning_desk_id = ""
-metadata/planning_attachment = "4927777982"
-metadata/planning_zone = 1
-
 [node name="@RigidBody3D@33573" type="RigidBody3D" parent="." unique_id=1977280623 instance=ExtResource("16_oajpx")]
 transform = Transform3D(0.99996847, 2.2940956e-05, 0.007939572, -2.2871729e-05, 1, -8.810255e-06, -0.007939572, 8.628385e-06, 0.99996847, -5.156414, 0.009518504, -29.379337)
 
@@ -7085,17 +7074,6 @@ metadata/planning_object_id = ""
 metadata/planning_desk_id = ""
 metadata/planning_attachment = "4934138033"
 metadata/planning_zone = 4
-
-[node name="@RigidBody3D@33576" type="RigidBody3D" parent="." unique_id=257362690 instance=ExtResource("16_oajpx")]
-transform = Transform3D(0.9999635, -8.2333355e-07, 0.008538656, 8.418969e-07, 1, -2.1704393e-06, -0.008538656, 2.1775488e-06, 0.9999635, -6.200604, 0.0053941905, -27.719275)
-
-model_path = "res://models/objects/enviroments/06/06_simple_chair_fell.glb"
-metadata/world_bound = true
-metadata/planning_settled_transform = Transform3D(0.9999635, -8.2333355e-07, 0.008538656, 8.418969e-07, 1, -2.1704393e-06, -0.008538656, 2.1775488e-06, 0.9999635, -6.200604, 0.0053941905, -27.719275)
-metadata/planning_object_id = ""
-metadata/planning_desk_id = ""
-metadata/planning_attachment = "4934138033"
-metadata/planning_zone = 1
 
 [node name="@RigidBody3D@33577" type="RigidBody3D" parent="." unique_id=750099033 instance=ExtResource("16_oajpx")]
 transform = Transform3D(-0.008127451, -9.199043e-06, -0.99996704, -6.129624e-06, 1, -9.149528e-06, 0.99996704, 6.055059e-06, -0.008127451, -4.3800297, 0.8884529, -28.313852)
@@ -14935,7 +14913,7 @@ metadata/planning_zone = 11
 [node name="@RigidBody3D@34318" type="RigidBody3D" parent="." unique_id=1683820003 instance=ExtResource("16_oajpx")]
 transform = Transform3D(0.99999344, 0.00013076818, -0.0036237806, -1.9834228e-05, 0.99953187, 0.03059591, 0.0036260851, -0.030595638, 0.99952525, -38.309555, 0.038963974, 10.495016)
 
-model_path = "res://models/objects/enviroments/06/06_office_chair_2.glb"
+model_path = "res://models/objects/enviroments/06/06_office_chair.glb"
 metadata/world_bound = true
 metadata/planning_settled_transform = Transform3D(0.99999344, 0.00013076818, -0.0036237806, -1.9834228e-05, 0.99953187, 0.03059591, 0.0036260851, -0.030595638, 0.99952525, -38.309555, 0.038963974, 10.495016)
 metadata/planning_object_id = ""
@@ -17552,7 +17530,7 @@ metadata/planning_attachment = ""
 [node name="@RigidBody3D@34557" type="RigidBody3D" parent="." unique_id=1097156770 instance=ExtResource("16_oajpx")]
 transform = Transform3D(0.9999907, 0.0005387986, -0.0042757504, -0.00035821233, 0.9991123, 0.0421239, 0.0042946516, -0.042121977, 0.99910325, -36.332195, 0.044501126, 10.513693)
 
-model_path = "res://models/objects/enviroments/06/06_office_chair_2.glb"
+model_path = "res://models/objects/enviroments/06/06_office_chair.glb"
 metadata/world_bound = true
 metadata/planning_settled_transform = Transform3D(0.9999907, 0.0005387986, -0.0042757504, -0.00035821233, 0.9991123, 0.0421239, 0.0042946516, -0.042121977, 0.99910325, -36.332195, 0.044501126, 10.513693)
 metadata/planning_object_id = ""
@@ -18367,7 +18345,7 @@ metadata/planning_attachment = ""
 [node name="@RigidBody3D@34632" type="RigidBody3D" parent="." unique_id=568301399 instance=ExtResource("16_oajpx")]
 transform = Transform3D(-0.0036176443, 0.03034408, -0.999533, 0.0015176339, 0.99953854, 0.030338757, 0.9999923, -0.0014071716, -0.0036621094, 36.264633, 0.038784504, -14.912623)
 
-model_path = "res://models/objects/enviroments/06/06_office_chair_2.glb"
+model_path = "res://models/objects/enviroments/06/06_office_chair.glb"
 metadata/world_bound = true
 metadata/planning_settled_transform = Transform3D(-0.0036176443, 0.03034408, -0.999533, 0.0015176339, 0.99953854, 0.030338757, 0.9999923, -0.0014071716, -0.0036621094, 36.264633, 0.038784504, -14.912623)
 metadata/planning_object_id = ""
@@ -19500,7 +19478,7 @@ metadata/planning_attachment = ""
 [node name="@RigidBody3D@34735" type="RigidBody3D" parent="." unique_id=2000715998 instance=ExtResource("16_oajpx")]
 transform = Transform3D(0.0039568543, -0.01357745, 0.9999, 0.00034276908, 0.9999078, 0.0135762, -0.99999213, 0.00028901594, 0.003961146, 27.972958, 0.030671358, -0.9732139)
 
-model_path = "res://models/objects/enviroments/06/06_office_chair_2.glb"
+model_path = "res://models/objects/enviroments/06/06_office_chair.glb"
 metadata/world_bound = true
 metadata/planning_settled_transform = Transform3D(0.0039568543, -0.01357745, 0.9999, 0.00034276908, 0.9999078, 0.0135762, -0.99999213, 0.00028901594, 0.003961146, 27.972958, 0.030671358, -0.9732139)
 metadata/planning_object_id = ""
@@ -21777,7 +21755,7 @@ metadata/planning_attachment = ""
 [node name="@RigidBody3D@34949" type="RigidBody3D" parent="." unique_id=608335427 instance=ExtResource("16_oajpx")]
 transform = Transform3D(0.9999999, -0.00022153973, 0.00049327733, 0.0001737533, 0.9954915, 0.09485058, -0.00051206653, -0.09485047, 0.9954914, -28.067354, 0.070970595, 10.619666)
 
-model_path = "res://models/objects/enviroments/06/06_office_chair_2.glb"
+model_path = "res://models/objects/enviroments/06/06_office_chair.glb"
 metadata/world_bound = true
 metadata/planning_settled_transform = Transform3D(0.9999999, -0.00022153973, 0.00049327733, 0.0001737533, 0.9954915, 0.09485058, -0.00051206653, -0.09485047, 0.9954914, -28.067354, 0.070970595, 10.619666)
 metadata/planning_object_id = ""
@@ -25821,17 +25799,6 @@ metadata/planning_desk_id = ""
 metadata/planning_attachment = "5461882932"
 metadata/planning_zone = 4
 
-[node name="@RigidBody3D@35305" type="RigidBody3D" parent="." unique_id=1650205459 instance=ExtResource("16_oajpx")]
-transform = Transform3D(0.99999464, 1.7398816e-07, -0.0032711998, 1.0403711e-05, 0.99999475, 0.0032335669, 0.003271183, -0.0032335836, 0.99998945, 3.87661, 0.008767247, 27.752499)
-
-model_path = "res://models/objects/enviroments/06/06_simple_chair_fell.glb"
-metadata/world_bound = true
-metadata/planning_settled_transform = Transform3D(0.99999464, 1.7398816e-07, -0.0032711998, 1.0403711e-05, 0.99999475, 0.0032335669, 0.003271183, -0.0032335836, 0.99998945, 3.87661, 0.008767247, 27.752499)
-metadata/planning_object_id = ""
-metadata/planning_desk_id = ""
-metadata/planning_attachment = "5461882932"
-metadata/planning_zone = 1
-
 [node name="@RigidBody3D@35306" type="RigidBody3D" parent="." unique_id=185503455 instance=ExtResource("16_oajpx")]
 transform = Transform3D(0.003891468, -1.1586499e-05, -0.9999925, -3.403648e-06, 1, -1.1599832e-05, 0.9999925, 3.4487625e-06, 0.003891468, 3.7076104, 0.009510517, 25.128382)
 
@@ -25864,17 +25831,6 @@ metadata/planning_object_id = ""
 metadata/planning_desk_id = ""
 metadata/planning_attachment = "5464312219"
 metadata/planning_zone = 4
-
-[node name="@RigidBody3D@35309" type="RigidBody3D" parent="." unique_id=703565454 instance=ExtResource("16_oajpx")]
-transform = Transform3D(0.0039863586, 7.2927955e-06, -0.999992, 1.6503785e-05, 1, 7.3586434e-06, 0.999992, -1.653299e-05, 0.0039863586, 2.0399892, 0.005381882, 24.096302)
-
-model_path = "res://models/objects/enviroments/06/06_simple_chair_fell.glb"
-metadata/world_bound = true
-metadata/planning_settled_transform = Transform3D(0.0039863586, 7.2927955e-06, -0.999992, 1.6503785e-05, 1, 7.3586434e-06, 0.999992, -1.653299e-05, 0.0039863586, 2.0399892, 0.005381882, 24.096302)
-metadata/planning_object_id = ""
-metadata/planning_desk_id = ""
-metadata/planning_attachment = "5464312219"
-metadata/planning_zone = 1
 
 [node name="@RigidBody3D@35310" type="RigidBody3D" parent="." unique_id=1501298135 instance=ExtResource("16_oajpx")]
 transform = Transform3D(0.9992451, 2.132791e-06, 0.038847905, -2.2508866e-06, 1, 2.9962132e-06, -0.038847905, -3.0813937e-06, 0.9992451, -0.25197592, 0.0107186735, 25.510529)
@@ -26082,17 +26038,6 @@ metadata/planning_desk_id = ""
 metadata/planning_attachment = "5521135463"
 metadata/planning_zone = 4
 
-[node name="@RigidBody3D@35329" type="RigidBody3D" parent="." unique_id=1607483128 instance=ExtResource("16_oajpx")]
-transform = Transform3D(0.9999472, -1.5639358e-05, 0.01027929, 1.5704853e-05, 1, -6.2906297e-06, -0.01027929, 6.451732e-06, 0.9999472, 10.852829, 0.005376458, 26.28619)
-
-model_path = "res://models/objects/enviroments/06/06_simple_chair_fell.glb"
-metadata/world_bound = true
-metadata/planning_settled_transform = Transform3D(0.9999472, -1.5639358e-05, 0.01027929, 1.5704853e-05, 1, -6.2906297e-06, -0.01027929, 6.451732e-06, 0.9999472, 10.852829, 0.005376458, 26.28619)
-metadata/planning_object_id = ""
-metadata/planning_desk_id = ""
-metadata/planning_attachment = "5521135463"
-metadata/planning_zone = 1
-
 [node name="@RigidBody3D@35330" type="RigidBody3D" parent="." unique_id=433623522 instance=ExtResource("16_oajpx")]
 transform = Transform3D(0.9985785, -0.00010570118, 0.053301103, -2.0844247e-05, 0.9999972, 0.0023736, -0.053301208, -0.0023713368, 0.9985757, 14.49637, 0.008945107, 25.75142)
 
@@ -26288,17 +26233,6 @@ metadata/planning_desk_id = ""
 metadata/planning_attachment = "5737539378"
 metadata/planning_zone = 3
 
-[node name="@RigidBody3D@35348" type="RigidBody3D" parent="." unique_id=1672283402 instance=ExtResource("16_oajpx")]
-transform = Transform3D(0.9999911, -5.9890008e-05, 0.004214453, 5.8000514e-05, 0.9999999, 0.0004484574, -0.004214479, -0.00044820897, 0.999991, 16.876524, 0.0053420365, 25.022257)
-
-model_path = "res://models/objects/enviroments/06/06_simple_chair_fell.glb"
-metadata/world_bound = true
-metadata/planning_settled_transform = Transform3D(0.9999911, -5.9890008e-05, 0.004214453, 5.8000514e-05, 0.9999999, 0.0004484574, -0.004214479, -0.00044820897, 0.999991, 16.876524, 0.0053420365, 25.022257)
-metadata/planning_object_id = ""
-metadata/planning_desk_id = ""
-metadata/planning_attachment = "5737539378"
-metadata/planning_zone = 1
-
 [node name="@RigidBody3D@35349" type="RigidBody3D" parent="." unique_id=1171124901 instance=ExtResource("16_oajpx")]
 transform = Transform3D(0.97976995, 2.1285732e-06, -0.2001271, -2.527101e-06, 1, -1.7359187e-06, 0.2001271, 2.2065421e-06, 0.97976995, 12.807171, 0.0134992, 24.270271)
 
@@ -26457,17 +26391,6 @@ metadata/planning_object_id = ""
 metadata/planning_desk_id = ""
 metadata/planning_attachment = "7682254432"
 metadata/planning_zone = 4
-
-[node name="@RigidBody3D@35364" type="RigidBody3D" parent="." unique_id=807682708 instance=ExtResource("16_oajpx")]
-transform = Transform3D(0.65532124, 4.33037e-06, 0.7553503, 7.4416484e-06, 1, -1.21891e-05, -0.7553503, 1.3608828e-05, 0.65532124, -12.912077, 0.00538072, -28.543495)
-
-model_path = "res://models/objects/enviroments/06/06_simple_chair_fell.glb"
-metadata/world_bound = true
-metadata/planning_settled_transform = Transform3D(0.65532124, 4.33037e-06, 0.7553503, 7.4416484e-06, 1, -1.21891e-05, -0.7553503, 1.3608828e-05, 0.65532124, -12.912077, 0.00538072, -28.543495)
-metadata/planning_object_id = ""
-metadata/planning_desk_id = ""
-metadata/planning_attachment = "7682254432"
-metadata/planning_zone = 1
 
 [node name="@RigidBody3D@35365" type="RigidBody3D" parent="." unique_id=1767153267 instance=ExtResource("16_oajpx")]
 transform = Transform3D(0.99896926, -2.3434348e-05, 0.04539128, 2.3055118e-05, 1, 8.878243e-06, -0.04539128, -7.82259e-06, 0.99896926, -17.457642, 0.010697901, -28.501947)
@@ -28504,7 +28427,7 @@ metadata/planning_zone = 5
 [node name="@RigidBody3D@35554" type="RigidBody3D" parent="." unique_id=632450920 instance=ExtResource("16_oajpx")]
 transform = Transform3D(0.004302442, -0.03281594, 0.9994522, -0.00072117895, 0.99946105, 0.03281934, -0.9999905, -0.0008619856, 0.0042764544, 27.997517, 0.03938943, -13.937092)
 
-model_path = "res://models/objects/enviroments/06/06_office_chair_2.glb"
+model_path = "res://models/objects/enviroments/06/06_office_chair.glb"
 metadata/world_bound = true
 metadata/planning_settled_transform = Transform3D(0.004302442, -0.03281594, 0.9994522, -0.00072117895, 0.99946105, 0.03281934, -0.9999905, -0.0008619856, 0.0042764544, 27.997517, 0.03938943, -13.937092)
 metadata/planning_object_id = ""
@@ -28537,7 +28460,7 @@ metadata/planning_zone = 5
 [node name="@RigidBody3D@35557" type="RigidBody3D" parent="." unique_id=169408104 instance=ExtResource("16_oajpx")]
 transform = Transform3D(-0.001286149, 0.027189283, -0.99962944, -0.00012804568, 0.9996303, 0.02718947, 0.9999991, 0.00016296748, -0.0012822151, 36.257442, 0.03711474, -21.081459)
 
-model_path = "res://models/objects/enviroments/06/06_office_chair_2.glb"
+model_path = "res://models/objects/enviroments/06/06_office_chair.glb"
 metadata/world_bound = true
 metadata/planning_settled_transform = Transform3D(-0.001286149, 0.027189283, -0.99962944, -0.00012804568, 0.9996303, 0.02718947, 0.9999991, 0.00016296748, -0.0012822151, 36.257442, 0.03711474, -21.081459)
 metadata/planning_object_id = ""
@@ -28548,7 +28471,7 @@ metadata/planning_zone = 1
 [node name="@RigidBody3D@35558" type="RigidBody3D" parent="." unique_id=1335484049 instance=ExtResource("16_oajpx")]
 transform = Transform3D(-0.008420587, 0.0107332, -0.99990696, -0.00036322186, 0.9999423, 0.010736638, 0.99996454, 0.00045359787, -0.008416295, 36.271927, 0.028981566, -17.052666)
 
-model_path = "res://models/objects/enviroments/06/06_office_chair_2.glb"
+model_path = "res://models/objects/enviroments/06/06_office_chair.glb"
 metadata/world_bound = true
 metadata/planning_settled_transform = Transform3D(-0.008420587, 0.0107332, -0.99990696, -0.00036322186, 0.9999423, 0.010736638, 0.99996454, 0.00045359787, -0.008416295, 36.271927, 0.028981566, -17.052666)
 metadata/planning_object_id = ""
@@ -28592,7 +28515,7 @@ metadata/planning_zone = 9
 [node name="@RigidBody3D@35562" type="RigidBody3D" parent="." unique_id=725981863 instance=ExtResource("16_oajpx")]
 transform = Transform3D(-0.006164789, 0.007924011, -0.9999497, 0.00021925988, 0.9999686, 0.00792281, 0.99998105, -0.00017040712, -0.006166339, 36.25328, 0.027627647, -12.84192)
 
-model_path = "res://models/objects/enviroments/06/06_office_chair_2.glb"
+model_path = "res://models/objects/enviroments/06/06_office_chair.glb"
 metadata/world_bound = true
 metadata/planning_settled_transform = Transform3D(-0.006164789, 0.007924011, -0.9999497, 0.00021925988, 0.9999686, 0.00792281, 0.99998105, -0.00017040712, -0.006166339, 36.25328, 0.027627647, -12.84192)
 metadata/planning_object_id = ""
@@ -29738,7 +29661,7 @@ metadata/planning_zone = 22
 [node name="@RigidBody3D@35666" type="RigidBody3D" parent="." unique_id=1942367526 instance=ExtResource("16_oajpx")]
 transform = Transform3D(-0.99999416, 0.00036449847, 0.0033983842, 0.00065111986, 0.9964042, 0.084725045, -0.0033552821, 0.08472676, -0.99639857, 36.292725, 0.06559104, 22.252218)
 
-model_path = "res://models/objects/enviroments/06/06_office_chair_2.glb"
+model_path = "res://models/objects/enviroments/06/06_office_chair.glb"
 metadata/world_bound = true
 metadata/planning_settled_transform = Transform3D(-0.99999416, 0.00036449847, 0.0033983842, 0.00065111986, 0.9964042, 0.084725045, -0.0033552821, 0.08472676, -0.99639857, 36.292725, 0.06559104, 22.252218)
 metadata/planning_object_id = ""
@@ -29760,7 +29683,7 @@ metadata/planning_zone = 5
 [node name="@RigidBody3D@35668" type="RigidBody3D" parent="." unique_id=274184004 instance=ExtResource("16_oajpx")]
 transform = Transform3D(-1, 0.000246728, 0.00037363064, 0.00026294135, 0.99903, 0.044034455, -0.00036240366, 0.04403455, -0.99903, 38.2682, 0.04574567, 22.295944)
 
-model_path = "res://models/objects/enviroments/06/06_office_chair_2.glb"
+model_path = "res://models/objects/enviroments/06/06_office_chair.glb"
 metadata/world_bound = true
 metadata/planning_settled_transform = Transform3D(-1, 0.000246728, 0.00037363064, 0.00026294135, 0.99903, 0.044034455, -0.00036240366, 0.04403455, -0.99903, 38.2682, 0.04574567, 22.295944)
 metadata/planning_object_id = ""
@@ -29782,7 +29705,7 @@ metadata/planning_zone = 5
 [node name="@RigidBody3D@35670" type="RigidBody3D" parent="." unique_id=1943496005 instance=ExtResource("16_oajpx")]
 transform = Transform3D(-0.99998224, 0.00016373655, 0.005938458, 0.0005790291, 0.9975469, 0.069998644, -0.005912429, 0.07000085, -0.9975294, 34.27001, 0.058644354, 22.264503)
 
-model_path = "res://models/objects/enviroments/06/06_office_chair_2.glb"
+model_path = "res://models/objects/enviroments/06/06_office_chair.glb"
 metadata/world_bound = true
 metadata/planning_settled_transform = Transform3D(-0.99998224, 0.00016373655, 0.005938458, 0.0005790291, 0.9975469, 0.069998644, -0.005912429, 0.07000085, -0.9975294, 34.27001, 0.058644354, 22.264503)
 metadata/planning_object_id = ""
@@ -40701,7 +40624,7 @@ metadata/planning_flicker_step = 0.2
 [node name="@RigidBody3D@36612" type="RigidBody3D" parent="." unique_id=466286531 instance=ExtResource("16_oajpx")]
 transform = Transform3D(1, -7.257592e-07, -3.204671e-08, 7.257592e-07, 1, -1.30216e-06, 3.2047655e-08, 1.30216e-06, 1, 1.3356668, 0.023960173, -16.788015)
 
-model_path = "res://models/objects/enviroments/06/06_office_chair_2.glb"
+model_path = "res://models/objects/enviroments/06/06_office_chair.glb"
 metadata/world_bound = true
 metadata/planning_settled_transform = Transform3D(1, -7.257592e-07, -3.204671e-08, 7.257592e-07, 1, -1.30216e-06, 3.2047655e-08, 1.30216e-06, 1, 1.3356668, 0.023960173, -16.788015)
 metadata/planning_object_id = ""
@@ -40791,7 +40714,7 @@ metadata/planning_zone = 8
 [node name="@RigidBody3D@36620" type="RigidBody3D" parent="." unique_id=329633374 instance=ExtResource("16_oajpx")]
 transform = Transform3D(1, -2.0264554e-06, 2.6025253e-07, 2.0264558e-06, 1, -1.5202422e-06, -2.6024946e-07, 1.5202427e-06, 1, -0.53712916, 0.023960114, -16.788013)
 
-model_path = "res://models/objects/enviroments/06/06_office_chair_2.glb"
+model_path = "res://models/objects/enviroments/06/06_office_chair.glb"
 metadata/world_bound = true
 metadata/planning_settled_transform = Transform3D(1, -2.0264554e-06, 2.6025253e-07, 2.0264558e-06, 1, -1.5202422e-06, -2.6024946e-07, 1.5202427e-06, 1, -0.53712916, 0.023960114, -16.788013)
 metadata/planning_object_id = ""
@@ -40868,7 +40791,7 @@ metadata/planning_zone = 9
 [node name="@RigidBody3D@36627" type="RigidBody3D" parent="." unique_id=1540091912 instance=ExtResource("16_oajpx")]
 transform = Transform3D(-1, 1.4503481e-06, -1.7561872e-06, 1.4503481e-06, 1, 1.7781554e-08, 1.7561872e-06, 1.7779007e-08, -1, -1.3356605, 0.023960292, 16.538017)
 
-model_path = "res://models/objects/enviroments/06/06_office_chair_2.glb"
+model_path = "res://models/objects/enviroments/06/06_office_chair.glb"
 metadata/world_bound = true
 metadata/planning_settled_transform = Transform3D(-1, 1.4503481e-06, -1.7561872e-06, 1.4503481e-06, 1, 1.7781554e-08, 1.7561872e-06, 1.7779007e-08, -1, -1.3356605, 0.023960292, 16.538017)
 metadata/planning_object_id = ""
@@ -40958,7 +40881,7 @@ metadata/planning_zone = 8
 [node name="@RigidBody3D@36635" type="RigidBody3D" parent="." unique_id=1853062563 instance=ExtResource("16_oajpx")]
 transform = Transform3D(-1, 1.94171e-06, -9.453696e-08, 1.94171e-06, 1, -1.6249875e-06, 9.45338e-08, -1.6249877e-06, -1, 0.5371275, 0.023960054, 16.538012)
 
-model_path = "res://models/objects/enviroments/06/06_office_chair_2.glb"
+model_path = "res://models/objects/enviroments/06/06_office_chair.glb"
 metadata/world_bound = true
 metadata/planning_settled_transform = Transform3D(-1, 1.94171e-06, -9.453696e-08, 1.94171e-06, 1, -1.6249875e-06, 9.45338e-08, -1.6249877e-06, -1, 0.5371275, 0.023960054, 16.538012)
 metadata/planning_object_id = ""
@@ -48602,7 +48525,7 @@ metadata/planning_attachment = ""
 [node name="@RigidBody3D@37147" type="RigidBody3D" parent="." unique_id=1521446391 instance=ExtResource("16_oajpx")]
 transform = Transform3D(-0.9999927, -0.00039502967, 0.0038301654, -0.00020445765, 0.99876773, 0.049628865, -0.0038450502, 0.049627718, -0.99876046, 21.298155, 0.048398912, -20.519257)
 
-model_path = "res://models/objects/enviroments/06/06_office_chair_2.glb"
+model_path = "res://models/objects/enviroments/06/06_office_chair.glb"
 metadata/world_bound = true
 metadata/planning_settled_transform = Transform3D(-0.9999927, -0.00039502967, 0.0038301654, -0.00020445765, 0.99876773, 0.049628865, -0.0038450502, 0.049627718, -0.99876046, 21.298155, 0.048398912, -20.519257)
 metadata/planning_object_id = ""

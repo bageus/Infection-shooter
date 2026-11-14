@@ -49,28 +49,26 @@ func _build(enemy_name: String) -> bool:
 	var nodes: Array = []
 	for node in instance.find_children("*", "MeshInstance3D", true, false):
 		var mesh_instance := node as MeshInstance3D
-		if mesh_instance.mesh is ArrayMesh and mesh_instance.mesh.get_surface_count() == 2:
+		if mesh_instance.mesh is ArrayMesh and _split_surfaces(mesh_instance.mesh).size() == 2:
 			nodes.append(mesh_instance)
 	nodes.sort_custom(func(a: Node, b: Node) -> bool: return String(a.name) < String(b.name))
 	if nodes.is_empty():
 		push_error("Source has no two-surface part meshes: " + enemy_name)
 		instance.free()
 		return false
-	var merged := [_new_surface(), _new_surface()]
+	var merged: Array = []
 	var parts: Array = []
-	var shares := [0.0, 0.0]
-	for node: MeshInstance3D in nodes:
-		for surface in 2:
-			shares[surface] += pow(float(node.mesh.surface_get_arrays(surface)[Mesh.ARRAY_INDEX].size() / 3), 0.8)
-	for id in nodes.size():
-		var node := nodes[id] as MeshInstance3D
-		var transform := _relative(node, instance)
-		for surface in 2:
-			var arrays := node.mesh.surface_get_arrays(surface)
-			var budget: float = (SKIN_TRIANGLES if surface == 0 else CAP_TRIANGLES) * pow(float(arrays[Mesh.ARRAY_INDEX].size() / 3), 0.8) / shares[surface]
-			var simplified := _simplify(arrays, maxi(int(budget), 12))
-			_append(merged[surface], simplified, transform, id, _part_lods(simplified))
-		parts.append({"name": String(node.name), "id": id, "caps": _caps(node.mesh.surface_get_arrays(1), transform)})
+	# Parts whose UV seams lock their edges simplify less than asked; tighten the skin target
+	# (up to three times) until the merged skin is within a few percent of its budget.
+	var skin_scale := 1.0
+	for attempt in 4:
+		merged = [_new_surface(), _new_surface()]
+		parts = []
+		_merge_parts(nodes, instance, skin_scale, merged, parts)
+		var skin_triangles := (merged[0].indices as PackedInt32Array).size() / 3
+		if skin_triangles <= SKIN_TRIANGLES * 1.05 or attempt == 3:
+			break
+		skin_scale *= clampf(float(SKIN_TRIANGLES) / float(skin_triangles), 0.4, 0.95)
 	var mesh := ArrayMesh.new()
 	for surface in 2:
 		mesh.add_surface_from_arrays(Mesh.PRIMITIVE_TRIANGLES, _finish(merged[surface]), [], _lods(merged[surface], surface))
@@ -91,6 +89,69 @@ func _build(enemy_name: String) -> bool:
 	_write_material(enemy_name)
 	_write_wound_material(enemy_name)
 	return ok
+
+
+# Simplifies every part to its share of the triangle budget and appends it to `merged`.
+func _merge_parts(nodes: Array, instance: Node, skin_scale: float, merged: Array, parts: Array) -> void:
+	var shares := [0.0, 0.0]
+	for node: MeshInstance3D in nodes:
+		var split := _split_surfaces(node.mesh)
+		for surface in 2:
+			shares[surface] += pow(float(_triangles(split[surface])), 0.8)
+	for id in nodes.size():
+		var node := nodes[id] as MeshInstance3D
+		var transform := _relative(node, instance)
+		var split := _split_surfaces(node.mesh)
+		for surface in 2:
+			var arrays: Array = split[surface]
+			if _triangles(arrays) == 0:
+				continue
+			var total := (SKIN_TRIANGLES * skin_scale) if surface == 0 else float(CAP_TRIANGLES)
+			var budget: float = total * pow(float(_triangles(arrays)), 0.8) / shares[surface]
+			var simplified := _simplify(arrays, maxi(int(budget), 12))
+			_append(merged[surface], simplified, transform, id, _part_lods(simplified))
+		parts.append({"name": String(node.name), "id": id, "caps": _caps(split[1], transform) if _triangles(split[1]) > 0 else []})
+
+
+# [skin arrays, cut-cap arrays] of a source part. Every surface that is not the bloody cut
+# tissue (the skin, and patches such as Brute's shoulder cloth) is joined into the skin;
+# a part without cut tissue (Titan's head) has empty caps. Returns [] when there is no skin.
+static func _split_surfaces(mesh: ArrayMesh) -> Array:
+	var skin: Array = []
+	var caps: Array = []
+	for surface in mesh.get_surface_count():
+		var material := mesh.surface_get_material(surface)
+		var is_cut := material != null and String(material.resource_name).begins_with("Bloody_Cut")
+		var arrays := mesh.surface_get_arrays(surface)
+		if is_cut:
+			caps = arrays
+		elif skin.is_empty():
+			skin = arrays
+		else:
+			skin = _join(skin, arrays)
+	if skin.is_empty():
+		return []
+	if caps.is_empty():
+		caps.resize(Mesh.ARRAY_MAX)
+		caps[Mesh.ARRAY_INDEX] = PackedInt32Array()
+	return [skin, caps]
+
+
+static func _triangles(arrays: Array) -> int:
+	var indices: PackedInt32Array = arrays[Mesh.ARRAY_INDEX] if arrays[Mesh.ARRAY_INDEX] != null else PackedInt32Array()
+	return indices.size() / 3
+
+
+static func _join(first: Array, second: Array) -> Array:
+	var base := (first[Mesh.ARRAY_VERTEX] as PackedVector3Array).size()
+	var result := first.duplicate()
+	for slot: int in [Mesh.ARRAY_VERTEX, Mesh.ARRAY_NORMAL, Mesh.ARRAY_TEX_UV, Mesh.ARRAY_TANGENT]:
+		result[slot] = first[slot] + second[slot]
+	var indices: PackedInt32Array = first[Mesh.ARRAY_INDEX].duplicate()
+	for index: int in second[Mesh.ARRAY_INDEX]:
+		indices.append(base + index)
+	result[Mesh.ARRAY_INDEX] = indices
+	return result
 
 
 static func _relative(node: Node3D, root: Node) -> Transform3D:
@@ -115,16 +176,21 @@ static func _simplify(arrays: Array, target: int) -> Array:
 		if (next[Mesh.ARRAY_INDEX] as PackedInt32Array).size() / 3 >= count:
 			break
 		arrays = next
+	# Normal-aware LODs stall on parts with many hard edges (Brute); merging all normals reduces further.
+	if _triangles(arrays) > target * 1.15:
+		var next := _simplify_once(arrays, target, 180.0, 180.0)
+		if _triangles(next) < _triangles(arrays):
+			arrays = next
 	return arrays
 
 
-static func _simplify_once(arrays: Array, target: int) -> Array:
+static func _simplify_once(arrays: Array, target: int, merge_angle := 60.0, split_angle := 90.0) -> Array:
 	var full: PackedInt32Array = arrays[Mesh.ARRAY_INDEX]
 	if full.size() / 3 <= target:
 		return arrays
 	var importer := ImporterMesh.new()
 	importer.add_surface(Mesh.PRIMITIVE_TRIANGLES, arrays)
-	importer.generate_lods(60.0, 90.0, [])
+	importer.generate_lods(merge_angle, split_angle, [])
 	var chosen := full
 	var best := absf(log(float(full.size() / 3) / float(target)))
 	for lod in importer.get_surface_lod_count(0):
@@ -370,6 +436,9 @@ func _write_textures(enemy_name: String) -> bool:
 	var materials: Array = document.materials
 	var body_material: Dictionary = materials[0]
 	var wound_material: Dictionary = materials[materials.size() - 1]
+	for candidate: Dictionary in materials:
+		if str(candidate.get("name", "")).begins_with("Bloody_Cut"):
+			wound_material = candidate
 	var wanted := {
 		"albedo": int(body_material.pbrMetallicRoughness.baseColorTexture.index),
 		"normal": int(body_material.normalTexture.index),

@@ -35,40 +35,12 @@
 			"path": "res://models/objects/enviroments/02/02_coffee_machine_destructible.glb"
 		},
 		{
-			"name": "coffee vending 1 dented",
-			"path": "res://models/objects/enviroments/02/vending/02_coffee_vending_1_dented.glb"
-		},
-		{
-			"name": "dishwasher dented",
-			"path": "res://models/objects/enviroments/02/02_dishwasher_dented.glb"
-		},
-		{
-			"name": "frige dented",
-			"path": "res://models/objects/enviroments/02/02_frige_dented.glb"
-		},
-		{
 			"name": "kittle destructible",
 			"path": "res://models/objects/enviroments/02/02_kittle_destructible.glb"
 		},
 		{
 			"name": "microwave destructible",
 			"path": "res://models/objects/enviroments/02/02_microwave_destructible.glb"
-		},
-		{
-			"name": "vending automat 1 dented",
-			"path": "res://models/objects/enviroments/02/vending/02_vending_automat_1_dented.glb"
-		},
-		{
-			"name": "vending automat 2 dented",
-			"path": "res://models/objects/enviroments/02/vending/02_vending_automat_2_dented.glb"
-		},
-		{
-			"name": "vending machine fantas dented",
-			"path": "res://models/objects/enviroments/02/vending/02_vending_machine_fantas_dented.glb"
-		},
-		{
-			"name": "washing machine dented",
-			"path": "res://models/objects/enviroments/02/02_washing_machine_dented.glb"
 		},
 		{
 			"name": "water cooler bottle attached destructible",
@@ -243,16 +215,8 @@
 			"path": "res://models/objects/enviroments/06/06_office_chair.glb"
 		},
 		{
-			"name": "office chair 2",
-			"path": "res://models/objects/enviroments/06/06_office_chair_2.glb"
-		},
-		{
 			"name": "simple chair",
 			"path": "res://models/objects/enviroments/06/06_simple_chair.glb"
-		},
-		{
-			"name": "simple chair fell",
-			"path": "res://models/objects/enviroments/06/06_simple_chair_fell.glb"
 		}
 	],
 	"07": [
