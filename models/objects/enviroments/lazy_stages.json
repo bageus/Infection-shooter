@@ -9,7 +9,7 @@
       "path": "res://models/objects/enviroments/01/damage/01_VECTRION_Destructible_jaggedfragments.glb"
     }
   ],
-  "02_pallet.glb": [
+  "15_pallet.glb": [
     {
       "name": "LargeParts",
       "path": "res://models/objects/enviroments/02/damage/02_pallet_largeparts.glb"
@@ -169,22 +169,10 @@
       "path": "res://models/objects/enviroments/06/damage/06_office_chair_largeparts.glb"
     }
   ],
-  "06_office_chair_2.glb": [
-    {
-      "name": "LargeParts",
-      "path": "res://models/objects/enviroments/06/damage/06_office_chair_2_largeparts.glb"
-    }
-  ],
   "06_simple_chair.glb": [
     {
       "name": "LargeParts",
       "path": "res://models/objects/enviroments/06/damage/06_simple_chair_largeparts.glb"
-    }
-  ],
-  "06_simple_chair_fell.glb": [
-    {
-      "name": "LargeParts",
-      "path": "res://models/objects/enviroments/06/damage/06_simple_chair_fell_largeparts.glb"
     }
   ],
   "07_coffee_table.glb": [

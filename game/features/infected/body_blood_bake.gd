@@ -63,7 +63,11 @@ static func _paint_triangle(image: Image, rest: Array, uv: Array, center: Vector
 	var y1 := clampi(ceili(high.y), 0, SIZE - 1)
 	var changed := false
 	for y in range(y0, y1 + 1):
-		for x in range(x0, x1 + 1):
+		# Only the columns the triangle covers on this row (its UV box can be mostly empty).
+		var span := _row_span(a, b, c, y + 0.5)
+		if span.x > span.y:
+			continue
+		for x in range(maxi(x0, floori(span.x) - 1), mini(x1, ceili(span.y) + 1) + 1):
 			var p := Vector2(x + 0.5, y + 0.5) - a
 			var d20 := p.dot(v0)
 			var d21 := p.dot(v1)
@@ -82,6 +86,21 @@ static func _paint_triangle(image: Image, rest: Array, uv: Array, center: Vector
 			if image.get_pixel(x, y) != old:
 				changed = true
 	return changed
+
+
+# Left and right x of the triangle on the horizontal line `row`; x > y when the line misses it.
+static func _row_span(a: Vector2, b: Vector2, c: Vector2, row: float) -> Vector2:
+	var low := INF
+	var high := -INF
+	for edge in [[a, b], [b, c], [c, a]]:
+		var p: Vector2 = edge[0]
+		var q: Vector2 = edge[1]
+		if (p.y - row) * (q.y - row) > 0.0 or is_equal_approx(p.y, q.y):
+			continue
+		var x := p.x + (q.x - p.x) * (row - p.y) / (q.y - p.y)
+		low = minf(low, x)
+		high = maxf(high, x)
+	return Vector2(low, high)
 
 
 # Same shape as body_wound.gdshader without the grain: x = blood, y = core.

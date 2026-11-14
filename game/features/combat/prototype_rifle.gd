@@ -248,7 +248,9 @@ func _show_muzzle_flash() -> void:
 	flash.set("atlas", MUZZLE_FLASH_SCRIPT.atlas_for(weapon_name))
 	var anchor := _authored_muzzle if is_instance_valid(_authored_muzzle) else muzzle
 	# Authored art uses +X; legacy gameplay-only scenes keep their -Z marker.
-	flash.set("barrel_axis", Vector3.RIGHT if anchor == _authored_muzzle else Vector3.FORWARD)
+	var axis := Vector3.RIGHT if anchor == _authored_muzzle else Vector3.FORWARD
+	flash.set("barrel_axis", axis)
+	MUZZLE_SMOKE.emit_at(anchor, axis)  # before the flash: the flash stays the last child
 	anchor.add_child(flash)
 
 
