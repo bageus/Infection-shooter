@@ -4,6 +4,7 @@ const TRACE := preload("res://game/features/combat/public/explosion_trace.gd")
 const AIM_GEOMETRY := preload("res://game/features/combat/weapon_aim_geometry.gd")
 const MUZZLE_FLASH := preload("res://game/features/combat/muzzle_flash.tscn")
 const MUZZLE_SMOKE := preload("res://game/features/combat/muzzle_smoke.gd")
+const MUZZLE_FLASH_SCRIPT := preload("res://game/features/combat/muzzle_flash.gd")
 const ART_SETUP := preload("res://game/features/combat/weapon_art_setup.gd")
 const SFX := preload("res://game/core/audio/public/sound_events.gd")
 # How far a gunshot carries to unaware infected, in metres.
@@ -245,6 +246,7 @@ func _play_reload_sound() -> void:
 
 func _show_muzzle_flash() -> void:
 	var flash := MUZZLE_FLASH.instantiate()
+	flash.set("atlas", MUZZLE_FLASH_SCRIPT.atlas_for(weapon_name))
 	var anchor := _authored_muzzle if is_instance_valid(_authored_muzzle) else muzzle
 	# Authored art uses +X; legacy gameplay-only scenes keep their -Z marker.
 	var axis := Vector3.RIGHT if anchor == _authored_muzzle else Vector3.FORWARD
