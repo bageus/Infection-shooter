@@ -39,6 +39,8 @@ func _run() -> void:
 		root.add_child(enemy)
 		for snapshot: Dictionary in snapshots:
 			var instance: MeshInstance3D = snapshot.instance
+			if snapshot.surface >= instance.mesh.get_surface_count():
+				continue # a whole enemy draws no cut-tissue surface
 			var after: Array = RenderingServer.mesh_get_surface(instance.mesh.get_rid(), snapshot.surface).get("lods", [])
 			_expect(after == snapshot.lods, "Ready enemy preserves exact LOD bytes/thresholds: " + path)
 		enemy.queue_free()

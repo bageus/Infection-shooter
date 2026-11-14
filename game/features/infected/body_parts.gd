@@ -81,6 +81,8 @@ func setup(body_owner: Node3D, visual_root: Node3D, strength: float) -> bool:
 		for surface in materials.size():
 			mesh_instance.set_surface_override_material(surface, materials[surface])
 		lease.bind(mesh_instance)
+		if data.surfaces.size() > 1:
+			mesh_instance.mesh = MESH.whole_mesh(data)
 		_entries.append({"instance": mesh_instance, "data": data, "materials": materials, "pool": pool, "lease": lease})
 	if _entries.is_empty():
 		return false
@@ -331,11 +333,24 @@ func sever(part: StringName, direction: Vector3, spawn_piece := true) -> RigidBo
 	if spawn_piece:
 		piece = _spawn_piece(part, info, chain, joint_world, direction)
 	_modifier.severed.append(root)
+	_show_cuts()
 	# The bleeding stump is the neighbour's cut tissue: nearest cap vertex outside the part.
 	_add_stump(root, _nearest_point(_skin_points(info.bones, true, true), joint_world), spawn_piece)
 	_remove_hitboxes(part)
 	part_severed.emit(part, piece)
 	return piece
+
+
+# The first severed part brings back the cut tissue surface that a whole body does not draw.
+func _show_cuts() -> void:
+	for entry: Dictionary in _entries:
+		var instance: MeshInstance3D = entry.instance
+		if instance.mesh == entry.data.mesh:
+			continue
+		instance.mesh = entry.data.mesh
+		for surface in entry.materials.size():
+			instance.set_surface_override_material(surface, entry.materials[surface])
+		entry.lease.bind(instance, entry.has("masks"))
 
 
 func _spawn_piece(part: StringName, info: Dictionary, chain: PackedInt32Array, joint_world: Vector3, direction: Vector3) -> RigidBody3D:
