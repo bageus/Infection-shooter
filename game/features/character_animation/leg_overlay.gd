@@ -3,7 +3,7 @@ extends SkeletonModifier3D
 ## skeleton is playing: a running enemy keeps stepping while its attack clip
 ## swings the arms and torso. Presentation only.
 
-const LEG_BONES := ["L_Thigh", "L_Shin", "L_Foot", "L_Toe", "R_Thigh", "R_Shin", "R_Foot", "R_Toe"]
+const LEG_BONES := ["L_Thigh", "L_Shin", "L_Foot", "L_Toe", "R_Thigh", "R_Shin", "R_Foot", "R_Toe", "LeftUpLeg", "LeftLeg", "LeftFoot", "LeftToeBase", "RightUpLeg", "RightLeg", "RightFoot", "RightToeBase"]
 
 var fade_seconds := 0.12
 ## Keeps stepping this long after the speed dips to zero for a tick.

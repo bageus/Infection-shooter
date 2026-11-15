@@ -18,22 +18,23 @@
       "notify_hit": "notify_hit(world_point: Vector3 = ZERO, world_direction: Vector3 = ZERO, strength: float = 1.0) -> void; skeletal models twist/rock the torso away from the hit with a damped spring, hips and legs keep the clip (hit_reaction_v1, ADR-0040); no direction rocks back; models without a spine bone flinch as a whole",
       "set_active": "set_active(active: bool) -> void; pauses animation for distant characters",
       "one_shot_finished": "signal one_shot_finished(state: StringName)",
-      "play_dodge": "play_dodge(world_direction: Vector3, duration: float) -> bool; plays the dive roll (whole hips clip, body turns along the dodge) over duration; false without leg_clips (ADR-0044)",
+      "play_dodge": "play_dodge(world_direction: Vector3, duration: float) -> bool; the body turns along the dodge and the baked dodge_clip (Running_Dive_Roll) plays squeezed into duration; false without that clip or when dead",
       "is_dodging": "is_dodging() -> bool",
       "play_named_one_shot": "play_named_one_shot(clip: StringName, blend := 0.12, speed := 1.0, leg_clip := \"\") -> float; plays a clip by name once, emits one_shot_finished(clip), returns its duration; with leg_clip a moving character keeps that locomotion clip on its legs meanwhile (ADR-0045)",
       "play_overlay": "play_overlay(clip: StringName) -> bool; plays a clip on the upper body only, over the running legs (ADR-0045)",
-      "attack_legs": "an attack/attack_left/attack_right one-shot played while the character moves loops the run or walk clip on the leg bones only (leg_overlay.gd), the attack clip keeps the rest; released when the attack ends or the body stops (held 0.25 s across speed dips, dropped at once on death or set_active(false)); not used with leg_clips",
+      "attack_legs": "an attack/attack_left/attack_right one-shot played while the character moves loops the run or walk clip on the leg bones only (leg_overlay.gd), the attack clip keeps the rest; released when the attack ends or the body stops (held 0.25 s across speed dips, dropped at once on death or set_active(false))",
       "play_strike": "play_strike(kind: StringName) -> float; procedural melee pose over the playing clips, kind kick (rear left leg) or punch (left arm); returns its duration, 0.0 without the bones or when dead; is_striking() reports it (ADR-0066)",
       "clip_meta": "clip_meta(clip, key, default) -> Variant; clip_length(clip) -> float (ADR-0045)",
       "prepare_visual": "prepare_visual() -> void; idempotent rig/clip preparation; optional defer_setup=true before ready postpones it; set_active requests are preserved"
     },
     "animation_assets_v1": {
-      "leg_playback_multiplier": "@export float = 1.0, finite and clamped 0.5..2.0; scales only leg_clips locomotion after speed matching, live and before attachment; upper-body, one-shot and dodge clocks unchanged (ADR-0050)",
+      "leg_playback_multiplier": "@export float = 1.0, finite and clamped 0.5..2.0; scales the playback of a clip_footsteps character's moving locomotion cycles after speed matching, live",
+      "clip_footsteps": "@export bool = false; emits footstep from the Walk_*/Run_* clip playback phases (clip_footsteps.gd); stance_feet @export bool = true attaches the enemy idle foot turn",
+      "dodge_clip": "@export StringName = Running_Dive_Roll",
+      "cancel_one_shot": "cancel_one_shot(clip: StringName) -> void; stops that one-shot early (a cancelled reload) and returns to locomotion",
       "animation_library": "@export AnimationLibrary; optional clip set replacing the model's own clips (ADR-0016)",
-      "procedural_gait": "@export bool; speed-synchronised leg gait layered over authored clips, presentation only (ADR-0016); knees bend in the plane the foot points along (ADR-0040)",
       "run_exit_ratio": "@export float = 0.85; a running character keeps the run clip down to this share of run_speed_threshold (ADR-0040)",
-      "extra_clips": "@export AnimationLibrary; clips merged into the model's default library; metadata ref_speed (cycle pace, m/s) and strike_time (attack impact, s) are honoured (ADR-0045)",
-      "leg_clips": "@export AnimationLibrary; retargeted hips-and-legs clips (run in eight directions, Dodge_Roll, Dodge_Strafe_Left/Right) replacing the procedural gait; arms, shoulders and weapon hold stay authored (ADR-0044)"
+      "extra_clips": "@export AnimationLibrary; clips merged into the model's default library; metadata ref_speed (cycle pace, m/s) and strike_time (attack impact, s) are honoured (ADR-0045)"
     }
   }
 }
