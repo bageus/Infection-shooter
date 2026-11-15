@@ -1,5 +1,6 @@
 extends SceneTree
 
+const BLOOD_LEVEL := preload("res://game/core/vfx/public/blood_level.gd")
 const DOOR := preload("res://game/presentation/office_floor/public/structural/sliding_glass_door.tscn")
 const MAIN := preload("res://game/bootstrap/app/main.tscn")
 const PREFS := preload("res://game/bootstrap/app/menu/menu_preferences.gd")
@@ -115,14 +116,16 @@ func _blood(player: Node3D) -> void:
 	effects.call("severed_burst", player.global_position, Vector3.FORWARD, excluded)
 	await physics_frame
 	await physics_frame
-	_check(container.get_child_count() >= 12, "Rupture combines many enlarged textured splashes")
+	# The floor burst scales with the blood amount level (12 at the base amount, now halved).
+	var burst := BLOOD_LEVEL.scale_amount(12)
+	_check(container.get_child_count() >= burst, "Rupture combines many enlarged textured splashes")
 	_check(_count_surface(container, wall) > 0, "Rupture reaches nearby walls")
 	var floor_count := 0
 	for mark in container.get_children():
 		if mark.global_basis.y.y > .9:
 			floor_count += 1
 		_check(not mark.find_children("*", "Decal", true, false).is_empty() or not mark.find_children("*", "MeshInstance3D", true, false).is_empty() or not (mark.get("_projected") as Array).is_empty(), "Blood marks have a texture-bearing visual")
-	_check(floor_count >= 8, "Rupture spreads over the floor")
+	_check(floor_count >= burst, "Rupture spreads over the floor")
 	effects.call("clear_marks")
 	player.set("_blood_motion_start", player.global_position)
 	player.position.x += .6
