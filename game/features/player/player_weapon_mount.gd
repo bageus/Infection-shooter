@@ -12,6 +12,7 @@ const MODEL_GUNS := {"PISTOL": "Pistol", "UZI": "Uzi", "SHOTGUN": "Shotgun", "GR
 var skeleton: Skeleton3D
 ## The player's ShotRecoil, source of the visual kick; null in isolated scenes.
 var recoil: RefCounted
+var _drop_rng := RandomNumberGenerator.new()
 var _active: Node3D
 var _aim_target := Vector3.INF
 var _model: Node3D
@@ -105,6 +106,9 @@ func _start_reload() -> void:
 	var seconds := maxf(float(_active.get("reload_time")), 0.05)
 	# The baked clip is longer than the weapon's reload time: it is played faster, the timing stays the weapon's.
 	var speed := minf(float(_driver.call("clip_length", clip)) / seconds, MAX_RELOAD_SPEED)
+	var player := _driver.get("animation_player") as AnimationPlayer
+	if player != null and player.has_animation(clip):
+		preload("res://game/features/player/magazine_drop_variety.gd").vary(player.get_animation(clip), _drop_rng)
 	var legs: StringName = get_parent().get("_animation_selection").select_clip()
 	if float(_driver.call("play_named_one_shot", clip, 0.08, speed, legs)) > 0.0:
 		_reload_clip = clip

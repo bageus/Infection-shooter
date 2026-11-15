@@ -10,12 +10,14 @@ var _viewport: SubViewport
 var _dark := false
 var _aim_off := 0.0
 var _offset := Vector3(2.6, 3.6, 2.6)
+var _only_new := false
 
 
 func _initialize() -> void:
 	var args := OS.get_cmdline_user_args()
 	if not args.is_empty():
 		_out = args[0]
+	_only_new = args.size() > 1 and args[1] == "turn_reload"
 	call_deferred("_capture")
 
 
@@ -68,6 +70,10 @@ func _capture() -> void:
 	for i in 30:
 		await _follow()
 	var sheet: Array[Image] = []
+	if _only_new:
+		await _turn_and_reload()
+		quit()
+		return
 	_offset = Vector3(3.0, 1.5, 1.2)
 	_aim_off = 0.0
 	sheet.append(await _shot())
@@ -172,6 +178,40 @@ func _capture() -> void:
 			await _follow()
 	_save(sheet, "death.png")
 	quit()
+
+
+## Turning on the spot (the cursor swings round, the feet step) and three reloads that drop the magazine differently.
+func _turn_and_reload() -> void:
+	var driver := _player.get_node("AnimationDriver")
+	var steps := [0]
+	driver.connect("footstep", func(_s: int, _v: float) -> void: steps[0] += 1)
+	_offset = Vector3(2.4, 3.2, 2.4)
+	var sheet: Array[Image] = []
+	var size := root.size
+	for side in [Vector2(0.15, 0.5), Vector2(0.85, 0.5)]:
+		Input.warp_mouse(Vector2(size) * side)
+		for k in 6:
+			sheet.append(await _shot())
+			print("TURN clip ", driver.animation_player.current_animation, " steps ", steps[0])
+			for i in 5:
+				await _follow()
+		for i in 40:
+			await _follow()
+	_save(sheet, "turn_in_place.png")
+	_offset = Vector3(1.6, 2.6, 1.6)
+	sheet = []
+	var weapon: Node = _player.call("get_current_weapon")
+	var magazine := _player.get_node("Body").find_child("Magazine_Removed_Pistol", true, false) as Node3D
+	for round in 3:
+		weapon.set("_magazine_ammo", 0)
+		weapon.call("start_reload")
+		for frame in 90:
+			await _follow()
+			if frame in [27, 34, 56]:
+				sheet.append(await _shot())
+		for i in 120:
+			await _follow()
+	_save(sheet, "magazine_drops.png")
 
 
 func _muzzle_ahead() -> Vector3:

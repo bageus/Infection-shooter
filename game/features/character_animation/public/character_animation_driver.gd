@@ -60,6 +60,8 @@ const STATE_ATTACK_CRAWL := &"attack_crawl"
 @export var extra_clips: AnimationLibrary
 ## Emit `footstep` from the baked Walk_*/Run_* cycles (the player's model has no leg motion modifiers).
 @export var clip_footsteps := false
+## Set by the player while its feet step it round on the spot: a walking pace for the cycle and footsteps.
+var turn_step_speed := 0.0
 ## Idle foot turn and knee nudge for authored enemy clips; the player's baked clips already stand right.
 @export var stance_feet := true
 ## Clip played for a dodge roll when there are no leg clips.
@@ -376,7 +378,8 @@ func _advance_one_shot(delta: float) -> void:
 	one_shot_finished.emit(finished)
 
 
-func _process_skeletal(speed: float) -> void:
+func _process_skeletal(real_speed: float) -> void:
+	var speed := maxf(real_speed, turn_step_speed)
 	_apply_flinch_overlay()
 	if clip_footsteps:
 		_emit_clip_steps(speed)
