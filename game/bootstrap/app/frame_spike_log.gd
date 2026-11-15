@@ -15,6 +15,7 @@ var _nodes := 0
 var _path := PATH
 var _rigid_bodies: Array = []
 var _rigid_at := 0
+var _session_marked := false
 
 
 ## Call once per frame with the frame time in seconds; returns true when this frame was logged.
@@ -49,6 +50,10 @@ func _write(msec: float, resources: int, nodes: int, tree: SceneTree) -> void:
 	if file == null:
 		return
 	file.seek_end()
+	if not _session_marked:
+		_session_marked = true
+		# The file is appended across runs and builds; this line lets a log be split per run.
+		file.store_line("# session start %s" % Time.get_datetime_string_from_system())
 	var hidden := _culled(tree)
 	var plan := _plan_state(tree)
 	var rigid := _rigid(tree)
