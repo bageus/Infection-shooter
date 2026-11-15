@@ -40,7 +40,7 @@ func _run() -> void:
 	_expect(not vfx.call("has_loop", "storm_pulse") and not vfx.call("has_loop", "bone_blades"), "Buff loops end with their buffs.")
 	_expect(not vfx.call("has_range_dome", "storm_pulse") and not vfx.call("has_range_dome", "bone_blades"), "Range domes end with their buffs.")
 
-	var meshes := player.get_node("Body").find_children("*", "MeshInstance3D", true, false)
+	var meshes := [player.get_node("Body").find_child("Character", true, false)]
 	vfx.call("set_passives", true, true)
 	await create_timer(0.5).timeout
 	_expect(float(vfx.call("overlay_value", "bone")) > 0.99 and float(vfx.call("overlay_value", "metal")) > 0.99, "Bone Armor and Hardened Tissue fade in.")

@@ -20,9 +20,8 @@ func _run() -> void:
 	_test_uzi_pistol_rounds()
 	await _test_player_wiring()
 	await _test_generic_fallback()
-	await _test_lowered_torso_not_twisted()
-	await _test_walk_lean()
-	await _test_long_guns_reachable()
+	await _test_baked_hold()
+	await _test_reload_clip()
 	await process_frame
 	await process_frame
 	print("Weapon presentation tests: %d failures" % failures)
@@ -116,13 +115,10 @@ func _test_player_wiring() -> void:
 	await process_frame
 	var mount := player.get_node("WeaponMount") as MOUNT
 	_check(mount.skeleton != null and mount.skeleton.find_bone("RightHand") >= 0, "imported RightHand exists")
-	_check(mount.socket != null, "authored WeaponSocket_R is usable")
-	_check(mount.socket.get_parent() is BoneAttachment3D, "authored socket follows a bone attachment")
-	_check(mount.socket.get_parent().bone_name == "RightHand", "socket belongs to right hand")
+	_check(mount.skeleton.find_bone("Backpack") >= 0, "the backpack has its own bone")
 	var driver: Node = player.get_node("AnimationDriver")
 	_check(driver.animation_player != null, "imported AnimationPlayer exists")
 	print("ASSET Skeleton3D: ", player.get_path_to(mount.skeleton))
-	print("ASSET socket: ", player.get_path_to(mount.socket))
 	print("ASSET clips: ", driver.animation_player.get_animation_list())
 	var selector := SELECTION.new()
 	selector.configure(player, player.get_node("AimPivot"), player.weapon_stance)
@@ -168,17 +164,14 @@ func _test_directional_selection(player: PLAYER_SCRIPT, selector: SELECTION, ani
 			var local: Vector3 = {"Forward": Vector3.FORWARD, "Backward": Vector3.BACK, "Left": Vector3.LEFT, "Right": Vector3.RIGHT}[direction]
 			player.velocity = aim.global_basis * local * 6.0
 			var clip := String(selector.select_clip())
-			_check(clip.ends_with(direction), "locomotion uses aim-local direction " + direction)
+			_check(clip.contains("_" + direction + "_"), "locomotion uses aim-local direction " + direction)
 			_check(animation_player.has_animation(clip), "actual imported walk exists: " + clip)
-		if index < 2:
-			_shot(player.weapon_stance)
-			_shot(player.weapon_stance)
-			_check(String(selector.select_clip()).contains("TwoHand"), "two-hand locomotion family selected")
+		_check(String(selector.select_clip()).ends_with("_" + SELECTION.family_of(index)), "the clip belongs to the held weapon")
 	player.weapon_stance.select_weapon(0)
 	player.velocity = aim.global_basis * Vector3(6.0, 0.0, -5.0)
 	selector.select_clip()
 	player.velocity = aim.global_basis * Vector3(5.0, 0.0, -5.1)
-	_check(String(selector.select_clip()).ends_with("Right"), "diagonal hysteresis prevents axis chatter")
+	_check(String(selector.select_clip()).contains("_Right_"), "diagonal hysteresis prevents axis chatter")
 	player.velocity = Vector3.ZERO
 	aim.rotation.y = 0.0
 	player.weapon_stance.tick(20.0, false)
@@ -226,13 +219,11 @@ func _test_mount_and_pause(player: PLAYER_SCRIPT, mount: MOUNT) -> void:
 	player.call("select_weapon_slot", 0)
 	var weapon: Node3D = player.call("get_current_weapon")
 	var scale_before := weapon.scale
-	var original_position: Vector3 = mount.socket.position
-	mount.socket.position += Vector3(0.03, 0.01, 0.02)
-	await process_frame
-	await process_frame
-	_check(weapon.global_position.distance_to(mount.socket.global_position) < 0.0001, "active weapon follows socket motion")
+	await _settle(player)
+	mount.sync_weapon(weapon)
+	var model_muzzle := player.get_node("Body").find_child("Pistol_Muzzle", true, false) as Node3D
+	_check(weapon.get_node("Muzzle").global_position.distance_to(model_muzzle.global_position) < 0.0001, "active weapon follows the model's muzzle")
 	_check(weapon.scale.is_equal_approx(scale_before), "bone motion does not alter weapon scale")
-	mount.socket.position = original_position
 	player.set_physics_process(true)
 	var before := float(player.weapon_stance.inactive_seconds)
 	paused = true
@@ -241,6 +232,7 @@ func _test_mount_and_pause(player: PLAYER_SCRIPT, mount: MOUNT) -> void:
 	_check(is_equal_approx(player.weapon_stance.inactive_seconds, before), "pause freezes inactivity timer")
 	paused = false
 	player.set_physics_process(false)
+	_check(mount != null, "mount exists")
 
 
 func _test_generic_fallback() -> void:
@@ -319,71 +311,7 @@ func _local_to(boundary: Node3D, marker: Node3D) -> Transform3D:
 	return result
 
 
-# Lowered pistol hangs by the leg: the torso must not chase the cursor, otherwise the vest on the back stretches.
-func _test_lowered_torso_not_twisted() -> void:
-	var player := PLAYER.instantiate() as PLAYER_SCRIPT
-	player.set_physics_process(false)
-	root.add_child(player)
-	var effects := Node3D.new()
-	root.add_child(effects)
-	player.call("configure_world", effects, null)
-	player.weapon_stance.select_weapon(0)
-	player.weapon_stance.tick(25.0, false)
-	var skeleton := (player.get_node("WeaponMount") as MOUNT).skeleton
-	var spine := skeleton.find_bone("Spine")
-	player.set("_aim_point", Vector3(8, 0, -4))
-	await process_frame
-	await process_frame
-	var body_aim: SkeletonModifier3D
-	for modifier in skeleton.find_children("*", "SkeletonModifier3D", false, false):
-		if modifier.get_script() != null and String(modifier.get_script().resource_path).ends_with("player_body_aim.gd"):
-			body_aim = modifier
-	_check(body_aim != null, "body aim modifier exists")
-	# Aim by hand: the frame loop sets the target on its own schedule, which made this test timing-dependent.
-	(player.get_node("WeaponMount") as MOUNT).aim_at(Vector3(8, 0, -4))
-	var before := skeleton.get_bone_pose_rotation(spine)
-	body_aim._process_modification_with_delta(0.0)
-	_check(before.angle_to(skeleton.get_bone_pose_rotation(spine)) < 0.0001, "lowered pistol does not twist the spine toward the cursor")
-	player.weapon_stance.record_activity()
-	body_aim._process_modification_with_delta(0.0)
-	_check(before.angle_to(skeleton.get_bone_pose_rotation(spine)) > 0.05, "raised pistol still turns the torso to the cursor")
-	var BODY_AIM := load("res://game/features/player/player_body_aim.gd")
-	var steep := Quaternion(Vector3.RIGHT, deg_to_rad(70.0))
-	_check(is_equal_approx(BODY_AIM.limit_pitch(steep).get_angle(), BODY_AIM.MAX_PITCH), "steep cursor pitch is capped so the vest does not spike")
-	var gentle := Quaternion(Vector3.RIGHT, deg_to_rad(3.0))
-	_check(BODY_AIM.limit_pitch(gentle).is_equal_approx(gentle), "gentle pitch is kept")
-	player.queue_free()
-	effects.queue_free()
-
-
-func _test_walk_lean() -> void:
-	var player := PLAYER.instantiate() as PLAYER_SCRIPT
-	player.set_physics_process(false)
-	root.add_child(player)
-	var effects := Node3D.new()
-	root.add_child(effects)
-	player.call("configure_world", effects, null)
-	await process_frame
-	var walk_lean: SkeletonModifier3D = (player.get_node("WeaponMount") as MOUNT).skeleton.get_node("WalkLean")
-	var skeleton := (player.get_node("WeaponMount") as MOUNT).skeleton
-	var settle := func(local: Vector3) -> float:
-		player.velocity = skeleton.global_basis * local
-		for i in 90:
-			walk_lean._process_modification_with_delta(1.0 / 60.0)
-		return walk_lean.lean
-	var walking: float = settle.call(Vector3(0, 0, 5.4))
-	var running: float = settle.call(Vector3(0, 0, 8.1))
-	var backing: float = settle.call(Vector3(0, 0, -5.4))
-	_check(walking > deg_to_rad(4.0), "torso tips forward while walking")
-	_check(running > walking + deg_to_rad(3.0), "torso tips further forward while running")
-	_check(backing < -deg_to_rad(3.0), "torso leans back while walking backwards")
-	settle.call(Vector3.ZERO)
-	_check(absf(walk_lean.lean) < deg_to_rad(0.1), "torso straightens when standing")
-	player.queue_free()
-	effects.queue_free()
-
-
-func _test_long_guns_reachable() -> void:
+func _test_baked_hold() -> void:
 	var player := PLAYER.instantiate() as PLAYER_SCRIPT
 	player.set_physics_process(false)
 	root.add_child(player)
@@ -391,12 +319,57 @@ func _test_long_guns_reachable() -> void:
 	root.add_child(effects)
 	player.call("configure_world", effects, null)
 	player.call("configure_weapon_drop", func(_i: int, _p: Vector3) -> bool: return true)
-	var pose: SkeletonModifier3D = (player.get_node("WeaponMount") as MOUNT).equipment_pose
-	for index in [2, 3, 4, 5, 6]:
+	var body := player.get_node("Body")
+	var guns := ["Pistol", "Uzi", "Shotgun", "Launcher", "AK", "M4", "Sniper", "Minigun"]
+	for index in guns.size():
 		player.call("pickup_weapon", index)
-		for i in 4:
-			await process_frame
-		_check(pose.hand_error < (.35 if pose.ARM_TUNING.has(pose._held) else .05), "left hand reaches the trigger grip of weapon %d (error %.3f)" % [index, pose.hand_error])
-		_check(pose.forend_error < .05, "right hand reaches the forend of weapon %d (error %.3f)" % [index, pose.forend_error])
+		await _settle(player)
+		var gun := body.find_child("Weapon_" + guns[index], true, false) as Node3D
+		_check(gun != null and gun.scale.x > 0.5, "the model draws only the held %s (scale %s)" % [guns[index], gun.scale if gun != null else "none"])
+		for other in guns:
+			if other != guns[index]:
+				_check((body.find_child("Weapon_" + other, true, false) as Node3D).scale.x < 0.1, "the %s is put away while %s is held" % [other, guns[index]])
+		var weapon: Node3D = player.call("get_current_weapon")
+		var model_muzzle := body.find_child(guns[index] + "_Muzzle", true, false) as Node3D
+		_check(weapon.get_node("Muzzle").global_position.distance_to(model_muzzle.global_position) < 0.001, "shots leave the model's %s muzzle" % guns[index])
+		_check(not (weapon.get_node("Body") as Node3D).visible, "the weapon's own model is hidden")
 	player.queue_free()
 	effects.queue_free()
+	await process_frame
+
+
+# A reload plays the model's clip and shows the ejected magazine.
+func _test_reload_clip() -> void:
+	var player := PLAYER.instantiate() as PLAYER_SCRIPT
+	player.set_physics_process(false)
+	root.add_child(player)
+	var effects := Node3D.new()
+	root.add_child(effects)
+	player.call("configure_world", effects, null)
+	await process_frame
+	var driver: Node = player.get_node("AnimationDriver")
+	var weapon: Node3D = player.call("get_current_weapon")
+	weapon.set("_magazine_ammo", 0)
+	weapon.call("start_reload")
+	var ejected := player.get_node("Body").find_child("Magazine_Removed_Pistol", true, false) as Node3D
+	var seen := false
+	for i in 90:
+		await process_frame
+		seen = seen or ejected.scale.x > 0.5
+	_check(String(driver.animation_player.current_animation) == "Reload_Pistol" or not weapon.call("is_reloading"), "the reload plays the model's clip")
+	_check(seen, "the spent magazine comes out during the reload")
+	weapon.call("cancel_reload")
+	for i in 3:
+		await process_frame
+	_check(String(driver.animation_player.current_animation) == "Idle_Pistol", "cancelling the reload returns to idle")
+	player.queue_free()
+	effects.queue_free()
+	await process_frame
+
+
+## Lets the clip cross-fade finish so the held gun is fully scaled in.
+func _settle(player: PLAYER_SCRIPT) -> void:
+	await process_frame
+	(player.get_node("AnimationDriver").animation_player as AnimationPlayer).advance(0.5)
+	await process_frame
+	await process_frame

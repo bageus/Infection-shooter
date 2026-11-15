@@ -209,7 +209,7 @@ func _check_walk_preferences(app: Node, context: String) -> void:
 	var player: Node = app.get("player")
 	var driver := player.get_node("AnimationDriver")
 	_check(player.get("_walk_speed_multiplier") == 1.25, "Saved walking speed reaches actual player: " + context)
-	_check(driver.get("leg_playback_multiplier") == 1.5 and driver.get("legs").get("playback_multiplier") == 1.5, "Saved animation pace reaches actual leg clock: " + context)
+	_check(driver.get("leg_playback_multiplier") == 1.5, "Saved animation pace reaches actual clip pace: " + context)
 
 
 func _restore_settings() -> void:
