@@ -15,6 +15,8 @@ func _ready() -> void:
 	_model = MODEL.instantiate() as Node3D
 	_model.position = Vector3(SIDE, 0, 0)
 	_model.scale = Vector3.ONE * MODEL_SCALE
+	# This node is no Node3D, so until a gun carries it the model would sit at the world origin.
+	_model.visible = false
 	add_child(_model)
 	# The beam leaves the model's LightSocket (the lens), pointing where the muzzle points.
 	_light = SpotLight3D.new()
@@ -33,6 +35,7 @@ func _process(delta: float) -> void:
 	var muzzle := weapon.get_node_or_null("Muzzle") as Node3D if is_instance_valid(weapon) else null
 	if muzzle != null and _model.get_parent() != muzzle:
 		_model.reparent(muzzle, false)
+		_model.visible = true
 	if Input.is_action_just_pressed("flashlight"):
 		_on = not _on
 	_light.light_energy = move_toward(_light.light_energy, ENERGY if _on else 0.0, delta * 3.0)
