@@ -73,7 +73,12 @@ func _build(segment: Dictionary) -> PhysicalBone3D:
 	var start: Vector3 = rest.affine_inverse() * Vector3(segment["start"])
 	var end: Vector3 = rest.affine_inverse() * Vector3(segment["end"])
 	var axis := end - start
-	var radius := clampf(float(segment["radius"]) * 1.5, .03, 1.0)
+	var radius := float(segment["radius"])
+	# Humanoid part-based skins weigh whole body parts to one bone, so the measured thickness can dwarf the
+	# bone and fold the ragdoll into a heap: bound it by the bone's length (the horde's tentacle rig is exempt).
+	if skeleton.find_bone("T0_A") < 0:
+		radius = minf(radius, maxf(axis.length() * .5 + .02, .1))
+	radius = clampf(radius * 1.5, .03, 1.0)
 	var capsule := CapsuleShape3D.new()
 	var world_bone := skeleton.global_transform * skeleton.get_bone_global_pose(index)
 	var world_radius := radius * world_bone.basis.get_scale().abs()[world_bone.basis.get_scale().abs().max_axis_index()]
