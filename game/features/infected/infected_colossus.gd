@@ -36,7 +36,7 @@ func _behaviour_tick(delta: float, target_offset: Vector3) -> void:
 	if _slam_busy > 0.0:
 		_cached_desired = Vector3.ZERO
 		return
-	if _slam_cooldown <= 0.0 and _pending_hit < 0.0 and _blast_stun_remaining <= 0.0 and target_offset.length() <= slam_trigger_distance:
+	if _slam_cooldown <= 0.0 and _pending_hit < 0.0 and _blast_stun_remaining <= 0.0 and target_offset.length() <= slam_trigger_distance and _clear_line():
 		_start_slam()
 
 

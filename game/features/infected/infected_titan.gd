@@ -131,17 +131,6 @@ func _stamp_crater(point: Vector3) -> void:
 	impact_pool.call("bake_surface_hit", collider, point, Vector3.UP, "GRENADE", surface.get("anchor") as MeshInstance3D)
 
 
-# Walls (layer 1) between the Titan and the player block the throw.
-func _clear_line() -> bool:
-	if not is_instance_valid(_target):
-		return false
-	var skip: Array[RID] = [get_rid()]
-	if _target is CollisionObject3D:
-		skip.append((_target as CollisionObject3D).get_rid())
-	var query := PhysicsRayQueryParameters3D.create(global_position + Vector3.UP * 0.8, _target.global_position + Vector3.UP * 0.8, 1, skip)
-	return get_world_3d().direct_space_state.intersect_ray(query).is_empty()
-
-
 # The swipe waits while the throw animation owns the body.
 func _try_attack() -> void:
 	if _throw_elapsed >= 0.0:
