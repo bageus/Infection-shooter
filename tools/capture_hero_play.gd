@@ -204,19 +204,24 @@ func _turn_and_reload() -> void:
 		for i in 40:
 			await _follow()
 	_save(sheet, "turn_in_place.png")
-	_offset = Vector3(1.6, 2.6, 1.6)
+	_offset = Vector3(2.2, 3.4, 2.2)
 	sheet = []
 	var weapon: Node = _player.call("get_current_weapon")
 	var magazine := _player.get_node("Body").find_child("Magazine_Removed_Pistol", true, false) as Node3D
+	_player.set("effects_root", _player.get_parent())
+	# Three reloads, the hero steps aside after each: the magazines stay where they fell.
 	for round in 3:
 		weapon.set("_magazine_ammo", 0)
 		weapon.call("start_reload")
-		for frame in 90:
+		for frame in 200:
 			await _follow()
-			if frame in [27, 34, 56]:
-				sheet.append(await _shot())
-		for i in 120:
+		Input.action_press("move_right")
+		for frame in 14:
 			await _follow()
+		Input.action_release("move_right")
+		for frame in 30:
+			await _follow()
+		sheet.append(await _shot())
 	_save(sheet, "magazine_drops.png")
 
 

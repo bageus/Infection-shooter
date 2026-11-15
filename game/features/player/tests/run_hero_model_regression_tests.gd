@@ -73,6 +73,11 @@ func _run() -> void:
 	var second := reload.track_get_key_value(track, reload.track_get_key_count(track) - 1) as Vector3
 	_check(first.distance_to(second) > 0.05 and is_equal_approx(first.y, second.y), "Two reloads drop the magazine to different spots on the floor")
 	_check((reload.track_get_key_value(track, 0) as Vector3).is_equal_approx(start), "The magazine still leaves the gun from the same place")
+	var slid := 0.0
+	for key in reload.track_get_key_count(track):
+		if reload.track_get_key_time(track, key) >= drop.land_time(reload):
+			slid = maxf(slid, (reload.track_get_key_value(track, key) as Vector3).distance_to(drop.rest(reload).origin))
+	_check(drop.land_time(reload) > 0.0 and slid < 0.001, "The landed magazine stays where it fell, it does not slide (%.3f m)" % slid)
 	await _check_aim_and_lean(player, body)
 	var standing_y := body.position.y
 	var seconds: float = player.call("play_death_fall")
