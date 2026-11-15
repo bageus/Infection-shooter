@@ -44,7 +44,7 @@ func _settle(scene: PackedScene, size: Vector3, pose: String) -> void:
 		if parent != null:
 			links.append({"child": child, "parent": parent, "length": _joint(child).distance_to(_joint(parent))})
 	# The upright horde has no pre-tilt, so it needs longer than a tilted body to come to rest.
-	for frame in 300:
+	for frame in 420:
 		await physics_frame
 	for link in links:
 		_check(absf(_joint(link["child"]).distance_to(_joint(link["parent"])) - float(link["length"])) < .065, "Joints retain anatomical segment lengths: " + corpse.name)
