@@ -476,7 +476,7 @@ func _lens_surface(mesh_instance: MeshInstance3D) -> int:
 	return best
 
 
-# Original (off) and lit copies of a light surface, made once.
+# Dim (shut) and lit (open, was 4.0) copies of a light surface, made once.
 func _light_materials(mesh_instance: MeshInstance3D, surface: int) -> Array:
 	var key := "%d:%d" % [mesh_instance.get_instance_id(), surface]
 	if _light_material_cache.has(key):
@@ -486,11 +486,11 @@ func _light_materials(mesh_instance: MeshInstance3D, surface: int) -> Array:
 	# The model's materials are ORM materials, which are not StandardMaterial3D.
 	if material is BaseMaterial3D:
 		var off := material.duplicate() as BaseMaterial3D
-		off.emission_enabled = false
-		var lit := material.duplicate() as BaseMaterial3D
-		lit.emission_enabled = true
-		lit.emission = Color(1.0, 0.78, 0.28)
-		lit.emission_energy_multiplier = 4.0
+		off.emission_enabled = true
+		off.emission = Color(1.0, 0.78, 0.28)
+		off.emission_energy_multiplier = 0.5
+		var lit := off.duplicate() as BaseMaterial3D
+		lit.emission_energy_multiplier = 2.0
 		pair = [off, lit]
 	_light_material_cache[key] = pair
 	return pair
