@@ -5,6 +5,7 @@ const LIBRARY := preload("res://game/presentation/office_floor/blood_texture_lib
 const EFFECTS := preload("res://game/presentation/office_floor/public/blood_effects_3d.tscn")
 const IMPACTS := preload("res://game/features/combat/public/impact_effects.gd")
 const MARK := preload("res://game/presentation/office_floor/blood_mark_3d.gd")
+const BLOOD_LEVEL := preload("res://game/core/vfx/public/blood_level.gd")
 var failures := 0
 var stage: Node3D
 var query: Node3D
@@ -121,7 +122,10 @@ func _test_hit_throttle_and_expiry() -> void:
 		effects.call("splatter_hit", Vector3(0, 1, 0), Vector3.FORWARD, "UZI", excluded, 501)
 	await physics_frame
 	await physics_frame
-	_expect(single >= 1 and _stats()["marks"] == single, "Automatic hits in one interval produce a single burst of splatters.")
+	# Side rays and spray positions are random, so bound by one hit's maximum rather than an exact count.
+	var one_hit_max: int = BLOOD_LEVEL.scale_amount(int(effects.get("splatters_per_hit"))) + BLOOD_LEVEL.scale_amount(4)
+	var burst := _stats()["marks"] as int
+	_expect(single >= 1 and burst >= 1 and burst <= one_hit_max, "Automatic hits in one interval produce a single burst of splatters.")
 	await create_timer(0.5).timeout
 	_expect(_stats()["marks"] == 0, "Expired marks finish fading and release their budget.")
 	budget.set("lifetime", 30.0)
@@ -130,13 +134,15 @@ func _test_hit_throttle_and_expiry() -> void:
 func _test_side_splatter() -> void:
 	# Shot goes straight back (+Z), so only the side rays can reach these columns.
 	effects.call("clear_marks")
-	(effects.get("_budget") as Node3D).set("max_marks", 20)
+	(effects.get("_budget") as Node3D).set("max_marks", 40)
 	var right := _surface(Vector3(0.8, 1.5, 0), Vector3(0.2, 3, 2))
 	var left := _surface(Vector3(-0.8, 1.5, 0), Vector3(0.2, 3, 2))
 	query.call("watch_environment", stage)
 	await physics_frame
 	await physics_frame
-	effects.call("splatter_hit", Vector3(0, 1, 0), Vector3.BACK, "UZI", excluded, 601)
+	# Each side ray is picked at random, so several hits (distinct sources) cover both columns.
+	for source in [601, 602, 603, 604, 605]:
+		effects.call("splatter_hit", Vector3(0, 1, 0), Vector3.BACK, "UZI", excluded, source)
 	await physics_frame
 	await physics_frame
 	var marks := _marks()

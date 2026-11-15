@@ -7,9 +7,9 @@ const LOW := 0
 const MEDIUM := 1
 const MAXIMUM := 2
 const COUNT := 3
-# Share of droplets and decal splatters per level. Medium keeps the base amount; low is clearly
-# thinner and maximum clearly heavier than medium, without flooding the floor.
-const AMOUNT := [0.35, 1.0, 1.4]
+# Share of droplets and decal splatters per level. Halved from the first tuning: floor blood was
+# left in too large a quantity on every step. Low stays clearly thinner than medium, maximum heavier.
+const AMOUNT := [0.175, 0.5, 0.7]
 # Size of each decal mark and how widely marks scatter around a hit, per level. Without these, the extra
 # marks of a heavier level pile up on the same spot and the difference barely shows.
 const SIZE := [0.75, 1.0, 1.3]
