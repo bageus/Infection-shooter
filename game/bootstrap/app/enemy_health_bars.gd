@@ -6,12 +6,12 @@ const ALIVE_GROUP := &"infected_alive"
 ## model top for hunger, brute, colossus and titan (measured in headless rest pose).
 const BAR_MARGIN := 0.3
 const BAR_SIZE := Vector2(40.0, 5.0)
-## Big enemies get a wider bar up to this many pixels, scaled to their collision width.
+## The bar width follows max health on a log scale: LOW_HEALTH (hunger) gets BAR_SIZE.x, HIGH_HEALTH (horde) gets MAX_BAR_WIDTH.
 const MAX_BAR_WIDTH := 220.0
+const LOW_HEALTH := 45.0
+const HIGH_HEALTH := 2700.0
 ## Bars past this distance are too small to read and cost a projection each, so they are skipped.
 const MAX_DISTANCE := 40.0
-## Bars are drawn wider than the body's on-screen width, so the size difference reads at a glance.
-const BAR_WIDTH_SCALE := 1.5
 const SHADER := preload("res://game/bootstrap/app/enemy_health_bar.gdshader")
 
 var camera: Camera3D
@@ -40,7 +40,6 @@ func _process(_delta: float) -> void:
 func _draw() -> void:
 	if camera == null or not is_instance_valid(camera):
 		return
-	var pixels_per_tan := size.y * 0.5 / tan(deg_to_rad(camera.fov) * 0.5)
 	for enemy in get_tree().get_nodes_in_group(ALIVE_GROUP):
 		var body := enemy as Node3D
 		if body == null or not body.is_inside_tree():
@@ -53,13 +52,16 @@ func _draw() -> void:
 		var distance := point.distance_to(camera.global_position)
 		if camera.is_position_behind(point) or distance > MAX_DISTANCE:
 			continue
-		# Pixels per metre at this distance, so the bar matches the enemy's width on screen.
-		var pixels := clampf(_body_width(body) * BAR_WIDTH_SCALE * pixels_per_tan / distance, BAR_SIZE.x, MAX_BAR_WIDTH)
-		var bar := Vector2(pixels, BAR_SIZE.y)
+		var bar := Vector2(bar_width(max_hp), BAR_SIZE.y)
 		var origin := camera.unproject_position(point) - bar * 0.5
-		if not (origin.is_finite() and is_finite(pixels) and is_finite(hp / max_hp)):
+		if not (origin.is_finite() and is_finite(hp / max_hp)):
 			continue  # NaN/inf makes the quad untriangulatable
 		_draw_bar(Rect2(origin, bar), clampf(hp / max_hp, 0.0, 1.0))
+
+
+static func bar_width(max_hp: float) -> float:
+	var t := clampf(log(maxf(max_hp, 1.0) / LOW_HEALTH) / log(HIGH_HEALTH / LOW_HEALTH), 0.0, 1.0)
+	return lerpf(BAR_SIZE.x, MAX_BAR_WIDTH, t)
 
 
 ## One quad per bar; the shader reads the health fraction from the vertex colour.
@@ -74,12 +76,6 @@ func _draw_bar(rect: Rect2, fraction: float) -> void:
 static func _bar_height(body: Node3D) -> float:
 	var capsule := _capsule(body)
 	return (capsule.height * 0.5 if capsule != null else 1.0) + BAR_MARGIN
-
-
-## Width of the enemy's collision capsule in metres (the horde's is wide, so its bar is too).
-static func _body_width(body: Node3D) -> float:
-	var capsule := _capsule(body)
-	return capsule.radius * 2.0 if capsule != null else 1.0
 
 
 static func _capsule(body: Node3D) -> CapsuleShape3D:

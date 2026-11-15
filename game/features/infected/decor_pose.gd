@@ -32,6 +32,9 @@ static func apply(body: Node3D, skeleton: Skeleton3D, config: Dictionary) -> voi
 		_rotate(skeleton, side + "_UpperArm", Vector3.RIGHT, rng.randf_range(-.55, .15))
 		_rotate(skeleton, side + "_Forearm", Vector3.RIGHT, rng.randf_range(-.8, -.15))
 	_rotate(skeleton, "Neck", Vector3.FORWARD, rng.randf_range(-.2, .2))
+	# The horde is an upright tentacle mass with no front or back: tilting it would lay it on its side.
+	if skeleton.find_bone("T0_A") >= 0:
+		tilt = Vector3.ZERO
 	body.basis = Basis(Vector3.UP, yaw) * Basis.from_euler(tilt) * Basis.from_scale(authored_scale)
 
 

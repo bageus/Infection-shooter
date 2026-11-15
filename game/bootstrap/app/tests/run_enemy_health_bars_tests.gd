@@ -17,9 +17,19 @@ func _check(ok: bool, message: String) -> void:
 
 func _run() -> void:
 	_preference_defaults_and_round_trip()
+	_width_follows_max_health()
 	await _bars_follow_the_setting()
 	print("Enemy health bar tests: %d failures" % failures)
 	quit(1 if failures else 0)
+
+
+func _width_follows_max_health() -> void:
+	var hunger: float = BARS.bar_width(45.0)
+	var brute: float = BARS.bar_width(135.0)
+	var titan: float = BARS.bar_width(520.0)
+	var horde: float = BARS.bar_width(2700.0)
+	_check(hunger < brute and brute < titan and titan < horde, "Bar width grows with max health")
+	_check(is_equal_approx(hunger, BARS.BAR_SIZE.x) and is_equal_approx(horde, BARS.MAX_BAR_WIDTH), "Weakest and strongest enemies get the min and max width")
 
 
 func _preference_defaults_and_round_trip() -> void:
@@ -66,9 +76,9 @@ func _bars_follow_the_setting() -> void:
 		var kind := (load("res://game/features/infected/public/%s.tscn" % key) as PackedScene).instantiate() as Node3D
 		stage.add_child(kind)
 		heights[key] = BARS._bar_height(kind)
-		widths[key] = BARS._body_width(kind)
+		widths[key] = BARS.bar_width(float(kind.get("max_health")))
 		kind.free()
-	_check(widths["infected_horde"] > widths["infected_colossus"] and widths["infected_colossus"] > widths["infected_hunger"], "Bar width grows with body width, horde widest")
+	_check(widths["infected_horde"] > widths["infected_colossus"] and widths["infected_colossus"] > widths["infected_titan"] and widths["infected_titan"] > widths["infected_brute"] and widths["infected_brute"] > widths["infected_hunger"], "Each real enemy type gets a wider bar the more health it has, horde widest")
 	_check(heights["infected_colossus"] > heights["infected_hunger"] and heights["infected_colossus"] > heights["infected_titan"], "Bar height follows each enemy type")
 	_check(is_equal_approx(heights["infected_hunger"], 0.925 + 0.3), "Hunger bar sits just above its capsule")
 	bars.call("set_enabled", false)
