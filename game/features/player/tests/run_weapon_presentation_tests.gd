@@ -359,8 +359,8 @@ func _test_reload_clip() -> void:
 	_check(String(driver.animation_player.current_animation) == "Reload_Pistol" or not weapon.call("is_reloading"), "the reload plays the model's clip")
 	_check(seen, "the spent magazine comes out during the reload")
 	weapon.call("cancel_reload")
-	for i in 3:
-		await process_frame
+	# A body still swinging round to the aim steps on the walk cycle; once it faces the aim the idle returns.
+	await create_timer(1.5).timeout
 	_check(String(driver.animation_player.current_animation) == "Idle_Pistol", "cancelling the reload returns to idle")
 	player.queue_free()
 	effects.queue_free()
