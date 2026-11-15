@@ -1,132 +1,119 @@
 extends Node
+## The model draws the gun, the hands, the magazines and the backpack with baked clips. This node only keeps the
+## gameplay weapon (shots, flash, casings) on the model's muzzle, starts the reload clip and spins the minigun barrels.
 
-const RELOAD_POSE := preload("res://game/features/player/player_reload_pose.gd")
-const EQUIPMENT_POSE := preload("res://game/features/player/player_equipment_pose.gd")
-var equipment_pose: SkeletonModifier3D
-var reload_pose: SkeletonModifier3D
+const FLASHLIGHT := preload("res://game/features/player/player_flashlight.gd")
+const MUZZLE_RISE_DEGREES := 5.0
+## The model's barrel runs along +X, the weapon's muzzle marker along -Z.
+const BARREL_TURN := Basis(Vector3.UP, -PI * 0.5)
+const MAX_RELOAD_SPEED := 3.0
+## Weapon name -> clip and node suffix in the model.
+const MODEL_GUNS := {"PISTOL": "Pistol", "UZI": "Uzi", "SHOTGUN": "Shotgun", "GRENADE LAUNCHER": "Launcher", "AK": "AK", "M4": "M4", "SNIPER RIFLE": "Sniper", "MINIGUN": "Minigun"}
 var skeleton: Skeleton3D
 ## The player's ShotRecoil, source of the visual kick; null in isolated scenes.
 var recoil: RefCounted
-const MUZZLE_RISE_DEGREES := 5.0
-var socket: Node3D
-var _remote: RemoteTransform3D
-var arm_offsets: SkeletonModifier3D
-var _aim_target := Vector3.INF
 var _active: Node3D
-var _aim_modifying := false
-var _hand := -1
-var _socket_offset := Transform3D.IDENTITY
-## Weapon-frame offset that puts another grip, not the origin, into the socket hand.
-var grip_shift := Vector3.ZERO:
-	set(value):
-		grip_shift = value
-		if _remote != null:
-			_remote.position = value # the remote pushes the weapon position, so the shift must live there too
+var _aim_target := Vector3.INF
+var _model: Node3D
+var _model_muzzle: Node3D
+var _model_barrels: Node3D
+var _reload_clip: StringName = &""
+var _loaded := 0
+var _driver: Node
 
 
 func _ready() -> void:
-	var model := get_parent().get_node("Body")
-	skeleton = _find_skeleton(model)
+	_model = get_parent().get_node("Body") as Node3D
+	skeleton = _model.find_children("*", "Skeleton3D", true, false)[0] as Skeleton3D
 	if skeleton == null or skeleton.find_bone("RightHand") < 0:
 		push_error("Player weapon mount requires Skeleton3D/RightHand")
 		return
-	socket = _find_socket(skeleton)
-	if socket == null:
-		var attachment := BoneAttachment3D.new()
-		attachment.name = "RightHandWeaponAttachment"
-		attachment.bone_name = "RightHand"
-		skeleton.add_child(attachment)
-		socket = Node3D.new()
-		socket.name = "WeaponSocket_R"
-		attachment.add_child(socket)
-		push_warning("Character has no authored WeaponSocket_R; using hand origin")
-	_hand = skeleton.find_bone("RightHand")
-	var attachment_root := socket.get_parent()
-	while attachment_root != null and not attachment_root is BoneAttachment3D:
-		attachment_root = attachment_root.get_parent()
-	if attachment_root is BoneAttachment3D:
-		_socket_offset = (attachment_root as Node3D).global_transform.affine_inverse() * socket.global_transform
-	equipment_pose = EQUIPMENT_POSE.new()
-	equipment_pose.name = "EquipmentPose"
-	equipment_pose.mount = self
-	skeleton.add_child(equipment_pose)
-	var lean := preload("res://game/features/player/player_walk_lean.gd").new()
-	lean.name = "WalkLean"
-	lean.player = get_parent() as CharacterBody3D
-	skeleton.add_child(lean)
-	skeleton.move_child(lean, equipment_pose.get_index()) # before the arm fit, so hands follow the tipped chest
-	var aim := preload("res://game/features/player/player_body_aim.gd").new()
-	aim.name = "BodyAim"
-	aim.mount = self
-	skeleton.add_child(aim)
+	_driver = get_parent().get_node_or_null("AnimationDriver")
 	recoil = get_parent().get("_shot_recoil")
-	var jolt := preload("res://game/features/player/player_kick_pose.gd").new()
-	jolt.name = "KickPose"
-	jolt.mount = self
-	skeleton.add_child(jolt)
-	var reload := RELOAD_POSE.new()
-	reload.name = "ReloadPose"
-	reload.mount = self
-	skeleton.add_child(reload)
-	reload_pose = reload
-	arm_offsets = preload("res://game/features/player/player_arm_offsets.gd").new()
-	arm_offsets.name = "ArmOffsets"
-	arm_offsets.pose = equipment_pose
-	skeleton.add_child(arm_offsets) # last, so it turns the arms after every other modifier
+	var light := FLASHLIGHT.new()
+	light.name = "Flashlight"
+	light.mount = self
+	add_child(light)
+	var kick := preload("res://game/features/player/player_kick_pose.gd").new()
+	kick.name = "KickPose"
+	kick.mount = self
+	skeleton.add_child(kick)
 	skeleton.skeleton_updated.connect(_sync_active)
-	_remote = RemoteTransform3D.new()
-	_remote.name = "ActiveWeaponTransform"
-	_remote.update_scale = false
-	_remote.update_rotation = false
-	_remote.use_global_coordinates = true
-	socket.add_child(_remote)
 
 
 func select_weapon(weapon: Node3D) -> void:
-	if socket == null or _remote == null:
-		return
+	_end_reload()
 	_active = weapon
-	_remote.remote_path = _remote.get_path_to(weapon)
-	_remote.force_update_cache()
+	var gun: String = MODEL_GUNS.get(weapon.call("get_weapon_name"), "")
+	_model_muzzle = _model.find_child(gun + "_Muzzle", true, false) as Node3D
+	_model_barrels = _model.find_child("BarrelCluster", true, false) as Node3D if gun == "Minigun" else null
+	# The weapon's own model stays hidden: the model's gun is drawn instead.
+	var visual := weapon.get_node_or_null("Body") as Node3D
+	if visual != null:
+		visual.hide()
+	_loaded = int(weapon.call("get_magazine_ammo"))
 	sync_weapon(weapon)
 
 
+## Puts the weapon's muzzle on the model's muzzle.
 func sync_weapon(weapon: Node3D) -> void:
-	if not is_instance_valid(socket) or not socket.is_inside_tree() or not weapon.is_inside_tree():
+	var muzzle := weapon.get_node_or_null("Muzzle") as Node3D
+	if not is_instance_valid(_model_muzzle) or muzzle == null or not _model_muzzle.is_inside_tree() or not weapon.is_inside_tree():
 		return
-	# Also synchronize at the firing boundary, before pending transform notifications.
-	if socket.get_parent() is BoneAttachment3D:
-		_socket_offset = socket.transform
-	var original_scale := weapon.scale
-	var hand := skeleton.global_transform * skeleton.get_bone_global_pose(_hand) * _socket_offset if _aim_modifying else socket.global_transform
-	weapon.global_transform = Transform3D(hand.basis.orthonormalized(), hand.origin + hand.basis.orthonormalized() * grip_shift)
-	weapon.scale = original_scale
-
-
-func _find_skeleton(node: Node) -> Skeleton3D:
-	if node is Skeleton3D:
-		return node as Skeleton3D
-	for child in node.get_children():
-		var found := _find_skeleton(child)
-		if found != null:
-			return found
-	return null
-
-
-func _find_socket(node: Node) -> Node3D:
-	if node.name == "WeaponSocket_R" and node is Node3D:
-		return node as Node3D
-	for child in node.get_children():
-		var found := _find_socket(child)
-		if found != null:
-			return found
-	return null
+	var at := _model_muzzle.global_transform
+	# Before the first clip frame (and between guns in a blend) the model's gun is scaled to nothing.
+	if absf(at.basis.determinant()) < 0.001:
+		return
+	var barrel := Transform3D(at.basis.orthonormalized() * BARREL_TURN, at.origin)
+	weapon.global_transform = barrel * muzzle.transform.affine_inverse()
 
 
 func aim_at(target: Vector3) -> void:
 	_aim_target = target
 	if is_instance_valid(_active):
 		sync_weapon(_active)
+
+
+func _process(_delta: float) -> void:
+	if not is_instance_valid(_active):
+		return
+	_update_reload()
+	var cluster: Variant = _active.get("_barrel_cluster")
+	if _model_barrels != null and cluster != null:
+		_model_barrels.transform = (cluster as Node3D).transform
+
+
+func _update_reload() -> void:
+	var reloading := bool(_active.call("is_reloading"))
+	var ammo := int(_active.call("get_magazine_ammo"))
+	# A shotgun takes one shell per cycle: the insert clip restarts with every shell.
+	var next_shell: bool = reloading and not _reload_clip.is_empty() and ammo > _loaded
+	_loaded = ammo
+	if reloading and (_reload_clip.is_empty() or next_shell):
+		_start_reload()
+	elif not reloading and not _reload_clip.is_empty():
+		_end_reload()
+
+
+func _start_reload() -> void:
+	if _driver == null:
+		return
+	var gun: String = MODEL_GUNS.get(_active.call("get_weapon_name"), "")
+	var clip := StringName("Reload_" + gun + ("_Insert" if bool(_active.get("shotgun_shell_reload")) else ""))
+	var seconds := maxf(float(_active.get("reload_time")), 0.05)
+	# The baked clip is longer than the weapon's reload time: it is played faster, the timing stays the weapon's.
+	var speed := minf(float(_driver.call("clip_length", clip)) / seconds, MAX_RELOAD_SPEED)
+	var legs: StringName = get_parent().get("_animation_selection").select_clip()
+	if float(_driver.call("play_named_one_shot", clip, 0.08, speed, legs)) > 0.0:
+		_reload_clip = clip
+
+
+func _end_reload() -> void:
+	if _reload_clip.is_empty() or _driver == null:
+		_reload_clip = &""
+		return
+	_driver.call("cancel_one_shot", _reload_clip)
+	_reload_clip = &""
 
 
 func _sync_active() -> void:

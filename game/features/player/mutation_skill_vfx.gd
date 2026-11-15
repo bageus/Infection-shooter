@@ -246,7 +246,9 @@ func _build_skin() -> void:
 			_skin = ShaderMaterial.new()
 			_skin.shader = SKIN_SHADER
 			_skin.set_shader_parameter(&"base_albedo", source.albedo_texture)
-		_skin_meshes.append(mesh)
+		# The shader reads one atlas: the vest, with its own texture, keeps its look.
+		if source.albedo_texture == _skin.get_shader_parameter(&"base_albedo"):
+			_skin_meshes.append(mesh)
 
 
 # The overlay is attached only while something shows: no extra pass otherwise.
