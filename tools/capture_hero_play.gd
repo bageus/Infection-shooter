@@ -11,6 +11,7 @@ var _dark := false
 var _aim_off := 0.0
 var _offset := Vector3(2.6, 3.6, 2.6)
 var _only_new := false
+var _guns := false
 
 
 func _initialize() -> void:
@@ -18,6 +19,7 @@ func _initialize() -> void:
 	if not args.is_empty():
 		_out = args[0]
 	_only_new = args.size() > 1 and args[1] == "turn_reload"
+	_guns = args.size() > 1 and args[1] == "guns"
 	call_deferred("_capture")
 
 
@@ -70,6 +72,10 @@ func _capture() -> void:
 	for i in 30:
 		await _follow()
 	var sheet: Array[Image] = []
+	if _guns:
+		await _guns_and_lean()
+		quit()
+		return
 	if _only_new:
 		await _turn_and_reload()
 		quit()
@@ -212,6 +218,49 @@ func _turn_and_reload() -> void:
 		for i in 120:
 			await _follow()
 	_save(sheet, "magazine_drops.png")
+
+
+## Each long gun from above with a red line along the aim from its muzzle (the drawn barrel should lie on it), then the run lean.
+func _guns_and_lean() -> void:
+	var line := MeshInstance3D.new()
+	var box := BoxMesh.new()
+	box.size = Vector3(0.012, 0.012, 5.0)
+	line.mesh = box
+	var red := StandardMaterial3D.new()
+	red.albedo_color = Color(1, 0, 0)
+	red.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
+	line.material_override = red
+	root.add_child(line)
+	var driver := _player.get_node("AnimationDriver")
+	Input.warp_mouse(Vector2(root.size) * Vector2(0.8, 0.35))
+	var sheet: Array[Image] = []
+	_offset = Vector3(0.0, 2.6, 0.001)
+	for slot in [4, 5, 2, 7]:
+		_player.call("pickup_weapon", slot)
+		for i in 150:
+			await _follow()
+		var muzzle := _player.call("get_current_weapon").get_node("Muzzle") as Node3D
+		var forward := -(_player.get_node("AimPivot") as Node3D).global_basis.z
+		line.global_position = muzzle.global_position + forward * 2.5
+		line.look_at(muzzle.global_position + forward * 5.0, Vector3.UP)
+		sheet.append(await _shot())
+		print("GUN ", _player.call("get_current_weapon").call("get_weapon_name"), " clip ", driver.animation_player.current_animation)
+	_save(sheet, "guns_aim_line.png")
+	line.queue_free()
+	_offset = Vector3(3.0, 1.2, 0.0)
+	sheet = []
+	Input.warp_mouse(Vector2(root.size) * Vector2(0.5, 0.1))
+	for i in 60:
+		await _follow()
+	Input.action_press("move_up")
+	for i in 60:
+		await _follow()
+	for k in 4:
+		sheet.append(await _shot())
+		for i in 6:
+			await _follow()
+	Input.action_release("move_up")
+	_save(sheet, "run_lean.png")
 
 
 func _muzzle_ahead() -> Vector3:

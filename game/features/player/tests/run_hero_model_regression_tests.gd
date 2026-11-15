@@ -73,6 +73,7 @@ func _run() -> void:
 	var second := reload.track_get_key_value(track, reload.track_get_key_count(track) - 1) as Vector3
 	_check(first.distance_to(second) > 0.05 and is_equal_approx(first.y, second.y), "Two reloads drop the magazine to different spots on the floor")
 	_check((reload.track_get_key_value(track, 0) as Vector3).is_equal_approx(start), "The magazine still leaves the gun from the same place")
+	await _check_aim_and_lean(player, body)
 	var standing_y := body.position.y
 	var seconds: float = player.call("play_death_fall")
 	_check(seconds > 0.8 and float(player.call("play_death_fall")) == 0.0, "Death starts one fall that takes about a second (%s s)" % seconds)
@@ -80,6 +81,38 @@ func _run() -> void:
 	_check(absf(body.global_basis.y.y) < 0.05 and body.position.y > standing_y, "The dead hero lies on the floor, lifted by the body's thickness")
 	print("Hero model regression tests: %d failures" % failures)
 	quit(1 if failures > 0 else 0)
+
+
+## The drawn gun meets the aim for every hold, the minigun's barrels keep their axis, and running leans the body.
+func _check_aim_and_lean(player: CharacterBody3D, body: Node3D) -> void:
+	player.set("input_locked", true)
+	var body_aim := preload("res://game/features/player/player_body_aim.gd")
+	var aim_direction := Vector3(0.3, 0.0, -1.0).normalized()
+	var mount_node := player.get_node("WeaponMount")
+	(player.get_node("AimPivot") as Node3D).global_rotation = Vector3(0.0, atan2(-aim_direction.x, -aim_direction.z), 0.0)
+	for slot in [4, 5, 2, 7]:
+		player.call("pickup_weapon", slot)
+		var settled := Time.get_ticks_msec() + 1800
+		while Time.get_ticks_msec() < settled:
+			body_aim.turn_body(body, aim_direction, 1.0 / 60.0, mount_node.call("barrel_yaw_offset"))
+			await process_frame
+		var held := mount_node.get("_model_muzzle") as Node3D
+		var drawn: Vector3 = -(held.global_basis.orthonormalized() * Basis(Vector3.UP, -PI * 0.5)).z
+		var miss := rad_to_deg(absf(angle_difference(atan2(drawn.x, drawn.z), atan2(aim_direction.x, aim_direction.z))))
+		_check(miss < 1.5, "The drawn %s points at the aim (off by %.1f degrees)" % [player.call("get_current_weapon").call("get_weapon_name"), miss])
+	var barrels := mount_node.get("_model_barrels") as MeshInstance3D
+	var centre: Vector3 = barrels.get_aabb().get_center()
+	var spun := Basis(Vector3.RIGHT, 1.1)
+	barrels.transform = Transform3D(spun, centre - spun * centre)
+	_check((barrels.transform * centre).is_equal_approx(centre), "The minigun's barrels turn about their own axis")
+	player.velocity = Vector3(0.0, 0.0, -8.1)
+	for i in 120:
+		body_aim.turn_body(body, Vector3(0, 0, -1), 1.0 / 60.0)
+	_check(body.global_basis.y.dot(Vector3(0, 0, -1)) > 0.08, "Running forward leans the body into the run (%.2f)" % body.global_basis.y.z)
+	player.velocity = Vector3.ZERO
+	for i in 120:
+		body_aim.turn_body(body, Vector3(0, 0, -1), 1.0 / 60.0)
+	_check(absf(body.global_basis.y.z) < 0.01, "Standing straightens the body again")
 
 
 func _check(condition: bool, message: String) -> void:

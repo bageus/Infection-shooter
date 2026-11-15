@@ -54,7 +54,9 @@ func _turning_in_place() -> bool:
 	var body := _character.get("body_visual") as Node3D
 	if body == null:
 		return false
-	var error := absf(angle_difference(body.global_rotation.y, _aim.global_rotation.y + PI))
+	var mount := _character.get("weapon_mount") as Node
+	var held_off := float(mount.get("barrel_offset")) if mount != null else 0.0
+	var error := absf(angle_difference(body.global_rotation.y, _aim.global_rotation.y + PI - held_off))
 	var now := Time.get_ticks_msec() * 0.001
 	if error > deg_to_rad(TURN_DEGREES):
 		_turn_until = now + TURN_HOLD_SECONDS

@@ -572,7 +572,7 @@ func _update_aim()->void:
 	if flat_direction.length_squared()>0.0001:
 		var target_direction:=flat_direction.normalized()
 		aim_pivot.look_at(aim_pivot.global_position+target_direction,Vector3.UP)
-		if _roll_remaining<=0.0: preload("res://game/features/player/player_body_aim.gd").turn_body(body_visual,target_direction,get_physics_process_delta_time()) # a roll keeps the body turned along it
+		if _roll_remaining<=0.0: preload("res://game/features/player/player_body_aim.gd").turn_body(body_visual,target_direction,get_physics_process_delta_time(),weapon_mount.call("barrel_yaw_offset")) # a roll keeps the body turned along it
 
 func _aim_uncontrolled() -> void:
 	var direction: Vector3 = _mutation_control.direction
@@ -580,7 +580,7 @@ func _aim_uncontrolled() -> void:
 		return
 	_aim_point = aim_pivot.global_position + direction * 8.0
 	aim_pivot.look_at(_aim_point, Vector3.UP)
-	if _roll_remaining<=0.0: preload("res://game/features/player/player_body_aim.gd").turn_body(body_visual,direction,get_physics_process_delta_time())
+	if _roll_remaining<=0.0: preload("res://game/features/player/player_body_aim.gd").turn_body(body_visual,direction,get_physics_process_delta_time(),weapon_mount.call("barrel_yaw_offset"))
 
 # Public weapon_view_v1: read-only view data, never persisted.
 func get_weapon_view() -> Dictionary:
