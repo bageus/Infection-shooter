@@ -70,8 +70,10 @@ func _on_footstep(_side: int, speed: float) -> void:
 	var impacts := _player.get("impact_pool") as Node
 	if is_instance_valid(impacts) and impacts.has_method("request_surface_step"):
 		impacts.call("request_surface_step", _player)
-	# Sprinting lands harder than walking.
-	SFX.play(_player, event, _player.global_position, lerpf(-3.0, 2.0, clampf((speed - 3.0) / 6.0, 0.0, 1.0)))
+	# Sprinting lands harder than walking, and a foot shuffled while turning on the spot barely taps.
+	SFX.play(_player, event, _player.global_position, lerpf(-8.0, 4.0, clampf(speed / 9.0, 0.0, 1.0)))
+	if _player.has_method("note_footstep"):
+		_player.call("note_footstep", speed)
 	get_tree().create_timer(BACKPACK_RATTLE_DELAY).timeout.connect(_play_backpack_rattle)
 
 
