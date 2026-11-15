@@ -268,6 +268,12 @@ func _migrate_scene_path(old_path: String) -> String:
 		var moved := MODEL_PATHS.find(old_path.trim_prefix(ENVIRONMENT_ROOT + "/").get_slice("/", 0), old_path.get_file())
 		if not moved.is_empty():
 			return moved
+	# Decor from before the part-based enemies: unsided limbs became left ones, mutilated corpses became whole ones.
+	var decor_dir := "res://game/features/infected/public/decor/"
+	if old_path.begins_with(decor_dir) and old_path.ends_with(".tscn") and not ResourceLoader.exists(old_path):
+		for candidate in [old_path.replace(".tscn", "_l.tscn"), old_path.replace("_mutilated", "")]:
+			if ResourceLoader.exists(candidate):
+				return candidate
 	var replacements = {
 		# Saved maps from before the pickups moved under game/features/pickups.
 		"res://game/bootstrap/app/weapon_pickups/uzi.tscn": "res://game/features/pickups/public/weapons/uzi.tscn",
