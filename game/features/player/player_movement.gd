@@ -370,10 +370,8 @@ func get_current_weapon_index()->int: return current_weapon_index
 func note_hit_direction(direction: Vector3) -> void: _hit_feedback.direction = direction # recoil of the next hit
 func take_damage(amount: float, damage_type: String = "physical") -> void:
 	_apply_damage(amount, damage_type, global_position, Vector3.FORWARD, damage_type)
-
 func get_projectile_material(_shape_index: int = -1) -> String:
 	return "flesh"
-
 func take_armor_capped_damage(amount: float) -> void: _apply_damage(amount, "physical", global_position, Vector3.FORWARD, "physical", true) # Colossus: armor soaks the whole blow
 func take_projectile_damage(amount: float, point: Vector3, direction: Vector3, weapon: String) -> void:
 	_apply_damage(amount, "physical", point, direction, weapon)
@@ -399,6 +397,8 @@ func _apply_damage(amount: float, damage_type: String, point: Vector3, direction
 		blood_wounded.emit(global_position, excluded)
 		if health <= 0.0:
 			blood_death.emit(global_position, excluded, get_instance_id())
+## The dead hero falls to the floor (the model has no death clip); returns the seconds until it lies still.
+func play_death_fall() -> float: return preload("res://game/features/player/player_death_fall.gd").start(self)
 ## True while damage taken is still unhealed; a full bar never bleeds.
 func is_wounded() -> bool:
 	return minf(_wound, max_health - health) > 0.01

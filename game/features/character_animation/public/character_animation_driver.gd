@@ -14,6 +14,7 @@ const OVERLAY := preload("res://game/features/character_animation/clip_overlay.g
 const LEG_OVERLAY := preload("res://game/features/character_animation/leg_overlay.gd")
 const STANCE_FEET := preload("res://game/features/character_animation/stance_feet.gd")
 const CLIP_FOOTSTEPS := preload("res://game/features/character_animation/clip_footsteps.gd")
+const CLIP_TUNING := preload("res://game/features/character_animation/clip_tuning.gd")
 const STRIKE_POSE := preload("res://game/features/character_animation/strike_pose.gd")
 const STATE_ATTACK := &"attack"
 const STATE_DEATH := &"death"
@@ -440,7 +441,7 @@ func _play_selected_clip(speed: float = 0.0) -> bool:
 		_play_clip(String(requested))
 		# Cycles that name the ground speed they are paced for follow the actual speed.
 		var reference := float(animation_player.get_animation(requested).get_meta("ref_speed", 0.0))
-		var wanted := (clampf(speed / reference, 0.5, 1.8) if reference > 0.0 and speed > 0.15 else 1.0) * locomotion_speed_multiplier
+		var wanted := (clampf(speed / reference, 0.5, 2.4) if reference > 0.0 and speed > 0.15 else 1.0) * locomotion_speed_multiplier
 		# The walking-animation setting paces the player's baked cycles (idle stays at its own pace).
 		if clip_footsteps and speed > 0.15:
 			wanted *= leg_playback_multiplier
@@ -512,6 +513,8 @@ func _index_animations() -> void:
 	for animation_name in animation_player.get_animation_list():
 		var normalized := str(animation_name).to_lower().replace(" ", "_").replace("-", "_")
 		_animations[normalized] = str(animation_name)
+	if clip_footsteps:
+		CLIP_TUNING.apply(animation_player, dodge_clip)
 	for state: StringName in LOCOMOTION_TOKENS:
 		_locomotion[state] = CLIP_LOOKUP.find(_animations, NON_LOOPING_TOKENS, LOCOMOTION_TOKENS[state])
 

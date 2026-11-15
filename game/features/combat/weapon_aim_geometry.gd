@@ -2,19 +2,15 @@ extends RefCounted
 ## Rotate the entire authored gun; its public muzzle and flash stay on the barrel.
 
 static func aim(weapon: Node3D, muzzle: Node3D, target: Vector3) -> void:
-	var offset := muzzle.global_position - weapon.global_position
+	# The turn pivots on the muzzle: it stays where the drawn gun's barrel ends and the shot leaves straight for the target.
+	var pivot := muzzle.global_position
 	var axis := -muzzle.global_basis.z.normalized()
-	var target_offset := target - weapon.global_position
-	if target_offset.length_squared() < 0.000001:
+	var wanted := target - pivot
+	if wanted.length_squared() < 0.000001:
 		return
-	var along := offset.dot(axis)
-	var transverse := offset - axis * along
-	var reach := sqrt(maxf(0.0, target_offset.length_squared() - transverse.length_squared()))
-	var aligned := transverse + axis * reach
-	if aligned.length_squared() < 0.000001:
-		aligned = axis
-	var turn := Basis(Quaternion(aligned.normalized(), target_offset.normalized()))
+	var turn := Basis(Quaternion(axis, wanted.normalized()))
 	weapon.global_basis = turn * weapon.global_basis
+	weapon.global_position = pivot + turn * (weapon.global_position - pivot)
 
 
 static func collision_origin(weapon: Node3D, muzzle: Node3D) -> Vector3:

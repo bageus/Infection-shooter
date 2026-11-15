@@ -124,7 +124,7 @@ func _check_on_model_muzzle(actor: Node3D, gun: Node3D, family: String) -> void:
 	var muzzle := gun.get_node("Muzzle") as Node3D
 	_check(muzzle.global_position.distance_to(model_muzzle.global_position) < .001, "Weapon muzzle sits on the model's muzzle")
 	_check((-muzzle.global_basis.z).dot(model_muzzle.global_basis.orthonormalized().x) > .999, "Weapon muzzle points along the model's barrel")
-	_check(not (gun.get_node("Body") as Node3D).visible, "The weapon's own model is hidden; the model's gun is drawn")
+	_check((gun.get_node("Body").find_children("*", "MeshInstance3D", true, false) as Array).all(func(m: Node) -> bool: return not (m as MeshInstance3D).visible), "The weapon's own meshes are hidden; the model's gun is drawn")
 
 
 func _check_reload_audio(gun: Node3D, index: int) -> void:
@@ -145,7 +145,7 @@ func _test_minigun(actor: CharacterBody3D, effects: Node3D, crosshair: Node) -> 
 	var backpack := actor.get_node("Body").find_child("Vest_Backpack", true, false) as MeshInstance3D
 	_check(backpack != null and backpack.visible and backpack.skin != null, "The model's backpack is skinned to the spine")
 	var flashlight := actor.find_child("Flashlight", true, false) as SpotLight3D
-	_check(flashlight != null and not flashlight.shadow_enabled and flashlight.find_parent("Muzzle") != null, "Flashlight model sits on the muzzle, beam from its lens, no shadows")
+	_check(flashlight != null and not flashlight.shadow_enabled and flashlight.find_parent("Minigun_Muzzle") != null, "Flashlight model sits on the model muzzle, beam from its lens, no shadows")
 	_check(not crosshair.scope.visible, "Switching to minigun disables scope render")
 	_check(gun.call("get_magazine_ammo") == 400 and gun.call("get_reserve_ammo") == 0, "HUD exposes one 400-round belt")
 	_check(not actor.call("_fire_weapon", gun), "Minigun does not fire before its barrels spin up")

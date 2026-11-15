@@ -332,7 +332,7 @@ func _test_baked_hold() -> void:
 		var weapon: Node3D = player.call("get_current_weapon")
 		var model_muzzle := body.find_child(guns[index] + "_Muzzle", true, false) as Node3D
 		_check(weapon.get_node("Muzzle").global_position.distance_to(model_muzzle.global_position) < 0.001, "shots leave the model's %s muzzle" % guns[index])
-		_check(not (weapon.get_node("Body") as Node3D).visible, "the weapon's own model is hidden")
+		_check((weapon.get_node("Body").find_children("*", "MeshInstance3D", true, false) as Array).all(func(m: Node) -> bool: return not (m as MeshInstance3D).visible), "the weapon's own meshes are hidden")
 	player.queue_free()
 	effects.queue_free()
 	await process_frame

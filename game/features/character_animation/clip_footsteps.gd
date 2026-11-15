@@ -1,7 +1,7 @@
 extends RefCounted
 ## Footstep timing of the player's baked walk and run cycles: the playback phases (0..1) at which the
 ## left and right foot land. Read off the ankle heights of the Walk_*/Run_* clips.
-const CONTACTS := {"Walk": [0.55, 0.05], "Run": [0.2, 0.75]}
+const CONTACTS := {"Walk": [0.55, 0.05], "Run": [0.27, 0.77]}
 
 
 ## Side (0 left, 1 right) of the foot that landed between two playback phases, -1 when none did.

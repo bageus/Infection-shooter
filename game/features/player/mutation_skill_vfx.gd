@@ -240,7 +240,8 @@ func _build_skin() -> void:
 	for node in body.find_children("*", "MeshInstance3D", true, false):
 		var mesh := node as MeshInstance3D
 		var source := mesh.get_active_material(0) as BaseMaterial3D
-		if source == null or source.albedo_texture == null:
+		# Only the skinned body: the gun and the flashlight riding it are rigid props.
+		if mesh.skin == null or source == null or source.albedo_texture == null:
 			continue
 		if _skin == null:
 			_skin = ShaderMaterial.new()

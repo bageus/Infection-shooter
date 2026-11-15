@@ -287,6 +287,10 @@ func _begin_death() -> void:
 	# Dead hero: input blocked, physics stays on so a mid-air death still falls.
 	player.input_locked = true
 	SFX.play(self, &"man_damage_3")
+	# The hero falls to the floor first, then the screen goes dark.
+	var fall: float = player.call("play_death_fall") if player.has_method("play_death_fall") else 0.0
+	if fall > 0.0:
+		await get_tree().create_timer(fall).timeout
 	var fade := DEATH_FADE.new()
 	fade.name = "DeathFade"
 	add_child(fade)
