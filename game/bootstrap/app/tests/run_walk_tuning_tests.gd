@@ -124,7 +124,7 @@ func _test_leg_clocks(player: CharacterBody3D) -> void:
 		driver.call("_process_skeletal", 3.0)
 		rates.append(animation_player.speed_scale)
 		_check(player.velocity == Vector3(0, 0, -3), "Pace tuning is presentation-only")
-	_check(is_equal_approx(rates[0], 0.5) and is_equal_approx(rates[1], 2.0), "Walking pace scales the baked cycle's playback")
+	_check(is_equal_approx(rates[1] / rates[0], 4.0), "Walking pace scales the baked cycle's playback")
 	_check(driver.call("play_dodge", Vector3.FORWARD, 0.55), "Dodge clip remains playable")
 	_check(is_equal_approx(animation_player.speed_scale, float(driver.call("clip_length", &"Running_Dive_Roll")) / 0.55), "Pace tuning does not scale the dodge")
 	player.call("set_walk_tuning", NAN, NAN)

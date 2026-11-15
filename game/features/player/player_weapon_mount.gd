@@ -20,6 +20,7 @@ var _model_barrels: Node3D
 var _reload_clip: StringName = &""
 var _loaded := 0
 var _driver: Node
+var _flashlight: Node
 
 
 func _ready() -> void:
@@ -30,10 +31,9 @@ func _ready() -> void:
 		return
 	_driver = get_parent().get_node_or_null("AnimationDriver")
 	recoil = get_parent().get("_shot_recoil")
-	var light := FLASHLIGHT.new()
-	light.name = "Flashlight"
-	light.mount = self
-	add_child(light)
+	_flashlight = FLASHLIGHT.new()
+	_flashlight.name = "FlashlightRig"
+	add_child(_flashlight)
 	var kick := preload("res://game/features/player/player_kick_pose.gd").new()
 	kick.name = "KickPose"
 	kick.mount = self
@@ -47,10 +47,12 @@ func select_weapon(weapon: Node3D) -> void:
 	var gun: String = MODEL_GUNS.get(weapon.call("get_weapon_name"), "")
 	_model_muzzle = _model.find_child(gun + "_Muzzle", true, false) as Node3D
 	_model_barrels = _model.find_child("BarrelCluster", true, false) as Node3D if gun == "Minigun" else null
-	# The weapon's own model stays hidden: the model's gun is drawn instead.
+	_flashlight.attach(_model_muzzle)
+	# The weapon's own meshes stay hidden (the model's gun is drawn instead); its markers stay visible, they carry the muzzle flash and smoke.
 	var visual := weapon.get_node_or_null("Body") as Node3D
 	if visual != null:
-		visual.hide()
+		for mesh in visual.find_children("*", "MeshInstance3D", true, false):
+			(mesh as MeshInstance3D).hide()
 	_loaded = int(weapon.call("get_magazine_ammo"))
 	sync_weapon(weapon)
 

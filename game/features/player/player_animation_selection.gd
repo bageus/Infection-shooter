@@ -4,8 +4,8 @@ extends RefCounted
 const STANCE := preload("res://game/features/player/player_weapon_stance.gd")
 const SPEED_DEADZONE := 0.15
 const AXIS_HYSTERESIS := 0.15
-## Speed above which the run cycle plays (the driver's own run threshold), and the share of it a runner keeps.
-const RUN_SPEED := 6.8
+## Ground speed above which the run cycle plays (the walk cycle is a slow stealth step), and the share of it a runner keeps.
+const RUN_SPEED := 1.8
 const RUN_EXIT_RATIO := 0.85
 ## Clip suffix per weapon index (pistol, uzi, shotgun, launcher, AK, M4, sniper, minigun).
 const FAMILIES := ["Pistol", "Uzi", "Shotgun", "Launcher", "AK", "M4", "Sniper", "Minigun"]
