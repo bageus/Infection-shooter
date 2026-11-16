@@ -36,7 +36,7 @@ func _behaviour_tick(delta: float, target_offset: Vector3) -> void:
 	if _slam_busy > 0.0:
 		_cached_desired = Vector3.ZERO
 		return
-	if _slam_cooldown <= 0.0 and _pending_hit < 0.0 and _blast_stun_remaining <= 0.0 and target_offset.length() <= slam_trigger_distance and _clear_line():
+	if _slam_cooldown <= 0.0 and _pending_hit < 0.0 and _blast_stun_remaining <= 0.0 and target_offset.length() <= slam_trigger_distance and _senses.clear_shot(self, _target):
 		_start_slam()
 
 
@@ -107,4 +107,4 @@ func _die() -> void:
 
 func _half_height() -> float:
 	var capsule := collision_shape.shape as CapsuleShape3D
-	return capsule.height * 0.5 if capsule != null else 1.0
+	return capsule.height * 0.5 - collision_shape.position.y if capsule != null else 1.0

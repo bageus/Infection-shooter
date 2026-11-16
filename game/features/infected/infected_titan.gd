@@ -26,7 +26,7 @@ func _behaviour_tick(delta: float, target_offset: Vector3) -> void:
 		_tick_throw(delta)
 		return
 	var distance := target_offset.length()
-	if _throw_cooldown <= 0.0 and _pending_hit < 0.0 and _blast_stun_remaining <= 0.0 and distance >= throw_min_distance and distance <= throw_max_distance and _clear_line():
+	if _throw_cooldown <= 0.0 and _pending_hit < 0.0 and _blast_stun_remaining <= 0.0 and distance >= throw_min_distance and distance <= throw_max_distance and _senses.clear_shot(self, _target):
 		_start_throw()
 
 
@@ -145,4 +145,4 @@ func _die() -> void:
 
 func _half_height() -> float:
 	var capsule := collision_shape.shape as CapsuleShape3D
-	return capsule.height * 0.5 if capsule != null else 1.0
+	return capsule.height * 0.5 - collision_shape.position.y if capsule != null else 1.0

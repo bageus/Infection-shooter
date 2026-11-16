@@ -496,17 +496,6 @@ func _apply_gravity(delta: float) -> void:
 		velocity.y -= gravity_acceleration * delta
 
 
-# Walls and metal grilles (layer 1) between this enemy and its target block ranged or area attacks.
-func _clear_line() -> bool:
-	if not is_instance_valid(_target):
-		return false
-	var skip: Array[RID] = [get_rid()]
-	if _target is CollisionObject3D:
-		skip.append((_target as CollisionObject3D).get_rid())
-	var query := PhysicsRayQueryParameters3D.create(global_position + Vector3.UP * 0.8, _target.global_position + Vector3.UP * 0.8, 1, skip)
-	return get_world_3d().direct_space_state.intersect_ray(query).is_empty()
-
-
 func _try_attack() -> void:
 	if _attack_cooldown > 0.0 or _blast_stun_remaining > 0.0:
 		return
