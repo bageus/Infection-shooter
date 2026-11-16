@@ -53,8 +53,8 @@ var _hitboxes: Dictionary = {}
 var _bleeding_stumps: Array = []
 const STUMP_BLEED_SECONDS := 3.5
 ## A staged wound paints this long per frame, so shooting a body apart costs no visible hitch.
-var _spent_frame := -1
-var _spent_usec := 0
+var spent_frame := -1
+var spent_usec := 0
 ## Bones of parts whose staged sever is still under way: later severs must not copy them.
 var _staged_bones := {}
 const DRIP_MARK_DISTANCE := 0.3

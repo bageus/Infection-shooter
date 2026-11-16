@@ -9,7 +9,7 @@ static var _quad: QuadMesh
 
 
 static func emit_at(anchor: Node3D, axis: Vector3) -> void:
-	if not EFFECTS_QUALITY.at_least(EFFECTS_QUALITY.MEDIUM):
+	if not EFFECTS_QUALITY.at_least(EFFECTS_QUALITY.MEDIUM) or not anchor.is_inside_tree():
 		return
 	var particles := anchor.get_node_or_null(NAME) as GPUParticles3D
 	if particles == null:
