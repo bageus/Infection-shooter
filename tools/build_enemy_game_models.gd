@@ -64,6 +64,10 @@ func _build(enemy_name: String) -> bool:
 		push_error("Source has no two-surface part meshes: " + enemy_name)
 		instance.free()
 		return false
+	var images := _read_images(enemy_name)
+	if images.is_empty():
+		instance.free()
+		return false
 	var merged: Array = []
 	var parts: Array = []
 	# Parts whose UV seams lock their edges simplify less than asked; tighten the skin target
@@ -72,12 +76,13 @@ func _build(enemy_name: String) -> bool:
 	for attempt in 4:
 		merged = [_new_surface(), _new_surface()]
 		parts = []
-		_merge_parts(nodes, instance, skin_scale, merged, parts, enemy_name in FULL_DETAIL)
+		_merge_parts(nodes, instance, skin_scale, merged, parts, enemy_name in FULL_DETAIL, images.albedo)
 		var skin_triangles := (merged[0].indices as PackedInt32Array).size() / 3
 		if enemy_name in FULL_DETAIL or skin_triangles <= SKIN_TRIANGLES * 1.05 or attempt == 3:
 			break
 		skin_scale *= clampf(float(SKIN_TRIANGLES) / float(skin_triangles), 0.4, 0.95)
 	_close_joints(merged[0], merged[1])
+	_smooth_joint_normals(merged[0])
 	var mesh := ArrayMesh.new()
 	for surface in 2:
 		mesh.add_surface_from_arrays(Mesh.PRIMITIVE_TRIANGLES, _finish(merged[surface]), [], _lods(merged[surface], surface))
@@ -94,14 +99,14 @@ func _build(enemy_name: String) -> bool:
 	var triangles := (merged[0].indices as PackedInt32Array).size() / 3 + (merged[1].indices as PackedInt32Array).size() / 3
 	print("%s: %d parts, %d triangles, aabb %s" % [enemy_name, parts.size(), triangles, mesh.get_aabb()])
 	instance.free()
-	var ok := _write_textures(enemy_name, FULL_TEXTURE_SIZE if enemy_name in FULL_DETAIL else TEXTURE_SIZE)
+	var ok := _write_textures(enemy_name, FULL_TEXTURE_SIZE if enemy_name in FULL_DETAIL else TEXTURE_SIZE, images)
 	_write_material(enemy_name)
 	_write_wound_material(enemy_name)
 	return ok
 
 
 # Simplifies every part to its share of the triangle budget and appends it to `merged`.
-func _merge_parts(nodes: Array, instance: Node, skin_scale: float, merged: Array, parts: Array, full_detail: bool) -> void:
+func _merge_parts(nodes: Array, instance: Node, skin_scale: float, merged: Array, parts: Array, full_detail: bool, albedo: Image) -> void:
 	var shares := [0.0, 0.0]
 	for node: MeshInstance3D in nodes:
 		var split := _split_surfaces(node.mesh)
@@ -118,6 +123,9 @@ func _merge_parts(nodes: Array, instance: Node, skin_scale: float, merged: Array
 			var total := (SKIN_TRIANGLES * skin_scale) if surface == 0 else float(CAP_TRIANGLES)
 			var budget: float = total * pow(float(_triangles(arrays)), 0.8) / shares[surface]
 			var simplified := _compact(arrays, arrays[Mesh.ARRAY_INDEX]) if full_detail and surface == 0 else _simplify(arrays, maxi(int(budget), 12))
+			# shortcut: Hunger and Revenant keep their white shirts and share no per-polygon atlas, so no repaint; upgrade if their joints show white.
+			if surface == 0 and full_detail:
+				simplified = _repaint_seams(simplified, albedo)
 			_append(merged[surface], simplified, transform, id, _part_lods(simplified))
 		parts.append({"name": String(node.name), "id": id, "caps": _caps(split[1], transform) if _triangles(split[1]) > 0 else []})
 
@@ -357,6 +365,151 @@ static func _close_joints(skin: Dictionary, caps: Dictionary) -> void:
 	skin.vertices = vertices
 
 
+# The source parts carry patches that do not belong to the body texture: seam strips at the
+# part joints whose atlas cells are plain white, and Brute's shoulder cloth, whose UVs are all
+# (0, 0). They show as white or grey bands on a whole enemy. Such triangles (white, reachable
+# from a part's open edge or the cloth through white triangles) take the UV of the nearest
+# ordinary triangle, so skin, cloth and normal map continue across the seam.
+const WHITE_CELL := 0.97
+
+
+static func _repaint_seams(arrays: Array, albedo: Image) -> Array:
+	var vertices: PackedVector3Array = arrays[Mesh.ARRAY_VERTEX]
+	var uvs: PackedVector2Array = arrays[Mesh.ARRAY_TEX_UV]
+	var indices: PackedInt32Array = arrays[Mesh.ARRAY_INDEX]
+	var count := indices.size() / 3
+	var canonical := PackedInt32Array()
+	canonical.resize(vertices.size())
+	var weld := {}
+	for v in vertices.size():
+		var key := Vector3i((vertices[v] * 10000.0).round())
+		if not weld.has(key):
+			weld[key] = v
+		canonical[v] = int(weld[key])
+	var edge_triangles := {}
+	for t in count:
+		for k in 3:
+			var a := canonical[indices[t * 3 + k]]
+			var b := canonical[indices[t * 3 + (k + 1) % 3]]
+			var edge := Vector2i(mini(a, b), maxi(a, b))
+			if not edge_triangles.has(edge):
+				edge_triangles[edge] = []
+			edge_triangles[edge].append(t)
+	var neighbours: Array = []
+	neighbours.resize(count)
+	var open_triangle := PackedByteArray()
+	open_triangle.resize(count)
+	for edge: Vector2i in edge_triangles:
+		var sharing: Array = edge_triangles[edge]
+		if sharing.size() == 1:
+			open_triangle[sharing[0]] = 1
+		for t: int in sharing:
+			for other: int in sharing:
+				if other != t:
+					if neighbours[t] == null:
+						neighbours[t] = []
+					neighbours[t].append(other)
+	var cloth := PackedByteArray()
+	var white := PackedByteArray()
+	cloth.resize(count)
+	white.resize(count)
+	var middle := PackedVector2Array()
+	middle.resize(count)
+	for t in count:
+		var centre := (uvs[indices[t * 3]] + uvs[indices[t * 3 + 1]] + uvs[indices[t * 3 + 2]]) / 3.0
+		middle[t] = centre
+		cloth[t] = 1 if uvs[indices[t * 3]] == Vector2.ZERO and uvs[indices[t * 3 + 1]] == Vector2.ZERO and uvs[indices[t * 3 + 2]] == Vector2.ZERO else 0
+		var p := albedo.get_pixel(clampi(int(centre.x * albedo.get_width()), 0, albedo.get_width() - 1), clampi(int(centre.y * albedo.get_height()), 0, albedo.get_height() - 1))
+		white[t] = 1 if p.r >= WHITE_CELL and p.g >= WHITE_CELL and p.b >= WHITE_CELL else 0
+	var seam := cloth.duplicate()
+	var queue: Array = []
+	for t in count:
+		if cloth[t] == 1 or (white[t] == 1 and open_triangle[t] == 1):
+			seam[t] = 1
+			queue.append(t)
+	var head := 0
+	while head < queue.size():
+		var t: int = queue[head]
+		head += 1
+		for other: int in (neighbours[t] if neighbours[t] != null else []):
+			if seam[other] == 0 and white[other] == 1:
+				seam[other] = 1
+				queue.append(other)
+	# Nearest ordinary triangle by steps across shared edges.
+	var donor := PackedInt32Array()
+	donor.resize(count)
+	donor.fill(-1)
+	queue = []
+	for t in count:
+		if seam[t] == 0:
+			donor[t] = t
+			queue.append(t)
+	head = 0
+	while head < queue.size():
+		var t: int = queue[head]
+		head += 1
+		for other: int in (neighbours[t] if neighbours[t] != null else []):
+			if seam[other] == 1 and donor[other] == -1:
+				donor[other] = donor[t]
+				queue.append(other)
+	var result := arrays.duplicate()
+	var out_vertices := vertices.duplicate()
+	var out_normals: PackedVector3Array = (arrays[Mesh.ARRAY_NORMAL] as PackedVector3Array).duplicate()
+	var out_uvs := uvs.duplicate()
+	var out_tangents: PackedFloat32Array = (arrays[Mesh.ARRAY_TANGENT] as PackedFloat32Array).duplicate()
+	var out_indices := indices.duplicate()
+	var normals: PackedVector3Array = arrays[Mesh.ARRAY_NORMAL]
+	var tangents: PackedFloat32Array = arrays[Mesh.ARRAY_TANGENT]
+	var painted := 0
+	for t in count:
+		if seam[t] == 0 or donor[t] < 0:
+			continue
+		painted += 1
+		for k in 3:
+			var v := indices[t * 3 + k]
+			out_indices[t * 3 + k] = out_vertices.size()
+			out_vertices.append(vertices[v])
+			out_normals.append(normals[v])
+			out_uvs.append(middle[donor[t]])
+			out_tangents.append_array(tangents.slice(v * 4, v * 4 + 4))
+	if painted == 0:
+		return arrays
+	print("  repainted %d seam triangles" % painted)
+	result[Mesh.ARRAY_VERTEX] = out_vertices
+	result[Mesh.ARRAY_NORMAL] = out_normals
+	result[Mesh.ARRAY_TEX_UV] = out_uvs
+	result[Mesh.ARRAY_TANGENT] = out_tangents
+	result[Mesh.ARRAY_INDEX] = out_indices
+	return result
+
+
+# Parts are separate meshes, so lighting would break along every joint. Vertices of different
+# parts that lie within 5 mm of each other share one averaged normal.
+static func _smooth_joint_normals(skin: Dictionary) -> void:
+	var vertices: PackedVector3Array = skin.vertices
+	var normals: PackedVector3Array = skin.normals
+	var colors: PackedColorArray = skin.colors
+	var groups := {}
+	for v in vertices.size():
+		var key := Vector3i((vertices[v] / 0.005).round())
+		if not groups.has(key):
+			groups[key] = []
+		groups[key].append(v)
+	var smoothed := normals.duplicate()
+	for key: Vector3i in groups:
+		var members: Array = groups[key]
+		var ids := {}
+		var sum := Vector3.ZERO
+		for v: int in members:
+			ids[roundi(colors[v].r * PART_ID_SCALE)] = true
+			sum += normals[v]
+		if ids.size() < 2 or sum.length() < 0.001:
+			continue
+		for v: int in members:
+			smoothed[v] = sum.normalized()
+	skin.normals = smoothed
+
+
 # Index lists of a coarser and a much coarser version of one part (about 50% and 25% of its
 # triangles) over the part's own vertices; a part that cannot be reduced keeps its full indices.
 static func _part_lods(arrays: Array) -> Array:
@@ -504,12 +657,13 @@ static func _find(parent: Dictionary, node: int) -> int:
 	return root
 
 
-# Reads the GLB's embedded images straight from its binary chunk.
-func _write_textures(enemy_name: String, texture_size: int) -> bool:
+# Reads the GLB's embedded images straight from its binary chunk: {albedo, normal, wound} Images,
+# or {} when one cannot be read.
+func _read_images(enemy_name: String) -> Dictionary:
 	var bytes := FileAccess.get_file_as_bytes(SOURCE_DIR + enemy_name + ".glb")
 	if bytes.size() < 20:
 		push_error("Cannot read " + enemy_name + ".glb")
-		return false
+		return {}
 	var json_length := bytes.decode_u32(12)
 	var document: Dictionary = JSON.parse_string(bytes.slice(20, 20 + json_length).get_string_from_utf8())
 	var bin_start := 20 + json_length + 8
@@ -524,7 +678,7 @@ func _write_textures(enemy_name: String, texture_size: int) -> bool:
 		"normal": int(body_material.normalTexture.index),
 		"wound": int(wound_material.pbrMetallicRoughness.baseColorTexture.index),
 	}
-	var ok := true
+	var result := {}
 	for suffix: String in wanted:
 		var texture: Dictionary = document.textures[wanted[suffix]]
 		var image_info: Dictionary = document.images[int(texture.source)]
@@ -540,8 +694,15 @@ func _write_textures(enemy_name: String, texture_size: int) -> bool:
 		var error := image.load_jpg_from_buffer(data) if data.slice(0, 2) == PackedByteArray([0xFF, 0xD8]) else image.load_png_from_buffer(data)
 		if error != OK:
 			push_error("Cannot decode %s texture of %s" % [suffix, enemy_name])
-			ok = false
-			continue
+			return {}
+		result[suffix] = image
+	return result
+
+
+func _write_textures(enemy_name: String, texture_size: int, images: Dictionary) -> bool:
+	var ok := true
+	for suffix: String in images:
+		var image: Image = (images[suffix] as Image).duplicate()
 		image.resize(mini(image.get_width(), texture_size), mini(image.get_height(), texture_size), Image.INTERPOLATE_LANCZOS)
 		image.convert(Image.FORMAT_RGB8)
 		var target := ProjectSettings.globalize_path("%s%s_%s.jpg" % [OUTPUT_DIR, enemy_name, suffix])
