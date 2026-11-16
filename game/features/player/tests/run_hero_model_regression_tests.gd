@@ -145,5 +145,5 @@ func _check_lens_glow(light: SpotLight3D) -> void:
 	var facing := (glow.material_override as StandardMaterial3D).albedo_color.a
 	camera.global_position = light.global_position + light.global_basis.z * 3.0
 	rig.call("_update_glow")
-	_check(facing > 0.9 and not glow.visible, "The lit lens glows toward a camera it faces, not from behind (%.2f)" % facing)
+	_check(facing > 0.9 * float(rig.get("GLOW_STRENGTH")) and not glow.visible, "The lit lens glows toward a camera it faces, not from behind (%.2f)" % facing)
 	camera.queue_free()
