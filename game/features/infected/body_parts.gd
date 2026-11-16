@@ -101,13 +101,22 @@ func _build_parts(strength: float) -> void:
 	if skeleton.find_bone("T0_A") >= 0:
 		for index in TENTACLES:
 			definitions[StringName("tentacle_%d" % index)] = {"bones": ["T%d_A" % index, "T%d_B" % index], "share": 0.3}
-		definitions[TORSO] = {"bones": ["Hips", "Body", "Crown", "L0", "L1", "L2", "L3", "L4", "L5"], "share": 0.0}
+		var torso: Array = ["Hips", "Body", "Crown", "L0", "L1", "L2", "L3", "L4", "L5"]
+		for bone in skeleton.get_bone_count():
+			if _is_step_cell(skeleton.get_bone_name(bone)):
+				torso.append(skeleton.get_bone_name(bone))
+		definitions[TORSO] = {"bones": torso, "share": 0.0}
 	else:
 		definitions = HUMANOID_PARTS
 	for part: StringName in definitions:
 		var entry := _part_entry(part, definitions[part], strength)
 		if not entry.is_empty():
 			parts[part] = entry
+
+
+# Horde step cells (C0, C1, ...) only animate skin under the body.
+static func _is_step_cell(bone_name: String) -> bool:
+	return MESH.is_step_cell(bone_name)
 
 
 func _part_entry(part: StringName, definition: Dictionary, strength: float) -> Dictionary:
@@ -121,6 +130,8 @@ func _part_entry(part: StringName, definition: Dictionary, strength: float) -> D
 	var segments: Array = []
 	for index in bones.size():
 		var bone := bones[index]
+		if _is_step_cell(skeleton.get_bone_name(bone)):
+			continue # skin-only: owns skin of the torso but has no collision volume of its own
 		var child: Variant = null
 		if index + 1 < bones.size() and skeleton.get_bone_parent(bones[index + 1]) == bone:
 			child = MESH.joint(_data, bones[index + 1], skeleton)
@@ -432,7 +443,7 @@ func _skin_points(bones: PackedInt32Array, caps_only := false, outside := false)
 			var best := -1
 			var best_weight := 0.0
 			for k in stride:
-				if weights[index * stride + k] > best_weight:
+				if weights[index * stride + k] > best_weight and not _is_step_cell(skeleton.get_bone_name(influences[index * stride + k])):
 					best_weight = weights[index * stride + k]
 					best = influences[index * stride + k]
 			if best < 0 or bones.has(best) == outside or not _data.binds.has(best):

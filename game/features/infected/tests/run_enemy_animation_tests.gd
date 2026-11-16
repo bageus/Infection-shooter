@@ -187,6 +187,28 @@ func _test_humanoid_clips(stage: Node3D, scene: PackedScene, label: String) -> v
 	await process_frame
 
 
+# Walk keeps the core level and moves many small step cells, each on its own phase.
+func _test_horde_steps(walk: Animation) -> void:
+	var peaks := {}
+	for track in walk.get_track_count():
+		var path := str(walk.track_get_path(track))
+		if walk.track_get_type(track) != Animation.TYPE_POSITION_3D or not path.begins_with("Skeleton3D:C"):
+			continue
+		var best := 0.0
+		var best_time := 0.0
+		for key in walk.track_get_key_count(track):
+			var lift: float = (walk.track_get_key_value(track, key) as Vector3).y
+			if lift > best:
+				best = lift
+				best_time = walk.track_get_key_time(track, key)
+		peaks[path] = snappedf(best_time, 0.05)
+	var phases := {}
+	for time in peaks.values():
+		phases[time] = true
+	_expect(peaks.size() >= 20, "Horde Walk steps with many leg cells (%d)." % peaks.size())
+	_expect(phases.size() >= 5, "Leg cells lift at different moments (%d phases)." % phases.size())
+
+
 func _test_horde_clips(stage: Node3D) -> void:
 	var enemy := await _spawn(stage, HORDE)
 	var player := _player_of(enemy)
@@ -195,6 +217,7 @@ func _test_horde_clips(stage: Node3D) -> void:
 		for clip in ["Idle", "Walk", "Run", "Summon", "Death"]:
 			_expect(player.has_animation(clip), "Horde has " + clip)
 		_expect(not player.has_animation("AttackLeft") and not player.has_animation("AttackRight"), "Horde has no swipe clip: it rams.")
+		_test_horde_steps(player.get_animation("Walk"))
 	enemy.queue_free()
 	await process_frame
 
