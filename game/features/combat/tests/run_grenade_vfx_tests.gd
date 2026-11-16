@@ -32,6 +32,11 @@ func _run() -> void:
 	_expect(blast.get_node("ImpactLight").light_energy > 0.0, "Explosion keeps its gameplay flash.")
 	var wisps := blast.get_node("SmokeWisps") as GPUParticles3D
 	_expect(((wisps.draw_pass_1 as PrimitiveMesh).material as ShaderMaterial).shader == SMOKE_SHADER, "Smoke puffs use the procedural smoke shader.")
+	var second := EXPLOSION.instantiate() as Node3D
+	stage.add_child(second)
+	second.call("start", Vector3.UP)
+	_expect((embers.draw_pass_1 as PrimitiveMesh).material == ((second.get_node("FireEmbers") as GPUParticles3D).draw_pass_1 as PrimitiveMesh).material, "Every blast shares one particle material instead of building new ones.")
+	second.queue_free()
 	await create_timer(0.5).timeout
 	var lingering := blast.get_node_or_null("LingeringSmoke") as GPUParticles3D
 	_expect(lingering != null and lingering.emitting, "A lingering smoke column rises after the blast.")
