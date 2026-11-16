@@ -1,10 +1,11 @@
 extends RefCounted
-## Enemy, blast and spawn hole lessons for the quest constructor. Each is one click step: the enemy's live idle model
+## Enemy, blast, spawn hole and flashlight lessons for the quest constructor. Each is one click step: the enemy's live idle model
 ## (tutorial_enemy_preview.gd) with a title and a short text. Titles and texts are translation keys (translations.json, ru and en),
 ## so the lesson follows the menu language. Texts describe what to expect, without stat numbers.
 
 const PREVIEW := preload("res://game/bootstrap/app/tutorial/tutorial_enemy_preview.gd")
 const TEXT := preload("res://game/bootstrap/app/mutation_text.gd")
+const KEYS := preload("res://game/bootstrap/app/tutorial/tutorial_keys.gd")
 const SCENE_DIR := "res://game/features/infected/public/"
 
 const DATA := {
@@ -17,6 +18,7 @@ const DATA := {
 	"enemy_horde": {"scene": SCENE_DIR + "infected_horde.tscn", "title_key": "tutEnemyHordeTitle", "text_key": "tutEnemyHorde"},
 	"blast_extinguisher": {"title_key": "tutBlastExtinguisherTitle", "text_key": "tutBlastExtinguisher"},
 	"spawn_hole": {"title_key": "tutSpawnHoleTitle", "text_key": "tutSpawnHole"},
+	"flashlight": {"title_key": "tutFlashlightTitle", "text_key": "tutFlashlight", "action": "flashlight"},
 }
 
 
@@ -31,10 +33,13 @@ static func has(lesson: String) -> bool:
 	return DATA.has(lesson)
 
 
-## The one step of an enemy, blast or spawn hole lesson. Enemies get a live preview of their idle model.
+## The one step of an enemy, blast, spawn hole or flashlight lesson. Enemies get a live preview of their idle model.
 static func step(lesson: String) -> Dictionary:
 	var entry: Dictionary = DATA[lesson]
-	var result := {"title": TEXT.t(str(entry.title_key)), "text": TEXT.t(str(entry.text_key)), "targets": [], "mode": "click"}
+	var text := TEXT.t(str(entry.text_key))
+	if entry.has("action"): # the text shows the key the player has bound to this action
+		text = text % KEYS.binding(str(entry.action))
+	var result := {"title": TEXT.t(str(entry.title_key)), "text": text, "targets": [], "mode": "click"}
 	if entry.has("scene"):
 		result["preview"] = str(entry.scene)
 	return result

@@ -33,6 +33,7 @@ func _run() -> void:
 			var localized: Dictionary = LESSONS.step(lesson)
 			_check(not str(localized.title).begins_with("tut") and not str(localized.text).begins_with("tut"), "%s lesson is translated to %s" % [lesson, language])
 	LOCALIZATION.apply_language("ru")
+	_check(not str(LESSONS.step("flashlight").text).contains("%s"), "The flashlight lesson text shows its bound key")
 	var blast: Dictionary = LESSONS.step("blast_extinguisher")
 	_check(str(blast.text) == "Взрыв огнетушителя наносит небольшой урон и оглушает всех в зоне поражения.", "The blast lesson text is the one-sentence summary")
 	quit(failures)
