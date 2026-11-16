@@ -119,6 +119,7 @@ func _update_hidden_enemies(covered: bool) -> void:
 			var body := enemy as Node3D
 			if body != null and body.visible and _may_contain(body.global_position) and _edge_distance(body.global_position) <= 0.0:
 				body.visible = false
+				body.set_meta(&"zone_hidden", true)
 				keep.append(body)
 		for body in _hidden_enemies:
 			if is_instance_valid(body) and not body.visible and _edge_distance(body.global_position) <= 0.0:
@@ -126,6 +127,7 @@ func _update_hidden_enemies(covered: bool) -> void:
 	for body in _hidden_enemies:
 		if is_instance_valid(body) and not keep.has(body):
 			body.visible = true
+			body.remove_meta(&"zone_hidden")
 	_hidden_enemies = keep
 
 

@@ -55,7 +55,7 @@ func _draw() -> void:
 		var bar := Vector2(bar_width(max_hp), BAR_SIZE.y)
 		var origin := camera.unproject_position(point) - bar * 0.5
 		# NaN, or the huge coordinates of a point grazing the camera plane, make the quad untriangulatable.
-		if not (origin.is_finite() and is_finite(hp / max_hp)) or not Rect2(Vector2.ZERO, size).grow(bar.x).intersects(Rect2(origin, bar)):
+		if not (origin.is_finite() and is_finite(hp / max_hp)) or not Rect2(Vector2.ZERO, get_viewport_rect().size).grow(bar.x).intersects(Rect2(origin, bar)):
 			continue
 		_draw_bar(Rect2(origin, bar), clampf(hp / max_hp, 0.0, 1.0))
 
