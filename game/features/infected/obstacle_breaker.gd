@@ -12,6 +12,8 @@ const GLASS_GROUP := "infected_breakable_glass"
 const STUCK_SECONDS := 0.6
 const STUCK_DISTANCE := 0.25
 const BREACH_SECONDS := 2.5
+## A distant target never makes a swing at the wall in front of it: only a confirmed breach or a close target does.
+const SMASH_NEAR_DISTANCE := 6.0
 
 var tier := 0
 var breaching := false
@@ -91,6 +93,8 @@ func blocking_collider(actor: CharacterBody3D, heading: Vector3) -> Dictionary:
 
 # Hits the prop in the way, if any; true when a blow landed.
 func smash(actor: CharacterBody3D, target: Node3D) -> bool:
+	if not breaching and actor.global_position.distance_to(target.global_position) > SMASH_NEAR_DISTANCE:
+		return false
 	var heading := target.global_position - actor.global_position
 	heading.y = 0.0
 	var block := blocking_collider(actor, heading.normalized())
