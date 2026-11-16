@@ -26,7 +26,7 @@ const TEXTURE_SIZE := 1024
 # The atlases of these enemies give every source polygon its own tiny UV island, so decimating
 # the mesh smears colours across islands (ragged, texture-less patches). They keep every source
 # triangle (far LODs still reduce) and their atlas at full size.
-const FULL_DETAIL := ["Brute", "Titan", "Colossus"]
+const FULL_DETAIL := ["Brute", "Titan", "Colossus", "Horde"]
 const FULL_TEXTURE_SIZE := 2048
 const JPG_QUALITY := 0.9
 
