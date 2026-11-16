@@ -10,6 +10,8 @@ const SIZE := 128
 # Matches the drip shape in body_wound.gdshader; blood runs down from the wound.
 const DOWN := Vector3(0.0, -1.0, 0.0)
 const CELL_SIZE := 0.15
+const PAINT_BUDGET_USEC := 3000
+const PAINT_CHUNK := 24
 
 
 static func create_mask() -> Image:
@@ -173,3 +175,37 @@ static func _mask_at(point: Vector3, center: Vector3, radius: float) -> Vector2:
 	var blood := 1.0 - smoothstep(edge * 0.55, edge, distance_to)
 	var core := 1.0 - smoothstep(radius * 0.12, radius * 0.3, offset.length())
 	return Vector2(blood, core)
+
+
+## A wound of `owner` (a body_parts node) painted at most PAINT_BUDGET_USEC per frame,
+## the budget shared by all wounds of that body, so shooting a corpse apart costs no hitch.
+## Does nothing once the body is gone.
+static func paint_sliced(owner: Node, rest_position: Vector3, rest_radius: float) -> void:
+	for entry: Dictionary in owner._entries:
+		if not owner.enabled:
+			return
+		if not entry.has("masks"):
+			owner._create_masks(entry)
+		for surface in entry.masks.size():
+			var mask: Dictionary = entry.masks[surface]
+			var tris := candidates(entry.data.surfaces[surface], rest_position, rest_radius)
+			var changed := false
+			var at := 0
+			while at < tris.size():
+				var stop := mini(at + PAINT_CHUNK, tris.size())
+				var started := Time.get_ticks_usec()
+				changed = paint_triangles(mask.image, entry.data.surfaces[surface], tris, at, stop, rest_position, rest_radius) or changed
+				at = stop
+				if owner._spent_frame != Engine.get_process_frames():
+					owner._spent_frame = Engine.get_process_frames()
+					owner._spent_usec = 0
+				owner._spent_usec += Time.get_ticks_usec() - started
+				while owner._spent_usec > PAINT_BUDGET_USEC and at < tris.size():
+					await owner.get_tree().process_frame
+					if not owner.enabled or not owner.is_inside_tree():
+						return
+					if owner._spent_frame != Engine.get_process_frames():
+						owner._spent_frame = Engine.get_process_frames()
+						owner._spent_usec = 0
+			if changed:
+				entry.lease.page.textures[surface].update_layer(mask.image, entry.lease.layer)

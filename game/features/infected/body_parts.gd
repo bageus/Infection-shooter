@@ -11,7 +11,7 @@ signal part_severed(part: StringName, piece: RigidBody3D)
 const MESH := preload("res://game/features/infected/body_part_mesh.gd")
 const MODIFIER := preload("res://game/features/infected/dismember_modifier.gd")
 const SEVERED := preload("res://game/features/infected/severed_part.gd")
-const HITBOX := preload("res://game/features/infected/body_part_hitbox.gd")
+const CORPSE_HITBOXES := preload("res://game/features/infected/body_corpse_hitboxes.gd")
 const FX := preload("res://game/features/infected/blood_drip_fx.gd")
 const BLOOD_BAKE := preload("res://game/features/infected/body_blood_bake.gd")
 const TORSO := &"torso"
@@ -53,8 +53,6 @@ var _hitboxes: Dictionary = {}
 var _bleeding_stumps: Array = []
 const STUMP_BLEED_SECONDS := 3.5
 ## A staged wound paints this long per frame, so shooting a body apart costs no visible hitch.
-const PAINT_BUDGET_USEC := 3000
-const PAINT_CHUNK := 24
 var _spent_frame := -1
 var _spent_usec := 0
 ## Bones of parts whose staged sever is still under way: later severs must not copy them.
@@ -295,38 +293,9 @@ func add_rest_wound(rest_position: Vector3, rest_radius: float) -> void:
 				entry.lease.page.textures[surface].update_layer(mask.image, entry.lease.layer)
 
 
-## add_rest_wound spread over frames: at most PAINT_BUDGET_USEC of painting per frame.
-## Does nothing once the body is gone. Returns when the whole wound is painted.
+## add_rest_wound spread over frames (see BLOOD_BAKE.paint_sliced); returns when painted.
 func add_rest_wound_sliced(rest_position: Vector3, rest_radius: float) -> void:
-	for entry: Dictionary in _entries:
-		if not enabled:
-			return
-		if not entry.has("masks"):
-			_create_masks(entry)
-		for surface in entry.masks.size():
-			var mask: Dictionary = entry.masks[surface]
-			var tris: PackedInt32Array = BLOOD_BAKE.candidates(entry.data.surfaces[surface], rest_position, rest_radius)
-			var changed := false
-			var at := 0
-			while at < tris.size():
-				var stop := mini(at + PAINT_CHUNK, tris.size())
-				var started := Time.get_ticks_usec()
-				changed = BLOOD_BAKE.paint_triangles(mask.image, entry.data.surfaces[surface], tris, at, stop, rest_position, rest_radius) or changed
-				at = stop
-				# All wounds of this body share one budget per frame.
-				if _spent_frame != Engine.get_process_frames():
-					_spent_frame = Engine.get_process_frames()
-					_spent_usec = 0
-				_spent_usec += Time.get_ticks_usec() - started
-				while _spent_usec > PAINT_BUDGET_USEC and at < tris.size():
-					await get_tree().process_frame
-					if not enabled or not is_inside_tree():
-						return
-					if _spent_frame != Engine.get_process_frames():
-						_spent_frame = Engine.get_process_frames()
-						_spent_usec = 0
-			if changed:
-				entry.lease.page.textures[surface].update_layer(mask.image, entry.lease.layer)
+	await BLOOD_BAKE.paint_sliced(self, rest_position, rest_radius)
 
 
 func _create_masks(entry: Dictionary) -> void:
@@ -584,42 +553,7 @@ func drip_mark_points() -> Array[Vector3]:
 
 # Bullet-only volumes on every remaining part so a corpse stays shootable.
 func enable_corpse_hitboxes() -> void:
-	if not enabled:
-		return
-	for part: StringName in parts:
-		if bool(parts[part].severed) or _hitboxes.has(part):
-			continue
-		var nodes: Array = []
-		for segment: Dictionary in parts[part].segments:
-			var bone: int = segment.bone
-			var attachment := BoneAttachment3D.new()
-			attachment.name = "Hitbox_" + skeleton.get_bone_name(bone)
-			attachment.bone_idx = bone
-			skeleton.add_child(attachment)
-			var bone_world := skeleton.global_transform * skeleton.get_bone_global_pose(bone)
-			var to_local := bone_world.affine_inverse()
-			var start: Vector3 = to_local * _world(bone, segment.start)
-			var finish: Vector3 = to_local * _world(bone, segment.end)
-			var hitbox := HITBOX.new()
-			# Jolt rejects a non-uniform scale on a body; bone scale is slightly uneven, so even it out.
-			var bone_scale := bone_world.basis.get_scale()
-			var even := (bone_scale.x + bone_scale.y + bone_scale.z) / 3.0
-			if even > 0.001:
-				hitbox.transform = Transform3D(Basis.from_scale(Vector3(even / maxf(bone_scale.x, 0.001), even / maxf(bone_scale.y, 0.001), even / maxf(bone_scale.z, 0.001))), Vector3.ZERO)
-			hitbox.parts = self
-			hitbox.part = part
-			var shape_node := CollisionShape3D.new()
-			var capsule := CapsuleShape3D.new()
-			var span := start.distance_to(finish)
-			capsule.radius = maxf(float(segment.radius), 0.03)
-			capsule.height = span + capsule.radius * 2.0
-			shape_node.shape = capsule
-			var axis := (finish - start).normalized() if span > 0.001 else Vector3.UP
-			shape_node.transform = Transform3D(Basis(Quaternion(Vector3.UP, axis)), (start + finish) * 0.5)
-			hitbox.add_child(shape_node)
-			attachment.add_child(hitbox)
-			nodes.append(attachment)
-		_hitboxes[part] = nodes
+	CORPSE_HITBOXES.enable(self)
 
 
 func remove_corpse_hitboxes() -> void:
