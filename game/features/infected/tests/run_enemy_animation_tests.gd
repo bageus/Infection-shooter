@@ -140,7 +140,9 @@ func _test_humanoid_clips(stage: Node3D, scene: PackedScene, label: String) -> v
 		_expect(player.has_animation(clip) and player.get_animation(clip).loop_mode == Animation.LOOP_NONE, "%s %s exists and is one-shot." % [label, clip])
 	if enemy.get_node("AnimationDriver").extra_clips != null:
 		# The Hunger family plays the Mixamo set (ADR-0045); run_hunger_behaviour_tests covers it.
-		for clip in ["Run", "RunLunge", "FoursRun", "Crawl", "BiteLoop", "Walk"]:
+		# The heavy humanoids carry only retargeted Walk and Run (tools/build_hunger_clips.gd).
+		var clips := ["Run", "RunLunge", "FoursRun", "Crawl", "BiteLoop", "Walk"] if player.has_animation("FoursRun") else ["Run", "Walk"]
+		for clip in clips:
 			_expect(player.get_animation(clip).loop_mode == Animation.LOOP_LINEAR and float(player.get_animation(clip).get_meta("ref_speed", 0.0)) > 0.0 or clip == "BiteLoop", "%s Mixamo %s loops." % [label, clip])
 		enemy.queue_free()
 		await process_frame

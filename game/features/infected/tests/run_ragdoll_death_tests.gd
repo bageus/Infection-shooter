@@ -31,6 +31,7 @@ func _run() -> void:
 	await _test_standing_collapses()
 	await _test_wall_stops_body()
 	await _test_body_rests_on_table()
+	await _test_corpses_do_not_pile()
 	await _test_corpse_sinks_and_hides()
 	await _test_kept_corpse_stays_visible()
 	await _test_planner_corpse_survives_overlap()
@@ -51,6 +52,19 @@ func _test_charging_falls_forward() -> void:
 	_expect(_bone(enemy, "Head").y < 0.5, "The body lies on the floor (head %.2f m)." % _bone(enemy, "Head").y)
 	_expect(_stretch(enemy) < 0.2, "The ragdoll joints keep their length (%.2f)." % _stretch(enemy))
 	enemy.queue_free()
+	await process_frame
+
+
+func _test_corpses_do_not_pile() -> void:
+	var first := await _spawn(Vector3(60, 1, 0))
+	var second := await _spawn(Vector3(60.3, 1, 0))
+	for enemy: CharacterBody3D in [first, second]:
+		enemy.call("take_projectile_damage", 1000.0, enemy.global_position, Vector3(0, 0, 1), "PISTOL")
+	await create_timer(2.5).timeout
+	var apart := (_bone(first, "Hips") - _bone(second, "Hips")).length()
+	_expect(apart > 0.7, "Two bodies killed side by side do not end up on top of each other (%.2f m apart)." % apart)
+	first.queue_free()
+	second.queue_free()
 	await process_frame
 
 

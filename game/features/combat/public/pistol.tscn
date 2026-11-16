@@ -13,6 +13,7 @@ height = 0.45
 script = ExtResource("1")
 bullet_scene = ExtResource("2")
 casing_scene = ExtResource("casing_model")
+casing_size_multiplier = 0.8
 weapon_name="PISTOL"
 shot_noise_radius = 18.0
 shots_per_second=3.5
