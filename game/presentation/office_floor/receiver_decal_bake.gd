@@ -5,6 +5,7 @@ const PIXELS := preload("res://game/presentation/office_floor/decal_pixels.gd")
 const MEMORY_GUARD := preload("res://game/core/vfx/public/memory_guard.gd")
 const FACE := 128
 const MAX_RECEIVERS := 12
+const TRACE := preload("res://game/core/vfx/public/decal_trace.gd")
 const MAX_QUEUE := 32
 const MAX_ARCHIVE := 24
 var pages: Dictionary = {}
@@ -16,7 +17,9 @@ var uploads := 0
 var sources: RefCounted
 
 func stamp(anchor: MeshInstance3D, point: Vector3, normal: Vector3, kind: String, frame: int, size: float, opacity: float, turns: int = 0, glass: bool = false, center: Vector2 = Vector2(0.5, 0.5)) -> bool:
-	if MEMORY_GUARD.low(): return false
+	if MEMORY_GUARD.low():
+		TRACE.drop("%s refused: low memory" % kind)
+		return false
 	if not is_instance_valid(anchor) or anchor.mesh == null or not point.is_finite() or not normal.is_finite() or not is_finite(opacity) or opacity <= 0.0 or not is_finite(size) or size <= 0.0 or queue.size() >= MAX_QUEUE: return false
 	if absf(anchor.global_basis.determinant()) < 1e-9 or not sources.sources.has(kind) or frame < 0 or frame >= sources.sources[kind].size(): return false
 	queue.append({"anchor": weakref(anchor), "point": anchor.to_local(point), "normal": (anchor.global_basis.transposed() * normal).normalized(),
@@ -45,7 +48,9 @@ func step() -> bool:
 
 func _apply(request: Dictionary) -> void:
 	var anchor := request.anchor.get_ref() as MeshInstance3D
-	if not is_instance_valid(anchor) or not anchor.is_visible_in_tree(): return
+	if not is_instance_valid(anchor) or not anchor.is_visible_in_tree():
+		TRACE.drop("%s dropped: anchor hidden when applied" % request.kind)
+		return
 	var id := anchor.get_instance_id()
 	if not pages.has(id):
 		if anchor.material_overlay != null: return
@@ -54,7 +59,9 @@ func _apply(request: Dictionary) -> void:
 	var page: Dictionary = pages[id]
 	var mapping := face_mapping(anchor.get_aabb(), request.point, request.normal, request.glass, anchor.global_basis)
 	var key := Vector3i(mapping.face, floori(mapping.uv.x * 8), floori(mapping.uv.y * 8))
-	if int(page.density.get(key, 0)) >= 6: return
+	if int(page.density.get(key, 0)) >= 6:
+		TRACE.drop("%s dropped: face density cap" % request.kind)
+		return
 	var image: Image = PIXELS.source(sources.sources[request.kind][request.frame], request.opacity, request.turns, request.kind == "bullet" and request.frame >= 5)
 	var extent: Vector2 = mapping.extent
 	var scale_axes: Vector2 = mapping.scale_axes

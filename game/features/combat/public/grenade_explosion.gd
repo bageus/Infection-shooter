@@ -1,6 +1,7 @@
 extends RefCounted
 const SURFACE_ATLASES := preload("res://game/core/vfx/public/surface_atlases.gd")
 const TRACE := preload("res://game/features/combat/public/explosion_trace.gd")
+const DECAL_TRACE := preload("res://game/core/vfx/public/decal_trace.gd")
 
 const RADIUS := 4.0
 const THROW_SPEED := 3.5 # m/s at full blast strength for intact furniture
@@ -59,6 +60,7 @@ static func warm_up(parent: Node3D, point: Vector3) -> void:
 static func explode(projectile: Node3D, location: Vector3, normal: Vector3, contact: Object, scene: Node3D, impacts: Node) -> void:
 	if not is_instance_valid(scene):
 		return
+	var started := Time.get_ticks_usec()
 	TRACE.begin("grenade_explode")
 	var effect := EXPLOSION_V1.instantiate() as Node3D
 	scene.add_child(effect)
@@ -82,7 +84,12 @@ static func explode(projectile: Node3D, location: Vector3, normal: Vector3, cont
 			continue
 		hit_ids[collider.get_instance_id()] = true
 		var body := collider as Node3D
-		if body == null or not _receives_blast(body):
+		if body == null:
+			continue
+		if not _receives_blast(body):
+			# A wall the blast touches but does not hit directly takes the same plaster, so no seam shows.
+			if body is StaticBody3D and collider != contact:
+				_scorch_neighbour(scene, projectile, location, contact, body, impacts)
 			continue
 		# Walls shelter whoever stands behind them.
 		if collider != contact and is_sheltered(projectile.get_world_3d(), location + normal * 0.25, body):
@@ -111,6 +118,7 @@ static func explode(projectile: Node3D, location: Vector3, normal: Vector3, cont
 		_scorch(scene, location, normal, impacts, contact as Node3D)
 	scorch_surroundings(projectile.get_world_3d(), scene, location, impacts)
 	TRACE.mark("scorch done (end of explode)")
+	DECAL_TRACE.timed("grenade blast", started, 8.0)
 
 
 ## The one way a blast hurts a destructible object, for grenades and the extinguisher alike, so
@@ -181,6 +189,18 @@ static func distance_to_shape(collider: Object, shape_index: int, location: Vect
 			var nearest := Vector3(clampf(local.x, -half.x, half.x), clampf(local.y, -half.y, half.y), clampf(local.z, -half.z, half.z))
 			return owner.to_global(nearest).distance_to(location)
 	return fallback.distance_to(location)
+
+
+## The wall piece in view from the blast, found with the hit wall excluded, so pieces meeting at a seam all scorch.
+static func _scorch_neighbour(scene: Node3D, projectile: Node3D, location: Vector3, contact: Object, body: StaticBody3D, impacts: Node) -> void:
+	var exclude: Array[RID] = []
+	if contact is CollisionObject3D:
+		exclude.append((contact as CollisionObject3D).get_rid())
+	var query := PhysicsRayQueryParameters3D.create(location, body.global_position, 1, exclude)
+	var hit := projectile.get_world_3d().direct_space_state.intersect_ray(query)
+	if hit.is_empty() or hit["collider"] != body:
+		return
+	_scorch(scene, hit["position"], hit["normal"], impacts, body)
 
 
 static func _scorch(scene: Node3D, hit_position: Vector3, normal: Vector3, pool: Node, collider: Node3D = null) -> void:
