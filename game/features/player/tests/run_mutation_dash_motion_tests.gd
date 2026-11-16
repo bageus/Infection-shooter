@@ -40,7 +40,7 @@ func _run() -> void:
 		player.call("_update_move", 1.0 / 60.0)
 		await physics_frame
 	_expect(absf(player.position.z - stopped) < 0.01 and player.collision_mask == mask, "Blocked dash stays stopped until expiry then restores collision")
-	_test_shoves_loose_objects(player, stage)
+	await _test_shoves_loose_objects(player, stage)
 	_test_effect_recovery(player)
 	stage.queue_free()
 	await process_frame

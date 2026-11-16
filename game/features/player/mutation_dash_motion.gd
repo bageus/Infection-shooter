@@ -44,6 +44,7 @@ func after_move(player: CharacterBody3D) -> void:
 		var collision := player.get_slide_collision(index)
 		var collider := collision.get_collider()
 		if collider is RigidBody3D:
+			player.add_collision_exception_with(collider)  # lets the dash pass through the shoved prop
 			_shove(collider, player._roll_direction, collision.get_position())
 		elif collision.get_normal().dot(player._roll_direction) < -0.1:
 			player._roll_pace = 0.0
@@ -52,6 +53,10 @@ func after_move(player: CharacterBody3D) -> void:
 		player.velocity.x = 0.0
 		player.velocity.z = 0.0
 		player.collision_mask = _mask
+		for id in _shoved:
+			var body := instance_from_id(id) as PhysicsBody3D
+			if body:
+				player.remove_collision_exception_with(body)
 		active = false
 
 
