@@ -11,7 +11,7 @@ signal part_severed(part: StringName, piece: RigidBody3D)
 const MESH := preload("res://game/features/infected/body_part_mesh.gd")
 const MODIFIER := preload("res://game/features/infected/dismember_modifier.gd")
 const SEVERED := preload("res://game/features/infected/severed_part.gd")
-const HITBOX := preload("res://game/features/infected/body_part_hitbox.gd")
+const CORPSE_HITBOXES := preload("res://game/features/infected/body_corpse_hitboxes.gd")
 const FX := preload("res://game/features/infected/blood_drip_fx.gd")
 const BLOOD_BAKE := preload("res://game/features/infected/body_blood_bake.gd")
 const TORSO := &"torso"
@@ -52,6 +52,11 @@ var _hitboxes: Dictionary = {}
 # Bleeding stumps: [WeakRef holder, until msec, last mark position, last mark msec].
 var _bleeding_stumps: Array = []
 const STUMP_BLEED_SECONDS := 3.5
+## A staged wound paints this long per frame, so shooting a body apart costs no visible hitch.
+var _spent_frame := -1
+var _spent_usec := 0
+## Bones of parts whose staged sever is still under way: later severs must not copy them.
+var _staged_bones := {}
 const DRIP_MARK_DISTANCE := 0.3
 const DRIP_MARK_INTERVAL_MS := 900
 
@@ -242,7 +247,7 @@ func pick_part(hit_position: Vector3, direction: Vector3) -> StringName:
 
 
 # Paints a bullet wound on `part` where the shot entered the skin.
-func wound(part: StringName, hit_position: Vector3, direction: Vector3, world_radius: float) -> void:
+func wound(part: StringName, hit_position: Vector3, direction: Vector3, world_radius: float, sliced := false) -> void:
 	if not enabled or not parts.has(part):
 		return
 	var ray := direction.normalized() if direction.length_squared() > 0.0001 else Vector3.FORWARD
@@ -268,7 +273,10 @@ func wound(part: StringName, hit_position: Vector3, direction: Vector3, world_ra
 			nearest = distance
 			closest = point
 	var entry := closest - ray * float(chosen.radius) * world_scale * 0.9
-	add_rest_wound(_to_rest(chosen.bone, entry), world_radius / maxf(world_scale, 0.01))
+	if sliced:
+		add_rest_wound_sliced(_to_rest(chosen.bone, entry), world_radius / maxf(world_scale, 0.01))
+	else:
+		add_rest_wound(_to_rest(chosen.bone, entry), world_radius / maxf(world_scale, 0.01))
 
 
 # Bakes a wound into every surface's blood mask. Masks are created on the first
@@ -283,6 +291,11 @@ func add_rest_wound(rest_position: Vector3, rest_radius: float) -> void:
 			var mask: Dictionary = entry.masks[surface]
 			if BLOOD_BAKE.paint(mask.image, entry.data.surfaces[surface], rest_position, rest_radius):
 				entry.lease.page.textures[surface].update_layer(mask.image, entry.lease.layer)
+
+
+## add_rest_wound spread over frames (see BLOOD_BAKE.paint_sliced); returns when painted.
+func add_rest_wound_sliced(rest_position: Vector3, rest_radius: float) -> void:
+	await BLOOD_BAKE.paint_sliced(self, rest_position, rest_radius)
 
 
 func _create_masks(entry: Dictionary) -> void:
@@ -320,13 +333,54 @@ func damage_part(part: StringName, amount: float) -> bool:
 # which is where the stump bleeds. A whole limb takes its lower part with it.
 # Returns the piece or null.
 func sever(part: StringName, direction: Vector3, spawn_piece := true) -> RigidBody3D:
-	if not enabled or not parts.has(part) or bool(parts[part].severed) or not bool(parts[part].severable):
+	var cut := _begin_sever(part)
+	if cut.is_empty():
 		return null
+	var root_segment: Dictionary = cut.root_segment
+	# Bake the cut first, so a piece copies the material with its stump already marked.
+	add_rest_wound(root_segment.start, float(root_segment.radius) * 1.35)
+	var piece: RigidBody3D = null
+	if spawn_piece:
+		piece = _spawn_piece(part, cut.chain, cut.joint_world, direction)
+	_collapse(cut)
+	_finish_sever(cut, piece, spawn_piece)
+	return piece
+
+
+# Same result as sever(), but each heavy step runs in a frame of its own: a shot-apart
+# corpse used to freeze the game for tens of milliseconds. The part vanishes and its
+# piece appears together, a few frames after the shot.
+func sever_staged(part: StringName, direction: Vector3) -> void:
+	var cut := _begin_sever(part)
+	if cut.is_empty():
+		return
+	for bone: int in cut.chain:
+		_staged_bones[bone] = true
+	_remove_hitboxes(part)
+	var root_segment: Dictionary = cut.root_segment
+	await add_rest_wound_sliced(root_segment.start, float(root_segment.radius) * 1.35)
+	if not enabled or not is_inside_tree():
+		return
+	await get_tree().process_frame
+	if not enabled or not is_inside_tree():
+		return
+	var piece := _spawn_piece(part, cut.chain, cut.joint_world, direction)
+	_collapse(cut)
+	await get_tree().process_frame
+	if not enabled or not is_inside_tree():
+		return
+	_finish_sever(cut, piece, true)
+
+
+# Marks the part and its lower parts severed; {} when there is nothing to sever.
+func _begin_sever(part: StringName) -> Dictionary:
+	if not enabled or not parts.has(part) or bool(parts[part].severed) or not bool(parts[part].severable):
+		return {}
 	var info: Dictionary = parts[part]
 	# Bones that already left with a lower part stay out of the piece.
 	var chain := PackedInt32Array()
 	for bone: int in info.bones:
-		if not _modifier.severed.has(bone):
+		if not _modifier.severed.has(bone) and not _staged_bones.has(bone):
 			chain.append(bone)
 	info.severed = true
 	info.hp = 0.0
@@ -337,19 +391,19 @@ func sever(part: StringName, direction: Vector3, spawn_piece := true) -> RigidBo
 			_remove_hitboxes(child)
 	var root: int = info.bones[0]
 	var root_segment: Dictionary = info.segments[0]
-	var joint_world := _world(root, root_segment.start)
-	# Bake the cut first, so a piece copies the material with its stump already marked.
-	add_rest_wound(root_segment.start, float(root_segment.radius) * 1.35)
-	var piece: RigidBody3D = null
-	if spawn_piece:
-		piece = _spawn_piece(part, chain, joint_world, direction)
-	_modifier.severed.append(root)
+	return {"part": part, "info": info, "chain": chain, "root": root, "root_segment": root_segment, "joint_world": _world(root, root_segment.start)}
+
+
+func _collapse(cut: Dictionary) -> void:
+	_modifier.severed.append(cut.root)
 	_show_cuts()
+
+
+func _finish_sever(cut: Dictionary, piece: RigidBody3D, spawn_piece: bool) -> void:
 	# The bleeding stump is the neighbour's cut tissue: nearest cap vertex outside the part.
-	_add_stump(root, _nearest_point(_skin_points(info.bones, true, true), joint_world), spawn_piece)
-	_remove_hitboxes(part)
-	part_severed.emit(part, piece)
-	return piece
+	_add_stump(cut.root, _nearest_point(_skin_points(cut.info.bones, true, true), cut.joint_world), spawn_piece)
+	_remove_hitboxes(cut.part)
+	part_severed.emit(cut.part, piece)
 
 
 # The first severed part brings back the cut tissue surface that a whole body does not draw.
@@ -499,42 +553,7 @@ func drip_mark_points() -> Array[Vector3]:
 
 # Bullet-only volumes on every remaining part so a corpse stays shootable.
 func enable_corpse_hitboxes() -> void:
-	if not enabled:
-		return
-	for part: StringName in parts:
-		if bool(parts[part].severed) or _hitboxes.has(part):
-			continue
-		var nodes: Array = []
-		for segment: Dictionary in parts[part].segments:
-			var bone: int = segment.bone
-			var attachment := BoneAttachment3D.new()
-			attachment.name = "Hitbox_" + skeleton.get_bone_name(bone)
-			attachment.bone_idx = bone
-			skeleton.add_child(attachment)
-			var bone_world := skeleton.global_transform * skeleton.get_bone_global_pose(bone)
-			var to_local := bone_world.affine_inverse()
-			var start: Vector3 = to_local * _world(bone, segment.start)
-			var finish: Vector3 = to_local * _world(bone, segment.end)
-			var hitbox := HITBOX.new()
-			# Jolt rejects a non-uniform scale on a body; bone scale is slightly uneven, so even it out.
-			var bone_scale := bone_world.basis.get_scale()
-			var even := (bone_scale.x + bone_scale.y + bone_scale.z) / 3.0
-			if even > 0.001:
-				hitbox.transform = Transform3D(Basis.from_scale(Vector3(even / maxf(bone_scale.x, 0.001), even / maxf(bone_scale.y, 0.001), even / maxf(bone_scale.z, 0.001))), Vector3.ZERO)
-			hitbox.parts = self
-			hitbox.part = part
-			var shape_node := CollisionShape3D.new()
-			var capsule := CapsuleShape3D.new()
-			var span := start.distance_to(finish)
-			capsule.radius = maxf(float(segment.radius), 0.03)
-			capsule.height = span + capsule.radius * 2.0
-			shape_node.shape = capsule
-			var axis := (finish - start).normalized() if span > 0.001 else Vector3.UP
-			shape_node.transform = Transform3D(Basis(Quaternion(Vector3.UP, axis)), (start + finish) * 0.5)
-			hitbox.add_child(shape_node)
-			attachment.add_child(hitbox)
-			nodes.append(attachment)
-		_hitboxes[part] = nodes
+	CORPSE_HITBOXES.enable(self)
 
 
 func remove_corpse_hitboxes() -> void:
@@ -551,12 +570,12 @@ func _remove_hitboxes(part: StringName) -> void:
 
 # Called by corpse hit volumes.
 func hit_corpse(part: StringName, damage: float, hit_position: Vector3, direction: Vector3, weapon: String) -> void:
-	wound(part, hit_position, direction, wound_radius(weapon))
+	wound(part, hit_position, direction, wound_radius(weapon), true)
 	if owner_body != null and owner_body.has_method("on_corpse_part_hit"):
 		owner_body.call("on_corpse_part_hit", part, damage, hit_position, direction, weapon)
 	FX.spray(_piece_parent(), hit_position, direction, 12, 0.9)
 	if damage_part(part, damage):
-		sever(part, direction)
+		sever_staged(part, direction)
 
 
 static func wound_radius(weapon: String) -> float:

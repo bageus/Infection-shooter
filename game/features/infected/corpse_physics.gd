@@ -7,6 +7,18 @@ var _parts: Node
 var _guard: Node
 const HUMANOID_SKIN_MARGIN := 1.25
 const GUARD := preload("res://game/features/infected/corpse_guard.gd")
+## Joint limits in degrees {swing, twist} by bone-name suffix: a body bends like a person, not like a sack.
+## Knees and elbows fold one way and barely twist; thighs stay near the hips so legs do not splay or corkscrew.
+const JOINT_LIMITS := {
+	"Thigh": [35.0, 8.0], "Shin": [75.0, 4.0], "Foot": [30.0, 5.0], "Toe": [20.0, 5.0],
+	"UpperArm": [70.0, 20.0], "Forearm": [75.0, 6.0], "Hand": [40.0, 10.0], "Shoulder": [20.0, 5.0],
+	"Spine": [20.0, 10.0], "Chest": [20.0, 10.0], "Neck": [35.0, 15.0], "Head": [35.0, 15.0],
+}
+const DEFAULT_LIMIT := [45.0, 25.0]
+## Topple spin of the upper body in rad/s, share of speed the legs keep, and gravity of a falling body.
+const TOPPLE_SPIN := 2.2
+const LEG_DRAG := 0.5
+const DEATH_GRAVITY := 1.4
 
 
 func setup(parts: Node) -> void:
@@ -43,8 +55,9 @@ func setup(parts: Node) -> void:
 		bone.global_transform = skeleton.global_transform * skeleton.get_bone_global_pose(bone.get_bone_id()) * bone.body_offset
 	for bone: PhysicalBone3D in simulator.get_children():
 		bone.joint_type = PhysicalBone3D.JOINT_TYPE_CONE
-		bone.set("joint_constraints/swing_span", 45.0)
-		bone.set("joint_constraints/twist_span", 25.0)
+		var limit := _limit(skeleton.get_bone_name(bone.get_bone_id()))
+		bone.set("joint_constraints/swing_span", limit[0])
+		bone.set("joint_constraints/twist_span", limit[1])
 	# All volumes are linked at skeleton joints; own limbs never collide.
 	var volumes := simulator.get_children()
 	for i in volumes.size():
@@ -56,6 +69,13 @@ func setup(parts: Node) -> void:
 	_guard.set_physics_process(false)
 	_refresh_guard()
 	parts.connect("part_severed", _severed)
+
+
+static func _limit(bone_name: String) -> Array:
+	for suffix: String in JOINT_LIMITS:
+		if bone_name.ends_with(suffix):
+			return JOINT_LIMITS[suffix]
+	return DEFAULT_LIMIT
 
 
 func _build(segment: Dictionary) -> PhysicalBone3D:
@@ -143,6 +163,24 @@ func launch(velocity: Vector3) -> void:
 		middle += bone.global_position.y / bones.size()
 	for bone: PhysicalBone3D in bones:
 		bone.linear_velocity = velocity * (1.0 if bone.global_position.y >= middle else 0.5)
+
+
+## A shot body does not fall as a plank: the upper body topples into the fall
+## direction while the legs buckle under it. Call after launch.
+func stagger(direction: Vector3) -> void:
+	if not is_instance_valid(simulator) or direction.is_zero_approx():
+		return
+	var topple := Vector3.UP.cross(direction.normalized()) * TOPPLE_SPIN
+	var bones := simulator.get_children()
+	var middle := 0.0
+	for bone: PhysicalBone3D in bones:
+		middle += bone.global_position.y / bones.size()
+	for bone: PhysicalBone3D in bones:
+		if bone.global_position.y >= middle:
+			bone.angular_velocity += topple
+		else:
+			bone.linear_velocity *= LEG_DRAG
+		bone.gravity_scale = DEATH_GRAVITY
 
 
 # Feet of a standing body sink a little into the floor; the solver would shove

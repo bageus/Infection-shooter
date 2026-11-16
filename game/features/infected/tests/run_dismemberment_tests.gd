@@ -231,6 +231,8 @@ func _test_corpse_stays_shootable(stage: Node3D) -> void:
 		for i in 6:
 			leg_box.call("take_projectile_hit", 15.0, (leg_box as Node3D).global_position, Vector3.UP, Vector3(1, 0, 0), "PISTOL")
 	_expect(parts.is_severed(&"leg_l"), "Shooting the corpse's leg takes it off.")
+	# The piece is built over a few frames so the shot causes no hitch.
+	await create_timer(0.5).timeout
 	_expect(dropped.size() == 1 and dropped[0] != null, "The corpse's leg drops as a piece (%s)." % [dropped])
 	enemy.queue_free()
 	await process_frame
