@@ -6,6 +6,7 @@ var _bones: Dictionary = {}
 var _parts: Node
 var _guard: Node
 const HUMANOID_SKIN_MARGIN := 1.25
+const HORDE_MAX_RADIUS := 0.6
 const GUARD := preload("res://game/features/infected/corpse_guard.gd")
 ## Joint limits in degrees {swing, twist} by bone-name suffix: a body bends like a person, not like a sack.
 ## Knees and elbows fold one way and barely twist; thighs stay near the hips so legs do not splay or corkscrew.
@@ -100,6 +101,8 @@ func _build(segment: Dictionary) -> PhysicalBone3D:
 	# (the horde's tentacle rig is exempt).
 	if skeleton.find_bone("T0_A") < 0:
 		radius = minf(radius, maxf(axis.length() * .5 + .02, .1) * HUMANOID_SKIN_MARGIN)
+	else:
+		radius = minf(radius, HORDE_MAX_RADIUS) # the full-detail dome would give the core capsules a metre of radius and hold the corpse off the floor
 	radius = clampf(radius, .03, 1.0)
 	var capsule := CapsuleShape3D.new()
 	var world_bone := skeleton.global_transform * skeleton.get_bone_global_pose(index)
