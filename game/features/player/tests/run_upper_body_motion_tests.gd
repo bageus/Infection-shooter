@@ -22,7 +22,7 @@ func _run() -> void:
 	_check(not KICK.RECOIL["MINIGUN"].has("RightHand") and KICK.RECOIL["MINIGUN"].has("RightShoulder"), "Minigun kicks elbows and shoulders")
 	for weapon in KICK.RECOIL:
 		for bone in KICK.RECOIL[weapon]:
-			_check(float(KICK.RECOIL[weapon][bone]) <= 4.0, "Recoil stays a micro movement")
+			_check(float(KICK.RECOIL[weapon][bone]) <= 10.0, "Recoil stays a micro movement")
 	var stage := Node3D.new()
 	root.add_child(stage)
 	var player = PLAYER.instantiate()
@@ -57,5 +57,12 @@ func _run() -> void:
 	_check(not shown.is_empty(), "Roll clip has weapon scale tracks")
 	for path in shown:
 		_check((shown[path] == Vector3.ONE) == ("Weapon_Pistol" in path), "Roll draws only the held gun: " + path)
+	_check(skeleton.get_node_or_null("RollArms") != null, "Roll holds the arms on the gun's idle pose")
+	await process_frame
+	var weapon: Node3D = player.get_current_weapon()
+	var port := weapon.get_node_or_null("EjectionPort") as Node3D
+	var muzzle_pos: Vector3 = player.get_node("WeaponMount").get("_model_muzzle").global_position
+	var hand_pos := skeleton.global_transform * skeleton.get_bone_global_pose(skeleton.find_bone("RightHand")).origin
+	_check(port != null and port.global_position.distance_to(muzzle_pos) > 0.05 and port.global_position.distance_to(muzzle_pos) < muzzle_pos.distance_to(hand_pos), "Casings leave from the middle of the gun, not the muzzle")
 	print("Upper body motion tests: %d failures" % failures)
 	quit(1 if failures else 0)

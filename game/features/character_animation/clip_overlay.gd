@@ -10,13 +10,15 @@ var fade_in := 0.08
 var fade_out := 0.3
 
 var _animation: Animation
+var _length := 0.0
 var _time := 0.0
 var _tracks := {} # bone index -> rotation track
 
 
-## Starts `animation`; its rotation tracks named after `bones` are blended in.
-func play(animation: Animation) -> void:
+## Starts `animation`; its rotation tracks named after `bones` are blended in. `length` > 0 ends it sooner (the clip loops).
+func play(animation: Animation, length := 0.0) -> void:
 	_animation = animation
+	_length = length if length > 0.0 else animation.length
 	_time = 0.0
 	_tracks.clear()
 	var skeleton := get_skeleton()
@@ -37,11 +39,11 @@ func _process_modification() -> void:
 		return
 	var delta := get_process_delta_time()
 	_time += delta
-	if _time >= _animation.length:
+	if _time >= _length:
 		_animation = null
 		return
-	var weight := minf(_time / fade_in, minf((_animation.length - _time) / fade_out, 1.0))
+	var weight := minf(_time / fade_in, minf((_length - _time) / fade_out, 1.0))
 	var skeleton := get_skeleton()
 	for bone: int in _tracks:
 		var pose := skeleton.get_bone_pose_rotation(bone)
-		skeleton.set_bone_pose_rotation(bone, pose.slerp(_animation.rotation_track_interpolate(_tracks[bone], _time), clampf(weight, 0.0, 1.0)))
+		skeleton.set_bone_pose_rotation(bone, pose.slerp(_animation.rotation_track_interpolate(_tracks[bone], fposmod(_time, _animation.length)), clampf(weight, 0.0, 1.0)))
