@@ -21,3 +21,18 @@ static func apply(player: AnimationPlayer, dodge_clip: StringName) -> void:
 		if roll.track_get_type(track) == Animation.TYPE_POSITION_3D and str(roll.track_get_path(track)).ends_with(":Root"):
 			for key in roll.track_get_key_count(track):
 				roll.track_set_key_value(track, key, Vector3.ZERO)
+
+
+## The roll clip scales every gun to nothing. Sets its Weapon_<name> scale tracks (and the magazine inside) so only
+## `held_weapon` (e.g. &"AK") stays drawn through the roll; an empty name leaves the clip as it is.
+static func hold_weapon(player: AnimationPlayer, dodge_clip: StringName, held_weapon: StringName) -> void:
+	if held_weapon.is_empty() or player == null or not player.has_animation(dodge_clip):
+		return
+	var roll := player.get_animation(dodge_clip)
+	for track in roll.get_track_count():
+		var path := str(roll.track_get_path(track))
+		var gun := path.get_slice("RightHand/Weapon_", 1).get_slice("/", 0).get_slice(":", 0) if "RightHand/Weapon_" in path else ""
+		if gun.is_empty() or roll.track_get_type(track) != Animation.TYPE_SCALE_3D:
+			continue
+		for key in roll.track_get_key_count(track):
+			roll.track_set_key_value(track, key, Vector3.ONE if gun == String(held_weapon) else Vector3.ZERO)
