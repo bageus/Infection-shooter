@@ -47,6 +47,8 @@ static func enable(owner: Node) -> void:
 
 
 static func refresh_scales(skeleton: Skeleton3D, hitboxes: Dictionary) -> void:
+	if not skeleton.is_inside_tree():
+		return # global transforms are invalid outside the tree (planning builds bodies off-tree)
 	for part: StringName in hitboxes:
 		for node: Node in hitboxes[part]:
 			if not is_instance_valid(node) or node.get_child_count() == 0:
