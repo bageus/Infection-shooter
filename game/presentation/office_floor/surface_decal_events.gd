@@ -43,6 +43,7 @@ func hit(collider: Node3D, point: Vector3, normal: Vector3, weapon: String, anch
 	var parent_name := str(collider.get_parent().name) if collider.get_parent() else ""
 	var label := (str(collider.name) + " " + str(anchor.name) + " " + parent_name).to_lower()
 	var wall := absf(normal.y) < 0.6 and (_is_architecture(collider) or "wall" in label or "column" in label) and "wood" not in label
+	TRACE.drop("%s hit normal.y=%.2f architecture=%s label=%s -> wall=%s" % [weapon, normal.y, _is_architecture(collider), label, wall])
 	_stamp(anchor, point, normal, "bullet", frame, size)
 	# Heavy hits (shots and blasts) always chip the plaster; light rounds only sometimes.
 	if wall and randf() < (1.0 if powerful(weapon) else 0.35):
