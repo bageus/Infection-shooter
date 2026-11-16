@@ -2,6 +2,7 @@ extends Control
 
 const CHECKPOINT := preload("res://game/bootstrap/app/checkpoint_progress.gd")
 const LEVEL_CHAIN := preload("res://game/bootstrap/app/level_chain.gd")
+const SFX := preload("res://game/core/audio/public/sound_events.gd")
 
 @onready var menu = $Menu
 var _loading := false
@@ -67,4 +68,5 @@ func _action(action: String) -> void:
 				menu.reason_key = "webQuit"
 				menu.refresh()
 			else:
+				SFX.stop_all(get_tree())
 				get_tree().quit()
