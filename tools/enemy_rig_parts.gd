@@ -336,7 +336,7 @@ static func horde_weights(model: RefCounted, author: RefCounted, skeleton: Skele
 		var rows: Array = []
 		for index in positions.size():
 			if owners[index] == body_id:
-				rows.append(_horde_body_row(dome[index], skeleton))
+				rows.append(author.add_cells(_horde_body_row(dome[index], skeleton), positions[index], skeleton))
 			else:
 				rows.append(_horde_leg_row(String(model.part_names[owners[index]]), positions[index], skeleton, legs))
 		result.append(rows)

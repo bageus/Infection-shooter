@@ -165,15 +165,29 @@ func weights(vertices: PackedVector3Array, skeleton: Skeleton3D) -> Array:
 				var share: float = skirt * float(pick[1])
 				row[skeleton.find_bone("T%d_A" % int(pick[0]))] += share * (1.0 - outer)
 				row[skeleton.find_bone("T%d_B" % int(pick[0]))] += share * outer
-		var cell_share := _smooth(CELL_ZONE, 0.15, y) * 0.85
-		if cell_share > 0.0:
-			for bone in bone_count:
-				row[bone] *= 1.0 - cell_share
-			for corner in _cell_corners(vertex):
-				if _cells.has(corner[0]):
-					row[skeleton.find_bone(_cells[corner[0]])] = cell_share * float(corner[1])
 		result.append(row)
 	return result
+
+
+# Gives the low part of the body its own step cells. Runs after the tentacle share is capped,
+# so the part bones keep their dominant weight; three cells at most leave a skin slot for it.
+func add_cells(row: PackedFloat32Array, vertex: Vector3, skeleton: Skeleton3D) -> PackedFloat32Array:
+	var y := (vertex.y - _floor_y) / (_top_y - _floor_y)
+	var bone_count := skeleton.get_bone_count()
+	var cell_share := _smooth(CELL_ZONE, 0.15, y) * 0.85
+	if cell_share > 0.0:
+		for bone in bone_count:
+			row[bone] *= 1.0 - cell_share
+		# Three cells at most: the skin keeps four influences, and the fourth stays with the vertex's own part bone.
+		var corners := _cell_corners(vertex).filter(func(c: Array) -> bool: return _cells.has(c[0]))
+		corners.sort_custom(func(a: Array, b: Array) -> bool: return a[1] > b[1])
+		corners = corners.slice(0, 3)
+		var total := 0.0
+		for corner in corners:
+			total += float(corner[1])
+		for corner in corners:
+			row[skeleton.find_bone(_cells[corner[0]])] = cell_share * float(corner[1]) / maxf(total, 0.0001)
+	return row
 
 
 func build_library(skeleton: Skeleton3D) -> AnimationLibrary:
