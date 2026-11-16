@@ -28,7 +28,9 @@ static func start(owner: Node, parts: Node, animation: Node, momentum: Vector3, 
 	if animation != null:
 		animation.call("set_active", false)
 	physics.call("set_enabled", true)
-	physics.call("launch", DEATH_FALL.velocity(momentum, push, size))
+	var fall := DEATH_FALL.velocity(momentum, push, size)
+	physics.call("launch", fall)
+	physics.call("stagger", fall)
 	_active += 1
 	var id := physics.get_instance_id()
 	_slots[id] = true

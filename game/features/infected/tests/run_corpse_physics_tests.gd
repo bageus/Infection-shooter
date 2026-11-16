@@ -59,6 +59,11 @@ func _settle(scene: PackedScene, size: Vector3, pose: String) -> void:
 	_check(Vector3(sample["scale"]).is_equal_approx(authored_scale), "Physics preserves authored model scale: " + corpse.name)
 	_check(AABB(sample["bounds"]).position.y >= -.04, "Visible corpse skin remains above floor: " + corpse.name)
 	_check(AABB(sample["bounds"]).position.y < .3, "Corpse rests against floor: " + corpse.name)
+	if scene == HUNGER:
+		var thigh := simulation.get_node("Physics_L_Thigh") as PhysicalBone3D
+		var shin := simulation.get_node("Physics_L_Shin") as PhysicalBone3D
+		_check(float(thigh.get("joint_constraints/swing_span")) <= 35.0, "Thighs keep legs from splaying")
+		_check(float(shin.get("joint_constraints/twist_span")) <= 5.0, "Knees do not corkscrew")
 	parts.call("sever", &"arm_l" if scene == HUNGER else &"tentacle_0", Vector3.ZERO, false)
 	await process_frame
 	_check(not simulation.has_node("Physics_L_UpperArm" if scene == HUNGER else "Physics_T0_A"), "Severing removes physical bones")
