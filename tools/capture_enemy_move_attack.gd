@@ -12,9 +12,11 @@ extends SceneTree
 const SCENES := {
 	"attack_hunger": "res://game/features/infected/public/infected_hunger.tscn",
 	"attack_brute": "res://game/features/infected/public/infected_brute.tscn",
+	"attack_colossus": "res://game/features/infected/public/infected_colossus.tscn",
+	"attack_titan": "res://game/features/infected/public/infected_titan.tscn",
 	"rise": "res://game/features/infected/public/infected_hunger.tscn",
 }
-const SIZE := Vector2i(480, 360)
+const SIZE := Vector2i(960, 720)
 const EVERY := 2
 
 var _out_dir := "/tmp/enemy_move_attack"
@@ -73,8 +75,9 @@ func _play(scenario: String) -> void:
 			print(scenario, " posture ", posture, " -> ", enemy.get("posture"), " at ", frame / EVERY)
 			posture = enemy.get("posture")
 		if frame % EVERY == 0:
-			var at := _subject.global_position + Vector3(0, 0.9, 0)
-			_camera.look_at_from_position(at + Vector3(2.6, 1.5, 3.1), at)
+			var big := scenario in ["attack_colossus", "attack_titan"]
+			var at := _subject.global_position + Vector3(0, 0.5 if big else 0.9, 0)
+			_camera.look_at_from_position(at + (Vector3(1.5, 0.3, -4.6) if big else Vector3(2.6, 1.5, 3.1)), at)
 			await RenderingServer.frame_post_draw
 			root.get_viewport().get_texture().get_image().save_png("%s/%s_%03d.png" % [_out_dir, scenario, frame / EVERY])
 	_stage.queue_free()
