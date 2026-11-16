@@ -88,8 +88,9 @@ func _ready() -> void:
 		_surface.friction = 0.7
 		_surface.bounce = 0.02
 	physics_material_override = _surface
-	linear_damp = 0.35
-	angular_damp = 0.9
+	# Heavier damping: blast-flung pieces used to keep rolling for ~10 s before they came to rest.
+	linear_damp = 1.2
+	angular_damp = 2.5
 	can_sleep = true
 	_ignore_characters()
 	var watcher := get_node_or_null("ImpactSound")
