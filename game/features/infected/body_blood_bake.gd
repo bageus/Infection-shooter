@@ -9,7 +9,7 @@ extends RefCounted
 const SIZE := 128
 # Matches the drip shape in body_wound.gdshader; blood runs down from the wound.
 const DOWN := Vector3(0.0, -1.0, 0.0)
-const SPREAD_MARGIN := 3.5
+const CELL_SIZE := 0.15
 
 
 static func create_mask() -> Image:
@@ -24,29 +24,70 @@ static func paint(image: Image, surface: Dictionary, center: Vector3, radius: fl
 	var indices: PackedInt32Array = surface.indices
 	if radius <= 0.0 or uvs.size() != vertices.size() or indices.size() < 3:
 		return false
-	var reach := radius * SPREAD_MARGIN
+	# The wound reaches r sideways, 2.9 r down (blood runs) and 0.7 r up; see _mask_at.
+	var box_low := center - Vector3(radius, radius * 2.9, radius)
+	var box_high := center + Vector3(radius, radius * 0.7, radius)
 	var changed := false
-	for tri in range(0, indices.size() - 2, 3):
-		var ia := indices[tri]
-		var ib := indices[tri + 1]
-		var ic := indices[tri + 2]
-		if not _near(vertices[ia], vertices[ib], vertices[ic], center, reach):
-			continue
-		if _paint_triangle(image, [vertices[ia], vertices[ib], vertices[ic]], [uvs[ia], uvs[ib], uvs[ic]], center, radius):
-			changed = true
+	var grid := _grid(surface)
+	var seen := {}
+	var low := Vector3i(floor_vec(box_low / CELL_SIZE))
+	var high := Vector3i(floor_vec(box_high / CELL_SIZE))
+	for x in range(low.x, high.x + 1):
+		for y in range(low.y, high.y + 1):
+			for z in range(low.z, high.z + 1):
+				for tri: int in grid.get(Vector3i(x, y, z), []):
+					if seen.has(tri):
+						continue
+					seen[tri] = true
+					var ia := indices[tri]
+					var ib := indices[tri + 1]
+					var ic := indices[tri + 2]
+					if not _near(vertices[ia], vertices[ib], vertices[ic], box_low, box_high):
+						continue
+					if _paint_triangle(image, vertices[ia], vertices[ib], vertices[ic], uvs[ia], uvs[ib], uvs[ic], center, radius):
+						changed = true
 	return changed
 
 
-static func _near(a: Vector3, b: Vector3, c: Vector3, center: Vector3, reach: float) -> bool:
-	var low := a.min(b).min(c) - Vector3.ONE * reach
-	var high := a.max(b).max(c) + Vector3.ONE * reach
-	return center.x >= low.x and center.x <= high.x and center.y >= low.y and center.y <= high.y and center.z >= low.z and center.z <= high.z
+## Triangles by rest-space cell, built once per surface: a hit then visits the
+## few triangles around it instead of scanning the whole body (a sever froze the game).
+static func _grid(surface: Dictionary) -> Dictionary:
+	if surface.has("tri_grid"):
+		return surface.tri_grid
+	var vertices: PackedVector3Array = surface.vertices
+	var indices: PackedInt32Array = surface.indices
+	var grid := {}
+	for tri in range(0, indices.size() - 2, 3):
+		var a := vertices[indices[tri]]
+		var b := vertices[indices[tri + 1]]
+		var c := vertices[indices[tri + 2]]
+		var low := Vector3i(floor_vec(a.min(b).min(c) / CELL_SIZE))
+		var high := Vector3i(floor_vec(a.max(b).max(c) / CELL_SIZE))
+		for x in range(low.x, high.x + 1):
+			for y in range(low.y, high.y + 1):
+				for z in range(low.z, high.z + 1):
+					var key := Vector3i(x, y, z)
+					if not grid.has(key):
+						grid[key] = PackedInt32Array()
+					grid[key].append(tri)
+	surface["tri_grid"] = grid
+	return grid
 
 
-static func _paint_triangle(image: Image, rest: Array, uv: Array, center: Vector3, radius: float) -> bool:
-	var a: Vector2 = uv[0] * SIZE
-	var b: Vector2 = uv[1] * SIZE
-	var c: Vector2 = uv[2] * SIZE
+static func floor_vec(v: Vector3) -> Vector3:
+	return v.floor()
+
+
+static func _near(a: Vector3, b: Vector3, c: Vector3, box_low: Vector3, box_high: Vector3) -> bool:
+	var low := a.min(b).min(c)
+	var high := a.max(b).max(c)
+	return high.x >= box_low.x and low.x <= box_high.x and high.y >= box_low.y and low.y <= box_high.y and high.z >= box_low.z and low.z <= box_high.z
+
+
+static func _paint_triangle(image: Image, ra: Vector3, rb: Vector3, rc: Vector3, uv_a: Vector2, uv_b: Vector2, uv_c: Vector2, center: Vector3, radius: float) -> bool:
+	var a: Vector2 = uv_a * SIZE
+	var b: Vector2 = uv_b * SIZE
+	var c: Vector2 = uv_c * SIZE
 	var v0 := b - a
 	var v1 := c - a
 	var d00 := v0.dot(v0)
@@ -76,14 +117,15 @@ static func _paint_triangle(image: Image, rest: Array, uv: Array, center: Vector
 			var u := 1.0 - v - w
 			if u < -0.0001 or v < -0.0001 or w < -0.0001:
 				continue
-			var point: Vector3 = rest[0] * u + rest[1] * v + rest[2] * w
+			var point: Vector3 = ra * u + rb * v + rc * w
 			var value := _mask_at(point, center, radius)
 			var old := image.get_pixel(x, y)
 			if value.x <= old.r and value.y <= old.g:
 				continue
-			image.set_pixel(x, y, Color(maxf(old.r, value.x), maxf(old.g, value.y), 0.0, 1.0))
+			var painted := Color(maxf(old.r, value.x), maxf(old.g, value.y), 0.0, 1.0)
+			image.set_pixel(x, y, painted)
 			# The image stores 8-bit channels: a change only counts when a byte moved.
-			if image.get_pixel(x, y) != old:
+			if not changed and image.get_pixel(x, y) != old:
 				changed = true
 	return changed
 

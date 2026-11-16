@@ -99,7 +99,7 @@ func _scan(parts: Node, center: Vector3, radius: float) -> void:
 			var indices: PackedInt32Array = surface.indices
 			for index in range(0, indices.size() - 2, 3):
 				triangles += 1
-				if BAKE._near(vertices[indices[index]], vertices[indices[index + 1]], vertices[indices[index + 2]], center, radius * BAKE.SPREAD_MARGIN):
+				if BAKE._near(vertices[indices[index]], vertices[indices[index + 1]], vertices[indices[index + 2]], center - Vector3(radius, radius * 2.9, radius), center + Vector3(radius, radius * 0.7, radius)):
 					near_triangles += 1
 
 
