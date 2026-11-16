@@ -28,6 +28,13 @@ var _vocal: AudioStreamPlayer3D
 var _feed_wait := 0.0
 
 
+# An enemy in a room under fog (the player is in another zone) is not heard.
+func _play(parent: Node, event: StringName, position := Vector3.INF, volume_offset := 0.0, pitch := 1.0) -> AudioStreamPlayer3D:
+	if body.get_meta(&"zone_hidden", false):
+		return null
+	return SFX.play(parent, event, position, volume_offset, pitch)
+
+
 func setup(owner_body: CharacterBody3D, size: float) -> void:
 	body = owner_body
 	step_sound = owner_body.get("step_sound")
@@ -58,7 +65,7 @@ func tick(delta: float, charging: bool, near_target: bool, lod_offset := 0) -> v
 			var impacts := body.get("impact_pool") as Node
 			if is_instance_valid(impacts) and impacts.has_method("request_surface_step"):
 				impacts.call("request_surface_step", body)
-			SFX.play(body, step_sound, body.global_position, 1.5 if charging else -2.0, step_pitch)
+			_play(body, step_sound, body.global_position, 1.5 if charging else -2.0, step_pitch)
 	var alerted := bool(body.call("is_alerted"))
 	# Hunger times its shout in _on_aggro, after interrupting corpse feeding.
 	if near_target and alerted and not spotted and growl_sound != &"growl_hunger":
@@ -92,7 +99,7 @@ func alert_shout() -> void:
 func growl(volume_offset := 0.0) -> void:
 	var action := &"fours" if growl_sound == &"growl_hunger" and int(body.get("posture")) == 1 else &"voice"
 	if not VOICE_PROFILE.PROFILES.has(growl_sound):
-		_vocal = SFX.play(body, growl_sound, Vector3.INF, volume_offset, voice_pitch)
+		_vocal = _play(body, growl_sound, Vector3.INF, volume_offset, voice_pitch)
 	else:
 		_voice(action, volume_offset)
 
@@ -101,11 +108,11 @@ func scream(volume_offset := 0.0) -> void:
 	if growl_sound == &"growl_hunger" or growl_sound == &"growl_brute":
 		_voice(&"alert", volume_offset, true)
 	else:
-		_vocal = SFX.play(body, scream_sound, Vector3.INF, volume_offset, voice_pitch)
+		_vocal = _play(body, scream_sound, Vector3.INF, volume_offset, voice_pitch)
 
 
 func hit(position: Vector3) -> void:
-	SFX.play(body.get_parent(), &"flesh_hit", position)
+	_play(body.get_parent(), &"flesh_hit", position)
 	if _pain_wait <= 0.0:
 		_pain_wait = 1.4
 		if VOICE_PROFILE.PROFILES.has(growl_sound):
@@ -115,7 +122,7 @@ func hit(position: Vector3) -> void:
 
 
 func attack_started() -> void:
-	SFX.play(body, &"attack_swing", Vector3.INF, 0.0, 1.0 / maxf(step_pitch, 0.5))
+	_play(body, &"attack_swing", Vector3.INF, 0.0, 1.0 / maxf(step_pitch, 0.5))
 	if VOICE_PROFILE.PROFILES.has(growl_sound):
 		_voice(&"attack", -1.0, true)
 	elif randf() < 0.5:
@@ -123,21 +130,21 @@ func attack_started() -> void:
 
 
 func attack_landed(bite: bool) -> void:
-	SFX.play(body, &"attack_bite" if bite else &"attack_hit", Vector3.INF, 0.0, step_pitch)
+	_play(body, &"attack_bite" if bite else &"attack_hit", Vector3.INF, 0.0, step_pitch)
 
 
 func severed(position: Vector3) -> void:
-	SFX.play(body.get_parent(), &"dismember", position)
+	_play(body.get_parent(), &"dismember", position)
 
 
 func died() -> void:
 	stop_voice()
 	var event := VOICE_PROFILE.event_for(growl_sound, &"death")
-	SFX.play(body, &"enemy_death" if event.is_empty() else event, Vector3.INF, 0.0, voice_pitch)
+	_play(body, &"enemy_death" if event.is_empty() else event, Vector3.INF, 0.0, voice_pitch)
 
 
 func play(event: StringName, volume_offset := 0.0) -> void:
-	SFX.play(body, event, Vector3.INF, volume_offset)
+	_play(body, event, Vector3.INF, volume_offset)
 
 
 func _voice(action: StringName, volume_offset: float = 0.0, interrupt: bool = false) -> void:
@@ -148,7 +155,7 @@ func _voice(action: StringName, volume_offset: float = 0.0, interrupt: bool = fa
 		if not interrupt:
 			return
 		stop_voice()
-	_vocal = SFX.play(body, event, Vector3.INF, volume_offset, voice_pitch)
+	_vocal = _play(body, event, Vector3.INF, volume_offset, voice_pitch)
 
 
 func stop_voice() -> void:

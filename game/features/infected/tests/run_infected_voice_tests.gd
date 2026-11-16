@@ -40,6 +40,14 @@ func _run() -> void:
 		first._growl_wait = 0.0
 	_expect(AUDIO._last_call_out_ms == call_out_time, "Hunting does not trigger another call-out.")
 	_expect(_count(first.body, &"growl_zombie") >= 1, "Hunting growls continue.")
+	var hidden := _infected(stage, &"growl_zombie")
+	hidden.body.set_meta(&"zone_hidden", true)
+	hidden.growl()
+	hidden.attack_started()
+	_expect(_count(hidden.body, &"growl_zombie") == 0 and _count(hidden.body, &"attack_swing") == 0, "An infected in a fogged room makes no sound.")
+	hidden.body.remove_meta(&"zone_hidden")
+	hidden.attack_started()
+	_expect(_count(hidden.body, &"attack_swing") == 1, "It is heard again once its room is revealed.")
 	stage.queue_free()
 	await process_frame
 	print("Infected voice tests: %d failure(s)." % failures)

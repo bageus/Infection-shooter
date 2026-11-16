@@ -3,6 +3,7 @@ const ALIVE_GROUP := "infected_alive"
 const CHASE_ROUTE := preload("res://game/features/infected/chase_route.gd")
 const CHASE_PACE := preload("res://game/features/infected/chase_pace.gd")
 const PERCEPTION := preload("res://game/features/infected/enemy_perception.gd")
+const SMASH_NEAR_DISTANCE := 6.0
 const BREAKER := preload("res://game/features/infected/obstacle_breaker.gd")
 const CROWD := preload("res://game/features/infected/crowd_separation.gd")
 var _route := CHASE_ROUTE.new()
@@ -484,6 +485,9 @@ func _push_chair_contacts() -> void:
 
 # Smashes the prop in the way when this class is strong enough for it.
 func _try_break_blocking_props() -> void:
+	# A distant target never makes a swing at the wall in front of it: only a confirmed breach or a close target does.
+	if not _breaker.breaching and global_position.distance_to(_target.global_position) > SMASH_NEAR_DISTANCE:
+		return
 	if _obstacle_cooldown <= 0.0 and _blast_stun_remaining <= 0.0 and _breaker.smash(self, _target):
 		_obstacle_cooldown = obstacle_attack_interval
 		_play_animation(_attack_state())
@@ -521,7 +525,7 @@ func _tick_pending_hit(delta: float) -> void:
 
 # The blow misses when the target has moved out of reach during the wind-up.
 func _deliver_attack() -> void:
-	if not is_instance_valid(_target) or not _target.has_method("take_damage"):
+	if not is_instance_valid(_target) or not _target.has_method("take_damage") or not _route.direct_clear():
 		return
 	var offset := _target.global_position - global_position
 	offset.y = 0.0
