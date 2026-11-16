@@ -521,7 +521,7 @@ func _tick_pending_hit(delta: float) -> void:
 
 # The blow misses when the target has moved out of reach during the wind-up.
 func _deliver_attack() -> void:
-	if not is_instance_valid(_target) or not _target.has_method("take_damage"):
+	if not is_instance_valid(_target) or not _target.has_method("take_damage") or not _route.direct_clear():
 		return
 	var offset := _target.global_position - global_position
 	offset.y = 0.0
