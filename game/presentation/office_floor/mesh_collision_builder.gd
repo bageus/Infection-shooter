@@ -8,6 +8,9 @@ extends Node3D
 @export var use_simple_collision: bool = true
 @export var breakaway_frame_surface: int = -1
 @export var frame_surface_boxes := false
+## Trimesh faces lying wholly below this height (a door sill, a skirting lip) get no collision: a character
+## body cannot step up, so a few centimetres of threshold would catch its feet. 0 keeps every face.
+@export var walkable_sill_height := 0.0
 
 var _built := false
 
@@ -81,7 +84,7 @@ func _add_mesh_collisions(node: Node, body: CollisionObject3D) -> void:
 				box.size = mesh_instance.get_aabb().size
 				shape = box
 			else:
-				shape = mesh_instance.mesh.create_trimesh_shape()
+				shape = _without_sill(mesh_instance.mesh.create_trimesh_shape(), global_transform.affine_inverse() * mesh_instance.global_transform)
 			if shape != null:
 				var collision := CollisionShape3D.new()
 				collision.shape = shape
@@ -95,6 +98,18 @@ func _add_mesh_collisions(node: Node, body: CollisionObject3D) -> void:
 					collision.global_transform = mesh_instance.global_transform
 	for child in node.get_children():
 		_add_mesh_collisions(child, body)
+
+
+func _without_sill(shape: ConcavePolygonShape3D, to_module: Transform3D) -> ConcavePolygonShape3D:
+	if shape == null or walkable_sill_height <= 0.0:
+		return shape
+	var faces := shape.get_faces()
+	var kept := PackedVector3Array()
+	for index in range(0, faces.size(), 3):
+		if maxf((to_module * faces[index]).y, maxf((to_module * faces[index + 1]).y, (to_module * faces[index + 2]).y)) > walkable_sill_height:
+			kept.append_array(faces.slice(index, index + 3))
+	shape.set_faces(kept)
+	return shape
 
 
 func _visible_in_model(mesh: Node3D) -> bool:

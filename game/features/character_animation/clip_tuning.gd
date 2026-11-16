@@ -3,7 +3,7 @@ extends RefCounted
 
 ## Ground speed (m/s) of the planted foot in the cycle, measured on the model: a stealth walk and a run.
 const WALK_SPEED := 0.5
-const RUN_SPEED := 3.7
+const RUN_SPEED := 4.0
 
 
 static func apply(player: AnimationPlayer, dodge_clip: StringName) -> void:
