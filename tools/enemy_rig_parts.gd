@@ -10,6 +10,7 @@ extends RefCounted
 
 const PART_ID_SCALE := 32.0
 const SOFT_SHARE := 0.46
+const JOINT_SHARE := 0.5
 # Spine chain as fractions of the way from Hips to Neck (matches the old hand-placed rigs).
 const SPINE_AT := 0.294
 const CHEST_AT := 0.65
@@ -280,18 +281,22 @@ static func _blend_joint(weights: Dictionary, joint: Dictionary, part: String, v
 	var radius: float = joint.radius
 	var along := (vertex - at).dot(axis)
 	var reach := 1.2 * radius
-	var share := 0.0
+	var pull := 0.0
 	if is_child:
-		share = SOFT_SHARE * (1.0 - smoothstep(0.0, reach, along))
+		pull = 1.0 - smoothstep(0.0, reach, along)
 	else:
-		share = SOFT_SHARE * smoothstep(-reach, 0.0, minf(along, 0.0))
-	share *= 1.0 - smoothstep(2.0 * radius, 3.2 * radius, vertex.distance_to(at))
-	if share <= 0.0:
+		pull = smoothstep(-reach, 0.0, minf(along, 0.0))
+	pull *= 1.0 - smoothstep(2.0 * radius, 3.2 * radius, vertex.distance_to(at))
+	if pull <= 0.0:
 		return
-	var target: String = joint.parent_bone if is_child else joint.child_bone
+	# At the joint plane both sides take the same bone mix, so the rims of the two parts stay together
+	# when the bones bend (the old mix kept the parent's spine blend and tore the belly open).
+	var own: String = joint.child_bone if is_child else joint.parent_bone
+	var other: String = joint.parent_bone if is_child else joint.child_bone
 	for bone: String in weights:
-		weights[bone] = float(weights[bone]) * (1.0 - share)
-	weights[target] = float(weights.get(target, 0.0)) + share
+		weights[bone] = float(weights[bone]) * (1.0 - pull)
+	weights[own] = float(weights.get(own, 0.0)) + pull * (1.0 - JOINT_SHARE)
+	weights[other] = float(weights.get(other, 0.0)) + pull * JOINT_SHARE
 
 
 static func _dense(weights: Dictionary, skeleton: Skeleton3D) -> PackedFloat32Array:
