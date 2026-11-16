@@ -174,7 +174,7 @@ func sink() -> void:
 
 
 func _severed(part: StringName, _piece: RigidBody3D) -> void:
-	for bone: PhysicalBone3D in _bones.get(part, []):
+	for bone in _bones.get(part, []):
 		if is_instance_valid(bone):
 			bone.queue_free()
 	_bones.erase(part)
