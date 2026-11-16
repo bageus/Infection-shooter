@@ -134,6 +134,11 @@ static func joint(data: Dictionary, bone: int, skeleton: Skeleton3D) -> Vector3:
 
 
 # Per-bone thickness and far tip in bind space, measured once per mesh.
+# Horde step cells (C0, C1, ...) only animate skin under the body; part geometry ignores them.
+static func is_step_cell(bone_name: String) -> bool:
+	return bone_name.length() > 1 and bone_name[0] == "C" and bone_name.substr(1).is_valid_int()
+
+
 static func bone_stats(data: Dictionary, bone: int, child_joint: Variant, skeleton: Skeleton3D) -> Dictionary:
 	var stats: Dictionary = data.bone_stats
 	if stats.has(bone):
@@ -151,7 +156,7 @@ static func bone_stats(data: Dictionary, bone: int, child_joint: Variant, skelet
 			var best := -1
 			var best_weight := 0.0
 			for k in stride:
-				if weights[index * stride + k] > best_weight:
+				if weights[index * stride + k] > best_weight and not is_step_cell(skeleton.get_bone_name(bones[index * stride + k])):
 					best_weight = weights[index * stride + k]
 					best = bones[index * stride + k]
 			if best == bone:

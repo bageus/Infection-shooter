@@ -22,6 +22,11 @@ var _floor_y := -0.55
 var _top_y := 0.55
 var _radius := 0.93
 var _rest := {}
+## Step cells: a grid of small bones under the body. The fused mass of arms and legs
+## is skinned to the four cells round each vertex, so every limb steps on its own phase.
+const CELL := 0.4
+const CELL_ZONE := 0.62 # cells own the skin below this fraction of the height
+var _cells := {} # Vector2i -> bone name
 ## Tentacle azimuths (radians, ascending) and {a, b} joint points taken from the model's legs;
 ## empty means eight evenly spread tentacles.
 var leg_angles: Array = []
@@ -64,10 +69,33 @@ func build_skeleton(vertices: PackedVector3Array) -> Skeleton3D:
 			mid = leg_joints[i].b
 		_add(skeleton, "T%d_A" % i, "Hips", root)
 		_add(skeleton, "T%d_B" % i, "T%d_A" % i, mid)
+	_cells.clear()
+	for vertex in vertices:
+		if (vertex.y - _floor_y) / height > CELL_ZONE:
+			continue
+		for corner in _cell_corners(vertex):
+			if not _cells.has(corner[0]):
+				_cells[corner[0]] = "C%d" % _cells.size()
+	for cell: Vector2i in _cells:
+		_add(skeleton, _cells[cell], "Hips", Vector3(float(cell.x) * CELL, _floor_y + height * 0.1, float(cell.y) * CELL))
 	skeleton.reset_bone_poses()
 	for index in skeleton.get_bone_count():
 		_rest[skeleton.get_bone_name(index)] = skeleton.get_bone_rest(index)
 	return skeleton
+
+
+# The four grid cells round a point: [[cell, weight], ...].
+static func _cell_corners(point: Vector3) -> Array:
+	var fx := point.x / CELL
+	var fz := point.z / CELL
+	var x0 := floori(fx)
+	var z0 := floori(fz)
+	var tx := fx - float(x0)
+	var tz := fz - float(z0)
+	return [
+		[Vector2i(x0, z0), (1.0 - tx) * (1.0 - tz)], [Vector2i(x0 + 1, z0), tx * (1.0 - tz)],
+		[Vector2i(x0, z0 + 1), (1.0 - tx) * tz], [Vector2i(x0 + 1, z0 + 1), tx * tz],
+	]
 
 
 func _angle(i: int) -> float:
@@ -137,6 +165,13 @@ func weights(vertices: PackedVector3Array, skeleton: Skeleton3D) -> Array:
 				var share: float = skirt * float(pick[1])
 				row[skeleton.find_bone("T%d_A" % int(pick[0]))] += share * (1.0 - outer)
 				row[skeleton.find_bone("T%d_B" % int(pick[0]))] += share * outer
+		var cell_share := _smooth(CELL_ZONE, 0.15, y) * 0.85
+		if cell_share > 0.0:
+			for bone in bone_count:
+				row[bone] *= 1.0 - cell_share
+			for corner in _cell_corners(vertex):
+				if _cells.has(corner[0]):
+					row[skeleton.find_bone(_cells[corner[0]])] = cell_share * float(corner[1])
 		result.append(row)
 	return result
 
@@ -159,6 +194,7 @@ func _idle(t: float) -> Dictionary:
 	pose.Crown = [Quaternion(Vector3.BACK, deg_to_rad(4.0 * sin(t / 2.6 * TAU * 2.0))), Vector3.ONE * (1.0 + 0.04 * breath)]
 	_ripple(pose, t / 2.6 * TAU, 6.0, 4.0, 1.0)
 	_wobble(pose, t / 2.6 * TAU, 1.0)
+	_steps(pose, t / 2.6 * TAU, 0.008, 0.006)
 	return pose
 
 
@@ -167,6 +203,7 @@ func _crawl(t: float) -> Dictionary:
 	var pose := _base()
 	_ripple(pose, phase, 22.0, 14.0, 2.0, false, true)
 	_wobble(pose, phase, 1.0)
+	_steps(pose, phase, 0.07, 0.06)
 	return pose
 
 
@@ -178,6 +215,7 @@ func _ram(t: float) -> Dictionary:
 	pose.Crown = [Quaternion(Vector3.RIGHT, deg_to_rad(-14.0)), Vector3(0.95, 0.9, 1.1)]
 	_ripple(pose, phase, 34.0, 26.0, 2.0, true, true)
 	_wobble(pose, phase, 0.6)
+	_steps(pose, phase, 0.09, 0.11)
 	return pose
 
 
@@ -253,6 +291,15 @@ func _wobble(pose: Dictionary, phase: float, amount: float) -> void:
 		]
 
 
+# Every cell lifts and swings on its own phase (a lifted foot swings forward, a
+# planted one slides back); whole cycles only, so the clip loops.
+func _steps(pose: Dictionary, phase: float, lift: float, sweep: float) -> void:
+	for cell: Vector2i in _cells:
+		var offset := TAU * fposmod(sin(float(cell.x) * 12.9898 + float(cell.y) * 78.233) * 43758.5453, 1.0)
+		var local := phase + offset
+		pose["step_" + String(_cells[cell])] = Vector3(0.0, lift * maxf(0.0, sin(local)), -sweep * cos(local))
+
+
 static func _lump_angle(k: int) -> float:
 	return TAU * (float(k) + 0.5) / float(LUMPS)
 
@@ -291,6 +338,12 @@ func _bake(skeleton: Skeleton3D, sampler: Callable, length: float, looping: bool
 			var scale_track := animation.add_track(Animation.TYPE_SCALE_3D)
 			animation.track_set_path(scale_track, NodePath("Skeleton3D:" + bone))
 			scale_tracks[bone] = scale_track
+	var step_tracks := {}
+	for cell: Vector2i in _cells:
+		var step_bone: String = _cells[cell]
+		var step_track := animation.add_track(Animation.TYPE_POSITION_3D)
+		animation.track_set_path(step_track, NodePath("Skeleton3D:" + step_bone))
+		step_tracks[step_bone] = step_track
 	var hips_track := animation.add_track(Animation.TYPE_POSITION_3D)
 	animation.track_set_path(hips_track, NodePath("Skeleton3D:Hips"))
 	var frames := maxi(2, ceili(length * FPS))
@@ -302,5 +355,8 @@ func _bake(skeleton: Skeleton3D, sampler: Callable, length: float, looping: bool
 			animation.rotation_track_insert_key(rotation_tracks[bone], time, (entry[0] as Quaternion).normalized())
 			if scale_tracks.has(bone):
 				animation.scale_track_insert_key(scale_tracks[bone], time, entry[1])
+		for step_bone: String in step_tracks:
+			var step: Vector3 = pose.get("step_" + step_bone, Vector3.ZERO)
+			animation.position_track_insert_key(step_tracks[step_bone], time, (_rest[step_bone] as Transform3D).origin + step)
 		animation.position_track_insert_key(hips_track, time, (_rest["Hips"] as Transform3D).origin + (pose.hips_offset as Vector3))
 	return animation
