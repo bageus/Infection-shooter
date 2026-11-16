@@ -24,20 +24,20 @@ static func vary(animation: Animation, rng: RandomNumberGenerator) -> void:
 		if (points[index] as Vector3).y <= (points[points.size() - 1] as Vector3).y + 0.005:
 			land = index
 			break
-	var land_time := animation.track_get_key_time(position, land)
+	var landed := animation.track_get_key_time(position, land)
 	var landed: Vector3 = points[land] as Vector3 + Vector3(rng.randf_range(-1.0, 1.0), 0.0, rng.randf_range(-1.0, 1.0)) * DRIFT_METRES
 	for index in points.size():
-		var fall := smoothstep(land_time - FALL_SECONDS, land_time, animation.track_get_key_time(position, index))
+		var fall := smoothstep(landed - FALL_SECONDS, landed, animation.track_get_key_time(position, index))
 		animation.track_set_key_value(position, index, landed if index >= land else (points[index] as Vector3).lerp(Vector3(landed.x, (points[index] as Vector3).y, landed.z), fall))
 	# It ends lying the way the clip leaves it at the very end, turned a random way round.
 	var turns := _base(animation, rotation)
 	var lying := (Quaternion(Vector3.UP, rng.randf_range(-PI, PI)) * (turns[turns.size() - 1] as Quaternion)).normalized()
 	for index in turns.size():
-		var fall := smoothstep(land_time - FALL_SECONDS, land_time, animation.track_get_key_time(rotation, index))
+		var fall := smoothstep(landed - FALL_SECONDS, landed, animation.track_get_key_time(rotation, index))
 		animation.track_set_key_value(rotation, index, (turns[index] as Quaternion).slerp(lying, fall))
-	_hide_after(animation, tracks[Animation.TYPE_SCALE_3D], land_time)
+	_hide_after(animation, tracks[Animation.TYPE_SCALE_3D], landed)
 	animation.set_meta(REST_META, Transform3D(Basis(lying), landed))
-	animation.set_meta(LAND_META, land_time)
+	animation.set_meta(LAND_META, landed)
 
 
 ## Where the magazine lies after `vary`, in the model's space, and the clip time it lands at (-1 without a magazine).

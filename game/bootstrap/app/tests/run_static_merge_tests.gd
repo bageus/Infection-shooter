@@ -15,6 +15,10 @@ func _initialize() -> void:
 		wall.rotation_degrees.y = 90 * i
 		wall.set_meta("planning_scene_path", WALL)
 		placed.append(wall)
+	var cabin_path := "res://game/presentation/office_floor/public/structural/elevator_cabin_passenger.tscn"
+	var cabin := (load(cabin_path) as PackedScene).instantiate() as Node3D
+	world.add_child(cabin)
+	cabin.set_meta("planning_scene_path", cabin_path)
 	var other := Node3D.new()
 	other.set_meta("planning_scene_path", "res://x/door.tscn")
 	world.add_child(other)
@@ -32,7 +36,16 @@ func _initialize() -> void:
 			originals.append(found)
 			for surface in (found as MeshInstance3D).mesh.get_surface_count():
 				vertex_total += ((found as MeshInstance3D).mesh.surface_get_arrays(surface)[Mesh.ARRAY_VERTEX] as PackedVector3Array).size()
-	var merged := MERGE.merge(placed, world)
+	var merged := MERGE.merge(placed.filter(func(n: Node) -> bool: return n != cabin), world)
+	MERGE.restore(self)
+	await process_frame
+	MERGE.merge([cabin], world)
+	for door in cabin.find_children("InnerDoor_*", "MeshInstance3D", true, false):
+		_check((door as MeshInstance3D).visible, "sliding lift doors are not merged away")
+	_check(not cabin.find_child("Handrail_Back", true, false).visible, "static cabin parts are still merged")
+	MERGE.restore(self)
+	await process_frame
+	merged = MERGE.merge(placed.filter(func(n: Node) -> bool: return n != cabin), world)
 	_check(merged == originals.size() and merged > 0, "every wall mesh was merged (%d of %d)" % [merged, originals.size()])
 	_check(originals.all(func(m: MeshInstance3D) -> bool: return not m.visible), "originals are hidden")
 	var holder := world.get_node("StaticMerged")

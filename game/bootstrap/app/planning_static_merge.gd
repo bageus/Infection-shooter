@@ -5,6 +5,8 @@ extends RefCounted
 ## anything destructible are not in SCENES and keep drawing on their own.
 const SCENES := ["wall_straight.tscn", "column.tscn", "floor_pad.tscn", "wall_half_panel.tscn", "elevator_cabin_freight.tscn", "elevator_cabin_passenger.tscn",
 	"window_double.tscn", "metal_grille.tscn", "01_duct_rect_straight.glb", "01_pipe_sewer_floor_straight.glb", "01_pipe_sewer_floor_elbow.glb", "01_pipe_water_floor_straight.glb", "07_reception_counter_two_heights.glb"]
+## Sliding lift doors move, so they must stay their own meshes (names as in the cabin's exclude list).
+const MOVING := ["door_left", "door_right"]
 const CHUNK := 12.0
 const GROUP := &"static_merged"
 const SOURCES := &"static_merge_sources"
@@ -19,7 +21,7 @@ static func merge(placed: Array, parent: Node3D) -> int:
 			continue
 		for found in (node as Node3D).find_children("*", "MeshInstance3D", true, false):
 			var mesh_node := found as MeshInstance3D
-			if mesh_node.mesh == null or mesh_node.skeleton != NodePath() or mesh_node.material_override != null or mesh_node.has_meta("planning_bounds_excluded") or not _shown_in(mesh_node, node):
+			if mesh_node.mesh == null or mesh_node.skeleton != NodePath() or mesh_node.material_override != null or mesh_node.has_meta("planning_bounds_excluded") or not _shown_in(mesh_node, node) or _is_moving(mesh_node):
 				continue
 			if absf(mesh_node.global_basis.determinant()) < 0.000001:
 				continue
@@ -75,6 +77,14 @@ static func _all_opaque(mesh_node: MeshInstance3D) -> bool:
 
 
 ## True when the mesh and every parent up to the placed node are visible (the whole level may still be hidden while loading).
+static func _is_moving(mesh_node: Node) -> bool:
+	var lower := String(mesh_node.name).to_lower()
+	for token in MOVING:
+		if token in lower:
+			return true
+	return false
+
+
 static func _shown_in(mesh_node: Node3D, root: Node3D) -> bool:
 	var current: Node = mesh_node
 	while current != null and current != root.get_parent():
