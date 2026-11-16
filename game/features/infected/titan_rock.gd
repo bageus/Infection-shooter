@@ -21,12 +21,12 @@ func _ready() -> void:
 	material.albedo_color = Color(0.36, 0.32, 0.28) * shade
 	material.roughness = 1.0
 	# Every rock is a different lump: a jittered sphere, squashed unevenly.
-	var source := SphereMesh.new()
-	source.radius = 0.3
-	source.height = 0.6
-	source.radial_segments = 10
-	source.rings = 6
-	var arrays := source.get_mesh_arrays()
+	var lump := SphereMesh.new()
+	lump.radius = 0.3
+	lump.height = 0.6
+	lump.radial_segments = 10
+	lump.rings = 6
+	var arrays := lump.get_mesh_arrays()
 	var vertices := arrays[Mesh.ARRAY_VERTEX] as PackedVector3Array
 	var phase := Vector3(randf() * TAU, randf() * TAU, randf() * TAU)
 	var squash := Vector3(randf_range(0.75, 1.25), randf_range(0.7, 1.1), randf_range(0.75, 1.25)) * randf_range(0.85, 1.15)
