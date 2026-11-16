@@ -5,6 +5,9 @@ extends Node
 const FLASHLIGHT := preload("res://game/features/player/player_flashlight.gd")
 const MUZZLE_RISE_DEGREES := 5.0
 ## The model's barrel runs along +X, the weapon's muzzle marker along -Z.
+const MAGAZINE_DROP := preload("res://game/features/player/magazine_drop_variety.gd")
+## A dropped magazine stays on the floor this long.
+const MAGAZINE_SECONDS := 30.0
 const IDLE_SETTLE_SECONDS := 0.4
 const BARREL_TURN := Basis(Vector3.UP, -PI * 0.5)
 const MAX_RELOAD_SPEED := 3.0
@@ -19,6 +22,7 @@ var _measured_clip := ""
 var _clip_since := 0.0
 var _barrel_center := Vector3.ZERO
 var _drop_rng := RandomNumberGenerator.new()
+var _drop_pending := false
 var _active: Node3D
 var _aim_target := Vector3.INF
 var _model: Node3D
@@ -124,6 +128,29 @@ func _update_reload() -> void:
 		_start_reload()
 	elif not reloading and not _reload_clip.is_empty():
 		_end_reload()
+	if _drop_pending:
+		_leave_magazine()
+
+
+## Once the ejected magazine lands, a loose copy stays on the floor where it fell: the clip's own magazine is part
+## of the model and would slide and turn with the hero.
+func _leave_magazine() -> void:
+	var player := _driver.get("animation_player") as AnimationPlayer if _driver != null else null
+	if _reload_clip.is_empty() or player == null or player.current_animation != _reload_clip:
+		_drop_pending = not _reload_clip.is_empty() and player != null
+		return
+	var animation := player.get_animation(_reload_clip)
+	if player.current_animation_position < MAGAZINE_DROP.land_time(animation):
+		return
+	_drop_pending = false
+	var magazine := _model.find_child("Magazine_Removed_" + String(_reload_clip).trim_prefix("Reload_"), true, false) as Node3D
+	var effects := get_parent().get("effects_root") as Node3D
+	if magazine == null or effects == null:
+		return
+	var loose := magazine.duplicate() as Node3D
+	effects.add_child(loose)
+	loose.global_transform = (magazine.get_parent() as Node3D).global_transform * MAGAZINE_DROP.rest(animation)
+	get_tree().create_timer(MAGAZINE_SECONDS).timeout.connect(loose.queue_free)
 
 
 func _start_reload() -> void:
@@ -136,7 +163,8 @@ func _start_reload() -> void:
 	var speed := minf(float(_driver.call("clip_length", clip)) / seconds, MAX_RELOAD_SPEED)
 	var player := _driver.get("animation_player") as AnimationPlayer
 	if player != null and player.has_animation(clip):
-		preload("res://game/features/player/magazine_drop_variety.gd").vary(player.get_animation(clip), _drop_rng)
+		MAGAZINE_DROP.vary(player.get_animation(clip), _drop_rng)
+		_drop_pending = MAGAZINE_DROP.land_time(player.get_animation(clip)) >= 0.0
 	var legs: StringName = get_parent().get("_animation_selection").select_clip()
 	if float(_driver.call("play_named_one_shot", clip, 0.08, speed, legs)) > 0.0:
 		_reload_clip = clip
@@ -148,6 +176,7 @@ func _end_reload() -> void:
 		return
 	_driver.call("cancel_one_shot", _reload_clip)
 	_reload_clip = &""
+	_drop_pending = false
 
 
 func _sync_active() -> void:
