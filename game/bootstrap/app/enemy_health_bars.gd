@@ -1,5 +1,5 @@
 extends Control
-## Settings: a small health bar above each live enemy. One node draws every bar in screen space,
+## Settings: a small health bar above each live enemy in the hero's room. One node draws every bar in screen space,
 ## and nothing runs while the setting is off.
 const ALIVE_GROUP := &"infected_alive"
 ## Bars sit this far above the top of each enemy's collision capsule, which matches the authored
@@ -40,9 +40,13 @@ func _process(_delta: float) -> void:
 func _draw() -> void:
 	if camera == null or not is_instance_valid(camera):
 		return
+	var hero := get_tree().get_first_node_in_group("player") as Node3D
+	var hero_rooms := rooms_at(get_tree(), hero.global_position) if hero != null else []
 	for enemy in get_tree().get_nodes_in_group(ALIVE_GROUP):
 		var body := enemy as Node3D
 		if body == null or not body.is_inside_tree():
+			continue
+		if hero != null and not same_room(hero_rooms, rooms_at(get_tree(), body.global_position)):
 			continue
 		var max_hp := float(body.get("max_health"))
 		var hp := float(body.get("health"))
@@ -58,6 +62,23 @@ func _draw() -> void:
 		if not (origin.is_finite() and is_finite(hp / max_hp)) or not Rect2(Vector2.ZERO, get_viewport_rect().size).grow(bar.x).intersects(Rect2(origin, bar)):
 			continue
 		_draw_bar(Rect2(origin, bar), clampf(hp / max_hp, 0.0, 1.0))
+
+
+## Darkness zones covering a point: a room is one id however many zones it has, a lone zone counts as its own room.
+static func rooms_at(tree: SceneTree, point: Vector3) -> Array:
+	var rooms := []
+	for zone: Node in tree.get_nodes_in_group("darkness_zone"):
+		if bool(zone.call("_edge_distance", point) <= 0.0):
+			var id: int = zone.get("room_id")
+			rooms.append(id if id > 0 else -zone.get_instance_id())
+	return rooms
+
+
+## Outside every zone counts as one open area; otherwise the two must share a room.
+static func same_room(first: Array, second: Array) -> bool:
+	if first.is_empty() or second.is_empty():
+		return first.is_empty() and second.is_empty()
+	return first.any(func(room: int) -> bool: return second.has(room))
 
 
 static func bar_width(max_hp: float) -> float:

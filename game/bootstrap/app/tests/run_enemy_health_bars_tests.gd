@@ -18,9 +18,24 @@ func _check(ok: bool, message: String) -> void:
 func _run() -> void:
 	_preference_defaults_and_round_trip()
 	_width_follows_max_health()
+	_only_same_room()
 	await _bars_follow_the_setting()
 	print("Enemy health bar tests: %d failures" % failures)
 	quit(1 if failures else 0)
+
+
+func _only_same_room() -> void:
+	_check(BARS.same_room([], []) and BARS.same_room([3], [3, 4]), "Open area and a shared room show bars")
+	_check(not BARS.same_room([3], []) and not BARS.same_room([], [3]) and not BARS.same_room([3], [4]), "Another room or a room against open area hides bars")
+	var stage := Node3D.new()
+	root.add_child(stage)
+	var zone := (load("res://game/presentation/office_floor/public/props/darkness_zone.tscn") as PackedScene).instantiate() as Node3D
+	stage.add_child(zone)
+	zone.call("configure_zone", Vector2(10, 10), 1.0, false)
+	zone.set("room_id", 7)
+	var inside: Array = BARS.rooms_at(self, Vector3(1, 0, 1))
+	_check(inside == [7] and BARS.rooms_at(self, Vector3(30, 0, 0)).is_empty(), "A point inside a zone belongs to its room, outside belongs to none")
+	stage.free()
 
 
 func _width_follows_max_health() -> void:
