@@ -61,7 +61,7 @@ var kickable := false
 var breakable := false
 var blast_hit := false
 var blast_motion := false
-var _kick_cooldown := 0.0
+var _kick_ready_msec := 0
 var _age := 0.0
 var rest_time := 0.0
 var _unstick_tries := 0
@@ -78,7 +78,7 @@ func _ready() -> void:
 	_age = 0.0
 	rest_time = 0.0
 	_unstick_tries = 0
-	_kick_cooldown = 0.0
+	_kick_ready_msec = Time.get_ticks_msec() + 600 # a fresh piece is not kicked while it is still flying
 	_piece_health = 55.0
 	_half_extents = Vector3.ZERO
 	collision_layer = HIT_LAYER
@@ -98,8 +98,8 @@ func _ready() -> void:
 		IMPACT_SOUND.watch(self, -6.0, &"fall_debris")
 	else:
 		watcher.call("reset_fragment")
-	# Every piece is pushed aside when the hero walks into it, so none block the way through.
-	set_physics_process(true)
+	# Every piece is pushed aside when the hero walks into it; FragmentRuntime polls for it, so no per-piece script tick.
+	set_physics_process(false)
 	add_to_group(GROUP)
 	add_to_group(CONTACTLESS_GROUP)
 	_expiry = create_tween()
@@ -194,18 +194,12 @@ func _register_budget() -> void:
 	_runtime.register(self)
 
 
-func _physics_process(delta: float) -> void:
-	_age += delta
-	_kick_cooldown -= delta
-	if _age < 0.6 or _kick_cooldown > 0.0:
+# Called by the shared FragmentRuntime poll (one script call per frame, not one per piece) when the hero is near.
+func kick_from(offset: Vector3) -> void:
+	var now := Time.get_ticks_msec()
+	if now < _kick_ready_msec:
 		return
-	var player := get_tree().get_first_node_in_group("player") as Node3D
-	if player == null:
-		return
-	var offset := global_position - player.global_position
-	if absf(offset.y) > 1.4 or Vector2(offset.x, offset.z).length_squared() > 0.7:
-		return
-	_kick_cooldown = KICK_COOLDOWN
+	_kick_ready_msec = now + int(KICK_COOLDOWN * 1000.0)
 	sleeping = false
 	var away := Vector3(offset.x, 0.0, offset.z).normalized()
 	apply_central_impulse((away + Vector3.UP * 0.25) * minf(mass * 1.7, 0.9))

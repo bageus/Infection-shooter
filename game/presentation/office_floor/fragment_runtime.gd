@@ -47,6 +47,23 @@ func _process(delta: float) -> void:
 	_wake_baked()
 
 
+# One pass for all pieces: the hero kicks any loose piece it walks into (sleeping ones included).
+func _physics_process(_delta: float) -> void:
+	if active.is_empty():
+		return
+	var player := get_tree().get_first_node_in_group("player") as Node3D
+	if player == null:
+		return
+	var here := player.global_position
+	for reference: WeakRef in active.values():
+		var body := reference.get_ref() as RigidBody3D
+		if body == null:
+			continue
+		var offset := body.global_position - here
+		if absf(offset.y) <= 1.4 and offset.x * offset.x + offset.z * offset.z <= 0.7:
+			body.call("kick_from", offset)
+
+
 func register(body: RigidBody3D) -> void:
 	var id := body.get_instance_id()
 	var reference: WeakRef = weakref(body)
