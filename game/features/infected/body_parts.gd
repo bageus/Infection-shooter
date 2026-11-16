@@ -342,7 +342,7 @@ func sever(part: StringName, direction: Vector3, spawn_piece := true) -> RigidBo
 	add_rest_wound(root_segment.start, float(root_segment.radius) * 1.35)
 	var piece: RigidBody3D = null
 	if spawn_piece:
-		piece = _spawn_piece(part, info, chain, joint_world, direction)
+		piece = _spawn_piece(part, chain, joint_world, direction)
 	_modifier.severed.append(root)
 	_show_cuts()
 	# The bleeding stump is the neighbour's cut tissue: nearest cap vertex outside the part.
@@ -364,7 +364,7 @@ func _show_cuts() -> void:
 		entry.lease.bind(instance, entry.has("masks"))
 
 
-func _spawn_piece(part: StringName, info: Dictionary, chain: PackedInt32Array, joint_world: Vector3, direction: Vector3) -> RigidBody3D:
+func _spawn_piece(part: StringName, chain: PackedInt32Array, joint_world: Vector3, direction: Vector3) -> RigidBody3D:
 	var entry: Dictionary = _entries[0]
 	var lease := piece_skin(entry)
 	var built := MESH.build_piece(entry.data, chain, skeleton, lease.materials)
