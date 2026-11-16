@@ -11,6 +11,8 @@ const ENERGY := 6.0
 ## The beam leans down a little so the floor ahead of the hero is lit, not only far walls.
 const PITCH_DOWN := 10.0
 const GLOW_SIZE := 0.45
+## Lens glare peak alpha: the bright spot at the lens was too strong at full.
+const GLOW_STRENGTH := 0.5
 var _model: Node3D
 var _light: SpotLight3D
 var _glow: MeshInstance3D
@@ -75,7 +77,7 @@ func _update_glow() -> void:
 		var beam := -_light.global_basis.z * Vector3(1, 0, 1)
 		facing = smoothstep(0.3, 0.9, beam.normalized().dot(to_camera.normalized()))
 	_glow.visible = facing > 0.0
-	(_glow.material_override as StandardMaterial3D).albedo_color.a = facing * _light.light_energy / ENERGY
+	(_glow.material_override as StandardMaterial3D).albedo_color.a = facing * _light.light_energy / ENERGY * GLOW_STRENGTH
 
 
 ## Clips the flashlight under the model's muzzle of the weapon now held.
