@@ -14,6 +14,7 @@ const PREFERENCES := preload("res://game/bootstrap/app/menu/menu_preferences.gd"
 const LOADER := preload("res://game/bootstrap/app/menu/mission_loader.gd")
 const CAMPAIGN := preload("res://game/bootstrap/app/campaign_config.gd")
 const ROUTE := preload("res://game/bootstrap/app/floor_route.gd")
+const SFX := preload("res://game/core/audio/public/sound_events.gd")
 const MAIN_PATH := "res://game/bootstrap/app/main.tscn"
 const SPIKE_MS := 50.0
 const LOAD_TIMEOUT_MSEC := 180000
@@ -100,6 +101,7 @@ func _run() -> void:
 	markdown.store_string(_markdown(runs))
 	markdown.close()
 	print("AUTOPLAY report: %s.md" % ProjectSettings.globalize_path(base))
+	SFX.stop_all(self) # a voice still playing at exit keeps its stream alive (ObjectDB leak)
 	if current_scene != null:
 		current_scene.queue_free() # an orderly teardown avoids a heap-corruption abort on quit
 		for i in 5:
