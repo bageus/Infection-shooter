@@ -12,6 +12,7 @@ var _aim_off := 0.0
 var _offset := Vector3(2.6, 3.6, 2.6)
 var _only_new := false
 var _guns := false
+var _diagonal := false
 
 
 func _initialize() -> void:
@@ -20,6 +21,7 @@ func _initialize() -> void:
 		_out = args[0]
 	_only_new = args.size() > 1 and args[1] == "turn_reload"
 	_guns = args.size() > 1 and args[1] == "guns"
+	_diagonal = args.size() > 1 and args[1] == "diagonal"
 	call_deferred("_capture")
 
 
@@ -72,6 +74,20 @@ func _capture() -> void:
 	for i in 30:
 		await _follow()
 	var sheet: Array[Image] = []
+	if _diagonal:
+		_offset = Vector3(3.2, 1.4, -1.0)
+		Input.warp_mouse(Vector2(root.size) * Vector2(0.5, 0.2))
+		Input.action_press("move_up")
+		Input.action_press("move_right")
+		for i in 60:
+			await _follow()
+		for k in 6:
+			sheet.append(await _shot())
+			for i in 2:
+				await _follow()
+		_save(sheet, "diagonal_run.png")
+		quit()
+		return
 	if _guns:
 		await _guns_and_lean()
 		quit()
@@ -204,19 +220,24 @@ func _turn_and_reload() -> void:
 		for i in 40:
 			await _follow()
 	_save(sheet, "turn_in_place.png")
-	_offset = Vector3(1.6, 2.6, 1.6)
+	_offset = Vector3(2.2, 3.4, 2.2)
 	sheet = []
 	var weapon: Node = _player.call("get_current_weapon")
 	var magazine := _player.get_node("Body").find_child("Magazine_Removed_Pistol", true, false) as Node3D
+	_player.set("effects_root", _player.get_parent())
+	# Three reloads, the hero steps aside after each: the magazines stay where they fell.
 	for round in 3:
 		weapon.set("_magazine_ammo", 0)
 		weapon.call("start_reload")
-		for frame in 90:
+		for frame in 200:
 			await _follow()
-			if frame in [27, 34, 56]:
-				sheet.append(await _shot())
-		for i in 120:
+		Input.action_press("move_right")
+		for frame in 14:
 			await _follow()
+		Input.action_release("move_right")
+		for frame in 30:
+			await _follow()
+		sheet.append(await _shot())
 	_save(sheet, "magazine_drops.png")
 
 

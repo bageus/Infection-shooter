@@ -1,22 +1,52 @@
 extends RefCounted
-## The reload clips bake one fall for the ejected magazine. Each reload bends that fall a little: a different
-## sideways drift, a different spin and a different roll after it lands, so no two drops look alike.
+## The reload clips bake one fall for the ejected magazine and then slide it along the floor, always the same way.
+## Each reload bends the fall a little (sideways drift, the way it lies) and ends the clip's part at the landing:
+## from there `rest()` gives the place on the floor where a loose copy is left, so it neither slides nor follows the hero.
 const DRIFT_METRES := 0.14
-const SPIN_RADIANS := 1.2
-const ROLL_SCALE := Vector2(0.4, 1.6)
 const FALL_SECONDS := 0.4
+const REST_META := &"magazine_rest"
+const LAND_META := &"magazine_land_time"
 
 
-## Rebuilds the `Magazine_Removed_*` tracks of `clip` from the authored keys with fresh random offsets.
+## Rebuilds the `Magazine_Removed_*` tracks of `animation` from the authored keys with fresh random offsets.
 static func vary(animation: Animation, rng: RandomNumberGenerator) -> void:
+	var tracks := {}
 	for track in animation.get_track_count():
-		if not String(animation.track_get_path(track)).contains("Magazine_Removed_") or animation.track_get_key_count(track) < 3:
-			continue
-		var type := animation.track_get_type(track)
-		if type == Animation.TYPE_POSITION_3D:
-			_vary_position(animation, track, rng)
-		elif type == Animation.TYPE_ROTATION_3D:
-			_vary_rotation(animation, track, rng)
+		if String(animation.track_get_path(track)).contains("Magazine_Removed_") and animation.track_get_key_count(track) >= 3:
+			tracks[animation.track_get_type(track)] = track
+	if not tracks.has(Animation.TYPE_POSITION_3D) or not tracks.has(Animation.TYPE_ROTATION_3D) or not tracks.has(Animation.TYPE_SCALE_3D):
+		return
+	var position: int = tracks[Animation.TYPE_POSITION_3D]
+	var rotation: int = tracks[Animation.TYPE_ROTATION_3D]
+	var points := _base(animation, position)
+	var land := 0
+	for index in points.size():
+		if (points[index] as Vector3).y <= (points[points.size() - 1] as Vector3).y + 0.005:
+			land = index
+			break
+	var land_time := animation.track_get_key_time(position, land)
+	var landed: Vector3 = points[land] as Vector3 + Vector3(rng.randf_range(-1.0, 1.0), 0.0, rng.randf_range(-1.0, 1.0)) * DRIFT_METRES
+	for index in points.size():
+		var fall := smoothstep(land_time - FALL_SECONDS, land_time, animation.track_get_key_time(position, index))
+		animation.track_set_key_value(position, index, landed if index >= land else (points[index] as Vector3).lerp(Vector3(landed.x, (points[index] as Vector3).y, landed.z), fall))
+	# It ends lying the way the clip leaves it at the very end, turned a random way round.
+	var turns := _base(animation, rotation)
+	var lying := (Quaternion(Vector3.UP, rng.randf_range(-PI, PI)) * (turns[turns.size() - 1] as Quaternion)).normalized()
+	for index in turns.size():
+		var fall := smoothstep(land_time - FALL_SECONDS, land_time, animation.track_get_key_time(rotation, index))
+		animation.track_set_key_value(rotation, index, (turns[index] as Quaternion).slerp(lying, fall))
+	_hide_after(animation, tracks[Animation.TYPE_SCALE_3D], land_time)
+	animation.set_meta(REST_META, Transform3D(Basis(lying), landed))
+	animation.set_meta(LAND_META, land_time)
+
+
+## Where the magazine lies after `vary`, in the model's space, and the clip time it lands at (-1 without a magazine).
+static func rest(animation: Animation) -> Transform3D:
+	return animation.get_meta(REST_META, Transform3D.IDENTITY)
+
+
+static func land_time(animation: Animation) -> float:
+	return float(animation.get_meta(LAND_META, -1.0))
 
 
 static func _base(animation: Animation, track: int) -> Array:
@@ -29,32 +59,11 @@ static func _base(animation: Animation, track: int) -> Array:
 	return animation.get_meta(key)
 
 
-static func _vary_position(animation: Animation, track: int, rng: RandomNumberGenerator) -> void:
-	var base := _base(animation, track)
-	var land := 0
-	for index in base.size():
-		if (base[index] as Vector3).y <= (base[base.size() - 1] as Vector3).y + 0.005:
-			land = index
-			break
-	var land_time := animation.track_get_key_time(track, land)
-	var drift := Vector3(rng.randf_range(-1.0, 1.0), 0.0, rng.randf_range(-1.0, 1.0)) * DRIFT_METRES
-	var roll := rng.randf_range(ROLL_SCALE.x, ROLL_SCALE.y)
-	var landed := base[land] as Vector3
-	for index in base.size():
-		var time := animation.track_get_key_time(track, index)
-		var fall := smoothstep(land_time - FALL_SECONDS, land_time, time)
-		var value := base[index] as Vector3 + drift * fall
-		if index > land:
-			value = landed + (base[index] as Vector3 - landed) * Vector3(roll, 1.0, roll) + drift
-		animation.track_set_key_value(track, index, value)
-
-
-static func _vary_rotation(animation: Animation, track: int, rng: RandomNumberGenerator) -> void:
-	var base := _base(animation, track)
-	var length := animation.track_get_key_time(track, base.size() - 1)
-	var axis := Vector3(rng.randf_range(-1.0, 1.0), rng.randf_range(-1.0, 1.0), rng.randf_range(-1.0, 1.0)).normalized()
-	var angle := rng.randf_range(-SPIN_RADIANS, SPIN_RADIANS)
-	for index in base.size():
-		var share := animation.track_get_key_time(track, index) / maxf(length, 0.001)
-		var spin := Quaternion(axis, angle * smoothstep(0.1, 0.45, share))
-		animation.track_set_key_value(track, index, (spin * (base[index] as Quaternion)).normalized())
+# The clip's own magazine disappears at the landing (the last two scale keys are the authored fade at the clip's end).
+static func _hide_after(animation: Animation, track: int, time: float) -> void:
+	var count := animation.track_get_key_count(track)
+	if animation.has_meta("drop_hidden_%d" % track) or count < 2:
+		return
+	animation.set_meta("drop_hidden_%d" % track, true)
+	animation.track_set_key_time(track, count - 2, time)
+	animation.track_set_key_time(track, count - 1, time + 0.02)
