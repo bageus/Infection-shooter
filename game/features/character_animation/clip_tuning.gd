@@ -7,7 +7,17 @@ const ARM_BONES := ["LeftShoulder", "LeftArm", "LeftForeArm", "LeftHand", "LeftF
 
 ## Ground speed (m/s) of the planted foot in the cycle, measured on the model: a stealth walk and a run.
 const WALK_SPEED := 0.5
-const RUN_SPEED := 4.0
+## Measured planted-foot speed of each run cycle by direction (they differ, backward and sideways steps are shorter).
+const RUN_SPEEDS := {"Forward": 3.75, "Forward_Left": 3.73, "Forward_Right": 3.73, "Left": 3.34, "Right": 3.52,
+	"Backward": 3.42, "Backward_Left": 3.3, "Backward_Right": 3.2}
+const RUN_SPEED_DEFAULT := 3.6
+
+
+## "Run_Backward_Left_AK" -> the speed of the "Backward_Left" cycle.
+static func _run_speed(clip_name: String) -> float:
+	var tokens := clip_name.split("_")
+	var key := tokens[1] + ("_" + tokens[2] if tokens.size() > 2 and tokens[2] in ["Left", "Right"] else "") if tokens.size() > 1 else ""
+	return float(RUN_SPEEDS.get(key, RUN_SPEED_DEFAULT))
 
 
 static func apply(player: AnimationPlayer, dodge_clip: StringName) -> void:
@@ -16,7 +26,7 @@ static func apply(player: AnimationPlayer, dodge_clip: StringName) -> void:
 		if clip_name.begins_with("Walk_"):
 			animation.set_meta("ref_speed", WALK_SPEED)
 		elif clip_name.begins_with("Run_"):
-			animation.set_meta("ref_speed", RUN_SPEED)
+			animation.set_meta("ref_speed", _run_speed(String(clip_name)))
 	# The roll clip carries the body 4 m along its Root bone; the game moves the hero itself, so the clip stays in place.
 	if not player.has_animation(dodge_clip):
 		return
