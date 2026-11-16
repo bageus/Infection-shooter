@@ -196,16 +196,16 @@ static func paint_sliced(owner: Node, rest_position: Vector3, rest_radius: float
 				var started := Time.get_ticks_usec()
 				changed = paint_triangles(mask.image, entry.data.surfaces[surface], tris, at, stop, rest_position, rest_radius) or changed
 				at = stop
-				if owner._spent_frame != Engine.get_process_frames():
-					owner._spent_frame = Engine.get_process_frames()
-					owner._spent_usec = 0
-				owner._spent_usec += Time.get_ticks_usec() - started
-				while owner._spent_usec > PAINT_BUDGET_USEC and at < tris.size():
+				if owner.spent_frame != Engine.get_process_frames():
+					owner.spent_frame = Engine.get_process_frames()
+					owner.spent_usec = 0
+				owner.spent_usec += Time.get_ticks_usec() - started
+				while owner.spent_usec > PAINT_BUDGET_USEC and at < tris.size():
 					await owner.get_tree().process_frame
 					if not owner.enabled or not owner.is_inside_tree():
 						return
-					if owner._spent_frame != Engine.get_process_frames():
-						owner._spent_frame = Engine.get_process_frames()
-						owner._spent_usec = 0
+					if owner.spent_frame != Engine.get_process_frames():
+						owner.spent_frame = Engine.get_process_frames()
+						owner.spent_usec = 0
 			if changed:
 				entry.lease.page.textures[surface].update_layer(mask.image, entry.lease.layer)
