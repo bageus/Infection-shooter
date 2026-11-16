@@ -238,8 +238,24 @@ func _strike_speed(animation: Animation) -> float:
 # Public animation_events_v1 addition (ADR-0044): plays the dodge roll for
 # `duration` seconds toward a world-space direction, relative to the body.
 # Returns false without leg clips. The roll turns the whole body along the dodge.
-func play_dodge(world_direction: Vector3, duration: float) -> bool:
+# `held_weapon` (e.g. &"AK"): the gun stays drawn in the hand through the roll instead of vanishing and reappearing.
+func play_dodge(world_direction: Vector3, duration: float, held_weapon: StringName = &"") -> bool:
+	if animation_player != null and animation_player.has_animation(dodge_clip):
+		_hold_weapon(animation_player.get_animation(dodge_clip), held_weapon)
 	return _play_dodge_clip(world_direction, duration)
+
+
+# The roll clip scales every gun to nothing; its Weapon_<name> scale tracks (and the magazine inside) are set to show only the held one.
+func _hold_weapon(animation: Animation, held_weapon: StringName) -> void:
+	if held_weapon.is_empty():
+		return
+	for track in animation.get_track_count():
+		var path := str(animation.track_get_path(track))
+		var gun := path.get_slice("RightHand/Weapon_", 1).get_slice("/", 0).get_slice(":", 0) if "RightHand/Weapon_" in path else ""
+		if gun.is_empty() or animation.track_get_type(track) != Animation.TYPE_SCALE_3D:
+			continue
+		for key in animation.track_get_key_count(track):
+			animation.track_set_key_value(track, key, Vector3.ONE if gun == String(held_weapon) else Vector3.ZERO)
 
 
 # Baked dodge: the body turns along the dodge and the whole-body roll clip is squeezed into `duration`.
