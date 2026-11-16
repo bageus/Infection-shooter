@@ -1,9 +1,11 @@
-[gd_scene load_steps=5 format=3]
+[gd_scene load_steps=6 format=3]
 
 [ext_resource type="Script" path="res://game/features/character_animation/public/character_animation_driver.gd" id="1_driver"]
 [ext_resource type="Script" path="res://game/features/infected/infected_revenant.gd" id="2_enemy"]
 [ext_resource type="PackedScene" path="res://game/features/infection_source/public/mutagen_cloud.tscn" id="3_cloud"]
 [ext_resource type="PackedScene" path="res://models/objects/characters/enemy/game/Revenant_rig.tscn" id="4_rig"]
+
+[ext_resource type="AnimationLibrary" path="res://models/objects/characters/enemy/game/Revenant_mixamo.res" id="5_mixamo"]
 
 [sub_resource type="CapsuleShape3D" id="EnemyShape"]
 radius = 0.45
@@ -40,7 +42,8 @@ shape = SubResource("EnemyShape")
 
 [node name="AnimationDriver" type="Node" parent="."]
 script = ExtResource("1_driver")
+extra_clips = ExtResource("5_mixamo")
 run_speed_threshold = 3.22
 walk_reference_speed = 1.84
 run_reference_speed = 4.6
-locomotion_speed_multiplier = 1.2
+locomotion_speed_multiplier = 1.0

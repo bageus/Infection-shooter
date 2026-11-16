@@ -19,9 +19,8 @@ extends SceneTree
 ## all-fours and stand to crawl transitions, the idle poses on all fours and on
 ## the belly, and the crawl attack.
 
-const HUNGER := preload("res://models/objects/characters/enemy/game/Hunger_rig.tscn")
+const ENEMY_DIR := "res://models/objects/characters/enemy/game/"
 const SOURCE_DIR := "res://models/objects/characters/enemy/hunger_clips/"
-const OUTPUT := "res://models/objects/characters/enemy/game/Hunger_mixamo.res"
 const FPS := 30.0
 const MIRROR := Basis(Vector3(-1, 0, 0), Vector3(0, 1, 0), Vector3(0, 0, 1))
 const PREFIX := "mixamorig_"
@@ -69,12 +68,23 @@ const SOURCES := [
 ]
 const BITE_SOURCE := "zombie_biting"
 # Ground speed (m/s) each locomotion cycle is paced for; the driver scales playback by speed / ref_speed.
+# Heavy humanoids (the rest of the roster) take only Idle/Walk/Run; their attacks, death and
+# hit clips stay procedural. Per enemy: Mixamo source of the Run clip, Body scale (the clip's
+# ground speed is measured in skeleton units), gameplay walk speed, how far the walk is pulled
+# toward the idle pose (shorter stride) and the cap on the walk slow-down.
+const HEAVY := {
+	"Revenant": {"run": "Zombie_Run", "scale": 1.0, "walk_mps": 1.84, "run_mps": 4.6, "walk_amount": 0.6},
+	"Brute": {"run": "Mutant_Run", "scale": 1.1, "walk_mps": 1.64, "run_mps": 4.1, "walk_amount": 0.55},
+	"Titan": {"run": "Mutant_Run", "scale": 1.35, "walk_mps": 1.32, "run_mps": 3.3, "walk_amount": 0.5},
+	"Colossus": {"run": "Mutant_Run", "scale": 1.55, "walk_mps": 1.16, "run_mps": 2.9, "walk_amount": 0.45},
+}
 const REF_SPEED := {"Walk": 2.16, "Run": 5.4, "RunLunge": 5.4, "FoursRun": 5.4, "Crawl": 1.2}
 # Bones may dip this far below the floor before a clip is lifted.
 const SINK_TOLERANCE := 0.01
 const WALK_STRETCH := 2.1
 const WALK_AMOUNT := 0.62
 
+var _enemy_name := "Hunger"
 var _hunger: Skeleton3D
 var _scale := 1.0
 var _root_basis := Basis.IDENTITY
@@ -89,27 +99,89 @@ func _init() -> void:
 
 
 func _run() -> void:
-	var model := HUNGER.instantiate()
+	var args := OS.get_cmdline_user_args()
+	if not args.is_empty():
+		_enemy_name = args[0]
+	var model := (load(ENEMY_DIR + _enemy_name + "_rig.tscn") as PackedScene).instantiate()
 	root.add_child(model)
 	_hunger = model.find_children("*", "Skeleton3D", true, false)[0] as Skeleton3D
 	_root_basis = _hunger.get_bone_global_rest(_hunger.find_bone("Root")).basis.orthonormalized()
 	_floor = _hunger.get_bone_global_rest(_hunger.find_bone("Root")).origin.y
-	for entry: Array in SOURCES:
-		if not _bake_source(entry):
+	if HEAVY.has(_enemy_name):
+		_bake_heavy(HEAVY[_enemy_name])
+	else:
+		for entry: Array in SOURCES:
+			if not _bake_source(entry):
+				quit(1)
+				return
+		if not _bake_bite():
 			quit(1)
 			return
-	if not _bake_bite():
-		quit(1)
-		return
-	_bake_synthetic()
+		_bake_synthetic()
 	var library := AnimationLibrary.new()
 	for clip_name: String in _frames:
 		var animation := _emit(clip_name)
 		library.add_animation(clip_name, animation)
 		print("%-14s %5.2fs  %3d frames  lowest %.3f m  %s" % [clip_name, animation.length, _frames[clip_name].size(), _lowest(_frames[clip_name]), _describe(animation)])
-	var error := ResourceSaver.save(library, OUTPUT)
-	print("saved ", OUTPUT, " -> ", error)
+	var output := ENEMY_DIR + _enemy_name + "_mixamo.res"
+	var error := ResourceSaver.save(library, output)
+	print("saved ", output, " -> ", error)
 	quit(0 if error == OK else 1)
+
+
+# ---------------------------------------------------------------- heavy humanoids
+
+func _bake_heavy(style: Dictionary) -> void:
+	for entry: Array in SOURCES:
+		if entry[0] == "Idle":
+			_bake_source(entry)
+	var run_name: String = style["run"]
+	_bake_source(["Run", run_name, false, true, false, -1.0, -1.0])
+	var idle: Dictionary = _frames["Idle"][0]
+	var run_frames: Array = _frames["Run"]
+	# Walk: the run pulled toward the idle pose (short stride), stretched so that the
+	# stance foot moves at the gameplay walk speed when the clip plays at 1x.
+	var amount: float = style["walk_amount"]
+	var base: Array = []
+	for frame: Dictionary in run_frames:
+		base.append(_blend(idle, frame, amount))
+	var stride := _ground_speed(base) * float(style["scale"]) # m/s at 1x
+	var stretch := clampf(stride / float(style["walk_mps"]), 1.0, 4.0)
+	var walk: Array = []
+	var walk_count := int(round(base.size() * stretch))
+	for index in walk_count:
+		var position := float(index) / float(walk_count) * base.size()
+		var low := int(floor(position)) % base.size()
+		walk.append(_blend(base[low], base[(low + 1) % base.size()], position - floor(position)))
+	_clamp_to_floor(walk)
+	_frames["Walk"] = walk
+	_loops["Walk"] = true
+	_finish_meta("Walk", walk, true)
+	_clamp_to_floor(_frames["Run"])
+	_meta["Walk"]["ref_speed"] = _ground_speed(walk) * float(style["scale"])
+	_meta["Run"]["ref_speed"] = _ground_speed(run_frames) * float(style["scale"])
+	for key in ["Idle"]: # the procedural idle stays
+		_frames.erase(key)
+		_loops.erase(key)
+		_meta.erase(key)
+	print("%s: walk stretch %.2f ref %.2f (gameplay %.2f), run ref %.2f (gameplay %.2f)" % [_enemy_name, stretch, _meta["Walk"]["ref_speed"], style["walk_mps"], _meta["Run"]["ref_speed"], style["run_mps"]])
+
+
+# Ground speed of a loop in skeleton units: how fast the planted foot moves back against the hips.
+func _ground_speed(frames: Array) -> float:
+	var total := 0.0
+	var samples := 0
+	var previous := {}
+	for frame: Dictionary in frames:
+		var points := _positions(frame, ["L_Foot", "R_Foot", "Hips"])
+		var low := "L_Foot" if (points["L_Foot"] as Vector3).y < (points["R_Foot"] as Vector3).y else "R_Foot"
+		var relative: Vector3 = (points[low] as Vector3) - (points["Hips"] as Vector3)
+		if previous.has(low):
+			var step: Vector3 = (previous[low] as Vector3) - relative
+			total += Vector2(step.x, step.z).length() * FPS
+			samples += 1
+		previous = {low: relative}
+	return total / maxf(samples, 1)
 
 
 # ---------------------------------------------------------------- sources
