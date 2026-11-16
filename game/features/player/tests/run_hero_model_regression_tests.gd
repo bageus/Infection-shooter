@@ -36,6 +36,11 @@ func _run() -> void:
 	driver.call("_process_skeletal", float(player.get("move_speed")))
 	_check(clips.current_animation.begins_with("Run_"), "Normal movement speed plays the run cycle (%s)" % clips.current_animation)
 	_check(clips.speed_scale > 1.0 and clips.speed_scale < 2.0, "The run cycle is sped up to the ground speed (x%.2f)" % clips.speed_scale)
+	(player.get_node("AimPivot") as Node3D).global_rotation = Vector3.ZERO
+	player.velocity = Vector3(1.0, 0.0, -1.0).normalized() * float(player.get("move_speed"))
+	var diagonal_clip: StringName = (player.get("_animation_selection") as RefCounted).call("select_clip")
+	var diagonal := body.find_child("DiagonalLegs", true, false)
+	_check(diagonal != null and String(diagonal.get("clip")).begins_with("Run_") and String(diagonal.get("clip")) != String(diagonal_clip) and absf(float(diagonal.get("weight")) - 0.5) < 0.05, "A diagonal run blends the legs half way toward the other axis (%s + %s)" % [diagonal_clip, diagonal.get("clip") if diagonal != null else "none"])
 	var light := player.find_child("Flashlight", true, false) as SpotLight3D
 	var muzzle := body.find_child("Pistol_Muzzle", true, false) as Node3D
 	_check(light != null and light.find_parent("Pistol_Muzzle") == muzzle, "The flashlight rides on the held gun's muzzle")

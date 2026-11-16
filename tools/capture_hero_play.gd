@@ -12,6 +12,7 @@ var _aim_off := 0.0
 var _offset := Vector3(2.6, 3.6, 2.6)
 var _only_new := false
 var _guns := false
+var _diagonal := false
 
 
 func _initialize() -> void:
@@ -20,6 +21,7 @@ func _initialize() -> void:
 		_out = args[0]
 	_only_new = args.size() > 1 and args[1] == "turn_reload"
 	_guns = args.size() > 1 and args[1] == "guns"
+	_diagonal = args.size() > 1 and args[1] == "diagonal"
 	call_deferred("_capture")
 
 
@@ -72,6 +74,20 @@ func _capture() -> void:
 	for i in 30:
 		await _follow()
 	var sheet: Array[Image] = []
+	if _diagonal:
+		_offset = Vector3(3.2, 1.4, -1.0)
+		Input.warp_mouse(Vector2(root.size) * Vector2(0.5, 0.2))
+		Input.action_press("move_up")
+		Input.action_press("move_right")
+		for i in 60:
+			await _follow()
+		for k in 6:
+			sheet.append(await _shot())
+			for i in 2:
+				await _follow()
+		_save(sheet, "diagonal_run.png")
+		quit()
+		return
 	if _guns:
 		await _guns_and_lean()
 		quit()
