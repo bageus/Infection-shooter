@@ -69,6 +69,7 @@ func _build(enemy_name: String) -> bool:
 		if skin_triangles <= SKIN_TRIANGLES * 1.05 or attempt == 3:
 			break
 		skin_scale *= clampf(float(SKIN_TRIANGLES) / float(skin_triangles), 0.4, 0.95)
+	_close_joints(merged[0], merged[1])
 	var mesh := ArrayMesh.new()
 	for surface in 2:
 		mesh.add_surface_from_arrays(Mesh.PRIMITIVE_TRIANGLES, _finish(merged[surface]), [], _lods(merged[surface], surface))
@@ -276,6 +277,76 @@ static func _append(target: Dictionary, arrays: Array, transform: Transform3D, p
 	target.tangents = out_tangents
 	target.colors = out_colors
 	target.indices = out_indices
+
+
+# The source parts stop about 1.4 cm short of each other, which leaves a dark crack at every
+# joint (neck, shoulders, hips, knees, wrists, ankles). Every open skin edge of a part is moved
+# onto the nearest open edge of a neighbouring part with a higher id, so neighbours share a
+# seam line; the cut caps of the moved part follow. Parts stay separate pieces (no shared
+# vertices), so dismemberment still splits along part ids.
+const JOINT_REACH := 0.03
+
+
+static func _close_joints(skin: Dictionary, caps: Dictionary) -> void:
+	var vertices: PackedVector3Array = skin.vertices
+	var colors: PackedColorArray = skin.colors
+	var indices: PackedInt32Array = skin.indices
+	var canonical := PackedInt32Array()
+	canonical.resize(vertices.size())
+	var first := {}
+	for v in vertices.size():
+		var key := Vector3i((vertices[v] * 10000.0).round())
+		if not first.has(key):
+			first[key] = v
+		canonical[v] = int(first[key])
+	var edge_count := {}
+	for t in range(0, indices.size(), 3):
+		for k in 3:
+			var a := canonical[indices[t + k]]
+			var b := canonical[indices[t + (k + 1) % 3]]
+			var edge := Vector2i(mini(a, b), maxi(a, b))
+			edge_count[edge] = int(edge_count.get(edge, 0)) + 1
+	var open_edges: Array = []
+	var open_vertices := {}
+	for edge: Vector2i in edge_count:
+		if edge_count[edge] == 1:
+			open_edges.append(edge)
+			open_vertices[edge.x] = true
+			open_vertices[edge.y] = true
+	var moved := {}
+	for v: int in open_vertices:
+		var part := roundi(colors[v].r * PART_ID_SCALE)
+		var best := JOINT_REACH
+		var target := Vector3.ZERO
+		for edge: Vector2i in open_edges:
+			if roundi(colors[edge.x].r * PART_ID_SCALE) <= part:
+				continue
+			var from := vertices[edge.x]
+			var along := vertices[edge.y] - from
+			var spot := from + along * clampf((vertices[v] - from).dot(along) / maxf(along.length_squared(), 1e-12), 0.0, 1.0)
+			if vertices[v].distance_to(spot) < best:
+				best = vertices[v].distance_to(spot)
+				target = spot
+		if best < JOINT_REACH:
+			moved[v] = target - vertices[v]
+	if moved.is_empty():
+		return
+	var cap_vertices: PackedVector3Array = caps.vertices
+	var cap_colors: PackedColorArray = caps.colors
+	for c in cap_vertices.size():
+		var part := roundi(cap_colors[c].r * PART_ID_SCALE)
+		var best := 0.01
+		var shift := Vector3.ZERO
+		for v: int in moved:
+			if roundi(colors[v].r * PART_ID_SCALE) == part and cap_vertices[c].distance_to(vertices[v]) < best:
+				best = cap_vertices[c].distance_to(vertices[v])
+				shift = moved[v]
+		cap_vertices[c] += shift
+	caps.vertices = cap_vertices
+	for v in vertices.size():
+		if moved.has(canonical[v]):
+			vertices[v] += moved[canonical[v]]
+	skin.vertices = vertices
 
 
 # Index lists of a coarser and a much coarser version of one part (about 50% and 25% of its

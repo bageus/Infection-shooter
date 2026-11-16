@@ -1,5 +1,5 @@
 extends SceneTree
-## Captures every enemy in the dark from the front, back and as a head close-up.
+## Captures every enemy in the dark from the front, back, head, shoulder, neck, hip and knee.
 ## usage: godot --path . -s tools/capture_enemy_glow.gd -- <output dir> [lit]
 const SCENES := {
 	"hunger": preload("res://game/features/infected/public/infected_hunger.tscn"),
@@ -59,7 +59,9 @@ func _actor(label: String, scene: PackedScene) -> void:
 	camera.make_current()
 	var top := Vector3(center.x, bounds.end.y - bounds.size.y * 0.12, center.z)
 	for view: Array in [["front", Vector3(0.15, 0.1, -1.0), center, 0.55], ["back", Vector3(-0.15, 0.1, 1.0), center, 0.55],
-			["head", Vector3(0.1, 0.0, -1.0), top, 0.38], ["shoulder", Vector3(-0.8, 0.3, 0.8), top, 0.6]]:
+			["head", Vector3(0.1, 0.0, -1.0), top, 0.38], ["shoulder", Vector3(-0.8, 0.3, 0.8), top, 0.6],
+			["neck", Vector3(0.1, 0.1, -1.0), _at(bounds, 0.86), 0.2], ["hip", Vector3(0.3, 0.1, -1.0), _at(bounds, 0.5), 0.25],
+			["knee", Vector3(0.3, 0.1, -1.0), _at(bounds, 0.27), 0.25]]:
 		camera.look_at_from_position(view[2] + (view[1] as Vector3).normalized() * span * view[3], view[2])
 		for frame in 3:
 			await process_frame
@@ -67,3 +69,8 @@ func _actor(label: String, scene: PackedScene) -> void:
 		root.get_texture().get_image().save_png(output.path_join("%s_%s.png" % [label, view[0]]))
 	stage.queue_free()
 	await process_frame
+
+
+# A point on the model's centre line at `fraction` of its height.
+func _at(bounds: AABB, fraction: float) -> Vector3:
+	return Vector3(bounds.get_center().x, bounds.position.y + bounds.size.y * fraction, bounds.get_center().z)
