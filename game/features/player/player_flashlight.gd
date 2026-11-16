@@ -10,11 +10,15 @@ const BARREL_TURN := Basis(Vector3.UP, -PI * 0.5)
 const ENERGY := 6.0
 ## The beam leans down a little so the floor ahead of the hero is lit, not only far walls.
 const PITCH_DOWN := 10.0
+const SWITCH_SOUND := preload("res://assets/audio/sfx/flashlight/switch_on_flashlight.ogg")
 const GLOW_SIZE := 0.45
+## Lens glare peak alpha: the bright spot at the lens was too strong at full.
+const GLOW_STRENGTH := 0.5
 var _model: Node3D
 var _light: SpotLight3D
 var _glow: MeshInstance3D
 var _on := false
+var _switch: AudioStreamPlayer
 
 
 func _ready() -> void:
@@ -35,6 +39,10 @@ func _ready() -> void:
 	_model.find_child("LightSocket", true, false).add_child(_light)
 	_glow = _make_glow()
 	_light.add_child(_glow)
+	# Same sound for on and off: one switch click.
+	_switch = AudioStreamPlayer.new()
+	_switch.stream = SWITCH_SOUND
+	add_child(_switch)
 
 
 ## Lens glare: a soft additive billboard just in front of the lens, seen when the beam faces the camera.
@@ -75,7 +83,7 @@ func _update_glow() -> void:
 		var beam := -_light.global_basis.z * Vector3(1, 0, 1)
 		facing = smoothstep(0.3, 0.9, beam.normalized().dot(to_camera.normalized()))
 	_glow.visible = facing > 0.0
-	(_glow.material_override as StandardMaterial3D).albedo_color.a = facing * _light.light_energy / ENERGY
+	(_glow.material_override as StandardMaterial3D).albedo_color.a = facing * _light.light_energy / ENERGY * GLOW_STRENGTH
 
 
 ## Clips the flashlight under the model's muzzle of the weapon now held.
@@ -90,6 +98,7 @@ func attach(muzzle: Node3D) -> void:
 func _process(delta: float) -> void:
 	if Input.is_action_just_pressed("flashlight"):
 		_on = not _on
+		_switch.play()
 	_light.light_energy = move_toward(_light.light_energy, ENERGY if _on else 0.0, delta * 4.0)
 	# A gun the clip has put away is scaled to nothing, and its flashlight with it.
 	_light.visible = _model.is_inside_tree() and _model.visible and absf(_model.global_basis.determinant()) > 0.001

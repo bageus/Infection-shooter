@@ -10,6 +10,8 @@ const FLOOR_Y := 0.0135 + 0.003
 const MAX_BASE_HEIGHT := 0.15
 const MIN_FOOTPRINT := 0.3
 const MARGIN := 0.12
+## Round furniture (round tables, pots) gets an elliptic shadow with a thinner margin, so it is not a square.
+const PLANT_MARGIN := 0.04
 ## Lifted this high above its resting floor the shadow is gone.
 const FADE_HEIGHT := 0.6
 
@@ -21,6 +23,7 @@ var _local_bounds := AABB()
 var _floor_y := FLOOR_Y
 var _shadow: MeshInstance3D
 var _visual: Node3D
+var _margin := MARGIN
 
 
 ## Measures the prop's meshes; false when the prop is not a floor-standing
@@ -42,6 +45,11 @@ func configure(prop: Node3D, visual: Node3D, meshes: Array[MeshInstance3D]) -> b
 	if world.position.y > FLOOR_Y + MAX_BASE_HEIGHT or minf(world.size.x, world.size.z) < MIN_FOOTPRINT:
 		return false
 	_floor_y = maxf(world.position.y, FLOOR_Y - 0.003) + 0.003
+	var file := str(prop.get("model_path")).get_file()
+	var round_shape := "circular" in file or "round" in file or "plant" in file
+	if "plant" in file:
+		_margin = PLANT_MARGIN
+	_material_setup_round(round_shape)
 	_shadow = MeshInstance3D.new()
 	_shadow.name = "ContactShadowQuad"
 	_shadow.set_meta("planning_bounds_excluded", true)
@@ -78,7 +86,7 @@ func _update() -> void:
 		low = low.min(flat)
 		high = high.max(flat)
 		bottom = minf(bottom, point.y)
-	var half := (high - low) * 0.5 + Vector2(MARGIN, MARGIN)
+	var half := (high - low) * 0.5 + Vector2(_margin, _margin)
 	var middle := (high + low) * 0.5
 	var center := right * middle.x + ahead * middle.y
 	center.y = _floor_y
@@ -86,7 +94,7 @@ func _update() -> void:
 	var shadow_basis := Basis(right * half.x * 2.0, ahead * half.y * 2.0, Vector3.UP)
 	_shadow.global_transform = Transform3D(shadow_basis, center)
 	_material.set_shader_parameter(&"half_size", half)
-	_material.set_shader_parameter(&"margin", MARGIN)
+	_material.set_shader_parameter(&"margin", _margin)
 	var lift := maxf(bottom - _floor_y, 0.0)
 	_material.set_shader_parameter(&"presence", 1.0 - smoothstep(0.05, FADE_HEIGHT, lift))
 	_shadow.visible = _visual.is_visible_in_tree()
@@ -97,6 +105,10 @@ static func _shared_quad() -> QuadMesh:
 		_quad = QuadMesh.new()
 		_quad.size = Vector2.ONE
 	return _quad
+
+
+func _material_setup_round(round_shape: bool) -> void:
+	_local_material().set_shader_parameter(&"round_shape", 1.0 if round_shape else 0.0)
 
 
 func _local_material() -> ShaderMaterial:

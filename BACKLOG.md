@@ -12,6 +12,7 @@ updated: 2026-09-18
 | ID | Phase | Outcome | Status |
 |---|---:|---|---|
 | T004 | 1 | Blood sprays onto walls and objects beside a hit | ACTIVE / IN_PROGRESS |
+| T005 | 1 | Flashlight: lens glare softer, flashlight switch sound (pending file from owner), quieter low-health breathing (-30%), plant and round-table contact shadows not square | Parallel to T004 by owner decision (2026-11-16); T004 untouched |
 
 ## Planned
 
