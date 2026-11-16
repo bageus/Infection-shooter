@@ -31,6 +31,7 @@ func _run() -> void:
 	await _test_standing_collapses()
 	await _test_wall_stops_body()
 	await _test_body_rests_on_table()
+	await _test_corpses_do_not_pile()
 	await _test_corpse_sinks_and_hides()
 	await _test_kept_corpse_stays_visible()
 	await _test_planner_corpse_survives_overlap()
@@ -46,11 +47,24 @@ func _test_charging_falls_forward() -> void:
 	enemy.call("take_projectile_damage", 1000.0, start, Vector3(0, 0, 1), "PISTOL")
 	_expect(enemy.get("_ragdoll") != null, "A kill starts a ragdoll.")
 	_expect(_clip(enemy) != "DeathForward" and _clip(enemy) != "Death", "No death clip plays (%s)." % _clip(enemy))
-	await create_timer(2.0).timeout
+	await _settle(2.0)
 	_expect(_bone(enemy, "Head").z < start.z - 0.5, "Running momentum carries the head forward (%s)." % _bone(enemy, "Head"))
 	_expect(_bone(enemy, "Head").y < 0.5, "The body lies on the floor (head %.2f m)." % _bone(enemy, "Head").y)
 	_expect(_stretch(enemy) < 0.2, "The ragdoll joints keep their length (%.2f)." % _stretch(enemy))
 	enemy.queue_free()
+	await process_frame
+
+
+func _test_corpses_do_not_pile() -> void:
+	var first := await _spawn(Vector3(60, 1, 0))
+	var second := await _spawn(Vector3(60.3, 1, 0))
+	for enemy: CharacterBody3D in [first, second]:
+		enemy.call("take_projectile_damage", 1000.0, enemy.global_position, Vector3(0, 0, 1), "PISTOL")
+	await create_timer(2.5).timeout
+	var apart := (_bone(first, "Hips") - _bone(second, "Hips")).length()
+	_expect(apart > 0.7, "Two bodies killed side by side do not end up on top of each other (%.2f m apart)." % apart)
+	first.queue_free()
+	second.queue_free()
 	await process_frame
 
 
@@ -62,7 +76,7 @@ func _test_close_shotgun_throws_back() -> void:
 	enemy.call("set_target", target)
 	var start := enemy.global_position
 	enemy.call("take_projectile_damage", 1000.0, start, Vector3(0, 0, 1), "SHOTGUN")
-	await create_timer(2.0).timeout
+	await _settle(2.0)
 	_expect(_bone(enemy, "Hips").z > start.z + 0.8, "The shotgun throws the body back from the shooter (%s)." % _bone(enemy, "Hips"))
 	_expect(_stretch(enemy) < 0.2, "The thrown ragdoll keeps its joints (%.2f)." % _stretch(enemy))
 	enemy.queue_free()
@@ -74,7 +88,7 @@ func _test_grenade_throws_away() -> void:
 	var enemy := await _spawn(Vector3(20, 1, 0))
 	var start := enemy.global_position
 	enemy.call("take_blast_damage", 140.0, start + Vector3(-1.5, -0.8, 0))
-	await create_timer(2.0).timeout
+	await _settle(2.0)
 	var travel := _bone(enemy, "Hips") - start
 	_expect(travel.x > 0.8 and absf(travel.z) < 1.0, "The grenade throws the body away from the explosion (%s)." % travel)
 	enemy.queue_free()
@@ -85,7 +99,7 @@ func _test_standing_collapses() -> void:
 	var enemy := await _spawn(Vector3(25, 1, 0))
 	var start := enemy.global_position
 	enemy.call("take_projectile_damage", 1000.0, start, Vector3(0, 0, 1), "PISTOL")
-	await create_timer(2.0).timeout
+	await _settle(2.0)
 	_expect(_bone(enemy, "Head").y < 0.8, "A standing infected collapses to the floor (head %.2f m)." % _bone(enemy, "Head").y)
 	_expect(Vector2(_bone(enemy, "Hips").x - start.x, _bone(enemy, "Hips").z - start.z).length() < 1.5, "It stays where it stood.")
 	enemy.queue_free()
@@ -97,7 +111,7 @@ func _test_wall_stops_body() -> void:
 	var enemy := await _spawn(Vector3(30, 1, 0))
 	var start := enemy.global_position
 	enemy.call("take_blast_damage", 155.0, start + Vector3(0, -0.8, -0.5))
-	await create_timer(2.0).timeout
+	await _settle(2.0)
 	# A blast may tear limbs off, so every remaining volume is checked.
 	for bone: PhysicalBone3D in enemy.find_children("Physics_*", "PhysicalBone3D", true, false):
 		_expect(bone.global_position.z < 1.0, "A wall stops the thrown %s (%.2f)." % [bone.name, bone.global_position.z])
@@ -112,7 +126,7 @@ func _test_body_rests_on_table() -> void:
 	var enemy := await _spawn(Vector3(40, 1, 0))
 	enemy.velocity = Vector3(0, 0, -5.4)
 	enemy.call("take_projectile_damage", 1000.0, enemy.global_position, Vector3(0, 0, 1), "PISTOL")
-	await create_timer(2.5).timeout
+	await _settle(2.5)
 	var chest := _bone(enemy, "Head")
 	_expect(chest.y > 0.6 or _bone(enemy, "Hips").y > 0.6, "The body is caught by the table, not under it (head %.2f, hips %.2f)." % [chest.y, _bone(enemy, "Hips").y])
 	enemy.queue_free()
@@ -125,7 +139,7 @@ func _test_kept_corpse_stays_visible() -> void:
 	var enemy := await _spawn(Vector3(52, 1, 0))
 	enemy.set("death_linger_seconds", 0.3)
 	enemy.call("take_projectile_damage", 1000.0, enemy.global_position, Vector3(0, 0, 1), "PISTOL")
-	await create_timer(3.0).timeout
+	await _settle(3.0)
 	_expect((enemy.get("body_visual") as Node3D).visible, "With keep_corpses the body stays visible after its linger.")
 	_expect(CORPSE_BUDGET.count() >= 1, "With keep_corpses the body is counted by the budget.")
 	CORPSE_BUDGET.keep = false
@@ -137,7 +151,7 @@ func _test_corpse_sinks_and_hides() -> void:
 	var enemy := await _spawn(Vector3(50, 1, 0))
 	enemy.set("death_linger_seconds", 0.3)
 	enemy.call("take_projectile_damage", 1000.0, enemy.global_position, Vector3(0, 0, 1), "PISTOL")
-	await create_timer(3.0).timeout
+	await _settle(3.0)
 	_expect(not (enemy.get("body_visual") as Node3D).visible, "The body is hidden after it sank.")
 	enemy.queue_free()
 	await process_frame
@@ -147,10 +161,10 @@ func _test_corpse_sinks_and_hides() -> void:
 func _test_planner_corpse_survives_overlap() -> void:
 	var first := _place_corpse(Vector3(60, 0.3, 0))
 	var second := _place_corpse(Vector3(60, 0.3, 0.05))
-	await create_timer(0.5).timeout
+	await _settle(0.5)
 	first.call("set_runtime_physics", true)
 	second.call("set_runtime_physics", true)
-	await create_timer(3.0).timeout
+	await _settle(3.0)
 	for corpse in [first, second]:
 		var hips := _bone(corpse, "Hips")
 		_expect(Vector2(hips.x - 60.0, hips.z).length() < 4.0 and hips.y < 3.0, "Overlapping corpses stay put (%s)." % hips)
@@ -163,11 +177,11 @@ func _test_planner_corpse_survives_overlap() -> void:
 func _test_stretched_ragdoll_is_recovered() -> void:
 	var corpse := _place_corpse(Vector3(70, 0.3, 0))
 	corpse.call("set_runtime_physics", true)
-	await create_timer(1.0).timeout
+	await _settle(1.0)
 	var guard: Node = corpse.get("parts").get("skeleton").get_node("CorpseGuard")
 	var bones: Array = guard.get("bones")
 	bones[bones.size() - 1].global_position += Vector3(0, 4, 0)
-	await create_timer(0.6).timeout
+	await _settle(0.6)
 	_expect(_stretch(corpse) < 0.2, "A stretched ragdoll is recovered (%.2f)." % _stretch(corpse))
 	corpse.queue_free()
 	await process_frame
@@ -229,6 +243,14 @@ func _add_box(at: Vector3, size: Vector3) -> StaticBody3D:
 	stage.add_child(body)
 	body.position = at
 	return body
+
+
+## Waits for the given amount of physics time, so a loaded machine cannot shorten the ragdoll's motion.
+func _settle(seconds: float) -> void:
+	var elapsed := 0.0
+	while elapsed < seconds:
+		await physics_frame
+		elapsed += 1.0 / Engine.physics_ticks_per_second
 
 
 func _expect(condition: bool, message: String) -> void:

@@ -13,6 +13,7 @@ height = 0.6
 script = ExtResource("1")
 bullet_scene = ExtResource("2")
 casing_scene = ExtResource("casing_model")
+casing_size_multiplier = 0.8
 weapon_name="UZI"
 shot_noise_radius = 22.0
 fire_mode="auto"

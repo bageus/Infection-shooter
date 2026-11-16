@@ -11,15 +11,15 @@ const GUARD := preload("res://game/features/infected/corpse_guard.gd")
 ## Joint limits in degrees {swing, twist} by bone-name suffix: a body bends like a person, not like a sack.
 ## Knees and elbows fold one way and barely twist; thighs stay near the hips so legs do not splay or corkscrew.
 const JOINT_LIMITS := {
-	"Thigh": [35.0, 8.0], "Shin": [75.0, 4.0], "Foot": [30.0, 5.0], "Toe": [20.0, 5.0],
+	"Thigh": [30.0, 8.0], "Shin": [40.0, 4.0], "Foot": [30.0, 5.0], "Toe": [20.0, 5.0],
 	"UpperArm": [70.0, 20.0], "Forearm": [75.0, 6.0], "Hand": [40.0, 10.0], "Shoulder": [20.0, 5.0],
-	"Spine": [20.0, 10.0], "Chest": [20.0, 10.0], "Neck": [35.0, 15.0], "Head": [35.0, 15.0],
+	"Spine": [15.0, 10.0], "Chest": [15.0, 10.0], "Neck": [35.0, 15.0], "Head": [35.0, 15.0],
 }
 const DEFAULT_LIMIT := [45.0, 25.0]
 ## Topple spin of the upper body in rad/s, share of speed the legs keep, and gravity of a falling body.
-const TOPPLE_SPIN := 2.2
-const LEG_DRAG := 0.5
-const DEATH_GRAVITY := 1.4
+const TOPPLE_SPIN := 3.0
+const LEG_DRAG := 1.0
+const DEATH_GRAVITY := 1.0
 
 
 func setup(parts: Node) -> void:

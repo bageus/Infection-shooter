@@ -10,6 +10,8 @@ const LEAN_SPINE := {"Spine": 0.4, "Spine1": 0.3, "Spine2": 0.3}
 const LEAN_START_SPEED := 1.8
 const LEAN_FULL_SPEED := 4.0
 const LEAN_FOLLOW := 8.0
+## Forward nod of the torso at the hardest footfall, degrees.
+const FOOTFALL_NOD_DEGREES := 3.5
 ## Degrees of muzzle-rise pitch per bone at full kick, listed from the spine outwards (parents first).
 const RECOIL := {
 	"PISTOL": {"RightForeArm": 5.0, "LeftForeArm": 4.0, "RightHand": 10.0, "LeftHand": 8.0},
@@ -54,6 +56,16 @@ func _apply_lean(skeleton: Skeleton3D, delta: float) -> void:
 	for bone_name in ["LeftShoulder", "RightShoulder"]:
 		_pitch(skeleton, bone_name, axis, -angle)
 	_pitch(skeleton, "Neck", axis, -angle * 0.5)
+	_apply_footfall(skeleton, axis)
+
+
+## Each footfall nods the torso forward a little and it springs back (the weight of the step); reuses the camera's step envelope.
+func _apply_footfall(skeleton: Skeleton3D, axis: Vector3) -> void:
+	var recoil: Object = mount.get("recoil")
+	var dip := float(recoil.get("_step_dip")) if recoil != null else 0.0
+	var nod := -deg_to_rad(FOOTFALL_NOD_DEGREES) * dip * dip * _lean
+	_pitch(skeleton, "Spine1", axis, nod)
+	_pitch(skeleton, "Neck", axis, -nod * 0.6)
 
 
 func _apply_recoil(skeleton: Skeleton3D) -> void:
