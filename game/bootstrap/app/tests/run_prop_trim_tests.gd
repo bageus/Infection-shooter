@@ -29,6 +29,9 @@ func _initialize() -> void:
 	_check(not TRIM.drops({}, MOUSE, true), "The planner always shows everything")
 	_check(not TRIM.drops({}, "res://game/features/pickups/public/medkit_pickup.tscn", false), "Pickups stay")
 	_check(not TRIM.drops({}, ENV + "99/unknown_model.glb", false), "A model missing from the size table stays")
+	QUALITY.set_level(QUALITY.LOW)
+	for hit_model in ["09/bin_bucket_mop/09_bucket.glb", "02/02_kittle_destructible.glb", "09/glass_mug/09_glass_water_bottle_clear_250ml.glb", "09/glass_mug/09_plastic_water_bottle_clear_330ml.glb"]:
+		_check(not TRIM.drops({}, ENV + hit_model, false), "Low keeps a hit-reactive item: " + hit_model)
 	var node := Node3D.new()
 	root.add_child(node)
 	var body := StaticBody3D.new()

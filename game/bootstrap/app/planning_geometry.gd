@@ -320,7 +320,12 @@ func _snap_position_for(node: Node3D, value: Vector3) -> Vector3:
 		return value
 	else:
 		var support_y = _support_height_at(node, base)
-		if value.y > 0.01:
+		# Probe under the snapped spot: the cursor height is for the spot it was aimed at, so an item
+		# snapped past a table's edge must drop to the floor instead of floating over the edge.
+		var probed := _surface_height_below(node, base)
+		if probed > -INF:
+			support_y = maxf(support_y, probed)
+		elif value.y > 0.01:
 			support_y = maxf(support_y, value.y)
 		base.y = SURFACE_PLACEMENT.ground_height(node, source_aabb, support_y)
 	if source_aabb.size.length_squared() <= 0.0001:
@@ -354,6 +359,19 @@ func _support_height_at(node: Node3D, base: Vector3) -> float:
 		if absf(base.x - center.x) <= half.x + node_half.x * 0.25 and absf(base.z - center.z) <= half.y + node_half.y * 0.25:
 			best_height = maxf(best_height, pad_world.position.y + pad_world.size.y)
 	return best_height
+
+
+## Top of the nearest solid surface straight below `base`, ignoring the node's own bodies; -INF when nothing is there.
+func _surface_height_below(node: Node3D, base: Vector3) -> float:
+	if not node.is_inside_tree():
+		return -INF
+	# Fixed span from above the tallest furniture to below the floor: the snapped height may be stale.
+	var query := PhysicsRayQueryParameters3D.create(Vector3(base.x, 2.5, base.z), Vector3(base.x, -0.5, base.z))
+	for body: Node in node.find_children("*", "CollisionObject3D", true, false) + [node]:
+		if body is CollisionObject3D:
+			query.exclude.append((body as CollisionObject3D).get_rid())
+	var hit := node.get_world_3d().direct_space_state.intersect_ray(query)
+	return (hit["position"] as Vector3).y if not hit.is_empty() else -INF
 
 
 func _snap_neighbors(node: Node3D) -> Array[Dictionary]:

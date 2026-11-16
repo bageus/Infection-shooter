@@ -10,6 +10,8 @@ const META := &"trim_size"
 const LAYERS := &"trim_layers"
 const SHADOW := &"trim_shadow"
 const ENVIRONMENT_DIR := "/models/objects/enviroments/"
+# Items that break, spark or get knocked around when hit: hiding them would make shots and kicks do nothing.
+const HIT_REACTIVE := ["09_bucket", "09_glass_water_bottle", "09_plastic_water_bottle", "02_kittle", "02_microwave", "09_stepladder"]
 static var _sizes: Dictionary = {}
 
 
@@ -25,6 +27,9 @@ static func size_of(record: Dictionary, scene_path: String) -> float:
 		return INF
 	if not str(record.get("object_id", "")).is_empty() or not str(record.get("desk_id", "")).is_empty():
 		return INF
+	for prefix in HIT_REACTIVE:
+		if scene_path.get_file().begins_with(prefix):
+			return INF
 	var size: float = float(_table().get(scene_path.get_file(), INF))
 	var scale := maxf(absf(float(record.get("scale_x", 1.0))), maxf(absf(float(record.get("scale_y", 1.0))), absf(float(record.get("scale_z", 1.0)))))
 	# Cardboard boxes are 0.7 m but clutter the floor: they go with the Low setting too.

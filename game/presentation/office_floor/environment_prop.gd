@@ -296,6 +296,7 @@ func _add_contact_shadow(wall_mounted: bool) -> void:
 
 
 func take_projectile_hit_at_shape(damage: float, hit_position: Vector3, normal: Vector3, direction: Vector3, weapon: String, shape_index: int) -> bool:
+	if damage > 0.0 and "02_microwave" in model_path: SPARKS.spawn(self, hit_position) # Electronics: every shot sparks.
 	if shape_index >= 0:
 		var owner_id := shape_find_owner(shape_index)
 		var collision := shape_owner_get_owner(owner_id) as CollisionShape3D
@@ -325,6 +326,7 @@ func get_projectile_material(shape_index: int = -1) -> String:
 		if _damage.category != "tech" and mesh_index >= 0 and mesh_index < _shape_meshes.size() and is_instance_valid(_shape_meshes[mesh_index]) and GEOMETRY.is_glass_mesh(_shape_meshes[mesh_index]):
 			return "glass"
 	var group := model_path.get_file().substr(0, 2)
+	if model_path.get_file().begins_with("09_stepladder"): return "metal" # Group 09 is light; the ladder rings like steel.
 	if group == "01": return "concrete"
 	if group == "05": return "tech"
 	if group == "09" or group == "11": return "light"
