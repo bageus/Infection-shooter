@@ -27,7 +27,7 @@ var _trauma := 0.0
 var _blast_trauma := 0.0
 var _blast_push := Vector3.ZERO
 ## Each footfall presses the camera down a little (the body's weight), then it springs back.
-const STEP_DIP_METRES := 0.07
+const STEP_DIP_METRES := 0.025
 const STEP_DIP_DECAY_PER_SECOND := 9.0
 var _step_dip := 0.0
 

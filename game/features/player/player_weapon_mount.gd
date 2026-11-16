@@ -81,6 +81,19 @@ func sync_weapon(weapon: Node3D) -> void:
 		return
 	var barrel := Transform3D(at.basis.orthonormalized() * BARREL_TURN, at.origin)
 	weapon.global_transform = barrel * muzzle.transform.affine_inverse()
+	_place_ejection_port(weapon, at)
+
+
+## Casings leave from the middle of the drawn gun (between muzzle and grip), to its right side.
+func _place_ejection_port(weapon: Node3D, muzzle_at: Transform3D) -> void:
+	var port := weapon.get_node_or_null("EjectionPort") as Node3D
+	var hand := skeleton.find_bone("RightHand")
+	var side := (-(muzzle_at.basis.orthonormalized() * BARREL_TURN).z).cross(Vector3.UP)
+	if port == null or hand < 0 or side.is_zero_approx():
+		return
+	side = side.normalized()
+	var middle := muzzle_at.origin.lerp(skeleton.global_transform * skeleton.get_bone_global_pose(hand).origin, 0.5)
+	port.global_transform = Transform3D(Basis(side, Vector3.UP, side.cross(Vector3.UP)), middle + side * 0.05)
 
 
 ## How far (radians of yaw) the gun drawn by the current clip points away from the body's front. The baked
