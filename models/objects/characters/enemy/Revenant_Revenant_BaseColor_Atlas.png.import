@@ -2,19 +2,19 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://b271e8ixusfso"
-path="res://.godot/imported/15_pallet_concrete_blocks_facility_Normal.png-8cd95209c5c192d80e34e84ee9f37f7b.ctex"
+uid="uid://cceeyyfos5tv5"
+path="res://.godot/imported/Revenant_Revenant_BaseColor_Atlas.png-9bb724bb6082df6f9186fe25815e1548.ctex"
 metadata={
 "vram_texture": false
 }
 generator_parameters={
-"md5": "678dd0fb37e5f93939f44740775264a9"
+"md5": "ac3e712c04894e420806523a1ecfa940"
 }
 
 [deps]
 
-source_file="res://models/objects/enviroments/15/15_pallet_concrete_blocks_facility_Normal.png"
-dest_files=["res://.godot/imported/15_pallet_concrete_blocks_facility_Normal.png-8cd95209c5c192d80e34e84ee9f37f7b.ctex"]
+source_file="res://models/objects/characters/enemy/Revenant_Revenant_BaseColor_Atlas.png"
+dest_files=["res://.godot/imported/Revenant_Revenant_BaseColor_Atlas.png-9bb724bb6082df6f9186fe25815e1548.ctex"]
 
 [params]
 

@@ -36,9 +36,15 @@ func _run() -> void:
 	driver.call("_process_skeletal", float(player.get("move_speed")))
 	_check(clips.current_animation.begins_with("Run_"), "Normal movement speed plays the run cycle (%s)" % clips.current_animation)
 	_check(clips.speed_scale > 1.0 and clips.speed_scale < 2.0, "The run cycle is sped up to the ground speed (x%.2f)" % clips.speed_scale)
+	(player.get_node("AimPivot") as Node3D).global_rotation = Vector3.ZERO
+	player.velocity = Vector3(1.0, 0.0, -1.0).normalized() * float(player.get("move_speed"))
+	var diagonal_clip: StringName = (player.get("_animation_selection") as RefCounted).call("select_clip")
+	var diagonal := body.find_child("DiagonalLegs", true, false)
+	_check(diagonal != null and String(diagonal.get("clip")).begins_with("Run_") and String(diagonal.get("clip")) != String(diagonal_clip) and absf(float(diagonal.get("weight")) - 0.5) < 0.05, "A diagonal run blends the legs half way toward the other axis (%s + %s)" % [diagonal_clip, diagonal.get("clip") if diagonal != null else "none"])
 	var light := player.find_child("Flashlight", true, false) as SpotLight3D
 	var muzzle := body.find_child("Pistol_Muzzle", true, false) as Node3D
 	_check(light != null and light.find_parent("Pistol_Muzzle") == muzzle, "The flashlight rides on the held gun's muzzle")
+	_check_lens_glow(light)
 	var weapon: Node3D = player.call("get_current_weapon")
 	var mount := player.get_node("WeaponMount")
 	mount.call("sync_weapon", weapon)
@@ -73,6 +79,11 @@ func _run() -> void:
 	var second := reload.track_get_key_value(track, reload.track_get_key_count(track) - 1) as Vector3
 	_check(first.distance_to(second) > 0.05 and is_equal_approx(first.y, second.y), "Two reloads drop the magazine to different spots on the floor")
 	_check((reload.track_get_key_value(track, 0) as Vector3).is_equal_approx(start), "The magazine still leaves the gun from the same place")
+	var slid := 0.0
+	for key in reload.track_get_key_count(track):
+		if reload.track_get_key_time(track, key) >= drop.land_time(reload):
+			slid = maxf(slid, (reload.track_get_key_value(track, key) as Vector3).distance_to(drop.rest(reload).origin))
+	_check(drop.land_time(reload) > 0.0 and slid < 0.001, "The landed magazine stays where it fell, it does not slide (%.3f m)" % slid)
 	await _check_aim_and_lean(player, body)
 	var standing_y := body.position.y
 	var seconds: float = player.call("play_death_fall")
@@ -119,3 +130,20 @@ func _check(condition: bool, message: String) -> void:
 	if not condition:
 		failures += 1
 		push_error("FAIL: " + message)
+
+
+func _check_lens_glow(light: SpotLight3D) -> void:
+	var rig := root.find_child("FlashlightRig", true, false)
+	var glow := light.get_node("LensGlow") as MeshInstance3D
+	var camera := Camera3D.new()
+	root.add_child(camera)
+	camera.make_current()
+	light.visible = true
+	light.light_energy = float(rig.get("ENERGY"))
+	camera.global_position = light.global_position - light.global_basis.z * 3.0
+	rig.call("_update_glow")
+	var facing := (glow.material_override as StandardMaterial3D).albedo_color.a
+	camera.global_position = light.global_position + light.global_basis.z * 3.0
+	rig.call("_update_glow")
+	_check(facing > 0.9 and not glow.visible, "The lit lens glows toward a camera it faces, not from behind (%.2f)" % facing)
+	camera.queue_free()

@@ -7,6 +7,7 @@
 [node name="MetalDoor" type="Node3D" groups=["camera_occluder"]]
 script = ExtResource("2_collision")
 use_simple_collision = false
+walkable_sill_height = 0.16
 exclude_name_tokens = PackedStringArray("doorpivot", "doorhandle", "doorleaf", "door_leaf")
 
 [node name="Visual" parent="." instance=ExtResource("1_model")]
