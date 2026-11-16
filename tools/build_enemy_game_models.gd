@@ -410,7 +410,8 @@ static func _cluster(arrays: Array, indices: PackedInt32Array, target: int) -> P
 	return result
 
 
-# Screen-size thresholds (edge_length) of the two LOD levels, as the old baked meshes used them.
+# LOD keys are world-space simplification errors: Godot switches at roughly key * 900 m (720p). The old 1.2 / 1.8
+# never switched, so crowds always drew the full 50-70k-triangle meshes; 0.006 / 0.012 switch near 6 m and 12 m.
 static func _lods(surface: Dictionary, index: int) -> Dictionary:
 	var full: PackedInt32Array = surface.indices
 	var near: PackedInt32Array = surface.lod_near
@@ -421,9 +422,9 @@ static func _lods(surface: Dictionary, index: int) -> Dictionary:
 		far = _whole_lod(surface, near, near.size() / 6)
 	var result := {}
 	if near.size() < full.size():
-		result[1.2 if index == 0 else 0.13] = near
+		result[0.006 if index == 0 else 0.13] = near
 	if far.size() < near.size():
-		result[1.8 if index == 0 else 0.2] = far
+		result[0.012 if index == 0 else 0.2] = far
 	return result
 
 
