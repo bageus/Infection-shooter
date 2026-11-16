@@ -19,15 +19,21 @@ static func create_mask() -> Image:
 ## Paints one wound. `surface` holds "vertices" (rest space), "uvs" and "indices"
 ## as built by body_part_mesh.gd. Returns true when any texel changed.
 static func paint(image: Image, surface: Dictionary, center: Vector3, radius: float) -> bool:
+	var tris := candidates(surface, center, radius)
+	return paint_triangles(image, surface, tris, 0, tris.size(), center, radius)
+
+
+## Indices (into surface.indices, multiples of 3) of the triangles the wound can reach.
+static func candidates(surface: Dictionary, center: Vector3, radius: float) -> PackedInt32Array:
+	var result := PackedInt32Array()
 	var vertices: PackedVector3Array = surface.vertices
 	var uvs: PackedVector2Array = surface.uvs
 	var indices: PackedInt32Array = surface.indices
 	if radius <= 0.0 or uvs.size() != vertices.size() or indices.size() < 3:
-		return false
+		return result
 	# The wound reaches r sideways, 2.9 r down (blood runs) and 0.7 r up; see _mask_at.
 	var box_low := center - Vector3(radius, radius * 2.9, radius)
 	var box_high := center + Vector3(radius, radius * 0.7, radius)
-	var changed := false
 	var grid := _grid(surface)
 	var seen := {}
 	var low := Vector3i(floor_vec(box_low / CELL_SIZE))
@@ -39,13 +45,24 @@ static func paint(image: Image, surface: Dictionary, center: Vector3, radius: fl
 					if seen.has(tri):
 						continue
 					seen[tri] = true
-					var ia := indices[tri]
-					var ib := indices[tri + 1]
-					var ic := indices[tri + 2]
-					if not _near(vertices[ia], vertices[ib], vertices[ic], box_low, box_high):
-						continue
-					if _paint_triangle(image, vertices[ia], vertices[ib], vertices[ic], uvs[ia], uvs[ib], uvs[ic], center, radius):
-						changed = true
+					if _near(vertices[indices[tri]], vertices[indices[tri + 1]], vertices[indices[tri + 2]], box_low, box_high):
+						result.append(tri)
+	return result
+
+
+## Paints tris[from..to): lets a caller spread one wound over several frames.
+static func paint_triangles(image: Image, surface: Dictionary, tris: PackedInt32Array, from: int, to: int, center: Vector3, radius: float) -> bool:
+	var vertices: PackedVector3Array = surface.vertices
+	var uvs: PackedVector2Array = surface.uvs
+	var indices: PackedInt32Array = surface.indices
+	var changed := false
+	for at in range(from, to):
+		var tri := tris[at]
+		var ia := indices[tri]
+		var ib := indices[tri + 1]
+		var ic := indices[tri + 2]
+		if _paint_triangle(image, vertices[ia], vertices[ib], vertices[ic], uvs[ia], uvs[ib], uvs[ic], center, radius):
+			changed = true
 	return changed
 
 
