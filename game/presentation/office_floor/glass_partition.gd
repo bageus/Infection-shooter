@@ -3,6 +3,7 @@ const SFX := preload("res://game/core/audio/public/sound_events.gd")
 
 const DAMAGE = preload("res://game/presentation/office_floor/environment_damage.gd")
 const CRACKS = preload("res://game/presentation/office_floor/glass_crack_marks.gd")
+const TRACE := preload("res://game/core/vfx/public/decal_trace.gd")
 const FRESNEL = preload("res://game/presentation/office_floor/glass_fresnel_material.gd")
 
 @export var max_health := 28.0
@@ -100,8 +101,10 @@ func _collect_blinds(node: Node) -> void:
 func take_projectile_hit(_damage: float, hit_position: Vector3, hit_normal: Vector3, _direction: Vector3, _weapon_name: String) -> bool:
 	if unbreakable:
 		# Bulletproof: every hit leaves a permanent chip, and the round stops here.
+		var started := Time.get_ticks_usec()
 		var mark_size := _glass_mark_size(hit_position)
 		CRACKS.spawn(self, hit_position, hit_normal, mark_size if mark_size >= 0.12 else 0.4, true)
+		TRACE.timed("unbreakable pane crack", started, 2.0)
 		return true
 	if _broken:
 		return false

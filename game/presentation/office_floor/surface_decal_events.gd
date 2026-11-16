@@ -3,6 +3,7 @@ extends RefCounted
 const GLASS_ATLAS := preload("res://game/core/vfx/public/surface_atlases.gd")
 const STAMP := preload("res://game/core/vfx/public/surface_stamp.gd")
 const RECEIVERS := preload("res://game/presentation/office_floor/receiver_decal_bake.gd")
+const TRACE := preload("res://game/core/vfx/public/decal_trace.gd")
 const SETTINGS := preload("res://game/presentation/office_floor/public/surface_decal_config.gd")
 const BIOMASS_AUDIO := preload("res://game/presentation/office_floor/biomass_impact_audio.gd")
 var receivers := RECEIVERS.new()
@@ -32,7 +33,9 @@ func hit(collider: Node3D, point: Vector3, normal: Vector3, weapon: String, anch
 		if weapon == "GRENADE":
 			_floor_stamp(Vector2(local.x, local.z), "floor_scuff", randi_range(0, 15), randf_range(0.35, 0.7))
 		return true
-	if not is_instance_valid(anchor): return false
+	if not is_instance_valid(anchor):
+		if _is_architecture(collider): TRACE.drop("wall hit with no visual anchor (collider %s)" % collider.name)
+		return false
 	# Window frames are glass-only: a hit there never gets plaster or a bullet hole.
 	if _is_window_frame(collider): return glass_hit(anchor, point, normal)
 	# A wall's glass insert can be hit through its solid collider: the ray still lands on the glass mesh, so it gets cracks only.
@@ -95,6 +98,7 @@ func _stamp(anchor: MeshInstance3D, point: Vector3, normal: Vector3, kind: Strin
 	var config: Dictionary = settings["glass" if glass else kind]
 	var center: Vector2 = GLASS_ATLAS.GLASS_CENTERS[frame] if kind == "glass_impact" else Vector2(0.5, 0.5)
 	var ok := receivers.stamp(anchor, point, normal, kind, frame, size * float(config.size), float(config.opacity), turns, glass, center)
+	if not ok and kind.begins_with("wall"): TRACE.drop("%s not queued on %s" % [kind, anchor.name])
 	if ok: floor_view.set_process(true)
 	return ok
 
