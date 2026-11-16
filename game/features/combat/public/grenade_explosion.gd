@@ -3,6 +3,7 @@ const SURFACE_ATLASES := preload("res://game/core/vfx/public/surface_atlases.gd"
 const TRACE := preload("res://game/features/combat/public/explosion_trace.gd")
 
 const RADIUS := 4.0
+const THROW_SPEED := 3.5 # m/s at full blast strength for intact furniture
 const OBJECT_DAMAGE := 380.0 # Full-strength hit on a prop; scaled by distance falloff and power.
 const CREATURE_DAMAGE := 155.0
 const MOUNT_CLEARANCE := 0.35
@@ -126,7 +127,12 @@ static func hit_object(collider: Object, shape: int, location: Vector3, directio
 
 static func push_body(collider: Object, direction: Vector3, factor: float) -> void:
 	if collider is RigidBody3D and not (collider as RigidBody3D).freeze:
-		(collider as RigidBody3D).apply_central_impulse(direction * (2.0 + 5.0 * factor))
+		var body := collider as RigidBody3D
+		var impulse := 2.0 + 5.0 * factor
+		# Catalogued furniture: a flat impulse barely moves a 20 kg table, so give it a real throw speed.
+		if collider.get("weight_kg") != null:
+			impulse = maxf(impulse, THROW_SPEED * factor * body.mass)
+		body.apply_central_impulse(direction * impulse)
 
 
 ## Radial blast marks on the structure around a point; grenades and extinguisher bursts share it.

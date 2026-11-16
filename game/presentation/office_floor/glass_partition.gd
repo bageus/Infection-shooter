@@ -99,10 +99,10 @@ func _collect_blinds(node: Node) -> void:
 
 func take_projectile_hit(_damage: float, hit_position: Vector3, hit_normal: Vector3, _direction: Vector3, _weapon_name: String) -> bool:
 	if unbreakable:
+		# Bulletproof: every hit leaves a permanent chip, and the round stops here.
 		var mark_size := _glass_mark_size(hit_position)
-		if mark_size >= 0.08:
-			CRACKS.spawn(self, hit_position, hit_normal, mark_size)
-		return true # bulletproof: the round stops here
+		CRACKS.spawn(self, hit_position, hit_normal, mark_size if mark_size >= 0.12 else 0.4, true)
+		return true
 	if _broken:
 		return false
 	# Bullets crack the pane first; a blast or the hit after the last crack

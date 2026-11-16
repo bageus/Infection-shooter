@@ -88,8 +88,9 @@ func _ready() -> void:
 		_surface.friction = 0.7
 		_surface.bounce = 0.02
 	physics_material_override = _surface
-	linear_damp = 0.35
-	angular_damp = 0.9
+	# Heavier damping: blast-flung pieces used to keep rolling for ~10 s before they came to rest.
+	linear_damp = 1.2
+	angular_damp = 2.5
 	can_sleep = true
 	_ignore_characters()
 	var watcher := get_node_or_null("ImpactSound")
@@ -97,8 +98,8 @@ func _ready() -> void:
 		IMPACT_SOUND.watch(self, -6.0, &"fall_debris")
 	else:
 		watcher.call("reset_fragment")
-	# Only kickable pieces poll for the player; all others cost no script time.
-	set_physics_process(kickable)
+	# Every piece is pushed aside when the hero walks into it, so none block the way through.
+	set_physics_process(true)
 	add_to_group(GROUP)
 	add_to_group(CONTACTLESS_GROUP)
 	_expiry = create_tween()

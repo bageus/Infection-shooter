@@ -3,7 +3,8 @@ extends RefCounted
 const ATLAS := preload("res://game/core/vfx/public/surface_atlases.gd")
 
 
-static func spawn(pane: StaticBody3D, point: Vector3, normal: Vector3, max_size: float = 0.65) -> MeshInstance3D:
+# permanent: kept outside the impact pool's mark budget, so it is never evicted or freed when hidden.
+static func spawn(pane: StaticBody3D, point: Vector3, normal: Vector3, max_size: float = 0.65, permanent: bool = false) -> MeshInstance3D:
 	var floor_view := pane.get("_debris_floor") as Node3D
 	if is_instance_valid(floor_view):
 		floor_view.call("bake_glass_hit", pane, point, normal)
@@ -31,7 +32,7 @@ static func spawn(pane: StaticBody3D, point: Vector3, normal: Vector3, max_size:
 	mark.global_position = point + outward * 0.0015
 	var up := Vector3.FORWARD if absf(outward.y) > 0.9 else Vector3.UP
 	mark.global_basis = Basis.looking_at(-outward, up) * Basis(Vector3.FORWARD, randf() * TAU)
-	if pool != null:
+	if pool != null and not permanent:
 		pool.call("register_mark", mark)
 	return mark
 
