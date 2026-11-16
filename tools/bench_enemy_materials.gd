@@ -68,8 +68,11 @@ func _physics_process(delta: float) -> bool:
 	for actor in actors:
 		actor._physics_process(delta)
 	samples.append(float(Time.get_ticks_usec() - started) / 1000.0)
-	if DisplayServer.get_name() != "headless" and ticks > 30:
+	if DisplayServer.get_name() != "headless" and ticks > 30 and ticks <= 40:
 		draw_samples.append(RenderingServer.get_rendering_info(RenderingServer.RENDERING_INFO_TOTAL_DRAW_CALLS_IN_FRAME))
+	# Physics timing needs all ticks; rendering is only needed for the draw-call window (software renderer costs ~0.2 s/frame in CI).
+	if DisplayServer.get_name() != "headless":
+		root.disable_3d = not (ticks >= 29 and ticks <= 40)
 	ticks += 1
 	if ticks == 239:
 		var total := 0.0
