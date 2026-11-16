@@ -57,13 +57,13 @@ func _write(msec: float, resources: int, nodes: int, tree: SceneTree) -> void:
 	var hidden := _culled(tree)
 	var plan := _plan_state(tree)
 	var rigid := _rigid(tree)
-	file.store_line("t=%.1fs frame=%.0fms process=%.1f physics=%.1f draw=%d objects=%d resources=%+d nodes=%+d (%d) static=%dMiB video=%dMiB enemies=%d culled=%d/%d merged=%d trim=%d/%d rigid=%d awake=%d frozen=%d monitored=%d probe=%d player=%s" % [
+	file.store_line("t=%.1fs frame=%.0fms process=%.1f physics=%.1f draw=%d objects=%d resources=%+d nodes=%+d (%d) static=%dMiB video=%dMiB enemies=%d culled=%d/%d merged=%d trim=%d/%d rigid=%d awake=%d frozen=%d monitored=%d awake_top=%s probe=%d player=%s" % [
 		Time.get_ticks_msec() / 1000.0, msec, Performance.get_monitor(Performance.TIME_PROCESS) * 1000.0,
 		Performance.get_monitor(Performance.TIME_PHYSICS_PROCESS) * 1000.0,
 		Performance.get_monitor(Performance.RENDER_TOTAL_DRAW_CALLS_IN_FRAME), Performance.get_monitor(Performance.RENDER_TOTAL_OBJECTS_IN_FRAME),
 		resources - _resources, nodes - _nodes, nodes, Performance.get_monitor(Performance.MEMORY_STATIC) / 1048576.0,
 		Performance.get_monitor(Performance.RENDER_VIDEO_MEM_USED) / 1048576.0,
-		(tree.get_nodes_in_group("infected_alive").size() if tree != null else 0), hidden[0], hidden[1], plan[0], plan[1], plan[2], rigid[0], rigid[1], rigid[2], rigid[3], probe_mode, at])
+		(tree.get_nodes_in_group("infected_alive").size() if tree != null else 0), hidden[0], hidden[1], plan[0], plan[1], plan[2], rigid[0], rigid[1], rigid[2], rigid[3], rigid[4], probe_mode, at])
 
 
 # Room-culled furniture: [hidden now, tagged in total].
@@ -83,22 +83,42 @@ func _plan_state(tree: SceneTree) -> Array:
 	return [merged, trimmed.filter(func(node): return not node.visible).size(), trimmed.size()]
 
 
-# Physics monitors read 0 with Jolt, so count the rigid bodies ourselves: [all, simulated and awake, frozen, reporting contacts].
+# Physics monitors read 0 with Jolt, so count the rigid bodies ourselves: [all, simulated and awake, frozen, reporting contacts, top awake kinds].
 # A frozen body never sleeps by the engine's flag but costs nothing, so it is counted apart. The tree is walked at most every 5 s.
 func _rigid(tree: SceneTree) -> Array:
 	if tree == null or tree.current_scene == null:
-		return [0, 0, 0, 0]
+		return [0, 0, 0, 0, ""]
 	if _rigid_bodies.is_empty() or Time.get_ticks_msec() - _rigid_at > 5000:
 		_rigid_at = Time.get_ticks_msec()
 		_rigid_bodies = tree.current_scene.find_children("*", "RigidBody3D", true, false)
 	var awake := 0
 	var frozen := 0
 	var monitored := 0
+	var kinds := {}
 	for body in _rigid_bodies:
 		if not is_instance_valid(body):
 			continue
 		var rigid := body as RigidBody3D
 		frozen += int(rigid.freeze)
 		monitored += int(rigid.contact_monitor)
-		awake += int(not rigid.freeze and not rigid.sleeping)
-	return [_rigid_bodies.size(), awake, frozen, monitored]
+		if not rigid.freeze and not rigid.sleeping:
+			awake += 1
+			var kind := _kind(rigid)
+			kinds[kind] = int(kinds.get(kind, 0)) + 1
+	return [_rigid_bodies.size(), awake, frozen, monitored, _top(kinds)]
+
+
+# What an awake body is: its model for a prop, else its script file, else its class.
+func _kind(body: RigidBody3D) -> String:
+	var model = body.get("model_path")
+	if model is String and not model.is_empty():
+		return model.get_file().get_basename()
+	var script := body.get_script() as Script
+	return script.resource_path.get_file().get_basename() if script != null else body.get_class()
+
+
+# The four most common awake kinds as "kind:count,..." so a body type that never sleeps shows up in the log.
+func _top(kinds: Dictionary) -> String:
+	var keys := kinds.keys()
+	keys.sort_custom(func(a, b) -> bool: return kinds[a] > kinds[b])
+	return ",".join(keys.slice(0, 4).map(func(key) -> String: return "%s:%d" % [key, kinds[key]]))
