@@ -10,8 +10,10 @@ const BARREL_TURN := Basis(Vector3.UP, -PI * 0.5)
 const ENERGY := 6.0
 ## The beam leans down a little so the floor ahead of the hero is lit, not only far walls.
 const PITCH_DOWN := 10.0
+const GLOW_SIZE := 0.45
 var _model: Node3D
 var _light: SpotLight3D
+var _glow: MeshInstance3D
 var _on := false
 
 
@@ -31,6 +33,49 @@ func _ready() -> void:
 	_light.shadow_enabled = false
 	_light.rotation_degrees.x = -PITCH_DOWN
 	_model.find_child("LightSocket", true, false).add_child(_light)
+	_glow = _make_glow()
+	_light.add_child(_glow)
+
+
+## Lens glare: a soft additive billboard just in front of the lens, seen when the beam faces the camera.
+func _make_glow() -> MeshInstance3D:
+	var halo := GradientTexture2D.new()
+	halo.fill = GradientTexture2D.FILL_RADIAL
+	halo.fill_from = Vector2(0.5, 0.5)
+	halo.fill_to = Vector2(0.5, 0.0)
+	halo.gradient = Gradient.new()
+	halo.gradient.set_color(0, Color(1, 1, 1, 1))
+	halo.gradient.set_color(1, Color(1, 1, 1, 0))
+	halo.gradient.add_point(0.15, Color(1, 1, 1, 0.9))
+	var material := StandardMaterial3D.new()
+	material.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
+	material.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
+	material.blend_mode = BaseMaterial3D.BLEND_MODE_ADD
+	material.billboard_mode = BaseMaterial3D.BILLBOARD_ENABLED
+	material.albedo_texture = halo
+	material.albedo_color = Color(_light.light_color, 0.0)
+	var quad := QuadMesh.new()
+	quad.size = Vector2.ONE * GLOW_SIZE
+	var glow := MeshInstance3D.new()
+	glow.name = "LensGlow"
+	glow.mesh = quad
+	glow.material_override = material
+	glow.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+	glow.position = Vector3(0, 0, -0.03)
+	return glow
+
+
+## Glare strength: full when the beam points at the camera, none from the side or behind.
+func _update_glow() -> void:
+	var camera := get_viewport().get_camera_3d() if is_inside_tree() else null
+	var facing := 0.0
+	if camera != null and _light.visible:
+		# Compared on the ground plane: the camera looks down from 45°, so "towards the camera" means the beam points down-screen.
+		var to_camera := (camera.global_position - _glow.global_position) * Vector3(1, 0, 1)
+		var beam := -_light.global_basis.z * Vector3(1, 0, 1)
+		facing = smoothstep(0.3, 0.9, beam.normalized().dot(to_camera.normalized()))
+	_glow.visible = facing > 0.0
+	(_glow.material_override as StandardMaterial3D).albedo_color.a = facing * _light.light_energy / ENERGY
 
 
 ## Clips the flashlight under the model's muzzle of the weapon now held.
@@ -48,3 +93,4 @@ func _process(delta: float) -> void:
 	_light.light_energy = move_toward(_light.light_energy, ENERGY if _on else 0.0, delta * 4.0)
 	# A gun the clip has put away is scaled to nothing, and its flashlight with it.
 	_light.visible = _model.is_inside_tree() and _model.visible and absf(_model.global_basis.determinant()) > 0.001
+	_update_glow()

@@ -44,6 +44,7 @@ func _run() -> void:
 	var light := player.find_child("Flashlight", true, false) as SpotLight3D
 	var muzzle := body.find_child("Pistol_Muzzle", true, false) as Node3D
 	_check(light != null and light.find_parent("Pistol_Muzzle") == muzzle, "The flashlight rides on the held gun's muzzle")
+	_check_lens_glow(light)
 	var weapon: Node3D = player.call("get_current_weapon")
 	var mount := player.get_node("WeaponMount")
 	mount.call("sync_weapon", weapon)
@@ -129,3 +130,20 @@ func _check(condition: bool, message: String) -> void:
 	if not condition:
 		failures += 1
 		push_error("FAIL: " + message)
+
+
+func _check_lens_glow(light: SpotLight3D) -> void:
+	var rig := root.find_child("FlashlightRig", true, false)
+	var glow := light.get_node("LensGlow") as MeshInstance3D
+	var camera := Camera3D.new()
+	root.add_child(camera)
+	camera.make_current()
+	light.visible = true
+	light.light_energy = float(rig.get("ENERGY"))
+	camera.global_position = light.global_position - light.global_basis.z * 3.0
+	rig.call("_update_glow")
+	var facing := (glow.material_override as StandardMaterial3D).albedo_color.a
+	camera.global_position = light.global_position + light.global_basis.z * 3.0
+	rig.call("_update_glow")
+	_check(facing > 0.9 and not glow.visible, "The lit lens glows toward a camera it faces, not from behind (%.2f)" % facing)
+	camera.queue_free()
