@@ -141,7 +141,8 @@ func _test_side_splatter() -> void:
 	await physics_frame
 	await physics_frame
 	# Each side ray is picked at random, so several hits (distinct sources) cover both columns.
-	for source in [601, 602, 603, 604, 605]:
+	# 5 sources left both columns uncovered about 1 run in 16; 24 make that negligible.
+	for source in range(601, 625):
 		effects.call("splatter_hit", Vector3(0, 1, 0), Vector3.BACK, "UZI", excluded, source)
 	await physics_frame
 	await physics_frame
