@@ -98,8 +98,8 @@ func _ready() -> void:
 		IMPACT_SOUND.watch(self, -6.0, &"fall_debris")
 	else:
 		watcher.call("reset_fragment")
-	# Only kickable pieces poll for the player; all others cost no script time.
-	set_physics_process(kickable)
+	# Every piece is pushed aside when the hero walks into it, so none block the way through.
+	set_physics_process(true)
 	add_to_group(GROUP)
 	add_to_group(CONTACTLESS_GROUP)
 	_expiry = create_tween()
