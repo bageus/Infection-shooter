@@ -487,7 +487,7 @@ func _update_move(delta:float)->void:
 		_roll_direction=d.normalized();_roll_remaining=roll_duration;_roll_pace=roll_speed;_roll_cooldown_remaining=roll_cooldown;_iframes_remaining=roll_iframes
 		mutation_effects.call("on_roll")
 		_play_sound(&"player_roll")
-		$AnimationDriver.call("play_dodge", _roll_direction, roll_duration)
+		$AnimationDriver.call("play_dodge", _roll_direction, roll_duration, StringName(ANIMATION_SELECTION.family_of(weapon_stance.weapon_index)))
 	else:
 		var walk_speed := move_speed * _walk_speed_multiplier
 		var target:=d*(sprint_speed if Input.is_action_pressed("sprint") and not bool(infection_runtime.call("is_control_lost")) else walk_speed) * float(mutation_effects.call("movement_multiplier"))
