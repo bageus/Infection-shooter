@@ -51,7 +51,7 @@ func _model() -> void:
 			_check(ENEMY_LESSONS.has(lesson), "Enemy lesson %s has its text and preview" % lesson)
 			continue
 		_check('\t\t"%s":' % lesson in director_source, "Lesson %s exists in the director" % lesson)
-	for lesson in ["move", "look", "roll", "sprint", "shoot", "reload", "mutation_scale", "active_skill", "passive_skill", "gas_mask", "antidote", "crates", "dna", "armor", "weapons", "one_way", "explore", "control_loss", "open_menu"]:
+	for lesson in ["move", "look", "roll", "sprint", "shoot", "reload", "mutation_scale", "active_skill", "passive_skill", "gas_mask", "antidote", "crates", "dna", "armor", "weapons", "one_way", "explore", "control_loss", "open_menu", "flashlight"]:
 		_check(lesson in MODEL.lesson_ids(), "Lesson %s is in the picker" % lesson)
 	var messy := MODEL.normalize({"type": "bogus", "delay": -5, "targets": ["a", "a", "", "b"], "trigger": {"kind": "xx", "value": 9.0}, "text": "hi"})
 	var rise := MODEL.make("find")

@@ -13,7 +13,7 @@ Before changing code or project structure, the agent MUST read:
 3. `GAME_SPEC.md` — product truth and sequential phase;
 4. `docs/WORKING_AGREEMENT.md` — user preferences and authority boundaries;
 5. `PROJECT_STATE.md` — compact current project truth;
-6. `ACTIVE_TASK.md` — the only active unit of work;
+6. `ACTIVE_TASK.md` — the only active unit of work. `ACTIVE_TASK.md` and `PROJECT_STATE.md` keep only the frontmatter and the newest ~100 journal lines; older journal entries live in `docs/archive/` and are read only on request;
 7. `BACKLOG.md` and `docs/GLOSSARY.md`;
 8. `docs/ARCHITECTURE.md` and `architecture/policy.json`;
 9. relevant `module.json` files and ADRs.

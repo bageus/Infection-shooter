@@ -45,6 +45,20 @@ func _chunks() -> void:
 	DEBRIS.spawn_chunks(host, AABB(Vector3.ZERO, Vector3.ONE), Color.BLUE, 500, Vector3.UP, Vector3.ZERO)
 	await process_frame
 	_expect(runtime.active.size() <= QUALITY.piece_burst() and runtime.created_chunks <= 80, "Burst bounds active and fading generic allocations")
+	# The hero kicks a loose piece it stands in, through the runtime's single poll.
+	var hero := Node3D.new()
+	hero.add_to_group("player")
+	world.add_child(hero)
+	var piece: RigidBody3D
+	for child in world.get_children():
+		if child is RigidBody3D and not DEBRIS.is_fading(child):
+			piece = child
+	hero.global_position = piece.global_position + Vector3(0.1, 0.0, 0.0)
+	piece.call("set", "_kick_ready_msec", 0)
+	piece.sleeping = true
+	await physics_frame
+	await physics_frame
+	_expect(not piece.sleeping, "Hero walking into a resting piece wakes and kicks it")
 	var other := Node3D.new()
 	root.add_child(other)
 	_expect(DEBRIS.runtime_for(other) != runtime, "Effects containers own independent pools")
