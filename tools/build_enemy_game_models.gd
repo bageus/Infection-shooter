@@ -23,6 +23,11 @@ const PART_ID_SCALE := 32.0
 const SKIN_TRIANGLES := 9000
 const CAP_TRIANGLES := 1000
 const TEXTURE_SIZE := 1024
+# The atlases of these enemies give every source polygon its own tiny UV island, so decimating
+# the mesh smears colours across islands (ragged, texture-less patches). They keep every source
+# triangle (far LODs still reduce) and their atlas at full size.
+const FULL_DETAIL := ["Brute", "Titan", "Colossus"]
+const FULL_TEXTURE_SIZE := 2048
 const JPG_QUALITY := 0.9
 
 
@@ -33,7 +38,10 @@ func _init() -> void:
 func _run() -> void:
 	DirAccess.make_dir_recursive_absolute(ProjectSettings.globalize_path(OUTPUT_DIR))
 	var failures := 0
+	var only := OS.get_cmdline_user_args()
 	for enemy_name: String in NAMES:
+		if not only.is_empty() and not only.has(enemy_name):
+			continue
 		if not _build(enemy_name):
 			failures += 1
 	print("Enemy game models built, failures: %d" % failures)
@@ -64,9 +72,9 @@ func _build(enemy_name: String) -> bool:
 	for attempt in 4:
 		merged = [_new_surface(), _new_surface()]
 		parts = []
-		_merge_parts(nodes, instance, skin_scale, merged, parts)
+		_merge_parts(nodes, instance, skin_scale, merged, parts, enemy_name in FULL_DETAIL)
 		var skin_triangles := (merged[0].indices as PackedInt32Array).size() / 3
-		if skin_triangles <= SKIN_TRIANGLES * 1.05 or attempt == 3:
+		if enemy_name in FULL_DETAIL or skin_triangles <= SKIN_TRIANGLES * 1.05 or attempt == 3:
 			break
 		skin_scale *= clampf(float(SKIN_TRIANGLES) / float(skin_triangles), 0.4, 0.95)
 	_close_joints(merged[0], merged[1])
@@ -86,14 +94,14 @@ func _build(enemy_name: String) -> bool:
 	var triangles := (merged[0].indices as PackedInt32Array).size() / 3 + (merged[1].indices as PackedInt32Array).size() / 3
 	print("%s: %d parts, %d triangles, aabb %s" % [enemy_name, parts.size(), triangles, mesh.get_aabb()])
 	instance.free()
-	var ok := _write_textures(enemy_name)
+	var ok := _write_textures(enemy_name, FULL_TEXTURE_SIZE if enemy_name in FULL_DETAIL else TEXTURE_SIZE)
 	_write_material(enemy_name)
 	_write_wound_material(enemy_name)
 	return ok
 
 
 # Simplifies every part to its share of the triangle budget and appends it to `merged`.
-func _merge_parts(nodes: Array, instance: Node, skin_scale: float, merged: Array, parts: Array) -> void:
+func _merge_parts(nodes: Array, instance: Node, skin_scale: float, merged: Array, parts: Array, full_detail: bool) -> void:
 	var shares := [0.0, 0.0]
 	for node: MeshInstance3D in nodes:
 		var split := _split_surfaces(node.mesh)
@@ -109,7 +117,7 @@ func _merge_parts(nodes: Array, instance: Node, skin_scale: float, merged: Array
 				continue
 			var total := (SKIN_TRIANGLES * skin_scale) if surface == 0 else float(CAP_TRIANGLES)
 			var budget: float = total * pow(float(_triangles(arrays)), 0.8) / shares[surface]
-			var simplified := _simplify(arrays, maxi(int(budget), 12))
+			var simplified := _compact(arrays, arrays[Mesh.ARRAY_INDEX]) if full_detail and surface == 0 else _simplify(arrays, maxi(int(budget), 12))
 			_append(merged[surface], simplified, transform, id, _part_lods(simplified))
 		parts.append({"name": String(node.name), "id": id, "caps": _caps(split[1], transform) if _triangles(split[1]) > 0 else []})
 
@@ -496,7 +504,7 @@ static func _find(parent: Dictionary, node: int) -> int:
 
 
 # Reads the GLB's embedded images straight from its binary chunk.
-func _write_textures(enemy_name: String) -> bool:
+func _write_textures(enemy_name: String, texture_size: int) -> bool:
 	var bytes := FileAccess.get_file_as_bytes(SOURCE_DIR + enemy_name + ".glb")
 	if bytes.size() < 20:
 		push_error("Cannot read " + enemy_name + ".glb")
@@ -533,7 +541,7 @@ func _write_textures(enemy_name: String) -> bool:
 			push_error("Cannot decode %s texture of %s" % [suffix, enemy_name])
 			ok = false
 			continue
-		image.resize(mini(image.get_width(), TEXTURE_SIZE), mini(image.get_height(), TEXTURE_SIZE), Image.INTERPOLATE_LANCZOS)
+		image.resize(mini(image.get_width(), texture_size), mini(image.get_height(), texture_size), Image.INTERPOLATE_LANCZOS)
 		image.convert(Image.FORMAT_RGB8)
 		var target := ProjectSettings.globalize_path("%s%s_%s.jpg" % [OUTPUT_DIR, enemy_name, suffix])
 		ok = image.save_jpg(target, JPG_QUALITY) == OK and ok

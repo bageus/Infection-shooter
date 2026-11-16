@@ -250,7 +250,11 @@ static func _humanoid_base(part: String, vertex: Vector3, points: Dictionary, sc
 			if t <= to:
 				var k := (t - from) / (to - from)
 				return {stops[index][0]: 1.0 - k, stops[index + 1][0]: k}
-		return {"Neck": 1.0}
+		# Above the neck only skin near the neck line follows the Neck bone; humps and shoulder
+		# growths beside it (Titan) stay on the Chest, or they tear away from the head when it turns.
+		var lateral := (vertex - hips - axis * t).length()
+		var neck := 1.0 - smoothstep(0.1 * scale, 0.22 * scale, lateral)
+		return {"Neck": neck, "Chest": 1.0 - neck}
 	var prefix := ("L_" if part.ends_with("_L") else "R_")
 	if part.begins_with("UpperArm"):
 		return {prefix + "UpperArm": 1.0}
