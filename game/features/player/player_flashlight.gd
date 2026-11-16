@@ -95,11 +95,12 @@ func attach(muzzle: Node3D) -> void:
 	_model.visible = true
 
 
-func _process(delta: float) -> void:
+func _process(_delta: float) -> void:
 	if Input.is_action_just_pressed("flashlight"):
 		_on = not _on
 		_switch.play()
-	_light.light_energy = move_toward(_light.light_energy, ENERGY if _on else 0.0, delta * 4.0)
+	# Instant switch: no fade-in or fade-out.
+	_light.light_energy = ENERGY if _on else 0.0
 	# A gun the clip has put away is scaled to nothing, and its flashlight with it.
 	_light.visible = _model.is_inside_tree() and _model.visible and absf(_model.global_basis.determinant()) > 0.001
 	_update_glow()
