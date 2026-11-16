@@ -94,6 +94,10 @@ func _retained(model: String, targeted: bool) -> void:
 	else:
 		prop.call("take_projectile_hit", 1000.0, position, Vector3.BACK, Vector3.FORWARD, "GRENADE")
 	await _ticks()
+	if targeted and model.contains("02_microwave"): # The door is pinned against shots; a grenade blast still tears it off.
+		_check(attachment.visible and _pieces().is_empty(), model + ": the door stays on")
+		await _cleanup(prop)
+		return
 	_check(not attachment.visible and body.is_visible_in_tree(), model + ": only the attachment disappears")
 	_check(prop.collision_layer != 0 and prop.get("_visual").visible, model + ": body stays collidable and visible")
 	var pieces := _pieces()

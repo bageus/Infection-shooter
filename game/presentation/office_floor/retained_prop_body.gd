@@ -10,6 +10,7 @@ const PARTS := {
 var enabled := false
 var detached := false
 var _part := ""
+var _pinned := false # A microwave door takes hits but never comes off.
 
 
 func anchored(model_path: String) -> bool:
@@ -23,6 +24,7 @@ func configure(geometry: RefCounted, model_path: String) -> void:
 	if not enabled:
 		return
 	_part = PARTS[file]
+	_pinned = file == "02_microwave_destructible.glb"
 	if _part.is_empty() or geometry.intact == null or geometry.stages.is_empty():
 		return
 	var stage: Node3D = geometry.stages[0]
@@ -54,6 +56,8 @@ func hit_shape(host: RigidBody3D, geometry: RefCounted, index: int, amount: floa
 	var mesh: MeshInstance3D = geometry.meshes[index]
 	if mesh.name != _part or amount <= 0.0:
 		return false
+	if _pinned:
+		return true
 	if detach(host, geometry, position, direction):
 		host.get("_damage").shatter()
 	return true

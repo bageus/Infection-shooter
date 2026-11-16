@@ -19,6 +19,7 @@ func _run() -> void:
 	await _test_floor_walls()
 	await _test_wall_probe()
 	_test_cabinets()
+	await _test_surface_probe()
 	await _capture_contacts()
 	stage.queue_free()
 	await process_frame
@@ -150,6 +151,20 @@ func _test_cabinets() -> void:
 		_check(absf(result.x - bounds.size.x) < .0001, "Real imported cabinet sides meet: " + name)
 		target.free()
 		source.free()
+
+func _test_surface_probe() -> void:
+	# An item snapped past a table's edge must find the floor below it, not the table top.
+	_wall(Vector3(12, .1, 9), Vector3(0, -.05, 0))
+	_wall(Vector3(1, .1, 1), Vector3(0, .85, 0))
+	await physics_frame
+	await physics_frame
+	var geometry := GEOMETRY.new()
+	var item := Node3D.new()
+	stage.add_child(item)
+	_check(absf(geometry._surface_height_below(item, Vector3(0, 0, 0)) - .9) < .001, "A spot over the table probes its top")
+	_check(absf(geometry._surface_height_below(item, Vector3(.8, 0, 0))) < .001, "A spot past the table edge probes the floor")
+	item.queue_free()
+	await process_frame
 
 func _check(condition: bool, message: String) -> void:
 	if not condition:
