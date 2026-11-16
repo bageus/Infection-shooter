@@ -21,6 +21,16 @@ var impact_pool: Node
 
 
 # Public scene wiring v1; owned by the mission composition.
+## Built once and shared by every rupture, so nothing is created on the burst frame.
+static var _shared := {}
+
+
+static func _material(key: String, build: Callable) -> Material:
+	if not _shared.has(key):
+		_shared[key] = build.call()
+	return _shared[key]
+
+
 func configure_world(container: Node3D, impacts: Node) -> void:
 	effects_root = container
 	impact_pool = impacts
@@ -31,11 +41,12 @@ func _ready() -> void:
 	torus.inner_radius = 0.86
 	torus.outer_radius = 1.0
 	_ring.mesh = torus
-	var ring_material := StandardMaterial3D.new()
-	ring_material.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
-	ring_material.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
-	ring_material.albedo_color = Color(0.88, 0.93, 0.96, 0.65)
-	_ring.material_override = ring_material
+	_ring.material_override = _material("ring", func() -> Material:
+		var ring_material := StandardMaterial3D.new()
+		ring_material.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
+		ring_material.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
+		ring_material.albedo_color = Color(0.88, 0.93, 0.96, 0.65)
+		return ring_material)
 	_ring.scale = Vector3.ONE * 0.08
 	_ring.visible = false
 	set_process(false)
@@ -103,13 +114,14 @@ func _setup_particles(emitter: GPUParticles3D, amount: int, lifetime: float,
 	var quad := QuadMesh.new()
 	quad.size = Vector2.ONE * size
 	# Soft procedural powder puffs: the white cloud billows and thins out.
-	var material := ShaderMaterial.new()
-	material.shader = POWDER_SHADER
-	material.set_shader_parameter("smoke_color", Color(0.93, 0.94, 0.95))
-	material.set_shader_parameter("opacity", opacity)
-	material.set_shader_parameter("growth", 2.2)
-	material.set_shader_parameter("swirl", 0.6)
-	quad.material = material
+	quad.material = _material("powder_%s" % opacity, func() -> Material:
+		var material := ShaderMaterial.new()
+		material.shader = POWDER_SHADER
+		material.set_shader_parameter("smoke_color", Color(0.93, 0.94, 0.95))
+		material.set_shader_parameter("opacity", opacity)
+		material.set_shader_parameter("growth", 2.2)
+		material.set_shader_parameter("swirl", 0.6)
+		return material)
 	emitter.draw_pass_1 = quad
 
 
@@ -132,9 +144,11 @@ func _spawn_fragments() -> void:
 		var mesh := BoxMesh.new()
 		mesh.size = box.size
 		visual.mesh = mesh
-		var surface := StandardMaterial3D.new()
-		surface.albedo_color = Color(0.72, 0.05, 0.045) if index % 3 == 0 else Color(0.58, 0.62, 0.65)
-		visual.material_override = surface
+		var red := index % 3 == 0
+		visual.material_override = _material("fragment_red" if red else "fragment_grey", func() -> Material:
+			var surface := StandardMaterial3D.new()
+			surface.albedo_color = Color(0.72, 0.05, 0.045) if red else Color(0.58, 0.62, 0.65)
+			return surface)
 		piece.add_child(visual)
 		world.add_child(piece)
 		piece.global_position = global_position + Vector3(randf_range(-0.12, 0.12), randf_range(-0.1, 0.2), randf_range(-0.12, 0.12))

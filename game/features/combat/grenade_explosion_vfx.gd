@@ -27,6 +27,8 @@ var _started := false
 var muted := false
 static var _shared_ember: Texture2D
 static var _shared_spark: Texture2D
+## Materials are identical for every blast (only the meshes differ with the exported sizes), so build each once.
+static var _shared_materials := {}
 var _ember_texture: Texture2D
 var _spark_texture: Texture2D
 
@@ -57,7 +59,7 @@ func start(surface_normal: Vector3) -> void:
 		outward, 88.0, Vector3(0, -7.0, 0), Color(1, 0.76, 0.3), 0.95, 0.0)
 	_configure_emitter(_wisps, _ember_texture, smoke_count, 1.7 * speed, smoke_size * size_scale, effect_radius * 0.32,
 		outward.lerp(Vector3.UP, 0.45).normalized(), 78.0, Vector3(0, 0.8, 0), Color(0.52, 0.52, 0.5), 0.42, 0.035)
-	(_wisps.draw_pass_1 as PrimitiveMesh).material = _smoke_material(1.8, 0.5, 2.6)
+	(_wisps.draw_pass_1 as PrimitiveMesh).material = _shared("wisps_smoke", func() -> Material: return _smoke_material(1.8, 0.5, 2.6))
 	var lingering := _lingering_smoke(outward, size_scale)
 	_configure_debris(outward, size_scale, speed)
 	_emit_after(_embers, 0.05 * speed)
@@ -91,6 +93,12 @@ func _glow_texture(core: Color, edge: Color) -> Texture2D:
 	texture.width = 64
 	texture.height = 64
 	return texture
+
+
+func _shared(key: String, build: Callable) -> Material:
+	if not _shared_materials.has(key):
+		_shared_materials[key] = build.call()
+	return _shared_materials[key]
 
 
 func _smoke_material(glow: float, opacity: float, growth: float) -> ShaderMaterial:
@@ -132,9 +140,10 @@ func _lingering_smoke(outward: Vector3, size_scale: float) -> GPUParticles3D:
 	smoke.process_material = motion
 	var quad := QuadMesh.new()
 	quad.size = Vector2.ONE * 0.85 * size_scale
-	var material := _smoke_material(0.3, 0.24, 3.2)
-	material.set_shader_parameter("smoke_color", Color(0.47, 0.46, 0.45))
-	quad.material = material
+	quad.material = _shared("lingering_smoke", func() -> Material:
+		var material := _smoke_material(0.3, 0.24, 3.2)
+		material.set_shader_parameter("smoke_color", Color(0.47, 0.46, 0.45))
+		return material)
 	smoke.draw_pass_1 = quad
 	return smoke
 
@@ -167,16 +176,17 @@ func _configure_emitter(emitter: GPUParticles3D, texture: Texture2D, amount: int
 	emitter.process_material = motion
 	var quad := QuadMesh.new()
 	quad.size = Vector2.ONE * size
-	var material := ShaderMaterial.new()
-	material.shader = PARTICLE_SHADER
-	material.set_shader_parameter("particle_texture", texture)
-	material.set_shader_parameter("tint", tint)
-	material.set_shader_parameter("opacity", opacity)
-	material.set_shader_parameter("uv_drift", drift)
-	material.set_shader_parameter("fire_particle", emitter == _embers)
-	material.set_shader_parameter("spark_particle", emitter == _spark_debris)
-	material.set_shader_parameter("growth", 2.6 if emitter == _wisps else 1.5)
-	quad.material = material
+	quad.material = _shared("emitter_" + str(emitter.name), func() -> Material:
+		var material := ShaderMaterial.new()
+		material.shader = PARTICLE_SHADER
+		material.set_shader_parameter("particle_texture", texture)
+		material.set_shader_parameter("tint", tint)
+		material.set_shader_parameter("opacity", opacity)
+		material.set_shader_parameter("uv_drift", drift)
+		material.set_shader_parameter("fire_particle", emitter == _embers)
+		material.set_shader_parameter("spark_particle", emitter == _spark_debris)
+		material.set_shader_parameter("growth", 2.6 if emitter == _wisps else 1.5)
+		return material)
 	emitter.draw_pass_1 = quad
 
 
@@ -197,10 +207,11 @@ func _configure_debris(outward: Vector3, size_scale: float, time_scale: float) -
 	_debris.process_material = motion
 	var fragment := BoxMesh.new()
 	fragment.size = Vector3(0.045, 0.035, 0.075) * size_scale
-	var material := StandardMaterial3D.new()
-	material.albedo_color = Color(0.15, 0.13, 0.1)
-	material.roughness = 0.9
-	fragment.material = material
+	fragment.material = _shared("debris", func() -> Material:
+		var material := StandardMaterial3D.new()
+		material.albedo_color = Color(0.15, 0.13, 0.1)
+		material.roughness = 0.9
+		return material)
 	_debris.draw_pass_1 = fragment
 
 
