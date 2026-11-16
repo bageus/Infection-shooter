@@ -326,6 +326,19 @@ func can_see(actor: Node3D, target: Node3D) -> bool:
 	return _line_clear(actor, target)
 
 
+# Walls and metal grilles (layer 1) block ranged and area attacks; glass does not matter here.
+func clear_shot(actor: Node3D, target: Node3D) -> bool:
+	if not is_instance_valid(target):
+		return false
+	var excluded: Array[RID] = []
+	if actor is CollisionObject3D:
+		excluded.append((actor as CollisionObject3D).get_rid())
+	if target is CollisionObject3D:
+		excluded.append((target as CollisionObject3D).get_rid())
+	var query := PhysicsRayQueryParameters3D.create(actor.global_position + Vector3.UP * 0.8, target.global_position + Vector3.UP * 0.8, 1, excluded)
+	return actor.get_world_3d().direct_space_state.intersect_ray(query).is_empty()
+
+
 # Walls and doors hide the player; glass panes do not.
 func _line_clear(actor: Node3D, target: Node3D) -> bool:
 	var space := actor.get_world_3d().direct_space_state
