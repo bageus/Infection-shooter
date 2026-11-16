@@ -26,7 +26,7 @@ func _behaviour_tick(delta: float, target_offset: Vector3) -> void:
 		_tick_throw(delta)
 		return
 	var distance := target_offset.length()
-	if _throw_cooldown <= 0.0 and _pending_hit < 0.0 and _blast_stun_remaining <= 0.0 and distance >= throw_min_distance and distance <= throw_max_distance and _clear_line():
+	if _throw_cooldown <= 0.0 and _pending_hit < 0.0 and _blast_stun_remaining <= 0.0 and distance >= throw_min_distance and distance <= throw_max_distance and _senses.clear_shot(self, _target):
 		_start_throw()
 
 
@@ -131,17 +131,6 @@ func _stamp_crater(point: Vector3) -> void:
 	impact_pool.call("bake_surface_hit", collider, point, Vector3.UP, "GRENADE", surface.get("anchor") as MeshInstance3D)
 
 
-# Walls (layer 1) between the Titan and the player block the throw.
-func _clear_line() -> bool:
-	if not is_instance_valid(_target):
-		return false
-	var skip: Array[RID] = [get_rid()]
-	if _target is CollisionObject3D:
-		skip.append((_target as CollisionObject3D).get_rid())
-	var query := PhysicsRayQueryParameters3D.create(global_position + Vector3.UP * 0.8, _target.global_position + Vector3.UP * 0.8, 1, skip)
-	return get_world_3d().direct_space_state.intersect_ray(query).is_empty()
-
-
 # The swipe waits while the throw animation owns the body.
 func _try_attack() -> void:
 	if _throw_elapsed >= 0.0:
@@ -156,4 +145,4 @@ func _die() -> void:
 
 func _half_height() -> float:
 	var capsule := collision_shape.shape as CapsuleShape3D
-	return capsule.height * 0.5 if capsule != null else 1.0
+	return capsule.height * 0.5 - collision_shape.position.y if capsule != null else 1.0

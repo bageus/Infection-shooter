@@ -76,7 +76,11 @@ func _draw_bar(rect: Rect2, fraction: float) -> void:
 ## Each enemy type has its own capsule, so the bar follows the type instead of a fixed height.
 static func _bar_height(body: Node3D) -> float:
 	var capsule := _capsule(body)
-	return (capsule.height * 0.5 if capsule != null else 1.0) + BAR_MARGIN
+	if capsule == null:
+		return 1.0 + BAR_MARGIN
+	# Root-to-feet distance: the collision capsule may sit off-centre (titan, colossus).
+	var shape := body.find_child("CollisionShape3D", false, false) as CollisionShape3D
+	return capsule.height * 0.5 - shape.position.y + BAR_MARGIN
 
 
 static func _capsule(body: Node3D) -> CapsuleShape3D:
