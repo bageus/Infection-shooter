@@ -59,8 +59,9 @@ func _start() -> void:
 
 func _wave(origin := Vector3.ZERO) -> Node3D:
 	# _release_slam computes feet at -0.9 local Z and half a capsule below root.
-	var capsule := (source.get_node("CollisionShape3D") as CollisionShape3D).shape as CapsuleShape3D
-	source.position = origin + Vector3(0, capsule.height * .5, .9)
+	var collision := source.get_node("CollisionShape3D") as CollisionShape3D
+	var capsule := collision.shape as CapsuleShape3D
+	source.position = origin + Vector3(0, capsule.height * .5 - collision.position.y, .9)
 	source.call("_release_slam")
 	var wave := effects.get_node("SlamWave") as Node3D
 	wave.set_physics_process(false)
