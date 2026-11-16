@@ -548,8 +548,9 @@ func _move_direction()->Vector3:
 	var r:Vector3=camera.global_transform.basis.x;r.y=0;r=r.normalized()
 	var d:Vector3=r*input.x+f*-input.y
 	return d.normalized() if d.length_squared()>1.0 else d
+var aim_cursor_override := Vector2.INF # viewport pixels replacing the OS mouse while finite (tools/autoplay_bot.gd; headless has no mouse)
 func _update_aim()->void:
-	var mouse:=get_viewport().get_mouse_position()
+	var mouse:=aim_cursor_override if aim_cursor_override.is_finite() else get_viewport().get_mouse_position()
 	if _stun_remaining > 0.0 and _stun_intensity > 0.35:
 		mouse.x = get_viewport().get_visible_rect().size.x - mouse.x
 	var origin:=camera.project_ray_origin(mouse)
