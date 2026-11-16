@@ -53,8 +53,6 @@ game/bootstrap/app/tests/run_shelf_glass_loading_tests.gd
 game/presentation/office_floor/tests/run_balance_tests.gd
 game/bootstrap/app/tests/run_mission_loading_tests.gd
 game/bootstrap/app/tests/run_loading_deadline_tests.gd
-game/features/character_animation/tests/run_gait_tests.gd
-game/features/character_animation/tests/run_leg_clips_tests.gd
 game/bootstrap/app/tests/run_mutation_feedback_tests.gd
 game/bootstrap/app/tests/run_progression_ui_tests.gd
 game/features/player/tests/run_skill_vfx_tests.gd
@@ -112,8 +110,10 @@ game/presentation/office_floor/tests/run_wall_sign_lamp_tests.gd
 game/features/infected/tests/run_part_lifetime_tests.gd
 game/bootstrap/app/tests/run_settings_tabs_tests.gd
 game/bootstrap/app/tests/run_walk_tuning_tests.gd
+game/bootstrap/app/tests/run_flashlight_binding_tests.gd
 game/presentation/office_floor/tests/run_staged_glb_tests.gd
 game/features/player/tests/run_weapon_presentation_tests.gd
+game/features/player/tests/run_hero_model_regression_tests.gd
 game/features/player/tests/run_shooting_camera_tests.gd
 game/features/infected/tests/run_death_fall_tests.gd
 game/features/player/tests/run_control_loss_tests.gd
@@ -261,7 +261,6 @@ game/bootstrap/app/tests/run_user_data_migration_tests.gd
 game/features/player/tests/run_melee_strike_tests.gd
 game/features/player/tests/run_kick_gameplay_tests.gd
 game/features/character_animation/tests/run_strike_pose_tests.gd
-game/features/player/tests/run_reload_pose_tests.gd
 game/features/infected/tests/run_death_cloud_tests.gd
 game/bootstrap/app/tests/run_campaign_config_tests.gd
 game/features/spawning/tests/run_endless_tests.gd
@@ -286,3 +285,4 @@ game/features/infected/tests/run_titan_throw_tests.gd
 game/features/player/tests/run_player_hit_feedback_tests.gd
 game/bootstrap/app/tests/run_enemy_health_bars_tests.gd
 game/features/infected/tests/run_enemy_glow_tests.gd
+game/features/character_animation/tests/run_clip_footsteps_tests.gd

@@ -26,8 +26,12 @@ func _initialize() -> void:
 
 func _run() -> void:
 	var migration := CATALOG.new()
-	for old_path in ["res://models/objects/enviroments/06/06_office_chair_2_fell.glb", "res://game/presentation/office_floor/public/props/06_office_chair_2_fell.tscn"]:
-		_expect(migration._migrate_scene_path(old_path) == "res://models/objects/enviroments/06/06_office_chair_2.glb", "Retired chair records retain a current replacement")
+	for old_path in ["res://models/objects/enviroments/06/06_office_chair_2.glb", "res://models/objects/enviroments/06/06_office_chair_2_fell.glb", "res://game/presentation/office_floor/public/props/06_office_chair_2_fell.tscn"]:
+		_expect(migration._migrate_scene_path(old_path) == "res://models/objects/enviroments/06/06_office_chair.glb", "Retired chair records retain a current replacement")
+	_expect(migration._migrate_scene_path("res://models/objects/enviroments/06/06_simple_chair_fell.glb").is_empty(), "The retired fallen chair is dropped from saved maps")
+	_expect(migration._migrate_scene_path("res://models/objects/enviroments/02/02_pallet.glb") == "res://models/objects/enviroments/15/15_pallet.glb", "The moved pallet keeps loading")
+	for pair in [["part_hunger_arm", "part_hunger_arm_l"], ["part_brute_leg", "part_brute_leg_l"], ["corpse_hunger_mutilated", "corpse_hunger"]]:
+		_expect(migration._migrate_scene_path("res://game/features/infected/public/decor/%s.tscn" % pair[0]) == "res://game/features/infected/public/decor/%s.tscn" % pair[1], "Pre-part decor %s loads as its current scene" % pair[0])
 	var world := Node3D.new()
 	root.add_child(world)
 	var player := Node3D.new()

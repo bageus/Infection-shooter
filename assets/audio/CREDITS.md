@@ -276,3 +276,7 @@ The second 2026-10-26 batch (`break_metal`, `break_electronics`, `break_lamp`, `
 The owner states that `antidote_use`, `sniper_fire` and `metal_door_close` are their own recordings, so their source rows were removed. `sniper_fire` had three identical copies; it now has one file.
 
 The owner also supplied `colossus_slam` (2026-10-26, `tools/import_colossus_audio.py`); its source rows were removed.
+
+## Owner-supplied impact and M4 sounds (2026-11-14)
+
+Converted from the owner's WAV files to mono OGG Vorbis (originals removed): `hit_pipe/hit_pipe_1.ogg` (from `Sharp_metallic_clang_2`), `hit_door/hit_door_1.ogg` (from `Sharp_metallic_clang_4`), and `m4_fire/m4_fire_1.ogg` (from `M16_gunfire,_sharp`, replaces the previous M4 shot).

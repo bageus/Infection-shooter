@@ -26,6 +26,15 @@ var shake_enabled := true
 var _trauma := 0.0
 var _blast_trauma := 0.0
 var _blast_push := Vector3.ZERO
+## Each footfall presses the camera down a little (the body's weight), then it springs back.
+const STEP_DIP_METRES := 0.07
+const STEP_DIP_DECAY_PER_SECOND := 9.0
+var _step_dip := 0.0
+
+
+## A foot lands at `speed` (m/s): a walking step dips less than a sprint.
+func footstep(speed: float) -> void:
+	_step_dip = clampf(speed / 8.0, 0.35, 1.0)
 
 
 func shot(weapon: String, forward: Vector3) -> void:
@@ -63,9 +72,10 @@ func blast(away: Vector3, strength: float) -> void:
 func camera_shake(delta: float) -> Vector3:
 	_trauma = maxf(0.0, _trauma - TRAUMA_DECAY_PER_SECOND * maxf(delta, 0.0))
 	_blast_trauma = maxf(0.0, _blast_trauma - BLAST_DECAY_PER_SECOND * maxf(delta, 0.0))
+	_step_dip = maxf(0.0, _step_dip - STEP_DIP_DECAY_PER_SECOND * maxf(delta, 0.0))
 	if not shake_enabled:
 		return Vector3.ZERO
-	var offset := Vector3.ZERO
+	var offset := Vector3(0.0, -_step_dip * _step_dip * STEP_DIP_METRES, 0.0)
 	if _trauma > 0.0:
 		var power := _trauma * _trauma * SHAKE_METRES
 		offset = Vector3(randf_range(-1.0, 1.0), randf_range(-1.0, 1.0), 0.0) * power

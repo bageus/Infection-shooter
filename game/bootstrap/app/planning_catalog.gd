@@ -268,6 +268,12 @@ func _migrate_scene_path(old_path: String) -> String:
 		var moved := MODEL_PATHS.find(old_path.trim_prefix(ENVIRONMENT_ROOT + "/").get_slice("/", 0), old_path.get_file())
 		if not moved.is_empty():
 			return moved
+	# Decor from before the part-based enemies: unsided limbs became left ones, mutilated corpses became whole ones.
+	var decor_dir := "res://game/features/infected/public/decor/"
+	if old_path.begins_with(decor_dir) and old_path.ends_with(".tscn") and not ResourceLoader.exists(old_path):
+		for candidate in [old_path.replace(".tscn", "_l.tscn"), old_path.replace("_mutilated", "")]:
+			if ResourceLoader.exists(candidate):
+				return candidate
 	var replacements = {
 		# Saved maps from before the pickups moved under game/features/pickups.
 		"res://game/bootstrap/app/weapon_pickups/uzi.tscn": "res://game/features/pickups/public/weapons/uzi.tscn",
@@ -275,8 +281,15 @@ func _migrate_scene_path(old_path: String) -> String:
 		"res://game/bootstrap/app/armor_pickups/armor.tscn": "res://game/features/pickups/public/armor_pickup.tscn",
 		"res://models/objects/enviroments/02/02_crate_wood_large.glb": "res://models/objects/enviroments/04/04_crate_wood_large.glb",
 		"res://models/objects/enviroments/02/02_crate_canvas_large.glb": "res://models/objects/enviroments/04/04_crate_canvas_large.glb",
-		"res://models/objects/enviroments/06/06_office_chair_2_fell.glb": "res://models/objects/enviroments/06/06_office_chair_2.glb",
-		"res://game/presentation/office_floor/public/props/06_office_chair_2_fell.tscn": "res://models/objects/enviroments/06/06_office_chair_2.glb",
+		# Retired chairs: chair 2 reloads as the remaining office chair, the fallen simple chair is dropped.
+		"res://models/objects/enviroments/06/06_office_chair_2.glb": "res://models/objects/enviroments/06/06_office_chair.glb",
+		"res://models/objects/enviroments/06/06_office_chair_2_fell.glb": "res://models/objects/enviroments/06/06_office_chair.glb",
+		"res://game/presentation/office_floor/public/props/06_office_chair_2.tscn": "res://models/objects/enviroments/06/06_office_chair.glb",
+		"res://game/presentation/office_floor/public/props/06_office_chair_2_fell.tscn": "res://models/objects/enviroments/06/06_office_chair.glb",
+		"res://models/objects/enviroments/06/06_simple_chair_fell.glb": "",
+		"res://game/presentation/office_floor/public/props/06_simple_chair_fell.tscn": "",
+		# The pallet moved from group 02 to 15 (simplified, same size).
+		"res://models/objects/enviroments/02/02_pallet.glb": "res://models/objects/enviroments/15/15_pallet.glb",
 		"res://models/objects/enviroments/05/09_phone_a_base.glb": "res://models/objects/enviroments/05/05_desk_phone.glb",
 		"res://models/objects/enviroments/05/09_phone_a_base_hang.glb": "res://models/objects/enviroments/05/05_desk_phone.glb",
 		"res://models/objects/enviroments/05/09_phone_b.glb": "res://models/objects/enviroments/05/05_desk_phone.glb",

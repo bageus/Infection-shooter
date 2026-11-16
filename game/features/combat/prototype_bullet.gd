@@ -4,6 +4,7 @@ const SFX := preload("res://game/core/audio/public/sound_events.gd")
 const IMPACT_SOUNDS := {
 	"metal": &"hit_metal", "wood": &"hit_wood", "light": &"hit_paper", "tech": &"hit_electronics",
 	"glass": &"hit_glass", "flesh": &"flesh_hit", "concrete": &"hit_wall", "solid": &"hit_wall",
+	"pipe": &"hit_pipe", "door": &"hit_door",
 }
 
 const MAX_HITS_PER_TICK := 5

@@ -3,7 +3,6 @@ extends CharacterBody3D
 const MUTATION_BALANCE := preload("res://game/features/infection/public/mutation_balance.gd")
 const CONSUMABLES := preload("res://game/features/player/player_consumables.gd")
 const HERO_START := preload("res://game/features/player/hero_spawn_start.gd")
-
 signal projectile_blood(position: Vector3, direction: Vector3, weapon: String, excluded: Array[RID], source_id: int)
 signal blood_wounded(position: Vector3, excluded: Array[RID])
 signal wounded_moved(previous: Vector3, current: Vector3, excluded: Array[RID])
@@ -13,7 +12,6 @@ var _blood_motion_start := Vector3.ZERO
 ## Health lost to damage and not yet healed. Raising max health leaves a gap
 ## below the cap that is not a wound, so only this makes the player bleed.
 var _wound := 0.0
-
 signal blast_stun_started(duration: float, intensity: float)
 signal blast_stun_ended()
 ## Health actually restored (after caps and skill bonuses); source is
@@ -370,10 +368,8 @@ func get_current_weapon_index()->int: return current_weapon_index
 func note_hit_direction(direction: Vector3) -> void: _hit_feedback.direction = direction # recoil of the next hit
 func take_damage(amount: float, damage_type: String = "physical") -> void:
 	_apply_damage(amount, damage_type, global_position, Vector3.FORWARD, damage_type)
-
 func get_projectile_material(_shape_index: int = -1) -> String:
 	return "flesh"
-
 func take_armor_capped_damage(amount: float) -> void: _apply_damage(amount, "physical", global_position, Vector3.FORWARD, "physical", true) # Colossus: armor soaks the whole blow
 func take_projectile_damage(amount: float, point: Vector3, direction: Vector3, weapon: String) -> void:
 	_apply_damage(amount, "physical", point, direction, weapon)
@@ -399,6 +395,8 @@ func _apply_damage(amount: float, damage_type: String, point: Vector3, direction
 		blood_wounded.emit(global_position, excluded)
 		if health <= 0.0:
 			blood_death.emit(global_position, excluded, get_instance_id())
+## The dead hero falls to the floor (the model has no death clip); returns the seconds until it lies still.
+func play_death_fall() -> float: return preload("res://game/features/player/player_death_fall.gd").start(self)
 ## True while damage taken is still unhealed; a full bar never bleeds.
 func is_wounded() -> bool:
 	return minf(_wound, max_health - health) > 0.01
@@ -442,6 +440,7 @@ func _update_camera(delta: float) -> void:
 		camera_rig.position += Vector3(randf_range(-0.06, 0.06), randf_range(-0.04, 0.04), 0) * _stun_intensity
 	camera_rig.rotate_y(deg_to_rad(turn * camera_rotation_speed * delta))
 
+func note_footstep(speed: float) -> void: _shot_recoil.footstep(speed)
 func apply_blast_shake(origin: Vector3, strength: float) -> void: _shot_recoil.blast(global_basis.inverse() * (global_position - origin), strength)
 
 func apply_blast_stun(duration: float, intensity: float) -> void:
@@ -573,7 +572,7 @@ func _update_aim()->void:
 	if flat_direction.length_squared()>0.0001:
 		var target_direction:=flat_direction.normalized()
 		aim_pivot.look_at(aim_pivot.global_position+target_direction,Vector3.UP)
-		preload("res://game/features/player/player_body_aim.gd").turn_body(body_visual,target_direction,get_physics_process_delta_time())
+		if _roll_remaining<=0.0: preload("res://game/features/player/player_body_aim.gd").turn_body(body_visual,target_direction,get_physics_process_delta_time(),weapon_mount.call("barrel_yaw_offset")) # a roll keeps the body turned along it
 
 func _aim_uncontrolled() -> void:
 	var direction: Vector3 = _mutation_control.direction
@@ -581,7 +580,7 @@ func _aim_uncontrolled() -> void:
 		return
 	_aim_point = aim_pivot.global_position + direction * 8.0
 	aim_pivot.look_at(_aim_point, Vector3.UP)
-	preload("res://game/features/player/player_body_aim.gd").turn_body(body_visual,direction,get_physics_process_delta_time())
+	if _roll_remaining<=0.0: preload("res://game/features/player/player_body_aim.gd").turn_body(body_visual,direction,get_physics_process_delta_time(),weapon_mount.call("barrel_yaw_offset"))
 
 # Public weapon_view_v1: read-only view data, never persisted.
 func get_weapon_view() -> Dictionary:

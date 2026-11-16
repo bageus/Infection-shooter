@@ -252,7 +252,7 @@ func _update_door_visuals(local_player: Vector3) -> void:
 			if is_instance_valid(light_node):
 				_set_light_state(light_node, lights_on)
 		if is_instance_valid(_indicator_glow):
-			_indicator_glow.set_wanted(lights_on)
+			_indicator_glow.light_energy = 1.6 if lights_on else 0.25
 
 
 # Opening starts from shut; swing doors thud when they shut, the elevator
@@ -430,9 +430,8 @@ func _collect_elevator_lights(node: Node) -> void:
 func _add_indicator_glow() -> void:
 	for node in _elevator_lights:
 		if node is MeshInstance3D and node.name.to_lower().contains("indicator"):
-			_indicator_glow = BUDGET_LIGHT.create(Color(1.0, 0.78, 0.4), 1.6, 3.0)
+			_indicator_glow = BUDGET_LIGHT.create(Color(1.0, 0.78, 0.4), 0.25, 1.0)
 			_indicator_glow.position = Vector3(0.0, -0.3, -0.45)
-			_indicator_glow.set_wanted(false)
 			node.add_child(_indicator_glow)
 			return
 
@@ -476,7 +475,7 @@ func _lens_surface(mesh_instance: MeshInstance3D) -> int:
 	return best
 
 
-# Original (off) and lit copies of a light surface, made once.
+# Dim (shut) and lit (open, was 4.0) copies of a light surface, made once.
 func _light_materials(mesh_instance: MeshInstance3D, surface: int) -> Array:
 	var key := "%d:%d" % [mesh_instance.get_instance_id(), surface]
 	if _light_material_cache.has(key):
@@ -486,11 +485,11 @@ func _light_materials(mesh_instance: MeshInstance3D, surface: int) -> Array:
 	# The model's materials are ORM materials, which are not StandardMaterial3D.
 	if material is BaseMaterial3D:
 		var off := material.duplicate() as BaseMaterial3D
-		off.emission_enabled = false
-		var lit := material.duplicate() as BaseMaterial3D
-		lit.emission_enabled = true
-		lit.emission = Color(1.0, 0.78, 0.28)
-		lit.emission_energy_multiplier = 4.0
+		off.emission_enabled = true
+		off.emission = Color(1.0, 0.78, 0.28)
+		off.emission_energy_multiplier = 0.5
+		var lit := off.duplicate() as BaseMaterial3D
+		lit.emission_energy_multiplier = 2.0
 		pair = [off, lit]
 	_light_material_cache[key] = pair
 	return pair

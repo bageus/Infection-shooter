@@ -117,7 +117,7 @@ func _test_weapons() -> void:
 
 
 func _test_impacts() -> void:
-	var expected := {"metal": &"hit_metal", "wood": &"hit_wood", "light": &"hit_paper", "tech": &"hit_electronics", "concrete": &"hit_wall", "glass": &"hit_glass"}
+	var expected := {"metal": &"hit_metal", "wood": &"hit_wood", "light": &"hit_paper", "tech": &"hit_electronics", "concrete": &"hit_wall", "glass": &"hit_glass", "pipe": &"hit_pipe", "door": &"hit_door"}
 	var x := 10.0
 	for material: String in expected:
 		var gun := _armed(PISTOL, Vector3(x, 1, 0))

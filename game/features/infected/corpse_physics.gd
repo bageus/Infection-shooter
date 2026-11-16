@@ -5,6 +5,7 @@ var skeleton: Skeleton3D
 var _bones: Dictionary = {}
 var _parts: Node
 var _guard: Node
+const HUMANOID_SKIN_MARGIN := 1.25
 const GUARD := preload("res://game/features/infected/corpse_guard.gd")
 
 
@@ -73,7 +74,13 @@ func _build(segment: Dictionary) -> PhysicalBone3D:
 	var start: Vector3 = rest.affine_inverse() * Vector3(segment["start"])
 	var end: Vector3 = rest.affine_inverse() * Vector3(segment["end"])
 	var axis := end - start
-	var radius := clampf(float(segment["radius"]) * 1.5, .03, 1.0)
+	var radius := float(segment["radius"]) * 1.5
+	# Humanoid part-based skins weigh whole body parts to one bone, so the measured thickness can dwarf the
+	# bone: bound it by the bone's length so the ragdoll neither folds into a heap nor hovers on its fat capsules
+	# (the horde's tentacle rig is exempt).
+	if skeleton.find_bone("T0_A") < 0:
+		radius = minf(radius, maxf(axis.length() * .5 + .02, .1) * HUMANOID_SKIN_MARGIN)
+	radius = clampf(radius, .03, 1.0)
 	var capsule := CapsuleShape3D.new()
 	var world_bone := skeleton.global_transform * skeleton.get_bone_global_pose(index)
 	var world_radius := radius * world_bone.basis.get_scale().abs()[world_bone.basis.get_scale().abs().max_axis_index()]

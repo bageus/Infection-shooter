@@ -62,18 +62,14 @@ func _test_rifles(actor: CharacterBody3D, effects: Node3D, crosshair: Node) -> v
 			if actor.get_node("AnimationDriver").animation_player.current_animation_position > .15:
 				break
 			await process_frame
-		_check(String(actor.get_node("AnimationDriver").animation_player.current_animation).contains("Launcher"), "Rifles reuse Launcher two-hand stance")
+		var family: String = {4: "AK", 5: "M4", 6: "Sniper"}[index]
+		_check(String(actor.get_node("AnimationDriver").animation_player.current_animation).ends_with("_" + family), "Each rifle plays its own baked clip")
 		_check(gun.casing_scene.resource_path.ends_with("12_rifle_casing.glb"), "Rifle casing model assigned")
 		_check(is_equal_approx(gun.casing_size_multiplier, 1.15 if index == 6 else 1.0), "Only sniper has enlarged rifle casings")
 		_check(is_equal_approx(gun.camera_distance_bonus, 8.0 if index == 6 else 3.0), "Sniper widens camera farther than assault rifles")
 		actor.call("_update_camera", 2.0)
 		_check(absf(actor.get("camera").position.length() - float(actor.get("_camera_distance")) - gun.camera_distance_bonus) < .01, "Equipping rifle applies actual camera distance")
-		var grip := gun.find_child("Grip_R", true, false) as Node3D
-		actor.get_node("WeaponMount").call("sync_weapon", gun)
-		_check(grip.global_position.distance_to(gun.global_position) < .001, "New right grip aligns with the hand socket")
-		var pose: Node = actor.get_node("WeaponMount").get("equipment_pose")
-		# Weapons posed by hand in the hold tuner (ARM_TUNING) may leave the trigger hand off the grip on purpose (owner-set hand nudges), within 35 cm.
-		_check(pose.hand_error < (.35 if pose.ARM_TUNING.has(pose._held) else .025), "Support hand reaches the authored grip without bone stretching")
+		await _check_on_model_muzzle(actor, gun, family)
 		var before: int = gun.call("get_magazine_ammo")
 		_check(actor.call("_fire_weapon", gun), "New rifle emits a real projectile")
 		_check(gun.call("get_magazine_ammo") == before - 1, "Shot consumes exactly one round")
@@ -118,6 +114,19 @@ func _test_rifles(actor: CharacterBody3D, effects: Node3D, crosshair: Node) -> v
 				bullet.queue_free()
 		await process_frame
 
+## The weapon's muzzle sits on the muzzle of the model's own gun, pointing along its barrel.
+func _check_on_model_muzzle(actor: Node3D, gun: Node3D, family: String) -> void:
+	(actor.get_node("AnimationDriver").animation_player as AnimationPlayer).advance(0.5)
+	await process_frame
+	await process_frame
+	actor.get_node("WeaponMount").call("sync_weapon", gun)
+	var model_muzzle := actor.get_node("Body").find_child(family + "_Muzzle", true, false) as Node3D
+	var muzzle := gun.get_node("Muzzle") as Node3D
+	_check(muzzle.global_position.distance_to(model_muzzle.global_position) < .001, "Weapon muzzle sits on the model's muzzle")
+	_check((-muzzle.global_basis.z).dot(model_muzzle.global_basis.orthonormalized().x) > .999, "Weapon muzzle points along the model's barrel")
+	_check((gun.get_node("Body").find_children("*", "MeshInstance3D", true, false) as Array).all(func(m: Node) -> bool: return not (m as MeshInstance3D).visible), "The weapon's own meshes are hidden; the model's gun is drawn")
+
+
 func _check_reload_audio(gun: Node3D, index: int) -> void:
 	var expected: StringName = {4: &"ak_reload", 5: &"m4_reload", 6: &"sniper_reload"}[index]
 	gun.call("start_reload")
@@ -132,12 +141,11 @@ func _test_minigun(actor: CharacterBody3D, effects: Node3D, crosshair: Node) -> 
 	var gun: Node3D = actor.call("get_current_weapon")
 	await process_frame
 	await process_frame
-	var pose: Node = actor.get_node("WeaponMount").get("equipment_pose")
-	_check(pose.hand_error < .025, "Minigun support hand reaches the front grip")
-	_check(pose.backpack.visible, "Backpack appears on the equipped player")
-	_check(pose.backpack.get_parent() is BoneAttachment3D, "Backpack follows the spine")
+	await _check_on_model_muzzle(actor, gun, "Minigun")
+	var backpack := actor.get_node("Body").find_child("Vest_Backpack", true, false) as MeshInstance3D
+	_check(backpack != null and backpack.visible and backpack.skin != null, "The model's backpack is skinned to the spine")
 	var flashlight := actor.find_child("Flashlight", true, false) as SpotLight3D
-	_check(flashlight != null and not flashlight.shadow_enabled and flashlight.find_parent("Muzzle") != null, "Flashlight model sits on the muzzle, beam from its lens, no shadows")
+	_check(flashlight != null and not flashlight.shadow_enabled and flashlight.find_parent("Minigun_Muzzle") != null, "Flashlight model sits on the model muzzle, beam from its lens, no shadows")
 	_check(not crosshair.scope.visible, "Switching to minigun disables scope render")
 	_check(gun.call("get_magazine_ammo") == 400 and gun.call("get_reserve_ammo") == 0, "HUD exposes one 400-round belt")
 	_check(not actor.call("_fire_weapon", gun), "Minigun does not fire before its barrels spin up")
@@ -186,7 +194,6 @@ func _test_minigun(actor: CharacterBody3D, effects: Node3D, crosshair: Node) -> 
 	_check(actor.call("select_weapon_slot", 0), "Normal weapon switch remains usable")
 	await process_frame
 	await process_frame
-	_check(not pose.backpack.visible, "Backpack is hidden when minigun is holstered")
 	# Let the sustained-fire envelope recover, then verify the original zoom.
 	for frame in 240:
 		actor.call("_update_camera", 1.0 / 60.0)

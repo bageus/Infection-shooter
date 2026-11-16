@@ -193,7 +193,7 @@ func _test_displays() -> void:
 		floor_view.call("clear_glass_debris")
 
 func _test_steps() -> void:
-	for weapon: String in ["SNIPER", "SHOTGUN", "AK", "M4", "MINIGUN", "GRENADE"]:
+	for weapon: String in ["SNIPER RIFLE", "SHOTGUN", "AK", "M4", "MINIGUN", "GRENADE", "GRENADE LAUNCHER"]:
 		_check(EVENTS.powerful(weapon), "Heavy weapon permits occasional structural damage")
 	_check(not EVENTS.powerful("PISTOL") and not EVENTS.powerful("UZI"), "Light bullets cannot peel plaster")
 	seed(7251)

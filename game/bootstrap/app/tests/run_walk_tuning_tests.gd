@@ -26,7 +26,7 @@ func _run() -> void:
 	player.set("gravity_acceleration", 0.0)
 	await process_frame
 	await process_frame
-	_check(player.get_node("AnimationDriver").get("legs").get("playback_multiplier") == 0.75, "Tuning set before skeleton attachment survives initialization")
+	_check(player.get_node("AnimationDriver").get("leg_playback_multiplier") == 0.75, "Tuning set before skeleton attachment survives initialization")
 	_test_config()
 	await _test_movement(player)
 	_test_leg_clocks(player)
@@ -115,30 +115,18 @@ func _settled_speed(player: CharacterBody3D, sprinting: bool = false) -> float:
 
 func _test_leg_clocks(player: CharacterBody3D) -> void:
 	var driver: Node = player.get_node("AnimationDriver")
-	driver.set_process(false)
-	var legs: SkeletonModifier3D = driver.get("legs")
-	_check(legs != null, "Player owns the retargeted leg clips")
-	if legs == null:
-		return
-	legs.active = false
-	player.velocity = Vector3(0, 0, 3)
-	legs.call("_process_modification_with_delta", 0.0)
-	var upper_rate: float = driver.get("animation_player").speed_scale
-	var increments: Array[float] = []
+	_check(driver.get("legs") == null, "Player plays baked whole-body clips, not retargeted leg clips")
+	var animation_player: AnimationPlayer = driver.get("animation_player")
+	player.velocity = Vector3(0, 0, -3)
+	var rates: Array[float] = []
 	for multiplier in [0.5, 2.0]:
 		player.call("set_walk_tuning", 1.0, multiplier)
-		legs.set("phase", 0.1)
-		legs.set("travel_angle", 0.0)
-		legs.set("weight", 1.0)
-		legs.call("_apply_run", legs.get_skeleton(), 0.01)
-		increments.append(float(legs.get("phase")) - 0.1)
-		_check(driver.get("animation_player").speed_scale == upper_rate, "Leg tuning leaves the upper-body clock unchanged")
-		_check(player.velocity == Vector3(0, 0, 3), "Leg tuning is presentation-only")
-		_check(driver.call("play_dodge", Vector3.FORWARD, 0.55), "Dodge clip remains playable")
-		legs.call("_process_modification_with_delta", 0.1)
-		_check(is_equal_approx(float(legs.get("_dodge_time")), 0.1), "Leg tuning does not scale the dodge clock")
-		legs.call("cancel_dodge")
-	_check(increments[0] > 0.0 and is_equal_approx(increments[1] / increments[0], 4.0), "2x leg cycles advance four times as far as 0.5x at the same velocity")
+		driver.call("_process_skeletal", 3.0)
+		rates.append(animation_player.speed_scale)
+		_check(player.velocity == Vector3(0, 0, -3), "Pace tuning is presentation-only")
+	_check(is_equal_approx(rates[1] / rates[0], 4.0), "Walking pace scales the baked cycle's playback")
+	_check(driver.call("play_dodge", Vector3.FORWARD, 0.55), "Dodge clip remains playable")
+	_check(is_equal_approx(animation_player.speed_scale, float(driver.call("clip_length", &"Running_Dive_Roll")) / 0.55), "Pace tuning does not scale the dodge")
 	player.call("set_walk_tuning", NAN, NAN)
 	_check(player.get("_walk_speed_multiplier") == 1.0 and driver.get("leg_playback_multiplier") == 1.0, "Non-finite tuning restores safe defaults")
 

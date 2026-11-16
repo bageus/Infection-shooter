@@ -8,13 +8,13 @@ signal footstep(side: int, speed: float)
 
 const MODEL_PROBE := preload("res://game/features/character_animation/animation_model_probe.gd")
 const POSE := preload("res://game/features/character_animation/procedural_pose.gd")
-const GAIT := preload("res://game/features/character_animation/procedural_gait.gd")
 const HIT_REACTION := preload("res://game/features/character_animation/hit_reaction.gd")
-const LEG_MOTION := preload("res://game/features/character_animation/leg_clip_motion.gd")
 const CLIP_LOOKUP := preload("res://game/features/character_animation/clip_lookup.gd")
 const OVERLAY := preload("res://game/features/character_animation/clip_overlay.gd")
 const LEG_OVERLAY := preload("res://game/features/character_animation/leg_overlay.gd")
 const STANCE_FEET := preload("res://game/features/character_animation/stance_feet.gd")
+const CLIP_FOOTSTEPS := preload("res://game/features/character_animation/clip_footsteps.gd")
+const CLIP_TUNING := preload("res://game/features/character_animation/clip_tuning.gd")
 const STRIKE_POSE := preload("res://game/features/character_animation/strike_pose.gd")
 const STATE_ATTACK := &"attack"
 const STATE_DEATH := &"death"
@@ -55,16 +55,17 @@ const STATE_ATTACK_CRAWL := &"attack_crawl"
 ## A running character keeps the run clip down to this share of the threshold,
 ## so speed wobble around it does not flicker between walk and run.
 @export_range(0.5, 1.0) var run_exit_ratio := 0.85
-## Rebuild the legs with a speed-synchronised gait over the playing clip
-## (for authored upper-body clips whose leg motion limps or slides).
-@export var procedural_gait := false
-## Retargeted hips-and-legs clips (run in eight directions, dodge roll and
-## strafe jumps, ADR-0044); they replace the procedural gait and leave the arms
-## and the weapon hold to the upper-body clips.
-@export var leg_clips: AnimationLibrary
 ## Clips merged into the model's own default library (same names win), so a
 ## rebuilt model keeps authored extras such as the Mixamo set (ADR-0045).
 @export var extra_clips: AnimationLibrary
+## Emit `footstep` from the baked Walk_*/Run_* cycles (the player's model has no leg motion modifiers).
+@export var clip_footsteps := false
+## Set by the player while its feet step it round on the spot: a walking pace for the cycle and footsteps.
+var turn_step_speed := 0.0
+## Idle foot turn and knee nudge for authored enemy clips; the player's baked clips already stand right.
+@export var stance_feet := true
+## Clip played for a dodge roll when there are no leg clips.
+@export var dodge_clip := &"Running_Dive_Roll"
 ## Playback speed is scaled by speed / reference while moving; 0 disables it.
 @export var walk_reference_speed := 0.0
 @export var run_reference_speed := 0.0
@@ -74,8 +75,6 @@ const STATE_ATTACK_CRAWL := &"attack_crawl"
 @export var leg_playback_multiplier := 1.0:
 	set(value):
 		leg_playback_multiplier = clampf(value, 0.5, 2.0) if is_finite(value) else 1.0
-		if legs != null:
-			legs.set("playback_multiplier", leg_playback_multiplier)
 ## Visual pivot animated procedurally when the model has no AnimationPlayer.
 @export var procedural_target_path: NodePath = NodePath("Body/Visual")
 @export var procedural_bob_height := 0.06
@@ -92,8 +91,6 @@ var defer_setup := false
 var _prepared := false
 var character: CharacterBody3D
 var animation_player: AnimationPlayer
-var gait: SkeletonModifier3D
-var legs: SkeletonModifier3D
 var hit_reaction: SkeletonModifier3D
 var overlay: SkeletonModifier3D
 var strike: SkeletonModifier3D
@@ -117,6 +114,7 @@ var _flinch_elapsed := -1.0
 var _overlay_applied := false
 var _attack_side := false
 var _transition_legs := ""
+var _step_phase := -1.0
 
 
 # Public animation_selection_v1: optional presentation-only selector.
@@ -241,19 +239,30 @@ func _strike_speed(animation: Animation) -> float:
 # `duration` seconds toward a world-space direction, relative to the body.
 # Returns false without leg clips. The roll turns the whole body along the dodge.
 func play_dodge(world_direction: Vector3, duration: float) -> bool:
-	if legs == null or _dead:
+	return _play_dodge_clip(world_direction, duration)
+
+
+# Baked dodge: the body turns along the dodge and the whole-body roll clip is squeezed into `duration`.
+func _play_dodge_clip(world_direction: Vector3, duration: float) -> bool:
+	var direction := Vector3(world_direction.x, 0.0, world_direction.z)
+	if _dead or direction.length_squared() < 0.0001 or _target == null or play_named_one_shot(dodge_clip, 0.06, clip_length(dodge_clip) / maxf(duration, 0.05)) <= 0.0:
 		return false
-	var skeleton := legs.get_skeleton()
-	var local := skeleton.global_basis.inverse() * Vector3(world_direction.x, 0.0, world_direction.z)
-	if local.length_squared() < 0.0001:
-		return false
-	var heading := atan2(local.x, local.z)
-	return bool(legs.call("start_dodge", "Dodge_Roll", duration, heading))
+	_target.global_rotation = Vector3(0.0, atan2(direction.x, direction.z), 0.0)
+	return true
 
 
 # Public animation_events_v1 addition (ADR-0044): true while a dodge clip plays.
 func is_dodging() -> bool:
-	return legs != null and bool(legs.call("is_dodging"))
+	return _one_shot == dodge_clip
+
+
+# Public animation_events_v1 addition: stops a one-shot clip early (a cancelled reload) and returns to locomotion.
+func cancel_one_shot(clip_name: StringName) -> void:
+	if _one_shot != clip_name or _dead:
+		return
+	_one_shot = &""
+	_transition_legs = ""
+	_current = ""
 
 
 # Public animation_events_v1: hit reaction. Skeletal models twist and rock the
@@ -286,10 +295,6 @@ func set_active(active: bool) -> void:
 		overlay.active = active
 	if leg_overlay != null:
 		leg_overlay.active = active
-	if legs != null:
-		legs.active = active
-	if gait != null:
-		gait.active = active
 
 
 func _ready() -> void:
@@ -320,12 +325,9 @@ func prepare_visual() -> void:
 		_configure_looping_clips()
 		_target = model as Node3D
 		_pose.feet = Vector3(0.0, MODEL_PROBE.feet_height(model), 0.0)
-		if leg_clips != null:
-			_attach_legs(model)
-		elif procedural_gait:
-			_attach_gait(model)
 		_attach_hit_reaction(model)
-		STANCE_FEET.attach(model, animation_player)
+		if stance_feet:
+			STANCE_FEET.attach(model, animation_player)
 		set_active(_active_requested)
 		_play_locomotion(&"idle", 0.0)
 		return
@@ -376,8 +378,11 @@ func _advance_one_shot(delta: float) -> void:
 	one_shot_finished.emit(finished)
 
 
-func _process_skeletal(speed: float) -> void:
+func _process_skeletal(real_speed: float) -> void:
+	var speed := maxf(real_speed, turn_step_speed)
 	_apply_flinch_overlay()
+	if clip_footsteps:
+		_emit_clip_steps(speed)
 	_update_attack_legs(speed)
 	if not _one_shot.is_empty() or _dead:
 		return
@@ -390,6 +395,19 @@ func _process_skeletal(speed: float) -> void:
 		_play_locomotion(&"walk", speed)
 	else:
 		_play_locomotion(&"idle", speed)
+
+
+func _emit_clip_steps(speed: float) -> void:
+	var clip := animation_player.current_animation
+	var length := animation_player.current_animation_length
+	if speed <= 0.15 or not _one_shot.is_empty() or length <= 0.0 or not animation_player.is_playing():
+		_step_phase = -1.0
+		return
+	var phase := animation_player.current_animation_position / length
+	var side := CLIP_FOOTSTEPS.step_side(clip.get_slice("_", 0), phase if _step_phase < 0.0 else _step_phase, phase)
+	_step_phase = phase
+	if side >= 0:
+		footstep.emit(side, speed)
 
 
 func _process_procedural(speed: float, delta: float) -> void:
@@ -426,7 +444,10 @@ func _play_selected_clip(speed: float = 0.0) -> bool:
 		_play_clip(String(requested))
 		# Cycles that name the ground speed they are paced for follow the actual speed.
 		var reference := float(animation_player.get_animation(requested).get_meta("ref_speed", 0.0))
-		var wanted := (clampf(speed / reference, 0.5, 1.8) if reference > 0.0 and speed > 0.15 else 1.0) * locomotion_speed_multiplier
+		var wanted := (clampf(speed / reference, 0.5, 2.4) if reference > 0.0 and speed > 0.15 else 1.0) * locomotion_speed_multiplier
+		# The walking-animation setting paces the player's baked cycles (idle stays at its own pace).
+		if clip_footsteps and speed > 0.15:
+			wanted *= leg_playback_multiplier
 		if not is_equal_approx(animation_player.speed_scale, wanted):
 			animation_player.speed_scale = wanted
 		return true
@@ -443,7 +464,7 @@ func _update_attack_legs(speed: float) -> void:
 	var clip: String = _transition_legs if not _transition_legs.is_empty() else _locomotion.get(state, "")
 	if _one_shot == STATE_ATTACK_CRAWL and animation_player.has_animation(CRAWL_LEGS):
 		clip = CRAWL_LEGS
-	var wanted := (_one_shot in MOVING_ATTACKS or not _transition_legs.is_empty()) and not _dead and leg_clips == null and not clip.is_empty()
+	var wanted := (_one_shot in MOVING_ATTACKS or not _transition_legs.is_empty()) and not _dead and not clip.is_empty()
 	if leg_overlay == null and wanted and speed > 0.15:
 		leg_overlay = LEG_OVERLAY.attach(animation_player.get_parent())
 	if leg_overlay != null:
@@ -495,6 +516,8 @@ func _index_animations() -> void:
 	for animation_name in animation_player.get_animation_list():
 		var normalized := str(animation_name).to_lower().replace(" ", "_").replace("-", "_")
 		_animations[normalized] = str(animation_name)
+	if clip_footsteps:
+		CLIP_TUNING.apply(animation_player, dodge_clip)
 	for state: StringName in LOCOMOTION_TOKENS:
 		_locomotion[state] = CLIP_LOOKUP.find(_animations, NON_LOOPING_TOKENS, LOCOMOTION_TOKENS[state])
 
@@ -545,30 +568,6 @@ func _should_loop(clip_name: String) -> bool:
 		if token in lower:
 			return true
 	return false
-
-
-func _attach_gait(model: Node) -> void:
-	var skeletons := model.find_children("*", "Skeleton3D", true, false)
-	if skeletons.is_empty():
-		return
-	gait = GAIT.new()
-	gait.name = "ProceduralGait"
-	gait.character = character
-	gait.connect("stepped", func(side: int, speed: float) -> void: footstep.emit(side, speed))
-	(skeletons[0] as Node).add_child(gait)
-
-
-func _attach_legs(model: Node) -> void:
-	var skeletons := model.find_children("*", "Skeleton3D", true, false)
-	if skeletons.is_empty():
-		return
-	legs = LEG_MOTION.new()
-	legs.name = "LegClips"
-	legs.character = character
-	legs.clips = leg_clips
-	legs.set("playback_multiplier", leg_playback_multiplier)
-	legs.connect("stepped", func(side: int, speed: float) -> void: footstep.emit(side, speed))
-	(skeletons[0] as Node).add_child(legs)
 
 
 func _attach_hit_reaction(model: Node) -> void:

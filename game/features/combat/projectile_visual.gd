@@ -20,19 +20,23 @@ var _direction := Vector3.RIGHT
 func configure(weapon: String, direction: Vector3) -> void:
 	_direction = direction.normalized()
 	var meshes: Array = _meshes_for(weapon)
+	# Visual only: bullets read 3x thinner across; length, hitboxes and damage stay. The grenade keeps its size.
+	var width := 1.0 if weapon == "GRENADE LAUNCHER" else 1.0 / 3.0
 	if meshes[0] != null:
 		var face := MeshInstance3D.new()
 		face.mesh = meshes[0]
+		face.scale.y = width
 		add_child(face)
 	var core := MeshInstance3D.new()
 	core.mesh = meshes[1]
-	core.scale.x = 1.5
+	core.scale = Vector3(1.5, width, width)
 	core.position.x = float(meshes[2]) * 0.12
 	add_child(core)
 	if meshes[3] != null:
 		var streak := MeshInstance3D.new()
 		streak.name = "BulletStreak"
 		streak.mesh = meshes[3]
+		streak.scale.y = width
 		streak.position.x = -float(meshes[2]) * 0.42
 		streak.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
 		add_child(streak)

@@ -335,18 +335,22 @@ func _test_elevator() -> void:
 	if glow == null:
 		return
 	var housing := door.find_child("Indicator_Housing", true, false) as MeshInstance3D
-	_check(not glow.visible, "Indicator light is off while the doors are shut")
-	_check(not _lens_glows(housing), "Indicator lens is dark while the doors are shut")
+	_check(glow.visible and glow.light_energy < 1.0, "Indicator halo is a small dim glow while the doors are shut")
+	_check(_lens_glows(housing), "Indicator lens always glows, even when the doors are shut")
+	var dim := _lens_energy(housing)
+	_check(dim > 0.0 and dim < 1.0, "Indicator lens is dim while the doors are shut")
 	actor.position = Vector3(0, 0, -0.8)
 	for i in range(100):
 		await physics_frame
-	_check(glow.visible, "Indicator light turns on when the doors are open")
+	_check(glow.light_energy > 1.0, "Indicator halo brightens when the doors are open")
 	_check(_lens_glows(housing), "Indicator lens glows when the doors are open")
+	var bright := _lens_energy(housing)
+	_check(bright > dim and bright < 4.0, "Indicator lens is brighter when open, but less than the old 4.0")
 	_check(not _frame_glows(housing), "Only the lens glows, not the frame")
 	actor.position = Vector3(0, 0, -9.0)
 	for i in range(220):
 		await physics_frame
-	_check(not glow.visible, "Indicator light turns off after the doors close")
+	_check(glow.light_energy < 1.0, "Indicator halo dims again after the doors close")
 	door.free()
 	actor.free()
 	controller.free()
@@ -355,6 +359,11 @@ func _test_elevator() -> void:
 func _lens_glows(housing: MeshInstance3D) -> bool:
 	var material := housing.get_surface_override_material(1) as BaseMaterial3D
 	return material != null and material.emission_enabled
+
+
+func _lens_energy(housing: MeshInstance3D) -> float:
+	var material := housing.get_surface_override_material(1) as BaseMaterial3D
+	return material.emission_energy_multiplier if material != null else 0.0
 
 
 func _frame_glows(housing: MeshInstance3D) -> bool:

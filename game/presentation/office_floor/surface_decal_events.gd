@@ -49,7 +49,7 @@ func hit(collider: Node3D, point: Vector3, normal: Vector3, weapon: String, anch
 	return true
 
 static func powerful(weapon: String) -> bool:
-	return weapon in ["SHOTGUN", "SNIPER", "AK", "AK_RIFLE", "M4", "M4_RIFLE", "MINIGUN", "GRENADE", "LAUNCHER"]
+	return weapon in ["SHOTGUN", "SNIPER RIFLE", "AK", "M4", "MINIGUN", "GRENADE", "GRENADE LAUNCHER"]
 
 # Architecture (walls, columns, windows, doors) sits under a camera_occluder root, whatever it is named.
 static func _is_architecture(collider: Node) -> bool:

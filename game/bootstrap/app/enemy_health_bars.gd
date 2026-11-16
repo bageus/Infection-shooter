@@ -57,6 +57,8 @@ func _draw() -> void:
 		var pixels := clampf(_body_width(body) * BAR_WIDTH_SCALE * pixels_per_tan / distance, BAR_SIZE.x, MAX_BAR_WIDTH)
 		var bar := Vector2(pixels, BAR_SIZE.y)
 		var origin := camera.unproject_position(point) - bar * 0.5
+		if not (origin.is_finite() and is_finite(pixels) and is_finite(hp / max_hp)):
+			continue  # NaN/inf makes the quad untriangulatable
 		_draw_bar(Rect2(origin, bar), clampf(hp / max_hp, 0.0, 1.0))
 
 

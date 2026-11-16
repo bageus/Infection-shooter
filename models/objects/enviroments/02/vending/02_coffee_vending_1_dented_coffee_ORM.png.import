@@ -2,10 +2,13 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://b5qhffkqf2b1w"
+uid="uid://bjmnmiw4qv71p"
 path="res://.godot/imported/02_coffee_vending_1_dented_coffee_ORM.png-db4e6a5e8402cba3b125d683ac9bd229.ctex"
 metadata={
 "vram_texture": false
+}
+generator_parameters={
+"md5": "f8b283fbf41c8677170a14fe4c29d341"
 }
 
 [deps]

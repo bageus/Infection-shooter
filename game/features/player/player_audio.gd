@@ -30,6 +30,8 @@ const SKILL_SOUNDS := {
 const PASSIVE_SOUNDS := {"second_heart": &"skill_second_heart", "retaliation": &"skill_retaliation"}
 ## Matches the spore release delay in mutation_skill_effects.gd.
 const SPORE_DELAY := 2.0
+## The backpack rattle follows each footstep by this much (a fraction of a second).
+const BACKPACK_RATTLE_DELAY := 0.1
 
 var glass_surface_query: Callable
 var biomass_surface_query: Callable
@@ -60,7 +62,7 @@ func _on_footstep(_side: int, speed: float) -> void:
 	if float(_player.get("_roll_remaining")) > 0.0:
 		return
 	var foot := _foot_position()
-	var event: StringName = &"step_player"
+	var event: StringName = &"step_concrete"
 	if glass_surface_query.is_valid() and bool(glass_surface_query.call(foot)):
 		event = &"step_glass"
 	elif biomass_surface_query.is_valid() and bool(biomass_surface_query.call(foot)):
@@ -68,8 +70,16 @@ func _on_footstep(_side: int, speed: float) -> void:
 	var impacts := _player.get("impact_pool") as Node
 	if is_instance_valid(impacts) and impacts.has_method("request_surface_step"):
 		impacts.call("request_surface_step", _player)
-	# Sprinting lands harder than walking.
-	SFX.play(_player, event, _player.global_position, lerpf(-3.0, 2.0, clampf((speed - 3.0) / 6.0, 0.0, 1.0)))
+	# Sprinting lands harder than walking, and a foot shuffled while turning on the spot barely taps.
+	SFX.play(_player, event, _player.global_position, lerpf(-8.0, 4.0, clampf(speed / 9.0, 0.0, 1.0)))
+	if _player.has_method("note_footstep"):
+		_player.call("note_footstep", speed)
+	get_tree().create_timer(BACKPACK_RATTLE_DELAY).timeout.connect(_play_backpack_rattle)
+
+
+func _play_backpack_rattle() -> void:
+	if is_instance_valid(_player) and _player.is_inside_tree():
+		SFX.play(_player, &"backpack_rattle")
 
 
 func _foot_position() -> Vector3:

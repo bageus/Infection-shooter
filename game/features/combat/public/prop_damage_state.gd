@@ -6,8 +6,13 @@ enum HitAction { NONE, SHUDDER, SCATTER, TRANSITION, CHIP_FACADE, DETACH, PUSH, 
 const BROKEN_CRATE_HEALTH := 70.0
 enum Transition { NONE, VARIANT, BREAK }
 const BIG_CRATES := ["04_crate_wood_large.glb"]
-## Props no blow breaks: a full drywall pallet is a solid stack, kept whole like the tarp-covered crate.
-const INDESTRUCTIBLE := ["15_pallet_drywall_flat_full.glb"]
+## Props no blow breaks: loaded pallets are solid stacks, kept whole like the tarp-covered crate;
+## vending machines and white goods are kept whole too (their dent and break stages were removed).
+const INDESTRUCTIBLE := [
+	"15_pallet_drywall_flat_full.glb", "15_pallet_concrete_blocks_double.glb",
+	"02_vending_automat_1_dented.glb", "02_vending_automat_2_dented.glb", "02_vending_machine_fantas_dented.glb",
+	"02_coffee_vending_1_dented.glb", "02_frige_dented.glb", "02_dishwasher_dented.glb", "02_washing_machine_dented.glb",
+]
 var category := "large"
 var health := 0.0
 var broken := false

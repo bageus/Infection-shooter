@@ -102,7 +102,7 @@ func take_projectile_hit(_damage: float, hit_position: Vector3, hit_normal: Vect
 		var mark_size := _glass_mark_size(hit_position)
 		if mark_size >= 0.08:
 			CRACKS.spawn(self, hit_position, hit_normal, mark_size)
-		return false
+		return true # bulletproof: the round stops here
 	if _broken:
 		return false
 	# Bullets crack the pane first; a blast or the hit after the last crack

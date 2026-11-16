@@ -2,10 +2,13 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://cbgc587x2gy8t"
+uid="uid://5qe8x4pa54f5"
 path="res://.godot/imported/02_vending_automat_2_dented_basecolor.png-f7bc6169a1006c763b06ae910355ec16.ctex"
 metadata={
 "vram_texture": false
+}
+generator_parameters={
+"md5": "2d749eaa72a7d0247844babab8e7991c"
 }
 
 [deps]
