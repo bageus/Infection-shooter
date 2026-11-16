@@ -6,7 +6,7 @@ var _bones: Dictionary = {}
 var _parts: Node
 var _guard: Node
 const HUMANOID_SKIN_MARGIN := 1.25
-const HORDE_MAX_RADIUS := 0.3
+const HORDE_MAX_RADIUS := 0.6
 const GUARD := preload("res://game/features/infected/corpse_guard.gd")
 ## Joint limits in degrees {swing, twist} by bone-name suffix: a body bends like a person, not like a sack.
 ## Knees and elbows fold one way and barely twist; thighs stay near the hips so legs do not splay or corkscrew.
