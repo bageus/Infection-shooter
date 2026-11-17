@@ -226,7 +226,8 @@ static func _lod_levels(body: Node3D) -> Array[int]:
 			var stride := RenderingServer.mesh_surface_get_format_index_stride(stored.format, stored.vertex_count)
 			var counts: Array[int] = [stored.index_count / 3]
 			for lod: Dictionary in stored.get("lods", []):
-				counts.append((lod.index_data as PackedByteArray).size() / stride / 3)
+				var lod_bytes := float((lod.index_data as PackedByteArray).size())
+				counts.append(int(lod_bytes / stride / 3.0))
 			surfaces.append(counts)
 			levels = maxi(levels, counts.size())
 	var result: Array[int] = []

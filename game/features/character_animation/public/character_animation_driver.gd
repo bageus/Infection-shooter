@@ -517,7 +517,7 @@ func _play_locomotion(state: StringName, speed: float) -> void:
 		_hold_rest_pose()
 		return
 	_play_clip(clip)
-	var own: float = _variants.own_rate(animation_player.get_animation(clip), speed)
+	var own: float = ENEMY_VARIANTS.own_rate(animation_player.get_animation(clip), speed)
 	var wanted := own * locomotion_speed_multiplier if own > 0.0 else _locomotion_scale(state, speed)
 	if not is_equal_approx(animation_player.speed_scale, wanted):
 		animation_player.speed_scale = wanted
@@ -565,7 +565,7 @@ func _index_animations() -> void:
 
 func _pick_one_shot_clip(state: StringName) -> String:
 	_attack_side = not _attack_side if state == STATE_ATTACK else _attack_side
-	return _variants.pick(_animations, state, ONE_SHOT_TOKENS[state], NON_LOOPING_TOKENS, _attack_side)
+	return ENEMY_VARIANTS.pick(_animations, state, ONE_SHOT_TOKENS[state], NON_LOOPING_TOKENS, _attack_side)
 
 
 func _configure_looping_clips() -> void:
