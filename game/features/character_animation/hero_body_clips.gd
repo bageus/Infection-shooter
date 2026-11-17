@@ -5,11 +5,17 @@ extends RefCounted
 const KICK := &"Kick"
 const TURN := {&"left": &"Turn_Left", &"right": &"Turn_Right"}
 const DEATHS := [&"Death_FromRight", &"Death_Dying", &"Death_HitToBack"]
+## The death clip that ends in a ragdoll (the fall backward).
+const RAGDOLL_AFTER := &"Death_HitToBack"
 ## A turn clip is squeezed to this many seconds (the body itself swings round in about half a second).
-const TURN_SECONDS := 0.75
+const TURN_SECONDS := 0.6
 const KICK_SPEED := 1.6
 const BODY_BONES := ["Hips", "Spine", "Spine1", "Spine2", "Neck", "Head", "LeftUpLeg", "LeftLeg", "LeftFoot", "LeftToeBase", "RightUpLeg", "RightLeg", "RightFoot", "RightToeBase"]
+## A turn on the spot drives only the pelvis and legs (the steps): the game already swings the torso, arms and head with the aim,
+## and a second clip on them made the head jerk (Vadim).
+const TURN_BONES := ["Hips", "LeftUpLeg", "LeftLeg", "LeftFoot", "LeftToeBase", "RightUpLeg", "RightLeg", "RightFoot", "RightToeBase"]
 const ARM_BONES := ["LeftShoulder", "LeftArm", "LeftForeArm", "LeftHand", "RightShoulder", "RightArm", "RightForeArm", "RightHand"]
+const RAGDOLL := preload("res://game/features/character_animation/hero_ragdoll.gd")
 const OVERLAY := preload("res://game/features/character_animation/clip_overlay.gd")
 
 
@@ -36,13 +42,13 @@ static func play(driver: Node, clip: StringName, clip_speed: float, kind: String
 			return 0.0
 		var overlay := OVERLAY.new()
 		overlay.name = "BodyClip"
-		overlay.bones = BODY_BONES
 		overlay.held = ARM_BONES
 		overlay.fade_in = 0.12
 		overlay.fade_out = 0.2
 		(skeletons[0] as Node).add_child(overlay)
 		driver.body_clip = overlay
 	var animation: Animation = driver.animation_player.get_animation(clip)
+	driver.body_clip.bones = TURN_BONES if kind == &"turn" else BODY_BONES
 	driver.body_clip.speed = clip_speed
 	driver.body_clip.play(animation, animation.length / clip_speed)
 	driver.set_meta(&"body_clip_kind", kind)
@@ -108,3 +114,13 @@ static func loop_clips(player: AnimationPlayer, looping: Array, blocked: Array) 
 			library.add_animation(clip_name, animation)
 		player.remove_animation_library(library_name)
 		player.add_animation_library(library_name, library)
+
+
+## Lets the dead hero go limp: the bones turn into a ragdoll that settles on the floor.
+static func release_ragdoll(driver: Node) -> void:
+	var skeletons: Array = driver.animation_player.get_parent().find_children("*", "Skeleton3D", true, false) if is_instance_valid(driver.animation_player) else []
+	if skeletons.is_empty():
+		return
+	driver.ragdoll = RAGDOLL.start(skeletons[0] as Skeleton3D, driver.character)
+	if driver.ragdoll != null:
+		driver.animation_player.active = false # the simulation owns the bones now

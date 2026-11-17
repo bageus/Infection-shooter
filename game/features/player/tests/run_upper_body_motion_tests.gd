@@ -65,7 +65,7 @@ func _run() -> void:
 	var hand_pos := skeleton.global_transform * skeleton.get_bone_global_pose(skeleton.find_bone("RightHand")).origin
 	_check(port != null and port.global_position.distance_to(muzzle_pos) > 0.05 and port.global_position.distance_to(muzzle_pos) < muzzle_pos.distance_to(hand_pos), "Casings leave from the middle of the gun, not the muzzle")
 	var run_back: Animation = driver.get("animation_player").get_animation(&"Run_Backward_Left_AK")
-	_check(is_equal_approx(float(run_back.get_meta("ref_speed")), 3.3), "Each run direction is paced for its own foot speed")
+	_check(is_equal_approx(float(run_back.get_meta("ref_speed")) * 0.8, 3.3), "Each run direction is paced for its own foot speed (RUN_PACE 0.8)")
 	for gun in ["pistol", "uzi"]:
 		var scene: Node = load("res://game/features/combat/public/%s.tscn" % gun).instantiate()
 		_check(is_equal_approx(float(scene.get("casing_size_multiplier")), 0.8), "%s casings are 20%% smaller" % gun)

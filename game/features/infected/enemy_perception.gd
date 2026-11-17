@@ -359,3 +359,11 @@ func _line_clear(actor: Node3D, target: Node3D) -> bool:
 			return false
 		excluded.append(hit.rid)
 	return false
+
+
+## True once the target (the hero) has no health left; the owner then stands still.
+func target_down(owner: CharacterBody3D, target: Node) -> bool:
+	var down: bool = target.get("health") != null and float(target.get("health")) <= 0.0
+	if down:
+		owner.velocity = Vector3(0.0, owner.velocity.y, 0.0)
+	return down
