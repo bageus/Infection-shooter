@@ -28,7 +28,7 @@ const BODY_PARTS := preload("res://game/features/infected/body_parts.gd")
 @export var visual_scale := 1.0
 ## Height of the model's feet below its origin, before scaling.
 @export var feet_offset := 0.0
-@export var pose_clip := "Death"
+@export var pose_clip := "DeathForward"
 @export var severed_parts: PackedStringArray = PackedStringArray()
 ## How wrecked the body is: 0 whole, higher levels cumulatively lose forearms, arms, shins, legs, head
 ## (Horde: tentacles one by one). Added to severed_parts.

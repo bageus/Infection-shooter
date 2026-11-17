@@ -203,7 +203,7 @@ func _bake_heavy(style: Dictionary) -> void:
 		var position := float(index) / float(walk_count) * base.size()
 		var low := int(floor(position)) % base.size()
 		walk.append(_blend(base[low], base[(low + 1) % base.size()], position - floor(position)))
-	_clamp_to_floor(walk)
+	_ground(walk)
 	_frames["Walk"] = walk
 	_loops["Walk"] = true
 	_finish_meta("Walk", walk, true)
@@ -246,8 +246,10 @@ func _bake_extra() -> void:
 			_remove_drift(clip_name)
 		if entry.has("pace"):
 			_pace(clip_name, String(entry["pace"]))
-		if loop and entry.get("pace", "") != "":
+		if loop and entry.get("pace", "") == "run":
 			_clamp_to_floor(_frames[clip_name])
+		elif loop and (entry.has("pace") or clip_name.begins_with("Idle")):
+			_ground(_frames[clip_name])
 
 
 # Walk and wander cycles are stretched until the stance foot moves at the gameplay speed at 1x;
@@ -338,6 +340,8 @@ func _bake_source(entry: Array) -> bool:
 	var name: String = entry[0]
 	if bool(entry[3]):
 		frames = _close_loop(frames)
+	if name == "Idle" or name == "Walk":
+		_ground(frames)
 	_frames[name] = frames
 	_loops[name] = bool(entry[3])
 	_finish_meta(name, frames, bool(entry[3]))
@@ -491,7 +495,12 @@ func _retarget(source: Skeleton3D, mirror: bool, yaw: float) -> Dictionary:
 			delta = MIRROR * delta * MIRROR
 		var wanted := delta * rest.basis.orthonormalized()
 		var child_mixamo: String = entry[3]
-		if not child_mixamo.is_empty():
+		if bone.ends_with("_Foot"):
+			# Feet stand flat in both rest poses, so the Mixamo turn alone keeps a planted foot flat.
+			# Aiming at the toe copied Mixamo's steep ankle-to-toe line onto our flatter feet and
+			# lifted every heel 4-30 cm (Titan and Colossus walked on their toes).
+			corrections[bone] = Basis.IDENTITY
+		elif not child_mixamo.is_empty():
 			var child_index := source.find_bone(PREFIX + (_swapped(child_mixamo) if mirror else child_mixamo))
 			var aim := source.get_bone_global_pose(child_index).origin - source.get_bone_global_pose(source_index).origin
 			if mirror:
@@ -583,7 +592,7 @@ func _bake_synthetic() -> void:
 		var high := (low + 1) % run_frames.size()
 		var sample := _blend(run_frames[low], run_frames[high], position - floor(position))
 		walk.append(_blend(idle, sample, WALK_AMOUNT))
-	_clamp_to_floor(walk)
+	_ground(walk)
 	_frames["Walk"] = walk
 	_loops["Walk"] = true
 	_finish_meta("Walk", walk, true)
@@ -639,6 +648,40 @@ func _clamp_to_floor(frames: Array) -> void:
 			var position: Vector3 = frame["HipsPosition"]
 			position.y -= dip
 			frame["HipsPosition"] = position
+
+
+# Walks and idles stand on the floor every frame: the lowest of each sole's heel, ball and toe tip
+# is moved onto the floor, up or down. Lifting only by the joints let the toe tips dig 7-9 cm into
+# the floor at toe-off and left the stance heel floating (the bodies looked on tiptoe).
+func _ground(frames: Array) -> void:
+	var soles := _sole_points()
+	for frame: Dictionary in frames:
+		_positions(frame, [])
+		var lowest := INF
+		for entry: Array in soles:
+			var point: Vector3 = _hunger.get_bone_global_pose(entry[0]) * (entry[1] as Vector3)
+			lowest = minf(lowest, point.y - _floor)
+		var position: Vector3 = frame["HipsPosition"]
+		position.y -= lowest
+		frame["HipsPosition"] = position
+
+
+# [bone, point in the bone's rest frame] for the heel (foot), the ball and the toe tip (toe), on the
+# rest floor. The rig puts the toe joint 60% of the way from the ankle to the front of the sole.
+func _sole_points() -> Array:
+	var result := []
+	for side in ["L_", "R_"]:
+		var foot := _hunger.find_bone(side + "Foot")
+		var toe := _hunger.find_bone(side + "Toe")
+		var ankle := _hunger.get_bone_global_rest(foot)
+		var ball := _hunger.get_bone_global_rest(toe)
+		var length := ball.origin.z - ankle.origin.z
+		var heel := Vector3(ankle.origin.x, _floor, ankle.origin.z - 0.25 * length)
+		var tip := Vector3(ball.origin.x, _floor, ankle.origin.z + length / 0.6)
+		result.append([foot, ankle.affine_inverse() * heel])
+		result.append([toe, ball.affine_inverse() * Vector3(ball.origin.x, _floor, ball.origin.z)])
+		result.append([toe, ball.affine_inverse() * tip])
+	return result
 
 
 # ---------------------------------------------------------------- output

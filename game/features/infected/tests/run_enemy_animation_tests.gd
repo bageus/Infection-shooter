@@ -136,7 +136,7 @@ func _test_humanoid_clips(stage: Node3D, scene: PackedScene, label: String) -> v
 		return
 	for clip in ["Idle", "Walk", "Run"]:
 		_expect(player.has_animation(clip) and player.get_animation(clip).loop_mode == Animation.LOOP_LINEAR, "%s %s exists and loops." % [label, clip])
-	for clip in ["AttackLeft", "AttackRight", "Death"]:
+	for clip in ["AttackLeft", "AttackRight", "DeathForward"]:
 		_expect(player.has_animation(clip) and player.get_animation(clip).loop_mode == Animation.LOOP_NONE, "%s %s exists and is one-shot." % [label, clip])
 	if enemy.get_node("AnimationDriver").extra_clips != null:
 		# The Hunger family plays the Mixamo set (ADR-0045); run_hunger_behaviour_tests covers it.
@@ -183,8 +183,8 @@ func _test_humanoid_clips(stage: Node3D, scene: PackedScene, label: String) -> v
 	_expect((strike["R_Hand"] as Vector3).z > (strike["Chest"] as Vector3).z + 0.2 * height, label + " AttackRight strikes forward at the hit frame.")
 	var left := _pose(player, "AttackLeft", attack_length * 0.38, bones)
 	_expect((left["L_Hand"] as Vector3).y > (left["Head"] as Vector3).y, label + " AttackLeft mirrors the wind-up.")
-	var death := _pose(player, "Death", player.get_animation("Death").length, bones)
-	_expect((death["Head"] as Vector3).y - (death["L_Foot"] as Vector3).y < 0.3 * height, label + " Death ends lying on the floor.")
+	var death := _pose(player, "DeathForward", player.get_animation("DeathForward").length, bones)
+	_expect((death["Head"] as Vector3).y - (death["L_Foot"] as Vector3).y < 0.3 * height, label + " DeathForward ends lying on the floor.")
 	enemy.queue_free()
 	await process_frame
 

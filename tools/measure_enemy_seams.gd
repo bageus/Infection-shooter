@@ -9,7 +9,7 @@ extends SceneTree
 ## weights of 17.11.2026 the worst gaps were 98-297 mm; the source parts already sit up to 4 mm apart).
 const CATALOG := preload("res://game/bootstrap/app/enemy_anim_viewer/enemy_anim_catalog.gd")
 const NAMES := ["Hunger", "Revenant", "Brute", "Titan", "Colossus"]
-const CLIPS := ["Idle", "Walk", "Run", "AttackLeft", "AttackRight", "Scream", "Agonize", "Death"]
+const CLIPS := ["Idle", "Walk", "Run", "AttackLeft", "AttackRight", "Scream", "Agonize", "DeathForward"]
 const TIMES := [0.15, 0.4, 0.65, 0.9]
 ## Rim vertices farther than this from every other part in the rest pose are not at a joint.
 const REST_REACH := 0.004
