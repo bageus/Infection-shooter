@@ -78,8 +78,14 @@ func _test_timeline() -> void:
 	chain.start(player)
 	chain.step(player.get_animation("Idle").length + 0.01, player, false, false)
 	_expect(player.get_animation("DeathBack").loop_mode == Animation.LOOP_NONE and player.current_animation == "DeathBack", "A death plays once")
-	var attack := player.get_animation("AttackLeft")
-	_expect(TIMELINE.speed_of(attack) > 1.0 and absf(TIMELINE.seconds_of("AttackLeft", attack) - attack.length / TIMELINE.speed_of(attack)) < 0.001, "Attacks play at the game's speed")
+	# An attack whose strike lands after the wind-up (Titan's AttackLeft strikes at 0.3 s, like Brute's and Colossus').
+	var attack_name := "AttackLeft"
+	for clip in player.get_animation_list():
+		if clip.begins_with("Attack") and float(player.get_animation(clip).get_meta("strike_time", 0.0)) > TIMELINE.STRIKE_WINDUP:
+			attack_name = clip
+			break
+	var attack := player.get_animation(attack_name)
+	_expect(TIMELINE.speed_of(attack) > 1.0 and absf(TIMELINE.seconds_of(attack_name, attack) - attack.length / TIMELINE.speed_of(attack)) < 0.001, "Attacks play at the game's speed")
 	titan.free()
 
 
