@@ -59,8 +59,8 @@ func _process_modification() -> void:
 	var weight := minf(_time / fade_in, minf((_length - _time) / fade_out, 1.0))
 	var skeleton := get_skeleton()
 	var kept := {}
-	for name: String in held:
-		var held_bone := skeleton.find_bone(name)
+	for held_name: String in held:
+		var held_bone := skeleton.find_bone(held_name)
 		if held_bone >= 0:
 			kept[held_bone] = skeleton.get_bone_global_pose(held_bone).basis.orthonormalized()
 	var clip_time := fposmod(_time * speed, _animation.length)
