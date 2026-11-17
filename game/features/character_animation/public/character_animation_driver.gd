@@ -16,15 +16,7 @@ const STANCE_FEET := preload("res://game/features/character_animation/stance_fee
 const CLIP_FOOTSTEPS := preload("res://game/features/character_animation/clip_footsteps.gd")
 const CLIP_TUNING := preload("res://game/features/character_animation/clip_tuning.gd")
 const STRIKE_POSE := preload("res://game/features/character_animation/strike_pose.gd")
-## Hero clips baked onto the soldier skeleton (tools/build_hero_clips.gd), played over the arms' grip.
-const HERO_KICK := &"Kick"
-const HERO_TURN := {&"left": &"Turn_Left", &"right": &"Turn_Right"}
-const HERO_DEATHS := [&"Death_FromRight", &"Death_Dying", &"Death_HitToBack"]
-## A turn clip is squeezed to this many seconds (the body itself swings round in about half a second).
-const HERO_TURN_SECONDS := 0.75
-const HERO_KICK_SPEED := 1.6
-const BODY_BONES := ["Hips", "Spine", "Spine1", "Spine2", "Neck", "Head", "LeftUpLeg", "LeftLeg", "LeftFoot", "LeftToeBase", "RightUpLeg", "RightLeg", "RightFoot", "RightToeBase"]
-const ARM_BONES := ["LeftShoulder", "LeftArm", "LeftForeArm", "LeftHand", "RightShoulder", "RightArm", "RightForeArm", "RightHand"]
+const HERO_CLIPS := preload("res://game/features/character_animation/hero_body_clips.gd")
 const STATE_ATTACK := &"attack"
 const STATE_DEATH := &"death"
 # Directional deaths (ADR-0034) fall back to the plain death clip.
@@ -105,7 +97,6 @@ var overlay: SkeletonModifier3D
 var strike: SkeletonModifier3D
 ## Whole-body clip (all but the arms) over the playing clip: the hero's kick and turns on the spot.
 var body_clip: SkeletonModifier3D
-var _body_clip_kind := &""
 var leg_overlay: SkeletonModifier3D
 var _current := ""
 var _animations: Dictionary = {}
@@ -199,12 +190,9 @@ func play_overlay(clip_name: StringName) -> bool:
 	if _dead or animation_player == null or not animation_player.has_animation(clip_name):
 		return false
 	if overlay == null:
-		var skeletons := animation_player.get_parent().find_children("*", "Skeleton3D", true, false)
-		if skeletons.is_empty():
+		overlay = HERO_CLIPS.attach(animation_player, OVERLAY, "ClipOverlay")
+		if overlay == null:
 			return false
-		overlay = OVERLAY.new()
-		overlay.name = "ClipOverlay"
-		(skeletons[0] as Node).add_child(overlay)
 	overlay.call("play", animation_player.get_animation(clip_name))
 	return true
 
@@ -214,90 +202,44 @@ func play_strike(kind: StringName) -> float:
 	prepare_visual()
 	if _dead or animation_player == null:
 		return 0.0
-	if kind == &"kick" and animation_player.has_animation(HERO_KICK):
-		return _play_body_clip(HERO_KICK, HERO_KICK_SPEED, &"kick")
+	if kind == &"kick" and HERO_CLIPS.has_kick(self):
+		return HERO_CLIPS.play(self, HERO_CLIPS.KICK, HERO_CLIPS.KICK_SPEED, kind)
 	if strike == null:
-		var skeletons := animation_player.get_parent().find_children("*", "Skeleton3D", true, false)
-		if skeletons.is_empty():
+		strike = HERO_CLIPS.attach(animation_player, STRIKE_POSE, "StrikePose")
+		if strike == null:
 			return 0.0
-		strike = STRIKE_POSE.new()
-		strike.name = "StrikePose"
-		(skeletons[0] as Node).add_child(strike)
 	return float(strike.call("start", kind))
 
 
 # Public animation_events_v1 addition (ADR-0066): true while a strike pose plays.
 func is_striking() -> bool:
-	return (strike != null and bool(strike.call("is_playing"))) or (_body_clip_kind == &"kick" and _body_clip_running())
+	return (strike != null and bool(strike.call("is_playing"))) or HERO_CLIPS.is_kicking(self)
 
 
-## Seconds from the start of a strike to the moment it lands (the kick clip names its foot's moment); `fallback` otherwise.
-func strike_impact_time(kind: StringName, fallback: float) -> float:
-	if kind == &"kick" and animation_player != null and animation_player.has_animation(HERO_KICK):
-		return float(clip_meta(HERO_KICK, &"impact_time", fallback * HERO_KICK_SPEED * 0.5)) / HERO_KICK_SPEED
-	return fallback
+# ADR-0070: seconds from the start of a strike to its impact (the kick clip's foot moment), `fallback` otherwise.
+func strike_impact_time(kind: StringName, fallback: float) -> float: return HERO_CLIPS.impact_time(self, kind, fallback)
 
 
-## The hero swings round on the spot: &"left" or &"right" plays the turn clip (all but the arms) unless one is running.
-## Returns false when there is no clip, the body is busy or dead.
+# ADR-0070: &"left"/&"right" plays the turn clip on all but the arms; false without it or when dead.
 func play_turn(side: StringName) -> bool:
-	if _dead or animation_player == null or not HERO_TURN.has(side) or not animation_player.has_animation(HERO_TURN[side]):
-		return false
-	if _body_clip_running():
-		return true
-	var clip := HERO_TURN[side] as StringName
-	return _play_body_clip(clip, animation_player.get_animation(clip).length / HERO_TURN_SECONDS, &"turn") > 0.0
+	return not _dead and HERO_CLIPS.turn(self, side)
 
 
-## True while the hero's turn or kick clip plays over the base clip.
-func is_body_clip_playing() -> bool:
-	return _body_clip_running()
+func is_body_clip_playing() -> bool: return HERO_CLIPS.running(self) # ADR-0070: the hero's turn or kick clip plays
 
 
-func _body_clip_running() -> bool:
-	return body_clip != null and bool(body_clip.call("is_playing"))
-
-
-func _play_body_clip(clip: StringName, clip_speed: float, kind: StringName) -> float:
-	if body_clip == null:
-		var skeletons := animation_player.get_parent().find_children("*", "Skeleton3D", true, false)
-		if skeletons.is_empty():
-			return 0.0
-		body_clip = OVERLAY.new()
-		body_clip.name = "BodyClip"
-		body_clip.set("bones", BODY_BONES)
-		body_clip.set("held", ARM_BONES)
-		body_clip.set("fade_in", 0.12)
-		body_clip.set("fade_out", 0.2)
-		(skeletons[0] as Node).add_child(body_clip)
-	var animation := animation_player.get_animation(clip)
-	body_clip.set("speed", clip_speed)
-	body_clip.call("play", animation, animation.length / clip_speed)
-	_body_clip_kind = kind
-	return animation.length / clip_speed
-
-
-## The hero's death: one of the death clips plays once and holds its last pose. Returns its length in seconds, 0.0 without clips.
+# ADR-0070: one random death clip plays once and holds its last pose; returns its length, 0.0 without clips or when dead.
 func play_death_clip() -> float:
 	prepare_visual()
-	if _dead or animation_player == null:
+	var clip := HERO_CLIPS.pick_death(self) if animation_player != null else &""
+	if _dead or clip == &"":
 		return 0.0
-	var choices: Array[StringName] = []
-	for clip in HERO_DEATHS:
-		if animation_player.has_animation(clip):
-			choices.append(clip)
-	if choices.is_empty():
-		return 0.0
-	if body_clip != null:
-		body_clip.call("stop")
-	if strike != null:
-		strike.call("stop")
-	var clip := choices[randi() % choices.size()]
+	for modifier: SkeletonModifier3D in [body_clip, strike, leg_overlay]:
+		if modifier != null:
+			modifier.call("stop")
 	var length := play_named_one_shot(clip, 0.15)
 	_one_shot = &"death"
 	_dead = true
-	if leg_overlay != null:
-		leg_overlay.call("stop")
 	return length
 
 
@@ -630,31 +572,9 @@ func _configure_looping_clips() -> void:
 	if _loops_configured:
 		return
 	_loops_configured = true
-	# Configure instance-owned copies once; never mutate imported shared resources.
-	for library_name in animation_player.get_animation_library_list():
-		var library := animation_player.get_animation_library(library_name).duplicate(false) as AnimationLibrary
-		for clip_name in library.get_animation_list():
-			if not _should_loop(String(clip_name)):
-				continue
-			var animation := library.get_animation(clip_name).duplicate(false) as Animation
-			animation.loop_mode = Animation.LOOP_LINEAR
-			library.remove_animation(clip_name)
-			library.add_animation(clip_name, animation)
-		animation_player.remove_animation_library(library_name)
-		animation_player.add_animation_library(library_name, library)
+	HERO_CLIPS.loop_clips(animation_player, LOOPING_TOKENS, NON_LOOPING_TOKENS)
 	if animation_player.get_animation_list().size() > 0:
 		_index_animations()
-
-
-func _should_loop(clip_name: String) -> bool:
-	var lower := clip_name.to_lower()
-	for blocked in NON_LOOPING_TOKENS:
-		if blocked in lower:
-			return false
-	for token in LOOPING_TOKENS:
-		if token in lower:
-			return true
-	return false
 
 
 func _attach_hit_reaction(model: Node) -> void:
@@ -677,10 +597,4 @@ func _apply_animation_library() -> void:
 		animation_player.add_animation_library(&"", animation_library)
 	if extra_clips == null or not animation_player.has_animation_library(&""):
 		return
-	var merged := animation_player.get_animation_library(&"").duplicate(false) as AnimationLibrary
-	for clip_name in extra_clips.get_animation_list():
-		if merged.has_animation(clip_name):
-			merged.remove_animation(clip_name)
-		merged.add_animation(clip_name, extra_clips.get_animation(clip_name))
-	animation_player.remove_animation_library(&"")
-	animation_player.add_animation_library(&"", merged)
+	HERO_CLIPS.merge_clips(animation_player, extra_clips)
