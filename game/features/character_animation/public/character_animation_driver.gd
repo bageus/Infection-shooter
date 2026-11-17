@@ -413,8 +413,8 @@ func _advance_one_shot(delta: float) -> void:
 func _process_skeletal(real_speed: float) -> void:
 	var speed := maxf(real_speed, turn_step_speed)
 	_apply_flinch_overlay()
-	if clip_footsteps:
-		_emit_clip_steps(speed)
+	if clip_footsteps: _emit_clip_steps(speed)
+	_transition_legs = CLIP_TUNING.follow_selector(self)
 	_update_attack_legs(speed)
 	if not _one_shot.is_empty() or _dead:
 		return
