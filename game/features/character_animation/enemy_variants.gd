@@ -12,6 +12,10 @@ const WANDER_WALK_CLIP := &"WalkWander"
 ## Share of deaths from standing that fall to the side (the rest fall forward).
 const SIDE_DEATH := 0.65
 
+## One-shots that give way to locomotion once the character moves (the stop transition, a turn on the spot).
+const INTERRUPTIBLE := [&"Transition", &"TurnLeft", &"TurnLeft2", &"TurnRight", &"TurnRight2"]
+const INTERRUPT_SPEED := 0.3
+
 var pool: Array[String] = []
 var _driver: Node
 var _idle_clip := ""
@@ -70,6 +74,10 @@ func variant(requested: StringName) -> StringName:
 func chasing() -> bool:
 	var character: Node = _driver.get("character")
 	return character != null and character.has_method("is_alerted") and bool(character.call("is_alerted"))
+
+
+func interrupts(one_shot: StringName, speed: float) -> bool:
+	return speed > INTERRUPT_SPEED and one_shot in INTERRUPTIBLE
 
 
 ## Standing still after a walk or run, out of a fight, plays the transition into idle once.

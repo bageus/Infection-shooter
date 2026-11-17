@@ -45,9 +45,6 @@ const ONE_SHOT_TOKENS := {
 const STRIKE_WINDUP := 0.35
 const MAX_ATTACK_SPEED := 2.2
 const FLINCH_SECONDS := 0.16
-# One-shots that give way to locomotion once the character moves (a stop transition, a turn on the spot).
-const INTERRUPTIBLE_ONE_SHOTS := [&"Transition", &"TurnLeft", &"TurnLeft2", &"TurnRight", &"TurnRight2"]
-const INTERRUPT_SPEED := 0.3
 const MOVING_ATTACKS := [&"attack", &"attack_left", &"attack_right", &"attack_crawl"]
 # A crawler that strikes while still dragging itself keeps this cycle on its legs.
 const CRAWL_LEGS := "Crawl"
@@ -416,11 +413,9 @@ func _advance_one_shot(delta: float) -> void:
 func _process_skeletal(real_speed: float) -> void:
 	var speed := maxf(real_speed, turn_step_speed)
 	_apply_flinch_overlay()
-	if clip_footsteps:
-		_emit_clip_steps(speed)
+	if clip_footsteps: _emit_clip_steps(speed)
 	_update_attack_legs(speed)
-	if _one_shot in INTERRUPTIBLE_ONE_SHOTS and not _dead and speed > INTERRUPT_SPEED:
-		cancel_one_shot(_one_shot)
+	if not _dead and _variants.interrupts(_one_shot, speed): cancel_one_shot(_one_shot)
 	if not _one_shot.is_empty() or _dead:
 		return
 	if _variants.stop_transition(speed, get_process_delta_time()):
