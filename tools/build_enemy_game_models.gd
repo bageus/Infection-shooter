@@ -733,6 +733,9 @@ func _read_images(enemy_name: String) -> Dictionary:
 func _write_textures(enemy_name: String, texture_size: int, images: Dictionary) -> bool:
 	var ok := true
 	for suffix: String in images:
+		# Every wound material but Brute's uses Horde_wound.jpg (same source image); copies fail the dedup check.
+		if suffix == "wound" and not enemy_name in ["Brute", "Horde"]:
+			continue
 		var image: Image = (images[suffix] as Image).duplicate()
 		image.resize(mini(image.get_width(), texture_size), mini(image.get_height(), texture_size), Image.INTERPOLATE_LANCZOS)
 		image.convert(Image.FORMAT_RGB8)
