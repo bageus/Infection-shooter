@@ -40,7 +40,7 @@ func select_clip() -> StringName:
 	var driver := _character.get_node_or_null("AnimationDriver")
 	var turning := speed <= SPEED_DEADZONE and _turning_in_place()
 	# The baked turn clips (all but the arms) swing the hero round on the spot; without them the walk cycle shuffles him.
-	var turn_clip := turning and driver != null and driver.has_method("play_turn") and bool(driver.call("play_turn", &"left" if _turn_error > 0.0 else &"right"))
+	var turn_clip := turning and driver != null and driver.has_method("play_turn") and bool(driver.call("play_turn", &"left" if _turn_error > 0.0 else &"right", rad_to_deg(absf(_turn_error))))
 	if driver != null:
 		driver.set("turn_step_speed", TURN_STEP_SPEED if turning and not turn_clip else 0.0)
 	if turn_clip:

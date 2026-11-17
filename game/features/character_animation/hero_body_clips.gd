@@ -7,8 +7,12 @@ const TURN := {&"left": &"Turn_Left", &"right": &"Turn_Right"}
 const DEATHS := [&"Death_FromRight", &"Death_Dying", &"Death_HitToBack"]
 ## The death clip that ends in a ragdoll (the fall backward).
 const RAGDOLL_AFTER := &"Death_HitToBack"
-## A turn clip is squeezed to this many seconds (the body itself swings round in about half a second).
-const TURN_SECONDS := 0.6
+## One pass of a turn clip (it turns the hero 45 degrees) lasts this many seconds; a wider turn repeats it without a break,
+## and the body swings round at the matching rate (TURN_RATE), so the steps and the body agree at any angle.
+const TURN_SECONDS := 0.45
+const TURN_CLIP_DEGREES := 45.0
+const TURN_RATE := deg_to_rad(TURN_CLIP_DEGREES) / TURN_SECONDS
+const TURN_MAX_PASSES := 4
 const KICK_SPEED := 1.6
 const BODY_BONES := ["Hips", "Spine", "Spine1", "Spine2", "Neck", "Head", "LeftUpLeg", "LeftLeg", "LeftFoot", "LeftToeBase", "RightUpLeg", "RightLeg", "RightFoot", "RightToeBase"]
 ## A turn on the spot drives only the pelvis and legs (the steps): the game already swings the torso, arms and head with the aim,
@@ -35,7 +39,7 @@ static func impact_time(driver: Node, kind: StringName, fallback: float) -> floa
 
 
 ## Plays `clip` over the body; returns its length in seconds, 0.0 when the skeleton is missing.
-static func play(driver: Node, clip: StringName, clip_speed: float, kind: StringName) -> float:
+static func play(driver: Node, clip: StringName, clip_speed: float, kind: StringName, passes := 1) -> float:
 	if driver.body_clip == null:
 		var skeletons: Array = driver.animation_player.get_parent().find_children("*", "Skeleton3D", true, false)
 		if skeletons.is_empty():
@@ -50,9 +54,9 @@ static func play(driver: Node, clip: StringName, clip_speed: float, kind: String
 	var animation: Animation = driver.animation_player.get_animation(clip)
 	driver.body_clip.bones = TURN_BONES if kind == &"turn" else BODY_BONES
 	driver.body_clip.speed = clip_speed
-	driver.body_clip.play(animation, animation.length / clip_speed)
+	driver.body_clip.play(animation, animation.length / clip_speed * passes) # the clip loops for the extra passes
 	driver.set_meta(&"body_clip_kind", kind)
-	return animation.length / clip_speed
+	return animation.length / clip_speed * passes
 
 
 static func is_kicking(driver: Node) -> bool:
@@ -60,13 +64,14 @@ static func is_kicking(driver: Node) -> bool:
 
 
 ## The turn clip for `side`, unless one already runs; false without the clip.
-static func turn(driver: Node, side: StringName) -> bool:
+static func turn(driver: Node, side: StringName, degrees := TURN_CLIP_DEGREES) -> bool:
 	if driver.animation_player == null or not TURN.has(side) or not driver.animation_player.has_animation(TURN[side]):
 		return false
 	if running(driver):
 		return true
 	var clip: StringName = TURN[side]
-	return play(driver, clip, driver.animation_player.get_animation(clip).length / TURN_SECONDS, &"turn") > 0.0
+	var passes := clampi(roundi(degrees / TURN_CLIP_DEGREES), 1, TURN_MAX_PASSES)
+	return play(driver, clip, driver.animation_player.get_animation(clip).length / TURN_SECONDS, &"turn", passes) > 0.0
 
 
 ## A random death clip the player has, or &"" without any.

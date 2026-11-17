@@ -67,6 +67,8 @@ func _run() -> void:
 	_expect(driver.play_turn(&"left") and driver.is_body_clip_playing(), "A left turn plays.")
 	_expect(driver.body_clip.get("_animation") == driver.animation_player.get_animation("Turn_Left"), "The left turn uses Turn_Left.")
 	_expect(not "Head" in driver.body_clip.bones and not "Spine" in driver.body_clip.bones, "A turn on the spot leaves the head and torso to the game.")
+	await create_timer(1.0).timeout
+	_expect(driver.play_turn(&"left", 90.0) and absf(driver.body_clip.remaining() - 2.0 * CLIPS_API.TURN_SECONDS) < 0.05, "A 90 degree turn is one clip run twice without a break (%.2f s)." % driver.body_clip.remaining())
 	_expect(not driver.play_turn(&"around"), "An unknown side plays nothing.")
 	await create_timer(1.0).timeout
 	_expect(not driver.is_body_clip_playing(), "The turn ends on its own.")

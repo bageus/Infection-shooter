@@ -225,7 +225,7 @@ func is_striking() -> bool: return (strike != null and bool(strike.call("is_play
 # ADR-0070: seconds from the start of a strike to its impact (the kick clip's foot moment), `fallback` otherwise.
 func strike_impact_time(kind: StringName, fallback: float) -> float: return HERO_CLIPS.impact_time(self, kind, fallback)
 
-func play_turn(side: StringName) -> bool: return not _dead and HERO_CLIPS.turn(self, side)
+func play_turn(side: StringName, degrees := 45.0) -> bool: return not _dead and HERO_CLIPS.turn(self, side, degrees)
 
 func is_body_clip_playing() -> bool: return HERO_CLIPS.running(self) # ADR-0070: the hero's turn or kick clip plays
 
