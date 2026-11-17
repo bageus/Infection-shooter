@@ -15,7 +15,9 @@
     "public/surface_stamp_cache.gd",
     "public/blood_level.gd",
     "public/effects_quality.gd",
-    "public/memory_guard.gd"
+    "public/memory_guard.gd",
+    "public/character_blob_shadow.gd",
+    "public/character_blob_shadow.gdshader"
   ],
   "dependencies": [],
   "runtime_contracts": {

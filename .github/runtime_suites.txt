@@ -292,3 +292,4 @@ game/features/character_animation/tests/run_clip_footsteps_tests.gd
 game/presentation/office_floor/tests/run_door_sill_tests.gd
 game/features/character_animation/tests/run_hero_clips_tests.gd
 game/features/infected/tests/run_offscreen_lazy_tick_tests.gd
+game/core/vfx/tests/run_character_blob_shadow_tests.gd
