@@ -6,8 +6,12 @@ extends SkeletonModifier3D
 const UPPER_BODY := ["Spine", "Chest", "Neck", "Head", "L_Shoulder", "L_UpperArm", "L_Forearm", "L_Hand", "R_Shoulder", "R_UpperArm", "R_Forearm", "R_Hand"]
 
 var bones: Array = UPPER_BODY
+## Bones that keep their skeleton-space orientation while the clip plays over their parents (the arms keep the weapon grip).
+var held: Array = []
 var fade_in := 0.08
 var fade_out := 0.3
+## Playback rate of the clip; `length` and the fades are in real seconds.
+var speed := 1.0
 
 var _animation: Animation
 var _length := 0.0
@@ -34,6 +38,16 @@ func is_playing() -> bool:
 	return _animation != null
 
 
+## Stops at once (the body died or was ragdolled).
+func stop() -> void:
+	_animation = null
+
+
+## Seconds still to play.
+func remaining() -> float:
+	return maxf(_length - _time, 0.0) if _animation != null else 0.0
+
+
 func _process_modification() -> void:
 	if _animation == null:
 		return
@@ -44,6 +58,19 @@ func _process_modification() -> void:
 		return
 	var weight := minf(_time / fade_in, minf((_length - _time) / fade_out, 1.0))
 	var skeleton := get_skeleton()
+	var kept := {}
+	for name: String in held:
+		var held_bone := skeleton.find_bone(name)
+		if held_bone >= 0:
+			kept[held_bone] = skeleton.get_bone_global_pose(held_bone).basis.orthonormalized()
+	var clip_time := fposmod(_time * speed, _animation.length)
 	for bone: int in _tracks:
 		var pose := skeleton.get_bone_pose_rotation(bone)
-		skeleton.set_bone_pose_rotation(bone, pose.slerp(_animation.rotation_track_interpolate(_tracks[bone], fposmod(_time, _animation.length)), clampf(weight, 0.0, 1.0)))
+		skeleton.set_bone_pose_rotation(bone, pose.slerp(_animation.rotation_track_interpolate(_tracks[bone], clip_time), clampf(weight, 0.0, 1.0)))
+	# Bone indices run parents first, so each held bone sees its parent's final pose.
+	var order := kept.keys()
+	order.sort()
+	for bone: int in order:
+		var parent := skeleton.get_bone_parent(bone)
+		var parent_basis := skeleton.get_bone_global_pose(parent).basis.orthonormalized() if parent >= 0 else Basis.IDENTITY
+		skeleton.set_bone_pose_rotation(bone, (parent_basis.inverse() * (kept[bone] as Basis)).orthonormalized().get_rotation_quaternion())

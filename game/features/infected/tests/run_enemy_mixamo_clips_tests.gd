@@ -1,5 +1,5 @@
 extends SceneTree
-## The owner's Mixamo set on Hunger, Revenant, Brute, Colossus and Titan (ADR-0070): which clips
+## The owner's Mixamo set on Hunger, Revenant, Brute, Colossus and Titan (ADR-0071): which clips
 ## each enemy has, random idles, the stop transition, the wander walk, attack and death picks,
 ## the hit clip for heavy weapons only, turns on the spot and the climb out of a spawn hole.
 

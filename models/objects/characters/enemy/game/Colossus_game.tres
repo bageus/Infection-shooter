@@ -12,6 +12,7 @@ roughness = 0.8
 normal_enabled = true
 normal_texture = ExtResource("2_normal")
 emission_enabled = true
+emission_operator = 1
 emission = Color(1, 0.1, 0.04, 1)
 emission_energy_multiplier = 0.45
 emission_texture = ExtResource("3_glow")

@@ -1,6 +1,6 @@
 extends RefCounted
 ## An enemy spawned from a hole starts its Climb clip, which begins below the floor, and stands
-## still until it is out (ADR-0070); the spawner faces each one away from the hole.
+## still until it is out (ADR-0071); the spawner faces each one away from the hole.
 
 const CLIP := &"Climb"
 

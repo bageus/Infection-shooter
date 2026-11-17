@@ -1,6 +1,6 @@
 extends RefCounted
 ## Unaware enemy that wants to walk off the other way turns on the spot with a baked turn clip
-## (TurnLeft / TurnRight, optional numbered variants) instead of spinning (ADR-0045, ADR-0070).
+## (TurnLeft / TurnRight, optional numbered variants) instead of spinning (ADR-0045, ADR-0071).
 ## The clip's yaw_curve meta says how much of the turn is done at each frame.
 
 const PERCEPTION := preload("res://game/features/infected/enemy_perception.gd")

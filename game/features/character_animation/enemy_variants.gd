@@ -1,5 +1,5 @@
 extends RefCounted
-## Enemy extras of the animation driver (ADR-0070): the idle pool (the base idle plus every Idle*
+## Enemy extras of the animation driver (ADR-0071): the idle pool (the base idle plus every Idle*
 ## extra clip, a new pick after 1-3 cycles), the transition played once when an unaware enemy
 ## stops after a walk, the wander walk, one run clip per body and the death pick.
 

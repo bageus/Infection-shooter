@@ -1,10 +1,13 @@
 extends Control
 ## Enemy animation page: pick an enemy, then play any clip it has in the game.
 ## Drag the view or hold Z/X to orbit, scroll to zoom. Run enemy_anim_viewer.tscn; it needs no game state.
+## Zooming out switches mesh LODs the way the game does (same camera FOV); the panel shows the distance and
+## the LOD Godot is drawing, read from the triangles the view rendered.
 
 const CATALOG := preload("res://game/bootstrap/app/enemy_anim_viewer/enemy_anim_catalog.gd")
 const ORBIT_SPEED := 1.6 # rad/s while Z or X is held
-const FOV := 30.0
+const FOV := 50.0 # the game camera's FOV, so LODs switch at the same distances as in play
+const MAX_DISTANCE := 30.0 # past the game camera's 24 m
 const FRAMING := 1.35 # room around the body so head and feet stay in view
 const BLEND := 0.15
 
@@ -14,6 +17,8 @@ var _clip_list: ItemList
 var _pause: Button
 var _loop: CheckBox
 var _info: Label
+var _lod_info: Label
+var _lod_triangles: Array[int] = [] # triangles drawn at LOD 0, 1, 2...
 var _container: SubViewportContainer
 var _view: SubViewport
 var _camera: Camera3D
@@ -42,6 +47,8 @@ func _ready() -> void:
 	_info = Label.new()
 	_info.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	panel.add_child(_info)
+	_lod_info = Label.new()
+	panel.add_child(_lod_info)
 	_clip_list = ItemList.new()
 	_clip_list.size_flags_vertical = SIZE_EXPAND_FILL
 	_clip_list.item_selected.connect(func(index: int) -> void: _play(_clip_list.get_item_metadata(index)))
@@ -118,6 +125,7 @@ func _show_enemy(index: int) -> void:
 		_clip_list.set_item_metadata(i, clip)
 	_info.text = "%s: клипов %d" % [CATALOG.enemy_name(_enemies[index]), clips.size()]
 	_frame(body)
+	_lod_triangles = _lod_levels(body)
 	_reset_view()
 	if clips.has("Idle"):
 		_play("Idle")
@@ -135,6 +143,48 @@ func _frame(body: Node3D) -> void:
 		found = true
 	_center = box.get_center()
 	_fit_distance = box.size.y * 0.5 / tan(deg_to_rad(FOV) * 0.5) * FRAMING
+
+
+# Triangles of every LOD level of the body meshes (a surface without that level keeps its last one).
+static func _lod_levels(body: Node3D) -> Array[int]:
+	var surfaces: Array = []
+	var levels := 1
+	for mesh_instance: MeshInstance3D in body.find_children("*", "MeshInstance3D", true, false):
+		if mesh_instance.mesh == null:
+			continue
+		for surface in mesh_instance.mesh.get_surface_count():
+			var stored := RenderingServer.mesh_get_surface(mesh_instance.mesh.get_rid(), surface)
+			var stride := RenderingServer.mesh_surface_get_format_index_stride(stored.format, stored.vertex_count)
+			var counts: Array[int] = [stored.index_count / 3]
+			for lod: Dictionary in stored.get("lods", []):
+				counts.append((lod.index_data as PackedByteArray).size() / stride / 3)
+			surfaces.append(counts)
+			levels = maxi(levels, counts.size())
+	var result: Array[int] = []
+	for level in levels:
+		var total := 0
+		for counts: Array[int] in surfaces:
+			total += counts[mini(level, counts.size() - 1)]
+		result.append(total)
+	return result
+
+
+# The LOD whose triangle count is closest to what the view drew last frame.
+static func current_lod(levels: Array[int], drawn: int) -> int:
+	var best := 0
+	for level in levels.size():
+		if absi(levels[level] - drawn) < absi(levels[best] - drawn):
+			best = level
+	return best
+
+
+func _update_lod_info() -> void:
+	if _body == null or _lod_triangles.is_empty():
+		_lod_info.text = ""
+		return
+	var drawn := RenderingServer.viewport_get_render_info(_view.get_viewport_rid(), RenderingServer.VIEWPORT_RENDER_INFO_TYPE_VISIBLE, RenderingServer.VIEWPORT_RENDER_INFO_PRIMITIVES_IN_FRAME)
+	var lod := current_lod(_lod_triangles, drawn)
+	_lod_info.text = "Дистанция %.1f м, LOD%d (%d треуг., уровней %d)" % [_distance, lod, drawn, _lod_triangles.size()]
 
 
 func _play(clip: String) -> void:
@@ -166,6 +216,7 @@ func _update_camera() -> void:
 
 
 func _process(delta: float) -> void:
+	_update_lod_info()
 	var turn := (1.0 if Input.is_key_pressed(KEY_X) else 0.0) - (1.0 if Input.is_key_pressed(KEY_Z) else 0.0)
 	if turn != 0.0 and _body != null:
 		_yaw += turn * ORBIT_SPEED * delta
@@ -181,7 +232,7 @@ func _input(event: InputEvent) -> void:
 			_dragging = button.pressed and inside
 		elif inside and button.pressed and button.button_index in [MOUSE_BUTTON_WHEEL_UP, MOUSE_BUTTON_WHEEL_DOWN]:
 			var zoom := 0.9 if button.button_index == MOUSE_BUTTON_WHEEL_UP else 1.1
-			_distance = clampf(_distance * zoom, 0.8, 30.0)
+			_distance = clampf(_distance * zoom, 0.8, MAX_DISTANCE)
 			_update_camera()
 	elif event is InputEventMouseMotion and _dragging:
 		var motion := event as InputEventMouseMotion

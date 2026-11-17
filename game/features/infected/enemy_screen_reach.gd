@@ -22,7 +22,11 @@ static func update(enemy: Node3D, animation: Node, asleep: bool) -> void:
 	if animation == null or Engine.get_physics_frames() % 6 != enemy.get_instance_id() % 6:
 		return
 	# F6 bisect switch: level 1 and up bring back the old behaviour (animation always runs).
-	var wanted := not asleep and not bool(Engine.get_meta("probe_no_animation", false)) and (int(Engine.get_meta("legacy_perf", 0)) >= 1 or could_be_seen(enemy, float(enemy.get("move_speed"))))
+	var legacy := int(Engine.get_meta("legacy_perf", 0)) >= 1
+	var seen := legacy or could_be_seen(enemy, float(enemy.get("move_speed")))
+	# The capsule runs a lazy AI tick while it cannot reach the frame (A2, off-screen).
+	enemy.set("offscreen", not seen)
+	var wanted := not asleep and not bool(Engine.get_meta("probe_no_animation", false)) and seen
 	if wanted != bool(animation.call("is_active")):
 		animation.call("set_active", wanted)
 	animation.get("step_state").set_step(animation.get("animation_player"), _step_for(enemy))

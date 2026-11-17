@@ -85,7 +85,7 @@ func _test_blast_rocks_torso_back(stage: Node3D) -> void:
 	var hit := await _spawn(stage, Vector3(-2, 1, 0))
 	var twin := await _spawn(stage, Vector3(2, 1, 0))
 	hit.call("take_blast_damage", 12.0, hit.global_position + Vector3(0, 0, -4))
-	# A blast is a heavy hit: the survivor plays the hit clip instead of the spring (ADR-0070).
+	# A blast is a heavy hit: the survivor plays the hit clip instead of the spring (ADR-0071).
 	_expect(float(hit.get("_hit_cooldown")) > 0.0, "A blast makes the survivor play the hit clip.")
 	hit.queue_free()
 	twin.queue_free()

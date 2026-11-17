@@ -386,7 +386,7 @@ func _test_skinned_rig(stage: Node3D) -> void:
 		var mesh := meshes[0] as MeshInstance3D
 		_expect(mesh.skin != null and mesh.skin.get_bind_count() == 22, "Hunger mesh is bound to its 22-bone skeleton.")
 		var triangles: int = (mesh.mesh as ArrayMesh).surface_get_arrays(0)[Mesh.ARRAY_INDEX].size() / 3
-		_expect(triangles <= 10000, "Hunger stays within the crowd budget (%d triangles)." % triangles)
+		_expect(triangles >= 39000, "Hunger keeps every source skin triangle (%d)." % triangles)
 		_expect(mesh.get_surface_override_material(0) != null, "Hunger keeps its material.")
 	enemy.queue_free()
 	await process_frame
@@ -474,7 +474,7 @@ func _test_attack_misses_when_target_leaves(stage: Node3D) -> void:
 	await process_frame
 
 
-# The five Mixamo enemies die with a death clip (ADR-0070), not as a ragdoll: the body drops
+# The five Mixamo enemies die with a death clip (ADR-0071), not as a ragdoll: the body drops
 # through the floor after the linger time and is then hidden.
 func _test_death_animation_then_sink(stage: Node3D) -> void:
 	var enemy := await _spawn(stage, HUNGER)

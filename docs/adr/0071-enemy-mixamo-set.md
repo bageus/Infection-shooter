@@ -1,4 +1,4 @@
-# ADR-0070: набор Mixamo-клипов владельца на Hunger, Revenant, Brute, Colossus, Titan
+# ADR-0071: набор Mixamo-клипов владельца на Hunger, Revenant, Brute, Colossus, Titan
 
 Статус: принято прямым запросом владельца 16.11.2026.
 

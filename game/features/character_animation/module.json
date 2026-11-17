@@ -23,7 +23,10 @@
       "play_named_one_shot": "play_named_one_shot(clip: StringName, blend := 0.12, speed := 1.0, leg_clip := \"\") -> float; plays a clip by name once, emits one_shot_finished(clip), returns its duration; with leg_clip a moving character keeps that locomotion clip on its legs meanwhile (ADR-0045)",
       "play_overlay": "play_overlay(clip: StringName) -> bool; plays a clip on the upper body only, over the running legs (ADR-0045)",
       "attack_legs": "an attack/attack_left/attack_right one-shot played while the character moves loops the run or walk clip on the leg bones only (leg_overlay.gd), the attack clip keeps the rest; released when the attack ends or the body stops (held 0.25 s across speed dips, dropped at once on death or set_active(false))",
-      "play_strike": "play_strike(kind: StringName) -> float; procedural melee pose over the playing clips, kind kick (rear left leg) or punch (left arm); returns its duration, 0.0 without the bones or when dead; is_striking() reports it (ADR-0066)",
+      "play_strike": "play_strike(kind: StringName) -> float; melee pose over the playing clips, kind kick (the baked Kick clip, all but the arms, else a procedural rear left leg kick) or punch (procedural left arm); returns its duration, 0.0 without the bones or when dead; is_striking() reports it (ADR-0066)",
+      "play_turn": "play_turn(side: StringName) -> bool; side left|right plays the baked Turn_Left/Turn_Right clip on all bones but the arms (they keep their grip) over the base clip, squeezed to 0.75 s; true while one plays, false without the clip or when dead; is_body_clip_playing() reports it (ADR-0071)",
+      "play_death_clip": "play_death_clip() -> float; plays one random baked Death_* clip once and holds its last pose, returns its length, 0.0 without clips or when dead (ADR-0071)",
+      "strike_impact_time": "strike_impact_time(kind: StringName, fallback: float) -> float; seconds from the start of a strike to its impact, from the Kick clip's impact_time meta, else fallback (ADR-0071)",
       "clip_meta": "clip_meta(clip, key, default) -> Variant; clip_length(clip) -> float (ADR-0045)",
       "prepare_visual": "prepare_visual() -> void; idempotent rig/clip preparation; optional defer_setup=true before ready postpones it; set_active requests are preserved"
     },
@@ -34,7 +37,7 @@
       "cancel_one_shot": "cancel_one_shot(clip: StringName) -> void; stops that one-shot early (a cancelled reload) and returns to locomotion",
       "animation_library": "@export AnimationLibrary; optional clip set replacing the model's own clips (ADR-0016)",
       "run_exit_ratio": "@export float = 0.85; a running character keeps the run clip down to this share of run_speed_threshold (ADR-0040)",
-      "enemy_variants": "extra_clips named Idle* join the base Idle in a random pool (1-3 cycles each); Transition plays once when an unaware enemy stops after a walk; WalkWander replaces Walk while the character's is_alerted() is false; RunZombie/RunForward are picked once per body; clips with own_pace meta follow their ref_speed (ADR-0070)",
+      "enemy_variants": "extra_clips named Idle* join the base Idle in a random pool (1-3 cycles each); Transition plays once when an unaware enemy stops after a walk; WalkWander replaces Walk while the character's is_alerted() is false; RunZombie/RunForward are picked once per body; clips with own_pace meta follow their ref_speed (ADR-0071)",
       "extra_clips": "@export AnimationLibrary; clips merged into the model's default library; metadata ref_speed (cycle pace, m/s) and strike_time (attack impact, s) are honoured (ADR-0045)"
     }
   }

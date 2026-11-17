@@ -71,6 +71,8 @@ func start() -> StringName:
 	_delay = float(IMPACT_DELAY[_pending])
 	var driver: Node = _host.player.get_node_or_null("AnimationDriver")
 	if driver != null:
+		if driver.has_method("strike_impact_time"):
+			_delay = float(driver.call("strike_impact_time", _pending, _delay)) # the kick clip lands later than the pose
 		driver.call("play_strike", _pending)
 	return _pending
 
