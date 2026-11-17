@@ -22,7 +22,12 @@ const BLOOD_TRAIL := preload("res://game/features/infected/blood_trail.gd")
 const DEATH_RAGDOLL := preload("res://game/features/infected/death_ragdoll.gd")
 const CORPSE_BUDGET := preload("res://game/features/infected/public/corpse_budget.gd")
 const STATUS_FX := preload("res://game/features/infected/infected_status_fx.gd")
+const TURN := preload("res://game/features/infected/enemy_turn_in_place.gd")
+const BODY := preload("res://game/features/infected/enemy_body_queries.gd")
+const LIMBS := preload("res://game/features/infected/infected_limb_loss.gd")
+const CLIMB := preload("res://game/features/infected/enemy_climb_out.gd")
 const KILLING_PUSH_MSEC := 300
+const HEAVY_HIT_WEAPONS := ["SHOTGUN", "GRENADE LAUNCHER"] # the weapons whose hit plays the hit clip
 # Longest wind-up before a swing lands, so long clips never delay the first hit.
 const MAX_WINDUP_SECONDS := 0.35
 
@@ -119,6 +124,11 @@ var _death_push := Vector3.ZERO
 var _death_push_msec := -KILLING_PUSH_MSEC
 var _fall_watch: RefCounted
 var _ragdoll: RefCounted
+var _hit_cooldown := 0.0
+var _reaction_heavy := false
+var _turn := TURN.new()
+var _turns_in_place := true # Hunger has its own turn and switches this off
+var _emerge_left := 0.0
 
 var effects_root: Node3D
 var impact_pool: Node
@@ -170,14 +180,11 @@ func _ready() -> void:
 	for piece in get_tree().get_nodes_in_group("contactless_debris"):
 		if piece is CollisionObject3D:
 			add_collision_exception_with(piece)
+	_emerge_left = CLIMB.begin(self, _animation)
 
 
 # Top of the collision capsule plus a little: where stun stars circle.
-func _head_height() -> float:
-	var capsule := collision_shape.shape as CapsuleShape3D
-	if capsule == null:
-		return 1.9
-	return collision_shape.position.y + capsule.height * 0.5 * absf(collision_shape.scale.y) + 0.3
+func _head_height() -> float: return BODY.head_height(collision_shape)
 
 
 func _setup_body_parts() -> void:
@@ -238,6 +245,7 @@ func take_projectile_damage(
 	_last_hit_direction = direction
 	_reaction_point = hit_position
 	_reaction_direction = direction
+	_reaction_heavy = weapon_name in HEAVY_HIT_WEAPONS
 	var shooter_distance := global_position.distance_to(_target.global_position) if is_instance_valid(_target) else INF
 	_set_death_push(DEATH_FALL.hit_push(weapon_name, direction, shooter_distance))
 	var part: StringName = BODY_PARTS.TORSO
@@ -262,6 +270,7 @@ func take_blast_damage(amount: float, origin: Vector3) -> void:
 	_set_death_push(DEATH_FALL.blast_push(origin, global_position, amount / 155.0))
 	_reaction_point = global_position + Vector3.UP
 	_reaction_direction = Vector3(global_position.x - origin.x, 0.0, global_position.z - origin.z).normalized()
+	_reaction_heavy = true
 	take_damage(amount)
 
 
@@ -293,44 +302,25 @@ func _apply_damage(amount: float, blast: bool) -> void:
 	if health > 0.0 and _animation != null and amount >= 1.0:
 		_react_to_hit(_pace.hit(amount, max_health))
 	_reaction_direction = Vector3.ZERO
+	_reaction_heavy = false
 	if health <= 0.0:
 		_die()
 
 
 # Heavy blasts tear at one or two random limbs.
-func _blast_limbs(amount: float) -> void:
-	var candidates: Array[StringName] = _parts.severable_parts()
-	candidates.shuffle()
-	for part in candidates.slice(0, 2):
-		if _parts.damage_part(part, amount * 0.8):
-			var away := global_position - (_last_hit_position if _last_hit_position != Vector3.ZERO else global_position + Vector3.DOWN)
-			_parts.sever(part, away.normalized() + Vector3.UP)
-			if _dead:
-				return
+func _blast_limbs(amount: float) -> void: LIMBS.blast(self, _parts, amount, _last_hit_position)
 
 
 func _on_part_severed(part: StringName, piece: RigidBody3D) -> void:
 	var where := piece.global_position if piece != null else global_position + Vector3.UP
 	limb_severed.emit(where, _last_hit_direction, _blood_exclusions())
 	audio.severed(where)
-	if _dead:
-		return
-	_part_lost(part)
+	if not _dead:
+		_part_lost(part)
 
 
 # Consequences of a lost part; specialised enemies extend this.
-func _part_lost(part: StringName) -> void:
-	var part_label := BODY_PARTS.limb_of(part)
-	if part == &"head":
-		_die()
-	elif part_label == "leg":
-		var legs: int = _parts.remaining("leg")
-		if limb_loss_kills or legs == 0:
-			_die()
-		else:
-			_mobility = minf(_mobility, 0.45)
-	elif part_label == "arm" and _parts.remaining("arm") == 0:
-		_attack_scale = 0.5
+func _part_lost(part: StringName) -> void: LIMBS.lost(self, _parts, part)
 
 
 # Corpse hit volumes report here so blood still sprays on the floor.
@@ -357,6 +347,7 @@ func apply_skill_push(direction: Vector3, distance: float) -> void:
 
 func _physics_process(delta: float) -> void:
 	_pace.recover_hit(delta)
+	_hit_cooldown = maxf(0.0, _hit_cooldown - delta)
 	_track_blood_motion()
 	_mark_stump_drips()
 	_blast_stun_remaining = maxf(0.0, _blast_stun_remaining - delta)
@@ -367,9 +358,14 @@ func _physics_process(delta: float) -> void:
 		if _fall_watch != null and not _fall_watch.call("step", delta):
 			_fall_watch = null
 		return
+	if _emerge_left > 0.0:
+		_emerge_left = CLIMB.step(self, _emerge_left, delta)
+		return
 	if _target == null or not is_instance_valid(_target):
 		return
 	_senses.refresh_modes(self)
+	if _turn.active() and _senses.is_chasing():
+		_turn.cancel(_animation)
 	SCREEN_REACH.update(self, _animation, _sleeping_far)
 	audio.tick(delta, _pace.charging, global_position.distance_squared_to(_target.global_position) < 576.0, _lod_frame_offset)
 	if not _senses.is_chasing():
@@ -426,11 +422,18 @@ func _physics_process(delta: float) -> void:
 
 
 # Hook for specialised enemies: one step of looking, listening and strolling.
-func _unaware_tick(delta: float) -> void: _senses.step_unaware(self, delta)
+func _unaware_tick(delta: float) -> void:
+	if _turns_in_place: _turn.tick(self, _animation, delta)
+	else: _senses.step_unaware(self, delta)
 
 
 # Hook for specialised enemies: how a hit that leaves the enemy alive shows.
-func _react_to_hit(strength: float) -> void: _animation.call("notify_hit", _reaction_point, _reaction_direction, strength)
+func _react_to_hit(strength: float) -> void:
+	# A shotgun or blast hit that leaves the enemy standing plays the hit clip over the legs.
+	if _reaction_heavy and _hit_cooldown <= 0.0 and bool(_animation.call("play_overlay", &"HitReaction")):
+		_hit_cooldown = 1.6
+		return
+	_animation.call("notify_hit", _reaction_point, _reaction_direction, strength)
 
 
 func _desired_velocity_from_offset(offset: Vector3) -> Vector3:
@@ -466,20 +469,14 @@ func is_dead() -> bool:
 
 # Smooth yaw turn toward the target; also while standing in attack range.
 func _turn_toward_face_direction(delta: float) -> void:
-	if _face_direction.length_squared() < 0.0001:
+	if _face_direction.length_squared() < 0.0001 or _turn.active():
 		return
 	var target_yaw := atan2(-_face_direction.x, -_face_direction.z)
 	rotation.y = lerp_angle(rotation.y, target_yaw, 1.0 - exp(-turn_speed * delta))
 
 
 # Sliding zeroes the velocity into an item, so pushes use the intended motion.
-func _push_chair_contacts() -> void:
-	var pushed := {}
-	for i in get_slide_collision_count():
-		var collider := get_slide_collision(i).get_collider()
-		if collider != null and not pushed.has(collider) and collider.has_method("push_from_character"):
-			pushed[collider] = true
-			collider.call("push_from_character", global_position, _intended_motion, push_strength)
+func _push_chair_contacts() -> void: BODY.push_contacts(self, _intended_motion, push_strength)
 
 
 # Smashes the prop in the way when this class is strong enough for it.
@@ -558,6 +555,8 @@ func _mark_stump_drips() -> void:
 
 func _die() -> void:
 	_dead = true
+	_emerge_left = 0.0
+	_turn.cancel(_animation)
 	remove_from_group(ALIVE_GROUP)
 	# An enemy killed while far had its animation paused; the death must play.
 	_sleeping_far = false
@@ -582,7 +581,8 @@ func _die() -> void:
 	collision_layer = 0
 	collision_mask = 0
 	collision_shape.disabled = true
-	if _parts != null and death_ragdoll:
+	# The Mixamo enemies die with a clip (their bones animate), so a corpse stays shootable like a ragdoll.
+	if _parts != null and (death_ragdoll or (_animation != null and _animation.get("extra_clips") != null)):
 		_parts.enable_corpse_hitboxes()
 	_ragdoll = null if not death_ragdoll else DEATH_RAGDOLL.start(self, _parts, _animation, Vector3(velocity.x, 0.0, velocity.z), _death_push if fresh else Vector3.ZERO, size)
 	if _ragdoll == null:

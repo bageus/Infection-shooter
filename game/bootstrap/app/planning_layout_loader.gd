@@ -14,10 +14,11 @@ const PLAYER := "res://game/features/player/public/player.tscn"
 const ROOM_CULL := preload("res://game/presentation/office_floor/public/room_cull.gd")
 const PROP_TRIM := preload("res://game/bootstrap/app/planning_prop_trim.gd")
 const SIMPLE_CASING := preload("res://game/bootstrap/app/planning_simple_casing.gd")
-# Deleted as unused in d288bda. Saved plans may still place them; keep those records without a missing-object warning.
+# Deleted as unused in d288bda (11_deco) and retired with the fallen simple chair. Saved plans may still place them; keep those records without a missing-object warning.
 const RETIRED_MODELS := {
 	"res://models/objects/enviroments/11/11_deco_2.glb": true,
 	"res://models/objects/enviroments/11/11_deco_3.glb": true,
+	"res://models/objects/enviroments/06/06_simple_chair_fell.glb": true,
 }
 var _biomass_cache: Dictionary = {}
 var objects: Node

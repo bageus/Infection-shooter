@@ -34,9 +34,24 @@ static func load_body(scene_path: String) -> Node3D:
 		enemy.free()
 		return null
 	_merge_extra_clips(enemy, player)
+	_hide_cut_tissue(body)
 	enemy.remove_child(body)
 	enemy.free()
 	return body
+
+
+# A whole enemy in the game draws only its skin (surface 0, see body_parts.gd); the cut tissue at
+# the part joints shows only once a part is shot off. The page keeps the same skin-only surface,
+# copied with its stored LODs.
+static func _hide_cut_tissue(body: Node3D) -> void:
+	for mesh_instance: MeshInstance3D in body.find_children("*", "MeshInstance3D", true, false):
+		var mesh := mesh_instance.mesh as ArrayMesh
+		if mesh == null or mesh.get_surface_count() < 2:
+			continue
+		var skin := ArrayMesh.new()
+		skin.set("_surfaces", [(mesh.get("_surfaces") as Array)[0]])
+		skin.surface_set_material(0, mesh_instance.get_active_material(0))
+		mesh_instance.mesh = skin
 
 
 static func find_player(node: Node) -> AnimationPlayer:
