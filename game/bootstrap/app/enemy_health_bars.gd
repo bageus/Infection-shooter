@@ -44,7 +44,8 @@ func _draw() -> void:
 	var hero_rooms := rooms_at(get_tree(), hero.global_position) if hero != null else []
 	for enemy in get_tree().get_nodes_in_group(ALIVE_GROUP):
 		var body := enemy as Node3D
-		if body == null or not body.is_inside_tree():
+		# A body hidden by a closed room's cover (or by anything else) must not leave its bar floating over the fog.
+		if body == null or not body.is_inside_tree() or not body.is_visible_in_tree():
 			continue
 		if hero != null and not same_room(hero_rooms, rooms_at(get_tree(), body.global_position)):
 			continue
