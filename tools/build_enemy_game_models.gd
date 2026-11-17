@@ -23,10 +23,10 @@ const PART_ID_SCALE := 32.0
 const SKIN_TRIANGLES := 9000
 const CAP_TRIANGLES := 1000
 const TEXTURE_SIZE := 1024
-# The atlases of these enemies give every source polygon its own tiny UV island, so decimating
-# the mesh smears colours across islands (ragged, texture-less patches). They keep every source
-# triangle (far LODs still reduce) and their atlas at full size.
-const FULL_DETAIL := ["Brute", "Titan", "Colossus", "Horde"]
+# Every enemy keeps every source triangle and its atlas at full size, so the game draws the
+# shapes, torn edges and texture of the source GLB (decimating Hunger and Revenant to 9k
+# triangles changed their clothes and tears). Far LODs still reduce.
+const FULL_DETAIL := ["Hunger", "Revenant", "Brute", "Titan", "Colossus", "Horde"]
 const FULL_TEXTURE_SIZE := 2048
 const JPG_QUALITY := 0.9
 
@@ -123,9 +123,8 @@ func _merge_parts(nodes: Array, instance: Node, skin_scale: float, merged: Array
 			var total := (SKIN_TRIANGLES * skin_scale) if surface == 0 else float(CAP_TRIANGLES)
 			var budget: float = total * pow(float(_triangles(arrays)), 0.8) / shares[surface]
 			var simplified := _compact(arrays, arrays[Mesh.ARRAY_INDEX]) if full_detail and surface == 0 else _simplify(arrays, maxi(int(budget), 12))
-			# shortcut: Hunger and Revenant keep their white shirts and share no per-polygon atlas, so no repaint; upgrade if their joints show white.
 			if surface == 0 and full_detail:
-				simplified = _repaint_seams(simplified, albedo)
+				simplified = _fix_winding(_repaint_seams(simplified, albedo))
 			_append(merged[surface], simplified, transform, id, _part_lods(simplified))
 		parts.append({"name": String(node.name), "id": id, "caps": _caps(split[1], transform) if _triangles(split[1]) > 0 else []})
 
@@ -411,8 +410,10 @@ static func _repaint_seams(arrays: Array, albedo: Image) -> Array:
 					neighbours[t].append(other)
 	var cloth := PackedByteArray()
 	var white := PackedByteArray()
+	var band := PackedByteArray()
 	cloth.resize(count)
 	white.resize(count)
+	band.resize(count)
 	var middle := PackedVector2Array()
 	middle.resize(count)
 	for t in count:
@@ -421,10 +422,13 @@ static func _repaint_seams(arrays: Array, albedo: Image) -> Array:
 		cloth[t] = 1 if uvs[indices[t * 3]] == Vector2.ZERO and uvs[indices[t * 3 + 1]] == Vector2.ZERO and uvs[indices[t * 3 + 2]] == Vector2.ZERO else 0
 		var p := albedo.get_pixel(clampi(int(centre.x * albedo.get_width()), 0, albedo.get_width() - 1), clampi(int(centre.y * albedo.get_height()), 0, albedo.get_height() - 1))
 		white[t] = 1 if p.r >= WHITE_CELL and p.g >= WHITE_CELL and p.b >= WHITE_CELL else 0
+		# The source atlases are 2048 x 2064: the 16 rows under the square are a plain white strip
+		# that the source's seam patches (12-25% of the skin triangles) are mapped onto.
+		band[t] = 1 if centre.y * albedo.get_height() >= albedo.get_width() else 0
 	var seam := cloth.duplicate()
 	var queue: Array = []
 	for t in count:
-		if cloth[t] == 1 or (white[t] == 1 and open_triangle[t] == 1):
+		if cloth[t] == 1 or band[t] == 1 or (white[t] == 1 and open_triangle[t] == 1):
 			seam[t] = 1
 			queue.append(t)
 	var head := 0
@@ -480,6 +484,32 @@ static func _repaint_seams(arrays: Array, albedo: Image) -> Array:
 	result[Mesh.ARRAY_TEX_UV] = out_uvs
 	result[Mesh.ARRAY_TANGENT] = out_tangents
 	result[Mesh.ARRAY_INDEX] = out_indices
+	return result
+
+
+# Some source triangles (mostly the seam patches) are wound against their vertex normals. Enemy
+# materials draw both sides, so seen from outside they count as back faces, get the inverted
+# normal and render as dark cracks. Such triangles are turned to face their normals.
+static func _fix_winding(arrays: Array) -> Array:
+	var vertices: PackedVector3Array = arrays[Mesh.ARRAY_VERTEX]
+	var normals: PackedVector3Array = arrays[Mesh.ARRAY_NORMAL]
+	var indices: PackedInt32Array = (arrays[Mesh.ARRAY_INDEX] as PackedInt32Array).duplicate()
+	var flipped := 0
+	for t in range(0, indices.size(), 3):
+		var a := indices[t]
+		var b := indices[t + 1]
+		var c := indices[t + 2]
+		# Godot's front faces are clockwise, so the outward face normal is (c - a) x (b - a).
+		var face := (vertices[c] - vertices[a]).cross(vertices[b] - vertices[a])
+		if face.dot(normals[a] + normals[b] + normals[c]) < 0.0:
+			indices[t + 1] = c
+			indices[t + 2] = b
+			flipped += 1
+	if flipped == 0:
+		return arrays
+	print("  turned %d triangles to face their normals" % flipped)
+	var result := arrays.duplicate()
+	result[Mesh.ARRAY_INDEX] = indices
 	return result
 
 
@@ -563,8 +593,9 @@ static func _cluster(arrays: Array, indices: PackedInt32Array, target: int) -> P
 	return result
 
 
-# LOD keys are world-space simplification errors: Godot switches at roughly key * 900 m (720p). The old 1.2 / 1.8
-# never switched, so crowds always drew the full 50-70k-triangle meshes; 0.006 / 0.012 switch near 6 m and 12 m.
+# LOD keys are world-space simplification errors: Godot switches at roughly key * 900 m (720p). The game camera
+# sits 9-24 m away, so 0.006 / 0.012 (6 m / 12 m) always drew the reduced parts, which broke apart at the joints
+# (Hunger and Revenant turned into dark shards). 0.03 / 0.06 keep the full source mesh within camera range.
 static func _lods(surface: Dictionary, index: int) -> Dictionary:
 	var full: PackedInt32Array = surface.indices
 	var near: PackedInt32Array = surface.lod_near
@@ -575,9 +606,9 @@ static func _lods(surface: Dictionary, index: int) -> Dictionary:
 		far = _whole_lod(surface, near, near.size() / 6)
 	var result := {}
 	if near.size() < full.size():
-		result[0.006 if index == 0 else 0.13] = near
+		result[0.03 if index == 0 else 0.13] = near
 	if far.size() < near.size():
-		result[0.012 if index == 0 else 0.2] = far
+		result[0.06 if index == 0 else 0.2] = far
 	return result
 
 
@@ -702,6 +733,9 @@ func _read_images(enemy_name: String) -> Dictionary:
 func _write_textures(enemy_name: String, texture_size: int, images: Dictionary) -> bool:
 	var ok := true
 	for suffix: String in images:
+		# Every wound material but Brute's uses Horde_wound.jpg (same source image); copies fail the dedup check.
+		if suffix == "wound" and not enemy_name in ["Brute", "Horde"]:
+			continue
 		var image: Image = (images[suffix] as Image).duplicate()
 		image.resize(mini(image.get_width(), texture_size), mini(image.get_height(), texture_size), Image.INTERPOLATE_LANCZOS)
 		image.convert(Image.FORMAT_RGB8)
