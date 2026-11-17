@@ -23,10 +23,10 @@ const PART_ID_SCALE := 32.0
 const SKIN_TRIANGLES := 9000
 const CAP_TRIANGLES := 1000
 const TEXTURE_SIZE := 1024
-# The atlases of these enemies give every source polygon its own tiny UV island, so decimating
-# the mesh smears colours across islands (ragged, texture-less patches). They keep every source
-# triangle (far LODs still reduce) and their atlas at full size.
-const FULL_DETAIL := ["Brute", "Titan", "Colossus", "Horde"]
+# Every enemy keeps every source triangle and its atlas at full size, so the game draws the
+# shapes, torn edges and texture of the source GLB (decimating Hunger and Revenant to 9k
+# triangles changed their clothes and tears). Far LODs still reduce.
+const FULL_DETAIL := ["Hunger", "Revenant", "Brute", "Titan", "Colossus", "Horde"]
 const FULL_TEXTURE_SIZE := 2048
 const JPG_QUALITY := 0.9
 
@@ -64,6 +64,10 @@ func _build(enemy_name: String) -> bool:
 		push_error("Source has no two-surface part meshes: " + enemy_name)
 		instance.free()
 		return false
+	var images := _read_images(enemy_name)
+	if images.is_empty():
+		instance.free()
+		return false
 	var merged: Array = []
 	var parts: Array = []
 	# Parts whose UV seams lock their edges simplify less than asked; tighten the skin target
@@ -72,15 +76,16 @@ func _build(enemy_name: String) -> bool:
 	for attempt in 4:
 		merged = [_new_surface(), _new_surface()]
 		parts = []
-		_merge_parts(nodes, instance, skin_scale, merged, parts, enemy_name in FULL_DETAIL)
+		_merge_parts(nodes, instance, skin_scale, merged, parts, enemy_name in FULL_DETAIL, images.albedo)
 		var skin_triangles := (merged[0].indices as PackedInt32Array).size() / 3
 		if enemy_name in FULL_DETAIL or skin_triangles <= SKIN_TRIANGLES * 1.05 or attempt == 3:
 			break
 		skin_scale *= clampf(float(SKIN_TRIANGLES) / float(skin_triangles), 0.4, 0.95)
 	_close_joints(merged[0], merged[1])
+	_smooth_joint_normals(merged[0])
 	var mesh := ArrayMesh.new()
 	for surface in 2:
-		mesh.add_surface_from_arrays(Mesh.PRIMITIVE_TRIANGLES, _finish(merged[surface]), [], _lods(merged[surface], surface))
+		mesh.add_surface_from_arrays(Mesh.PRIMITIVE_TRIANGLES, _finish(merged[surface]), [], _lods(_finish(merged[surface]), surface))
 	mesh.resource_name = enemy_name + "_game"
 	var mesh_path := OUTPUT_DIR + enemy_name + "_game.res"
 	if ResourceSaver.save(mesh, mesh_path) != OK:
@@ -94,14 +99,14 @@ func _build(enemy_name: String) -> bool:
 	var triangles := (merged[0].indices as PackedInt32Array).size() / 3 + (merged[1].indices as PackedInt32Array).size() / 3
 	print("%s: %d parts, %d triangles, aabb %s" % [enemy_name, parts.size(), triangles, mesh.get_aabb()])
 	instance.free()
-	var ok := _write_textures(enemy_name, FULL_TEXTURE_SIZE if enemy_name in FULL_DETAIL else TEXTURE_SIZE)
+	var ok := _write_textures(enemy_name, FULL_TEXTURE_SIZE if enemy_name in FULL_DETAIL else TEXTURE_SIZE, images)
 	_write_material(enemy_name)
 	_write_wound_material(enemy_name)
 	return ok
 
 
 # Simplifies every part to its share of the triangle budget and appends it to `merged`.
-func _merge_parts(nodes: Array, instance: Node, skin_scale: float, merged: Array, parts: Array, full_detail: bool) -> void:
+func _merge_parts(nodes: Array, instance: Node, skin_scale: float, merged: Array, parts: Array, full_detail: bool, albedo: Image) -> void:
 	var shares := [0.0, 0.0]
 	for node: MeshInstance3D in nodes:
 		var split := _split_surfaces(node.mesh)
@@ -118,7 +123,9 @@ func _merge_parts(nodes: Array, instance: Node, skin_scale: float, merged: Array
 			var total := (SKIN_TRIANGLES * skin_scale) if surface == 0 else float(CAP_TRIANGLES)
 			var budget: float = total * pow(float(_triangles(arrays)), 0.8) / shares[surface]
 			var simplified := _compact(arrays, arrays[Mesh.ARRAY_INDEX]) if full_detail and surface == 0 else _simplify(arrays, maxi(int(budget), 12))
-			_append(merged[surface], simplified, transform, id, _part_lods(simplified))
+			if surface == 0 and full_detail:
+				simplified = _fix_winding(_repaint_seams(simplified, albedo))
+			_append(merged[surface], simplified, transform, id)
 		parts.append({"name": String(node.name), "id": id, "caps": _caps(split[1], transform) if _triangles(split[1]) > 0 else []})
 
 
@@ -245,11 +252,10 @@ static func _compact(arrays: Array, indices: PackedInt32Array) -> Array:
 
 static func _new_surface() -> Dictionary:
 	return {"vertices": PackedVector3Array(), "normals": PackedVector3Array(), "uvs": PackedVector2Array(),
-		"tangents": PackedFloat32Array(), "colors": PackedColorArray(), "indices": PackedInt32Array(),
-		"lod_near": PackedInt32Array(), "lod_far": PackedInt32Array()}
+		"tangents": PackedFloat32Array(), "colors": PackedColorArray(), "indices": PackedInt32Array()}
 
 
-static func _append(target: Dictionary, arrays: Array, transform: Transform3D, part_id: int, lods: Array) -> void:
+static func _append(target: Dictionary, arrays: Array, transform: Transform3D, part_id: int) -> void:
 	var vertices: PackedVector3Array = arrays[Mesh.ARRAY_VERTEX]
 	var normals: PackedVector3Array = arrays[Mesh.ARRAY_NORMAL]
 	var uvs: PackedVector2Array = arrays[Mesh.ARRAY_TEX_UV]
@@ -260,8 +266,6 @@ static func _append(target: Dictionary, arrays: Array, transform: Transform3D, p
 	var out_tangents: PackedFloat32Array = target.tangents
 	var out_colors: PackedColorArray = target.colors
 	var out_indices: PackedInt32Array = target.indices
-	var near: PackedInt32Array = target.lod_near
-	var far: PackedInt32Array = target.lod_far
 	var base := out_vertices.size()
 	var color := Color(float(part_id) / PART_ID_SCALE, 0.0, 0.0, 1.0)
 	for index in vertices.size():
@@ -273,12 +277,6 @@ static func _append(target: Dictionary, arrays: Array, transform: Transform3D, p
 		out_colors.append(color)
 	for index: int in arrays[Mesh.ARRAY_INDEX]:
 		out_indices.append(base + index)
-	for index: int in lods[0]:
-		near.append(base + index)
-	for index: int in lods[1]:
-		far.append(base + index)
-	target.lod_near = near
-	target.lod_far = far
 	target.vertices = out_vertices
 	target.normals = out_normals
 	target.uvs = out_uvs
@@ -357,81 +355,203 @@ static func _close_joints(skin: Dictionary, caps: Dictionary) -> void:
 	skin.vertices = vertices
 
 
-# Index lists of a coarser and a much coarser version of one part (about 50% and 25% of its
-# triangles) over the part's own vertices; a part that cannot be reduced keeps its full indices.
-static func _part_lods(arrays: Array) -> Array:
-	var full: PackedInt32Array = arrays[Mesh.ARRAY_INDEX]
-	var near := _reduce(arrays, full, full.size() / 6)
-	return [near, _reduce(arrays, near, full.size() / 12)]
+# The source parts carry patches that do not belong to the body texture: seam strips at the
+# part joints whose atlas cells are plain white, and Brute's shoulder cloth, whose UVs are all
+# (0, 0). They show as white or grey bands on a whole enemy. Such triangles (white, reachable
+# from a part's open edge or the cloth through white triangles) take the UV of the nearest
+# ordinary triangle, so skin, cloth and normal map continue across the seam.
+const WHITE_CELL := 0.97
 
 
-# Repeats meshopt passes over the same vertices (unused ones stay in place) until at most
-# `target` triangles are left, or a pass stops helping.
-static func _reduce(arrays: Array, indices: PackedInt32Array, target: int) -> PackedInt32Array:
-	for pass_index in 5:
-		if indices.size() / 3 <= target * 1.15:
-			break
-		var step := arrays.duplicate()
-		step[Mesh.ARRAY_INDEX] = indices
-		var tool := SurfaceTool.new()
-		tool.create_from_arrays(step)
-		var best := tool.generate_lod(1.0, maxi(target * 3, 3))
-		if best.size() >= indices.size():
-			break
-		indices = best
-	if indices.size() / 3 > target * 1.15:
-		indices = _cluster(arrays, indices, target)
-	return indices
-
-
-# Last resort for meshes meshopt leaves alone: vertex clustering on a grid, keeping one real
-# vertex per cell so the result still indexes the same buffer. Cells grow until it fits.
-static func _cluster(arrays: Array, indices: PackedInt32Array, target: int) -> PackedInt32Array:
+static func _repaint_seams(arrays: Array, albedo: Image) -> Array:
 	var vertices: PackedVector3Array = arrays[Mesh.ARRAY_VERTEX]
-	var cell := 0.004
-	var result := indices
-	for step in 12:
-		var representative := {}
-		var kept := PackedInt32Array()
-		for triangle in indices.size() / 3:
-			var mapped := []
-			for corner in 3:
-				var vertex: int = indices[triangle * 3 + corner]
-				var key := Vector3i((vertices[vertex] / cell).floor())
-				if not representative.has(key):
-					representative[key] = vertex
-				mapped.append(representative[key])
-			if mapped[0] != mapped[1] and mapped[1] != mapped[2] and mapped[0] != mapped[2]:
-				kept.append_array(PackedInt32Array(mapped))
-		result = kept
-		if kept.size() / 3 <= target:
-			break
-		cell *= 1.5
+	var uvs: PackedVector2Array = arrays[Mesh.ARRAY_TEX_UV]
+	var indices: PackedInt32Array = arrays[Mesh.ARRAY_INDEX]
+	var count := indices.size() / 3
+	var canonical := PackedInt32Array()
+	canonical.resize(vertices.size())
+	var weld := {}
+	for v in vertices.size():
+		var key := Vector3i((vertices[v] * 10000.0).round())
+		if not weld.has(key):
+			weld[key] = v
+		canonical[v] = int(weld[key])
+	var edge_triangles := {}
+	for t in count:
+		for k in 3:
+			var a := canonical[indices[t * 3 + k]]
+			var b := canonical[indices[t * 3 + (k + 1) % 3]]
+			var edge := Vector2i(mini(a, b), maxi(a, b))
+			if not edge_triangles.has(edge):
+				edge_triangles[edge] = []
+			edge_triangles[edge].append(t)
+	var neighbours: Array = []
+	neighbours.resize(count)
+	var open_triangle := PackedByteArray()
+	open_triangle.resize(count)
+	for edge: Vector2i in edge_triangles:
+		var sharing: Array = edge_triangles[edge]
+		if sharing.size() == 1:
+			open_triangle[sharing[0]] = 1
+		for t: int in sharing:
+			for other: int in sharing:
+				if other != t:
+					if neighbours[t] == null:
+						neighbours[t] = []
+					neighbours[t].append(other)
+	var cloth := PackedByteArray()
+	var white := PackedByteArray()
+	var band := PackedByteArray()
+	cloth.resize(count)
+	white.resize(count)
+	band.resize(count)
+	var middle := PackedVector2Array()
+	middle.resize(count)
+	for t in count:
+		var centre := (uvs[indices[t * 3]] + uvs[indices[t * 3 + 1]] + uvs[indices[t * 3 + 2]]) / 3.0
+		middle[t] = centre
+		cloth[t] = 1 if uvs[indices[t * 3]] == Vector2.ZERO and uvs[indices[t * 3 + 1]] == Vector2.ZERO and uvs[indices[t * 3 + 2]] == Vector2.ZERO else 0
+		var p := albedo.get_pixel(clampi(int(centre.x * albedo.get_width()), 0, albedo.get_width() - 1), clampi(int(centre.y * albedo.get_height()), 0, albedo.get_height() - 1))
+		white[t] = 1 if p.r >= WHITE_CELL and p.g >= WHITE_CELL and p.b >= WHITE_CELL else 0
+		# The source atlases are 2048 x 2064: the 16 rows under the square are a plain white strip
+		# that the source's seam patches (12-25% of the skin triangles) are mapped onto.
+		band[t] = 1 if centre.y * albedo.get_height() >= albedo.get_width() else 0
+	var seam := cloth.duplicate()
+	var queue: Array = []
+	for t in count:
+		if cloth[t] == 1 or band[t] == 1 or (white[t] == 1 and open_triangle[t] == 1):
+			seam[t] = 1
+			queue.append(t)
+	var head := 0
+	while head < queue.size():
+		var t: int = queue[head]
+		head += 1
+		for other: int in (neighbours[t] if neighbours[t] != null else []):
+			if seam[other] == 0 and white[other] == 1:
+				seam[other] = 1
+				queue.append(other)
+	# Nearest ordinary triangle by steps across shared edges.
+	var donor := PackedInt32Array()
+	donor.resize(count)
+	donor.fill(-1)
+	queue = []
+	for t in count:
+		if seam[t] == 0:
+			donor[t] = t
+			queue.append(t)
+	head = 0
+	while head < queue.size():
+		var t: int = queue[head]
+		head += 1
+		for other: int in (neighbours[t] if neighbours[t] != null else []):
+			if seam[other] == 1 and donor[other] == -1:
+				donor[other] = donor[t]
+				queue.append(other)
+	var result := arrays.duplicate()
+	var out_vertices := vertices.duplicate()
+	var out_normals: PackedVector3Array = (arrays[Mesh.ARRAY_NORMAL] as PackedVector3Array).duplicate()
+	var out_uvs := uvs.duplicate()
+	var out_tangents: PackedFloat32Array = (arrays[Mesh.ARRAY_TANGENT] as PackedFloat32Array).duplicate()
+	var out_indices := indices.duplicate()
+	var normals: PackedVector3Array = arrays[Mesh.ARRAY_NORMAL]
+	var tangents: PackedFloat32Array = arrays[Mesh.ARRAY_TANGENT]
+	var painted := 0
+	for t in count:
+		if seam[t] == 0 or donor[t] < 0:
+			continue
+		painted += 1
+		for k in 3:
+			var v := indices[t * 3 + k]
+			out_indices[t * 3 + k] = out_vertices.size()
+			out_vertices.append(vertices[v])
+			out_normals.append(normals[v])
+			out_uvs.append(middle[donor[t]])
+			out_tangents.append_array(tangents.slice(v * 4, v * 4 + 4))
+	if painted == 0:
+		return arrays
+	print("  repainted %d seam triangles" % painted)
+	result[Mesh.ARRAY_VERTEX] = out_vertices
+	result[Mesh.ARRAY_NORMAL] = out_normals
+	result[Mesh.ARRAY_TEX_UV] = out_uvs
+	result[Mesh.ARRAY_TANGENT] = out_tangents
+	result[Mesh.ARRAY_INDEX] = out_indices
 	return result
 
 
-# Screen-size thresholds (edge_length) of the two LOD levels, as the old baked meshes used them.
-static func _lods(surface: Dictionary, index: int) -> Dictionary:
-	var full: PackedInt32Array = surface.indices
-	var near: PackedInt32Array = surface.lod_near
-	var far: PackedInt32Array = surface.lod_far
-	if near.size() >= full.size():
-		near = _whole_lod(surface, full, full.size() / 6)
-	if far.size() >= near.size():
-		far = _whole_lod(surface, near, near.size() / 6)
+# Some source triangles (mostly the seam patches) are wound against their vertex normals. Enemy
+# materials draw both sides, so seen from outside they count as back faces, get the inverted
+# normal and render as dark cracks. Such triangles are turned to face their normals.
+static func _fix_winding(arrays: Array) -> Array:
+	var vertices: PackedVector3Array = arrays[Mesh.ARRAY_VERTEX]
+	var normals: PackedVector3Array = arrays[Mesh.ARRAY_NORMAL]
+	var indices: PackedInt32Array = (arrays[Mesh.ARRAY_INDEX] as PackedInt32Array).duplicate()
+	var flipped := 0
+	for t in range(0, indices.size(), 3):
+		var a := indices[t]
+		var b := indices[t + 1]
+		var c := indices[t + 2]
+		# Godot's front faces are clockwise, so the outward face normal is (c - a) x (b - a).
+		var face := (vertices[c] - vertices[a]).cross(vertices[b] - vertices[a])
+		if face.dot(normals[a] + normals[b] + normals[c]) < 0.0:
+			indices[t + 1] = c
+			indices[t + 2] = b
+			flipped += 1
+	if flipped == 0:
+		return arrays
+	print("  turned %d triangles to face their normals" % flipped)
+	var result := arrays.duplicate()
+	result[Mesh.ARRAY_INDEX] = indices
+	return result
+
+
+# Parts are separate meshes, so lighting would break along every joint. Vertices of different
+# parts that lie within 5 mm of each other share one averaged normal.
+static func _smooth_joint_normals(skin: Dictionary) -> void:
+	var vertices: PackedVector3Array = skin.vertices
+	var normals: PackedVector3Array = skin.normals
+	var colors: PackedColorArray = skin.colors
+	var groups := {}
+	for v in vertices.size():
+		var key := Vector3i((vertices[v] / 0.005).round())
+		if not groups.has(key):
+			groups[key] = []
+		groups[key].append(v)
+	var smoothed := normals.duplicate()
+	for key: Vector3i in groups:
+		var members: Array = groups[key]
+		var ids := {}
+		var sum := Vector3.ZERO
+		for v: int in members:
+			ids[roundi(colors[v].r * PART_ID_SCALE)] = true
+			sum += normals[v]
+		if ids.size() < 2 or sum.length() < 0.001:
+			continue
+		for v: int in members:
+			smoothed[v] = sum.normalized()
+	skin.normals = smoothed
+
+
+# Godot's own LOD generator (the one the scene importer uses) on the merged surface. The earlier
+# per-part meshopt passes with a vertex-clustering fallback tore across the atlas islands, so
+# LOD1/LOD2 rendered as dark shards. LOD keys are world-space errors: Godot switches at roughly
+# key * 900 m (720p), so 0.012 / 0.024 give LOD1 near 12 m and LOD2 near 20 m of the 9-24 m game camera
+# (measured with tools/bench_enemy_lods.gd: 40% shorter frames at 16 m, 56% at 24 m).
+const LOD_KEYS := [[0.012, 0.024], [0.13, 0.2]]
+
+
+static func _lods(arrays: Array, surface: int) -> Dictionary:
+	var importer := ImporterMesh.new()
+	importer.add_surface(Mesh.PRIMITIVE_TRIANGLES, arrays)
+	importer.generate_lods(25.0, 60.0, [])
 	var result := {}
-	if near.size() < full.size():
-		result[1.2 if index == 0 else 0.13] = near
-	if far.size() < near.size():
-		result[1.8 if index == 0 else 0.2] = far
+	var previous: int = (arrays[Mesh.ARRAY_INDEX] as PackedInt32Array).size()
+	for lod in mini(importer.get_surface_lod_count(0), 2):
+		var indices := importer.get_surface_lod_indices(0, lod)
+		if indices.size() >= previous:
+			break
+		result[LOD_KEYS[surface][lod]] = indices
+		previous = indices.size()
 	return result
-
-
-# Parts meshopt could not reduce one by one are reduced across the whole merged surface.
-static func _whole_lod(surface: Dictionary, indices: PackedInt32Array, target: int) -> PackedInt32Array:
-	var arrays := _finish(surface)
-	arrays[Mesh.ARRAY_INDEX] = indices
-	return _reduce(arrays, indices, target)
 
 
 static func _finish(surface: Dictionary) -> Array:
@@ -503,12 +623,13 @@ static func _find(parent: Dictionary, node: int) -> int:
 	return root
 
 
-# Reads the GLB's embedded images straight from its binary chunk.
-func _write_textures(enemy_name: String, texture_size: int) -> bool:
+# Reads the GLB's embedded images straight from its binary chunk: {albedo, normal, wound} Images,
+# or {} when one cannot be read.
+func _read_images(enemy_name: String) -> Dictionary:
 	var bytes := FileAccess.get_file_as_bytes(SOURCE_DIR + enemy_name + ".glb")
 	if bytes.size() < 20:
 		push_error("Cannot read " + enemy_name + ".glb")
-		return false
+		return {}
 	var json_length := bytes.decode_u32(12)
 	var document: Dictionary = JSON.parse_string(bytes.slice(20, 20 + json_length).get_string_from_utf8())
 	var bin_start := 20 + json_length + 8
@@ -523,7 +644,7 @@ func _write_textures(enemy_name: String, texture_size: int) -> bool:
 		"normal": int(body_material.normalTexture.index),
 		"wound": int(wound_material.pbrMetallicRoughness.baseColorTexture.index),
 	}
-	var ok := true
+	var result := {}
 	for suffix: String in wanted:
 		var texture: Dictionary = document.textures[wanted[suffix]]
 		var image_info: Dictionary = document.images[int(texture.source)]
@@ -539,8 +660,18 @@ func _write_textures(enemy_name: String, texture_size: int) -> bool:
 		var error := image.load_jpg_from_buffer(data) if data.slice(0, 2) == PackedByteArray([0xFF, 0xD8]) else image.load_png_from_buffer(data)
 		if error != OK:
 			push_error("Cannot decode %s texture of %s" % [suffix, enemy_name])
-			ok = false
+			return {}
+		result[suffix] = image
+	return result
+
+
+func _write_textures(enemy_name: String, texture_size: int, images: Dictionary) -> bool:
+	var ok := true
+	for suffix: String in images:
+		# Every wound material but Brute's uses Horde_wound.jpg (same source image); copies fail the dedup check.
+		if suffix == "wound" and not enemy_name in ["Brute", "Horde"]:
 			continue
+		var image: Image = (images[suffix] as Image).duplicate()
 		image.resize(mini(image.get_width(), texture_size), mini(image.get_height(), texture_size), Image.INTERPOLATE_LANCZOS)
 		image.convert(Image.FORMAT_RGB8)
 		var target := ProjectSettings.globalize_path("%s%s_%s.jpg" % [OUTPUT_DIR, enemy_name, suffix])

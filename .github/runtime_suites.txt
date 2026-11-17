@@ -68,6 +68,7 @@ game/presentation/office_floor/tests/run_hit_effect_tests.gd
 game/presentation/office_floor/tests/run_glass_crack_tests.gd
 game/presentation/office_floor/tests/run_glass_span_tests.gd
 game/features/combat/tests/run_grenade_vfx_tests.gd
+game/bootstrap/app/tests/run_ttk_balance_tests.gd
 game/bootstrap/app/tests/run_grenade_stun_tests.gd
 game/features/combat/tests/run_floor_danger_zone_tests.gd
 game/bootstrap/app/tests/run_blast_shelter_tests.gd
@@ -248,6 +249,7 @@ game/bootstrap/app/tests/run_issue7_card_loot_tests.gd
 game/bootstrap/app/tests/run_darkness_room_tests.gd
 game/bootstrap/app/tests/run_room_cull_tests.gd
 game/bootstrap/app/tests/run_enemy_render_probe_tests.gd
+game/bootstrap/app/tests/run_enemy_anim_viewer_tests.gd
 game/bootstrap/app/tests/run_door_darkness_flow_tests.gd
 game/bootstrap/app/tests/run_biomass_floor_bake_tests.gd
 game/bootstrap/app/tests/run_biomass_light_energy_tests.gd
@@ -288,3 +290,6 @@ game/bootstrap/app/tests/run_enemy_health_bars_tests.gd
 game/features/infected/tests/run_enemy_glow_tests.gd
 game/features/character_animation/tests/run_clip_footsteps_tests.gd
 game/presentation/office_floor/tests/run_door_sill_tests.gd
+game/features/infected/tests/run_enemy_mixamo_clips_tests.gd
+game/features/character_animation/tests/run_hero_clips_tests.gd
+game/features/infected/tests/run_offscreen_lazy_tick_tests.gd

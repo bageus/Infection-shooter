@@ -221,6 +221,7 @@ func _bone(owner: Node, bone_name: String) -> Vector3:
 
 func _spawn(at: Vector3) -> CharacterBody3D:
 	var enemy := HUNGER.instantiate() as CharacterBody3D
+	enemy.set("death_ragdoll", true) # the scene dies with a clip; these tests are about the ragdoll
 	stage.add_child(enemy)
 	enemy.global_position = at
 	await process_frame

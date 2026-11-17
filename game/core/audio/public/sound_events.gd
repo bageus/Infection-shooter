@@ -297,6 +297,13 @@ static func play(parent: Node, event: StringName, position := Vector3.INF, volum
 	return player
 
 
+# Stops every live voice. Call before SceneTree.quit(): a voice still playing at
+# exit keeps its stream playback alive and Godot reports leaked ObjectDB instances.
+static func stop_all(tree: SceneTree) -> void:
+	for voice in tree.get_nodes_in_group(VOICE_GROUP):
+		(voice as AudioStreamPlayer3D).stop()
+
+
 # Non-positional interface cues use a dry bus and their own small voice budget,
 # so combat sound limits cannot silence menu feedback.
 const UI_GROUP := &"ui_sfx_voice"

@@ -24,8 +24,6 @@ const IDLE_WAIT := Vector2(10.0, 25.0)
 const CORPSE_RANGE := 8.0
 const CORPSE_CHECK := 2.5
 const FEED_SECONDS := Vector2(5.0, 10.0)
-const HIT_FLINCH_STRENGTH := 0.75
-const HIT_COOLDOWN := 1.6
 const SIGHT_CHECK := 0.2
 
 @export var rest_behaviours := true # in-place turns, idle flavour and feeding when unaware
@@ -37,8 +35,6 @@ var _running := false
 var _skip_scream := false
 var _aggro_pending := false
 var _aggro_done := false
-var _spring_only := false
-var _hit_cooldown := 0.0
 var _idle_wait := randf_range(IDLE_WAIT.x, IDLE_WAIT.y)
 var _turn_time := -1.0
 var _turn_length := 1.0
@@ -54,6 +50,7 @@ var _sight_wait := 0.0
 
 func _ready() -> void:
 	super._ready()
+	_turns_in_place = false # it has its own turn with the busy state
 	_feral = randf() < FERAL_SHARE
 	if _animation != null:
 		_animation.call("configure_clip_selector", _clip_for_state)
@@ -78,13 +75,6 @@ func hear_alert(at: Vector3, radius: float) -> void:
 	super.hear_alert(at, radius)
 
 
-# Blasts rock the torso with the directional spring, not the shot flinch clip.
-func take_blast_damage(amount: float, origin: Vector3) -> void:
-	_spring_only = true
-	super.take_blast_damage(amount, origin)
-	_spring_only = false
-
-
 # Sight and shots start the chase; the shout itself is _on_aggro's.
 func _notice_player() -> void:
 	if _senses.alert():
@@ -93,7 +83,6 @@ func _notice_player() -> void:
 
 func _physics_process(delta: float) -> void:
 	_busy = maxf(0.0, _busy - delta)
-	_hit_cooldown = maxf(0.0, _hit_cooldown - delta)
 	super._physics_process(delta)
 	# Sight, a shot or a cry may have started the chase since the last tick.
 	if not _dead and is_instance_valid(_target) and is_alerted() and not _aggro_done:
@@ -141,15 +130,9 @@ func _try_attack() -> void:
 	super._try_attack()
 
 
+# The hit clip (shotgun and blasts, see the base class) only plays while standing and free.
 func _react_to_hit(strength: float) -> void:
-	if not _reaction_direction.is_zero_approx():
-		super._react_to_hit(strength)
-		return
-	var flinch := posture == Posture.STAND and not _feeding and _busy <= 0.0 and not _aggro_pending and not _spring_only
-	if flinch and strength >= HIT_FLINCH_STRENGTH and _hit_cooldown <= 0.0 and _animation != null:
-		if bool(_animation.call("play_overlay", &"HitReaction")):
-			_hit_cooldown = HIT_COOLDOWN
-			return
+	_reaction_heavy = _reaction_heavy and posture == Posture.STAND and not _feeding and _busy <= 0.0 and not _aggro_pending
 	super._react_to_hit(strength)
 
 
@@ -281,6 +264,8 @@ func _start_turn_if_needed(yaw_before: float) -> bool:
 	if absf(angle) < TURN_MIN_ANGLE or _animation == null:
 		return false
 	var clip := &"TurnLeft" if angle > 0.0 else &"TurnRight"
+	if randf() < 0.5 and float(_animation.call("clip_length", StringName(String(clip) + "2"))) > 0.0:
+		clip = StringName(String(clip) + "2")
 	var curve: PackedFloat32Array = _animation.call("clip_meta", clip, &"yaw_curve", PackedFloat32Array())
 	var total := float(_animation.call("clip_meta", clip, &"turn_yaw", 0.0))
 	if curve.size() < 2 or absf(total) < 0.1:

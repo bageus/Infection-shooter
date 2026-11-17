@@ -205,7 +205,7 @@ func _turn_in_place() -> void:
 	var yaw := float(enemy.rotation.y)
 	var wanted := atan2(-enemy.get("_face_direction").x, -enemy.get("_face_direction").z)
 	_check(bool(enemy.call("_start_turn_if_needed", yaw)), "A big change of direction starts a turn.")
-	_check(_player_of(enemy).current_animation == "TurnRight", "Turning toward its right plays TurnRight (%s)." % _player_of(enemy).current_animation)
+	_check(_player_of(enemy).current_animation.begins_with("TurnRight"), "Turning toward its right plays TurnRight (%s)." % _player_of(enemy).current_animation)
 	await create_timer(0.3).timeout
 	var partway := wrapf(enemy.rotation.y - yaw, -PI, PI)
 	await create_timer(2.0).timeout
