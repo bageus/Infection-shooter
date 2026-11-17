@@ -2,6 +2,7 @@ extends SceneTree
 ## Enemy animation page: finds every enemy scene, merges the clips the game plays on each body, and builds its UI.
 const CATALOG := preload("res://game/bootstrap/app/enemy_anim_viewer/enemy_anim_catalog.gd")
 const VIEWER := preload("res://game/bootstrap/app/enemy_anim_viewer/enemy_anim_viewer.tscn")
+const VIEWER_SCRIPT := preload("res://game/bootstrap/app/enemy_anim_viewer/enemy_anim_viewer.gd")
 var failures := 0
 
 
@@ -35,6 +36,12 @@ func _run() -> void:
 	_expect(horde != null and CATALOG.find_player(horde).has_animation("Idle"), "Horde loads with Idle")
 	if horde != null:
 		horde.free()
+
+	var hunger := CATALOG.load_body("res://game/features/infected/public/infected_hunger.tscn")
+	var levels: Array[int] = VIEWER_SCRIPT._lod_levels(hunger)
+	_expect(levels.size() == 3 and levels[0] > levels[1] and levels[1] > levels[2], "Hunger has LOD0-2 with fewer triangles each: %s" % [levels])
+	_expect(VIEWER_SCRIPT.current_lod(levels, levels[1] + 10) == 1, "Drawn triangles near LOD1 read as LOD1")
+	hunger.free()
 
 	var viewer := VIEWER.instantiate()
 	root.add_child(viewer)

@@ -85,7 +85,7 @@ func _build(enemy_name: String) -> bool:
 	_smooth_joint_normals(merged[0])
 	var mesh := ArrayMesh.new()
 	for surface in 2:
-		mesh.add_surface_from_arrays(Mesh.PRIMITIVE_TRIANGLES, _finish(merged[surface]), [], _lods(merged[surface], surface))
+		mesh.add_surface_from_arrays(Mesh.PRIMITIVE_TRIANGLES, _finish(merged[surface]), [], _lods(_finish(merged[surface]), surface))
 	mesh.resource_name = enemy_name + "_game"
 	var mesh_path := OUTPUT_DIR + enemy_name + "_game.res"
 	if ResourceSaver.save(mesh, mesh_path) != OK:
@@ -125,7 +125,7 @@ func _merge_parts(nodes: Array, instance: Node, skin_scale: float, merged: Array
 			var simplified := _compact(arrays, arrays[Mesh.ARRAY_INDEX]) if full_detail and surface == 0 else _simplify(arrays, maxi(int(budget), 12))
 			if surface == 0 and full_detail:
 				simplified = _fix_winding(_repaint_seams(simplified, albedo))
-			_append(merged[surface], simplified, transform, id, _part_lods(simplified))
+			_append(merged[surface], simplified, transform, id)
 		parts.append({"name": String(node.name), "id": id, "caps": _caps(split[1], transform) if _triangles(split[1]) > 0 else []})
 
 
@@ -252,11 +252,10 @@ static func _compact(arrays: Array, indices: PackedInt32Array) -> Array:
 
 static func _new_surface() -> Dictionary:
 	return {"vertices": PackedVector3Array(), "normals": PackedVector3Array(), "uvs": PackedVector2Array(),
-		"tangents": PackedFloat32Array(), "colors": PackedColorArray(), "indices": PackedInt32Array(),
-		"lod_near": PackedInt32Array(), "lod_far": PackedInt32Array()}
+		"tangents": PackedFloat32Array(), "colors": PackedColorArray(), "indices": PackedInt32Array()}
 
 
-static func _append(target: Dictionary, arrays: Array, transform: Transform3D, part_id: int, lods: Array) -> void:
+static func _append(target: Dictionary, arrays: Array, transform: Transform3D, part_id: int) -> void:
 	var vertices: PackedVector3Array = arrays[Mesh.ARRAY_VERTEX]
 	var normals: PackedVector3Array = arrays[Mesh.ARRAY_NORMAL]
 	var uvs: PackedVector2Array = arrays[Mesh.ARRAY_TEX_UV]
@@ -267,8 +266,6 @@ static func _append(target: Dictionary, arrays: Array, transform: Transform3D, p
 	var out_tangents: PackedFloat32Array = target.tangents
 	var out_colors: PackedColorArray = target.colors
 	var out_indices: PackedInt32Array = target.indices
-	var near: PackedInt32Array = target.lod_near
-	var far: PackedInt32Array = target.lod_far
 	var base := out_vertices.size()
 	var color := Color(float(part_id) / PART_ID_SCALE, 0.0, 0.0, 1.0)
 	for index in vertices.size():
@@ -280,12 +277,6 @@ static func _append(target: Dictionary, arrays: Array, transform: Transform3D, p
 		out_colors.append(color)
 	for index: int in arrays[Mesh.ARRAY_INDEX]:
 		out_indices.append(base + index)
-	for index: int in lods[0]:
-		near.append(base + index)
-	for index: int in lods[1]:
-		far.append(base + index)
-	target.lod_near = near
-	target.lod_far = far
 	target.vertices = out_vertices
 	target.normals = out_normals
 	target.uvs = out_uvs
@@ -540,83 +531,27 @@ static func _smooth_joint_normals(skin: Dictionary) -> void:
 	skin.normals = smoothed
 
 
-# Index lists of a coarser and a much coarser version of one part (about 50% and 25% of its
-# triangles) over the part's own vertices; a part that cannot be reduced keeps its full indices.
-static func _part_lods(arrays: Array) -> Array:
-	var full: PackedInt32Array = arrays[Mesh.ARRAY_INDEX]
-	var near := _reduce(arrays, full, full.size() / 6)
-	return [near, _reduce(arrays, near, full.size() / 12)]
+# Godot's own LOD generator (the one the scene importer uses) on the merged surface. The earlier
+# per-part meshopt passes with a vertex-clustering fallback tore across the atlas islands, so
+# LOD1/LOD2 rendered as dark shards. LOD keys are world-space errors: Godot switches at roughly
+# key * 900 m (720p), so 0.012 / 0.024 give LOD1 near 12 m and LOD2 near 20 m of the 9-24 m game camera
+# (measured with tools/bench_enemy_lods.gd: 40% shorter frames at 16 m, 56% at 24 m).
+const LOD_KEYS := [[0.012, 0.024], [0.13, 0.2]]
 
 
-# Repeats meshopt passes over the same vertices (unused ones stay in place) until at most
-# `target` triangles are left, or a pass stops helping.
-static func _reduce(arrays: Array, indices: PackedInt32Array, target: int) -> PackedInt32Array:
-	for pass_index in 5:
-		if indices.size() / 3 <= target * 1.15:
-			break
-		var step := arrays.duplicate()
-		step[Mesh.ARRAY_INDEX] = indices
-		var tool := SurfaceTool.new()
-		tool.create_from_arrays(step)
-		var best := tool.generate_lod(1.0, maxi(target * 3, 3))
-		if best.size() >= indices.size():
-			break
-		indices = best
-	if indices.size() / 3 > target * 1.15:
-		indices = _cluster(arrays, indices, target)
-	return indices
-
-
-# Last resort for meshes meshopt leaves alone: vertex clustering on a grid, keeping one real
-# vertex per cell so the result still indexes the same buffer. Cells grow until it fits.
-static func _cluster(arrays: Array, indices: PackedInt32Array, target: int) -> PackedInt32Array:
-	var vertices: PackedVector3Array = arrays[Mesh.ARRAY_VERTEX]
-	var cell := 0.004
-	var result := indices
-	for step in 12:
-		var representative := {}
-		var kept := PackedInt32Array()
-		for triangle in indices.size() / 3:
-			var mapped := []
-			for corner in 3:
-				var vertex: int = indices[triangle * 3 + corner]
-				var key := Vector3i((vertices[vertex] / cell).floor())
-				if not representative.has(key):
-					representative[key] = vertex
-				mapped.append(representative[key])
-			if mapped[0] != mapped[1] and mapped[1] != mapped[2] and mapped[0] != mapped[2]:
-				kept.append_array(PackedInt32Array(mapped))
-		result = kept
-		if kept.size() / 3 <= target:
-			break
-		cell *= 1.5
-	return result
-
-
-# LOD keys are world-space simplification errors: Godot switches at roughly key * 900 m (720p). The game camera
-# sits 9-24 m away, so 0.006 / 0.012 (6 m / 12 m) always drew the reduced parts, which broke apart at the joints
-# (Hunger and Revenant turned into dark shards). 0.03 / 0.06 keep the full source mesh within camera range.
-static func _lods(surface: Dictionary, index: int) -> Dictionary:
-	var full: PackedInt32Array = surface.indices
-	var near: PackedInt32Array = surface.lod_near
-	var far: PackedInt32Array = surface.lod_far
-	if near.size() >= full.size():
-		near = _whole_lod(surface, full, full.size() / 6)
-	if far.size() >= near.size():
-		far = _whole_lod(surface, near, near.size() / 6)
+static func _lods(arrays: Array, surface: int) -> Dictionary:
+	var importer := ImporterMesh.new()
+	importer.add_surface(Mesh.PRIMITIVE_TRIANGLES, arrays)
+	importer.generate_lods(25.0, 60.0, [])
 	var result := {}
-	if near.size() < full.size():
-		result[0.03 if index == 0 else 0.13] = near
-	if far.size() < near.size():
-		result[0.06 if index == 0 else 0.2] = far
+	var previous: int = (arrays[Mesh.ARRAY_INDEX] as PackedInt32Array).size()
+	for lod in mini(importer.get_surface_lod_count(0), 2):
+		var indices := importer.get_surface_lod_indices(0, lod)
+		if indices.size() >= previous:
+			break
+		result[LOD_KEYS[surface][lod]] = indices
+		previous = indices.size()
 	return result
-
-
-# Parts meshopt could not reduce one by one are reduced across the whole merged surface.
-static func _whole_lod(surface: Dictionary, indices: PackedInt32Array, target: int) -> PackedInt32Array:
-	var arrays := _finish(surface)
-	arrays[Mesh.ARRAY_INDEX] = indices
-	return _reduce(arrays, indices, target)
 
 
 static func _finish(surface: Dictionary) -> Array:
