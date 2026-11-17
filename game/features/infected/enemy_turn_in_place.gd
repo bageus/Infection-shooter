@@ -37,7 +37,7 @@ func start(animation: Node, yaw_before: float, face: Vector3) -> bool:
 	var curve: PackedFloat32Array = animation.call("clip_meta", clip, &"yaw_curve", PackedFloat32Array())
 	if curve.size() < 2 or absf(float(animation.call("clip_meta", clip, &"turn_yaw", 0.0))) < 0.1:
 		return false
-	var length := float(animation.call("play_named_one_shot", clip, 0.12, SPEED))
+	var length := float(animation.call("play_named_one_shot", clip, 0.25, SPEED))
 	if length <= 0.0:
 		return false
 	_clip = clip

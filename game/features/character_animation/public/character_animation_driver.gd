@@ -17,6 +17,7 @@ const CLIP_FOOTSTEPS := preload("res://game/features/character_animation/clip_fo
 const CLIP_TUNING := preload("res://game/features/character_animation/clip_tuning.gd")
 const STRIKE_POSE := preload("res://game/features/character_animation/strike_pose.gd")
 const ENEMY_VARIANTS := preload("res://game/features/character_animation/enemy_variants.gd")
+const ENEMY_BLENDS := preload("res://game/features/character_animation/public/enemy_blends.gd")
 const HERO_CLIPS := preload("res://game/features/character_animation/hero_body_clips.gd")
 const STATE_ATTACK := &"attack"
 const STATE_DEATH := &"death"
@@ -151,7 +152,7 @@ func play_one_shot(state: StringName) -> float:
 		var animation := animation_player.get_animation(clip)
 		var scale := _strike_speed(animation)
 		animation_player.speed_scale = scale
-		animation_player.play(clip, 0.08)
+		animation_player.play(clip, _blend(clip, 0.08, false))
 		length = animation.length / scale
 	elif _target != null:
 		length = procedural_death_seconds if state in DEATH_STATES else procedural_attack_seconds
@@ -539,11 +540,15 @@ func _hold_rest_pose() -> void:
 	_current = "__rest"
 
 
+func _blend(clip: String, base: float, after_one_shot: bool) -> float:
+	return ENEMY_BLENDS.seconds(clip, base, after_one_shot) if extra_clips != null else base
+
+
 func _play_clip(actual: String) -> void:
 	if _current == actual:
 		return
+	animation_player.play(actual, _blend(actual, 0.12, _current.is_empty()))
 	_current = actual
-	animation_player.play(actual, 0.12)
 
 
 func _index_animations() -> void:
