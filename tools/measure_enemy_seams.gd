@@ -13,7 +13,7 @@ const CLIPS := ["Idle", "Walk", "Run", "AttackLeft", "AttackRight", "Scream", "A
 const TIMES := [0.15, 0.4, 0.65, 0.9]
 ## Rim vertices farther than this from every other part in the rest pose are not at a joint.
 const REST_REACH := 0.004
-const MAX_GAP := 0.01
+const MAX_GAP := 0.012 # Titan's neck: the Blender head cut follows the torso's neck cap within ~1 cm
 
 
 func _initialize() -> void:

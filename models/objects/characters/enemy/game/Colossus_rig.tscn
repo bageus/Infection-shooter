@@ -27,16 +27,16 @@ bind/5/bone = 5
 bind/5/pose = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.003610239, -0.69976026, -0.22875457)
 bind/6/name = &""
 bind/6/bone = 6
-bind/6/pose = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.19233304, -0.49301416, 0.0010356158)
+bind/6/pose = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.19233577, -0.49301895, 0.0010330677)
 bind/7/name = &""
 bind/7/bone = 7
-bind/7/pose = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.27452818, -0.44302624, 0.118808776)
+bind/7/pose = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.27453208, -0.44303104, 0.11880368)
 bind/8/name = &""
 bind/8/bone = 8
-bind/8/pose = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.5663808, -0.130144, -0.009741589)
+bind/8/pose = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.5663842, -0.13014624, -0.009745538)
 bind/9/name = &""
 bind/9/bone = 9
-bind/9/pose = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.60223705, 0.46666235, -0.14914778)
+bind/9/pose = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.60223764, 0.46666196, -0.14914848)
 bind/10/name = &""
 bind/10/bone = 10
 bind/10/pose = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.19546075, -0.51252496, -0.0073022097)
@@ -66,17 +66,17 @@ bind/18/bone = 18
 bind/18/pose = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.19321245, 0.15459046, 0.017854042)
 bind/19/name = &""
 bind/19/bone = 19
-bind/19/pose = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.2633716, 0.50229967, -0.05223105)
+bind/19/pose = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.2633705, 0.5022994, -0.052232042)
 bind/20/name = &""
 bind/20/bone = 20
-bind/20/pose = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.2633716, 0.8603762, -0.05223105)
+bind/20/pose = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.2633705, 0.8603762, -0.052232042)
 bind/21/name = &""
 bind/21/bone = 21
-bind/21/pose = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.2633716, 0.9113639, -0.32074872)
+bind/21/pose = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.2633705, 0.9113639, -0.3207491)
 
-[node name="Visual" type="Node3D" unique_id=2034988961]
+[node name="Visual" type="Node3D" unique_id=1246889187]
 
-[node name="Skeleton3D" type="Skeleton3D" parent="." unique_id=415261964]
+[node name="Skeleton3D" type="Skeleton3D" parent="." unique_id=2012638665]
 bones/0/name = "Root"
 bones/0/parent = -1
 bones/0/rest = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.9513542, 0)
@@ -121,30 +121,30 @@ bones/5/rotation = Quaternion(0, 0, 0, 1)
 bones/5/scale = Vector3(1, 1, 1)
 bones/6/name = "L_Shoulder"
 bones/6/parent = 3
-bones/6/rest = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.19178864, 0.13334274, -0.11777316)
+bones/6/rest = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.19179137, 0.13334754, -0.11777061)
 bones/6/enabled = true
-bones/6/position = Vector3(0.19178864, 0.13334274, -0.11777316)
+bones/6/position = Vector3(0.19179137, 0.13334754, -0.11777061)
 bones/6/rotation = Quaternion(0, 0, 0, 1)
 bones/6/scale = Vector3(1, 1, 1)
 bones/7/name = "L_UpperArm"
 bones/7/parent = 6
-bones/7/rest = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.08219513, -0.049987912, -0.11777316)
+bones/7/rest = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.08219631, -0.049987912, -0.11777061)
 bones/7/enabled = true
-bones/7/position = Vector3(0.08219513, -0.049987912, -0.11777316)
+bones/7/position = Vector3(0.08219631, -0.049987912, -0.11777061)
 bones/7/rotation = Quaternion(0, 0, 0, 1)
 bones/7/scale = Vector3(1, 1, 1)
 bones/8/name = "L_Forearm"
 bones/8/parent = 7
-bones/8/rest = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.29185262, -0.31288224, 0.12855037)
+bones/8/rest = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.29185212, -0.3128848, 0.12854922)
 bones/8/enabled = true
-bones/8/position = Vector3(0.29185262, -0.31288224, 0.12855037)
+bones/8/position = Vector3(0.29185212, -0.3128848, 0.12854922)
 bones/8/rotation = Quaternion(0, 0, 0, 1)
 bones/8/scale = Vector3(1, 1, 1)
 bones/9/name = "L_Hand"
 bones/9/parent = 8
-bones/9/rest = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.035856247, -0.59680635, 0.13940619)
+bones/9/rest = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.035853446, -0.5968082, 0.13940294)
 bones/9/enabled = true
-bones/9/position = Vector3(0.035856247, -0.59680635, 0.13940619)
+bones/9/position = Vector3(0.035853446, -0.5968082, 0.13940294)
 bones/9/rotation = Quaternion(0, 0, 0, 1)
 bones/9/scale = Vector3(1, 1, 1)
 bones/10/name = "R_Shoulder"
@@ -212,32 +212,32 @@ bones/18/rotation = Quaternion(0, 0, 0, 1)
 bones/18/scale = Vector3(1, 1, 1)
 bones/19/name = "R_Shin"
 bones/19/parent = 18
-bones/19/rest = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.07015914, -0.34770918, 0.07008509)
+bones/19/rest = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.070158064, -0.34770894, 0.070086084)
 bones/19/enabled = true
-bones/19/position = Vector3(-0.07015914, -0.34770918, 0.07008509)
+bones/19/position = Vector3(-0.070158064, -0.34770894, 0.070086084)
 bones/19/rotation = Quaternion(0, 0, 0, 1)
 bones/19/scale = Vector3(1, 1, 1)
 bones/20/name = "R_Foot"
 bones/20/parent = 19
-bones/20/rest = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.3580765, 0)
+bones/20/rest = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.35807675, 0)
 bones/20/enabled = true
-bones/20/position = Vector3(0, -0.3580765, 0)
+bones/20/position = Vector3(0, -0.35807675, 0)
 bones/20/rotation = Quaternion(0, 0, 0, 1)
 bones/20/scale = Vector3(1, 1, 1)
 bones/21/name = "R_Toe"
 bones/21/parent = 20
-bones/21/rest = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.05098772, 0.26851767)
+bones/21/rest = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.05098772, 0.26851708)
 bones/21/enabled = true
-bones/21/position = Vector3(0, -0.05098772, 0.26851767)
+bones/21/position = Vector3(0, -0.05098772, 0.26851708)
 bones/21/rotation = Quaternion(0, 0, 0, 1)
 bones/21/scale = Vector3(1, 1, 1)
 
-[node name="Mesh" type="MeshInstance3D" parent="Skeleton3D" unique_id=1894869374]
+[node name="Mesh" type="MeshInstance3D" parent="Skeleton3D" unique_id=1504211114]
 mesh = ExtResource("1_hvk0u")
 skin = SubResource("Skin_vfd4t")
 skeleton = NodePath("..")
 surface_material_override/0 = ExtResource("2_vcclb")
 surface_material_override/1 = ExtResource("3_fex3d")
 
-[node name="AnimationPlayer" type="AnimationPlayer" parent="." unique_id=555893666]
+[node name="AnimationPlayer" type="AnimationPlayer" parent="." unique_id=9329975]
 libraries/ = ExtResource("4_1n53o")
