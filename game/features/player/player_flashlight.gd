@@ -31,7 +31,7 @@ func _ready() -> void:
 	_light.name = "Flashlight"
 	_light.light_color = Color(1.0, .96, .88)
 	_light.light_energy = 0.0
-	_light.spot_range = 9.0
+	_light.spot_range = 8.1
 	_light.spot_angle = 28.0
 	_light.spot_attenuation = 0.8
 	_light.shadow_enabled = false

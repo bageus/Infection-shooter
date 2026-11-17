@@ -3,12 +3,17 @@ extends Node
 const TYPES: Array[String] = ["tile", "concrete"]
 const LABELS: Array[String] = ["Плитка", "Бетон (матовый, с потёртостями)"]
 const DEFAULT := "tile"
+## Tile edge in metres, a map setting saved as floor_tile_step_v1 (the stock grid is 2 m).
+const TILE_KEY := "floor_tile_step_v1"
+const TILE_LIMITS := Vector2(1.0, 4.0)
+const TILE_DEFAULT := 2.0
 
 var session: Variant
 var controls: Node
 var panel: VBoxContainer
 var picker: OptionButton
 var group_button: Button
+var tile_step: SpinBox
 
 
 static func valid(raw: Variant) -> bool:
@@ -25,6 +30,22 @@ static func restore(session_context: Variant, raw: Variant) -> void:
 	var floor_view := _floor(session_context)
 	if floor_view != null:
 		floor_view.call("set_floor_type", raw if valid(raw) else DEFAULT)
+
+
+static func valid_tile(raw: Variant) -> bool:
+	return (raw is float or raw is int) and float(raw) >= TILE_LIMITS.x and float(raw) <= TILE_LIMITS.y
+
+
+static func capture_tile(session_context: Variant) -> float:
+	var floor_view := _floor(session_context)
+	return float(floor_view.get("tile_step")) if floor_view != null else TILE_DEFAULT
+
+
+## A map without the key restores the stock 2 m tile.
+static func restore_tile(session_context: Variant, raw: Variant) -> void:
+	var floor_view := _floor(session_context)
+	if floor_view != null:
+		floor_view.call("set_tile_step", float(raw) if valid_tile(raw) else TILE_DEFAULT)
 
 
 static func _floor(session_context: Variant) -> Node3D:
@@ -53,6 +74,15 @@ func setup(context: Variant, controls_node: Node) -> void:
 		picker.add_item(label)
 	picker.item_selected.connect(func(index: int) -> void: restore(session, TYPES[index]))
 	panel.add_child(picker)
+	var tile_title := Label.new()
+	tile_title.text = "Размер ячейки плитки, м"
+	panel.add_child(tile_title)
+	tile_step = SpinBox.new()
+	tile_step.min_value = TILE_LIMITS.x
+	tile_step.max_value = TILE_LIMITS.y
+	tile_step.step = 0.5
+	tile_step.value_changed.connect(func(value: float) -> void: restore_tile(session, value))
+	panel.add_child(tile_step)
 	panel.hide()
 	box.add_child(panel)
 	box.move_child(panel, controls.palette.get_index())
@@ -64,5 +94,6 @@ func show_group() -> void:
 	controls.catalog.active_catalog = []
 	controls._rebuild_palette()
 	picker.select(maxi(TYPES.find(capture(session)), 0))
+	tile_step.set_value_no_signal(capture_tile(session))
 	panel.show()
 	controls.status.text = "STRUCTURE Floor | choose the floor type of this level"

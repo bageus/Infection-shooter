@@ -106,7 +106,7 @@ func refresh() -> void:
 	buttons.clear()
 	_build_content()
 	footer.text = "━━   " + text({"main": "quarantine", "pause": "floor", "failed": "lastSignal", "complete": "evac"}[screen_kind]).to_upper()
-	footer.visible = screen_kind != "main"
+	footer.visible = screen_kind != "main" and screen_kind != "failed"
 	keyboard.text = "v." + str(ProjectSettings.get_setting("application/config/version", "0.00.000"))
 	_layout()
 	_focus_first()
@@ -115,9 +115,10 @@ func refresh() -> void:
 func _build_content() -> void:
 	var factor: float = preferences.values.text_scale
 	if screen_kind != "main":
-		content.add_child(STYLE.label(text("suspended") if screen_kind == "pause" else ("GAME OVER" if screen_kind == "failed" else "MISSION COMPLETE"), 11))
+		if screen_kind != "failed":
+			content.add_child(STYLE.label(text("suspended") if screen_kind == "pause" else "MISSION COMPLETE", 11))
 	var headline: String = {"main": "INFECTION\nSHOOTER", "pause": text("pause"),
-		"failed": text("signal") + "\n" + text("lost"), "complete": text("samples") + "\n" + text("extracted")}[screen_kind]
+		"failed": text("failed").replace(" ", "\n"), "complete": text("samples") + "\n" + text("extracted")}[screen_kind]
 	var title := STYLE.label(headline.to_upper(), 62, true)
 	title.add_theme_constant_override("line_spacing", -10)
 	var title_area := Control.new()
@@ -127,7 +128,7 @@ func _build_content() -> void:
 	title.scale.x = 0.78
 	var subtitle := STYLE.label(text({"main": "patient", "pause": "alpha", "failed": "failed", "complete": "notCured"}[screen_kind]).to_upper(), roundi(12 * factor))
 	subtitle.add_theme_color_override("font_color", STYLE.MUTED)
-	if screen_kind != "main":
+	if screen_kind != "main" and screen_kind != "failed":
 		content.add_child(subtitle)
 	else:
 		subtitle.free()
@@ -164,7 +165,11 @@ func _build_content() -> void:
 			_add_button("toMain", "main")
 		"failed":
 			_add_button("checkpoint", "continue", true)
-			_add_button("restart", "restart")
+			var retry := _add_button("restart", "restart")
+			retry.custom_minimum_size.y = 72
+			retry.add_theme_font_size_override("font_size", 26)
+			retry.add_theme_color_override("font_color", Color("ffffff"))
+			retry.add_theme_color_override("font_focus_color", Color("ffffff"))
 			_add_button("toMain", "main")
 			_add_steam_button()
 		"complete":

@@ -40,6 +40,7 @@ var _glass_hinge_root_closed := Transform3D.IDENTITY
 var _elevator_lights: Array[Node3D] = []
 var _indicator_glow: OmniLight3D
 var _fallback_leaf_collisions: Array[CollisionShape3D] = []
+var _fallen_collision := preload("door_fallen_collision.gd").new()
 var _key_hint: Node3D
 var _hints := HINT_BADGES.new()
 const BUDGET_LIGHT := preload("res://game/presentation/office_floor/budget_omni_light.gd")
@@ -58,7 +59,6 @@ const LOCKED_ICON := preload("res://assets/interface/icon/locked_door.png")
 const LOCKED_TINT := Color("dcae4a")
 # Beyond this distance the next approach plays the locked cue again.
 const LOCKED_CUE_REARM_DISTANCE := 0.5
-
 
 # Moving leaf colliders and their render receivers share the existing surface contract.
 func configure_world(_container: Node3D, impacts: Node) -> void:
@@ -144,6 +144,7 @@ func _physics_process(delta: float) -> void:
 	# must open immediately, while animation/delay/remote requests always run.
 	# A door laid on its side (planner lay) has a horizontal up axis: it stays idle.
 	var fallen := absf(global_basis.y.normalized().y) < 0.5
+	_fallen_collision.set_off(self, fallen)
 	var idle_distance := maxf(3.0, trigger_distance + LOCKED_CUE_REARM_DISTANCE)
 	if _pose_ready and _open_amount == 0.0 and _close_timer <= 0.0 and not _requested_open and (fallen or Vector2(local_player.x, local_player.z).length_squared() > idle_distance * idle_distance):
 		if _key_hint != null and _key_hint.visible:

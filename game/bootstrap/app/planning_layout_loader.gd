@@ -211,6 +211,7 @@ func _begin(prepared: Dictionary) -> void:
 	SURFACE_SETTINGS.restore(session, prepared.get("surface_decals_v1", {}))
 	FLOOR_SIZE.restore(session, prepared.get("floor_size_v1", []))
 	preload("res://game/bootstrap/app/planning_floor_type.gd").restore(session, prepared.get("floor_type_v1", ""))
+	preload("res://game/bootstrap/app/planning_floor_type.gd").restore_tile(session, prepared.get("floor_tile_step_v1", 2.0))
 	LAMP_VISIBILITY.restore(session, prepared.get(LAMP_VISIBILITY.KEY, false))
 	QUESTS.restore(session, prepared)
 	session.edit_history.stack.clear()

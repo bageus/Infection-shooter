@@ -264,6 +264,8 @@ func _enter_level(planner: Node) -> void:
 	pending.set("current_level", _level_name)
 	if not _carry.is_empty():
 		pending.call("apply_carry", _carry)
+	if pending.has_node("LevelEntries"):
+		pending.get_node("LevelEntries").call("note_entry")
 	if _arrival.has("x"):
 		(planner.get("main_player") as Node3D).position = Vector3(float(_arrival.x), 1.0, float(_arrival.z))
 

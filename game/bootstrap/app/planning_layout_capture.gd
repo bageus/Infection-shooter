@@ -105,6 +105,7 @@ static func collect(objects: Node, nodes: Array, include_player: bool = true) ->
 	if not floor_size.is_empty(): data["floor_size_v1"] = floor_size
 	if LAMP_VISIBILITY.capture(objects.session): data[LAMP_VISIBILITY.KEY] = true
 	data["floor_type_v1"] = preload("res://game/bootstrap/app/planning_floor_type.gd").capture(objects.session)
+	data["floor_tile_step_v1"] = preload("res://game/bootstrap/app/planning_floor_type.gd").capture_tile(objects.session)
 	preload("res://game/bootstrap/app/planning_biomass_bake.gd").capture(objects.session, data)
 	return data
 

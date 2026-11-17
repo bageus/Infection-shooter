@@ -8,6 +8,8 @@ const PATH := "user://level_chain.json"
 ## A platform build ships its chain here; it is read when the player has none of their own.
 const SHIPPED_PATH := "res://content/levels/" + "level_chain.json"
 const TYPES: Array[String] = ["none", "ceiling", "floor"]
+## Always a checkpoint, also in chains saved before the flag was set for it.
+const CHECKPOINT_MAP := "tutorial_lvl"
 const SLOT_COUNT := 2
 ## Text shown before a map starts and after it is completed.
 const DESCRIPTION_KEYS: Array[String] = ["description_before", "description_after"]
@@ -163,7 +165,7 @@ func load_dict(data: Variant) -> void:
 		if not raw is Dictionary or str(raw.get("name", "")).is_empty() or index_of(str(raw.name)) >= 0:
 			continue
 		var entries: Array = raw.get("entries", []) if raw.get("entries") is Array else []
-		maps.append({"name": str(raw.name), "checkpoint": bool(raw.get("checkpoint", false)),
+		maps.append({"name": str(raw.name), "checkpoint": bool(raw.get("checkpoint", false)) or str(raw.name) == CHECKPOINT_MAP,
 			"description_before": str(raw.get("description_before", "")), "description_after": str(raw.get("description_after", "")),
 			"entries": [_clean_entry(entries[0] if entries.size() > 0 else null), _clean_entry(entries[1] if entries.size() > 1 else null)]})
 

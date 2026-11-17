@@ -93,9 +93,11 @@ func _add_tile(center: Vector2, tile_scale: float, tile_offset: Vector2) -> void
 	var key := Vector4i(floori(float(cell.x) / SECTION_TILES), floori(float(cell.y) / SECTION_TILES), variant, int(tile_scale < 1.0))
 	if not _batches.has(key):
 		_batches[key] = []
-	var tile_transform := Transform3D(Basis.from_scale(Vector3(tile_scale, 1.0, tile_scale)), Vector3(center.x, tile_y, center.y))
+	# The mesh is a 2 m tile; a larger or smaller grid scales it, and the shader's tile space stays +-1.
+	var half := tile_step * 0.5
+	var tile_transform := Transform3D(Basis.from_scale(Vector3(tile_scale * half, 1.0, tile_scale * half)), Vector3(center.x, tile_y, center.y))
 	# The shader draws seams in parent-tile space, so subtiles keep the 2 m grid.
-	_batches[key].append([tile_transform, Color(tile_offset.x, tile_offset.y, tile_scale, 0.0)])
+	_batches[key].append([tile_transform, Color(tile_offset.x / half, tile_offset.y / half, tile_scale, 0.0)])
 
 
 func _flush_batches() -> void:
@@ -144,6 +146,15 @@ func set_floor_size(size: Vector2) -> void:
 	if size == floor_size:
 		return
 	floor_size = size
+	if is_node_ready():
+		_build_tiles()
+
+
+## Sets the tile edge in metres; like a resize it rebuilds the grid.
+func set_tile_step(step: float) -> void:
+	if is_equal_approx(step, tile_step):
+		return
+	tile_step = step
 	if is_node_ready():
 		_build_tiles()
 
