@@ -16,6 +16,15 @@ const STANCE_FEET := preload("res://game/features/character_animation/stance_fee
 const CLIP_FOOTSTEPS := preload("res://game/features/character_animation/clip_footsteps.gd")
 const CLIP_TUNING := preload("res://game/features/character_animation/clip_tuning.gd")
 const STRIKE_POSE := preload("res://game/features/character_animation/strike_pose.gd")
+## Hero clips baked onto the soldier skeleton (tools/build_hero_clips.gd), played over the arms' grip.
+const HERO_KICK := &"Kick"
+const HERO_TURN := {&"left": &"Turn_Left", &"right": &"Turn_Right"}
+const HERO_DEATHS := [&"Death_FromRight", &"Death_Dying", &"Death_HitToBack"]
+## A turn clip is squeezed to this many seconds (the body itself swings round in about half a second).
+const HERO_TURN_SECONDS := 0.75
+const HERO_KICK_SPEED := 1.6
+const BODY_BONES := ["Hips", "Spine", "Spine1", "Spine2", "Neck", "Head", "LeftUpLeg", "LeftLeg", "LeftFoot", "LeftToeBase", "RightUpLeg", "RightLeg", "RightFoot", "RightToeBase"]
+const ARM_BONES := ["LeftShoulder", "LeftArm", "LeftForeArm", "LeftHand", "RightShoulder", "RightArm", "RightForeArm", "RightHand"]
 const STATE_ATTACK := &"attack"
 const STATE_DEATH := &"death"
 # Directional deaths (ADR-0034) fall back to the plain death clip.
@@ -94,6 +103,9 @@ var animation_player: AnimationPlayer
 var hit_reaction: SkeletonModifier3D
 var overlay: SkeletonModifier3D
 var strike: SkeletonModifier3D
+## Whole-body clip (all but the arms) over the playing clip: the hero's kick and turns on the spot.
+var body_clip: SkeletonModifier3D
+var _body_clip_kind := &""
 var leg_overlay: SkeletonModifier3D
 var _current := ""
 var _animations: Dictionary = {}
@@ -202,6 +214,8 @@ func play_strike(kind: StringName) -> float:
 	prepare_visual()
 	if _dead or animation_player == null:
 		return 0.0
+	if kind == &"kick" and animation_player.has_animation(HERO_KICK):
+		return _play_body_clip(HERO_KICK, HERO_KICK_SPEED, &"kick")
 	if strike == null:
 		var skeletons := animation_player.get_parent().find_children("*", "Skeleton3D", true, false)
 		if skeletons.is_empty():
@@ -214,7 +228,77 @@ func play_strike(kind: StringName) -> float:
 
 # Public animation_events_v1 addition (ADR-0066): true while a strike pose plays.
 func is_striking() -> bool:
-	return strike != null and bool(strike.call("is_playing"))
+	return (strike != null and bool(strike.call("is_playing"))) or (_body_clip_kind == &"kick" and _body_clip_running())
+
+
+## Seconds from the start of a strike to the moment it lands (the kick clip names its foot's moment); `fallback` otherwise.
+func strike_impact_time(kind: StringName, fallback: float) -> float:
+	if kind == &"kick" and animation_player != null and animation_player.has_animation(HERO_KICK):
+		return float(clip_meta(HERO_KICK, &"impact_time", fallback * HERO_KICK_SPEED * 0.5)) / HERO_KICK_SPEED
+	return fallback
+
+
+## The hero swings round on the spot: &"left" or &"right" plays the turn clip (all but the arms) unless one is running.
+## Returns false when there is no clip, the body is busy or dead.
+func play_turn(side: StringName) -> bool:
+	if _dead or animation_player == null or not HERO_TURN.has(side) or not animation_player.has_animation(HERO_TURN[side]):
+		return false
+	if _body_clip_running():
+		return true
+	var clip := HERO_TURN[side] as StringName
+	return _play_body_clip(clip, animation_player.get_animation(clip).length / HERO_TURN_SECONDS, &"turn") > 0.0
+
+
+## True while the hero's turn or kick clip plays over the base clip.
+func is_body_clip_playing() -> bool:
+	return _body_clip_running()
+
+
+func _body_clip_running() -> bool:
+	return body_clip != null and bool(body_clip.call("is_playing"))
+
+
+func _play_body_clip(clip: StringName, clip_speed: float, kind: StringName) -> float:
+	if body_clip == null:
+		var skeletons := animation_player.get_parent().find_children("*", "Skeleton3D", true, false)
+		if skeletons.is_empty():
+			return 0.0
+		body_clip = OVERLAY.new()
+		body_clip.name = "BodyClip"
+		body_clip.set("bones", BODY_BONES)
+		body_clip.set("held", ARM_BONES)
+		body_clip.set("fade_in", 0.12)
+		body_clip.set("fade_out", 0.2)
+		(skeletons[0] as Node).add_child(body_clip)
+	var animation := animation_player.get_animation(clip)
+	body_clip.set("speed", clip_speed)
+	body_clip.call("play", animation, animation.length / clip_speed)
+	_body_clip_kind = kind
+	return animation.length / clip_speed
+
+
+## The hero's death: one of the death clips plays once and holds its last pose. Returns its length in seconds, 0.0 without clips.
+func play_death_clip() -> float:
+	prepare_visual()
+	if _dead or animation_player == null:
+		return 0.0
+	var choices: Array[StringName] = []
+	for clip in HERO_DEATHS:
+		if animation_player.has_animation(clip):
+			choices.append(clip)
+	if choices.is_empty():
+		return 0.0
+	if body_clip != null:
+		body_clip.call("stop")
+	if strike != null:
+		strike.call("stop")
+	var clip := choices[randi() % choices.size()]
+	var length := play_named_one_shot(clip, 0.15)
+	_one_shot = &"death"
+	_dead = true
+	if leg_overlay != null:
+		leg_overlay.call("stop")
+	return length
 
 
 # Public animation_events_v1 addition (ADR-0045): length of a clip, 0.0 if unknown.
@@ -245,6 +329,8 @@ func play_dodge(world_direction: Vector3, duration: float, held_weapon: StringNa
 
 # Baked dodge: the body turns along the dodge and the whole-body roll clip is squeezed into `duration`.
 func _play_dodge_clip(world_direction: Vector3, duration: float) -> bool:
+	if body_clip != null:
+		body_clip.call("stop") # a roll cancels a turn or kick in progress
 	var direction := Vector3(world_direction.x, 0.0, world_direction.z)
 	if _dead or direction.length_squared() < 0.0001 or _target == null or play_named_one_shot(dodge_clip, 0.06, clip_length(dodge_clip) / maxf(duration, 0.05)) <= 0.0:
 		return false
