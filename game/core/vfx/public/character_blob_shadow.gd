@@ -61,8 +61,15 @@ static func attach(node: Node) -> bool:
 static func _node_added(node: Node) -> void:
 	for group in WATCHED_GROUPS:
 		if node.is_in_group(group):
-			attach.call_deferred(node)
+			_attach_alive.call_deferred(node.get_instance_id())
 			return
+
+
+# The character may be freed before the deferred call runs (scenes torn down in the same frame).
+static func _attach_alive(id: int) -> void:
+	var node := instance_from_id(id) as Node
+	if node != null:
+		attach(node)
 
 
 static func _shared_quad() -> QuadMesh:
