@@ -42,14 +42,15 @@ const MAP := [
 	["RightFoot", "RightFoot", "RightToeBase", "RightToeBase"],
 	["RightToeBase", "RightToeBase", "", ""],
 ]
-# Clip, FBX, remove the body's turn about the vertical (the game turns the body itself), end speed.
+# Clip, FBX, remove the body's turn about the vertical (the game turns the body itself), extra turn (degrees) of the whole clip.
+# The kick lands its foot 35 degrees across the body in the source; -35 aims it straight ahead.
 const SOURCES := [
-	["Turn_Left", "Turn Left 45 Degrees", true],
-	["Turn_Right", "Turning Right 45 Degrees", true],
-	["Kick", "Rifle Turn And Kick", false],
-	["Death_FromRight", "Death From Right", false],
-	["Death_Dying", "Dying", false],
-	["Death_HitToBack", "Rifle Hit To Back", false],
+	["Turn_Left", "Turn Left 45 Degrees", true, 0.0],
+	["Turn_Right", "Turning Right 45 Degrees", true, 0.0],
+	["Kick", "Rifle Turn And Kick", false, 35.5],
+	["Death_FromRight", "Death From Right", false, 0.0],
+	["Death_Dying", "Dying", false, 0.0],
+	["Death_HitToBack", "Rifle Hit To Back", false, 0.0],
 ]
 
 var _hero: Skeleton3D
@@ -68,7 +69,7 @@ func _run() -> void:
 	_root_basis = _hero.get_bone_global_rest(_hero.find_bone("Root")).basis.orthonormalized()
 	var library := AnimationLibrary.new()
 	for entry: Array in SOURCES:
-		var animation := _bake(String(entry[1]), bool(entry[2]))
+		var animation := _bake(String(entry[1]), bool(entry[2]), deg_to_rad(float(entry[3])))
 		if animation == null:
 			quit(1)
 			return
@@ -82,7 +83,7 @@ func _run() -> void:
 	quit(0 if error == OK else 1)
 
 
-func _bake(file: String, remove_yaw: bool) -> Animation:
+func _bake(file: String, remove_yaw: bool, extra_yaw: float) -> Animation:
 	var packed := load(SOURCE_DIR + file + ".fbx") as PackedScene
 	if packed == null:
 		push_error("Missing " + file)
@@ -107,7 +108,7 @@ func _bake(file: String, remove_yaw: bool) -> Animation:
 		if index == 0:
 			start_heading = heading
 		# The Mixamo characters do not all start facing the same way: the start heading is always removed.
-		var yaw := heading if remove_yaw else start_heading
+		var yaw := (heading if remove_yaw else start_heading) + extra_yaw
 		yaws.append(angle_difference(start_heading, heading))
 		frames.append(_retarget(source, yaw))
 		for foot in ["LeftFoot", "RightFoot"]:

@@ -100,6 +100,7 @@ var strike: SkeletonModifier3D
 ## Whole-body clip (all but the arms) over the playing clip: the hero's kick and turns on the spot.
 var body_clip: SkeletonModifier3D
 var leg_overlay: SkeletonModifier3D
+var ragdoll: PhysicalBoneSimulator3D # the dead hero's ragdoll after his fall backward, else null
 var _current := ""
 var _animations: Dictionary = {}
 var _locomotion: Dictionary = {}
@@ -119,6 +120,7 @@ var _flinch_elapsed := -1.0
 var _overlay_applied := false
 var _attack_side := false
 var _transition_legs := ""
+var _legs_phase := -1.0 # position of the leg clip the one-shot took over from (-1: none), handed to the leg overlay once
 var _step_phase := -1.0
 var _variants := ENEMY_VARIANTS.new(self)
 
@@ -178,6 +180,7 @@ func play_named_one_shot(clip_name: StringName, blend: float = 0.12, speed: floa
 	if _dead or animation_player == null or not animation_player.has_animation(clip_name):
 		return 0.0
 	var animation := animation_player.get_animation(clip_name)
+	_legs_phase = animation_player.current_animation_position if animation_player.current_animation == String(leg_clip) else -1.0
 	_current = String(clip_name)
 	animation_player.speed_scale = speed
 	animation_player.play(clip_name, _blend(String(clip_name), blend, false))
@@ -216,21 +219,15 @@ func play_strike(kind: StringName) -> float:
 
 
 # Public animation_events_v1 addition (ADR-0066): true while a strike pose plays.
-func is_striking() -> bool:
-	return (strike != null and bool(strike.call("is_playing"))) or HERO_CLIPS.is_kicking(self)
+func is_striking() -> bool: return (strike != null and bool(strike.call("is_playing"))) or HERO_CLIPS.is_kicking(self)
 
 
 # ADR-0070: seconds from the start of a strike to its impact (the kick clip's foot moment), `fallback` otherwise.
 func strike_impact_time(kind: StringName, fallback: float) -> float: return HERO_CLIPS.impact_time(self, kind, fallback)
 
-
-# ADR-0070: &"left"/&"right" plays the turn clip on all but the arms; false without it or when dead.
-func play_turn(side: StringName) -> bool:
-	return not _dead and HERO_CLIPS.turn(self, side)
-
+func play_turn(side: StringName) -> bool: return not _dead and HERO_CLIPS.turn(self, side)
 
 func is_body_clip_playing() -> bool: return HERO_CLIPS.running(self) # ADR-0070: the hero's turn or kick clip plays
-
 
 # ADR-0070: one random death clip plays once and holds its last pose; returns its length, 0.0 without clips or when dead.
 func play_death_clip() -> float:
@@ -244,6 +241,8 @@ func play_death_clip() -> float:
 	var length := play_named_one_shot(clip, 0.15)
 	_one_shot = &"death"
 	_dead = true
+	if clip == HERO_CLIPS.RAGDOLL_AFTER and is_inside_tree(): # the fall backward ends in a ragdoll
+		get_tree().create_timer(length).timeout.connect(HERO_CLIPS.release_ragdoll.bind(self))
 	return length
 
 
@@ -503,7 +502,8 @@ func _update_attack_legs(speed: float) -> void:
 	if leg_overlay == null and wanted and speed > 0.15:
 		leg_overlay = LEG_OVERLAY.attach(animation_player.get_parent())
 	if leg_overlay != null:
-		leg_overlay.call("drive", animation_player.get_animation(clip) if wanted else null, _locomotion_scale(state if _transition_legs.is_empty() else &"run", speed), speed > 0.15)
+		leg_overlay.call("drive", animation_player.get_animation(clip) if wanted else null, CLIP_TUNING.leg_rate(self, clip, state, speed), speed > 0.15, _legs_phase)
+		_legs_phase = -1.0
 
 
 func _locomotion_scale(state: StringName, speed: float) -> float:

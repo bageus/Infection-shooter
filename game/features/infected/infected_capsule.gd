@@ -361,7 +361,7 @@ func _physics_process(delta: float) -> void:
 	if _emerge_left > 0.0:
 		_emerge_left = CLIMB.step(self, _emerge_left, delta)
 		return
-	if _target == null or not is_instance_valid(_target):
+	if _target == null or not is_instance_valid(_target) or _senses.target_down(self, _target): # a dead hero is neither chased nor hit
 		return
 	_senses.refresh_modes(self)
 	if _turn.active() and _senses.is_chasing():
