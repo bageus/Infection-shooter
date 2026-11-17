@@ -286,6 +286,9 @@ func _test_wander_walk_and_transition(name: String) -> void:
 	idler.velocity = Vector3.ZERO
 	await create_timer(0.2).timeout
 	_expect(idle_player.current_animation == "Transition", "%s stopping after a walk plays Transition (%s)." % [name, idle_player.current_animation])
+	idler.velocity = Vector3(0, 0, 8.0)
+	await create_timer(0.2).timeout
+	_expect(idle_player.current_animation.begins_with("Run"), "%s running during Transition drops it for a run clip (%s)." % [name, idle_player.current_animation])
 	idler.queue_free()
 	watched.queue_free()
 	await process_frame
