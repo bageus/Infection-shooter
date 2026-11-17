@@ -8,7 +8,7 @@ extends SceneTree
 const CATALOG := preload("res://game/bootstrap/app/enemy_anim_viewer/enemy_anim_catalog.gd")
 const SEAMS := preload("res://tools/measure_enemy_seams.gd")
 const NAMES := ["Hunger", "Revenant", "Brute", "Titan", "Colossus"]
-const CLIPS := ["Idle", "Walk"]
+const CLIPS := ["Idle", "Walk", "AttackLeft", "AttackRight", "AttackLeft2", "AttackRight2", "AttackLeft3", "AttackRight3", "HitReaction", "Transition"]
 const FRAMES := 16
 ## Heel and toes each reach the floor within this (crouched zombie walks keep the heel 2-3 cm up); on
 ## 17.11.2026 Titan and Colossus stood 4-5 cm on their toes in Idle and 13 cm in Walk.
@@ -73,6 +73,8 @@ func _measure(enemy: String) -> float:
 	var line := enemy + ": rest heel %+.0f mm" % ((_lowest(at_rest, feet["L"][0]) - floor_y) * 1000.0)
 	var worst := 0.0
 	for clip: String in CLIPS:
+		if not player.has_animation(clip):
+			continue
 		var length := player.get_animation(clip).length
 		for side: String in feet:
 			var samples := []
