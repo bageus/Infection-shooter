@@ -17,6 +17,10 @@ const CHILD_SHARE := 0.53
 const SEAM_REACH := 1.3
 # Rim vertices this close to another part's rim are on a seam (the build leaves them on it).
 const SEAM_TOUCH := 0.004
+## Grid cells (model units) of the Blender weight lookup: skin, then cut tissue.
+const LOOKUP_CELLS := [0.02, 0.12]
+## Home bone of each part: dismemberment cuts a vertex off with a severed chain that holds it.
+const HOME_BONE := {"Head": "Head", "Torso": "Chest", "UpperArm": "UpperArm", "Forearm_Hand": "Forearm", "Thigh": "Thigh", "Shin_Foot": "Shin"}
 ## Hip socket height above the thigh cut, per unit of `scale` (body height / 1.9).
 const HIP_ABOVE_CUT := 0.13
 # Spine chain as fractions of the way from Hips to Neck (matches the old hand-placed rigs).
@@ -261,6 +265,81 @@ static func humanoid_weights(model: RefCounted, points: Dictionary, skeleton: Sk
 		result.append(rows)
 	_weld_rims(model, rims, result[0])
 	return result
+
+
+# Skin weights computed in Blender on the whole body (tools/blender_enemy_weights.py writes
+# <Name>_weights.json): each game vertex takes the weights of the nearest Blender vertex, smooth
+# across the old cuts. Dismemberment splits by each vertex's home bone instead (home_bones).
+static func blender_weights(model: RefCounted, path: String, skeleton: Skeleton3D) -> Array:
+	var data: Dictionary = JSON.parse_string(FileAccess.get_file_as_string(path))
+	var bones: Array = data.bones
+	var positions: Array = data.positions
+	var bones_of: Array = data.bones_of
+	var weights: Array = data.weights
+	# a fine grid for the skin, a coarse one for cut tissue deep inside the old joints
+	var grids := [{}, {}]
+	for v in positions.size() / 3:
+		var at := Vector3(positions[v * 3], positions[v * 3 + 1], positions[v * 3 + 2])
+		for level in 2:
+			var cell := Vector3i((at / LOOKUP_CELLS[level]).floor())
+			if not grids[level].has(cell):
+				grids[level][cell] = []
+			grids[level][cell].append([at, v])
+	var result: Array = []
+	for surface in model.surfaces.size():
+		var points: PackedVector3Array = model.vertices(surface)
+		var owners: PackedInt32Array = model.ids(surface)
+		var rows: Array = []
+		for index in points.size():
+			var nearest := _nearest_row(grids, points[index])
+			var row := {}
+			for k in 4:
+				var w := float(weights[nearest * 4 + k])
+				if w > 0.0:
+					var bone: String = bones[int(bones_of[nearest * 4 + k])]
+					row[bone] = float(row.get(bone, 0.0)) + w
+			rows.append(_dense(row, skeleton))
+		result.append(rows)
+	# the two rims of an old cut take one row, so the skin stays closed when they bend
+	_weld_rims(model, model.skin_rims(), result[0])
+	return result
+
+
+## Per surface, the home bone index of every vertex (HOME_BONE of its part, sided).
+static func home_bones(model: RefCounted, skeleton: Skeleton3D) -> Array:
+	var result: Array = []
+	for surface in model.surfaces.size():
+		var owners: PackedInt32Array = model.ids(surface)
+		var homes := PackedInt32Array()
+		homes.resize(owners.size())
+		for index in owners.size():
+			var part: String = model.part_names[owners[index]]
+			var side := part.right(2)
+			var bone: String = HOME_BONE.get(part, "")
+			if bone.is_empty():
+				bone = side.substr(1) + "_" + str(HOME_BONE[part.trim_suffix(side)])
+			homes[index] = skeleton.find_bone(bone)
+		result.append(homes)
+	return result
+
+
+static func _nearest_row(grids: Array, point: Vector3) -> int:
+	for level in 2:
+		var home := Vector3i((point / LOOKUP_CELLS[level]).floor())
+		var best := -1
+		var best_distance := INF
+		for x in range(-2, 3):
+			for y in range(-2, 3):
+				for z in range(-2, 3):
+					for entry: Array in grids[level].get(home + Vector3i(x, y, z), []):
+						var d := point.distance_squared_to(entry[0])
+						if d < best_distance:
+							best_distance = d
+							best = entry[1]
+		if best >= 0:
+			return best
+	push_error("No Blender weight near %s" % point)
+	return 0
 
 
 # One blend per joint: the part on its parent side and the part on its child side. The shoulder

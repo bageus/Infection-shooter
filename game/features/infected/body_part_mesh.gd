@@ -57,6 +57,7 @@ static func prepare(mesh_instance: MeshInstance3D, skeleton: Skeleton3D) -> Dict
 			for index in vertices.size():
 				indices[index] = index
 		surfaces.append({
+			"homes": TOPOLOGY.homes(arrays[Mesh.ARRAY_COLOR] if arrays[Mesh.ARRAY_COLOR] != null else PackedColorArray()),
 			"vertices": vertices,
 			"normals": arrays[Mesh.ARRAY_NORMAL] if arrays[Mesh.ARRAY_NORMAL] != null else PackedVector3Array(),
 			"uvs": arrays[Mesh.ARRAY_TEX_UV] if arrays[Mesh.ARRAY_TEX_UV] != null else PackedVector2Array(),

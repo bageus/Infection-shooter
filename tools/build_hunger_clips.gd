@@ -105,6 +105,9 @@ const EXTRA := [
 	{"name": "RunZombie", "file": "Zombie_Run", "enemies": ["Brute"], "loop": true, "pace": "run"},
 	{"name": "RunForward", "file": "Run Forward", "enemies": ["Revenant", "Brute", "Titan"], "loop": true, "pace": "run"},
 	{"name": "Climb", "file": "Climbing", "enemies": ALL, "settle": true},
+	# Authored in Blender on the Mixamo rig (tools/blender_enemy_clips.py); they replace the procedural clips.
+	{"name": "Throw", "file": "Titan Throw", "enemies": ["Titan"]},
+	{"name": "Slam", "file": "Colossus Slam", "enemies": ["Colossus"]},
 	{"series": "AttackLeft", "file": "Zombie Attack", "enemies": ["Revenant", "Brute", "Colossus", "Titan"]},
 	{"series": "AttackLeft", "file": "Mutant Punch", "enemies": BRAWLERS},
 	{"series": "AttackLeft", "file": "Mutant Swiping", "enemies": BRAWLERS},
@@ -133,7 +136,7 @@ const SINK_TOLERANCE := 0.01
 const WALK_STRETCH := 2.1
 const WALK_AMOUNT := 0.62
 # Clips that stand in place: their feet are flattened near the floor and the soles put on it.
-const STANDING := ["Idle", "Attack", "HitReaction", "Transition", "Turn"]
+const STANDING := ["Idle", "Attack", "HitReaction", "Transition", "Turn", "Throw", "Slam"]
 # Ankle lift above its rest height (skeleton units) over which a foot goes from flat to as animated.
 const FLAT_FROM := 0.04
 const FLAT_TO := 0.14

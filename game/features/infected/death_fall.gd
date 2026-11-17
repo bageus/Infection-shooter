@@ -8,6 +8,11 @@ extends RefCounted
 const DEATH := &"death"
 const DEATH_FORWARD := &"death_forward"
 const DEATH_BACK := &"death_back"
+## Side falls toward a leg that was shot off.
+const DEATH_RIGHT := &"death_right"
+const DEATH_LEFT := &"death_left"
+const RIGHT_LEG := [&"leg_r", &"shin_r"]
+const LEFT_LEG := [&"leg_l", &"shin_l"]
 ## Push of one killing hit in m/s on a standard-size body.
 const WEAPON_PUSH := {"PISTOL": 0.4, "UZI": 0.4, "RIFLE": 0.6, "SHOTGUN": 9.0, "GRENADE LAUNCHER": 2.0}
 ## The shotgun pushes fully up to SHOTGUN_CLOSE metres and fades out by SHOTGUN_FAR.
@@ -23,6 +28,8 @@ const MOMENTUM_SHARE := 0.6
 const COLLAPSE_SPEED := 0.2
 ## Thrown at least this hard, a body falls backward as thrown rather than slumping.
 const THROWN_SPEED := 2.5
+## Push of a killing head shot (m/s on a standard body); it replaces the running momentum.
+const HEAD_SHOT_PUSH := 4.0
 ## Metres the body travels along the floor per m/s of fall speed.
 const SLIDE_PER_SPEED := 0.17
 const MAX_SLIDE := 1.8
@@ -49,9 +56,31 @@ static func velocity(momentum: Vector3, push: Vector3, size: float) -> Vector3:
 	return _flat(momentum) * MOMENTUM_SHARE + _flat(push) / pow(maxf(size, 0.5), 1.5)
 
 
+## A killing shot to the head snaps it away from the shooter and the legs stop driving: shot from
+## the front the body goes over backward (the biggest ones just collapse). Returns [momentum, push].
+static func kill_push(momentum: Vector3, push: Vector3, kill_part: StringName, direction: Vector3) -> Array:
+	if kill_part == &"head":
+		return [Vector3.ZERO, _flat(direction).normalized() * HEAD_SHOT_PUSH]
+	return [momentum, push]
+
+
+## DEATH_RIGHT / DEATH_LEFT when a leg is off, or torn off by the killing shot at `kill_part`; else &"".
+static func leg_side(parts: Node, kill_part: StringName) -> StringName:
+	if parts == null:
+		return &""
+	for leg: Array in [[RIGHT_LEG, DEATH_RIGHT], [LEFT_LEG, DEATH_LEFT]]:
+		for part: StringName in leg[0]:
+			if parts.is_severed(part) or (part == kill_part and float(parts.part_ratio(part)) <= 0.5):
+				return leg[1]
+	return &""
+
+
 ## Returns {state: death clip state, turn: yaw radians that line the clip's fall
-## up with the fall direction, slide: planar travel of the body}.
-static func resolve(momentum: Vector3, push: Vector3, forward: Vector3, size: float) -> Dictionary:
+## up with the fall direction, slide: planar travel of the body}. `aside` (leg_side) wins:
+## the side clips carry their own travel.
+static func resolve(momentum: Vector3, push: Vector3, forward: Vector3, size: float, aside: StringName = &"") -> Dictionary:
+	if aside != &"":
+		return {"state": aside, "turn": 0.0, "slide": Vector3.ZERO}
 	var fall := velocity(momentum, push, size)
 	var speed := fall.length()
 	var facing := _flat(forward).normalized()

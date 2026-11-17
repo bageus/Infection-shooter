@@ -3,6 +3,7 @@ extends SceneTree
 ## the source GLB, for checking joint tears.
 ##   xvfb-run -a godot --path . --audio-driver Dummy --rendering-method gl_compatibility --script tools/capture_enemy_poses.gd -- <out dir> [Name ...]
 ## Writes <out>/<name>_<pose>_<view>.png; pose "source" is the source GLB as authored.
+## ENEMY_POSES="Slam@0.3,Slam@0.46" picks other clip poses (share of the clip); their files carry the share.
 const CATALOG := preload("res://game/bootstrap/app/enemy_anim_viewer/enemy_anim_catalog.gd")
 const NAMES := ["Hunger", "Revenant", "Brute", "Titan", "Colossus"]
 const POSES := [["Idle", 0.4], ["Walk", 0.3], ["AttackRight", 0.45], ["Scream", 0.5], ["DeathForward", 0.35]]
@@ -54,13 +55,19 @@ func _enemy(enemy: String) -> void:
 	stage.add_child(body)
 	var player := CATALOG.find_player(body)
 	bounds = _bounds(body)
-	for pose: Array in POSES:
+	var poses: Array = POSES
+	var chosen := OS.get_environment("ENEMY_POSES")
+	if not chosen.is_empty():
+		poses = []
+		for item in chosen.split(","):
+			poses.append([item.get_slice("@", 0), float(item.get_slice("@", 1)), "_" + item.get_slice("@", 1)])
+	for pose: Array in poses:
 		if not player.has_animation(pose[0]):
 			continue
 		player.play(pose[0])
 		player.seek(player.get_animation(pose[0]).length * float(pose[1]), true)
 		player.pause()
-		await _shoot(camera, bounds, (body.find_children("*", "MeshInstance3D", true, false)[0] as Node3D).global_transform.basis.orthonormalized(), "%s_%s" % [enemy.to_lower(), String(pose[0]).to_lower()])
+		await _shoot(camera, bounds, (body.find_children("*", "MeshInstance3D", true, false)[0] as Node3D).global_transform.basis.orthonormalized(), "%s_%s%s" % [enemy.to_lower(), String(pose[0]).to_lower(), pose[2] if pose.size() > 2 else ""])
 	stage.queue_free()
 	await process_frame
 

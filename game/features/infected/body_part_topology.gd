@@ -2,6 +2,21 @@ extends RefCounted
 ## Immutable part membership, unique vertex order, remapped indices and bones.
 ## Lives in the existing prepared-mesh data cache; no posed vertices are kept.
 const CHAIN_MEMBERSHIP := .5
+## Whole-body skins (Blender weights, tools/build_enemy_rigs.gd) store each vertex's home bone in
+## COLOR.g as index / HOME_SCALE; a vertex leaves with a severed chain that holds its home bone.
+const HOME_SCALE := 64.0
+
+
+## Home bone per vertex from the rig mesh colours, or empty when the mesh has none.
+static func homes(colors: PackedColorArray) -> PackedInt32Array:
+	var result := PackedInt32Array()
+	for color in colors:
+		if color.g > 0.0:
+			result.resize(colors.size())
+			for index in colors.size():
+				result[index] = roundi(colors[index].g * HOME_SCALE)
+			return result
+	return result
 
 static func for_surface(data: Dictionary, chain: PackedInt32Array, surface_index: int) -> Dictionary:
 	var cache: Dictionary = data.get_or_add("piece_topology", {})
@@ -15,7 +30,11 @@ static func for_surface(data: Dictionary, chain: PackedInt32Array, surface_index
 	var stride: int = surface.stride
 	var member := PackedByteArray()
 	member.resize(vertices.size())
-	if not bones.is_empty():
+	var home_of: PackedInt32Array = surface.get("homes", PackedInt32Array())
+	if not home_of.is_empty():
+		for index in vertices.size():
+			member[index] = 1 if chain.has(home_of[index]) else 0
+	elif not bones.is_empty():
 		for index in vertices.size():
 			var share := 0.0
 			for k in stride:

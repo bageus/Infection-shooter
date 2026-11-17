@@ -27,6 +27,7 @@ func _run() -> void:
 	root.add_child(stage)
 	_add_box(stage, Vector3(0, -0.5, 0), Vector3(200, 1, 200), 2)
 	await _test_clip_fallback(stage)
+	await _test_part_falls(stage)
 	print("Death fall tests: %d failures" % failures)
 	quit(1 if failures > 0 else 0)
 
@@ -92,6 +93,20 @@ func _test_clip_fallback(stage: Node3D) -> void:
 	RAGDOLL._active = 0
 	enemy.queue_free()
 	await process_frame
+
+
+# A killing head shot throws the head back even on the run; without a leg the body drops to its side.
+func _test_part_falls(stage: Node3D) -> void:
+	RAGDOLL._active = RAGDOLL.MAX_ACTIVE
+	for case: Array in [["Head", "DeathBack"], ["R_Shin", "DeathSide"], ["L_Shin", "DeathSide2"]]:
+		var enemy := await _spawn(stage, Vector3(0, 1, 0))
+		enemy.velocity = Vector3(0, 0, -5.4)
+		var at := _bone(enemy, case[0])
+		enemy.call("take_projectile_damage", 1000.0, at, Vector3(0, 0, 1), "PISTOL")
+		_expect(_clip(enemy) == case[1], "A killing shot at %s plays %s (%s)." % [case[0], case[1], _clip(enemy)])
+		enemy.queue_free()
+		await process_frame
+	RAGDOLL._active = 0
 
 
 func _bone(enemy: Node, bone_name: String) -> Vector3:
