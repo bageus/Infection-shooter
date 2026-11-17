@@ -92,6 +92,7 @@ var _obstacle_cooldown: float = 0.0
 var _dead: bool = false
 var _push_velocity: Vector3 = Vector3.ZERO
 var _ai_tick_offset: int = 0
+var offscreen := false  # set by enemy_screen_reach
 var _cached_desired: Vector3 = Vector3.ZERO
 var _lod_frame_offset: int = 0
 var _sleeping_far := false
@@ -385,10 +386,10 @@ func _physics_process(delta: float) -> void:
 
 	var far := distance_sq > sleep_distance * sleep_distance
 	_sleeping_far = far
-	if far and physics_frame % 12 != _lod_frame_offset:
-		return
-	# A far enemy ticks every 12th frame, so its clocks advance 12 frames' worth.
-	var step := delta * 12.0 if far else delta
+	var lazy := far or (offscreen and distance_sq >= full_simulation_distance * full_simulation_distance)
+	var period := 12 if far else (4 if lazy else 1)  # a lazy enemy ticks every Nth frame, clocks advance N frames
+	if lazy and physics_frame % period != _lod_frame_offset % period: return
+	var step := delta * period
 
 	_attack_cooldown = maxf(0.0, _attack_cooldown - step)
 	_pace.tick(step, sqrt(distance_sq), charge_distance, move_speed, walk_speed_factor)
@@ -396,20 +397,19 @@ func _physics_process(delta: float) -> void:
 
 	var near := distance_sq < full_simulation_distance * full_simulation_distance
 	var ai_divisor := 1 if near else 4
-	if physics_frame % ai_divisor == _ai_tick_offset % ai_divisor:
+	if lazy or physics_frame % ai_divisor == _ai_tick_offset % ai_divisor:
 		_cached_desired = _desired_velocity_from_offset(target_offset)
 
 	_behaviour_tick(step, target_offset)
 	var desired := Vector3.ZERO if _blast_stun_remaining > 0.0 else _cached_desired * (1.0 - _pace.hit_penalty) * _authoring.movement_scale()
-	if not _sleeping_far:
+	if not lazy:
 		_turn_toward_face_direction(delta)
 	var spread := CROWD.spread(self, collision_shape)
 	velocity.x = desired.x + _push_velocity.x + spread.x
 	velocity.z = desired.z + _push_velocity.z + spread.z
 	_push_velocity = _push_velocity.move_toward(Vector3.ZERO, push_decay * delta)
-	if _sleeping_far:
-		# Far enemies take one cheap collision-checked step (no sliding or
-		# gravity), so they still stop at walls and closed doors.
+	if lazy:
+		# One collision-checked step (no sliding or gravity): still stops at walls and doors.
 		move_and_collide(Vector3(velocity.x, 0.0, velocity.z) * step)
 		return
 
