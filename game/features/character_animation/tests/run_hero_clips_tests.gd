@@ -3,6 +3,7 @@ extends SceneTree
 
 const DRIVER := preload("res://game/features/character_animation/public/character_animation_driver.gd")
 const MODEL := preload("res://models/objects/characters/soldier_animated.glb")
+const CLIPS_API := preload("res://game/features/character_animation/hero_body_clips.gd")
 const CLIPS := preload("res://models/objects/characters/hero_extra_clips.res")
 
 var failures := 0
@@ -65,6 +66,7 @@ func _run() -> void:
 	_expect(not driver.is_striking(), "The kick ends on its own.")
 	_expect(driver.play_turn(&"left") and driver.is_body_clip_playing(), "A left turn plays.")
 	_expect(driver.body_clip.get("_animation") == driver.animation_player.get_animation("Turn_Left"), "The left turn uses Turn_Left.")
+	_expect(not "Head" in driver.body_clip.bones and not "Spine" in driver.body_clip.bones, "A turn on the spot leaves the head and torso to the game.")
 	_expect(not driver.play_turn(&"around"), "An unknown side plays nothing.")
 	await create_timer(1.0).timeout
 	_expect(not driver.is_body_clip_playing(), "The turn ends on its own.")
@@ -75,6 +77,11 @@ func _run() -> void:
 	var lying := after.hips.y
 	_expect(lying < standing - 0.4, "The dead hero's hips end low (%.2f -> %.2f)." % [standing, lying])
 	_expect(driver.play_strike(&"kick") == 0.0 and not driver.play_turn(&"left"), "A dead hero neither kicks nor turns.")
+	# The fall backward ends in a ragdoll that lies on the floor.
+	CLIPS_API.release_ragdoll(driver)
+	_expect(driver.ragdoll != null and driver.ragdoll.get_child_count() >= 10, "The ragdoll builds a volume per main bone.")
+	await create_timer(1.5).timeout
+	_expect(is_instance_valid(driver.ragdoll) and driver.ragdoll.active and after.hips.y < standing - 0.4, "The ragdoll keeps lying low (%.2f)." % after.hips.y)
 	print("hero clips failures: ", failures)
 	quit(1 if failures > 0 else 0)
 

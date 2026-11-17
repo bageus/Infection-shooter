@@ -31,7 +31,9 @@ static func attach(model: Node) -> SkeletonModifier3D:
 
 
 ## Keeps `animation` looping on the legs at `time_scale` until release().
-func follow(animation: Animation, time_scale: float) -> void:
+func follow(animation: Animation, time_scale: float, phase := -1.0) -> void:
+	if phase >= 0.0 and (_weight <= 0.0 or animation != _animation):
+		_time = fposmod(phase, animation.length) # starts where the main cycle left off
 	if animation != _animation:
 		_animation = animation
 		_tracks.clear()
@@ -47,10 +49,10 @@ func follow(animation: Animation, time_scale: float) -> void:
 
 
 ## Follows `animation` while the character moves (or moved within hold_seconds); null releases.
-func drive(animation: Animation, time_scale: float, moving: bool) -> void:
+func drive(animation: Animation, time_scale: float, moving: bool, phase := -1.0) -> void:
 	_hold = hold_seconds if moving else maxf(0.0, _hold - get_process_delta_time())
 	if animation != null and _hold > 0.0:
-		follow(animation, time_scale)
+		follow(animation, time_scale, phase)
 	else:
 		release()
 

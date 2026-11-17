@@ -11,13 +11,15 @@ const WALK_SPEED := 0.5
 const RUN_SPEEDS := {"Forward": 3.75, "Forward_Left": 3.73, "Forward_Right": 3.73, "Left": 3.34, "Right": 3.52,
 	"Backward": 3.42, "Backward_Left": 3.3, "Backward_Right": 3.2}
 const RUN_SPEED_DEFAULT := 3.6
+## The run cycle plays at this share of the speed-matched rate (Vadim: the legs were too fast); the stride is paced for slower steps.
+const RUN_PACE := 0.8
 
 
 ## "Run_Backward_Left_AK" -> the speed of the "Backward_Left" cycle.
 static func _run_speed(clip_name: String) -> float:
 	var tokens := clip_name.split("_")
 	var key := tokens[1] + ("_" + tokens[2] if tokens.size() > 2 and tokens[2] in ["Left", "Right"] else "") if tokens.size() > 1 else ""
-	return float(RUN_SPEEDS.get(key, RUN_SPEED_DEFAULT))
+	return float(RUN_SPEEDS.get(key, RUN_SPEED_DEFAULT)) / RUN_PACE
 
 
 static func apply(player: AnimationPlayer, dodge_clip: StringName) -> void:
@@ -64,3 +66,13 @@ static func hold_weapon(player: AnimationPlayer, dodge_clip: StringName, held_we
 		hold.set("fade_out", 0.12)
 		skeletons[0].add_child(hold)
 	hold.call("play", player.get_animation(idle), seconds)
+
+
+## Playback rate of the legs kept on a locomotion cycle under a one-shot: the rate the player's main clip would run at
+## (baked cycles name their paced speed), so a reload on the run keeps the stride; the driver's own scale otherwise.
+static func leg_rate(driver: Node, clip: String, state: StringName, speed: float) -> float:
+	var legs: bool = driver.get("_transition_legs") != ""
+	var reference := float(driver.animation_player.get_animation(clip).get_meta("ref_speed", 0.0)) if driver.clip_footsteps and legs and driver.animation_player.has_animation(clip) else 0.0
+	if reference <= 0.0:
+		return driver._locomotion_scale(state if not legs else &"run", speed)
+	return clampf(speed / reference, 0.5, 2.4) * driver.locomotion_speed_multiplier * driver.leg_playback_multiplier
