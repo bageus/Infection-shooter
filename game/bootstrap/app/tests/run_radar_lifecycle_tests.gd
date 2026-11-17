@@ -62,7 +62,10 @@ func _death_and_eviction(radar: Control, enemy: CharacterBody3D, enemies: Node3D
 	enemy.call("take_projectile_damage", 1000.0, enemy.global_position, Vector3.FORWARD, "PISTOL")
 	_check(enemy.call("is_dead") and enemy.get_parent() == enemies, "Killed infected stays in the same container")
 	_check(not _target(radar, enemy), "Marker disappears immediately on death")
-	await create_timer(.2).timeout
+	var waited := 0.0
+	while BUDGET.count() == 0 and waited < 8.0: # the death clip plays before the corpse is retained
+		await create_timer(.25).timeout
+		waited += .25
 	_check(BUDGET.count() == 1, "Real corpse entered the retention budget")
 	_check((enemy.get("body_visual") as Node3D).visible, "Retained corpse is still visible")
 	_check(not _target(radar, enemy), "Visible retained corpse is not a live target")

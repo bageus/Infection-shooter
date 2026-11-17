@@ -16,6 +16,8 @@ const STANCE_FEET := preload("res://game/features/character_animation/stance_fee
 const CLIP_FOOTSTEPS := preload("res://game/features/character_animation/clip_footsteps.gd")
 const CLIP_TUNING := preload("res://game/features/character_animation/clip_tuning.gd")
 const STRIKE_POSE := preload("res://game/features/character_animation/strike_pose.gd")
+const ENEMY_VARIANTS := preload("res://game/features/character_animation/enemy_variants.gd")
+const ENEMY_BLENDS := preload("res://game/features/character_animation/public/enemy_blends.gd")
 const HERO_CLIPS := preload("res://game/features/character_animation/hero_body_clips.gd")
 const STATE_ATTACK := &"attack"
 const STATE_DEATH := &"death"
@@ -118,6 +120,7 @@ var _overlay_applied := false
 var _attack_side := false
 var _transition_legs := ""
 var _step_phase := -1.0
+var _variants := ENEMY_VARIANTS.new(self)
 
 
 # Public animation_selection_v1: optional presentation-only selector.
@@ -127,7 +130,8 @@ func configure_clip_selector(selector: Callable) -> void:
 	if animation_player != null and selector.is_valid():
 		if changed:
 			_configure_looping_clips()
-		_play_selected_clip()
+		if _one_shot.is_empty():
+			_play_selected_clip()
 
 
 # Public animation_events_v1: plays a non-looping attack, death or a skeletal
@@ -148,7 +152,7 @@ func play_one_shot(state: StringName) -> float:
 		var animation := animation_player.get_animation(clip)
 		var scale := _strike_speed(animation)
 		animation_player.speed_scale = scale
-		animation_player.play(clip, 0.08)
+		animation_player.play(clip, _blend(clip, 0.08, false))
 		length = animation.length / scale
 	elif _target != null:
 		length = procedural_death_seconds if state in DEATH_STATES else procedural_attack_seconds
@@ -415,6 +419,8 @@ func _process_skeletal(real_speed: float) -> void:
 	_update_attack_legs(speed)
 	if not _one_shot.is_empty() or _dead:
 		return
+	if _variants.stop_transition(speed, get_process_delta_time()):
+		return
 	if _play_selected_clip(speed):
 		return
 	var run_floor := run_speed_threshold * (run_exit_ratio if _current == _locomotion.get(&"run", "") else 1.0)
@@ -468,7 +474,7 @@ func _apply_flinch_overlay() -> void:
 func _play_selected_clip(speed: float = 0.0) -> bool:
 	if not _clip_selector.is_valid():
 		return false
-	var requested := StringName(_clip_selector.call())
+	var requested: StringName = _variants.variant(StringName(_clip_selector.call()))
 	if animation_player.has_animation(requested):
 		_play_clip(String(requested))
 		# Cycles that name the ground speed they are paced for follow the actual speed.
@@ -506,12 +512,13 @@ func _locomotion_scale(state: StringName, speed: float) -> float:
 
 
 func _play_locomotion(state: StringName, speed: float) -> void:
-	var clip: String = _locomotion.get(state, "")
+	var clip: String = _locomotion.get(state, "") if state == &"run" else String(_variants.variant(StringName(_locomotion.get(state, ""))))
 	if clip.is_empty():
 		_hold_rest_pose()
 		return
 	_play_clip(clip)
-	var wanted := _locomotion_scale(state, speed)
+	var own: float = _variants.own_rate(animation_player.get_animation(clip), speed)
+	var wanted := own * locomotion_speed_multiplier if own > 0.0 else _locomotion_scale(state, speed)
 	if not is_equal_approx(animation_player.speed_scale, wanted):
 		animation_player.speed_scale = wanted
 
@@ -533,11 +540,15 @@ func _hold_rest_pose() -> void:
 	_current = "__rest"
 
 
+func _blend(clip: String, base: float, after_one_shot: bool) -> float:
+	return ENEMY_BLENDS.seconds(clip, base, after_one_shot) if extra_clips != null else base
+
+
 func _play_clip(actual: String) -> void:
 	if _current == actual:
 		return
+	animation_player.play(actual, _blend(actual, 0.12, _current.is_empty()))
 	_current = actual
-	animation_player.play(actual, 0.12)
 
 
 func _index_animations() -> void:
@@ -549,23 +560,12 @@ func _index_animations() -> void:
 		CLIP_TUNING.apply(animation_player, dodge_clip)
 	for state: StringName in LOCOMOTION_TOKENS:
 		_locomotion[state] = CLIP_LOOKUP.find(_animations, NON_LOOPING_TOKENS, LOCOMOTION_TOKENS[state])
+	_variants.index()
 
 
 func _pick_one_shot_clip(state: StringName) -> String:
-	if state == STATE_ATTACK:
-		var sides: Array[String] = []
-		for token in ["attackleft", "attackright"]:
-			var side := CLIP_LOOKUP.variant(_animations, token)
-			if not side.is_empty():
-				sides.append(side)
-		if not sides.is_empty():
-			_attack_side = not _attack_side
-			return sides[int(_attack_side) % sides.size()]
-	if state in [&"attack_left", &"attack_right"]:
-		var variant := CLIP_LOOKUP.variant(_animations, String(ONE_SHOT_TOKENS[state][0]))
-		if not variant.is_empty():
-			return variant
-	return CLIP_LOOKUP.find(_animations, NON_LOOPING_TOKENS, ONE_SHOT_TOKENS[state])
+	_attack_side = not _attack_side if state == STATE_ATTACK else _attack_side
+	return _variants.pick(_animations, state, ONE_SHOT_TOKENS[state], NON_LOOPING_TOKENS, _attack_side)
 
 
 func _configure_looping_clips() -> void:

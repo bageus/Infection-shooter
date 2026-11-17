@@ -20,7 +20,10 @@ extends SceneTree
 ## the belly, and the crawl attack.
 
 const ENEMY_DIR := "res://models/objects/characters/enemy/game/"
-const SOURCE_DIR := "res://models/objects/characters/enemy/hunger_clips/"
+const SOURCE_DIRS := [
+	"res://models/objects/characters/enemy/hunger_clips/",
+	"res://models/objects/characters/enemy/clips/",
+]
 const FPS := 30.0
 const MIRROR := Basis(Vector3(-1, 0, 0), Vector3(0, 1, 0), Vector3(0, 0, 1))
 const PREFIX := "mixamorig_"
@@ -67,6 +70,52 @@ const SOURCES := [
 	["BiteLoop", "zombie_biting_2", false, true, false, -1.0, -1.0],
 ]
 const BITE_SOURCE := "zombie_biting"
+const ALL := ["Hunger", "Revenant", "Brute", "Colossus", "Titan"]
+const HEAVY_ALL := ["Revenant", "Brute", "Colossus", "Titan"]
+const BIG := ["Colossus", "Titan"]
+const BRAWLERS := ["Brute", "Colossus", "Titan"]
+# Clips added to every enemy listed in "enemies" (the owner's list of 16.11.2026). Keys: name,
+# file, enemies, mirror, loop, yaw (turn clips: remove the hips yaw, kept as a curve), pace
+# (walk / wander: stretched to the gameplay speed, run: measured; all set ref_speed and own_pace),
+# inplace (the hips drift over the clip is removed, the clip ends where it began),
+# series (numbered AttackLeft, AttackLeft2 ... in the order listed per enemy), cap (death clips:
+# most metres the body may travel), settle (climb: the last frame is the standing pose).
+const EXTRA := [
+	{"name": "Transition", "file": "Zombie Transition", "enemies": ALL, "inplace": true},
+	{"name": "IdleZombie1", "file": "Zombie Idle_1", "enemies": ALL, "loop": true},
+	{"name": "IdleZombie2", "file": "Zombie Idle_2", "enemies": ALL, "loop": true},
+	{"name": "IdleZombie3", "file": "Zombie Idle_3", "enemies": ALL, "loop": true},
+	{"name": "IdleZombie4", "file": "Zombie Idle_4", "enemies": ALL, "loop": true},
+	{"name": "IdleOrc", "file": "Orc Idle", "enemies": ALL, "loop": true},
+	{"name": "IdleOldMan", "file": "Old Man Idle", "enemies": ALL, "loop": true},
+	{"name": "IdleMutant", "file": "Mutant Idle", "enemies": BIG, "loop": true},
+	{"name": "IdleScratch", "file": "Zombie Scratch Idle", "enemies": BIG, "loop": true},
+	{"name": "DeathSide", "file": "Zombie Stumbling", "enemies": ALL, "cap": 1.1},
+	{"name": "DeathSide2", "file": "Zombie Stumbling", "enemies": ALL, "mirror": true, "cap": 1.1},
+	{"name": "DeathForward", "file": "Zombie Dying", "enemies": ALL, "cap": 1.1},
+	{"name": "DeathBack", "file": "Stumble Backwards", "enemies": ALL, "cap": 1.1},
+	{"name": "HitReaction", "file": "Zombie_Reaction_Hit", "enemies": HEAVY_ALL},
+	{"name": "TurnLeft", "file": "Left Turn", "enemies": HEAVY_ALL, "yaw": true},
+	{"name": "TurnRight", "file": "Left Turn_1", "enemies": HEAVY_ALL, "yaw": true},
+	{"name": "TurnLeft2", "file": "Left Turn", "enemies": ["Hunger"], "yaw": true},
+	{"name": "TurnRight2", "file": "Left Turn_1", "enemies": ["Hunger"], "yaw": true},
+	{"name": "Walk", "file": "Mutant Walking", "enemies": BIG, "loop": true, "pace": "walk"},
+	{"name": "WalkWander", "file": "Drunk Walk", "enemies": ["Revenant"], "loop": true, "pace": "wander"},
+	{"name": "WalkWander", "file": "Old Man Walk", "enemies": BRAWLERS, "loop": true, "pace": "wander"},
+	{"name": "RunZombie", "file": "Zombie_Run", "enemies": ["Brute"], "loop": true, "pace": "run"},
+	{"name": "RunForward", "file": "Run Forward", "enemies": ["Revenant", "Brute", "Titan"], "loop": true, "pace": "run"},
+	{"name": "Climb", "file": "Climbing", "enemies": ALL, "settle": true},
+	{"series": "AttackLeft", "file": "Zombie Attack", "enemies": ["Revenant", "Brute", "Colossus", "Titan"]},
+	{"series": "AttackLeft", "file": "Mutant Punch", "enemies": BRAWLERS},
+	{"series": "AttackLeft", "file": "Mutant Swiping", "enemies": BRAWLERS},
+	{"series": "AttackLeft", "file": "Stable Sword Inward Slash_2", "enemies": BRAWLERS},
+	{"series": "AttackRight", "file": "Zombie Attack_2", "enemies": ["Revenant", "Brute", "Colossus", "Titan"]},
+	{"series": "AttackRight", "file": "Mutant Punch_1", "enemies": BIG},
+	{"series": "AttackRight", "file": "Mutant Swiping_1", "enemies": BIG},
+	{"series": "AttackRight", "file": "Stable Sword Inward Slash", "enemies": BIG},
+]
+# Walks and runs are paced by stance-foot speed against the hips; wanderers move at this share of move_speed.
+const WANDER_SHARE := 0.35
 # Ground speed (m/s) each locomotion cycle is paced for; the driver scales playback by speed / ref_speed.
 # Heavy humanoids (the rest of the roster) take only Idle/Walk/Run; their attacks, death and
 # hit clips stay procedural. Per enemy: Mixamo source of the Run clip, Body scale (the clip's
@@ -118,6 +167,7 @@ func _run() -> void:
 			quit(1)
 			return
 		_bake_synthetic()
+	_bake_extra()
 	var library := AnimationLibrary.new()
 	for clip_name: String in _frames:
 		var animation := _emit(clip_name)
@@ -165,6 +215,101 @@ func _bake_heavy(style: Dictionary) -> void:
 		_loops.erase(key)
 		_meta.erase(key)
 	print("%s: walk stretch %.2f ref %.2f (gameplay %.2f), run ref %.2f (gameplay %.2f)" % [_enemy_name, stretch, _meta["Walk"]["ref_speed"], style["walk_mps"], _meta["Run"]["ref_speed"], style["run_mps"]])
+
+
+# ---------------------------------------------------------------- the owner's added clips
+
+func _body_scale() -> float:
+	return float(HEAVY[_enemy_name]["scale"]) if HEAVY.has(_enemy_name) else 1.0
+
+
+func _bake_extra() -> void:
+	var series := {}
+	for entry: Dictionary in EXTRA:
+		if not _enemy_name in entry["enemies"]:
+			continue
+		var clip_name: String = entry.get("name", "")
+		if entry.has("series"):
+			var count: int = series.get(entry["series"], 0)
+			series[entry["series"]] = count + 1
+			clip_name = String(entry["series"]) + ("" if count == 0 else str(count + 1))
+		var loop: bool = entry.get("loop", false)
+		if not _bake_source([clip_name, entry["file"], entry.get("mirror", false), loop, entry.get("yaw", false), -1.0, -1.0]):
+			push_error("Could not bake " + clip_name)
+			quit(1)
+			return
+		if entry.has("cap"):
+			_cap_travel(clip_name, float(entry["cap"]))
+		if entry.get("settle", false):
+			_settle_end(clip_name)
+		if entry.get("inplace", false):
+			_remove_drift(clip_name)
+		if entry.has("pace"):
+			_pace(clip_name, String(entry["pace"]))
+		if loop and entry.get("pace", "") != "":
+			_clamp_to_floor(_frames[clip_name])
+
+
+# Walk and wander cycles are stretched until the stance foot moves at the gameplay speed at 1x;
+# every paced clip names its own ground speed (ref_speed) and the driver follows it (own_pace).
+func _pace(clip_name: String, kind: String) -> void:
+	var scale := _body_scale()
+	var style: Dictionary = HEAVY.get(_enemy_name, {})
+	var target := 0.0
+	if kind == "walk":
+		target = float(style.get("walk_mps", 0.0))
+	elif kind == "wander":
+		target = float(style.get("run_mps", 0.0)) * WANDER_SHARE
+	var frames: Array = _frames[clip_name]
+	if target > 0.0:
+		var stretch := clampf(_ground_speed(frames) * scale / target, 1.0, 4.0)
+		var count := int(round(frames.size() * stretch))
+		var stretched: Array = []
+		for index in count:
+			var position := float(index) / float(count) * frames.size()
+			var low := int(floor(position)) % frames.size()
+			stretched.append(_blend(frames[low], frames[(low + 1) % frames.size()], position - floor(position)))
+		frames = stretched
+		_frames[clip_name] = frames
+	_meta[clip_name]["ref_speed"] = _ground_speed(frames) * scale
+	_meta[clip_name]["own_pace"] = true
+	print("%s %s: ref %.2f m/s, target %.2f" % [_enemy_name, clip_name, _meta[clip_name]["ref_speed"], target])
+
+
+# A death clip may carry the body at most `metres` from where it stood (the fall adds its own slide).
+func _cap_travel(clip_name: String, metres: float) -> void:
+	var rest := _hunger.get_bone_rest(_hunger.find_bone("Hips")).origin
+	var farthest := 0.0
+	for frame: Dictionary in _frames[clip_name]:
+		var position: Vector3 = frame["HipsPosition"]
+		farthest = maxf(farthest, Vector2(position.x - rest.x, position.z - rest.z).length())
+	var factor := minf(1.0, metres / maxf(farthest * _body_scale(), 0.001))
+	for frame: Dictionary in _frames[clip_name]:
+		var position: Vector3 = frame["HipsPosition"]
+		frame["HipsPosition"] = Vector3(rest.x + (position.x - rest.x) * factor, position.y, rest.z + (position.z - rest.z) * factor)
+	print("%s %s: travel %.2f m -> %.2f m" % [_enemy_name, clip_name, farthest * _body_scale(), farthest * _body_scale() * factor])
+
+
+# Moves the hips back along a straight line so the last frame is over the first (no pop into the idle after it).
+func _remove_drift(clip_name: String) -> void:
+	var frames: Array = _frames[clip_name]
+	var span := float(frames.size() - 1)
+	var drift: Vector3 = (frames[frames.size() - 1]["HipsPosition"] as Vector3) - (frames[0]["HipsPosition"] as Vector3)
+	drift.y = 0.0
+	for index in frames.size():
+		frames[index]["HipsPosition"] = (frames[index]["HipsPosition"] as Vector3) - drift * (float(index) / span)
+
+
+# The climb out of the hole ends standing where the enemy was spawned, so the whole clip is moved
+# until its last frame is at the rest height and place; the start is then under the floor.
+func _settle_end(clip_name: String) -> void:
+	var frames: Array = _frames[clip_name]
+	var rest := _hunger.get_bone_rest(_hunger.find_bone("Hips")).origin
+	var end: Vector3 = frames[frames.size() - 1]["HipsPosition"]
+	var shift := end - rest
+	for frame: Dictionary in frames:
+		frame["HipsPosition"] = (frame["HipsPosition"] as Vector3) - shift
+	print("%s %s: starts %.2f m below, %.2f m behind" % [_enemy_name, clip_name, (rest.y - (frames[0]["HipsPosition"] as Vector3).y) * _body_scale(), (frames[0]["HipsPosition"] as Vector3).z * _body_scale()])
 
 
 # Ground speed of a loop in skeleton units: how fast the planted foot moves back against the hips.
@@ -234,7 +379,11 @@ func _bake_bite() -> bool:
 
 # Samples a source FBX into Hunger-skeleton frames: {bone: Quaternion, "HipsPosition": Vector3}.
 func _source_frames(file: String, mirror: bool, remove_yaw: bool, from_time: float, to_time: float, loop: bool) -> Array:
-	var packed := load(SOURCE_DIR + file + ".fbx") as PackedScene
+	var packed: PackedScene = null
+	for dir: String in SOURCE_DIRS:
+		if ResourceLoader.exists(dir + file + ".fbx"):
+			packed = load(dir + file + ".fbx") as PackedScene
+			break
 	if packed == null:
 		push_error("Missing " + file)
 		return []

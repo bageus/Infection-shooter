@@ -160,7 +160,7 @@ func _shadow_checks(tabs: TabContainer, dialog: Control) -> void:
 	var quality := tabs.get_child(2).find_child("ShadowQuality", true, false) as HSlider
 	_check(shadows.text == "Динамические тени" and not shadows.tooltip_text.is_empty(), "Shadow toggle clearly describes dynamic-only behavior")
 	_check(quality.tooltip_text == dialog.view.text("shadowQualityHint"), "Quality slider explains dynamic-only scope")
-	_check(shadows != null and shadows.button_pressed, "Shadows toggle belongs to Video and defaults on")
+	_check(shadows != null and not shadows.button_pressed, "Shadows toggle belongs to Video and defaults off")
 	_check(quality != null and quality.value == 1.0 and quality.max_value == 3.0 and quality.step == 1.0, "Shadow quality slider has 4 levels and defaults to Medium")
 	quality.value = 0.0
 	await create_timer(0.6).timeout

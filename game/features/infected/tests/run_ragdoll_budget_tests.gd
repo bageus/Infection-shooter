@@ -146,6 +146,7 @@ func _spawn(linger: float, size: Vector3 = Vector3.ONE) -> CharacterBody3D:
 	enemy.scale = size
 	next_position += 1
 	enemy.set("death_linger_seconds", linger)
+	enemy.set("death_ragdoll", true) # the scene plays death clips; these tests are about the ragdoll
 	stage.add_child(enemy)
 	enemy.set_physics_process(false)
 	await physics_frame

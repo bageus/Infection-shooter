@@ -9,6 +9,7 @@ extends RefCounted
 ## range to half a metre instead of disabling the light's shadow.
 
 const WALL_BASE_SHADOW := preload("res://game/presentation/office_floor/public/wall_base_shadow.gd")
+const BLOB_SHADOW := preload("res://game/core/vfx/public/character_blob_shadow.gd")
 const DEFAULT_LEVEL := 2
 const OFF_DISTANCE := 0.5
 const LEVELS: Array[Dictionary] = [
@@ -39,6 +40,9 @@ static func apply(tree: SceneTree, enabled: bool, level: int) -> void:
 		tree.root.positional_shadow_atlas_size = int(preset.atlas)
 	# Walls bake a contact strip on the floor only while real shadows are off.
 	WALL_BASE_SHADOW.set_shadows_allowed(tree, enabled)
+	# Characters get a soft blob under their feet while real shadows are off.
+	BLOB_SHADOW.track(tree)
+	BLOB_SHADOW.set_shadows_allowed(tree, enabled)
 	var scene := tree.current_scene
 	if scene == null:
 		return

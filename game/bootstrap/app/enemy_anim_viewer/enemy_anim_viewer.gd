@@ -5,6 +5,7 @@ extends Control
 ## the LOD Godot is drawing, read from the triangles the view rendered.
 
 const CATALOG := preload("res://game/bootstrap/app/enemy_anim_viewer/enemy_anim_catalog.gd")
+const TIMELINE := preload("res://game/bootstrap/app/enemy_anim_viewer/enemy_anim_timeline.gd")
 const ORBIT_SPEED := 1.6 # rad/s while Z or X is held
 const FOV := 50.0 # the game camera's FOV, so LODs switch at the same distances as in play
 const MAX_DISTANCE := 30.0 # past the game camera's 24 m
@@ -30,6 +31,10 @@ var _distance := 4.0
 var _yaw := 0.0
 var _pitch := 0.15
 var _dragging := false
+var _timeline := TIMELINE.new()
+var _timeline_list: ItemList
+var _presets: OptionButton
+var _chain_repeat: CheckBox
 
 
 func _ready() -> void:
@@ -53,6 +58,7 @@ func _ready() -> void:
 	_clip_list.size_flags_vertical = SIZE_EXPAND_FILL
 	_clip_list.item_selected.connect(func(index: int) -> void: _play(_clip_list.get_item_metadata(index)))
 	panel.add_child(_clip_list)
+	_build_timeline_panel(panel)
 	_loop = CheckBox.new()
 	_loop.text = "Зациклить"
 	_loop.button_pressed = true
@@ -60,7 +66,7 @@ func _ready() -> void:
 	_pause = Button.new()
 	_pause.text = "Пауза"
 	_pause.toggle_mode = true
-	_pause.toggled.connect(func(paused: bool) -> void: _set_speed(0.0 if paused else 1.0))
+	_pause.toggled.connect(func(paused: bool) -> void: _set_speed(0.0 if paused else _timeline.resume_speed(_player)))
 	panel.add_child(_pause)
 	var reset := Button.new()
 	reset.text = "Сбросить вид"
@@ -72,6 +78,68 @@ func _ready() -> void:
 		_enemy_select.add_item(CATALOG.enemy_name(path))
 	if not _enemies.is_empty():
 		_show_enemy(0)
+
+
+# Timeline: clips are added to a chain (or a preset of real game transitions is loaded) and played with the game's blends.
+func _build_timeline_panel(panel: VBoxContainer) -> void:
+	var title := Label.new()
+	title.text = "Таймлайн (цепочка клипов)"
+	panel.add_child(title)
+	_timeline_list = ItemList.new()
+	_timeline_list.custom_minimum_size.y = 130
+	panel.add_child(_timeline_list)
+	var row := HBoxContainer.new()
+	panel.add_child(row)
+	_add_button(row, "+ клип", _timeline_add)
+	_add_button(row, "Убрать", func() -> void: _timeline_remove())
+	_add_button(row, "Очистить", func() -> void: _timeline_set([]))
+	_presets = OptionButton.new()
+	for preset: String in TIMELINE.PRESETS:
+		_presets.add_item(preset)
+	panel.add_child(_presets)
+	var preset_row := HBoxContainer.new()
+	panel.add_child(preset_row)
+	_add_button(preset_row, "Загрузить пресет", _timeline_load_preset)
+	_add_button(preset_row, "▶ Играть цепочку", func() -> void: _timeline.start(_player))
+	_chain_repeat = CheckBox.new()
+	_chain_repeat.text = "Зациклить цепочку"
+	_chain_repeat.button_pressed = true
+	panel.add_child(_chain_repeat)
+
+
+func _add_button(parent: Control, text: String, action: Callable) -> void:
+	var button := Button.new()
+	button.text = text
+	button.pressed.connect(action)
+	parent.add_child(button)
+
+
+func _timeline_add() -> void:
+	var picked := _clip_list.get_selected_items()
+	if not picked.is_empty():
+		_timeline_set(_timeline.entries + [str(_clip_list.get_item_metadata(picked[0]))])
+
+
+func _timeline_remove() -> void:
+	var picked := _timeline_list.get_selected_items()
+	if not picked.is_empty():
+		var rest := _timeline.entries.duplicate()
+		rest.remove_at(picked[0])
+		_timeline_set(rest)
+
+
+func _timeline_load_preset() -> void:
+	if _player != null:
+		_timeline_set(TIMELINE.preset_clips(_presets.get_item_text(_presets.selected), _player.get_animation_list()))
+		_timeline.start(_player)
+
+
+func _timeline_set(clips: Array) -> void:
+	_timeline.stop()
+	_timeline.entries.assign(clips)
+	_timeline_list.clear()
+	for index in clips.size():
+		_timeline_list.add_item("%d. %s" % [index + 1, clips[index]])
 
 
 func _build_view(split: HSplitContainer) -> void:
@@ -106,6 +174,7 @@ func _environment() -> WorldEnvironment:
 
 
 func _show_enemy(index: int) -> void:
+	_timeline_set([])
 	if _body != null:
 		_body.free()
 		_body = null
@@ -190,6 +259,7 @@ func _update_lod_info() -> void:
 func _play(clip: String) -> void:
 	if _player == null:
 		return
+	_timeline.stop()
 	_player.get_animation(clip).loop_mode = Animation.LOOP_LINEAR if _loop.button_pressed else Animation.LOOP_NONE
 	_player.play(clip, BLEND)
 	_set_speed(0.0 if _pause.button_pressed else 1.0)
@@ -201,7 +271,7 @@ func _set_speed(speed: float) -> void:
 
 
 func _reset_view() -> void:
-	_yaw = 0.0
+	_yaw = PI # enemy bodies are turned 180 degrees in their scenes; start facing their front
 	_pitch = 0.15
 	_distance = _fit_distance
 	_update_camera()
@@ -217,6 +287,9 @@ func _update_camera() -> void:
 
 func _process(delta: float) -> void:
 	_update_lod_info()
+	_timeline.step(delta, _player, _pause.button_pressed, _chain_repeat.button_pressed)
+	if _timeline.playing and _timeline.current >= 0:
+		_timeline_list.select(_timeline.current)
 	var turn := (1.0 if Input.is_key_pressed(KEY_X) else 0.0) - (1.0 if Input.is_key_pressed(KEY_Z) else 0.0)
 	if turn != 0.0 and _body != null:
 		_yaw += turn * ORBIT_SPEED * delta
