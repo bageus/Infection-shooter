@@ -17,6 +17,8 @@ const CHILD_SHARE := 0.53
 const SEAM_REACH := 1.3
 # Rim vertices this close to another part's rim are on a seam (the build leaves them on it).
 const SEAM_TOUCH := 0.004
+## Hip socket height above the thigh cut, per unit of `scale` (body height / 1.9).
+const HIP_ABOVE_CUT := 0.13
 # Spine chain as fractions of the way from Hips to Neck (matches the old hand-placed rigs).
 const SPINE_AT := 0.294
 const CHEST_AT := 0.65
@@ -180,10 +182,13 @@ static func humanoid_joints(model: RefCounted) -> Dictionary:
 		points[prefix + "Forearm"] = elbow
 		points[prefix + "Hand"] = elbow.lerp(tip, 0.82)
 		points[prefix + "HandTip"] = tip
-		points[prefix + "Thigh"] = thigh[0]
+		# The thigh parts are cut level with the crotch; the hip socket sits higher, inside the pelvis
+		# (Mixamo: ~7% of the height above the crotch). Pivoting at the cut bent the legs below the belt.
+		var hip: Vector3 = thigh[0] + Vector3(0.0, HIP_ABOVE_CUT * scale, 0.0)
+		points[prefix + "Thigh"] = hip
 		points[prefix + "Shin"] = knee
-		_add_foot(points, prefix, model.part_vertices("Shin_Foot_" + side), thigh[0], knee, low, scale)
-		hips_sum += thigh[0]
+		_add_foot(points, prefix, model.part_vertices("Shin_Foot_" + side), hip, knee, low, scale)
+		hips_sum += hip
 	var hips := hips_sum * 0.5 + Vector3(0.0, 0.04 * scale, 0.0)
 	var neck: Vector3 = model.cap_centers("Head", 1)[0] if not (model.caps["Head"] as Array).is_empty() else model.top_cap("Torso")
 	var head_top := -INF

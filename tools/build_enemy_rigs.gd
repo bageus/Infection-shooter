@@ -6,7 +6,7 @@ extends SceneTree
 ##
 ## For the five humanoids and the Horde it writes into models/objects/characters/enemy/game/:
 ##   <Name>_rig_mesh.res  skinned copy of <Name>_game.res (skin + cut caps, 4 weights/vertex)
-##   <Name>_anims.res     AnimationLibrary (Idle, Walk, Run, attacks, Death, extras)
+##   <Name>_anims.res     AnimationLibrary (Idle, Walk, Run, attacks, DeathForward, DeathBack, extras)
 ##   <Name>_rig.tscn      Visual > Skeleton3D > Mesh + AnimationPlayer
 
 const AUTHOR := preload("res://tools/enemy_animation_author.gd")

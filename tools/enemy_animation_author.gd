@@ -107,8 +107,8 @@ func build_humanoid_library(source_style: Dictionary) -> AnimationLibrary:
 	library.add_animation(&"AttackRight", _bake(func(t: float) -> Dictionary: return _keyed(t / attack_length, _attack_keys(style), style), attack_length, false))
 	library.add_animation(&"AttackLeft", _bake(func(t: float) -> Dictionary: return _mirror(_keyed(t / attack_length, _attack_keys(style), style)), attack_length, false))
 	var death_length := float(style.death_seconds)
-	library.add_animation(&"Death", _bake(func(t: float) -> Dictionary: return _keyed(t / death_length, _death_keys(style), style), death_length, false))
-	# Directional deaths (ADR-0034): a forward fall and a thrown-back fall.
+	# Directional deaths (ADR-0034): a forward fall and a thrown-back fall. No plain Death clip any more
+	# (17.11.2026): the death state picks these or the Mixamo DeathSide.
 	var forward_keys := DEATH_POSES.forward_keys(_stance(style), hips_height)
 	library.add_animation(&"DeathForward", _bake(func(t: float) -> Dictionary: return _keyed(t / death_length, forward_keys, style), death_length, false))
 	var back_length := death_length * 0.85
@@ -152,6 +152,12 @@ func _idle(t: float, style: Dictionary) -> Dictionary:
 	p.hips_x = 0.01 * hips_height * sway
 	p.L_flex += 3.0 * sway
 	p.R_flex -= 3.0 * sway
+	# Soles flat on the floor (the bent knees tipped the toes 5 deg down and the fixed hips drop sank
+	# them up to 8 cm: Titan and Colossus stood on their toes).
+	for prefix: String in SIDES:
+		p[prefix + "ankle"] = float(p.get(prefix + "swing", 0.0)) - float(p.get(prefix + "knee", 0.0))
+	p.hips_y = 0.0
+	p.hips_y = -_ankle_drop(p)
 	return p
 
 
@@ -191,8 +197,9 @@ func _run(t: float, style: Dictionary) -> Dictionary:
 	_gait(p, phase, float(style.run_swing), [RUN_THIGH, RUN_KNEE, RUN_SOLE], 1.0 - 0.25 * heavy, 0.04 + 0.12 * heavy, 0.015, 12.0 - 4.0 * heavy)
 	p.hips_y -= 0.03 * hips_height * (1.0 + heavy)
 	p.hips_z = 0.03 * hips_height
-	# Clawing arms pump against the legs, thrown forward to grab, never quite in step.
-	var reach := 52.0 + 16.0 * float(style.reach)
+	# Clawing arms pump against the legs, thrown forward to grab, never quite in step (the base reach
+	# went up 10 deg when the hip sockets moved up into the pelvis and the back swing reached behind the chest).
+	var reach := 62.0 + 16.0 * float(style.reach)
 	for prefix: String in SIDES:
 		var side: float = SIDES[prefix]
 		var lag := 0.0 if side > 0.0 else 0.06
@@ -318,26 +325,6 @@ func _attack_keys(style: Dictionary) -> Array:
 	var settle := stance.duplicate()
 	settle.merge({"twist": 10.0, "lean": 14.0, "R_flex": 30.0, "R_elbow": 34.0, "L_swing": 10.0, "L_knee": 14.0}, true)
 	return [[0.0, stance], [0.36, windup], [0.40, windup], [0.47, strike], [0.58, follow], [0.78, settle], [1.0, stance]]
-
-
-func _death_keys(style: Dictionary) -> Array:
-	var stance := _stance(style)
-	var recoil := stance.duplicate()
-	recoil.merge({"lean": -16.0, "head": -28.0, "neck": -8.0, "L_flex": 42.0, "R_flex": 48.0, "L_abd": 28.0, "R_abd": 32.0, "L_elbow": 55.0, "R_elbow": 60.0, "hips_z": -0.03 * hips_height, "twist": 8.0}, true)
-	var buckle := recoil.duplicate()
-	buckle.merge({"L_knee": 70.0, "R_knee": 58.0, "L_swing": 32.0, "R_swing": 22.0, "hips_y": -0.38 * hips_height, "hips_pitch": -22.0, "lean": -6.0, "head": -12.0, "L_ankle": -20.0, "R_ankle": -16.0}, true)
-	var lying := 0.13 * hips_height - hips_height
-	var fall := buckle.duplicate()
-	fall.merge({
-		"hips_pitch": -88.0, "hips_y": lying, "hips_z": -0.42 * hips_height, "lean": 4.0, "head": 8.0, "neck": 6.0,
-		"L_knee": 24.0, "R_knee": 34.0, "L_swing": 8.0, "R_swing": 14.0, "L_ankle": 10.0, "R_ankle": 18.0,
-		"L_flex": -12.0, "R_flex": -6.0, "L_abd": 62.0, "R_abd": 74.0, "L_elbow": 26.0, "R_elbow": 18.0, "head_turn": 24.0, "twist": 4.0,
-	}, true)
-	var bounce := fall.duplicate()
-	bounce.merge({"hips_pitch": -94.0, "hips_y": lying + 0.04 * hips_height, "L_abd": 74.0, "R_abd": 84.0}, true)
-	var rest := fall.duplicate()
-	rest.merge({"hips_pitch": -90.0, "head_turn": 30.0, "L_knee": 16.0, "R_knee": 28.0}, true)
-	return [[0.0, stance], [0.14, recoil], [0.42, buckle], [0.7, fall], [0.82, bounce], [1.0, rest]]
 
 
 func _slam_keys(style: Dictionary) -> Array:

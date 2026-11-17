@@ -5,7 +5,7 @@ extends SceneTree
 ## Writes <out>/<name>_<pose>_<view>.png; pose "source" is the source GLB as authored.
 const CATALOG := preload("res://game/bootstrap/app/enemy_anim_viewer/enemy_anim_catalog.gd")
 const NAMES := ["Hunger", "Revenant", "Brute", "Titan", "Colossus"]
-const POSES := [["Idle", 0.4], ["Walk", 0.3], ["AttackRight", 0.45], ["Scream", 0.5], ["Death", 0.35]]
+const POSES := [["Idle", 0.4], ["Walk", 0.3], ["AttackRight", 0.45], ["Scream", 0.5], ["DeathForward", 0.35]]
 const VIEWS := {"front": Vector3(0.25, 0.15, 1.0), "back": Vector3(-0.35, 0.25, -1.0)}
 var output := "user://enemy_poses"
 
