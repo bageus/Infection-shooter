@@ -122,6 +122,7 @@ var _reaction_point := Vector3.ZERO
 var _reaction_direction := Vector3.ZERO
 var _death_push := Vector3.ZERO
 var _death_push_msec := -KILLING_PUSH_MSEC
+var _kill_part: StringName = &"" # part hit by the latest shot; DEATH_FALL.kill_push and leg_side read it
 var _fall_watch: RefCounted
 var _ragdoll: RefCounted
 var _hit_cooldown := 0.0
@@ -232,12 +233,7 @@ func apply_player_push(direction: Vector3, strength: float) -> void:
 		_push_velocity = _push_velocity.normalized() * max_push_speed
 
 
-func take_projectile_damage(
-	amount: float,
-	hit_position: Vector3,
-	direction: Vector3,
-	weapon_name: String = "PISTOL"
-) -> void:
+func take_projectile_damage(amount: float, hit_position: Vector3, direction: Vector3, weapon_name: String = "PISTOL") -> void:
 	if _dead or amount <= 0.0:
 		return
 	_setup_body_parts()
@@ -252,6 +248,7 @@ func take_projectile_damage(
 	if _parts != null:
 		part = _parts.pick_part(hit_position, direction)
 		_parts.wound(part, hit_position, direction, BODY_PARTS.wound_radius(weapon_name))
+	_kill_part = part
 	projectile_blood.emit(hit_position, direction, weapon_name, _blood_exclusions(), get_instance_id())
 	BLOOD_FX.spray(get_parent() as Node3D, hit_position, direction, 16, 1.0)
 	audio.hit(hit_position)
@@ -278,6 +275,7 @@ func take_blast_damage(amount: float, origin: Vector3) -> void:
 func _set_death_push(push: Vector3) -> void:
 	_death_push = push
 	_death_push_msec = Time.get_ticks_msec()
+	_kill_part = &""
 
 
 func take_damage(amount: float) -> void:
@@ -454,8 +452,7 @@ func _desired_velocity_from_offset(offset: Vector3) -> Vector3:
 	return route_direction * _chase_speed(distance)
 
 
-func _chase_speed(_distance: float) -> float:
-	return _pace.speed * _mobility
+func _chase_speed(_distance: float) -> float: return _pace.speed * _mobility
 
 
 # Hook for specialised enemies (slam, ram, summon); runs every simulated tick.
@@ -463,8 +460,7 @@ func _behaviour_tick(_delta: float, _target_offset: Vector3) -> void:
 	pass
 
 
-func is_dead() -> bool:
-	return _dead
+func is_dead() -> bool: return _dead
 
 
 # Smooth yaw turn toward the target; also while standing in attack range.
@@ -529,8 +525,7 @@ func _deliver_attack() -> void:
 
 
 # Swing with whichever arm is still attached.
-func _attack_state() -> StringName:
-	return &"attack" if _parts == null else _parts.attack_state()
+func _attack_state() -> StringName: return &"attack" if _parts == null else _parts.attack_state()
 
 
 func _play_animation(state: StringName) -> float:
@@ -568,8 +563,8 @@ func _die() -> void:
 	_pending_hit = -1.0
 	var fresh := Time.get_ticks_msec() - _death_push_msec <= KILLING_PUSH_MSEC
 	var size := body_visual.scale.x if body_visual != null else 1.0
-	var fall := DEATH_FALL.resolve(Vector3(velocity.x, 0.0, velocity.z), _death_push if fresh else Vector3.ZERO, -global_basis.z, size)
-	fall = DEATH_OBSTACLE.adjust(self, _parts, fall, size)
+	var kick: Array = DEATH_FALL.kill_push(Vector3(velocity.x, 0.0, velocity.z), _death_push if fresh else Vector3.ZERO, _kill_part if fresh else &"", _last_hit_direction)
+	var fall := DEATH_OBSTACLE.adjust(self, _parts, DEATH_FALL.resolve(kick[0], kick[1], -global_basis.z, size, _fall_aside()), size)
 	var landing: Vector3 = DEATH_FALL.landing(self, fall["slide"], 0.35 * size)
 	_blood.reset(global_position)
 	blood_death.emit(global_position + landing, _blood_exclusions(), get_instance_id())
@@ -584,11 +579,14 @@ func _die() -> void:
 	# The Mixamo enemies die with a clip (their bones animate), so a corpse stays shootable like a ragdoll.
 	if _parts != null and (death_ragdoll or (_animation != null and _animation.get("extra_clips") != null)):
 		_parts.enable_corpse_hitboxes()
-	_ragdoll = null if not death_ragdoll else DEATH_RAGDOLL.start(self, _parts, _animation, Vector3(velocity.x, 0.0, velocity.z), _death_push if fresh else Vector3.ZERO, size)
+	_ragdoll = null if not death_ragdoll else DEATH_RAGDOLL.start(self, _parts, _animation, kick[0], kick[1], size)
 	if _ragdoll == null:
 		_fall_watch = DEATH_CLIP.play(self, _parts, _animation, fall, landing)
 	preload("res://game/features/infected/corpse_blood_pool.gd").start(self, _parts, global_position + landing)
 	_authoring.start_death_cloud(death_cloud)
+
+
+func _fall_aside() -> StringName: return DEATH_FALL.leg_side(_parts, _kill_part)
 
 
 func _hide_corpse() -> void:

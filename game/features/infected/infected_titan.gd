@@ -4,12 +4,14 @@ extends "res://game/features/infected/infected_capsule.gd"
 
 const ROCK := preload("res://game/features/infected/titan_rock.gd")
 const THROW_STEP_SPEED := 3.0
+const THROW_HAND := "R_Hand"
 
 @export var throw_min_distance := 5.0
 @export var throw_max_distance := 14.0
 @export var throw_cooldown := 14.0
-@export_range(0.1, 0.9) var throw_grab_fraction := 0.34
-@export_range(0.1, 0.95) var throw_release_fraction := 0.72
+# Titan Throw (tools/blender_enemy_clips.py): the hand is on the rock at frame 19 of 98, the swing lets go at 62.
+@export_range(0.1, 0.9) var throw_grab_fraction := 0.2
+@export_range(0.1, 0.95) var throw_release_fraction := 0.63
 @export var throw_flight_seconds := 0.85
 @export var throw_damage := 30.0
 
@@ -18,6 +20,7 @@ var _throw_elapsed := -1.0
 var _throw_length := 0.0
 var _rock: Node3D
 var _rock_ground := Vector3.ZERO
+var _hand_skeleton: Skeleton3D
 
 
 func _behaviour_tick(delta: float, target_offset: Vector3) -> void:
@@ -76,11 +79,14 @@ func _spawn_rock() -> void:
 	_rock.global_position = _rock_ground + Vector3.UP * 0.3
 
 
-# Rock path by clip progress: floor until the grab, up to the chest, back behind
-# the head for the wind-up, then forward to the release point.
+# Rock path by clip progress: on the floor until the grab, then in the throwing hand. Without a
+# skeleton: up to the chest, back behind the head for the wind-up, then forward to the release point.
 func _rock_position(progress: float) -> Vector3:
 	var forward := -global_transform.basis.z
 	var floor_point := _rock_ground + Vector3.UP * 0.3
+	var skeleton := _skeleton()
+	if progress >= throw_grab_fraction and skeleton != null and skeleton.find_bone(THROW_HAND) >= 0:
+		return skeleton.global_transform * skeleton.get_bone_global_pose(skeleton.find_bone(THROW_HAND)).origin
 	var lift := global_position + Vector3.UP * 1.1 + forward * 0.9
 	var windup := global_position + Vector3.UP * 1.8 - forward * 0.15
 	var release := global_position + Vector3.UP * 1.4 + forward * 1.0
@@ -92,6 +98,13 @@ func _rock_position(progress: float) -> Vector3:
 	if progress < 0.62:
 		return lift.lerp(windup, smoothstep(0.5, 0.62, progress))
 	return windup.lerp(release, smoothstep(0.62, throw_release_fraction, progress))
+
+
+func _skeleton() -> Skeleton3D:
+	if _hand_skeleton == null and is_instance_valid(body_visual):
+		var found := body_visual.find_children("*", "Skeleton3D", true, false)
+		_hand_skeleton = found[0] as Skeleton3D if not found.is_empty() else null
+	return _hand_skeleton if is_instance_valid(_hand_skeleton) else null
 
 
 func _release_rock() -> void:

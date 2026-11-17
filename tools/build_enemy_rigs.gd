@@ -13,6 +13,7 @@ const AUTHOR := preload("res://tools/enemy_animation_author.gd")
 const HORDE_AUTHOR := preload("res://tools/horde_animation_author.gd")
 const OUTPUT_DIR := "res://models/objects/characters/enemy/game/"
 const PARTS := preload("res://tools/enemy_rig_parts.gd")
+const HOME_SCALE := 64.0 # body_part_topology.gd HOME_SCALE
 const HUMANOID_BONES := [
 	["Root", ""], ["Hips", "Root"], ["Spine", "Hips"], ["Chest", "Spine"], ["Neck", "Chest"], ["Head", "Neck"],
 	["L_Shoulder", "Chest"], ["L_UpperArm", "L_Shoulder"], ["L_Forearm", "L_UpperArm"], ["L_Hand", "L_Forearm"],
@@ -68,23 +69,25 @@ func _build_humanoid(enemy_name: String) -> bool:
 			origin -= points[parent] as Vector3
 		skeleton.set_bone_rest(index, Transform3D(Basis.IDENTITY, origin))
 	skeleton.reset_bone_poses()
-	var weights: Array = PARTS.humanoid_weights(model, points, skeleton)
+	# Whole-body weights from Blender when present (tools/blender_enemy_weights.py), else per part.
+	var weights_path := OUTPUT_DIR + enemy_name + "_weights.json"
+	var weights: Array = PARTS.blender_weights(model, weights_path, skeleton) if FileAccess.file_exists(weights_path) else PARTS.humanoid_weights(model, points, skeleton)
 	var author := AUTHOR.new()
 	author.setup(skeleton)
 	var style: Dictionary = STYLES[enemy_name]
 	var library: AnimationLibrary = author.build_humanoid_library(style)
 	print("%s: pace %s, hips %.2f, leg %.2f" % [enemy_name, author.pace(style), author.hips_height, author.leg_length])
-	return _save_rig(enemy_name, skeleton, model.surfaces, weights, library)
+	return _save_rig(enemy_name, skeleton, model.surfaces, weights, library, PARTS.home_bones(model, skeleton))
 
 
 # ---------------------------------------------------------------- shared output
 
-func _save_rig(enemy_name: String, skeleton: Skeleton3D, surfaces: Array, dense_per_surface: Array, library: AnimationLibrary) -> bool:
+func _save_rig(enemy_name: String, skeleton: Skeleton3D, surfaces: Array, dense_per_surface: Array, library: AnimationLibrary, homes: Array = []) -> bool:
 	var game := load(OUTPUT_DIR + enemy_name + "_game.res") as ArrayMesh
 	var mesh := ArrayMesh.new()
 	var vertex_total := 0
 	for surface_index in surfaces.size():
-		var skinned := _skin_surface(surfaces[surface_index], dense_per_surface[surface_index])
+		var skinned := _skin_surface(surfaces[surface_index], dense_per_surface[surface_index], homes[surface_index] if not homes.is_empty() else PackedInt32Array())
 		vertex_total += (skinned[Mesh.ARRAY_VERTEX] as PackedVector3Array).size()
 		# Same vertices as the game mesh, so its LOD index lists carry over.
 		mesh.add_surface_from_arrays(Mesh.PRIMITIVE_TRIANGLES, skinned, [], _stored_lods(game, surface_index))
@@ -105,8 +108,9 @@ static func _stored_lods(mesh: ArrayMesh, surface: int) -> Dictionary:
 	return result
 
 
-# Four strongest bones per vertex; the part id stored in COLOR is dropped.
-func _skin_surface(arrays: Array, dense: Array) -> Array:
+# Four strongest bones per vertex. COLOR keeps the part id in r and gets the home bone in g
+# (index / HOME_SCALE; body_part_topology.gd cuts by it), or is dropped when there are no homes.
+func _skin_surface(arrays: Array, dense: Array, homes: PackedInt32Array) -> Array:
 	var count: int = (arrays[Mesh.ARRAY_VERTEX] as PackedVector3Array).size()
 	var bones := PackedInt32Array()
 	var weights := PackedFloat32Array()
@@ -138,6 +142,11 @@ func _skin_surface(arrays: Array, dense: Array) -> Array:
 				weights[v * 4 + k] /= kept
 	var skinned := arrays.duplicate()
 	skinned[Mesh.ARRAY_COLOR] = null
+	if not homes.is_empty():
+		var colors: PackedColorArray = (arrays[Mesh.ARRAY_COLOR] as PackedColorArray).duplicate()
+		for v in count:
+			colors[v].g = float(homes[v]) / HOME_SCALE
+		skinned[Mesh.ARRAY_COLOR] = colors
 	skinned[Mesh.ARRAY_BONES] = bones
 	skinned[Mesh.ARRAY_WEIGHTS] = weights
 	return skinned

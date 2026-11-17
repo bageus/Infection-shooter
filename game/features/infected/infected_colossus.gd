@@ -7,13 +7,15 @@ const SHOCKWAVE := preload("res://game/features/infected/ground_shockwave.gd")
 @export var slam_trigger_distance := 4.2
 @export var slam_cooldown := 11.0
 @export_range(1.0, 2.5) var slam_anim_speed := 1.7
-@export_range(0.1, 0.9) var slam_hit_fraction := 0.56
+# Colossus Slam (tools/blender_enemy_clips.py): the fists hit the floor at frame 27 of 58.
+@export_range(0.1, 0.9) var slam_hit_fraction := 0.46
 @export var slam_radius := 6.0
 @export var slam_wave_speed := 14.0
 @export var slam_player_damage := 32.0
 @export var slam_object_damage := 320.0
-@export var slam_lean_degrees := 14.0
-@export var slam_crouch := 0.3
+# Extra lean and crouch of the whole body on top of the clip (the authored Slam crouches by itself).
+@export var slam_lean_degrees := 0.0
+@export var slam_crouch := 0.0
 
 var _slam_cooldown := 2.5
 var _slam_pending := -1.0
