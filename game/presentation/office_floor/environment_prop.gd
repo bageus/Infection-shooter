@@ -434,7 +434,7 @@ func _detach(direction: Vector3) -> void:
 	freeze = false
 	IMPACT_SOUND.wake(self)
 	sleeping = false
-	apply_central_impulse((direction.normalized() + Vector3.UP * 0.2).normalized() * maxf(0.5, mass * 0.12))
+	apply_central_impulse.call_deferred((direction.normalized() + Vector3.UP * 0.2).normalized() * maxf(0.5, mass * 0.12))
 	if is_in_group(&"wall_signs"):
 		_vanish_after(SIGN_LIFETIME)
 
