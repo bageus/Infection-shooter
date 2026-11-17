@@ -132,6 +132,11 @@ const REF_SPEED := {"Walk": 2.16, "Run": 5.4, "RunLunge": 5.4, "FoursRun": 5.4, 
 const SINK_TOLERANCE := 0.01
 const WALK_STRETCH := 2.1
 const WALK_AMOUNT := 0.62
+# Clips that stand in place: their feet are flattened near the floor and the soles put on it.
+const STANDING := ["Idle", "Attack", "HitReaction", "Transition", "Turn"]
+# Ankle lift above its rest height (skeleton units) over which a foot goes from flat to as animated.
+const FLAT_FROM := 0.04
+const FLAT_TO := 0.14
 
 var _enemy_name := "Hunger"
 var _hunger: Skeleton3D
@@ -248,7 +253,10 @@ func _bake_extra() -> void:
 			_pace(clip_name, String(entry["pace"]))
 		if loop and entry.get("pace", "") == "run":
 			_clamp_to_floor(_frames[clip_name])
-		elif loop and (entry.has("pace") or clip_name.begins_with("Idle")):
+		elif loop and entry.has("pace"):
+			_ground(_frames[clip_name])
+		elif STANDING.any(func(prefix: String) -> bool: return clip_name.begins_with(prefix)):
+			_flatten_feet(_frames[clip_name])
 			_ground(_frames[clip_name])
 
 
@@ -340,6 +348,8 @@ func _bake_source(entry: Array) -> bool:
 	var name: String = entry[0]
 	if bool(entry[3]):
 		frames = _close_loop(frames)
+	if name == "Idle":
+		_flatten_feet(frames)
 	if name == "Idle" or name == "Walk":
 		_ground(frames)
 	_frames[name] = frames
@@ -664,6 +674,29 @@ func _ground(frames: Array) -> void:
 		var position: Vector3 = frame["HipsPosition"]
 		position.y -= lowest
 		frame["HipsPosition"] = position
+
+
+# A foot near the floor stands flat: its pitch and roll from the rest pose fade out (only the turn
+# about the vertical stays) while the ankle is within FLAT_FROM..FLAT_TO of its rest height. The
+# Mixamo punches and slashes rise on the toes of the stance foot, and on our flatter, longer feet
+# that read as tiptoeing (heels 6-27 cm up, toes 8-18 cm into the floor in Titan's attacks).
+func _flatten_feet(frames: Array) -> void:
+	for frame: Dictionary in frames:
+		for side in ["L_", "R_"]:
+			_positions(frame, [])
+			var foot := _hunger.find_bone(side + "Foot")
+			var posed := _hunger.get_bone_global_pose(foot)
+			var rest := _hunger.get_bone_global_rest(foot)
+			var lift := posed.origin.y - rest.origin.y
+			var weight := 1.0 - smoothstep(FLAT_FROM, FLAT_TO, lift)
+			if weight <= 0.0:
+				continue
+			var turn := (posed.basis.orthonormalized() * rest.basis.orthonormalized().inverse()).get_rotation_quaternion()
+			var ahead := turn * Vector3.BACK
+			var flat := Quaternion(Vector3.UP, atan2(ahead.x, ahead.z))
+			var wanted := Basis(turn.slerp(flat, weight)) * rest.basis.orthonormalized()
+			var parent := _hunger.get_bone_global_pose(_hunger.get_bone_parent(foot)).basis.orthonormalized()
+			frame[side + "Foot"] = (parent.inverse() * wanted).orthonormalized().get_rotation_quaternion()
 
 
 # [bone, point in the bone's rest frame] for the heel (foot), the ball and the toe tip (toe), on the

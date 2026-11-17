@@ -58,7 +58,7 @@ def _padding_faces(bm, uvl, is_cut):
                         seen.add(g); stack.append(g)
                 else:
                     rim.append(shade[g])
-        if len(island) <= 6 and rim and sum(rim) / len(rim) > 0.12:
+        if len(island) <= 40 and rim and sum(rim) / len(rim) > 0.1:
             found += island
     return found
 for o in [o for o in bpy.context.scene.objects if o.type == 'MESH']:
@@ -68,7 +68,12 @@ for o in [o for o in bpy.context.scene.objects if o.type == 'MESH']:
     uvl = bm.loops.layers.uv[0]
     is_cut = lambda f: mats[f.material_index].name.startswith('Bloody_Cut')
     bad = [f for f in bm.faces if not is_cut(f) and (all(dummy(l[uvl].uv) for l in f.loops) or mats[f.material_index].name.endswith('Shoulder_Cloth'))]
-    bad += [f for f in _padding_faces(bm, uvl, is_cut) if f not in set(bad)]
+    # The cloth patch and padding islands take one spot of texture (see below): copying a skin
+    # triangle's corners onto big faces smeared it into streaks across the shoulder.
+    spot = {f for f in bad if mats[f.material_index].name.endswith('Shoulder_Cloth')}
+    padding = [f for f in _padding_faces(bm, uvl, is_cut) if f not in set(bad)]
+    spot.update(padding)
+    bad += padding
     badset = set(bad)
     tris = []  # (verts co, uvs)
     for f in bm.faces:
@@ -79,6 +84,16 @@ for o in [o for o in bpy.context.scene.objects if o.type == 'MESH']:
                          (loops[0][uvl].uv.copy(), loops[k][uvl].uv.copy(), loops[k + 1][uvl].uv.copy())))
     verts = [p for t in tris for p in t[0]]
     tree = BVHTree.FromPolygons(verts, [(3 * i, 3 * i + 1, 3 * i + 2) for i in range(len(tris))])
+    cloth = {f for f in spot if mats[f.material_index].name.endswith('Shoulder_Cloth')}
+    cloth_uv = None
+    if cloth:
+        middle = sum((f.calc_center_median() for f in cloth), Vector()) / len(cloth)
+        for hit in sorted(tree.find_nearest_range(middle, 0.3), key=lambda hit: hit[3]):
+            centre_uv = sum(tris[hit[2]][1], Vector((0.0, 0.0))) / 3.0
+            if texel(centre_uv).min() > 0.45:  # shirt, not skin or shadow
+                cloth_uv = centre_uv
+                break
+        cloth_uv = cloth_uv or sum(tris[tree.find_nearest(middle)[2]][1], Vector((0.0, 0.0))) / 3.0
     for f in bad:
         # Each corner takes the UV of the nearest real skin triangle's matching corner, so the face keeps
         # a non-degenerate UV (projecting every corner onto the skin collapsed wall faces to a point:
@@ -93,6 +108,15 @@ for o in [o for o in bpy.context.scene.objects if o.type == 'MESH']:
                 index = hit[2]
                 break
         corners, uvs = tris[index]
+        if f in spot:
+            # a one-texel triangle on one spot of skin: the cloth all at the spot nearest its middle (one
+            # even patch; per-face spots or projected corners made streaks and crossed into padding),
+            # a padding face at the nearest skin triangle's centre
+            centre_uv = cloth_uv if f in cloth else sum(uvs, Vector((0.0, 0.0))) / 3.0
+            for k, l in enumerate(f.loops):
+                l[uvl].uv = centre_uv + [Vector((0.0, 0.0)), Vector((1.0 / AW, 0.0)), Vector((0.0, 1.0 / AH))][k % 3]
+            f.material_index = body_index
+            continue
         for k, l in enumerate(f.loops):
             nearest = min(range(3), key=lambda i: (corners[i] - l.vert.co).length) if k >= 3 else k
             l[uvl].uv = uvs[nearest]
