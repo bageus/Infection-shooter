@@ -201,7 +201,7 @@ func _set_speed(speed: float) -> void:
 
 
 func _reset_view() -> void:
-	_yaw = 0.0
+	_yaw = PI # enemy bodies are turned 180 degrees in their scenes; start facing their front
 	_pitch = 0.15
 	_distance = _fit_distance
 	_update_camera()
