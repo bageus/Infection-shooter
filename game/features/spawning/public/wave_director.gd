@@ -255,10 +255,9 @@ func _spawn(key: String, enemy_id: String) -> void:
 		enemy.call("configure_stats", {"health": config["health"], "damage": config["damage"]})
 	_apply_loot(enemy, _loot.get(point_id, {}))
 	var ground: Vector3 = point.call("spawn_position", index)
-	var yaw := 0.0
-	if is_instance_valid(_player):
-		var toward := _player.global_position - ground
-		yaw = atan2(-toward.x, -toward.z)
+	# Out of the hole: each one faces away from its centre, so a wave climbs out in different directions.
+	var outward := ground - point.global_position
+	var yaw := atan2(-outward.x, -outward.z) if outward.length_squared() > 0.01 else 0.0
 	# Placed before it enters the tree so its blood trail starts at the hole.
 	enemy.transform = Transform3D(Basis(Vector3.UP, yaw), _enemies_root.to_local(ground + Vector3(0.0, _standing_height(enemy), 0.0)))
 	enemy.set_meta(&"spawned_by", point_id)
