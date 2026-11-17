@@ -3,7 +3,6 @@ extends RefCounted
 ## The list comes from the folder, so a new infected_*.tscn appears in the viewer without editing it.
 
 const SCENE_DIR := "res://game/features/infected/public/"
-const BODY_MESH := preload("res://game/features/infected/body_part_mesh.gd")
 
 
 ## Paths of every enemy scene, sorted by file name.
@@ -41,16 +40,18 @@ static func load_body(scene_path: String) -> Node3D:
 	return body
 
 
-# A whole enemy in the game draws only its skin (body_parts.gd); the cut tissue at the part
-# joints shows only once a part is shot off. The page shows the same skin-only mesh.
+# A whole enemy in the game draws only its skin (surface 0, see body_parts.gd); the cut tissue at
+# the part joints shows only once a part is shot off. The page keeps the same skin-only surface,
+# copied with its stored LODs.
 static func _hide_cut_tissue(body: Node3D) -> void:
-	for skeleton: Skeleton3D in body.find_children("*", "Skeleton3D", true, false):
-		for mesh_instance: MeshInstance3D in skeleton.find_children("*", "MeshInstance3D", true, false):
-			if not mesh_instance.mesh is ArrayMesh or mesh_instance.mesh.get_surface_count() < 2:
-				continue
-			var data := BODY_MESH.prepare(mesh_instance, skeleton)
-			if not data.is_empty():
-				mesh_instance.mesh = BODY_MESH.whole_mesh(data)
+	for mesh_instance: MeshInstance3D in body.find_children("*", "MeshInstance3D", true, false):
+		var mesh := mesh_instance.mesh as ArrayMesh
+		if mesh == null or mesh.get_surface_count() < 2:
+			continue
+		var skin := ArrayMesh.new()
+		skin.set("_surfaces", [(mesh.get("_surfaces") as Array)[0]])
+		skin.surface_set_material(0, mesh_instance.get_active_material(0))
+		mesh_instance.mesh = skin
 
 
 static func find_player(node: Node) -> AnimationPlayer:
