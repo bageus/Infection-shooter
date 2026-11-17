@@ -57,7 +57,8 @@ func _run() -> void:
 	player.velocity = Vector3.ZERO
 	(player.get_node("AimPivot") as Node3D).global_rotation = Vector3(0.0, 1.5, 0.0)
 	body.global_rotation = Vector3(0.0, PI, 0.0)
-	_check(selection.call("select_clip") == &"Walk_Forward_Pistol" and float(driver.get("turn_step_speed")) > 0.0, "Turning on the spot steps the feet round on the walk cycle")
+	_check(selection.call("select_clip") == &"Idle_Pistol" and float(driver.get("turn_step_speed")) == 0.0 and driver.call("is_body_clip_playing"), "Turning on the spot plays the baked turn clip over the idle")
+	_check(driver.body_clip.get("_animation") == clips.get_animation("Turn_Left"), "A body that must swing left plays Turn_Left")
 	body.global_rotation = Vector3(0.0, 1.5 + PI, 0.0)
 	selection.set("_turn_until", 0.0)
 	_check(selection.call("select_clip") == &"Idle_Pistol" and float(driver.get("turn_step_speed")) == 0.0, "Facing the aim again returns to idle")
@@ -88,8 +89,9 @@ func _run() -> void:
 	var standing_y := body.position.y
 	var seconds: float = player.call("play_death_fall")
 	_check(seconds > 0.8 and float(player.call("play_death_fall")) == 0.0, "Death starts one fall that takes about a second (%s s)" % seconds)
+	_check(String(driver.animation_player.current_animation).begins_with("Death_"), "The dead hero plays a baked death clip (%s)" % driver.animation_player.current_animation)
 	await create_timer(seconds).timeout
-	_check(absf(body.global_basis.y.y) < 0.05 and body.position.y > standing_y, "The dead hero lies on the floor, lifted by the body's thickness")
+	_check(String(driver.animation_player.current_animation).begins_with("Death_") or driver.animation_player.current_animation == "", "The death clip holds, it does not return to idle")
 	print("Hero model regression tests: %d failures" % failures)
 	quit(1 if failures > 0 else 0)
 
