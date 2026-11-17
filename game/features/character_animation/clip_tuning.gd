@@ -76,3 +76,13 @@ static func leg_rate(driver: Node, clip: String, state: StringName, speed: float
 	if reference <= 0.0:
 		return driver._locomotion_scale(state if not legs else &"run", speed)
 	return clampf(speed / reference, 0.5, 2.4) * driver.locomotion_speed_multiplier * driver.leg_playback_multiplier
+
+
+## The legs kept under the hero's reload follow what he does now (walk, run, turn), not what he did when it began.
+static func follow_selector(driver: Node) -> String:
+	var legs: String = driver.get("_transition_legs")
+	var selector: Callable = driver.get("_clip_selector")
+	if legs.is_empty() or not selector.is_valid() or driver.get("_dead"):
+		return legs
+	var now := String(selector.call())
+	return now if driver.animation_player.has_animation(now) else legs

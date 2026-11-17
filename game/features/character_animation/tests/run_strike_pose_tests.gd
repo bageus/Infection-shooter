@@ -36,6 +36,8 @@ func _run() -> void:
 	character.add_child(driver)
 	await process_frame
 	_expect(driver.play_strike(&"wave") == 0.0, "An unknown strike kind plays nothing.")
+	_expect(driver.play_strike(POSE.PUNCH) > 0.0, "The jab plays on the soldier skeleton.")
+	driver.strike.call("stop")
 	_expect(driver.play_strike(POSE.KICK) > 0.0 and driver.is_striking(), "The kick plays on the soldier skeleton.")
 	var skeleton: Skeleton3D = driver.strike.get_skeleton()
 	var foot := skeleton.find_bone("LeftFoot")
