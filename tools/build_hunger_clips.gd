@@ -77,10 +77,11 @@ const BRAWLERS := ["Brute", "Colossus", "Titan"]
 # Clips added to every enemy listed in "enemies" (the owner's list of 16.11.2026). Keys: name,
 # file, enemies, mirror, loop, yaw (turn clips: remove the hips yaw, kept as a curve), pace
 # (walk / wander: stretched to the gameplay speed, run: measured; all set ref_speed and own_pace),
+# inplace (the hips drift over the clip is removed, the clip ends where it began),
 # series (numbered AttackLeft, AttackLeft2 ... in the order listed per enemy), cap (death clips:
 # most metres the body may travel), settle (climb: the last frame is the standing pose).
 const EXTRA := [
-	{"name": "Transition", "file": "Zombie Transition", "enemies": ALL},
+	{"name": "Transition", "file": "Zombie Transition", "enemies": ALL, "inplace": true},
 	{"name": "IdleZombie1", "file": "Zombie Idle_1", "enemies": ALL, "loop": true},
 	{"name": "IdleZombie2", "file": "Zombie Idle_2", "enemies": ALL, "loop": true},
 	{"name": "IdleZombie3", "file": "Zombie Idle_3", "enemies": ALL, "loop": true},
@@ -241,6 +242,8 @@ func _bake_extra() -> void:
 			_cap_travel(clip_name, float(entry["cap"]))
 		if entry.get("settle", false):
 			_settle_end(clip_name)
+		if entry.get("inplace", false):
+			_remove_drift(clip_name)
 		if entry.has("pace"):
 			_pace(clip_name, String(entry["pace"]))
 		if loop and entry.get("pace", "") != "":
@@ -285,6 +288,16 @@ func _cap_travel(clip_name: String, metres: float) -> void:
 		var position: Vector3 = frame["HipsPosition"]
 		frame["HipsPosition"] = Vector3(rest.x + (position.x - rest.x) * factor, position.y, rest.z + (position.z - rest.z) * factor)
 	print("%s %s: travel %.2f m -> %.2f m" % [_enemy_name, clip_name, farthest * _body_scale(), farthest * _body_scale() * factor])
+
+
+# Moves the hips back along a straight line so the last frame is over the first (no pop into the idle after it).
+func _remove_drift(clip_name: String) -> void:
+	var frames: Array = _frames[clip_name]
+	var span := float(frames.size() - 1)
+	var drift: Vector3 = (frames[frames.size() - 1]["HipsPosition"] as Vector3) - (frames[0]["HipsPosition"] as Vector3)
+	drift.y = 0.0
+	for index in frames.size():
+		frames[index]["HipsPosition"] = (frames[index]["HipsPosition"] as Vector3) - drift * (float(index) / span)
 
 
 # The climb out of the hole ends standing where the enemy was spawned, so the whole clip is moved

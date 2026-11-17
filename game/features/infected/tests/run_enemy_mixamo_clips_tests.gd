@@ -39,6 +39,7 @@ func _run() -> void:
 	stage.add_child(floor_body)
 	floor_body.position = Vector3(0, -0.5, 0)
 	for name: String in ALL:
+		await _test_seams(name)
 		await _test_clip_set(name)
 		await _test_death_picks(name)
 	for name: String in HEAVY:
@@ -99,6 +100,48 @@ func _test_clip_set(name: String) -> void:
 		_expect(player.get_animation("TurnLeft2").get_meta("yaw_curve", PackedFloat32Array()).size() > 1, "Hunger TurnLeft2 carries its yaw curve.")
 	enemy.queue_free()
 	await process_frame
+
+
+# Seams between clips: a cycle ends where it starts, the transition into idle ends over its start (no
+# slide), and the game cross-fades the added clips longer than plain locomotion.
+func _test_seams(name: String) -> void:
+	var enemy := await _spawn(name)
+	var player := _player_of(enemy)
+	var skeleton := enemy.find_children("*", "Skeleton3D", true, false)[0] as Skeleton3D
+	enemy.get_node("AnimationDriver").set_process(false)
+	var idle := _pose(player, skeleton, "Idle", 0.0)
+	var height: float = (idle["Head"] as Vector3).y - (idle["L_Foot"] as Vector3).y
+	for clip: String in player.get_animation_list():
+		var animation := player.get_animation(clip)
+		if animation.loop_mode == Animation.LOOP_LINEAR and clip.begins_with("Idle") or clip.begins_with("Walk") or clip.begins_with("Run"):
+			var first := _pose(player, skeleton, clip, 0.0)
+			var last := _pose(player, skeleton, clip, animation.length)
+			_expect(_apart(first, last) < 0.08 * height, "%s %s loops without a jump (%.2f)." % [name, clip, _apart(first, last) / height])
+	var begin := _pose(player, skeleton, "Transition", 0.0)
+	var end := _pose(player, skeleton, "Transition", player.get_animation("Transition").length)
+	var drift := Vector2((end["Hips"] as Vector3).x - (begin["Hips"] as Vector3).x, (end["Hips"] as Vector3).z - (begin["Hips"] as Vector3).z).length()
+	_expect(drift < 0.02 * height, "%s Transition ends over where it began (%.3f)." % [name, drift / height])
+	var blends := preload("res://game/features/character_animation/public/enemy_blends.gd")
+	_expect(blends.seconds("IdleOrc", 0.12) > 0.12 and blends.seconds("Run", 0.12) == 0.12 and blends.seconds("Run", 0.12, true) >= 0.3, name + " cross-fades added clips longer.")
+	enemy.queue_free()
+	await process_frame
+
+
+func _pose(player: AnimationPlayer, skeleton: Skeleton3D, clip: String, time: float) -> Dictionary:
+	player.play(clip)
+	player.seek(time, true)
+	player.advance(0.0)
+	var result := {}
+	for bone in ["Hips", "Chest", "Head", "L_Hand", "R_Hand", "L_Foot", "R_Foot"]:
+		result[bone] = skeleton.get_bone_global_pose(skeleton.find_bone(bone)).origin
+	return result
+
+
+func _apart(a: Dictionary, b: Dictionary) -> float:
+	var worst := 0.0
+	for bone: String in a:
+		worst = maxf(worst, (a[bone] as Vector3).distance_to(b[bone]))
+	return worst
 
 
 func _test_death_picks(name: String) -> void:
