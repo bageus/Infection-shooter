@@ -452,7 +452,7 @@ func _on_restart_pressed() -> void:
 	if _mission_loading:
 		return
 	if has_node("LevelEntries") and $LevelEntries.chain.index_of(current_level) >= 0:
-		travel_to_level(current_level, {})
+		travel_to_level(current_level, {}, true)
 		return
 	_mission_loading = true
 	var loader := preload("res://game/bootstrap/app/menu/mission_loader.gd").new()
@@ -472,7 +472,8 @@ func apply_carry(carry: Dictionary) -> void:
 
 
 ## Level chain: reload the scene with another saved map, arriving at `arrival` ({x, z} or {}).
-func travel_to_level(map_name: String, arrival: Dictionary) -> void:
+## `restore_entry` brings back the resources the map was first entered with (a restart).
+func travel_to_level(map_name: String, arrival: Dictionary, restore_entry: bool = false) -> void:
 	if _mission_loading:
 		return
 	_mission_loading = true
@@ -481,8 +482,7 @@ func travel_to_level(map_name: String, arrival: Dictionary) -> void:
 	loader.set("completion_music", completion_music)
 	_music_handed_off = is_instance_valid(completion_music)
 	loader.completed.connect(func(_success: bool) -> void: _mission_loading = false)
-	var carry := {"loadout": player.call("export_loadout"), "threshold": infection_runtime.call("get_critical_threshold"), "control": infection_runtime.call("export_control_progress")}
-	loader.start_map(planning_mode.storage.read_map_path(map_name), map_name, arrival, carry)
+	loader.start_map(planning_mode.storage.read_map_path(map_name), map_name, arrival, $LevelEntries.carry_for(map_name, restore_entry))
 
 
 func _setup_blood_effects() -> void:

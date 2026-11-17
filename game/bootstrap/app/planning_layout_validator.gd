@@ -24,6 +24,8 @@ static func error(data: Dictionary) -> String:
 		return "invalid lamp_fixtures_v1"
 	if data.has("floor_type_v1") and not preload("res://game/bootstrap/app/planning_floor_type.gd").valid(data.floor_type_v1):
 		return "invalid floor_type_v1"
+	if data.has("floor_tile_step_v1") and not preload("res://game/bootstrap/app/planning_floor_type.gd").valid_tile(data.floor_tile_step_v1):
+		return "invalid floor_tile_step_v1"
 	if not data.get("objects") is Array:
 		return "objects must be an array"
 	if data.has("version"):

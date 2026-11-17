@@ -208,9 +208,9 @@ func _build_steps(lesson: String) -> Array:
 					KEYS.row(["camera_left", "camera_right"]), "cycle",
 					func() -> bool: return _look_seconds >= LOOK_SECONDS)
 		"one_way":
-			return [_click(TEXT.t("tutOneWay"), [])]
+			return [_click(TEXT.t("tutOneWay"), [], Callable(), TEXT.t("tutOneWayTitle"))]
 		"locked_door":
-			return [_click(TEXT.t("tutLockedDoor"), [])]
+			return [_click(TEXT.t("tutLockedDoor"), [], Callable(), TEXT.t("tutLockedDoorTitle"))]
 		"roll":
 			return _task(TEXT.t("tutRoll") % KEYS.binding("roll"), TEXT.t("objRoll") % KEYS.binding("roll"), KEYS.row(["roll"]), "all", func() -> bool: return _rolled)
 		"sprint":
@@ -276,8 +276,8 @@ func _standing(lesson: String, kind: String) -> Array[Node]:
 	return found
 
 
-func _click(text: String, targets: Array, requires: Callable = Callable()) -> Dictionary:
-	return {"text": text, "targets": targets, "mode": "click", "requires": requires}
+func _click(text: String, targets: Array, requires: Callable = Callable(), title: String = "") -> Dictionary:
+	return {"title": title, "text": text, "targets": targets, "mode": "click", "requires": requires}
 
 
 func _picture(text: String) -> Dictionary:

@@ -152,10 +152,18 @@ func _custom_trigger() -> void:
 func _fallen_door() -> void:
 	player.key = false
 	var fallen := _door(Vector3.ZERO)
+	var slab := StaticBody3D.new()
+	fallen.add_child(slab)
 	fallen.get_parent().basis = Basis.from_euler(Vector3(PI * 0.5, 0.0, 0.0))
 	player.position = Vector3(0.5, 0.0, 0.0)
 	for tick in 30: fallen.call("_physics_process", 0.05)
 	_expect(float(fallen.get("_open_amount")) == 0.0, "Door laid on its side does not open when the player approaches")
+	_expect(slab.collision_layer == 0, "Door laid on its side has no collision (walkable)")
+	fallen.get_parent().basis = Basis.IDENTITY
+	fallen.call("_physics_process", 0.05)
+	_expect(slab.collision_layer == 1, "Door stood up again regains collision")
+	fallen.set("_open_amount", 0.0)
+	fallen.get_parent().basis = Basis.from_euler(Vector3(PI * 0.5, 0.0, 0.0))
 	fallen.call("request_open")
 	fallen.call("_physics_process", 0.05)
 	_expect(float(fallen.get("_open_amount")) == 0.0, "Door laid on its side ignores remote open requests")
