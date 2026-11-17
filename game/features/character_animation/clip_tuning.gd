@@ -72,10 +72,10 @@ static func hold_weapon(player: AnimationPlayer, dodge_clip: StringName, held_we
 ## (baked cycles name their paced speed), so a reload on the run keeps the stride; the driver's own scale otherwise.
 static func leg_rate(driver: Node, clip: String, state: StringName, speed: float) -> float:
 	var legs: bool = driver.get("_transition_legs") != ""
-	var reference := float(driver.animation_player.get_animation(clip).get_meta("ref_speed", 0.0)) if driver.clip_footsteps and legs and driver.animation_player.has_animation(clip) else 0.0
-	if reference <= 0.0:
+	var ref_speed := float(driver.animation_player.get_animation(clip).get_meta("ref_speed", 0.0)) if driver.clip_footsteps and legs and driver.animation_player.has_animation(clip) else 0.0
+	if ref_speed <= 0.0:
 		return driver._locomotion_scale(state if not legs else &"run", speed)
-	return clampf(speed / reference, 0.5, 2.4) * driver.locomotion_speed_multiplier * driver.leg_playback_multiplier
+	return clampf(speed / ref_speed, 0.5, 2.4) * driver.locomotion_speed_multiplier * driver.leg_playback_multiplier
 
 
 ## The legs kept under the hero's reload follow what he does now (walk, run, turn), not what he did when it began.

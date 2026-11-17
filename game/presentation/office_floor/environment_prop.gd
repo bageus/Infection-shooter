@@ -431,6 +431,10 @@ func _show_power_off_stage() -> void:
 
 
 func _detach(direction: Vector3) -> void:
+	# Jolt rejects impulses on a body that has no physics space yet (glass drops during the same frame it was spawned).
+	if not is_inside_tree():
+		call_deferred("_detach", direction)
+		return
 	freeze = false
 	IMPACT_SOUND.wake(self)
 	sleeping = false
