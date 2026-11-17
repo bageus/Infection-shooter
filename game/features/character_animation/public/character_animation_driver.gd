@@ -180,7 +180,7 @@ func play_named_one_shot(clip_name: StringName, blend: float = 0.12, speed: floa
 	var animation := animation_player.get_animation(clip_name)
 	_current = String(clip_name)
 	animation_player.speed_scale = speed
-	animation_player.play(clip_name, blend)
+	animation_player.play(clip_name, _blend(String(clip_name), blend, false))
 	_one_shot = clip_name
 	_transition_legs = String(leg_clip) if animation_player.has_animation(leg_clip) else ""
 	_one_shot_elapsed = 0.0
