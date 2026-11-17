@@ -34,6 +34,7 @@
       "cancel_one_shot": "cancel_one_shot(clip: StringName) -> void; stops that one-shot early (a cancelled reload) and returns to locomotion",
       "animation_library": "@export AnimationLibrary; optional clip set replacing the model's own clips (ADR-0016)",
       "run_exit_ratio": "@export float = 0.85; a running character keeps the run clip down to this share of run_speed_threshold (ADR-0040)",
+      "enemy_variants": "extra_clips named Idle* join the base Idle in a random pool (1-3 cycles each); Transition plays once when an unaware enemy stops after a walk; WalkWander replaces Walk while the character's is_alerted() is false; RunZombie/RunForward are picked once per body; clips with own_pace meta follow their ref_speed (ADR-0070)",
       "extra_clips": "@export AnimationLibrary; clips merged into the model's default library; metadata ref_speed (cycle pace, m/s) and strike_time (attack impact, s) are honoured (ADR-0045)"
     }
   }

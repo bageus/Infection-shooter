@@ -239,7 +239,7 @@ func _test_locomotion_selection(stage: Node3D, scene: PackedScene, label: String
 	var driver := enemy.get_node("AnimationDriver")
 	var player := _player_of(enemy)
 	await _frames(3)
-	_expect(player.current_animation == "Idle", label + " stands in Idle.")
+	_expect(player.current_animation.begins_with("Idle"), label + " stands in an Idle clip.")
 	enemy.velocity = Vector3(0, 0, float(driver.get("walk_reference_speed")))
 	await _frames(3)
 	_expect(player.current_animation == "Walk", label + " stalking speed plays Walk.")
@@ -250,7 +250,7 @@ func _test_locomotion_selection(stage: Node3D, scene: PackedScene, label: String
 	_expect(absf(player.speed_scale - _pace_for(driver, player, "Run", driver.get("run_reference_speed"))) < 0.05, label + " Run is paced for its speed.")
 	enemy.velocity = Vector3.ZERO
 	await _frames(3)
-	_expect(player.current_animation == "Idle", label + " returns to Idle.")
+	_expect(player.current_animation.begins_with("Idle"), label + " returns to an Idle clip.")
 	enemy.queue_free()
 	await process_frame
 
@@ -271,11 +271,11 @@ func _test_one_shots(stage: Node3D) -> void:
 	_expect(float(driver.call("play_one_shot", &"slam")) == 0.0, "Enemies without a slam clip ignore slam.")
 	await create_timer(first + 0.1).timeout
 	var death := float(driver.call("play_one_shot", &"death"))
-	_expect(death > 1.0 and player.current_animation == "Death", "Death plays the Death clip.")
+	_expect(death > 1.0 and player.current_animation.begins_with("Death"), "Death plays a death clip (%s)." % player.current_animation)
 	_expect(float(driver.call("play_one_shot", &"attack")) == 0.0, "Death is final.")
 	enemy.velocity = Vector3(0, 0, 4.5)
 	await create_timer(death + 0.2).timeout
-	_expect(player.assigned_animation == "Death", "Locomotion never overrides a finished death pose.")
+	_expect(player.assigned_animation.begins_with("Death"), "Locomotion never overrides a finished death pose.")
 	enemy.queue_free()
 	await process_frame
 
@@ -290,7 +290,7 @@ func _test_attack_keeps_legs_moving(stage: Node3D, scene: PackedScene, label: St
 	_expect(length > 0.0, "%s attacks." % label)
 	var angles := {}
 	for case in ["still", "moving"]:
-		driver.call("play_one_shot", &"attack")
+		length = float(driver.call("play_one_shot", &"attack")) # attack clips differ in length
 		var seen: Array[Quaternion] = []
 		for i in 12:
 			enemy.velocity = Vector3(0, 0, 0.0 if case == "still" else 4.5)
@@ -474,16 +474,19 @@ func _test_attack_misses_when_target_leaves(stage: Node3D) -> void:
 	await process_frame
 
 
-# Deaths are ragdolls (ADR-0041): no clip plays, the body drops through the floor after
-# the linger time and is then hidden.
+# The five Mixamo enemies die with a death clip (ADR-0070), not as a ragdoll: the body drops
+# through the floor after the linger time and is then hidden.
 func _test_death_animation_then_sink(stage: Node3D) -> void:
 	var enemy := await _spawn(stage, HUNGER)
 	enemy.set("death_linger_seconds", 0.1)
 	var body := enemy.get_node("Body") as Node3D
 	enemy.call("take_damage", 1000.0)
-	_expect(enemy.get("_ragdoll") != null, "A killed enemy becomes a ragdoll.")
+	_expect(enemy.get("_ragdoll") == null, "A killed Mixamo enemy plays its death clip, not a ragdoll.")
 	_expect(body.visible, "The corpse stays visible while it falls.")
-	await create_timer(1.8).timeout
+	var waited := 0.0
+	while body.visible and waited < 8.0: # the death clip, the linger and the sink
+		await create_timer(0.25).timeout
+		waited += 0.25
 	_expect(not body.visible, "The corpse is hidden after sinking.")
 	enemy.queue_free()
 	await process_frame

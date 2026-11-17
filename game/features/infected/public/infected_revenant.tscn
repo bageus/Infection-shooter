@@ -17,6 +17,7 @@ collision_mask = 1
 safe_margin = 0.02
 floor_stop_on_slope = false
 script = ExtResource("2_enemy")
+death_ragdoll = false
 step_sound = &"step_light"
 growl_sound = &"growl_revenant"
 voice_pitch = 1.0

@@ -85,12 +85,8 @@ func _test_blast_rocks_torso_back(stage: Node3D) -> void:
 	var hit := await _spawn(stage, Vector3(-2, 1, 0))
 	var twin := await _spawn(stage, Vector3(2, 1, 0))
 	hit.call("take_blast_damage", 12.0, hit.global_position + Vector3(0, 0, -4))
-	var peak := 0.0
-	for i in 10:
-		var a := await _sample(_skeleton(hit))
-		var b := await _sample(_skeleton(twin))
-		peak = maxf(peak, (a["Head"] as Vector3).z - (b["Head"] as Vector3).z)
-	_expect(peak > 0.03, "A blast in front rocks the torso back (%.3f m)." % peak)
+	# A blast is a heavy hit: the survivor plays the hit clip instead of the spring (ADR-0070).
+	_expect(float(hit.get("_hit_cooldown")) > 0.0, "A blast makes the survivor play the hit clip.")
 	hit.queue_free()
 	twin.queue_free()
 	await process_frame
@@ -100,6 +96,11 @@ func _spawn(stage: Node3D, at: Vector3) -> CharacterBody3D:
 	var enemy := HUNGER.instantiate() as CharacterBody3D
 	stage.add_child(enemy)
 	enemy.global_position = at
+	# Twins must play the same clip: the random idle pool is switched off for this comparison.
+	var driver := enemy.get_node("AnimationDriver")
+	driver.get("_variants").pool.clear()
+	driver.set("_current", "Idle")
+	(driver.get("animation_player") as AnimationPlayer).play("Idle", 0.0)
 	await process_frame
 	return enemy
 
