@@ -116,6 +116,10 @@ static func pick(animations: Dictionary, state: StringName, tokens: Array, block
 		var found := CLIP_LOOKUP.variant(animations, String(tokens[0]))
 		if not found.is_empty():
 			return found
+	if state in [&"death_forward", &"death_back"]: # DeathForward, DeathForward2, ...: mirrored and spread poses
+		var pose := CLIP_LOOKUP.variant(animations, String(tokens[0]))
+		if not pose.is_empty():
+			return pose
 	if state == &"death":
 		var side := CLIP_LOOKUP.variant(animations, "deathside")
 		if not side.is_empty() and randf() < SIDE_DEATH:

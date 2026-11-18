@@ -149,14 +149,14 @@ func _test_death_picks(name: String) -> void:
 	var driver := enemy.get_node("AnimationDriver")
 	var player := _player_of(enemy)
 	driver.call("play_one_shot", &"death_back")
-	_expect(player.current_animation == "DeathBack", name + " thrown back plays DeathBack.")
+	_expect(player.current_animation.begins_with("DeathBack"), name + " thrown back plays DeathBack.")
 	enemy.queue_free()
 	await process_frame
 	enemy = await _spawn(name)
 	driver = enemy.get_node("AnimationDriver")
 	player = _player_of(enemy)
 	driver.call("play_one_shot", &"death_forward")
-	_expect(player.current_animation == "DeathForward", name + " falling ahead plays DeathForward.")
+	_expect(player.current_animation.begins_with("DeathForward"), name + " falling ahead plays DeathForward.")
 	enemy.queue_free()
 	await process_frame
 	var sides := 0
