@@ -5,6 +5,7 @@ extends RefCounted
 const PATH := "user://frame_spikes.log"
 const SPIKE_MSEC := 40.0
 const WINDOW_SEC := 5.0
+const WAKE_JUMP := 300 # awake bodies gained in one frame that is logged even when the frame itself was short
 var spikes := 0
 var probe_mode := 0 # F5 enemy render probe step, logged so a log can be split by mode.
 var worst_msec := 0.0
@@ -16,6 +17,7 @@ var _path := PATH
 var _rigid_bodies: Array = []
 var _rigid_at := 0
 var _session_marked := false
+var _awake_last := 0
 
 
 ## Call once per frame with the frame time in seconds; returns true when this frame was logged.
@@ -28,11 +30,15 @@ func tick(delta: float, tree: SceneTree) -> bool:
 	_window_worst = maxf(_window_worst, msec)
 	var resources := int(Performance.get_monitor(Performance.OBJECT_RESOURCE_COUNT))
 	var nodes := int(Performance.get_monitor(Performance.OBJECT_NODE_COUNT))
+	var awake := _awake_count(tree)
+	var woke := awake - _awake_last
+	_awake_last = awake
 	var logged := false
 	if msec >= SPIKE_MSEC:
 		spikes += 1
 		worst_msec = maxf(worst_msec, msec)
-		_write(msec, resources, nodes, tree)
+	if msec >= SPIKE_MSEC or woke >= WAKE_JUMP:
+		_write(msec, resources, nodes, tree, woke)
 		logged = true
 	_resources = resources
 	_nodes = nodes
@@ -43,7 +49,7 @@ func summary() -> String:
 	return "Spikes: worst 5 s %.0f ms | frames over %.0f ms: %d (worst %.0f) | log %s" % [_window_worst, SPIKE_MSEC, spikes, worst_msec, PATH]
 
 
-func _write(msec: float, resources: int, nodes: int, tree: SceneTree) -> void:
+func _write(msec: float, resources: int, nodes: int, tree: SceneTree, woke: int) -> void:
 	var player := tree.get_first_node_in_group("player") as Node3D if tree != null else null
 	var at := "%.1f,%.1f" % [player.global_position.x, player.global_position.z] if player != null else "?"
 	var file := FileAccess.open(_path, FileAccess.READ_WRITE if FileAccess.file_exists(_path) else FileAccess.WRITE)
@@ -57,13 +63,13 @@ func _write(msec: float, resources: int, nodes: int, tree: SceneTree) -> void:
 	var hidden := _culled(tree)
 	var plan := _plan_state(tree)
 	var rigid := _rigid(tree)
-	file.store_line("t=%.1fs frame=%.0fms process=%.1f physics=%.1f draw=%d objects=%d resources=%+d nodes=%+d (%d) static=%dMiB video=%dMiB enemies=%d culled=%d/%d merged=%d trim=%d/%d rigid=%d awake=%d frozen=%d monitored=%d awake_top=%s probe=%d player=%s" % [
+	file.store_line("t=%.1fs frame=%.0fms process=%.1f physics=%.1f draw=%d objects=%d resources=%+d nodes=%+d (%d) static=%dMiB video=%dMiB enemies=%d culled=%d/%d merged=%d trim=%d/%d rigid=%d awake=%d frozen=%d monitored=%d awake_top=%s probe=%d woke=%+d player=%s" % [
 		Time.get_ticks_msec() / 1000.0, msec, Performance.get_monitor(Performance.TIME_PROCESS) * 1000.0,
 		Performance.get_monitor(Performance.TIME_PHYSICS_PROCESS) * 1000.0,
 		Performance.get_monitor(Performance.RENDER_TOTAL_DRAW_CALLS_IN_FRAME), Performance.get_monitor(Performance.RENDER_TOTAL_OBJECTS_IN_FRAME),
 		resources - _resources, nodes - _nodes, nodes, Performance.get_monitor(Performance.MEMORY_STATIC) / 1048576.0,
 		Performance.get_monitor(Performance.RENDER_VIDEO_MEM_USED) / 1048576.0,
-		(tree.get_nodes_in_group("infected_alive").size() if tree != null else 0), hidden[0], hidden[1], plan[0], plan[1], plan[2], rigid[0], rigid[1], rigid[2], rigid[3], rigid[4], probe_mode, at])
+		(tree.get_nodes_in_group("infected_alive").size() if tree != null else 0), hidden[0], hidden[1], plan[0], plan[1], plan[2], rigid[0], rigid[1], rigid[2], rigid[3], rigid[4], probe_mode, woke, at])
 
 
 # Room-culled furniture: [hidden now, tagged in total].
@@ -86,16 +92,12 @@ func _plan_state(tree: SceneTree) -> Array:
 # Physics monitors read 0 with Jolt, so count the rigid bodies ourselves: [all, simulated and awake, frozen, reporting contacts, top awake kinds].
 # A frozen body never sleeps by the engine's flag but costs nothing, so it is counted apart. The tree is walked at most every 5 s.
 func _rigid(tree: SceneTree) -> Array:
-	if tree == null or tree.current_scene == null:
-		return [0, 0, 0, 0, ""]
-	if _rigid_bodies.is_empty() or Time.get_ticks_msec() - _rigid_at > 5000:
-		_rigid_at = Time.get_ticks_msec()
-		_rigid_bodies = tree.current_scene.find_children("*", "RigidBody3D", true, false)
+	var bodies := _bodies(tree)
 	var awake := 0
 	var frozen := 0
 	var monitored := 0
 	var kinds := {}
-	for body in _rigid_bodies:
+	for body in bodies:
 		if not is_instance_valid(body):
 			continue
 		var rigid := body as RigidBody3D
@@ -105,7 +107,26 @@ func _rigid(tree: SceneTree) -> Array:
 			awake += 1
 			var kind := _kind(rigid)
 			kinds[kind] = int(kinds.get(kind, 0)) + 1
-	return [_rigid_bodies.size(), awake, frozen, monitored, _top(kinds)]
+	return [bodies.size(), awake, frozen, monitored, _top(kinds)]
+
+
+# Awake (simulated, not sleeping) rigid bodies now; cheap enough to run every frame while the overlay is open.
+func _awake_count(tree: SceneTree) -> int:
+	var awake := 0
+	for body in _bodies(tree):
+		if is_instance_valid(body) and not body.freeze and not body.sleeping:
+			awake += 1
+	return awake
+
+
+# Every RigidBody3D in the current scene, walked at most every 5 s.
+func _bodies(tree: SceneTree) -> Array:
+	if tree == null or tree.current_scene == null:
+		return []
+	if _rigid_bodies.is_empty() or Time.get_ticks_msec() - _rigid_at > 5000:
+		_rigid_at = Time.get_ticks_msec()
+		_rigid_bodies = tree.current_scene.find_children("*", "RigidBody3D", true, false)
+	return _rigid_bodies
 
 
 # What an awake body is: its model for a prop, else its script file, else its class.
