@@ -74,7 +74,8 @@ func _process(delta: float) -> void:
 		var target := 0.0 if _player_inside() or _room_has_open_door() else 1.0
 		_cull_room(target > 0.0 and _fade >= 1.0 and _glass_portals.is_empty() and not Engine.get_meta("planning_active", false) and int(Engine.get_meta("legacy_perf", 0)) < 3)
 		_hide_timer -= delta
-		if _hide_timer <= 0.0:
+		# A lifting cover reveals its enemies (and their health bars) on the same frame, not on the next interval.
+		if _hide_timer <= 0.0 or (target == 0.0 and not _hidden_enemies.is_empty()):
 			_hide_timer = ENEMY_HIDE_INTERVAL
 			_update_hidden_enemies(target > 0.0 and _fade > 0.5 and _glass_portals.is_empty())
 		# A settled cover (fully up or fully lifted) needs no per-frame writes, which is most rooms most of the time.
@@ -86,7 +87,8 @@ func _process(delta: float) -> void:
 					_portal_timer = PORTAL_REFRESH * 4.0
 					_push_portals()
 			return
-		_fade = move_toward(_fade, target, FADE_SPEED * delta)
+		# Lifting is instant (an open door or entry shows the room at once); only covering fades in.
+		_fade = 0.0 if target == 0.0 else move_toward(_fade, target, FADE_SPEED * delta)
 		_settled = target if _fade == target else -1.0
 		overlay.visible = _fade > 0.01
 		set_meta("explored", not overlay.visible)
