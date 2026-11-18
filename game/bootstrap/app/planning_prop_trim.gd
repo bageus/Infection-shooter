@@ -8,6 +8,7 @@ const MAX_SIZE_BY_LEVEL := [0.5, 0.25, 0.0]
 const GROUP := &"trim_decor"
 const META := &"trim_size"
 const LAYERS := &"trim_layers"
+const FROZEN := &"trim_frozen"
 const SHADOW := &"trim_shadow"
 const ENVIRONMENT_DIR := "/models/objects/enviroments/"
 # Items that break, spark or get knocked around when hit: hiding them would make shots and kicks do nothing.
@@ -71,6 +72,11 @@ static func _show(node: Node3D, shown: bool) -> void:
 		var saved: Vector2i = body.get_meta(LAYERS)
 		body.collision_layer = saved.x if shown else 0
 		body.collision_mask = saved.y if shown else 0
+		# Clearing the layers alone leaves a loose rigid body simulated (it falls forever and never sleeps); freezing parks it.
+		if body is RigidBody3D:
+			if not body.has_meta(FROZEN):
+				body.set_meta(FROZEN, body.freeze)
+			body.freeze = body.get_meta(FROZEN) if shown else true
 
 
 ## Low draws props without casting into the sun's shadow map (each caster costs a second draw); their baked contact shadow stays.
