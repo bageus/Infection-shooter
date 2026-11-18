@@ -134,6 +134,12 @@ func _apply_lock_visuals() -> void:
 
 
 func _physics_process(delta: float) -> void:
+	var started := Time.get_ticks_usec()
+	_physics_step(delta)
+	PhysicsCost.usec += Time.get_ticks_usec() - started
+
+
+func _physics_step(delta: float) -> void:
 	if not is_instance_valid(_player):
 		return
 	var local_player := to_local(_player.global_position)

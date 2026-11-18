@@ -66,6 +66,12 @@ func reset_fragment() -> void:
 
 
 func _physics_process(delta: float) -> void:
+	var started := Time.get_ticks_usec()
+	_physics_step(delta)
+	PhysicsCost.usec += Time.get_ticks_usec() - started
+
+
+func _physics_step(delta: float) -> void:
 	# Prepared maps can assign sleep directly, bypassing the engine's signal.
 	if _body.freeze or _body.sleeping:
 		set_physics_process(false)
