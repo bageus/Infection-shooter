@@ -412,17 +412,24 @@ jobs:
             if [ "$suite" = game/bootstrap/app/tests/run_planner_light_view_tests.gd ]; then suite_timeout=900; fi # software renderer runs this one past 480 s on forward_plus
             if [ "$suite" = game/bootstrap/app/tests/run_planner_light_view_tests.gd ] && [ "$renderer" = forward_plus ]; then
               # Diagnostic: the suite prints its result and calls quit(), but the process lingers. Once it has printed, wait, then attach gdb and dump every native thread.
-              sudo apt-get update -q
-              sudo apt-get install -y -q gdb
+              set +e
+              echo "diag: installing gdb"
+              sudo apt-get install -y -q gdb || echo "diag: gdb install failed"
+              echo "diag: starting suite in background"
               xvfb-run -a godot --path . --audio-driver Dummy --rendering-method "$renderer" --script "$suite" > /tmp/occlusion.log 2>&1 &
-              for _ in $(seq 1 300); do grep -q "Planner light view tests:" /tmp/occlusion.log && break; sleep 1; done
+              for _ in $(seq 1 300); do
+                if grep -q "Planner light view tests:" /tmp/occlusion.log; then break; fi
+                sleep 1
+              done
+              echo "diag: suite printed result; waiting 60 s before attaching gdb"
               sleep 60
               gpid=$(pgrep -x godot | head -1)
-              echo "lingering godot pid: ${gpid:-none}"
-              gdb -p "$gpid" -batch -ex "thread apply all bt" > /tmp/menu_previews/planner_exit_bt.txt 2>&1 || true
-              cat /tmp/menu_previews/planner_exit_bt.txt
-              kill -9 "$gpid" 2>/dev/null || true
-              wait || true
+              echo "diag: lingering godot pid: ${gpid:-none}"
+              if [ -n "$gpid" ]; then gdb -p "$gpid" -batch -ex "thread apply all bt" > /tmp/menu_previews/planner_exit_bt.txt 2>&1; fi
+              cat /tmp/menu_previews/planner_exit_bt.txt 2>/dev/null
+              [ -n "$gpid" ] && kill -9 "$gpid"
+              wait
+              set -e
               suite_status=124 # the lingering process is the bug under diagnosis; keep the job red
             else
               timeout "$suite_timeout" xvfb-run -a godot "${native_log_args[@]}" --path . --audio-driver Dummy --rendering-method "$renderer" --script "$suite" > /tmp/occlusion.log 2>&1 || suite_status=$?
