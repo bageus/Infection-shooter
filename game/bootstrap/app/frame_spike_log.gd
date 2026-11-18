@@ -30,7 +30,8 @@ func tick(delta: float, tree: SceneTree) -> bool:
 	_window_worst = maxf(_window_worst, msec)
 	var resources := int(Performance.get_monitor(Performance.OBJECT_RESOURCE_COUNT))
 	var nodes := int(Performance.get_monitor(Performance.OBJECT_NODE_COUNT))
-	var awake := _awake_count(tree)
+	# Counting every body costs about 2 ms, so it runs every 10th physics frame; a jump is still seen within 10 frames.
+	var awake := _awake_count(tree) if Engine.get_physics_frames() % 10 == 0 else _awake_last
 	var woke := awake - _awake_last
 	_awake_last = awake
 	var logged := false
