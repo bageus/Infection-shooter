@@ -30,7 +30,7 @@ func _initialize() -> void:
 	Engine.set_meta("planning_active", false)
 	PREP.apply(placed, world)
 	var first := _state()
-	_check(first[0] > 0 and first[1] == 1, "play merges structure and trims decor: %s" % [first])
+	_check(first[0] == 0 and first[1] == 1, "play keeps structure unmerged and trims decor: %s" % [first])
 	PREP.apply(placed, world)
 	_check(_state() == first, "a second call changes nothing")
 	Engine.set_meta("planning_active", true)
