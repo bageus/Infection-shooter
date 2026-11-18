@@ -90,10 +90,10 @@ const EXTRA := [
 	{"name": "IdleOldMan", "file": "Old Man Idle", "enemies": ALL, "loop": true},
 	{"name": "IdleMutant", "file": "Mutant Idle", "enemies": BIG, "loop": true},
 	{"name": "IdleScratch", "file": "Zombie Scratch Idle", "enemies": BIG, "loop": true},
-	{"name": "DeathSide", "file": "Zombie Stumbling Floor", "enemies": ALL, "cap": 1.1},
-	{"name": "DeathSide2", "file": "Zombie Stumbling Floor", "enemies": ALL, "mirror": true, "cap": 1.1},
-	{"name": "DeathForward", "file": "Zombie Dying Floor", "enemies": ALL, "cap": 1.1},
-	{"name": "DeathBack", "file": "Stumble Backwards Floor", "enemies": ALL, "cap": 1.1},
+	{"name": "DeathSide", "file": "Zombie Stumbling Floor", "from": 0.034, "enemies": ALL, "cap": 1.1},
+	{"name": "DeathSide2", "file": "Zombie Stumbling Floor", "from": 0.034, "enemies": ALL, "mirror": true, "cap": 1.1},
+	{"name": "DeathForward", "file": "Zombie Dying Floor", "from": 0.034, "enemies": ALL, "cap": 1.1},
+	{"name": "DeathBack", "file": "Stumble Backwards Floor", "from": 0.034, "enemies": ALL, "cap": 1.1},
 	{"name": "HitReaction", "file": "Zombie_Reaction_Hit", "enemies": HEAVY_ALL},
 	{"name": "TurnLeft", "file": "Left Turn", "enemies": HEAVY_ALL, "yaw": true},
 	{"name": "TurnRight", "file": "Left Turn_1", "enemies": HEAVY_ALL, "yaw": true},
@@ -242,7 +242,7 @@ func _bake_extra() -> void:
 			series[entry["series"]] = count + 1
 			clip_name = String(entry["series"]) + ("" if count == 0 else str(count + 1))
 		var loop: bool = entry.get("loop", false)
-		if not _bake_source([clip_name, entry["file"], entry.get("mirror", false), loop, entry.get("yaw", false), -1.0, -1.0]):
+		if not _bake_source([clip_name, entry["file"], entry.get("mirror", false), loop, entry.get("yaw", false), entry.get("from", -1.0), -1.0]):
 			push_error("Could not bake " + clip_name)
 			quit(1)
 			return
