@@ -106,6 +106,17 @@ func _test_part_falls(stage: Node3D) -> void:
 		_expect(_clip(enemy) == case[1], "A killing shot at %s plays %s (%s)." % [case[0], case[1], _clip(enemy)])
 		enemy.queue_free()
 		await process_frame
+	# A crawler is already down: it settles flat on its belly with the DeathCrawl clip and does not hang.
+	var crawler := await _spawn(stage, Vector3(0, 1, 0))
+	crawler.set("posture", 2) # Posture.CRAWL
+	crawler.call("take_projectile_damage", 1000.0, _bone(crawler, "Head"), Vector3(0, 0, 1), "PISTOL")
+	_expect(_clip(crawler) == "DeathCrawl", "A crawler dies with DeathCrawl (%s)." % _clip(crawler))
+	_expect(crawler.get("_fall_watch") == null, "A crawler's death has no obstacle watcher.")
+	var player := crawler.get_node("AnimationDriver").get("animation_player") as AnimationPlayer
+	await create_timer(1.0).timeout
+	_expect(not player.is_playing() or player.current_animation_position >= player.current_animation_length - 0.05, "The crawler's clip ran to its end.")
+	crawler.queue_free()
+	await process_frame
 	RAGDOLL._active = 0
 
 

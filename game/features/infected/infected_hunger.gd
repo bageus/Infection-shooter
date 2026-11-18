@@ -378,6 +378,8 @@ func _end_feeding(stand_up: bool) -> void:
 		_start_busy(&"BiteUp")
 
 
-# On all fours or on the belly it is already down: no side fall from standing.
+# On the belly it is already down and just lies flat; on all fours no side fall from standing.
 func _fall_aside() -> StringName:
+	if posture == Posture.CRAWL:
+		return DEATH_FALL.DEATH_CRAWL
 	return super._fall_aside() if posture == Posture.STAND else &""

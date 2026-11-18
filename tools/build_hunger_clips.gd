@@ -176,6 +176,8 @@ func _run() -> void:
 			return
 		_bake_synthetic()
 	_bake_extra()
+	if _frames.has("Crawl") and _frames.has("DeathForward"):
+		_bake_crawl_death()
 	var library := AnimationLibrary.new()
 	for clip_name: String in _frames:
 		var animation := _emit(clip_name)
@@ -625,6 +627,17 @@ func _bake_synthetic() -> void:
 		claw.append(cycle[int(float(index) / float(claw_count) * cycle.size()) % cycle.size()])
 	claw.append(crawl)
 	_add("CrawlAttack", claw, false)
+
+
+# A crawler is already down: its death eases the crawl pose into the face-down pose that ends DeathForward,
+# lying where it crawled.
+func _bake_crawl_death() -> void:
+	var crawl: Dictionary = _frames["Crawl"][0]
+	var lying: Dictionary = (_frames["DeathForward"].back() as Dictionary).duplicate()
+	var position: Vector3 = lying["HipsPosition"]
+	var start: Vector3 = crawl["HipsPosition"]
+	lying["HipsPosition"] = Vector3(start.x, position.y, start.z)
+	_add("DeathCrawl", _transition(crawl, lying, 0.7), false)
 
 
 func _add(clip_name: String, frames: Array, loop: bool) -> void:

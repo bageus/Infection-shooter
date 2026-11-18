@@ -11,7 +11,8 @@ static func play(owner: CharacterBody3D, parts: Node, animation: Node, fall: Dic
 	DEATH_FALL.throw(owner, float(fall["turn"]), landing)
 	var death_length: float = owner.call("_play_animation", fall["state"])
 	var watch: RefCounted = DEATH_OBSTACLE.new()
-	if not watch.call("start", owner, parts, animation, fall, death_length):
+	# A crawler is already on the floor: nothing to topple onto, so nothing to freeze on.
+	if fall["state"] == DEATH_FALL.DEATH_CRAWL or not watch.call("start", owner, parts, animation, fall, death_length):
 		watch = null
 	var body_visual: Node3D = owner.get("body_visual")
 	if death_length > 0.0:
