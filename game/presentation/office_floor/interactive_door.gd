@@ -362,7 +362,7 @@ func _add_swing_leaf_collision(part: Node3D) -> void:
 		var mesh_to_body := body.global_transform.affine_inverse() * leaf.global_transform
 		collision.transform = mesh_to_body
 		collision.position += mesh_to_body.basis * bounds.get_center()
-		if "doorhandle" in leaf.name.to_lower():
+		if "doorhandle" in leaf.name.to_lower() and bounds.get_longest_axis_size() < 0.5:
 			_fallback_leaf_collisions.append(collision)
 
 
