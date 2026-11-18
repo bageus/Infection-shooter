@@ -9,7 +9,9 @@ const DEATHS := [&"Death_FromRight", &"Death_Dying", &"Death_HitToBack"]
 const RAGDOLL_AFTER := &"Death_HitToBack"
 ## One pass of a turn clip (it turns the hero 45 degrees) lasts this many seconds. The clip keeps looping, its seam
 ## blended, for as long as the hero is still turning, and the body swings round at the matching rate (player_body_aim.gd).
-const TURN_SECONDS := 0.36
+const TURN_SECONDS := 0.5
+## Per second rate at which the turn pose follows its clip (a low-pass that takes the flicks out of the quick steps).
+const TURN_SMOOTH := 20.0
 ## Seconds of the clip over which the end of a pass is blended into its start.
 const TURN_LOOP_BLEND := 0.25
 const KICK_SPEED := 1.6
@@ -54,6 +56,7 @@ static func play(driver: Node, clip: StringName, clip_speed: float, kind: String
 	driver.body_clip.bones = TURN_BONES if kind == &"turn" else BODY_BONES
 	driver.body_clip.speed = clip_speed
 	driver.body_clip.loop_blend = TURN_LOOP_BLEND if kind == &"turn" else 0.0
+	driver.body_clip.smooth = TURN_SMOOTH if kind == &"turn" else 0.0
 	driver.body_clip.play(animation, animation.length / clip_speed)
 	driver.set_meta(&"body_clip_kind", kind)
 	return animation.length / clip_speed

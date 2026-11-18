@@ -107,7 +107,8 @@ func barrel_yaw_offset() -> float:
 	if clip != _measured_clip:
 		_measured_clip = clip
 		_clip_since = now
-	if not clip.begins_with("Idle_") or now - _clip_since < IDLE_SETTLE_SECONDS or not is_instance_valid(_model_muzzle) or not _model_muzzle.is_inside_tree() or absf(_model_muzzle.global_basis.determinant()) < 0.001:
+	# A turn clip swings the hips under the held gun: measuring then would feed the turn back into the body's aim.
+	if not clip.begins_with("Idle_") or now - _clip_since < IDLE_SETTLE_SECONDS or (_driver != null and bool(_driver.call("is_body_clip_playing"))) or not is_instance_valid(_model_muzzle) or not _model_muzzle.is_inside_tree() or absf(_model_muzzle.global_basis.determinant()) < 0.001:
 		return barrel_offset
 	var barrel := -(_model_muzzle.global_basis.orthonormalized() * BARREL_TURN).z
 	var front := _model.global_basis.z
