@@ -62,6 +62,14 @@ func _run() -> void:
 	body.global_rotation = Vector3(0.0, 1.5 + PI, 0.0)
 	selection.set("_turn_until", 0.0)
 	_check(selection.call("select_clip") == &"Idle_Pistol" and float(driver.get("turn_step_speed")) == 0.0, "Facing the aim again returns to idle")
+	# A reload begun standing still keeps the legs on what he does later: walking on makes them walk.
+	driver.call("play_named_one_shot", &"Reload_Pistol", 0.08, 1.0, selection.call("select_clip"))
+	_check(String(driver.get("_transition_legs")) == "Idle_Pistol", "A reload begun standing keeps the idle legs")
+	player.velocity = Vector3(0, 0, -float(player.get("move_speed")))
+	driver.call("_process_skeletal", float(player.get("move_speed")))
+	_check(String(driver.get("_transition_legs")).begins_with("Run_") and driver.get("leg_overlay") != null, "Walking on during that reload puts the walking legs under it (%s)" % driver.get("_transition_legs"))
+	driver.call("cancel_one_shot", &"Reload_Pistol")
+	player.velocity = Vector3.ZERO
 	var events: Dictionary = preload("res://game/core/audio/public/sound_events.gd").EVENTS
 	_check(float(events[&"step_concrete"][1]) - float(events[&"backpack_rattle"][1]) >= 8.0, "The backpack rattle sits well below the footstep")
 	var drop := preload("res://game/features/player/magazine_drop_variety.gd")
