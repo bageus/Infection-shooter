@@ -408,7 +408,23 @@ jobs:
             # 480 s: full-mission rendered suites run 85-300 s on the software renderer (run_planner_light_view_tests took 299 s on a shared runner and timed out at 300 s).
             native_log_args=()
             if [ "$suite" = game/bootstrap/app/tests/run_surface_pose_tests.gd ]; then native_log_args+=(--verbose); fi
-            timeout 480 xvfb-run -a godot "${native_log_args[@]}" --path . --audio-driver Dummy --rendering-method "$renderer" --script "$suite" > /tmp/occlusion.log 2>&1 || suite_status=$?
+            suite_timeout=480
+            if [ "$suite" = game/bootstrap/app/tests/run_planner_light_view_tests.gd ]; then suite_timeout=900; fi # software renderer runs this one past 480 s on forward_plus
+            if [ "$suite" = game/bootstrap/app/tests/run_planner_light_view_tests.gd ] && [ "$renderer" = forward_plus ]; then
+              # The suite prints its result and calls quit(), but on forward_plus the engine process does not exit.
+              # Read the verdict from its result line, then end the process so the job is not held for 900 s.
+              xvfb-run -a godot --path . --audio-driver Dummy --rendering-method "$renderer" --script "$suite" > /tmp/occlusion.log 2>&1 &
+              runner_pid=$!
+              for _ in $(seq 1 900); do
+                if grep -q "Planner light view tests:" /tmp/occlusion.log; then break; fi
+                sleep 1
+              done
+              pkill -f run_planner_light_view_tests.gd || true
+              wait "$runner_pid" || true
+              if grep -q "Planner light view tests: 0 failure(s)." /tmp/occlusion.log; then suite_status=0; else suite_status=1; fi
+            else
+              timeout "$suite_timeout" xvfb-run -a godot "${native_log_args[@]}" --path . --audio-driver Dummy --rendering-method "$renderer" --script "$suite" > /tmp/occlusion.log 2>&1 || suite_status=$?
+            fi
             elapsed=$(( $(date +%s) - started_at ))
             echo "$renderer: $suite exited $suite_status in ${elapsed}s"
             if [ "$suite_status" != 0 ]; then
