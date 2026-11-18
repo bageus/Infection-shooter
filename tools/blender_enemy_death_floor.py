@@ -19,7 +19,14 @@ LIMBS = [("LeftHand", "LeftForeArm", 3, 0.07), ("RightHand", "RightForeArm", 3, 
 SOURCES = ["clips/Zombie Dying", "hunger_clips/Stumble Backwards", "clips/Zombie Stumbling"]
 
 
-def author(source):
+# Pose variants of the same fall: world x, y metres each limb slides over the floor by the end
+# (the height stays on the floor), so corpses of one fall do not all lie alike.
+SPREAD = {"LeftHand": (0.34, 0.2), "RightHand": (-0.26, -0.17), "LeftFoot": (0.22, -0.18),
+          "RightFoot": (-0.25, 0.22), "Head": (0.08, 0.08)}
+VARIANTS = [("", {}), (" B", SPREAD)]
+
+
+def author(source, suffix, spread):
     bpy.ops.wm.read_factory_settings(use_empty=True)
     bpy.ops.import_scene.fbx(filepath=os.path.join(ROOT, source + ".fbx"))
     scene = bpy.context.scene
@@ -57,6 +64,8 @@ def author(source):
             x = min(1.0, max(0.0, (f - (last - ramp)) / (ramp - SETTLED)))
             x = x * x * (3.0 - 2.0 * x)
             at.z = at.z + (min(at.z, cap) - at.z) * x
+            at.x += spread.get(point, (0, 0))[0] * x
+            at.y += spread.get(point, (0, 0))[1] * x
             target.location = at
             target.keyframe_insert("location", frame=f)
         c = pb[P + tip].constraints.new('IK')
@@ -71,16 +80,17 @@ def author(source):
                      clear_constraints=True, use_current_action=True, bake_types={'POSE'})
     bpy.ops.object.mode_set(mode='OBJECT')
     scene.frame_set(last)
-    print(source, "last frame z:", {p: round((world @ pb[P + p].head).z, 2) for p, *_ in LIMBS},
+    print(source + suffix, "last frame z:", {p: round((world @ pb[P + p].head).z, 2) for p, *_ in LIMBS},
           "toes", [round((world @ pb[P + s + "ToeBase"].head).z, 2) for s in ("Left", "Right")])
     scene.frame_set(start)  # the exporter writes the current pose as the rest pose: the T-pose frame
     for e in marks:
         bpy.data.objects.remove(e)
     scene.frame_start, scene.frame_end = start, last
-    output = os.path.join(ROOT, source + " Floor.fbx")
+    output = os.path.join(ROOT, source + " Floor" + suffix + ".fbx")
     bpy.ops.export_scene.fbx(filepath=output, object_types={'ARMATURE'}, add_leaf_bones=False, bake_anim=True,
                              bake_anim_use_all_actions=False, bake_anim_use_nla_strips=False, bake_anim_force_startend_keying=True)
 
 
 for source in SOURCES:
-    author(source)
+    for suffix, spread in VARIANTS:
+        author(source, suffix, spread)

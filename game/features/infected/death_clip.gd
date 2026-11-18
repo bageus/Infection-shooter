@@ -4,11 +4,13 @@ extends RefCounted
 const DEATH_FALL := preload("res://game/features/infected/death_fall.gd")
 const DEATH_OBSTACLE := preload("res://game/features/infected/death_obstacle.gd")
 const CORPSE_BUDGET := preload("res://game/features/infected/public/corpse_budget.gd")
+const YAW_JITTER := 0.5 # radians
 
 
 # Returns the fall watcher to step while the body falls, or null.
 static func play(owner: CharacterBody3D, parts: Node, animation: Node, fall: Dictionary, landing: Vector3) -> RefCounted:
-	DEATH_FALL.throw(owner, float(fall["turn"]), landing)
+	# A few degrees of random yaw so the corpses of one fall do not all point the same way.
+	DEATH_FALL.throw(owner, float(fall["turn"]) + randf_range(-YAW_JITTER, YAW_JITTER), landing)
 	var death_length: float = owner.call("_play_animation", fall["state"])
 	var watch: RefCounted = DEATH_OBSTACLE.new()
 	# A crawler is already on the floor: nothing to topple onto, so nothing to freeze on.

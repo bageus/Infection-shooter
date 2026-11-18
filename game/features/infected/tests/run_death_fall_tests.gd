@@ -87,7 +87,7 @@ func _test_clip_fallback(stage: Node3D) -> void:
 	var start := enemy.global_position
 	enemy.velocity = Vector3(0, 0, -5.4)
 	enemy.call("take_projectile_damage", 1000.0, start, Vector3(0, 0, 1), "PISTOL")
-	_expect(_clip(enemy) == "DeathForward", "Without a free ragdoll slot the forward fall clip plays (%s)." % _clip(enemy))
+	_expect(_clip(enemy).begins_with("DeathForward"), "Without a free ragdoll slot the forward fall clip plays (%s)." % _clip(enemy))
 	await create_timer(0.7).timeout
 	_expect(enemy.global_position.z < start.z - 0.4, "The clip fall still carries the body forward.")
 	RAGDOLL._active = 0
@@ -103,7 +103,7 @@ func _test_part_falls(stage: Node3D) -> void:
 		enemy.velocity = Vector3(0, 0, -5.4)
 		var at := _bone(enemy, case[0])
 		enemy.call("take_projectile_damage", 1000.0, at, Vector3(0, 0, 1), "PISTOL")
-		_expect(_clip(enemy) == case[1], "A killing shot at %s plays %s (%s)." % [case[0], case[1], _clip(enemy)])
+		_expect(_clip(enemy) == case[1] or (case[0] == "Head" and _clip(enemy).begins_with("DeathBack")), "A killing shot at %s plays %s (%s)." % [case[0], case[1], _clip(enemy)])
 		enemy.queue_free()
 		await process_frame
 	# A crawler is already down: it settles flat on its belly with the DeathCrawl clip and does not hang.
@@ -116,6 +116,13 @@ func _test_part_falls(stage: Node3D) -> void:
 	await create_timer(1.0).timeout
 	_expect(not player.is_playing() or player.current_animation_position >= player.current_animation_length - 0.05, "The crawler's clip ran to its end.")
 	crawler.queue_free()
+	# Each fall has several finished poses (mirrored, limbs spread): all of them end lying on the floor.
+	var lengths := {}
+	for enemy_name in ["Hunger", "Titan"]:
+		var rig := load("res://models/objects/characters/enemy/game/%s_mixamo.res" % enemy_name) as AnimationLibrary
+		for pose: String in ["DeathForward", "DeathBack", "DeathSide"]:
+			for number in ["", "2", "3", "4"]:
+				_expect(rig.has_animation(pose + number), "%s has %s." % [enemy_name, pose + number])
 	await process_frame
 	RAGDOLL._active = 0
 

@@ -117,6 +117,9 @@ func _build(segment: Dictionary) -> PhysicalBone3D:
 	var shape := CollisionShape3D.new()
 	shape.shape = capsule
 	bone.add_child(shape)
+	# Jolt rejects a body with non-uniform global scale on entering the tree. The simulator inherits the skeleton's
+	# scale, so pose the body first: skeleton * pose * body_offset is a rotation without scale.
+	bone.transform = skeleton.get_bone_global_pose(index) * bone.body_offset
 	simulator.add_child(bone)
 	return bone
 

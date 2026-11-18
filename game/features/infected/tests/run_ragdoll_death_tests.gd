@@ -46,7 +46,7 @@ func _test_charging_falls_forward() -> void:
 	enemy.velocity = Vector3(0, 0, -5.4)
 	enemy.call("take_projectile_damage", 1000.0, start, Vector3(0, 0, 1), "PISTOL")
 	_expect(enemy.get("_ragdoll") != null, "A kill starts a ragdoll.")
-	_expect(_clip(enemy) != "DeathForward" and _clip(enemy) != "Death", "No death clip plays (%s)." % _clip(enemy))
+	_expect(not _clip(enemy).begins_with("DeathForward") and _clip(enemy) != "Death", "No death clip plays (%s)." % _clip(enemy))
 	await _settle(2.0)
 	_expect(_bone(enemy, "Head").z < start.z - 0.5, "Running momentum carries the head forward (%s)." % _bone(enemy, "Head"))
 	_expect(_bone(enemy, "Head").y < 0.5, "The body lies on the floor (head %.2f m)." % _bone(enemy, "Head").y)
