@@ -67,6 +67,13 @@ func _run() -> void:
 	_expect(driver.play_turn(&"left") and driver.is_body_clip_playing(), "A left turn plays.")
 	_expect(driver.body_clip.get("_animation") == driver.animation_player.get_animation("Turn_Left"), "The left turn uses Turn_Left.")
 	_expect(not "Head" in driver.body_clip.bones and not "Spine" in driver.body_clip.bones, "A turn on the spot leaves the head and torso to the game.")
+	await create_timer(1.0).timeout
+	_expect(driver.play_turn(&"left"), "A new turn starts after the first one ended.")
+	var turn_start: float = driver.body_clip.get("_time")
+	for _step in 30: # still turning: asking again keeps the one clip going, past the length of a pass and without a restart
+		await create_timer(0.05).timeout
+		driver.play_turn(&"left")
+	_expect(driver.is_body_clip_playing() and float(driver.body_clip.get("_time")) > turn_start + 1.4, "A turn that goes on keeps its clip going (%.2f s)." % float(driver.body_clip.get("_time")))
 	_expect(not driver.play_turn(&"around"), "An unknown side plays nothing.")
 	await create_timer(1.0).timeout
 	_expect(not driver.is_body_clip_playing(), "The turn ends on its own.")

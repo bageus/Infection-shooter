@@ -12,6 +12,8 @@ var fade_in := 0.08
 var fade_out := 0.3
 ## Playback rate of the clip; `length` and the fades are in real seconds.
 var speed := 1.0
+## Clip seconds over which the end of a pass is blended into its start while the clip loops (0: a plain loop).
+var loop_blend := 0.0
 
 var _animation: Animation
 var _length := 0.0
@@ -43,6 +45,11 @@ func stop() -> void:
 	_animation = null
 
 
+## Keeps a running clip from ending: it fades out only once nobody asks for it any more.
+func hold() -> void:
+	_length = maxf(_length, _time + fade_out + 0.05)
+
+
 ## Seconds still to play.
 func remaining() -> float:
 	return maxf(_length - _time, 0.0) if _animation != null else 0.0
@@ -64,9 +71,20 @@ func _process_modification() -> void:
 		if held_bone >= 0:
 			kept[held_bone] = skeleton.get_bone_global_pose(held_bone).basis.orthonormalized()
 	var clip_time := fposmod(_time * speed, _animation.length)
+	# A blended loop: after the first pass the clip repeats from loop_blend on, and the end of each pass fades into that start.
+	var span := _animation.length - loop_blend
+	var pass_time := _time * speed
+	var into := 0.0
+	if loop_blend > 0.0:
+		clip_time = fposmod(pass_time, span) + (loop_blend if pass_time >= span else 0.0)
+		into = clampf((fposmod(pass_time, span) - (span - loop_blend)) / loop_blend, 0.0, 1.0)
 	for bone: int in _tracks:
 		var pose := skeleton.get_bone_pose_rotation(bone)
-		skeleton.set_bone_pose_rotation(bone, pose.slerp(_animation.rotation_track_interpolate(_tracks[bone], clip_time), clampf(weight, 0.0, 1.0)))
+		var target: Quaternion = _animation.rotation_track_interpolate(_tracks[bone], clip_time)
+		if into > 0.0:
+			var start: Quaternion = _animation.rotation_track_interpolate(_tracks[bone], loop_blend - (span - fposmod(pass_time, span)))
+			target = target.slerp(start, into)
+		skeleton.set_bone_pose_rotation(bone, pose.slerp(target, clampf(weight, 0.0, 1.0)))
 	# Bone indices run parents first, so each held bone sees its parent's final pose.
 	var order := kept.keys()
 	order.sort()

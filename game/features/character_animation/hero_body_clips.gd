@@ -7,8 +7,11 @@ const TURN := {&"left": &"Turn_Left", &"right": &"Turn_Right"}
 const DEATHS := [&"Death_FromRight", &"Death_Dying", &"Death_HitToBack"]
 ## The death clip that ends in a ragdoll (the fall backward).
 const RAGDOLL_AFTER := &"Death_HitToBack"
-## A turn clip is squeezed to this many seconds (the body itself swings round in about half a second).
-const TURN_SECONDS := 0.6
+## One pass of a turn clip (it turns the hero 45 degrees) lasts this many seconds. The clip keeps looping, its seam
+## blended, for as long as the hero is still turning, and the body swings round at the matching rate (player_body_aim.gd).
+const TURN_SECONDS := 0.36
+## Seconds of the clip over which the end of a pass is blended into its start.
+const TURN_LOOP_BLEND := 0.25
 const KICK_SPEED := 1.6
 const BODY_BONES := ["Hips", "Spine", "Spine1", "Spine2", "Neck", "Head", "LeftUpLeg", "LeftLeg", "LeftFoot", "LeftToeBase", "RightUpLeg", "RightLeg", "RightFoot", "RightToeBase"]
 ## A turn on the spot drives only the pelvis and legs (the steps): the game already swings the torso, arms and head with the aim,
@@ -50,6 +53,7 @@ static func play(driver: Node, clip: StringName, clip_speed: float, kind: String
 	var animation: Animation = driver.animation_player.get_animation(clip)
 	driver.body_clip.bones = TURN_BONES if kind == &"turn" else BODY_BONES
 	driver.body_clip.speed = clip_speed
+	driver.body_clip.loop_blend = TURN_LOOP_BLEND if kind == &"turn" else 0.0
 	driver.body_clip.play(animation, animation.length / clip_speed)
 	driver.set_meta(&"body_clip_kind", kind)
 	return animation.length / clip_speed
@@ -64,6 +68,7 @@ static func turn(driver: Node, side: StringName) -> bool:
 	if driver.animation_player == null or not TURN.has(side) or not driver.animation_player.has_animation(TURN[side]):
 		return false
 	if running(driver):
+		driver.body_clip.hold() # still turning: the clip goes on instead of fading out and starting again
 		return true
 	var clip: StringName = TURN[side]
 	return play(driver, clip, driver.animation_player.get_animation(clip).length / TURN_SECONDS, &"turn") > 0.0
