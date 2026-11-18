@@ -40,6 +40,7 @@ static var _room_distance: Dictionary = {}
 static var _room_open: Dictionary = {}
 # Glass panes stay see-through after they break, so they are remembered once found.
 var _glass_portals: Dictionary = {}
+var _far_glass: Dictionary = {} # Panes checked and found out of reach; the zone does not move, so they stay out of reach.
 var _fog_enabled := true
 # Enemies this zone hid while its cover is up: an arm leaning through a thin wall must not show in the lit room.
 var _hidden_enemies: Array[Node3D] = []
@@ -303,10 +304,14 @@ func _push_portals() -> void:
 	if material == null:
 		return
 	for shape in _glass_panes():
-		if is_instance_valid(shape) and not _glass_portals.has(shape.get_instance_id()) and _edge_distance(shape.global_position) <= PORTALS.GLASS_REACH:
-			var pane: Dictionary = PORTALS.pane(shape, global_position)
-			if not pane.is_empty():
-				_glass_portals[shape.get_instance_id()] = pane
+		if not is_instance_valid(shape) or _glass_portals.has(shape.get_instance_id()) or _far_glass.has(shape.get_instance_id()):
+			continue
+		if _edge_distance(shape.global_position) > PORTALS.GLASS_REACH:
+			_far_glass[shape.get_instance_id()] = true # shortcut: a far pane is not re-measured, so a zone must not move; upgrade if zones can move
+			continue
+		var pane: Dictionary = PORTALS.pane(shape, global_position)
+		if not pane.is_empty():
+			_glass_portals[shape.get_instance_id()] = pane
 	var portals: Array = _glass_portals.values()
 	for door in _linked_doors:
 		if is_instance_valid(door) and door.has_method("is_open_for_exploration") and bool(door.call("is_open_for_exploration")):
