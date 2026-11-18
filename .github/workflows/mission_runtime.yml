@@ -413,15 +413,39 @@ jobs:
             if [ "$suite" = game/bootstrap/app/tests/run_planner_light_view_tests.gd ] && [ "$renderer" = forward_plus ]; then
               # The suite prints its result and calls quit(), but on forward_plus the engine process does not exit.
               # Read the verdict from its result line, then end the process so the job is not held for 900 s.
+              # Diagnostic: measure whether the engine exits after printing its result line.
+              sudo apt-get install -y -q gdb
               xvfb-run -a godot --path . --audio-driver Dummy --rendering-method "$renderer" --script "$suite" > /tmp/occlusion.log 2>&1 &
               runner_pid=$!
               for _ in $(seq 1 900); do
                 if grep -q "Planner light view tests:" /tmp/occlusion.log; then break; fi
                 sleep 1
               done
-              pkill -f run_planner_light_view_tests.gd || true
-              wait "$runner_pid" || true
-              if grep -q "Planner light view tests: 0 failure(s)." /tmp/occlusion.log; then suite_status=0; else suite_status=1; fi
+              printed_at=$(date +%s)
+              echo "diag: result line seen after $(( printed_at - started_at )) s"
+              exited=0
+              for _ in $(seq 1 180); do
+                if ! kill -0 "$runner_pid" 2>/dev/null; then exited=1; break; fi
+                sleep 1
+              done
+              echo "diag: runner exited within 180 s of result line: $exited ($(( $(date +%s) - printed_at )) s)"
+              if [ "$exited" = 0 ]; then
+                ps -eo pid,ppid,stat,etime,comm,args | grep -v grep | grep -i -E 'godot|xvfb' | cut -c1-220
+                gpid=$(pgrep -n -f 'rendering-method forward_plus --script game/bootstrap/app/tests/run_planner_light_view_tests.gd' || true)
+                echo "diag: candidate godot pid: ${gpid:-none}"
+                if [ -n "$gpid" ]; then
+                  grep -E 'State|Threads' /proc/$gpid/status || true
+                  gdb -p "$gpid" -batch -ex "thread apply all bt 25" > /tmp/menu_previews/planner_exit_bt.txt 2>&1 || true
+                  cat /tmp/menu_previews/planner_exit_bt.txt | head -300
+                  kill -9 "$gpid" 2>/dev/null || true
+                fi
+                suite_status=124
+              else
+                wait "$runner_pid" && suite_status=0 || suite_status=$?
+              fi
+              if grep -q "Planner light view tests: 0 failure(s)." /tmp/occlusion.log; then verdict=pass; else verdict=fail; fi
+              echo "diag: verdict from result line: $verdict; process exit status: $suite_status"
+              suite_status=$([ "$verdict" = pass ] && [ "$exited" = 1 ] && echo 0 || echo 1)
             else
               timeout "$suite_timeout" xvfb-run -a godot "${native_log_args[@]}" --path . --audio-driver Dummy --rendering-method "$renderer" --script "$suite" > /tmp/occlusion.log 2>&1 || suite_status=$?
             fi
