@@ -51,7 +51,7 @@ def run_commands(source: str) -> str:
 
 def invokes_suite(commands: str, path: str) -> bool:
     target = r"(?:res://)?" + re.escape(path)
-    godot = r"(?m)^(?:timeout \d+ )?(?:xvfb-run -a )?godot\b[^\n]*?--script\s+"
+    godot = r'(?m)^(?:timeout (?:\d+|"\$\w+") )?(?:xvfb-run -a )?godot\b[^\n]*?--script\s+'
     if re.search(godot + target + r"(?=\s|$)", commands):
         return True
     # The existing integration/native jobs execute an explicit shell for list.
