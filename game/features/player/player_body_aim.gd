@@ -3,8 +3,8 @@ extends RefCounted
 const BODY_TURN_RATE := 14.0
 ## Standing still the body swings round slower, so the feet have time to step it round.
 const STAND_TURN_RATE := 6.0
-## Standing still the body turns no faster than the turn clip steps (45 degrees per 0.45 s, hero_body_clips.gd TURN_RATE).
-const STAND_MAX_TURN := deg_to_rad(100.0)
+## Standing still the body turns no faster than the turn clip steps (45 degrees per 0.36 s, hero_body_clips.gd TURN_SECONDS).
+const STAND_MAX_TURN := deg_to_rad(125.0)
 const STAND_SPEED := 0.5
 ## Running forward the body leans into it: the full lean is reached at sprint speed.
 const LEAN_DEGREES := 7.0
