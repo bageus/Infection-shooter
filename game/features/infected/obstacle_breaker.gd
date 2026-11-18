@@ -14,6 +14,9 @@ const STUCK_DISTANCE := 0.25
 const BREACH_SECONDS := 2.5
 ## A distant target never makes a swing at the wall in front of it: only a confirmed breach or a close target does.
 const SMASH_NEAR_DISTANCE := 6.0
+## More than this many infected within CROWD_RADIUS of a blocking object: all of them smash it, whatever their tier.
+const CROWD_COUNT := 5
+const CROWD_RADIUS := 2.5
 
 var tier := 0
 var breaching := false
@@ -78,27 +81,41 @@ func track_progress(actor: Node3D, delta: float, route_blocked: bool) -> void:
 
 
 # First slide collision the infected can smash while pressing toward `heading`.
+# A crowded blocking object is smashed by every infected pressing on it ("crowd" true in the result).
 func blocking_collider(actor: CharacterBody3D, heading: Vector3) -> Dictionary:
-	if tier <= 0 or heading.is_zero_approx():
+	if heading.is_zero_approx():
 		return {}
 	for i in actor.get_slide_collision_count():
 		var collision := actor.get_slide_collision(i)
 		var collider := collision.get_collider()
-		if collider == null or not can_break(collider):
+		if collider == null or required_tier(collider) == 0:
 			continue
-		if breaching or -collision.get_normal().dot(heading) > 0.5:
-			return {"collider": collider, "position": collision.get_position()}
+		if not (breaching or -collision.get_normal().dot(heading) > 0.5):
+			continue
+		var crowd := not can_break(collider) and _crowd_size(actor, collision.get_position()) > CROWD_COUNT
+		if can_break(collider) or crowd:
+			return {"collider": collider, "position": collision.get_position(), "crowd": crowd}
 	return {}
+
+
+# Infected (the actor included) standing within CROWD_RADIUS of a point.
+static func _crowd_size(actor: Node3D, point: Vector3) -> int:
+	var count := 0
+	for node in actor.get_tree().get_nodes_in_group("infected"):
+		if node is Node3D and node.is_inside_tree() and (node as Node3D).global_position.distance_to(point) <= CROWD_RADIUS:
+			count += 1
+	return count
 
 
 # Hits the prop in the way, if any; true when a blow landed.
 func smash(actor: CharacterBody3D, target: Node3D) -> bool:
-	if not breaching and actor.global_position.distance_to(target.global_position) > SMASH_NEAR_DISTANCE:
-		return false
 	var heading := target.global_position - actor.global_position
 	heading.y = 0.0
 	var block := blocking_collider(actor, heading.normalized())
 	if block.is_empty():
+		return false
+	var near := actor.global_position.distance_to(target.global_position) <= SMASH_NEAR_DISTANCE
+	if not (breaching or near or block["crowd"]):
 		return false
 	var collider: Object = block["collider"]
 	collider.call("take_melee_hit", float(actor.get("obstacle_damage")), block["position"], -actor.global_transform.basis.z)

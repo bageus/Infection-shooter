@@ -38,6 +38,8 @@ func _run() -> void:
 	_tiers()
 	await _breach(REVENANT, true)
 	await _breach(HUNGER, false)
+	await _crowd(6, true)
+	await _crowd(5, false)
 	Engine.time_scale = 1.0
 	print("Enemy perception tests: %d failures" % failures)
 	quit(0 if failures == 0 else 1)
@@ -264,6 +266,36 @@ func _breach(scene: PackedScene, expect_hits: bool) -> void:
 		_check(chair.hits > 0, "A revenant stuck behind a chair smashes it")
 	else:
 		_check(chair.hits == 0, "A basic infected never attacks props")
+
+
+# More than five basic infected jammed against a chair smash it; five or fewer never do.
+func _crowd(count: int, expect_hits: bool) -> void:
+	await _fresh_stage()
+	_wall(Vector3(-2.2, 1.5, -6), Vector3(0.4, 3, 40))
+	_wall(Vector3(2.2, 1.5, -6), Vector3(0.4, 3, 40))
+	var chair := Prop.new()
+	chair.name = "06_office_chair"
+	chair.collision_layer = 1
+	stage.add_child(chair)
+	var shape := CollisionShape3D.new()
+	var box := BoxShape3D.new()
+	box.size = Vector3(4, 1.5, 0.6)
+	shape.shape = box
+	chair.add_child(shape)
+	chair.position = Vector3(0, 0.75, -4)
+	var player := Target.new()
+	stage.add_child(player)
+	player.position = Vector3(0, 0.1, -9)
+	for i in count:
+		var enemy := HUNGER.instantiate() as CharacterBody3D
+		stage.add_child(enemy)
+		enemy.global_position = Vector3(-1.2 + 0.5 * i, 0.1, -2.0)
+		enemy.set_target(player)
+	await _frames(900)
+	if expect_hits:
+		_check(chair.hits > 0, "%d basic infected pressing a chair smash it" % count)
+	else:
+		_check(chair.hits == 0, "%d basic infected (not more than 5) leave the chair alone" % count)
 
 
 func _check(condition: bool, message: String) -> void:
