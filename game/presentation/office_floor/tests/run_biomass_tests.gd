@@ -369,7 +369,7 @@ func _check_settling() -> void:
 	await process_frame
 	await process_frame
 	wall.queue_free()
-	await _wait_until(func() -> bool: return piece.has_meta("biomass_settled") and absf(piece.global_position.y - 0.0135) < 0.001, 600)
+	await _wait_until(func() -> bool: return piece.get_meta("biomass_settled", "") == "baked" and absf(piece.global_position.y - 0.0135) < 0.001, 600)
 	var visual := piece.get("_visual") as MeshInstance3D
 	_expect(piece.get_blood_config()["surface"] == "floor" and piece.get_blood_attachment()["owner"] == "", "A patch whose object was destroyed is no longer on the wall.")
 	_expect(absf(piece.global_position.y - 0.0135) < 0.001 and piece.global_basis.y.dot(Vector3.UP) > 0.99, "It settles onto the floor, lying flat (y=%.3f)." % piece.global_position.y)
@@ -388,7 +388,7 @@ func _check_settling() -> void:
 	await process_frame
 	await process_frame
 	pane.visible = false
-	await _wait_until(func() -> bool: return drop.has_meta("biomass_settled") and absf(drop.global_position.y - 0.0135) < 0.001, 600)
+	await _wait_until(func() -> bool: return drop.get_meta("biomass_settled", "") == "fallen" and absf(drop.global_position.y - 0.0135) < 0.001, 600)
 	_expect(drop.get_meta("biomass_settled", "") == "fallen" and absf(drop.global_position.y - 0.0135) < 0.001, "A patch on broken glass falls to the floor.")
 	_expect(is_equal_approx(float(CLIP.value(drop.get("_visual") as MeshInstance3D, "depth_scale")), 1.0), "Fallen glass mass is not baked flat.")
 	Engine.set_meta("planning_active", true)

@@ -190,6 +190,8 @@ func _test_attack_variants(name: String) -> void:
 
 
 func _test_hit_clip(name: String) -> void:
+	# The hits below can sever a leg at random, which kills the enemy and so ends the flinch; a fixed seed keeps the limbs intact.
+	seed(7)
 	var enemy := await _spawn(name)
 	var target := FakeTarget.new()
 	stage.add_child(target)
