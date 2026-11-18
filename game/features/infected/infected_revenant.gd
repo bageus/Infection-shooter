@@ -24,6 +24,12 @@ func _ready() -> void:
 
 
 func _physics_process(delta: float) -> void:
+	var started := Time.get_ticks_usec()
+	_physics_step(delta)
+	PhysicsCost.usec += Time.get_ticks_usec() - started
+
+
+func _physics_step(delta: float) -> void:
 	super._physics_process(delta)
 	if berserk or _dead:
 		return

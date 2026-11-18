@@ -69,6 +69,12 @@ func _ready() -> void:
 
 
 func _physics_process(delta: float) -> void:
+	var started := Time.get_ticks_usec()
+	_physics_step(delta)
+	PhysicsCost.usec += Time.get_ticks_usec() - started
+
+
+func _physics_step(delta: float) -> void:
 	if not _broken or _blinds.is_empty():
 		return
 	var near := false

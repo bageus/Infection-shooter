@@ -18,6 +18,7 @@ var _rigid_bodies: Array = []
 var _rigid_at := 0
 var _session_marked := false
 var _awake_last := 0
+var _script_last := 0
 
 
 ## Call once per frame with the frame time in seconds; returns true when this frame was logged.
@@ -35,11 +36,13 @@ func tick(delta: float, tree: SceneTree) -> bool:
 	var woke := awake - _awake_last
 	_awake_last = awake
 	var logged := false
+	var scripts := PhysicsCost.usec - _script_last
+	_script_last = PhysicsCost.usec
 	if msec >= SPIKE_MSEC:
 		spikes += 1
 		worst_msec = maxf(worst_msec, msec)
 	if msec >= SPIKE_MSEC or woke >= WAKE_JUMP:
-		_write(msec, resources, nodes, tree, woke)
+		_write(msec, resources, nodes, tree, woke, scripts)
 		logged = true
 	_resources = resources
 	_nodes = nodes
@@ -50,7 +53,7 @@ func summary() -> String:
 	return "Spikes: worst 5 s %.0f ms | frames over %.0f ms: %d (worst %.0f) | log %s" % [_window_worst, SPIKE_MSEC, spikes, worst_msec, PATH]
 
 
-func _write(msec: float, resources: int, nodes: int, tree: SceneTree, woke: int) -> void:
+func _write(msec: float, resources: int, nodes: int, tree: SceneTree, woke: int, scripts_usec: int) -> void:
 	var player := tree.get_first_node_in_group("player") as Node3D if tree != null else null
 	var at := "%.1f,%.1f" % [player.global_position.x, player.global_position.z] if player != null else "?"
 	var file := FileAccess.open(_path, FileAccess.READ_WRITE if FileAccess.file_exists(_path) else FileAccess.WRITE)
@@ -64,14 +67,14 @@ func _write(msec: float, resources: int, nodes: int, tree: SceneTree, woke: int)
 	var hidden := _culled(tree)
 	var plan := _plan_state(tree)
 	var rigid := _rigid(tree)
-	file.store_line("t=%.1fs frame=%.0fms process=%.1f physics=%.1f draw=%d objects=%d resources=%+d nodes=%+d (%d) static=%dMiB video=%dMiB enemies=%d culled=%d/%d merged=%d trim=%d/%d rigid=%d awake=%d frozen=%d monitored=%d awake_top=%s probe=%d woke=%+d phys_active=%d nav=%.1f player=%s" % [
+	file.store_line("t=%.1fs frame=%.0fms process=%.1f physics=%.1f draw=%d objects=%d resources=%+d nodes=%+d (%d) static=%dMiB video=%dMiB enemies=%d culled=%d/%d merged=%d trim=%d/%d rigid=%d awake=%d frozen=%d monitored=%d awake_top=%s probe=%d woke=%+d phys_active=%d nav=%.1f scripts=%.1f player=%s" % [
 		Time.get_ticks_msec() / 1000.0, msec, Performance.get_monitor(Performance.TIME_PROCESS) * 1000.0,
 		Performance.get_monitor(Performance.TIME_PHYSICS_PROCESS) * 1000.0,
 		Performance.get_monitor(Performance.RENDER_TOTAL_DRAW_CALLS_IN_FRAME), Performance.get_monitor(Performance.RENDER_TOTAL_OBJECTS_IN_FRAME),
 		resources - _resources, nodes - _nodes, nodes, Performance.get_monitor(Performance.MEMORY_STATIC) / 1048576.0,
 		Performance.get_monitor(Performance.RENDER_VIDEO_MEM_USED) / 1048576.0,
 		(tree.get_nodes_in_group("infected_alive").size() if tree != null else 0), hidden[0], hidden[1], plan[0], plan[1], plan[2], rigid[0], rigid[1], rigid[2], rigid[3], rigid[4], probe_mode, woke,
-		Performance.get_monitor(Performance.PHYSICS_3D_ACTIVE_OBJECTS), Performance.get_monitor(Performance.TIME_NAVIGATION_PROCESS) * 1000.0, at])
+		Performance.get_monitor(Performance.PHYSICS_3D_ACTIVE_OBJECTS), Performance.get_monitor(Performance.TIME_NAVIGATION_PROCESS) * 1000.0, scripts_usec / 1000.0, at])
 
 
 # Room-culled furniture: [hidden now, tagged in total].
