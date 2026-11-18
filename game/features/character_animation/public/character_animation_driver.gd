@@ -22,7 +22,7 @@ const HERO_CLIPS := preload("res://game/features/character_animation/hero_body_c
 const STATE_ATTACK := &"attack"
 const STATE_DEATH := &"death"
 # Directional deaths (ADR-0034) fall back to the plain death clip.
-const DEATH_STATES := [&"death", &"death_forward", &"death_back", &"death_right", &"death_left"]
+const DEATH_STATES := [&"death", &"death_forward", &"death_back", &"death_right", &"death_left", &"death_crawl"]
 const LOCOMOTION_TOKENS := {
 	&"idle": ["idle", "stand"],
 	&"walk": ["walk", "locomotion"],
@@ -37,7 +37,7 @@ const ONE_SHOT_TOKENS := {
 	&"death": ["death", "dead"],
 	&"death_forward": ["deathforward", "death", "dead"],
 	&"death_back": ["deathback", "death", "dead"],
-	&"death_right": ["deathside", "death", "dead"], &"death_left": ["deathside2", "death", "dead"], # DeathSide falls to its right
+	&"death_right": ["deathside", "death", "dead"], &"death_left": ["deathside2", "death", "dead"], &"death_crawl": ["deathcrawl", "death", "dead"], # DeathSide falls to its right
 	&"slam": ["slam"], &"summon": ["summon"], &"throw": ["throw"],
 	&"attack_crawl": ["crawlattack"],
 }

@@ -11,6 +11,8 @@ const DEATH_BACK := &"death_back"
 ## Side falls toward a leg that was shot off.
 const DEATH_RIGHT := &"death_right"
 const DEATH_LEFT := &"death_left"
+## A crawler is already down: it only settles flat on its belly.
+const DEATH_CRAWL := &"death_crawl"
 const RIGHT_LEG := [&"leg_r", &"shin_r"]
 const LEFT_LEG := [&"leg_l", &"shin_l"]
 ## Push of one killing hit in m/s on a standard-size body.
