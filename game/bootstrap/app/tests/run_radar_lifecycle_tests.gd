@@ -16,6 +16,9 @@ func _run() -> void:
 	var player := Node3D.new()
 	player.name = "Player"
 	stage.add_child(player)
+	var camera_rig := Node3D.new()
+	camera_rig.name = "CameraRig"
+	player.add_child(camera_rig)
 	var enemies := Node3D.new()
 	enemies.name = "Enemies"
 	stage.add_child(enemies)
@@ -23,6 +26,7 @@ func _run() -> void:
 	var radar := layer.get_node("Radar") as Control
 	radar.set("player_path", NodePath("../../Player"))
 	radar.set("enemies_path", NodePath("../../Enemies"))
+	radar.set("camera_rig_path", NodePath("../../Player/CameraRig"))
 	stage.add_child(layer)
 	var enemy := HUNGER.instantiate() as CharacterBody3D
 	enemy.position = Vector3(2, 1, 3)
