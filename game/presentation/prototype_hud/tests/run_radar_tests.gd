@@ -24,6 +24,9 @@ func _run() -> void:
 	var actor := Node3D.new()
 	actor.name = "Player"
 	stage.add_child(actor)
+	var camera_rig := Node3D.new()
+	camera_rig.name = "CameraRig"
+	actor.add_child(camera_rig)
 	var enemies := Node3D.new()
 	enemies.name = "Enemies"
 	stage.add_child(enemies)
@@ -34,6 +37,7 @@ func _run() -> void:
 	var radar := TestRadar.new()
 	radar.player_path = NodePath("../Player")
 	radar.enemies_path = NodePath("../Enemies")
+	radar.camera_rig_path = NodePath("../Player/CameraRig")
 	radar.size = Vector2(160, 160)
 	stage.add_child(radar)
 	radar.set_process(false)
@@ -53,6 +57,12 @@ func _run() -> void:
 	radar.size = Vector2(240, 200)
 	await process_frame
 	_check((radar.get("_background") as Control).size == radar.size, "Cached background follows radar resize")
+	# Unturned camera: world +Z (enemy) is screen down, world +X is screen right.
+	_check(radar._to_radar(Vector3(2, 0, 3), 18.0).is_equal_approx(Vector2(2, 3)), "Unturned camera maps world X/Z to screen right/down")
+	# Camera turned 90 degrees: the enemy's offset is rotated into view space.
+	camera_rig.rotation.y = PI * 0.5
+	_check(radar._to_radar(Vector3(2, 0, 3), 18.0).is_equal_approx(Vector2(-3, 2)), "Turned camera rotates radar blips with the view")
+	camera_rig.rotation.y = 0.0
 	await _marker_selection(stage, radar, enemy)
 	stage.queue_free()
 	await process_frame

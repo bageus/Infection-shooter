@@ -4,10 +4,12 @@ const PALETTE := preload("res://game/presentation/prototype_hud/hud_palette.gd")
 
 @export var player_path: NodePath
 @export var enemies_path: NodePath
+@export var camera_rig_path: NodePath
 @export var world_radius: float = 18.0
 
 var player: Node3D
 var enemies: Node
+var camera_rig: Node3D
 const REFRESH_SECONDS := .05
 var _refresh_remaining := 0.0
 var _background: RadarBackground
@@ -34,6 +36,7 @@ func _ready() -> void:
 	resized.connect(_on_resized)
 	player = get_node(player_path)
 	enemies = get_node(enemies_path)
+	camera_rig = get_node(camera_rig_path)
 	queue_redraw()
 
 
@@ -80,9 +83,14 @@ func _is_radar_target(enemy: Node) -> bool:
 
 
 func _draw_blip(center: Vector2, radius: float, world_position: Vector3, color: Color, blip_radius: float) -> void:
-	var delta := world_position - player.global_position
-	var point := Vector2(delta.x, delta.z) / world_radius * radius
+	var point := _to_radar(world_position, radius)
 	var edge := radius - blip_radius - 2.0
 	if point.length() > edge:
 		point = point.normalized() * edge
 	draw_circle(center + point, blip_radius, color)
+
+
+# Radar is camera-relative: up is the view direction, so turning the camera turns the blips.
+func _to_radar(world_position: Vector3, radius: float) -> Vector2:
+	var local := camera_rig.global_basis.inverse() * (world_position - player.global_position)
+	return Vector2(local.x, local.z) / world_radius * radius
