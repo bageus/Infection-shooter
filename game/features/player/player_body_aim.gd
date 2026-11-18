@@ -3,6 +3,8 @@ extends RefCounted
 const BODY_TURN_RATE := 14.0
 ## Standing still the body swings round slower, so the feet have time to step it round.
 const STAND_TURN_RATE := 6.0
+## Standing still the body turns no faster than the turn clip steps (45 degrees per 0.45 s, hero_body_clips.gd TURN_RATE).
+const STAND_MAX_TURN := deg_to_rad(100.0)
 const STAND_SPEED := 0.5
 ## Running forward the body leans into it: the full lean is reached at sprint speed.
 const LEAN_DEGREES := 7.0
@@ -17,7 +19,11 @@ static func turn_body(body: Node3D, direction: Vector3, delta: float, barrel_off
 		return
 	var mover := body.get_parent() as CharacterBody3D
 	var rate := STAND_TURN_RATE if mover != null and Vector2(mover.velocity.x, mover.velocity.z).length() < STAND_SPEED else BODY_TURN_RATE
-	var yaw := lerp_angle(body.global_rotation.y, atan2(direction.x, direction.z) - barrel_offset, 1.0 - exp(-rate * delta))
+	var target := atan2(direction.x, direction.z) - barrel_offset
+	var step := angle_difference(body.global_rotation.y, target) * (1.0 - exp(-rate * delta))
+	if rate == STAND_TURN_RATE:
+		step = clampf(step, -STAND_MAX_TURN * delta, STAND_MAX_TURN * delta)
+	var yaw := body.global_rotation.y + step
 	var forward := maxf(0.0, Vector2(mover.velocity.x, mover.velocity.z).dot(Vector2(direction.x, direction.z).normalized())) if mover != null else 0.0
 	var lean := lerpf(float(body.get_meta(&"lean", 0.0)), deg_to_rad(LEAN_DEGREES) * clampf(forward / LEAN_FULL_SPEED, 0.0, 1.0), 1.0 - exp(-LEAN_RATE * delta))
 	body.set_meta(&"lean", lean)
