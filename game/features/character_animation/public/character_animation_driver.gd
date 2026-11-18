@@ -414,8 +414,8 @@ func _process_skeletal(real_speed: float) -> void:
 	var speed := maxf(real_speed, turn_step_speed)
 	_apply_flinch_overlay()
 	if clip_footsteps: _emit_clip_steps(speed)
-	_transition_legs = CLIP_TUNING.follow_selector(self)
 	_update_attack_legs(speed)
+	if not _dead and _variants.interrupts(_one_shot, speed): cancel_one_shot(_one_shot)
 	if not _one_shot.is_empty() or _dead:
 		return
 	if _variants.stop_transition(speed, get_process_delta_time()):
