@@ -14,11 +14,14 @@ var fade_out := 0.3
 var speed := 1.0
 ## Clip seconds over which the end of a pass is blended into its start while the clip loops (0: a plain loop).
 var loop_blend := 0.0
+## Per second rate at which the posed rotation follows the clip's (0: exactly), to take the flicks out of quick steps.
+var smooth := 0.0
 
 var _animation: Animation
 var _length := 0.0
 var _time := 0.0
 var _tracks := {} # bone index -> rotation track
+var _followed := {} # bone index -> the smoothed clip rotation
 
 
 ## Starts `animation`; its rotation tracks named after `bones` are blended in. `length` > 0 ends it sooner (the clip loops).
@@ -27,6 +30,7 @@ func play(animation: Animation, length := 0.0) -> void:
 	_length = length if length > 0.0 else animation.length
 	_time = 0.0
 	_tracks.clear()
+	_followed.clear()
 	var skeleton := get_skeleton()
 	for track in animation.get_track_count():
 		if animation.track_get_type(track) != Animation.TYPE_ROTATION_3D:
@@ -84,6 +88,9 @@ func _process_modification() -> void:
 		if into > 0.0:
 			var start: Quaternion = _animation.rotation_track_interpolate(_tracks[bone], loop_blend - (span - fposmod(pass_time, span)))
 			target = target.slerp(start, into)
+		if smooth > 0.0 and _followed.has(bone):
+			target = (_followed[bone] as Quaternion).slerp(target, 1.0 - exp(-smooth * delta))
+		_followed[bone] = target
 		skeleton.set_bone_pose_rotation(bone, pose.slerp(target, clampf(weight, 0.0, 1.0)))
 	# Bone indices run parents first, so each held bone sees its parent's final pose.
 	var order := kept.keys()
