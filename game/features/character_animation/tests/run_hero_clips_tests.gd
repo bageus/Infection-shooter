@@ -5,6 +5,7 @@ const DRIVER := preload("res://game/features/character_animation/public/characte
 const MODEL := preload("res://models/objects/characters/soldier_animated.glb")
 const CLIPS_API := preload("res://game/features/character_animation/hero_body_clips.gd")
 const CLIPS := preload("res://models/objects/characters/hero_extra_clips.res")
+const LEG_OVERLAY := preload("res://game/features/character_animation/leg_overlay.gd")
 
 var failures := 0
 
@@ -14,6 +15,8 @@ class Probe extends SkeletonModifier3D:
 	var foot := Vector3.ZERO
 	var hand := Basis.IDENTITY
 	var hips := Vector3.ZERO
+	var hips_basis := Basis.IDENTITY
+	var spine_basis := Basis.IDENTITY
 
 
 	func _process_modification() -> void:
@@ -21,6 +24,8 @@ class Probe extends SkeletonModifier3D:
 		foot = skeleton.get_bone_global_pose(skeleton.find_bone("RightFoot")).origin
 		hand = skeleton.get_bone_global_pose(skeleton.find_bone("LeftHand")).basis.orthonormalized()
 		hips = skeleton.get_bone_global_pose(skeleton.find_bone("Hips")).origin
+		hips_basis = skeleton.get_bone_global_pose(skeleton.find_bone("Hips")).basis.orthonormalized()
+		spine_basis = skeleton.get_bone_global_pose(skeleton.find_bone("Spine")).basis.orthonormalized()
 
 
 func _init() -> void:
@@ -75,6 +80,15 @@ func _run() -> void:
 		driver.play_turn(&"left")
 	_expect(driver.is_body_clip_playing() and float(driver.body_clip.get("_time")) > turn_start + 1.4, "A turn that goes on keeps its clip going (%.2f s)." % float(driver.body_clip.get("_time")))
 	_expect(not driver.play_turn(&"around"), "An unknown side plays nothing.")
+	# Legs kept on a strafe cycle under another clip (a reload on the move) bring the cycle's pelvis along, the torso stays.
+	var legs := LEG_OVERLAY.attach(body)
+	var last := Probe.new() # after the legs
+	skeleton.add_child(last)
+	legs.follow(driver.animation_player.get_animation("Run_Right_Pistol"), 1.0)
+	await create_timer(0.5).timeout
+	_expect(last.hips_basis.get_rotation_quaternion().angle_to(before.hips_basis.get_rotation_quaternion()) > 0.4, "The legs' cycle turns the pelvis with them.")
+	_expect(last.spine_basis.get_rotation_quaternion().angle_to(before.spine_basis.get_rotation_quaternion()) < 0.05, "The torso keeps the pose of the clip underneath.")
+	legs.stop()
 	await create_timer(1.0).timeout
 	_expect(not driver.is_body_clip_playing(), "The turn ends on its own.")
 	var standing := after.hips.y
