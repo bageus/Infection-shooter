@@ -15,6 +15,6 @@ static func push_contacts(actor: CharacterBody3D, intended_motion: Vector3, stre
 	var pushed := {}
 	for i in actor.get_slide_collision_count():
 		var collider := actor.get_slide_collision(i).get_collider()
-		if collider != null and not pushed.has(collider) and collider.has_method("push_from_character"):
+		if collider != null and not pushed.has(collider) and collider.has_method("push_from_character") and not bool(actor.get(&"offscreen")):
 			pushed[collider] = true
 			collider.call("push_from_character", actor.global_position, intended_motion, strength, &"enemy")

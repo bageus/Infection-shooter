@@ -230,7 +230,7 @@ func _collide(actor: ACTOR, motion: Vector3) -> void:
 		if hit == null:
 			return
 		var collider := hit.get_collider()
-		if collider != null and collider != pushed and collider.has_method("push_from_character"):
+		if collider != null and collider != pushed and collider.has_method("push_from_character") and not bool(actor.get(&"offscreen")):
 			pushed = collider
 			collider.call("push_from_character", actor.global_position, actor._intended_motion, actor.push_strength, &"enemy")
 		motion = hit.get_remainder().slide(hit.get_normal())
