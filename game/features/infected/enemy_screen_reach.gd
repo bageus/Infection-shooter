@@ -19,6 +19,12 @@ static func could_be_seen(enemy: Node3D, move_speed: float) -> bool:
 # Animation runs only for enemies that can reach the frame within about a
 # second; the check runs every 6th frame.
 static func update(enemy: Node3D, animation: Node, asleep: bool) -> void:
+	var started := Time.get_ticks_usec()
+	_update_inner(enemy, animation, asleep)
+	PhysicsCost.add(&"screen_reach", Time.get_ticks_usec() - started)
+
+
+static func _update_inner(enemy: Node3D, animation: Node, asleep: bool) -> void:
 	if animation == null or Engine.get_physics_frames() % 6 != enemy.get_instance_id() % 6:
 		return
 	# F6 bisect switch: level 1 and up bring back the old behaviour (animation always runs).

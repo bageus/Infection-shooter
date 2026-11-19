@@ -231,7 +231,10 @@ func _check_sight(actor: CharacterBody3D, target: Node3D, delta: float) -> bool:
 	_sight_wait -= delta
 	if _sight_wait <= 0.0:
 		_sight_wait = SIGHT_CHECK_SECONDS + float(actor.get_instance_id() % 7) * 0.01
-		if can_see(actor, target):
+		var started := Time.get_ticks_usec()
+		var seen := can_see(actor, target)
+		PhysicsCost.add(&"perception_sight", Time.get_ticks_usec() - started)
+		if seen:
 			state = State.CHASE
 			return true
 	return false
