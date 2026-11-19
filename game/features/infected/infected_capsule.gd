@@ -398,7 +398,9 @@ func _physics_process(delta: float) -> void:
 	var desired := Vector3.ZERO if _blast_stun_remaining > 0.0 else _cached_desired * (1.0 - _pace.hit_penalty) * _authoring.movement_scale()
 	if not lazy:
 		_turn_toward_face_direction(delta)
+	var t_mark := Time.get_ticks_usec()
 	var spread := CROWD.spread(self, collision_shape)
+	PhysicsCost.add(&"capsule_crowd", Time.get_ticks_usec() - t_mark)
 	velocity.x = desired.x + _push_velocity.x + spread.x
 	velocity.z = desired.z + _push_velocity.z + spread.z
 	_push_velocity = _push_velocity.move_toward(Vector3.ZERO, push_decay * delta)
