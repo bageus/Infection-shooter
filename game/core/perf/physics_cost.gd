@@ -4,6 +4,7 @@ class_name PhysicsCost
 
 static var usec := 0
 static var by_script: Dictionary = {}
+static var wakes: Dictionary = {}
 
 
 static func add(script: StringName, spent: int) -> void:
@@ -16,3 +17,18 @@ static func lap(script: StringName, since: int) -> int:
 	var now := Time.get_ticks_usec()
 	add(script, now - since)
 	return now
+
+
+## Counts a request to wake `body`, keyed by its model or node name and the code path, so the F3 log shows what wakes debris.
+static func woke(body: Node, reason: StringName) -> void:
+	var model = body.get("model_path")
+	var kind := String(model).get_file().get_basename() if model is String and not String(model).is_empty() else String(body.name)
+	var key := "%s:%s" % [kind, reason]
+	wakes[key] = int(wakes.get(key, 0)) + 1
+
+
+# The three most frequent wake requests so far as "kind:reason=count,...".
+static func top_wakes() -> String:
+	var keys := wakes.keys()
+	keys.sort_custom(func(a, b) -> bool: return wakes[a] > wakes[b])
+	return ",".join(keys.slice(0, 3).map(func(key) -> String: return "%s=%d" % [key, wakes[key]]))

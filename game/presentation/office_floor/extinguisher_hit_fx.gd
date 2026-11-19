@@ -87,6 +87,7 @@ func start(hit_point: Vector3, bullet_direction: Vector3) -> void:
 	_elapsed = 0.0
 	_anchor = _body.global_position
 	_body.freeze = false
+	PhysicsCost.woke(_body, &"extinguisher")
 	_body.sleeping = false
 	var watcher := _body.get_node_or_null("ImpactSound")
 	if watcher != null:
