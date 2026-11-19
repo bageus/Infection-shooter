@@ -342,3 +342,5 @@ No product blocker. Exact imported .blend bounds still require visual confirmati
 Run repository gates, then measure imported structural mesh AABBs in Godot against `docs/ASSET_STANDARD.md`; correct the 13_* glass connection span to 4.0 m and any retained legacy cubicle partition to 3.0 m only after confirming source mesh bounds.
 
 ## Session handoff
+
+19.11.2026 (отдача на руках, поручение Vadim): в `player_kick_pose.gd` отдача теперь включает плечевой сустав (`RightArm`/`LeftArm`, раньше только ключицы) и более сильный изгиб локтей (предплечья 5–9°); время удержания позы своё у каждого оружия (`RECOIL_HOLD`: пистолет/УЗИ/АК/М4 0.09–0.12 с, дробовик/снайперка/гранатомёт 0.26–0.3 с, миниган 0.06 с). Ноги, перезарядка и поворот не затрагиваются (только кости рук и корпуса). Тесты: run_upper_body_motion, run_shot_recoil, run_hero_clips PASS. Не проверено глазами (нет рендера).
