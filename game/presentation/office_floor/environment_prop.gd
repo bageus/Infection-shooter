@@ -578,8 +578,8 @@ func _setup_weight(volume: float) -> void:
 		body_entered.connect(func(body: Node) -> void: CONTACT.kick(self, weight_kg, body))
 
 
-func push_from_character(character_position: Vector3, movement: Vector3, strength: float = 1.0) -> void:
-	CONTACT.push(self, weight_kg, character_position, movement, strength)
+func push_from_character(character_position: Vector3, movement: Vector3, strength: float = 1.0, source: StringName = &"unknown") -> void:
+	CONTACT.push(self, weight_kg, character_position, movement, strength, source)
 
 
 func get_display_edges() -> Dictionary:

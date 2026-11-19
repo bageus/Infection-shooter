@@ -26,7 +26,7 @@ class StraightRoute:
 class Prop:
 	extends StaticBody3D
 	var pushes := 0
-	func push_from_character(_at: Vector3, _motion: Vector3, _strength: float) -> void:
+	func push_from_character(_at: Vector3, _motion: Vector3, _strength: float, _source: StringName = &"") -> void:
 		pushes += 1
 
 func _initialize() -> void:

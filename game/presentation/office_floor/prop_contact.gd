@@ -8,9 +8,12 @@ const KICKABLE_LAYER := 4
 # Floor/walls/props (1-2) and other kicked items (3) carry kickable items.
 const KICKABLE_MASK := 7
 const KICK_COOLDOWN_MS := 350
+# Enemies bump props constantly; a sleeping prop wakes only for a real shove, and at most once per ENEMY_PUSH_FRAMES.
+const ENEMY_WAKE_MIN_GAIN := 0.3
+const ENEMY_PUSH_FRAMES := 4
 
 
-static func push(body: RigidBody3D, weight: float, character_position: Vector3, movement: Vector3, strength: float) -> bool:
+static func push(body: RigidBody3D, weight: float, character_position: Vector3, movement: Vector3, strength: float, source: StringName = &"unknown") -> bool:
 	movement.y = 0.0
 	if body.freeze or movement.length_squared() < 0.01:
 		return false
@@ -25,7 +28,14 @@ static func push(body: RigidBody3D, weight: float, character_position: Vector3, 
 	var gain := WEIGHT.push_velocity_change(weight, strength, movement.length(), body.linear_velocity.dot(direction), delta)
 	if gain <= 0.0:
 		return false
-	PhysicsCost.woke(body, &"player_push")
+	if source == &"enemy":
+		if body.sleeping and gain < ENEMY_WAKE_MIN_GAIN:
+			return false
+		var frame := Engine.get_physics_frames()
+		if body.has_meta(&"enemy_push_frame") and frame - int(body.get_meta(&"enemy_push_frame")) < ENEMY_PUSH_FRAMES:
+			return false
+		body.set_meta(&"enemy_push_frame", frame)
+	PhysicsCost.woke(body, StringName("push_" + String(source)))
 	body.sleeping = false
 	body.apply_central_impulse(direction * gain * body.mass)
 	BUCKET_MOP.split(body, direction)
