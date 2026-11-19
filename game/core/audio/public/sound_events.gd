@@ -304,6 +304,7 @@ static func _stream(path: String) -> AudioStream:
 
 # Voices are reused rather than freed: a player per footstep was the cost. A looped voice is still freed by its owner.
 static var _idle: Array = []
+static var _exit_hooked := false
 
 
 static func _take_player() -> AudioStreamPlayer3D:
@@ -311,6 +312,10 @@ static func _take_player() -> AudioStreamPlayer3D:
 		var idle := _idle.pop_back() as AudioStreamPlayer3D
 		if is_instance_valid(idle):
 			return idle
+	if not _exit_hooked:
+		_exit_hooked = true
+		var tree := Engine.get_main_loop() as SceneTree
+		tree.root.tree_exiting.connect(stop_all.bind(tree))
 	var fresh := AudioStreamPlayer3D.new()
 	fresh.tree_exiting.connect(_voice_ended.bind(fresh))
 	fresh.finished.connect(_release.bind(fresh), CONNECT_DEFERRED)
