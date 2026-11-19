@@ -3,6 +3,7 @@ extends SceneTree
 const PLAYER := preload("res://game/features/player/public/player.tscn")
 const LAYOUT := preload("res://game/bootstrap/app/mission_layout.gd")
 const CROSSHAIR := preload("res://game/presentation/prototype_hud/public/crosshair.tscn")
+const SFX := preload("res://game/core/audio/public/sound_events.gd")
 var failures := 0
 var _dropped: Array[int] = []
 
@@ -42,6 +43,7 @@ func _run() -> void:
 	effects.queue_free()
 	await process_frame
 	await create_timer(1.1).timeout
+	SFX.stop_all(Engine.get_main_loop() as SceneTree)
 	print("New weapon tests: %d failures" % failures)
 	quit(1 if failures else 0)
 

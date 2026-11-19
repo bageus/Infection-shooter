@@ -339,6 +339,12 @@ static func _release(player: AudioStreamPlayer3D) -> void:
 static func stop_all(tree: SceneTree) -> void:
 	for voice in tree.get_nodes_in_group(VOICE_GROUP):
 		(voice as AudioStreamPlayer3D).stop()
+	# Pooled voices and cached recordings are static: free them so exit reports no leaks.
+	for idle in _idle:
+		if is_instance_valid(idle):
+			(idle as Node).free()
+	_idle.clear()
+	_streams.clear()
 
 
 # Non-positional interface cues use a dry bus and their own small voice budget,
