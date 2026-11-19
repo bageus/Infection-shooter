@@ -41,8 +41,8 @@ func _process_modification_with_delta(delta: float) -> void:
 	_apply_lean(skeleton, delta)
 	var shot: Object = mount.get("recoil")
 	var weapon := mount.get("_active") as Node3D
-	var name := String(weapon.call("get_weapon_name")) if is_instance_valid(weapon) else ""
-	_recoil = maxf(float(shot.get("kick")) if shot != null else 0.0, _recoil * exp(-delta / float(RECOIL_HOLD.get(name, RECOIL_HOLD_DEFAULT))))
+	var weapon_name := String(weapon.call("get_weapon_name")) if is_instance_valid(weapon) else ""
+	_recoil = maxf(float(shot.get("kick")) if shot != null else 0.0, _recoil * exp(-delta / float(RECOIL_HOLD.get(weapon_name, RECOIL_HOLD_DEFAULT))))
 	_apply_recoil(skeleton)
 
 

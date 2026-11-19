@@ -99,6 +99,7 @@ var _dead: bool = false
 var _push_velocity: Vector3 = Vector3.ZERO
 var _ai_tick_offset: int = 0
 var offscreen := false  # set by enemy_screen_reach
+@warning_ignore("unused_private_class_variable")  # read and written by capsule_step.gd
 var _cached_desired: Vector3 = Vector3.ZERO
 var _lod_frame_offset: int = 0
 var _sleeping_far := false
