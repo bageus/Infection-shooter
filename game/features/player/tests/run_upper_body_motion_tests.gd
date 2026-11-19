@@ -16,13 +16,16 @@ func _run() -> void:
 	for weapon in RECOIL.DISTANCES:
 		_check(KICK.RECOIL.has(weapon), "%s has a recoil profile" % weapon)
 	var pistol: Dictionary = KICK.RECOIL["PISTOL"]
-	_check(pistol.has("RightHand") and pistol.has("RightForeArm") and not pistol.has("RightShoulder") and not pistol.has("Spine2"), "Pistol kicks only hands and elbows")
+	_check(pistol.has("RightHand") and pistol.has("RightForeArm") and pistol.has("RightArm") and not pistol.has("RightShoulder") and not pistol.has("Spine2"), "Pistol kicks hands, elbows and shoulder joint, not the collar bones or torso")
 	_check(KICK.RECOIL["AK"].has("RightShoulder") and not KICK.RECOIL["AK"].has("Spine2"), "Automatic rifles add the shoulders")
 	_check(KICK.RECOIL["SHOTGUN"].has("Spine2") and KICK.RECOIL["SNIPER RIFLE"].has("Spine2"), "Shotgun and sniper kick the upper body")
 	_check(not KICK.RECOIL["MINIGUN"].has("RightHand") and KICK.RECOIL["MINIGUN"].has("RightShoulder"), "Minigun kicks elbows and shoulders")
 	for weapon in KICK.RECOIL:
+		_check(KICK.RECOIL_HOLD.has(weapon), "%s has a recoil hold time" % weapon)
+		_check(KICK.RECOIL[weapon].has("RightForeArm") and KICK.RECOIL[weapon].has("RightArm") and KICK.RECOIL[weapon].has("RightShoulder") == (weapon not in ["PISTOL", "UZI"]), "%s bends the elbow and shoulder" % weapon)
 		for bone in KICK.RECOIL[weapon]:
 			_check(float(KICK.RECOIL[weapon][bone]) <= 10.0, "Recoil stays a micro movement")
+	_check(KICK.RECOIL_HOLD["SHOTGUN"] > KICK.RECOIL_HOLD["PISTOL"] and KICK.RECOIL_HOLD["PISTOL"] > KICK.RECOIL_HOLD["MINIGUN"], "Heavier guns settle slower")
 	var stage := Node3D.new()
 	root.add_child(stage)
 	var player = PLAYER.instantiate()

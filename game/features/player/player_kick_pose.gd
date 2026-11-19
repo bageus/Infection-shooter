@@ -1,7 +1,7 @@
 extends SkeletonModifier3D
 ## Upper-body motion drawn over the baked clips: a forward lean while running, and a micro-kick on a shot.
-## The kick is per weapon: the heavier the gun, the more of the body takes it (pistol and uzi only hands and elbows,
-## rifles add the shoulders, shotgun and sniper a little of the torso, minigun elbows and shoulders).
+## The kick is per weapon: the heavier the gun, the more of the body takes it (pistol and uzi hands, elbows and a little shoulder,
+## rifles add the collar bones, shotgun and sniper some of the torso, minigun elbows and shoulders).
 
 ## Forward lean of the spine at a full run, degrees; the shoulders turn back by the same amount so the arms keep
 ## their aim and the gun does not point down.
@@ -12,19 +12,23 @@ const LEAN_FULL_SPEED := 4.0
 const LEAN_FOLLOW := 8.0
 ## Forward nod of the torso at the hardest footfall, degrees.
 const FOOTFALL_NOD_DEGREES := 3.5
-## Degrees of muzzle-rise pitch per bone at full kick, listed from the spine outwards (parents first).
+## Degrees of muzzle-rise pitch per bone at full kick, listed from the spine outwards (parents first). "Arm" is the
+## shoulder joint (the collar bone "Shoulder" only adds a little shrug); the pitches add up along the arm, so the gun rises
+## by their sum while the elbow visibly folds.
 const RECOIL := {
-	"PISTOL": {"RightForeArm": 5.0, "LeftForeArm": 4.0, "RightHand": 10.0, "LeftHand": 8.0},
-	"UZI": {"RightForeArm": 3.5, "LeftForeArm": 3.0, "RightHand": 7.0, "LeftHand": 6.0},
-	"AK": {"RightShoulder": 4.0, "LeftShoulder": 4.0, "RightForeArm": 4.0, "LeftForeArm": 4.0, "RightHand": 6.0, "LeftHand": 6.0},
-	"M4": {"RightShoulder": 3.5, "LeftShoulder": 3.5, "RightForeArm": 3.5, "LeftForeArm": 3.5, "RightHand": 5.0, "LeftHand": 5.0},
-	"SHOTGUN": {"Spine": 3.0, "Spine2": 6.0, "RightForeArm": 3.0, "LeftForeArm": 3.0, "RightHand": 5.0, "LeftHand": 5.0},
-	"SNIPER RIFLE": {"Spine": 2.5, "Spine2": 5.0, "RightForeArm": 2.5, "LeftForeArm": 2.5, "RightHand": 4.0, "LeftHand": 4.0},
-	"GRENADE LAUNCHER": {"Spine": 3.0, "Spine2": 6.0, "RightForeArm": 3.0, "LeftForeArm": 3.0, "RightHand": 5.0, "LeftHand": 5.0},
-	"MINIGUN": {"RightShoulder": 2.5, "LeftShoulder": 2.5, "RightForeArm": 3.0, "LeftForeArm": 3.0},
+	"PISTOL": {"RightArm": 4.0, "LeftArm": 3.0, "RightForeArm": 9.0, "LeftForeArm": 7.0, "RightHand": 10.0, "LeftHand": 8.0},
+	"UZI": {"RightArm": 3.0, "LeftArm": 3.0, "RightForeArm": 6.0, "LeftForeArm": 5.0, "RightHand": 6.0, "LeftHand": 5.0},
+	"AK": {"RightShoulder": 3.0, "LeftShoulder": 3.0, "RightArm": 5.0, "LeftArm": 5.0, "RightForeArm": 8.0, "LeftForeArm": 7.0, "RightHand": 6.0, "LeftHand": 6.0},
+	"M4": {"RightShoulder": 2.5, "LeftShoulder": 2.5, "RightArm": 4.0, "LeftArm": 4.0, "RightForeArm": 7.0, "LeftForeArm": 6.0, "RightHand": 5.0, "LeftHand": 5.0},
+	"SHOTGUN": {"Spine": 3.0, "Spine2": 5.0, "RightShoulder": 3.0, "LeftShoulder": 3.0, "RightArm": 7.0, "LeftArm": 7.0, "RightForeArm": 8.0, "LeftForeArm": 8.0, "RightHand": 5.0, "LeftHand": 5.0},
+	"SNIPER RIFLE": {"Spine": 2.5, "Spine2": 4.0, "RightShoulder": 3.0, "LeftShoulder": 3.0, "RightArm": 6.0, "LeftArm": 6.0, "RightForeArm": 7.0, "LeftForeArm": 7.0, "RightHand": 4.0, "LeftHand": 4.0},
+	"GRENADE LAUNCHER": {"Spine": 3.0, "Spine2": 5.0, "RightShoulder": 3.0, "LeftShoulder": 3.0, "RightArm": 7.0, "LeftArm": 7.0, "RightForeArm": 8.0, "LeftForeArm": 8.0, "RightHand": 5.0, "LeftHand": 5.0},
+	"MINIGUN": {"RightShoulder": 2.0, "LeftShoulder": 2.0, "RightArm": 3.0, "LeftArm": 3.0, "RightForeArm": 5.0, "LeftForeArm": 5.0},
 }
-## The shot's kick fades in 0.08 s, too brief to see from the camera; the pose holds it about this long.
-const RECOIL_HOLD_SECONDS := 0.14
+## The shot's kick fades in 0.08 s, too brief to see from the camera; the pose holds it this long (seconds): light guns
+## snap back, heavy ones keep the arms up and settle slowly, the minigun's constant buzz barely lingers.
+const RECOIL_HOLD := {"PISTOL": 0.12, "UZI": 0.09, "AK": 0.12, "M4": 0.12, "SHOTGUN": 0.26, "SNIPER RIFLE": 0.3, "GRENADE LAUNCHER": 0.28, "MINIGUN": 0.06}
+const RECOIL_HOLD_DEFAULT := 0.14
 var mount: Node
 var _lean := 0.0
 var _recoil := 0.0
@@ -36,7 +40,9 @@ func _process_modification_with_delta(delta: float) -> void:
 		return
 	_apply_lean(skeleton, delta)
 	var shot: Object = mount.get("recoil")
-	_recoil = maxf(float(shot.get("kick")) if shot != null else 0.0, _recoil * exp(-delta / RECOIL_HOLD_SECONDS))
+	var weapon := mount.get("_active") as Node3D
+	var name := String(weapon.call("get_weapon_name")) if is_instance_valid(weapon) else ""
+	_recoil = maxf(float(shot.get("kick")) if shot != null else 0.0, _recoil * exp(-delta / float(RECOIL_HOLD.get(name, RECOIL_HOLD_DEFAULT))))
 	_apply_recoil(skeleton)
 
 
