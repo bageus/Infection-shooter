@@ -163,6 +163,12 @@ func _on_aggro() -> void:
 
 
 func _behaviour_tick(_delta: float, target_offset: Vector3) -> void:
+	var started := Time.get_ticks_usec()
+	_behaviour_tick_inner(_delta, target_offset)
+	PhysicsCost.add(&"hunger_behaviour_tick", Time.get_ticks_usec() - started)
+
+
+func _behaviour_tick_inner(_delta: float, target_offset: Vector3) -> void:
 	_distance = target_offset.length()
 	if _busy > 0.0:
 		_cached_desired = Vector3.ZERO
@@ -217,6 +223,12 @@ func _die() -> void:
 # ------------------------------------------------------------ at rest
 
 func _unaware_tick(delta: float) -> void:
+	var started := Time.get_ticks_usec()
+	_unaware_tick_inner(delta)
+	PhysicsCost.add(&"hunger_unaware_tick", Time.get_ticks_usec() - started)
+
+
+func _unaware_tick_inner(delta: float) -> void:
 	if _turn_time >= 0.0:
 		_step_turn(delta)
 		return
