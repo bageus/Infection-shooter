@@ -235,6 +235,7 @@ static func _next_variant(event: StringName, count: int) -> int:
 
 static var _voices := 0
 static var _per_event: Dictionary = {}
+static var _streams: Dictionary = {}
 
 
 ## `looped` repeats the recording until the caller frees the returned player.
@@ -250,7 +251,7 @@ static func play(parent: Node, event: StringName, position := Vector3.INF, volum
 	if int(_per_event.get(event, 0)) >= int(spec[MAX_SAME]) or _voices >= MAX_VOICES:
 		return null
 	var path := _event_path(event, _next_variant(event, int(spec[VARIANTS])))
-	var stream := load(path) as AudioStream
+	var stream := _stream(path)
 	if stream == null:
 		return null
 	if looped and stream is AudioStreamOggVorbis:
@@ -295,6 +296,13 @@ static func play(parent: Node, event: StringName, position := Vector3.INF, volum
 		return player
 	player.play()
 	return player
+
+
+# Each recording is loaded once: a footstep or a voice line would otherwise load its file again.
+static func _stream(path: String) -> AudioStream:
+	if not _streams.has(path):
+		_streams[path] = load(path) as AudioStream
+	return _streams[path]
 
 
 # Stops every live voice. Call before SceneTree.quit(): a voice still playing at

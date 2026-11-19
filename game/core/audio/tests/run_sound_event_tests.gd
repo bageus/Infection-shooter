@@ -40,6 +40,8 @@ func _run() -> void:
 		if SFX.play(stage, &"elevator_open") != null:
 			played += 1
 	_expect(played == 1, "Per-event voice limits stop pile-ups (%d)." % played)
+	var cached_path := SFX._event_path(&"elevator_open", 1)
+	_expect(SFX._stream(cached_path) != null and SFX._stream(cached_path) == SFX._stream(cached_path), "A recording is loaded once and then reused")
 	_expect(SFX.has_event(&"player_roll") and ResourceLoader.exists(SFX._event_path(&"player_roll", 1)), "Roll uses the supplied OGG recording")
 	_test_ui(stage)
 	stage.queue_free()
