@@ -21,8 +21,10 @@ static func lap(script: StringName, since: int) -> int:
 
 ## Counts a request to wake `body`, keyed by its model or node name and the code path, so the F3 log shows what wakes debris.
 static func woke(body: Node, reason: StringName) -> void:
+	var kind := String(body.name)
 	var model = body.get("model_path")
-	var kind := String(model).get_file().get_basename() if model is String and not String(model).is_empty() else String(body.name)
+	if model is String and not model.is_empty():
+		kind = model.get_file().get_basename()
 	var key := "%s:%s" % [kind, reason]
 	wakes[key] = int(wakes.get(key, 0)) + 1
 
