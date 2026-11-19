@@ -309,9 +309,9 @@ static var _exit_hooked := false
 
 static func _take_player() -> AudioStreamPlayer3D:
 	while not _idle.is_empty():
-		var idle := _idle.pop_back() as AudioStreamPlayer3D
+		var idle = _idle.pop_back()
 		if is_instance_valid(idle):
-			return idle
+			return idle as AudioStreamPlayer3D
 	if not _exit_hooked:
 		_exit_hooked = true
 		var tree := Engine.get_main_loop() as SceneTree

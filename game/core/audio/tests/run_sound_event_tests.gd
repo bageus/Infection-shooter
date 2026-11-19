@@ -48,6 +48,13 @@ func _run() -> void:
 	_expect(pooled.get_parent() == null and SFX._voices == voices_before - 1, "A finished voice leaves the tree and frees its slot")
 	_expect(SFX.play(stage, &"pistol_fire") == pooled, "A finished voice is reused for the next sound")
 	_expect(SFX.has_event(&"player_roll") and ResourceLoader.exists(SFX._event_path(&"player_roll", 1)), "Roll uses the supplied OGG recording")
+	var dead := AudioStreamPlayer3D.new()
+	SFX._idle.append(dead)
+	dead.free()
+	var reused := SFX._take_player()
+	_expect(is_instance_valid(reused), "A freed voice left in the pool is skipped")
+	if is_instance_valid(reused):
+		reused.free()
 	_test_ui(stage)
 	stage.queue_free()
 	await process_frame
