@@ -25,6 +25,7 @@ const STATUS_FX := preload("res://game/features/infected/infected_status_fx.gd")
 const TURN := preload("res://game/features/infected/enemy_turn_in_place.gd")
 const BODY := preload("res://game/features/infected/enemy_body_queries.gd")
 const LIMBS := preload("res://game/features/infected/infected_limb_loss.gd")
+const STEP := preload("res://game/features/infected/capsule_step.gd")
 const CLIMB := preload("res://game/features/infected/enemy_climb_out.gd")
 const KILLING_PUSH_MSEC := 300
 const HEAVY_HIT_WEAPONS := ["SHOTGUN", "GRENADE LAUNCHER"] # the weapons whose hit plays the hit clip
@@ -344,81 +345,7 @@ func apply_skill_push(direction: Vector3, distance: float) -> void:
 
 
 func _physics_process(delta: float) -> void:
-	_pace.recover_hit(delta)
-	_hit_cooldown = maxf(0.0, _hit_cooldown - delta)
-	_track_blood_motion()
-	_mark_stump_drips()
-	_blast_stun_remaining = maxf(0.0, _blast_stun_remaining - delta)
-	if _mutation_status.step(self, delta):
-		return
-	if _dead:
-		velocity = Vector3.ZERO
-		if _fall_watch != null and not _fall_watch.call("step", delta):
-			_fall_watch = null
-		return
-	if _emerge_left > 0.0:
-		_emerge_left = CLIMB.step(self, _emerge_left, delta)
-		return
-	if _target == null or not is_instance_valid(_target) or _senses.target_down(self, _target): # a dead hero is neither chased nor hit
-		return
-	_senses.refresh_modes(self)
-	if _turn.active() and _senses.is_chasing():
-		_turn.cancel(_animation)
-	SCREEN_REACH.update(self, _animation, _sleeping_far)
-	audio.tick(delta, _pace.charging, global_position.distance_squared_to(_target.global_position) < 576.0, _lod_frame_offset)
-	if not _senses.is_chasing():
-		_unaware_tick(delta)
-		if not _senses.is_chasing():
-			return
-		_notice_player()
-	_tick_pending_hit(delta)
-
-	var target_offset := _target.global_position - global_position
-	target_offset.y = 0.0
-	var distance_sq := target_offset.length_squared()
-	var physics_frame := Engine.get_physics_frames()
-
-	var far := distance_sq > sleep_distance * sleep_distance
-	_sleeping_far = far
-	var lazy := far or (offscreen and distance_sq >= full_simulation_distance * full_simulation_distance)
-	var period := 12 if far else (4 if lazy else 1)  # a lazy enemy ticks every Nth frame, clocks advance N frames
-	if lazy and physics_frame % period != _lod_frame_offset % period: return
-	var step := delta * period
-
-	_attack_cooldown = maxf(0.0, _attack_cooldown - step)
-	_pace.tick(step, sqrt(distance_sq), charge_distance, move_speed, walk_speed_factor)
-	_obstacle_cooldown = maxf(0.0, _obstacle_cooldown - step)
-
-	var near := distance_sq < full_simulation_distance * full_simulation_distance
-	var ai_divisor := 1 if near else 4
-	if lazy or physics_frame % ai_divisor == _ai_tick_offset % ai_divisor:
-		_cached_desired = _desired_velocity_from_offset(target_offset)
-
-	_behaviour_tick(step, target_offset)
-	var desired := Vector3.ZERO if _blast_stun_remaining > 0.0 else _cached_desired * (1.0 - _pace.hit_penalty) * _authoring.movement_scale()
-	if not lazy:
-		_turn_toward_face_direction(delta)
-	var spread := CROWD.spread(self, collision_shape)
-	velocity.x = desired.x + _push_velocity.x + spread.x
-	velocity.z = desired.z + _push_velocity.z + spread.z
-	_push_velocity = _push_velocity.move_toward(Vector3.ZERO, push_decay * delta)
-	if lazy:
-		# One collision-checked step (no sliding or gravity): still stops at walls and doors.
-		move_and_collide(Vector3(velocity.x, 0.0, velocity.z) * step)
-		return
-
-	_apply_gravity(delta)
-	if not near and physics_frame % 2 != _ai_tick_offset % 2:
-		move_and_collide(velocity * delta)
-		return
-	_intended_motion = Vector3(velocity.x, 0.0, velocity.z)
-	var t_mark := Time.get_ticks_usec()
-	move_and_slide()
-	PhysicsCost.add(&"capsule_slide", Time.get_ticks_usec() - t_mark)
-	_push_chair_contacts()
-	_breaker.track_progress(self, delta if near else delta * 2.0, not _route.direct_clear())
-	if near or physics_frame % 4 == _ai_tick_offset:
-		_try_break_blocking_props(); PhysicsCost.add(&"capsule_props", Time.get_ticks_usec() - t_mark)
+	STEP.run(self, delta)
 
 
 # Hook for specialised enemies: one step of looking, listening and strolling.

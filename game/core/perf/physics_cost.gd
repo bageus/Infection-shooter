@@ -9,3 +9,10 @@ static var by_script: Dictionary = {}
 static func add(script: StringName, spent: int) -> void:
 	usec += spent
 	by_script[script] = int(by_script.get(script, 0)) + spent
+
+
+## Records the time since `since` under `script` and returns now, so consecutive steps can be timed in one chain.
+static func lap(script: StringName, since: int) -> int:
+	var now := Time.get_ticks_usec()
+	add(script, now - since)
+	return now

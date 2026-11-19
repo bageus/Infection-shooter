@@ -165,7 +165,9 @@ func step_unaware(actor: ACTOR, delta: float) -> void:
 	var supported := actor.is_on_floor()
 	var support_checked := supported and (distance_sq >= actor.full_simulation_distance * actor.full_simulation_distance or actor.velocity.is_zero_approx())
 	if support_checked:
+		var support_started := Time.get_ticks_usec()
 		supported = _idle_body.supported(actor)
+		PhysicsCost.add(&"unaware_support_ray", Time.get_ticks_usec() - support_started)
 	var divisor := 1
 	if state == State.UNAWARE and supported and not disturbed:
 		if distance_sq > actor.sleep_distance * actor.sleep_distance:
@@ -192,6 +194,7 @@ func step_unaware(actor: ACTOR, delta: float) -> void:
 	# UNAWARE has no crowd steering in the existing behavior (spread is zero).
 	if wish.is_zero_approx() and not disturbed and supported and (support_checked or _idle_body.supported(actor)):
 		return
+	var move_started := Time.get_ticks_usec()
 	if divisor > 1:
 		var motion := Vector3(actor.velocity.x, 0.0, actor.velocity.z) * step
 		if _wandering:
@@ -204,6 +207,7 @@ func step_unaware(actor: ACTOR, delta: float) -> void:
 			_collide(actor, motion)
 	else:
 		_slide(actor)
+	PhysicsCost.add(&"unaware_move", Time.get_ticks_usec() - move_started)
 
 
 func _slide(actor: ACTOR) -> void:
