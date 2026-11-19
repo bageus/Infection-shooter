@@ -516,7 +516,7 @@ func _push_chair_contacts()->void:
 		var collider:=get_slide_collision(i).get_collider()
 		if collider!=null and not pushed.has(collider) and collider.has_method("push_from_character"):
 			pushed[collider]=true
-			collider.call("push_from_character",global_position,_intended_motion,push_strength)
+			collider.call("push_from_character",global_position,_intended_motion,push_strength,&"player")
 
 func _push_roll_contacts()->void:
 	for i in get_slide_collision_count():

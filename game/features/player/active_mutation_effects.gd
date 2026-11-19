@@ -166,7 +166,7 @@ func _strike_objects(forward: Vector3, damage: float) -> void:
 			body.call("break_by_strike", body.global_position, forward, true)
 			continue
 		if body is RigidBody3D and not (body as RigidBody3D).freeze:
-			body.call("push_from_character", player.global_position, forward * STRIKE_PUSH_SPEED, 1.0)
+			body.call("push_from_character", player.global_position, forward * STRIKE_PUSH_SPEED, 1.0, &"player")
 		body.call("take_melee_hit", damage, body.global_position, forward)
 
 

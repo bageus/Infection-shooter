@@ -72,8 +72,8 @@ func _ready() -> void:
 	can_sleep = true
 	IMPACT_SOUND.watch(self)
 
-func push_from_character(character_position: Vector3, movement: Vector3, strength: float = 1.0) -> void:
-	CONTACT.push(self, weight_kg, character_position, movement, strength)
+func push_from_character(character_position: Vector3, movement: Vector3, strength: float = 1.0, source: StringName = &"unknown") -> void:
+	CONTACT.push(self, weight_kg, character_position, movement, strength, source)
 
 func take_projectile_hit(damage: float, hit_position: Vector3, _hit_normal: Vector3, direction: Vector3, weapon_name: String) -> bool:
 	if "extinguisher" in (name + get_parent().name).to_lower():

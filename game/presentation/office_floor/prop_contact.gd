@@ -10,7 +10,7 @@ const KICKABLE_MASK := 7
 const KICK_COOLDOWN_MS := 350
 
 
-static func push(body: RigidBody3D, weight: float, character_position: Vector3, movement: Vector3, strength: float) -> bool:
+static func push(body: RigidBody3D, weight: float, character_position: Vector3, movement: Vector3, strength: float, source: StringName = &"unknown") -> bool:
 	movement.y = 0.0
 	if body.freeze or movement.length_squared() < 0.01:
 		return false
@@ -25,7 +25,7 @@ static func push(body: RigidBody3D, weight: float, character_position: Vector3, 
 	var gain := WEIGHT.push_velocity_change(weight, strength, movement.length(), body.linear_velocity.dot(direction), delta)
 	if gain <= 0.0:
 		return false
-	PhysicsCost.woke(body, &"player_push")
+	PhysicsCost.woke(body, StringName("push_" + String(source)))
 	body.sleeping = false
 	body.apply_central_impulse(direction * gain * body.mass)
 	BUCKET_MOP.split(body, direction)
