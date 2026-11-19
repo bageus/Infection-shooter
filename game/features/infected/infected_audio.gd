@@ -62,10 +62,12 @@ func tick(delta: float, charging: bool, near_target: bool, lod_offset := 0) -> v
 		_walked += moved.length()
 		if _walked >= step_length:
 			_walked = 0.0
-			var impacts := body.get("impact_pool") as Node
-			if is_instance_valid(impacts) and impacts.has_method("request_surface_step"):
-				impacts.call("request_surface_step", body)
-			_play(body, step_sound, body.global_position, 1.5 if charging else -2.0, step_pitch)
+			# Distant enemies and crowds beyond the per-frame cap step silently: a footstep out of earshot is not heard anyway.
+			if near_target and take_step_budget():
+				var impacts := body.get("impact_pool") as Node
+				if is_instance_valid(impacts) and impacts.has_method("request_surface_step"):
+					impacts.call("request_surface_step", body)
+				_play(body, step_sound, body.global_position, 1.5 if charging else -2.0, step_pitch)
 	var alerted := bool(body.call("is_alerted"))
 	# Hunger times its shout in _on_aggro, after interrupting corpse feeding.
 	if near_target and alerted and not spotted and growl_sound != &"growl_hunger":
@@ -79,6 +81,22 @@ func tick(delta: float, charging: bool, near_target: bool, lod_offset := 0) -> v
 		else:
 			_voice(&"idle", -3.0)
 		_growl_wait = randf_range(2.2, 4.5) if charging else randf_range(5.0, 9.0)
+
+
+# shortcut: a fixed cap on footsteps per physics frame, not tuned to player count; upgrade if steps go missing in big crowds.
+const MAX_STEPS_PER_FRAME := 4
+static var _step_frame := -1
+static var _steps_in_frame := 0
+
+
+## True while this physics frame still has footstep budget.
+static func take_step_budget() -> bool:
+	var frame := Engine.get_physics_frames()
+	if frame != _step_frame:
+		_step_frame = frame
+		_steps_in_frame = 0
+	_steps_in_frame += 1
+	return _steps_in_frame <= MAX_STEPS_PER_FRAME
 
 
 func _call_out() -> void:

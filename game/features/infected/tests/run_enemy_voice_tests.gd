@@ -6,12 +6,22 @@ const SFX := preload("res://game/core/audio/public/sound_events.gd")
 var failures := 0
 
 
+func _step_budget() -> void:
+	var audio_script := load("res://game/features/infected/infected_audio.gd")
+	var allowed := 0
+	for i in 6:
+		if audio_script.take_step_budget():
+			allowed += 1
+	_check(allowed == 4, "Only the first footsteps of a frame get the budget (%d)" % allowed)
+
+
 func _initialize() -> void:
 	call_deferred("_run")
 
 
 func _run() -> void:
 	_profiles()
+	_step_budget()
 	await _species_hooks()
 	var stage := Node3D.new()
 	root.add_child(stage)
