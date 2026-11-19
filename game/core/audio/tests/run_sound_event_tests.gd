@@ -42,6 +42,11 @@ func _run() -> void:
 	_expect(played == 1, "Per-event voice limits stop pile-ups (%d)." % played)
 	var cached_path := SFX._event_path(&"elevator_open", 1)
 	_expect(SFX._stream(cached_path) != null and SFX._stream(cached_path) == SFX._stream(cached_path), "A recording is loaded once and then reused")
+	var pooled := SFX.play(stage, &"pistol_fire")
+	var voices_before := SFX._voices
+	SFX._release(pooled)
+	_expect(pooled.get_parent() == null and SFX._voices == voices_before - 1, "A finished voice leaves the tree and frees its slot")
+	_expect(SFX.play(stage, &"pistol_fire") == pooled, "A finished voice is reused for the next sound")
 	_expect(SFX.has_event(&"player_roll") and ResourceLoader.exists(SFX._event_path(&"player_roll", 1)), "Roll uses the supplied OGG recording")
 	_test_ui(stage)
 	stage.queue_free()
