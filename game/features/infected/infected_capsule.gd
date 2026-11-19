@@ -398,9 +398,7 @@ func _physics_process(delta: float) -> void:
 	var desired := Vector3.ZERO if _blast_stun_remaining > 0.0 else _cached_desired * (1.0 - _pace.hit_penalty) * _authoring.movement_scale()
 	if not lazy:
 		_turn_toward_face_direction(delta)
-	var t_mark := Time.get_ticks_usec()
 	var spread := CROWD.spread(self, collision_shape)
-	PhysicsCost.add(&"capsule_crowd", Time.get_ticks_usec() - t_mark)
 	velocity.x = desired.x + _push_velocity.x + spread.x
 	velocity.z = desired.z + _push_velocity.z + spread.z
 	_push_velocity = _push_velocity.move_toward(Vector3.ZERO, push_decay * delta)
@@ -414,11 +412,13 @@ func _physics_process(delta: float) -> void:
 		move_and_collide(velocity * delta)
 		return
 	_intended_motion = Vector3(velocity.x, 0.0, velocity.z)
+	var t_mark := Time.get_ticks_usec()
 	move_and_slide()
+	PhysicsCost.add(&"capsule_slide", Time.get_ticks_usec() - t_mark)
 	_push_chair_contacts()
 	_breaker.track_progress(self, delta if near else delta * 2.0, not _route.direct_clear())
 	if near or physics_frame % 4 == _ai_tick_offset:
-		_try_break_blocking_props()
+		_try_break_blocking_props(); PhysicsCost.add(&"capsule_props", Time.get_ticks_usec() - t_mark)
 
 
 # Hook for specialised enemies: one step of looking, listening and strolling.

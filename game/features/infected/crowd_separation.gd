@@ -31,6 +31,13 @@ static func body_radius(shape_node: CollisionShape3D, scale: float) -> float:
 ## Registers `who` for this frame and returns the horizontal velocity that moves it
 ## out of its neighbours (zero when nobody is within two body radii).
 static func spread(who: Node3D, shape_node: CollisionShape3D) -> Vector3:
+	var started := Time.get_ticks_usec()
+	var result := _spread(who, shape_node)
+	PhysicsCost.add(&"capsule_crowd", Time.get_ticks_usec() - started)
+	return result
+
+
+static func _spread(who: Node3D, shape_node: CollisionShape3D) -> Vector3:
 	if who is CollisionObject3D:
 		(who as CollisionObject3D).set_collision_mask_value(INFECTED_LAYER, false)
 	var frame := Engine.get_physics_frames()
