@@ -43,6 +43,13 @@ func configure_budget(budget: Node) -> void:
 ## A far enemy is out of sight and ticks rarely: it heads straight for the target and plans
 ## around walls (physics sweeps, A*) only once it is inside the enemy's sleep distance.
 func direction(actor: CharacterBody3D, target: Node3D, radius: float, far: bool = false) -> Vector3:
+	var started := Time.get_ticks_usec()
+	var result := _direction(actor, target, radius, far)
+	PhysicsCost.add(&"capsule_route", Time.get_ticks_usec() - started)
+	return result
+
+
+func _direction(actor: CharacterBody3D, target: Node3D, radius: float, far: bool = false) -> Vector3:
 	if far:
 		if not path.is_empty() or _next_probe != 0:
 			release()
