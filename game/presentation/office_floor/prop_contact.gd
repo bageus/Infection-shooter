@@ -25,6 +25,7 @@ static func push(body: RigidBody3D, weight: float, character_position: Vector3, 
 	var gain := WEIGHT.push_velocity_change(weight, strength, movement.length(), body.linear_velocity.dot(direction), delta)
 	if gain <= 0.0:
 		return false
+	PhysicsCost.woke(body, &"player_push")
 	body.sleeping = false
 	body.apply_central_impulse(direction * gain * body.mass)
 	BUCKET_MOP.split(body, direction)

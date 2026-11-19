@@ -38,6 +38,7 @@ static func apply(body: RigidBody3D, weight_kg: float, weapon: String, direction
 	if delta_speed <= 0.0: return
 	body.set_meta(FRAME_BUDGET, frame)
 	body.set_meta(FRAME_USED, used + delta_speed)
+	PhysicsCost.woke(body, &"bullet")
 	body.sleeping = false
 	# A central nudge avoids huge torque on small inertias and never injects vertical lift.
 	body.apply_central_impulse(direction.normalized() * delta_speed * body.mass)

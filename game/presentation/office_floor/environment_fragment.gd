@@ -138,6 +138,7 @@ func topple_from(size: Vector3, hit_position: Vector3, direction: Vector3) -> vo
 
 # A piece pinned under a heavy top can survive the first push, so it is pushed again, harder, while it still stands.
 func _push_over(away: Vector3, height: float, strength: float, retries: int) -> void:
+	PhysicsCost.woke(self, &"fragment_push_over")
 	sleeping = false
 	apply_impulse(away * mass * TOPPLE_SPEED * strength, Vector3.UP * height * 0.4)
 	if retries <= 0 or not is_inside_tree():
@@ -200,6 +201,7 @@ func kick_from(offset: Vector3) -> void:
 	if now < _kick_ready_msec:
 		return
 	_kick_ready_msec = now + int(KICK_COOLDOWN * 1000.0)
+	PhysicsCost.woke(self, &"fragment_kick")
 	sleeping = false
 	var away := Vector3(offset.x, 0.0, offset.z).normalized()
 	apply_central_impulse((away + Vector3.UP * 0.25) * minf(mass * 1.7, 0.9))
@@ -263,6 +265,7 @@ func unstick() -> bool:
 	var away := Vector3(thin_axis.x, 0.0, thin_axis.z)
 	if away.length_squared() < 0.0004:
 		away = Vector3.RIGHT
+	PhysicsCost.woke(self, &"fragment_unstick")
 	sleeping = false
 	apply_impulse(away.normalized() * mass * UNSTICK_SPEED * (1.0 + UNSTICK_GROWTH * _unstick_tries), Vector3.UP * height * 0.4)
 	return true
@@ -341,6 +344,7 @@ func take_projectile_hit(damage: float, hit_position: Vector3, _normal: Vector3,
 		return false
 	_piece_health -= BALANCE.object_damage(damage, weapon, "large")
 	if _piece_health > 0.0:
+		PhysicsCost.woke(self, &"fragment_hit")
 		sleeping = false
 		BULLET_PUSH.apply(self, maxf(mass, 1.0), weapon, direction, hit_position)
 		return false

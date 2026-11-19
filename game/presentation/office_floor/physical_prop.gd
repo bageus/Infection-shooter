@@ -102,6 +102,7 @@ func _rupture_extinguisher(hit_position: Vector3) -> void:
 
 
 func take_melee_hit(damage: float, hit_position: Vector3, direction: Vector3) -> void:
+	PhysicsCost.woke(self, &"melee")
 	sleeping = false
 	apply_impulse(direction.normalized() * character_push_impulse, hit_position - global_position)
 	_health -= maxf(damage, 0.0)

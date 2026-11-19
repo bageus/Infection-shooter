@@ -166,6 +166,7 @@ func acquire(size: Vector3, tint: Color) -> RigidBody3D:
 	if body.has_meta("debris_fading"):
 		body.remove_meta("debris_fading")
 	body.freeze = false
+	PhysicsCost.woke(body, &"fragment_reuse")
 	body.sleeping = false
 	body.linear_velocity = Vector3.ZERO
 	body.angular_velocity = Vector3.ZERO
