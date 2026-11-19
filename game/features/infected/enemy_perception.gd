@@ -55,6 +55,8 @@ var _wandering := false
 var _wander_wait := 1.0
 var _idle_elapsed := 0.0
 var _idle_body: IDLE_BODY
+var _support_cache := true
+var _support_next_frame := 0
 
 
 func assign_target(actor: ACTOR, target: Node3D, forced_target: bool) -> void:
@@ -165,9 +167,14 @@ func step_unaware(actor: ACTOR, delta: float) -> void:
 	var supported := actor.is_on_floor()
 	var support_checked := supported and (distance_sq >= actor.full_simulation_distance * actor.full_simulation_distance or actor.velocity.is_zero_approx())
 	if support_checked:
-		var support_started := Time.get_ticks_usec()
-		supported = _idle_body.supported(actor)
-		PhysicsCost.add(&"unaware_support_ray", Time.get_ticks_usec() - support_started)
+		# shortcut: a still or far enemy re-checks its floor ray every 4 frames, not every frame; upgrade if a fall must register within 4 frames.
+		var frame := Engine.get_physics_frames()
+		if frame >= _support_next_frame:
+			var support_started := Time.get_ticks_usec()
+			_support_cache = _idle_body.supported(actor)
+			_support_next_frame = frame + 4
+			PhysicsCost.add(&"unaware_support_ray", Time.get_ticks_usec() - support_started)
+		supported = _support_cache
 	var divisor := 1
 	if state == State.UNAWARE and supported and not disturbed:
 		if distance_sq > actor.sleep_distance * actor.sleep_distance:
