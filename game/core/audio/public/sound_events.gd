@@ -235,6 +235,7 @@ static func _next_variant(event: StringName, count: int) -> int:
 
 static var _voices := 0
 static var _per_event: Dictionary = {}
+static var _streams: Dictionary = {}
 
 
 ## `looped` repeats the recording until the caller frees the returned player.
@@ -250,7 +251,7 @@ static func play(parent: Node, event: StringName, position := Vector3.INF, volum
 	if int(_per_event.get(event, 0)) >= int(spec[MAX_SAME]) or _voices >= MAX_VOICES:
 		return null
 	var path := _event_path(event, _next_variant(event, int(spec[VARIANTS])))
-	var stream := load(path) as AudioStream
+	var stream := _stream(path)
 	if stream == null:
 		return null
 	if looped and stream is AudioStreamOggVorbis:
@@ -258,7 +259,8 @@ static func play(parent: Node, event: StringName, position := Vector3.INF, volum
 		var looping := (stream as AudioStreamOggVorbis).duplicate() as AudioStreamOggVorbis
 		looping.loop = true
 		stream = looping
-	var player := AudioStreamPlayer3D.new()
+	var player := _take_player()
+	player.set_meta(&"sfx_event", event)
 	player.name = "Sfx_" + String(event)
 	player.stream = stream
 	player.bus = BUS if AudioServer.get_bus_index(BUS) >= 0 else &"Master"
@@ -275,10 +277,6 @@ static func play(parent: Node, event: StringName, position := Vector3.INF, volum
 	player.add_to_group(group)
 	_voices += 1
 	_per_event[event] = int(_per_event.get(event, 0)) + 1
-	player.tree_exiting.connect(func() -> void:
-		_voices -= 1
-		_per_event[event] = int(_per_event.get(event, 1)) - 1, CONNECT_ONE_SHOT)
-	player.finished.connect(player.queue_free)
 	parent.add_child(player)
 	if position.is_finite():
 		player.global_position = position
@@ -289,12 +287,56 @@ static func play(parent: Node, event: StringName, position := Vector3.INF, volum
 		if not looped:
 			var voice: WeakRef = weakref(player)
 			tree.create_timer(stream.get_length() / player.pitch_scale).timeout.connect(func() -> void:
-				var live := voice.get_ref() as Node
+				var live := voice.get_ref() as AudioStreamPlayer3D
 				if live != null:
-					live.queue_free())
+					_release(live))
 		return player
 	player.play()
 	return player
+
+
+# Each recording is loaded once: a footstep or a voice line would otherwise load its file again.
+static func _stream(path: String) -> AudioStream:
+	if not _streams.has(path):
+		_streams[path] = load(path) as AudioStream
+	return _streams[path]
+
+
+# Voices are reused rather than freed: a player per footstep was the cost. A looped voice is still freed by its owner.
+static var _idle: Array = []
+static var _exit_hooked := false
+
+
+static func _take_player() -> AudioStreamPlayer3D:
+	while not _idle.is_empty():
+		var idle := _idle.pop_back() as AudioStreamPlayer3D
+		if is_instance_valid(idle):
+			return idle
+	if not _exit_hooked:
+		_exit_hooked = true
+		var tree := Engine.get_main_loop() as SceneTree
+		tree.root.tree_exiting.connect(stop_all.bind(tree))
+	var fresh := AudioStreamPlayer3D.new()
+	fresh.tree_exiting.connect(_voice_ended.bind(fresh))
+	fresh.finished.connect(_release.bind(fresh), CONNECT_DEFERRED)
+	return fresh
+
+
+static func _voice_ended(player: AudioStreamPlayer3D) -> void:
+	var event: StringName = player.get_meta(&"sfx_event", &"")
+	_voices -= 1
+	_per_event[event] = int(_per_event.get(event, 1)) - 1
+
+
+## Takes a finished voice out of the tree and keeps it for the next sound.
+static func _release(player: AudioStreamPlayer3D) -> void:
+	if not is_instance_valid(player) or player.get_parent() == null:
+		return
+	player.stop()
+	player.remove_from_group(VOICE_GROUP)
+	player.remove_from_group(StringName("sfx_" + String(player.get_meta(&"sfx_event", &""))))
+	player.get_parent().remove_child(player)
+	_idle.append(player)
 
 
 # Stops every live voice. Call before SceneTree.quit(): a voice still playing at
@@ -302,6 +344,12 @@ static func play(parent: Node, event: StringName, position := Vector3.INF, volum
 static func stop_all(tree: SceneTree) -> void:
 	for voice in tree.get_nodes_in_group(VOICE_GROUP):
 		(voice as AudioStreamPlayer3D).stop()
+	# Pooled voices and cached recordings are static: free them so exit reports no leaks.
+	for idle in _idle:
+		if is_instance_valid(idle):
+			(idle as Node).free()
+	_idle.clear()
+	_streams.clear()
 
 
 # Non-positional interface cues use a dry bus and their own small voice budget,
