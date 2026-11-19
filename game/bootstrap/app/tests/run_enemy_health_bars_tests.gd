@@ -35,6 +35,9 @@ func _only_same_room() -> void:
 	zone.set("room_id", 7)
 	var inside: Array = BARS.rooms_at(self, Vector3(1, 0, 1))
 	_check(inside == [7] and BARS.rooms_at(self, Vector3(30, 0, 0)).is_empty(), "A point inside a zone belongs to its room, outside belongs to none")
+	_check(BARS.covered_by_other_room(self, Vector3(5.3, 0, 0), []), "A point just past a fogged room counts as covered for a hero outside it")
+	_check(not BARS.covered_by_other_room(self, Vector3(5.3, 0, 0), [7]) and not BARS.covered_by_other_room(self, Vector3(1, 0, 1), [7]), "A hero in the same room is not covered by its own fog")
+	_check(not BARS.covered_by_other_room(self, Vector3(30, 0, 0), []), "A point far from every fogged room is not covered")
 	stage.free()
 
 

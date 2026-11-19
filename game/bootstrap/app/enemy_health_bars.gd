@@ -12,6 +12,8 @@ const LOW_HEALTH := 45.0
 const HIGH_HEALTH := 2700.0
 ## Bars past this distance are too small to read and cost a projection each, so they are skipped.
 const MAX_DISTANCE := 40.0
+## shortcut: a fixed 0.6 m reach past a fogged footprint, not measured from the fog shader; upgrade if bars still float over fog
+const COVER_MARGIN := 0.6
 const SHADER := preload("res://game/bootstrap/app/enemy_health_bar.gdshader")
 
 var camera: Camera3D
@@ -49,6 +51,8 @@ func _draw() -> void:
 			continue
 		if hero != null and not same_room(hero_rooms, rooms_at(get_tree(), body.global_position)):
 			continue
+		if covered_by_other_room(get_tree(), body.global_position, hero_rooms):
+			continue
 		var max_hp := float(body.get("max_health"))
 		var hp := float(body.get("health"))
 		if max_hp <= 0.0 or hp <= 0.0:
@@ -63,6 +67,19 @@ func _draw() -> void:
 		if not (origin.is_finite() and is_finite(hp / max_hp)) or not Rect2(Vector2.ZERO, get_viewport_rect().size).grow(bar.x).intersects(Rect2(origin, bar)):
 			continue
 		_draw_bar(Rect2(origin, bar), clampf(hp / max_hp, 0.0, 1.0))
+
+
+## A covered room's fog darkens the screen around its enemies, and the bar is drawn in screen space on top of it.
+## A point near a fogged zone the hero is not in counts as covered (the margin takes in the body the fog hides).
+static func covered_by_other_room(tree: SceneTree, point: Vector3, hero_rooms: Array) -> bool:
+	for zone: Node in tree.get_nodes_in_group("darkness_zone"):
+		var overlay := zone.get("overlay") as MeshInstance3D
+		if overlay == null or not overlay.visible or float(zone.call("_edge_distance", point)) > COVER_MARGIN:
+			continue
+		var id: int = zone.get("room_id")
+		if not hero_rooms.has(id if id > 0 else -zone.get_instance_id()):
+			return true
+	return false
 
 
 ## Darkness zones covering a point: a room is one id however many zones it has, a lone zone counts as its own room.
