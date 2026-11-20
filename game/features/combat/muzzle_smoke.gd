@@ -17,7 +17,9 @@ static func emit_at(anchor: Node3D, axis: Vector3) -> void:
 		anchor.add_child(particles)
 	particles.emitting = true
 	var timer := particles.get_child(0) as Timer
-	timer.start(STOP_AFTER)
+	# Timer.start() errors outside the tree; a refused add_child leaves the puff detached.
+	if timer.is_inside_tree():
+		timer.start(STOP_AFTER)
 
 
 static func _create(axis: Vector3) -> GPUParticles3D:
