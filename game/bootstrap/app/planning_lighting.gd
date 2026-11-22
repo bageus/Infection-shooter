@@ -8,6 +8,9 @@ extends Node
 		if is_instance_valid(_local_toggle):
 			_local_toggle.set_pressed_no_signal(value)
 
+const ROOM_CULL := preload("res://game/presentation/office_floor/public/room_cull.gd")
+const VIEW_SECONDS := 0.2
+var _view_left := 0.0
 var _local_toggle: CheckButton
 var _scene_tree: SceneTree
 var world_environment: WorldEnvironment
@@ -83,6 +86,11 @@ func _ready() -> void:
 
 
 func _process(delta: float) -> void:
+	_view_left -= delta
+	if _view_left <= 0.0:
+		_view_left = VIEW_SECONDS
+		var player := get_tree().get_first_node_in_group(&"player") as Node3D
+		ROOM_CULL.update_view(get_tree(), get_viewport().get_camera_3d(), player)
 	_refresh_left -= delta
 	if _refresh_left <= 0.0:
 		_refresh_left = REFRESH_SECONDS
