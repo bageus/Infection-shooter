@@ -33,7 +33,7 @@ func _run() -> void:
 	player.set_physics_process(false)
 	var planner: Node = stage.get("planning_mode")
 	var catalog = planner.get("catalog")
-	_check(catalog.group_catalogs["13"].size() == 10, "All ten wall objects are in group 13")
+	_check(catalog.group_catalogs["13"].size() == 11, "All ten wall objects and the shooting range target are in group 13")
 	_check(catalog.group_catalogs["01"].size() == 44 and catalog.group_catalogs["09"].size() == 97, "Palette lists models from group subfolders")
 	_check(catalog.group_catalogs["14"].size() == 6 and catalog.group_catalogs["15"].size() == 17, "Groups 14 and 15 are in the palette")
 	var root_view: Array = catalog.folder_view("01", "")

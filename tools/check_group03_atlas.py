@@ -3,7 +3,7 @@
 import argparse, json, math
 from pathlib import Path
 import numpy as np
-from build_group03_atlas import ROOT, GROUP, SOURCE_REF, git_bytes, stages, collect
+from build_group03_atlas import ROOT, GROUP, SOURCE_REF, ATLAS_MODELS, git_bytes, stages, collect
 from check_group01_atlas import read_glb, accessor, containing_tile
 from check_model_textures import audit, validate_png
 
@@ -45,10 +45,13 @@ def main():
     parser=argparse.ArgumentParser(description=__doc__);parser.add_argument('--compare-source',action='store_true');args=parser.parse_args()
     layout=json.loads((GROUP/'atlas_layout.json').read_text());manifest=json.loads((GROUP/'lazy_stages.json').read_text())
     originals=list(GROUP.glob('*.glb'));assert len(originals)==15 and len(manifest)==15
-    resources=list(GROUP.rglob('*.glb'));assert len(resources)==53
+    resources=list(GROUP.rglob('*.glb'));assert len(resources)==15+sum(len(v) for v in manifest.values())
     for path in resources:
         assert not audit(path)['errors'],path.name
         doc,binary=read_glb(path.read_bytes());assert len(doc['scenes'])==1
+        # Intact models re-authored with embedded palette textures (not the atlas) are checked for structure only.
+        atlas=all('uri' in image for image in doc['images']) and bool(doc['images'])
+        if not atlas:continue
         live=set()
         for mesh in doc['meshes']:
             for p in mesh['primitives']:
@@ -60,17 +63,19 @@ def main():
         assert live==set(range(len(doc['accessors']))),path.name+': orphan accessor'
         assert {a['bufferView'] for a in doc['accessors']}==set(range(len(doc['bufferViews']))),path.name+': orphan view'
         assert len(binary)-sum(v['byteLength'] for v in doc['bufferViews'])<=4*len(doc['bufferViews'])
-        profile=Path(str(path)+'.import').read_text();assert 'group03_material_post_import.gd' in profile
+        assert 'group03_material_post_import.gd' in Path(str(path)+'.import').read_text()
     for kind,limit in [('albedo',2048),('normal',1024),('orm',1024),('emission',1024)]:
         path=GROUP/f'textures/unified/group03_{kind}.png';validate_png(path.read_bytes());profile=Path(str(path)+'.import').read_text()
         for setting in ['compress/mode=2','mipmaps/generate=true','process/size_limit='+str(limit)]:assert setting in profile
     if args.compare_source:
         for path in originals:
+            if path.name not in ATLAS_MODELS:continue
             old,oldbin=read_glb(git_bytes(SOURCE_REF,path.relative_to(ROOT).as_posix()))
             targets={'Intact':path,**{entry['name']:ROOT/entry['path'][6:] for entry in manifest[path.name]}}
             for name,roots,parent in stages(old):
+                if name not in targets:continue
                 new,newbin=read_glb(targets[name].read_bytes());before=triangles(old,oldbin,collect(old,roots,parent));after=triangles(new,newbin,collect(new,new['scenes'][0]['nodes']))
                 preserve(before,after,path.name+'/'+name)
-    print('Group03 atlas: 15 intact models, 38 lazy stages, UV/PBR/import/geometry PASS')
+    print('Group03 atlas: 15 intact models, %d lazy stages'%sum(len(v) for v in manifest.values())+', UV/PBR/import/geometry PASS')
 
 if __name__=='__main__':main()

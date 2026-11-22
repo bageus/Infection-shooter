@@ -131,7 +131,8 @@ def validate_model(path, layout):
     doc, binary = read_glb(path.read_bytes())
     # Non-destructible models carry their own materials and are outside the atlas.
     # 01_stairs_2 keeps its own embedded 1024 px maps and is outside the atlas.
-    atlas = 'images' in doc and path.name not in SELF_TEXTURED
+    # Models re-authored with embedded textures (no external image URI) are outside the atlas.
+    atlas = bool(doc.get('images')) and all('uri' in image for image in doc['images']) and path.name not in SELF_TEXTURED
     if atlas:
         assert doc['images'] == [{'uri': os.path.relpath(GROUP/f'textures/unified/group01_{kind}.png', path.parent).replace(os.sep, '/')} for kind in ['albedo', 'normal', 'orm']], f'{path.name}: stale images'
         assert len(doc['textures']) == 3
@@ -152,7 +153,7 @@ def validate_model(path, layout):
                 if 'VECTRION' in path.name:
                     assert tile == 'brushed_steel', 'VECTRION is not assigned to metal'
     assert live == set(range(len(doc['accessors']))), f'{path.name}: orphan accessors'
-    assert {a['bufferView'] for a in doc['accessors']} == set(range(len(doc['bufferViews']))), f'{path.name}: orphan buffers'
+    assert {a['bufferView'] for a in doc['accessors']} | {i['bufferView'] for i in doc.get('images', []) if 'bufferView' in i} == set(range(len(doc['bufferViews']))), f'{path.name}: orphan buffers'
     used_bytes = sum(v['byteLength'] for v in doc['bufferViews'])
     assert len(binary)-used_bytes <= 4*len(doc['bufferViews']), f'{path.name}: stale binary payload'
     if not atlas:
@@ -181,7 +182,7 @@ def main():
         profile = Path(str(p)+'.import').read_text()
         for setting in ['compress/mode=2', 'mipmaps/generate=true', 'process/size_limit='+str(size), 'detect_3d/compress_to=0']:
             assert setting in profile, f'{kind}: wrong import budget'
-    atlas_count = sum('images' in read_glb(path.read_bytes())[0] for path in paths)
+    atlas_count = sum(all('uri' in i for i in read_glb(path.read_bytes())[0].get('images', [{}])) and 'images' in read_glb(path.read_bytes())[0] for path in paths)
     print(f'Group 01 atlas: {atlas_count} atlas models of {len(paths)}; UV, metal, buffers and budgets PASS' + ('; geometry/stages match '+args.compare_ref if args.compare_ref else ''))
 
 

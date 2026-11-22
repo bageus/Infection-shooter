@@ -16,6 +16,8 @@ TEXTURE_REF = '8d2452437ea8a6465b44bbb2cedcd402df302ce5'
 METAL_REF = 'f49af602b5bb533bdf18e9d12e74a30b2706a9c4^'
 SIZE, CELL, GUTTER = 2048, 512, 16
 KINDS = ['albedo', 'normal', 'orm', 'emission']
+# Only these intact models still use the atlas; the others carry embedded palettes and are never rebuilt.
+ATLAS_MODELS = {'03_book_case.glb', '03_book_case_small.glb', '03_server_rack.glb'}
 
 
 def git_bytes(ref, path):
@@ -230,6 +232,9 @@ def build_model(path,doc,binary,mapping):
     manifest=[];statistics=[]
     all_stages=stages(doc)
     for stage,roots,parent in all_stages:
+        target=path if stage=='Intact' else GROUP/'damage'/f'{path.stem}_{stage.lower()}.glb'
+        # Deleted stages stay deleted.
+        if stage!='Intact' and not target.exists():continue
         entries=collect(doc,roots,parent);writer=Writer();nodes=[]
         for name,part in chunks(entries,stage):
             groups=geometry(doc,binary,part,mapping)
@@ -238,8 +243,8 @@ def build_model(path,doc,binary,mapping):
                 opaque={k:v for k,v in groups.items() if k!=2};mesh=writer.mesh(name,opaque);nodes.append({'name':name,'mesh':mesh});nodes.append({'name':name+'_Glass','mesh':writer.mesh(name+'_Glass',{2:groups[2]})})
             else:nodes.append({'name':name,'mesh':writer.mesh(name,groups)})
         mesh_nodes=list(range(len(nodes)));nodes.append({'name':stage,'children':mesh_nodes});root_index=len(nodes)-1
-        target=path if stage=='Intact' else GROUP/'damage'/f'{path.stem}_{stage.lower()}.glb'
-        writer.save(target,nodes,[{'name':path.stem,'nodes':[root_index]}])
+        # The current intact GLB is never overwritten.
+        if stage!='Intact':writer.save(target,nodes,[{'name':path.stem,'nodes':[root_index]}])
         if stage!='Intact':manifest.append({'name':stage,'path':'res://'+target.relative_to(ROOT).as_posix()})
         statistics.append({'stage':stage,'source_mesh_nodes':len(entries),'mesh_nodes':len(mesh_nodes),'surfaces':sum(len(m['primitives']) for m in writer.meshes),'bytes':target.stat().st_size})
     return manifest,statistics
@@ -248,8 +253,10 @@ def build_model(path,doc,binary,mapping):
 def main():
     parser=argparse.ArgumentParser(description=__doc__);parser.add_argument('--apply',action='store_true',required=True);parser.parse_args()
     paths=sorted(GROUP.glob('*.glb'));docs=[(p,*read_glb(git_bytes(SOURCE_REF,p.relative_to(ROOT).as_posix()))) for p in paths]
-    mapping,tiles=build_atlas(docs);manifest={};stats={}
+    mapping,tiles=build_atlas(docs);stats={}
+    manifest=json.loads((GROUP/'lazy_stages.json').read_text())
     for path,doc,binary in docs:
+        if path.name not in ATLAS_MODELS:continue
         manifest[path.name],stats[path.name]=build_model(path,doc,binary,mapping);print(path.name,stats[path.name],flush=True)
     (GROUP/'lazy_stages.json').write_text(json.dumps(manifest,indent=2)+'\n')
     layout={'source_ref':SOURCE_REF,'texture_ref':TEXTURE_REF,'metal_ref':METAL_REF,'size':SIZE,'gutter':GUTTER,'tiles':tiles,'models':stats}
