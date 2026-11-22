@@ -36,3 +36,6 @@ model_structure_audit*.csv
 
 # Verified planner recovery copies (runtime/editor-local, not authored assets)
 *.json.bak
+
+# Generated code graph (graphify); shared copy lives in /mnt/project-files/tools/graphify
+/graphify-out/
