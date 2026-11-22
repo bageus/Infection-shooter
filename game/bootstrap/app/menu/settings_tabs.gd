@@ -295,6 +295,13 @@ func _video() -> void:
 	smoke.button_pressed = dialog.view.preferences.values.bullet_impact_smoke
 	smoke.toggled.connect(func(value: bool) -> void: dialog.call("_change", "bullet_impact_smoke", value))
 	dialog.get("layout").add_child(smoke)
+	var hide_unseen := CheckButton.new()
+	hide_unseen.name = "HideUnseenProps"
+	hide_unseen.text = dialog.view.text("hideUnseenProps")
+	hide_unseen.tooltip_text = dialog.view.text("hideUnseenPropsHint")
+	hide_unseen.button_pressed = dialog.view.preferences.values.hide_unseen_props
+	hide_unseen.toggled.connect(func(value: bool) -> void: dialog.call("_change", "hide_unseen_props", value))
+	dialog.get("layout").add_child(hide_unseen)
 
 
 func _shadow_quality() -> void:

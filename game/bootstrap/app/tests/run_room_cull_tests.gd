@@ -43,6 +43,10 @@ func _run() -> void:
 	var outside := _prop(8.0, CHAIR)
 	var wall := _prop(0.0, WALL)
 	var quest := _prop(0.5, CHAIR, {"object_id": "key"})
+	var crate := RigidBody3D.new()
+	crate.position = Vector3(-0.3, 0.0, 0.0)
+	root.add_child(crate)
+	ROOM_CULL.tag(crate, {}, CHAIR)
 	var zone := ZONE.instantiate() as Node3D
 	zone.set("permanent", false)
 	zone.set("room_id", 3)
@@ -50,6 +54,13 @@ func _run() -> void:
 	root.add_child(zone)
 	await create_timer(0.6).timeout
 	_expect(not inside.visible, "Furniture in a fogged room is hidden")
+	_expect(crate.freeze and crate.collision_layer == 0 and crate.process_mode == Node.PROCESS_MODE_DISABLED, "A hidden body is parked: frozen, no layers, no processing")
+	door.open = true
+	await create_timer(0.4).timeout
+	_expect(not crate.freeze and crate.collision_layer != 0 and crate.process_mode == Node.PROCESS_MODE_INHERIT, "Showing a body restores its collision and processing")
+	door.open = false
+	await create_timer(0.8).timeout
+	_expect(crate.freeze, "The body is parked again when hidden")
 	_expect(by_wall.visible and outside.visible, "Props at the wall and outside the room stay drawn")
 	_expect(wall.visible and quest.visible, "Structure and id-bound props stay drawn")
 	door.open = true
@@ -75,6 +86,15 @@ func _run() -> void:
 	await create_timer(0.8).timeout
 	_expect(inside.visible, "The open planner always shows the furniture")
 	Engine.set_meta("planning_active", false)
+	# The player setting off keeps every prop drawn and active, even inside a fogged room.
+	ROOM_CULL.enabled = false
+	ROOM_CULL.restore_all(root.get_tree())
+	player.position = Vector3(0.0, 0.0, 0.0)
+	await create_timer(0.2).timeout
+	player.position = Vector3(50.0, 0.0, 50.0)
+	await create_timer(0.8).timeout
+	_expect(inside.visible and not crate.freeze, "With the setting off, nothing is hidden or parked")
+	ROOM_CULL.enabled = true
 	print("Room cull tests: %d failure(s)." % failures)
 	quit(failures)
 
