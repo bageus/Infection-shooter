@@ -11,6 +11,10 @@ const EDGE_MARGIN := 0.3
 ## Player setting: off keeps every prop drawn and simulated, as before culling existed.
 static var enabled := true
 const PARKED := &"parked"
+const REASONS := &"park_reasons"
+const ROOM_REASON := 1
+const VIEW_REASON := 2
+const VIEW_MIN_DISTANCE := 10.0
 static var _grid: Dictionary = {}
 static var _indexed := -1
 
@@ -52,23 +56,45 @@ static func set_shown(props: Array[Node3D], shown: bool) -> void:
 			prop.set_meta(&"room_culled", not shown) # The decor trim must not show a prop its room still hides.
 			if not (shown and prop.get_meta(&"trim_hidden", false)):
 				prop.visible = shown
-			_park(prop, not shown)
+			_park(prop, ROOM_REASON, not shown)
 
 
 ## Shows every culled prop again, used when the setting is switched off.
 static func restore_all(tree: SceneTree) -> void:
 	var culled: Array[Node3D] = []
 	for node in tree.get_nodes_in_group(GROUP):
-		if node is Node3D and bool(node.get_meta(&"room_culled", false)):
-			culled.append(node)
+		if node is Node3D:
+			_park(node as Node3D, VIEW_REASON, false)
+			if bool(node.get_meta(&"room_culled", false)):
+				culled.append(node)
 	set_shown(culled, true)
 
 
-# A hidden prop stops colliding and simulating: its bodies lose their layers and freeze, its scripts stop.
-static func _park(prop: Node3D, park: bool) -> void:
-	if park == prop.has_meta(PARKED):
+## Parks tagged furniture that is out of the camera's view and at least VIEW_MIN_DISTANCE from the player.
+## Runs every few frames from PlanningLighting; the player's surroundings always stay live.
+static func update_view(tree: SceneTree, camera: Camera3D, player: Node3D) -> void:
+	if not enabled or camera == null or player == null:
 		return
-	if park:
+	for node in tree.get_nodes_in_group(GROUP):
+		var prop := node as Node3D
+		if prop == null or not is_instance_valid(prop):
+			continue
+		var at := prop.global_position
+		var near := at.distance_to(player.global_position) < VIEW_MIN_DISTANCE
+		var moving := prop is RigidBody3D and not (prop as RigidBody3D).sleeping
+		var seen := camera.is_position_in_frustum(at) or near
+		_park(prop, VIEW_REASON, not seen and not moving)
+
+
+# A prop stays parked while any reason holds (room hidden, or out of view). Bodies lose their layers and freeze.
+static func _park(prop: Node3D, reason: int, on: bool) -> void:
+	var reasons := int(prop.get_meta(REASONS, 0))
+	var was := reasons != 0
+	reasons = (reasons | reason) if on else (reasons & ~reason)
+	prop.set_meta(REASONS, reasons)
+	if (reasons != 0) == was:
+		return
+	if reasons != 0:
 		var bodies: Array[Dictionary] = []
 		var nodes: Array[Node] = [prop]
 		nodes.append_array(prop.find_children("*", "CollisionObject3D", true, false))
