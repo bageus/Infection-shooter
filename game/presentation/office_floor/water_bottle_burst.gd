@@ -1,6 +1,7 @@
 extends RefCounted
 ## A shot cooler bottle bursts and spills its water; it never drops off whole.
-const PET_MATERIAL := "transparent_pet_bottle"
+# The re-authored cooler models name the bottle material "...Transparent3_4".
+const PET_MATERIAL := "transparent"
 const WATER := Color(0.62, 0.84, 0.96, 0.55)
 const OUTLINE_POINTS := 28
 
