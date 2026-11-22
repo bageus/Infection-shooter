@@ -8,6 +8,9 @@ const STRUCTURE_DIR := "/enviroments/01/"
 const ENVIRONMENT_DIR := "/enviroments/"
 const CELL := 4.0
 const EDGE_MARGIN := 0.3
+## Player setting: off keeps every prop drawn and simulated, as before culling existed.
+static var enabled := true
+const PARKED := &"parked"
 static var _grid: Dictionary = {}
 static var _indexed := -1
 
@@ -21,8 +24,10 @@ static func tag(node: Node3D, record: Dictionary, scene_path: String) -> void:
 
 ## Visible tagged props whose centre lies inside the zone rectangle, away from its walls.
 static func props_in(zone: Node3D, size: Vector2, tree: SceneTree) -> Array[Node3D]:
-	_index(tree)
 	var found: Array[Node3D] = []
+	if not enabled:
+		return found
+	_index(tree)
 	var inverse := zone.global_transform.affine_inverse()
 	var half := size * 0.5 - Vector2.ONE * EDGE_MARGIN
 	var reach := size.length() * 0.5
@@ -47,6 +52,49 @@ static func set_shown(props: Array[Node3D], shown: bool) -> void:
 			prop.set_meta(&"room_culled", not shown) # The decor trim must not show a prop its room still hides.
 			if not (shown and prop.get_meta(&"trim_hidden", false)):
 				prop.visible = shown
+			_park(prop, not shown)
+
+
+## Shows every culled prop again, used when the setting is switched off.
+static func restore_all(tree: SceneTree) -> void:
+	var culled: Array[Node3D] = []
+	for node in tree.get_nodes_in_group(GROUP):
+		if node is Node3D and bool(node.get_meta(&"room_culled", false)):
+			culled.append(node)
+	set_shown(culled, true)
+
+
+# A hidden prop stops colliding and simulating: its bodies lose their layers and freeze, its scripts stop.
+static func _park(prop: Node3D, park: bool) -> void:
+	if park == prop.has_meta(PARKED):
+		return
+	if park:
+		var bodies: Array[Dictionary] = []
+		var nodes: Array[Node] = [prop]
+		nodes.append_array(prop.find_children("*", "CollisionObject3D", true, false))
+		for node in nodes:
+			if node is CollisionObject3D:
+				var body := node as CollisionObject3D
+				var rigid := body as RigidBody3D
+				bodies.append({"body": body, "layer": body.collision_layer, "mask": body.collision_mask, "freeze": rigid.freeze if rigid else false})
+				body.collision_layer = 0
+				body.collision_mask = 0
+				if rigid:
+					rigid.freeze = true
+		prop.set_meta(PARKED, {"process": prop.process_mode, "bodies": bodies})
+		prop.process_mode = Node.PROCESS_MODE_DISABLED
+		return
+	var saved: Dictionary = prop.get_meta(PARKED)
+	prop.remove_meta(PARKED)
+	prop.process_mode = saved.process
+	for entry: Dictionary in saved.bodies:
+		var body := entry.body as CollisionObject3D
+		if not is_instance_valid(body):
+			continue
+		body.collision_layer = entry.layer
+		body.collision_mask = entry.mask
+		if body is RigidBody3D:
+			(body as RigidBody3D).freeze = entry.freeze
 
 
 # One pass over all tagged props, redone when props are added or removed.
