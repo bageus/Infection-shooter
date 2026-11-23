@@ -22,6 +22,8 @@ var _hints_were_visible := true
 func setup(stage: Node3D, player: Node3D, _infection: Node) -> void:
 	_stage = stage
 	_player = player
+	# The planner pauses the tree; stairs placed there must cut the floor at once, so the scan keeps running.
+	process_mode = Node.PROCESS_MODE_ALWAYS
 	_objects = stage.get_node("PlanningObjects")
 	_objects.child_entered_tree.connect(_on_planning_child_entered)
 	_objects.child_exiting_tree.connect(_on_planning_child_exiting)
@@ -31,6 +33,7 @@ func setup(stage: Node3D, player: Node3D, _infection: Node) -> void:
 	_refresh_stairs()
 	_hints = FLOOR_HINT.new()
 	_hints.name = "FloorHints"
+	_hints.process_mode = Node.PROCESS_MODE_PAUSABLE # Chevrons stay frozen while paused; only the stair scan runs on pause.
 	_hints.player = player
 	_hints.target_source = floor_hint_target
 	add_child(_hints)
