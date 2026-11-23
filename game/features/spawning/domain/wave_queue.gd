@@ -31,7 +31,7 @@ func activate(point_id: String, config: Dictionary) -> bool:
 	var clean := SPAWN_CONFIG.sanitize_queue(config)
 	var entries: Array[Dictionary] = []
 	for entry: Dictionary in clean["enemies"]:
-		entries.append({"enemy": entry["enemy"], "remaining": int(entry["count"])})
+		entries.append({"enemy": entry["enemy"], "remaining": int(entry["count"]), "skins": entry.get("skins", {})})
 	_plans.append({"id": point_id, "config": clean, "entries": entries, "remaining": SPAWN_CONFIG.total_count(clean), "cooldown": 0.0, "turn": 0})
 	return true
 
@@ -60,8 +60,8 @@ func clear() -> void:
 	_cursor = 0
 
 
-## Advances every wave by `delta` and returns [{"id", "count", "enemies"}] to spawn now;
-## "enemies" names the kind of each infected, taking turns between the queue's kinds.
+## Advances every wave by `delta` and returns [{"id", "count", "enemies", "skins"}] to spawn now;
+## "enemies" names the kind of each infected, taking turns between the queue's kinds; "skins" is its costume.
 ## `alive_total` is every living infected on the level; `alive_by_point` maps a
 ## point id to how many of its own are alive (the "refill" rule).
 func step(delta: float, alive_total: int, cap: int, alive_by_point: Dictionary) -> Array[Dictionary]:
@@ -80,7 +80,12 @@ func step(delta: float, alive_total: int, cap: int, alive_by_point: Dictionary) 
 		var count := mini(_wanted(plan, int(alive_by_point.get(plan["id"], 0))), free)
 		if count <= 0:
 			continue
-		orders.append({"id": plan["id"], "count": count, "enemies": _take(plan, count)})
+		var enemies: Array[String] = []
+		var skins: Array[String] = []
+		for take: Dictionary in _take(plan, count):
+			enemies.append(take["enemy"])
+			skins.append(take["skin"])
+		orders.append({"id": plan["id"], "count": count, "enemies": enemies, "skins": skins})
 		plan["remaining"] = int(plan["remaining"]) - count
 		plan["cooldown"] = float(plan["config"]["interval"])
 		free -= count
@@ -91,16 +96,17 @@ func step(delta: float, alive_total: int, cap: int, alive_by_point: Dictionary) 
 	return orders
 
 
-func _take(plan: Dictionary, count: int) -> Array[String]:
-	var kinds: Array[String] = []
+func _take(plan: Dictionary, count: int) -> Array[Dictionary]:
+	var takes: Array[Dictionary] = []
 	var entries: Array = plan["entries"]
-	while kinds.size() < count:
+	while takes.size() < count:
 		var entry: Dictionary = entries[int(plan["turn"]) % entries.size()]
 		plan["turn"] = int(plan["turn"]) + 1
 		if int(entry["remaining"]) > 0:
 			entry["remaining"] = int(entry["remaining"]) - 1
-			kinds.append(str(entry["enemy"]))
-	return kinds
+			var enemy := str(entry["enemy"])
+			takes.append({"enemy": enemy, "skin": SPAWN_CONFIG.pick_skin(enemy, entry["skins"], randf())})
+	return takes
 
 
 func _wanted(plan: Dictionary, alive_own: int) -> int:

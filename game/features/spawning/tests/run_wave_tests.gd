@@ -19,6 +19,7 @@ func _run() -> void:
 	_trigger_rules()
 	_queue_rules()
 	_mixed_queue()
+	_skins()
 	await _director()
 	await _burst_spread()
 	await _queues()
@@ -127,6 +128,25 @@ func _mixed_queue() -> void:
 	_check(kinds.size() == 4 and kinds.count("hunger") == 3 and kinds.count("brute") == 1, "a queue spawns each of its kinds in full %s" % str(kinds))
 	_check(kinds[0] != kinds[1], "kinds take turns")
 	_check(queue.pending("m") == 0, "the mixed queue is spent")
+
+
+func _skins() -> void:
+	var auto := CONFIG.skin_shares({})
+	_check(is_equal_approx(auto["normal"], 40.0) and is_equal_approx(auto["janitor"], 10.0) and auto["scientist"] == 0.0 and auto["hazmat"] == 0.0, "auto skins: 50/50 suits, janitors and guards 20%, scientists and hazmat never mixed")
+	var sci := CONFIG.with_skin_share({}, "scientist", 10.0)
+	var both := CONFIG.with_skin_share(sci, "hazmat", 5.0)
+	_check(is_equal_approx(sci["scientist"], 10.0) and is_equal_approx(both["hazmat"], 5.0) and is_equal_approx(both["scientist"], 10.0), "a manual share stays as set")
+	var shares := CONFIG.skin_shares(both)
+	_check(is_equal_approx(shares.values().reduce(func(acc: float, v: float) -> float: return acc + v, 0.0), 100.0) and is_equal_approx(shares["normal"], 34.0), "the auto split takes the rest of the total")
+	_check(CONFIG.pick_skin("titan", {"hazmat": 100.0}, 0.5) == "normal", "kinds without costumes always spawn normal")
+	_check(CONFIG.pick_skin("hunger", {"hazmat": 100.0}, 0.99) == "hazmat", "a 100% manual skin is always picked")
+	_check(CONFIG.pick_skin("hunger", {}, 0.85) == "janitor" and CONFIG.pick_skin("hunger", {}, 0.1) == "normal", "auto roll picks by the auto split")
+	var clean := CONFIG.sanitize({"queues": [{"enemies": [{"enemy": "brute", "count": 3, "skins": {"scientist": 150, "bogus": 5}}]}]})
+	_check(clean["queues"][0]["enemies"][0]["skins"] == {"scientist": 100.0}, "sanitize keeps known skins and clamps them")
+	var queue := QUEUE.new()
+	queue.activate("s", {"enemies": [{"enemy": "hunger", "count": 4, "skins": {"hazmat": 100}}], "interval": 0.1, "rule": "burst", "batch": 10})
+	var order := queue.step(0.1, 0, 90, {})[0]
+	_check(order["skins"] == ["hazmat", "hazmat", "hazmat", "hazmat"], "queue orders carry each infected's skin")
 
 
 func _stage() -> Dictionary:
