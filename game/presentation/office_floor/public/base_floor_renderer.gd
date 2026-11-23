@@ -21,6 +21,7 @@ const LOOKS := {"tile": 0, "concrete": 1, "wood": 2, "carpet": 3, "lab_tile": 4}
 @export var tile_step := 2.0
 @export var tile_y := 0.001
 var openings: Array[Rect2] = []
+var cell_looks: Dictionary = {} # Vector2i grid cell -> look name, painted over floor_type
 var _batches: Dictionary = {}
 var _tile_mesh: Mesh
 var _materials: Array[ShaderMaterial] = []
@@ -91,7 +92,8 @@ func _add_tile(center: Vector2, tile_scale: float, tile_offset: Vector2) -> void
 	# Partition by location and material so camera culling stays local.
 	var cell := Vector2i(floori((center.x + floor_size.x * 0.5) / tile_step), floori((center.y + floor_size.y * 0.5) / tile_step))
 	var variant := posmod(hash(cell), MATERIAL_VARIANTS)
-	var key := Vector4i(floori(float(cell.x) / SECTION_TILES), floori(float(cell.y) / SECTION_TILES), variant, int(tile_scale < 1.0))
+	var look: int = LOOKS.get(cell_looks.get(cell, floor_type), 0)
+	var key := Vector4i(floori(float(cell.x) / SECTION_TILES), floori(float(cell.y) / SECTION_TILES), look * MATERIAL_VARIANTS + variant, int(tile_scale < 1.0))
 	if not _batches.has(key):
 		_batches[key] = []
 	# The mesh is a 2 m tile; a larger or smaller grid scales it, and the shader's tile space stays +-1.
@@ -126,13 +128,15 @@ func _flush_batches() -> void:
 
 
 func _build_materials() -> void:
-	for index in MATERIAL_VARIANTS:
-		# Shallow copies share the generated textures across the entire floor.
-		var material := TILE_MATERIAL.duplicate(false) as ShaderMaterial
-		material.set_shader_parameter("look", LOOKS.get(floor_type, 0))
-		material.set_shader_parameter("tint", 0.99 + float(index) * (0.02 / float(MATERIAL_VARIANTS - 1)))
-		material.set_shader_parameter("roughness_offset", (float(index) - float(MATERIAL_VARIANTS - 1) * 0.5) * 0.006)
-		_materials.append(material)
+	# One material per look and variant, indexed look * MATERIAL_VARIANTS + variant.
+	for look in LOOKS.size():
+		for index in MATERIAL_VARIANTS:
+			# Shallow copies share the generated textures across the entire floor.
+			var material := TILE_MATERIAL.duplicate(false) as ShaderMaterial
+			material.set_shader_parameter("look", look)
+			material.set_shader_parameter("tint", 0.99 + float(index) * (0.02 / float(MATERIAL_VARIANTS - 1)))
+			material.set_shader_parameter("roughness_offset", (float(index) - float(MATERIAL_VARIANTS - 1) * 0.5) * 0.006)
+			_materials.append(material)
 
 
 func set_stair_openings(areas: Array[Rect2]) -> void:
@@ -160,14 +164,41 @@ func set_tile_step(step: float) -> void:
 		_build_tiles()
 
 
-## Switches the material look; like a resize it rebuilds the sections, so floor stamps are cleared.
+## Switches the default look of the whole floor; like a resize it rebuilds the sections, so floor stamps are cleared.
 func set_floor_type(type: String) -> void:
 	if type == floor_type:
 		return
 	floor_type = type
-	_materials.clear()
 	if is_node_ready():
 		_build_tiles()
+
+
+## Paints one grid cell at a floor-local XZ point with a look; returns true when the cell changed.
+func paint_floor_cell(at: Vector2, type: String) -> bool:
+	if not LOOKS.has(type) or not Rect2(-floor_size * 0.5, floor_size).has_point(at):
+		return false
+	var cell := Vector2i(floori((at.x + floor_size.x * 0.5) / tile_step), floori((at.y + floor_size.y * 0.5) / tile_step))
+	if cell_looks.get(cell, floor_type) == type:
+		return false
+	cell_looks[cell] = type
+	if is_node_ready():
+		_build_tiles()
+	return true
+
+
+## Areas are [x, y, look] per grid cell; an empty list clears every painted cell.
+func set_floor_areas(areas: Array) -> void:
+	cell_looks.clear()
+	for area: Array in areas:
+		cell_looks[Vector2i(int(area[0]), int(area[1]))] = area[2]
+	if is_node_ready():
+		_build_tiles()
+
+
+func get_floor_areas() -> Array:
+	var keys := cell_looks.keys()
+	keys.sort()
+	return keys.map(func(cell: Vector2i) -> Array: return [cell.x, cell.y, cell_looks[cell]])
 
 
 func scatter_glass_debris(panes: Array[MeshInstance3D], direction: Vector3) -> void:

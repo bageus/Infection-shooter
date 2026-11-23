@@ -248,6 +248,8 @@ func restore_authored() -> bool:
 			repair["floor_type_v1"] = authored_layout["floor_type_v1"]
 		if authored_layout.has("floor_tile_step_v1"):
 			repair["floor_tile_step_v1"] = authored_layout["floor_tile_step_v1"]
+		if authored_layout.has("floor_areas_v1"):
+			repair["floor_areas_v1"] = authored_layout["floor_areas_v1"]
 		QUESTS.add_to(session, repair)
 		objects._apply_layout_data(repair)
 	objects.keep_on_clear = {}
