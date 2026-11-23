@@ -10,6 +10,7 @@ extends RefCounted
 
 const DEATH_FALL := preload("res://game/features/infected/death_fall.gd")
 const WORLD_MASK := 1
+const LEG_SETTLE := preload("res://game/features/infected/leg_settle.gd")
 ## Room a standard-size body needs to fall full length, in metres.
 const FALL_LENGTH := 1.6
 ## An obstacle closer than this share of FALL_LENGTH turns the fall aside
@@ -26,6 +27,8 @@ const FLOOR_CLEARANCE := 0.14
 const HEAD_REACH := 0.1
 ## Surfaces steeper than this (|normal.y| below it) count as walls.
 const WALL_NORMAL_Y := 0.5
+## After the freeze the legs swing down for this long, at this rate (rad/s).
+const LEG_SETTLE_TIME := 0.8
 
 var _body: CharacterBody3D
 var _skeleton: Skeleton3D
@@ -39,6 +42,7 @@ var _direction := Vector3.ZERO
 var _reach := 0.0
 var _chest_height := 0.0
 var frozen := false
+var _settle := 0.0 # seconds the legs still have to come down after the freeze
 
 
 ## Turns a fall that would hit a wall straight away; returns the fall result
@@ -83,7 +87,9 @@ func start(body: CharacterBody3D, parts: Node, animation: Node, fall: Dictionary
 ## One physics step of the fall; false once there is nothing left to watch.
 func step(delta: float) -> bool:
 	_remaining -= delta
-	if frozen or _remaining <= 0.0 or not is_instance_valid(_body) or not _body.is_inside_tree():
+	if frozen:
+		return _settle_legs(delta)
+	if _remaining <= 0.0 or not is_instance_valid(_body) or not _body.is_inside_tree():
 		return false
 	var hips := _point(_skeleton, _bones["hips"])
 	var chest := _point(_skeleton, _bones["chest"])
@@ -108,7 +114,18 @@ func step(delta: float) -> bool:
 		# The body rests on a table or a ledge: the fall stops in this pose.
 		_player.pause()
 		frozen = true
+		_settle = LEG_SETTLE_TIME
+		return true
+	return true
+
+
+# Legs hanging past a ledge swing down until the foot reaches the floor or something solid.
+func _settle_legs(delta: float) -> bool:
+	_settle -= delta
+	if _settle <= 0.0 or not is_instance_valid(_body) or not _body.is_inside_tree():
 		return false
+	var axis := Vector3.UP.cross(_direction).normalized() if not _direction.is_zero_approx() else Vector3.RIGHT
+	LEG_SETTLE.lower(_skeleton, _body.get_world_3d(), axis, _excluded, LEG_SETTLE.SWING_RATE * delta)
 	return true
 
 

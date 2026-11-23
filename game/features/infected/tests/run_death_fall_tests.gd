@@ -25,9 +25,10 @@ func _run() -> void:
 	_test_clips()
 	var stage := Node3D.new()
 	root.add_child(stage)
-	_add_box(stage, Vector3(0, -0.5, 0), Vector3(200, 1, 200), 2)
+	_add_box(stage, Vector3(0, -0.5, 0), Vector3(200, 1, 200), 3)
 	await _test_clip_fallback(stage)
 	await _test_part_falls(stage)
+	await _test_legs_settle(stage)
 	print("Death fall tests: %d failures" % failures)
 	quit(1 if failures > 0 else 0)
 
@@ -124,6 +125,21 @@ func _test_part_falls(stage: Node3D) -> void:
 			for number in ["", "2", "3", "4"]:
 				_expect(rig.has_animation(pose + number), "%s has %s." % [enemy_name, pose + number])
 	await process_frame
+	RAGDOLL._active = 0
+
+
+# A death clip may end with a leg in the air: the legs come down onto the floor afterwards.
+func _test_legs_settle(stage: Node3D) -> void:
+	RAGDOLL._active = RAGDOLL.MAX_ACTIVE
+	for weapon in ["SHOTGUN", "PISTOL"]:
+		var enemy := await _spawn(stage, Vector3(0, 0.96, 0))
+		enemy.velocity = Vector3(0, 0, 0)
+		enemy.call("take_projectile_damage", 1000.0, enemy.global_position, Vector3(0, 0, -1), weapon)
+		await create_timer(4.0).timeout
+		var feet := maxf(_bone(enemy, "L_Foot").y, _bone(enemy, "R_Foot").y)
+		_expect(feet < 0.3, "After a %s death both feet lie on the floor (highest %.2f m)." % [weapon, feet])
+		enemy.queue_free()
+		await process_frame
 	RAGDOLL._active = 0
 
 
