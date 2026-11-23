@@ -21,9 +21,9 @@ const WOOD_MARKS := [
 @export var fragment_lifetime := 24.0
 @export var one_leg_tilt_impulse := 3.0
 @export var two_leg_tilt_impulse := 4.0
-# Pieces of a lost leg may not prop the table up where the leg stood; after this the table clears them.
 const SAG_SHIFT := 0.45
-const LEG_PIECE_CLEAR_TIME := 1.2
+# A table on its remaining legs is a stable tripod, so after this delay the rest of the legs give way and the top falls to the floor.
+const COLLAPSE_DELAY := 0.7
 
 var _stage_scenes: Array[PackedScene] = [] # keep loaded stage resources alive
 var _intact: Node3D
@@ -241,10 +241,26 @@ func _on_leg_lost(part_id: String, _hit_position: Vector3, blast: bool = false) 
 	_assembly.sleeping = false
 	_assembly.apply_torque_impulse(Vector3.UP.cross(tilt) * strength)
 	_wake_tabletop_items(tilt, strength if blast else 0.0)
+	var assembly := _assembly
+	get_tree().create_timer(COLLAPSE_DELAY).timeout.connect(
+		func() -> void:
+			if is_instance_valid(self) and _assembly == assembly and assembly != null:
+				_detach_legs(-tilt)
+	)
 
 
 func _drop_remaining_legs(_hit_position: Vector3, direction: Vector3, blast: bool = false) -> void:
 	_wake_tabletop_items(direction, two_leg_tilt_impulse if blast else 0.0)
+	_detach_legs(direction, blast)
+	_modular.reparent(get_node("Visual"), true)
+	_modular.hide()
+	_assembly.collision_layer = 0
+	_assembly.queue_free()
+	_assembly = null
+
+
+# The legs still standing come off as separate bodies; the assembly keeps only the top.
+func _detach_legs(direction: Vector3, blast: bool = false) -> void:
 	for part_id in LEG_IDS:
 		if not _active.has(part_id):
 			continue
@@ -269,12 +285,10 @@ func _drop_remaining_legs(_hit_position: Vector3, direction: Vector3, blast: boo
 		if blast:
 			body.apply_impulse((outward + Vector3.UP * 0.15).normalized() * fragment_impulse, Vector3.UP * 0.25)
 			body.apply_torque_impulse(Vector3.UP.cross(outward) * fragment_impulse * 0.4)
+		if _assembly != null:
+			(_part_shapes[part_id] as CollisionShape3D).set_deferred("disabled", true)
+			_clear_from_assembly(body)
 		_schedule_settle(body, fragment_lifetime * 2.0)
-	_modular.reparent(get_node("Visual"), true)
-	_modular.hide()
-	_assembly.collision_layer = 0
-	_assembly.queue_free()
-	_assembly = null
 
 
 func _wake_tabletop_items(direction: Vector3, strength: float) -> void:
@@ -329,15 +343,9 @@ func _spawn_piece(part_id: String, source_name: String, source_current: Transfor
 	_schedule_settle(body, fragment_lifetime if final_stage else fragment_lifetime * 2.0)
 
 
-# The pieces of a broken leg fall out from under the table instead of holding it up where the leg stood.
+# Leg pieces never hold the table up; a collapsing top would otherwise come to rest on them at an angle.
 func _clear_from_assembly(piece: RigidBody3D) -> void:
-	var table_body := _assembly
-	piece.add_collision_exception_with(table_body)
-	get_tree().create_timer(LEG_PIECE_CLEAR_TIME).timeout.connect(
-		func() -> void:
-			if is_instance_valid(piece) and is_instance_valid(table_body):
-				piece.remove_collision_exception_with(table_body)
-	)
+	piece.add_collision_exception_with(_assembly)
 
 
 func _schedule_settle(body: RigidBody3D, duration: float) -> void:

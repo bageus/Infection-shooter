@@ -99,7 +99,13 @@ func _staged_table(legs: Array) -> void:
 	_expect(assembly != null, label + " keeps its assembly")
 	if assembly != null:
 		var tilt := rad_to_deg(assembly.global_basis.y.angle_to(Vector3.UP))
-		_expect(tilt > 20.0, label + " tips over (tilt %.1f deg)" % tilt)
+		var top_height := (assembly.get_node("Top") as Node3D).global_position.y - FLOOR_TOP
+		print("  %s: tilt %.1f deg, tabletop centre %.2f m above floor" % [label, tilt, top_height])
+		if tilt > 15.0:
+			for body in table.get_parent().get_children():
+				if body is RigidBody3D and body != assembly:
+					print("    ", body.name, body.global_position, body.sleeping)
+		_expect(tilt < 15.0 and top_height < 0.2, label + " ends up flat on the floor, not propped on its legs (tilt %.1f deg, top %.2f m up)" % [tilt, top_height])
 	stage.queue_free()
 	await process_frame
 
