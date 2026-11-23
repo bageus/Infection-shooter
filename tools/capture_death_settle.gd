@@ -1,7 +1,6 @@
 extends SceneTree
 ## Side contact sheet of a killed infected falling onto a ledge, to check that the legs settle.
-##   xvfb-run -a godot --path . --rendering-method gl_compatibility --script res://tools/capture_death_settle.gd -- <out.png> [ledge|floor] [SHOTGUN|PISTOL]
-const HUNGER := preload("res://game/features/infected/public/infected_hunger.tscn")
+##   xvfb-run -a godot --path . --rendering-method gl_compatibility --script res://tools/capture_death_settle.gd -- <out.png> [ledge|floor] [SHOTGUN|PISTOL] [hunger|brute|revenant|...] [back|forward]
 const CELL := Vector2i(300, 260)
 const TIMES := [0.0, 1.0, 1.6, 4.0, 6.0, 9.0]
 
@@ -29,12 +28,14 @@ func _run() -> void:
 	_box(stage, Vector3(0, -0.5, 0), Vector3(40, 1, 40), 3, Color(0.45, 0.47, 0.5))
 	if ledge:
 		_box(stage, Vector3(0, 0.35, -1.3), Vector3(0.8, 0.7, 4), 1, Color(0.6, 0.45, 0.3))
-	var enemy := HUNGER.instantiate() as CharacterBody3D
+	var kind := args[3] if args.size() > 3 else "hunger"
+	var enemy := (load("res://game/features/infected/public/infected_%s.tscn" % kind) as PackedScene).instantiate() as CharacterBody3D
 	stage.add_child(enemy)
 	enemy.global_position = Vector3(1.6, 0.96, 0)
 	enemy.rotation.y = 0.0
 	await create_timer(0.5).timeout
-	enemy.rotation.y = -PI / 2.0 # faces +z... model front is -z basis; turn so the fall runs along -x
+	# back: the enemy faces the shooter (+x) and is thrown backward; forward: it faces away
+	enemy.rotation.y = (-PI / 2.0 if (args.size() < 5 or args[4] == "back") else PI / 2.0) # faces +z... model front is -z basis; turn so the fall runs along -x
 	var view := SubViewport.new()
 	view.size = CELL
 	view.render_target_update_mode = SubViewport.UPDATE_ALWAYS
@@ -49,7 +50,8 @@ func _run() -> void:
 	var sheet := Image.create(CELL.x * TIMES.size(), CELL.y, false, Image.FORMAT_RGBA8)
 	enemy.velocity = Vector3(0, 0, 0)
 	var dir := Vector3(-1, 0, 0)
-	enemy.call("take_projectile_damage", 1000.0, enemy.global_position + Vector3.UP * 0.2, dir, weapon)
+	enemy.call("take_projectile_damage", 1000.0, enemy.global_position + Vector3.UP * 0.75, dir, weapon)
+	print("CLIP ", kind, " ", enemy.get_node("AnimationDriver").get("animation_player").current_animation)
 	var t := 0.0
 	for i in TIMES.size():
 		await create_timer(TIMES[i] - t).timeout if TIMES[i] > t else await process_frame

@@ -20,6 +20,7 @@ static func lower(skeleton: Skeleton3D, world: World3D, axis: Vector3, exclude: 
 		if thigh < 0 or foot < 0:
 			continue
 		var at := _point(skeleton, foot)
+		moved = _straighten(skeleton, skeleton.find_bone(side + "_Shin"), angle) or moved
 		if _rests(world, at, exclude):
 			continue
 		var best := 0.0
@@ -68,6 +69,19 @@ static func settle_over(owner: Node3D, skeleton: Skeleton3D, delay: float, secon
 		if flat.is_zero_approx() or not lower(skeleton, owner.get_world_3d(), Vector3.UP.cross(flat).normalized(), exclude, SWING_RATE * delta):
 			return
 		await owner.get_tree().process_frame
+
+
+# The knee unbends toward the rest pose (a straight leg); true while it still turns.
+static func _straighten(skeleton: Skeleton3D, shin: int, angle: float) -> bool:
+	if shin < 0:
+		return false
+	var now := skeleton.get_bone_pose_rotation(shin)
+	var rest := skeleton.get_bone_rest(shin).basis.get_rotation_quaternion()
+	var left := now.angle_to(rest)
+	if left < 0.03:
+		return false
+	skeleton.set_bone_pose_rotation(shin, now.slerp(rest, minf(1.0, angle * 1.5 / left)))
+	return true
 
 
 static func _rests(world: World3D, foot_at: Vector3, exclude: Array[RID]) -> bool:
