@@ -5,9 +5,13 @@ render_mode blend_mix, depth_draw_opaque, cull_back, diffuse_burley, specular_sc
 // world-space wear so neighbouring tiles never repeat the same scuffs.
 uniform vec3 base_color : source_color = vec3(0.4, 0.42, 0.44);
 uniform float tint = 1.0;
-// Matte worn concrete instead of tile: no seams, drag scuffs, pitting and traffic polish.
-uniform bool concrete = false;
+// Floor look: 0 grey tile, 1 worn concrete, 2 wood planks, 3 carpet, 4 white lab tile.
+uniform int look = 0;
 uniform vec3 concrete_color : source_color = vec3(0.46, 0.46, 0.45);
+uniform vec3 wood_color : source_color = vec3(0.45, 0.29, 0.15);
+uniform vec3 carpet_color : source_color = vec3(0.2, 0.23, 0.28);
+uniform vec3 lab_color : source_color = vec3(0.86, 0.87, 0.86);
+uniform vec3 lab_grout_color : source_color = vec3(0.5, 0.52, 0.53);
 uniform vec3 grout_color : source_color = vec3(0.17, 0.175, 0.18);
 // Seam half-width and bevel width in metres, measured from the tile edge.
 uniform float grout_width = 0.011;
@@ -77,12 +81,13 @@ void fragment() {
 	float marks = smoothstep(0.8, 0.93, texture(detail_noise, world_xz * 0.23 + vec2(0.13, 0.57)).r) * traffic;
 	float dull = smoothstep(0.35, 0.85, texture(surface_noise, world_xz * 0.3 + vec2(0.61, 0.19)).r) * wear_amount;
 
-	vec3 color = base_color * tint * tile_shade * mix(0.98, 1.02, mottle);
+	vec3 tile_base = look == 4 ? lab_color : base_color;
+	vec3 color = tile_base * tint * tile_shade * mix(0.98, 1.02, mottle);
 	color *= 1.0 - 0.025 * traffic;
 	color *= 1.0 - 0.035 * scuff;
 	color *= 1.0 - 0.04 * marks;
 	color *= 1.0 - 0.14 * bevel;
-	ALBEDO = mix(color, grout_color, grout);
+	ALBEDO = mix(color, look == 4 ? lab_grout_color : grout_color, grout);
 
 	float wear = clamp(dull * 0.25 + scuff * 0.30 + marks * 0.20 + traffic * 0.10, 0.0, 1.0);
 	ROUGHNESS = mix(clamp(roughness_polished + roughness_offset, 0.0, 1.0), roughness_worn, wear);
@@ -91,7 +96,7 @@ void fragment() {
 	SPECULAR = specular_amount * (1.0 - grout);
 	CLEARCOAT = clearcoat_amount * (1.0 - wear * 0.7) * (1.0 - max(grout, bevel * 0.5));
 	CLEARCOAT_ROUGHNESS = mix(0.45, 0.7, wear);
-	if (concrete) {
+	if (look == 1) {
 		float blotch = texture(surface_noise, world_xz * 0.07 + vec2(0.21, 0.43)).r;
 		float cloud = texture(surface_noise, world_xz * 0.9 + vec2(0.52, 0.18)).r;
 		float pits = smoothstep(0.62, 0.86, texture(detail_noise, world_xz * 3.1 + vec2(0.3, 0.8)).r);
@@ -104,6 +109,33 @@ void fragment() {
 		float concrete_wear = clamp(traffic * 0.5 + drag * 0.5, 0.0, 1.0);
 		ROUGHNESS = clamp(mix(0.9, 0.72, concrete_wear) + roughness_offset + pits * 0.06, 0.0, 1.0);
 		SPECULAR = 0.18 + 0.12 * concrete_wear;
+		CLEARCOAT = 0.0;
+	}
+	if (look == 2) {
+		// Planks run along X: 0.2 m wide rows, 1.2 m long pieces staggered by row, in world space so they run on across tiles.
+		float row = floor(world_xz.y / 0.2);
+		float along = (world_xz.x + row * 0.6) / 1.2;
+		float plank_tint = 0.85 + 0.3 * tile_hash(vec2(row, floor(along)));
+		float grain = texture(detail_noise, vec2(world_xz.x * 0.35, world_xz.y * 4.0)).r;
+		vec3 wood = wood_color * tint * plank_tint * mix(0.85, 1.1, grain);
+		float seam_row = min(fract(world_xz.y / 0.2), 1.0 - fract(world_xz.y / 0.2)) * 0.2;
+		float seam_end = min(fract(along), 1.0 - fract(along)) * 1.2;
+		float seam = 1.0 - smoothstep(0.004, 0.008, min(seam_row, seam_end));
+		ALBEDO = mix(wood, wood * 0.35, seam);
+		ROUGHNESS = clamp(0.42 + roughness_offset + 0.2 * (1.0 - grain) + 0.1 * traffic, 0.0, 1.0);
+		SPECULAR = 0.5;
+		CLEARCOAT = 0.3;
+	}
+	if (look == 3) {
+		// Carpet tiles: 0.5 m squares with a faint seam and short fibre noise, no gloss.
+		float pile = texture(detail_noise, world_xz * 9.0).r;
+		float fleck = texture(surface_noise, world_xz * 2.4 + vec2(0.4, 0.9)).r;
+		vec2 f = fract(world_xz * 2.0);
+		float seam = 1.0 - smoothstep(0.0, 0.02, min(min(f.x, 1.0 - f.x), min(f.y, 1.0 - f.y)));
+		vec3 carpet = carpet_color * tint * mix(0.85, 1.12, pile) * mix(0.95, 1.05, fleck) * (1.0 + 0.08 * traffic);
+		ALBEDO = carpet * (1.0 - 0.15 * seam);
+		ROUGHNESS = clamp(0.95 + roughness_offset, 0.0, 1.0);
+		SPECULAR = 0.1;
 		CLEARCOAT = 0.0;
 	}
 	if (glass_enabled) {

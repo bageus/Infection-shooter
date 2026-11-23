@@ -22,6 +22,7 @@ var lighting_catalog = [
 	{"name":"Точечный светильник","path":"res://game/presentation/office_floor/public/props/planner_light.tscn","kind":"light","fixture_shape":"point"},
 	{"name":"Длинный узкий светильник","path":"res://game/presentation/office_floor/public/props/planner_light.tscn","kind":"light","fixture_shape":"linear"},
 	{"name":"Прямоугольный светильник","path":"res://game/presentation/office_floor/public/props/planner_light.tscn","kind":"light","fixture_shape":"rectangle"},
+	{"name":"Фаер (красный)","path":"res://game/presentation/office_floor/public/props/flare_prop.tscn","kind":"flare"},
 	{"name":"Permanent Darkness","path":"res://game/presentation/office_floor/public/props/darkness_zone.tscn","kind":"darkness"},
 	{"name":"Exploration Darkness","path":"res://game/presentation/office_floor/public/props/darkness_zone.tscn","kind":"exploration_darkness"},
 	{"name":"Пыль: плотная","path":"res://game/presentation/office_floor/public/props/dust_zone.tscn","kind":"dust","dust":2},
@@ -191,6 +192,8 @@ func _environment_scene_for(file_name: String) -> String:
 		return str(structural[file_name])
 	if file_name == "07_table.glb":
 		return "res://game/presentation/office_floor/public/props/07_table.tscn"
+	if file_name == "Shooting_Range_Target_30tris.glb":
+		return "res://game/presentation/office_floor/public/props/shooting_range_target.tscn"
 	return _pickup_scene_for(file_name)
 
 

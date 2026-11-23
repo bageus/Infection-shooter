@@ -108,11 +108,9 @@ func _process(delta: float) -> void:
 	if delta_pos.length() <= reveal_distance:
 		reveal()
 		return
-	if require_door_open:
-		for door in _linked_doors:
-			if is_instance_valid(door) and door.has_method("is_open_for_exploration") and bool(door.call("is_open_for_exploration")):
-				reveal()
-				return
+	if require_door_open and _has_open_door():
+		reveal()
+		return
 
 ## While the cover is up, enemies standing inside the room are hidden whole, so no limb shows past the wall.
 func _update_hidden_enemies(covered: bool) -> void:
@@ -193,6 +191,7 @@ static var _doors_frame := -1
 static var _doors: Array = []
 static var _glass_time := -1000000
 static var _glass_shapes: Array = []
+static var _opening_shapes: Array = [] # shapes of breakable wood partitions (group darkness_opening)
 const GLASS_SCAN_MSEC := 1000
 
 
@@ -228,6 +227,10 @@ func _glass_panes() -> Array:
 		for body in get_tree().get_nodes_in_group("infected_breakable_glass"):
 			for shape in body.find_children("*", "CollisionShape3D", true, false):
 				_glass_shapes.append(shape)
+		_opening_shapes = []
+		for body in get_tree().get_nodes_in_group("darkness_opening"):
+			for shape in body.find_children("*", "CollisionShape3D", true, false):
+				_opening_shapes.append(shape)
 	return _glass_shapes
 
 
@@ -281,9 +284,19 @@ func _refresh_rooms() -> void:
 			_room_open[id] = true
 
 
+## An open door, or a broken glass pane or partition near this zone, is a way in. A broken piece's collision is disabled.
 func _has_open_door() -> bool:
 	for door in _linked_doors:
 		if is_instance_valid(door) and door.has_method("is_open_for_exploration") and bool(door.call("is_open_for_exploration")):
+			return true
+	_glass_panes()
+	return _broken_opening(_glass_shapes) or _broken_opening(_opening_shapes)
+
+
+## shortcut: a partition counts by its shape centres, so a long one is measured from its nearest shape only; upgrade if a far part of a broken partition should open the room.
+func _broken_opening(shapes: Array) -> bool:
+	for shape in shapes:
+		if is_instance_valid(shape) and shape.disabled and _edge_distance(shape.global_position) <= PORTALS.GLASS_REACH:
 			return true
 	return false
 

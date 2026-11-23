@@ -6,28 +6,31 @@ extends RefCounted
 ## with the body and collapses with a severed part. Costumes are not part of the wound/blood skin:
 ## body_parts.gd skips the instance through the `body_part_cap` meta.
 const DIR := "res://models/objects/characters/enemy/game/"
-## Skin id to the costume mesh it wears; "normal" shows the body as it is. "no_tie" wears the shirt
-## placket overlay ("man") until the artist says how it should differ from the normal suit.
+## Skin id to the costume mesh it wears; "normal" shows the body as it is, "no_tie" shows the body
+## on a rig mesh without the tie and wears no costume mesh.
 const COSTUMES := {
-	&"no_tie": "man",
 	&"janitor": "janitor",
 	&"guard": "guard",
 	&"scientist": "scientist",
 	&"hazmat": "hazmat",
 }
 const NODE_NAME := "Costume"
+const NO_TIE_SKIN := &"no_tie"
 const MESH := preload("res://game/features/infected/body_part_mesh.gd")
 
 
 ## Adds the costume of `skin` under the skeleton of `visual_root`; returns it or null.
 static func apply(visual_root: Node3D, skin: StringName) -> MeshInstance3D:
-	if visual_root == null or not COSTUMES.has(skin):
+	if visual_root == null or not (COSTUMES.has(skin) or skin == NO_TIE_SKIN):
 		return null
 	var skeleton := visual_root.find_child("Skeleton3D", true, false) as Skeleton3D
 	if skeleton == null or skeleton.has_node(NODE_NAME):
 		return null
 	var body := _body_mesh(skeleton)
 	var enemy := _enemy_name(visual_root)
+	if body != null and skin == NO_TIE_SKIN:
+		_remove_tie(body, enemy)
+		return null
 	var path := "%s%s_%s_costume.res" % [DIR, enemy, COSTUMES[skin]]
 	if body == null or enemy.is_empty() or not ResourceLoader.exists(path):
 		return null
@@ -40,6 +43,14 @@ static func apply(visual_root: Node3D, skin: StringName) -> MeshInstance3D:
 	costume.set_meta(&"skin", skin)
 	skeleton.add_child(costume)
 	return costume
+
+
+## Swaps in the rig mesh without the tie triangles (tools/build_no_tie_meshes.gd).
+static func _remove_tie(body: MeshInstance3D, enemy: String) -> void:
+	var path := "%s%s_rig_mesh_no_tie.res" % [DIR, enemy]
+	if ResourceLoader.exists(path):
+		body.mesh = load(path)
+		body.set_meta(&"no_tie", true)
 
 
 ## Enemy name of a rig scene ("Hunger" for Hunger_rig.tscn), from the instanced Visual node.

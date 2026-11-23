@@ -93,6 +93,7 @@ static func collect(objects: Node, nodes: Array, include_player: bool = true) ->
 			records[-1]["blood_surface"] = str(blood["surface"])
 			records[-1]["blood_normal"] = blood["normal"]
 			records[-1]["blood_attachment"] = node.call("get_blood_attachment")
+		if node.has_method("is_flare_enabled"): records[-1]["flare_enabled"] = bool(node.call("is_flare_enabled"))
 		if node.has_method("get_authored_energy"):
 			records[-1]["energy_multiplier"] = float(node.get("energy_multiplier"))
 			var color: Color = node.call("get_authored_color")

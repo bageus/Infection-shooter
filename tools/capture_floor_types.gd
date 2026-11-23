@@ -54,7 +54,7 @@ func _capture() -> void:
 	camera.current = true
 	camera.fov = 50.0
 	camera.look_at_from_position(Vector3(0.0, 4.2, 4.5), Vector3(0.0, 0.0, -0.5))
-	for type in ["tile", "concrete"]:
+	for type in ["tile", "concrete", "wood", "carpet", "lab_tile"]:
 		floor_view.call("set_floor_type", type)
 		var rng := RandomNumberGenerator.new()
 		rng.seed = 5
