@@ -294,6 +294,8 @@ func _place(entry: Dictionary) -> void:
 		if node.has_method("configure_zone"):
 			# The restored node scale already stretches the 4 m base zone.
 			node.call("configure_zone", Vector2(4.0, 4.0), node.get("darkness"), node.get("permanent"))
+	if node.has_method("set_density") and int(record.get("dust", -1)) >= 0:
+		node.call("set_density", int(record.dust))
 	if load_kind == "enemy":
 		node.set_meta("planning_actor_kind", "enemy")
 		node.set_meta("planning_spawn_transform", node.transform)

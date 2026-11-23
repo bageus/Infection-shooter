@@ -12,6 +12,7 @@ const PLATFORM := preload("res://game/infrastructure/platform/public/platform.gd
 const BLOOD_LEVEL := preload("res://game/core/vfx/public/blood_level.gd")
 const PROP_TRIM := preload("res://game/bootstrap/app/planning_prop_trim.gd")
 const EFFECTS_QUALITY := preload("res://game/core/vfx/public/effects_quality.gd")
+const DUST := preload("res://game/presentation/office_floor/public/dust_zone.gd")
 const DESTRUCTION_QUALITY := preload("res://game/core/vfx/public/destruction_quality.gd")
 var bindings := BINDINGS.new()
 
@@ -21,7 +22,7 @@ const DEFAULTS := {"window_mode": 0, "resolution": "1280x720", "language": "ru",
 	"walk_speed_multiplier": 1.0, "walk_animation_multiplier": 1.0,
 	"enemy_move_speed_multiplier": 1.0, "enemy_animation_multiplier": 1.0,
 	"volume": 0.4, "effects_volume": 1.0, "music_volume": 1.0, "menu_music_volume": 1.0, "occlusion_mode": 0, "test_mutagen": false, "infinite_antidotes": false, "lighting": true, "game_lights_only": false, "blood_style": 0, "blood_level": 1, "blood_green": false, "effects_quality": 2, "destruction_quality": 1,
-	"bullet_impact_smoke": true, "enemy_health_bars": false, "sunlight": true, "shadows": false, "shadow_quality": 1, "mesh_lod": true, "keep_corpses": true, "hide_unseen_props": true, "floor_hints": true, "camera_shake": true, "post_fx": true}
+	"bullet_impact_smoke": true, "enemy_health_bars": false, "sunlight": true, "shadows": false, "shadow_quality": 1, "mesh_lod": true, "keep_corpses": true, "hide_unseen_props": true, "floor_hints": true, "camera_shake": true, "post_fx": true, "dust": true}
 var values: Dictionary = DEFAULTS.duplicate()
 
 
@@ -151,6 +152,7 @@ func apply_to_game(tree: SceneTree, display_user_action: bool = false) -> void:
 	BLOOD_LEVEL.set_green(bool(values.blood_green))
 	PROP_TRIM.apply_live(tree)
 	DESTRUCTION_QUALITY.set_level(int(values.destruction_quality))
+	DUST.set_enabled(tree, bool(values.dust))
 	var scene := tree.current_scene if tree != null else null
 	if scene != null and scene.has_method("refresh_control_labels"):
 		scene.call("refresh_control_labels")

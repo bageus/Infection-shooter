@@ -272,6 +272,8 @@ func _configure_new_asset(node: Node3D, entry: Dictionary) -> void:
 	spawn_options.call("configure_new", node)
 	fixtures.configure_new_asset(node, entry)
 	room_options.configure_new(node, entry)
+	if str(entry.get("kind", "")) == "dust" and node.has_method("set_density"):
+		node.call("set_density", int(entry.get("dust", 1)))
 	if str(entry.get("kind", "")) != "blood" or not node.has_method("configure_blood"):
 		return
 	var surface: String = ["floor", "wall", "object"][blood_surface.selected] if blood_surface != null else "floor"
