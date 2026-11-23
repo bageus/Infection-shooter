@@ -16,7 +16,8 @@ const CASING_SIZE := 0.06 # Spent brass reads as a small plastic chip, about the
 const CASING_MIN_SIZE := 0.04
 
 @export var floor_size := Vector2(80.0, 60.0)
-@export var floor_type := "tile" # "tile" or "concrete"; selects the material look, the grid stays the same
+@export var floor_type := "tile" # tile, concrete, wood, carpet or lab_tile; selects the material look, the grid stays the same
+const LOOKS := {"tile": 0, "concrete": 1, "wood": 2, "carpet": 3, "lab_tile": 4}
 @export var tile_step := 2.0
 @export var tile_y := 0.001
 var openings: Array[Rect2] = []
@@ -128,7 +129,7 @@ func _build_materials() -> void:
 	for index in MATERIAL_VARIANTS:
 		# Shallow copies share the generated textures across the entire floor.
 		var material := TILE_MATERIAL.duplicate(false) as ShaderMaterial
-		material.set_shader_parameter("concrete", floor_type == "concrete")
+		material.set_shader_parameter("look", LOOKS.get(floor_type, 0))
 		material.set_shader_parameter("tint", 0.99 + float(index) * (0.02 / float(MATERIAL_VARIANTS - 1)))
 		material.set_shader_parameter("roughness_offset", (float(index) - float(MATERIAL_VARIANTS - 1) * 0.5) * 0.006)
 		_materials.append(material)
