@@ -108,11 +108,9 @@ func _process(delta: float) -> void:
 	if delta_pos.length() <= reveal_distance:
 		reveal()
 		return
-	if require_door_open:
-		for door in _linked_doors:
-			if is_instance_valid(door) and door.has_method("is_open_for_exploration") and bool(door.call("is_open_for_exploration")):
-				reveal()
-				return
+	if require_door_open and _has_open_door():
+		reveal()
+		return
 
 ## While the cover is up, enemies standing inside the room are hidden whole, so no limb shows past the wall.
 func _update_hidden_enemies(covered: bool) -> void:
@@ -281,9 +279,13 @@ func _refresh_rooms() -> void:
 			_room_open[id] = true
 
 
+## An open door or a broken glass pane near this zone is a way in. A pane's collision is disabled when it breaks.
 func _has_open_door() -> bool:
 	for door in _linked_doors:
 		if is_instance_valid(door) and door.has_method("is_open_for_exploration") and bool(door.call("is_open_for_exploration")):
+			return true
+	for shape in _glass_panes():
+		if is_instance_valid(shape) and shape.disabled and _edge_distance(shape.global_position) <= PORTALS.GLASS_REACH:
 			return true
 	return false
 
