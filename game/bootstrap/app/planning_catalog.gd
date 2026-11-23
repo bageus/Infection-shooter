@@ -189,6 +189,8 @@ func _environment_scene_for(file_name: String) -> String:
 		return str(structural[file_name])
 	if file_name == "07_table.glb":
 		return "res://game/presentation/office_floor/public/props/07_table.tscn"
+	if file_name == "Shooting_Range_Target_30tris.glb":
+		return "res://game/presentation/office_floor/public/props/shooting_range_target.tscn"
 	return _pickup_scene_for(file_name)
 
 
