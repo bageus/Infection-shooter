@@ -42,8 +42,11 @@ func _skin(stage: Node3D, scene: PackedScene, label: String, skin: String) -> vo
 	var actor := await _spawn(stage, scene, skin)
 	var skeleton := actor.body_visual.find_child("Skeleton3D", true, false) as Skeleton3D
 	var costume := skeleton.get_node_or_null("Costume") as MeshInstance3D
-	if skin == "normal":
-		_check(costume == null, "%s normal wears no costume" % label)
+	var bare := skin in ["normal", "no_tie"]
+	if bare:
+		_check(costume == null, "%s %s wears no costume" % [label, skin])
+		var body := skeleton.find_children("*", "MeshInstance3D", true, false)[0] as MeshInstance3D
+		_check(body.get_meta(&"no_tie", false) == (skin == "no_tie"), "%s %s body mesh" % [label, skin])
 	else:
 		_check(costume != null and costume.mesh.get_surface_count() >= 1 and costume.skin != null, "%s %s wears a skinned costume" % [label, skin])
 		if costume != null:
@@ -54,7 +57,7 @@ func _skin(stage: Node3D, scene: PackedScene, label: String, skin: String) -> vo
 		var covered := 0
 		for node in skeleton.find_children("*", "MeshInstance3D", true, false):
 			covered += 1 if (node as MeshInstance3D).get_meta(&"body_part_cap", false) else 0
-		_check(covered == (0 if skin == "normal" else 1), "%s %s: the costume stays out of the wound skin" % [label, skin])
+		_check(covered == (0 if bare else 1), "%s %s: the costume stays out of the wound skin" % [label, skin])
 	actor.queue_free()
 	await process_frame
 
