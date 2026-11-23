@@ -95,6 +95,7 @@ game/features/player/tests/run_skill_sound_tests.gd
 game/features/infected/tests/run_chase_route_tests.gd
 game/features/infected/tests/run_chase_search_motion_tests.gd
 game/features/infected/tests/run_chase_wall_beyond_range_tests.gd
+game/features/infected/tests/run_wall_standoff_tests.gd
 game/features/infected/tests/run_chase_stairs_slope_tests.gd
 game/features/infected/tests/run_chase_real_enemy_slope_tests.gd
 game/features/infected/tests/run_crowd_separation_tests.gd
