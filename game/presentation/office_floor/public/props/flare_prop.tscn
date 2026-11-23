@@ -1,0 +1,37 @@
+[gd_scene load_steps=5 format=3]
+
+[ext_resource type="Script" path="res://game/presentation/office_floor/public/props/flare_prop.gd" id="1_script"]
+
+[sub_resource type="CylinderMesh" id="body_mesh"]
+top_radius = 0.03
+bottom_radius = 0.03
+height = 0.3
+
+[sub_resource type="StandardMaterial3D" id="body_material"]
+albedo_color = Color(0.32, 0.32, 0.34, 1)
+roughness = 0.8
+
+[sub_resource type="SphereMesh" id="cap_mesh"]
+radius = 0.035
+height = 0.07
+
+[sub_resource type="StandardMaterial3D" id="cap_material"]
+albedo_color = Color(0.9, 0.08, 0.05, 1)
+emission_enabled = true
+emission = Color(1, 0.1, 0.05, 1)
+emission_energy_multiplier = 2.0
+
+[node name="Flare" type="Node3D"]
+script = ExtResource("1_script")
+metadata/planning_kind = "flare"
+
+[node name="Body" type="MeshInstance3D" parent="."]
+mesh = SubResource("body_mesh")
+material_override = SubResource("body_material")
+position = Vector3(0, 0.03, 0)
+rotation_degrees = Vector3(0, 0, 90)
+
+[node name="Cap" type="MeshInstance3D" parent="."]
+mesh = SubResource("cap_mesh")
+material_override = SubResource("cap_material")
+position = Vector3(0.15, 0.03, 0)
