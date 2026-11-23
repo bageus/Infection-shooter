@@ -260,7 +260,7 @@ func _spawn(key: String, enemy_id: String, skin_id: String) -> void:
 	var outward := ground - point.global_position
 	var yaw := atan2(-outward.x, -outward.z) if outward.length_squared() > 0.01 else 0.0
 	# Placed before it enters the tree so its blood trail starts at the hole.
-	enemy.transform = Transform3D(Basis(Vector3.UP, yaw), _enemies_root.to_local(ground + Vector3(0.0, _standing_height(enemy), 0.0)))
+	enemy.transform = Transform3D(Basis(Vector3.UP, yaw), _enemies_root.to_local(ground))
 	enemy.set_meta(&"spawned_by", point_id)
 	enemy.set_meta(&"spawned_queue", int(queue["index"]))
 	enemy.set_meta(&"spawn_origin", ground)
@@ -280,10 +280,3 @@ func _apply_loot(enemy: Node, loot: Dictionary) -> void:
 		"manual":
 			enemy.call("configure_loot", {"mode": "auto", "chance": float(loot.get("chance", 0.0))})
 
-
-# Tall infected (capsule up to 2.9 m) must start above the floor, not inside it.
-func _standing_height(enemy: Node) -> float:
-	var shape_node := enemy.get_node_or_null("CollisionShape3D") as CollisionShape3D
-	if shape_node != null and shape_node.shape is CapsuleShape3D:
-		return maxf(1.0, (shape_node.shape as CapsuleShape3D).height * 0.5 + 0.1)
-	return 1.0
