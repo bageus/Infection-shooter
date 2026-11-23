@@ -1,6 +1,6 @@
 extends Node3D
 ## Dust motes floating in the air of a rectangular zone (4 m base, stretched by the node scale like
-## darkness zones). Three stacked layers of one shader; the motes are lit only by the scene lights,
+## darkness zones). Two stacked layers of one shader; the motes are lit only by the scene lights,
 ## so they show in the flashlight cone and under lamps. The density is set per zone in the planner.
 
 const SHADER := preload("res://game/presentation/office_floor/public/dust_zone.gdshader")
@@ -8,8 +8,10 @@ const BASE_SIZE := 4.0
 const HEIGHT := 3.0
 ## Light, weak and dense dust; the index is saved in the map as `dust`.
 const DENSITIES := [0.3, 0.6, 1.0]
+## Opacity of the grey veil per layer: light, weak and dense (dense dust wraps the hero and enemies).
+const HAZE := [0.06, 0.12, 0.22]
 const DEFAULT_LEVEL := 1
-const LAYERS := [{"at": 0.2, "weight": 0.6}, {"at": 0.5, "weight": 1.0}, {"at": 0.8, "weight": 0.6}]
+const LAYERS := [{"at": 0.3, "weight": 1.0}, {"at": 0.7, "weight": 1.0}]
 const FADE_SPEED := 1.5
 const DRAW_RANGE := 30.0
 const GROUP := &"dust_zones"
@@ -74,6 +76,7 @@ func set_density(value: int) -> void:
 	set_meta("planning_dust", level)
 	for material in _materials:
 		material.set_shader_parameter("density", float(DENSITIES[level]))
+		material.set_shader_parameter("haze", float(HAZE[level]))
 
 
 func get_density() -> int:
