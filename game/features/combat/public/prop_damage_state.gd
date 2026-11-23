@@ -12,6 +12,15 @@ const INDESTRUCTIBLE := [
 	"15_pallet_drywall_flat_full.glb", "15_pallet_concrete_blocks_double.glb",
 	"02_vending_automat_1_dented.glb", "02_vending_automat_2_dented.glb", "02_vending_machine_fantas_dented.glb",
 	"02_coffee_vending_1_dented.glb", "02_frige_dented.glb", "02_dishwasher_dented.glb", "02_washing_machine_dented.glb",
+	# Lab equipment: cabinets, tanks and scanners that no blow breaks (the fridge's front glass breaks on its own).
+	"MRI_Scanner.glb", "X_Ray_System.glb", "Hyperbaric_Chamber.glb", "Medical_Instrument_Cabinet.glb",
+	"Laboratory_Storage_Cabinet.glb", "Laboratory_Drying_Cabinet.glb", "Morgue_Drawers_3x3.glb",
+	"Laboratory_Fridge.glb", "Containment_Tank_No_Subject.glb", "Containment_Tank_hunger.glb",
+]
+## Lab files are not named with a group prefix, so their electronics are listed by name.
+const LAB_ELECTRONICS := [
+	"Laboratory_Autoclave.glb", "Laboratory_Balance.glb", "Laboratory_Microscope.glb", "Medical_Lab_Oven.glb",
+	"MRI_Scanner.glb", "Patient_Monitor_Stand.glb", "Vortex_Mixer.glb", "X_Ray_System.glb",
 ]
 var category := "large"
 var health := 0.0
@@ -31,7 +40,7 @@ var _has_fragments := false
 
 func configure(model_name: String, variant_count: int, has_fragments: bool) -> void:
 	var group := model_name.substr(0, 2)
-	category = "tech" if group == "05" else ("small" if group in ["09", "11", "12"] else "large")
+	category = "tech" if group == "05" or model_name in LAB_ELECTRONICS else ("small" if group in ["09", "11", "12"] else "large")
 	_variant_count = variant_count
 	_has_fragments = has_fragments
 	collapses = not has_fragments and (model_name.to_lower().contains("cardboard") or model_name in BIG_CRATES)

@@ -1,7 +1,11 @@
 extends RefCounted
 ## Glassware, fruit and paintings: any shot that does damage breaks them whole, leaving their material decals.
 
-const GLASSWARE: Array[String] = ["09_glass.glb", "09_glass_2.glb"]
+const GLASSWARE: Array[String] = ["09_glass.glb", "09_glass_2.glb", "Laboratory_Flasks_Set.glb", "Test_Tube_Rack.glb"]
+# Lab electronics that break whole and leave plastic decals.
+const PLASTIC_LAB: Array[String] = ["Laboratory_Balance.glb", "Laboratory_Microscope.glb"]
+# Tank glass shows the decals of a hit but the pane never breaks.
+const GLASS_INTACT: Array[String] = ["Containment_Tank_No_Subject.glb", "Containment_Tank_hunger.glb"]
 const PAPER := preload("res://game/presentation/office_floor/paper_shreds.gd")
 const BREAK_SOUND := preload("res://game/presentation/office_floor/prop_break_sound.gd")
 const FLOOR_DEBRIS := preload("res://game/presentation/office_floor/prop_floor_debris.gd")
@@ -14,7 +18,11 @@ static func applies(model_path: String) -> bool:
 	return (is_glassware(model_path) or PAPER.is_paper(model_path)
 		or file.begins_with("09_fruit_") or file.begins_with("09_painting")
 		or file.begins_with("09_pen_") or file.begins_with("09_pencil") or file.begins_with("09_marker")
-		or file in ["05_computer_mouse.glb", "05_keyboard.glb", "09_stapler.glb"] )
+		or file in PLASTIC_LAB or file in ["05_computer_mouse.glb", "05_keyboard.glb", "09_stapler.glb"] )
+
+
+static func glass_intact(model_path: String) -> bool:
+	return model_path.get_file() in GLASS_INTACT
 
 
 static func is_glassware(model_path: String) -> bool:
