@@ -15,6 +15,9 @@ const TURN_SMOOTH := 20.0
 ## Seconds of the clip over which the end of a pass is blended into its start.
 const TURN_LOOP_BLEND := 0.25
 const KICK_SPEED := 1.6
+## The kick clip is cut here (clip seconds): its foot is back on the floor, and the tail where the torso unwinds slower is dropped,
+## so the foot, the torso and the backpack fade back to the base pose together (Vadim).
+const KICK_END := 0.95
 const BODY_BONES := ["Hips", "Spine", "Spine1", "Spine2", "Neck", "Head", "LeftUpLeg", "LeftLeg", "LeftFoot", "LeftToeBase", "RightUpLeg", "RightLeg", "RightFoot", "RightToeBase"]
 ## A turn on the spot drives only the pelvis and legs (the steps): the game already swings the torso, arms and head with the aim,
 ## and a second clip on them made the head jerk (Vadim).
@@ -57,9 +60,10 @@ static func play(driver: Node, clip: StringName, clip_speed: float, kind: String
 	driver.body_clip.speed = clip_speed
 	driver.body_clip.loop_blend = TURN_LOOP_BLEND if kind == &"turn" else 0.0
 	driver.body_clip.smooth = TURN_SMOOTH if kind == &"turn" else 0.0
-	driver.body_clip.play(animation, animation.length / clip_speed)
+	var seconds := (KICK_END if kind == &"kick" else animation.length) / clip_speed
+	driver.body_clip.play(animation, seconds)
 	driver.set_meta(&"body_clip_kind", kind)
-	return animation.length / clip_speed
+	return seconds
 
 
 static func is_kicking(driver: Node) -> bool:
