@@ -4,12 +4,12 @@ importer="scene"
 importer_version=1
 type="PackedScene"
 uid="uid://bmhlbxrqrn4f7"
-path="res://.godot/imported/Shooting_Range_Target_30tris.glb-5f0a547a4105f15ffca798abebd6a6ea.scn"
+path="res://.godot/imported/13_Shooting_Range_Target_30tris.glb-8c894eb52de983e3586ca24ac82046c2.scn"
 
 [deps]
 
-source_file="res://models/objects/enviroments/13/Shooting_Range_Target_30tris.glb"
-dest_files=["res://.godot/imported/Shooting_Range_Target_30tris.glb-5f0a547a4105f15ffca798abebd6a6ea.scn"]
+source_file="res://models/objects/enviroments/13/13_Shooting_Range_Target_30tris.glb"
+dest_files=["res://.godot/imported/13_Shooting_Range_Target_30tris.glb-8c894eb52de983e3586ca24ac82046c2.scn"]
 
 [params]
 

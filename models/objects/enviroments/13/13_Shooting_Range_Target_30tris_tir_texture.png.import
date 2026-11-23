@@ -3,7 +3,7 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://keih3vatbmsa"
-path="res://.godot/imported/Shooting_Range_Target_30tris_tir_texture.png-4200c56afb1970e5d95cd6f84050dc19.ctex"
+path="res://.godot/imported/13_Shooting_Range_Target_30tris_tir_texture.png-3a72ea4f5c03467077be50437ff3a1a1.ctex"
 metadata={
 "vram_texture": false
 }
@@ -13,8 +13,8 @@ generator_parameters={
 
 [deps]
 
-source_file="res://models/objects/enviroments/13/Shooting_Range_Target_30tris_tir_texture.png"
-dest_files=["res://.godot/imported/Shooting_Range_Target_30tris_tir_texture.png-4200c56afb1970e5d95cd6f84050dc19.ctex"]
+source_file="res://models/objects/enviroments/13/13_Shooting_Range_Target_30tris_tir_texture.png"
+dest_files=["res://.godot/imported/13_Shooting_Range_Target_30tris_tir_texture.png-3a72ea4f5c03467077be50437ff3a1a1.ctex"]
 
 [params]
 
