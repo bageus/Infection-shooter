@@ -21,7 +21,7 @@ func _run() -> void:
 	_check(target.take_projectile_hit(10.0, Vector3(2, 1, 3), Vector3.BACK, Vector3.FORWARD, "AK"), "hit is absorbed")
 	await create_timer(0.5).timeout
 	_check(hinge.global_basis.y.dot(Vector3.UP) < 0.1, "post lies flat after the hit")
-	_check(hinge.global_position.is_equal_approx(target.global_position + Vector3(0, 0.105, 0.02)), "hinge stays at the base top")
+	_check(hinge.global_position.is_equal_approx(target.global_position + Vector3(0, 0.055, -0.22)), "hinge stays at the rear base edge")
 	_check(base.global_position.is_equal_approx(base_start), "base stays in place")
 	target.take_projectile_hit(10.0, Vector3(2, 1, 3), Vector3.BACK, Vector3.FORWARD, "AK")
 	await create_timer(10.5).timeout

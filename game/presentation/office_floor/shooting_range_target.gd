@@ -1,13 +1,15 @@
 extends Node3D
-## Shooting range target: a hit drops the post and face flat on a hinge at the base top,
+## Shooting range target: a hit drops the post and face flat on a hinge at the rear base edge,
 ## the base stays put, and the target stands up again after 10 seconds.
 
 const MODEL_SCENE := preload("res://models/objects/enviroments/13/Shooting_Range_Target_30tris.glb")
 const FALL_SECONDS := 0.25
 const DOWN_SECONDS := 10.0
 const RISE_SECONDS := 0.8
-## Top of the base in model space (metres); the post hinges here.
-const PIVOT := Vector3(0.0, 0.105, 0.02)
+## The post hinges on its rear base edge at half its thickness (metres), so it lies on the floor when down.
+const PIVOT := Vector3(0.0, 0.055, -0.22)
+## Moves the post from the base centre to the rear edge, clear of the base when it falls.
+const SHIFT_TO_REAR := Vector3(0.0, 0.0, -0.24)
 const MIN_SIZE := 0.04
 
 var model_path := "res://models/objects/enviroments/13/Shooting_Range_Target_30tris.glb"
@@ -29,6 +31,7 @@ func _ready() -> void:
 	for part_name in ["Upright", "Target"]:
 		var part := visual.find_child(part_name, true, false) as MeshInstance3D
 		part.reparent(_hinge, true)
+		part.position += SHIFT_TO_REAR
 		moving.append(part)
 	for part in moving:
 		_add_box(_hinge, _box_in(_hinge, part))
