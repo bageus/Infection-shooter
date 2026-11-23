@@ -22,9 +22,20 @@ const BUCKET_MOP := preload("res://game/presentation/office_floor/bucket_mop_spl
 
 
 ## A shot that hits the prop: a bucket with a mop splits off its mop first, then the item is pushed.
-static func shot(body: RigidBody3D, weight_kg: float, weapon: String, direction: Vector3, hit_position: Vector3) -> void:
+static func shot(body: RigidBody3D, weight_kg: float, weapon: String, direction: Vector3, hit_position: Vector3, light_item := false) -> void:
 	BUCKET_MOP.split(body, direction)
 	apply(body, weight_kg, weapon, direction, hit_position)
+	if light_item:
+		fly_off(body, direction)
+
+
+## A plastic bottle is light: a hit throws it off its shelf instead of nudging it (apply caps at MAX_SPEED).
+static func fly_off(body: RigidBody3D, direction: Vector3) -> void:
+	if body.freeze or direction.is_zero_approx():
+		return
+	PhysicsCost.woke(body, &"bullet")
+	body.sleeping = false
+	body.apply_central_impulse((direction.normalized() + Vector3.UP).normalized() * body.mass * 2.0)
 
 
 ## Pellets share a frame budget; position is retained for compatible callers.
