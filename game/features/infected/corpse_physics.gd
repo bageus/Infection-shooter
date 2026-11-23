@@ -155,11 +155,11 @@ func freeze_pose() -> void:
 	for index in skeleton.get_bone_count():
 		if poses.has(index):
 			skeleton.set_bone_global_pose(index, poses[index])
-	_lower_legs()
 
 
-# A body left lying keeps no leg raised in the air: the thighs come down to the floor.
-func _lower_legs() -> void:
+## A body left lying keeps no leg raised in the air: the thighs come down to the floor.
+## Called after freeze_pose, which itself keeps the simulated pose exactly.
+func lower_legs() -> void:
 	var hips := skeleton.find_bone("Hips")
 	var head := skeleton.find_bone("Head")
 	if hips < 0 or head < 0 or not skeleton.is_inside_tree():

@@ -83,6 +83,7 @@ static func release_after(owner: Node, physics: RefCounted, linger: float, gone:
 		return
 	if CORPSE_BUDGET.keep:
 		physics.call("freeze_pose")
+		physics.call("lower_legs")
 		_released(physics.get_instance_id())
 		var evict := func() -> void:
 			if is_instance_valid(owner):
