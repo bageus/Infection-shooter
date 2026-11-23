@@ -21,6 +21,7 @@ const DESKS := {
 	"07_table_square_tall": "table_square_tall",
 	"07_coffee_table2": "coffee_table2",
 	"07_table_longest": "table_longest",
+	"07_table_lab": "table_lab",
 	"03_bookshelf": "bookshelf",
 	"03_book_case": "book_case",
 	"03_book_case_small": "book_case_small",
@@ -130,7 +131,9 @@ static func generate(desk: Node3D, path: String, parent: Node3D, existing: Array
 	var stations: Array = desk_profile.get("stations", [])
 	for station_index in stations.size():
 		var station: Dictionary = stations[station_index]
-		var setup := _read("setups/" + SETUPS[random.randi_range(0, SETUPS.size() - 1)] + ".json")
+		# A desk profile may name its own setup pool; others draw from the office computer setups.
+		var pool: Array = desk_profile.get("setups", SETUPS)
+		var setup := _read("setups/" + str(pool[random.randi_range(0, pool.size() - 1)]) + ".json")
 		# Reserve the mandatory mouse and phone before computer and optional pieces.
 		var items: Array = [
 			{"model": "05_computer_mouse", "x": 0.73, "z": -0.21},
@@ -177,7 +180,7 @@ static func _read(path: String) -> Dictionary:
 
 static func _model_path(model: String) -> String:
 	if model.length() < 2 or not model.substr(0, 2).is_valid_int():
-		return ""
+		return MODEL_PATHS.find("05", model + ".glb") # Lab equipment has no group prefix.
 	return MODEL_PATHS.find(model.substr(0, 2), model + ".glb")
 
 

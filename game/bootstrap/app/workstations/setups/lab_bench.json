@@ -1,0 +1,8 @@
+{
+  "items": [
+    {"model": "Laboratory_Microscope", "x": -0.4, "z": -0.1},
+    {"model": "Laboratory_Balance", "x": -0.15, "z": 0.05},
+    {"model": "Laboratory_Flasks_Set", "x": 0.25, "z": -0.1},
+    {"model": "Test_Tube_Rack", "x": 0.6, "z": 0.1}
+  ]
+}
