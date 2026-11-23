@@ -9,8 +9,9 @@ const KICKABLE_LAYER := 4
 const KICKABLE_MASK := 7
 const KICK_COOLDOWN_MS := 350
 # Enemies bump props constantly; a sleeping prop wakes only for a real shove, and at most once per ENEMY_PUSH_FRAMES.
+# 30 frames (0.5 s) lets a pushed prop fall asleep between shoves; at 4 frames the cooler bottle and vending machine never slept.
 const ENEMY_WAKE_MIN_GAIN := 0.3
-const ENEMY_PUSH_FRAMES := 4
+const ENEMY_PUSH_FRAMES := 30
 
 
 static func push(body: RigidBody3D, weight: float, character_position: Vector3, movement: Vector3, strength: float, source: StringName = &"unknown") -> bool:

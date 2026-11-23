@@ -16,7 +16,7 @@ func _run() -> void:
 	zone.call("set_density", 2) # before entering the tree, like a freshly placed zone
 	root.add_child(zone)
 	await process_frame
-	_check(zone.get_child_count() == 4, "three layers and a marker")
+	_check(zone.get_child_count() == 3, "two layers and a marker")
 	var material := (zone.get_child(0) as MeshInstance3D).material_override as ShaderMaterial
 	_check(is_equal_approx(float(material.get_shader_parameter("density")), 1.0), "dense level reaches the shader")
 	zone.call("set_density", 0)

@@ -301,8 +301,8 @@ func _test_wander_walk_and_transition(name: String) -> void:
 func _test_climb_out(name: String) -> void:
 	var enemy := (load(DIR + "infected_%s.tscn" % name) as PackedScene).instantiate() as CharacterBody3D
 	enemy.set_meta(&"spawned_by", "hole")
+	enemy.transform = Transform3D(Basis(), Vector3(0, 0.0, 0))
 	stage.add_child(enemy)
-	enemy.global_position = Vector3(0, 1.2, 0)
 	await process_frame
 	var target := FakeTarget.new()
 	stage.add_child(target)
@@ -310,6 +310,8 @@ func _test_climb_out(name: String) -> void:
 	enemy.call("set_target", target)
 	var player := _player_of(enemy)
 	_expect(player.current_animation == "Climb", name + " starts with the Climb clip (%s)." % player.current_animation)
+	_expect(enemy.global_position.y < -1.0, name + " starts under the floor (%.2f)." % enemy.global_position.y)
+	_expect(enemy.collision_mask == 0, name + " has no floor collision while it climbs.")
 	var start := enemy.global_position
 	for index in 20:
 		await physics_frame
@@ -318,6 +320,7 @@ func _test_climb_out(name: String) -> void:
 	await create_timer(float(player.get_animation("Climb").length) + 0.5).timeout
 	await physics_frame
 	await physics_frame
+	_expect(enemy.collision_mask != 0, name + " has its floor collision back once it is out.")
 	_expect(Vector2(enemy.velocity.x, enemy.velocity.z).length() > 0.3, name + " chases once it is out.")
 	enemy.queue_free()
 	target.queue_free()

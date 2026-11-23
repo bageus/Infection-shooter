@@ -252,6 +252,7 @@ func _input(event: InputEvent) -> void:
 	if event is InputEventMouse and (ui.get_node("Panel") as Control).get_global_rect().has_point(event.position):
 		# _input precedes GUI dispatch: let the palette receive this event.
 		return
+	if _brush_paints(event): return
 	# Allow both map names and SpinBox editors to receive keys before planner shortcuts.
 	if _text_field_has_focus() and event is InputEventKey:
 		if event is InputEventKey and event.pressed and event.keycode == KEY_ESCAPE:
@@ -327,6 +328,17 @@ func _input(event: InputEvent) -> void:
 			objects._drag_selected(event.position)
 		elif objects.preview != null:
 			objects._update_preview(event.position)
+
+
+## While the floor brush is on, left clicks and drags (not ALT-drag, which rotates) paint the floor instead of selecting.
+func _brush_paints(event: InputEvent) -> bool:
+	var click: bool = event is InputEventMouseButton and event.button_index == MOUSE_BUTTON_LEFT and event.pressed
+	var drag: bool = event is InputEventMouseMotion and Input.is_mouse_button_pressed(MOUSE_BUTTON_LEFT) and not Input.is_key_pressed(KEY_ALT)
+	if not (click or drag) or not controls.floor_type.painting():
+		return false
+	controls.floor_type.paint_at(event.position)
+	get_viewport().set_input_as_handled()
+	return true
 
 
 func _text_field_has_focus() -> bool:
