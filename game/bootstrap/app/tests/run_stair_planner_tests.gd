@@ -28,6 +28,8 @@ func _run() -> void:
 		{"scene": PATH.replace("01_stairs.glb", "01_stairs_2.glb"), "x": 12, "y": -3, "z": 2},
 	]})
 	_check(not result.has("error"), "Real loader accepts canonical and legacy stair records")
+	await _settle()
+	_check(not (mission.get("_openings") as Array).is_empty(), "Stairs cut the floor while the planner (paused tree) is open")
 	planner.call("exit")
 	await _settle()
 	_check(not (mission.get("_openings") as Array).is_empty(), "Loaded stairs create floor openings after resume")
