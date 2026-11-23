@@ -9,7 +9,7 @@ static func is_screen(model: String) -> bool:
 
 static func for_model(model: String, event: String) -> Array[String]:
 	var label := model.to_lower()
-	if event == "shatter" and (has_any(label, ["painting", "09_fruit_", "09_glass", "09_mug"])):
+	if event == "shatter" and (has_any(label, ["painting", "09_fruit_", "09_glass", "09_mug", "laboratory_flasks", "test_tube", "laboratory_balance", "laboratory_microscope", "containment_tank"])):
 		return _shattered(label)
 	if event == "screen":
 		if is_screen(label):
@@ -52,6 +52,10 @@ static func _shattered(label: String) -> Array[String]:
 		return _mix(["paper", "cardboard", "wood"], [4, 3, 3])
 	if label.begins_with("09_fruit_") and "plate" not in label:
 		return _mix(["plastic"], [3])
+	if has_any(label, ["laboratory_balance", "laboratory_microscope"]):
+		return _mix(["plastic"], [8])
+	if "containment_tank" in label: # Tank glass: decals only, the pane stays whole.
+		return _mix(["glass"], [8])
 	return _mix(["glass", "plastic"], [6, 3])
 
 

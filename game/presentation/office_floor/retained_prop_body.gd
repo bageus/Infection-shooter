@@ -15,7 +15,9 @@ var _pinned := false # A microwave door takes hits but never comes off.
 
 func anchored(model_path: String) -> bool:
 	var file := model_path.get_file()
-	return file == "02_frige_dented.glb"
+	# Lab equipment bolted down: scanners, the drying cabinet, drawers and the tanks never slide.
+	return file in ["02_frige_dented.glb", "Laboratory_Fridge.glb", "MRI_Scanner.glb", "X_Ray_System.glb",
+		"Laboratory_Drying_Cabinet.glb", "Morgue_Drawers_3x3.glb", "Containment_Tank_No_Subject.glb", "Containment_Tank_hunger.glb"]
 
 
 func configure(geometry: RefCounted, model_path: String) -> void:

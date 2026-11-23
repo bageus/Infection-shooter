@@ -328,7 +328,7 @@ func get_projectile_material(shape_index: int = -1) -> String:
 	var group := model_path.get_file().substr(0, 2)
 	if model_path.get_file().begins_with("09_stepladder"): return "metal" # Group 09 is light; the ladder rings like steel.
 	if group == "01": return "concrete"
-	if group == "05": return "tech"
+	if _damage.category == "tech": return "tech" # Lab electronics are named without the group prefix.
 	if group == "09" or group == "11": return "light"
 	if group == "03" or group == "06": return "metal"
 	return "wood"
@@ -557,8 +557,8 @@ func hit_environment_fragment(fragment: RigidBody3D, hit_position: Vector3, dire
 
 
 func _shatter_glass(hit_position: Vector3, direction: Vector3) -> void:
-	if _damage.break_glass():
-		BREAKUP.shatter_glass(self, _geometry, hit_position, direction)
+	if FRAGILE.glass_intact(model_path): _floor_debris.emit(self, model_path, "shatter", hit_position, direction) # Tank glass: decals only.
+	elif _damage.break_glass(): BREAKUP.shatter_glass(self, _geometry, hit_position, direction)
 
 
 # Light, low items stop blocking characters (layer 3) and are kicked aside by
