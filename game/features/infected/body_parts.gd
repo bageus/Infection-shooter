@@ -431,6 +431,7 @@ func _spawn_piece(part: StringName, chain: PackedInt32Array, joint_world: Vector
 	visual.mesh = built.mesh
 	lease.bind(visual, entry.has("masks"))
 	piece.add_child(visual)
+	preload("res://game/features/infected/infected_costume.gd").dress_piece(piece, skeleton, entry.data, chain, built.center)
 	var shape := CollisionShape3D.new()
 	var hull := ConvexPolygonShape3D.new()
 	hull.points = built.points
