@@ -27,6 +27,7 @@ const TURN := preload("res://game/features/infected/enemy_turn_in_place.gd")
 const BODY := preload("res://game/features/infected/enemy_body_queries.gd")
 const LIMBS := preload("res://game/features/infected/infected_limb_loss.gd")
 const STEP := preload("res://game/features/infected/capsule_step.gd")
+const WALL_STANDOFF := preload("res://game/features/infected/wall_standoff.gd")
 const CLIMB := preload("res://game/features/infected/enemy_climb_out.gd")
 const KILLING_PUSH_MSEC := 300
 const HEAVY_HIT_WEAPONS := ["SHOTGUN", "GRENADE LAUNCHER"] # the weapons whose hit plays the hit clip
@@ -170,6 +171,7 @@ func _ready() -> void:
 	_pace = CHASE_PACE.new(get_instance_id())
 	_lod_frame_offset = get_instance_id() % 12
 	death_cloud.depleted.connect(_on_death_cloud_depleted)
+	WALL_STANDOFF.add(self, collision_shape)
 	COSTUME.apply(body_visual, StringName(str(get_meta(&"skin", &"normal"))))
 	if not is_instance_valid(_visual_budget):
 		_setup_body_parts()
