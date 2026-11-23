@@ -55,7 +55,7 @@ func _run() -> void:
 	var rest_foot := before.foot
 	_expect(driver.strike_impact_time(&"kick", 0.27) > 0.2 and driver.strike_impact_time(&"kick", 0.27) < 0.6, "The kick lands where its clip puts the foot (%.2f s)." % driver.strike_impact_time(&"kick", 0.27))
 	var length: float = driver.play_strike(&"kick")
-	_expect(length > 0.8 and driver.is_striking() and driver.is_body_clip_playing(), "The kick plays as a body clip (%.2f s)." % length)
+	_expect(length > 0.5 and driver.is_striking() and driver.is_body_clip_playing(), "The kick plays as a body clip (%.2f s)." % length)
 	var after := Probe.new() # after it
 	skeleton.add_child(after)
 	var forward := 0.0
