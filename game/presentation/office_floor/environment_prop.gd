@@ -200,12 +200,12 @@ func _release_loot() -> void:
 func _ready() -> void:
 	if model_path.is_empty():
 		return
+	if "01_wood_slat_partition" in model_path: add_to_group(&"darkness_opening") # a broken partition opens a dark room
 	var wall_mounted := is_wall_mounted()
 	if wall_mounted:
 		set_meta("planning_wall_mount", true)
 		add_to_group(&"wall_mounted_props")
-		if "/enviroments/13/" in model_path:
-			add_to_group(&"wall_signs")
+		if "/enviroments/13/" in model_path: add_to_group(&"wall_signs")
 		# A logo mounted on a wood partition falls when the partition breaks, and stays on the floor.
 		if "vectrion" in model_path.to_lower():
 			add_to_group(&"partition_signs")
