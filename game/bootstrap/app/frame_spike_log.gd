@@ -6,7 +6,12 @@ const PATH := "user://frame_spikes.log"
 const SPIKE_MSEC := 40.0
 const WINDOW_SEC := 5.0
 const WAKE_JUMP := 300 # awake bodies gained in one frame that is logged even when the frame itself was short
+const LOAD_JUMP := 20 # resources created in one frame that get an explicit "loads" marker
+const SPAWN_JUMP := 50 # nodes created in one frame that get an explicit "spawns" marker
+# Code that knows about a stall-prone event (a load, a spawn, a shader) calls note(); the next frame carries it.
+static var pending: Array[String] = []
 var spikes := 0
+var _scene_id := 0
 var probe_mode := 0 # F5 enemy render probe step, logged so a log can be split by mode.
 var worst_msec := 0.0
 var _window_worst := 0.0
@@ -20,6 +25,12 @@ var _session_marked := false
 var _awake_last := 0
 var _script_last := 0
 var _script_seen := {}
+
+
+## Adds a marker to the frame log; a frame that is logged carries the markers noted since the previous frame.
+static func note(text: String) -> void:
+	if pending.size() < 20:
+		pending.append(text)
 
 
 ## Call once per frame with the frame time in seconds; returns true when this frame was logged.
@@ -40,11 +51,23 @@ func tick(delta: float, tree: SceneTree) -> bool:
 	var scripts := PhysicsCost.usec - _script_last
 	_script_last = PhysicsCost.usec
 	var top := _top_scripts()
+	# Markers name what the frame before this tick did: loads, spawns and scene changes. Shader compiles are not visible to scripts.
+	var marks: Array[String] = pending
+	pending = []
+	if resources - _resources >= LOAD_JUMP:
+		marks.append("loads+%d" % (resources - _resources))
+	if nodes - _nodes >= SPAWN_JUMP:
+		marks.append("spawns+%d" % (nodes - _nodes))
+	var scene := tree.current_scene if tree != null else null
+	var scene_id := scene.get_instance_id() if scene != null else 0
+	if scene_id != _scene_id:
+		_scene_id = scene_id
+		marks.append("scene %s" % (scene.scene_file_path if scene != null else "none"))
 	if msec >= SPIKE_MSEC:
 		spikes += 1
 		worst_msec = maxf(worst_msec, msec)
 	if msec >= SPIKE_MSEC or woke >= WAKE_JUMP:
-		_write(msec, resources, nodes, tree, woke, scripts, top)
+		_write(msec, resources, nodes, tree, woke, scripts, top, marks)
 		logged = true
 	_resources = resources
 	_nodes = nodes
@@ -66,7 +89,7 @@ func _top_scripts() -> String:
 	return ",".join(keys.slice(0, 3).map(func(key) -> String: return "%s:%.1f" % [key, spent[key] / 1000.0]))
 
 
-func _write(msec: float, resources: int, nodes: int, tree: SceneTree, woke: int, scripts_usec: int, top: String) -> void:
+func _write(msec: float, resources: int, nodes: int, tree: SceneTree, woke: int, scripts_usec: int, top: String, marks: Array[String]) -> void:
 	var player := tree.get_first_node_in_group("player") as Node3D if tree != null else null
 	var at := "%.1f,%.1f" % [player.global_position.x, player.global_position.z] if player != null else "?"
 	var file := FileAccess.open(_path, FileAccess.READ_WRITE if FileAccess.file_exists(_path) else FileAccess.WRITE)
@@ -80,14 +103,14 @@ func _write(msec: float, resources: int, nodes: int, tree: SceneTree, woke: int,
 	var hidden := _culled(tree)
 	var plan := _plan_state(tree)
 	var rigid := _rigid(tree)
-	file.store_line("t=%.1fs frame=%.0fms process=%.1f physics=%.1f draw=%d objects=%d resources=%+d nodes=%+d (%d) static=%dMiB video=%dMiB enemies=%d culled=%d/%d merged=%d trim=%d/%d rigid=%d awake=%d frozen=%d monitored=%d awake_top=%s probe=%d woke=%+d phys_active=%d nav=%.1f scripts=%.1f top=%s wakes=%s player=%s" % [
+	file.store_line("t=%.1fs frame=%.0fms process=%.1f physics=%.1f draw=%d objects=%d resources=%+d nodes=%+d (%d) static=%dMiB video=%dMiB enemies=%d culled=%d/%d merged=%d trim=%d/%d rigid=%d awake=%d frozen=%d monitored=%d awake_top=%s probe=%d woke=%+d phys_active=%d nav=%.1f scripts=%.1f top=%s wakes=%s player=%s events=%s" % [
 		Time.get_ticks_msec() / 1000.0, msec, Performance.get_monitor(Performance.TIME_PROCESS) * 1000.0,
 		Performance.get_monitor(Performance.TIME_PHYSICS_PROCESS) * 1000.0,
 		Performance.get_monitor(Performance.RENDER_TOTAL_DRAW_CALLS_IN_FRAME), Performance.get_monitor(Performance.RENDER_TOTAL_OBJECTS_IN_FRAME),
 		resources - _resources, nodes - _nodes, nodes, Performance.get_monitor(Performance.MEMORY_STATIC) / 1048576.0,
 		Performance.get_monitor(Performance.RENDER_VIDEO_MEM_USED) / 1048576.0,
 		(tree.get_nodes_in_group("infected_alive").size() if tree != null else 0), hidden[0], hidden[1], plan[0], plan[1], plan[2], rigid[0], rigid[1], rigid[2], rigid[3], rigid[4], probe_mode, woke,
-		Performance.get_monitor(Performance.PHYSICS_3D_ACTIVE_OBJECTS), Performance.get_monitor(Performance.TIME_NAVIGATION_PROCESS) * 1000.0, scripts_usec / 1000.0, top, PhysicsCost.top_wakes(), at])
+		Performance.get_monitor(Performance.PHYSICS_3D_ACTIVE_OBJECTS), Performance.get_monitor(Performance.TIME_NAVIGATION_PROCESS) * 1000.0, scripts_usec / 1000.0, top, PhysicsCost.top_wakes(), at, ",".join(marks) if not marks.is_empty() else "-"])
 
 
 # Room-culled furniture: [hidden now, tagged in total].
