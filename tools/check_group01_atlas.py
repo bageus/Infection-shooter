@@ -131,8 +131,8 @@ def validate_model(path, layout):
     doc, binary = read_glb(path.read_bytes())
     # Non-destructible models carry their own materials and are outside the atlas.
     # 01_stairs_2 keeps its own embedded 1024 px maps and is outside the atlas.
-    # Models re-authored with embedded textures (no external image URI) are outside the atlas.
-    atlas = bool(doc.get('images')) and all('uri' in image for image in doc['images']) and path.name not in SELF_TEXTURED
+    # Models with their own textures (embedded, or extracted next to the model by the dedup tool) are outside the atlas.
+    atlas = bool(doc.get('images')) and all('/textures/unified/' in image.get('uri', '') for image in doc['images']) and path.name not in SELF_TEXTURED
     if atlas:
         assert doc['images'] == [{'uri': os.path.relpath(GROUP/f'textures/unified/group01_{kind}.png', path.parent).replace(os.sep, '/')} for kind in ['albedo', 'normal', 'orm']], f'{path.name}: stale images'
         assert len(doc['textures']) == 3
