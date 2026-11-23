@@ -9,7 +9,7 @@ const MODEL_PATHS := preload("res://game/core/model_paths/public/model_paths.gd"
 const LAB_MODELS := ["Laboratory_Autoclave", "Laboratory_Balance", "Laboratory_Drying_Cabinet", "Laboratory_Flasks_Set", "Laboratory_Fridge",
 	"Laboratory_Microscope", "Laboratory_Storage_Cabinet", "Hyperbaric_Chamber", "Medical_Instrument_Cabinet", "Medical_Lab_Oven",
 	"MRI_Scanner", "Morgue_Drawers_3x3", "Patient_Monitor_Stand", "Test_Tube_Rack", "Vortex_Mixer", "X_Ray_System",
-	"Containment_Tank_No_Subject"]
+	"Containment_Tank_No_Subject", "Containment_Tank_hunger"]
 const BREAKABLE_MODELS := ["Laboratory_Balance.glb", "Laboratory_Microscope.glb", "Laboratory_Flasks_Set.glb", "Test_Tube_Rack.glb"]
 
 var failures := 0
@@ -57,7 +57,7 @@ func _check_rules() -> void:
 	_check("glass" in glass, "Lab flasks leave glass decals")
 	var tank := RECIPE.for_model("Containment_Tank_No_Subject.glb", "shatter")
 	_check(not tank.is_empty() and tank.all(func(kind: String) -> bool: return kind == "glass"), "A tank leaves glass decals only")
-	_check(FRAGILE.glass_intact("Containment_Tank_No_Subject.glb") and not FRAGILE.glass_intact("Laboratory_Fridge.glb"), "Only the tank glass stays whole")
+	_check(FRAGILE.glass_intact("Containment_Tank_hunger.glb") and FRAGILE.glass_intact("Containment_Tank_No_Subject.glb") and not FRAGILE.glass_intact("Laboratory_Fridge.glb"), "Only the tank glass stays whole")
 
 	var fridge := DAMAGE_STATE.new()
 	fridge.configure("Laboratory_Fridge.glb", 0, false)
