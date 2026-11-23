@@ -55,13 +55,13 @@ static func profile(path: String) -> Dictionary:
 	return _read("desks/" + key + ".json") if not key.is_empty() else {}
 
 
-static func from_saved_template(desk: Node3D, path: String, parent: Node3D, make_asset: Callable) -> Array[Node3D]:
+static func from_saved_template(desk: Node3D, path: String, parent: Node3D, make_asset: Callable, migrate := Callable()) -> Array[Node3D]:
 	var created: Array[Node3D] = []
-	var templates: Array[Dictionary] = TEMPLATE_FILES.list_for(desk_name(path))
+	var templates: Array[Dictionary] = TEMPLATE_FILES.list_for(desk_name(path), migrate)
 	if templates.is_empty():
 		return created
 	var template: Dictionary = templates[randi_range(0, templates.size() - 1)]
-	var data: Dictionary = TEMPLATE_FILES.load(str(template["path"]), desk_name(path))
+	var data: Dictionary = TEMPLATE_FILES.load(str(template["path"]), desk_name(path), migrate)
 	var zones: Array = data.get("zones", [])
 	if not data.is_empty():
 		desk.set_meta("planning_template_edit", {"zones": zones.duplicate(true), "front": int(data.get("front", 0))})

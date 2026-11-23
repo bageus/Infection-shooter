@@ -44,14 +44,15 @@ static func save(desk_type: String, name_part: String, payload: Dictionary) -> b
 	return DirAccess.rename_absolute(temporary, path) == OK
 
 
-static func list_for(desk_type: String) -> Array[Dictionary]:
+## Only templates that load for this desk: prefixes overlap (book_case / book_case_small) and old paths may need migrate.
+static func list_for(desk_type: String, migrate := Callable()) -> Array[Dictionary]:
 	var results: Array[Dictionary] = []
 	var folder := DirAccess.open(ROOT)
 	if folder == null:
 		return results
 	var prefix := desk_type + "_"
 	for file in folder.get_files():
-		if file.begins_with(prefix) and file.ends_with(".json"):
+		if file.begins_with(prefix) and file.ends_with(".json") and not _read(ROOT + "/" + file, desk_type, migrate).is_empty():
 			results.append({"name": file.trim_prefix(prefix).trim_suffix(".json"), "path": ROOT + "/" + file})
 	results.sort_custom(func(a: Dictionary, b: Dictionary) -> bool: return str(a.name).naturalnocasecmp_to(str(b.name)) < 0)
 	return results
@@ -59,6 +60,10 @@ static func list_for(desk_type: String) -> Array[Dictionary]:
 
 ## migrate maps a saved model path to its current one, as level loading does for saved maps.
 static func load(path: String, desk_type: String, migrate := Callable()) -> Dictionary:
+	return _read(path, desk_type, migrate)
+
+
+static func _read(path: String, desk_type: String, migrate: Callable) -> Dictionary:
 	if not desk_type.is_valid_identifier() or path.get_base_dir() != ROOT or not path.begins_with(ROOT + "/" + desk_type + "_") or not path.ends_with(".json"):
 		return {}
 	var file := FileAccess.open(path, FileAccess.READ)

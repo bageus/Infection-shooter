@@ -323,7 +323,7 @@ func _place_selected(screen_pos: Vector2) -> void:
 	if not catalog.WORKSTATIONS.desk_name(selected_path).is_empty():
 		var desk_id = str(Time.get_ticks_usec())
 		node.set_meta("planning_desk_id", desk_id)
-		var attachments: Array[Node3D] = catalog.WORKSTATIONS.from_saved_template(node, selected_path, session.root, Callable(catalog, "_instantiate_asset"))
+		var attachments: Array[Node3D] = catalog.WORKSTATIONS.from_saved_template(node, selected_path, session.root, Callable(catalog, "_instantiate_asset"), Callable(catalog, "_migrate_scene_path"))
 		for object in attachments:
 			object.set_meta("planning_attachment", desk_id)
 			placed.append(object)
