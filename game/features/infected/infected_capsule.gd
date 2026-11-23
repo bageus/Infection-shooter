@@ -5,6 +5,7 @@ const CHASE_PACE := preload("res://game/features/infected/chase_pace.gd")
 const PERCEPTION := preload("res://game/features/infected/enemy_perception.gd")
 const BREAKER := preload("res://game/features/infected/obstacle_breaker.gd")
 const CROWD := preload("res://game/features/infected/crowd_separation.gd")
+const COSTUME := preload("res://game/features/infected/infected_costume.gd")
 var _route := CHASE_ROUTE.new()
 var _pace := CHASE_PACE.new()
 var _senses := PERCEPTION.new()
@@ -169,6 +170,7 @@ func _ready() -> void:
 	_pace = CHASE_PACE.new(get_instance_id())
 	_lod_frame_offset = get_instance_id() % 12
 	death_cloud.depleted.connect(_on_death_cloud_depleted)
+	COSTUME.apply(body_visual, StringName(str(get_meta(&"skin", &"normal"))))
 	if not is_instance_valid(_visual_budget):
 		_setup_body_parts()
 	audio = AUDIO.new()

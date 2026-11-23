@@ -216,7 +216,7 @@ static func wound_material(original: Material) -> ShaderMaterial:
 # Static mesh of the vertices that mostly follow `chain`, skinned into the
 # current pose and expressed in world orientation around `center`.
 # Returns {mesh, center, points} or {} when the chain owns no geometry.
-static func build_piece(data: Dictionary, chain: PackedInt32Array, skeleton: Skeleton3D, materials: Array) -> Dictionary:
+static func build_piece(data: Dictionary, chain: PackedInt32Array, skeleton: Skeleton3D, materials: Array, fixed_center: Variant = null) -> Dictionary:
 	var skinning := {}
 	var topologies: Array[Dictionary] = []
 	for i in (data.surfaces as Array).size():
@@ -243,22 +243,28 @@ static func build_piece(data: Dictionary, chain: PackedInt32Array, skeleton: Ske
 		var out_indices: PackedInt32Array = topology["indices"]
 		var source_normals: PackedVector3Array = surface.normals
 		var source_uvs: PackedVector2Array = surface.uvs
+		var source_colors: PackedColorArray = surface.get("colors", PackedColorArray())
+		var colors := PackedColorArray()
 		for corner: int in topology["vertices"]:
 			var transform := _blend(skinning, bones, weights, stride, corner)
 			positions.append(transform * vertices[corner])
 			normals.append((transform.basis * (source_normals[corner] if not source_normals.is_empty() else Vector3.UP)).normalized())
 			uvs.append(source_uvs[corner] if not source_uvs.is_empty() else Vector2.ZERO)
+			if not source_colors.is_empty():
+				colors.append(source_colors[corner])
 			rest.append_array([vertices[corner].x, vertices[corner].y, vertices[corner].z, 1.0])
 		if out_indices.is_empty():
 			continue
 		all_points.append_array(positions)
-		surfaces_out.append({"positions": positions, "normals": normals, "uvs": uvs, "rest": rest, "indices": out_indices, "material": materials[surface_index] if surface_index < materials.size() else null})
+		surfaces_out.append({"positions": positions, "normals": normals, "uvs": uvs, "rest": rest, "colors": colors, "indices": out_indices, "material": materials[surface_index] if surface_index < materials.size() else null})
 	if all_points.is_empty():
 		return {}
 	var center := Vector3.ZERO
 	for point in all_points:
 		center += point
 	center /= float(all_points.size())
+	if fixed_center != null:
+		center = fixed_center
 	var mesh := ArrayMesh.new()
 	for entry: Dictionary in surfaces_out:
 		var positions: PackedVector3Array = entry.positions
@@ -270,6 +276,8 @@ static func build_piece(data: Dictionary, chain: PackedInt32Array, skeleton: Ske
 		arrays[Mesh.ARRAY_NORMAL] = entry.normals
 		arrays[Mesh.ARRAY_TEX_UV] = entry.uvs
 		arrays[Mesh.ARRAY_CUSTOM0] = entry.rest
+		if not (entry.colors as PackedColorArray).is_empty():
+			arrays[Mesh.ARRAY_COLOR] = entry.colors
 		arrays[Mesh.ARRAY_INDEX] = entry.indices
 		mesh.add_surface_from_arrays(Mesh.PRIMITIVE_TRIANGLES, arrays, [], {}, Mesh.ARRAY_CUSTOM_RGBA_FLOAT << Mesh.ARRAY_FORMAT_CUSTOM0_SHIFT)
 		if entry.material != null:
