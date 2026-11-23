@@ -38,18 +38,18 @@ static func save(mode: Variant) -> void:
 
 static func refresh(mode: Variant) -> void:
 	mode.template_list.clear()
-	for item in TEMPLATE_FILES.list_for(WORKSTATIONS.desk_name(mode._desk_path())):
-		# Offer only what Apply accepts, so the list and the check agree.
-		if _load(mode, str(item["path"])).is_empty():
-			continue
+	for item in TEMPLATE_FILES.list_for(WORKSTATIONS.desk_name(mode._desk_path()), _migrate(mode)):
 		mode.template_list.add_item(str(item["name"]))
 		mode.template_list.set_item_metadata(mode.template_list.item_count - 1, item["path"])
 
 
-static func _load(mode: Variant, path: String) -> Dictionary:
+static func _migrate(mode: Variant) -> Callable:
 	var catalog: Variant = mode.planner.get("catalog")
-	var migrate := Callable(catalog, "_migrate_scene_path") if catalog != null else Callable()
-	return TEMPLATE_FILES.load(path, WORKSTATIONS.desk_name(mode._desk_path()), migrate)
+	return Callable(catalog, "_migrate_scene_path") if catalog != null else Callable()
+
+
+static func _load(mode: Variant, path: String) -> Dictionary:
+	return TEMPLATE_FILES.load(path, WORKSTATIONS.desk_name(mode._desk_path()), _migrate(mode))
 
 
 static func load_selected(mode: Variant) -> void:
