@@ -1,6 +1,7 @@
-extends Node3D
+extends StaticBody3D
 ## Shooting range target: a hit drops the post and face flat on a hinge at the rear base edge,
 ## the base stays put, and the target stands up again after 10 seconds.
+## One static body: its post and face colliders move with the visual hinge, so nested moving bodies are not needed.
 
 const MODEL_SCENE := preload("res://models/objects/enviroments/13/13_Shooting_Range_Target_30tris.glb")
 const FALL_SECONDS := 0.25
@@ -13,7 +14,9 @@ const SHIFT_TO_REAR := Vector3(0.0, 0.0, -0.24)
 const MIN_SIZE := 0.04
 
 var model_path := "res://models/objects/enviroments/13/13_Shooting_Range_Target_30tris.glb"
-var _hinge: AnimatableBody3D
+var _hinge: Node3D
+var _moving_shapes: Array[CollisionShape3D] = []
+var _moving_offsets: Array[Transform3D] = []
 var _axis := Vector3.RIGHT
 var _fall := 0.0
 var _down := false
@@ -23,23 +26,20 @@ var _tween: Tween
 func _ready() -> void:
 	var visual := MODEL_SCENE.instantiate() as Node3D
 	add_child(visual)
-	_hinge = AnimatableBody3D.new()
+	_hinge = Node3D.new()
 	_hinge.name = "Hinge"
-	_hinge.transform = Transform3D(Basis(), PIVOT)
 	add_child(_hinge)
-	var moving: Array[MeshInstance3D] = []
+	_hinge.transform = Transform3D(Basis(), PIVOT)
 	for part_name in ["Upright", "Target"]:
 		var part := visual.find_child(part_name, true, false) as MeshInstance3D
 		part.reparent(_hinge, true)
 		part.position += SHIFT_TO_REAR
-		moving.append(part)
-	for part in moving:
-		_add_box(_hinge, _box_in(_hinge, part))
-	var base_body := StaticBody3D.new()
-	base_body.name = "Base"
-	add_child(base_body)
+	for part_name in ["Upright", "Target"]:
+		_add_moving_box(_hinge.find_child(part_name, false, false) as MeshInstance3D)
 	var base := visual.find_child("Base", true, false) as MeshInstance3D
-	_add_box(base_body, _box_in(base_body, base))
+	var base_box := _box_in(self, base)
+	_add_box(base_box, Transform3D(Basis(), base_box.get_center()))
+	_set_fall(0.0)
 
 
 func take_projectile_hit(_damage: float, _hit_position: Vector3, _normal: Vector3, direction: Vector3, _weapon: String) -> bool:
@@ -59,13 +59,20 @@ func take_projectile_hit(_damage: float, _hit_position: Vector3, _normal: Vector
 	return true
 
 
+func get_projectile_material(_shape_index: int = -1) -> String:
+	return "metal"
+
+
 func _start_rise() -> void:
 	_down = false
 
 
 func _set_fall(amount: float) -> void:
 	_fall = amount
-	_hinge.transform = Transform3D(Basis(_axis, amount * PI * 0.5), PIVOT)
+	var hinge_transform := Transform3D(Basis(_axis, amount * PI * 0.5), PIVOT)
+	_hinge.transform = hinge_transform
+	for index in _moving_shapes.size():
+		_moving_shapes[index].transform = hinge_transform * _moving_offsets[index]
 
 
 ## The mesh's bounds in the frame of `body`, so collision boxes match the visible parts.
@@ -73,11 +80,19 @@ func _box_in(body: Node3D, mesh: MeshInstance3D) -> AABB:
 	return body.global_transform.affine_inverse() * (mesh.global_transform * mesh.get_aabb())
 
 
-func _add_box(body: Node3D, box: AABB) -> void:
+func _add_moving_box(mesh: MeshInstance3D) -> void:
+	var box := _box_in(_hinge, mesh)
+	var offset := Transform3D(Basis(), box.get_center())
+	_moving_offsets.append(offset)
+	_moving_shapes.append(_add_box(box, offset))
+
+
+func _add_box(box: AABB, offset: Transform3D) -> CollisionShape3D:
 	var shape := BoxShape3D.new()
 	# Zero-thickness parts (the face plane) still need a solid box for bullets to hit.
 	shape.size = Vector3(maxf(box.size.x, MIN_SIZE), maxf(box.size.y, MIN_SIZE), maxf(box.size.z, MIN_SIZE))
 	var collision := CollisionShape3D.new()
 	collision.shape = shape
-	collision.position = box.get_center()
-	body.add_child(collision)
+	collision.transform = offset
+	add_child(collision)
+	return collision
