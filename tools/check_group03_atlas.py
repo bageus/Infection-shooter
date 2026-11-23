@@ -49,8 +49,8 @@ def main():
     for path in resources:
         assert not audit(path)['errors'],path.name
         doc,binary=read_glb(path.read_bytes());assert len(doc['scenes'])==1
-        # Intact models re-authored with embedded palette textures (not the atlas) are checked for structure only.
-        atlas=all('uri' in image for image in doc['images']) and bool(doc['images'])
+        # Models re-authored with their own palette materials (not the shared Group03 ones) are checked for structure only.
+        atlas=any(m['name'].startswith('Group03') for m in doc['materials'])
         if not atlas:continue
         live=set()
         for mesh in doc['meshes']:
