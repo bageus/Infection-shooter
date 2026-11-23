@@ -21,7 +21,7 @@ class WorkstationTemplatesTest(unittest.TestCase):
         desks = list((DATA / "desks").glob("*.json"))
         setups = list((DATA / "setups").glob("*.json"))
         self.assertEqual({path.stem for path in desks}, set(DESK_CATALOG.values()))
-        self.assertEqual(len(setups), 5)
+        self.assertEqual(len(setups), 6)
         for path in desks:
             with self.subTest(profile=path.stem):
                 profile = json.loads(path.read_text())
@@ -65,6 +65,18 @@ class WorkstationTemplatesTest(unittest.TestCase):
         self.assertLessEqual(station["grid_depth"], 0.84 + 0.001)
         self.assertAlmostEqual(station["z"] - station["grid_depth"] / 2, -0.33 + 0.005, delta=0.01)
         self.assertAlmostEqual(station["z"] + station["grid_depth"] / 2, 0.51 - 0.005, delta=0.01)
+
+    def test_lab_table_has_its_own_setup_pool_and_models_exist(self):
+        key = DESK_CATALOG.get("07_table_lab")
+        self.assertEqual(key, "table_lab")
+        profile = json.loads((DATA / "desks" / f"{key}.json").read_text())
+        self.assertEqual(profile["setups"], ["lab_bench"])
+        self.assertTrue((MODELS / "07" / "07_table_lab.glb").exists())
+        items = json.loads((DATA / "setups" / "lab_bench.json").read_text())["items"]
+        for entry in items:
+            self.assertTrue(any((MODELS / "05" / "medical").glob(f"{entry['model']}.glb")), entry["model"])
+        office = json.loads((DATA / "desks" / "table_longest.json").read_text())
+        self.assertNotIn("setups", office)
 
     def test_every_named_model_exists(self):
         names = set(re.findall(r'"(\d\d_[A-Za-z0-9_]+)"', SCRIPT))
