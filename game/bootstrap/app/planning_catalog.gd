@@ -22,6 +22,7 @@ var lighting_catalog = [
 	{"name":"Точечный светильник","path":"res://game/presentation/office_floor/public/props/planner_light.tscn","kind":"light","fixture_shape":"point"},
 	{"name":"Длинный узкий светильник","path":"res://game/presentation/office_floor/public/props/planner_light.tscn","kind":"light","fixture_shape":"linear"},
 	{"name":"Прямоугольный светильник","path":"res://game/presentation/office_floor/public/props/planner_light.tscn","kind":"light","fixture_shape":"rectangle"},
+	{"name":"Фаер (красный)","path":"res://game/presentation/office_floor/public/props/flare_prop.tscn","kind":"flare"},
 	{"name":"Permanent Darkness","path":"res://game/presentation/office_floor/public/props/darkness_zone.tscn","kind":"darkness"},
 	{"name":"Exploration Darkness","path":"res://game/presentation/office_floor/public/props/darkness_zone.tscn","kind":"exploration_darkness"}
 ]

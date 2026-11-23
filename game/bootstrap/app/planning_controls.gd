@@ -21,7 +21,9 @@ const GROUP_TEMPLATES := preload("res://game/bootstrap/app/planning_group_templa
 var loot_options: Node
 var corpse_options: Node
 const TARGET_OPTIONS := preload("res://game/bootstrap/app/planning_target_options.gd")
+const FLARE_OPTIONS := preload("res://game/bootstrap/app/planning_flare_options.gd")
 var target_options: Node
+var flare_options: Node
 const FRUIT_OPTIONS := preload("res://game/bootstrap/app/planning_fruit_options.gd")
 var fruit_options: Node
 var door_options: Node
@@ -133,6 +135,9 @@ func setup_controls() -> void:
 	target_options = TARGET_OPTIONS.new()
 	add_child(target_options)
 	target_options.call("setup", session, objects)
+	flare_options = FLARE_OPTIONS.new()
+	add_child(flare_options)
+	flare_options.call("setup", session, objects)
 	door_options = DOOR_OPTIONS.new()
 	add_child(door_options)
 	door_options.call("setup", session, objects)
@@ -263,6 +268,7 @@ func _configure_new_asset(node: Node3D, entry: Dictionary) -> void:
 	corpse_options.call("configure_new", node)
 	fruit_options.call("configure_new", node)
 	target_options.call("configure_new", node)
+	flare_options.call("configure_new", node)
 	spawn_options.call("configure_new", node)
 	fixtures.configure_new_asset(node, entry)
 	room_options.configure_new(node, entry)
@@ -376,6 +382,8 @@ func _update_light_ui() -> void:
 		fruit_options.call("update")
 	if target_options != null:
 		target_options.call("update")
+	if flare_options != null:
+		flare_options.call("update")
 	if door_options != null:
 		door_options.call("update")
 	if room_options != null:

@@ -221,6 +221,8 @@ func _clear_preview() -> void:
 		controls.fruit_options.hide()
 	if controls.target_options != null:
 		controls.target_options.hide()
+	if controls.flare_options != null:
+		controls.flare_options.hide()
 	if controls.door_options != null:
 		controls.door_options.hide()
 	if controls.room_options != null:

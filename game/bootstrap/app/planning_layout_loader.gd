@@ -271,6 +271,8 @@ func _place(entry: Dictionary) -> void:
 		node.call("set_planning_visual", session.active)
 	if node.has_method("configure_spawn"):
 		node.call("set_planning_visual", session.active)
+	if node.has_method("set_flare_enabled"):
+		node.call("set_flare_enabled", bool(record.get("flare_enabled", true)))
 	if node.has_method("set_authored_energy"):
 		node.set("energy_multiplier", float(record.get("energy_multiplier", 0.65)))
 		node.call("set_authored_energy", float(record.get("light_energy", node.call("get_authored_energy"))))
