@@ -2,7 +2,7 @@ extends Node3D
 ## Shooting range target: a hit drops the post and face flat on a hinge at the rear base edge,
 ## the base stays put, and the target stands up again after 10 seconds.
 
-const MODEL_SCENE := preload("res://models/objects/enviroments/13/Shooting_Range_Target_30tris.glb")
+const MODEL_SCENE := preload("res://models/objects/enviroments/13/13_Shooting_Range_Target_30tris.glb")
 const FALL_SECONDS := 0.25
 const DOWN_SECONDS := 10.0
 const RISE_SECONDS := 0.8
@@ -12,7 +12,7 @@ const PIVOT := Vector3(0.0, 0.055, -0.22)
 const SHIFT_TO_REAR := Vector3(0.0, 0.0, -0.24)
 const MIN_SIZE := 0.04
 
-var model_path := "res://models/objects/enviroments/13/Shooting_Range_Target_30tris.glb"
+var model_path := "res://models/objects/enviroments/13/13_Shooting_Range_Target_30tris.glb"
 var _hinge: AnimatableBody3D
 var _axis := Vector3.RIGHT
 var _fall := 0.0
