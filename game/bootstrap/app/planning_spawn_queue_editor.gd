@@ -128,6 +128,8 @@ func _load_entries(queue: Dictionary) -> void:
 		var remove := _button(row, "×", _remove_entry.bind(index))
 		remove.disabled = entries.size() <= 1
 		entries_box.add_child(row)
+		if str(entries[index]["enemy"]) in SPAWN_CONFIG.SKIN_ENEMIES:
+			entries_box.add_child(_skin_box(index, entries[index]))
 	add_entry_button.disabled = entries.size() >= SPAWN_CONFIG.ENTRIES_MAX
 
 
@@ -137,6 +139,40 @@ func _queue() -> Dictionary:
 
 func _entry_kind(selected: int, index: int) -> void:
 	_queue()["enemies"][index]["enemy"] = SPAWN_CONFIG.ENEMIES[selected]
+	_commit()
+
+
+## Costume shares of one entry: a percent per skin, the auto split until one of them is set.
+func _skin_box(index: int, entry: Dictionary) -> Control:
+	var box := VBoxContainer.new()
+	var shares: Dictionary = SPAWN_CONFIG.skin_shares(entry.get("skins", {}))
+	var grid := GridContainer.new()
+	grid.columns = SPAWN_CONFIG.SKINS.size()
+	for skin_index in SPAWN_CONFIG.SKINS.size():
+		var label := Label.new()
+		label.text = SPAWN_CONFIG.SKIN_SHORT_LABELS[skin_index]
+		label.tooltip_text = SPAWN_CONFIG.SKIN_LABELS[skin_index]
+		grid.add_child(label)
+	for skin_index in SPAWN_CONFIG.SKINS.size():
+		var skin: String = SPAWN_CONFIG.SKINS[skin_index]
+		var share := _spin(0, 100, 1)
+		share.set_value_no_signal(float(shares[skin]))
+		share.tooltip_text = SPAWN_CONFIG.SKIN_LABELS[skin_index]
+		share.value_changed.connect(_entry_skin.bind(index, skin))
+		grid.add_child(share)
+	box.add_child(grid)
+	_button(box, "Скины: авто", _entry_skin_auto.bind(index))
+	return box
+
+
+func _entry_skin(value: float, index: int, skin: String) -> void:
+	var entry: Dictionary = _queue()["enemies"][index]
+	entry["skins"] = SPAWN_CONFIG.with_skin_share(entry.get("skins", {}), skin, value)
+	_commit()
+
+
+func _entry_skin_auto(index: int) -> void:
+	_queue()["enemies"][index].erase("skins")
 	_commit()
 
 

@@ -17,6 +17,14 @@ const ENEMY_SCENES := {
 	"colossus": "res://game/features/infected/public/infected_colossus.tscn",
 	"horde": "res://game/features/infected/public/infected_horde.tscn",
 }
+## Costume skins, in palette order. Only these kinds wear them; the rest always spawn "normal".
+const SKINS: Array[String] = ["normal", "no_tie", "janitor", "guard", "scientist", "hazmat"]
+const SKIN_LABELS: Array[String] = ["Обычный", "Без галстука", "Уборщик", "Охранник", "Учёный", "Герметичный костюм"]
+const SKIN_SHORT_LABELS: Array[String] = ["Обычн.", "Без гал.", "Уборщ.", "Охран.", "Учёный", "Герм."]
+const SKIN_ENEMIES: Array[String] = ["hunger", "brute", "revenant"]
+## Auto split of a 100% share: the usual suit 50/50 with janitors and guards mixed in as 20%.
+## Scientists and hazmat suits are never mixed in automatically.
+const SKIN_AUTO := {"normal": 40.0, "no_tie": 40.0, "janitor": 10.0, "guard": 10.0, "scientist": 0.0, "hazmat": 0.0}
 ## stream: one per interval; burst: a batch per interval; refill: one per
 ## interval while fewer than `batch` of this point's infected are alive.
 const RULES: Array[String] = ["stream", "burst", "refill"]
@@ -120,7 +128,65 @@ static func sanitize_queue(raw: Variant) -> Dictionary:
 static func _entry(source: Dictionary) -> Dictionary:
 	var id := str(source.get("enemy", ""))
 	var count: Variant = source.get("count")
-	return {"enemy": id if id in ENEMIES else "hunger", "count": clampi(int(count), 1, COUNT_MAX) if _number(count) else 20}
+	var entry := {"enemy": id if id in ENEMIES else "hunger", "count": clampi(int(count), 1, COUNT_MAX) if _number(count) else 20}
+	var skins := _manual_skins(source.get("skins"))
+	if not skins.is_empty():
+		entry["skins"] = skins
+	return entry
+
+
+## Manual skin percents of one entry: only known skins with numbers. Missing skins follow the auto split.
+static func _manual_skins(raw: Variant) -> Dictionary:
+	var manual := {}
+	if raw is Dictionary:
+		for skin: String in SKINS:
+			if _number(raw.get(skin)):
+				manual[skin] = clampf(float(raw[skin]), 0.0, 100.0)
+	return manual
+
+
+## Share (percent) of every skin for an entry: manual values stay as set, the rest of the
+## total is split by the auto ratios. Sums to 100 unless the manual values already exceed it.
+static func skin_shares(manual: Dictionary) -> Dictionary:
+	var shares := {}
+	var manual_total := 0.0
+	var auto_total := 0.0
+	for skin: String in SKINS:
+		if manual.has(skin):
+			shares[skin] = float(manual[skin])
+			manual_total += float(manual[skin])
+		else:
+			auto_total += float(SKIN_AUTO[skin])
+	var rest := maxf(0.0, 100.0 - manual_total)
+	for skin: String in SKINS:
+		if not manual.has(skin):
+			shares[skin] = rest * float(SKIN_AUTO[skin]) / auto_total if auto_total > 0.0 else 0.0
+	return shares
+
+
+## Sets one skin's manual share; the other manual shares stay as they are. Stored in the entry as "skins".
+static func with_skin_share(manual: Dictionary, skin: String, percent: float) -> Dictionary:
+	var result := manual.duplicate()
+	result[skin] = clampf(percent, 0.0, 100.0)
+	return result
+
+
+## Skin of one spawned infected: picks by weight from `roll` (0 up to 1). Kinds without costumes stay "normal".
+static func pick_skin(enemy_id: String, manual: Dictionary, roll: float) -> String:
+	if not enemy_id in SKIN_ENEMIES:
+		return "normal"
+	var shares := skin_shares(manual)
+	var total := 0.0
+	for skin: String in SKINS:
+		total += float(shares[skin])
+	if total <= 0.0:
+		return "normal"
+	var at := roll * total
+	for skin: String in SKINS:
+		at -= float(shares[skin])
+		if at < 0.0 and float(shares[skin]) > 0.0:
+			return skin
+	return "normal"
 
 
 ## Infected a queue spawns in total.
