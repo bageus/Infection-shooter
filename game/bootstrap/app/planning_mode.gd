@@ -375,6 +375,8 @@ func _set_light_markers_visible(value: bool) -> void:
 	for light_node in get_tree().get_nodes_in_group("planner_lights"):
 		if light_node.has_method("set_planning_visual"):
 			light_node.call("set_planning_visual", value)
+	for dust_node in get_tree().get_nodes_in_group("dust_zones"):
+		dust_node.call("set_planning_visual", value)
 
 var player_spawn_defined: bool:
 	get:

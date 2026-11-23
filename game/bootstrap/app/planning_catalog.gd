@@ -23,7 +23,10 @@ var lighting_catalog = [
 	{"name":"Длинный узкий светильник","path":"res://game/presentation/office_floor/public/props/planner_light.tscn","kind":"light","fixture_shape":"linear"},
 	{"name":"Прямоугольный светильник","path":"res://game/presentation/office_floor/public/props/planner_light.tscn","kind":"light","fixture_shape":"rectangle"},
 	{"name":"Permanent Darkness","path":"res://game/presentation/office_floor/public/props/darkness_zone.tscn","kind":"darkness"},
-	{"name":"Exploration Darkness","path":"res://game/presentation/office_floor/public/props/darkness_zone.tscn","kind":"exploration_darkness"}
+	{"name":"Exploration Darkness","path":"res://game/presentation/office_floor/public/props/darkness_zone.tscn","kind":"exploration_darkness"},
+	{"name":"Пыль: плотная","path":"res://game/presentation/office_floor/public/props/dust_zone.tscn","kind":"dust","dust":2},
+	{"name":"Пыль: слабая","path":"res://game/presentation/office_floor/public/props/dust_zone.tscn","kind":"dust","dust":1},
+	{"name":"Пыль: лёгкая","path":"res://game/presentation/office_floor/public/props/dust_zone.tscn","kind":"dust","dust":0}
 ]
 # Enemy paths accepted by map loading; includes the retired mutant alias.
 const ENEMY_SCENES := [

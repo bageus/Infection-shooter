@@ -20,7 +20,7 @@ func record_transform(node: Node3D) -> void:
 		"light_energy": node.get_meta("planning_light_energy", -1.0), "light_angle": node.get_meta("planning_light_angle", -1.0),
 		"loot": _loot_of(node), "enemy_stats": node.call("get_enemy_stats") if node.has_method("configure_stats") else {}, "death_cloud": _cloud_of(node),
 		"fruit": _fruit_of(node), "tutorial_target": TARGET.is_target(node),
-		"darkness": DARKNESS.capture(node),
+		"darkness": DARKNESS.capture(node), "dust": int(node.get_meta("planning_dust", -1)),
 		"spawn": _spawn_of(node), "spawn_triggers": node.get_meta(WAVE_DIRECTOR.TRIGGER_META, [])})
 
 
@@ -230,6 +230,8 @@ func _restore(record: Dictionary, offset: Vector3, new_desk: bool) -> Node3D:
 		var fixture: Dictionary = record.get("fixture", {})
 		node.call("configure_fixture", str(fixture.get("shape", "point")), bool(fixture.get("visible_in_game", false)))
 	DARKNESS.apply(node, record.get("darkness", {}))
+	if int(record.get("dust", -1)) >= 0 and node.has_method("set_density"):
+		node.call("set_density", int(record.dust))
 	parent.add_child(node)
 	if node.has_method("set_planning_visual"):
 		node.call("set_planning_visual", planner.active)

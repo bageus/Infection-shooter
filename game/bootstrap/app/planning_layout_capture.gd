@@ -42,7 +42,7 @@ static func collect(objects: Node, nodes: Array, include_player: bool = true) ->
 			"object_id": str(node.get_meta("planning_object_id", "")),
 			"desk_id": node.get_meta("planning_desk_id", ""),
 			"attachment": node.get_meta("planning_attachment", ""),
-			"zone": node.get_meta("planning_zone", -1),
+			"zone": node.get_meta("planning_zone", -1), "dust": int(node.get_meta("planning_dust", -1)),
 			"x": save_position.x, "y": save_position.y, "z": save_position.z,
 			"rotation_y": node.rotation_degrees.y,
 			"rotation_x": node.rotation_degrees.x, "rotation_z": node.rotation_degrees.z,

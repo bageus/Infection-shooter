@@ -302,6 +302,17 @@ func _video() -> void:
 	hide_unseen.button_pressed = dialog.view.preferences.values.hide_unseen_props
 	hide_unseen.toggled.connect(func(value: bool) -> void: dialog.call("_change", "hide_unseen_props", value))
 	dialog.get("layout").add_child(hide_unseen)
+	_dust_row()
+
+
+func _dust_row() -> void:
+	var dust := CheckButton.new()
+	dust.name = "Dust"
+	dust.text = dialog.view.text("dust")
+	dust.tooltip_text = dialog.view.text("dustHint")
+	dust.button_pressed = dialog.view.preferences.values.dust
+	dust.toggled.connect(func(value: bool) -> void: dialog.call("_change", "dust", value))
+	dialog.get("layout").add_child(dust)
 
 
 func _shadow_quality() -> void:
