@@ -4,6 +4,7 @@ extends RefCounted
 const DEATH_FALL := preload("res://game/features/infected/death_fall.gd")
 const DEATH_OBSTACLE := preload("res://game/features/infected/death_obstacle.gd")
 const CORPSE_BUDGET := preload("res://game/features/infected/public/corpse_budget.gd")
+const LEG_SETTLE := preload("res://game/features/infected/leg_settle.gd")
 const YAW_JITTER := 0.5 # radians
 
 
@@ -16,6 +17,8 @@ static func play(owner: CharacterBody3D, parts: Node, animation: Node, fall: Dic
 	# A crawler is already on the floor: nothing to topple onto, so nothing to freeze on.
 	if fall["state"] == DEATH_FALL.DEATH_CRAWL or not watch.call("start", owner, parts, animation, fall, death_length):
 		watch = null
+	if death_length > 0.0 and fall["state"] != DEATH_FALL.DEATH_CRAWL:
+		LEG_SETTLE.settle_over(owner, owner.get("_parts").get("skeleton"), death_length, 0.8)
 	var body_visual: Node3D = owner.get("body_visual")
 	if death_length > 0.0:
 		# The corpse stays visible while the clip plays, then sinks away.

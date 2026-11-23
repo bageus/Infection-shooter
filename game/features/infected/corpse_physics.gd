@@ -7,6 +7,7 @@ var _parts: Node
 var _guard: Node
 const HUMANOID_SKIN_MARGIN := 1.25
 const HORDE_MAX_RADIUS := 0.6
+const LEG_SETTLE := preload("res://game/features/infected/leg_settle.gd")
 const GUARD := preload("res://game/features/infected/corpse_guard.gd")
 ## Joint limits in degrees {swing, twist} by bone-name suffix: a body bends like a person, not like a sack.
 ## Knees and elbows fold one way and barely twist; thighs stay near the hips so legs do not splay or corkscrew.
@@ -154,6 +155,17 @@ func freeze_pose() -> void:
 	for index in skeleton.get_bone_count():
 		if poses.has(index):
 			skeleton.set_bone_global_pose(index, poses[index])
+	_lower_legs()
+
+
+# A body left lying keeps no leg raised in the air: the thighs come down to the floor.
+func _lower_legs() -> void:
+	var hips := skeleton.find_bone("Hips")
+	var head := skeleton.find_bone("Head")
+	if hips < 0 or head < 0 or not skeleton.is_inside_tree():
+		return
+	var along: Vector3 = skeleton.global_basis * (skeleton.get_bone_global_pose(head).origin - skeleton.get_bone_global_pose(hips).origin)
+	LEG_SETTLE.drop(skeleton, skeleton.get_world_3d(), along, [])
 
 
 ## Gives every bone the same start velocity; the upper body leads a little so a
