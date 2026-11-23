@@ -1,7 +1,7 @@
 extends Node
-## Floor material of the location: tile (default) or matte worn concrete. A map setting saved as floor_type_v1.
-const TYPES: Array[String] = ["tile", "concrete"]
-const LABELS: Array[String] = ["Плитка", "Бетон (матовый, с потёртостями)"]
+## Floor material of the location: grey tile (default), worn concrete, wood, carpet or white lab tile. A map setting saved as floor_type_v1.
+const TYPES: Array[String] = ["tile", "concrete", "wood", "carpet", "lab_tile"]
+const LABELS: Array[String] = ["Плитка", "Бетон (матовый, с потёртостями)", "Паркет (имитация дерева)", "Ковролин", "Белая лабораторная плитка"]
 const DEFAULT := "tile"
 ## Tile edge in metres, a map setting saved as floor_tile_step_v1 (the stock grid is 2 m).
 const TILE_KEY := "floor_tile_step_v1"

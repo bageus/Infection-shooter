@@ -7,7 +7,8 @@ var _failures := 0
 
 func _initialize() -> void:
 	_check(FLOOR_TYPE.valid("tile") and FLOOR_TYPE.valid("concrete"), "Both floor types are valid")
-	_check(not FLOOR_TYPE.valid("carpet") and not FLOOR_TYPE.valid(3) and not FLOOR_TYPE.valid(null), "Unknown types are refused")
+	_check(FLOOR_TYPE.valid("wood") and FLOOR_TYPE.valid("carpet") and FLOOR_TYPE.valid("lab_tile"), "Wood, carpet and lab tile are valid")
+	_check(not FLOOR_TYPE.valid("lava") and not FLOOR_TYPE.valid(3) and not FLOOR_TYPE.valid(null), "Unknown types are refused")
 	call_deferred("_run_planner_flow")
 
 
@@ -52,7 +53,7 @@ func _sections(floor_view: Node) -> Array:
 
 
 func _concrete(section: MultiMeshInstance3D) -> bool:
-	return bool((section.material_override as ShaderMaterial).get_shader_parameter("concrete"))
+	return int((section.material_override as ShaderMaterial).get_shader_parameter("look")) == 1
 
 
 func _check(condition: bool, message: String) -> void:
