@@ -225,18 +225,18 @@ func advance(delta: float) -> void:
 		own[key] = _spawned[key].size() + _backlog.filter(func(order: Dictionary) -> bool: return order["key"] == key).size()
 	# Infected still waiting in the backlog already hold their slots under the cap.
 	for order in _queue.step(delta, alive_count() + _backlog.size(), max_alive, own):
-		for kind: String in order["enemies"]:
-			_backlog.append({"key": str(order["id"]), "enemy": kind})
+		for index in order["enemies"].size():
+			_backlog.append({"key": str(order["id"]), "enemy": order["enemies"][index], "skin": order["skins"][index]})
 
 
 func _drain_backlog() -> void:
 	var budget := mini(SPAWNS_PER_FRAME, _backlog.size())
 	for step in budget:
 		var order: Dictionary = _backlog.pop_front()
-		_spawn(str(order["key"]), str(order["enemy"]))
+		_spawn(str(order["key"]), str(order["enemy"]), str(order["skin"]))
 
 
-func _spawn(key: String, enemy_id: String) -> void:
+func _spawn(key: String, enemy_id: String, skin_id: String) -> void:
 	var queue: Dictionary = _queues.get(key, {})
 	var point: Node3D = _points.get(queue.get("point", ""))
 	if queue.is_empty() or not is_instance_valid(point):
@@ -253,6 +253,7 @@ func _spawn(key: String, enemy_id: String) -> void:
 	var enemy := packed.instantiate() as Node3D
 	if enemy.has_method("configure_stats"):
 		enemy.call("configure_stats", {"health": config["health"], "damage": config["damage"]})
+	enemy.set_meta(&"skin", skin_id)
 	_apply_loot(enemy, _loot.get(point_id, {}))
 	var ground: Vector3 = point.call("spawn_position", index)
 	# Out of the hole: each one faces away from its centre, so a wave climbs out in different directions.
