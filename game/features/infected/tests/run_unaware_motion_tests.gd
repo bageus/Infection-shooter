@@ -159,6 +159,7 @@ func _run() -> void:
 	var enemy := HUNGER.instantiate()
 	enemy.position.y = 0.1
 	enemy.rest_behaviours = false
+	enemy._slumber.enabled = false  # these tests drive the far LOD paths a sleeping infected would skip
 	stage.add_child(enemy)
 	var senses := Senses.new()
 	enemy._senses = senses

@@ -174,7 +174,7 @@ func _wander() -> void:
 	await _fresh_stage()
 	var player := Target.new()
 	stage.add_child(player)
-	player.position = Vector3(0, 0.1, -60)
+	player.position = Vector3(0, 0.1, -25)
 	var enemy := _spawn(HUNGER, Vector3(0, 0.1, 0), player, true)
 	await _frames(5)
 	var home := enemy.global_position

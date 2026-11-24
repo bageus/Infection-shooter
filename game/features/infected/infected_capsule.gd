@@ -108,6 +108,7 @@ var _sleeping_far := false
 var _blast_stun_remaining := 0.0
 var mutation_poison_remaining := 0.0
 @warning_ignore("unused_private_class_variable") var _mutation_poison_damage := 0.0 # Read and written by mutation_status.gd.
+var _slumber := preload("res://game/features/infected/enemy_slumber.gd").new()
 var _mutation_status := preload("res://game/features/infected/mutation_status.gd").new()
 var _blood := BLOOD_TRAIL.new()
 var _pending_hit := -1.0
@@ -220,12 +221,16 @@ func is_alerted() -> bool: return _senses.is_chasing()
 func hear_noise(at: Vector3, radius: float) -> void:
 	if not _dead:
 		_senses.hear(self, at, minf(radius, hearing_range))
+		if not _senses.is_unaware():
+			_slumber.wake(self)
 
 
 # A neighbour spotted the player and cried out.
 func hear_alert(at: Vector3, radius: float) -> void:
 	if not _dead:
 		_senses.hear_ally(self, at, radius)
+		if not _senses.is_unaware():
+			_slumber.wake(self)
 
 
 func _notice_player() -> void:
@@ -233,6 +238,7 @@ func _notice_player() -> void:
 
 
 func apply_player_push(direction: Vector3, strength: float) -> void:
+	_slumber.wake(self)
 	if _dead or strength <= 0.0: return
 	_push_velocity += direction.normalized() * strength
 	if _push_velocity.length() > max_push_speed:
@@ -240,6 +246,7 @@ func apply_player_push(direction: Vector3, strength: float) -> void:
 
 
 func take_projectile_damage(amount: float, hit_position: Vector3, direction: Vector3, weapon_name: String = "PISTOL") -> void:
+	_slumber.wake(self)
 	if _dead or amount <= 0.0:
 		return
 	_setup_body_parts()
@@ -269,6 +276,7 @@ func take_projectile_damage(amount: float, hit_position: Vector3, direction: Vec
 
 ## Explosion damage: limbs torn off fly away from the blast centre.
 func take_blast_damage(amount: float, origin: Vector3) -> void:
+	_slumber.wake(self)
 	_last_hit_position = origin
 	_set_death_push(DEATH_FALL.blast_push(origin, global_position, amount / 155.0))
 	_reaction_point = global_position + Vector3.UP
@@ -285,6 +293,7 @@ func _set_death_push(push: Vector3) -> void:
 
 
 func take_damage(amount: float) -> void:
+	_slumber.wake(self)
 	_apply_damage(amount, amount >= BLAST_DISMEMBER_DAMAGE)
 
 
@@ -335,17 +344,21 @@ func on_corpse_part_hit(_part: StringName, _damage: float, hit_position: Vector3
 
 
 func apply_blast_stun(duration: float, intensity: float) -> void:
+	_slumber.wake(self)
 	_mutation_status.stun(self, duration, intensity)
 
 
 func apply_mutation_poison(duration: float, damage_per_second: float, parasite: bool = false) -> void:
+	_slumber.wake(self)
 	_mutation_status.poison(self, duration, damage_per_second, parasite)
 
 func apply_skill_infection(duration: float, damage_per_second: float) -> void:
+	_slumber.wake(self)
 	_mutation_status.infectious = true
 	_mutation_status.poison(self, duration, damage_per_second, false)
 
 func apply_skill_push(direction: Vector3, distance: float) -> void:
+	_slumber.wake(self)
 	_mutation_status.push(self, direction, distance)
 
 
@@ -483,6 +496,7 @@ func _mark_stump_drips() -> void:
 
 
 func _die() -> void:
+	_slumber.wake(self)
 	_dead = true
 	_emerge_left = 0.0
 	_turn.cancel(_animation)
