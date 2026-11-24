@@ -496,6 +496,7 @@ func _mark_stump_drips() -> void:
 
 
 func _die() -> void:
+	var t := Time.get_ticks_usec() # laps feed the F3 frame log: where a death's cost goes
 	_slumber.wake(self)
 	_dead = true
 	_emerge_left = 0.0
@@ -515,12 +516,15 @@ func _die() -> void:
 	var fall := DEATH_OBSTACLE.adjust(self, _parts, DEATH_FALL.resolve(kick[0], kick[1], -global_basis.z, size, _fall_aside()), size)
 	var landing: Vector3 = DEATH_FALL.landing(self, fall["slide"], 0.35 * size)
 	_blood.reset(global_position)
+	t = PhysicsCost.lap(&"die_setup", t)
 	blood_death.emit(global_position + landing, _blood_exclusions(), get_instance_id())
+	t = PhysicsCost.lap(&"die_blood_signal", t)
 	if is_instance_valid(_target) and _target.has_method("mutation_enemy_killed"):
 		_target.call("mutation_enemy_killed", self)
 	# Infected summoned by a Horde drop nothing: an endless summon is no loot farm.
 	if is_instance_valid(effects_root) and not has_meta("summoned_by"):
 		_authoring.release(effects_root, global_position)
+	t = PhysicsCost.lap(&"die_loot", t)
 	collision_layer = 0
 	collision_mask = 0
 	collision_shape.disabled = true
@@ -530,8 +534,10 @@ func _die() -> void:
 	_ragdoll = null if not death_ragdoll else DEATH_RAGDOLL.start(self, _parts, _animation, kick[0], kick[1], size)
 	if _ragdoll == null:
 		_fall_watch = DEATH_CLIP.play(self, _parts, _animation, fall, landing)
+	t = PhysicsCost.lap(&"die_ragdoll_clip", t)
 	preload("res://game/features/infected/corpse_blood_pool.gd").start(self, _parts, global_position + landing)
 	_authoring.start_death_cloud(death_cloud)
+	PhysicsCost.lap(&"die_pool_cloud", t)
 
 
 func _fall_aside() -> StringName: return DEATH_FALL.leg_side(_parts, _kill_part)
