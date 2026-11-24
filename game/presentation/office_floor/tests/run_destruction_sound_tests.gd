@@ -27,6 +27,8 @@ func _run() -> void:
 	await _physical_crate()
 	await _weapon()
 	_check(BREAK_SOUND.event_for("02_kettle.glb", "wood") == &"break_electronics", "Appliances use electrical sounds regardless of numbered group")
+	_check(BREAK_SOUND.event_for("03_file_cabinet_largest.glb", "metal") == &"break_wood", "A file cabinet breaks with a wood sound, not metal")
+	_check(BREAK_SOUND.event_for("03_locker_tall.glb", "metal") == &"break_metal", "Lockers keep their metal sound")
 	var burst := BURST.instantiate()
 	_check(burst.get_node_or_null("Pop") == null, "Burst has no unused Pop node")
 	burst.free()

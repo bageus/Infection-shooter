@@ -16,6 +16,8 @@ func _initialize() -> void:
 func _run() -> void:
 	for model in ["07_table_circular", "07_table_square_tall", "07_round_dining_table", "07_table_longest"]:
 		await _environment_table(model)
+	# A rifle round is not a grenade: the table breaks without a blast push, so its top must still fall.
+	await _environment_table("07_coffee_table2", "AK")
 	for legs in [["Leg_BL"], ["Leg_BL", "Leg_BR"], ["Leg_BL", "Leg_FR"]]:
 		await _staged_table(legs)
 	print("Table topple tests: %d failure(s)." % failures)
@@ -37,7 +39,7 @@ func _stage() -> Node3D:
 	return stage
 
 
-func _environment_table(model: String) -> void:
+func _environment_table(model: String, weapon := "GRENADE") -> void:
 	var stage := _stage()
 	var effects := Node3D.new()
 	stage.add_child(effects)
@@ -49,7 +51,7 @@ func _environment_table(model: String) -> void:
 	for frame in 5:
 		await physics_frame
 	for shot in 8:
-		prop.call("take_projectile_hit", 400.0, Vector3(0, 0.5, 0), Vector3.UP, Vector3.FORWARD, "GRENADE")
+		prop.call("take_projectile_hit", 400.0, Vector3(0, 0.5, 0), Vector3.UP, Vector3.FORWARD, weapon)
 		if prop.get("_damage").transition_pending:
 			prop.call("_apply_damage", Vector3(0, 0.5, 0), Vector3.FORWARD)
 	for frame in 300:
@@ -73,6 +75,10 @@ func _environment_table(model: String) -> void:
 		worst = maxf(worst, _deepest_overlap(piece))
 		_expect(piece.global_position.y > 0.0 and piece.global_position.length() < 10.0, "%s: piece %s stays on the floor, not flung away (at %s)" % [model, piece.name, piece.global_position])
 	_expect(upright == 0, "%s: %d of %d tall slender pieces (legs, pedestal) are still standing" % [model, upright, tall])
+	var highest := 0.0
+	for piece in pieces:
+		highest = maxf(highest, piece.global_position.y)
+	_expect(highest < 0.45, "%s: a piece is still held up at %.2f m, so the table stands whole" % [model, highest])
 	_expect(worst <= MAX_OVERLAP, "%s: pieces overlap by %.2f m (they pass through each other)" % [model, worst])
 	stage.queue_free()
 	await process_frame

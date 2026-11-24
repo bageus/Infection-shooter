@@ -87,11 +87,12 @@ func glass_hit(anchor: MeshInstance3D, point: Vector3, normal: Vector3) -> bool:
 		var mapping := RECEIVERS.face_mapping(bounds, anchor.to_local(point), anchor.global_basis.transposed() * normal, true)
 		var axis := int(mapping.face) >> 1
 		var pair: Vector2i = [Vector2i(2, 1), Vector2i(0, 2), Vector2i(0, 1)][axis]
+		# Each pane's corner fissures get their own turn, size and spot, so panes do not share one picture.
 		for index in 4:
 			var corner := bounds.get_center()
-			corner[pair.x] = bounds.position[pair.x] + bounds.size[pair.x] * (0.88 if index in [1, 2] else 0.12)
-			corner[pair.y] = bounds.position[pair.y] + bounds.size[pair.y] * (0.88 if index in [2, 3] else 0.12)
-			_stamp(anchor, anchor.to_global(corner), normal, "glass_fracture", 13, 0.35, index, true)
+			corner[pair.x] = bounds.position[pair.x] + bounds.size[pair.x] * (randf_range(0.82, 0.94) if index in [1, 2] else randf_range(0.06, 0.18))
+			corner[pair.y] = bounds.position[pair.y] + bounds.size[pair.y] * (randf_range(0.82, 0.94) if index in [2, 3] else randf_range(0.06, 0.18))
+			_stamp(anchor, anchor.to_global(corner), normal, "glass_fracture", 13, randf_range(0.34, 0.4), randi_range(0, 3), true)
 	if _corners.size() > 32: _corners.erase(_corners.keys()[0])
 	return ok
 
