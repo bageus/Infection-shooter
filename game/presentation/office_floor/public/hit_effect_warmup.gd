@@ -12,7 +12,7 @@ const EXTINGUISHER_FX := preload("res://game/presentation/office_floor/extinguis
 const EXTINGUISHER_BURST := preload("res://game/presentation/office_floor/extinguisher_burst.tscn")
 const SFX_EVENTS: Array[StringName] = [&"extinguisher_spray", &"extinguisher_burst", &"extinguisher_fall", &"hit_metal", &"hit_wood", &"hit_paper",
 		&"hit_electronics", &"hit_glass", &"hit_pipe", &"hit_door", &"glass_break", &"fall_wood", &"fall_metal", &"fall_light", &"fall_tech", &"fall_debris", &"break_wood", &"break_furniture", &"break_cardboard", &"break_metal",
-		&"break_electronics", &"break_lamp", &"weapon_switch", &"medkit_pickup", &"medkit_use", &"weapon_pickup", &"ammo_pickup", &"antidote_pickup", &"antidote_use", &"key_pickup", &"dna_pickup"]
+		&"break_electronics", &"break_lamp", &"weapon_switch", &"medkit_pickup", &"medkit_use", &"weapon_pickup", &"ammo_pickup", &"antidote_pickup", &"antidote_use", &"key_pickup", &"dna_pickup", &"launcher_fire", &"launcher_reload", &"casing_launcher", &"grenade_explode", &"dry_fire"]
 const AUDIO_WARMUP := preload("res://game/presentation/office_floor/audio_warmup.gd")
 const FLIPBOOK := preload("res://game/core/vfx/public/sprite_flipbook.gd")
 const ATLASES := preload("res://game/core/vfx/public/effect_atlases.gd")
