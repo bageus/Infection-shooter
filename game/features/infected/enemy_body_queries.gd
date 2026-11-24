@@ -15,6 +15,9 @@ static func push_contacts(actor: CharacterBody3D, intended_motion: Vector3, stre
 	var pushed := {}
 	for i in actor.get_slide_collision_count():
 		var collider := actor.get_slide_collision(i).get_collider()
+		# A prop at rest is a wall to the enemy: touching it never wakes it (that was the cost of a chase). It moves only by a blow or when already moving.
+		if collider is RigidBody3D and ((collider as RigidBody3D).sleeping or (collider as RigidBody3D).freeze):
+			continue
 		if collider != null and not pushed.has(collider) and collider.has_method("push_from_character") and not bool(actor.get(&"offscreen")):
 			pushed[collider] = true
 			collider.call("push_from_character", actor.global_position, intended_motion, strength, &"enemy")
