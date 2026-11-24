@@ -171,6 +171,8 @@ func _shadow_checks(tabs: TabContainer, dialog: Control) -> void:
 	_check(dialog.view.text("shadowQuality0") == "Низкое", "Shadow quality level is named")
 	var few := tabs.get_child(2).find_child("FewLamps", true, false) as CheckButton
 	_check(few != null and not few.button_pressed and not few.tooltip_text.is_empty(), "The few-lamps switch is in Video and off by default")
+	var scale := tabs.get_child(2).find_child("RenderScale", true, false) as HSlider
+	_check(scale != null and scale.value == 100.0 and scale.min_value == 50.0, "The 3D scale slider is in Video at 100% by default")
 	var stage := Node3D.new()
 	var sun := DirectionalLight3D.new()
 	sun.name = "GlobalOverheadLight"

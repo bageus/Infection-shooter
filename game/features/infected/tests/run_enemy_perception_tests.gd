@@ -22,6 +22,11 @@ class Prop:
 		hits += 1
 
 
+class Armored:
+	extends Prop
+	var unbreakable := true
+
+
 func _initialize() -> void:
 	call_deferred("_run")
 
@@ -236,7 +241,17 @@ func _tiers() -> void:
 	_check(small.can_break(chair) and not small.can_break(table), "Revenant smashes a chair but not a table")
 	_check(big.can_break(chair) and big.can_break(table), "Titan and above smash tables too")
 	_check(not big.can_break(rock), "Non-destructible bodies are never targets")
-	for node in [chair, table, rock]:
+	var glass := Prop.new()
+	glass.add_to_group("infected_breakable_glass")
+	var armored := Armored.new()
+	armored.add_to_group("infected_breakable_glass")
+	_check(small.can_break(glass) and not small.can_break(armored) and not big.can_break(armored), "Plain glass is smashed, bulletproof glass never")
+	root.add_child(table)
+	small._count_swing(table)
+	small._count_swing(table)
+	small._count_swing(table)
+	_check(small._given_up.has(table.get_instance_id()), "A prop that did not move after three swings is given up on")
+	for node in [chair, table, rock, glass, armored]:
 		node.free()
 
 

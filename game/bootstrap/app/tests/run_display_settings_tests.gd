@@ -118,6 +118,12 @@ func _adapter() -> void:
 	DISPLAY.apply_to(window, values)
 	await process_frame
 	_check(window.scaling_3d_scale == 1.0, "Auto renders at native viewport size")
+	values.render_scale = 50
+	DISPLAY.apply_to(window, values)
+	await process_frame
+	_check(absf(window.scaling_3d_scale - 0.5) < 0.00001, "The player's 3D scale setting halves the drawn size")
+	values.render_scale = 100
+	DISPLAY.apply_to(window, values)
 	window.queue_free()
 	await process_frame
 

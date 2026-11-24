@@ -276,6 +276,7 @@ func _video() -> void:
 		shadows.toggled.connect(func(value: bool) -> void:
 			_set_shadow_quality_enabled(quality, quality_name, value)
 			dialog.call("_change", "shadows", value))
+		_render_scale_row()
 		_few_lamps_row()
 		var mesh_lod := CheckButton.new()
 		mesh_lod.name = "MeshLod"
@@ -304,6 +305,37 @@ func _video() -> void:
 	hide_unseen.toggled.connect(func(value: bool) -> void: dialog.call("_change", "hide_unseen_props", value))
 	dialog.get("layout").add_child(hide_unseen)
 	_dust_row()
+
+
+func _render_scale_row() -> void:
+	var percent := Label.new()
+	percent.name = "RenderScalePercent"
+	percent.custom_minimum_size.x = 60
+	percent.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
+	var slider := HSlider.new()
+	slider.name = "RenderScale"
+	slider.tooltip_text = dialog.view.text("renderScaleHint")
+	slider.custom_minimum_size.x = 160
+	slider.min_value = 50
+	slider.max_value = 100
+	slider.step = 5
+	slider.tick_count = 11
+	slider.value = dialog.view.preferences.values.render_scale
+	percent.text = "%d%%" % int(slider.value)
+	# Applying rewrites the settings file and rebuilds the menu, so it waits until the slider stops.
+	var settle := Timer.new()
+	settle.one_shot = true
+	settle.wait_time = SETTLE_SECONDS
+	slider.add_child(settle)
+	settle.timeout.connect(func() -> void: dialog.call("_change", "render_scale", int(slider.value)))
+	slider.value_changed.connect(func(value: float) -> void:
+		percent.text = "%d%%" % int(value)
+		dialog.view.preferences.values.render_scale = int(value)
+		if settle.is_inside_tree(): settle.start())
+	var box := HBoxContainer.new()
+	box.add_child(slider)
+	box.add_child(percent)
+	dialog.call("_row", "renderScale", box)
 
 
 func _few_lamps_row() -> void:

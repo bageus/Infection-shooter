@@ -17,12 +17,17 @@ const SMASH_NEAR_DISTANCE := 6.0
 ## More than this many infected within CROWD_RADIUS of a blocking object: all of them smash it, whatever their tier.
 const CROWD_COUNT := 5
 const CROWD_RADIUS := 2.5
+## An enemy that swung this many times at a prop which never moved gives up on it and treats it as a wall.
+const MAX_SWINGS := 3
+const MOVED_DISTANCE := 0.1
 
 var tier := 0
 var breaching := false
 var _breach_left := 0.0
 var _stuck_time := 0.0
 var _last_position := Vector3.INF
+var _swings := {} # prop instance id -> [swings, position at the first swing]
+var _given_up := {} # prop instance ids this enemy no longer swings at
 
 
 # Tier an infected needs to hit this collider; 0 means it is not a target.
@@ -37,6 +42,8 @@ static func required_tier(collider: Object) -> int:
 		for token in IGNORED_SCRIPTS:
 			if token in script.resource_path:
 				return 0
+	if node.get("unbreakable") == true: # bulletproof glass: no blow breaks it, so enemies do not swing at it
+		return 0
 	if node.is_in_group(GLASS_GROUP):
 		return 1
 	var label := String(node.name)
@@ -88,7 +95,7 @@ func blocking_collider(actor: CharacterBody3D, heading: Vector3) -> Dictionary:
 	for i in actor.get_slide_collision_count():
 		var collision := actor.get_slide_collision(i)
 		var collider := collision.get_collider()
-		if collider == null or required_tier(collider) == 0:
+		if collider == null or required_tier(collider) == 0 or _given_up.has(collider.get_instance_id()):
 			continue
 		if not (breaching or -collision.get_normal().dot(heading) > 0.5):
 			continue
@@ -107,6 +114,20 @@ static func _crowd_size(actor: Node3D, point: Vector3) -> int:
 	return count
 
 
+# Counts a swing; a prop still where it was after MAX_SWINGS is given up on.
+func _count_swing(collider: Object) -> void:
+	var node := collider as Node3D
+	if node == null:
+		return
+	if _swings.size() > 64:
+		_swings.clear()
+	var entry: Array = _swings.get(node.get_instance_id(), [0, node.global_position])
+	entry[0] += 1
+	_swings[node.get_instance_id()] = entry
+	if entry[0] >= MAX_SWINGS and node.global_position.distance_to(entry[1] as Vector3) < MOVED_DISTANCE:
+		_given_up[node.get_instance_id()] = true
+
+
 # Hits the prop in the way, if any; true when a blow landed.
 func smash(actor: CharacterBody3D, target: Node3D) -> bool:
 	var heading := target.global_position - actor.global_position
@@ -118,5 +139,6 @@ func smash(actor: CharacterBody3D, target: Node3D) -> bool:
 	if not (breaching or near or block["crowd"]):
 		return false
 	var collider: Object = block["collider"]
+	_count_swing(collider)
 	collider.call("take_melee_hit", float(actor.get("obstacle_damage")), block["position"], -actor.global_transform.basis.z)
 	return true

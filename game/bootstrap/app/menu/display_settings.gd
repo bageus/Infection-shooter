@@ -5,6 +5,8 @@ var _window: Window
 var _resolution := ""
 var _mode := -1
 var _wanted := Vector2i.ZERO
+## Player setting: share of the window size the 3D scene is drawn at (50-100 %); the menu and HUD stay sharp.
+var _user_scale := 1.0
 
 
 static func screen_size() -> Vector2i:
@@ -27,6 +29,7 @@ static func apply_to(window: Window, values: Dictionary, user_action: bool = fal
 
 
 func configure(values: Dictionary, user_action: bool) -> void:
+	_user_scale = clampi(int(values.get("render_scale", 100)), 50, 100) / 100.0
 	var mode := clampi(int(values.window_mode), 0, 1)
 	var resolution := CATALOG.resolve(str(values.resolution), screen_size(), mode == 1)
 	values.resolution = resolution
@@ -70,4 +73,4 @@ func _place_window() -> void:
 func _update_render_scale() -> void:
 	# Read the settled viewport; never scale menu/font pixels or camera input.
 	var scale := CATALOG.render_scale(_wanted, _window.size) if _mode == 1 or OS.has_feature("web") else 1.0
-	_window.scaling_3d_scale = scale
+	_window.scaling_3d_scale = scale * _user_scale

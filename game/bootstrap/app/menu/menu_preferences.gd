@@ -22,7 +22,7 @@ const DEFAULTS := {"window_mode": 0, "resolution": "1280x720", "language": "ru",
 	"walk_speed_multiplier": 1.0, "walk_animation_multiplier": 1.0,
 	"enemy_move_speed_multiplier": 1.0, "enemy_animation_multiplier": 1.0,
 	"volume": 0.4, "effects_volume": 1.0, "music_volume": 1.0, "menu_music_volume": 1.0, "occlusion_mode": 0, "test_mutagen": false, "infinite_antidotes": false, "lighting": true, "game_lights_only": false, "blood_style": 0, "blood_level": 1, "blood_green": false, "effects_quality": 2, "destruction_quality": 1,
-	"bullet_impact_smoke": true, "enemy_health_bars": false, "sunlight": true, "shadows": false, "shadow_quality": 1, "few_lamps": false, "mesh_lod": true, "keep_corpses": true, "hide_unseen_props": true, "floor_hints": true, "camera_shake": true, "post_fx": true, "dust": true}
+	"bullet_impact_smoke": true, "enemy_health_bars": false, "sunlight": true, "shadows": false, "shadow_quality": 1, "few_lamps": false, "render_scale": 100, "mesh_lod": true, "keep_corpses": true, "hide_unseen_props": true, "floor_hints": true, "camera_shake": true, "post_fx": true, "dust": true}
 var values: Dictionary = DEFAULTS.duplicate()
 
 
@@ -62,6 +62,7 @@ func load_settings() -> void:
 	values.enemy_move_speed_multiplier = ENEMY_TUNING.clamp_multiplier(values.enemy_move_speed_multiplier)
 	values.enemy_animation_multiplier = ENEMY_TUNING.clamp_multiplier(values.enemy_animation_multiplier)
 	values.shadow_quality = clampi(values.shadow_quality, 0, SHADOWS.level_count() - 1)
+	values.render_scale = clampi(int(values.render_scale), 50, 100)
 	values.volume = clampf(values.volume, 0.0, 1.0)
 	values.effects_volume = clampf(values.effects_volume, 0.0, 1.0)
 	values.music_volume = clampf(values.music_volume, 0.0, 1.0)
