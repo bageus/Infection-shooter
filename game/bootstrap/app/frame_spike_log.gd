@@ -25,6 +25,8 @@ var _session_marked := false
 var _awake_last := 0
 var _script_last := 0
 var _script_seen := {}
+var _measuring := false
+var _self_usec := 0 # what this logger itself cost last frame, so the overlay is not blamed on the game
 
 
 ## Adds a marker to the frame log; a frame that is logged carries the markers noted since the previous frame.
@@ -35,6 +37,16 @@ static func note(text: String) -> void:
 
 ## Call once per frame with the frame time in seconds; returns true when this frame was logged.
 func tick(delta: float, tree: SceneTree) -> bool:
+	var started := Time.get_ticks_usec()
+	if not _measuring and tree != null:
+		_measuring = true
+		RenderingServer.viewport_set_measure_render_time(tree.root.get_viewport_rid(), true)
+	var logged := _tick(delta, tree)
+	_self_usec = Time.get_ticks_usec() - started
+	return logged
+
+
+func _tick(delta: float, tree: SceneTree) -> bool:
 	var msec := delta * 1000.0
 	_window_age += delta
 	if _window_age >= WINDOW_SEC:
@@ -100,17 +112,20 @@ func _write(msec: float, resources: int, nodes: int, tree: SceneTree, woke: int,
 		_session_marked = true
 		# The file is appended across runs and builds; this line lets a log be split per run.
 		file.store_line("# session start %s" % Time.get_datetime_string_from_system())
+	var viewport := tree.root.get_viewport_rid() if tree != null else RID()
+	var render_cpu := RenderingServer.viewport_get_measured_render_time_cpu(viewport) if viewport.is_valid() else 0.0
+	var render_gpu := RenderingServer.viewport_get_measured_render_time_gpu(viewport) if viewport.is_valid() else 0.0
 	var hidden := _culled(tree)
 	var plan := _plan_state(tree)
 	var rigid := _rigid(tree)
-	file.store_line("t=%.1fs frame=%.0fms process=%.1f physics=%.1f draw=%d objects=%d resources=%+d nodes=%+d (%d) static=%dMiB video=%dMiB enemies=%d culled=%d/%d merged=%d trim=%d/%d rigid=%d awake=%d frozen=%d monitored=%d awake_top=%s probe=%d woke=%+d phys_active=%d nav=%.1f scripts=%.1f top=%s wakes=%s player=%s events=%s" % [
+	file.store_line("t=%.1fs frame=%.0fms process=%.1f physics=%.1f draw=%d objects=%d resources=%+d nodes=%+d (%d) static=%dMiB video=%dMiB enemies=%d culled=%d/%d merged=%d trim=%d/%d rigid=%d awake=%d frozen=%d monitored=%d awake_top=%s probe=%d woke=%+d phys_active=%d nav=%.1f scripts=%.1f top=%s wakes=%s player=%s rcpu=%.1f rgpu=%.1f fps=%d self=%.1f events=%s" % [
 		Time.get_ticks_msec() / 1000.0, msec, Performance.get_monitor(Performance.TIME_PROCESS) * 1000.0,
 		Performance.get_monitor(Performance.TIME_PHYSICS_PROCESS) * 1000.0,
 		Performance.get_monitor(Performance.RENDER_TOTAL_DRAW_CALLS_IN_FRAME), Performance.get_monitor(Performance.RENDER_TOTAL_OBJECTS_IN_FRAME),
 		resources - _resources, nodes - _nodes, nodes, Performance.get_monitor(Performance.MEMORY_STATIC) / 1048576.0,
 		Performance.get_monitor(Performance.RENDER_VIDEO_MEM_USED) / 1048576.0,
 		(tree.get_nodes_in_group("infected_alive").size() if tree != null else 0), hidden[0], hidden[1], plan[0], plan[1], plan[2], rigid[0], rigid[1], rigid[2], rigid[3], rigid[4], probe_mode, woke,
-		Performance.get_monitor(Performance.PHYSICS_3D_ACTIVE_OBJECTS), Performance.get_monitor(Performance.TIME_NAVIGATION_PROCESS) * 1000.0, scripts_usec / 1000.0, top, PhysicsCost.top_wakes(), at, ",".join(marks) if not marks.is_empty() else "-"])
+		Performance.get_monitor(Performance.PHYSICS_3D_ACTIVE_OBJECTS), Performance.get_monitor(Performance.TIME_NAVIGATION_PROCESS) * 1000.0, scripts_usec / 1000.0, top, PhysicsCost.top_wakes(), at, render_cpu, render_gpu, int(Engine.get_frames_per_second()), _self_usec / 1000.0, ",".join(marks) if not marks.is_empty() else "-"])
 
 
 # Room-culled furniture: [hidden now, tagged in total].
