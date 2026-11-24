@@ -29,6 +29,8 @@ const MAX_LIGHTS := 28
 const MAX_SHADOW_LIGHTS := MAX_LIGHTS
 ## The lamp budget in force; the F7 render probe lowers it to measure what lamps cost. Normal play keeps MAX_LIGHTS.
 var light_cap := MAX_LIGHTS
+## The "few lamps" setting: only the nearest lamps are lit; the rest show as floor pools. F7 probe on a weak GPU: 7 instead of 28 saved about 3 ms of GPU per frame.
+const FEW_LIGHTS := 7
 ## Visual layer carrying wall meshes for lamp shadows; must match planner_light.WALL_CASTER_LAYER.
 const WALL_CASTER_LAYER := 1 << 19
 const REFRESH_SECONDS := 0.15
@@ -143,6 +145,13 @@ func _remember_inputs(lamps: Array[Node]) -> void:
 func _view_state(camera: Camera3D) -> Array:
 	return [] if camera == null else [camera.get_instance_id(), camera.global_transform,
 		camera.get_camera_transform(), camera.get_camera_projection()]
+
+
+func set_few_lamps(few: bool) -> void:
+	var cap := FEW_LIGHTS if few else MAX_LIGHTS
+	if cap != light_cap:
+		light_cap = cap
+		refresh_light_budget()
 
 
 func set_shadows_allowed(allowed: bool) -> void:

@@ -1,11 +1,11 @@
 extends RefCounted
 ## F7 debug probe: switches one rendering feature off at a time (shadows, lamps, particles, resolution, all 3D)
 ## for a few seconds each and writes the average frame, GPU and render-CPU time of every step to the frame log, so
-## it shows what the frame really costs on this GPU. Stand still in a quiet spot; the whole run takes about 25 s.
+## it shows what the frame really costs on this GPU. Stand still in a quiet spot; the whole run takes about 40 s.
 const LOG := preload("res://game/bootstrap/app/frame_spike_log.gd")
-const STEPS := ["baseline", "shadows off", "14 lamps", "7 lamps", "no lamps", "particles off", "half resolution", "3D off"]
+const STEPS := ["baseline", "shadows off", "14 lamps", "7 lamps", "no lamps", "particles off", "half resolution", "3D off", "baseline again"]
 const SETTLE := 1.5
-const MEASURE := 2.5
+const MEASURE := 4.0
 const SAVED := &"render_probe_saved"
 
 var path := LOG.PATH
