@@ -95,6 +95,11 @@ func _queue_warmup() -> void:
 	for enemy in _enemies_root.get_children():
 		if enemy.has_method("watch_target") and not enemy.scene_file_path.is_empty():
 			paths[enemy.scene_file_path] = true
+			# A horde summons three more kinds; the first of each would otherwise build its body mid-fight.
+			for property in [&"summon_scene", &"summon_revenant_scene", &"summon_brute_scene"]:
+				var summoned := enemy.get(property) as PackedScene
+				if summoned != null and not summoned.resource_path.is_empty():
+					paths[summoned.resource_path] = true
 	for path: String in paths:
 		if not _warmed.has(path) and not _warm_paths.has(path):
 			_warm_paths.append(path)
