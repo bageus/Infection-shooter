@@ -110,10 +110,10 @@ const EXTRA := [
 	{"name": "TurnLeft2", "file": "Left Turn", "enemies": ["Hunger"], "yaw": true},
 	{"name": "TurnRight2", "file": "Left Turn_1", "enemies": ["Hunger"], "yaw": true},
 	{"name": "Walk", "file": "Mutant Walking", "enemies": BIG, "loop": true, "pace": "walk"},
-	{"name": "WalkWander", "file": "Drunk Walk", "enemies": ["Revenant"], "loop": true, "pace": "wander"},
+	{"name": "WalkWander", "file": "Drunk Walk", "enemies": ["Revenant"], "loop": true, "pace": "wander", "inplace": true},
 	{"name": "WalkWander", "file": "Old Man Walk", "enemies": BRAWLERS, "loop": true, "pace": "wander"},
 	{"name": "RunZombie", "file": "Zombie_Run", "enemies": ["Brute"], "loop": true, "pace": "run"},
-	{"name": "RunForward", "file": "Run Forward", "enemies": ["Revenant", "Brute", "Titan"], "loop": true, "pace": "run"},
+	{"name": "RunForward", "file": "Run Forward", "enemies": ["Revenant", "Brute", "Titan"], "loop": true, "pace": "run", "inplace": true},
 	{"name": "Climb", "file": "Climbing", "enemies": ALL, "settle": true},
 	# Authored in Blender on the Mixamo rig (tools/blender_enemy_clips.py); they replace the procedural clips.
 	{"name": "Throw", "file": "Titan Throw", "enemies": ["Titan"]},
@@ -264,6 +264,8 @@ func _bake_extra() -> void:
 			_settle_end(clip_name)
 		if entry.get("inplace", false):
 			_remove_drift(clip_name)
+			if loop:
+				_centre_root(clip_name) # the hips swing ~1.5 m across a Mixamo run; a loop stays put instead
 		if entry.has("pace"):
 			_pace(clip_name, String(entry["pace"]))
 		if loop and entry.get("pace", "") == "run":
@@ -313,6 +315,15 @@ func _cap_travel(clip_name: String, metres: float) -> void:
 		var position: Vector3 = frame["HipsPosition"]
 		frame["HipsPosition"] = Vector3(rest.x + (position.x - rest.x) * factor, position.y, rest.z + (position.z - rest.z) * factor)
 	print("%s %s: travel %.2f m -> %.2f m" % [_enemy_name, clip_name, farthest * _body_scale(), farthest * _body_scale() * factor])
+
+
+# Holds the hips' ground position at the loop's average, so the cycle does not travel and snap back at its seam.
+func _centre_root(clip_name: String) -> void:
+	var frames: Array = _frames[clip_name]
+	var rest := _hunger.get_bone_rest(_hunger.find_bone("Hips")).origin
+	for frame: Dictionary in frames:
+		var position: Vector3 = frame["HipsPosition"]
+		frame["HipsPosition"] = Vector3(rest.x, position.y, rest.z)
 
 
 # Moves the hips back along a straight line so the last frame is over the first (no pop into the idle after it).

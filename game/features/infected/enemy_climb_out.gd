@@ -25,6 +25,8 @@ static func begin(actor: Node, animation: Node) -> float:
 	actor.set_meta(&"emerge_mask", body.collision_mask)
 	actor.set_meta(&"emerge_from", body.global_position.y)
 	actor.set_meta(&"emerge_length", length)
+	var visual := actor.get("body_visual") as Node3D
+	actor.set_meta(&"emerge_visual_y", visual.position.y if visual != null else 0.0)
 	body.collision_mask = 0 # the floor would push the body up while it starts below it
 	return length
 
@@ -35,9 +37,17 @@ static func step(actor: CharacterBody3D, left: float, delta: float) -> float:
 	var length: float = actor.get_meta(&"emerge_length")
 	var progress := 1.0 - left / length
 	var rise := smoothstep(RISE_FROM, 1.0, progress)
-	actor.global_position.y = lerpf(actor.get_meta(&"emerge_from"), _capsule_height(actor) * 0.5 + 0.02, rise)
+	var from: float = actor.get_meta(&"emerge_from")
+	var y := lerpf(from, _capsule_height(actor) * 0.5 + 0.02, rise)
+	actor.global_position.y = y
+	# The mesh lags the capsule's lift, so the clip's own climb shows instead of the whole body riding up.
+	var visual := actor.get("body_visual") as Node3D
+	if visual != null:
+		visual.position.y = float(actor.get_meta(&"emerge_visual_y")) + (from - y) * (1.0 - rise)
 	if left - delta > 0.0:
 		return left - delta
+	if visual != null:
+		visual.position.y = float(actor.get_meta(&"emerge_visual_y"))
 	actor.collision_mask = actor.get_meta(&"emerge_mask")
 	return 0.0
 
