@@ -28,6 +28,9 @@ static func run(e, delta: float) -> void:
 	e._senses.refresh_modes(e)
 	if e._turn.active() and e._senses.is_chasing():
 		e._turn.cancel(e._animation)
+	if e._senses.is_unaware() and e._slumber.may_sleep(e, e.global_position.distance_squared_to(e._target.global_position)):
+		e._slumber.sleep(e)
+		return
 	SCREEN_REACH.update(e, e._animation, e._sleeping_far)
 	e.audio.tick(delta, e._pace.charging, e.global_position.distance_squared_to(e._target.global_position) < 576.0, e._lod_frame_offset)
 	t = PhysicsCost.lap(&"capsule_audio", t)
