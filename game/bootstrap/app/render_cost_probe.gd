@@ -1,9 +1,9 @@
 extends RefCounted
-## F7 debug probe: switches one rendering feature off at a time (shadows, lamps, particles, resolution, all 3D)
+## F7 debug probe: switches one rendering feature off at a time (shadows, lamps, sun, flashlight, particles, resolution, all 3D)
 ## for a few seconds each and writes the average frame, GPU and render-CPU time of every step to the frame log, so
-## it shows what the frame really costs on this GPU. Stand still in a quiet spot; the whole run takes about 40 s.
+## it shows what the frame really costs on this GPU. Stand still in a quiet spot; the whole run takes about 50 s.
 const LOG := preload("res://game/bootstrap/app/frame_spike_log.gd")
-const STEPS := ["baseline", "shadows off", "14 lamps", "7 lamps", "no lamps", "particles off", "half resolution", "3D off", "baseline again"]
+const STEPS := ["baseline", "shadows off", "14 lamps", "7 lamps", "no lamps", "sun off", "flashlight off", "particles off", "half resolution", "3D off", "baseline again"]
 const SETTLE := 1.5
 const MEASURE := 4.0
 const SAVED := &"render_probe_saved"
@@ -72,13 +72,19 @@ func _enter(tree: SceneTree, step: int) -> void:
 				lighting.set("light_cap", [14, 7, 0][step - 2])
 				lighting.call("refresh_light_budget")
 		5:
+			_hide(tree.current_scene.get_node_or_null("GlobalOverheadLight") if tree.current_scene != null else null)
+		6:
+			var player := tree.get_first_node_in_group("player")
+			for light: Node in player.find_children("*", "Light3D", true, false) if player != null else []:
+				_hide(light)
+		7:
 			for node: Node3D in _nodes(tree, "GPUParticles3D") + _nodes(tree, "CPUParticles3D"):
 				if node.visible:
 					node.set_meta(SAVED, true)
 					node.visible = false
-		6:
+		8:
 			tree.root.scaling_3d_scale = 0.5
-		7:
+		9:
 			tree.root.disable_3d = true
 
 
@@ -109,10 +115,17 @@ func _restore(tree: SceneTree) -> void:
 		lighting.call("refresh_light_budget")
 	if lighting != null and bool(lighting.get("shadows_allowed")) != _shadows:
 		lighting.call("set_shadows_allowed", _shadows)
-	for node: Node3D in _nodes(tree, "GPUParticles3D") + _nodes(tree, "CPUParticles3D"):
+	for node: Node3D in _nodes(tree, "GPUParticles3D") + _nodes(tree, "CPUParticles3D") + _nodes(tree, "Light3D"):
 		if node.has_meta(SAVED):
 			node.remove_meta(SAVED)
 			node.visible = true
+
+
+# Hides a node and remembers it, so _restore shows it again.
+func _hide(node: Node) -> void:
+	if node is Node3D and (node as Node3D).visible:
+		node.set_meta(SAVED, true)
+		(node as Node3D).visible = false
 
 
 func _lighting(tree: SceneTree) -> Node:
