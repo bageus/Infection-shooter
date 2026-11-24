@@ -27,6 +27,8 @@ const MAX_LIGHTS := 28
 ## Every lit lamp casts a shadow, but only walls cast it (shadow_caster_mask), so the pass stays
 ## cheap and the light stops at walls without touching the lamp angle.
 const MAX_SHADOW_LIGHTS := MAX_LIGHTS
+## The lamp budget in force; the F7 render probe lowers it to measure what lamps cost. Normal play keeps MAX_LIGHTS.
+var light_cap := MAX_LIGHTS
 ## Visual layer carrying wall meshes for lamp shadows; must match planner_light.WALL_CASTER_LAYER.
 const WALL_CASTER_LAYER := 1 << 19
 const REFRESH_SECONDS := 0.15
@@ -200,8 +202,8 @@ func refresh_light_budget(capture_inputs: bool = true) -> void:
 	for entry in ranked:
 		var lamp: Node = entry.node
 		var cost: int = lamp.call("get_light_cost")
-		var lit := used + cost <= MAX_LIGHTS
-		var shadow: bool = lit and shadows_allowed and shadowed + cost <= MAX_SHADOW_LIGHTS
+		var lit := used + cost <= light_cap
+		var shadow: bool = lit and shadows_allowed and shadowed + cost <= mini(MAX_SHADOW_LIGHTS, light_cap)
 		if lit:
 			used += cost
 		elif entry.seen:
