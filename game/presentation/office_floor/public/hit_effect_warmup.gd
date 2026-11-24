@@ -12,7 +12,7 @@ const EXTINGUISHER_FX := preload("res://game/presentation/office_floor/extinguis
 const EXTINGUISHER_BURST := preload("res://game/presentation/office_floor/extinguisher_burst.tscn")
 const SFX_EVENTS: Array[StringName] = [&"extinguisher_spray", &"extinguisher_burst", &"extinguisher_fall", &"hit_metal", &"hit_wood", &"hit_paper",
 		&"hit_electronics", &"hit_glass", &"hit_pipe", &"hit_door", &"glass_break", &"fall_wood", &"fall_metal", &"fall_light", &"fall_tech", &"fall_debris", &"break_wood", &"break_furniture", &"break_cardboard", &"break_metal",
-		&"break_electronics", &"break_lamp", &"weapon_switch"]
+		&"break_electronics", &"break_lamp", &"weapon_switch", &"medkit_pickup", &"medkit_use", &"weapon_pickup", &"ammo_pickup", &"antidote_pickup", &"antidote_use", &"key_pickup", &"dna_pickup"]
 const AUDIO_WARMUP := preload("res://game/presentation/office_floor/audio_warmup.gd")
 const FLIPBOOK := preload("res://game/core/vfx/public/sprite_flipbook.gd")
 const ATLASES := preload("res://game/core/vfx/public/effect_atlases.gd")
@@ -59,6 +59,14 @@ func setup(parent: Node) -> void:
 	droplet.position = point
 	droplet.scale = Vector3.ONE * 0.05
 	add_child(droplet)
+	# The "+35" number a medkit pops up: its glyphs and outline are rasterized on first draw.
+	var heal_number := Label3D.new()
+	heal_number.font = preload("res://assets/interface/fonts/body.ttf")
+	heal_number.text = "+0123456789"
+	heal_number.font_size = 50
+	heal_number.outline_size = 11
+	heal_number.position = point
+	add_child(heal_number)
 	effect_count = get_child_count()
 	var audio := AUDIO_WARMUP.new()
 	# Keep streams on the mission, beyond the four-frame visual viewport.
