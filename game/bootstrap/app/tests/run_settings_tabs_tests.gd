@@ -169,6 +169,8 @@ func _shadow_checks(tabs: TabContainer, dialog: Control) -> void:
 	shadow_prefs.load_settings()
 	_check(int(shadow_prefs.values.shadow_quality) == 0, "Shadow quality survives settings reload")
 	_check(dialog.view.text("shadowQuality0") == "Низкое", "Shadow quality level is named")
+	var few := tabs.get_child(2).find_child("FewLamps", true, false) as CheckButton
+	_check(few != null and not few.button_pressed and not few.tooltip_text.is_empty(), "The few-lamps switch is in Video and off by default")
 	var stage := Node3D.new()
 	var sun := DirectionalLight3D.new()
 	sun.name = "GlobalOverheadLight"

@@ -276,6 +276,13 @@ func _video() -> void:
 		shadows.toggled.connect(func(value: bool) -> void:
 			_set_shadow_quality_enabled(quality, quality_name, value)
 			dialog.call("_change", "shadows", value))
+		var few_lamps := CheckButton.new()
+		few_lamps.name = "FewLamps"
+		few_lamps.text = dialog.view.text("fewLamps")
+		few_lamps.tooltip_text = dialog.view.text("fewLampsHint")
+		few_lamps.button_pressed = dialog.view.preferences.values.few_lamps
+		few_lamps.toggled.connect(func(value: bool) -> void: dialog.call("_change", "few_lamps", value))
+		dialog.get("layout").add_child(few_lamps)
 		var mesh_lod := CheckButton.new()
 		mesh_lod.name = "MeshLod"
 		mesh_lod.text = dialog.view.text("meshLod")

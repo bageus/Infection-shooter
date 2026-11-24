@@ -108,6 +108,10 @@ func _run() -> void:
 	_display_changes()
 	await _camera_changes()
 	_real_flicker()
+	controller.set_few_lamps(true)
+	_expect(controller.light_cap == LIGHTING.FEW_LIGHTS, "The few-lamps setting lowers the lamp budget")
+	controller.set_few_lamps(false)
+	_expect(controller.light_cap == LIGHTING.MAX_LIGHTS, "Turning it off restores the full lamp budget")
 	stage.free()
 	await process_frame
 	if "--trace" in OS.get_cmdline_user_args():
