@@ -25,7 +25,11 @@ static func watch(body: RigidBody3D, volume_offset_db := 0.0, fixed_event: Strin
 	if not fixed_event.is_empty():
 		watcher.event = fixed_event
 	elif body.has_method("get_projectile_material"):
-		watcher.event = MATERIAL_EVENTS.get(str(body.call("get_projectile_material", -1)), &"fall_wood")
+		var material := str(body.call("get_projectile_material", -1))
+		# A cabinet's bullet cost is metal, but it knocks and lands like wood.
+		if body.has_method("get_impact_sound_material") and str(body.call("get_impact_sound_material", -1)) == "wood":
+			material = "wood"
+		watcher.event = MATERIAL_EVENTS.get(material, &"fall_wood")
 	body.add_child(watcher)
 
 

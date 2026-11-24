@@ -40,14 +40,23 @@ static func spawn_stage(body: RigidBody3D, geometry: GEOMETRY, stage_index: int,
 		if meshes.size() == 1 and _piece_id(meshes[0].name) == _piece_id(prefix): return false
 	var spawned := 0
 	var frame := _continuation_frame(geometry, from_piece)
+	# Legs that come off a whole table would otherwise leave its top standing on them as before.
+	var pushed := blast or (prefix.is_empty() and _has_legs(meshes))
 	for mesh in meshes:
-		var fragment: RigidBody3D = DAMAGE.spawn_piece(body, mesh, body, stage_index, spawned, direction, hit_position, blast, false, frame, from_piece)
+		var fragment: RigidBody3D = DAMAGE.spawn_piece(body, mesh, body, stage_index, spawned, direction, hit_position, pushed, false, frame, from_piece)
 		if fragment != null:
 			fragment.set("breakable", stage_index + 1 < geometry.stages.size())
 			spawned += 1
 			if blast and _is_blast_split(body, mesh):
 				_split_later(body, geometry, fragment, hit_position, direction)
 	return spawned > 0
+
+
+static func _has_legs(meshes: Array[MeshInstance3D]) -> bool:
+	for mesh in meshes:
+		if mesh.name.begins_with("Leg_"):
+			return true
+	return false
 
 
 static func _is_blast_split(body: Node3D, mesh: MeshInstance3D) -> bool:

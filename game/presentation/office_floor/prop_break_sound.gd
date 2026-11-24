@@ -1,6 +1,7 @@
 extends RefCounted
 ## Select destruction timbre from the authored model, independently of durability.
 const SFX := preload("res://game/core/audio/public/sound_events.gd")
+const IMPACT_MATERIAL := preload("res://game/presentation/office_floor/environment_impact_material.gd")
 
 
 static func event_for(model_path: String, material: String) -> StringName:
@@ -14,11 +15,19 @@ static func event_for(model_path: String, material: String) -> StringName:
 		return &"break_electronics"
 	if "cardboard" in model or "archive_box" in model:
 		return &"break_cardboard"
-	if "crate" in model or "wood" in model:
+	if "crate" in model or "wood" in model or _wood_furniture(model):
 		return &"break_wood"
 	if material == "metal":
 		return &"break_metal"
 	return &"break_furniture"
+
+
+# Shelves and cabinets are metal-costed but ring like wood, the same list the impact sound uses.
+static func _wood_furniture(model: String) -> bool:
+	for name in IMPACT_MATERIAL.WOOD_MODELS:
+		if name in model:
+			return true
+	return false
 
 
 static func play(host: Node3D, container: Node3D, model_path: String, material: String, point: Vector3) -> void:
