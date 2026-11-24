@@ -127,6 +127,7 @@ func _ready() -> void:
 	wave_director.name = "WaveDirector"
 	add_child(wave_director)
 	wave_director.call("configure", enemies, player)
+	wave_director.set("warm_enemy_meshes", true)
 	_sync_endless()
 	planning_lighting = $PlanningLighting
 	planning_lighting.setup($WorldEnvironment, $PlanningUI/Panel/VBox/LightingPreview, $PlanningUI/Panel/VBox/LocalLights)

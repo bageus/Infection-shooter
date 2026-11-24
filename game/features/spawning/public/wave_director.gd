@@ -7,6 +7,7 @@ extends Node
 const SPAWN_CONFIG := preload("res://game/features/spawning/public/spawn_config.gd")
 const WAVE_QUEUE := preload("res://game/features/spawning/domain/wave_queue.gd")
 const ENDLESS := preload("res://game/features/spawning/domain/endless_waves.gd")
+const BODY_WARMUP := preload("res://game/features/infected/public/body_mesh_warmup.gd")
 ## Meta on a placed infected: Array of link keys (spawn_config.link_key) whose queue its death can start.
 const TRIGGER_META := &"spawn_triggers"
 const POINT_GROUP := &"enemy_spawn_points"
@@ -25,7 +26,12 @@ var max_alive := WAVE_QUEUE.MAX_ALIVE
 ## Endless mode: authored triggers are ignored and all queues replay, harder each round.
 var endless := false
 var round_number := 0
+## Builds each enemy kind's body geometry (one kind per frame) when the director arms, and holds the waves until
+## that is done, so the first enemy of a kind does not freeze a fight for about 0.8 s. The mission turns it on.
+var warm_enemy_meshes := false
 
+var _warm_paths: Array[String] = []
+var _warmed := {}
 var _enemies_root: Node3D
 var _player: Node3D
 var _queue := WAVE_QUEUE.new()
@@ -76,6 +82,30 @@ func arm() -> void:
 		for id in ids:
 			if _linked.has(str(id)):
 				_linked[str(id)].append(enemy)
+	if warm_enemy_meshes:
+		_queue_warmup()
+
+
+## Every enemy kind this level can show: the kinds in the spawn queues and the placed ones.
+func _queue_warmup() -> void:
+	var paths := {}
+	for key: String in _queues:
+		for entry: Dictionary in _queues[key]["config"]["enemies"]:
+			paths[SPAWN_CONFIG.scene_path(str(entry["enemy"]))] = true
+	for enemy in _enemies_root.get_children():
+		if enemy.has_method("watch_target") and not enemy.scene_file_path.is_empty():
+			paths[enemy.scene_file_path] = true
+	for path: String in paths:
+		if not _warmed.has(path) and not _warm_paths.has(path):
+			_warm_paths.append(path)
+
+
+func _process(_delta: float) -> void:
+	if _warm_paths.is_empty():
+		return
+	var path: String = _warm_paths.pop_front()
+	BODY_WARMUP.warm(self, path)
+	_warmed[path] = true
 
 
 ## Drops pending waves and removes what they spawned (planner entered or mission restarted).
@@ -92,6 +122,7 @@ func disarm() -> void:
 	_fired_at.clear()
 	_scenes.clear()
 	_spawn_index.clear()
+	_warm_paths.clear()
 	_queue.clear()
 	_backlog.clear()
 	_armed = false
@@ -230,6 +261,8 @@ func advance(delta: float) -> void:
 
 
 func _drain_backlog() -> void:
+	if not _warm_paths.is_empty():
+		return
 	var budget := mini(SPAWNS_PER_FRAME, _backlog.size())
 	for step in budget:
 		var order: Dictionary = _backlog.pop_front()

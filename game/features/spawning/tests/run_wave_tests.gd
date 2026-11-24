@@ -23,6 +23,7 @@ func _run() -> void:
 	await _director()
 	await _burst_spread()
 	await _queues()
+	await _warmup()
 	print("Wave tests: %d failures" % failures)
 	quit(failures)
 
@@ -234,6 +235,38 @@ func _spawned(enemies: Node3D) -> Array[Node3D]:
 		if enemy.has_meta(&"spawned_by") and not enemy.is_queued_for_deletion():
 			found.append(enemy)
 	return found
+
+
+# With the warm-up on, each enemy kind of the level is built once before any wave spawns.
+func _warmup() -> void:
+	var world := _stage()
+	var stage: Node3D = world["stage"]
+	var enemies: Node3D = world["enemies"]
+	var point := POINT.instantiate() as Node3D
+	point.set_meta("planning_object_id", "warm_test")
+	stage.add_child(point)
+	point.call("configure_spawn", {"queues": [{"enemies": [{"enemy": "hunger", "count": 1}, {"enemy": "brute", "count": 1}], "interval": 0.1, "trigger": "any"}]})
+	_enemy(enemies, Vector3(0, 1, 0), [])
+	var director := DIRECTOR.new()
+	stage.add_child(director)
+	director.configure(enemies, world["player"])
+	director.arm()
+	_check((director.get("_warm_paths") as Array).is_empty(), "the warm-up is off unless the mission turns it on")
+	director.disarm()
+	director.warm_enemy_meshes = true
+	director.arm()
+	var queued: Array = director.get("_warm_paths")
+	_check(queued.size() == 2 and queued.has(CONFIG.scene_path("hunger")) and queued.has(CONFIG.scene_path("brute")), "each kind is queued once, queued and placed ones alike (%s)" % [queued])
+	await process_frame
+	await process_frame
+	await process_frame
+	_check((director.get("_warm_paths") as Array).is_empty() and (director.get("_warmed") as Dictionary).size() == 2, "one kind is built per frame until all are done")
+	_check(director.alive_count() == 1 and enemies.get_child_count() == 1, "the warm-up leaves no enemy behind")
+	director.disarm()
+	director.arm()
+	_check((director.get("_warm_paths") as Array).is_empty(), "a re-arm does not warm a kind twice")
+	director.disarm()
+	stage.queue_free()
 
 
 func _frames(count: int) -> void:

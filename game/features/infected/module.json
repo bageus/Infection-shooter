@@ -23,6 +23,7 @@
     "public/hearing_profile.gd",
     "public/corpse_budget.gd",
     "public/enemy_tuning.gd",
+    "public/body_mesh_warmup.gd",
     "public/mutant_level2.tscn",
     "public/infected_hunger.tscn",
     "public/infected_revenant.tscn",
