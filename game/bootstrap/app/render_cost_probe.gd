@@ -1,9 +1,9 @@
 extends RefCounted
-## F7 debug probe: switches one rendering feature off at a time (shadows, MSAA, lights, particles, resolution, all 3D)
+## F7 debug probe: switches one rendering feature off at a time (shadows, lamps, particles, resolution, all 3D)
 ## for a few seconds each and writes the average frame, GPU and render-CPU time of every step to the frame log, so
 ## it shows what the frame really costs on this GPU. Stand still in a quiet spot; the whole run takes about 25 s.
 const LOG := preload("res://game/bootstrap/app/frame_spike_log.gd")
-const STEPS := ["baseline", "shadows off", "MSAA off", "lights off", "particles off", "half resolution", "3D off"]
+const STEPS := ["baseline", "shadows off", "14 lamps", "7 lamps", "no lamps", "particles off", "half resolution", "3D off"]
 const SETTLE := 1.5
 const MEASURE := 2.5
 const SAVED := &"render_probe_saved"
@@ -16,7 +16,8 @@ var _frames := 0
 var _frame_sum := 0.0
 var _cpu_sum := 0.0
 var _gpu_sum := 0.0
-var _msaa := 0
+var _shadows := true
+var _cap := 0
 var _scale := 1.0
 var _results: Array[String] = []
 
@@ -26,8 +27,11 @@ func start(tree: SceneTree) -> void:
 		return
 	running = true
 	_results = []
-	_msaa = tree.root.msaa_3d
 	_scale = tree.root.scaling_3d_scale
+	var lighting := _lighting(tree)
+	if lighting != null:
+		_shadows = bool(lighting.get("shadows_allowed"))
+		_cap = int(lighting.get("light_cap"))
 	_enter(tree, 0)
 
 
@@ -58,27 +62,23 @@ func _enter(tree: SceneTree, step: int) -> void:
 	_frame_sum = 0.0
 	_cpu_sum = 0.0
 	_gpu_sum = 0.0
+	var lighting := _lighting(tree)
 	match step:
 		1:
-			for light: Light3D in _nodes(tree, "Light3D"):
-				if light.shadow_enabled:
-					light.set_meta(SAVED, true)
-					light.shadow_enabled = false
-		2:
-			tree.root.msaa_3d = Viewport.MSAA_DISABLED
-		3:
-			for light: Light3D in _nodes(tree, "Light3D"):
-				if light.visible:
-					light.set_meta(SAVED, true)
-					light.visible = false
-		4:
+			if lighting != null:
+				lighting.call("set_shadows_allowed", false)
+		2, 3, 4:
+			if lighting != null:
+				lighting.set("light_cap", [14, 7, 0][step - 2])
+				lighting.call("refresh_light_budget")
+		5:
 			for node: Node3D in _nodes(tree, "GPUParticles3D") + _nodes(tree, "CPUParticles3D"):
 				if node.visible:
 					node.set_meta(SAVED, true)
 					node.visible = false
-		5:
-			tree.root.scaling_3d_scale = 0.5
 		6:
+			tree.root.scaling_3d_scale = 0.5
+		7:
 			tree.root.disable_3d = true
 
 
@@ -101,16 +101,22 @@ func _finish_step(tree: SceneTree) -> void:
 
 # Puts back only what this probe changed.
 func _restore(tree: SceneTree) -> void:
-	tree.root.msaa_3d = _msaa as Viewport.MSAA
 	tree.root.scaling_3d_scale = _scale
 	tree.root.disable_3d = false
-	for node: Node3D in _nodes(tree, "Light3D") + _nodes(tree, "GPUParticles3D") + _nodes(tree, "CPUParticles3D"):
+	var lighting := _lighting(tree)
+	if lighting != null and int(lighting.get("light_cap")) != _cap:
+		lighting.set("light_cap", _cap)
+		lighting.call("refresh_light_budget")
+	if lighting != null and bool(lighting.get("shadows_allowed")) != _shadows:
+		lighting.call("set_shadows_allowed", _shadows)
+	for node: Node3D in _nodes(tree, "GPUParticles3D") + _nodes(tree, "CPUParticles3D"):
 		if node.has_meta(SAVED):
 			node.remove_meta(SAVED)
-			if node is Light3D and _step == 1:
-				(node as Light3D).shadow_enabled = true
-			else:
-				node.visible = true
+			node.visible = true
+
+
+func _lighting(tree: SceneTree) -> Node:
+	return tree.current_scene.get_node_or_null("PlanningLighting") if tree.current_scene != null else null
 
 
 func _nodes(tree: SceneTree, type: String) -> Array:
