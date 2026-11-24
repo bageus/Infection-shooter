@@ -52,6 +52,7 @@ func _run() -> void:
 	await _test_wander_walk_and_transition("revenant")
 	await _test_climb_out("titan")
 	await _test_climb_out("hunger")
+	_test_loops_in_place()
 	stage.queue_free()
 	await process_frame
 	print("Enemy Mixamo clip tests: %d failure(s)." % failures)
@@ -325,6 +326,22 @@ func _test_climb_out(name: String) -> void:
 	enemy.queue_free()
 	target.queue_free()
 	await process_frame
+
+
+# A looping cycle that swings its hips snaps back at the seam: the Revenant's locomotion stays in place.
+func _test_loops_in_place() -> void:
+	var lib := load("res://models/objects/characters/enemy/game/Revenant_mixamo.res") as AnimationLibrary
+	for clip: String in ["RunForward", "WalkWander"]:
+		var anim := lib.get_animation(clip)
+		for track in anim.get_track_count():
+			if anim.track_get_type(track) != Animation.TYPE_POSITION_3D:
+				continue
+			var first: Vector3 = anim.track_get_key_value(track, 0)
+			var spread := 0.0
+			for key in anim.track_get_key_count(track):
+				var point: Vector3 = anim.track_get_key_value(track, key)
+				spread = maxf(spread, Vector2(point.x - first.x, point.z - first.z).length())
+			_expect(spread < 0.01, "Revenant %s keeps its hips in place (%.3f m)." % [clip, spread])
 
 
 func _expect(condition: bool, message: String) -> void:
