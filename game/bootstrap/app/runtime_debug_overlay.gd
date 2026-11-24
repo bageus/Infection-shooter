@@ -4,12 +4,14 @@ var infection: Node
 var occlusion: Node
 var label: Label
 const PROBE := preload("res://game/bootstrap/app/enemy_render_probe.gd")
+const COST_PROBE := preload("res://game/bootstrap/app/render_cost_probe.gd")
 const SPIKES := preload("res://game/bootstrap/app/frame_spike_log.gd")
 var spikes := SPIKES.new()
 var planning_ui: Control
 var _wanted := false
 var _elapsed := 0.0
 var _probe := 0
+var _cost_probe := COST_PROBE.new()
 
 
 func setup(runtime: Node, effects: Node) -> void:
@@ -52,6 +54,8 @@ func _input(event: InputEvent) -> void:
 		Engine.set_meta("legacy_perf", (int(Engine.get_meta("legacy_perf", 0)) + 1) % 4)
 		if int(Engine.get_meta("legacy_perf")) >= 3:
 			get_tree().call_group("darkness_zone", "uncull_room")
+	if event is InputEventKey and event.pressed and not event.echo and event.keycode == KEY_F7:
+		_cost_probe.start(get_tree())
 	if event is InputEventKey and event.pressed and not event.echo and event.keycode == KEY_F4:
 		var effects = get_parent().get("blood_effects")
 		if is_instance_valid(effects):
@@ -60,6 +64,7 @@ func _input(event: InputEvent) -> void:
 
 func _process(delta: float) -> void:
 	spikes.tick(delta, get_tree())
+	_cost_probe.tick(delta, get_tree())
 	_apply_visibility()
 	_elapsed += delta
 	if _elapsed >= .25:
