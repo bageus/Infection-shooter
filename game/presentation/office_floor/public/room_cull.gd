@@ -15,6 +15,8 @@ const REASONS := &"park_reasons"
 const ROOM_REASON := 1
 const VIEW_REASON := 2
 const VIEW_MIN_DISTANCE := 10.0
+## Props brought back into play per view pass: turning a whole room back on in one frame froze the game for about a second.
+const UNPARK_PER_PASS := 12
 static var _grid: Dictionary = {}
 static var _indexed := -1
 
@@ -50,6 +52,7 @@ static func props_in(zone: Node3D, size: Vector2, tree: SceneTree) -> Array[Node
 
 
 static func set_shown(props: Array[Node3D], shown: bool) -> void:
+	var started := Time.get_ticks_usec()
 	for prop in props:
 		# A prop the effects quality hid meanwhile (meta set by the decor trim) stays hidden.
 		if is_instance_valid(prop):
@@ -57,6 +60,7 @@ static func set_shown(props: Array[Node3D], shown: bool) -> void:
 			if not (shown and prop.get_meta(&"trim_hidden", false)):
 				prop.visible = shown
 			_park(prop, ROOM_REASON, not shown)
+	PhysicsCost.add(&"room_show", Time.get_ticks_usec() - started)
 
 
 ## Shows every culled prop again, used when the setting is switched off.
@@ -75,6 +79,8 @@ static func restore_all(tree: SceneTree) -> void:
 static func update_view(tree: SceneTree, camera: Camera3D, player: Node3D) -> void:
 	if not enabled or camera == null or player == null:
 		return
+	var started := Time.get_ticks_usec()
+	var unparked := 0
 	for node in tree.get_nodes_in_group(GROUP):
 		var prop := node as Node3D
 		if prop == null or not is_instance_valid(prop):
@@ -83,7 +89,13 @@ static func update_view(tree: SceneTree, camera: Camera3D, player: Node3D) -> vo
 		var near := at.distance_to(player.global_position) < VIEW_MIN_DISTANCE
 		var moving := prop is RigidBody3D and not (prop as RigidBody3D).sleeping
 		var seen := camera.is_position_in_frustum(at) or near
-		_park(prop, VIEW_REASON, not seen and not moving)
+		var park := not seen and not moving
+		if not park and (int(prop.get_meta(REASONS, 0)) & VIEW_REASON) != 0:
+			if unparked >= UNPARK_PER_PASS:
+				continue # the rest come back on the next pass
+			unparked += 1
+		_park(prop, VIEW_REASON, park)
+	PhysicsCost.add(&"room_view", Time.get_ticks_usec() - started)
 
 
 # A prop stays parked while any reason holds (room hidden, or out of view). Bodies lose their layers and freeze.
