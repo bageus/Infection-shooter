@@ -47,6 +47,21 @@ func _run() -> void:
 	ROOM_CULL.restore_all(root.get_tree())
 	_expect(not _parked(ahead) and not _parked(behind), "The setting off restores every prop")
 	ROOM_CULL.enabled = true
+	# A whole room coming back into view returns a few props per pass, not all in one frame.
+	var crowd: Array[Node3D] = []
+	for i in 30:
+		crowd.append(_prop(Vector3(i * 0.1, 0, 40)))
+	camera.look_at(Vector3(0, 0, -15), Vector3.UP)
+	await process_frame
+	ROOM_CULL.update_view(root.get_tree(), camera, player)
+	camera.look_at(Vector3(0, 0, 40), Vector3.UP)
+	await process_frame
+	ROOM_CULL.update_view(root.get_tree(), camera, player)
+	var left := crowd.filter(func(n): return _parked(n)).size()
+	_expect(left > 30 - ROOM_CULL.UNPARK_PER_PASS - 1 and left < 30, "A pass brings back only its share of a parked room")
+	ROOM_CULL.update_view(root.get_tree(), camera, player)
+	ROOM_CULL.update_view(root.get_tree(), camera, player)
+	_expect(crowd.all(func(n): return not _parked(n)), "The next passes bring back the rest")
 	print("View park tests: %d failure(s)." % failures)
 	quit(failures)
 
