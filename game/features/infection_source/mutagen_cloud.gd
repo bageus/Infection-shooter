@@ -26,6 +26,9 @@ signal depleted
 const HEAL_PER_SECOND := 2.0
 
 var _floor_offset := 0.0
+var _clear_body := 0
+var _clear_frame := -1
+var _clear := false
 var _active: bool = false
 var _absorption_remaining: float = 0.0
 var _lifetime_remaining: float = 0.0
@@ -189,7 +192,7 @@ func _heal_visitors(delta: float) -> void:
 			continue
 		if not body.has_method("on_mutagen_cloud") and not heals_visitors:
 			continue
-		if int(body.get_meta(&"mutagen_presence_frame", -1)) == frame or not WALL_FIELD.clear_to(self, body):
+		if int(body.get_meta(&"mutagen_presence_frame", -1)) == frame or not _clear_to(body):
 			continue
 		body.set_meta(&"mutagen_presence_frame", frame)
 		if body.has_method("on_mutagen_cloud"):
@@ -206,10 +209,22 @@ func _find_absorbing_body() -> Node:
 			continue
 		if int(body.get_meta(&"mutagen_absorbed_frame", -1)) == frame:
 			continue
-		if WALL_FIELD.clear_to(self, body):
+		if _clear_to(body):
 			body.set_meta(&"mutagen_absorbed_frame", frame)
 			return body
 	return null
+
+
+# The wall test is a ray chain through every loose prop on the way. Healing and absorbing both ask it
+# for the same body in one physics frame, so the second ask reuses the answer; the next frame asks again.
+func _clear_to(body: Node3D) -> bool:
+	var frame := Engine.get_physics_frames()
+	if _clear_body == body.get_instance_id() and _clear_frame == frame:
+		return _clear
+	_clear_body = body.get_instance_id()
+	_clear_frame = frame
+	_clear = WALL_FIELD.clear_to(self, body)
+	return _clear
 
 
 func _set_progress(value: float) -> void:
