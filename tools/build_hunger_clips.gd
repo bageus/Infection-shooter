@@ -109,10 +109,10 @@ const EXTRA := [
 	{"name": "TurnRight", "file": "Left Turn_1", "enemies": HEAVY_ALL, "yaw": true},
 	{"name": "TurnLeft2", "file": "Left Turn", "enemies": ["Hunger"], "yaw": true},
 	{"name": "TurnRight2", "file": "Left Turn_1", "enemies": ["Hunger"], "yaw": true},
-	{"name": "Walk", "file": "Mutant Walking", "enemies": BIG, "loop": true, "pace": "walk"},
+	{"name": "Walk", "file": "Mutant Walking", "enemies": BIG, "loop": true, "pace": "walk", "inplace": true},
 	{"name": "WalkWander", "file": "Drunk Walk", "enemies": ["Revenant"], "loop": true, "pace": "wander", "inplace": true},
-	{"name": "WalkWander", "file": "Old Man Walk", "enemies": BRAWLERS, "loop": true, "pace": "wander"},
-	{"name": "RunZombie", "file": "Zombie_Run", "enemies": ["Brute"], "loop": true, "pace": "run"},
+	{"name": "WalkWander", "file": "Old Man Walk", "enemies": BRAWLERS, "loop": true, "pace": "wander", "inplace": true},
+	{"name": "RunZombie", "file": "Zombie_Run", "enemies": ["Brute"], "loop": true, "pace": "run", "inplace": true},
 	{"name": "RunForward", "file": "Run Forward", "enemies": ["Revenant", "Brute", "Titan"], "loop": true, "pace": "run", "inplace": true},
 	{"name": "Climb", "file": "Climbing", "enemies": ALL, "settle": true},
 	# Authored in Blender on the Mixamo rig (tools/blender_enemy_clips.py); they replace the procedural clips.

@@ -328,20 +328,26 @@ func _test_climb_out(name: String) -> void:
 	await process_frame
 
 
-# A looping cycle that swings its hips snaps back at the seam: the Revenant's locomotion stays in place.
+# A looping cycle that swings its hips snaps back at the seam: these locomotion loops stay in place.
 func _test_loops_in_place() -> void:
-	var lib := load("res://models/objects/characters/enemy/game/Revenant_mixamo.res") as AnimationLibrary
-	for clip: String in ["RunForward", "WalkWander"]:
-		var anim := lib.get_animation(clip)
-		for track in anim.get_track_count():
-			if anim.track_get_type(track) != Animation.TYPE_POSITION_3D:
-				continue
-			var first: Vector3 = anim.track_get_key_value(track, 0)
-			var spread := 0.0
-			for key in anim.track_get_key_count(track):
-				var point: Vector3 = anim.track_get_key_value(track, key)
-				spread = maxf(spread, Vector2(point.x - first.x, point.z - first.z).length())
-			_expect(spread < 0.01, "Revenant %s keeps its hips in place (%.3f m)." % [clip, spread])
+	var loops := {
+		"Revenant": ["RunForward", "WalkWander"],
+		"Brute": ["RunForward", "RunZombie", "WalkWander"],
+		"Titan": ["RunForward", "WalkWander", "Walk"],
+	}
+	for enemy: String in loops:
+		var lib := load("res://models/objects/characters/enemy/game/%s_mixamo.res" % enemy) as AnimationLibrary
+		for clip: String in loops[enemy]:
+			var anim := lib.get_animation(clip)
+			for track in anim.get_track_count():
+				if anim.track_get_type(track) != Animation.TYPE_POSITION_3D:
+					continue
+				var first: Vector3 = anim.track_get_key_value(track, 0)
+				var spread := 0.0
+				for key in anim.track_get_key_count(track):
+					var point: Vector3 = anim.track_get_key_value(track, key)
+					spread = maxf(spread, Vector2(point.x - first.x, point.z - first.z).length())
+				_expect(spread < 0.01, "%s %s keeps its hips in place (%.3f m)." % [enemy, clip, spread])
 
 
 func _expect(condition: bool, message: String) -> void:
