@@ -26,6 +26,7 @@ var _awake_last := 0
 var _script_last := 0
 var _script_seen := {}
 var _measuring := false
+var _last_usec := 0 # wall clock of the previous tick: the engine caps delta, so a real stall only shows here
 var _self_usec := 0 # what this logger itself cost last frame, so the overlay is not blamed on the game
 
 
@@ -47,7 +48,10 @@ func tick(delta: float, tree: SceneTree) -> bool:
 
 
 func _tick(delta: float, tree: SceneTree) -> bool:
-	var msec := delta * 1000.0
+	var now := Time.get_ticks_usec()
+	var wall := (now - _last_usec) / 1000.0 if _last_usec > 0 else 0.0
+	_last_usec = now
+	var msec := maxf(delta * 1000.0, wall)
 	_window_age += delta
 	if _window_age >= WINDOW_SEC:
 		_window_age = 0.0
