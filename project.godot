@@ -18,7 +18,7 @@ config/icon="res://assets/icons/game_icon_256.png"
 
 [audio]
 
-buses/default_bus_layout="uid://jpy38riq1ys6"
+buses/default_bus_layout="res://default_bus_layout.tres"
 
 [autoload]
 
