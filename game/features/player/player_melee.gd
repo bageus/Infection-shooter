@@ -12,7 +12,7 @@ const COOLDOWN := 2.0
 const NEAR_ENEMY := 2.0
 const PUNCH_REACH := 1.1
 const PUNCH_DAMAGE := 17.0
-const KICK_LENGTH := 1.7
+const KICK_LENGTH := 2.55 # was 1.7; the reach is 50% longer
 ## The player origin is the capsule centre; the floor is this far below it.
 const PLAYER_HALF_HEIGHT := 0.9
 ## Damage a kick deals to a prop it hits (tables, nightstands); a few kicks break one.

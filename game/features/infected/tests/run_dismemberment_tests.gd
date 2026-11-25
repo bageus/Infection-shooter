@@ -30,6 +30,7 @@ func _run() -> void:
 	var stage := Node3D.new()
 	root.add_child(stage)
 	_add_floor(stage)
+	await _test_pistol_and_uzi_do_not_sever(stage)
 	await _test_arm_shot_off(stage)
 	await _test_headshot_kills(stage)
 	await _test_small_enemy_crawls_on_one_leg(stage)
@@ -70,7 +71,7 @@ func _spawn(stage: Node3D, scene: PackedScene, at: Vector3) -> CharacterBody3D:
 
 
 # Fires shots from the enemy's side through the middle of a part.
-func _shoot(enemy: Node, part: StringName, damage: float, shots: int, weapon := "PISTOL") -> void:
+func _shoot(enemy: Node, part: StringName, damage: float, shots: int, weapon := "AK") -> void:
 	var parts: Node = enemy.get("_parts")
 	for i in shots:
 		if bool(enemy.get("_dead")) or parts.is_severed(part):
@@ -92,6 +93,16 @@ func _pieces(stage: Node3D) -> Array[Node]:
 		if child is RigidBody3D and child.has_method("start_bleeding"):
 			result.append(child)
 	return result
+
+
+# Pistol and uzi rounds wound a limb but never tear it off.
+func _test_pistol_and_uzi_do_not_sever(stage: Node3D) -> void:
+	for weapon in ["PISTOL", "UZI"]:
+		var enemy := await _spawn(stage, HUNGER, Vector3(0, 1.0, 0))
+		var parts: Node = enemy.get("_parts")
+		await _shoot(enemy, &"arm_l", 12.0, 6, weapon)
+		_expect(not parts.is_severed(&"arm_l"), "%s does not sever a limb." % weapon)
+		enemy.queue_free()
 
 
 func _test_arm_shot_off(stage: Node3D) -> void:

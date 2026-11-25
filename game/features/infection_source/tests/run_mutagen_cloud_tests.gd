@@ -93,7 +93,7 @@ func _check_refused_mutagen_stays(stage: Node3D) -> void:
 	cloud.queue_free()
 
 
-# A cloud set to hold N units gives exactly N, stops absorbing at once and then fades out gradually.
+# A cloud set to hold N units gives exactly N, then disappears at once.
 func _check_absorb_units_are_exact(stage: Node3D) -> void:
 	_units_cloud = _spawn(stage, Vector3(50, 0, 0), 2.0)
 	_units_cloud.set("ends_when_absorbed", true)
@@ -107,16 +107,24 @@ func _check_absorb_units_are_exact(stage: Node3D) -> void:
 	var total := float(_units_cloud.get("_absorbed_units"))
 	_expect(is_equal_approx(total, 5.0), "A 5-unit cloud gives exactly 5 units (%.4f)." % total)
 	_expect(bool(_units_cloud.call("is_spent")), "An emptied cloud has nothing left to feed.")
-	_expect(_units_cloud.visible and not _units_ended[0], "An emptied cloud fades out instead of vanishing at once.")
-	_units_taken = total
-	_units_cloud.call("_feed", body, 0.3)
-	_expect(is_equal_approx(float(_units_cloud.get("_absorbed_units")), _units_taken), "A faded cloud is not absorbed any further.")
+	_expect(not _units_cloud.visible and _units_ended[0], "An emptied cloud vanishes at once and reports it.")
 	body.queue_free()
+	# A 1-unit cloud fed by a long frame (first feed) still gives exactly 1 unit.
+	var one := _spawn(stage, Vector3(52, 0, 0), 2.0)
+	one.set("ends_when_absorbed", true)
+	one.set("absorb_units", 1.0)
+	one.call("activate")
+	var hitch := Absorber.new()
+	stage.add_child(hitch)
+	for _step in 10:
+		one.call("_feed", hitch, 0.5)
+	_expect(is_equal_approx(float(one.get("_absorbed_units")), 1.0), "A 1-unit cloud gives exactly 1 unit even after a long first frame.")
+	hitch.queue_free()
+	one.queue_free()
 
 
 var _units_cloud: Area3D
 var _units_ended := [false]
-var _units_taken := 0.0
 
 
 class Visitor extends CharacterBody3D:

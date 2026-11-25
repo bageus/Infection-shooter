@@ -38,6 +38,7 @@ var _absorbed_units: float = 0.0
 # Mutagen per second the body last took from this cloud (0 until the first feed).
 var _units_per_second: float = 0.0
 const UNIT_EPSILON := 0.0001
+const PROBE_SECONDS := 1.0 / 30.0
 # Variant, seed, spin and stagger of every puff (what the MultiMesh holds).
 var _puffs: Array[Color] = []
 @onready var _visual: MultiMeshInstance3D = $Visual
@@ -166,8 +167,10 @@ func _physics_step(delta: float) -> void:
 # to what is left (at the rate the body last took) and the cloud ends when empty.
 func _feed(body: Node, step: float) -> void:
 	var capped := step
-	if ends_when_absorbed and _units_per_second > 0.0:
-		capped = minf(step, maxf(absorb_units - _absorbed_units, 0.0) / _units_per_second)
+	if ends_when_absorbed:
+		# shortcut: the first feed is a 1/30 s probe until the rate is known, upgrade if the body's rate becomes configurable.
+		var left := maxf(absorb_units - _absorbed_units, 0.0)
+		capped = minf(step, left / _units_per_second) if _units_per_second > 0.0 else minf(step, PROBE_SECONDS)
 	var gained: Variant = body.call("absorb_mutagen", capped)
 	if gained is float and float(gained) <= 0.0:
 		return
@@ -176,9 +179,9 @@ func _feed(body: Node, step: float) -> void:
 		_absorbed_units += float(gained)
 		if capped > 0.0:
 			_units_per_second = float(gained) / capped
-		# The limit stops absorption at once; the cloud then thins out gradually instead of vanishing.
+		# The last unit is taken: the cloud is gone at once.
 		if _absorbed_units >= absorb_units - UNIT_EPSILON:
-			_dissipate_early()
+			_finish()
 	# Keep detecting presence until dissipation: a visitor may have Devourer
 	# even when this cloud was created before that skill became active.
 

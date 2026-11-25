@@ -71,7 +71,7 @@ func _check_untimed_cloud(stage: Node3D) -> void:
 	# 1.0 s of feeding gives 5 mutagen: half of the 10 threshold.
 	cloud.call("_feed", body, 1.0)
 	_expect(cloud.visible and float(cloud.get("_absorption_remaining")) == INF, "An absorption-ended cloud keeps feeding until its threshold.")
-	cloud.call("_feed", body, 1.0)
+	cloud.call("_feed", body, 2.0) # the rest of the threshold: the cloud takes exactly what is left
 	cloud.call("_physics_process", 5.0)
 	_expect(not cloud.visible, "An untimed cloud ends once its threshold of mutagen is absorbed.")
 	body.queue_free()
