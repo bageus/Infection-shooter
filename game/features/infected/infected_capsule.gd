@@ -31,6 +31,7 @@ const WALL_STANDOFF := preload("res://game/features/infected/wall_standoff.gd")
 const CLIMB := preload("res://game/features/infected/enemy_climb_out.gd")
 const KILLING_PUSH_MSEC := 300
 const HEAVY_HIT_WEAPONS := ["SHOTGUN", "GRENADE LAUNCHER"] # the weapons whose hit plays the hit clip
+const NO_DISMEMBER_WEAPONS := ["PISTOL", "UZI"] # their hits wound but never sever a limb
 # Longest wind-up before a swing lands, so long clips never delay the first hit.
 const MAX_WINDUP_SECONDS := 0.35
 
@@ -266,10 +267,12 @@ func take_projectile_damage(amount: float, hit_position: Vector3, direction: Vec
 	BLOOD_FX.spray(get_parent() as Node3D, hit_position, direction, 16, 1.0)
 	audio.hit(hit_position)
 	amount = _mutation_status.scented_damage(_target, health < max_health, amount)
-	var severed := _parts != null and bool(_parts.damage_part(part, amount))
+	# Pistol and uzi rounds wound but never tear a limb off.
+	var can_sever := _parts != null and weapon_name not in NO_DISMEMBER_WEAPONS
+	var severed := can_sever and bool(_parts.damage_part(part, amount))
 	_apply_damage(amount, false)
 	# A killing shot also tears off a part that was already badly damaged.
-	if _parts != null and part != BODY_PARTS.TORSO and not _parts.is_severed(part):
+	if can_sever and part != BODY_PARTS.TORSO and not _parts.is_severed(part):
 		if severed or (_dead and float(_parts.part_ratio(part)) <= 0.5):
 			_parts.sever(part, direction)
 
