@@ -16,7 +16,7 @@ static func blast(actor: CharacterBody3D, parts: Node, amount: float, last_hit: 
 				return
 
 
-## Consequences of a lost part: a head or (for small infected) a leg kills, the last arm halves the blows.
+## Consequences of a lost part: a head or (for small infected) a leg kills. An arm costs nothing but its look.
 static func lost(actor: CharacterBody3D, parts: Node, part: StringName) -> void:
 	var part_label := BODY_PARTS.limb_of(part)
 	if part == &"head":
@@ -27,5 +27,3 @@ static func lost(actor: CharacterBody3D, parts: Node, part: StringName) -> void:
 			actor.call("_die")
 		else:
 			actor.set("_mobility", minf(float(actor.get("_mobility")), 0.45))
-	elif part_label == "arm" and parts.remaining("arm") == 0:
-		actor.set("_attack_scale", 0.5)

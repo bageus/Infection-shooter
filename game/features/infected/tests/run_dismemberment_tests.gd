@@ -31,6 +31,7 @@ func _run() -> void:
 	root.add_child(stage)
 	_add_floor(stage)
 	await _test_pistol_and_uzi_do_not_sever(stage)
+	await _test_blast_rings(stage)
 	await _test_arm_shot_off(stage)
 	await _test_headshot_kills(stage)
 	await _test_small_enemy_crawls_on_one_leg(stage)
@@ -105,6 +106,25 @@ func _test_pistol_and_uzi_do_not_sever(stage: Node3D) -> void:
 		enemy.queue_free()
 
 
+# A blast inside 2 m leaves only blood; between 2 and 4 m the body lives on, hurt.
+func _test_blast_rings(stage: Node3D) -> void:
+	var close := await _spawn(stage, HUNGER, Vector3(20, 1.0, 0))
+	close.call("take_blast_damage", 155.0, close.global_position + Vector3(1.0, 0, 0))
+	_expect(bool(close.get("_dead")) and not close.visible, "A blast within 2 m gibs the enemy to blood only.")
+	close.queue_free()
+	var far := await _spawn(stage, HUNGER, Vector3(30, 1.0, 0))
+	far.call("take_blast_damage", 10.0, far.global_position + Vector3(3.0, 0, 0))
+	_expect(not bool(far.get("_dead")) and far.visible, "A blast from 2 to 4 m hurts but does not gib.")
+	far.queue_free()
+	var torn := await _spawn(stage, HUNGER, Vector3(40, 1.0, 0))
+	var before: int = torn.get("_parts").severable_parts().size()
+	torn.call("take_blast_damage", 500.0, torn.global_position + Vector3(3.0, 0, 0))
+	var lost := before - int(torn.get("_parts").severable_parts().size())
+	_expect(lost >= 2 and bool(torn.get("_dead")), "A lethal blast from 2 to 4 m tears 2 or more pieces off and kills (%d)." % lost)
+	torn.queue_free()
+	await process_frame
+
+
 func _test_arm_shot_off(stage: Node3D) -> void:
 	var enemy := await _spawn(stage, HUNGER, Vector3(0, 1.0, 0))
 	var parts: Node = enemy.get("_parts")
@@ -124,13 +144,13 @@ func _test_arm_shot_off(stage: Node3D) -> void:
 	var body: MeshInstance3D = parts._entries[0].instance
 	_expect(body.mesh.get_surface_count() == 1, "A whole enemy draws skin only, no cut tissue.")
 	var before := _pieces(stage).size()
-	await _shoot(enemy, &"arm_l", 12.0, 1)
+	await _shoot(enemy, &"arm_l", 1.0, 40)
 	var painted := false
 	for surface_mask: Dictionary in parts._entries[0].get("masks", []):
 		for byte in (surface_mask.image as Image).get_data():
 			painted = painted or byte > 64
 	_expect(painted, "A hit bakes a wound into the skin's blood mask.")
-	await _shoot(enemy, &"arm_l", 12.0, 6)
+	await _shoot(enemy, &"arm_l", 1.0, 40)
 	_expect(parts.is_severed(&"arm_l"), "Enough damage shoots the arm off.")
 	_expect(body.mesh.get_surface_count() == 2 and body.get_surface_override_material(1) != null, "Severing brings the cut tissue back with its material.")
 	_expect(not bool(enemy.get("_dead")), "Losing an arm does not kill.")
@@ -165,22 +185,25 @@ func _test_arm_shot_off(stage: Node3D) -> void:
 
 
 func _test_headshot_kills(stage: Node3D) -> void:
-	var enemy := await _spawn(stage, HUNGER, Vector3(4, 1.0, 0))
-	await _shoot(enemy, &"head", 30.0, 3)
-	_expect(enemy.get("_parts").is_severed(&"head"), "Headshots take the head off.")
-	_expect(bool(enemy.get("_dead")), "A headless enemy dies.")
-	enemy.queue_free()
-	await process_frame
+	var taken := 0
+	for i in 12:
+		var enemy := await _spawn(stage, HUNGER, Vector3(4, 1.0, 0))
+		await _shoot(enemy, &"head", 30.0, 3)
+		_expect(bool(enemy.get("_dead")), "A lethal headshot kills the enemy.")
+		taken += int(enemy.get("_parts").is_severed(&"head"))
+		enemy.queue_free()
+		await process_frame
+	_expect(taken > 0 and taken < 12, "A lethal headshot takes the head only some of the time (%d of 12)." % taken)
 
 
 func _test_small_enemy_crawls_on_one_leg(stage: Node3D) -> void:
 	var enemy := await _spawn(stage, ZOMBIE, Vector3(8, 1.0, 0))
-	await _shoot(enemy, &"leg_r", 12.0, 6)
+	await _shoot(enemy, &"leg_r", 1.0, 40)
 	_expect(enemy.get("_parts").is_severed(&"leg_r"), "The zombie's leg can be shot off.")
 	# The Hunger family drags itself on with one leg (ADR-0045) and dies without any.
 	_expect(not bool(enemy.get("_dead")), "A small infected survives losing one leg and crawls.")
 	_expect(is_equal_approx(float(enemy.get("_mobility")), 0.28), "A one-legged infected crawls slowly.")
-	await _shoot(enemy, &"leg_l", 12.0, 6)
+	await _shoot(enemy, &"leg_l", 1.0, 40)
 	_expect(bool(enemy.get("_dead")), "A small infected dies from losing both legs.")
 	enemy.queue_free()
 	await process_frame

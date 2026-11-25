@@ -32,6 +32,10 @@ const CLIMB := preload("res://game/features/infected/enemy_climb_out.gd")
 const KILLING_PUSH_MSEC := 300
 const HEAVY_HIT_WEAPONS := ["SHOTGUN", "GRENADE LAUNCHER"] # the weapons whose hit plays the hit clip
 const NO_DISMEMBER_WEAPONS := ["PISTOL", "UZI"] # their hits wound but never sever a limb
+const LIMB_SEVER_CHANCE := 0.3 # per hit on an arm or leg from a limb-cutting weapon
+const HEAD_SEVER_CHANCE := 0.5 # only a lethal shot to the head can take it
+const BLAST_GIB_RADIUS := 2.0 # inside this a blast leaves only blood
+const BLAST_LIMB_RADIUS := 4.0 # inside this a blast may take an arm or a leg
 # Longest wind-up before a swing lands, so long clips never delay the first hit.
 const MAX_WINDUP_SECONDS := 0.35
 
@@ -267,13 +271,14 @@ func take_projectile_damage(amount: float, hit_position: Vector3, direction: Vec
 	BLOOD_FX.spray(get_parent() as Node3D, hit_position, direction, 16, 1.0)
 	audio.hit(hit_position)
 	amount = _mutation_status.scented_damage(_target, health < max_health, amount)
-	# Pistol and uzi rounds wound but never tear a limb off.
-	var can_sever := _parts != null and weapon_name not in NO_DISMEMBER_WEAPONS
-	var severed := can_sever and bool(_parts.damage_part(part, amount))
+	var lethal := amount >= health
 	_apply_damage(amount, false)
-	# A killing shot also tears off a part that was already badly damaged.
-	if can_sever and part != BODY_PARTS.TORSO and not _parts.is_severed(part):
-		if severed or (_dead and float(_parts.part_ratio(part)) <= 0.5):
+	# A hit takes a limb by chance, never by its hp. Pistol and uzi rounds never take a limb.
+	if _parts != null and part != BODY_PARTS.TORSO and not _parts.is_severed(part):
+		if part == &"head":
+			if lethal and randf() < HEAD_SEVER_CHANCE:
+				_parts.sever(part, direction)
+		elif weapon_name not in NO_DISMEMBER_WEAPONS and randf() < LIMB_SEVER_CHANCE:
 			_parts.sever(part, direction)
 
 
@@ -285,7 +290,42 @@ func take_blast_damage(amount: float, origin: Vector3) -> void:
 	_reaction_point = global_position + Vector3.UP
 	_reaction_direction = Vector3(global_position.x - origin.x, 0.0, global_position.z - origin.z).normalized()
 	_reaction_heavy = true
-	take_damage(amount)
+	var distance := global_position.distance_to(origin)
+	if distance <= BLAST_GIB_RADIUS and not _dead:
+		# shortcut: a close blast hides the body and leaves blood, no pieces fly; upgrade if gibbed pieces are wanted.
+		BLOOD_FX.spray(get_parent() as Node3D, origin, Vector3.UP, 24, 1.0)
+		_apply_damage(health, false)
+		visible = false
+		return
+	if distance <= BLAST_LIMB_RADIUS and _parts != null:
+		if amount >= health:
+			_blast_tear(origin)
+		else:
+			_blast_limb_roll(origin)
+	_apply_damage(amount, false)
+
+
+# A lethal blast in the outer ring throws 2 to 5 random pieces off.
+func _blast_tear(origin: Vector3) -> void:
+	var candidates: Array[StringName] = _parts.severable_parts()
+	candidates.shuffle()
+	for part in candidates.slice(0, randi_range(2, 5)):
+		_parts.sever(part, (global_position - origin).normalized() + Vector3.UP)
+
+
+# A third of the time an arm comes off, a third a leg, otherwise nothing.
+func _blast_limb_roll(origin: Vector3) -> void:
+	var roll := randf()
+	var group := "arm" if roll < 1.0 / 3.0 else ("leg" if roll < 2.0 / 3.0 else "")
+	if group == "":
+		return
+	var candidates: Array[StringName] = []
+	for part in _parts.severable_parts():
+		if BODY_PARTS.limb_of(part) == group:
+			candidates.append(part)
+	if candidates.is_empty():
+		return
+	_parts.sever(candidates.pick_random(), (global_position - origin).normalized() + Vector3.UP)
 
 
 # A blow only throws the body if it is the one that kills.

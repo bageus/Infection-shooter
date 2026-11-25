@@ -211,7 +211,7 @@ func _test_hit_clip(name: String) -> void:
 	enemy.call("take_projectile_damage", 40.0, point, Vector3(0, 0, 1), "SHOTGUN")
 	_expect(float(enemy.get("_hit_cooldown")) > 0.0, name + " flinches with the hit clip from a shotgun.")
 	enemy.set("_hit_cooldown", 0.0)
-	enemy.call("take_blast_damage", 50.0, enemy.global_position + Vector3(2, 0, 0))
+	enemy.call("take_blast_damage", 50.0, enemy.global_position + Vector3(5, 0, 0)) # beyond the 4 m limb ring
 	_expect(float(enemy.get("_hit_cooldown")) > 0.0, name + " flinches with the hit clip from a blast.")
 	enemy.set("_hit_cooldown", 0.0)
 	enemy.set("health", 30.0)
