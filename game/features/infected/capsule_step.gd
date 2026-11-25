@@ -64,14 +64,13 @@ static func run(e, delta: float) -> void:
 	var ai_divisor: int = 1 if near else 4
 	if lazy or physics_frame % ai_divisor == e._ai_tick_offset % ai_divisor:
 		e._cached_desired = e._desired_velocity_from_offset(target_offset)
-		e._cached_spread = CROWD.spread(e, e.collision_shape)
 
 	e._behaviour_tick(step, target_offset)
 	t = PhysicsCost.lap(&"capsule_behaviour_desired", t)
 	var desired: Vector3 = Vector3.ZERO if e._blast_stun_remaining > 0.0 else e._cached_desired * (1.0 - e._pace.hit_penalty) * e._authoring.movement_scale()
 	if not lazy:
 		e._turn_toward_face_direction(delta)
-	var spread: Vector3 = e._cached_spread
+	var spread: Vector3 = CROWD.spread(e, e.collision_shape) # registers in the grid, so it must run every frame
 	e.velocity.x = desired.x + e._push_velocity.x + spread.x
 	e.velocity.z = desired.z + e._push_velocity.z + spread.z
 	e._push_velocity = e._push_velocity.move_toward(Vector3.ZERO, e.push_decay * delta)

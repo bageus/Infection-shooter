@@ -103,7 +103,6 @@ var _ai_tick_offset: int = 0
 var offscreen := false  # set by enemy_screen_reach
 @warning_ignore("unused_private_class_variable")  # read and written by capsule_step.gd
 var _cached_desired: Vector3 = Vector3.ZERO
-var _cached_spread: Vector3 = Vector3.ZERO
 var _lod_frame_offset: int = 0
 var _sleeping_far := false
 var _blast_stun_remaining := 0.0
