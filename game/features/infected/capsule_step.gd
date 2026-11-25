@@ -70,7 +70,7 @@ static func run(e, delta: float) -> void:
 	var desired: Vector3 = Vector3.ZERO if e._blast_stun_remaining > 0.0 else e._cached_desired * (1.0 - e._pace.hit_penalty) * e._authoring.movement_scale()
 	if not lazy:
 		e._turn_toward_face_direction(delta)
-	var spread: Vector3 = CROWD.spread(e, e.collision_shape)
+	var spread: Vector3 = CROWD.spread(e, e.collision_shape) # registers in the grid, so it must run every frame
 	e.velocity.x = desired.x + e._push_velocity.x + spread.x
 	e.velocity.z = desired.z + e._push_velocity.z + spread.z
 	e._push_velocity = e._push_velocity.move_toward(Vector3.ZERO, e.push_decay * delta)
@@ -88,7 +88,7 @@ static func run(e, delta: float) -> void:
 	var t_mark: int = Time.get_ticks_usec()
 	e.move_and_slide()
 	PhysicsCost.add(&"capsule_slide", Time.get_ticks_usec() - t_mark)
-	e._push_chair_contacts()
+	if near or physics_frame % 4 == e._ai_tick_offset % 4: e._push_chair_contacts()
 	t = PhysicsCost.lap(&"capsule_push_chair", t)
 	e._breaker.track_progress(e, delta if near else delta * 2.0, not e._route.direct_clear())
 	t = PhysicsCost.lap(&"capsule_track", t)

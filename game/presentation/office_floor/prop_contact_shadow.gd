@@ -12,6 +12,8 @@ const MIN_FOOTPRINT := 0.3
 const MARGIN := 0.12
 ## Round furniture (round tables, pots) gets an elliptic shadow with a thinner margin, so it is not a square.
 const PLANT_MARGIN := 0.04
+## A plant's pot is about this share of its smallest horizontal extent (leaves spread much wider).
+const PLANT_POT_SHARE := 0.5
 ## Lifted this high above its resting floor the shadow is gone.
 const FADE_HEIGHT := 0.6
 
@@ -41,11 +43,15 @@ func configure(prop: Node3D, visual: Node3D, meshes: Array[MeshInstance3D]) -> b
 		found = true
 	if not found:
 		return false
+	var file := str(prop.get("model_path")).get_file()
+	if "plant" in file or "bamboo" in file:
+		# One mesh holds pot and foliage, so its bounds are the whole leaf spread; the shadow is the pot's: a square on the model origin.
+		var side := PLANT_POT_SHARE * minf(_local_bounds.size.x, _local_bounds.size.z)
+		_local_bounds = AABB(Vector3(-side * 0.5, _local_bounds.position.y, -side * 0.5), Vector3(side, _local_bounds.size.y, side))
 	var world := prop.global_transform * _local_bounds
 	if world.position.y > FLOOR_Y + MAX_BASE_HEIGHT or minf(world.size.x, world.size.z) < MIN_FOOTPRINT:
 		return false
 	_floor_y = maxf(world.position.y, FLOOR_Y - 0.003) + 0.003
-	var file := str(prop.get("model_path")).get_file()
 	var round_shape := "circular" in file or "round" in file or "plant" in file
 	if "plant" in file:
 		_margin = PLANT_MARGIN
