@@ -200,7 +200,7 @@ func _release_loot() -> void:
 func _ready() -> void:
 	if model_path.is_empty():
 		return
-	if "01_wood_slat_partition" in model_path: add_to_group(&"darkness_opening") # a broken partition opens a dark room
+	if "01_wood_slat_partition" in model_path or "01_wall_timber_frame_only" in model_path or "01_wall_frame_drywall" in model_path: add_to_group(&"darkness_opening") # a broken partition or breakable wall opens a dark room
 	var wall_mounted := is_wall_mounted()
 	if wall_mounted:
 		set_meta("planning_wall_mount", true)
