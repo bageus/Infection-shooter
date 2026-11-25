@@ -10,6 +10,7 @@ const CHAIR := MODELS + "06/06_simple_chair.glb"
 const CLOCK := MODELS + "09/09_wall_clock.glb"
 const MUG := MODELS + "09/glass_mug/09_mug.glb"
 const CABINET := MODELS + "03/03_file_cabinet_smaller.glb"
+const BAMBOO := MODELS + "11/11_bamboo.glb"
 
 var failures := 0
 
@@ -26,7 +27,11 @@ func _run() -> void:
 	var clock := _prop(stage, CLOCK, Vector3(6, 1.6, 0))
 	var mug := _prop(stage, MUG, Vector3(8, 0, 0))
 	var raised := _prop(stage, CABINET, Vector3(10, 0.8, 0))
+	var bamboo := _prop(stage, BAMBOO, Vector3(14, 0, 0))
 	await process_frame
+	var pot := _quad(bamboo)
+	var pot_half: Vector2 = (pot.material_override as ShaderMaterial).get_shader_parameter(&"half_size") if pot != null else Vector2(9, 9)
+	_expect(pot_half.x < 0.5 and pot_half.y < 0.5, "A plant's shadow is its pot, not its leaf spread (%s)." % pot_half)
 	_expect(_quad(table) != null and _quad(chair) != null, "Tables and chairs on the floor cast a contact shadow.")
 	_expect(_quad(clock) == null, "Wall-mounted items cast none.")
 	_expect(_quad(mug) == null, "Small kickable items cast none.")
