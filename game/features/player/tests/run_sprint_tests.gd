@@ -81,6 +81,7 @@ func _run() -> void:
 
 	# The roll's arm hold lasts through the cross-fade back to locomotion.
 	player.get_node("AnimationDriver").call("play_dodge", Vector3(1, 0, 0), 0.55, &"Pistol")
+	_expect(float(player.get_node("AnimationDriver").get("_one_shot_length")) < 0.55 - 0.05, "The roll hands over to walking before its settling tail.")
 	var hold := player.get_node("Body").find_child("RollArms", true, false)
 	_expect(hold != null and float(hold.call("remaining")) > 0.55 + 0.25, "The pistol's arms are held until the roll has blended out.")
 	Input.action_press("move_up")
