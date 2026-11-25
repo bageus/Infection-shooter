@@ -16,10 +16,6 @@ run/main_scene="res://game/bootstrap/app/menu/front_end.tscn"
 config/features=PackedStringArray("4.7", "GL Compatibility")
 config/icon="res://assets/icons/game_icon_256.png"
 
-[audio]
-
-buses/default_bus_layout="res://default_bus_layout.tres"
-
 [autoload]
 
 Platform="*res://game/infrastructure/platform/public/platform.gd"
