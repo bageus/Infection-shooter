@@ -13,6 +13,8 @@ const RUN_SPEEDS := {"Forward": 3.75, "Forward_Left": 3.73, "Forward_Right": 3.7
 const RUN_SPEED_DEFAULT := 3.6
 ## The run cycle plays at this share of the speed-matched rate (Vadim: the legs were too fast); the stride is paced for slower steps.
 const RUN_PACE := 0.8
+## Seconds the roll's arm hold outlasts the roll: the cross-fade back to locomotion (enemy_blends.gd AFTER_ONE_SHOT).
+const ROLL_ARMS_TAIL := 0.3
 
 
 ## "Run_Backward_Left_AK" -> the speed of the "Backward_Left" cycle.
@@ -65,7 +67,9 @@ static func hold_weapon(player: AnimationPlayer, dodge_clip: StringName, held_we
 		hold.set("fade_in", 0.05)
 		hold.set("fade_out", 0.12)
 		skeletons[0].add_child(hold)
-	hold.call("play", player.get_animation(idle), seconds)
+	# The base clip then cross-fades from the roll's own arms (a two-handed stance) into the locomotion clip for the next
+	# AFTER_ONE_SHOT seconds: the hold lasts through that blend, or the arms show the roll's pose for a moment and snap.
+	hold.call("play", player.get_animation(idle), seconds + ROLL_ARMS_TAIL)
 
 
 ## Playback rate of the legs kept on a locomotion cycle under a one-shot: the rate the player's main clip would run at
