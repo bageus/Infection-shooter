@@ -36,6 +36,8 @@ const EVENTS := {
 	&"extinguisher_spray": [1, -2.0, 40.0, 4.0, 0.03, 2],
 	&"pistol_reload": [1, -2.0, 20.0, 3.0, 0.02, 1],
 	&"uzi_reload": [1, -2.0, 20.0, 3.0, 0.02, 1],
+	&"pistol_reload_in": [1, -2.0, 20.0, 3.0, 0.02, 1],
+	&"uzi_reload_in": [1, -2.0, 20.0, 3.0, 0.02, 1],
 	&"shotgun_shell_load": [2, -2.0, 20.0, 3.0, 0.03, 2],
 	&"launcher_reload": [1, -2.0, 20.0, 3.0, 0.02, 1],
 	&"shotgun_pump": [1, -2.0, 20.0, 3.0, 0.02, 1],

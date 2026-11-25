@@ -1,8 +1,6 @@
 extends CharacterBody3D
 
-const MUTATION_BALANCE := preload("res://game/features/infection/public/mutation_balance.gd")
-const CONSUMABLES := preload("res://game/features/player/player_consumables.gd")
-const HERO_START := preload("res://game/features/player/hero_spawn_start.gd")
+const MUTATION_BALANCE := preload("res://game/features/infection/public/mutation_balance.gd"); const CONSUMABLES := preload("res://game/features/player/player_consumables.gd"); const HERO_START := preload("res://game/features/player/hero_spawn_start.gd")
 signal projectile_blood(position: Vector3, direction: Vector3, weapon: String, excluded: Array[RID], source_id: int)
 signal blood_wounded(position: Vector3, excluded: Array[RID])
 signal wounded_moved(previous: Vector3, current: Vector3, excluded: Array[RID])
@@ -22,12 +20,11 @@ var _antidote_action := preload("res://game/features/player/player_antidote.gd")
 var _idle_bleed := preload("res://game/features/player/player_idle_bleed.gd").new()
 const CONTROL_LOSS := preload("res://game/features/player/mutation_control_loss.gd")
 const MUTATION_EFFECTS := preload("res://game/features/player/mutation_skill_effects.gd")
-const SCOPE_RAISE := preload("res://game/features/player/scope_raise_state.gd")
-const WEAPON_STANCE := preload("res://game/features/player/player_weapon_stance.gd")
+const SCOPE_RAISE := preload("res://game/features/player/scope_raise_state.gd"); const WEAPON_STANCE := preload("res://game/features/player/player_weapon_stance.gd")
 const ANIMATION_SELECTION := preload("res://game/features/player/player_animation_selection.gd")
 const PLAYER_AUDIO := preload("res://game/features/player/player_audio.gd")
-const HEAL_FEEDBACK := preload("res://game/features/player/player_heal_feedback.gd")
-const HIT_FEEDBACK := preload("res://game/features/player/player_hit_feedback.gd")
+const HEAL_FEEDBACK := preload("res://game/features/player/player_heal_feedback.gd"); const HIT_FEEDBACK := preload("res://game/features/player/player_hit_feedback.gd")
+const SPRINT := preload("res://game/features/player/player_sprint.gd")
 @export var move_speed: float = 5.4
 var _walk_speed_multiplier := 1.0
 @export var sprint_speed: float = 8.1
@@ -161,7 +158,7 @@ func _physics_process(delta: float) -> void:
 	weapon_mount.call("aim_at", _aim_point)
 	_update_move(delta); _idle_bleed.tick(self, delta)
 	var w:=get_current_weapon()
-	var fire_pressed := w != null and not input_locked and not Input.is_key_pressed(KEY_ALT) and not _mutation_menu_open and _roll_remaining <= 0.0 and (control_lost or (Input.is_action_pressed("fire") if bool(w.call("wants_continuous_fire")) else Input.is_action_just_pressed("fire")))
+	var fire_pressed := w != null and not input_locked and not Input.is_key_pressed(KEY_ALT) and not _mutation_menu_open and _roll_remaining <= 0.0 and not is_sprinting() and (control_lost or (Input.is_action_pressed("fire") if bool(w.call("wants_continuous_fire")) else Input.is_action_just_pressed("fire")))
 	if w != null and _scope_raise.step(delta, _scope_magnification(w) > 1.0, fire_pressed and not control_lost):
 		_fire_weapon(w)
 	elif fire_pressed and control_lost:
@@ -490,7 +487,7 @@ func _update_move(delta:float)->void:
 		$AnimationDriver.call("play_dodge", _roll_direction, roll_duration, StringName(ANIMATION_SELECTION.family_of(weapon_stance.weapon_index)))
 	else:
 		var walk_speed := move_speed * _walk_speed_multiplier
-		var target:=d*(sprint_speed if Input.is_action_pressed("sprint") and not bool(infection_runtime.call("is_control_lost")) else walk_speed) * float(mutation_effects.call("movement_multiplier"))
+		var target:=d*(sprint_speed if is_sprinting() else walk_speed) * float(mutation_effects.call("movement_multiplier"))
 		var accel:=ground_acceleration if d.length_squared()>0.0001 else ground_deceleration
 		velocity.x=move_toward(velocity.x,target.x,accel*delta);velocity.z=move_toward(velocity.z,target.z,accel*delta)
 	velocity.y=0.0 if is_on_floor() else velocity.y-gravity_acceleration*delta
@@ -573,7 +570,7 @@ func _update_aim()->void:
 	if flat_direction.length_squared()>0.0001:
 		var target_direction:=flat_direction.normalized()
 		aim_pivot.look_at(aim_pivot.global_position+target_direction,Vector3.UP)
-		if _roll_remaining<=0.0: preload("res://game/features/player/player_body_aim.gd").turn_body(body_visual,target_direction,get_physics_process_delta_time(),weapon_mount.call("barrel_yaw_offset")) # a roll keeps the body turned along it
+		if _roll_remaining<=0.0: SPRINT.turn_body(self,target_direction) # a roll keeps the body turned along it
 
 func _aim_uncontrolled() -> void:
 	var direction: Vector3 = _mutation_control.direction
@@ -583,10 +580,12 @@ func _aim_uncontrolled() -> void:
 	aim_pivot.look_at(_aim_point, Vector3.UP)
 	if _roll_remaining<=0.0: preload("res://game/features/player/player_body_aim.gd").turn_body(body_visual,direction,get_physics_process_delta_time(),weapon_mount.call("barrel_yaw_offset"))
 
+# Public sprint_v1: true while the hero sprints with the gun carried (no aim cursor, no fire; see player_sprint.gd).
+func is_sprinting() -> bool: return SPRINT.active(self)
 # Public weapon_view_v1: read-only view data, never persisted.
 func get_weapon_view() -> Dictionary:
 	var weapon := get_current_weapon()
-	var magnification := 0.0 if _scope_raise.hidden else _scope_magnification(weapon)
+	var magnification := 0.0 if _scope_raise.hidden or is_sprinting() else _scope_magnification(weapon)
 	return {"camera": camera, "target": _aim_point, "magnification": magnification}
 
 func _scope_magnification(weapon: Node3D) -> float:

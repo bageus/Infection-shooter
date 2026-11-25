@@ -38,6 +38,13 @@ func select_clip() -> StringName:
 	var local_velocity := _aim.global_basis.orthonormalized().inverse() * _character.velocity
 	var speed := Vector2(local_velocity.x, local_velocity.z).length()
 	var driver := _character.get_node_or_null("AnimationDriver")
+	var sprint_clip := StringName("Sprint_" + family)
+	if _character.has_method("is_sprinting") and bool(_character.call("is_sprinting")) and driver != null and driver.get("animation_player") != null and (driver.get("animation_player") as AnimationPlayer).has_animation(sprint_clip):
+		# The baked sprint carries the gun low and to the side; no leg blends or turn steps under it.
+		_running = true
+		_blend_diagonal(&"", 0.0)
+		driver.set("turn_step_speed", 0.0)
+		return sprint_clip
 	var turning := speed <= SPEED_DEADZONE and _turning_in_place()
 	# The baked turn clips (all but the arms) swing the hero round on the spot; without them the walk cycle shuffles him.
 	var turn_clip := turning and driver != null and driver.has_method("play_turn") and bool(driver.call("play_turn", &"left" if _turn_error > 0.0 else &"right"))
@@ -73,6 +80,10 @@ func _blend_diagonal(clip: StringName, weight: float) -> void:
 		_diagonal.name = "DiagonalLegs"
 		_diagonal.set("player", driver.get("animation_player"))
 		(skeletons[0] as Node).add_child(_diagonal)
+		var feet := preload("res://game/features/player/player_run_feet.gd").new() as SkeletonModifier3D
+		feet.name = "RunFeet"
+		feet.set("player", driver.get("animation_player"))
+		(skeletons[0] as Node).add_child(feet)
 	_diagonal.set("clip", clip)
 	_diagonal.set("weight", weight)
 

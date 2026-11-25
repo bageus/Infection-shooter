@@ -23,6 +23,9 @@ const WEAPON_SOUNDS := {
 	"MINIGUN": [&"minigun_fire", &"", &"casing_heavy"],
 	"GRENADE LAUNCHER": [&"launcher_fire", &"launcher_reload", &"casing_launcher"],
 }
+# Magazine-in sound (the mag-out recording reversed) per reload event, played at this share of the reload.
+const RELOAD_IN := {&"pistol_reload": &"pistol_reload_in", &"uzi_reload": &"uzi_reload_in"}
+const RELOAD_IN_AT := 0.5
 const SPIN_HOLD := 0.12
 # Time the barrels keep turning at full speed after the trigger is released.
 const SPIN_COAST := 0.35
@@ -74,6 +77,7 @@ var effects_root: Node3D
 var impact_pool: Node
 var _authored_muzzle: Node3D
 var _reload_sound: AudioStreamPlayer3D
+var _reload_in_wait := -1.0
 var _barrel_cluster: Node3D
 var _barrel_angle := 0.0
 # Spin from 0 (still) to 1 (full speed) and the time the trigger is still held.
@@ -133,6 +137,10 @@ func _process(delta: float) -> void:
 		_barrel_cluster.transform = Transform3D(turn, center - turn * center)
 	_cooldown_remaining = maxf(0.0, _cooldown_remaining - delta)
 	if not _reloading: return
+	if _reload_in_wait >= 0.0:
+		_reload_in_wait -= delta
+		if _reload_in_wait < 0.0:
+			_reload_sound = SFX.play(self, RELOAD_IN[sound_event(1)])
 	_reload_remaining -= delta
 	if _reload_remaining > 0.0: return
 	if shotgun_shell_reload:
@@ -242,6 +250,7 @@ func _dry_fire() -> void:
 
 func _play_reload_sound() -> void:
 	_reload_sound = SFX.play(self, sound_event(1))
+	_reload_in_wait = reload_time * RELOAD_IN_AT if RELOAD_IN.has(sound_event(1)) else -1.0
 
 
 func _show_muzzle_flash() -> void:
@@ -262,6 +271,7 @@ func start_reload() -> void:
 	_play_reload_sound()
 func cancel_reload() -> void:
 	_reloading = false
+	_reload_in_wait = -1.0
 	if is_instance_valid(_reload_sound):
 		_reload_sound.queue_free()
 func get_weapon_name() -> String: return weapon_name

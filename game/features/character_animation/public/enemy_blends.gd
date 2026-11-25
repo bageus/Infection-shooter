@@ -5,7 +5,7 @@ extends RefCounted
 
 const AFTER_ONE_SHOT := 0.3 # back to idle or locomotion after an attack, turn or climb
 const ONE_SHOT := 0.2 # into any clip that is not locomotion (attacks, screams, hits, throws, crawl changes)
-const LOCOMOTION := ["Walk", "Run", "Crawl", "FoursRun"]
+const LOCOMOTION := ["Walk", "Run", "Sprint", "Crawl", "FoursRun"]
 
 
 ## Seconds to cross-fade into `clip`; `after_one_shot` when a one-shot clip just ended.

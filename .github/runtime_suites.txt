@@ -124,6 +124,7 @@ game/features/player/tests/run_shooting_camera_tests.gd
 game/features/infected/tests/run_death_fall_tests.gd
 game/features/player/tests/run_control_loss_tests.gd
 game/features/player/tests/run_roll_iframes_tests.gd
+game/features/player/tests/run_sprint_tests.gd
 game/features/infected/tests/run_status_fx_tests.gd
 game/features/combat/tests/run_impact_geometry_index_tests.gd
 game/bootstrap/app/tests/run_group03_atlas_tests.gd

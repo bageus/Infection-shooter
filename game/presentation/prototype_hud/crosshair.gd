@@ -28,7 +28,8 @@ func _process(_delta: float) -> void:
 		return
 	scope.position = crosshair.position
 	scope.call("update_view", player.call("get_weapon_view"))
-	crosshair.visible = not scope.visible
+	# Sprinting carries the gun: no aim cursor until the sprint ends.
+	crosshair.visible = not scope.visible and not (player.has_method("is_sprinting") and bool(player.call("is_sprinting")))
 
 
 # Menus, planning, death and the mutation tree all pause the tree and need the OS pointer back.
