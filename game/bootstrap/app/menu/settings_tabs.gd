@@ -141,6 +141,14 @@ func _comfort_rows() -> void:
 	health_bars.tooltip_text = dialog.view.text("enemyHealthBarsHint")
 	health_bars.button_pressed = dialog.view.preferences.values.enemy_health_bars
 	health_bars.toggled.connect(func(value: bool) -> void: dialog.call("_change", "enemy_health_bars", value))
+	for counter in [["show_fps", "showFps", "showFpsHint"], ["show_enemy_count", "showEnemyCount", "showEnemyCountHint"]]:
+		var check := CheckButton.new()
+		check.name = "Counter_" + counter[0]
+		check.text = dialog.view.text(counter[1])
+		check.tooltip_text = dialog.view.text(counter[2])
+		check.button_pressed = dialog.view.preferences.values[counter[0]]
+		check.toggled.connect(func(value: bool) -> void: dialog.call("_change", counter[0], value))
+		dialog.get("layout").add_child(check)
 	dialog.get("layout").add_child(health_bars)
 	var shake := CheckButton.new()
 	shake.name = "CameraShake"

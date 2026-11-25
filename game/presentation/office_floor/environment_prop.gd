@@ -30,7 +30,6 @@ const BULLET_PUSH = preload("res://game/presentation/office_floor/bullet_push.gd
 const FLOOR_TOP := 0.0135 # Visible base floor top (tile_y .001 + half its .025 thickness); the physics floor matches it.
 var repeated_electronic_particles := not OS.has_feature("web") # repeated sparks are off on web builds
 
-
 const SPARKS = preload("res://game/presentation/office_floor/electric_sparks.gd")
 const BLAST = preload("res://game/presentation/office_floor/blast_effect.gd")
 const WALL_MOUNT = preload("res://game/presentation/office_floor/public/wall_mount_models.gd")
@@ -298,6 +297,7 @@ func _add_contact_shadow(wall_mounted: bool) -> void:
 
 
 func take_projectile_hit_at_shape(damage: float, hit_position: Vector3, normal: Vector3, direction: Vector3, weapon: String, shape_index: int) -> bool:
+	if FRAGILE.armored_hit(self, damage, hit_position, normal): return true
 	if damage > 0.0 and "02_microwave" in model_path: SPARKS.spawn(self, hit_position) # Electronics: every shot sparks.
 	if shape_index >= 0:
 		var owner_id := shape_find_owner(shape_index)
@@ -319,6 +319,7 @@ func _burst_bottle(mesh_index: int, hit_position: Vector3, direction: Vector3) -
 
 
 func get_projectile_material(shape_index: int = -1) -> String:
+	if FRAGILE.glass_intact(model_path): return "glass" # Kick = glass; shots sound armored (IMPACT_MATERIAL).
 	if shape_index >= 0:
 		var shape_owner := shape_owner_get_owner(shape_find_owner(shape_index)) as CollisionShape3D
 		var mesh_index := _shapes.find(shape_owner)
@@ -557,8 +558,7 @@ func hit_environment_fragment(fragment: RigidBody3D, hit_position: Vector3, dire
 
 
 func _shatter_glass(hit_position: Vector3, direction: Vector3) -> void:
-	if FRAGILE.glass_intact(model_path): _floor_debris.emit(self, model_path, "shatter", hit_position, direction) # Tank glass: decals only.
-	elif _damage.break_glass(): BREAKUP.shatter_glass(self, _geometry, hit_position, direction)
+	if _damage.break_glass(): BREAKUP.shatter_glass(self, _geometry, hit_position, direction)
 
 
 # Light, low items stop blocking characters (layer 3) and are kicked aside by

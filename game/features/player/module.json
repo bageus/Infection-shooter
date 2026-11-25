@@ -14,7 +14,10 @@
     "Hit feedback (white or light-blue body flash, recoil)"
   ],
   "public_api": [
-    "public/player.tscn"
+    "public/player.tscn",
+    "public/decor/hero_corpse_back.tscn",
+    "public/decor/hero_corpse_face_down.tscn",
+    "public/decor/hero_corpse_side.tscn"
   ],
   "dependencies": [
     "features.combat",

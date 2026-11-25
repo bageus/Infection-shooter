@@ -10,6 +10,7 @@ const PAPER := preload("res://game/presentation/office_floor/paper_shreds.gd")
 const BREAK_SOUND := preload("res://game/presentation/office_floor/prop_break_sound.gd")
 const FLOOR_DEBRIS := preload("res://game/presentation/office_floor/prop_floor_debris.gd")
 const PROP_DAMAGE := preload("res://game/features/combat/public/prop_damage_state.gd")
+const CRACKS := preload("res://game/presentation/office_floor/glass_crack_marks.gd")
 const SFX := preload("res://game/core/audio/public/sound_events.gd")
 
 
@@ -23,6 +24,15 @@ static func applies(model_path: String) -> bool:
 
 static func glass_intact(model_path: String) -> bool:
 	return model_path.get_file() in GLASS_INTACT
+
+
+## Bullet-resistant tank glass: a hit leaves a permanent chip and the round stops.
+static func armored_hit(body: RigidBody3D, damage: float, point: Vector3, normal: Vector3) -> bool:
+	if not glass_intact(body.get("model_path")):
+		return false
+	if damage > 0.0:
+		CRACKS.spawn(body, point, normal, 0.4, true)
+	return true
 
 
 static func is_glassware(model_path: String) -> bool:

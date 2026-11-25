@@ -81,6 +81,7 @@ var weapon_catalog = [
 # Dead infected and loose body parts placed as decoration (ADR-0017). A corpse has a
 # destruction level in the planner panel; parts are one entry each, halves and whole limbs.
 const GORE_DIR := "res://game/features/infected/public/decor/"
+const HERO_CORPSE_DIR := "res://game/features/player/public/decor/"
 const GORE_ENEMIES := ["Hunger", "Revenant", "Brute", "Titan", "Colossus"]
 const GORE_PART_LABELS := {
 	"head": "Head", "torso": "Torso",
@@ -101,6 +102,8 @@ func _gore_catalog() -> Array:
 		for part: String in parts:
 			var label: String = GORE_PART_LABELS.get(part, "Body" if part == "torso" else "Tentacle " + part.trim_prefix("tentacle_"))
 			entries.append({"name": "%s %s" % [enemy, label], "path": GORE_DIR + "part_%s_%s.tscn" % [key, part], "kind": "decor"})
+	for pose: String in ["back", "face_down", "side"]:
+		entries.append({"name": "Hero " + pose.replace("_", " "), "path": HERO_CORPSE_DIR + "hero_corpse_%s.tscn" % pose, "kind": "decor"})
 	return entries
 
 

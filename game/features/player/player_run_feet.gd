@@ -11,6 +11,7 @@ var _weight := 0.0
 
 
 func _process_modification() -> void:
+	_keep_feet_above_floor()
 	var clip := String(player.current_animation) if player != null else ""
 	var wanted := 1.0 if clip.begins_with("Run_Forward") or clip.begins_with("Run_Backward") else 0.0
 	_weight = move_toward(_weight, wanted, EASE_PER_SECOND * get_process_delta_time())
@@ -24,3 +25,20 @@ func _process_modification() -> void:
 	var parent_basis := skeleton.get_bone_global_pose(parent).basis
 	var turned := Basis(Vector3.UP, deg_to_rad(FIX_DEGREES) * _weight) * skeleton.get_bone_global_pose(foot).basis
 	skeleton.set_bone_pose_rotation(foot, (parent_basis.orthonormalized().inverse() * turned.orthonormalized()).get_rotation_quaternion())
+
+
+## Walk and run legs blended from another cycle (diagonal) sit under the main clip's hips, so a foot can dip below the floor
+## (Vadim). An ankle never goes lower than its rest height (feet on the floor): the hips are raised by the deficit.
+func _keep_feet_above_floor() -> void:
+	var clip := String(player.current_animation) if player != null else ""
+	if not (clip.begins_with("Walk_") or clip.begins_with("Run_")):
+		return
+	var skeleton := get_skeleton()
+	var hips := skeleton.find_bone("Hips")
+	var deficit := 0.0
+	for side in ["Left", "Right"]:
+		var foot := skeleton.find_bone(side + "Foot")
+		if foot >= 0:
+			deficit = maxf(deficit, skeleton.get_bone_global_rest(foot).origin.y - skeleton.get_bone_global_pose(foot).origin.y)
+	if hips >= 0 and skeleton.get_bone_parent(hips) < 0 and deficit > 0.0:
+		skeleton.set_bone_pose_position(hips, skeleton.get_bone_pose_position(hips) + Vector3(0.0, deficit, 0.0))
