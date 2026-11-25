@@ -1,4 +1,5 @@
 extends SceneTree
+const DESTRUCTION_QUALITY := preload("res://game/core/vfx/public/destruction_quality.gd")
 ## Bullets drop authored parts locally; explosions scatter; small props leave only baked marks.
 const PROP := preload("res://game/presentation/office_floor/public/props/environment_prop.tscn")
 const PAPER := preload("res://game/presentation/office_floor/public/props/paper_prop.tscn")
@@ -19,6 +20,7 @@ class Host extends RigidBody3D:
 	var model_path := "test_table.glb"
 
 func _init() -> void:
+	DESTRUCTION_QUALITY.set_level(DESTRUCTION_QUALITY.HIGH) # Breakage checks run at High, where every prop breaks.
 	call_deferred("_run")
 
 func _run() -> void:

@@ -1,4 +1,5 @@
 extends SceneTree
+const DESTRUCTION_QUALITY := preload("res://game/core/vfx/public/destruction_quality.gd")
 ## Audit actual catalog wrappers, rather than only glTF group names.
 const CATALOG := preload("res://game/bootstrap/app/planning_catalog.gd")
 const DAMAGE_STATE := preload("res://game/features/combat/public/prop_damage_state.gd")
@@ -9,6 +10,7 @@ var rows: Array[Dictionary] = []
 var stage: Node3D
 
 func _init() -> void:
+	DESTRUCTION_QUALITY.set_level(DESTRUCTION_QUALITY.HIGH) # Breakage checks run at High, where every prop breaks.
 	call_deferred("_run")
 
 func _run() -> void:

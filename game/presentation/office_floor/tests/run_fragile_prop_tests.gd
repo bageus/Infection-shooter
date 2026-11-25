@@ -1,4 +1,5 @@
 extends SceneTree
+const DESTRUCTION_QUALITY := preload("res://game/core/vfx/public/destruction_quality.gd")
 ## Glassware, fruit and paintings break whole on their first hit from any weapon and report their material decals.
 const PROP_SCENE := preload("res://game/presentation/office_floor/public/props/environment_prop.tscn")
 const FRAGILE := preload("res://game/presentation/office_floor/fragile_prop.gd")
@@ -12,6 +13,7 @@ var floor_view: Node3D
 
 
 func _init() -> void:
+	DESTRUCTION_QUALITY.set_level(DESTRUCTION_QUALITY.HIGH) # Breakage checks run at High, where every prop breaks.
 	call_deferred("_run")
 
 

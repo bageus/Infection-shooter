@@ -1,4 +1,5 @@
 extends SceneTree
+const DESTRUCTION_QUALITY := preload("res://game/core/vfx/public/destruction_quality.gd")
 ## Runtime checks for staged destructible GLBs (one glTF scene per damage
 ## stage, imported by addons/staged_glb_import): stage groups, full breakage
 ## into large parts and fragments, the plant pot and the reception facade.
@@ -15,6 +16,7 @@ var failures := 0
 
 
 func _init() -> void:
+	DESTRUCTION_QUALITY.set_level(DESTRUCTION_QUALITY.HIGH) # Breakage checks run at High, where every prop breaks.
 	call_deferred("_run")
 
 

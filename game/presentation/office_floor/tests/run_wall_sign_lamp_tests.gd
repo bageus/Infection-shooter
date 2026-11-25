@@ -1,4 +1,5 @@
 extends SceneTree
+const DESTRUCTION_QUALITY := preload("res://game/core/vfx/public/destruction_quality.gd")
 ## Wall signs fall and vanish when shot or when their glass pane breaks;
 ## a desk lamp stops shining once it is damaged.
 
@@ -11,6 +12,7 @@ var stage: Node3D
 
 
 func _init() -> void:
+	DESTRUCTION_QUALITY.set_level(DESTRUCTION_QUALITY.HIGH) # Breakage checks run at High, where every prop breaks.
 	call_deferred("_run")
 
 

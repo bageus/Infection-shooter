@@ -14,6 +14,7 @@ var failures := 0
 
 
 func _init() -> void:
+	QUALITY.set_level(QUALITY.HIGH) # Breakage checks run at High, where every prop breaks.
 	call_deferred("_run")
 
 
@@ -27,6 +28,7 @@ func _run() -> void:
 	await _test_fragment_ignores_characters(stage)
 	await _test_expire_bakes_and_frees(stage)
 	await _test_budget(stage)
+	QUALITY.set_level(QUALITY.HIGH) # Cabinets and tables break only at High or Medium.
 	await _test_physical_prop_break(stage)
 	await _test_environment_prop(stage)
 	stage.queue_free()

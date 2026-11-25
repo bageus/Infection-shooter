@@ -1,4 +1,5 @@
 extends SceneTree
+const DESTRUCTION_QUALITY := preload("res://game/core/vfx/public/destruction_quality.gd")
 ## Verify actual damage/selection commands emit once and voices survive the prop.
 const PROP := preload("res://game/presentation/office_floor/public/props/environment_prop.tscn")
 const PHYSICAL := preload("res://game/presentation/office_floor/physical_prop.gd")
@@ -11,6 +12,7 @@ var effects: Node3D
 
 
 func _initialize() -> void:
+	DESTRUCTION_QUALITY.set_level(DESTRUCTION_QUALITY.HIGH) # Breakage checks run at High, where every prop breaks.
 	call_deferred("_run")
 
 

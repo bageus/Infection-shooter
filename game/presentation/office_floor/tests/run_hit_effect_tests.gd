@@ -1,4 +1,5 @@
 extends SceneTree
+const DESTRUCTION_QUALITY := preload("res://game/core/vfx/public/destruction_quality.gd")
 ## Runtime checks for hit effects on props: paper is torn apart by one shot,
 ## electronics short-circuit (spark sheet + flash) on the first hit only, and a
 ## shot fire extinguisher sprays, drops on its side and ruptures with sound.
@@ -14,6 +15,7 @@ var stage: Node3D
 
 
 func _init() -> void:
+	DESTRUCTION_QUALITY.set_level(DESTRUCTION_QUALITY.HIGH) # Breakage checks run at High, where every prop breaks.
 	call_deferred("_run")
 
 
