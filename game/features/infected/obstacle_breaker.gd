@@ -31,7 +31,19 @@ var _given_up := {} # prop instance ids this enemy no longer swings at
 
 
 # Tier an infected needs to hit this collider; 0 means it is not a target.
+static var _tier_cache := {}
+
 static func required_tier(collider: Object) -> int:
+	if collider == null or not is_instance_valid(collider):
+		return 0
+	var id := collider.get_instance_id()
+	if not _tier_cache.has(id):
+		if _tier_cache.size() > 2000:
+			_tier_cache.clear()
+		_tier_cache[id] = _compute_tier(collider)
+	return _tier_cache[id]
+
+static func _compute_tier(collider: Object) -> int:
 	if not (collider is Node) or not collider.has_method("take_melee_hit"):
 		return 0
 	var node := collider as Node
