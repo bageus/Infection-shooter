@@ -61,13 +61,13 @@ func _check_rules() -> void:
 
 	var fridge := DAMAGE_STATE.new()
 	fridge.configure("Laboratory_Fridge.glb", 0, false)
-	_check(fridge.category != "tech" and fridge.indestructible, "A fridge is not electronics and is indestructible")
+	_check(fridge.category != "tech" and fridge.is_indestructible(), "A fridge is not electronics and is indestructible")
 	var autoclave := DAMAGE_STATE.new()
 	autoclave.configure("Laboratory_Autoclave.glb", 0, false)
 	_check(autoclave.category == "tech", "An autoclave is electronics")
 	var mri := DAMAGE_STATE.new()
 	mri.configure("MRI_Scanner.glb", 0, false)
-	_check(mri.category == "tech" and mri.indestructible, "An MRI scanner sparks and is indestructible")
+	_check(mri.category == "tech" and mri.is_indestructible(), "An MRI scanner sparks and is indestructible")
 
 	var anchored := RETAINED.new()
 	for file in ["Laboratory_Fridge.glb", "MRI_Scanner.glb", "X_Ray_System.glb", "Containment_Tank_No_Subject.glb"]:
