@@ -597,4 +597,6 @@ func snap_display_edges(neighbors: Array[Dictionary]) -> void:
 
 func _notification(what: int) -> void:
 	if what == NOTIFICATION_TRANSFORM_CHANGED and is_inside_tree():
+		var started := Time.get_ticks_usec()
 		_geometry.shadows.update(self)
+		PhysicsCost.add(&"notify_prop_shadow", Time.get_ticks_usec() - started) # F3 frame log

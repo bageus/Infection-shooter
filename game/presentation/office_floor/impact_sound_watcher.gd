@@ -48,7 +48,9 @@ func _ready() -> void:
 
 func _notification(what: int) -> void:
 	if what == NOTIFICATION_TRANSFORM_CHANGED and is_instance_valid(_body) and not is_physics_processing():
+		var started := Time.get_ticks_usec()
 		_on_sleeping_changed()
+		PhysicsCost.add(&"notify_impact_sound", Time.get_ticks_usec() - started) # F3 frame log
 
 
 ## Resumes watching a body that was just unfrozen (a prop knocked off a wall).

@@ -66,7 +66,9 @@ func configure(prop: Node3D, visual: Node3D, meshes: Array[MeshInstance3D]) -> b
 
 func _notification(what: int) -> void:
 	if what == NOTIFICATION_TRANSFORM_CHANGED and is_inside_tree() and _shadow != null:
+		var started := Time.get_ticks_usec()
 		_update()
+		PhysicsCost.add(&"notify_contact_shadow", Time.get_ticks_usec() - started) # F3 frame log
 
 
 # Footprint of the oriented bounds on the floor, along the prop's own axes.
