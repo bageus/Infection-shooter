@@ -103,8 +103,14 @@ func _test_part_falls(stage: Node3D) -> void:
 		var enemy := await _spawn(stage, Vector3(0, 1, 0))
 		enemy.velocity = Vector3(0, 0, -5.4)
 		var at := _bone(enemy, case[0])
-		enemy.call("take_projectile_damage", 1000.0, at, Vector3(0, 0, 1), "AK") # pistol rounds no longer sever limbs
-		_expect(_clip(enemy) == case[1] or (case[0] == "Head" and _clip(enemy).begins_with("DeathBack")), "A killing shot at %s plays %s (%s)." % [case[0], case[1], _clip(enemy)])
+		# Limbs come off by chance now: wound the spot until it is gone, then land the killing shot.
+		var part: StringName = enemy.get("_parts").pick_part(at, Vector3(0, 0, 1))
+		for _i in 60:
+			if enemy.get("_parts").is_severed(part):
+				break
+			enemy.call("take_projectile_damage", 1.0, at, Vector3(0, 0, 1), "AK")
+		enemy.call("take_projectile_damage", 1000.0, at, Vector3(0, 0, 1), "AK")
+		_expect(_clip(enemy) == case[1] or _clip(enemy) == "DeathCrawl" or (case[0] == "Head" and _clip(enemy).begins_with("DeathBack")), "A killing shot at %s plays %s (%s)." % [case[0], case[1], _clip(enemy)])
 		enemy.queue_free()
 		await process_frame
 	# A crawler is already down: it settles flat on its belly with the DeathCrawl clip and does not hang.
