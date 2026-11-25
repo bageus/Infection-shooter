@@ -280,7 +280,7 @@ func _play_dodge_clip(world_direction: Vector3, duration: float) -> bool:
 	if _dead or direction.length_squared() < 0.0001 or _target == null or play_named_one_shot(dodge_clip, 0.06, clip_length(dodge_clip) / maxf(duration, 0.05)) <= 0.0:
 		return false
 	_target.global_rotation = Vector3(0.0, atan2(direction.x, direction.z), 0.0)
-	return true
+	_one_shot_length *= 0.8; return true # the clip's last part is the character settling in place: hand over to walking before it
 
 
 # Public animation_events_v1 addition (ADR-0044): true while a dodge clip plays.
