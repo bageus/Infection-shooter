@@ -298,8 +298,19 @@ func take_blast_damage(amount: float, origin: Vector3) -> void:
 		visible = false
 		return
 	if distance <= BLAST_LIMB_RADIUS and _parts != null:
-		_blast_limb_roll(origin)
+		if amount >= health:
+			_blast_tear(origin)
+		else:
+			_blast_limb_roll(origin)
 	_apply_damage(amount, false)
+
+
+# A lethal blast in the outer ring throws 2 to 5 random pieces off.
+func _blast_tear(origin: Vector3) -> void:
+	var candidates: Array[StringName] = _parts.severable_parts()
+	candidates.shuffle()
+	for part in candidates.slice(0, randi_range(2, 5)):
+		_parts.sever(part, (global_position - origin).normalized() + Vector3.UP)
 
 
 # A third of the time an arm comes off, a third a leg, otherwise nothing.

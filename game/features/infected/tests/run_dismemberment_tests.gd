@@ -116,6 +116,12 @@ func _test_blast_rings(stage: Node3D) -> void:
 	far.call("take_blast_damage", 10.0, far.global_position + Vector3(3.0, 0, 0))
 	_expect(not bool(far.get("_dead")) and far.visible, "A blast from 2 to 4 m hurts but does not gib.")
 	far.queue_free()
+	var torn := await _spawn(stage, HUNGER, Vector3(40, 1.0, 0))
+	var before: int = torn.get("_parts").severable_parts().size()
+	torn.call("take_blast_damage", 500.0, torn.global_position + Vector3(3.0, 0, 0))
+	var lost := before - int(torn.get("_parts").severable_parts().size())
+	_expect(lost >= 2 and bool(torn.get("_dead")), "A lethal blast from 2 to 4 m tears 2 or more pieces off and kills (%d)." % lost)
+	torn.queue_free()
 	await process_frame
 
 
