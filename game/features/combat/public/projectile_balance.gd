@@ -7,9 +7,11 @@ static func distance_multiplier(weapon: String, distance: float, max_range: floa
 	if weapon == "SHOTGUN":
 		full_damage_distance = 2.0
 		minimum = 0.08
+	elif weapon == "PISTOL":
+		minimum = 11.0 / 15.0 # 15 close, 11 at the longest range
 	elif weapon == "UZI":
 		full_damage_distance = 3.0
-		minimum = 0.2
+		minimum = 11.0 / 15.0 # 15 close, 11 at the longest range
 	elif weapon == "SNIPER RIFLE":
 		full_damage_distance = 55.0
 		minimum = 0.72
