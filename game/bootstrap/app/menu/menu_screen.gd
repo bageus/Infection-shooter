@@ -26,6 +26,8 @@ var content: VBoxContainer
 var footer: Label
 var keyboard: Label
 var reason_key := ""
+## Set by the game before a mission ends: its map is a checkpoint, so restart says so.
+var checkpoint_mission := false
 ## Store page offered on the defeat and victory screens; empty on platforms without the promo.
 var steam_url := ""
 var _click_player: AudioStreamPlayer
@@ -105,8 +107,8 @@ func refresh() -> void:
 		child.queue_free()
 	buttons.clear()
 	_build_content()
-	footer.text = "━━   " + text({"main": "quarantine", "pause": "floor", "failed": "lastSignal", "complete": "evac"}[screen_kind]).to_upper()
-	footer.visible = screen_kind != "main" and screen_kind != "failed"
+	footer.text = "━━   " + text("lastSignal").to_upper()
+	footer.visible = screen_kind == "failed"
 	keyboard.text = "v." + str(ProjectSettings.get_setting("application/config/version", "0.00.000"))
 	_layout()
 	_focus_first()
@@ -114,11 +116,8 @@ func refresh() -> void:
 
 func _build_content() -> void:
 	var factor: float = preferences.values.text_scale
-	if screen_kind != "main":
-		if screen_kind != "failed":
-			content.add_child(STYLE.label(text("suspended") if screen_kind == "pause" else "MISSION COMPLETE", 11))
 	var headline: String = {"main": "INFECTION\nSHOOTER", "pause": text("pause"),
-		"failed": text("failed").replace(" ", "\n"), "complete": text("samples") + "\n" + text("extracted")}[screen_kind]
+		"failed": text("failed").replace(" ", "\n"), "complete": text("missionDone").replace(" ", "\n")}[screen_kind]
 	var title := STYLE.label(headline.to_upper(), 62, true)
 	title.add_theme_constant_override("line_spacing", -10)
 	var title_area := Control.new()
@@ -126,12 +125,6 @@ func _build_content() -> void:
 	content.add_child(title_area)
 	title_area.add_child(title)
 	title.scale.x = 0.78
-	var subtitle := STYLE.label(text({"main": "patient", "pause": "alpha", "failed": "failed", "complete": "notCured"}[screen_kind]).to_upper(), roundi(12 * factor))
-	subtitle.add_theme_color_override("font_color", STYLE.MUTED)
-	if screen_kind != "main" and screen_kind != "failed":
-		content.add_child(subtitle)
-	else:
-		subtitle.free()
 	var spacer := Control.new()
 	spacer.custom_minimum_size.y = 16
 	content.add_child(spacer)
@@ -155,36 +148,30 @@ func _build_content() -> void:
 			if OS.is_debug_build(): _add_button("loadMap", "load_map") # Planner only; release exports have none
 			_add_button("settings", "settings")
 			_add_button("about", "about")
+			_add_button("aboutUs", "about_us")
 			_add_button("exit", "quit")
 		"pause":
 			_add_button("continue", "resume")
-			_add_button("restart", "restart")
+			_add_button(_restart_key(), "restart")
 			if OS.is_debug_build(): # The planner stays out of release exports
 				_add_button("planning", "planning")
 			_add_button("settings", "settings")
 			_add_button("toMain", "main")
 		"failed":
-			_add_button("checkpoint", "continue", true)
-			var retry := _add_button("restart", "restart")
-			retry.custom_minimum_size.y = 72
-			retry.add_theme_font_size_override("font_size", 26)
-			retry.add_theme_color_override("font_color", Color("ffffff"))
-			retry.add_theme_color_override("font_focus_color", Color("ffffff"))
+			_emphasize(_add_button(_restart_key(), "restart"))
 			_add_button("toMain", "main")
 			_add_steam_button()
 		"complete":
-			_add_button("continue", "continue")
+			_add_continue_row()
 			_add_button("toMain", "main")
-			_add_button("new", "restart")
 			_add_steam_button()
-	var note := STYLE.label(text(_note_key()), roundi(11 * factor))
-	note.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-	note.add_theme_color_override("font_color", STYLE.MUTED)
-	note.custom_minimum_size.y = 35
-	if screen_kind != "main" or not reason_key.is_empty():
+	var note_key := _note_key()
+	if not note_key.is_empty():
+		var note := STYLE.label(text(note_key), roundi(11 * factor))
+		note.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+		note.add_theme_color_override("font_color", STYLE.MUTED)
+		note.custom_minimum_size.y = 35
 		content.add_child(note)
-	else:
-		note.free()
 
 
 func _add_steam_button() -> void:
@@ -192,10 +179,40 @@ func _add_steam_button() -> void:
 		_add_button("steamPromo", "steam")
 
 
+## Continue sits beside a checkpoint marker when the finished mission was a checkpoint.
+func _add_continue_row() -> void:
+	var go := _add_button("continue", "continue")
+	_emphasize(go)
+	content.remove_child(go)
+	var row := HBoxContainer.new()
+	content.add_child(row)
+	go.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	row.add_child(go)
+	if checkpoint_mission:
+		var marker := STYLE.label(text("checkpointLabel"), roundi(11 * preferences.values.text_scale))
+		marker.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
+		marker.add_theme_color_override("font_color", STYLE.MUTED)
+		row.add_child(marker)
+
+
+func _emphasize(button: Button) -> void:
+	button.custom_minimum_size.y = 72
+	button.add_theme_font_size_override("font_size", 26)
+	button.add_theme_color_override("font_color", Color("ffffff"))
+	button.add_theme_color_override("font_focus_color", Color("ffffff"))
+
+
+## Web builds keep the plain restart wording; desktop names the checkpoint it returns to.
+func _restart_key() -> String:
+	if OS.has_feature("web"):
+		return "restart"
+	return "restartCheckpoint" if screen_kind == "pause" or checkpoint_mission else "restart"
+
+
 func _note_key() -> String:
 	if not reason_key.is_empty():
 		return reason_key
-	return {"main": "noSave", "pause": "pauseNote", "failed": "noSave", "complete": "successNote"}[screen_kind]
+	return "noSave" if screen_kind == "failed" else ""
 
 
 func _add_button(key: String, action: String, disabled: bool = false) -> Button:
@@ -211,7 +228,9 @@ func _add_button(key: String, action: String, disabled: bool = false) -> Button:
 
 func activate(action: String) -> void:
 	play_click()
-	if action in ["settings", "about", "briefing", "quit", "restart", "main", "load_map"]:
+	# A failed mission has no alternative to restarting, so that restart needs no confirmation.
+	var direct := screen_kind == "failed" and action == "restart"
+	if action in ["settings", "about", "about_us", "briefing", "quit", "restart", "main", "load_map"] and not direct:
 		_open_dialog(action)
 	else:
 		dispatch(action)

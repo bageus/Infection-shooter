@@ -231,7 +231,7 @@ func _activate_pending(tree: SceneTree, previous: Node) -> void:
 	Input.mouse_mode = Input.MOUSE_MODE_VISIBLE
 	var lines := PackedStringArray()
 	if checkpoint_notice:
-		lines.append("Чекпоинт" if _ru else "Checkpoint")
+		lines.append("Контрольная точка" if _ru else "Checkpoint")
 	var description := LEVEL_TEXT.before(_level_name)
 	if not description.is_empty():
 		lines.append(description)

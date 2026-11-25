@@ -372,6 +372,7 @@ func _end_run(reason: String) -> void:
 		boom.finished.connect(boom.queue_free)
 		add_child(boom)
 		boom.play()
+	game_over.set("checkpoint_mission", _mission_has_checkpoint())
 	game_over.call("show_screen", kind, reason_key)
 	game_over.move_to_front()
 	Input.mouse_mode = Input.MOUSE_MODE_VISIBLE
@@ -395,6 +396,13 @@ func _end_run(reason: String) -> void:
 		description.set_anchors_and_offsets_preset(Control.PRESET_TOP_WIDE)
 		description.offset_top = 40
 		description.offset_bottom = 160
+
+
+func _mission_has_checkpoint() -> bool:
+	if not has_node("LevelEntries"):
+		return false
+	var chain: RefCounted = $LevelEntries.chain
+	return chain.is_checkpoint(chain.index_of(current_level))
 
 
 func drop_weapon_pickup(index: int, world_position: Vector3) -> bool:
