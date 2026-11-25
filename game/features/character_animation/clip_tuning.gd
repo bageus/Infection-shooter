@@ -44,7 +44,7 @@ static func apply(player: AnimationPlayer, dodge_clip: StringName) -> void:
 ## The roll clip scales every gun to nothing. Sets its Weapon_<name> scale tracks (and the magazine inside) so only
 ## `held_weapon` (e.g. &"AK") stays drawn through the roll; an empty name leaves the clip as it is. For `seconds` the arms
 ## also keep that gun's Idle hold (both hands on the grip), the roll clip's own arms point nowhere near each gun.
-static func hold_weapon(player: AnimationPlayer, dodge_clip: StringName, held_weapon: StringName, seconds := 0.0) -> void:
+static func hold_weapon(player: AnimationPlayer, dodge_clip: StringName, held_weapon: StringName, seconds := 0.0, hold_prefix := &"Idle_") -> void:
 	if held_weapon.is_empty() or player == null or not player.has_animation(dodge_clip):
 		return
 	var roll := player.get_animation(dodge_clip)
@@ -55,7 +55,7 @@ static func hold_weapon(player: AnimationPlayer, dodge_clip: StringName, held_we
 			continue
 		for key in roll.track_get_key_count(track):
 			roll.track_set_key_value(track, key, Vector3.ONE if gun == String(held_weapon) else Vector3.ZERO)
-	var idle := StringName("Idle_" + String(held_weapon))
+	var idle := StringName(String(hold_prefix) + String(held_weapon)) # the Idle hold, or the Sprint_ arms when the roll interrupts a sprint
 	var skeletons := player.get_parent().find_children("*", "Skeleton3D", true, false)
 	if seconds <= 0.0 or skeletons.is_empty() or not player.has_animation(idle):
 		return

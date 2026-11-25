@@ -6,9 +6,10 @@ extends SceneTree
 const PLAYER := preload("res://game/features/player/public/player.tscn")
 const SPRINT := preload("res://game/features/player/player_sprint.gd")
 const CELL := Vector2i(360, 520)
-const WEAPONS := [0, 1, 2, 3, 4, 5, 6]
+var WEAPONS := [0, 1, 2, 3, 4, 5, 6]
+var _size := 3.2
 const FRAMES := 5
-const VIEWS := {"top": Vector3(0.001, 1, 0.35), "side": Vector3(1, 0.2, 0), "front": Vector3(0, 0.3, -1), "threeq": Vector3(0.8, 0.5, 0.6)}
+const VIEWS := {"top": Vector3(0.001, 1, 0.35), "side": Vector3(1, 0.2, 0), "front": Vector3(0, 0.3, -1), "threeq": Vector3(0.8, 0.5, 0.6), "left": Vector3(-1, 0.2, 0), "frontleft": Vector3(-0.8, 0.3, -0.8)}
 var _out := "/tmp/sprint.png"
 var _view := "side"
 var _actor: Node3D
@@ -20,6 +21,10 @@ func _initialize() -> void:
 		_out = args[0]
 	if args.size() > 1:
 		_view = args[1]
+	if args.size() > 2: # e.g. "3" for the launcher only; with a fourth argument the camera size
+		WEAPONS = [int(args[2])]
+	if args.size() > 3:
+		_size = float(args[3])
 	call_deferred("_capture")
 
 
@@ -54,7 +59,7 @@ func _capture() -> void:
 	viewport.world_3d = stage.get_world_3d()
 	var camera := Camera3D.new()
 	camera.projection = Camera3D.PROJECTION_ORTHOGONAL
-	camera.size = 3.2
+	camera.size = _size
 	viewport.add_child(camera)
 	camera.current = true
 	var sheet := Image.create(CELL.x * FRAMES, CELL.y * WEAPONS.size(), false, Image.FORMAT_RGBA8)
@@ -70,7 +75,7 @@ func _capture() -> void:
 		for i in 14:
 			await _tick()
 		print("weapon ", index, " sprinting ", _actor.call("is_sprinting"), " clip ", _actor.get_node("AnimationDriver").animation_player.current_animation)
-		var center := _actor.global_position + Vector3(0, 0.2, 0)
+		var center := _actor.global_position + Vector3(0, 0.2 if _size > 2.0 else 0.0, 0)
 		for col in FRAMES:
 			for i in 3:
 				await _tick()

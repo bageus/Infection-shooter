@@ -234,8 +234,10 @@ func _retarget(source: Skeleton3D, yaw: float) -> Dictionary:
 const SPRINT_ONE_HAND := {"Pistol": "Standard Run", "Uzi": "Standard Run"}
 const SPRINT_TWO_HAND := {"Shotgun": "Rifle Run (1)", "Launcher": "Rifle Run (1)", "AK": "Rifle Run (1)", "M4": "Rifle Run (1)", "Sniper": "Rifle Run (1)"}
 const SPRINT_REF_SPEED := 4.8
-## Share of the idle hold's orientation (gun pointed ahead) the one-handed gun keeps while the arm swings.
-const ONE_HAND_CARRY := 0.6
+## Share of the idle hold's orientation the one-handed gun takes over from the swinging arm: 0 keeps it fixed in the hand (a turned gun looked detached, Vadim).
+## Metres the long gun is lowered in the fit (skeleton space), so the left hand meets its foregrip: the launcher rode too high (Vadim).
+const GUN_DROP := {"Launcher": 0.07}
+const ONE_HAND_CARRY := 0.0
 const GRIP_BONES_RIGHT := ["RightFingers1", "RightFingers2", "RightThumb1", "RightThumb2", "RightElbowSleeve"]
 const GRIP_BONES_LEFT := ["LeftFingers1", "LeftFingers2", "LeftThumb1", "LeftThumb2"]
 
@@ -335,7 +337,7 @@ func _fit_weapon(base: Animation, model: Node, player: AnimationPlayer, gun: Str
 		var origin := Vector3.ZERO
 		if two_hands:
 			turn = _frame((target_l - target_r).normalized(), pose_r.basis * palm) * frame_w.inverse()
-			origin = (target_r + target_l) * 0.5 - turn * ((grip_r + grip_l) * 0.5)
+			origin = (target_r + target_l) * 0.5 - turn * ((grip_r + grip_l) * 0.5) - Vector3(0.0, float(GUN_DROP.get(gun, 0.0)), 0.0)
 		else:
 			# One hand: the gun swings with the arm only half way, it stays pointed ahead, turning about the grip.
 			turn = (pose_r.basis * local.basis).orthonormalized().slerp(held.basis.orthonormalized(), ONE_HAND_CARRY)

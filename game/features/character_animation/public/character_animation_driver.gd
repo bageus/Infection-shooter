@@ -267,8 +267,8 @@ func _strike_speed(animation: Animation) -> float:
 # Public animation_events_v1 addition (ADR-0044): plays the dodge roll for
 # `duration` seconds toward a world-space direction, relative to the body.
 # Returns false without leg clips. The roll turns the whole body along the dodge.
-func play_dodge(world_direction: Vector3, duration: float, held_weapon: StringName = &"") -> bool:
-	CLIP_TUNING.hold_weapon(animation_player, dodge_clip, held_weapon, duration)
+func play_dodge(world_direction: Vector3, duration: float, held_weapon: StringName = &"", hold_prefix: StringName = &"Idle_") -> bool:
+	CLIP_TUNING.hold_weapon(animation_player, dodge_clip, held_weapon, duration, hold_prefix)
 	return _play_dodge_clip(world_direction, duration)
 
 
