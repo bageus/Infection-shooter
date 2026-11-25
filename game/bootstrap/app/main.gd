@@ -27,7 +27,6 @@ const OCCLUSION := preload("res://game/bootstrap/app/occlusion_effects.gd")
 const ENEMY_HEALTH_BARS := preload("res://game/bootstrap/app/enemy_health_bars.gd")
 const MISSION_LAYOUT := preload("res://game/bootstrap/app/mission_layout.gd")
 const LEVEL_ENTRIES := preload("res://game/bootstrap/app/level_entry_runtime.gd")
-const CHECKPOINT := preload("res://game/bootstrap/app/checkpoint_progress.gd")
 const LEVEL_TEXT := preload("res://game/bootstrap/app/level_text.gd")
 const WAVE_DIRECTOR := preload("res://game/features/spawning/public/wave_director.gd")
 
@@ -356,8 +355,6 @@ func _choose_enhanced_ammo() -> void:
 func _end_run(reason: String) -> void:
 	_ended = true
 	var kind := "complete" if reason == "MISSION COMPLETE" else "failed"
-	if kind == "complete":
-		CHECKPOINT.on_completed(current_level)
 	var reason_key: String = {"MUTATION OVERTOOK YOU": "failedMutation",
 		"YOU FELL OUTSIDE THE FLOOR": "failedFall", "YOU DIED": "failedHealth"}.get(reason, "")
 	if kind == "complete" and not is_instance_valid(completion_music):

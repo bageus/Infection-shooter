@@ -168,7 +168,9 @@ static func _quiet(samples: Array, previous: Dictionary) -> bool:
 ## upward contact with immovable geometry; falling/moving supports never pass.
 func _stabilize_supported(advanced: int, counters: Dictionary) -> void:
 	for body: Variant in _bodies:
-		if not is_instance_valid(body): continue
+		if not is_instance_valid(body) or not body.is_inside_tree(): continue
+		# A body outside any physics space (disabled, being freed) cannot be probed.
+		if not PhysicsServer3D.body_get_space(body.get_rid()).is_valid(): continue
 		if bool(PhysicsServer3D.body_get_state(body.get_rid(), PhysicsServer3D.BODY_STATE_SLEEPING)): continue
 		var id: int = body.get_instance_id()
 		var linear: Vector3 = PhysicsServer3D.body_get_state(body.get_rid(), PhysicsServer3D.BODY_STATE_LINEAR_VELOCITY)
