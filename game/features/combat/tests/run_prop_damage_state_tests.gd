@@ -79,17 +79,23 @@ func _quality_tiers() -> void:
 	for name in ["09_book_big.glb", "15_barrel_blue.glb", "11_deco_plant.glb"]:
 		_check(STATE.breaks_from_level(name) == high, "High only: " + name)
 	var table := STATE.new()
-	table.configure("07_table.glb", 1, true, low)
-	_check(table.indestructible and table.hit(500.0, "GRENADE", false, false, false, false) == STATE.HitAction.NONE and not table.broken, "A table stays intact at Low, even to a grenade")
+	table.configure("07_table.glb", 1, true, func() -> int: return low)
+	_check(table.is_indestructible() and table.hit(500.0, "GRENADE", false, false, false, false) == STATE.HitAction.NONE and not table.broken, "A table stays intact at Low, even to a grenade")
 	var divider := STATE.new()
-	divider.configure("08_divider_full_H.glb", 1, true, medium)
-	_check(not divider.indestructible and divider.hit(500.0, "GRENADE", false, false, false, false) == STATE.HitAction.TRANSITION, "A divider breaks at Medium")
+	divider.configure("08_divider_full_H.glb", 1, true, func() -> int: return medium)
+	_check(not divider.is_indestructible() and divider.hit(500.0, "GRENADE", false, false, false, false) == STATE.HitAction.TRANSITION, "A divider breaks at Medium")
 	var chair := STATE.new()
-	chair.configure("06_office_chair.glb", 0, true, low)
-	_check(not chair.indestructible, "A chair breaks at Low")
+	chair.configure("06_office_chair.glb", 0, true, func() -> int: return low)
+	_check(not chair.is_indestructible(), "A chair breaks at Low")
+	var live := [low]
+	var switched := STATE.new()
+	switched.configure("07_table.glb", 1, true, func() -> int: return live[0])
+	_check(switched.is_indestructible(), "A table spawned at Low is intact while the level is Low")
+	live[0] = high
+	_check(not switched.is_indestructible(), "Raising the level to High makes an existing table breakable")
 	var default_table := STATE.new()
 	default_table.configure("07_table.glb", 1, true)
-	_check(not default_table.indestructible, "Without a quality level a prop breaks as at High")
+	_check(not default_table.is_indestructible(), "Without a quality level a prop breaks as at High")
 
 
 func _check(value: bool, message: String) -> void:
