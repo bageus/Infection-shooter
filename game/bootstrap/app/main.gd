@@ -357,7 +357,7 @@ func _end_run(reason: String) -> void:
 	_ended = true
 	var kind := "complete" if reason == "MISSION COMPLETE" else "failed"
 	if kind == "complete":
-		CHECKPOINT.on_completed(current_level)
+		CHECKPOINT.on_completed(current_level, $LevelEntries.carry_for(current_level, false) if has_node("LevelEntries") else {})
 	var reason_key: String = {"MUTATION OVERTOOK YOU": "failedMutation",
 		"YOU FELL OUTSIDE THE FLOOR": "failedFall", "YOU DIED": "failedHealth"}.get(reason, "")
 	if kind == "complete" and not is_instance_valid(completion_music):

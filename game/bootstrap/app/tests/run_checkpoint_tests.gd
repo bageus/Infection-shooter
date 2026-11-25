@@ -52,9 +52,14 @@ func _run() -> void:
 	CHECKPOINT.on_completed("tutorial_lvl")
 	_check(CHECKPOINT.resume_map() == "level_b", "Replaying an earlier checkpoint does not move progress back")
 	_check(CHECKPOINT.map_file("level_b").ends_with("level_b.json"), "The continue map resolves to its saved file")
+	var kit := {"loadout": {"slots": [0, 3, -1], "armor": 50.0, "ammo": [10, 20]}, "threshold": 45.0, "control": {"collected": {"a": true}}}
+	CHECKPOINT.on_completed("level_a", kit)
+	_check(CHECKPOINT.passed_carry().is_empty(), "A checkpoint that does not move progress keeps the saved loadout")
 	chain.set_checkpoint(2, true)
 	chain.save(CHAIN_PATH)
-	CHECKPOINT.on_completed("level_b")
+	CHECKPOINT.on_completed("level_b", kit)
+	var saved: Dictionary = CHECKPOINT.passed_carry()
+	_check(saved.get("threshold") == 45.0 and saved.loadout.armor == 50.0 and saved.loadout.slots.map(func(v): return int(v)) == [0, 3, -1] and saved.control.collected.has("a"), "The loadout, armor, ammo and DNA survive a restart")
 	_check(CHECKPOINT.resume_map() == "", "No Continue after the last map of the chain")
 
 	chain.set_checkpoint(0, true)

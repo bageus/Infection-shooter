@@ -17,11 +17,22 @@ static func passed_map() -> String:
 	return str(data.get("passed", ""))
 
 
-static func save_passed(map_name: String) -> Error:
+## Weapons, armor, ammo and DNA saved with the checkpoint ({} for a file saved without them).
+static func passed_carry() -> Dictionary:
+	if not FileAccess.file_exists(PATH):
+		return {}
+	var data: Variant = JSON.parse_string(FileAccess.get_file_as_string(PATH))
+	if not data is Dictionary or int(data.get("version", 0)) != VERSION:
+		return {}
+	var carry: Variant = data.get("carry", {})
+	return carry if carry is Dictionary else {}
+
+
+static func save_passed(map_name: String, carry: Dictionary = {}) -> Error:
 	var file := FileAccess.open(PATH, FileAccess.WRITE)
 	if file == null:
 		return FileAccess.get_open_error()
-	file.store_string(JSON.stringify({"version": VERSION, "passed": map_name}, "\t"))
+	file.store_string(JSON.stringify({"version": VERSION, "passed": map_name, "carry": carry}, "\t"))
 	return OK
 
 
@@ -36,7 +47,7 @@ static func resume_map() -> String:
 
 
 ## Called when a map is completed. A checkpoint map becomes the saved progress unless a further one is already saved.
-static func on_completed(map_name: String) -> void:
+static func on_completed(map_name: String, carry: Dictionary = {}) -> void:
 	var chain: RefCounted = LEVEL_CHAIN.new()
 	chain.load_file()
 	var index: int = chain.index_of(map_name)
@@ -44,7 +55,7 @@ static func on_completed(map_name: String) -> void:
 		return
 	var saved: int = chain.index_of(passed_map())
 	if saved < index:
-		save_passed(map_name)
+		save_passed(map_name, carry)
 
 
 ## Scene file of a chain map, read the same way the planner reads it.
