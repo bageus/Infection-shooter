@@ -154,6 +154,13 @@ func set_few_lamps(few: bool) -> void:
 		refresh_light_budget()
 
 
+## Lets lamps shadow characters and props too (highest shadow quality); walls alone is the cheap default.
+func set_object_shadows(enabled: bool) -> void:
+	get_tree().set_meta(&"lamp_all_casters", enabled)
+	for lamp in get_tree().get_nodes_in_group("planner_lights"):
+		lamp.call("set_all_casters", enabled)
+
+
 func set_shadows_allowed(allowed: bool) -> void:
 	shadows_allowed = allowed
 	refresh_light_budget()
