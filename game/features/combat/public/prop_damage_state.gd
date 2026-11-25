@@ -17,6 +17,10 @@ const INDESTRUCTIBLE := [
 	"Laboratory_Storage_Cabinet.glb", "Laboratory_Drying_Cabinet.glb", "Morgue_Drawers_3x3.glb",
 	"Laboratory_Fridge.glb", "Containment_Tank_No_Subject.glb", "Containment_Tank_hunger.glb",
 ]
+## Appliances whose electronics break from Low (microwave, coffee machine, arcade cabinets).
+const ELECTRONICS_02 := ["02_microwave_destructible.glb", "02_coffee_machine_destructible.glb", "02_arcade_machine_V1.glb", "02_arcade_machine_V2.glb", "02_arcade_machine_V3.glb", "02_arcade_machine_V4.glb", "02_arcade_machine_V5.glb", "02_arcade_machine_V6.glb"]
+## Glassware that breaks whole on its first hit (mirrors fragile_prop.gd is_glassware).
+const GLASSWARE := ["09_glass.glb", "09_glass_2.glb", "Laboratory_Flasks_Set.glb", "Test_Tube_Rack.glb"]
 ## Lab files are not named with a group prefix, so their electronics are listed by name.
 const LAB_ELECTRONICS := [
 	"Laboratory_Autoclave.glb", "Laboratory_Balance.glb", "Laboratory_Microscope.glb", "Medical_Lab_Oven.glb",
@@ -38,14 +42,36 @@ var _variant_count := 0
 var _has_fragments := false
 
 
-func configure(model_name: String, variant_count: int, has_fragments: bool) -> void:
+## Lowest destruction quality level (0 Low, 1 Medium, 2 High) at which a prop breaks.
+## Low breaks electronics, chairs, small boxes and breakable glass; Medium adds cabinets,
+## tables, partitions and large crates; High breaks everything else.
+static func breaks_from_level(model_name: String) -> int:
+	var group := model_name.substr(0, 2)
+	if group == "05" or group == "06" or model_name in LAB_ELECTRONICS or model_name in ELECTRONICS_02:
+		return 0
+	if model_name in GLASSWARE or model_name.begins_with("09_glass_water_bottle") or model_name.begins_with("09_mug") or model_name.begins_with("09_fruit_plate"):
+		return 0
+	if group == "01" and "glass" in model_name and "breakable" in model_name:
+		return 0
+	if group == "04":
+		return 0 if "cardboard" in model_name or "small" in model_name else 1
+	if "box" in model_name:
+		return 0
+	if group in ["03", "07", "08"] or model_name == "01_wood_slat_partition_destructible.glb":
+		return 1
+	if group == "02" and "capboard" in model_name:
+		return 1
+	return 2
+
+
+func configure(model_name: String, variant_count: int, has_fragments: bool, quality: int = 2) -> void:
 	var group := model_name.substr(0, 2)
 	category = "tech" if group == "05" or model_name in LAB_ELECTRONICS else ("small" if group in ["09", "11", "12"] else "large")
 	_variant_count = variant_count
 	_has_fragments = has_fragments
 	collapses = not has_fragments and (model_name.to_lower().contains("cardboard") or model_name in BIG_CRATES)
 	health = BROKEN_CRATE_HEALTH if model_name.begins_with("04_crate") else _stage_health()
-	indestructible = model_name in INDESTRUCTIBLE
+	indestructible = model_name in INDESTRUCTIBLE or quality < breaks_from_level(model_name)
 
 
 func hit(amount: float, weapon: String, book_stack: bool, wall_mounted: bool, anchored: bool, facade: bool) -> HitAction:

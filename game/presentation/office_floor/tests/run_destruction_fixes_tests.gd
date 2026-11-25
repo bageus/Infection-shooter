@@ -1,4 +1,5 @@
 extends SceneTree
+const DESTRUCTION_QUALITY := preload("res://game/core/vfx/public/destruction_quality.gd")
 ## Open glass door shards, detached cooler bottle, and blood marks on panes.
 
 const PROP := preload("res://game/presentation/office_floor/public/props/environment_prop.tscn")
@@ -10,6 +11,7 @@ var stage: Node3D
 
 
 func _init() -> void:
+	DESTRUCTION_QUALITY.set_level(DESTRUCTION_QUALITY.HIGH) # Breakage checks run at High, where every prop breaks.
 	call_deferred("_run")
 
 

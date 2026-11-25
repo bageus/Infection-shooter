@@ -17,6 +17,7 @@ var spawned := 0
 
 
 func _init() -> void:
+	QUALITY.set_level(QUALITY.HIGH) # Breakage checks run at High, where every prop breaks.
 	call_deferred("_run")
 
 
@@ -33,6 +34,7 @@ func _run() -> void:
 	floor_body.add_child(floor_shape)
 	stage.add_child(floor_body)
 	floor_body.position.y = -0.1
+	QUALITY.set_level(QUALITY.HIGH) # The cluster is made of props that only High breaks.
 	var effects := Node3D.new()
 	stage.add_child(effects)
 	effects.child_entered_tree.connect(func(node: Node) -> void: spawned += int(node.get_script() == FRAGMENT))
@@ -52,6 +54,7 @@ func _run() -> void:
 	var live := 0
 	for piece in get_nodes_in_group(FRAGMENT.GROUP):
 		live += int(not DEBRIS.is_fading(piece))
+	QUALITY.set_level(QUALITY.LOW)
 	_check(spawned > QUALITY.piece_budget(), "A cluster blast makes more pieces than the idle budget (%d)" % spawned)
 	_check(live == spawned, "Every fresh blast piece is still visible (%d of %d)" % [live, spawned])
 	stage.queue_free()

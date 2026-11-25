@@ -29,6 +29,7 @@ func _run() -> void:
 	stage.add_child(effects)
 	_test_emission_history()
 	await _test_props()
+	QUALITY.set_level(QUALITY.DEFAULT)
 	await _test_table()
 	await _test_legacy_table()
 	if DisplayServer.get_name() != "headless":
@@ -179,6 +180,7 @@ func _test_emission_history() -> void:
 
 
 func _test_props() -> void:
+	QUALITY.set_level(QUALITY.HIGH) # These props break only at High.
 	var cases := {"09/books/09_book_small.glb": "paper", "09/files/09_file_binder.glb": "paper",
 		"04/04_cardboard_boxes_1.glb": "cardboard", "05/monitor/05_monitor_destructible.glb": "glass",
 		"05/05_wall_TV_destructible.glb": "glass", "09/09_fire_extinguisher.glb": "extinguisher",
@@ -201,7 +203,7 @@ func _test_props() -> void:
 				prop.call("_apply_damage", Vector3.UP, Vector3.FORWARD)
 		var queue: Array = floor_view.get("_glass").queue
 		_check(_kind_count(queue, cases[model]) > 0, "Actual %s destruction queues %s" % [model, cases[model]])
-		_check(queue.size() <= 96, "A real destruction event leaves room in the shared stamp queue")
+		_check(queue.size() <= QUALITY.queue_max() / 2, "A real destruction event leaves room in the shared stamp queue")
 		if cases[model] == "glass":
 			_check(_kind_count(queue, "plastic") > 0, "Broken screen mixes plastic with glass")
 			var before := queue.size()

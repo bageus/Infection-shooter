@@ -21,6 +21,7 @@ const CARPET_SHADOW := preload("res://game/presentation/office_floor/carpet_shad
 const CONTACT_SHADOW := preload("res://game/presentation/office_floor/prop_contact_shadow.gd")
 const DAMAGE = preload("res://game/presentation/office_floor/environment_damage.gd")
 const PROP_DAMAGE := preload("res://game/features/combat/public/prop_damage_state.gd")
+const DESTRUCTION_QUALITY := preload("res://game/core/vfx/public/destruction_quality.gd")
 var _damage := PROP_DAMAGE.new()
 const WEIGHT = preload("res://game/presentation/office_floor/prop_weight.gd")
 const CONTACT = preload("res://game/presentation/office_floor/prop_contact.gd")
@@ -215,7 +216,8 @@ func _ready() -> void:
 	_reaction.setup(self, visual)
 	_geometry.prepare_stages(model_path)
 	_retained.configure(_geometry, model_path)
-	_damage.configure(model_path.get_file(), _variants.size(), not _stages.is_empty())
+	_damage.configure(model_path.get_file(), _variants.size(), not _stages.is_empty(), DESTRUCTION_QUALITY.level)
+	if _damage.indestructible: _retained.enabled = false # Parts that would come off stay on at this quality.
 	# Architectural pieces, carpets and the reception core stay anchored.
 	# A wall item that a shot tears loose (extinguisher, TV, clock) switches to dynamic mid-game.
 	# From a static body that costs Jolt ~80 ms (broadphase re-insert); from a kinematic one it is free.
@@ -304,9 +306,8 @@ func take_projectile_hit_at_shape(damage: float, hit_position: Vector3, normal: 
 		if _retained.hit_shape(self, _geometry, mesh_index, damage, hit_position, direction):
 			_push_cooler(hit_position, direction, weapon)
 			return false
-		# Electronics keep their glass screen: shattering it disabled the only collision
-		# shape, so a shot monitor fell through its desk and skipped the short circuit.
-		if not _retained.enabled and _damage.category != "tech" and not FRAGILE.applies(model_path) and mesh_index >= 0 and mesh_index < _shape_meshes.size() and is_instance_valid(_shape_meshes[mesh_index]) and GEOMETRY.is_glass_mesh(_shape_meshes[mesh_index]):
+		# Electronics keep their glass screen (shattering it dropped a monitor through its desk).
+		if not _retained.enabled and not _damage.indestructible and _damage.category != "tech" and not FRAGILE.applies(model_path) and mesh_index >= 0 and mesh_index < _shape_meshes.size() and is_instance_valid(_shape_meshes[mesh_index]) and GEOMETRY.is_glass_mesh(_shape_meshes[mesh_index]):
 			call_deferred("_shatter_glass", hit_position, direction)
 			if weapon != "GRENADE":
 				return false
@@ -321,8 +322,7 @@ func get_projectile_material(shape_index: int = -1) -> String:
 	if shape_index >= 0:
 		var shape_owner := shape_owner_get_owner(shape_find_owner(shape_index)) as CollisionShape3D
 		var mesh_index := _shapes.find(shape_owner)
-		# Electronics keep their glass screen: shattering it disabled the only collision
-		# shape, so a shot monitor fell through its desk and skipped the short circuit.
+		# Electronics keep their glass screen (shattering it dropped a monitor through its desk).
 		if _damage.category != "tech" and mesh_index >= 0 and mesh_index < _shape_meshes.size() and is_instance_valid(_shape_meshes[mesh_index]) and GEOMETRY.is_glass_mesh(_shape_meshes[mesh_index]):
 			return "glass"
 	var group := model_path.get_file().substr(0, 2)
@@ -353,7 +353,7 @@ func take_projectile_hit(damage: float, hit_position: Vector3, _normal: Vector3,
 		BULLET_PUSH.apply(self, weight_kg, weapon, direction, hit_position)
 		_trigger_extinguisher(hit_position, direction)
 		return false
-	if damage > 0.0 and FRAGILE.shatter(self, _visual, _shapes, _damage, _floor_debris, hit_position, direction):
+	if damage > 0.0 and not _damage.indestructible and FRAGILE.shatter(self, _visual, _shapes, _damage, _floor_debris, hit_position, direction):
 		return false
 	if damage > 0.0 and is_instance_valid(glass_debris_floor) and has_display():
 		glass_debris_floor.call("bake_display_hit", self, hit_position, _normal)
@@ -372,7 +372,7 @@ func take_projectile_hit(damage: float, hit_position: Vector3, _normal: Vector3,
 			SPARKS.short_circuit(self, hit_position, _normal)
 			if is_lamp():
 				BREAK_SOUND.play(self, effects_root, model_path, "tech", hit_position)
-	if model_path.get_file() == "02_water_cooler_bottle.glb":
+	if model_path.get_file() == "02_water_cooler_bottle.glb" and not _damage.indestructible:
 		var bottle := BOTTLE_BURST.find_bottle(_shape_meshes)
 		if bottle >= 0 and damage > 0.0:
 			_burst_bottle(bottle, hit_position, direction)

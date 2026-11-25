@@ -8,6 +8,7 @@ func _initialize() -> void:
 	_variant_progression()
 	_grenade_and_pending()
 	_special_objects()
+	_quality_tiers()
 	print("Prop damage state tests: %d failures" % failures)
 	quit(failures)
 
@@ -65,6 +66,30 @@ func _special_objects() -> void:
 	_check(effects.trigger_extinguisher() and not effects.trigger_extinguisher(), "Extinguisher triggers exactly once")
 	_check(effects.break_glass() and not effects.break_glass(), "Glass shatters exactly once")
 	_check(effects.tear_paper() and effects.broken and not effects.tear_paper(), "Paper tears and becomes broken exactly once")
+
+
+func _quality_tiers() -> void:
+	var low := 0
+	var medium := 1
+	var high := 2
+	for name in ["05_PC.glb", "06_office_chair.glb", "04_cardboard_box_closed.glb", "04_crate_small_broken.glb", "09_glass.glb", "09_mug.glb", "01_glass_door_breakable.glb", "03_box_1_metal_dented.glb"]:
+		_check(STATE.breaks_from_level(name) == low, "Low breaks " + name)
+	for name in ["03_cabinet.glb", "07_table.glb", "08_divider_full_H.glb", "01_wood_slat_partition_destructible.glb", "04_crate_wood_large.glb"]:
+		_check(STATE.breaks_from_level(name) == medium, "Medium adds " + name)
+	for name in ["09_book_big.glb", "10_couch_flat.glb", "15_barrel_blue.glb", "11_deco_plant.glb"]:
+		_check(STATE.breaks_from_level(name) == high, "High only: " + name)
+	var table := STATE.new()
+	table.configure("07_table.glb", 1, true, low)
+	_check(table.indestructible and table.hit(500.0, "GRENADE", false, false, false, false) == STATE.HitAction.NONE and not table.broken, "A table stays intact at Low, even to a grenade")
+	var divider := STATE.new()
+	divider.configure("08_divider_full_H.glb", 1, true, medium)
+	_check(not divider.indestructible and divider.hit(500.0, "GRENADE", false, false, false, false) == STATE.HitAction.TRANSITION, "A divider breaks at Medium")
+	var chair := STATE.new()
+	chair.configure("06_office_chair.glb", 0, true, low)
+	_check(not chair.indestructible, "A chair breaks at Low")
+	var default_table := STATE.new()
+	default_table.configure("07_table.glb", 1, true)
+	_check(not default_table.indestructible, "Without a quality level a prop breaks as at High")
 
 
 func _check(value: bool, message: String) -> void:

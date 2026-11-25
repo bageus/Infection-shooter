@@ -1,4 +1,5 @@
 extends SceneTree
+const DESTRUCTION_QUALITY := preload("res://game/core/vfx/public/destruction_quality.gd")
 ## Runtime checks for office breakage: cardboard bursts apart, a monitor
 ## shows its Power_Off stage when shorted, a wood partition drops the VECTRION
 ## logo, and a wood slat partition rings like wood.
@@ -17,6 +18,7 @@ var failures := 0
 
 
 func _init() -> void:
+	DESTRUCTION_QUALITY.set_level(DESTRUCTION_QUALITY.HIGH) # Breakage checks run at High, where every prop breaks.
 	call_deferred("_run")
 
 

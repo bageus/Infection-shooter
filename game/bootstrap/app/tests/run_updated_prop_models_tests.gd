@@ -1,4 +1,5 @@
 extends SceneTree
+const DESTRUCTION_QUALITY := preload("res://game/core/vfx/public/destruction_quality.gd")
 ## New authored two-part props must use the real catalogue and damage commands.
 const CATALOG := preload("res://game/bootstrap/app/planning_catalog.gd")
 const PLACEMENT := preload("res://game/bootstrap/app/planning_surface_placement.gd")
@@ -15,6 +16,7 @@ var catalog := CATALOG.new()
 
 
 func _initialize() -> void:
+	DESTRUCTION_QUALITY.set_level(DESTRUCTION_QUALITY.HIGH) # Breakage checks run at High, where every prop breaks.
 	call_deferred("_run")
 
 
