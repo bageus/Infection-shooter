@@ -72,11 +72,11 @@ func _quality_tiers() -> void:
 	var low := 0
 	var medium := 1
 	var high := 2
-	for name in ["05_PC.glb", "06_office_chair.glb", "04_cardboard_box_closed.glb", "04_crate_small_broken.glb", "09_glass.glb", "09_mug.glb", "01_glass_door_breakable.glb", "03_box_1_metal_dented.glb"]:
+	for name in ["05_PC.glb", "06_office_chair.glb", "04_cardboard_box_closed.glb", "04_crate_small_broken.glb", "04_crate_wood_large.glb", "09_glass.glb", "09_mug.glb", "01_glass_door_breakable.glb", "03_box_1_metal_dented.glb"]:
 		_check(STATE.breaks_from_level(name) == low, "Low breaks " + name)
-	for name in ["03_cabinet.glb", "07_table.glb", "08_divider_full_H.glb", "01_wood_slat_partition_destructible.glb", "04_crate_wood_large.glb"]:
+	for name in ["03_cabinet.glb", "07_table.glb", "10_couch_flat.glb", "08_divider_full_H.glb", "01_wood_slat_partition_destructible.glb"]:
 		_check(STATE.breaks_from_level(name) == medium, "Medium adds " + name)
-	for name in ["09_book_big.glb", "10_couch_flat.glb", "15_barrel_blue.glb", "11_deco_plant.glb"]:
+	for name in ["09_book_big.glb", "15_barrel_blue.glb", "11_deco_plant.glb"]:
 		_check(STATE.breaks_from_level(name) == high, "High only: " + name)
 	var table := STATE.new()
 	table.configure("07_table.glb", 1, true, low)

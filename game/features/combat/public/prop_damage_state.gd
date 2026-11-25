@@ -43,8 +43,8 @@ var _has_fragments := false
 
 
 ## Lowest destruction quality level (0 Low, 1 Medium, 2 High) at which a prop breaks.
-## Low breaks electronics, chairs, small boxes and breakable glass; Medium adds cabinets,
-## tables, partitions and large crates; High breaks everything else.
+## Low breaks electronics, chairs, boxes, every crate (loot crates break at all levels) and
+## breakable glass; Medium adds cabinets, tables, sofas, partitions and dividers; High breaks the rest.
 static func breaks_from_level(model_name: String) -> int:
 	var group := model_name.substr(0, 2)
 	if group == "05" or group == "06" or model_name in LAB_ELECTRONICS or model_name in ELECTRONICS_02:
@@ -54,10 +54,10 @@ static func breaks_from_level(model_name: String) -> int:
 	if group == "01" and "glass" in model_name and "breakable" in model_name:
 		return 0
 	if group == "04":
-		return 0 if "cardboard" in model_name or "small" in model_name else 1
+		return 0
 	if "box" in model_name:
 		return 0
-	if group in ["03", "07", "08"] or model_name == "01_wood_slat_partition_destructible.glb":
+	if group in ["03", "07", "08", "10"] or model_name == "01_wood_slat_partition_destructible.glb":
 		return 1
 	if group == "02" and "capboard" in model_name:
 		return 1
