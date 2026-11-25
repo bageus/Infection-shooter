@@ -55,6 +55,8 @@ static func apply(tree: SceneTree, enabled: bool, level: int) -> void:
 	var lighting := scene.get_node_or_null("PlanningLighting")
 	if lighting != null and lighting.has_method("set_shadows_allowed"):
 		lighting.call("set_shadows_allowed", enabled)
+		if lighting.has_method("set_object_shadows"):
+			lighting.call("set_object_shadows", enabled and level >= DEFAULT_LEVEL)
 	var wall := scene.get_node_or_null("DisplayWall")
 	if wall != null and wall.has_method("set_shadows_allowed"):
 		wall.call("set_shadows_allowed", enabled)
