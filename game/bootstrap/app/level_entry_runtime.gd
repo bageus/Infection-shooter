@@ -12,6 +12,7 @@ var _main: Node
 var _player: Node3D
 var _planner: Node
 var _markers: Array[Label3D] = []
+const CHECKPOINT := preload("res://game/bootstrap/app/checkpoint_progress.gd")
 var _panel: RefCounted
 var _elapsed := 0.0
 ## Resources each chain map was first entered with; a restart returns the player to them.
@@ -47,6 +48,7 @@ func note_entry() -> void:
 	var map_name := str(_main.get("current_level"))
 	if not _entry_carries.has(map_name):
 		_entry_carries[map_name] = _live_carry()
+		CHECKPOINT.on_entered(map_name, _entry_carries[map_name])
 
 
 ## Resources a chain travel carries; a restart passes restore=true to get the first-entry state.
