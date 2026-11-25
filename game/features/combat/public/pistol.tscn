@@ -21,7 +21,7 @@ magazine_size=15
 starting_reserve_ammo=75
 reload_time=1.1
 spread_degrees=0.7
-bullet_damage=30.0
+bullet_damage=15.0
 bullet_speed=40.0
 bullet_range=36.0
 [node name="Body" parent="." instance=ExtResource("weapon_model")]
